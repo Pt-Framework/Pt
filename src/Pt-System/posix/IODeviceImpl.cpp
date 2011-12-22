@@ -74,9 +74,13 @@ void IODeviceImpl::open(int fd, bool isAsync, bool inherit)
         int ret = fcntl(_fd, F_SETFL, flags);
         if(-1 == ret)
             throw IOError(PT_ERROR_MSG("Could not set fd to non-blocking"));
+
+        EventLoop* loop = _device.parent();
+        if(loop)
+            this->attach(*loop);
     }
 
-    if (!inherit)
+    if ( ! inherit)
     {
         int flags = fcntl(_fd, F_GETFD);
         flags |= FD_CLOEXEC ;
@@ -84,7 +88,6 @@ void IODeviceImpl::open(int fd, bool isAsync, bool inherit)
         if(-1 == ret)
             throw IOError(PT_ERROR_MSG("Could not set FD_CLOEXEC"));
     }
-
 }
 
 
@@ -92,6 +95,14 @@ void IODeviceImpl::close()
 {
     if(_fd != -1)
     {
+        EventLoop* loop = _device.parent();
+        if(_iohandle)
+        {
+            assert(loop);
+            loop->impl().disable(_iohandle);
+            _iohandle = 0;
+        }
+
         int fd = _fd;
         _fd = -1;
 
@@ -100,6 +111,35 @@ void IODeviceImpl::close()
             if( errno != EINTR )
                 throw IOError( PT_ERROR_MSG("close failed") );
         }
+    }
+}
+
+
+void IODeviceImpl::attach(EventLoop& loop)
+{
+    if( this->fd() < 0)
+        return;
+
+    _iohandle = loop.impl().enable(_device, this->fd());
+
+    if( _device.rbuf() )
+    {
+        loop.impl().beginRead( _iohandle );
+    }
+
+    if( _device.wbuf() )
+    {
+        loop.impl().beginWrite( _iohandle );
+    }
+}
+
+
+void IODeviceImpl::detach(EventLoop& loop)
+{
+    if(_iohandle)
+    {
+        loop.impl().disable(_iohandle);
+        _iohandle = 0;
     }
 }
 
@@ -455,51 +495,6 @@ int IODeviceImpl::checkWait(fd_set& rfds, fd_set& wfds, fd_set& efds)
     }
 
     return avail;
-}
-
-
-void IODeviceImpl::attach(EventLoop& s)
-{
-//  if( this->fd() > FD_SETSIZE )
-//  {
-//      throw System::IOError( PT_ERROR_MSG("FD_SETSIZE too small for fd") );
-//  }
-}
-
-
-void IODeviceImpl::detach(EventLoop& s)
-{
-    //this->exitSelect();
-}
-
-
-void IODeviceImpl::enable(EventLoop& loop)
-{
-    if( this->fd() < 0 )
-        return;
-
-    _iohandle = loop.impl().enable(_device, this->fd());
-
-    if( _device.rbuf() )
-    {
-        loop.impl().beginRead( _iohandle );
-    }
-
-    if( _device.wbuf() )
-    {
-        loop.impl().beginWrite( _iohandle );
-    }
-}
-
-
-void IODeviceImpl::disable(EventLoop& loop)
-{
-    std::cerr << "IODeviceImpl::disable"<< std::endl;
-    if(_iohandle)
-    {
-        loop.impl().disable(_iohandle);
-        _iohandle = 0;
-    }
 }
 
 

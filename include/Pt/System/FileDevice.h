@@ -92,10 +92,6 @@ class PT_SYSTEM_API FileDevice : public IODevice
 
         virtual void onDetach(EventLoop&);
 
-        virtual void onEnable(EventLoop&);
-
-        virtual void onDisable(EventLoop&);
-
         virtual bool onAvail();
 
     private:

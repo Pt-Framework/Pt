@@ -68,7 +68,7 @@ void Selectable::setParent(EventLoop* parent)
 
         if( this->enabled() )
         {
-            this->onDisable(*_parent);
+            //this->onDisable(*_parent);
             _parent->onDisable(*this);
         }
 
@@ -84,7 +84,7 @@ void Selectable::setParent(EventLoop* parent)
 
         if( this->enabled() )
         {
-            this->onEnable(*parent);
+            //this->onEnable(*parent);
             parent->onEnable(*this);
         }
 
@@ -147,7 +147,7 @@ void Selectable::setEnabled(bool isEnabled)
     {
         if(_parent)
         {
-            this->onEnable(*_parent);
+            //this->onEnable(*_parent);
             _parent->onEnable(*this);
         }
 
@@ -163,7 +163,7 @@ void Selectable::setEnabled(bool isEnabled)
 
             if( this->enabled() )
             {
-                this->onDisable(*_parent);
+                //this->onDisable(*_parent);
                 _parent->onDisable(*this);
             }
         }

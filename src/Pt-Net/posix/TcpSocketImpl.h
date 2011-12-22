@@ -69,7 +69,7 @@ class TcpSocketImpl : public System::IODeviceImpl
         void close();
 
         // TODO: enable socket before connect or accept...
-        void enable(System::EventLoop& loop);
+        void attach(System::EventLoop& loop);
 
         bool avail();
 

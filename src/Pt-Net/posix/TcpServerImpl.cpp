@@ -56,20 +56,28 @@ TcpServerImpl::TcpServerImpl(TcpServer& server)
 
 void TcpServerImpl::create(int domain, int type, int protocol)
 {
-  log_debug("create socket");
-
-  _fd = ::socket(domain, type, protocol);
-  if (_fd < 0)
-    throw System::SystemError("socket");
+    log_debug("create socket");
+    
+    _fd = ::socket(domain, type, protocol);
+    if (_fd < 0)
+        throw System::SystemError("socket");
 }
 
 
 void TcpServerImpl::close()
 {
-  if (_fd < 0)
+    if (_fd < 0)
       return;
 
     log_debug("close socket");
+
+    System::EventLoop* loop = _server.parent();
+    if(_iohandle)
+    {
+        assert(loop);
+        loop->impl().disable(_iohandle);
+        _iohandle = 0;
+    }
 
     ::close(_fd);
     _fd = -1;
@@ -163,6 +171,11 @@ void TcpServerImpl::listen(const std::string& ipaddr,
                 }
             }
 #endif
+
+            System::EventLoop* loop = _server.parent();
+            if(loop)
+                this->attach(*loop);
+
             return;
         }
     }
@@ -285,31 +298,35 @@ bool TcpServerImpl::wait(std::size_t msecs)
 
 
 
-
-
-
-
-void TcpServerImpl::attach(System::EventLoop& s)
+void TcpServerImpl::attach(System::EventLoop& loop)
 {
-}
+    if( this->fd() < 0 || _iohandle)
+        return;
 
-
-void TcpServerImpl::detach(System::EventLoop& s)
-{
-}
-
-
-void TcpServerImpl::enable(System::EventLoop& loop)
-{
     _iohandle = loop.impl().enable(_server, this->fd());
     loop.impl().beginRead( _iohandle );
 }
 
 
+void TcpServerImpl::detach(System::EventLoop& loop)
+{
+    if(_iohandle)
+    {
+        loop.impl().disable(_iohandle);
+        _iohandle = 0;
+    }
+}
+
+
+void TcpServerImpl::enable(System::EventLoop& loop)
+{
+
+}
+
+
 void TcpServerImpl::disable(System::EventLoop& loop)
 {
-    loop.impl().disable(_iohandle);
-    _iohandle = 0;
+
 }
 
 

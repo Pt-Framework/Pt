@@ -95,10 +95,12 @@ void TcpSocketImpl::close()
 }
 
 
-// TODO enable sockets after an open call
-void TcpSocketImpl::enable(System::EventLoop& loop)
+void TcpSocketImpl::attach(System::EventLoop& loop)
 {
-    IODeviceImpl::enable(loop);
+    if(_fd == -1)
+        return;
+
+    IODeviceImpl::attach(loop);
 
     if( ! _isConnected )
     {
@@ -238,7 +240,12 @@ bool TcpSocketImpl::beginConnect(const AddrInfo& addrInfo)
     _addrInfoPtr = _addrInfo.impl()->begin();
     _connectResult = tryConnect();
     checkPendingError();
-    std::cerr << "###########" << _isConnected << std::endl;
+    std::cerr << "########### " << _fd << " connected: " << _isConnected << std::endl;
+
+    System::EventLoop* loop = _socket.parent();
+    if(loop)
+        this->attach(*loop);
+
     return _isConnected;
 }
 

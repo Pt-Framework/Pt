@@ -175,18 +175,6 @@ void FileDevice::onDetach(EventLoop& s)
 }
 
 
-void FileDevice::onEnable(EventLoop& loop)
-{
-    _impl->enable(loop);
-}
-
-
-void FileDevice::onDisable(EventLoop& loop)
-{
-    _impl->disable(loop);
-}
-
-
 bool FileDevice::onAvail()
 {
     return _impl->avail();

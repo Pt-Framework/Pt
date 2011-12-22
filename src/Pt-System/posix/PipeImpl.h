@@ -65,12 +65,6 @@ class PipeIODevice : public Pt::System::IODevice
         void onDetach(EventLoop& loop)
         { _impl.detach(loop); }
 
-        void onEnable(EventLoop& loop)
-        { _impl.enable(loop); }
-
-        void onDisable(EventLoop& loop)
-        { _impl.disable(loop); }
-
         bool onAvail()
         { return _impl.avail(); }
 

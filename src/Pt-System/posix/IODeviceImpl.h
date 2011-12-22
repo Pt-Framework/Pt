@@ -112,13 +112,9 @@ namespace System {
 
             virtual int checkWait(fd_set& rfds, fd_set& wfds, fd_set& efds);
 
-            void attach(EventLoop& s);
+            virtual void attach(EventLoop& s);
 
-            void detach(EventLoop& s);
-
-            virtual void enable(EventLoop& loop);
-
-            virtual void disable(EventLoop& loop);
+            virtual void detach(EventLoop& s);
 
             virtual bool avail();
 

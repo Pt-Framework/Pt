@@ -108,10 +108,6 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
 
         virtual bool onWait(std::size_t msecs) = 0;
 
-        virtual void onEnable(EventLoop&) = 0;
-
-        virtual void onDisable(EventLoop&) = 0;
-
         // new API
         bool checkAvail()
         {

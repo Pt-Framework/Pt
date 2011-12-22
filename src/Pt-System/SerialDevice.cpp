@@ -225,17 +225,6 @@ void SerialDevice::onDetach(EventLoop& s)
     _impl->detach(s);
 }
 
-void SerialDevice::onEnable(EventLoop& loop)
-{
-    _impl->enable(loop);
-}
-
-
-void SerialDevice::onDisable(EventLoop& loop)
-{
-    _impl->disable(loop);
-}
-
 
 bool SerialDevice::onAvail()
 {

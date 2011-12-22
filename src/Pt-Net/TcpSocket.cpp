@@ -202,18 +202,6 @@ void TcpSocket::onDetach(System::EventLoop& sb)
 }
 
 
-void TcpSocket::onEnable(System::EventLoop& loop)
-{
-    _impl->enable(loop);
-}
-
-
-void TcpSocket::onDisable(System::EventLoop& loop)
-{
-    _impl->disable(loop);
-}
-
-
 bool TcpSocket::onAvail()
 {
     return _impl->avail();

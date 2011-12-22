@@ -135,6 +135,11 @@ void UdpSocketImpl::bind(const std::string& ipaddr, unsigned short int port, uns
         {
             _isBound = true;
             std::memmove(&_servaddr, it->ai_addr, it->ai_addrlen);
+
+            System::EventLoop* loop = _socket.parent();
+            if(loop)
+                this->attach(*loop);
+
             return;
         }
 
@@ -193,6 +198,11 @@ void UdpSocketImpl::connect(const AddrInfo& ai)
         if( 0 == ::connect(_fd, it->ai_addr, it->ai_addrlen) )
         {
             _isConnected = true;
+
+            System::EventLoop* loop = _socket.parent();
+            if(loop)
+                this->attach(*loop);
+
             return;
         }
 
