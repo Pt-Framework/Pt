@@ -102,23 +102,58 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
 
         //void setAvail();
 
-        void setAvail(bool isAvail);
-
         // TODO: move close to IODevice, Selectable only knows cancel
         //! @brief Closes the Selectable
         virtual void onClose() = 0;
 
         virtual bool onWait(std::size_t msecs) = 0;
 
-        virtual void onAttach(EventLoop&) = 0;
-
-        virtual void onDetach(EventLoop&) = 0;
-
         virtual void onEnable(EventLoop&) = 0;
 
         virtual void onDisable(EventLoop&) = 0;
 
+        // new API
+        bool checkAvail()
+        {
+            bool ret = false;
+
+            if( isAvail() )
+                ret = onAvail();
+
+            return ret;
+        }
+
+        // TODO: should call cancel to make sure we are not changing 
+        //       loops while operation is running
+        void detach()
+        {
+            if(_parent)
+            {
+                this->cancelX();
+                this->onDetach(*_parent);
+            }
+        }
+
+        void cancelX()
+        {
+            this->doCancel();
+            this->setCancelled();
+        }
+
+    protected:
+        virtual void onAttach(EventLoop&) = 0;
+
+        virtual void onDetach(EventLoop&) = 0;
+
+        virtual void setAvail(bool isAvail);
+
+        virtual void setCancelled() {}
+
+        virtual bool isAvail() const;
+
         virtual bool onAvail() = 0;
+
+        virtual void doCancel() {}
 
     private:
         EventLoop* _parent;

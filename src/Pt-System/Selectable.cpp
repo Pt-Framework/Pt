@@ -131,7 +131,7 @@ bool Selectable::enabled() const
 
 bool Selectable::avail() const
 {
-    return _state == Avail;
+    return this->isAvail();
 }
 
 
@@ -170,6 +170,12 @@ void Selectable::setEnabled(bool isEnabled)
 
         _state = Disabled;
     }
+}
+
+
+bool Selectable::isAvail() const
+{
+    return _state == Avail;
 }
 
 

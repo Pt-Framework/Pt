@@ -340,11 +340,11 @@ void EventLoopImpl::waitNext(std::size_t umsecs, bool& isActive )
                 if( _signalled.empty() )
                     break;
                 
-                Selectable* sel = *(_signalled.begin());
+                Selectable* selectable = *(_signalled.begin());
                 _signalled.erase( _signalled.begin() );
                 lock.unlock();
 
-                sel->onAvail();
+                selectable->onAvail();
             }
         }
         // some of the other event handles was active
