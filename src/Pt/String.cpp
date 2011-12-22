@@ -85,7 +85,7 @@ void basic_string<Pt::Char>::privreserve(size_t n)
     {
         size_type nn = 16;
         while (nn < n)
-            nn += (nn << 1);
+            nn += (nn >> 1);
         reserve(nn);
     }
 }
@@ -156,7 +156,7 @@ basic_string<Pt::Char>& basic_string<Pt::Char>::assign(const basic_string<Pt::Ch
         return *this;
     }
 
-    privreserve(str.capacity());
+    privreserve(str.size());
     Pt::Char* p = privdata_rw();
     size_type l = str.length();
     traits_type::copy(p, str.data(), l);
