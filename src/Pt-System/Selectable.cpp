@@ -44,13 +44,6 @@ Selectable::~Selectable()
             _parent->onIdle(*this);
         }
 
-        // TODO: this should not happen...
-        if( this->enabled() )
-        {
-            assert(false);
-            _parent->onDisable(*this);
-        }
-
         _parent->onDetach(*this);
     }
 }
@@ -66,12 +59,6 @@ void Selectable::setParent(EventLoop* parent)
         if(_state == Avail)
             _parent->onIdle(*this);
 
-        if( this->enabled() )
-        {
-            //this->onDisable(*_parent);
-            _parent->onDisable(*this);
-        }
-
         this->onDetach(*_parent);
         _parent->onDetach(*this);
         _parent = 0;
@@ -81,12 +68,6 @@ void Selectable::setParent(EventLoop* parent)
     {
         this->onAttach(*parent);
         parent->onAttach(*this);
-
-        if( this->enabled() )
-        {
-            //this->onEnable(*parent);
-            parent->onEnable(*this);
-        }
 
         if(_state == Avail)
             parent->onAvail(*this);
@@ -113,7 +94,14 @@ void Selectable::close()
     if( this->enabled() )
     {
         this->onClose();
-        this->setEnabled(false);
+
+        if(_parent)
+        {
+           if(_state == Avail)
+                _parent->onIdle(*this);
+        }
+
+        _state = Disabled;
     }
 }
 
@@ -145,12 +133,6 @@ void Selectable::setEnabled(bool isEnabled)
 {
     if(isEnabled)
     {
-        if(_parent)
-        {
-            //this->onEnable(*_parent);
-            _parent->onEnable(*this);
-        }
-
         if(_state == Disabled)
             _state = Active;
     }
@@ -160,12 +142,6 @@ void Selectable::setEnabled(bool isEnabled)
         {
            if(_state == Avail)
                 _parent->onIdle(*this);
-
-            if( this->enabled() )
-            {
-                //this->onDisable(*_parent);
-                _parent->onDisable(*this);
-            }
         }
 
         _state = Disabled;

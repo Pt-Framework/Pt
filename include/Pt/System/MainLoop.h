@@ -116,12 +116,10 @@ namespace System {
 
             virtual void onDetach(Selectable&);
 
-            virtual void onEnable( Selectable& s );
-
-            virtual void onDisable( Selectable& s );
-
             virtual void onIdle(Selectable& s);
+
             virtual void onActive(Selectable& s);
+
             virtual void onAvail(Selectable& s);
 
             virtual void onRun();

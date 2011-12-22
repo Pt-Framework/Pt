@@ -73,18 +73,6 @@ void MainLoop::onDetach(Selectable& s)
 }
 
 
-void MainLoop::onEnable( Selectable& s )
-{
-    _impl->enable(s);
-}
-
-
-void MainLoop::onDisable(Selectable& s)
-{
-    _impl->disable(s);
-}
-
-
 void MainLoop::onIdle(Selectable& s)
 {
     _impl->idle(s);

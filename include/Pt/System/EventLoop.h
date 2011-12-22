@@ -165,18 +165,6 @@ class PT_SYSTEM_API EventLoop : public Connectable
         */
         virtual void onDetach(Selectable&) = 0;
 
-        /** @brief A Selectable is enabled
-
-            Does not throw exceptions.
-        */
-        virtual void onEnable(Selectable&) = 0;
-
-        /** @brief A Selectable is disabled
-
-            Does not throw exceptions.
-        */
-        virtual void onDisable(Selectable&) = 0;
-
         virtual void onIdle(Selectable&) = 0;
 
         virtual void onActive(Selectable&) = 0;

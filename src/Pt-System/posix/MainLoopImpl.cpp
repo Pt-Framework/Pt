@@ -109,16 +109,6 @@ void EventLoopImpl::detach(Selectable& s)
 }
 
 
-void EventLoopImpl::enable(Selectable& s)
-{
-}
-
-
-void EventLoopImpl::disable(Selectable& s)
-{
-}
-
-
 void EventLoopImpl::idle(Selectable& s)
 {
     _avail.erase(&s);
