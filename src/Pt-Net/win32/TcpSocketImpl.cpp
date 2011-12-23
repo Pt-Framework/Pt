@@ -38,9 +38,9 @@
 #include <cstring>
 #include <cassert>
 
-#include <iostream>
-//#define log_debug(x)
-#define log_debug(x) std::cerr << x << std::endl;
+//#include <iostream>
+#define log_debug(x)
+//#define log_debug(x) std::cerr << x << std::endl;
 
 namespace Pt {
 

@@ -321,11 +321,11 @@ void EventLoopImpl::waitNext(std::size_t umsecs, bool& isActive )
             {
                 Selectable* dev = *_current;
 
-                std::cerr << "ON AVAIL" << std::endl;
+                //std::cerr << "ON AVAIL" << std::endl;
                 if( dev->enabled() ) 
                     dev->onAvail();
 
-                std::cerr << "ITERATOR AFTER AVAIL" << std::endl;
+                //std::cerr << "ITERATOR AFTER AVAIL" << std::endl;
                 if( _current != _devices.end() && *_current == dev )
                 {
                     ++_current;
