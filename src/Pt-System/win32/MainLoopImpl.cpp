@@ -294,7 +294,7 @@ void EventLoopImpl::waitNext(std::size_t umsecs, bool& isActive )
         {
             Selectable* s = *_currentAvail;
 
-            if( s->enabled() ) 
+            //if( s->enabled() ) 
                 s->onAvail();
 
             if( _currentAvail != _avail.end() &&
@@ -322,7 +322,7 @@ void EventLoopImpl::waitNext(std::size_t umsecs, bool& isActive )
                 Selectable* dev = *_current;
 
                 //std::cerr << "ON AVAIL" << std::endl;
-                if( dev->enabled() ) 
+                //if( dev->enabled() ) 
                     dev->onAvail();
 
                 //std::cerr << "ITERATOR AFTER AVAIL" << std::endl;
@@ -352,7 +352,7 @@ void EventLoopImpl::waitNext(std::size_t umsecs, bool& isActive )
         {
             Selectable* selectable = _handles.at(offset);
 
-            if( selectable->enabled() )
+            //if( selectable->enabled() )
                  selectable->onAvail();
         }
     }

@@ -90,7 +90,7 @@ void PipeIODevice::onCancel()
 void PipeIODevice::open(HANDLE handle, bool isAsync)
 {
     this->setHandle(handle);
-    this->setEnabled(true);
+    //this->setEnabled(true);
     this->setEof(false);
     this->setAsync(isAsync);
 }

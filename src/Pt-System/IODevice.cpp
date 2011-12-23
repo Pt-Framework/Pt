@@ -94,7 +94,7 @@ size_t IODevice::endRead()
 
     if(_wavail > 0)
         this->setAvail(true); //TODO: do we need to setAvail again?
-    else if(_wbuf)
+    else //if(_wbuf)
         this->setAvail(false);
     //else
     //    this->setIdle();
@@ -179,6 +179,8 @@ size_t IODevice::endWrite()
     if(_ravail > 0 || (_rbuf && _eof) )
         this->setAvail(true);
     else if(_rbuf)
+        this->setAvail(false);
+    else
         this->setAvail(false);
     //else
     //    this->setIdle();

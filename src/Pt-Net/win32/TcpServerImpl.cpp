@@ -158,7 +158,7 @@ void TcpServerImpl::listen(const std::string& ipaddr,
         }
 #endif
     
-        log_debug("bind");
+        log_debug("bind ");
         if( ::bind(_fd, it->ai_addr, it->ai_addrlen) == 0 )
         {
           // save our information
@@ -183,6 +183,8 @@ void TcpServerImpl::listen(const std::string& ipaddr,
             return;
         }
     }
+
+    log_debug("error: " << GetLastError());
     
     close();
 

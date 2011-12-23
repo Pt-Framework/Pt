@@ -43,10 +43,10 @@ class TcpSocketTest : public Pt::Unit::TestSuite
         {
           this->registerMethod( "NonBlockingWithLoop", *this,
                                 &TcpSocketTest::NonBlockingWithLoop);
-          this->registerMethod( "NonBlockingWithWait", *this,
-                                &TcpSocketTest::NonBlockingWithWait);
-          this->registerMethod( "ConnectFailed", *this,
-                                &TcpSocketTest::ConnectFailed);
+          //this->registerMethod( "NonBlockingWithWait", *this,
+          //                      &TcpSocketTest::NonBlockingWithWait);
+          //this->registerMethod( "ConnectFailed", *this,
+          //                      &TcpSocketTest::ConnectFailed);
         }
 
         void setUp()
@@ -122,7 +122,7 @@ class TcpSocketTest : public Pt::Unit::TestSuite
 
         void NonBlockingWithLoop()
         {
-            Pt::Net::TcpServer server("127.0.0.1", 8000);
+            Pt::Net::TcpServer server("127.0.0.1", 9000);
             {
                 //this->reportMessage("\nSTART");
 
@@ -135,7 +135,7 @@ class TcpSocketTest : public Pt::Unit::TestSuite
                 Pt::Net::TcpSocket client;
                 connect(client.connected, *this, &TcpSocketTest::onConnect);
                 connect(client.outputReady, *this, &TcpSocketTest::onOutput);
-                client.beginConnect("127.0.0.1", 8000);
+                client.beginConnect("127.0.0.1", 9000);
                 _loop->add(client);
 
                 _loop->run();
@@ -145,7 +145,7 @@ class TcpSocketTest : public Pt::Unit::TestSuite
                 delete _loop;
                 _loop  = 0;
             }
-            server.listen("127.0.0.1", 8000);
+            server.listen("127.0.0.1", 9000);
 
             PT_UNIT_ASSERT( 0 == std::strncmp(input, "Hello World !!!", 15) );
             //this->reportMessage("FINISHED");
@@ -154,8 +154,8 @@ class TcpSocketTest : public Pt::Unit::TestSuite
         void onAccept(Pt::Net::TcpServer& server)
         {
             _acceptor->accept(server);
-            //this->reportMessage( "ACCEPTED IP: " + _acceptor->getSockAddr() +
-            //                     " PEER: " + _acceptor->getPeerAddr() );
+            this->reportMessage( "ACCEPTED IP: " + _acceptor->getSockAddr() +
+                                 " PEER: " + _acceptor->getPeerAddr() );
 
             _acceptor->beginRead(input, 200);
         }

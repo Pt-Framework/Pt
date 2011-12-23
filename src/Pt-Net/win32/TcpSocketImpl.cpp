@@ -420,6 +420,10 @@ void TcpSocketImpl::accept(const TcpServer& server, unsigned flags)
     log_debug("accepted " << _fd);
 
     _isConnected = true;
+
+    System::EventLoop* loop = _socket.parent();
+    if(loop)
+        this->attach(*loop);
 }
 
 
