@@ -647,7 +647,7 @@ void ClientImpl::processBodyAvailable(System::StreamBuffer& sb)
                 _client->replyFinished(*_client);
         }
 
-        if (_socket.enabled())
+        if (_socket.isConnected())
         {
             if ((!_chunkedIStream.eod() || !_parser.end()))
             {
@@ -685,7 +685,7 @@ void ClientImpl::processBodyAvailable(System::StreamBuffer& sb)
 
             _client->replyFinished(*_client);
         }
-        else if (_socket.enabled() && _stream.good())
+        else if (_socket.isConnected() && _stream.good())
         {
             sb.beginRead();
         }

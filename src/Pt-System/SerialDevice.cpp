@@ -63,13 +63,14 @@ SerialDevice::~SerialDevice()
 
 void SerialDevice::open( const std::string& file, OpenMode mode)
 {
-    if( this->enabled() ) {
+    //if( this->enabled() ) 
+    {
         this->close();
     }
 
     _impl->open( file, mode);
 
-    IODevice::setEnabled(true);
+    //IODevice::setEnabled(true);
     IODevice::setEof(false);
     IODevice::setAsync( mode & IODevice::Async);
 }

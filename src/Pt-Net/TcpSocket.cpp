@@ -125,7 +125,7 @@ void TcpSocket::connect(const AddrInfo& addrinfo)
 {
     this->close();
     _impl->connect(addrinfo);
-    this->setEnabled(true);
+    //this->setEnabled(true);
     this->setAsync(true);
     this->setEof(false);
 }
@@ -135,7 +135,7 @@ bool TcpSocket::beginConnect(const AddrInfo& addrinfo)
 {
     this->close();
     bool ret = _impl->beginConnect(addrinfo);
-    this->setEnabled(true);
+    //this->setEnabled(true);
     this->setAsync(true);
     this->setEof(false);
 
@@ -169,7 +169,7 @@ void TcpSocket::accept(const TcpServer& server, unsigned flags)
 {
     this->close();
     _impl->accept(server, flags);
-    this->setEnabled(true);
+    //this->setEnabled(true);
     this->setAsync(true);
     this->setEof(false);
 }
@@ -256,11 +256,11 @@ void TcpSocket::onCancel()
     {
         _impl->cancel();
     }
-    else if (enabled())
+    else //if (enabled())
     {
         // we are in connecting state
         _impl->close();
-        setEnabled(false);
+        //setEnabled(false);
     }
 }
 

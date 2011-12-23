@@ -91,18 +91,21 @@ const EventLoop* Selectable::parent() const
 
 void Selectable::close()
 {
-    if( this->enabled() )
-    {
+    //if( this->enabled() )
+    //{
         this->onClose();
 
         if(_parent)
         {
            if(_state == Avail)
+           {
                 _parent->onIdle(*this);
+                _state = Idle;
+           }
         }
 
-        _state = Disabled;
-    }
+        //_state = Disabled;
+    //}
 }
 
 bool Selectable::wait(std::size_t msecs)
@@ -111,10 +114,10 @@ bool Selectable::wait(std::size_t msecs)
 }
 
 
-bool Selectable::enabled() const
+/*bool Selectable::enabled() const
 {
     return _state != Disabled;
-}
+}*/
 
 
 bool Selectable::avail() const
@@ -125,28 +128,31 @@ bool Selectable::avail() const
 
 Selectable::Selectable()
 : _parent(0)
-, _state(Disabled)
+, _state(Idle)
 { }
 
 
-void Selectable::setEnabled(bool isEnabled)
+/*void Selectable::setEnabled(bool isEnabled)
 {
     if(isEnabled)
     {
-        if(_state == Disabled)
-            _state = Active;
+        //if(_state == Disabled)
+        //    _state = Active;
     }
     else // disable
     {
         if(_parent)
         {
            if(_state == Avail)
+           {
                 _parent->onIdle(*this);
+                _state = Idle;
+           }
         }
 
-        _state = Disabled;
+        //_state = Disabled;
     }
-}
+}*/
 
 
 bool Selectable::isAvail() const
@@ -169,7 +175,7 @@ void Selectable::setAvail(bool isAvail)
         if(_parent)
             _parent->onIdle(*this);
     
-        _state = Active;
+        _state = Idle;
     }
 }
 

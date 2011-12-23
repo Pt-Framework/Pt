@@ -59,7 +59,7 @@ UdpSocket::~UdpSocket()
 void UdpSocket::bind(const std::string& ipaddr, unsigned short int port, unsigned flags)
 {
     _impl->bind(ipaddr, port, flags);
-    this->setEnabled(true);
+    //this->setEnabled(true);
     this->setAsync(true);
     this->setEof(false);
 }
@@ -68,7 +68,7 @@ void UdpSocket::bind(const std::string& ipaddr, unsigned short int port, unsigne
 void UdpSocket::connect(const AddrInfo& addrinfo)
 {
     _impl->connect(addrinfo);
-    this->setEnabled(true);
+    //this->setEnabled(true);
     this->setAsync(true);
     this->setEof(false);
 }

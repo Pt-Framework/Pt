@@ -316,7 +316,7 @@ std::streambuf::pos_type StreamBufferImpl::seekoff(StreamBuffer& sb, std::stream
 
     pos_type ret = pos_type(off_type(-1));
 
-    if(!_ioDevice || !_ioDevice->enabled() || !_ioDevice->seekable() || off == 0)
+    if(!_ioDevice || /*! _ioDevice->enabled() ||*/ !_ioDevice->seekable() || off == 0)
         return ret;
 
     if(_ioDevice->writing())

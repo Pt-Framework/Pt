@@ -47,8 +47,7 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
         // TODO: Idle, Active, Avail
         enum State
         {
-            Disabled = 0,
-            Active = 1,
+            Idle = 0,
             Avail = 2
         };
 
@@ -78,7 +77,7 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
 
             \return true if the I/O device is usable, false otherwise.
         */
-        bool enabled() const;
+        //bool enabled() const;
 
         // TODO: active
         //bool idle() const;
@@ -90,7 +89,7 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
         Selectable();
 
         //! @brief Sets or unsets the device enabled
-        void setEnabled(bool isEnabled);
+        //void setEnabled(bool isEnabled);
 
         // TODO: setUnavail would be enough
         //       alternatively, the EventLoop could unset the avail flag

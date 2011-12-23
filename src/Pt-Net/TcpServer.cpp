@@ -70,7 +70,7 @@ void TcpServer::listen(const std::string& ipaddr, unsigned short int port, int b
 {
     this->close();
     _impl->listen(ipaddr, port, backlog, flags);
-    this->setEnabled(true);
+    //this->setEnabled(true);
 }
 
 

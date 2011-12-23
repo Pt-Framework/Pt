@@ -90,8 +90,8 @@ void SerialChannel::onClose()
 
 void SerialChannel::onWrite(const std::string& message)
 {
-    if(_device.enabled() == false)
-        return;
+    //if(_device.enabled() == false)
+    //    return;
 
     _device.write( message.data(), message.size() );
     _device.write("\r\n", 2);

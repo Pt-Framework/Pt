@@ -49,7 +49,8 @@ FileDevice::FileDevice(const char* path, OpenMode mode)
 
 FileDevice::~FileDevice()
 {
-    if( this->enabled() ) {
+    //if( this->enabled() ) 
+    {
         try { this->close(); } catch(...) { }
     }
 
@@ -59,7 +60,8 @@ FileDevice::~FileDevice()
 
 void FileDevice::open( const char* path, OpenMode mode)
 {
-    if( this->enabled() ) {
+    //if( this->enabled() ) 
+    {
         this->close();
     }
 
@@ -67,7 +69,7 @@ void FileDevice::open( const char* path, OpenMode mode)
 
     _path = path;
 
-    IODevice::setEnabled(true);
+    //IODevice::setEnabled(true);
     IODevice::setEof(false);
     IODevice::setAsync(mode & Async);
 }
@@ -76,7 +78,7 @@ void FileDevice::open( const char* path, OpenMode mode)
 void FileDevice::onClose()
 {
     _impl->close();
-    IODevice::setEnabled(false);
+    //IODevice::setEnabled(false);
     IODevice::setEof(false);
 }
 
