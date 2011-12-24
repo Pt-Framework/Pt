@@ -189,7 +189,46 @@ void TcpServerImpl::listen(const std::string& ipaddr,
 }
 
 
-bool TcpServerImpl::wait(std::size_t msecs)
+void TcpServerImpl::attach(System::EventLoop& loop)
+{
+    if( this->fd() < 0 || _iohandle)
+        return;
+
+    _iohandle = loop.impl().enable(_server, this->fd());
+    loop.impl().beginRead( _iohandle );
+}
+
+
+void TcpServerImpl::detach(System::EventLoop& loop)
+{
+    if(_iohandle)
+    {
+        loop.impl().disable(_iohandle);
+        _iohandle = 0;
+    }
+}
+
+
+bool TcpServerImpl::avail()
+{
+    std::cerr << "IODeviceImpl::avail"<< std::endl;
+
+    if( ! _iohandle)
+        return false;
+
+    System::EventLoopImpl& impl = _server.parent()->impl();
+
+    if( impl.isReadable(_iohandle) )
+    {
+        _server.connectionPending.send(_server);
+        return true;
+    }
+
+    return false;
+}
+
+
+/*bool TcpServerImpl::wait(std::size_t msecs)
 {
     log_debug("wait " << msecs);
 
@@ -237,7 +276,7 @@ bool TcpServerImpl::wait(std::size_t msecs)
     }
 
     return avail != 0;
-}
+}*/
 
 
 /*void TcpServerImpl::attach(System::EventLoop& s)
@@ -295,58 +334,6 @@ bool TcpServerImpl::wait(std::size_t msecs)
 
     return 0;
 }*/
-
-
-
-void TcpServerImpl::attach(System::EventLoop& loop)
-{
-    if( this->fd() < 0 || _iohandle)
-        return;
-
-    _iohandle = loop.impl().enable(_server, this->fd());
-    loop.impl().beginRead( _iohandle );
-}
-
-
-void TcpServerImpl::detach(System::EventLoop& loop)
-{
-    if(_iohandle)
-    {
-        loop.impl().disable(_iohandle);
-        _iohandle = 0;
-    }
-}
-
-
-void TcpServerImpl::enable(System::EventLoop& loop)
-{
-
-}
-
-
-void TcpServerImpl::disable(System::EventLoop& loop)
-{
-
-}
-
-
-bool TcpServerImpl::avail()
-{
-    std::cerr << "IODeviceImpl::avail"<< std::endl;
-
-    if( ! _iohandle)
-        return false;
-
-    System::EventLoopImpl& impl = _server.parent()->impl();
-
-    if( impl.isReadable(_iohandle) )
-    {
-        _server.connectionPending.send(_server);
-        return true;
-    }
-
-    return false;
-}
 
 } // namespace Net
 

@@ -82,10 +82,6 @@ class TcpServerImpl  : public System::SelectableImpl
         void attach(System::EventLoop& s);
 
         void detach(System::EventLoop& s);
-
-        void enable(System::EventLoop& el);
-    
-        void disable(System::EventLoop& el);
     
         bool avail();
 

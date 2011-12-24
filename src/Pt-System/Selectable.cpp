@@ -36,20 +36,16 @@ namespace System {
 Selectable::Selectable()
 : _parent(0)
 , _state(Idle)
-{ }
+{ 
+}
 
 
 Selectable::~Selectable()
 {
-    if(_parent)
-    {
-        // TODO: this should not happen...
-        if(_state == Avail)
-        {
-            assert(false);
-            _parent->onIdle(*this);
-        }
+    assert(_state != Avail);
 
+    if(_parent)
+    {    
         _parent->onDetach(*this);
     }
 }
@@ -100,21 +96,18 @@ const EventLoop* Selectable::parent() const
 
 void Selectable::close()
 {
-    //if( this->enabled() )
-    //{
-        this->onClose();
+    // TODO: should we also cancel?
 
-        if(_parent)
-        {
-           if(_state == Avail)
-           {
-                _parent->onIdle(*this);
-                _state = Idle;
-           }
-        }
+    this->onClose();
 
-        //_state = Disabled;
-    //}
+    if(_parent)
+    {
+       if(_state == Avail)
+       {
+            _parent->onIdle(*this);
+            _state = Idle;
+       }
+    }
 }
 
 
