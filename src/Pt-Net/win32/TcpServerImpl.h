@@ -57,7 +57,7 @@ class TcpServerImpl
         TcpServer&			_server;
         SOCKET				_fd;
         sockaddr_storage    _servaddr;
-        WSAEVENT			_waitEvent;
+        //WSAEVENT			_waitEvent;
 		HANDLE				_currentHandle;
 
         void attachEvent(HANDLE ev, long events);
@@ -79,21 +79,22 @@ class TcpServerImpl
         inline SOCKET fd() const
         { return _fd; }
 
-        HANDLE waitHandle() const;
-        bool wait(std::size_t msecs);
+        //HANDLE waitHandle() const;
+
+        //bool wait(std::size_t msecs);
 
         void attach(System::EventLoop& s);
 
         void detach(System::EventLoop& s);
 
-        void enable(System::EventLoop& loop);
+        //void enable(System::EventLoop& loop);
 
-        void disable(System::EventLoop& loop);
+        //void disable(System::EventLoop& loop);
 
         bool avail();
 
         // implementation using WSAEventSelect
-        virtual bool setWaitHandle(HANDLE h, bool& avail);
+        //virtual bool setWaitHandle(HANDLE h, bool& avail);
 
         // implementation using WSAEventSelect
         //virtual bool checkEvent();

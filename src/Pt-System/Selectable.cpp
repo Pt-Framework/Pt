@@ -117,14 +117,6 @@ void Selectable::close()
     //}
 }
 
-bool Selectable::wait(std::size_t msecs)
-{
-    return this->onWait(msecs);
-}
-
-
-
-
 
 void Selectable::cancel()
 {
@@ -157,6 +149,12 @@ void Selectable::setAvail(bool isAvail)
         _state = Idle;
     }
 }
+
+
+/*bool Selectable::wait(std::size_t msecs)
+{
+    return this->onWait(msecs);
+}*/
 
 
 /*bool Selectable::avail() const

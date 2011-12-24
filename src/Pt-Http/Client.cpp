@@ -118,10 +118,10 @@ void Client::setParent(System::EventLoop& selector)
     _impl->setParent(selector);
 }
 
-void Client::wait(std::size_t msecs)
+/*void Client::wait(std::size_t msecs)
 {
     _impl->wait(msecs);
-}
+}*/
 
 std::istream& Client::in()
 {

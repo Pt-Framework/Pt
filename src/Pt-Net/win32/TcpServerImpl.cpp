@@ -40,9 +40,9 @@
 #include <limits>
 //#include <Mswsock.h>
 
-#include <iostream>
-#define log_debug(x) std::cerr << x << std::endl;
-#define log_trace(x) std::cerr << x << std::endl;
+//#include <iostream>
+#define log_debug(x) // std::cerr << x << std::endl;
+#define log_trace(x) // std::cerr << x << std::endl;
 
 namespace Pt {
 
@@ -65,19 +65,15 @@ static struct WsaInit
 TcpServerImpl::TcpServerImpl(TcpServer& server)
 : _server(server)
 , _fd(INVALID_SOCKET)
-, _waitEvent( CreateEvent( NULL, FALSE, FALSE, NULL ) )
-, _currentHandle(_waitEvent)
+, _currentHandle(INVALID_HANDLE_VALUE)
 {
-    WSAResetEvent(_currentHandle);
+    //WSAResetEvent(_currentHandle);
 }
 
 TcpServerImpl::~TcpServerImpl()
 {
-    WSAResetEvent(_waitEvent);
+    //WSAResetEvent(_waitEvent);
     close();
-
-    WSACloseEvent(_waitEvent);
-    _waitEvent = INVALID_HANDLE_VALUE;
 }
 
 void TcpServerImpl::create(int domain, int type, int protocol)
@@ -199,7 +195,7 @@ SOCKET TcpServerImpl::accept()
 {
     // set the server socket to blocking-mode
     u_long argp = 0;
-    attachEvent(0,0);
+    attachEvent(0, 0);
     ::ioctlsocket(_fd, FIONBIO, &argp);
     
     SOCKET fd = ::WSAAccept(_fd, NULL, NULL, NULL, 0);
@@ -211,14 +207,75 @@ SOCKET TcpServerImpl::accept()
     }
     
     // reset the blocking mode
-    attachEvent(_currentHandle, FD_ACCEPT);
+    if(_currentHandle != INVALID_HANDLE_VALUE)
+        attachEvent(_currentHandle, FD_ACCEPT);
 
-    //_server.setIdle(); // why?
+    log_debug(fd << " accepted ");
+    _server.setAvail(false);
     return fd;
 }
 
 
-bool TcpServerImpl::wait(std::size_t umsecs)
+void TcpServerImpl::attachEvent(HANDLE ev, long events)
+{
+    if (WSAEventSelect(_fd, ev, events) == SOCKET_ERROR)
+    {
+        log_debug("Set event failed: "<< WSAGetLastError());
+        throw System::SystemError( PT_ERROR_MSG("attach event to server socket failed") );
+    }
+}
+
+
+void TcpServerImpl::attach(System::EventLoop& loop)
+{
+    log_debug("attach to loop " << _fd);
+
+    // not yet listening
+    if (_fd == INVALID_SOCKET)
+        return;
+
+    _currentHandle = loop.impl().beginWait(_server);
+    attachEvent(_currentHandle, FD_ACCEPT);
+}
+
+
+void TcpServerImpl::detach(System::EventLoop& loop)
+{
+    log_debug("detach from loop " << _fd);
+
+    loop.impl().endWait(_server);
+    _currentHandle = INVALID_HANDLE_VALUE;
+}
+
+
+bool TcpServerImpl::avail()
+{
+    log_debug("TcpServerImpl::avail");
+    
+    if (_fd == INVALID_SOCKET)
+        return false;
+    
+    if( _server.avail() )
+    {
+        _server.connectionPending.send(_server);
+        return true;
+    }
+
+    WSANETWORKEVENTS events;
+
+    if(WSAEnumNetworkEvents(_fd, NULL, &events) == SOCKET_ERROR)
+        throw System::SystemError("WSAEnumNetworkEvents failed");
+
+    if((events.lNetworkEvents & FD_ACCEPT) != FD_ACCEPT)
+        return false;
+
+    //ResetEvent(_currentHandle);
+    _server.connectionPending.send(_server);
+    return true;
+}
+
+
+/*bool TcpServerImpl::wait(std::size_t umsecs)
 {
     log_debug(_fd << " wait " << umsecs);
     
@@ -252,66 +309,10 @@ bool TcpServerImpl::wait(std::size_t umsecs)
     }
 
     return false;
-}
+}*/
 
 
-void TcpServerImpl::attachEvent(HANDLE ev, long events)
-{
-    if (WSAEventSelect(_fd, ev, events) == SOCKET_ERROR)
-    {
-        log_debug("Set event failed: "<< WSAGetLastError());
-        throw System::SystemError( PT_ERROR_MSG("attach event to server socket failed") );
-    }
-}
-
-
-void TcpServerImpl::attach(System::EventLoop& loop)
-{
-    log_debug("attach to loop " << _fd);
-
-    if (_fd == INVALID_SOCKET)
-        return;
-
-    HANDLE h = loop.impl().beginWait(_server);
-
-    bool active = false;
-    this->setWaitHandle(h, active);
-
-    // TODO: use this->setAvail() ?
-    if(active)
-        loop.impl().setAvail(_server);
-}
-
-
-void TcpServerImpl::detach(System::EventLoop& loop)
-{
-    log_debug("detach from loop " << _fd);
-
-    if (_fd != INVALID_SOCKET)
-    {
-        bool active = false;
-        this->setWaitHandle(_waitEvent, active);
-    
-        if(active)
-            _server.setAvail(true);
-    }
-
-    loop.impl().endWait(_server);
-
-//  if (_fd == INVALID_SOCKET)
-//      return;
-//
-//  bool active = checkEvent();
-//
-//  if(active)
-//      _server.setAvail();
-//
-//  log_debug("server is active: " << active);
-//  this->setWaitHandle(_waitEvent, active);
-}
-
-
-void TcpServerImpl::enable(System::EventLoop& loop)
+/*void TcpServerImpl::enable(System::EventLoop& loop)
 {
     log_debug("enable in loop " << _fd);
 }
@@ -320,41 +321,14 @@ void TcpServerImpl::enable(System::EventLoop& loop)
 void TcpServerImpl::disable(System::EventLoop& loop)
 {
     log_debug("disable in loop " << _fd);
-}
+}*/
 
 
-bool TcpServerImpl::avail()
-{
-    log_debug("TcpServerImpl::avail");
-    
-    if (_fd == INVALID_SOCKET)
-        return false;
-    
-    if( _server.avail() )
-    {
-        _server.connectionPending.send(_server);
-        return true;
-    }
-
-    WSANETWORKEVENTS events;
-
-    if(WSAEnumNetworkEvents(_fd, NULL, &events) == SOCKET_ERROR)
-        throw System::SystemError("WSAEnumNetworkEvents failed");
-
-    if((events.lNetworkEvents & FD_ACCEPT) != FD_ACCEPT)
-        return false;
-
-    ResetEvent(_currentHandle);
-    _server.connectionPending.send(_server);
-    return true;
-}
-
-
-bool TcpServerImpl::setWaitHandle(HANDLE h, bool& avail)
+/*bool TcpServerImpl::setWaitHandle(HANDLE h, bool& avail)
 {
     log_debug("setWaitHandle");
 
-    if(_currentHandle == h)
+    if(_currentHandle == INVALID_HANDLE_VALUE)
         return true;
         
     avail = _server.avail();
@@ -363,13 +337,13 @@ bool TcpServerImpl::setWaitHandle(HANDLE h, bool& avail)
     attachEvent(_currentHandle, FD_ACCEPT);
     
     return true;
-}
+}*/
 
 
-HANDLE TcpServerImpl::waitHandle() const
+/*HANDLE TcpServerImpl::waitHandle() const
 {
     return _currentHandle;
-}
+}*/
 
 /*bool TcpServerImpl::checkEvent()
 {

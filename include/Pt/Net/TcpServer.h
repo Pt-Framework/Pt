@@ -66,17 +66,10 @@ class TcpServerImpl;
       virtual void onClose();
 
       // inherit doc
-      virtual bool onWait(std::size_t msecs);
-
-      // inherit doc
       virtual void onAttach(System::EventLoop&);
 
       // inherit doc
       virtual void onDetach(System::EventLoop&);
-
-      virtual void onEnable(System::EventLoop& el);
-
-      virtual void onDisable(System::EventLoop& el);
 
       virtual void onCancel();
 

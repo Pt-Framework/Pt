@@ -69,7 +69,7 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
         void close();
 
         // TODO: remove single wait, use blocking calls with timeout instead
-        bool wait(std::size_t msecs = WaitInfinite);
+        //bool wait(std::size_t msecs = WaitInfinite);
 
         bool avail()
         { return this->isAvail(); }
@@ -78,7 +78,7 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
         //! @brief Default Constructor
         Selectable();
 
-        virtual bool onWait(std::size_t msecs) = 0;
+        //virtual bool onWait(std::size_t msecs) = 0;
 
     protected:
         virtual void onAttach(EventLoop&) = 0;

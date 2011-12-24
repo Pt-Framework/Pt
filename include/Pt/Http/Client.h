@@ -110,7 +110,7 @@ class PT_HTTP_API Client : private NonCopyable
 
         // Executes the underlying selector until a event occures or the
         // specified timeout is reached.
-        void wait(std::size_t msecs);
+        //void wait(std::size_t msecs);
 
         // Returns the underlying stream, where the reply may be read from.
         std::istream& in();

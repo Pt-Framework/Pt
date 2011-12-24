@@ -97,7 +97,7 @@ class TcpSocketTest : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT_THROW(socket.endConnect(), Pt::System::IOError);
         }
 
-        void NonBlockingWithWait()
+        /*void NonBlockingWithWait()
         {
             //this->reportMessage("\nSTART");
 
@@ -118,7 +118,7 @@ class TcpSocketTest : public Pt::Unit::TestSuite
 
             PT_UNIT_ASSERT( 0 == std::strncmp(input, "Hello World !!!", 15) );
             //this->reportMessage("FINISHED");
-        }
+        }*/
 
         void NonBlockingWithLoop()
         {

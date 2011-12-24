@@ -86,12 +86,6 @@ void TcpServer::onClose()
 }
 
 
-bool TcpServer::onWait(std::size_t msecs)
-{
-    return _impl->wait(msecs);
-}
-
-
 void TcpServer::onAttach(System::EventLoop& sb)
 {
     _impl->attach(sb);
@@ -101,18 +95,6 @@ void TcpServer::onAttach(System::EventLoop& sb)
 void TcpServer::onDetach(System::EventLoop& sb)
 {
     _impl->detach(sb);
-}
-
-
-void TcpServer::onEnable(System::EventLoop& loop)
-{
-    _impl->enable(loop);
-}
-
-
-void TcpServer::onDisable(System::EventLoop& loop)
-{
-    _impl->disable(loop);
 }
 
 

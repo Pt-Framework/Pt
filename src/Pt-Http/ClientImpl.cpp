@@ -317,10 +317,10 @@ void ClientImpl::endExecute()
 }
 
 
-void ClientImpl::wait(std::size_t msecs)
+/*void ClientImpl::wait(std::size_t msecs)
 {
     _socket.wait(msecs);
-}
+}*/
 
 
 void ClientImpl::sendRequest(const Request& request)
