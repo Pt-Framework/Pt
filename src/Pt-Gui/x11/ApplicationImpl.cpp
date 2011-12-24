@@ -838,7 +838,6 @@ X11Fd::X11Fd(Display* display)
 {
     int xfd = XConnectionNumber( _display );
     System::FdImpl::setFd(xfd);
-    this->setEnabled(true);
  
     // Do we really need this?
     //XftInit(0);

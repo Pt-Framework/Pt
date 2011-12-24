@@ -459,7 +459,7 @@ class ServerThread : public Connectable
             _thread.start();
         }
 
-        ServerThread::~ServerThread()
+        ~ServerThread()
         {
             stop();
         }

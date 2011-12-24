@@ -57,10 +57,6 @@ class X11Fd : public System::Selectable
 
         void setFd(int fd)
         { System::FdImpl::setFd(fd); }
-        
-        // inherit doc
-        virtual System::SelectableImpl& simpl()
-        { return *this; }
 
         void flush()
         { this->onInput(); }
@@ -72,10 +68,9 @@ class X11Fd : public System::Selectable
         virtual void onClose()
         { System::FdImpl::closeFd(); }
 
-        // inherit doc
-        virtual bool onWait(std::size_t msecs)
-        { return false; }
-        
+        virtual void onCancel()
+        { throw std::logic_error("not implemented"); }
+
         // inherit doc
         virtual void onAttach(System::EventLoop& s)
         { System::FdImpl::attach(s); }
@@ -84,14 +79,8 @@ class X11Fd : public System::Selectable
         virtual void onDetach(System::EventLoop& s)
         { System::FdImpl::detach(s); }
 
-        void onEnable(EventLoop& loop)
-        { System::FdImpl::enable(loop); }
-
-        void onDisable(EventLoop& loop)
-        { System::FdImpl::disable(loop); }
-
         bool onAvail()
-        { System::FdImpl::avail(); }
+        { throw std::logic_error("not implemented"); }
 
     private:
         Display* _display;
