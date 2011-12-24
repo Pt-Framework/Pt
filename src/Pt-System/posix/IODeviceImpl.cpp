@@ -115,6 +115,16 @@ void IODeviceImpl::close()
 }
 
 
+void IODeviceImpl::cancel()
+{
+    EventLoop* loop = _device.parent();
+    if( loop && _iohandle )
+    {
+        loop->impl().cancel(_iohandle);
+    }
+}
+
+
 void IODeviceImpl::attach(EventLoop& loop)
 {
     if( this->fd() < 0)
@@ -314,16 +324,6 @@ size_t IODeviceImpl::write( const char* buffer, size_t count )
 void IODeviceImpl::sigwrite( int signo )
 {
     ::write(_fd, (const void*)&signo, sizeof(int));
-}
-
-
-void IODeviceImpl::cancel()
-{
-    EventLoop* loop = _device.parent();
-    if( loop && _iohandle )
-    {
-        loop->impl().cancel(_iohandle);
-    }
 }
 
 

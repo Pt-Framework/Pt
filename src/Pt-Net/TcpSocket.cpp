@@ -262,6 +262,8 @@ void TcpSocket::onCancel()
         _impl->close();
         //setEnabled(false);
     }
+
+    IODevice::onCancel();
 }
 
 

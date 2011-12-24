@@ -79,12 +79,6 @@ void MainLoop::onIdle(Selectable& s)
 }
 
 
-void MainLoop::onActive(Selectable& s)
-{
-    _impl->active(s);
-}
-
-
 void MainLoop::onAvail(Selectable& s)
 {
     _impl->avail(s);

@@ -118,8 +118,6 @@ namespace System {
 
             virtual void onIdle(Selectable& s);
 
-            virtual void onActive(Selectable& s);
-
             virtual void onAvail(Selectable& s);
 
             virtual void onRun();

@@ -207,6 +207,8 @@ void UdpSocket::onCancel()
     {
         _impl->cancel();
     }
+
+    IODevice::onCancel();
 }
 
 

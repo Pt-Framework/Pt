@@ -27,7 +27,7 @@
  */
 
 #include "ClientImpl.h"
-#include <Pt/Http2/Client.h>
+#include <Pt/Http/Client.h>
 #include "Parser.h"
 #include <Pt/System/IOError.h>
 #include <Pt/TextStream.h>
@@ -605,9 +605,12 @@ void ClientImpl::processBodyAvailable(System::StreamBuffer& sb)
                 }
 
                 log_debug("in_avail=" << _chunkedIStream.rdbuf()->in_avail() << " eod=" << _chunkedIStream.eod());
-                if (_chunkedIStream.eod())
+                if( _chunkedIStream.eod() )
                 {
-                    _parser.readHeader();
+                    if( _replyHeader.hasHeader("Trailer") )
+                        _parser.readHeader();
+                    else
+                        _client->replyFinished(*_client);
                 }
             }
 
@@ -636,8 +639,15 @@ void ClientImpl::processBodyAvailable(System::StreamBuffer& sb)
             if (_chunkedIStream.fail())
                 throw System::IOError( PT_ERROR_MSG("error reading HTTP reply body") );
         }
+        else if( _chunkedIStream.eod() )
+        {
+            if( _replyHeader.hasHeader("Trailer") )
+                _parser.readHeader();
+            else
+                _client->replyFinished(*_client);
+        }
 
-        if (_socket.enabled())
+        if (_socket.isConnected())
         {
             if ((!_chunkedIStream.eod() || !_parser.end()))
             {
@@ -675,7 +685,7 @@ void ClientImpl::processBodyAvailable(System::StreamBuffer& sb)
 
             _client->replyFinished(*_client);
         }
-        else if (_socket.enabled() && _stream.good())
+        else if (_socket.isConnected() && _stream.good())
         {
             sb.beginRead();
         }
@@ -691,6 +701,8 @@ void ClientImpl::cancel()
     _socket.close();
     _stream.clear();
     _stream.buffer().discard();
+
+    _chunkedIStream.reset();
 }
 
 

@@ -212,11 +212,6 @@ void MainLoop::onIdle(System::Selectable& s)
 }
 
 
-void MainLoop::onActive(System::Selectable& s)
-{
-}
-
-
 void MainLoop::onAvail(System::Selectable& s)
 {
 }

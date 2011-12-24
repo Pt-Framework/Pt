@@ -115,12 +115,6 @@ void EventLoopImpl::idle(Selectable& s)
 }
 
 
-void EventLoopImpl::active(Selectable& s)
-{
-    _avail.erase(&s);
-}
-
-
 void EventLoopImpl::avail(Selectable& s)
 {
     _avail.insert(&s);

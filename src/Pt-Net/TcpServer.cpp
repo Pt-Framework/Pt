@@ -116,6 +116,12 @@ void TcpServer::onDisable(System::EventLoop& loop)
 }
 
 
+void TcpServer::onCancel()
+{
+    //_impl->cancel();
+}
+
+
 bool TcpServer::onAvail()
 {
     return _impl->avail();

@@ -78,6 +78,8 @@ class TcpServerImpl;
 
       virtual void onDisable(System::EventLoop& el);
 
+      virtual void onCancel();
+
       virtual bool onAvail();
   };
 

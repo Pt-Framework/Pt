@@ -220,12 +220,8 @@ size_t IODevice::write(const char* buffer, size_t n)
 }
 
 
-void IODevice::cancel()
+void IODevice::onCancel()
 {
-    onCancel();
-
-    setAvail(false);
-
     _rbuf = 0;
     _rbuflen = 0;
     _ravail = 0;

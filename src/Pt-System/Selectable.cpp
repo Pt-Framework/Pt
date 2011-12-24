@@ -33,6 +33,12 @@ namespace Pt {
 
 namespace System {
 
+Selectable::Selectable()
+: _parent(0)
+, _state(Idle)
+{ }
+
+
 Selectable::~Selectable()
 {
     if(_parent)
@@ -59,6 +65,9 @@ void Selectable::setParent(EventLoop* parent)
         if(_state == Avail)
             _parent->onIdle(*this);
 
+        // TODO: should call cancel to make sure we are not changing 
+        //       loops while operation is running
+        //this->cancel();
         this->onDetach(*_parent);
         _parent->onDetach(*this);
         _parent = 0;
@@ -114,45 +123,15 @@ bool Selectable::wait(std::size_t msecs)
 }
 
 
-/*bool Selectable::enabled() const
-{
-    return _state != Disabled;
-}*/
 
 
-bool Selectable::avail() const
+
+void Selectable::cancel()
 {
-    return this->isAvail();
+    this->onCancel();
+    this->setCancelled();
+    this->setAvail(false);
 }
-
-
-Selectable::Selectable()
-: _parent(0)
-, _state(Idle)
-{ }
-
-
-/*void Selectable::setEnabled(bool isEnabled)
-{
-    if(isEnabled)
-    {
-        //if(_state == Disabled)
-        //    _state = Active;
-    }
-    else // disable
-    {
-        if(_parent)
-        {
-           if(_state == Avail)
-           {
-                _parent->onIdle(*this);
-                _state = Idle;
-           }
-        }
-
-        //_state = Disabled;
-    }
-}*/
 
 
 bool Selectable::isAvail() const
@@ -178,6 +157,41 @@ void Selectable::setAvail(bool isAvail)
         _state = Idle;
     }
 }
+
+
+/*bool Selectable::avail() const
+{
+    return this->isAvail();
+}*/
+
+
+/*bool Selectable::enabled() const
+{
+    return _state != Disabled;
+}*/
+
+
+/*void Selectable::setEnabled(bool isEnabled)
+{
+    if(isEnabled)
+    {
+        //if(_state == Disabled)
+        //    _state = Active;
+    }
+    else // disable
+    {
+        if(_parent)
+        {
+           if(_state == Avail)
+           {
+                _parent->onIdle(*this);
+                _state = Idle;
+           }
+        }
+
+        //_state = Disabled;
+    }
+}*/
 
 
 /*bool Selectable::idle() const

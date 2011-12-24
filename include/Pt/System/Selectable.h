@@ -44,7 +44,6 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
     public:
         static const std::size_t WaitInfinite = EventLoop::WaitInfinite;
 
-        // TODO: Idle, Active, Avail
         enum State
         {
             Idle = 0,
@@ -61,6 +60,8 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
 
         const EventLoop* parent() const;
 
+        void cancel();
+
         /** @brief Closes the I/O device
 
            Frees any resources associated with this object, like I/O handles.
@@ -70,85 +71,30 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
         // TODO: remove single wait, use blocking calls with timeout instead
         bool wait(std::size_t msecs = WaitInfinite);
 
-        /** @brief Test if the I/O device object is enabled
-
-            Test if the I/O device object is enabled i.e. open and ready
-            to perform I/O operations
-
-            \return true if the I/O device is usable, false otherwise.
-        */
-        //bool enabled() const;
-
-        // TODO: active
-        //bool idle() const;
-
-        bool avail() const;
-
     protected:
         //! @brief Default Constructor
         Selectable();
 
-        //! @brief Sets or unsets the device enabled
-        //void setEnabled(bool isEnabled);
-
-        // TODO: setUnavail would be enough
-        //       alternatively, the EventLoop could unset the avail flag
-        //void setIdle();
-
-        // TODO: setUnavail would be enough
-        //       alternatively, the EventLoop could unset the avail flag
-        //void setActive();
-
-        //void setAvail();
-
-        // TODO: move close to IODevice, Selectable only knows cancel
-        //! @brief Closes the Selectable
-        virtual void onClose() = 0;
-
         virtual bool onWait(std::size_t msecs) = 0;
-
-        // new API
-        bool checkAvail()
-        {
-            bool ret = false;
-
-            if( isAvail() )
-                ret = onAvail();
-
-            return ret;
-        }
-
-        // TODO: should call cancel to make sure we are not changing 
-        //       loops while operation is running
-        void detach()
-        {
-            if(_parent)
-            {
-                this->cancelX();
-                this->onDetach(*_parent);
-            }
-        }
-
-        void cancelX()
-        {
-            this->doCancel();
-            this->setCancelled();
-        }
 
     protected:
         virtual void onAttach(EventLoop&) = 0;
 
         virtual void onDetach(EventLoop&) = 0;
 
-        virtual void setAvail(bool isAvail);
+        //! @brief Closes the Selectable
+        virtual void onClose() = 0;
 
-        virtual void setCancelled() {}
+        virtual void setAvail(bool isAvail);
 
         virtual bool isAvail() const;
 
         virtual bool onAvail() = 0;
 
-        virtual void doCancel() {}
+        virtual void setCancelled() {}
+
+        //! @brief Cancel operations,
+        virtual void onCancel() = 0;
 
     private:
         EventLoop* _parent;

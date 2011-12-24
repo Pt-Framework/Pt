@@ -95,8 +95,6 @@ class MainLoop : public Pt::System::EventLoop
 
         virtual void onIdle(System::Selectable& s);
 
-        virtual void onActive(System::Selectable& s);
-
         virtual void onAvail(System::Selectable& s);
 
         virtual void onRun();

@@ -253,8 +253,6 @@ class EventLoopImpl : public EventDispatcher
 
         void idle(Selectable& s);
 
-        void active(Selectable& s);
-
         void avail(Selectable& s);
 
     protected:

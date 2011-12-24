@@ -143,7 +143,8 @@ size_t FileDevice::onWrite(const char* buffer, size_t count)
 
 void FileDevice::onCancel()
 {
-    return _impl->cancel();
+    _impl->cancel();
+    IODevice::onCancel();
 }
 
 
