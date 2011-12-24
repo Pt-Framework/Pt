@@ -153,38 +153,6 @@ void EventLoopImpl::detach(Selectable& s)
 }
 
 
-void EventLoopImpl::enable(Selectable& s)
-{
-}
-
-
-void EventLoopImpl::disable(Selectable& s)
-{
-//  std::set<Selectable*>::iterator iter = _devices.find( &s );
-//  if( iter != _devices.end() )
-//  {
-//      assert(false);
-//      if( _current != _devices.end() && *_current == *iter )
-//      {
-//          _devices.erase(_current++);
-//      }
-//      else
-//      {
-//          _devices.erase(iter);
-//      }
-//  }
-//
-//  iter = _avail.find( &s );
-//  if( iter != _avail.end() )
-//  {
-//      assert(false);
-//      if( _currentAvail != _avail.end() && *_currentAvail == *iter )
-//          _avail.erase(_currentAvail++);
-//      else
-//          _avail.erase(iter);
-//  }
-}
-
 
 void EventLoopImpl::idle(Selectable& s)
 {
@@ -197,24 +165,6 @@ void EventLoopImpl::idle(Selectable& s)
         _avail.erase(_currentAvail++);
     else
         _avail.erase(it);
-
-    //TODO: remove signalled
-}
-
-
-void EventLoopImpl::active(Selectable& s)
-{
-    std::set<Selectable*>::iterator it = _avail.find( &s );
-    if( it != _avail.end() )
-    {
-        if( _currentAvail != _avail.end() &&
-           *_currentAvail == *it )
-            _avail.erase(_currentAvail++);
-        else
-            _avail.erase(it);
-    }
-
-    //TODO: remove signalled
 }
 
 

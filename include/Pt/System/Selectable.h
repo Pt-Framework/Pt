@@ -71,6 +71,9 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
         // TODO: remove single wait, use blocking calls with timeout instead
         bool wait(std::size_t msecs = WaitInfinite);
 
+        bool avail()
+        { return this->isAvail(); }
+
     protected:
         //! @brief Default Constructor
         Selectable();

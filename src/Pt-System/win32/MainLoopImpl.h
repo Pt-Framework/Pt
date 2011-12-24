@@ -129,13 +129,7 @@ class PT_SYSTEM_API EventLoopImpl : public EventDispatcher
 
         void detach(Selectable& s);
 
-        void enable(Selectable& s);
-
-        void disable(Selectable& s);
-
         void idle(Selectable& s);
-
-        void active(Selectable& s);
 
         void avail(Selectable& s);
 

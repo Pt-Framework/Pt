@@ -593,27 +593,9 @@ void MainLoop::onDetach(System::Selectable& s)
 }
 
 
-void MainLoop::onEnable( System::Selectable& s )
-{
-    _impl.enable(s);
-}
-
-
-void MainLoop::onDisable( System::Selectable& s )
-{
-    _impl.disable(s);
-}
-
-
 void MainLoop::onIdle(System::Selectable& s)
 {
     _impl.idle(s);
-}
-
-
-void MainLoop::onActive(System::Selectable& s)
-{
-    _impl.active(s);
 }
 
 
