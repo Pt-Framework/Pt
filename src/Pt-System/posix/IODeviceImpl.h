@@ -62,7 +62,7 @@ namespace System {
         DestructionSentry*& _sentry;
     };
 
-    class IODeviceImpl : public SelectableImpl
+    class IODeviceImpl
     {
         public:
             IODeviceImpl(IODevice& device);
@@ -100,17 +100,17 @@ namespace System {
 
             virtual void sync() const;
 
-            virtual bool wait(std::size_t msecs);
+            //virtual bool wait(std::size_t msecs);
 
             virtual bool wait(std::size_t msecs, fd_set* rfds, fd_set* wfds, fd_set* efds);
 
-            virtual void initWait(fd_set& rfds, fd_set& wfds, fd_set& efds);
+            //virtual void initWait(fd_set& rfds, fd_set& wfds, fd_set& efds);
 
             //virtual int initSelect(fd_set& rfds, fd_set& wfds, fd_set& efds);
 
             //virtual void exitSelect();
 
-            virtual int checkWait(fd_set& rfds, fd_set& wfds, fd_set& efds);
+            //virtual int checkWait(fd_set& rfds, fd_set& wfds, fd_set& efds);
 
             virtual void attach(EventLoop& s);
 

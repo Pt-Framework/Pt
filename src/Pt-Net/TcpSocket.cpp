@@ -184,12 +184,6 @@ void TcpSocket::onClose()
 }
 
 
-bool TcpSocket::onWait(std::size_t msecs)
-{
-    return _impl->wait(msecs);
-}
-
-
 void TcpSocket::onAttach(System::EventLoop& sb)
 {
     _impl->attach(sb);

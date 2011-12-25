@@ -77,12 +77,6 @@ void PipeIODevice::open(int fd, bool isAsync)
 }
 
 
-bool PipeIODevice::onWait(std::size_t msecs)
-{
-    return _impl.wait(msecs);
-}
-
-
 size_t PipeIODevice::onBeginRead(char* buffer, size_t n, bool& eof)
 {
     return _impl.beginRead(buffer, n, eof);

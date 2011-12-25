@@ -188,12 +188,6 @@ void SerialDevice::onClose()
 }
 
 
-bool SerialDevice::onWait(std::size_t n)
-{
-    return _impl->wait(n);
-}
-
-
 size_t SerialDevice::onRead(char* buffer, size_t count, bool& eof)
 {
     return _impl->read( buffer, count, eof );

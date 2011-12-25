@@ -333,7 +333,7 @@ void TcpSocketImpl::accept(const TcpServer& server, unsigned flags)
 }
 
 
-void TcpSocketImpl::initWait(fd_set& rfds, fd_set& wfds, fd_set& efds)
+/*void TcpSocketImpl::initWait(fd_set& rfds, fd_set& wfds, fd_set& efds)
 {
     System::IODeviceImpl::initWait(rfds, wfds, efds);
 
@@ -345,7 +345,7 @@ void TcpSocketImpl::initWait(fd_set& rfds, fd_set& wfds, fd_set& efds)
             FD_SET(this->fd(), &efds);
         }
     }
-}
+}*/
 
 
 bool TcpSocketImpl::avail()
@@ -419,7 +419,7 @@ bool TcpSocketImpl::avail()
 }
 
 
-int TcpSocketImpl::checkWait(fd_set& rfds, fd_set& wfds, fd_set& efds)
+/*int TcpSocketImpl::checkWait(fd_set& rfds, fd_set& wfds, fd_set& efds)
 {
     log_debug("TcpSocketImpl::checkWait");
 
@@ -482,7 +482,7 @@ int TcpSocketImpl::checkWait(fd_set& rfds, fd_set& wfds, fd_set& efds)
     }
 
     return 0;
-}
+}*/
 
 } // namespace Net
 

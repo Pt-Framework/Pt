@@ -49,7 +49,7 @@ namespace Net {
 
 class TcpServer;
 
-class TcpServerImpl  : public System::SelectableImpl
+class TcpServerImpl
 {
     private:
         TcpServer& _server;
@@ -77,22 +77,11 @@ class TcpServerImpl  : public System::SelectableImpl
         int fd() const
         { return _fd; }
 
-        bool wait(std::size_t msecs);
-
         void attach(System::EventLoop& s);
 
         void detach(System::EventLoop& s);
     
         bool avail();
-
-        // implementation using select
-        //virtual int initSelect(fd_set&, fd_set&, fd_set&);
-
-        // implementation using select
-        //virtual void exitSelect();
-
-        // implementation using select
-        //virtual int checkEvent(fd_set&, fd_set&, fd_set&);
 };
 
 } // namespace Net

@@ -113,12 +113,6 @@ size_t FileDevice::size() const
 }
 
 
-bool FileDevice::onWait(std::size_t n)
-{
-    return _impl->wait(n);
-}
-
-
 FileDevice::pos_type FileDevice::onSeek(off_type offset, std::ios::seekdir sd)
 {
     return _impl->seek(offset, sd);

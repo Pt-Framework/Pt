@@ -88,9 +88,9 @@ class TcpSocketImpl : public System::IODeviceImpl
 
         void accept(const TcpServer& server, unsigned inherit);
 
-        void initWait(fd_set& rfds, fd_set& wfds, fd_set& efds);
+        //void initWait(fd_set& rfds, fd_set& wfds, fd_set& efds);
 
-        int checkWait(fd_set& rfds, fd_set& wfds, fd_set& efds);
+        //int checkWait(fd_set& rfds, fd_set& wfds, fd_set& efds);
 };
 
 } // namespace Net

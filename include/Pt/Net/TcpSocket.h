@@ -94,9 +94,6 @@ class PT_NET_API TcpSocket : public System::IODevice
         virtual void onClose();
 
         // inherit doc
-        virtual bool onWait(std::size_t msecs);
-
-        // inherit doc
         virtual void onAttach(System::EventLoop& el);
 
         // inherit doc

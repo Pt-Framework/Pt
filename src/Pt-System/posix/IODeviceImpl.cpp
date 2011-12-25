@@ -335,169 +335,6 @@ void IODeviceImpl::sync() const
 }
 
 
-bool IODeviceImpl::wait(std::size_t msecs)
-{
-    fd_set rfds;
-    fd_set wfds;
-    fd_set efds;
-    FD_ZERO(&rfds);
-    FD_ZERO(&wfds);
-    FD_ZERO(&efds);
-    this->initWait(rfds, wfds, efds);
-    this->wait(msecs, &rfds, &wfds, &efds);
-    return this->checkWait(rfds, wfds, efds);
-}
-
-
-bool IODeviceImpl::wait(std::size_t msecs, fd_set* rfds, fd_set* wfds, fd_set* efds)
-{
-    struct timeval* timeout = 0;
-    struct timeval tv;
-    if(msecs != EventLoop::WaitInfinite)
-    {
-        tv.tv_sec = msecs / 1000;
-        tv.tv_usec = (msecs % 1000) * 1000;
-        timeout = &tv;
-    }
-
-    int ret = -1;
-    do
-    {
-        ret = ::select(FD_SETSIZE, rfds, wfds, efds, timeout);
-    } while (ret == -1 && errno == EINTR);
-
-    if (ret == -1)
-        throw IOError( PT_ERROR_MSG("select failed") );
-
-    return ret > 0;
-}
-
-
-void IODeviceImpl::initWait(fd_set& rfds, fd_set& wfds, fd_set& efds)
-{
-    if( this->fd() > FD_SETSIZE )
-    {
-        throw System::IOError( PT_ERROR_MSG("FD_SETSIZE too small for fd") );
-    }
-
-    if( this->fd() > 0 )
-    {
-        if( _device.rbuf() )
-        {
-            FD_SET(this->fd(), &rfds);
-        }
-
-        if( _device.wbuf() )
-        {
-            FD_SET(this->fd(), &wfds);
-        }
-    }
-}
-
-
-// TODO: move to enable
-/*int IODeviceImpl::initSelect(fd_set& rfds, fd_set& wfds, fd_set& efds)
-{
-    _rfds = &rfds;
-    _wfds = &wfds;
-    _efds = &efds;
-    this->initWait(rfds, wfds, efds);
-
-    return this->fd();
-}*/
-
-
-// TODO: move to detach / disable
-/*void IODeviceImpl::exitSelect()
-{
-    if( this->fd() > 0)
-    {
-        if(_rfds)
-            FD_CLR(this->fd(), _rfds);
-        if(_wfds)
-            FD_CLR(this->fd(), _wfds);
-        if(_efds)
-            FD_CLR(this->fd(), _efds);
-    }
-
-    _rfds = 0;
-    _wfds = 0;
-    _efds = 0;
-}*/
-
-
-int IODeviceImpl::checkWait(fd_set& rfds, fd_set& wfds, fd_set& efds)
-{
-    int avail = 0;
-
-    if( this->fd() < 0)
-        return 0;
-
-    DestructionSentry sentry(_sentry);
-
-    if ( FD_ISSET(this->fd(), &efds) )
-    {
-        _errorPending = true;
-
-        try
-        {
-            bool reading = _device.reading();
-            bool writing = _device.writing();
-
-            if (reading)
-            {
-                ++avail;
-                _device.inputReady(_device);
-            }
-
-            if( ! _sentry )
-                return avail;
-
-            if (writing)
-            {
-                ++avail;
-                _device.outputReady(_device);
-            }
-
-            if( ! _sentry )
-                return avail;
-
-            if (!reading && !writing)
-            {
-                avail = true;
-                _device.close();
-            }
-        }
-        catch (...)
-        {
-            _errorPending = false;
-            throw;
-        }
-        _errorPending = false;
-
-        return avail;
-    }
-
-
-    if( _device.wavail() > 0 || FD_ISSET(this->fd(), &wfds) )
-    {
-        _device.outputReady(_device);
-        ++avail;
-    }
-
-    if( ! sentry )
-        return avail;
-
-    if( _device.rbuf() && FD_ISSET(this->fd(), &rfds) )
-    {
-        _device.inputReady(_device);
-        ++avail;
-    }
-
-    return avail;
-}
-
-
 bool IODeviceImpl::avail()
 {
     std::cerr << "IODeviceImpl::avail"<< std::endl;
@@ -572,6 +409,169 @@ bool IODeviceImpl::avail()
 
     return avail > 0;
 }
+
+
+bool IODeviceImpl::wait(std::size_t msecs, fd_set* rfds, fd_set* wfds, fd_set* efds)
+{
+    struct timeval* timeout = 0;
+    struct timeval tv;
+    if(msecs != EventLoop::WaitInfinite)
+    {
+        tv.tv_sec = msecs / 1000;
+        tv.tv_usec = (msecs % 1000) * 1000;
+        timeout = &tv;
+    }
+
+    int ret = -1;
+    do
+    {
+        ret = ::select(FD_SETSIZE, rfds, wfds, efds, timeout);
+    } while (ret == -1 && errno == EINTR);
+
+    if (ret == -1)
+        throw IOError( PT_ERROR_MSG("select failed") );
+
+    return ret > 0;
+}
+
+
+/*bool IODeviceImpl::wait(std::size_t msecs)
+{
+    fd_set rfds;
+    fd_set wfds;
+    fd_set efds;
+    FD_ZERO(&rfds);
+    FD_ZERO(&wfds);
+    FD_ZERO(&efds);
+    this->initWait(rfds, wfds, efds);
+    this->wait(msecs, &rfds, &wfds, &efds);
+    return this->checkWait(rfds, wfds, efds);
+}*/
+
+
+/*void IODeviceImpl::initWait(fd_set& rfds, fd_set& wfds, fd_set& efds)
+{
+    if( this->fd() > FD_SETSIZE )
+    {
+        throw System::IOError( PT_ERROR_MSG("FD_SETSIZE too small for fd") );
+    }
+
+    if( this->fd() > 0 )
+    {
+        if( _device.rbuf() )
+        {
+            FD_SET(this->fd(), &rfds);
+        }
+
+        if( _device.wbuf() )
+        {
+            FD_SET(this->fd(), &wfds);
+        }
+    }
+}*/
+
+
+// TODO: move to enable
+/*int IODeviceImpl::initSelect(fd_set& rfds, fd_set& wfds, fd_set& efds)
+{
+    _rfds = &rfds;
+    _wfds = &wfds;
+    _efds = &efds;
+    this->initWait(rfds, wfds, efds);
+
+    return this->fd();
+}*/
+
+
+// TODO: move to detach / disable
+/*void IODeviceImpl::exitSelect()
+{
+    if( this->fd() > 0)
+    {
+        if(_rfds)
+            FD_CLR(this->fd(), _rfds);
+        if(_wfds)
+            FD_CLR(this->fd(), _wfds);
+        if(_efds)
+            FD_CLR(this->fd(), _efds);
+    }
+
+    _rfds = 0;
+    _wfds = 0;
+    _efds = 0;
+}*/
+
+
+/*int IODeviceImpl::checkWait(fd_set& rfds, fd_set& wfds, fd_set& efds)
+{
+    int avail = 0;
+
+    if( this->fd() < 0)
+        return 0;
+
+    DestructionSentry sentry(_sentry);
+
+    if ( FD_ISSET(this->fd(), &efds) )
+    {
+        _errorPending = true;
+
+        try
+        {
+            bool reading = _device.reading();
+            bool writing = _device.writing();
+
+            if (reading)
+            {
+                ++avail;
+                _device.inputReady(_device);
+            }
+
+            if( ! _sentry )
+                return avail;
+
+            if (writing)
+            {
+                ++avail;
+                _device.outputReady(_device);
+            }
+
+            if( ! _sentry )
+                return avail;
+
+            if (!reading && !writing)
+            {
+                avail = true;
+                _device.close();
+            }
+        }
+        catch (...)
+        {
+            _errorPending = false;
+            throw;
+        }
+        _errorPending = false;
+
+        return avail;
+    }
+
+
+    if( _device.wavail() > 0 || FD_ISSET(this->fd(), &wfds) )
+    {
+        _device.outputReady(_device);
+        ++avail;
+    }
+
+    if( ! sentry )
+        return avail;
+
+    if( _device.rbuf() && FD_ISSET(this->fd(), &rfds) )
+    {
+        _device.inputReady(_device);
+        ++avail;
+    }
+
+    return avail;
+}*/
 
 }//namespace System
 

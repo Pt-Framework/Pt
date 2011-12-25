@@ -35,8 +35,6 @@ namespace Pt {
 
 namespace System {
 
-class SelectableImpl;
-
 class PT_SYSTEM_API Selectable : protected NonCopyable
 {
     friend class EventLoopImpl;

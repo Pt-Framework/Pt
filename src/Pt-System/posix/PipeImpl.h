@@ -68,8 +68,6 @@ class PipeIODevice : public Pt::System::IODevice
         bool onAvail()
         { return _impl.avail(); }
 
-        bool onWait(std::size_t msecs);
-
         size_t onBeginRead(char* buffer, size_t n, bool& eof);
 
         size_t onEndRead(bool& eof);
@@ -87,9 +85,6 @@ class PipeIODevice : public Pt::System::IODevice
         void onSync() const;
 
         IODeviceImpl& ioimpl()
-        { return _impl; }
-
-        SelectableImpl& simpl()
         { return _impl; }
 
     private:
