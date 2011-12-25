@@ -191,7 +191,7 @@ void TcpServerImpl::listen(const std::string& ipaddr,
 
 void TcpServerImpl::attach(System::EventLoop& loop)
 {
-    if( this->fd() < 0 || _iohandle)
+    if( this->fd() < 0 )
         return;
 
     _iohandle = loop.impl().enable(_server, this->fd());
@@ -211,7 +211,7 @@ void TcpServerImpl::detach(System::EventLoop& loop)
 
 bool TcpServerImpl::avail()
 {
-    std::cerr << "IODeviceImpl::avail"<< std::endl;
+    std::cerr << "TcpServerImpl::avail"<< std::endl;
 
     if( ! _iohandle)
         return false;
