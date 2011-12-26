@@ -151,16 +151,6 @@ void FileDeviceImpl::detach(EventLoop& loop)
 }
 
 
-void FileDeviceImpl::enable(EventLoop& loop)
-{
-}
-
-
-void FileDeviceImpl::disable(EventLoop& loop)
-{
-}
-
-
 bool FileDeviceImpl::avail()
 {
     bool avail = false;

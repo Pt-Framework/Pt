@@ -387,18 +387,6 @@ void UdpSocketImpl::detach(System::EventLoop& loop)
 }
 
 
-void UdpSocketImpl::enable(System::EventLoop& loop)
-{
-
-}
-
-
-void UdpSocketImpl::disable(System::EventLoop& loop)
-{
-
-}
-
-
 bool UdpSocketImpl::avail()
 {
     DestructionSentry sentry(_sentry);

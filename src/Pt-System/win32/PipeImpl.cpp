@@ -234,18 +234,6 @@ void PipeIODevice::onDetach(EventLoop& loop)
 }
 
 
-void PipeIODevice::onEnable(EventLoop& loop)
-{
-
-}
-
-
-void PipeIODevice::onDisable(EventLoop& loop)
-{
-
-}
-
-
 bool PipeIODevice::onAvail()
 {
     bool avail = false;

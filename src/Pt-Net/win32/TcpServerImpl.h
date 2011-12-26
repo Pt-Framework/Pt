@@ -54,25 +54,24 @@ class TcpServer;
 class TcpServerImpl
 {
     private:
-        TcpServer&			_server;
-        SOCKET				_fd;
-        sockaddr_storage    _servaddr;
-        //WSAEVENT			_waitEvent;
-		HANDLE				_currentHandle;
+        TcpServer& _server;
+        SOCKET _fd;
+        sockaddr_storage _servaddr;
+        HANDLE _currentHandle;
 
         void attachEvent(HANDLE ev, long events);
 
     public:
         TcpServerImpl(TcpServer& server);
-		~TcpServerImpl();
+        ~TcpServerImpl();
 
         void create(int domain, int type, int protocol);
 
         void close();
 
-		SOCKET accept();
+        SOCKET accept();
 
-		void listen(const std::string& ipaddr,
+        void listen(const std::string& ipaddr,
                     unsigned short int port,
                     int backlog = 5, unsigned flags = 0);
 

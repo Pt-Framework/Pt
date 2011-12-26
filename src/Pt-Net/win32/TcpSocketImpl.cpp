@@ -285,8 +285,11 @@ void TcpSocketImpl::attach(System::EventLoop& loop)
 
     HANDLE h = loop.impl().beginWait(_socket);
 
-    bool active = false;
-    this->setWaitHandle(h, active);
+    bool active = _dataSends != 0;
+
+    log_debug(_fd << " setWaitHandle");
+    _currentEventHandle = h;
+    attachEvent(_currentEventHandle, _eventFlags);
 
     // TODO: use this->setAvail() ?
     if(active)
@@ -450,27 +453,6 @@ bool TcpSocketImpl::wait(std::size_t umsecs)
     }
 
     return false;
-}
-
-
-bool TcpSocketImpl::setWaitHandle(HANDLE h, bool& avail)
-{
-    log_debug(_fd << " setWaitHandle");
-    avail = _dataSends != 0;
-
-    if( _currentEventHandle == h)
-        return true;
-
-    _currentEventHandle = h;
-
-    if(_waitEvent != _currentEventHandle)
-    {
-        log_debug(_fd << " wait handle is selector");
-    }
-
-    attachEvent(_currentEventHandle, _eventFlags);
-
-    return true;
 }
 
 
@@ -654,6 +636,26 @@ size_t TcpSocketImpl::write(const char* buffer, size_t count)
     return 0;
 }
 
+
+/*bool TcpSocketImpl::setWaitHandle(HANDLE h, bool& avail)
+{
+    log_debug(_fd << " setWaitHandle");
+    avail = _dataSends != 0;
+
+    if( _currentEventHandle == h)
+        return true;
+
+    _currentEventHandle = h;
+
+    if(_waitEvent != _currentEventHandle)
+    {
+        log_debug(_fd << " wait handle is selector");
+    }
+
+    attachEvent(_currentEventHandle, _eventFlags);
+
+    return true;
+}*/
 
 /*bool TcpSocketImpl::checkEvent()
 {

@@ -168,10 +168,6 @@ class TcpSocketImpl
 
         bool avail();
 
-        bool setWaitHandle(HANDLE h, bool& avail);
-
-        //bool checkEvent();
-
         void cancel();
 };
 

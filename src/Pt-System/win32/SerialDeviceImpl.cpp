@@ -160,16 +160,6 @@ void SerialDeviceImpl::detach(EventLoop& loop)
 }
 
 
-void SerialDeviceImpl::enable(EventLoop& loop)
-{
-}
-
-
-void SerialDeviceImpl::disable(EventLoop& loop)
-{
-}
-
-
 bool SerialDeviceImpl::avail()
 {
     bool avail = false;
