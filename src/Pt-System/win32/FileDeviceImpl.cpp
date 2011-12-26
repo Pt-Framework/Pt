@@ -171,7 +171,7 @@ bool FileDeviceImpl::avail()
 }
 
 
-bool FileDeviceImpl::wait(std::size_t msecs)
+/*bool FileDeviceImpl::wait(std::size_t msecs)
 {
 #ifndef _WIN32_WCE
     if( _device.avail() )
@@ -207,7 +207,7 @@ bool FileDeviceImpl::wait(std::size_t msecs)
 #else
     return true;
 #endif
-}
+}*/
 
 
 bool FileDeviceImpl::setWaitHandle(HANDLE h, bool& avail)

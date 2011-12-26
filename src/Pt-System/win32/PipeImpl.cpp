@@ -96,7 +96,7 @@ void PipeIODevice::open(HANDLE handle, bool isAsync)
 }
 
 
-bool PipeIODevice::onWait(std::size_t msecs)
+/*bool PipeIODevice::onWait(std::size_t msecs)
 {
     if( this->avail() )
     {
@@ -127,7 +127,7 @@ bool PipeIODevice::onWait(std::size_t msecs)
         throw IOError( PT_ERROR_MSG("WAIT_FAILED on pipe") );
 
     return false;
-}
+}*/
 
 
 bool PipeIODevice::setWaitHandle(HANDLE h, bool& avail)

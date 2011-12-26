@@ -82,13 +82,7 @@ void Selectable::setParent(EventLoop* parent)
 }
 
 
-EventLoop* Selectable::parent()
-{
-    return _parent;
-}
-
-
-const EventLoop* Selectable::parent() const
+EventLoop* Selectable::parent() const
 {
     return _parent;
 }
@@ -113,15 +107,11 @@ void Selectable::close()
 
 void Selectable::cancel()
 {
+    // this should block until the operation is cancelled
     this->onCancel();
-    this->setCancelled();
-    this->setAvail(false);
-}
 
-
-bool Selectable::isAvail() const
-{
-    return _state == Avail;
+    // signal that an operation was cancelled
+    this->setIdle();
 }
 
 
@@ -142,6 +132,15 @@ void Selectable::setAvail(bool isAvail)
         _state = Idle;
     }
 }
+
+void Selectable::setIdle()
+{
+    if(_parent)
+        _parent->onIdle(*this);
+
+    _state = Idle;
+}
+
 
 
 /*bool Selectable::wait(std::size_t msecs)

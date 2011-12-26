@@ -52,11 +52,10 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
         //! @brief Destructor
         virtual ~Selectable();
 
+        // TODO: split attach/detach
         void setParent(EventLoop* parent);
 
-        EventLoop* parent();
-
-        const EventLoop* parent() const;
+        EventLoop* parent() const;
 
         void cancel();
 
@@ -66,30 +65,30 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
         */
         void close();
 
-        bool avail()
-        { return this->isAvail(); }
-
     protected:
         //! @brief Default Constructor
         Selectable();
 
     protected:
+        //! @brief Attached to loop
         virtual void onAttach(EventLoop&) = 0;
 
+        //! @brief Detached from loop
         virtual void onDetach(EventLoop&) = 0;
 
         //! @brief Closes the Selectable
         virtual void onClose() = 0;
 
+        //! @brief Signals state transition to avail state
         virtual void setAvail(bool isAvail);
 
-        virtual bool isAvail() const;
+        //! @brief Signals state transition to idle state
+        virtual void setIdle();
 
+        //! @brief Check if ready and run
         virtual bool onAvail() = 0;
 
-        virtual void setCancelled() {}
-
-        //! @brief Cancel operations,
+        //! @brief Blocks until operation has cancelled
         virtual void onCancel() = 0;
 
     private:

@@ -180,7 +180,7 @@ bool SerialDeviceImpl::avail()
 }
 
 
-bool SerialDeviceImpl::wait(std::size_t msecs)
+/*bool SerialDeviceImpl::wait(std::size_t msecs)
 {
     if( _device.avail() )
     {
@@ -211,7 +211,7 @@ bool SerialDeviceImpl::wait(std::size_t msecs)
         throw IOError("WAIT_FAILED on pipe", PT_SOURCEINFO);
           
     return false;
-}
+}*/
 
 
 bool SerialDeviceImpl::setWaitHandle(HANDLE h, bool& avail)

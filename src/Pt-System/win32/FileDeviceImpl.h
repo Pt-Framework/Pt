@@ -48,7 +48,7 @@ class FileDeviceImpl  : public IODeviceImpl
 
         bool avail();
 
-        virtual bool wait(std::size_t msecs);
+        //virtual bool wait(std::size_t msecs);
 
         virtual bool setWaitHandle(HANDLE h, bool& avail);
 

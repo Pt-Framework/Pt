@@ -211,7 +211,7 @@ SOCKET TcpServerImpl::accept()
         attachEvent(_currentHandle, FD_ACCEPT);
 
     log_debug(fd << " accepted ");
-    _server.setAvail(false);
+    //_server.setAvail(false);
     return fd;
 }
 
@@ -255,11 +255,11 @@ bool TcpServerImpl::avail()
     if (_fd == INVALID_SOCKET)
         return false;
     
-    if( _server.avail() )
+    /*if( _server.avail() )
     {
         _server.connectionPending.send(_server);
         return true;
-    }
+    }*/
 
     WSANETWORKEVENTS events;
 

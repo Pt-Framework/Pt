@@ -47,7 +47,7 @@ class SerialDeviceImpl : public IODeviceImpl
 
         bool avail();
 
-        bool wait(std::size_t msecs);
+        //bool wait(std::size_t msecs);
         
         bool setWaitHandle(HANDLE h, bool& active);
         
