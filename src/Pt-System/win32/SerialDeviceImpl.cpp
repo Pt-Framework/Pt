@@ -154,7 +154,7 @@ void SerialDeviceImpl::detach(EventLoop& loop)
     this->setWaitHandle(_waitHandle, active);
 
     if(active)
-        _device.setAvail(true);
+        _device.setAvail();
 
     loop.impl().endWait(_device);
 }

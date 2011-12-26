@@ -115,8 +115,10 @@ void Selectable::cancel()
 }
 
 
-void Selectable::setAvail(bool isAvail)
+void Selectable::setAvail()
 {
+    bool isAvail = true;
+
     if(isAvail)
     {
         if(_parent)

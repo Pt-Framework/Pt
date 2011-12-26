@@ -64,9 +64,9 @@ void IODevice::beginRead(char* buffer, size_t n)
     size_t r = this->onBeginRead(buffer, n, _eof);
 
     if(r > 0 || _eof || _wavail)
-        this->setAvail(true);
+        this->setAvail();
     else
-        this->setAvail(false);
+        this->setIdle();
 
     _rbuf = buffer;
     _rbuflen = n;
@@ -93,9 +93,9 @@ size_t IODevice::endRead()
     }
 
     if(_wavail > 0)
-        this->setAvail(true); //TODO: do we need to setAvail again?
+        this->setAvail(); //TODO: do we need to setAvail again?
     else //if(_wbuf)
-        this->setAvail(false);
+        this->setIdle();
     //else
     //    this->setIdle();
 
@@ -146,9 +146,9 @@ size_t IODevice::beginWrite(const char* buffer, size_t n)
     size_t r = this->onBeginWrite(buffer, n);
 
     if(r > 0 || _ravail)
-        this->setAvail(true);
+        this->setAvail();
     else
-        this->setAvail(false);
+        this->setIdle();
 
     _wbuf = buffer;
     _wbuflen = n;
@@ -177,11 +177,11 @@ size_t IODevice::endWrite()
     }
 
     if(_ravail > 0 || (_rbuf && _eof) )
-        this->setAvail(true);
+        this->setAvail();
     else if(_rbuf)
-        this->setAvail(false);
+        this->setIdle();
     else
-        this->setAvail(false);
+        this->setIdle();
     //else
     //    this->setIdle();
 

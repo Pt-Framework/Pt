@@ -80,7 +80,7 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
         virtual void onClose() = 0;
 
         //! @brief Signals state transition to avail state
-        virtual void setAvail(bool isAvail);
+        virtual void setAvail();
 
         //! @brief Signals state transition to idle state
         virtual void setIdle();
