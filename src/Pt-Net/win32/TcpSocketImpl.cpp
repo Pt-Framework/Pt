@@ -51,30 +51,70 @@ TcpSocketImpl::TcpSocketImpl(TcpSocket& socket)
 , _sentry(0)
 , _socket(socket)
 , _fd(INVALID_SOCKET)
-, _waitEvent( CreateEvent( NULL, FALSE, FALSE, NULL ) )
 , _isConnected(false)
 , _eventFlags(FD_CLOSE)
 , _timeout(INFINITE) // Pt::System::EventLoop::WaitInfinite ?
 , _dataSends(0)
 {
-    _currentEventHandle = _waitEvent;
+    _currentEventHandle = INVALID_HANDLE_VALUE;
 }
 
 
 TcpSocketImpl::~TcpSocketImpl()
 {
-    WSAResetEvent(_waitEvent);
-    WSACloseEvent(_waitEvent);
-
     if(_sentry)
         _sentry->detach();
 }
 
 
+void TcpSocketImpl::attachEvent(HANDLE ev, long events)
+{
+    if (WSAEventSelect(_fd, ev, events) == SOCKET_ERROR)
+    {
+        log_debug("set event failed: "<< WSAGetLastError());
+        throw System::SystemError( PT_ERROR_MSG("attach event to socket failed") );
+    }
+}
+
+
+void TcpSocketImpl::attach(System::EventLoop& loop)
+{
+    log_debug("attach to loop");
+
+    if( _fd == INVALID_SOCKET)
+        return;
+
+    HANDLE h = loop.impl().beginWait(_socket);
+
+    bool active = _dataSends != 0 || (_isConnected && _eventFlags & FD_CONNECT);
+
+    log_debug(_fd << " setWaitHandle");
+    _currentEventHandle = h;
+    attachEvent(_currentEventHandle, _eventFlags);
+
+    if(active)
+        loop.impl().setAvail(_socket);
+}
+
+
+void TcpSocketImpl::detach(System::EventLoop& loop)
+{
+    log_debug("detach from loop");
+
+    //if( _fd != INVALID_SOCKET)
+    //    attachEvent(_waitEvent, _eventFlags);
+
+    loop.impl().endWait(_socket);
+    _currentEventHandle = INVALID_HANDLE_VALUE;
+}
+
+
 void TcpSocketImpl::cancel()
 {
-    SetEvent(_currentEventHandle);
-    attachEvent(0, 0);
+    if( _fd != INVALID_SOCKET && _currentEventHandle != INVALID_HANDLE_VALUE)
+        attachEvent(0, 0);
+
+    _isConnected = false;
 }
 
 
@@ -83,7 +123,8 @@ void TcpSocketImpl::close()
     if( _fd == INVALID_SOCKET )
         return;
 
-    attachEvent(0, 0);
+    if(_currentEventHandle != INVALID_HANDLE_VALUE)
+        attachEvent(0, 0);
 
     System::EventLoop* loop = _socket.parent();
     if(loop)
@@ -132,6 +173,7 @@ const char* TcpSocketImpl::tryConnect()
         if( ::connect(_fd, _addrInfoPtr->ai_addr, _addrInfoPtr->ai_addrlen) == 0 )
         {
             _isConnected = true;
+            _eventFlags |= FD_CONNECT;
             log_debug("immediate connect ");
             break;
         }
@@ -153,6 +195,7 @@ const char* TcpSocketImpl::tryConnect()
 
     return 0;
 }
+
 
 bool TcpSocketImpl::beginConnect(const AddrInfo& ai)
 {
@@ -216,7 +259,9 @@ void TcpSocketImpl::endConnect()
     log_debug(_fd << " endConnect");
 
     _eventFlags &= ~FD_CONNECT;
-    attachEvent(_currentEventHandle, _eventFlags);
+
+    if(_currentEventHandle != INVALID_HANDLE_VALUE)
+        attachEvent(_currentEventHandle, _eventFlags);
 
     checkPendingError();
 
@@ -273,51 +318,6 @@ void TcpSocketImpl::endConnect()
         close();
         throw;
     }
-}
-
-
-void TcpSocketImpl::attach(System::EventLoop& loop)
-{
-    log_debug("attach to loop");
-
-    if( _fd == INVALID_SOCKET)
-        return;
-
-    HANDLE h = loop.impl().beginWait(_socket);
-
-    bool active = _dataSends != 0;
-
-    log_debug(_fd << " setWaitHandle");
-    _currentEventHandle = h;
-    attachEvent(_currentEventHandle, _eventFlags);
-
-    if(active)
-        loop.impl().setAvail(_socket);
-}
-
-
-void TcpSocketImpl::detach(System::EventLoop& loop)
-{
-    log_debug("detach from loop");
-
-    if( _fd != INVALID_SOCKET)
-        attachEvent(_waitEvent, _eventFlags);
-
-    loop.impl().endWait(_socket);
-    //if( _fd != INVALID_SOCKET)
-    //    attachEvent(_waitEvent, _eventFlags);
-}
-
-
-void TcpSocketImpl::enable(System::EventLoop& loop)
-{
-
-}
-
-
-void TcpSocketImpl::disable(System::EventLoop& loop)
-{
-
 }
 
 
@@ -403,16 +403,6 @@ bool TcpSocketImpl::avail()
     }
 
     return ev;
-}
-
-
-void TcpSocketImpl::attachEvent(HANDLE ev, long events)
-{
-    if (WSAEventSelect(_fd, ev, events) == SOCKET_ERROR)
-    {
-        log_debug("set event failed: "<< WSAGetLastError());
-        throw System::SystemError( PT_ERROR_MSG("attach event to socket failed") );
-    }
 }
 
 

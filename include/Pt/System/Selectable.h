@@ -47,6 +47,7 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
         virtual ~Selectable();
 
         // TODO: split attach/detach
+        // TODO: set active
         void setParent(EventLoop* parent);
 
         EventLoop* parent() const;

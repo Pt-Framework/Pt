@@ -246,17 +246,7 @@ size_t TcpSocket::onWrite(const char* buffer, size_t count)
 
 void TcpSocket::onCancel()
 {
-    if (_impl->isConnected())
-    {
-        _impl->cancel();
-    }
-    else //if (enabled())
-    {
-        // we are in connecting state
-        _impl->close();
-        //setEnabled(false);
-    }
-
+    _impl->cancel();
     IODevice::onCancel();
 }
 

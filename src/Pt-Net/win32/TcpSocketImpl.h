@@ -94,7 +94,6 @@ class TcpSocketImpl
         SOCKET	      _fd;
         sockaddr_storage  _peeraddr;
         TcpSocket&    _socket;
-        WSAEVENT      _waitEvent;
         std::size_t	  _timeout;
         // WSAOVERLAPPED _connectOverlapped;
         WSAOVERLAPPED _sendOverlapped;
@@ -161,10 +160,6 @@ class TcpSocketImpl
         void attach(System::EventLoop& sb);
 
         void detach(System::EventLoop& sb);
-
-        void enable(System::EventLoop& sb);
-
-        void disable(System::EventLoop& sb);
 
         bool avail();
 

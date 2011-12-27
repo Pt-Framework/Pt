@@ -35,15 +35,12 @@ namespace System {
 
 Selectable::Selectable()
 : _parent(0)
-//, _state(Idle)
 { 
 }
 
 
 Selectable::~Selectable()
 {
-    //assert(_state != Avail);
-
     if(_parent)
     {    
         _parent->onDetach(*this);
@@ -58,9 +55,6 @@ void Selectable::setParent(EventLoop* parent)
 
     if(_parent)
     {
-        //if(_state == Avail)
-        //    _parent->onIdle(*this);
-
         this->cancel();
 
         this->onDetach(*_parent);
@@ -72,10 +66,6 @@ void Selectable::setParent(EventLoop* parent)
     {
         this->onAttach(*parent);
         parent->onAttach(*this);
-
-        // TODO: do this in IODevice attach()
-        //if( this->isAvail() )
-        //    parent->onAvail(*this);
     }
 
     _parent = parent;
