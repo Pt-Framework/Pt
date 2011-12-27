@@ -39,19 +39,14 @@ namespace Pt {
 namespace System {
 
 PipeIODevice::PipeIODevice()
-: _waitHandle(INVALID_HANDLE_VALUE)
 {
-    _waitHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
-    if( _waitHandle == NULL )
-        throw SystemError( PT_ERROR_MSG("CreateEvent failed") );
-
     _readOv.Offset = 0;
     _readOv.OffsetHigh = 0;
-    _readOv.hEvent = NULL;
+    _readOv.hEvent = INVALID_HANDLE_VALUE;
 
     _writeOv.Offset = 0;
     _writeOv.OffsetHigh = 0;
-    _writeOv.hEvent = NULL;
+    _writeOv.hEvent = INVALID_HANDLE_VALUE;
 }
 
 
@@ -64,8 +59,20 @@ PipeIODevice::~PipeIODevice()
     catch(...)
     {
     }
+}
 
-    ::CloseHandle(_waitHandle);
+
+void PipeIODevice::open(HANDLE handle, bool isAsync)
+{
+    this->setHandle(handle);
+    this->setEof(false);
+    this->setAsync(isAsync);
+}
+
+
+void PipeIODevice::onClose()
+{
+    IODeviceImpl::close();
 }
 
 
@@ -84,53 +91,249 @@ void PipeIODevice::onCancel()
     {
         GetOverlappedResult( handle(), &_writeOv, &bytes, TRUE );
     }
+
+    IODevice::onCancel();
 }
 
 
-void PipeIODevice::open(HANDLE handle, bool isAsync)
+void PipeIODevice::onAttach(EventLoop& loop)
 {
-    this->setHandle(handle);
-    //this->setEnabled(true);
-    this->setEof(false);
-    this->setAsync(isAsync);
-}
+    HANDLE h = loop.impl().beginWait(*this);
 
-
-/*bool PipeIODevice::onWait(std::size_t msecs)
-{
-    if( this->avail() )
+    bool avail = false;
+    _readOv.hEvent = h;
+    _writeOv.hEvent = h;
+ 
+    // beginRead was called before the IODevice was added to a EventLoop
+    if( this->reading() )
     {
-        this->checkEvent();
-        return true;
+        bool eof = false;
+        size_t n = this->onBeginRead(_rbuf, _rbuflen, eof);
+        if(eof || n > 0)
+            avail = true;
+
+        this->setEof(eof);
     }
 
-    if(_readOv.hEvent == NULL)
+    // see above. onBeginWrite didn't do anything
+    if( this->writing() )
     {
-        bool active = false;
-        this->setWaitHandle(_waitHandle, active);
-        if( active )
+        size_t n = this->onBeginWrite(_wbuf, _wbuflen);
+        if(n > 0)
+            avail = true;
+    }
+
+    if(avail)
+        loop.impl().setAvail(*this);
+}
+
+
+void PipeIODevice::onDetach(EventLoop& loop)
+{
+    loop.impl().endWait(*this);
+
+    _readOv.Offset = 0;
+    _readOv.OffsetHigh = 0;
+    _readOv.hEvent = INVALID_HANDLE_VALUE;
+
+    _writeOv.Offset = 0;
+    _writeOv.OffsetHigh = 0;
+    _writeOv.hEvent = INVALID_HANDLE_VALUE;
+}
+
+
+bool PipeIODevice::onAvail()
+{
+    bool avail = false;
+
+    if( this->writing() && HasOverlappedIoCompleted(&_writeOv) )
+    {
+        outputReady.send(*this);
+        avail = true;
+    }
+
+    if( this->reading() && HasOverlappedIoCompleted(&_readOv) )
+    {
+        inputReady.send(*this);
+        avail = true;
+    }
+
+    return avail;
+}
+
+
+size_t PipeIODevice::onBeginRead(char* buffer, size_t n, bool& eof)
+{
+    // beginRead was called before the IODevice was attached
+    if(_readOv.hEvent == INVALID_HANDLE_VALUE)
+        return 0;
+
+    // if we can can read data immediately, we return the number of bytes
+    // that were read, so the EventLoop calls onAvail, even if the event 
+    // in the overlapped struct is not fired
+    DWORD readBytes = 0;
+    if( FALSE == ReadFile(handle(), (void*)buffer, n, &readBytes, &_readOv) )
+    {
+        DWORD err = GetLastError();
+        if( ERROR_HANDLE_EOF == err || ERROR_BROKEN_PIPE == err )
         {
-            this->checkEvent();
-            return true;
+            eof = true;
+            return 0;
+        }
+        else if( err == ERROR_IO_PENDING )
+        {
+            return 0;
+        }
+
+        throw IOError( PT_ERROR_MSG("Could not begin read from file handle") );
+    }
+
+    return readBytes;
+}
+
+
+size_t PipeIODevice::onEndRead(bool& eof)
+{
+    if( this->eof() )
+    {
+        eof = true;
+        return 0;
+    }
+
+    // a IODevice::beginRead outside a EventLoop was followed by an endRead
+    // This happens when the IODevice is async, but used synchronously
+    if(_readOv.hEvent == INVALID_HANDLE_VALUE)
+    {
+        return this->onRead(_rbuf, _rbuflen, eof);
+    }
+
+    // finishes the overlapped operation. Blocks until data is available
+    // This was beginRead can be ended by endRead without a wait step.
+    DWORD readBytes = 0;
+    if( FALSE == GetOverlappedResult(handle(), &_readOv, &readBytes, TRUE) )
+    {
+        DWORD err = GetLastError();
+        if( ERROR_BROKEN_PIPE == err || ERROR_BROKEN_PIPE == err )
+        {
+            eof = true;
+        }
+        else
+        {
+            throw IOError( PT_ERROR_MSG("Could not end read from file handle") );
         }
     }
 
-    DWORD result = WaitForSingleObject(_readOv.hEvent, msecs);
+    _readOv.Offset += readBytes;
+    _writeOv.Offset += readBytes;
+    return readBytes;
+}
 
-    if(result == WAIT_OBJECT_0)
+
+size_t PipeIODevice::onRead(char* buffer, size_t count, bool& eof)
+{
+    DWORD readBytes = 0;
+    if( FALSE == ReadFile(handle(), (void*)buffer, count, &readBytes, NULL) )
     {
-        this->checkEvent();
-        return true;
+        if( ERROR_HANDLE_EOF == GetLastError() || 
+            ERROR_BROKEN_PIPE == GetLastError() )
+        {
+            eof = true;
+            readBytes = 0;
+        }
+        else if( ERROR_IO_PENDING == GetLastError() )
+        {
+            if(FALSE == GetOverlappedResult(handle(), &_readOv, &readBytes, TRUE) )
+            {
+                throw IOError( PT_ERROR_MSG("Could not read from file handle") );
+            }
+        }
+        else
+        {
+            throw IOError( PT_ERROR_MSG("Could not read from file handle") );
+        }
     }
 
-    if(result != WAIT_TIMEOUT)
-        throw IOError( PT_ERROR_MSG("WAIT_FAILED on pipe") );
+    _readOv.Offset += readBytes;
+    _writeOv.Offset += readBytes;
+    return readBytes;
+}
 
-    return false;
-}*/
+
+size_t PipeIODevice::onBeginWrite(const char* buffer, size_t n)
+{
+    if(_writeOv.hEvent == INVALID_HANDLE_VALUE)
+        return 0;
+
+    DWORD writtenBytes = 0;
+    if( FALSE == WriteFile(handle(), (void*)buffer, n, &writtenBytes, &_writeOv) )
+    {
+        DWORD err = GetLastError();
+        if( ERROR_IO_PENDING == err )
+        {
+            return 0;
+        }
+        
+        throw IOError( PT_ERROR_MSG("Could not read from file handle") );
+    }
+
+    return writtenBytes;
+}
 
 
-bool PipeIODevice::setWaitHandle(HANDLE h, bool& avail)
+size_t PipeIODevice::onEndWrite()
+{
+    if(_writeOv.hEvent == INVALID_HANDLE_VALUE)
+    {
+        return this->onWrite(_wbuf, _wbuflen);
+    }
+
+    DWORD writtenBytes = 0;
+    if (GetOverlappedResult( handle(), &_writeOv, &writtenBytes, FALSE) == FALSE )
+    {
+        throw IOError( PT_ERROR_MSG("GetOverlappedResult failed") );
+    }
+
+    _writeOv.Offset += writtenBytes;
+    return writtenBytes;
+}
+
+
+size_t PipeIODevice::onWrite(const char* buffer, size_t count)
+{
+    DWORD writtenBytes = 0;
+
+    if( FALSE == WriteFile(handle(), (void*)buffer, count, &writtenBytes, NULL) )
+    {
+        if( ERROR_IO_PENDING != GetLastError() )
+        {
+            throw IOError(PT_ERROR_MSG("Could not write to file handle") );
+        }
+        if(GetOverlappedResult(handle(), &_readOv, &writtenBytes, FALSE) == FALSE )
+        {
+            writtenBytes = 0;
+        }
+    }
+
+    _readOv.Offset += writtenBytes;
+    _writeOv.Offset += writtenBytes;
+    return writtenBytes;
+}
+
+
+void PipeIODevice::onSync() const
+{
+    if( FALSE == ::FlushFileBuffers( handle() ) )
+        throw IOError( PT_ERROR_MSG("Could not flush file buffer") );
+}
+
+
+void PipeIODevice::redirect(int newFd, bool close)
+{
+}
+
+
+
+/*bool PipeIODevice::setWaitHandle(HANDLE h, bool& avail)
 {
     // set avail to true if data is immediately available. This will
     // let the EventLoop check the other Selectables with a timeout of
@@ -183,10 +386,10 @@ bool PipeIODevice::setWaitHandle(HANDLE h, bool& avail)
 
     // we accept the HANDLE h
     return true;
-}
+}*/
 
 
-bool PipeIODevice::checkEvent()
+/*bool PipeIODevice::checkEvent()
 {
     bool avail = false;
 
@@ -203,231 +406,42 @@ bool PipeIODevice::checkEvent()
     }
 
     return avail;
-}
+}*/
 
 
-void PipeIODevice::onAttach(EventLoop& loop)
+/*bool PipeIODevice::onWait(std::size_t msecs)
 {
-    HANDLE h = loop.impl().beginWait(*this);
-
-    bool active = false;
-    this->setWaitHandle(h, active);
-
-    if(active)
-        loop.impl().setAvail(*this);
-}
-
-
-void PipeIODevice::onDetach(EventLoop& loop)
-{
-    // handle the case when we were added to a EventLoop and beginRead
-    // was called with data possibly available. setWaitHandle() will
-    // cancel the overlapped operation or set the active flag in which
-    // case we set Avail so the next waiter knows data is available
-    bool active = false;
-    this->setWaitHandle(_waitHandle, active);
-
-    if(active)
-        loop.impl().setAvail(*this);
-
-    loop.impl().endWait(*this);
-}
-
-
-bool PipeIODevice::onAvail()
-{
-    bool avail = false;
-
-    if( _wbuf && HasOverlappedIoCompleted(&_writeOv) )
+    if( this->avail() )
     {
-        outputReady.send(*this);
-        avail = true;
+        this->checkEvent();
+        return true;
     }
 
-    if( _rbuf && HasOverlappedIoCompleted(&_readOv) )
-    {
-        inputReady.send(*this);
-        avail = true;
-    }
-
-    return avail;
-}
-
-
-size_t PipeIODevice::onBeginRead(char* buffer, size_t n, bool& eof)
-{
-    // IODevice::beginRead was called before the IODevice was added to
-    // a selector or IODevice::wait was called for the first time
-    if(_readOv.hEvent == NULL)
-        return 0;
-
-    // if we can can read data immediately, we return the number of bytes
-    // that were read, so the EventLoop calls checkEvent on us even if the
-    // event in the overlapped struct is not fired
-    DWORD readBytes = 0;
-    if( FALSE == ReadFile(handle(), (void*)buffer, n, &readBytes, &_readOv) )
-    {
-        DWORD err = GetLastError();
-        if( ERROR_HANDLE_EOF == err || ERROR_BROKEN_PIPE == err )
-        {
-            eof = true;
-            return 0;
-        }
-        else if( err == ERROR_IO_PENDING )
-        {
-            return 0;
-        }
-
-        throw IOError( PT_ERROR_MSG("Could not begin read from file handle") );
-    }
-
-    return readBytes;
-}
-
-
-size_t PipeIODevice::onEndRead(bool& eof)
-{
-    if( this->eof() )
-    {
-        eof = true;
-        return 0;
-    }
-
-    // a IODevice::beginRead outside a EventLoop was followed by an endRead
-    // This happens when the IODevice is async, but used synchronously
     if(_readOv.hEvent == NULL)
     {
-        return this->onRead(_rbuf, _rbuflen, eof);
+        bool active = false;
+        this->setWaitHandle(_waitHandle, active);
+        if( active )
+        {
+            this->checkEvent();
+            return true;
+        }
     }
 
-    // finishes the overlapped operation. Blocks until data is available
-    // This was beginRead can be ended by endRead without a wait step.
-    DWORD readBytes = 0;
-    if( FALSE == GetOverlappedResult(handle(), &_readOv, &readBytes, TRUE) )
+    DWORD result = WaitForSingleObject(_readOv.hEvent, msecs);
+
+    if(result == WAIT_OBJECT_0)
     {
-        DWORD err = GetLastError();
-        if( ERROR_BROKEN_PIPE == err || ERROR_BROKEN_PIPE == err )
-        {
-            eof = true;
-        }
-        else
-        {
-            throw IOError( PT_ERROR_MSG("Could not end read from file handle") );
-        }
+        this->checkEvent();
+        return true;
     }
 
-    _readOv.Offset += readBytes;
-    _writeOv.Offset += readBytes;
-    return readBytes;
-}
+    if(result != WAIT_TIMEOUT)
+        throw IOError( PT_ERROR_MSG("WAIT_FAILED on pipe") );
 
+    return false;
+}*/
 
-size_t PipeIODevice::onRead(char* buffer, size_t count, bool& eof)
-{
-    DWORD readBytes = 0;
-    if( FALSE == ReadFile(handle(), (void*)buffer, count, &readBytes, &_readOv) )
-    {
-        if( ERROR_HANDLE_EOF == GetLastError() || 
-            ERROR_BROKEN_PIPE == GetLastError() )
-        {
-            eof = true;
-            readBytes = 0;
-        }
-        else if( ERROR_IO_PENDING == GetLastError() )
-        {
-            if(FALSE == GetOverlappedResult(handle(), &_readOv, &readBytes, TRUE) )
-            {
-                throw IOError( PT_ERROR_MSG("Could not read from file handle") );
-            }
-        }
-        else
-        {
-            throw IOError( PT_ERROR_MSG("Could not read from file handle") );
-        }
-    }
-
-    _readOv.Offset += readBytes;
-    _writeOv.Offset += readBytes;
-    return readBytes;
-}
-
-
-size_t PipeIODevice::onBeginWrite(const char* buffer, size_t n)
-{
-    if(_writeOv.hEvent == NULL)
-        return 0;
-
-    DWORD writtenBytes = 0;
-    if( FALSE == WriteFile(handle(), (void*)buffer, n, &writtenBytes, &_writeOv) )
-    {
-        DWORD err = GetLastError();
-        if( ERROR_IO_PENDING == err )
-        {
-            return 0;
-        }
-        
-        throw IOError( PT_ERROR_MSG("Could not read from file handle") );
-    }
-
-    return writtenBytes;
-}
-
-
-size_t PipeIODevice::onEndWrite()
-{
-    if(_writeOv.hEvent == NULL)
-    {
-        return this->onWrite(_wbuf, _wbuflen);
-    }
-
-    DWORD writtenBytes = 0;
-    if (GetOverlappedResult( handle(), &_writeOv, &writtenBytes, FALSE) == FALSE )
-    {
-        throw IOError( PT_ERROR_MSG("GetOverlappedResult failed") );
-    }
-
-    _writeOv.Offset += writtenBytes;
-    return writtenBytes;
-}
-
-
-void PipeIODevice::onClose()
-{
-    IODeviceImpl::close();
-}
-
-
-size_t PipeIODevice::onWrite(const char* buffer, size_t count)
-{
-    DWORD writtenBytes = 0;
-
-    if( FALSE == WriteFile(handle(), (void*)buffer, count, &writtenBytes, NULL) )
-    {
-        if( ERROR_IO_PENDING != GetLastError() )
-        {
-            throw IOError(PT_ERROR_MSG("Could not write to file handle") );
-        }
-        if(GetOverlappedResult(handle(), &_readOv, &writtenBytes, FALSE) == FALSE )
-        {
-            writtenBytes = 0;
-        }
-    }
-
-    _readOv.Offset += writtenBytes;
-    _writeOv.Offset += writtenBytes;
-    return writtenBytes;
-}
-
-
-void PipeIODevice::onSync() const
-{
-    if( FALSE == ::FlushFileBuffers( handle() ) )
-        throw IOError( PT_ERROR_MSG("Could not flush file buffer") );
-}
-
-void PipeIODevice::redirect(int newFd, bool close)
-{
-}
 
 PipeImpl::PipeImpl(bool isAsync)
 {

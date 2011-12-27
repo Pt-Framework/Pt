@@ -43,6 +43,7 @@ class TcpServerImpl;
   {
       friend class TcpServerImpl;
       TcpServerImpl* _impl;
+      bool _avail;
 
     public:
       enum { INHERIT = 1, DEFER_ACCEPT = 2 };
@@ -74,6 +75,15 @@ class TcpServerImpl;
       virtual void onCancel();
 
       virtual bool onAvail();
+
+      //! @brief Signals state transition to avail state
+      virtual void setAvail();
+
+      //! @brief Signals state transition to idle state
+      virtual void setIdle();
+
+      virtual bool isAvail()
+      { return false; }
   };
 
 } // namespace Net

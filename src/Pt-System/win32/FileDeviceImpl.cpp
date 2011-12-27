@@ -320,6 +320,7 @@ void FileDeviceImpl::cancel()
     {
         GetOverlappedResult( handle(), &_writeOv, &bytes, TRUE );
     }
+
 #endif
 }
 

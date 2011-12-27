@@ -291,7 +291,6 @@ void TcpSocketImpl::attach(System::EventLoop& loop)
     _currentEventHandle = h;
     attachEvent(_currentEventHandle, _eventFlags);
 
-    // TODO: use this->setAvail() ?
     if(active)
         loop.impl().setAvail(_socket);
 }

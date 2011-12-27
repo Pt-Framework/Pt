@@ -27,28 +27,83 @@ namespace Pt {
 
 namespace System {
 
-    class IODevice;
+class IODevice;
 
-    class IODeviceImpl
-    {
-        public:
-            IODeviceImpl();
+class IODeviceImpl
+{
+    public:
+        IODeviceImpl();
 
-            virtual ~IODeviceImpl();
+        virtual ~IODeviceImpl();
 
-            void setHandle(HANDLE h);
+        void setHandle(HANDLE h);
 
-            HANDLE deviceHandle() const
-            { return _handle; }	
+        HANDLE deviceHandle() const
+        { return _handle; }	
 
-            HANDLE handle() const
-            { return _handle; }	
+        HANDLE handle() const
+        { return _handle; }	
 
-            virtual void close();
+        virtual void close();
 
-        private:
-            HANDLE _handle;
-    };
+    private:
+        HANDLE _handle;
+};
+
+
+/*class OverlappedIODeviceImpl : public IODeviceImpl
+{
+    public:
+        OverlappedIODeviceImpl();
+
+        virtual ~OverlappedIODeviceImpl();
+
+        virtual void open(HANDLE handle, bool isAsync);
+
+        //virtual bool checkEvent();
+
+        virtual bool setWaitHandle(HANDLE h, bool& avail);
+
+        virtual IODeviceImpl& ioimpl()
+        { return *this; }
+
+        void redirect(int newFd, bool close = true);
+
+    protected:
+        void onAttach(EventLoop& loop);
+
+        void onDetach(EventLoop& loop);
+
+        bool onAvail();
+
+        size_t onBeginRead(char* buffer, size_t n, bool& eof);
+
+        size_t onEndRead(bool& eof);
+
+        size_t onBeginWrite(const char* buffer, size_t n);
+
+        size_t onEndWrite();
+
+        //bool onWait(std::size_t msecs);
+
+        //! @brief Closes the I/O device
+        virtual void onClose();
+
+        //! @brief Read bytes from device
+        virtual size_t onRead(char* buffer, size_t count, bool& eof);
+
+        //! @brief Write bytes to device
+        virtual size_t onWrite(const char* buffer, size_t count);
+
+        virtual void onSync() const;
+
+        virtual void onCancel() ;
+
+     private:
+        HANDLE _waitHandle;
+        OVERLAPPED _readOv;
+        OVERLAPPED _writeOv;
+};*/
 
 } //namespace System
 

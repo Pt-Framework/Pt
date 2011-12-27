@@ -36,6 +36,7 @@ namespace Net {
 
 TcpServer::TcpServer()
 : _impl(0)
+, _avail(false)
 {
     _impl = new TcpServerImpl(*this);
 }
@@ -43,6 +44,7 @@ TcpServer::TcpServer()
 
 TcpServer::TcpServer(const std::string& ipaddr, unsigned short int port, int backlog, unsigned flags)
 : _impl(0)
+, _avail(false)
 {
     _impl = new TcpServerImpl(*this);
     std::auto_ptr<TcpServerImpl> impl(_impl);
@@ -101,12 +103,33 @@ void TcpServer::onDetach(System::EventLoop& sb)
 void TcpServer::onCancel()
 {
     //_impl->cancel();
+    this->setIdle();
 }
 
 
 bool TcpServer::onAvail()
 {
     return _impl->avail();
+}
+
+
+void TcpServer::setAvail()
+{
+    System::EventLoop* loop = this->parent();
+    if(loop)
+        loop->setAvail(*this); 
+
+    _avail = true;
+}
+
+
+void TcpServer::setIdle()
+{
+    System::EventLoop* loop = this->parent();
+    if(loop)
+        loop->setIdle(*this);
+
+    _avail = false;
 }
 
 } // namespace Net

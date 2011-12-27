@@ -36,6 +36,7 @@ namespace System {
 IODevice::IODevice()
 : _eof(false)
 , _async(false)
+, _avail(false)
 , _rbuf(0)
 , _rbuflen(0)
 , _ravail(0)
@@ -220,8 +221,30 @@ size_t IODevice::write(const char* buffer, size_t n)
 }
 
 
+void IODevice::setAvail()
+{
+    System::EventLoop* loop = this->parent();
+    if(loop)
+        loop->setAvail(*this); 
+
+    _avail = true;
+}
+
+
+void IODevice::setIdle()
+{
+    System::EventLoop* loop = this->parent();
+    if(loop)
+        loop->setIdle(*this);
+
+    _avail = false;
+}
+
+
 void IODevice::onCancel()
 {
+    this->setIdle();
+
     _rbuf = 0;
     _rbuflen = 0;
     _ravail = 0;

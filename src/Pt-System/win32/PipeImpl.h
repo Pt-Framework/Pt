@@ -39,9 +39,9 @@ class PipeIODevice : public IODevice, private IODeviceImpl
 
         virtual void open(HANDLE handle, bool isAsync);
 
-        virtual bool checkEvent();
+        //virtual bool checkEvent();
 
-        virtual bool setWaitHandle(HANDLE h, bool& avail);
+        //virtual bool setWaitHandle(HANDLE h, bool& avail);
 
         virtual IODeviceImpl& ioimpl()
         { return *this; }
@@ -79,7 +79,6 @@ class PipeIODevice : public IODevice, private IODeviceImpl
         virtual void onCancel() ;
 
      private:
-        HANDLE _waitHandle;
         OVERLAPPED _readOv;
         OVERLAPPED _writeOv;
 };

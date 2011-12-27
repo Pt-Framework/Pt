@@ -366,11 +366,13 @@ void UdpSocketImpl::attach(System::EventLoop& loop)
 
     HANDLE h = loop.impl().beginWait(_socket);
 
-    bool active = false;
-    this->setWaitHandle(h, active);
+    bool avail = _dataSends != 0;
+    _currentEventHandle = h;
+
+    this->setEventFlags(_currentEventHandle, _eventFlags);
 
     // TODO: use this->setAvail() ?
-    if(active)
+    if(avail)
         loop.impl().setAvail(_socket);
 }
 
@@ -426,7 +428,7 @@ bool UdpSocketImpl::avail()
 }
 
 
-bool UdpSocketImpl::setWaitHandle(HANDLE h, bool& avail)
+/*bool UdpSocketImpl::setWaitHandle(HANDLE h, bool& avail)
 {
     avail = _dataSends != 0;
 
@@ -437,7 +439,7 @@ bool UdpSocketImpl::setWaitHandle(HANDLE h, bool& avail)
 
     this->setEventFlags(_currentEventHandle, _eventFlags);
     return true;
-}
+}*/
 
 
 void UdpSocketImpl::setEventFlags(HANDLE ev, long events)

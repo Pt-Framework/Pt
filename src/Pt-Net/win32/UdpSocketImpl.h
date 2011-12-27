@@ -138,7 +138,7 @@ class UdpSocketImpl
 
         bool avail();
 
-        bool setWaitHandle(HANDLE h, bool& avail);
+        //bool setWaitHandle(HANDLE h, bool& avail);
 
     protected:
         //const char* tryConnect();

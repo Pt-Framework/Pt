@@ -35,14 +35,14 @@ namespace System {
 
 Selectable::Selectable()
 : _parent(0)
-, _state(Idle)
+//, _state(Idle)
 { 
 }
 
 
 Selectable::~Selectable()
 {
-    assert(_state != Avail);
+    //assert(_state != Avail);
 
     if(_parent)
     {    
@@ -58,12 +58,11 @@ void Selectable::setParent(EventLoop* parent)
 
     if(_parent)
     {
-        if(_state == Avail)
-            _parent->onIdle(*this);
+        //if(_state == Avail)
+        //    _parent->onIdle(*this);
 
-        // TODO: should call cancel to make sure we are not changing 
-        //       loops while operation is running
-        //this->cancel();
+        this->cancel();
+
         this->onDetach(*_parent);
         _parent->onDetach(*this);
         _parent = 0;
@@ -74,8 +73,9 @@ void Selectable::setParent(EventLoop* parent)
         this->onAttach(*parent);
         parent->onAttach(*this);
 
-        if(_state == Avail)
-            parent->onAvail(*this);
+        // TODO: do this in IODevice attach()
+        //if( this->isAvail() )
+        //    parent->onAvail(*this);
     }
 
     _parent = parent;
@@ -90,18 +90,9 @@ EventLoop* Selectable::parent() const
 
 void Selectable::close()
 {
-    // TODO: should we also cancel?
+    this->cancel();
 
     this->onClose();
-
-    if(_parent)
-    {
-       if(_state == Avail)
-       {
-            _parent->onIdle(*this);
-            _state = Idle;
-       }
-    }
 }
 
 
@@ -109,31 +100,36 @@ void Selectable::cancel()
 {
     // this should block until the operation is cancelled
     this->onCancel();
-
-    // signal that an operation was cancelled
-    this->setIdle();
 }
 
 
-void Selectable::setAvail()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*void Selectable::setAvail()
 {
-    bool isAvail = true;
+    if(_parent)
+        _parent->onAvail(*this); 
 
-    if(isAvail)
-    {
-        if(_parent)
-            _parent->onAvail(*this); 
-    
-        _state = Avail;
-    }
-    else
-    {
-        if(_parent)
-            _parent->onIdle(*this);
-    
-        _state = Idle;
-    }
+    _state = Avail;
 }
+
 
 void Selectable::setIdle()
 {
@@ -141,7 +137,7 @@ void Selectable::setIdle()
         _parent->onIdle(*this);
 
     _state = Idle;
-}
+}*/
 
 
 

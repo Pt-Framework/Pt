@@ -61,6 +61,47 @@ void IODeviceImpl::close()
     }
 }
 
+
+/*OverlappedIODeviceImpl::OverlappedIODeviceImpl()
+: _waitHandle(INVALID_HANDLE_VALUE)
+{
+    _waitHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
+    if( _waitHandle == NULL )
+        throw SystemError( PT_ERROR_MSG("CreateEvent failed") );
+
+    _readOv.Offset = 0;
+    _readOv.OffsetHigh = 0;
+    _readOv.hEvent = NULL;
+
+    _writeOv.Offset = 0;
+    _writeOv.OffsetHigh = 0;
+    _writeOv.hEvent = NULL;
+}
+
+
+OverlappedIODeviceImpl::~OverlappedIODeviceImpl()
+{ 
+    ::CloseHandle(_waitHandle);
+}
+
+
+void OverlappedIODeviceImpl::onCancel()
+{
+    ::CancelIo( handle() );
+
+    DWORD bytes = 0;
+
+    if( this->reading() && ! HasOverlappedIoCompleted(&_readOv) )
+    {
+        GetOverlappedResult( handle(), &_readOv, &bytes, TRUE );
+    }
+
+    if( this->writing() && ! HasOverlappedIoCompleted(&_writeOv) )
+    {
+        GetOverlappedResult( handle(), &_writeOv, &bytes, TRUE );
+    }
+}*/
+
 }//namespaec System
 
 }//namespace Pt

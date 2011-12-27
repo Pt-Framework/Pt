@@ -300,9 +300,17 @@ class PT_SYSTEM_API IODevice : public Selectable
         //! @brief Sets or unsets the device to async
         void setAsync(bool async);
 
+        virtual void setIdle();
+
+        virtual void setAvail();
+
+        virtual bool isAvail()
+        { return _avail; }
+
     private:
         bool _eof;
         bool _async;
+        bool _avail;
 
     protected:
         char* _rbuf;

@@ -42,12 +42,6 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
     public:
         static const std::size_t WaitInfinite = EventLoop::WaitInfinite;
 
-        enum State
-        {
-            Idle = 0,
-            Avail = 2
-        };
-
     public:
         //! @brief Destructor
         virtual ~Selectable();
@@ -79,21 +73,53 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
         //! @brief Closes the Selectable
         virtual void onClose() = 0;
 
-        //! @brief Signals state transition to avail state
-        virtual void setAvail();
-
-        //! @brief Signals state transition to idle state
-        virtual void setIdle();
+        //! @brief Blocks until operation has cancelled
+        virtual void onCancel() = 0;
 
         //! @brief Check if ready and run
         virtual bool onAvail() = 0;
 
-        //! @brief Blocks until operation has cancelled
-        virtual void onCancel() = 0;
-
     private:
         EventLoop* _parent;
-        State _state;
+};
+
+class Active : public Selectable
+{
+    public:
+        virtual ~Active()
+        {}
+
+    protected:
+        Active()
+        {}
+
+        //! @brief Attached to loop
+        virtual void onAttach(EventLoop&)
+        {}
+
+        //! @brief Detached from loop
+        virtual void onDetach(EventLoop&)
+        {}
+
+        //! @brief Closes the Selectable
+        virtual void onClose()
+        {}
+
+        //! @brief Signals state transition to avail state
+        virtual void setAvail()
+        {}
+
+        //! @brief Signals state transition to idle state
+        virtual void setIdle()
+        {}
+
+         //! @brief Check if ready and run
+        virtual bool onAvail()
+        {}
+
+        //! @brief Blocks until operation has cancelled
+        virtual void onCancel()
+        {}
 };
 
 } // namespace System
