@@ -2380,6 +2380,15 @@ LIST * builtin_shell( FRAME * frame, int flags )
     return result;
 }
 
+#else  /* #ifdef HAVE_POPEN */
+
+LIST * builtin_shell( FRAME * frame, int flags )
+{
+    return L0;
+}
+
+#endif /* #ifdef HAVE_POPEN */
+
 /* Pt extension:
  */
 typedef struct exec_ret_val_closure {
@@ -2391,14 +2400,14 @@ typedef struct exec_ret_val_closure {
 static void exec_closure(void *closure, int status, timing_info* time, const char* cmd, const char* output)
 {
     exec_ret_val_closure* ervc = (exec_ret_val_closure*) closure;
-    
+
     char   strExitCode[1024];
     string s;
 
     sprintf(strExitCode, "%d", status);
     ervc->result = 0;
     ervc->result = list_new( ervc->result, object_new( strExitCode ) );
-    
+
     string_new(&s);
     for( ; ; )
     {
@@ -2433,7 +2442,7 @@ LIST *builtin_exec( FRAME * frame, int flags)
     OBJECT*              varname = 0;
     LIST*                shell = 0;
     exec_ret_val_closure ervc;
-    
+
     command = lol_get( frame->args, 0 );
     if( ! command )
         return L0;
@@ -2444,15 +2453,6 @@ LIST *builtin_exec( FRAME * frame, int flags)
 
     exec_cmd( object_str( command->value ), exec_closure, &ervc, shell, 0, 0);
     exec_wait();
-    
+
     return ervc.result;
 }
-
-#else  /* #ifdef HAVE_POPEN */
-
-LIST * builtin_shell( FRAME * frame, int flags )
-{
-    return L0;
-}
-
-#endif /* #ifdef HAVE_POPEN */
