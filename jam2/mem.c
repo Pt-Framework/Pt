@@ -72,4 +72,47 @@ http://www.boost.org/LICENSE_1_0.txt)
     #include "duma/duma.c"
     #include "duma/print.c"
 
+/* Pt extension:
+ */
+#elif defined(PT_MCHECK)
+
+static int PT_MCheckHandler_Installed = 0;
+static int PT_MCheck_Counter          = 0;
+
+void pt_mcheck_atexit_handler()
+{
+    if(PT_MCheck_Counter != 0) printf("WARNING: Unbalanced memory allocation and free!\n");
+}
+
+void *pt_calloc(size_t nmemb, size_t size)
+{
+    if(!PT_MCheckHandler_Installed) {
+        PT_MCheckHandler_Installed = 1;
+        atexit(pt_mcheck_atexit_handler);
+    };
+
+    ++PT_MCheck_Counter;
+    return calloc(nmemb, size);
+}
+
+void *pt_malloc(size_t size)
+{
+    if(!PT_MCheckHandler_Installed) {
+        PT_MCheckHandler_Installed = 1;
+        atexit(pt_mcheck_atexit_handler);
+    };
+
+    ++PT_MCheck_Counter;
+    return malloc( size);
+}
+
+void pt_free(void *ptr)
+{
+    --PT_MCheck_Counter;
+    free(ptr);
+}
+
+void *pt_realloc(void *ptr, size_t size)
+{ return realloc(ptr, size); }
+
 #endif

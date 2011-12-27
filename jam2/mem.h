@@ -59,6 +59,20 @@ http://www.boost.org/LICENSE_1_0.txt)
     #define BJAM_NEWSTR_NO_ALLOCATE
     #endif
 
+/* Pt extension:
+ */
+#elif defined(PT_MCHECK)
+
+    #define bjam_malloc_x(s) pt_malloc(s)
+    #define bjam_calloc_x(n,s) pt_calloc(n,s)
+    #define bjam_realloc_x(p,s) pt_realloc(p,s)
+    #define bjam_free_x(p) pt_free(p)
+
+    void *pt_calloc(size_t nmemb, size_t size);
+    void *pt_malloc(size_t size);
+    void pt_free(void *ptr);
+    void *pt_realloc(void *ptr, size_t size);
+
 #else
 
     /* Standard C memory allocation. */
