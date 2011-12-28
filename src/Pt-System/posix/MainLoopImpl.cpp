@@ -86,7 +86,7 @@ EventLoopImpl::~EventLoopImpl()
     while( _attached.size() )
     {
         it = _attached.begin();
-        (*it)->setParent(0);
+        (*it)->detach();
     }
 
     if( _wakePipe[0] != -1 && _wakePipe[1] != -1 )

@@ -118,7 +118,7 @@ class Active : public Selectable
 
          //! @brief Check if ready and run
         virtual bool onAvail()
-        {}
+        { return false; }
 
         //! @brief Blocks until operation has cancelled
         virtual void onCancel()

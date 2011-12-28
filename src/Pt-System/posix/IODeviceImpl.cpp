@@ -132,12 +132,20 @@ void IODeviceImpl::attach(EventLoop& loop)
 
     _iohandle = loop.impl().enable(_device, this->fd());
 
-    if( _device.rbuf() )
+    if( _device.ravail() )
+    {
+        loop.impl().avail(_device);
+    }
+    else if( _device.rbuf() )
     {
         loop.impl().beginRead( _iohandle );
     }
 
-    if( _device.wbuf() )
+    if( _device.wavail() )
+    {
+        loop.impl().avail(_device);
+    }
+    else if( _device.wbuf() )
     {
         loop.impl().beginWrite( _iohandle );
     }

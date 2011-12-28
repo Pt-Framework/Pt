@@ -52,6 +52,7 @@ class TcpSocketImpl : public System::IODeviceImpl
     private:
         TcpSocket& _socket;
         bool _isConnected;
+        bool _isConnecting;
         struct sockaddr_storage _peeraddr;
         AddrInfo _addrInfo;
         AddrInfoImpl::const_iterator _addrInfoPtr;
@@ -67,6 +68,8 @@ class TcpSocketImpl : public System::IODeviceImpl
         ~TcpSocketImpl();
 
         void close();
+
+        void cancel();
 
         // TODO: enable socket before connect or accept...
         void attach(System::EventLoop& loop);

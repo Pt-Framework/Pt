@@ -106,7 +106,7 @@ ApplicationImpl::~ApplicationImpl()
 
 void ApplicationImpl::init(EventLoop& loop)
 {
-    pt_signal_pipe->out().setParent(&loop);
+    pt_signal_pipe->out().setActive(loop);
     connect(pt_signal_pipe->out().inputReady, processSignal);
 }
 
