@@ -53,6 +53,9 @@ void Selectable::setActive(EventLoop& parent)
     //TODO: exception safety...
     //      may need to split this function in attach/detach...
 
+    if(_parent == &parent)
+        return;
+
     if(_parent)
     {
         assert(false);

@@ -304,9 +304,6 @@ class PT_SYSTEM_API IODevice : public Selectable
 
         virtual void setAvail();
 
-        virtual bool isAvail()
-        { return _avail; }
-
     private:
         bool _eof;
         bool _async;

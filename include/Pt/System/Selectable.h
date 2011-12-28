@@ -50,6 +50,9 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
         // TODO: set active
         void setActive(EventLoop& parent);
 
+        bool isActive() const
+        { return _parent != 0; }
+
         void detach();
 
         EventLoop* parent() const;
