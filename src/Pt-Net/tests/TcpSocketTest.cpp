@@ -72,7 +72,7 @@ class TcpSocketTest : public Pt::Unit::TestSuite
         void ConnectFailed()
         {
             Pt::Net::TcpSocket client;
-            client.setParent(_loop);
+            client.setActive(*_loop);
             connect(client.connected, *this, &TcpSocketTest::onConnectFailed);
 
             try
@@ -136,7 +136,7 @@ class TcpSocketTest : public Pt::Unit::TestSuite
                 Pt::Net::TcpSocket client;
                 connect(client.connected, *this, &TcpSocketTest::onConnect);
                 connect(client.outputReady, *this, &TcpSocketTest::onOutput);
-                client.setParent(_loop);
+                client.setActive(*_loop);
                 client.beginConnect("127.0.0.1", 9000);
                 //_loop->add(client);
 
@@ -150,7 +150,7 @@ class TcpSocketTest : public Pt::Unit::TestSuite
             server.listen("127.0.0.1", 9000);
 
             PT_UNIT_ASSERT( 0 == std::strncmp(input, "Hello World !!!", 15) );
-            //this->reportMessage("FINISHED");
+            this->reportMessage("FINISHED");
         }
 
         void onAccept(Pt::Net::TcpServer& server)

@@ -78,7 +78,7 @@ EventLoopImpl::~EventLoopImpl()
     while( _attached.size() )
     {
         it = _attached.begin();
-        (*it)->setParent(0);
+        (*it)->detach();
     }
 
     CloseHandle( _wakeEvent );

@@ -48,7 +48,9 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
 
         // TODO: split attach/detach
         // TODO: set active
-        void setParent(EventLoop* parent);
+        void setActive(EventLoop& parent);
+
+        void detach();
 
         EventLoop* parent() const;
 

@@ -48,11 +48,33 @@ Selectable::~Selectable()
 }
 
 
-void Selectable::setParent(EventLoop* parent)
+void Selectable::setActive(EventLoop& parent)
 {
     //TODO: exception safety...
     //      may need to split this function in attach/detach...
 
+    if(_parent)
+    {
+        assert(false);
+        this->cancel();
+
+        this->onDetach(*_parent);
+        _parent->onDetach(*this);
+        _parent = 0;
+    }
+
+    //if(parent)
+    {
+        this->onAttach(parent);
+        parent.onAttach(*this);
+    }
+
+    _parent = &parent;
+}
+
+
+void Selectable::detach()
+{
     if(_parent)
     {
         this->cancel();
@@ -61,14 +83,6 @@ void Selectable::setParent(EventLoop* parent)
         _parent->onDetach(*this);
         _parent = 0;
     }
-
-    if(parent)
-    {
-        this->onAttach(*parent);
-        parent->onAttach(*this);
-    }
-
-    _parent = parent;
 }
 
 

@@ -137,6 +137,7 @@ bool TcpSocket::beginConnect(const AddrInfo& addrinfo)
     assert( parent() );
 
     this->close();
+
     bool ret = _impl->beginConnect(addrinfo);
     //this->setEnabled(true);
     this->setAsync(true);

@@ -82,14 +82,14 @@ Signal<>& EventLoop::exited()
 
 void EventLoop::add(Selectable& s)
 {
-    s.setParent(this);
+    s.setActive(*this);
 }
 
 
 void EventLoop::remove(Selectable& s)
 {
     if(s.parent() == this)
-        s.setParent(0);
+        s.detach();
 }
 
 
