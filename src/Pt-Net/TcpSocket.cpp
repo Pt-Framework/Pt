@@ -32,6 +32,7 @@
 #include <stdexcept>
 #include <memory>
 #include <iostream>
+#include <cassert>
 
 namespace Pt {
 
@@ -133,6 +134,8 @@ void TcpSocket::connect(const AddrInfo& addrinfo)
 
 bool TcpSocket::beginConnect(const AddrInfo& addrinfo)
 {
+    assert( parent() );
+
     this->close();
     bool ret = _impl->beginConnect(addrinfo);
     //this->setEnabled(true);
