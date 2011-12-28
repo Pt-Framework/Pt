@@ -59,15 +59,13 @@ void IODevice::beginRead(char* buffer, size_t n)
     //if (!enabled())
     //    throw DeviceClosed( PT_ERROR_MSG("Device not enabled") );
 
-    if (_rbuf)
+    if (_rbuf || _wbuf)
         throw IOPending( PT_ERROR_MSG("read operation pending") );
 
     size_t r = this->onBeginRead(buffer, n, _eof);
 
-    if(r > 0 || _eof || _wavail)
+    if(r > 0 || _eof)
         this->setAvail();
-    else
-        this->setIdle();
 
     _rbuf = buffer;
     _rbuflen = n;
@@ -93,12 +91,8 @@ size_t IODevice::endRead()
         throw;
     }
 
-    if(_wavail > 0)
-        this->setAvail(); //TODO: do we need to setAvail again?
-    else //if(_wbuf)
+    if(_ravail > 0 || _eof)
         this->setIdle();
-    //else
-    //    this->setIdle();
 
     _rbuf = 0;
     _rbuflen = 0;
@@ -141,15 +135,13 @@ size_t IODevice::beginWrite(const char* buffer, size_t n)
     //if (!enabled())
     //    throw std::logic_error( PT_ERROR_MSG("Device not enabled") );
 
-    if (_wbuf)
+    if (_wbuf || _rbuf)
         throw IOPending( PT_ERROR_MSG("write operation pending") );
 
     size_t r = this->onBeginWrite(buffer, n);
 
-    if(r > 0 || _ravail)
+    if(r > 0)
         this->setAvail();
-    else
-        this->setIdle();
 
     _wbuf = buffer;
     _wbuflen = n;
@@ -177,14 +169,8 @@ size_t IODevice::endWrite()
         throw;
     }
 
-    if(_ravail > 0 || (_rbuf && _eof) )
-        this->setAvail();
-    else if(_rbuf)
+    if(_wavail > 0 )
         this->setIdle();
-    else
-        this->setIdle();
-    //else
-    //    this->setIdle();
 
     _wbuf = 0;
     _wbuflen = 0;
