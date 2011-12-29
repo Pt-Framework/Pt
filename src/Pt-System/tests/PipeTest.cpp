@@ -73,17 +73,15 @@ class PipeTest : public Pt::Unit::TestSuite
         {
             _data = "Hello World, where do you want to GOTO day!";
 
-            Pt::System::Pipe pipe(Pt::System::Pipe::Async);
+            Pt::System::Pipe pipe;
             pipe.in().write( _data.c_str(), _data.size() );
 
             pipe.out().setActive(*_loop);
             pipe.out().beginRead( _buffer, sizeof(_buffer) );
             pipe.out().inputReady += Pt::slot(*this, &PipeTest::onRead);
 
-            //_loop->add( pipe.out() );
             _loop->run();
 
-            //this->reportMessage(_result);
             PT_UNIT_ASSERT(_result == _data);
         }
 
@@ -105,10 +103,10 @@ class PipeTest : public Pt::Unit::TestSuite
             _data = "Hello World, where do you want to GOTO day!";
             _pos = 0;
 
-            Pt::System::Pipe pipe(Pt::System::Pipe::Async);
-            pipe.in().setActive(*_loop);
-
+            Pt::System::Pipe pipe;
+            
             std::memcpy(_buffer, _data.c_str(),  sizeof(_buffer));
+            pipe.in().setActive(*_loop);
             pipe.in().beginWrite(_buffer, sizeof(_buffer));
             pipe.in().outputReady += Pt::slot( *this, &PipeTest::onWrite);
 
@@ -145,7 +143,7 @@ class PipeTest : public Pt::Unit::TestSuite
         {
             std::string out("Hello World, where do you want to GOTO day!");
 
-            Pt::System::Pipe pipe(Pt::System::Pipe::Async);
+            Pt::System::Pipe pipe;
             pipe.in().write( out.c_str(), out.size() );
 
             pipe.out().setActive(*_loop);
@@ -166,7 +164,7 @@ class PipeTest : public Pt::Unit::TestSuite
         void PipeIOStream()
         {
             _data = "Hello world!";
-            Pt::System::Pipe pipe(Pt::System::Pipe::Async);
+            Pt::System::Pipe pipe;
             pipe.in().setActive(*_loop);
             pipe.out().setActive(*_loop);
 

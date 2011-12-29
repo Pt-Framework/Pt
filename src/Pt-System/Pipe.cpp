@@ -36,7 +36,7 @@ namespace Pt {
 
 namespace System {
 
-Pipe::Pipe(OpenMode mode)
+Pipe::Pipe()
 {
     _impl = new PipeImpl();
 }

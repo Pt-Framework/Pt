@@ -46,18 +46,23 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
         //! @brief Destructor
         virtual ~Selectable();
 
+        //! @brief Sets the parent loop, so that operations can be run
         void setActive(EventLoop& parent);
 
+        //! @brief Returns true if operations can be run
         bool isActive() const
         { return _parent != 0; }
 
+        //! @brief Remove from event loop and cancels outstanding operations
         void detach();
 
+        //! @brief Returns the parent event loop in which operations are running
         EventLoop* parent() const;
 
+        //! @brief Blocks until operation has cancelled
         void cancel();
 
-        //! @brief Closes the I/O device
+        //! @brief Closes all resources and cancels any outstanding operations
         void close();
 
     protected:

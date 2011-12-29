@@ -72,12 +72,19 @@ void PipeIODevice::open(HANDLE handle)
 void PipeIODevice::onClose()
 {
     IODeviceImpl::close();
+
+    _readOv.Offset = 0;
+    _readOv.OffsetHigh = 0;
+
+    _writeOv.Offset = 0;
+    _writeOv.OffsetHigh = 0;
 }
 
 
 void PipeIODevice::onCancel()
 {
-    ::CancelIo( handle() );
+    ::CancelIoEx( handle(), &_readOv );
+    ::CancelIoEx( handle(), &_writeOv );
 
     DWORD bytes = 0;
 
@@ -99,31 +106,8 @@ void PipeIODevice::onAttach(EventLoop& loop)
 {
     HANDLE h = loop.impl().beginWait(*this);
 
-    bool avail = false;
     _readOv.hEvent = h;
     _writeOv.hEvent = h;
- 
-    // beginRead was called before the IODevice was added to a EventLoop
-    if( this->reading() )
-    {
-        bool eof = false;
-        size_t n = this->onBeginRead(_rbuf, _rbuflen, eof);
-        if(eof || n > 0)
-            avail = true;
-
-        this->setEof(eof);
-    }
-
-    // see above. onBeginWrite didn't do anything
-    if( this->writing() )
-    {
-        size_t n = this->onBeginWrite(_wbuf, _wbuflen);
-        if(n > 0)
-            avail = true;
-    }
-
-    if(avail)
-        loop.impl().setAvail(*this);
 }
 
 
@@ -131,12 +115,7 @@ void PipeIODevice::onDetach(EventLoop& loop)
 {
     loop.impl().endWait(*this);
 
-    _readOv.Offset = 0;
-    _readOv.OffsetHigh = 0;
     _readOv.hEvent = NULL;
-
-    _writeOv.Offset = 0;
-    _writeOv.OffsetHigh = 0;
     _writeOv.hEvent = NULL;
 }
 
@@ -163,10 +142,6 @@ bool PipeIODevice::onAvail()
 
 size_t PipeIODevice::onBeginRead(char* buffer, size_t n, bool& eof)
 {
-    // beginRead was called before the IODevice was attached
-    if(_readOv.hEvent == NULL)
-        return 0;
-
     // if we can can read data immediately, we return the number of bytes
     // that were read, so the EventLoop calls onAvail, even if the event 
     // in the overlapped struct is not fired
@@ -199,15 +174,8 @@ size_t PipeIODevice::onEndRead(bool& eof)
         return 0;
     }
 
-    // a IODevice::beginRead outside a EventLoop was followed by an endRead
-    // This happens when the IODevice is async, but used synchronously
-    if(_readOv.hEvent == NULL)
-    {
-        return this->onRead(_rbuf, _rbuflen, eof);
-    }
-
-    // finishes the overlapped operation. Blocks until data is available
-    // This was beginRead can be ended by endRead without a wait step.
+    // finishes the overlapped operation. Blocks until data is available,
+    // so beginRead can be ended by endRead without a wait step.
     DWORD readBytes = 0;
     if( FALSE == GetOverlappedResult(handle(), &_readOv, &readBytes, TRUE) )
     {
@@ -260,9 +228,6 @@ size_t PipeIODevice::onRead(char* buffer, size_t count, bool& eof)
 
 size_t PipeIODevice::onBeginWrite(const char* buffer, size_t n)
 {
-    if(_writeOv.hEvent == NULL)
-        return 0;
-
     DWORD writtenBytes = 0;
     if( FALSE == WriteFile(handle(), (void*)buffer, n, &writtenBytes, &_writeOv) )
     {
@@ -281,11 +246,6 @@ size_t PipeIODevice::onBeginWrite(const char* buffer, size_t n)
 
 size_t PipeIODevice::onEndWrite()
 {
-    if(_writeOv.hEvent == NULL)
-    {
-        return this->onWrite(_wbuf, _wbuflen);
-    }
-
     DWORD writtenBytes = 0;
     if (GetOverlappedResult( handle(), &_writeOv, &writtenBytes, FALSE) == FALSE )
     {
@@ -329,6 +289,67 @@ void PipeIODevice::onSync() const
 void PipeIODevice::redirect(int newFd, bool close)
 {
 }
+
+
+PipeImpl::PipeImpl()
+{
+    std::stringstream ss;
+    ss<<"\\\\.\\pipe\\pt-" << GetCurrentProcessId() << '-' << _nameId;
+
+    DWORD pflags = PIPE_ACCESS_DUPLEX;
+    DWORD access = GENERIC_WRITE;
+    DWORD share  = 0;
+    DWORD create = OPEN_EXISTING;
+    DWORD flags  = 0;
+    
+    flags  = FILE_FLAG_OVERLAPPED;
+    pflags |= FILE_FLAG_OVERLAPPED;
+
+    HANDLE inputHandle = ::CreateNamedPipe(ss.str().c_str(),
+                                           pflags,
+                                           PIPE_TYPE_BYTE | PIPE_READMODE_BYTE | PIPE_WAIT,
+                                           1,
+                                           256,
+                                           256,
+                                           1000,
+                                           NULL );
+    if (inputHandle == INVALID_HANDLE_VALUE)
+        throw SystemError("Could not create named pipe", PT_SOURCEINFO);
+
+    HANDLE outputHandle = ::CreateFile(ss.str().c_str(), access, share, NULL, create, flags, NULL);
+    if(outputHandle == INVALID_HANDLE_VALUE)
+        throw SystemError("Could not open file handle", PT_SOURCEINFO);
+
+    _out.open(inputHandle);
+    _in.open(outputHandle);
+
+    InterlockedIncrement(&_nameId);
+}
+
+PipeImpl::~PipeImpl()
+{
+    _nameId--;
+}
+
+
+PipeIODevice& PipeImpl::out()
+{
+    return _out;
+}
+
+
+PipeIODevice& PipeImpl::in()
+{
+    return _in;
+}
+
+
+LONG PipeImpl::_nameId = 0;
+
+} // namespace System
+
+} // namespace Pt
+
 
 
 
@@ -441,62 +462,3 @@ void PipeIODevice::redirect(int newFd, bool close)
     return false;
 }*/
 
-
-PipeImpl::PipeImpl()
-{
-    std::stringstream ss;
-    ss<<"\\\\.\\pipe\\pt-" << GetCurrentProcessId() << '-' << _nameId;
-
-    DWORD pflags = PIPE_ACCESS_DUPLEX;
-    DWORD access = GENERIC_WRITE;
-    DWORD share  = 0;
-    DWORD create = OPEN_EXISTING;
-    DWORD flags  = 0;
-    
-    flags  = FILE_FLAG_OVERLAPPED;
-    pflags |= FILE_FLAG_OVERLAPPED;
-
-    HANDLE inputHandle = ::CreateNamedPipe(ss.str().c_str(),
-                                           pflags,
-                                           PIPE_TYPE_BYTE | PIPE_READMODE_BYTE | PIPE_WAIT,
-                                           1,
-                                           256,
-                                           256,
-                                           1000,
-                                           NULL );
-    if (inputHandle == INVALID_HANDLE_VALUE)
-        throw SystemError("Could not create named pipe", PT_SOURCEINFO);
-
-    HANDLE outputHandle = ::CreateFile(ss.str().c_str(), access, share, NULL, create, flags, NULL);
-    if(outputHandle == INVALID_HANDLE_VALUE)
-        throw SystemError("Could not open file handle", PT_SOURCEINFO);
-
-    _out.open(inputHandle);
-    _in.open(outputHandle);
-
-    InterlockedIncrement(&_nameId);
-}
-
-PipeImpl::~PipeImpl()
-{
-    _nameId--;
-}
-
-
-PipeIODevice& PipeImpl::out()
-{
-    return _out;
-}
-
-
-PipeIODevice& PipeImpl::in()
-{
-    return _in;
-}
-
-
-LONG PipeImpl::_nameId = 0;
-
-} // namespace System
-
-} // namespace Pt
