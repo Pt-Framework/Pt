@@ -27,6 +27,7 @@
  */
 
 #include "Pt/System/Selectable.h"
+#include <stdexcept>
 #include <cassert>
 
 namespace Pt {
@@ -54,14 +55,7 @@ void Selectable::setActive(EventLoop& parent)
         return;
 
     if(_parent)
-    {
-        assert(false);
-        this->cancel();
-
-        this->onDetach(*_parent);
-        _parent->onDetach(*this);
-        _parent = 0;
-    }
+        throw std::logic_error("selectable already active");
 
     this->onAttach(parent);
     parent.onAttach(*this);
@@ -88,12 +82,7 @@ EventLoop* Selectable::parent() const
 }
 
 
-void Selectable::close()
-{
-    this->cancel();
 
-    this->onClose();
-}
 
 
 void Selectable::cancel()

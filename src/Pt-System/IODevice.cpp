@@ -51,6 +51,14 @@ IODevice::~IODevice()
 { }
 
 
+void IODevice::close()
+{
+    this->cancel();
+    this->onClose();
+    IODevice::setEof(false);
+}
+
+
 void IODevice::beginRead(char* buffer, size_t n)
 {
     if( ! isActive() )
@@ -102,7 +110,7 @@ size_t IODevice::endRead()
 size_t IODevice::read(char* buffer, size_t n)
 {
     if( _rbuf || _wbuf)
-        throw IOPending( PT_ERROR_MSG("i/ooperation pending") );
+        throw IOPending( PT_ERROR_MSG("i/o operation pending") );
 
     return this->onRead(buffer, n, _eof);
 }

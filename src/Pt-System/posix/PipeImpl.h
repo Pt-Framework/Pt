@@ -57,7 +57,7 @@ class PipeIODevice : public Pt::System::IODevice
         void open(int fd);
 
         void onClose()
-        { cancel(); _impl.close(); }
+        { _impl.close(); }
 
         void onAttach(EventLoop& loop)
         { _impl.attach(loop); }

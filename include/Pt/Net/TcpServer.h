@@ -58,14 +58,13 @@ class TcpServerImpl;
 
       void listen(const std::string& ipaddr, unsigned short int port, int backlog = 5, unsigned flags = 0);
 
+      void close();
+
       TcpServerImpl& impl() const;
 
       Signal<TcpServer&> connectionPending;
 
     protected:
-      // inherit doc
-      virtual void onClose();
-
       // inherit doc
       virtual void onAttach(System::EventLoop&);
 

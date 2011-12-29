@@ -61,9 +61,7 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
         //! @brief Blocks until operation has cancelled
         void cancel();
 
-        //! @brief Closes all resources and cancels any outstanding operations
-        void close();
-
+        //! @brief Run operation if it is ready
         bool run()
         { return this->onRun(); }
 
@@ -77,9 +75,6 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
 
         //! @brief Detached from loop
         virtual void onDetach(EventLoop&) = 0;
-
-        //! @brief Closes all resources
-        virtual void onClose() = 0;
 
         //! @brief Blocks until operation has cancelled
         virtual void onCancel() = 0;
@@ -100,40 +95,38 @@ class Active : public Selectable
         //! @brief Signals state transition to avail state
         void setAvail()
         {
-            // loop.signalAvail(*this);
+            this->parent()->signalAvail(*this);
         }
 
         //! @brief Signals state transition to idle state
         void setIdle()
         {
-            // loop.signalIdle(*this);
+            this->parent()->signalIdle(*this);
         }
 
     protected:
-        Active()
-        {}
+        Active(EventLoop& loop)
+        {
+            this->setActive(loop);
+        }
 
+        //! @brief Closes all resources
+        virtual void onClose() = 0;
+
+        //! @brief Blocks until operation has cancelled
+        virtual void onCancel() = 0;
+
+         //! @brief Check if ready and run
+        virtual bool onRun() = 0;
+
+    protected:
         //! @brief Attached to loop
         virtual void onAttach(EventLoop&)
-        {}
+        { }
 
         //! @brief Detached from loop
         virtual void onDetach(EventLoop&)
-        {}
-
-        //! @brief Closes all resources
-        virtual void onClose()
-        {}
-
-        //! @brief Blocks until operation has cancelled
-        virtual void onCancel()
-        {
-            // loop.signalIdle(*this);
-        }
-
-         //! @brief Check if ready and run
-        virtual bool onRun()
-        { return false; }
+        { }
 };
 
 } // namespace System

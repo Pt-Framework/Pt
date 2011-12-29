@@ -68,6 +68,7 @@ TcpServer::~TcpServer()
 }
 
 
+
 void TcpServer::listen(const std::string& ipaddr, unsigned short int port, int backlog, unsigned flags)
 {
     this->close();
@@ -82,7 +83,7 @@ TcpServerImpl& TcpServer::impl() const
 }
 
 
-void TcpServer::onClose()
+void TcpServer::close()
 {
     _impl->close();
 }

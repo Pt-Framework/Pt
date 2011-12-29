@@ -176,9 +176,7 @@ void TcpSocket::accept(const TcpServer& server, unsigned flags)
 
 void TcpSocket::onClose()
 {
-    std::cerr << "TcpSocket::onClose() 1" << std::endl;
-    cancel();
-    std::cerr << "TcpSocket::onClose() 2" << std::endl;
+    std::cerr << "TcpSocket::onClose()" << std::endl;
     _impl->close();
 }
 

@@ -109,6 +109,8 @@ class PT_SYSTEM_API IODevice : public Selectable
         //! @brief Destructor
         virtual ~IODevice();
 
+        void close();
+
         void beginRead(char* buffer, size_t n);
 
         size_t endRead();
@@ -248,6 +250,9 @@ class PT_SYSTEM_API IODevice : public Selectable
     protected:
         //! @brief Default Constructor
         IODevice();
+
+        //! @brief Closes all resources and cancels any outstanding operations
+        virtual void onClose() = 0;
 
         virtual size_t onBeginRead(char* buffer, size_t n, bool& eof) = 0;
 

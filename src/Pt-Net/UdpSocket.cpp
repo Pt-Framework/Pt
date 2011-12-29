@@ -126,7 +126,6 @@ std::size_t UdpSocket::timeout() const
 
 void UdpSocket::onClose()
 {
-    cancel();
     _impl->close();
 }
 
