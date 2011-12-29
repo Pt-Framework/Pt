@@ -78,7 +78,7 @@ namespace System {
             std::size_t timeout() const
             { return _timeout; }
 
-            void open(int fd, bool isAsync, bool closeOnExec);
+            void open(int fd, bool closeOnExec);
 
             virtual void close();
 

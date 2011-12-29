@@ -63,22 +63,19 @@ IODeviceImpl::~IODeviceImpl()
 }
 
 
-void IODeviceImpl::open(int fd, bool isAsync, bool inherit)
+void IODeviceImpl::open(int fd, bool inherit)
 {
     _fd = fd;
 
-    if (isAsync)
-    {
-        int flags = fcntl(_fd, F_GETFL);
-        flags |= O_NONBLOCK ;
-        int ret = fcntl(_fd, F_SETFL, flags);
-        if(-1 == ret)
-            throw IOError(PT_ERROR_MSG("Could not set fd to non-blocking"));
+    int flags = fcntl(_fd, F_GETFL);
+    flags |= O_NONBLOCK ;
+    int ret = fcntl(_fd, F_SETFL, flags);
+    if(-1 == ret)
+        throw IOError(PT_ERROR_MSG("Could not set fd to non-blocking"));
 
-        EventLoop* loop = _device.parent();
-        if(loop)
-            this->attach(*loop);
-    }
+    EventLoop* loop = _device.parent();
+    if(loop)
+        this->attach(*loop);
 
     if ( ! inherit)
     {

@@ -100,7 +100,7 @@ void UdpSocketImpl::bind(const std::string& ipaddr, unsigned short int port, uns
         if( _fd < 0 )
         {
             int fd = socket(it->ai_family, SOCK_DGRAM, 0);
-            IODeviceImpl::open(fd, true, false);
+            IODeviceImpl::open(fd, false);
         }
 
         if( _fd < 0 )
@@ -175,7 +175,7 @@ void UdpSocketImpl::connect(const AddrInfo& ai)
         if( _fd < 0 )
         {
             int fd = socket(it->ai_family, SOCK_DGRAM, 0);
-            IODeviceImpl::open(fd, true, false);
+            IODeviceImpl::open(fd, false);
         }
 
         if( _fd < 0 )

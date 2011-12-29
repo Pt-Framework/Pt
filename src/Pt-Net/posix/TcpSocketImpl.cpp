@@ -216,7 +216,7 @@ const char* TcpSocketImpl::tryConnect()
                 return "socket";
         }
 
-        IODeviceImpl::open(fd, true, false);
+        IODeviceImpl::open(fd, false);
 
         std::memmove(&_peeraddr, _addrInfoPtr->ai_addr, _addrInfoPtr->ai_addrlen);
 
@@ -323,7 +323,7 @@ void TcpSocketImpl::accept(const TcpServer& server, unsigned flags)
     if( _fd < 0 )
       throw System::SystemError("accept");
 
-    System::IODeviceImpl::open(_fd, true, inherit);
+    System::IODeviceImpl::open(_fd, inherit);
     //TODO ECONNABORTED EINTR EPERM
 
     _isConnected = true;

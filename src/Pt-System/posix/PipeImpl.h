@@ -54,7 +54,7 @@ class PipeIODevice : public Pt::System::IODevice
         void redirect(int fd, bool close = true);
 
     protected:
-        void open(int fd, bool isAsync);
+        void open(int fd);
 
         void onClose()
         { cancel(); _impl.close(); }
@@ -95,7 +95,7 @@ class PipeIODevice : public Pt::System::IODevice
 class PipeImpl
 {
     public:
-        PipeImpl(bool isAsync);
+        PipeImpl();
 
         PipeIODevice& in();
 

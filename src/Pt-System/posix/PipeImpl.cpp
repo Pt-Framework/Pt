@@ -64,15 +64,13 @@ void PipeIODevice::redirect(int newFd, bool close)
     {
         IODevice::close();
         // last arg is true, because FD_CLOEXEC should not be set on fds 0,1,2
-        _impl.open(newFd, async(), true);
+        _impl.open(newFd, true);
     }
 }
 
-void PipeIODevice::open(int fd, bool isAsync)
+void PipeIODevice::open(int fd)
 {
-    _impl.open(fd, isAsync, false);
-    //this->setEnabled(true);
-    this->setAsync(isAsync);
+    _impl.open(fd, false);
     this->setEof(false);
 }
 
@@ -126,14 +124,14 @@ void PipeIODevice::onSync() const
 }
 
 
-PipeImpl::PipeImpl(bool isAsync)
+PipeImpl::PipeImpl()
 {
     int fds[2];
     if(-1 == ::pipe(fds) )
         throw SystemError( PT_ERROR_MSG("pipe failed") );
 
-    _out.open( fds[0], isAsync );
-    _in.open( fds[1], isAsync );
+    _out.open( fds[0] );
+    _in.open( fds[1] );
 }
 
 

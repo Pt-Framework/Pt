@@ -63,8 +63,7 @@ void FileDeviceImpl::open( const char* path, IODevice::OpenMode mode)
         flags |= O_RDONLY;
     }
 
-    if(mode & IODevice::Async)
-        flags |= O_NONBLOCK;
+    flags |= O_NONBLOCK;
 
     if(mode & IODevice::Trunc)
         flags |= O_TRUNC;

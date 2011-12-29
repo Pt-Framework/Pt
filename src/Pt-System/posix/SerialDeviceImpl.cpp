@@ -79,8 +79,7 @@ void SerialDeviceImpl::open(const std::string& path, IODevice::OpenMode mode)
         flags |= O_RDONLY;
     }
 
-    if(mode & IODevice::Async)
-        flags |= O_NONBLOCK;
+    flags |= O_NONBLOCK;
 
     if(mode & IODevice::Trunc)
         flags |= O_TRUNC;
