@@ -62,11 +62,10 @@ PipeIODevice::~PipeIODevice()
 }
 
 
-void PipeIODevice::open(HANDLE handle, bool isAsync)
+void PipeIODevice::open(HANDLE handle)
 {
     this->setHandle(handle);
     this->setEof(false);
-    this->setAsync(isAsync);
 }
 
 
@@ -443,7 +442,7 @@ void PipeIODevice::redirect(int newFd, bool close)
 }*/
 
 
-PipeImpl::PipeImpl(bool isAsync)
+PipeImpl::PipeImpl()
 {
     std::stringstream ss;
     ss<<"\\\\.\\pipe\\pt-" << GetCurrentProcessId() << '-' << _nameId;
@@ -454,11 +453,8 @@ PipeImpl::PipeImpl(bool isAsync)
     DWORD create = OPEN_EXISTING;
     DWORD flags  = 0;
     
-    if(isAsync)
-    {
-        flags  = FILE_FLAG_OVERLAPPED;
-        pflags |= FILE_FLAG_OVERLAPPED;
-    }
+    flags  = FILE_FLAG_OVERLAPPED;
+    pflags |= FILE_FLAG_OVERLAPPED;
 
     HANDLE inputHandle = ::CreateNamedPipe(ss.str().c_str(),
                                            pflags,
@@ -475,8 +471,8 @@ PipeImpl::PipeImpl(bool isAsync)
     if(outputHandle == INVALID_HANDLE_VALUE)
         throw SystemError("Could not open file handle", PT_SOURCEINFO);
 
-    _out.open(inputHandle, isAsync);
-    _in.open(outputHandle, isAsync);
+    _out.open(inputHandle);
+    _in.open(outputHandle);
 
     InterlockedIncrement(&_nameId);
 }

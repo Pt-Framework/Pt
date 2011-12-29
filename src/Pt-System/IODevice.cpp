@@ -36,7 +36,6 @@ namespace System {
 
 IODevice::IODevice()
 : _eof(false)
-, _async(false)
 , _avail(false)
 , _rbuf(0)
 , _rbuflen(0)
@@ -54,16 +53,11 @@ IODevice::~IODevice()
 
 void IODevice::beginRead(char* buffer, size_t n)
 {
-    assert( isActive() );
-
-    if (!async())
-        throw std::logic_error( PT_ERROR_MSG("Device not in async mode") );
-
-    //if (!enabled())
-    //    throw DeviceClosed( PT_ERROR_MSG("Device not enabled") );
+    if( ! isActive() )
+        throw std::logic_error( PT_ERROR_MSG("I/O device not active") );
 
     if (_rbuf || _wbuf)
-        throw IOPending( PT_ERROR_MSG("read operation pending") );
+        throw IOPending( PT_ERROR_MSG("I/O operation pending") );
 
     size_t r = this->onBeginRead(buffer, n, _eof);
 
@@ -135,13 +129,8 @@ size_t IODevice::read(char* buffer, size_t n)
 
 size_t IODevice::beginWrite(const char* buffer, size_t n)
 {
-    assert( isActive() );
-
-    if (!async())
-        throw std::logic_error( PT_ERROR_MSG("Device not in async mode") );
-
-    //if (!enabled())
-    //    throw std::logic_error( PT_ERROR_MSG("Device not enabled") );
+    if( ! isActive() )
+        throw std::logic_error( PT_ERROR_MSG("I/O device not active") );
 
     if (_wbuf || _rbuf)
         throw IOPending( PT_ERROR_MSG("write operation pending") );
@@ -292,21 +281,9 @@ bool IODevice::eof() const
 }
 
 
-bool IODevice::async() const
-{
-    return _async; 
-}
-
-
 void IODevice::setEof(bool eof)
 { 
     _eof = eof; 
-}
-
-
-void IODevice::setAsync(bool async)
-{
-    _async = async; 
 }
 
 }

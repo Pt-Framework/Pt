@@ -71,7 +71,6 @@ void FileDevice::open( const char* path, OpenMode mode)
 
     //IODevice::setEnabled(true);
     IODevice::setEof(false);
-    IODevice::setAsync(mode & Async);
 }
 
 

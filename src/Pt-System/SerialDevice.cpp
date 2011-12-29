@@ -72,7 +72,6 @@ void SerialDevice::open( const std::string& file, OpenMode mode)
 
     //IODevice::setEnabled(true);
     IODevice::setEof(false);
-    IODevice::setAsync( mode & IODevice::Async);
 }
 
 void SerialDevice::onCancel()
@@ -171,8 +170,7 @@ bool SerialDevice::setSignal(SerialDevice::SerialLine signal)
 
 void SerialDevice::setTimeout( size_t msec )
 {
-    if ( !this->async() )
-        _impl->setTimeout( msec );
+    _impl->setTimeout( msec );
 }
 
 

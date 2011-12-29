@@ -37,7 +37,7 @@ class PipeIODevice : public IODevice, private IODeviceImpl
 
         virtual ~PipeIODevice();
 
-        virtual void open(HANDLE handle, bool isAsync);
+        virtual void open(HANDLE handle);
 
         //virtual bool checkEvent();
 
@@ -86,7 +86,7 @@ class PipeIODevice : public IODevice, private IODeviceImpl
 class PipeImpl
 {
     public:
-        PipeImpl(bool isAsync);
+        PipeImpl();
 
         ~PipeImpl();
 

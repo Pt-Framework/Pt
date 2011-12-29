@@ -57,10 +57,7 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
 
         void cancel();
 
-        /** @brief Closes the I/O device
-
-           Frees any resources associated with this object, like I/O handles.
-        */
+        //! @brief Closes the I/O device
         void close();
 
     protected:

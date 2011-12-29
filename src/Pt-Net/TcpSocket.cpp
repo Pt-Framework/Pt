@@ -126,21 +126,18 @@ void TcpSocket::connect(const AddrInfo& addrinfo)
 {
     this->close();
     _impl->connect(addrinfo);
-    //this->setEnabled(true);
-    this->setAsync(true);
     this->setEof(false);
 }
 
 
 bool TcpSocket::beginConnect(const AddrInfo& addrinfo)
 {
-    assert( isActive() );
+    if( ! isActive() )
+        throw std::logic_error( PT_ERROR_MSG("socket not active") );
 
     this->close();
 
     bool ret = _impl->beginConnect(addrinfo);
-    //this->setEnabled(true);
-    this->setAsync(true);
     this->setEof(false);
 
     if(ret)
@@ -173,8 +170,6 @@ void TcpSocket::accept(const TcpServer& server, unsigned flags)
 {
     this->close();
     _impl->accept(server, flags);
-    //this->setEnabled(true);
-    this->setAsync(true);
     this->setEof(false);
 }
 

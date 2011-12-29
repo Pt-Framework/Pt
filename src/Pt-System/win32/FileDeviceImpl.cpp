@@ -93,12 +93,9 @@ void FileDeviceImpl::open( const char* path, IODevice::OpenMode mode)
     if( mode & IODevice::Trunc )
         create |= TRUNCATE_EXISTING;
 
-    if( mode & IODevice::Async )
-    {
 #ifndef _WIN32_WCE
-        flags |= FILE_FLAG_OVERLAPPED;
+    flags |= FILE_FLAG_OVERLAPPED;
 #endif
-    }
 
     std::basic_string<TCHAR> tpath;
     win32::fromMultiByte(path, tpath);

@@ -102,7 +102,6 @@ class PT_SYSTEM_API IODevice : public Selectable
         typedef IOS_OpenMode OpenMode;
 
         static const OpenMode Sync   = IOS_Sync;
-        static const OpenMode Async  = IOS_Async;
         static const OpenMode Read   = IOS_Read;
         static const OpenMode Write  = IOS_Write;
         static const OpenMode AtEnd  = IOS_AtEnd;
@@ -208,10 +207,6 @@ class PT_SYSTEM_API IODevice : public Selectable
         */
         bool eof() const;
 
-        /** @brief Returns true if the device operates in asynchronous mode
-        */
-        bool async() const;
-
         /** @brief Notifies about available data
 
             This signal is send when the IODevice is monitored
@@ -297,16 +292,12 @@ class PT_SYSTEM_API IODevice : public Selectable
         //! @brief Sets or unsets the device to eof
         void setEof(bool eof);
 
-        //! @brief Sets or unsets the device to async
-        void setAsync(bool async);
-
         virtual void setIdle();
 
         virtual void setAvail();
 
     private:
         bool _eof;
-        bool _async;
         bool _avail;
 
     protected:
