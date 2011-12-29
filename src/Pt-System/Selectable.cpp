@@ -50,9 +50,6 @@ Selectable::~Selectable()
 
 void Selectable::setActive(EventLoop& parent)
 {
-    //TODO: exception safety...
-    //      may need to split this function in attach/detach...
-
     if(_parent == &parent)
         return;
 
@@ -66,12 +63,8 @@ void Selectable::setActive(EventLoop& parent)
         _parent = 0;
     }
 
-    //if(parent)
-    {
-        this->onAttach(parent);
-        parent.onAttach(*this);
-    }
-
+    this->onAttach(parent);
+    parent.onAttach(*this);
     _parent = &parent;
 }
 

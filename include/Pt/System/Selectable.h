@@ -46,8 +46,6 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
         //! @brief Destructor
         virtual ~Selectable();
 
-        // TODO: split attach/detach
-        // TODO: set active
         void setActive(EventLoop& parent);
 
         bool isActive() const

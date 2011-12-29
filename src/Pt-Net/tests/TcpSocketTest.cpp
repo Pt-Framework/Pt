@@ -128,10 +128,10 @@ class TcpSocketTest : public Pt::Unit::TestSuite
                 //this->reportMessage("\nSTART");
 
                 connect(server.connectionPending, *this, &TcpSocketTest::onAccept);
-                _loop->add(server);
+                server.setActive(*_loop);
 
                 connect(_acceptor->inputReady, *this, &TcpSocketTest::onInput);
-                _loop->add(*_acceptor);
+                _acceptor->setActive(*_loop);
 
                 Pt::Net::TcpSocket client;
                 connect(client.connected, *this, &TcpSocketTest::onConnect);

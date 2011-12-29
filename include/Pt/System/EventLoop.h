@@ -72,11 +72,11 @@ class PT_SYSTEM_API EventLoop : public Connectable
             Adds a Selectable to the selector. Selectable are removed
             automatically when they get destroyed.
         */
-        void add(Selectable& s);
+        //void add(Selectable& s);
 
         /** @brief Removes a Selectable.
         */
-        void remove(Selectable& s);
+        //void remove(Selectable& s);
 
         /** @brief Adds a Timer
 

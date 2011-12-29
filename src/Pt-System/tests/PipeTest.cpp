@@ -76,10 +76,11 @@ class PipeTest : public Pt::Unit::TestSuite
             Pt::System::Pipe pipe(Pt::System::Pipe::Async);
             pipe.in().write( _data.c_str(), _data.size() );
 
+            pipe.out().setActive(*_loop);
             pipe.out().beginRead( _buffer, sizeof(_buffer) );
             pipe.out().inputReady += Pt::slot(*this, &PipeTest::onRead);
 
-            _loop->add( pipe.out() );
+            //_loop->add( pipe.out() );
             _loop->run();
 
             //this->reportMessage(_result);
@@ -105,12 +106,12 @@ class PipeTest : public Pt::Unit::TestSuite
             _pos = 0;
 
             Pt::System::Pipe pipe(Pt::System::Pipe::Async);
+            pipe.in().setActive(*_loop);
 
             std::memcpy(_buffer, _data.c_str(),  sizeof(_buffer));
             pipe.in().beginWrite(_buffer, sizeof(_buffer));
             pipe.in().outputReady += Pt::slot( *this, &PipeTest::onWrite);
 
-            _loop->add( pipe.in() );
             _loop->run();
             std::cerr << "run ended" << std::endl;
 
@@ -147,10 +148,10 @@ class PipeTest : public Pt::Unit::TestSuite
             Pt::System::Pipe pipe(Pt::System::Pipe::Async);
             pipe.in().write( out.c_str(), out.size() );
 
+            pipe.out().setActive(*_loop);
             pipe.out().beginRead(_buffer, sizeof(_buffer));
             pipe.out().inputReady += Pt::slot(*this, &PipeTest::onReadRemove);
 
-            _loop->add( pipe.out() );
             _loop->run();
         }
 
@@ -166,8 +167,8 @@ class PipeTest : public Pt::Unit::TestSuite
         {
             _data = "Hello world!";
             Pt::System::Pipe pipe(Pt::System::Pipe::Async);
-            _loop->add( pipe.in() );
-            _loop->add( pipe.out() );
+            pipe.in().setActive(*_loop);
+            pipe.out().setActive(*_loop);
 
             outbuf.attach( pipe.in() );
             outbuf.outputReady() += Pt::slot(*this, &PipeTest::onStreamOutput);

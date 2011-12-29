@@ -111,13 +111,13 @@ ClientImpl::ClientImpl(Client* client, System::EventLoop& loop, const Net::AddrI
     Pt::connect(_socket.connected, *this, &ClientImpl::onConnect);
     Pt::connect(_stream.buffer().outputReady(), *this, &ClientImpl::onOutput);
     Pt::connect(_stream.buffer().inputReady(), *this, &ClientImpl::onInput);
-    setParent(loop);
+    setActive(loop);
 }
 
 
-void ClientImpl::setParent(System::EventLoop& loop)
+void ClientImpl::setActive(System::EventLoop& loop)
 {
-    loop.add(_socket);
+    _socket.setActive(loop);
 }
 
 

@@ -158,7 +158,7 @@ void TcpConnection::begin(System::EventLoop& loop)
 {
     Http::Connection::init(loop);
 
-    loop.add(*this);
+    this->setActive(loop);
     loop.add(_timer);
 
     _stream.buffer().beginRead();
@@ -535,7 +535,7 @@ Server::Server(System::EventLoop& eventLoop)
     _defaultService = new NotFoundService();
     _noAuthService = new NotAuthenticatedService();
 
-    _loop.add(_serverSocket);
+    _serverSocket.setActive(eventLoop);
     _serverSocket.connectionPending += Pt::slot(*this, &Server::onAccept);
 }
 
@@ -553,9 +553,9 @@ Server::Server(System::EventLoop& eventLoop, const std::string& ip, unsigned sho
     _defaultService = new NotFoundService();
     _noAuthService = new NotAuthenticatedService();
 
+    _serverSocket.setActive(_loop);
     this->startWorker();
-
-    _loop.add(_serverSocket);
+    
     _serverSocket.connectionPending += Pt::slot(*this, &Server::onAccept);
 }
 

@@ -27,7 +27,8 @@
  */
 
 #include "Pt/System/IODevice.h"
-#include <string.h>
+#include <cstring>
+#include <cassert>
 
 namespace Pt {
 
@@ -53,6 +54,8 @@ IODevice::~IODevice()
 
 void IODevice::beginRead(char* buffer, size_t n)
 {
+    assert( isActive() );
+
     if (!async())
         throw std::logic_error( PT_ERROR_MSG("Device not in async mode") );
 
@@ -104,11 +107,14 @@ size_t IODevice::endRead()
 
 size_t IODevice::read(char* buffer, size_t n)
 {
-    if (async())
-    {
-        if( _rbuf )
-            throw IOPending( PT_ERROR_MSG("read operation pending") );
+    if( _rbuf || _wbuf)
+        throw IOPending( PT_ERROR_MSG("i/ooperation pending") );
 
+    /*if (async())
+    { 
+        if( _rbuf )
+            throw IOPending( PT_ERROR_MSG("read operation pending") ); 
+     
         try // TODO pass buffer pointer/length to onEndRead
         {
             this->beginRead(buffer, n);
@@ -121,7 +127,7 @@ size_t IODevice::read(char* buffer, size_t n)
             _rbuf = 0; _rbuflen = 0; _ravail = 0;
             throw;
         }
-    }
+    }*/
 
     return this->onRead(buffer, n, _eof);
 }
@@ -129,6 +135,8 @@ size_t IODevice::read(char* buffer, size_t n)
 
 size_t IODevice::beginWrite(const char* buffer, size_t n)
 {
+    assert( isActive() );
+
     if (!async())
         throw std::logic_error( PT_ERROR_MSG("Device not in async mode") );
 
@@ -182,7 +190,10 @@ size_t IODevice::endWrite()
 
 size_t IODevice::write(const char* buffer, size_t n)
 {
-    if( async() )
+    if( _rbuf || _wbuf)
+        throw IOPending( PT_ERROR_MSG("i/ooperation pending") );
+
+    /*if( async() )
     {
         if( _wbuf )
         {
@@ -201,7 +212,7 @@ size_t IODevice::write(const char* buffer, size_t n)
             _wbuf = 0; _wbuflen = 0; _wavail = 0;
             throw;
         }
-    }
+    }*/
 
     return this->onWrite(buffer, n);
 }

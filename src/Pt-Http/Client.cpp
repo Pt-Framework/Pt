@@ -113,9 +113,9 @@ void Client::endExecute()
     _impl->endExecute();
 }
 
-void Client::setParent(System::EventLoop& selector)
+void Client::setActive(System::EventLoop& selector)
 {
-    _impl->setParent(selector);
+    _impl->setActive(selector);
 }
 
 /*void Client::wait(std::size_t msecs)

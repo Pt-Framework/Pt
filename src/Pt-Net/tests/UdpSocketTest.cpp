@@ -84,14 +84,14 @@ class UdpSocketTest : public Pt::Unit::TestSuite
 
         void Unicast()
         {
+            _receiver->setActive(*_loop);
+            _sender->setActive(*_loop);
+
             _sender->connect("127.0.0.1", 8000);
             PT_UNIT_ASSERT( _sender->isConnected() );
 
             _receiver->bind("127.0.0.1", 8000, 0);
             PT_UNIT_ASSERT( _receiver->isBound() );
-
-            _loop->add(*_receiver);
-            _loop->add(*_sender);
 
             _receiver->inputReady += Pt::slot(*this, &UdpSocketTest::onUnicastInput);
             _receiver->beginRead(inbuf, 200);
@@ -137,9 +137,9 @@ class UdpSocketTest : public Pt::Unit::TestSuite
             _receiver2->bind("0.0.0.0", 8000, 0);
             PT_UNIT_ASSERT( _receiver2->isBound() );
 
-            _loop->add(*_receiver);
-            _loop->add(*_receiver2);
-            _loop->add(*_sender);
+            _receiver->setActive(*_loop);
+            _receiver2->setActive(*_loop);
+            _sender->setActive(*_loop);
 
             _sender->outputReady += Pt::slot(*this, &UdpSocketTest::onBroadcastOutput);
             _sender->beginWrite("Hello BROADCAST!", 16);
@@ -186,9 +186,9 @@ class UdpSocketTest : public Pt::Unit::TestSuite
             _receiver2->joinMulticastGroup("224.0.1.1");
             PT_UNIT_ASSERT( _receiver2->isBound() );
 
-            _loop->add(*_receiver);
-            _loop->add(*_receiver2);
-            _loop->add(*_sender);
+            _receiver->setActive(*_loop);
+            _receiver2->setActive(*_loop);
+            _sender->setActive(*_loop);
 
             _sender->outputReady += Pt::slot(*this, &UdpSocketTest::onMulticastOutput);
             _sender->beginWrite("Hello MULTICAST!", 16);

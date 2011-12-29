@@ -134,7 +134,7 @@ void TcpSocket::connect(const AddrInfo& addrinfo)
 
 bool TcpSocket::beginConnect(const AddrInfo& addrinfo)
 {
-    assert( parent() );
+    assert( isActive() );
 
     this->close();
 

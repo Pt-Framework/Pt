@@ -42,11 +42,11 @@ PipeIODevice::PipeIODevice()
 {
     _readOv.Offset = 0;
     _readOv.OffsetHigh = 0;
-    _readOv.hEvent = INVALID_HANDLE_VALUE;
+    _readOv.hEvent = NULL;
 
     _writeOv.Offset = 0;
     _writeOv.OffsetHigh = 0;
-    _writeOv.hEvent = INVALID_HANDLE_VALUE;
+    _writeOv.hEvent = NULL;
 }
 
 
@@ -134,11 +134,11 @@ void PipeIODevice::onDetach(EventLoop& loop)
 
     _readOv.Offset = 0;
     _readOv.OffsetHigh = 0;
-    _readOv.hEvent = INVALID_HANDLE_VALUE;
+    _readOv.hEvent = NULL;
 
     _writeOv.Offset = 0;
     _writeOv.OffsetHigh = 0;
-    _writeOv.hEvent = INVALID_HANDLE_VALUE;
+    _writeOv.hEvent = NULL;
 }
 
 
@@ -165,7 +165,7 @@ bool PipeIODevice::onAvail()
 size_t PipeIODevice::onBeginRead(char* buffer, size_t n, bool& eof)
 {
     // beginRead was called before the IODevice was attached
-    if(_readOv.hEvent == INVALID_HANDLE_VALUE)
+    if(_readOv.hEvent == NULL)
         return 0;
 
     // if we can can read data immediately, we return the number of bytes
@@ -202,7 +202,7 @@ size_t PipeIODevice::onEndRead(bool& eof)
 
     // a IODevice::beginRead outside a EventLoop was followed by an endRead
     // This happens when the IODevice is async, but used synchronously
-    if(_readOv.hEvent == INVALID_HANDLE_VALUE)
+    if(_readOv.hEvent == NULL)
     {
         return this->onRead(_rbuf, _rbuflen, eof);
     }
@@ -232,7 +232,7 @@ size_t PipeIODevice::onEndRead(bool& eof)
 size_t PipeIODevice::onRead(char* buffer, size_t count, bool& eof)
 {
     DWORD readBytes = 0;
-    if( FALSE == ReadFile(handle(), (void*)buffer, count, &readBytes, NULL) )
+    if( FALSE == ReadFile(handle(), (void*)buffer, count, &readBytes, &_readOv) )
     {
         if( ERROR_HANDLE_EOF == GetLastError() || 
             ERROR_BROKEN_PIPE == GetLastError() )
@@ -261,7 +261,7 @@ size_t PipeIODevice::onRead(char* buffer, size_t count, bool& eof)
 
 size_t PipeIODevice::onBeginWrite(const char* buffer, size_t n)
 {
-    if(_writeOv.hEvent == INVALID_HANDLE_VALUE)
+    if(_writeOv.hEvent == NULL)
         return 0;
 
     DWORD writtenBytes = 0;
@@ -282,7 +282,7 @@ size_t PipeIODevice::onBeginWrite(const char* buffer, size_t n)
 
 size_t PipeIODevice::onEndWrite()
 {
-    if(_writeOv.hEvent == INVALID_HANDLE_VALUE)
+    if(_writeOv.hEvent == NULL)
     {
         return this->onWrite(_wbuf, _wbuflen);
     }
@@ -302,7 +302,7 @@ size_t PipeIODevice::onWrite(const char* buffer, size_t count)
 {
     DWORD writtenBytes = 0;
 
-    if( FALSE == WriteFile(handle(), (void*)buffer, count, &writtenBytes, NULL) )
+    if( FALSE == WriteFile(handle(), (void*)buffer, count, &writtenBytes, &_writeOv) )
     {
         if( ERROR_IO_PENDING != GetLastError() )
         {

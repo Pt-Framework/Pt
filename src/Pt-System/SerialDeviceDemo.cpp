@@ -113,6 +113,9 @@ int main( int argc, char* argv[] )
 
         readMousePnp(port);
 
+        Pt::System::MainLoop loop;
+        
+
         Pt::System::SerialDevice serialDevice(port, Pt::System::SerialDevice::Read);
         serialDevice.setBaudRate(Pt::System::SerialDevice::BaudRate4800);
         serialDevice.setCharSize(8);
@@ -120,10 +123,8 @@ int main( int argc, char* argv[] )
         serialDevice.setParity(Pt::System::SerialDevice::ParityNone);
         serialDevice.setFlowControl(Pt::System::SerialDevice::FlowControlHard);
         serialDevice.setTimeout(100);
+        serialDevice.setActive(loop);
         connect(serialDevice.inputReady, onInput);
-
-        Pt::System::MainLoop loop;
-        loop.add(serialDevice);
 
         serialDevice.beginRead(buffer, size);
         loop.run();

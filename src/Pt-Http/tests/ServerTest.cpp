@@ -64,7 +64,7 @@ class ServerTest : public Pt::Unit::TestSuite
             Pt::Http::Server server(*loop, "127.0.0.1", 8001);
 
             Pt::Http::Client client("127.0.0.1", 8001);
-            client.setParent(*loop);
+            client.setActive(*loop);
             connect(client.headerReceived, *this, &ServerTest::onReplyHeader);
             connect(client.bodyAvailable, *this, &ServerTest::onReply);
             connect(client.replyFinished, *this, &ServerTest::onReplyFinished);
