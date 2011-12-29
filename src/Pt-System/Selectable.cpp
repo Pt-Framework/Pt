@@ -85,16 +85,6 @@ EventLoop* Selectable::parent() const
 
 
 
-void Selectable::cancel()
-{
-    // this should block until the operation is cancelled
-    this->onCancel();
-}
-
-
-
-
-
 
 
 

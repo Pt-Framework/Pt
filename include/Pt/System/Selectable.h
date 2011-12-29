@@ -59,7 +59,8 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
         EventLoop* parent() const;
 
         //! @brief Blocks until operation has cancelled
-        void cancel();
+        void cancel()
+        { this->onCancel(); }
 
         //! @brief Run operation if it is ready
         bool run()
@@ -109,10 +110,6 @@ class Active : public Selectable
         {
             this->setActive(loop);
         }
-
-        //! @brief Closes all resources
-        virtual void onClose() = 0;
-
         //! @brief Blocks until operation has cancelled
         virtual void onCancel() = 0;
 
