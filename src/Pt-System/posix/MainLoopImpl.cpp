@@ -264,7 +264,7 @@ void EventLoopImpl::waitNext(std::size_t msecs, bool& isActive )
         {
             Selectable* selectable = *_current;
 
-            bool isAvail = selectable->onAvail();
+            bool isAvail = selectable->run();
             std::cerr << "available: " << isAvail << std::endl;
 
             if( isAvail )

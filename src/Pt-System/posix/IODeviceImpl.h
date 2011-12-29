@@ -116,7 +116,7 @@ namespace System {
 
             virtual void detach(EventLoop& s);
 
-            virtual bool avail();
+            virtual bool run();
 
         protected:
             IODevice& _device;

@@ -36,6 +36,7 @@ class FileDeviceImpl : public IODeviceImpl
 
     public:
         FileDeviceImpl(FileDevice& device);
+
         ~FileDeviceImpl();
 
         void open(const char* path, IODevice::OpenMode mode);

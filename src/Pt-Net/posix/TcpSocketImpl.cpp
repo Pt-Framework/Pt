@@ -331,12 +331,12 @@ void TcpSocketImpl::accept(const TcpServer& server, unsigned flags)
 }
 
 
-bool TcpSocketImpl::avail()
+bool TcpSocketImpl::run()
 {
-    std::cerr << "########### AVAIL" << std::endl;
+    std::cerr << "########### RUN" << std::endl;
 
     if( _isConnected )
-        return System::IODeviceImpl::avail();
+        return System::IODeviceImpl::run();
 
     System::EventLoopImpl& impl = _device.parent()->impl();
 

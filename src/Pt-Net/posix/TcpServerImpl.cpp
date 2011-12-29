@@ -209,7 +209,7 @@ void TcpServerImpl::detach(System::EventLoop& loop)
 }
 
 
-bool TcpServerImpl::avail()
+bool TcpServerImpl::run()
 {
     std::cerr << "TcpServerImpl::avail"<< std::endl;
 

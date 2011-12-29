@@ -47,7 +47,7 @@ namespace {
     {
         if( ! pt_signal_pipe )
         {
-            pt_signal_pipe = new Pt::System::Pipe(Pt::System::Pipe::Async);
+            pt_signal_pipe = new Pt::System::Pipe();
             pt_signal_pipe->out().setActive(loop);
             pt_signal_pipe->out().beginRead( _signalBuffer, sizeof(_signalBuffer) );
         }

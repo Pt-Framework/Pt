@@ -340,7 +340,7 @@ void IODeviceImpl::sync() const
 }
 
 
-bool IODeviceImpl::avail()
+bool IODeviceImpl::run()
 {
     std::cerr << "IODeviceImpl::avail"<< std::endl;
 

@@ -81,7 +81,7 @@ class TcpServerImpl
 
         void detach(System::EventLoop& s);
     
-        bool avail();
+        bool run();
 };
 
 } // namespace Net
