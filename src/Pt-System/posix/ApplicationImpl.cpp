@@ -43,11 +43,12 @@ namespace {
     Pt::System::Pipe* pt_signal_pipe = 0;
     static char _signalBuffer[128];
 
-    void initSignalPipe()
+    void initSignalPipe(Pt::System::EventLoop& loop)
     {
         if( ! pt_signal_pipe )
         {
             pt_signal_pipe = new Pt::System::Pipe(Pt::System::Pipe::Async);
+            pt_signal_pipe->out().setActive(loop);
             pt_signal_pipe->out().beginRead( _signalBuffer, sizeof(_signalBuffer) );
         }
     }
@@ -93,8 +94,7 @@ namespace Pt {
 namespace System {
 
 ApplicationImpl::ApplicationImpl()
-{
-    ::initSignalPipe();
+{   
 }
 
 
@@ -106,7 +106,7 @@ ApplicationImpl::~ApplicationImpl()
 
 void ApplicationImpl::init(EventLoop& loop)
 {
-    pt_signal_pipe->out().setActive(loop);
+    ::initSignalPipe(loop);
     connect(pt_signal_pipe->out().inputReady, processSignal);
 }
 
@@ -126,11 +126,11 @@ bool ApplicationImpl::catchSystemSignal(int sig)
         {
             throw SystemError( PT_ERROR_MSG("sigaction failed") );
         }
-		
-		return true;
+        
+        return true;
     }
 
-	return false;
+    return false;
 }
 
 
@@ -138,15 +138,15 @@ bool ApplicationImpl::raiseSystemSignal(int sig)
 {
     if (sig > 0 && sig < NSIG)
     {
-		if( 0 != ::raise(sig) )
+        if( 0 != ::raise(sig) )
         {
             throw SystemError( PT_ERROR_MSG("sigaction failed") );
         }
 
-		return true;
-	}
-	
-	return false;
+        return true;
+    }
+    
+    return false;
 }
 
 } // namespace System
