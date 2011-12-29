@@ -54,7 +54,7 @@ PipeIODevice::~PipeIODevice()
 {
     try
     {
-        Selectable::close();
+        IODevice::close();
     }
     catch(...)
     {
