@@ -120,7 +120,7 @@ void PipeIODevice::onDetach(EventLoop& loop)
 }
 
 
-bool PipeIODevice::onAvail()
+bool PipeIODevice::onRun()
 {
     bool avail = false;
 

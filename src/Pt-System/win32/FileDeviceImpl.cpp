@@ -148,7 +148,7 @@ void FileDeviceImpl::detach(EventLoop& loop)
 }
 
 
-bool FileDeviceImpl::avail()
+bool FileDeviceImpl::run()
 {
     bool avail = false;
 

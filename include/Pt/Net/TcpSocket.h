@@ -99,7 +99,7 @@ class PT_NET_API TcpSocket : public System::IODevice
         // inherit doc
         virtual void onDetach(System::EventLoop& el);
 
-        virtual bool onAvail();
+        virtual bool onRun();
 
         // inherit doc
         virtual size_t onBeginRead(char* buffer, size_t n, bool& eof);

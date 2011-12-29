@@ -74,7 +74,7 @@ class TcpServerImpl;
 
       virtual void onCancel();
 
-      virtual bool onAvail();
+      virtual bool onRun();
 
       //! @brief Signals state transition to avail state
       virtual void setAvail();

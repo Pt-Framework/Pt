@@ -136,7 +136,7 @@ class UdpSocketImpl
 
         void detach(System::EventLoop& loop);
 
-        bool avail();
+        bool run();
 
         //bool setWaitHandle(HANDLE h, bool& avail);
 

@@ -149,9 +149,9 @@ void UdpSocket::onDetach(System::EventLoop& loop)
 }
 
 
-bool UdpSocket::onAvail()
+bool UdpSocket::onRun()
 {
-    return _impl->avail();
+    return _impl->run();
 }
 
 

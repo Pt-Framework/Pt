@@ -321,7 +321,7 @@ void TcpSocketImpl::endConnect()
 }
 
 
-bool TcpSocketImpl::avail()
+bool TcpSocketImpl::run()
 {
     log_debug(_fd << " avail");
 
@@ -437,7 +437,7 @@ bool TcpSocketImpl::wait(std::size_t umsecs)
     if( _dataSends != 0 || (www =
         WSAWaitForMultipleEvents(1, &_currentEventHandle, FALSE, msecs, FALSE)) != WSA_WAIT_TIMEOUT)
     {      
-        bool av = this->avail();
+        bool av = this->run();
         return true;
     }
 

@@ -195,9 +195,9 @@ void TcpSocket::onDetach(System::EventLoop& sb)
 }
 
 
-bool TcpSocket::onAvail()
+bool TcpSocket::onRun()
 {
-    return _impl->avail();
+    return _impl->run();
 }
 
 

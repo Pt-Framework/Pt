@@ -248,7 +248,7 @@ void TcpServerImpl::detach(System::EventLoop& loop)
 }
 
 
-bool TcpServerImpl::avail()
+bool TcpServerImpl::run()
 {
     log_debug("TcpServerImpl::avail");
     

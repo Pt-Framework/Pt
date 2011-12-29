@@ -154,7 +154,7 @@ void SerialDeviceImpl::detach(EventLoop& loop)
 }
 
 
-bool SerialDeviceImpl::avail()
+bool SerialDeviceImpl::run()
 {
     bool avail = false;
 

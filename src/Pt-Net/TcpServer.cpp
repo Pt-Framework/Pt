@@ -107,9 +107,9 @@ void TcpServer::onCancel()
 }
 
 
-bool TcpServer::onAvail()
+bool TcpServer::onRun()
 {
-    return _impl->avail();
+    return _impl->run();
 }
 
 

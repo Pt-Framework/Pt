@@ -90,7 +90,7 @@ class PT_SYSTEM_API FileDevice : public IODevice
 
         virtual void onDetach(EventLoop&);
 
-        virtual bool onAvail();
+        virtual bool onRun();
 
     private:
         std::string _path;

@@ -220,9 +220,9 @@ void SerialDevice::onDetach(EventLoop& s)
 }
 
 
-bool SerialDevice::onAvail()
+bool SerialDevice::onRun()
 {
-    return _impl->avail();
+    return _impl->run();
 }
 
 }//namespace System

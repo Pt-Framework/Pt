@@ -90,7 +90,7 @@ class TcpServerImpl
 
         //void disable(System::EventLoop& loop);
 
-        bool avail();
+        bool run();
 
         // implementation using WSAEventSelect
         //virtual bool setWaitHandle(HANDLE h, bool& avail);

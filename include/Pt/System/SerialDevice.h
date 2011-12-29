@@ -208,7 +208,7 @@ class PT_SYSTEM_API SerialDevice : public IODevice
 
         void onDetach(EventLoop&);
 
-        bool onAvail();
+        bool onRun();
 
         void onCancel();
 };

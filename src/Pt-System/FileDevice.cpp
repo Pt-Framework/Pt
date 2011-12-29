@@ -171,9 +171,9 @@ void FileDevice::onDetach(EventLoop& s)
 }
 
 
-bool FileDevice::onAvail()
+bool FileDevice::onRun()
 {
-    return _impl->avail();
+    return _impl->run();
 }
 
 } // namespace System

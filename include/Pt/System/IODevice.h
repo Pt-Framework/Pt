@@ -44,13 +44,11 @@ namespace System {
 
 enum IOS_OpenMode
 {
-    IOS_Sync        = 0,
-    IOS_Async       = 1L << 0,
-    IOS_Read        = 1L << 1,
-    IOS_Write       = 1L << 2,
-    IOS_AtEnd       = 1L << 3,
-    IOS_Append      = 1L << 4,
-    IOS_Trunc       = 1L << 5,
+    IOS_Read        = 1L << 0,
+    IOS_Write       = 1L << 1,
+    IOS_AtEnd       = 1L << 2,
+    IOS_Append      = 1L << 3,
+    IOS_Trunc       = 1L << 4,
     IOS_OpenModeEnd = 1L << 16
 };
 
@@ -101,7 +99,6 @@ class PT_SYSTEM_API IODevice : public Selectable
 
         typedef IOS_OpenMode OpenMode;
 
-        static const OpenMode Sync   = IOS_Sync;
         static const OpenMode Read   = IOS_Read;
         static const OpenMode Write  = IOS_Write;
         static const OpenMode AtEnd  = IOS_AtEnd;

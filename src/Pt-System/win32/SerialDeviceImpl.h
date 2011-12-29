@@ -45,7 +45,7 @@ class SerialDeviceImpl : public IODeviceImpl
 
         void detach(EventLoop& s);
 
-        bool avail();
+        bool run();
 
         //bool wait(std::size_t msecs);
         

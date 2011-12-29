@@ -38,8 +38,6 @@ namespace System {
 // TODO: rename Waitable
 class PT_SYSTEM_API Selectable : protected NonCopyable
 {
-    friend class EventLoopImpl;
-
     public:
         static const std::size_t WaitInfinite = EventLoop::WaitInfinite;
 
@@ -66,6 +64,9 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
         //! @brief Closes all resources and cancels any outstanding operations
         void close();
 
+        bool run()
+        { return this->onRun(); }
+
     protected:
         //! @brief Default Constructor
         Selectable();
@@ -77,14 +78,14 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
         //! @brief Detached from loop
         virtual void onDetach(EventLoop&) = 0;
 
-        //! @brief Closes the Selectable
+        //! @brief Closes all resources
         virtual void onClose() = 0;
 
         //! @brief Blocks until operation has cancelled
         virtual void onCancel() = 0;
 
         //! @brief Check if ready and run
-        virtual bool onAvail() = 0;
+        virtual bool onRun() = 0;
 
     private:
         EventLoop* _parent;
@@ -95,6 +96,18 @@ class Active : public Selectable
     public:
         virtual ~Active()
         {}
+
+        //! @brief Signals state transition to avail state
+        void setAvail()
+        {
+            // loop.signalAvail(*this);
+        }
+
+        //! @brief Signals state transition to idle state
+        void setIdle()
+        {
+            // loop.signalIdle(*this);
+        }
 
     protected:
         Active()
@@ -108,25 +121,19 @@ class Active : public Selectable
         virtual void onDetach(EventLoop&)
         {}
 
-        //! @brief Closes the Selectable
+        //! @brief Closes all resources
         virtual void onClose()
         {}
 
-        //! @brief Signals state transition to avail state
-        virtual void setAvail()
-        {}
-
-        //! @brief Signals state transition to idle state
-        virtual void setIdle()
-        {}
-
-         //! @brief Check if ready and run
-        virtual bool onAvail()
-        { return false; }
-
         //! @brief Blocks until operation has cancelled
         virtual void onCancel()
-        {}
+        {
+            // loop.signalIdle(*this);
+        }
+
+         //! @brief Check if ready and run
+        virtual bool onRun()
+        { return false; }
 };
 
 } // namespace System

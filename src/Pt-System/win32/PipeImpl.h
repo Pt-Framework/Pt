@@ -53,7 +53,7 @@ class PipeIODevice : public IODevice, private IODeviceImpl
 
         void onDetach(EventLoop& loop);
 
-        bool onAvail();
+        bool onRun();
 
         size_t onBeginRead(char* buffer, size_t n, bool& eof);
 

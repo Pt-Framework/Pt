@@ -104,25 +104,6 @@ size_t IODevice::read(char* buffer, size_t n)
     if( _rbuf || _wbuf)
         throw IOPending( PT_ERROR_MSG("i/ooperation pending") );
 
-    /*if (async())
-    { 
-        if( _rbuf )
-            throw IOPending( PT_ERROR_MSG("read operation pending") ); 
-     
-        try // TODO pass buffer pointer/length to onEndRead
-        {
-            this->beginRead(buffer, n);
-            size_t n = this->onEndRead(_eof);
-            _rbuf = 0; _rbuflen = 0; _ravail = 0;
-            return n;
-        }
-        catch(...)
-        {
-            _rbuf = 0; _rbuflen = 0; _ravail = 0;
-            throw;
-        }
-    }*/
-
     return this->onRead(buffer, n, _eof);
 }
 
@@ -181,27 +162,6 @@ size_t IODevice::write(const char* buffer, size_t n)
 {
     if( _rbuf || _wbuf)
         throw IOPending( PT_ERROR_MSG("i/ooperation pending") );
-
-    /*if( async() )
-    {
-        if( _wbuf )
-        {
-            throw IOPending( PT_ERROR_MSG("write operation pending") );
-        }
-
-        try
-        {
-            this->beginWrite(buffer, n);
-            size_t c = endWrite();
-            _wbuf = 0; _wbuflen = 0; _wavail = 0;
-            return c;
-        }
-        catch(...)
-        {
-            _wbuf = 0; _wbuflen = 0; _wavail = 0;
-            throw;
-        }
-    }*/
 
     return this->onWrite(buffer, n);
 }

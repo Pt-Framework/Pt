@@ -161,7 +161,7 @@ class TcpSocketImpl
 
         void detach(System::EventLoop& sb);
 
-        bool avail();
+        bool run();
 
         void cancel();
 };
