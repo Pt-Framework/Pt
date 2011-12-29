@@ -67,17 +67,6 @@ class PT_SYSTEM_API EventLoop : public Connectable
         // TODO: rename EventLoopImpl
         virtual EventLoopImpl& impl() = 0;
 
-        /** @brief Adds a Selectable
-
-            Adds a Selectable to the selector. Selectable are removed
-            automatically when they get destroyed.
-        */
-        //void add(Selectable& s);
-
-        /** @brief Removes a Selectable.
-        */
-        //void remove(Selectable& s);
-
         /** @brief Adds a Timer
 
             Adds a Timer to the selector. Timers are removed
@@ -130,6 +119,12 @@ class PT_SYSTEM_API EventLoop : public Connectable
         void setIdle(Selectable& s)
         { this->onIdle(s); }
 
+        void signalAvail(Selectable& s)
+        { this->onSignalAvail(s); }
+
+        void signalIdle(Selectable& s)
+        { this->onSignalIdle(s); }
+
     protected:
         /** @brief Constructs the EventLoop
         */
@@ -171,9 +166,13 @@ class PT_SYSTEM_API EventLoop : public Connectable
         */
         virtual void onDetach(Selectable&) = 0;
 
+        virtual void onAvail(Selectable&) = 0;
+
         virtual void onIdle(Selectable&) = 0;
 
-        virtual void onAvail(Selectable&) = 0;
+        virtual void onSignalAvail(Selectable&) {}
+
+        virtual void onSignalIdle(Selectable&) {}
 
     private:
         Timer _idleTimer;

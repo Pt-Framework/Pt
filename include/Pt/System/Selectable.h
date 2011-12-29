@@ -35,6 +35,7 @@ namespace Pt {
 
 namespace System {
 
+// TODO: rename Waitable
 class PT_SYSTEM_API Selectable : protected NonCopyable
 {
     friend class EventLoopImpl;

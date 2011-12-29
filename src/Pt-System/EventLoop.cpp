@@ -80,18 +80,6 @@ Signal<>& EventLoop::exited()
     return _exited; 
 }
 
-/*void EventLoop::add(Selectable& s)
-{
-    s.setActive(*this);
-}*/
-
-
-/*void EventLoop::remove(Selectable& s)
-{
-    if(s.parent() == this)
-        s.detach();
-}*/
-
 
 void EventLoop::add(Timer& timer)
 {
