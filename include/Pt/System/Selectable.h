@@ -35,7 +35,7 @@ namespace Pt {
 
 namespace System {
 
-// TODO: rename Waitable
+//! @brief Dispatches operations through an event loop
 class PT_SYSTEM_API Selectable : protected NonCopyable
 {
     public:
