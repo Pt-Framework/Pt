@@ -160,13 +160,13 @@ bool SerialDeviceImpl::run()
 
     if( _device._wbuf && HasOverlappedIoCompleted(&_writeOv) )
     {
-        _device.outputReady.send(_device);
+        _device.outputReady().send(_device);
         avail = true;
     }
 
     if( _device._rbuf && HasOverlappedIoCompleted(&_readOv) )
     {
-        _device.inputReady.send(_device);
+        _device.inputReady().send(_device);
         avail = true;
     }
 
@@ -253,13 +253,13 @@ bool SerialDeviceImpl::checkEvent()
 
     if( _device._wbuf && HasOverlappedIoCompleted(&_writeOv) )
     {
-        _device.outputReady.send( _device );
+        _device.outputReady().send( _device );
         avail = true;
     }
     
     if( _device._rbuf && HasOverlappedIoCompleted(&_readOv) )
     {
-        _device.inputReady.send( _device );
+        _device.inputReady().send( _device );
         avail = true;
     }
 

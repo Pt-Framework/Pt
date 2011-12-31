@@ -126,13 +126,13 @@ bool PipeIODevice::onRun()
 
     if( this->writing() && HasOverlappedIoCompleted(&_writeOv) )
     {
-        outputReady.send(*this);
+        outputReady().send(*this);
         avail = true;
     }
 
     if( this->reading() && HasOverlappedIoCompleted(&_readOv) )
     {
-        inputReady.send(*this);
+        inputReady().send(*this);
         avail = true;
     }
 

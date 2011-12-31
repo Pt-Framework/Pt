@@ -329,7 +329,7 @@ bool TcpSocketImpl::run()
 
     if(_dataSends != 0 )
     {
-       _socket.outputReady.send(_socket);
+       _socket.outputReady().send(_socket);
        return true;
     }
 
@@ -376,7 +376,7 @@ bool TcpSocketImpl::run()
     {
        //ResetEvent(_currentEventHandle);
        ev = true;
-       _socket.outputReady.send(_socket);
+       _socket.outputReady().send(_socket);
 
        if( ! _sentry )
            return ev;
@@ -386,7 +386,7 @@ bool TcpSocketImpl::run()
     {
         //ResetEvent(_currentEventHandle);
         ev = true;
-        _socket.inputReady.send(_socket);
+        _socket.inputReady().send(_socket);
 
         if( ! _sentry )
            return ev;

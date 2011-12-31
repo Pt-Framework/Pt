@@ -395,7 +395,7 @@ bool UdpSocketImpl::run()
 
     if(_dataSends != 0 )
     {
-       _socket.outputReady.send(_socket);
+       _socket.outputReady().send(_socket);
        return true;
     }
 
@@ -409,7 +409,7 @@ bool UdpSocketImpl::run()
     if((events.lNetworkEvents & FD_WRITE) == FD_WRITE)
     {
        ev = true;
-       _socket.outputReady.send(_socket);
+       _socket.outputReady().send(_socket);
 
        if( ! _sentry )
            return ev;
@@ -418,7 +418,7 @@ bool UdpSocketImpl::run()
     if((events.lNetworkEvents & FD_READ) == FD_READ)
     {
         ev = true;
-        _socket.inputReady.send(_socket);
+        _socket.inputReady().send(_socket);
 
         if( ! _sentry )
            return ev;
