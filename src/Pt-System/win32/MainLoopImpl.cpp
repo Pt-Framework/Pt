@@ -73,14 +73,6 @@ EventLoopImpl::EventLoopImpl()
 
 EventLoopImpl::~EventLoopImpl()
 { 
-    std::set<Selectable*>::iterator it;
-
-    while( _attached.size() )
-    {
-        it = _attached.begin();
-        (*it)->detach();
-    }
-
     CloseHandle( _wakeEvent );
     CloseHandle( _ioEvent );
     CloseHandle( _signalledEvent );
@@ -139,19 +131,6 @@ void EventLoopImpl::endWait(Selectable& s)
             _avail.erase(iter);
     }
 }
-
-
-void EventLoopImpl::attach(Selectable& s)
-{
-    _attached.insert(&s);
-}
-
-
-void EventLoopImpl::detach(Selectable& s)
-{
-    _attached.erase(&s);
-}
-
 
 
 void EventLoopImpl::idle(Selectable& s)
