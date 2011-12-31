@@ -247,10 +247,6 @@ class EventLoopImpl : public EventDispatcher
             }
         }
 
-        void attach(Selectable& s);
-
-        void detach(Selectable& s);
-
         void idle(Selectable& s);
 
         void avail(Selectable& s);
@@ -267,7 +263,6 @@ class EventLoopImpl : public EventDispatcher
         IOHandle* _first;
         IOHandle* _last;
         std::set<Selectable*>::iterator _current;
-        std::set<Selectable*> _attached;
         std::set<Selectable*> _devices; // active
         std::set<Selectable*> _avail;
         fd_set _rfds;

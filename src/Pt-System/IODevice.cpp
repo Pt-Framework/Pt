@@ -110,7 +110,7 @@ size_t IODevice::endRead()
 size_t IODevice::read(char* buffer, size_t n)
 {
     if( _rbuf || _wbuf)
-        throw IOPending( PT_ERROR_MSG("i/o operation pending") );
+        throw IOPending( PT_ERROR_MSG("I/O operation pending") );
 
     return this->onRead(buffer, n, _eof);
 }
@@ -122,7 +122,7 @@ size_t IODevice::beginWrite(const char* buffer, size_t n)
         throw std::logic_error( PT_ERROR_MSG("I/O device not active") );
 
     if (_wbuf || _rbuf)
-        throw IOPending( PT_ERROR_MSG("write operation pending") );
+        throw IOPending( PT_ERROR_MSG("I/O operation pending") );
 
     size_t r = this->onBeginWrite(buffer, n);
 
@@ -169,7 +169,7 @@ size_t IODevice::endWrite()
 size_t IODevice::write(const char* buffer, size_t n)
 {
     if( _rbuf || _wbuf)
-        throw IOPending( PT_ERROR_MSG("i/ooperation pending") );
+        throw IOPending( PT_ERROR_MSG("I/O operation pending") );
 
     return this->onWrite(buffer, n);
 }

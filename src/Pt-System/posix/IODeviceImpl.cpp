@@ -42,9 +42,6 @@ IODeviceImpl::IODeviceImpl(IODevice& device)
 , _iohandle(0)
 , _fd(-1)
 , _timeout(System::Selectable::WaitInfinite)
-//, _rfds(0)
-//, _wfds(0)
-//, _efds(0)
 , _sentry(0)
 , _errorPending(false)
 { }
@@ -52,14 +49,8 @@ IODeviceImpl::IODeviceImpl(IODevice& device)
 
 IODeviceImpl::~IODeviceImpl()
 {
-    //assert(_rfds == 0);
-    //assert(_wfds == 0);
-    //assert(_efds == 0);
-
     if(_sentry)
         _sentry->detach();
-
-    //this->exitSelect();
 }
 
 
@@ -128,24 +119,6 @@ void IODeviceImpl::attach(EventLoop& loop)
         return;
 
     _iohandle = loop.impl().enable(_device, this->fd());
-
-    if( _device.ravail() )
-    {
-        loop.impl().avail(_device);
-    }
-    else if( _device.rbuf() )
-    {
-        loop.impl().beginRead( _iohandle );
-    }
-
-    if( _device.wavail() )
-    {
-        loop.impl().avail(_device);
-    }
-    else if( _device.wbuf() )
-    {
-        loop.impl().beginWrite( _iohandle );
-    }
 }
 
 
@@ -167,11 +140,6 @@ size_t IODeviceImpl::beginRead(char* buffer, size_t n, bool&)
         loop->impl().beginRead( _iohandle );
     }
 
-//  if(_rfds)
-//  {
-//      FD_SET( this->fd(), _rfds );
-//  }
-
     return 0;
 }
 
@@ -183,11 +151,6 @@ size_t IODeviceImpl::endRead(bool& eof)
     {
         loop->impl().endRead( _iohandle );
     }
-
-//  if(_rfds)
-//  {
-//      FD_CLR( this->fd(), _rfds );
-//  }
 
     if (_errorPending)
     {
@@ -247,11 +210,6 @@ size_t IODeviceImpl::beginWrite(const char* buffer, size_t n)
     if (ret == 0 || errno == ECONNRESET || errno == EPIPE)
         throw System::IOError("lost connection to peer");
 
-//  if(_wfds)
-//  {
-//      FD_SET( this->fd(), _wfds );
-//  }
-
     EventLoop* loop = _device.parent();
     if( loop && _iohandle)
     {
@@ -270,11 +228,6 @@ size_t IODeviceImpl::endWrite()
     {
         loop->impl().endWrite( _iohandle );
     }
-
-//  if(_wfds)
-//  {
-//      FD_CLR( this->fd(), _wfds );
-//  }
 
     if (_errorPending)
     {
@@ -326,6 +279,30 @@ size_t IODeviceImpl::write( const char* buffer, size_t count )
 }
 
 
+bool IODeviceImpl::wait(std::size_t msecs, fd_set* rfds, fd_set* wfds, fd_set* efds)
+{
+    struct timeval* timeout = 0;
+    struct timeval tv;
+    if(msecs != EventLoop::WaitInfinite)
+    {
+        tv.tv_sec = msecs / 1000;
+        tv.tv_usec = (msecs % 1000) * 1000;
+        timeout = &tv;
+    }
+
+    int ret = -1;
+    do
+    {
+        ret = ::select(FD_SETSIZE, rfds, wfds, efds, timeout);
+    } while (ret == -1 && errno == EINTR);
+
+    if (ret == -1)
+        throw IOError( PT_ERROR_MSG("select failed") );
+
+    return ret > 0;
+}
+
+
 void IODeviceImpl::sync() const
 {
     int ret = fsync(_fd);
@@ -335,6 +312,87 @@ void IODeviceImpl::sync() const
 
 
 bool IODeviceImpl::run()
+{
+    std::cerr << "IODeviceImpl::run"<< std::endl;
+
+    if( ! _iohandle)
+        return false;
+
+    int avail = 0;
+    EventLoopImpl& impl = _device.parent()->impl();
+    DestructionSentry sentry(_sentry);
+
+    bool reading = _device.reading();
+    if(reading)
+    {
+        if ( impl.isError(_iohandle) )
+        {
+            _errorPending = true;
+    
+            try
+            {
+                ++avail;
+                _device.inputReady(_device);
+    
+                if( ! _sentry )
+                    return avail;
+            }
+            catch (...)
+            {
+                _errorPending = false;
+                throw;
+            }
+            _errorPending = false;
+    
+            return avail;
+        }
+
+        if( _device.ravail() > 0 || impl.isReadable(_iohandle) )
+        {
+            std::cerr << "IODeviceImpl::avail " << "READABLE" << std::endl;
+            _device.inputReady(_device);
+            ++avail;
+        }
+    }
+
+    bool writing = _device.writing();
+    if(writing)
+    {
+        if ( impl.isError(_iohandle) )
+        {
+            _errorPending = true;
+    
+            try
+            {
+                ++avail;
+                _device.outputReady(_device);
+    
+                if( ! _sentry )
+                    return avail;
+            }
+            catch (...)
+            {
+                _errorPending = false;
+                throw;
+            }
+            _errorPending = false;
+    
+            return avail;
+        }
+
+        if( _device.wavail() > 0 || impl.isWritable(_iohandle) )
+        {
+            std::cerr << "IODeviceImpl::avail " << "WRITABLE" << std::endl;
+            _device.outputReady(_device);
+            ++avail;
+        }
+    }
+
+    return avail > 0;
+}
+
+
+/*bool IODeviceImpl::run()
 {
     std::cerr << "IODeviceImpl::avail"<< std::endl;
 
@@ -407,31 +465,7 @@ bool IODeviceImpl::run()
     }
 
     return avail > 0;
-}
-
-
-bool IODeviceImpl::wait(std::size_t msecs, fd_set* rfds, fd_set* wfds, fd_set* efds)
-{
-    struct timeval* timeout = 0;
-    struct timeval tv;
-    if(msecs != EventLoop::WaitInfinite)
-    {
-        tv.tv_sec = msecs / 1000;
-        tv.tv_usec = (msecs % 1000) * 1000;
-        timeout = &tv;
-    }
-
-    int ret = -1;
-    do
-    {
-        ret = ::select(FD_SETSIZE, rfds, wfds, efds, timeout);
-    } while (ret == -1 && errno == EINTR);
-
-    if (ret == -1)
-        throw IOError( PT_ERROR_MSG("select failed") );
-
-    return ret > 0;
-}
+}*/
 
 
 /*bool IODeviceImpl::wait(std::size_t msecs)

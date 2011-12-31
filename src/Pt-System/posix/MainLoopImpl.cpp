@@ -81,31 +81,12 @@ EventLoopImpl::EventLoopImpl()
 EventLoopImpl::~EventLoopImpl()
 { 
     std::cerr << "EventLoopImpl::~EventLoopImpl()" << std::endl;
-    std::set<Selectable*>::iterator it;
-
-    while( _attached.size() )
-    {
-        it = _attached.begin();
-        (*it)->detach();
-    }
 
     if( _wakePipe[0] != -1 && _wakePipe[1] != -1 )
     {
         ::close(_wakePipe[0]);
         ::close(_wakePipe[1]);
     }
-}
-
-
-void EventLoopImpl::attach(Selectable& s)
-{
-    _attached.insert(&s);
-}
-
-
-void EventLoopImpl::detach(Selectable& s)
-{
-    _attached.erase(&s);
 }
 
 
@@ -200,10 +181,8 @@ void EventLoopImpl::waitNext(std::size_t msecs, bool& isActive )
         }
 
         _clock.start();
-        std::cerr << "select called" << std::endl;
         avail = ::select(FD_SETSIZE, &_rfdsR, &_wfdsR, &_efdsR, timeout);
         Pt::int64_t elapsed = _clock.stop().totalMSecs();
-        std::cerr << "select returned after " << elapsed << std::endl;
 
         if( avail < 0 && errno != EINTR )
         {
