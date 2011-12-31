@@ -211,7 +211,7 @@ class PT_SYSTEM_API IODevice : public Selectable
             This signal is send when the IODevice is monitored
             in a Selector or EventLoop and data becomes available.
         */
-        Signal<IODevice&> inputReady;
+        Signal<IODevice&>& inputReady();
 
         /** @brief Notifies when data can be written
 
@@ -219,7 +219,7 @@ class PT_SYSTEM_API IODevice : public Selectable
             in a Selector or EventLoop and the device is ready
             to write data.
         */
-        Signal<IODevice&> outputReady;
+        Signal<IODevice&>& outputReady();
 
         bool reading() const
         { return _rbuf != 0; }
@@ -307,6 +307,8 @@ class PT_SYSTEM_API IODevice : public Selectable
         const char* _wbuf;
         size_t _wbuflen;
         size_t _wavail;
+        Signal<IODevice&> _inputReady;
+        Signal<IODevice&> _outputReady;
         void* _reserved;
 };
 

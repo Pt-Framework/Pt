@@ -68,13 +68,13 @@ void StreamBufferImpl::attach(StreamBuffer& sb, IODevice& ioDevice)
         if( ioDevice.reading() || ioDevice.writing() )
             throw IOPending( PT_ERROR_MSG("IODevice in use") );
 
-        disconnect(ioDevice.inputReady,  sb, &StreamBuffer::onRead );
-        disconnect(ioDevice.outputReady, sb, &StreamBuffer::onWrite);
+        ioDevice.inputReady() -= slot(sb, &StreamBuffer::onRead);
+        ioDevice.outputReady() -= slot(sb, &StreamBuffer::onWrite);
     }
 
     _ioDevice = &ioDevice;
-    connect(ioDevice.inputReady,  sb, &StreamBuffer::onRead );
-    connect(ioDevice.outputReady, sb, &StreamBuffer::onWrite);
+    ioDevice.inputReady() += slot(sb, &StreamBuffer::onRead);
+    ioDevice.outputReady() += slot(sb, &StreamBuffer::onWrite);
 }
 
 void StreamBufferImpl::beginRead(StreamBuffer& sb)

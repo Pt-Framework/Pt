@@ -130,12 +130,12 @@ class TcpSocketTest : public Pt::Unit::TestSuite
                 connect(server.connectionPending, *this, &TcpSocketTest::onAccept);
                 server.setActive(*_loop);
 
-                connect(_acceptor->inputReady, *this, &TcpSocketTest::onInput);
+                _acceptor->inputReady() += Pt::slot(*this, &TcpSocketTest::onInput);
                 _acceptor->setActive(*_loop);
 
                 Pt::Net::TcpSocket client;
                 connect(client.connected, *this, &TcpSocketTest::onConnect);
-                connect(client.outputReady, *this, &TcpSocketTest::onOutput);
+                client.outputReady() += Pt::slot(*this, &TcpSocketTest::onOutput);
                 client.setActive(*_loop);
                 client.beginConnect("127.0.0.1", 9000);
                 //_loop->add(client);

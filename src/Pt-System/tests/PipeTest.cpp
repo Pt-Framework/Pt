@@ -78,7 +78,7 @@ class PipeTest : public Pt::Unit::TestSuite
 
             pipe.out().setActive(*_loop);
             pipe.out().beginRead( _buffer, sizeof(_buffer) );
-            pipe.out().inputReady += Pt::slot(*this, &PipeTest::onRead);
+            pipe.out().inputReady() += Pt::slot(*this, &PipeTest::onRead);
 
             _loop->run();
 
@@ -108,7 +108,7 @@ class PipeTest : public Pt::Unit::TestSuite
             std::memcpy(_buffer, _data.c_str(),  sizeof(_buffer));
             pipe.in().setActive(*_loop);
             pipe.in().beginWrite(_buffer, sizeof(_buffer));
-            pipe.in().outputReady += Pt::slot( *this, &PipeTest::onWrite);
+            pipe.in().outputReady() += Pt::slot( *this, &PipeTest::onWrite);
 
             _loop->run();
             std::cerr << "run ended" << std::endl;
@@ -148,7 +148,7 @@ class PipeTest : public Pt::Unit::TestSuite
 
             pipe.out().setActive(*_loop);
             pipe.out().beginRead(_buffer, sizeof(_buffer));
-            pipe.out().inputReady += Pt::slot(*this, &PipeTest::onReadRemove);
+            pipe.out().inputReady() += Pt::slot(*this, &PipeTest::onReadRemove);
 
             _loop->run();
         }

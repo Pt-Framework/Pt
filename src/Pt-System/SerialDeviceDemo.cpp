@@ -124,7 +124,7 @@ int main( int argc, char* argv[] )
         serialDevice.setFlowControl(Pt::System::SerialDevice::FlowControlHard);
         serialDevice.setTimeout(100);
         serialDevice.setActive(loop);
-        connect(serialDevice.inputReady, onInput);
+        serialDevice.inputReady() += Pt::slot(onInput);
 
         serialDevice.beginRead(buffer, size);
         loop.run();

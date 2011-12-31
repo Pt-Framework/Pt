@@ -93,10 +93,10 @@ class UdpSocketTest : public Pt::Unit::TestSuite
             _receiver->bind("127.0.0.1", 8000, 0);
             PT_UNIT_ASSERT( _receiver->isBound() );
 
-            _receiver->inputReady += Pt::slot(*this, &UdpSocketTest::onUnicastInput);
+            _receiver->inputReady() += Pt::slot(*this, &UdpSocketTest::onUnicastInput);
             _receiver->beginRead(inbuf, 200);
 
-            _sender->outputReady += Pt::slot(*this, &UdpSocketTest::onUnicastOutput);
+            _sender->outputReady() += Pt::slot(*this, &UdpSocketTest::onUnicastOutput);
             _sender->beginWrite("Hello UNICAST!", 14);
 
             _loop->run();
@@ -141,13 +141,13 @@ class UdpSocketTest : public Pt::Unit::TestSuite
             _receiver2->setActive(*_loop);
             _sender->setActive(*_loop);
 
-            _sender->outputReady += Pt::slot(*this, &UdpSocketTest::onBroadcastOutput);
+            _sender->outputReady() += Pt::slot(*this, &UdpSocketTest::onBroadcastOutput);
             _sender->beginWrite("Hello BROADCAST!", 16);
 
-            _receiver->inputReady += Pt::slot(*this, &UdpSocketTest::onBroadcastInput);
+            _receiver->inputReady() += Pt::slot(*this, &UdpSocketTest::onBroadcastInput);
             _receiver->beginRead(inbuf, 200);
 
-            _receiver2->inputReady += Pt::slot(*this, &UdpSocketTest::onBroadcastInput);
+            _receiver2->inputReady() += Pt::slot(*this, &UdpSocketTest::onBroadcastInput);
             _receiver2->beginRead(inbuf2, 200);
 
             _loop->run();
@@ -190,13 +190,13 @@ class UdpSocketTest : public Pt::Unit::TestSuite
             _receiver2->setActive(*_loop);
             _sender->setActive(*_loop);
 
-            _sender->outputReady += Pt::slot(*this, &UdpSocketTest::onMulticastOutput);
+            _sender->outputReady() += Pt::slot(*this, &UdpSocketTest::onMulticastOutput);
             _sender->beginWrite("Hello MULTICAST!", 16);
 
-            _receiver->inputReady += Pt::slot(*this, &UdpSocketTest::onMulticastInput);
+            _receiver->inputReady() += Pt::slot(*this, &UdpSocketTest::onMulticastInput);
             _receiver->beginRead(inbuf, 200);
 
-            _receiver2->inputReady += Pt::slot(*this, &UdpSocketTest::onMulticastInput);
+            _receiver2->inputReady() += Pt::slot(*this, &UdpSocketTest::onMulticastInput);
             _receiver2->beginRead(inbuf2, 200);
 
             _loop->run();

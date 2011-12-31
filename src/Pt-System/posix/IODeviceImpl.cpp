@@ -332,7 +332,7 @@ bool IODeviceImpl::run()
             try
             {
                 ++avail;
-                _device.inputReady(_device);
+                _device.inputReady().send(_device);
     
                 if( ! _sentry )
                     return avail;
@@ -350,7 +350,7 @@ bool IODeviceImpl::run()
         if( _device.ravail() > 0 || impl.isReadable(_iohandle) )
         {
             std::cerr << "IODeviceImpl::avail " << "READABLE" << std::endl;
-            _device.inputReady(_device);
+            _device.inputReady().send(_device);
             ++avail;
         }
     }
@@ -365,7 +365,7 @@ bool IODeviceImpl::run()
             try
             {
                 ++avail;
-                _device.outputReady(_device);
+                _device.outputReady().send(_device);
     
                 if( ! _sentry )
                     return avail;
@@ -383,7 +383,7 @@ bool IODeviceImpl::run()
         if( _device.wavail() > 0 || impl.isWritable(_iohandle) )
         {
             std::cerr << "IODeviceImpl::avail " << "WRITABLE" << std::endl;
-            _device.outputReady(_device);
+            _device.outputReady().send(_device);
             ++avail;
         }
     }

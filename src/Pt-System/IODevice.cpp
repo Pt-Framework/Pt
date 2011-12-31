@@ -254,6 +254,18 @@ void IODevice::setEof(bool eof)
     _eof = eof; 
 }
 
+
+Signal<IODevice&>& IODevice::inputReady()
+{
+    return _inputReady;
+}
+
+
+Signal<IODevice&>& IODevice::outputReady()
+{
+    return _outputReady;
+}
+
 }
 
 }

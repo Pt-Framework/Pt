@@ -100,14 +100,14 @@ ApplicationImpl::ApplicationImpl()
 
 ApplicationImpl::~ApplicationImpl()
 {
-    disconnect(pt_signal_pipe->out().inputReady, processSignal);
+    pt_signal_pipe->out().inputReady() -= slot(processSignal);
 }
 
 
 void ApplicationImpl::init(EventLoop& loop)
 {
     ::initSignalPipe(loop);
-    connect(pt_signal_pipe->out().inputReady, processSignal);
+    pt_signal_pipe->out().inputReady() += slot(processSignal);
 }
 
 
