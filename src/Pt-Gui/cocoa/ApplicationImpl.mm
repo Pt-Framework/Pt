@@ -207,6 +207,16 @@ void MainLoop::onDisable(System::Selectable& s)
 }
 
 
+void MainLoop::onSignalAvail(System::Selectable&)
+{
+}
+
+
+void MainLoop::onSignalIdle(System::Selectable&)
+{
+}
+
+
 void MainLoop::onIdle(System::Selectable& s)
 {
 }

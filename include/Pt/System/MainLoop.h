@@ -116,6 +116,10 @@ namespace System {
 
             virtual void onDetach(Selectable&);
 
+            virtual void onSignalAvail(Selectable&);
+        
+            virtual void onSignalIdle(Selectable&);
+
             virtual void onIdle(Selectable& s);
 
             virtual void onAvail(Selectable& s);

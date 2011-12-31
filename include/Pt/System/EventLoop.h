@@ -171,9 +171,9 @@ class PT_SYSTEM_API EventLoop : public Connectable
 
         virtual void onIdle(Selectable&) = 0;
 
-        virtual void onSignalAvail(Selectable&) {}
+        virtual void onSignalAvail(Selectable&) = 0;
 
-        virtual void onSignalIdle(Selectable&) {}
+        virtual void onSignalIdle(Selectable&) = 0;
 
     private:
         Timer _idleTimer;

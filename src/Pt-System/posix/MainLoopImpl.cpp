@@ -90,6 +90,16 @@ EventLoopImpl::~EventLoopImpl()
 }
 
 
+void EventLoopImpl::signalAvail(Selectable&)
+{
+}
+
+
+void EventLoopImpl::signalIdle(Selectable&)
+{
+}
+
+
 void EventLoopImpl::idle(Selectable& s)
 {
     _avail.erase(&s);
