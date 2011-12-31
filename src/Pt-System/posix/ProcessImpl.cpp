@@ -143,10 +143,10 @@ void ProcessImpl::start()
             _stdinPipe->in().close();
             _stdinPipe->impl()->redirectStdin();
         }
-        else if (_procInfo.stdInput())
-        {
-            dup2(_procInfo.stdInput()->ioimpl().fd(), STDIN_FILENO);
-        }
+        //else if (_procInfo.stdInput())
+        //{
+            //dup2(_procInfo.stdInput()->ioimpl().fd(), STDIN_FILENO);
+        //}
 
         // redirect stdout
 
@@ -159,10 +159,10 @@ void ProcessImpl::start()
             _stdoutPipe->out().close();
             _stdoutPipe->impl()->redirectStdout();
         }
-        else if (_procInfo.stdOutput())
-        {
-            dup2(_procInfo.stdOutput()->ioimpl().fd(), STDOUT_FILENO);
-        }
+        //else if (_procInfo.stdOutput())
+        //{
+            //dup2(_procInfo.stdOutput()->ioimpl().fd(), STDOUT_FILENO);
+        //}
 
         // redirect stderr
 
@@ -178,10 +178,10 @@ void ProcessImpl::start()
         {
             _stdoutPipe->impl()->redirectStderr(false);
         }
-        else if (_procInfo.stdError())
-        {
-            dup2(_procInfo.stdError()->ioimpl().fd(), STDERR_FILENO);
-        }
+        //else if (_procInfo.stdError())
+        //{
+            //dup2(_procInfo.stdError()->ioimpl().fd(), STDERR_FILENO);
+        //}
 
         // exec
 

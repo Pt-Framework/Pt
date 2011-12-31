@@ -53,6 +53,8 @@ class PipeIODevice : public Pt::System::IODevice
 
         void redirect(int fd, bool close = true);
 
+        void sigwrite( int signo );
+
     protected:
         void open(int fd);
 

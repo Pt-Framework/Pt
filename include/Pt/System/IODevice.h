@@ -220,8 +220,6 @@ class PT_SYSTEM_API IODevice : public Selectable
             to write data.
         */
         Signal<IODevice&> outputReady;
- 
-        virtual IODeviceImpl& ioimpl() = 0;
 
         bool reading() const
         { return _rbuf != 0; }

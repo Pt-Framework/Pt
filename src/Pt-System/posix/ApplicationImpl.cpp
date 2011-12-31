@@ -24,7 +24,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "ApplicationImpl.h"
-#include "IODeviceImpl.h"
+#include "PipeImpl.h"
 #include "Pt/System/Pipe.h"
 #include "Pt/System/Application.h"
 #include "Pt/System/SystemError.h"
@@ -85,7 +85,7 @@ extern "C" void pt_system_application_sighandler(int sigNo)
 {
     if(pt_signal_pipe)
     {
-        pt_signal_pipe->in().ioimpl().sigwrite(sigNo);
+        pt_signal_pipe->impl()->in().sigwrite(sigNo);
     }
 }
 

@@ -68,6 +68,13 @@ void PipeIODevice::redirect(int newFd, bool close)
     }
 }
 
+
+void PipeIODevice::sigwrite( int signo )
+{
+    ::write(fd(), (const void*)&signo, sizeof(int));
+}
+
+
 void PipeIODevice::open(int fd)
 {
     _impl.open(fd, false);

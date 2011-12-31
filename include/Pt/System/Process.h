@@ -61,9 +61,15 @@ class ProcessInfo
         enum IODeviceMode
         {
             Close   = 0,
-            Keep    = 1,
+            //Keep    = 1,
             Capture = 2,
             Combine = 3  // combine stderr with stdout; only valid for stderr
+        };
+
+        // TODO: use IOFlags instead of IODeviceMode
+        enum IOFlags
+        {
+            Input, Output, Error, AllOut
         };
 
         //! process info can contain at least the command
@@ -79,48 +85,44 @@ class ProcessInfo
 
         const std::string& arg(unsigned idx) const;
 
-
         bool detach() const
         { return _detach; }
 
         void detach(bool sw)
         { _detach = sw; }
 
-
         void setStdInput(IODeviceMode mode)
         { _stdinMode = mode; }
 
-        void setStdInput(IODevice* dev)
-        { _stdin = dev; _stdinMode = Keep; }
+        //void setStdInput(IODevice* dev)
+        //{ _stdin = dev; _stdinMode = Keep; }
 
-        IODevice* stdInput() const
-        { return _stdin; }
+        //IODevice* stdInput() const
+        //{ return _stdin; }
 
         IODeviceMode stdInputMode() const
         { return _stdinMode; }
 
-
         void setStdOutput(IODeviceMode mode)
         { _stdoutMode = mode; }
 
-        void setStdOutput(IODevice* dev)
-        { _stdout = dev; _stdoutMode = Keep; }
+        //void setStdOutput(IODevice* dev)
+        //{ _stdout = dev; _stdoutMode = Keep; }
 
-        IODevice* stdOutput() const
-        { return _stdout; }
+        //IODevice* stdOutput() const
+        //{ return _stdout; }
 
         IODeviceMode stdOutputMode() const
         { return _stdoutMode; }
 
-
         void setStdError(IODeviceMode mode)
         { _stderrMode = mode; }
 
-        void setStdError(IODevice* dev)
-        { _stderr = dev; _stderrMode = Keep; }
+        //void setStdError(IODevice* dev)
+        //{ _stderr = dev; _stderrMode = Keep; }
 
-        IODevice* stdError() const
-        { return _stderr; }
+        //IODevice* stdError() const
+        //{ return _stderr; }
 
         IODeviceMode stdErrorMode() const
         { return _stderrMode; }
@@ -131,13 +133,13 @@ class ProcessInfo
         bool _detach;
 
         IODeviceMode _stdinMode;
-        IODevice* _stdin;
+        //IODevice* _stdin;
 
         IODeviceMode _stdoutMode;
-        IODevice* _stdout;
+        //IODevice* _stdout;
 
         IODeviceMode _stderrMode;
-        IODevice* _stderr;
+        //IODevice* _stderr;
 };
 
 //! @brief Executes shell commands
@@ -228,11 +230,11 @@ inline ProcessInfo::ProcessInfo(const std::string& command)
 : _command(command)
 , _detach(false)
 , _stdinMode(Close)
-, _stdin(0)
-, _stdoutMode(Keep)
-, _stdout(0)
-, _stderrMode(Keep)
-, _stderr(0)
+//, _stdin(0)
+, _stdoutMode(Close)
+//, _stdout(0)
+, _stderrMode(Close)
+//, _stderr(0)
 {
 }
 

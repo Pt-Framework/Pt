@@ -326,12 +326,6 @@ size_t IODeviceImpl::write( const char* buffer, size_t count )
 }
 
 
-void IODeviceImpl::sigwrite( int signo )
-{
-    ::write(_fd, (const void*)&signo, sizeof(int));
-}
-
-
 void IODeviceImpl::sync() const
 {
     int ret = fsync(_fd);
