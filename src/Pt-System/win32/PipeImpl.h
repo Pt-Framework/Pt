@@ -46,6 +46,9 @@ class PipeIODevice : public IODevice, private IODeviceImpl
         virtual IODeviceImpl& ioimpl()
         { return *this; }
 
+        HANDLE handle() const
+        { return IODeviceImpl::deviceHandle(); }
+
         void redirect(int newFd, bool close = true);
 
     protected:

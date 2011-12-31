@@ -24,7 +24,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "ProcessImplBase.h"
-#include "IODeviceImpl.h"
+#include "PipeImpl.h"
 #include "Pt/System/SystemError.h"
 #include "win32.h"
 #include <sstream>
@@ -114,20 +114,20 @@ void ProcessImplBase::start()
     {
         _stdinPipe = new Pipe();
         _stdInput = &_stdinPipe->in();
-        SetHandleInformation( _stdinPipe->out().ioimpl().deviceHandle(),
+        SetHandleInformation( _stdinPipe->impl()->out().handle(),
                               HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
-        m_startUp.hStdInput = _stdinPipe->out().ioimpl().deviceHandle();
+        m_startUp.hStdInput = _stdinPipe->impl()->out().handle();
     }
     else if( _procInfo.stdInputMode() == ProcessInfo::Close )
     {
         m_startUp.hStdInput = INVALID_HANDLE_VALUE;
     }
-    else if( _procInfo.stdInput() )
-    {
-        SetHandleInformation( _procInfo.stdInput()->ioimpl().deviceHandle(),
-                              HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
-        m_startUp.hStdInput = _procInfo.stdInput()->ioimpl().deviceHandle();
-    }
+    //else if( _procInfo.stdInput() )
+    //{
+        //SetHandleInformation( _procInfo.stdInput()->ioimpl().deviceHandle(),
+        //                      HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
+        //m_startUp.hStdInput = _procInfo.stdInput()->ioimpl().deviceHandle();
+    //}
 
     // Standard Output
 
@@ -136,20 +136,20 @@ void ProcessImplBase::start()
         _stdoutPipe = new Pipe();
         _stdOutput = &_stdoutPipe->out();
 
-        SetHandleInformation( _stdoutPipe->in().ioimpl().deviceHandle(),
+        SetHandleInformation( _stdoutPipe->impl()->in().handle(),
                               HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
-        m_startUp.hStdOutput = _stdoutPipe->in().ioimpl().deviceHandle();
+        m_startUp.hStdOutput = _stdoutPipe->impl()->in().handle();
     }
     else if( _procInfo.stdOutputMode() == ProcessInfo::Close )
     {
         m_startUp.hStdOutput = INVALID_HANDLE_VALUE;
     }
-    else if( _procInfo.stdOutput() )
-    {
-        SetHandleInformation( _procInfo.stdOutput()->ioimpl().deviceHandle(),
-                              HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
-        m_startUp.hStdOutput = _procInfo.stdOutput()->ioimpl().deviceHandle();
-    }
+    //else if( _procInfo.stdOutput() )
+    //{
+        //SetHandleInformation( _procInfo.stdOutput()->ioimpl().deviceHandle(),
+        //                      HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
+        //m_startUp.hStdOutput = _procInfo.stdOutput()->ioimpl().deviceHandle();
+    //}
 
     // Standard Error
 
@@ -158,9 +158,9 @@ void ProcessImplBase::start()
         _stderrPipe = new Pipe();
         _stdError = &_stderrPipe->out();
 
-        SetHandleInformation( _stderrPipe->in().ioimpl().deviceHandle(),
+        SetHandleInformation( _stderrPipe->impl()->in().handle(),
                               HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
-        m_startUp.hStdError = _stderrPipe->in().ioimpl().deviceHandle();
+        m_startUp.hStdError = _stderrPipe->impl()->in().handle();
     }
     else if( _procInfo.stdErrorMode() == ProcessInfo::Combine )
     {
@@ -170,12 +170,12 @@ void ProcessImplBase::start()
     {
         m_startUp.hStdError = INVALID_HANDLE_VALUE;
     }
-    else if( _procInfo.stdError() )
-    {
-        SetHandleInformation( _procInfo.stdError()->ioimpl().deviceHandle(),
-                              HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
-        m_startUp.hStdError = _procInfo.stdError()->ioimpl().deviceHandle();
-    }
+    //else if( _procInfo.stdError() )
+    //{
+        //SetHandleInformation( _procInfo.stdError()->ioimpl().deviceHandle(),
+        //                      HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
+        //m_startUp.hStdError = _procInfo.stdError()->ioimpl().deviceHandle();
+    //}
 
     // TODO ???
     // if (_procInfo.detach())
