@@ -593,6 +593,18 @@ void MainLoop::onDetach(System::Selectable& s)
 }
 
 
+void MainLoop::onSignalIdle(System::Selectable& s)
+{
+    _impl.signalIdle(s);
+}
+
+
+void MainLoop::onSignalAvail(System::Selectable& s)
+{
+    _impl.signalAvail(s);
+}
+
+
 void MainLoop::onIdle(System::Selectable& s)
 {
     _impl.idle(s);

@@ -131,7 +131,7 @@ class PT_SYSTEM_API EventLoopImpl : public EventDispatcher
 
         void signalAvail(Selectable& s);
 
-        void signalCancel(Selectable& s);
+        void signalIdle(Selectable& s);
 
         HANDLE beginWait(Selectable& s);
 

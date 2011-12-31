@@ -153,7 +153,7 @@ void EventLoopImpl::avail(Selectable& s)
 }
 
 
-void EventLoopImpl::signalCancel(Selectable& s)
+void EventLoopImpl::signalIdle(Selectable& s)
 {
     Pt::System::MutexLock lock(_signalledMutex);
     _signalled.erase(&s);
