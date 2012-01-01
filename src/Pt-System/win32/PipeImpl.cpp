@@ -102,12 +102,16 @@ void PipeIODevice::onCancel()
 }
 
 
+void PipeIODevice::setWaitHandle(HANDLE h)
+{
+    _readOv.hEvent = h;
+    _writeOv.hEvent = h;
+}
+
+
 void PipeIODevice::onAttach(EventLoop& loop)
 {
-    loop.impl().enable(*this, _iohandle);
-
-    _readOv.hEvent = _iohandle.waitEvent();
-    _writeOv.hEvent = _iohandle.waitEvent();
+    loop.impl().enable(*this, *this);
 }
 
 
@@ -283,11 +287,6 @@ void PipeIODevice::onSync() const
 {
     if( FALSE == ::FlushFileBuffers( handle() ) )
         throw IOError( PT_ERROR_MSG("Could not flush file buffer") );
-}
-
-
-void PipeIODevice::redirect(int newFd, bool close)
-{
 }
 
 

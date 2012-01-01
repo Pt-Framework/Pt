@@ -81,28 +81,15 @@ void TcpSocketImpl::attach(System::EventLoop& loop)
 {
     log_debug("attach to loop");
 
-    if( _fd == INVALID_SOCKET)
-        return;
-
-    HANDLE h = loop.impl().enable(_socket);
-
-    bool active = _dataSends != 0 || (_isConnected && _eventFlags & FD_CONNECT);
-
     log_debug(_fd << " setWaitHandle");
+    HANDLE h = loop.impl().enable(_socket);
     _currentEventHandle = h;
-    attachEvent(_currentEventHandle, _eventFlags);
-
-    if(active)
-        loop.impl().setAvail(_socket);
 }
 
 
 void TcpSocketImpl::detach(System::EventLoop& loop)
 {
     log_debug("detach from loop");
-
-    //if( _fd != INVALID_SOCKET)
-    //    attachEvent(_waitEvent, _eventFlags);
 
     loop.impl().disable(_socket);
     _currentEventHandle = INVALID_HANDLE_VALUE;
@@ -139,13 +126,8 @@ void TcpSocketImpl::close()
 void TcpSocketImpl::accept(const TcpServer& server, unsigned flags)
 {
     _fd = server.impl().accept();
-    log_debug("accepted " << _fd);
-
     _isConnected = true;
-
-    System::EventLoop* loop = _socket.parent();
-    if(loop)
-        this->attach(*loop);
+    log_debug("accepted " << _fd);
 }
 
 
@@ -225,9 +207,16 @@ bool TcpSocketImpl::beginConnect(const AddrInfo& ai)
         log_debug("connected " << _fd);
     }
 
-    System::EventLoop* loop = _socket.parent();
-    if(loop)
-        this->attach(*loop);
+    if( _socket.isActive() )
+    {
+        System::EventLoop* loop = _socket.parent();
+        log_debug(_fd << " setWaitHandle");
+
+        attachEvent(_currentEventHandle, _eventFlags);
+    
+        if(_isConnected && _eventFlags & FD_CONNECT)
+            loop->impl().avail(_socket);
+    }
 
     return _isConnected;
 }

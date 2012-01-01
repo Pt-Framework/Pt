@@ -29,6 +29,7 @@
  */
 #include "MainLoopImpl.h"
 #include "SelectableImpl.h"
+#include "IODeviceImpl.h"
 #include "Pt/System/IOError.h"
 #include "Pt/System/SystemError.h"
 #include "Pt/System/EventLoop.h"
@@ -95,7 +96,7 @@ void EventLoopImpl::disable(IOHandle* h)
 }
 
 
-void EventLoopImpl::enable(Selectable& s, OverlappedHandle& io)
+void EventLoopImpl::enable(Selectable& s, IODeviceImpl& io)
 {
     io.setWaitHandle(_ioEvent);
     _devices.insert(&s);

@@ -35,6 +35,8 @@ namespace Pt {
 
 namespace System {
 
+class IODeviceImpl;
+
 class HandleMap
 {
     public:
@@ -118,22 +120,6 @@ struct IOHandle
 };
 
 
-struct OverlappedHandle
-{
-    OverlappedHandle()
-    : _ioEvent(INVALID_HANDLE_VALUE)
-    {}
-
-    void setWaitHandle(HANDLE h)
-    { _ioEvent = h; }
-
-    HANDLE waitEvent()
-    { return _ioEvent; }
-
-    HANDLE _ioEvent;
-};
-
-
 class PT_SYSTEM_API EventLoopImpl : public EventDispatcher
 {
     public:
@@ -149,7 +135,7 @@ class PT_SYSTEM_API EventLoopImpl : public EventDispatcher
 
         void signalIdle(Selectable& s);
 
-        void enable(Selectable& s, OverlappedHandle& io);
+        void enable(Selectable& s, IODeviceImpl& io);
 
         HANDLE enable(Selectable& s);
 

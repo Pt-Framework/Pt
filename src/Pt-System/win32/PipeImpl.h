@@ -46,10 +46,10 @@ class PipeIODevice : public IODevice, private IODeviceImpl
         virtual IODeviceImpl& ioimpl()
         { return *this; }
 
+        virtual void setWaitHandle(HANDLE h);
+
         HANDLE handle() const
         { return IODeviceImpl::deviceHandle(); }
-
-        void redirect(int newFd, bool close = true);
 
     protected:
         void onAttach(EventLoop& loop);
@@ -82,7 +82,6 @@ class PipeIODevice : public IODevice, private IODeviceImpl
         virtual void onCancel() ;
 
      private:
-        OverlappedHandle _iohandle;
         OVERLAPPED _readOv;
         OVERLAPPED _writeOv;
 };

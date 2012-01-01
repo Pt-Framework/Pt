@@ -44,6 +44,8 @@ class IODeviceImpl
         HANDLE handle() const
         { return _handle; }	
 
+        virtual void setWaitHandle(HANDLE h) {}
+
         virtual void close();
 
     private:

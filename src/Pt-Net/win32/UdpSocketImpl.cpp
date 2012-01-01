@@ -365,15 +365,8 @@ void UdpSocketImpl::attach(System::EventLoop& loop)
         return;
 
     HANDLE h = loop.impl().enable(_socket);
-
-    bool avail = _dataSends != 0;
     _currentEventHandle = h;
-
     this->setEventFlags(_currentEventHandle, _eventFlags);
-
-    // TODO: use this->setAvail() ?
-    if(avail)
-        loop.impl().setAvail(_socket);
 }
 
 
