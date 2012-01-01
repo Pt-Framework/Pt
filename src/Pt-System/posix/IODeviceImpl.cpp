@@ -64,10 +64,6 @@ void IODeviceImpl::open(int fd, bool inherit)
     if(-1 == ret)
         throw IOError(PT_ERROR_MSG("Could not set fd to non-blocking"));
 
-    EventLoop* loop = _device.parent();
-    if(loop)
-        this->attach(*loop);
-
     if ( ! inherit)
     {
         int flags = fcntl(_fd, F_GETFD);
@@ -76,12 +72,21 @@ void IODeviceImpl::open(int fd, bool inherit)
         if(-1 == ret)
             throw IOError(PT_ERROR_MSG("Could not set FD_CLOEXEC"));
     }
+
+    if( _device.isActive() )
+        _iohandle = _device.parent()->impl().enable(_device, this->fd());
+}
+
+
+bool IODeviceImpl::isOpen() const
+{
+    return this->fd() != -1;
 }
 
 
 void IODeviceImpl::close()
 {
-    if(_fd != -1)
+    if( this->isOpen() )
     {
         EventLoop* loop = _device.parent();
         if(_iohandle)
@@ -103,22 +108,12 @@ void IODeviceImpl::close()
 }
 
 
-void IODeviceImpl::cancel()
-{
-    EventLoop* loop = _device.parent();
-    if( loop && _iohandle )
-    {
-        loop->impl().cancel(_iohandle);
-    }
-}
-
-
 void IODeviceImpl::attach(EventLoop& loop)
 {
-    if( this->fd() < 0)
-        return;
-
-    _iohandle = loop.impl().enable(_device, this->fd());
+    if( this->isOpen() )
+    {
+        _iohandle = loop.impl().enable(_device, this->fd());
+    }
 }
 
 
@@ -132,8 +127,20 @@ void IODeviceImpl::detach(EventLoop& loop)
 }
 
 
+void IODeviceImpl::cancel()
+{
+    EventLoop* loop = _device.parent();
+    if( loop && _iohandle )
+    {
+        loop->impl().cancel(_iohandle);
+    }
+}
+
+
 size_t IODeviceImpl::beginRead(char* buffer, size_t n, bool&)
 {
+    assert( _device.parent() );
+
     EventLoop* loop = _device.parent();
     if( loop && _iohandle)
     {
@@ -146,6 +153,8 @@ size_t IODeviceImpl::beginRead(char* buffer, size_t n, bool&)
 
 size_t IODeviceImpl::endRead(bool& eof)
 {
+    assert( _device.parent() );
+
     EventLoop* loop = _device.parent();
     if( loop && _iohandle )
     {

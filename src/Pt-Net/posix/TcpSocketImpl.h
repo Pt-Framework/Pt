@@ -71,9 +71,6 @@ class TcpSocketImpl : public System::IODeviceImpl
 
         void cancel();
 
-        // TODO: enable socket before connect or accept...
-        void attach(System::EventLoop& loop);
-
         bool run();
 
         std::string getSockAddr() const;

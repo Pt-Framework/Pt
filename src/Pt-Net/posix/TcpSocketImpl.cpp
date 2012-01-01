@@ -104,25 +104,21 @@ void TcpSocketImpl::cancel()
 }
 
 
-void TcpSocketImpl::attach(System::EventLoop& loop)
+void TcpSocketImpl::accept(const TcpServer& server, unsigned flags)
 {
-    if(_fd == -1)
-        return;
+    bool inherit = (flags & TcpSocket::INHERIT) != 0;
+    socklen_t peeraddr_len = sizeof(_peeraddr);
 
-    IODeviceImpl::attach(loop);
+    log_debug( "accept " << server.impl().fd() );
+    _fd = ::accept(server.impl().fd(), reinterpret_cast <struct sockaddr*>(&_peeraddr), &peeraddr_len);
+    if( _fd < 0 )
+      throw System::SystemError("accept");
 
-    if( _isConnecting )
-    {
-        if( ! _isConnected )
-        {
-            std::cerr << "IODeviceImpl::beginConnect on handle " << std::endl;
-            loop.impl().beginWrite( _iohandle );
-        }
-        else
-        {
-            loop.impl().avail(_device);
-        }
-    }
+    System::IODeviceImpl::open(_fd, inherit);
+    //TODO ECONNABORTED EINTR EPERM
+
+    _isConnected = true;
+    log_debug( "accepted " << server.impl().fd() << " => " << _fd );
 }
 
 
@@ -137,19 +133,27 @@ void TcpSocketImpl::connect(const AddrInfo& addrInfo)
 bool TcpSocketImpl::beginConnect(const AddrInfo& addrInfo)
 {
     log_trace("begin connect");
-    std::cerr << "########### BEGIN CONNECT" << std::endl;
 
-    assert(!_isConnected);
+    assert( ! _isConnected );
 
     _addrInfo = addrInfo;
     _addrInfoPtr = _addrInfo.impl()->begin();
     _connectResult = tryConnect();
     checkPendingError();
-    std::cerr << "########### " << _fd << " connected: " << _isConnected << std::endl;
 
-    System::EventLoop* loop = _socket.parent();
-    if(loop)
-        this->attach(*loop);
+    if(_socket.isActive() && _isConnecting )
+    {
+        System::EventLoop* loop = _socket.parent();
+        if( ! _isConnected )
+        {
+            log_trace("IODeviceImpl::beginConnect on handle");
+            loop->impl().beginWrite( _iohandle );
+        }
+        else
+        {
+            loop->impl().avail(_device);
+        }
+    }
 
     return _isConnected;
 }
@@ -256,10 +260,6 @@ void TcpSocketImpl::endConnect()
         loop->impl().endWrite( _iohandle );
     }
 
-//  if(_wfds && ! _socket.wbuf() )
-//  {
-//      FD_CLR( this->fd(), _wfds );
-//  }
 
     checkPendingError();
 
@@ -310,24 +310,6 @@ void TcpSocketImpl::endConnect()
         close();
         throw;
     }
-}
-
-
-void TcpSocketImpl::accept(const TcpServer& server, unsigned flags)
-{
-    bool inherit = (flags & TcpSocket::INHERIT) != 0;
-    socklen_t peeraddr_len = sizeof(_peeraddr);
-
-    log_debug( "accept " << server.impl().fd() );
-    _fd = ::accept(server.impl().fd(), reinterpret_cast <struct sockaddr*>(&_peeraddr), &peeraddr_len);
-    if( _fd < 0 )
-      throw System::SystemError("accept");
-
-    System::IODeviceImpl::open(_fd, inherit);
-    //TODO ECONNABORTED EINTR EPERM
-
-    _isConnected = true;
-    log_debug( "accepted " << server.impl().fd() << " => " << _fd );
 }
 
 

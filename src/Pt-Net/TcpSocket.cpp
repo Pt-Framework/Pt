@@ -122,11 +122,23 @@ std::size_t TcpSocket::timeout() const
 }
 
 
+void TcpSocket::accept(const TcpServer& server, unsigned flags)
+{
+    this->close();
+
+    _impl->accept(server, flags);
+
+    //if( this->isActive() )
+    //{
+    //    this->parent()->impl().enable(*this, *_impl);
+    //}
+}
+
+
 void TcpSocket::connect(const AddrInfo& addrinfo)
 {
     this->close();
     _impl->connect(addrinfo);
-    this->setEof(false);
 }
 
 
@@ -136,7 +148,6 @@ bool TcpSocket::beginConnect(const AddrInfo& addrinfo)
         throw std::logic_error( PT_ERROR_MSG("socket not active") );
 
     this->close();
-    this->setEof(false);
 
     bool ret = _impl->beginConnect(addrinfo);
     if(ret)
@@ -166,23 +177,19 @@ bool TcpSocket::isConnected() const
 }
 
 
-void TcpSocket::accept(const TcpServer& server, unsigned flags)
-{
-    this->close();
-    _impl->accept(server, flags);
-    this->setEof(false);
-}
-
-
 void TcpSocket::onClose()
 {
-    std::cerr << "TcpSocket::onClose()" << std::endl;
     _impl->close();
 }
 
 
 void TcpSocket::onAttach(System::EventLoop& sb)
 {
+    //if( this->isConnected() )
+    //{
+    //    this->parent()->impl().enable(*this, *_impl);
+    //}
+
     _impl->attach(sb);
 }
 

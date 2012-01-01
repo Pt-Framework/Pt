@@ -80,6 +80,8 @@ namespace System {
 
             void open(int fd, bool closeOnExec);
 
+            bool isOpen() const;
+
             virtual void close();
 
             virtual size_t beginRead(char* buffer, size_t n, bool& eof);
