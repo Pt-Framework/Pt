@@ -364,7 +364,7 @@ void UdpSocketImpl::attach(System::EventLoop& loop)
     if( _fd == INVALID_SOCKET)
         return;
 
-    HANDLE h = loop.impl().beginWait(_socket);
+    HANDLE h = loop.impl().enable(_socket);
 
     bool avail = _dataSends != 0;
     _currentEventHandle = h;
@@ -382,7 +382,7 @@ void UdpSocketImpl::detach(System::EventLoop& loop)
     if( _fd != INVALID_SOCKET)
         setEventFlags(_waitEvent, _eventFlags);
 
-    loop.impl().endWait(_socket);
+    loop.impl().disable(_socket);
 
     //if( _fd != INVALID_SOCKET)
     //    setEventFlags(_waitEvent, _eventFlags);

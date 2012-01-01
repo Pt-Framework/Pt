@@ -78,14 +78,8 @@ EventLoopImpl::~EventLoopImpl()
     CloseHandle( _signalledEvent );
 }
 
-HANDLE EventLoopImpl::beginWait(Selectable& s)
-{ 
-    _devices.insert(&s);
-    return _ioEvent; 
-}
 
-
-IOHandle* EventLoopImpl::registerHandle(Selectable& s, HANDLE h)
+IOHandle* EventLoopImpl::enable(Selectable& s, HANDLE h)
 {
     IOHandle* iohandle =  new IOHandle(s, h);
     _dirty.push_back(iohandle);
@@ -93,7 +87,7 @@ IOHandle* EventLoopImpl::registerHandle(Selectable& s, HANDLE h)
 }
 
 
-void EventLoopImpl::unregisterHandle(IOHandle* h)
+void EventLoopImpl::disable(IOHandle* h)
 {
     _dirty.remove(h);
     _handles.remove( *(h->sel) );
@@ -101,13 +95,21 @@ void EventLoopImpl::unregisterHandle(IOHandle* h)
 }
 
 
-void EventLoopImpl::setAvail(Selectable& s)
+void EventLoopImpl::enable(Selectable& s, OverlappedHandle& io)
 {
-    _avail.insert(&s);
+    io.setWaitHandle(_ioEvent);
+    _devices.insert(&s);
 }
 
 
-void EventLoopImpl::endWait(Selectable& s)
+HANDLE EventLoopImpl::enable(Selectable& s)
+{ 
+    _devices.insert(&s);
+    return _ioEvent; 
+}
+
+
+void EventLoopImpl::disable(Selectable& s)
 {
     std::set<Selectable*>::iterator iter = _devices.find( &s );
     if( iter != _devices.end() )
@@ -130,6 +132,12 @@ void EventLoopImpl::endWait(Selectable& s)
         else
             _avail.erase(iter);
     }
+}
+
+
+void EventLoopImpl::setAvail(Selectable& s)
+{
+    _avail.insert(&s);
 }
 
 

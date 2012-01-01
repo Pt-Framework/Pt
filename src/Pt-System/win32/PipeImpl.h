@@ -82,6 +82,7 @@ class PipeIODevice : public IODevice, private IODeviceImpl
         virtual void onCancel() ;
 
      private:
+        OverlappedHandle _iohandle;
         OVERLAPPED _readOv;
         OVERLAPPED _writeOv;
 };

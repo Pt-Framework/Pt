@@ -121,7 +121,7 @@ void FileDeviceImpl::open( const char* path, IODevice::OpenMode mode)
 
 void FileDeviceImpl::attach(EventLoop& loop)
 {
-    HANDLE h = loop.impl().beginWait(_device);
+    HANDLE h = loop.impl().enable(_device);
 
     bool active = false;
     this->setWaitHandle(h, active);
@@ -144,7 +144,7 @@ void FileDeviceImpl::detach(EventLoop& loop)
     if(active)
         _device.setAvail();
 
-    loop.impl().endWait(_device);
+    loop.impl().disable(_device);
 }
 
 

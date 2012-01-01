@@ -104,16 +104,16 @@ void PipeIODevice::onCancel()
 
 void PipeIODevice::onAttach(EventLoop& loop)
 {
-    HANDLE h = loop.impl().beginWait(*this);
+    loop.impl().enable(*this, _iohandle);
 
-    _readOv.hEvent = h;
-    _writeOv.hEvent = h;
+    _readOv.hEvent = _iohandle.waitEvent();
+    _writeOv.hEvent = _iohandle.waitEvent();
 }
 
 
 void PipeIODevice::onDetach(EventLoop& loop)
 {
-    loop.impl().endWait(*this);
+    loop.impl().disable(*this);
 
     _readOv.hEvent = NULL;
     _writeOv.hEvent = NULL;

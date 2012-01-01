@@ -118,6 +118,22 @@ struct IOHandle
 };
 
 
+struct OverlappedHandle
+{
+    OverlappedHandle()
+    : _ioEvent(INVALID_HANDLE_VALUE)
+    {}
+
+    void setWaitHandle(HANDLE h)
+    { _ioEvent = h; }
+
+    HANDLE waitEvent()
+    { return _ioEvent; }
+
+    HANDLE _ioEvent;
+};
+
+
 class PT_SYSTEM_API EventLoopImpl : public EventDispatcher
 {
     public:
@@ -133,13 +149,15 @@ class PT_SYSTEM_API EventLoopImpl : public EventDispatcher
 
         void signalIdle(Selectable& s);
 
-        HANDLE beginWait(Selectable& s);
+        void enable(Selectable& s, OverlappedHandle& io);
 
-        void endWait(Selectable& s);
+        HANDLE enable(Selectable& s);
 
-        IOHandle* registerHandle(Selectable& s, HANDLE h);
+        void disable(Selectable& s);
 
-        void unregisterHandle(IOHandle* h);
+        IOHandle* enable(Selectable& s, HANDLE h);
+
+        void disable(IOHandle* h);
 
         void setAvail(Selectable& s);
 

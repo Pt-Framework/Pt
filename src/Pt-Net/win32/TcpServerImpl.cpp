@@ -234,7 +234,7 @@ void TcpServerImpl::attach(System::EventLoop& loop)
     if (_fd == INVALID_SOCKET)
         return;
 
-    _currentHandle = loop.impl().beginWait(_server);
+    _currentHandle = loop.impl().enable(_server);
     attachEvent(_currentHandle, FD_ACCEPT);
 }
 
@@ -243,7 +243,7 @@ void TcpServerImpl::detach(System::EventLoop& loop)
 {
     log_debug("detach from loop " << _fd);
 
-    loop.impl().endWait(_server);
+    loop.impl().disable(_server);
     _currentHandle = INVALID_HANDLE_VALUE;
 }
 
