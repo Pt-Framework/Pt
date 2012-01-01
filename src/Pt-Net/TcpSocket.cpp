@@ -136,12 +136,12 @@ bool TcpSocket::beginConnect(const AddrInfo& addrinfo)
         throw std::logic_error( PT_ERROR_MSG("socket not active") );
 
     this->close();
-
-    bool ret = _impl->beginConnect(addrinfo);
     this->setEof(false);
 
+    bool ret = _impl->beginConnect(addrinfo);
     if(ret)
         connected(*this);
+
     return ret;
 }
 
