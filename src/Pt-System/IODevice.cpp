@@ -83,6 +83,8 @@ size_t IODevice::endRead()
     if( ! _rbuf )
         return 0;
 
+    // TODO: handle ravail like in endWrite()
+
     size_t n;
     try
     {
@@ -142,7 +144,19 @@ size_t IODevice::endWrite()
     if( ! _wbuf )
         return 0;
 
-    size_t n;
+    size_t n = 0;
+
+    if(_wavail > 0)
+    {
+        n = _wavail;
+        _wbuf = 0;
+        _wbuflen = 0;
+        _wavail = 0;
+
+        this->setIdle();
+        return n;
+    }
+
     try
     {
         n = onEndWrite();
@@ -154,9 +168,6 @@ size_t IODevice::endWrite()
         _wavail = 0;
         throw;
     }
-
-    if(_wavail > 0 )
-        this->setIdle();
 
     _wbuf = 0;
     _wbuflen = 0;
