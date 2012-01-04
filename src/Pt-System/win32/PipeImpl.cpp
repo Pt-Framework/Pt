@@ -128,13 +128,13 @@ bool PipeIODevice::onRun()
 {
     bool avail = false;
 
-    if( this->writing() && HasOverlappedIoCompleted(&_writeOv) )
+    if( this->writing() && ( _wavail || HasOverlappedIoCompleted(&_writeOv) ) )
     {
         outputReady().send(*this);
         avail = true;
     }
 
-    if( this->reading() && HasOverlappedIoCompleted(&_readOv) )
+    if( this->reading() && (_ravail || HasOverlappedIoCompleted(&_readOv) ) )
     {
         inputReady().send(*this);
         avail = true;

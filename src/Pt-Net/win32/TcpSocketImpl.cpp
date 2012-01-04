@@ -38,8 +38,9 @@
 #include <cstring>
 #include <cassert>
 
-//#include <iostream>
 #define log_debug(x)
+
+//#include <iostream>
 //#define log_debug(x) std::cerr << x << std::endl;
 
 namespace Pt {
@@ -54,7 +55,6 @@ TcpSocketImpl::TcpSocketImpl(TcpSocket& socket)
 , _isConnected(false)
 , _eventFlags(FD_CLOSE)
 , _timeout(INFINITE) // Pt::System::EventLoop::WaitInfinite ?
-, _dataSends(0)
 {
     _currentEventHandle = INVALID_HANDLE_VALUE;
 }
@@ -329,12 +329,6 @@ bool TcpSocketImpl::run()
 
     DestructionSentry sentry(_sentry);
 
-    if(_dataSends != 0 )
-    {
-       _socket.outputReady().send(_socket);
-       return true;
-    }
-
     WSANETWORKEVENTS events;
 
     if(WSAEnumNetworkEvents(_fd, NULL, &events) == SOCKET_ERROR)
@@ -374,7 +368,7 @@ bool TcpSocketImpl::run()
         }
     }
 
-    if((events.lNetworkEvents & FD_WRITE) == FD_WRITE)
+    if(_socket.wavail() || ((events.lNetworkEvents & FD_WRITE) == FD_WRITE))
     {
        //ResetEvent(_currentEventHandle);
        ev = true;
@@ -384,7 +378,7 @@ bool TcpSocketImpl::run()
            return ev;
     }
 
-    if((events.lNetworkEvents & FD_READ) == FD_READ)
+    if(_socket.ravail() || ((events.lNetworkEvents & FD_READ) == FD_READ))
     {
         //ResetEvent(_currentEventHandle);
         ev = true;
@@ -422,9 +416,7 @@ bool TcpSocketImpl::wait(std::size_t umsecs)
         msecs = std::numeric_limits<int>::max();
     }
 
-    DWORD www = 0;
-    if( _dataSends != 0 || (www =
-        WSAWaitForMultipleEvents(1, &_currentEventHandle, FALSE, msecs, FALSE)) != WSA_WAIT_TIMEOUT)
+    if( WSA_WAIT_TIMEOUT != WSAWaitForMultipleEvents(1, &_currentEventHandle, FALSE, msecs, FALSE) )
     {      
         bool av = this->run();
         return true;
@@ -561,7 +553,6 @@ size_t TcpSocketImpl::beginWrite(const char* buffer, size_t n)
     {
         if(WSAGetLastError() == WSAEWOULDBLOCK)
         {
-            _dataSends = 0;
             _eventFlags |= FD_WRITE;
             attachEvent(_currentEventHandle, _eventFlags);
             return 0;
@@ -569,7 +560,7 @@ size_t TcpSocketImpl::beginWrite(const char* buffer, size_t n)
     }
 
     log_debug(_fd << " beginWrite sent " << numberOfBytesSent << " of " << n << " bytes");
-    _dataSends = numberOfBytesSent;
+
     //SetEvent(_currentEventHandle);
     return numberOfBytesSent;
 }
@@ -578,12 +569,6 @@ size_t TcpSocketImpl::beginWrite(const char* buffer, size_t n)
 size_t TcpSocketImpl::endWrite()
 {
     log_debug(_fd << " wndWrite");
-    if(_dataSends != 0)
-    {
-        size_t n =  _dataSends;
-        _dataSends = 0;
-        return n;
-    }
 
     _eventFlags &= ~FD_WRITE;
 

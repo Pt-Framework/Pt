@@ -399,7 +399,7 @@ bool UdpSocketImpl::run()
 
     bool ev = false;
 
-    if((events.lNetworkEvents & FD_WRITE) == FD_WRITE)
+    if(_socket.wavail() || ((events.lNetworkEvents & FD_WRITE) == FD_WRITE) )
     {
        ev = true;
        _socket.outputReady().send(_socket);
@@ -408,7 +408,7 @@ bool UdpSocketImpl::run()
            return ev;
     }
 
-    if((events.lNetworkEvents & FD_READ) == FD_READ)
+    if(_socket.ravail() || ((events.lNetworkEvents & FD_READ) == FD_READ) )
     {
         ev = true;
         _socket.inputReady().send(_socket);
@@ -522,7 +522,7 @@ size_t UdpSocketImpl::beginWrite(const char* buffer, size_t n)
         }
     }
 
-    _dataSends = numberOfBytesSent;
+    //_dataSends = numberOfBytesSent;
     //SetEvent(_currentEventHandle);
     return numberOfBytesSent;
 }
