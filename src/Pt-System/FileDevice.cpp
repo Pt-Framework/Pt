@@ -65,20 +65,14 @@ void FileDevice::open( const char* path, OpenMode mode)
         this->close();
     }
 
-    _impl->open(path, mode);
-
+    _impl->open(path, mode, parent());
     _path = path;
-
-    //IODevice::setEnabled(true);
-    IODevice::setEof(false);
 }
 
 
 void FileDevice::onClose()
 {
-    _impl->close();
-    //IODevice::setEnabled(false);
-    IODevice::setEof(false);
+    _impl->close( parent() );
 }
 
 
@@ -96,25 +90,25 @@ void FileDevice::onDetach(EventLoop& s)
 
 size_t FileDevice::onBeginRead(char* buffer, size_t n, bool& eof)
 {
-    return _impl->beginRead(buffer, n, eof);
+    return _impl->beginRead(*parent(), buffer, n, eof);
 }
 
 
 size_t FileDevice::onEndRead(bool& eof)
 {
-    return _impl->endRead(eof);
+    return _impl->endRead(*parent(), eof);
 }
 
 
 size_t FileDevice::onBeginWrite(const char* buffer, size_t n)
 {
-    return _impl->beginWrite(buffer, n);
+    return _impl->beginWrite(*parent(), buffer, n);
 }
 
 
 size_t FileDevice::onEndWrite()
 {
-    return _impl->endWrite();
+    return _impl->endWrite( *parent() );
 }
 
 
@@ -148,7 +142,11 @@ size_t FileDevice::onWrite(const char* buffer, size_t count)
 
 void FileDevice::onCancel()
 {
-    _impl->cancel();
+    if( isActive() )
+    {
+        _impl->cancel( *parent() );
+    }
+
     IODevice::onCancel();
 }
 
@@ -165,15 +163,29 @@ void FileDevice::onSync() const
 }
 
 
-IODeviceImpl& FileDevice::ioimpl()
-{ 
-    return *_impl; 
-}
-
-
 bool FileDevice::onRun()
 {
-    return _impl->run();
+    //return _impl.run(); 
+
+    if( this->reading() )
+    {
+        if( _ravail || _impl->runRead( *parent() ) )
+        {
+            inputReady().send(*this);
+            return true;
+        }
+    }
+
+    if( this->writing() )
+    {
+        if( _wavail || _impl->runWrite( *parent() ) )
+        {
+            outputReady().send(*this);
+            return false;
+        }
+    }
+
+    return false;
 }
 
 } // namespace System

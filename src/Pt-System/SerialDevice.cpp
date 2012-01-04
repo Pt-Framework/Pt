@@ -68,39 +68,42 @@ void SerialDevice::open( const std::string& file, OpenMode mode)
         this->close();
     }
 
-    _impl->open( file, mode);
-
-    //IODevice::setEnabled(true);
-    IODevice::setEof(false);
+    _impl->open( file, mode, parent() );
 }
+
 
 void SerialDevice::onCancel()
 {
-    _impl->cancel();
+    if( isActive() )
+    {
+        _impl->cancel( *parent() );
+    }
+
     IODevice::onCancel();
 }
 
+
 size_t SerialDevice::onBeginRead(char* buffer, size_t n, bool& eof)
 {
-    return _impl->beginRead(buffer, n, eof);
+    return _impl->beginRead(*parent(), buffer, n, eof);
 }
 
 
 size_t SerialDevice::onEndRead(bool& eof)
 {
-    return _impl->endRead(eof);
+    return _impl->endRead(*parent(),eof);
 }
 
 
 size_t SerialDevice::onBeginWrite(const char* buffer, size_t n)
 {
-    return _impl->beginWrite(buffer, n);
+    return _impl->beginWrite(*parent(),buffer, n);
 }
 
 
 size_t SerialDevice::onEndWrite()
 {
-    return _impl->endWrite();
+    return _impl->endWrite(*parent());
 }
 
 
@@ -182,7 +185,7 @@ size_t SerialDevice::timeout() const
 
 void SerialDevice::onClose()
 {
-    _impl->close();
+    _impl->close( parent() );
 }
 
 
@@ -203,10 +206,6 @@ void SerialDevice::flush()
     _impl->flush();
 }
 
-IODeviceImpl& SerialDevice::ioimpl()
-{ 
-    return *_impl; 
-}
 
 void SerialDevice::onAttach(EventLoop& s)
 {
@@ -222,7 +221,27 @@ void SerialDevice::onDetach(EventLoop& s)
 
 bool SerialDevice::onRun()
 {
-    return _impl->run();
+    //return _impl.run(); 
+
+    if( this->reading() )
+    {
+        if( _ravail || _impl->runRead( *parent() ) )
+        {
+            inputReady().send(*this);
+            return true;
+        }
+    }
+
+    if( this->writing() )
+    {
+        if( _wavail || _impl->runWrite( *parent() ) )
+        {
+            outputReady().send(*this);
+            return false;
+        }
+    }
+
+    return false;
 }
 
 }//namespace System

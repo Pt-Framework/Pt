@@ -43,7 +43,7 @@ class ApplicationTest : public Pt::Unit::TestSuite
         ApplicationTest()
         : Pt::Unit::TestSuite("ApplicationTest")
         {
-            Pt::Unit::TestSuite::registerMethod( "SignalTest", *this, &ApplicationTest::SignalTest);
+            //Pt::Unit::TestSuite::registerMethod( "SignalTest", *this, &ApplicationTest::SignalTest);
         }
 
         void setUp()

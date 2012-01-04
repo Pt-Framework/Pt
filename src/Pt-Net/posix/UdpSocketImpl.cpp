@@ -48,7 +48,6 @@ namespace Net {
 
 UdpSocketImpl::UdpSocketImpl(UdpSocket& socket)
 : System::IODeviceImpl(socket)
-, _socket(socket)
 , _broadcast(false)
 , _isConnected(false)
 , _isBound(false)
@@ -66,15 +65,15 @@ UdpSocketImpl::~UdpSocketImpl()
 }
 
 
-void UdpSocketImpl::close()
+void UdpSocketImpl::close(System::EventLoop* loop)
 {
-    System::IODeviceImpl::close();
+    System::IODeviceImpl::close(loop);
     _isConnected = false;
     _isBound = false;
 }
 
 
-void UdpSocketImpl::bind(const std::string& ipaddr, unsigned short int port, unsigned flags)
+void UdpSocketImpl::bind(const std::string& ipaddr, unsigned short int port, unsigned flags, System::EventLoop* loop)
 {
     AddrInfo ai(ipaddr, port, true);
 
@@ -91,62 +90,57 @@ void UdpSocketImpl::bind(const std::string& ipaddr, unsigned short int port, uns
         else if( _isBound )
         {
             if(it->ai_family != reinterpret_cast <struct sockaddr*>(&_servaddr)->sa_family)
-                this->close();
+                this->close(loop);
         }
 
         if(it->ai_family == AF_INET6 && _broadcast )
             continue;
 
-        if( _fd < 0 )
+        if( this->fd() < 0 )
         {
             int fd = socket(it->ai_family, SOCK_DGRAM, 0);
-            IODeviceImpl::open(fd, false);
+            IODeviceImpl::open(fd, false, loop);
         }
 
-        if( _fd < 0 )
+        if( this->fd() < 0 )
             continue;
 
 #ifdef SO_REUSEPORT
-        if (::setsockopt(_fd, SOL_SOCKET, SO_REUSEPORT, (char*)&on, sizeof(on)) < 0)
-		{
-			this->close();
+        if (::setsockopt(this->fd(), SOL_SOCKET, SO_REUSEPORT, (char*)&on, sizeof(on)) < 0)
+        {
+            this->close(loop);
             throw System::SystemError("setsockopt SO_REUSEPORT");
-		}
+        }
 #endif
 
-        if (::setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, (char*)&on, sizeof(on)) < 0)
-		{
-			this->close();
+        if (::setsockopt(this->fd(), SOL_SOCKET, SO_REUSEADDR, (char*)&on, sizeof(on)) < 0)
+        {
+            this->close(loop);
             throw System::SystemError("setsockopt SO_REUSEADDR");
-		}
+        }
 
 #if defined(IPV6_V6ONLY)
         if( it->ai_family == AF_INET6 )
         {
-            if( ::setsockopt(_fd, IPPROTO_IPV6, IPV6_V6ONLY, (const char*) &on, sizeof(on)) < 0 )
+            if( ::setsockopt(this->fd(), IPPROTO_IPV6, IPV6_V6ONLY, (const char*) &on, sizeof(on)) < 0 )
             {
-                this->close();
+                this->close(loop);
                 throw System::SystemError("setsockopt IPV6_V6ONLY failed");
             }
         }
 #endif
 
-        if( ::bind(_fd, it->ai_addr, it->ai_addrlen) == 0 )
+        if( ::bind(this->fd(), it->ai_addr, it->ai_addrlen) == 0 )
         {
             _isBound = true;
             std::memmove(&_servaddr, it->ai_addr, it->ai_addrlen);
-
-            System::EventLoop* loop = _socket.parent();
-            if(loop)
-                this->attach(*loop);
-
             return;
         }
 
         addrInUse = errno == EADDRINUSE;
 
         if( ! _isConnected )
-            this->close();
+            this->close(loop);
     }
 
     if(addrInUse)
@@ -156,7 +150,7 @@ void UdpSocketImpl::bind(const std::string& ipaddr, unsigned short int port, uns
 }
 
 
-void UdpSocketImpl::connect(const AddrInfo& ai)
+void UdpSocketImpl::connect(const AddrInfo& ai, System::EventLoop* loop)
 {
     AddrInfoImpl::const_iterator it = ai.impl()->begin();
     for( ; it != ai.impl()->end(); ++it)
@@ -169,25 +163,25 @@ void UdpSocketImpl::connect(const AddrInfo& ai)
         else if( _isConnected )
         {
             if(it->ai_family != reinterpret_cast <struct sockaddr*>(&_peeraddr)->sa_family)
-                this->close();
+                this->close(loop);
         }
 
-        if( _fd < 0 )
+        if( this->fd() < 0 )
         {
             int fd = socket(it->ai_family, SOCK_DGRAM, 0);
-            IODeviceImpl::open(fd, false);
+            IODeviceImpl::open(fd, false, loop);
         }
 
-        if( _fd < 0 )
+        if( this->fd() < 0 )
             continue;
 
         if( _broadcast)
         {
             const int on = 1;
-            if( 0 > ::setsockopt(_fd, SOL_SOCKET, SO_BROADCAST, (char*)&on, sizeof(on)) )
+            if( 0 > ::setsockopt(this->fd(), SOL_SOCKET, SO_BROADCAST, (char*)&on, sizeof(on)) )
             {
                 if( ! _isBound )
-                    this->close();
+                    this->close(loop);
 
                 throw System::SystemError("setsockopt SO_BROADCAST failed");
             }
@@ -195,19 +189,14 @@ void UdpSocketImpl::connect(const AddrInfo& ai)
 
         std::memmove(&_peeraddr, it->ai_addr, it->ai_addrlen);
 
-        if( 0 == ::connect(_fd, it->ai_addr, it->ai_addrlen) )
+        if( 0 == ::connect(this->fd(), it->ai_addr, it->ai_addrlen) )
         {
             _isConnected = true;
-
-            System::EventLoop* loop = _socket.parent();
-            if(loop)
-                this->attach(*loop);
-
             return;
         }
 
         if( ! _isBound )
-            this->close();
+            this->close(loop);
     }
 
     throw System::IOError("connect failed");
@@ -234,7 +223,7 @@ void UdpSocketImpl::setBroadcast()
 
 void UdpSocketImpl::joinMulticastGroup(const std::string& ipaddr)
 {
-    if( _fd < 0 )
+    if( this->fd() < 0 )
         return;
 
     AddrInfo ai(ipaddr, 0, true);
@@ -249,7 +238,7 @@ void UdpSocketImpl::joinMulticastGroup(const std::string& ipaddr)
 
             req.imr_interface.s_addr = htonl(INADDR_ANY);
 
-            if (::setsockopt(_fd, IPPROTO_IP, IP_ADD_MEMBERSHIP, (char*)&req, sizeof(ip_mreq)) == 0)
+            if (::setsockopt(this->fd(), IPPROTO_IP, IP_ADD_MEMBERSHIP, (char*)&req, sizeof(ip_mreq)) == 0)
             {
                 return; // success
             }
@@ -262,7 +251,7 @@ void UdpSocketImpl::joinMulticastGroup(const std::string& ipaddr)
 
             req.ipv6mr_interface = 0;
 
-            if (::setsockopt(_fd, IPPROTO_IPV6, IPV6_JOIN_GROUP, (char*)&req, sizeof(ipv6_mreq)) == 0)
+            if (::setsockopt(this->fd(), IPPROTO_IPV6, IPV6_JOIN_GROUP, (char*)&req, sizeof(ipv6_mreq)) == 0)
             {
                 return; // success
             }
@@ -276,7 +265,7 @@ void UdpSocketImpl::joinMulticastGroup(const std::string& ipaddr)
 
 void UdpSocketImpl::dropMulticastGroup(const std::string& ipaddr)
 {
-    if( _fd < 0 )
+    if( this->fd() < 0 )
         return;
 
     AddrInfo ai(ipaddr, 0, true);
@@ -291,7 +280,7 @@ void UdpSocketImpl::dropMulticastGroup(const std::string& ipaddr)
 
             req.imr_interface.s_addr = htonl(INADDR_ANY);
 
-            if (::setsockopt(_fd, IPPROTO_IP, IP_DROP_MEMBERSHIP, (char*)&req, sizeof(ip_mreq)) == 0)
+            if (::setsockopt(this->fd(), IPPROTO_IP, IP_DROP_MEMBERSHIP, (char*)&req, sizeof(ip_mreq)) == 0)
             {
                 return; // success
             }
@@ -304,7 +293,7 @@ void UdpSocketImpl::dropMulticastGroup(const std::string& ipaddr)
 
             req.ipv6mr_interface = 0;
 
-            if (::setsockopt(_fd, IPPROTO_IPV6, IPV6_LEAVE_GROUP, (char*)&req, sizeof(ipv6_mreq)) == 0)
+            if (::setsockopt(this->fd(), IPPROTO_IPV6, IPV6_LEAVE_GROUP, (char*)&req, sizeof(ipv6_mreq)) == 0)
             {
                 return; // success
             }
@@ -333,38 +322,6 @@ std::string UdpSocketImpl::getPeerAddr() const
 }
 
 
-size_t UdpSocketImpl::beginRead(char* buffer, size_t n, bool&)
-{
-    assert(buffer != 0);
-
-    System::EventLoop* loop = _device.parent();
-    if( loop && _iohandle)
-    {
-        loop->impl().beginRead( _iohandle );
-    }
-
-    return 0;
-}
-
-
-size_t UdpSocketImpl::endRead(bool& eof)
-{
-    System::EventLoop* loop = _device.parent();
-    if( loop && _iohandle )
-    {
-        loop->impl().endRead( _iohandle );
-    }
-
-    if (_errorPending)
-    {
-        _errorPending = false;
-        throw System::IOError("read error", PT_SOURCEINFO);
-    }
-
-    return this->read( _device.rbuf(), _device.rbuflen(), eof );
-}
-
-
 size_t UdpSocketImpl::read( char* buffer, size_t count, bool& eof )
 {
     ssize_t ret = 0;
@@ -372,7 +329,7 @@ size_t UdpSocketImpl::read( char* buffer, size_t count, bool& eof )
 
     while(true)
     {
-        ret = ::recvfrom( _fd, buffer, count, 0, (sockaddr*)&_peeraddr, &addrlen );
+        ret = ::recvfrom( this->fd(), buffer, count, 0, (sockaddr*)&_peeraddr, &addrlen );
         if(ret > 0)
             break;
 
@@ -396,44 +353,20 @@ size_t UdpSocketImpl::read( char* buffer, size_t count, bool& eof )
 }
 
 
-size_t UdpSocketImpl::beginWrite(const char* buffer, size_t n)
+size_t UdpSocketImpl::beginWrite(System::EventLoop& loop, const char* buffer, size_t n)
 {
-    ssize_t ret = ::sendto( _fd, buffer, n, 0, (sockaddr*)&_peeraddr, sizeof(_peeraddr));
+    ssize_t ret = ::sendto( this->fd(), buffer, n, 0, (sockaddr*)&_peeraddr, sizeof(_peeraddr));
 
-    if(ret > 0)
+    if (ret > 0)
         return static_cast<size_t>(ret);
 
-    System::EventLoop* loop = _device.parent();
-    if( loop && _iohandle)
-    {
-        loop->impl().beginWrite( _iohandle );
-    }
+    if (ret == 0 || errno == ECONNRESET || errno == EPIPE)
+        throw System::IOError("lost connection to peer");
+
+    std::cerr << "IODeviceImpl::beginWrite on handle " << std::endl;
+    loop.impl().beginWrite( &_ioh );
 
     return 0;
-}
-
-
-size_t UdpSocketImpl::endWrite()
-{
-    System::EventLoop* loop = _device.parent();
-    if( loop && _iohandle )
-    {
-        loop->impl().endWrite( _iohandle );
-    }
-
-    if (_errorPending)
-    {
-        _errorPending = false;
-        throw System::IOError("write error", PT_SOURCEINFO);
-    }
-
-    if (_device.wavail() > 0)
-    {
-        size_t n = _device.wavail();
-        return n;
-    }
-
-    return this->write( _device.wbuf(), _device.wbuflen() );
 }
 
 
@@ -444,9 +377,9 @@ size_t UdpSocketImpl::write( const char* buffer, size_t count )
     while(true)
     {
         if(_isConnected)
-            ret = ::write( _fd, buffer, count);
+            ret = ::write( this->fd(), buffer, count);
         else
-            ret = ::sendto( _fd, buffer, count, 0, (sockaddr*)&_peeraddr, sizeof(_peeraddr));
+            ret = ::sendto( this->fd(), buffer, count, 0, (sockaddr*)&_peeraddr, sizeof(_peeraddr));
 
         if(ret >= 0)
             break;

@@ -50,16 +50,18 @@ class TcpSocket;
 class TcpSocketImpl : public System::IODeviceImpl
 {
     private:
-        TcpSocket& _socket;
         bool _isConnected;
         bool _isConnecting;
         struct sockaddr_storage _peeraddr;
         AddrInfo _addrInfo;
         AddrInfoImpl::const_iterator _addrInfoPtr;
 
-        int checkConnect();
+        int checkConnect(System::EventLoop& loop);
+
         void checkPendingError();
-        const char* tryConnect();
+
+        const char* tryConnect(System::EventLoop* loop);
+
         const char* _connectResult;
 
     public:
@@ -67,11 +69,11 @@ class TcpSocketImpl : public System::IODeviceImpl
 
         ~TcpSocketImpl();
 
-        void close();
+        void close(System::EventLoop* loop);
 
-        void cancel();
+        void cancel(System::EventLoop& loop);
 
-        bool run();
+        bool runConnect(System::EventLoop& loop);
 
         std::string getSockAddr() const;
 
@@ -82,15 +84,11 @@ class TcpSocketImpl : public System::IODeviceImpl
 
         void connect(const AddrInfo& addrinfo);
 
-        bool beginConnect(const AddrInfo& addrinfo);
+        bool beginConnect(const AddrInfo& addrinfo, System::EventLoop* loop);
 
-        void endConnect();
+        void endConnect(System::EventLoop& loop);
 
-        void accept(const TcpServer& server, unsigned inherit);
-
-        //void initWait(fd_set& rfds, fd_set& wfds, fd_set& efds);
-
-        //int checkWait(fd_set& rfds, fd_set& wfds, fd_set& efds);
+        void accept(const TcpServer& server, unsigned inherit, System::EventLoop* loop);
 };
 
 } // namespace Net

@@ -31,6 +31,47 @@ namespace System {
 
 class EventLoop;
 
+struct IOHandle
+{
+    IOHandle(Selectable& sel, int fd)
+    : sel(&sel)
+    , fd(fd)
+    , wflags(0)
+    , flags(0)
+    , next(0)
+    , prev(0)
+    {}
+
+    IOHandle(Selectable& sel)
+    : sel(&sel)
+    , fd(-1)
+    , wflags(0)
+    , flags(0)
+    , next(0)
+    , prev(0)
+    {}
+
+    IOHandle()
+    : sel(0)
+    , fd(-1)
+    , wflags(0)
+    , flags(0)
+    , next(0)
+    , prev(0)
+    {}
+
+    bool isOpen() const
+    { return fd != -1; }
+
+    Selectable* sel;
+    int fd;
+    int wflags;
+    int flags;
+    IOHandle* next;
+    IOHandle* prev;
+};
+
+
 class FdImpl
 {
     public:

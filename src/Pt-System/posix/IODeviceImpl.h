@@ -70,7 +70,7 @@ namespace System {
             virtual ~IODeviceImpl();
 
             int fd() const
-            { return _fd; }
+            { return _ioh.fd; }
 
             void setTimeout(std::size_t msecs)
             { _timeout = msecs; }
@@ -78,31 +78,53 @@ namespace System {
             std::size_t timeout() const
             { return _timeout; }
 
-            void open(int fd, bool closeOnExec);
+            void open(int fd, bool closeOnExec, EventLoop* loop);
 
             bool isOpen() const;
 
-            virtual void close();
+            virtual void attach(EventLoop& s);
 
-            virtual size_t beginRead(char* buffer, size_t n, bool& eof);
+            virtual void detach(EventLoop& s);
 
-            virtual size_t endRead(bool& eof);
+            virtual void cancel(EventLoop& loop);
+
+            virtual void close(EventLoop* loop);
+
+            virtual size_t beginRead(EventLoop& loop, char* buffer, size_t n, bool& eof);
+
+            virtual size_t endRead(EventLoop& loop, bool& eof);
 
             virtual size_t read( char* buffer, size_t count, bool& eof );
 
-            virtual size_t beginWrite(const char* buffer, size_t n);
+            virtual size_t beginWrite(EventLoop& loop, const char* buffer, size_t n);
 
-            virtual size_t endWrite();
+            virtual size_t endWrite(EventLoop& loop);
 
             virtual size_t write( const char* buffer, size_t count );
-
-            virtual void cancel();
-
+            
             virtual void sync() const;
 
-            //virtual bool wait(std::size_t msecs);
-
             virtual bool wait(std::size_t msecs, fd_set* rfds, fd_set* wfds, fd_set* efds);
+
+            bool runRead(EventLoop& loop);
+
+            bool runWrite(EventLoop& loop);
+
+            //void open(int fd, bool closeOnExec);
+
+            //virtual void close();
+
+            //virtual void cancel();
+            
+            //virtual size_t beginRead(char* buffer, size_t n, bool& eof);
+
+            //virtual size_t endRead(bool& eof);
+
+            //virtual size_t beginWrite(const char* buffer, size_t n);
+
+            //virtual size_t endWrite();
+
+            //virtual bool wait(std::size_t msecs);
 
             //virtual void initWait(fd_set& rfds, fd_set& wfds, fd_set& efds);
 
@@ -112,20 +134,16 @@ namespace System {
 
             //virtual int checkWait(fd_set& rfds, fd_set& wfds, fd_set& efds);
 
-            virtual void attach(EventLoop& s);
+            //virtual void attach(EventLoop& s);
 
-            virtual void detach(EventLoop& s);
+            //virtual void detach(EventLoop& s);
 
-            virtual bool run();
+            //virtual bool run();
 
         protected:
             IODevice& _device;
-            IOHandle* _iohandle;
-            int _fd;
+            IOHandle _ioh;
             std::size_t _timeout;
-            //fd_set* _rfds;
-            //fd_set* _wfds;
-            //fd_set* _efds;
             DestructionSentry* _sentry;
             bool _errorPending;
     };

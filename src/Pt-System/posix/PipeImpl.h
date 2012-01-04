@@ -34,6 +34,7 @@
 #include <Pt/System/Api.h>
 #include <Pt/System/IODevice.h>
 #include <unistd.h>
+#include <cerrno>
 
 namespace Pt {
 
@@ -58,17 +59,13 @@ class PipeIODevice : public Pt::System::IODevice
     protected:
         void open(int fd);
 
-        void onClose()
-        { _impl.close(); }
+        void onClose();
 
-        void onAttach(EventLoop& loop)
-        { _impl.attach(loop); }
+        void onAttach(EventLoop& loop);
 
-        void onDetach(EventLoop& loop)
-        { _impl.detach(loop); }
+        void onDetach(EventLoop& loop);
 
-        bool onRun()
-        { return _impl.run(); }
+        bool onRun();
 
         size_t onBeginRead(char* buffer, size_t n, bool& eof);
 
@@ -85,9 +82,6 @@ class PipeIODevice : public Pt::System::IODevice
         void onCancel();
 
         void onSync() const;
-
-        IODeviceImpl& ioimpl()
-        { return _impl; }
 
     private:
         IODeviceImpl _impl;

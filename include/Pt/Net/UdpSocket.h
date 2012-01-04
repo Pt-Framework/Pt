@@ -81,9 +81,6 @@ class PT_NET_API UdpSocket : public System::IODevice
         virtual void onClose();
 
         // inherit doc
-        virtual bool onWait(std::size_t msecs);
-
-        // inherit doc
         virtual void onAttach(System::EventLoop&);
 
         // inherit doc
@@ -111,10 +108,6 @@ class PT_NET_API UdpSocket : public System::IODevice
 
         // inherit doc
         virtual void onCancel();
-
-    public:
-        // inherit doc
-        virtual System::IODeviceImpl& ioimpl();
 };
 
 } // namespace Net

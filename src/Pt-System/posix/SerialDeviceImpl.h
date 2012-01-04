@@ -39,9 +39,9 @@ class SerialDeviceImpl : public IODeviceImpl
 
         ~SerialDeviceImpl();
 
-        void open(const std::string& path, IODevice::OpenMode mode);
+        void open(const std::string& path, IODevice::OpenMode mode, EventLoop* loop);
 
-        void close();
+        void close(EventLoop* loop);
 
         void setBaudRate( unsigned rate );
 

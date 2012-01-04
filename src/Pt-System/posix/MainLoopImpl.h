@@ -24,6 +24,7 @@
 #include "Pt/System/IODevice.h"
 #include "Pt/System/Clock.h"
 #include "Pt/System/EventLoop.h"
+#include "IODeviceImpl.h"
 #include <sys/select.h>
 #include <set>
 #include <list>
@@ -32,25 +33,6 @@
 namespace Pt {
 
 namespace System {
-
-struct IOHandle
-{
-    IOHandle(Selectable& sel, int fd)
-    : sel(&sel)
-    , fd(fd)
-    , wflags(0)
-    , flags(0)
-    , next(0)
-    , prev(0)
-    {}
-
-    Selectable* sel;
-    int fd;
-    int wflags;
-    int flags;
-    IOHandle* next;
-    IOHandle* prev;
-};
 
 class EventLoopImpl : public EventDispatcher
 {
@@ -66,42 +48,38 @@ class EventLoopImpl : public EventDispatcher
 
         ~EventLoopImpl();
 
-        IOHandle* enable(Selectable& s, int fd)
+        void enable(IOHandle& h)
         {
-            std::cerr << "# enable fd: " << fd << std::endl;
-            _devices.insert( &s );
+            std::cerr << "# enable fd: " << h.fd << std::endl;
+            _devices.insert( h.sel );
 
-            if( fd > FD_SETSIZE )
+            if( h.fd > FD_SETSIZE )
                 throw System::IOError( PT_ERROR_MSG("FD_SETSIZE too small for fd") );
 
             // no change required, move to back
-            IOHandle* h = new IOHandle(s, fd);
-            push_back(h);
-            FD_SET(h->fd, &_efds);
-
-            return h;
+            push_back(&h);
+            FD_SET(h.fd, &_efds);
         }
 
-        void disable(IOHandle* h)
+        void disable(IOHandle& h)
         {
-            std::cerr << "# disable fd: " << h->fd << std::endl;
-           std::set<Selectable*>::iterator it = _devices.find( h->sel );
+            std::cerr << "# disable fd: " << h.fd << std::endl;
+           std::set<Selectable*>::iterator it = _devices.find( h.sel );
            if( it == _devices.end() )
                 return;
 
-            if( h->fd > 0)
+            if( h.fd > 0)
             {
-                if(h->wflags & Input)
-                    FD_CLR(h->fd, &_rfds);
+                if(h.wflags & Input)
+                    FD_CLR(h.fd, &_rfds);
 
-                if(h->wflags & Output)
-                    FD_CLR(h->fd, &_wfds);
+                if(h.wflags & Output)
+                    FD_CLR(h.fd, &_wfds);
 
-                FD_CLR(h->fd, &_efds);
+                FD_CLR(h.fd, &_efds);
             }
 
-            pop(h);
-            delete h;
+            pop(&h);
 
             if( _current == _devices.end() )
             {
@@ -117,15 +95,15 @@ class EventLoopImpl : public EventDispatcher
             }
         }
 
-        void cancel(IOHandle* h)
+        void cancel(IOHandle& h)
         {
-            if(h->flags)
+            if(h.flags)
             {
-                h->flags = 0;
+                h.flags = 0;
     
                 // update before next wait, move to front
-                pop(h);
-                push_front(h);
+                pop(&h);
+                push_front(&h);
             }
         }
 

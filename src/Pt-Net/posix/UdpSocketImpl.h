@@ -57,11 +57,11 @@ class UdpSocketImpl : public System::IODeviceImpl
 
         ~UdpSocketImpl();
 
-        void close();
+        void close(System::EventLoop* loop);
 
-        void bind(const std::string& ipaddr, unsigned short int port, unsigned flags);
+        void bind(const std::string& ipaddr, unsigned short int port, unsigned flags, System::EventLoop* loop);
 
-        void connect(const AddrInfo& addrinfo);
+        void connect(const AddrInfo& addrinfo, System::EventLoop* loop);
 
         bool isConnected() const;
 
@@ -75,22 +75,15 @@ class UdpSocketImpl : public System::IODeviceImpl
 
         std::string getSockAddr() const;
 
-		std::string getPeerAddr() const;
-
-        size_t beginRead(char* buffer, size_t n, bool& eof);
+        std::string getPeerAddr() const;
 
         size_t read(char* buffer, size_t count, bool& eof);
 
-        size_t endRead(bool& eof);
-
-        size_t beginWrite(const char* buffer, size_t n);
+        size_t beginWrite(System::EventLoop& loop, const char* buffer, size_t n);
 
         size_t write(const char* buffer, size_t n);
 
-        size_t endWrite();
-
     private:
-        UdpSocket&                   _socket;
         bool                         _broadcast;
         bool                         _isConnected;
         bool                         _isBound;

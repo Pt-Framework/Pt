@@ -47,7 +47,7 @@ FileDeviceImpl::~FileDeviceImpl()
 { }
 
 
-void FileDeviceImpl::open( const char* path, IODevice::OpenMode mode)
+void FileDeviceImpl::open( const char* path, IODevice::OpenMode mode, EventLoop* loop)
 {
     int flags = O_RDONLY;
 
@@ -68,18 +68,20 @@ void FileDeviceImpl::open( const char* path, IODevice::OpenMode mode)
     if(mode & IODevice::Trunc)
         flags |= O_TRUNC;
 
-    _fd = ::open(path, flags, 0644);
-    if(_fd == -1)
+    int fd = ::open(path, flags, 0644);
+    if(fd == -1)
     {
         throw FileNotFound(path, PT_SOURCEINFO);
     }
+
+    IODeviceImpl::open(fd, false, loop);
 
     try {
         if(mode & IODevice::AtEnd)
             this->seek(0, std::ios::end);
     }
     catch(...) {
-        this->close();
+        this->close(loop);
         throw;
     }
 }
@@ -89,7 +91,7 @@ bool FileDeviceImpl::seekable() const
 {
     struct stat s;
 
-    int ret = fstat(_fd, &s);
+    int ret = fstat(_ioh.fd, &s);
     if(ret == 0)
     {
         if(S_ISREG(s.st_mode) || S_ISBLK(s.st_mode))
@@ -121,7 +123,7 @@ FileDeviceImpl::pos_type FileDeviceImpl::seek(off_type offset, std::ios::seekdir
             break;
     }
 
-    off_t ret = lseek(_fd, offset, whence);
+    off_t ret = lseek(fd(), offset, whence);
     if( ret == (off_t)-1 )
         throw IOError( PT_ERROR_MSG("lseek failed") );
 
@@ -131,7 +133,7 @@ FileDeviceImpl::pos_type FileDeviceImpl::seek(off_type offset, std::ios::seekdir
 
 void FileDeviceImpl::resize(off_type size)
 {
-    int ret = ::ftruncate(_fd, size);
+    int ret = ::ftruncate(fd(), size);
     if(ret != 0)
         throw IOError( PT_ERROR_MSG("ftruncate failed") );
 
@@ -141,7 +143,7 @@ void FileDeviceImpl::resize(off_type size)
 size_t FileDeviceImpl::size()
 {
     struct stat buff;
-    int ret = fstat(_fd, &buff);
+    int ret = fstat(fd(), &buff);
     if(ret != 0)
         throw IOError( PT_ERROR_MSG("fstat failed") );
 

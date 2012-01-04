@@ -28,6 +28,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "PipeImpl.h"
+#include "MainLoopImpl.h"
 #include "Pt/System/SystemError.h"
 #include <memory>
 #include <cerrno>
@@ -54,43 +55,100 @@ PipeIODevice::~PipeIODevice()
     {}
 }
 
-void PipeIODevice::redirect(int newFd, bool close)
-{
-    int ret = ::dup2(fd(), newFd);
-    if (ret < 0)
-        throw SystemError("dup2");
-
-    if (close)
-    {
-        IODevice::close();
-        // last arg is true, because FD_CLOEXEC should not be set on fds 0,1,2
-        _impl.open(newFd, true);
-    }
-}
-
-
-void PipeIODevice::sigwrite( int signo )
-{
-    ::write(fd(), (const void*)&signo, sizeof(int));
-}
-
 
 void PipeIODevice::open(int fd)
 {
-    _impl.open(fd, false);
-    this->setEof(false);
+    _impl.open(fd, false, parent());
+
+//  _impl.open2(fd, false);
+//
+//  if( this->isActive() )
+//      _impl.enable( *parent() );
+}
+
+
+void PipeIODevice::onClose()
+{ 
+    _impl.close( parent() );
+
+//  if( _impl.isOpen() )
+//  {
+//      if( this->isActive() )
+//          _impl.disable( *parent() );
+//
+//      _impl.close2();
+//  }
+}
+
+
+void PipeIODevice::onAttach(EventLoop& loop)
+{ 
+    //if( _impl.isOpen() )
+    //{
+    //    _impl.enable(loop); 
+    //}
+
+    _impl.attach(loop); 
+}
+
+
+void PipeIODevice::onDetach(EventLoop& loop)
+{
+    //if( _impl.isOpen() ) // isOpen()
+    //{
+    //    _impl.disable(loop); 
+    //}
+
+    _impl.detach(loop);
+}
+
+
+bool PipeIODevice::onRun()
+{ 
+    //return _impl.run(); 
+
+    if( this->reading() )
+    {
+        if( _ravail || _impl.runRead( *parent() ) )
+        {
+            inputReady().send(*this);
+            return true;
+        }
+    }
+
+    if( this->writing() )
+    {
+        if( _wavail || _impl.runWrite( *parent() ) )
+        {
+            outputReady().send(*this);
+            return false;
+        }
+    }
+
+    return false;
+}
+
+
+void PipeIODevice::onCancel()
+{
+    if( isActive() )
+    {
+        _impl.cancel( *parent() );
+    }
+
+    IODevice::onCancel();
 }
 
 
 size_t PipeIODevice::onBeginRead(char* buffer, size_t n, bool& eof)
 {
-    return _impl.beginRead(buffer, n, eof);
+    return _impl.beginRead(*parent(), buffer, n, eof);
 }
 
 
 size_t PipeIODevice::onEndRead(bool& eof)
 {
-    return _impl.endRead(eof);
+    return _impl.endRead(*parent(), eof);
 }
 
 
@@ -102,13 +160,13 @@ size_t PipeIODevice::onRead(char* buffer, size_t count, bool& eof)
 
 size_t PipeIODevice::onBeginWrite(const char* buffer, size_t n)
 {
-    return _impl.beginWrite(buffer, n);
+    return _impl.beginWrite(*parent(), buffer, n);
 }
 
 
 size_t PipeIODevice::onEndWrite()
 {
-    return _impl.endWrite();
+    return _impl.endWrite(*parent());
 }
 
 
@@ -118,16 +176,30 @@ size_t PipeIODevice::onWrite(const char* buffer, size_t count)
 }
 
 
-void PipeIODevice::onCancel()
-{
-    _impl.cancel();
-    IODevice::onCancel();
-}
-
-
 void PipeIODevice::onSync() const
 {
     _impl.sync();
+}
+
+
+void PipeIODevice::redirect(int newFd, bool close)
+{
+    int ret = ::dup2(fd(), newFd);
+    if (ret < 0)
+        throw SystemError("dup2");
+
+    if (close)
+    {
+        IODevice::close();
+        // second arg is true, because FD_CLOEXEC should not be set on fds 0,1,2
+        _impl.open(newFd, true, parent());
+    }
+}
+
+
+void PipeIODevice::sigwrite( int signo )
+{
+    ::write(fd(), (const void*)&signo, sizeof(int));
 }
 
 

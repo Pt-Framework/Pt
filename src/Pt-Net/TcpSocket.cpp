@@ -126,12 +126,7 @@ void TcpSocket::accept(const TcpServer& server, unsigned flags)
 {
     this->close();
 
-    _impl->accept(server, flags);
-
-    //if( this->isActive() )
-    //{
-    //    this->parent()->impl().enable(*this, *_impl);
-    //}
+    _impl->accept(server, flags, parent());
 }
 
 
@@ -149,7 +144,7 @@ bool TcpSocket::beginConnect(const AddrInfo& addrinfo)
 
     this->close();
 
-    bool ret = _impl->beginConnect(addrinfo);
+    bool ret = _impl->beginConnect(addrinfo, parent());
     if(ret)
         connected(*this);
 
@@ -161,7 +156,7 @@ void TcpSocket::endConnect()
 {
     try
     {
-        _impl->endConnect();
+        _impl->endConnect( *parent() );
     }
     catch (...)
     {
@@ -179,17 +174,12 @@ bool TcpSocket::isConnected() const
 
 void TcpSocket::onClose()
 {
-    _impl->close();
+    _impl->close( parent() );
 }
 
 
 void TcpSocket::onAttach(System::EventLoop& sb)
 {
-    //if( this->isConnected() )
-    //{
-    //    this->parent()->impl().enable(*this, *_impl);
-    //}
-
     _impl->attach(sb);
 }
 
@@ -202,7 +192,38 @@ void TcpSocket::onDetach(System::EventLoop& sb)
 
 bool TcpSocket::onRun()
 {
-    return _impl->run();
+    //return _impl->run();
+
+    if( ! this->isConnected() )
+    {
+        if( _impl->runConnect( *parent() ) )
+        {
+            connected.send(*this);
+            return true;
+        }
+
+        return false;
+    }
+
+    if( this->reading() )
+    {
+        if( _ravail || _impl->runRead( *parent() ) )
+        {
+            inputReady().send(*this);
+            return true;
+        }
+    }
+
+    if( this->writing() )
+    {
+        if( _wavail || _impl->runWrite( *parent() ) )
+        {
+            outputReady().send(*this);
+            return false;
+        }
+    }
+
+    return false;
 }
 
 
@@ -211,13 +232,13 @@ size_t TcpSocket::onBeginRead(char* buffer, size_t n, bool& eof)
     if (!_impl->isConnected())
         throw System::IOPending( PT_ERROR_MSG("connect operation pending") );
 
-    return _impl->beginRead(buffer, n, eof);
+    return _impl->beginRead(*parent(), buffer, n, eof);
 }
 
 
 size_t TcpSocket::onEndRead(bool& eof)
 {
-    return _impl->endRead(eof);
+    return _impl->endRead(*parent(), eof);
 }
 
 
@@ -232,13 +253,13 @@ size_t TcpSocket::onBeginWrite(const char* buffer, size_t n)
     if (!_impl->isConnected())
         throw System::IOPending( PT_ERROR_MSG("connect operation pending") );
 
-    return _impl->beginWrite(buffer, n);
+    return _impl->beginWrite(*parent(), buffer, n);
 }
 
 
 size_t TcpSocket::onEndWrite()
 {
-    return _impl->endWrite();
+    return _impl->endWrite(*parent());
 }
 
 
@@ -250,15 +271,12 @@ size_t TcpSocket::onWrite(const char* buffer, size_t count)
 
 void TcpSocket::onCancel()
 {
-    _impl->cancel();
+    if( isActive() )
+    {
+        _impl->cancel( *parent() );
+    }
+
     IODevice::onCancel();
-}
-
-
-System::IODeviceImpl& TcpSocket::ioimpl()
-{
-	System::IODeviceImpl* dev = (System::IODeviceImpl*)  _impl;
-    return *dev;
 }
 
 } // namespace Net

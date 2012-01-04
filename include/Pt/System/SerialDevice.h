@@ -187,8 +187,6 @@ class PT_SYSTEM_API SerialDevice : public IODevice
         //! @brief Transmit the current buffered characters.
         void flush();
 
-        virtual IODeviceImpl& ioimpl();
-
     protected:
         void onClose();
 

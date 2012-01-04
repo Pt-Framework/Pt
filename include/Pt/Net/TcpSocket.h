@@ -121,10 +121,6 @@ class PT_NET_API TcpSocket : public System::IODevice
 
         // inherit doc
         virtual void onCancel();
-
-    public:
-        // inherit doc
-        virtual System::IODeviceImpl& ioimpl();
 };
 
 } // namespace Net

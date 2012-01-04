@@ -58,14 +58,14 @@ UdpSocket::~UdpSocket()
 
 void UdpSocket::bind(const std::string& ipaddr, unsigned short int port, unsigned flags)
 {
-    _impl->bind(ipaddr, port, flags);
+    _impl->bind(ipaddr, port, flags, parent());
     this->setEof(false);
 }
 
 
 void UdpSocket::connect(const AddrInfo& addrinfo)
 {
-    _impl->connect(addrinfo);
+    _impl->connect(addrinfo, parent());
     this->setEof(false);
 }
 
@@ -126,13 +126,7 @@ std::size_t UdpSocket::timeout() const
 
 void UdpSocket::onClose()
 {
-    _impl->close();
-}
-
-
-bool UdpSocket::onWait(std::size_t msecs)
-{
-    return false;
+    _impl->close( parent() );
 }
 
 
@@ -150,7 +144,25 @@ void UdpSocket::onDetach(System::EventLoop& loop)
 
 bool UdpSocket::onRun()
 {
-    return _impl->run();
+    if( this->reading() )
+    {
+        if( _ravail || _impl->runRead( *parent() ) )
+        {
+            inputReady().send(*this);
+            return true;
+        }
+    }
+
+    if( this->writing() )
+    {
+        if( _wavail || _impl->runWrite( *parent() ) )
+        {
+            outputReady().send(*this);
+            return false;
+        }
+    }
+
+    return false;
 }
 
 
@@ -159,13 +171,13 @@ size_t UdpSocket::onBeginRead(char* buffer, size_t n, bool& eof)
     if( ! _impl->isConnected() && ! _impl->isBound() )
         throw System::IOError("socket not connected");
 
-    return _impl->beginRead(buffer, n, eof);
+    return _impl->beginRead(*parent(), buffer, n, eof);
 }
 
 
 size_t UdpSocket::onEndRead(bool& eof)
 {
-    return _impl->endRead(eof);
+    return _impl->endRead(*parent(), eof);
 }
 
 
@@ -180,13 +192,13 @@ size_t UdpSocket::onBeginWrite(const char* buffer, size_t n)
     if( ! _impl->isConnected() && ! _impl->isBound() )
         throw System::IOError("socket not connected");
 
-    return _impl->beginWrite(buffer, n);
+    return _impl->beginWrite(*parent(), buffer, n);
 }
 
 
 size_t UdpSocket::onEndWrite()
 {
-    return _impl->endWrite();
+    return _impl->endWrite(*parent());
 }
 
 
@@ -198,19 +210,12 @@ size_t UdpSocket::onWrite(const char* buffer, size_t count)
 
 void UdpSocket::onCancel()
 {
-    if(_impl->isConnected() || _impl->isBound() )
+    if(this->isActive() && (_impl->isConnected() || _impl->isBound()) )
     {
-        _impl->cancel();
+        _impl->cancel( *parent() );
     }
 
     IODevice::onCancel();
-}
-
-
-System::IODeviceImpl& UdpSocket::ioimpl()
-{
-	System::IODeviceImpl* dev = (System::IODeviceImpl*) _impl;
-    return *dev;
 }
 
 } //namespace Net

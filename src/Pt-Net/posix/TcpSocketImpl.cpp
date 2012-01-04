@@ -74,7 +74,6 @@ namespace Net {
 
 TcpSocketImpl::TcpSocketImpl(TcpSocket& socket)
 : System::IODeviceImpl(socket)
-, _socket(socket)
 , _isConnected(false)
 , _isConnecting(false)
 {
@@ -83,54 +82,51 @@ TcpSocketImpl::TcpSocketImpl(TcpSocket& socket)
 
 TcpSocketImpl::~TcpSocketImpl()
 {
-    //assert(_rfds == 0);
-    //assert(_wfds == 0);
 }
 
 
-void TcpSocketImpl::close()
+void TcpSocketImpl::close(System::EventLoop* loop)
 {
-    log_debug("close socket " << _fd);
-    System::IODeviceImpl::close();
+    log_debug("close socket " << fd());
+    System::IODeviceImpl::close(loop);
     _isConnected = false;
     _isConnecting = false;
 }
 
 
-void TcpSocketImpl::cancel()
+void TcpSocketImpl::cancel(System::EventLoop& loop)
 {
     _isConnecting = false;
-    IODeviceImpl::cancel();
+    IODeviceImpl::cancel(loop);
 }
 
 
-void TcpSocketImpl::accept(const TcpServer& server, unsigned flags)
+void TcpSocketImpl::accept(const TcpServer& server, unsigned flags, System::EventLoop* loop)
 {
     bool inherit = (flags & TcpSocket::INHERIT) != 0;
     socklen_t peeraddr_len = sizeof(_peeraddr);
 
     log_debug( "accept " << server.impl().fd() );
-    _fd = ::accept(server.impl().fd(), reinterpret_cast <struct sockaddr*>(&_peeraddr), &peeraddr_len);
-    if( _fd < 0 )
+    int fd = ::accept(server.impl().fd(), reinterpret_cast <struct sockaddr*>(&_peeraddr), &peeraddr_len);
+    if( fd < 0 )
       throw System::SystemError("accept");
 
-    System::IODeviceImpl::open(_fd, inherit);
+    System::IODeviceImpl::open(fd, inherit, loop);
     //TODO ECONNABORTED EINTR EPERM
 
     _isConnected = true;
-    log_debug( "accepted " << server.impl().fd() << " => " << _fd );
+    log_debug( "accepted " << server.impl().fd() << " => " << this->fd() );
 }
 
 
 void TcpSocketImpl::connect(const AddrInfo& addrInfo)
 {
     log_debug("connect");
-    this->beginConnect(addrInfo);
-    this->endConnect();
+    throw std::logic_error("posix tcp connect not implemented");
 }
 
 
-bool TcpSocketImpl::beginConnect(const AddrInfo& addrInfo)
+bool TcpSocketImpl::beginConnect(const AddrInfo& addrInfo, System::EventLoop* loop)
 {
     log_trace("begin connect");
 
@@ -138,16 +134,15 @@ bool TcpSocketImpl::beginConnect(const AddrInfo& addrInfo)
 
     _addrInfo = addrInfo;
     _addrInfoPtr = _addrInfo.impl()->begin();
-    _connectResult = tryConnect();
+    _connectResult = tryConnect(loop);
     checkPendingError();
 
-    if(_socket.isActive() && _isConnecting )
+    if(loop && _isConnecting )
     {
-        System::EventLoop* loop = _socket.parent();
         if( ! _isConnected )
         {
             log_trace("IODeviceImpl::beginConnect on handle");
-            loop->impl().beginWrite( _iohandle );
+            loop->impl().beginWrite( &_ioh );
         }
         else
         {
@@ -159,7 +154,7 @@ bool TcpSocketImpl::beginConnect(const AddrInfo& addrInfo)
 }
 
 
-int TcpSocketImpl::checkConnect()
+int TcpSocketImpl::checkConnect(System::EventLoop& loop)
 {
     log_trace("checkConnect");
 
@@ -170,7 +165,7 @@ int TcpSocketImpl::checkConnect()
     if( ::getsockopt(this->fd(), SOL_SOCKET, SO_ERROR, &sockerr, &optlen) != 0 )
     {
         // getsockopt failed
-        close();
+        close(&loop);
         throw System::SystemError("getsockopt");
     }
 
@@ -194,11 +189,11 @@ void TcpSocketImpl::checkPendingError()
 }
 
 
-const char* TcpSocketImpl::tryConnect()
+const char* TcpSocketImpl::tryConnect(System::EventLoop* loop)
 {
     log_trace("tryConnect");
 
-    assert(_fd == -1);
+    assert(fd() == -1);
 
     if (_addrInfoPtr == _addrInfo.impl()->end())
     {
@@ -220,11 +215,11 @@ const char* TcpSocketImpl::tryConnect()
                 return "socket";
         }
 
-        IODeviceImpl::open(fd, false);
+        IODeviceImpl::open(fd, false, loop);
 
         std::memmove(&_peeraddr, _addrInfoPtr->ai_addr, _addrInfoPtr->ai_addrlen);
 
-        log_debug("created socket " << _fd << " max: " << FD_SETSIZE);
+        log_debug("created socket " << this->fd() << " max: " << FD_SETSIZE);
 
         if( ::connect(this->fd(), _addrInfoPtr->ai_addr, _addrInfoPtr->ai_addrlen) == 0 )
         {
@@ -241,7 +236,7 @@ const char* TcpSocketImpl::tryConnect()
             break;
         }
 
-        close();
+        close(loop);
         if (++_addrInfoPtr == _addrInfo.impl()->end())
             return "connect";
     }
@@ -250,16 +245,14 @@ const char* TcpSocketImpl::tryConnect()
 }
 
 
-void TcpSocketImpl::endConnect()
+void TcpSocketImpl::endConnect(System::EventLoop& loop)
 {
     log_trace("ending connect");
 
-    System::EventLoop* loop = _device.parent();
-    if( loop && _iohandle && ! _socket.wbuf() )
-    {
-        loop->impl().endWrite( _iohandle );
-    }
-
+    //if( ! _socket.wbuf() )
+    //{
+        loop.impl().endWrite( &_ioh );
+    //}
 
     checkPendingError();
 
@@ -281,7 +274,7 @@ void TcpSocketImpl::endConnect()
             if (avail)
             {
                 // something has happened
-                checkConnect();
+                checkConnect(loop);
                 if (_isConnected)
                     return;
 
@@ -297,9 +290,9 @@ void TcpSocketImpl::endConnect()
                 throw System::IOTimeout();
             }
 
-            close();
+            close(&loop);
 
-            _connectResult = tryConnect();
+            _connectResult = tryConnect(&loop);
             if (_isConnected)
                 return;
             checkPendingError();
@@ -307,13 +300,100 @@ void TcpSocketImpl::endConnect()
     }
     catch(...)
     {
-        close();
+        close(&loop);
         throw;
     }
 }
 
 
-bool TcpSocketImpl::run()
+bool TcpSocketImpl::runConnect(System::EventLoop& loop)
+{
+    if(_isConnected)
+        return false;
+
+    System::EventLoopImpl& impl = loop.impl();
+
+    if( impl.isError(&_ioh) )
+    {
+        AddrInfoImpl::const_iterator ptr = _addrInfoPtr;
+        if (++ptr == _addrInfo.impl()->end())
+        {
+            // not really connected but error
+            // end of addrinfo list means that no working addrinfo was found
+            std::cerr << "########### CONNECT FAIL" << std::endl;
+            return true;
+        }
+        else
+        {
+            _addrInfoPtr = ptr;
+
+            close(&loop);
+            _connectResult = tryConnect(&loop);
+
+            if (_isConnected || _connectResult)
+                // immediate success or error
+                return true;
+            else
+                // by closing the previous file handle _pfd is set to 0.
+                // creating a new socket in tryConnect may also change the value of fd.
+                // TODO: handle this differently, without loosing the socket fd...
+                throw std::logic_error("posix tcp socket impl reconnect not implemented");
+
+            return _isConnected;
+        }
+    }
+    else if( impl.isWritable(&_ioh)  )
+    {
+        std::cerr << "########### WRITABLE" << std::endl;
+        int sockerr = checkConnect(loop);
+        if (_isConnected)
+        {
+            return true;
+        }
+
+        // something went wrong - look for next addrInfo
+        log_debug("sockerr is " << sockerr << " try next");
+        if (++_addrInfoPtr == _addrInfo.impl()->end())
+        {
+            // no more addrInfo - propagate error
+            _connectResult = "connect failed";
+            return true;
+        }
+
+        _connectResult = tryConnect(&loop);
+        if (_isConnected)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+
+std::string TcpSocketImpl::getSockAddr() const
+{
+    struct sockaddr_storage addr;
+
+    socklen_t slen = sizeof(addr);
+    if (::getsockname(fd(), reinterpret_cast<struct sockaddr*>(&addr), &slen) < 0)
+        throw System::SystemError("getsockname");
+
+    std::string ret;
+    formatIp(addr, ret);
+    return ret;
+}
+
+
+std::string TcpSocketImpl::getPeerAddr() const
+{
+    std::string ret;
+    formatIp(_peeraddr, ret);
+    return ret;
+}
+
+
+/*bool TcpSocketImpl::run()
 {
     std::cerr << "########### RUN" << std::endl;
 
@@ -338,7 +418,7 @@ bool TcpSocketImpl::run()
             _addrInfoPtr = ptr;
 
             close();
-            _connectResult = tryConnect();
+            _connectResult = tryConnect(0);
 
             if (_isConnected || _connectResult)
                 // immediate success or error
@@ -372,7 +452,7 @@ bool TcpSocketImpl::run()
             return true;
         }
 
-        _connectResult = tryConnect();
+        _connectResult = tryConnect(0);
         if (_isConnected)
         {
             _socket.connected.send(_socket);
@@ -381,29 +461,7 @@ bool TcpSocketImpl::run()
     }
 
     return false;
-}
-
-
-std::string TcpSocketImpl::getSockAddr() const
-{
-    struct sockaddr_storage addr;
-
-    socklen_t slen = sizeof(addr);
-    if (::getsockname(fd(), reinterpret_cast<struct sockaddr*>(&addr), &slen) < 0)
-        throw System::SystemError("getsockname");
-
-    std::string ret;
-    formatIp(addr, ret);
-    return ret;
-}
-
-
-std::string TcpSocketImpl::getPeerAddr() const
-{
-    std::string ret;
-    formatIp(_peeraddr, ret);
-    return ret;
-}
+}*/
 
 
 /*void TcpSocketImpl::initWait(fd_set& rfds, fd_set& wfds, fd_set& efds)

@@ -62,7 +62,7 @@ SerialDeviceImpl::~SerialDeviceImpl()
 }
 
 
-void SerialDeviceImpl::open(const std::string& path, IODevice::OpenMode mode)
+void SerialDeviceImpl::open(const std::string& path, IODevice::OpenMode mode, EventLoop* loop)
 {
     int flags = O_RDONLY;
 
@@ -86,11 +86,14 @@ void SerialDeviceImpl::open(const std::string& path, IODevice::OpenMode mode)
 
     flags |=  O_NOCTTY;
 
-    _fd = ::open( path.c_str(), flags );
-    if( -1 == _fd )
+    int fd = ::open( path.c_str(), flags );
+    if( -1 == fd )
     {
         throw DeviceNotFound(path, PT_SOURCEINFO);
     }
+
+    // TODO: exception safety
+    IODeviceImpl::open(fd, false, loop);
 
     struct termios ios;
     if( ::tcgetattr( IODeviceImpl::fd(), &ios) == -1 )
@@ -113,13 +116,13 @@ void SerialDeviceImpl::open(const std::string& path, IODevice::OpenMode mode)
 }
 
 
-void SerialDeviceImpl::close()
+void SerialDeviceImpl::close(EventLoop* loop)
 {
     if( IODeviceImpl::fd() != -1)
     {
         ::tcsetattr( IODeviceImpl::fd(), TCSANOW, &_prevIos );
 
-        IODeviceImpl::close();
+        IODeviceImpl::close(loop);
     }
 }
 

@@ -58,8 +58,6 @@ class PT_SYSTEM_API FileDevice : public IODevice
 
         size_t size() const;
 
-        virtual IODeviceImpl& ioimpl();
-
     protected:
         size_t onBeginRead(char* buffer, size_t n, bool& eof);
 

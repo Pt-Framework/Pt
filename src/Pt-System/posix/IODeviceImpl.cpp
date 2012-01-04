@@ -39,12 +39,12 @@ namespace System {
 
 IODeviceImpl::IODeviceImpl(IODevice& device)
 : _device(device)
-, _iohandle(0)
-, _fd(-1)
+, _ioh(device)
 , _timeout(System::Selectable::WaitInfinite)
 , _sentry(0)
 , _errorPending(false)
-{ }
+{ 
+}
 
 
 IODeviceImpl::~IODeviceImpl()
@@ -54,50 +54,47 @@ IODeviceImpl::~IODeviceImpl()
 }
 
 
-void IODeviceImpl::open(int fd, bool inherit)
-{
-    _fd = fd;
-
-    int flags = fcntl(_fd, F_GETFL);
-    flags |= O_NONBLOCK ;
-    int ret = fcntl(_fd, F_SETFL, flags);
-    if(-1 == ret)
-        throw IOError(PT_ERROR_MSG("Could not set fd to non-blocking"));
-
-    if ( ! inherit)
-    {
-        int flags = fcntl(_fd, F_GETFD);
-        flags |= FD_CLOEXEC ;
-        int ret = fcntl(_fd, F_SETFD, flags);
-        if(-1 == ret)
-            throw IOError(PT_ERROR_MSG("Could not set FD_CLOEXEC"));
-    }
-
-    if( _device.isActive() )
-        _iohandle = _device.parent()->impl().enable(_device, this->fd());
-}
-
-
 bool IODeviceImpl::isOpen() const
 {
     return this->fd() != -1;
 }
 
 
-void IODeviceImpl::close()
+void IODeviceImpl::open(int fd, bool inherit, EventLoop* loop)
+{
+    _ioh.fd = fd;
+
+    int flags = fcntl(this->fd(), F_GETFL);
+    flags |= O_NONBLOCK ;
+    int ret = fcntl(this->fd(), F_SETFL, flags);
+    if(-1 == ret)
+        throw IOError(PT_ERROR_MSG("Could not set fd to non-blocking"));
+
+    if ( ! inherit)
+    {
+        int flags = fcntl(this->fd(), F_GETFD);
+        flags |= FD_CLOEXEC ;
+        int ret = fcntl(this->fd(), F_SETFD, flags);
+        if(-1 == ret)
+            throw IOError(PT_ERROR_MSG("Could not set FD_CLOEXEC"));
+    }
+
+    if( loop )
+        loop->impl().enable(_ioh);
+}
+
+
+void IODeviceImpl::close(EventLoop* loop)
 {
     if( this->isOpen() )
     {
-        EventLoop* loop = _device.parent();
-        if(_iohandle)
-        {
-            assert(loop);
-            loop->impl().disable(_iohandle);
-            _iohandle = 0;
-        }
+        _errorPending = false;
 
-        int fd = _fd;
-        _fd = -1;
+        if(loop)
+            loop->impl().disable(_ioh);
+
+        int fd = _ioh.fd;
+        _ioh.fd = -1;
 
         while ( ::close(fd) != 0 )
         {
@@ -109,57 +106,40 @@ void IODeviceImpl::close()
 
 
 void IODeviceImpl::attach(EventLoop& loop)
-{
+{ 
     if( this->isOpen() )
     {
-        _iohandle = loop.impl().enable(_device, this->fd());
+        loop.impl().enable(_ioh);
     }
 }
 
 
 void IODeviceImpl::detach(EventLoop& loop)
 {
-    if(_iohandle)
+    if( this->isOpen() )
     {
-        loop.impl().disable(_iohandle);
-        _iohandle = 0;
+        loop.impl().disable(_ioh);
     }
 }
 
 
-void IODeviceImpl::cancel()
+void IODeviceImpl::cancel(EventLoop& loop)
 {
-    EventLoop* loop = _device.parent();
-    if( loop && _iohandle )
-    {
-        loop->impl().cancel(_iohandle);
-    }
+    if( this->isOpen() )
+        loop.impl().cancel(_ioh);
 }
 
 
-size_t IODeviceImpl::beginRead(char* buffer, size_t n, bool&)
+size_t IODeviceImpl::beginRead(EventLoop& loop, char* buffer, size_t n, bool&)
 {
-    assert( _device.parent() );
-
-    EventLoop* loop = _device.parent();
-    if( loop && _iohandle)
-    {
-        loop->impl().beginRead( _iohandle );
-    }
-
+    loop.impl().beginRead( &_ioh );
     return 0;
 }
 
 
-size_t IODeviceImpl::endRead(bool& eof)
+size_t IODeviceImpl::endRead(EventLoop& loop, bool& eof)
 {
-    assert( _device.parent() );
-
-    EventLoop* loop = _device.parent();
-    if( loop && _iohandle )
-    {
-        loop->impl().endRead( _iohandle );
-    }
+    loop.impl().endRead( &_ioh );
 
     if (_errorPending)
     {
@@ -177,7 +157,7 @@ size_t IODeviceImpl::read( char* buffer, size_t count, bool& eof )
 
     while(true)
     {
-        ret = ::read( _fd, (void*)buffer, count);
+        ret = ::read( _ioh.fd, (void*)buffer, count);
         if(ret > 0)
             break;
 
@@ -207,11 +187,9 @@ size_t IODeviceImpl::read( char* buffer, size_t count, bool& eof )
 }
 
 
-size_t IODeviceImpl::beginWrite(const char* buffer, size_t n)
+size_t IODeviceImpl::beginWrite(EventLoop& loop, const char* buffer, size_t n)
 {
-    std::cerr << "IODeviceImpl::beginWrite" << std::endl;
-    ssize_t ret = ::write(_fd, (const void*)buffer, n);
-    std::cerr << "IODeviceImpl::beginWrite " << ret << std::endl;
+    ssize_t ret = ::write(_ioh.fd, (const void*)buffer, n);
 
     if (ret > 0)
         return static_cast<size_t>(ret);
@@ -219,35 +197,20 @@ size_t IODeviceImpl::beginWrite(const char* buffer, size_t n)
     if (ret == 0 || errno == ECONNRESET || errno == EPIPE)
         throw System::IOError("lost connection to peer");
 
-    EventLoop* loop = _device.parent();
-    if( loop && _iohandle)
-    {
-        std::cerr << "IODeviceImpl::beginWrite on handle " << std::endl;
-        loop->impl().beginWrite( _iohandle );
-    }
-
+    std::cerr << "IODeviceImpl::beginWrite on handle " << std::endl;
+    loop.impl().beginWrite( &_ioh );
     return 0;
 }
 
 
-size_t IODeviceImpl::endWrite()
+size_t IODeviceImpl::endWrite(EventLoop& loop)
 {
-    EventLoop* loop = _device.parent();
-    if( loop && _iohandle )
-    {
-        loop->impl().endWrite( _iohandle );
-    }
+    loop.impl().endWrite( &_ioh );
 
     if (_errorPending)
     {
         _errorPending = false;
         throw IOError("write error", PT_SOURCEINFO);
-    }
-
-    if (_device.wavail() > 0)
-    {
-        size_t n = _device.wavail();
-        return n;
     }
 
     return this->write( _device.wbuf(), _device.wbuflen() );
@@ -260,7 +223,7 @@ size_t IODeviceImpl::write( const char* buffer, size_t count )
 
     while(true)
     {
-        ret = ::write(_fd, (const void*)buffer, count);
+        ret = ::write(_ioh.fd, (const void*)buffer, count);
         std::cerr << "wrote: " << ret << std::endl;
         if(ret > 0)
             break;
@@ -314,13 +277,207 @@ bool IODeviceImpl::wait(std::size_t msecs, fd_set* rfds, fd_set* wfds, fd_set* e
 
 void IODeviceImpl::sync() const
 {
-    int ret = fsync(_fd);
+    int ret = fsync(_ioh.fd);
     if(ret != 0)
         throw IOError( PT_ERROR_MSG("sync failed") );
 }
 
 
-bool IODeviceImpl::run()
+bool IODeviceImpl::runRead(EventLoop& loop)
+{
+    std::cerr << "IODeviceImpl::runRead"<< std::endl;
+
+    if( ! this->isOpen() )
+        return false;
+
+    EventLoopImpl& impl = loop.impl();
+
+    if ( impl.isError(&_ioh) )
+    {
+        _errorPending = true;
+        return true;
+    }
+
+    return impl.isReadable(&_ioh);
+}
+
+
+bool IODeviceImpl::runWrite(EventLoop& loop)
+{
+    std::cerr << "IODeviceImpl::runWrite"<< std::endl;
+
+    if( ! this->isOpen() )
+        return false;
+
+    EventLoopImpl& impl = loop.impl();
+
+    if ( impl.isError(&_ioh) )
+    {
+        _errorPending = true;
+        return true;
+    }
+
+    return impl.isWritable(&_ioh);
+}
+
+
+/*void IODeviceImpl::open(int fd, bool inherit)
+{
+    _fd = fd;
+
+    int flags = fcntl(_fd, F_GETFL);
+    flags |= O_NONBLOCK ;
+    int ret = fcntl(_fd, F_SETFL, flags);
+    if(-1 == ret)
+        throw IOError(PT_ERROR_MSG("Could not set fd to non-blocking"));
+
+    if ( ! inherit)
+    {
+        int flags = fcntl(_fd, F_GETFD);
+        flags |= FD_CLOEXEC ;
+        int ret = fcntl(_fd, F_SETFD, flags);
+        if(-1 == ret)
+            throw IOError(PT_ERROR_MSG("Could not set FD_CLOEXEC"));
+    }
+
+    if( _device.isActive() )
+        _iohandle = _device.parent()->impl().enable(_device, this->fd());
+}*/
+
+
+/*void IODeviceImpl::close()
+{
+    if( this->isOpen() )
+    {
+        EventLoop* loop = _device.parent();
+        if(_iohandle)
+        {
+            assert(loop);
+            loop->impl().disable(_iohandle);
+            _iohandle = 0;
+        }
+
+        int fd = _fd;
+        _fd = -1;
+
+        while ( ::close(fd) != 0 )
+        {
+            if( errno != EINTR )
+                throw IOError( PT_ERROR_MSG("close failed") );
+        }
+    }
+}*/
+
+
+/*void IODeviceImpl::attach(EventLoop& loop)
+{
+    if( this->isOpen() )
+    {
+        _iohandle = loop.impl().enable(_device, this->fd());
+    }
+}*/
+
+
+/*void IODeviceImpl::detach(EventLoop& loop)
+{
+    if(_iohandle)
+    {
+        loop.impl().disable(_iohandle);
+        _iohandle = 0;
+    }
+}*/
+
+
+/*void IODeviceImpl::cancel()
+{
+    EventLoop* loop = _device.parent();
+    if( loop && _iohandle )
+    {
+        loop->impl().cancel(_iohandle);
+    }
+}*/
+
+
+/*size_t IODeviceImpl::beginRead(char* buffer, size_t n, bool&)
+{
+    assert( _device.parent() );
+
+    EventLoop* loop = _device.parent();
+    if( loop && _iohandle)
+    {
+        loop->impl().beginRead( _iohandle );
+    }
+
+    return 0;
+}*/
+
+
+/*size_t IODeviceImpl::endRead(bool& eof)
+{
+    assert( _device.parent() );
+
+    EventLoop* loop = _device.parent();
+    if( loop && _iohandle )
+    {
+        loop->impl().endRead( _iohandle );
+    }
+
+    if (_errorPending)
+    {
+        _errorPending = false;
+        throw IOError("read error", PT_SOURCEINFO);
+    }
+
+    return this->read( _device.rbuf(), _device.rbuflen(), eof );
+}*/
+
+
+/*size_t IODeviceImpl::beginWrite(const char* buffer, size_t n)
+{
+    ssize_t ret = ::write(_fd, (const void*)buffer, n);
+
+    if (ret > 0)
+        return static_cast<size_t>(ret);
+
+    if (ret == 0 || errno == ECONNRESET || errno == EPIPE)
+        throw System::IOError("lost connection to peer");
+
+    EventLoop* loop = _device.parent();
+    if( loop && _iohandle)
+    {
+        std::cerr << "IODeviceImpl::beginWrite on handle " << std::endl;
+        loop->impl().beginWrite( _iohandle );
+    }
+
+    return 0;
+}*/
+
+
+/*size_t IODeviceImpl::endWrite()
+{
+    EventLoop* loop = _device.parent();
+    if( loop && _iohandle )
+    {
+        loop->impl().endWrite( _iohandle );
+    }
+
+    if (_errorPending)
+    {
+        _errorPending = false;
+        throw IOError("write error", PT_SOURCEINFO);
+    }
+
+    //if (_device.wavail() > 0)
+    //{
+    //    size_t n = _device.wavail();
+    //    return n;
+    //}
+
+    return this->write( _device.wbuf(), _device.wbuflen() );
+}*/
+
+
+/*bool IODeviceImpl::run()
 {
     std::cerr << "IODeviceImpl::run"<< std::endl;
 
@@ -398,7 +555,7 @@ bool IODeviceImpl::run()
     }
 
     return avail > 0;
-}
+}*/
 
 
 /*bool IODeviceImpl::run()

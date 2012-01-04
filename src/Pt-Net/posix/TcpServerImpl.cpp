@@ -48,8 +48,7 @@ namespace Net {
 
 TcpServerImpl::TcpServerImpl(TcpServer& server)
 : _server(server)
-, _fd(-1)
-, _iohandle(0)
+, _ioh(server)
 {
 }
 
@@ -58,29 +57,27 @@ void TcpServerImpl::create(int domain, int type, int protocol)
 {
     log_debug("create socket");
     
-    _fd = ::socket(domain, type, protocol);
-    if (_fd < 0)
+    _ioh.fd = ::socket(domain, type, protocol);
+    if (_ioh.fd < 0)
         throw System::SystemError("socket");
 }
 
 
 void TcpServerImpl::close()
 {
-    if (_fd < 0)
+    if (_ioh.fd < 0)
       return;
 
     log_debug("close socket");
 
     System::EventLoop* loop = _server.parent();
-    if(_iohandle)
+    if(loop)
     {
-        assert(loop);
-        loop->impl().disable(_iohandle);
-        _iohandle = 0;
+        loop->impl().disable(_ioh);
     }
 
-    ::close(_fd);
-    _fd = -1;
+    ::close(_ioh.fd);
+    _ioh.fd = -1;
 }
 
 
@@ -109,7 +106,7 @@ void TcpServerImpl::listen(const std::string& ipaddr,
         }
 
         log_debug("setsockopt SO_REUSEADDR");
-        if (::setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) < 0)
+        if (::setsockopt(this->fd(), SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) < 0)
         {
             close();
             throw System::SystemError("setsockopt SO_REUSEADDR");
@@ -118,7 +115,7 @@ void TcpServerImpl::listen(const std::string& ipaddr,
 #ifdef IPPROTO_IPV6
         if (it->ai_family == AF_INET6)
         {
-          if (::setsockopt(_fd, IPPROTO_IPV6, IPV6_V6ONLY, &on, sizeof(on)) < 0)
+          if (::setsockopt(this->fd(), IPPROTO_IPV6, IPV6_V6ONLY, &on, sizeof(on)) < 0)
           {
               log_debug("could not set socket option IPV6_V6ONLY, errno=" << errno <<
                         ": " << strerror(errno));
@@ -129,13 +126,13 @@ void TcpServerImpl::listen(const std::string& ipaddr,
 #endif
 
         log_debug("bind");
-        if (::bind(_fd, it->ai_addr, it->ai_addrlen) == 0)
+        if (::bind(this->fd(), it->ai_addr, it->ai_addrlen) == 0)
         {
             // save our information
             std::memmove(&_servaddr, it->ai_addr, it->ai_addrlen);
 
             log_debug("listen");
-            if( ::listen(_fd, backlog) < 0 )
+            if( ::listen(this->fd(), backlog) < 0 )
             {
                 close();
 
@@ -147,9 +144,9 @@ void TcpServerImpl::listen(const std::string& ipaddr,
 
             if( (flags & TcpServer::INHERIT) == 0 )
             {
-                int flags = ::fcntl(_fd, F_GETFD);
+                int flags = ::fcntl(this->fd(), F_GETFD);
                 flags |= FD_CLOEXEC ;
-                int ret = ::fcntl(_fd, F_SETFD, flags);
+                int ret = ::fcntl(this->fd(), F_SETFD, flags);
                 if (ret == -1)
                 {
                     close();
@@ -194,18 +191,17 @@ void TcpServerImpl::attach(System::EventLoop& loop)
     if( this->fd() < 0 )
         return;
 
-    _iohandle = loop.impl().enable(_server, this->fd());
-    loop.impl().beginRead( _iohandle );
+    loop.impl().enable(_ioh);
+    loop.impl().beginRead( &_ioh );
 }
 
 
 void TcpServerImpl::detach(System::EventLoop& loop)
 {
-    if(_iohandle)
-    {
-        loop.impl().disable(_iohandle);
-        _iohandle = 0;
-    }
+    if( this->fd() < 0 )
+        return;
+
+    loop.impl().disable(_ioh);
 }
 
 
@@ -213,12 +209,12 @@ bool TcpServerImpl::run()
 {
     std::cerr << "TcpServerImpl::avail"<< std::endl;
 
-    if( ! _iohandle)
+    if(this->fd() < 0)
         return false;
 
     System::EventLoopImpl& impl = _server.parent()->impl();
 
-    if( impl.isReadable(_iohandle) )
+    if( impl.isReadable(&_ioh) )
     {
         _server.connectionPending.send(_server);
         return true;

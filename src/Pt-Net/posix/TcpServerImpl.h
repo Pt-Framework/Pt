@@ -53,8 +53,7 @@ class TcpServerImpl
 {
     private:
         TcpServer& _server;
-        int _fd;
-        System::IOHandle* _iohandle;
+        System::IOHandle _ioh;
         struct sockaddr_storage _servaddr;
 
     public:
@@ -75,7 +74,7 @@ class TcpServerImpl
         { return _servaddr; }
 
         int fd() const
-        { return _fd; }
+        { return _ioh.fd; }
 
         void attach(System::EventLoop& s);
 
