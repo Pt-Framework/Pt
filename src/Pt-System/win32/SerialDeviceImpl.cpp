@@ -62,7 +62,7 @@ SerialDeviceImpl::~SerialDeviceImpl()
 }
 
 
-void SerialDeviceImpl::open( const std::string& port_, IODevice::OpenMode mode)
+void SerialDeviceImpl::open( const std::string& port_, IODevice::OpenMode mode, EventLoop* loop)
 {
     std::basic_string<TCHAR> port;
 	win32::fromMultiByte( port_.c_str(), port );
@@ -110,7 +110,7 @@ void SerialDeviceImpl::open( const std::string& port_, IODevice::OpenMode mode)
 }
 
 
-void SerialDeviceImpl::close()
+void SerialDeviceImpl::close(EventLoop* loop)
 {
     //Restore the port state.
     SetCommState( handle(), &_orgCommState );
@@ -226,7 +226,7 @@ bool SerialDeviceImpl::setWaitHandle(HANDLE h, bool& avail)
         _writeOv.hEvent = h;
     }
     
-    if( ! prevHandle && _device._rbuf )
+    /*if( ! prevHandle && _device._rbuf )
     {
         bool eof = false;
         size_t n = this->beginRead(_device._rbuf, _device._rbuflen, eof);
@@ -241,7 +241,7 @@ bool SerialDeviceImpl::setWaitHandle(HANDLE h, bool& avail)
         size_t n = this->beginWrite(_device._wbuf, _device._wbuflen);
         if(n > 0)
             avail = true;
-    }
+    }*/
  
     return true;
 }
@@ -267,7 +267,7 @@ bool SerialDeviceImpl::checkEvent()
 }
 
 
-void SerialDeviceImpl::cancel()
+void SerialDeviceImpl::cancel(EventLoop& loop)
 {	
     ::CancelIo( handle() );
 	::PurgeComm(handle(), PURGE_RXABORT | PURGE_TXABORT| PURGE_TXCLEAR | PURGE_RXCLEAR);
@@ -286,7 +286,7 @@ void SerialDeviceImpl::cancel()
 }
 
 
-size_t SerialDeviceImpl::beginRead(char* buffer, size_t n, bool& eof)
+size_t SerialDeviceImpl::beginRead(EventLoop& loop, char* buffer, size_t n, bool& eof)
 {
     if(_readOv.hEvent == NULL)
         return 0;
@@ -312,7 +312,7 @@ size_t SerialDeviceImpl::beginRead(char* buffer, size_t n, bool& eof)
 }
 
 
-size_t SerialDeviceImpl::endRead(bool& eof)
+size_t SerialDeviceImpl::endRead(EventLoop& loop, bool& eof)
 {
     if( _device.eof() )
     { 
@@ -340,7 +340,7 @@ size_t SerialDeviceImpl::endRead(bool& eof)
 }
 
 
-size_t SerialDeviceImpl::beginWrite(const char* buffer, size_t n)
+size_t SerialDeviceImpl::beginWrite(EventLoop& loop, const char* buffer, size_t n)
 {
     if(_writeOv.hEvent == NULL)
         return 0;
@@ -361,7 +361,7 @@ size_t SerialDeviceImpl::beginWrite(const char* buffer, size_t n)
 }
 
 
-size_t SerialDeviceImpl::endWrite()
+size_t SerialDeviceImpl::endWrite(EventLoop& loop)
 {
     if(_writeOv.hEvent == NULL)
     {

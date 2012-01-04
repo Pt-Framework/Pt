@@ -58,6 +58,12 @@ class PipeIODevice : public IODevice, private IODeviceImpl
 
         bool onRun();
 
+        bool runRead(EventLoop&)
+        { return false; }
+
+        bool runWrite(EventLoop&)
+        { return false; }
+
         size_t onBeginRead(char* buffer, size_t n, bool& eof);
 
         size_t onEndRead(bool& eof);

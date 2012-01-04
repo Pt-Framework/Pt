@@ -48,21 +48,27 @@ class FileDeviceImpl  : public IODeviceImpl
 
         bool run();
 
+        bool runRead(EventLoop&)
+        { return false; }
+
+        bool runWrite(EventLoop&)
+        { return false; }
+
         //virtual bool wait(std::size_t msecs);
 
         virtual bool setWaitHandle(HANDLE h, bool& avail);
 
         bool checkEvent();
 
-        size_t beginRead(char* buffer, size_t n, bool& eof);
+        size_t beginRead(EventLoop& loop, char* buffer, size_t n, bool& eof);
 
-        size_t endRead(bool& eof);
+        size_t endRead(EventLoop& loop, bool& eof);
 
-        size_t beginWrite(const char* buffer, size_t n);
+        size_t beginWrite(EventLoop& loop, const char* buffer, size_t n);
 
-        size_t endWrite();
+        size_t endWrite(EventLoop& loop);
 
-        void open( const char* path, IODevice::OpenMode mode);
+        void open( const char* path, IODevice::OpenMode mode, EventLoop* loop);
 
         pos_type seek( off_type offset, std::ios::seekdir sd );
 
@@ -76,7 +82,7 @@ class FileDeviceImpl  : public IODeviceImpl
 
         void sync() const;
 
-		void cancel();
+		void cancel(EventLoop&);
 
     private:
         FileDevice& _device;

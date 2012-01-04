@@ -71,7 +71,7 @@ void PipeIODevice::open(HANDLE handle)
 
 void PipeIODevice::onClose()
 {
-    IODeviceImpl::close();
+    IODeviceImpl::close( parent() );
 
     _readOv.Offset = 0;
     _readOv.OffsetHigh = 0;

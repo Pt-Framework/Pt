@@ -46,7 +46,7 @@ class IODeviceImpl
 
         virtual void setWaitHandle(HANDLE h) {}
 
-        virtual void close();
+        virtual void close(EventLoop* loop);
 
     private:
         HANDLE _handle;

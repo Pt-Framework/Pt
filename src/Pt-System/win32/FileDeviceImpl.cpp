@@ -66,7 +66,7 @@ FileDeviceImpl::~FileDeviceImpl()
 }
 
 
-void FileDeviceImpl::open( const char* path, IODevice::OpenMode mode)
+void FileDeviceImpl::open( const char* path, IODevice::OpenMode mode, EventLoop* loop)
 {
     _readOv.Offset = 0;
     _readOv.OffsetHigh = 0;
@@ -113,7 +113,7 @@ void FileDeviceImpl::open( const char* path, IODevice::OpenMode mode)
     }
     catch(...)
     {
-        this->close();
+        this->close(loop);
         throw;
     }
 }
@@ -227,7 +227,7 @@ bool FileDeviceImpl::setWaitHandle(HANDLE h, bool& avail)
         _writeOv.hEvent = h;
     }
     
-    if( ! prevHandle && _device._rbuf )
+    /*if( ! prevHandle && _device._rbuf )
     {
         bool eof = false;
         size_t n = this->beginRead(_device._rbuf, _device._rbuflen, eof);
@@ -242,7 +242,7 @@ bool FileDeviceImpl::setWaitHandle(HANDLE h, bool& avail)
         size_t n = this->beginWrite(_device._wbuf, _device._wbuflen);
         if(n > 0)
             avail = true;
-    }
+    }*/
  
     return true;
     
@@ -301,7 +301,7 @@ bool FileDeviceImpl::checkEvent()
 }
 
 
-void FileDeviceImpl::cancel()
+void FileDeviceImpl::cancel(EventLoop&)
 {
 #ifndef _WIN32_WCE
     ::CancelIo( handle() );
@@ -322,7 +322,7 @@ void FileDeviceImpl::cancel()
 }
 
 
-size_t FileDeviceImpl::beginRead(char* buffer, size_t n, bool& eof)
+size_t FileDeviceImpl::beginRead(EventLoop& loop, char* buffer, size_t n, bool& eof)
 {
     if(_readOv.hEvent == NULL)
         return 0;
@@ -348,7 +348,7 @@ size_t FileDeviceImpl::beginRead(char* buffer, size_t n, bool& eof)
 }
 
 
-size_t FileDeviceImpl::endRead(bool& eof)
+size_t FileDeviceImpl::endRead(EventLoop& loop, bool& eof)
 {
     if( _device.eof() )
     {
@@ -385,7 +385,7 @@ size_t FileDeviceImpl::endRead(bool& eof)
 }
 
 
-size_t FileDeviceImpl::beginWrite(const char* buffer, size_t n)
+size_t FileDeviceImpl::beginWrite(EventLoop& loop, const char* buffer, size_t n)
 {
     if(_writeOv.hEvent == NULL)
         return 0;
@@ -406,7 +406,7 @@ size_t FileDeviceImpl::beginWrite(const char* buffer, size_t n)
 }
 
 
-size_t FileDeviceImpl::endWrite()
+size_t FileDeviceImpl::endWrite(EventLoop& loop)
 {
     DWORD writtenBytes = 0;
   

@@ -37,13 +37,19 @@ class SerialDeviceImpl : public IODeviceImpl
         
         ~SerialDeviceImpl();
 
-        void open( const std::string& file, IODevice::OpenMode mode);
+        void open( const std::string& file, IODevice::OpenMode mode, EventLoop* loop);
 
-        void close();
+        void close(EventLoop* loop);
 
         void attach(EventLoop& s);
 
         void detach(EventLoop& s);
+
+        bool runRead(EventLoop&)
+        { return false; }
+
+        bool runWrite(EventLoop&)
+        { return false; }
 
         bool run();
 
@@ -53,15 +59,15 @@ class SerialDeviceImpl : public IODeviceImpl
         
         bool checkEvent();
 
-        void cancel();
+        void cancel(EventLoop& loop);
 
-        size_t beginRead(char* buffer, size_t n, bool& eof);
+        size_t beginRead(EventLoop& loop, char* buffer, size_t n, bool& eof);
 
-        size_t endRead(bool& eof);
+        size_t endRead(EventLoop& loop, bool& eof);
 
-        size_t beginWrite(const char* buffer, size_t n);
+        size_t beginWrite(EventLoop& loop, const char* buffer, size_t n);
 
-        size_t endWrite();		
+        size_t endWrite(EventLoop& loop);
        
         size_t read( char* buffer, size_t count, bool& eof );        
         

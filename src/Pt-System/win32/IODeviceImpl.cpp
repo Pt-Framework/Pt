@@ -50,7 +50,7 @@ void IODeviceImpl::setHandle(HANDLE h)
 }
 
 
-void IODeviceImpl::close()
+void IODeviceImpl::close(EventLoop* loop)
 {
     if(_handle != INVALID_HANDLE_VALUE)
     {
