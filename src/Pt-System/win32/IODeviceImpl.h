@@ -44,7 +44,7 @@ class IODeviceImpl
         HANDLE handle() const
         { return _handle; }	
 
-        virtual void setWaitHandle(HANDLE h) {}
+        //virtual void setWaitHandle(HANDLE h) {}
 
         virtual void close(EventLoop* loop);
 
@@ -53,59 +53,44 @@ class IODeviceImpl
 };
 
 
-/*class OverlappedIODeviceImpl : public IODeviceImpl
+class OverlappedIODeviceImpl : public IODeviceImpl
 {
     public:
-        OverlappedIODeviceImpl();
+        OverlappedIODeviceImpl(IODevice& dev);
 
-        virtual ~OverlappedIODeviceImpl();
+        ~OverlappedIODeviceImpl();
 
-        virtual void open(HANDLE handle, bool isAsync);
+        void attach(EventLoop& loop);
 
-        //virtual bool checkEvent();
+        void detach(EventLoop& loop);
 
-        virtual bool setWaitHandle(HANDLE h, bool& avail);
+        bool runRead(EventLoop&);
 
-        virtual IODeviceImpl& ioimpl()
-        { return *this; }
+        bool runWrite(EventLoop&);
 
-        void redirect(int newFd, bool close = true);
+        virtual size_t beginRead(EventLoop& loop, char* buffer, size_t n, bool& eof);
 
-    protected:
-        void onAttach(EventLoop& loop);
+        virtual size_t endRead(EventLoop& loop, bool& eof);
 
-        void onDetach(EventLoop& loop);
+        virtual size_t beginWrite(EventLoop& loop, const char* buffer, size_t n);
 
-        bool onAvail();
+        virtual size_t endWrite(EventLoop& loop);
 
-        size_t onBeginRead(char* buffer, size_t n, bool& eof);
+        virtual void close(EventLoop* loop);
 
-        size_t onEndRead(bool& eof);
+        virtual size_t read(char* buffer, size_t count, bool& eof);
 
-        size_t onBeginWrite(const char* buffer, size_t n);
+        virtual size_t write(const char* buffer, size_t count);
 
-        size_t onEndWrite();
+        virtual void sync() const;
 
-        //bool onWait(std::size_t msecs);
+        virtual void cancel(EventLoop& loop) ;
 
-        //! @brief Closes the I/O device
-        virtual void onClose();
-
-        //! @brief Read bytes from device
-        virtual size_t onRead(char* buffer, size_t count, bool& eof);
-
-        //! @brief Write bytes to device
-        virtual size_t onWrite(const char* buffer, size_t count);
-
-        virtual void onSync() const;
-
-        virtual void onCancel() ;
-
-     private:
-        HANDLE _waitHandle;
+     protected:
+        IODevice& _device;
         OVERLAPPED _readOv;
         OVERLAPPED _writeOv;
-};*/
+};
 
 } //namespace System
 

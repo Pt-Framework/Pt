@@ -96,13 +96,6 @@ void EventLoopImpl::disable(IOHandle* h)
 }
 
 
-void EventLoopImpl::enable(Selectable& s, IODeviceImpl& io)
-{
-    io.setWaitHandle(_ioEvent);
-    _devices.insert(&s);
-}
-
-
 HANDLE EventLoopImpl::enable(Selectable& s)
 { 
     _devices.insert(&s);

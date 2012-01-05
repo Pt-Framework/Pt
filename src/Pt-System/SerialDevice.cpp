@@ -63,11 +63,7 @@ SerialDevice::~SerialDevice()
 
 void SerialDevice::open( const std::string& file, OpenMode mode)
 {
-    //if( this->enabled() ) 
-    {
-        this->close();
-    }
-
+    this->close();
     _impl->open( file, mode, parent() );
 }
 
@@ -201,9 +197,9 @@ size_t SerialDevice::onWrite(const char* buffer, size_t count)
 }
 
 
-void SerialDevice::flush()
+void SerialDevice::onSync() const
 {
-    _impl->flush();
+    _impl->sync();
 }
 
 
@@ -221,8 +217,6 @@ void SerialDevice::onDetach(EventLoop& s)
 
 bool SerialDevice::onRun()
 {
-    //return _impl.run(); 
-
     if( this->reading() )
     {
         if( _ravail || _impl->runRead( *parent() ) )

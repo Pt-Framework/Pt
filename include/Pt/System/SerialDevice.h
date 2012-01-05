@@ -184,9 +184,6 @@ class PT_SYSTEM_API SerialDevice : public IODevice
 
         bool setSignal(SerialDevice::SerialLine signal);
 
-        //! @brief Transmit the current buffered characters.
-        void flush();
-
     protected:
         void onClose();
 
@@ -209,6 +206,8 @@ class PT_SYSTEM_API SerialDevice : public IODevice
         bool onRun();
 
         void onCancel();
+
+        void onSync() const;
 };
 
 } //namespace System

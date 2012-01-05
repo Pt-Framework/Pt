@@ -27,7 +27,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "IODeviceImpl.h"
+#include "MainLoopImpl.h"
 #include "Pt/System/IOError.h"
+#include "Pt/System/IODevice.h"
+#include "Pt/System/EventLoop.h"
 
 namespace Pt{ 
 
@@ -61,14 +64,13 @@ void IODeviceImpl::close(EventLoop* loop)
     }
 }
 
+/////////////////////////////////////////////////////////////////////
+// OverlappedIODeviceImpl
+/////////////////////////////////////////////////////////////////////
 
-/*OverlappedIODeviceImpl::OverlappedIODeviceImpl()
-: _waitHandle(INVALID_HANDLE_VALUE)
+OverlappedIODeviceImpl::OverlappedIODeviceImpl(IODevice& dev)
+: _device(dev)
 {
-    _waitHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
-    if( _waitHandle == NULL )
-        throw SystemError( PT_ERROR_MSG("CreateEvent failed") );
-
     _readOv.Offset = 0;
     _readOv.OffsetHigh = 0;
     _readOv.hEvent = NULL;
@@ -80,27 +82,216 @@ void IODeviceImpl::close(EventLoop* loop)
 
 
 OverlappedIODeviceImpl::~OverlappedIODeviceImpl()
-{ 
-    ::CloseHandle(_waitHandle);
+{
 }
 
 
-void OverlappedIODeviceImpl::onCancel()
+void OverlappedIODeviceImpl::close(EventLoop* loop)
 {
-    ::CancelIo( handle() );
+    IODeviceImpl::close(loop);
+
+    _readOv.Offset = 0;
+    _readOv.OffsetHigh = 0;
+
+    _writeOv.Offset = 0;
+    _writeOv.OffsetHigh = 0;
+}
+
+
+void OverlappedIODeviceImpl::cancel(EventLoop& loop)
+{
+    ::CancelIoEx( handle(), &_readOv );
+    ::CancelIoEx( handle(), &_writeOv );
 
     DWORD bytes = 0;
+    GetOverlappedResult( handle(), &_readOv, &bytes, TRUE );
+    GetOverlappedResult( handle(), &_writeOv, &bytes, TRUE );
+}
 
-    if( this->reading() && ! HasOverlappedIoCompleted(&_readOv) )
+
+void OverlappedIODeviceImpl::attach(EventLoop& loop)
+{
+    HANDLE h = loop.impl().enable(_device);
+
+    _readOv.hEvent = h;
+    _writeOv.hEvent = h;
+}
+
+
+void OverlappedIODeviceImpl::detach(EventLoop& loop)
+{
+    loop.impl().disable(_device);
+
+    _readOv.hEvent = NULL;
+    _writeOv.hEvent = NULL;
+}
+
+
+bool OverlappedIODeviceImpl::runRead(EventLoop& loop)
+{
+    if( HasOverlappedIoCompleted(&_readOv) )
     {
-        GetOverlappedResult( handle(), &_readOv, &bytes, TRUE );
+        return true;
     }
 
-    if( this->writing() && ! HasOverlappedIoCompleted(&_writeOv) )
+    return false;
+}
+
+bool OverlappedIODeviceImpl::runWrite(EventLoop& loop)
+{
+    if( HasOverlappedIoCompleted(&_writeOv) )
     {
-        GetOverlappedResult( handle(), &_writeOv, &bytes, TRUE );
+        return true;
     }
-}*/
+
+    return false;
+}
+
+
+size_t OverlappedIODeviceImpl::beginRead(EventLoop& loop, char* buffer, size_t n, bool& eof)
+{
+    // if we can can read data immediately, we return the number of bytes
+    // that were read, so the EventLoop calls onAvail, even if the event 
+    // in the overlapped struct is not fired
+    DWORD readBytes = 0;
+    if( FALSE == ReadFile(handle(), (void*)buffer, n, &readBytes, &_readOv) )
+    {
+        DWORD err = GetLastError();
+        if( ERROR_HANDLE_EOF == err || ERROR_BROKEN_PIPE == err )
+        {
+            eof = true;
+            return 0;
+        }
+        else if( err == ERROR_IO_PENDING )
+        {
+            return 0;
+        }
+
+        throw IOError( PT_ERROR_MSG("Could not begin read from file handle") );
+    }
+
+    return readBytes;
+}
+
+
+size_t OverlappedIODeviceImpl::endRead(EventLoop& loop, bool& eof)
+{
+    if( _device.eof() )
+    {
+        eof = true;
+        return 0;
+    }
+
+    // finishes the overlapped operation. Blocks until data is available,
+    // so beginRead can be ended by endRead without a wait step.
+    DWORD readBytes = 0;
+    if( FALSE == GetOverlappedResult(handle(), &_readOv, &readBytes, TRUE) )
+    {
+        DWORD err = GetLastError();
+        if( ERROR_BROKEN_PIPE == err || ERROR_BROKEN_PIPE == err )
+        {
+            eof = true;
+        }
+        else
+        {
+            throw IOError( PT_ERROR_MSG("Could not end read from file handle") );
+        }
+    }
+
+    _readOv.Offset += readBytes;
+    _writeOv.Offset += readBytes;
+    return readBytes;
+}
+
+
+size_t OverlappedIODeviceImpl::read(char* buffer, size_t count, bool& eof)
+{
+    DWORD readBytes = 0;
+    if( FALSE == ReadFile(handle(), (void*)buffer, count, &readBytes, &_readOv) )
+    {
+        if( ERROR_HANDLE_EOF == GetLastError() || 
+            ERROR_BROKEN_PIPE == GetLastError() )
+        {
+            eof = true;
+            readBytes = 0;
+        }
+        else if( ERROR_IO_PENDING == GetLastError() )
+        {
+            if(FALSE == GetOverlappedResult(handle(), &_readOv, &readBytes, TRUE) )
+            {
+                throw IOError( PT_ERROR_MSG("Could not read from file handle") );
+            }
+        }
+        else
+        {
+            throw IOError( PT_ERROR_MSG("Could not read from file handle") );
+        }
+    }
+
+    _readOv.Offset += readBytes;
+    _writeOv.Offset += readBytes;
+    return readBytes;
+}
+
+
+size_t OverlappedIODeviceImpl::beginWrite(EventLoop& loop, const char* buffer, size_t n)
+{
+    DWORD writtenBytes = 0;
+    if( FALSE == WriteFile(handle(), (void*)buffer, n, &writtenBytes, &_writeOv) )
+    {
+        DWORD err = GetLastError();
+        if( ERROR_IO_PENDING == err )
+        {
+            return 0;
+        }
+        
+        throw IOError( PT_ERROR_MSG("Could not read from file handle") );
+    }
+
+    return writtenBytes;
+}
+
+
+size_t OverlappedIODeviceImpl::endWrite(EventLoop& loop)
+{
+    DWORD writtenBytes = 0;
+    if (GetOverlappedResult( handle(), &_writeOv, &writtenBytes, FALSE) == FALSE )
+    {
+        throw IOError( PT_ERROR_MSG("GetOverlappedResult failed") );
+    }
+
+    _writeOv.Offset += writtenBytes;
+    return writtenBytes;
+}
+
+
+size_t OverlappedIODeviceImpl::write(const char* buffer, size_t count)
+{
+    DWORD writtenBytes = 0;
+
+    if( FALSE == WriteFile(handle(), (void*)buffer, count, &writtenBytes, &_writeOv) )
+    {
+        if( ERROR_IO_PENDING != GetLastError() )
+        {
+            throw IOError(PT_ERROR_MSG("Could not write to file handle") );
+        }
+        if(GetOverlappedResult(handle(), &_readOv, &writtenBytes, FALSE) == FALSE )
+        {
+            writtenBytes = 0;
+        }
+    }
+
+    _readOv.Offset += writtenBytes;
+    _writeOv.Offset += writtenBytes;
+    return writtenBytes;
+}
+
+
+void OverlappedIODeviceImpl::sync() const
+{
+    if( FALSE == ::FlushFileBuffers( handle() ) )
+        throw IOError( PT_ERROR_MSG("Could not flush file buffer") );
+}
 
 }//namespaec System
 

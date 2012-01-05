@@ -31,7 +31,7 @@ namespace Pt {
 
 namespace System {
 
-class FileDeviceImpl  : public IODeviceImpl
+class FileDeviceImpl  : public OverlappedIODeviceImpl
 {
     public:
         typedef FileDevice::pos_type pos_type;
@@ -42,53 +42,15 @@ class FileDeviceImpl  : public IODeviceImpl
 
         ~FileDeviceImpl();
 
-        void attach(EventLoop& s);
-
-        void detach(EventLoop& s);
-
-        bool run();
-
-        bool runRead(EventLoop&)
-        { return false; }
-
-        bool runWrite(EventLoop&)
-        { return false; }
-
-        //virtual bool wait(std::size_t msecs);
-
-        virtual bool setWaitHandle(HANDLE h, bool& avail);
-
-        bool checkEvent();
-
-        size_t beginRead(EventLoop& loop, char* buffer, size_t n, bool& eof);
-
-        size_t endRead(EventLoop& loop, bool& eof);
-
-        size_t beginWrite(EventLoop& loop, const char* buffer, size_t n);
-
-        size_t endWrite(EventLoop& loop);
-
         void open( const char* path, IODevice::OpenMode mode, EventLoop* loop);
 
         pos_type seek( off_type offset, std::ios::seekdir sd );
 
         size_t size();
 
-        size_t read( char* buffer, size_t count, bool& eof );
-
-        size_t write( const char* buffer, size_t count );
-
         size_t peek( char* buffer, size_t count );
 
-        void sync() const;
-
-		void cancel(EventLoop&);
-
     private:
-        FileDevice& _device;
-        HANDLE _waitHandle;
-        OVERLAPPED _readOv;
-        OVERLAPPED _writeOv;
 };
 
 }//namespace System

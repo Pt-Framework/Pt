@@ -23,14 +23,13 @@
 #include <Pt/System/Api.h>
 #include <Pt/System/IODevice.h>
 #include "IODeviceImpl.h"
-#include "MainLoopImpl.h"
 #include <windows.h>
 
 namespace Pt {
 
 namespace System {
 
-class PipeIODevice : public IODevice, private IODeviceImpl
+class PipeIODevice : public IODevice
 {
     public:
         PipeIODevice();
@@ -39,17 +38,8 @@ class PipeIODevice : public IODevice, private IODeviceImpl
 
         virtual void open(HANDLE handle);
 
-        //virtual bool checkEvent();
-
-        //virtual bool setWaitHandle(HANDLE h, bool& avail);
-
-        virtual IODeviceImpl& ioimpl()
-        { return *this; }
-
-        virtual void setWaitHandle(HANDLE h);
-
         HANDLE handle() const
-        { return IODeviceImpl::deviceHandle(); }
+        { return _impl.deviceHandle(); }
 
     protected:
         void onAttach(EventLoop& loop);
@@ -58,12 +48,6 @@ class PipeIODevice : public IODevice, private IODeviceImpl
 
         bool onRun();
 
-        bool runRead(EventLoop&)
-        { return false; }
-
-        bool runWrite(EventLoop&)
-        { return false; }
-
         size_t onBeginRead(char* buffer, size_t n, bool& eof);
 
         size_t onEndRead(bool& eof);
@@ -71,8 +55,6 @@ class PipeIODevice : public IODevice, private IODeviceImpl
         size_t onBeginWrite(const char* buffer, size_t n);
 
         size_t onEndWrite();
-
-        //bool onWait(std::size_t msecs);
 
         //! @brief Closes the I/O device
         virtual void onClose();
@@ -88,8 +70,7 @@ class PipeIODevice : public IODevice, private IODeviceImpl
         virtual void onCancel() ;
 
      private:
-        OVERLAPPED _readOv;
-        OVERLAPPED _writeOv;
+        OverlappedIODeviceImpl _impl;
 };
 
 class PipeImpl

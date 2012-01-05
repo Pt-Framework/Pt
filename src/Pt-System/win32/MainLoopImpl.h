@@ -135,8 +135,6 @@ class PT_SYSTEM_API EventLoopImpl : public EventDispatcher
 
         void signalIdle(Selectable& s);
 
-        void enable(Selectable& s, IODeviceImpl& io);
-
         HANDLE enable(Selectable& s);
 
         void disable(Selectable& s);
