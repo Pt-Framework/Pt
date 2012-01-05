@@ -146,7 +146,7 @@ bool TcpSocket::beginConnect(const AddrInfo& addrinfo)
 
     bool ret = _impl->beginConnect(addrinfo, parent());
     if(ret)
-        connected(*this);
+        connected.send(*this);
 
     return ret;
 }

@@ -104,41 +104,12 @@ namespace System {
             
             virtual void sync() const;
 
-            virtual bool wait(std::size_t msecs, fd_set* rfds, fd_set* wfds, fd_set* efds);
-
             bool runRead(EventLoop& loop);
 
             bool runWrite(EventLoop& loop);
 
-            //void open(int fd, bool closeOnExec);
-
-            //virtual void close();
-
-            //virtual void cancel();
-            
-            //virtual size_t beginRead(char* buffer, size_t n, bool& eof);
-
-            //virtual size_t endRead(bool& eof);
-
-            //virtual size_t beginWrite(const char* buffer, size_t n);
-
-            //virtual size_t endWrite();
-
-            //virtual bool wait(std::size_t msecs);
-
-            //virtual void initWait(fd_set& rfds, fd_set& wfds, fd_set& efds);
-
-            //virtual int initSelect(fd_set& rfds, fd_set& wfds, fd_set& efds);
-
-            //virtual void exitSelect();
-
-            //virtual int checkWait(fd_set& rfds, fd_set& wfds, fd_set& efds);
-
-            //virtual void attach(EventLoop& s);
-
-            //virtual void detach(EventLoop& s);
-
-            //virtual bool run();
+        protected:
+            bool wait(std::size_t msecs, fd_set* rfds, fd_set* wfds, fd_set* efds);
 
         protected:
             IODevice& _device;
