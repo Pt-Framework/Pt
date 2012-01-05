@@ -59,54 +59,29 @@ PipeIODevice::~PipeIODevice()
 void PipeIODevice::open(int fd)
 {
     _impl.open(fd, false, parent());
-
-//  _impl.open2(fd, false);
-//
-//  if( this->isActive() )
-//      _impl.enable( *parent() );
 }
 
 
 void PipeIODevice::onClose()
 { 
     _impl.close( parent() );
-
-//  if( _impl.isOpen() )
-//  {
-//      if( this->isActive() )
-//          _impl.disable( *parent() );
-//
-//      _impl.close2();
-//  }
 }
 
 
 void PipeIODevice::onAttach(EventLoop& loop)
 { 
-    //if( _impl.isOpen() )
-    //{
-    //    _impl.enable(loop); 
-    //}
-
     _impl.attach(loop); 
 }
 
 
 void PipeIODevice::onDetach(EventLoop& loop)
 {
-    //if( _impl.isOpen() ) // isOpen()
-    //{
-    //    _impl.disable(loop); 
-    //}
-
     _impl.detach(loop);
 }
 
 
 bool PipeIODevice::onRun()
 { 
-    //return _impl.run(); 
-
     if( this->reading() )
     {
         if( _ravail || _impl.runRead( *parent() ) )

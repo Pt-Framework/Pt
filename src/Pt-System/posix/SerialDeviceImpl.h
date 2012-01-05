@@ -69,7 +69,7 @@ class SerialDeviceImpl : public IODeviceImpl
 
         size_t timeout() const;
 
-        void flush();
+        void sync() const;
 
     private:
         termios                     _prevIos;

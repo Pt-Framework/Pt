@@ -448,10 +448,11 @@ bool SerialDeviceImpl::setSignal(SerialDevice::SerialLine signal)
     return false;
 }
 
-void SerialDeviceImpl::flush()
+void SerialDeviceImpl::sync() const
 {
     ::tcflush(IODeviceImpl::fd(), TCIFLUSH);
 }
 
 } //namespace System
+
 } //namespace Pt
