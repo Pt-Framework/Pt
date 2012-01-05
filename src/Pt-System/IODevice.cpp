@@ -83,9 +83,19 @@ size_t IODevice::endRead()
     if( ! _rbuf )
         return 0;
 
-    // TODO: handle ravail like in endWrite()
+    size_t n = 0;
 
-    size_t n;
+    if(_ravail > 0 || _eof)
+    {
+        n = _ravail;
+        _rbuf = 0;
+        _rbuflen = 0;
+        _ravail = 0;
+
+        this->setIdle();
+        return n;
+    }
+
     try
     {
         n = this->onEndRead(_eof);
@@ -97,9 +107,6 @@ size_t IODevice::endRead()
         _ravail = 0;
         throw;
     }
-
-    if(_ravail > 0 || _eof)
-        this->setIdle();
 
     _rbuf = 0;
     _rbuflen = 0;

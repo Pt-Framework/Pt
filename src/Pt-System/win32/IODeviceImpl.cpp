@@ -176,11 +176,11 @@ size_t OverlappedIODeviceImpl::beginRead(EventLoop& loop, char* buffer, size_t n
 
 size_t OverlappedIODeviceImpl::endRead(EventLoop& loop, bool& eof)
 {
-    if( _device.eof() )
+    /*if( _device.eof() )
     {
         eof = true;
         return 0;
-    }
+    }*/
 
     // finishes the overlapped operation. Blocks until data is available,
     // so beginRead can be ended by endRead without a wait step.
