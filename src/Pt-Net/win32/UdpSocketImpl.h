@@ -84,11 +84,11 @@ class UdpSocketImpl
 
         ~UdpSocketImpl();
 
-        void close();
+        void close(System::EventLoop* loop);
 
-        void bind(const std::string& ipaddr, unsigned short int port, unsigned flags);
+        void bind(const std::string& ipaddr, unsigned short int port, unsigned flags, System::EventLoop* loop);
 
-        void connect(const AddrInfo& addrinfo);
+        void connect(const AddrInfo& addrinfo, System::EventLoop* loop);
 
         bool isConnected() const;
 
@@ -100,7 +100,7 @@ class UdpSocketImpl
 
         void dropMulticastGroup(const std::string& ipaddr);
 
-        void cancel();
+        void cancel(System::EventLoop& loop);
 
         std::string getSockAddr() const;
 
@@ -116,17 +116,17 @@ class UdpSocketImpl
             return _timeout;
         }
 
-        size_t beginRead(char* buffer, size_t n, bool& eof);
+        size_t beginRead(System::EventLoop& loop, char* buffer, size_t n, bool& eof);
 
         size_t read(char* buffer, size_t count, bool& eof);
 
-        size_t endRead(bool& eof);
+        size_t endRead(System::EventLoop& loop, bool& eof);
 
-        size_t beginWrite(const char* buffer, size_t n);
+        size_t beginWrite(System::EventLoop& loop, const char* buffer, size_t n);
 
         size_t write(const char* buffer, size_t n);
 
-        size_t endWrite();
+        size_t endWrite(System::EventLoop& loop);
 
         //bool beginConnect(const AddrInfo& ai);
         //void endConnect();
@@ -136,7 +136,11 @@ class UdpSocketImpl
 
         void detach(System::EventLoop& loop);
 
-        bool run();
+        bool runRead(System::EventLoop& loop);
+
+        bool runWrite(System::EventLoop& loop);
+
+        bool run(System::EventLoop& loop);
 
         //bool setWaitHandle(HANDLE h, bool& avail);
 

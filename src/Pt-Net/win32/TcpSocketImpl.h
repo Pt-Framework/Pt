@@ -105,39 +105,39 @@ class TcpSocketImpl
         long          _eventFlags;
         size_t        _dataSends;
 
-        int checkConnect();
+        int checkConnect(System::EventLoop* loop);
         void attachEvent(HANDLE ev, long events);
         size_t checkReceiveResult(bool& eof);
         size_t checkSendResult();
-        const char* tryConnect();
+        const char* tryConnect(System::EventLoop* loop);
         void checkPendingError();
     public:
         TcpSocketImpl(TcpSocket& socket);
 
         ~TcpSocketImpl();
 
-        void close();
+        void close(System::EventLoop* loop);
 
         bool isConnected() const
         { return _isConnected; }
 
-        void accept(const TcpServer& server, unsigned flags);
+        void accept(const TcpServer& server, unsigned flags, System::EventLoop* loop);
 
         void connect(const AddrInfo& addrinfo);
 
-        bool beginConnect(const AddrInfo& addrinfo);
+        bool beginConnect(const AddrInfo& addrinfo, System::EventLoop* loop);
 
-        void endConnect();
+        void endConnect(System::EventLoop& loop);
 
-        size_t beginRead(char* buffer, size_t n, bool& eof);
+        size_t beginRead(System::EventLoop& loop, char* buffer, size_t n, bool& eof);
 
         size_t read(char* buffer, size_t count, bool& eof);
 
-        size_t endRead(bool& eof);
+        size_t endRead(System::EventLoop& loop, bool& eof);
 
-        size_t beginWrite(const char* buffer, size_t n);
+        size_t beginWrite(System::EventLoop& loop, const char* buffer, size_t n);
 
-        size_t endWrite();
+        size_t endWrite(System::EventLoop& loop);
 
         size_t write(const char* buffer, size_t count);
 
@@ -161,9 +161,15 @@ class TcpSocketImpl
 
         void detach(System::EventLoop& sb);
 
-        bool run();
+        bool runRead(System::EventLoop& loop);
 
-        void cancel();
+        bool runWrite(System::EventLoop& loop);
+
+        bool runConnect(System::EventLoop& loop);
+
+        bool run(System::EventLoop& loop);
+
+        void cancel(System::EventLoop& loop);
 };
 
 } // namespace Net

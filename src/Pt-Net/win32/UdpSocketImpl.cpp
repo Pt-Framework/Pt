@@ -70,7 +70,7 @@ UdpSocketImpl::~UdpSocketImpl()
 }
 
 
-void UdpSocketImpl::close()
+void UdpSocketImpl::close(System::EventLoop* loop)
 {
     if( _fd == INVALID_SOCKET )
         return;
@@ -78,7 +78,6 @@ void UdpSocketImpl::close()
     _eventFlags  = 0;
     setEventFlags(0, 0); // is this needed ?
 
-    System::EventLoop* loop = _socket.parent();
     if(loop)
         this->detach(*loop);
 
@@ -89,7 +88,7 @@ void UdpSocketImpl::close()
 }
 
 
-void UdpSocketImpl::bind(const std::string& ipaddr, unsigned short int port, unsigned flags)
+void UdpSocketImpl::bind(const std::string& ipaddr, unsigned short int port, unsigned flags, System::EventLoop* loop)
 {
     AddrInfo ai(ipaddr, port, true);
 
@@ -106,7 +105,7 @@ void UdpSocketImpl::bind(const std::string& ipaddr, unsigned short int port, uns
         else if( _isBound )
         {
             if(it->ai_family != _servaddr.ss_family)
-                this->close();
+                this->close(loop);
         }
 
         if( it->ai_family == AF_INET6 && _broadcast)
@@ -120,7 +119,7 @@ void UdpSocketImpl::bind(const std::string& ipaddr, unsigned short int port, uns
 
         if (::setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, (char*)&reuseAddr, sizeof(reuseAddr)) < 0)
         {
-            this->close();
+            this->close(loop);
             throw System::SystemError("setsockopt");
         }
 
@@ -131,7 +130,7 @@ void UdpSocketImpl::bind(const std::string& ipaddr, unsigned short int port, uns
         {
             if( ::setsockopt(_fd, IPPROTO_IPV6, IPV6_V6ONLY, (const char*) &on, sizeof(on)) < 0 )
             {
-                this->close();
+                this->close(loop);
                 throw System::SystemError("setsockopt IPV6_V6ONLY failed");
             }
         }
@@ -142,7 +141,6 @@ void UdpSocketImpl::bind(const std::string& ipaddr, unsigned short int port, uns
             _isBound = true;
             std::memmove(&_servaddr, it->ai_addr, it->ai_addrlen);
 
-            System::EventLoop* loop = _socket.parent();
             if(loop)
                 this->attach(*loop);
 
@@ -152,7 +150,7 @@ void UdpSocketImpl::bind(const std::string& ipaddr, unsigned short int port, uns
         addrInUse = WSAGetLastError() == WSAEADDRINUSE;
 
         if( ! _isConnected )
-            this->close();
+            this->close(loop);
     }
 
     if(addrInUse)
@@ -162,7 +160,7 @@ void UdpSocketImpl::bind(const std::string& ipaddr, unsigned short int port, uns
 }
 
 
-void UdpSocketImpl::connect(const AddrInfo& ai)
+void UdpSocketImpl::connect(const AddrInfo& ai, System::EventLoop* loop)
 {
     _addrInfo = ai;
     _addrInfoPtr = _addrInfo.impl()->begin();
@@ -177,7 +175,7 @@ void UdpSocketImpl::connect(const AddrInfo& ai)
         else if( _isConnected )
         {
             if(_addrInfoPtr->ai_family != _peeraddr.ss_family)
-                this->close();
+                this->close(loop);
         }
 
         if( _fd == INVALID_SOCKET )
@@ -191,7 +189,7 @@ void UdpSocketImpl::connect(const AddrInfo& ai)
             const int on = 1;
             if (::setsockopt(_fd, SOL_SOCKET, SO_BROADCAST, (char*)&on, sizeof(on)) < 0)
             {
-                this->close();
+                this->close(loop);
                 throw System::SystemError("setsockopt");
             }
         }
@@ -202,7 +200,6 @@ void UdpSocketImpl::connect(const AddrInfo& ai)
         {
             _isConnected = true;
 
-            System::EventLoop* loop = _socket.parent();
             if(loop)
                 this->attach(*loop);
 
@@ -210,7 +207,7 @@ void UdpSocketImpl::connect(const AddrInfo& ai)
         }
 
         if( ! _isBound )
-            this->close();
+            this->close(loop);
     }
 
     throw System::IOError("connect failed");
@@ -317,7 +314,7 @@ void UdpSocketImpl::dropMulticastGroup(const std::string& ipaddr)
 }
 
 
-void UdpSocketImpl::cancel()
+void UdpSocketImpl::cancel(System::EventLoop& loop)
 {
     if( _fd != INVALID_SOCKET )
     {
@@ -382,7 +379,39 @@ void UdpSocketImpl::detach(System::EventLoop& loop)
 }
 
 
-bool UdpSocketImpl::run()
+bool UdpSocketImpl::runRead(System::EventLoop& loop)
+{
+    WSANETWORKEVENTS events;
+
+    if( WSAEnumNetworkEvents(_fd, NULL, &events) == SOCKET_ERROR )
+        throw System::SystemError("WSAEnumNetworkEvents failed");
+
+    if( (events.lNetworkEvents & FD_READ) == FD_READ )
+    {
+        return true;
+    }
+
+    return false;
+}
+
+
+bool UdpSocketImpl::runWrite(System::EventLoop& loop)
+{
+    WSANETWORKEVENTS events;
+
+    if( WSAEnumNetworkEvents(_fd, NULL, &events) == SOCKET_ERROR )
+        throw System::SystemError("WSAEnumNetworkEvents failed");
+
+    if( (events.lNetworkEvents & FD_WRITE) == FD_WRITE )
+    {
+       return true;
+    }
+
+    return false;
+}
+
+
+bool UdpSocketImpl::run(System::EventLoop& loop)
 {
     DestructionSentry sentry(_sentry);
 
@@ -444,7 +473,7 @@ void UdpSocketImpl::setEventFlags(HANDLE ev, long events)
 }
 
 
-size_t UdpSocketImpl::beginRead(char* buffer, size_t n, bool& eof)
+size_t UdpSocketImpl::beginRead(System::EventLoop& loop, char* buffer, size_t n, bool& eof)
 {
     assert(buffer != 0);
     _eventFlags |= FD_READ;
@@ -463,7 +492,7 @@ size_t UdpSocketImpl::read(char* buffer, size_t count, bool& eof)
 }
 
 
-size_t UdpSocketImpl::endRead(bool& eof)
+size_t UdpSocketImpl::endRead(System::EventLoop& loop, bool& eof)
 {
     _eventFlags &= ~FD_READ;
 
@@ -500,7 +529,7 @@ size_t UdpSocketImpl::write(const char* buffer, size_t n)
 }
 
 
-size_t UdpSocketImpl::beginWrite(const char* buffer, size_t n)
+size_t UdpSocketImpl::beginWrite(System::EventLoop& loop, const char* buffer, size_t n)
 {
      _sendBuffer.buf = const_cast<char*>(buffer);
     _sendBuffer.len = n;
@@ -528,7 +557,7 @@ size_t UdpSocketImpl::beginWrite(const char* buffer, size_t n)
 }
 
 
-size_t UdpSocketImpl::endWrite()
+size_t UdpSocketImpl::endWrite(System::EventLoop& loop)
 {
     if(_dataSends != 0)
     {
