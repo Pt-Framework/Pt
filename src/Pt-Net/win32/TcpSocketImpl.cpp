@@ -168,7 +168,6 @@ const char* TcpSocketImpl::tryConnect(System::EventLoop* loop)
         if( ::connect(_fd, _addrInfoPtr->ai_addr, _addrInfoPtr->ai_addrlen) == 0 )
         {
             _isConnected = true;
-            _eventFlags |= FD_CONNECT;
             log_debug("immediate connect ");
             break;
         }
@@ -207,16 +206,8 @@ bool TcpSocketImpl::beginConnect(const AddrInfo& ai, System::EventLoop* loop)
         log_debug("connected " << _fd);
     }
 
-    if( _socket.isActive() )
-    {
-        System::EventLoop* loop = _socket.parent();
-        log_debug(_fd << " setWaitHandle");
-
+    if( ! _isConnected)
         attachEvent(_currentEventHandle, _eventFlags);
-    
-        if(_isConnected && _eventFlags & FD_CONNECT)
-            loop->impl().avail(_socket);
-    }
 
     return _isConnected;
 }
@@ -409,7 +400,7 @@ bool TcpSocketImpl::runConnect(System::EventLoop& loop)
 }
 
 
-bool TcpSocketImpl::run(System::EventLoop& loop)
+/*bool TcpSocketImpl::run(System::EventLoop& loop)
 {
     log_debug(_fd << " avail");
 
@@ -485,7 +476,7 @@ bool TcpSocketImpl::run(System::EventLoop& loop)
     }
 
     return ev;
-}
+}*/
 
 
 bool TcpSocketImpl::wait(std::size_t umsecs)

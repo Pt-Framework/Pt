@@ -167,7 +167,7 @@ class TcpSocketImpl
 
         bool runConnect(System::EventLoop& loop);
 
-        bool run(System::EventLoop& loop);
+        //bool run(System::EventLoop& loop);
 
         void cancel(System::EventLoop& loop);
 };

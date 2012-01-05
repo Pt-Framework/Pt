@@ -411,7 +411,7 @@ bool UdpSocketImpl::runWrite(System::EventLoop& loop)
 }
 
 
-bool UdpSocketImpl::run(System::EventLoop& loop)
+/*bool UdpSocketImpl::run(System::EventLoop& loop)
 {
     DestructionSentry sentry(_sentry);
 
@@ -447,7 +447,7 @@ bool UdpSocketImpl::run(System::EventLoop& loop)
     }
 
     return ev;
-}
+}*/
 
 
 /*bool UdpSocketImpl::setWaitHandle(HANDLE h, bool& avail)
