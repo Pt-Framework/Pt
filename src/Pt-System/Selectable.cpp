@@ -101,13 +101,13 @@ void Selectable::unsetAvail()
 
 void Selectable::cancel()
 { 
+    this->onCancel(); 
+
     if( _parent && _avail )
     {
         _parent->onIdle(*this);
         _avail = false;
     }
-
-    this->onCancel(); 
 }
 
 
