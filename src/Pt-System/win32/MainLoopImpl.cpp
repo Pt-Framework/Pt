@@ -45,7 +45,6 @@ namespace System {
 EventLoopImpl::EventLoopImpl()
 {
     _current = _devices.end();
-    _currentAvail = _avail.end();
 
     _wakeEvent = CreateEvent( NULL, FALSE, FALSE, NULL );
     if( _wakeEvent == NULL )
@@ -118,40 +117,35 @@ void EventLoopImpl::disable(Selectable& s)
         }
     }
 
-    iter = _avail.find( &s );
-    if( iter != _avail.end() )
+    std::vector<Selectable*>::iterator it = _avail.begin();
+    while(it != _avail.end())
     {
-        if( _currentAvail != _avail.end() && *_currentAvail == *iter )
-            _avail.erase(_currentAvail++);
-        else
-            _avail.erase(iter);
+        if(*it == &s)
+            assert(false);
+
+        ++it;
     }
-}
 
-
-void EventLoopImpl::setAvail(Selectable& s)
-{
-    _avail.insert(&s);
+    this->idle(s);
 }
 
 
 void EventLoopImpl::idle(Selectable& s)
 {
-    std::set<Selectable*>::iterator it = _avail.find( &s );
-    if( it == _avail.end() )
-        return;
-
-    if( _currentAvail != _avail.end() &&
-       *_currentAvail == *it )
-        _avail.erase(_currentAvail++);
-    else
-        _avail.erase(it);
+    std::vector<Selectable*>::iterator it = _avail.begin();
+    while(it != _avail.end())
+    {
+        if(*it == &s)
+            it = _avail.erase(it);
+        else
+            ++it;
+    }
 }
 
 
 void EventLoopImpl::avail(Selectable& s)
 {
-    _avail.insert(&s);
+    _avail.push_back(&s);
 }
 
 
@@ -221,20 +215,12 @@ void EventLoopImpl::waitNext(std::size_t umsecs, bool& isActive )
     try
     {
         // check all selectables that did not require waiting
-        for( _currentAvail = _avail.begin(); _currentAvail != _avail.end(); )
+        while( ! _avail.empty() )
         {
-            Selectable* s = *_currentAvail;
-
-            //if( s->enabled() ) 
-                s->run();
-
-            if( _currentAvail != _avail.end() &&
-               *_currentAvail == s )
-            {
-                    ++_currentAvail;
-            }
+            Selectable* s = _avail.back();
+            _avail.pop_back();
+            s->run();
         }
-
 
         if(isTimeout)
             return;
@@ -251,12 +237,8 @@ void EventLoopImpl::waitNext(std::size_t umsecs, bool& isActive )
             for( _current = _devices.begin(); _current != _devices.end(); )
             {
                 Selectable* dev = *_current;
+                dev->run();
 
-                //std::cerr << "ON AVAIL" << std::endl;
-                //if( dev->enabled() ) 
-                    dev->run();
-
-                //std::cerr << "ITERATOR AFTER AVAIL" << std::endl;
                 if( _current != _devices.end() && *_current == dev )
                 {
                     ++_current;
@@ -282,15 +264,12 @@ void EventLoopImpl::waitNext(std::size_t umsecs, bool& isActive )
         else if( offset < _handles.size() )
         {
             Selectable* selectable = _handles.at(offset);
-
-            //if( selectable->enabled() )
-                 selectable->run();
+            selectable->run();
         }
     }
     catch (...)
     {
         _current = _devices.end();
-        _currentAvail = _avail.end();
         throw;
     }
 }

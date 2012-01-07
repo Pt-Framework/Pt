@@ -82,14 +82,16 @@ EventLoop* Selectable::parent() const
 }
 
 
+void Selectable::cancel()
+{ 
+    this->onCancel(); 
+}
 
 
-
-
-
-
-
-
+bool Selectable::run()
+{ 
+    return this->onRun(); 
+}
 
 
 

@@ -143,8 +143,6 @@ class PT_SYSTEM_API EventLoopImpl : public EventDispatcher
 
         void disable(IOHandle* h);
 
-        void setAvail(Selectable& s);
-
     protected:
         virtual void onRun();
 
@@ -161,9 +159,8 @@ class PT_SYSTEM_API EventLoopImpl : public EventDispatcher
         HandleMap _handles;
         std::list<IOHandle*> _dirty;
         std::set<Selectable*>::iterator _current;
-        std::set<Selectable*>::iterator _currentAvail;
         std::set<Selectable*> _devices;
-        std::set<Selectable*> _avail;
+        std::vector<Selectable*> _avail;
         std::set<Selectable*> _signalled;
         Pt::System::Mutex _signalledMutex;
 };

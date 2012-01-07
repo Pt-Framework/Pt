@@ -36,7 +36,6 @@ namespace System {
 
 IODevice::IODevice()
 : _eof(false)
-, _avail(false)
 , _rbuf(0)
 , _rbuflen(0)
 , _ravail(0)
@@ -70,7 +69,7 @@ void IODevice::beginRead(char* buffer, size_t n)
     size_t r = this->onBeginRead(buffer, n, _eof);
 
     if(r > 0 || _eof)
-        this->setAvail();
+        this->parent()->setAvail(*this); 
 
     _rbuf = buffer;
     _rbuflen = n;
@@ -91,8 +90,6 @@ size_t IODevice::endRead()
         _rbuf = 0;
         _rbuflen = 0;
         _ravail = 0;
-
-        this->setIdle();
         return n;
     }
 
@@ -136,7 +133,7 @@ size_t IODevice::beginWrite(const char* buffer, size_t n)
     size_t r = this->onBeginWrite(buffer, n);
 
     if(r > 0)
-        this->setAvail();
+        this->parent()->setAvail(*this); 
 
     _wbuf = buffer;
     _wbuflen = n;
@@ -159,8 +156,6 @@ size_t IODevice::endWrite()
         _wbuf = 0;
         _wbuflen = 0;
         _wavail = 0;
-
-        this->setIdle();
         return n;
     }
 
@@ -193,29 +188,20 @@ size_t IODevice::write(const char* buffer, size_t n)
 }
 
 
-void IODevice::setAvail()
-{
-    System::EventLoop* loop = this->parent();
-    if(loop)
-        loop->setAvail(*this); 
-
-    _avail = true;
-}
-
-
-void IODevice::setIdle()
-{
-    System::EventLoop* loop = this->parent();
-    if(loop)
-        loop->setIdle(*this);
-
-    _avail = false;
-}
-
-
 void IODevice::onCancel()
 {
-    this->setIdle();
+    System::EventLoop* loop = this->parent();
+    if(loop)
+    {
+        if(_ravail > 0)
+            loop->setIdle(*this);
+
+        if(_rbuf && _eof)
+            loop->setIdle(*this);
+    
+        if(_wavail > 0)
+            loop->setIdle(*this);
+    }
 
     _rbuf = 0;
     _rbuflen = 0;
