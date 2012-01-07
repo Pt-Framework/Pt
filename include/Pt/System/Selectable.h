@@ -64,6 +64,10 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
         //! @brief Run operation if it is ready
         bool run();
 
+        void setAvail();
+
+        void setIdle();
+
     protected:
         //! @brief Default Constructor
         Selectable();
@@ -83,6 +87,7 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
 
     private:
         EventLoop* _parent;
+        bool _avail;
 };
 
 class Active : public Selectable
@@ -92,13 +97,13 @@ class Active : public Selectable
         {}
 
         //! @brief Signals state transition to avail state
-        void setAvail()
+        void signalAvail()
         {
             this->parent()->signalAvail(*this);
         }
 
         //! @brief Signals state transition to idle state
-        void setIdle()
+        void signalIdle()
         {
             this->parent()->signalIdle(*this);
         }

@@ -102,13 +102,20 @@ void EventLoopImpl::signalIdle(Selectable&)
 
 void EventLoopImpl::idle(Selectable& s)
 {
-    _avail.erase(&s);
+    std::vector<Selectable*>::iterator it = _avail.begin();
+    while( it != _avail.end() )
+    {
+        if(*it == &s)
+            it = _avail.erase(it);
+        else
+            ++it;
+    }
 }
 
 
 void EventLoopImpl::avail(Selectable& s)
 {
-    _avail.insert(&s);
+    _avail.push_back(&s);
 }
 
 
@@ -245,16 +252,23 @@ void EventLoopImpl::waitNext(std::size_t msecs, bool& isActive )
 
     try
     {
-        avail += _avail.size();
+        std::cerr << "avail: " << _avail.size() << " selected: " << avail << std::endl;
 
-        //TODO: iterate _avail too...
+        while( ! _avail.empty() )
+        {
+            Selectable* selectable = _avail.back();
+            _avail.pop_back();
+            std::cerr << "avail: " << selectable << std::endl;
+            selectable->setIdle();
+            selectable->run();
+        }
 
         for( _current = _devices.begin(); _current != _devices.end(); )
         {
             Selectable* selectable = *_current;
 
             bool isAvail = selectable->run();
-            std::cerr << "available: " << isAvail << std::endl;
+            std::cerr << "selected: " << selectable << " " << isAvail << std::endl;
 
             if( isAvail )
                 --avail;

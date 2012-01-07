@@ -246,7 +246,7 @@ class EventLoopImpl : public EventDispatcher
         IOHandle* _last;
         std::set<Selectable*>::iterator _current;
         std::set<Selectable*> _devices; // active
-        std::set<Selectable*> _avail;
+        std::vector<Selectable*> _avail;
         fd_set _rfds;
         fd_set _wfds;
         fd_set _efds;

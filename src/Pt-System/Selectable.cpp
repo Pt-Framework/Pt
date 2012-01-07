@@ -36,6 +36,7 @@ namespace System {
 
 Selectable::Selectable()
 : _parent(0)
+, _avail(false)
 { 
 }
 
@@ -82,8 +83,27 @@ EventLoop* Selectable::parent() const
 }
 
 
+void Selectable::setAvail()
+{
+    if(_parent)
+    {
+        _parent->setAvail(*this);
+        _avail = true;
+    }
+}
+
+
+void Selectable::setIdle()
+{
+    _avail = false;
+}
+
+
 void Selectable::cancel()
 { 
+    if(_parent && _avail)
+        _parent->setIdle(*this);
+
     this->onCancel(); 
 }
 
