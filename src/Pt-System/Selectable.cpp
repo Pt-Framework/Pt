@@ -85,15 +85,15 @@ EventLoop* Selectable::parent() const
 
 void Selectable::setAvail()
 {
-    if(_parent)
+    if(_parent && ! _avail)
     {
-        _parent->setAvail(*this);
+        _parent->onAvail(*this);
         _avail = true;
     }
 }
 
 
-void Selectable::setIdle()
+void Selectable::unsetAvail()
 {
     _avail = false;
 }
@@ -101,10 +101,10 @@ void Selectable::setIdle()
 
 void Selectable::cancel()
 { 
-    if(_parent && _avail)
+    if( _parent && _avail )
     {
-        _parent->setIdle(*this);
-        this->setIdle();
+        _parent->onIdle(*this);
+        _avail = false;
     }
 
     this->onCancel(); 

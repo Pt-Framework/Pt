@@ -66,13 +66,12 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
 
         void setAvail();
 
-        void setIdle();
+        void unsetAvail();
 
     protected:
         //! @brief Default Constructor
         Selectable();
 
-    protected:
         //! @brief Attached to loop
         virtual void onAttach(EventLoop&) = 0;
 
@@ -90,6 +89,7 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
         bool _avail;
 };
 
+
 class Active : public Selectable
 {
     public:
@@ -102,10 +102,11 @@ class Active : public Selectable
             this->parent()->signalAvail(*this);
         }
 
-        //! @brief Signals state transition to idle state
-        void signalIdle()
+        void beginSomething()
         {
-            this->parent()->signalIdle(*this);
+            // worker thread
+
+            signalAvail();
         }
 
     protected:
@@ -115,7 +116,10 @@ class Active : public Selectable
         }
 
         //! @brief Blocks until operation has cancelled
-        virtual void onCancel() = 0;
+        virtual void onCancel()
+        {
+            this->parent()->signalIdle(*this);
+        }
 
          //! @brief Check if ready and run
         virtual bool onRun() = 0;

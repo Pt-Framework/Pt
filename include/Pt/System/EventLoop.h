@@ -114,17 +114,20 @@ class PT_SYSTEM_API EventLoop : public Connectable
         */
         Signal<>& exited();
 
-        void setAvail(Selectable& s)
-        { this->onAvail(s); }
+        //void setAvail(Selectable& s)
+        //{ this->onAvail(s); }
 
-        void setIdle(Selectable& s)
-        { this->onIdle(s); }
+        //void setIdle(Selectable& s)
+        //{ this->onIdle(s); }
 
         void signalAvail(Selectable& s)
         { this->onSignalAvail(s); }
 
         void signalIdle(Selectable& s)
         { this->onSignalIdle(s); }
+
+        bool isSignalled(Selectable&) const
+        { return false; }
 
     protected:
         /** @brief Constructs the EventLoop
@@ -229,7 +232,6 @@ class PT_SYSTEM_API EventDispatcher
         Allocator _allocator;
         Allocator* _usedalloc;
         EventQueue _eventQueue;
-        //std::set<Selectable*> _selectables;
         TimerQueue _timers;
         int _state;
         Signal<const Event&> _event;

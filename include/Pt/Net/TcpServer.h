@@ -74,15 +74,6 @@ class TcpServerImpl;
       virtual void onCancel();
 
       virtual bool onRun();
-
-      //! @brief Signals state transition to avail state
-      virtual void setAvail();
-
-      //! @brief Signals state transition to idle state
-      virtual void setIdle();
-
-      virtual bool isAvail()
-      { return false; }
   };
 
 } // namespace Net

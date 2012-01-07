@@ -73,9 +73,29 @@ EventLoopImpl::EventLoopImpl()
 
 EventLoopImpl::~EventLoopImpl()
 { 
+    std::set<Selectable*>::iterator it;
+
+    while( _selectables.size() )
+    {
+        it = _selectables.begin();
+        (*it)->detach();
+    }
+
     CloseHandle( _wakeEvent );
     CloseHandle( _ioEvent );
     CloseHandle( _signalledEvent );
+}
+
+
+void EventLoopImpl::attach(Selectable& s)
+{
+    _selectables.insert(&s);
+}
+
+
+void EventLoopImpl::detach(Selectable& s)
+{
+    _selectables.erase(&s);
 }
 
 
@@ -164,6 +184,12 @@ void EventLoopImpl::signalAvail(Selectable& s)
 }
 
 
+bool EventLoopImpl::isSignalled()
+{
+    return false;
+}
+
+
 void EventLoopImpl::onRun()
 {
     bool isActive = true;
@@ -219,6 +245,7 @@ void EventLoopImpl::waitNext(std::size_t umsecs, bool& isActive )
         {
             Selectable* s = _avail.back();
             _avail.pop_back();
+            s->unsetAvail();
             s->run();
         }
 

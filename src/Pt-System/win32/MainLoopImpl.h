@@ -127,6 +127,10 @@ class PT_SYSTEM_API EventLoopImpl : public EventDispatcher
         
         ~EventLoopImpl();
 
+        void attach(Selectable& s);
+
+        void detach(Selectable& s);
+
         void idle(Selectable& s);
 
         void avail(Selectable& s);
@@ -134,6 +138,8 @@ class PT_SYSTEM_API EventLoopImpl : public EventDispatcher
         void signalAvail(Selectable& s);
 
         void signalIdle(Selectable& s);
+
+        bool isSignalled();
 
         HANDLE enable(Selectable& s);
 
@@ -157,6 +163,7 @@ class PT_SYSTEM_API EventLoopImpl : public EventDispatcher
         HANDLE _ioEvent;
         HANDLE _signalledEvent;
         HandleMap _handles;
+        std::set<Selectable*> _selectables;
         std::list<IOHandle*> _dirty;
         std::set<Selectable*>::iterator _current;
         std::set<Selectable*> _devices;

@@ -173,14 +173,6 @@ EventDispatcher::EventDispatcher(Allocator& a)
 
 EventDispatcher::~EventDispatcher()
 {
-    /*std::set<Selectable*>::iterator it;
-
-    while( _selectables.size() )
-    {
-        it = _selectables.begin();
-        (*it)->detach();
-    }*/
-
     try
     {
         while ( ! _eventQueue.empty() )
@@ -296,18 +288,6 @@ bool EventDispatcher::processEvents()
 
     return isActive;
 }
-
-
-/*void EventDispatcher::attach(Selectable& s)
-{
-    _selectables.insert(&s);
-}
-
-
-void EventDispatcher::detach(Selectable& s)
-{
-    _selectables.erase(&s);
-}*/
 
 
 void EventDispatcher::addTimer(Timer& timer)

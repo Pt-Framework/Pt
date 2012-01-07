@@ -104,7 +104,7 @@ void TcpServer::onDetach(System::EventLoop& sb)
 void TcpServer::onCancel()
 {
     //_impl->cancel();
-    this->setIdle();
+    //this->setIdle();
 }
 
 
@@ -114,7 +114,7 @@ bool TcpServer::onRun()
 }
 
 
-void TcpServer::setAvail()
+/*void TcpServer::setAvail()
 {
     System::EventLoop* loop = this->parent();
     if(loop)
@@ -131,7 +131,7 @@ void TcpServer::setIdle()
         loop->setIdle(*this);
 
     _avail = false;
-}
+}*/
 
 } // namespace Net
 
