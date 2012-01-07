@@ -197,7 +197,6 @@ size_t IODeviceImpl::beginWrite(EventLoop& loop, const char* buffer, size_t n)
     if (ret == 0 || errno == ECONNRESET || errno == EPIPE)
         throw System::IOError("lost connection to peer");
 
-    std::cerr << "IODeviceImpl::beginWrite on handle " << std::endl;
     loop.impl().beginWrite( &_ioh );
     return 0;
 }
@@ -224,7 +223,6 @@ size_t IODeviceImpl::write( const char* buffer, size_t count )
     while(true)
     {
         ret = ::write(_ioh.fd, (const void*)buffer, count);
-        std::cerr << "wrote: " << ret << std::endl;
         if(ret > 0)
             break;
 
@@ -285,8 +283,6 @@ void IODeviceImpl::sync() const
 
 bool IODeviceImpl::runRead(EventLoop& loop)
 {
-    std::cerr << "IODeviceImpl::runRead"<< std::endl;
-
     if( ! this->isOpen() )
         return false;
 
@@ -304,8 +300,6 @@ bool IODeviceImpl::runRead(EventLoop& loop)
 
 bool IODeviceImpl::runWrite(EventLoop& loop)
 {
-    std::cerr << "IODeviceImpl::runWrite"<< std::endl;
-
     if( ! this->isOpen() )
         return false;
 

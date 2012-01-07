@@ -50,7 +50,6 @@ class EventLoopImpl : public EventDispatcher
 
         void enable(IOHandle& h)
         {
-            std::cerr << "# enable fd: " << h.fd << std::endl;
             _devices.insert( h.sel );
 
             if( h.fd > FD_SETSIZE )
@@ -63,7 +62,6 @@ class EventLoopImpl : public EventDispatcher
 
         void disable(IOHandle& h)
         {
-            std::cerr << "# disable fd: " << h.fd << std::endl;
            std::set<Selectable*>::iterator it = _devices.find( h.sel );
            if( it == _devices.end() )
                 return;
@@ -109,7 +107,6 @@ class EventLoopImpl : public EventDispatcher
 
         void beginRead(IOHandle* h)
         {
-            std::cerr << "beginRead on fd: " << h->fd << std::endl;
             pop(h);
             h->flags |= Input;
  
@@ -125,7 +122,6 @@ class EventLoopImpl : public EventDispatcher
         {
             if(h->flags & Input)
             {
-                std::cerr << "endRead on fd: " << h->fd << std::endl;
                 h->flags &= ~Input;
     
                 // update before next wait, move to front
@@ -136,7 +132,6 @@ class EventLoopImpl : public EventDispatcher
 
         void beginWrite(IOHandle* h)
         {
-            std::cerr << "beginWrite on fd: " << h->fd << std::endl;
             pop(h);
             h->flags |= Output;
  
@@ -151,9 +146,7 @@ class EventLoopImpl : public EventDispatcher
         {
             if(h->flags & Output)
             {
-                std::cerr << "endWrite on fd: " << h->fd << " " << h->flags << " " << h->wflags << std::endl;
                 h->flags &= ~Output;
-                std::cerr << "endWrite on fd: " << h->fd << " " << h->flags << " " << h->wflags << std::endl;
     
                 // update before next wait, move to front
                 pop(h);
@@ -228,6 +221,8 @@ class EventLoopImpl : public EventDispatcher
         void signalAvail(Selectable& s);
 
         void signalIdle(Selectable& s);
+
+        bool isSignalled(Selectable& s);
 
         void idle(Selectable& s);
 

@@ -363,7 +363,6 @@ size_t UdpSocketImpl::beginWrite(System::EventLoop& loop, const char* buffer, si
     if (ret == 0 || errno == ECONNRESET || errno == EPIPE)
         throw System::IOError("lost connection to peer");
 
-    std::cerr << "IODeviceImpl::beginWrite on handle " << std::endl;
     loop.impl().beginWrite( &_ioh );
 
     return 0;

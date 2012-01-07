@@ -207,8 +207,6 @@ void TcpServerImpl::detach(System::EventLoop& loop)
 
 bool TcpServerImpl::run()
 {
-    std::cerr << "TcpServerImpl::avail"<< std::endl;
-
     if(this->fd() < 0)
         return false;
 

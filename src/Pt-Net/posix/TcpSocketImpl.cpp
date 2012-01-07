@@ -41,8 +41,10 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-#define log_debug(x) std::cerr << x << std::endl;
-#define log_trace(x) std::cerr << x << std::endl;
+//#define log_debug(x) std::cerr << x << std::endl;
+//#define log_trace(x) std::cerr << x << std::endl;
+#define log_debug(x)
+#define log_trace(x)
 
 namespace
 {
@@ -320,7 +322,6 @@ bool TcpSocketImpl::runConnect(System::EventLoop& loop)
         {
             // not really connected but error
             // end of addrinfo list means that no working addrinfo was found
-            std::cerr << "########### CONNECT FAIL" << std::endl;
             return true;
         }
         else
@@ -344,7 +345,6 @@ bool TcpSocketImpl::runConnect(System::EventLoop& loop)
     }
     else if( impl.isWritable(&_ioh)  )
     {
-        std::cerr << "########### WRITABLE" << std::endl;
         int sockerr = checkConnect(loop);
         if (_isConnected)
         {

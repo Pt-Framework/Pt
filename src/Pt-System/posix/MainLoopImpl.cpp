@@ -80,8 +80,6 @@ EventLoopImpl::EventLoopImpl()
 
 EventLoopImpl::~EventLoopImpl()
 { 
-    std::cerr << "EventLoopImpl::~EventLoopImpl()" << std::endl;
-
     std::set<Selectable*>::iterator it;
 
     while( _selectables.size() )
@@ -119,6 +117,10 @@ void EventLoopImpl::signalIdle(Selectable&)
 {
 }
 
+
+bool EventLoopImpl::isSignalled(Selectable& s)
+{
+}
 
 void EventLoopImpl::idle(Selectable& s)
 {
@@ -162,34 +164,29 @@ void EventLoopImpl::waitNext(std::size_t msecs, bool& isActive )
 {
     for(IOHandle* h = _first; h != 0; h = h->next)
     {
-        std::cerr << "prepare handle: " << h->fd << " " << h->flags << " " << h->wflags << std::endl;
         if(h->flags == h->wflags)
             break;
 
         if(h->flags & Input &&  0 == (h->wflags & Input))
         {
-            std::cerr << "beginWait Input on fd: " << h->fd << std::endl;
             FD_SET(h->fd, &_rfds);
             h->wflags |= Input;
         }
 
         if(0 == (h->flags & Input) && h->wflags & Input)
         {
-            std::cerr << "stopWait Input on fd: " << h->fd << std::endl;
             FD_CLR( h->fd, &_rfds );
             h->wflags &= ~Input;
         }
 
         if(h->flags & Output &&  0 == (h->wflags & Output))
         {
-            std::cerr << "beginWait Output on fd: " << h->fd << std::endl;
             FD_SET(h->fd, &_wfds);
             h->wflags |= Output;
         }
 
         if(0 == (h->flags & Output) &&  h->wflags & Output)
         {
-            std::cerr << "stopWait output on fd: " << h->fd << std::endl;
             FD_CLR( h->fd, &_wfds );
             h->wflags &= ~Output;
         }
@@ -272,14 +269,11 @@ void EventLoopImpl::waitNext(std::size_t msecs, bool& isActive )
 
     try
     {
-        std::cerr << "avail: " << _avail.size() << " selected: " << avail << std::endl;
-
         while( ! _avail.empty() )
         {
             Selectable* selectable = _avail.back();
             _avail.pop_back();
-            std::cerr << "avail: " << selectable << std::endl;
-            selectable->setIdle();
+            selectable->unsetAvail();
             selectable->run();
         }
 
@@ -288,7 +282,6 @@ void EventLoopImpl::waitNext(std::size_t msecs, bool& isActive )
             Selectable* selectable = *_current;
 
             bool isAvail = selectable->run();
-            std::cerr << "selected: " << selectable << " " << isAvail << std::endl;
 
             if( isAvail )
                 --avail;
@@ -310,8 +303,6 @@ void EventLoopImpl::waitNext(std::size_t msecs, bool& isActive )
         _current = _devices.end();
         throw;
     }
-
-    std::cerr << "waitNext return"<< std::endl;
 }
 
 

@@ -83,18 +83,14 @@ TcpSocket::TcpSocket(const AddrInfo& addrinfo)
 
 TcpSocket::~TcpSocket()
 {
-    std::cerr << "TcpSocket::~TcpSocket()" << std::endl;
     try
     {
-        std::cerr << "TcpSocket::~TcpSocket() close" << std::endl;
         this->close();
     }
     catch(...)
     {}
 
-    std::cerr << "TcpSocket::~TcpSocket() delete _impl" << std::endl;
     delete _impl;
-    std::cerr << "TcpSocket::~TcpSocket() return" << std::endl;
 }
 
 
@@ -192,8 +188,6 @@ void TcpSocket::onDetach(System::EventLoop& sb)
 
 bool TcpSocket::onRun()
 {
-    //return _impl->run();
-
     if( ! this->isConnected() )
     {
         if( _impl->runConnect( *parent() ) )

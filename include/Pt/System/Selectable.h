@@ -27,6 +27,7 @@
 #define PT_SELECTABLE_H
 
 #include <Pt/Types.h>
+#include <Pt/Atomicity.h>
 #include <Pt/NonCopyable.h>
 #include <Pt/System/Api.h>
 #include <Pt/System/EventLoop.h>
@@ -93,6 +94,12 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
 class Active : public Selectable
 {
     public:
+
+        struct Status
+        {
+            atomic_t _avail;
+        };
+
         virtual ~Active()
         {}
 

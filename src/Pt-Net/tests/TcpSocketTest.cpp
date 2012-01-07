@@ -150,14 +150,14 @@ class TcpSocketTest : public Pt::Unit::TestSuite
             server.listen("127.0.0.1", 9000);
 
             PT_UNIT_ASSERT( 0 == std::strncmp(input, "Hello World !!!", 15) );
-            this->reportMessage("FINISHED");
+            //this->reportMessage("FINISHED");
         }
 
         void onAccept(Pt::Net::TcpServer& server)
         {
             _acceptor->accept(server);
-            this->reportMessage( "ACCEPTED IP: " + _acceptor->getSockAddr() +
-                                 " PEER: " + _acceptor->getPeerAddr() );
+            //this->reportMessage( "ACCEPTED IP: " + _acceptor->getSockAddr() +
+            //                     " PEER: " + _acceptor->getPeerAddr() );
 
             _acceptor->beginRead(input, 200);
         }
@@ -176,17 +176,16 @@ class TcpSocketTest : public Pt::Unit::TestSuite
         {
             _loop->exit();
             std::size_t n = device.endRead();
-            std::string msg("INPUT RECEIVED: ");
-            msg.append(input, n);
-            this->reportMessage(msg);
+            //std::string msg("INPUT RECEIVED: ");
+            //msg.append(input, n);
+            //this->reportMessage(msg);
             PT_UNIT_ASSERT(n > 5);
         }
 
         void onOutput(Pt::System::IODevice& device)
         {
             std::size_t n = device.endWrite();
-            std::cerr << "out: " << n << std::endl;
-            this->reportMessage("### ### ### OUTPUT SENT");
+            //this->reportMessage("### ### ### OUTPUT SENT");
             PT_UNIT_ASSERT(n > 5);
         }
 
