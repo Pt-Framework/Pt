@@ -82,11 +82,31 @@ EventLoopImpl::~EventLoopImpl()
 { 
     std::cerr << "EventLoopImpl::~EventLoopImpl()" << std::endl;
 
+    std::set<Selectable*>::iterator it;
+
+    while( _selectables.size() )
+    {
+        it = _selectables.begin();
+        (*it)->detach();
+    }
+
     if( _wakePipe[0] != -1 && _wakePipe[1] != -1 )
     {
         ::close(_wakePipe[0]);
         ::close(_wakePipe[1]);
     }
+}
+
+
+void EventLoopImpl::avail(Selectable& s)
+{
+    _avail.push_back(&s);
+}
+
+
+void EventLoopImpl::attach(Selectable& s)
+{
+    _selectables.insert(&s);
 }
 
 
@@ -113,9 +133,9 @@ void EventLoopImpl::idle(Selectable& s)
 }
 
 
-void EventLoopImpl::avail(Selectable& s)
+void EventLoopImpl::detach(Selectable& s)
 {
-    _avail.push_back(&s);
+    _selectables.erase(&s);
 }
 
 

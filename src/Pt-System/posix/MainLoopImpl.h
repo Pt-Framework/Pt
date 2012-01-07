@@ -233,6 +233,10 @@ class EventLoopImpl : public EventDispatcher
 
         void avail(Selectable& s);
 
+        void attach(Selectable& s);
+
+        void detach(Selectable& s);
+
     protected:
         virtual void onRun();
 
@@ -244,6 +248,7 @@ class EventLoopImpl : public EventDispatcher
         int _wakePipe[2];
         IOHandle* _first;
         IOHandle* _last;
+        std::set<Selectable*> _selectables;
         std::set<Selectable*>::iterator _current;
         std::set<Selectable*> _devices; // active
         std::vector<Selectable*> _avail;

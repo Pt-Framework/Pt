@@ -211,10 +211,6 @@ class PT_SYSTEM_API EventDispatcher
 
         bool processEvents();
 
-        void attach(Selectable& s);
-
-        void detach(Selectable& s);
-
         void addTimer(Timer& timer);
 
         void removeTimer( Timer& timer );
@@ -233,7 +229,7 @@ class PT_SYSTEM_API EventDispatcher
         Allocator _allocator;
         Allocator* _usedalloc;
         EventQueue _eventQueue;
-        std::set<Selectable*> _selectables;
+        //std::set<Selectable*> _selectables;
         TimerQueue _timers;
         int _state;
         Signal<const Event&> _event;

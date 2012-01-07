@@ -102,7 +102,10 @@ void Selectable::setIdle()
 void Selectable::cancel()
 { 
     if(_parent && _avail)
+    {
         _parent->setIdle(*this);
+        this->setIdle();
+    }
 
     this->onCancel(); 
 }
