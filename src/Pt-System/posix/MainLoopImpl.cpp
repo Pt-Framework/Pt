@@ -96,12 +96,6 @@ EventLoopImpl::~EventLoopImpl()
 }
 
 
-void EventLoopImpl::avail(Selectable& s)
-{
-    _avail.push_back(&s);
-}
-
-
 void EventLoopImpl::attach(Selectable& s)
 {
     _selectables.insert(&s);
@@ -118,12 +112,17 @@ void EventLoopImpl::signalIdle(Selectable&)
 }
 
 
-bool EventLoopImpl::isSignalled(Selectable& s)
+void EventLoopImpl::avail(Selectable& s)
 {
+    MutexLock lock(_mutex);
+    _avail.push_back(&s);
 }
+
 
 void EventLoopImpl::idle(Selectable& s)
 {
+    MutexLock lock(_mutex);
+
     std::vector<Selectable*>::iterator it = _avail.begin();
     while( it != _avail.end() )
     {
@@ -200,7 +199,20 @@ void EventLoopImpl::waitNext(std::size_t msecs, bool& isActive )
     _wfdsR = _wfds;
     _efdsR = _efds;
 
-    msecs = _avail.size() ? 0 : msecs;
+    while(true)
+    {
+        MutexLock lock(_mutex);
+        if( _avail.empty() )
+            break;
+
+        Selectable* selectable = _avail.back();
+        _avail.pop_back();
+        lock.unlock();
+
+        msecs = 0;
+        selectable->run();
+    }
+
     int avail = -1;
 
     while( true )
@@ -223,7 +235,7 @@ void EventLoopImpl::waitNext(std::size_t msecs, bool& isActive )
             throw IOError( PT_ERROR_MSG("select failed") );
         }
 
-        if( avail > 0 || _avail.size() )
+        if( avail > 0 || msecs == 0 )
             break;
 
         if(msecs == EventLoop::WaitInfinite)
@@ -269,14 +281,6 @@ void EventLoopImpl::waitNext(std::size_t msecs, bool& isActive )
 
     try
     {
-        while( ! _avail.empty() )
-        {
-            Selectable* selectable = _avail.back();
-            _avail.pop_back();
-            selectable->unsetAvail();
-            selectable->run();
-        }
-
         for( _current = _devices.begin(); _current != _devices.end(); )
         {
             Selectable* selectable = *_current;

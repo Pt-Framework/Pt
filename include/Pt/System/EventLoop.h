@@ -114,20 +114,8 @@ class PT_SYSTEM_API EventLoop : public Connectable
         */
         Signal<>& exited();
 
-        //void setAvail(Selectable& s)
-        //{ this->onAvail(s); }
-
-        //void setIdle(Selectable& s)
-        //{ this->onIdle(s); }
-
-        void signalAvail(Selectable& s)
-        { this->onSignalAvail(s); }
-
-        void signalIdle(Selectable& s)
-        { this->onSignalIdle(s); }
-
-        bool isSignalled(Selectable&) const
-        { return false; }
+        void setAvail(Selectable& s)
+        { this->onAvail(s); }
 
     protected:
         /** @brief Constructs the EventLoop

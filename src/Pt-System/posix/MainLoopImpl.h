@@ -23,6 +23,7 @@
 #include "Pt/System/Api.h"
 #include "Pt/System/IODevice.h"
 #include "Pt/System/Clock.h"
+#include "Pt/System/Mutex.h"
 #include "Pt/System/EventLoop.h"
 #include "IODeviceImpl.h"
 #include <sys/select.h>
@@ -222,8 +223,6 @@ class EventLoopImpl : public EventDispatcher
 
         void signalIdle(Selectable& s);
 
-        bool isSignalled(Selectable& s);
-
         void idle(Selectable& s);
 
         void avail(Selectable& s);
@@ -240,6 +239,7 @@ class EventLoopImpl : public EventDispatcher
         void waitNext(std::size_t timeout, bool& isActive);
 
     private:
+        Mutex _mutex;
         int _wakePipe[2];
         IOHandle* _first;
         IOHandle* _last;

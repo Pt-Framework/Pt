@@ -50,8 +50,7 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
         void setActive(EventLoop& parent);
 
         //! @brief Returns true if operations can be run
-        bool isActive() const
-        { return _parent != 0; }
+        bool isActive() const;
 
         //! @brief Remove from event loop and cancels outstanding operations
         void detach();
@@ -59,7 +58,7 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
         //! @brief Returns the parent event loop in which operations are running
         EventLoop* parent() const;
 
-        //! @brief Blocks until operation has cancelled
+        //! @brief Cancels all operations
         void cancel();
 
         //! @brief Run operation if it is ready
@@ -67,17 +66,15 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
 
         void setAvail();
 
-        void unsetAvail();
-
     protected:
         //! @brief Default Constructor
         Selectable();
 
         //! @brief Attached to loop
-        virtual void onAttach(EventLoop&) = 0;
+        virtual void onAttach(EventLoop& loop) = 0;
 
         //! @brief Detached from loop
-        virtual void onDetach(EventLoop&) = 0;
+        virtual void onDetach(EventLoop& loop) = 0;
 
         //! @brief Blocks until operation has cancelled
         virtual void onCancel() = 0;
@@ -87,58 +84,45 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
 
     private:
         EventLoop* _parent;
-        bool _avail;
 };
 
 
 class Active : public Selectable
 {
     public:
-
-        struct Status
-        {
-            atomic_t _avail;
-        };
-
         virtual ~Active()
         {}
 
-        //! @brief Signals state transition to avail state
-        void signalAvail()
+        void begin()
         {
-            this->parent()->signalAvail(*this);
-        }
+            if( ! isActive() )
+                return;
 
-        void beginSomething()
-        {
-            // worker thread
-
-            signalAvail();
+            this->onBegin( *parent() );
         }
 
     protected:
-        Active(EventLoop& loop)
+        Active()
+        { }
+
+        virtual void onBegin(EventLoop& loop)
         {
-            this->setActive(loop);
+            loop.setAvail(*this);
         }
 
-        //! @brief Blocks until operation has cancelled
         virtual void onCancel()
         {
-            this->parent()->signalIdle(*this);
         }
 
-         //! @brief Check if ready and run
         virtual bool onRun() = 0;
 
-    protected:
-        //! @brief Attached to loop
-        virtual void onAttach(EventLoop&)
-        { }
+        virtual void onAttach(EventLoop& loop)
+        {
+        }
 
-        //! @brief Detached from loop
-        virtual void onDetach(EventLoop&)
-        { }
+        virtual void onDetach(EventLoop& loop)
+        {
+        }
 };
 
 } // namespace System

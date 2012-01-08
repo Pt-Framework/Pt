@@ -36,7 +36,6 @@ namespace System {
 
 Selectable::Selectable()
 : _parent(0)
-, _avail(false)
 { 
 }
 
@@ -64,6 +63,12 @@ void Selectable::setActive(EventLoop& parent)
 }
 
 
+bool Selectable::isActive() const
+{ 
+    return _parent != 0; 
+}
+
+
 void Selectable::detach()
 {
     if(_parent)
@@ -85,17 +90,10 @@ EventLoop* Selectable::parent() const
 
 void Selectable::setAvail()
 {
-    if(_parent && ! _avail)
-    {
-        _parent->onAvail(*this);
-        _avail = true;
-    }
-}
+    if( ! _parent)
+        throw std::logic_error("selectable not active");
 
-
-void Selectable::unsetAvail()
-{
-    _avail = false;
+    _parent->onAvail(*this);
 }
 
 
@@ -103,10 +101,9 @@ void Selectable::cancel()
 { 
     this->onCancel(); 
 
-    if( _parent && _avail )
+    if( _parent )
     {
         _parent->onIdle(*this);
-        _avail = false;
     }
 }
 
@@ -115,7 +112,6 @@ bool Selectable::run()
 { 
     return this->onRun(); 
 }
-
 
 
 
