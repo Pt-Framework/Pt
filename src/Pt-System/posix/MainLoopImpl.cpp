@@ -102,6 +102,12 @@ void EventLoopImpl::attach(Selectable& s)
 }
 
 
+void EventLoopImpl::detach(Selectable& s)
+{
+    _selectables.erase(&s);
+}
+
+
 void EventLoopImpl::avail(Selectable& s)
 {
     MutexLock lock(_mutex);
@@ -121,12 +127,6 @@ void EventLoopImpl::idle(Selectable& s)
         else
             ++it;
     }
-}
-
-
-void EventLoopImpl::detach(Selectable& s)
-{
-    _selectables.erase(&s);
 }
 
 
