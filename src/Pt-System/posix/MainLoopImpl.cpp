@@ -102,16 +102,6 @@ void EventLoopImpl::attach(Selectable& s)
 }
 
 
-void EventLoopImpl::signalAvail(Selectable&)
-{
-}
-
-
-void EventLoopImpl::signalIdle(Selectable&)
-{
-}
-
-
 void EventLoopImpl::avail(Selectable& s)
 {
     MutexLock lock(_mutex);

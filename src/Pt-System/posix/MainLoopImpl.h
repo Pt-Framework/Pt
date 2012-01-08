@@ -219,10 +219,6 @@ class EventLoopImpl : public EventDispatcher
             }
         }
 
-        void signalAvail(Selectable& s);
-
-        void signalIdle(Selectable& s);
-
         void idle(Selectable& s);
 
         void avail(Selectable& s);
