@@ -324,10 +324,6 @@ class MainLoop : public Pt::System::EventLoop
 
         virtual void onDetach(System::Selectable&);
 
-        virtual void onSignalAvail(System::Selectable&);
-
-        virtual void onSignalIdle(System::Selectable&);
-
         virtual void onIdle(System::Selectable& s);
 
         virtual void onAvail(System::Selectable& s);

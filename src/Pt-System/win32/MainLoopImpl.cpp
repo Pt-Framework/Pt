@@ -57,17 +57,8 @@ EventLoopImpl::EventLoopImpl()
         throw SystemError( PT_ERROR_MSG("CreateEvent failed") );
     }
 
-    _signalledEvent = CreateEvent( NULL, FALSE, FALSE, NULL );
-    if( _signalledEvent == NULL )
-    {
-        CloseHandle( _wakeEvent );
-        CloseHandle( _ioEvent );
-        throw SystemError( PT_ERROR_MSG("CreateEvent failed") );
-    }
-
     _handles.add( _wakeEvent, 0 );
     _handles.add( _ioEvent, 0 );
-    _handles.add( _signalledEvent, 0 );
 }
 
 
@@ -83,7 +74,6 @@ EventLoopImpl::~EventLoopImpl()
 
     CloseHandle( _wakeEvent );
     CloseHandle( _ioEvent );
-    CloseHandle( _signalledEvent );
 }
 
 
@@ -150,8 +140,17 @@ void EventLoopImpl::disable(Selectable& s)
 }
 
 
+void EventLoopImpl::avail(Selectable& s)
+{
+    Pt::System::MutexLock lock(_signalledMutex);
+    _avail.push_back(&s);
+}
+
+
 void EventLoopImpl::idle(Selectable& s)
 {
+    Pt::System::MutexLock lock(_signalledMutex);
+
     std::vector<Selectable*>::iterator it = _avail.begin();
     while(it != _avail.end())
     {
@@ -160,33 +159,6 @@ void EventLoopImpl::idle(Selectable& s)
         else
             ++it;
     }
-}
-
-
-void EventLoopImpl::avail(Selectable& s)
-{
-    _avail.push_back(&s);
-}
-
-
-void EventLoopImpl::signalIdle(Selectable& s)
-{
-    Pt::System::MutexLock lock(_signalledMutex);
-    _signalled.erase(&s);
-}
-
-
-void EventLoopImpl::signalAvail(Selectable& s)
-{
-    Pt::System::MutexLock lock(_signalledMutex);
-    _signalled.insert(&s);
-    SetEvent( _signalledEvent );
-}
-
-
-bool EventLoopImpl::isSignalled()
-{
-    return false;
 }
 
 
@@ -230,9 +202,20 @@ void EventLoopImpl::waitNext(std::size_t umsecs, bool& isActive )
 
     _dirty.clear();
 
-    if( _avail.size() )
+    // check all selectables that did not require waiting
+    while( true )
     {
+        Pt::System::MutexLock lock(_signalledMutex);
+
+        if( _avail.empty() )
+            break;
+
         msecs = 0;
+        Selectable* s = _avail.back();
+        _avail.pop_back();
+        lock.unlock();
+
+        s->run();
     }
 
     bool isTimeout = false;
@@ -240,15 +223,6 @@ void EventLoopImpl::waitNext(std::size_t umsecs, bool& isActive )
 
     try
     {
-        // check all selectables that did not require waiting
-        while( ! _avail.empty() )
-        {
-            Selectable* s = _avail.back();
-            _avail.pop_back();
-            s->unsetAvail();
-            s->run();
-        }
-
         if(isTimeout)
             return;
 
@@ -258,6 +232,7 @@ void EventLoopImpl::waitNext(std::size_t umsecs, bool& isActive )
             isActive = EventDispatcher::processEvents();
             return;
         }
+
         // I/O event at offset 1 was active
         else if (offset == 1)
         {
@@ -270,21 +245,6 @@ void EventLoopImpl::waitNext(std::size_t umsecs, bool& isActive )
                 {
                     ++_current;
                 }
-            }
-        }
-        else if (offset == 2)
-        {
-            for(;;)
-            {
-                Pt::System::MutexLock lock(_signalledMutex);
-                if( _signalled.empty() )
-                    break;
-                
-                Selectable* selectable = *(_signalled.begin());
-                _signalled.erase( _signalled.begin() );
-                lock.unlock();
-
-                selectable->run();
             }
         }
         // some of the other event handles was active

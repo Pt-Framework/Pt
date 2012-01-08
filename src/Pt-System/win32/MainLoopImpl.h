@@ -135,12 +135,6 @@ class PT_SYSTEM_API EventLoopImpl : public EventDispatcher
 
         void avail(Selectable& s);
 
-        void signalAvail(Selectable& s);
-
-        void signalIdle(Selectable& s);
-
-        bool isSignalled();
-
         HANDLE enable(Selectable& s);
 
         void disable(Selectable& s);
@@ -161,7 +155,6 @@ class PT_SYSTEM_API EventLoopImpl : public EventDispatcher
     private:
         HANDLE _wakeEvent;
         HANDLE _ioEvent;
-        HANDLE _signalledEvent;
         HandleMap _handles;
         std::set<Selectable*> _selectables;
         std::list<IOHandle*> _dirty;
