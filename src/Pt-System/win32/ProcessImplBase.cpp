@@ -59,9 +59,6 @@ namespace System {
 ProcessImplBase::ProcessImplBase(const ProcessInfo& procInfo)
 : _procInfo(procInfo)
 , _state(Process::Ready)
-, _stdInput(0)
-, _stdOutput(0)
-, _stdError(0)
 , _stdinPipe(0)
 , _stdoutPipe(0)
 , _stderrPipe(0)
@@ -84,7 +81,7 @@ void ProcessImplBase::start()
 
     _state = Process::Failed;
 
-	STARTUPINFO m_startUp;
+    STARTUPINFO m_startUp;
 
     ZeroMemory( &m_startUp, sizeof(m_startUp) );
     m_startUp.cb = sizeof(m_startUp);
@@ -94,88 +91,65 @@ void ProcessImplBase::start()
 
     delete _stdinPipe;
     _stdinPipe = 0;
-    _stdInput = 0;
 
     delete _stdoutPipe;
     _stdoutPipe = 0;
-    _stdOutput = 0;
 
     delete _stderrPipe;
     _stderrPipe = 0;
-    _stdError = 0;
 
-	m_startUp.hStdInput = INVALID_HANDLE_VALUE;
-	m_startUp.hStdOutput = INVALID_HANDLE_VALUE;
-	m_startUp.hStdError = INVALID_HANDLE_VALUE;
+    m_startUp.hStdInput = INVALID_HANDLE_VALUE;
+    m_startUp.hStdOutput = INVALID_HANDLE_VALUE;
+    m_startUp.hStdError = INVALID_HANDLE_VALUE;
 
     // Standard Input
 
-    if( _procInfo.stdInputMode() == ProcessInfo::Capture )
+    if( _procInfo.stdInputRedirected() )
     {
         _stdinPipe = new Pipe();
-        _stdInput = &_stdinPipe->in();
+
         SetHandleInformation( _stdinPipe->impl()->out().handle(),
                               HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
         m_startUp.hStdInput = _stdinPipe->impl()->out().handle();
     }
-    else if( _procInfo.stdInputMode() == ProcessInfo::Close )
+    else if( _procInfo.stdInputClosed() )
     {
         m_startUp.hStdInput = INVALID_HANDLE_VALUE;
     }
-    //else if( _procInfo.stdInput() )
-    //{
-        //SetHandleInformation( _procInfo.stdInput()->ioimpl().deviceHandle(),
-        //                      HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
-        //m_startUp.hStdInput = _procInfo.stdInput()->ioimpl().deviceHandle();
-    //}
 
     // Standard Output
 
-    if( _procInfo.stdOutputMode() == ProcessInfo::Capture )
+    if( _procInfo.stdOutputRedirected() )
     {
         _stdoutPipe = new Pipe();
-        _stdOutput = &_stdoutPipe->out();
 
         SetHandleInformation( _stdoutPipe->impl()->in().handle(),
                               HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
         m_startUp.hStdOutput = _stdoutPipe->impl()->in().handle();
     }
-    else if( _procInfo.stdOutputMode() == ProcessInfo::Close )
+    else if( _procInfo.stdOutputClosed() )
     {
         m_startUp.hStdOutput = INVALID_HANDLE_VALUE;
     }
-    //else if( _procInfo.stdOutput() )
-    //{
-        //SetHandleInformation( _procInfo.stdOutput()->ioimpl().deviceHandle(),
-        //                      HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
-        //m_startUp.hStdOutput = _procInfo.stdOutput()->ioimpl().deviceHandle();
-    //}
 
     // Standard Error
 
-    if( _procInfo.stdErrorMode() == ProcessInfo::Capture )
+    if( _procInfo.stdErrorRedirected() )
     {
         _stderrPipe = new Pipe();
-        _stdError = &_stderrPipe->out();
 
         SetHandleInformation( _stderrPipe->impl()->in().handle(),
                               HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
         m_startUp.hStdError = _stderrPipe->impl()->in().handle();
     }
-    else if( _procInfo.stdErrorMode() == ProcessInfo::Combine )
+    else if( _procInfo.stdErrorAsOutput() )
     {
         m_startUp.hStdError = m_startUp.hStdOutput;
     }
-    else if( _procInfo.stdErrorMode() == ProcessInfo::Close )
+    else if( _procInfo.stdErrorClosed() )
     {
         m_startUp.hStdError = INVALID_HANDLE_VALUE;
     }
-    //else if( _procInfo.stdError() )
-    //{
-        //SetHandleInformation( _procInfo.stdError()->ioimpl().deviceHandle(),
-        //                      HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
-        //m_startUp.hStdError = _procInfo.stdError()->ioimpl().deviceHandle();
-    //}
 
     // TODO ???
     // if (_procInfo.detach())
@@ -185,12 +159,12 @@ void ProcessImplBase::start()
     m_startUp.dwFlags |= STARTF_USESTDHANDLES;
 
     std::basic_string<TCHAR> tcmd;
-	win32::fromMultiByte( _procInfo.command(), tcmd );
+    win32::fromMultiByte( _procInfo.command(), tcmd );
     for( unsigned i = 0; i < _procInfo.argCount(); i++)
     {
-		std::basic_string<TCHAR> targ;
+        std::basic_string<TCHAR> targ;
         win32::fromMultiByte( " " + _procInfo.arg(i), targ );
-		tcmd += targ;
+        tcmd += targ;
     }
 
     std::vector<TCHAR> m_buffer( tcmd.begin(), tcmd.end() );

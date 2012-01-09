@@ -58,18 +58,12 @@ class ProcessFailed : public std::runtime_error
 class ProcessInfo
 {
     public:
-        enum IODeviceMode
+        enum IOMode
         {
-            Close   = 0,
-            //Keep    = 1,
-            Capture = 2,
-            Combine = 3  // combine stderr with stdout; only valid for stderr
-        };
-
-        // TODO: use IOFlags instead of IODeviceMode
-        enum IOFlags
-        {
-            Input, Output, Error, AllOut
+            Keep = 0,
+            Close   = 1,
+            Redirect = 2,
+            ToStdOut = 3  // combine stderr with stdout, only valid for stderr
         };
 
         //! process info can contain at least the command
@@ -91,55 +85,43 @@ class ProcessInfo
         void detach(bool sw)
         { _detach = sw; }
 
-        void setStdInput(IODeviceMode mode)
+        void setStdInput(IOMode mode)
         { _stdinMode = mode; }
 
-        //void setStdInput(IODevice* dev)
-        //{ _stdin = dev; _stdinMode = Keep; }
+        bool stdInputClosed() const
+        { return (_stdinMode & Close) == Close; }
 
-        //IODevice* stdInput() const
-        //{ return _stdin; }
+        bool stdInputRedirected() const
+        { return (_stdinMode & Redirect)== Redirect; }
 
-        IODeviceMode stdInputMode() const
-        { return _stdinMode; }
-
-        void setStdOutput(IODeviceMode mode)
+        void setStdOutput(IOMode mode)
         { _stdoutMode = mode; }
 
-        //void setStdOutput(IODevice* dev)
-        //{ _stdout = dev; _stdoutMode = Keep; }
+        bool stdOutputClosed() const
+        { return (_stdoutMode & Close) == Close; }
 
-        //IODevice* stdOutput() const
-        //{ return _stdout; }
+        bool stdOutputRedirected() const
+        { return (_stdoutMode & Redirect) == Redirect; }
 
-        IODeviceMode stdOutputMode() const
-        { return _stdoutMode; }
-
-        void setStdError(IODeviceMode mode)
+        void setStdError(IOMode mode)
         { _stderrMode = mode; }
 
-        //void setStdError(IODevice* dev)
-        //{ _stderr = dev; _stderrMode = Keep; }
+        bool stdErrorClosed() const
+        { return (_stderrMode & Close) == Close; }
 
-        //IODevice* stdError() const
-        //{ return _stderr; }
+        bool stdErrorRedirected() const
+        { return (_stderrMode & Redirect) == Redirect; }
 
-        IODeviceMode stdErrorMode() const
-        { return _stderrMode; }
+        bool stdErrorAsOutput() const
+        { return (_stderrMode & ToStdOut) == ToStdOut; }
 
     private:
         std::string _command;
         std::vector<std::string> _args;
         bool _detach;
-
-        IODeviceMode _stdinMode;
-        //IODevice* _stdin;
-
-        IODeviceMode _stdoutMode;
-        //IODevice* _stdout;
-
-        IODeviceMode _stderrMode;
-        //IODevice* _stderr;
+        IOMode _stdinMode;
+        IOMode _stdoutMode;
+        IOMode _stderrMode;
 };
 
 //! @brief Executes shell commands
@@ -230,11 +212,8 @@ inline ProcessInfo::ProcessInfo(const std::string& command)
 : _command(command)
 , _detach(false)
 , _stdinMode(Close)
-//, _stdin(0)
 , _stdoutMode(Close)
-//, _stdout(0)
 , _stderrMode(Close)
-//, _stderr(0)
 {
 }
 
@@ -268,3 +247,4 @@ inline const std::string& ProcessInfo::arg(unsigned idx) const
 }
 
 #endif // PT_SYSTEM_PROCESS_H
+

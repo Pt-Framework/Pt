@@ -88,7 +88,7 @@ EventLoop* Selectable::parent() const
 }
 
 
-void Selectable::setAvail()
+void Selectable::setReady()
 {
     if( ! _parent)
         throw std::logic_error("selectable not active");

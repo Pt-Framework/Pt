@@ -60,23 +60,18 @@ class ProcessImplBase : private NonCopyable
         static unsigned long usedMemory();
 
         IODevice* stdInput()
-        { return _stdInput; }
+        { return _stdinPipe?  &_stdinPipe->in() : 0; }
 
         IODevice* stdOutput()
-        { return _stdOutput; }
+        { return _stdoutPipe?  &_stdoutPipe->out() : 0; }
 
         IODevice* stdError()
-        { return _stdError; }
+        { return _stderrPipe?  &_stderrPipe->out() : 0; }
 
     private:
         PROCESS_INFORMATION m_pid;
         ProcessInfo _procInfo;
         Process::State _state;
-
-        IODevice* _stdInput;
-        IODevice* _stdOutput;
-        IODevice* _stdError;
-
         Pipe* _stdinPipe;
         Pipe* _stdoutPipe;
         Pipe* _stderrPipe;

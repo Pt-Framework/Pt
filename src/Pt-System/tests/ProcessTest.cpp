@@ -65,7 +65,7 @@ void ProcessTest::RedirectStdout()
     Pt::System::ProcessInfo procInfo(processName);
     procInfo.addArg( "testString");
 
-    procInfo.setStdOutput(Pt::System::ProcessInfo::Capture);
+    procInfo.setStdOutput(Pt::System::ProcessInfo::Redirect);
 
     Pt::System::Process p(procInfo);
 
@@ -90,7 +90,7 @@ void ProcessTest::RedirectStderr()
     procInfo.addArg( "-e");
     procInfo.addArg( "testString");
 
-    procInfo.setStdError(Pt::System::ProcessInfo::Capture);
+    procInfo.setStdError(Pt::System::ProcessInfo::Redirect);
 
     Pt::System::Process p(procInfo);
 
@@ -114,7 +114,7 @@ void ProcessTest::RedirectStdin()
     Pt::System::ProcessInfo procInfo(processName);
     procInfo.addArg( "-R");
 
-    procInfo.setStdInput(Pt::System::ProcessInfo::Capture);
+    procInfo.setStdInput(Pt::System::ProcessInfo::Redirect);
 
     Pt::System::Process p(procInfo);
 

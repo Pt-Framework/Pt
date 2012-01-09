@@ -64,7 +64,7 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
         //! @brief Run operation if it is ready
         bool run();
 
-        void setAvail();
+        void setReady();
 
     protected:
         //! @brief Default Constructor
