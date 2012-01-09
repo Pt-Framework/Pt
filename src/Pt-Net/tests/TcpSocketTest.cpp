@@ -73,7 +73,7 @@ class TcpSocketTest : public Pt::Unit::TestSuite
         {
             Pt::Net::TcpSocket client;
             client.setActive(*_loop);
-            connect(client.connected, *this, &TcpSocketTest::onConnectFailed);
+            client.connected() += Pt::slot(*this, &TcpSocketTest::onConnectFailed);
 
             try
             {
@@ -134,7 +134,7 @@ class TcpSocketTest : public Pt::Unit::TestSuite
                 _acceptor->setActive(*_loop);
 
                 Pt::Net::TcpSocket client;
-                connect(client.connected, *this, &TcpSocketTest::onConnect);
+                client.connected() += Pt::slot(*this, &TcpSocketTest::onConnect);
                 client.outputReady() += Pt::slot(*this, &TcpSocketTest::onOutput);
                 client.setActive(*_loop);
                 client.beginConnect("127.0.0.1", 9000);

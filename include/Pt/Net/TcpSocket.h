@@ -85,7 +85,8 @@ class PT_NET_API TcpSocket : public System::IODevice
 
         void endConnect();
 
-        Signal<TcpSocket&> connected;
+        Signal<TcpSocket&>& connected()
+        { return _connected; }
 
         bool isConnected() const;
 
@@ -121,6 +122,9 @@ class PT_NET_API TcpSocket : public System::IODevice
 
         // inherit doc
         virtual void onCancel();
+
+    private:
+        Signal<TcpSocket&> _connected;
 };
 
 } // namespace Net

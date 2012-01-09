@@ -142,7 +142,7 @@ bool TcpSocket::beginConnect(const AddrInfo& addrinfo)
 
     bool ret = _impl->beginConnect(addrinfo, parent());
     if(ret)
-        connected.send(*this);
+        connected().send(*this);
 
     return ret;
 }
@@ -192,7 +192,7 @@ bool TcpSocket::onRun()
     {
         if( _impl->runConnect( *parent() ) )
         {
-            connected.send(*this);
+            connected().send(*this);
             return true;
         }
 
