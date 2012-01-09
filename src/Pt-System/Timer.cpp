@@ -65,9 +65,9 @@ class Timer::Sentry
 Timer::Timer()
 : _sentry(0)
 , _loop(0)
-, _active(false)
+//, _started(false)
 , _interval(0)
-, _remaining(0)
+//, _remaining(0)
 , _finished(0)
 { }
 
@@ -76,8 +76,7 @@ Timer::~Timer()
 {
     try
     {
-        if(_loop)
-            _loop->remove(*this);
+        this->detach();
     }
     catch(...) {}
 
@@ -86,9 +85,9 @@ Timer::~Timer()
 }
 
 
-bool Timer::active() const
+bool Timer::started() const
 {
-    return _active;
+    return _finished != 0;
 }
 
 
@@ -100,13 +99,17 @@ std::size_t Timer::interval() const
 
 void Timer::start(std::size_t interval)
 {
-    if(_active)
+    if( started() )
         this->stop();
 
-    _active = true;
+    //_started = true;
     _interval = interval;
-    _remaining = Pt::int64_t(_interval) * 1000;
-    _finished = Clock::getSystemTicks() + _remaining;
+
+    //_remaining = Pt::int64_t(_interval) * 1000;
+    //_finished = Clock::getSystemTicks() + _remaining;
+
+    Timespan remaining = Pt::int64_t(_interval) * 1000;
+    _finished = Clock::getSystemTicks() + remaining;
 
     if(_loop)
         _loop->onAddTimer(*this);
@@ -115,8 +118,8 @@ void Timer::start(std::size_t interval)
 
 void Timer::stop()
 {
-    _active = false;
-    _remaining = 0;
+    //_started = false;
+    //_remaining = 0;
     _finished = 0;
 
     if(_loop)
@@ -126,7 +129,7 @@ void Timer::stop()
 
 bool Timer::update()
 {
-    if(_active == false)
+    if(started() == false)
         return false;
 
     Timespan now = Clock::getSystemTicks();
@@ -136,14 +139,14 @@ bool Timer::update()
 
 bool Timer::update(const Timespan& now)
 {
-    if(_active == false)
+    if(started() == false)
         return false;
 
     bool hasElapsed = now >= _finished;
 
     Timer::Sentry sentry(_sentry);
 
-    while( _active && now >= _finished )
+    while( started() && now >= _finished )
     {
         _finished += (_interval * 1000);
 
@@ -153,29 +156,32 @@ bool Timer::update(const Timespan& now)
         timeout().send();
     }
 
-    _remaining = _finished - now;
+    //_remaining = _finished - now;
     return hasElapsed;
 }
 
 
-void Timer::setParent(EventLoop* loop)
+void Timer::setActive(EventLoop& loop)
 {
-    if(_loop == loop)
-        return;
+    if(_loop)
+        throw std::logic_error("timer already active");
 
+    loop.onAddTimer(*this);
+    _loop = &loop;
+}
+
+
+void Timer::detach()
+{
     if(_loop)
     {
         _loop->onRemoveTimer(*this);
     }
 
-    if(loop)
-    {
-        loop->onAddTimer(*this);
-    }
-
-    _loop = loop;
+    _loop = 0;
 }
 
 }
 
 }
+

@@ -53,11 +53,11 @@ namespace System {
 
         int main()
         {
-            Pt::System::Timer timer;
-            connect(timer.timeout, onTimer);
-
             Pt::System::EventLoop loop;
-            loop.add(timer);
+  
+            Pt::System::Timer timer;
+            timer.timeout() += Pt::slot(onTimer);
+            timer.setActive(loop);
             timer.start(1000);
 
             loop.run();
@@ -85,11 +85,13 @@ namespace System {
             EventLoop* parent()
             { return _loop; }
 
-            void setParent(EventLoop* s);
+            void setActive(EventLoop& loop);
 
-            /** @brief Returs true if timer is active
+            void detach();
+
+            /** @brief Returs true if timer was started
             */
-            bool active() const;
+            bool started() const;
 
             /** @brief Returns the current timer interval
 
@@ -138,9 +140,9 @@ namespace System {
         private:
             Sentry*     _sentry;
             EventLoop*  _loop;
-            bool        _active;
+            //bool        _started;
             std::size_t _interval;
-            Timespan    _remaining;
+            //Timespan    _remaining;
             Timespan    _finished;
             Signal<>    _timeout;
     };

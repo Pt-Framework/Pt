@@ -86,7 +86,7 @@ class GoogleWeatherClient : public Pt::Connectable
 
             // the timeout signal is called when the interval has expired
             _timer.timeout() += Pt::slot(*this, &GoogleWeatherClient::beginRequest);
-            _loop.add(_timer); // timers are managed by a loop
+            _timer.setActive(_loop); // timers are managed by a loop
 
             // run member function in a worker thread, this does not start the thread
             _thread = new Pt::System::AttachedThread( Pt::callable(*this, &GoogleWeatherClient::run) );

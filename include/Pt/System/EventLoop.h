@@ -75,13 +75,13 @@ class PT_SYSTEM_API EventLoop : public Connectable
 
             @param timer The device to add
         */
-        void add(Timer& timer);
+        //void add(Timer& timer);
 
         /** @brief Removes a Timer
 
             @param timer The timer to remove
         */
-        void remove(Timer& timer);
+        //void remove(Timer& timer);
 
         /** @brief Starts the event loop
         */

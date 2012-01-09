@@ -159,9 +159,10 @@ void TcpConnection::begin(System::EventLoop& loop)
     Http::Connection::init(loop);
 
     this->setActive(loop);
-    loop.add(_timer);
 
     _stream.buffer().beginRead();
+
+    _timer.setActive(loop);
     _timer.start( _server.readTimeout() );
     _loop = &loop;
 }

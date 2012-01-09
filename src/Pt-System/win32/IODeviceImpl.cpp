@@ -100,8 +100,7 @@ void OverlappedIODeviceImpl::close(EventLoop* loop)
 
 void OverlappedIODeviceImpl::cancel(EventLoop& loop)
 {
-    ::CancelIoEx( handle(), &_readOv );
-    ::CancelIoEx( handle(), &_writeOv );
+    CancelIo( handle() );
 
     DWORD bytes = 0;
     GetOverlappedResult( handle(), &_readOv, &bytes, TRUE );

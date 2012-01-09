@@ -52,13 +52,13 @@ class TimerTest : public Pt::Unit::TestSuite
         {
             _count = 0;
 
-            _timer = new Pt::System::Timer();
-            _timer->start(100);
-
             _loop = new Pt::System::MainLoop();
             _loop->timeout() += Pt::slot(*_loop, &Pt::System::MainLoop::exit);
             _loop->setIdleTimeout(2000);
-            _loop->add(*_timer);
+
+            _timer = new Pt::System::Timer();
+            _timer->setActive(*_loop);
+            _timer->start(100);
         }
 
         void tearDown()
@@ -88,7 +88,7 @@ class TimerTest : public Pt::Unit::TestSuite
         {
             Pt::System::Timer exitTimer;
             exitTimer.start(500);
-            _loop->add(exitTimer);
+            exitTimer.setActive(*_loop);
             exitTimer.timeout() += Pt::slot(*_loop, &Pt::System::MainLoop::exit);
 
             _timer->timeout() += Pt::slot(*this, &TimerTest::onTimeout);
@@ -111,7 +111,7 @@ class TimerTest : public Pt::Unit::TestSuite
         {
             Pt::System::Timer exitTimer;
             exitTimer.start(500);
-            _loop->add(exitTimer);
+            exitTimer.setActive(*_loop);
             exitTimer.timeout() += Pt::slot(*_loop, &Pt::System::MainLoop::exit);
 
             _timer->timeout() += Pt::slot(*this, &TimerTest::onTimeout );
@@ -130,13 +130,13 @@ class TimerTest : public Pt::Unit::TestSuite
 
         void removeTimer()
         {
-            _loop->remove(*_timer);
+            _timer->detach();
         }
 
         void removeAddTimer()
         {
-            _loop->remove(*_timer);
-            _loop->add(*_timer);
+            _timer->detach();
+            _timer->setActive(*_loop);
         }
 
         void destroyTimer()

@@ -56,7 +56,7 @@ void EventLoop::setIdleTimeout(size_t msecs)
 
 size_t EventLoop::idleTimeout() const
 { 
-    if( ! _idleTimer.active() )
+    if( ! _idleTimer.started() )
         return WaitInfinite;
 
     return _idleTimer.interval(); 
@@ -81,24 +81,24 @@ Signal<>& EventLoop::exited()
 }
 
 
-void EventLoop::add(Timer& timer)
+/*void EventLoop::add(Timer& timer)
 {
-    timer.setParent(this);
+    timer.setActive(*this);
 }
 
 
 void EventLoop::remove( Timer& timer )
 {
     if(timer.parent() == this)
-        timer.setParent(0);
-}
+        timer.detach();
+}*/
 
 
 void EventLoop::run()
 {
-    _idleTimer.setParent(this);
+    _idleTimer.setActive(*this);
     this->onRun();
-    _idleTimer.setParent(0);
+    _idleTimer.detach();
     exited();
 }
 
@@ -188,7 +188,7 @@ EventDispatcher::~EventDispatcher()
     while( _timers.size() )
     {
        Timer* timer = _timers.begin()->second;
-        timer->setParent(0);
+        timer->detach();
     }
 }
 
@@ -292,7 +292,7 @@ bool EventDispatcher::processEvents()
 
 void EventDispatcher::addTimer(Timer& timer)
 {
-    if( timer.active() )
+    if( timer.started() )
     {
         TimerQueue::value_type elem(timer.finished(), &timer);
         _timers.insert(elem);
