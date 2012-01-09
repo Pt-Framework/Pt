@@ -40,7 +40,7 @@ namespace System {
 IODeviceImpl::IODeviceImpl(IODevice& device)
 : _device(device)
 , _ioh(device)
-, _timeout(System::Selectable::WaitInfinite)
+, _timeout(System::EventLoop::WaitInfinite)
 , _sentry(0)
 , _errorPending(false)
 { 

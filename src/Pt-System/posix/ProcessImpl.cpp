@@ -79,24 +79,24 @@ void ProcessImpl::start()
     _stderrPipe = 0;
     _stdError = 0;
 
-    if (_procInfo.stdInputMode() == ProcessInfo::Capture)
+    if (_procInfo.stdInputRedirected())
     {
         _stdinPipe = new Pipe();
         _stdInput = &_stdinPipe->in();
     }
 
-    if (_procInfo.stdOutputMode() == ProcessInfo::Capture)
+    if (_procInfo.stdOutputRedirected())
     {
         _stdoutPipe = new Pipe();
         _stdOutput = &_stdoutPipe->out();
     }
 
-    if (_procInfo.stdErrorMode() == ProcessInfo::Capture)
+    if (_procInfo.stdErrorRedirected() )
     {
         _stderrPipe = new Pipe();
         _stdError = &_stderrPipe->out();
     }
-    else if (_procInfo.stdErrorMode() == ProcessInfo::Combine)
+    else if (_procInfo.stdErrorAsOutput())
     {
         _stdError = &_stdinPipe->out();
     }
@@ -134,11 +134,11 @@ void ProcessImpl::start()
 
         // redirect stdin
 
-        if (_procInfo.stdInputMode() == ProcessInfo::Close)
+        if (_procInfo.stdInputClosed())
         {
             std::fclose(stdin);
         }
-        else if (_procInfo.stdInputMode() == ProcessInfo::Capture)
+        else if (_procInfo.stdInputRedirected())
         {
             _stdinPipe->in().close();
             _stdinPipe->impl()->redirectStdin();
@@ -150,11 +150,11 @@ void ProcessImpl::start()
 
         // redirect stdout
 
-        if (_procInfo.stdOutputMode() == ProcessInfo::Close)
+        if (_procInfo.stdOutputClosed())
         {
             std::fclose(stdout);
         }
-        else if (_procInfo.stdOutputMode() == ProcessInfo::Capture)
+        else if (_procInfo.stdOutputRedirected())
         {
             _stdoutPipe->out().close();
             _stdoutPipe->impl()->redirectStdout();
@@ -166,15 +166,15 @@ void ProcessImpl::start()
 
         // redirect stderr
 
-        if (_procInfo.stdErrorMode() == ProcessInfo::Close)
+        if (_procInfo.stdErrorClosed())
         {
             std::fclose(stderr);
         }
-        else if (_procInfo.stdErrorMode() == ProcessInfo::Capture)
+        else if (_procInfo.stdErrorRedirected())
         {
             _stderrPipe->impl()->redirectStderr();
         }
-        else if (_procInfo.stdErrorMode() == ProcessInfo::Combine)
+        else if (_procInfo.stdErrorAsOutput())
         {
             _stdoutPipe->impl()->redirectStderr(false);
         }
@@ -225,13 +225,13 @@ void ProcessImpl::start()
 
         // check for open pipes
 
-        if (_procInfo.stdInputMode() == ProcessInfo::Capture)
+        if (_procInfo.stdInputRedirected())
             _stdinPipe->out().close();
 
-        if (_procInfo.stdOutputMode() == ProcessInfo::Capture)
+        if (_procInfo.stdOutputRedirected())
             _stdoutPipe->in().close();
 
-        if (_procInfo.stdErrorMode() == ProcessInfo::Capture)
+        if (_procInfo.stdErrorRedirected())
             _stderrPipe->in().close();
     }
 }

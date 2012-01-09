@@ -98,7 +98,8 @@ void MainLoopImplOnWake(void* p)
 }
 
 
-MainLoopImpl::MainLoopImpl()
+MainLoopImpl::MainLoopImpl(Signal<const Pt::Event&>& eventSignal)
+: _event(&eventSignal)
 {
     [PtGuiApplication sharedApplication];
     [NSApp initPool];
@@ -123,8 +124,8 @@ MainLoopImpl::MainLoopImpl()
 }
 
 
-MainLoopImpl::MainLoopImpl(Allocator& a)
-: System::EventDispatcher(a)
+MainLoopImpl::MainLoopImpl(Signal<const Pt::Event&>& eventSignal, Allocator& a)
+: _event(&eventSignal)
 {
     [PtGuiApplication sharedApplication];
     [NSApp initPool];
@@ -173,6 +174,7 @@ void MainLoopImpl::onWake()
 
 MainLoop::MainLoop()
 : System::EventLoop()
+, _impl( event() )
 {
 }
 
@@ -183,13 +185,13 @@ MainLoop::~MainLoop()
 }
 
 
-void MainLoop::onAttach(System::Selectable& s)
+void MainLoop::onAttachSelectable(System::Selectable& s)
 {
     _impl.attach(s);
 }
 
 
-void MainLoop::onDetach(System::Selectable& s)
+void MainLoop::onDetachSelectable(System::Selectable& s)
 {
     _impl.detach(s);
 }
@@ -222,7 +224,7 @@ void MainLoop::onIdle(System::Selectable& s)
 }
 
 
-void MainLoop::onAvail(System::Selectable& s)
+void MainLoop::onReady(System::Selectable& s)
 {
 }
 
@@ -230,12 +232,6 @@ void MainLoop::onAvail(System::Selectable& s)
 void MainLoop::onRun()
 {
     _impl.run();
-}
-
-
-Signal<const Pt::Event&>& MainLoop::onEvent()
-{
-    return _impl.event();
 }
 
 
@@ -269,15 +265,15 @@ void MainLoop::onWake()
 }
 
 
-void MainLoop::onAddTimer(System::Timer& timer)
+void MainLoop::onAttachTimer(System::Timer& timer)
 {
-    _impl.addTimer(timer);
+    _impl.attach(timer);
 }
 
 
-void MainLoop::onRemoveTimer(System::Timer& timer)
+void MainLoop::onDetachTimer(System::Timer& timer)
 {
-    _impl.removeTimer(timer);
+    _impl.detach(timer);
 }
 
 } // namespace Gui

@@ -56,7 +56,7 @@ ClientImpl::ClientImpl()
 , _reader(_ts)
 , _formatter(_writer)
 , _method(0)
-, _timeout(System::Selectable::WaitInfinite)
+, _timeout(System::EventLoop::WaitInfinite)
 , _errorPending(false)
 {
     _writer.useIndent(false);

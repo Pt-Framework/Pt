@@ -40,8 +40,10 @@ namespace Pt {
 
 namespace System {
 
-EventLoopImpl::EventLoopImpl()
-: _first(0)
+EventLoopImpl::EventLoopImpl(Signal<const Event&>& eventSignal)
+: _exited(false)
+, _event(&eventSignal)
+, _first(0)
 , _last(0)
 {
     _current = _devices.end();
@@ -130,27 +132,103 @@ void EventLoopImpl::idle(Selectable& s)
 }
 
 
-void EventLoopImpl::onRun()
+void EventLoopImpl::run()
 {
+    MutexLock lock(_mutex);
+    _exited = false;
+    lock.unlock();
+
     bool isActive = true;
     while(isActive)
     {
-        size_t timeout = this->processTimers();
+        size_t timeout = _timerQueue.processTimers();
 
         this->waitNext(timeout, isActive);
     }
 }
 
 
-void EventLoopImpl::onWake()
+void EventLoopImpl::exit()
+{
+    MutexLock lock(_mutex);
+    _exited = true;
+    lock.unlock();
+
+    wake();
+}
+
+
+void EventLoopImpl::wake()
 {
     ::write( _wakePipe[1], "W", 1);
     ::fsync( _wakePipe[1] );
 }
 
 
+void EventLoopImpl::commitEvent(const Event& event)
+{ 
+    MutexLock lock(_mutex);
+    _eventQueue.pushEvent(event); 
+    lock.unlock();
+
+    wake();
+}
+
+
+void EventLoopImpl::queueEvent(const Event& event)
+{ 
+    MutexLock lock(_mutex);
+    _eventQueue.pushEvent(event); 
+}
+
+
+bool EventLoopImpl::processEvents()
+{ 
+    bool isActive = true;
+
+    while( true )
+    {
+        MutexLock lock(_mutex);
+        isActive = ! _exited;
+
+        if ( _eventQueue.empty() || ! isActive )
+            break;
+
+        Event* ev = _eventQueue.front();
+
+        try
+        {
+            lock.unlock();
+            _event->send(*ev);
+            _eventQueue.popFront();
+        }
+        catch(...)
+        {
+            _eventQueue.popFront();
+            throw;
+        }
+    }
+
+    return isActive;
+}
+
+
 void EventLoopImpl::waitNext(std::size_t msecs, bool& isActive )
 {
+    while(true)
+    {
+        MutexLock lock(_mutex);
+        if( _avail.empty() )
+            break;
+
+        Selectable* selectable = _avail.back();
+        _avail.pop_back();
+        lock.unlock();
+
+        msecs = 0;
+        selectable->run();
+    }
+
     for(IOHandle* h = _first; h != 0; h = h->next)
     {
         if(h->flags == h->wflags)
@@ -188,20 +266,6 @@ void EventLoopImpl::waitNext(std::size_t msecs, bool& isActive )
     _rfdsR = _rfds;
     _wfdsR = _wfds;
     _efdsR = _efds;
-
-    while(true)
-    {
-        MutexLock lock(_mutex);
-        if( _avail.empty() )
-            break;
-
-        Selectable* selectable = _avail.back();
-        _avail.pop_back();
-        lock.unlock();
-
-        msecs = 0;
-        selectable->run();
-    }
 
     int avail = -1;
 
@@ -252,7 +316,7 @@ void EventLoopImpl::waitNext(std::size_t msecs, bool& isActive )
             int ret = ::read(_wakePipe[0], buffer, sizeof(buffer));
             if(ret > 0)
             {
-                isActive = EventDispatcher::processEvents();
+                isActive = this->processEvents();
                 continue;
             }
 
@@ -302,8 +366,8 @@ void EventLoopImpl::waitNext(std::size_t msecs, bool& isActive )
 
 
 
-MainLoopImpl::MainLoopImpl()
-: EventLoopImpl()
+MainLoopImpl::MainLoopImpl(Signal<const Event&>& eventSignal)
+: EventLoopImpl(eventSignal)
 {
 //  _current = _devices.end();
 //
@@ -334,8 +398,8 @@ MainLoopImpl::MainLoopImpl()
 //  FD_SET(_wakePipe[0], &_rfds);
 }
 
-MainLoopImpl::MainLoopImpl(Allocator& a)
-//: EventLoopImpl(a)
+MainLoopImpl::MainLoopImpl(Signal<const Event&>& eventSignal, Allocator& a)
+: EventLoopImpl(eventSignal)
 {
 //  _current = _devices.end();
 //

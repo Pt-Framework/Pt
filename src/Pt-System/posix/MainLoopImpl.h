@@ -35,7 +35,7 @@ namespace Pt {
 
 namespace System {
 
-class EventLoopImpl : public EventDispatcher
+class EventLoopImpl
 {
     enum IOFlags
     {
@@ -45,7 +45,7 @@ class EventLoopImpl : public EventDispatcher
     };
 
     public:
-        EventLoopImpl();
+        EventLoopImpl(Signal<const Event&>& eventSignal);
 
         ~EventLoopImpl();
 
@@ -227,15 +227,33 @@ class EventLoopImpl : public EventDispatcher
 
         void detach(Selectable& s);
 
+        void run();
+
+        void exit();
+
+        void wake();
+
+        void commitEvent(const Event& event);
+
+        void queueEvent(const Event& event);
+
+        bool processEvents();
+
+        void attach(Timer& timer)
+        { _timerQueue.addTimer(timer); }
+
+        void detach( Timer& timer )
+        { _timerQueue.removeTimer(timer); }
+
     protected:
-        virtual void onRun();
-
-        virtual void onWake();
-
         void waitNext(std::size_t timeout, bool& isActive);
 
     private:
         Mutex _mutex;
+        bool _exited;
+        TimerQueue _timerQueue;
+        EventQueue _eventQueue;
+        Signal<const Event&>* _event;
         int _wakePipe[2];
         IOHandle* _first;
         IOHandle* _last;
@@ -255,9 +273,9 @@ class EventLoopImpl : public EventDispatcher
 class MainLoopImpl : public EventLoopImpl
 {
     public:
-        MainLoopImpl();
+        MainLoopImpl(Signal<const Event&>& eventSignal);
 
-        MainLoopImpl(Allocator& a);
+        MainLoopImpl(Signal<const Event&>& eventSignal, Allocator& a);
 
         ~MainLoopImpl();
 };

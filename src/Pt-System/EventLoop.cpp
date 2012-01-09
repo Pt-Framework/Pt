@@ -71,7 +71,7 @@ Signal<>& EventLoop::timeout()
 
 Signal<const Event&>& EventLoop::event()
 { 
-    return this->onEvent(); 
+    return _event; 
 }
 
 
@@ -144,17 +144,17 @@ void EventLoop::onRemoveTimer( Timer& timer )
 // EventDispatcher
 //////////////////////////////////////////////////////////////////////////
 
-EventDispatcher::EventDispatcher()
-: _allocator(/*255, 64*/)
+/*EventDispatcher::EventDispatcher()
+: _allocator() 
 , _usedalloc(&_allocator)
 , _state(0)
 {}
 
 
 EventDispatcher::EventDispatcher(Allocator& a)
-: _allocator(/*255, 64*/)
-, _usedalloc(&a)
-, _state(0)
+: _allocator() 
+, _usedalloc(&a) 
+, _state(0) 
 {}
 
 
@@ -339,7 +339,7 @@ size_t EventDispatcher::processTimers()
     }
 
     return lowestTimeout;
-}
+}*/
 
 
 //////////////////////////////////////////////////////////////////////////

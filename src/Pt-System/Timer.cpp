@@ -112,7 +112,7 @@ void Timer::start(std::size_t interval)
     _finished = Clock::getSystemTicks() + remaining;
 
     if(_loop)
-        _loop->onAddTimer(*this);
+        _loop->onAttachTimer(*this);
 }
 
 
@@ -123,7 +123,7 @@ void Timer::stop()
     _finished = 0;
 
     if(_loop)
-        _loop->onRemoveTimer(*this);
+        _loop->onDetachTimer(*this);
 }
 
 
@@ -166,7 +166,7 @@ void Timer::setActive(EventLoop& loop)
     if(_loop)
         throw std::logic_error("timer already active");
 
-    loop.onAddTimer(*this);
+    loop.onAttachTimer(*this);
     _loop = &loop;
 }
 
@@ -175,7 +175,7 @@ void Timer::detach()
 {
     if(_loop)
     {
-        _loop->onRemoveTimer(*this);
+        _loop->onDetachTimer(*this);
     }
 
     _loop = 0;

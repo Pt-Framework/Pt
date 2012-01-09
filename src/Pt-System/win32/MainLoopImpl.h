@@ -142,10 +142,10 @@ class PT_SYSTEM_API EventLoopImpl
 
         bool processEvents();
 
-        void addTimer(Timer& timer)
+        void attach(Timer& timer)
         { _timerQueue.addTimer(timer); }
 
-        void removeTimer( Timer& timer )
+        void detach(Timer& timer)
         { _timerQueue.removeTimer(timer); }
 
         void attach(Selectable& s);

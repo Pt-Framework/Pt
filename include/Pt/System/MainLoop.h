@@ -112,17 +112,15 @@ namespace System {
             EventLoopImpl& impl();
 
         protected:
-            virtual void onAttach(Selectable&);
+            virtual void onAttachSelectable(Selectable&);
 
-            virtual void onDetach(Selectable&);
+            virtual void onDetachSelectable(Selectable&);
 
             virtual void onIdle(Selectable& s);
 
-            virtual void onAvail(Selectable& s);
+            virtual void onReady(Selectable& s);
 
             virtual void onRun();
-
-            virtual Signal<const Event&>& onEvent();
 
             virtual void onExit();
     
@@ -134,9 +132,9 @@ namespace System {
     
             virtual void onWake();
     
-            virtual void onAddTimer(Timer& timer);
+            virtual void onAttachTimer(Timer& timer);
     
-            virtual void onRemoveTimer(Timer& timer);
+            virtual void onDetachTimer(Timer& timer);
 
         private:
             MainLoopImpl* _impl;

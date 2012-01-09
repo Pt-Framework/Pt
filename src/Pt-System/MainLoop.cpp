@@ -37,7 +37,7 @@ MainLoop::MainLoop()
 : EventLoop()
 , _impl(0)
 {
-    _impl = new MainLoopImpl();
+    _impl = new MainLoopImpl( this->event() );
 }
 
 
@@ -45,7 +45,7 @@ MainLoop::MainLoop(Allocator& a)
 : EventLoop()
 , _impl(0)
 {
-    _impl = new MainLoopImpl(a);
+    _impl = new MainLoopImpl(this->event(), a);
 }
 
 
@@ -61,13 +61,13 @@ EventLoopImpl& MainLoop::impl()
 }
 
 
-void MainLoop::onAttach(Selectable& s)
+void MainLoop::onAttachSelectable(Selectable& s)
 {
     _impl->attach(s);
 }
 
 
-void MainLoop::onDetach(Selectable& s)
+void MainLoop::onDetachSelectable(Selectable& s)
 {
     _impl->detach(s);
 }
@@ -79,7 +79,7 @@ void MainLoop::onIdle(Selectable& s)
 }
 
 
-void MainLoop::onAvail(Selectable& s)
+void MainLoop::onReady(Selectable& s)
 {
     _impl->avail(s);
 }
@@ -88,12 +88,6 @@ void MainLoop::onAvail(Selectable& s)
 void MainLoop::onRun()
 {
     _impl->run();
-}
-
-
-Signal<const Event&>& MainLoop::onEvent()
-{
-    return _impl->event();
 }
 
 
@@ -127,15 +121,15 @@ void MainLoop::onWake()
 }
 
 
-void MainLoop::onAddTimer(Timer& timer)
+void MainLoop::onAttachTimer(Timer& timer)
 {
-    _impl->addTimer(timer);
+    _impl->attach(timer);
 }
 
 
-void MainLoop::onRemoveTimer( Timer& timer )
+void MainLoop::onDetachTimer( Timer& timer )
 {
-    _impl->removeTimer(timer);
+    _impl->detach(timer);
 }
 
 } // namespace System

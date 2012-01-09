@@ -44,7 +44,7 @@ Selectable::~Selectable()
 {
     if(_parent)
     {    
-        _parent->onDetach(*this);
+        _parent->onDetachSelectable(*this);
     }
 }
 
@@ -58,7 +58,7 @@ void Selectable::setActive(EventLoop& parent)
         throw std::logic_error("selectable already active");
 
     this->onAttach(parent);
-    parent.onAttach(*this);
+    parent.onAttachSelectable(*this);
     _parent = &parent;
 }
 
@@ -76,7 +76,7 @@ void Selectable::detach()
         this->cancel();
 
         this->onDetach(*_parent);
-        _parent->onDetach(*this);
+        _parent->onDetachSelectable(*this);
         _parent = 0;
     }
 }
@@ -93,7 +93,7 @@ void Selectable::setReady()
     if( ! _parent)
         throw std::logic_error("selectable not active");
 
-    _parent->onAvail(*this);
+    _parent->setReady(*this);
 }
 
 

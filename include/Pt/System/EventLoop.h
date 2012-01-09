@@ -99,7 +99,7 @@ class PT_SYSTEM_API EventLoop : public Connectable
         Signal<>& exited();
 
         void setReady(Selectable& s)
-        { this->onAvail(s); }
+        { this->onReady(s); }
 
     protected:
         /** @brief Constructs the EventLoop
@@ -107,8 +107,6 @@ class PT_SYSTEM_API EventLoop : public Connectable
         EventLoop();
 
         virtual void onRun() = 0;
-
-        virtual Signal<const Event&>& onEvent() = 0;
 
         virtual void onExit() = 0;
 
@@ -125,35 +123,29 @@ class PT_SYSTEM_API EventLoop : public Connectable
         virtual void onWake() = 0;
 
         //! @internal
-        virtual void onAddTimer(Timer& timer) = 0;
+        virtual void onAttachTimer(Timer& timer) = 0;
 
         //! @internal
-        virtual void onRemoveTimer(Timer& timer) = 0;
+        virtual void onDetachTimer(Timer& timer) = 0;
 
-        /** @brief A Selectable is attached to this %Selector
+        //! @internal A Selectable is attached
+        virtual void onAttachSelectable(Selectable&) = 0;
 
-            Does not throw exceptions.
-        */
-        virtual void onAttach(Selectable&) = 0;
+        //! @internal A Selectable is detached
+        virtual void onDetachSelectable(Selectable&) = 0;
 
-        /** @brief A Selectable is detached from this %Selector
-
-            Does not throw exceptions.
-        */
-        virtual void onDetach(Selectable&) = 0;
-
-        // TODO: onReady
-        virtual void onAvail(Selectable&) = 0;
+        virtual void onReady(Selectable&) = 0;
 
         virtual void onIdle(Selectable&) = 0;
 
     private:
         Timer _idleTimer;
         Signal<> _exited;
+        Signal<const Event&> _event;
 };
 
 //! @internal
-class PT_SYSTEM_API EventDispatcher
+/*class PT_SYSTEM_API EventDispatcher
 {
     typedef std::multimap<Timespan, Timer*> TimerQueue;
     typedef std::deque<Event*> EventQueue;
@@ -204,7 +196,7 @@ class PT_SYSTEM_API EventDispatcher
         TimerQueue _timers;
         int _state;
         Signal<const Event&> _event;
-};
+};*/
 
 
 class PT_SYSTEM_API EventQueue

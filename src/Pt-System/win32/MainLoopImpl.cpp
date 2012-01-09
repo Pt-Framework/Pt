@@ -256,15 +256,6 @@ void EventLoopImpl::waitNext(std::size_t umsecs, bool& isActive )
         msecs = std::numeric_limits<DWORD>::max();
     }
 
-    std::list<IOHandle*>::iterator iter;
-    for( iter = _dirty.begin(); iter != _dirty.end(); ++iter )
-    {
-        // TODO: handle immediate avail by calling setAvail in Selectable
-        _handles.add( (*iter)->handle(), (*iter)->sel);
-    }
-
-    _dirty.clear();
-
     // check all selectables that did not require waiting
     while( true )
     {
@@ -280,6 +271,15 @@ void EventLoopImpl::waitNext(std::size_t umsecs, bool& isActive )
 
         s->run();
     }
+
+    std::list<IOHandle*>::iterator iter;
+    for( iter = _dirty.begin(); iter != _dirty.end(); ++iter )
+    {
+        // TODO: handle immediate avail by calling setAvail in Selectable
+        _handles.add( (*iter)->handle(), (*iter)->sel);
+    }
+
+    _dirty.clear();
 
     bool isTimeout = false;
     DWORD offset = waitFor(_handles.size(), _handles.handles(), msecs, isTimeout);

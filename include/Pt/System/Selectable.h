@@ -40,9 +40,6 @@ namespace System {
 class PT_SYSTEM_API Selectable : protected NonCopyable
 {
     public:
-        static const std::size_t WaitInfinite = EventLoop::WaitInfinite;
-
-    public:
         //! @brief Destructor
         virtual ~Selectable();
 

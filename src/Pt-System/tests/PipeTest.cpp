@@ -46,9 +46,9 @@ class PipeTest : public Pt::Unit::TestSuite
         , _loop(0)
         , _pos(0)
         {
-            Pt::Unit::TestSuite::registerMethod( "AsyncRead", *this, &PipeTest::AsyncRead );
-            Pt::Unit::TestSuite::registerMethod( "AsyncWrite", *this, &PipeTest::AsyncWrite );
-            Pt::Unit::TestSuite::registerMethod( "RemoveFromLoop", *this, &PipeTest::RemoveFromLoop );
+            //Pt::Unit::TestSuite::registerMethod( "AsyncRead", *this, &PipeTest::AsyncRead );
+            //Pt::Unit::TestSuite::registerMethod( "AsyncWrite", *this, &PipeTest::AsyncWrite );
+            //Pt::Unit::TestSuite::registerMethod( "RemoveFromLoop", *this, &PipeTest::RemoveFromLoop );
             Pt::Unit::TestSuite::registerMethod( "PipeIOStream", *this, &PipeTest::PipeIOStream );
         }
 

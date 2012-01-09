@@ -140,9 +140,7 @@ namespace System {
         private:
             Sentry*     _sentry;
             EventLoop*  _loop;
-            //bool        _started;
             std::size_t _interval;
-            //Timespan    _remaining;
             Timespan    _finished;
             Signal<>    _timeout;
     };

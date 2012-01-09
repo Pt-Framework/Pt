@@ -33,14 +33,38 @@ namespace Pt {
 
 namespace Gui {
 
-class MainLoopImpl : public System::EventDispatcher
+class MainLoopImpl
 {
     public:
-        MainLoopImpl();
+        MainLoopImpl(Signal<const Pt::Event&>& eventSignal);
 
-        MainLoopImpl(Allocator& a);
+        MainLoopImpl(Signal<const Pt::Event&>& eventSignal, Allocator& a);
 
         virtual ~MainLoopImpl();
+
+        void run()
+        {}
+
+        void exit()
+        {}
+
+        void wake()
+        {}
+
+        void commitEvent(const Pt::Event& event)
+        {}
+
+        void queueEvent(const Pt::Event& event)
+        {}
+
+        bool processEvents()
+        { return false; }
+
+        void attach(System::Timer& timer)
+        {  }
+
+        void detach( System::Timer& timer )
+        {  }
 
         void attach(System::Selectable& s)
         {}
@@ -69,6 +93,7 @@ class MainLoopImpl : public System::EventDispatcher
         virtual void onWake();
 
     private:
+        Signal<const Pt::Event&>* _event;
         CFRunLoopSourceRef _wakeSource;
 };
 
@@ -85,9 +110,9 @@ class MainLoop : public Pt::System::EventLoop
         { return *_eimpl; }
 
     protected:
-        virtual void onAttach(System::Selectable&);
+        virtual void onAttachSelectable(System::Selectable&);
 
-        virtual void onDetach(System::Selectable&);
+        virtual void onDetachSelectable(System::Selectable&);
 
         virtual void onEnable(System::Selectable& s);
 
@@ -99,11 +124,9 @@ class MainLoop : public Pt::System::EventLoop
 
         virtual void onIdle(System::Selectable& s);
 
-        virtual void onAvail(System::Selectable& s);
+        virtual void onReady(System::Selectable& s);
 
         virtual void onRun();
-
-        virtual Signal<const Pt::Event&>& onEvent();
 
         virtual void onExit();
 
@@ -115,9 +138,9 @@ class MainLoop : public Pt::System::EventLoop
 
         virtual void onWake();
 
-        virtual void onAddTimer(System::Timer& timer);
+        virtual void onAttachTimer(System::Timer& timer);
 
-        virtual void onRemoveTimer(System::Timer& timer);
+        virtual void onDetachTimer(System::Timer& timer);
 
     private:
         MainLoopImpl _impl;
