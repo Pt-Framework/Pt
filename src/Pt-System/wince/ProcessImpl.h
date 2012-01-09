@@ -16,37 +16,5 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef PT_wince_ProcessImpl_h
-#define PT_wince_ProcessImpl_h
 
-#include "../win32/ProcessImplBase.h"
-#include "../win32/win32.h"
-
-#include <string>
-
-namespace Pt {
-
-namespace System {
-
-class ProcessImpl : public ProcessImplBase
-{
-    public:
-        ProcessImpl(const std::string& command);
-
-        ProcessImpl(const ProcessInfo& procInfo);
-
-        static std::string getEnvVar(const std::string& name);
-
-        static void setEnvVar(const std::string& name, const std::string& value);
-
-        static void unsetEnvVar(const std::string& name)
-        {
-            ProcessImpl::setEnvVar(name, "");
-        }
-};
-
-} // namespace System
-
-} // namespace Pt
-
-#endif
+#include "../win32/ProcessImpl.h"

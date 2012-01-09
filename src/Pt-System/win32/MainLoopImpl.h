@@ -120,12 +120,33 @@ struct IOHandle
 };
 
 
-class PT_SYSTEM_API EventLoopImpl : public EventDispatcher
+class PT_SYSTEM_API EventLoopImpl
 {
     public:
         EventLoopImpl();
         
         ~EventLoopImpl();
+
+        void run();
+
+        void exit();
+
+        void wake();
+
+        Signal<const Event&>& event()
+        { return _event; }
+
+        void commitEvent(const Event& event);
+
+        void queueEvent(const Event& event);
+
+        bool processEvents();
+
+        void addTimer(Timer& timer)
+        { _timerQueue.addTimer(timer); }
+
+        void removeTimer( Timer& timer )
+        { _timerQueue.removeTimer(timer); }
 
         void attach(Selectable& s);
 
@@ -144,15 +165,16 @@ class PT_SYSTEM_API EventLoopImpl : public EventDispatcher
         void disable(IOHandle* h);
 
     protected:
-        virtual void onRun();
-
-        virtual void onWake();
-
-         void waitNext(std::size_t timeout, bool& isActive);
+        void waitNext(std::size_t timeout, bool& isActive);
 
         virtual DWORD waitFor(DWORD numHandles, const HANDLE *handles, DWORD msecs, bool& isTimeout);
 
     private:
+        RecursiveMutex _mutex;
+        bool _exited;
+        TimerQueue _timerQueue;
+        EventQueue _eventQueue;
+        Signal<const Event&> _event;
         HANDLE _wakeEvent;
         HANDLE _ioEvent;
         HandleMap _handles;
@@ -161,8 +183,6 @@ class PT_SYSTEM_API EventLoopImpl : public EventDispatcher
         std::set<Selectable*>::iterator _current;
         std::set<Selectable*> _devices;
         std::vector<Selectable*> _avail;
-        std::set<Selectable*> _signalled;
-        Pt::System::Mutex _signalledMutex;
 };
 
 

@@ -43,6 +43,7 @@ namespace Pt {
 namespace System {
 
 EventLoopImpl::EventLoopImpl()
+: _exited(false)
 {
     _current = _devices.end();
 
@@ -142,14 +143,14 @@ void EventLoopImpl::disable(Selectable& s)
 
 void EventLoopImpl::avail(Selectable& s)
 {
-    Pt::System::MutexLock lock(_signalledMutex);
+    Pt::System::RecursiveLock lock(_mutex);
     _avail.push_back(&s);
 }
 
 
 void EventLoopImpl::idle(Selectable& s)
 {
-    Pt::System::MutexLock lock(_signalledMutex);
+    Pt::System::RecursiveLock lock(_mutex);
 
     std::vector<Selectable*>::iterator it = _avail.begin();
     while(it != _avail.end())
@@ -162,21 +163,83 @@ void EventLoopImpl::idle(Selectable& s)
 }
 
 
-void EventLoopImpl::onRun()
+void EventLoopImpl::run()
 {
+    RecursiveLock lock(_mutex);
+    _exited = false;
+    lock.unlock();
+
     bool isActive = true;
     while(isActive)
     {
-        size_t timeout = this->processTimers();
+        size_t timeout = _timerQueue.processTimers();
 
         this->waitNext(timeout, isActive);
     }
 }
 
 
-void EventLoopImpl::onWake()
+void EventLoopImpl::exit()
+{
+    RecursiveLock lock(_mutex);
+    _exited = true;
+    lock.unlock();
+
+    wake();
+}
+
+
+void EventLoopImpl::wake()
 {
     SetEvent( _wakeEvent );
+}
+
+
+void EventLoopImpl::commitEvent(const Event& event)
+{ 
+    RecursiveLock lock(_mutex);
+    _eventQueue.pushEvent(event); 
+    lock.unlock();
+
+    wake();
+}
+
+
+void EventLoopImpl::queueEvent(const Event& event)
+{ 
+    RecursiveLock lock(_mutex);
+    _eventQueue.pushEvent(event); 
+}
+
+
+bool EventLoopImpl::processEvents()
+{ 
+    bool isActive = true;
+
+    while( true )
+    {
+        RecursiveLock lock(_mutex);
+        isActive = ! _exited;
+
+        if ( _eventQueue.empty() || ! isActive )
+            break;
+
+        Event* ev = _eventQueue.front();
+
+        try
+        {
+            lock.unlock();
+            _event.send(*ev);
+            _eventQueue.popFront();
+        }
+        catch(...)
+        {
+            _eventQueue.popFront();
+            throw;
+        }
+    }
+
+    return isActive;
 }
 
 
@@ -196,7 +259,7 @@ void EventLoopImpl::waitNext(std::size_t umsecs, bool& isActive )
     std::list<IOHandle*>::iterator iter;
     for( iter = _dirty.begin(); iter != _dirty.end(); ++iter )
     {
-        // TODO: handle immediate avail by calling setAvail in Selectabe
+        // TODO: handle immediate avail by calling setAvail in Selectable
         _handles.add( (*iter)->handle(), (*iter)->sel);
     }
 
@@ -205,7 +268,7 @@ void EventLoopImpl::waitNext(std::size_t umsecs, bool& isActive )
     // check all selectables that did not require waiting
     while( true )
     {
-        Pt::System::MutexLock lock(_signalledMutex);
+        Pt::System::RecursiveLock lock(_mutex);
 
         if( _avail.empty() )
             break;
@@ -229,7 +292,7 @@ void EventLoopImpl::waitNext(std::size_t umsecs, bool& isActive )
         // wake event at offset 0 was active
         if (offset == 0)
         {
-            isActive = EventDispatcher::processEvents();
+            isActive = this->processEvents();
             return;
         }
 

@@ -20,8 +20,10 @@
 #define PT_win32_ProcessImpl_h
 
 #include "ProcessImplBase.h"
+#include "../win32/win32.h"
 #include "Pt/System/Process.h"
 #include <cstdlib>
+#include <string>
 #include <sstream>
 #include <stdlib.h>
 #include <windows.h>
@@ -35,7 +37,7 @@ namespace System {
         public:
             ProcessImpl(const std::string& command);
 
-			ProcessImpl(const ProcessInfo& procInfo);
+            ProcessImpl(const ProcessInfo& procInfo);
 
             static void setEnvVar(const std::string& name, const std::string& value);
 

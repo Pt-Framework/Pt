@@ -21,6 +21,7 @@
 #define PT_SYSTEM_IODEVICEIMPL_H
 
 #include "SelectableImpl.h"
+#include "Pt/System/IOError.h"
 #include <windows.h>
 
 namespace Pt {
@@ -39,19 +40,26 @@ class IODeviceImpl
         void setHandle(HANDLE h);
 
         HANDLE deviceHandle() const
-        { return _handle; }	
+        { return _handle; }
 
         HANDLE handle() const
-        { return _handle; }	
+        { return _handle; }
 
         //virtual void setWaitHandle(HANDLE h) {}
 
         virtual void close(EventLoop* loop);
 
+        void sync() const
+        {
+            if( FALSE == ::FlushFileBuffers( handle() ) )
+                throw IOError( PT_ERROR_MSG("Could not flush file buffer") );
+        }
+
     private:
         HANDLE _handle;
 };
 
+#ifndef _WIN32_WCE
 
 class OverlappedIODeviceImpl : public IODeviceImpl
 {
@@ -82,8 +90,6 @@ class OverlappedIODeviceImpl : public IODeviceImpl
 
         virtual size_t write(const char* buffer, size_t count);
 
-        virtual void sync() const;
-
         virtual void cancel(EventLoop& loop) ;
 
      protected:
@@ -91,6 +97,8 @@ class OverlappedIODeviceImpl : public IODeviceImpl
         OVERLAPPED _readOv;
         OVERLAPPED _writeOv;
 };
+
+#endif
 
 } //namespace System
 

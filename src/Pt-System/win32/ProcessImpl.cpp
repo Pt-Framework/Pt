@@ -39,6 +39,86 @@ ProcessImpl::ProcessImpl(const ProcessInfo& procInfo)
 {}
 
 
+#ifdef _WIN32_WCE
+
+std::string ProcessImpl::getEnvVar(const std::string& name)
+{
+    HKEY hk;
+
+    long ret = RegOpenKeyEx( HKEY_LOCAL_MACHINE,
+                                _T("Software\\ptv\\environment"),
+                                0,
+                                KEY_QUERY_VALUE,
+                                &hk );
+
+    if(ret != ERROR_SUCCESS)
+    {
+        throw SystemError( PT_ERROR_MSG("Could not open Registry") );
+    }
+
+    DWORD type = REG_SZ;
+    DWORD byteLength = MAX_PATH * sizeof(TCHAR);
+    TCHAR data[MAX_PATH] = {0};
+    std::basic_string<TCHAR> wname;
+    win32::fromMultiByte(name, wname);
+
+    ret = RegQueryValueEx(hk, wname.c_str(), NULL, &type, (LPBYTE)data, &byteLength);
+
+    RegCloseKey(hk);
+
+    if(ret != ERROR_SUCCESS)
+    {
+        throw SystemError( PT_ERROR_MSG("Could not query Registry") );
+    }
+
+    if( byteLength == 0 || data[0] == 0 )
+        return "";
+
+    return win32::toMultiByte( (LPCTSTR)data );
+}
+
+
+void ProcessImpl::unsetEnvVar(const std::string& name)
+{
+    ProcessImpl::setEnvVar(name, "");
+}
+
+
+void ProcessImpl::setEnvVar(const std::string& name, const std::string& value)
+{
+    HKEY hk;
+    DWORD ret = 0;
+    ret = RegCreateKeyEx( HKEY_LOCAL_MACHINE,
+                            _T("Software\\ptv\\environment"),
+                            0,
+                            _T(""),
+                            0,
+                            0,
+                            NULL,
+                            &hk,
+                            &ret );
+    if(ret != ERROR_SUCCESS)
+    {
+        throw SystemError( PT_ERROR_MSG("Could not create Registry key") );
+    }
+
+    std::basic_string<TCHAR> wname;
+    win32::fromMultiByte(name, wname);
+    std::basic_string<TCHAR> wvalue;
+    win32::fromMultiByte(value, wvalue);
+
+    LPBYTE data = (LPBYTE)wvalue.c_str();
+    DWORD size = wvalue.size() * sizeof(TCHAR);
+
+    LONG lret = RegSetValueEx(hk, wname.c_str(), 0, REG_SZ, data, size);
+    RegCloseKey(hk);
+
+    if(lret != ERROR_SUCCESS)
+        throw SystemError( PT_ERROR_MSG("Could not set Registry value") );
+}
+
+#else
+
 void ProcessImpl::setEnvVar(const std::string& name, const std::string& value)
 {
     if( 0 == SetEnvironmentVariable(name.c_str(), value.c_str()) )
@@ -92,6 +172,8 @@ std::string ProcessImpl::getEnvVar(const std::string& name)
 
     return ret;
 }
+
+#endif
 
 } // namespace Pt
 

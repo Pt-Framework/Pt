@@ -64,6 +64,8 @@ void IODeviceImpl::close(EventLoop* loop)
     }
 }
 
+#ifndef _WIN32_WCE
+
 /////////////////////////////////////////////////////////////////////
 // OverlappedIODeviceImpl
 /////////////////////////////////////////////////////////////////////
@@ -285,13 +287,9 @@ size_t OverlappedIODeviceImpl::write(const char* buffer, size_t count)
     return writtenBytes;
 }
 
-
-void OverlappedIODeviceImpl::sync() const
-{
-    if( FALSE == ::FlushFileBuffers( handle() ) )
-        throw IOError( PT_ERROR_MSG("Could not flush file buffer") );
-}
+#endif
 
 }//namespaec System
 
 }//namespace Pt
+

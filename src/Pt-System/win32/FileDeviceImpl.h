@@ -31,7 +31,11 @@ namespace Pt {
 
 namespace System {
 
+#ifdef _WIN32_WCE
+class FileDeviceImpl  : public IODeviceImpl
+#else
 class FileDeviceImpl  : public OverlappedIODeviceImpl
+#endif
 {
     public:
         typedef FileDevice::pos_type pos_type;
@@ -50,7 +54,37 @@ class FileDeviceImpl  : public OverlappedIODeviceImpl
 
         size_t peek( char* buffer, size_t count );
 
+#ifdef _WIN32_WCE
+        void attach(EventLoop& loop);
+
+        void detach(EventLoop& loop);
+
+        bool runRead(EventLoop&);
+
+        bool runWrite(EventLoop&);
+
+        virtual size_t beginRead(EventLoop& loop, char* buffer, size_t n, bool& eof);
+
+        virtual size_t endRead(EventLoop& loop, bool& eof);
+
+        virtual size_t beginWrite(EventLoop& loop, const char* buffer, size_t n);
+
+        virtual size_t endWrite(EventLoop& loop);
+
+        virtual void close(EventLoop* loop);
+
+        virtual size_t read(char* buffer, size_t count, bool& eof);
+
+        virtual size_t write(const char* buffer, size_t count);
+
+        virtual void cancel(EventLoop& loop) ;
+
     private:
+        IODevice& _device;
+        OVERLAPPED _readOv;
+        OVERLAPPED _writeOv;
+
+#endif
 };
 
 }//namespace System

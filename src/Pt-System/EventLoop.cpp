@@ -81,19 +81,6 @@ Signal<>& EventLoop::exited()
 }
 
 
-/*void EventLoop::add(Timer& timer)
-{
-    timer.setActive(*this);
-}
-
-
-void EventLoop::remove( Timer& timer )
-{
-    if(timer.parent() == this)
-        timer.detach();
-}*/
-
-
 void EventLoop::run()
 {
     _idleTimer.setActive(*this);
@@ -353,6 +340,172 @@ size_t EventDispatcher::processTimers()
 
     return lowestTimeout;
 }
+
+
+//////////////////////////////////////////////////////////////////////////
+// EventQueue
+//////////////////////////////////////////////////////////////////////////
+
+EventQueue::EventQueue()
+: _allocator(/*255, 64*/)
+, _usedalloc(&_allocator)
+{}
+
+
+EventQueue::EventQueue(Allocator& a)
+: _allocator(/*255, 64*/)
+, _usedalloc(&a)
+{}
+
+
+EventQueue::~EventQueue()
+{
+    try
+    {
+        while ( ! _eventQueue.empty() )
+        {
+            Event* ev = _eventQueue.front();
+            _eventQueue.pop_front();
+            ev->destroy( this->allocator() );
+        }
+    }
+    catch(...)
+    {}
+}
+
+
+void EventQueue::clear()
+{
+    try
+    {
+        while ( ! _eventQueue.empty() )
+        {
+            Event* ev = _eventQueue.front();
+            _eventQueue.pop_front();
+            ev->destroy( this->allocator() );
+        }
+    }
+    catch(...)
+    {}
+}
+
+
+void EventQueue::pushEvent(const Event& ev)
+{
+    Event& clonedEvent = ev.clone( this->allocator() );
+
+    try
+    {
+        _eventQueue.push_back(&clonedEvent);
+    }
+    catch(...)
+    {
+        clonedEvent.destroy( this->allocator() );
+        throw;
+    }
+}
+
+
+Event* EventQueue::front()
+{
+    return _eventQueue.front();
+}
+
+
+void EventQueue::popFront()
+{
+    Event* ev = _eventQueue.front();
+    _eventQueue.pop_front();
+    ev->destroy( this->allocator() );
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+// TimerQueue
+//////////////////////////////////////////////////////////////////////////
+
+TimerQueue::TimerQueue()
+{}
+
+
+TimerQueue::~TimerQueue()
+{
+    while( _timers.size() )
+    {
+       Timer* timer = _timers.begin()->second;
+        timer->detach();
+    }
+}
+
+
+void TimerQueue::addTimer(Timer& timer)
+{
+    if( timer.started() )
+    {
+        TimerMap::value_type elem(timer.finished(), &timer);
+        _timers.insert(elem);
+    }
+}
+
+
+void TimerQueue::removeTimer( Timer& timer )
+{
+    std::multimap<Timespan, Timer*>::iterator it;
+    for(it = _timers.begin(); it != _timers.end(); ++it)
+    {
+        if(it->second == &timer)
+        {
+            _timers.erase(it);
+            return;
+        }
+    }
+}
+
+
+size_t TimerQueue::processTimers()
+{
+    size_t lowestTimeout = EventLoop::WaitInfinite;
+
+    if( _timers.empty() )
+        return lowestTimeout;
+
+    Timespan now = Clock::getSystemTicks();
+    Timer* timer = _timers.begin()->second;
+    bool timerActive = now >= timer->finished();
+
+    while( ! _timers.empty() )
+    {
+        timer = _timers.begin()->second;
+
+        if( now < timer->finished() )
+        {
+            Pt::int64_t remaining = (timer->finished() - now).toUSecs();
+            lowestTimeout = (remaining / 1000);
+            if(remaining % 1000 > 0) 
+                ++lowestTimeout;
+
+            break;
+        }
+
+        timer->update(now);
+
+        if( ! _timers.empty() )
+        {
+            timer = _timers.begin()->second;
+            _timers.erase( _timers.begin() );
+
+            TimerMap::value_type elem(timer->finished(), timer);
+            _timers.insert(elem);
+        }
+    }
+
+    return lowestTimeout;
+}
+
+
+
+
+
 
 
 /*bool EventLoopImpl::processTimers(size_t& lowestTimeout)

@@ -107,7 +107,7 @@ class Active : public Selectable
 
         virtual void onBegin(EventLoop& loop)
         {
-            loop.setAvail(*this);
+            loop.setReady(*this);
             loop.wake();
         }
 

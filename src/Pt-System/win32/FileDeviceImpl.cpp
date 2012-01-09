@@ -38,16 +38,32 @@ namespace Pt {
 
 namespace System {
 
+#ifdef _WIN32_WCE
+
+FileDeviceImpl::FileDeviceImpl(FileDevice& dev)
+: IODeviceImpl()
+, _device(dev)
+{
+    _readOv.Offset = 0;
+    _readOv.OffsetHigh = 0;
+    _readOv.hEvent = NULL;
+
+    _writeOv.Offset = 0;
+    _writeOv.OffsetHigh = 0;
+    _writeOv.hEvent = NULL;
+}
+
+#else
+
 FileDeviceImpl::FileDeviceImpl(FileDevice& dev)
 : OverlappedIODeviceImpl(dev)
 {
 }
 
+#endif
 
 FileDeviceImpl::~FileDeviceImpl()
 { 
-//#ifndef _WIN32_WCE
-//#endif
 }
 
 
@@ -157,6 +173,109 @@ size_t FileDeviceImpl::peek(char* buffer, size_t count)
 
     return ret;
 }
+
+#ifdef _WIN32_WCE
+
+void FileDeviceImpl::close(EventLoop* loop)
+{
+    IODeviceImpl::close(loop);
+
+    _readOv.Offset = 0;
+    _readOv.OffsetHigh = 0;
+
+    _writeOv.Offset = 0;
+    _writeOv.OffsetHigh = 0;
+}
+
+
+void FileDeviceImpl::cancel(EventLoop& loop)
+{
+}
+
+
+void FileDeviceImpl::attach(EventLoop& loop)
+{
+}
+
+
+void FileDeviceImpl::detach(EventLoop& loop)
+{
+}
+
+
+bool FileDeviceImpl::runRead(EventLoop& loop)
+{
+    return false;
+}
+
+bool FileDeviceImpl::runWrite(EventLoop& loop)
+{
+    return false;
+}
+
+
+size_t FileDeviceImpl::beginRead(EventLoop& loop, char* buffer, size_t n, bool& eof)
+{
+    return this->read(buffer, n, eof);
+}
+
+
+size_t FileDeviceImpl::endRead(EventLoop& loop, bool& eof)
+{
+    return 0;
+}
+
+
+size_t FileDeviceImpl::read(char* buffer, size_t count, bool& eof)
+{
+    DWORD readBytes = 0;
+    if( FALSE == ReadFile(handle(), (void*)buffer, count, &readBytes, &_readOv) )
+    {
+        if( ERROR_HANDLE_EOF == GetLastError() || 
+            ERROR_BROKEN_PIPE == GetLastError() )
+        {
+            eof = true;
+            readBytes = 0;
+        }
+        else
+        {
+            throw IOError( PT_ERROR_MSG("Could not read from file handle") );
+        }
+    }
+
+    _readOv.Offset += readBytes;
+    _writeOv.Offset += readBytes;
+    return readBytes;
+}
+
+
+size_t FileDeviceImpl::beginWrite(EventLoop& loop, const char* buffer, size_t n)
+{
+    return this->write(buffer, n);
+}
+
+
+size_t FileDeviceImpl::endWrite(EventLoop& loop)
+{
+    return 0;
+}
+
+
+size_t FileDeviceImpl::write(const char* buffer, size_t count)
+{
+    DWORD writtenBytes = 0;
+
+    if( FALSE == WriteFile(handle(), (void*)buffer, count, &writtenBytes, &_writeOv) )
+    {
+        throw IOError(PT_ERROR_MSG("Could not write to file handle") );
+    }
+
+    _readOv.Offset += writtenBytes;
+    _writeOv.Offset += writtenBytes;
+    return writtenBytes;
+}
+
+#endif
 
 } //namespace System
 
