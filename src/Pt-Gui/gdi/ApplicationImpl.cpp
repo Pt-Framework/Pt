@@ -47,7 +47,8 @@ namespace Pt {
 
 namespace Gui {
 
-MainLoopImpl::MainLoopImpl()
+MainLoopImpl::MainLoopImpl(Signal<const Pt::Event&>& eventSignal)
+: Pt::System::MainLoopImpl(eventSignal)
 {
 }
 
@@ -101,6 +102,7 @@ const LPCSTR MainLoop::CHILD_WINDOW_CLASS_NAME = "PtChildWindow";
 
 MainLoop::MainLoop()
 : System::EventLoop()
+, _impl( event() )
 , _trackingMouseEvent(false)
 {
     _instanceHandle = (HINSTANCE)GetModuleHandle(NULL);
@@ -581,13 +583,13 @@ unsigned int MainLoop::createModifiersFromMouseMessage(int wParam)
 }
 
 
-void MainLoop::onAttach(System::Selectable& s)
+void MainLoop::onAttachSelectable(System::Selectable& s)
 {
     _impl.attach(s);
 }
 
 
-void MainLoop::onDetach(System::Selectable& s)
+void MainLoop::onDetachSelectable(System::Selectable& s)
 {
     _impl.detach(s);
 }
@@ -599,7 +601,7 @@ void MainLoop::onIdle(System::Selectable& s)
 }
 
 
-void MainLoop::onAvail(System::Selectable& s)
+void MainLoop::onReady(System::Selectable& s)
 {
     _impl.avail(s);
 }
@@ -608,12 +610,6 @@ void MainLoop::onAvail(System::Selectable& s)
 void MainLoop::onRun()
 {
     _impl.run();
-}
-
-
-Signal<const Pt::Event&>& MainLoop::onEvent()
-{
-    return _impl.event();
 }
 
 
@@ -647,15 +643,15 @@ void MainLoop::onWake()
 }
 
 
-void MainLoop::onAddTimer(System::Timer& timer)
+void MainLoop::onAttachTimer(System::Timer& timer)
 {
-    _impl.addTimer(timer);
+    _impl.attach(timer);
 }
 
 
-void MainLoop::onRemoveTimer(System::Timer& timer )
+void MainLoop::onDetachTimer(System::Timer& timer )
 {
-    _impl.removeTimer(timer);
+    _impl.detach(timer);
 }
 
 } // namespace Gui

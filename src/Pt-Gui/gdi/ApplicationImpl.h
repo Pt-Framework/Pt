@@ -58,7 +58,7 @@ class Widget;
 class MainLoopImpl : public Pt::System::MainLoopImpl
 {
     public:
-        MainLoopImpl();
+        MainLoopImpl(Signal<const Pt::Event&>& eventSignal);
 
         ~MainLoopImpl();
 
@@ -320,17 +320,15 @@ class MainLoop : public Pt::System::EventLoop
         unsigned int createModifiersFromMouseMessage(int wParam);
 
      protected:
-        virtual void onAttach(System::Selectable&);
+        virtual void onAttachSelectable(System::Selectable&);
 
-        virtual void onDetach(System::Selectable&);
+        virtual void onDetachSelectable(System::Selectable&);
 
         virtual void onIdle(System::Selectable& s);
 
-        virtual void onAvail(System::Selectable& s);
+        virtual void onReady(System::Selectable& s);
 
         virtual void onRun();
-
-        virtual Signal<const Pt::Event&>& onEvent();
 
         virtual void onExit();
 
@@ -342,9 +340,9 @@ class MainLoop : public Pt::System::EventLoop
 
         virtual void onWake();
 
-        virtual void onAddTimer(System::Timer& timer);
+        virtual void onAttachTimer(System::Timer& timer);
 
-        virtual void onRemoveTimer(System::Timer& timer);
+        virtual void onDetachTimer(System::Timer& timer);
 
     private:
         //! @brief Registers the top level and child window classes with Windows for later use.

@@ -144,6 +144,57 @@ class PT_SYSTEM_API EventLoop : public Connectable
         Signal<const Event&> _event;
 };
 
+
+class PT_SYSTEM_API EventQueue
+{
+    public:
+        EventQueue();
+
+        EventQueue(Allocator& a);
+
+        virtual ~EventQueue();
+
+        Allocator& allocator()
+        { return *_usedalloc; }
+
+        void clear();
+
+        bool empty()
+        { return _eventQueue.empty(); }
+
+        void pushEvent(const Event& event);
+
+        Event* front();
+
+        void popFront();
+
+    private:
+        Allocator _allocator;
+        Allocator* _usedalloc;
+        std::deque<Event*> _eventQueue;
+};
+
+
+class PT_SYSTEM_API TimerQueue
+{
+    typedef std::multimap<Timespan, Timer*> TimerMap;
+
+    public:
+        TimerQueue();
+
+        virtual ~TimerQueue();
+
+        void addTimer(Timer& timer);
+
+        void removeTimer( Timer& timer );
+
+        size_t processTimers();
+
+    private:
+        TimerMap _timers;
+};
+
+
 //! @internal
 /*class PT_SYSTEM_API EventDispatcher
 {
@@ -197,56 +248,6 @@ class PT_SYSTEM_API EventLoop : public Connectable
         int _state;
         Signal<const Event&> _event;
 };*/
-
-
-class PT_SYSTEM_API EventQueue
-{
-    public:
-        EventQueue();
-
-        EventQueue(Allocator& a);
-
-        virtual ~EventQueue();
-
-        Allocator& allocator()
-        { return *_usedalloc; }
-
-        void clear();
-
-        bool empty()
-        { return _eventQueue.empty(); }
-
-        void pushEvent(const Event& event);
-
-        Event* front();
-
-        void popFront();
-
-    private:
-        Allocator _allocator;
-        Allocator* _usedalloc;
-        std::deque<Event*> _eventQueue;
-};
-
-
-class PT_SYSTEM_API TimerQueue
-{
-    typedef std::multimap<Timespan, Timer*> TimerMap;
-
-    public:
-        TimerQueue();
-
-        virtual ~TimerQueue();
-
-        void addTimer(Timer& timer);
-
-        void removeTimer( Timer& timer );
-
-        size_t processTimers();
-
-    private:
-        TimerMap _timers;
-};
 
 } // namespace System
 

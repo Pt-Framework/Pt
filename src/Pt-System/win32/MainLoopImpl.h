@@ -123,7 +123,7 @@ struct IOHandle
 class PT_SYSTEM_API EventLoopImpl
 {
     public:
-        EventLoopImpl();
+        EventLoopImpl(Signal<const Pt::Event&>& eventSignal);
         
         ~EventLoopImpl();
 
@@ -132,9 +132,6 @@ class PT_SYSTEM_API EventLoopImpl
         void exit();
 
         void wake();
-
-        Signal<const Event&>& event()
-        { return _event; }
 
         void commitEvent(const Event& event);
 
@@ -174,7 +171,7 @@ class PT_SYSTEM_API EventLoopImpl
         bool _exited;
         TimerQueue _timerQueue;
         EventQueue _eventQueue;
-        Signal<const Event&> _event;
+        Signal<const Event&>* _event;
         HANDLE _wakeEvent;
         HANDLE _ioEvent;
         HandleMap _handles;
@@ -189,9 +186,9 @@ class PT_SYSTEM_API EventLoopImpl
 class PT_SYSTEM_API MainLoopImpl : public EventLoopImpl
 {
     public:
-        MainLoopImpl();
+        MainLoopImpl(Signal<const Pt::Event&>& eventSignal);
 
-        MainLoopImpl(Allocator& a);
+        MainLoopImpl(Signal<const Pt::Event&>& eventSignal, Allocator& a);
 
         ~MainLoopImpl();
 };

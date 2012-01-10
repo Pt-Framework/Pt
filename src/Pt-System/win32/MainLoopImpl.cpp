@@ -42,8 +42,9 @@ namespace Pt {
 
 namespace System {
 
-EventLoopImpl::EventLoopImpl()
+EventLoopImpl::EventLoopImpl(Signal<const Pt::Event&>& eventSignal)
 : _exited(false)
+, _event(&eventSignal)
 {
     _current = _devices.end();
 
@@ -229,7 +230,7 @@ bool EventLoopImpl::processEvents()
         try
         {
             lock.unlock();
-            _event.send(*ev);
+            _event->send(*ev);
             _eventQueue.popFront();
         }
         catch(...)
@@ -344,8 +345,8 @@ DWORD EventLoopImpl::waitFor(DWORD numHandles, const HANDLE *handles, DWORD msec
 }
 
 
-MainLoopImpl::MainLoopImpl()
-: EventLoopImpl()
+MainLoopImpl::MainLoopImpl(Signal<const Pt::Event&>& eventSignal)
+: EventLoopImpl(eventSignal)
 {
 //  _current = _devices.end();
 //  _currentAvail = _avail.end();
@@ -365,8 +366,8 @@ MainLoopImpl::MainLoopImpl()
 //  _handles.add( _ioEvent, 0 );
 }
 
-MainLoopImpl::MainLoopImpl(Allocator& a)
-: EventLoopImpl()
+MainLoopImpl::MainLoopImpl(Signal<const Pt::Event&>& eventSignal, Allocator& a)
+: EventLoopImpl(eventSignal)
 {
 //  _current = _devices.end();
 //  _currentAvail = _avail.end();
