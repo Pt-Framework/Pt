@@ -79,6 +79,8 @@ class TcpServerImpl
         void attach(System::EventLoop& s);
 
         void detach(System::EventLoop& s);
+
+        void cancel(System::EventLoop& s);
     
         bool run();
 };

@@ -38,8 +38,6 @@ struct IOHandle
     , fd(fd)
     , wflags(0)
     , flags(0)
-    , next(0)
-    , prev(0)
     {}
 
     IOHandle(Selectable& sel)
@@ -47,8 +45,6 @@ struct IOHandle
     , fd(-1)
     , wflags(0)
     , flags(0)
-    , next(0)
-    , prev(0)
     {}
 
     IOHandle()
@@ -56,8 +52,6 @@ struct IOHandle
     , fd(-1)
     , wflags(0)
     , flags(0)
-    , next(0)
-    , prev(0)
     {}
 
     bool isOpen() const
@@ -67,8 +61,6 @@ struct IOHandle
     int fd;
     int wflags;
     int flags;
-    IOHandle* next;
-    IOHandle* prev;
 };
 
 

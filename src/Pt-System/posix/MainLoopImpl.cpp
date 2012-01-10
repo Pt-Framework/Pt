@@ -43,8 +43,6 @@ namespace System {
 EventLoopImpl::EventLoopImpl(Signal<const Event&>& eventSignal)
 : _exited(false)
 , _event(&eventSignal)
-, _first(0)
-, _last(0)
 {
     _current = _devices.end();
 
@@ -229,10 +227,12 @@ void EventLoopImpl::waitNext(std::size_t msecs, bool& isActive )
         selectable->run();
     }
 
-    for(IOHandle* h = _first; h != 0; h = h->next)
+    for( std::vector<IOHandle*>::iterator it = _dirty.begin(); it != _dirty.end(); ++it)
     {
+        IOHandle* h = *it;
+
         if(h->flags == h->wflags)
-            break;
+            continue;
 
         if(h->flags & Input &&  0 == (h->wflags & Input))
         {
@@ -258,6 +258,8 @@ void EventLoopImpl::waitNext(std::size_t msecs, bool& isActive )
             h->wflags &= ~Output;
         }
     }
+
+    _dirty.clear();
 
     FD_ZERO(&_rfdsR);
     FD_ZERO(&_wfdsR);

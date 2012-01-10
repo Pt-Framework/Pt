@@ -41,7 +41,8 @@ class EventLoopImpl
     {
         Input = 1,
         Output = 2,
-        Error = 4
+        Error = 4,
+        Enabled = 8
     };
 
     public:
@@ -49,36 +50,25 @@ class EventLoopImpl
 
         ~EventLoopImpl();
 
-        void enable(IOHandle& h)
-        {
-            _devices.insert( h.sel );
-
-            if( h.fd > FD_SETSIZE )
-                throw System::IOError( PT_ERROR_MSG("FD_SETSIZE too small for fd") );
-
-            // no change required, move to back
-            push_back(&h);
-            FD_SET(h.fd, &_efds);
-        }
-
-        void disable(IOHandle& h)
+        void cancel(IOHandle& h)
         {
            std::set<Selectable*>::iterator it = _devices.find( h.sel );
            if( it == _devices.end() )
                 return;
 
-            if( h.fd > 0)
-            {
-                if(h.wflags & Input)
-                    FD_CLR(h.fd, &_rfds);
+           assert(h.fd > 0);
 
-                if(h.wflags & Output)
-                    FD_CLR(h.fd, &_wfds);
+            if(h.wflags & Input)
+                FD_CLR(h.fd, &_rfds);
 
-                FD_CLR(h.fd, &_efds);
-            }
+            if(h.wflags & Output)
+                FD_CLR(h.fd, &_wfds);
 
-            pop(&h);
+            FD_CLR(h.fd, &_efds);
+            h.wflags = 0;
+            h.flags = 0;
+
+            remove(&h);
 
             if( _current == _devices.end() )
             {
@@ -94,33 +84,18 @@ class EventLoopImpl
             }
         }
 
-        void cancel(IOHandle& h)
-        {
-            if(h.flags)
-            {
-                h.flags = 0;
-    
-                // update before next wait, move to front
-                pop(&h);
-                push_front(&h);
-            }
-        }
-
         void beginRead(IOHandle* h)
         {
-            // TODO: h->flags could contain a flag value for enabled
-            // if itsnot enabled add it to _devices
+            if( (h->flags & Enabled) != Enabled )
+            {
+                h->flags |= Enabled;
+                h->wflags |= Enabled;
+                FD_SET(h->fd, &_efds);
+                _devices.insert( h->sel );
+            }
 
-
-            pop(h);
             h->flags |= Input;
- 
-            // TODO: if no change is required, the handle does not have to be 
-            //       int the list at all... -> it would be a real changelist
-            if(h->flags == h->wflags)
-                push_back(h); // no change required, move to back
-            else
-                push_front(h); // update before next wait, move to front
+            setChanged(h);
         }
 
         void endRead(IOHandle* h)
@@ -128,23 +103,22 @@ class EventLoopImpl
             if(h->flags & Input)
             {
                 h->flags &= ~Input;
-    
-                // update before next wait, move to front
-                pop(h);
-                push_front(h);
+                setChanged(h);
             }
         }
 
         void beginWrite(IOHandle* h)
         {
-            pop(h);
-            h->flags |= Output;
- 
-            if(h->flags == h->wflags)
-                push_back(h); // no change required, move to back
-            else
-                push_front(h); // update before next wait, move to front
+            if( (h->flags & Enabled) != Enabled )
+            {
+                h->flags |= Enabled;
+                h->wflags |= Enabled;
+                FD_SET(h->fd, &_efds);
+                _devices.insert( h->sel );
+            }
 
+            h->flags |= Output;
+            setChanged(h);
         }
 
         void endWrite(IOHandle* h)
@@ -152,10 +126,7 @@ class EventLoopImpl
             if(h->flags & Output)
             {
                 h->flags &= ~Output;
-    
-                // update before next wait, move to front
-                pop(h);
-                push_front(h);
+                setChanged(h);
             }
         }
 
@@ -174,73 +145,19 @@ class EventLoopImpl
             return FD_ISSET(h->fd, &_efdsR);
         }
 
-        void pop(IOHandle* h)
+        void remove(IOHandle* h)
         {
-            IOHandle* prev = h->prev;
-            IOHandle* next = h->next;
-
-//          if(prev && next)
-//          {
-//              prev->next = next;
-//              next->prev = prev;
-//          }
-//          else
-//          {
-//              if( h == _first)
-//                  _first = h->next;
-//              if( h == _last)
-//                  _last = h->prev;
-//          }
-//
-//          h->next = 0;
-//          h->prev = 0;
-//
-//          TODO: push_front is enough, we don't need _last
-
-
-            if( h == _first)
-                _first = h->next;
-            else
-                prev->next = next;
-
-            if( h == _last)
-                _last = h->prev;
-            else
-                next->prev = prev;
-
-            h->next = 0;
-            h->prev = 0;
-        }
-
-        void push_back(IOHandle* h)
-        {
-            if( ! _first)
+            for( std::vector<IOHandle*>::iterator it = _dirty.begin(); it != _dirty.end();)
             {
-                _first = h;
-                _last = h;
-            }
-            else
-            {
-                _last->next = h;
-                h->prev = _last;
-                _last = h;
+                if(*it == h)
+                    it = _dirty.erase(it);
+                else
+                    ++it;
             }
         }
 
-        void push_front(IOHandle* h)
-        {
-            if( ! _first)
-            {
-                _first = h;
-                _last = h;
-            }
-            else
-            {
-                h->next = _first;
-                _first->prev = h;
-                _first = h;
-            }
-        }
+        void setChanged(IOHandle* h)
+        { _dirty.push_back(h); }
 
         void idle(Selectable& s);
 
@@ -278,8 +195,7 @@ class EventLoopImpl
         EventQueue _eventQueue;
         Signal<const Event&>* _event;
         int _wakePipe[2];
-        IOHandle* _first;
-        IOHandle* _last;
+        std::vector<IOHandle*> _dirty;
         std::set<Selectable*> _selectables;
         std::set<Selectable*>::iterator _current;
         std::set<Selectable*> _devices; // active

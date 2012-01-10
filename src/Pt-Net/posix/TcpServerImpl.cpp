@@ -70,11 +70,11 @@ void TcpServerImpl::close()
 
     log_debug("close socket");
 
-    System::EventLoop* loop = _server.parent();
+    /*System::EventLoop* loop = _server.parent();
     if(loop)
     {
         loop->impl().disable(_ioh);
-    }
+    }*/
 
     ::close(_ioh.fd);
     _ioh.fd = -1;
@@ -191,17 +191,26 @@ void TcpServerImpl::attach(System::EventLoop& loop)
     if( this->fd() < 0 )
         return;
 
-    loop.impl().enable(_ioh);
+    //loop.impl().enable(_ioh);
     loop.impl().beginRead( &_ioh );
 }
 
 
 void TcpServerImpl::detach(System::EventLoop& loop)
 {
+    /*if( this->fd() < 0 )
+        return;
+
+    loop.impl().disable(_ioh);*/
+}
+
+
+void TcpServerImpl::cancel(System::EventLoop& loop)
+{
     if( this->fd() < 0 )
         return;
 
-    loop.impl().disable(_ioh);
+    loop.impl().cancel(_ioh);
 }
 
 

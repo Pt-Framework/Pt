@@ -83,8 +83,8 @@ void IODeviceImpl::open(int fd, bool inherit, EventLoop* loop)
             throw IOError(PT_ERROR_MSG("Could not set FD_CLOEXEC"));
     }
 
-    if( loop )
-        loop->impl().enable(_ioh);
+    //if( loop )
+    //    loop->impl().enable(_ioh);
 }
 
 
@@ -97,8 +97,8 @@ void IODeviceImpl::close(EventLoop* loop)
     {
         _errorPending = false;
 
-        if(loop)
-            loop->impl().disable(_ioh);
+        //if(loop)
+        //    loop->impl().disable(_ioh);
 
         int fd = _ioh.fd;
         _ioh.fd = -1;
@@ -114,12 +114,12 @@ void IODeviceImpl::close(EventLoop* loop)
 
 void IODeviceImpl::attach(EventLoop& loop)
 { 
-    if( this->isOpen() )
+    /*if( this->isOpen() )
     {
         loop.impl().enable(_ioh);
-    }
+    }*/
 
-    // TODO: we do not need to enable the i/o handle now, but defer it
+    // we do not need to enable the i/o handle now, but defer it
     // until we call impl().beginRead or impl().beginWrite on the i/o handle.
     // The EventLoopImpl can check internally...
 }
@@ -127,16 +127,16 @@ void IODeviceImpl::attach(EventLoop& loop)
 
 void IODeviceImpl::detach(EventLoop& loop)
 {
-    if( this->isOpen() )
+    /*if( this->isOpen() )
     {
         loop.impl().disable(_ioh);
-    }
+    }*/
 }
 
 
 void IODeviceImpl::cancel(EventLoop& loop)
 {
-    // TODO: disable the handle, we know canel is always called before close
+    // disable the handle, we know cancel is always called before close
     // if this is attached to a loop
 
     if( this->isOpen() )

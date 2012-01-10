@@ -103,7 +103,8 @@ void TcpServer::onDetach(System::EventLoop& sb)
 
 void TcpServer::onCancel()
 {
-    //_impl->cancel();
+    if( this->isActive() )
+    _impl->cancel( *parent() );
     //this->setIdle();
 }
 
