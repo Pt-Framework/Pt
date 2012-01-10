@@ -30,10 +30,10 @@
 #include "MainLoopImpl.h"
 #include "Pt/System/EventLoop.h"
 #include "Pt/System/SystemError.h"
+#include <sstream>
+#include <cassert>
 #include <windows.h>
-#include <sstream>
 #include <Msgqueue.h>
-#include <sstream>
 
 namespace Pt {
 
@@ -44,6 +44,7 @@ PipeIODevice::PipeIODevice(Mode mode)
 , _msgSize(0)
 , _bufferSize(0)
 {
+    _ioh.sel = this;
 }
 
 
@@ -51,7 +52,7 @@ PipeIODevice::~PipeIODevice()
 {   
     try
     {
-        Selectable::close();
+        IODevice::close();
     }
     catch(...)
     {
@@ -63,6 +64,8 @@ void PipeIODevice::open(HANDLE h, bool isAsync)
 {
     this->setHandle(h);
 
+    _ioh.setHandle(h);
+
     MSGQUEUEINFO info;
     info.dwSize = sizeof(MSGQUEUEINFO);
 
@@ -71,67 +74,59 @@ void PipeIODevice::open(HANDLE h, bool isAsync)
         _msgSize = info.cbMaxMessage;
         _buffer.resize(_msgSize);
     }
-
-    this->setEnabled(true);
-    this->setAsync(isAsync);
-    this->setEof(false);
 }
 
 
-bool PipeIODevice::setWaitHandle(HANDLE h, bool& avail)
+void PipeIODevice::onClose()
 {
-    return false;
+    if(handle() != INVALID_HANDLE_VALUE)
+    {
+        if( FALSE == ::CloseMsgQueue(handle()) )
+        {
+            throw IOError( "CloseMsgQueue failed", PT_SOURCEINFO );
+        }
+
+        this->setHandle(INVALID_HANDLE_VALUE);
+        _ioh.setHandle(INVALID_HANDLE_VALUE);
+    }
 }
 
 
-void PipeIODevice::getWaitHandles(HandleMap& handles, bool& avail)
-{ 
-    handles.add(handle(), this);
-	
-	if(_bufferSize > 0)
-		avail = true;
+void PipeIODevice::onCancel()
+{
+    parent()->impl().disable(_ioh);
 }
 
 
-bool PipeIODevice::checkEvent()
+void PipeIODevice::onAttach(EventLoop& loop)
+{
+}
+
+
+void PipeIODevice::onDetach(EventLoop& loop)
+{
+    assert( ! reading() ); 
+    assert( ! writing() ); 
+}
+
+
+bool PipeIODevice::onRun()
 {
     bool avail = false;
 
     if( _wbuf )
     {
-        outputReady.send(*this);
+        outputReady().send(*this);
         avail = true;
     }
     
     if( _rbuf )
     {
-        inputReady.send(*this);
+        inputReady().send(*this);
         avail = true;
     }
 
     return avail;
-}
-
-
-bool PipeIODevice::onWait(std::size_t msecs)
-{
-    if(_bufferSize)
-    {
-        return true;
-    }
-
-    DWORD result = WaitForSingleObject(handle(), msecs);
-
-    if(result == WAIT_OBJECT_0)
-    {
-        this->checkEvent();
-    }
-    else if(result == WAIT_FAILED)
-    {
-        throw IOError( PT_ERROR_MSG("WaitForSingleObject failed") );
-    }
-
-    return result == WAIT_OBJECT_0;
 }
 
 
@@ -140,15 +135,18 @@ size_t PipeIODevice::onBeginRead(char* buffer, size_t n, bool& eof)
     if( Read != _mode )
         throw IOError( PT_ERROR_MSG("Could not read from write only pipe") );
     
-	if(_bufferSize)
-		return std::min(_bufferSize, n);
+    if(_bufferSize)
+        return std::min(_bufferSize, n);
 
-	return 0;
+    parent()->impl().enable(_ioh);
+    return 0;
 }
 
 
 size_t PipeIODevice::onEndRead(bool& eof)
 {
+    parent()->impl().disable(_ioh);
+
     DWORD readBytes = 0;
     DWORD flags     = 0;
     eof = false;
@@ -185,13 +183,16 @@ size_t PipeIODevice::onBeginWrite(const char* buffer, size_t n)
     {
         throw IOError( PT_ERROR_MSG("Could not write on a read only pipe") );
     }
-	
-	return 0;
+    
+    parent()->impl().enable(_ioh);
+    return 0;
 }
 
 
 size_t PipeIODevice::onEndWrite()
 {
+    parent()->impl().disable(_ioh);
+
     DWORD bytesToWrite = std::min<DWORD>(_wbuflen, _msgSize);
 
     if ( FALSE == WriteMsgQueue(handle(), (LPVOID) _wbuf, bytesToWrite, 0, 0))
@@ -200,20 +201,6 @@ size_t PipeIODevice::onEndWrite()
     }
     
     return bytesToWrite;
-}
-
-
-void PipeIODevice::onClose()
-{
-    if(handle() != INVALID_HANDLE_VALUE)
-    {
-        if( FALSE == ::CloseMsgQueue(handle()) )
-        {
-            throw IOError( "CloseMsgQueue failed", PT_SOURCEINFO );
-        }
-
-        this->setHandle(INVALID_HANDLE_VALUE);
-    }
 }
 
 
@@ -284,9 +271,27 @@ void PipeIODevice::onSync() const
 }
 
 
-void PipeIODevice::onCancel()
+/*bool PipeIODevice::onWait(std::size_t msecs)
 {
+    if(_bufferSize)
+    {
+        return true;
+    }
+
+    DWORD result = WaitForSingleObject(handle(), msecs);
+
+    if(result == WAIT_OBJECT_0)
+    {
+        this->checkEvent();
+    }
+    else if(result == WAIT_FAILED)
+    {
+        throw IOError( PT_ERROR_MSG("WaitForSingleObject failed") );
+    }
+
+    return result == WAIT_OBJECT_0;
 }
+*/
 
 
 PipeImpl::PipeImpl(bool isAsync)

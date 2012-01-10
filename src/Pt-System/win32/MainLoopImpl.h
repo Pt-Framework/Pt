@@ -39,6 +39,11 @@ class IODeviceImpl;
 
 struct IOHandle
 {
+    IOHandle()
+    : sel(0)
+    , _handle(INVALID_HANDLE_VALUE)
+    {}
+
     IOHandle(Selectable& s)
     : sel(&s)
     , _handle(INVALID_HANDLE_VALUE)
@@ -51,6 +56,9 @@ struct IOHandle
 
     HANDLE handle()
     { return _handle; }
+
+    void setHandle(HANDLE h)
+    { _handle = h; }
 
     Selectable* sel;
     HANDLE _handle;

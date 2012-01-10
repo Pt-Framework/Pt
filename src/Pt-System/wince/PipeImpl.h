@@ -23,6 +23,7 @@
 #include <Pt/System/Api.h>
 #include <Pt/System/IODevice.h>
 #include "IODeviceImpl.h"
+#include "MainLoopImpl.h"
 #include <windows.h>
 #include <vector>
 #include <cassert>
@@ -35,63 +36,50 @@ class PipeIODevice : public IODevice, private IODeviceImpl
 {
     public:
         enum Mode {Read, Write};
-
+    
         PipeIODevice(Mode mode);
-
+    
         ~PipeIODevice();
-
+    
         void open(HANDLE handle, bool isAsync);
-
-        bool setWaitHandle(HANDLE h, bool& avail);
-
-        void getWaitHandles(HandleMap& handles, bool& avail);
-
-        bool checkEvent();
-
-        virtual IODeviceImpl& ioimpl()
-        { return *this; }
-
-        virtual SelectableImpl& simpl()
-        { return *this; }
-
+    
     protected:
-        size_t onBeginRead(char* buffer, size_t n, bool& eof);
-
-        size_t onEndRead(bool& eof);
-
-        size_t onBeginWrite(const char* buffer, size_t n);
-
-        size_t onEndWrite();
-
-        bool onWait(std::size_t n);
-
+        void onAttach(EventLoop& loop);
+    
+        void onDetach(EventLoop& loop);
+    
+        void onCancel();
+    
         //! @brief Closes the I/O device
-        virtual void onClose();
-
+        void onClose();
+    
+        bool onRun();
+    
+        size_t onBeginRead(char* buffer, size_t n, bool& eof);
+    
+        size_t onEndRead(bool& eof);
+    
+        size_t onBeginWrite(const char* buffer, size_t n);
+    
+        size_t onEndWrite();
+    
         //! @brief Read bytes from device
-        virtual size_t onRead(char* buffer, size_t count, bool& eof);
-
+        size_t onRead(char* buffer, size_t count, bool& eof);
+    
         //! @brief Write bytes to device
-        virtual size_t onWrite(const char* buffer, size_t count);
-
-        virtual void onSync() const;
-
-        void onAttach(EventLoop& s)
-        { }
-
-        void onDetach(EventLoop& s)
-        { }
-
-        virtual void onCancel();
-
-     protected:
+        size_t onWrite(const char* buffer, size_t count);
+    
+        void onSync() const;
+    
+    protected:
         void writeMessage(const char* buffer, size_t count);
-
-     private:
-        Mode                        _mode;
-        DWORD                       _msgSize;
-        size_t                      _bufferSize;
-        std::vector<char>           _buffer;
+    
+    private:
+        IOHandle _ioh;
+        Mode     _mode;
+        DWORD    _msgSize;
+        size_t   _bufferSize;
+        std::vector<char> _buffer;
 };
 
 class PipeImpl
