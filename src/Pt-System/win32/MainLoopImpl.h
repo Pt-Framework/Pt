@@ -35,8 +35,6 @@ namespace Pt {
 
 namespace System {
 
-class IODeviceImpl;
-
 struct IOHandle
 {
     IOHandle()
@@ -176,7 +174,7 @@ class PT_SYSTEM_API EventLoopImpl
         void disable(IOHandle& handle);
 
     protected:
-        void waitNext(std::size_t timeout, bool& isActive);
+        bool waitNext();
 
         virtual DWORD waitFor(DWORD numHandles, const HANDLE *handles, DWORD msecs, bool& isTimeout);
 

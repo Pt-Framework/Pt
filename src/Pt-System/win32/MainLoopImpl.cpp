@@ -91,6 +91,28 @@ void EventLoopImpl::detach(Selectable& s)
 }
 
 
+void EventLoopImpl::avail(Selectable& s)
+{
+    Pt::System::MutexLock lock(_mutex);
+    _avail.push_back(&s);
+}
+
+
+void EventLoopImpl::idle(Selectable& s)
+{
+    Pt::System::MutexLock lock(_mutex);
+
+    std::vector<Selectable*>::iterator it = _avail.begin();
+    while(it != _avail.end())
+    {
+        if(*it == &s)
+            it = _avail.erase(it);
+        else
+            ++it;
+    }
+}
+
+
 void EventLoopImpl::enable(IOHandle& handle)
 {
     return _handles.add(handle);
@@ -127,41 +149,14 @@ void EventLoopImpl::disable(Selectable& s)
 }
 
 
-void EventLoopImpl::avail(Selectable& s)
-{
-    Pt::System::MutexLock lock(_mutex);
-    _avail.push_back(&s);
-}
-
-
-void EventLoopImpl::idle(Selectable& s)
-{
-    Pt::System::MutexLock lock(_mutex);
-
-    std::vector<Selectable*>::iterator it = _avail.begin();
-    while(it != _avail.end())
-    {
-        if(*it == &s)
-            it = _avail.erase(it);
-        else
-            ++it;
-    }
-}
-
-
 void EventLoopImpl::run()
 {
     MutexLock lock(_mutex);
     _exited = false;
     lock.unlock();
 
-    bool isActive = true;
-    while(isActive)
-    {
-        size_t timeout = _timerQueue.processTimers();
-
-        this->waitNext(timeout, isActive);
-    }
+    while( this->waitNext() )
+        ;
 }
 
 
@@ -197,7 +192,7 @@ void EventLoopImpl::queueEvent(const Event& event)
     _eventQueue.pushEvent(event); 
 }
 
-
+// TODO: move this to EventQueue, use second Mutex for avail queue
 bool EventLoopImpl::processEvents()
 { 
     bool isActive = true;
@@ -229,15 +224,17 @@ bool EventLoopImpl::processEvents()
 }
 
 
-void EventLoopImpl::waitNext(std::size_t umsecs, bool& isActive )
+bool EventLoopImpl::waitNext()
 {
+    size_t timeoutUMSecs = _timerQueue.processTimers();
+
     // convert unsigned to signed
-    DWORD msecs = umsecs;
-    if(umsecs == MainLoop::WaitInfinite)
+    DWORD msecs = timeoutUMSecs;
+    if(timeoutUMSecs == MainLoop::WaitInfinite)
     {
         msecs = INFINITE;
     }
-    else if( umsecs > std::numeric_limits<DWORD>::max() )
+    else if( timeoutUMSecs > std::numeric_limits<DWORD>::max() )
     {
         msecs = std::numeric_limits<DWORD>::max();
     }
@@ -266,13 +263,12 @@ void EventLoopImpl::waitNext(std::size_t umsecs, bool& isActive )
     try
     {
         if(isTimeout)
-            return;
+            return true;
 
         // wake event at offset 0 was active
         if (offset == 0)
         {
-            isActive = this->processEvents();
-            return;
+            return this->processEvents();
         }
 
         // I/O event at offset 1 was active
@@ -301,6 +297,8 @@ void EventLoopImpl::waitNext(std::size_t umsecs, bool& isActive )
         _current = _devices.end();
         throw;
     }
+
+    return true;
 }
 
 
