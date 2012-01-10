@@ -136,13 +136,8 @@ void EventLoopImpl::run()
     _exited = false;
     lock.unlock();
 
-    bool isActive = true;
-    while(isActive)
-    {
-        size_t timeout = _timerQueue.processTimers();
-
-        this->waitNext(timeout, isActive);
-    }
+    while( this->waitNext() )
+        ;
 }
 
 
@@ -211,8 +206,11 @@ bool EventLoopImpl::processEvents()
 }
 
 
-void EventLoopImpl::waitNext(std::size_t msecs, bool& isActive )
+bool EventLoopImpl::waitNext()
 {
+    bool isActive = true;
+    size_t msecs = _timerQueue.processTimers();
+
     while(true)
     {
         MutexLock lock(_mutex);
@@ -298,7 +296,7 @@ void EventLoopImpl::waitNext(std::size_t msecs, bool& isActive )
             continue;
 
         if(static_cast<Pt::uint64_t>(elapsed) >= msecs)
-            return; // timeout
+            return isActive; // timeout
 
         msecs -= int(elapsed);
     }
@@ -363,6 +361,8 @@ void EventLoopImpl::waitNext(std::size_t msecs, bool& isActive )
         _current = _devices.end();
         throw;
     }
+
+    return isActive;
 }
 
 

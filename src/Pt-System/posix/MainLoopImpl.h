@@ -186,7 +186,7 @@ class EventLoopImpl
         { _timerQueue.removeTimer(timer); }
 
     protected:
-        void waitNext(std::size_t timeout, bool& isActive);
+        bool waitNext();
 
     private:
         Mutex _mutex;
