@@ -59,8 +59,8 @@ EventLoopImpl::EventLoopImpl(Signal<const Pt::Event&>& eventSignal)
         throw SystemError( PT_ERROR_MSG("CreateEvent failed") );
     }
 
-    _handles.add( _wakeEvent, 0 );
-    _handles.add( _ioEvent, 0 );
+    _handles.add( _wakeEvent );
+    _handles.add( _ioEvent );
 }
 
 
@@ -91,19 +91,15 @@ void EventLoopImpl::detach(Selectable& s)
 }
 
 
-IOHandle* EventLoopImpl::enable(Selectable& s, HANDLE h)
+void EventLoopImpl::enable(IOHandle& handle)
 {
-    IOHandle* iohandle =  new IOHandle(s, h);
-    _dirty.push_back(iohandle);
-    return iohandle;
+    return _handles.add(handle);
 }
 
 
-void EventLoopImpl::disable(IOHandle* h)
+void EventLoopImpl::disable(IOHandle& handle)
 {
-    _dirty.remove(h);
-    _handles.remove( *(h->sel) );
-    delete h;
+    _handles.remove(handle);
 }
 
 
@@ -128,30 +124,19 @@ void EventLoopImpl::disable(Selectable& s)
             _devices.erase(iter);
         }
     }
-
-    std::vector<Selectable*>::iterator it = _avail.begin();
-    while(it != _avail.end())
-    {
-        if(*it == &s)
-            assert(false);
-
-        ++it;
-    }
-
-    this->idle(s);
 }
 
 
 void EventLoopImpl::avail(Selectable& s)
 {
-    Pt::System::RecursiveLock lock(_mutex);
+    Pt::System::MutexLock lock(_mutex);
     _avail.push_back(&s);
 }
 
 
 void EventLoopImpl::idle(Selectable& s)
 {
-    Pt::System::RecursiveLock lock(_mutex);
+    Pt::System::MutexLock lock(_mutex);
 
     std::vector<Selectable*>::iterator it = _avail.begin();
     while(it != _avail.end())
@@ -166,7 +151,7 @@ void EventLoopImpl::idle(Selectable& s)
 
 void EventLoopImpl::run()
 {
-    RecursiveLock lock(_mutex);
+    MutexLock lock(_mutex);
     _exited = false;
     lock.unlock();
 
@@ -182,7 +167,7 @@ void EventLoopImpl::run()
 
 void EventLoopImpl::exit()
 {
-    RecursiveLock lock(_mutex);
+    MutexLock lock(_mutex);
     _exited = true;
     lock.unlock();
 
@@ -198,7 +183,7 @@ void EventLoopImpl::wake()
 
 void EventLoopImpl::commitEvent(const Event& event)
 { 
-    RecursiveLock lock(_mutex);
+    MutexLock lock(_mutex);
     _eventQueue.pushEvent(event); 
     lock.unlock();
 
@@ -208,7 +193,7 @@ void EventLoopImpl::commitEvent(const Event& event)
 
 void EventLoopImpl::queueEvent(const Event& event)
 { 
-    RecursiveLock lock(_mutex);
+    MutexLock lock(_mutex);
     _eventQueue.pushEvent(event); 
 }
 
@@ -219,7 +204,7 @@ bool EventLoopImpl::processEvents()
 
     while( true )
     {
-        RecursiveLock lock(_mutex);
+        MutexLock lock(_mutex);
         isActive = ! _exited;
 
         if ( _eventQueue.empty() || ! isActive )
@@ -260,7 +245,7 @@ void EventLoopImpl::waitNext(std::size_t umsecs, bool& isActive )
     // check all selectables that did not require waiting
     while( true )
     {
-        Pt::System::RecursiveLock lock(_mutex);
+        Pt::System::MutexLock lock(_mutex);
 
         if( _avail.empty() )
             break;
@@ -273,17 +258,10 @@ void EventLoopImpl::waitNext(std::size_t umsecs, bool& isActive )
         s->run();
     }
 
-    std::list<IOHandle*>::iterator iter;
-    for( iter = _dirty.begin(); iter != _dirty.end(); ++iter )
-    {
-        // TODO: handle immediate avail by calling setAvail in Selectable
-        _handles.add( (*iter)->handle(), (*iter)->sel);
-    }
-
-    _dirty.clear();
+    HANDLE* handles = _handles.buildHandles();
 
     bool isTimeout = false;
-    DWORD offset = waitFor(_handles.size(), _handles.handles(), msecs, isTimeout);
+    DWORD offset = waitFor(_handles.size(), handles, msecs, isTimeout);
 
     try
     {

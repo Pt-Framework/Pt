@@ -37,69 +37,6 @@ namespace System {
 
 class IODeviceImpl;
 
-class HandleMap
-{
-    public:
-        HandleMap()
-        {}
-
-        ~HandleMap()
-        { }
-
-        void add(HANDLE h, Selectable* s)
-        {
-            _handles.push_back(h);
-            _selectables.push_back(s);
-        }
-
-        HANDLE* handles()
-        {
-            if(_handles.empty())
-                return 0;
-
-            return &_handles[0];
-        }
-
-        size_t size() const
-        { return _handles.size(); }
-
-        Selectable* at(size_t n)
-        { return _selectables[n]; }
-
-        void pop_front()
-        {
-            _selectables.erase( _selectables.begin() );
-            _handles.erase( _handles.begin() );
-        }
-
-        void remove(Selectable& s)
-        {
-            if( _selectables.empty() )
-                return;
-
-            std::vector<Selectable*>::iterator it;
-            std::vector<HANDLE>::iterator hit =_handles.begin();
-            for(it = _selectables.begin(); it != _selectables.end(); )
-            {
-                if(*it != &s)
-                {
-                    ++it;
-                    ++hit;
-                }
-                else
-                {
-                    it = _selectables.erase(it);
-                    hit = _handles.erase(hit);
-                }
-            }
-        }
-
-    private:
-        std::vector<HANDLE> _handles;
-        std::vector<Selectable*> _selectables;
-};
-
-
 struct IOHandle
 {
     IOHandle(Selectable& s)
@@ -117,6 +54,75 @@ struct IOHandle
 
     Selectable* sel;
     HANDLE _handle;
+};
+
+
+class HandleMap
+{
+    public:
+        HandleMap()
+        {}
+
+        void add(HANDLE h)
+        {
+            _handles.push_back(h);
+            _selectables.push_back(0);
+        }
+
+        void add(IOHandle& handle)
+        {
+            _dirty.push_back(&handle);
+        }
+
+        void remove(IOHandle& handle)
+        {
+            std::vector<Selectable*>::iterator it = _selectables.begin();
+            std::vector<HANDLE>::iterator hit =_handles.begin();
+            while( it != _selectables.end() )
+            {
+                if(*it != handle.sel)
+                {
+                    ++it;
+                    ++hit;
+                }
+                else
+                {
+                    it = _selectables.erase(it);
+                    hit = _handles.erase(hit);
+                }
+            }
+
+            _dirty.remove(&handle);
+        }
+
+        HANDLE* buildHandles()
+        {
+            std::list<IOHandle*>::iterator iter;
+            for( iter = _dirty.begin(); iter != _dirty.end(); ++iter )
+            {
+                IOHandle* handle = *iter;
+                _handles.push_back(handle->handle());
+                _selectables.push_back(handle->sel);
+            }
+        
+            _dirty.clear();
+
+            if(_handles.empty())
+                return 0;
+
+            return &_handles[0];
+        }
+
+        size_t size() const
+        { return _handles.size(); }
+
+        Selectable* at(size_t n)
+        { return _selectables[n]; }
+
+    private:
+        std::vector<HANDLE> _handles;
+        std::vector<Selectable*> _selectables;
+        std::list<IOHandle*> _dirty;
 };
 
 
@@ -157,9 +163,9 @@ class PT_SYSTEM_API EventLoopImpl
 
         void disable(Selectable& s);
 
-        IOHandle* enable(Selectable& s, HANDLE h);
+        void enable(IOHandle& handle);
 
-        void disable(IOHandle* h);
+        void disable(IOHandle& handle);
 
     protected:
         void waitNext(std::size_t timeout, bool& isActive);
@@ -167,7 +173,7 @@ class PT_SYSTEM_API EventLoopImpl
         virtual DWORD waitFor(DWORD numHandles, const HANDLE *handles, DWORD msecs, bool& isTimeout);
 
     private:
-        RecursiveMutex _mutex;
+        Mutex _mutex;
         bool _exited;
         TimerQueue _timerQueue;
         EventQueue _eventQueue;
@@ -176,7 +182,6 @@ class PT_SYSTEM_API EventLoopImpl
         HANDLE _ioEvent;
         HandleMap _handles;
         std::set<Selectable*> _selectables;
-        std::list<IOHandle*> _dirty;
         std::set<Selectable*>::iterator _current;
         std::set<Selectable*> _devices;
         std::vector<Selectable*> _avail;
