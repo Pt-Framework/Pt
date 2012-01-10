@@ -107,7 +107,7 @@ class PT_SYSTEM_API Pipe : public NonCopyable
 
         const IODevice& in() const;
 
-        size_t write(const char* buf, size_t count)
+        /*size_t write(const char* buf, size_t count)
         {
           return in().write(buf, count);
         }
@@ -127,7 +127,7 @@ class PT_SYSTEM_API Pipe : public NonCopyable
           char ch;
           out().read(&ch, 1);
           return ch;
-        }
+        }*/
 
         PipeImpl* impl()
         { return _impl; }
