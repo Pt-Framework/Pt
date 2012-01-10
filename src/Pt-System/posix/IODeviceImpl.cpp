@@ -62,6 +62,10 @@ bool IODeviceImpl::isOpen() const
 
 void IODeviceImpl::open(int fd, bool inherit, EventLoop* loop)
 {
+    // TODO: we do not need to enable the i/o handle now, but defer it
+    // until we call impl().beginRead or impl().beginWrite on the i/o handle.
+    // The EventLoopImpl can check internally...
+
     _ioh.fd = fd;
 
     int flags = fcntl(this->fd(), F_GETFL);
@@ -86,6 +90,9 @@ void IODeviceImpl::open(int fd, bool inherit, EventLoop* loop)
 
 void IODeviceImpl::close(EventLoop* loop)
 {
+    // TODO: we know cancel is always called before close, so we do not need
+    // a loop to disable the i/o handle
+
     if( this->isOpen() )
     {
         _errorPending = false;
@@ -111,6 +118,10 @@ void IODeviceImpl::attach(EventLoop& loop)
     {
         loop.impl().enable(_ioh);
     }
+
+    // TODO: we do not need to enable the i/o handle now, but defer it
+    // until we call impl().beginRead or impl().beginWrite on the i/o handle.
+    // The EventLoopImpl can check internally...
 }
 
 
@@ -125,6 +136,9 @@ void IODeviceImpl::detach(EventLoop& loop)
 
 void IODeviceImpl::cancel(EventLoop& loop)
 {
+    // TODO: disable the handle, we know canel is always called before close
+    // if this is attached to a loop
+
     if( this->isOpen() )
         loop.impl().cancel(_ioh);
 }
