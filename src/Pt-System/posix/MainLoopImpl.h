@@ -108,6 +108,10 @@ class EventLoopImpl
 
         void beginRead(IOHandle* h)
         {
+            // TODO: h->flags could contain a flag value for enabled
+            // if itsnot enabled add it to _devices
+
+
             pop(h);
             h->flags |= Input;
  
@@ -174,6 +178,25 @@ class EventLoopImpl
         {
             IOHandle* prev = h->prev;
             IOHandle* next = h->next;
+
+//          if(prev && next)
+//          {
+//              prev->next = next;
+//              next->prev = prev;
+//          }
+//          else
+//          {
+//              if( h == _first)
+//                  _first = h->next;
+//              if( h == _last)
+//                  _last = h->prev;
+//          }
+//
+//          h->next = 0;
+//          h->prev = 0;
+//
+//          TODO: push_front is enough, we don't need _last
+
 
             if( h == _first)
                 _first = h->next;
