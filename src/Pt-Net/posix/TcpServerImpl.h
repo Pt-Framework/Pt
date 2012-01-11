@@ -70,6 +70,8 @@ class TcpServerImpl
                     unsigned short int port,
                     int backlog = 5, unsigned flags = 0);
 
+        void beginAccept(System::EventLoop& loop);
+
         const struct sockaddr_storage& getAddr() const
         { return _servaddr; }
 

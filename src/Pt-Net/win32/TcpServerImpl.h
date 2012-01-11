@@ -71,6 +71,8 @@ class TcpServerImpl
 
         SOCKET accept();
 
+        void beginAccept(System::EventLoop& loop);
+
         void listen(const std::string& ipaddr,
                     unsigned short int port,
                     int backlog = 5, unsigned flags = 0);
@@ -78,25 +80,13 @@ class TcpServerImpl
         inline SOCKET fd() const
         { return _fd; }
 
-        //HANDLE waitHandle() const;
-
-        //bool wait(std::size_t msecs);
-
         void attach(System::EventLoop& s);
 
         void detach(System::EventLoop& s);
 
-        //void enable(System::EventLoop& loop);
-
-        //void disable(System::EventLoop& loop);
+        void cancel(System::EventLoop& s);
 
         bool run();
-
-        // implementation using WSAEventSelect
-        //virtual bool setWaitHandle(HANDLE h, bool& avail);
-
-        // implementation using WSAEventSelect
-        //virtual bool checkEvent();
 };
 
 } // namespace Net

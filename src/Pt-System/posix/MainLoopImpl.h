@@ -190,7 +190,6 @@ class EventLoopImpl
 
     private:
         Mutex _mutex;
-        bool _exited;
         TimerQueue _timerQueue;
         EventQueue _eventQueue;
         Signal<const Event&>* _event;

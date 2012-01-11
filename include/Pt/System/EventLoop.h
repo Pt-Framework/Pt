@@ -150,28 +150,25 @@ class PT_SYSTEM_API EventQueue
     public:
         EventQueue();
 
-        EventQueue(Allocator& a);
+        EventQueue( Allocator& a);
 
         virtual ~EventQueue();
 
         Allocator& allocator()
         { return *_usedalloc; }
 
-        void clear();
-
-        bool empty()
-        { return _eventQueue.empty(); }
+        void exit();
 
         void pushEvent(const Event& event);
 
-        Event* front();
-
-        void popFront();
+        bool processEvents(Signal<const Event&>& eventSignal);
 
     private:
+        Mutex _mutex;
         Allocator _allocator;
         Allocator* _usedalloc;
         std::deque<Event*> _eventQueue;
+        bool _exited;
 };
 
 

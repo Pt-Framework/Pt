@@ -43,8 +43,7 @@ namespace Pt {
 namespace System {
 
 EventLoopImpl::EventLoopImpl(Signal<const Pt::Event&>& eventSignal)
-: _exited(false)
-, _event(&eventSignal)
+: _event(&eventSignal)
 {
     _current = _devices.end();
 
@@ -151,10 +150,6 @@ void EventLoopImpl::disable(Selectable& s)
 
 void EventLoopImpl::run()
 {
-    MutexLock lock(_mutex);
-    _exited = false;
-    lock.unlock();
-
     while( this->waitNext() )
         ;
 }
@@ -162,10 +157,7 @@ void EventLoopImpl::run()
 
 void EventLoopImpl::exit()
 {
-    MutexLock lock(_mutex);
-    _exited = true;
-    lock.unlock();
-
+    _eventQueue.exit();
     wake();
 }
 
@@ -178,49 +170,20 @@ void EventLoopImpl::wake()
 
 void EventLoopImpl::commitEvent(const Event& event)
 { 
-    MutexLock lock(_mutex);
     _eventQueue.pushEvent(event); 
-    lock.unlock();
-
     wake();
 }
 
 
 void EventLoopImpl::queueEvent(const Event& event)
 { 
-    MutexLock lock(_mutex);
     _eventQueue.pushEvent(event); 
 }
 
-// TODO: move this to EventQueue, use second Mutex for avail queue
+
 bool EventLoopImpl::processEvents()
 { 
-    bool isActive = true;
-
-    while( true )
-    {
-        MutexLock lock(_mutex);
-        isActive = ! _exited;
-
-        if ( _eventQueue.empty() || ! isActive )
-            break;
-
-        Event* ev = _eventQueue.front();
-
-        try
-        {
-            lock.unlock();
-            _event->send(*ev);
-            _eventQueue.popFront();
-        }
-        catch(...)
-        {
-            _eventQueue.popFront();
-            throw;
-        }
-    }
-
-    return isActive;
+    return _eventQueue.processEvents(*_event);
 }
 
 

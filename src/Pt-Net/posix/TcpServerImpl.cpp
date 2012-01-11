@@ -186,6 +186,15 @@ void TcpServerImpl::listen(const std::string& ipaddr,
 }
 
 
+void TcpServerImpl::beginAccept(System::EventLoop& loop)
+{
+    if( this->fd() < 0 )
+        return;
+
+    loop.impl().beginRead( &_ioh );
+}
+
+
 void TcpServerImpl::attach(System::EventLoop& loop)
 {
     if( this->fd() < 0 )

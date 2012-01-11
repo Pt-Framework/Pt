@@ -108,6 +108,39 @@ void TcpServerImpl::close()
     _fd = INVALID_SOCKET;
 }
 
+
+void TcpServerImpl::cancel(System::EventLoop& loop)
+{
+    // not yet listening
+    if (_fd == INVALID_SOCKET)
+        return;
+
+    attachEvent(_currentHandle, 0);
+}
+
+
+void TcpServerImpl::attach(System::EventLoop& loop)
+{
+    log_debug("attach to loop " << _fd);
+
+    // not yet listening
+    if (_fd == INVALID_SOCKET)
+        return;
+
+    _currentHandle = loop.impl().enable(_server);
+    attachEvent(_currentHandle, FD_ACCEPT);
+}
+
+
+void TcpServerImpl::detach(System::EventLoop& loop)
+{
+    log_debug("detach from loop " << _fd);
+
+    loop.impl().disable(_server);
+    _currentHandle = INVALID_HANDLE_VALUE;
+}
+
+
 void TcpServerImpl::listen(const std::string& ipaddr,
                            unsigned short int port,
                            int backlog, unsigned)
@@ -191,6 +224,16 @@ void TcpServerImpl::listen(const std::string& ipaddr,
 }
 
 
+void TcpServerImpl::beginAccept(System::EventLoop& loop)
+{
+    if (_currentHandle != INVALID_HANDLE_VALUE)
+        return;
+
+    _currentHandle = loop.impl().enable(_server);
+    attachEvent(_currentHandle, FD_ACCEPT);
+}
+
+
 SOCKET TcpServerImpl::accept()
 {
     // set the server socket to blocking-mode
@@ -223,28 +266,6 @@ void TcpServerImpl::attachEvent(HANDLE ev, long events)
         log_debug("Set event failed: "<< WSAGetLastError());
         throw System::SystemError( PT_ERROR_MSG("attach event to server socket failed") );
     }
-}
-
-
-void TcpServerImpl::attach(System::EventLoop& loop)
-{
-    log_debug("attach to loop " << _fd);
-
-    // not yet listening
-    if (_fd == INVALID_SOCKET)
-        return;
-
-    _currentHandle = loop.impl().enable(_server);
-    attachEvent(_currentHandle, FD_ACCEPT);
-}
-
-
-void TcpServerImpl::detach(System::EventLoop& loop)
-{
-    log_debug("detach from loop " << _fd);
-
-    loop.impl().disable(_server);
-    _currentHandle = INVALID_HANDLE_VALUE;
 }
 
 

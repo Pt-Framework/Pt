@@ -41,8 +41,7 @@ namespace Pt {
 namespace System {
 
 EventLoopImpl::EventLoopImpl(Signal<const Event&>& eventSignal)
-: _exited(false)
-, _event(&eventSignal)
+: _event(&eventSignal)
 {
     _current = _devices.end();
 
@@ -132,10 +131,6 @@ void EventLoopImpl::idle(Selectable& s)
 
 void EventLoopImpl::run()
 {
-    MutexLock lock(_mutex);
-    _exited = false;
-    lock.unlock();
-
     while( this->waitNext() )
         ;
 }
@@ -143,10 +138,7 @@ void EventLoopImpl::run()
 
 void EventLoopImpl::exit()
 {
-    MutexLock lock(_mutex);
-    _exited = true;
-    lock.unlock();
-
+    _eventQueue.exit();
     wake();
 }
 
@@ -160,24 +152,21 @@ void EventLoopImpl::wake()
 
 void EventLoopImpl::commitEvent(const Event& event)
 { 
-    MutexLock lock(_mutex);
     _eventQueue.pushEvent(event); 
-    lock.unlock();
-
     wake();
 }
 
 
 void EventLoopImpl::queueEvent(const Event& event)
 { 
-    MutexLock lock(_mutex);
-    _eventQueue.pushEvent(event); 
+    _eventQueue.pushEvent(event);  
 }
 
 
 bool EventLoopImpl::processEvents()
 { 
-    bool isActive = true;
+    return _eventQueue.processEvents(*_event);
+    /*bool isActive = true;
 
     while( true )
     {
@@ -202,7 +191,7 @@ bool EventLoopImpl::processEvents()
         }
     }
 
-    return isActive;
+    return isActive;*/
 }
 
 

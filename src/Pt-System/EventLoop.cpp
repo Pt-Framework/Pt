@@ -103,12 +103,14 @@ void EventLoop::exit()
 EventQueue::EventQueue()
 : _allocator(/*255, 64*/)
 , _usedalloc(&_allocator)
+, _exited(false)
 {}
 
 
 EventQueue::EventQueue(Allocator& a)
 : _allocator(/*255, 64*/)
 , _usedalloc(&a)
+, _exited(false)
 {}
 
 
@@ -116,6 +118,8 @@ EventQueue::~EventQueue()
 {
     try
     {
+        MutexLock lock(_mutex);
+
         while ( ! _eventQueue.empty() )
         {
             Event* ev = _eventQueue.front();
@@ -128,24 +132,17 @@ EventQueue::~EventQueue()
 }
 
 
-void EventQueue::clear()
+void EventQueue::exit()
 {
-    try
-    {
-        while ( ! _eventQueue.empty() )
-        {
-            Event* ev = _eventQueue.front();
-            _eventQueue.pop_front();
-            ev->destroy( this->allocator() );
-        }
-    }
-    catch(...)
-    {}
+    MutexLock lock(_mutex);
+    _exited = true;
 }
 
 
 void EventQueue::pushEvent(const Event& ev)
-{
+{ 
+    MutexLock lock(_mutex);
+
     Event& clonedEvent = ev.clone( this->allocator() );
 
     try
@@ -160,17 +157,37 @@ void EventQueue::pushEvent(const Event& ev)
 }
 
 
-Event* EventQueue::front()
-{
-    return _eventQueue.front();
-}
+bool EventQueue::processEvents(Signal<const Event&>& eventSignal)
+{ 
+    bool isActive = true;
 
+    while( true )
+    {
+        MutexLock lock(_mutex);
+        isActive = ! _exited;
 
-void EventQueue::popFront()
-{
-    Event* ev = _eventQueue.front();
-    _eventQueue.pop_front();
-    ev->destroy( this->allocator() );
+        if ( _eventQueue.empty() || ! isActive )
+            break;
+
+        Event* ev = _eventQueue.front();
+
+        try
+        {
+            lock.unlock();
+            eventSignal.send(*ev);
+
+            _eventQueue.pop_front();
+            ev->destroy( this->allocator() );
+        }
+        catch(...)
+        {
+            _eventQueue.pop_front();
+            ev->destroy( this->allocator() );
+            throw;
+        }
+    }
+
+    return isActive;
 }
 
 

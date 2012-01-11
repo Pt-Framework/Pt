@@ -43,7 +43,6 @@ class TcpServerImpl;
   {
       friend class TcpServerImpl;
       TcpServerImpl* _impl;
-      bool _avail;
 
     public:
       enum { INHERIT = 1, DEFER_ACCEPT = 2 };
@@ -57,6 +56,8 @@ class TcpServerImpl;
       ~TcpServer();
 
       void listen(const std::string& ipaddr, unsigned short int port, int backlog = 5, unsigned flags = 0);
+
+      void beginAccept();
 
       void close();
 
