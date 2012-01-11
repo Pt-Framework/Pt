@@ -43,7 +43,7 @@ namespace System {
 EventLoopImpl::EventLoopImpl(Signal<const Event&>& eventSignal)
 : _event(&eventSignal)
 {
-    _current = _devices.end();
+    /*_current = _devices.end();
 
     //Open a pipe to send wake up message.
     if( ::pipe( _wakePipe ) )
@@ -73,13 +73,13 @@ EventLoopImpl::EventLoopImpl(Signal<const Event&>& eventSignal)
     FD_ZERO(&_wfdsR);
     FD_ZERO(&_efdsR);
 
-    FD_SET(_wakePipe[0], &_rfds);
+    FD_SET(_wakePipe[0], &_rfds);*/
 }
 
 
 EventLoopImpl::~EventLoopImpl()
 { 
-    std::set<Selectable*>::iterator it;
+    /*std::set<Selectable*>::iterator it;
 
     while( _selectables.size() )
     {
@@ -91,19 +91,19 @@ EventLoopImpl::~EventLoopImpl()
     {
         ::close(_wakePipe[0]);
         ::close(_wakePipe[1]);
-    }
+    }*/
 }
 
 
 void EventLoopImpl::attach(Selectable& s)
 {
-    _selectables.insert(&s);
+    _selector.attach(s);
 }
 
 
 void EventLoopImpl::detach(Selectable& s)
 {
-    _selectables.erase(&s);
+    _selector.detach(s);
 }
 
 
@@ -145,8 +145,7 @@ void EventLoopImpl::exit()
 
 void EventLoopImpl::wake()
 {
-    ::write( _wakePipe[1], "W", 1);
-    ::fsync( _wakePipe[1] );
+    _selector.wake();
 }
 
 
@@ -166,32 +165,6 @@ void EventLoopImpl::queueEvent(const Event& event)
 bool EventLoopImpl::processEvents()
 { 
     return _eventQueue.processEvents(*_event);
-    /*bool isActive = true;
-
-    while( true )
-    {
-        MutexLock lock(_mutex);
-        isActive = ! _exited;
-
-        if ( _eventQueue.empty() || ! isActive )
-            break;
-
-        Event* ev = _eventQueue.front();
-
-        try
-        {
-            lock.unlock();
-            _event->send(*ev);
-            _eventQueue.popFront();
-        }
-        catch(...)
-        {
-            _eventQueue.popFront();
-            throw;
-        }
-    }
-
-    return isActive;*/
 }
 
 
@@ -213,6 +186,17 @@ bool EventLoopImpl::waitNext()
         msecs = 0;
         selectable->run();
     }
+
+    if( _selector.waitForWake(msecs) )
+        isActive = this->processEvents();
+
+    return isActive;
+}
+
+
+/*bool EventLoopImpl::waitForWake(size_t msecs)
+{
+    bool isWake = false;
 
     for( std::vector<IOHandle*>::iterator it = _dirty.begin(); it != _dirty.end(); ++it)
     {
@@ -285,7 +269,7 @@ bool EventLoopImpl::waitNext()
             continue;
 
         if(static_cast<Pt::uint64_t>(elapsed) >= msecs)
-            return isActive; // timeout
+            return isWake; // timeout
 
         msecs -= int(elapsed);
     }
@@ -305,7 +289,7 @@ bool EventLoopImpl::waitNext()
             int ret = ::read(_wakePipe[0], buffer, sizeof(buffer));
             if(ret > 0)
             {
-                isActive = this->processEvents();
+                isWake = true;
                 continue;
             }
 
@@ -351,8 +335,8 @@ bool EventLoopImpl::waitNext()
         throw;
     }
 
-    return isActive;
-}
+    return isWake;
+}*/
 
 
 
