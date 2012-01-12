@@ -79,29 +79,34 @@ void TcpSocketImpl::attachEvent(HANDLE ev, long events)
 
 void TcpSocketImpl::attach(System::EventLoop& loop)
 {
-    log_debug("attach to loop");
-
-    log_debug(_fd << " setWaitHandle");
+    /*log_debug("attach to loop");
     HANDLE h = loop.impl().enable(_socket);
-    _currentEventHandle = h;
+    _currentEventHandle = h;*/
 }
 
 
 void TcpSocketImpl::detach(System::EventLoop& loop)
 {
-    log_debug("detach from loop");
+    /*log_debug("detach from loop");
 
     loop.impl().disable(_socket);
-    _currentEventHandle = INVALID_HANDLE_VALUE;
+    _currentEventHandle = INVALID_HANDLE_VALUE;*/
 }
 
 
 void TcpSocketImpl::cancel(System::EventLoop& loop)
 {
-    if( _fd != INVALID_SOCKET && _currentEventHandle != INVALID_HANDLE_VALUE)
-        attachEvent(0, 0);
+    if(_currentEventHandle != INVALID_HANDLE_VALUE)
+    {
+        loop.impl().disable(_socket);
+        _currentEventHandle = INVALID_HANDLE_VALUE;
+    }
 
-    _isConnected = false;
+    _eventFlags = 0;
+    if( _fd != INVALID_SOCKET )
+    {
+        this->attachEvent(0, 0);
+    }
 }
 
 
@@ -110,11 +115,11 @@ void TcpSocketImpl::close(System::EventLoop* loop)
     if( _fd == INVALID_SOCKET )
         return;
 
-    if(_currentEventHandle != INVALID_HANDLE_VALUE)
+    /*if(_currentEventHandle != INVALID_HANDLE_VALUE)
         attachEvent(0, 0);
 
     if(loop)
-        this->detach(*loop);
+        this->detach(*loop);*/
 
     ::closesocket(_fd);
     _fd = INVALID_SOCKET;
@@ -191,14 +196,20 @@ const char* TcpSocketImpl::tryConnect(System::EventLoop* loop)
 }
 
 
-bool TcpSocketImpl::beginConnect(const AddrInfo& ai, System::EventLoop* loop)
+bool TcpSocketImpl::beginConnect(const AddrInfo& ai, System::EventLoop& loop)
 {
     assert( ! _isConnected );
     log_debug("begin connect");
 
+    if(_currentEventHandle == INVALID_HANDLE_VALUE)
+    {
+        HANDLE h = loop.impl().enable(_socket);
+        _currentEventHandle = h;
+    }
+    
     _addrInfo = ai;
     _addrInfoPtr = _addrInfo.impl()->begin();
-    _connectResult = tryConnect(loop);
+    _connectResult = tryConnect(&loop);
     checkPendingError();
 
     if(_isConnected)
@@ -211,6 +222,7 @@ bool TcpSocketImpl::beginConnect(const AddrInfo& ai, System::EventLoop* loop)
 
     return _isConnected;
 }
+
 
 void TcpSocketImpl::checkPendingError()
 {
@@ -552,6 +564,13 @@ std::string TcpSocketImpl::getPeerAddr() const
 size_t TcpSocketImpl::beginRead(System::EventLoop& loop, char* buffer, size_t n, bool& eof)
 {
     log_debug(_fd << " beginRead");
+
+    if(_currentEventHandle == INVALID_HANDLE_VALUE)
+    {
+        HANDLE h = loop.impl().enable(_socket);
+        _currentEventHandle = h;
+    }
+
     assert(buffer != 0);
     _eventFlags |= FD_READ;
 
@@ -595,20 +614,38 @@ size_t TcpSocketImpl::endRead(System::EventLoop& loop, bool& eof)
     log_debug(_fd << " endRead");
     _eventFlags &= ~FD_READ;
 
-    //Set socket to blocking mode
-    attachEvent(0,0);
-
-    u_long argp = 0;
-    ::ioctlsocket(_fd, FIONBIO, &argp);
-
     int len = ::recv(_fd, _receiveBuffer.buf, _receiveBuffer.len, 0);
 
     if( len == 0)
+    {
         eof = true;
+    }
+    else if(len == -1)
+    {
+        int err = WSAGetLastError();
+        if(err == WSAEWOULDBLOCK)
+        {
+            //Set socket to blocking mode
+            attachEvent(0,0);
+        
+            u_long argp = 0;
+            ::ioctlsocket(_fd, FIONBIO, &argp);
+        
+            len = ::recv(_fd, _receiveBuffer.buf, _receiveBuffer.len, 0);
+        
+            if( len == 0)
+                eof = true;
+        
+            //Set socket to non-blocking mode
+            argp = 1;
+            ::ioctlsocket(_fd, FIONBIO, &argp);
+        }
+        else if(err == WSAECONNRESET)
+        {
+            eof = true;
+        }
+    }
 
-    //Set socket to non-blocking mode
-    argp = 1;
-    ::ioctlsocket(_fd, FIONBIO, &argp);
     attachEvent(_currentEventHandle, _eventFlags);
 
     return len;
@@ -618,6 +655,13 @@ size_t TcpSocketImpl::endRead(System::EventLoop& loop, bool& eof)
 size_t TcpSocketImpl::beginWrite(System::EventLoop& loop, const char* buffer, size_t n)
 {
     log_debug(_fd << " beginWrite");
+
+    if(_currentEventHandle == INVALID_HANDLE_VALUE)
+    {
+        HANDLE h = loop.impl().enable(_socket);
+        _currentEventHandle = h;
+    }
+
     _sendBuffer.buf = const_cast<char*>(buffer);
     _sendBuffer.len = n;
 

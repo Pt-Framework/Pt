@@ -120,10 +120,6 @@ void SerialDeviceImpl::close(EventLoop* loop)
 }
 
 
-
-
-
-
 void SerialDeviceImpl::cancel(EventLoop& loop)
 {
     ::CancelIo( handle() );

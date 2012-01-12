@@ -162,15 +162,12 @@ class UdpSocketImpl
         bool                         _isConnected;
         bool                         _isBound;
         sockaddr_storage             _peeraddr;
-        sockaddr_storage	         _servaddr;
+        sockaddr_storage             _servaddr;
         long                         _eventFlags;
-        WSAEVENT                     _waitEvent;
-        HANDLE	                     _currentEventHandle;
-        //const char*                  _connectResult;
-        std::size_t	                 _timeout;
-        std::size_t		             _dataSends;
+        HANDLE                       _currentEventHandle;
+        std::size_t                  _timeout;
         WSABUF                       _sendBuffer;
-        WSABUF		                 _receiveBuffer;
+        WSABUF                       _receiveBuffer;
 };
 
 } // namespace Net

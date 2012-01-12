@@ -102,29 +102,40 @@ void OverlappedIODeviceImpl::close(EventLoop* loop)
 
 void OverlappedIODeviceImpl::cancel(EventLoop& loop)
 {
+    // CancelIO is enough, because we cancel in the same thread where the
+    // operation was started
     CancelIo( handle() );
 
     DWORD bytes = 0;
     GetOverlappedResult( handle(), &_readOv, &bytes, TRUE );
     GetOverlappedResult( handle(), &_writeOv, &bytes, TRUE );
+
+    if(_readOv.hEvent != NULL)
+    {
+        loop.impl().disable(_device);
+    }
+
+    _readOv.hEvent = NULL;
+    _writeOv.hEvent = NULL;
+
 }
 
 
 void OverlappedIODeviceImpl::attach(EventLoop& loop)
 {
-    HANDLE h = loop.impl().enable(_device);
+    /*HANDLE h = loop.impl().enable(_device);
 
     _readOv.hEvent = h;
-    _writeOv.hEvent = h;
+    _writeOv.hEvent = h;*/
 }
 
 
 void OverlappedIODeviceImpl::detach(EventLoop& loop)
 {
-    loop.impl().disable(_device);
+    /*loop.impl().disable(_device);
 
     _readOv.hEvent = NULL;
-    _writeOv.hEvent = NULL;
+    _writeOv.hEvent = NULL;*/
 }
 
 
@@ -151,6 +162,13 @@ bool OverlappedIODeviceImpl::runWrite(EventLoop& loop)
 
 size_t OverlappedIODeviceImpl::beginRead(EventLoop& loop, char* buffer, size_t n, bool& eof)
 {
+    if(_readOv.hEvent == NULL)
+    {
+        HANDLE h = loop.impl().enable(_device);
+        _readOv.hEvent = h;
+        _writeOv.hEvent = h;
+    }
+
     // if we can can read data immediately, we return the number of bytes
     // that were read, so the EventLoop calls onAvail, even if the event 
     // in the overlapped struct is not fired
@@ -177,12 +195,6 @@ size_t OverlappedIODeviceImpl::beginRead(EventLoop& loop, char* buffer, size_t n
 
 size_t OverlappedIODeviceImpl::endRead(EventLoop& loop, bool& eof)
 {
-    /*if( _device.eof() )
-    {
-        eof = true;
-        return 0;
-    }*/
-
     // finishes the overlapped operation. Blocks until data is available,
     // so beginRead can be ended by endRead without a wait step.
     DWORD readBytes = 0;
@@ -237,6 +249,13 @@ size_t OverlappedIODeviceImpl::read(char* buffer, size_t count, bool& eof)
 
 size_t OverlappedIODeviceImpl::beginWrite(EventLoop& loop, const char* buffer, size_t n)
 {
+    if(_readOv.hEvent == NULL)
+    {
+        HANDLE h = loop.impl().enable(_device);
+        _readOv.hEvent = h;
+        _writeOv.hEvent = h;
+    }
+
     DWORD writtenBytes = 0;
     if( FALSE == WriteFile(handle(), (void*)buffer, n, &writtenBytes, &_writeOv) )
     {

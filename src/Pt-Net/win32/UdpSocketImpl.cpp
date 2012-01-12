@@ -51,22 +51,64 @@ UdpSocketImpl::UdpSocketImpl(UdpSocket& socket)
 , _isConnected(false)
 , _isBound(false)
 , _eventFlags(FD_CLOSE)
-, _waitEvent( CreateEvent( NULL, FALSE, FALSE, NULL ) )
 , _currentEventHandle(INVALID_HANDLE_VALUE)
 , _timeout(Pt::System::EventLoop::WaitInfinite)
-, _dataSends(0)
 {
-    _currentEventHandle = _waitEvent;
 }
 
 
 UdpSocketImpl::~UdpSocketImpl()
 {
-	WSAResetEvent(_waitEvent);
-    WSACloseEvent(_waitEvent);
-
     if(_sentry)
         _sentry->detach();
+}
+
+
+void UdpSocketImpl::setEventFlags(HANDLE ev, long events)
+{
+    if( WSAEventSelect(_fd, ev, events) == SOCKET_ERROR )
+    {
+        throw System::SystemError("WSAEventSelectt failed");
+    }
+}
+
+
+void UdpSocketImpl::attach(System::EventLoop& loop)
+{
+    /*if( _fd == INVALID_SOCKET)
+        return;
+
+    HANDLE h = loop.impl().enable(_socket);
+    _currentEventHandle = h;
+    this->setEventFlags(_currentEventHandle, _eventFlags);*/
+}
+
+
+void UdpSocketImpl::detach(System::EventLoop& loop)
+{
+    /*if( _fd != INVALID_SOCKET)
+        setEventFlags(_waitEvent, _eventFlags);
+
+    loop.impl().disable(_socket);*/
+
+    //if( _fd != INVALID_SOCKET)
+    //    setEventFlags(_waitEvent, _eventFlags);
+}
+
+
+void UdpSocketImpl::cancel(System::EventLoop& loop)
+{
+    if(_currentEventHandle != INVALID_HANDLE_VALUE)
+    {
+        loop.impl().disable(_socket);
+        _currentEventHandle = INVALID_HANDLE_VALUE;
+    }
+
+    _eventFlags = 0;
+    if( _fd != INVALID_SOCKET )
+    {
+        this->setEventFlags(0, 0);
+    }
 }
 
 
@@ -75,11 +117,11 @@ void UdpSocketImpl::close(System::EventLoop* loop)
     if( _fd == INVALID_SOCKET )
         return;
 
-    _eventFlags  = 0;
+    /*_eventFlags  = 0;
     setEventFlags(0, 0); // is this needed ?
 
     if(loop)
-        this->detach(*loop);
+        this->detach(*loop);*/
 
     ::closesocket(_fd);
     _fd = INVALID_SOCKET;
@@ -314,15 +356,6 @@ void UdpSocketImpl::dropMulticastGroup(const std::string& ipaddr)
 }
 
 
-void UdpSocketImpl::cancel(System::EventLoop& loop)
-{
-    if( _fd != INVALID_SOCKET )
-    {
-        this->setEventFlags(0, 0);
-    }
-}
-
-
 std::string UdpSocketImpl::getSockAddr() const
 {
     const sockaddr_in* sa = reinterpret_cast<const sockaddr_in*>(&_servaddr);
@@ -353,29 +386,6 @@ std::string UdpSocketImpl::getPeerAddr() const
 
     return inet_ntoa(sa->sin_addr);
     //return adr;
-}
-
-
-void UdpSocketImpl::attach(System::EventLoop& loop)
-{
-    if( _fd == INVALID_SOCKET)
-        return;
-
-    HANDLE h = loop.impl().enable(_socket);
-    _currentEventHandle = h;
-    this->setEventFlags(_currentEventHandle, _eventFlags);
-}
-
-
-void UdpSocketImpl::detach(System::EventLoop& loop)
-{
-    if( _fd != INVALID_SOCKET)
-        setEventFlags(_waitEvent, _eventFlags);
-
-    loop.impl().disable(_socket);
-
-    //if( _fd != INVALID_SOCKET)
-    //    setEventFlags(_waitEvent, _eventFlags);
 }
 
 
@@ -464,17 +474,20 @@ bool UdpSocketImpl::runWrite(System::EventLoop& loop)
 }*/
 
 
-void UdpSocketImpl::setEventFlags(HANDLE ev, long events)
+size_t UdpSocketImpl::read(char* buffer, size_t count, bool& eof)
 {
-    if( WSAEventSelect(_fd, ev, events) == SOCKET_ERROR )
-    {
-        throw System::SystemError("WSAEventSelectt failed");
-    }
+    return 0;
 }
 
 
 size_t UdpSocketImpl::beginRead(System::EventLoop& loop, char* buffer, size_t n, bool& eof)
 {
+    if(_currentEventHandle == INVALID_HANDLE_VALUE)
+    {
+        HANDLE h = loop.impl().enable(_socket);
+        _currentEventHandle = h;
+    }
+
     assert(buffer != 0);
     _eventFlags |= FD_READ;
 
@@ -482,12 +495,6 @@ size_t UdpSocketImpl::beginRead(System::EventLoop& loop, char* buffer, size_t n,
     _receiveBuffer.len = n;
 
     setEventFlags(_currentEventHandle, _eventFlags);
-    return 0;
-}
-
-
-size_t UdpSocketImpl::read(char* buffer, size_t count, bool& eof)
-{
     return 0;
 }
 
@@ -531,6 +538,12 @@ size_t UdpSocketImpl::write(const char* buffer, size_t n)
 
 size_t UdpSocketImpl::beginWrite(System::EventLoop& loop, const char* buffer, size_t n)
 {
+    if(_currentEventHandle == INVALID_HANDLE_VALUE)
+    {
+        HANDLE h = loop.impl().enable(_socket);
+        _currentEventHandle = h;
+    }
+
      _sendBuffer.buf = const_cast<char*>(buffer);
     _sendBuffer.len = n;
 
@@ -544,14 +557,12 @@ size_t UdpSocketImpl::beginWrite(System::EventLoop& loop, const char* buffer, si
     {
         if(WSAGetLastError() == WSAEWOULDBLOCK)
         {
-            _dataSends = 0;
             _eventFlags |= FD_WRITE;
             setEventFlags(_currentEventHandle, _eventFlags);
             return 0;
         }
     }
 
-    //_dataSends = numberOfBytesSent;
     //SetEvent(_currentEventHandle);
     return numberOfBytesSent;
 }
@@ -559,13 +570,6 @@ size_t UdpSocketImpl::beginWrite(System::EventLoop& loop, const char* buffer, si
 
 size_t UdpSocketImpl::endWrite(System::EventLoop& loop)
 {
-    if(_dataSends != 0)
-    {
-        size_t n =  _dataSends;
-        _dataSends = 0;
-        return n;
-    }
-
     _eventFlags &= ~FD_WRITE;
 
     //Set socket to blocking mode

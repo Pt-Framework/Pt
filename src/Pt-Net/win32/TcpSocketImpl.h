@@ -125,7 +125,7 @@ class TcpSocketImpl
 
         void connect(const AddrInfo& addrinfo);
 
-        bool beginConnect(const AddrInfo& addrinfo, System::EventLoop* loop);
+        bool beginConnect(const AddrInfo& addrinfo, System::EventLoop& loop);
 
         void endConnect(System::EventLoop& loop);
 

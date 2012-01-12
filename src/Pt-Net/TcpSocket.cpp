@@ -140,7 +140,7 @@ bool TcpSocket::beginConnect(const AddrInfo& addrinfo)
 
     this->close();
 
-    bool ret = _impl->beginConnect(addrinfo, parent());
+    bool ret = _impl->beginConnect(addrinfo, *parent());
     if(ret)
         connected().send(*this);
 
