@@ -56,11 +56,11 @@ class TcpSocketImpl : public System::IODeviceImpl
         AddrInfo _addrInfo;
         AddrInfoImpl::const_iterator _addrInfoPtr;
 
-        int checkConnect(System::EventLoop& loop);
+        int checkConnect();
 
         void checkPendingError();
 
-        const char* tryConnect(System::EventLoop* loop);
+        const char* tryConnect();
 
         const char* _connectResult;
 
@@ -69,7 +69,7 @@ class TcpSocketImpl : public System::IODeviceImpl
 
         ~TcpSocketImpl();
 
-        void close(System::EventLoop* loop);
+        void close();
 
         void cancel(System::EventLoop& loop);
 
@@ -84,11 +84,11 @@ class TcpSocketImpl : public System::IODeviceImpl
 
         void connect(const AddrInfo& addrinfo);
 
-        bool beginConnect(const AddrInfo& addrinfo, System::EventLoop* loop);
+        bool beginConnect(const AddrInfo& addrinfo, System::EventLoop& loop);
 
         void endConnect(System::EventLoop& loop);
 
-        void accept(const TcpServer& server, unsigned inherit, System::EventLoop* loop);
+        void accept(const TcpServer& server, unsigned inherit);
 };
 
 } // namespace Net

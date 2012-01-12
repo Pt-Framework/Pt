@@ -60,7 +60,7 @@ bool IODeviceImpl::isOpen() const
 }
 
 
-void IODeviceImpl::open(int fd, bool inherit, EventLoop* loop)
+void IODeviceImpl::open(int fd, bool inherit)
 {
     // TODO: we do not need to enable the i/o handle now, but defer it
     // until we call impl().beginRead or impl().beginWrite on the i/o handle.
@@ -88,7 +88,7 @@ void IODeviceImpl::open(int fd, bool inherit, EventLoop* loop)
 }
 
 
-void IODeviceImpl::close(EventLoop* loop)
+void IODeviceImpl::close()
 {
     // TODO: we know cancel is always called before close, so we do not need
     // a loop to disable the i/o handle

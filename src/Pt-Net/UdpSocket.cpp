@@ -58,14 +58,14 @@ UdpSocket::~UdpSocket()
 
 void UdpSocket::bind(const std::string& ipaddr, unsigned short int port, unsigned flags)
 {
-    _impl->bind(ipaddr, port, flags, parent());
+    _impl->bind(ipaddr, port, flags);
     this->setEof(false);
 }
 
 
 void UdpSocket::connect(const AddrInfo& addrinfo)
 {
-    _impl->connect(addrinfo, parent());
+    _impl->connect(addrinfo);
     this->setEof(false);
 }
 
@@ -126,7 +126,7 @@ std::size_t UdpSocket::timeout() const
 
 void UdpSocket::onClose()
 {
-    _impl->close( parent() );
+    _impl->close();
 }
 
 

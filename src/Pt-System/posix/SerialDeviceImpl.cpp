@@ -93,7 +93,7 @@ void SerialDeviceImpl::open(const std::string& path, IODevice::OpenMode mode, Ev
     }
 
     // TODO: exception safety
-    IODeviceImpl::open(fd, false, loop);
+    IODeviceImpl::open(fd, false);
 
     struct termios ios;
     if( ::tcgetattr( IODeviceImpl::fd(), &ios) == -1 )
@@ -116,13 +116,13 @@ void SerialDeviceImpl::open(const std::string& path, IODevice::OpenMode mode, Ev
 }
 
 
-void SerialDeviceImpl::close(EventLoop* loop)
+void SerialDeviceImpl::close()
 {
     if( IODeviceImpl::fd() != -1)
     {
         ::tcsetattr( IODeviceImpl::fd(), TCSANOW, &_prevIos );
 
-        IODeviceImpl::close(loop);
+        IODeviceImpl::close();
     }
 }
 

@@ -78,7 +78,7 @@ namespace System {
             std::size_t timeout() const
             { return _timeout; }
 
-            void open(int fd, bool closeOnExec, EventLoop* loop);
+            void open(int fd, bool closeOnExec);
 
             bool isOpen() const;
 
@@ -88,7 +88,7 @@ namespace System {
 
             virtual void cancel(EventLoop& loop);
 
-            virtual void close(EventLoop* loop);
+            virtual void close();
 
             virtual size_t beginRead(EventLoop& loop, char* buffer, size_t n, bool& eof);
 

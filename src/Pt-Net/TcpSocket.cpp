@@ -122,7 +122,7 @@ void TcpSocket::accept(const TcpServer& server, unsigned flags)
 {
     this->close();
 
-    _impl->accept(server, flags, parent());
+    _impl->accept(server, flags);
 }
 
 
@@ -170,7 +170,7 @@ bool TcpSocket::isConnected() const
 
 void TcpSocket::onClose()
 {
-    _impl->close( parent() );
+    _impl->close();
 }
 
 

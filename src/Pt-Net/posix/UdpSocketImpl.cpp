@@ -65,15 +65,15 @@ UdpSocketImpl::~UdpSocketImpl()
 }
 
 
-void UdpSocketImpl::close(System::EventLoop* loop)
+void UdpSocketImpl::close()
 {
-    System::IODeviceImpl::close(loop);
+    System::IODeviceImpl::close();
     _isConnected = false;
     _isBound = false;
 }
 
 
-void UdpSocketImpl::bind(const std::string& ipaddr, unsigned short int port, unsigned flags, System::EventLoop* loop)
+void UdpSocketImpl::bind(const std::string& ipaddr, unsigned short int port, unsigned flags)
 {
     AddrInfo ai(ipaddr, port, true);
 
@@ -90,7 +90,7 @@ void UdpSocketImpl::bind(const std::string& ipaddr, unsigned short int port, uns
         else if( _isBound )
         {
             if(it->ai_family != reinterpret_cast <struct sockaddr*>(&_servaddr)->sa_family)
-                this->close(loop);
+                this->close();
         }
 
         if(it->ai_family == AF_INET6 && _broadcast )
@@ -99,7 +99,7 @@ void UdpSocketImpl::bind(const std::string& ipaddr, unsigned short int port, uns
         if( this->fd() < 0 )
         {
             int fd = socket(it->ai_family, SOCK_DGRAM, 0);
-            IODeviceImpl::open(fd, false, loop);
+            IODeviceImpl::open(fd, false);
         }
 
         if( this->fd() < 0 )
@@ -108,14 +108,14 @@ void UdpSocketImpl::bind(const std::string& ipaddr, unsigned short int port, uns
 #ifdef SO_REUSEPORT
         if (::setsockopt(this->fd(), SOL_SOCKET, SO_REUSEPORT, (char*)&on, sizeof(on)) < 0)
         {
-            this->close(loop);
+            this->close();
             throw System::SystemError("setsockopt SO_REUSEPORT");
         }
 #endif
 
         if (::setsockopt(this->fd(), SOL_SOCKET, SO_REUSEADDR, (char*)&on, sizeof(on)) < 0)
         {
-            this->close(loop);
+            this->close();
             throw System::SystemError("setsockopt SO_REUSEADDR");
         }
 
@@ -124,7 +124,7 @@ void UdpSocketImpl::bind(const std::string& ipaddr, unsigned short int port, uns
         {
             if( ::setsockopt(this->fd(), IPPROTO_IPV6, IPV6_V6ONLY, (const char*) &on, sizeof(on)) < 0 )
             {
-                this->close(loop);
+                this->close();
                 throw System::SystemError("setsockopt IPV6_V6ONLY failed");
             }
         }
@@ -140,7 +140,7 @@ void UdpSocketImpl::bind(const std::string& ipaddr, unsigned short int port, uns
         addrInUse = errno == EADDRINUSE;
 
         if( ! _isConnected )
-            this->close(loop);
+            this->close();
     }
 
     if(addrInUse)
@@ -150,7 +150,7 @@ void UdpSocketImpl::bind(const std::string& ipaddr, unsigned short int port, uns
 }
 
 
-void UdpSocketImpl::connect(const AddrInfo& ai, System::EventLoop* loop)
+void UdpSocketImpl::connect(const AddrInfo& ai)
 {
     AddrInfoImpl::const_iterator it = ai.impl()->begin();
     for( ; it != ai.impl()->end(); ++it)
@@ -163,13 +163,13 @@ void UdpSocketImpl::connect(const AddrInfo& ai, System::EventLoop* loop)
         else if( _isConnected )
         {
             if(it->ai_family != reinterpret_cast <struct sockaddr*>(&_peeraddr)->sa_family)
-                this->close(loop);
+                this->close();
         }
 
         if( this->fd() < 0 )
         {
             int fd = socket(it->ai_family, SOCK_DGRAM, 0);
-            IODeviceImpl::open(fd, false, loop);
+            IODeviceImpl::open(fd, false);
         }
 
         if( this->fd() < 0 )
@@ -181,7 +181,7 @@ void UdpSocketImpl::connect(const AddrInfo& ai, System::EventLoop* loop)
             if( 0 > ::setsockopt(this->fd(), SOL_SOCKET, SO_BROADCAST, (char*)&on, sizeof(on)) )
             {
                 if( ! _isBound )
-                    this->close(loop);
+                    this->close();
 
                 throw System::SystemError("setsockopt SO_BROADCAST failed");
             }
@@ -196,7 +196,7 @@ void UdpSocketImpl::connect(const AddrInfo& ai, System::EventLoop* loop)
         }
 
         if( ! _isBound )
-            this->close(loop);
+            this->close();
     }
 
     throw System::IOError("connect failed");

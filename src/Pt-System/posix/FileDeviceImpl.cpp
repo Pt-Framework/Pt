@@ -47,7 +47,7 @@ FileDeviceImpl::~FileDeviceImpl()
 { }
 
 
-void FileDeviceImpl::open( const char* path, IODevice::OpenMode mode, EventLoop* loop)
+void FileDeviceImpl::open( const char* path, IODevice::OpenMode mode)
 {
     int flags = O_RDONLY;
 
@@ -74,14 +74,14 @@ void FileDeviceImpl::open( const char* path, IODevice::OpenMode mode, EventLoop*
         throw FileNotFound(path, PT_SOURCEINFO);
     }
 
-    IODeviceImpl::open(fd, false, loop);
+    IODeviceImpl::open(fd, false);
 
     try {
         if(mode & IODevice::AtEnd)
             this->seek(0, std::ios::end);
     }
     catch(...) {
-        this->close(loop);
+        this->close();
         throw;
     }
 }

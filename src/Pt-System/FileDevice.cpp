@@ -65,14 +65,14 @@ void FileDevice::open( const char* path, OpenMode mode)
         this->close();
     }
 
-    _impl->open(path, mode, parent());
+    _impl->open(path, mode);
     _path = path;
 }
 
 
 void FileDevice::onClose()
 {
-    _impl->close( parent() );
+    _impl->close();
 }
 
 

@@ -87,10 +87,10 @@ TcpSocketImpl::~TcpSocketImpl()
 }
 
 
-void TcpSocketImpl::close(System::EventLoop* loop)
+void TcpSocketImpl::close()
 {
     log_debug("close socket " << fd());
-    System::IODeviceImpl::close(loop);
+    System::IODeviceImpl::close();
     _isConnected = false;
     _isConnecting = false;
 }
@@ -103,7 +103,7 @@ void TcpSocketImpl::cancel(System::EventLoop& loop)
 }
 
 
-void TcpSocketImpl::accept(const TcpServer& server, unsigned flags, System::EventLoop* loop)
+void TcpSocketImpl::accept(const TcpServer& server, unsigned flags)
 {
     bool inherit = (flags & TcpSocket::INHERIT) != 0;
     socklen_t peeraddr_len = sizeof(_peeraddr);
@@ -113,7 +113,7 @@ void TcpSocketImpl::accept(const TcpServer& server, unsigned flags, System::Even
     if( fd < 0 )
       throw System::SystemError("accept");
 
-    System::IODeviceImpl::open(fd, inherit, loop);
+    System::IODeviceImpl::open(fd, inherit);
     //TODO ECONNABORTED EINTR EPERM
 
     _isConnected = true;
@@ -128,7 +128,7 @@ void TcpSocketImpl::connect(const AddrInfo& addrInfo)
 }
 
 
-bool TcpSocketImpl::beginConnect(const AddrInfo& addrInfo, System::EventLoop* loop)
+bool TcpSocketImpl::beginConnect(const AddrInfo& addrInfo, System::EventLoop& loop)
 {
     log_trace("begin connect");
 
@@ -136,19 +136,19 @@ bool TcpSocketImpl::beginConnect(const AddrInfo& addrInfo, System::EventLoop* lo
 
     _addrInfo = addrInfo;
     _addrInfoPtr = _addrInfo.impl()->begin();
-    _connectResult = tryConnect(loop);
+    _connectResult = tryConnect();
     checkPendingError();
 
-    if(loop && _isConnecting )
+    if(_isConnecting )
     {
         if( ! _isConnected )
         {
             log_trace("IODeviceImpl::beginConnect on handle");
-            loop->impl().beginWrite( &_ioh );
+            loop.impl().beginWrite( &_ioh );
         }
         else
         {
-            loop->impl().avail(_device);
+            loop.impl().avail(_device);
         }
     }
 
@@ -156,7 +156,7 @@ bool TcpSocketImpl::beginConnect(const AddrInfo& addrInfo, System::EventLoop* lo
 }
 
 
-int TcpSocketImpl::checkConnect(System::EventLoop& loop)
+int TcpSocketImpl::checkConnect()
 {
     log_trace("checkConnect");
 
@@ -167,7 +167,7 @@ int TcpSocketImpl::checkConnect(System::EventLoop& loop)
     if( ::getsockopt(this->fd(), SOL_SOCKET, SO_ERROR, &sockerr, &optlen) != 0 )
     {
         // getsockopt failed
-        close(&loop);
+        close();
         throw System::SystemError("getsockopt");
     }
 
@@ -191,7 +191,7 @@ void TcpSocketImpl::checkPendingError()
 }
 
 
-const char* TcpSocketImpl::tryConnect(System::EventLoop* loop)
+const char* TcpSocketImpl::tryConnect()
 {
     log_trace("tryConnect");
 
@@ -217,7 +217,7 @@ const char* TcpSocketImpl::tryConnect(System::EventLoop* loop)
                 return "socket";
         }
 
-        IODeviceImpl::open(fd, false, loop);
+        IODeviceImpl::open(fd, false);
 
         std::memmove(&_peeraddr, _addrInfoPtr->ai_addr, _addrInfoPtr->ai_addrlen);
 
@@ -238,7 +238,7 @@ const char* TcpSocketImpl::tryConnect(System::EventLoop* loop)
             break;
         }
 
-        close(loop);
+        close();
         if (++_addrInfoPtr == _addrInfo.impl()->end())
             return "connect";
     }
@@ -276,7 +276,7 @@ void TcpSocketImpl::endConnect(System::EventLoop& loop)
             if (avail)
             {
                 // something has happened
-                checkConnect(loop);
+                checkConnect();
                 if (_isConnected)
                     return;
 
@@ -292,9 +292,9 @@ void TcpSocketImpl::endConnect(System::EventLoop& loop)
                 throw System::IOTimeout();
             }
 
-            close(&loop);
+            close();
 
-            _connectResult = tryConnect(&loop);
+            _connectResult = tryConnect();
             if (_isConnected)
                 return;
             checkPendingError();
@@ -302,7 +302,7 @@ void TcpSocketImpl::endConnect(System::EventLoop& loop)
     }
     catch(...)
     {
-        close(&loop);
+        close();
         throw;
     }
 }
@@ -328,8 +328,8 @@ bool TcpSocketImpl::runConnect(System::EventLoop& loop)
         {
             _addrInfoPtr = ptr;
 
-            close(&loop);
-            _connectResult = tryConnect(&loop);
+            close();
+            _connectResult = tryConnect();
 
             if (_isConnected || _connectResult)
                 // immediate success or error
@@ -345,7 +345,7 @@ bool TcpSocketImpl::runConnect(System::EventLoop& loop)
     }
     else if( impl.isWritable(&_ioh)  )
     {
-        int sockerr = checkConnect(loop);
+        int sockerr = checkConnect();
         if (_isConnected)
         {
             return true;
@@ -360,7 +360,7 @@ bool TcpSocketImpl::runConnect(System::EventLoop& loop)
             return true;
         }
 
-        _connectResult = tryConnect(&loop);
+        _connectResult = tryConnect();
         if (_isConnected)
         {
             return true;

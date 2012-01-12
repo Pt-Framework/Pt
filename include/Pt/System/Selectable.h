@@ -68,10 +68,10 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
         Selectable();
 
         //! @brief Attached to loop
-        virtual void onAttach(EventLoop& loop) = 0;
+        //virtual void onAttach(EventLoop& loop) = 0;
 
         //! @brief Detached from loop
-        virtual void onDetach(EventLoop& loop) = 0;
+        //virtual void onDetach(EventLoop& loop) = 0;
 
         //! @brief Blocks until operation has cancelled
         virtual void onCancel() = 0;

@@ -181,7 +181,7 @@ size_t SerialDevice::timeout() const
 
 void SerialDevice::onClose()
 {
-    _impl->close( parent() );
+    _impl->close();
 }
 
 

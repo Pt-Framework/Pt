@@ -33,6 +33,14 @@ class EventLoop;
 
 struct IOHandle
 {
+    enum IOFlags
+    {
+        Input = 1,
+        Output = 2,
+        Error = 4,
+        Enabled = 8
+    };
+
     IOHandle(Selectable& sel, int fd)
     : sel(&sel)
     , fd(fd)

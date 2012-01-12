@@ -58,13 +58,13 @@ PipeIODevice::~PipeIODevice()
 
 void PipeIODevice::open(int fd)
 {
-    _impl.open(fd, false, parent());
+    _impl.open(fd, false);
 }
 
 
 void PipeIODevice::onClose()
 { 
-    _impl.close( parent() );
+    _impl.close();
 }
 
 
@@ -167,7 +167,7 @@ void PipeIODevice::redirect(int newFd, bool close)
     {
         IODevice::close();
         // second arg is true, because FD_CLOEXEC should not be set on fds 0,1,2
-        _impl.open(newFd, true, parent());
+        _impl.open(newFd, true);
     }
 }
 

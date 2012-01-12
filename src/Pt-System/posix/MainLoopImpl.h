@@ -42,27 +42,12 @@ namespace Pt {
 
 namespace System {
 
-class Selector
+
+class WakePipe
 {
-    enum IOFlags
-    {
-        Input = 1,
-        Output = 2,
-        Error = 4,
-        Enabled = 8
-    };
-
-    enum WaitResult
-    {
-        None = 0,
-        Wake = 1
-    };
-
     public:
-        Selector()
+        WakePipe()
         {
-            _current = _devices.end();
-        
             //Open a pipe to send wake up message.
             if( ::pipe( _wakePipe ) )
                 throw SystemError( PT_ERROR_MSG("pipe failed") );
@@ -82,7 +67,152 @@ class Selector
             ret = ::fcntl(_wakePipe[1], F_SETFL, flags|O_NONBLOCK);
             if(-1 == ret)
                 throw SystemError( PT_ERROR_MSG("fcntl failed") );
-        
+        }
+
+        ~WakePipe()
+        {
+            if( _wakePipe[0] != -1 && _wakePipe[1] != -1 )
+            {
+                ::close(_wakePipe[0]);
+                ::close(_wakePipe[1]);
+            }
+        }
+
+        void wake()
+        {
+            ::write( _wakePipe[1], "W", 1);
+            ::fsync( _wakePipe[1] );
+        }
+
+        bool isReady()
+        {
+            bool isWake = false;
+            while(true)
+            {
+                int ret = ::read(_wakePipe[0], _buffer, sizeof(_buffer));
+                if(ret > 0)
+                {
+                    isWake = true;
+                    continue;
+                }
+    
+                if (ret == -1)
+                {
+                    if(errno == EINTR)
+                        continue;
+    
+                    if(errno == EAGAIN)
+                        break;
+                }
+    
+                throw IOError( PT_ERROR_MSG("pipe read failed") );
+            }
+
+            return isWake;
+        }
+
+        int readFd()
+        { return _wakePipe[0]; }
+
+    private:
+        int _wakePipe[2];
+        char _buffer[1024];
+};
+
+
+class IOHandleQueue
+{
+    public:
+        typedef std::vector<IOHandle*>::iterator Iterator;
+
+        IOHandleQueue()
+        {
+        }
+
+        ~IOHandleQueue()
+        {   
+        }
+
+        Iterator begin()
+        { return _dirty.begin(); }
+
+        Iterator end()
+        { return _dirty.end(); }
+
+        bool enable(IOHandle* h)
+        {
+            if( (h->flags & IOHandle::Enabled) != IOHandle::Enabled )
+            {
+                h->flags |= IOHandle::Enabled;
+                h->wflags |= IOHandle::Enabled;
+                return true;
+            }
+
+            return false;
+        }
+
+        void beginRead(IOHandle* h)
+        {
+            h->flags |= IOHandle::Input;
+            setChanged(h);
+        }
+
+        void endRead(IOHandle* h)
+        {
+            if(h->flags & IOHandle::Input)
+            {
+                h->flags &= ~IOHandle::Input;
+                setChanged(h);
+            }
+        }
+
+        void beginWrite(IOHandle* h)
+        {
+            h->flags |= IOHandle::Output;
+            setChanged(h);
+        }
+
+        void endWrite(IOHandle* h)
+        {
+            if(h->flags & IOHandle::Output)
+            {
+                h->flags &= ~IOHandle::Output;
+                setChanged(h);
+            }
+        }
+
+        void clear()
+        {
+            _dirty.clear();
+        }
+
+        void remove(IOHandle* h)
+        {
+            for( std::vector<IOHandle*>::iterator it = _dirty.begin(); it != _dirty.end();)
+            {
+                if(*it == h)
+                    it = _dirty.erase(it);
+                else
+                    ++it;
+            }
+        }
+
+    protected:
+        void setChanged(IOHandle* h)
+        { _dirty.push_back(h); }
+
+    private:
+        std::vector<IOHandle*> _dirty;
+};
+
+
+class Selector
+{
+    public:
+        Selector()
+        {
+            _current = _devices.end();
+
             FD_ZERO(&_rfds);
             FD_ZERO(&_wfds);
             FD_ZERO(&_efds);
@@ -91,7 +221,7 @@ class Selector
             FD_ZERO(&_wfdsR);
             FD_ZERO(&_efdsR);
         
-            FD_SET(_wakePipe[0], &_rfds);
+            FD_SET(_wakePipe.readFd(), &_rfds);
         }
 
         ~Selector()
@@ -103,12 +233,6 @@ class Selector
                 it = _selectables.begin();
                 (*it)->detach();
             }
-
-            if( _wakePipe[0] != -1 && _wakePipe[1] != -1 )
-            {
-                ::close(_wakePipe[0]);
-                ::close(_wakePipe[1]);
-            }
         }
 
         void cancel(IOHandle& h)
@@ -119,17 +243,17 @@ class Selector
 
            assert(h.fd > 0);
 
-            if(h.wflags & Input)
+            if(h.wflags & IOHandle::Input)
                 FD_CLR(h.fd, &_rfds);
 
-            if(h.wflags & Output)
+            if(h.wflags & IOHandle::Output)
                 FD_CLR(h.fd, &_wfds);
 
             FD_CLR(h.fd, &_efds);
             h.wflags = 0;
             h.flags = 0;
 
-            remove(&h);
+            _dirty.remove(&h);
 
             if( _current == _devices.end() )
             {
@@ -147,48 +271,34 @@ class Selector
 
         void beginRead(IOHandle* h)
         {
-            if( (h->flags & Enabled) != Enabled )
+            if(_dirty.enable(h) )
             {
-                h->flags |= Enabled;
-                h->wflags |= Enabled;
                 FD_SET(h->fd, &_efds);
                 _devices.insert( h->sel );
             }
 
-            h->flags |= Input;
-            setChanged(h);
+            _dirty.beginRead(h);
         }
 
         void endRead(IOHandle* h)
         {
-            if(h->flags & Input)
-            {
-                h->flags &= ~Input;
-                setChanged(h);
-            }
+            _dirty.endRead(h);
         }
 
         void beginWrite(IOHandle* h)
         {
-            if( (h->flags & Enabled) != Enabled )
+            if(_dirty.enable(h) )
             {
-                h->flags |= Enabled;
-                h->wflags |= Enabled;
                 FD_SET(h->fd, &_efds);
                 _devices.insert( h->sel );
             }
 
-            h->flags |= Output;
-            setChanged(h);
+            _dirty.beginWrite(h);
         }
 
         void endWrite(IOHandle* h)
         {
-            if(h->flags & Output)
-            {
-                h->flags &= ~Output;
-                setChanged(h);
-            }
+            _dirty.endWrite(h);
         }
 
         bool isReadable(IOHandle* h)
@@ -208,24 +318,8 @@ class Selector
 
         void wake()
         {
-            ::write( _wakePipe[1], "W", 1);
-            ::fsync( _wakePipe[1] );
+            _wakePipe.wake();
         }
-
-    protected:
-        void remove(IOHandle* h)
-        {
-            for( std::vector<IOHandle*>::iterator it = _dirty.begin(); it != _dirty.end();)
-            {
-                if(*it == h)
-                    it = _dirty.erase(it);
-                else
-                    ++it;
-            }
-        }
-
-        void setChanged(IOHandle* h)
-        { _dirty.push_back(h); }
 
     public:
         bool waitForWake(size_t msecs)
@@ -239,28 +333,28 @@ class Selector
                 if(h->flags == h->wflags)
                     continue;
         
-                if(h->flags & Input &&  0 == (h->wflags & Input))
+                if(h->flags & IOHandle::Input &&  0 == (h->wflags & IOHandle::Input))
                 {
                     FD_SET(h->fd, &_rfds);
-                    h->wflags |= Input;
+                    h->wflags |= IOHandle::Input;
                 }
         
-                if(0 == (h->flags & Input) && h->wflags & Input)
+                if(0 == (h->flags & IOHandle::Input) && h->wflags & IOHandle::Input)
                 {
                     FD_CLR( h->fd, &_rfds );
-                    h->wflags &= ~Input;
+                    h->wflags &= ~IOHandle::Input;
                 }
         
-                if(h->flags & Output &&  0 == (h->wflags & Output))
+                if(h->flags & IOHandle::Output &&  0 == (h->wflags & IOHandle::Output))
                 {
                     FD_SET(h->fd, &_wfds);
-                    h->wflags |= Output;
+                    h->wflags |= IOHandle::Output;
                 }
         
-                if(0 == (h->flags & Output) &&  h->wflags & Output)
+                if(0 == (h->flags & IOHandle::Output) &&  h->wflags & IOHandle::Output)
                 {
                     FD_CLR( h->fd, &_wfds );
-                    h->wflags &= ~Output;
+                    h->wflags &= ~IOHandle::Output;
                 }
             }
         
@@ -308,36 +402,10 @@ class Selector
                 msecs -= int(elapsed);
             }
         
-            if( FD_ISSET(_wakePipe[0], &_efdsR) )
-            {
-                throw IOError( PT_ERROR_MSG("pipe failed") );
-            }
-        
-            if( FD_ISSET(_wakePipe[0], &_rfdsR) )
+            if( FD_ISSET(_wakePipe.readFd(), &_rfdsR) )
             {
                 --avail;
-        
-                static char buffer[1024];
-                while(true)
-                {
-                    int ret = ::read(_wakePipe[0], buffer, sizeof(buffer));
-                    if(ret > 0)
-                    {
-                        isWake = true;
-                        continue;
-                    }
-        
-                    if (ret == -1)
-                    {
-                        if(errno == EINTR)
-                            continue;
-        
-                        if(errno == EAGAIN)
-                            break;
-                    }
-        
-                    throw IOError( PT_ERROR_MSG("pipe read failed") );
-                }
+                isWake = _wakePipe.isReady();
             }
         
             try
@@ -383,8 +451,9 @@ class Selector
         }
 
     private:
-        int _wakePipe[2];
-        std::vector<IOHandle*> _dirty;
+        WakePipe _wakePipe;
+        //std::vector<IOHandle*> _dirty;
+        IOHandleQueue _dirty;
         std::set<Selectable*> _selectables; // inactive
         std::set<Selectable*>::iterator _current;
         std::set<Selectable*> _devices; // active

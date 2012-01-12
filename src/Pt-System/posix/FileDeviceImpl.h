@@ -39,7 +39,7 @@ class FileDeviceImpl : public IODeviceImpl
 
         ~FileDeviceImpl();
 
-        void open(const char* path, IODevice::OpenMode mode, EventLoop* loop);
+        void open(const char* path, IODevice::OpenMode mode);
 
         bool seekable() const;
 

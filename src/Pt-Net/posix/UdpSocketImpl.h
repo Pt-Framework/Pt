@@ -57,11 +57,11 @@ class UdpSocketImpl : public System::IODeviceImpl
 
         ~UdpSocketImpl();
 
-        void close(System::EventLoop* loop);
+        void close();
 
-        void bind(const std::string& ipaddr, unsigned short int port, unsigned flags, System::EventLoop* loop);
+        void bind(const std::string& ipaddr, unsigned short int port, unsigned flags);
 
-        void connect(const AddrInfo& addrinfo, System::EventLoop* loop);
+        void connect(const AddrInfo& addrinfo);
 
         bool isConnected() const;
 
