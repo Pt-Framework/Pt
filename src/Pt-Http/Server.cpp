@@ -555,6 +555,8 @@ Server::Server(System::EventLoop& eventLoop, const std::string& ip, unsigned sho
     _noAuthService = new NotAuthenticatedService();
 
     _serverSocket.setActive(_loop);
+    _serverSocket.beginAccept();
+
     this->startWorker();
     
     _serverSocket.connectionPending += Pt::slot(*this, &Server::onAccept);
@@ -585,6 +587,7 @@ void Server::listen(const std::string& ip, unsigned short int port, int backlog)
 {
     this->startWorker();
     _serverSocket.listen(ip, port, backlog);
+    _serverSocket.beginAccept();
 }
 
 

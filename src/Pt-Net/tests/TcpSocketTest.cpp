@@ -127,8 +127,9 @@ class TcpSocketTest : public Pt::Unit::TestSuite
             {
                 //this->reportMessage("\nSTART");
 
-                connect(server.connectionPending, *this, &TcpSocketTest::onAccept);
+                server.connectionPending += Pt::slot(*this, &TcpSocketTest::onAccept);
                 server.setActive(*_loop);
+                server.beginAccept();
 
                 _acceptor->inputReady() += Pt::slot(*this, &TcpSocketTest::onInput);
                 _acceptor->setActive(*_loop);
@@ -138,7 +139,6 @@ class TcpSocketTest : public Pt::Unit::TestSuite
                 client.outputReady() += Pt::slot(*this, &TcpSocketTest::onOutput);
                 client.setActive(*_loop);
                 client.beginConnect("127.0.0.1", 9000);
-                //_loop->add(client);
 
                 _loop->run();
 
@@ -147,6 +147,7 @@ class TcpSocketTest : public Pt::Unit::TestSuite
                 delete _loop;
                 _loop  = 0;
             }
+
             server.listen("127.0.0.1", 9000);
 
             PT_UNIT_ASSERT( 0 == std::strncmp(input, "Hello World !!!", 15) );

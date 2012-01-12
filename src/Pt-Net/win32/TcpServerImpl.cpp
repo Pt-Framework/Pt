@@ -112,32 +112,32 @@ void TcpServerImpl::close()
 void TcpServerImpl::cancel(System::EventLoop& loop)
 {
     // not yet listening
-    if (_fd == INVALID_SOCKET)
+    if (_fd == INVALID_SOCKET || _currentHandle == INVALID_HANDLE_VALUE)
         return;
 
     attachEvent(_currentHandle, 0);
+
+    loop.impl().disable(_server);
+    _currentHandle = INVALID_HANDLE_VALUE;
 }
 
 
 void TcpServerImpl::attach(System::EventLoop& loop)
 {
-    log_debug("attach to loop " << _fd);
-
-    // not yet listening
-    if (_fd == INVALID_SOCKET)
-        return;
-
-    _currentHandle = loop.impl().enable(_server);
-    attachEvent(_currentHandle, FD_ACCEPT);
 }
 
 
 void TcpServerImpl::detach(System::EventLoop& loop)
 {
-    log_debug("detach from loop " << _fd);
+}
 
-    loop.impl().disable(_server);
-    _currentHandle = INVALID_HANDLE_VALUE;
+
+void TcpServerImpl::beginAccept(System::EventLoop& loop)
+{
+    assert(_currentHandle == INVALID_HANDLE_VALUE);
+
+    _currentHandle = loop.impl().enable(_server);
+    attachEvent(_currentHandle, FD_ACCEPT);
 }
 
 
@@ -204,10 +204,6 @@ void TcpServerImpl::listen(const std::string& ipaddr,
                 else
                     throw System::SystemError("listen");
             }
-
-            System::EventLoop* loop = _server.parent();
-            if(loop)
-                this->attach(*loop);
     
             return;
         }
@@ -221,16 +217,6 @@ void TcpServerImpl::listen(const std::string& ipaddr,
         throw AddressInUse();
     else
         throw System::SystemError("bind");
-}
-
-
-void TcpServerImpl::beginAccept(System::EventLoop& loop)
-{
-    if (_currentHandle != INVALID_HANDLE_VALUE)
-        return;
-
-    _currentHandle = loop.impl().enable(_server);
-    attachEvent(_currentHandle, FD_ACCEPT);
 }
 
 

@@ -76,7 +76,7 @@ void TcpServer::listen(const std::string& ipaddr, unsigned short int port, int b
 void TcpServer::beginAccept()
 {
     if( ! isActive() )
-        throw std::logic_error("TCP server not active");
+        throw std::logic_error("TCP server not activex");
 
     _impl->beginAccept( *parent() );
 }

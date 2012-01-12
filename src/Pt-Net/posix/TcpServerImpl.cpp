@@ -197,11 +197,12 @@ void TcpServerImpl::beginAccept(System::EventLoop& loop)
 
 void TcpServerImpl::attach(System::EventLoop& loop)
 {
-    if( this->fd() < 0 )
-        return;
+    /*if( this->fd() < 0 )
+        return;*/
+
+    /*loop.impl().beginRead( &_ioh );*/
 
     //loop.impl().enable(_ioh);
-    loop.impl().beginRead( &_ioh );
 }
 
 
