@@ -103,7 +103,6 @@ class TcpSocketImpl
         WSABUF        _receiveBuffer;
         bool          _isConnected;
         long          _eventFlags;
-        size_t        _dataSends;
 
         int checkConnect();
         void attachEvent(HANDLE ev, long events);
