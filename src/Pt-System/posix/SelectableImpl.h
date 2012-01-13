@@ -1,6 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006-2007 Laurentiu-Gheorghe Crisan                     *
- *   Copyright (C) 2006-2007 Marc Boris Duerner                            *
+ *   Copyright (C) 2006-2012 Marc Boris Duerner                            *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -21,8 +20,16 @@
 #define PT_SYSTEM_SELECTABLEIMPL_H
 
 #include "Pt/System/IOError.h"
-#include <cstddef>
+
+//#define PT_WITH_POSIX_POLL 1
+
+#ifdef PT_WITH_POSIX_POLL
+#include <sys/poll.h>
+#else
 #include <sys/select.h>
+#endif
+
+#include <cstddef>
 #include <unistd.h>
 
 namespace Pt {

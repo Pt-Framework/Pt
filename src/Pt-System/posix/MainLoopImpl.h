@@ -215,7 +215,9 @@ class Selector
             _current = _devices.end();
         
             pollfd pfd;
-            pfd.events = POLLIN|POLLERR;
+            pfd.fd = _wakePipe.readFd();
+            pfd.events = POLLIN;
+            pfd.revents = 0;
             _pollfds.push_back(pfd);
 
             _iohandles.push_back(0);
@@ -247,12 +249,7 @@ class Selector
 
             _iohandles.at(offset) = _iohandles.back();
             _iohandles.resize(_iohandles.size() - 1);
-
-            if( ! _pollfds.empty() )
-            {
-                assert( ! _iohandles.empty() );
-                _iohandles[offset]->pollfdsOffset = offset;
-            }
+            _iohandles[offset]->pollfdsOffset = offset;
 
             _dirty.remove(&h);
 
@@ -282,7 +279,8 @@ class Selector
 
                 pollfd pfd;
                 pfd.fd = h->fd;
-                pfd.events = POLLERR;
+                pfd.events = 0;
+                pfd.revents = 0;
                 _pollfds.push_back(pfd);
 
                 _devices.insert( h->sel );
@@ -308,7 +306,8 @@ class Selector
 
                 pollfd pfd;
                 pfd.fd = h->fd;
-                pfd.events = POLLERR;
+                pfd.events = 0;
+                pfd.revents = 0;
                 _pollfds.push_back(pfd);
 
                 _devices.insert( h->sel );
@@ -324,17 +323,17 @@ class Selector
 
         bool isReadable(IOHandle* h)
         {
-            return _pollfds[h->pollfdsOffset].revents & POLLIN;
+            return _pollfds[h->pollfdsOffset].revents & (POLLIN|POLLHUP);
         }
 
         bool isWritable(IOHandle* h)
         {
-            _pollfds[h->pollfdsOffset].revents & POLLOUT;
+            return _pollfds[h->pollfdsOffset].revents & (POLLOUT|POLLHUP);
         }
 
         bool isError(IOHandle* h)
         {
-            _pollfds[h->pollfdsOffset].revents & POLLERR;
+            return _pollfds[h->pollfdsOffset].revents & (POLLERR|POLLNVAL);
         }
 
         void wake()
@@ -411,7 +410,9 @@ class Selector
                     continue;
         
                 if(elapsed >= msecs)
+                {
                     return isWake; // timeout
+                }
         
                 msecs -= int(elapsed);
             }
