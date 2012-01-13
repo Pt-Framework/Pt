@@ -81,6 +81,8 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
 
     private:
         EventLoop* _parent;
+        Selectable* _prev;
+        Selectable* _next;
 };
 
 

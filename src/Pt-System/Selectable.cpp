@@ -36,6 +36,8 @@ namespace System {
 
 Selectable::Selectable()
 : _parent(0)
+, _prev(0)
+, _next(0)
 { 
 }
 
@@ -46,6 +48,9 @@ Selectable::~Selectable()
     {    
         _parent->onDetachSelectable(*this);
     }
+
+    assert(_prev == 0);
+    assert(_next == 0);
 }
 
 
@@ -56,6 +61,9 @@ void Selectable::setActive(EventLoop& parent)
 
     if(_parent)
         throw std::logic_error("selectable already active");
+
+    assert(_prev == 0);
+    assert(_next == 0);
 
     //this->onAttach(parent);
     parent.onAttachSelectable(*this);
@@ -79,6 +87,9 @@ void Selectable::detach()
         _parent->onDetachSelectable(*this);
         _parent = 0;
     }
+
+    assert(_prev == 0);
+    assert(_next == 0);
 }
 
 
