@@ -67,7 +67,7 @@ FileDeviceImpl::~FileDeviceImpl()
 }
 
 
-void FileDeviceImpl::open( const char* path, IODevice::OpenMode mode, EventLoop* loop)
+void FileDeviceImpl::open( const char* path, IODevice::OpenMode mode)
 {
     _readOv.Offset = 0;
     _readOv.OffsetHigh = 0;
@@ -114,7 +114,7 @@ void FileDeviceImpl::open( const char* path, IODevice::OpenMode mode, EventLoop*
     }
     catch(...)
     {
-        this->close(loop);
+        this->close();
         throw;
     }
 }
@@ -176,9 +176,9 @@ size_t FileDeviceImpl::peek(char* buffer, size_t count)
 
 #ifdef _WIN32_WCE
 
-void FileDeviceImpl::close(EventLoop* loop)
+void FileDeviceImpl::close()
 {
-    IODeviceImpl::close(loop);
+    IODeviceImpl::close();
 
     _readOv.Offset = 0;
     _readOv.OffsetHigh = 0;

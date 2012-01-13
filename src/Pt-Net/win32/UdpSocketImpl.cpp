@@ -112,7 +112,7 @@ void UdpSocketImpl::cancel(System::EventLoop& loop)
 }
 
 
-void UdpSocketImpl::close(System::EventLoop* loop)
+void UdpSocketImpl::close()
 {
     if( _fd == INVALID_SOCKET )
         return;
@@ -130,7 +130,7 @@ void UdpSocketImpl::close(System::EventLoop* loop)
 }
 
 
-void UdpSocketImpl::bind(const std::string& ipaddr, unsigned short int port, unsigned flags, System::EventLoop* loop)
+void UdpSocketImpl::bind(const std::string& ipaddr, unsigned short int port, unsigned flags)
 {
     AddrInfo ai(ipaddr, port, true);
 
@@ -147,7 +147,7 @@ void UdpSocketImpl::bind(const std::string& ipaddr, unsigned short int port, uns
         else if( _isBound )
         {
             if(it->ai_family != _servaddr.ss_family)
-                this->close(loop);
+                this->close();
         }
 
         if( it->ai_family == AF_INET6 && _broadcast)
@@ -161,7 +161,7 @@ void UdpSocketImpl::bind(const std::string& ipaddr, unsigned short int port, uns
 
         if (::setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, (char*)&reuseAddr, sizeof(reuseAddr)) < 0)
         {
-            this->close(loop);
+            this->close();
             throw System::SystemError("setsockopt");
         }
 
@@ -183,8 +183,8 @@ void UdpSocketImpl::bind(const std::string& ipaddr, unsigned short int port, uns
             _isBound = true;
             std::memmove(&_servaddr, it->ai_addr, it->ai_addrlen);
 
-            if(loop)
-                this->attach(*loop);
+            /*if(loop)
+                this->attach(*loop);*/
 
             return;
         }
@@ -192,7 +192,7 @@ void UdpSocketImpl::bind(const std::string& ipaddr, unsigned short int port, uns
         addrInUse = WSAGetLastError() == WSAEADDRINUSE;
 
         if( ! _isConnected )
-            this->close(loop);
+            this->close();
     }
 
     if(addrInUse)
@@ -202,7 +202,7 @@ void UdpSocketImpl::bind(const std::string& ipaddr, unsigned short int port, uns
 }
 
 
-void UdpSocketImpl::connect(const AddrInfo& ai, System::EventLoop* loop)
+void UdpSocketImpl::connect(const AddrInfo& ai)
 {
     _addrInfo = ai;
     _addrInfoPtr = _addrInfo.impl()->begin();
@@ -217,7 +217,7 @@ void UdpSocketImpl::connect(const AddrInfo& ai, System::EventLoop* loop)
         else if( _isConnected )
         {
             if(_addrInfoPtr->ai_family != _peeraddr.ss_family)
-                this->close(loop);
+                this->close();
         }
 
         if( _fd == INVALID_SOCKET )
@@ -231,7 +231,7 @@ void UdpSocketImpl::connect(const AddrInfo& ai, System::EventLoop* loop)
             const int on = 1;
             if (::setsockopt(_fd, SOL_SOCKET, SO_BROADCAST, (char*)&on, sizeof(on)) < 0)
             {
-                this->close(loop);
+                this->close();
                 throw System::SystemError("setsockopt");
             }
         }
@@ -242,14 +242,14 @@ void UdpSocketImpl::connect(const AddrInfo& ai, System::EventLoop* loop)
         {
             _isConnected = true;
 
-            if(loop)
-                this->attach(*loop);
+            /*if(loop)
+                this->attach(*loop);*/
 
             return;
         }
 
         if( ! _isBound )
-            this->close(loop);
+            this->close();
     }
 
     throw System::IOError("connect failed");

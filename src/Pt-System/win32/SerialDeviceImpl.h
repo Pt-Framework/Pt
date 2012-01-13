@@ -37,9 +37,9 @@ class SerialDeviceImpl : public OverlappedIODeviceImpl
         
         ~SerialDeviceImpl();
 
-        void open( const std::string& file, IODevice::OpenMode mode, EventLoop* loop);
+        void open( const std::string& file, IODevice::OpenMode mode);
 
-        void close(EventLoop* loop);
+        void close();
 
         void cancel(EventLoop& loop);
 

@@ -63,10 +63,10 @@ SerialDeviceImpl::~SerialDeviceImpl()
 }
 
 
-void SerialDeviceImpl::open( const std::string& port_, IODevice::OpenMode mode, EventLoop* loop)
+void SerialDeviceImpl::open( const std::string& port_, IODevice::OpenMode mode)
 {
     std::basic_string<TCHAR> port;
-	win32::fromMultiByte( port_.c_str(), port );
+    win32::fromMultiByte( port_.c_str(), port );
 
     DWORD openFlags = 0;
 
@@ -111,12 +111,12 @@ void SerialDeviceImpl::open( const std::string& port_, IODevice::OpenMode mode, 
 }
 
 
-void SerialDeviceImpl::close(EventLoop* loop)
+void SerialDeviceImpl::close()
 {
     //Restore the port state.
     SetCommState( handle(), &_orgCommState );
     
-    OverlappedIODeviceImpl::close(loop);
+    OverlappedIODeviceImpl::close();
 }
 
 

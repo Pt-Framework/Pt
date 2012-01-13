@@ -64,7 +64,7 @@ SerialDevice::~SerialDevice()
 void SerialDevice::open( const std::string& file, OpenMode mode)
 {
     this->close();
-    _impl->open( file, mode, parent() );
+    _impl->open( file, mode );
 }
 
 

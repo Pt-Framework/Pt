@@ -84,11 +84,11 @@ class UdpSocketImpl
 
         ~UdpSocketImpl();
 
-        void close(System::EventLoop* loop);
+        void close();
 
-        void bind(const std::string& ipaddr, unsigned short int port, unsigned flags, System::EventLoop* loop);
+        void bind(const std::string& ipaddr, unsigned short int port, unsigned flags);
 
-        void connect(const AddrInfo& addrinfo, System::EventLoop* loop);
+        void connect(const AddrInfo& addrinfo);
 
         bool isConnected() const;
 
@@ -128,10 +128,6 @@ class UdpSocketImpl
 
         size_t endWrite(System::EventLoop& loop);
 
-        //bool beginConnect(const AddrInfo& ai);
-        //void endConnect();
-        //bool wait(std::size_t umsecs);
-
         void attach(System::EventLoop& loop);
 
         void detach(System::EventLoop& loop);
@@ -142,15 +138,8 @@ class UdpSocketImpl
 
         bool run(System::EventLoop& loop);
 
-        //bool setWaitHandle(HANDLE h, bool& avail);
-
     protected:
-        //const char* tryConnect();
-        //void checkPendingError();
-
         void setEventFlags(HANDLE ev, long events);
-
-        //bool checkEvent();
 
     private:
         UdpSocket&                   _socket;

@@ -47,7 +47,7 @@ class IODeviceImpl
 
         //virtual void setWaitHandle(HANDLE h) {}
 
-        virtual void close(EventLoop* loop);
+        virtual void close();
 
         void sync() const
         {
@@ -84,7 +84,7 @@ class OverlappedIODeviceImpl : public IODeviceImpl
 
         virtual size_t endWrite(EventLoop& loop);
 
-        virtual void close(EventLoop* loop);
+        virtual void close();
 
         virtual size_t read(char* buffer, size_t count, bool& eof);
 

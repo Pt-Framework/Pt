@@ -62,7 +62,7 @@ SerialDeviceImpl::~SerialDeviceImpl()
 }
 
 
-void SerialDeviceImpl::open(const std::string& path, IODevice::OpenMode mode, EventLoop* loop)
+void SerialDeviceImpl::open(const std::string& path, IODevice::OpenMode modep)
 {
     int flags = O_RDONLY;
 

@@ -63,7 +63,7 @@ void PipeIODevice::open(HANDLE handle)
 
 void PipeIODevice::onClose()
 {
-    _impl.close( parent() );
+    _impl.close();
 }
 
 

@@ -110,7 +110,7 @@ void TcpSocketImpl::cancel(System::EventLoop& loop)
 }
 
 
-void TcpSocketImpl::close(System::EventLoop* loop)
+void TcpSocketImpl::close()
 {
     if( _fd == INVALID_SOCKET )
         return;
@@ -127,7 +127,7 @@ void TcpSocketImpl::close(System::EventLoop* loop)
 }
 
 
-void TcpSocketImpl::accept(const TcpServer& server, unsigned flags, System::EventLoop* loop)
+void TcpSocketImpl::accept(const TcpServer& server, unsigned flags)
 {
     _fd = server.impl().accept();
     _isConnected = true;
@@ -143,7 +143,7 @@ void TcpSocketImpl::connect(const AddrInfo& addrinfo)
 }
 
 
-const char* TcpSocketImpl::tryConnect(System::EventLoop* loop)
+const char* TcpSocketImpl::tryConnect()
 {
 
     if (_addrInfoPtr == _addrInfo.impl()->end())
@@ -186,7 +186,7 @@ const char* TcpSocketImpl::tryConnect(System::EventLoop* loop)
         }
 
         log_debug("connect failed");
-        close(loop);
+        close();
 
         if (++_addrInfoPtr == _addrInfo.impl()->end())
             return "connect";
@@ -209,7 +209,7 @@ bool TcpSocketImpl::beginConnect(const AddrInfo& ai, System::EventLoop& loop)
     
     _addrInfo = ai;
     _addrInfoPtr = _addrInfo.impl()->begin();
-    _connectResult = tryConnect(&loop);
+    _connectResult = tryConnect();
     checkPendingError();
 
     if(_isConnected)
@@ -238,7 +238,7 @@ void TcpSocketImpl::checkPendingError()
 }
 
 
-int TcpSocketImpl::checkConnect(System::EventLoop* loop)
+int TcpSocketImpl::checkConnect()
 {
     int sockerr;
 
@@ -247,7 +247,7 @@ int TcpSocketImpl::checkConnect(System::EventLoop* loop)
     if( ::getsockopt(_fd, SOL_SOCKET, SO_ERROR, (char*)&sockerr, &optlen) != 0 )
     {
         //WSAINPROGRESS??
-        close(loop);
+        close();
         throw System::SystemError("getsockopt");
     }
     else if(sockerr == 0)
@@ -286,7 +286,7 @@ void TcpSocketImpl::endConnect(System::EventLoop& loop)
             if (avail)
             {
                 // something has happened
-                checkConnect(&loop);
+                checkConnect();
                 if (_isConnected)
                 {
                     _eventFlags &= ~FD_CONNECT;
@@ -306,9 +306,9 @@ void TcpSocketImpl::endConnect(System::EventLoop& loop)
                 throw System::IOTimeout();
             }
 
-            close(&loop);
+            close();
 
-            _connectResult = tryConnect(&loop);
+            _connectResult = tryConnect();
             if (_isConnected)
             {
                 _eventFlags &= ~FD_CONNECT;
@@ -320,7 +320,7 @@ void TcpSocketImpl::endConnect(System::EventLoop& loop)
     }
     catch(...)
     {
-        close(&loop);
+        close();
         throw;
     }
 }
@@ -395,7 +395,7 @@ bool TcpSocketImpl::runConnect(System::EventLoop& loop)
                 return true;
             }
 
-            _connectResult = tryConnect(&loop);
+            _connectResult = tryConnect();
             if (_isConnected)
             {
                 return true;

@@ -105,23 +105,23 @@ class TcpSocketImpl
         long          _eventFlags;
         size_t        _dataSends;
 
-        int checkConnect(System::EventLoop* loop);
+        int checkConnect();
         void attachEvent(HANDLE ev, long events);
         size_t checkReceiveResult(bool& eof);
         size_t checkSendResult();
-        const char* tryConnect(System::EventLoop* loop);
+        const char* tryConnect();
         void checkPendingError();
     public:
         TcpSocketImpl(TcpSocket& socket);
 
         ~TcpSocketImpl();
 
-        void close(System::EventLoop* loop);
+        void close();
 
         bool isConnected() const
         { return _isConnected; }
 
-        void accept(const TcpServer& server, unsigned flags, System::EventLoop* loop);
+        void accept(const TcpServer& server, unsigned flags);
 
         void connect(const AddrInfo& addrinfo);
 

@@ -53,7 +53,7 @@ void IODeviceImpl::setHandle(HANDLE h)
 }
 
 
-void IODeviceImpl::close(EventLoop* loop)
+void IODeviceImpl::close()
 {
     if(_handle != INVALID_HANDLE_VALUE)
     {
@@ -88,9 +88,9 @@ OverlappedIODeviceImpl::~OverlappedIODeviceImpl()
 }
 
 
-void OverlappedIODeviceImpl::close(EventLoop* loop)
+void OverlappedIODeviceImpl::close()
 {
-    IODeviceImpl::close(loop);
+    IODeviceImpl::close();
 
     _readOv.Offset = 0;
     _readOv.OffsetHigh = 0;
