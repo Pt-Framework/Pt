@@ -117,7 +117,7 @@ void TcpServerImpl::cancel(System::EventLoop& loop)
 
     attachEvent(_currentHandle, 0);
 
-    loop.impl().disable(_server);
+    loop.impl().disableOverlapped(_server);
     _currentHandle = INVALID_HANDLE_VALUE;
 }
 
@@ -136,7 +136,7 @@ void TcpServerImpl::beginAccept(System::EventLoop& loop)
 {
     assert(_currentHandle == INVALID_HANDLE_VALUE);
 
-    _currentHandle = loop.impl().enable(_server);
+    _currentHandle = loop.impl().enableOverlapped(_server);
     attachEvent(_currentHandle, FD_ACCEPT);
 }
 

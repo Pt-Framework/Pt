@@ -42,7 +42,7 @@ struct IOHandle
     , _handle(INVALID_HANDLE_VALUE)
     {}
 
-    IOHandle(Selectable& s)
+    explicit IOHandle(Selectable& s)
     : sel(&s)
     , _handle(INVALID_HANDLE_VALUE)
     {}
@@ -165,9 +165,9 @@ class PT_SYSTEM_API EventLoopImpl
 
         void avail(Selectable& s);
 
-        HANDLE enable(Selectable& s);
+        HANDLE enableOverlapped(Selectable& s);
 
-        void disable(Selectable& s);
+        void disableOverlapped(Selectable& s);
 
         void enable(IOHandle& handle);
 

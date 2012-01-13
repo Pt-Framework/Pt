@@ -44,6 +44,9 @@ struct IOHandle
     IOHandle(Selectable& sel, int fd)
     : sel(&sel)
     , fd(fd)
+#ifdef PT_WITH_POSIX_POLL
+    , pollfdsOffset(0)
+#endif
     , wflags(0)
     , flags(0)
     {}
@@ -51,6 +54,9 @@ struct IOHandle
     IOHandle(Selectable& sel)
     : sel(&sel)
     , fd(-1)
+#ifdef PT_WITH_POSIX_POLL
+    , pollfdsOffset(0)
+#endif
     , wflags(0)
     , flags(0)
     {}
@@ -58,6 +64,9 @@ struct IOHandle
     IOHandle()
     : sel(0)
     , fd(-1)
+#ifdef PT_WITH_POSIX_POLL
+    , pollfdsOffset(0)
+#endif
     , wflags(0)
     , flags(0)
     {}
@@ -67,6 +76,9 @@ struct IOHandle
 
     Selectable* sel;
     int fd;
+#ifdef PT_WITH_POSIX_POLL
+    size_t pollfdsOffset;
+#endif
     int wflags;
     int flags;
 };

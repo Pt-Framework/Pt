@@ -205,6 +205,277 @@ class IOHandleQueue
         std::vector<IOHandle*> _dirty;
 };
 
+#ifdef PT_WITH_POSIX_POLL
+
+class Selector
+{
+    public:
+        Selector()
+        {
+            _current = _devices.end();
+        
+            pollfd pfd;
+            pfd.events = POLLIN|POLLERR;
+            _pollfds.push_back(pfd);
+
+            _iohandles.push_back(0);
+        }
+
+        ~Selector()
+        {         
+            std::set<Selectable*>::iterator it;
+
+            while( _selectables.size() )
+            {
+                it = _selectables.begin();
+                (*it)->detach();
+            }
+        }
+
+        void cancel(IOHandle& h)
+        {
+            std::set<Selectable*>::iterator it = _devices.find( h.sel );
+            if( it == _devices.end() )
+                return;
+
+            assert(h.fd > 0);
+            assert(h.pollfdsOffset != 0);
+
+            size_t offset = h.pollfdsOffset;
+            _pollfds.at(offset) = _pollfds.back();
+            _pollfds.resize(_pollfds.size() - 1);
+
+            _iohandles.at(offset) = _iohandles.back();
+            _iohandles.resize(_iohandles.size() - 1);
+
+            if( ! _pollfds.empty() )
+            {
+                assert( ! _iohandles.empty() );
+                _iohandles[offset]->pollfdsOffset = offset;
+            }
+
+            _dirty.remove(&h);
+
+            if( _current == _devices.end() )
+            {
+                _devices.erase(it);
+            }
+            else if(*_current == *it)
+            {
+                _devices.erase(_current++);
+            }
+            else
+            {
+                _devices.erase(it);
+            }
+        }
+
+        void beginRead(IOHandle* h)
+        {
+            if(_dirty.enable(h) )
+            {
+                size_t offset = _pollfds.size();
+                assert(offset == _iohandles.size());
+
+                h->pollfdsOffset = offset;
+                _iohandles.push_back(h);
+
+                pollfd pfd;
+                pfd.fd = h->fd;
+                pfd.events = POLLERR;
+                _pollfds.push_back(pfd);
+
+                _devices.insert( h->sel );
+            }
+
+            _dirty.beginRead(h);
+        }
+
+        void endRead(IOHandle* h)
+        {
+            _dirty.endRead(h);
+        }
+
+        void beginWrite(IOHandle* h)
+        {
+            if(_dirty.enable(h) )
+            {
+                size_t offset = _pollfds.size();
+                assert(offset == _iohandles.size());
+
+                h->pollfdsOffset = offset;
+                _iohandles.push_back(h);
+
+                pollfd pfd;
+                pfd.fd = h->fd;
+                pfd.events = POLLERR;
+                _pollfds.push_back(pfd);
+
+                _devices.insert( h->sel );
+            }
+
+            _dirty.beginWrite(h);
+        }
+
+        void endWrite(IOHandle* h)
+        {
+            _dirty.endWrite(h);
+        }
+
+        bool isReadable(IOHandle* h)
+        {
+            return _pollfds[h->pollfdsOffset].revents & POLLIN;
+        }
+
+        bool isWritable(IOHandle* h)
+        {
+            _pollfds[h->pollfdsOffset].revents & POLLOUT;
+        }
+
+        bool isError(IOHandle* h)
+        {
+            _pollfds[h->pollfdsOffset].revents & POLLERR;
+        }
+
+        void wake()
+        {
+            _wakePipe.wake();
+        }
+
+    public:
+        bool waitForWake(size_t umsecs)
+        {
+            int msecs = umsecs;
+            if(umsecs == EventLoop::WaitInfinite)
+            {
+                msecs = -1;
+            }
+            if (umsecs > static_cast<std::size_t>(std::numeric_limits<int>::max()))
+            {
+                msecs = std::numeric_limits<int>::max();
+            }
+
+            bool isWake = false;
+        
+            for( std::vector<IOHandle*>::iterator it = _dirty.begin(); it != _dirty.end(); ++it)
+            {
+                IOHandle* h = *it;
+        
+                if(h->flags == h->wflags)
+                    continue;
+        
+                if(h->flags & IOHandle::Input &&  0 == (h->wflags & IOHandle::Input))
+                {
+                    _pollfds[h->pollfdsOffset].events |= POLLIN;
+                    h->wflags |= IOHandle::Input;
+                }
+        
+                if(0 == (h->flags & IOHandle::Input) && h->wflags & IOHandle::Input)
+                {
+                    _pollfds[h->pollfdsOffset].events &= ~POLLIN;
+                    h->wflags &= ~IOHandle::Input;
+                }
+        
+                if(h->flags & IOHandle::Output &&  0 == (h->wflags & IOHandle::Output))
+                {
+                    _pollfds[h->pollfdsOffset].events |= POLLOUT;
+                    h->wflags |= IOHandle::Output;
+                }
+        
+                if(0 == (h->flags & IOHandle::Output) &&  h->wflags & IOHandle::Output)
+                {
+                    _pollfds[h->pollfdsOffset].events &= ~POLLOUT;
+                    h->wflags &= ~IOHandle::Output;
+                }
+            }
+        
+            _dirty.clear();
+               
+            int avail = -1;
+
+            while( true )
+            {            
+                _clock.start();
+                avail = ::poll(&_pollfds[0], _pollfds.size(), msecs);
+                Pt::int64_t elapsed = _clock.stop().totalMSecs();
+
+                if( avail < 0 && errno != EINTR )
+                {
+                    throw IOError( PT_ERROR_MSG("select failed") );
+                }
+        
+                if( avail > 0 || msecs == 0 )
+                    break;
+        
+                if(msecs < 0) // negative poll time means infinite
+                    continue;
+        
+                if(elapsed >= msecs)
+                    return isWake; // timeout
+        
+                msecs -= int(elapsed);
+            }
+
+            if( _pollfds[0].revents & POLLIN )
+            {
+                --avail;
+                isWake = _wakePipe.isReady();
+            }
+        
+            try
+            {
+                for( _current = _devices.begin(); _current != _devices.end(); )
+                {
+                    Selectable* selectable = *_current;
+        
+                    bool isAvail = selectable->run();
+        
+                    if( isAvail )
+                        --avail;
+        
+                    if(avail <= 0)
+                        break;
+        
+                    if(_current != _devices.end())
+                    {
+                        if(*_current == selectable)
+                        {
+                            ++_current;
+                        }
+                    }
+                }
+            }
+            catch (...)
+            {
+                _current = _devices.end();
+                throw;
+            }
+        
+            return isWake;
+        }
+
+        void attach(Selectable& s)
+        {
+            _selectables.insert(&s);
+        }
+        
+        void detach(Selectable& s)
+        {
+            _selectables.erase(&s);
+        }
+
+    private:
+        WakePipe _wakePipe;
+        std::vector<pollfd> _pollfds;
+        std::vector<IOHandle*> _iohandles;
+        IOHandleQueue _dirty;
+        std::set<Selectable*> _selectables; // inactive
+        std::set<Selectable*>::iterator _current;
+        std::set<Selectable*> _devices; // active
+        Clock _clock;
+};
+
+#else
 
 class Selector
 {
@@ -466,6 +737,7 @@ class Selector
         Clock _clock;
 };
 
+#endif
 
 class EventLoopImpl
 {

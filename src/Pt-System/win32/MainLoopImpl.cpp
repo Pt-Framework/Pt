@@ -124,14 +124,14 @@ void EventLoopImpl::disable(IOHandle& handle)
 }
 
 
-HANDLE EventLoopImpl::enable(Selectable& s)
+HANDLE EventLoopImpl::enableOverlapped(Selectable& s)
 { 
     _devices.insert(&s);
     return _ioEvent; 
 }
 
 
-void EventLoopImpl::disable(Selectable& s)
+void EventLoopImpl::disableOverlapped(Selectable& s)
 {
     std::set<Selectable*>::iterator iter = _devices.find( &s );
     if( iter != _devices.end() )
