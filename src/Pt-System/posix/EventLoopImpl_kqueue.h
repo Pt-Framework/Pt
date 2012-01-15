@@ -1,0 +1,369 @@
+/*
+ * Copyright (C) 2006-20012 Marc Boris Duerner
+ * 
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ * 
+ * As a special exception, you may use this file as part of a free
+ * software library without restriction. Specifically, if other files
+ * instantiate templates or use macros or inline functions from this
+ * file, or you compile this file and link it with other files to
+ * produce an executable, this file does not by itself cause the
+ * resulting executable to be covered by the GNU General Public
+ * License. This exception does not however invalidate any other
+ * reasons why the executable file might be covered by the GNU Library
+ * General Public License.
+ * 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+#ifndef PT_SYSTEM_EVENTLOOPIMPL_KQUEUE_H
+#define PT_SYSTEM_EVENTLOOPIMPL_KQUEUE_H
+
+#include "Pt/System/Api.h"
+#include "Pt/System/Clock.h"
+#include "Pt/System/Selectable.h"
+
+#include <set>
+#include <cstddef>
+
+#include <sys/types.h>
+#include <sys/event.h>
+#include <sys/time.h>
+
+namespace Pt {
+
+namespace System {
+
+struct IOHandle
+{
+    enum IOFlags
+    {
+        Input = 1,
+        Output = 2,
+        Error = 4,
+        Enabled = 8
+    };
+
+    IOHandle(Selectable& sel, int fd)
+    : sel(&sel)
+    , fd(fd)
+    , filter(0)
+    , rfilter(0)
+    , kev(0)
+    , wflags(0)
+    , flags(0)
+    {
+    }
+
+    IOHandle(Selectable& sel)
+    : sel(&sel)
+    , fd(-1)
+    , filter(0)
+    , rfilter(0)
+    , kev(0)
+    , wflags(0)
+    , flags(0)
+    {
+    }
+
+    IOHandle()
+    : sel(0)
+    , fd(-1)
+    , filter(0)
+    , rfilter(0)
+    , kev(0)
+    , wflags(0)
+    , flags(0)
+    {
+    }
+
+    bool isOpen() const
+    { return fd != -1; }
+
+    Selectable* sel;
+    int fd;
+    short filter;
+    short rfilter;
+    struct kevent* kev;
+    int wflags;
+    int flags;
+};
+
+class Selector
+{
+    public:
+        Selector()
+        : _kd(-1)
+        , _avail(0)
+        {
+            _kd = kqueue();
+
+            struct kevent kev;
+            EV_SET(&kev, _wakePipe.readFd(), EVFILT_READ, EV_ADD, 0, 0, &_wakePipe);
+
+            timespec ts;
+            ts.tv_sec = 0;
+            ts.tv_nsec = 0;
+            kevent(_kd, &kev, 1, NULL, 0, &ts);
+        }
+
+        ~Selector()
+        {         
+            std::set<Selectable*>::iterator it;
+
+            while( _selectables.size() )
+            {
+                it = _selectables.begin();
+                (*it)->detach();
+            }
+        }
+
+        void cancel(IOHandle& h)
+        {
+            if(h.fd < 0)
+                return;
+
+            // remove from change list
+            std::vector<IOHandle*>::iterator it = std::remove(_changelist.begin(), _changelist.end(), &h);
+            _changelist.erase(it, _changelist.end());
+
+            // remove from avail list
+            for(int n = 0; n < _avail; ++n)
+            {
+                struct kevent& kev = _events[n];
+                if(kev.udata == &h)
+                {
+                    kev.udata = 0;
+                }
+            }
+
+            struct kevent kev[2];
+            EV_SET(&kev[0], h.fd, EVFILT_READ, EV_DELETE, 0, 0, &h);
+            EV_SET(&kev[1], h.fd, EVFILT_WRITE, EV_DELETE, 0, 0, &h);
+
+            timespec ts;
+            ts.tv_sec = 0;
+            ts.tv_nsec = 0;
+            kevent(_kd, kev, 2, NULL, 0, &ts);
+        }
+
+        void beginRead(IOHandle* h)
+        {
+            bool isAdded = h->filter || h->rfilter;
+            if(! isAdded)
+                _changelist.push_back(h);
+
+            h->filter |= IOHandle::Input;
+        }
+
+        void endRead(IOHandle* h)
+        {
+            bool isAdded = h->filter || h->rfilter;
+            if(! isAdded)
+                _changelist.push_back(h);
+
+            h->rfilter |= IOHandle::Input;
+        }
+
+        void beginWrite(IOHandle* h)
+        {
+            bool isAdded = h->filter || h->rfilter;
+            if(! isAdded)
+                _changelist.push_back(h);
+
+            h->filter |= IOHandle::Output;
+        }
+
+        void endWrite(IOHandle* h)
+        {
+            bool isAdded = h->filter || h->rfilter;
+            if(! isAdded)
+                _changelist.push_back(h);
+
+            h->rfilter |= IOHandle::Output;
+        }
+
+        bool isReadable(IOHandle* h)
+        {
+            bool isReady = h->kev && (h->kev->filter & EVFILT_READ);
+                       
+            if(isReady)
+                h->kev = 0;
+
+            return isReady;
+        }
+
+        bool isWritable(IOHandle* h)
+        {
+            bool isReady = h->kev && (h->kev->filter & EVFILT_WRITE);
+
+            if(isReady)
+                h->kev = 0;
+
+            return isReady;
+        }
+
+        bool isError(IOHandle* h)
+        {
+            return false;
+        }
+
+        void wake()
+        {
+            _wakePipe.wake();
+        }
+
+    public:
+        bool waitForWake(size_t msecs)
+        {
+            // process kevents which are left over from the last iteration
+            // because of an exception
+            if(_avail > 0)
+                return processAvail();
+        
+            std::vector<struct kevent> changedEvents;
+            for( std::vector<IOHandle*>::iterator it = _changelist.begin(); it != _changelist.end(); ++it)
+            {
+                IOHandle* h = *it;
+        
+                if(h->filter == h->rfilter)
+                {
+                    h->filter = 0;
+                    h->rfilter = 0;
+                    continue;
+                }
+        
+                short enableFilter = h->filter & ~h->rfilter;
+                short disableFilter = h->rfilter & ~h->filter;
+
+                h->filter = 0;
+                h->rfilter = 0;
+
+                struct kevent kev;
+
+                if(enableFilter & IOHandle::Input)
+                {
+                    EV_SET(&kev, h->fd, EVFILT_READ, EV_ADD|EV_ENABLE|EV_CLEAR, 0, 0, h);
+                    changedEvents.push_back(kev);
+                }
+                if(enableFilter & IOHandle::Output)
+                {
+                    EV_SET(&kev, h->fd, EVFILT_WRITE, EV_ADD|EV_ENABLE|EV_CLEAR, 0, 0, h);
+                    changedEvents.push_back(kev);
+                }
+                if(disableFilter & IOHandle::Input)
+                {
+                    EV_SET(&kev, h->fd, EVFILT_READ, EV_DISABLE, 0, 0, h);
+                    changedEvents.push_back(kev);
+                }
+                if(disableFilter & IOHandle::Output)
+                {
+                    EV_SET(&kev, h->fd, EVFILT_WRITE, EV_DISABLE, 0, 0, h);
+                    changedEvents.push_back(kev);
+                }
+            }
+        
+            _changelist.clear();
+               
+            bool isWake = false;
+        
+            while( true )
+            {
+                struct timespec* timeout = 0;
+                struct timespec ts;
+                if(msecs != EventLoop::WaitInfinite)
+                {
+                    ts.tv_sec = msecs / 1000;
+                    ts.tv_nsec = (msecs % 1000) * 1000000;
+                    timeout = &ts;
+                }
+        
+                _clock.start();
+                _avail = ::kevent(_kd, &changedEvents[0], changedEvents.size(), _events, EVENTS_SIZE, timeout);
+                Pt::int64_t elapsed = _clock.stop().totalMSecs();
+        
+                if( _avail < 0 && errno != EINTR )
+                    throw IOError( PT_ERROR_MSG("select failed") );
+        
+                if(_avail > 0 || msecs == 0)
+                {
+                    isWake = processAvail();
+                    break;
+                }
+        
+                if(msecs != EventLoop::WaitInfinite)
+                { 
+                    if(elapsed >= msecs)
+                        break; // timeout
+            
+                    msecs -= int(elapsed);
+                }
+            }
+        
+            return isWake;
+        }
+
+        bool processAvail()
+        {
+            bool isWake = false;
+
+            while(_avail > 0)
+            {
+                struct kevent& kev = _events[--_avail];
+
+                void* p = kev.udata;
+                if(p == 0)
+                {
+                    continue;
+                }
+                else if( p == &_wakePipe )
+                {
+                    isWake = _wakePipe.isReady();
+                }
+                else
+                {
+                    IOHandle* h = reinterpret_cast<IOHandle*>(p);
+                    h->kev = &kev;
+                    h->sel->run();
+                }
+            }
+
+            return isWake;
+        }
+
+        void attach(Selectable& s)
+        {
+            _selectables.insert(&s);
+        }
+        
+        void detach(Selectable& s)
+        {
+            _selectables.erase(&s);
+        }
+
+    private:
+        std::set<Selectable*> _selectables; // inactive
+        Clock _clock;
+        WakePipe _wakePipe;
+        int _kd;
+        std::vector<IOHandle*> _changelist;
+        static const unsigned EVENTS_SIZE = 32;
+        struct kevent _events[EVENTS_SIZE];
+        int _avail;
+};
+
+} //namespace System
+
+} //namespace Pt
+
+#endif
+

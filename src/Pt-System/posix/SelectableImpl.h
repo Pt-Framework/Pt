@@ -21,75 +21,11 @@
 
 #include "Pt/System/IOError.h"
 
-//#define PT_WITH_POSIX_POLL 1
-
-#ifdef PT_WITH_POSIX_POLL
-#include <sys/poll.h>
-#else
-#include <sys/select.h>
-#endif
-
-#include <cstddef>
-#include <unistd.h>
-
 namespace Pt {
 
 namespace System {
 
 class EventLoop;
-
-struct IOHandle
-{
-    enum IOFlags
-    {
-        Input = 1,
-        Output = 2,
-        Error = 4,
-        Enabled = 8
-    };
-
-    IOHandle(Selectable& sel, int fd)
-    : sel(&sel)
-    , fd(fd)
-#ifdef PT_WITH_POSIX_POLL
-    , pollfdsOffset(0)
-#endif
-    , wflags(0)
-    , flags(0)
-    {}
-
-    IOHandle(Selectable& sel)
-    : sel(&sel)
-    , fd(-1)
-#ifdef PT_WITH_POSIX_POLL
-    , pollfdsOffset(0)
-#endif
-    , wflags(0)
-    , flags(0)
-    {}
-
-    IOHandle()
-    : sel(0)
-    , fd(-1)
-#ifdef PT_WITH_POSIX_POLL
-    , pollfdsOffset(0)
-#endif
-    , wflags(0)
-    , flags(0)
-    {}
-
-    bool isOpen() const
-    { return fd != -1; }
-
-    Selectable* sel;
-    int fd;
-#ifdef PT_WITH_POSIX_POLL
-    size_t pollfdsOffset;
-#endif
-    int wflags;
-    int flags;
-};
-
 
 class FdImpl
 {
