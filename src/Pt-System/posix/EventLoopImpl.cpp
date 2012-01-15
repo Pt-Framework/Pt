@@ -32,112 +32,12 @@ namespace Pt {
 
 namespace System {
 
-EventLoopImpl::EventLoopImpl(Signal<const Event&>& eventSignal)
-: _event(&eventSignal)
+EventLoopImpl::EventLoopImpl()
 { }
 
 
 EventLoopImpl::~EventLoopImpl()
 { }
-
-
-void EventLoopImpl::attach(Selectable& s)
-{
-    _selector.attach(s);
-}
-
-
-void EventLoopImpl::detach(Selectable& s)
-{
-    _selector.detach(s);
-}
-
-
-void EventLoopImpl::avail(Selectable& s)
-{
-    MutexLock lock(_mutex);
-    _avail.push_back(&s);
-}
-
-
-void EventLoopImpl::idle(Selectable& s)
-{
-    MutexLock lock(_mutex);
-
-    std::vector<Selectable*>::iterator it = _avail.begin();
-    while( it != _avail.end() )
-    {
-        if(*it == &s)
-            it = _avail.erase(it);
-        else
-            ++it;
-    }
-}
-
-
-void EventLoopImpl::run()
-{
-    while( this->waitNext() )
-        ;
-}
-
-
-void EventLoopImpl::exit()
-{
-    _eventQueue.exit();
-    wake();
-}
-
-
-void EventLoopImpl::wake()
-{
-    _selector.wake();
-}
-
-
-void EventLoopImpl::commitEvent(const Event& event)
-{ 
-    _eventQueue.pushEvent(event); 
-    wake();
-}
-
-
-void EventLoopImpl::queueEvent(const Event& event)
-{ 
-    _eventQueue.pushEvent(event);  
-}
-
-
-bool EventLoopImpl::processEvents()
-{ 
-    return _eventQueue.processEvents(*_event);
-}
-
-
-bool EventLoopImpl::waitNext()
-{
-    bool isActive = true;
-    size_t msecs = _timerQueue.processTimers();
-
-    while(true)
-    {
-        MutexLock lock(_mutex);
-        if( _avail.empty() )
-            break;
-
-        Selectable* selectable = _avail.back();
-        _avail.pop_back();
-        lock.unlock();
-
-        msecs = 0;
-        selectable->run();
-    }
-
-    if( _selector.waitForWake(msecs) )
-        isActive = this->processEvents();
-
-    return isActive;
-}
 
 } //namespace System
 

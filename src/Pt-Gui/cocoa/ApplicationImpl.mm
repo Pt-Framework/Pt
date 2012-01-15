@@ -73,6 +73,8 @@ void MainLoopImplOnWake(void* p)
     }
     while(event != nil);
 
+    impl->processAvail();
+
     // process Pt events
     bool isActive = impl->processEvents();
 
@@ -97,6 +99,13 @@ void MainLoopImplOnWake(void* p)
     }
 }
 
+void MainLoopImplOnTimer(CFRunLoopTimerRef timer, void *p)
+{
+    MainLoopImpl* impl = reinterpret_cast<MainLoopImpl*>(p);
+    impl->processTimers();
+
+}
+
 
 MainLoopImpl::MainLoopImpl(Signal<const Pt::Event&>& eventSignal)
 : _event(&eventSignal)
@@ -119,8 +128,21 @@ MainLoopImpl::MainLoopImpl(Signal<const Pt::Event&>& eventSignal)
 
     _wakeSource = CFRunLoopSourceCreate(kCFAllocatorDefault, 0, &ctx);
 
+    CFRunLoopTimerContext timerCtx;
+    timerCtx.version = 0;
+    timerCtx.info = this;
+    timerCtx.retain = NULL;
+    timerCtx.release = NULL;
+    timerCtx.copyDescription = NULL;
+
+    _masterTimer = CFRunLoopTimerCreate( kCFAllocatorDefault,
+                                         CFAbsoluteTimeGetCurrent(),
+                                         10000.0, 0, 0, 
+                                         &MainLoopImplOnTimer, &timerCtx);
+
     CFRunLoopRef rl = [[NSRunLoop currentRunLoop] getCFRunLoop];
     CFRunLoopAddSource(rl, _wakeSource, kCFRunLoopCommonModes);
+    CFRunLoopAddTimer(rl, _masterTimer, kCFRunLoopCommonModes);
 }
 
 
@@ -145,8 +167,21 @@ MainLoopImpl::MainLoopImpl(Signal<const Pt::Event&>& eventSignal, Allocator& a)
 
     _wakeSource = CFRunLoopSourceCreate(kCFAllocatorDefault, 0, &ctx);
 
+    CFRunLoopTimerContext timerCtx;
+    timerCtx.version = 0;
+    timerCtx.info = this;
+    timerCtx.retain = NULL;
+    timerCtx.release = NULL;
+    timerCtx.copyDescription = NULL;
+
+    _masterTimer = CFRunLoopTimerCreate( kCFAllocatorDefault,
+                                         CFAbsoluteTimeGetCurrent(),
+                                         10000.0, 0, 0, 
+                                         &MainLoopImplOnTimer, &timerCtx);
+
     CFRunLoopRef rl = [[NSRunLoop currentRunLoop] getCFRunLoop];
     CFRunLoopAddSource(rl, _wakeSource, kCFRunLoopCommonModes);
+    CFRunLoopAddTimer(rl, _masterTimer, kCFRunLoopCommonModes);
 }
 
 
@@ -156,28 +191,193 @@ MainLoopImpl::~MainLoopImpl()
     CFRunLoopRemoveSource(rl, _wakeSource, kCFRunLoopCommonModes);
     CFRelease(_wakeSource);
 
-    [ NSApp release];
+    CFRunLoopRemoveTimer(rl, _masterTimer, kCFRunLoopCommonModes);
+    CFRelease(_masterTimer);
+
+    [NSApp release];
+
+    std::set<System::Selectable*>::iterator it;
+    while( _selectables.size() )
+    {
+        it = _selectables.begin();
+        (*it)->detach();
+    }
 }
 
 
-void MainLoopImpl::onRun()
+void MainLoopImpl::run()
 {
     [NSApp run];
 }
 
 
-void MainLoopImpl::onWake()
+void MainLoopImpl::wake()
 {
+    CFRunLoopSourceSignal(_wakeSource);
+    CFRunLoopRef rl = [[NSRunLoop currentRunLoop] getCFRunLoop];
+    CFRunLoopWakeUp(rl);
+}
+
+
+void MainLoopImpl::exit()
+{
+    _eventQueue.exit();
+    wake();
+}
+
+
+void MainLoopImpl::commitEvent(const Pt::Event& event)
+{
+    _eventQueue.pushEvent(event); 
+    wake();
+}
+
+
+void MainLoopImpl::queueEvent(const Pt::Event& event)
+{
+    _eventQueue.pushEvent(event);
+}
+
+
+bool MainLoopImpl::processEvents()
+{ 
+    return _eventQueue.processEvents(*_event);
+}
+
+
+void MainLoopImpl::processAvail()
+{
+    while(true)
+    {
+        System::MutexLock lock(_mutex);
+        if( _avail.empty() )
+            break;
+
+        System::Selectable* selectable = _avail.back();
+        _avail.pop_back();
+        lock.unlock();
+
+        selectable->run();
+    }
+}
+
+
+void MainLoopImpl::attach(System::Timer& timer)
+{ 
+    _timerQueue.addTimer(timer); 
+    this->processTimers();
+}
+
+
+void MainLoopImpl::detach(System::Timer& timer)
+{ 
+    _timerQueue.removeTimer(timer);
+    this->processTimers();
+}
+
+
+void MainLoopImpl::processTimers()
+{ 
+    CFTimeInterval nextTimer = _timerQueue.processTimers();
+
+    if(nextTimer == System::EventLoop::WaitInfinite)
+    {
+        nextTimer = std::numeric_limits<CFTimeInterval>::max();
+    }
+
+    CFTimeInterval interval = nextTimer / 1000.0;
+    CFAbsoluteTime fireDate = CFAbsoluteTimeGetCurrent() + interval;
+    CFRunLoopTimerSetNextFireDate (_masterTimer, fireDate);
+}
+
+
+void MainLoopImpl::attach(System::Selectable& s)
+{
+    _selectables.insert(&s);
+}
+
+
+void MainLoopImpl::detach(System::Selectable& s)
+{
+    _selectables.erase(&s);
+}
+
+
+void MainLoopImpl::idle(System::Selectable& s)
+{ 
+    System::MutexLock lock(_mutex);
+
+    std::vector<System::Selectable*>::iterator it = _avail.begin();
+    while( it != _avail.end() )
+    {
+        if(*it == &s)
+            it = _avail.erase(it);
+        else
+            ++it;
+    }
+}
+
+
+void MainLoopImpl::avail(System::Selectable& s)
+{  
+    System::MutexLock lock(_mutex);
+    _avail.push_back(&s);
+
     CFRunLoopSourceSignal(_wakeSource);
 }
 
+
+void MainLoopImpl::cancel(System::IOHandle& h)
+{  
+}
+
+
+void MainLoopImpl::beginRead(System::IOHandle* h)
+{  
+}
+
+
+void MainLoopImpl::endRead(System::IOHandle* h)
+{  
+}
+
+
+void MainLoopImpl::beginWrite(System::IOHandle* h)
+{  
+}
+
+
+void MainLoopImpl::endWrite(System::IOHandle* h)
+{  
+}
+
+
+bool MainLoopImpl::isReadable(System::IOHandle* h)
+{  
+    return false;
+}
+
+
+bool MainLoopImpl::isWritable(System::IOHandle* h)
+{
+    return false;  
+}
+
+
+bool MainLoopImpl::isError(System::IOHandle* h)
+{
+    return false;
+}
+
+//
+// MainLoop
+//
 
 MainLoop::MainLoop()
 : System::EventLoop()
 , _impl( event() )
 {
 }
-
 
 
 MainLoop::~MainLoop()
@@ -197,35 +397,15 @@ void MainLoop::onDetachSelectable(System::Selectable& s)
 }
 
 
-void MainLoop::onEnable(System::Selectable& s)
-{
-    _impl.enable(s);
-}
-
-
-void MainLoop::onDisable(System::Selectable& s)
-{
-    _impl.disable(s);
-}
-
-
-void MainLoop::onSignalAvail(System::Selectable&)
-{
-}
-
-
-void MainLoop::onSignalIdle(System::Selectable&)
-{
-}
-
-
 void MainLoop::onIdle(System::Selectable& s)
 {
+    _impl.idle(s);
 }
 
 
 void MainLoop::onReady(System::Selectable& s)
 {
+    _impl.avail(s);
 }
 
 

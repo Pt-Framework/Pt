@@ -44,6 +44,69 @@ class MainLoopImpl : public EventLoopImpl
         MainLoopImpl(Signal<const Event&>& eventSignal, Allocator& a);
 
         ~MainLoopImpl();
+
+        void cancel(IOHandle& h)
+        { _selector.cancel(h); }
+
+        void beginRead(IOHandle* h)
+        { _selector.beginRead(h); }
+
+        void endRead(IOHandle* h)
+        { _selector.endRead(h); }
+
+        void beginWrite(IOHandle* h)
+        { _selector.beginWrite(h); }
+
+        void endWrite(IOHandle* h)
+        { _selector.endWrite(h); }
+
+        bool isReadable(IOHandle* h)
+        { return _selector.isReadable(h); }
+
+        bool isWritable(IOHandle* h)
+        {return _selector.isWritable(h); }
+
+        bool isError(IOHandle* h)
+        { return _selector.isError(h); }
+
+        void attach(Selectable& s)
+        { _selector.attach(s); }
+        
+        void detach(Selectable& s)
+        { _selector.detach(s); }
+
+        void idle(Selectable& s);
+
+        void avail(Selectable& s);
+
+        void run();
+
+        void exit();
+
+        void wake();
+
+        void commitEvent(const Event& event);
+
+        void queueEvent(const Event& event);
+
+        bool processEvents();
+
+        void attach(Timer& timer)
+        { _timerQueue.addTimer(timer); }
+
+        void detach( Timer& timer )
+        { _timerQueue.removeTimer(timer); }
+
+    protected:
+        bool waitNext();
+
+    private:
+        Mutex _mutex;
+        Signal<const Event&>* _event;
+        TimerQueue _timerQueue;
+        EventQueue _eventQueue;
+        Selector _selector;
+        std::vector<Selectable*> _avail;
 };
 
 } //namespace System

@@ -33,16 +33,104 @@ namespace Pt {
 namespace System {
 
 MainLoopImpl::MainLoopImpl(Signal<const Event&>& eventSignal)
-: EventLoopImpl(eventSignal)
+: _event(&eventSignal)
 { }
 
 MainLoopImpl::MainLoopImpl(Signal<const Event&>& eventSignal, Allocator& a)
-: EventLoopImpl(eventSignal)
+: _event(&eventSignal)
 { }
 
 
 MainLoopImpl::~MainLoopImpl()
 { }
+
+
+void MainLoopImpl::avail(Selectable& s)
+{
+    MutexLock lock(_mutex);
+    _avail.push_back(&s);
+}
+
+
+void MainLoopImpl::idle(Selectable& s)
+{
+    MutexLock lock(_mutex);
+
+    std::vector<Selectable*>::iterator it = _avail.begin();
+    while( it != _avail.end() )
+    {
+        if(*it == &s)
+            it = _avail.erase(it);
+        else
+            ++it;
+    }
+}
+
+
+void MainLoopImpl::run()
+{
+    while( this->waitNext() )
+        ;
+}
+
+
+void MainLoopImpl::exit()
+{
+    _eventQueue.exit();
+    wake();
+}
+
+
+void MainLoopImpl::wake()
+{
+    _selector.wake();
+}
+
+
+void MainLoopImpl::commitEvent(const Event& event)
+{ 
+    _eventQueue.pushEvent(event); 
+    wake();
+}
+
+
+void MainLoopImpl::queueEvent(const Event& event)
+{ 
+    _eventQueue.pushEvent(event);  
+}
+
+
+bool MainLoopImpl::processEvents()
+{ 
+    return _eventQueue.processEvents(*_event);
+}
+
+
+bool MainLoopImpl::waitNext()
+{
+    bool isActive = true;
+    size_t msecs = _timerQueue.processTimers();
+
+    // TODO: do this only on wake
+    while(true)
+    {
+        MutexLock lock(_mutex);
+        if( _avail.empty() )
+            break;
+
+        Selectable* selectable = _avail.back();
+        _avail.pop_back();
+        lock.unlock();
+
+        msecs = 0;
+        selectable->run();
+    }
+
+    if( _selector.waitForWake(msecs) )
+        isActive = this->processEvents();
+
+    return isActive;
+}
 
 } //namespace System
 

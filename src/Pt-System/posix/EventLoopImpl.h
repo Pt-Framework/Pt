@@ -148,70 +148,29 @@ namespace System {
 class EventLoopImpl
 {
     public:
-        EventLoopImpl(Signal<const Event&>& eventSignal);
+        EventLoopImpl();
 
-        ~EventLoopImpl();
+        virtual ~EventLoopImpl();
 
-        void cancel(IOHandle& h)
-        { _selector.cancel(h); }
+        virtual void idle(Selectable& s) = 0;
 
-        void beginRead(IOHandle* h)
-        { _selector.beginRead(h); }
+        virtual void avail(Selectable& s) = 0;
 
-        void endRead(IOHandle* h)
-        { _selector.endRead(h); }
+        virtual void cancel(IOHandle& h) = 0;
 
-        void beginWrite(IOHandle* h)
-        { _selector.beginWrite(h); }
+        virtual void beginRead(IOHandle* h) = 0;
 
-        void endWrite(IOHandle* h)
-        { _selector.endWrite(h); }
+        virtual void endRead(IOHandle* h) = 0;
 
-        bool isReadable(IOHandle* h)
-        { return _selector.isReadable(h); }
+        virtual void beginWrite(IOHandle* h) = 0;
 
-        bool isWritable(IOHandle* h)
-        {return _selector.isWritable(h); }
+        virtual void endWrite(IOHandle* h) = 0;
 
-        bool isError(IOHandle* h)
-        { return _selector.isError(h); }
+        virtual bool isReadable(IOHandle* h) = 0;
 
-        void idle(Selectable& s);
+        virtual bool isWritable(IOHandle* h) = 0;
 
-        void avail(Selectable& s);
-
-        void attach(Selectable& s);
-
-        void detach(Selectable& s);
-
-        void run();
-
-        void exit();
-
-        void wake();
-
-        void commitEvent(const Event& event);
-
-        void queueEvent(const Event& event);
-
-        bool processEvents();
-
-        void attach(Timer& timer)
-        { _timerQueue.addTimer(timer); }
-
-        void detach( Timer& timer )
-        { _timerQueue.removeTimer(timer); }
-
-    protected:
-        bool waitNext();
-
-    private:
-        Mutex _mutex;
-        TimerQueue _timerQueue;
-        EventQueue _eventQueue;
-        Signal<const Event&>* _event;
-        Selector _selector;
-        std::vector<Selectable*> _avail;
+        virtual bool isError(IOHandle* h) = 0;
 };
 
 } //namespace System

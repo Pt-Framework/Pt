@@ -33,7 +33,7 @@ namespace Pt {
 
 namespace Gui {
 
-class MainLoopImpl
+class MainLoopImpl : public System::EventLoopImpl
 {
     public:
         MainLoopImpl(Signal<const Pt::Event&>& eventSignal);
@@ -42,59 +42,59 @@ class MainLoopImpl
 
         virtual ~MainLoopImpl();
 
-        void run()
-        {}
+        void run();
 
-        void exit()
-        {}
+        void exit();
 
-        void wake()
-        {}
+        void wake();
 
-        void commitEvent(const Pt::Event& event)
-        {}
+        void commitEvent(const Pt::Event& ev);
 
-        void queueEvent(const Pt::Event& event)
-        {}
+        void queueEvent(const Pt::Event& ev);
 
-        bool processEvents()
-        { return false; }
+        bool processEvents();
 
-        void attach(System::Timer& timer)
-        {  }
+        void processAvail();
 
-        void detach( System::Timer& timer )
-        {  }
+        void processTimers();
 
-        void attach(System::Selectable& s)
-        {}
+        void attach(System::Timer& timer);
 
-        void detach(System::Selectable& s)
-        {}
+        void detach(System::Timer& timer);
 
-        void enable(System::Selectable& s)
-        {}
+        void attach(System::Selectable& s);
 
-        void disable(System::Selectable& s)
-        {}
+        void detach(System::Selectable& s);
 
-        void idle(System::Selectable& s)
-        {}
+        virtual void idle(System::Selectable& s);
 
-        void active(System::Selectable& s)
-        {}
+        virtual void avail(System::Selectable& s);
 
-        void avail(System::Selectable& s)
-        {}
+        virtual void cancel(System::IOHandle& h);
 
-    protected:
-        virtual void onRun();
+        virtual void beginRead(System::IOHandle* h);
 
-        virtual void onWake();
+        virtual void endRead(System::IOHandle* h);
+
+        virtual void beginWrite(System::IOHandle* h);
+
+        virtual void endWrite(System::IOHandle* h);
+
+        virtual bool isReadable(System::IOHandle* h);
+
+        virtual bool isWritable(System::IOHandle* h);
+
+        virtual bool isError(System::IOHandle* h);
 
     private:
+        System::Mutex _mutex;
+        std::set<System::Selectable*> _selectables;
+        std::vector<System::Selectable*> _avail;
+        System::TimerQueue _timerQueue;
+        System::EventQueue _eventQueue;
         Signal<const Pt::Event&>* _event;
         CFRunLoopSourceRef _wakeSource;
+        CFRunLoopTimerRef _masterTimer;
 };
 
 
@@ -107,20 +107,12 @@ class MainLoop : public Pt::System::EventLoop
         ~MainLoop();
 
         System::EventLoopImpl& impl()
-        { return *_eimpl; }
+        { return _impl; }
 
     protected:
         virtual void onAttachSelectable(System::Selectable&);
 
         virtual void onDetachSelectable(System::Selectable&);
-
-        virtual void onEnable(System::Selectable& s);
-
-        virtual void onDisable(System::Selectable& s);
-
-        virtual void onSignalAvail(System::Selectable&);
-
-        virtual void onSignalIdle(System::Selectable&);
 
         virtual void onIdle(System::Selectable& s);
 
@@ -144,7 +136,6 @@ class MainLoop : public Pt::System::EventLoop
 
     private:
         MainLoopImpl _impl;
-        System::EventLoopImpl* _eimpl;
 };
 
 } // namespace Gui
