@@ -67,7 +67,7 @@ class FdImpl
         virtual void onInput() = 0;
 
     private:
-        int _fd;
+        
         fd_set* _rfds;
 };
 

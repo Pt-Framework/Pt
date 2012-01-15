@@ -835,9 +835,9 @@ static const XKeySym2UCS xkeysym2ucs[] = {
 
 X11Fd::X11Fd(Display* display)
 : _display(display)
+, _ioh(*this)
 {
-    int xfd = XConnectionNumber( _display );
-    System::FdImpl::setFd(xfd);
+    _ioh.fd = XConnectionNumber( _display );
  
     // Do we really need this?
     //XftInit(0);
@@ -848,7 +848,6 @@ X11Fd::~X11Fd()
 {
     try
     {
-        System::FdImpl::setFd(-1);
         this->close();
     }
     catch(...)
@@ -856,11 +855,11 @@ X11Fd::~X11Fd()
 }
 
 
-void X11Fd::onInput()
+bool X11Fd::onRun()
 {
     // Get all pending events after a flush
     if( ! XPending(_display) )
-        return;
+        return false;
 
     // XEventsQueued(_display, QueuedAlready) > 0
     while( XPending(_display) > 0 ) {
@@ -897,6 +896,8 @@ void X11Fd::onInput()
                 break;
         }
     }
+
+    return true;
 }
 
 
@@ -922,7 +923,8 @@ MainLoop::MainLoop()
     // Do we really need this?
     //XftInit(0);  
 
-    this->add(_xfd);
+    _xfd.setActive(*this);
+    _xfd.begin();
 
     // TODO: need to flush later
     _xfd.flush();

@@ -37,9 +37,11 @@
 #include <Pt/Singleton.h>
 #include <Pt/Event.h>
 
-#include "posix/SelectableImpl.h"
+#include "posix/EventLoopImpl.h"
 
 #include <map>
+
+#include <unistd.h>
 
 namespace Pt {
 
@@ -48,43 +50,43 @@ namespace Gui {
 class Widget;
 
 class X11Fd : public System::Selectable
-            , private System::FdImpl
 {
     public:
         X11Fd(Display* display);
 
         ~X11Fd();
 
-        void setFd(int fd)
-        { System::FdImpl::setFd(fd); }
+        void begin()
+        {
+            if( ! this->isActive() )
+                throw std::logic_error("not implemented"); 
+
+            Pt::System::EventLoopImpl& impl = this->parent()->impl();
+            impl.beginRead(&_ioh);
+        }
+
+        void close()
+        { 
+            if(_ioh.fd != -1)
+            {
+                ::close(_ioh.fd); 
+                _ioh.fd = -1;
+            }
+        }
 
         void flush()
-        { this->onInput(); }
+        { this->onRun(); }
     
     protected:
-        virtual void onInput();
-
-        // inherit doc
-        virtual void onClose()
-        { System::FdImpl::closeFd(); }
+        virtual bool onRun();
 
         virtual void onCancel()
-        { throw std::logic_error("not implemented"); }
-
-        // inherit doc
-        virtual void onAttach(System::EventLoop& s)
-        { System::FdImpl::attach(s); }
-
-        // inherit doc
-        virtual void onDetach(System::EventLoop& s)
-        { System::FdImpl::detach(s); }
-
-        bool onAvail()
         { throw std::logic_error("not implemented"); }
 
     private:
         Display* _display;
         XEvent _xev;
+        Pt::System::IOHandle _ioh;
 };
 
 

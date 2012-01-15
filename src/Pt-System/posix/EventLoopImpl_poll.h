@@ -33,6 +33,7 @@
 #include "Pt/System/Selectable.h"
 
 #include <set>
+#include <cassert>
 #include <cstddef>
 
 #include <sys/types.h>

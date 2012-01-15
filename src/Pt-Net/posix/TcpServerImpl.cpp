@@ -161,7 +161,7 @@ void TcpServerImpl::listen(const std::string& ipaddr,
 
                 log_debug("set TCP_DEFER_ACCEPT to " << deferSecs);
 
-                if( ::setsockopt(_fd, SOL_TCP, TCP_DEFER_ACCEPT, &deferSecs, sizeof(deferSecs)) < 0)
+                if( ::setsockopt(this->fd(), SOL_TCP, TCP_DEFER_ACCEPT, &deferSecs, sizeof(deferSecs)) < 0)
                 {
                     close();
                     throw System::SystemError("setsockopt TCP_DEFER_ACCEPT");

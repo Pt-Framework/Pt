@@ -34,6 +34,7 @@
 
 #include <set>
 #include <cstddef>
+#include <cassert>
 
 #include <sys/types.h>
 #include <sys/select.h>

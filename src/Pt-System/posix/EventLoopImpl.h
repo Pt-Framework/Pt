@@ -127,7 +127,13 @@ class WakePipe
     #define PT_WITH_BSD_KQUEUE
 #endif
 
-#if defined(PT_WITH_BSD_KQUEUE)
+#ifdef __linux__
+    #define PT_WITH_LINUX_EPOLL
+#endif
+
+#if defined (PT_WITH_LINUX_EPOLL)
+    #include "EventLoopImpl_epoll.h"
+#elif defined(PT_WITH_BSD_KQUEUE)
     #include "EventLoopImpl_kqueue.h"
 #elif defined(PT_WITH_POSIX_POLL)
     #include "EventLoopImpl_poll.h"
