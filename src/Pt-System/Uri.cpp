@@ -26,8 +26,71 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+/*
+3.1. Common Internet Scheme Syntax
+
+
+   While the syntax for the rest of the URL may vary depending on the
+   particular scheme selected, URL schemes that involve the direct use
+   of an IP-based protocol to a specified host on the Internet use a
+   common syntax for the scheme-specific data:
+
+        //<user>:<password>@<host>:<port>/<url-path>
+
+   Some or all of the parts "<user>:<password>@", ":<password>",
+   ":<port>", and "/<url-path>" may be excluded.  The scheme specific
+   data start with a double slash "//" to indicate that it complies with
+   the common Internet scheme syntax. The different components obey the
+   following rules:
+
+    user
+        An optional user name. Some schemes (e.g., ftp) allow the
+        specification of a user name.
+
+    password
+        An optional password. If present, it follows the user
+        name separated from it by a colon.
+
+   The user name (and password), if present, are followed by a
+   commercial at-sign "@". Within the user and password field, any ":",
+   "@", or "/" must be encoded.
+
+   Note that an empty user name or password is different than no user
+   name or password; there is no way to specify a password without
+   specifying a user name. E.g., <URL:ftp://@host.com/> has an empty
+   user name and no password, <URL:ftp://host.com/> has no user name,
+   while <URL:ftp://foo:@host.com/> has a user name of "foo" and an
+   empty password.
+
+    host
+        The fully qualified domain name of a network host, or its IP
+        address as a set of four decimal digit groups separated by
+        ".". Fully qualified domain names take the form as described
+        in Section 3.5 of RFC 1034 [13] and Section 2.1 of RFC 1123
+        [5]: a sequence of domain labels separated by ".", each domain
+        label starting and ending with an alphanumerical character and
+        possibly also containing "-" characters. The rightmost domain
+        label will never start with a digit, though, which
+        syntactically distinguishes all domain names from the IP
+        addresses.
+
+    port
+        The port number to connect to. Most schemes designate
+        protocols that have a default port number. Another port number
+        may optionally be supplied, in decimal, separated from the
+        host by a colon. If the port is omitted, the colon is as well.
+
+    url-path
+        The rest of the locator consists of data specific to the
+        scheme, and is known as the "url-path". It supplies the
+        details of how the specified resource can be accessed. Note
+        that the "/" between the host (or port) and the url-path is
+        NOT part of the url-path.
+*/
+
 #include <Pt/System/Uri.h>
 #include <stdexcept>
+#include <iostream>
 #include <sstream>
 #include <cctype>
 
@@ -112,6 +175,12 @@ namespace System
           {
             _ipv6 = true;
             state = state_ipv6;
+          }
+          else if (ch == '/')
+          {
+            if(_protocol != "file") // TODO: the third slash is not part of the url-path
+              _path = ch;
+            state = state_path;
           }
           else
           {

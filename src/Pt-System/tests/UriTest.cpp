@@ -44,6 +44,7 @@ class UriTest : public Pt::Unit::TestSuite
             registerMethod("testHttpPort", *this, &UriTest::testHttpPort);
             registerMethod("testHttpsPort", *this, &UriTest::testHttpsPort);
             registerMethod("testFtpPort", *this, &UriTest::testFtpPort);
+            registerMethod("testFile", *this, &UriTest::testFile);
             registerMethod("testUriStr", *this, &UriTest::testUriStr);
         }
 
@@ -202,6 +203,12 @@ class UriTest : public Pt::Unit::TestSuite
         {
             Pt::System::Uri uri("ftp://host/");
             PT_UNIT_ASSERT_EQUALS(uri.port(), 21);
+        }
+
+        void testFile()
+        {
+            Pt::System::Uri uri("file:///hallo.txt");
+            PT_UNIT_ASSERT_EQUALS(uri.path(), "hallo.txt");
         }
 
         void testUriStr()

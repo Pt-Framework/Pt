@@ -116,33 +116,33 @@ namespace System {
             typedef typename std::multimap< std::string, PluginT* > PluginMap;
             typedef typename std::multimap< IfaceT*, PluginT* > InstanceMap;
 
-			class Iterator
-			{
-				public:
-					Iterator()
-					{}
+            class Iterator
+            {
+                public:
+                    Iterator()
+                    {}
 
-					Iterator(typename PluginMap::const_iterator it)
-					: _it( it)
-					{}
+                    Iterator(typename PluginMap::const_iterator it)
+                    : _it( it)
+                    {}
 
-					Iterator& operator++()
-					{ ++_it; return *this; }
-	
-					const PluginId& operator*() const
-					{ return *(_it->second); }
+                    Iterator& operator++()
+                    { ++_it; return *this; }
+    
+                    const PluginId& operator*() const
+                    { return *(_it->second); }
 
-					const PluginId* operator->() const
-					{ return _it->second; }
+                    const PluginId* operator->() const
+                    { return _it->second; }
 
-					bool operator==(const Iterator& it) const
-					{ return _it == it._it; }
+                    bool operator==(const Iterator& it) const
+                    { return _it == it._it; }
 
-					bool operator!=(const Iterator& it) const
-					{ return _it != it._it; }
+                    bool operator!=(const Iterator& it) const
+                    { return _it != it._it; }
 
-					typename PluginMap::const_iterator _it;
-			};
+                    typename PluginMap::const_iterator _it;
+            };
 
         public:
             PluginManager()
@@ -163,11 +163,11 @@ namespace System {
 
             void destroy(IfaceT* inst);
 
-			Iterator begin() const
-			{ return Iterator( _plugins.begin() ); }
-			
-			Iterator end() const
-			{ return Iterator( _plugins.end() ); }
+            Iterator begin() const
+            { return Iterator( _plugins.begin() ); }
+            
+            Iterator end() const
+            { return Iterator( _plugins.end() ); }
 
         protected:
             PluginMap& plugins()
@@ -181,7 +181,7 @@ namespace System {
             const std::type_info& _iface;
 
             /// A list of all loaded libraries
-			std::list<Library> _libs;
+            std::list<Library> _libs;
 
             /// A map of a feature string and the Plugin* which handles it.
             PluginMap _plugins;
@@ -208,11 +208,11 @@ namespace System {
     {
         Library shlib(path);
 
-    	void* symbol = shlib.resolve( sym.c_str() );
-    	if( ! symbol )
-    	    return;
+        void* symbol = shlib.resolve( sym.c_str() );
+        if( ! symbol )
+            return;
 
-		PluginId** plugins = (PluginId**) symbol;
+        PluginId** plugins = (PluginId**) symbol;
 
         for(; *plugins != 0; ++plugins)
         {

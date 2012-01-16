@@ -67,7 +67,7 @@ class PT_SYSTEM_API Library
 
              The library is loaded immediately.
         */
-        Library(const std::string& path);
+        explicit Library(const std::string& path);
 
         Library(const Library& other);
 
@@ -92,7 +92,7 @@ class PT_SYSTEM_API Library
             Returns the address of the symbol or 0 if it was not found.
          */
         void* operator[](const char* symbol) const
-		{ return this->resolve(symbol); }
+        { return this->resolve(symbol); }
 
         /** @brief Resolves the symbol \a symbol from the shared library
             Returns the address of the symbol or 0 if it was not found.

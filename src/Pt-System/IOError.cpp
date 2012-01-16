@@ -57,10 +57,21 @@ AccessFailed::AccessFailed(const std::string& resource, const SourceInfo& si)
 }
 
 
+AccessFailed::AccessFailed(const std::string& resource)
+: IOError("could not access " + resource)
+{
+}
+
+
 PermissionDenied::PermissionDenied(const std::string& resource, const SourceInfo& si)
 : AccessFailed(resource , si)
 {
 }
+
+
+ResourceNotFound::ResourceNotFound(const std::string& resource)
+: AccessFailed(resource)
+{}
 
 
 DeviceNotFound::DeviceNotFound(const std::string& device, const SourceInfo& si)

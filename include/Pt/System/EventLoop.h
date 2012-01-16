@@ -61,13 +61,11 @@ class PT_SYSTEM_API EventLoop : public Connectable
     public:
         static const std::size_t WaitInfinite = static_cast<const std::size_t>(-1);
 
-        /** @brief Destructs the EventLoop
+        /** @brief Destructs the EventLoop.
         */
         virtual ~EventLoop();
 
-        virtual EventLoopImpl& impl() = 0;
-
-        /** @brief Starts the event loop
+        /** @brief Starts the event loop.
         */
         void run();
 
@@ -75,15 +73,15 @@ class PT_SYSTEM_API EventLoop : public Connectable
         */
         void exit();
 
-        /** @brief Sets the idle timeout
+        /** @brief Sets the idle timeout.
         */
         void setIdleTimeout(size_t msecs);
 
-        /** @brief Returns the idle timeout
+        /** @brief Returns the idle timeout.
         */
         size_t idleTimeout() const;
 
-        /** @brief Notifies about wait timeouts
+        /** @brief Notifies about wait timeouts.
             This signal is send when the timeout given to a wait
             call of the selector expires and no activity occured.
         */
@@ -94,20 +92,26 @@ class PT_SYSTEM_API EventLoop : public Connectable
         */
         Signal<const Event&>& event();
 
-        /** @brief Emited when the eventloop is exited
+        /** @brief Emited when the eventloop is exited.
         */
         Signal<>& exited();
 
+        /** @brief Set the Selectable to ready-state.
+        */
         void setReady(Selectable& s)
         { this->onReady(s); }
 
+        //! @ internal
+        virtual EventLoopImpl& impl() = 0;
+
     protected:
-        /** @brief Constructs the EventLoop
-        */
+        //! @internal Constructor
         EventLoop();
 
+        //! @internal Runs the loop
         virtual void onRun() = 0;
 
+        //! @internal Exits the loop
         virtual void onExit() = 0;
 
         //! @internal EventSink interface
@@ -122,10 +126,10 @@ class PT_SYSTEM_API EventLoop : public Connectable
         //! @internal EventSink interface
         virtual void onWake() = 0;
 
-        //! @internal
+        //! @internal A timer is attached
         virtual void onAttachTimer(Timer& timer) = 0;
 
-        //! @internal
+        //! @internal A Timer is detached
         virtual void onDetachTimer(Timer& timer) = 0;
 
         //! @internal A Selectable is attached
@@ -134,8 +138,10 @@ class PT_SYSTEM_API EventLoop : public Connectable
         //! @internal A Selectable is detached
         virtual void onDetachSelectable(Selectable&) = 0;
 
+        //! @internal Mark the selectable as ready
         virtual void onReady(Selectable&) = 0;
 
+        //! @internal Mark the selecatble as not ready
         virtual void onIdle(Selectable&) = 0;
 
     private:
@@ -144,7 +150,7 @@ class PT_SYSTEM_API EventLoop : public Connectable
         Signal<const Event&> _event;
 };
 
-
+//! @ internal
 class PT_SYSTEM_API EventQueue
 {
     public:
@@ -171,7 +177,7 @@ class PT_SYSTEM_API EventQueue
         bool _exited;
 };
 
-
+//! @ internal
 class PT_SYSTEM_API TimerQueue
 {
     typedef std::multimap<Timespan, Timer*> TimerMap;
@@ -190,61 +196,6 @@ class PT_SYSTEM_API TimerQueue
     private:
         TimerMap _timers;
 };
-
-
-//! @internal
-/*class PT_SYSTEM_API EventDispatcher
-{
-    typedef std::multimap<Timespan, Timer*> TimerQueue;
-    typedef std::deque<Event*> EventQueue;
-
-    public:
-        EventDispatcher();
-
-        EventDispatcher(Allocator& a);
-
-        virtual ~EventDispatcher();
-
-        void run();
-
-        void exit();
-
-        void wake();
-
-        Allocator& allocator()
-        { return *_usedalloc; }
-
-        Signal<const Event&>& event()
-        { return _event; }
-
-        void commitEvent(const Event& event);
-
-        void queueEvent(const Event& event);
-
-        bool processEvents();
-
-        void addTimer(Timer& timer);
-
-        void removeTimer( Timer& timer );
-
-        size_t processTimers();
-
-    protected:
-        virtual void onRun() = 0;
-
-        virtual void onWake() = 0;
-
-        virtual void onExit() {}
-
-    private:
-        RecursiveMutex _queueMutex;
-        Allocator _allocator;
-        Allocator* _usedalloc;
-        EventQueue _eventQueue;
-        TimerQueue _timers;
-        int _state;
-        Signal<const Event&> _event;
-};*/
 
 } // namespace System
 

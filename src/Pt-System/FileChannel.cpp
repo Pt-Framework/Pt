@@ -27,10 +27,10 @@
  */
 
 #include "FileChannel.h"
-#include "Pt/System/Url.h"
+#include "Pt/System/Uri.h"
 #include "Pt/System/File.h"
-#include <iostream>
 #include <sstream>
+#include <cctype>
 
 namespace Pt {
 
@@ -54,28 +54,67 @@ void FileChannel::onOpen(const std::string& urlstring)
 {
     _maxSize = 1*1024*1024;
     _numBackup = 1;
-    Pt::System::Url url(urlstring);
+    Pt::System::Uri url(urlstring);
 
-    std::string value = url.arg("size");
-    std::istringstream ss(value);
-    ss >> _maxSize;
+    enum {
+      Key, Value
+    } state = Key;
 
-    value = url.arg("files");
-    unsigned maxFile = 1;
-    std::istringstream ss2(value);
-    ss2 >> maxFile;
-    _numBackup = maxFile - 1;
+    std::string key, value;
+    std::string query = url.query() + '&';
+    for(std::string::iterator it = query.begin(); it != query.end(); ++it)
+    {
+        char ch = *it;
+        switch(state)
+        {
+            case Key:
+                if(std::isalpha(ch))
+                    key += ch;
+                else if(ch == '=')
+                    state = Value;
+                else
+                    throw std::invalid_argument("invalid query string");
+
+                break;
+
+            case Value:
+                if(std::isalnum(ch))
+                    value += ch;
+                else if(ch == '&')
+                {
+                    if(key == "size")
+                    {
+                        std::istringstream ss(value);
+                        ss >> _maxSize;
+                    }
+                    else if(key == "files")
+                    {
+                        unsigned maxFile = 1;
+                        std::istringstream ss(value);
+                        ss >> maxFile;
+                        _numBackup = maxFile - 1;
+                    }
+                    key.clear();
+                    value.clear();
+                    state = Key;
+                }
+                else
+                    throw std::invalid_argument("invalid query string");
+
+                break;
+        }
+    }
 
     _file = url.path();
 
-	_fs.open(_file.c_str(), std::ios_base::out | std::ios_base::app);
+    _fs.open(_file.c_str(), std::ios_base::out | std::ios_base::app);
 
     if( !_fs)
         throw std::invalid_argument("invalid file name: " + _file);
 
-	_curSize = _fs.tellp();
+    _curSize = _fs.tellp();
 
-	if(_curSize > _maxSize)
+    if(_curSize > _maxSize)
     {
         this->rotate();
     }

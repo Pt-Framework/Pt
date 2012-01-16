@@ -28,10 +28,9 @@
 #include <Pt/System/Api.h>
 #include <string>
 
-namespace Pt
-{
-namespace System
-{
+namespace Pt {
+
+namespace System {
 
   class PT_SYSTEM_API Uri
   {
@@ -100,5 +99,8 @@ namespace System
 
       std::string str() const;
   };
-}
-}
+
+} // namespace System
+
+} // namespace Pt
+

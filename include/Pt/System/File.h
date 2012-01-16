@@ -119,7 +119,7 @@ class PT_SYSTEM_API File
 
             @param to Location of new file
             @param allowCopy Allow copy between drives
-			@return True if file successfully moved, otherwise false
+            @return True if file successfully moved, otherwise false
         */
         void move(const std::string& to, bool allowCopy = true);
 

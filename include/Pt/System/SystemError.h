@@ -61,7 +61,7 @@ class PT_SYSTEM_API OpenLibraryFailed : public SystemError
 
         //! @brief Destructor
         ~OpenLibraryFailed() throw()
-		{}
+        {}
 };
 
 /** @brief Thrown, when a symbol is not found in a library
@@ -75,7 +75,7 @@ class PT_SYSTEM_API SymbolNotFound : public SystemError
 
         //! @brief Destructor
         ~SymbolNotFound() throw()
-		{}
+        {}
 
         //! @brief Returns the symbol, which was not found
         const std::string& symbol() const

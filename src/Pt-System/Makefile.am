@@ -44,7 +44,6 @@ libPt_System_la_SOURCES = \
 	SystemError.cpp \
 	Thread.cpp \
 	Timer.cpp \
-	Url.cpp \
     ConsoleChannel.cpp \
     FileChannel.cpp \
     Logger.cpp \

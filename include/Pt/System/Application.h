@@ -73,7 +73,7 @@ class PT_SYSTEM_API Application : public Pt::Connectable
     public:
         explicit Application(int argc = 0, char** argv = 0);
 
-        Application(EventLoop* loop, int argc = 0, char** argv = 0);
+        explicit Application(EventLoop* loop, int argc = 0, char** argv = 0);
 
         ~Application();
 

@@ -27,7 +27,6 @@
  */
 
 #include "SerialChannel.h"
-#include <Pt/System/Url.h>
 #include <Pt/System/IOError.h>
 #include <iostream>
 #include <sstream>

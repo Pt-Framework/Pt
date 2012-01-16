@@ -62,6 +62,8 @@ namespace System {
     class PT_SYSTEM_API AccessFailed : public IOError
     {
         public:
+            explicit AccessFailed(const std::string& resource);
+
             AccessFailed(const std::string& resource, const SourceInfo& si);
 
             ~AccessFailed() throw()
@@ -74,6 +76,16 @@ namespace System {
             std::string _resource;
     };
 
+
+    class PT_SYSTEM_API ResourceNotFound : public AccessFailed
+    {
+        public:
+            explicit ResourceNotFound(const std::string& resource);
+
+            ~ResourceNotFound() throw()
+            {}
+    };
+
     class PT_SYSTEM_API PermissionDenied : public AccessFailed
     {
         public:
@@ -83,6 +95,7 @@ namespace System {
             {}
     };
 
+    // obsolete
     class PT_SYSTEM_API DeviceNotFound : public AccessFailed
     {
         public:

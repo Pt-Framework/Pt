@@ -90,6 +90,8 @@ class PT_SYSTEM_API StreamBufferImpl {
 class StreamBuffer : public std::streambuf
                    , public Connectable
 {
+    friend class StreamBufferImpl;
+
     public:
         explicit StreamBuffer(size_t bufferSize = 8192, bool extend = false)
         : _impl(*this, bufferSize, extend)
@@ -101,8 +103,6 @@ class StreamBuffer : public std::streambuf
 
         ~StreamBuffer()
         {}
-
-        ////////////////////////////////////////////////////////////////////////////////////////
 
         IODevice* device()
         { return _impl.ioDevice(); }
@@ -123,8 +123,6 @@ class StreamBuffer : public std::streambuf
 
         std::streamsize speekn(char* buffer, std::streamsize size)
         { return _impl.xspeekn(*this, buffer, size); }
-
-        ////////////////////////////////////////////////////////////////////////////////////////
 
         void attach(IODevice& ioDevice)
         { _impl.attach(*this, ioDevice); }
@@ -150,8 +148,6 @@ class StreamBuffer : public std::streambuf
         void discard()
         { _impl.discard(*this); }
 
-        ////////////////////////////////////////////////////////////////////////////////////////
-
     protected:
         virtual int sync()
         { return _impl.sync(*this); }
@@ -173,8 +169,6 @@ class StreamBuffer : public std::streambuf
 
     private:
         StreamBufferImpl _impl;
-
-        friend class StreamBufferImpl;
 };
 
 } // namespace System

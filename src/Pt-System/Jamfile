@@ -36,7 +36,6 @@ SharedLibrary Pt-System : $(PT_SYSTEM_IMPL)
                           SystemError.cpp
                           Thread.cpp
                           Timer.cpp
-                          Url.cpp
                           Uri.cpp
                           ConsoleChannel.cpp
                           FileChannel.cpp
