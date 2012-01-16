@@ -47,7 +47,7 @@ FileDeviceImpl::~FileDeviceImpl()
 { }
 
 
-void FileDeviceImpl::open( const char* path, IODevice::OpenMode mode)
+void FileDeviceImpl::open( const char* path, std::ios::openmode mode)
 {
     int flags = O_RDONLY;
 

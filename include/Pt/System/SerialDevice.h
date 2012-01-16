@@ -138,14 +138,14 @@ class PT_SYSTEM_API SerialDevice : public IODevice
 
         /** @brief Constructs a serial device and open the specified device file
          */
-        SerialDevice( const std::string& file, OpenMode mode);
+        SerialDevice( const std::string& file, std::ios::openmode mode);
 
         //! @brief Destructor
         virtual ~SerialDevice();
 
         /** @brief Open the specified device file
          */
-        void open( const std::string& file, OpenMode mode);
+        void open( const std::string& file, std::ios::openmode mode);
 
         //! @brief Sets the baud rate
 		void setBaudRate( unsigned rate );

@@ -42,40 +42,6 @@ namespace Pt {
 
 namespace System {
 
-enum IOS_OpenMode
-{
-    IOS_Read        = 1L << 0,
-    IOS_Write       = 1L << 1,
-    IOS_AtEnd       = 1L << 2,
-    IOS_Append      = 1L << 3,
-    IOS_Trunc       = 1L << 4,
-    IOS_OpenModeEnd = 1L << 16
-};
-
-inline IOS_OpenMode operator&(IOS_OpenMode a, IOS_OpenMode b)
-{ return IOS_OpenMode(static_cast<int>(a) & static_cast<int>(b)); }
-
-inline IOS_OpenMode operator|(IOS_OpenMode a, IOS_OpenMode b)
-{ return IOS_OpenMode(static_cast<int>(a) | static_cast<int>(b)); }
-
-inline IOS_OpenMode operator^(IOS_OpenMode a, IOS_OpenMode b)
-{ return IOS_OpenMode(static_cast<int>(a) ^ static_cast<int>(b)); }
-
-inline IOS_OpenMode& operator|=(IOS_OpenMode& a, IOS_OpenMode b)
-{ return a = a | b; }
-
-inline IOS_OpenMode& operator&=(IOS_OpenMode& a, IOS_OpenMode b)
-{ return a = a & b; }
-
-inline IOS_OpenMode& operator^=(IOS_OpenMode& a, IOS_OpenMode b)
-{ return a = a ^ b; }
-
-inline IOS_OpenMode operator~(IOS_OpenMode a)
-{ return IOS_OpenMode(~static_cast<int>(a)); }
-
-
-class IODeviceImpl;
-
 /** @brief Endpoint for I/O operations
 
     This class serves as the base class for all kinds of I/O devices. The
@@ -97,20 +63,13 @@ class PT_SYSTEM_API IODevice : public Selectable
 
         typedef std::ios_base::seekdir SeekDir;
 
-        //typedef IOS_OpenMode OpenMode;
-        typedef std::ios::openmode OpenMode;
+        typedef std::ios::openmode OpenFlags;
 
-        //static const OpenMode Read   = IOS_Read;
-        //static const OpenMode Write  = IOS_Write;
-        //static const OpenMode AtEnd  = IOS_AtEnd;
-        //static const OpenMode Append = IOS_Append;
-        //static const OpenMode Trunc  = IOS_Trunc;
-
-        static const OpenMode Read   = std::ios::in;
-        static const OpenMode Write  = std::ios::out;
-        static const OpenMode AtEnd  = std::ios::ate;
-        static const OpenMode Append = std::ios::app;
-        static const OpenMode Trunc  = std::ios::trunc;
+        static const OpenFlags Read   = std::ios::in;
+        static const OpenFlags Write  = std::ios::out;
+        static const OpenFlags AtEnd  = std::ios::ate;
+        static const OpenFlags Append = std::ios::app;
+        static const OpenFlags Trunc  = std::ios::trunc;
 
     public:
         //! @brief Destructor

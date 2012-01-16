@@ -40,7 +40,7 @@ SerialDevice::SerialDevice()
 }
 
 
-SerialDevice::SerialDevice( const std::string& file, OpenMode mode)
+SerialDevice::SerialDevice( const std::string& file, std::ios::openmode mode)
 : _impl( 0 )
 {
     _impl = new SerialDeviceImpl(*this);
@@ -61,7 +61,7 @@ SerialDevice::~SerialDevice()
 }
 
 
-void SerialDevice::open( const std::string& file, OpenMode mode)
+void SerialDevice::open( const std::string& file, std::ios::openmode mode)
 {
     this->close();
     _impl->open( file, mode );

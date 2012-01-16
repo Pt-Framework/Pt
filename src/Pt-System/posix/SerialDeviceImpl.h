@@ -39,7 +39,7 @@ class SerialDeviceImpl : public IODeviceImpl
 
         ~SerialDeviceImpl();
 
-        void open(const std::string& path, IODevice::OpenMode mode);
+        void open(const std::string& path, std::ios::openmode mode);
 
         void close();
 

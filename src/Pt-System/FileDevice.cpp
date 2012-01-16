@@ -39,7 +39,7 @@ FileDevice::FileDevice()
 }
 
 
-FileDevice::FileDevice(const char* path, OpenMode mode)
+FileDevice::FileDevice(const char* path, std::ios::openmode mode)
 {
     _impl = new FileDeviceImpl(*this);
 
@@ -58,7 +58,7 @@ FileDevice::~FileDevice()
 }
 
 
-void FileDevice::open( const char* path, OpenMode mode)
+void FileDevice::open( const char* path, std::ios::openmode mode)
 {
     //if( this->enabled() ) 
     {
