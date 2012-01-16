@@ -36,14 +36,19 @@ namespace Pt {
 
 namespace System {
 
-StreamBufferImpl::StreamBufferImpl(StreamBuffer& sb, size_t bufferSize, bool extend)
-: _ioDevice   (0),
-    _ibufferSize(0),
-    _ibuffer    (0),
-    _obufferSize(0),
-    _obuffer    (0),
-    _pbmax      (4),
-    _oextend    (extend)
+StreamBufferImpl::StreamBufferImpl()
+: _ioDevice   (0)
+, _ibufferSize(0)
+, _ibuffer    (0)
+, _obufferSize(0)
+, _obuffer    (0)
+, _pbmax      (4)
+, _oextend    (false)
+{
+
+}
+
+void StreamBufferImpl::init(StreamBuffer& sb, size_t bufferSize, bool extend)
 {
     _ibufferSize = bufferSize + 4;
     _ibuffer = 0;
@@ -63,18 +68,24 @@ void StreamBufferImpl::attach(StreamBuffer& sb, IODevice& ioDevice)
     if( ioDevice.reading() || ioDevice.writing() )
         throw IOPending( PT_ERROR_MSG("IODevice in use") );
 
-    if(_ioDevice)
-    {
-        if( ioDevice.reading() || ioDevice.writing() )
-            throw IOPending( PT_ERROR_MSG("IODevice in use") );
-
-        ioDevice.inputReady() -= slot(sb, &StreamBuffer::onRead);
-        ioDevice.outputReady() -= slot(sb, &StreamBuffer::onWrite);
-    }
+    this->detach(sb);
 
     _ioDevice = &ioDevice;
     ioDevice.inputReady() += slot(sb, &StreamBuffer::onRead);
     ioDevice.outputReady() += slot(sb, &StreamBuffer::onWrite);
+}
+
+void StreamBufferImpl::detach(StreamBuffer& sb)
+{
+    if( ! _ioDevice)
+        return;
+
+    if( _ioDevice->reading() || _ioDevice->writing() )
+        throw IOPending( PT_ERROR_MSG("IODevice in use") );
+
+    _ioDevice->inputReady() -= slot(sb, &StreamBuffer::onRead);
+    _ioDevice->outputReady() -= slot(sb, &StreamBuffer::onWrite);
+    _ioDevice = 0;
 }
 
 void StreamBufferImpl::beginRead(StreamBuffer& sb)

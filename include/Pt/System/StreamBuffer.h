@@ -39,9 +39,12 @@ namespace Pt {
 
 namespace System {
 
-class PT_SYSTEM_API StreamBufferImpl {
+class PT_SYSTEM_API StreamBufferImpl 
+{
     public:
-        StreamBufferImpl(StreamBuffer& sb, size_t bufferSize, bool extend);
+        StreamBufferImpl();
+
+        void init(StreamBuffer& sb, size_t bufferSize, bool extend);
 
         IODevice* ioDevice()
         { return _ioDevice; }
@@ -53,21 +56,17 @@ class PT_SYSTEM_API StreamBufferImpl {
         { return _outputReady; }
 
         void attach(StreamBuffer& sb, IODevice& ioDevice);
-
+        void detach(StreamBuffer& sb);
         void beginRead(StreamBuffer& sb);
         void onRead(StreamBuffer& sb);
         void endRead(StreamBuffer& sb);
-
         size_t beginWrite(StreamBuffer& sb);
         void onWrite(StreamBuffer& sb);
         size_t endWrite(StreamBuffer& sb);
-
         void discard(StreamBuffer& sb);
         int sync(StreamBuffer& sb);
-
         std::streambuf::int_type underflow(StreamBuffer& sb);
         std::streambuf::int_type overflow(StreamBuffer& sb, std::streambuf::int_type ch);
-
         std::streamsize xspeekn(StreamBuffer& sb, char* buffer, std::streamsize size);
         std::streambuf::pos_type seekoff(StreamBuffer& sb, std::streambuf::off_type off, std::ios::seekdir dir, std::ios::openmode);
         std::streambuf::pos_type seekpos(StreamBuffer& sb, std::streambuf::pos_type p, std::ios::openmode mode);
@@ -94,12 +93,17 @@ class StreamBuffer : public std::streambuf
 
     public:
         explicit StreamBuffer(size_t bufferSize = 8192, bool extend = false)
-        : _impl(*this, bufferSize, extend)
-        {}
+        : _impl()
+        {
+            _impl.init(*this, bufferSize, extend);
+        }
 
         explicit StreamBuffer(IODevice& ioDevice, size_t bufferSize = 8192, bool extend = false)
-        : _impl(*this, bufferSize, extend)
-        { _impl.attach(*this, ioDevice); }
+        : _impl()
+        {
+            _impl.init(*this, bufferSize, extend);
+            _impl.attach(*this, ioDevice); 
+        }
 
         ~StreamBuffer()
         {}
@@ -126,6 +130,9 @@ class StreamBuffer : public std::streambuf
 
         void attach(IODevice& ioDevice)
         { _impl.attach(*this, ioDevice); }
+
+        void detach()
+        { _impl.detach(*this); }
 
         void beginRead()
         { _impl.beginRead(*this); }
