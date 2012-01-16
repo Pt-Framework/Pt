@@ -1,4 +1,6 @@
 /*
+ * Copyright (C) 2008-2012 Marc Boris Duerner
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -31,6 +33,7 @@
 #include <Pt/NonCopyable.h>
 #include <Pt/System/Api.h>
 #include <Pt/System/EventLoop.h>
+#include <cassert>
 
 namespace Pt {
 
@@ -39,6 +42,8 @@ namespace System {
 //! @brief Dispatches operations through an event loop
 class PT_SYSTEM_API Selectable : protected NonCopyable
 {
+    friend class SelectableList;
+
     public:
         //! @brief Destructor
         virtual ~Selectable();
@@ -86,43 +91,111 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
 };
 
 
-class Active : public Selectable
+class SelectableList
 {
     public:
-        virtual ~Active()
+        class Iterator
+        {
+            public:
+                Iterator()
+                : _sel(0)
+                {}
+
+                explicit Iterator(Selectable* s)
+                : _sel(s)
+                {}
+
+                Iterator& operator=(const Iterator& it)
+                {
+                    _sel = it._sel;
+                    return *this;
+                }
+        
+                Iterator& operator++()
+                {
+                    assert(_sel);
+                    _sel = _sel->_next;
+                    return *this;
+                }
+        
+                Selectable& operator*() const
+                { return *_sel; }
+        
+                Selectable* operator->() const
+                { return _sel; }
+
+                bool operator ==(const Iterator& it) const
+                { return _sel == it._sel; }
+
+                bool operator !=(const Iterator& it) const
+                { return _sel != it._sel; }
+
+            private:
+                Selectable* _sel;
+        };
+
+    public:
+        SelectableList()
+        : _first(0)
+        , _last(0)
         {}
 
-        void begin()
-        {
-            if( ! isActive() )
-                return;
+        ~SelectableList()
+        {}
 
-            this->onBegin( *parent() );
+        bool empty() const
+        { return ! _first; }
+
+        Iterator end()
+        { return Iterator(); }
+
+        Iterator begin()
+        { return Iterator(_first); }
+
+        void push_back(Selectable& s)
+        {
+            assert(s._prev == 0);
+            assert(s._next == 0);
+
+            s._prev = _last;
+            _last = &s;
+
+            if( ! _first)
+                _first = &s;
         }
 
-    protected:
-        Active()
-        { }
-
-        virtual void onBegin(EventLoop& loop)
+        void remove(Selectable& s)
         {
-            loop.setReady(*this);
-            loop.wake();
+            assert(s._prev || _first == &s);
+            Selectable* prev = s._prev;
+            Selectable* next = s._next;
+            s._prev = 0;
+            s._next = 0;
+
+            if(next)
+            {
+                next->_prev = prev;
+            }
+            else // last element
+            {
+                assert(&s == _last);
+                _last = prev;
+            }
+
+            if(prev)
+            {
+                prev->_next = next;
+            }
+            else // first element
+            {
+                assert(&s == _first);
+                _first = next;
+            }
         }
 
-        virtual void onCancel()
-        {
-        }
-
-        virtual bool onRun() = 0;
-
-        virtual void onAttach(EventLoop& loop)
-        {
-        }
-
-        virtual void onDetach(EventLoop& loop)
-        {
-        }
+    private:
+        Selectable* _first;
+        Selectable* _last;
 };
 
 } // namespace System
@@ -130,3 +203,4 @@ class Active : public Selectable
 } // namespace Pt
 
 #endif
+
