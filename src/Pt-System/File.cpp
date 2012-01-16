@@ -44,7 +44,7 @@ File::File(const std::string& path)
 , _impl(0)
 {
     if( ! File::exists( _path) )
-        throw FileNotFound(path, PT_SOURCEINFO);
+        throw AccessFailed(path);
 }
 
 
@@ -53,7 +53,7 @@ File::File(const FileInfo& fi)
 , _impl(0)
 {
     if( ! fi.isFile() )
-        throw FileNotFound(fi.path(), PT_SOURCEINFO);
+        throw AccessFailed(fi.path());
 }
 
 

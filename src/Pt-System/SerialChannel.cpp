@@ -61,15 +61,15 @@ void SerialChannel::onOpen(const std::string& urlstr)
     std::getline(sStream, protocol, ':');
     if( protocol != "comm" )
     {
-        throw Pt::System::AccessFailed( "Unexpected protocol type: " + protocol, PT_SOURCEINFO );
+        throw Pt::System::AccessFailed( "Unexpected protocol type: " + protocol );
     }
     if( sStream.get() != '/' )
     {
-        throw Pt::System::AccessFailed( "Malformed URL! Expected '/' after protocol part.", PT_SOURCEINFO );
+        throw Pt::System::AccessFailed( "Malformed URL! Expected '/' after protocol part." );
     }
     if( sStream.get() != '/' )
     {
-        throw Pt::System::AccessFailed( "Malformed URL! Expected '/' after protocol part.", PT_SOURCEINFO );
+        throw Pt::System::AccessFailed( "Malformed URL! Expected '/' after protocol part." );
     }
     std::string path;
     std::getline( sStream, path );

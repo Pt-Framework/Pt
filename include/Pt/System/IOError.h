@@ -64,8 +64,6 @@ namespace System {
         public:
             explicit AccessFailed(const std::string& resource);
 
-            AccessFailed(const std::string& resource, const SourceInfo& si);
-
             ~AccessFailed() throw()
             {}
 
@@ -76,8 +74,8 @@ namespace System {
             std::string _resource;
     };
 
-    // obsolete
-    class PT_SYSTEM_API PermissionDenied : public AccessFailed
+
+    /*class PT_SYSTEM_API PermissionDenied : public AccessFailed
     {
         public:
             PermissionDenied(const std::string& resource, const SourceInfo& si);
@@ -86,7 +84,7 @@ namespace System {
             {}
     };
 
-    // obsolete
+
     class PT_SYSTEM_API DeviceNotFound : public AccessFailed
     {
         public:
@@ -105,26 +103,26 @@ namespace System {
 
             ~FileNotFound() throw()
             {}
-    };
+    };*/
 
-    // obsolete
+
     /** @brief A directory could not be found at a given path
     */
-    class PT_SYSTEM_API DirectoryNotFound : public AccessFailed
+    /*class PT_SYSTEM_API DirectoryNotFound : public AccessFailed
     {
-        public:
+        public:*/
             /** @brief Construct from path and source info
 
                 Constructs the exception from the path where the directory
                 could not be found and the location in the source code where
                 he exception was thrown.
-            */
+            *//*
             DirectoryNotFound(const std::string& path, const SourceInfo& si);
 
             //! @brief Destructor
             ~DirectoryNotFound() throw()
             {}
-    };
+    };*/
 
     class PT_SYSTEM_API IOPending : public IOError
     {

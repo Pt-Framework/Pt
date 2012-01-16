@@ -51,19 +51,13 @@ IOTimeout::IOTimeout()
 }
 
 
-AccessFailed::AccessFailed(const std::string& resource, const SourceInfo& si)
-: IOError("could not access " + resource, si)
-{
-}
-
-
 AccessFailed::AccessFailed(const std::string& resource)
 : IOError("could not access " + resource)
 {
 }
 
 
-PermissionDenied::PermissionDenied(const std::string& resource, const SourceInfo& si)
+/*PermissionDenied::PermissionDenied(const std::string& resource, const SourceInfo& si)
 : AccessFailed(resource , si)
 {
 }
@@ -81,7 +75,7 @@ FileNotFound::FileNotFound(const std::string& path, const SourceInfo& si)
 
 DirectoryNotFound::DirectoryNotFound(const std::string& path, const SourceInfo& si)
 : AccessFailed(path, si)
-{ }
+{ }*/
 
 
 IOPending::IOPending(const std::string& what, const SourceInfo& si)

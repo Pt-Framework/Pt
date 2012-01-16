@@ -89,7 +89,7 @@ void SerialDeviceImpl::open(const std::string& path, IODevice::OpenMode mode)
     int fd = ::open( path.c_str(), flags );
     if( -1 == fd )
     {
-        throw DeviceNotFound(path, PT_SOURCEINFO);
+        throw AccessFailed(path);
     }
 
     // TODO: exception safety

@@ -45,7 +45,7 @@ namespace System {
 void throwErrno(const std::string& path, const Pt::SourceInfo& si);
 
 
-void throwDirectoryErrno(const std::string& path, const Pt::SourceInfo& si)
+/*void throwDirectoryErrno(const std::string& path, const Pt::SourceInfo& si)
 {
     switch(errno)
     {
@@ -58,7 +58,7 @@ void throwDirectoryErrno(const std::string& path, const Pt::SourceInfo& si)
 
         default: throwErrno(path, si);
     }
-}
+}*/
 
 
 DirectoryIteratorImpl::DirectoryIteratorImpl(const std::string& path)
@@ -71,7 +71,7 @@ DirectoryIteratorImpl::DirectoryIteratorImpl(const std::string& path)
     _handle = ::opendir( path.c_str() );
     if( !_handle )
     {
-        throwDirectoryErrno(path, PT_SOURCEINFO);
+        throw AccessFailed(path);
     }
 
     // append a trailing slash if not empty, so we can add the
@@ -130,7 +130,7 @@ void DirectoryImpl::create(const std::string& path)
 {
     if( -1 == ::mkdir(path.c_str(), 0777) )
     {
-        throwDirectoryErrno(path, PT_SOURCEINFO);
+        throw AccessFailed(path);
     }
 }
 
@@ -139,7 +139,7 @@ void DirectoryImpl::remove(const std::string& path)
 {
     if( -1 == ::rmdir(path.c_str()) )
     {
-        throwDirectoryErrno(path, PT_SOURCEINFO);
+        throw AccessFailed(path);
     }
 }
 
@@ -148,7 +148,7 @@ void DirectoryImpl::move(const std::string& oldName, const std::string& newName)
 {
     if (0 != ::rename(oldName.c_str(), newName.c_str()))
     {
-        throwDirectoryErrno(oldName, PT_SOURCEINFO);
+        throw AccessFailed(oldName);
     }
 }
 
@@ -157,7 +157,7 @@ void DirectoryImpl::chdir(const std::string& path)
 {
     if( -1 == ::chdir(path.c_str()) )
     {
-        throwDirectoryErrno(path, PT_SOURCEINFO);
+        throw AccessFailed(path);
     }
 }
 

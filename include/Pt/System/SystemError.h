@@ -53,7 +53,7 @@ class PT_SYSTEM_API SystemError : public std::runtime_error
 
 /** @brief Thrown, when a shared library could not be loaded
 */
-class PT_SYSTEM_API OpenLibraryFailed : public SystemError
+/*class PT_SYSTEM_API OpenLibraryFailed : public SystemError
 {
     public:
         //! @brief Constructs from a message string and source info
@@ -62,25 +62,9 @@ class PT_SYSTEM_API OpenLibraryFailed : public SystemError
         //! @brief Destructor
         ~OpenLibraryFailed() throw()
         {}
-};
+};*/
 
-/** @brief Thrown, when a symbol is not found in a library
-*/
-class PT_SYSTEM_API SymbolNotFound : public SystemError
-{
-    std::string _symbol;
 
-    public:
-        SymbolNotFound(const std::string& sym, const Pt::SourceInfo& si);
-
-        //! @brief Destructor
-        ~SymbolNotFound() throw()
-        {}
-
-        //! @brief Returns the symbol, which was not found
-        const std::string& symbol() const
-        { return _symbol; }
-};
 
 } // namespace System
 

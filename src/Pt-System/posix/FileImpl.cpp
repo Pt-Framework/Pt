@@ -56,7 +56,7 @@ namespace System {
 // EPERM  The directory containing pathname has the sticky bit (S_ISVTX) set
 // EPERM  The filesystem containing pathname does not support the removal of directories.
 // EROFS  pathname refers to a file on a read-only filesystem.
-void throwErrno(const std::string& path, const Pt::SourceInfo& si)
+/*void throwErrno(const std::string& path, const Pt::SourceInfo& si)
 {
     if(errno == EEXIST)
         throw AccessFailed(path, si);
@@ -94,12 +94,12 @@ void throwErrno(const std::string& path, const Pt::SourceInfo& si)
         default: // EFAULT EMFILE EOVERFLOW
             throw SystemError( strerror(errno), si );
     }
-}
+}*/
 
 
 namespace {
 
-void throwFileErrno(const std::string& path, const Pt::SourceInfo& si)
+/*void throwFileErrno(const std::string& path, const Pt::SourceInfo& si)
 {
     switch(errno)
     {
@@ -112,7 +112,7 @@ void throwFileErrno(const std::string& path, const Pt::SourceInfo& si)
 
         default: throwErrno(path, si);
     }
-}
+}*/
 
 }
 
@@ -122,7 +122,7 @@ std::size_t FileImpl::size(const std::string& path)
 
     if( 0 != stat(path.c_str(), &buff) )
     {
-        throwFileErrno(path, PT_SOURCEINFO);
+        throw AccessFailed(path);
     }
 
     return buff.st_size;
@@ -139,45 +139,45 @@ void FileImpl::resize(const std::string& path, std::size_t newSize)
     while ( ret == EINTR );
 
     if(ret != 0)
-        throwFileErrno( path, PT_SOURCEINFO);
+        throw AccessFailed(path);
 }
 
 
 void FileImpl::remove(const std::string& path)
 {
     if(0 != ::remove(path.c_str()))
-        throwFileErrno(path, PT_SOURCEINFO);
+        throw AccessFailed(path);
 }
 
 
 void FileImpl::move(const std::string& path, const std::string& to, bool allowCopy)
 {
-	int ret = ::rename(path.c_str(), to.c_str());
-	if( 0 != ret )
-	{
-		if( EXDEV == ret )
-		{
-			if( ! allowCopy )
-				throw AccessFailed(path, PT_SOURCEINFO);
+    int ret = ::rename(path.c_str(), to.c_str());
+    if( 0 != ret )
+    {
+        if( EXDEV == ret )
+        {
+            if( ! allowCopy )
+                throw AccessFailed(path);
 
-			FileDevice f1(path.c_str(), IODevice::Read);
-			FileDevice f2(to.c_str(), IODevice::Write);
+            FileDevice f1(path.c_str(), IODevice::Read);
+            FileDevice f2(to.c_str(), IODevice::Write);
 
-			char buffer[8192];
-			size_t n = 0;
-			do
-			{
-				if( ! f1.eof() )
-					n = f1.read( buffer + n, sizeof(buffer) - n );
+            char buffer[8192];
+            size_t n = 0;
+            do
+            {
+                if( ! f1.eof() )
+                    n = f1.read( buffer + n, sizeof(buffer) - n );
 
-				f2.write( buffer, n );
-			} while(n > 0);
+                f2.write( buffer, n );
+            } while(n > 0);
 
-			return;
-		}
+            return;
+        }
 
-		throwFileErrno(path, PT_SOURCEINFO);
-	}
+        throw AccessFailed(path);
+    }
 }
 
 
@@ -185,7 +185,7 @@ void FileImpl::create(const std::string& path)
 {
     int fd = open(path.c_str(), O_RDWR|O_EXCL|O_CREAT, 0777);
     if( fd < 0 )
-        throwFileErrno(path, PT_SOURCEINFO);
+        throw AccessFailed(path);
 
     ::close(fd);
 }

@@ -45,7 +45,7 @@ void LibraryImpl::open(const std::string& path)
     _handle = ::dlopen(path.c_str(), flags);
     if( !_handle )
     {
-        throw OpenLibraryFailed( path, PT_SOURCEINFO );
+        throw AccessFailed(path);
     }
 }
 
@@ -70,3 +70,4 @@ void* LibraryImpl::resolve(const char* symbol) const
 } // namespace System
 
 } // namespace Pt
+

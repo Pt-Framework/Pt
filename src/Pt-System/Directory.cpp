@@ -122,7 +122,7 @@ Directory::Directory(const std::string& path)
 , _impl(0)
 {
     if( ! Directory::exists( path.c_str() ) )
-        throw DirectoryNotFound(path, PT_SOURCEINFO);
+        throw AccessFailed(path);
 }
 
 
@@ -131,7 +131,7 @@ Directory::Directory(const FileInfo& fi)
 , _impl(0)
 {
     if( ! fi.isDirectory() )
-        throw DirectoryNotFound(fi.path(), PT_SOURCEINFO);
+        throw AccessFailed(fi.path());
 }
 
 
