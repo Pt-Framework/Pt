@@ -97,13 +97,20 @@ class PT_SYSTEM_API IODevice : public Selectable
 
         typedef std::ios_base::seekdir SeekDir;
 
-        typedef IOS_OpenMode OpenMode;
+        //typedef IOS_OpenMode OpenMode;
+        typedef std::ios::openmode OpenMode;
 
-        static const OpenMode Read   = IOS_Read;
-        static const OpenMode Write  = IOS_Write;
-        static const OpenMode AtEnd  = IOS_AtEnd;
-        static const OpenMode Append = IOS_Append;
-        static const OpenMode Trunc  = IOS_Trunc;
+        //static const OpenMode Read   = IOS_Read;
+        //static const OpenMode Write  = IOS_Write;
+        //static const OpenMode AtEnd  = IOS_AtEnd;
+        //static const OpenMode Append = IOS_Append;
+        //static const OpenMode Trunc  = IOS_Trunc;
+
+        static const OpenMode Read   = std::ios::in;
+        static const OpenMode Write  = std::ios::out;
+        static const OpenMode AtEnd  = std::ios::ate;
+        static const OpenMode Append = std::ios::app;
+        static const OpenMode Trunc  = std::ios::trunc;
 
     public:
         //! @brief Destructor
