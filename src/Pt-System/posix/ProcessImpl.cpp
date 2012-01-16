@@ -243,7 +243,7 @@ void ProcessImpl::kill()
     if( 0 > ::kill(_pid, SIGINT)
         || 0 > ::waitpid(_pid, &iStatus, WNOHANG|WUNTRACED) )
     {
-        throw SystemError(std::strerror(errno), PT_SOURCEINFO);
+        throw SystemError(std::strerror(errno));
     }
 
     _state = Process::Finished;
@@ -277,7 +277,7 @@ bool ProcessImpl::tryWait(int& status)
     if (0 > ret)
     {
         _state = Process::Failed;
-        throw SystemError(std::strerror(errno), PT_SOURCEINFO);
+        throw SystemError(std::strerror(errno));
     }
 
     if (ret == 0)

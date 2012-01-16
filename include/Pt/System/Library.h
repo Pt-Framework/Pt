@@ -45,7 +45,7 @@ class PT_SYSTEM_API SymbolNotFound : public SystemError
     std::string _symbol;
 
     public:
-        SymbolNotFound(const std::string& sym, const Pt::SourceInfo& si);
+        SymbolNotFound(const std::string& sym);
 
         //! @brief Destructor
         ~SymbolNotFound() throw()

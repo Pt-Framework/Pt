@@ -289,7 +289,7 @@ namespace System {
         typename InstanceMap::iterator it = _instances.find(inst);
         if( it == _instances.end() ) 
         {
-            throw SystemError("Could not destroy object.", PT_SOURCEINFO);
+            throw SystemError("Could not destroy object.");
         }
 
         it->second->destroy(inst);

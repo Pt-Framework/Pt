@@ -286,7 +286,7 @@ class PT_SYSTEM_API IODevice : public Selectable
 
         //! @brief Move the next read position to the given offset
         virtual pos_type onSeek(off_type, std::ios::seekdir)
-        { throw IOError("Could not seek on device.", PT_SOURCEINFO); }
+        { throw IOError("Could not seek on device"); }
 
         //! @brief Synchronize device
         virtual void onSync() const

@@ -71,7 +71,7 @@ namespace sqlite {
 				throw std::runtime_error("Operation terminated by sqlite3_interrupt" + srcInfo);
 
 			case SQLITE_IOERR :
-				throw System::IOError("Some kind of disk I/O error occurred", srcInfo);
+				throw System::IOError("Some kind of disk I/O error occurred");
 
 			case SQLITE_CORRUPT :
 				throw std::runtime_error("The database disk image is malformed" + srcInfo);

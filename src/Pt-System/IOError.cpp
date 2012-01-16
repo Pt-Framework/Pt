@@ -33,14 +33,26 @@ namespace Pt {
 
 namespace System {
 
-IOError::IOError(const std::string& what, const SourceInfo& si)
+/*IOError::IOError(const std::string& what, const SourceInfo& si)
 : std::ios::failure(what + si)
 {
-}
+}*/
 
 
 IOError::IOError(const std::string& msg)
 : std::ios::failure(msg)
+{
+}
+
+
+IOError::IOError(const char* msg)
+: std::ios::failure(msg)
+{
+}
+
+
+IOPending::IOPending(const char* msg)
+: IOError(msg)
 {
 }
 
@@ -76,18 +88,6 @@ FileNotFound::FileNotFound(const std::string& path, const SourceInfo& si)
 DirectoryNotFound::DirectoryNotFound(const std::string& path, const SourceInfo& si)
 : AccessFailed(path, si)
 { }*/
-
-
-IOPending::IOPending(const std::string& what, const SourceInfo& si)
-: IOError(what, si)
-{
-}
-
-
-IOPending::IOPending(const char* msg)
-: IOError(msg)
-{
-}
 
 } // namespace System
 

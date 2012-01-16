@@ -32,8 +32,8 @@ namespace Pt {
 
 namespace System {
 
-SystemError::SystemError(const std::string & what, const SourceInfo& si)
-: std::runtime_error(what + si)
+SystemError::SystemError(const std::string & what)
+: std::runtime_error(what)
 { }
 
 

@@ -20,7 +20,6 @@
 #define PT_LIBRARYIMPL_H
 
 #include "Pt/System/IOError.h"
-#include "Pt/System/SystemError.h"
 #include <string>
 #include <dlfcn.h>
 

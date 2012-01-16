@@ -337,7 +337,7 @@ size_t UdpSocketImpl::read( char* buffer, size_t count, bool& eof )
             continue;
 
         if(errno != EAGAIN)
-            throw System::IOError("read failed", PT_SOURCEINFO);
+            throw System::IOError("read failed");
 
         fd_set rfds;
         FD_ZERO(&rfds);

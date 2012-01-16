@@ -43,7 +43,7 @@ namespace System {
 class PT_SYSTEM_API SystemError : public std::runtime_error
 {
     public:
-        SystemError(const std::string& what, const SourceInfo& si);
+        explicit SystemError(const std::string& what);
 
         explicit SystemError(const char* what);
 

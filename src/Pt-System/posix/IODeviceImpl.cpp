@@ -157,7 +157,7 @@ size_t IODeviceImpl::endRead(EventLoop& loop, bool& eof)
     if (_errorPending)
     {
         _errorPending = false;
-        throw IOError("read error", PT_SOURCEINFO);
+        throw IOError("read error");
     }
 
     return this->read( _device.rbuf(), _device.rbuflen(), eof );
@@ -184,7 +184,7 @@ size_t IODeviceImpl::read( char* buffer, size_t count, bool& eof )
             continue;
 
         if(errno != EAGAIN)
-            throw IOError("read failed", PT_SOURCEINFO);
+            throw IOError("read failed");
 
         fd_set rfds;
         FD_ZERO(&rfds);
@@ -222,7 +222,7 @@ size_t IODeviceImpl::endWrite(EventLoop& loop)
     if (_errorPending)
     {
         _errorPending = false;
-        throw IOError("write error", PT_SOURCEINFO);
+        throw IOError("write error");
     }
 
     return this->write( _device.wbuf(), _device.wbuflen() );
@@ -246,7 +246,7 @@ size_t IODeviceImpl::write( const char* buffer, size_t count )
             continue;
 
         if(errno != EAGAIN)
-            throw IOError("Could not write to file handle", PT_SOURCEINFO);
+            throw IOError("Could not write to file handle");
 
         fd_set wfds;
         FD_ZERO(&wfds);

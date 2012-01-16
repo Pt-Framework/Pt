@@ -39,40 +39,52 @@ namespace Pt {
 
 namespace System {
 
-    class PT_SYSTEM_API IOError : public std::ios::failure
-    {
-        public:
-            IOError(const std::string& what, const SourceInfo& si);
+class PT_SYSTEM_API IOError : public std::ios::failure
+{
+    public:
+        //IOError(const std::string& what, const SourceInfo& si);
+        explicit IOError(const std::string& what);
 
-            explicit IOError(const std::string& what);
+        explicit IOError(const char* what);
 
-            ~IOError() throw()
-            {}
-    };
+        ~IOError() throw()
+        {}
+};
 
-    class PT_SYSTEM_API IOTimeout : public IOError
-    {
-        public:
-            IOTimeout();
+class PT_SYSTEM_API IOPending : public IOError
+{
+    public:
+        explicit IOPending(const std::string& what);
 
-            ~IOTimeout() throw()
-            {}
-    };
+        explicit IOPending(const char* what);
 
-    class PT_SYSTEM_API AccessFailed : public IOError
-    {
-        public:
-            explicit AccessFailed(const std::string& resource);
+        ~IOPending() throw()
+        {}
+};
 
-            ~AccessFailed() throw()
-            {}
+class PT_SYSTEM_API IOTimeout : public IOError
+{
+    public:
+        IOTimeout();
 
-            const std::string& resource() const
-            { return _resource; }
+        ~IOTimeout() throw()
+        {}
+};
 
-        private:
-            std::string _resource;
-    };
+class PT_SYSTEM_API AccessFailed : public IOError
+{
+    public:
+        explicit AccessFailed(const std::string& resource);
+
+        ~AccessFailed() throw()
+        {}
+
+        const std::string& resource() const
+        { return _resource; }
+
+    private:
+        std::string _resource;
+};
 
 
     /*class PT_SYSTEM_API PermissionDenied : public AccessFailed
@@ -124,16 +136,7 @@ namespace System {
             {}
     };*/
 
-    class PT_SYSTEM_API IOPending : public IOError
-    {
-        public:
-            IOPending(const std::string& what, const SourceInfo& si);
 
-            IOPending(const char* what);
-
-            ~IOPending() throw()
-            {}
-    };
 
 } // namespace System
 

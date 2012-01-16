@@ -38,8 +38,8 @@ namespace Pt {
 
 namespace System {
 
-SymbolNotFound::SymbolNotFound(const std::string& sym, const Pt::SourceInfo& si)
-: SystemError("symbol not found: " + sym, si)
+SymbolNotFound::SymbolNotFound(const std::string& sym)
+: SystemError("symbol not found: " + sym)
 , _symbol(sym)
 { }
 
@@ -172,7 +172,7 @@ Symbol Library::getSymbol(const char* symbol) const
     void* sym = this->resolve(symbol);
     if (sym == 0)
     {
-        throw SymbolNotFound(symbol, PT_SOURCEINFO);
+        throw SymbolNotFound(symbol);
     }
 
     return Symbol(*this, sym);
