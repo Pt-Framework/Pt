@@ -40,7 +40,7 @@ namespace Pt {
 
 namespace System {
 
-void throwError(DWORD error, const std::string& path, const Pt::SourceInfo& si)
+/*void throwError(DWORD error, const std::string& path, const Pt::SourceInfo& si)
 {
 //INVALID_DATA,		EINVAL
 //INVALID_PARAMETER,		EINVAL
@@ -97,12 +97,12 @@ void throwError(DWORD error, const std::string& path, const Pt::SourceInfo& si)
         default:
             throw SystemError(path, si);
     }
-}
+}*/
 
 
 namespace {
 
-void throwFileError(const std::string& path, const Pt::SourceInfo& si)
+/*void throwFileError(const std::string& path, const Pt::SourceInfo& si)
 {
     DWORD error = GetLastError();
     switch(error)
@@ -115,7 +115,7 @@ void throwFileError(const std::string& path, const Pt::SourceInfo& si)
         default:
             throwError(error, path, si);
     }
-}
+}*/
 
 }
 

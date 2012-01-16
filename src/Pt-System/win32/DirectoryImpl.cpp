@@ -42,7 +42,7 @@ namespace System {
 void throwError(DWORD error, const std::string& path, const Pt::SourceInfo& si);
 
 
-void throwDirError(const std::string& path, const Pt::SourceInfo& si)
+/*void throwDirError(const std::string& path, const Pt::SourceInfo& si)
 {
     DWORD error = GetLastError();
     switch(error)
@@ -55,7 +55,7 @@ void throwDirError(const std::string& path, const Pt::SourceInfo& si)
         default:
             throwError(error, path, si);
     }
-}
+}*/
 
 
 DirectoryIteratorImpl::DirectoryIteratorImpl(const std::string& path)

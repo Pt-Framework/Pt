@@ -172,7 +172,7 @@ void UdpSocketImpl::bind(const std::string& ipaddr, unsigned short int port, uns
         {
             if( ::setsockopt(_fd, IPPROTO_IPV6, IPV6_V6ONLY, (const char*) &on, sizeof(on)) < 0 )
             {
-                this->close(loop);
+                this->close();
                 throw System::SystemError("setsockopt IPV6_V6ONLY failed");
             }
         }
