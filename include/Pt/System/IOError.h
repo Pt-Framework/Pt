@@ -76,16 +76,7 @@ namespace System {
             std::string _resource;
     };
 
-
-    class PT_SYSTEM_API ResourceNotFound : public AccessFailed
-    {
-        public:
-            explicit ResourceNotFound(const std::string& resource);
-
-            ~ResourceNotFound() throw()
-            {}
-    };
-
+    // obsolete
     class PT_SYSTEM_API PermissionDenied : public AccessFailed
     {
         public:
@@ -106,6 +97,7 @@ namespace System {
     };
 
 
+    // obsolete
     class PT_SYSTEM_API FileNotFound : public AccessFailed
     {
         public:
@@ -115,6 +107,7 @@ namespace System {
             {}
     };
 
+    // obsolete
     /** @brief A directory could not be found at a given path
     */
     class PT_SYSTEM_API DirectoryNotFound : public AccessFailed

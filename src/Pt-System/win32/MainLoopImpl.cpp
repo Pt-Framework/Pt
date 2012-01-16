@@ -28,7 +28,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "MainLoopImpl.h"
-#include "SelectableImpl.h"
 #include "IODeviceImpl.h"
 #include "Pt/System/IOError.h"
 #include "Pt/System/SystemError.h"

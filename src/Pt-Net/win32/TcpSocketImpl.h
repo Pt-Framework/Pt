@@ -37,7 +37,6 @@
 #include "Pt/Net/Api.h"
 #include "Pt/Signal.h"
 #include "Pt/Net/AddrInfo.h"
-#include "SelectableImpl.h"
 #include "AddrInfoImpl.h"
 #include <string>
 #include <windows.h>

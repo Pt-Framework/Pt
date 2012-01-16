@@ -20,7 +20,6 @@
 #ifndef PT_SYSTEM_IODEVICEIMPL_H
 #define PT_SYSTEM_IODEVICEIMPL_H
 
-#include "SelectableImpl.h"
 #include "Pt/System/IOError.h"
 #include <windows.h>
 

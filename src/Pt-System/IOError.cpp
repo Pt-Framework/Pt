@@ -69,11 +69,6 @@ PermissionDenied::PermissionDenied(const std::string& resource, const SourceInfo
 }
 
 
-ResourceNotFound::ResourceNotFound(const std::string& resource)
-: AccessFailed(resource)
-{}
-
-
 DeviceNotFound::DeviceNotFound(const std::string& device, const SourceInfo& si)
 : AccessFailed(device, si)
 {}
