@@ -75,7 +75,7 @@ DirectoryIteratorImpl::DirectoryIteratorImpl(const std::string& path)
     _findHandle = FindFirstFile( tpath.c_str(), &_current );
 
     if(_findHandle == INVALID_HANDLE_VALUE)
-        throwDirError(path, PT_SOURCEINFO);
+        throw AccessFailed(path);
 
     _path = path;
     if( ! _path.empty() && _path[_path.size()-1] != '\\')
@@ -137,7 +137,7 @@ void DirectoryImpl::create(const std::string& path)
     win32::fromMultiByte( path, str );
 
     if( FALSE == ::CreateDirectory(str.c_str(), NULL) )
-        throwDirError(path, PT_SOURCEINFO);
+        throw AccessFailed(path);
 }
 
 
@@ -148,17 +148,17 @@ void DirectoryImpl::move(const std::string& oldName, const std::string& newName)
     std::basic_string<TCHAR> to;
     win32::fromMultiByte( newName, to );
 
-    #ifdef _WIN32_WCE
+#ifdef _WIN32_WCE
 
-        if( FALSE == ::MoveFile( from.c_str(), to.c_str() ) )
-            throwDirError(oldName, PT_SOURCEINFO);
+    if( FALSE == ::MoveFile( from.c_str(), to.c_str() ) )
+        throw AccessFailed(oldName);
 
-    #else
+#else
 
-        if( FALSE == ::MoveFileEx( from.c_str(), to.c_str(), MOVEFILE_COPY_ALLOWED) )
-            throwDirError(oldName, PT_SOURCEINFO);
+    if( FALSE == ::MoveFileEx( from.c_str(), to.c_str(), MOVEFILE_COPY_ALLOWED) )
+        throw AccessFailed(oldName);
 
-    #endif
+#endif
 }
 
 
@@ -168,22 +168,22 @@ void DirectoryImpl::remove(const std::string& path)
     win32::fromMultiByte( path, str );
 
     if( FALSE == ::RemoveDirectory( str.c_str() ) )
-        throwDirError(path, PT_SOURCEINFO);
+        throw AccessFailed(path);
 }
 
 
 void DirectoryImpl::chdir(const std::string& path)
 {
-    #ifdef _WIN32_WCE
+#ifdef _WIN32_WCE
 
-        throw std::runtime_error( PT_ERROR_MSG("SetCurrentDirectory not supported.") );
+    throw std::runtime_error( PT_ERROR_MSG("SetCurrentDirectory not supported.") );
 
-    #else
+#else
 
-        if( FALSE == ::SetCurrentDirectory( path.c_str() ) )
-            throwDirError(path, PT_SOURCEINFO);
+    if( FALSE == ::SetCurrentDirectory( path.c_str() ) )
+        throw AccessFailed(path); // TODO: is this right?
 
-    #endif
+#endif
 }
 
 

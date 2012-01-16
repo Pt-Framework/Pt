@@ -45,7 +45,7 @@ SerialDeviceImpl::SerialDeviceImpl(SerialDevice& device)
 {
     _waitHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
     if( _waitHandle == NULL )
-        throw SystemError("CreateEvent failed", PT_SOURCEINFO);
+        throw SystemError("CreateEvent", PT_SOURCEINFO);
 
     _readOv.Offset = 0;
     _readOv.OffsetHigh = 0;
@@ -81,12 +81,12 @@ void SerialDeviceImpl::open( const std::string& port_, IODevice::OpenMode mode)
     h = CreateFile( port.c_str() , openFlags, 0, NULL, OPEN_EXISTING, FILE_FLAG_OVERLAPPED, NULL);
 
     if( h == 0  || h == INVALID_HANDLE_VALUE )
-        throw DeviceNotFound("Could not open port" , PT_SOURCEINFO);
+        throw AccessFailed(port_);
 
     try
     {
         if( ! GetCommState( h, &_orgCommState ) )
-            throw AccessFailed("Get port state failed" , PT_SOURCEINFO);
+            throw IOError("GetCommState");
 
         // Do not use timeouts, return read data immediately.
         COMMTIMEOUTS comTimeOut;
@@ -97,7 +97,7 @@ void SerialDeviceImpl::open( const std::string& port_, IODevice::OpenMode mode)
         comTimeOut.WriteTotalTimeoutConstant    = 1;
 
         if( !SetCommTimeouts( h, &comTimeOut ) )
-            throw IOError("Set port time outs failed" , PT_SOURCEINFO);
+            throw IOError("SetCommTimeouts");
 
         SetCommMask( h, 0 );
     }
@@ -132,14 +132,14 @@ void SerialDeviceImpl::cancel(EventLoop& loop)
 void SerialDeviceImpl::writeCommState( DCB& commState )
 {
     if( ! SetCommState( handle(), &commState ) )
-        throw IOError( "Changing port state failed" , PT_SOURCEINFO );
+        throw IOError("SetCommStated");
 }
 
 
 void SerialDeviceImpl::readCommState( DCB& commState ) const
 {
     if( ! GetCommState( handle(), &commState ) )
-        throw IOError( "Get port state failed" , PT_SOURCEINFO );
+        throw IOError("GetCommState");
 }
 
 
@@ -377,7 +377,7 @@ void SerialDeviceImpl::setTimeout( size_t msec )
     comTimeOut.WriteTotalTimeoutConstant    = 100;
 
     if( !SetCommTimeouts( handle(), &comTimeOut ) )
-        throw IOError("Set port time outs failed" , PT_SOURCEINFO);
+        throw IOError("SetCommTimeouts");
 }
 
 

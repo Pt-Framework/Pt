@@ -128,7 +128,7 @@ std::size_t FileImpl::size(const std::string& path)
 
     HANDLE h = FindFirstFile(tpath.c_str(), &data);
     if(h == INVALID_HANDLE_VALUE)
-        throwFileError( path, PT_SOURCEINFO);
+        throw AccessFailed(path);
 
     FindClose(h);
 
@@ -153,17 +153,17 @@ void FileImpl::resize(const std::string& path, std::size_t newSize)
                              NULL );
 
     if(h == INVALID_HANDLE_VALUE)
-        throwFileError(path, PT_SOURCEINFO);
+        throw AccessFailed(path);
 
     if( INVALID_SET_FILE_POINTER == ::SetFilePointer(h, newSize, NULL, FILE_BEGIN) ||
         FALSE == ::SetEndOfFile(h) )
     {
         ::CloseHandle(h);
-        throwFileError(path, PT_SOURCEINFO);
+        throw IOError("SetFilePointer");
     }
 
     if( FALSE == ::CloseHandle(h) )
-        throwFileError(path, PT_SOURCEINFO);
+        throw IOError("CloseHandle");
 }
 
 
@@ -173,7 +173,7 @@ void FileImpl::remove(const std::string& path)
     win32::fromMultiByte(path, tpath);
 
     if( FALSE == ::DeleteFile( tpath.c_str() ) )
-        throwFileError(path, PT_SOURCEINFO);
+        throw AccessFailed(path);
 }
 
 
@@ -192,16 +192,16 @@ void FileImpl::move(const std::string& path, const std::string& to, bool allowCo
         if(error == ERROR_NOT_SAME_DEVICE)
         {
             if( ! allowCopy )
-                throw AccessFailed(path, PT_SOURCEINFO); // better exception class
+                throw AccessFailed(path);
 
             if( FALSE == CopyFile( tpath.c_str(), tto.c_str(), TRUE ) )
-                throwFileError(path, PT_SOURCEINFO);
+                throw AccessFailed(path);
 
             FileImpl::remove(path);
             return;
         }
 
-        throwFileError(path, PT_SOURCEINFO);
+        throw AccessFailed(path);
     }
 #else
     DWORD flags = 0;
@@ -209,15 +209,9 @@ void FileImpl::move(const std::string& path, const std::string& to, bool allowCo
         flags = MOVEFILE_COPY_ALLOWED;
 
     if( FALSE == ::MoveFileEx(tpath.c_str(), tto.c_str(), flags) )
-	{
-        DWORD error = GetLastError();
-        if (error == ERROR_NOT_SAME_DEVICE)
-        {
-            throw AccessFailed(path, PT_SOURCEINFO); // better exception class
-        }
-
-        throwFileError(path, PT_SOURCEINFO);
-	}
+    {
+        throw AccessFailed(path);
+    }
 #endif
 }
 
@@ -236,10 +230,10 @@ void FileImpl::create(const std::string& path)
                            NULL);
 
     if (h == INVALID_HANDLE_VALUE)
-        throwFileError(path, PT_SOURCEINFO);
+        throw AccessFailed(path);
 
     if( FALSE == ::CloseHandle(h) )
-        throwFileError(path, PT_SOURCEINFO);
+        throw IOError("CloseHandle");
 }
 
 } // namespace System

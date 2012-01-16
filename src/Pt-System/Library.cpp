@@ -113,7 +113,7 @@ Library& Library::open(const std::string& libname)
         _path = libname;
         return *this;
     }
-    catch(const OpenLibraryFailed&)
+    catch(const AccessFailed&)
     { }
 
     std::string path = libname;
@@ -125,7 +125,7 @@ Library& Library::open(const std::string& libname)
         _path = path;
         return *this;
     }
-    catch(const OpenLibraryFailed&)
+    catch(const AccessFailed&)
     { }
 
     std::string::size_type idx = path.rfind( Directory::sep() );
@@ -135,7 +135,7 @@ Library& Library::open(const std::string& libname)
     }
     else if( ++idx == path.length() )
     {
-        throw OpenLibraryFailed(path, PT_SOURCEINFO);
+        throw AccessFailed(path);
     }
 
     path.insert( idx, prefix() );
