@@ -63,7 +63,7 @@ SerialDeviceImpl::~SerialDeviceImpl()
 }
 
 
-void SerialDeviceImpl::open( const std::string& port_, IODevice::OpenMode mode)
+void SerialDeviceImpl::open( const std::string& port_, std::ios::openmode mode)
 {
     std::basic_string<TCHAR> port;
     win32::fromMultiByte( port_.c_str(), port );

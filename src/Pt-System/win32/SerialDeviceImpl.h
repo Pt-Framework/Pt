@@ -37,7 +37,7 @@ class SerialDeviceImpl : public OverlappedIODeviceImpl
         
         ~SerialDeviceImpl();
 
-        void open( const std::string& file, IODevice::OpenMode mode);
+        void open( const std::string& file, std::ios::openmode mode);
 
         void close();
 

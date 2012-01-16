@@ -67,7 +67,7 @@ FileDeviceImpl::~FileDeviceImpl()
 }
 
 
-void FileDeviceImpl::open( const char* path, IODevice::OpenMode mode)
+void FileDeviceImpl::open( const char* path, std::ios::openmode mode)
 {
     _readOv.Offset = 0;
     _readOv.OffsetHigh = 0;
