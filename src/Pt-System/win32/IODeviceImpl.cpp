@@ -58,7 +58,7 @@ void IODeviceImpl::close()
     if(_handle != INVALID_HANDLE_VALUE)
     {
         if( FALSE == ::CloseHandle(_handle) )
-            throw IOError("Could not close file handle", PT_SOURCEINFO);
+            throw IOError("Could not close file handle");
 
         _handle = INVALID_HANDLE_VALUE;
     }

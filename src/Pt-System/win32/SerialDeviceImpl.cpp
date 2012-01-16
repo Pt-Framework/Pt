@@ -45,7 +45,7 @@ SerialDeviceImpl::SerialDeviceImpl(SerialDevice& device)
 {
     _waitHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
     if( _waitHandle == NULL )
-        throw SystemError("CreateEvent", PT_SOURCEINFO);
+        throw SystemError("CreateEvent");
 
     _readOv.Offset = 0;
     _readOv.OffsetHigh = 0;

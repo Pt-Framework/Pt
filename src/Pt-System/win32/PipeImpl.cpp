@@ -186,11 +186,11 @@ PipeImpl::PipeImpl()
                                            1000,
                                            NULL );
     if (inputHandle == INVALID_HANDLE_VALUE)
-        throw SystemError("Could not create named pipe", PT_SOURCEINFO);
+        throw SystemError("Could not create named pipe");
 
     HANDLE outputHandle = ::CreateFile(ss.str().c_str(), access, share, NULL, create, flags, NULL);
     if(outputHandle == INVALID_HANDLE_VALUE)
-        throw SystemError("Could not open file handle", PT_SOURCEINFO);
+        throw SystemError("Could not open file handle");
 
     _out.open(inputHandle);
     _in.open(outputHandle);

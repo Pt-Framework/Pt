@@ -123,7 +123,7 @@ void ProcessImpl::setEnvVar(const std::string& name, const std::string& value)
 {
     if( 0 == SetEnvironmentVariable(name.c_str(), value.c_str()) )
     {
-        throw SystemError("Set Environment Variable Error!", PT_SOURCEINFO);
+        throw SystemError("Set Environment Variable Error!");
     }
 }
 
@@ -132,7 +132,7 @@ void ProcessImpl::unsetEnvVar(const std::string& name)
 {
     if( 0 == SetEnvironmentVariable(name.c_str(), NULL) )
     {
-        throw SystemError("UnSet Environment Variable Error!",PT_SOURCEINFO);
+        throw SystemError("UnSet Environment Variable Error!");
     }
 }
 
@@ -150,7 +150,7 @@ std::string ProcessImpl::getEnvVar(const std::string& name)
         {
             return ret;
         }
-        throw SystemError("Get Environment Variable Error 1!",PT_SOURCEINFO);
+        throw SystemError("Get Environment Variable Error 1!");
     }
     if(cnt<200)
     {
@@ -163,7 +163,7 @@ std::string ProcessImpl::getEnvVar(const std::string& name)
         if( 0 == cnt )
         {
             delete[] cp2;
-            throw SystemError("Get Environment Variable Error 2!",PT_SOURCEINFO);
+            throw SystemError("Get Environment Variable Error 2!");
         }
 
         ret = cp2;
