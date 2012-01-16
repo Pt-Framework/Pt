@@ -43,6 +43,7 @@ namespace System {
 class PT_SYSTEM_API Selectable : protected NonCopyable
 {
     friend class SelectableList;
+    friend class SelectableListIterator;
 
     public:
         //! @brief Destructor
@@ -92,48 +93,50 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
 };
 
 
+class SelectableListIterator
+{
+    public:
+        SelectableListIterator()
+        : _sel(0)
+        {}
+
+        explicit SelectableListIterator(Selectable* s)
+        : _sel(s)
+        {}
+
+        SelectableListIterator& operator=(const SelectableListIterator& it)
+        {
+            _sel = it._sel;
+            return *this;
+        }
+
+        SelectableListIterator& operator++()
+        {
+            assert(_sel);
+            _sel = _sel->_next;
+            return *this;
+        }
+
+        Selectable& operator*() const
+        { return *_sel; }
+
+        Selectable* operator->() const
+        { return _sel; }
+
+        bool operator ==(const SelectableListIterator& it) const
+        { return _sel == it._sel; }
+
+        bool operator !=(const SelectableListIterator& it) const
+        { return _sel != it._sel; }
+
+    private:
+        Selectable* _sel;
+};
+
 class SelectableList
 {
     public:
-        class Iterator
-        {
-            public:
-                Iterator()
-                : _sel(0)
-                {}
-
-                explicit Iterator(Selectable* s)
-                : _sel(s)
-                {}
-
-                Iterator& operator=(const Iterator& it)
-                {
-                    _sel = it._sel;
-                    return *this;
-                }
-        
-                Iterator& operator++()
-                {
-                    assert(_sel);
-                    _sel = _sel->_next;
-                    return *this;
-                }
-        
-                Selectable& operator*() const
-                { return *_sel; }
-        
-                Selectable* operator->() const
-                { return _sel; }
-
-                bool operator ==(const Iterator& it) const
-                { return _sel == it._sel; }
-
-                bool operator !=(const Iterator& it) const
-                { return _sel != it._sel; }
-
-            private:
-                Selectable* _sel;
-        };
+        typedef SelectableListIterator Iterator;
 
     public:
         SelectableList()
