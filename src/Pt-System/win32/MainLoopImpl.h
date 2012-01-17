@@ -186,9 +186,9 @@ class PT_SYSTEM_API EventLoopImpl
         HANDLE _wakeEvent;
         HANDLE _ioEvent;
         HandleMap _handles;
-        std::set<Selectable*> _selectables;
         std::set<Selectable*>::iterator _current;
         std::set<Selectable*> _devices;
+        SelectableList _selectables;
         std::vector<Selectable*> _avail;
 };
 

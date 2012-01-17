@@ -33,6 +33,7 @@
 #include <Pt/NonCopyable.h>
 #include <Pt/System/Api.h>
 #include <Pt/System/EventLoop.h>
+#include <iostream>
 #include <cassert>
 
 namespace Pt {
@@ -92,7 +93,7 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
         Selectable* _next;
 };
 
-
+/*
 class SelectableListIterator
 {
     public:
@@ -161,11 +162,13 @@ class SelectableList
             assert(s._prev == 0);
             assert(s._next == 0);
 
-            s._prev = _last;
-            _last = &s;
-
             if( ! _first)
                 _first = &s;
+            else
+                _last->_next = &s;
+
+            s._prev = _last;
+            _last = &s;
         }
 
         void remove(Selectable& s)
@@ -178,6 +181,7 @@ class SelectableList
 
             if(next)
             {
+                assert(next->_prev == &s);
                 next->_prev = prev;
             }
             else // last element
@@ -188,6 +192,7 @@ class SelectableList
 
             if(prev)
             {
+                assert(prev->_next == &s);
                 prev->_next = next;
             }
             else // first element
@@ -200,6 +205,104 @@ class SelectableList
     private:
         Selectable* _first;
         Selectable* _last;
+};
+*/
+
+class SelectableListIterator
+{
+    public:
+        SelectableListIterator()
+        : _sel(0)
+        {}
+
+        explicit SelectableListIterator(Selectable* s)
+        : _sel(s)
+        {}
+
+        SelectableListIterator& operator=(const SelectableListIterator& it)
+        {
+            _sel = it._sel;
+            return *this;
+        }
+
+        SelectableListIterator& operator++()
+        {
+            assert(_sel);
+            _sel = _sel->_next;
+            return *this;
+        }
+
+        Selectable& operator*() const
+        { return *_sel; }
+
+        Selectable* operator->() const
+        { return _sel; }
+
+        bool operator ==(const SelectableListIterator& it) const
+        { return _sel == it._sel; }
+
+        bool operator !=(const SelectableListIterator& it) const
+        { return _sel != it._sel; }
+
+    private:
+        Selectable* _sel;
+};
+
+
+class SelectableList : public Selectable
+{
+    public:
+        typedef SelectableListIterator Iterator;
+
+    public:
+        SelectableList()
+        {
+            this->_next = this;
+            this->_prev = this;
+        }
+
+        ~SelectableList()
+        {
+            this->_next = 0;
+            this->_prev = 0;
+        }
+
+        bool empty() const
+        { return this->_next == this; }
+
+        Iterator end()
+        { return Iterator(this); }
+
+        Iterator begin()
+        { return Iterator(this->_next); }
+
+        void insert(Selectable& s)
+        {
+            Selectable* second = this->_next;
+            this->_next = &s;
+            second->_prev = &s;
+
+            s._prev = this;
+            s._next = second;
+        }
+
+        void remove(Selectable& s)
+        {
+            if(0 == s._next)
+                return;
+
+            assert(s._next && s._prev);
+            s._prev->_next = s._next;
+            s._next->_prev = s._prev;
+            s._next = 0;
+            s._prev = 0;
+        }
+
+        virtual void onCancel()
+        { }
+
+        virtual bool onRun()
+        { return false; }
 };
 
 } // namespace System

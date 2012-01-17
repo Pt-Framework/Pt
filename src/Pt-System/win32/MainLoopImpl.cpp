@@ -64,12 +64,9 @@ EventLoopImpl::EventLoopImpl(Signal<const Pt::Event&>& eventSignal)
 
 EventLoopImpl::~EventLoopImpl()
 { 
-    std::set<Selectable*>::iterator it;
-
-    while( _selectables.size() )
+    while( ! _selectables.empty() )
     {
-        it = _selectables.begin();
-        (*it)->detach();
+        _selectables.begin()->detach();
     }
 
     CloseHandle( _wakeEvent );
@@ -79,13 +76,13 @@ EventLoopImpl::~EventLoopImpl()
 
 void EventLoopImpl::attach(Selectable& s)
 {
-    _selectables.insert(&s);
+    _selectables.insert(s);
 }
 
 
 void EventLoopImpl::detach(Selectable& s)
 {
-    _selectables.erase(&s);
+    _selectables.remove(s);
 }
 
 
