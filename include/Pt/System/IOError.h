@@ -136,8 +136,6 @@ class PT_SYSTEM_API AccessFailed : public IOError
             {}
     };*/
 
-
-
 } // namespace System
 
 } // namespace Pt

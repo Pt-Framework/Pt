@@ -131,15 +131,15 @@ class PT_SYSTEM_API Directory
     public:
         /** @brief Constructs a %Directory object from the path \a path
 
-            If no directory exists at \a path, an exception of type DirectoryNotFound
+            If no directory exists at \a path, an exception of type AccessFailed
             is thrown.
         */
         explicit Directory(const std::string& path);
 
         /** @brief Constructs a %Directory object from a FileInfo object
 
-            An exception of type %DirectoryNotFound is thrown if the %FileInfo
-            does not represent a directory.
+            An exception of type %AccessFailed is thrown if the %FileInfo does
+            not represent a directory.
         */
         explicit Directory(const FileInfo& fi);
 

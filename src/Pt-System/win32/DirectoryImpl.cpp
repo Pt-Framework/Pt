@@ -29,18 +29,15 @@
  */
 #include "win32.h"
 #include "DirectoryImpl.h"
+#include "FileInfoImpl.h"
 #include "Pt/System/SystemError.h"
-#include "Pt/System/Directory.h"
+#include "Pt/System/IOError.h"
 #include "Pt/System/Process.h"
-#include <vector>
 #include <windows.h>
 
 namespace Pt {
 
 namespace System {
-
-void throwError(DWORD error, const std::string& path, const Pt::SourceInfo& si);
-
 
 /*void throwDirError(const std::string& path, const Pt::SourceInfo& si)
 {
@@ -180,8 +177,11 @@ void DirectoryImpl::chdir(const std::string& path)
 
 #else
 
+    if( FileInfoImpl::getType( path.c_str() ) != FileInfo::Directory )
+        throw AccessFailed(path);
+
     if( FALSE == ::SetCurrentDirectory( path.c_str() ) )
-        throw AccessFailed(path); // TODO: is this right?
+        throw SystemError("SetCurrentDirectory");
 
 #endif
 }

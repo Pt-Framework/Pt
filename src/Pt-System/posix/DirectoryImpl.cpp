@@ -42,9 +42,6 @@ namespace Pt {
 
 namespace System {
 
-void throwErrno(const std::string& path, const Pt::SourceInfo& si);
-
-
 /*void throwDirectoryErrno(const std::string& path, const Pt::SourceInfo& si)
 {
     switch(errno)
@@ -100,11 +97,11 @@ const std::string& DirectoryIteratorImpl::path() const
         std::string::size_type idx = _path.rfind('/');
         if(idx != std::string::npos && ++idx < _path.size() )
         {
-        	_path.replace(idx, _path.size(), _current->d_name);
+            _path.replace(idx, _path.size(), _current->d_name);
         }
         else
         {
-        	_path += _current->d_name;
+            _path += _current->d_name;
         }
     }
 
@@ -155,9 +152,12 @@ void DirectoryImpl::move(const std::string& oldName, const std::string& newName)
 
 void DirectoryImpl::chdir(const std::string& path)
 {
+    if( FileInfoImpl::getType( path.c_str() ) != FileInfo::Directory )
+        throw AccessFailed(path);
+
     if( -1 == ::chdir(path.c_str()) )
     {
-        throw AccessFailed(path);
+        throw SystemError("chdir");
     }
 }
 
