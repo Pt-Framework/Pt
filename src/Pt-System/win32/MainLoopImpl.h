@@ -21,6 +21,7 @@
 #ifndef PT_SYSTEM_MainLoopImpl_H
 #define PT_SYSTEM_MainLoopImpl_H
 
+#include "../SelectableList.h"
 #include "Pt/System/Api.h"
 #include "Pt/System/Selectable.h"
 #include "Pt/System/EventLoop.h"
