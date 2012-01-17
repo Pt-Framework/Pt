@@ -26,7 +26,7 @@ namespace Pt {
 namespace System {
 
 class EventLoop;
-
+/*
 class FdImpl
 {
     public:
@@ -135,7 +135,7 @@ inline int FdImpl::checkEvent(fd_set& rfds, fd_set& wfds, fd_set& efds)
 
     return 0;
 }
-
+*/
 } // namespace System
 
 } //namespace Pt

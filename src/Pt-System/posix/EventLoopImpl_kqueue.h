@@ -28,6 +28,7 @@
 #ifndef PT_SYSTEM_EVENTLOOPIMPL_KQUEUE_H
 #define PT_SYSTEM_EVENTLOOPIMPL_KQUEUE_H
 
+#include "../SelectableList.h"
 #include "Pt/System/Api.h"
 #include "Pt/System/Clock.h"
 #include "Pt/System/Selectable.h"
@@ -106,12 +107,9 @@ class Selector
 
         ~Selector()
         {         
-            std::set<Selectable*>::iterator it;
-
-            while( _selectables.size() )
+            while( ! _selectables.empty() )
             {
-                it = _selectables.begin();
-                (*it)->detach();
+                _selectables.begin()->detach();
             }
 
             ::close(_kd);
@@ -119,12 +117,12 @@ class Selector
 
         void attach(Selectable& s)
         {
-            _selectables.insert(&s);
+            _selectables.insert(s);
         }
         
         void detach(Selectable& s)
         {
-            _selectables.erase(&s);
+            _selectables.remove(s);
         }
 
         void cancel(IOHandle& h)
@@ -340,7 +338,7 @@ class Selector
         }
 
     private:
-        std::set<Selectable*> _selectables; // inactive
+        SelectableList _selectables;
         Clock _clock;
         WakePipe _wakePipe;
         int _kd;

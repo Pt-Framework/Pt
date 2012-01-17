@@ -131,8 +131,6 @@ bool Selectable::run()
 
 
 
-
-
 /*void Selectable::setAvail()
 {
     if(_parent)
