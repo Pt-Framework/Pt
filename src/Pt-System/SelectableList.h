@@ -63,6 +63,10 @@ class SelectableList : private Selectable
         { return false; }
 };
 
+// TODO: make link and unlink work with a SelectableIterator
+// we start with an default constructed one that points to null
+// and is equal end
+
 inline void unlink(Selectable& s)
 {
     if(0 == s._prev)
