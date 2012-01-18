@@ -37,8 +37,7 @@ namespace Pt {
 namespace System {
 
 IODeviceImpl::IODeviceImpl(IODevice& device)
-: _device(device)
-, _ioh(device)
+: _ioh(device)
 , _timeout(System::EventLoop::WaitInfinite)
 , _sentry(0)
 , _errorPending(false)
@@ -160,7 +159,7 @@ size_t IODeviceImpl::endRead(EventLoop& loop, char* buffer, size_t n, bool& eof)
         throw IOError("read error");
     }
 
-    return this->read( _device.rbuf(), _device.rbuflen(), eof );
+    return this->read( buffer, n, eof );
 }
 
 
@@ -225,7 +224,7 @@ size_t IODeviceImpl::endWrite(EventLoop& loop, const char* buffer, size_t n)
         throw IOError("write error");
     }
 
-    return this->write( _device.wbuf(), _device.wbuflen() );
+    return this->write( buffer, n );
 }
 
 

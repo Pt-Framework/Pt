@@ -76,6 +76,7 @@ namespace Net {
 
 TcpSocketImpl::TcpSocketImpl(TcpSocket& socket)
 : System::IODeviceImpl(socket)
+, _socket(socket)
 , _isConnected(false)
 , _isConnecting(false)
 {
@@ -148,7 +149,7 @@ bool TcpSocketImpl::beginConnect(const AddrInfo& addrInfo, System::EventLoop& lo
         }
         else
         {
-            loop.impl().avail(_device);
+            loop.impl().avail(_socket);
         }
     }
 

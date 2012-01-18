@@ -50,6 +50,7 @@ class TcpSocket;
 class TcpSocketImpl : public System::IODeviceImpl
 {
     private:
+        TcpSocket& _socket;
         bool _isConnected;
         bool _isConnecting;
         struct sockaddr_storage _peeraddr;

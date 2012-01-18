@@ -112,7 +112,6 @@ namespace System {
             bool wait(std::size_t msecs, fd_set* rfds, fd_set* wfds, fd_set* efds);
 
         protected:
-            IODevice& _device;
             IOHandle _ioh;
             std::size_t _timeout;
             DestructionSentry* _sentry;

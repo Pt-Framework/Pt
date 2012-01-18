@@ -160,8 +160,8 @@ void FileImpl::move(const std::string& path, const std::string& to, bool allowCo
             if( ! allowCopy )
                 throw AccessFailed(path);
 
-            FileDevice f1(path.c_str(), IODevice::Read);
-            FileDevice f2(to.c_str(), IODevice::Write);
+            FileDevice f1(path.c_str(), std::ios::in);
+            FileDevice f2(to.c_str(), std::ios::out);
 
             char buffer[8192];
             size_t n = 0;

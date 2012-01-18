@@ -69,13 +69,13 @@ class PipeIODevice : public Pt::System::IODevice
 
         size_t onBeginRead(char* buffer, size_t n, bool& eof);
 
-        size_t onEndRead(bool& eof);
+        size_t onEndRead(char* buffer, size_t n, bool& eof);
 
         size_t onRead(char* buffer, size_t count, bool& eof);
 
         size_t onBeginWrite(const char* buffer, size_t n);
 
-        size_t onEndWrite();
+        size_t onEndWrite(const char* buffer, size_t n);
 
         size_t onWrite(const char* buffer, size_t count);
 

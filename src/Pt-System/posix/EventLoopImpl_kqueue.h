@@ -109,7 +109,7 @@ class Selector
         {         
             while( ! _selectables.empty() )
             {
-                _selectables.begin()->detach();
+                _selectables.first()->detach();
             }
 
             ::close(_kd);
@@ -117,12 +117,12 @@ class Selector
 
         void attach(Selectable& s)
         {
-            _selectables.insert(s);
+            link(s, _selectables);
         }
         
         void detach(Selectable& s)
         {
-            _selectables.remove(s);
+            unlink(s);
         }
 
         void cancel(IOHandle& h)
