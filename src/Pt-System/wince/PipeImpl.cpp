@@ -60,7 +60,7 @@ PipeIODevice::~PipeIODevice()
 }
 
 
-void PipeIODevice::open(HANDLE h, bool isAsync)
+void PipeIODevice::open(HANDLE h)
 {
     this->setHandle(h);
 
@@ -83,7 +83,7 @@ void PipeIODevice::onClose()
     {
         if( FALSE == ::CloseMsgQueue(handle()) )
         {
-            throw IOError( "CloseMsgQueue failed", PT_SOURCEINFO );
+            throw IOError( "CloseMsgQueue failed" );
         }
 
         this->setHandle(INVALID_HANDLE_VALUE);
@@ -143,7 +143,7 @@ size_t PipeIODevice::onBeginRead(char* buffer, size_t n, bool& eof)
 }
 
 
-size_t PipeIODevice::onEndRead(bool& eof)
+size_t PipeIODevice::onEndRead(char* buffer, size_t n, bool& eof)
 {
     parent()->impl().disable(_ioh);
 
@@ -189,7 +189,7 @@ size_t PipeIODevice::onBeginWrite(const char* buffer, size_t n)
 }
 
 
-size_t PipeIODevice::onEndWrite()
+size_t PipeIODevice::onEndWrite(const char* buffer, size_t n)
 {
     parent()->impl().disable(_ioh);
 
@@ -294,7 +294,7 @@ void PipeIODevice::onSync() const
 */
 
 
-PipeImpl::PipeImpl(bool isAsync)
+PipeImpl::PipeImpl()
 : _out(PipeIODevice::Read)
 , _in(PipeIODevice::Write)
 {
@@ -320,8 +320,8 @@ PipeImpl::PipeImpl(bool isAsync)
     if (inputHandle == INVALID_HANDLE_VALUE)
         throw IOError( PT_ERROR_MSG("Could not open message queue handle") );
 
-    _out.open(inputHandle, isAsync);
-    _in.open(outputHandle, isAsync);
+    _out.open(inputHandle);
+    _in.open(outputHandle);
 }
 
 
