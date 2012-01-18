@@ -77,11 +77,11 @@ class OverlappedIODeviceImpl : public IODeviceImpl
 
         virtual size_t beginRead(EventLoop& loop, char* buffer, size_t n, bool& eof);
 
-        virtual size_t endRead(EventLoop& loop, bool& eof);
+        virtual size_t endRead(EventLoop& loop, char* buffer, size_t n, bool& eof);
 
         virtual size_t beginWrite(EventLoop& loop, const char* buffer, size_t n);
 
-        virtual size_t endWrite(EventLoop& loop);
+        virtual size_t endWrite(EventLoop& loop, const char* buffer, size_t n);
 
         virtual void close();
 

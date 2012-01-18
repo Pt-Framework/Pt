@@ -95,7 +95,7 @@ size_t IODevice::endRead()
 
     try
     {
-        n = this->onEndRead(_eof);
+        n = this->onEndRead(_rbuf, _rbuflen, _eof);
     }
     catch (...)
     {
@@ -161,7 +161,7 @@ size_t IODevice::endWrite()
 
     try
     {
-        n = onEndWrite();
+        n = onEndWrite(_wbuf, _wbuflen);
     }
     catch (...)
     {
@@ -190,19 +190,6 @@ size_t IODevice::write(const char* buffer, size_t n)
 
 void IODevice::onCancel()
 {
-//  System::EventLoop* loop = this->parent();
-//  if(loop)
-//  {
-//      if(_ravail > 0)
-//          loop->setIdle(*this);
-//
-//      if(_rbuf && _eof)
-//          loop->setIdle(*this);
-//
-//      if(_wavail > 0)
-//          loop->setIdle(*this);
-//  }
-
     _rbuf = 0;
     _rbuflen = 0;
     _ravail = 0;

@@ -230,9 +230,9 @@ size_t TcpSocket::onBeginRead(char* buffer, size_t n, bool& eof)
 }
 
 
-size_t TcpSocket::onEndRead(bool& eof)
+size_t TcpSocket::onEndRead(char* buffer, size_t n, bool& eof)
 {
-    return _impl->endRead(*parent(), eof);
+    return _impl->endRead(*parent(), buffer, n, eof);
 }
 
 
@@ -251,9 +251,9 @@ size_t TcpSocket::onBeginWrite(const char* buffer, size_t n)
 }
 
 
-size_t TcpSocket::onEndWrite()
+size_t TcpSocket::onEndWrite(const char* buffer, size_t n)
 {
-    return _impl->endWrite(*parent());
+    return _impl->endWrite(*parent(), buffer, n);
 }
 
 

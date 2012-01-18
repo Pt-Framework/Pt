@@ -22,6 +22,7 @@
 #define PT_SYSTEM_MainLoopImpl_H
 
 #include "../SelectableList.h"
+#include "EventLoopImpl.h"
 #include "Pt/System/Api.h"
 #include "Pt/System/Selectable.h"
 #include "Pt/System/EventLoop.h"
@@ -35,34 +36,6 @@
 namespace Pt {
 
 namespace System {
-
-struct IOHandle
-{
-    IOHandle()
-    : sel(0)
-    , _handle(INVALID_HANDLE_VALUE)
-    {}
-
-    explicit IOHandle(Selectable& s)
-    : sel(&s)
-    , _handle(INVALID_HANDLE_VALUE)
-    {}
-
-    IOHandle(Selectable& s, HANDLE h)
-    : sel(&s)
-    , _handle(h)
-    {}
-
-    HANDLE handle()
-    { return _handle; }
-
-    void setHandle(HANDLE h)
-    { _handle = h; }
-
-    Selectable* sel;
-    HANDLE _handle;
-};
-
 
 class HandleMap
 {
@@ -169,6 +142,10 @@ class PT_SYSTEM_API EventLoopImpl
         HANDLE enableOverlapped(Selectable& s);
 
         void disableOverlapped(Selectable& s);
+
+        void enableOverlapped(IOHandle& s);
+
+        void disableOverlapped(IOHandle& s);
 
         void enable(IOHandle& handle);
 

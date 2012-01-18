@@ -70,10 +70,10 @@ void SerialDeviceImpl::open( const std::string& port_, std::ios::openmode mode)
 
     DWORD openFlags = 0;
 
-    if( mode & IODevice::Write )
+    if( mode & std::ios::out )
         openFlags |= GENERIC_WRITE;
 
-    if( mode & IODevice::Read )
+    if( mode & std::ios::in )
         openFlags |= GENERIC_READ;
 
     HANDLE h = INVALID_HANDLE_VALUE;

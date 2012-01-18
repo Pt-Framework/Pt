@@ -82,16 +82,16 @@ void FileDeviceImpl::open( const char* path, std::ios::openmode mode)
     DWORD create = OPEN_EXISTING;
     DWORD flags  = 0;
 
-    if( mode & IODevice::Read )
+    if( mode & std::ios::in )
         access |= GENERIC_READ;
 
-    if( mode & IODevice::Write )
+    if( mode & std::ios::out )
     {
         access |= GENERIC_WRITE;
         create = OPEN_ALWAYS;
     }
 
-    if( mode & IODevice::Trunc )
+    if( mode & std::ios::trunc )
         create |= TRUNCATE_EXISTING;
 
 #ifndef _WIN32_WCE
@@ -109,7 +109,7 @@ void FileDeviceImpl::open( const char* path, std::ios::openmode mode)
 
     try
     {
-        if(mode & IODevice::AtEnd )
+        if(mode & std::ios::ate )
             this->seek(0, std::ios::end);
     }
     catch(...)

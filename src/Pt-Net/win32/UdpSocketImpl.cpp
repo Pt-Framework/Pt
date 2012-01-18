@@ -499,7 +499,7 @@ size_t UdpSocketImpl::beginRead(System::EventLoop& loop, char* buffer, size_t n,
 }
 
 
-size_t UdpSocketImpl::endRead(System::EventLoop& loop, bool& eof)
+size_t UdpSocketImpl::endRead(System::EventLoop& loop, char* buffer, size_t n, bool& eof)
 {
     _eventFlags &= ~FD_READ;
 
@@ -568,7 +568,7 @@ size_t UdpSocketImpl::beginWrite(System::EventLoop& loop, const char* buffer, si
 }
 
 
-size_t UdpSocketImpl::endWrite(System::EventLoop& loop)
+size_t UdpSocketImpl::endWrite(System::EventLoop& loop, const char* buffer, size_t n)
 {
     _eventFlags &= ~FD_WRITE;
 

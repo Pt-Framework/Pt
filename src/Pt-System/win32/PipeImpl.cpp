@@ -127,9 +127,9 @@ size_t PipeIODevice::onBeginRead(char* buffer, size_t n, bool& eof)
 }
 
 
-size_t PipeIODevice::onEndRead(bool& eof)
+size_t PipeIODevice::onEndRead(char* buffer, size_t n, bool& eof)
 {
-    return _impl.endRead(*parent(), eof);
+    return _impl.endRead(*parent(), buffer, n, eof);
 }
 
 
@@ -145,9 +145,9 @@ size_t PipeIODevice::onBeginWrite(const char* buffer, size_t n)
 }
 
 
-size_t PipeIODevice::onEndWrite()
+size_t PipeIODevice::onEndWrite(const char* buffer, size_t n)
 {
-    return _impl.endWrite( *parent() );
+    return _impl.endWrite( *parent(), buffer, n );
 }
 
 

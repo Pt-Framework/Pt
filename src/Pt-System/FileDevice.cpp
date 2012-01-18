@@ -94,9 +94,9 @@ size_t FileDevice::onBeginRead(char* buffer, size_t n, bool& eof)
 }
 
 
-size_t FileDevice::onEndRead(bool& eof)
+size_t FileDevice::onEndRead(char* buffer, size_t n, bool& eof)
 {
-    return _impl->endRead(*parent(), eof);
+    return _impl->endRead(*parent(), buffer, n, eof);
 }
 
 
@@ -106,9 +106,9 @@ size_t FileDevice::onBeginWrite(const char* buffer, size_t n)
 }
 
 
-size_t FileDevice::onEndWrite()
+size_t FileDevice::onEndWrite(const char* buffer, size_t n)
 {
-    return _impl->endWrite( *parent() );
+    return _impl->endWrite( *parent(), buffer, n );
 }
 
 

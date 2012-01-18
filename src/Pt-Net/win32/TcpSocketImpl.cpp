@@ -49,21 +49,18 @@ namespace Net {
 
 TcpSocketImpl::TcpSocketImpl(TcpSocket& socket)
 : _connectResult(0)
-, _sentry(0)
-, _socket(socket)
 , _fd(INVALID_SOCKET)
 , _isConnected(false)
 , _eventFlags(FD_CLOSE)
 , _timeout(INFINITE) // Pt::System::EventLoop::WaitInfinite ?
+, _ioh(socket)
 {
-    _currentEventHandle = INVALID_HANDLE_VALUE;
+    //_currentEventHandle = INVALID_HANDLE_VALUE;
 }
 
 
 TcpSocketImpl::~TcpSocketImpl()
 {
-    if(_sentry)
-        _sentry->detach();
 }
 
 
@@ -96,10 +93,10 @@ void TcpSocketImpl::detach(System::EventLoop& loop)
 
 void TcpSocketImpl::cancel(System::EventLoop& loop)
 {
-    if(_currentEventHandle != INVALID_HANDLE_VALUE)
+    if(_ioh.handle() != INVALID_HANDLE_VALUE)
     {
-        loop.impl().disableOverlapped(_socket);
-        _currentEventHandle = INVALID_HANDLE_VALUE;
+        loop.impl().disableOverlapped(_ioh);
+        //_currentEventHandle = INVALID_HANDLE_VALUE;
     }
 
     _eventFlags = FD_CLOSE;
@@ -201,10 +198,9 @@ bool TcpSocketImpl::beginConnect(const AddrInfo& ai, System::EventLoop& loop)
     assert( ! _isConnected );
     log_debug("begin connect");
 
-    if(_currentEventHandle == INVALID_HANDLE_VALUE)
+    if(_ioh.handle() == INVALID_HANDLE_VALUE)
     {
-        HANDLE h = loop.impl().enableOverlapped(_socket);
-        _currentEventHandle = h;
+        loop.impl().enableOverlapped(_ioh);
     }
     
     _addrInfo = ai;
@@ -218,7 +214,7 @@ bool TcpSocketImpl::beginConnect(const AddrInfo& ai, System::EventLoop& loop)
     }
 
     if( ! _isConnected)
-        attachEvent(_currentEventHandle, _eventFlags);
+        attachEvent(_ioh.handle(), _eventFlags);
 
     return _isConnected;
 }
@@ -265,8 +261,8 @@ void TcpSocketImpl::endConnect(System::EventLoop& loop)
 
     _eventFlags &= ~FD_CONNECT;
 
-    if(_currentEventHandle != INVALID_HANDLE_VALUE)
-        attachEvent(_currentEventHandle, _eventFlags);
+    if(_ioh.handle() != INVALID_HANDLE_VALUE)
+        attachEvent(_ioh.handle(), _eventFlags);
 
     checkPendingError();
 
@@ -274,7 +270,7 @@ void TcpSocketImpl::endConnect(System::EventLoop& loop)
         return;
 
     _eventFlags |= FD_CONNECT;
-    attachEvent(_currentEventHandle, _eventFlags);
+    attachEvent(_ioh.handle(), _eventFlags);
 
     log_debug(_fd << " force endConnect");
     try
@@ -290,7 +286,7 @@ void TcpSocketImpl::endConnect(System::EventLoop& loop)
                 if (_isConnected)
                 {
                     _eventFlags &= ~FD_CONNECT;
-                    attachEvent(_currentEventHandle, _eventFlags);
+                    attachEvent(_ioh.handle(), _eventFlags);
                     return;
                 }
 
@@ -312,7 +308,7 @@ void TcpSocketImpl::endConnect(System::EventLoop& loop)
             if (_isConnected)
             {
                 _eventFlags &= ~FD_CONNECT;
-                attachEvent(_currentEventHandle, _eventFlags);
+                attachEvent(_ioh.handle(), _eventFlags);
                 return;
             }
             checkPendingError();
@@ -505,7 +501,8 @@ bool TcpSocketImpl::wait(std::size_t umsecs)
         msecs = std::numeric_limits<int>::max();
     }
 
-    if( WSA_WAIT_TIMEOUT != WSAWaitForMultipleEvents(1, &_currentEventHandle, FALSE, msecs, FALSE) )
+    HANDLE h = _ioh.handle();
+    if( WSA_WAIT_TIMEOUT != WSAWaitForMultipleEvents(1, &h, FALSE, msecs, FALSE) )
     {      
         return true;
     }
@@ -565,10 +562,9 @@ size_t TcpSocketImpl::beginRead(System::EventLoop& loop, char* buffer, size_t n,
 {
     log_debug(_fd << " beginRead");
 
-    if(_currentEventHandle == INVALID_HANDLE_VALUE)
+    if(_ioh.handle() == INVALID_HANDLE_VALUE)
     {
-        HANDLE h = loop.impl().enableOverlapped(_socket);
-        _currentEventHandle = h;
+        loop.impl().enableOverlapped(_ioh);
     }
 
     assert(buffer != 0);
@@ -586,7 +582,7 @@ size_t TcpSocketImpl::beginRead(System::EventLoop& loop, char* buffer, size_t n,
     //     std::cerr << _fd << " WAIT:  " << (wr == WAIT_OBJECT_0) << std::endl;
     // }
 
-    attachEvent(_currentEventHandle, _eventFlags);
+    attachEvent(_ioh.handle(), _eventFlags);
 
     // if( argp == 2878)
     // {
@@ -609,7 +605,7 @@ size_t TcpSocketImpl::read(char* buffer, size_t count, bool& eof)
 }
 
 
-size_t TcpSocketImpl::endRead(System::EventLoop& loop, bool& eof)
+size_t TcpSocketImpl::endRead(System::EventLoop& loop, char* buffer, size_t n, bool& eof)
 {
     log_debug(_fd << " endRead");
     _eventFlags &= ~FD_READ;
@@ -646,7 +642,7 @@ size_t TcpSocketImpl::endRead(System::EventLoop& loop, bool& eof)
         }
     }
 
-    attachEvent(_currentEventHandle, _eventFlags);
+    attachEvent(_ioh.handle(), _eventFlags);
 
     return len;
 }
@@ -656,10 +652,9 @@ size_t TcpSocketImpl::beginWrite(System::EventLoop& loop, const char* buffer, si
 {
     log_debug(_fd << " beginWrite");
 
-    if(_currentEventHandle == INVALID_HANDLE_VALUE)
+    if(_ioh.handle() == INVALID_HANDLE_VALUE)
     {
-        HANDLE h = loop.impl().enableOverlapped(_socket);
-        _currentEventHandle = h;
+        loop.impl().enableOverlapped(_ioh);
     }
 
     _sendBuffer.buf = const_cast<char*>(buffer);
@@ -674,7 +669,7 @@ size_t TcpSocketImpl::beginWrite(System::EventLoop& loop, const char* buffer, si
         if(WSAGetLastError() == WSAEWOULDBLOCK)
         {
             _eventFlags |= FD_WRITE;
-            attachEvent(_currentEventHandle, _eventFlags);
+            attachEvent(_ioh.handle(), _eventFlags);
             return 0;
         }
     }
@@ -686,7 +681,7 @@ size_t TcpSocketImpl::beginWrite(System::EventLoop& loop, const char* buffer, si
 }
 
 
-size_t TcpSocketImpl::endWrite(System::EventLoop& loop)
+size_t TcpSocketImpl::endWrite(System::EventLoop& loop, const char* buffer, size_t n)
 {
     log_debug(_fd << " wndWrite");
 
@@ -708,7 +703,7 @@ size_t TcpSocketImpl::endWrite(System::EventLoop& loop)
     //Set socket to non-blocking mode
     argp = 1;
     ::ioctlsocket(_fd, FIONBIO, &argp);
-    attachEvent(_currentEventHandle, _eventFlags);
+    attachEvent(_ioh.handle(), _eventFlags);
 
     return  numberOfBytesSent;
 }

@@ -119,13 +119,13 @@ class UdpSocketImpl
 
         size_t read(char* buffer, size_t count, bool& eof);
 
-        size_t endRead(System::EventLoop& loop, bool& eof);
+        size_t endRead(System::EventLoop& loop, char* buffer, size_t n, bool& eof);
 
         size_t beginWrite(System::EventLoop& loop, const char* buffer, size_t n);
 
         size_t write(const char* buffer, size_t n);
 
-        size_t endWrite(System::EventLoop& loop);
+        size_t endWrite(System::EventLoop& loop, const char* buffer, size_t n);
 
         void attach(System::EventLoop& loop);
 

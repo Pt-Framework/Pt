@@ -73,7 +73,7 @@ void SerialChannel::onOpen(const std::string& urlstr)
     }
     std::string path;
     std::getline( sStream, path );
-    _device.open( path, Pt::System::SerialDevice::Write );
+    _device.open( path, std::ios::out );
     _device.setBaudRate(Pt::System::SerialDevice::BaudRate4800);
     _device.setCharSize(8);
     _device.setStopBits(Pt::System::SerialDevice::OneStopBit);

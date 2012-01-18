@@ -65,11 +65,11 @@ class PT_SYSTEM_API IODevice : public Selectable
 
         typedef std::ios::openmode OpenFlags;
 
-        static const OpenFlags Read   = std::ios::in;
+        /*static const OpenFlags Read   = std::ios::in;
         static const OpenFlags Write  = std::ios::out;
         static const OpenFlags AtEnd  = std::ios::ate;
         static const OpenFlags Append = std::ios::app;
-        static const OpenFlags Trunc  = std::ios::trunc;
+        static const OpenFlags Trunc  = std::ios::trunc;*/
 
     public:
         //! @brief Destructor
@@ -220,14 +220,14 @@ class PT_SYSTEM_API IODevice : public Selectable
 
         virtual size_t onBeginRead(char* buffer, size_t n, bool& eof) = 0;
 
-        virtual size_t onEndRead(bool& eof) = 0;
+        virtual size_t onEndRead(char* buffer, size_t n, bool& eof) = 0;
 
         //! @brief Read bytes from device
         virtual size_t onRead(char* buffer, size_t count, bool& eof) = 0;
 
         virtual size_t onBeginWrite(const char* buffer, size_t n) = 0;
 
-        virtual size_t onEndWrite() = 0;
+        virtual size_t onEndWrite(const char* buffer, size_t n) = 0;
 
         //! @brief Write bytes to device
         virtual size_t onWrite(const char* buffer, size_t count) = 0;

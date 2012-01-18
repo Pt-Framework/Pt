@@ -66,22 +66,22 @@ void SerialDeviceImpl::open(const std::string& path, std::ios::openmode mode)
 {
     int flags = O_RDONLY;
 
-    if( (mode & IODevice::Read ) && (mode & IODevice::Write) )
+    if( (mode & std::ios::in ) && (mode & std::ios::out) )
     {
         flags |= O_RDWR;
     }
-    else if(mode & IODevice::Write)
+    else if(mode & std::ios::out)
     {
         flags |= O_WRONLY;
     }
-    else if(mode & IODevice::Read  )
+    else if(mode & std::ios::in  )
     {
         flags |= O_RDONLY;
     }
 
     flags |= O_NONBLOCK;
 
-    if(mode & IODevice::Trunc)
+    if(mode & std::ios::trunc)
         flags |= O_TRUNC;
 
     flags |=  O_NOCTTY;

@@ -38,6 +38,7 @@
 #include "Pt/Signal.h"
 #include "Pt/Net/AddrInfo.h"
 #include "AddrInfoImpl.h"
+#include "EventLoopImpl.h"
 #include <string>
 #include <windows.h>
 #include <winsock2.h>
@@ -57,51 +58,18 @@ class TcpSocket;
 
 class TcpSocketImpl
 {
-    struct DestructionSentry
-    {
-        DestructionSentry(DestructionSentry*& sentry)
-        : _deleted(false)
-        , _sentry(sentry)
-        {
-           sentry = this;
-        }
-
-        ~DestructionSentry()
-        {
-            if( ! _deleted )
-                this->detach();
-        }
-
-        bool operator!() const
-        { return _deleted; }
-
-        void detach()
-        {
-            _sentry = 0;
-            _deleted = true;
-        }
-
-        bool _deleted;
-        DestructionSentry*& _sentry;
-    };
-
     private:
         AddrInfo _addrInfo;
         const char* _connectResult;
         AddrInfoImpl::const_iterator _addrInfoPtr;
-        DestructionSentry* _sentry;
-        SOCKET	      _fd;
-        sockaddr_storage  _peeraddr;
-        TcpSocket&    _socket;
-        std::size_t	  _timeout;
-        // WSAOVERLAPPED _connectOverlapped;
-        WSAOVERLAPPED _sendOverlapped;
-        // WSAOVERLAPPED _receiveOverlapped;
-        WSABUF        _sendBuffer;
-        HANDLE        _currentEventHandle;
-        WSABUF        _receiveBuffer;
-        bool          _isConnected;
-        long          _eventFlags;
+        SOCKET _fd;
+        sockaddr_storage _peeraddr;
+        std::size_t _timeout;
+        System::IOHandle _ioh;
+        WSABUF _sendBuffer;
+        WSABUF _receiveBuffer;
+        bool _isConnected;
+        long _eventFlags;
 
         int checkConnect();
         void attachEvent(HANDLE ev, long events);
@@ -131,11 +99,11 @@ class TcpSocketImpl
 
         size_t read(char* buffer, size_t count, bool& eof);
 
-        size_t endRead(System::EventLoop& loop, bool& eof);
+        size_t endRead(System::EventLoop& loop, char* buffer, size_t n, bool& eof);
 
         size_t beginWrite(System::EventLoop& loop, const char* buffer, size_t n);
 
-        size_t endWrite(System::EventLoop& loop);
+        size_t endWrite(System::EventLoop& loop, const char* buffer, size_t n);
 
         size_t write(const char* buffer, size_t count);
 
@@ -164,8 +132,6 @@ class TcpSocketImpl
         bool runWrite(System::EventLoop& loop);
 
         bool runConnect(System::EventLoop& loop);
-
-        //bool run(System::EventLoop& loop);
 
         void cancel(System::EventLoop& loop);
 };

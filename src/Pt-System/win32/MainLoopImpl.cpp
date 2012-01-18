@@ -144,6 +144,32 @@ void EventLoopImpl::disableOverlapped(Selectable& s)
 }
 
 
+void EventLoopImpl::enableOverlapped(IOHandle& ioh)
+{ 
+    assert(ioh.sel);
+    ioh.setHandle(_ioEvent);
+    _devices.insert(ioh.sel);
+}
+
+
+void EventLoopImpl::disableOverlapped(IOHandle& ioh)
+{
+    assert(ioh.sel);
+    std::set<Selectable*>::iterator iter = _devices.find( ioh.sel );
+    if( iter != _devices.end() )
+    {
+        if( _current != _devices.end() && *_current == *iter )
+        {
+            _devices.erase(_current++);
+        }
+        else
+        {
+            _devices.erase(iter);
+        }
+    }
+}
+
+
 void EventLoopImpl::run()
 {
     while( this->waitNext() )

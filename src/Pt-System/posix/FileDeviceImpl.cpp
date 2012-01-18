@@ -51,21 +51,21 @@ void FileDeviceImpl::open( const char* path, std::ios::openmode mode)
 {
     int flags = O_RDONLY;
 
-    if( (mode & IODevice::Read ) && (mode & IODevice::Write) ) {
+    if( (mode & std::ios::in ) && (mode & std::ios::out) ) {
         flags |= O_RDWR;
         flags |= O_CREAT;
     }
-    else if(mode & IODevice::Write) {
+    else if(mode & std::ios::out) {
         flags |= O_WRONLY;
         flags |= O_CREAT;
     }
-    else if(mode & IODevice::Read) {
+    else if(mode & std::ios::in) {
         flags |= O_RDONLY;
     }
 
     flags |= O_NONBLOCK;
 
-    if(mode & IODevice::Trunc)
+    if(mode & std::ios::trunc)
         flags |= O_TRUNC;
 
     int fd = ::open(path, flags, 0644);
@@ -77,7 +77,7 @@ void FileDeviceImpl::open( const char* path, std::ios::openmode mode)
     IODeviceImpl::open(fd, false);
 
     try {
-        if(mode & IODevice::AtEnd)
+        if(mode & std::ios::ate)
             this->seek(0, std::ios::end);
     }
     catch(...) {

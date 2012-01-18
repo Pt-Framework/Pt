@@ -150,7 +150,7 @@ size_t IODeviceImpl::beginRead(EventLoop& loop, char* buffer, size_t n, bool&)
 }
 
 
-size_t IODeviceImpl::endRead(EventLoop& loop, bool& eof)
+size_t IODeviceImpl::endRead(EventLoop& loop, char* buffer, size_t n, bool& eof)
 {
     loop.impl().endRead( &_ioh );
 
@@ -215,7 +215,7 @@ size_t IODeviceImpl::beginWrite(EventLoop& loop, const char* buffer, size_t n)
 }
 
 
-size_t IODeviceImpl::endWrite(EventLoop& loop)
+size_t IODeviceImpl::endWrite(EventLoop& loop, const char* buffer, size_t n)
 {
     loop.impl().endWrite( &_ioh );
 

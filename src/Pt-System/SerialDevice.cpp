@@ -85,21 +85,21 @@ size_t SerialDevice::onBeginRead(char* buffer, size_t n, bool& eof)
 }
 
 
-size_t SerialDevice::onEndRead(bool& eof)
+size_t SerialDevice::onEndRead(char* buffer, size_t n, bool& eof)
 {
-    return _impl->endRead(*parent(),eof);
+    return _impl->endRead(*parent(), buffer, n, eof);
 }
 
 
 size_t SerialDevice::onBeginWrite(const char* buffer, size_t n)
 {
-    return _impl->beginWrite(*parent(),buffer, n);
+    return _impl->beginWrite(*parent(), buffer, n);
 }
 
 
-size_t SerialDevice::onEndWrite()
+size_t SerialDevice::onEndWrite(const char* buffer, size_t n)
 {
-    return _impl->endWrite(*parent());
+    return _impl->endWrite(*parent(), buffer, n);
 }
 
 

@@ -193,7 +193,7 @@ size_t OverlappedIODeviceImpl::beginRead(EventLoop& loop, char* buffer, size_t n
 }
 
 
-size_t OverlappedIODeviceImpl::endRead(EventLoop& loop, bool& eof)
+size_t OverlappedIODeviceImpl::endRead(EventLoop& loop, char* buffer, size_t n, bool& eof)
 {
     // finishes the overlapped operation. Blocks until data is available,
     // so beginRead can be ended by endRead without a wait step.
@@ -272,7 +272,7 @@ size_t OverlappedIODeviceImpl::beginWrite(EventLoop& loop, const char* buffer, s
 }
 
 
-size_t OverlappedIODeviceImpl::endWrite(EventLoop& loop)
+size_t OverlappedIODeviceImpl::endWrite(EventLoop& loop, const char* buffer, size_t n)
 {
     DWORD writtenBytes = 0;
     if (GetOverlappedResult( handle(), &_writeOv, &writtenBytes, FALSE) == FALSE )
