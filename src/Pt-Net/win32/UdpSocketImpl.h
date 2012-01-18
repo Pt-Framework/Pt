@@ -33,6 +33,7 @@
 #define WIN32_LEAN_AND_MEAN
 #endif
 
+#include "EventLoopImpl.h"
 #include "AddrInfoImpl.h"
 #include "Pt/Net/Api.h"
 #include "Pt/Net/AddrInfo.h"
@@ -49,35 +50,6 @@ class UdpSocket;
 
 class UdpSocketImpl
 {
-    private:
-        struct DestructionSentry
-        {
-            DestructionSentry(DestructionSentry*& sentry)
-            : _deleted(false)
-            , _sentry(sentry)
-            {
-               sentry = this;
-            }
-
-            ~DestructionSentry()
-            {
-                if( ! _deleted )
-                    this->detach();
-            }
-
-            bool operator!() const
-            { return _deleted; }
-
-            void detach()
-            {
-                _sentry = 0;
-                _deleted = true;
-            }
-
-            bool _deleted;
-            DestructionSentry*& _sentry;
-        };
-
     public:
         UdpSocketImpl(UdpSocket& socket);
 
@@ -141,9 +113,8 @@ class UdpSocketImpl
         void setEventFlags(HANDLE ev, long events);
 
     private:
-        UdpSocket&                   _socket;
+        System::IOHandle             _ioh;
         bool                         _broadcast;
-        DestructionSentry*           _sentry;
         SOCKET                       _fd;
         AddrInfo                     _addrInfo;
         AddrInfoImpl::const_iterator _addrInfoPtr;
@@ -152,7 +123,6 @@ class UdpSocketImpl
         sockaddr_storage             _peeraddr;
         sockaddr_storage             _servaddr;
         long                         _eventFlags;
-        HANDLE                       _currentEventHandle;
         std::size_t                  _timeout;
         WSABUF                       _sendBuffer;
         WSABUF                       _receiveBuffer;

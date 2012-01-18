@@ -40,6 +40,10 @@ namespace System {
 class PT_SYSTEM_API Selectable : protected NonCopyable
 {
     friend class SelectableList;
+    friend void link(Selectable& s, SelectableList& list);
+    friend void unlink(Selectable& s);
+
+    
     friend class SelectableListIterator;
 
     public:
@@ -66,6 +70,9 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
 
         //! @brief Notify readiness to the parent EventLoop 
         void setReady();
+
+        Selectable* next()
+        { return _next; }
 
     protected:
         //! @brief Default Constructor

@@ -20,6 +20,7 @@
 #ifndef PT_SYSTEM_IODEVICEIMPL_H
 #define PT_SYSTEM_IODEVICEIMPL_H
 
+#include "EventLoopImpl.h"
 #include "Pt/System/IOError.h"
 #include <windows.h>
 
@@ -92,7 +93,7 @@ class OverlappedIODeviceImpl : public IODeviceImpl
         virtual void cancel(EventLoop& loop) ;
 
      protected:
-        IODevice& _device;
+        IOHandle _ioh;
         OVERLAPPED _readOv;
         OVERLAPPED _writeOv;
 };

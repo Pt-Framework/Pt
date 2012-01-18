@@ -37,102 +37,65 @@ namespace Pt {
 
 namespace System {
 
-class SelectableListIterator
+class SelectableList : private Selectable
 {
-    public:
-        SelectableListIterator()
-        : _sel(0)
-        {}
-
-        explicit SelectableListIterator(Selectable* s)
-        : _sel(s)
-        {}
-
-        SelectableListIterator& operator=(const SelectableListIterator& it)
-        {
-            _sel = it._sel;
-            return *this;
-        }
-
-        SelectableListIterator& operator++()
-        {
-            assert(_sel);
-            _sel = _sel->_next;
-            return *this;
-        }
-
-        Selectable& operator*() const
-        { return *_sel; }
-
-        Selectable* operator->() const
-        { return _sel; }
-
-        bool operator ==(const SelectableListIterator& it) const
-        { return _sel == it._sel; }
-
-        bool operator !=(const SelectableListIterator& it) const
-        { return _sel != it._sel; }
-
-    private:
-        Selectable* _sel;
-};
-
-
-class SelectableList : public Selectable
-{
-    public:
-        typedef SelectableListIterator Iterator;
-
     public:
         SelectableList()
-        {
-            this->_next = this;
-            this->_prev = this;
-        }
-
-        ~SelectableList()
         {
             this->_next = 0;
             this->_prev = 0;
         }
 
         bool empty() const
-        { return this->_next == this; }
+        { return this->_next == 0; }
 
-        Iterator end()
-        { return Iterator(this); }
+        Selectable* first()
+        { return this->next(); }
 
-        Iterator begin()
-        { return Iterator(this->_next); }
+        Selectable* head()
+        { return this; }
 
-        void insert(Selectable& s)
-        {
-            Selectable* second = this->_next;
-            this->_next = &s;
-            second->_prev = &s;
-
-            s._prev = this;
-            s._next = second;
-        }
-
-        void remove(Selectable& s)
-        {
-            if(0 == s._next)
-                return;
-
-            assert(s._next && s._prev);
-            s._prev->_next = s._next;
-            s._next->_prev = s._prev;
-            s._next = 0;
-            s._prev = 0;
-        }
-
+    protected:
         virtual void onCancel()
         { }
 
         virtual bool onRun()
         { return false; }
 };
+
+inline void unlink(Selectable& s)
+{
+    if(0 == s._prev)
+        return;
+
+    assert(s._prev);
+
+    s._prev->_next = s._next;
+
+    if(s._next)
+        s._next->_prev = s._prev;
+
+    s._next = 0;
+    s._prev = 0;
+}
+
+inline void link(Selectable& s, SelectableList& list)
+{
+    assert(0 == s._prev);
+    assert(0 == s._next);
+    if(s._prev)
+    {
+        unlink(s);
+    }
+
+    Selectable* second = list.first();
+    if(second)
+        second->_prev = &s;
+
+    list.head()->_next = &s;
+    s._prev = list.head();
+    s._next = second;
+}
 
 } // namespace System
 

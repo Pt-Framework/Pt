@@ -44,7 +44,7 @@ namespace System {
 EventLoopImpl::EventLoopImpl(Signal<const Pt::Event&>& eventSignal)
 : _event(&eventSignal)
 {
-    _current = _devices.end();
+    _current = 0;
 
     _wakeEvent = CreateEvent( NULL, FALSE, FALSE, NULL );
     if( _wakeEvent == NULL )
@@ -64,10 +64,17 @@ EventLoopImpl::EventLoopImpl(Signal<const Pt::Event&>& eventSignal)
 
 EventLoopImpl::~EventLoopImpl()
 { 
+    while( ! _devices.empty() )
+    {
+        _devices.first()->detach();
+    }
+
     while( ! _selectables.empty() )
     {
-        _selectables.begin()->detach();
+        _selectables.first()->detach();
     }
+
+    assert( _devices.empty() );
 
     CloseHandle( _wakeEvent );
     CloseHandle( _ioEvent );
@@ -76,13 +83,13 @@ EventLoopImpl::~EventLoopImpl()
 
 void EventLoopImpl::attach(Selectable& s)
 {
-    _selectables.insert(s);
+    link(s, _selectables);
 }
 
 
 void EventLoopImpl::detach(Selectable& s)
 {
-    _selectables.remove(s);
+    unlink(s);
 }
 
 
@@ -120,53 +127,27 @@ void EventLoopImpl::disable(IOHandle& handle)
 }
 
 
-HANDLE EventLoopImpl::enableOverlapped(Selectable& s)
-{ 
-    _devices.insert(&s);
-    return _ioEvent; 
-}
-
-
-void EventLoopImpl::disableOverlapped(Selectable& s)
-{
-    std::set<Selectable*>::iterator iter = _devices.find( &s );
-    if( iter != _devices.end() )
-    {
-        if( _current != _devices.end() && *_current == *iter )
-        {
-            _devices.erase(_current++);
-        }
-        else
-        {
-            _devices.erase(iter);
-        }
-    }
-}
-
-
 void EventLoopImpl::enableOverlapped(IOHandle& ioh)
 { 
     assert(ioh.sel);
     ioh.setHandle(_ioEvent);
-    _devices.insert(ioh.sel);
+
+    unlink( *(ioh.sel) );
+    link( *(ioh.sel) , _devices);
 }
 
 
 void EventLoopImpl::disableOverlapped(IOHandle& ioh)
 {
     assert(ioh.sel);
-    std::set<Selectable*>::iterator iter = _devices.find( ioh.sel );
-    if( iter != _devices.end() )
+
+    if( _current == ioh.sel )
     {
-        if( _current != _devices.end() && *_current == *iter )
-        {
-            _devices.erase(_current++);
-        }
-        else
-        {
-            _devices.erase(iter);
-        }
+        _current = _current->next();
     }
+
+    unlink( *(ioh.sel) );
+    link(*(ioh.sel), _selectables);
 }
 
 
@@ -259,14 +240,14 @@ bool EventLoopImpl::waitNext()
         // I/O event at offset 1 was active
         else if (offset == 1)
         {
-            for( _current = _devices.begin(); _current != _devices.end(); )
+            for( _current = _devices.first(); _current != 0; )
             {
-                Selectable* dev = *_current;
+                Selectable* dev = _current;
                 dev->run();
 
-                if( _current != _devices.end() && *_current == dev )
+                if(_current == dev)
                 {
-                    ++_current;
+                    _current = _current->next();
                 }
             }
         }
@@ -279,7 +260,7 @@ bool EventLoopImpl::waitNext()
     }
     catch (...)
     {
-        _current = _devices.end();
+        _current = 0;
         throw;
     }
 

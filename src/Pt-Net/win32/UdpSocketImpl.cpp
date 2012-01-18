@@ -26,7 +26,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-
 #include "UdpSocketImpl.h"
 #include "MainLoopImpl.h"
 #include <Pt/Net/AddrInfo.h>
@@ -43,15 +42,12 @@ namespace Pt {
 namespace Net {
 
 UdpSocketImpl::UdpSocketImpl(UdpSocket& socket)
-: _socket(socket)
+: _ioh(socket)
 , _broadcast(false)
-, _sentry(0)
-//, _connectResult(0)
 , _fd(INVALID_SOCKET)
 , _isConnected(false)
 , _isBound(false)
 , _eventFlags(FD_CLOSE)
-, _currentEventHandle(INVALID_HANDLE_VALUE)
 , _timeout(Pt::System::EventLoop::WaitInfinite)
 {
 }
@@ -59,8 +55,6 @@ UdpSocketImpl::UdpSocketImpl(UdpSocket& socket)
 
 UdpSocketImpl::~UdpSocketImpl()
 {
-    if(_sentry)
-        _sentry->detach();
 }
 
 
@@ -98,10 +92,9 @@ void UdpSocketImpl::detach(System::EventLoop& loop)
 
 void UdpSocketImpl::cancel(System::EventLoop& loop)
 {
-    if(_currentEventHandle != INVALID_HANDLE_VALUE)
+    if(_ioh.handle() != INVALID_HANDLE_VALUE)
     {
-        loop.impl().disableOverlapped(_socket);
-        _currentEventHandle = INVALID_HANDLE_VALUE;
+        loop.impl().disableOverlapped(_ioh);
     }
 
     _eventFlags = 0;
@@ -482,10 +475,9 @@ size_t UdpSocketImpl::read(char* buffer, size_t count, bool& eof)
 
 size_t UdpSocketImpl::beginRead(System::EventLoop& loop, char* buffer, size_t n, bool& eof)
 {
-    if(_currentEventHandle == INVALID_HANDLE_VALUE)
+    if(_ioh.handle() == INVALID_HANDLE_VALUE)
     {
-        HANDLE h = loop.impl().enableOverlapped(_socket);
-        _currentEventHandle = h;
+        loop.impl().enableOverlapped(_ioh);
     }
 
     assert(buffer != 0);
@@ -494,7 +486,7 @@ size_t UdpSocketImpl::beginRead(System::EventLoop& loop, char* buffer, size_t n,
     _receiveBuffer.buf = buffer;
     _receiveBuffer.len = n;
 
-    setEventFlags(_currentEventHandle, _eventFlags);
+    setEventFlags(_ioh.handle(), _eventFlags);
     return 0;
 }
 
@@ -524,7 +516,7 @@ size_t UdpSocketImpl::endRead(System::EventLoop& loop, char* buffer, size_t n, b
         ::ioctlsocket(_fd, FIONBIO, &argp);
     }
 
-    setEventFlags(_currentEventHandle, _eventFlags);
+    setEventFlags(_ioh.handle(), _eventFlags);
 
     return len;
 }
@@ -538,10 +530,9 @@ size_t UdpSocketImpl::write(const char* buffer, size_t n)
 
 size_t UdpSocketImpl::beginWrite(System::EventLoop& loop, const char* buffer, size_t n)
 {
-    if(_currentEventHandle == INVALID_HANDLE_VALUE)
+    if(_ioh.handle() == INVALID_HANDLE_VALUE)
     {
-        HANDLE h = loop.impl().enableOverlapped(_socket);
-        _currentEventHandle = h;
+        loop.impl().enableOverlapped(_ioh);
     }
 
      _sendBuffer.buf = const_cast<char*>(buffer);
@@ -558,7 +549,7 @@ size_t UdpSocketImpl::beginWrite(System::EventLoop& loop, const char* buffer, si
         if(WSAGetLastError() == WSAEWOULDBLOCK)
         {
             _eventFlags |= FD_WRITE;
-            setEventFlags(_currentEventHandle, _eventFlags);
+            setEventFlags(_ioh.handle(), _eventFlags);
             return 0;
         }
     }
@@ -588,7 +579,7 @@ size_t UdpSocketImpl::endWrite(System::EventLoop& loop, const char* buffer, size
     //Set socket to non-blocking mode
     argp = 1;
     ::ioctlsocket(_fd, FIONBIO, &argp);
-    setEventFlags(_currentEventHandle, _eventFlags);
+    setEventFlags(_ioh.handle(), _eventFlags);
 
     return  numberOfBytesSent;
 }

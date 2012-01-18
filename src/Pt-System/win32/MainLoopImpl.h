@@ -139,10 +139,6 @@ class PT_SYSTEM_API EventLoopImpl
 
         void avail(Selectable& s);
 
-        HANDLE enableOverlapped(Selectable& s);
-
-        void disableOverlapped(Selectable& s);
-
         void enableOverlapped(IOHandle& s);
 
         void disableOverlapped(IOHandle& s);
@@ -164,8 +160,8 @@ class PT_SYSTEM_API EventLoopImpl
         HANDLE _wakeEvent;
         HANDLE _ioEvent;
         HandleMap _handles;
-        std::set<Selectable*>::iterator _current;
-        std::set<Selectable*> _devices;
+        Selectable* _current;
+        SelectableList _devices;
         SelectableList _selectables;
         std::vector<Selectable*> _avail;
 };

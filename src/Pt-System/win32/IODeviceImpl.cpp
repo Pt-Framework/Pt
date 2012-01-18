@@ -71,7 +71,7 @@ void IODeviceImpl::close()
 /////////////////////////////////////////////////////////////////////
 
 OverlappedIODeviceImpl::OverlappedIODeviceImpl(IODevice& dev)
-: _device(dev)
+: _ioh(dev)
 {
     _readOv.Offset = 0;
     _readOv.OffsetHigh = 0;
@@ -112,7 +112,7 @@ void OverlappedIODeviceImpl::cancel(EventLoop& loop)
 
     if(_readOv.hEvent != NULL)
     {
-        loop.impl().disableOverlapped(_device);
+        loop.impl().disableOverlapped(_ioh);
     }
 
     _readOv.hEvent = NULL;
@@ -164,9 +164,9 @@ size_t OverlappedIODeviceImpl::beginRead(EventLoop& loop, char* buffer, size_t n
 {
     if(_readOv.hEvent == NULL)
     {
-        HANDLE h = loop.impl().enableOverlapped(_device);
-        _readOv.hEvent = h;
-        _writeOv.hEvent = h;
+        loop.impl().enableOverlapped(_ioh);
+        _readOv.hEvent = _ioh.handle();
+        _writeOv.hEvent = _ioh.handle();
     }
 
     // if we can can read data immediately, we return the number of bytes
@@ -251,9 +251,9 @@ size_t OverlappedIODeviceImpl::beginWrite(EventLoop& loop, const char* buffer, s
 {
     if(_readOv.hEvent == NULL)
     {
-        HANDLE h = loop.impl().enableOverlapped(_device);
-        _readOv.hEvent = h;
-        _writeOv.hEvent = h;
+        loop.impl().enableOverlapped(_ioh);
+        _readOv.hEvent = _ioh.handle();
+        _writeOv.hEvent = _ioh.handle();
     }
 
     DWORD writtenBytes = 0;

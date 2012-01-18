@@ -34,6 +34,8 @@
 #define WIN32_LEAN_AND_MEAN
 #endif
 
+#include "EventLoopImpl.h"
+
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <string>
@@ -54,9 +56,10 @@ class TcpServerImpl
 {
     private:
         TcpServer& _server;
+        System::IOHandle _ioh;
         SOCKET _fd;
         sockaddr_storage _servaddr;
-        HANDLE _currentHandle;
+
 
         void attachEvent(HANDLE ev, long events);
 

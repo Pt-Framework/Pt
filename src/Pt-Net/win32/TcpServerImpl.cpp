@@ -64,8 +64,8 @@ static struct WsaInit
 
 TcpServerImpl::TcpServerImpl(TcpServer& server)
 : _server(server)
+, _ioh(server)
 , _fd(INVALID_SOCKET)
-, _currentHandle(INVALID_HANDLE_VALUE)
 {
     //WSAResetEvent(_currentHandle);
 }
@@ -112,13 +112,12 @@ void TcpServerImpl::close()
 void TcpServerImpl::cancel(System::EventLoop& loop)
 {
     // not yet listening
-    if (_fd == INVALID_SOCKET || _currentHandle == INVALID_HANDLE_VALUE)
+    if (_fd == INVALID_SOCKET || _ioh.handle() == INVALID_HANDLE_VALUE)
         return;
 
-    attachEvent(_currentHandle, 0);
+    attachEvent(_ioh.handle(), 0);
 
-    loop.impl().disableOverlapped(_server);
-    _currentHandle = INVALID_HANDLE_VALUE;
+    loop.impl().disableOverlapped(_ioh);
 }
 
 
@@ -134,10 +133,10 @@ void TcpServerImpl::detach(System::EventLoop& loop)
 
 void TcpServerImpl::beginAccept(System::EventLoop& loop)
 {
-    assert(_currentHandle == INVALID_HANDLE_VALUE);
+    assert(_ioh.handle() == INVALID_HANDLE_VALUE);
 
-    _currentHandle = loop.impl().enableOverlapped(_server);
-    attachEvent(_currentHandle, FD_ACCEPT);
+    loop.impl().enableOverlapped(_ioh);
+    attachEvent(_ioh.handle(), FD_ACCEPT);
 }
 
 
@@ -236,8 +235,8 @@ SOCKET TcpServerImpl::accept()
     }
     
     // reset the blocking mode
-    if(_currentHandle != INVALID_HANDLE_VALUE)
-        attachEvent(_currentHandle, FD_ACCEPT);
+    if(_ioh.handle() != INVALID_HANDLE_VALUE)
+        attachEvent(_ioh.handle(), FD_ACCEPT);
 
     log_debug(fd << " accepted ");
     //_server.setAvail(false);
