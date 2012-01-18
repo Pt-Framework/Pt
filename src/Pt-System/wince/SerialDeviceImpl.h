@@ -39,22 +39,25 @@ class SerialDeviceImpl : public Pt::System::IODeviceImpl
 
         ~SerialDeviceImpl();
 
-        void open( const std::string& file, IODevice::OpenMode mode);
+        void open( const std::string& file, std::ios::openmode mode);
 
         //! @brief Closes the I/O device
         void close();
+
+        void cancel(EventLoop& loop);
 
         void attach(EventLoop& mon);
 
         void detach(EventLoop& mon);
 
-        bool wait(std::size_t msecs);
 
         bool setWaitHandle(HANDLE h, bool& avail);
-		
+
         void getWaitHandles(HandleMap& handles, bool& avail);
-		
-        bool checkEvent();
+
+        bool runRead(EventLoop&);
+
+        bool runWrite(EventLoop&);
 
         size_t beginRead(char* buffer, size_t n, bool& eof);    
 
@@ -104,8 +107,7 @@ class SerialDeviceImpl : public Pt::System::IODeviceImpl
         void run();       
         
     public:
-		SerialDevice& _device;
-        HANDLE _ioReady;
+        SerialDevice& _device;
         HANDLE _beginWait;
         DCB _orgCommState;        
         AttachedThread* _thread;  

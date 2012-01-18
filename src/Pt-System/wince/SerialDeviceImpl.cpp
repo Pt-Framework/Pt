@@ -41,13 +41,11 @@ SerialDeviceImpl::SerialDeviceImpl(SerialDevice& device)
 : _device(device)
 , _thread(0)
 , _terminateThread(false)
-, _ioReady(0)
 , _beginWait(0)
 , _rlen(0)
 , _wlen(0)
 , _event(0)
 { 
-    _ioReady  = CreateEvent(NULL, TRUE, FALSE, NULL);    
     _beginWait = CreateEvent(NULL, FALSE, FALSE, NULL);
 }
 
@@ -57,16 +55,16 @@ SerialDeviceImpl::~SerialDeviceImpl()
 }
 
 
-void SerialDeviceImpl::open( const std::string& port_, IODevice::OpenMode mode)
+void SerialDeviceImpl::open( const std::string& port_, std::ios::openmode mode)
 {
     std::basic_string<TCHAR> port;
     win32::fromMultiByte( port_, port );
 
     DWORD openFlags = 0;
-    if( mode & IODevice::Write )
+    if( mode & std::ios::out )
         openFlags |= GENERIC_WRITE;
 
-    if( mode & IODevice::Read )
+    if( mode & std::ios::in )
         openFlags |= GENERIC_READ;
 
     HANDLE h = CreateFile( port.c_str() , openFlags, 0, NULL, OPEN_EXISTING, 0, NULL);
@@ -74,14 +72,14 @@ void SerialDeviceImpl::open( const std::string& port_, IODevice::OpenMode mode)
     size_t err = GetLastError();
 
     if( h == 0  || h == INVALID_HANDLE_VALUE )
-        throw DeviceNotFound(port_, PT_SOURCEINFO);
+        throw AccessFailed(port_);
 
     this->setHandle(h);
 
     try
     {
         if( ! GetCommState( h, &_orgCommState ) )
-            throw AccessFailed("Get port state failed" , PT_SOURCEINFO);       
+            throw AccessFailed("Get port state failed" );       
 
         COMMTIMEOUTS comTimeOut;
         comTimeOut.ReadIntervalTimeout          = MAXDWORD;
@@ -91,15 +89,9 @@ void SerialDeviceImpl::open( const std::string& port_, IODevice::OpenMode mode)
         comTimeOut.WriteTotalTimeoutConstant    = 1;
 
         if( ! SetCommTimeouts( h, &comTimeOut ) )
-            throw AccessFailed("Set port time outs failed" , PT_SOURCEINFO);
+            throw AccessFailed("Set port time outs failed");
 
         _terminateThread = false;
-
-        if (mode & IODevice::Async)
-        {
-            _thread = new AttachedThread( callable(*this, &SerialDeviceImpl::run) );
-            _thread->start();
-        }
     }
     catch( ... )
     {
@@ -112,6 +104,17 @@ void SerialDeviceImpl::open( const std::string& port_, IODevice::OpenMode mode)
 
 void SerialDeviceImpl::close()
 {
+    // Closing the com handle will end WaitCommEvent
+    CloseHandle( handle() );
+    CloseHandle( _beginWait );
+
+    this->setHandle(INVALID_HANDLE_VALUE);
+    _beginWait = 0;
+}
+
+
+void SerialDeviceImpl::cancel(EventLoop& loop)
+{
     if( handle() == 0 || handle() == INVALID_HANDLE_VALUE )
         return;
     
@@ -123,21 +126,11 @@ void SerialDeviceImpl::close()
 
     // Wake up the thread
     SetEvent(_beginWait);
-    
-    // Closing the com handle will end WaitCommEvent
-    CloseHandle( handle() );
 
     // Wait for comm event thread termination
     _thread->join();
     delete _thread;
     _thread = 0;
-
-    CloseHandle( _ioReady );
-    CloseHandle( _beginWait );
-
-    this->setHandle(INVALID_HANDLE_VALUE);
-    _ioReady = 0;
-    _beginWait = 0;
 }
 
 
@@ -151,12 +144,6 @@ void SerialDeviceImpl::detach(EventLoop& mon)
 }
 
 
-bool SerialDeviceImpl::wait(std::size_t msecs)
-{
-    return false;
-}
-
-
 bool SerialDeviceImpl::setWaitHandle(HANDLE h, bool& avail)
 {
     return false;
@@ -165,11 +152,26 @@ bool SerialDeviceImpl::setWaitHandle(HANDLE h, bool& avail)
 
 void SerialDeviceImpl::getWaitHandles(HandleMap& handles, bool& avail)
 { 
-    handles.add(_ioReady, &_device);
+    //handles.add(_ioReady, &_device);
 }
 
 
-bool SerialDeviceImpl::checkEvent()
+bool SerialDeviceImpl::runRead(EventLoop& loop)
+{
+
+
+    return false;
+}
+
+bool SerialDeviceImpl::runWrite(EventLoop& loop)
+{
+
+
+    return false;
+}
+
+
+/*bool SerialDeviceImpl::checkEvent()
 {
     bool avail = false;
 
@@ -186,7 +188,7 @@ bool SerialDeviceImpl::checkEvent()
     }
 
     return avail;
-}
+}*/
 
 
 void SerialDeviceImpl::run()
@@ -243,6 +245,12 @@ void SerialDeviceImpl::run()
 
 size_t SerialDeviceImpl::beginRead(char* buffer, size_t n, bool& eof) 
 {
+    if ( ! _thread)
+    {
+        _thread = new AttachedThread( callable(*this, &SerialDeviceImpl::run) );
+        _thread->start();
+    }
+
     _rlen = 0;
 
     DWORD mask = 0;
@@ -283,6 +291,12 @@ size_t SerialDeviceImpl::endRead(bool& eof)
 
 size_t SerialDeviceImpl::beginWrite(const char* buffer, size_t n)
 {
+    if ( ! _thread)
+    {
+        _thread = new AttachedThread( callable(*this, &SerialDeviceImpl::run) );
+        _thread->start();
+    }
+
     _wlen = this->write(buffer, n); 
 
     if(_wlen == 0)
