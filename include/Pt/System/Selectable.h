@@ -36,6 +36,8 @@ namespace Pt {
 
 namespace System {
 
+class SelectableList;
+
 //! @brief Dispatches operations through an event loop
 class PT_SYSTEM_API Selectable : protected NonCopyable
 {
