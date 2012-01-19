@@ -55,6 +55,36 @@ class SelectableList : private Selectable
         Selectable* head()
         { return this; }
 
+        void insert(Selectable& s)
+        {
+            if(s._prev || s._next)
+                unlink(s);
+        
+            Selectable* second = this->first();
+            if(second)
+                second->_prev = &s;
+        
+            this->head()->_next = &s;
+            s._prev = this->head();
+            s._next = second;
+        }
+
+        static void unlink(Selectable& s)
+        {
+            if(0 == s._prev)
+                return;
+        
+            assert(s._prev);
+        
+            s._prev->_next = s._next;
+        
+            if(s._next)
+                s._next->_prev = s._prev;
+        
+            s._next = 0;
+            s._prev = 0;
+        }
+
     protected:
         virtual void onCancel()
         { }
@@ -62,10 +92,6 @@ class SelectableList : private Selectable
         virtual bool onRun()
         { return false; }
 };
-
-// TODO: make link and unlink work with a SelectableIterator
-// we start with an default constructed one that points to null
-// and is equal end
 
 inline void unlink(Selectable& s)
 {
