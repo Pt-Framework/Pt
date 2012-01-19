@@ -50,29 +50,20 @@ class SerialDeviceImpl : public Pt::System::IODeviceImpl
 
         void detach(EventLoop& mon);
 
-
-        bool setWaitHandle(HANDLE h, bool& avail);
-
-        void getWaitHandles(HandleMap& handles, bool& avail);
-
         bool runRead(EventLoop&);
 
         bool runWrite(EventLoop&);
 
-        size_t beginRead(char* buffer, size_t n, bool& eof);    
+        size_t beginRead(EventLoop& loop, char* buffer, size_t n, bool& eof);    
 
-        size_t endRead( bool& eof);
+        size_t endRead(EventLoop& loop, char* buffer, size_t n, bool& eof);
 
-        size_t beginWrite(const char* buffer, size_t n);
-
-        size_t endWrite();
-
-        void cancel();
-
-        //! @brief Read bytes from device
         size_t read( char* buffer, size_t count, bool& eof );
 
-        //! @brief Write bytes to device
+        size_t beginWrite(EventLoop& loop, const char* buffer, size_t n);
+
+        size_t endWrite(EventLoop& loop, const char* buffer, size_t n);
+
         size_t write( const char* buffer, size_t count );
 
         void flush();
@@ -112,8 +103,6 @@ class SerialDeviceImpl : public Pt::System::IODeviceImpl
         DCB _orgCommState;        
         AttachedThread* _thread;  
         bool _terminateThread;
-        DWORD _rlen;
-        size_t _wlen;
         DWORD _event;
 };
 

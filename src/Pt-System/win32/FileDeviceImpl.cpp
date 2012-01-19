@@ -220,7 +220,7 @@ size_t FileDeviceImpl::beginRead(EventLoop& loop, char* buffer, size_t n, bool& 
 }
 
 
-size_t FileDeviceImpl::endRead(EventLoop& loop, bool& eof)
+size_t FileDeviceImpl::endRead(EventLoop& loop, char* buffer, size_t n, bool& eof)
 {
     return 0;
 }
@@ -255,7 +255,7 @@ size_t FileDeviceImpl::beginWrite(EventLoop& loop, const char* buffer, size_t n)
 }
 
 
-size_t FileDeviceImpl::endWrite(EventLoop& loop)
+size_t FileDeviceImpl::endWrite(EventLoop& loop, const char* buffer, size_t n)
 {
     return 0;
 }
