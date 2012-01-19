@@ -93,7 +93,7 @@ class SelectableList : private Selectable
         { return false; }
 };
 
-inline void unlink(Selectable& s)
+/*inline void unlink(Selectable& s)
 {
     if(0 == s._prev)
         return;
@@ -125,7 +125,7 @@ inline void link(Selectable& s, SelectableList& list)
     list.head()->_next = &s;
     s._prev = list.head();
     s._next = second;
-}
+}*/
 
 } // namespace System
 

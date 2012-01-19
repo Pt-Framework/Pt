@@ -99,11 +99,19 @@ void MainLoopImplOnWake(void* p)
     }
 }
 
+
 void MainLoopImplOnTimer(CFRunLoopTimerRef timer, void *p)
 {
     MainLoopImpl* impl = reinterpret_cast<MainLoopImpl*>(p);
     impl->processTimers();
 
+}
+
+
+void MainLoopImplOnKQueue(CFFileDescriptorRef f, CFOptionFlags callBackTypes, void *p)
+{
+    MainLoopImpl* impl = reinterpret_cast<MainLoopImpl*>(p);
+    impl->processKQueue();
 }
 
 
@@ -128,6 +136,11 @@ MainLoopImpl::MainLoopImpl(Signal<const Pt::Event&>& eventSignal)
 
     _wakeSource = CFRunLoopSourceCreate(kCFAllocatorDefault, 0, &ctx);
 
+    CFFileDescriptorRef fdref = CFFileDescriptorCreate(kCFAllocatorDefault, _selector.kd(), false, 
+                                                       &MainLoopImplOnKQueue, NULL);
+    CFFileDescriptorEnableCallBacks(fdref, kCFFileDescriptorReadCallBack);
+    _kqueueSource = CFFileDescriptorCreateRunLoopSource(kCFAllocatorDefault, fdref, 0);
+
     CFRunLoopTimerContext timerCtx;
     timerCtx.version = 0;
     timerCtx.info = this;
@@ -142,6 +155,7 @@ MainLoopImpl::MainLoopImpl(Signal<const Pt::Event&>& eventSignal)
 
     CFRunLoopRef rl = [[NSRunLoop currentRunLoop] getCFRunLoop];
     CFRunLoopAddSource(rl, _wakeSource, kCFRunLoopCommonModes);
+    CFRunLoopAddSource(rl, _kqueueSource, kCFRunLoopCommonModes);
     CFRunLoopAddTimer(rl, _masterTimer, kCFRunLoopCommonModes);
 }
 
@@ -167,6 +181,11 @@ MainLoopImpl::MainLoopImpl(Signal<const Pt::Event&>& eventSignal, Allocator& a)
 
     _wakeSource = CFRunLoopSourceCreate(kCFAllocatorDefault, 0, &ctx);
 
+    CFFileDescriptorRef fdref = CFFileDescriptorCreate(kCFAllocatorDefault, _selector.kd(), false, 
+                                                       &MainLoopImplOnKQueue, NULL);
+    CFFileDescriptorEnableCallBacks(fdref, kCFFileDescriptorReadCallBack);
+    _kqueueSource = CFFileDescriptorCreateRunLoopSource(kCFAllocatorDefault, fdref, 0);
+
     CFRunLoopTimerContext timerCtx;
     timerCtx.version = 0;
     timerCtx.info = this;
@@ -179,8 +198,10 @@ MainLoopImpl::MainLoopImpl(Signal<const Pt::Event&>& eventSignal, Allocator& a)
                                          10000.0, 0, 0, 
                                          &MainLoopImplOnTimer, &timerCtx);
 
+
     CFRunLoopRef rl = [[NSRunLoop currentRunLoop] getCFRunLoop];
     CFRunLoopAddSource(rl, _wakeSource, kCFRunLoopCommonModes);
+    CFRunLoopAddSource(rl, _kqueueSource, kCFRunLoopCommonModes);
     CFRunLoopAddTimer(rl, _masterTimer, kCFRunLoopCommonModes);
 }
 
@@ -191,17 +212,13 @@ MainLoopImpl::~MainLoopImpl()
     CFRunLoopRemoveSource(rl, _wakeSource, kCFRunLoopCommonModes);
     CFRelease(_wakeSource);
 
+    CFRunLoopRemoveSource(rl, _kqueueSource, kCFRunLoopCommonModes);
+    CFRelease(_kqueueSource);
+
     CFRunLoopRemoveTimer(rl, _masterTimer, kCFRunLoopCommonModes);
     CFRelease(_masterTimer);
 
     [NSApp release];
-
-    std::set<System::Selectable*>::iterator it;
-    while( _selectables.size() )
-    {
-        it = _selectables.begin();
-        (*it)->detach();
-    }
 }
 
 
@@ -242,6 +259,12 @@ void MainLoopImpl::queueEvent(const Pt::Event& event)
 bool MainLoopImpl::processEvents()
 { 
     return _eventQueue.processEvents(*_event);
+}
+
+
+void MainLoopImpl::processKQueue()
+{ 
+    _selector.waitForWake(0);
 }
 
 
@@ -293,13 +316,13 @@ void MainLoopImpl::processTimers()
 
 void MainLoopImpl::attach(System::Selectable& s)
 {
-    _selectables.insert(&s);
+    _selector.attach(s);
 }
 
 
 void MainLoopImpl::detach(System::Selectable& s)
 {
-    _selectables.erase(&s);
+    _selector.detach(s);
 }
 
 
@@ -328,45 +351,54 @@ void MainLoopImpl::avail(System::Selectable& s)
 
 
 void MainLoopImpl::cancel(System::IOHandle& h)
-{  
+{
+    _selector.cancel(h);
 }
 
 
 void MainLoopImpl::beginRead(System::IOHandle* h)
 {  
+    _selector.beginRead(h);
+    CFRunLoopSourceSignal(_kqueueSource);
 }
 
 
 void MainLoopImpl::endRead(System::IOHandle* h)
 {  
+    _selector.endRead(h);
+    CFRunLoopSourceSignal(_kqueueSource);
 }
 
 
 void MainLoopImpl::beginWrite(System::IOHandle* h)
 {  
+    _selector.beginWrite(h);
+    CFRunLoopSourceSignal(_kqueueSource);
 }
 
 
 void MainLoopImpl::endWrite(System::IOHandle* h)
 {  
+    _selector.endWrite(h);
+    CFRunLoopSourceSignal(_kqueueSource);
 }
 
 
 bool MainLoopImpl::isReadable(System::IOHandle* h)
 {  
-    return false;
+    return _selector.isReadable(h);
 }
 
 
 bool MainLoopImpl::isWritable(System::IOHandle* h)
 {
-    return false;  
+    return _selector.isWritable(h);  
 }
 
 
 bool MainLoopImpl::isError(System::IOHandle* h)
 {
-    return false;
+    return _selector.isError(h);
 }
 
 //

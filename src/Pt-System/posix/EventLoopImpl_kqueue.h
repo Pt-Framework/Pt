@@ -115,14 +115,17 @@ class Selector
             ::close(_kd);
         }
 
+        int kd() const
+        { return _kd; }
+
         void attach(Selectable& s)
         {
-            link(s, _selectables);
+            _selectables.insert(s);
         }
         
         void detach(Selectable& s)
         {
-            unlink(s);
+            SelectableList::unlink(s);
         }
 
         void cancel(IOHandle& h)

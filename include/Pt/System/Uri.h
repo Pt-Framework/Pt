@@ -27,6 +27,7 @@
  */
 #include <Pt/System/Api.h>
 #include <string>
+#include <stdexcept>
 
 namespace Pt {
 

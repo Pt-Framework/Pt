@@ -42,11 +42,6 @@ class SelectableList;
 class PT_SYSTEM_API Selectable : protected NonCopyable
 {
     friend class SelectableList;
-    friend void link(Selectable& s, SelectableList& list);
-    friend void unlink(Selectable& s);
-
-    
-    friend class SelectableListIterator;
 
     public:
         //! @brief Destructor

@@ -58,6 +58,8 @@ class MainLoopImpl : public System::EventLoopImpl
 
         void processTimers();
 
+        void processKQueue();
+
         void attach(System::Timer& timer);
 
         void detach(System::Timer& timer);
@@ -88,12 +90,13 @@ class MainLoopImpl : public System::EventLoopImpl
 
     private:
         System::Mutex _mutex;
-        std::set<System::Selectable*> _selectables;
         std::vector<System::Selectable*> _avail;
         System::TimerQueue _timerQueue;
         System::EventQueue _eventQueue;
+        System::Selector _selector;
         Signal<const Pt::Event&>* _event;
         CFRunLoopSourceRef _wakeSource;
+        CFRunLoopSourceRef _kqueueSource;
         CFRunLoopTimerRef _masterTimer;
 };
 
