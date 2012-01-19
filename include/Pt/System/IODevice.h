@@ -1,7 +1,5 @@
 /*
- * Copyright (C) 2006-2007 Laurentiu-Gheorghe Crisan
- * Copyright (C) 2006-2007 Marc Boris Duerner
- * Copyright (C) 2006-2007 PTV AG
+ * Copyright (C) 2006-2012 Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -58,18 +56,8 @@ class PT_SYSTEM_API IODevice : public Selectable
 {
     public:
         typedef std::char_traits<char>::pos_type pos_type;
-
         typedef std::char_traits<char>::off_type off_type;
-
         typedef std::ios_base::seekdir SeekDir;
-
-        typedef std::ios::openmode OpenFlags;
-
-        /*static const OpenFlags Read   = std::ios::in;
-        static const OpenFlags Write  = std::ios::out;
-        static const OpenFlags AtEnd  = std::ios::ate;
-        static const OpenFlags Append = std::ios::app;
-        static const OpenFlags Trunc  = std::ios::trunc;*/
 
     public:
         //! @brief Destructor
