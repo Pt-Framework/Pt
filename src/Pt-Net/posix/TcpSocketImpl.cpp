@@ -125,7 +125,66 @@ void TcpSocketImpl::accept(const TcpServer& server, unsigned flags)
 void TcpSocketImpl::connect(const AddrInfo& addrInfo)
 {
     log_debug("connect");
-    throw std::logic_error("posix tcp connect not implemented");
+    assert( ! _isConnected );
+
+    _addrInfo = addrInfo;
+    _addrInfoPtr = _addrInfo.impl()->begin();
+
+    for( ; _addrInfoPtr != _addrInfo.impl()->end(); ++_addrInfoPtr)
+    {
+        int fd = ::socket(_addrInfoPtr->ai_family, SOCK_STREAM, 0);
+        if (fd < 0)
+            continue;
+
+        IODeviceImpl::open(fd, false);
+        std::memmove(&_peeraddr, _addrInfoPtr->ai_addr, _addrInfoPtr->ai_addrlen);
+        log_debug("created socket " << this->fd());
+
+        if( ::connect(this->fd(), _addrInfoPtr->ai_addr, _addrInfoPtr->ai_addrlen) == 0 )
+        {
+            _isConnected = true;
+            break;
+        }
+
+        if (errno != EINPROGRESS)
+        {
+            close();
+            continue;
+        }
+
+        fd_set wfds;
+        FD_ZERO(&wfds);
+        FD_SET(this->fd(), &wfds);
+        bool avail = this->wait(timeout(), 0, &wfds, 0);
+        if( ! avail)
+            throw System::IOTimeout();
+
+        int sockerr;
+        socklen_t optlen = sizeof(sockerr);
+    
+        // check for socket error
+        if( ::getsockopt(this->fd(), SOL_SOCKET, SO_ERROR, &sockerr, &optlen) != 0 )
+        {
+            // getsockopt failed
+            close();
+            throw System::SystemError("getsockopt");
+        }
+    
+        if (sockerr == 0)
+        {
+            log_debug("connected successfully");
+            _isConnected = true;
+            break;
+        }
+        
+        close();
+    }
+
+    if(_addrInfoPtr == _addrInfo.impl()->end())
+    {
+        log_debug("no more address informations");
+        throw System::IOError("connect failed");
+    }
 }
 
 
