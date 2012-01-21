@@ -53,9 +53,12 @@ struct IOHandle
         FilterWrite = 2,
     };
 
+    static const size_t InvalidId = static_cast<size_t>(-1);
+
     IOHandle(Selectable& sel, int fd)
     : sel(&sel)
     , fd(fd)
+    , id(InvalidId)
     , enableFilters(0)
     , disableFilters(0)
     , kev(0)
@@ -64,6 +67,7 @@ struct IOHandle
     IOHandle(Selectable& sel)
     : sel(&sel)
     , fd(-1)
+    , id(InvalidId)
     , enableFilters(0)
     , disableFilters(0)
     , kev(0)
@@ -72,6 +76,7 @@ struct IOHandle
     IOHandle()
     : sel(0)
     , fd(-1)
+    , id(InvalidId)
     , enableFilters(0)
     , disableFilters(0)
     , kev(0)
@@ -82,6 +87,7 @@ struct IOHandle
 
     Selectable* sel;
     int fd;
+    size_t id;
     short enableFilters;
     short disableFilters;
     struct kevent* kev;

@@ -28,6 +28,7 @@
 #include <Pt/Singleton.h>
 
 #import <CoreFoundation/CFRunLoop.h>
+#import <CoreFoundation/CFFileDescriptor.h>
 
 namespace Pt {
 
@@ -35,6 +36,41 @@ namespace Gui {
 
 class MainLoopImpl : public System::EventLoopImpl
 {
+    struct IOEntry
+    {
+        IOEntry()
+        : iohandle(0)
+        , flags(0)
+        { }
+
+        IOEntry(System::IOHandle& io, CFRunLoopSourceRef s, CFFileDescriptorRef fd)
+        : iohandle(&io)
+        , source(s)
+        , fd(fd)
+        , flags(0)
+        { }
+
+        IOEntry(const IOEntry& e)
+        : iohandle(e.iohandle)
+        , source(e.source)
+        , fd(e.fd)
+        , flags(0)
+        { }
+
+        IOEntry& operator=(const IOEntry& e)
+        {
+            iohandle = e.iohandle;
+            source = e.source;
+            fd = e.fd;
+            return *this;
+        }
+
+        System::IOHandle* iohandle;
+        CFRunLoopSourceRef source;
+        CFFileDescriptorRef fd;
+        CFOptionFlags flags;
+    };
+
     public:
         MainLoopImpl(Signal<const Pt::Event&>& eventSignal);
 
@@ -57,8 +93,6 @@ class MainLoopImpl : public System::EventLoopImpl
         void processAvail();
 
         void processTimers();
-
-        void processKQueue();
 
         void attach(System::Timer& timer);
 
@@ -89,14 +123,17 @@ class MainLoopImpl : public System::EventLoopImpl
         virtual bool isError(System::IOHandle* h);
 
     private:
+        IOEntry& enableIOHandle(System::IOHandle* h);
+
+    private:
         System::Mutex _mutex;
+        System::SelectableList _selectables;
+        std::vector<IOEntry> _iotable;
         std::vector<System::Selectable*> _avail;
         System::TimerQueue _timerQueue;
         System::EventQueue _eventQueue;
-        System::Selector _selector;
         Signal<const Pt::Event&>* _event;
         CFRunLoopSourceRef _wakeSource;
-        CFRunLoopSourceRef _kqueueSource;
         CFRunLoopTimerRef _masterTimer;
 };
 

@@ -108,10 +108,17 @@ void MainLoopImplOnTimer(CFRunLoopTimerRef timer, void *p)
 }
 
 
-void MainLoopImplOnKQueue(CFFileDescriptorRef f, CFOptionFlags callBackTypes, void *p)
+void MainLoopImplOnFd(CFFileDescriptorRef f, CFOptionFlags flags, void *p)
 {
-    MainLoopImpl* impl = reinterpret_cast<MainLoopImpl*>(p);
-    impl->processKQueue();
+    System::IOHandle* h = reinterpret_cast<System::IOHandle*>(p);
+
+    if(flags & kCFFileDescriptorReadCallBack)
+        h->enableFilters = System::IOHandle::FilterRead;
+    else if(flags & kCFFileDescriptorWriteCallBack)
+        h->enableFilters = System::IOHandle::FilterWrite;
+
+    System::Selectable* s = h->sel;
+    s->run();
 }
 
 
@@ -136,11 +143,6 @@ MainLoopImpl::MainLoopImpl(Signal<const Pt::Event&>& eventSignal)
 
     _wakeSource = CFRunLoopSourceCreate(kCFAllocatorDefault, 0, &ctx);
 
-    CFFileDescriptorRef fdref = CFFileDescriptorCreate(kCFAllocatorDefault, _selector.kd(), false, 
-                                                       &MainLoopImplOnKQueue, NULL);
-    CFFileDescriptorEnableCallBacks(fdref, kCFFileDescriptorReadCallBack);
-    _kqueueSource = CFFileDescriptorCreateRunLoopSource(kCFAllocatorDefault, fdref, 0);
-
     CFRunLoopTimerContext timerCtx;
     timerCtx.version = 0;
     timerCtx.info = this;
@@ -155,7 +157,6 @@ MainLoopImpl::MainLoopImpl(Signal<const Pt::Event&>& eventSignal)
 
     CFRunLoopRef rl = [[NSRunLoop currentRunLoop] getCFRunLoop];
     CFRunLoopAddSource(rl, _wakeSource, kCFRunLoopCommonModes);
-    CFRunLoopAddSource(rl, _kqueueSource, kCFRunLoopCommonModes);
     CFRunLoopAddTimer(rl, _masterTimer, kCFRunLoopCommonModes);
 }
 
@@ -181,11 +182,6 @@ MainLoopImpl::MainLoopImpl(Signal<const Pt::Event&>& eventSignal, Allocator& a)
 
     _wakeSource = CFRunLoopSourceCreate(kCFAllocatorDefault, 0, &ctx);
 
-    CFFileDescriptorRef fdref = CFFileDescriptorCreate(kCFAllocatorDefault, _selector.kd(), false, 
-                                                       &MainLoopImplOnKQueue, NULL);
-    CFFileDescriptorEnableCallBacks(fdref, kCFFileDescriptorReadCallBack);
-    _kqueueSource = CFFileDescriptorCreateRunLoopSource(kCFAllocatorDefault, fdref, 0);
-
     CFRunLoopTimerContext timerCtx;
     timerCtx.version = 0;
     timerCtx.info = this;
@@ -201,19 +197,20 @@ MainLoopImpl::MainLoopImpl(Signal<const Pt::Event&>& eventSignal, Allocator& a)
 
     CFRunLoopRef rl = [[NSRunLoop currentRunLoop] getCFRunLoop];
     CFRunLoopAddSource(rl, _wakeSource, kCFRunLoopCommonModes);
-    CFRunLoopAddSource(rl, _kqueueSource, kCFRunLoopCommonModes);
     CFRunLoopAddTimer(rl, _masterTimer, kCFRunLoopCommonModes);
 }
 
 
 MainLoopImpl::~MainLoopImpl()
 {
+    while( ! _selectables.empty() )
+    {
+        _selectables.first()->detach();
+    }
+
     CFRunLoopRef rl = [[NSRunLoop currentRunLoop] getCFRunLoop];
     CFRunLoopRemoveSource(rl, _wakeSource, kCFRunLoopCommonModes);
     CFRelease(_wakeSource);
-
-    CFRunLoopRemoveSource(rl, _kqueueSource, kCFRunLoopCommonModes);
-    CFRelease(_kqueueSource);
 
     CFRunLoopRemoveTimer(rl, _masterTimer, kCFRunLoopCommonModes);
     CFRelease(_masterTimer);
@@ -259,12 +256,6 @@ void MainLoopImpl::queueEvent(const Pt::Event& event)
 bool MainLoopImpl::processEvents()
 { 
     return _eventQueue.processEvents(*_event);
-}
-
-
-void MainLoopImpl::processKQueue()
-{ 
-    _selector.waitForWake(0);
 }
 
 
@@ -316,13 +307,13 @@ void MainLoopImpl::processTimers()
 
 void MainLoopImpl::attach(System::Selectable& s)
 {
-    _selector.attach(s);
+    _selectables.insert(s);
 }
 
 
 void MainLoopImpl::detach(System::Selectable& s)
 {
-    _selector.detach(s);
+    System::SelectableList::unlink(s);
 }
 
 
@@ -352,53 +343,111 @@ void MainLoopImpl::avail(System::Selectable& s)
 
 void MainLoopImpl::cancel(System::IOHandle& h)
 {
-    _selector.cancel(h);
+    size_t id = h.id;
+
+    if(id == System::IOHandle::InvalidId)
+        return;
+
+    h.enableFilters = 0;
+    IOEntry& entry = _iotable[id];
+
+    CFRunLoopRef rl = [[NSRunLoop currentRunLoop] getCFRunLoop];
+    CFRunLoopRemoveSource(rl, entry.source, kCFRunLoopCommonModes);
+    CFRelease(entry.source);
+    CFRelease(entry.fd);
+
+    if(_iotable.size() > 1)
+    {
+        _iotable.back().iohandle->id = id;
+        _iotable[id] = _iotable.back();
+    }
+
+    h.id = System::IOHandle::InvalidId;
+    _iotable.resize(_iotable.size() -1);
+
+}
+
+
+MainLoopImpl::IOEntry& MainLoopImpl::enableIOHandle(System::IOHandle* h)
+{
+    if(h->id == System::IOHandle::InvalidId)
+    {
+        CFFileDescriptorContext ctx;
+        ctx.version = 0;
+        ctx.info = h;
+        ctx.retain = NULL;
+        ctx.release = NULL;
+        ctx.copyDescription = NULL;
+
+        CFFileDescriptorRef fdref = CFFileDescriptorCreate(kCFAllocatorDefault, h->fd, false, 
+                                                           &MainLoopImplOnFd, NULL);
+
+        CFRunLoopSourceRef fdsource = CFFileDescriptorCreateRunLoopSource(kCFAllocatorDefault, fdref, 0);
+    
+        CFRunLoopRef rl = [[NSRunLoop currentRunLoop] getCFRunLoop];
+        CFRunLoopAddSource(rl, fdsource, kCFRunLoopCommonModes);
+
+        IOEntry entry(*h, fdsource, fdref);
+
+        size_t id = _iotable.size();
+        _iotable.push_back(entry);
+        h->id = id;
+        return _iotable.back();
+    }
+
+    return _iotable[h->id];
 }
 
 
 void MainLoopImpl::beginRead(System::IOHandle* h)
 {  
-    _selector.beginRead(h);
-    CFRunLoopSourceSignal(_kqueueSource);
+    CFFileDescriptorRef fdref = enableIOHandle(h).fd;
+    CFFileDescriptorEnableCallBacks(fdref, kCFFileDescriptorReadCallBack);
 }
 
 
 void MainLoopImpl::endRead(System::IOHandle* h)
-{  
-    _selector.endRead(h);
-    CFRunLoopSourceSignal(_kqueueSource);
+{
+    CFFileDescriptorRef fdref = _iotable[h->id].fd;
+    CFFileDescriptorDisableCallBacks(fdref, kCFFileDescriptorReadCallBack);
 }
 
 
 void MainLoopImpl::beginWrite(System::IOHandle* h)
 {  
-    _selector.beginWrite(h);
-    CFRunLoopSourceSignal(_kqueueSource);
+    CFFileDescriptorRef fdref = enableIOHandle(h).fd;
+    CFFileDescriptorEnableCallBacks(fdref, kCFFileDescriptorWriteCallBack);
 }
 
 
 void MainLoopImpl::endWrite(System::IOHandle* h)
-{  
-    _selector.endWrite(h);
-    CFRunLoopSourceSignal(_kqueueSource);
+{
+    CFFileDescriptorRef fdref = _iotable[h->id].fd;
+    CFFileDescriptorDisableCallBacks(fdref, kCFFileDescriptorWriteCallBack);
 }
 
 
 bool MainLoopImpl::isReadable(System::IOHandle* h)
 {  
-    return _selector.isReadable(h);
+    bool isReady = h->enableFilters == System::IOHandle::FilterRead;
+    if(isReady)
+        h->enableFilters = 0;
+    return isReady;
 }
 
 
 bool MainLoopImpl::isWritable(System::IOHandle* h)
 {
-    return _selector.isWritable(h);  
+    bool isReady = h->enableFilters == System::IOHandle::FilterWrite;
+    if(isReady)
+        h->enableFilters = 0;
+    return isReady;
 }
 
 
 bool MainLoopImpl::isError(System::IOHandle* h)
 {
-    return _selector.isError(h);
+    return false;
 }
 
 //
