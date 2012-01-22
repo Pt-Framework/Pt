@@ -49,8 +49,9 @@ struct IOHandle
 {
     enum IOFlags
     {
-        FilterRead = 1,
-        FilterWrite = 2,
+        Read = 1,
+        Write = 2,
+        Error = 4
     };
 
     static const size_t InvalidId = static_cast<size_t>(-1);
@@ -173,7 +174,7 @@ class Selector
             if(! isAdded)
                 _changelist.push_back(h);
 
-            h->changed |= IOHandle::FilterRead;
+            h->changed |= IOHandle::Read;
         }
 
         void endRead(IOHandle* h)
@@ -183,7 +184,7 @@ class Selector
                 _changelist.push_back(h);
 
             h->ready = 0;
-            h->changed &= ~IOHandle::FilterRead;
+            h->changed &= ~IOHandle::Read;
         }
 
         void beginWrite(IOHandle* h)
@@ -192,7 +193,7 @@ class Selector
             if(! isAdded)
                 _changelist.push_back(h);
 
-            h->changed |= IOHandle::FilterWrite;
+            h->changed |= IOHandle::Write;
         }
 
         void endWrite(IOHandle* h)
@@ -202,17 +203,17 @@ class Selector
                 _changelist.push_back(h);
 
             h->ready = 0;
-            h->changed &= ~IOHandle::FilterWrite;
+            h->changed &= ~IOHandle::Write;
         }
 
         bool isReadable(IOHandle* h)
         {
-            return h->ready & IOHandle::FilterRead;
+            return h->ready & IOHandle::Read;
         }
 
         bool isWritable(IOHandle* h)
         {
-            return h->ready & IOHandle::FilterWrite;
+            return h->ready & IOHandle::Write;
         }
 
         bool isError(IOHandle* h)
@@ -243,9 +244,9 @@ class Selector
 
                 struct kevent kev;
 
-                if(h->changed & IOHandle::FilterRead)
+                if(h->changed & IOHandle::Read)
                 {
-                    if(0 == (h->events & IOHandle::FilterRead))
+                    if(0 == (h->events & IOHandle::Read))
                     {
                         EV_SET(&kev, h->fd, EVFILT_READ, EV_ADD|EV_ENABLE|EV_CLEAR, 0, 0, h);
                         changedEvents.push_back(kev);
@@ -253,16 +254,16 @@ class Selector
                 }
                 else
                 {
-                    if(h->events & IOHandle::FilterRead)
+                    if(h->events & IOHandle::Read)
                     {
                         EV_SET(&kev, h->fd, EVFILT_READ, EV_DISABLE, 0, 0, h);
                         changedEvents.push_back(kev);
                     }
                 }
 
-                if(h->changed & IOHandle::FilterWrite)
+                if(h->changed & IOHandle::Write)
                 {
-                    if(0 == (h->events & IOHandle::FilterWrite))
+                    if(0 == (h->events & IOHandle::Write))
                     {
                         EV_SET(&kev, h->fd, EVFILT_WRITE, EV_ADD|EV_ENABLE|EV_CLEAR, 0, 0, h);
                         changedEvents.push_back(kev);
@@ -270,7 +271,7 @@ class Selector
                 }
                 else
                 {
-                    if(h->events & IOHandle::FilterWrite)
+                    if(h->events & IOHandle::Write)
                     {
                         EV_SET(&kev, h->fd, EVFILT_WRITE, EV_DISABLE, 0, 0, h);
                         changedEvents.push_back(kev);
@@ -343,12 +344,12 @@ class Selector
 
                     if(kev.filter & EVFILT_READ)
                     {
-                        h->ready |= IOHandle::FilterRead;
+                        h->ready |= IOHandle::Read;
                     }
 
                     if(kev.filter & EVFILT_WRITE)
                     {
-                        h->ready |= IOHandle::FilterWrite;
+                        h->ready |= IOHandle::Write;
                     }
 
                     h->sel->run();
