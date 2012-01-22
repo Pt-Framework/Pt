@@ -44,45 +44,6 @@ namespace Pt {
 
 namespace System {
 
-struct IOHandle
-{
-    IOHandle(Selectable& sel, int fd)
-    : sel(&sel)
-    , fd(fd)
-    , events(0)
-    , changed(0)
-    , ev(0)
-    {
-    }
-
-    IOHandle(Selectable& sel)
-    : sel(&sel)
-    , fd(-1)
-    , events(0)
-    , changed(0)
-    , ev(0)
-    {
-    }
-
-    IOHandle()
-    : sel(0)
-    , fd(-1)
-    , events(0)
-    , changed(0)
-    , ev(0)
-    {
-    }
-
-    bool isOpen() const
-    { return fd != -1; }
-
-    Selectable* sel;
-    int fd;
-    unsigned events;
-    unsigned changed;
-    epoll_event* ev;
-};
-
 class Selector
 {
     public:
@@ -130,9 +91,11 @@ class Selector
             }
 
             // remove from epoll
+            epoll_ctl(_epfd, EPOLL_CTL_DEL, h.fd, NULL);
+
             h.events = 0;
             h.changed = 0;
-            epoll_ctl(_epfd, EPOLL_CTL_DEL, h.fd, NULL);
+            h.ready = 0;
         }
 
         void beginRead(IOHandle* h)
@@ -141,7 +104,7 @@ class Selector
             if(! isAdded)
                 _changelist.push_back(h);
 
-            h->changed |= EPOLLIN;
+            h->changed |= IOHandle::Read;
         }
 
         void endRead(IOHandle* h)
@@ -150,7 +113,8 @@ class Selector
             if(! isAdded)
                 _changelist.push_back(h);
 
-            h->changed &= ~EPOLLIN;
+            h->ready = 0;
+            h->changed &= ~IOHandle::Read;
         }
 
         void beginWrite(IOHandle* h)
@@ -159,7 +123,7 @@ class Selector
             if(! isAdded)
                 _changelist.push_back(h);
 
-            h->changed |= EPOLLOUT;
+            h->changed |= IOHandle::Write;
         }
 
         void endWrite(IOHandle* h)
@@ -168,37 +132,38 @@ class Selector
             if(! isAdded)
                 _changelist.push_back(h);
 
-            h->changed &= ~EPOLLOUT;
+            h->ready = 0;
+            h->changed &= ~IOHandle::Write;
         }
 
         bool isReadable(IOHandle* h)
         {
-            bool isReady = h->ev && (h->ev->events & (EPOLLIN|EPOLLHUP));
+            /*bool isReady = h->ev && (h->ev->events & (EPOLLIN|EPOLLHUP));
                        
             if(isReady)
-                h->ev->events &= (EPOLLIN|EPOLLHUP);
+                h->ev->events &= (EPOLLIN|EPOLLHUP);*/
 
-            return isReady;
+            return h->ready & IOHandle::Read;
         }
 
         bool isWritable(IOHandle* h)
         {
-            bool isReady = h->ev && (h->ev->events & (EPOLLOUT|EPOLLHUP));
+            /*bool isReady = h->ev && (h->ev->events & (EPOLLOUT|EPOLLHUP));
 
             if(isReady)
-                h->ev->events &= (EPOLLIN|EPOLLHUP);
+                h->ev->events &= (EPOLLIN|EPOLLHUP);*/
 
-            return isReady;
+            return h->ready & IOHandle::Write;
         }
 
         bool isError(IOHandle* h)
         {
-            bool isReady = h->ev && (h->ev->events & EPOLLERR);
+            /*bool isReady = h->ev && (h->ev->events & EPOLLERR);
 
             if(isReady)
-                h->ev->events &= EPOLLERR;
+                h->ev->events &= EPOLLERR;*/
 
-            return isReady;
+            return h->ready & IOHandle::Error;
         }
 
         void wake()
@@ -213,8 +178,7 @@ class Selector
             // because of an exception
             if(_avail > 0)
                 return processAvail();
-        
-            std::vector<epoll_event> changedEvents;
+
             for( std::vector<IOHandle*>::iterator it = _changelist.begin(); it != _changelist.end(); ++it)
             {
                 IOHandle* h = *it;
@@ -223,7 +187,12 @@ class Selector
                     continue;
 
                 epoll_event ev;
-                ev.events = h->changed;
+
+                if(h->changed & IOHandle::Read)
+                    ev.events |= EPOLLIN;
+                if(h->changed & IOHandle::Write)
+                    ev.events |= EPOLLOUT;
+ 
                 ev.data.ptr = h;
 
                 if(h->events)
@@ -292,7 +261,20 @@ class Selector
                 else
                 {
                     IOHandle* h = reinterpret_cast<IOHandle*>(p);
-                    h->ev = &ev;
+
+                    if(ev.events & (EPOLLIN|EPOLLHUP))
+                    {
+                        h->ready |= IOHandle::Read;
+                    }
+                    if(ev.events & (EPOLLOUT|EPOLLHUP))
+                    {
+                        h->ready |= IOHandle::Write;
+                    }
+                    if(ev.events & EPOLLERR)
+                    {
+                        h->ready |= IOHandle::Error;
+                    }
+
                     h->sel->run();
                 }
             }

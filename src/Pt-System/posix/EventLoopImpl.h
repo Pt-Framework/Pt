@@ -119,6 +119,55 @@ class WakePipe
         char _buffer[1024];
 };
 
+struct IOHandle
+{
+    enum WaitFlags
+    {
+        Read = 1,
+        Write = 2,
+        Error = 4
+    };
+
+    static const size_t InvalidId = static_cast<size_t>(-1);
+
+    IOHandle(Selectable& sel, int fd)
+    : sel(&sel)
+    , fd(fd)
+    , id(InvalidId)
+    , events(0)
+    , changed(0)
+    , ready(0)
+    { }
+
+    IOHandle(Selectable& sel)
+    : sel(&sel)
+    , fd(-1)
+    , id(InvalidId)
+    , events(0)
+    , changed(0)
+    , ready(0)
+    { }
+
+    IOHandle()
+    : sel(0)
+    , fd(-1)
+    , id(InvalidId)
+    , events(0)
+    , changed(0)
+    , ready(0)
+    { }
+
+    bool isOpen() const
+    { return fd != -1; }
+
+    Selectable* sel;
+    int fd;
+    size_t id;
+    short events;
+    short changed;
+    short ready;
+};
+
 } //namespace System
 
 } //namespace Pt

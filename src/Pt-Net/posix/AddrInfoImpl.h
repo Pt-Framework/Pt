@@ -32,6 +32,7 @@
 #include <Pt/RefCounted.h>
 #include <string>
 #include <iterator>
+#include <cassert>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
@@ -76,7 +77,10 @@ namespace Net {
                     bool operator!= (const const_iterator& it) const
                         { return current != it.current; }
                     const_iterator& operator++ ()
-                        { current = current->ai_next; return *this; }
+                        { 
+                            assert(current);
+                            current = current->ai_next; return *this; 
+                        }
                     const_iterator operator++ (int)
                         {
                           const_iterator ret(current);

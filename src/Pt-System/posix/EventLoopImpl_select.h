@@ -44,40 +44,6 @@ namespace Pt {
 
 namespace System {
 
-struct IOHandle
-{
-    IOHandle(Selectable& sel, int fd)
-    : sel(&sel)
-    , fd(fd)
-    , _enabled(false)
-    { }
-
-    IOHandle(Selectable& sel)
-    : sel(&sel)
-    , fd(-1)
-    , _enabled(false)
-    { }
-
-    IOHandle()
-    : sel(0)
-    , fd(-1)
-    , _enabled(false)
-    { }
-
-    bool isSelecting() const
-    { return _enabled; }
-
-    void setSelecting(bool b)
-    { _enabled = b; }
-
-    bool isOpen() const
-    { return fd != -1; }
-
-    Selectable* sel;
-    int fd;
-    bool _enabled;
-};
-
 class Selector
 {
     public:
@@ -118,7 +84,7 @@ class Selector
             FD_CLR(h.fd, &_rfds);
             FD_CLR(h.fd, &_wfds);
             FD_CLR(h.fd, &_efds);
-            h.setSelecting(false);
+            h.id = IOHandle::InvalidId;
             
             if( (_current != _devices.end()) && (*_current == *it) )
             {
@@ -132,11 +98,11 @@ class Selector
 
         void enableSelect(IOHandle* h)
         {
-            if( ! h->isSelecting() )
+            if( ! h->id != IOHandle::InvalidId )
             {
                 _devices.insert( h->sel );
                 FD_SET(h->fd, &_efds);
-                h->setSelecting(true);
+                h->id = 1;
             }
         }
 

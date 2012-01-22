@@ -33,6 +33,7 @@
 #include "Pt/System/Selectable.h"
 
 #include <set>
+#include <limits>
 #include <cassert>
 #include <cstddef>
 
@@ -42,36 +43,6 @@
 namespace Pt {
 
 namespace System {
-
-struct IOHandle
-{
-    static const size_t NoPoll = static_cast<size_t>(-1);
-
-    IOHandle(Selectable& sel, int fd)
-    : sel(&sel)
-    , fd(fd)
-    , pollfdsOffset(NoPoll)
-    { }
-
-    IOHandle(Selectable& sel)
-    : sel(&sel)
-    , fd(-1)
-    , pollfdsOffset(NoPoll)
-    { }
-
-    IOHandle()
-    : sel(0)
-    , fd(-1)
-    , pollfdsOffset(NoPoll)
-    { }
-
-    bool isOpen() const
-    { return fd != -1; }
-
-    Selectable* sel;
-    int fd;
-    size_t pollfdsOffset;
-};
 
 class Selector
 {
@@ -107,16 +78,16 @@ class Selector
                 return;
 
             assert(h.fd > 0);
-            assert(h.pollfdsOffset != 0);
+            assert(h.id != 0);
 
-            size_t offset = h.pollfdsOffset;
-            h.pollfdsOffset = IOHandle::NoPoll;
+            size_t offset = h.id;
+            h.id = IOHandle::InvalidId;
             _pollfds.at(offset) = _pollfds.back();
             _pollfds.resize(_pollfds.size() - 1);
 
             _iohandles.at(offset) = _iohandles.back();
             _iohandles.resize(_iohandles.size() - 1);
-            _iohandles[offset]->pollfdsOffset = offset;
+            _iohandles[offset]->id = offset;
 
             if( (_current != _devices.end()) && (*_current == *it) )
             {
@@ -130,7 +101,7 @@ class Selector
 
         pollfd& enablePoll(IOHandle* h)
         {
-            if( h->pollfdsOffset == IOHandle::NoPoll)
+            if( h->id == IOHandle::InvalidId)
             {
                 assert(_pollfds.size() == _iohandles.size());
 
@@ -139,7 +110,7 @@ class Selector
 
                 _devices.insert( h->sel );
 
-                h->pollfdsOffset = _pollfds.size();
+                h->id = _pollfds.size();
                 _iohandles.push_back(h);
 
                 pollfd pfd;
@@ -151,7 +122,7 @@ class Selector
                 return _pollfds.back();
             }
 
-            return _pollfds[h->pollfdsOffset];
+            return _pollfds[h->id];
         }
 
         void beginRead(IOHandle* h)
@@ -161,8 +132,8 @@ class Selector
 
         void endRead(IOHandle* h)
         {
-            assert(h->pollfdsOffset != IOHandle::NoPoll);
-            _pollfds[h->pollfdsOffset].events &= ~POLLIN;
+            assert(h->id != IOHandle::InvalidId);
+            _pollfds[h->id].events &= ~POLLIN;
         }
 
         void beginWrite(IOHandle* h)
@@ -172,32 +143,32 @@ class Selector
 
         void endWrite(IOHandle* h)
         {
-            assert(h->pollfdsOffset != IOHandle::NoPoll);
-            _pollfds[h->pollfdsOffset].events &= ~POLLOUT;
+            assert(h->id != IOHandle::InvalidId);
+            _pollfds[h->id].events &= ~POLLOUT;
         }
 
         bool isReadable(IOHandle* h)
         {
-            if(h->pollfdsOffset == IOHandle::NoPoll)
+            if(h->id == IOHandle::InvalidId)
                 return false;
 
-            return _pollfds[h->pollfdsOffset].revents & (POLLIN|POLLHUP);
+            return _pollfds[h->id].revents & (POLLIN|POLLHUP);
         }
 
         bool isWritable(IOHandle* h)
         {
-            if(h->pollfdsOffset == IOHandle::NoPoll)
+            if(h->id == IOHandle::InvalidId)
                 return false;
 
-            return _pollfds[h->pollfdsOffset].revents & (POLLOUT|POLLHUP);
+            return _pollfds[h->id].revents & (POLLOUT|POLLHUP);
         }
 
         bool isError(IOHandle* h)
         {
-            if(h->pollfdsOffset == IOHandle::NoPoll)
+            if(h->id == IOHandle::InvalidId)
                 return false;
 
-            return _pollfds[h->pollfdsOffset].revents & (POLLERR|POLLNVAL);
+            return _pollfds[h->id].revents & (POLLERR|POLLNVAL);
         }
 
         void wake()
