@@ -76,18 +76,143 @@ void MainLoopImplOnFd(CFFileDescriptorRef f, CFOptionFlags flags, void *p)
 
     if(flags & kCFFileDescriptorReadCallBack)
     {
-        h->events &= ~System::IOHandle::FilterRead;
-        h->ready = System::IOHandle::FilterRead;
+        h->events &= ~System::IOHandle::Read;
+        h->ready = System::IOHandle::Read;
     }
     else if(flags & kCFFileDescriptorWriteCallBack)
     {
-        h->events &= ~System::IOHandle::FilterWrite;
-        h->ready = System::IOHandle::FilterWrite;
+        h->events &= ~System::IOHandle::Write;
+        h->ready = System::IOHandle::Write;
     }
 
     System::Selectable* s = h->sel;
     s->run();
 }
+
+
+void Selector::cancel(System::IOHandle& h)
+{
+    size_t id = h.id;
+
+    if(id == System::IOHandle::InvalidId)
+        return;
+
+    IOEntry& entry = _iotable[id];
+
+    CFRunLoopRef rl = [[NSRunLoop currentRunLoop] getCFRunLoop];
+    CFRunLoopRemoveSource(rl, entry.source, kCFRunLoopCommonModes);
+    CFRelease(entry.source);
+    CFRelease(entry.fd);
+
+    if(_iotable.size() > 1)
+    {
+        _iotable.back().iohandle->id = id;
+        _iotable[id] = _iotable.back();
+    }
+
+    h.id = System::IOHandle::InvalidId;
+    _iotable.resize(_iotable.size() -1);
+
+    h.ready = 0;
+}
+
+
+Selector::IOEntry& Selector::enableIOHandle(System::IOHandle* h)
+{
+    if(h->id == System::IOHandle::InvalidId)
+    {
+        CFFileDescriptorContext ctx;
+        ctx.version = 0;
+        ctx.info = h;
+        ctx.retain = NULL;
+        ctx.release = NULL;
+        ctx.copyDescription = NULL;
+
+        CFFileDescriptorRef fdref = CFFileDescriptorCreate(kCFAllocatorDefault, h->fd, false, 
+                                                           &MainLoopImplOnFd, NULL);
+
+        CFRunLoopSourceRef fdsource = CFFileDescriptorCreateRunLoopSource(kCFAllocatorDefault, fdref, 0);
+    
+        CFRunLoopRef rl = [[NSRunLoop currentRunLoop] getCFRunLoop];
+        CFRunLoopAddSource(rl, fdsource, kCFRunLoopCommonModes);
+
+        IOEntry entry(*h, fdsource, fdref);
+
+        size_t id = _iotable.size();
+        _iotable.push_back(entry);
+        h->id = id;
+        return _iotable.back();
+    }
+
+    return _iotable[h->id];
+}
+
+
+void Selector::beginRead(System::IOHandle* h)
+{  
+    CFFileDescriptorRef fdref = enableIOHandle(h).fd;
+    CFFileDescriptorEnableCallBacks(fdref, kCFFileDescriptorReadCallBack);
+
+    h->events = System::IOHandle::Read;
+}
+
+
+void Selector::endRead(System::IOHandle* h)
+{
+    if(h->events & System::IOHandle::Read)
+    {
+        CFFileDescriptorRef fdref = _iotable[h->id].fd;
+        CFFileDescriptorDisableCallBacks(fdref, kCFFileDescriptorReadCallBack);
+    }
+
+    h->ready = 0;
+    h->events &= ~System::IOHandle::Read;
+}
+
+
+void Selector::beginWrite(System::IOHandle* h)
+{  
+    CFFileDescriptorRef fdref = enableIOHandle(h).fd;
+    CFFileDescriptorEnableCallBacks(fdref, kCFFileDescriptorWriteCallBack);
+
+    h->events = System::IOHandle::Write;
+}
+
+
+void Selector::endWrite(System::IOHandle* h)
+{
+    if(h->events & System::IOHandle::Write)
+    {
+        CFFileDescriptorRef fdref = _iotable[h->id].fd;
+        CFFileDescriptorDisableCallBacks(fdref, kCFFileDescriptorWriteCallBack);
+    }
+
+    h->ready = 0;
+    h->events &= ~System::IOHandle::Write;
+}
+
+
+bool Selector::isReadable(System::IOHandle* h)
+{  
+    bool isReady = h->ready == System::IOHandle::Read;
+    return isReady;
+}
+
+
+bool Selector::isWritable(System::IOHandle* h)
+{
+    bool isReady = h->ready == System::IOHandle::Write;
+    return isReady;
+}
+
+
+bool Selector::isError(System::IOHandle* h)
+{
+    return false;
+}
+
+
+
 
 
 MainLoopImpl::MainLoopImpl(Signal<const Pt::Event&>& eventSignal)
@@ -388,20 +513,20 @@ void MainLoopImpl::beginRead(System::IOHandle* h)
     CFFileDescriptorRef fdref = enableIOHandle(h).fd;
     CFFileDescriptorEnableCallBacks(fdref, kCFFileDescriptorReadCallBack);
 
-    h->events = System::IOHandle::FilterRead;
+    h->events = System::IOHandle::Read;
 }
 
 
 void MainLoopImpl::endRead(System::IOHandle* h)
 {
-    if(h->events & System::IOHandle::FilterRead)
+    if(h->events & System::IOHandle::Read)
     {
         CFFileDescriptorRef fdref = _iotable[h->id].fd;
         CFFileDescriptorDisableCallBacks(fdref, kCFFileDescriptorReadCallBack);
     }
 
     h->ready = 0;
-    h->events &= ~System::IOHandle::FilterRead;
+    h->events &= ~System::IOHandle::Read;
 }
 
 
@@ -410,33 +535,33 @@ void MainLoopImpl::beginWrite(System::IOHandle* h)
     CFFileDescriptorRef fdref = enableIOHandle(h).fd;
     CFFileDescriptorEnableCallBacks(fdref, kCFFileDescriptorWriteCallBack);
 
-    h->events = System::IOHandle::FilterWrite;
+    h->events = System::IOHandle::Write;
 }
 
 
 void MainLoopImpl::endWrite(System::IOHandle* h)
 {
-    if(h->events & System::IOHandle::FilterWrite)
+    if(h->events & System::IOHandle::Write)
     {
         CFFileDescriptorRef fdref = _iotable[h->id].fd;
         CFFileDescriptorDisableCallBacks(fdref, kCFFileDescriptorWriteCallBack);
     }
 
     h->ready = 0;
-    h->events &= ~System::IOHandle::FilterWrite;
+    h->events &= ~System::IOHandle::Write;
 }
 
 
 bool MainLoopImpl::isReadable(System::IOHandle* h)
 {  
-    bool isReady = h->ready == System::IOHandle::FilterRead;
+    bool isReady = h->ready == System::IOHandle::Read;
     return isReady;
 }
 
 
 bool MainLoopImpl::isWritable(System::IOHandle* h)
 {
-    bool isReady = h->ready == System::IOHandle::FilterWrite;
+    bool isReady = h->ready == System::IOHandle::Write;
     return isReady;
 }
 

@@ -168,31 +168,6 @@ struct IOHandle
     short ready;
 };
 
-} //namespace System
-
-} //namespace Pt
-
-#ifdef __APPLE__
-    #define PT_WITH_BSD_KQUEUE
-#endif
-
-#ifdef __linux__
-    #define PT_WITH_LINUX_EPOLL
-#endif
-
-#if defined (PT_WITH_LINUX_EPOLL)
-    #include "EventLoopImpl_epoll.h"
-#elif defined(PT_WITH_BSD_KQUEUE)
-    #include "EventLoopImpl_kqueue.h"
-#elif defined(PT_WITH_POSIX_POLL)
-    #include "EventLoopImpl_poll.h"
-#else
-    #include "EventLoopImpl_select.h"
-#endif
-
-namespace Pt {
-
-namespace System {
 
 class EventLoopImpl
 {
@@ -200,10 +175,6 @@ class EventLoopImpl
         EventLoopImpl();
 
         virtual ~EventLoopImpl();
-
-        virtual void idle(Selectable& s) = 0;
-
-        virtual void avail(Selectable& s) = 0;
 
         virtual void cancel(IOHandle& h) = 0;
 

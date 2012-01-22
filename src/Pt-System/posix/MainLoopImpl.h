@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-20012 Marc Boris Duerner
+ * Copyright (C) 2006-2012 Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -31,6 +31,24 @@
 #include "EventLoopImpl.h"
 #include "Pt/System/Api.h"
 #include "Pt/Signal.h"
+
+#ifdef __APPLE__
+    #define PT_WITH_BSD_KQUEUE
+#endif
+
+#ifdef __linux__
+    #define PT_WITH_LINUX_EPOLL
+#endif
+
+#if defined (PT_WITH_LINUX_EPOLL)
+    #include "EventLoopImpl_epoll.h"
+#elif defined(PT_WITH_BSD_KQUEUE)
+    #include "EventLoopImpl_kqueue.h"
+#elif defined(PT_WITH_POSIX_POLL)
+    #include "EventLoopImpl_poll.h"
+#else
+    #include "EventLoopImpl_select.h"
+#endif
 
 namespace Pt {
 
@@ -64,7 +82,7 @@ class MainLoopImpl : public EventLoopImpl
         { return _selector.isReadable(h); }
 
         bool isWritable(IOHandle* h)
-        {return _selector.isWritable(h); }
+        { return _selector.isWritable(h); }
 
         bool isError(IOHandle* h)
         { return _selector.isError(h); }

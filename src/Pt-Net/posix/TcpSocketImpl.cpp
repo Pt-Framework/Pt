@@ -208,7 +208,7 @@ bool TcpSocketImpl::beginConnect(const AddrInfo& addrInfo, System::EventLoop& lo
         }
         else
         {
-            loop.impl().avail(_socket);
+            loop.setReady(_socket);
         }
     }
 

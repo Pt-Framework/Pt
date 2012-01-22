@@ -34,6 +34,70 @@ namespace Pt {
 
 namespace Gui {
 
+class Selector
+{
+    struct IOEntry
+    {
+        IOEntry()
+        : iohandle(0)
+        , flags(0)
+        { }
+
+        IOEntry(System::IOHandle& io, CFRunLoopSourceRef s, CFFileDescriptorRef fd)
+        : iohandle(&io)
+        , source(s)
+        , fd(fd)
+        , flags(0)
+        { }
+
+        IOEntry(const IOEntry& e)
+        : iohandle(e.iohandle)
+        , source(e.source)
+        , fd(e.fd)
+        , flags(0)
+        { }
+
+        IOEntry& operator=(const IOEntry& e)
+        {
+            iohandle = e.iohandle;
+            source = e.source;
+            fd = e.fd;
+            return *this;
+        }
+
+        System::IOHandle* iohandle;
+        CFRunLoopSourceRef source;
+        CFFileDescriptorRef fd;
+        CFOptionFlags flags;
+    };
+
+    public:
+        Selector();
+
+        virtual ~Selector();
+
+        virtual void cancel(System::IOHandle& h);
+
+        virtual void beginRead(System::IOHandle* h);
+
+        virtual void endRead(System::IOHandle* h);
+
+        virtual void beginWrite(System::IOHandle* h);
+
+        virtual void endWrite(System::IOHandle* h);
+
+        virtual bool isReadable(System::IOHandle* h);
+
+        virtual bool isWritable(System::IOHandle* h);
+
+        virtual bool isError(System::IOHandle* h);
+
+        IOEntry& enableIOHandle(System::IOHandle* h);
+
+    private:
+        std::vector<IOEntry> _iotable;
+};
+
 class MainLoopImpl : public System::EventLoopImpl
 {
     struct IOEntry
@@ -100,9 +164,9 @@ class MainLoopImpl : public System::EventLoopImpl
 
         void detach(System::Selectable& s);
 
-        virtual void idle(System::Selectable& s);
+        void idle(System::Selectable& s);
 
-        virtual void avail(System::Selectable& s);
+        void avail(System::Selectable& s);
 
         virtual void cancel(System::IOHandle& h);
 

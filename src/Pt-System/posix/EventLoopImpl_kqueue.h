@@ -73,9 +73,6 @@ class Selector
             ::close(_kd);
         }
 
-        int kd() const
-        { return _kd; }
-
         void attach(Selectable& s)
         {
             _selectables.insert(s);
@@ -177,7 +174,6 @@ class Selector
             _wakePipe.wake();
         }
 
-    public:
         bool waitForWake(size_t msecs)
         {
             // process kevents which are left over from the last iteration
@@ -272,6 +268,7 @@ class Selector
             return isWake;
         }
 
+    private:
         bool processAvail()
         {
             bool isWake = false;
