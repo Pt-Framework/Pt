@@ -58,45 +58,7 @@ namespace Gui {
 void MainLoopImplOnWake(void* p)
 {
     MainLoopImpl* impl = reinterpret_cast<MainLoopImpl*>(p);
-
-    NSEvent* event = nil;
-
-    // process cocoa events
-    do
-    {
-        event = [NSApp nextEventMatchingMask: NSAnyEventMask
-                                   untilDate: nil
-                                      inMode: NSDefaultRunLoopMode
-                                     dequeue: YES];
-    
-        [NSApp sendEvent:event];
-    }
-    while(event != nil);
-
-    impl->processAvail();
-
-    // process Pt events
-    bool isActive = impl->processEvents();
-
-    // handle loop exit
-    if( ! isActive)
-    {
-        // set stop flag
-        [NSApp stop: nil];
-
-        // post fake event so NSApp notices the stop flag
-        event = [NSEvent otherEventWithType: NSApplicationDefined
-                                   location: NSMakePoint(0,0)
-                              modifierFlags: 0
-                                  timestamp: 0.0
-                               windowNumber: 0
-                                    context: nil
-                                    subtype: 0
-                                      data1: 0
-                                      data2: 0];
-
-        [NSApp postEvent: event atStart: false];
-    }
+    impl->processEvents();
 }
 
 
@@ -113,9 +75,15 @@ void MainLoopImplOnFd(CFFileDescriptorRef f, CFOptionFlags flags, void *p)
     System::IOHandle* h = reinterpret_cast<System::IOHandle*>(p);
 
     if(flags & kCFFileDescriptorReadCallBack)
-        h->enableFilters = System::IOHandle::FilterRead;
+    {
+        h->events &= ~System::IOHandle::FilterRead;
+        h->ready = System::IOHandle::FilterRead;
+    }
     else if(flags & kCFFileDescriptorWriteCallBack)
-        h->enableFilters = System::IOHandle::FilterWrite;
+    {
+        h->events &= ~System::IOHandle::FilterWrite;
+        h->ready = System::IOHandle::FilterWrite;
+    }
 
     System::Selectable* s = h->sel;
     s->run();
@@ -125,79 +93,14 @@ void MainLoopImplOnFd(CFFileDescriptorRef f, CFOptionFlags flags, void *p)
 MainLoopImpl::MainLoopImpl(Signal<const Pt::Event&>& eventSignal)
 : _event(&eventSignal)
 {
-    [PtGuiApplication sharedApplication];
-    [NSApp initPool];
-
-    // NSRunLoop, CFRunLoop, CFFileDescriptor
-    CFRunLoopSourceContext ctx;
-    ctx.version = 0;
-    ctx.info = this;
-    ctx.retain = NULL;
-    ctx.release = NULL;
-    ctx.copyDescription = NULL;
-    ctx.equal = NULL;
-    ctx.hash = NULL;
-    ctx.schedule = NULL;
-    ctx.cancel = NULL;
-    ctx.perform = &MainLoopImplOnWake;
-
-    _wakeSource = CFRunLoopSourceCreate(kCFAllocatorDefault, 0, &ctx);
-
-    CFRunLoopTimerContext timerCtx;
-    timerCtx.version = 0;
-    timerCtx.info = this;
-    timerCtx.retain = NULL;
-    timerCtx.release = NULL;
-    timerCtx.copyDescription = NULL;
-
-    _masterTimer = CFRunLoopTimerCreate( kCFAllocatorDefault,
-                                         CFAbsoluteTimeGetCurrent(),
-                                         10000.0, 0, 0, 
-                                         &MainLoopImplOnTimer, &timerCtx);
-
-    CFRunLoopRef rl = [[NSRunLoop currentRunLoop] getCFRunLoop];
-    CFRunLoopAddSource(rl, _wakeSource, kCFRunLoopCommonModes);
-    CFRunLoopAddTimer(rl, _masterTimer, kCFRunLoopCommonModes);
+    init();
 }
 
 
 MainLoopImpl::MainLoopImpl(Signal<const Pt::Event&>& eventSignal, Allocator& a)
 : _event(&eventSignal)
 {
-    [PtGuiApplication sharedApplication];
-    [NSApp initPool];
-    
-    // NSRunLoop, CFRunLoop, CFFileDescriptor
-    CFRunLoopSourceContext ctx;
-    ctx.version = 0;
-    ctx.info = this;
-    ctx.retain = NULL;
-    ctx.release = NULL;
-    ctx.copyDescription = NULL;
-    ctx.equal = NULL;
-    ctx.hash = NULL;
-    ctx.schedule = NULL;
-    ctx.cancel = NULL;
-    ctx.perform = &MainLoopImplOnWake;
-
-    _wakeSource = CFRunLoopSourceCreate(kCFAllocatorDefault, 0, &ctx);
-
-    CFRunLoopTimerContext timerCtx;
-    timerCtx.version = 0;
-    timerCtx.info = this;
-    timerCtx.retain = NULL;
-    timerCtx.release = NULL;
-    timerCtx.copyDescription = NULL;
-
-    _masterTimer = CFRunLoopTimerCreate( kCFAllocatorDefault,
-                                         CFAbsoluteTimeGetCurrent(),
-                                         10000.0, 0, 0, 
-                                         &MainLoopImplOnTimer, &timerCtx);
-
-
-    CFRunLoopRef rl = [[NSRunLoop currentRunLoop] getCFRunLoop];
-    CFRunLoopAddSource(rl, _wakeSource, kCFRunLoopCommonModes);
-    CFRunLoopAddTimer(rl, _masterTimer, kCFRunLoopCommonModes);
+    init();
 }
 
 
@@ -216,6 +119,44 @@ MainLoopImpl::~MainLoopImpl()
     CFRelease(_masterTimer);
 
     [NSApp release];
+}
+
+
+void MainLoopImpl::init()
+{
+    [PtGuiApplication sharedApplication];
+    [NSApp initPool];
+
+    // NSRunLoop, CFRunLoop, CFFileDescriptor
+    CFRunLoopSourceContext ctx;
+    ctx.version = 0;
+    ctx.info = this;
+    ctx.retain = NULL;
+    ctx.release = NULL;
+    ctx.copyDescription = NULL;
+    ctx.equal = NULL;
+    ctx.hash = NULL;
+    ctx.schedule = NULL;
+    ctx.cancel = NULL;
+    ctx.perform = &MainLoopImplOnWake;
+
+    _wakeSource = CFRunLoopSourceCreate(kCFAllocatorDefault, 0, &ctx);
+
+    CFRunLoopTimerContext timerCtx;
+    timerCtx.version = 0;
+    timerCtx.info = this;
+    timerCtx.retain = NULL;
+    timerCtx.release = NULL;
+    timerCtx.copyDescription = NULL;
+
+    _masterTimer = CFRunLoopTimerCreate( kCFAllocatorDefault,
+                                         CFAbsoluteTimeGetCurrent(),
+                                         10000.0, 0, 0, 
+                                         &MainLoopImplOnTimer, &timerCtx);
+
+    CFRunLoopRef rl = [[NSRunLoop currentRunLoop] getCFRunLoop];
+    CFRunLoopAddSource(rl, _wakeSource, kCFRunLoopCommonModes);
+    CFRunLoopAddTimer(rl, _masterTimer, kCFRunLoopCommonModes);
 }
 
 
@@ -255,12 +196,25 @@ void MainLoopImpl::queueEvent(const Pt::Event& event)
 
 bool MainLoopImpl::processEvents()
 { 
-    return _eventQueue.processEvents(*_event);
-}
+    NSEvent* event = nil;
 
+    //
+    // process cocoa events
+    //
+    do
+    {
+        event = [NSApp nextEventMatchingMask: NSAnyEventMask
+                                   untilDate: nil
+                                      inMode: NSDefaultRunLoopMode
+                                     dequeue: YES];
+    
+        [NSApp sendEvent:event];
+    }
+    while(event != nil);
 
-void MainLoopImpl::processAvail()
-{
+    //
+    // process available selectables
+    //
     while(true)
     {
         System::MutexLock lock(_mutex);
@@ -273,6 +227,36 @@ void MainLoopImpl::processAvail()
 
         selectable->run();
     }
+
+    //
+    // process Pt events
+    //
+    bool isActive = _eventQueue.processEvents(*_event);
+
+    //
+    // handle loop exit
+    //
+    if( ! isActive)
+    {
+        // set stop flag
+        [NSApp stop: nil];
+
+        // post fake event so NSApp notices the stop flag
+        event = [NSEvent otherEventWithType: NSApplicationDefined
+                                   location: NSMakePoint(0,0)
+                              modifierFlags: 0
+                                  timestamp: 0.0
+                               windowNumber: 0
+                                    context: nil
+                                    subtype: 0
+                                      data1: 0
+                                      data2: 0];
+
+        [NSApp postEvent: event atStart: false];
+    }
+
+
+    return _eventQueue.processEvents(*_event);
 }
 
 
@@ -348,7 +332,6 @@ void MainLoopImpl::cancel(System::IOHandle& h)
     if(id == System::IOHandle::InvalidId)
         return;
 
-    h.enableFilters = 0;
     IOEntry& entry = _iotable[id];
 
     CFRunLoopRef rl = [[NSRunLoop currentRunLoop] getCFRunLoop];
@@ -365,6 +348,7 @@ void MainLoopImpl::cancel(System::IOHandle& h)
     h.id = System::IOHandle::InvalidId;
     _iotable.resize(_iotable.size() -1);
 
+    h.ready = 0;
 }
 
 
@@ -403,13 +387,21 @@ void MainLoopImpl::beginRead(System::IOHandle* h)
 {  
     CFFileDescriptorRef fdref = enableIOHandle(h).fd;
     CFFileDescriptorEnableCallBacks(fdref, kCFFileDescriptorReadCallBack);
+
+    h->events = System::IOHandle::FilterRead;
 }
 
 
 void MainLoopImpl::endRead(System::IOHandle* h)
 {
-    CFFileDescriptorRef fdref = _iotable[h->id].fd;
-    CFFileDescriptorDisableCallBacks(fdref, kCFFileDescriptorReadCallBack);
+    if(h->events & System::IOHandle::FilterRead)
+    {
+        CFFileDescriptorRef fdref = _iotable[h->id].fd;
+        CFFileDescriptorDisableCallBacks(fdref, kCFFileDescriptorReadCallBack);
+    }
+
+    h->ready = 0;
+    h->events &= ~System::IOHandle::FilterRead;
 }
 
 
@@ -417,30 +409,34 @@ void MainLoopImpl::beginWrite(System::IOHandle* h)
 {  
     CFFileDescriptorRef fdref = enableIOHandle(h).fd;
     CFFileDescriptorEnableCallBacks(fdref, kCFFileDescriptorWriteCallBack);
+
+    h->events = System::IOHandle::FilterWrite;
 }
 
 
 void MainLoopImpl::endWrite(System::IOHandle* h)
 {
-    CFFileDescriptorRef fdref = _iotable[h->id].fd;
-    CFFileDescriptorDisableCallBacks(fdref, kCFFileDescriptorWriteCallBack);
+    if(h->events & System::IOHandle::FilterWrite)
+    {
+        CFFileDescriptorRef fdref = _iotable[h->id].fd;
+        CFFileDescriptorDisableCallBacks(fdref, kCFFileDescriptorWriteCallBack);
+    }
+
+    h->ready = 0;
+    h->events &= ~System::IOHandle::FilterWrite;
 }
 
 
 bool MainLoopImpl::isReadable(System::IOHandle* h)
 {  
-    bool isReady = h->enableFilters == System::IOHandle::FilterRead;
-    if(isReady)
-        h->enableFilters = 0;
+    bool isReady = h->ready == System::IOHandle::FilterRead;
     return isReady;
 }
 
 
 bool MainLoopImpl::isWritable(System::IOHandle* h)
 {
-    bool isReady = h->enableFilters == System::IOHandle::FilterWrite;
-    if(isReady)
-        h->enableFilters = 0;
+    bool isReady = h->ready == System::IOHandle::FilterWrite;
     return isReady;
 }
 

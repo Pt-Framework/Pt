@@ -59,27 +59,27 @@ struct IOHandle
     : sel(&sel)
     , fd(fd)
     , id(InvalidId)
-    , enableFilters(0)
-    , disableFilters(0)
-    , kev(0)
+    , events(0)
+    , changed(0)
+    , ready(0)
     { }
 
     IOHandle(Selectable& sel)
     : sel(&sel)
     , fd(-1)
     , id(InvalidId)
-    , enableFilters(0)
-    , disableFilters(0)
-    , kev(0)
+    , events(0)
+    , changed(0)
+    , ready(0)
     { }
 
     IOHandle()
     : sel(0)
     , fd(-1)
     , id(InvalidId)
-    , enableFilters(0)
-    , disableFilters(0)
-    , kev(0)
+    , events(0)
+    , changed(0)
+    , ready(0)
     { }
 
     bool isOpen() const
@@ -88,9 +88,9 @@ struct IOHandle
     Selectable* sel;
     int fd;
     size_t id;
-    short enableFilters;
-    short disableFilters;
-    struct kevent* kev;
+    short events;
+    short changed;
+    short ready;
 };
 
 class Selector
@@ -161,62 +161,58 @@ class Selector
             ts.tv_sec = 0;
             ts.tv_nsec = 0;
             kevent(_kd, kev, 2, NULL, 0, &ts);
+
+            h.events = 0;
+            h.changed = 0;
+            h.ready = 0;
         }
 
         void beginRead(IOHandle* h)
         {
-            bool isAdded = h->enableFilters || h->disableFilters;
+            bool isAdded = h->changed != h->events;
             if(! isAdded)
                 _changelist.push_back(h);
 
-            h->enableFilters |= IOHandle::FilterRead;
+            h->changed |= IOHandle::FilterRead;
         }
 
         void endRead(IOHandle* h)
-        {
-            bool isAdded = h->enableFilters || h->disableFilters;
+        {   
+            bool isAdded = h->changed != h->events;
             if(! isAdded)
                 _changelist.push_back(h);
 
-            h->disableFilters |= IOHandle::FilterRead;
+            h->ready = 0;
+            h->changed &= ~IOHandle::FilterRead;
         }
 
         void beginWrite(IOHandle* h)
         {
-            bool isAdded = h->enableFilters || h->disableFilters;
+            bool isAdded = h->changed != h->events;
             if(! isAdded)
                 _changelist.push_back(h);
 
-            h->enableFilters |= IOHandle::FilterWrite;
+            h->changed |= IOHandle::FilterWrite;
         }
 
         void endWrite(IOHandle* h)
         {
-            bool isAdded = h->enableFilters || h->disableFilters;
+            bool isAdded = h->changed != h->events;
             if(! isAdded)
                 _changelist.push_back(h);
 
-            h->disableFilters |= IOHandle::FilterWrite;
+            h->ready = 0;
+            h->changed &= ~IOHandle::FilterWrite;
         }
 
         bool isReadable(IOHandle* h)
         {
-            bool isReady = h->kev && (h->kev->filter & EVFILT_READ);
-                       
-            if(isReady)
-                h->kev = 0;
-
-            return isReady;
+            return h->ready & IOHandle::FilterRead;
         }
 
         bool isWritable(IOHandle* h)
         {
-            bool isReady = h->kev && (h->kev->filter & EVFILT_WRITE);
-
-            if(isReady)
-                h->kev = 0;
-
-            return isReady;
+            return h->ready & IOHandle::FilterWrite;
         }
 
         bool isError(IOHandle* h)
@@ -242,40 +238,46 @@ class Selector
             {
                 IOHandle* h = *it;
         
-                if(h->enableFilters == h->disableFilters)
-                {
-                    h->enableFilters = 0;
-                    h->disableFilters = 0;
+                if(h->changed == h->events)
                     continue;
-                }
-        
-                short enableFilter = h->enableFilters & ~h->disableFilters;
-                short disableFilter = h->disableFilters & ~h->enableFilters;
-                h->enableFilters = 0;
-                h->disableFilters = 0;
 
                 struct kevent kev;
 
-                if(enableFilter & IOHandle::FilterRead)
+                if(h->changed & IOHandle::FilterRead)
                 {
-                    EV_SET(&kev, h->fd, EVFILT_READ, EV_ADD|EV_ENABLE|EV_CLEAR, 0, 0, h);
-                    changedEvents.push_back(kev);
+                    if(0 == (h->events & IOHandle::FilterRead))
+                    {
+                        EV_SET(&kev, h->fd, EVFILT_READ, EV_ADD|EV_ENABLE|EV_CLEAR, 0, 0, h);
+                        changedEvents.push_back(kev);
+                    }
                 }
-                if(enableFilter & IOHandle::FilterWrite)
+                else
                 {
-                    EV_SET(&kev, h->fd, EVFILT_WRITE, EV_ADD|EV_ENABLE|EV_CLEAR, 0, 0, h);
-                    changedEvents.push_back(kev);
+                    if(h->events & IOHandle::FilterRead)
+                    {
+                        EV_SET(&kev, h->fd, EVFILT_READ, EV_DISABLE, 0, 0, h);
+                        changedEvents.push_back(kev);
+                    }
                 }
-                if(disableFilter & IOHandle::FilterRead)
+
+                if(h->changed & IOHandle::FilterWrite)
                 {
-                    EV_SET(&kev, h->fd, EVFILT_READ, EV_DISABLE, 0, 0, h);
-                    changedEvents.push_back(kev);
+                    if(0 == (h->events & IOHandle::FilterWrite))
+                    {
+                        EV_SET(&kev, h->fd, EVFILT_WRITE, EV_ADD|EV_ENABLE|EV_CLEAR, 0, 0, h);
+                        changedEvents.push_back(kev);
+                    }
                 }
-                if(disableFilter & IOHandle::FilterWrite)
+                else
                 {
-                    EV_SET(&kev, h->fd, EVFILT_WRITE, EV_DISABLE, 0, 0, h);
-                    changedEvents.push_back(kev);
+                    if(h->events & IOHandle::FilterWrite)
+                    {
+                        EV_SET(&kev, h->fd, EVFILT_WRITE, EV_DISABLE, 0, 0, h);
+                        changedEvents.push_back(kev);
+                    }
                 }
+
+                h->events = h->changed;
             }
         
             _changelist.clear();
@@ -338,7 +340,17 @@ class Selector
                 else
                 {
                     IOHandle* h = reinterpret_cast<IOHandle*>(p);
-                    h->kev = &kev;
+
+                    if(kev.filter & EVFILT_READ)
+                    {
+                        h->ready |= IOHandle::FilterRead;
+                    }
+
+                    if(kev.filter & EVFILT_WRITE)
+                    {
+                        h->ready |= IOHandle::FilterWrite;
+                    }
+
                     h->sel->run();
                 }
             }

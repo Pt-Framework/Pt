@@ -90,8 +90,6 @@ class MainLoopImpl : public System::EventLoopImpl
 
         bool processEvents();
 
-        void processAvail();
-
         void processTimers();
 
         void attach(System::Timer& timer);
@@ -123,6 +121,8 @@ class MainLoopImpl : public System::EventLoopImpl
         virtual bool isError(System::IOHandle* h);
 
     private:
+        void init();
+
         IOEntry& enableIOHandle(System::IOHandle* h);
 
     private:
