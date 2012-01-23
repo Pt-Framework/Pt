@@ -140,24 +140,7 @@ class IOTable
 };
 
 
-class PT_SYSTEM_API EventLoopImpl
-{
-    public:
-        EventLoopImpl();
-        
-        virtual ~EventLoopImpl();
-
-        virtual void enableOverlapped(IOHandle& s) = 0;
-
-        virtual void disableOverlapped(IOHandle& s) = 0;
-
-        virtual void enable(IOHandle& handle) = 0;
-
-        virtual void disable(IOHandle& handle) = 0;
-};
-
-
-class PT_SYSTEM_API Selector : public EventLoopImpl
+class PT_SYSTEM_API Selector
 {
     public:
         Selector();

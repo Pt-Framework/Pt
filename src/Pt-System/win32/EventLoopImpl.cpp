@@ -205,14 +205,6 @@ DWORD Selector::waitFor(DWORD numHandles, const HANDLE *handles, DWORD msecs, bo
     return result - WAIT_OBJECT_0;
 }
 
-
-EventLoopImpl::EventLoopImpl()
-{}
-
-
-EventLoopImpl::~EventLoopImpl()
-{}
-
 }
 
 }

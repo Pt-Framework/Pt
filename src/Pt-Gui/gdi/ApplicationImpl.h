@@ -135,7 +135,7 @@ class MainLoop : public Pt::System::EventLoop
 
         ~MainLoop();
 
-        System::EventLoopImpl& impl()
+        System::Selector& impl()
         { return _impl.selector(); }
 
         //! @brief Returns this application's instance handle (Windows).
