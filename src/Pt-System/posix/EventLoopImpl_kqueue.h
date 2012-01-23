@@ -45,10 +45,10 @@ namespace Pt {
 
 namespace System {
 
-class Selector : public EventLoopImpl
+class SelectorImpl : public Selector
 {
     public:
-        Selector()
+        SelectorImpl()
         : _kd(-1)
         , _avail(0)
         {
@@ -63,7 +63,7 @@ class Selector : public EventLoopImpl
             kevent(_kd, &kev, 1, NULL, 0, &ts);
         }
 
-        ~Selector()
+        ~SelectorImpl()
         {         
             while( ! _selectables.empty() )
             {

@@ -169,12 +169,12 @@ struct IOHandle
 };
 
 
-class EventLoopImpl
+class Selector
 {
     public:
-        EventLoopImpl();
+        Selector();
 
-        virtual ~EventLoopImpl();
+        virtual ~Selector();
 
         virtual void cancel(IOHandle& h) = 0;
 

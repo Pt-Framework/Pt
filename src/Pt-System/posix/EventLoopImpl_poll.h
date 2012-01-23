@@ -44,10 +44,10 @@ namespace Pt {
 
 namespace System {
 
-class Selector : public EventLoopImpl
+class SelectorImpl : public Selector
 {
     public:
-        Selector()
+        SelectorImpl()
         {
             _current = _devices.end();
         
@@ -60,7 +60,7 @@ class Selector : public EventLoopImpl
             _iohandles.push_back(0);
         }
 
-        ~Selector()
+        ~SelectorImpl()
         {         
             std::set<Selectable*>::iterator it;
 

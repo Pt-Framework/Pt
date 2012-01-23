@@ -44,10 +44,10 @@ namespace Pt {
 
 namespace System {
 
-class Selector  : public EventLoopImpl
+class SelectorImpl  : public Selector
 {
     public:
-        Selector()
+        SelectorImpl()
         : _epfd(-1)
         , _avail(0)
         {
@@ -60,7 +60,7 @@ class Selector  : public EventLoopImpl
             epoll_ctl(_epfd, EPOLL_CTL_ADD, _wakePipe.readFd(), &ev);
         }
 
-        ~Selector()
+        ~SelectorImpl()
         {         
             std::set<Selectable*>::iterator it;
 

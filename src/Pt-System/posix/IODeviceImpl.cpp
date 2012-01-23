@@ -298,15 +298,15 @@ bool IODeviceImpl::runRead(EventLoop& loop)
     if( ! this->isOpen() )
         return false;
 
-    EventLoopImpl& impl = loop.impl();
+    Selector& selector = loop.impl();
 
-    if ( impl.isError(&_ioh) )
+    if ( selector.isError(&_ioh) )
     {
         _errorPending = true;
         return true;
     }
 
-    return impl.isReadable(&_ioh);
+    return selector.isReadable(&_ioh);
 }
 
 
@@ -315,15 +315,15 @@ bool IODeviceImpl::runWrite(EventLoop& loop)
     if( ! this->isOpen() )
         return false;
 
-    EventLoopImpl& impl = loop.impl();
+    Selector& selector = loop.impl();
 
-    if ( impl.isError(&_ioh) )
+    if ( selector.isError(&_ioh) )
     {
         _errorPending = true;
         return true;
     }
 
-    return impl.isWritable(&_ioh);
+    return selector.isWritable(&_ioh);
 }
 
 

@@ -64,7 +64,7 @@ class MainLoopImpl
 
         ~MainLoopImpl();
 
-        EventLoopImpl& selector()
+        Selector& selector()
         { return _selector; }
 
         void attach(Selectable& s)
@@ -103,7 +103,7 @@ class MainLoopImpl
         Signal<const Event&>* _event;
         TimerQueue _timerQueue;
         EventQueue _eventQueue;
-        Selector _selector;
+        SelectorImpl _selector;
         std::vector<Selectable*> _avail;
 };
 

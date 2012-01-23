@@ -373,9 +373,9 @@ bool TcpSocketImpl::runConnect(System::EventLoop& loop)
     if(_isConnected)
         return false;
 
-    System::EventLoopImpl& impl = loop.impl();
+    System::Selector& selector = loop.impl();
 
-    if( impl.isError(&_ioh) )
+    if( selector.isError(&_ioh) )
     {
         AddrInfoImpl::const_iterator ptr = _addrInfoPtr;
         if (++ptr == _addrInfo.impl()->end())
@@ -403,7 +403,7 @@ bool TcpSocketImpl::runConnect(System::EventLoop& loop)
             return _isConnected;
         }
     }
-    else if( impl.isWritable(&_ioh)  )
+    else if( selector.isWritable(&_ioh)  )
     {
         int sockerr = checkConnect();
         if (_isConnected)

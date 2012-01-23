@@ -44,10 +44,10 @@ namespace Pt {
 
 namespace System {
 
-class Selector : public EventLoopImpl
+class SelectorImpl : public Selector
 {
     public:
-        Selector()
+        SelectorImpl()
         {
             _current = _devices.end();
 
@@ -62,7 +62,7 @@ class Selector : public EventLoopImpl
             FD_SET(_wakePipe.readFd(), &_rfds);
         }
 
-        ~Selector()
+        ~SelectorImpl()
         {         
             std::set<Selectable*>::iterator it;
 

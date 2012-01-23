@@ -61,8 +61,8 @@ class X11Fd : public System::Selectable
             if( ! this->isActive() )
                 throw std::logic_error("not implemented"); 
 
-            Pt::System::EventLoopImpl& impl = this->parent()->impl();
-            impl.beginRead(&_ioh);
+            Pt::System::Selector& selector = this->parent()->impl();
+            selector.beginRead(&_ioh);
         }
 
         void close()

@@ -229,9 +229,9 @@ bool TcpServerImpl::run()
     if(this->fd() < 0)
         return false;
 
-    System::EventLoopImpl& impl = _server.parent()->impl();
+    System::Selector& selector = _server.parent()->impl();
 
-    if( impl.isReadable(&_ioh) )
+    if( selector.isReadable(&_ioh) )
     {
         _server.connectionPending.send(_server);
         return true;

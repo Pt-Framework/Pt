@@ -48,7 +48,7 @@ namespace System {
 
 class Timer;
 class Selectable;
-class EventLoopImpl;
+class Selector;
 
 /** @brief Thread-safe event loop supporting I/O multiplexing and Timers.
 */
@@ -102,7 +102,7 @@ class PT_SYSTEM_API EventLoop : public Connectable
         { this->onReady(s); }
 
         //! @ internal
-        virtual EventLoopImpl& impl() = 0;
+        virtual Selector& impl() = 0;
 
     protected:
         //! @internal Constructor

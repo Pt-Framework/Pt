@@ -32,11 +32,11 @@ namespace Pt {
 
 namespace System {
 
-EventLoopImpl::EventLoopImpl()
+Selector::Selector()
 { }
 
 
-EventLoopImpl::~EventLoopImpl()
+Selector::~Selector()
 { }
 
 } //namespace System
