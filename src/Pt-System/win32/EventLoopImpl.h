@@ -140,7 +140,24 @@ class IOTable
 };
 
 
-class PT_SYSTEM_API Selector
+class PT_SYSTEM_API EventLoopImpl
+{
+    public:
+        EventLoopImpl();
+        
+        virtual ~EventLoopImpl();
+
+        virtual void enableOverlapped(IOHandle& s) = 0;
+
+        virtual void disableOverlapped(IOHandle& s) = 0;
+
+        virtual void enable(IOHandle& handle) = 0;
+
+        virtual void disable(IOHandle& handle) = 0;
+};
+
+
+class PT_SYSTEM_API Selector : public EventLoopImpl
 {
     public:
         Selector();
@@ -173,23 +190,6 @@ class PT_SYSTEM_API Selector
         Selectable* _current;
         SelectableList _devices;
         SelectableList _selectables;
-};
-
-
-class PT_SYSTEM_API EventLoopImpl
-{
-    public:
-        EventLoopImpl();
-        
-        virtual ~EventLoopImpl();
-
-        virtual void enableOverlapped(IOHandle& s) = 0;
-
-        virtual void disableOverlapped(IOHandle& s) = 0;
-
-        virtual void enable(IOHandle& handle) = 0;
-
-        virtual void disable(IOHandle& handle) = 0;
 };
 
 } // namespace System

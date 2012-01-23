@@ -28,7 +28,7 @@ namespace Pt {
 
 namespace System {
 
-class PT_SYSTEM_API MainLoopImpl : public EventLoopImpl
+class PT_SYSTEM_API MainLoopImpl
 {
     public:
         MainLoopImpl(Signal<const Pt::Event&>& eventSignal);
@@ -68,18 +68,6 @@ class PT_SYSTEM_API MainLoopImpl : public EventLoopImpl
         void idle(Selectable& s);
 
         void avail(Selectable& s);
-
-        void enableOverlapped(IOHandle& h)
-        { _selector.enableOverlapped(h); }
-
-        void disableOverlapped(IOHandle& h)
-        { _selector.disableOverlapped(h); }
-
-        void enable(IOHandle& h)
-        { _selector.enable(h); }
-
-        void disable(IOHandle& h)
-        { _selector.disable(h); }
 
     protected:
         bool waitNext();

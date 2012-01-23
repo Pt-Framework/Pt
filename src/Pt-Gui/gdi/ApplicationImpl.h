@@ -68,7 +68,7 @@ class Selector : public System::Selector
  * method of this singleton class. It creates the essential association between the
  * Windows' HWND and the application's widget.
  */
-class MainLoopImpl : public Pt::System::EventLoopImpl
+class MainLoopImpl
 {
     public:
         MainLoopImpl(Signal<const Pt::Event&>& eventSignal);
@@ -107,18 +107,6 @@ class MainLoopImpl : public Pt::System::EventLoopImpl
 
         void avail(System::Selectable& s);
 
-        void enableOverlapped(System::IOHandle& h)
-        { _selector.enableOverlapped(h); }
-
-        void disableOverlapped(System::IOHandle& h)
-        { _selector.disableOverlapped(h); }
-
-        void enable(System::IOHandle& h)
-        { _selector.enable(h); }
-
-        void disable(System::IOHandle& h)
-        { _selector.disable(h); }
-
     protected:
         bool waitNext();
 
@@ -148,7 +136,7 @@ class MainLoop : public Pt::System::EventLoop
         ~MainLoop();
 
         System::EventLoopImpl& impl()
-        { return _impl; }
+        { return _impl.selector(); }
 
         //! @brief Returns this application's instance handle (Windows).
         HINSTANCE getInstanceHandle()
