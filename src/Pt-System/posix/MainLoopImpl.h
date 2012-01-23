@@ -38,6 +38,7 @@
 
 #ifdef __linux__
     #define PT_WITH_LINUX_EPOLL
+    //#define PT_WITH_POSIX_POLL
 #endif
 
 #if defined (PT_WITH_LINUX_EPOLL)
