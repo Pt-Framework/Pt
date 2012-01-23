@@ -47,18 +47,17 @@ namespace Pt {
 
 namespace Gui {
 
-MainLoopImpl::MainLoopImpl(Signal<const Pt::Event&>& eventSignal)
-: Pt::System::MainLoopImpl(eventSignal)
+Selector::Selector()
 {
 }
 
 
-MainLoopImpl::~MainLoopImpl()
+Selector::~Selector()
 {
 }
 
 
-DWORD MainLoopImpl::waitFor(DWORD numHandles, const HANDLE *handles, DWORD msecs, bool& isTimeout)
+DWORD Selector::waitFor(DWORD numHandles, const HANDLE *handles, DWORD msecs, bool& isTimeout)
 {
     DWORD result = MsgWaitForMultipleObjects(numHandles, (HANDLE *)handles, false, msecs, QS_ALLEVENTS);
     if(result == WAIT_FAILED)
@@ -84,7 +83,7 @@ DWORD MainLoopImpl::waitFor(DWORD numHandles, const HANDLE *handles, DWORD msecs
 }
 
 
-void MainLoopImpl::processMessage()
+void Selector::processMessage()
 {
     MSG msg;
 
@@ -93,6 +92,100 @@ void MainLoopImpl::processMessage()
         TranslateMessage(&msg);
         DispatchMessage(&msg);
     }
+}
+
+
+MainLoopImpl::MainLoopImpl(Signal<const Pt::Event&>& eventSignal)
+: _event(&eventSignal)
+{
+}
+
+
+MainLoopImpl::~MainLoopImpl()
+{
+}
+
+
+void MainLoopImpl::avail(System::Selectable& s)
+{
+    Pt::System::MutexLock lock(_mutex);
+    _avail.push_back(&s);
+}
+
+
+void MainLoopImpl::idle(System::Selectable& s)
+{
+    Pt::System::MutexLock lock(_mutex);
+
+    std::vector<System::Selectable*>::iterator it = _avail.begin();
+    while(it != _avail.end())
+    {
+        if(*it == &s)
+            it = _avail.erase(it);
+        else
+            ++it;
+    }
+}
+
+
+void MainLoopImpl::run()
+{
+    while( this->waitNext() )
+        ;
+}
+
+
+void MainLoopImpl::exit()
+{
+    _eventQueue.exit();
+    wake();
+}
+
+
+void MainLoopImpl::commitEvent(const Pt::Event& event)
+{ 
+    _eventQueue.pushEvent(event); 
+    wake();
+}
+
+
+void MainLoopImpl::queueEvent(const Pt::Event& event)
+{ 
+    _eventQueue.pushEvent(event); 
+}
+
+
+bool MainLoopImpl::processEvents()
+{ 
+    return _eventQueue.processEvents(*_event);
+}
+
+
+bool MainLoopImpl::waitNext()
+{
+    size_t timeout = _timerQueue.processTimers();
+
+    // check all selectables that did not require waiting
+    while( true )
+    {
+        Pt::System::MutexLock lock(_mutex);
+
+        if( _avail.empty() )
+            break;
+
+        timeout = 0;
+        System::Selectable* s = _avail.back();
+        _avail.pop_back();
+        lock.unlock();
+
+        s->run();
+    }
+
+    bool isActive = true;
+    if( _selector.waitForWake(timeout) )
+        isActive = this->processEvents();
+
+    return isActive;
 }
 
 

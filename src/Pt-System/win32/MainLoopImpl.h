@@ -36,6 +36,61 @@ class PT_SYSTEM_API MainLoopImpl : public EventLoopImpl
         MainLoopImpl(Signal<const Pt::Event&>& eventSignal, Allocator& a);
 
         ~MainLoopImpl();
+
+        Selector& selector()
+        { return _selector; }
+
+        void run();
+
+        void exit();
+
+        void wake()
+        { _selector.wake(); }
+
+        void commitEvent(const Event& event);
+
+        void queueEvent(const Event& event);
+
+        bool processEvents();
+
+        void attach(Timer& timer)
+        { _timerQueue.addTimer(timer); }
+
+        void detach(Timer& timer)
+        { _timerQueue.removeTimer(timer); }
+
+        void attach(Selectable& s)
+        { _selector.attach(s); }
+
+        void detach(Selectable& s)
+        { _selector.detach(s); }
+
+        void idle(Selectable& s);
+
+        void avail(Selectable& s);
+
+        void enableOverlapped(IOHandle& h)
+        { _selector.enableOverlapped(h); }
+
+        void disableOverlapped(IOHandle& h)
+        { _selector.disableOverlapped(h); }
+
+        void enable(IOHandle& h)
+        { _selector.enable(h); }
+
+        void disable(IOHandle& h)
+        { _selector.disable(h); }
+
+    protected:
+        bool waitNext();
+
+    private:
+        Mutex _mutex;
+        TimerQueue _timerQueue;
+        EventQueue _eventQueue;
+        Selector _selector;
+        Signal<const Event&>* _event;
+        std::vector<Selectable*> _avail;
 };
 
 }//namespace System

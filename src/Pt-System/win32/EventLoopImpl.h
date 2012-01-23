@@ -71,10 +71,10 @@ struct IOHandle
     HANDLE _handle;
 };
 
-class HandleMap
+class IOTable
 {
     public:
-        HandleMap()
+        IOTable()
         {}
 
         void add(HANDLE h)
@@ -140,38 +140,18 @@ class HandleMap
 };
 
 
-class PT_SYSTEM_API EventLoopImpl
+class PT_SYSTEM_API Selector
 {
     public:
-        EventLoopImpl(Signal<const Pt::Event&>& eventSignal);
+        Selector();
         
-        ~EventLoopImpl();
-
-        void run();
-
-        void exit();
+        ~Selector();
 
         void wake();
-
-        void commitEvent(const Event& event);
-
-        void queueEvent(const Event& event);
-
-        bool processEvents();
-
-        void attach(Timer& timer)
-        { _timerQueue.addTimer(timer); }
-
-        void detach(Timer& timer)
-        { _timerQueue.removeTimer(timer); }
 
         void attach(Selectable& s);
 
         void detach(Selectable& s);
-
-        void idle(Selectable& s);
-
-        void avail(Selectable& s);
 
         void enableOverlapped(IOHandle& s);
 
@@ -181,23 +161,35 @@ class PT_SYSTEM_API EventLoopImpl
 
         void disable(IOHandle& handle);
 
-    protected:
-        bool waitNext();
+        bool waitForWake(size_t msecs);
 
+    protected:
         virtual DWORD waitFor(DWORD numHandles, const HANDLE *handles, DWORD msecs, bool& isTimeout);
 
     private:
-        Mutex _mutex;
-        TimerQueue _timerQueue;
-        EventQueue _eventQueue;
-        Signal<const Event&>* _event;
         HANDLE _wakeEvent;
         HANDLE _ioEvent;
-        HandleMap _handles;
+        IOTable _handles;
         Selectable* _current;
         SelectableList _devices;
         SelectableList _selectables;
-        std::vector<Selectable*> _avail;
+};
+
+
+class PT_SYSTEM_API EventLoopImpl
+{
+    public:
+        EventLoopImpl();
+        
+        virtual ~EventLoopImpl();
+
+        virtual void enableOverlapped(IOHandle& s) = 0;
+
+        virtual void disableOverlapped(IOHandle& s) = 0;
+
+        virtual void enable(IOHandle& handle) = 0;
+
+        virtual void disable(IOHandle& handle) = 0;
 };
 
 } // namespace System

@@ -25,7 +25,7 @@
 #include <Pt/Gui/KeyEvent.h>
 #include <Pt/Singleton.h>
 
-#include "win32/MainLoopImpl.h"
+#include "win32/EventLoopImpl.h"
 
 #include <map>
 #include <iostream>
@@ -37,6 +37,19 @@ namespace Pt {
 namespace Gui {
 
 class Widget;
+
+class Selector : public System::Selector
+{
+    public:
+        Selector();
+        
+        ~Selector();
+
+        void processMessage();
+
+    protected:
+        virtual DWORD waitFor(DWORD numHandles, const HANDLE *handles, DWORD msecs, bool& isTimeout);
+};
 
 /**
  * @brief Global singleton class which provides access to the applications's instance
@@ -55,17 +68,67 @@ class Widget;
  * method of this singleton class. It creates the essential association between the
  * Windows' HWND and the application's widget.
  */
-class MainLoopImpl : public Pt::System::MainLoopImpl
+class MainLoopImpl : public Pt::System::EventLoopImpl
 {
     public:
         MainLoopImpl(Signal<const Pt::Event&>& eventSignal);
 
         ~MainLoopImpl();
 
-    protected:
-        virtual DWORD waitFor(DWORD numHandles, const HANDLE *handles, DWORD msecs, bool& isTimeout);
+        Selector& selector()
+        { return _selector; }
 
-        void processMessage();
+        void run();
+
+        void exit();
+
+        void wake()
+        { _selector.wake(); }
+
+        void commitEvent(const Pt::Event& event);
+
+        void queueEvent(const Pt::Event& event);
+
+        bool processEvents();
+
+        void attach(System::Timer& timer)
+        { _timerQueue.addTimer(timer); }
+
+        void detach(System::Timer& timer)
+        { _timerQueue.removeTimer(timer); }
+
+        void attach(System::Selectable& s)
+        { _selector.attach(s); }
+
+        void detach(System::Selectable& s)
+        { _selector.detach(s); }
+
+        void idle(System::Selectable& s);
+
+        void avail(System::Selectable& s);
+
+        void enableOverlapped(System::IOHandle& h)
+        { _selector.enableOverlapped(h); }
+
+        void disableOverlapped(System::IOHandle& h)
+        { _selector.disableOverlapped(h); }
+
+        void enable(System::IOHandle& h)
+        { _selector.enable(h); }
+
+        void disable(System::IOHandle& h)
+        { _selector.disable(h); }
+
+    protected:
+        bool waitNext();
+
+    private:
+        System::Mutex _mutex;
+        System::TimerQueue _timerQueue;
+        System::EventQueue _eventQueue;
+        Selector _selector;
+        Signal<const Pt::Event&>* _event;
+        std::vector<System::Selectable*> _avail;
 };
 
 

@@ -35,8 +35,7 @@ namespace Pt {
 
 namespace System {
 
-EventLoopImpl::EventLoopImpl(Signal<const Pt::Event&>& eventSignal)
-: _event(&eventSignal)
+Selector::Selector()
 {
     _current = 0;
 
@@ -56,7 +55,7 @@ EventLoopImpl::EventLoopImpl(Signal<const Pt::Event&>& eventSignal)
 }
 
 
-EventLoopImpl::~EventLoopImpl()
+Selector::~Selector()
 { 
     while( ! _devices.empty() )
     {
@@ -75,53 +74,31 @@ EventLoopImpl::~EventLoopImpl()
 }
 
 
-void EventLoopImpl::attach(Selectable& s)
+void Selector::attach(Selectable& s)
 {
     _selectables.insert(s);
 }
 
 
-void EventLoopImpl::detach(Selectable& s)
+void Selector::detach(Selectable& s)
 {
     SelectableList::unlink(s);
 }
 
 
-void EventLoopImpl::avail(Selectable& s)
-{
-    Pt::System::MutexLock lock(_mutex);
-    _avail.push_back(&s);
-}
-
-
-void EventLoopImpl::idle(Selectable& s)
-{
-    Pt::System::MutexLock lock(_mutex);
-
-    std::vector<Selectable*>::iterator it = _avail.begin();
-    while(it != _avail.end())
-    {
-        if(*it == &s)
-            it = _avail.erase(it);
-        else
-            ++it;
-    }
-}
-
-
-void EventLoopImpl::enable(IOHandle& handle)
+void Selector::enable(IOHandle& handle)
 {
     return _handles.add(handle);
 }
 
 
-void EventLoopImpl::disable(IOHandle& handle)
+void Selector::disable(IOHandle& handle)
 {
     _handles.remove(handle);
 }
 
 
-void EventLoopImpl::enableOverlapped(IOHandle& ioh)
+void Selector::enableOverlapped(IOHandle& ioh)
 { 
     assert(ioh.sel);
     Selectable* s = ioh.sel;
@@ -131,7 +108,7 @@ void EventLoopImpl::enableOverlapped(IOHandle& ioh)
 }
 
 
-void EventLoopImpl::disableOverlapped(IOHandle& ioh)
+void Selector::disableOverlapped(IOHandle& ioh)
 {
     assert(ioh.sel);
     Selectable* s = ioh.sel;
@@ -145,49 +122,14 @@ void EventLoopImpl::disableOverlapped(IOHandle& ioh)
 }
 
 
-void EventLoopImpl::run()
-{
-    while( this->waitNext() )
-        ;
-}
-
-
-void EventLoopImpl::exit()
-{
-    _eventQueue.exit();
-    wake();
-}
-
-
-void EventLoopImpl::wake()
+void Selector::wake()
 {
     SetEvent( _wakeEvent );
 }
 
 
-void EventLoopImpl::commitEvent(const Event& event)
-{ 
-    _eventQueue.pushEvent(event); 
-    wake();
-}
-
-
-void EventLoopImpl::queueEvent(const Event& event)
-{ 
-    _eventQueue.pushEvent(event); 
-}
-
-
-bool EventLoopImpl::processEvents()
-{ 
-    return _eventQueue.processEvents(*_event);
-}
-
-
-bool EventLoopImpl::waitNext()
+bool Selector::waitForWake(size_t timeoutUMSecs)
 {
-    size_t timeoutUMSecs = _timerQueue.processTimers();
-
     // convert unsigned to signed
     DWORD msecs = timeoutUMSecs;
     if(timeoutUMSecs == EventLoop::WaitInfinite)
@@ -199,22 +141,6 @@ bool EventLoopImpl::waitNext()
         msecs = std::numeric_limits<DWORD>::max();
     }
 
-    // check all selectables that did not require waiting
-    while( true )
-    {
-        Pt::System::MutexLock lock(_mutex);
-
-        if( _avail.empty() )
-            break;
-
-        msecs = 0;
-        Selectable* s = _avail.back();
-        _avail.pop_back();
-        lock.unlock();
-
-        s->run();
-    }
-
     HANDLE* handles = _handles.buildHandles();
 
     bool isTimeout = false;
@@ -223,12 +149,12 @@ bool EventLoopImpl::waitNext()
     try
     {
         if(isTimeout)
-            return true;
+            return false;
 
         // wake event at offset 0 was active
         if (offset == 0)
         {
-            return this->processEvents();
+            return true;
         }
 
         // I/O event at offset 1 was active
@@ -258,11 +184,10 @@ bool EventLoopImpl::waitNext()
         throw;
     }
 
-    return true;
+    return false;
 }
 
-
-DWORD EventLoopImpl::waitFor(DWORD numHandles, const HANDLE *handles, DWORD msecs, bool& isTimeout)
+DWORD Selector::waitFor(DWORD numHandles, const HANDLE *handles, DWORD msecs, bool& isTimeout)
 {
     DWORD result = WaitForMultipleObjects( numHandles, handles, false, msecs );
     if(result == WAIT_FAILED)
@@ -279,6 +204,14 @@ DWORD EventLoopImpl::waitFor(DWORD numHandles, const HANDLE *handles, DWORD msec
 
     return result - WAIT_OBJECT_0;
 }
+
+
+EventLoopImpl::EventLoopImpl()
+{}
+
+
+EventLoopImpl::~EventLoopImpl()
+{}
 
 }
 
