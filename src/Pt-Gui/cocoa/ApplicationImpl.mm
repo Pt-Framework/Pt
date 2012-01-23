@@ -57,14 +57,14 @@ namespace Gui {
 
 void MainLoopImplOnWake(void* p)
 {
-    MainLoopImpl* impl = reinterpret_cast<MainLoopImpl*>(p);
+    MainLoop* impl = reinterpret_cast<MainLoop*>(p);
     impl->processEvents();
 }
 
 
 void MainLoopImplOnTimer(CFRunLoopTimerRef timer, void *p)
 {
-    MainLoopImpl* impl = reinterpret_cast<MainLoopImpl*>(p);
+    MainLoop* impl = reinterpret_cast<MainLoop*>(p);
     impl->processTimers();
 
 }
@@ -90,146 +90,14 @@ void MainLoopImplOnFd(CFFileDescriptorRef f, CFOptionFlags flags, void *p)
 }
 
 
-void Selector::cancel(System::IOHandle& h)
-{
-    size_t id = h.id;
-
-    if(id == System::IOHandle::InvalidId)
-        return;
-
-    IOEntry& entry = _iotable[id];
-
-    CFRunLoopRef rl = [[NSRunLoop currentRunLoop] getCFRunLoop];
-    CFRunLoopRemoveSource(rl, entry.source, kCFRunLoopCommonModes);
-    CFRelease(entry.source);
-    CFRelease(entry.fd);
-
-    if(_iotable.size() > 1)
-    {
-        _iotable.back().iohandle->id = id;
-        _iotable[id] = _iotable.back();
-    }
-
-    h.id = System::IOHandle::InvalidId;
-    _iotable.resize(_iotable.size() -1);
-
-    h.ready = 0;
-}
-
-
-Selector::IOEntry& Selector::enableIOHandle(System::IOHandle* h)
-{
-    if(h->id == System::IOHandle::InvalidId)
-    {
-        CFFileDescriptorContext ctx;
-        ctx.version = 0;
-        ctx.info = h;
-        ctx.retain = NULL;
-        ctx.release = NULL;
-        ctx.copyDescription = NULL;
-
-        CFFileDescriptorRef fdref = CFFileDescriptorCreate(kCFAllocatorDefault, h->fd, false, 
-                                                           &MainLoopImplOnFd, NULL);
-
-        CFRunLoopSourceRef fdsource = CFFileDescriptorCreateRunLoopSource(kCFAllocatorDefault, fdref, 0);
-    
-        CFRunLoopRef rl = [[NSRunLoop currentRunLoop] getCFRunLoop];
-        CFRunLoopAddSource(rl, fdsource, kCFRunLoopCommonModes);
-
-        IOEntry entry(*h, fdsource, fdref);
-
-        size_t id = _iotable.size();
-        _iotable.push_back(entry);
-        h->id = id;
-        return _iotable.back();
-    }
-
-    return _iotable[h->id];
-}
-
-
-void Selector::beginRead(System::IOHandle* h)
-{  
-    CFFileDescriptorRef fdref = enableIOHandle(h).fd;
-    CFFileDescriptorEnableCallBacks(fdref, kCFFileDescriptorReadCallBack);
-
-    h->events = System::IOHandle::Read;
-}
-
-
-void Selector::endRead(System::IOHandle* h)
-{
-    if(h->events & System::IOHandle::Read)
-    {
-        CFFileDescriptorRef fdref = _iotable[h->id].fd;
-        CFFileDescriptorDisableCallBacks(fdref, kCFFileDescriptorReadCallBack);
-    }
-
-    h->ready = 0;
-    h->events &= ~System::IOHandle::Read;
-}
-
-
-void Selector::beginWrite(System::IOHandle* h)
-{  
-    CFFileDescriptorRef fdref = enableIOHandle(h).fd;
-    CFFileDescriptorEnableCallBacks(fdref, kCFFileDescriptorWriteCallBack);
-
-    h->events = System::IOHandle::Write;
-}
-
-
-void Selector::endWrite(System::IOHandle* h)
-{
-    if(h->events & System::IOHandle::Write)
-    {
-        CFFileDescriptorRef fdref = _iotable[h->id].fd;
-        CFFileDescriptorDisableCallBacks(fdref, kCFFileDescriptorWriteCallBack);
-    }
-
-    h->ready = 0;
-    h->events &= ~System::IOHandle::Write;
-}
-
-
-bool Selector::isReadable(System::IOHandle* h)
-{  
-    bool isReady = h->ready == System::IOHandle::Read;
-    return isReady;
-}
-
-
-bool Selector::isWritable(System::IOHandle* h)
-{
-    bool isReady = h->ready == System::IOHandle::Write;
-    return isReady;
-}
-
-
-bool Selector::isError(System::IOHandle* h)
-{
-    return false;
-}
-
-
-
-
-
-MainLoopImpl::MainLoopImpl(Signal<const Pt::Event&>& eventSignal)
-: _event(&eventSignal)
+MainLoop::MainLoop()
+: System::EventLoop()
 {
     init();
 }
 
 
-MainLoopImpl::MainLoopImpl(Signal<const Pt::Event&>& eventSignal, Allocator& a)
-: _event(&eventSignal)
-{
-    init();
-}
-
-
-MainLoopImpl::~MainLoopImpl()
+MainLoop::~MainLoop()
 {
     while( ! _selectables.empty() )
     {
@@ -247,7 +115,7 @@ MainLoopImpl::~MainLoopImpl()
 }
 
 
-void MainLoopImpl::init()
+void MainLoop::init()
 {
     [PtGuiApplication sharedApplication];
     [NSApp initPool];
@@ -285,13 +153,56 @@ void MainLoopImpl::init()
 }
 
 
-void MainLoopImpl::run()
+void MainLoop::onAttachSelectable(System::Selectable& s)
+{
+    _selectables.insert(s);
+}
+
+
+void MainLoop::onDetachSelectable(System::Selectable& s)
+{
+    System::SelectableList::unlink(s);
+}
+
+
+void MainLoop::onIdle(System::Selectable& s)
+{ 
+    System::MutexLock lock(_mutex);
+
+    std::vector<System::Selectable*>::iterator it = _avail.begin();
+    while( it != _avail.end() )
+    {
+        if(*it == &s)
+            it = _avail.erase(it);
+        else
+            ++it;
+    }
+}
+
+
+void MainLoop::onReady(System::Selectable& s)
+{  
+    System::MutexLock lock(_mutex);
+    _avail.push_back(&s);
+
+    CFRunLoopSourceSignal(_wakeSource);
+}
+
+
+void MainLoop::onRun()
 {
     [NSApp run];
 }
 
 
-void MainLoopImpl::wake()
+void MainLoop::onExit()
+{
+    _eventQueue.exit();
+    wake();
+}
+
+
+void MainLoop::onWake()
 {
     CFRunLoopSourceSignal(_wakeSource);
     CFRunLoopRef rl = [[NSRunLoop currentRunLoop] getCFRunLoop];
@@ -299,27 +210,20 @@ void MainLoopImpl::wake()
 }
 
 
-void MainLoopImpl::exit()
+void MainLoop::onCommitEvent(const Pt::Event& ev)
 {
-    _eventQueue.exit();
+    _eventQueue.pushEvent( ev ); 
     wake();
 }
 
 
-void MainLoopImpl::commitEvent(const Pt::Event& event)
+void MainLoop::onQueueEvent(const Pt::Event& ev)
 {
-    _eventQueue.pushEvent(event); 
-    wake();
+    _eventQueue.pushEvent( ev );
 }
 
 
-void MainLoopImpl::queueEvent(const Pt::Event& event)
-{
-    _eventQueue.pushEvent(event);
-}
-
-
-bool MainLoopImpl::processEvents()
+void MainLoop::onProcessEvents()
 { 
     NSEvent* event = nil;
 
@@ -356,7 +260,7 @@ bool MainLoopImpl::processEvents()
     //
     // process Pt events
     //
-    bool isActive = _eventQueue.processEvents(*_event);
+    bool isActive = _eventQueue.processEvents( this->event() );
 
     //
     // handle loop exit
@@ -379,78 +283,24 @@ bool MainLoopImpl::processEvents()
 
         [NSApp postEvent: event atStart: false];
     }
-
-
-    return _eventQueue.processEvents(*_event);
 }
 
 
-void MainLoopImpl::attach(System::Timer& timer)
+void MainLoop::onAttachTimer(System::Timer& timer)
 { 
     _timerQueue.addTimer(timer); 
     this->processTimers();
 }
 
 
-void MainLoopImpl::detach(System::Timer& timer)
+void MainLoop::onDetachTimer(System::Timer& timer)
 { 
     _timerQueue.removeTimer(timer);
     this->processTimers();
 }
 
 
-void MainLoopImpl::processTimers()
-{ 
-    CFTimeInterval nextTimer = _timerQueue.processTimers();
-
-    if(nextTimer == System::EventLoop::WaitInfinite)
-    {
-        nextTimer = std::numeric_limits<CFTimeInterval>::max();
-    }
-
-    CFTimeInterval interval = nextTimer / 1000.0;
-    CFAbsoluteTime fireDate = CFAbsoluteTimeGetCurrent() + interval;
-    CFRunLoopTimerSetNextFireDate (_masterTimer, fireDate);
-}
-
-
-void MainLoopImpl::attach(System::Selectable& s)
-{
-    _selectables.insert(s);
-}
-
-
-void MainLoopImpl::detach(System::Selectable& s)
-{
-    System::SelectableList::unlink(s);
-}
-
-
-void MainLoopImpl::idle(System::Selectable& s)
-{ 
-    System::MutexLock lock(_mutex);
-
-    std::vector<System::Selectable*>::iterator it = _avail.begin();
-    while( it != _avail.end() )
-    {
-        if(*it == &s)
-            it = _avail.erase(it);
-        else
-            ++it;
-    }
-}
-
-
-void MainLoopImpl::avail(System::Selectable& s)
-{  
-    System::MutexLock lock(_mutex);
-    _avail.push_back(&s);
-
-    CFRunLoopSourceSignal(_wakeSource);
-}
-
-
-void MainLoopImpl::cancel(System::IOHandle& h)
+void MainLoop::cancel(System::IOHandle& h)
 {
     size_t id = h.id;
 
@@ -477,7 +327,7 @@ void MainLoopImpl::cancel(System::IOHandle& h)
 }
 
 
-MainLoopImpl::IOEntry& MainLoopImpl::enableIOHandle(System::IOHandle* h)
+MainLoop::IOEntry& MainLoop::enableIOHandle(System::IOHandle* h)
 {
     if(h->id == System::IOHandle::InvalidId)
     {
@@ -508,7 +358,7 @@ MainLoopImpl::IOEntry& MainLoopImpl::enableIOHandle(System::IOHandle* h)
 }
 
 
-void MainLoopImpl::beginRead(System::IOHandle* h)
+void MainLoop::beginRead(System::IOHandle* h)
 {  
     CFFileDescriptorRef fdref = enableIOHandle(h).fd;
     CFFileDescriptorEnableCallBacks(fdref, kCFFileDescriptorReadCallBack);
@@ -517,7 +367,7 @@ void MainLoopImpl::beginRead(System::IOHandle* h)
 }
 
 
-void MainLoopImpl::endRead(System::IOHandle* h)
+void MainLoop::endRead(System::IOHandle* h)
 {
     if(h->events & System::IOHandle::Read)
     {
@@ -530,7 +380,7 @@ void MainLoopImpl::endRead(System::IOHandle* h)
 }
 
 
-void MainLoopImpl::beginWrite(System::IOHandle* h)
+void MainLoop::beginWrite(System::IOHandle* h)
 {  
     CFFileDescriptorRef fdref = enableIOHandle(h).fd;
     CFFileDescriptorEnableCallBacks(fdref, kCFFileDescriptorWriteCallBack);
@@ -539,7 +389,7 @@ void MainLoopImpl::beginWrite(System::IOHandle* h)
 }
 
 
-void MainLoopImpl::endWrite(System::IOHandle* h)
+void MainLoop::endWrite(System::IOHandle* h)
 {
     if(h->events & System::IOHandle::Write)
     {
@@ -552,110 +402,38 @@ void MainLoopImpl::endWrite(System::IOHandle* h)
 }
 
 
-bool MainLoopImpl::isReadable(System::IOHandle* h)
+bool MainLoop::isReadable(System::IOHandle* h)
 {  
     bool isReady = h->ready == System::IOHandle::Read;
     return isReady;
 }
 
 
-bool MainLoopImpl::isWritable(System::IOHandle* h)
+bool MainLoop::isWritable(System::IOHandle* h)
 {
     bool isReady = h->ready == System::IOHandle::Write;
     return isReady;
 }
 
 
-bool MainLoopImpl::isError(System::IOHandle* h)
+bool MainLoop::isError(System::IOHandle* h)
 {
     return false;
 }
 
-//
-// MainLoop
-//
 
-MainLoop::MainLoop()
-: System::EventLoop()
-, _impl( event() )
-{
-}
+void MainLoop::processTimers()
+{ 
+    CFTimeInterval nextTimer = _timerQueue.processTimers();
 
+    if(nextTimer == System::EventLoop::WaitInfinite)
+    {
+        nextTimer = std::numeric_limits<CFTimeInterval>::max();
+    }
 
-MainLoop::~MainLoop()
-{
-}
-
-
-void MainLoop::onAttachSelectable(System::Selectable& s)
-{
-    _impl.attach(s);
-}
-
-
-void MainLoop::onDetachSelectable(System::Selectable& s)
-{
-    _impl.detach(s);
-}
-
-
-void MainLoop::onIdle(System::Selectable& s)
-{
-    _impl.idle(s);
-}
-
-
-void MainLoop::onReady(System::Selectable& s)
-{
-    _impl.avail(s);
-}
-
-
-void MainLoop::onRun()
-{
-    _impl.run();
-}
-
-
-void MainLoop::onExit()
-{
-    _impl.exit();
-}
-
-
-void MainLoop::onCommitEvent(const Pt::Event& ev)
-{
-    _impl.commitEvent(ev);
-}
-
-
-void MainLoop::onQueueEvent(const Pt::Event& ev)
-{
-    _impl.queueEvent(ev);
-}
-
-
-void MainLoop::onProcessEvents()
-{
-    _impl.processEvents();
-}
-
-
-void MainLoop::onWake()
-{
-    _impl.wake();
-}
-
-
-void MainLoop::onAttachTimer(System::Timer& timer)
-{
-    _impl.attach(timer);
-}
-
-
-void MainLoop::onDetachTimer(System::Timer& timer)
-{
-    _impl.detach(timer);
+    CFTimeInterval interval = nextTimer / 1000.0;
+    CFAbsoluteTime fireDate = CFAbsoluteTimeGetCurrent() + interval;
+    CFRunLoopTimerSetNextFireDate (_masterTimer, fireDate);
 }
 
 } // namespace Gui

@@ -54,7 +54,7 @@ namespace Pt {
 
 namespace System {
 
-class MainLoopImpl : public EventLoopImpl
+class MainLoopImpl
 {
     public:
         MainLoopImpl(Signal<const Event&>& eventSignal);
@@ -63,29 +63,8 @@ class MainLoopImpl : public EventLoopImpl
 
         ~MainLoopImpl();
 
-        void cancel(IOHandle& h)
-        { _selector.cancel(h); }
-
-        void beginRead(IOHandle* h)
-        { _selector.beginRead(h); }
-
-        void endRead(IOHandle* h)
-        { _selector.endRead(h); }
-
-        void beginWrite(IOHandle* h)
-        { _selector.beginWrite(h); }
-
-        void endWrite(IOHandle* h)
-        { _selector.endWrite(h); }
-
-        bool isReadable(IOHandle* h)
-        { return _selector.isReadable(h); }
-
-        bool isWritable(IOHandle* h)
-        { return _selector.isWritable(h); }
-
-        bool isError(IOHandle* h)
-        { return _selector.isError(h); }
+        EventLoopImpl& selector()
+        { return _selector; }
 
         void attach(Selectable& s)
         { _selector.attach(s); }

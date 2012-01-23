@@ -57,7 +57,7 @@ MainLoop::~MainLoop()
 
 EventLoopImpl& MainLoop::impl()
 {
-    return *_impl;
+    return _impl->selector();
 }
 
 

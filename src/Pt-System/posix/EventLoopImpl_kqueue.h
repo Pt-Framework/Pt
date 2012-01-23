@@ -45,7 +45,7 @@ namespace Pt {
 
 namespace System {
 
-class Selector
+class Selector : public EventLoopImpl
 {
     public:
         Selector()

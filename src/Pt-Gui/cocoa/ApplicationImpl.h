@@ -34,7 +34,9 @@ namespace Pt {
 
 namespace Gui {
 
-class Selector
+class MainLoop : public Pt::System::EventLoop
+               , public System::EventLoopImpl
+               , public Pt::Singleton<MainLoop>
 {
     struct IOEntry
     {
@@ -72,102 +74,41 @@ class Selector
     };
 
     public:
-        Selector();
+        MainLoop();
 
-        virtual ~Selector();
+        ~MainLoop();
 
-        virtual void cancel(System::IOHandle& h);
-
-        virtual void beginRead(System::IOHandle* h);
-
-        virtual void endRead(System::IOHandle* h);
-
-        virtual void beginWrite(System::IOHandle* h);
-
-        virtual void endWrite(System::IOHandle* h);
-
-        virtual bool isReadable(System::IOHandle* h);
-
-        virtual bool isWritable(System::IOHandle* h);
-
-        virtual bool isError(System::IOHandle* h);
-
-        IOEntry& enableIOHandle(System::IOHandle* h);
-
-    private:
-        std::vector<IOEntry> _iotable;
-};
-
-class MainLoopImpl : public System::EventLoopImpl
-{
-    struct IOEntry
-    {
-        IOEntry()
-        : iohandle(0)
-        , flags(0)
-        { }
-
-        IOEntry(System::IOHandle& io, CFRunLoopSourceRef s, CFFileDescriptorRef fd)
-        : iohandle(&io)
-        , source(s)
-        , fd(fd)
-        , flags(0)
-        { }
-
-        IOEntry(const IOEntry& e)
-        : iohandle(e.iohandle)
-        , source(e.source)
-        , fd(e.fd)
-        , flags(0)
-        { }
-
-        IOEntry& operator=(const IOEntry& e)
-        {
-            iohandle = e.iohandle;
-            source = e.source;
-            fd = e.fd;
-            return *this;
-        }
-
-        System::IOHandle* iohandle;
-        CFRunLoopSourceRef source;
-        CFFileDescriptorRef fd;
-        CFOptionFlags flags;
-    };
-
-    public:
-        MainLoopImpl(Signal<const Pt::Event&>& eventSignal);
-
-        MainLoopImpl(Signal<const Pt::Event&>& eventSignal, Allocator& a);
-
-        virtual ~MainLoopImpl();
-
-        void run();
-
-        void exit();
-
-        void wake();
-
-        void commitEvent(const Pt::Event& ev);
-
-        void queueEvent(const Pt::Event& ev);
-
-        bool processEvents();
+        System::EventLoopImpl& impl()
+        { return *this; }
 
         void processTimers();
 
-        void attach(System::Timer& timer);
+    protected:
+        virtual void onAttachSelectable(System::Selectable&);
 
-        void detach(System::Timer& timer);
+        virtual void onDetachSelectable(System::Selectable&);
 
-        void attach(System::Selectable& s);
+        virtual void onIdle(System::Selectable& s);
 
-        void detach(System::Selectable& s);
+        virtual void onReady(System::Selectable& s);
 
-        void idle(System::Selectable& s);
+        virtual void onRun();
 
-        void avail(System::Selectable& s);
+        virtual void onExit();
 
+        virtual void onCommitEvent(const Pt::Event& event);
+
+        virtual void onQueueEvent(const Pt::Event& event);
+
+        virtual void onProcessEvents();
+
+        virtual void onWake();
+
+        virtual void onAttachTimer(System::Timer& timer);
+
+        virtual void onDetachTimer(System::Timer& timer);
+
+    protected:
         virtual void cancel(System::IOHandle& h);
 
         virtual void beginRead(System::IOHandle* h);
@@ -196,50 +137,8 @@ class MainLoopImpl : public System::EventLoopImpl
         std::vector<System::Selectable*> _avail;
         System::TimerQueue _timerQueue;
         System::EventQueue _eventQueue;
-        Signal<const Pt::Event&>* _event;
         CFRunLoopSourceRef _wakeSource;
         CFRunLoopTimerRef _masterTimer;
-};
-
-
-class MainLoop : public Pt::System::EventLoop
-               , public Pt::Singleton<MainLoop>
-{
-    public:
-        MainLoop();
-
-        ~MainLoop();
-
-        System::EventLoopImpl& impl()
-        { return _impl; }
-
-    protected:
-        virtual void onAttachSelectable(System::Selectable&);
-
-        virtual void onDetachSelectable(System::Selectable&);
-
-        virtual void onIdle(System::Selectable& s);
-
-        virtual void onReady(System::Selectable& s);
-
-        virtual void onRun();
-
-        virtual void onExit();
-
-        virtual void onCommitEvent(const Pt::Event& event);
-
-        virtual void onQueueEvent(const Pt::Event& event);
-
-        virtual void onProcessEvents();
-
-        virtual void onWake();
-
-        virtual void onAttachTimer(System::Timer& timer);
-
-        virtual void onDetachTimer(System::Timer& timer);
-
-    private:
-        MainLoopImpl _impl;
 };
 
 } // namespace Gui
