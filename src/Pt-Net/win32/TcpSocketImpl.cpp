@@ -134,9 +134,43 @@ void TcpSocketImpl::accept(const TcpServer& server, unsigned flags)
 
 void TcpSocketImpl::connect(const AddrInfo& addrinfo)
 {
-    throw std::logic_error("TcpSocketImpl::connect not implemented");
-    //this->beginConnect(addrinfo);
-    //this->endConnect();
+    log_debug("connect");
+    assert( ! _isConnected );
+
+    _addrInfo = addrinfo;
+    _addrInfoPtr = _addrInfo.impl()->begin();
+
+    for( ; _addrInfoPtr != _addrInfo.impl()->end(); ++_addrInfoPtr)
+    {
+        _fd = WSASocket(_addrInfoPtr->ai_family, SOCK_STREAM, 0, NULL, 0, 0);
+
+        if (_fd < 0)
+            continue;
+
+       //Set socket to bloking mode
+       u_long argp = 0;
+       ::ioctlsocket(_fd, FIONBIO, &argp);
+        
+        std::memmove(&_peeraddr, _addrInfoPtr->ai_addr, _addrInfoPtr->ai_addrlen);
+
+        log_debug("created socket " << _fd);
+
+        if( ::connect(_fd, _addrInfoPtr->ai_addr, _addrInfoPtr->ai_addrlen) == 0 )
+        {
+            _isConnected = true;
+            //Set socket to non-blocking mode
+            argp = 1;
+            ::ioctlsocket(_fd, FIONBIO, &argp);
+            break;
+        }
+        close();
+    }
+
+    if(_addrInfoPtr == _addrInfo.impl()->end())
+    {
+        log_debug("no more address informations");
+        throw System::IOError("connect failed");
+    }
 }
 
 
@@ -711,7 +745,28 @@ size_t TcpSocketImpl::endWrite(System::EventLoop& loop, const char* buffer, size
 
 size_t TcpSocketImpl::write(const char* buffer, size_t count)
 {
-    return 0;
+    log_debug(_fd << " wndWrite");
+
+    _eventFlags &= ~FD_WRITE;
+    _sendBuffer.buf = const_cast<char*>(buffer);
+    _sendBuffer.len = count;
+
+    //Set socket to blocking mode
+    u_long argp = 0;
+    ::ioctlsocket(_fd, FIONBIO, &argp);
+
+    DWORD numberOfBytesSent = 0;
+
+    int rc = WSASend(_fd, &_sendBuffer, 1, &numberOfBytesSent, 0, NULL, NULL);
+
+    if(rc == SOCKET_ERROR)
+        throw System::SystemError( PT_ERROR_MSG("beginWrite failed") );
+
+    //Set socket to non-blocking mode
+    argp = 1;
+    ::ioctlsocket(_fd, FIONBIO, &argp);
+
+    return  numberOfBytesSent;
 }
 
 
