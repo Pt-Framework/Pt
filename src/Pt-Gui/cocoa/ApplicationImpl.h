@@ -35,7 +35,7 @@ namespace Pt {
 namespace Gui {
 
 class MainLoop : public Pt::System::EventLoop
-               , public System::EventLoopImpl
+               , public System::Selector
                , public Pt::Singleton<MainLoop>
 {
     struct IOEntry
@@ -78,7 +78,7 @@ class MainLoop : public Pt::System::EventLoop
 
         ~MainLoop();
 
-        System::EventLoopImpl& impl()
+        System::Selector& impl()
         { return *this; }
 
         void processTimers();
