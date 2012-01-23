@@ -30,8 +30,8 @@
 #define PT_MEMORYPOOL_H
 
 #include <Pt/MemoryBlock.h>
-
 #include <vector>
+#include <cassert>
 
 namespace Pt{
 
@@ -181,6 +181,66 @@ private:
 
     /// Pointer to the only empty MemoryBlock if there is one, else NULL.
     MemoryBlock* _emptyMemoryBlock;
+};
+
+
+class MemoryPool2
+{
+    struct BlockInfo
+    {
+        /// Index of first empty block.
+        uint8_t firstAvail;
+
+        /// Count of empty slots
+        uint8_t _availCount;
+    };
+
+    public:
+        /// Create a MemoryPool which manages blocks of 'blockSize' size.
+        MemoryPool2()
+        {}
+    
+        /// Destroy the MemoryPool and release all its MemoryBlocks.
+        ~MemoryPool2()
+        {}
+    
+        void init(std::size_t blockSize, std::size_t pageSize)
+        {
+            assert(blockSize > 0);
+            assert(pageSize >= blockSize);
+
+            // make room for offset to begin
+            size_t mod = _blockSize % sizeof(void*);
+             _blockSize += sizeof(void*) - (_blockSize % sizeof(void*));
+
+            std::size_t numBlocks = pageSize / blockSize;
+            if (numBlocks > 255)
+            {
+                numBlocks = 255;
+            }
+            else if(numBlocks < 8)
+            {
+                numBlocks = 8;
+            }
+        
+            _numBlocks = static_cast<Pt::uint8_t>(numBlocks);
+            assert(_numBlocks == numBlocks);
+        }
+    
+        void* allocate()
+        { return 0; }
+    
+        bool deallocate(void* p)
+        { return false; }
+
+    private:
+        /// element size in bytes.
+        std::size_t _blockSize;
+    
+        /// Number of elements managed by each block.
+        Pt::uint8_t _numBlocks;
+
+        std::vector<BlockInfo*> _blocks;
 };
 
 }
