@@ -5,7 +5,6 @@ SubDirC++Flags [ FDefines PT_API_EXPORT ] ;
 
 SharedLibrary Pt : Atomicity.cpp
                    Char.cpp
-                   Chunk.cpp
                    Connection.cpp
                    Connectable.cpp
                    Convert.cpp
@@ -13,10 +12,10 @@ SharedLibrary Pt : Atomicity.cpp
                    Date.cpp
                    DateTime.cpp
                    Deserializer.cpp
-                   Page.cpp
+                   MemoryBlock.cpp
+                   MemoryPool.cpp
                    PageAllocator.cpp
                    PoolAllocator.cpp
-                   PoolFactory.cpp
                    Regex.cpp
                    regexp.cpp
                    SerializationError.cpp

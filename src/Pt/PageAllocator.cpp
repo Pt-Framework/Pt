@@ -27,43 +27,68 @@
  */		
 
 #include <Pt/PageAllocator.h>
-#include "Page.h"
 
 namespace Pt {
 
-	PageAllocator::PageAllocator( std::size_t size )
-	: _listOfVariableChunk(0)
-	{
-		expandStorage(size);
-	}
-	
-	PageAllocator::~PageAllocator()
-	{
-		Page* memchunk = _listOfVariableChunk;
-		while( memchunk )
-		{
-			_listOfVariableChunk = memchunk->nextVariableChunk();
-			delete memchunk;
-			memchunk = _listOfVariableChunk;
-		}
-	}
-	
-	void* PageAllocator::allocate( std::size_t size )
-	{
-		std::size_t space = _listOfVariableChunk->spaceAvailable();
-		if( size > space )
-			expandStorage( size );
+PageAllocator::Page::Page(Page* nextChunk, std::size_t chunkSize)
+: _nextChunk(0)
+, _mem(0)
+, _chunkSize(chunkSize > DEFAULT_VARIABLE_CHUNK_SIZE ? chunkSize : DEFAULT_VARIABLE_CHUNK_SIZE)
+, _bytesAlreadyAllocated(0)
+{
+    _nextChunk = nextChunk;
+    _mem = new char[ _chunkSize ];
+}
 
-		return _listOfVariableChunk->allocate(size);
-	}
-	
-	void PageAllocator::deallocate( void* p, std::size_t size )
-	{
-	}
 
-	void PageAllocator::expandStorage(std::size_t size)
-	{
-		_listOfVariableChunk = new Page(_listOfVariableChunk, size);
-	}
+PageAllocator::Page::~Page()
+{
+    delete [] _mem;
+}
+
+
+void* PageAllocator::Page::allocate(std::size_t reqSize)
+{
+    void* addr = _mem  + _bytesAlreadyAllocated;
+    _bytesAlreadyAllocated += reqSize;
+
+    return addr;
+}
+
+
+PageAllocator::PageAllocator( std::size_t size )
+: _listOfVariableChunk(0)
+{
+    expandStorage(size);
+}
+
+PageAllocator::~PageAllocator()
+{
+    Page* memchunk = _listOfVariableChunk;
+    while( memchunk )
+    {
+        _listOfVariableChunk = memchunk->nextVariableChunk();
+        delete memchunk;
+        memchunk = _listOfVariableChunk;
+    }
+}
+
+void* PageAllocator::allocate( std::size_t size )
+{
+    std::size_t space = _listOfVariableChunk->spaceAvailable();
+    if( size > space )
+        expandStorage( size );
+
+    return _listOfVariableChunk->allocate(size);
+}
+
+void PageAllocator::deallocate( void* p, std::size_t size )
+{
+}
+
+void PageAllocator::expandStorage(std::size_t size)
+{
+    _listOfVariableChunk = new Page(_listOfVariableChunk, size);
+}
 
 }

@@ -31,22 +31,49 @@
 
 #include <Pt/Api.h>
 #include <Pt/Allocator.h>
+#include <cstddef>
 
-namespace Pt{
-
-class Page;
+namespace Pt {
 
 class PT_API PageAllocator : public Pt::Allocator
 {
-	public:
-		PageAllocator( std::size_t size = 4096 );
-		~PageAllocator();
-		void* allocate( std::size_t size );
-		void deallocate( void* p, std::size_t size );
+    public:
+        class Page
+        {
+            public:
+                Page(Page* nextChunk, std::size_t chunkSize);
+                
+                ~Page();
+        
+                void* allocate(std::size_t reqSize);
+        
+                Page *nextVariableChunk()
+                { return _nextChunk; }
+        
+                std::size_t spaceAvailable()
+                { return _chunkSize - _bytesAlreadyAllocated; }
+        
+                enum { DEFAULT_VARIABLE_CHUNK_SIZE = 4096 };
+        
+            private:
+                Page* _nextChunk;
+                char* _mem;
+                std::size_t _chunkSize;
+                std::size_t _bytesAlreadyAllocated;
+        };
 
-	private:
-		Page* _listOfVariableChunk;
-		void expandStorage( std::size_t size );
+    public:
+        PageAllocator( std::size_t size = 4096 );
+
+        ~PageAllocator();
+
+        void* allocate( std::size_t size );
+
+        void deallocate( void* p, std::size_t size );
+
+    private:
+        Page* _listOfVariableChunk;
+        void expandStorage( std::size_t size );
 };
 
 }

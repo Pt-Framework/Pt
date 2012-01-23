@@ -26,16 +26,16 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <Pt/PoolAllocator.h>
-#include "PoolFactory.h"
-#include "Chunk.h"
+#include "Pt/PoolAllocator.h"
+#include "Pt/MemoryPool.h"
+#include "Pt/MemoryBlock.h"
 
 #include <cassert>
 
 namespace {
 
 /**
- * @brief Calculates index into array where a PoolFactory of numBytes is located.
+ * @brief Calculates index into array where a MemoryPool of numBytes is located.
  */
  inline std::size_t getOffset(std::size_t numBytes, std::size_t alignment)
  {
@@ -48,14 +48,14 @@ namespace {
 namespace Pt {
 
 PoolAllocator::PoolAllocator(std::size_t pageSize, std::size_t maxObjectSize,
-                                     std::size_t objectAlignSize):
+                             std::size_t objectAlignSize):
 _pool(0),
 _maxObjectSize(maxObjectSize),
 _objectAlignSize(objectAlignSize)
 {
     assert( 0 != objectAlignSize );
     const std::size_t allocCount = getOffset( maxObjectSize, objectAlignSize );
-    _pool = new PoolFactory[allocCount];
+    _pool = new MemoryPool[allocCount];
     for (std::size_t i = 0; i < allocCount; ++i)
     {
         _pool[ i ].init((i+1)*objectAlignSize, pageSize);
@@ -84,11 +84,11 @@ void* PoolAllocator::allocate(std::size_t size)
     assert(index < allocCount);
 #endif
 
-    PoolFactory& allocator = _pool[ index ];
-    assert(allocator.blockSize() >= size);
-    assert(allocator.blockSize() < size + getAlignment());
+    MemoryPool& pool = _pool[ index ];
+    assert(pool.blockSize() >= size);
+    assert(pool.blockSize() < size + getAlignment());
 
-    return allocator.allocate();
+    return pool.allocate();
 }
 
 void PoolAllocator::deallocate(void* p, std::size_t size)
@@ -113,7 +113,7 @@ void PoolAllocator::deallocate(void* p, std::size_t size)
     assert(index < allocCount);
 #endif
 
-    PoolFactory& allocator = _pool[ index ];
+    MemoryPool& allocator = _pool[ index ];
     assert(allocator.blockSize() >= size);
     assert(allocator.blockSize()  < size + getAlignment());
     const bool found = allocator.deallocate(p);
@@ -130,7 +130,7 @@ bool PoolAllocator::trim( void )
 
     for ( ; i < allocCount; ++i )
     {
-        if (_pool[ i ].trimEmptyChunk())
+        if (_pool[ i ].trimEmptyMemoryBlock())
         {
             found = true;
         }
@@ -138,7 +138,7 @@ bool PoolAllocator::trim( void )
     
     for ( i = 0; i < allocCount; ++i )
     {
-        if (_pool[ i ].trimChunkList())
+        if (_pool[ i ].trimMemoryBlockList())
         {
             found = true;
         }
@@ -178,76 +178,6 @@ bool PoolAllocator::isCorrupt() const
     }
 #endif	
     return false;
-}
-
-PoolAllocator::ChunkProxy::ChunkProxy():
-_chunk(new Chunk())
-{
-}
-
-PoolAllocator::ChunkProxy::~ChunkProxy()
-{
-}
-
-bool PoolAllocator::ChunkProxy::operator== (const ChunkProxy& rhs)
-{
-	return *_chunk == *rhs._chunk;
-}
-
-void PoolAllocator::ChunkProxy::init(std::size_t blockSize, Pt::uint8_t blocks)
-{ 
-	_chunk->init(blockSize, blocks); 
-}
-
-void* PoolAllocator::ChunkProxy::allocate( std::size_t blockSize )
-{ 
-	return _chunk->allocate(blockSize); 
-}
-
-void PoolAllocator::ChunkProxy::deallocate(void* p, std::size_t blockSize)
-{ 
-	_chunk->deallocate(p, blockSize); 
-}
-
-void PoolAllocator::ChunkProxy::reset( std::size_t blockSize, Pt::uint8_t blocks )
-{ 
-	_chunk->reset(blockSize, blocks); 
-}
-
-void PoolAllocator::ChunkProxy::release()
-{ 
-	_chunk->release(); 
-}
-	
-#ifndef NDEBUG
-		
-bool PoolAllocator::ChunkProxy::isCorrupt( Pt::uint8_t numBlocks, std::size_t blockSize, bool checkIndexes ) const
-{ 
-	return _chunk->isCorrupt(numBlocks, blockSize, checkIndexes); 
-}
-
-bool PoolAllocator::ChunkProxy::isBlockAvailable(void* p, Pt::uint8_t numBlocks, std::size_t blockSize) const
-{ 
-	return _chunk->isBlockAvailable(p, numBlocks, blockSize); 
-}
-
-#endif
-
-bool PoolAllocator::ChunkProxy::hasBlock( void* p, std::size_t chunkLength ) const
-{ return _chunk->hasBlock(p, chunkLength); }
-
-bool PoolAllocator::ChunkProxy::hasAvailable(Pt::uint8_t numBlocks ) const
-{ return _chunk->hasAvailable(numBlocks); }
-
-bool PoolAllocator::ChunkProxy::isFilled() const
-{ return _chunk->isFilled(); }
-
-const Pt::uint8_t PoolAllocator::ChunkProxy::blocksAvailable() const
-{ return _chunk->blocksAvailable(); }
-
-const Pt::Chunk& PoolAllocator::ChunkProxy::chunk()
-{
-	return *_chunk;
 }
 
 }
