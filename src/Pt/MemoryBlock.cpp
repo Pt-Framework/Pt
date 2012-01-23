@@ -80,7 +80,6 @@ void MemoryBlock::reset(std::size_t blockSize, Pt::uint8_t blocks)
 
 void MemoryBlock::release()
 {
-	//std::cerr << "." << std::flush;
     assert( 0 != _pData );
     ::operator delete (_pData);
 
