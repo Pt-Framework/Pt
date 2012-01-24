@@ -138,20 +138,20 @@ void IODeviceImpl::cancel(EventLoop& loop)
     // if this is attached to a loop
 
     if( this->isOpen() )
-        loop.impl().cancel(_ioh);
+        loop.selector().cancel(_ioh);
 }
 
 
 size_t IODeviceImpl::beginRead(EventLoop& loop, char* buffer, size_t n, bool&)
 {
-    loop.impl().beginRead( &_ioh );
+    loop.selector().beginRead( &_ioh );
     return 0;
 }
 
 
 size_t IODeviceImpl::endRead(EventLoop& loop, char* buffer, size_t n, bool& eof)
 {
-    loop.impl().endRead( &_ioh );
+    loop.selector().endRead( &_ioh );
 
     if (_errorPending)
     {
@@ -209,14 +209,14 @@ size_t IODeviceImpl::beginWrite(EventLoop& loop, const char* buffer, size_t n)
     if (ret == 0 || errno == ECONNRESET || errno == EPIPE)
         throw System::IOError("lost connection to peer");
 
-    loop.impl().beginWrite( &_ioh );
+    loop.selector().beginWrite( &_ioh );
     return 0;
 }
 
 
 size_t IODeviceImpl::endWrite(EventLoop& loop, const char* buffer, size_t n)
 {
-    loop.impl().endWrite( &_ioh );
+    loop.selector().endWrite( &_ioh );
 
     if (_errorPending)
     {
@@ -298,7 +298,7 @@ bool IODeviceImpl::runRead(EventLoop& loop)
     if( ! this->isOpen() )
         return false;
 
-    Selector& selector = loop.impl();
+    Selector& selector = loop.selector();
 
     if ( selector.isError(&_ioh) )
     {
@@ -315,7 +315,7 @@ bool IODeviceImpl::runWrite(EventLoop& loop)
     if( ! this->isOpen() )
         return false;
 
-    Selector& selector = loop.impl();
+    Selector& selector = loop.selector();
 
     if ( selector.isError(&_ioh) )
     {

@@ -191,7 +191,7 @@ void TcpServerImpl::beginAccept(System::EventLoop& loop)
     if( this->fd() < 0 )
         return;
 
-    loop.impl().beginRead( &_ioh );
+    loop.selector().beginRead( &_ioh );
 }
 
 
@@ -220,7 +220,7 @@ void TcpServerImpl::cancel(System::EventLoop& loop)
     if( this->fd() < 0 )
         return;
 
-    loop.impl().cancel(_ioh);
+    loop.selector().cancel(_ioh);
 }
 
 
@@ -229,7 +229,7 @@ bool TcpServerImpl::run()
     if(this->fd() < 0)
         return false;
 
-    System::Selector& selector = _server.parent()->impl();
+    System::Selector& selector = _server.parent()->selector();
 
     if( selector.isReadable(&_ioh) )
     {

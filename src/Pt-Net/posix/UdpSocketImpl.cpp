@@ -363,7 +363,7 @@ size_t UdpSocketImpl::beginWrite(System::EventLoop& loop, const char* buffer, si
     if (ret == 0 || errno == ECONNRESET || errno == EPIPE)
         throw System::IOError("lost connection to peer");
 
-    loop.impl().beginWrite( &_ioh );
+    loop.selector().beginWrite( &_ioh );
 
     return 0;
 }

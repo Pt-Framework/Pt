@@ -78,7 +78,7 @@ class MainLoop : public Pt::System::EventLoop
 
         ~MainLoop();
 
-        System::Selector& impl()
+        System::Selector& selector()
         { return *this; }
 
         void processTimers();

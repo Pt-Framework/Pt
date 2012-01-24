@@ -204,7 +204,7 @@ bool TcpSocketImpl::beginConnect(const AddrInfo& addrInfo, System::EventLoop& lo
         if( ! _isConnected )
         {
             log_trace("IODeviceImpl::beginConnect on handle");
-            loop.impl().beginWrite( &_ioh );
+            loop.selector().beginWrite( &_ioh );
         }
         else
         {
@@ -313,7 +313,7 @@ void TcpSocketImpl::endConnect(System::EventLoop& loop)
 
     //if( ! _socket.wbuf() )
     //{
-        loop.impl().endWrite( &_ioh );
+        loop.selector().endWrite( &_ioh );
     //}
 
     checkPendingError();
@@ -373,7 +373,7 @@ bool TcpSocketImpl::runConnect(System::EventLoop& loop)
     if(_isConnected)
         return false;
 
-    System::Selector& selector = loop.impl();
+    System::Selector& selector = loop.selector();
 
     if( selector.isError(&_ioh) )
     {
