@@ -28,6 +28,7 @@
 #undef PT_API_EXPORT
 
 #include <Pt/MemoryBlock.h>
+#include <Pt/MemoryPool.h>
 #include <Pt/PoolAllocator.h>
 #include <Pt/PageAllocator.h>
 #include <Pt/Types.h>
@@ -40,24 +41,27 @@
 
 class AllocatorTest : public Pt::Unit::TestSuite
 {
-public:
-    AllocatorTest() : Pt::Unit::TestSuite("AllocatorTest")
-    {
-        Pt::Unit::TestSuite::registerMethod( "Test chunk complex test for allocate and deallocate method", *this, &AllocatorTest::complexAllocateDeallocateTest );
-        Pt::Unit::TestSuite::registerMethod( "Test chunk allocate deallocate method", *this, &AllocatorTest::allocateDeallocate );
-		Pt::Unit::TestSuite::registerMethod( "Test the trim method", *this, &AllocatorTest::trimTest );
-		Pt::Unit::TestSuite::registerMethod( "benchMarkPrimitiveTypes", *this, &AllocatorTest::benchMarkPrimitiveTypes );
+    public:
+        AllocatorTest() : Pt::Unit::TestSuite("AllocatorTest")
+        {
+            Pt::Unit::TestSuite::registerMethod( "Test chunk complex test for allocate and deallocate method", *this, &AllocatorTest::complexAllocateDeallocateTest );
+            Pt::Unit::TestSuite::registerMethod( "Test chunk allocate deallocate method", *this, &AllocatorTest::allocateDeallocate );
+            Pt::Unit::TestSuite::registerMethod( "Test the trim method", *this, &AllocatorTest::trimTest );
+            Pt::Unit::TestSuite::registerMethod( "benchMarkPrimitiveTypes", *this, &AllocatorTest::benchMarkPrimitiveTypes );
+    
+            Pt::Unit::TestSuite::registerMethod( "MemPool", *this, &AllocatorTest::MemPool );
+    
+            // TODO this test fails currently:
+            //Pt::Unit::TestSuite::registerMethod( "poolFactory", *this, &AllocatorTest::poolFactoryTest );
+        }
 
-        // TODO this test fails currently:
-		//Pt::Unit::TestSuite::registerMethod( "poolFactory", *this, &AllocatorTest::poolFactoryTest );
-    }
-
-protected:
-	void complexAllocateDeallocateTest();
-	void allocateDeallocate();
-	void trimTest();
-	void benchMarkPrimitiveTypes();
-	//void poolFactoryTest();
+    protected:
+        void complexAllocateDeallocateTest();
+        void allocateDeallocate();
+        void trimTest();
+        void benchMarkPrimitiveTypes();
+        void MemPool();
+        //void poolFactoryTest();
 
 };
 
@@ -198,6 +202,34 @@ void AllocatorTest::allocateDeallocate()
         PT_UNIT_ASSERT(chunk._blocksAvailable == 155 + (i+1));
     }
 }
+
+void AllocatorTest::MemPool()
+{
+    Pt::MemPool pool( sizeof(Pt::uint32_t) );
+
+    Pt::uint32_t* array[1000];
+
+    for (Pt::uint32_t i = 0; i < 1000; i++)
+    {
+        array[i] = (Pt::uint32_t*) pool.allocate();
+    }
+
+    for (Pt::uint32_t i = 0; i < 500; i++)
+    {
+        pool.deallocate( array[i] );
+    }
+
+    for (Pt::uint32_t i = 0; i < 500; i++)
+    {
+        array[i] = (Pt::uint32_t*) pool.allocate();
+    }
+
+    for (Pt::uint32_t i = 0; i < 1000; i++)
+    {
+        pool.deallocate( array[i] );
+    }
+}
+
 
 /* 
 void AllocatorTest::poolFactoryTest() { 

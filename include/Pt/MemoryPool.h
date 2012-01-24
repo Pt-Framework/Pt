@@ -243,6 +243,145 @@ class MemoryPool2
         std::vector<BlockInfo*> _blocks;
 };
 
+
+
+class MemPool
+{
+    typedef std::size_t Data_t;
+    static const Data_t BlockElements = 512;
+    static const Data_t DSize = sizeof(Data_t);
+
+    class MemBlock
+    {
+            Data_t* block;
+            Data_t firstFreeUnitIndex;
+            Data_t availUnits;
+            Data_t endIndex;
+            Data_t UnitSizeInDSize;
+        
+        public:
+            MemBlock(std::size_t unitSize)
+            : block(0)
+            , firstFreeUnitIndex( Data_t(-1) )
+            , UnitSizeInDSize(unitSize)
+            , availUnits(BlockElements)
+            {}
+        
+            bool isFull() const
+            {
+                return availUnits == 0;
+            }
+
+            bool isEmpty() const
+            {
+                return availUnits == BlockElements;
+            }   
+
+            void clear()
+            {
+                delete[] block;
+                block = 0;
+                firstFreeUnitIndex = Data_t(-1);
+            }
+        
+            Data_t* allocate()
+            {
+                assert(availUnits > 0);
+
+                if(firstFreeUnitIndex == Data_t(-1))
+                {
+                    if( ! block )
+                    {
+                        block = new Data_t[BlockElements*UnitSizeInDSize];
+                        endIndex = 0;
+                    }
+            
+                    Data_t* retval = block + endIndex;
+                    endIndex += UnitSizeInDSize;
+                    assert(endIndex <= BlockElements*UnitSizeInDSize);
+                    --availUnits;
+                    return retval;
+                }
+                else
+                {
+                    assert(firstFreeUnitIndex < endIndex);
+                    Data_t* retval = block + firstFreeUnitIndex;
+                    firstFreeUnitIndex = *retval;
+                    --availUnits;
+                    return retval;
+                }
+            }
+        
+            void deallocate(Data_t* ptr)
+            {
+                *ptr = firstFreeUnitIndex;
+                firstFreeUnitIndex = ptr - block;
+                assert( ptr >= block );
+                assert( ptr <= (block + endIndex) );
+            
+                if(++availUnits == BlockElements)
+                    clear();
+            }
+    };
+
+    public:
+        MemPool(std::size_t ElemSize)
+        : ElemSizeInDSize((ElemSize + (DSize-1)) / DSize)
+        , UnitSizeInDSize(ElemSizeInDSize + 1)
+        {
+            blocksVector.reserve(16); 
+        }
+
+        ~MemPool()
+        {
+            for(std::size_t i = 0; i < blocksVector.size(); ++i)
+            {
+                assert( blocksVector[i].isEmpty() );
+                blocksVector[i].clear();
+            }
+        }
+        
+        void* allocate()
+        {
+            if( blocksWithFree.empty() )
+            {
+                blocksWithFree.push_back( blocksVector.size() );
+                blocksVector.push_back( MemBlock(UnitSizeInDSize) );
+            }
+            
+            const Data_t index = blocksWithFree.back();
+            MemBlock& block = blocksVector[index];
+            Data_t* retval = block.allocate();
+            retval[ElemSizeInDSize] = index;
+            
+            if(block.isFull())
+                blocksWithFree.pop_back();
+            
+            return retval;
+        }
+        
+        void deallocate(void* ptr)
+        {
+            if( ! ptr )
+                return;
+            
+            Data_t* unitPtr = (Data_t*)ptr;
+            const Data_t blockIndex = unitPtr[ElemSizeInDSize];
+            MemBlock& block = blocksVector[blockIndex];
+            
+            if( block.isFull() )
+                blocksWithFree.push_back(blockIndex);
+
+            block.deallocate(unitPtr);
+        }
+
+    private:
+        std::vector<MemBlock> blocksVector;
+        std::vector<Data_t> blocksWithFree;
+        Data_t ElemSizeInDSize;
+        Data_t UnitSizeInDSize;
+};
+
 }
 
 #endif // PT_MEMORYPOOL_H
