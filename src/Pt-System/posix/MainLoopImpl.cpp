@@ -81,12 +81,6 @@ void MainLoopImpl::exit()
 }
 
 
-void MainLoopImpl::wake()
-{
-    _selector.wake();
-}
-
-
 void MainLoopImpl::commitEvent(const Event& event)
 { 
     _eventQueue.pushEvent(event); 

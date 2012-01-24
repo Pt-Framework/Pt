@@ -26,15 +26,13 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef PT_SYSTEM_POSIX_EVENTLOOPIMPL_H
-#define PT_SYSTEM_POSIX_EVENTLOOPIMPL_H
+#ifndef PT_SYSTEM_POSIX_SELECTOR_H
+#define PT_SYSTEM_POSIX_SELECTOR_H
 
 #include "Pt/System/Api.h"
 #include "Pt/System/IOError.h"
 #include "Pt/System/SystemError.h"
-
 #include <iostream>
-
 #include <errno.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -191,6 +189,20 @@ class Selector
         virtual bool isWritable(IOHandle* h) = 0;
 
         virtual bool isError(IOHandle* h) = 0;
+
+//      void attach(Selectable& s)
+//      {
+//          _selectables.insert(s);
+//      }
+//
+//      void detach(Selectable& s)
+//      {
+//          SelectableList::unlink(s);
+//      }
+
+    private:
+        // TODO: move this here
+        // SelectableList _selectables;
 };
 
 } //namespace System

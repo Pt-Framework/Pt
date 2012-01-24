@@ -34,13 +34,11 @@
 #define WIN32_LEAN_AND_MEAN
 #endif
 
-#include "EventLoopImpl.h"
-
+#include "Selector.h"
+#include <string>
 #include <winsock2.h>
 #include <ws2tcpip.h>
-#include <string>
 #include <windows.h>
-#include <Pt/System/Mutex.h>
 
 namespace Pt {
 
@@ -59,7 +57,6 @@ class TcpServerImpl
         System::IOHandle _ioh;
         SOCKET _fd;
         sockaddr_storage _servaddr;
-
 
         void attachEvent(HANDLE ev, long events);
 

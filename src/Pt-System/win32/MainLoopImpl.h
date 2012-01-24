@@ -21,7 +21,7 @@
 #ifndef PT_SYSTEM_MainLoopImpl_H
 #define PT_SYSTEM_MainLoopImpl_H
 
-#include "EventLoopImpl.h"
+#include "Selector.h"
 #include "Pt/System/Api.h"
 
 namespace Pt {

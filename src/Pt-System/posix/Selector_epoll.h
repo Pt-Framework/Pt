@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2012 Marc Boris Duerner
+ * Copyright (C) 2006-20012 Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,62 +25,52 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef PT_SYSTEM_EVENTLOOPIMPL_KQUEUE_H
-#define PT_SYSTEM_EVENTLOOPIMPL_KQUEUE_H
+#ifndef PT_SYSTEM_SELECTOR_EPOLL_H
+#define PT_SYSTEM_SELECTOR_EPOLL_H
 
-#include "../SelectableList.h"
 #include "Pt/System/Api.h"
 #include "Pt/System/Clock.h"
 #include "Pt/System/Selectable.h"
 
 #include <set>
+#include <limits>
 #include <cassert>
 #include <cstddef>
 
 #include <sys/types.h>
-#include <sys/event.h>
-#include <sys/time.h>
+#include <sys/epoll.h>
 
 namespace Pt {
 
 namespace System {
 
-class SelectorImpl : public Selector
+class SelectorImpl  : public Selector
 {
     public:
         SelectorImpl()
-        : _kd(-1)
+        : _epfd(-1)
         , _avail(0)
         {
-            _kd = kqueue();
+            _epfd = epoll_create(16);
 
-            struct kevent kev;
-            EV_SET(&kev, _wakePipe.readFd(), EVFILT_READ, EV_ADD, 0, 0, &_wakePipe);
+            epoll_event ev;
+            ev.events = EPOLLIN;
+            ev.data.ptr = &_wakePipe;
 
-            timespec ts;
-            ts.tv_sec = 0;
-            ts.tv_nsec = 0;
-            kevent(_kd, &kev, 1, NULL, 0, &ts);
+            epoll_ctl(_epfd, EPOLL_CTL_ADD, _wakePipe.readFd(), &ev);
         }
 
         ~SelectorImpl()
         {         
-            while( ! _selectables.empty() )
+            std::set<Selectable*>::iterator it;
+
+            while( _selectables.size() )
             {
-                _selectables.first()->detach();
+                it = _selectables.begin();
+                (*it)->detach();
             }
 
-            ::close(_kd);
-        }
-
-        void attach(Selectable& s)
-        {
-            _selectables.insert(s);
-        }
-        
-        void detach(Selectable& s)
-        {
-            SelectableList::unlink(s);
+            ::close(_epfd);
         }
 
         void cancel(IOHandle& h)
@@ -92,24 +82,16 @@ class SelectorImpl : public Selector
             std::vector<IOHandle*>::iterator it = std::remove(_changelist.begin(), _changelist.end(), &h);
             _changelist.erase(it, _changelist.end());
 
-            // remove from avail list
+            // disable in avail list
             for(int n = 0; n < _avail; ++n)
             {
-                struct kevent& kev = _events[n];
-                if(kev.udata == &h)
-                {
-                    kev.udata = 0;
-                }
+                epoll_event& ev = _events[n];
+                if(ev.data.ptr == &h)
+                    ev.data.ptr  = 0;
             }
 
-            struct kevent kev[2];
-            EV_SET(&kev[0], h.fd, EVFILT_READ, EV_DELETE, 0, 0, &h);
-            EV_SET(&kev[1], h.fd, EVFILT_WRITE, EV_DELETE, 0, 0, &h);
-
-            timespec ts;
-            ts.tv_sec = 0;
-            ts.tv_nsec = 0;
-            kevent(_kd, kev, 2, NULL, 0, &ts);
+            // remove from epoll
+            epoll_ctl(_epfd, EPOLL_CTL_DEL, h.fd, NULL);
 
             h.events = 0;
             h.changed = 0;
@@ -126,7 +108,7 @@ class SelectorImpl : public Selector
         }
 
         void endRead(IOHandle* h)
-        {   
+        {
             bool isAdded = h->changed != h->events;
             if(! isAdded)
                 _changelist.push_back(h);
@@ -156,17 +138,32 @@ class SelectorImpl : public Selector
 
         bool isReadable(IOHandle* h)
         {
+            /*bool isReady = h->ev && (h->ev->events & (EPOLLIN|EPOLLHUP));
+                       
+            if(isReady)
+                h->ev->events &= (EPOLLIN|EPOLLHUP);*/
+
             return h->ready & IOHandle::Read;
         }
 
         bool isWritable(IOHandle* h)
         {
+            /*bool isReady = h->ev && (h->ev->events & (EPOLLOUT|EPOLLHUP));
+
+            if(isReady)
+                h->ev->events &= (EPOLLIN|EPOLLHUP);*/
+
             return h->ready & IOHandle::Write;
         }
 
         bool isError(IOHandle* h)
         {
-            return false;
+            /*bool isReady = h->ev && (h->ev->events & EPOLLERR);
+
+            if(isReady)
+                h->ev->events &= EPOLLERR;*/
+
+            return h->ready & IOHandle::Error;
         }
 
         void wake()
@@ -174,14 +171,14 @@ class SelectorImpl : public Selector
             _wakePipe.wake();
         }
 
-        bool waitForWake(size_t msecs)
+    public:
+        bool waitForWake(size_t umsecs)
         {
-            // process kevents which are left over from the last iteration
+            // process events which are left over from the last iteration
             // because of an exception
             if(_avail > 0)
                 return processAvail();
-        
-            std::vector<struct kevent> changedEvents;
+
             for( std::vector<IOHandle*>::iterator it = _changelist.begin(); it != _changelist.end(); ++it)
             {
                 IOHandle* h = *it;
@@ -189,62 +186,38 @@ class SelectorImpl : public Selector
                 if(h->changed == h->events)
                     continue;
 
-                struct kevent kev;
+                epoll_event ev;
 
                 if(h->changed & IOHandle::Read)
-                {
-                    if(0 == (h->events & IOHandle::Read))
-                    {
-                        EV_SET(&kev, h->fd, EVFILT_READ, EV_ADD|EV_ENABLE|EV_CLEAR, 0, 0, h);
-                        changedEvents.push_back(kev);
-                    }
-                }
-                else
-                {
-                    if(h->events & IOHandle::Read)
-                    {
-                        EV_SET(&kev, h->fd, EVFILT_READ, EV_DISABLE, 0, 0, h);
-                        changedEvents.push_back(kev);
-                    }
-                }
-
+                    ev.events |= EPOLLIN;
                 if(h->changed & IOHandle::Write)
-                {
-                    if(0 == (h->events & IOHandle::Write))
-                    {
-                        EV_SET(&kev, h->fd, EVFILT_WRITE, EV_ADD|EV_ENABLE|EV_CLEAR, 0, 0, h);
-                        changedEvents.push_back(kev);
-                    }
-                }
+                    ev.events |= EPOLLOUT;
+ 
+                ev.data.ptr = h;
+
+                if(h->events)
+                    epoll_ctl(_epfd, EPOLL_CTL_MOD, h->fd, &ev);
                 else
-                {
-                    if(h->events & IOHandle::Write)
-                    {
-                        EV_SET(&kev, h->fd, EVFILT_WRITE, EV_DISABLE, 0, 0, h);
-                        changedEvents.push_back(kev);
-                    }
-                }
+                    epoll_ctl(_epfd, EPOLL_CTL_ADD, h->fd, &ev);
 
                 h->events = h->changed;
             }
         
             _changelist.clear();
-               
+
+            int msecs = -1;
+            if(umsecs != EventLoop::WaitInfinite)
+            {
+                const size_t maxMSecs = std::numeric_limits<int>::max();
+                msecs = umsecs > maxMSecs ? maxMSecs : static_cast<int>(umsecs);
+            }
+
             bool isWake = false;
         
             while( true )
-            {
-                struct timespec* timeout = 0;
-                struct timespec ts;
-                if(msecs != EventLoop::WaitInfinite)
-                {
-                    ts.tv_sec = msecs / 1000;
-                    ts.tv_nsec = (msecs % 1000) * 1000000;
-                    timeout = &ts;
-                }
-        
+            {     
                 _clock.start();
-                _avail = ::kevent(_kd, &changedEvents[0], changedEvents.size(), _events, EVENTS_SIZE, timeout);
+                _avail = epoll_wait(_epfd, _events, EVENTS_SIZE, msecs);
                 Pt::int64_t elapsed = _clock.stop().totalMSecs();
         
                 if( _avail < 0 && errno != EINTR )
@@ -256,7 +229,7 @@ class SelectorImpl : public Selector
                     break;
                 }
         
-                if(msecs != EventLoop::WaitInfinite)
+                if(umsecs != EventLoop::WaitInfinite)
                 { 
                     if(elapsed >= msecs)
                         break; // timeout
@@ -268,16 +241,15 @@ class SelectorImpl : public Selector
             return isWake;
         }
 
-    private:
         bool processAvail()
         {
             bool isWake = false;
 
             while(_avail > 0)
             {
-                struct kevent& kev = _events[--_avail];
+                epoll_event& ev = _events[--_avail];
 
-                void* p = kev.udata;
+                void* p = ev.data.ptr;
                 if(p == 0)
                 {
                     continue;
@@ -290,14 +262,17 @@ class SelectorImpl : public Selector
                 {
                     IOHandle* h = reinterpret_cast<IOHandle*>(p);
 
-                    if(kev.filter & EVFILT_READ)
+                    if(ev.events & (EPOLLIN|EPOLLHUP))
                     {
                         h->ready |= IOHandle::Read;
                     }
-
-                    if(kev.filter & EVFILT_WRITE)
+                    if(ev.events & (EPOLLOUT|EPOLLHUP))
                     {
                         h->ready |= IOHandle::Write;
+                    }
+                    if(ev.events & EPOLLERR)
+                    {
+                        h->ready |= IOHandle::Error;
                     }
 
                     h->sel->run();
@@ -307,14 +282,24 @@ class SelectorImpl : public Selector
             return isWake;
         }
 
+        void attach(Selectable& s)
+        {
+            _selectables.insert(&s);
+        }
+        
+        void detach(Selectable& s)
+        {
+            _selectables.erase(&s);
+        }
+
     private:
-        SelectableList _selectables;
+        std::set<Selectable*> _selectables; // inactive
         Clock _clock;
         WakePipe _wakePipe;
-        int _kd;
+        int _epfd;
         std::vector<IOHandle*> _changelist;
         static const unsigned EVENTS_SIZE = 32;
-        struct kevent _events[EVENTS_SIZE];
+        struct epoll_event _events[EVENTS_SIZE];
         int _avail;
 };
 

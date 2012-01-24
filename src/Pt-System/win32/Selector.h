@@ -26,8 +26,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef PT_SYSTEM_EventLoopImpl_H
-#define PT_SYSTEM_EventLoopImpl_H
+#ifndef PT_SYSTEM_SELECTOR_H
+#define PT_SYSTEM_SELECTOR_H
 
 #include "../SelectableList.h"
 #include "Pt/System/Api.h"

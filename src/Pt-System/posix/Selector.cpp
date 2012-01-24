@@ -26,18 +26,24 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "EventLoopImpl.h"
+#include "Selector.h"
 
 namespace Pt {
 
 namespace System {
 
 Selector::Selector()
-{ }
+{
+}
 
 
 Selector::~Selector()
-{ }
+{ 
+//  while( ! _selectables.empty() )
+//  {
+//      _selectables.first()->detach();
+//  }
+}
 
 } //namespace System
 

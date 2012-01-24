@@ -28,7 +28,7 @@
 #ifndef PT_SYSTEM_POSIX_MAINLOOPIMPL_H
 #define PT_SYSTEM_POSIX_MAINLOOPIMPL_H
 
-#include "EventLoopImpl.h"
+#include "Selector.h"
 #include "Pt/System/Api.h"
 #include "Pt/Signal.h"
 
@@ -42,13 +42,13 @@
 #endif
 
 #if defined (PT_WITH_LINUX_EPOLL)
-    #include "EventLoopImpl_epoll.h"
+    #include "Selector_epoll.h"
 #elif defined(PT_WITH_BSD_KQUEUE)
-    #include "EventLoopImpl_kqueue.h"
+    #include "Selector_kqueue.h"
 #elif defined(PT_WITH_POSIX_POLL)
-    #include "EventLoopImpl_poll.h"
+    #include "Selector_poll.h"
 #else
-    #include "EventLoopImpl_select.h"
+    #include "Selector_select.h"
 #endif
 
 namespace Pt {
@@ -81,7 +81,8 @@ class MainLoopImpl
 
         void exit();
 
-        void wake();
+        void wake()
+        { _selector.wake(); }
 
         void commitEvent(const Event& event);
 

@@ -25,7 +25,7 @@
 #include <Pt/Gui/KeyEvent.h>
 #include <Pt/Singleton.h>
 
-#include "win32/EventLoopImpl.h"
+#include "win32/Selector.h"
 
 #include <map>
 #include <iostream>

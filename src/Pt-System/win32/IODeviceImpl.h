@@ -20,7 +20,7 @@
 #ifndef PT_SYSTEM_IODEVICEIMPL_H
 #define PT_SYSTEM_IODEVICEIMPL_H
 
-#include "EventLoopImpl.h"
+#include "Selector.h"
 #include "Pt/System/IOError.h"
 #include <windows.h>
 

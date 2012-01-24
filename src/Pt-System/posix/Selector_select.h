@@ -25,20 +25,20 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef PT_SYSTEM_EVENTLOOPIMPL_POLL_H
-#define PT_SYSTEM_EVENTLOOPIMPL_POLL_H
+#ifndef PT_SYSTEM_SELECTOR_SELECT_H
+#define PT_SYSTEM_SELECTOR_SELECT_H
 
 #include "Pt/System/Api.h"
 #include "Pt/System/Clock.h"
 #include "Pt/System/Selectable.h"
 
 #include <set>
-#include <limits>
-#include <cassert>
 #include <cstddef>
+#include <cassert>
 
 #include <sys/types.h>
-#include <sys/poll.h>
+#include <sys/select.h>
+#include <unistd.h>
 
 namespace Pt {
 
@@ -50,14 +50,16 @@ class SelectorImpl : public Selector
         SelectorImpl()
         {
             _current = _devices.end();
-        
-            pollfd pfd;
-            pfd.fd = _wakePipe.readFd();
-            pfd.events = POLLIN;
-            pfd.revents = 0;
-            _pollfds.push_back(pfd);
 
-            _iohandles.push_back(0);
+            FD_ZERO(&_rfds);
+            FD_ZERO(&_wfds);
+            FD_ZERO(&_efds);
+        
+            FD_ZERO(&_rfdsOut);
+            FD_ZERO(&_wfdsOut);
+            FD_ZERO(&_efdsOut);
+        
+            FD_SET(_wakePipe.readFd(), &_rfds);
         }
 
         ~SelectorImpl()
@@ -78,17 +80,12 @@ class SelectorImpl : public Selector
                 return;
 
             assert(h.fd > 0);
-            assert(h.id != 0);
 
-            size_t offset = h.id;
+            FD_CLR(h.fd, &_rfds);
+            FD_CLR(h.fd, &_wfds);
+            FD_CLR(h.fd, &_efds);
             h.id = IOHandle::InvalidId;
-            _pollfds.at(offset) = _pollfds.back();
-            _pollfds.resize(_pollfds.size() - 1);
-
-            _iohandles.at(offset) = _iohandles.back();
-            _iohandles.resize(_iohandles.size() - 1);
-            _iohandles[offset]->id = offset;
-
+            
             if( (_current != _devices.end()) && (*_current == *it) )
             {
                 _devices.erase(_current++);
@@ -99,76 +96,51 @@ class SelectorImpl : public Selector
             }
         }
 
-        pollfd& enablePoll(IOHandle* h)
+        void enableSelect(IOHandle* h)
         {
-            if( h->id == IOHandle::InvalidId)
+            if( ! h->id != IOHandle::InvalidId )
             {
-                assert(_pollfds.size() == _iohandles.size());
-
-                _iohandles.reserve(_iohandles.size() + 1);
-                _pollfds.reserve(_pollfds.size() + 1);
-
                 _devices.insert( h->sel );
-
-                h->id = _pollfds.size();
-                _iohandles.push_back(h);
-
-                pollfd pfd;
-                pfd.fd = h->fd;
-                pfd.events = 0;
-                pfd.revents = 0;
-                _pollfds.push_back(pfd);
-
-                return _pollfds.back();
+                FD_SET(h->fd, &_efds);
+                h->id = 1;
             }
-
-            return _pollfds[h->id];
         }
 
         void beginRead(IOHandle* h)
         {
-            enablePoll(h).events |= POLLIN;
+            enableSelect(h);
+            FD_SET(h->fd, &_rfds);
         }
 
         void endRead(IOHandle* h)
         {
-            assert(h->id != IOHandle::InvalidId);
-            _pollfds[h->id].events &= ~POLLIN;
+            FD_CLR( h->fd, &_rfds );
         }
 
         void beginWrite(IOHandle* h)
         {
-            enablePoll(h).events |= POLLOUT;
+            enableSelect(h);
+            FD_SET(h->fd, &_wfds);
         }
 
         void endWrite(IOHandle* h)
         {
-            assert(h->id != IOHandle::InvalidId);
-            _pollfds[h->id].events &= ~POLLOUT;
+            FD_CLR( h->fd, &_wfds );
         }
 
         bool isReadable(IOHandle* h)
         {
-            if(h->id == IOHandle::InvalidId)
-                return false;
-
-            return _pollfds[h->id].revents & (POLLIN|POLLHUP);
+            return FD_ISSET(h->fd, &_rfdsOut);
         }
 
         bool isWritable(IOHandle* h)
         {
-            if(h->id == IOHandle::InvalidId)
-                return false;
-
-            return _pollfds[h->id].revents & (POLLOUT|POLLHUP);
+            return FD_ISSET(h->fd, &_wfdsOut);
         }
 
         bool isError(IOHandle* h)
         {
-            if(h->id == IOHandle::InvalidId)
-                return false;
-
-            return _pollfds[h->id].revents & (POLLERR|POLLNVAL);
+            return FD_ISSET(h->fd, &_efdsOut);
         }
 
         void wake()
@@ -177,41 +149,53 @@ class SelectorImpl : public Selector
         }
 
     public:
-        bool waitForWake(size_t umsecs)
+        bool waitForWake(size_t msecs)
         {
-            const size_t maxMSecs = std::numeric_limits<int>::max();
-
-            int msecs = static_cast<int>(umsecs);
-            if(umsecs == EventLoop::WaitInfinite)
-                msecs = -1;
-            else if(umsecs > maxMSecs)
-                msecs = std::numeric_limits<int>::max();
-
-            bool isWake = false;               
+            bool isWake = false;
+        
+            FD_ZERO(&_rfdsOut);
+            FD_ZERO(&_wfdsOut);
+            FD_ZERO(&_efdsOut);
+        
+            _rfdsOut = _rfds;
+            _wfdsOut = _wfds;
+            _efdsOut = _efds;
+        
             int avail = -1;
-
+        
             while( true )
-            {            
+            {
+                struct timeval* timeout = 0;
+                struct timeval tv;
+                if(msecs != EventLoop::WaitInfinite)
+                {
+                    tv.tv_sec = msecs / 1000;
+                    tv.tv_usec = (msecs % 1000) * 1000;
+                    timeout = &tv;
+                }
+        
                 _clock.start();
-                avail = ::poll(&_pollfds[0], _pollfds.size(), msecs);
+                avail = ::select(FD_SETSIZE, &_rfdsOut, &_wfdsOut, &_efdsOut, timeout);
                 Pt::int64_t elapsed = _clock.stop().totalMSecs();
-
+        
                 if( avail < 0 && errno != EINTR )
+                {
                     throw IOError( PT_ERROR_MSG("select failed") );
+                }
         
                 if( avail > 0 || msecs == 0 )
                     break;
         
-                if(umsecs != EventLoop::WaitInfinite) // negative poll time means infinite
+                if(msecs != EventLoop::WaitInfinite)
                 {
-                    if(elapsed >= msecs)
+                    if(static_cast<Pt::uint64_t>(elapsed) >= msecs)
                         return isWake; // timeout
             
                     msecs -= int(elapsed);
                 }
             }
-
-            if( _pollfds[0].revents & POLLIN )
+        
+            if( FD_ISSET(_wakePipe.readFd(), &_rfdsOut) )
             {
                 --avail;
                 isWake = _wakePipe.isReady();
@@ -261,11 +245,15 @@ class SelectorImpl : public Selector
 
     private:
         WakePipe _wakePipe;
-        std::vector<pollfd> _pollfds;
-        std::vector<IOHandle*> _iohandles;
         std::set<Selectable*> _selectables; // inactive
         std::set<Selectable*>::iterator _current;
         std::set<Selectable*> _devices; // active
+        fd_set _rfds;
+        fd_set _wfds;
+        fd_set _efds;
+        fd_set _rfdsOut;
+        fd_set _wfdsOut;
+        fd_set _efdsOut;
         Clock _clock;
 };
 
