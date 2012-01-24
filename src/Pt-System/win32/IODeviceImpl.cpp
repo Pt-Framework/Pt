@@ -112,7 +112,7 @@ void OverlappedIODeviceImpl::cancel(EventLoop& loop)
 
     if(_readOv.hEvent != NULL)
     {
-        loop.impl().disableOverlapped(_ioh);
+        loop.selector().disableOverlapped(_ioh);
     }
 
     _readOv.hEvent = NULL;
@@ -164,7 +164,7 @@ size_t OverlappedIODeviceImpl::beginRead(EventLoop& loop, char* buffer, size_t n
 {
     if(_readOv.hEvent == NULL)
     {
-        loop.impl().enableOverlapped(_ioh);
+        loop.selector().enableOverlapped(_ioh);
         _readOv.hEvent = _ioh.handle();
         _writeOv.hEvent = _ioh.handle();
     }
@@ -251,7 +251,7 @@ size_t OverlappedIODeviceImpl::beginWrite(EventLoop& loop, const char* buffer, s
 {
     if(_readOv.hEvent == NULL)
     {
-        loop.impl().enableOverlapped(_ioh);
+        loop.selector().enableOverlapped(_ioh);
         _readOv.hEvent = _ioh.handle();
         _writeOv.hEvent = _ioh.handle();
     }

@@ -98,6 +98,7 @@ void MainLoopImpl::queueEvent(const Event& event)
 
 bool MainLoopImpl::processEvents()
 { 
+    //TODO: should this also check selectables?
     return _eventQueue.processEvents(*_event);
 }
 
@@ -124,7 +125,7 @@ bool MainLoopImpl::waitNext()
 
     bool isActive = true;
     if( _selector.waitForWake(timeout) )
-        isActive = this->processEvents();
+        isActive = _eventQueue.processEvents(*_event);
 
     return isActive;
 }

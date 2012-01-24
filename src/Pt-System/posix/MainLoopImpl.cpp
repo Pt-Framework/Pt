@@ -102,6 +102,7 @@ void MainLoopImpl::queueEvent(const Event& event)
 
 bool MainLoopImpl::processEvents()
 { 
+    //TODO: should this also check selectables?
     return _eventQueue.processEvents(*_event);
 }
 
@@ -111,7 +112,6 @@ bool MainLoopImpl::waitNext()
     bool isActive = true;
     size_t msecs = _timerQueue.processTimers();
 
-    // TODO: do this only on wake
     while(true)
     {
         MutexLock lock(_mutex);
@@ -127,7 +127,7 @@ bool MainLoopImpl::waitNext()
     }
 
     if( _selector.waitForWake(msecs) )
-        isActive = this->processEvents();
+        isActive = _eventQueue.processEvents(*_event);
 
     return isActive;
 }

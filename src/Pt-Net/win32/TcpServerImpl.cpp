@@ -117,7 +117,7 @@ void TcpServerImpl::cancel(System::EventLoop& loop)
 
     attachEvent(_ioh.handle(), 0);
 
-    loop.impl().disableOverlapped(_ioh);
+    loop.selector().disableOverlapped(_ioh);
 }
 
 
@@ -135,7 +135,7 @@ void TcpServerImpl::beginAccept(System::EventLoop& loop)
 {
     assert(_ioh.handle() == INVALID_HANDLE_VALUE);
 
-    loop.impl().enableOverlapped(_ioh);
+    loop.selector().enableOverlapped(_ioh);
     attachEvent(_ioh.handle(), FD_ACCEPT);
 }
 

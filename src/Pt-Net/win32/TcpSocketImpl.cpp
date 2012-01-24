@@ -95,7 +95,7 @@ void TcpSocketImpl::cancel(System::EventLoop& loop)
 {
     if(_ioh.handle() != INVALID_HANDLE_VALUE)
     {
-        loop.impl().disableOverlapped(_ioh);
+        loop.selector().disableOverlapped(_ioh);
         //_currentEventHandle = INVALID_HANDLE_VALUE;
     }
 
@@ -234,7 +234,7 @@ bool TcpSocketImpl::beginConnect(const AddrInfo& ai, System::EventLoop& loop)
 
     if(_ioh.handle() == INVALID_HANDLE_VALUE)
     {
-        loop.impl().enableOverlapped(_ioh);
+        loop.selector().enableOverlapped(_ioh);
     }
     
     _addrInfo = ai;
@@ -598,7 +598,7 @@ size_t TcpSocketImpl::beginRead(System::EventLoop& loop, char* buffer, size_t n,
 
     if(_ioh.handle() == INVALID_HANDLE_VALUE)
     {
-        loop.impl().enableOverlapped(_ioh);
+        loop.selector().enableOverlapped(_ioh);
     }
 
     assert(buffer != 0);
@@ -688,7 +688,7 @@ size_t TcpSocketImpl::beginWrite(System::EventLoop& loop, const char* buffer, si
 
     if(_ioh.handle() == INVALID_HANDLE_VALUE)
     {
-        loop.impl().enableOverlapped(_ioh);
+        loop.selector().enableOverlapped(_ioh);
     }
 
     _sendBuffer.buf = const_cast<char*>(buffer);

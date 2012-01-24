@@ -68,58 +68,6 @@ class Selector : public System::Selector
  * method of this singleton class. It creates the essential association between the
  * Windows' HWND and the application's widget.
  */
-class MainLoopImpl
-{
-    public:
-        MainLoopImpl(Signal<const Pt::Event&>& eventSignal);
-
-        ~MainLoopImpl();
-
-        Selector& selector()
-        { return _selector; }
-
-        void run();
-
-        void exit();
-
-        void wake()
-        { _selector.wake(); }
-
-        void commitEvent(const Pt::Event& event);
-
-        void queueEvent(const Pt::Event& event);
-
-        bool processEvents();
-
-        void attach(System::Timer& timer)
-        { _timerQueue.addTimer(timer); }
-
-        void detach(System::Timer& timer)
-        { _timerQueue.removeTimer(timer); }
-
-        void attach(System::Selectable& s)
-        { _selector.attach(s); }
-
-        void detach(System::Selectable& s)
-        { _selector.detach(s); }
-
-        void idle(System::Selectable& s);
-
-        void avail(System::Selectable& s);
-
-    protected:
-        bool waitNext();
-
-    private:
-        System::Mutex _mutex;
-        System::TimerQueue _timerQueue;
-        System::EventQueue _eventQueue;
-        Selector _selector;
-        Signal<const Pt::Event&>* _event;
-        std::vector<System::Selectable*> _avail;
-};
-
-
 class MainLoop : public Pt::System::EventLoop
                , public Pt::Singleton<MainLoop>
 {
@@ -135,8 +83,8 @@ class MainLoop : public Pt::System::EventLoop
 
         ~MainLoop();
 
-        System::Selector& impl()
-        { return _impl.selector(); }
+        System::Selector& selector()
+        { return _selector; }
 
         //! @brief Returns this application's instance handle (Windows).
         HINSTANCE getInstanceHandle()
@@ -395,6 +343,9 @@ class MainLoop : public Pt::System::EventLoop
 
         virtual void onDetachTimer(System::Timer& timer);
 
+    protected:
+        bool waitNext();
+
     private:
         //! @brief Registers the top level and child window classes with Windows for later use.
         void registerWindowClasses();
@@ -403,14 +354,20 @@ class MainLoop : public Pt::System::EventLoop
         void unregisterWindowClasses();
 
     private:
-        MainLoopImpl _impl;
-
         //! @brief Instance handle of this application
         HINSTANCE _instanceHandle;
         bool _trackingMouseEvent;
 
         //! @brief Map for associations between Window handles and widgets.
         std::map<HWND, Widget*> _windowHandle2Widget;  
+
+    private:
+        System::Mutex _mutex;
+        System::TimerQueue _timerQueue;
+        System::EventQueue _eventQueue;
+        Selector _selector;
+        Signal<const Pt::Event&>* _event;
+        std::vector<System::Selectable*> _avail;
 };
 
 } // namespace Gui

@@ -94,7 +94,7 @@ void UdpSocketImpl::cancel(System::EventLoop& loop)
 {
     if(_ioh.handle() != INVALID_HANDLE_VALUE)
     {
-        loop.impl().disableOverlapped(_ioh);
+        loop.selector().disableOverlapped(_ioh);
     }
 
     _eventFlags = 0;
@@ -477,7 +477,7 @@ size_t UdpSocketImpl::beginRead(System::EventLoop& loop, char* buffer, size_t n,
 {
     if(_ioh.handle() == INVALID_HANDLE_VALUE)
     {
-        loop.impl().enableOverlapped(_ioh);
+        loop.selector().enableOverlapped(_ioh);
     }
 
     assert(buffer != 0);
@@ -532,7 +532,7 @@ size_t UdpSocketImpl::beginWrite(System::EventLoop& loop, const char* buffer, si
 {
     if(_ioh.handle() == INVALID_HANDLE_VALUE)
     {
-        loop.impl().enableOverlapped(_ioh);
+        loop.selector().enableOverlapped(_ioh);
     }
 
      _sendBuffer.buf = const_cast<char*>(buffer);

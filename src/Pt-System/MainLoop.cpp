@@ -55,7 +55,7 @@ MainLoop::~MainLoop()
 }
 
 
-Selector& MainLoop::impl()
+Selector& MainLoop::selector()
 {
     return _impl->selector();
 }

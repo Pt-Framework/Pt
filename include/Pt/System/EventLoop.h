@@ -102,7 +102,7 @@ class PT_SYSTEM_API EventLoop : public Connectable
         { this->onReady(s); }
 
         //! @ internal
-        virtual Selector& impl() = 0;
+        virtual Selector& selector() = 0;
 
     protected:
         //! @internal Constructor
