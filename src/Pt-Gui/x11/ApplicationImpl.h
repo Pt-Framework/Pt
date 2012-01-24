@@ -37,7 +37,7 @@
 #include <Pt/Singleton.h>
 #include <Pt/Event.h>
 
-#include "posix/EventLoopImpl.h"
+#include "posix/Selector.h"
 
 #include <map>
 
@@ -61,7 +61,7 @@ class X11Fd : public System::Selectable
             if( ! this->isActive() )
                 throw std::logic_error("not implemented"); 
 
-            Pt::System::Selector& selector = this->parent()->impl();
+            Pt::System::Selector& selector = this->parent()->selector();
             selector.beginRead(&_ioh);
         }
 
