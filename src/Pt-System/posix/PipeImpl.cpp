@@ -68,18 +68,6 @@ void PipeIODevice::onClose()
 }
 
 
-void PipeIODevice::onAttach(EventLoop& loop)
-{ 
-    _impl.attach(loop); 
-}
-
-
-void PipeIODevice::onDetach(EventLoop& loop)
-{
-    _impl.detach(loop);
-}
-
-
 bool PipeIODevice::onRun()
 { 
     if( this->reading() )

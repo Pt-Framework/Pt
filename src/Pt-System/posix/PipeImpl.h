@@ -61,10 +61,6 @@ class PipeIODevice : public Pt::System::IODevice
 
         void onClose();
 
-        void onAttach(EventLoop& loop);
-
-        void onDetach(EventLoop& loop);
-
         bool onRun();
 
         size_t onBeginRead(char* buffer, size_t n, bool& eof);
