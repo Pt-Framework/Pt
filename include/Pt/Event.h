@@ -29,65 +29,80 @@
 
 #include <Pt/Api.h>
 #include <Pt/Types.h>
-#include <typeinfo>
 #include <Pt/Allocator.h>
+#include <typeinfo>
 
-namespace Pt
+namespace Pt {
+
+/** \brief Base class for all event types.
+
+    Specific Event objects, subclass from Event and implement the clone()
+    and typeInfo() methods. The first is used to deep copy event objects
+    for example in an EventLoop and the latter one is used to dispatch
+    events by type.
+ */
+class Event
 {
+    public:
+        /** \brief Destructor.
+         */
+        virtual ~Event()
+        {}
 
-    /** \brief Base class for all event types.
+        virtual Event& clone(Allocator& allocator) const = 0;
 
-        Specific Event objects, subclass from Event and implement the clone()
-        and typeInfo() methods. The first is used to deep copy event objects
-        for example in an EventLoop and the latter one is used to dispatch
-        events by type.
-     */
-    class Event
-    {
-        public:
-            /** \brief Destructor.
-             */
-            virtual ~Event()
-            {}
+        virtual void destroy(Allocator& allocator) = 0;
 
-            virtual Event& clone(Allocator& allocator) const = 0;
+        /** \brief Returns the type info for this class of events.
+          */
+        virtual const std::type_info& typeInfo() const = 0;
 
-            virtual void destroy(Allocator& allocator)= 0;
+    public:
+        template <typename EventT>
+        static Event& copyConstruct(const EventT& ev, Allocator& allocator)
+        {
+            void* mem = allocator.allocate( sizeof(EventT) );
+            EventT* pev = new (mem) EventT(ev);
+            return *(pev);
+        }
 
-            /** \brief Returns the type info for this class of events.
-              */
-            virtual const std::type_info& typeInfo() const = 0;
-    };
+        template <typename EventT>
+        static void destruct(const EventT& ev, Allocator& allocator)
+        {
+            this->~EventT();
+            allocator.deallocate(&ev, sizeof(T));
+        }
+};
 
-    template <typename T>
-    class BasicEvent : public Event
-    {
-        public:
-            BasicEvent()
-            {
-            }
+template <typename T>
+class BasicEvent : public Event
+{
+    public:
+        BasicEvent()
+        {
+        }
 
-            BasicEvent(const BasicEvent& src)
-            {
-            }
+        BasicEvent(const BasicEvent& src)
+        {
+        }
 
-            virtual const std::type_info& typeInfo() const
-            {
-                return typeid(T);
-            }
+        virtual const std::type_info& typeInfo() const
+        {
+            return typeid(T);
+        }
 
-            virtual Event& clone(Allocator& allocator) const
-            {
-                void* pEvent = allocator.allocate(sizeof(T));
-                return *(new (pEvent)T(*static_cast<const T*>(this)));
-            }
+        virtual Event& clone(Allocator& allocator) const
+        {
+            void* pEvent = allocator.allocate(sizeof(T));
+            return *(new (pEvent)T(*static_cast<const T*>(this)));
+        }
 
-            virtual void destroy(Allocator& allocator)
-            {
-                this->~BasicEvent();
-                allocator.deallocate(this, sizeof(T));
-            }
-    };
+        virtual void destroy(Allocator& allocator)
+        {
+            this->~BasicEvent();
+            allocator.deallocate(this, sizeof(T));
+        }
+};
 
 } // namespace Pt
 
