@@ -59,6 +59,8 @@ class PT_API SettingsError : public SerializationError
 };
 
 /** @brief Store application settings
+    
+    TODO: this should not publically inherit SerializationInfo !!!
 */
 class PT_API Settings : public SerializationInfo
 {
