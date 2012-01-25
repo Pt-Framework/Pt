@@ -195,9 +195,9 @@ class MemPool
     {
             Record* block;
             std::size_t firstFreeIndex;
+            std::size_t unitSize;
             std::size_t availUnits;
             std::size_t endIndex;
-            std::size_t unitSize;
             std::size_t maxUnits;
         
         public:
@@ -206,6 +206,7 @@ class MemPool
             , firstFreeIndex(InvalidIndex)
             , unitSize(unitSize_)
             , availUnits(numUnits)
+            , endIndex(0)
             , maxUnits(numUnits)
             {}
         
