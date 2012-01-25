@@ -29,6 +29,7 @@
 #include "Pt/SerializationContext.h"
 #include "Pt/SerializationSurrogate.h"
 #include "Pt/SerializationError.h"
+#include "Pt/MemoryPool.h"
 
 #include <map>
 #include <cassert>
@@ -111,18 +112,41 @@ namespace
 
 }
 
+#define NEWPOOL
+//#define OLDPOOL
+//#define FREELIST
+
 class SerializationContextImpl
 {
     public:
         SerializationContextImpl()
-        : _limit(64),
-          _alloc(64)
+        : _limit(64)
+#ifdef FREELIST
+        , _alloc(64) // block allocator
+#endif
+
+#ifdef NEWPOOL
+        , _alloc(sizeof(SerializationInfo)) // MemPool
+#endif
         {
+#ifdef OLDPOOL
+            _alloc.init(sizeof(SerializationInfo), 4096);
+#endif
         }
 
         size_t _limit;
-        BlockAllocator<SerializationInfo> _alloc;
 
+#ifdef FREELIST
+        BlockAllocator<SerializationInfo> _alloc;
+#endif
+
+#ifdef NEWPOOL
+        MemPool _alloc;
+#endif
+
+#ifdef OLDPOOL
+        MemoryPool _alloc;
+#endif
         std::map<Pt::TypeInfo, SerializationSurrogate*> _surrmap;
 };
 

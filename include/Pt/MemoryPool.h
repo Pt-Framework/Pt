@@ -247,24 +247,26 @@ class MemoryPool2
 
 class MemPool
 {
-    typedef std::size_t Data_t;
-    static const Data_t BlockElements = 512;
-    static const Data_t DSize = sizeof(Data_t);
+    typedef std::size_t Record;
+    static const Record RecordSize = sizeof(Record);
+    static const Record InvalidIndex = std::size_t(-1);
 
     class MemBlock
     {
-            Data_t* block;
-            Data_t firstFreeUnitIndex;
-            Data_t availUnits;
-            Data_t endIndex;
-            Data_t UnitSizeInDSize;
+            Record* block;
+            std::size_t firstFreeIndex;
+            std::size_t availUnits;
+            std::size_t endIndex;
+            std::size_t unitSize;
+            std::size_t maxUnits;
         
         public:
-            MemBlock(std::size_t unitSize)
+            MemBlock(std::size_t unitSize_, std::size_t numUnits = 512)
             : block(0)
-            , firstFreeUnitIndex( Data_t(-1) )
-            , UnitSizeInDSize(unitSize)
-            , availUnits(BlockElements)
+            , firstFreeIndex(InvalidIndex)
+            , unitSize(unitSize_)
+            , availUnits(numUnits)
+            , maxUnits(numUnits)
             {}
         
             bool isFull() const
@@ -274,88 +276,92 @@ class MemPool
 
             bool isEmpty() const
             {
-                return availUnits == BlockElements;
+                return availUnits == maxUnits;
             }   
 
             void clear()
             {
                 delete[] block;
                 block = 0;
-                firstFreeUnitIndex = Data_t(-1);
+                firstFreeIndex = InvalidIndex;
             }
         
-            Data_t* allocate()
+            Record* allocate()
             {
                 assert(availUnits > 0);
 
-                if(firstFreeUnitIndex == Data_t(-1))
+                if( firstFreeIndex != InvalidIndex )
                 {
-                    if( ! block )
-                    {
-                        block = new Data_t[BlockElements*UnitSizeInDSize];
-                        endIndex = 0;
-                    }
-            
-                    Data_t* retval = block + endIndex;
-                    endIndex += UnitSizeInDSize;
-                    assert(endIndex <= BlockElements*UnitSizeInDSize);
+                    assert(firstFreeIndex < endIndex);
+                    Record* retval = block + firstFreeIndex;
+                    firstFreeIndex = *retval;
                     --availUnits;
                     return retval;
                 }
-                else
+
+                if( ! block )
                 {
-                    assert(firstFreeUnitIndex < endIndex);
-                    Data_t* retval = block + firstFreeUnitIndex;
-                    firstFreeUnitIndex = *retval;
-                    --availUnits;
-                    return retval;
+                    block = new Record[maxUnits*unitSize];
+                    endIndex = 0;
                 }
+        
+                Record* retval = block + endIndex;
+                endIndex += unitSize;
+
+                assert(endIndex <= maxUnits*unitSize);
+                --availUnits;
+                return retval;
             }
         
-            void deallocate(Data_t* ptr)
+            void deallocate(Record* ptr)
             {
-                *ptr = firstFreeUnitIndex;
-                firstFreeUnitIndex = ptr - block;
+                assert(availUnits <= maxUnits);
+
+                *ptr = firstFreeIndex;
+                firstFreeIndex = ptr - block;
                 assert( ptr >= block );
                 assert( ptr <= (block + endIndex) );
-            
-                if(++availUnits == BlockElements)
-                    clear();
+                ++availUnits;
             }
     };
 
     public:
-        MemPool(std::size_t ElemSize)
-        : ElemSizeInDSize((ElemSize + (DSize-1)) / DSize)
-        , UnitSizeInDSize(ElemSizeInDSize + 1)
+        MemPool(std::size_t elemSize)
+        : unitSize(((elemSize + (RecordSize-1)) / RecordSize) + 1)
         {
-            blocksVector.reserve(16); 
+            _blocks.reserve(16); 
+
+            _freelist.push_back( _blocks.size() );
+            _blocks.push_back( MemBlock(unitSize) );
+
         }
 
         ~MemPool()
         {
-            for(std::size_t i = 0; i < blocksVector.size(); ++i)
+            for(std::size_t i = 0; i < _blocks.size(); ++i)
             {
-                assert( blocksVector[i].isEmpty() );
-                blocksVector[i].clear();
+                assert( _blocks[i].isEmpty() );
+                _blocks[i].clear();
             }
         }
         
         void* allocate()
         {
-            if( blocksWithFree.empty() )
+            if( _freelist.empty() )
             {
-                blocksWithFree.push_back( blocksVector.size() );
-                blocksVector.push_back( MemBlock(UnitSizeInDSize) );
+                _freelist.push_back( _blocks.size() );
+                _blocks.push_back( MemBlock(unitSize) );
             }
             
-            const Data_t index = blocksWithFree.back();
-            MemBlock& block = blocksVector[index];
-            Data_t* retval = block.allocate();
-            retval[ElemSizeInDSize] = index;
+            const std::size_t index = _freelist.back();
+            MemBlock& block = _blocks[index];
+
+            Record* retval = block.allocate();
+            *retval = index;
+            ++retval;
             
             if(block.isFull())
-                blocksWithFree.pop_back();
+                _freelist.pop_back();
             
             return retval;
         }
@@ -365,21 +371,26 @@ class MemPool
             if( ! ptr )
                 return;
             
-            Data_t* unitPtr = (Data_t*)ptr;
-            const Data_t blockIndex = unitPtr[ElemSizeInDSize];
-            MemBlock& block = blocksVector[blockIndex];
+            Record* unitPtr = reinterpret_cast<Record*>(ptr);
+            --unitPtr;
+
+            const std::size_t blockIndex = *unitPtr;
+            MemBlock& block = _blocks[blockIndex];
             
             if( block.isFull() )
-                blocksWithFree.push_back(blockIndex);
+                _freelist.push_back(blockIndex);
 
             block.deallocate(unitPtr);
+
+            // keep the first block
+            if(  block.isEmpty() && blockIndex > 0 )
+                block.clear();
         }
 
     private:
-        std::vector<MemBlock> blocksVector;
-        std::vector<Data_t> blocksWithFree;
-        Data_t ElemSizeInDSize;
-        Data_t UnitSizeInDSize;
+        std::vector<MemBlock> _blocks;
+        std::vector<std::size_t> _freelist;
+        std::size_t unitSize; /// Number of records to store one element and the control record
 };
 
 }
