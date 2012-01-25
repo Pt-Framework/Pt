@@ -76,18 +76,6 @@ void FileDevice::onClose()
 }
 
 
-void FileDevice::onAttach(EventLoop& s)
-{
-    _impl->attach(s);
-}
-
-
-void FileDevice::onDetach(EventLoop& s)
-{
-    _impl->detach(s);
-}
-
-
 size_t FileDevice::onBeginRead(char* buffer, size_t n, bool& eof)
 {
     return _impl->beginRead(*parent(), buffer, n, eof);

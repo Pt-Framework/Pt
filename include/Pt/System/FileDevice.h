@@ -84,10 +84,6 @@ class PT_SYSTEM_API FileDevice : public IODevice
 
         void onSync() const;
 
-        virtual void onAttach(EventLoop&);
-
-        virtual void onDetach(EventLoop&);
-
         virtual bool onRun();
 
     private:

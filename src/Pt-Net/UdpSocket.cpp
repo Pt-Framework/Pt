@@ -130,18 +130,6 @@ void UdpSocket::onClose()
 }
 
 
-void UdpSocket::onAttach(System::EventLoop& loop)
-{
-    _impl->attach(loop);
-}
-
-
-void UdpSocket::onDetach(System::EventLoop& loop)
-{
-    _impl->detach(loop);
-}
-
-
 bool UdpSocket::onRun()
 {
     if( this->reading() )

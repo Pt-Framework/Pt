@@ -94,12 +94,6 @@ class PT_NET_API TcpSocket : public System::IODevice
         // inherit doc
         virtual void onClose();
 
-        // inherit doc
-        virtual void onAttach(System::EventLoop& el);
-
-        // inherit doc
-        virtual void onDetach(System::EventLoop& el);
-
         virtual bool onRun();
 
         // inherit doc

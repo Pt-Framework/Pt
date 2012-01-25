@@ -203,18 +203,6 @@ void SerialDevice::onSync() const
 }
 
 
-void SerialDevice::onAttach(EventLoop& s)
-{
-    _impl->attach(s);
-}
-
-
-void SerialDevice::onDetach(EventLoop& s)
-{
-    _impl->detach(s);
-}
-
-
 bool SerialDevice::onRun()
 {
     if( this->reading() )

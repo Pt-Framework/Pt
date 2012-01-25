@@ -66,12 +66,6 @@ class TcpServerImpl;
       Signal<TcpServer&> connectionPending;
 
     protected:
-      // inherit doc
-      virtual void onAttach(System::EventLoop&);
-
-      // inherit doc
-      virtual void onDetach(System::EventLoop&);
-
       virtual void onCancel();
 
       virtual bool onRun();

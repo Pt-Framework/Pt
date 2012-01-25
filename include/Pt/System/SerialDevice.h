@@ -148,7 +148,7 @@ class PT_SYSTEM_API SerialDevice : public IODevice
         void open( const std::string& file, std::ios::openmode mode);
 
         //! @brief Sets the baud rate
-		void setBaudRate( unsigned rate );
+        void setBaudRate( unsigned rate );
 
         //! @brief Gets the baud rate
         unsigned baudRate() const;
@@ -198,10 +198,6 @@ class PT_SYSTEM_API SerialDevice : public IODevice
         size_t onRead(char* buffer, size_t count, bool& eof);
 
         size_t onWrite(const char* buffer, size_t count);
-
-        void onAttach(EventLoop&);
-
-        void onDetach(EventLoop&);
 
         bool onRun();
 

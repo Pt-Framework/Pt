@@ -80,12 +80,6 @@ class PT_NET_API UdpSocket : public System::IODevice
         // inherit doc
         virtual void onClose();
 
-        // inherit doc
-        virtual void onAttach(System::EventLoop&);
-
-        // inherit doc
-        virtual void onDetach(System::EventLoop&);
-
         virtual bool onRun();
 
         // inherit doc

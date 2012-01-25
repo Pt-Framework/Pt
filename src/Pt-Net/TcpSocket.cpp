@@ -174,18 +174,6 @@ void TcpSocket::onClose()
 }
 
 
-void TcpSocket::onAttach(System::EventLoop& sb)
-{
-    _impl->attach(sb);
-}
-
-
-void TcpSocket::onDetach(System::EventLoop& sb)
-{
-    _impl->detach(sb);
-}
-
-
 bool TcpSocket::onRun()
 {
     if( ! this->isConnected() )

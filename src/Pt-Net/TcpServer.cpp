@@ -94,18 +94,6 @@ void TcpServer::close()
 }
 
 
-void TcpServer::onAttach(System::EventLoop& sb)
-{
-    _impl->attach(sb);
-}
-
-
-void TcpServer::onDetach(System::EventLoop& sb)
-{
-    _impl->detach(sb);
-}
-
-
 void TcpServer::onCancel()
 {
     if( this->isActive() )
