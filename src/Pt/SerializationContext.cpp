@@ -126,7 +126,7 @@ class SerializationContextImpl
 #endif
 
 #ifdef NEWPOOL
-        , _alloc(sizeof(SerializationInfo)) // MemPool
+        , _alloc(sizeof(SerializationInfo))
 #endif
         {
 #ifdef OLDPOOL

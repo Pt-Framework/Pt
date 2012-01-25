@@ -31,6 +31,7 @@
 
 #include <Pt/MemoryBlock.h>
 #include <vector>
+#include <iostream>
 #include <cassert>
 
 namespace Pt{
@@ -184,67 +185,6 @@ private:
 };
 
 
-class MemoryPool2
-{
-    struct BlockInfo
-    {
-        /// Index of first empty block.
-        uint8_t firstAvail;
-
-        /// Count of empty slots
-        uint8_t _availCount;
-    };
-
-    public:
-        /// Create a MemoryPool which manages blocks of 'blockSize' size.
-        MemoryPool2()
-        {}
-    
-        /// Destroy the MemoryPool and release all its MemoryBlocks.
-        ~MemoryPool2()
-        {}
-    
-        void init(std::size_t blockSize, std::size_t pageSize)
-        {
-            assert(blockSize > 0);
-            assert(pageSize >= blockSize);
-
-            // make room for offset to begin
-            size_t mod = _blockSize % sizeof(void*);
-             _blockSize += sizeof(void*) - (_blockSize % sizeof(void*));
-
-            std::size_t numBlocks = pageSize / blockSize;
-            if (numBlocks > 255)
-            {
-                numBlocks = 255;
-            }
-            else if(numBlocks < 8)
-            {
-                numBlocks = 8;
-            }
-        
-            _numBlocks = static_cast<Pt::uint8_t>(numBlocks);
-            assert(_numBlocks == numBlocks);
-        }
-    
-        void* allocate()
-        { return 0; }
-    
-        bool deallocate(void* p)
-        { return false; }
-
-    private:
-        /// element size in bytes.
-        std::size_t _blockSize;
-    
-        /// Number of elements managed by each block.
-        Pt::uint8_t _numBlocks;
-
-        std::vector<BlockInfo*> _blocks;
-};
-
-
-
 class MemPool
 {
     typedef std::size_t Record;
@@ -261,7 +201,7 @@ class MemPool
             std::size_t maxUnits;
         
         public:
-            MemBlock(std::size_t unitSize_, std::size_t numUnits = 512)
+            MemBlock(std::size_t unitSize_, std::size_t numUnits)
             : block(0)
             , firstFreeIndex(InvalidIndex)
             , unitSize(unitSize_)
@@ -326,14 +266,11 @@ class MemPool
     };
 
     public:
-        MemPool(std::size_t elemSize)
-        : unitSize(((elemSize + (RecordSize-1)) / RecordSize) + 1)
+        MemPool(std::size_t elemSize, std::size_t maxPageSize = 8192)
+        : _recordsPerUnit(((elemSize + (RecordSize - 1)) / RecordSize) + 1)
+        , _maxUnits(maxPageSize / (_recordsPerUnit * RecordSize))
         {
             _blocks.reserve(16); 
-
-            _freelist.push_back( _blocks.size() );
-            _blocks.push_back( MemBlock(unitSize) );
-
         }
 
         ~MemPool()
@@ -350,7 +287,7 @@ class MemPool
             if( _freelist.empty() )
             {
                 _freelist.push_back( _blocks.size() );
-                _blocks.push_back( MemBlock(unitSize) );
+                _blocks.push_back( MemBlock(_recordsPerUnit, _maxUnits) );
             }
             
             const std::size_t index = _freelist.back();
@@ -390,7 +327,90 @@ class MemPool
     private:
         std::vector<MemBlock> _blocks;
         std::vector<std::size_t> _freelist;
-        std::size_t unitSize; /// Number of records to store one element and the control record
+        std::size_t _recordsPerUnit; /// Number of records to store one element and the control record
+        std::size_t _maxUnits;
+};
+
+
+class MemPoolAllocator
+{
+    public:
+        MemPoolAllocator(std::size_t maxElemSize, std::size_t step = 16, std::size_t maxPagesize = 8192)
+        : _maxObjectSize(maxElemSize)
+        , _objectAlignSize(step)
+        {
+            assert( 0 != _objectAlignSize );
+
+            const std::size_t numPools = (_maxObjectSize + _objectAlignSize - 1) / _objectAlignSize;
+
+            for (std::size_t i = 1; i <= numPools; ++i)
+            {
+                _pools.push_back( new MemPool(i * _objectAlignSize, maxPagesize) );
+            }
+
+            assert(numPools == _pools.size());
+        }
+        
+        ~MemPoolAllocator()
+        {
+            assert( 0 != _objectAlignSize );
+
+            std::vector<MemPool*>::iterator it;
+            for(it = _pools.begin(); it != _pools.end(); ++it)
+            {
+                delete *it;
+            }
+        }
+
+
+        void* allocate(std::size_t size)
+        {
+            if (size > _maxObjectSize || 0 == size)
+            {
+                return ::operator new( size );
+            }
+        
+            const std::size_t index = (size-1) / _objectAlignSize;
+
+            assert (index < _pools.size() );
+            MemPool* pool = _pools[index];
+            return pool->allocate();
+        }
+        
+        void deallocate(void* p, std::size_t size)
+        {
+            if (size > _maxObjectSize || NULL == p)
+            {
+                ::operator delete(p);
+                return;
+            }
+
+            assert(size > 0);
+               
+            // WTF ???
+            //if (0 == size)
+            //{
+            //    size = 1;
+            //}
+        
+            const std::size_t index = (size-1) / _objectAlignSize;
+            assert (index < _pools.size() );
+            MemPool* pool = _pools[index];
+            pool->deallocate(p);
+        }
+
+    private:
+        std::vector<MemPool*> _pools;
+
+        /**
+         * @brief Largest object size supported by allocators.
+         */
+        const std::size_t _maxObjectSize;
+    
+        /**
+         * @brief Size of alignment boundaries.
+         */
+        const std::size_t _objectAlignSize;
 };
 
 }
