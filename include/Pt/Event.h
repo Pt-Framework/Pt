@@ -69,8 +69,8 @@ class Event
         template <typename EventT>
         static void destruct(const EventT& ev, Allocator& allocator)
         {
-            this->~EventT();
-            allocator.deallocate(&ev, sizeof(T));
+            ev.~EventT();
+            allocator.deallocate(&ev, sizeof(EventT));
         }
 };
 
