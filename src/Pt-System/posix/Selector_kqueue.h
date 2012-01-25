@@ -308,7 +308,6 @@ class SelectorImpl : public Selector
         }
 
     private:
-        // TODO: move this to Selector
         SelectableList _selectables;
         Clock _clock;
         WakePipe _wakePipe;

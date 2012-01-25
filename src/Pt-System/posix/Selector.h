@@ -189,20 +189,6 @@ class Selector
         virtual bool isWritable(IOHandle* h) = 0;
 
         virtual bool isError(IOHandle* h) = 0;
-
-//      void attach(Selectable& s)
-//      {
-//          _selectables.insert(s);
-//      }
-//
-//      void detach(Selectable& s)
-//      {
-//          SelectableList::unlink(s);
-//      }
-
-    private:
-        // TODO: move this here
-        // SelectableList _selectables;
 };
 
 } //namespace System

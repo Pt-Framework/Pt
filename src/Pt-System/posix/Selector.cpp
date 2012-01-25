@@ -39,10 +39,6 @@ Selector::Selector()
 
 Selector::~Selector()
 { 
-//  while( ! _selectables.empty() )
-//  {
-//      _selectables.first()->detach();
-//  }
 }
 
 } //namespace System

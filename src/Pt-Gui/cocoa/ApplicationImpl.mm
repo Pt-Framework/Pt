@@ -191,6 +191,8 @@ void MainLoop::onReady(System::Selectable& s)
 
 void MainLoop::onRun()
 {
+    // NOTE: instead of a master timer we could also iterate using
+    //       NSApp runUntil().
     [NSApp run];
 }
 

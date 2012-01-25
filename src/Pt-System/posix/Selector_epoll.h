@@ -28,6 +28,7 @@
 #ifndef PT_SYSTEM_SELECTOR_EPOLL_H
 #define PT_SYSTEM_SELECTOR_EPOLL_H
 
+#include "../SelectableList.h"
 #include "Pt/System/Api.h"
 #include "Pt/System/Clock.h"
 #include "Pt/System/Selectable.h"
@@ -62,15 +63,22 @@ class SelectorImpl  : public Selector
 
         ~SelectorImpl()
         {         
-            std::set<Selectable*>::iterator it;
-
-            while( _selectables.size() )
+            while( ! _selectables.empty() )
             {
-                it = _selectables.begin();
-                (*it)->detach();
+                _selectables.first()->detach();
             }
 
             ::close(_epfd);
+        }
+
+        void attach(Selectable& s)
+        {
+            _selectables.insert(s);
+        }
+        
+        void detach(Selectable& s)
+        {
+            SelectableList::unlink(s);
         }
 
         void cancel(IOHandle& h)
@@ -282,18 +290,8 @@ class SelectorImpl  : public Selector
             return isWake;
         }
 
-        void attach(Selectable& s)
-        {
-            _selectables.insert(&s);
-        }
-        
-        void detach(Selectable& s)
-        {
-            _selectables.erase(&s);
-        }
-
     private:
-        std::set<Selectable*> _selectables; // inactive
+        SelectableList _selectables;
         Clock _clock;
         WakePipe _wakePipe;
         int _epfd;
