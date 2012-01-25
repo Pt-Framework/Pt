@@ -28,6 +28,7 @@
 #ifndef PT_SYSTEM_SELECTOR_SELECT_H
 #define PT_SYSTEM_SELECTOR_SELECT_H
 
+#include "../SelectableList.h"
 #include "Pt/System/Api.h"
 #include "Pt/System/Clock.h"
 #include "Pt/System/Selectable.h"
@@ -49,7 +50,7 @@ class SelectorImpl : public Selector
     public:
         SelectorImpl()
         {
-            _current = _devices.end();
+            _current = 0;
 
             FD_ZERO(&_rfds);
             FD_ZERO(&_wfds);
@@ -64,19 +65,34 @@ class SelectorImpl : public Selector
 
         ~SelectorImpl()
         {         
-            std::set<Selectable*>::iterator it;
-
-            while( _selectables.size() )
+            while( ! _devices.empty() )
             {
-                it = _selectables.begin();
-                (*it)->detach();
+                _devices.first()->detach();
             }
+
+            while( ! _selectables.empty() )
+            {
+                _selectables.first()->detach();
+            }
+
+            assert( _devices.empty() );
+        }
+
+        void attach(Selectable& s)
+        {
+            _selectables.insert(s);
+        }
+        
+        void detach(Selectable& s)
+        {
+            SelectableList::unlink(s);
         }
 
         void cancel(IOHandle& h)
         {
-            std::set<Selectable*>::iterator it = _devices.find( h.sel );
-            if( it == _devices.end() )
+            Selectable* s = h.sel;
+
+            if(h.id == IOHandle::InvalidId)
                 return;
 
             assert(h.fd > 0);
@@ -86,21 +102,20 @@ class SelectorImpl : public Selector
             FD_CLR(h.fd, &_efds);
             h.id = IOHandle::InvalidId;
             
-            if( (_current != _devices.end()) && (*_current == *it) )
+            if( _current == h.sel )
             {
-                _devices.erase(_current++);
+                _current = _current->next();
             }
-            else
-            {
-                _devices.erase(it);
-            }
+        
+            _selectables.insert(*s);
         }
 
         void enableSelect(IOHandle* h)
         {
+            Selectable* s = h->sel;
             if( ! h->id != IOHandle::InvalidId )
             {
-                _devices.insert( h->sel );
+                _devices.insert(*s);
                 FD_SET(h->fd, &_efds);
                 h->id = 1;
             }
@@ -203,51 +218,40 @@ class SelectorImpl : public Selector
         
             try
             {
-                for( _current = _devices.begin(); _current != _devices.end(); )
+                for( _current = _devices.first(); _current != 0; )
                 {
-                    Selectable* selectable = *_current;
+                    Selectable* selectable = _current;
         
                     bool isAvail = selectable->run();
-        
+
                     if( isAvail )
                         --avail;
-        
+
                     if(avail <= 0)
                         break;
-        
-                    if(_current != _devices.end())
+
+                    if(_current == selectable)
                     {
-                        if(*_current == selectable)
-                        {
-                            ++_current;
-                        }
+                        _current = _current->next();
                     }
                 }
+
+                _current = 0;
             }
             catch (...)
             {
-                _current = _devices.end();
+                _current = 0;
                 throw;
             }
-        
-            return isWake;
-        }
 
-        void attach(Selectable& s)
-        {
-            _selectables.insert(&s);
-        }
-        
-        void detach(Selectable& s)
-        {
-            _selectables.erase(&s);
+            return isWake;
         }
 
     private:
         WakePipe _wakePipe;
-        std::set<Selectable*> _selectables; // inactive
-        std::set<Selectable*>::iterator _current;
-        std::set<Selectable*> _devices; // active
+        SelectableList _selectables;
+        SelectableList _devices;
+        Selectable* _current;
         fd_set _rfds;
         fd_set _wfds;
         fd_set _efds;

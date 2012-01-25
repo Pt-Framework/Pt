@@ -34,6 +34,7 @@
 
 #ifdef __APPLE__
     #define PT_WITH_BSD_KQUEUE
+    //#define PT_WITH_POSIX_POLL
 #endif
 
 #ifdef __linux__
