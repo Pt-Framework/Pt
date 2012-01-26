@@ -29,6 +29,76 @@ namespace Pt {
 
 namespace System {
 
+#ifdef _WIN32_WCE
+
+class PipeIODevice : public IODevice, private IODeviceImpl
+{
+    public:
+        enum Mode {Read, Write};
+    
+        PipeIODevice(Mode mode);
+    
+        ~PipeIODevice();
+    
+        void open(HANDLE handle);
+    
+    protected:
+        void onAttach(EventLoop& loop);
+    
+        void onDetach(EventLoop& loop);
+    
+        void onCancel();
+    
+        //! @brief Closes the I/O device
+        void onClose();
+    
+        bool onRun();
+    
+        size_t onBeginRead(char* buffer, size_t n, bool& eof);
+    
+        size_t onEndRead(char* buffer, size_t n, bool& eof);
+    
+        size_t onBeginWrite(const char* buffer, size_t n);
+    
+        size_t onEndWrite(const char* buffer, size_t n);
+    
+        //! @brief Read bytes from device
+        size_t onRead(char* buffer, size_t count, bool& eof);
+    
+        //! @brief Write bytes to device
+        size_t onWrite(const char* buffer, size_t count);
+    
+        void onSync() const;
+    
+    protected:
+        void writeMessage(const char* buffer, size_t count);
+    
+    private:
+        IOHandle _ioh;
+        Mode     _mode;
+        DWORD    _msgSize;
+        size_t   _bufferSize;
+        std::vector<char> _buffer;
+};
+
+class PipeImpl
+{
+    public:
+        PipeImpl();
+
+        ~PipeImpl();
+
+        IODevice& out();
+
+        IODevice& in();
+
+    private:
+        PipeIODevice  _out;
+        PipeIODevice  _in;
+};
+
+#else // normal WIN32
+
 class PipeIODevice : public IODevice
 {
     public:
@@ -85,6 +155,8 @@ class PipeImpl
         PipeIODevice        _out;
         static LONG _nameId;
 };
+
+#endif
 
 } // namespace System
 

@@ -28,14 +28,325 @@
  */
 #include "PipeImpl.h"
 #include "Pt/System/SystemError.h"
-#include <windows.h>
 #include <sstream>
 #include <iostream>
 #include <cassert>
+#include <windows.h>
+
+#ifdef _WIN32_WCE
+#include "MainLoopImpl.h"
+#include "Pt/System/EventLoop.h"
+#include <Msgqueue.h>
+#endif
 
 namespace Pt {
 
 namespace System {
+
+#ifdef _WIN32_WCE
+
+PipeIODevice::PipeIODevice(Mode mode)
+: _mode(mode)
+, _msgSize(0)
+, _bufferSize(0)
+{
+    _ioh.sel = this;
+}
+
+
+PipeIODevice::~PipeIODevice()
+{   
+    try
+    {
+        IODevice::close();
+    }
+    catch(...)
+    {
+    }
+}
+
+
+void PipeIODevice::open(HANDLE h)
+{
+    this->setHandle(h);
+
+    _ioh.setHandle(h);
+
+    MSGQUEUEINFO info;
+    info.dwSize = sizeof(MSGQUEUEINFO);
+
+    if ( TRUE == GetMsgQueueInfo(handle(), &info) )
+    {
+        _msgSize = info.cbMaxMessage;
+        _buffer.resize(_msgSize);
+    }
+}
+
+
+void PipeIODevice::onClose()
+{
+    if(handle() != INVALID_HANDLE_VALUE)
+    {
+        if( FALSE == ::CloseMsgQueue(handle()) )
+        {
+            throw IOError( "CloseMsgQueue failed" );
+        }
+
+        this->setHandle(INVALID_HANDLE_VALUE);
+        _ioh.setHandle(INVALID_HANDLE_VALUE);
+    }
+}
+
+
+void PipeIODevice::onCancel()
+{
+    parent()->selector().disable(_ioh);
+}
+
+
+void PipeIODevice::onAttach(EventLoop& loop)
+{
+}
+
+
+void PipeIODevice::onDetach(EventLoop& loop)
+{
+    assert( ! reading() ); 
+    assert( ! writing() ); 
+}
+
+
+bool PipeIODevice::onRun()
+{
+    bool avail = false;
+
+    if( _wbuf )
+    {
+        outputReady().send(*this);
+        avail = true;
+    }
+    
+    if( _rbuf )
+    {
+        inputReady().send(*this);
+        avail = true;
+    }
+
+    return avail;
+}
+
+
+size_t PipeIODevice::onBeginRead(char* buffer, size_t n, bool& eof)
+{
+    if( Read != _mode )
+        throw IOError( PT_ERROR_MSG("Could not read from write only pipe") );
+    
+    if(_bufferSize)
+        return std::min(_bufferSize, n);
+
+    parent()->selector().enable(_ioh);
+    return 0;
+}
+
+
+size_t PipeIODevice::onEndRead(char* buffer, size_t n, bool& eof)
+{
+    parent()->selector().disable(_ioh);
+
+    DWORD readBytes = 0;
+    DWORD flags     = 0;
+    eof = false;
+
+    if (_bufferSize)
+    {
+        readBytes = _bufferSize;
+    }
+    else if ( FALSE == ReadMsgQueue(handle(), &_buffer[0], _msgSize, &readBytes, INFINITE, &flags) )
+    {
+        throw IOError( PT_ERROR_MSG("Could not read from message queue handle") );
+    }
+
+    DWORD bytesToCopy = std::min<DWORD>(_rbuflen, readBytes);
+
+    memcpy(_rbuf, &_buffer[0], bytesToCopy);
+    _bufferSize = 0;
+
+    if (_rbuflen >= readBytes)
+        return readBytes;
+
+    std::vector<char>::iterator beginData = (_buffer.begin() + bytesToCopy);
+    std::vector<char>::iterator endData   = (_buffer.begin() + readBytes);
+    std::copy(beginData, endData, _buffer.begin());
+
+    _bufferSize = (readBytes - bytesToCopy);
+    return bytesToCopy;
+}
+
+
+size_t PipeIODevice::onBeginWrite(const char* buffer, size_t n)
+{
+    if( Write != _mode )
+    {
+        throw IOError( PT_ERROR_MSG("Could not write on a read only pipe") );
+    }
+    
+    parent()->selector().enable(_ioh);
+    return 0;
+}
+
+
+size_t PipeIODevice::onEndWrite(const char* buffer, size_t n)
+{
+    parent()->selector().disable(_ioh);
+
+    DWORD bytesToWrite = std::min<DWORD>(_wbuflen, _msgSize);
+
+    if ( FALSE == WriteMsgQueue(handle(), (LPVOID) _wbuf, bytesToWrite, 0, 0))
+    {
+        throw IOError( PT_ERROR_MSG("WriteMsgQueue failed") );
+    }
+    
+    return bytesToWrite;
+}
+
+
+size_t PipeIODevice::onRead(char* buffer, size_t count, bool& eof)
+{
+    if( Read != _mode )
+        throw IOError( PT_ERROR_MSG("Could not read from write only pipe") );
+
+    DWORD readBytes = 0;
+    DWORD flags     = 0;
+    eof = false;
+
+    if(_bufferSize) 
+    {
+        readBytes = _bufferSize;
+    }
+    else if ( FALSE == ReadMsgQueue(handle(), &_buffer[0], _msgSize, &readBytes, INFINITE, &flags) ) 
+    {
+        throw IOError( PT_ERROR_MSG("ReadMsgQueue failed") );
+    }
+
+    memcpy(buffer, &_buffer[0], count);
+    _bufferSize = 0;
+
+    if (count >= readBytes)
+        return readBytes;
+
+    std::vector<char>::iterator beginData = (_buffer.begin() + count);
+    std::vector<char>::iterator endData   = (_buffer.begin() + readBytes);
+    std::copy(beginData, endData, _buffer.begin());
+    _bufferSize = (readBytes - count);
+
+    return count;
+}
+
+
+void PipeIODevice::writeMessage(const char* buffer, size_t count)
+{
+    if( FALSE == WriteMsgQueue(handle(), (LPVOID) buffer, count, INFINITE, 0) )
+        throw IOError( PT_ERROR_MSG("WriteMsgQueue failed") );
+}
+
+
+size_t PipeIODevice::onWrite(const char* buffer, size_t count)
+{
+    if( Write != _mode )
+        throw IOError( PT_ERROR_MSG("Could not write on a read only pipe") );
+
+    size_t offset = 0;
+    for(size_t n = count; ; n -= _msgSize )
+    {
+        if (n <= _msgSize)
+        {
+            writeMessage( (buffer + offset), n );
+            break;
+        }
+
+        writeMessage( (buffer + offset), _msgSize );
+        offset += _msgSize;
+    }
+
+    return count;
+}
+
+
+void PipeIODevice::onSync() const
+{
+}
+
+
+/*bool PipeIODevice::onWait(std::size_t msecs)
+{
+    if(_bufferSize)
+    {
+        return true;
+    }
+
+    DWORD result = WaitForSingleObject(handle(), msecs);
+
+    if(result == WAIT_OBJECT_0)
+    {
+        this->checkEvent();
+    }
+    else if(result == WAIT_FAILED)
+    {
+        throw IOError( PT_ERROR_MSG("WaitForSingleObject failed") );
+    }
+
+    return result == WAIT_OBJECT_0;
+}
+*/
+
+
+PipeImpl::PipeImpl()
+: _out(PipeIODevice::Read)
+, _in(PipeIODevice::Write)
+{
+    MSGQUEUEOPTIONS writeOpts, readOpts;
+
+    memset(&writeOpts, 0, sizeof(writeOpts));
+    memset(&readOpts,  0, sizeof(readOpts));
+
+    writeOpts.dwSize          = sizeof(MSGQUEUEOPTIONS);
+    writeOpts.dwFlags         = MSGQUEUE_ALLOW_BROKEN;
+    writeOpts.dwMaxMessages   = 100;
+    writeOpts.cbMaxMessage    = 1024;
+    writeOpts.bReadAccess     = FALSE;
+
+    readOpts = writeOpts;
+    readOpts.bReadAccess     = TRUE;
+
+    HANDLE outputHandle = CreateMsgQueue(NULL, &writeOpts);
+    if (outputHandle == INVALID_HANDLE_VALUE)
+        throw IOError( PT_ERROR_MSG("Could not create message queue handle") );
+
+    HANDLE inputHandle  = OpenMsgQueue(::GetCurrentProcess(), outputHandle, &readOpts);
+    if (inputHandle == INVALID_HANDLE_VALUE)
+        throw IOError( PT_ERROR_MSG("Could not open message queue handle") );
+
+    _out.open(inputHandle);
+    _in.open(outputHandle);
+}
+
+
+PipeImpl::~PipeImpl()
+{
+}
+
+
+IODevice& PipeImpl::out()
+{
+    return _out;
+}
+
+IODevice& PipeImpl::in()
+{
+    return _in;
+}
+
+#else  // normal WIN32
 
 PipeIODevice::PipeIODevice()
 : _impl(*this)
@@ -205,6 +516,8 @@ PipeIODevice& PipeImpl::in()
 
 
 LONG PipeImpl::_nameId = 0;
+
+#endif
 
 } // namespace System
 

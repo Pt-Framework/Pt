@@ -21,8 +21,10 @@
 #define PT_SYSTEM_SERIALDEVICEIMPL_H
 
 #include "IODeviceImpl.h"
+#include "Pt/System/IODevice.h"
 #include "Pt/System/IOError.h"
 #include "Pt/System/SerialDevice.h"
+#include "Pt/System/Thread.h"
 #include <string>
 #include <windows.h>
 
@@ -30,7 +32,11 @@ namespace Pt{
 
 namespace System{
 
+#ifdef _WIN32_WCE
+class SerialDeviceImpl : public Pt::System::IODeviceImpl
+#else
 class SerialDeviceImpl : public OverlappedIODeviceImpl
+#endif
 {
     public:
         SerialDeviceImpl(SerialDevice& device);
@@ -69,17 +75,50 @@ class SerialDeviceImpl : public OverlappedIODeviceImpl
         
         bool setSignal(SerialDevice::SerialLine signal);
         
+#ifdef _WIN32_WCE
+        bool runRead(EventLoop&);
+
+        bool runWrite(EventLoop&);
+
+        size_t beginRead(EventLoop& loop, char* buffer, size_t n, bool& eof);    
+
+        size_t endRead(EventLoop& loop, char* buffer, size_t n, bool& eof);
+
+        size_t read( char* buffer, size_t count, bool& eof );
+
+        size_t beginWrite(EventLoop& loop, const char* buffer, size_t n);
+
+        size_t endWrite(EventLoop& loop, const char* buffer, size_t n);
+
+        size_t write( const char* buffer, size_t count );
+#endif
+
     private:
         void writeCommState( DCB& commState );
         
         void readCommState( DCB& commState ) const;
 
+#ifdef _WIN32_WCE
+        void run();       
+#endif
+
+#ifdef _WIN32_WCE
+    private:
+        SerialDevice& _device;
+        HANDLE _beginWait;
+        DCB _orgCommState;        
+        AttachedThread* _thread;  
+        bool _terminateThread;
+        DWORD _event;
+
+#else // normal WIN32
     private:
         SerialDevice& _device;
         HANDLE _waitHandle;
         OVERLAPPED _readOv;
         OVERLAPPED _writeOv;
         DCB _orgCommState;
+#endif
 };
 
 }//namespace System

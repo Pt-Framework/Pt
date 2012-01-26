@@ -38,6 +38,283 @@ namespace Pt {
 
 namespace System {
 
+#ifdef _WIN32_WCE
+
+SerialDeviceImpl::SerialDeviceImpl(SerialDevice& device)
+: _device(device)
+, _thread(0)
+, _terminateThread(false)
+, _beginWait(0)
+, _event(0)
+{ 
+    _beginWait = CreateEvent(NULL, FALSE, FALSE, NULL);
+}
+
+
+SerialDeviceImpl::~SerialDeviceImpl()
+{ 
+    CloseHandle( _beginWait );
+}
+
+
+void SerialDeviceImpl::open( const std::string& port_, std::ios::openmode mode)
+{
+    std::basic_string<TCHAR> port;
+    win32::fromMultiByte( port_, port );
+
+    DWORD openFlags = 0;
+    if( mode & std::ios::out )
+        openFlags |= GENERIC_WRITE;
+
+    if( mode & std::ios::in )
+        openFlags |= GENERIC_READ;
+
+    HANDLE h = CreateFile( port.c_str() , openFlags, 0, NULL, OPEN_EXISTING, 0, NULL);
+
+    size_t err = GetLastError();
+
+    if( h == 0  || h == INVALID_HANDLE_VALUE )
+        throw AccessFailed(port_);
+
+    this->setHandle(h);
+
+    try
+    {
+        if( ! GetCommState( h, &_orgCommState ) )
+            throw AccessFailed("Get port state failed" );       
+
+        // ReadFile and WriteFile are non-blocking
+        COMMTIMEOUTS comTimeOut;
+        comTimeOut.ReadIntervalTimeout          = MAXDWORD;
+        comTimeOut.ReadTotalTimeoutMultiplier   = MAXDWORD;
+        comTimeOut.ReadTotalTimeoutConstant     = 1;
+        comTimeOut.WriteTotalTimeoutMultiplier  = 0;
+        comTimeOut.WriteTotalTimeoutConstant    = 1;
+
+        if( ! SetCommTimeouts( h, &comTimeOut ) )
+            throw AccessFailed("Set port time outs failed");
+
+        _terminateThread = false;
+    }
+    catch( ... )
+    {
+        CloseHandle(h);
+        h = 0;
+        throw;
+    }
+}
+
+void SerialDeviceImpl::close()
+{
+    assert(0 == _thread);
+    CloseHandle( handle() );
+    this->setHandle(INVALID_HANDLE_VALUE);
+}
+
+
+void SerialDeviceImpl::cancel(EventLoop& loop)
+{
+    if( handle() == 0 || handle() == INVALID_HANDLE_VALUE )
+        return;
+    
+    // Signalise the thread to terminate
+    _terminateThread = true;
+    
+    // Reset the wait mask, to wake up WaitCommEvent
+    SetCommMask( handle(), 0 );
+
+    // Wake up the thread
+    SetEvent(_beginWait);
+
+    // Wait for comm event thread termination
+    _thread->join();
+    delete _thread;
+    _thread = 0;
+
+    _event = 0;
+}
+
+
+bool SerialDeviceImpl::runRead(EventLoop& loop)
+{
+    return (_event & EV_RXCHAR) == EV_RXCHAR;
+}
+
+
+bool SerialDeviceImpl::runWrite(EventLoop& loop)
+{
+    return (_event & EV_TXEMPTY) == EV_TXEMPTY;
+}
+
+
+void SerialDeviceImpl::run()
+{ 
+    while( ! _terminateThread )
+    {   
+        WaitForSingleObject(_beginWait, INFINITE);
+
+        if(_terminateThread)
+            return;
+
+        // NOTE: WaitCommEvent can be interrupted by calling SetCommMask
+        // from another thread
+        _event = 0;
+        BOOL ret = WaitCommEvent(handle(), &_event, NULL); 
+
+        //TODO: Handle comm errors
+        DWORD error = 0;
+        COMSTAT cs; 
+        ClearCommError( handle(), &error, &cs );
+        DWORD err = GetLastError();
+        
+        if( ret == TRUE && (_event & (EV_TXEMPTY|EV_RXCHAR)) )
+        {         
+            _device.setReady();
+        }        
+        else
+        {
+            // TODO: Handling for unexpected events
+            DebugBreak();
+        }
+    }
+}
+
+
+size_t SerialDeviceImpl::beginRead(EventLoop& loop, char* buffer, size_t n, bool& eof) 
+{
+    DWORD len = 0;
+    if( ! ReadFile( handle(), buffer, n, &len, 0 ) )
+    {
+        throw IOError("ReadFile");
+    }
+
+    if( len > 0 )
+        return len;
+
+    DWORD mask = 0;
+    GetCommMask( handle(), &mask );
+    SetCommMask( handle(), mask | EV_RXCHAR );
+
+    if ( ! _thread)
+    {
+        _thread = new AttachedThread( callable(*this, &SerialDeviceImpl::run) );
+        _thread->start();
+    }
+
+    SetEvent(_beginWait); 
+    return 0;
+}
+
+
+size_t SerialDeviceImpl::endRead(EventLoop& loop, char* buffer, size_t n, bool& eof)
+{
+    DWORD mask = 0;
+    GetCommMask(handle(), &mask);
+    SetCommMask(handle(), mask &~ EV_RXCHAR);
+    _event &= ~EV_RXCHAR;
+
+    return read(buffer, n, eof);
+}
+
+
+size_t SerialDeviceImpl::read( char* buffer, size_t count, bool& eof )
+{
+    DWORD length = 0;
+
+    if( ! ReadFile( handle(), buffer, count, &length, 0 ) )
+        throw IOError( PT_ERROR_MSG("Read port failed") );
+
+    if(length > 0)
+        return length;
+
+    DWORD mask = 0;
+    GetCommMask( handle(), &mask );
+    SetCommMask( handle(), mask | EV_RXCHAR );
+
+    DWORD event = 0;
+    WaitCommEvent(handle(), &event, NULL); 
+
+    SetCommMask( handle(), mask &~ EV_RXCHAR );
+
+    if( ! ReadFile( handle(), buffer, count, &length, 0 ) )
+        throw IOError( PT_ERROR_MSG("Read port failed") );
+
+    if( length == 0 )     
+       eof = true;
+
+    return length;
+}
+
+
+size_t SerialDeviceImpl::beginWrite(EventLoop& loop, const char* buffer, size_t n)
+{
+    DWORD len = 0;
+    if( ! WriteFile( handle(), buffer, n, &len, 0 ) )
+    {
+        throw IOError( PT_ERROR_MSG("Could not write to file handle") );
+    }
+
+    if(len > 0)
+        return len;
+
+    DWORD mask = 0;
+    GetCommMask(handle(), &mask);
+    SetCommMask(handle(), mask | EV_TXEMPTY);
+
+    if ( ! _thread)
+    {
+        _thread = new AttachedThread( callable(*this, &SerialDeviceImpl::run) );
+        _thread->start();
+    }
+
+    SetEvent(_beginWait);
+
+    return 0;
+}
+
+
+size_t SerialDeviceImpl::endWrite(EventLoop& loop, const char* buffer, size_t n)
+{
+    DWORD mask = 0;
+    GetCommMask(handle(), &mask);
+    SetCommMask( handle(), mask &~ EV_TXEMPTY );
+    _event &= ~EV_TXEMPTY;
+
+    return write(buffer, n);
+}   
+
+
+size_t SerialDeviceImpl::write( const char* buffer, size_t count )
+{
+    DWORD length = 0;
+
+    if( ! WriteFile( handle(), buffer, count, &length, 0 ) )
+    {
+        throw IOError( PT_ERROR_MSG("Could not write to file handle") );
+    }
+
+    if(length > 0)
+        return length;
+
+    DWORD mask = 0;
+    GetCommMask(handle(), &mask);
+    SetCommMask(handle(), mask | EV_TXEMPTY);
+
+    DWORD event = 0;
+    WaitCommEvent(handle(), &event, NULL); 
+
+    SetCommMask( handle(), mask &~ EV_TXEMPTY );
+
+    if( ! WriteFile( handle(), buffer, count, &length, 0 ) )
+    {
+        throw IOError( PT_ERROR_MSG("Could not write to file handle") );
+    }
+
+    return length;
+}
+
+#else // normal WIN32
+
 SerialDeviceImpl::SerialDeviceImpl(SerialDevice& device)
 : OverlappedIODeviceImpl(device)
 , _device(device)
@@ -61,6 +338,7 @@ SerialDeviceImpl::~SerialDeviceImpl()
 {
     ::CloseHandle(_waitHandle);
 }
+
 
 
 void SerialDeviceImpl::open( const std::string& port_, std::ios::openmode mode)
@@ -120,6 +398,7 @@ void SerialDeviceImpl::close()
 }
 
 
+
 void SerialDeviceImpl::cancel(EventLoop& loop)
 {
     ::CancelIo( handle() );
@@ -128,6 +407,7 @@ void SerialDeviceImpl::cancel(EventLoop& loop)
     OverlappedIODeviceImpl::cancel(loop);
 }
 
+#endif // normal WIN32
 
 void SerialDeviceImpl::writeCommState( DCB& commState )
 {
@@ -373,8 +653,14 @@ void SerialDeviceImpl::setTimeout( size_t msec )
     comTimeOut.ReadIntervalTimeout          = MAXDWORD;
     comTimeOut.ReadTotalTimeoutMultiplier   = MAXDWORD;
     comTimeOut.ReadTotalTimeoutConstant     = msec;
+
+#ifdef _WIN32_WCE
+    comTimeOut.WriteTotalTimeoutMultiplier  = 0;
+    comTimeOut.WriteTotalTimeoutConstant    = msec;
+#else
     comTimeOut.WriteTotalTimeoutMultiplier  = 10;
     comTimeOut.WriteTotalTimeoutConstant    = 100;
+#endif
 
     if( !SetCommTimeouts( handle(), &comTimeOut ) )
         throw IOError("SetCommTimeouts");

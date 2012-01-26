@@ -78,7 +78,7 @@ if $(TARGET_OS:L) = "qnxnto"
 }
 if $(TARGET_OS:L) = "wince"
 {
-    SYS     ?= wince ;
+    SYS     ?= win32 ;
     GUI     ?= gdi ;
     SYSLIBS = mmtimer.lib ;
     NETLIBS = winsock.lib Ws2.lib ;
