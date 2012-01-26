@@ -36,117 +36,17 @@
 
 namespace Pt {
 
-namespace
-{
-    // The BlockAllocator allocates multipe chunks of memory at once
-    // and returns on each call to allocate the next available chunk.
-    // The chunks are not deallocated nor recycled, but the memory
-    // is released, when the BlockAllocator is released.
-    //
-    // This fits perfectly well into the serialiation context, since
-    // a bunch of SerializationInfo objects are needed for serialization
-    // and are released all at once, when the serialation is finished.
-
-    template <typename T>
-    class BlockAllocator
-    {
-            BlockAllocator(const BlockAllocator&) { }
-            BlockAllocator& operator=(const BlockAllocator&)  { return *this; }
-
-        public:
-            explicit BlockAllocator(size_t numElementsPerBlock)
-                : _blockSize(numElementsPerBlock * sizeof(T)),
-                  _offset(_blockSize),
-                  _count(0)
-            {
-                assert(numElementsPerBlock > 0);
-            }
-
-            ~BlockAllocator();
-
-            void* allocate();
-            void deallocate(void *);
-
-        private:
-            size_t _blockSize;
-            size_t _offset;
-            unsigned _count;
-            std::vector<char*> _memory;
-    };
-
-    template <typename T>
-    BlockAllocator<T>::~BlockAllocator()
-    {
-        for (std::vector<char*>::iterator it = _memory.begin(); it != _memory.end(); ++it)
-            delete[] *it;
-    }
-
-    template <typename T>
-    void* BlockAllocator<T>::allocate()
-    {
-        if (_offset >= _blockSize)
-        {
-            _memory.push_back( new char[_blockSize] );
-            _offset = 0;
-        }
-
-        void* ptr = static_cast<void*>(_memory.back() + _offset);
-
-        _offset += sizeof(T);
-        ++_count;
-
-        return ptr;
-    }
-
-    template <typename T>
-    void BlockAllocator<T>::deallocate(void*)
-    {
-        if  (--_count == 0)
-        {
-            for (std::vector<char*>::iterator it = _memory.begin(); it != _memory.end(); ++it)
-                delete[] *it;
-            _memory.clear();
-            _offset = _blockSize;
-        }
-    }
-
-}
-
-#define NEWPOOL
-//#define OLDPOOL
-//#define FREELIST
-
 class SerializationContextImpl
 {
     public:
         SerializationContextImpl()
         : _limit(64)
-#ifdef FREELIST
-        , _alloc(64) // block allocator
-#endif
-
-#ifdef NEWPOOL
         , _alloc(sizeof(SerializationInfo))
-#endif
-        {
-#ifdef OLDPOOL
-            _alloc.init(sizeof(SerializationInfo), 4096);
-#endif
-        }
+
+        { }
 
         size_t _limit;
-
-#ifdef FREELIST
-        BlockAllocator<SerializationInfo> _alloc;
-#endif
-
-#ifdef NEWPOOL
         MemoryPool _alloc;
-#endif
-
-#ifdef OLDPOOL
-        MemoryPool _alloc;
-#endif
         std::map<Pt::TypeInfo, SerializationSurrogate*> _surrmap;
 };
 
