@@ -361,6 +361,16 @@ class PT_SYSTEM_API Logger : protected Pt::NonCopyable
         */
         ~Logger();
 
+        /** @brief Get a target from the logging manager
+
+            The target is created if it does not exist, otherwise the
+            existing target is returned. If the target is created it is
+            initialised with the properties from the configuration file
+            of the loggin manager. This method is thread-safe.
+        */
+        static LogTarget& getTarget(const std::string& name)
+        { return LogTarget::get(name); }
+
         /** @brief Returns true if the log level is enabled for the target
         */
         bool enabled(LogLevel level) const

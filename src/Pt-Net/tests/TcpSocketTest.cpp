@@ -32,6 +32,7 @@
 #include "Pt/Net/TcpServer.h"
 #include "Pt/Net/TcpSocket.h"
 #include "Pt/System/MainLoop.h"
+#include "Pt/System/Logger.h"
 #include <string>
 
 class TcpSocketTest : public Pt::Unit::TestSuite
@@ -41,12 +42,14 @@ class TcpSocketTest : public Pt::Unit::TestSuite
         : Pt::Unit::TestSuite("TcpSocketTest")
         , _loop(0)
         {
+          Pt::System::Logger::getTarget("").setLogLevel(Pt::System::Warn);
+
           this->registerMethod( "NonBlockingWithLoop", *this,
                                 &TcpSocketTest::NonBlockingWithLoop);
           //this->registerMethod( "NonBlockingWithWait", *this,
           //                      &TcpSocketTest::NonBlockingWithWait);
-          //this->registerMethod( "ConnectFailed", *this,
-          //                      &TcpSocketTest::ConnectFailed);
+          this->registerMethod( "ConnectFailed", *this,
+                                &TcpSocketTest::ConnectFailed);
         }
 
         void setUp()

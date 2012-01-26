@@ -31,6 +31,7 @@
 #include "AddrInfoImpl.h"
 #include "TcpServerImpl.h"
 #include "MainLoopImpl.h"
+#include <Pt/System/Logger.h>
 #include <Pt/System/SystemError.h>
 #include <Pt/Net/TcpServer.h>
 #include <Pt/Net/TcpSocket.h>
@@ -38,10 +39,7 @@
 #include <cstring>
 #include <cassert>
 
-#define log_debug(x)
-
-//#include <iostream>
-//#define log_debug(x) std::cerr << x << std::endl;
+log_define("Pt.System.TcpSocket");
 
 namespace Pt {
 
