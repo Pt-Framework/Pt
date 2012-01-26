@@ -27,157 +27,52 @@
  */
 
 #include "Pt/PoolAllocator.h"
-#include "Pt/MemoryPool.h"
-#include "Pt/MemoryBlock.h"
-
-#include <cassert>
-
-namespace {
-
-/**
- * @brief Calculates index into array where a MemoryPool of numBytes is located.
- */
- inline std::size_t getOffset(std::size_t numBytes, std::size_t alignment)
- {
-    const std::size_t alignExtra = alignment - 1;
-    return (numBytes + alignExtra) / alignment;
- }
-
-};
 
 namespace Pt {
 
-PoolAllocator::PoolAllocator(std::size_t pageSize, std::size_t maxObjectSize,
-                             std::size_t objectAlignSize):
-_pool(0),
-_maxObjectSize(maxObjectSize),
-_objectAlignSize(objectAlignSize)
+MemoryPool::MemoryPool(std::size_t elemSize, std::size_t maxPageSize)
+: _recordsPerUnit(((elemSize + (RecordSize - 1)) / RecordSize) + 1)
+, _maxUnits(maxPageSize / (_recordsPerUnit * RecordSize))
 {
-    assert( 0 != objectAlignSize );
-    const std::size_t allocCount = getOffset( maxObjectSize, objectAlignSize );
-    _pool = new MemoryPool[allocCount];
-    for (std::size_t i = 0; i < allocCount; ++i)
+    _blocks.reserve(16); 
+}
+
+
+MemoryPool:: ~MemoryPool()
+{
+    for(std::size_t i = 0; i < _blocks.size(); ++i)
     {
-        _pool[ i ].init((i+1)*objectAlignSize, pageSize);
+        assert( _blocks[i].isEmpty() );
+        _blocks[i].clear();
     }
 }
 
-PoolAllocator::~PoolAllocator(void)
+
+PoolAllocator::PoolAllocator(std::size_t maxElemSize, std::size_t step, std::size_t maxPagesize)
+: _maxObjectSize(maxElemSize)
+, _objectAlignSize(step)
 {
     assert( 0 != _objectAlignSize );
-    delete [] _pool;
+
+    const std::size_t numPools = (_maxObjectSize + _objectAlignSize - 1) / _objectAlignSize;
+
+    for (std::size_t i = 1; i <= numPools; ++i)
+    {
+        _pools.push_back( new MemoryPool(i * _objectAlignSize, maxPagesize) );
+    }
+
+    assert(numPools == _pools.size());
 }
 
-void* PoolAllocator::allocate(std::size_t size)
+PoolAllocator::~PoolAllocator()
 {
-    if (size > getMaxObjectSize() || 0 == size)
+    assert( 0 != _objectAlignSize );
+
+    std::vector<MemoryPool*>::iterator it;
+    for(it = _pools.begin(); it != _pools.end(); ++it)
     {
-        return ::operator new( size );
+        delete *it;
     }
-
-    assert(NULL != _pool);
-
-    const std::size_t index = getOffset( size, getAlignment() ) - 1;
-
-#ifndef NDEBUG
-    const std::size_t allocCount = getOffset(getMaxObjectSize(), getAlignment());
-    assert(index < allocCount);
-#endif
-
-    MemoryPool& pool = _pool[ index ];
-    assert(pool.blockSize() >= size);
-    assert(pool.blockSize() < size + getAlignment());
-
-    return pool.allocate();
-}
-
-void PoolAllocator::deallocate(void* p, std::size_t size)
-{
-    if (size > getMaxObjectSize() || NULL == p)
-    {
-        ::operator delete(p);
-        return;
-    }
-
-    assert(NULL != _pool);
-
-    if (0 == size)
-    {
-        size = 1;
-    }
-
-    const std::size_t index = getOffset(size, getAlignment()) - 1;
-
-#ifndef NDEBUG
-    const std::size_t allocCount = getOffset(getMaxObjectSize(), getAlignment());
-    assert(index < allocCount);
-#endif
-
-    MemoryPool& allocator = _pool[ index ];
-    assert(allocator.blockSize() >= size);
-    assert(allocator.blockSize()  < size + getAlignment());
-    const bool found = allocator.deallocate(p);
-
-    (void) found;
-    assert( found );
-}
-
-bool PoolAllocator::trim( void )
-{
-    bool found = false;
-    const std::size_t allocCount = getOffset(getMaxObjectSize(), getAlignment());
-    std::size_t i = 0;
-
-    for ( ; i < allocCount; ++i )
-    {
-        if (_pool[ i ].trimEmptyMemoryBlock())
-        {
-            found = true;
-        }
-    }
-    
-    for ( i = 0; i < allocCount; ++i )
-    {
-        if (_pool[ i ].trimMemoryBlockList())
-        {
-            found = true;
-        }
-    }
-
-    return found;
-}
-
-bool PoolAllocator::isCorrupt() const
-{
-#ifndef NDEBUG
-    if (NULL == _pool)
-    {
-        assert(false);
-        return true;
-    }
-
-    if (0 == getAlignment())
-    {
-        assert(false);
-        return true;
-    }
-
-    if (0 == getMaxObjectSize())
-    {
-        assert( false );
-        return true;
-    }
-
-    const std::size_t allocCount = getOffset(getMaxObjectSize(), getAlignment());
-    for (std::size_t i = 0; i < allocCount; ++i )
-    {
-        if (_pool[i].isCorrupt() )
-        {
-            return true;
-        }
-    }
-#endif	
-    return false;
 }
 
 }

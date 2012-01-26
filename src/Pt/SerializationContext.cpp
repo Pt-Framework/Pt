@@ -29,7 +29,7 @@
 #include "Pt/SerializationContext.h"
 #include "Pt/SerializationSurrogate.h"
 #include "Pt/SerializationError.h"
-#include "Pt/MemoryPool.h"
+#include "Pt/PoolAllocator.h"
 
 #include <map>
 #include <cassert>
@@ -141,7 +141,7 @@ class SerializationContextImpl
 #endif
 
 #ifdef NEWPOOL
-        MemPool _alloc;
+        MemoryPool _alloc;
 #endif
 
 #ifdef OLDPOOL

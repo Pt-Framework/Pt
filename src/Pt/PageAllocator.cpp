@@ -62,6 +62,7 @@ PageAllocator::PageAllocator( std::size_t size )
     expandStorage(size);
 }
 
+
 PageAllocator::~PageAllocator()
 {
     Page* memchunk = _listOfVariableChunk;
@@ -73,6 +74,7 @@ PageAllocator::~PageAllocator()
     }
 }
 
+
 void* PageAllocator::allocate( std::size_t size )
 {
     std::size_t space = _listOfVariableChunk->spaceAvailable();
@@ -82,12 +84,15 @@ void* PageAllocator::allocate( std::size_t size )
     return _listOfVariableChunk->allocate(size);
 }
 
+
 void PageAllocator::deallocate( void* p, std::size_t size )
 {
 }
 
+
 void PageAllocator::expandStorage(std::size_t size)
 {
+    // TODO: shouldn't size be the current chunk size ?
     _listOfVariableChunk = new Page(_listOfVariableChunk, size);
 }
 

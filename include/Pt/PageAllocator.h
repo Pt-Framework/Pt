@@ -42,19 +42,22 @@ class PT_API PageAllocator : public Pt::Allocator
         {
             public:
                 Page(Page* nextChunk, std::size_t chunkSize);
-                
+
                 ~Page();
-        
+
                 void* allocate(std::size_t reqSize);
-        
+
                 Page *nextVariableChunk()
                 { return _nextChunk; }
-        
-                std::size_t spaceAvailable()
+
+                std::size_t spaceAvailable() const
                 { return _chunkSize - _bytesAlreadyAllocated; }
         
+                std::size_t capacity() const
+                { return _chunkSize; }
+
                 enum { DEFAULT_VARIABLE_CHUNK_SIZE = 4096 };
-        
+
             private:
                 Page* _nextChunk;
                 char* _mem;

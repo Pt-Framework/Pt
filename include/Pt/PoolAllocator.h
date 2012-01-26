@@ -32,143 +32,191 @@
 #include <Pt/Api.h>
 #include <Pt/Allocator.h>
 #include <Pt/Types.h>
+#include <Pt/NonCopyable.h>
+#include <vector>
+#include <cassert>
+#include <cstddef>
 
 namespace Pt {
 
-class MemoryPool;
+class PT_API MemoryPool : public NonCopyable
+{
+    typedef std::size_t Record;
+    static const Record RecordSize = sizeof(Record);
+    static const Record InvalidIndex = std::size_t(-1);
 
-/** @brief Manages a pool of fixed-size allocators.
+    class Block
+    {
+            Record* block;
+            std::size_t firstFreeIndex;
+            std::size_t unitSize;
+            std::size_t availUnits;
+            std::size_t endIndex;
+            std::size_t maxUnits;
+        
+        public:
+            Block(std::size_t unitSize_, std::size_t numUnits)
+            : block(0)
+            , firstFreeIndex(InvalidIndex)
+            , unitSize(unitSize_)
+            , availUnits(numUnits)
+            , endIndex(0)
+            , maxUnits(numUnits)
+            {}
+        
+            bool isFull() const
+            { return availUnits == 0; }
 
-    Designed to be a non-templated base class of AllocatorSingleton so that
-    implementation details can be safely hidden in the source code file.
- */
-class PT_API PoolAllocator : public Pt::Allocator
+            bool isEmpty() const
+            { return availUnits == maxUnits; }   
+
+            void clear()
+            {
+                delete[] block;
+                block = 0;
+                firstFreeIndex = InvalidIndex;
+            }
+        
+            Record* allocate()
+            {
+                assert(availUnits > 0);
+
+                if( firstFreeIndex != InvalidIndex )
+                {
+                    assert(firstFreeIndex < endIndex);
+                    Record* retval = block + firstFreeIndex;
+                    firstFreeIndex = *retval;
+                    --availUnits;
+                    return retval;
+                }
+
+                if( ! block )
+                {
+                    block = new Record[maxUnits*unitSize];
+                    endIndex = 0;
+                }
+        
+                Record* retval = block + endIndex;
+                endIndex += unitSize;
+
+                assert(endIndex <= maxUnits*unitSize);
+                --availUnits;
+                return retval;
+            }
+        
+            void deallocate(Record* ptr)
+            {
+                assert(availUnits <= maxUnits);
+
+                *ptr = firstFreeIndex;
+                firstFreeIndex = ptr - block;
+                assert( ptr >= block );
+                assert( ptr <= (block + endIndex) );
+                ++availUnits;
+            }
+    };
+
+    public:
+        MemoryPool(std::size_t elemSize, std::size_t maxPageSize = 8192);
+
+        ~MemoryPool();
+        
+        void* allocate()
+        {
+            if( _freelist.empty() )
+            {
+                _freelist.push_back( _blocks.size() );
+                _blocks.push_back( Block(_recordsPerUnit, _maxUnits) );
+            }
+            
+            const std::size_t index = _freelist.back();
+            Block& block = _blocks[index];
+
+            Record* retval = block.allocate();
+            *retval = index;
+            ++retval;
+            
+            if(block.isFull())
+                _freelist.pop_back();
+            
+            return retval;
+        }
+        
+        void deallocate(void* ptr)
+        {
+            if( ! ptr )
+                return;
+            
+            Record* unitPtr = reinterpret_cast<Record*>(ptr);
+            --unitPtr;
+
+            const std::size_t blockIndex = *unitPtr;
+            Block& block = _blocks[blockIndex];
+            
+            if( block.isFull() )
+                _freelist.push_back(blockIndex);
+
+            block.deallocate(unitPtr);
+
+            // keep the first block
+            if(  block.isEmpty() && blockIndex > 0 )
+                block.clear();
+        }
+
+    private:
+        std::vector<Block> _blocks;
+        std::vector<std::size_t> _freelist;
+
+        //! @internal @brief Number of records to store one element and the control record
+        std::size_t _recordsPerUnit;
+        std::size_t _maxUnits;
+};
+
+
+class PT_API PoolAllocator : public NonCopyable
 {
     public:
-        /** 
-         * @brief The only available constructor needs certain parameters in order to
-         *        initialize all the MemoryPool's.  
-         * @param[in] pageSize # of bytes in a page of memory.
-         * @param[in] maxObjectSize Max # of bytes which this may allocate.
-         * @param[in] objectAlignSize # of bytes between alignment boundaries.
-         */
-        PoolAllocator(std::size_t pageSize, std::size_t maxObjectSize,
-                      std::size_t objectAlignSize );
-    
-        /** 
-         * @brief Destructor releases all blocks, all MemoryBlocks, and MemoryPool's.
-         * 
-         * Any outstanding blocks are unavailable, and should not be used after
-         * this destructor is called.  The destructor is deliberately non-virtual
-         * because it is protected, not public.
-         */
+        PoolAllocator(std::size_t maxElemSize, std::size_t step = 16, std::size_t maxPagesize = 8192);
+        
         ~PoolAllocator();
-    
-        /** 
-         * @brief Allocates a block of memory of requested size.  Complexity is often
-         * constant-time, but might be O(C) where C is the number of MemoryBlocks in a
-         * MemoryPool. 
-    
-         * @par Exception Safety Level
-         * Provides either strong-exception safety, or no-throw exception-safety
-         * level depending upon doThrow parameter.  The reason it provides two
-         * levels of exception safety is because it is used by both the nothrow
-         * and throwing new operators.  The underlying implementation will never
-         * throw of its own accord, but this can decide to throw if it does not
-         * allocate.  The only exception it should emit is std::bad_alloc.
-    
-         * @par Allocation Failure
-         * If it does not allocate, it will call trimExcessMemory and attempt to
-         * allocate again, before it decides to throw or return NULL.  Many
-         * allocators loop through several new_handler functions, and terminate
-         * if they can not allocate, but not this one.  It only makes one attempt
-         * using its own implementation of the new_handler, and then returns NULL
-         * or throws so that the program can decide what to do at a higher level.
-         * (Side note: Even though the C++ Standard allows allocators and
-         * new_handlers to terminate if they fail, the Pt allocator does not do
-         * that since that policy is not polite to a host program.)
-    
-         * @param size # of bytes needed for allocation.
-         * @param doThrow True if this should throw if unable to allocate, false
-         * if it should provide no-throw exception safety level.
-         * @return NULL if nothing allocated and doThrow is false.  Else the
-         * pointer to an available block of memory.
-         */
-        void* allocate(std::size_t size);
-    
-        /** 
-         * @brief Deallocates a block of memory at a given place and of a specific
-         * size.  Complexity is almost always constant-time, and is O(C) only if
-         * it has to search for which MemoryBlock deallocates.  This never throws.
-         */
-        void deallocate(void* p, std::size_t size);
-    
-    
-        /**
-         * @brief Returns max # of bytes which this can allocate.
-         *
-         * @return Returns max # of bytes allocates by MemoryPools.
-         */
-        inline std::size_t getMaxObjectSize() const
-        { return _maxObjectSize; }
-    
-        /**
-         * @brief Returns # of bytes between allocation boundaries.
-         * @return Returns # of bytes between allocation boundaries.
-         */
-        inline std::size_t getAlignment() const 
-        { return _objectAlignSize; }
-    
-        /** 
-         * @brief Releases empty MemoryBlocks from memory.
-         *
-         * Complexity is O(F + C) where F is the count of MemoryPool's in the pool, and C is the number of
-         * MemoryBlocks in all MemoryPool's.  This will never throw.
-         * @return True if any memory released, or false if none released.
-         */
-        bool trim( void );
-    
-        /** 
-         * @brief Returns true if anything in implementation is corrupt.
-         *
-         * Complexity is O(F + C + B) where F is the count of MemoryPool's in the pool,
-         * C is the number of MemoryBlocks in all MemoryPool's, and B is the number
-         * of blocks in all MemoryBlocks.  If it determines any data is corrupted, this
-         * will return true in release version, but assert in debug version at
-         * the line where it detects the corrupted data.  If it does not detect
-         * any corrupted data, it returns false.
-         */
-        bool isCorrupt( void ) const;
-    
+
+        void* allocate(std::size_t size)
+        {
+            if (size > _maxObjectSize || 0 == size)
+            {
+                return ::operator new( size );
+            }
+        
+            const std::size_t index = (size-1) / _objectAlignSize;
+
+            assert (index < _pools.size() );
+            MemoryPool* pool = _pools[index];
+            return pool->allocate();
+        }
+        
+        void deallocate(void* p, std::size_t size)
+        {
+            if (size > _maxObjectSize || NULL == p)
+            {
+                ::operator delete(p);
+                return;
+            }
+
+            assert(size > 0);
+
+            const std::size_t index = (size-1) / _objectAlignSize;
+            assert (index < _pools.size() );
+            MemoryPool* pool = _pools[index];
+            pool->deallocate(p);
+        }
+
     private:
-        /**
-         * @brief Default-constructor is not implemented.
-         */
-        PoolAllocator(void);
-    
-        /** 
-         * @brief Copy-constructor is not implemented.     
-         */
-        PoolAllocator(const PoolAllocator&);
-    
-        /** 
-         * @brief Copy-assignment operator is not implemented.
-         */
-        PoolAllocator& operator = (const PoolAllocator&);
-    
-        /**
-         * @brief Pointer to array of fixed-size allocators.
-         */
-        MemoryPool* _pool;
-    
-        /**
-         * @brief Largest object size supported by allocators.
-         */
+        std::vector<MemoryPool*> _pools;
+
+        //! @internal @brief Largest object size supported by allocators.
         const std::size_t _maxObjectSize;
     
-        /**
-         * @brief Size of alignment boundaries.
-         */
+        //! @internal @brief Size of alignment boundaries.
         const std::size_t _objectAlignSize;
 };
 
