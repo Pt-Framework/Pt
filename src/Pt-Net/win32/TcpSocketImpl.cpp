@@ -27,15 +27,14 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "TcpSocketImpl.h"
-#include <Pt/Net/AddrInfo.h>
 #include "AddrInfoImpl.h"
 #include "TcpServerImpl.h"
 #include "MainLoopImpl.h"
-#include <Pt/System/Logger.h>
-#include <Pt/System/SystemError.h>
+#include <Pt/Net/AddrInfo.h>
 #include <Pt/Net/TcpServer.h>
 #include <Pt/Net/TcpSocket.h>
-#include <sstream>
+#include <Pt/System/Logger.h>
+#include <Pt/System/SystemError.h>
 #include <cstring>
 #include <cassert>
 
@@ -46,14 +45,13 @@ namespace Pt {
 namespace Net {
 
 TcpSocketImpl::TcpSocketImpl(TcpSocket& socket)
-: _connectResult(0)
+: _errorPending(false)
 , _fd(INVALID_SOCKET)
 , _isConnected(false)
 , _eventFlags(FD_CLOSE)
-, _timeout(INFINITE) // Pt::System::EventLoop::WaitInfinite ?
+, _timeout(System::EventLoop::WaitInfinite)
 , _ioh(socket)
 {
-    //_currentEventHandle = INVALID_HANDLE_VALUE;
 }
 
 
@@ -66,26 +64,9 @@ void TcpSocketImpl::attachEvent(HANDLE ev, long events)
 {
     if (WSAEventSelect(_fd, ev, events) == SOCKET_ERROR)
     {
-        log_debug("set event failed: "<< WSAGetLastError());
+        log_warn( "WSAEventSelect failed: " << WSAGetLastError() );
         throw System::SystemError( PT_ERROR_MSG("attach event to socket failed") );
     }
-}
-
-
-void TcpSocketImpl::attach(System::EventLoop& loop)
-{
-    /*log_debug("attach to loop");
-    HANDLE h = loop.impl().enable(_socket);
-    _currentEventHandle = h;*/
-}
-
-
-void TcpSocketImpl::detach(System::EventLoop& loop)
-{
-    /*log_debug("detach from loop");
-
-    loop.impl().disable(_socket);
-    _currentEventHandle = INVALID_HANDLE_VALUE;*/
 }
 
 
@@ -116,6 +97,7 @@ void TcpSocketImpl::close()
     if(loop)
         this->detach(*loop);*/
 
+    log_debug("close socket " << _fd);
     ::closesocket(_fd);
     _fd = INVALID_SOCKET;
     _isConnected = false;
@@ -172,63 +154,12 @@ void TcpSocketImpl::connect(const AddrInfo& addrinfo)
 }
 
 
-const char* TcpSocketImpl::tryConnect()
-{
-
-    if (_addrInfoPtr == _addrInfo.impl()->end())
-    {
-        log_debug("no more address informations");
-        return "invalid address information";
-    }
-
-    while (true)
-    {
-        while (true)
-        {
-            log_debug("create socket");
-            _fd = WSASocket(_addrInfoPtr->ai_family, SOCK_STREAM, 0, NULL, 0, 0);
-
-             if (_fd != INVALID_SOCKET)
-                break;
-
-             if (++_addrInfoPtr == _addrInfo.impl()->end())
-                return "socket";
-        }
-
-        std::memmove(&_peeraddr, _addrInfoPtr->ai_addr, _addrInfoPtr->ai_addrlen);
-
-        log_debug("created socket " << _fd);
-
-        if( ::connect(_fd, _addrInfoPtr->ai_addr, _addrInfoPtr->ai_addrlen) == 0 )
-        {
-            _isConnected = true;
-            log_debug("immediate connect ");
-            break;
-        }
-
-        DWORD lastError = WSAGetLastError();
-        if( lastError == WSAEWOULDBLOCK || lastError == WSAEINPROGRESS )
-        {
-            _eventFlags |= FD_CONNECT;
-            log_debug("connect in progress");
-            break;
-        }
-
-        log_debug("connect failed");
-        close();
-
-        if (++_addrInfoPtr == _addrInfo.impl()->end())
-            return "connect";
-    }
-
-    return 0;
-}
-
-
 bool TcpSocketImpl::beginConnect(const AddrInfo& ai, System::EventLoop& loop)
 {
     assert( ! _isConnected );
     log_debug("begin connect");
+
+    _errorPending = false;
 
     if(_ioh.handle() == INVALID_HANDLE_VALUE)
     {
@@ -237,113 +168,145 @@ bool TcpSocketImpl::beginConnect(const AddrInfo& ai, System::EventLoop& loop)
     
     _addrInfo = ai;
     _addrInfoPtr = _addrInfo.impl()->begin();
-    _connectResult = tryConnect();
-    checkPendingError();
 
-    if(_isConnected)
+    while(true)
     {
-        log_debug("connected " << _fd);
-    }
+        if(_addrInfoPtr == _addrInfo.impl()->end())
+            throw System::IOError("connect failed");
 
-    if( ! _isConnected)
-        attachEvent(_ioh.handle(), _eventFlags);
+        try
+        {
+            _isConnected = beginConnect(*_addrInfoPtr);
+            break;
+        } 
+        catch(const System::IOError&)
+        {
+            ++_addrInfoPtr;
+        }
+    }
 
     return _isConnected;
 }
 
 
-void TcpSocketImpl::checkPendingError()
+// return true if wait is needed...
+bool TcpSocketImpl::beginConnect(const ::addrinfo& ai)
 {
-    log_debug(_fd << " checkPendingError");
+    _fd = WSASocket(ai.ai_family, SOCK_STREAM, 0, NULL, 0, 0);
+    log_debug("created socket " << _fd);
 
-    if(_connectResult)
-    {
-        log_debug(_fd << "error msg: " << _connectResult);
-        const char* p = _connectResult;
-        _connectResult = 0;
-        throw System::IOError(p);
-    }
-}
+    if (_fd == INVALID_SOCKET)
+        throw System::IOError("WSASocket");
 
+    std::memmove(&_peeraddr, _addrInfoPtr->ai_addr, _addrInfoPtr->ai_addrlen);
 
-int TcpSocketImpl::checkConnect()
-{
-    int sockerr;
-
-    socklen_t optlen = sizeof(sockerr);
-
-    if( ::getsockopt(_fd, SOL_SOCKET, SO_ERROR, (char*)&sockerr, &optlen) != 0 )
-    {
-        //WSAINPROGRESS??
-        close();
-        throw System::SystemError("getsockopt");
-    }
-    else if(sockerr == 0)
+    if( ::connect(_fd, _addrInfoPtr->ai_addr, _addrInfoPtr->ai_addrlen) == 0 )
     {
         _isConnected = true;
+        log_debug("immediate connect");
+        return true;
     }
 
-    return sockerr;
+    DWORD lastError = WSAGetLastError();
+    if( lastError == WSAEWOULDBLOCK || lastError == WSAEINPROGRESS )
+    {
+        _eventFlags |= FD_CONNECT;
+        attachEvent(_ioh.handle(), _eventFlags);
+        log_debug("connect in progress");
+        return false;
+    }
+
+    log_debug("connect failed");
+    close();
+    throw System::IOError("connect");
+
+    return false;
 }
 
 
 void TcpSocketImpl::endConnect(System::EventLoop& loop)
 {
-    log_debug(_fd << " endConnect");
+    log_debug("endConnect on " << _fd);
 
     _eventFlags &= ~FD_CONNECT;
+    attachEvent(_ioh.handle(), _eventFlags);
 
-    if(_ioh.handle() != INVALID_HANDLE_VALUE)
-        attachEvent(_ioh.handle(), _eventFlags);
-
-    checkPendingError();
+    if(_errorPending)
+        throw System::IOError("connect");
 
     if( _isConnected )
         return;
 
-    _eventFlags |= FD_CONNECT;
-    attachEvent(_ioh.handle(), _eventFlags);
+    log_debug("wait for connect on " << _fd);
 
-    log_debug(_fd << " force endConnect");
     try
     {
+        bool hasTimeout = false;
         while (true)
         {
+            _eventFlags |= FD_CONNECT;
+            attachEvent(_ioh.handle(), _eventFlags);
+
             bool avail = this->wait(_timeout);
+            if( ! avail )
+                hasTimeout = true;
 
-            if (avail)
+            _eventFlags &= ~FD_CONNECT;
+            attachEvent(_ioh.handle(), _eventFlags);
+
+            if(avail)
             {
-                // something has happened
-                checkConnect();
-                if (_isConnected)
+                WSANETWORKEVENTS events;
+                if( WSAEnumNetworkEvents(_fd, NULL, &events) == SOCKET_ERROR )
+                    throw System::SystemError("WSAEnumNetworkEvents failed");
+
+                if( (events.lNetworkEvents & FD_CLOSE) == FD_CLOSE )
                 {
-                    _eventFlags &= ~FD_CONNECT;
-                    attachEvent(_ioh.handle(), _eventFlags);
-                    return;
+                    log_debug("received close event " << _fd);
                 }
-
-                if (++_addrInfoPtr == _addrInfo.impl()->end())
+                else if( (events.lNetworkEvents & FD_CONNECT) == FD_CONNECT )
                 {
-                    // no more addrInfo - propagate error
-                    throw System::IOError("connect failed");
+                    int s = FD_CONNECT_BIT;
+                    if(events.iErrorCode[s] == 0)
+                    {
+                        log_debug("connected " << _fd);
+                        _isConnected = true;
+                        return;
+                    }
+                }
+                else
+                {
+                    log_debug("received unknown network event " << _fd);
+                    continue;
                 }
             }
-            else if (++_addrInfoPtr == _addrInfo.impl()->end())
-            {
-                // nothing has happened in time
-                throw System::IOTimeout();
-            }
+            
+            log_debug("failed to connect, try next address " << _fd);
+            this->close();
+            ++_addrInfoPtr;
 
-            close();
-
-            _connectResult = tryConnect();
-            if (_isConnected)
+            while(true)
             {
-                _eventFlags &= ~FD_CONNECT;
-                attachEvent(_ioh.handle(), _eventFlags);
-                return;
+                if( _addrInfoPtr == _addrInfo.impl()->end() )
+                {
+                    log_debug("no more addresses to try");
+                    if(hasTimeout)
+                        throw System::IOTimeout();
+                    else
+                        throw System::IOError("connect");
+                }
+        
+                try
+                {
+                    log_debug("try next address");
+                    _isConnected = beginConnect(*_addrInfoPtr);
+                    break;
+                } 
+                catch(const System::IOError&)
+                {
+                    ++_addrInfoPtr;
+                }
             }
-            checkPendingError();
         }
     }
     catch(...)
@@ -351,6 +314,54 @@ void TcpSocketImpl::endConnect(System::EventLoop& loop)
         close();
         throw;
     }
+}
+
+
+bool TcpSocketImpl::runConnect(System::EventLoop& loop)
+{
+    WSANETWORKEVENTS events;
+
+    if( WSAEnumNetworkEvents(_fd, NULL, &events) == SOCKET_ERROR )
+        throw System::SystemError("WSAEnumNetworkEvents failed");
+
+    if( (events.lNetworkEvents & FD_CLOSE) == FD_CLOSE )
+    {
+       _errorPending = true;
+       return true;
+    }
+
+    if( (events.lNetworkEvents & FD_CONNECT) != FD_CONNECT )
+        return false;
+
+    int s = FD_CONNECT_BIT;
+    if(events.iErrorCode[s] == 0)
+    {
+        _isConnected = true;
+        return true;
+    }
+
+    this->close();
+
+    while( true )
+    {
+        if( _addrInfoPtr == _addrInfo.impl()->end() )
+        {
+            _errorPending = true;
+            return true;
+        }
+
+        try
+        {
+            _isConnected = beginConnect(*_addrInfoPtr);
+            break;
+        } 
+        catch(const System::IOError&)
+        {
+            ++_addrInfoPtr;
+        }
+    }
+
+    return _isConnected;
 }
 
 
@@ -375,6 +386,7 @@ bool TcpSocketImpl::runRead(System::EventLoop& loop)
     return false;
 }
 
+
 bool TcpSocketImpl::runWrite(System::EventLoop& loop)
 {
     WSANETWORKEVENTS events;
@@ -395,128 +407,6 @@ bool TcpSocketImpl::runWrite(System::EventLoop& loop)
 
     return false;
 }
-
-
-bool TcpSocketImpl::runConnect(System::EventLoop& loop)
-{
-    WSANETWORKEVENTS events;
-
-    if( WSAEnumNetworkEvents(_fd, NULL, &events) == SOCKET_ERROR )
-        throw System::SystemError("WSAEnumNetworkEvents failed");
-
-    if( (events.lNetworkEvents & FD_CLOSE) == FD_CLOSE )
-    {
-       _isConnected = false;
-       return true;
-    }
-
-    if((events.lNetworkEvents & FD_CONNECT) == FD_CONNECT && ! _isConnected)
-    {
-        //ResetEvent(_currentEventHandle);
-        int s = FD_CONNECT_BIT;
-        if(events.iErrorCode[s] != 0)
-        {
-            if (++_addrInfoPtr == _addrInfo.impl()->end())
-            {
-                // no more addrInfo - propagate error
-                _connectResult = "connect failed";
-                return true;
-            }
-
-            _connectResult = tryConnect();
-            if (_isConnected)
-            {
-                return true;
-            }
-        }
-        else
-        {
-            _isConnected = true;
-            return true;
-        }
-    }
-
-    return false;
-}
-
-
-/*bool TcpSocketImpl::run(System::EventLoop& loop)
-{
-    log_debug(_fd << " avail");
-
-    DestructionSentry sentry(_sentry);
-
-    WSANETWORKEVENTS events;
-
-    if(WSAEnumNetworkEvents(_fd, NULL, &events) == SOCKET_ERROR)
-        throw System::SystemError("WSAEnumNetworkEvents failed");
-
-    bool ev = false;
-
-    if((events.lNetworkEvents & FD_CONNECT) == FD_CONNECT && !_isConnected)
-    {
-        //ResetEvent(_currentEventHandle);
-        int s = FD_CONNECT_BIT;
-        if(events.iErrorCode[s] != 0)
-        {
-            if (++_addrInfoPtr == _addrInfo.impl()->end())
-            {
-                // no more addrInfo - propagate error
-                _connectResult = "connect failed";
-                _socket.connected.send(_socket);
-                return true;
-            }
-
-            _connectResult = tryConnect(&loop);
-            if (_isConnected)
-            {
-                _socket.connected.send(_socket);
-                return true;
-            }
-        }
-        else
-        {
-            ev = true;
-            _isConnected = true;
-            _socket.connected.send(_socket);
-
-            if( ! _sentry )
-               return ev;
-        }
-    }
-
-    if(_socket.wavail() || ((events.lNetworkEvents & FD_WRITE) == FD_WRITE))
-    {
-       //ResetEvent(_currentEventHandle);
-       ev = true;
-       _socket.outputReady().send(_socket);
-
-       if( ! _sentry )
-           return ev;
-    }
-
-    if(_socket.ravail() || ((events.lNetworkEvents & FD_READ) == FD_READ))
-    {
-        //ResetEvent(_currentEventHandle);
-        ev = true;
-        _socket.inputReady().send(_socket);
-
-        if( ! _sentry )
-           return ev;
-    }
-
-    if((events.lNetworkEvents & FD_CLOSE) == FD_CLOSE)
-    {
-        //ResetEvent(_currentEventHandle);
-         ev = true;
-       _isConnected = false;
-
-       if( ! _sentry )
-           return ev;
-    }
-
-    return ev;
-}*/
 
 
 bool TcpSocketImpl::wait(std::size_t umsecs)
@@ -766,111 +656,6 @@ size_t TcpSocketImpl::write(const char* buffer, size_t count)
 
     return  numberOfBytesSent;
 }
-
-
-/*bool TcpSocketImpl::setWaitHandle(HANDLE h, bool& avail)
-{
-    log_debug(_fd << " setWaitHandle");
-    avail = _dataSends != 0;
-
-    if( _currentEventHandle == h)
-        return true;
-
-    _currentEventHandle = h;
-
-    if(_waitEvent != _currentEventHandle)
-    {
-        log_debug(_fd << " wait handle is selector");
-    }
-
-    attachEvent(_currentEventHandle, _eventFlags);
-
-    return true;
-}*/
-
-/*bool TcpSocketImpl::checkEvent()
-{
-    log_debug(_fd << " checkEvent");
-
-    DestructionSentry sentry(_sentry);
-
-    if(_dataSends != 0 )
-    {
-       _socket.outputReady.send(_socket);
-       return true;
-    }
-
-    WSANETWORKEVENTS events;
-
-    if(WSAEnumNetworkEvents(_fd, NULL, &events) == SOCKET_ERROR)
-        throw System::SystemError("WSAEnumNetworkEvents failed");
-
-    bool ev = false;
-
-    if((events.lNetworkEvents & FD_CONNECT) == FD_CONNECT && !_isConnected)
-    {
-        //ResetEvent(_currentEventHandle);
-        int s = FD_CONNECT_BIT;
-        if(events.iErrorCode[s] != 0)
-        {
-            if (++_addrInfoPtr == _addrInfo.impl()->end())
-            {
-                // no more addrInfo - propagate error
-                _connectResult = "connect failed";
-                _socket.connected.send(_socket);
-                return true;
-            }
-
-            _connectResult = tryConnect();
-            if (_isConnected)
-            {
-                _socket.connected.send(_socket);
-                return true;
-            }
-        }
-        else
-        {
-            ev = true;
-            _isConnected = true;
-            _socket.connected.send(_socket);
-
-            if( ! _sentry )
-               return ev;
-        }
-    }
-
-    if((events.lNetworkEvents & FD_WRITE) == FD_WRITE)
-    {
-       //ResetEvent(_currentEventHandle);
-       ev = true;
-       _socket.outputReady.send(_socket);
-
-       if( ! _sentry )
-           return ev;
-    }
-
-    if((events.lNetworkEvents & FD_READ) == FD_READ)
-    {
-        //ResetEvent(_currentEventHandle);
-        ev = true;
-        _socket.inputReady.send(_socket);
-
-        if( ! _sentry )
-           return ev;
-    }
-
-    if((events.lNetworkEvents & FD_CLOSE) == FD_CLOSE)
-    {
-        //ResetEvent(_currentEventHandle);
-         ev = true;
-       _isConnected = false;
-
-       if( ! _sentry )
-           return ev;
-    }
-
-    return ev;
-}*/
 
 } // namespace Net
 

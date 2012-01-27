@@ -59,25 +59,6 @@ class TcpSocket;
 
 class TcpSocketImpl
 {
-    private:
-        AddrInfo _addrInfo;
-        const char* _connectResult;
-        AddrInfoImpl::const_iterator _addrInfoPtr;
-        SOCKET _fd;
-        sockaddr_storage _peeraddr;
-        std::size_t _timeout;
-        System::IOHandle _ioh;
-        WSABUF _sendBuffer;
-        WSABUF _receiveBuffer;
-        bool _isConnected;
-        long _eventFlags;
-
-        int checkConnect();
-        void attachEvent(HANDLE ev, long events);
-        size_t checkReceiveResult(bool& eof);
-        size_t checkSendResult();
-        const char* tryConnect();
-        void checkPendingError();
     public:
         TcpSocketImpl(TcpSocket& socket);
 
@@ -93,6 +74,8 @@ class TcpSocketImpl
         void connect(const AddrInfo& addrinfo);
 
         bool beginConnect(const AddrInfo& addrinfo, System::EventLoop& loop);
+
+        bool TcpSocketImpl::beginConnect(const ::addrinfo& ai);
 
         void endConnect(System::EventLoop& loop);
 
@@ -124,10 +107,6 @@ class TcpSocketImpl
 
         bool wait(std::size_t msecs);
 
-        void attach(System::EventLoop& sb);
-
-        void detach(System::EventLoop& sb);
-
         bool runRead(System::EventLoop& loop);
 
         bool runWrite(System::EventLoop& loop);
@@ -135,6 +114,22 @@ class TcpSocketImpl
         bool runConnect(System::EventLoop& loop);
 
         void cancel(System::EventLoop& loop);
+
+    private:
+        void attachEvent(HANDLE ev, long events);
+
+    private:
+        AddrInfo _addrInfo;
+        AddrInfoImpl::const_iterator _addrInfoPtr;
+        bool _errorPending;
+        SOCKET _fd;
+        sockaddr_storage _peeraddr;
+        std::size_t _timeout;
+        System::IOHandle _ioh;
+        WSABUF _sendBuffer;
+        WSABUF _receiveBuffer;
+        bool _isConnected;
+        long _eventFlags;
 };
 
 } // namespace Net
