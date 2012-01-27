@@ -75,7 +75,6 @@ void TcpSocketImpl::cancel(System::EventLoop& loop)
     if(_ioh.handle() != INVALID_HANDLE_VALUE)
     {
         loop.selector().disableOverlapped(_ioh);
-        //_currentEventHandle = INVALID_HANDLE_VALUE;
     }
 
     _eventFlags = FD_CLOSE;
@@ -90,12 +89,6 @@ void TcpSocketImpl::close()
 {
     if( _fd == INVALID_SOCKET )
         return;
-
-    /*if(_currentEventHandle != INVALID_HANDLE_VALUE)
-        attachEvent(0, 0);
-
-    if(loop)
-        this->detach(*loop);*/
 
     log_debug("close socket " << _fd);
     ::closesocket(_fd);
@@ -189,7 +182,6 @@ bool TcpSocketImpl::beginConnect(const AddrInfo& ai, System::EventLoop& loop)
 }
 
 
-// return true if wait is needed...
 bool TcpSocketImpl::beginConnect(const ::addrinfo& ai)
 {
     _fd = WSASocket(ai.ai_family, SOCK_STREAM, 0, NULL, 0, 0);

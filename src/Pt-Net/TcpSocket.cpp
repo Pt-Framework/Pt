@@ -40,6 +40,7 @@ namespace Net {
 
 TcpSocket::TcpSocket()
 : _impl(0)
+, _connecting(false)
 {
     _impl = new TcpSocketImpl(*this);
 }
@@ -47,6 +48,7 @@ TcpSocket::TcpSocket()
 
 TcpSocket::TcpSocket(const TcpServer& server, unsigned flags)
 : _impl(0)
+, _connecting(false)
 {
     _impl = new TcpSocketImpl(*this);
     std::auto_ptr<TcpSocketImpl> impl(_impl);
@@ -59,6 +61,7 @@ TcpSocket::TcpSocket(const TcpServer& server, unsigned flags)
 
 TcpSocket::TcpSocket(const std::string& ipaddr, unsigned short int port)
 : _impl(0)
+, _connecting(false)
 {
     _impl = new TcpSocketImpl(*this);
     std::auto_ptr<TcpSocketImpl> impl(_impl);
@@ -71,6 +74,7 @@ TcpSocket::TcpSocket(const std::string& ipaddr, unsigned short int port)
 
 TcpSocket::TcpSocket(const AddrInfo& addrinfo)
 : _impl(0)
+, _connecting(false)
 {
     _impl = new TcpSocketImpl(*this);
     std::auto_ptr<TcpSocketImpl> impl(_impl);
@@ -133,6 +137,18 @@ void TcpSocket::connect(const AddrInfo& addrinfo)
 }
 
 
+void TcpSocket::connect(const std::string& ipaddr, unsigned short int port)
+{ 
+    connect(AddrInfo(ipaddr, port)); 
+}
+
+
+bool TcpSocket::beginConnect(const std::string& ipaddr, unsigned short int port)
+{ 
+    return beginConnect(AddrInfo(ipaddr, port)); 
+}
+
+
 bool TcpSocket::beginConnect(const AddrInfo& addrinfo)
 {
     if( ! isActive() )
@@ -141,8 +157,11 @@ bool TcpSocket::beginConnect(const AddrInfo& addrinfo)
     this->close();
 
     bool ret = _impl->beginConnect(addrinfo, *parent());
+    _connecting = true;
     if(ret)
-        connected().send(*this);
+    {
+        this->setReady();
+    }
 
     return ret;
 }
@@ -152,6 +171,7 @@ void TcpSocket::endConnect()
 {
     try
     {
+        _connecting = false;
         _impl->endConnect( *parent() );
     }
     catch (...)
@@ -176,9 +196,9 @@ void TcpSocket::onClose()
 
 bool TcpSocket::onRun()
 {
-    if( ! this->isConnected() )
+    if( _connecting )
     {
-        if( _impl->runConnect( *parent() ) )
+        if( this->isConnected() || _impl->runConnect( *parent() ) )
         {
             connected().send(*this);
             return true;

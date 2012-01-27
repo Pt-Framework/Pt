@@ -75,13 +75,11 @@ class PT_NET_API TcpSocket : public System::IODevice
 
         void connect(const AddrInfo& addrinfo);
 
-        void connect(const std::string& ipaddr, unsigned short int port)
-        { connect(AddrInfo(ipaddr, port)); }
+        void connect(const std::string& ipaddr, unsigned short int port);
 
         bool beginConnect(const AddrInfo& addrinfo);
 
-        bool beginConnect(const std::string& ipaddr, unsigned short int port)
-        { return beginConnect(AddrInfo(ipaddr, port)); }
+        bool beginConnect(const std::string& ipaddr, unsigned short int port);
 
         void endConnect();
 
@@ -119,6 +117,7 @@ class PT_NET_API TcpSocket : public System::IODevice
 
     private:
         Signal<TcpSocket&> _connected;
+        bool _connecting;
 };
 
 } // namespace Net

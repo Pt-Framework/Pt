@@ -66,6 +66,8 @@ class TcpSocketImpl
 
         void close();
 
+        void cancel(System::EventLoop& loop);
+
         bool isConnected() const
         { return _isConnected; }
 
@@ -75,9 +77,11 @@ class TcpSocketImpl
 
         bool beginConnect(const AddrInfo& addrinfo, System::EventLoop& loop);
 
-        bool TcpSocketImpl::beginConnect(const ::addrinfo& ai);
+        bool beginConnect(const ::addrinfo& ai);
 
         void endConnect(System::EventLoop& loop);
+
+        bool runConnect(System::EventLoop& loop);
 
         size_t beginRead(System::EventLoop& loop, char* buffer, size_t n, bool& eof);
 
@@ -85,9 +89,13 @@ class TcpSocketImpl
 
         size_t endRead(System::EventLoop& loop, char* buffer, size_t n, bool& eof);
 
+        bool runRead(System::EventLoop& loop);
+
         size_t beginWrite(System::EventLoop& loop, const char* buffer, size_t n);
 
         size_t endWrite(System::EventLoop& loop, const char* buffer, size_t n);
+
+        bool runWrite(System::EventLoop& loop);
 
         size_t write(const char* buffer, size_t count);
 
@@ -106,14 +114,6 @@ class TcpSocketImpl
         }
 
         bool wait(std::size_t msecs);
-
-        bool runRead(System::EventLoop& loop);
-
-        bool runWrite(System::EventLoop& loop);
-
-        bool runConnect(System::EventLoop& loop);
-
-        void cancel(System::EventLoop& loop);
 
     private:
         void attachEvent(HANDLE ev, long events);
