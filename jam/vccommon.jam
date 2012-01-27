@@ -1,0 +1,262 @@
+##########################################################################
+# Tools and Flags
+##########################################################################
+
+if $(CONFIG:L) = debug 
+{
+    CCFLAGS   += /MDd /Zi /D "DEBUG" /D "_DEBUG" ;
+    OPTIM     ?= /Od ;
+    LINKFLAGS += /DEBUG ;
+}
+else if $(CONFIG:L) = release 
+{
+    CCFLAGS += /MD /D "NDEBUG" ;
+    OPTIM   ?= /Ox /Ot /Oy ;
+}
+
+C++FLAGS  += $(CCFLAGS) /EHsc /fp:fast /GR /TP /FD ;
+WARN      ?= /W3 ;
+UNDEFFLAG = "/u _" ;
+
+
+##########################################################################
+# Rules
+##########################################################################
+
+if $(MT)
+{
+    rule EmbedManifest
+    {
+      MFTYPE on $(<) = 1 ;
+      
+      if $(<:S) = $(SUFDLL:S)
+      {
+        MFTYPE on $(<) = 2 ;
+      }
+    
+      Mt $(<) : $(>) ;
+    }
+
+    actions Mt
+    {
+      "$(MT)" -manifest $(>) -b$(3) -outputresource:$(<);$(MFTYPE)
+    }
+}
+
+rule FDefines 
+{ 
+  return /D$(<) ; 
+}
+
+
+rule FIncludes 
+{ 
+  return /I$(<) ; 
+}
+
+
+rule LibraryImpl
+{
+  local _target = $(PRELIB)$(<)$(SUFLIB) ;
+  
+  Clean clean : $(_target:S=.pdb) ;
+  Clean clean : $(_target:S=.idb) ;
+
+  local _objects = [ FGristFiles $(>:S=$(SUFOBJ)) ] ;
+  PDB on $(_objects) = $(_target:S=.pdb) ;
+  Depends $(_objects) : first ;
+}
+
+
+rule Library_MakeLocateImpl
+{
+  local _target = $(PRELIB)$(<:S=$(SUFLIB)) ;
+  
+  MakeLocate $(_target:S=.pdb) : $(>) ;
+  MakeLocate $(_target:S=.idb) : $(>) ;
+  
+  # create dir before C++ rule creates .pdb files
+  Depends first : $(>) ;
+}
+
+
+rule MainImpl
+{
+  local _target = $(<:S=$(SUFEXE)) ;
+
+  Clean clean : $(_target) ;
+  Clean clean : $(_target:S=.lib) ;
+  Clean clean : $(_target:S=.exp) ; 
+  Clean clean : $(_target:S=.pdb) ;
+  Clean clean : $(_target:S=.ilk) ;
+  Clean clean : $(_target:S=.idb) ;
+  Clean clean : $(_target:S=.exe.manifest) ;
+
+  local _objects = [ FGristFiles $(>:S=$(SUFOBJ)) ] ;
+  PDB on $(_objects) = $(_target:S=.pdb) ;
+
+  # embed manifest into exe
+  if $(MT)
+  {
+    EmbedManifest $(_target) : $(_target:S=.exe.manifest) ;
+  }
+
+  # MAINLINKFLAGS are mainWCRTStartup for wince
+  LINKFLAGS on $(_target) += $(LINKFLAGS) $(MAINLINKFLAGS) ;
+
+  Depends $(_objects) : first ;
+}
+
+
+rule Main_LinkSharedLibrariesImpl
+{
+  local _target = $(<:S=$(SUFEXE)) ;
+
+  if $(3) 
+  {
+    LINKLIBS on $(_target) += $(2).lib ;
+    LINKLIBS on $(_target) += /LIBPATH:$(3) ;
+  }
+  else
+  {
+    Main_LinkLibraries $(<) : $(>) ;
+    Depends $(_target) : $(>:S=$(SUFDLL)) ;
+  }
+}
+
+
+rule Main_MakeLocateImpl
+{
+  local _target = $(<:S=$(SUFEXE)) ;
+  
+  MakeLocate $(_target:S=.lib) : $(>) ;
+  MakeLocate $(_target:S=.exp) : $(>) ;
+  MakeLocate $(_target:S=.pdb) : $(>) ;
+  MakeLocate $(_target:S=.idb) : $(>) ;
+  MakeLocate $(_target:S=.ilk) : $(>) ;
+  MakeLocate $(_target:S=.exe.manifest) : $(>) ;
+    
+  # create dir before C++ rule creates .pdb files
+  Depends first : $(>) ;
+}
+
+
+rule SharedLibraryImpl
+{
+  # Add grist to file names
+  local _sources = [ FGristFiles $(>) ] ;
+  local _objects = $(_sources:S=$(SUFOBJ)) ;
+
+  # Add library name decorations <name><.dll/.so>
+  local _target = $(PRELIB)$(<:S=$(SUFDLL)) ;
+
+  Clean clean : $(_target) ;
+  Clean clean : $(_target:S=.lib) ;
+  Clean clean : $(_target:S=.exp) ; 
+  Clean clean : $(_target:S=.pdb) ;
+  Clean clean : $(_target:S=.ilk) ;
+  Clean clean : $(_target:S=.idb) ;
+  Clean clean : $(_target).manifest ;
+
+  PDB on $(_objects) = $(_target:S=.pdb) ;
+  Depends $(_sources) : first ;
+  Depends $(PRELIB)$(<:S=$(SUFLIB)) : $(_target) ;
+
+  # embed manifest into dll
+  if $(MT)
+  {
+    EmbedManifest $(_target) : $(_target).manifest ;
+  }
+
+  # The *.lib is created before its *.dll and therefore has an older timestamp.
+  # However, the lib depends on the dll and will be recreated everytime a 
+  # target is called using this dll because it seems to be 'old'.
+  # NOUPDATE will ignore the lib's timestamp once it has been created.
+  NOUPDATE $(PRELIB)$(<:S=$(SUFLIB)) ;
+
+  LINKFLAGS on $(_target) += /dll $(LINKFLAGS) ;
+}
+
+
+rule SharedLibrary_LinkSharedLibrariesImpl
+{
+  # Add library name decorations <name><.dll/.so>
+  local _target = $(PRELIB)$(<:S=$(SUFDLL)) ;
+
+  if $(3) 
+  {
+    LINKLIBS on $(_target) += $(>).lib ;
+    LINKLIBS on $(_target) += /LIBPATH:$(3) ;
+  }
+  else
+  {
+    SharedLibrary_LinkLibraries $(<) : $(>) ;
+    Depends $(_target) : $(>:S=$(SUFDLL)) ;
+  }
+}
+
+
+rule SharedLibrary_MakeLocateImpl
+{
+  local _target = $(PRELIB)$(<:S=$(SUFDLL)) ;
+
+  MakeLocate $(_target:S=.lib) : $(>) ;
+  MakeLocate $(_target:S=.exp) : $(>) ;
+  MakeLocate $(_target:S=.pdb) : $(>) ;   
+  MakeLocate $(_target:S=.ilk) : $(>) ;
+  MakeLocate $(_target:S=.idb) : $(>) ;
+  MakeLocate $(_target:S=.dll.manifest) : $(>) ;
+    
+  # create dir before C++ rule creates .pdb files
+  Depends first : $(>) ;
+}
+
+##########################################################################
+# Actions
+##########################################################################
+
+actions As
+{
+  set PATH=$(VISUALC_PATH);%PATH%
+  "$(AS)" /Ml /p /v /w2 $(>) $(<) ,nul,nul;
+}
+
+
+actions Cc bind PDB
+{
+  set PATH=$(VISUALC_PATH);%PATH%
+  "$(CC)" /c $(CCFLAGS) $(OPTIM) $(WARN) /Fo$(<) /Fd$(PDB) /I$(HDRS) /I$(STDHDRS) $(>)
+}
+
+
+actions C++ bind PDB
+{ 
+  set PATH=$(VISUALC_PATH);%PATH%
+  "$(C++)" /c $(C++FLAGS) $(OPTIM) $(WARN) /Fo$(<) /Fd$(PDB) /I$(HDRS) /I$(STDHDRS) /Tp $(>)
+}
+
+
+actions updated together piecemeal Archive
+{
+  set PATH=$(VISUALC_PATH);%PATH%
+
+  set _inputfile_=archive.cmd
+  echo "$(>)" > %_inputfile_%
+
+  if exist $(<) set _$(<:B)_=$(<)
+
+  "$(AR)" /NOLOGO /out:$(<) %_$(<:B)_% @%_inputfile_%
+
+  del %_inputfile_%
+}
+# set PATH=$(VISUALC)\Common7/IDE;%PATH%
+# if exist $(<) set _$(<:B)_=$(<)
+# "$(AR)" /out:$(<) %_$(<:B)_% $(>)
+
+
+actions together Link bind NEEDLIBS
+{
+  set PATH=$(VISUALC_PATH);%PATH%
+  "$(LINK)" $(LINKFLAGS) /PDB:$(<:S=.pdb) /out:$(<) $(UNDEFS) $(>) $(NEEDLIBS) $(LINKLIBS)
+}
+

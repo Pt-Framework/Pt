@@ -13,11 +13,11 @@ if $(CONFIGURE)
     {
         if $(PROCESSOR_ARCHITECTURE:L) = "amd64"
         {
-            VISUALC = [ W32_GETREG "HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Microsoft\\VisualStudio\\8.0\\" : "InstallDir" ]  ;
+            VISUALC = [ W32_GETREG "HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Microsoft\\VisualStudio\\10.0\\" : "InstallDir" ] ;
         }
         else # PROCESSOR_ARCHITECTURE = "x86"
         {
-            VISUALC = [ W32_GETREG "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\8.0\\" : "InstallDir" ]  ;
+            VISUALC = [ W32_GETREG "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\10.0\\" : "InstallDir" ] ;
         }
     
         VISUALC = $(VISUALC:P) ;
@@ -32,6 +32,20 @@ if $(CONFIGURE)
 
     Echo "Checking for Visual Studio directory..." $(VISUALC) ;
     Configure VISUALC_PATH : $(VISUALC)\\Common7\\IDE ;
+    
+    # Other places to search for the platform SDK:
+    #
+    # HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Microsoft SDKs\Windows\v6.0A
+    # HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Microsoft SDKs\Windows\v6.0A
+    # $(VISUALC)\\vc\\PlatformSDK ;
+    PLATFORMSDK ?= [ W32_GETREG "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Microsoft SDKs\\Windows\\v7.0A\\" : "InstallationFolder" ] ;
+
+    if ! $(PLATFORMSDK)
+    {
+        Exit "PLATFORMSDK not found" ;
+    }
+
+    Echo "Checking for Platform SDK..." $(PLATFORMSDK) ;
 
     ###########################################################################
     # Visual Studio Toolchain
@@ -39,11 +53,9 @@ if $(CONFIGURE)
     
     if $(TARGET_OS:L) = "nt"
     {
-        MT  = $(VISUALC)\\vc\\bin\\mt -nologo ;
         CCFLAGS   += /DWIN32 ;
         LINKFLAGS += /MANIFEST ;
         STDHDRS = \"$(VISUALC)\\vc\\include\" ;
-        PLATFORMSDK ?= $(VISUALC)\\vc\\PlatformSDK ;
         STDHDRS += \"$(PLATFORMSDK)\\include\" ;
 
         if $(TARGET_OSPLAT:L) = "x64"
@@ -65,11 +77,7 @@ if $(CONFIGURE)
             }
         
             LINKFLAGS += /LIBPATH:\""$(VISUALC)\\vc\\lib\\amd64\"" ;
-            
-            #c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\LIB\amd64;
-            #C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\lib\x64;
-            #HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Microsoft SDKs\Windows\v6.0A
-            LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)\\lib\\amd64\"" ;
+            LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)\\lib\\x64\"" ;
         }
         else if $(TARGET_OSPLAT:L) = "x86"
         {
@@ -79,41 +87,25 @@ if $(CONFIGURE)
             LINK      = $(VISUALC)\\vc\\bin\\link /nologo ;
     
             LINKFLAGS += /LIBPATH:\""$(VISUALC)\\vc\\lib\"" ;
-    
-            #HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Microsoft SDKs\Windows\v6.0A
             LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)\\lib\"" ;
-        }
-    }
-    else if $(TARGET_OS:L) = "wince"
-    {
-        STDHDRS = \"$(VISUALC)\\vc\\ce\\include\" ;
-        CCFLAGS += "/D _WIN32_WCE=0x420 /D WINCE /D UNDER_CE /D WIN32_PLATFORM_PSPC /D _CONSOLE /D _UNICODE /D UNICODE" ;
-        MAINLINKFLAGS += /ENTRY:mainWCRTStartup ;
-
-        if $(TARGET_OSPLAT:L) = "arm"
-        {
-            AS   = $(VISUALC)\\VC\\ce\\bin\\x86_arm\\armasm ;
-            AR   = $(VISUALC)\\VC\\bin\\lib ;
-            CC   = $(VISUALC)\\VC\\ce\\bin\\x86_arm\\cl /nologo ;
-            LINK = $(VISUALC)\\VC\\ce\\bin\\x86_arm\\link /nologo ;
-    
-            LINKFLAGS += /LIBPATH:\""$(VISUALC)\\VC\\ce\\lib\\armv4\"" ;
-    
-            CCFLAGS       += "/D ARM /D _ARM_ /QRarch4" ;
-            LINKFLAGS     += "/MANIFEST:NO /NODEFAULTLIB:oldnames.lib /subsystem:windowsce,4.20 /ERRORREPORT:PROMPT /ARMPADCODE /machine:ARM" ;
-            LINKLIBS      += "coredll.lib corelibc.lib ccrtrtti.lib secchk.lib" ;
-
-            STDHDRS += \"$(VISUALC)\\smartdevices\\sdk\\pocketpc2003\\include\" ;
-            LINKFLAGS += /LIBPATH:\""$(VISUALC)\\SmartDevices\\SDK\\PocketPC2003\\Lib\\armv4\"" ;
         }
     }
 
     Configure AS : $(AS) ;
+    Echo "Checking for assember..." $(AS) ;
+
     Configure AR : $(AR) ;
+    Echo "Checking for archiver..." $(AR) ;
+
     Configure CC : $(CC) ;
+    Echo "Checking for C compiler..." $(CC) ;
+
     Configure C++ : $(CC) ;
+    Echo "Checking for C++ compiler..." $(C++) ;
+
     Configure LINK : $(LINK) ;
-    Configure MT : $(MT) ;
+    Echo "Checking for linker..." $(LINK) ;
+
     Configure STDHDRS : $(STDHDRS) ;
     Configure CCFLAGS : $(CCFLAGS) ;
     Configure LINKFLAGS : $(LINKFLAGS) ;
