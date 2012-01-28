@@ -18,7 +18,7 @@ if $(CONFIGURE)
     RANLIB = $(TOOLSET_PATH:E="")ranlib ;
     AR     = $(TOOLSET_PATH:E="")ar ru ;
     LINK   = $(CC) ;
-    
+
     Configure AR : $(AR:J=" ") ;
     Configure CC : $(CC) ;
     Configure C++ : $(C++) ;
@@ -31,12 +31,14 @@ if $(CONFIGURE)
     }
     else if $(TARGET_OS:L) = nt
     {
+        WITH_GCC_FLAG_SHARED = 1 ;
         WITH_GCC_FLAG_PSEUDO_RELOC = 1 ;
         WITH_GCC_FLAG_GROUPLIBS = 1 ;
         WITH_GCC_FLAG_RPATH = 1 ;
     }
     else
     {
+        WITH_GCC_FLAG_SHARED = 1 ;
         WITH_GCC_FLAG_EXPORT = 1 ;
         WITH_GCC_FLAG_GROUPLIBS = 1 ;
         WITH_GCC_FLAG_RPATH = 1 ;
