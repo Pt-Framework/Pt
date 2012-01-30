@@ -104,14 +104,10 @@ class TcpSocketImpl
         std::string getPeerAddr() const;
 
         void setTimeout(std::size_t msecs)
-        {
-            _timeout = msecs;
-        }
+        { _timeout = msecs; }
 
         std::size_t timeout() const
-        {
-            return _timeout;
-        }
+        { return _timeout; }
 
         bool wait(std::size_t msecs);
 
@@ -123,7 +119,6 @@ class TcpSocketImpl
         AddrInfoImpl::const_iterator _addrInfoPtr;
         bool _errorPending;
         SOCKET _fd;
-        sockaddr_storage _peeraddr;
         std::size_t _timeout;
         System::IOHandle _ioh;
         WSABUF _sendBuffer;

@@ -45,38 +45,44 @@ namespace
   }
 }
 
+
 AddressInUse::AddressInUse()
 : IOError("address in use")
 { }
+
 
 AddressInUse::AddressInUse(const std::string& ipaddr, unsigned short int port)
     : IOError(AddressInUseMsg(ipaddr, port))
 {
 }
 
+
 AddrInfo::AddrInfo(AddrInfoImpl* impl)
-  : _impl(impl)
+: _impl(impl)
 {
-    if (_impl)
-        _impl->addRef();
+    _impl->addRef();
 }
 
 
-AddrInfo::AddrInfo(const std::string& host, unsigned short port, bool listen)
-    : _impl(0)
+AddrInfo::AddrInfo(const std::string& host, unsigned short port, bool passive)
+: _impl(0)
 {
-    struct addrinfo hints;
+    /*struct addrinfo hints;
     memset(&hints, 0, sizeof(hints));
     hints.ai_socktype = SOCK_STREAM;
     if (listen)
         hints.ai_flags |= AI_PASSIVE;
-    _impl = new AddrInfoImpl(host, port, hints);
 
+    _impl = new AddrInfoImpl(host, port, hints);
+    _impl->addRef();*/
+
+    _impl = new AddrInfoImpl(host, port, passive);
     _impl->addRef();
 }
 
+
 AddrInfo::AddrInfo(const AddrInfo& src)
-    : _impl(src._impl)
+: _impl(src._impl)
 {
     _impl->addRef();
 }
@@ -86,6 +92,7 @@ AddrInfo::~AddrInfo()
     if (_impl)
         _impl->release();
 }
+
 
 AddrInfo& AddrInfo::operator= (const AddrInfo& src)
 {
@@ -103,17 +110,19 @@ AddrInfo& AddrInfo::operator= (const AddrInfo& src)
     return *this;
 }
 
+
 const std::string& AddrInfo::host() const
 {
     return _impl->host();
 }
+
 
 unsigned short AddrInfo::port() const
 {
     return _impl->port();
 }
 
-
 }
 
 }
+

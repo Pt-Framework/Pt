@@ -28,6 +28,7 @@
 #include "AddrInfoImpl.h"
 #include "Pt/SourceInfo.h"
 #include "Pt/System/SystemError.h"
+#include <iostream>
 #include <sstream>
 #include <stdexcept>
 #include <string.h>
@@ -36,14 +37,16 @@ namespace Pt {
 
 namespace Net {
 
-AddrInfoImpl::AddrInfoImpl(const std::string& ipaddr, unsigned short port)
+AddrInfoImpl::AddrInfoImpl(const std::string& ipaddr, unsigned short port, bool listen)
 : ai(0)
 {
     struct addrinfo hints;
-
-    // give some useful default values to use for getaddrinfo()
     memset(&hints, 0, sizeof(hints));
-    hints.ai_socktype = SOCK_STREAM;
+
+    //hints.ai_socktype = SOCK_STREAM;
+
+    if (listen)
+        hints.ai_flags |= AI_PASSIVE;
 
     init(ipaddr, port, hints);
 }
@@ -52,7 +55,7 @@ AddrInfoImpl::AddrInfoImpl(const std::string& ipaddr, unsigned short port)
 AddrInfoImpl::~AddrInfoImpl()
 {
     if (ai)
-        ::freeaddrinfo(ai);	
+        ::freeaddrinfo(ai);
 }
 
 

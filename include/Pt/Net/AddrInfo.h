@@ -37,41 +37,49 @@ namespace Pt {
 
 namespace Net {
 
-    class PT_NET_API AddressInUse : public System::IOError
-    {
-        public:
-            AddressInUse();
+class PT_NET_API AddressInUse : public System::IOError
+{
+    public:
+        AddressInUse();
 
-            AddressInUse(const std::string& ipaddr, unsigned short int port);
+        AddressInUse(const std::string& ipaddr, unsigned short int port);
 
-            ~AddressInUse() throw()
-            {}
-    };
+        ~AddressInUse() throw()
+        {}
+};
 
-    class AddrInfoImpl;
+class AddrInfoImpl;
 
-    class PT_NET_API AddrInfo
-    {
-        public:
-            AddrInfo()
-                : _impl(0)
-                { }
-            explicit AddrInfo(AddrInfoImpl* impl);
-            AddrInfo(const std::string& host, unsigned short port, bool bind = false);
-            AddrInfo(const AddrInfo& src);
-            ~AddrInfo();
+class PT_NET_API AddrInfo
+{
+    public:
+        AddrInfo()
+        : _impl(0)
+        { }
 
-            AddrInfo& operator= (const AddrInfo& src);
+        explicit AddrInfo(AddrInfoImpl* impl);
 
-            const std::string& host() const;
-            unsigned short port() const;
+        AddrInfo(const std::string& host, unsigned short port, bool passive = false);
 
-            AddrInfoImpl* impl()               { return _impl; }
-            const AddrInfoImpl* impl() const   { return _impl; }
+        AddrInfo(const AddrInfo& src);
 
-        private:
-            AddrInfoImpl* _impl;
-    };
+        ~AddrInfo();
+
+        AddrInfo& operator=(const AddrInfo& src);
+
+        const std::string& host() const;
+
+        unsigned short port() const;
+
+        AddrInfoImpl* impl()               
+        { return _impl; }
+
+        const AddrInfoImpl* impl() const   
+        { return _impl; }
+
+    private:
+        AddrInfoImpl* _impl;
+};
 
 } // namespace Net
 

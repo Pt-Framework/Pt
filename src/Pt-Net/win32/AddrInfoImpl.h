@@ -101,15 +101,12 @@ class AddrInfoImpl : public Pt::RefCounted
         };
 
     public:
-        AddrInfoImpl(const std::string& ipaddr, unsigned short port, const addrinfo& hints)
-        : ai(0)
-        {
-            init(ipaddr, port, hints);
-        }
-
-        AddrInfoImpl(const std::string& ipaddr, unsigned short port);
+        AddrInfoImpl(const std::string& ipaddr, unsigned short port, bool listen);
 
         ~AddrInfoImpl();
+
+        ::addrinfo* first() const
+        { return ai; }
 
         const_iterator begin() const
         { return const_iterator(ai); }
@@ -118,14 +115,10 @@ class AddrInfoImpl : public Pt::RefCounted
         { return const_iterator(); }
 
         inline const std::string& host() const
-		{
-			return _host;
-		}
+        { return _host; }
 
         inline unsigned short port() const
-		{
-			return _port;
-		}
+        { return _port; }
 };
 
 } // namespace Net

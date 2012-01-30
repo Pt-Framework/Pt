@@ -74,12 +74,14 @@ void TcpSocketImpl::cancel(System::EventLoop& loop)
 {
     if(_ioh.handle() != INVALID_HANDLE_VALUE)
     {
+        log_debug("cancelling io handle " << _fd);
         loop.selector().disableOverlapped(_ioh);
     }
 
     _eventFlags = FD_CLOSE;
     if( _fd != INVALID_SOCKET )
     {
+        log_debug("cancelling socket " << _fd);
         this->attachEvent(0, 0);
     }
 }
@@ -124,8 +126,6 @@ void TcpSocketImpl::connect(const AddrInfo& addrinfo)
        u_long argp = 0;
        ::ioctlsocket(_fd, FIONBIO, &argp);
         
-        std::memmove(&_peeraddr, _addrInfoPtr->ai_addr, _addrInfoPtr->ai_addrlen);
-
         log_debug("created socket " << _fd);
 
         if( ::connect(_fd, _addrInfoPtr->ai_addr, _addrInfoPtr->ai_addrlen) == 0 )
@@ -189,8 +189,6 @@ bool TcpSocketImpl::beginConnect(const ::addrinfo& ai)
 
     if (_fd == INVALID_SOCKET)
         throw System::IOError("WSASocket");
-
-    std::memmove(&_peeraddr, _addrInfoPtr->ai_addr, _addrInfoPtr->ai_addrlen);
 
     if( ::connect(_fd, _addrInfoPtr->ai_addr, _addrInfoPtr->ai_addrlen) == 0 )
     {
@@ -318,20 +316,26 @@ bool TcpSocketImpl::runConnect(System::EventLoop& loop)
 
     if( (events.lNetworkEvents & FD_CLOSE) == FD_CLOSE )
     {
+        log_debug("received FD_CLOSE for connect");
        _errorPending = true;
        return true;
     }
 
     if( (events.lNetworkEvents & FD_CONNECT) != FD_CONNECT )
+    {
+        log_debug("network events did not contain FD_CONNECT for connect");
         return false;
+    }
 
     int s = FD_CONNECT_BIT;
     if(events.iErrorCode[s] == 0)
     {
+        log_debug("connect was successful");
         _isConnected = true;
         return true;
     }
 
+    log_debug("closing socket to try next address");
     this->close();
 
     while( true )
@@ -428,47 +432,42 @@ bool TcpSocketImpl::wait(std::size_t umsecs)
 std::string TcpSocketImpl::getSockAddr() const
 {
     SOCKADDR sockadr;
-    int len = sizeof(sockadr);
-    int ret = getsockname(_fd, &sockadr, &len);
+    int l = sizeof(sockadr);
+    int ret = getsockname(_fd, &sockadr, &l);
 
-    if( ret == SOCKET_ERROR)
-        throw System::SystemError( PT_ERROR_MSG("getSockAddr failed") );
+    SOCKADDR* saddr = const_cast<SOCKADDR*>(&sockadr);
+    DWORD len = 32;
+    TCHAR adr[32];
+    WSAAddressToString(saddr, sizeof(SOCKADDR), NULL, adr, &len);
 
-    const sockaddr_in* sa = reinterpret_cast<const sockaddr_in*>(&sockadr);
-    return inet_ntoa(sa->sin_addr);
+    std::string address;
+    for(unsigned n = 0; n < len; n++)
+    {
+        address.push_back( int(adr[n]) );
+    }
+
+    return address;
 }
-
-
-// std::string TcpSocketImpl::getSockAddr() const
-// {
-//     SOCKADDR sockadr;
-//     int l = sizeof(sockadr);
-//     int ret = getsockname(_fd, &sockadr, &l);
-
-//     SOCKADDR* saddr = const_cast<SOCKADDR*>(&sockadr);
-//     DWORD len = 32;
-//     TCHAR adr[32];
-//     WSAAddressToString(saddr, sizeof(SOCKADDR), NULL, adr, &len);
-
-//     std::string address(32, '\0');
-//     for(unsigned n = 0; n < len; n++)
-//     {
-//         address.push_back( int(adr[n]) );
-//     }
-
-//     return adr;
-// }
 
 
 std::string TcpSocketImpl::getPeerAddr() const
 {
-	const sockaddr_in* sa = reinterpret_cast<const sockaddr_in*>(&_peeraddr);
+    SOCKADDR sockadr;
+    int l = sizeof(sockadr);
+    int ret = getpeername(_fd, &sockadr, &l);
 
-	//char adr[15]; //TODO: Windows CE wchar_t
-	//WSAAddressToString(sa, sizeof(sa), NULL, adr, 15);
+    SOCKADDR* saddr = const_cast<SOCKADDR*>(&sockadr);
+    DWORD len = 32;
+    TCHAR adr[32];
+    WSAAddressToString(saddr, sizeof(SOCKADDR), NULL, adr, &len);
 
-    return inet_ntoa(sa->sin_addr);
-	//return adr;
+    std::string address;
+    for(unsigned n = 0; n < len; n++)
+    {
+        address.push_back( int(adr[n]) );
+    }
+
+    return address;
 }
 
 
@@ -487,34 +486,7 @@ size_t TcpSocketImpl::beginRead(System::EventLoop& loop, char* buffer, size_t n,
     _receiveBuffer.buf = buffer;
     _receiveBuffer.len = n;
 
-    // u_long argp = 0;
-    // ::ioctlsocket(_fd, FIONREAD, &argp);
-    // std::cerr << _fd << " FIONREAD: " << argp << std::endl;
-    // if( argp == 2878)
-    // {
-    //     DWORD wr = WaitForSingleObject(_currentEventHandle, 0);
-    //     std::cerr << _fd << " WAIT:  " << (wr == WAIT_OBJECT_0) << std::endl;
-    // }
-
     attachEvent(_ioh.handle(), _eventFlags);
-
-    // if( argp == 2878)
-    // {
-    //     DWORD wr = WaitForSingleObject(_currentEventHandle, 0);
-    //     std::cerr << _fd << " WAIT2: " << (wr == WAIT_OBJECT_0) << std::endl;
-
-    //     if(wr == WAIT_OBJECT_0)
-    //     {
-    //         std::cerr << _fd << " RESET" << std::endl;
-    //         SetEvent(_currentEventHandle);
-    //     }
-    // }
-    return 0;
-}
-
-
-size_t TcpSocketImpl::read(char* buffer, size_t count, bool& eof)
-{
     return 0;
 }
 
@@ -536,7 +508,7 @@ size_t TcpSocketImpl::endRead(System::EventLoop& loop, char* buffer, size_t n, b
         if(err == WSAEWOULDBLOCK)
         {
             //Set socket to blocking mode
-            attachEvent(0,0);
+            attachEvent(0, 0);
         
             u_long argp = 0;
             ::ioctlsocket(_fd, FIONBIO, &argp);
@@ -562,6 +534,27 @@ size_t TcpSocketImpl::endRead(System::EventLoop& loop, char* buffer, size_t n, b
 }
 
 
+size_t TcpSocketImpl::read(char* buffer, size_t count, bool& eof)
+{
+    //Set socket to blocking mode
+    u_long argp = 0;
+    ::ioctlsocket(_fd, FIONBIO, &argp);
+
+    int len = ::recv(_fd, buffer, count, 0);
+
+    //Set socket to non-blocking mode
+    argp = 1;
+    ::ioctlsocket(_fd, FIONBIO, &argp);
+
+    if( len == 0)
+        eof = true;
+    else if(len < 0)
+        throw System::IOError("recv");
+
+    return static_cast<size_t>(len);
+}
+
+
 size_t TcpSocketImpl::beginWrite(System::EventLoop& loop, const char* buffer, size_t n)
 {
     log_debug(_fd << " beginWrite");
@@ -580,24 +573,29 @@ size_t TcpSocketImpl::beginWrite(System::EventLoop& loop, const char* buffer, si
 
     if(rc == SOCKET_ERROR)
     {
+        log_debug("socket error on " << _fd);
         if(WSAGetLastError() == WSAEWOULDBLOCK)
         {
+            log_debug("WSAEWOULDBLOCK on " << _fd);
             _eventFlags |= FD_WRITE;
             attachEvent(_ioh.handle(), _eventFlags);
             return 0;
+        }
+        else
+        {
+            throw System::IOError("WSASend");
         }
     }
 
     log_debug(_fd << " beginWrite sent " << numberOfBytesSent << " of " << n << " bytes");
 
-    //SetEvent(_currentEventHandle);
     return numberOfBytesSent;
 }
 
 
 size_t TcpSocketImpl::endWrite(System::EventLoop& loop, const char* buffer, size_t n)
 {
-    log_debug(_fd << " wndWrite");
+    log_debug(_fd << " endWrite");
 
     _eventFlags &= ~FD_WRITE;
 
@@ -611,13 +609,13 @@ size_t TcpSocketImpl::endWrite(System::EventLoop& loop, const char* buffer, size
 
     int rc = WSASend(_fd, &_sendBuffer, 1, &numberOfBytesSent, 0, NULL, NULL);
 
-    if(rc == SOCKET_ERROR)
-        throw System::SystemError( PT_ERROR_MSG("beginWrite failed") );
-
     //Set socket to non-blocking mode
     argp = 1;
     ::ioctlsocket(_fd, FIONBIO, &argp);
     attachEvent(_ioh.handle(), _eventFlags);
+
+    if(rc == SOCKET_ERROR)
+        throw System::IOError("WSASend");
 
     return  numberOfBytesSent;
 }
@@ -625,9 +623,8 @@ size_t TcpSocketImpl::endWrite(System::EventLoop& loop, const char* buffer, size
 
 size_t TcpSocketImpl::write(const char* buffer, size_t count)
 {
-    log_debug(_fd << " wndWrite");
+    log_debug(_fd << " endWrite");
 
-    _eventFlags &= ~FD_WRITE;
     _sendBuffer.buf = const_cast<char*>(buffer);
     _sendBuffer.len = count;
 
@@ -639,12 +636,12 @@ size_t TcpSocketImpl::write(const char* buffer, size_t count)
 
     int rc = WSASend(_fd, &_sendBuffer, 1, &numberOfBytesSent, 0, NULL, NULL);
 
-    if(rc == SOCKET_ERROR)
-        throw System::SystemError( PT_ERROR_MSG("beginWrite failed") );
-
     //Set socket to non-blocking mode
     argp = 1;
     ::ioctlsocket(_fd, FIONBIO, &argp);
+
+    if(rc == SOCKET_ERROR)
+        throw System::IOError("WSASend");
 
     return  numberOfBytesSent;
 }
@@ -652,3 +649,4 @@ size_t TcpSocketImpl::write(const char* buffer, size_t count)
 } // namespace Net
 
 } // namespace Pt
+

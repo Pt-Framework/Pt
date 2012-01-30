@@ -39,37 +39,47 @@ namespace Net {
 
 class TcpServerImpl;
 
-  class PT_NET_API TcpServer : public System::Selectable
-  {
-      friend class TcpServerImpl;
-      TcpServerImpl* _impl;
+class PT_NET_API TcpServer : public System::Selectable
+{
+        friend class TcpServerImpl;
+        TcpServerImpl* _impl;
 
     public:
-      enum { INHERIT = 1, DEFER_ACCEPT = 2 };
+        enum AcceptFlags 
+        { 
+            None = 0,
+            Inherit = 1, 
+            DeferAccept = 2,
+            ALL_ACCEPT_FLAGS = 0xffffffff
+        };
 
-      TcpServer();
-
-      /** @brief Creates a server socket and listens on an address
-      */
-      TcpServer(const std::string& ipaddr, unsigned short int port, int backlog = 5, unsigned flags = 0);
-
-      ~TcpServer();
-
-      void listen(const std::string& ipaddr, unsigned short int port, int backlog = 5, unsigned flags = 0);
-
-      void beginAccept();
-
-      void close();
-
-      TcpServerImpl& impl() const;
-
-      Signal<TcpServer&> connectionPending;
+        TcpServer();
+        
+        /** @brief Creates a server socket and listens on an address
+        */
+        TcpServer(const std::string& ipaddr, unsigned short int port, int backlog = 5, unsigned flags = 0);
+        
+        ~TcpServer();
+        
+        void listen(const std::string& ipaddr, unsigned short int port, int backlog = 5, unsigned flags = 0);
+        
+        void beginAccept();
+        
+        void close();
+        
+        TcpServerImpl& impl() const;
+        
+        Signal<TcpServer&>& connectionPending()
+        { return _connectionPending; }
 
     protected:
-      virtual void onCancel();
+        virtual void onCancel();
+        
+        virtual bool onRun();
 
-      virtual bool onRun();
-  };
+    private:
+        Signal<TcpServer&> _connectionPending;
+};
 
 } // namespace Net
 

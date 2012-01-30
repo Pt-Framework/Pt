@@ -26,23 +26,22 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#include <Pt/Net/AddrInfo.h>
+
 #include "AddrInfoImpl.h"
 #include "TcpServerImpl.h"
 #include "MainLoopImpl.h"
+#include <Pt/Net/AddrInfo.h>
 #include <Pt/Net/TcpServer.h>
-#include <Pt/System/SystemError.h>
+#include <Pt/System/Logger.h>
 #include <Pt/System/EventLoop.h>
-#include <Pt/System/Selectable.h>
+#include <Pt/System/SystemError.h>
 #include <cerrno>
 #include <cassert>
 #include <cstring>
 #include <limits>
 //#include <Mswsock.h>
 
-//#include <iostream>
-#define log_debug(x) // std::cerr << x << std::endl;
-#define log_trace(x) // std::cerr << x << std::endl;
+log_define("Pt.System.TcpServer");
 
 namespace Pt {
 
@@ -67,14 +66,13 @@ TcpServerImpl::TcpServerImpl(TcpServer& server)
 , _ioh(server)
 , _fd(INVALID_SOCKET)
 {
-    //WSAResetEvent(_currentHandle);
 }
+
 
 TcpServerImpl::~TcpServerImpl()
 {
-    //WSAResetEvent(_waitEvent);
-    close();
 }
+
 
 void TcpServerImpl::create(int domain, int type, int protocol)
 {
@@ -91,6 +89,7 @@ void TcpServerImpl::create(int domain, int type, int protocol)
     log_debug("server socket " << _fd);
 }
 
+
 void TcpServerImpl::close()
 {
     if (_fd == INVALID_SOCKET)
@@ -99,10 +98,6 @@ void TcpServerImpl::close()
     log_debug("close socket " << _fd);
 
     attachEvent(0, 0);
-
-    System::EventLoop* loop = _server.parent();
-    if(loop)
-        this->detach(*loop);
 
     ::closesocket(_fd);
     _fd = INVALID_SOCKET;
@@ -118,16 +113,6 @@ void TcpServerImpl::cancel(System::EventLoop& loop)
     attachEvent(_ioh.handle(), 0);
 
     loop.selector().disableOverlapped(_ioh);
-}
-
-
-void TcpServerImpl::attach(System::EventLoop& loop)
-{
-}
-
-
-void TcpServerImpl::detach(System::EventLoop& loop)
-{
 }
 
 
@@ -261,121 +246,16 @@ bool TcpServerImpl::run()
     if (_fd == INVALID_SOCKET)
         return false;
     
-    /*if( _server.avail() )
-    {
-        _server.connectionPending.send(_server);
-        return true;
-    }*/
-
     WSANETWORKEVENTS events;
-
     if(WSAEnumNetworkEvents(_fd, NULL, &events) == SOCKET_ERROR)
         throw System::SystemError("WSAEnumNetworkEvents failed");
 
     if((events.lNetworkEvents & FD_ACCEPT) != FD_ACCEPT)
         return false;
 
-    //ResetEvent(_currentHandle);
-    _server.connectionPending.send(_server);
+    _server.connectionPending().send(_server);
     return true;
 }
-
-
-/*bool TcpServerImpl::wait(std::size_t umsecs)
-{
-    log_debug(_fd << " wait " << umsecs);
-    
-    if( _server.avail() )
-    {
-        _server.connectionPending.send(_server);
-        return true;
-    }
-    
-    attachEvent(_currentHandle, FD_ACCEPT);
-    log_debug("wait for accept");
-    
-    // convert unsigned to signed
-    int msecs = umsecs;
-    if(umsecs == Pt::System::EventLoop::WaitInfinite) 
-    {
-        msecs = INFINITE;
-    }
-    else if( umsecs > static_cast<std::size_t>(std::numeric_limits<int>::max()) )
-    {
-        msecs = std::numeric_limits<int>::max();
-    }
-    
-    // Does this work if socket is closed?
-    
-    if(WSAWaitForMultipleEvents(1, &_currentHandle, FALSE, msecs, FALSE) != WSA_WAIT_TIMEOUT)
-    {
-        WSAResetEvent(_currentHandle);
-        _server.connectionPending.send(_server);
-        return true;
-    }
-
-    return false;
-}*/
-
-
-/*void TcpServerImpl::enable(System::EventLoop& loop)
-{
-    log_debug("enable in loop " << _fd);
-}
-
-
-void TcpServerImpl::disable(System::EventLoop& loop)
-{
-    log_debug("disable in loop " << _fd);
-}*/
-
-
-/*bool TcpServerImpl::setWaitHandle(HANDLE h, bool& avail)
-{
-    log_debug("setWaitHandle");
-
-    if(_currentHandle == INVALID_HANDLE_VALUE)
-        return true;
-        
-    avail = _server.avail();
-
-    _currentHandle = h;
-    attachEvent(_currentHandle, FD_ACCEPT);
-    
-    return true;
-}*/
-
-
-/*HANDLE TcpServerImpl::waitHandle() const
-{
-    return _currentHandle;
-}*/
-
-/*bool TcpServerImpl::checkEvent()
-{
-    log_debug("TcpServerImpl::checkEvent");
-    
-    if (_fd == INVALID_SOCKET)
-        return false;
-    
-    if(_server.avail())
-    {
-        _server.connectionPending.send(_server);
-        return true;
-    }
-
-    WSANETWORKEVENTS events;
-
-    if(WSAEnumNetworkEvents(_fd, NULL, &events) == SOCKET_ERROR)
-        throw System::SystemError("ask network events failed");
-
-    if((events.lNetworkEvents & FD_ACCEPT) != FD_ACCEPT)
-        return false;
-
-    ResetEvent(_currentHandle);
-    _server.connectionPending.send(_server);
-    return true;
-}*/
 
 } // namespace Net
 

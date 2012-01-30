@@ -53,15 +53,26 @@ namespace Net {
                       const addrinfo& hints);
 
             AddrInfoImpl()
-                : _ai(0)
-                { }
+            : _ai(0)
+            { }
+
             AddrInfoImpl(const std::string& host, unsigned short port)
-                : _ai(0)
-                { init(host, port); }
+            : _ai(0)
+            { init(host, port); }
+
             AddrInfoImpl(const std::string& host, unsigned short port,
-                         const addrinfo& hints)
-                : _ai(0)
-                { init(host, port, hints); }
+                         bool listen)
+            : _ai(0)
+            { 
+                struct addrinfo hints;
+                memset(&hints, 0, sizeof(hints));
+                hints.ai_socktype = SOCK_STREAM;
+                if (listen)
+                    hints.ai_flags |= AI_PASSIVE;
+
+                init(host, port, hints); 
+            }
+
             ~AddrInfoImpl();
 
             class const_iterator : public std::iterator<std::forward_iterator_tag, addrinfo>

@@ -579,12 +579,12 @@ class LoggedScope
     Pt::System::LogTarget::initTargets(file);
 
     #define log_define(category)                                   \
-    Pt::System::Logger& getStaticLogger()                          \
+    static Pt::System::Logger& getStaticLogger()                   \
     {                                                              \
         static Pt::System::Logger pt_logger(category);             \
         return pt_logger;                                          \
     }                                                              \
-    Pt::System::Logger& pt_static_logger_init = getStaticLogger();
+    static Pt::System::Logger& pt_static_logger_init = getStaticLogger();
 
     #define log_xxxx(level, expr)                                        \
     do {                                                                 \

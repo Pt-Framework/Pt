@@ -42,13 +42,32 @@ namespace Net {
 class TcpServer;
 class AddrInfo;
 
+class PT_NET_API ConnectFailed : public System::IOError
+{
+    public:
+        ConnectFailed();
+
+        ConnectFailed(const std::string& ipaddr, unsigned short int port);
+
+        ~ConnectFailed() throw()
+        {}
+
+    private:
+        std::string _host;
+        unsigned short _port;
+};
+
 class PT_NET_API TcpSocket : public System::IODevice
 {
-        class TcpSocketImpl* _impl;
-
     public:
         // flags for accept method
-        enum { INHERIT = 1, DEFER_ACCEPT = 2 };
+        enum AcceptFlags 
+        { 
+            None = 0,
+            Inherit = 1, 
+            DeferAccept = 2,
+            ALL_ACCEPT_FLAGS = 0xffffffff
+        };
 
         TcpSocket();
 
@@ -60,16 +79,13 @@ class PT_NET_API TcpSocket : public System::IODevice
 
         ~TcpSocket();
 
-        std::string getSockAddr() const;
+        std::string socketAddress() const;
 
-        std::string getPeerAddr() const;
+        std::string peerAddress() const;
 
         void setTimeout(std::size_t msecs);
 
         std::size_t timeout() const;
-
-        std::size_t getTimeout() const
-        { return timeout(); }
 
         void accept(const TcpServer& server, unsigned flags = 0);
 
@@ -116,6 +132,7 @@ class PT_NET_API TcpSocket : public System::IODevice
         virtual void onCancel();
 
     private:
+        class TcpSocketImpl* _impl;
         Signal<TcpSocket&> _connected;
         bool _connecting;
 };

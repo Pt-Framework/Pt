@@ -79,10 +79,6 @@ class TcpServerImpl
         inline SOCKET fd() const
         { return _fd; }
 
-        void attach(System::EventLoop& s);
-
-        void detach(System::EventLoop& s);
-
         void cancel(System::EventLoop& s);
 
         bool run();
