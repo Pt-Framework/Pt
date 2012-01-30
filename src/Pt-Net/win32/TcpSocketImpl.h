@@ -75,7 +75,7 @@ class TcpSocketImpl
 
         void connect(const AddrInfo& addrinfo);
 
-        bool beginConnect(const AddrInfo& addrinfo, System::EventLoop& loop);
+        bool beginConnect(System::EventLoop& loop, const AddrInfo& addrinfo);
 
         bool beginConnect(const ::addrinfo& ai);
 
@@ -99,9 +99,9 @@ class TcpSocketImpl
 
         size_t write(const char* buffer, size_t count);
 
-        std::string getSockAddr() const;
+        std::string socketAddress() const;
 
-        std::string getPeerAddr() const;
+        std::string peerAddress() const;
 
         void setTimeout(std::size_t msecs)
         { _timeout = msecs; }

@@ -33,6 +33,7 @@
 #include "Pt/Net/TcpServer.h"
 #include "Pt/Net/TcpSocket.h"
 #include "Pt/System/SystemError.h"
+#include "Pt/System/Logger.h"
 #include "Pt/System/IOError.h"
 #include <cerrno>
 #include <cstring>
@@ -41,33 +42,30 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-//#define log_debug(x) std::cerr << x << std::endl;
-//#define log_trace(x) std::cerr << x << std::endl;
-#define log_debug(x)
-#define log_trace(x)
+log_define("Pt.Net.TcpSocket");
 
-namespace
+namespace {
+
+void addressToString(const sockaddr_storage& addr, std::string& str)
 {
+#ifdef PT_WITH_INET_NTOA
+    static Pt::System::Mutex monitor;
+    Pt::System::MutexLock lock(monitor);
 
-    void formatIp(const sockaddr_storage& addr, std::string& str)
-    {
-#ifdef HAVE_INET_NTOP
-        const sockaddr_in* sa = reinterpret_cast<const sockaddr_in*>(&addr);
-        char strbuf[INET6_ADDRSTRLEN + 1];
-        const char* p = inet_ntop(sa->sin_family, &sa->sin_addr, strbuf, sizeof(strbuf));
-        str = (p == 0 ? "-" : strbuf);
+    const sockaddr_in* sa = reinterpret_cast<const sockaddr_in*>(&addr);
+    const char* p = inet_ntoa(sa->sin_addr);
+    if (p)
+        str = p;
+    else
+        str.clear();
 #else
-        static Pt::System::Mutex monitor;
-        Pt::System::MutexLock lock(monitor);
-
-        const sockaddr_in* sa = reinterpret_cast<const sockaddr_in*>(&addr);
-        const char* p = inet_ntoa(sa->sin_addr);
-        if (p)
-            str = p;
-        else
-            str.clear();
+    const sockaddr_in* sa = reinterpret_cast<const sockaddr_in*>(&addr);
+    char strbuf[INET6_ADDRSTRLEN + 1];
+    const char* p = inet_ntop(sa->sin_family, &sa->sin_addr, strbuf, sizeof(strbuf));
+    str = (p == 0 ? "-" : strbuf);
 #endif
-    }
+}
+
 }
 
 namespace Pt {
@@ -106,11 +104,13 @@ void TcpSocketImpl::cancel(System::EventLoop& loop)
 
 void TcpSocketImpl::accept(const TcpServer& server, unsigned flags)
 {
-    bool inherit = (flags & TcpSocket::INHERIT) != 0;
-    socklen_t peeraddr_len = sizeof(_peeraddr);
+    bool inherit = (flags & TcpSocket::Inherit) != 0;
+
+    sockaddr_storage peeraddr;
+    socklen_t peeraddr_len = sizeof(peeraddr);
 
     log_debug( "accept " << server.impl().fd() );
-    int fd = ::accept(server.impl().fd(), reinterpret_cast <struct sockaddr*>(&_peeraddr), &peeraddr_len);
+    int fd = ::accept(server.impl().fd(), reinterpret_cast <struct sockaddr*>(&peeraddr), &peeraddr_len);
     if( fd < 0 )
       throw System::SystemError("accept");
 
@@ -137,7 +137,7 @@ void TcpSocketImpl::connect(const AddrInfo& addrInfo)
             continue;
 
         IODeviceImpl::open(fd, false);
-        std::memmove(&_peeraddr, _addrInfoPtr->ai_addr, _addrInfoPtr->ai_addrlen);
+
         log_debug("created socket " << this->fd());
 
         if( ::connect(this->fd(), _addrInfoPtr->ai_addr, _addrInfoPtr->ai_addrlen) == 0 )
@@ -188,7 +188,7 @@ void TcpSocketImpl::connect(const AddrInfo& addrInfo)
 }
 
 
-bool TcpSocketImpl::beginConnect(const AddrInfo& addrInfo, System::EventLoop& loop)
+bool TcpSocketImpl::beginConnect(System::EventLoop& loop, const AddrInfo& addrInfo)
 {
     log_trace("begin connect");
 
@@ -278,8 +278,6 @@ const char* TcpSocketImpl::tryConnect()
         }
 
         IODeviceImpl::open(fd, false);
-
-        std::memmove(&_peeraddr, _addrInfoPtr->ai_addr, _addrInfoPtr->ai_addrlen);
 
         log_debug("created socket " << this->fd() << " max: " << FD_SETSIZE);
 
@@ -411,6 +409,8 @@ bool TcpSocketImpl::runConnect(System::EventLoop& loop)
             return true;
         }
 
+        close();
+
         // something went wrong - look for next addrInfo
         log_debug("sockerr is " << sockerr << " try next");
         if (++_addrInfoPtr == _addrInfo.impl()->end())
@@ -431,7 +431,7 @@ bool TcpSocketImpl::runConnect(System::EventLoop& loop)
 }
 
 
-std::string TcpSocketImpl::getSockAddr() const
+std::string TcpSocketImpl::socketAddress() const
 {
     struct sockaddr_storage addr;
 
@@ -440,15 +440,21 @@ std::string TcpSocketImpl::getSockAddr() const
         throw System::SystemError("getsockname");
 
     std::string ret;
-    formatIp(addr, ret);
+    addressToString(addr, ret);
     return ret;
 }
 
 
-std::string TcpSocketImpl::getPeerAddr() const
+std::string TcpSocketImpl::peerAddress() const
 {
+    struct sockaddr_storage addr;
+
+    socklen_t slen = sizeof(addr);
+    if (::getpeername(fd(), reinterpret_cast<struct sockaddr*>(&addr), &slen) < 0)
+        throw System::SystemError("getsockname");
+
     std::string ret;
-    formatIp(_peeraddr, ret);
+    addressToString(addr, ret);
     return ret;
 }
 

@@ -41,75 +41,66 @@ namespace Pt {
 
 namespace Net {
 
-    class AddrInfoImpl : public Pt::RefCounted
-    {
-            std::string _host;
-            unsigned short _port;
-            struct addrinfo* _ai;
+class AddrInfoImpl : public Pt::RefCounted
+{
+        std::string _host;
+        unsigned short _port;
+        struct addrinfo* _ai;
 
-        public:
-            void init(const std::string& host, unsigned short port);
-            void init(const std::string& host, unsigned short port,
-                      const addrinfo& hints);
+    public:
+        class const_iterator : public std::iterator<std::forward_iterator_tag, addrinfo>
+        {
+                struct addrinfo* current;
 
-            AddrInfoImpl()
-            : _ai(0)
-            { }
+            public:
+                explicit const_iterator(struct addrinfo* ai = 0)
+                : current(ai)
+                { }
 
-            AddrInfoImpl(const std::string& host, unsigned short port)
-            : _ai(0)
-            { init(host, port); }
+                bool operator== (const const_iterator& it) const
+                { return current == it.current; }
 
-            AddrInfoImpl(const std::string& host, unsigned short port,
-                         bool listen)
-            : _ai(0)
-            { 
-                struct addrinfo hints;
-                memset(&hints, 0, sizeof(hints));
-                hints.ai_socktype = SOCK_STREAM;
-                if (listen)
-                    hints.ai_flags |= AI_PASSIVE;
+                bool operator!= (const const_iterator& it) const
+                { return current != it.current; }
 
-                init(host, port, hints); 
-            }
+                const_iterator& operator++ ()
+                { 
+                    assert(current);
+                    current = current->ai_next; return *this; 
+                }
 
-            ~AddrInfoImpl();
+                const_iterator operator++ (int)
+                {
+                  const_iterator ret(current);
+                  current = current->ai_next;
+                  return ret;
+                }
 
-            class const_iterator : public std::iterator<std::forward_iterator_tag, addrinfo>
-            {
-                    struct addrinfo* current;
+                reference operator* () const
+                { return *current; }
 
-                public:
-                    explicit const_iterator(struct addrinfo* ai = 0)
-                        : current(ai)
-                        { }
-                    bool operator== (const const_iterator& it) const
-                        { return current == it.current; }
-                    bool operator!= (const const_iterator& it) const
-                        { return current != it.current; }
-                    const_iterator& operator++ ()
-                        { 
-                            assert(current);
-                            current = current->ai_next; return *this; 
-                        }
-                    const_iterator operator++ (int)
-                        {
-                          const_iterator ret(current);
-                          current = current->ai_next;
-                          return ret;
-                        }
-                    reference operator* () const
-                        { return *current; }
-                    pointer operator-> () const
-                        { return current; }
-              };
+                pointer operator-> () const
+                { return current; }
+        };
 
-            const std::string& host() const;
-            unsigned short port() const;
+        AddrInfoImpl(const std::string& host, unsigned short port, bool listen);
 
-            const_iterator begin() const  { return const_iterator(_ai); }
-            const_iterator end() const    { return const_iterator(); }
-    };
+        ~AddrInfoImpl();
+
+        void init(const std::string& host, unsigned short port, const addrinfo& hints);
+
+        const std::string& host() const
+        { return _host; }
+        
+        unsigned short port() const
+        { return _port; }
+
+        const_iterator begin() const  
+        { return const_iterator(_ai); }
+
+        const_iterator end() const    
+        { return const_iterator(); }
+};
 
 } // namespace Net
 

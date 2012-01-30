@@ -147,7 +147,7 @@ void TcpSocketImpl::connect(const AddrInfo& addrinfo)
 }
 
 
-bool TcpSocketImpl::beginConnect(const AddrInfo& ai, System::EventLoop& loop)
+bool TcpSocketImpl::beginConnect(System::EventLoop& loop, const AddrInfo& ai)
 {
     assert( ! _isConnected );
     log_debug("begin connect");
@@ -429,7 +429,7 @@ bool TcpSocketImpl::wait(std::size_t umsecs)
 }
 
 
-std::string TcpSocketImpl::getSockAddr() const
+std::string TcpSocketImpl::socketAddress() const
 {
     SOCKADDR sockadr;
     int l = sizeof(sockadr);
@@ -450,7 +450,7 @@ std::string TcpSocketImpl::getSockAddr() const
 }
 
 
-std::string TcpSocketImpl::getPeerAddr() const
+std::string TcpSocketImpl::peerAddress() const
 {
     SOCKADDR sockadr;
     int l = sizeof(sockadr);

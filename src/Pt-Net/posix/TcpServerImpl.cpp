@@ -70,12 +70,6 @@ void TcpServerImpl::close()
 
     log_debug("close socket");
 
-    /*System::EventLoop* loop = _server.parent();
-    if(loop)
-    {
-        loop->impl().disable(_ioh);
-    }*/
-
     ::close(_ioh.fd);
     _ioh.fd = -1;
 }
@@ -142,7 +136,7 @@ void TcpServerImpl::listen(const std::string& ipaddr,
                     throw System::SystemError("listen");
             }
 
-            if( (flags & TcpServer::INHERIT) == 0 )
+            if( (flags & TcpServer::Inherit) == 0 )
             {
                 int flags = ::fcntl(this->fd(), F_GETFD);
                 flags |= FD_CLOEXEC ;
@@ -155,7 +149,7 @@ void TcpServerImpl::listen(const std::string& ipaddr,
             }
 
 #ifdef TCP_DEFER_ACCEPT
-            if( (flags & TcpServer::DEFER_ACCEPT) != 0 )
+            if( (flags & TcpServer::DeferAccept) != 0 )
             {
                 int deferSecs = 30;
 
@@ -168,10 +162,6 @@ void TcpServerImpl::listen(const std::string& ipaddr,
                 }
             }
 #endif
-
-            System::EventLoop* loop = _server.parent();
-            if(loop)
-                this->attach(*loop);
 
             return;
         }
@@ -195,26 +185,6 @@ void TcpServerImpl::beginAccept(System::EventLoop& loop)
 }
 
 
-void TcpServerImpl::attach(System::EventLoop& loop)
-{
-    /*if( this->fd() < 0 )
-        return;*/
-
-    /*loop.impl().beginRead( &_ioh );*/
-
-    //loop.impl().enable(_ioh);
-}
-
-
-void TcpServerImpl::detach(System::EventLoop& loop)
-{
-    /*if( this->fd() < 0 )
-        return;
-
-    loop.impl().disable(_ioh);*/
-}
-
-
 void TcpServerImpl::cancel(System::EventLoop& loop)
 {
     if( this->fd() < 0 )
@@ -233,120 +203,12 @@ bool TcpServerImpl::run()
 
     if( selector.isReadable(&_ioh) )
     {
-        _server.connectionPending.send(_server);
+        _server.connectionPending().send(_server);
         return true;
     }
 
     return false;
 }
-
-
-/*bool TcpServerImpl::wait(std::size_t msecs)
-{
-    log_debug("wait " << msecs);
-
-    if( this->fd() > FD_SETSIZE )
-    {
-        throw System::IOError( PT_ERROR_MSG("FD_SETSIZE too small for fd") );
-    }
-
-    fd_set rfds;
-    fd_set efds;
-    FD_ZERO(&rfds);
-    FD_ZERO(&efds);
-
-    struct timeval* timeout = 0;
-    struct timeval tv;
-    if(msecs != System::EventLoop::WaitInfinite)
-    {
-        tv.tv_sec = msecs / 1000;
-        tv.tv_usec = (msecs % 1000) * 1000;
-        timeout = &tv;
-    }
-
-    if( this->fd() > 0 )
-    {
-        FD_SET(this->fd(), &rfds);
-        FD_SET(this->fd(), &efds);
-    }
-
-    while( true )
-    {
-        int ret = ::select(this->fd() + 1, &rfds, 0, &efds, timeout);
-        if( ret != -1 )
-            break;
-
-        if( errno != EINTR )
-            throw System::IOError( "select failed" );
-    }
-
-    int avail = 0;
-
-    if( FD_ISSET(this->fd(), &rfds) )
-    {
-        _server.connectionPending.send(_server);
-        ++avail;
-    }
-
-    return avail != 0;
-}*/
-
-
-/*void TcpServerImpl::attach(System::EventLoop& s)
-{
-    log_debug("attach to selector");
-
-    if( this->fd() > FD_SETSIZE )
-    {
-        throw System::IOError( PT_ERROR_MSG("FD_SETSIZE too small for fd") );
-    }
-}*/
-
-
-/*void TcpServerImpl::detach(System::EventLoop& s)
-{
-    log_debug("detach from selector");
-    this->exitSelect();
-}*/
-
-
-/*int TcpServerImpl::initSelect(fd_set& rfds, fd_set& wfds, fd_set& efds)
-{
-    _rfds = &rfds;
-
-    if( this->fd() > 0)
-    {
-        FD_SET(this->fd(), _rfds);
-    }
-
-    return this->fd();
-}*/
-
-
-/*void TcpServerImpl::exitSelect()
-{
-    if( _rfds && this->fd() > 0)
-    {
-        FD_CLR(this->fd(), _rfds);
-    }
-
-    _rfds = 0;
-}*/
-
-
-/*int TcpServerImpl::checkEvent(fd_set& rfds, fd_set& wfds, fd_set& efds)
-{
-    if( this->fd() < 0)
-        return 0;
-
-    if( FD_ISSET(this->fd(), &rfds) )
-    {
-        _server.connectionPending.send(_server);
-        return 1;
-    }
-
-    return 0;
-}*/
 
 } // namespace Net
 

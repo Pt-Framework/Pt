@@ -53,7 +53,6 @@ class TcpSocketImpl : public System::IODeviceImpl
         TcpSocket& _socket;
         bool _isConnected;
         bool _isConnecting;
-        struct sockaddr_storage _peeraddr;
         AddrInfo _addrInfo;
         AddrInfoImpl::const_iterator _addrInfoPtr;
 
@@ -76,16 +75,16 @@ class TcpSocketImpl : public System::IODeviceImpl
 
         bool runConnect(System::EventLoop& loop);
 
-        std::string getSockAddr() const;
+        std::string socketAddress() const;
 
-        std::string getPeerAddr() const;
+        std::string peerAddress() const;
 
         bool isConnected() const
         { return _isConnected; }
 
         void connect(const AddrInfo& addrinfo);
 
-        bool beginConnect(const AddrInfo& addrinfo, System::EventLoop& loop);
+        bool beginConnect(System::EventLoop& loop, const AddrInfo& addrinfo);
 
         void endConnect(System::EventLoop& loop);
 

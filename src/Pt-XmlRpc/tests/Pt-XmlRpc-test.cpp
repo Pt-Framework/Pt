@@ -35,6 +35,7 @@
 #include "Pt/Http/Server.h"
 #include "Pt/System/MainLoop.h"
 #include "Pt/System/Clock.h"
+#include "Pt/System/Logger.h"
 
 struct Color
 {
@@ -77,6 +78,8 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
         PtXmlRpcTest()
         : Pt::Unit::TestSuite("Pt-XmlRpc-Test")
         {
+            Pt::System::Logger::getTarget("").setLogLevel(Pt::System::Warn);
+
             registerMethod("Fault", *this, &PtXmlRpcTest::Fault);
             registerMethod("Exception", *this, &PtXmlRpcTest::Exception);
             registerMethod("CallbackException", *this, &PtXmlRpcTest::CallbackException);

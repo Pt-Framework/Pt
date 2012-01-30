@@ -113,13 +113,13 @@ TcpSocket::~TcpSocket()
 
 std::string TcpSocket::socketAddress() const
 {
-    return _impl->getSockAddr();
+    return _impl->socketAddress();
 }
 
 
 std::string TcpSocket::peerAddress() const
 {
-    return _impl->getPeerAddr();
+    return _impl->peerAddress();
 }
 
 
@@ -169,7 +169,7 @@ bool TcpSocket::beginConnect(const AddrInfo& addrinfo)
 
     this->close();
 
-    bool ret = _impl->beginConnect(addrinfo, *parent());
+    bool ret = _impl->beginConnect(*parent(), addrinfo);
     _connecting = true;
     if(ret)
     {

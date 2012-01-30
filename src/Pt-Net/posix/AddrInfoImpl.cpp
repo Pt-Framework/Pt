@@ -36,61 +36,53 @@ namespace Pt {
 
 namespace Net {
 
-    void AddrInfoImpl::init(const std::string& host, unsigned short port)
+AddrInfoImpl::AddrInfoImpl(const std::string& host, unsigned short port, bool listen)
+: _ai(0)
+{ 
+    struct addrinfo hints;
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_socktype = SOCK_STREAM;
+
+    if (listen)
+        hints.ai_flags |= AI_PASSIVE;
+
+    init(host, port, hints); 
+}
+
+
+AddrInfoImpl::~AddrInfoImpl()
+{
+    if (_ai)
+        freeaddrinfo(_ai);
+}
+
+void AddrInfoImpl::init(const std::string& host, unsigned short port, const addrinfo& hints)
+{
+    if (_ai)
     {
-        struct addrinfo hints;
-
-        // give some useful default values to use for getaddrinfo()
-        memset(&hints, 0, sizeof(hints));
-        hints.ai_socktype = SOCK_STREAM;
-
-        init(host, port, hints);
+        freeaddrinfo(_ai);
+        _ai = 0;
     }
 
-    void AddrInfoImpl::init(const std::string& host, unsigned short port,
-        const addrinfo& hints)
-    {
-        if (_ai)
-        {
-            freeaddrinfo(_ai);
-            _ai = 0;
-        }
+    _host = host;
+    _port = port;
 
-        _host = host;
-        _port = port;
+    std::ostringstream p;
+    p << port;
 
-        std::ostringstream p;
-        p << port;
+    const char* node = 0;
 
-        const char* node = 0;
+    if( ! host.empty() )
+        node = host.c_str();
 
-        if( ! host.empty() )
-            node = host.c_str();
+    // TODO: exception type
+    if (0 != ::getaddrinfo(node, p.str().c_str(), &hints, &_ai))
+        throw System::SystemError(("invalid ipaddress " + host).c_str());
 
-        // TODO: exception type
-        if (0 != ::getaddrinfo(node, p.str().c_str(), &hints, &_ai))
-            throw System::SystemError(("invalid ipaddress " + host).c_str());
-
-        // TODO: exception type
-        if (_ai == 0)
-            throw System::SystemError("getaddrinfo");
-    }
-
-    AddrInfoImpl::~AddrInfoImpl()
-    {
-        if (_ai)
-            freeaddrinfo(_ai);
-    }
-
-    const std::string& AddrInfoImpl::host() const
-    {
-        return _host;
-    }
-
-    unsigned short AddrInfoImpl::port() const
-    {
-        return _port;
-    }
+    // TODO: exception type
+    if (_ai == 0)
+        throw System::SystemError("getaddrinfo");
+}
 
 } // namespace Net
 

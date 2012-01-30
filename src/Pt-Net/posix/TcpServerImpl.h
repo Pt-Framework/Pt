@@ -78,10 +78,6 @@ class TcpServerImpl
         int fd() const
         { return _ioh.fd; }
 
-        void attach(System::EventLoop& s);
-
-        void detach(System::EventLoop& s);
-
         void cancel(System::EventLoop& s);
     
         bool run();
