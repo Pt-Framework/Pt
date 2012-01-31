@@ -96,14 +96,17 @@ class SelectorImpl : public Selector
             assert(h.fd > 0);
             assert(h.id != 0);
 
-            size_t offset = h.id;
-            h.id = IOHandle::InvalidId;
-            _pollfds.at(offset) = _pollfds.back();
-            _pollfds.resize(_pollfds.size() - 1);
+            if(h.id != _iohandles.back()->id)
+            {
+                size_t offset = h.id;
+                _pollfds.at(offset) = _pollfds.back();
+                _iohandles.at(offset) = _iohandles.back();
+                _iohandles[offset]->id = offset;
+            }
 
-            _iohandles.at(offset) = _iohandles.back();
+            _pollfds.resize(_pollfds.size() - 1);
             _iohandles.resize(_iohandles.size() - 1);
-            _iohandles[offset]->id = offset;
+            h.id = IOHandle::InvalidId;
 
             if( _current == h.sel )
             {
