@@ -597,8 +597,8 @@ inline OutIterT putInt(OutIterT it, T i)
 
 
 template <typename CharT, typename T, typename FormatT>
-inline std::size_t formatFloat(CharT* fraction, std::size_t fractSize, int& intpart, int& exp, T n,
-                               const FormatT& fmt, int precision, bool scientific)
+inline int formatFloat(CharT* fraction, int fractSize, int& intpart, int& exp, T n,
+                       const FormatT& fmt, int precision, bool scientific)
 {
     intpart = 0;
     exp = 0;
@@ -618,7 +618,7 @@ inline std::size_t formatFloat(CharT* fraction, std::size_t fractSize, int& intp
     if(exp != 0)
         n /= std::pow(T(10.0), exp);
 
-    if( precision >= 0 && std::size_t(precision) < fractSize )
+    if( precision >= 0 && precision < fractSize )
     {
         if( ! scientific )
             precision += exp;
@@ -634,7 +634,7 @@ inline std::size_t formatFloat(CharT* fraction, std::size_t fractSize, int& intp
     
     int digit = 0;
     T eps = std::numeric_limits<T>::epsilon();
-    std::size_t places = 0;
+    int places = 0;
 
     while(n > eps && places < fractSize)
     {
