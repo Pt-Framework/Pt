@@ -105,7 +105,7 @@ void TcpSocketImpl::cancel(System::EventLoop& loop)
 
 void TcpSocketImpl::accept(const TcpServer& server, unsigned flags)
 {
-    bool inherit = (flags & TcpSocket::Inherit) != 0;
+    bool inherit = false;
 
     sockaddr_storage peeraddr;
     socklen_t peeraddr_len = sizeof(peeraddr);

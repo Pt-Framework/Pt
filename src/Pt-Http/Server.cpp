@@ -143,7 +143,7 @@ TcpConnection::TcpConnection(Server& server, Net::TcpServer& tcpServer)
     _stream.buffer().outputReady() += Pt::slot(*this, &TcpConnection::onOutput);
     _timer.timeout() += Pt::slot(*this, &TcpConnection::onTimeout);
 
-    Net::TcpSocket::accept(tcpServer, Net::TcpSocket::DeferAccept);
+    Net::TcpSocket::accept(tcpServer);
 }
 
 

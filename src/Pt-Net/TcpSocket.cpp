@@ -72,7 +72,7 @@ TcpSocket::TcpSocket(const TcpServer& server, unsigned flags)
 }
 
 
-TcpSocket::TcpSocket(const std::string& ipaddr, unsigned short int port)
+TcpSocket::TcpSocket(const std::string& ipaddr, unsigned short int port, unsigned /*flags*/)
 : _impl(0)
 , _connecting(false)
 {
@@ -85,7 +85,7 @@ TcpSocket::TcpSocket(const std::string& ipaddr, unsigned short int port)
 }
 
 
-TcpSocket::TcpSocket(const AddrInfo& addrinfo)
+TcpSocket::TcpSocket(const AddrInfo& addrinfo, unsigned /*flags*/)
 : _impl(0)
 , _connecting(false)
 {
@@ -143,26 +143,26 @@ void TcpSocket::accept(const TcpServer& server, unsigned flags)
 }
 
 
-void TcpSocket::connect(const AddrInfo& addrinfo)
+void TcpSocket::connect(const AddrInfo& addrinfo, unsigned /*flags*/)
 {
     this->close();
     _impl->connect(addrinfo);
 }
 
 
-void TcpSocket::connect(const std::string& ipaddr, unsigned short int port)
+void TcpSocket::connect(const std::string& ipaddr, unsigned short int port, unsigned /*flags*/)
 { 
     connect(AddrInfo(ipaddr, port)); 
 }
 
 
-bool TcpSocket::beginConnect(const std::string& ipaddr, unsigned short int port)
+bool TcpSocket::beginConnect(const std::string& ipaddr, unsigned short int port, unsigned /*flags*/)
 { 
     return beginConnect(AddrInfo(ipaddr, port)); 
 }
 
 
-bool TcpSocket::beginConnect(const AddrInfo& addrinfo)
+bool TcpSocket::beginConnect(const AddrInfo& addrinfo, unsigned /*flags*/)
 {
     if( ! isActive() )
         throw std::logic_error( PT_ERROR_MSG("socket not active") );

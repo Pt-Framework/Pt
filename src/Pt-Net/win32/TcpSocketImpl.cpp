@@ -76,7 +76,7 @@ void TcpSocketImpl::cancel(System::EventLoop& loop)
 
     if(_ioh.handle() != INVALID_HANDLE_VALUE)
     {
-        log_debug("cancelling io handle " << _fd);
+        log_debug("cancelling io handle " << _ioh.handle());
         loop.selector().disableOverlapped(_ioh);
     }
 
@@ -160,6 +160,7 @@ bool TcpSocketImpl::beginConnect(System::EventLoop& loop, const AddrInfo& ai)
     if(_ioh.handle() == INVALID_HANDLE_VALUE)
     {
         loop.selector().enableOverlapped(_ioh);
+        log_debug("enabled i/o handle " << _ioh.handle());
     }
     
     _addrInfo = ai;

@@ -136,16 +136,13 @@ void TcpServerImpl::listen(const std::string& ipaddr,
                     throw System::SystemError("listen");
             }
 
-            if( (flags & TcpServer::Inherit) == 0 )
+            int flags = ::fcntl(this->fd(), F_GETFD);
+            flags |= FD_CLOEXEC ;
+            int ret = ::fcntl(this->fd(), F_SETFD, flags);
+            if (ret == -1)
             {
-                int flags = ::fcntl(this->fd(), F_GETFD);
-                flags |= FD_CLOEXEC ;
-                int ret = ::fcntl(this->fd(), F_SETFD, flags);
-                if (ret == -1)
-                {
-                    close();
-                    throw System::SystemError("Could not set FD_CLOEXEC");
-                }
+                close();
+                throw System::SystemError("Could not set FD_CLOEXEC");
             }
 
 #ifdef TCP_DEFER_ACCEPT

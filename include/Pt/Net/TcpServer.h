@@ -41,16 +41,14 @@ class TcpServerImpl;
 
 class PT_NET_API TcpServer : public System::Selectable
 {
-        friend class TcpServerImpl;
-        TcpServerImpl* _impl;
+    //friend class TcpServerImpl;
 
     public:
-        enum AcceptFlags 
+        enum SocketFlags 
         { 
             None = 0,
-            Inherit = 1, 
             DeferAccept = 2,
-            ALL_ACCEPT_FLAGS = 0xffffffff
+            ALL_SOCKET_FLAGS = 0xffffffff
         };
 
         TcpServer();
@@ -78,6 +76,7 @@ class PT_NET_API TcpServer : public System::Selectable
         virtual bool onRun();
 
     private:
+        TcpServerImpl* _impl;
         Signal<TcpServer&> _connectionPending;
 };
 

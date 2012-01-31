@@ -61,21 +61,20 @@ class PT_NET_API TcpSocket : public System::IODevice
 {
     public:
         // flags for accept method
-        enum AcceptFlags 
+        enum SocketFlags 
         { 
             None = 0,
-            Inherit = 1, 
-            DeferAccept = 2,
-            ALL_ACCEPT_FLAGS = 0xffffffff
+            //Inherit = 1, 
+            ALL_SOCKET_FLAGS = 0xffffffff
         };
 
         TcpSocket();
 
         TcpSocket(const TcpServer& server, unsigned flags = 0);
 
-        TcpSocket(const std::string& ipaddr, unsigned short int port);
+        TcpSocket(const std::string& ipaddr, unsigned short int port, unsigned flags = 0);
 
-        explicit TcpSocket(const AddrInfo& addrinfo);
+        explicit TcpSocket(const AddrInfo& addrinfo, unsigned flags = 0);
 
         ~TcpSocket();
 
@@ -89,13 +88,13 @@ class PT_NET_API TcpSocket : public System::IODevice
 
         void accept(const TcpServer& server, unsigned flags = 0);
 
-        void connect(const AddrInfo& addrinfo);
+        void connect(const AddrInfo& addrinfo, unsigned flags = 0);
 
-        void connect(const std::string& ipaddr, unsigned short int port);
+        void connect(const std::string& ipaddr, unsigned short int port, unsigned flags = 0);
 
-        bool beginConnect(const AddrInfo& addrinfo);
+        bool beginConnect(const AddrInfo& addrinfo, unsigned flags = 0);
 
-        bool beginConnect(const std::string& ipaddr, unsigned short int port);
+        bool beginConnect(const std::string& ipaddr, unsigned short int port, unsigned flags = 0);
 
         void endConnect();
 

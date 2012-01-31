@@ -224,7 +224,6 @@ SOCKET TcpServerImpl::accept()
         attachEvent(_ioh.handle(), FD_ACCEPT);
 
     log_debug(fd << " accepted ");
-    //_server.setAvail(false);
     return fd;
 }
 

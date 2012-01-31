@@ -106,26 +106,6 @@ bool TcpServer::onRun()
     return _impl->run();
 }
 
-
-/*void TcpServer::setAvail()
-{
-    System::EventLoop* loop = this->parent();
-    if(loop)
-        loop->setAvail(*this); 
-
-    _avail = true;
-}
-
-
-void TcpServer::setIdle()
-{
-    System::EventLoop* loop = this->parent();
-    if(loop)
-        loop->setIdle(*this);
-
-    _avail = false;
-}*/
-
 } // namespace Net
 
 } // namespace Pt
