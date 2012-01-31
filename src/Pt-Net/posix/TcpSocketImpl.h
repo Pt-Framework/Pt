@@ -75,12 +75,12 @@ class TcpSocketImpl : public System::IODeviceImpl
         void accept(const TcpServer& server, unsigned inherit);
 
     protected:
-        bool TcpSocketImpl::beginConnect(const ::addrinfo& ai);
+        bool beginConnect(System::EventLoop& loop, const ::addrinfo& ai);
 
     private:
         TcpSocket& _socket;
-        bool _isConnected;
         bool _errorPending;
+        bool _isConnected;
         AddrInfo _addrInfo;
         AddrInfoImpl::const_iterator _addrInfoPtr;
 };

@@ -88,8 +88,12 @@ TcpSocketImpl::~TcpSocketImpl()
 
 void TcpSocketImpl::close()
 {
-    log_debug("close socket " << fd());
-    System::IODeviceImpl::close();
+    if( this->isOpen() )
+    {
+        log_debug("close socket " << fd());
+        System::IODeviceImpl::close();
+    }
+
     _isConnected = false;
     _errorPending = false;
 }
@@ -97,9 +101,13 @@ void TcpSocketImpl::close()
 
 void TcpSocketImpl::cancel(System::EventLoop& loop)
 {
-    log_debug("cancel socket " << fd());
+    if( this->isOpen() )
+    {
+        log_debug("cancel socket " << fd());
+        IODeviceImpl::cancel(loop);
+    }
+
     _errorPending = false;
-    IODeviceImpl::cancel(loop);
 }
 
 
@@ -213,7 +221,7 @@ bool TcpSocketImpl::beginConnect(System::EventLoop& loop, const AddrInfo& addrIn
 
         try
         {
-            _isConnected = beginConnect(*_addrInfoPtr);
+            _isConnected = beginConnect(loop, *_addrInfoPtr);
             break;
         } 
         catch(const System::IOError&)
@@ -226,16 +234,16 @@ bool TcpSocketImpl::beginConnect(System::EventLoop& loop, const AddrInfo& addrIn
 }
 
 
-bool TcpSocketImpl::beginConnect(const ::addrinfo& ai)
+bool TcpSocketImpl::beginConnect(System::EventLoop& loop, const ::addrinfo& ai)
 {
-    log_trace("begin connect");
+    log_trace("begin connect to addr family:" << ai.ai_family << ", socktype:" << ai.ai_socktype);
     assert( ! _isConnected );
 
     int fd = ::socket(ai.ai_family, SOCK_STREAM, 0);
     if (fd < 0)
     {
         log_debug("failed to create socket for address " << this->fd());
-        throw IOError("socket")
+        throw System::IOError("socket");
     }
 
     IODeviceImpl::open(fd, false);
@@ -252,7 +260,7 @@ bool TcpSocketImpl::beginConnect(const ::addrinfo& ai)
     {
         log_debug("connect failed for address " << this->fd());
         close();
-        throw IOError("connect");
+        throw System::IOError("connect");
     }
 
     log_debug("connect in progress " << this->fd());
@@ -270,13 +278,13 @@ void TcpSocketImpl::endConnect(System::EventLoop& loop)
 
     if( _isConnected )
     {
-        log_debug("connected successfully " << _fd);
+        log_debug("connected successfully " << this->fd());
         return;
     }
 
     if(_errorPending)
     {
-        log_debug("pending error " << _fd);
+        log_debug("pending error " << this->fd());
         throw System::IOError("connect");
     }
 
@@ -315,11 +323,11 @@ void TcpSocketImpl::endConnect(System::EventLoop& loop)
                 }
             }
 
-            log_debug("failed to connect, try next address " << _fd);
+            log_debug("failed to connect, try next address " << this->fd());
 
             while(true)
             {
-                cancel();
+                cancel(loop);
                 close();
     
                 if( ++_addrInfoPtr == _addrInfo.impl()->end() )
@@ -334,16 +342,17 @@ void TcpSocketImpl::endConnect(System::EventLoop& loop)
                 try 
                 {
                     log_debug("trying next address");
-                    return beginConnect(*_addrInfoPtr);
+                    _isConnected = beginConnect(loop, *_addrInfoPtr);
+                    return;
                 }
-                catch(const IOError& )
+                catch(const System::IOError& )
                 { }
             }
         }
     }
     catch(...)
     {
-        cancel();
+        cancel(loop);
         close();
         throw;
     }
@@ -362,7 +371,7 @@ bool TcpSocketImpl::runConnect(System::EventLoop& loop)
 
         while(true)
         {
-            cancel();
+            cancel(loop);
             close();
 
             if( ++_addrInfoPtr == _addrInfo.impl()->end() )
@@ -375,9 +384,9 @@ bool TcpSocketImpl::runConnect(System::EventLoop& loop)
             try 
             {
                 log_debug("trying next address");
-                return beginConnect(*_addrInfoPtr);
+                return beginConnect(loop, *_addrInfoPtr);
             }
-            catch(const IOError& )
+            catch(const System::IOError& )
             { }
         }
     }
@@ -389,7 +398,7 @@ bool TcpSocketImpl::runConnect(System::EventLoop& loop)
         socklen_t optlen = sizeof(sockerr);
         if( ::getsockopt(this->fd(), SOL_SOCKET, SO_ERROR, &sockerr, &optlen) != 0 )
         {
-            cancel();
+            cancel(loop);
             close();
 
             // getsockopt failure is not an I/O error
@@ -398,7 +407,7 @@ bool TcpSocketImpl::runConnect(System::EventLoop& loop)
     
         if (sockerr == 0)
         {
-            log_debug("ending write " << _fd);
+            log_debug("ending write " << this->fd());
             loop.selector().endWrite( &_ioh );
 
             log_debug("connected successfully");
@@ -408,7 +417,7 @@ bool TcpSocketImpl::runConnect(System::EventLoop& loop)
 
         while(true)
         {
-            cancel();
+            cancel(loop);
             close();
 
             if( ++_addrInfoPtr == _addrInfo.impl()->end() )
@@ -421,9 +430,9 @@ bool TcpSocketImpl::runConnect(System::EventLoop& loop)
             try 
             {
                 log_debug("trying next address");
-                return beginConnect(*_addrInfoPtr);
+                return beginConnect(loop, *_addrInfoPtr);
             }
-            catch(const IOError& )
+            catch(const System::IOError& )
             { }
         }
     }

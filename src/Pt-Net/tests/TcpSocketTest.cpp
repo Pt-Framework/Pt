@@ -65,7 +65,7 @@ class TcpSocketTest : public Pt::Unit::TestSuite
 
             _loop = new Pt::System::MainLoop();
             _loop->timeout() += Pt::slot(*_loop, &Pt::System::MainLoop::exit);
-            _loop->setIdleTimeout(2000);
+            _loop->setIdleTimeout(3000);
 
             _acceptor = new Pt::Net::TcpSocket();
         }

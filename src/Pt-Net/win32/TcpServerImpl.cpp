@@ -252,7 +252,6 @@ bool TcpServerImpl::run()
     if((events.lNetworkEvents & FD_ACCEPT) != FD_ACCEPT)
         return false;
 
-    _server.connectionPending().send(_server);
     return true;
 }
 

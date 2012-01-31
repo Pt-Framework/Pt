@@ -103,7 +103,11 @@ void TcpServer::onCancel()
 
 bool TcpServer::onRun()
 {
-    return _impl->run();
+    bool avail = _impl->run();
+    if(avail)
+        _connectionPending.send(*this);
+
+    return avail;
 }
 
 } // namespace Net

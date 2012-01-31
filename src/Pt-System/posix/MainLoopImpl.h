@@ -105,8 +105,8 @@ class MainLoopImpl
         Signal<const Event&>* _event;
         TimerQueue _timerQueue;
         EventQueue _eventQueue;
-        SelectorImpl _selector;
         std::vector<Selectable*> _avail;
+        SelectorImpl _selector;
 };
 
 } //namespace System

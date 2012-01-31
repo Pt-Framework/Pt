@@ -198,13 +198,7 @@ bool TcpServerImpl::run()
 
     System::Selector& selector = _server.parent()->selector();
 
-    if( selector.isReadable(&_ioh) )
-    {
-        _server.connectionPending().send(_server);
-        return true;
-    }
-
-    return false;
+    return selector.isReadable(&_ioh);
 }
 
 } // namespace Net

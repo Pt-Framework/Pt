@@ -41,7 +41,6 @@ AddrInfoImpl::AddrInfoImpl(const std::string& host, unsigned short port, bool li
 { 
     struct addrinfo hints;
     memset(&hints, 0, sizeof(hints));
-    hints.ai_socktype = SOCK_STREAM;
 
     if (listen)
         hints.ai_flags |= AI_PASSIVE;

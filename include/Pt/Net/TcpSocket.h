@@ -60,7 +60,6 @@ class PT_NET_API ConnectFailed : public System::IOError
 class PT_NET_API TcpSocket : public System::IODevice
 {
     public:
-        // flags for accept method
         enum SocketFlags 
         { 
             None = 0,
@@ -68,6 +67,7 @@ class PT_NET_API TcpSocket : public System::IODevice
             ALL_SOCKET_FLAGS = 0xffffffff
         };
 
+    public:
         TcpSocket();
 
         TcpSocket(const TcpServer& server, unsigned flags = 0);
