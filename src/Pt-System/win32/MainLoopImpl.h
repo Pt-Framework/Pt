@@ -76,9 +76,9 @@ class PT_SYSTEM_API MainLoopImpl
         Mutex _mutex;
         TimerQueue _timerQueue;
         EventQueue _eventQueue;
-        Selector _selector;
         Signal<const Event&>* _event;
         std::vector<Selectable*> _avail;
+        Selector _selector;
 };
 
 }//namespace System
