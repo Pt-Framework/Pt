@@ -184,8 +184,11 @@ void TcpSocket::endConnect()
 {
     try
     {
-        _connecting = false;
-        _impl->endConnect( *parent() );
+        if(_connecting)
+        {
+            _connecting = false;
+            _impl->endConnect( *parent() );
+        }
     }
     catch (...)
     {

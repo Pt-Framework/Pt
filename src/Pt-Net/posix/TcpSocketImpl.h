@@ -29,7 +29,6 @@
 #ifndef PT_NET_TcpSocketImpl_H
 #define PT_NET_TcpSocketImpl_H
 
-#include "Pt/Signal.h"
 #include "IODeviceImpl.h"
 #include "Pt/Net/AddrInfo.h"
 #include "AddrInfoImpl.h"
@@ -49,21 +48,6 @@ class TcpSocket;
 
 class TcpSocketImpl : public System::IODeviceImpl
 {
-    private:
-        TcpSocket& _socket;
-        bool _isConnected;
-        bool _isConnecting;
-        AddrInfo _addrInfo;
-        AddrInfoImpl::const_iterator _addrInfoPtr;
-
-        int checkConnect();
-
-        void checkPendingError();
-
-        const char* tryConnect();
-
-        const char* _connectResult;
-
     public:
         TcpSocketImpl(TcpSocket& socket);
 
@@ -89,6 +73,16 @@ class TcpSocketImpl : public System::IODeviceImpl
         void endConnect(System::EventLoop& loop);
 
         void accept(const TcpServer& server, unsigned inherit);
+
+    protected:
+        bool TcpSocketImpl::beginConnect(const ::addrinfo& ai);
+
+    private:
+        TcpSocket& _socket;
+        bool _isConnected;
+        bool _errorPending;
+        AddrInfo _addrInfo;
+        AddrInfoImpl::const_iterator _addrInfoPtr;
 };
 
 } // namespace Net

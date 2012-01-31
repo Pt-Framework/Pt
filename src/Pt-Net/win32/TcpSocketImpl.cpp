@@ -72,6 +72,8 @@ void TcpSocketImpl::attachEvent(HANDLE ev, long events)
 
 void TcpSocketImpl::cancel(System::EventLoop& loop)
 {
+    _errorPending = false;
+
     if(_ioh.handle() != INVALID_HANDLE_VALUE)
     {
         log_debug("cancelling io handle " << _fd);
@@ -96,6 +98,7 @@ void TcpSocketImpl::close()
     ::closesocket(_fd);
     _fd = INVALID_SOCKET;
     _isConnected = false;
+    _errorPending = false;
 }
 
 
@@ -165,7 +168,10 @@ bool TcpSocketImpl::beginConnect(System::EventLoop& loop, const AddrInfo& ai)
     while(true)
     {
         if(_addrInfoPtr == _addrInfo.impl()->end())
+        {
+            log_debug("connect failed to all possible addresses");
             throw System::IOError("connect failed");
+        }
 
         try
         {
@@ -173,9 +179,9 @@ bool TcpSocketImpl::beginConnect(System::EventLoop& loop, const AddrInfo& ai)
             break;
         } 
         catch(const System::IOError&)
-        {
-            ++_addrInfoPtr;
-        }
+        { }
+
+        ++_addrInfoPtr;
     }
 
     return _isConnected;
@@ -227,7 +233,7 @@ void TcpSocketImpl::endConnect(System::EventLoop& loop)
     if( _isConnected )
         return;
 
-    log_debug("wait for connect on " << _fd);
+    log_info("async connect not yet ready socket=" << _fd);
 
     try
     {

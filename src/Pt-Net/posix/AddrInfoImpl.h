@@ -66,21 +66,29 @@ class AddrInfoImpl : public Pt::RefCounted
                 const_iterator& operator++ ()
                 { 
                     assert(current);
-                    current = current->ai_next; return *this; 
+                    current = current->ai_next; 
+                    return *this; 
                 }
 
                 const_iterator operator++ (int)
                 {
-                  const_iterator ret(current);
-                  current = current->ai_next;
-                  return ret;
+                    assert(current);
+                    const_iterator ret(current);
+                    current = current->ai_next;
+                    return ret;
                 }
 
                 reference operator* () const
-                { return *current; }
+                { 
+                    assert(current); 
+                    return *current; 
+                }
 
                 pointer operator-> () const
-                { return current; }
+                { 
+                    assert(current); 
+                    return current; 
+                }
         };
 
         AddrInfoImpl(const std::string& host, unsigned short port, bool listen);

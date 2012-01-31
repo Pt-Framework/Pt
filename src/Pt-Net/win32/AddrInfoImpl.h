@@ -35,7 +35,7 @@
 #include <Pt/Net/Api.h>
 #include <Pt/RefCounted.h>
 #include <string>
- 
+#include <cassert>
 #include <winsock2.h>
 #include <ws2tcpip.h>
 
@@ -84,20 +84,31 @@ class AddrInfoImpl : public Pt::RefCounted
                 { return current != it.current; }
 
                 const_iterator& operator++ ()
-                { current = current->ai_next; return *this; }
+                { 
+                    assert(current);
+                    current = current->ai_next; 
+                    return *this; 
+                }
 
                 const_iterator operator++ (int)
                 {
-                  const_iterator ret(current);
-                  current = current->ai_next;
-                  return ret;
+                    assert(current);
+                    const_iterator ret(current);
+                    current = current->ai_next;
+                    return ret;
                 }
 
                 reference operator* () const
-                { return *current; }
+                { 
+                    assert(current); 
+                    return *current; 
+                }
 
                 pointer operator-> () const
-                { return current; }
+                { 
+                    assert(current); 
+                    return current; 
+                }
         };
 
     public:

@@ -75,8 +75,8 @@ namespace Net {
 TcpSocketImpl::TcpSocketImpl(TcpSocket& socket)
 : System::IODeviceImpl(socket)
 , _socket(socket)
+, _errorPending(false)
 , _isConnected(false)
-, _isConnecting(false)
 {
 }
 
@@ -91,13 +91,14 @@ void TcpSocketImpl::close()
     log_debug("close socket " << fd());
     System::IODeviceImpl::close();
     _isConnected = false;
-    _isConnecting = false;
+    _errorPending = false;
 }
 
 
 void TcpSocketImpl::cancel(System::EventLoop& loop)
 {
-    _isConnecting = false;
+    log_debug("cancel socket " << fd());
+    _errorPending = false;
     IODeviceImpl::cancel(loop);
 }
 
@@ -124,7 +125,7 @@ void TcpSocketImpl::accept(const TcpServer& server, unsigned flags)
 
 void TcpSocketImpl::connect(const AddrInfo& addrInfo)
 {
-    log_debug("connect");
+    log_trace("connect");
     assert( ! _isConnected );
 
     _addrInfo = addrInfo;
@@ -134,20 +135,24 @@ void TcpSocketImpl::connect(const AddrInfo& addrInfo)
     {
         int fd = ::socket(_addrInfoPtr->ai_family, SOCK_STREAM, 0);
         if (fd < 0)
+        {
+            log_debug("failed to create socket for address " << this->fd());
             continue;
+        }
 
         IODeviceImpl::open(fd, false);
-
-        log_debug("created socket " << this->fd());
+        log_info("created socket " << this->fd());
 
         if( ::connect(this->fd(), _addrInfoPtr->ai_addr, _addrInfoPtr->ai_addrlen) == 0 )
         {
+            log_debug("connect imediately successful " << this->fd());
             _isConnected = true;
             break;
         }
 
         if (errno != EINPROGRESS)
         {
+            log_debug("connect failed " << this->fd());
             close();
             continue;
         }
@@ -165,7 +170,7 @@ void TcpSocketImpl::connect(const AddrInfo& addrInfo)
         // check for socket error
         if( ::getsockopt(this->fd(), SOL_SOCKET, SO_ERROR, &sockerr, &optlen) != 0 )
         {
-            // getsockopt failed
+            log_warn("getsockopt failed " << this->fd());
             close();
             throw System::SystemError("getsockopt");
         }
@@ -177,12 +182,13 @@ void TcpSocketImpl::connect(const AddrInfo& addrInfo)
             break;
         }
         
+        log_debug("connect failed for address" << this->fd());
         close();
     }
 
     if(_addrInfoPtr == _addrInfo.impl()->end())
     {
-        log_debug("no more address informations");
+        log_info("could not connect to any address");
         throw System::IOError("connect failed");
     }
 }
@@ -191,117 +197,67 @@ void TcpSocketImpl::connect(const AddrInfo& addrInfo)
 bool TcpSocketImpl::beginConnect(System::EventLoop& loop, const AddrInfo& addrInfo)
 {
     log_trace("begin connect");
-
     assert( ! _isConnected );
 
+    _errorPending = false;
     _addrInfo = addrInfo;
     _addrInfoPtr = _addrInfo.impl()->begin();
-    _connectResult = tryConnect();
-    checkPendingError();
 
-    if(_isConnecting )
+    while(true)
     {
-        if( ! _isConnected )
+        if(_addrInfoPtr == _addrInfo.impl()->end())
         {
-            log_trace("IODeviceImpl::beginConnect on handle");
-            loop.selector().beginWrite( &_ioh );
+            log_debug("connect failed to all possible addresses");
+            throw System::IOError("connect failed");
         }
-        else
+
+        try
         {
-            loop.setReady(_socket);
-        }
+            _isConnected = beginConnect(*_addrInfoPtr);
+            break;
+        } 
+        catch(const System::IOError&)
+        { }
+
+        ++_addrInfoPtr;
     }
 
     return _isConnected;
 }
 
 
-int TcpSocketImpl::checkConnect()
+bool TcpSocketImpl::beginConnect(const ::addrinfo& ai)
 {
-    log_trace("checkConnect");
+    log_trace("begin connect");
+    assert( ! _isConnected );
 
-    int sockerr;
-    socklen_t optlen = sizeof(sockerr);
-
-    // check for socket error
-    if( ::getsockopt(this->fd(), SOL_SOCKET, SO_ERROR, &sockerr, &optlen) != 0 )
+    int fd = ::socket(ai.ai_family, SOCK_STREAM, 0);
+    if (fd < 0)
     {
-        // getsockopt failed
-        close();
-        throw System::SystemError("getsockopt");
+        log_debug("failed to create socket for address " << this->fd());
+        throw IOError("socket")
     }
 
-    if (sockerr == 0)
+    IODeviceImpl::open(fd, false);
+    log_debug("created socket " << this->fd());
+
+    if( ::connect(this->fd(), ai.ai_addr, ai.ai_addrlen) == 0 )
     {
-        log_debug("connected successfully");
+        log_debug("connect imediately successful " << this->fd());
         _isConnected = true;
+        return true;
     }
 
-    return sockerr;
-}
-
-void TcpSocketImpl::checkPendingError()
-{
-    if (_connectResult)
+    if (errno != EINPROGRESS)
     {
-        const char* p = _connectResult;
-        _connectResult = 0;
-        throw System::IOError(p);
-    }
-}
-
-
-const char* TcpSocketImpl::tryConnect()
-{
-    log_trace("tryConnect");
-
-    assert(fd() == -1);
-
-    if (_addrInfoPtr == _addrInfo.impl()->end())
-    {
-        log_debug("no more address informations");
-        return "invalid address information";
-    }
-
-    while (true)
-    {
-        int fd;
-        while (true)
-        {
-            log_debug("create socket");
-            fd = ::socket(_addrInfoPtr->ai_family, SOCK_STREAM, 0);
-            if (fd >= 0)
-                break;
-
-            if (++_addrInfoPtr == _addrInfo.impl()->end())
-                return "socket";
-        }
-
-        IODeviceImpl::open(fd, false);
-
-        log_debug("created socket " << this->fd() << " max: " << FD_SETSIZE);
-
-        if( ::connect(this->fd(), _addrInfoPtr->ai_addr, _addrInfoPtr->ai_addrlen) == 0 )
-        {
-            _isConnected = true;
-            _isConnecting = true;
-            log_debug("connected successfully");
-            break;
-        }
-
-        if (errno == EINPROGRESS)
-        {
-            _isConnecting = true;
-            log_debug("connect in progress");
-            break;
-        }
-
+        log_debug("connect failed for address " << this->fd());
         close();
-        if (++_addrInfoPtr == _addrInfo.impl()->end())
-            return "connect";
+        throw IOError("connect");
     }
 
-    return 0;
+    log_debug("connect in progress " << this->fd());
+    loop.selector().beginWrite( &_ioh );
+    return false;
 }
 
 
@@ -309,20 +265,26 @@ void TcpSocketImpl::endConnect(System::EventLoop& loop)
 {
     log_trace("ending connect");
 
-    //if( ! _socket.wbuf() )
-    //{
-        loop.selector().endWrite( &_ioh );
-    //}
-
-    checkPendingError();
-
-    _isConnecting = false;
+    // we do not need to remove the IOHandle from the selector, this has
+    // already been done in runConnect().
 
     if( _isConnected )
+    {
+        log_debug("connected successfully " << _fd);
         return;
+    }
+
+    if(_errorPending)
+    {
+        log_debug("pending error " << _fd);
+        throw System::IOError("connect");
+    }
+
+    log_info("ending async connect without waiting");
 
     try
     {
+        bool hasTimeout = false;
         while (true)
         {
             fd_set wfds;
@@ -330,36 +292,58 @@ void TcpSocketImpl::endConnect(System::EventLoop& loop)
             FD_SET(this->fd(), &wfds);
 
             bool avail = this->wait(timeout(), 0, &wfds, 0);
+            if( ! avail )
+                hasTimeout = true;
 
             if (avail)
             {
-                // something has happened
-                checkConnect();
-                if (_isConnected)
-                    return;
-
-                if (++_addrInfoPtr == _addrInfo.impl()->end())
+                int sockerr = 0;
+                socklen_t optlen = sizeof(sockerr);
+                if( ::getsockopt(this->fd(), SOL_SOCKET, SO_ERROR, &sockerr, &optlen) != 0 )
                 {
-                    // no more addrInfo - propagate error
-                    throw System::IOError("connect failed");
+                    close();
+
+                    // getsockopt failed, not an I/O error
+                    throw System::SystemError("getsockopt");
+                }
+            
+                if (sockerr == 0)
+                {
+                    log_debug("connected successfully");
+                    _isConnected = true;
+                    return;
                 }
             }
-            else if (++_addrInfoPtr == _addrInfo.impl()->end())
+
+            log_debug("failed to connect, try next address " << _fd);
+
+            while(true)
             {
-                // nothing has happened in time
-                throw System::IOTimeout();
+                cancel();
+                close();
+    
+                if( ++_addrInfoPtr == _addrInfo.impl()->end() )
+                {
+                    log_debug("no more addresses to try");
+                    if(hasTimeout)
+                        throw System::IOTimeout();
+                    else
+                        throw System::IOError("connect");
+                }
+    
+                try 
+                {
+                    log_debug("trying next address");
+                    return beginConnect(*_addrInfoPtr);
+                }
+                catch(const IOError& )
+                { }
             }
-
-            close();
-
-            _connectResult = tryConnect();
-            if (_isConnected)
-                return;
-            checkPendingError();
         }
     }
     catch(...)
     {
+        cancel();
         close();
         throw;
     }
@@ -368,62 +352,79 @@ void TcpSocketImpl::endConnect(System::EventLoop& loop)
 
 bool TcpSocketImpl::runConnect(System::EventLoop& loop)
 {
-    if(_isConnected)
-        return false;
+    log_trace("runConnect");
 
     System::Selector& selector = loop.selector();
 
     if( selector.isError(&_ioh) )
     {
-        AddrInfoImpl::const_iterator ptr = _addrInfoPtr;
-        if (++ptr == _addrInfo.impl()->end())
-        {
-            // not really connected but error
-            // end of addrinfo list means that no working addrinfo was found
-            return true;
-        }
-        else
-        {
-            _addrInfoPtr = ptr;
+        log_debug("socket has error");
 
+        while(true)
+        {
+            cancel();
             close();
-            _connectResult = tryConnect();
 
-            if (_isConnected || _connectResult)
-                // immediate success or error
+            if( ++_addrInfoPtr == _addrInfo.impl()->end() )
+            {
+                log_debug("no usable address, connect failed");
+                _errorPending = true;
                 return true;
-            else
-                // by closing the previous file handle _pfd is set to 0.
-                // creating a new socket in tryConnect may also change the value of fd.
-                // TODO: handle this differently, without loosing the socket fd...
-                throw std::logic_error("posix tcp socket impl reconnect not implemented");
+            }
 
-            return _isConnected;
+            try 
+            {
+                log_debug("trying next address");
+                return beginConnect(*_addrInfoPtr);
+            }
+            catch(const IOError& )
+            { }
         }
     }
     else if( selector.isWritable(&_ioh)  )
     {
-        int sockerr = checkConnect();
-        if (_isConnected)
+        log_debug("socket is writable");
+
+        int sockerr = 0;
+        socklen_t optlen = sizeof(sockerr);
+        if( ::getsockopt(this->fd(), SOL_SOCKET, SO_ERROR, &sockerr, &optlen) != 0 )
         {
+            cancel();
+            close();
+
+            // getsockopt failure is not an I/O error
+            throw System::SystemError("getsockopt");
+        }
+    
+        if (sockerr == 0)
+        {
+            log_debug("ending write " << _fd);
+            loop.selector().endWrite( &_ioh );
+
+            log_debug("connected successfully");
+            _isConnected = true;
             return true;
         }
 
-        close();
-
-        // something went wrong - look for next addrInfo
-        log_debug("sockerr is " << sockerr << " try next");
-        if (++_addrInfoPtr == _addrInfo.impl()->end())
+        while(true)
         {
-            // no more addrInfo - propagate error
-            _connectResult = "connect failed";
-            return true;
-        }
+            cancel();
+            close();
 
-        _connectResult = tryConnect();
-        if (_isConnected)
-        {
-            return true;
+            if( ++_addrInfoPtr == _addrInfo.impl()->end() )
+            {
+                log_debug("no usable address to connect");
+                _errorPending = true;
+                return true;
+            }
+
+            try 
+            {
+                log_debug("trying next address");
+                return beginConnect(*_addrInfoPtr);
+            }
+            catch(const IOError& )
+            { }
         }
     }
 
@@ -458,158 +459,7 @@ std::string TcpSocketImpl::peerAddress() const
     return ret;
 }
 
-
-/*bool TcpSocketImpl::run()
-{
-    std::cerr << "########### RUN" << std::endl;
-
-    if( _isConnected )
-        return System::IODeviceImpl::run();
-
-    System::EventLoopImpl& impl = _device.parent()->impl();
-
-    if( impl.isError(_iohandle) )
-    {
-        AddrInfoImpl::const_iterator ptr = _addrInfoPtr;
-        if (++ptr == _addrInfo.impl()->end())
-        {
-            // not really connected but error
-            // end of addrinfo list means that no working addrinfo was found
-            _socket.connected.send(_socket);
-            std::cerr << "########### CONNECT FAIL" << std::endl;
-            return true;
-        }
-        else
-        {
-            _addrInfoPtr = ptr;
-
-            close();
-            _connectResult = tryConnect(0);
-
-            if (_isConnected || _connectResult)
-                // immediate success or error
-                _socket.connected.send(_socket);
-            else
-                // by closing the previous file handle _pfd is set to 0.
-                // creating a new socket in tryConnect may also change the value of fd.
-                // TODO: handle this differently, without loosing the socket fd...
-                throw std::logic_error("posix tcp socket impl reconnect not implemented");
-
-            return _isConnected;
-        }
-    }
-    else if( impl.isWritable(_iohandle)  )
-    {
-        std::cerr << "########### WRITABLE" << std::endl;
-        int sockerr = checkConnect();
-        if (_isConnected)
-        {
-            _socket.connected.send(_socket);
-            return true;
-        }
-
-        // something went wrong - look for next addrInfo
-        log_debug("sockerr is " << sockerr << " try next");
-        if (++_addrInfoPtr == _addrInfo.impl()->end())
-        {
-            // no more addrInfo - propagate error
-            _connectResult = "connect failed";
-            _socket.connected.send(_socket);
-            return true;
-        }
-
-        _connectResult = tryConnect(0);
-        if (_isConnected)
-        {
-            _socket.connected.send(_socket);
-            return true;
-        }
-    }
-
-    return false;
-}*/
-
-
-/*void TcpSocketImpl::initWait(fd_set& rfds, fd_set& wfds, fd_set& efds)
-{
-    System::IODeviceImpl::initWait(rfds, wfds, efds);
-
-    if( this->fd() > 0 )
-    {
-        if( ! _isConnected )
-        {
-            FD_SET(this->fd(), &wfds);
-            FD_SET(this->fd(), &efds);
-        }
-    }
-}*/
-
-
-/*int TcpSocketImpl::checkWait(fd_set& rfds, fd_set& wfds, fd_set& efds)
-{
-    log_debug("TcpSocketImpl::checkWait");
-
-    if( _isConnected )
-        return System::IODeviceImpl::checkWait(rfds, wfds, efds);
-
-    if (FD_ISSET(this->fd(), &efds) )
-    {
-        AddrInfoImpl::const_iterator ptr = _addrInfoPtr;
-        if (++ptr == _addrInfo.impl()->end())
-        {
-            // not really connected but error
-            // end of addrinfo list means that no working addrinfo was found
-            _socket.connected.send(_socket);
-            return true;
-        }
-        else
-        {
-            _addrInfoPtr = ptr;
-
-            close();
-            _connectResult = tryConnect();
-
-            if (_isConnected || _connectResult)
-                // immediate success or error
-                _socket.connected.send(_socket);
-            else
-                // by closing the previous file handle _pfd is set to 0.
-                // creating a new socket in tryConnect may also change the value of fd.
-                throw std::logic_error("posix tcp socket impl reconnect not implemented");
-
-            return _isConnected;
-        }
-    }
-    else if (FD_ISSET(this->fd(), &wfds) )
-    {
-        int sockerr = checkConnect();
-        if (_isConnected)
-        {
-            _socket.connected.send(_socket);
-            return 1;
-        }
-
-        // something went wrong - look for next addrInfo
-        log_debug("sockerr is " << sockerr << " try next");
-        if (++_addrInfoPtr == _addrInfo.impl()->end())
-        {
-            // no more addrInfo - propagate error
-            _connectResult = "connect failed";
-            _socket.connected.send(_socket);
-            return 1;
-        }
-
-        _connectResult = tryConnect();
-        if (_isConnected)
-        {
-            _socket.connected.send(_socket);
-            return 1;
-        }
-    }
-
-    return 0;
-}*/
-
 } // namespace Net
 
 } // namespace Pt
+
