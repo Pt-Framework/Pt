@@ -112,6 +112,7 @@ void Selector::disableOverlapped(IOHandle& ioh)
 {
     assert(ioh.sel);
     Selectable* s = ioh.sel;
+    ioh.setHandle(INVALID_HANDLE_VALUE);
 
     if( _current == s )
     {
