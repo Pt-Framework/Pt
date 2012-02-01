@@ -147,7 +147,7 @@ void UdpSocketImpl::bind(const std::string& ipaddr, unsigned short int port, uns
     if(addrInUse)
         throw AddressInUse();
     else
-        throw System::IOError("bind");
+        throw System::AccessFailed( ai.host() );
 }
 
 
@@ -200,7 +200,7 @@ void UdpSocketImpl::connect(const AddrInfo& ai)
             this->close();
     }
 
-    throw System::IOError("connect failed");
+    throw System::AccessFailed( ai.host() );
 }
 
 

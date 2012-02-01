@@ -121,7 +121,7 @@ void TcpSocketImpl::accept(const TcpServer& server, unsigned flags)
     log_debug( "accept " << server.impl().fd() );
     int fd = ::accept(server.impl().fd(), reinterpret_cast <struct sockaddr*>(&peeraddr), &peeraddr_len);
     if( fd < 0 )
-      throw System::SystemError("accept");
+      throw System::IOError("accept");
 
     System::IODeviceImpl::open(fd, inherit);
     //TODO ECONNABORTED EINTR EPERM
@@ -197,7 +197,7 @@ void TcpSocketImpl::connect(const AddrInfo& addrInfo)
     if(_addrInfoPtr == _addrInfo.impl()->end())
     {
         log_info("could not connect to any address");
-        throw System::IOError("connect failed");
+        throw System::AccessFailed( _addrInfo.host() );
     }
 }
 
@@ -216,7 +216,7 @@ bool TcpSocketImpl::beginConnect(System::EventLoop& loop, const AddrInfo& addrIn
         if(_addrInfoPtr == _addrInfo.impl()->end())
         {
             log_debug("connect failed to all possible addresses");
-            throw System::IOError("connect failed");
+            throw System::AccessFailed( _addrInfo.host() );
         }
 
         try
@@ -285,7 +285,7 @@ void TcpSocketImpl::endConnect(System::EventLoop& loop)
     if(_errorPending)
     {
         log_debug("pending error " << this->fd());
-        throw System::IOError("connect");
+        throw System::AccessFailed( _addrInfo.host() );
     }
 
     log_info("ending async connect without waiting");
@@ -336,7 +336,7 @@ void TcpSocketImpl::endConnect(System::EventLoop& loop)
                     if(hasTimeout)
                         throw System::IOTimeout();
                     else
-                        throw System::IOError("connect");
+                        throw System::AccessFailed( _addrInfo.host() );
                 }
     
                 try 

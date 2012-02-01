@@ -31,6 +31,7 @@
 #include "Pt/System/SystemError.h"
 #include <string>
 #include <sstream>
+#include <cstring>
 
 namespace Pt {
 
@@ -40,7 +41,7 @@ AddrInfoImpl::AddrInfoImpl(const std::string& host, unsigned short port, bool li
 : _ai(0)
 { 
     struct addrinfo hints;
-    memset(&hints, 0, sizeof(hints));
+    std::memset(&hints, 0, sizeof(hints));
 
     if (listen)
         hints.ai_flags |= AI_PASSIVE;
