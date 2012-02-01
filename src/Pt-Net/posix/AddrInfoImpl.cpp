@@ -74,13 +74,8 @@ void AddrInfoImpl::init(const std::string& host, unsigned short port, const addr
     if( ! host.empty() )
         node = host.c_str();
 
-    // TODO: exception type
     if (0 != ::getaddrinfo(node, p.str().c_str(), &hints, &_ai))
-        throw System::SystemError(("invalid ipaddress " + host).c_str());
-
-    // TODO: exception type
-    if (_ai == 0)
-        throw System::SystemError("getaddrinfo");
+        throw System::AccessFailed(_host + ':' + p.str());
 }
 
 } // namespace Net

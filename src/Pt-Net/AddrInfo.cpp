@@ -26,36 +26,14 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <Pt/Net/AddrInfo.h>
-#include <string.h>
 #include "AddrInfoImpl.h"
+#include "Pt/Net/AddrInfo.h"
+#include "Pt/System/IOError.h"
 #include <sstream>
 
 namespace Pt {
 
 namespace Net {
-
-namespace
-{
-  std::string AddressInUseMsg(const std::string& ipaddr, unsigned short int port)
-  {
-    std::ostringstream msg;
-    msg << "address " << ipaddr << ':' << port << " in use";
-    return msg.str();
-  }
-}
-
-
-AddressInUse::AddressInUse()
-: IOError("address in use")
-{ }
-
-
-AddressInUse::AddressInUse(const std::string& ipaddr, unsigned short int port)
-    : IOError(AddressInUseMsg(ipaddr, port))
-{
-}
-
 
 AddrInfo::AddrInfo(AddrInfoImpl* impl)
 : _impl(impl)
@@ -67,15 +45,6 @@ AddrInfo::AddrInfo(AddrInfoImpl* impl)
 AddrInfo::AddrInfo(const std::string& host, unsigned short port, bool passive)
 : _impl(0)
 {
-    /*struct addrinfo hints;
-    memset(&hints, 0, sizeof(hints));
-    hints.ai_socktype = SOCK_STREAM;
-    if (listen)
-        hints.ai_flags |= AI_PASSIVE;
-
-    _impl = new AddrInfoImpl(host, port, hints);
-    _impl->addRef();*/
-
     _impl = new AddrInfoImpl(host, port, passive);
     _impl->addRef();
 }

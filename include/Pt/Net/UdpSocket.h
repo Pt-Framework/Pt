@@ -31,32 +31,33 @@
 
 #include <Pt/Net/Api.h>
 #include <Pt/Net/AddrInfo.h>
-#include <Pt/Signal.h>
 #include <Pt/System/IODevice.h>
 
 namespace Pt {
 
 namespace Net {
 
-class AddrInfo;
-
+/** @brief UDP server and client socket
+ */
 class PT_NET_API UdpSocket : public System::IODevice
 {
-    class UdpSocketImpl* _impl;
+    public:
+        enum SocketFlags 
+        { 
+            None = 0,
+            ALL_SOCKET_FLAGS = 0xffffffff
+        };
 
     public:
         UdpSocket();
 
         ~UdpSocket();
 
-        void bind(const std::string& ipaddr, unsigned short int port, unsigned flags);
+        void bind(const std::string& ipaddr, unsigned short int port, unsigned flags = 0);
 
-        void connect(const std::string& ipaddr, unsigned short int port)
-        {
-            connect( AddrInfo(ipaddr, port) );
-        }
+        void connect(const std::string& ipaddr, unsigned short int port, unsigned flags = 0);
 
-        void connect(const AddrInfo& addrinfo);
+        void connect(const AddrInfo& addrinfo, unsigned flags = 0);
 
         bool isConnected() const;
 
@@ -68,9 +69,9 @@ class PT_NET_API UdpSocket : public System::IODevice
 
         void dropMulticastGroup(const std::string& ipaddr);
 
-        std::string getSockAddr() const;
+        std::string socketAddress() const;
 
-        std::string getPeerAddr() const;
+        std::string peerAddress() const;
 
         void setTimeout(std::size_t msecs);
 
@@ -102,6 +103,10 @@ class PT_NET_API UdpSocket : public System::IODevice
 
         // inherit doc
         virtual void onCancel();
+
+    private:
+        //! @internal
+        class UdpSocketImpl* _impl;
 };
 
 } // namespace Net

@@ -59,7 +59,7 @@ void TcpServerImpl::create(int domain, int type, int protocol)
     
     _ioh.fd = ::socket(domain, type, protocol);
     if (_ioh.fd < 0)
-        throw System::SystemError("socket");
+        throw System::IOError("socket");
 }
 
 
@@ -133,7 +133,7 @@ void TcpServerImpl::listen(const std::string& ipaddr,
                 if (errno == EADDRINUSE)
                     throw AddressInUse();
                 else
-                    throw System::SystemError("listen");
+                    throw System::IOError("listen");
             }
 
             int flags = ::fcntl(this->fd(), F_GETFD);
@@ -169,7 +169,7 @@ void TcpServerImpl::listen(const std::string& ipaddr,
     if (errno == EADDRINUSE)
         throw AddressInUse(ipaddr, port);
     else
-        throw System::SystemError("bind");
+        throw System::IOError("bind");
 }
 
 

@@ -38,19 +38,6 @@ namespace Pt {
 
 namespace Net {
 
-ConnectFailed::ConnectFailed()
-: System::IOError("connect failed")
-, _port(0)
-{}
-
-
-ConnectFailed::ConnectFailed(const std::string& host, unsigned short int port)
-: System::IOError("connect failed to " + host)
-, _host(host)
-, _port(port)
-{}
-
-
 TcpSocket::TcpSocket()
 : _impl(0)
 , _connecting(false)

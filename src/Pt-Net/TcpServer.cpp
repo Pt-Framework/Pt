@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2009 by Marc Boris Duerner, Tommi Maekitalo
+ * Copyright (C) 2006-2012 by Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -28,7 +28,9 @@
 
 #include "TcpServerImpl.h"
 #include "Pt/Net/TcpServer.h"
+#include "Pt/Net/AddressInUse.h"
 #include <memory>
+
 
 namespace Pt {
 

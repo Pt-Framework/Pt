@@ -39,10 +39,10 @@ namespace Net {
 
 class TcpServerImpl;
 
+/** @brief TCP server socket
+ */
 class PT_NET_API TcpServer : public System::Selectable
 {
-    //friend class TcpServerImpl;
-
     public:
         enum SocketFlags 
         { 
@@ -64,11 +64,12 @@ class PT_NET_API TcpServer : public System::Selectable
         void beginAccept();
         
         void close();
-        
-        TcpServerImpl& impl() const;
-        
+
         Signal<TcpServer&>& connectionPending()
         { return _connectionPending; }
+
+        //! @internal
+        TcpServerImpl& impl() const;
 
     protected:
         virtual void onCancel();
@@ -76,7 +77,10 @@ class PT_NET_API TcpServer : public System::Selectable
         virtual bool onRun();
 
     private:
+        //! @internal
         TcpServerImpl* _impl;
+
+        //! @internal
         Signal<TcpServer&> _connectionPending;
 };
 

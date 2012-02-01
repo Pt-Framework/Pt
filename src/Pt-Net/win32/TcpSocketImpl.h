@@ -112,7 +112,7 @@ class TcpSocketImpl
         bool wait(std::size_t msecs);
 
     private:
-        void attachEvent(HANDLE ev, long events);
+        void setEventFlags(HANDLE ev, long events);
 
     private:
         AddrInfo _addrInfo;

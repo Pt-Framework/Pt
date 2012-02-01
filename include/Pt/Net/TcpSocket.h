@@ -30,33 +30,16 @@
 #define Pt_Net_TcpSocket_h
 
 #include <Pt/Net/Api.h>
-#include <Pt/System/IODevice.h>
 #include <Pt/Net/AddrInfo.h>
-#include <Pt/Signal.h>
+#include <Pt/System/IODevice.h>
 #include <string>
 
 namespace Pt {
 
 namespace Net {
 
-class TcpServer;
-class AddrInfo;
-
-class PT_NET_API ConnectFailed : public System::IOError
-{
-    public:
-        ConnectFailed();
-
-        ConnectFailed(const std::string& ipaddr, unsigned short int port);
-
-        ~ConnectFailed() throw()
-        {}
-
-    private:
-        std::string _host;
-        unsigned short _port;
-};
-
+/** @brief TCP client socket
+ */
 class PT_NET_API TcpSocket : public System::IODevice
 {
     public:
@@ -72,6 +55,10 @@ class PT_NET_API TcpSocket : public System::IODevice
 
         TcpSocket(const TcpServer& server, unsigned flags = 0);
 
+        /** @brief Connect to a host
+            
+            @throw System::AccessFailed if the host is not reachable
+         */
         TcpSocket(const std::string& ipaddr, unsigned short int port, unsigned flags = 0);
 
         explicit TcpSocket(const AddrInfo& addrinfo, unsigned flags = 0);
@@ -90,6 +77,10 @@ class PT_NET_API TcpSocket : public System::IODevice
 
         void connect(const AddrInfo& addrinfo, unsigned flags = 0);
 
+        /** @brief Connect to a host
+            
+            @throw System::AccessFailed if the host is not reachable
+         */
         void connect(const std::string& ipaddr, unsigned short int port, unsigned flags = 0);
 
         bool beginConnect(const AddrInfo& addrinfo, unsigned flags = 0);
@@ -107,6 +98,7 @@ class PT_NET_API TcpSocket : public System::IODevice
         // inherit doc
         virtual void onClose();
 
+        // inherit doc
         virtual bool onRun();
 
         // inherit doc
@@ -131,8 +123,13 @@ class PT_NET_API TcpSocket : public System::IODevice
         virtual void onCancel();
 
     private:
+        //! @internal
         class TcpSocketImpl* _impl;
+
+        //! @internal
         Signal<TcpSocket&> _connected;
+
+        //! @internal
         bool _connecting;
 };
 

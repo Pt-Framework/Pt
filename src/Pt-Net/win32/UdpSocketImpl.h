@@ -73,19 +73,15 @@ class UdpSocketImpl
 
         void cancel(System::EventLoop& loop);
 
-        std::string getSockAddr() const;
+        std::string socketAddress() const;
 
-        std::string getPeerAddr() const;
+        std::string peerAddress() const;
 
         void setTimeout(std::size_t msecs)
-        {
-            _timeout = msecs;
-        }
+        { _timeout = msecs; }
 
         std::size_t timeout() const
-        {
-            return _timeout;
-        }
+        { return _timeout; }
 
         size_t beginRead(System::EventLoop& loop, char* buffer, size_t n, bool& eof);
 
@@ -99,29 +95,21 @@ class UdpSocketImpl
 
         size_t endWrite(System::EventLoop& loop, const char* buffer, size_t n);
 
-        void attach(System::EventLoop& loop);
-
-        void detach(System::EventLoop& loop);
-
         bool runRead(System::EventLoop& loop);
 
         bool runWrite(System::EventLoop& loop);
-
-        bool run(System::EventLoop& loop);
 
     protected:
         void setEventFlags(HANDLE ev, long events);
 
     private:
         System::IOHandle             _ioh;
-        bool                         _broadcast;
         SOCKET                       _fd;
-        AddrInfo                     _addrInfo;
-        AddrInfoImpl::const_iterator _addrInfoPtr;
+        bool                         _broadcast;
         bool                         _isConnected;
         bool                         _isBound;
-        sockaddr_storage             _peeraddr;
-        sockaddr_storage             _servaddr;
+        mutable sockaddr_storage     _peeraddr;
+        mutable sockaddr_storage     _servaddr;
         long                         _eventFlags;
         std::size_t                  _timeout;
         WSABUF                       _sendBuffer;

@@ -8,6 +8,7 @@ PT_NET_SUBDIR = [ FDirName $(TOP) src Pt-Net $(SYS:L) ] ;
 PT_NET_IMPL += [ GLOB $(PT_NET_SUBDIR) : *.cpp  ] ;
 
 SharedLibrary Pt-Net : $(PT_NET_IMPL)
+                       AddressInUse.cpp
                        TcpServer.cpp
                        TcpSocket.cpp
                        UdpSocket.cpp

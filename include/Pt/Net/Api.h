@@ -40,14 +40,18 @@
 #    define PT_NET_API PT_IMPORT
 #  endif
 
-#define HAVE_INET_NTOP 1
-
 namespace Pt {
 
 /** @namespace Pt::Net
     @brief Network and Socket Programming
 */
 namespace Net {
+
+class AddrInfo;
+class ConnectFailed;
+class TcpServer;
+class TcpSocket;
+class UdpSocket;
 
 } // namespace Net
 

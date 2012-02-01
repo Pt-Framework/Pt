@@ -30,32 +30,22 @@
 #define PT_NET_ADDRINFO_H
 
 #include <Pt/Net/Api.h>
-#include <Pt/System/IOError.h>
 #include <string>
 
 namespace Pt {
 
 namespace Net {
 
-class PT_NET_API AddressInUse : public System::IOError
-{
-    public:
-        AddressInUse();
-
-        AddressInUse(const std::string& ipaddr, unsigned short int port);
-
-        ~AddressInUse() throw()
-        {}
-};
-
 class AddrInfoImpl;
 
+/** @brief Resolves hostnames to network addresses
+    
+    @todo Provide special constructors for INADDR_ANY and such.
+ */
 class PT_NET_API AddrInfo
 {
     public:
-        AddrInfo()
-        : _impl(0)
-        { }
+        AddrInfo();
 
         explicit AddrInfo(AddrInfoImpl* impl);
 
@@ -71,15 +61,31 @@ class PT_NET_API AddrInfo
 
         unsigned short port() const;
 
-        AddrInfoImpl* impl()               
-        { return _impl; }
+        //! @internal
+        AddrInfoImpl* impl();
 
-        const AddrInfoImpl* impl() const   
-        { return _impl; }
+        //! @internal
+        const AddrInfoImpl* impl() const;
 
     private:
         AddrInfoImpl* _impl;
 };
+
+
+inline AddrInfo::AddrInfo()
+: _impl(0)
+{ 
+}
+
+inline AddrInfoImpl* AddrInfo::impl()               
+{ 
+    return _impl; 
+}
+
+inline const AddrInfoImpl* AddrInfo::impl() const   
+{ 
+    return _impl; 
+}
 
 } // namespace Net
 

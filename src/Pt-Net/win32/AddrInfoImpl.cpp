@@ -27,6 +27,7 @@
  */
 #include "AddrInfoImpl.h"
 #include "Pt/SourceInfo.h"
+#include "Pt/System/IOError.h"
 #include "Pt/System/SystemError.h"
 #include <iostream>
 #include <sstream>
@@ -42,8 +43,6 @@ AddrInfoImpl::AddrInfoImpl(const std::string& ipaddr, unsigned short port, bool 
 {
     struct addrinfo hints;
     memset(&hints, 0, sizeof(hints));
-
-    //hints.ai_socktype = SOCK_STREAM;
 
     if (listen)
         hints.ai_flags |= AI_PASSIVE;
@@ -68,17 +67,7 @@ void AddrInfoImpl::init(const std::string& ipaddr, unsigned short port, const ad
     _port = port;
 
     if (0 != ::getaddrinfo(ipaddr.c_str(), p.str().c_str(), &hints, &ai))
-    {
-         WSACleanup();
-        // TODO: exception type
-        throw System::SystemError( PT_ERROR_MSG("invalid netork address") );
-    }
-
-    if (ai == 0)
-    {
-        // TODO: exception type
-        throw System::SystemError( PT_ERROR_MSG("getaddrinfo failed") );
-    }
+         throw System::AccessFailed(_host + ':' + p.str());
 }
 
 }

@@ -60,7 +60,7 @@ TcpSocketImpl::~TcpSocketImpl()
 }
 
 
-void TcpSocketImpl::attachEvent(HANDLE ev, long events)
+void TcpSocketImpl::setEventFlags(HANDLE ev, long events)
 {
     if (WSAEventSelect(_fd, ev, events) == SOCKET_ERROR)
     {
@@ -84,7 +84,7 @@ void TcpSocketImpl::cancel(System::EventLoop& loop)
     if( _fd != INVALID_SOCKET )
     {
         log_debug("cancelling socket " << _fd);
-        this->attachEvent(0, 0);
+        this->setEventFlags(0, 0);
     }
 }
 
@@ -145,7 +145,7 @@ void TcpSocketImpl::connect(const AddrInfo& addrinfo)
     if(_addrInfoPtr == _addrInfo.impl()->end())
     {
         log_debug("no more address informations");
-        throw System::IOError("connect failed");
+        throw System::AccessFailed( _addrInfo.host() );
     }
 }
 
@@ -171,7 +171,7 @@ bool TcpSocketImpl::beginConnect(System::EventLoop& loop, const AddrInfo& ai)
         if(_addrInfoPtr == _addrInfo.impl()->end())
         {
             log_debug("connect failed to all possible addresses");
-            throw System::IOError("connect failed");
+            throw System::AccessFailed( _addrInfo.host() );
         }
 
         try
@@ -208,7 +208,7 @@ bool TcpSocketImpl::beginConnect(const ::addrinfo& ai)
     if( lastError == WSAEWOULDBLOCK || lastError == WSAEINPROGRESS )
     {
         _eventFlags |= FD_CONNECT;
-        attachEvent(_ioh.handle(), _eventFlags);
+        setEventFlags(_ioh.handle(), _eventFlags);
         log_debug("connect in progress");
         return false;
     }
@@ -226,10 +226,10 @@ void TcpSocketImpl::endConnect(System::EventLoop& loop)
     log_debug("endConnect on " << _fd);
 
     _eventFlags &= ~FD_CONNECT;
-    attachEvent(_ioh.handle(), _eventFlags);
+    setEventFlags(_ioh.handle(), _eventFlags);
 
     if(_errorPending)
-        throw System::IOError("connect");
+        throw System::AccessFailed(_addrInfo.host() );
 
     if( _isConnected )
         return;
@@ -242,14 +242,14 @@ void TcpSocketImpl::endConnect(System::EventLoop& loop)
         while (true)
         {
             _eventFlags |= FD_CONNECT;
-            attachEvent(_ioh.handle(), _eventFlags);
+            setEventFlags(_ioh.handle(), _eventFlags);
 
             bool avail = this->wait(_timeout);
             if( ! avail )
                 hasTimeout = true;
 
             _eventFlags &= ~FD_CONNECT;
-            attachEvent(_ioh.handle(), _eventFlags);
+            setEventFlags(_ioh.handle(), _eventFlags);
 
             if(avail)
             {
@@ -290,7 +290,7 @@ void TcpSocketImpl::endConnect(System::EventLoop& loop)
                     if(hasTimeout)
                         throw System::IOTimeout();
                     else
-                        throw System::IOError("connect");
+                        throw System::AccessFailed(_addrInfo.host() );
                 }
         
                 try
@@ -493,7 +493,7 @@ size_t TcpSocketImpl::beginRead(System::EventLoop& loop, char* buffer, size_t n,
     _receiveBuffer.buf = buffer;
     _receiveBuffer.len = n;
 
-    attachEvent(_ioh.handle(), _eventFlags);
+    setEventFlags(_ioh.handle(), _eventFlags);
     return 0;
 }
 
@@ -515,7 +515,7 @@ size_t TcpSocketImpl::endRead(System::EventLoop& loop, char* buffer, size_t n, b
         if(err == WSAEWOULDBLOCK)
         {
             //Set socket to blocking mode
-            attachEvent(0, 0);
+            setEventFlags(0, 0);
         
             u_long argp = 0;
             ::ioctlsocket(_fd, FIONBIO, &argp);
@@ -535,7 +535,7 @@ size_t TcpSocketImpl::endRead(System::EventLoop& loop, char* buffer, size_t n, b
         }
     }
 
-    attachEvent(_ioh.handle(), _eventFlags);
+    setEventFlags(_ioh.handle(), _eventFlags);
 
     return len;
 }
@@ -585,7 +585,7 @@ size_t TcpSocketImpl::beginWrite(System::EventLoop& loop, const char* buffer, si
         {
             log_debug("WSAEWOULDBLOCK on " << _fd);
             _eventFlags |= FD_WRITE;
-            attachEvent(_ioh.handle(), _eventFlags);
+            setEventFlags(_ioh.handle(), _eventFlags);
             return 0;
         }
         else
@@ -607,7 +607,7 @@ size_t TcpSocketImpl::endWrite(System::EventLoop& loop, const char* buffer, size
     _eventFlags &= ~FD_WRITE;
 
     //Set socket to blocking mode
-    attachEvent(0, 0);
+    setEventFlags(0, 0);
 
     u_long argp = 0;
     ::ioctlsocket(_fd, FIONBIO, &argp);
@@ -619,7 +619,7 @@ size_t TcpSocketImpl::endWrite(System::EventLoop& loop, const char* buffer, size
     //Set socket to non-blocking mode
     argp = 1;
     ::ioctlsocket(_fd, FIONBIO, &argp);
-    attachEvent(_ioh.handle(), _eventFlags);
+    setEventFlags(_ioh.handle(), _eventFlags);
 
     if(rc == SOCKET_ERROR)
         throw System::IOError("WSASend");

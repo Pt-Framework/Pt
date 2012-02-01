@@ -28,7 +28,8 @@
 
 #include "UdpSocketImpl.h"
 #include "MainLoopImpl.h"
-#include <Pt/Net/AddrInfo.h>
+#include "Pt/Net/AddrInfo.h"
+#include "Pt/Net/AddressInUse.h"
 #include <Pt/Net/UdpSocket.h>
 #include <Pt/System/EventLoop.h>
 #include <Pt/System/SystemError.h>
@@ -43,8 +44,8 @@ namespace Net {
 
 UdpSocketImpl::UdpSocketImpl(UdpSocket& socket)
 : _ioh(socket)
-, _broadcast(false)
 , _fd(INVALID_SOCKET)
+, _broadcast(false)
 , _isConnected(false)
 , _isBound(false)
 , _eventFlags(FD_CLOSE)
@@ -67,29 +68,6 @@ void UdpSocketImpl::setEventFlags(HANDLE ev, long events)
 }
 
 
-void UdpSocketImpl::attach(System::EventLoop& loop)
-{
-    /*if( _fd == INVALID_SOCKET)
-        return;
-
-    HANDLE h = loop.impl().enable(_socket);
-    _currentEventHandle = h;
-    this->setEventFlags(_currentEventHandle, _eventFlags);*/
-}
-
-
-void UdpSocketImpl::detach(System::EventLoop& loop)
-{
-    /*if( _fd != INVALID_SOCKET)
-        setEventFlags(_waitEvent, _eventFlags);
-
-    loop.impl().disable(_socket);*/
-
-    //if( _fd != INVALID_SOCKET)
-    //    setEventFlags(_waitEvent, _eventFlags);
-}
-
-
 void UdpSocketImpl::cancel(System::EventLoop& loop)
 {
     if(_ioh.handle() != INVALID_HANDLE_VALUE)
@@ -109,12 +87,6 @@ void UdpSocketImpl::close()
 {
     if( _fd == INVALID_SOCKET )
         return;
-
-    /*_eventFlags  = 0;
-    setEventFlags(0, 0); // is this needed ?
-
-    if(loop)
-        this->detach(*loop);*/
 
     ::closesocket(_fd);
     _fd = INVALID_SOCKET;
@@ -191,30 +163,29 @@ void UdpSocketImpl::bind(const std::string& ipaddr, unsigned short int port, uns
     if(addrInUse)
         throw AddressInUse();
     else
-        throw System::IOError("bind");
+        throw System::AccessFailed( ai.host() );
 }
 
 
 void UdpSocketImpl::connect(const AddrInfo& ai)
 {
-    _addrInfo = ai;
-    _addrInfoPtr = _addrInfo.impl()->begin();
+    AddrInfoImpl::const_iterator it = ai.impl()->begin();
 
-    for( ; _addrInfoPtr != _addrInfo.impl()->end(); ++_addrInfoPtr)
+    for( ; it != ai.impl()->end(); ++it)
     {
         if( _isBound )
         {
-            if(_addrInfoPtr->ai_family != _servaddr.ss_family)
+            if(it->ai_family != _servaddr.ss_family)
                 continue;
         }
         else if( _isConnected )
         {
-            if(_addrInfoPtr->ai_family != _peeraddr.ss_family)
+            if(it->ai_family != _peeraddr.ss_family)
                 this->close();
         }
 
         if( _fd == INVALID_SOCKET )
-            _fd = WSASocket(_addrInfoPtr->ai_family, SOCK_DGRAM, 0, NULL, 0, 0);
+            _fd = WSASocket(it->ai_family, SOCK_DGRAM, 0, NULL, 0, 0);
 
         if( _fd == INVALID_SOCKET )
             continue;
@@ -229,15 +200,11 @@ void UdpSocketImpl::connect(const AddrInfo& ai)
             }
         }
 
-        std::memmove(&_peeraddr, _addrInfoPtr->ai_addr, _addrInfoPtr->ai_addrlen);
+        std::memmove(&_peeraddr, it->ai_addr, it->ai_addrlen);
 
-        if( 0 == ::connect(_fd, _addrInfoPtr->ai_addr, _addrInfoPtr->ai_addrlen) )
+        if( 0 == ::connect(_fd, it->ai_addr, it->ai_addrlen) )
         {
             _isConnected = true;
-
-            /*if(loop)
-                this->attach(*loop);*/
-
             return;
         }
 
@@ -245,7 +212,7 @@ void UdpSocketImpl::connect(const AddrInfo& ai)
             this->close();
     }
 
-    throw System::IOError("connect failed");
+    throw System::AccessFailed( ai.host() );
 }
 
 
@@ -349,36 +316,43 @@ void UdpSocketImpl::dropMulticastGroup(const std::string& ipaddr)
 }
 
 
-std::string UdpSocketImpl::getSockAddr() const
+std::string UdpSocketImpl::socketAddress() const
 {
-    const sockaddr_in* sa = reinterpret_cast<const sockaddr_in*>(&_servaddr);
+    std::string address;
 
-    // SOCKADDR* saddr = const_cast<SOCKADDR*>(&_servaddr);
-    // DWORD len = 32;
-    // TCHAR adr[32];
-    // WSAAddressToString(saddr, sizeof(SOCKADDR), NULL, adr, &len);
+    if(this->isBound() )
+    {
+        SOCKADDR* saddr = reinterpret_cast<SOCKADDR*>(&_servaddr);
+    
+        DWORD len = 32;
+        TCHAR adr[32];
+        WSAAddressToString(saddr, sizeof(SOCKADDR), NULL, adr, &len);
+    
+        for(unsigned n = 0; n < len; n++)
+            address.push_back( int(adr[n]) );
+    }
 
-    // std::string address;
-    // address.reserve(32);
-    // for(unsigned n = 0; n < len; n++)
-    // {
-    //     address.push_back( int(adr[n]) );
-    // }
-
-    return inet_ntoa(sa->sin_addr);
-    //return adr;
+    return address;
 }
 
 
-std::string UdpSocketImpl::getPeerAddr() const
+std::string UdpSocketImpl::peerAddress() const
 {
-    const sockaddr_in* sa = reinterpret_cast<const sockaddr_in*>(&_peeraddr);
+    std::string address;
 
-    //char adr[15]; //TODO: Windows CE wchar_t
-    //WSAAddressToString(sa, sizeof(sa), NULL, adr, 15);
+    if(this->isConnected() )
+    {
+        SOCKADDR* saddr = reinterpret_cast<SOCKADDR*>(&_peeraddr);
+    
+        DWORD len = 32;
+        TCHAR adr[32];
+        WSAAddressToString(saddr, sizeof(SOCKADDR), NULL, adr, &len);
+    
+        for(unsigned n = 0; n < len; n++)
+            address.push_back( int(adr[n]) );
+    }
 
-    return inet_ntoa(sa->sin_addr);
-    //return adr;
+    return address;
 }
 
 
@@ -414,62 +388,36 @@ bool UdpSocketImpl::runWrite(System::EventLoop& loop)
 }
 
 
-/*bool UdpSocketImpl::run(System::EventLoop& loop)
-{
-    DestructionSentry sentry(_sentry);
-
-    if(_dataSends != 0 )
-    {
-       _socket.outputReady().send(_socket);
-       return true;
-    }
-
-    WSANETWORKEVENTS events;
-
-    if(WSAEnumNetworkEvents(_fd, NULL, &events) == SOCKET_ERROR)
-        throw System::SystemError("WSAEnumNetworkEvents failed");
-
-    bool ev = false;
-
-    if(_socket.wavail() || ((events.lNetworkEvents & FD_WRITE) == FD_WRITE) )
-    {
-       ev = true;
-       _socket.outputReady().send(_socket);
-
-       if( ! _sentry )
-           return ev;
-    }
-
-    if(_socket.ravail() || ((events.lNetworkEvents & FD_READ) == FD_READ) )
-    {
-        ev = true;
-        _socket.inputReady().send(_socket);
-
-        if( ! _sentry )
-           return ev;
-    }
-
-    return ev;
-}*/
-
-
-/*bool UdpSocketImpl::setWaitHandle(HANDLE h, bool& avail)
-{
-    avail = _dataSends != 0;
-
-    if( _currentEventHandle == h)
-        return true;
-
-    _currentEventHandle = h;
-
-    this->setEventFlags(_currentEventHandle, _eventFlags);
-    return true;
-}*/
-
-
 size_t UdpSocketImpl::read(char* buffer, size_t count, bool& eof)
 {
-    return 0;
+    WSABUF recvbuf;
+    recvbuf.buf = buffer;
+    recvbuf.len = count;
+
+    int addrlen = sizeof(_peeraddr);
+    int len = recvfrom( _fd, recvbuf.buf, recvbuf.len, 
+                        0, (sockaddr*)&_peeraddr, &addrlen );
+
+    if( len == -1 && WSAGetLastError() == WSAEWOULDBLOCK)
+    {
+        //Set socket to blocking mode
+        setEventFlags(0,0);
+
+        u_long argp = 0;
+        ::ioctlsocket(_fd, FIONBIO, &argp);
+
+        len = recvfrom( _fd, recvbuf.buf, recvbuf.len, 0,
+                        (sockaddr*) &_peeraddr,  &addrlen );
+
+        //Set socket to non-blocking mode
+        argp = 1;
+        ::ioctlsocket(_fd, FIONBIO, &argp);
+
+        if(_ioh.handle() != INVALID_HANDLE_VALUE)
+            setEventFlags(_ioh.handle(), _eventFlags);
+    }
+
+    return len;
 }
 
 
@@ -524,7 +472,29 @@ size_t UdpSocketImpl::endRead(System::EventLoop& loop, char* buffer, size_t n, b
 
 size_t UdpSocketImpl::write(const char* buffer, size_t n)
 {
-    return 0;
+    WSABUF sendbuf;
+    sendbuf.buf = const_cast<char*>(buffer);
+    sendbuf.len = n;
+
+    //Set socket to blocking mode
+    setEventFlags(0, 0);
+    u_long argp = 0;
+    ::ioctlsocket(_fd, FIONBIO, &argp);
+
+    DWORD bytesSent = 0;
+    int rc = WSASend(_fd, &sendbuf, 1, &bytesSent, 0, NULL, NULL);
+
+    //Set socket to non-blocking mode
+    argp = 1;
+    ::ioctlsocket(_fd, FIONBIO, &argp);
+
+    if(_ioh.handle() != INVALID_HANDLE_VALUE)
+        setEventFlags(_ioh.handle(), _eventFlags);
+
+    if(rc == SOCKET_ERROR)
+        throw System::IOError("WSASend");  
+
+    return  bytesSent;
 }
 
 
@@ -554,7 +524,6 @@ size_t UdpSocketImpl::beginWrite(System::EventLoop& loop, const char* buffer, si
         }
     }
 
-    //SetEvent(_currentEventHandle);
     return numberOfBytesSent;
 }
 
@@ -563,7 +532,12 @@ size_t UdpSocketImpl::endWrite(System::EventLoop& loop, const char* buffer, size
 {
     _eventFlags &= ~FD_WRITE;
 
-    //Set socket to blocking mode
+    //The WSAEventSelect function automatically sets socket s to nonblocking
+    // mode, regardless of the value of lNetworkEvents. To set socket s back 
+    // to blocking mode, it is first necessary to clear the event record 
+    // associated with socket s via a call to WSAEventSelect with 
+    // lNetworkEvents set to zero and the hEventObject parameter set to NULL.
+    // You can then call ioctlsocket or WSAIoctl to set the socket back to blocking mode.
     setEventFlags(0, 0);
 
     u_long argp = 0;
@@ -584,215 +558,7 @@ size_t UdpSocketImpl::endWrite(System::EventLoop& loop, const char* buffer, size
     return  numberOfBytesSent;
 }
 
-
-/*bool UdpSocketImpl::checkEvent()
-{
-    DestructionSentry sentry(_sentry);
-
-    if(_dataSends != 0 )
-    {
-       _socket.outputReady.send(_socket);
-       return true;
-    }
-
-    WSANETWORKEVENTS events;
-
-    if(WSAEnumNetworkEvents(_fd, NULL, &events) == SOCKET_ERROR)
-        throw System::SystemError("WSAEnumNetworkEvents failed");
-
-    bool ev = false;
-
-    if((events.lNetworkEvents & FD_WRITE) == FD_WRITE)
-    {
-       ev = true;
-       _socket.outputReady.send(_socket);
-
-       if( ! _sentry )
-           return ev;
-    }
-
-    if((events.lNetworkEvents & FD_READ) == FD_READ)
-    {
-        ev = true;
-        _socket.inputReady.send(_socket);
-
-        if( ! _sentry )
-           return ev;
-    }
-
-    // if((events.lNetworkEvents & FD_CLOSE) == FD_CLOSE)
-    // {
-    //      ev = true;
-    //    _isConnected = false;
-
-    //    if( ! _sentry )
-    //        return ev;
-    // }
-
-    return ev;
-}*/
-
-
-// bool UdpSocketImpl::wait(std::size_t umsecs)
-// {
-//     DWORD msecs = umsecs;
-//     if(umsecs == Pt::System::EventLoop::WaitInfinite)
-//     {
-//         msecs = INFINITE;
-//     }
-//     else if( umsecs > static_cast<size_t>(std::numeric_limits<DWORD>::max()) )
-//     {
-//         msecs = std::numeric_limits<int>::max();
-//     }
-
-//     // why dataSends ?
-//     if( _dataSends != 0 ||
-//         WSAWaitForMultipleEvents(1, &_currentEventHandle, FALSE, msecs, FALSE) != WSA_WAIT_TIMEOUT)
-//     {
-//         this->checkEvent();
-//         return true;
-//     }
-
-//     return false;
-// }
-
-
-// bool UdpSocketImpl::beginConnect(const AddrInfo& ai)
-// {
-//     assert( ! _isConnected );
-
-//     _addrInfo = ai;
-//     _addrInfoPtr = _addrInfo.impl()->begin();
-//     _connectResult = tryConnect();
-//     checkPendingError();
-
-//     return _isConnected;
-// }
-
-
-// const char* UdpSocketImpl::tryConnect()
-// {
-//     if( _addrInfoPtr == _addrInfo.impl()->end() )
-//     {
-//         return "invalid address";
-//     }
-
-//     while (true)
-//     {
-//         while (true)
-//         {
-//             _fd = WSASocket(_addrInfoPtr->ai_family, SOCK_DGRAM, 0, NULL, 0, 0);
-
-//              if (_fd != INVALID_SOCKET)
-//                 break;
-
-//              if (++_addrInfoPtr == _addrInfo.impl()->end())
-//                 return "WSASocket failed";
-//         }
-
-//         std::memmove(&_peeraddr, _addrInfoPtr->ai_addr, _addrInfoPtr->ai_addrlen);
-
-//         if( ::connect(_fd, _addrInfoPtr->ai_addr, _addrInfoPtr->ai_addrlen) == 0 )
-//         {
-//             _isConnected = true;
-//             break;
-//         }
-
-//         if (errno == WSAEINPROGRESS)
-//         {
-//             break;
-//         }
-
-//         close();
-
-//         if (++_addrInfoPtr == _addrInfo.impl()->end())
-//             return "connect failed";
-//     }
-
-//     return 0;
-// }
-
-
-// void UdpSocketImpl::checkPendingError()
-// {
-//     if(_connectResult)
-//     {
-//         const char* p = _connectResult;
-//         _connectResult = 0;
-//         throw System::IOError(p);
-//     }
-// }
-
-
-// void UdpSocketImpl::endConnect()
-// {
-//     _eventFlags &= ~FD_CONNECT;
-//     this->setEventFlags(_currentEventHandle, _eventFlags);
-
-//     checkPendingError();
-
-//     if( _isConnected )
-//         return;
-
-//     _eventFlags |= FD_CONNECT;
-//     this->setEventFlags(_currentEventHandle, _eventFlags);
-
-//     try
-//     {
-//         while (true)
-//         {
-//             bool avail = this->wait(_timeout);
-
-//             if(avail)
-//             {
-//                 int sockerr = 0;
-//                 socklen_t optlen = sizeof(sockerr);
-
-//                 if( ::getsockopt(_fd, SOL_SOCKET, SO_ERROR, (char*)&sockerr, &optlen) != 0 )
-//                 {
-//                     close();
-//                     throw System::SystemError("getsockopt");
-//                 }
-
-//                 if( sockerr == 0 )
-//                 {
-//                     _isConnected = true;
-//                     _eventFlags &= ~FD_CONNECT;
-//                     this->setEventFlags(_currentEventHandle, _eventFlags);
-//                     return;
-//                 }
-
-//                 if (++_addrInfoPtr == _addrInfo.impl()->end())
-//                 {
-//                     // no more addrInfo - propagate error
-//                     throw System::IOError("connect failed");
-//                 }
-//             }
-//             else if (++_addrInfoPtr == _addrInfo.impl()->end())
-//             {
-//                 throw System::IOTimeout();
-//             }
-
-//             close();
-//             _connectResult = tryConnect();
-
-//             if( _isConnected )
-//             {
-//                 _eventFlags &= ~FD_CONNECT;
-//                 this->setEventFlags(_currentEventHandle, _eventFlags);
-//                 return;
-//             }
-
-//             checkPendingError();
-//         }
-//     }
-//     catch(...)
-//     {
-//         close();
-//         throw;
-//     }
-// }
-
 } // namespace Net
 
 } // namespace Pt
+

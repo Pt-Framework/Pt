@@ -39,12 +39,6 @@
 #include <winsock2.h>
 #include <ws2tcpip.h>
 
-#if ! defined( __GNUC__)  
-    #if NTDDI_VERSION  == NTDDI_WIN2K
-        //#include <wspiapi.h>
-    #endif
-#endif
-
 namespace Pt {
 
 namespace Net {

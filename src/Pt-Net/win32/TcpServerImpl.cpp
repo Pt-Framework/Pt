@@ -27,10 +27,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "AddrInfoImpl.h"
 #include "TcpServerImpl.h"
-#include "MainLoopImpl.h"
+#include "AddrInfoImpl.h"
 #include <Pt/Net/AddrInfo.h>
+#include <Pt/Net/AddressInUse.h>
 #include <Pt/Net/TcpServer.h>
 #include <Pt/System/Logger.h>
 #include <Pt/System/EventLoop.h>
@@ -62,8 +62,7 @@ static struct WsaInit
 
 
 TcpServerImpl::TcpServerImpl(TcpServer& server)
-: _server(server)
-, _ioh(server)
+: _ioh(server)
 , _fd(INVALID_SOCKET)
 {
 }
@@ -82,7 +81,7 @@ void TcpServerImpl::create(int domain, int type, int protocol)
 
     if (_fd == INVALID_SOCKET)
     {
-        log_debug("Error at socket(): "<< WSAGetLastError());
+        log_debug("socket() failed: "<< WSAGetLastError());
         throw System::SystemError( PT_ERROR_MSG("creating socket failed") );
     }
 
@@ -97,7 +96,7 @@ void TcpServerImpl::close()
 
     log_debug("close socket " << _fd);
 
-    attachEvent(0, 0);
+    setEventFlags(0, 0);
 
     ::closesocket(_fd);
     _fd = INVALID_SOCKET;
@@ -110,8 +109,8 @@ void TcpServerImpl::cancel(System::EventLoop& loop)
     if (_fd == INVALID_SOCKET || _ioh.handle() == INVALID_HANDLE_VALUE)
         return;
 
-    attachEvent(_ioh.handle(), 0);
-
+    log_debug("cancel socket " << _fd);
+    setEventFlags(_ioh.handle(), 0);
     loop.selector().disableOverlapped(_ioh);
 }
 
@@ -120,8 +119,9 @@ void TcpServerImpl::beginAccept(System::EventLoop& loop)
 {
     assert(_ioh.handle() == INVALID_HANDLE_VALUE);
 
+    log_debug("begin accepting " << _fd);
     loop.selector().enableOverlapped(_ioh);
-    attachEvent(_ioh.handle(), FD_ACCEPT);
+    setEventFlags(_ioh.handle(), FD_ACCEPT);
 }
 
 
@@ -129,8 +129,8 @@ void TcpServerImpl::listen(const std::string& ipaddr,
                            unsigned short int port,
                            int backlog, unsigned)
 {
-    log_debug("listen on " << ipaddr << " port " << port
-              << " backlog " << backlog << " flags " << 0);
+    log_debug("listen on " << ipaddr << " port " << port << 
+              " backlog " << backlog << " flags " << 0);
 
     AddrInfo ai(ipaddr, port, true);
 
@@ -174,9 +174,7 @@ void TcpServerImpl::listen(const std::string& ipaddr,
         log_debug("bind ");
         if( ::bind(_fd, it->ai_addr, it->ai_addrlen) == 0 )
         {
-          // save our information
-            std::memmove(&_servaddr, it->ai_addr, it->ai_addrlen);
-    
+   
             log_debug("listen ");
     
             if (::listen(_fd, backlog) == SOCKET_ERROR)
@@ -186,21 +184,21 @@ void TcpServerImpl::listen(const std::string& ipaddr,
                 if (WSAGetLastError() == WSAEADDRINUSE)
                     throw AddressInUse();
                 else
-                    throw System::SystemError("listen");
+                    throw System::IOError("listen");
             }
     
             return;
         }
     }
 
-    log_debug("error: " << GetLastError());
+    log_debug( "error: " << WSAGetLastError() );
     
     close();
 
     if (WSAGetLastError() == WSAEADDRINUSE)
         throw AddressInUse();
     else
-        throw System::SystemError("bind");
+        throw System::IOError("bind");
 }
 
 
@@ -208,33 +206,23 @@ SOCKET TcpServerImpl::accept()
 {
     // set the server socket to blocking-mode
     u_long argp = 0;
-    attachEvent(0, 0);
+    setEventFlags(0, 0);
     ::ioctlsocket(_fd, FIONBIO, &argp);
     
     SOCKET fd = ::WSAAccept(_fd, NULL, NULL, NULL, 0);
     
     if( fd == SOCKET_ERROR)
     {
-        log_debug("accept failed: "<< WSAGetLastError());
-        throw System::SystemError( PT_ERROR_MSG("accept failed") );
+        log_debug("accept failed: " << WSAGetLastError());
+        throw System::IOError( PT_ERROR_MSG("accept failed") );
     }
     
     // reset the blocking mode
     if(_ioh.handle() != INVALID_HANDLE_VALUE)
-        attachEvent(_ioh.handle(), FD_ACCEPT);
+        setEventFlags(_ioh.handle(), FD_ACCEPT);
 
     log_debug(fd << " accepted ");
     return fd;
-}
-
-
-void TcpServerImpl::attachEvent(HANDLE ev, long events)
-{
-    if (WSAEventSelect(_fd, ev, events) == SOCKET_ERROR)
-    {
-        log_debug("Set event failed: "<< WSAGetLastError());
-        throw System::SystemError( PT_ERROR_MSG("attach event to server socket failed") );
-    }
 }
 
 
@@ -253,6 +241,16 @@ bool TcpServerImpl::run()
         return false;
 
     return true;
+}
+
+
+void TcpServerImpl::setEventFlags(HANDLE ev, long events)
+{
+    if (WSAEventSelect(_fd, ev, events) == SOCKET_ERROR)
+    {
+        log_debug("Set event failed: "<< WSAGetLastError());
+        throw System::SystemError( PT_ERROR_MSG("attach event to server socket failed") );
+    }
 }
 
 } // namespace Net
