@@ -30,6 +30,7 @@
 #include "UdpSocketImpl.h"
 #include "MainLoopImpl.h"
 #include <Pt/Net/AddrInfo.h>
+#include <Pt/Net/AddressInUse.h>
 #include <Pt/Net/UdpSocket.h>
 #include <Pt/System/SystemError.h>
 #include <Pt/System/IOError.h>
@@ -304,7 +305,7 @@ void UdpSocketImpl::dropMulticastGroup(const std::string& ipaddr)
 }
 
 
-std::string UdpSocketImpl::getSockAddr() const
+std::string UdpSocketImpl::socketAddress() const
 {
 	const sockaddr_in* sa = reinterpret_cast<const sockaddr_in*>(&_servaddr);
     char strbuf[INET6_ADDRSTRLEN + 1];
@@ -313,7 +314,7 @@ std::string UdpSocketImpl::getSockAddr() const
 }
 
 
-std::string UdpSocketImpl::getPeerAddr() const
+std::string UdpSocketImpl::peerAddress() const
 {
 	const sockaddr_in* sa = reinterpret_cast<const sockaddr_in*>(&_peeraddr);
     char strbuf[INET6_ADDRSTRLEN + 1];

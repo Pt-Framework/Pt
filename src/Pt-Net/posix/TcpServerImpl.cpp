@@ -26,10 +26,11 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <Pt/Net/AddrInfo.h>
 #include "TcpServerImpl.h"
 #include "AddrInfoImpl.h"
 #include "MainLoopImpl.h"
+#include <Pt/Net/AddrInfo.h>
+#include <Pt/Net/AddressInUse.h>
 #include <Pt/Net/TcpServer.h>
 #include <Pt/System/SystemError.h>
 #include <Pt/System/EventLoop.h>

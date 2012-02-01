@@ -27,10 +27,10 @@
  */
 
 #include "AddrInfoImpl.h"
-#include <Pt/System/SystemError.h>
+#include "Pt/System/IOError.h"
+#include "Pt/System/SystemError.h"
 #include <string>
 #include <sstream>
-#include <string.h>
 
 namespace Pt {
 

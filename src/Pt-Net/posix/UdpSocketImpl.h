@@ -73,9 +73,9 @@ class UdpSocketImpl : public System::IODeviceImpl
 
         void dropMulticastGroup(const std::string& ipaddr);
 
-        std::string getSockAddr() const;
+        std::string socketAddress() const;
 
-        std::string getPeerAddr() const;
+        std::string peerAddress() const;
 
         size_t read(char* buffer, size_t count, bool& eof);
 
