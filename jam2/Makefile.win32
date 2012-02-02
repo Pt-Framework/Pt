@@ -9,7 +9,7 @@
 # nmake /f Makefile.win32
 #
 CC = cl /nologo
-CFLAGS = -DNT /RTC1 /MT /Os -wd4996 kernel32.lib advapi32.lib user32.lib
+CFLAGS = -DNT /RTC1 /MT /Os /DPT_MCHECK -wd4996 kernel32.lib advapi32.lib user32.lib
 TARGET = /Fejam
 
 SOURCES = \

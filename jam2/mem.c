@@ -81,7 +81,7 @@ static int PT_MCheck_Counter          = 0;
 
 void pt_mcheck_atexit_handler()
 {
-    if(PT_MCheck_Counter != 0) printf("WARNING: Unbalanced memory allocation and free!\n");
+    if(PT_MCheck_Counter != 0) printf("WARNING: Unbalanced memory allocation and free: %i\n", PT_MCheck_Counter);
 }
 
 void *pt_calloc(size_t nmemb, size_t size)
