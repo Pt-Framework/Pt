@@ -373,6 +373,8 @@ bool TcpSocketImpl::runConnect(System::EventLoop& loop)
             try 
             {
                 log_debug("trying next address");
+
+                // if this returns true the i/o handle is not in the loop
                 return beginConnect(loop, *_addrInfoPtr);
             }
             catch(const System::IOError& )
@@ -417,6 +419,8 @@ bool TcpSocketImpl::runConnect(System::EventLoop& loop)
             try 
             {
                 log_debug("trying next address");
+
+                // if this returns true the i/o handle is not in the loop
                 return beginConnect(loop, *_addrInfoPtr);
             }
             catch(const System::IOError& )
