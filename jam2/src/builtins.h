@@ -65,6 +65,14 @@ LIST *builtin_makedir( FRAME * frame, int flags );
 
 /* Pt extension:
  */
+LIST *builtin_writefile(FRAME *args, int flags);
+
+/* Pt extension:
+ */
+LIST *builtin_escape(FRAME *args, int flags);
+
+/* Pt extension:
+ */
 LIST *builtin_exec( FRAME * frame, int flags );
 
 void backtrace( FRAME *frame );

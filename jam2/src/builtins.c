@@ -428,6 +428,14 @@ void load_builtins()
               builtin_exec, 0, 0 );
       }
 
+    /* Pt extension */
+    bind_builtin( "WriteFile" ,
+                  builtin_writefile, 0, 0 );
+
+    /* Pt extension */
+    bind_builtin( "Escape" ,
+                  builtin_escape, 0, 0 );
+
       /* Initialize builtin modules. */
       init_set();
       init_path();
@@ -2455,4 +2463,61 @@ LIST *builtin_exec( FRAME * frame, int flags)
     exec_wait();
 
     return ervc.result;
+}
+
+/* Pt extension:
+ */
+LIST* builtin_writefile( FRAME * frame, int flags )
+{
+    LIST* fname = lol_get( frame->args, 0 );
+    LIST* text = lol_get( frame->args, 1 );
+    FILE* file = NULL;
+
+    if(fname && text)
+    {
+        file = fopen(object_str(fname->value), "a");
+        if(file)
+        {
+            fprintf( file, "%s\n", object_str(text->value) );
+            fclose(file);
+        }
+    }
+
+    return L0;
+}
+
+/* Pt extension:
+ */
+LIST* builtin_escape( FRAME * frame, int flags )
+{
+    const char* c = 0;
+    string s;
+    LIST* result = 0;
+    LIST* arg = lol_get( frame->args, 0 );
+
+    string_new( &s );
+
+    if(arg)
+    {
+        for(c = object_str(arg->value); *c != '\0' ; ++c)
+        {
+            if(*c == '"')
+            {
+                string_push_back( &s, '\\' );
+            }
+
+            string_push_back( &s, *c );
+
+            if(*c == '\\')
+            {
+                string_push_back( &s, *c );
+            }
+        }
+
+    }
+
+    result = list_new( L0, object_new(s.value) );
+    string_free(&s);
+
+    return result;
 }

@@ -2,7 +2,7 @@
 # Jam Environment
 ##########################################################################
 
-JAMDIR ?= jam ;
+JAMDIR ?= jam2 ;
 DOT = . ;
 
 rule JamInclude
