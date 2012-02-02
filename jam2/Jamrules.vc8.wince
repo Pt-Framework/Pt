@@ -1,0 +1,121 @@
+# Include target specific options
+#
+JamInclude Jamrules.vc8.wince.$(TARGET_OSPLAT:L) ;
+
+
+# Flags and options
+#
+CCFLAGS += /D "_WIN32_WCE=0x420" /D "WINCE" /D "UNDER_CE" /D "WIN32_PLATFORM_PSPC" ;
+CCFLAGS += /D "_CONSOLE" /D "_UNICODE" /D "UNICODE" /W3 ;
+
+LINKFLAGS     += /MANIFEST:NO /NODEFAULTLIB:"oldnames.lib" ;
+LINKFLAGS     += /subsystem:windowsce,4.20 /ERRORREPORT:PROMPT ;
+MAINLINKFLAGS += /ENTRY:"mainWCRTStartup" ;
+
+
+if $(CONFIG:L) = debug 
+{
+    CCFLAGS   +=  /Zi /D "DEBUG" /D "_DEBUG" /MDd ;
+    OPTIM     ?=  /Os /Od ;
+    LINKFLAGS += /DEBUG ;
+}
+else
+{
+    CCFLAGS += /MD /D "NDEBUG" ;
+    OPTIM   ?=  /O1 /Oy ;
+}
+
+WARN      ?= /W3 ;
+C++FLAGS  +=  $(CCFLAGS) ;
+C++FLAGS  +=  /EHsc /fp:fast /GR /TP ;
+
+
+STDHDRS = \"$(VISUALC)\\vc\\ce\\include\" 
+          \"$(VISUALC)\\smartdevices\\sdk\\pocketpc2003\\include\" ;
+
+
+# copy libs to root dir of wince device
+WINCE_INSTALLDIR = / ;
+LIBDIR = $(WINCE_INSTALLDIR) ;
+
+rule EmbedManifest
+{
+# no manifest files on WinCE
+}
+
+rule CEPrepare
+{
+    NotFile $(<) ;
+    Always $(<) ;
+    Depends install : $(<) ;
+    Depends test : $(<) ;
+}
+
+rule Resources
+{
+    local i ;
+    for i in $(3)
+    {
+      InstallFile $(WINCE_INSTALLDIR) : $(3[i]) ;
+    }
+}
+
+
+actions CEPrepare
+{
+    rem change to parent directory (to allow quickbuild to remove the current dir)
+    pushd ..
+
+        ce connect 1
+
+    rem change back to the previous directory                
+    popd
+    
+    ce md $(>:P)
+}
+
+CEPrepare DeviceEmulator : $(WINCE_INSTALLDIR) ;
+
+# same implementation as in Jamrules.vc, but additionally
+# install the dll.
+rule SharedLibraryImpl
+{
+    # Add grist to file names
+    local _sources = [ FGristFiles $(>) ] ;
+    local _objects = $(_sources:S=$(SUFOBJ)) ;
+
+    # Add library name decorations <name><.dll/.so>
+    local _target = $(PRELIB)$(<:S=$(SUFDLL)) ;
+
+    Clean clean : $(_target) ;
+    Clean clean : $(_target:S=.lib) ;
+    Clean clean : $(_target:S=.exp) ;   
+    Clean clean : $(_target:S=.pdb) ;
+    Clean clean : $(_target:S=.ilk) ;
+    Clean clean : $(_target:S=.idb) ;
+    Clean clean : $(_target).manifest ;
+
+    PDB on $(_objects) = $(_target:S=.pdb) ;
+    Depends $(_sources) : first ;
+    Depends $(PRELIB)$(<:S=$(SUFLIB)) : $(_target) ;
+
+  # The *.lib is created before its *.dll and therefore has an older timestamp.
+  # However, the lib depends on the dll and will be recreated everytime a 
+  # target is called using this dll because it seems to be 'old'.
+  # NOUPDATE will ignore the lib's timestamp once it has been created.
+  NOUPDATE $(PRELIB)$(<:S=$(SUFLIB)) ;
+
+    LINKFLAGS on $(_target) += /dll $(LINKFLAGS) ;
+    
+    # Install the dll. The Install rule for wince will install the file
+  # on the eumulator image into WINCE_INSTALLDIR 
+    InstallLib $(WINCE_INSTALLDIR) : $(_target) ;
+
+}
+
+# copy files into emulator image using the ce command line shell. 
+# used to run unit tests on wince
+actions Install
+{
+    ce copy $(>) $(<) 
+}

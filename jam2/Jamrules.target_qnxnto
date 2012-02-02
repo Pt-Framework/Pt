@@ -1,0 +1,25 @@
+# Set default values for toolset, system API and GUI API
+#
+TOOLSET ?= qcc ;
+
+SUFLIB = .a ;
+SUFDLL = .so ;
+SUFEXE	= "" ;
+
+PRELIB = lib ;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

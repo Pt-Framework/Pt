@@ -1,0 +1,9 @@
+PRELIB    = lib ;
+SUFLIB    = .a ;
+SUFDLL    = .a ;
+SUFEXE	  = "" ;
+SUFDBG    = "" ;
+
+TOOLSET ?= xlc ;
+OSPLAT ?= ppc ;
+TARGET_OSPLAT ?= ppc ;

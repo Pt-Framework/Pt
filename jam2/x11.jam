@@ -1,0 +1,160 @@
+if ! $(X11_JAM) {
+X11_JAM = true ;
+
+X11_INCLUDE_PATHS = /usr/include
+                    /usr/include/X11
+                    /usr/X11R7/include
+                    /usr/X11R6/include
+                    /opt/X11R7/include
+                    /opt/X11R6/include  ;
+
+X11_LIBRARY_PATHS = /usr/lib
+                    /usr/X11R7/lib
+                    /usr/X11R6/lib
+                    /opt/X11R6/lib
+                    /opt/X11R7/lib
+                    /usr/lib64
+                    /usr/X11R7/lib64
+                    /usr/X11R6/lib64
+                    /opt/X11R6/lib64
+                    /opt/X11R7/lib64 ;
+
+
+rule X11Includes
+{
+    local incl = [ GLOB $(X11_INCLUDE_PATHS) : X11  ] ;
+    Echo "Checking for X11 includes... " $(incl[0]) ;
+
+    # return empty string if no libs were found
+    return -I$(incl[0]) ;
+}
+
+
+rule X11Libs
+{
+    local libs = [ GLOB $(X11_LIBRARY_PATHS) : *X11.* ] ;
+    Echo "Checking for X11 libraries... " $(libs[0]:P) ;
+
+    # return empty string if no libs were found
+    return -L$(libs[0]:P)" -lX11" ;
+}
+
+
+rule XextLibs
+{
+    local libs = [ GLOB $(X11_LIBRARY_PATHS) : *Xext.* ] ;
+    Echo "Checking for Xext libraries... " $(libs[0]:P) ;
+
+    # return empty string if no libs were found
+    return -L$(libs[0]:P)" -lXext" ;
+}
+
+
+rule XftIncludes
+{
+    local incl = [ GLOB $(X11_INCLUDE_PATHS)/X11 : Xft ] ;
+    Echo "Checking for Xft includes... " $(incl[0]) ;
+
+    # return empty string if no libs were found
+    return -I$(incl[0]) ;
+}
+
+
+rule XftLibs
+{
+    local libs = [ GLOB $(X11_LIBRARY_PATHS) : *Xft.* ] ;
+    Echo "Checking for Xft libraries... " $(libs[0]:P) ;
+
+    # return empty string if no libs were found
+    return -L$(libs[0]:P)" -lXft" ;
+}
+
+} # X11_JAM
+
+
+# TODO: Solaris
+# SubDirHdrs /usr/sfw/include ; # ft-stuff
+# SubDirHdrs /usr/sfw/include/freetype2 ; # ft-stuff
+# /usr/sfw/lib/libXrender.so # extra path for XRender
+
+# Must search X11 includes in these locations (sorted by priority) :
+# /usr/X11R7/include/X11
+# /usr/X11R6/include/X11
+# /usr/include/X11
+# /usr/X11R6/include
+# /usr/X11R7/include
+# /usr/include
+#
+# /usr/local/X11R6/include/X11
+# /usr/local/X11R7/include/X11
+# /usr/local/include/X11
+# /usr/local/X11R6/include
+# /usr/local/X11R7/include
+# /usr/local/include
+#
+# /opt/X11R6/include/X11
+# /opt/X11R7/include/X11
+# /opt/include/X11
+# /opt/X11R6/include
+# /opt/X11R7/include
+# /opt/include
+#
+
+# Must search X11 libraries in these locations (sorted by priority) :
+# /usr/X11R6/lib64/X11
+# /usr/X11R6/lib32/X11
+# /usr/X11R6/lib/X11
+# /usr/X11R7/lib64/X11
+# /usr/X11R7/lib32/X11
+# /usr/X11R7/lib/X11
+# /usr/lib64/X11
+# /usr/lib32/X11
+# /usr/lib/X11
+# /usr/X11R6/lib64
+# /usr/X11R6/lib32
+# /usr/X11R6/lib
+# /usr/X11R7/lib64
+# /usr/X11R7/lib32
+# /usr/X11R7/lib
+# /usr/lib64
+# /usr/lib32
+# /usr/lib
+#
+# /usr/local/X11R6/lib64/X11
+# /usr/local/X11R6/lib32/X11
+# /usr/local/X11R6/lib/X11
+# /usr/local/X11R7/lib64/X11
+# /usr/local/X11R7/lib32/X11
+# /usr/local/X11R7/lib/X11
+# /usr/local/lib64/X11
+# /usr/local/lib32/X11
+# /usr/local/lib/X11
+# /usr/local/X11R6/lib64
+# /usr/local/X11R6/lib32
+# /usr/local/X11R6/lib
+# /usr/local/X11R7/lib64
+# /usr/local/X11R7/lib32
+# /usr/local/X11R7/lib
+# /usr/local/lib64
+# /usr/local/lib32
+# /usr/local/lib
+#
+# /opt/X11R6/lib64/X11
+# /opt/X11R6/lib32/X11
+# /opt/X11R6/lib/X11
+# /opt/X11R7/lib64/X11
+# /opt/X11R7/lib32/X11
+# /opt/X11R7/lib/X11
+# /opt/lib64/X11
+# /opt/lib32/X11
+# /opt/lib/X11
+# /opt/X11R6/lib64
+# /opt/X11R6/lib32
+# /opt/X11R6/lib
+# /opt/X11R7/lib64
+# /opt/X11R7/lib32
+# /opt/X11R7/lib
+# /opt/lib64
+# /opt/lib32
+# /opt/lib
+#

@@ -1,0 +1,148 @@
+##############################################################################
+# Tools and utilities
+##############################################################################
+CC     = cc ;
+C++    = CC ;
+RANLIB ?= ranlib ;
+
+##############################################################################
+# Compiler flags
+##############################################################################
+WARN ?= +w -errtags=yes ;
+
+if $(CONFIG:L) = debug
+{
+    CCFLAGS += -DEBUG -g ;
+    OPTIM   ?= ;
+}
+else if $(CONFIG:L) = release
+{
+    CCFLAGS += -DNDEBUG ;
+    OPTIM	?= -fast ;
+}
+
+if $(TARGET_OSPLAT) = sparc9
+{
+    CCFLAGS += -xtarget=ultra -xarch=v9 ;
+    LINKFLAGS += -xtarget=ultra -xarch=v9 ;
+}
+
+CCFLAGS   += -mt -lpthread -D_POSIX_C_SOURCE=199506L -D__EXTENSIONS__ ;
+C++FLAGS  += $(CCFLAGS) -features=extensions ;
+
+##############################################################################
+# Linker flags
+##############################################################################
+LINKFLAGS += -mt -lpthread ;
+
+C++LINKFLAGS += $(LINKFLAGS) ;
+
+##############################################################################
+# C++ STL version
+##############################################################################
+LIBSTDC++ ?= roguewave ;
+if $(LIBSTDC++) = stlport4
+{
+	LIBSTDC++ = stlport4 ;
+    C++FLAGS += -library=stlport4 ;
+    C++LINKFLAGS += -library=stlport4 ;
+}
+else if $(LIBSTDC++) != roguewave
+{
+    Exit "Please specify LIBSTDC++ (roguewave, stlport4)." ;
+}
+
+##############################################################################
+# Rules
+##############################################################################
+rule FDefines
+{ return -D$(<) ; }
+
+
+rule FIncludes
+{ return -I$(<) ; }
+
+
+rule MainImpl
+{
+    # Add executable name decoration
+    local _target = $(<:S=$(SUFEXE)) ;
+
+    switch $(>:S)
+    {
+        case .C :   LINK on $(_target) = $(C++) ;
+                    LINKFLAGS on $(_target) += $(C++LINKFLAGS) ;
+        case .cc :  LINK on $(_target) = $(C++) ;
+                    LINKFLAGS on $(_target) += $(C++LINKFLAGS) ;
+        case .cpp : LINK on $(_target) = $(C++) ;
+                    LINKFLAGS on $(_target) += $(C++LINKFLAGS) ;
+        case * :    LINK on $(_target) = $(CC) ;
+                    LINKFLAGS on $(_target) += $(LINKFLAGS) ;
+    }
+}
+
+
+rule Main_LinkSharedLibrariesImpl
+{
+    local _target = [ FAppendSuffix $(<) : $(SUFEXE) ] ;
+    local _libs = $(PRELIB)$(>:S=$(SUFDLL)) ;
+
+    if $(3)
+    {
+        LINKLIBS on $(_target) += $(LINKLIBS) -L$(3) -l$(2) ;
+    }
+    else
+    {
+        Depends $(_target) : $(PRELIB)$(>:S=$(SUFDLL)) ;
+        SHLIBS on $(_target) += $(_libs) ;
+        LINKSHLIBS on $(_target) += $(>:S=$(SUFDLL)) ;
+    }
+}
+
+
+rule SharedLibraryImpl
+{
+    # Add library name decorations <lib><name><.so>
+    local _target = $(PRELIB)$(<)$(SUFDLL) ;
+
+    switch $(>:S)
+    {
+        case .C :   LINK on $(_target) = $(C++) ;
+                    LINKFLAGS on $(_target) += $(C++LINKFLAGS) ;
+        case .cc :  LINK on $(_target) = $(C++) ;
+                    LINKFLAGS on $(_target) += $(C++LINKFLAGS) ;
+        case .cpp : LINK on $(_target) = $(C++) ;
+                    LINKFLAGS on $(_target) += $(C++LINKFLAGS) ;
+        case * :    LINK on $(_target) = $(CC) ;
+                    LINKFLAGS on $(_target) += $(LINKFLAGS) ;
+    }
+
+    LINKFLAGS on $(_target) += -G ;
+}
+
+
+rule SharedLibrary_LinkSharedLibrariesImpl
+{
+    local _target = $(PRELIB)$(<)$(SUFDLL) ;
+    local _libs = $(PRELIB)$(>)$(SUFDLL) ;
+
+    if $(3)
+    {
+        LINKLIBS on $(_target) += $(LINKLIBS) -L$(3) -l$(2) ;
+    }
+    else
+    {
+        Depends $(_target) : $(_libs) ;
+        SHLIBS on $(_target) += $(_libs) ;
+        LINKSHLIBS on $(_target) += $(>:S=$(SUFDLL)) ;
+    }
+}
+
+##############################################################################
+# Actions
+##############################################################################
+actions Link bind NEEDLIBS SHLIBS
+{
+    $(LINK) -o $(<) $(LINKFLAGS) -L$(SHLIBS:P) $(UNDEFS) $(>) -l$(LINKSHLIBS:B) $(NEEDLIBS) $(LINKLIBS) 
+}
+

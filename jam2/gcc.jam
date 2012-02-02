@@ -1,0 +1,259 @@
+##############################################################################
+# Configuration
+##############################################################################
+
+if $(CONFIGURE)
+{
+    if $(TOOLSET_ROOT)
+    {
+        TOOLSET_PATH = $(TOOLSET_ROOT:J=" ")$(SLASH)bin$(SLASH) ;
+    }
+    else if $(TOOLSET_PATH)
+    {
+        TOOLSET_PATH  =  $(TOOLSET_PATH:J=" ")$(SLASH) ;
+    }
+
+    CC     = $(TOOLSET_PATH:E="")gcc ;
+    C++    = $(TOOLSET_PATH:E="")g++ ;
+    RANLIB = $(TOOLSET_PATH:E="")ranlib ;
+    AR     = $(TOOLSET_PATH:E="")ar ru ;
+    LINK   = $(CC) ;
+
+    Configure AR : $(AR:J=" ") ;
+    Configure CC : $(CC) ;
+    Configure C++ : $(C++) ;
+    Configure LINK : $(LINK) ;
+    Configure RANLIB: $(RANLIB) ;
+
+    if $(TARGET_OS:L) = macosx
+    {
+        WITH_GCC_FLAG_DYNAMICLIB = 1 ;
+    }
+    else if $(TARGET_OS:L) = nt
+    {
+        WITH_GCC_FLAG_SHARED = 1 ;
+        WITH_GCC_FLAG_PSEUDO_RELOC = 1 ;
+        WITH_GCC_FLAG_GROUPLIBS = 1 ;
+        WITH_GCC_FLAG_RPATH = 1 ;
+    }
+    else
+    {
+        WITH_GCC_FLAG_SHARED = 1 ;
+        WITH_GCC_FLAG_EXPORT = 1 ;
+        WITH_GCC_FLAG_GROUPLIBS = 1 ;
+        WITH_GCC_FLAG_RPATH = 1 ;
+    }
+
+    # ConfigureCc WITH_GCC_FLAG_PSEUDO_RELOC : "int main() { return 0; }"
+    #                                        : "-Wl,--enable-runtime-pseudo-reloc" ;
+    #
+    # ConfigureCc WITH_GCC_FLAG_VISIBILITY  : "int main() { return 0; }"
+    #                                       : "-fvisibility-inlines-hidden -fvisibility=hidden" ;
+    #
+    # ConfigureCc WITH_GCC_FLAG_EXPORT : "int main() { return 0; }"
+    #                                  : "-Wl,-E" ;
+    #
+    # ConfigureCc WITH_GCC_FLAG_RPATH : "int main() { return 0; }"
+    #                                 : "-Wl,-rpath-link jam" ;
+    #
+    # ConfigureCc WITH_GCC_FLAG_GROUPLIBS : "int main() { return 0; }"
+    #                                     : "-Wl,--start-group -Wl,--end-group" ;
+    #
+    # ConfigureCc WITH_GCC_FLAG_DYNAMICLIB : "int main() { return 0; }"
+    #                                      : "-dynamiclib -install_name test" ;
+    #
+    # ConfigureCc WITH_GCC_FLAG_SHARED : "int main() { return 0; }"
+    #                                  : "-shared" ;
+
+    if $(WITH_GCC_FLAG_PSEUDO_RELOC)
+    {
+        LINKFLAGS  += "-Wl,--enable-runtime-pseudo-reloc"  ;
+    }
+    
+    if $(WITH_GCC_FLAG_VISIBILITY)
+    {
+        CCFLAGS    += -fvisibility=hidden ;
+        LINKFLAGS  += -fvisibility-inlines-hidden -fvisibility=hidden ;
+    }
+    
+    if $(WITH_GCC_FLAG_VISIBILITY)
+    {
+        C++FLAGS += -fvisibility-inlines-hidden ;
+    }
+    
+    if $(WITH_GCC_FLAG_GROUPLIBS)
+    {
+        GCC_START_GROUP = "-Wl,--start-group" ;
+        GCC_END_GROUP = "-Wl,--end-group" ;
+    }
+    
+    if $(WITH_GCC_FLAG_RPATH)
+    {
+        RPATH_LINKFLAGS = "-Wl,-rpath-link" ;
+    }
+
+    if $(WITH_GCC_FLAG_EXPORT)
+    {
+        MAIN_LINKFLAGS = "-Wl,-E" ;
+    }
+
+    if $(WITH_GCC_FLAG_DYNAMICLIB)
+    {
+        SHLIB_LINKFLAGS = -dynamiclib -install_name $(_target)  ;
+    }
+    else if $(WITH_GCC_FLAG_SHARED)
+    {
+        SHLIB_LINKFLAGS = -shared ;
+    }
+    
+    Configure CCFLAGS : $(CCFLAGS) ;
+    Configure C++FLAGS : $(C++FLAGS) ;
+    Configure LINKFLAGS : $(LINKFLAGS) ;
+    Configure SHLIB_LINKFLAGS : $(SHLIB_LINKFLAGS) ;
+    Configure MAIN_LINKFLAGS : $(MAIN_LINKFLAGS) ;
+    Configure RPATH_LINKFLAGS : $(RPATH_LINKFLAGS) ;
+    Configure GCC_START_GROUP : $(GCC_START_GROUP) ;
+    Configure GCC_END_GROUP : $(GCC_END_GROUP) ;
+}
+
+
+##############################################################################
+# Compiler and linker flags
+##############################################################################
+
+if $(TARGET_OSPLAT:L) != x86
+{
+    CCFLAGS += -fPIC ;
+}
+
+if $(CONFIG:L) = debug
+{
+    CCFLAGS += -DDEBUG -g ;
+    OPTIM   ?= -O0 ;
+}
+else
+{
+    CCFLAGS += -DNDEBUG ;
+    OPTIM   ?= -g -O2 ;
+}
+
+C++FLAGS += $(CCFLAGS) ;
+WARN ?= -Wall ;
+
+
+##############################################################################
+# Build rules
+##############################################################################
+
+rule FDefines
+{ return -D$(<) ; }
+
+
+rule FIncludes
+{ return -I$(<) ; }
+
+
+rule MainImpl
+{
+    # Add executable name decoration
+    local _target = $(<:S=$(SUFEXE)) ;
+
+    # linker flag -E: export global symbols from the executable
+    LINKFLAGS on $(_target) += $(LINKFLAGS) $(MAIN_LINKFLAGS) ;
+
+    switch $(>:S)
+    {
+        case .C :   LINK on $(_target) = $(C++) ;
+        case .cc :  LINK on $(_target) = $(C++) ;
+        case .cpp : LINK on $(_target) = $(C++) ;
+        case * :    LINK on $(_target) = $(CC) ;
+    }
+}
+
+
+rule Main_LinkSharedLibrariesImpl
+{
+    local _target = [ FAppendSuffix $(<) : $(SUFEXE) ] ;
+    local _libs = $(PRELIB)$(>:S=$(SUFDLL)) ;
+
+    if $(3)
+    {
+        LINKLIBS on $(_target) += $(LINKLIBS) -L$(3) -l$(2) ;
+    }
+    else
+    {
+        Depends $(_target) : $(PRELIB)$(>:S=$(SUFDLL)) ;
+        SHLIBS on $(_target) += $(_libs) ;
+        LINKSHLIBS on $(_target) += $(>:S=$(SUFDLL)) ;
+    }
+}
+
+
+rule SharedLibraryImpl
+{
+    # Add library name decorations <lib><name><.so>
+    local _target = $(PRELIB)$(<)$(SUFDLL) ;
+
+    LINKFLAGS on $(_target) += $(LINKFLAGS) $(SHLIB_LINKFLAGS) ;
+
+    switch $(>:S)
+    {
+        case .C :   LINK on $(_target) = $(C++) ;
+        case .cc :  LINK on $(_target) = $(C++) ;
+        case .cpp : LINK on $(_target) = $(C++) ;
+        case * :    LINK on $(_target) = $(CC) ;
+    }
+}
+
+
+rule SharedLibrary_LinkSharedLibrariesImpl
+{
+    local _target = $(PRELIB)$(<)$(SUFDLL) ;
+    local _deps = $(PRELIB)$(>)$(SUFDLL) ;
+
+    if $(3)
+    {
+        LINKLIBS on $(_target) += $(LINKLIBS) -L$(3) -l$(2) ;
+    }
+    else
+    {
+        Depends $(_target) : $(_deps) ;
+        SHLIBS on $(_target) += $(PRELIB)$(>:S=$(SUFDLL)) ;
+        LINKSHLIBS on $(_target) += $(>:S=$(SUFDLL)) ;
+
+        # Add all shared libraries required by this shared library in a
+        # variable called RPATHLIBS so that their paths can be added as
+        # rpath-link option to the linker command later
+        if $(RPATH_LINKFLAGS)
+        {
+            for local _d in $(_deps)
+            {
+                local _found = false ;
+    
+                for _r in $(RPATHLIBS)
+                {
+                    if $(_r) = $(_d)
+                    {
+                        _found = true ;
+                    }
+                }
+    
+                # only add if not added previously
+                if $(_found) = false
+                {
+                    RPATHLIBS += $(_d)  ;
+                }
+            }
+        }
+    }
+}
+
+##############################################################################
+# Build actions
+##############################################################################
+
+actions Link bind NEEDLIBS SHLIBS RPATHLIBS
+{
+  $(LINK) $(LINKFLAGS) $(RPATH_LINKFLAGS)$(SPACE)$(RPATHLIBS:P) -L$(SHLIBS:P) $(WARN) -o $(<) $(UNDEFS) $(>) $(GCC_START_GROUP) -l$(LINKSHLIBS:B) $(LINKLIBS) $(NEEDLIBS) $(GCC_END_GROUP) 
+}
+

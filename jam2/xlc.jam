@@ -1,0 +1,130 @@
+##############################################################################
+# Auto-configuration rules
+##############################################################################
+
+rule TryCompile
+{
+    local _cc = $(1) ;
+
+    local _prog = $(2) ;
+    local _flags = $(3) ;
+    local _l = $(4) ;
+    local _L = $(5) ;
+
+    local _cmd = $(_cc) $(_flags) -o $(_out:S=$(SUFEXE)) $(_prog) -L$(_L) -l$(_l) ;
+    return [ TryCommand $(_cmd) ] ;
+}
+
+
+rule TryCc
+{
+    return [ TryCompile xlc : $(2) : $(3) : $(4) : $(5) ] ;
+}
+
+
+rule TryC++
+{
+    return [ TryCompile xlC_r : $(2) : $(3) : $(4) : $(5) ] ;
+}
+
+##############################################################################
+# Tools and utilities
+##############################################################################
+
+CC      = xlC_r ;
+C++     = xlC_r ;
+RANLIB  = ranlib ;
+AR      = ar ru ;
+LINK    = $(C++) ;
+
+##############################################################################
+# Compiler and linker flags
+##############################################################################
+
+if $(CONFIG:L) = debug
+{
+    CCFLAGS += -DDEBUG -g ;
+    OPTIM   ?= -O0 ;
+}
+else
+{
+    CCFLAGS += -DNDEBUG ;
+    OPTIM	  ?= -O2 ;
+}
+
+LINKFLAGS += -bh:5 ;
+C++FLAGS  += $(CCFLAGS) -qrtti -qlanglvl=newexcp -qeh -qstaticinline ;
+WARN      ?= -qinfo=lan ;
+
+##############################################################################
+# Build rules
+##############################################################################
+
+rule FDefines
+{ return -D$(<) ; }
+
+
+rule FIncludes
+{ return -I$(<) ; }
+
+
+rule MainImpl
+{
+    # Add executable name decoration
+    local _target = $(<:S=$(SUFEXE)) ;
+}
+
+
+rule Main_LinkSharedLibrariesImpl
+{
+    local _target = [ FAppendSuffix $(<) : $(SUFEXE) ] ;
+    local _libs = $(PRELIB)$(>:S=$(SUFDLL)) ;
+
+    if $(3)
+    {
+        LINKLIBS on $(_target) += $(LINKLIBS) -L$(3) -l$(2) ;
+    }
+    else
+    {
+        Depends $(_target) : $(PRELIB)$(>:S=$(SUFDLL)) ;
+        SHLIBS on $(_target) += $(_libs) ;
+        LINKSHLIBS on $(_target) += $(>:S=$(SUFDLL)) ;
+    }
+}
+
+
+rule SharedLibraryImpl
+{
+    # Add library name decorations <lib><name><.so>
+    local _target = $(PRELIB)$(<)$(SUFDLL) ;
+
+    LINKFLAGS on $(_target) += $(LINKFLAGS) -qmkshrobj ;
+}
+
+
+rule SharedLibrary_LinkSharedLibrariesImpl
+{
+    local _target = $(PRELIB)$(<)$(SUFDLL) ;
+    local _libs = $(PRELIB)$(>)$(SUFDLL) ;
+
+    if $(3)
+    {
+        LINKLIBS on $(_target) += $(LINKLIBS) -L$(3) -l$(2) ;
+    }
+    else
+    {
+        Depends $(_target) : $(_libs) ;
+        SHLIBS on $(_target) += $(_libs) ;
+        LINKSHLIBS on $(_target) += $(>:S=$(SUFDLL)) ;
+    }
+}
+
+##############################################################################
+# Build actions
+##############################################################################
+
+actions Link bind NEEDLIBS SHLIBS LINKSHLIBS
+{
+    $(CC) $(LINKFLAGS) -L$(SHLIBS:P) $(WARN) -o $(<) $(UNDEFS) $(>) -bdynamic -l$(LINKSHLIBS:B) $(LINKLIBS) $(NEEDLIBS)
+}
+

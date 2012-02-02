@@ -1,0 +1,7 @@
+PRELIB    = lib ;
+SUFLIB    = .a ;
+SUFDLL    = .so ;
+SUFEXE	  = "" ;
+SUFDBG    = "" ;
+
+TOOLSET ?= xcode ;

@@ -1,0 +1,156 @@
+#
+# Initialize variables
+#
+CC     = gcc ;
+C++    = g++ ;
+RANLIB ?= ranlib ;
+LINK   = $(CC) ;
+
+if $(TARGET_OS) = "aspen"
+{
+    if $(TARGET_OSPLAT) = "armv6"
+    {
+        CC = /Developer/Platforms/Aspen.platform/Developer/usr/bin/gcc-4.0 ;
+        C++ = /Developer/Platforms/Aspen.platform/Developer/usr/bin/g++-4.0 ;
+        RANLIB = /Developer/Platforms/Aspen.platform/Developer/usr/bin/ranlib ;
+
+        CCFLAGS += -arch armv6 -maspen-version-min=1.2 -gdwarf-2 -mthumb ;
+        CCFLAGS += -isysroot /Developer/Platforms/Aspen.platform/Developer/SDKs/Aspen1.2.sdk ;
+
+        LINKFLAGS += -arch armv6 ;
+        LINKFLAGS += -isysroot /Developer/Platforms/Aspen.platform/Developer/SDKs/Aspen1.2.sdk ;
+        LINKFLAGS += -maspen-version-min=1.2 -Wl,-dead_strip ;
+    }
+    else if $(TARGET_OSPLAT) = "x86"
+    {
+        CC = /Developer/usr/bin/gcc-4.0 ;
+        C++ = /Developer/usr/bin/g++-4.0 ;
+        RANLIB = /Developer/usr/bin/ranlib ;
+
+        CCFLAGS += -arch i386 -DASPEN_SIMULATOR=1 -D__ASPEN_VERSION_MIN_REQUIRED=10200 ;
+        CCFLAGS += -mmacosx-version-min=10.5 -gdwarf-2 ; 
+        CCFLAGS += -isysroot /Developer/Platforms/AspenSimulator.platform/Developer/SDKs/AspenSimulator1.2.sdk ;
+
+        LINKFLAGS += -arch i386 ;
+        LINKFLAGS += -isysroot /Developer/Platforms/AspenSimulator.platform/Developer/SDKs/AspenSimulator1.2.sdk ;
+        LINKFLAGS += -Wl,-rpath,/Developer/Platforms/AspenSimulator.platform/Developer/SDKs/AspenSimulator1.2.sdk ;
+        LINKFLAGS += -mmacosx-version-min=10.5 -rpath,/bin ;
+
+        Echo LINKFLAGS $(LINKFLAGS) ;
+    }
+}
+
+#
+# Flags and options
+#
+if $(CONFIG:L) = debug
+{
+	CCFLAGS += -DDEBUG -g ;
+	OPTIM   ?= -O0 ;
+}
+else
+{
+	CCFLAGS += -DNDEBUG ;
+	OPTIM	  ?= -g -O2 ;
+}
+
+WARN ?= -Wall ;
+
+# only use -fPIC for non-X86 CPUs
+if $(TARGET_OSPLAT:U) != X86
+{
+	CCFLAGS += -fPIC ;
+}
+
+C++FLAGS	+= $(CCFLAGS) ;
+
+
+rule FDefines
+{ return -D$(<) ; }
+
+
+rule FIncludes
+{ return -I$(<) ; }
+
+
+rule FLinkLibs
+{ return -l$(<) ; }
+
+
+rule FLinkPath
+{ return -L$(<) ; }
+
+
+rule MainImpl
+{
+    # Add executable name decoration
+    local _target = $(<:S=$(SUFEXE)) ;
+
+    switch $(>:S)
+    {
+        case .C :   LINK on $(_target) = $(C++) ;
+        case .cc :  LINK on $(_target) = $(C++) ;
+        case .cpp : LINK on $(_target) = $(C++) ;
+        case * :    LINK on $(_target) = $(CC) ;
+    }
+}
+
+
+rule Main_LinkSharedLibrariesImpl
+{
+    local _target = [ FAppendSuffix $(<) : $(SUFEXE) ] ;
+    local _libs = $(PRELIB)$(>:S=$(SUFDLL)) ;
+
+	if $(3)
+	{
+        LINKLIBS on $(_target) += $(LINKLIBS) -L$(3) -l$(2) ;
+	}
+	else
+	{
+		Depends $(_target) : $(PRELIB)$(>:S=$(SUFDLL)) ;
+        SHLIBS on $(_target) += $(_libs) ;
+        LINKSHLIBS on $(_target) += $(>:S=$(SUFDLL)) ;
+    }
+}
+
+
+rule SharedLibraryImpl
+{
+    # Add library name decorations <lib><name><.so>
+    local _target = $(PRELIB)$(<)$(SUFDLL) ;
+
+    LINKFLAGS on $(_target) += $(LINKFLAGS) -dynamiclib -install_name $(_target) ;
+
+    switch $(>:S)
+    {
+        case .C :   LINK on $(_target) = $(C++) ;
+        case .cc :  LINK on $(_target) = $(C++) ;
+        case .cpp : LINK on $(_target) = $(C++) ;
+        case * :    LINK on $(_target) = $(CC) ;
+    }
+}
+
+
+rule SharedLibrary_LinkSharedLibrariesImpl
+{
+    local _target = $(PRELIB)$(<)$(SUFDLL) ;
+    local _deps = $(PRELIB)$(>)$(SUFDLL) ;
+
+    if $(3)
+    {
+        LINKLIBS on $(_target) += $(LINKLIBS) -L$(3) -l$(2) ;
+    }
+    else
+    {
+        Depends $(_target) : $(_deps) ;
+        SHLIBS on $(_target) += $(PRELIB)$(>:S=$(SUFDLL)) ;
+        LINKSHLIBS on $(_target) += $(>:S=$(SUFDLL)) ;
+    }
+}
+
+
+actions Link bind NEEDLIBS SHLIBS
+{
+    $(LINK) $(LINKFLAGS) -L$(SHLIBS:P) $(WARN) -o $(<) $(UNDEFS) $(>) -l$(LINKSHLIBS:B) $(LINKLIBS) $(NEEDLIBS)
+}
+

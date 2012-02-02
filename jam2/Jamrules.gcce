@@ -1,0 +1,143 @@
+TARGET_OSPLAT = arm ;
+
+EPOCROOT = $(EPOCROOT:J=" ") ;
+
+if ! [ GLOB $(EPOCROOT)\\Epoc32\\include : e32base.h ] 
+{
+	Exit "Please specify EPOCROOT" ;
+}
+
+# set path=C:\Program Files\CSL Arm Toolchain\libexec\gcc\arm-none-symbianelf\3.4.3;%path%
+TOOLSET_ROOT = $(TOOLSET_ROOT:J=" ") ;
+
+if ! [ GLOB $(TOOLSET_ROOT)\\bin : arm-none-symbianelf-gcc.exe ] 
+{
+	Exit "Please specify TOOLSET_ROOT" ;
+}
+
+CC  = \"$(TOOLSET_ROOT)\\bin\\arm-none-symbianelf-gcc.exe\" ;
+C++ = \"$(TOOLSET_ROOT)\\bin\\arm-none-symbianelf-g++.exe\" ;
+LN  = \"$(TOOLSET_ROOT)\\bin\\arm-none-symbianelf-ld.exe\" ;
+AR  = \"$(TOOLSET_ROOT)\\bin\\arm-none-symbianelf-ar.exe\" cr ;
+
+# Use the first available variant resource header file if not set
+VARIANT_HRH ?= [ GLOB $(EPOCROOT)\\epoc32\\include\\variant : *.hrh ] ;
+VARIANT_HRH = $(VARIANT_HRH[0]) ;
+
+if ! $(VARIANT_HRH)
+{
+	Exit "Please specify path to the variant resource header (VARIANT_HRH)" ;
+}
+
+Echo Using VARIANT_HRH $(VARIANT_HRH) ;
+
+CCFLAGS += -Wall -march=armv5t -mapcs -pipe -nostdinc -c -msoft-float ;
+CCFLAGS += -D_UNICODE -D__SYMBIAN32__ -D__SERIES60_30__ -D__SERIES60_3X__ -D__GCCE__ ;
+CCFLAGS += -D__EPOC32__ -D__MARM__ -D__EABI__ -D__MARM_ARMV5__ -D__EXE__ -D__SUPPORT_CPP_EXCEPTIONS__ ;
+CCFLAGS += -D__REMOVE_PLATSEC_DIAGNOSTIC_STRINGS__ ;
+CCFLAGS += -D__PRODUCT_INCLUDE__=\\\"$(VARIANT_HRH)\\\" ;
+CCFLAGS += -include $(EPOCROOT)\\EPOC32\\INCLUDE\\GCCE\\GCCE.h ;
+
+
+if $(CONFIG:L) = debug
+{
+	CCFLAGS += -DDEBUG -g ;
+	OPTIM   ?= -O0 ;
+}
+else
+{
+	CCFLAGS += -DNDEBUG ;
+	OPTIM	  ?= -O1 ;
+}
+
+WARN ?= ; #-Wall ;
+
+C++FLAGS    = $(CCFLAGS) ;
+C++FLAGS    += -x c++ -Wno-ctor-dtor-privacy -Wno-unknown-pragmas  -fexceptions ;
+C++FLAGS    += -Wno-unused-function -Wno-unused-variable -DPT_STLPORT -DEH_DELETE_HAS_THROW_SPEC -D_STLP_USE_NEWALLOC -D_STLP_USE_DEBUG_ALLOC -DEH_NEW_HEADERS -fno-enforce-eh-specs ;
+
+STDHDRS	    = ;
+STDHDRS     += $(EPOCROOT)\\epoc32\\include\\stdapis ;
+STDHDRS     += $(EPOCROOT)\\epoc32\\include ;
+
+# TODO: use installed path
+STDHDRS     += extern\\stlport\\stlport ;
+STDHDRS     += c:\\Symbian\\stlport\\stlport ;
+
+STDHDRS     += $(EPOCROOT)\\epoc32\\include\\variant ;
+STDHDRS     += "\"$(TOOLSET_ROOT)\\bin\\..\\lib\\gcc\\arm-none-symbianelf\\3.4.3\\include"\" ;
+
+LINKFLAGS   += --target1-abs --no-undefined -nostdlib -shared -Ttext 0x8000 -Tdata 0x400000 --default-symver ;
+LINKFLAGS   += --entry _E32Startup -u _E32Startup ;
+
+LINKLIBS    += -lsupc++ -lgcc ;
+LINKLIBS    += -L"\"$(TOOLSET_ROOT)\\bin\\..\\arm-none-symbianelf\\lib"\" ;
+LINKLIBS    += -L"\"$(TOOLSET_ROOT)\\bin\\..\\lib\\gcc\\arm-none-symbianelf\\3.4.3"\" ;
+LINKLIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\UDEB\\EEXE.LIB ;
+LINKLIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\UDEB\\libcrt0.lib ;
+
+STLPLIB    = extern\\stlport\\symbian\\lib\\stlport_s.lib ;
+
+SYMLIBS    = $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\libc.dso ;
+SYMLIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\euser.dso ;
+SYMLIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\efsrv.dso ;
+SYMLIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\estlib.dso ;
+SYMLIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\libm.dso ;
+SYMLIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\libpthread.dso ;
+SYMLIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\libdl.dso ;
+SYMLIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\hal.dso ;
+SYMLIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\esock.dso ;
+SYMLIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\bluetooth.dso ;
+SYMLIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\btextnotifiers.dso ;
+
+SYMLIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\UDEB\\usrt2_2.lib ;
+SYMLIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\dfpaeabi.dso ;
+SYMLIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\dfprvct2_2.dso ; 
+SYMLIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\drtaeabi.dso ;
+SYMLIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\scppnwdl.dso ;
+SYMLIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\drtrvct2_2.dso ; 
+
+
+rule FDefines
+{ return -D$(<) ; }
+
+
+rule FIncludes
+{ return -I$(<) ; }
+
+
+rule Main_LinkSharedLibraries
+{
+    Main_LinkLibraries $(<) : $(>) : $(3) : $(4) ;
+}
+
+
+rule SharedLibrary
+{
+    Library $(<) : $(>) : $(3) : $(4) ;
+}
+
+
+rule SharedLibrary_MakeLocate
+{
+    MakeLocate $(PRELIB)$(<:S=$(SUFLIB)) : $(>) ;
+}
+
+
+actions C++
+{
+    $(C++) -c $(C++FLAGS) $(OPTIM) $(WARN) -I$(HDRS) -I$(STDHDRS) -o $(<) $(>) 
+}
+
+
+actions Cc
+{
+    $(CC) -c $(CCFLAGS) $(OPTIM) $(WARN) -I$(HDRS) -I$(STDHDRS) -o $(<) $(>) 
+}
+
+
+actions Link bind NEEDLIBS SHLIBS RPATHLIBS
+{
+    $(LN) $(LINKFLAGS) -o $(<) $(>) $(LINKLIBS) $(NEEDLIBS) $(STLPLIB) $(GUILIBS) $(SYMLIBS)
+}
+

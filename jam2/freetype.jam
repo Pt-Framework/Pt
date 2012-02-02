@@ -1,0 +1,47 @@
+if ! $(FREETYPE_JAM) {
+FREETYPE_JAM = true ;
+
+FREETYPE_INCLUDE_PATHS = /usr/include
+                         /usr/sfw/include/ ;
+
+rule FreeTypeIncludes
+{
+    local incl = [ GLOB $(FREETYPE_INCLUDE_PATHS) : freetype2  ] ;
+    Echo "Checking for freetype includes... " $(incl[0]) ;
+
+    # ft2build.h may be somewhere else
+    local incl2 = [ GLOB $(FREETYPE_INCLUDE_PATHS) : ft2build.h  ] ;
+
+    return $(incl2[0]:P) $(incl[0]) ;
+}
+
+FREETYPE_LIBRARY_PATHS = /usr/lib
+                         /usr/sfw/lib ;
+
+rule FreeTypeLinkFlags
+{
+    local libs = [ GLOB $(FREETYPE_LIBRARY_PATHS) : *freetype.* ] ;
+    Echo "Checking for freetype libraries... " $(libs[0]:P) ;
+
+    return -L$(libs[0]:P)" -lfreetype" ;
+}
+
+rule ConfigureFreetype
+{
+    FREETYPE_INCLUDES  ?= [ FreeTypeIncludes ] ;
+    FREETYPE_LINKFLAGS ?= [ FreeTypeLinkFlags ] ;
+
+    if ! $(FREETYPE_INCLUDES) || ! $(FREETYPE_LINKFLAGS)
+    {
+        FREETYPE_INCLUDES = $(TOP)/src/Pt-Gfx/freetype/include ;
+        FREETYPE_LINKFLAGS = "" ;
+        Echo "    INFO: freetype not found, using builtin version." ;
+    }
+
+    Configure FREETYPE_INCLUDES : $(FREETYPE_INCLUDES) ;
+    Configure FREETYPE_LINKFLAGS : $(FREETYPE_LINKFLAGS) ;
+}
+
+} # FREETYPE_JAM
+
+

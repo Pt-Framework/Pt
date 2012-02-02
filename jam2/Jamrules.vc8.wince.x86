@@ -1,0 +1,6 @@
+exit This platform is currently not supported with this toolset. Please edit the file "Jamrules.vc8" ;
+
+#ToolsetBinPath = [ FDirName $(ToolsetBinPath) x86_cex86 ] ;
+
+LINKFLAGS += /machine:X86 ;
+C++FLAGS +=  /D "x86" /D "_x86_" ;

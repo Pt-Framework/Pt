@@ -1,0 +1,93 @@
+#
+# Tools
+#
+CC      = xlC_r ;
+C++     = xlC_r ;
+RANLIB  ?= ranlib ;
+
+#
+# Compiler and linker flags
+#
+if $(CONFIG:L) = debug
+{
+    CCFLAGS += -DDEBUG -g ;
+    OPTIM   ?= -O0 ;
+}
+else
+{
+    CCFLAGS += -DNDEBUG ;
+    OPTIM	  ?= -O2 ;
+}
+
+LINKFLAGS += -bh:5 ;
+C++FLAGS  += $(CCFLAGS) -qrtti -qlanglvl=newexcp -qeh -qstaticinline ;
+WARN      ?= -qinfo=lan ;
+
+#
+# Implementation of platform specific rules and actions
+#
+rule FDefines
+{ return -D$(<) ; }
+
+
+rule FIncludes
+{ return -I$(<) ; }
+
+
+rule MainImpl
+{
+    # Add executable name decoration
+    local _target = $(<:S=$(SUFEXE)) ;
+}
+
+
+rule Main_LinkSharedLibrariesImpl
+{
+    local _target = [ FAppendSuffix $(<) : $(SUFEXE) ] ;
+    local _libs = $(PRELIB)$(>:S=$(SUFDLL)) ;
+
+    if $(3)
+    {
+        LINKLIBS on $(_target) += $(LINKLIBS) -L$(3) -l$(2) ;
+    }
+    else
+    {
+        Depends $(_target) : $(PRELIB)$(>:S=$(SUFDLL)) ;
+        SHLIBS on $(_target) += $(_libs) ;
+        LINKSHLIBS on $(_target) += $(>:S=$(SUFDLL)) ;
+    }
+}
+
+
+rule SharedLibraryImpl
+{
+    # Add library name decorations <lib><name><.so>
+    local _target = $(PRELIB)$(<)$(SUFDLL) ;
+
+    LINKFLAGS on $(_target) += $(LINKFLAGS) -qmkshrobj ;
+}
+
+
+rule SharedLibrary_LinkSharedLibrariesImpl
+{
+    local _target = $(PRELIB)$(<)$(SUFDLL) ;
+    local _libs = $(PRELIB)$(>)$(SUFDLL) ;
+
+    if $(3)
+    {
+        LINKLIBS on $(_target) += $(LINKLIBS) -L$(3) -l$(2) ;
+    }
+    else
+    {
+        Depends $(_target) : $(_libs) ;
+        SHLIBS on $(_target) += $(_libs) ;
+        LINKSHLIBS on $(_target) += $(>:S=$(SUFDLL)) ;
+    }
+}
+
+
+actions Link bind NEEDLIBS SHLIBS LINKSHLIBS
+{
+    $(CC) $(LINKFLAGS) -L$(SHLIBS:P) $(WARN) -o $(<) $(UNDEFS) $(>) -bdynamic -l$(LINKSHLIBS:B) $(LINKLIBS) $(NEEDLIBS)
+}
+
