@@ -147,10 +147,6 @@ void UdpSocketImpl::bind(const std::string& ipaddr, unsigned short int port, uns
         {
             _isBound = true;
             std::memmove(&_servaddr, it->ai_addr, it->ai_addrlen);
-
-            /*if(loop)
-                this->attach(*loop);*/
-
             return;
         }
 
@@ -415,6 +411,9 @@ size_t UdpSocketImpl::read(char* buffer, size_t count, bool& eof)
 
         if(_ioh.handle() != INVALID_HANDLE_VALUE)
             setEventFlags(_ioh.handle(), _eventFlags);
+
+        if(len < 0)
+            throw System::IOError("recvfrom");
     }
 
     return len;
@@ -442,9 +441,9 @@ size_t UdpSocketImpl::beginRead(System::EventLoop& loop, char* buffer, size_t n,
 size_t UdpSocketImpl::endRead(System::EventLoop& loop, char* buffer, size_t n, bool& eof)
 {
     _eventFlags &= ~FD_READ;
+    setEventFlags(_ioh.handle(), _eventFlags);
 
     int addrlen = sizeof(_peeraddr);
-    //int len = ::recv(_fd, _receiveBuffer.buf, _receiveBuffer.len, 0);
     int len = recvfrom( _fd, _receiveBuffer.buf, _receiveBuffer.len, 0,
                         (sockaddr*) &_peeraddr, &addrlen );
 
@@ -456,15 +455,18 @@ size_t UdpSocketImpl::endRead(System::EventLoop& loop, char* buffer, size_t n, b
         u_long argp = 0;
         ::ioctlsocket(_fd, FIONBIO, &argp);
 
-        //len = ::recv(_fd, _receiveBuffer.buf, _receiveBuffer.len, 0);
         len = recvfrom( _fd, _receiveBuffer.buf, _receiveBuffer.len, 0,
                         (sockaddr*) &_peeraddr,  &addrlen );
+
         //Set socket to non-blocking mode
         argp = 1;
         ::ioctlsocket(_fd, FIONBIO, &argp);
-    }
 
-    setEventFlags(_ioh.handle(), _eventFlags);
+        setEventFlags(_ioh.handle(), _eventFlags);
+
+        if(len < 0)
+            throw System::IOError("recvfrom");
+    }
 
     return len;
 }
@@ -510,7 +512,6 @@ size_t UdpSocketImpl::beginWrite(System::EventLoop& loop, const char* buffer, si
 
     DWORD numberOfBytesSent = 0;
 
-    //int rc = WSASend(_fd, &_sendBuffer, 1, &numberOfBytesSent, 0, NULL, NULL);
     int rc = WSASendTo( _fd, &_sendBuffer, 1, &numberOfBytesSent, 0,
                         (sockaddr*)&_peeraddr, sizeof(_peeraddr), NULL, NULL);
 
@@ -532,7 +533,7 @@ size_t UdpSocketImpl::endWrite(System::EventLoop& loop, const char* buffer, size
 {
     _eventFlags &= ~FD_WRITE;
 
-    //The WSAEventSelect function automatically sets socket s to nonblocking
+    // The WSAEventSelect function automatically sets socket s to nonblocking
     // mode, regardless of the value of lNetworkEvents. To set socket s back 
     // to blocking mode, it is first necessary to clear the event record 
     // associated with socket s via a call to WSAEventSelect with 
@@ -543,19 +544,18 @@ size_t UdpSocketImpl::endWrite(System::EventLoop& loop, const char* buffer, size
     u_long argp = 0;
     ::ioctlsocket(_fd, FIONBIO, &argp);
 
-    DWORD numberOfBytesSent = 0;
-
-    int rc = WSASend(_fd, &_sendBuffer, 1, &numberOfBytesSent, 0, NULL, NULL);
-
-    if(rc == SOCKET_ERROR)
-        throw System::SystemError( PT_ERROR_MSG("beginWrite failed") );
+    DWORD bytesSend = 0;
+    int rc = WSASend(_fd, &_sendBuffer, 1, &bytesSend, 0, NULL, NULL);
 
     //Set socket to non-blocking mode
     argp = 1;
     ::ioctlsocket(_fd, FIONBIO, &argp);
     setEventFlags(_ioh.handle(), _eventFlags);
 
-    return  numberOfBytesSent;
+    if(rc == SOCKET_ERROR)
+        throw System::IOError("WSASend");
+
+    return  bytesSend;
 }
 
 } // namespace Net
