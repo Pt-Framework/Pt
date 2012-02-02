@@ -293,6 +293,7 @@ void ShortPathToLongPath( char * short_path, string * out )
         return;
     }
 
+    /* Pt extension bugfix */
     if ( (short_path[0] == '\\') && (short_path[1] == '\0') )
     {
         string_push_back( out, '\\' );
