@@ -166,7 +166,14 @@ bool TcpSocketImpl::beginConnect(System::EventLoop& loop, const AddrInfo& ai)
     _addrInfo = ai;
     _addrInfoPtr = _addrInfo.impl()->begin();
 
-    while(true)
+    _isConnected = beginConnect();
+    return _isConnected;
+}
+
+
+bool TcpSocketImpl::beginConnect()
+{
+    for( ; ; ++_addrInfoPtr)
     {
         if(_addrInfoPtr == _addrInfo.impl()->end())
         {
@@ -174,50 +181,31 @@ bool TcpSocketImpl::beginConnect(System::EventLoop& loop, const AddrInfo& ai)
             throw System::AccessFailed( _addrInfo.host() );
         }
 
-        try
+        _fd = WSASocket(_addrInfoPtr->ai_family, SOCK_STREAM, 0, NULL, 0, 0);
+        if (_fd == INVALID_SOCKET)
+            continue;
+    
+        log_debug("created socket " << _fd);
+
+        if( ::connect(_fd, _addrInfoPtr->ai_addr, _addrInfoPtr->ai_addrlen) == 0 )
         {
-            _isConnected = beginConnect(*_addrInfoPtr);
-            break;
-        } 
-        catch(const System::IOError&)
-        { }
-
-        ++_addrInfoPtr;
+            _isConnected = true;
+            log_debug("immediate connect");
+            return true;
+        }
+    
+        DWORD lastError = WSAGetLastError();
+        if( lastError == WSAEWOULDBLOCK || lastError == WSAEINPROGRESS )
+        {
+            _eventFlags |= FD_CONNECT;
+            setEventFlags(_ioh.handle(), _eventFlags);
+            log_debug("connect in progress");
+            return false;
+        }
+    
+        log_debug("connect failed, try next address");
+        close();
     }
-
-    return _isConnected;
-}
-
-
-bool TcpSocketImpl::beginConnect(const ::addrinfo& ai)
-{
-    _fd = WSASocket(ai.ai_family, SOCK_STREAM, 0, NULL, 0, 0);
-    log_debug("created socket " << _fd);
-
-    if (_fd == INVALID_SOCKET)
-        throw System::IOError("WSASocket");
-
-    if( ::connect(_fd, _addrInfoPtr->ai_addr, _addrInfoPtr->ai_addrlen) == 0 )
-    {
-        _isConnected = true;
-        log_debug("immediate connect");
-        return true;
-    }
-
-    DWORD lastError = WSAGetLastError();
-    if( lastError == WSAEWOULDBLOCK || lastError == WSAEINPROGRESS )
-    {
-        _eventFlags |= FD_CONNECT;
-        setEventFlags(_ioh.handle(), _eventFlags);
-        log_debug("connect in progress");
-        return false;
-    }
-
-    log_debug("connect failed");
-    close();
-    throw System::IOError("connect");
-
-    return false;
 }
 
 
@@ -238,15 +226,12 @@ void TcpSocketImpl::endConnect(System::EventLoop& loop)
 
     try
     {
-        bool hasTimeout = false;
         while (true)
         {
             _eventFlags |= FD_CONNECT;
             setEventFlags(_ioh.handle(), _eventFlags);
 
             bool avail = this->wait(_timeout);
-            if( ! avail )
-                hasTimeout = true;
 
             _eventFlags &= ~FD_CONNECT;
             setEventFlags(_ioh.handle(), _eventFlags);
@@ -281,29 +266,7 @@ void TcpSocketImpl::endConnect(System::EventLoop& loop)
             log_debug("failed to connect, try next address " << _fd);
             this->close();
             ++_addrInfoPtr;
-
-            while(true)
-            {
-                if( _addrInfoPtr == _addrInfo.impl()->end() )
-                {
-                    log_debug("no more addresses to try");
-                    if(hasTimeout)
-                        throw System::IOTimeout();
-                    else
-                        throw System::AccessFailed(_addrInfo.host() );
-                }
-        
-                try
-                {
-                    log_debug("try next address");
-                    _isConnected = beginConnect(*_addrInfoPtr);
-                    break;
-                } 
-                catch(const System::IOError&)
-                {
-                    ++_addrInfoPtr;
-                }
-            }
+            _isConnected = beginConnect();
         }
     }
     catch(...)
@@ -344,24 +307,16 @@ bool TcpSocketImpl::runConnect(System::EventLoop& loop)
 
     log_debug("closing socket to try next address");
     this->close();
+    ++_addrInfoPtr;
 
-    while( true )
+    try 
     {
-        if( _addrInfoPtr == _addrInfo.impl()->end() )
-        {
-            _errorPending = true;
-            return true;
-        }
-
-        try
-        {
-            _isConnected = beginConnect(*_addrInfoPtr);
-            break;
-        } 
-        catch(const System::IOError&)
-        {
-            ++_addrInfoPtr;
-        }
+        _isConnected = beginConnect();
+    }
+    catch(const System::IOError&)
+    {
+        _errorPending = true;
+        return true;
     }
 
     return _isConnected;

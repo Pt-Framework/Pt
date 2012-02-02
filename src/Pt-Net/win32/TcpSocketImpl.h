@@ -77,8 +77,6 @@ class TcpSocketImpl
 
         bool beginConnect(System::EventLoop& loop, const AddrInfo& addrinfo);
 
-        bool beginConnect(const ::addrinfo& ai);
-
         void endConnect(System::EventLoop& loop);
 
         bool runConnect(System::EventLoop& loop);
@@ -112,6 +110,7 @@ class TcpSocketImpl
         bool wait(std::size_t msecs);
 
     private:
+        bool beginConnect();
         void setEventFlags(HANDLE ev, long events);
 
     private:
