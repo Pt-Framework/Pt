@@ -346,7 +346,7 @@ size_t UdpSocketImpl::read( char* buffer, size_t count, bool& eof )
         bool ret = this->wait(_timeout, &rfds, 0, 0);
         if(false == ret)
         {
-            throw System::IOTimeout();
+            throw System::IOError("recvfrom");
         }
     }
 
@@ -398,7 +398,7 @@ size_t UdpSocketImpl::write( const char* buffer, size_t count )
 
         if(false == this->wait(_timeout, 0, &wfds, 0) )
         {
-            throw System::IOTimeout();
+            throw System::IOError("recvfrom");
         }
     }
 

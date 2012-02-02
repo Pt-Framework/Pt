@@ -169,25 +169,23 @@ void TcpSocketImpl::connect(const AddrInfo& addrInfo)
         FD_ZERO(&wfds);
         FD_SET(this->fd(), &wfds);
         bool avail = this->wait(timeout(), 0, &wfds, 0);
-        if( ! avail)
-            throw System::IOTimeout();
-
-        int sockerr;
-        socklen_t optlen = sizeof(sockerr);
-    
-        // check for socket error
-        if( ::getsockopt(this->fd(), SOL_SOCKET, SO_ERROR, &sockerr, &optlen) != 0 )
+        if(avail)
         {
-            log_warn("getsockopt failed " << this->fd());
-            close();
-            throw System::SystemError("getsockopt");
-        }
-    
-        if (sockerr == 0)
-        {
-            log_debug("connected successfully");
-            _isConnected = true;
-            break;
+            int sockerr;
+            socklen_t optlen = sizeof(sockerr);
+            if( ::getsockopt(this->fd(), SOL_SOCKET, SO_ERROR, &sockerr, &optlen) != 0 )
+            {
+                log_warn("getsockopt failed " << this->fd());
+                close();
+                throw System::SystemError("getsockopt");
+            }
+        
+            if (sockerr == 0)
+            {
+                log_debug("connected successfully");
+                _isConnected = true;
+                break;
+            }
         }
         
         log_debug("connect failed for address" << this->fd());
@@ -271,90 +269,81 @@ bool TcpSocketImpl::beginConnect(System::EventLoop& loop, const ::addrinfo& ai)
 
 void TcpSocketImpl::endConnect(System::EventLoop& loop)
 {
+    // endConnect is only called if a async connect is running, however
+    // the user might have called it in response to a ready notification
+    // or not.
     log_trace("ending connect");
-
-    // we do not need to remove the IOHandle from the selector, this has
-    // already been done in runConnect().
-
-    if( _isConnected )
-    {
-        log_debug("connected successfully " << this->fd());
-        return;
-    }
 
     if(_errorPending)
     {
+        // _errorPending is set in runConnect if an error was detected and
+        // connect could not be restarted for te next resolved address. In
+        // either case, the i/o handle is not registered anymore.
         log_debug("pending error " << this->fd());
         throw System::AccessFailed( _addrInfo.host() );
     }
 
-    log_info("ending async connect without waiting");
-
-    try
+    if(_isConnected)
     {
-        bool hasTimeout = false;
-        while (true)
+        // _isConnected is set in runConnect if the socket was writable 
+        // and no error was detected. The i/o handle no longer waits for 
+        // writability.
+        log_debug("connected successfully " << this->fd());
+        return;
+    }
+
+    loop.selector().endWrite( &_ioh );
+    log_info("wait for async connect");
+
+    while (true)
+    {
+        fd_set wfds;
+        FD_ZERO(&wfds);
+        FD_SET(this->fd(), &wfds);
+
+        bool avail = this->wait(timeout(), 0, &wfds, 0);
+        if (avail)
         {
-            fd_set wfds;
-            FD_ZERO(&wfds);
-            FD_SET(this->fd(), &wfds);
-
-            bool avail = this->wait(timeout(), 0, &wfds, 0);
-            if( ! avail )
-                hasTimeout = true;
-
-            if (avail)
+            int sockerr = 0;
+            socklen_t optlen = sizeof(sockerr);
+            if( ::getsockopt(this->fd(), SOL_SOCKET, SO_ERROR, &sockerr, &optlen) != 0 )
             {
-                int sockerr = 0;
-                socklen_t optlen = sizeof(sockerr);
-                if( ::getsockopt(this->fd(), SOL_SOCKET, SO_ERROR, &sockerr, &optlen) != 0 )
-                {
-                    close();
-
-                    // getsockopt failed, not an I/O error
-                    throw System::SystemError("getsockopt");
-                }
-            
-                if (sockerr == 0)
-                {
-                    log_debug("connected successfully");
-                    _isConnected = true;
-                    return;
-                }
+                // getsockopt failed, not an I/O error
+                throw System::SystemError("getsockopt");
             }
-
-            log_debug("failed to connect, try next address " << this->fd());
-
-            while(true)
+        
+            if (sockerr == 0)
             {
-                cancel(loop);
-                close();
-    
-                if( ++_addrInfoPtr == _addrInfo.impl()->end() )
-                {
-                    log_debug("no more addresses to try");
-                    if(hasTimeout)
-                        throw System::IOTimeout();
-                    else
-                        throw System::AccessFailed( _addrInfo.host() );
-                }
-    
-                try 
-                {
-                    log_debug("trying next address");
-                    _isConnected = beginConnect(loop, *_addrInfoPtr);
-                    return;
-                }
-                catch(const System::IOError& )
-                { }
+                log_debug("connected successfully");
+                _isConnected = true;
+                return;
             }
         }
-    }
-    catch(...)
-    {
-        cancel(loop);
-        close();
-        throw;
+
+        log_debug("failed to connect, try next address " << this->fd());
+
+        assert(false);
+        // this is all wrong, we should not add the i/o handle to the loop
+        while(true)
+        {
+            cancel(loop);
+            close();
+
+            if( ++_addrInfoPtr == _addrInfo.impl()->end() )
+            {
+                log_debug("no more addresses to try");
+                throw System::AccessFailed( _addrInfo.host() );
+            }
+
+            try 
+            {
+                log_debug("trying next address");
+                _isConnected = beginConnect(loop, *_addrInfoPtr);
+                return;
+            }
+            catch(const System::IOError& )
+            { }
+        }
     }
 }
 
@@ -407,10 +396,8 @@ bool TcpSocketImpl::runConnect(System::EventLoop& loop)
     
         if (sockerr == 0)
         {
-            log_debug("ending write " << this->fd());
-            loop.selector().endWrite( &_ioh );
-
             log_debug("connected successfully");
+            loop.selector().endWrite( &_ioh );
             _isConnected = true;
             return true;
         }

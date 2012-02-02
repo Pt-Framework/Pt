@@ -57,10 +57,10 @@ IOPending::IOPending(const char* msg)
 }
 
 
-IOTimeout::IOTimeout()
+/*IOTimeout::IOTimeout()
 : IOError("Timeout")
 {
-}
+}*/
 
 
 AccessFailed::AccessFailed(const std::string& resource)

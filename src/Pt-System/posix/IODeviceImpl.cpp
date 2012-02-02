@@ -191,7 +191,7 @@ size_t IODeviceImpl::read( char* buffer, size_t count, bool& eof )
         bool ret = this->wait(_timeout, &rfds, 0, 0);
         if(false == ret)
         {
-            throw System::IOTimeout();
+            throw System::IOError("read");
         }
     }
 
@@ -253,7 +253,7 @@ size_t IODeviceImpl::write( const char* buffer, size_t count )
         bool ret = this->wait(_timeout, 0, &wfds, 0);
         if(false == ret)
         {
-            throw System::IOTimeout();
+            throw System::IOError("write");
         }
     }
 

@@ -62,14 +62,14 @@ class PT_SYSTEM_API IOPending : public IOError
         {}
 };
 
-class PT_SYSTEM_API IOTimeout : public IOError
+/*class PT_SYSTEM_API IOTimeout : public IOError
 {
     public:
         IOTimeout();
 
         ~IOTimeout() throw()
         {}
-};
+};*/
 
 class PT_SYSTEM_API AccessFailed : public IOError
 {
