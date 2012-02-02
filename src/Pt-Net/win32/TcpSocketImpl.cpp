@@ -224,55 +224,47 @@ void TcpSocketImpl::endConnect(System::EventLoop& loop)
 
     log_info("async connect not yet ready socket=" << _fd);
 
-    try
+    while (true)
     {
-        while (true)
+        _eventFlags |= FD_CONNECT;
+        setEventFlags(_ioh.handle(), _eventFlags);
+
+        bool avail = this->wait(_timeout);
+
+        _eventFlags &= ~FD_CONNECT;
+        setEventFlags(_ioh.handle(), _eventFlags);
+
+        if(avail)
         {
-            _eventFlags |= FD_CONNECT;
-            setEventFlags(_ioh.handle(), _eventFlags);
+            WSANETWORKEVENTS events;
+            if( WSAEnumNetworkEvents(_fd, NULL, &events) == SOCKET_ERROR )
+                throw System::SystemError("WSAEnumNetworkEvents failed");
 
-            bool avail = this->wait(_timeout);
-
-            _eventFlags &= ~FD_CONNECT;
-            setEventFlags(_ioh.handle(), _eventFlags);
-
-            if(avail)
+            if( (events.lNetworkEvents & FD_CLOSE) == FD_CLOSE )
             {
-                WSANETWORKEVENTS events;
-                if( WSAEnumNetworkEvents(_fd, NULL, &events) == SOCKET_ERROR )
-                    throw System::SystemError("WSAEnumNetworkEvents failed");
-
-                if( (events.lNetworkEvents & FD_CLOSE) == FD_CLOSE )
+                log_debug("received close event " << _fd);
+            }
+            else if( (events.lNetworkEvents & FD_CONNECT) == FD_CONNECT )
+            {
+                int s = FD_CONNECT_BIT;
+                if(events.iErrorCode[s] == 0)
                 {
-                    log_debug("received close event " << _fd);
-                }
-                else if( (events.lNetworkEvents & FD_CONNECT) == FD_CONNECT )
-                {
-                    int s = FD_CONNECT_BIT;
-                    if(events.iErrorCode[s] == 0)
-                    {
-                        log_debug("connected " << _fd);
-                        _isConnected = true;
-                        return;
-                    }
-                }
-                else
-                {
-                    log_debug("received unknown network event " << _fd);
-                    continue;
+                    log_debug("connected " << _fd);
+                    _isConnected = true;
+                    return;
                 }
             }
-            
-            log_debug("failed to connect, try next address " << _fd);
-            this->close();
-            ++_addrInfoPtr;
-            _isConnected = beginConnect();
+            else
+            {
+                log_debug("received unknown network event " << _fd);
+                continue;
+            }
         }
-    }
-    catch(...)
-    {
-        close();
-        throw;
+        
+        log_debug("failed to connect, try next address " << _fd);
+        this->close();
+        ++_addrInfoPtr;
+        _isConnected = beginConnect();
     }
 }
 
