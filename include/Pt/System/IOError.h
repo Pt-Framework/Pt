@@ -42,7 +42,6 @@ namespace System {
 class PT_SYSTEM_API IOError : public std::ios::failure
 {
     public:
-        //IOError(const std::string& what, const SourceInfo& si);
         explicit IOError(const std::string& what);
 
         explicit IOError(const char* what);
@@ -62,18 +61,11 @@ class PT_SYSTEM_API IOPending : public IOError
         {}
 };
 
-/*class PT_SYSTEM_API IOTimeout : public IOError
-{
-    public:
-        IOTimeout();
-
-        ~IOTimeout() throw()
-        {}
-};*/
-
 class PT_SYSTEM_API AccessFailed : public IOError
 {
     public:
+        explicit AccessFailed(const char* resource);
+
         explicit AccessFailed(const std::string& resource);
 
         ~AccessFailed() throw()
@@ -85,56 +77,6 @@ class PT_SYSTEM_API AccessFailed : public IOError
     private:
         std::string _resource;
 };
-
-
-    /*class PT_SYSTEM_API PermissionDenied : public AccessFailed
-    {
-        public:
-            PermissionDenied(const std::string& resource, const SourceInfo& si);
-
-            ~PermissionDenied() throw()
-            {}
-    };
-
-
-    class PT_SYSTEM_API DeviceNotFound : public AccessFailed
-    {
-        public:
-            DeviceNotFound(const std::string& device, const SourceInfo& si);
-
-            ~DeviceNotFound() throw()
-            {}
-    };
-
-
-    // obsolete
-    class PT_SYSTEM_API FileNotFound : public AccessFailed
-    {
-        public:
-            FileNotFound(const std::string& path, const SourceInfo& si);
-
-            ~FileNotFound() throw()
-            {}
-    };*/
-
-
-    /** @brief A directory could not be found at a given path
-    */
-    /*class PT_SYSTEM_API DirectoryNotFound : public AccessFailed
-    {
-        public:*/
-            /** @brief Construct from path and source info
-
-                Constructs the exception from the path where the directory
-                could not be found and the location in the source code where
-                he exception was thrown.
-            *//*
-            DirectoryNotFound(const std::string& path, const SourceInfo& si);
-
-            //! @brief Destructor
-            ~DirectoryNotFound() throw()
-            {}
-    };*/
 
 } // namespace System
 

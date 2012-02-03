@@ -33,12 +33,6 @@ namespace Pt {
 
 namespace System {
 
-/*IOError::IOError(const std::string& what, const SourceInfo& si)
-: std::ios::failure(what + si)
-{
-}*/
-
-
 IOError::IOError(const std::string& msg)
 : std::ios::failure(msg)
 {
@@ -57,37 +51,18 @@ IOPending::IOPending(const char* msg)
 }
 
 
-/*IOTimeout::IOTimeout()
-: IOError("Timeout")
+AccessFailed::AccessFailed(const char* resource)
+: IOError(resource)
+, _resource(resource)
 {
-}*/
+}
 
 
 AccessFailed::AccessFailed(const std::string& resource)
-: IOError("could not access " + resource)
+: IOError(resource)
+, _resource(resource)
 {
 }
-
-
-/*PermissionDenied::PermissionDenied(const std::string& resource, const SourceInfo& si)
-: AccessFailed(resource , si)
-{
-}
-
-
-DeviceNotFound::DeviceNotFound(const std::string& device, const SourceInfo& si)
-: AccessFailed(device, si)
-{}
-
-
-FileNotFound::FileNotFound(const std::string& path, const SourceInfo& si)
-: AccessFailed(path, si)
-{}
-
-
-DirectoryNotFound::DirectoryNotFound(const std::string& path, const SourceInfo& si)
-: AccessFailed(path, si)
-{ }*/
 
 } // namespace System
 
