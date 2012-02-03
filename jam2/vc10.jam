@@ -1,37 +1,94 @@
 
+rule ConfigureVisualC
+{
+    if ! $(VISUALC_CONFIGURED)
+    {
+        VISUALC_CONFIGURED = 1 ;
+    
+        if $(VISUALC) 
+        {
+            VISUALC = $(VISUALC:J=" ") ;
+        } 
+        else
+        {
+            if $(PROCESSOR_ARCHITECTURE:L) = "amd64"
+            {
+                VISUALC = [ W32_GETREG "HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Microsoft\\VisualStudio\\10.0\\" : "InstallDir" ] ;
+            }
+            else # PROCESSOR_ARCHITECTURE = "x86"
+            {
+                VISUALC = [ W32_GETREG "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\10.0\\" : "InstallDir" ] ;
+            }
+        
+            VISUALC = $(VISUALC:P) ;
+            VISUALC = $(VISUALC:P) ;
+            VISUALC = $(VISUALC:P) ;
+        }
+        
+        if ! $(VISUALC)
+        {
+            Exit "VISUALC not found" ;
+        }
+    
+        Echo "Checking for Visual Studio..." $(VISUALC) ;
+        Configure VISUALC_PATH : $(VISUALC)\\Common7\\IDE ;
+    }
+}
+
+
+rule ConfigureCc
+{
+    ConfigureVisualC ;
+}
+
+
+rule ConfigureC++
+{
+    ConfigureVisualC ;
+}
+
+
+rule ConfigurePlatformSDK
+{
+    if ! $(PLATFORMSDK_CONFIGURED)
+    {
+        PLATFORMSDK_CONFIGURED = 1 ;
+
+        # Other places to search for the platform SDK:
+        #
+        # HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Microsoft SDKs\Windows\v6.0A
+        # HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Microsoft SDKs\Windows\v6.0A
+        # $(VISUALC)\\vc\\PlatformSDK ;
+        PLATFORMSDK ?= [ W32_GETREG "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Microsoft SDKs\\Windows\\v7.0A\\" : "InstallationFolder" ] ;
+    
+        if ! $(PLATFORMSDK)
+        {
+            Exit "PLATFORMSDK not found" ;
+        }
+    
+        Echo "Checking for Platform SDK..." $(PLATFORMSDK) ;
+
+        PLATFORMSDK_INCLUDES = \"$(PLATFORMSDK)\\include\" ;
+
+        if $(TARGET_OSPLAT:L) = "x64"
+        {
+            PLATFORMSDK_LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)\\lib\\x64\"" ;
+        }
+        else if $(TARGET_OSPLAT:L) = "x86"
+        {
+            PLATFORMSDK_LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)\\lib\"" ;
+        }
+    }
+}
+
+
 ##########################################################################
 # Configuration
 ##########################################################################
 
 if $(CONFIGURE)
 {
-    if $(VISUALC) 
-    {
-        VISUALC = $(VISUALC:J=" ") ;
-    } 
-    else
-    {
-        if $(PROCESSOR_ARCHITECTURE:L) = "amd64"
-        {
-            VISUALC = [ W32_GETREG "HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Microsoft\\VisualStudio\\10.0\\" : "InstallDir" ] ;
-        }
-        else # PROCESSOR_ARCHITECTURE = "x86"
-        {
-            VISUALC = [ W32_GETREG "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\10.0\\" : "InstallDir" ] ;
-        }
-    
-        VISUALC = $(VISUALC:P) ;
-        VISUALC = $(VISUALC:P) ;
-        VISUALC = $(VISUALC:P) ;
-    }
-    
-    if ! $(VISUALC)
-    {
-        Exit "VISUALC not found" ;
-    }
-
-    Echo "Checking for Visual Studio..." $(VISUALC) ;
-    Configure VISUALC_PATH : $(VISUALC)\\Common7\\IDE ;
+    ConfigureVisualC ;
     
     # Other places to search for the platform SDK:
     #

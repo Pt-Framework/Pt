@@ -1,8 +1,9 @@
 
-ConfigureCc ;
-ConfigureC++ ;
-
 JamInclude freetype.jam ;
+
+ConfigureCc ;
+
+ConfigureC++ ;
 
 ConfigureFreetype ;
 
