@@ -297,17 +297,7 @@ rule ConfigureDotSlash
     Echo "Checking for directory separator..." $(SLASH) ;
 }
 
-##########################################################################
-# Set Target OS to host OS if unset
-##########################################################################
 
-TARGET_OS ?= $(OS:L) ;
-
-##########################################################################
-# Set target platform to host platform if unset
-##########################################################################
-
-TARGET_OSPLAT ?= $(OSPLAT:L) ;
 
 ##########################################################################
 # Set configuration
@@ -344,8 +334,6 @@ if $(CONFIGURE)
     TryCommand "del /f/q config.jam" ;
 
     Echo "Checking for host platform..." $(OS:L) ;
-    Echo "Checking for target OS..." $(TARGET_OS:L) ;
-    Echo "Checking for target platform..." $(TARGET_OSPLAT:L) ;
 
     ConfigureRm ;
     ConfigureMv ;
@@ -375,22 +363,32 @@ JamInclude Jamrules.base ;
 # rules and variables.
 ##########################################################################
 
-SUFOBJ ?= .o ; # TODO: move these from Jamrules.base to here
-PRELIB ?= lib ;
-SUFLIB ?= .a ;
-SUFDLL ?= .so ;
-SUFEXE ?= "" ;
-SUFDBG ?= "" ; # TODO: deprecated
-
-JamInclude $(TARGET_OS:L).jam ;
-
 if $(CONFIGURE)
-{
+{   
+    TARGET_OS ?= $(OS:L) ;
+    Echo "Checking for target OS..." $(TARGET_OS:L) ;
+    Configure TARGET_OS : $(TARGET_OS) ;
+
+    JamInclude $(TARGET_OS:L).jam ;
+
+    TARGET_OSPLAT ?= $(OSPLAT:L) ;
+    Echo "Checking for target platform..." $(TARGET_OSPLAT:L) ;
+    Configure TARGET_OSPLAT : $(TARGET_OSPLAT) ;
+
     Echo "Checking for object file suffix... " $(SUFOBJ) ;
+    Configure SUFOBJ : $(SUFOBJ) ;
+
     Echo "Checking for library prefix..." $(PRELIB) ;
+    Configure PRELIB : $(PRELIB) ;
+
     Echo "Checking for library suffix..." $(SUFLIB) ;
+    Configure SUFLIB : $(SUFLIB) ;
+
     Echo "Checking for executable suffix..." $(SUFEXE) ;
+    Configure SUFEXE : $(SUFEXE) ;
+
     Echo "Checking for shared library suffix..." $(SUFDLL) ;
+    Configure SUFDLL : $(SUFDLL) ;
 }
 
 ##########################################################################
@@ -413,8 +411,28 @@ if $(CONFIGURE)
     }
 }
 
-#JamInclude Jamrules.$(TOOLSET:L) ;
 JamInclude $(TOOLSET:L).jam ;
+
+if ! $(AS)
+{
+    Exit "AS is not defined" ;
+}
+if ! $(AR)
+{
+    Exit "AR is not defined" ;
+}
+if ! $(CC)
+{
+    Exit "CC is not defined" ;
+}
+if ! $(C++)
+{
+    Exit "C++ is not defined" ;
+}
+if ! $(LINK)
+{
+    Exit "LINK is not defined" ;
+}
 
 ##########################################################################
 # Include the project specific configuration

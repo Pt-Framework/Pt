@@ -2,12 +2,12 @@
 # Platform specific prefixes and suffixes
 ##############################################################################
 
-SUFOBJ	= .obj ;
-PRELIB	= "" ;
-SUFLIB	= .lib ;
-SUFEXE	= .exe ;
-SUFDLL	= .dll ;
-SUFDBG = "" ;
+SUFOBJ ?= .obj ;
+PRELIB ?= "" ;
+SUFLIB ?= .lib ;
+SUFEXE ?= .exe ;
+SUFDLL ?= .dll ;
+SUFDBG ?= "" ;
 
 ##############################################################################
 # Default toolkit

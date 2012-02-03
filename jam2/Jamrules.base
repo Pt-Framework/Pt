@@ -141,22 +141,16 @@
 #   all - default if none given on command line
 #
 
-
+#
 # Initialize variables
 #
-AR          ?= ar ru ;
-AS          ?= as ;
+
 ASFLAGS     ?= ;
 AWK         ?= awk ;
 BINDIR      ?= /usr/local/bin ;
-C++         ?= cc ;
 C++FLAGS    ?= ;
-CC          ?= cc ;
 CCFLAGS     ?= ;
-CP          ?= cp -f ;
 CRELIB      ?= ;
-DOT         ?= . ;
-DOTDOT      ?= .. ;
 EXEMODE     ?= 711 ;
 FILEMODE    ?= 644 ;
 FORTRAN     ?= f77 ;
@@ -168,37 +162,24 @@ JAMFILE     ?= Jamfile ;
 JAMRULES    ?= Jamrules ;
 LEX         ?= ;
 LIBDIR      ?= /usr/local/lib ;
-LINK        ?= $(CC) ;
 LINKFLAGS   ?= ;
 LINKLIBS    ?= ;
-LN          ?= ln ;
 MANDIR      ?= /usr/local/man ;
-MKDIR       ?= mkdir ;
-MV          ?= mv -f ;
 NOARSCAN    ?= true ;
-OPTIM       ?= ;
-PRELIB      ?= "" ;
-RANLIB      ?= ;
 RCP         ?= rcp ;
-RM          ?= rm -f ;
 RSH         ?= rsh ;
 SED         ?= sed ;
 SHELLHEADER ?= "#!/bin/sh" ;
 SHELLMODE   ?= 755 ;
-SLASH       ?= / ;
 STDHDRS     ?= /usr/include ;
-SUFEXE      ?= "" ;
-SUFLIB      ?= .a ;
-SUFOBJ      ?= .o ;
 UNDEFFLAG   ?= "-u _" ;
-WARN        ?= ;
 YACC        ?= ;
 YACCFILES   ?= ;
 YACCFLAGS   ?= ;
 TEMP_TARGET ?= ;
-# OBJECT_TARGET ?= tmp ;
 SPACE = " " ;
 
+# OBJECT_TARGET ?= tmp ;
 
 HDRPATTERN = 
     "^[     ]*#[    ]*include[  ]*[<\"]([^\">]*)[\">].*$" ;

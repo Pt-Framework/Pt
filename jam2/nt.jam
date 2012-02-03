@@ -2,22 +2,18 @@
 # Platform specific prefixes and suffixes
 ##############################################################################
 
-SUFOBJ = .obj ;
-PRELIB = "" ;
-SUFLIB = .lib ;
-SUFEXE = .exe ;
-SUFDLL = .dll ;
-SUFDBG = "" ;
+SUFOBJ ?= .obj ;
+PRELIB ?= "" ;
+SUFLIB ?= .lib ;
+SUFEXE ?= .exe ;
+SUFDLL ?= .dll ;
+SUFDBG ?= "" ;
 
 ##############################################################################
 # Default toolkit
 ##############################################################################
 
-if $(MSVCDir)
-{
-    TOOLSET ?= vc7 ;
-}
-else if $(VSINSTALLDIR)
+if $(VSINSTALLDIR)
 {
     if $(VS100COMNTOOLS)
     {
@@ -29,16 +25,21 @@ else if $(VSINSTALLDIR)
         TOOLSET ?= vc9 ;
     }
    
-    TOOLSET ?= vc8 ;
-}
-else if $(MINGW)
-{
-    TOOLSET ?= mingw ;
+    if $(VS90COMNTOOLS)
+    {
+        TOOLSET ?= vc8 ;
+    }
 }
 else
 {
-    TOOLSET ?= vc7 ;
+    # TODO: if TOOLSET is not specify on command line search registry for 
+    #       visual studio installation
+    #local instdir ;
+
+    #instdir = [ W32_GETREG "HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Microsoft\\VisualStudio\\8.0\\" : "InstallDir" ]  ;
+    #instdir = [ W32_GETREG "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\8.0\\" : "InstallDir" ]  ;
+
 }
 
-# TODO: if TOOLSET is not specify on command line search registry for 
-#       visual studio installation
+
+

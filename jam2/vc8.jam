@@ -30,8 +30,24 @@ if $(CONFIGURE)
         Exit "VISUALC not found" ;
     }
 
-    Echo "Checking for Visual Studio directory..." $(VISUALC) ;
+    Echo "Checking for Visual Studio..." $(VISUALC) ;
     Configure VISUALC_PATH : $(VISUALC)\\Common7\\IDE ;
+
+    if $(TARGET_OS:L) = "nt"
+    {
+        PLATFORMSDK ?= $(VISUALC)\\vc\\PlatformSDK ;
+    }
+    else if $(TARGET_OS:L) = "wince"
+    {
+        PLATFORMSDK ?= $(VISUALC)\\smartdevices\\sdk\\pocketpc2003 ;
+    }
+
+    if ! $(PLATFORMSDK)
+    {
+        Exit "PLATFORMSDK not found" ;
+    }
+
+    Echo "Checking for Platform SDK..." $(PLATFORMSDK) ;
 
     ###########################################################################
     # Visual Studio Toolchain
@@ -43,7 +59,6 @@ if $(CONFIGURE)
         CCFLAGS   += /DWIN32 ;
         LINKFLAGS += /MANIFEST ;
         STDHDRS = \"$(VISUALC)\\vc\\include\" ;
-        PLATFORMSDK ?= $(VISUALC)\\vc\\PlatformSDK ;
         STDHDRS += \"$(PLATFORMSDK)\\include\" ;
 
         if $(TARGET_OSPLAT:L) = "x64"
@@ -51,17 +66,17 @@ if $(CONFIGURE)
             if $(PROCESSOR_ARCHITECTURE:L) = "amd64"
             {
                 # TODO: we could use the 32-bit compiler programs too...
-                AS   = $(VISUALC)\\vc\\bin\\amd64\\ml64 ;
-                AR   = $(VISUALC)\\vc\\bin\\amd64\\lib ;
-                CC   = $(VISUALC)\\vc\\bin\\amd64\\cl /nologo ;
-                LINK = $(VISUALC)\\vc\\bin\\amd64\\link /nologo ;
+                AS   ?= $(VISUALC)\\vc\\bin\\amd64\\ml64 ;
+                AR   ?= $(VISUALC)\\vc\\bin\\amd64\\lib ;
+                CC   ?= $(VISUALC)\\vc\\bin\\amd64\\cl /nologo ;
+                LINK ?= $(VISUALC)\\vc\\bin\\amd64\\link /nologo ;
             }
             else # PROCESSOR_ARCHITECTURE = "x86"
             {
-                AS   = $(VISUALC)\\vc\\bin\\x86_amd64\\ml64 ;
-                AR   = $(VISUALC)\\vc\\bin\\x86_amd64\\lib ;
-                CC   = $(VISUALC)\\vc\\bin\\x86_amd64\\cl /nologo ;
-                LINK = $(VISUALC)\\vc\\bin\\x86_amd64\\link /nologo ;
+                AS   ?= $(VISUALC)\\vc\\bin\\x86_amd64\\ml64 ;
+                AR   ?= $(VISUALC)\\vc\\bin\\x86_amd64\\lib ;
+                CC   ?= $(VISUALC)\\vc\\bin\\x86_amd64\\cl /nologo ;
+                LINK ?= $(VISUALC)\\vc\\bin\\x86_amd64\\link /nologo ;
             }
         
             LINKFLAGS += /LIBPATH:\""$(VISUALC)\\vc\\lib\\amd64\"" ;
@@ -73,10 +88,10 @@ if $(CONFIGURE)
         }
         else if $(TARGET_OSPLAT:L) = "x86"
         {
-            AS        = $(VISUALC)\\vc\\bin\\ml ;
-            AR        = $(VISUALC)\\vc\\bin\\lib ;
-            CC        = $(VISUALC)\\vc\\bin\\cl /nologo ;
-            LINK      = $(VISUALC)\\vc\\bin\\link /nologo ;
+            AS        ?= $(VISUALC)\\vc\\bin\\ml ;
+            AR        ?= $(VISUALC)\\vc\\bin\\lib ;
+            CC        ?= $(VISUALC)\\vc\\bin\\cl /nologo ;
+            LINK      ?= $(VISUALC)\\vc\\bin\\link /nologo ;
     
             LINKFLAGS += /LIBPATH:\""$(VISUALC)\\vc\\lib\"" ;
     
@@ -92,10 +107,10 @@ if $(CONFIGURE)
 
         if $(TARGET_OSPLAT:L) = "arm"
         {
-            AS   = $(VISUALC)\\VC\\ce\\bin\\x86_arm\\armasm ;
-            AR   = $(VISUALC)\\VC\\bin\\lib ;
-            CC   = $(VISUALC)\\VC\\ce\\bin\\x86_arm\\cl /nologo ;
-            LINK = $(VISUALC)\\VC\\ce\\bin\\x86_arm\\link /nologo ;
+            AS   ?= $(VISUALC)\\VC\\ce\\bin\\x86_arm\\armasm ;
+            AR   ?= $(VISUALC)\\VC\\bin\\lib ;
+            CC   ?= $(VISUALC)\\VC\\ce\\bin\\x86_arm\\cl /nologo ;
+            LINK ?= $(VISUALC)\\VC\\ce\\bin\\x86_arm\\link /nologo ;
     
             LINKFLAGS += /LIBPATH:\""$(VISUALC)\\VC\\ce\\lib\\armv4\"" ;
     
@@ -103,16 +118,26 @@ if $(CONFIGURE)
             LINKFLAGS     += "/MANIFEST:NO /NODEFAULTLIB:oldnames.lib /subsystem:windowsce,4.20 /ERRORREPORT:PROMPT /ARMPADCODE /machine:ARM" ;
             LINKLIBS      += "coredll.lib corelibc.lib ccrtrtti.lib secchk.lib" ;
 
-            STDHDRS += \"$(VISUALC)\\smartdevices\\sdk\\pocketpc2003\\include\" ;
-            LINKFLAGS += /LIBPATH:\""$(VISUALC)\\SmartDevices\\SDK\\PocketPC2003\\Lib\\armv4\"" ;
+            STDHDRS += \"$(PLATFORMSDK)\\include\" ;
+            LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)\\Lib\\armv4\"" ;
         }
     }
 
     Configure AS : $(AS) ;
+    Echo "Checking for assember..." $(AS:BS) ;
+
     Configure AR : $(AR) ;
+    Echo "Checking for archiver..." $(AR:BS) ;
+
     Configure CC : $(CC) ;
+    Echo "Checking for C compiler..." $(CC:BS) ;
+
     Configure C++ : $(CC) ;
+    Echo "Checking for C++ compiler..." $(C++:BS) ;
+
     Configure LINK : $(LINK) ;
+    Echo "Checking for linker..." $(LINK:BS) ;
+
     Configure MT : $(MT) ;
     Configure STDHDRS : $(STDHDRS) ;
     Configure CCFLAGS : $(CCFLAGS) ;

@@ -30,7 +30,7 @@ if $(CONFIGURE)
         Exit "VISUALC not found" ;
     }
 
-    Echo "Checking for Visual Studio directory..." $(VISUALC) ;
+    Echo "Checking for Visual Studio..." $(VISUALC) ;
     Configure VISUALC_PATH : $(VISUALC)\\Common7\\IDE ;
     
     # Other places to search for the platform SDK:
@@ -92,19 +92,19 @@ if $(CONFIGURE)
     }
 
     Configure AS : $(AS) ;
-    Echo "Checking for assember..." $(AS) ;
+    Echo "Checking for assember..." $(AS:BS) ;
 
     Configure AR : $(AR) ;
-    Echo "Checking for archiver..." $(AR) ;
+    Echo "Checking for archiver..." $(AR:BS) ;
 
     Configure CC : $(CC) ;
-    Echo "Checking for C compiler..." $(CC) ;
+    Echo "Checking for C compiler..." $(CC:BS) ;
 
     Configure C++ : $(CC) ;
-    Echo "Checking for C++ compiler..." $(C++) ;
+    Echo "Checking for C++ compiler..." $(C++:BS) ;
 
     Configure LINK : $(LINK) ;
-    Echo "Checking for linker..." $(LINK) ;
+    Echo "Checking for linker..." $(LINK:BS) ;
 
     Configure STDHDRS : $(STDHDRS) ;
     Configure CCFLAGS : $(CCFLAGS) ;
