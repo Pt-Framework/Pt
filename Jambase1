@@ -398,6 +398,14 @@ if $(CONFIGURE)
 # specific rules and variables.
 ##########################################################################
 
+rule ConfigureCc
+{
+}
+
+rule ConfigureC++
+{
+}
+
 if $(CONFIGURE)
 {
     if $(TOOLSET)
