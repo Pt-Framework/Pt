@@ -108,6 +108,8 @@ void *pt_malloc(size_t size)
 
 void pt_free(void *ptr)
 {
+    if(!ptr) return;
+
     --PT_MCheck_Counter;
     free(ptr);
 }
