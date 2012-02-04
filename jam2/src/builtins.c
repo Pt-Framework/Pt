@@ -2416,30 +2416,33 @@ static void exec_closure(void *closure, int status, timing_info* time, const cha
     ervc->result = 0;
     ervc->result = list_new( ervc->result, object_new( strExitCode ) );
 
-    string_new(&s);
-    for( ; ; )
+    if(output)
     {
-        switch(*output)
+        string_new(&s);
+        for( ; ; )
         {
-            case '\0':
-            case '\n':
-            case '\r':
-                if(s.size > 0) {
-                    ervc->result = list_new( ervc->result, object_new( s.value ) );
-                    string_truncate(&s, 0);
-                }
+            switch(*output)
+            {
+                case '\0':
+                case '\n':
+                case '\r':
+                    if(s.size > 0) {
+                        ervc->result = list_new( ervc->result, object_new( s.value ) );
+                        string_truncate(&s, 0);
+                    }
+                    break;
+    
+                default:
+                    string_push_back(&s, *output);
+            }
+    
+            if(*output == '\0')
                 break;
-
-            default:
-                string_push_back(&s, *output);
+    
+            ++output;
         }
-
-        if(*output == '\0')
-            break;
-
-        ++output;
+        string_free(&s);
     }
-    string_free(&s);
 }
 
 /* Pt extension:

@@ -112,7 +112,7 @@ if $(CONFIGURE)
 
     if $(WITH_GCC_FLAG_DYNAMICLIB)
     {
-        SHLIB_LINKFLAGS = -dynamiclib -install_name $(_target)  ;
+        SHLIB_LINKFLAGS = -dynamiclib ;
     }
     else if $(WITH_GCC_FLAG_SHARED)
     {
@@ -208,6 +208,11 @@ rule SharedLibraryImpl
     local _target = $(PRELIB)$(<)$(SUFDLL) ;
 
     LINKFLAGS on $(_target) += $(LINKFLAGS) $(SHLIB_LINKFLAGS) ;
+
+    if $(INSTALL_PATH) # macosx feature
+    {
+        LINKFLAGS on $(_target) += -install_name $(_target:D=$(INSTALL_PATH)) ;
+    }
 
     switch $(>:S)
     {
