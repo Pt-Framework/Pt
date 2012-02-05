@@ -41,11 +41,13 @@ if $(CONFIGURE)
         TOOLSET_PATH  =  $(TOOLSET_PATH:J=" ")$(SLASH) ;
     }
 
-    AS     ?= $(TOOLSET_PATH:E="")as ;
-    CC     ?= $(TOOLSET_PATH:E="")gcc ;
-    C++    ?= $(TOOLSET_PATH:E="")g++ ;
-    RANLIB ?= $(TOOLSET_PATH:E="")ranlib ;
-    AR     ?= $(TOOLSET_PATH:E="")ar ru ;
+	TOOLSET_PREFIX ?= "" ;
+
+    AS     ?= $(TOOLSET_PATH:E="")$(TOOLSET_PREFIX)as ;
+    CC     ?= $(TOOLSET_PATH:E="")$(TOOLSET_PREFIX)gcc ;
+    C++    ?= $(TOOLSET_PATH:E="")$(TOOLSET_PREFIX)g++ ;
+    RANLIB ?= $(TOOLSET_PATH:E="")$(TOOLSET_PREFIX)ranlib ;
+    AR     ?= $(TOOLSET_PATH:E="")$(TOOLSET_PREFIX)ar ru ;
     LINK   ?= $(CC) ;
 
     Configure AS : $(AS:J=" ") ;
