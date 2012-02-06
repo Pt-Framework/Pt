@@ -26,18 +26,24 @@ if $(OS:L) = "nt"
     TONULL = " 2>NUL 1>NUL" ;
 }
 
+CONFIGURED_VARIABLES = ;
+
 rule Configure
 {
+    # TODO: we want += here, but that only works if we avoid constructs
+    # like Configure XXX : $(XXX) 
+
     $(1) = $(2) ;
+    CONFIGURED_VARIABLES += $(1) ;
 
-    local _value ;
-    for _v in $(2)
-    {
-        local _valtmp = [ Escape $(_v) ] ;
-        _value += "\"$(_valtmp)\"" ;
-    }
+    #local _value ;
+    #for _v in $(2)
+    #{
+    #    local _valtmp = [ Escape $(_v) ] ;
+    #    _value += "\"$(_valtmp)\"" ;
+    #}
 
-    WriteFile config.tmp : $(1)" ?= "$(_value:J=" ")" ;" ;
+    #WriteFile config.tmp : $(1)" ?= "$(_value:J=" ")" ;" ;
 }
 
 rule TryCommand
@@ -429,7 +435,20 @@ JamInclude $(TOOLSET:L).jam ;
 if $(CONFIGURE)
 {
     include Jamconfig ;
-    TryCommand $(MV) config.tmp config.jam ;
+
+    #TryCommand $(MV) config.tmp config.jam ;
+
+    for local _var in $(CONFIGURED_VARIABLES)
+    {
+        local _value ;
+        for _v in $($(_var))
+        {
+            local _valtmp = [ Escape $(_v) ] ;
+            _value += "\"$(_valtmp)\"" ;
+        }
+    
+        WriteFile config.jam : $(_var)" ?= "$(_value:J=" ")" ;" ;
+    }
 }
 
 if $(CONFIGURE_ONLY)
