@@ -421,26 +421,6 @@ if $(CONFIGURE)
 
 JamInclude $(TOOLSET:L).jam ;
 
-if ! $(AS)
-{
-    Exit "AS is not defined" ;
-}
-if ! $(AR)
-{
-    Exit "AR is not defined" ;
-}
-if ! $(CC)
-{
-    Exit "CC is not defined" ;
-}
-if ! $(C++)
-{
-    Exit "C++ is not defined" ;
-}
-if ! $(LINK)
-{
-    Exit "LINK is not defined" ;
-}
 
 ##########################################################################
 # Include the project specific configuration
