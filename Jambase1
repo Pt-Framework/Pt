@@ -13,6 +13,8 @@ rule JamInclude
     include $(_s) ;
 }
 
+# TODO: it should be possible that the jamdir is anywhere on the system
+
 ##########################################################################
 # Include base rules
 ##########################################################################
