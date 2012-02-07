@@ -13,33 +13,18 @@ SUFDBG ?= "" ;
 # Default toolkit
 ##############################################################################
 
-if $(VSINSTALLDIR)
+if $(VS100COMNTOOLS)
 {
-    if $(VS100COMNTOOLS)
-    {
-        TOOLSET ?= vc10 ;
-    }
-
-    if $(VS90COMNTOOLS)
-    {
-        TOOLSET ?= vc9 ;
-    }
-   
-    if $(VS90COMNTOOLS)
-    {
-        TOOLSET ?= vc8 ;
-    }
-}
-else
-{
-    # TODO: if TOOLSET is not specify on command line search registry for 
-    #       visual studio installation
-    #local instdir ;
-
-    #instdir = [ W32_GETREG "HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Microsoft\\VisualStudio\\8.0\\" : "InstallDir" ]  ;
-    #instdir = [ W32_GETREG "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\8.0\\" : "InstallDir" ]  ;
-
+    TOOLSET ?= vc10 ;
 }
 
+if $(VS90COMNTOOLS)
+{
+    TOOLSET ?= vc9 ;
+}
 
+if $(VS90COMNTOOLS)
+{
+    TOOLSET ?= vc8 ;
+}
 

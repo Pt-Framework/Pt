@@ -2,22 +2,24 @@
 # Tools and Flags
 ##########################################################################
 
-if $(CONFIG:L) = debug 
+if ! $(CONFIGURE)
 {
-    CCFLAGS   += /MDd /Zi /D "DEBUG" /D "_DEBUG" ;
-    OPTIM     ?= /Od ;
-    LINKFLAGS += /DEBUG ;
+    if $(CONFIG:L) = debug 
+    {
+        CCFLAGS   += /MDd /Zi /D "DEBUG" /D "_DEBUG" ;
+        OPTIM     ?= /Od ;
+        LINKFLAGS += /DEBUG ;
+    }
+    else if $(CONFIG:L) = release 
+    {
+        CCFLAGS += /MD /D "NDEBUG" ;
+        OPTIM   ?= /Ox /Ot /Oy ;
+    }
+    
+    C++FLAGS  += $(CCFLAGS) /EHsc /fp:fast /GR /TP /FD ;
+    WARN      ?= /W3 ;
+    UNDEFFLAG = "/u _" ;
 }
-else if $(CONFIG:L) = release 
-{
-    CCFLAGS += /MD /D "NDEBUG" ;
-    OPTIM   ?= /Ox /Ot /Oy ;
-}
-
-C++FLAGS  += $(CCFLAGS) /EHsc /fp:fast /GR /TP /FD ;
-WARN      ?= /W3 ;
-UNDEFFLAG = "/u _" ;
-
 
 ##########################################################################
 # Rules

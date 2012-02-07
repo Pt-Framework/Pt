@@ -30,8 +30,9 @@ rule ConfigureVisualC
             Exit "VISUALC not found" ;
         }
     
+        VISUALC_PATH = $(VISUALC)\\Common7\\IDE ;
         Echo "Checking for Visual Studio..." $(VISUALC) ;
-        Configure VISUALC_PATH : $(VISUALC)\\Common7\\IDE ;
+        Configure VISUALC_PATH ;
     }
 }
 
@@ -43,6 +44,8 @@ rule ConfigureCc
     if ! $(CC_CONFIGURED)
     {
         CC_CONFIGURED = 1 ;
+
+        LINKFLAGS += /MANIFEST ;
 
         if $(TARGET_OSPLAT:L) = "x64"
         {
@@ -64,10 +67,10 @@ rule ConfigureCc
         }
         else if $(TARGET_OSPLAT:L) = "x86"
         {
-            AS        = $(VISUALC)\\vc\\bin\\ml ;
-            AR        = $(VISUALC)\\vc\\bin\\lib ;
-            CC        = $(VISUALC)\\vc\\bin\\cl /nologo ;
-            LINK      = $(VISUALC)\\vc\\bin\\link /nologo ;
+            AS   = $(VISUALC)\\vc\\bin\\ml ;
+            AR   = $(VISUALC)\\vc\\bin\\lib ;
+            CC   = $(VISUALC)\\vc\\bin\\cl /nologo ;
+            LINK = $(VISUALC)\\vc\\bin\\link /nologo ;
         }
 
         Configure AS : $(AS) ;
@@ -82,16 +85,19 @@ rule ConfigureCc
         Configure LINK : $(LINK) ;
         Echo "Checking for linker..." $(LINK:BS) ;
 
-        VISUALC_INCLUDES = \""$(VISUALC)\\vc\\include\"" ;
+        STDHDRS += \""$(VISUALC)\\vc\\include\"" ;
     
         if $(TARGET_OSPLAT:L) = "x64"
         {   
-            VISUALC_LINKFLAGS += /LIBPATH:\""$(VISUALC)\\vc\\lib\\amd64\"" ;
+            LINKFLAGS += /LIBPATH:\""$(VISUALC)\\vc\\lib\\amd64\"" ;
         }
         else if $(TARGET_OSPLAT:L) = "x86"
         {
-            VISUALC_LINKFLAGS += /LIBPATH:\""$(VISUALC)\\vc\\lib\"" ;
+            LINKFLAGS += /LIBPATH:\""$(VISUALC)\\vc\\lib\"" ;
         }
+
+        Configure STDHDRS ;
+        Configure LINKFLAGS ;
     }
 }
 
@@ -105,8 +111,8 @@ rule ConfigureC++
     if ! $(C++_CONFIGURED)
     {
         C++_CONFIGURED = 1 ;
-
-        Configure C++ : $(CC) ;
+        C++ = $(CC) ;
+        Configure C++ ;
         Echo "Checking for C++ compiler..." $(C++:BS) ;
     }
 }
@@ -127,16 +133,21 @@ rule ConfigurePlatformSDK
     
         Echo "Checking for Platform SDK..." $(PLATFORMSDK) ;
 
-        PLATFORMSDK_INCLUDES = \""$(PLATFORMSDK)\\include\"" ;
+        STDHDRS += \""$(PLATFORMSDK)\\include\"" ;
+        CCFLAGS   += /DWIN32 ;
 
         if $(TARGET_OSPLAT:L) = "x64"
         {
-            PLATFORMSDK_LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)\\lib\\x64\"" ;
+            LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)\\lib\\x64\"" ;
         }
         else if $(TARGET_OSPLAT:L) = "x86"
         {
-            PLATFORMSDK_LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)\\lib\"" ;
+            LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)\\lib\"" ;
         }
+
+        Configure STDHDRS ;
+        Configure CCFLAGS ;
+        Configure LINKFLAGS ;
     }
 }
 

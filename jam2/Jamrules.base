@@ -171,7 +171,7 @@ RSH         ?= rsh ;
 SED         ?= sed ;
 SHELLHEADER ?= "#!/bin/sh" ;
 SHELLMODE   ?= 755 ;
-STDHDRS     ?= /usr/include ;
+#STDHDRS     ?= /usr/include ;
 UNDEFFLAG   ?= "-u _" ;
 YACC        ?= ;
 YACCFILES   ?= ;
@@ -1279,7 +1279,6 @@ rule SubDir
         }
 
         # Include it.
-
         include $(_r) ;
     }
 

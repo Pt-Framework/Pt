@@ -35,7 +35,7 @@
 #include <Pt/System/Logger.h>
 #include <Pt/System/EventLoop.h>
 #include <Pt/System/SystemError.h>
-#include <cerrno>
+
 #include <cassert>
 #include <cstring>
 #include <limits>

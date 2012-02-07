@@ -30,8 +30,9 @@ rule ConfigureVisualC
             Exit "VISUALC not found" ;
         }
     
+        VISUALC_PATH = $(VISUALC)\\Common7\\IDE ;
         Echo "Checking for Visual Studio..." $(VISUALC) ;
-        Configure VISUALC_PATH : $(VISUALC)\\Common7\\IDE ;
+        Configure VISUALC_PATH ;
     }
 }
 
@@ -47,6 +48,7 @@ rule ConfigureCc
         if $(TARGET_OS:L) = "nt"
         {
             MT  = $(VISUALC)\\vc\\bin\\mt -nologo ;
+            LINKFLAGS += /MANIFEST ;
 
             if $(TARGET_OSPLAT:L) = "x64"
             {
@@ -77,13 +79,15 @@ rule ConfigureCc
         else if $(TARGET_OS:L) = "wince"
         {
             MAINLINKFLAGS += /ENTRY:mainWCRTStartup ;
+            LINKFLAGS += /MANIFEST:NO ;
+            LINKLIBS += "corelibc.lib ccrtrtti.lib secchk.lib" ;
 
             if $(TARGET_OSPLAT:L) = "arm"
             {
-                AS   ?= $(VISUALC)\\VC\\ce\\bin\\x86_arm\\armasm ;
-                AR   ?= $(VISUALC)\\VC\\bin\\lib ;
-                CC   ?= $(VISUALC)\\VC\\ce\\bin\\x86_arm\\cl /nologo ;
-                LINK ?= $(VISUALC)\\VC\\ce\\bin\\x86_arm\\link /nologo ;
+                AS   = $(VISUALC)\\VC\\ce\\bin\\x86_arm\\armasm ;
+                AR   = $(VISUALC)\\VC\\bin\\lib ;
+                CC   = $(VISUALC)\\VC\\ce\\bin\\x86_arm\\cl /nologo ;
+                LINK = $(VISUALC)\\VC\\ce\\bin\\x86_arm\\link /nologo ;
             }
         }
 
@@ -100,29 +104,34 @@ rule ConfigureCc
         Echo "Checking for linker..." $(LINK:BS) ;
 
         Configure MAINLINKFLAGS : $(MAINLINKFLAGS) ;
+        Configure LINKFLAGS ;
+        Configure LINKLIBS ;
         
         if $(TARGET_OS:L) = "nt"
         {
-            VISUALC_INCLUDES = \""$(VISUALC)\\vc\\include\"" ;
+            STDHDRS += \""$(VISUALC)\\vc\\include\"" ;
 
             if $(TARGET_OSPLAT:L) = "x64"
             {   
-                VISUALC_LINKFLAGS += /LIBPATH:\""$(VISUALC)\\vc\\lib\\amd64\"" ;
+                LINKFLAGS += /LIBPATH:\""$(VISUALC)\\vc\\lib\\amd64\"" ;
             }
             else if $(TARGET_OSPLAT:L) = "x86"
             {
-                VISUALC_LINKFLAGS += /LIBPATH:\""$(VISUALC)\\vc\\lib\"" ;
+                LINKFLAGS += /LIBPATH:\""$(VISUALC)\\vc\\lib\"" ;
             }
         }
         else if $(TARGET_OS:L) = "wince"
         {
-            STDHDRS = \"$(VISUALC)\\vc\\ce\\include\" ;
+            STDHDRS += \"$(VISUALC)\\vc\\ce\\include\" ;
 
             if $(TARGET_OSPLAT:L) = "arm"
             {
                 LINKFLAGS += /LIBPATH:\""$(VISUALC)\\VC\\ce\\lib\\armv4\"" ;
             }
         }
+
+        Configure STDHDRS ;
+        Configure LINKFLAGS ;
     }
 }
 
@@ -136,8 +145,8 @@ rule ConfigureC++
     if ! $(C++_CONFIGURED)
     {
         C++_CONFIGURED = 1 ;
-
-        Configure C++ : $(CC) ;
+        C++ = $(CC) ;
+        Configure C++ ;
         Echo "Checking for C++ compiler..." $(C++:BS) ;
     }
 }
@@ -162,28 +171,35 @@ rule ConfigurePlatformSDK
 
         if $(TARGET_OS:L) = "nt"
         {
-            PLATFORMSDK_INCLUDES = \""$(PLATFORMSDK)\\include\"" ;
+            STDHDRS += \""$(PLATFORMSDK)\\include\"" ;
+            CCFLAGS   += /DWIN32 ;
+
             if $(TARGET_OSPLAT:L) = "x64"
             {
-                PLATFORMSDK_LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)\\lib\\x64\"" ;
+                LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)\\lib\\x64\"" ;
             }
             else if $(TARGET_OSPLAT:L) = "x86"
             {
-                PLATFORMSDK_LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)\\lib\"" ;
+                LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)\\lib\"" ;
             }
         }
         else if $(TARGET_OS:L) = "wince"
         {
-            PLATFORMSDK_INCLUDES = \""$(PLATFORMSDK)\\include\"" ;
-            PLATFORMSDK_CCFLAGS = "/D _WIN32_WCE=0x420 /D WINCE /D UNDER_CE /D WIN32_PLATFORM_PSPC /D _CONSOLE /D _UNICODE /D UNICODE" ;
+            STDHDRS += \""$(PLATFORMSDK)\\include\"" ;
+            CCFLAGS += "/D _WIN32_WCE=0x420 /D WINCE /D UNDER_CE /D WIN32_PLATFORM_PSPC /D _CONSOLE /D _UNICODE /D UNICODE" ;
+            LINKLIBS += coredll.lib ;
 
             if $(TARGET_OSPLAT:L) = "arm"
             {
-                PLATFORMSDK_CCFLAGS += "/D ARM /D _ARM_ /QRarch4" ;
-                PLATFORMSDK_LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)\\Lib\\armv4\"" ;
-                PLATFORMSDK_LINKFLAGS += "/NODEFAULTLIB:oldnames.lib /subsystem:windowsce,4.20 /ERRORREPORT:PROMPT /ARMPADCODE /machine:ARM" ;
+                CCFLAGS += "/D ARM /D _ARM_ /QRarch4" ;
+                LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)\\Lib\\armv4\"" ;
+                LINKFLAGS += "/NODEFAULTLIB:oldnames.lib /subsystem:windowsce,4.20 /ERRORREPORT:PROMPT /ARMPADCODE /machine:ARM" ;
             }
         }
+
+        Configure STDHDRS ;
+        Configure LINKFLAGS ;
+        Configure CCFLAGS ;
     }
 }
 
