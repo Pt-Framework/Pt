@@ -1,6 +1,6 @@
 PRELIB    = lib ;
 SUFLIB    = .a ;
-SUFDLL    = .so ;
+SUFDLL    = .dylib ;
 SUFEXE	  = "" ;
 SUFDBG    = "" ;
 
