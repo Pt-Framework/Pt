@@ -3,13 +3,15 @@
 ##########################################################################
 
 JAMDIR ?= jam2 ;
-DOT = . ;
 
 rule JamInclude
 {
-    local _s = $(DOT) ;
-    _s = $(JAMDIR:R=$(_s)) ;
-    _s = $(<:R=$(_s)) ;
+    # local _s = "" ; # = $(DOT) ;
+    # _s = $(JAMDIR:R=$(_s)) ;
+    # _s = $(<:R=$(_s)) ;
+    # include $(_s) ;
+
+    local _s = $(<:R=$(JAMDIR)) ;
     include $(_s) ;
 }
 
