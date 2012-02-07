@@ -14,9 +14,6 @@ Configure ALL_LOCATE_TARGET ;
 OUTPUT_TARGET = build$(SLASH)$(CONFIG) ;
 Configure OUTPUT_TARGET ;
 
-# include rules and actions to build unit tests
-ConfigureInclude unittest.jam ;
-
 #############################################################################
 # Platform settings
 #############################################################################

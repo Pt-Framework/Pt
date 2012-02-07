@@ -39,19 +39,13 @@ for _arg in $(ARGV)
     if $(_arg) = configure
     {
         CONFIGURE = 1 ;
-        CONFIGURE_ONLY = 1 ;
     }
-}
-
-if ! [ CHECK_IF_FILE Jamrules ]
-{
-    CONFIGURE = 1 ;
 }
 
 if $(CONFIGURE)
 {
-    TryCommand "rm -f Jamrules" ;
-    TryCommand "del /f/q Jamrules" ;
+    TryCommand "rm -f config.jam" ;
+    TryCommand "del /f/q config.jam" ;
 
     Echo "Checking for host platform..." $(OS:L) ;
 
@@ -127,24 +121,22 @@ if $(CONFIGURE)
             _value += "\"$(_valtmp)\"" ;
         }
     
-        WriteFile Jamrules : $(_var)" ?= "$(_value:J=" ")" ;" ;
+        WriteFile config.jam : $(_var)" ?= "$(_value:J=" ")" ;" ;
     }
 
     for local _var in $(CONFIGURED_INCLUDES)
     {  
-        WriteFile Jamrules : JamInclude" "$(_var)" ;" ;
+        WriteFile config.jam : JamInclude" "$(_var)" ;" ;
     }
-}
 
-if $(CONFIGURE_ONLY)
-{
     Exit "Configuration successful." ;
 }
 
+if ! [ CHECK_IF_FILE config.jam ]
+{
+    Exit "Build not configured." ;
+}
 
-##########################################################################
-# include the project top level Jamfile
-##########################################################################
-
+include config.jam ;
 include Jamfile ;
 
