@@ -15,22 +15,13 @@ rule JamInclude
     include $(_s) ;
 }
 
-# TODO: it should be possible that the jamdir is anywhere on the system
 
 ##########################################################################
 # Include base rules
 ##########################################################################
 
-JamInclude Jamrules.base ;
+JamInclude base.jam ;
 
-##########################################################################
-# Set configuration
-#
-# Can be set with 'jam -s CONFIG=debug' or 'jam -s CONFIG=release'.
-##########################################################################
-
-CONFIG ?= debug ;
-CONFIG = $(CONFIG:L) ;
 
 ##########################################################################
 # Configure
@@ -108,7 +99,6 @@ if $(CONFIGURE)
     Echo "Checking for toolset..."$(TOOLSET:L) ;
     Configure TOOLSET : $(TOOLSET) ;
     JamInclude $(TOOLSET:L).jam ;
-    ConfigureInclude $(TOOLSET:L).jam ;
 
     ##########################################################################
     # Project specific configuration
@@ -128,11 +118,6 @@ if $(CONFIGURE)
         WriteFile config.jam : $(_var)" ?= "$(_value:J=" ")" ;" ;
     }
 
-    for local _var in $(CONFIGURED_INCLUDES)
-    {  
-        WriteFile config.jam : JamInclude" "$(_var)" ;" ;
-    }
-
     Exit "Configuration successful." ;
 }
 
@@ -141,6 +126,17 @@ if ! [ CHECK_IF_FILE config.jam ]
     Exit "Build not configured." ;
 }
 
+##########################################################################
+# Set configuration
+#
+# Can be set with 'jam -s CONFIG=debug' or 'jam -s CONFIG=release'.
+##########################################################################
+
+CONFIG ?= debug ;
+CONFIG = $(CONFIG:L) ;
+
+
 include config.jam ;
+JamInclude $(TOOLSET:L).jam ;
 include Jamfile ;
 

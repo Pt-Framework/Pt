@@ -27,24 +27,6 @@ rule Configure
     }
 }
 
-CONFIGURED_INCLUDES = ;
-
-rule ConfigureInclude
-{
-    local _found ;
-    for local _v in $(CONFIGURED_INCLUDES)
-    {
-        if $(_v) = $(1)
-        {
-            _found = 1 ;
-        }
-    }
-
-    if ! $(_found)
-    {
-        CONFIGURED_INCLUDES += $(1) ;
-    }
-}
 
 rule TryCommand
 {
