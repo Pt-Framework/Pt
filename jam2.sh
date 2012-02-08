@@ -7,7 +7,7 @@ JAM_SOURCES="./builtins.c ./class.c ./command.c ./compile.c ./constants.c ./debu
 if test ! -f ./jam2.bin; then
     echo "Building jam executable..."
     cd jam2/src
-    cc -o ../../jam2.bin -g -DPT_MCHECK $JAM_SOURCES
+    cc -o ../../jam2.bin -DPT_MCHECK $JAM_SOURCES
     cd ../..
     echo "Built jam2.bin"
 fi

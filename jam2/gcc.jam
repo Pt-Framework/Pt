@@ -30,7 +30,7 @@
 # Configuration
 ##############################################################################
 
-if $(CONFIGURE)
+rule ConfigureCc
 {
     if $(TOOLSET_ROOT)
     {
@@ -41,31 +41,27 @@ if $(CONFIGURE)
         TOOLSET_PATH  =  $(TOOLSET_PATH:J=" ")$(SLASH) ;
     }
 
-	TOOLSET_PREFIX ?= "" ;
+    TOOLSET_PREFIX ?= "" ;
 
     AS     ?= $(TOOLSET_PATH:E="")$(TOOLSET_PREFIX)as ;
     CC     ?= $(TOOLSET_PATH:E="")$(TOOLSET_PREFIX)gcc ;
-    C++    ?= $(TOOLSET_PATH:E="")$(TOOLSET_PREFIX)g++ ;
     RANLIB ?= $(TOOLSET_PATH:E="")$(TOOLSET_PREFIX)ranlib ;
     AR     ?= $(TOOLSET_PATH:E="")$(TOOLSET_PREFIX)ar ru ;
     LINK   ?= $(CC) ;
 
-    Configure AS : $(AS:J=" ") ;
+    Configure AS ;
     Echo "Checking for assember..." $(AS:BS) ;
 
-    Configure AR : $(AR:J=" ") ;
+    Configure AR ;
     Echo "Checking for archiver..." $(AR:BS) ;
 
-    Configure CC : $(CC) ;
+    Configure CC ;
     Echo "Checking for C compiler..." $(CC:BS) ;
 
-    Configure C++ : $(C++) ;
-    Echo "Checking for C++ compiler..." $(C++:BS) ;
-
-    Configure LINK : $(LINK) ;
+    Configure LINK ;
     Echo "Checking for linker..." $(LINK:BS) ;
 
-    Configure RANLIB: $(RANLIB) ;
+    Configure RANLIB ;
     Echo "Checking for ranlib..." $(RANLIB:BS) ;
 
     if $(TARGET_OS:L) = macosx
@@ -119,11 +115,6 @@ if $(CONFIGURE)
         LINKFLAGS  += -fvisibility-inlines-hidden -fvisibility=hidden ;
     }
     
-    if $(WITH_GCC_FLAG_VISIBILITY)
-    {
-        C++FLAGS += -fvisibility-inlines-hidden ;
-    }
-    
     if $(WITH_GCC_FLAG_GROUPLIBS)
     {
         GCC_START_GROUP = "-Wl,--start-group" ;
@@ -150,7 +141,6 @@ if $(CONFIGURE)
     }
     
     Configure CCFLAGS : $(CCFLAGS) ;
-    Configure C++FLAGS : $(C++FLAGS) ;
     Configure LINKFLAGS : $(LINKFLAGS) ;
     Configure SHLIB_LINKFLAGS : $(SHLIB_LINKFLAGS) ;
     Configure MAIN_LINKFLAGS : $(MAIN_LINKFLAGS) ;
@@ -160,29 +150,59 @@ if $(CONFIGURE)
 }
 
 
+rule ConfigureC++
+{
+    ConfigureCc ;
+
+    if ! $(C++_CONFIGURED)
+    {
+        C++_CONFIGURED = 1 ;
+
+        if $(TOOLSET_ROOT)
+        {
+            TOOLSET_PATH = $(TOOLSET_ROOT:J=" ")$(SLASH)bin$(SLASH) ;
+        }
+        else if $(TOOLSET_PATH)
+        {
+            TOOLSET_PATH  =  $(TOOLSET_PATH:J=" ")$(SLASH) ;
+        }
+    
+        TOOLSET_PREFIX ?= "" ;
+    
+        C++ ?= $(TOOLSET_PATH:E="")$(TOOLSET_PREFIX)g++ ;
+        Configure C++ ;
+        Echo "Checking for C++ compiler..." $(C++:BS) ;
+
+        if $(WITH_GCC_FLAG_VISIBILITY)
+        {
+            C++FLAGS += -fvisibility-inlines-hidden ;
+        }
+
+        Configure C++FLAGS ;
+    }
+}
+
+
 ##############################################################################
 # Compiler and linker flags
 ##############################################################################
 
-if $(TARGET_OSPLAT:L) != x86
-{
-    CCFLAGS += -fPIC ;
+if ! $(CONFIGURE)
+{    
+    if $(CONFIG:L) = debug
+    {
+        CCFLAGS += -DDEBUG -g ;
+        OPTIM   ?= -O0 ;
+    }
+    else
+    {
+        CCFLAGS += -DNDEBUG ;
+        OPTIM   ?= -g -O2 ;
+    }
+    
+    C++FLAGS += $(CCFLAGS) ;
+    WARN ?= -Wall ;
 }
-
-if $(CONFIG:L) = debug
-{
-    CCFLAGS += -DDEBUG -g ;
-    OPTIM   ?= -O0 ;
-}
-else
-{
-    CCFLAGS += -DNDEBUG ;
-    OPTIM   ?= -g -O2 ;
-}
-
-C++FLAGS += $(CCFLAGS) ;
-WARN ?= -Wall ;
-
 
 ##############################################################################
 # Build rules
