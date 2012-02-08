@@ -309,12 +309,12 @@ rule ConfigureTarget
     TARGET_OS ?= $(OS:L) ;
     Echo "Building for target OS..." $(TARGET_OS:L) ;
     Configure TARGET_OS ;
+    JamInclude $(TARGET_OS:L).jam ;
 
     TARGET_OSPLAT ?= $(OSPLAT:L) ;
     Echo "Building for target platform..." $(TARGET_OSPLAT:L) ;
     Configure TARGET_OSPLAT ;
 
-    JamInclude $(TARGET_OS:L).jam ;
     Echo "Using object file suffix... " $(SUFOBJ) ;
     Configure SUFOBJ ;
 
