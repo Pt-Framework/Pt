@@ -11,12 +11,14 @@ Configure ALL_LOCATE_OBJECTS ;
 ALL_LOCATE_TARGET = build$(SLASH)$(CONFIG) ;
 Configure ALL_LOCATE_TARGET ;
 
+# TODO: is this obsolete?
 OUTPUT_TARGET = build$(SLASH)$(CONFIG) ;
 Configure OUTPUT_TARGET ;
 
 #############################################################################
 # Platform settings
 #############################################################################
+
 if $(TARGET_OS:L) = "nt"
 {
     ConfigurePlatformSDK ;
@@ -112,6 +114,7 @@ Echo "Checking for graphics UI..." $(GUI) ;
 #############################################################################
 # OpenSSL libraries and includes
 #############################################################################
+
 WITH_OPENSSL ?= "no" ;
 
 for local arg in $(ARGV)
@@ -129,6 +132,7 @@ Echo "Checking for OpenSSL (--with-openssl)..." $(WITH_OPENSSL) ;
 #############################################################################
 # HTTP2 libraries and includes
 #############################################################################
+
 WITH_HTTP2 ?= "no" ;
 
 for local arg in $(ARGV)
@@ -146,6 +150,7 @@ Echo "Checking for HTTP2 (--with-http2)..." $(WITH_HTTP2) ;
 #############################################################################
 # Gfx libraries and includes
 #############################################################################
+
 JamInclude freetype.jam ;
 
 ConfigureFreetype ;
@@ -166,6 +171,7 @@ if ! $(FREETYPE_INCLUDES) || ! $(FREETYPE_LINKFLAGS)
 #############################################################################
 # GUI libraries and includes
 #############################################################################
+
 if $(GUI:L) = "gdi"
 {
     if $(TARGET_OS:L) = "nt"
