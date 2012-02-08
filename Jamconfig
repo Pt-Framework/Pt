@@ -37,6 +37,15 @@ if $(TARGET_OS:L) = "nt"
                   #$(MINGW)$(SLASH)lib$(SLASH)libws2_32.a ;
     }
 }
+if $(TARGET_OS:L) = "wince"
+{
+    ConfigurePlatformSDK ;
+
+    SYS     ?= win32 ;
+    GUI     ?= gdi ;
+    SYSLIBS = mmtimer.lib ;
+    NETLIBS = winsock.lib Ws2.lib ;
+}
 if $(TARGET_OS:L) = "linux"
 {
     SYS     ?= posix ;
@@ -78,15 +87,6 @@ if $(TARGET_OS:L) = "qnxnto"
     GUI     ?= photon ;
     SYSLIBS =  ;
     NETLIBS = -lsocket ;
-}
-if $(TARGET_OS:L) = "wince"
-{
-    ConfigurePlatformSDK ;
-
-    SYS     ?= win32 ;
-    GUI     ?= gdi ;
-    SYSLIBS = mmtimer.lib ;
-    NETLIBS = winsock.lib Ws2.lib ;
 }
 if $(TARGET_OS:L) = "symbian"
 {
@@ -154,7 +154,6 @@ if ! $(FREETYPE_INCLUDES) || ! $(FREETYPE_LINKFLAGS)
 {
     FREETYPE_INCLUDES = src/Pt-Gfx/freetype/include ;
     FREETYPE_LINKFLAGS = "" ;
-    Echo "    INFO: freetype not found, using builtin version." ;
 
     Configure FREETYPE_INCLUDES ;
     Echo "Checking for freetype includes..." $(FREETYPE_INCLUDES) ;

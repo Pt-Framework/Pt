@@ -1,0 +1,76 @@
+##########################################################################
+# Jam Environment
+##########################################################################
+
+JAMDIR ?= jam2 ;
+
+rule JamInclude
+{
+    # local _s = "" ; # = $(DOT) ;
+    # _s = $(JAMDIR:R=$(_s)) ;
+    # _s = $(<:R=$(_s)) ;
+    # include $(_s) ;
+
+    local _s = $(<:R=$(JAMDIR)) ;
+    include $(_s) ;
+}
+
+##########################################################################
+# Configure Step
+##########################################################################
+
+for _arg in $(ARGV)
+{
+    if $(_arg) = configure
+    {
+        CONFIGURE = 1 ;
+    }
+}
+
+if $(CONFIGURE)
+{
+    JamInclude configure.jam ;
+
+    TryCommand "rm -f config.jam" ;
+    TryCommand "del /f/q config.jam" ;
+
+    Echo "Checking for host platform..." $(OS:L) ;
+
+    ConfigureRm ;
+    ConfigureMv ;
+    ConfigureCp ;
+    ConfigureMkDir ;
+    ConfigureChMod ;
+    ConfigureLn ;
+    ConfigureDotSlash ;
+    ConfigureTarget ;
+    ConfigureToolset ;
+
+    # Project specific configuration
+    include Jamconfig ;
+
+    ConfigureExit ;
+}
+
+if ! [ CHECK_IF_FILE config.jam ]
+{
+    Exit "Build not configured." ;
+}
+
+include config.jam ;
+
+##########################################################################
+# Build Step
+##########################################################################
+
+# Basic variables and rules
+JamInclude base.jam ;
+
+# Toolset specific variables and rules
+CONFIG ?= debug ;
+CONFIG = $(CONFIG:L) ;
+JamInclude $(TOOLSET:L).jam ;
+
+# Project root Jamfile
+include Jamfile ;
+

@@ -40,4 +40,3 @@ PtUnitTest               Pt-Db-test : Pt-Db-test.cpp $(PT_DB_TESTS) ;
 Main_LinkSharedLibraries Pt-Db-test : Pt-Db Pt-Unit Pt-System Pt ;
 PtUnitTest_MakeLocate    Pt-Db-test : $(OUTPUT_TARGET) ;
 
-DeploySharedLibrary $(DEPLOY_LIBDIR) : Pt-Db ;

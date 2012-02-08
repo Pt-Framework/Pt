@@ -27,6 +27,24 @@ rule Configure
     }
 }
 
+rule ConfigureExit
+{
+    for local _var in $(CONFIGURED_VARIABLES)
+    {
+        local _value ;
+        for _v in $($(_var))
+        {
+            local _valtmp = [ Escape $(_v) ] ;
+            _value += "\"$(_valtmp)\"" ;
+        }
+    
+        WriteFile config.jam : $(_var)" ?= "$(_value:J=" ")" ;" ;
+    }
+
+    Exit "Configuration successful." ;
+}
+
+
 
 rule TryCommand
 {
@@ -286,6 +304,43 @@ rule ConfigureDotSlash
 }
 
 
+rule ConfigureTarget
+{
+    TARGET_OS ?= $(OS:L) ;
+    Echo "Building for target OS..." $(TARGET_OS:L) ;
+    Configure TARGET_OS ;
+
+    TARGET_OSPLAT ?= $(OSPLAT:L) ;
+    Echo "Building for target platform..." $(TARGET_OSPLAT:L) ;
+    Configure TARGET_OSPLAT ;
+
+    JamInclude $(TARGET_OS:L).jam ;
+    Echo "Using object file suffix... " $(SUFOBJ) ;
+    Configure SUFOBJ ;
+
+    Echo "Using library prefix..." $(PRELIB) ;
+    Configure PRELIB ;
+
+    Echo "Using library suffix..." $(SUFLIB) ;
+    Configure SUFLIB ;
+
+    Echo "Using executable suffix..." $(SUFEXE) ;
+    Configure SUFEXE ;
+
+    Echo "Using shared library suffix..." $(SUFDLL) ;
+    Configure SUFDLL ;
+}
 
 
+rule ConfigureToolset
+{
+    if ! $(TOOLSET)
+    {
+        Exit "Checking for toolset... FAILED! (Please set the TOOLSET variable)" ;
+    }
+
+    Echo "Checking for toolset..."$(TOOLSET:L) ;
+    Configure TOOLSET : $(TOOLSET) ;
+    JamInclude $(TOOLSET:L).jam ;
+}
 
