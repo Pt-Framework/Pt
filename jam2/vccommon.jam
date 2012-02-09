@@ -21,9 +21,49 @@ if ! $(CONFIGURE)
     UNDEFFLAG = "/u _" ;
 }
 
+
 ##########################################################################
 # Rules
 ##########################################################################
+
+rule TryCompile
+{
+    local _cc = "set PATH=$(VISUALC_PATH);%PATH% & " \""$(1)\"" ;
+    local _src = $(2) ;
+    local _cflags = $(3) ;
+    local _l = $(4) ;
+    local _L = $(5) ;
+
+    TryCommand $(RM) "check.cpp" ;
+    TryCommand $(RM) "check.obj" ;
+
+    local _line ;
+    for _line in $(_src)
+    {
+        WriteFile check.cpp : $(_line) ;
+    }
+
+    local _cmd = $(_cc) /c /Fo check.obj $(_cflags) /I$(STDHDRS) /Tp check.cpp ;
+    local _r = [ TryCommand $(_cmd) ] ;
+
+    TryCommand $(RM) "check.cpp" ;
+    TryCommand $(RM) "check.obj" ;
+
+    return $(_r) ;
+}
+
+
+rule TryCompileCc
+{
+    return [ TryCompile $(CC) : $(2) : $(3) : $(4) : $(5) ] ;
+}
+
+
+rule TryCompileC++
+{
+    return [ TryCompile $(C++) : $(2) : $(3) : $(4) : $(5) ] ;
+}
+
 
 if $(MT)
 {

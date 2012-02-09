@@ -48,15 +48,15 @@ rule ConfigureExit
 
 rule TryCommand
 {
-    local _cmd  = $(1) $(TONULL) ;
+    local _cmd  = $(1) ; #$(TONULL) ;
     
-    # Echo "command: " $(_cmd:J=" ") ;
+    #Echo "command: " $(_cmd:J=" ") ;
     # local _result = [ COMMAND $(_cmd:J=" ") : "exit-status" ] ;
     local _result = [ EXEC $(_cmd:J=" ") ] ;
 
-    # Echo result $(_result) ;
+    #Echo P: $(_result[2-]) ;
 
-    if $(_result) = 0
+    if $(_result[1]) = 0
     {
         return $(1) ;
     }
