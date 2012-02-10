@@ -2,20 +2,15 @@
 # Compiler and linker settings
 #############################################################################
 
+# configure basic C compiler
 ConfigureCc ;
+
+# configure basic C++ compiler
 ConfigureC++ ;
 
-local rc = [ TryCompileC++ WITH_LONG_LONG : "#include <iostream>"
-                                            "int main() { long long ll = 42; std::cout << ll; }" ] ;
-
-if ! $(rc)
-{
-    Echo "  INFO: no long long available" ;
-}
-else
-{
-    Echo "  INFO: long long available" ;
-}
+CheckCompileC++ "#include <iostream>"
+                "int main() { long long ll = 42; std::cout << ll; }" 
+                : WITH_LONG_LONG : "long long" ;
 
 ALL_LOCATE_OBJECTS = tmp$(SLASH)$(CONFIG) ;
 Configure ALL_LOCATE_OBJECTS ;

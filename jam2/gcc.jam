@@ -189,21 +189,14 @@ rule TryCompile
     local _cflags = $(3) ;
     local _l = $(4) ;
     local _L = $(5) ;
+    local _obj = $(_src:S=$(SUFOBJ)) ;
 
-    TryCommand $(RM) "check.cpp" ;
-    TryCommand $(RM) "check.o" ;
+    TryCommand $(RM) $(_obj) ;
 
-    local _line ;
-    for _line in $(_src)
-    {
-        WriteFile check.cpp : $(_line) ;
-    }
-
-    local _cmd = $(_cc) -c -o check.o $(_cflags) -I$(STDHDRS) check.cpp ;
+    local _cmd = $(_cc) -c -o $(_obj) $(_cflags) -I$(STDHDRS) $(_src) ;
     local _r = [ TryCommand $(_cmd) ] ;
 
-    TryCommand $(RM) "check.cpp" ;
-    TryCommand $(RM) "check.o" ;
+    TryCommand $(RM) $(_obj) ;
 
     return $(_r) ;
 }
@@ -211,13 +204,13 @@ rule TryCompile
 
 rule TryCompileCc
 {
-    return [ TryCompile $(CC) : $(2) : $(3) : $(4) : $(5) ] ;
+    return [ TryCompile $(CC) : $(1) : $(2) : $(3) : $(4) ] ;
 }
 
 
 rule TryCompileC++
 {
-    return [ TryCompile $(C++) : $(2) : $(3) : $(4) : $(5) ] ;
+    return [ TryCompile $(C++) : $(1) : $(2) : $(3) : $(4) ] ;
 }
 
 ##############################################################################

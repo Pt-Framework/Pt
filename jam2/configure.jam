@@ -344,3 +344,43 @@ rule ConfigureToolset
     JamInclude $(TOOLSET:L).jam ;
 }
 
+
+rule CheckCompileC++
+{
+    local _src = $(1) ;
+    local _var = $(2) ;
+    local _msg = $(3) ;
+    if ! $(3)
+    {
+        _msg = $(2) ;
+    }
+
+    TryCommand $(RM) check.cpp ;
+
+    local _line ;
+    for _line in $(_src)
+    {
+        WriteFile check.cpp : $(_line) ;
+    }
+
+    local _r = [ TryCompileC++ check.cpp ] ;
+
+    TryCommand $(RM) check.cpp ;
+
+    if $(_r)
+    {
+        Echo "Checking for" $(_msg) "... yes" ;
+        if $(_var)
+        {
+            $(_var) = 1 ;
+            Configure $(_var) ;
+        }
+    }
+    else
+    {
+        Echo "Checking for" $(_msg)  "... no" ;
+    }
+
+    return _r ;
+}
+

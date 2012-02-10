@@ -123,7 +123,12 @@ rule CheckC++
     local _r = [ TryC++ $(1) : check.cpp : $(3) : $(4) : $(5) ] ;
     if $(_r)
     {
+        Echo "Checking for" $(1) "... yes"
         $(1) = 1 ;
+    }
+    else
+    {
+        Echo "Checking for" $(1) "... no"
     }
 
     TryCommand $(RM) "check.cpp" ;
