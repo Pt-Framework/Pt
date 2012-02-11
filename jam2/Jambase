@@ -1,10 +1,20 @@
 ##########################################################################
 # Jam Environment
+#
+# TODO:
+# http://www.boost.org/boost-build2/doc/html/jam/language.html
+#
 ##########################################################################
 
 JAMDIR ?= jam2 ;
 
 rule Load
+{
+    local _s = $(<:R=$(JAMDIR)) ;
+    include $(_s) ;
+}
+
+rule JamInclude
 {
     local _s = $(<:R=$(JAMDIR)) ;
     include $(_s) ;
@@ -42,7 +52,7 @@ if $(CONFIGURE)
     ConfigureToolset ;
 
     # Project specific configuration
-    include Jamconfig ;
+    include Jamconfigure ;
 
     ConfigureExit ;
 }
