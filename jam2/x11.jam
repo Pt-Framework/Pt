@@ -23,7 +23,7 @@ X11_LIBRARY_PATHS = /usr/lib
 rule X11Includes
 {
     local incl = [ GLOB $(X11_INCLUDE_PATHS) : X11  ] ;
-    Echo "Checking for X11 includes... " $(incl[0]) ;
+    #Echo "Checking for X11 includes... " $(incl[0]) ;
 
     # return empty string if no libs were found
     return -I$(incl[0]) ;
@@ -33,7 +33,7 @@ rule X11Includes
 rule X11Libs
 {
     local libs = [ GLOB $(X11_LIBRARY_PATHS) : *X11.* ] ;
-    Echo "Checking for X11 libraries... " $(libs[0]:P) ;
+    #Echo "Checking for X11 libraries... " $(libs[0]:P) ;
 
     # return empty string if no libs were found
     return -L$(libs[0]:P)" -lX11" ;
@@ -43,7 +43,7 @@ rule X11Libs
 rule XextLibs
 {
     local libs = [ GLOB $(X11_LIBRARY_PATHS) : *Xext.* ] ;
-    Echo "Checking for Xext libraries... " $(libs[0]:P) ;
+    #Echo "Checking for Xext libraries... " $(libs[0]:P) ;
 
     # return empty string if no libs were found
     return -L$(libs[0]:P)" -lXext" ;
@@ -53,7 +53,7 @@ rule XextLibs
 rule XftIncludes
 {
     local incl = [ GLOB $(X11_INCLUDE_PATHS)/X11 : Xft ] ;
-    Echo "Checking for Xft includes... " $(incl[0]) ;
+    #Echo "Checking for Xft includes... " $(incl[0]) ;
 
     # return empty string if no libs were found
     return -I$(incl[0]) ;
@@ -63,7 +63,7 @@ rule XftIncludes
 rule XftLibs
 {
     local libs = [ GLOB $(X11_LIBRARY_PATHS) : *Xft.* ] ;
-    Echo "Checking for Xft libraries... " $(libs[0]:P) ;
+    #Echo "Checking for Xft libraries... " $(libs[0]:P) ;
 
     # return empty string if no libs were found
     return -L$(libs[0]:P)" -lXft" ;
@@ -93,7 +93,7 @@ rule ConfigureXExt
         Configure XEXT_LIBS ;
     }
 
-    Echo "Checking for xext libs..." $(X11_LIBS) ;
+    Echo "Checking for xext libs..." $(XEXT_LIBS) ;
 }
 
 rule ConfigureXft
