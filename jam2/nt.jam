@@ -23,7 +23,7 @@ if $(VS90COMNTOOLS)
     TOOLSET ?= vc9 ;
 }
 
-if $(VS90COMNTOOLS)
+if $(VS80COMNTOOLS)
 {
     TOOLSET ?= vc8 ;
 }
