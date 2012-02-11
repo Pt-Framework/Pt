@@ -141,5 +141,5 @@ if $(CONFIGURE)
     Configure LINKLIBS : $(LINKLIBS) ;
 }
 
-JamInclude vccommon.jam ;
+Load vccommon.jam ;
 

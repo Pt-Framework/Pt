@@ -69,6 +69,48 @@ rule XftLibs
     return -L$(libs[0]:P)" -lXft" ;
 }
 
+rule ConfigureX11
+{
+    X11_INCLUDES  ?= [ X11Includes ] ;
+    X11_LIBS = [ X11Libs ] ;
+    
+    if $(X11_INCLUDES) && $(X11_LIBS)
+    {
+        Configure X11_INCLUDES ;
+        Configure X11_LIBS ;
+    }
+
+    Echo "Checking for x11 includes..." $(X11_INCLUDES) ;
+    Echo "Checking for x11 libs..." $(X11_LIBS) ;
+}
+
+rule ConfigureXExt
+{
+    XEXT_LIBS += [ XextLibs ] ;
+
+    if $(XEXT_LIBS)
+    {
+        Configure XEXT_LIBS ;
+    }
+
+    Echo "Checking for xext libs..." $(X11_LIBS) ;
+}
+
+rule ConfigureXft
+{
+    XFT_INCLUDES  ?= [ XftIncludes ] ;
+    XFT_LIBS = [ XftLibs ] ;
+
+    if $(XFT_INCLUDES) && $(XFT_LIBS)
+    {
+        Configure XFT_INCLUDES ;
+        Configure XFT_LIBS ;
+    }
+
+    Echo "Checking for xft includes..." $(XFT_INCLUDES) ;
+    Echo "Checking for xft libs..." $(XFT_LIBS) ;
+}
+
 } # X11_JAM
 
 

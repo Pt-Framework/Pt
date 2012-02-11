@@ -44,11 +44,9 @@ rule ConfigureExit
     Exit "Configuration successful." ;
 }
 
-
-
 rule TryCommand
 {
-    local _cmd  = $(1) ; #$(TONULL) ;
+    local _cmd  = $(1) $(TONULL) ;
     
     #Echo "command: " $(_cmd:J=" ") ;
     # local _result = [ COMMAND $(_cmd:J=" ") : "exit-status" ] ;
@@ -309,7 +307,7 @@ rule ConfigureTarget
     TARGET_OS ?= $(OS:L) ;
     Echo "Building for target OS..." $(TARGET_OS:L) ;
     Configure TARGET_OS ;
-    JamInclude $(TARGET_OS:L).jam ;
+    Load $(TARGET_OS:L).jam ;
 
     TARGET_OSPLAT ?= $(OSPLAT:L) ;
     Echo "Building for target platform..." $(TARGET_OSPLAT:L) ;
@@ -341,7 +339,7 @@ rule ConfigureToolset
 
     Echo "Checking for toolset..."$(TOOLSET:L) ;
     Configure TOOLSET : $(TOOLSET) ;
-    JamInclude $(TOOLSET:L).jam ;
+    Load $(TOOLSET:L).jam ;
 }
 
 

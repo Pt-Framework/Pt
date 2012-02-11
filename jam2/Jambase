@@ -4,13 +4,8 @@
 
 JAMDIR ?= jam2 ;
 
-rule JamInclude
+rule Load
 {
-    # local _s = "" ; # = $(DOT) ;
-    # _s = $(JAMDIR:R=$(_s)) ;
-    # _s = $(<:R=$(_s)) ;
-    # include $(_s) ;
-
     local _s = $(<:R=$(JAMDIR)) ;
     include $(_s) ;
 }
@@ -29,7 +24,7 @@ for _arg in $(ARGV)
 
 if $(CONFIGURE)
 {
-    JamInclude configure.jam ;
+    Load configure.jam ;
 
     TryCommand "rm -f config.jam" ;
     TryCommand "del /f/q config.jam" ;
@@ -54,7 +49,7 @@ if $(CONFIGURE)
 
 if ! [ CHECK_IF_FILE config.jam ]
 {
-    Exit "Build not configured." ;
+    Exit "Build not configured. Run jam configure first." ;
 }
 
 include config.jam ;
@@ -64,12 +59,12 @@ include config.jam ;
 ##########################################################################
 
 # Basic variables and rules
-JamInclude base.jam ;
+Load base.jam ;
 
 # Toolset specific variables and rules
 CONFIG ?= debug ;
 CONFIG = $(CONFIG:L) ;
-JamInclude $(TOOLSET:L).jam ;
+Load $(TOOLSET:L).jam ;
 
 # Project root Jamfile
 include Jamfile ;

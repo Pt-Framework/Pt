@@ -36,6 +36,9 @@ rule ConfigureFreetype
         Configure FREETYPE_INCLUDES : $(FREETYPE_INCLUDES) ;
         Configure FREETYPE_LINKFLAGS : $(FREETYPE_LINKFLAGS) ;
     }
+
+    Echo "Checking for freetype includes..." $(FREETYPE_INCLUDES) ;
+    Echo "Checking for freetype linkflags..." $(FREETYPE_LINKFLAGS) ;
 }
 
 } # FREETYPE_JAM

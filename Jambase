@@ -8,12 +8,19 @@ JAMDIR ?= jam ;
 #
 rule JamInclude
 {
-	local _s = $(DOT) ;
-	_s = $(JAMDIR:R=$(_s)) ;
-	_s = $(<:R=$(_s)) ;
-	include $(_s) ;
+    local _s = $(DOT) ;
+    _s = $(JAMDIR:R=$(_s)) ;
+    _s = $(<:R=$(_s)) ;
+    include $(_s) ;
 }
 
+rule Load
+{
+    local _s = $(DOT) ;
+    _s = $(JAMDIR:R=$(_s)) ;
+    _s = $(<:R=$(_s)) ;
+    include $(_s) ;
+}
 
 # Set Target OS to host OS if unset
 #

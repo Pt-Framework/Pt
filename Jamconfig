@@ -158,7 +158,7 @@ Echo "Checking for HTTP2 (--with-http2)..." $(WITH_HTTP2) ;
 # Gfx libraries and includes
 #############################################################################
 
-JamInclude freetype.jam ;
+Load freetype.jam ;
 
 ConfigureFreetype ;
     
@@ -168,10 +168,7 @@ if ! $(FREETYPE_INCLUDES) || ! $(FREETYPE_LINKFLAGS)
     FREETYPE_LINKFLAGS = "" ;
 
     Configure FREETYPE_INCLUDES ;
-    Echo "Checking for freetype includes..." $(FREETYPE_INCLUDES) ;
-
-    Configure FREETYPE_LINKFLAGS ;
-    Echo "Checking for freetype linkflags..." $(FREETYPE_LINKFLAGS) ;
+    Echo "Using builtin freetype library..." $(FREETYPE_INCLUDES) ;
 }
 
 
@@ -192,52 +189,30 @@ if $(GUI:L) = "gdi"
                   #$(MINGW)$(SLASH)lib$(SLASH)libuser32.a  ;
     }
 }
-
 if $(GUI:L) = "x11"
 {
     if ! $(GUILIBS) 
     {
-        JamInclude x11.jam ;
+        Load x11.jam ;
 
-        local x11incl = [ X11Includes ] ;
-        if $(x11incl) = ""
+        ConfigureX11 ;
+        ConfigureXExt ;
+        ConfigureXft ;
+
+        if $(X11_INCLUDES) && $(X11_LIBS) && $(XEXT_LIBS) && $(XFT_INCLUDES) && $(XFT_LIBS)
         {
-            Echo "    ERROR: X11 includes are required!" ;
+            GUILIBS += $(X11_LIBS) $(XEXT_LIBS) $(XFT_LIBS) ;
         }
-
-        local x11libs = [ X11Libs ] ;
-        if $(x11libs) = ""
-        {
-            Echo "    ERROR: X11 libraries are required!" ;
+        else
+        {   
+            GUI = none ;
         }
-
-       local xextlibs = [ XextLibs ] ;
-        if $(xextlibs) = ""
-       {
-            Echo "    ERROR: Xext libraries are required!" ;
-        }
-
-        local xftincl = [ XftIncludes ] ;
-        if $(xftincl) = ""
-        {
-            Echo "    INFO: Xft includes not available!" ;
-        }
-
-        local xftlibs = [ XftLibs ] ;
-        if $(xftlibs) = ""
-        {
-            Echo "    INFO: Xft libraries not available!" ;
-        }
-
-        GUILIBS += $(x11libs) $(xextlibs) $(xftlibs) ;
     }
 }
-
 if $(GUI:L) = "photon"
 {
     GUILIBS = -lphrender -lph ;
 }
-
 if $(GUI:L) = "symbian-eikon"
 {
     GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\apparc.dso ;
@@ -254,17 +229,19 @@ if $(GUI:L) = "symbian-eikon"
     GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\bitgdi.dso ;
     GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\gdi.dso ;
 }
-
 if $(GUI:L) = "cocoa"
 {
     GUILIBS = -framework AppKit -framework Foundation ;
 }
-
 if $(GUI:L) = "uikit"
 {
     GUILIBS = -framework UIKit -framework Foundation -framework CoreGraphics ;
 }
 
-Configure GUILIBS ;
-Echo "Checking for gui libss..." $(GUILIBS) ;
+Echo "Checking whether GUI library should be built..." $(GUI) ;
+if $(GUI)
+{
+    Configure GUILIBS ;
+    Echo "Checking for gui libs..." $(GUILIBS) ;
+}
 

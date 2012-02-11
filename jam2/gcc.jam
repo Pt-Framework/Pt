@@ -25,128 +25,140 @@
 # @executable_path/../Libraries/libfoo.dylib (compatibility version 0.0.0, current version 0.0.0)
 # /usr/lib/libgcc_s.1.dylib (compatibility version 1.0.0, current version 1.0.0)
 # /usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 111.0.0)
+#
+#
+# NOTE: future platform checks
+#
+# ConfigureCc WITH_GCC_FLAG_PSEUDO_RELOC : "int main() { return 0; }"
+#                                        : "-Wl,--enable-runtime-pseudo-reloc" ;
+#
+# ConfigureCc WITH_GCC_FLAG_VISIBILITY  : "int main() { return 0; }"
+#                                       : "-fvisibility-inlines-hidden -fvisibility=hidden" ;
+#
+# ConfigureCc WITH_GCC_FLAG_EXPORT : "int main() { return 0; }"
+#                                  : "-Wl,-E" ;
+#
+# ConfigureCc WITH_GCC_FLAG_RPATH : "int main() { return 0; }"
+#                                 : "-Wl,-rpath-link jam" ;
+#
+# ConfigureCc WITH_GCC_FLAG_GROUPLIBS : "int main() { return 0; }"
+#                                     : "-Wl,--start-group -Wl,--end-group" ;
+#
+# ConfigureCc WITH_GCC_FLAG_DYNAMICLIB : "int main() { return 0; }"
+#                                      : "-dynamiclib -install_name test" ;
+#
+# ConfigureCc WITH_GCC_FLAG_SHARED : "int main() { return 0; }"
+#                                  : "-shared" ;
 
 ##############################################################################
 # Configuration
 ##############################################################################
 
+rule TryCompile
+{
+    local _cc = $(1) ;
+    local _src = $(2) ;
+    local _cflags = $(3) ;
+    local _l = $(4) ;
+    local _L = $(5) ;
+    local _obj = $(_src:S=$(SUFOBJ)) ;
+
+    TryCommand $(RM) $(_obj) ;
+
+    local _cmd = $(_cc) -c -o $(_obj) $(_cflags) -I$(STDHDRS) $(_src) ;
+    local _r = [ TryCommand $(_cmd) ] ;
+
+    TryCommand $(RM) $(_obj) ;
+
+    return $(_r) ;
+}
+
+
+rule TryCompileCc
+{
+    return [ TryCompile $(CC) : $(1) : $(2) : $(3) : $(4) ] ;
+}
+
+
+rule TryCompileC++
+{
+    return [ TryCompile $(C++) : $(1) : $(2) : $(3) : $(4) ] ;
+}
+
+
 rule ConfigureCc
 {
-    if $(TOOLSET_ROOT)
+    if ! $(CC_CONFIGURED)
     {
-        TOOLSET_PATH = $(TOOLSET_ROOT:J=" ")$(SLASH)bin$(SLASH) ;
-    }
-    else if $(TOOLSET_PATH)
-    {
-        TOOLSET_PATH  =  $(TOOLSET_PATH:J=" ")$(SLASH) ;
-    }
+        CC_CONFIGURED = 1 ;
 
-    TOOLSET_PREFIX ?= "" ;
-
-    AS     ?= $(TOOLSET_PATH:E="")$(TOOLSET_PREFIX)as ;
-    CC     ?= $(TOOLSET_PATH:E="")$(TOOLSET_PREFIX)gcc ;
-    RANLIB ?= $(TOOLSET_PATH:E="")$(TOOLSET_PREFIX)ranlib ;
-    AR     ?= $(TOOLSET_PATH:E="")$(TOOLSET_PREFIX)ar ru ;
-    LINK   ?= $(CC) ;
-
-    Configure AS ;
-    Echo "Checking for assember..." $(AS:BS) ;
-
-    Configure AR ;
-    Echo "Checking for archiver..." $(AR:BS) ;
-
-    Configure CC ;
-    Echo "Checking for C compiler..." $(CC:BS) ;
-
-    Configure LINK ;
-    Echo "Checking for linker..." $(LINK:BS) ;
-
-    Configure RANLIB ;
-    Echo "Checking for ranlib..." $(RANLIB:BS) ;
-
-    if $(TARGET_OS:L) = macosx
-    {
-        WITH_GCC_FLAG_DYNAMICLIB = 1 ;
-    }
-    else if $(TARGET_OS:L) = nt
-    {
-        WITH_GCC_FLAG_SHARED = 1 ;
-        WITH_GCC_FLAG_PSEUDO_RELOC = 1 ;
-        WITH_GCC_FLAG_GROUPLIBS = 1 ;
-        WITH_GCC_FLAG_RPATH = 1 ;
-    }
-    else
-    {
-        WITH_GCC_FLAG_SHARED = 1 ;
-        WITH_GCC_FLAG_EXPORT = 1 ;
-        WITH_GCC_FLAG_GROUPLIBS = 1 ;
-        WITH_GCC_FLAG_RPATH = 1 ;
-    }
-
-    # ConfigureCc WITH_GCC_FLAG_PSEUDO_RELOC : "int main() { return 0; }"
-    #                                        : "-Wl,--enable-runtime-pseudo-reloc" ;
-    #
-    # ConfigureCc WITH_GCC_FLAG_VISIBILITY  : "int main() { return 0; }"
-    #                                       : "-fvisibility-inlines-hidden -fvisibility=hidden" ;
-    #
-    # ConfigureCc WITH_GCC_FLAG_EXPORT : "int main() { return 0; }"
-    #                                  : "-Wl,-E" ;
-    #
-    # ConfigureCc WITH_GCC_FLAG_RPATH : "int main() { return 0; }"
-    #                                 : "-Wl,-rpath-link jam" ;
-    #
-    # ConfigureCc WITH_GCC_FLAG_GROUPLIBS : "int main() { return 0; }"
-    #                                     : "-Wl,--start-group -Wl,--end-group" ;
-    #
-    # ConfigureCc WITH_GCC_FLAG_DYNAMICLIB : "int main() { return 0; }"
-    #                                      : "-dynamiclib -install_name test" ;
-    #
-    # ConfigureCc WITH_GCC_FLAG_SHARED : "int main() { return 0; }"
-    #                                  : "-shared" ;
-
-    if $(WITH_GCC_FLAG_PSEUDO_RELOC)
-    {
-        LINKFLAGS  += "-Wl,--enable-runtime-pseudo-reloc"  ;
-    }
+        if $(TOOLSET_ROOT)
+        {
+            TOOLSET_PATH = $(TOOLSET_ROOT:J=" ")$(SLASH)bin$(SLASH) ;
+        }
+        else if $(TOOLSET_PATH)
+        {
+            TOOLSET_PATH  =  $(TOOLSET_PATH:J=" ")$(SLASH) ;
+        }
     
-    if $(WITH_GCC_FLAG_VISIBILITY)
-    {
-        CCFLAGS    += -fvisibility=hidden ;
-        LINKFLAGS  += -fvisibility-inlines-hidden -fvisibility=hidden ;
-    }
+        TOOLSET_PREFIX ?= "" ;
     
-    if $(WITH_GCC_FLAG_GROUPLIBS)
-    {
-        GCC_START_GROUP = "-Wl,--start-group" ;
-        GCC_END_GROUP = "-Wl,--end-group" ;
-    }
+        AS     ?= $(TOOLSET_PATH:E="")$(TOOLSET_PREFIX)as ;
+        CC     ?= $(TOOLSET_PATH:E="")$(TOOLSET_PREFIX)gcc ;
+        RANLIB ?= $(TOOLSET_PATH:E="")$(TOOLSET_PREFIX)ranlib ;
+        AR     ?= $(TOOLSET_PATH:E="")$(TOOLSET_PREFIX)ar ru ;
+        LINK   ?= $(CC) ;
     
-    if $(WITH_GCC_FLAG_RPATH)
-    {
-        RPATH_LINKFLAGS = "-Wl,-rpath-link" ;
-    }
+        Configure AS ;
+        Echo "Checking for assember..." $(AS:BS) ;
+    
+        Configure AR ;
+        Echo "Checking for archiver..." $(AR:BS) ;
+    
+        Configure CC ;
+        Echo "Checking for C compiler..." $(CC:BS) ;
+    
+        Configure LINK ;
+        Echo "Checking for linker..." $(LINK:BS) ;
+    
+        Configure RANLIB ;
+        Echo "Checking for ranlib..." $(RANLIB:BS) ;
+    
+        if $(TARGET_OS:L) = macosx
+        {
+            SHLIB_LINKFLAGS = -dynamiclib ;
+        }
+        else if $(TARGET_OS:L) = nt
+        {
+            SHLIB_LINKFLAGS = -shared ;
+            LINKFLAGS  += "-Wl,--enable-runtime-pseudo-reloc"  ;
+            GCC_START_GROUP = "-Wl,--start-group" ;
+            GCC_END_GROUP = "-Wl,--end-group" ;
+            RPATH_LINKFLAGS = "-Wl,-rpath-link" ;
+        }
+        else
+        {
+            SHLIB_LINKFLAGS = -shared ;
+            MAIN_LINKFLAGS = "-Wl,-E" ;
+            GCC_START_GROUP = "-Wl,--start-group" ;
+            GCC_END_GROUP = "-Wl,--end-group" ;
+            RPATH_LINKFLAGS = "-Wl,-rpath-link" ;
+        }
 
-    if $(WITH_GCC_FLAG_EXPORT)
-    {
-        MAIN_LINKFLAGS = "-Wl,-E" ;
+        if $(WITH_GCC_FLAG_VISIBILITY)
+        {
+            CCFLAGS    += -fvisibility=hidden ;
+            LINKFLAGS  += -fvisibility-inlines-hidden -fvisibility=hidden ;
+        }
+        
+        Configure CCFLAGS : $(CCFLAGS) ;
+        Configure LINKFLAGS : $(LINKFLAGS) ;
+        Configure SHLIB_LINKFLAGS : $(SHLIB_LINKFLAGS) ;
+        Configure MAIN_LINKFLAGS : $(MAIN_LINKFLAGS) ;
+        Configure RPATH_LINKFLAGS : $(RPATH_LINKFLAGS) ;
+        Configure GCC_START_GROUP : $(GCC_START_GROUP) ;
+        Configure GCC_END_GROUP : $(GCC_END_GROUP) ;
     }
-
-    if $(WITH_GCC_FLAG_DYNAMICLIB)
-    {
-        SHLIB_LINKFLAGS = -dynamiclib ;
-    }
-    else if $(WITH_GCC_FLAG_SHARED)
-    {
-        SHLIB_LINKFLAGS = -shared ;
-    }
-    
-    Configure CCFLAGS : $(CCFLAGS) ;
-    Configure LINKFLAGS : $(LINKFLAGS) ;
-    Configure SHLIB_LINKFLAGS : $(SHLIB_LINKFLAGS) ;
-    Configure MAIN_LINKFLAGS : $(MAIN_LINKFLAGS) ;
-    Configure RPATH_LINKFLAGS : $(RPATH_LINKFLAGS) ;
-    Configure GCC_START_GROUP : $(GCC_START_GROUP) ;
-    Configure GCC_END_GROUP : $(GCC_END_GROUP) ;
 }
 
 
@@ -182,36 +194,6 @@ rule ConfigureC++
     }
 }
 
-rule TryCompile
-{
-    local _cc = $(1) ;
-    local _src = $(2) ;
-    local _cflags = $(3) ;
-    local _l = $(4) ;
-    local _L = $(5) ;
-    local _obj = $(_src:S=$(SUFOBJ)) ;
-
-    TryCommand $(RM) $(_obj) ;
-
-    local _cmd = $(_cc) -c -o $(_obj) $(_cflags) -I$(STDHDRS) $(_src) ;
-    local _r = [ TryCommand $(_cmd) ] ;
-
-    TryCommand $(RM) $(_obj) ;
-
-    return $(_r) ;
-}
-
-
-rule TryCompileCc
-{
-    return [ TryCompile $(CC) : $(1) : $(2) : $(3) : $(4) ] ;
-}
-
-
-rule TryCompileC++
-{
-    return [ TryCompile $(C++) : $(1) : $(2) : $(3) : $(4) ] ;
-}
 
 ##############################################################################
 # Compiler and linker flags

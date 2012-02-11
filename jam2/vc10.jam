@@ -146,6 +146,5 @@ rule ConfigurePlatformSDK
     }
 }
 
-
-JamInclude vccommon.jam ;
+Load vccommon.jam ;
 
