@@ -39,24 +39,6 @@ WITH_UNIX_NETC = [ CheckBuildC++ "#include <netdb.h>"
 
 Echo "Checking for sockets part of C library..." $(WITH_UNIX_NETC) ;
 
-# check for winmm (win32) library
-WITH_WINMM = [ CheckBuildC++ "#include <windows.h>"
-                             "#include <mmsystem.h>"
-                             "int main() { return timeGetTime(); }"
-                           : ""
-                           : winmm ] ;
-
-Echo "Checking for winmm library..." $(WITH_WINMM) ;
-
-# check for mmtimer (wince) library
-WITH_MMTIMER = [ CheckBuildC++ "#include <windows.h>"
-                               "#include <mmsystem.h>"
-                               "int main() { return timeGetTime(); }"
-                             : ""
-                             : mmtimer ] ;
-
-Echo "Checking for mmtimer library..." $(WITH_MMTIMER) ;
-
 #ConfigureDefine test.h : PT_VERSION_MAJOR : 1 ;
 #ConfigureDefine test.h : PT_VERSION_MINOR : 0 ;
 #ConfigureDefine test.h : PT_VERSION_REV : 0 ;
@@ -86,6 +68,24 @@ if $(TARGET_OS:L) = "nt"
                   #$(MINGW)$(SLASH)lib$(SLASH)libwsock32.a
                   #$(MINGW)$(SLASH)lib$(SLASH)libws2_32.a ;
     }
+
+    # check for winmm (win32) library
+    WITH_WINMM = [ CheckBuildC++ "#include <windows.h>"
+                                 "#include <mmsystem.h>"
+                                 "int main() { return timeGetTime(); }"
+                               : ""
+                               : winmm ] ;
+    
+    Echo "Checking for winmm library..." $(WITH_WINMM) ;
+    
+    # check for mmtimer (wince) library
+    WITH_MMTIMER = [ CheckBuildC++ "#include <windows.h>"
+                                   "#include <mmsystem.h>"
+                                   "int main() { return timeGetTime(); }"
+                                 : ""
+                                 : mmtimer ] ;
+    
+    Echo "Checking for mmtimer library..." $(WITH_MMTIMER) ;
 }
 if $(TARGET_OS:L) = "wince"
 {

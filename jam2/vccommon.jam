@@ -5,26 +5,27 @@
 rule TryBuild
 {
     local _cc = "set PATH=$(VISUALC_PATH);%PATH% & " \""$(1)\"" ;
+    local _link = "set PATH=$(VISUALC_PATH);%PATH% & " \""$(LINK)\"" ;
     local _src = $(2) ;
     local _cflags = $(3) ;
     local _l = $(4) ;
     local _L = $(5) ;
-    local _out = a.out ;
-    local _cmd ;
+    local _obj = $(_src:S=$(SUFOBJ))  ;
+    local _exe = $(_src:S=$(SUFEXE))  ;
 
-    TryCommand $(RM) TryCommand $(RM) $(_obj) ;
-
-    if $(4)
-    {
-        _cmd = $(_cc) /Fe $(_out) $(_cflags) /I$(STDHDRS) /LIBPATH:$(5) $(4:s=.lib) /Tp $(_src) ;
-    }
-    else
-    {
-        _cmd = $(_cc) /c /Fo $(_out) $(_cflags) /I$(STDHDRS) /Tp $(_src) ;
-    }
-
+    local _cmd = $(_cc) /c /Fo$(_obj) $(_cflags) /I$(STDHDRS) /Tp $(_src) ;
     local _r = [ TryCommand $(_cmd) ] ;
-    TryCommand $(RM) TryCommand $(RM) $(_obj) ;
+
+    if $(_r) && $(4)
+    {
+        _cmd = $(_link) $(LINKFLAGS) /out:$(_exe) $(_obj) /LIBPATH:$(5) $(4:S=.lib) ;
+        _r = [ TryCommand $(_cmd) ] ;
+        TryCommand $(RM) $(_exe) ;
+        TryCommand $(RM) $(_exe).manifest ;
+    }
+
+    TryCommand $(RM) $(_obj) ;
+    
     return $(_r) ;
 }
 
