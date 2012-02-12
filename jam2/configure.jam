@@ -2,6 +2,9 @@
 # Basic Configuration Rules
 ##########################################################################
 
+YES ?= "yes" ;
+NO ?= "no" ;
+
 TONULL = " 2>/dev/null 1>/dev/null" ;
 if $(OS:L) = "nt"
 {
@@ -56,7 +59,7 @@ rule TryCommand
 
     if $(_result[1]) = 0
     {
-        return $(1) ;
+        return $(YES) ;
     }
 }
 
@@ -343,15 +346,9 @@ rule ConfigureToolset
 }
 
 
-rule CheckCompileC++
+rule CheckBuildCc
 {
     local _src = $(1) ;
-    local _var = $(2) ;
-    local _msg = $(3) ;
-    if ! $(3)
-    {
-        _msg = $(2) ;
-    }
 
     TryCommand $(RM) check.cpp ;
 
@@ -361,24 +358,28 @@ rule CheckCompileC++
         WriteFile check.cpp : $(_line) ;
     }
 
-    local _r = [ TryCompileC++ check.cpp ] ;
+    local _r = [ TryBuildCc check.cpp : $(2) : $(3) : $(4) : $(5) ] ;
+
+    TryCommand $(RM) check.cpp ;
+    return $(_r) ;
+}
+
+
+rule CheckBuildC++
+{
+    local _src = $(1) ;
 
     TryCommand $(RM) check.cpp ;
 
-    if $(_r)
+    local _line ;
+    for _line in $(_src)
     {
-        Echo "Checking for" $(_msg) "... yes" ;
-        if $(_var)
-        {
-            $(_var) = 1 ;
-            Configure $(_var) ;
-        }
-    }
-    else
-    {
-        Echo "Checking for" $(_msg)  "... no" ;
+        WriteFile check.cpp : $(_line) ;
     }
 
-    return _r ;
+    local _r = [ TryBuildC++ check.cpp : $(2) : $(3) : $(4) : $(5) ] ;
+
+    TryCommand $(RM) check.cpp ;
+    return $(_r) ;
 }
 

@@ -54,35 +54,43 @@
 # Configuration
 ##############################################################################
 
-rule TryCompile
+rule TryBuild
 {
     local _cc = $(1) ;
     local _src = $(2) ;
     local _cflags = $(3) ;
     local _l = $(4) ;
     local _L = $(5) ;
-    local _obj = $(_src:S=$(SUFOBJ)) ;
+    local _out = a.out ;
+    local _cmd ;
 
-    TryCommand $(RM) $(_obj) ;
+    TryCommand $(RM) $(_out) ;
 
-    local _cmd = $(_cc) -c -o $(_obj) $(_cflags) -I$(STDHDRS) $(_src) ;
+    if $(4)
+    {
+        _cmd = $(_cc) -o $(_out) $(_cflags) -I$(STDHDRS) -L$(5) -l$(4) $(_src) ;
+    }
+    else
+    {
+        _cmd = $(_cc) -c -o $(_out) $(_cflags) -I$(STDHDRS) $(_src) ;
+    }
+
     local _r = [ TryCommand $(_cmd) ] ;
 
-    TryCommand $(RM) $(_obj) ;
-
+    TryCommand $(RM) $(_out) ;
     return $(_r) ;
 }
 
 
-rule TryCompileCc
+rule TryBuildCc
 {
-    return [ TryCompile $(CC) : $(1) : $(2) : $(3) : $(4) ] ;
+    return [ TryBuild $(CC) : $(1) : $(2) : $(3) : $(4) ] ;
 }
 
 
-rule TryCompileC++
+rule TryBuildC++
 {
-    return [ TryCompile $(C++) : $(1) : $(2) : $(3) : $(4) ] ;
+    return [ TryBuild $(C++) : $(1) : $(2) : $(3) : $(4) ] ;
 }
 
 
@@ -148,9 +156,9 @@ rule ConfigureCc
         if $(WITH_GCC_FLAG_VISIBILITY)
         {
             CCFLAGS    += -fvisibility=hidden ;
-            LINKFLAGS  += -fvisibility-inlines-hidden -fvisibility=hidden ;
+            LINKFLAGS  += -fvisibility=hidden ;
         }
-        
+
         Configure CCFLAGS : $(CCFLAGS) ;
         Configure LINKFLAGS : $(LINKFLAGS) ;
         Configure SHLIB_LINKFLAGS : $(SHLIB_LINKFLAGS) ;
@@ -188,6 +196,14 @@ rule ConfigureC++
         if $(WITH_GCC_FLAG_VISIBILITY)
         {
             C++FLAGS += -fvisibility-inlines-hidden ;
+            LINKFLAGS += -fvisibility-inlines-hidden ;
+        }
+
+        local _r = [ CheckBuildC++ "#include <iostream>"
+                                   "int main() { std::cout << 42; return 0; }" ] ;
+        if ! $(_r)
+        {
+            Exit "ERROR: configured C++ compiler does not work" ;
         }
 
         Configure C++FLAGS ;

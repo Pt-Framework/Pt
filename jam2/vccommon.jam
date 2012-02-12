@@ -1,5 +1,47 @@
 ##########################################################################
-# Tools and Flags
+# Configuration rules
+##########################################################################
+
+rule TryBuild
+{
+    local _cc = "set PATH=$(VISUALC_PATH);%PATH% & " \""$(1)\"" ;
+    local _src = $(2) ;
+    local _cflags = $(3) ;
+    local _l = $(4) ;
+    local _L = $(5) ;
+    local _out = a.out ;
+    local _cmd ;
+
+    TryCommand $(RM) TryCommand $(RM) $(_obj) ;
+
+    if $(4)
+    {
+        _cmd = $(_cc) /Fe $(_out) $(_cflags) /I$(STDHDRS) /LIBPATH:$(5) $(4:s=.lib) /Tp $(_src) ;
+    }
+    else
+    {
+        _cmd = $(_cc) /c /Fo $(_out) $(_cflags) /I$(STDHDRS) /Tp $(_src) ;
+    }
+
+    local _r = [ TryCommand $(_cmd) ] ;
+    TryCommand $(RM) TryCommand $(RM) $(_obj) ;
+    return $(_r) ;
+}
+
+
+rule TryBuildCc
+{
+    return [ TryBuild $(CC) : $(1) : $(2) : $(3) : $(4) ] ;
+}
+
+
+rule TryBuildC++
+{
+    return [ TryBuild $(C++) : $(1) : $(2) : $(3) : $(4) ] ;
+}
+
+##########################################################################
+# Build variables
 ##########################################################################
 
 if ! $(CONFIGURE)
@@ -23,40 +65,8 @@ if ! $(CONFIGURE)
 
 
 ##########################################################################
-# Rules
+# Build rules
 ##########################################################################
-
-rule TryCompile
-{
-    local _cc = "set PATH=$(VISUALC_PATH);%PATH% & " \""$(1)\"" ;
-    local _src = $(2) ;
-    local _cflags = $(3) ;
-    local _l = $(4) ;
-    local _L = $(5) ;
-    local _obj = $(_src:S=$(SUFOBJ)) ;
-
-    TryCommand $(RM) TryCommand $(RM) $(_obj) ;
-
-    local _cmd = $(_cc) /c /Fo $(_obj) $(_cflags) /I$(STDHDRS) /Tp $(_src) ;
-    local _r = [ TryCommand $(_cmd) ] ;
-
-    TryCommand $(RM) TryCommand $(RM) $(_obj) ;
-
-    return $(_r) ;
-}
-
-
-rule TryCompileCc
-{
-    return [ TryCompile $(CC) : $(1) : $(2) : $(3) : $(4) ] ;
-}
-
-
-rule TryCompileC++
-{
-    return [ TryCompile $(C++) : $(1) : $(2) : $(3) : $(4) ] ;
-}
-
 
 if $(MT)
 {

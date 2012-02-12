@@ -8,9 +8,60 @@ ConfigureCc ;
 # configure basic C++ compiler
 ConfigureC++ ;
 
-CheckCompileC++ "#include <iostream>"
-                "int main() { long long ll = 42; std::cout << ll; }" 
-                : WITH_LONG_LONG : "long long" ;
+# check if long long type is available
+WITH_LONG_LONG = [ CheckBuildC++ "#include <iostream>"
+                                   "int main() { long long ll = 42; std::cout << ll; }" ] ;
+
+Echo "Checking for long long..." $(WITH_LONG_LONG) ;
+
+# check for socket library
+WITH_UNIX_SOCKETS = [ CheckBuildC++ "#include <sys/types.h>"
+                                      "#include <sys/socket.h>"
+                                      "int main() { return socket(0,0,0); }"
+                                    : ""
+                                    : socket ] ;
+
+Echo "Checking for unix sockets..." $(WITH_UNIX_SOCKETS) ;
+
+# check for nsl library
+WITH_UNIX_NSL = [ CheckBuildC++ "#include <netdb.h>"
+                                  "int main() { gethostbyname(\"1.2.3.4\"); return 0; }"
+                                 : ""
+                                 : nsl ] ;
+
+Echo "Checking for nsl sockets..." $(WITH_UNIX_NSL) ;
+
+# check for sockets in C library
+WITH_UNIX_NETC = [ CheckBuildC++ "#include <netdb.h>"
+                                   "int main() { gethostbyname(\"1.2.3.4\"); return 0; }"
+                                 : ""
+                                 : c ] ;
+
+Echo "Checking for sockets part of C library..." $(WITH_UNIX_NETC) ;
+
+# check for winmm (win32) library
+WITH_WINMM = [ CheckBuildC++ "#include <windows.h>"
+                             "#include <mmsystem.h>"
+                             "int main() { return timeGetTime(); }"
+                           : ""
+                           : winmm ] ;
+
+Echo "Checking for winmm library..." $(WITH_WINMM) ;
+
+# check for mmtimer (wince) library
+WITH_MMTIMER = [ CheckBuildC++ "#include <windows.h>"
+                               "#include <mmsystem.h>"
+                               "int main() { return timeGetTime(); }"
+                             : ""
+                             : mmtimer ] ;
+
+Echo "Checking for mmtimer library..." $(WITH_MMTIMER) ;
+
+#ConfigureDefine test.h : PT_VERSION_MAJOR : 1 ;
+#ConfigureDefine test.h : PT_VERSION_MINOR : 0 ;
+#ConfigureDefine test.h : PT_VERSION_REV : 0 ;
+#ConfigureDefine test.h : PT_WITH_STD_LOCALE : $(WITH_STD_LOCALE) ;
+#ConfigureDefine test.h : PT_WITH_WINMM : $(WITH_WINMM) ;
 
 #############################################################################
 # Platform settings
