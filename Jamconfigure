@@ -8,94 +8,148 @@ ConfigureCc ;
 # configure basic C++ compiler
 ConfigureC++ ;
 
-# check if long long type is available
-WITH_LONG_LONG = [ CheckBuildC++ "#include <iostream>"
-                                   "int main() { long long ll = 42; std::cout << ll; }" ] ;
-
-Echo "Checking for long long..." $(WITH_LONG_LONG) ;
-
-# check for socket library
-WITH_UNIX_SOCKETS = [ CheckBuildC++ "#include <sys/types.h>"
-                                      "#include <sys/socket.h>"
-                                      "int main() { return socket(0,0,0); }"
-                                    : ""
-                                    : socket ] ;
-
-Echo "Checking for unix sockets..." $(WITH_UNIX_SOCKETS) ;
-
-# check for nsl library
-WITH_UNIX_NSL = [ CheckBuildC++ "#include <netdb.h>"
-                                  "int main() { gethostbyname(\"1.2.3.4\"); return 0; }"
-                                 : ""
-                                 : nsl ] ;
-
-Echo "Checking for nsl sockets..." $(WITH_UNIX_NSL) ;
-
-# check for sockets in C library
-WITH_UNIX_NETC = [ CheckBuildC++ "#include <netdb.h>"
-                                   "int main() { gethostbyname(\"1.2.3.4\"); return 0; }"
-                                 : ""
-                                 : c ] ;
-
-Echo "Checking for sockets part of C library..." $(WITH_UNIX_NETC) ;
-
-#ConfigureDefine test.h : PT_VERSION_MAJOR : 1 ;
-#ConfigureDefine test.h : PT_VERSION_MINOR : 0 ;
-#ConfigureDefine test.h : PT_VERSION_REV : 0 ;
-#ConfigureDefine test.h : PT_WITH_STD_LOCALE : $(WITH_STD_LOCALE) ;
-#ConfigureDefine test.h : PT_WITH_WINMM : $(WITH_WINMM) ;
+# ConfigureDefine test.h : PT_WITH_STD_LOCALE : $(WITH_STD_LOCALE) ;
 
 #############################################################################
 # Platform settings
 #############################################################################
 
-if $(TARGET_OS:L) = "nt"
+if ! $(SYS)
 {
-    ConfigurePlatformSDK ;
-
-    SYS     ?= win32 ;
-    GUI     ?= gdi ;
-    SYSLIBS = version.lib Psapi.lib ;
-    NETLIBS = wsock32.lib ws2_32.lib ;
-
-    if $(MINGW) || $(TOOLSET) = "gcc"
+    WITH_WIN32 = [ CheckBuildC++ "#include <windows.h>"
+                                 "int main() { return 0; }" ] ;
+    if $(WITH_WIN32)
     {
-        SYSLIBS = -lversion -lwinmm -lpsapi ;
-                  #$(MINGW)$(SLASH)lib$(SLASH)libversion.a
-                  #$(MINGW)$(SLASH)lib$(SLASH)libwinmm.a
-                  #$(MINGW)$(SLASH)lib$(SLASH)libpsapi.a ;
-        NETLIBS = -lwsock32 -lws2_32 ;
-                  #$(MINGW)$(SLASH)lib$(SLASH)libwsock32.a
-                  #$(MINGW)$(SLASH)lib$(SLASH)libws2_32.a ;
+        SYS = win32 ;
+    }
+    else
+    {
+        SYS = posix ;
+    }
+}
+
+Echo "Checking for subsystem ..." $(SYS) ;
+
+if $(SYS) = "win32"
+{
+    SYS ?= win32 ;
+    GUI ?= gdi ;
+
+    WITH_PSAPI = [ CheckBuildC++ "#include <windows.h>"
+                                 "#include <Psapi.h>"
+                                 "int main() { PROCESS_MEMORY_COUNTERS pmc;"
+                                 "GetProcessMemoryInfo( NULL, &pmc, sizeof(pmc) );"
+                                 "return 0; }"
+                                 : ""
+                                 : Psapi ] ;
+
+    Echo "Checking for psapi library..." $(WITH_PSAPI) ;
+    if $(WITH_PSAPI)
+    {
+        SYSLIBS += Psapi.lib ;
     }
 
-    # check for winmm (win32) library
-    WITH_WINMM = [ CheckBuildC++ "#include <windows.h>"
-                                 "#include <mmsystem.h>"
-                                 "int main() { return timeGetTime(); }"
-                               : ""
-                               : winmm ] ;
-    
-    Echo "Checking for winmm library..." $(WITH_WINMM) ;
-    
-    # check for mmtimer (wince) library
-    WITH_MMTIMER = [ CheckBuildC++ "#include <windows.h>"
-                                   "#include <mmsystem.h>"
-                                   "int main() { return timeGetTime(); }"
-                                 : ""
-                                 : mmtimer ] ;
-    
-    Echo "Checking for mmtimer library..." $(WITH_MMTIMER) ;
-}
-if $(TARGET_OS:L) = "wince"
-{
-    ConfigurePlatformSDK ;
 
-    SYS     ?= win32 ;
-    GUI     ?= gdi ;
-    SYSLIBS = mmtimer.lib ;
-    NETLIBS = winsock.lib Ws2.lib ;
+    if ! $(NETLIBS)
+    {
+        WITH_WSA = [ CheckBuildC++ "#define WIN32_LEAN_AND_MEAN"
+                                   "#include <windows.h>"
+                                   "#include <winsock2.h>"
+                                   "int func() { WSADATA wd; WSAStartup(MAKEWORD(2,2), &wd);"
+                                   "return 0; }"
+                                   : ""
+                                   : wsock32 ws2_32 ] ;
+
+        if $(WITH_WSA)
+        {
+            NETLIBS = wsock32.lib ws2_32.lib ;
+        }
+    }
+
+    if ! $(NETLIBS)
+    {
+        WITH_WSA = [ CheckBuildC++ "#define WIN32_LEAN_AND_MEAN"
+                                   "#include <windows.h>"
+                                   "#include <winsock2.h>"
+                                   "int func() { WSADATA wd; WSAStartup(MAKEWORD(2,2), &wd);"
+                                   "return 0; }"
+                                   : ""
+                                   : winsock Ws2 ] ;
+        if $(WITH_WSA)
+        {
+            NETLIBS = winsock.lib Ws2.lib ;
+        }
+    }
+
+    if ! $(NETLIBS)
+    {
+        Exit "Checking for wsa library..." FAILED ;
+    }
 }
+else if $(SYS) = "posix"
+{
+    if ! $(NETLIBS)
+    {
+        WITH_UNIX_SOCKETS = [ CheckBuildC++ "#include <sys/types.h>"
+                                            "#include <sys/socket.h>"
+                                            "int main() { return socket(0,0,0); }"
+                                          : ""
+                                          : c ] ;
+        if $(WITH_UNIX_SOCKETS)
+        {
+            NETLIBS = "" ;
+        }
+    }
+
+    if ! $(NETLIBS)
+    {
+        WITH_UNIX_SOCKETS = [ CheckBuildC++ "#include <sys/types.h>"
+                                            "#include <sys/socket.h>"
+                                            "int main() { return socket(0,0,0); }"
+                                          : ""
+                                          : socket ] ;
+
+        if $(WITH_UNIX_SOCKETS)
+        {
+            NETLIBS = -lsocket ;
+        }
+    }
+
+    if ! $(NETLIBS)
+    {
+        Exit "Checking for socket library..." FAILED ;
+    }
+
+
+    WITH_NSL = [ CheckBuildC++ "#include <netdb.h>"
+                               "int main() { gethostbyname(\"1.2.3.4\"); return 0; }"
+                              : ""
+                              : c ] ;
+
+    if ! $(WITH_NSL)
+    {
+        # check for nsl library
+        WITH_UNIX_NSL = [ CheckBuildC++ "#include <netdb.h>"
+                                        "int main() { gethostbyname(\"1.2.3.4\"); return 0; }"
+                                      : ""
+                                      : nsl ] ;
+
+        if $(WITH_NSL)
+        {
+            NETLIBS = -lnsl ;
+        }
+    }
+    
+    if ! $(WITH_NSL)
+    {
+        Exit "Checking for nsl library..." FAILED ;
+    }  
+}
+else
+{
+    Exit "ERROR: Unknown subsystem" ;
+}
+
 if $(TARGET_OS:L) = "linux"
 {
     SYS     ?= posix ;
@@ -138,16 +192,6 @@ if $(TARGET_OS:L) = "qnxnto"
     SYSLIBS =  ;
     NETLIBS = -lsocket ;
 }
-if $(TARGET_OS:L) = "symbian"
-{
-    SYS     ?= symbian ;
-    GUI     ?= symbian-eikon ;
-    SYSLIBS =  ;
-    NETLIBS =  ;
-}
-
-Configure SYS ;
-Echo "Checking for subsystem..." $(SYS) ;
 
 Configure SYSLIBS ;
 Echo "Checking for system libraries..." $(SYSLIBS) ;

@@ -1,60 +1,22 @@
 ##############################################################################
-# Auto-configuration rules
-##############################################################################
-
-rule TryCompile
-{
-    local _cc = $(1) ;
-
-    local _prog = $(2) ;
-    local _flags = $(3) ;
-    local _l = $(4) ;
-    local _L = $(5) ;
-
-    local _cmd = $(_cc) $(_flags) -o $(_out:S=$(SUFEXE)) $(_prog) -L$(_L) -l$(_l) ;
-    return [ TryCommand $(_cmd) ] ;
-}
-
-
-rule TryCc
-{
-    return [ TryCompile xlc : $(2) : $(3) : $(4) : $(5) ] ;
-}
-
-
-rule TryC++
-{
-    return [ TryCompile xlC_r : $(2) : $(3) : $(4) : $(5) ] ;
-}
-
-##############################################################################
-# Tools and utilities
-##############################################################################
-
-CC      = xlC_r ;
-C++     = xlC_r ;
-RANLIB  = ranlib ;
-AR      = ar ru ;
-LINK    = $(C++) ;
-
-##############################################################################
 # Compiler and linker flags
 ##############################################################################
 
+local _flags = ;
 if $(CONFIG:L) = debug
 {
-    CCFLAGS += -DDEBUG -g ;
-    OPTIM   ?= -O0 ;
+    _flags += -DDEBUG ;
+    OPTIM   ?= -O0 -g ;
 }
 else
 {
-    CCFLAGS += -DNDEBUG ;
+    _flags += -DNDEBUG ;
     OPTIM	  ?= -O2 ;
 }
 
-LINKFLAGS += -bh:5 ;
-C++FLAGS  += $(CCFLAGS) -qrtti -qlanglvl=newexcp -qeh -qstaticinline ;
-WARN      ?= -qinfo=lan ;
+CCFLAGS  += $(_flags) ;
+C++FLAGS += $(_flags) ;
+WARN     ?= -qinfo=lan ;
 
 ##############################################################################
 # Build rules

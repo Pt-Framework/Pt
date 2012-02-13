@@ -52,10 +52,8 @@ rule TryCommand
     local _cmd  = $(1) $(TONULL) ;
     
     #Echo "command: " $(_cmd:J=" ") ;
-    # local _result = [ COMMAND $(_cmd:J=" ") : "exit-status" ] ;
     local _result = [ EXEC $(_cmd:J=" ") ] ;
-
-    #Echo P: $(_result[2-]) ;
+    #Echo result: $(_result[2-]) ;
 
     if $(_result[1]) = 0
     {
@@ -342,7 +340,7 @@ rule ConfigureToolset
 
     Echo "Checking for toolset..."$(TOOLSET:L) ;
     Configure TOOLSET : $(TOOLSET) ;
-    Load $(TOOLSET:L).jam ;
+    Load $(TOOLSET:L)-configure.jam ;
 }
 
 

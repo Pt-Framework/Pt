@@ -1,170 +1,49 @@
-# contains common rules for all vc-compilers
-#
+##########################################################################
+# Build variables
+##########################################################################
 
-# Set path to Visual Studio installation using environment variable VSINSTALLDIR 
-# if it was not passed to jam using -sVISUALC=<path> 
-
-if $(VISUALC) 
+local _flags = ;
+if $(CONFIG:L) = debug 
 {
-    VISUALC = $(VISUALC:J=" ") ;
-} 
-else
+    _flags   += /MDd /D "DEBUG" /D "_DEBUG" ;
+    OPTIM     ?= /Od /Zi ;
+    LINKFLAGS += /DEBUG ;
+}
+else if $(CONFIG:L) = release 
 {
-    if $(PROCESSOR_ARCHITECTURE) = "AMD64"
-    {
-        VISUALC = [ W32_GETREG "HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Microsoft\\VisualStudio\\10.0\\" : "InstallDir" ]  ;
-    }
-    else
-    {
-        VISUALC = [ W32_GETREG "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\10.0\\" : "InstallDir" ]  ;
-    }
-
-    VISUALC = $(VISUALC:P) ;
-    VISUALC = $(VISUALC:P) ;
-    VISUALC = $(VISUALC:P) ;
+    _flags += /MD /D "NDEBUG" ;
+    OPTIM   ?= /Ox /Ot /Oy ;
 }
 
-Exit V is $(VISUALC) ;
+CCFLAGS   += $(_flags) ;
+C++FLAGS  += $(_flags) ;
+WARN      ?= /W3 ;
+UNDEFFLAG = "/u _" ;
 
-if ! $(VISUALC)
+
+##########################################################################
+# Build rules
+##########################################################################
+
+if $(MT)
 {
-    Exit "No Visual Studio installation path defined. Use either -sVISUALC=<path_to_VS> or set the environment variable VSINSTALLDIR" ;
-}
-
-# Path to VC/C++ module of visual studio installation 
-#
-VCDIR ?= $(VISUALC)\\vc ;
-
-
-PLATFORMSDK ?= $(VISUALC)\\vc\\PlatformSDK ;
-
-if $(TARGET_OSPLAT:L) = "x64"
-{
-    #LIB=
-    #c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\LIB\amd64;
-    #c:\ProgramFiles (x86)\Microsoft Visual Studio 10.0\VC\ATLMFC\LIB\amd64;
-    #C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\lib\x64;
+    rule EmbedManifest
+    {
+      MFTYPE on $(<) = 1 ;
+      
+      if $(<:S) = $(SUFDLL:S)
+      {
+        MFTYPE on $(<) = 2 ;
+      }
     
-    #HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Microsoft SDKs\Windows\v6.0A
-
-    AR          = $(VISUALC)\\vc\\bin\\amd64\\lib ;
-    AS          = masm386 ;
-    CC          = $(VISUALC)\\vc\\bin\\amd64\\cl /nologo ;
-    RC          = $(VISUALC)\\vc\\bin\\amd64\\rc ;
-    MT          = $(VISUALC)\\vc\\bin\\amd64\\mt -nologo ;
-    CCFLAGS    ?= /D_CRT_SECURE_NO_DEPRECATE ;
-    C++         = $(CC) ;
-    #C++FLAGS  += $(CCFLAGS) /Zc:wchar_t- ;
-    C++FLAGS   += $(CCFLAGS) ;
-    LINK        = $(VISUALC)\\vc\\bin\\amd64\\link /nologo ;
-    LINKFLAGS += /MANIFEST ;
-    LINKLIBS   ?= "" ;
-    UNDEFFLAG   = "/u _" ;
-
-    LINKFLAGS += /LIBPATH:"\"$(PLATFORMSDK)\\lib"\" ;
-
-    CCFLAGS += /DWIN32 ;
-
-    if $(CONFIG:L) = debug 
-    {
-        CCFLAGS   += /MDd /Zi /RTC1 ;
-        OPTIM     ?= /Od ;
-        LINKFLAGS += /DEBUG ;
-    }
-    else if $(CONFIG:L) = release 
-    {
-        CCFLAGS += /MD /D "NDEBUG" ;
-        OPTIM   ?= /Ox /Ot /Oy ;
-    }
-    else if $(CONFIG:L) = aqtime
-    {
-        CCFLAGS += /MD /Zi /D "NDEBUG" ;
-        OPTIM   ?= /Ox /Ot /Oy ;
-        LINKFLAGS += /DEBUG ;
+      Mt $(<) : $(>) ;
     }
 
-    WARN     ?= /W3 ;
-    C++FLAGS += $(CCFLAGS) /EHsc /GR /FD ;
+    actions Mt
+    {
+      "$(MT)" -manifest $(>) -b$(3) -outputresource:$(<);$(MFTYPE)
+    }
 }
-else if $(TARGET_OSPLAT:L) = "x86"
-{
-    #HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Microsoft SDKs\Windows\v6.0A
-
-    AR          = $(VISUALC)\\vc\\bin\\lib ;
-    AS          = masm386 ;
-    CC          = $(VISUALC)\\vc\\bin\\cl /nologo ;
-    RC          = $(VISUALC)\\vc\\bin\\rc ;
-    MT          = $(VISUALC)\\vc\\bin\\mt -nologo ;
-    CCFLAGS    ?= /D_CRT_SECURE_NO_DEPRECATE ;
-    C++         = $(CC) ;
-    #C++FLAGS  += $(CCFLAGS) /Zc:wchar_t- ;
-    C++FLAGS   += $(CCFLAGS) ;
-    LINK        = $(VISUALC)\\vc\\bin\\link /nologo ;
-    #LINKFLAGS += /MANIFEST:NO ;
-    LINKFLAGS += /MANIFEST ;
-    LINKLIBS   ?= "" ;
-    UNDEFFLAG   = "/u _" ;
-
-    LINKFLAGS += /LIBPATH:"\"$(PLATFORMSDK)\\lib"\" ;
-
-    CCFLAGS += /DWIN32 ;
-
-    if $(CONFIG:L) = debug 
-    {
-        CCFLAGS   += /MDd /Zi /RTC1 ;
-        OPTIM     ?= /Od ;
-        LINKFLAGS += /DEBUG ;
-    }
-    else if $(CONFIG:L) = release 
-    {
-        CCFLAGS += /MD /D "NDEBUG" ;
-        OPTIM   ?= /Ox /Ot /Oy ;
-    }
-    else if $(CONFIG:L) = aqtime
-    {
-        CCFLAGS += /MD /Zi /D "NDEBUG" ;
-        OPTIM   ?= /Ox /Ot /Oy ;
-        LINKFLAGS += /DEBUG ;
-    }
-
-    WARN     ?= /W3 ;
-    C++FLAGS += $(CCFLAGS) /EHsc /GR /FD ;
-}
-
-
-rule EmbedManifest
-{
-  MFTYPE on $(<) = 1 ;
-  
-  if $(<:S) = $(SUFDLL:S)
-  {
-    MFTYPE on $(<) = 2 ;
-  }
-
-  Mt $(<) : $(>) ;
-}
-
-
-actions Mt
-{
-  set PATH=$(VISUALC)\vc\bin;%PATH%
-  "$(MT)" -manifest $(>) -b$(3) -outputresource:$(<);$(MFTYPE)
-}
-
-
-
-# Include rules for selected target OS
-# Do not allow OSPLAT other than x86 for NT
-#
-
-
-# set directories to standard header 
-#
-STDHDRS = \"$(VISUALC)\\vc\\include\" 
-          \"$(PLATFORMSDK)\\include\" ;
-
-
-
 
 rule FDefines 
 { 
@@ -219,8 +98,12 @@ rule MainImpl
   PDB on $(_objects) = $(_target:S=.pdb) ;
 
   # embed manifest into exe
-  EmbedManifest $(_target) : $(_target:S=.exe.manifest) ;
-  
+  if $(MT)
+  {
+    EmbedManifest $(_target) : $(_target:S=.exe.manifest) ;
+  }
+
+  # MAINLINKFLAGS are mainWCRTStartup for wince
   LINKFLAGS on $(_target) += $(LINKFLAGS) $(MAINLINKFLAGS) ;
 
   Depends $(_objects) : first ;
@@ -282,7 +165,10 @@ rule SharedLibraryImpl
   Depends $(PRELIB)$(<:S=$(SUFLIB)) : $(_target) ;
 
   # embed manifest into dll
-  EmbedManifest $(_target) : $(_target).manifest ;
+  if $(MT)
+  {
+    EmbedManifest $(_target) : $(_target).manifest ;
+  }
 
   # The *.lib is created before its *.dll and therefore has an older timestamp.
   # However, the lib depends on the dll and will be recreated everytime a 
@@ -327,12 +213,34 @@ rule SharedLibrary_MakeLocateImpl
   Depends first : $(>) ;
 }
 
-#
+##########################################################################
 # Actions
+##########################################################################
+
+actions As
+{
+  set PATH=$(VISUALC_PATH);%PATH%
+  "$(AS)" /Ml /p /v /w2 $(>) $(<) ,nul,nul;
+}
+
+
+actions Cc bind PDB
+{
+  set PATH=$(VISUALC_PATH);%PATH%
+  "$(CC)" /c $(CCFLAGS) $(OPTIM) $(WARN) /Fo$(<) /Fd$(PDB) /I$(HDRS) /I$(STDHDRS) $(>)
+}
+
+
+actions C++ bind PDB
+{ 
+  set PATH=$(VISUALC_PATH);%PATH%
+  "$(C++)" /c $(C++FLAGS) $(OPTIM) $(WARN) /Fo$(<) /Fd$(PDB) /I$(HDRS) /I$(STDHDRS) /Tp $(>)
+}
+
 
 actions updated together piecemeal Archive
 {
-  set PATH=$(VISUALC)\Common7/IDE;%PATH%
+  set PATH=$(VISUALC_PATH);%PATH%
 
   set _inputfile_=archive.cmd
   echo "$(>)" > %_inputfile_%
@@ -348,98 +256,9 @@ actions updated together piecemeal Archive
 # "$(AR)" /out:$(<) %_$(<:B)_% $(>)
 
 
-actions As
-{
-  set PATH=$(VISUALC)\Common7/IDE;%PATH%
-  "$(AS)" /Ml /p /v /w2 $(>) $(<) ,nul,nul;
-}
-
-
-actions Cc bind PDB
-{
-  set PATH=$(VISUALC)\Common7/IDE;%PATH%
-  "$(CC)" /c $(CCFLAGS) $(OPTIM) $(WARN) /Fo$(<) /Fd$(PDB) /I$(HDRS) /I$(STDHDRS) $(>)
-}
-
-
-actions C++ bind PDB
-{ 
-  set PATH=$(VISUALC)\Common7\IDE;%PATH%
-  "$(C++)" /c $(C++FLAGS) $(OPTIM) $(WARN) /Fo$(<) /Fd$(PDB) /I$(HDRS) /I$(STDHDRS) /Tp $(>)
-}
-
-
 actions together Link bind NEEDLIBS
 {
-  set PATH=$(VISUALC)\vc\bin;%PATH%
-  set PATH=$(VISUALC)\Common7\IDE;%PATH%
-  set LIB=$(VCDIR)\lib\;$(PLATFORMSDK)\lib\;%LIB% 
+  set PATH=$(VISUALC_PATH);%PATH%
   "$(LINK)" $(LINKFLAGS) /PDB:$(<:S=.pdb) /out:$(<) $(UNDEFS) $(>) $(NEEDLIBS) $(LINKLIBS)
 }
 
-
-###################################################################################################
-# Die hier folgende Implementierung der Rule Link ist ein Workaround, um die Zeilenlängen-
-# beschränkung der Shell unter Windows für den VC Linker zu umgehen. Dazu wird ein Response-File
-# mit den zu linkenden Object-Files angelegt, der dann dem Linker übergeben wird.
-# Problematisch ist diese Rule, wenn JAM mit dem Parameter -r aufgerufen wird (z.B. im Autobuild)
-# Dann verursacht das von JAM genutzte Pipen der Logausgabe mittels >> in Kombination mit dem Pipen
-# in den Responsefile einen Konflikt
-###################################################################################################
-#actions win32-Link bind RESPONSEFILE NEEDLIBS
-#{
-# set PATH=$(VISUALC)\Common7\IDE;%PATH%
-# set LIB=$(VCDIR)\lib\;$(PLATFORMSDK)\lib\;%LIB% 
-# "$(LINK)" $(LINKFLAGS) /out:$(<) $(UNDEFS) @$(RESPONSEFILE) $(NEEDLIBS) $(LINKLIBS)
-#}
-#
-#
-#
-#rule ResponseFile # target-requiring-response-file : files-to-write ;
-#{
-#    local responsefile = $(1).rsp ;
-#   
-#    if ! [ on $(1) FReturn $(RESPONSEFILE) ]
-#    {
-#        on $(1) MakeLocate $(responsefile) : $(LOCATE) ;
-#
-#        Depends $(1) : $(responsefile) ;
-#        Temporary $(responsefile) ;
-#       
-#        EmptyResponseFile $(1) ;
-#
-#        RESPONSEFILE on $(1) = $(responsefile) ;
-#    }
-#
-#    AppendResponseFile $(1) : $(2) ;
-#}
-#
-#rule FReturn
-#{
-#    return $(1) ;
-#}
-#
-#actions quietly ignore EmptyResponseFile bind RESPONSEFILE
-#{
-#    $(RM) $(RESPONSEFILE) 2> NUL
-#}
-#
-#actions quietly together piecemeal AppendResponseFile bind RESPONSEFILE
-#{
-#    echo "$(>)" >> $(RESPONSEFILE)
-#}
-#
-#actions together quietly ignore RemoveResponseFile bind RESPONSEFILE
-#{
-#    $(RM) $(RESPONSEFILE) 2> NUL
-#}
-#
-#rule Link
-#{
-#    ResponseFile $(<) : $(>) ;
-#    win32-Link $(<) : $(>) ;
-#    RemoveResponseFile $(<) ;
-#
-#    MODE on $(<) = $(EXEMODE) ;
-#    Chmod $(<) ;
-#}
