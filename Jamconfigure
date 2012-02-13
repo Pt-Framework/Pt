@@ -88,20 +88,13 @@ if $(SYS) = "win32"
 }
 else if $(SYS) = "posix"
 {
-    if ! $(NETLIBS)
-    {
-        WITH_UNIX_SOCKETS = [ CheckBuildC++ "#include <sys/types.h>"
-                                            "#include <sys/socket.h>"
-                                            "int main() { return socket(0,0,0); }"
-                                          : ""
-                                          : c ] ;
-        if $(WITH_UNIX_SOCKETS)
-        {
-            NETLIBS = "" ;
-        }
-    }
+    WITH_UNIX_SOCKETS = [ CheckBuildC++ "#include <sys/types.h>"
+                                        "#include <sys/socket.h>"
+                                        "int main() { return socket(0,0,0); }"
+                                      : ""
+                                      : "c" ] ;
 
-    if ! $(NETLIBS)
+    if ! $(WITH_UNIX_SOCKETS)
     {
         WITH_UNIX_SOCKETS = [ CheckBuildC++ "#include <sys/types.h>"
                                             "#include <sys/socket.h>"
@@ -115,7 +108,7 @@ else if $(SYS) = "posix"
         }
     }
 
-    if ! $(NETLIBS)
+    if ! $(WITH_UNIX_SOCKETS)
     {
         Exit "Checking for socket library..." FAILED ;
     }
@@ -124,7 +117,7 @@ else if $(SYS) = "posix"
     WITH_NSL = [ CheckBuildC++ "#include <netdb.h>"
                                "int main() { gethostbyname(\"1.2.3.4\"); return 0; }"
                               : ""
-                              : c ] ;
+                              : "c" ] ;
 
     if ! $(WITH_NSL)
     {
