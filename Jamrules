@@ -13,6 +13,9 @@ ALL_LOCATE_TARGET = build$(SLASH)$(CONFIG) ;
 # set directory to build library/binary files into
 OUTPUT_TARGET = build$(SLASH)$(CONFIG) ;
 
+if $(OLD_JAM)
+{
+
 #############################################################################
 # Platform settings
 #############################################################################
@@ -236,6 +239,7 @@ if $(GUI:L) = "uikit"
     GUILIBS = -framework UIKit -framework Foundation -framework CoreGraphics ;
 }
 
+}
 
 Echo ;
 Echo "Project: Platinum C++ Framework" ;
