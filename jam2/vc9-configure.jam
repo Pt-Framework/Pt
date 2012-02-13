@@ -79,6 +79,7 @@ rule ConfigurePlatformSDK
             if $(TARGET_OSPLAT:L) = "arm"
             {
                 CCFLAGS += "/D ARM /D _ARM_ /QRarch4" ;
+                C++FLAGS += "/D ARM /D _ARM_ /QRarch4" ;
                 LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)\\Lib\\armv4\"" ;
                 LINKFLAGS += "/NODEFAULTLIB:oldnames.lib /subsystem:windowsce,4.20 /ERRORREPORT:PROMPT /ARMPADCODE /machine:ARM" ;
             }
@@ -87,6 +88,7 @@ rule ConfigurePlatformSDK
         Configure STDHDRS ;
         Configure LINKFLAGS ;
         Configure CCFLAGS ;
+        Configure C++FLAGS ;
     }
 }
 
