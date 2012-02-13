@@ -33,9 +33,6 @@ Configure SYS ;
 
 if $(SYS) = "win32"
 {
-    SYS ?= win32 ;
-    GUI ?= gdi ;
-
     WITH_PSAPI = [ CheckBuildC++ "#include <windows.h>"
                                  "#include <Psapi.h>"
                                  "int main() { PROCESS_MEMORY_COUNTERS pmc;"
@@ -145,10 +142,6 @@ else if $(SYS) = "posix"
         Exit "Checking for pthreads library..." FAILED ;
     }
 
-
-
-
-
     if ! $(WITH_UNIX_SOCKETS)
     {
         WITH_UNIX_SOCKETS = [ CheckBuildC++ "#include <sys/types.h>"
@@ -194,50 +187,11 @@ else if $(SYS) = "posix"
     }  
 }
 
-if $(TARGET_OS:L) = "linux"
-{
-    SYS     ?= posix ;
-    GUI     ?= x11 ;
-    SYSLIBS += -lrt ;
-    #NETLIBS = -lnsl ;
-}
-if $(TARGET_OS:L) = "macosx"
-{
-    SYS     ?= posix ;
-    GUI     ?= cocoa ;
-}
-if $(TARGET_OS:L) = "aspen"
-{
-    SYS     ?= posix ;
-    GUI     ?= uikit ;
-}
-if $(TARGET_OS) = "aix"
-{
-    SYS      ?= posix ;
-    GUI      ?= x11 ;
-    SYSLIBS  += -lrt ;
-    LINKLIBS += $(SYSLIBS) ;
-}
-if $(TARGET_OS) = "solaris"
-{
-    SYS     ?= posix ;
-    GUI     ?= x11 ;
-    SYSLIBS += -lrt ;
-}
-if $(TARGET_OS:L) = "qnxnto"
-{
-    SYS     ?= posix ;
-    GUI     ?= photon ;
-}
-
 Configure SYSLIBS ;
 Echo "Checking for system libraries..." $(SYSLIBS) ;
 
 Configure NETLIBS ;
 Echo "Checking for network libraries..." $(NETLIBS) ;
-
-Configure GUI ;
-Echo "Checking for graphics UI..." $(GUI) ;
 
 
 #############################################################################
@@ -297,6 +251,35 @@ if ! $(FREETYPE_INCLUDES) || ! $(FREETYPE_LINKFLAGS)
 #############################################################################
 # GUI libraries and includes
 #############################################################################
+
+if $(TARGET_OS:L) = "linux"
+{
+    GUI     ?= x11 ;
+}
+if $(TARGET_OS:L) = "macosx"
+{
+    GUI     ?= cocoa ;
+}
+if $(TARGET_OS:L) = "aspen"
+{
+    GUI     ?= uikit ;
+}
+if $(TARGET_OS) = "aix"
+{
+    GUI      ?= x11 ;
+    LINKLIBS += $(SYSLIBS) ;
+}
+if $(TARGET_OS) = "solaris"
+{
+    GUI     ?= x11 ;
+}
+if $(TARGET_OS:L) = "qnxnto"
+{
+    GUI     ?= photon ;
+}
+
+Configure GUI ;
+Echo "Checking for graphics UI..." $(GUI) ;
 
 if $(GUI:L) = "gdi"
 {
