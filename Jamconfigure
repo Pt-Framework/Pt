@@ -251,7 +251,14 @@ if ! $(FREETYPE_INCLUDES) || ! $(FREETYPE_LINKFLAGS)
 #############################################################################
 # GUI libraries and includes
 #############################################################################
-
+if $(TARGET_OS:L) = "nt"
+{
+    GUI     ?= gdi ;
+}
+if $(TARGET_OS:L) = "wince"
+{
+    GUI     ?= gdi ;
+}
 if $(TARGET_OS:L) = "linux"
 {
     GUI     ?= x11 ;
