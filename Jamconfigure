@@ -29,6 +29,7 @@ if ! $(SYS)
 }
 
 Echo "Checking for subsystem ..." $(SYS) ;
+Configure SYS ;
 
 if $(SYS) = "win32"
 {
@@ -137,10 +138,6 @@ else if $(SYS) = "posix"
     {
         Exit "Checking for nsl library..." FAILED ;
     }  
-}
-else
-{
-    Exit "ERROR: Unknown subsystem" ;
 }
 
 if $(TARGET_OS:L) = "linux"
