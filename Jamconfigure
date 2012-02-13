@@ -89,6 +89,34 @@ if $(SYS) = "win32"
 }
 else if $(SYS) = "posix"
 {
+    WITH_DL = [ CheckBuildC++ "#include <dlfcn.h>"
+                              "int main() { dlopen(0,0); return 0; }"
+                            : ""
+                            : c ] ;
+
+    if ! $(WITH_DL)
+    {
+        WITH_DL = [ CheckBuildC++ "#include <dlfcn.h>"
+                                  "int main() { dlopen(0,0); return 0; }"
+                                : ""
+                                : dl ] ;
+
+        if $(WITH_DL)
+        {
+            SYSLIBS += -ldl ;
+        }
+    }
+
+    if ! $(WITH_DL)
+    {
+        Exit "Checking for dl library..." FAILED ;
+    }
+    else
+    {
+        Echo "Checking for dl library..." $(SYSLIBS) ;
+    }
+
+
     WITH_UNIX_SOCKETS = [ CheckBuildC++ "#include <sys/types.h>"
                                         "#include <sys/socket.h>"
                                         "int main() { return socket(0,0,0); }"
@@ -105,7 +133,7 @@ else if $(SYS) = "posix"
 
         if $(WITH_UNIX_SOCKETS)
         {
-            NETLIBS = -lsocket ;
+            NETLIBS += -lsocket ;
         }
     }
 
@@ -130,7 +158,7 @@ else if $(SYS) = "posix"
 
         if $(WITH_NSL)
         {
-            NETLIBS = -lnsl ;
+            NETLIBS += -lnsl ;
         }
     }
     
@@ -144,43 +172,38 @@ if $(TARGET_OS:L) = "linux"
 {
     SYS     ?= posix ;
     GUI     ?= x11 ;
-    SYSLIBS = -ldl -lpthread -lrt ;
-    NETLIBS = -lnsl ;
+    SYSLIBS += -lpthread -lrt ;
+    #NETLIBS = -lnsl ;
 }
 if $(TARGET_OS:L) = "macosx"
 {
     SYS     ?= posix ;
     GUI     ?= cocoa ;
-    SYSLIBS = -ldl -lpthread ;
-    #NETLIBS =  ;
+    SYSLIBS += -lpthread ;
 }
 if $(TARGET_OS:L) = "aspen"
 {
     SYS     ?= posix ;
     GUI     ?= uikit ;
-    SYSLIBS = -ldl -lpthread ;
+    SYSLIBS += -lpthread ;
 }
 if $(TARGET_OS) = "aix"
 {
     SYS      ?= posix ;
     GUI      ?= x11 ;
-    SYSLIBS  = -bdynamic -ldl -lpthread -lrt ;
+    SYSLIBS  += -lpthread -lrt ;
     LINKLIBS += $(SYSLIBS) ;
-    # NETLIBS =
 }
 if $(TARGET_OS) = "solaris"
 {
     SYS     ?= posix ;
     GUI     ?= x11 ;
-    SYSLIBS = -ldl -lpthread -lrt ;
-    NETLIBS = -lsocket -lnsl ;
+    SYSLIBS += -lpthread -lrt ;
 }
 if $(TARGET_OS:L) = "qnxnto"
 {
     SYS     ?= posix ;
     GUI     ?= photon ;
-    SYSLIBS =  ;
-    NETLIBS = -lsocket ;
 }
 
 Configure SYSLIBS ;
