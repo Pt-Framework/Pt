@@ -13,12 +13,12 @@ rule TryBuild
     local _obj = $(_src:S=$(SUFOBJ))  ;
     local _exe = $(_src:S=$(SUFEXE))  ;
 
-    local _cmd = $(_cc) /c /Fo$(_obj) $(_cflags) /I$(STDHDRS) /Tp $(_src) ;
+    local _cmd = $(_cc) $(_cflags) /c /Fo$(_obj) /I$(STDHDRS) /Tp $(_src) ;
     local _r = [ TryCommand $(_cmd) ] ;
 
     if $(_r) && $(4)
     {
-        _cmd = $(_link) $(LINKFLAGS) /out:$(_exe) $(_obj) /LIBPATH:$(5) $(4:S=.lib) ;
+        _cmd = $(_link) $(LINKFLAGS) /ENTRY:main /out:$(_exe) $(_obj) /LIBPATH:$(5) $(4:S=.lib) ;
         _r = [ TryCommand $(_cmd) ] ;
         TryCommand $(RM) $(_exe) ;
         TryCommand $(RM) $(_exe).manifest ;
@@ -32,14 +32,138 @@ rule TryBuild
 
 rule TryBuildCc
 {
-    return [ TryBuild $(CC) : $(1) : $(2) : $(3) : $(4) ] ;
+    local _cflags = $(CCFLAGS) $(2) ;
+    return [ TryBuild $(CC) : $(1) : $(_cflags) : $(3) : $(4) ] ;
 }
 
 
 rule TryBuildC++
 {
-    return [ TryBuild $(C++) : $(1) : $(2) : $(3) : $(4) ] ;
+    local _cflags = $(C++FLAGS) $(2) ;
+    return [ TryBuild $(C++) : $(1) : $(_cflags) : $(3) : $(4) ] ;
 }
+
+
+rule ConfigureCc
+{
+    ConfigureVisualC ;
+
+    if ! $(CC_CONFIGURED)
+    {
+        CC_CONFIGURED = 1 ;
+
+        if $(TARGET_OS:L) = "nt"
+        {
+            ConfigureMt ;
+
+            LINKFLAGS += /MANIFEST ;
+
+            if $(TARGET_OSPLAT:L) = "x64"
+            {
+                if $(PROCESSOR_ARCHITECTURE:L) = "amd64"
+                {
+                    # TODO: we could use the 32-bit compiler programs too...
+                    AS   = $(VISUALC)\\vc\\bin\\amd64\\ml64 ;
+                    AR   = $(VISUALC)\\vc\\bin\\amd64\\lib ;
+                    CC   = $(VISUALC)\\vc\\bin\\amd64\\cl /nologo ;
+                    LINK = $(VISUALC)\\vc\\bin\\amd64\\link /nologo ;
+                }
+                else # PROCESSOR_ARCHITECTURE = "x86"
+                {
+                    AS   = $(VISUALC)\\vc\\bin\\x86_amd64\\ml64 ;
+                    AR   = $(VISUALC)\\vc\\bin\\x86_amd64\\lib ;
+                    CC   = $(VISUALC)\\vc\\bin\\x86_amd64\\cl /nologo ;
+                    LINK = $(VISUALC)\\vc\\bin\\x86_amd64\\link /nologo ;
+                }
+            }
+            else if $(TARGET_OSPLAT:L) = "x86"
+            {
+                AS        = $(VISUALC)\\vc\\bin\\ml ;
+                AR        = $(VISUALC)\\vc\\bin\\lib ;
+                CC        = $(VISUALC)\\vc\\bin\\cl /nologo ;
+                LINK      = $(VISUALC)\\vc\\bin\\link /nologo ;
+            }
+        }
+        else if $(TARGET_OS:L) = "wince"
+        {
+            MAINLINKFLAGS += /ENTRY:mainWCRTStartup ;
+            LINKFLAGS += /MANIFEST:NO ;
+            LINKLIBS += "corelibc.lib ccrtrtti.lib secchk.lib" ;
+
+            if $(TARGET_OSPLAT:L) = "arm"
+            {
+                AS   = $(VISUALC)\\VC\\ce\\bin\\x86_arm\\armasm ;
+                AR   = $(VISUALC)\\VC\\bin\\lib ;
+                CC   = $(VISUALC)\\VC\\ce\\bin\\x86_arm\\cl /nologo ;
+                LINK = $(VISUALC)\\VC\\ce\\bin\\x86_arm\\link /nologo ;
+            }
+        }
+
+        Configure AS : $(AS) ;
+        Echo "Checking for assember..." $(AS:BS) ;
+    
+        Configure AR : $(AR) ;
+        Echo "Checking for archiver..." $(AR:BS) ;
+    
+        Configure CC : $(CC) ;
+        Echo "Checking for C compiler..." $(CC:BS) ;
+    
+        Configure LINK : $(LINK) ;
+        Echo "Checking for linker..." $(LINK:BS) ;
+
+        Configure MAINLINKFLAGS ;
+        Configure LINKFLAGS ;
+        Configure LINKLIBS ;
+        
+        if $(TARGET_OS:L) = "nt"
+        {
+            STDHDRS += \""$(VISUALC)\\vc\\include\"" ;
+
+            if $(TARGET_OSPLAT:L) = "x64"
+            {   
+                LINKFLAGS += /LIBPATH:\""$(VISUALC)\\vc\\lib\\amd64\"" ;
+            }
+            else if $(TARGET_OSPLAT:L) = "x86"
+            {
+                LINKFLAGS += /LIBPATH:\""$(VISUALC)\\vc\\lib\"" ;
+            }
+        }
+        else if $(TARGET_OS:L) = "wince"
+        {
+            STDHDRS += \"$(VISUALC)\\vc\\ce\\include\" ;
+
+            if $(TARGET_OSPLAT:L) = "arm"
+            {
+                LINKFLAGS += /LIBPATH:\""$(VISUALC)\\VC\\ce\\lib\\armv4\"" ;
+            }
+        }
+
+        Configure STDHDRS ;
+        Configure LINKFLAGS ;
+
+        ConfigurePlatformSDK ;
+    }
+}
+
+
+rule ConfigureC++
+{
+    ConfigureVisualC ;
+
+    ConfigureCc ;
+
+    if ! $(C++_CONFIGURED)
+    {
+        C++_CONFIGURED = 1 ;
+        C++ = $(CC) ;
+        Configure C++ ;
+        Echo "Checking for C++ compiler..." $(C++:BS) ;
+
+        C++FLAGS += /EHsc /fp:fast /GR /TP /FD ;
+        Configure C++FLAGS ;
+    }
+}
+
 
 ##########################################################################
 # Build variables
@@ -47,19 +171,21 @@ rule TryBuildC++
 
 if ! $(CONFIGURE)
 {
+    local _flags = ;
     if $(CONFIG:L) = debug 
     {
-        CCFLAGS   += /MDd /Zi /D "DEBUG" /D "_DEBUG" ;
+        _flags   += /MDd /Zi /D "DEBUG" /D "_DEBUG" ;
         OPTIM     ?= /Od ;
         LINKFLAGS += /DEBUG ;
     }
     else if $(CONFIG:L) = release 
     {
-        CCFLAGS += /MD /D "NDEBUG" ;
+        _flags += /MD /D "NDEBUG" ;
         OPTIM   ?= /Ox /Ot /Oy ;
     }
     
-    C++FLAGS  += $(CCFLAGS) /EHsc /fp:fast /GR /TP /FD ;
+    CCFLAGS += $(_flags) ;
+    C++FLAGS  += $(_flags) ;
     WARN      ?= /W3 ;
     UNDEFFLAG = "/u _" ;
 }
