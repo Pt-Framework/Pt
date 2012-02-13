@@ -111,17 +111,43 @@ else if $(SYS) = "posix"
     {
         Exit "Checking for dl library..." FAILED ;
     }
-    else
-    {
-        Echo "Checking for dl library..." $(SYSLIBS) ;
-    }
-
 
     WITH_UNIX_SOCKETS = [ CheckBuildC++ "#include <sys/types.h>"
                                         "#include <sys/socket.h>"
                                         "int main() { return socket(0,0,0); }"
                                       : ""
                                       : "c" ] ;
+
+
+
+
+
+    WITH_PTHREADS = [ CheckBuildC++ "#include <pthread.h>"
+                                    "int main() { pthread_t id; void* p; pthread_join(id, &p); return 0; }"
+                                  : ""
+                                  : c ] ;
+
+    if ! $(WITH_PTHREADS)
+    {
+        WITH_PTHREADS = [ CheckBuildC++ "#include <pthread.h>"
+                                        "int main() { pthread_t id; void* p; pthread_join(id, &p); return 0; }"
+                                      : ""
+                                      : pthread ] ;
+
+        if $(WITH_PTHREADS)
+        {
+            SYSLIBS += -lpthread ;
+        }
+    }
+
+    if ! $(WITH_PTHREADS)
+    {
+        Exit "Checking for pthreads library..." FAILED ;
+    }
+
+
+
+
 
     if ! $(WITH_UNIX_SOCKETS)
     {
@@ -172,33 +198,31 @@ if $(TARGET_OS:L) = "linux"
 {
     SYS     ?= posix ;
     GUI     ?= x11 ;
-    SYSLIBS += -lpthread -lrt ;
+    SYSLIBS += -lrt ;
     #NETLIBS = -lnsl ;
 }
 if $(TARGET_OS:L) = "macosx"
 {
     SYS     ?= posix ;
     GUI     ?= cocoa ;
-    SYSLIBS += -lpthread ;
 }
 if $(TARGET_OS:L) = "aspen"
 {
     SYS     ?= posix ;
     GUI     ?= uikit ;
-    SYSLIBS += -lpthread ;
 }
 if $(TARGET_OS) = "aix"
 {
     SYS      ?= posix ;
     GUI      ?= x11 ;
-    SYSLIBS  += -lpthread -lrt ;
+    SYSLIBS  += -lrt ;
     LINKLIBS += $(SYSLIBS) ;
 }
 if $(TARGET_OS) = "solaris"
 {
     SYS     ?= posix ;
     GUI     ?= x11 ;
-    SYSLIBS += -lpthread -lrt ;
+    SYSLIBS += -lrt ;
 }
 if $(TARGET_OS:L) = "qnxnto"
 {
