@@ -2,7 +2,7 @@
 #
 DOT = . ;
 JAMDIR ?= jam ;
-
+OLD_JAM = 1 ;
 
 # Return path to jamrules
 #
