@@ -39,7 +39,12 @@ if $(CONFIGURE)
     TryCommand "rm -f config.jam" ;
     TryCommand "del /f/q config.jam" ;
 
+    TryCommand "rm -f config.log" ;
+    TryCommand "del /f/q config.log" ;
+
     Echo "Checking for host platform..." $(OS:L) ;
+
+    ConfigureLog "[ Configure ]" ;
 
     ConfigureRm ;
     ConfigureMv ;
@@ -52,6 +57,7 @@ if $(CONFIGURE)
     ConfigureToolset ;
 
     # Project specific configuration
+    ConfigureLog "\n[ Jamconfigure ]" ;
     include Jamconfigure ;
 
     ConfigureExit ;

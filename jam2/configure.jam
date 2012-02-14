@@ -11,6 +11,9 @@ if $(OS:L) = "nt"
     TONULL = " 2>NUL 1>NUL" ;
 }
 
+CONFIG_LOG = config.log ;
+CONFIG_JAM = config.jam ;
+
 CONFIGURED_VARIABLES = ;
 
 rule Configure
@@ -30,6 +33,14 @@ rule Configure
     }
 }
 
+rule ConfigureLog
+{
+    for local _line in $(1)
+    {
+        WriteFile $(CONFIG_LOG) : $(_line) ;
+    }
+}
+
 rule ConfigureExit
 {
     for local _var in $(CONFIGURED_VARIABLES)
@@ -41,7 +52,7 @@ rule ConfigureExit
             _value += "\"$(_valtmp)\"" ;
         }
     
-        WriteFile config.jam : $(_var)" ?= "$(_value:J=" ")" ;" ;
+        WriteFile $(CONFIG_JAM) : $(_var)" ?= "$(_value:J=" ")" ;" ;
     }
 
     Exit "Configuration successful." ;
@@ -49,11 +60,11 @@ rule ConfigureExit
 
 rule TryCommand
 {
-    local _cmd  = $(1) $(TONULL) ;
-    
-    #Echo "command: " $(_cmd:J=" ") ;
+    local _cmd  = $(1) ; #$(TONULL) ;
+    ConfigureLog $(_cmd:J=" ") ;
+
     local _result = [ EXEC $(_cmd:J=" ") ] ;
-    #Echo result: $(_result[2-]) ;
+    ConfigureLog $(_result[2-]) ;
 
     if $(_result[1]) = 0
     {
@@ -346,7 +357,10 @@ rule ConfigureToolset
 
 rule CheckBuildCc
 {
+    ConfigureLog "\n[ CheckBuildCc ]" ;
+
     local _src = $(1) ;
+    ConfigureLog $(_src) ;
 
     TryCommand $(RM) check.cpp ;
 
@@ -365,7 +379,10 @@ rule CheckBuildCc
 
 rule CheckBuildC++
 {
+    ConfigureLog "\n[ CheckBuildC++ ]" ;
+    
     local _src = $(1) ;
+    ConfigureLog $(_src) ;
 
     TryCommand $(RM) check.cpp ;
 
