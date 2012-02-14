@@ -189,20 +189,6 @@ ALWAYS clean uninstall ;
 
 Load configure.jam ;
 
-rule First
-{
-     DEPENDS first : $(<) ;
-     Clean clean : $(<) ;
-}
-
-
-actions First
-{
-    echo creating $(<)
-    touch $(<)
-}
-
-
 rule As
 {
     DEPENDS $(<) : $(>) ;

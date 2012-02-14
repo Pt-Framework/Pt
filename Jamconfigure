@@ -33,56 +33,23 @@ Configure SYS ;
 
 if $(SYS) = "win32"
 {
-    WITH_PSAPI = [ CheckBuildC++ "#include <windows.h>"
-                                 "#include <Psapi.h>"
-                                 "int main() { PROCESS_MEMORY_COUNTERS pmc;"
-                                 "GetProcessMemoryInfo( NULL, &pmc, sizeof(pmc) );"
-                                 "return 0; }"
-                                 : ""
-                                 : Psapi ] ;
+    Load win32-configure.jam ;
 
-    Echo "Checking for psapi library..." $(WITH_PSAPI) ;
+    ConfigurePsapi ;
+
     if $(WITH_PSAPI)
     {
-        SYSLIBS += Psapi.lib ;
+        SYSLIBS += $(PSAPI_LIBS) ;
     }
 
+    ConfigureWsa ;
 
-    if ! $(NETLIBS)
+    if ! $(WITH_WSA)
     {
-        WITH_WSA = [ CheckBuildC++ "#define WIN32_LEAN_AND_MEAN"
-                                   "#include <windows.h>"
-                                   "#include <winsock2.h>"
-                                   "int func() { WSADATA wd; WSAStartup(MAKEWORD(2,2), &wd);"
-                                   "return 0; }"
-                                   : ""
-                                   : wsock32 ws2_32 ] ;
-
-        if $(WITH_WSA)
-        {
-            NETLIBS = wsock32.lib ws2_32.lib ;
-        }
+        Exit "ERROR: WSA is required." ;
     }
 
-    if ! $(NETLIBS)
-    {
-        WITH_WSA = [ CheckBuildC++ "#define WIN32_LEAN_AND_MEAN"
-                                   "#include <windows.h>"
-                                   "#include <winsock2.h>"
-                                   "int func() { WSADATA wd; WSAStartup(MAKEWORD(2,2), &wd);"
-                                   "return 0; }"
-                                   : ""
-                                   : winsock Ws2 ] ;
-        if $(WITH_WSA)
-        {
-            NETLIBS = winsock.lib Ws2.lib ;
-        }
-    }
-
-    if ! $(NETLIBS)
-    {
-        Exit "Checking for wsa library..." FAILED ;
-    }
+    NETLIBS = $(WSA_LIBS) ;
 }
 else if $(SYS) = "posix"
 {
@@ -187,6 +154,11 @@ else if $(SYS) = "posix"
     }  
 }
 
+if $(TARGET_OS) = "aix"
+{
+    LINKLIBS += $(SYSLIBS) ;
+}
+
 Configure SYSLIBS ;
 Echo "Checking for system libraries..." $(SYSLIBS) ;
 
@@ -213,24 +185,6 @@ Echo "Checking for OpenSSL (--with-openssl)..." $(WITH_OPENSSL) ;
 
 
 #############################################################################
-# HTTP2 libraries and includes
-#############################################################################
-
-WITH_HTTP2 ?= "no" ;
-
-for local arg in $(ARGV)
-{
-    if $(arg) = "--with-http2"
-    {
-        WITH_HTTP2 = "yes" ;
-    }
-}
-
-Configure WITH_HTTP2 ;
-Echo "Checking for HTTP2 (--with-http2)..." $(WITH_HTTP2) ;
-
-
-#############################################################################
 # Gfx libraries and includes
 #############################################################################
 
@@ -251,30 +205,49 @@ if ! $(FREETYPE_INCLUDES) || ! $(FREETYPE_LINKFLAGS)
 #############################################################################
 # GUI libraries and includes
 #############################################################################
-if $(TARGET_OS:L) = "nt"
+
+WITH_GUI = [ CheckBuildC++ "#include <windows.h>"
+                           "int main() { WNDCLASS wc; RegisterClass(&wc); return 0; }" ] ;
+
+if $(WITH_GUI)
 {
-    GUI     ?= gdi ;
+    ConfigureGdi ;
+    ConfigureWinUI ;
+
+    if $(WITH_GDI) && $(WITH_WINUI)
+    {
+        GUI = gdi ;
+        GUILIBS = $(GDI_LIBS) $(WINUI_LIBS) ;
+    }
 }
-if $(TARGET_OS:L) = "wince"
+
+if ! $(WITH_GUI)
 {
-    GUI     ?= gdi ;
+    Load x11.jam ;
+
+    ConfigureX11 ;
+    if $(X11_LIBS)
+    {
+        ConfigureXExt ;
+        ConfigureXft ;
+
+        if $(X11_INCLUDES) && $(X11_LIBS) && $(XEXT_LIBS) && $(XFT_INCLUDES) && $(XFT_LIBS)
+        {
+            GUI = x11 ;
+            GUILIBS += $(X11_LIBS) $(XEXT_LIBS) $(XFT_LIBS) ;
+        }
+    }
 }
-if $(TARGET_OS:L) = "linux"
-{
-    GUI     ?= x11 ;
-}
+
 if $(TARGET_OS:L) = "macosx"
 {
     GUI     ?= cocoa ;
+    GUILIBS = -framework AppKit -framework Foundation ;
 }
 if $(TARGET_OS:L) = "aspen"
 {
     GUI     ?= uikit ;
-}
-if $(TARGET_OS) = "aix"
-{
-    GUI      ?= x11 ;
-    LINKLIBS += $(SYSLIBS) ;
+    GUILIBS = -framework UIKit -framework Foundation -framework CoreGraphics ;
 }
 if $(TARGET_OS) = "solaris"
 {
@@ -283,50 +256,11 @@ if $(TARGET_OS) = "solaris"
 if $(TARGET_OS:L) = "qnxnto"
 {
     GUI     ?= photon ;
-}
-
-Configure GUI ;
-Echo "Checking for graphics UI..." $(GUI) ;
-
-if $(GUI:L) = "gdi"
-{
-    if $(TARGET_OS:L) = "nt"
-    {
-        GUILIBS = gdi32.lib user32.lib ;
-    }
-    if $(MINGW) || $(TOOLSET) = "gcc"
-    {
-        GUILIBS = -lgdi32 -luser32 ;
-                  #$(MINGW)$(SLASH)lib$(SLASH)libgdi32.a
-                  #$(MINGW)$(SLASH)lib$(SLASH)libuser32.a  ;
-    }
-}
-if $(GUI:L) = "x11"
-{
-    if ! $(GUILIBS) 
-    {
-        Load x11.jam ;
-
-        ConfigureX11 ;
-        ConfigureXExt ;
-        ConfigureXft ;
-
-        if $(X11_INCLUDES) && $(X11_LIBS) && $(XEXT_LIBS) && $(XFT_INCLUDES) && $(XFT_LIBS)
-        {
-            GUILIBS += $(X11_LIBS) $(XEXT_LIBS) $(XFT_LIBS) ;
-        }
-        else
-        {   
-            GUI = none ;
-        }
-    }
-}
-if $(GUI:L) = "photon"
-{
     GUILIBS = -lphrender -lph ;
 }
-if $(GUI:L) = "symbian-eikon"
+if $(TARGET_OS:L) = "symbian"
 {
+    GUI = symbian-eikon ;
     GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\apparc.dso ;
     GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\cone.dso ;
     GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\eikcore.dso ;
@@ -341,16 +275,10 @@ if $(GUI:L) = "symbian-eikon"
     GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\bitgdi.dso ;
     GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\gdi.dso ;
 }
-if $(GUI:L) = "cocoa"
-{
-    GUILIBS = -framework AppKit -framework Foundation ;
-}
-if $(GUI:L) = "uikit"
-{
-    GUILIBS = -framework UIKit -framework Foundation -framework CoreGraphics ;
-}
 
-Echo "Checking whether GUI library should be built..." $(GUI) ;
+Configure GUI ;
+Echo "Checking for graphics UI..." $(GUI) ;
+
 if $(GUI)
 {
     Configure GUILIBS ;

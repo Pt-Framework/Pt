@@ -14,4 +14,14 @@ SUFDBG ?= "" ;
 ##############################################################################
 
 TARGET_OSPLAT ?= arm ;
-TOOLSET ?= vc8 ;
+
+if $(VS90COMNTOOLS)
+{
+    TOOLSET ?= vc9 ;
+}
+
+if $(VS80COMNTOOLS)
+{
+    TOOLSET ?= vc8 ;
+}
+

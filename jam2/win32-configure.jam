@@ -1,0 +1,124 @@
+
+rule ConfigurePsapi
+{
+    WITH_PSAPI = [ CheckBuildC++ "#include <windows.h>"
+                                        "#include <Psapi.h>"
+                                        "int main() { PROCESS_MEMORY_COUNTERS pmc;"
+                                        "GetProcessMemoryInfo( NULL, &pmc, sizeof(pmc) );"
+                                        "return 0; }"
+                                        : ""
+                                        : Psapi ] ;
+
+    Echo "Checking for psapi..." $(WITH_PSAPI) ;
+    Configure WITH_PSAPI ;
+
+    if $(WITH_PSAPI)
+    {
+        PSAPI_LIBS += Psapi.lib ;
+
+        Echo "Checking for psapi libs..." $(PSAPI_LIBS) ;
+        Configure PSAPI_LIBS ;
+    }
+}
+
+rule ConfigureWsa
+{
+    WITH_WSA = [ CheckBuildC++ "#define WIN32_LEAN_AND_MEAN"
+                                      "#include <windows.h>"
+                                      "#include <winsock2.h>"
+                                      "int main() { WSADATA wd; WSAStartup(MAKEWORD(2,2), &wd);"
+                                      "return 0; }"
+                                      : ""
+                                      : wsock32 ws2_32 ] ;
+
+    if $(WITH_WSA)
+    {
+        WSA_LIBS = wsock32.lib ws2_32.lib ;
+    }
+
+    if ! $(WITH_WSA)
+    {
+        WITH_WSA = [ CheckBuildC++ "#define WIN32_LEAN_AND_MEAN"
+                                    "#include <windows.h>"
+                                    "#include <winsock2.h>"
+                                    "int main() { WSADATA wd; WSAStartup(MAKEWORD(2,2), &wd);"
+                                    "return 0; }"
+                                    : ""
+                                    : winsock Ws2 ] ;
+        if $(WITH_WSA)
+        {
+            WSA_LIBS = winsock.lib Ws2.lib ;
+        }
+    }
+
+    Echo "Checking for wsa..." $(WITH_WSA) ;
+    Configure WITH_WSA ;
+
+    if $(WITH_WSA)
+    {
+        Echo "Checking for wsa2 libs..." $(WSA_LIBS) ;
+        Configure WSA_LIBS ;
+    }
+}
+
+
+rule ConfigureGdi
+{
+    WITH_GDI = [ CheckBuildC++ "#include <windows.h>"
+                               "int main() { HDC dc; Rectangle(dc,0,0,0,0); return 0; }"
+                              : ""
+                              : gdi32 ] ;
+
+    if $(WITH_GDI)
+    {
+        GDI_LIBS = gdi32.lib ;
+    }
+
+    if ! $(WITH_GDI)
+    {
+        WITH_GDI = [ CheckBuildC++ "#include <windows.h>"
+                                   "int main() { HDC dc; Rectangle(dc,0,0,0,0); return 0; }"
+                                  : ""
+                                  : coredll.lib ] ;
+    }
+    
+    Echo "Checking for gdi..." $(WITH_GDI) ;
+    Configure WITH_GDI ;
+
+    if $(WITH_GDI)
+    {
+        Echo "Checking for gdi libs..." $(GDI_LIBS) ;
+        Configure GDI_LIBS ;
+    }
+}
+
+
+rule ConfigureWinUI
+{
+    WITH_WINUI = [ CheckBuildC++ "#include <windows.h>"
+                                 "int main() { WNDCLASS wc; RegisterClass(&wc); return 0; }"
+                                : ""
+                                : user32.lib ] ;
+
+    if $(WITH_WINUI)
+    {
+        WINUI_LIBS = user32.lib ;
+    }
+
+    if ! $(WITH_WINUI)
+    {
+        WITH_WINUI = [ CheckBuildC++ "#include <windows.h>"
+                                     "int main() { WNDCLASS wc; RegisterClass(&wc); return 0; }"
+                                      : ""
+                                      : "coredll.lib" ] ;
+    }
+
+    Echo "Checking for windows UI..." $(WITH_WINUI) ;
+    Configure WITH_WINUI ;
+
+    if $(WITH_WINUI)
+    {
+        Echo "Checking for user32 libs..." $(WINUI_LIBS) ;
+        Configure WINUI_LIBS ;
+    }
+}
