@@ -5,12 +5,12 @@
 # include rules an actions to build unit tests
 JamInclude unittest.jam ;
 
-# set directory to build object files into
+# set directory to build objects and targets
 ALL_LOCATE_OBJECTS = tmp$(SLASH)$(CONFIG) ;
-
 ALL_LOCATE_TARGET = build$(SLASH)$(CONFIG) ;
 
 # set directory to build library/binary files into
+# this is used by MakeLocate in the Jamfiles
 OUTPUT_TARGET = build$(SLASH)$(CONFIG) ;
 
 if $(OLD_JAM)
