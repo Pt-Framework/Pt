@@ -53,6 +53,8 @@ if $(SYS) = "win32"
 }
 else if $(SYS) = "posix"
 {
+    Load posix-configure.jam ;
+
     ConfigureDl ;
 
     if ! $(WITH_DL)

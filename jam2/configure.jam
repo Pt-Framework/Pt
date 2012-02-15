@@ -63,7 +63,7 @@ rule ConfigureExit
 
 rule TryCommand
 {
-    local _cmd  = $(1) ; #$(TONULL) ;
+    local _cmd  = $(1) $(STDERR_TO_STDOUT) ; #$(TONULL) ;
     ConfigureLog $(_cmd:J=" ") ;
 
     local _result = [ EXEC $(_cmd:J=" ") ] ;
