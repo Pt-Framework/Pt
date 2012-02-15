@@ -5,6 +5,9 @@
 YES ?= "yes" ;
 NO ?= "no" ;
 
+#windows batch and posix shell
+STDERR_TO_STDOUT = " 2>&1" ; 
+
 TONULL = " 2>/dev/null 1>/dev/null" ;
 if $(OS:L) = "nt"
 {

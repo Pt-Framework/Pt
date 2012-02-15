@@ -1,0 +1,124 @@
+
+rule ConfigureDl
+{
+    WITH_DL = [ CheckBuildC++ "#include <dlfcn.h>"
+                              "int main() { dlopen(0,0); return 0; }"
+                            : ""
+                            : c ] ;
+
+    if ! $(WITH_DL)
+    {
+        WITH_DL = [ CheckBuildC++ "#include <dlfcn.h>"
+                                  "int main() { dlopen(0,0); return 0; }"
+                                : ""
+                                : dl ] ;
+
+        if $(WITH_DL)
+        {
+            DL_LIBS += -ldl ;
+        }
+    }
+
+    Echo "Checking for dl..." $(WITH_DL) ;
+    Configure WITH_DL ;
+
+    if $(WITH_DL)
+    {
+        Echo "Checking for dl libs..." $(DL_LIBS) ;
+        Configure DL_LIBS ;
+    }
+}
+
+rule ConfigurePThread
+{
+    WITH_PTHREADS = [ CheckBuildC++ "#include <pthread.h>"
+                                    "int main() { pthread_t id; void* p; pthread_join(id, &p); return 0; }"
+                                  : ""
+                                  : c ] ;
+
+    if ! $(WITH_PTHREADS)
+    {
+        WITH_PTHREADS = [ CheckBuildC++ "#include <pthread.h>"
+                                        "int main() { pthread_t id; void* p; pthread_join(id, &p); return 0; }"
+                                      : ""
+                                      : pthread ] ;
+
+        if $(WITH_PTHREADS)
+        {
+            PTHREAD_LIBS += -lpthread ;
+        }
+    }
+
+    Echo "Checking for pthread..." $(WITH_PTHREADS) ;
+    Configure WITH_PTHREADS ;
+
+    if $(WITH_PTHREADS)
+    {
+        Echo "Checking for pthread libs..." $(PTHREAD_LIBS) ;
+        Configure PTHREAD_LIBS ;
+    }
+}
+
+rule ConfigureUnixSockets
+{
+    WITH_UNIX_SOCKETS = [ CheckBuildC++ "#include <sys/types.h>"
+                                        "#include <sys/socket.h>"
+                                        "int main() { return socket(0,0,0); }"
+                                      : ""
+                                      : "c" ] ;
+
+    if ! $(WITH_UNIX_SOCKETS)
+    {
+        WITH_UNIX_SOCKETS = [ CheckBuildC++ "#include <sys/types.h>"
+                                            "#include <sys/socket.h>"
+                                            "int main() { return socket(0,0,0); }"
+                                          : ""
+                                          : socket ] ;
+
+        if $(WITH_UNIX_SOCKETS)
+        {
+            UNIX_SOCKET_LIBS += -lsocket ;
+        }
+    }
+
+    Echo "Checking for unix sockets..." $(WITH_UNIX_SOCKETS) ;
+    Configure WITH_UNIX_SOCKETS ;
+
+    if $(WITH_UNIX_SOCKETS)
+    {
+        Echo "Checking for unix socket libs..." $(UNIX_SOCKET_LIBS) ;
+        Configure UNIX_SOCKET_LIBS ;
+    }
+}
+
+rule ConfigureNsl
+{
+    WITH_NSL = [ CheckBuildC++ "#include <netdb.h>"
+                               "int main() { gethostbyname(\"1.2.3.4\"); return 0; }"
+                              : ""
+                              : "c" ] ;
+
+    if ! $(WITH_NSL)
+    {
+        # check for nsl library
+        WITH_NSL = [ CheckBuildC++ "#include <netdb.h>"
+                                   "int main() { gethostbyname(\"1.2.3.4\"); return 0; }"
+                                   : ""
+                                   : nsl ] ;
+
+        if $(WITH_NSL)
+        {
+            NSL_LIBS += -lnsl ;
+        }
+    }
+    
+    Echo "Checking for nsl..." $(WITH_NSL) ;
+    Configure WITH_NSL ;
+
+    if $(WITH_NSL)
+    {
+        Echo "Checking for nsl libs..." $(NSL_LIBS) ;
+        Configure NSL_LIBS ;
+    }
+}
+

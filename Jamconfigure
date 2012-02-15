@@ -53,105 +53,37 @@ if $(SYS) = "win32"
 }
 else if $(SYS) = "posix"
 {
-    WITH_DL = [ CheckBuildC++ "#include <dlfcn.h>"
-                              "int main() { dlopen(0,0); return 0; }"
-                            : ""
-                            : c ] ;
+    ConfigureDl ;
 
     if ! $(WITH_DL)
     {
-        WITH_DL = [ CheckBuildC++ "#include <dlfcn.h>"
-                                  "int main() { dlopen(0,0); return 0; }"
-                                : ""
-                                : dl ] ;
-
-        if $(WITH_DL)
-        {
-            SYSLIBS += -ldl ;
-        }
+        Exit "ERROR: dl is required." ;
     }
 
-    if ! $(WITH_DL)
-    {
-        Exit "Checking for dl library..." FAILED ;
-    }
-
-    WITH_UNIX_SOCKETS = [ CheckBuildC++ "#include <sys/types.h>"
-                                        "#include <sys/socket.h>"
-                                        "int main() { return socket(0,0,0); }"
-                                      : ""
-                                      : "c" ] ;
-
-
-
-
-
-    WITH_PTHREADS = [ CheckBuildC++ "#include <pthread.h>"
-                                    "int main() { pthread_t id; void* p; pthread_join(id, &p); return 0; }"
-                                  : ""
-                                  : c ] ;
+    ConfigurePThread ;
 
     if ! $(WITH_PTHREADS)
     {
-        WITH_PTHREADS = [ CheckBuildC++ "#include <pthread.h>"
-                                        "int main() { pthread_t id; void* p; pthread_join(id, &p); return 0; }"
-                                      : ""
-                                      : pthread ] ;
-
-        if $(WITH_PTHREADS)
-        {
-            SYSLIBS += -lpthread ;
-        }
+        Exit "ERROR: pthread is required." ;
     }
 
-    if ! $(WITH_PTHREADS)
-    {
-        Exit "Checking for pthreads library..." FAILED ;
-    }
+    SYSLIBS = $(DL_LIBS) $(PTHREAD_LIBS) ;
+
+    ConfigureUnixSockets ;
 
     if ! $(WITH_UNIX_SOCKETS)
     {
-        WITH_UNIX_SOCKETS = [ CheckBuildC++ "#include <sys/types.h>"
-                                            "#include <sys/socket.h>"
-                                            "int main() { return socket(0,0,0); }"
-                                          : ""
-                                          : socket ] ;
-
-        if $(WITH_UNIX_SOCKETS)
-        {
-            NETLIBS += -lsocket ;
-        }
+        Exit "ERROR: unix sockets are required." ;
     }
 
-    if ! $(WITH_UNIX_SOCKETS)
-    {
-        Exit "Checking for socket library..." FAILED ;
-    }
-
-
-    WITH_NSL = [ CheckBuildC++ "#include <netdb.h>"
-                               "int main() { gethostbyname(\"1.2.3.4\"); return 0; }"
-                              : ""
-                              : "c" ] ;
-
-    if ! $(WITH_NSL)
-    {
-        # check for nsl library
-        WITH_UNIX_NSL = [ CheckBuildC++ "#include <netdb.h>"
-                                        "int main() { gethostbyname(\"1.2.3.4\"); return 0; }"
-                                      : ""
-                                      : nsl ] ;
-
-        if $(WITH_NSL)
-        {
-            NETLIBS += -lnsl ;
-        }
-    }
+    ConfigureNsl ;
     
     if ! $(WITH_NSL)
     {
-        Exit "Checking for nsl library..." FAILED ;
+        Exit "ERROR: nsl is required." ;
     }  
+
+    NETLIBS = $(UNIX_SOCKET_LIBS) $(NSL_LIBS) ;
 }
 
 if $(TARGET_OS) = "aix"
@@ -160,10 +92,10 @@ if $(TARGET_OS) = "aix"
 }
 
 Configure SYSLIBS ;
-Echo "Checking for system libraries..." $(SYSLIBS) ;
+Echo "Using system libraries..." $(SYSLIBS) ;
 
 Configure NETLIBS ;
-Echo "Checking for network libraries..." $(NETLIBS) ;
+Echo "Using network libraries..." $(NETLIBS) ;
 
 
 #############################################################################
@@ -206,18 +138,58 @@ if ! $(FREETYPE_INCLUDES) || ! $(FREETYPE_LINKFLAGS)
 # GUI libraries and includes
 #############################################################################
 
-WITH_GUI = [ CheckBuildC++ "#include <windows.h>"
-                           "int main() { WNDCLASS wc; RegisterClass(&wc); return 0; }" ] ;
-
-if $(WITH_GUI)
+if $(TARGET_OS:L) = "macosx"
 {
-    ConfigureGdi ;
-    ConfigureWinUI ;
+    GUI     ?= cocoa ;
+    GUILIBS = -framework AppKit -framework Foundation ;
+    WITH_GUI = $(YES) ;
+}
+if $(TARGET_OS:L) = "aspen"
+{
+    GUI     ?= uikit ;
+    GUILIBS = -framework UIKit -framework Foundation -framework CoreGraphics ;
+    WITH_GUI = $(YES) ;
+}
+if $(TARGET_OS:L) = "qnxnto"
+{
+    GUI     ?= photon ;
+    GUILIBS = -lphrender -lph ;
+    WITH_GUI = $(YES) ;
+}
+if $(TARGET_OS:L) = "symbian"
+{
+    GUI = symbian-eikon ;
+    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\apparc.dso ;
+    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\cone.dso ;
+    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\eikcore.dso ;
+    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\avkon.dso ;
+    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\commonengine.dso ;
+    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\estor.dso ;
+    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\hlplch.dso ;
+    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\bafl.dso ;
+    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\charconv.dso ;
+    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\ws32.dso ;
+    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\fbscli.dso ;
+    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\bitgdi.dso ;
+    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\gdi.dso ;
+    WITH_GUI = $(YES) ;
+}
 
-    if $(WITH_GDI) && $(WITH_WINUI)
+if ! $(WITH_GUI)
+{
+    WITH_GUI = [ CheckBuildC++ "#include <windows.h>"
+                               "int main() { WNDCLASS wc; RegisterClass(&wc); return 0; }" ] ;
+    
+    if $(WITH_GUI)
     {
-        GUI = gdi ;
-        GUILIBS = $(GDI_LIBS) $(WINUI_LIBS) ;
+        ConfigureGdi ;
+        ConfigureWinUI ;
+    
+        if $(WITH_GDI) && $(WITH_WINUI)
+        {
+            GUI = gdi ;
+            GUILIBS = $(GDI_LIBS) $(WINUI_LIBS) ;
+        }
     }
 }
 
@@ -239,49 +211,12 @@ if ! $(WITH_GUI)
     }
 }
 
-if $(TARGET_OS:L) = "macosx"
-{
-    GUI     ?= cocoa ;
-    GUILIBS = -framework AppKit -framework Foundation ;
-}
-if $(TARGET_OS:L) = "aspen"
-{
-    GUI     ?= uikit ;
-    GUILIBS = -framework UIKit -framework Foundation -framework CoreGraphics ;
-}
-if $(TARGET_OS) = "solaris"
-{
-    GUI     ?= x11 ;
-}
-if $(TARGET_OS:L) = "qnxnto"
-{
-    GUI     ?= photon ;
-    GUILIBS = -lphrender -lph ;
-}
-if $(TARGET_OS:L) = "symbian"
-{
-    GUI = symbian-eikon ;
-    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\apparc.dso ;
-    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\cone.dso ;
-    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\eikcore.dso ;
-    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\avkon.dso ;
-    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\commonengine.dso ;
-    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\estor.dso ;
-    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\hlplch.dso ;
-    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\bafl.dso ;
-    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\charconv.dso ;
-    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\ws32.dso ;
-    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\fbscli.dso ;
-    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\bitgdi.dso ;
-    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\gdi.dso ;
-}
-
 Configure GUI ;
 Echo "Checking for graphics UI..." $(GUI) ;
 
 if $(GUI)
 {
     Configure GUILIBS ;
-    Echo "Checking for gui libs..." $(GUILIBS) ;
+    Echo "Using gui libs..." $(GUILIBS) ;
 }
 
