@@ -37,6 +37,10 @@ void out_action
     int          exit_reason
 )
 {
+    //printf("a:%s, t:%s, c:%s, o:%s, e:%s, x:%d\n", 
+    //       action?action:"null",target?target:"null", command?command:"null",
+    //       out_data?out_data:"null",err_data?err_data:"null", exit_reason);
+
     /* Print out the action+target line, if the action is quite the action
      * should be null.
      */
