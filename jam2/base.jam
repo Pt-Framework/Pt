@@ -639,7 +639,7 @@ rule Main
     $(<)_type = "Main" ;
 
     # Add executable name decoration
-    local _target = $(<:S=$(SUFEXE)) ;
+    # local _target = $(<:S=$(SUFEXE)) ;
 
     Depends exe : $(<) ;
 
