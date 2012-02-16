@@ -293,7 +293,7 @@ void ShortPathToLongPath( char * short_path, string * out )
         return;
     }
 
-    /* Pt extension bugfix */
+    /* Pt extension bugfix, crashed when GLOB /usr/include on win32 */
     if ( (short_path[0] == '\\') && (short_path[1] == '\0') )
     {
         string_push_back( out, '\\' );
