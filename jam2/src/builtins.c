@@ -2462,8 +2462,14 @@ LIST *builtin_exec( FRAME * frame, int flags)
     shell = var_get( varname );
     object_free( varname );
 
+
+    int oldval = globs.pipe_action;
+    globs.pipe_action = 2; // Only output stderr
+
     exec_cmd( object_str( command->value ), exec_closure, &ervc, shell, 0, 0);
     exec_wait();
+
+    globs.pipe_action = oldval;
 
     return ervc.result;
 }
