@@ -161,13 +161,28 @@ rule ConfigureCc
             LINKFLAGS  += -fvisibility=hidden ;
         }
 
-        Configure CCFLAGS : $(CCFLAGS) ;
-        Configure LINKFLAGS : $(LINKFLAGS) ;
-        Configure SHLIB_LINKFLAGS : $(SHLIB_LINKFLAGS) ;
-        Configure MAIN_LINKFLAGS : $(MAIN_LINKFLAGS) ;
-        Configure RPATH_LINKFLAGS : $(RPATH_LINKFLAGS) ;
-        Configure GCC_START_GROUP : $(GCC_START_GROUP) ;
-        Configure GCC_END_GROUP : $(GCC_END_GROUP) ;
+        if $(CONFIG:L) = debug
+        {
+            CCFLAGS += -DDEBUG ;
+            OPTIM   ?= -O0 -g ;
+        }
+        else
+        {
+            CCFLAGS += -DNDEBUG ;
+            OPTIM   ?= -O2 ;
+        }
+
+        WARN ?= -Wall ;
+
+        Configure CCFLAGS ;
+        Configure WARN ;
+        Configure OPTIM ;
+        Configure LINKFLAGS ;
+        Configure SHLIB_LINKFLAGS) ;
+        Configure MAIN_LINKFLAGS ;
+        Configure RPATH_LINKFLAGS ;
+        Configure GCC_START_GROUP ;
+        Configure GCC_END_GROUP ;
     }
 }
 
@@ -206,6 +221,15 @@ rule ConfigureC++
         if ! $(_r)
         {
             Exit "ERROR: configured C++ compiler does not work" ;
+        }
+
+        if $(CONFIG:L) = debug
+        {
+            C++FLAGS += -DDEBUG ;
+        }
+        else
+        {
+            C++FLAGS += -DNDEBUG ;
         }
 
         Configure C++FLAGS ;

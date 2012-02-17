@@ -1,38 +1,4 @@
 ##############################################################################
-# Compiler flags
-##############################################################################
-if $(CONFIG:L) = debug
-{
-    CCFLAGS += -DEBUG -g ;
-    OPTIM   ?= ;
-}
-else if $(CONFIG:L) = release
-{
-    CCFLAGS += -DNDEBUG ;
-    OPTIM	?= -fast ;
-}
-
-WARN ?= +w  -erroff=doubunder -errtags=yes ; # , hidef,hidevf -errtags=yes ;
-
-C++LINKFLAGS += $(LINKFLAGS) ;
-
-##############################################################################
-# C++ STL version
-##############################################################################
-LIBSTDC++ ?= roguewave ;
-
-if $(LIBSTDC++) = stlport4
-{
-    LIBSTDC++ = stlport4 ;
-    C++FLAGS += -library=stlport4 ;
-    C++LINKFLAGS += -library=stlport4 ;
-}
-else if $(LIBSTDC++) != roguewave
-{
-    Exit "Please specify LIBSTDC++ (roguewave, stlport4)." ;
-}
-
-##############################################################################
 # Rules
 ##############################################################################
 rule FDefines

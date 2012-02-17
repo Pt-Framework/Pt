@@ -389,6 +389,7 @@ rule InstallInto
     for local i in $(>)
     {
         local tt = $(i:G=$(g)) ;
+        Echo $(tt) $(i) ;
 
         Depends $(tt) : $(i) ;
         Install $(tt) : $(i) ;
@@ -421,7 +422,7 @@ rule InstallBin
 
 rule InstallFile
 {
-    InstallInto $(<) : $(>) ;
+    InstallInto $(<) : [ FGristFiles $(>) ] ;
 
     local _grist = [ FGrist $(INSTALLGRIST) $(SUBDIR_TOKENS) ] ;
     MODE on $(>:G=$(_grist)) = $(FILEMODE) ;
@@ -472,7 +473,41 @@ rule InstallShell
 }
 
 
+rule Main_MakeInstall
+{
+    local _target = $(>:S=$(SUFEXE)) ;
+    InstallBin $(<) : $(_target) ;
+}
 
+
+rule SharedLibrary_MakeInstall
+{
+    local _target = $(PRELIB)$(>:S=$(SUFDLL)) ;
+    InstallLib $(<) : $(_target) ;
+}
+
+
+rule Library_MakeInstall
+{
+    local _target = $(PRELIB)$(>:S=$(SUFLIB)) ;
+    InstallLib $(<) : $(_target) ;
+}
+
+
+rule MakeInstall
+{
+    local _type = $($(>)_type) ;
+    if $(_type)
+    {
+        #Echo Calling $(_type)_MakeInstall for $(>) ;
+        $(_type)_MakeInstall $(<) : $(>) ;
+    }
+    else
+    {
+        #Echo Fallback InstallFile for $(>) ;
+        InstallFile $(<) : $(>) ;
+    }
+}
 
 
 rule Library
@@ -991,13 +1026,6 @@ rule SharedLibraryFromObjects
     MakeLocate $(_target) : $(LOCATE_TARGET) ;
 
     Link $(_target) : $(_objects) ;
-}
-
-
-rule SharedLibrary_Install
-{
-    local _target = $(PRELIB)$(<:S=$(SUFDLL)) ;
-    InstallLib $(LIBDIR) : $(_target) ;
 }
 
 

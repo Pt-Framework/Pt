@@ -33,6 +33,7 @@ SharedLibrary Pt : Atomicity.cpp
                    ;
 
 MakeLocate Pt : $(OUTPUT_TARGET) ;
+MakeInstall "c:\\lib" : Pt ;
 
 NOTFILE Pt-all ;
 DEPENDS Pt-all : Pt ;

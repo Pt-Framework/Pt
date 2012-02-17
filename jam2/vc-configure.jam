@@ -185,16 +185,13 @@ rule ConfigureC++
         if $(CONFIG:L) = debug 
         {
             C++FLAGS  += /MDd /D "DEBUG" /D "_DEBUG" ;
-            OPTIM     ?= /Od /Zi ;
         }
         else
         {
             C++FLAGS += /MD /D "NDEBUG" ;
-            OPTIM    ?= /Ox /Ot /Oy ;
         }
 
         Configure C++FLAGS ;
-        Configure OPTIM ;
 
         local _r = [ CheckBuildC++ "#include <iostream>"
                                    "int main() { std::cout << 42; return 0; }" ] ;

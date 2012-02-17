@@ -73,8 +73,23 @@ rule ConfigureCc
     
         LINKFLAGS += -bh:5 ;
 
-        Configure CCFLAGS : $(CCFLAGS) ;
-        Configure LINKFLAGS : $(LINKFLAGS) ;
+        if $(CONFIG:L) = debug
+        {
+            CCFLAGS += -DDEBUG ;
+            OPTIM   ?= -O0 -g ;
+        }
+        else
+        {
+            CCFLAGS += -DNDEBUG ;
+            OPTIM	  ?= -O2 ;
+        }
+
+        WARN ?= -qinfo=lan ;
+
+        Configure CCFLAGS ;
+        Configure OPTIM ;
+        Configure WARN ;
+        Configure LINKFLAGS ;
     }
 }
 
@@ -92,6 +107,16 @@ rule ConfigureC++
         Echo "Checking for C++ compiler..." $(C++:BS) ;
 
         C++FLAGS += -qrtti -qlanglvl=newexcp -qeh -qstaticinline ;
+        
+        if $(CONFIG:L) = debug
+        {
+            C++FLAGS  += -DDEBUG ;
+        }
+        else
+        {
+            C++FLAGS  += -DNDEBUG ;
+        }
+
         Configure C++FLAGS ;
 
         local _r = [ CheckBuildC++ "#include <iostream>"
