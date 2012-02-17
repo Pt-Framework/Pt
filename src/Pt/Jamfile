@@ -1,7 +1,7 @@
 SubDir TOP src Pt ;
 SubDirHdrs $(TOP)/include ;
 SubDirC++Flags [ FDefines PT_API_EXPORT ] ;
-# SubDirObjects tmp $(CONFIG) Pt ;
+SubDirObjects tmp Pt ;
 
 SharedLibrary Pt : Atomicity.cpp
                    Char.cpp
