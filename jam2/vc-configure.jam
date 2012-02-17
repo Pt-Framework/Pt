@@ -141,6 +141,27 @@ rule ConfigureCc
         Configure STDHDRS ;
         Configure LINKFLAGS ;
 
+        if $(CONFIG:L) = debug 
+        {
+            CCFLAGS   += /MDd /D "DEBUG" /D "_DEBUG" ;
+            OPTIM     ?= /Od /Zi ;
+            LINKFLAGS += /DEBUG ;
+        }
+        else 
+        {
+            CCFLAGS += /MD /D "NDEBUG" ;
+            OPTIM   ?= /Ox /Ot /Oy ;
+        }
+
+        WARN      ?= /W3 ;
+        UNDEFFLAG  = "/u _" ;
+
+        Configure CCFLAGS ;
+        Configure LINKFLAGS ;
+        Configure OPTIM ;
+        Configure WARN ;
+        Configure UNDEFFLAG ;
+
         ConfigurePlatformSDK ;
     }
 }
@@ -160,7 +181,20 @@ rule ConfigureC++
         Echo "Checking for C++ compiler..." $(C++:BS) ;
 
         C++FLAGS += /EHsc /fp:fast /GR /TP /FD ;
+
+        if $(CONFIG:L) = debug 
+        {
+            C++FLAGS  += /MDd /D "DEBUG" /D "_DEBUG" ;
+            OPTIM     ?= /Od /Zi ;
+        }
+        else
+        {
+            C++FLAGS += /MD /D "NDEBUG" ;
+            OPTIM    ?= /Ox /Ot /Oy ;
+        }
+
         Configure C++FLAGS ;
+        Configure OPTIM ;
 
         local _r = [ CheckBuildC++ "#include <iostream>"
                                    "int main() { std::cout << 42; return 0; }" ] ;

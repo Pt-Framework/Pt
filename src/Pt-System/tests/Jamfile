@@ -1,5 +1,6 @@
 SubDir TOP src Pt-System tests ;
 SubDirHdrs $(TOP)/include ;
+SubDirObjects tmp Pt-System ;
 
 PT_SYSTEM_TESTS = ApplicationTest.cpp
                   DirectoryTest.cpp
