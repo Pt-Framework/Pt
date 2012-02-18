@@ -1,6 +1,6 @@
 SubDir TOP src Pt-Net tests ;
 SubDirHdrs $(TOP)/include ;
-SubDirObjects tmp Pt-Net ;
+SubDirObjects tmp $(CONFIG) Pt-Net ;
 
 PtUnitTest Pt-Net-test : Pt-Net-test.cpp
                          TcpSocketTest.cpp

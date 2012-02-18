@@ -25,6 +25,8 @@ rule TryBuild
     }
 
     TryCommand $(RM) $(_obj) ;
+    TryCommand $(RM) $(_obj:S=.ilk) ;
+    TryCommand $(RM) $(_obj:S=.pdb) ;
     
     return $(_r) ;
 }

@@ -1,7 +1,7 @@
 SubDir TOP src Pt tests ;
 SubDirHdrs $(TOP)/include ;
 SubDirHdrs $(TOP)/src/Pt ; # for Chunk.h
-SubDirObjects tmp Pt ;
+SubDirObjects tmp $(CONFIG) Pt ;
 
 PtUnitTest Pt-test : Pt-test.cpp
                      AllocatorTest.cpp

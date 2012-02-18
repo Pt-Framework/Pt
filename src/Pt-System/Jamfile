@@ -3,7 +3,7 @@ SubDir TOP src Pt-System ;
 SubDirHdrs $(TOP)/include ;
 SubDirHdrs $(TOP)/src/Pt-System/$(SYS:L) ;
 SubDirC++Flags [ FDefines PT_SYSTEM_API_EXPORT ] ;
-SubDirObjects tmp Pt-System ;
+SubDirObjects tmp $(CONFIG) Pt-System ;
 
 PT_SYSTEM_SUBDIR = [ FDirName $(TOP) src Pt-System $(SYS:L) ] ;
 PT_SYSTEM_IMPL += [ GLOB $(PT_SYSTEM_SUBDIR) : *.cpp  ] ;
