@@ -1,3 +1,3 @@
 SubDir TOP include Pt Db ;
 
-InstallFile "c:\\install\\Db" : Connection.h ;
+InstallFile [ FDirName $(INSTALL_INCLUDE) Pt Db ]  : Connection.h ;

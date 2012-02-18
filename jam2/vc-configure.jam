@@ -18,7 +18,7 @@ rule TryBuild
 
     if $(_r) && $(4)
     {
-        _cmd = $(_link) /dll $(LINKFLAGS) /out:$(_out) $(_obj) /LIBPATH:$(5) $(LINKLIBS) $(4:S=.lib) ;
+        _cmd = $(_link) /dll $(LINKFLAGS) /out:$(_out) $(_obj) /LIBPATH:$(5) $(LINKLIBS) $(4) ;
         _r = [ TryCommand $(_cmd) ] ;
         TryCommand $(RM) $(_out) ;
         TryCommand $(RM) $(_out).manifest ;

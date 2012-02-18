@@ -365,8 +365,6 @@ rule CheckBuildCc
     local _src = $(1) ;
     ConfigureLog $(_src) ;
 
-    TryCommand $(RM) check.cpp ;
-
     local _line ;
     for _line in $(_src)
     {
@@ -386,8 +384,6 @@ rule CheckBuildC++
     
     local _src = $(1) ;
     ConfigureLog $(_src) ;
-
-    TryCommand $(RM) check.cpp ;
 
     local _line ;
     for _line in $(_src)

@@ -7,7 +7,7 @@ rule ConfigurePsapi
                                         "GetProcessMemoryInfo( NULL, &pmc, sizeof(pmc) );"
                                         "return 0; }"
                                         : ""
-                                        : Psapi ] ;
+                                        : Psapi.lib ] ;
 
     Echo "Checking for psapi..." $(WITH_PSAPI) ;
     Configure WITH_PSAPI ;
@@ -29,7 +29,7 @@ rule ConfigureWsa
                                       "int main() { WSADATA wd; WSAStartup(MAKEWORD(2,2), &wd);"
                                       "return 0; }"
                                       : ""
-                                      : wsock32 ws2_32 ] ;
+                                      : wsock32.lib ws2_32.lib ] ;
 
     if $(WITH_WSA)
     {
@@ -44,7 +44,7 @@ rule ConfigureWsa
                                     "int main() { WSADATA wd; WSAStartup(MAKEWORD(2,2), &wd);"
                                     "return 0; }"
                                     : ""
-                                    : winsock Ws2 ] ;
+                                    : winsock.lib Ws2.lib ] ;
         if $(WITH_WSA)
         {
             WSA_LIBS = winsock.lib Ws2.lib ;
@@ -67,7 +67,7 @@ rule ConfigureGdi
     WITH_GDI = [ CheckBuildC++ "#include <windows.h>"
                                "int main() { HDC dc; Rectangle(dc,0,0,0,0); return 0; }"
                               : ""
-                              : gdi32 ] ;
+                              : gdi32.lib ] ;
 
     if $(WITH_GDI)
     {

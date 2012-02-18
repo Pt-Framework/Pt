@@ -17,10 +17,8 @@ SharedLibrary Pt-Net : $(PT_NET_IMPL)
 
 LinkSharedLibraries Pt-Net : Pt Pt-System ;
 MakeLocate Pt-Net : $(OUTPUT_TARGET) ;
-LINKLIBS on $(PRELIB)Pt-Net$(SUFDLL) = $(LINKLIBS) $(NETLIBS) ;
+MakeInstall Pt-Net : $(INSTALL_LIB) ;
 
-# Pseudo target to call from projects
-NOTFILE Pt-Net-all ;
-DEPENDS Pt-Net-all : Pt-Net ;
+LINKLIBS on $(PRELIB)Pt-Net$(SUFDLL) = $(LINKLIBS) $(NETLIBS) ;
 
 SubInclude TOP src Pt-Net tests ;

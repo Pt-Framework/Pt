@@ -2,7 +2,7 @@ SubDir TOP include Pt ;
 
 HdrMacroFile Atomicity.h ;
 
-InstallFile "c:\\install" : Connection.h ;
+InstallFile [ FDirName $(INSTALL_INCLUDE) Pt ] : Connection.h ;
 
 SubInclude TOP include Pt Db ;
 SubInclude TOP include Pt Gfx ;

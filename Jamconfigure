@@ -2,6 +2,10 @@
 # Compiler and linker settings
 #############################################################################
 
+CONFIG ?= release ;
+Configure CONFIG ;
+Echo "Using configuration..." $(CONFIG) ;
+
 # configure basic C compiler
 ConfigureCc ;
 
@@ -140,18 +144,6 @@ if ! $(FREETYPE_INCLUDES) || ! $(FREETYPE_LINKFLAGS)
 # GUI libraries and includes
 #############################################################################
 
-if $(TARGET_OS:L) = "macosx"
-{
-    GUI     ?= cocoa ;
-    GUILIBS = -framework AppKit -framework Foundation ;
-    WITH_GUI = $(YES) ;
-}
-if $(TARGET_OS:L) = "aspen"
-{
-    GUI     ?= uikit ;
-    GUILIBS = -framework UIKit -framework Foundation -framework CoreGraphics ;
-    WITH_GUI = $(YES) ;
-}
 if $(TARGET_OS:L) = "qnxnto"
 {
     GUI     ?= photon ;
@@ -211,6 +203,26 @@ if ! $(WITH_GUI)
             GUILIBS += $(X11_LIBS) $(XEXT_LIBS) $(XFT_LIBS) ;
         }
     }
+}
+
+if ! $(WITH_GUI)
+{
+    WITH_GUI = [ CheckBuildC++ "#include <CoreFoundation/CFRunLoop.h>"
+                               "int main() {"
+                               "CFRunLoopRef l = CFRunLoopGetMain();"
+                               "return 0; }"
+                             : ""
+                             : -framework AppKit -framework Foundation ] ;
+
+    if $(WITH_GUI)
+    {
+        GUI = cocoa ;
+        GUILIBS = -framework AppKit -framework Foundation ;
+    }
+
+    # iOS aspen:
+    #GUI     ?= uikit ;
+    #GUILIBS = -framework UIKit -framework Foundation -framework CoreGraphics ;
 }
 
 Configure GUI ;

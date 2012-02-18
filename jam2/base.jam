@@ -389,7 +389,6 @@ rule InstallInto
     for local i in $(>)
     {
         local tt = $(i:G=$(g)) ;
-        Echo $(tt) $(i) ;
 
         Depends $(tt) : $(i) ;
         Install $(tt) : $(i) ;
@@ -475,36 +474,36 @@ rule InstallShell
 
 rule Main_MakeInstall
 {
-    local _target = $(>:S=$(SUFEXE)) ;
-    InstallBin $(<) : $(_target) ;
+    local _target = $(<:S=$(SUFEXE)) ;
+    InstallBin $(>) : $(_target) ;
 }
 
 
 rule SharedLibrary_MakeInstall
 {
-    local _target = $(PRELIB)$(>:S=$(SUFDLL)) ;
-    InstallLib $(<) : $(_target) ;
+    local _target = $(PRELIB)$(<:S=$(SUFDLL)) ;
+    InstallLib $(>) : $(_target) ;
 }
 
 
 rule Library_MakeInstall
 {
-    local _target = $(PRELIB)$(>:S=$(SUFLIB)) ;
-    InstallLib $(<) : $(_target) ;
+    local _target = $(PRELIB)$(<:S=$(SUFLIB)) ;
+    InstallLib $(>) : $(_target) ;
 }
 
 
 rule MakeInstall
 {
-    local _type = $($(>)_type) ;
+    local _type = $($(<)_type) ;
     if $(_type)
     {
-        #Echo Calling $(_type)_MakeInstall for $(>) ;
+        #Echo Calling $(_type)_MakeInstall for $(<) ;
         $(_type)_MakeInstall $(<) : $(>) ;
     }
     else
     {
-        #Echo Fallback InstallFile for $(>) ;
+        #Echo Fallback InstallFile for $(<) ;
         InstallFile $(<) : $(>) ;
     }
 }

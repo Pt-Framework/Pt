@@ -13,6 +13,12 @@ ALL_LOCATE_TARGET = build$(SLASH)$(CONFIG) ;
 # this is used by MakeLocate in the Jamfiles
 OUTPUT_TARGET = build$(SLASH)$(CONFIG) ;
 
+# installation directories
+INSTALL_DIR ?= [ FDirName $(TOP) deploy ] ;
+INSTALL_BIN ?= [ FDirName $(INSTALL_DIR) bin ] ; 
+INSTALL_INCLUDE ?= [ FDirName $(INSTALL_DIR) include ] ; 
+INSTALL_LIB ?= [ FDirName $(INSTALL_DIR) lib ] ; 
+
 if $(OLD_JAM)
 {
 Echo "Using Jam version 1" ;
@@ -261,3 +267,6 @@ Echo "C++ Flags (C++FLAGS)..." $(C++FLAGS) ;
 Echo "C Flags (CCFLAGS)..." $(CCFLAGS) ;
 Echo "Optimisation (OPTIM)..." $(OPTIM) ;
 Echo "Warnings (WARN)..." $(WARN) ;
+Echo "Install programs (INSTALL_BIN)..." $(INSTALL_BIN) ;
+Echo "Install includes (INSTALL_INCLUDE)..." $(INSTALL_INCLUDE) ;
+Echo "Install libraries (INSTALL_LIB)..." $(INSTALL_LIB) ;

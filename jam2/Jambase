@@ -34,6 +34,14 @@ for _arg in $(ARGV)
 
 if $(CONFIGURE)
 {
+    for _arg in $(ARGV)
+    {
+        if $(_arg) = --debug
+        {
+            CONFIG = debug ;
+        }
+    }
+
     Load configure.jam ;
 
     TryCommand "rm -f config.jam" ;
@@ -53,6 +61,7 @@ if $(CONFIGURE)
     ConfigureChMod ;
     ConfigureLn ;
     ConfigureDotSlash ;
+
     ConfigureTarget ;
     ConfigureToolset ;
 
@@ -78,8 +87,6 @@ include config.jam ;
 Load base.jam ;
 
 # Toolset specific variables and rules
-CONFIG ?= debug ;
-CONFIG = $(CONFIG:L) ;
 Load $(TOOLSET:L).jam ;
 
 # Project root Jamfile
