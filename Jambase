@@ -1,0 +1,7 @@
+JAMBASE ?= Jambase ;
+JAMDIR  ?= jam ;
+
+JAMBASE = $(JAMBASE:R=$(JAMDIR)) ;
+Echo "Using Jambase at" $(JAMBASE) ;
+include $(JAMBASE) ;
+
