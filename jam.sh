@@ -12,6 +12,6 @@ if test ! -f ./jam.bin; then
     echo "Built jam.bin"
 fi
 
-./jam.bin -fJambase $*
+./jam.bin $*
 
 

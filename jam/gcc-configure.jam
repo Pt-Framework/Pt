@@ -159,6 +159,12 @@ rule ConfigureCc
             LINKFLAGS  += -fvisibility=hidden ;
         }
 
+        # only use -fPIC for non-X86 CPUs
+        if $(TARGET_OSPLAT:U) != X86
+        {
+            CCFLAGS += -fPIC ;
+        }
+
         if $(CONFIG:L) = debug
         {
             CCFLAGS += -DDEBUG ;
@@ -219,6 +225,12 @@ rule ConfigureC++
         if ! $(_r)
         {
             Exit "ERROR: configured C++ compiler does not work" ;
+        }
+
+        # only use -fPIC for non-X86 CPUs
+        if $(TARGET_OSPLAT:U) != X86
+        {
+            C++FLAGS += -fPIC ;
         }
 
         if $(CONFIG:L) = debug

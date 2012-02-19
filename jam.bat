@@ -11,6 +11,6 @@ if not exist jam.exe (
     goto :eof
 )
 
-call .\jam.exe -fJambase %*
+call .\jam.exe %*
 goto :eof
 
