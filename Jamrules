@@ -16,9 +16,9 @@ OUTPUT_OBJECT = tmp$(SLASH)$(CONFIG) ;
 
 # installation directories
 INSTALL_DIR ?= [ FDirName $(TOP) deploy $(CONFIG) ] ;
-INSTALL_BIN ?= [ FDirName $(INSTALL_DIR) bin ] ; 
-INSTALL_INCLUDE ?= [ FDirName $(INSTALL_DIR) include ] ; 
-INSTALL_LIB ?= [ FDirName $(INSTALL_DIR) lib ] ; 
+INSTALL_BINDIR ?= [ FDirName $(INSTALL_DIR) bin ] ; 
+INSTALL_INCLUDEDIR ?= [ FDirName $(INSTALL_DIR) include ] ; 
+INSTALL_LIBDIR ?= [ FDirName $(INSTALL_DIR) lib ] ; 
 
 Echo "Host Operating System (OS)..." $(OS:L) ;
 Echo "Host Platform (OSPLAT)..." $(OSPLAT:L) ;
@@ -36,6 +36,6 @@ Echo "Optimisation (OPTIM)..." $(OPTIM) ;
 Echo "Warnings (WARN)..." $(WARN) ;
 Echo "Build targets (OUTPUT_TARGET)..." $(OUTPUT_TARGET) ;
 Echo "Build objects (OUTPUT_OBJECT)..." $(OUTPUT_OBJECT) ;
-Echo "Install programs (INSTALL_BIN)..." $(INSTALL_BIN) ;
-Echo "Install includes (INSTALL_INCLUDE)..." $(INSTALL_INCLUDE) ;
-Echo "Install libraries (INSTALL_LIB)..." $(INSTALL_LIB) ;
+Echo "Install programs (INSTALL_BINDIR)..." $(INSTALL_BINDIR) ;
+Echo "Install includes (INSTALL_INCLUDEDIR)..." $(INSTALL_INCLUDEDIR) ;
+Echo "Install libraries (INSTALL_LIBDIR)..." $(INSTALL_LIBDIR) ;

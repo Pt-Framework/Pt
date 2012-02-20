@@ -472,21 +472,21 @@ rule InstallShell
 }
 
 
-rule Main_MakeInstall
+rule Main-MakeInstall
 {
     local _target = $(<:S=$(SUFEXE)) ;
     InstallBin $(>) : $(_target) ;
 }
 
 
-rule SharedLibrary_MakeInstall
+rule SharedLibrary-MakeInstall
 {
     local _target = $(PRELIB)$(<:S=$(SUFDLL)) ;
     InstallLib $(>) : $(_target) ;
 }
 
 
-rule Library_MakeInstall
+rule Library-MakeInstall
 {
     local _target = $(PRELIB)$(<:S=$(SUFLIB)) ;
     InstallLib $(>) : $(_target) ;
@@ -498,13 +498,24 @@ rule MakeInstall
     local _type = $($(<)_type) ;
     if $(_type)
     {
-        #Echo Calling $(_type)_MakeInstall for $(<) ;
-        $(_type)_MakeInstall $(<) : $(>) ;
+        #Echo Calling $(_type)-MakeInstall for $(<) ;
+        $(_type)-MakeInstall $(<) : $(>) ;
     }
-    else
+
+    local _install_lib = ;
+    on $(<) _install_lib = $(INSTALL_LIB) ;
+
+    for local l in $(_install_lib)
     {
-        #Echo Fallback InstallFile for $(<) ;
-        InstallFile $(<) : $(>) ;
+        InstallLib $(>) : $(l) ;
+    }
+
+    local _install_bin = ;
+    on $(<) _install_bin = $(INSTALL_BIN) ;
+
+    for local l in $(_install_bin)
+    {
+        InstallBin $(>) : $(l) ;
     }
 }
 
@@ -686,47 +697,21 @@ rule Main
     # save the type to resolve rule names later
     $(<)_type = "Main" ;
 
-    # Add executable name decoration
-    # local _target = $(<:S=$(SUFEXE)) ;
-
-    Depends exe : $(<) ;
-
-    MainFromObjects $(<) : $(>:GBS=$(SUFOBJ)) ; # FIX was only S
-    Objects $(>) ;
+    Main-Build $(<) : $(>) ;
 
     MainImpl $(<) : $(>) ;
 }
 
 
-rule MainImpl
+rule Main-Build
 {
+    MainFromObjects $(<) : $(>:GBS=$(SUFOBJ)) ; # FIX was only S
+    Objects $(>) ;
 }
 
 
-rule MainFromObjects
+rule MainImpl
 {
-    local _s _t ;
-
-    # Add grist to file names
-    # Add suffix to exe
-
-    _s = [ FGristFiles $(>) ] ;
-    _t = [ FAppendSuffix $(<) : $(SUFEXE) ] ;
-
-    if $(_t) != $(<)
-    {
-        DEPENDS $(<) : $(_t) ;
-        NOTFILE $(<) ;
-    }
-
-    # make compiled sources a dependency of target
-
-    DEPENDS $(_t) : $(_s) ;
-    _MakeLocate $(_t) : $(LOCATE_TARGET) ;
-
-    Clean clean : $(_t) ;
-
-    Link $(_t) : $(_s) ;    
 }
 
 
@@ -773,6 +758,35 @@ rule Main_MakeLocate
 
 rule Main_MakeLocateImpl
 {
+}
+
+
+rule MainFromObjects
+{
+    local _s _t ;
+
+    # Add grist to file names
+    # Add suffix to exe
+
+    _s = [ FGristFiles $(>) ] ;
+    _t = [ FAppendSuffix $(<) : $(SUFEXE) ] ;
+
+    Depends exe : $(<) ;
+
+    if $(_t) != $(<)
+    {
+        DEPENDS $(<) : $(_t) ;
+        NOTFILE $(<) ;
+    }
+
+    # make compiled sources a dependency of target
+
+    DEPENDS $(_t) : $(_s) ;
+    _MakeLocate $(_t) : $(LOCATE_TARGET) ;
+
+    Clean clean : $(_t) ;
+
+    Link $(_t) : $(_s) ;    
 }
 
 
@@ -1575,7 +1589,7 @@ actions HardLink
     $(RM) $(<) && $(LN) $(>) $(<)
 }
 
-actions Install
+actions existing Install
 {
     $(CP) $(>) $(<) 
 }

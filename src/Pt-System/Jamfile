@@ -45,6 +45,6 @@ SharedLibrary Pt-System : $(PT_SYSTEM_IMPL)
 LinkSharedLibraries Pt-System : Pt ;
 LinkLibs Pt-System : $(SYSLIBS) ;
 MakeLocate Pt-System : $(OUTPUT_TARGET) ;
-MakeInstall Pt-System : $(INSTALL_LIB) ;
+MakeInstall Pt-System : $(INSTALL_LIBDIR) ;
 
 SubInclude TOP src Pt-System tests ;

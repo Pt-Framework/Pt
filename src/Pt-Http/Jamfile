@@ -20,6 +20,6 @@ SharedLibrary Pt-Http : Client.cpp
 
 LinkSharedLibraries Pt-Http : Pt Pt-System Pt-Net ;
 MakeLocate Pt-Http : $(OUTPUT_TARGET) ;
-MakeInstall Pt-Http : $(INSTALL_LIB) ;
+MakeInstall Pt-Http : $(INSTALL_LIBDIR) ;
 
 SubInclude TOP src Pt-Http tests ;

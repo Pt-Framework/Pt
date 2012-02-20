@@ -18,6 +18,6 @@ SharedLibrary Pt-Net : $(PT_NET_IMPL)
 LinkSharedLibraries Pt-Net : Pt Pt-System ;
 LinkLibs Pt-Net : $(NETLIBS) ;
 MakeLocate Pt-Net : $(OUTPUT_TARGET) ;
-MakeInstall Pt-Net : $(INSTALL_LIB) ;
+MakeInstall Pt-Net : $(INSTALL_LIBDIR) ;
 
 SubInclude TOP src Pt-Net tests ;

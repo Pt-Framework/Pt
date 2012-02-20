@@ -19,6 +19,6 @@ PT_XML_SOURCES = Characters.cpp
 SharedLibrary Pt-Xml : $(PT_XML_SOURCES) ;
 LinkSharedLibraries Pt-Xml :  Pt ;
 MakeLocate Pt-Xml : $(OUTPUT_TARGET) ;
-MakeInstall Pt-Xml : $(INSTALL_LIB) ;
+MakeInstall Pt-Xml : $(INSTALL_LIBDIR) ;
 
 SubInclude TOP src Pt-Xml tests ;

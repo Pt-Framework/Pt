@@ -137,6 +137,8 @@ rule SharedLibraryImpl
   Clean clean : $(_target:S=.idb) ;
   Clean clean : $(_target).manifest ;
 
+  INSTALL_LIB on $(<) += $(_target:S=.lib) $(_target:S=.pdb) ;
+
   PDB on $(_objects) = $(_target:S=.pdb) ;
   Depends $(_sources) : first ;
   Depends $(PRELIB)$(<:S=$(SUFLIB)) : $(_target) ;

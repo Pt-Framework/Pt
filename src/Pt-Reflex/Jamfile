@@ -10,6 +10,6 @@ SharedLibrary Pt-Reflex : Reflectable.cpp
 
 LinkSharedLibraries Pt-Reflex : Pt ;
 MakeLocate Pt-Reflex : $(OUTPUT_TARGET) ;
-MakeInstall Pt-Reflex : $(INSTALL_LIB) ;
+MakeInstall Pt-Reflex : $(INSTALL_LIBDIR) ;
 
 SubInclude TOP src Pt-Reflex tests ;

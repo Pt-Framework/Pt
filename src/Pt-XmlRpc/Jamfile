@@ -16,6 +16,6 @@ PT_XMLRPC_SOURCES = Client.cpp
 SharedLibrary Pt-XmlRpc : $(PT_XMLRPC_SOURCES) ;
 LinkSharedLibraries Pt-XmlRpc :  Pt-Xml Pt-Http Pt-Net Pt-System Pt ;
 MakeLocate Pt-XmlRpc : $(OUTPUT_TARGET) ;
-MakeInstall Pt-XmlRpc : $(INSTALL_LIB) ;
+MakeInstall Pt-XmlRpc : $(INSTALL_LIBDIR) ;
 
 SubInclude TOP src Pt-XmlRpc tests ;
