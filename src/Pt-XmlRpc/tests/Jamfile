@@ -1,5 +1,6 @@
 SubDir TOP src Pt-XmlRpc tests ;
 SubDirHdrs $(TOP)/include ;
+SubDirObjects $(OUTPUT_OBJECT) Pt-XmlRpc ;
 
 PtUnitTest Pt-XmlRpc-test : Pt-XmlRpc-test.cpp $(PT_XMLRPC_TESTS) ;
 LinkSharedLibraries Pt-XmlRpc-test : Pt-XmlRpc Pt-Http Pt-Net Pt-System Pt-Unit Pt ;
@@ -16,6 +17,3 @@ MakeLocate RpcBenchClient : $(OUTPUT_TARGET) ;
 Main RpcBenchServer : RpcBenchServer.cpp ;
 LinkSharedLibraries RpcBenchServer : Pt-XmlRpc Pt-Xml Pt-Http Pt-Net Pt-System Pt ;
 MakeLocate RpcBenchServer.cpp : $(OUTPUT_TARGET) ;
-
-# Pseudo target to call from projects
-DEPENDS Pt-XmlRpc-all : Pt-XmlRpc-test ;

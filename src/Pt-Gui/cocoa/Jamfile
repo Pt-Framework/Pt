@@ -2,6 +2,7 @@ SubDir TOP src Pt-Gui cocoa ;
 SubDirHdrs $(TOP)/include ;
 SubDirHdrs $(TOP)/src/Pt-System ;
 SubDirC++Flags [ FDefines PT_GUI_API_EXPORT ] ;
+SubDirObjects $(OUTPUT_OBJECT) Pt-Gui ;
 
 Library Pt-Gui-cocoa : ApplicationImpl.mm
                        PainterImpl.mm
@@ -11,8 +12,8 @@ Library Pt-Gui-cocoa : ApplicationImpl.mm
                        WidgetImpl.mm
                        WidgetPainter.mm
                        ;
-Library_MakeLocate Pt-Gui-cocoa : $(OUTPUT_TARGET) ;
+MakeLocate Pt-Gui-cocoa : $(OUTPUT_TARGET) ;
 
 Main nstest : nstest.cpp ;
-Main_LinkSharedLibraries nstest : Pt Pt-System Pt-Gfx Pt-Gui ;
-Main_MakeLocate nstest : $(OUTPUT_TARGET) ;
+LinkSharedLibraries nstest : Pt Pt-System Pt-Gfx Pt-Gui ;
+MakeLocate nstest : $(OUTPUT_TARGET) ;

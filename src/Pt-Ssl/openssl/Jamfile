@@ -19,6 +19,8 @@ SubDirCcFlags [ FDefines OPENSSL_NO_PSK ] ;
 SubDirCcFlags [ FDefines OPENSSL_NO_RC2 ] ;
 SubDirCcFlags [ FDefines OPENSSL_NO_RC4 ] ;
 
+SubDirObjects $(OUTPUT_OBJECT) Pt-Ssl openssl ;
+
 if $(TARGET_OS) = "wince"
 {
     File [ FDirName $(TOP) src Pt-Ssl openssl crypto opensslconf.h ] :

@@ -2,6 +2,7 @@ SubDir TOP src Pt-Gui gdi ;
 SubDirHdrs $(TOP)/include ;
 SubDirHdrs $(TOP)/src/Pt-System ;
 SubDirC++Flags [ FDefines PT_GUI_API_EXPORT ] ;
+SubDirObjects $(OUTPUT_OBJECT) Pt-Gui ;
 
 Library Pt-Gui-gdi : ApplicationImpl.cpp
                      PainterImpl.cpp
@@ -11,4 +12,4 @@ Library Pt-Gui-gdi : ApplicationImpl.cpp
                      WidgetPainter.cpp
                      ;
 
-Library_MakeLocate Pt-Gui-gdi : $(OUTPUT_TARGET) ;
+MakeLocate Pt-Gui-gdi : $(OUTPUT_TARGET) ;

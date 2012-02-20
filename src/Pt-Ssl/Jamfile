@@ -2,6 +2,7 @@ SubDir TOP src Pt-Ssl ;
 SubDirHdrs $(TOP)/include ;
 SubDirHdrs $(TOP)/src/Pt-Ssl/openssl/include ;
 SubDirC++Flags [ FDefines PT_SSL_API_EXPORT ] ;
+SubDirObjects $(OUTPUT_OBJECT) Pt-Ssl ;
 
 SharedLibrary Pt-Ssl : Exception.cpp
                        Utils.cpp
@@ -22,9 +23,9 @@ SharedLibrary Pt-Ssl : Exception.cpp
                        AESCipher.cpp
                        ;
 
-SharedLibrary_LinkSharedLibraries Pt-Ssl : Pt Pt-Net Pt-System ;
-SharedLibrary_LinkLibraries Pt-Ssl : Pt-Ssl-openssl ;
-SharedLibrary_MakeLocate Pt-Ssl : $(OUTPUT_TARGET) ;
+LinkSharedLibraries Pt-Ssl : Pt Pt-Net Pt-System ;
+LinkLibraries Pt-Ssl : Pt-Ssl-openssl ;
+MakeLocate Pt-Ssl : $(OUTPUT_TARGET) ;
 
 Main SSLServerClientTest : SSLServerClientTest.cpp ;
 LinkSharedLibraries SSLServerClientTest : Pt-Ssl Pt-Net Pt-System Pt ;

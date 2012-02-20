@@ -1,6 +1,7 @@
 SubDir TOP src Pt-Unit ;
 SubDirHdrs $(TOP)/include ;
 SubDirC++Flags [ FDefines PT_UNIT_API_EXPORT ] ;
+SubDirObjects $(OUTPUT_OBJECT) Pt-Unit ;
 
 PT_UNIT_SOURCES = Application.cpp
                   Assertion.cpp
@@ -16,7 +17,4 @@ PT_UNIT_SOURCES = Application.cpp
 SharedLibrary Pt-Unit : $(PT_UNIT_SOURCES) ;
 LinkSharedLibraries Pt-Unit : Pt Pt-System ;
 MakeLocate Pt-Unit : $(OUTPUT_TARGET) ;
-
-# Define a pseudo target to call from projects
-NOTFILE Pt-Unit-all ;
-DEPENDS Pt-Unit-all : Pt-Unit ;
+MakeInstall Pt-Unit : $(INSTALL_LIB) ;

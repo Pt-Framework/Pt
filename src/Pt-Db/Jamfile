@@ -2,6 +2,7 @@ SubDir TOP src Pt-Db ;
 SubDirHdrs $(TOP)/include ;
 SubDirC++Flags [ FDefines PT_DB_API_EXPORT ] ;
 SubDirCcFlags  [ FDefines PT_DB_API_EXPORT ] ;
+SubDirObjects $(OUTPUT_OBJECT) Pt-Db ;
 
 if $(TARGET_OS:L) = symbian
 {
@@ -27,16 +28,16 @@ PT_DB_SOURCES = [ FDirName sqlite SQLConnection.cpp ]
                 ValueImpl.cpp
                 ;
 
-SharedLibrary                     Pt-Db : $(PT_DB_SOURCES) ;
-SharedLibrary_LinkSharedLibraries Pt-Db : Pt Pt-System ;
-SharedLibrary_MakeLocate          Pt-Db : $(OUTPUT_TARGET) ;
+SharedLibrary Pt-Db : $(PT_DB_SOURCES) ;
+LinkSharedLibraries Pt-Db : Pt Pt-System ;
+MakeLocate Pt-Db : $(OUTPUT_TARGET) ;
 
 PT_DB_TESTS = ResultImplTest.cpp
               RowImplTest.cpp
               SqliteTest.cpp
               ValueImplTest.cpp
               ;
-PtUnitTest               Pt-Db-test : Pt-Db-test.cpp $(PT_DB_TESTS) ;
-Main_LinkSharedLibraries Pt-Db-test : Pt-Db Pt-Unit Pt-System Pt ;
-PtUnitTest_MakeLocate    Pt-Db-test : $(OUTPUT_TARGET) ;
+PtUnitTest  Pt-Db-test : Pt-Db-test.cpp $(PT_DB_TESTS) ;
+LinkSharedLibraries Pt-Db-test : Pt-Db Pt-Unit Pt-System Pt ;
+MakeLocate Pt-Db-test : $(OUTPUT_TARGET) ;
 

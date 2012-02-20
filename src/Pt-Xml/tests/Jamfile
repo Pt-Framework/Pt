@@ -1,5 +1,6 @@
 SubDir TOP src Pt-Xml tests ;
 SubDirHdrs $(TOP)/include ;
+SubDirObjects $(OUTPUT_OBJECT) Pt-Xml ;
 
 PtUnitTest Pt-Xml-test : Pt-Xml-test.cpp
                          XmlSerializerTest.cpp
@@ -12,6 +13,3 @@ MakeLocate Pt-Xml-test : $(OUTPUT_TARGET) ;
 Main SerializerBench : SerializerBench.cpp ;
 LinkSharedLibraries SerializerBench : Pt-Xml Pt-Reflex Pt-System Pt-Unit Pt ;
 MakeLocate SerializerBench : $(OUTPUT_TARGET) ;
-
-# Pseudo target to call from projects
-DEPENDS Pt-Xml-all : Pt-Xml-test ;

@@ -30,6 +30,24 @@ PT_INSTALL_INCLUDES = [ GLOB $(PT_INCLUDES_SUBDIR) : *.h  ] ;
 PT_INSTALL_INCLUDES += [ GLOB $(PT_INCLUDES_SUBDIR) : *.tpp  ] ;
 InstallFile [ FDirName $(INSTALL_INCLUDE) Pt Http ] : $(PT_INSTALL_INCLUDES:BS) ;
 
+SubDir TOP include Pt Xml ;
+PT_INCLUDES_SUBDIR = [ FDirName $(TOP) include Pt Xml ] ;
+PT_INSTALL_INCLUDES = [ GLOB $(PT_INCLUDES_SUBDIR) : *.h  ] ;
+PT_INSTALL_INCLUDES += [ GLOB $(PT_INCLUDES_SUBDIR) : *.tpp  ] ;
+InstallFile [ FDirName $(INSTALL_INCLUDE) Pt Xml ] : $(PT_INSTALL_INCLUDES:BS) ;
+
+SubDir TOP include Pt XmlRpc ;
+PT_INCLUDES_SUBDIR = [ FDirName $(TOP) include Pt XmlRpc ] ;
+PT_INSTALL_INCLUDES = [ GLOB $(PT_INCLUDES_SUBDIR) : *.h  ] ;
+PT_INSTALL_INCLUDES += [ GLOB $(PT_INCLUDES_SUBDIR) : *.tpp  ] ;
+InstallFile [ FDirName $(INSTALL_INCLUDE) Pt XmlRpc ] : $(PT_INSTALL_INCLUDES:BS) ;
+
+SubDir TOP include Pt Unit ;
+PT_INCLUDES_SUBDIR = [ FDirName $(TOP) include Pt Unit ] ;
+PT_INSTALL_INCLUDES = [ GLOB $(PT_INCLUDES_SUBDIR) : *.h  ] ;
+PT_INSTALL_INCLUDES += [ GLOB $(PT_INCLUDES_SUBDIR) : *.tpp  ] ;
+InstallFile [ FDirName $(INSTALL_INCLUDE) Pt Unit ] : $(PT_INSTALL_INCLUDES:BS) ;
+
 SubDir TOP include Pt Db ;
 PT_INCLUDES_SUBDIR = [ FDirName $(TOP) include Pt Db ] ;
 PT_INSTALL_INCLUDES = [ GLOB $(PT_INCLUDES_SUBDIR) : *.h  ] ;

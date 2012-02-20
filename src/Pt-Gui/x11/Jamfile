@@ -4,6 +4,7 @@ SubDirHdrs $(FREETYPE_INCLUDES) ;
 SubDirHdrs /usr/include/X11 ;
 SubDirHdrs $(TOP)/src/Pt-System ;
 SubDirC++Flags [ FDefines PT_GUI_API_EXPORT ] ;
+SubDirObjects $(OUTPUT_OBJECT) Pt-Gui ;
 
 Library Pt-Gui-x11 : ApplicationImpl.cpp
                      Drawable.cpp
@@ -14,4 +15,4 @@ Library Pt-Gui-x11 : ApplicationImpl.cpp
                      PainterImpl.cpp
                      ;
 
-Library_MakeLocate Pt-Gui-x11 : $(OUTPUT_TARGET) ;
+MakeLocate Pt-Gui-x11 : $(OUTPUT_TARGET) ;
