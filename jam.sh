@@ -4,14 +4,14 @@ JAM_SOURCES="./builtins.c ./class.c ./command.c ./compile.c ./constants.c ./debu
 
 #use -DPT_MCHECK for memory usage statistics
 
-if test ! -f ./jam.bin; then
-    echo "Building jam executable..."
+if test ! -f ./jam100.bin; then
+    echo "Building jam executable version 1.00..."
     cd jam/src
-    cc -o ../../jam.bin $JAM_SOURCES
+    cc -o ../../jam100.bin $JAM_SOURCES
     cd ../..
-    echo "Built jam.bin"
+    echo "Built jam100.bin"
 fi
 
-./jam.bin $*
+./jam100.bin $*
 
 
