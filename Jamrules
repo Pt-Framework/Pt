@@ -3,15 +3,16 @@
 #############################################################################
 
 # include rules an actions to build unit tests
-JamInclude unittest.jam ;
+Load unittest.jam ;
 
 # set directory to build objects and targets
 ALL_LOCATE_OBJECTS = tmp$(SLASH)$(CONFIG) ;
 ALL_LOCATE_TARGET = build$(SLASH)$(CONFIG) ;
 
-# set directory to build library/binary files into
-# this is used by MakeLocate in the Jamfiles
+# set directory to build objects and targets
+# this is used by MakeLocate and SubDirObjects in the Jamfiles
 OUTPUT_TARGET = build$(SLASH)$(CONFIG) ;
+OUTPUT_OBJECT = tmp$(SLASH)$(CONFIG) ;
 
 # installation directories
 INSTALL_DIR ?= [ FDirName $(TOP) deploy ] ;
@@ -19,8 +20,6 @@ INSTALL_BIN ?= [ FDirName $(INSTALL_DIR) bin ] ;
 INSTALL_INCLUDE ?= [ FDirName $(INSTALL_DIR) include ] ; 
 INSTALL_LIB ?= [ FDirName $(INSTALL_DIR) lib ] ; 
 
-Echo ;
-Echo "Project: Platinum C++ Framework" ;
 Echo "Host Operating System (OS)..." $(OS:L) ;
 Echo "Host Platform (OSPLAT)..." $(OSPLAT:L) ;
 Echo "Target OS (TARGET_OS)..." $(TARGET_OS:L) ;
@@ -32,8 +31,11 @@ Echo "Graphic User Interface (GUI)..." $(GUI) ;
 Echo "System Interface (SYS)..." $(SYS) ;
 Echo "C++ Flags (C++FLAGS)..." $(C++FLAGS) ;
 Echo "C Flags (CCFLAGS)..." $(CCFLAGS) ;
+Echo "Linker Flags (LINKFLAGS)..." $(LINKFLAGS) ;
 Echo "Optimisation (OPTIM)..." $(OPTIM) ;
 Echo "Warnings (WARN)..." $(WARN) ;
+Echo "Build targets (OUTPUT_TARGET)..." $(OUTPUT_TARGET) ;
+Echo "Build objects (OUTPUT_OBJECT)..." $(OUTPUT_OBJECT) ;
 Echo "Install programs (INSTALL_BIN)..." $(INSTALL_BIN) ;
 Echo "Install includes (INSTALL_INCLUDE)..." $(INSTALL_INCLUDE) ;
 Echo "Install libraries (INSTALL_LIB)..." $(INSTALL_LIB) ;

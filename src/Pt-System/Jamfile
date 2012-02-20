@@ -1,12 +1,11 @@
 SubDir TOP src Pt-System ;
-
 SubDirHdrs $(TOP)/include ;
 SubDirHdrs $(TOP)/src/Pt-System/$(SYS:L) ;
 SubDirC++Flags [ FDefines PT_SYSTEM_API_EXPORT ] ;
-SubDirObjects tmp $(CONFIG) Pt-System ;
+SubDirObjects $(OUTPUT_OBJECT) Pt-System ;
 
-PT_SYSTEM_SUBDIR = [ FDirName $(TOP) src Pt-System $(SYS:L) ] ;
-PT_SYSTEM_IMPL += [ GLOB $(PT_SYSTEM_SUBDIR) : *.cpp  ] ;
+PT_SYSTEM_IMPL_SUBDIR = [ FDirName $(TOP) src Pt-System $(SYS:L) ] ;
+PT_SYSTEM_IMPL += [ GLOB $(PT_SYSTEM_IMPL_SUBDIR) : *.cpp  ] ;
 
 SharedLibrary Pt-System : $(PT_SYSTEM_IMPL)
                           Application.cpp
@@ -44,25 +43,8 @@ SharedLibrary Pt-System : $(PT_SYSTEM_IMPL)
                           ;
 
 LinkSharedLibraries Pt-System : Pt ;
-LINKLIBS on $(PRELIB)Pt-System$(SUFDLL) = $(LINKLIBS) $(SYSLIBS) ;
+LinkLibs Pt-System : $(SYSLIBS) ;
 MakeLocate Pt-System : $(OUTPUT_TARGET) ;
 MakeInstall Pt-System : $(INSTALL_LIB) ;
 
-SharedLibrary TestPlugin : TestPlugin.cpp ;
-SharedLibrary_LinkSharedLibraries TestPlugin : Pt Pt-System ;
-SharedLibrary_MakeLocate TestPlugin : $(OUTPUT_TARGET) ;
-
-Main PluginDemo : PluginDemo.cpp ;
-Main_LinkSharedLibraries PluginDemo : Pt Pt-System ;
-Main_MakeLocate PluginDemo : $(OUTPUT_TARGET) ;
-
-Main EventSinkDemo : EventSinkDemo.cpp ;
-Main_LinkSharedLibraries EventSinkDemo : Pt Pt-System  ;
-Main_MakeLocate EventSinkDemo : $(OUTPUT_TARGET) ;
-
-Main SerialDeviceDemo : SerialDeviceDemo.cpp ;
-Main_LinkSharedLibraries SerialDeviceDemo : Pt Pt-System  ;
-Main_MakeLocate SerialDeviceDemo : $(OUTPUT_TARGET) ;
-
 SubInclude TOP src Pt-System tests ;
-

@@ -3,7 +3,7 @@ SubDirHdrs $(TOP)/include ;
 SubDirC++Flags [ FDefines PT_NET_API_EXPORT ] ;
 SubDirHdrs $(TOP)/src/Pt-Net/$(SYS:L) ;
 SubDirHdrs $(TOP)/src/Pt-System/$(SYS:L) ;
-SubDirObjects tmp $(CONFIG) Pt-Net ;
+SubDirObjects $(OUTPUT_OBJECT) Pt-Net ;
 
 PT_NET_SUBDIR = [ FDirName $(TOP) src Pt-Net $(SYS:L) ] ;
 PT_NET_IMPL += [ GLOB $(PT_NET_SUBDIR) : *.cpp  ] ;
@@ -16,9 +16,8 @@ SharedLibrary Pt-Net : $(PT_NET_IMPL)
                        AddrInfo.cpp ;
 
 LinkSharedLibraries Pt-Net : Pt Pt-System ;
+LinkLibs Pt-Net : $(NETLIBS) ;
 MakeLocate Pt-Net : $(OUTPUT_TARGET) ;
 MakeInstall Pt-Net : $(INSTALL_LIB) ;
-
-LINKLIBS on $(PRELIB)Pt-Net$(SUFDLL) = $(LINKLIBS) $(NETLIBS) ;
 
 SubInclude TOP src Pt-Net tests ;

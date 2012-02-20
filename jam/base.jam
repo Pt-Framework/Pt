@@ -627,7 +627,21 @@ rule LinkFlags
     }
     else
     {
-        Exit "ERROR:" No such target: $(1) ;
+        Exit "ERROR: LinkFlags does not work for target" $(<) ;
+    }
+}
+
+
+rule LinkLibs
+{
+    local _type = $($(<)_type) ;
+    if $(_type)
+    {
+        $(_type)_LinkLibs $(<) : $(>) ;
+    }
+    else
+    {
+        Exit "ERROR: LinkLibs does not work for target" $(<) ;
     }
 }
 
@@ -723,6 +737,13 @@ rule Main_LinkFlags
 }
 
 
+rule Main_LinkLibs
+{
+    local _target = $(<:S=$(SUFEXE)) ;
+    LINKLIBS on $(_target) += $(>) ;
+}
+
+
 rule Main_LinkLibraries
 {
     local _t = $(<:S=$(SUFEXE)) ;
@@ -752,16 +773,6 @@ rule Main_MakeLocate
 
 rule Main_MakeLocateImpl
 {
-}
-
-
-# @brief Adds extern libraries as linker flags to a executable target
-#
-# @param < the target
-# @param > list of flags
-rule MainLinkExtLibraries
-{
-	LINKLIBS on $(<)$(SUFEXE) += $(LINKLIBS) $(PRELIB)$(>:S=$(SUFLIB)) ;
 }
 
 
@@ -1032,6 +1043,13 @@ rule SharedLibrary_LinkFlags
 {
     local _target = $(PRELIB)$(<:S=$(SUFDLL)) ;
     LINKFLAGS on $(_target) += $(>) ;
+}
+
+
+rule SharedLibrary_LinkLibs
+{
+    local _target = $(PRELIB)$(<:S=$(SUFDLL)) ;
+    LINKLIBS on $(_target) += $(>) ;
 }
 
 

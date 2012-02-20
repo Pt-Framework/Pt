@@ -1,7 +1,6 @@
 SubDir TOP src Pt tests ;
 SubDirHdrs $(TOP)/include ;
-SubDirHdrs $(TOP)/src/Pt ; # for Chunk.h
-SubDirObjects tmp $(CONFIG) Pt ;
+SubDirObjects $(OUTPUT_OBJECT) Pt ;
 
 PtUnitTest Pt-test : Pt-test.cpp
                      AllocatorTest.cpp
@@ -32,6 +31,3 @@ PtUnitTest Pt-test : Pt-test.cpp
 
 LinkSharedLibraries Pt-test : Pt-System Pt-Unit Pt ;
 MakeLocate Pt-test : $(OUTPUT_TARGET) ;
-
-# Pseudo target to call from projects
-DEPENDS Pt-all : Pt-test ;

@@ -1,3 +1,0 @@
-SubDir TOP include Pt Db ;
-
-InstallFile [ FDirName $(INSTALL_INCLUDE) Pt Db ]  : Connection.h ;
