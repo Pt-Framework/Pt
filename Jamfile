@@ -16,13 +16,19 @@ SubDir TOP include Pt Net ;
 PT_INCLUDES_SUBDIR = [ FDirName $(TOP) include Pt Net ] ;
 PT_INSTALL_INCLUDES = [ GLOB $(PT_INCLUDES_SUBDIR) : *.h  ] ;
 PT_INSTALL_INCLUDES += [ GLOB $(PT_INCLUDES_SUBDIR) : *.tpp  ] ;
-InstallFile [ FDirName $(INSTALL_INCLUDE) Pt System ] : $(PT_INSTALL_INCLUDES:BS) ;
+InstallFile [ FDirName $(INSTALL_INCLUDE) Pt Net ] : $(PT_INSTALL_INCLUDES:BS) ;
 
 SubDir TOP include Pt Reflex ;
 PT_INCLUDES_SUBDIR = [ FDirName $(TOP) include Pt Reflex ] ;
 PT_INSTALL_INCLUDES = [ GLOB $(PT_INCLUDES_SUBDIR) : *.h  ] ;
 PT_INSTALL_INCLUDES += [ GLOB $(PT_INCLUDES_SUBDIR) : *.tpp  ] ;
-InstallFile [ FDirName $(INSTALL_INCLUDE) Pt Db ] : $(PT_INSTALL_INCLUDES:BS) ;
+InstallFile [ FDirName $(INSTALL_INCLUDE) Pt Reflex ] : $(PT_INSTALL_INCLUDES:BS) ;
+
+SubDir TOP include Pt Http ;
+PT_INCLUDES_SUBDIR = [ FDirName $(TOP) include Pt Http ] ;
+PT_INSTALL_INCLUDES = [ GLOB $(PT_INCLUDES_SUBDIR) : *.h  ] ;
+PT_INSTALL_INCLUDES += [ GLOB $(PT_INCLUDES_SUBDIR) : *.tpp  ] ;
+InstallFile [ FDirName $(INSTALL_INCLUDE) Pt Http ] : $(PT_INSTALL_INCLUDES:BS) ;
 
 SubDir TOP include Pt Db ;
 PT_INCLUDES_SUBDIR = [ FDirName $(TOP) include Pt Db ] ;
@@ -30,4 +36,25 @@ PT_INSTALL_INCLUDES = [ GLOB $(PT_INCLUDES_SUBDIR) : *.h  ] ;
 PT_INSTALL_INCLUDES += [ GLOB $(PT_INCLUDES_SUBDIR) : *.tpp  ] ;
 InstallFile [ FDirName $(INSTALL_INCLUDE) Pt Db ] : $(PT_INSTALL_INCLUDES:BS) ;
 
-SubInclude TOP src ;
+SubInclude TOP src Pt ;
+SubInclude TOP src Pt-System ;
+SubInclude TOP src Pt-Net ;
+SubInclude TOP src Pt-Reflex ;
+SubInclude TOP src Pt-Cma ;
+SubInclude TOP src Pt-Http ;
+SubInclude TOP src Pt-Db ;
+SubInclude TOP src Pt-Gfx ;
+SubInclude TOP src Pt-Unit ;
+SubInclude TOP src Pt-Xml ;
+SubInclude TOP src Pt-XmlRpc ;
+
+if $(WITH_OPENSSL) = yes
+{
+    SubInclude TOP src Pt-Ssl ;
+}
+
+if $(GUI)
+{
+    SubInclude TOP src Pt-Gui ;
+}
+
