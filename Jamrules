@@ -15,7 +15,7 @@ OUTPUT_TARGET = build$(SLASH)$(CONFIG) ;
 OUTPUT_OBJECT = tmp$(SLASH)$(CONFIG) ;
 
 # installation directories
-INSTALL_DIR ?= [ FDirName $(TOP) deploy ] ;
+INSTALL_DIR ?= [ FDirName $(TOP) deploy $(CONFIG) ] ;
 INSTALL_BIN ?= [ FDirName $(INSTALL_DIR) bin ] ; 
 INSTALL_INCLUDE ?= [ FDirName $(INSTALL_DIR) include ] ; 
 INSTALL_LIB ?= [ FDirName $(INSTALL_DIR) lib ] ; 
