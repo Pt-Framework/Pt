@@ -12,6 +12,14 @@ rule FIncludes
 
 rule MainImpl
 {
+}
+
+
+rule Main-Build
+{
+    MainFromObjects $(<) : $(>:GBS=$(SUFOBJ)) ; # FIX was only S
+    Objects $(>) ;
+
     # Add executable name decoration
     local _target = $(<:S=$(SUFEXE)) ;
 

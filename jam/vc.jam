@@ -59,31 +59,39 @@ rule Library_MakeLocateImpl
 }
 
 
+rule Main-Build
+{
+    MainFromObjects $(<) : $(>:GBS=$(SUFOBJ)) ; # FIX was only S
+    Objects $(>) ;
+
+    local _target = $(<:S=$(SUFEXE)) ;
+    
+    Clean clean : $(_target) ;
+    Clean clean : $(_target:S=.lib) ;
+    Clean clean : $(_target:S=.exp) ; 
+    Clean clean : $(_target:S=.pdb) ;
+    Clean clean : $(_target:S=.ilk) ;
+    Clean clean : $(_target:S=.idb) ;
+    Clean clean : $(_target:S=.exe.manifest) ;
+    
+    local _objects = [ FGristFiles $(>:S=$(SUFOBJ)) ] ;
+    PDB on $(_objects) = $(_target:S=.pdb) ;
+    
+    # embed manifest into exe
+    if $(MT)
+    {
+        EmbedManifest $(_target) : $(_target:S=.exe.manifest) ;
+    }
+    
+    # MAINLINKFLAGS are mainWCRTStartup for wince
+    LINKFLAGS on $(_target) += $(LINKFLAGS) $(MAINLINKFLAGS) ;
+    
+    Depends $(_objects) : first ;
+}
+
+
 rule MainImpl
 {
-  local _target = $(<:S=$(SUFEXE)) ;
-
-  Clean clean : $(_target) ;
-  Clean clean : $(_target:S=.lib) ;
-  Clean clean : $(_target:S=.exp) ; 
-  Clean clean : $(_target:S=.pdb) ;
-  Clean clean : $(_target:S=.ilk) ;
-  Clean clean : $(_target:S=.idb) ;
-  Clean clean : $(_target:S=.exe.manifest) ;
-
-  local _objects = [ FGristFiles $(>:S=$(SUFOBJ)) ] ;
-  PDB on $(_objects) = $(_target:S=.pdb) ;
-
-  # embed manifest into exe
-  if $(MT)
-  {
-    EmbedManifest $(_target) : $(_target:S=.exe.manifest) ;
-  }
-
-  # MAINLINKFLAGS are mainWCRTStartup for wince
-  LINKFLAGS on $(_target) += $(LINKFLAGS) $(MAINLINKFLAGS) ;
-
-  Depends $(_objects) : first ;
 }
 
 

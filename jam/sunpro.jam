@@ -9,8 +9,11 @@ rule FIncludes
 { return -I$(<) ; }
 
 
-rule MainImpl
+rule Main-Build
 {
+    MainFromObjects $(<) : $(>:GBS=$(SUFOBJ)) ; # FIX was only S
+    Objects $(>) ;
+
     # Add executable name decoration
     local _target = $(<:S=$(SUFEXE)) ;
 
@@ -23,8 +26,11 @@ rule MainImpl
         case .cpp : LINK on $(_target) = $(C++) ;
                     LINKFLAGS on $(_target) += $(C++LINKFLAGS) ;
         case * :    LINK on $(_target) = $(CC) ;
-                    LINKFLAGS on $(_target) += $(LINKFLAGS) ;
     }
+}
+
+rule MainImpl
+{
 }
 
 

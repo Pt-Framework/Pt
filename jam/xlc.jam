@@ -12,8 +12,6 @@ rule FIncludes
 
 rule MainImpl
 {
-    # Add executable name decoration
-    local _target = $(<:S=$(SUFEXE)) ;
 }
 
 
