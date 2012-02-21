@@ -151,7 +151,6 @@ CRELIB       ?= ;
 EXEMODE      ?= 711 ;
 FILEMODE     ?= 644 ;
 HDRS         ?= ;
-INCLUDEDIR   ?= /usr/local/include ;
 INSTALLGRIST ?= installed ;
 JAMFILE      ?= Jamfile ;
 JAMRULES     ?= Jamrules ;
@@ -167,7 +166,6 @@ SHELLHEADER  ?= "#!/bin/sh" ;
 SHELLMODE    ?= 755 ;
 #STDHDRS     ?= /usr/include ;
 UNDEFFLAG    ?= "-u _" ;
-TEMP_TARGET  ?= ;
 SPACE        ?= " " ;
 
 HDRPATTERN = 
