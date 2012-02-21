@@ -37,7 +37,7 @@ Configure SYS ;
 
 if $(SYS) = "win32"
 {
-    Load win32-configure.jam ;
+    Load win32.jam ;
 
     ConfigurePsapi ;
 
@@ -57,7 +57,7 @@ if $(SYS) = "win32"
 }
 else if $(SYS) = "posix"
 {
-    Load posix-configure.jam ;
+    Load posix.jam ;
 
     ConfigureDl ;
 
