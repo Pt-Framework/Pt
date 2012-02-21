@@ -10,11 +10,6 @@ rule FIncludes
 { return -I$(<) ; }
 
 
-rule MainImpl
-{
-}
-
-
 rule Main-Build
 {
     MainFromObjects $(<) : $(>:GBS=$(SUFOBJ)) ; # FIX was only S
@@ -36,7 +31,7 @@ rule Main-Build
 }
 
 
-rule Main_LinkSharedLibrariesImpl
+rule Main_LinkSharedLibraries
 {
     local _target = [ FAppendSuffix $(<) : $(SUFEXE) ] ;
     local _libs = $(PRELIB)$(>:S=$(SUFDLL)) ;

@@ -29,12 +29,8 @@ rule Main-Build
     }
 }
 
-rule MainImpl
-{
-}
 
-
-rule Main_LinkSharedLibrariesImpl
+rule Main_LinkSharedLibraries
 {
     local _target = [ FAppendSuffix $(<) : $(SUFEXE) ] ;
     local _libs = $(PRELIB)$(>:S=$(SUFDLL)) ;

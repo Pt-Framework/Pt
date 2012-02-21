@@ -530,15 +530,14 @@ rule Library
     Depends $(<) : $(_l) ;
     NotFile $(<) ;
 
-    LibraryFromObjects $(1) : $(2:GBS=$(SUFOBJ)) ; # FIX was only S
-    Objects $(2) : $(1) ;
-
-    LibraryImpl $(<) : $(>) ;
+    Library-Build $(<) : $(>) ;
 }
 
 
-rule LibraryImpl
+rule Library-Build
 {
+    LibraryFromObjects $(1) : $(2:GBS=$(SUFOBJ)) ; # FIX was only S
+    Objects $(2) ;
 }
 
 
@@ -612,12 +611,6 @@ rule Library_MakeLocate
 {
     local _l = $(PRELIB)$(<:S=$(SUFLIB)) ;
     _MakeLocate $(_l) : $(2) ;
-    Library_MakeLocateImpl $(<) : $(>) ;
-}
-
-
-rule Library_MakeLocateImpl
-{
 }
 
 
@@ -698,8 +691,6 @@ rule Main
     $(<)_type = "Main" ;
 
     Main-Build $(<) : $(>) ;
-
-    #MainImpl $(<) : $(>) ;
 }
 
 
@@ -707,11 +698,6 @@ rule Main-Build
 {
     MainFromObjects $(<) : $(>:GBS=$(SUFOBJ)) ; # FIX was only S
     Objects $(>) ;
-}
-
-
-rule MainImpl
-{
 }
 
 
@@ -740,24 +726,12 @@ rule Main_LinkLibraries
 
 rule Main_LinkSharedLibraries
 {
-  Main_LinkSharedLibrariesImpl $(<) : $(>) : $(3) ;
-}
-
-
-rule Main_LinkSharedLibrariesImpl
-{
 }
 
 
 rule Main_MakeLocate
 {
     _MakeLocate $(<:S=$(SUFEXE)) : $(>) ;
-    Main_MakeLocateImpl $(<) : $(>) ;
-}
-
-
-rule Main_MakeLocateImpl
-{
 }
 
 
