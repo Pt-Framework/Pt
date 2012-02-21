@@ -10,14 +10,9 @@ rule ConfigureVisualC
         } 
         else
         {     
-            if $(PROCESSOR_ARCHITECTURE:L) = "amd64"
-            {
-                VISUALC = [ W32_GETREG "HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Microsoft\\VisualStudio\\9.0\\" : "InstallDir" ] ;
-            }
-            else # PROCESSOR_ARCHITECTURE = "x86"
-            {
-                VISUALC = [ W32_GETREG "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\9.0\\" : "InstallDir" ] ;
-            }
+            VISUALC = [ W32_GETREG "HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Microsoft\\VCExpress\\9.0\\" : "InstallDir" ] ;
+            VISUALC ?= [ W32_GETREG "HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Microsoft\\VisualStudio\\9.0\\" : "InstallDir" ] ;
+            VISUALC ?= [ W32_GETREG "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\9.0\\" : "InstallDir" ] ;
 
             VISUALC = $(VISUALC:P) ;
             VISUALC = $(VISUALC:P) ;
