@@ -106,6 +106,10 @@ rule ConfigureC++
         Configure C++ ;
         Echo "Checking for C++ compiler..." $(C++:BS) ;
 
+        LINK++ = $(C++) ;
+        Configure LINK++ ;
+        Echo "Checking for C++ linker" $(LINK++:BS) ;
+
         C++FLAGS += -qrtti -qlanglvl=newexcp -qeh -qstaticinline ;
         
         if $(CONFIG:L) = debug

@@ -113,6 +113,10 @@ rule ConfigureC++
         Configure C++ ;
         Echo "Checking for C++ compiler..." $(C++:BS) ;
 
+        LINK++ = $(C++) ;
+        Configure LINK++ ;
+        Echo "Checking for C++ linker" $(LINK++:BS) ;
+
         C++FLAGS += -mt -lpthread -D_POSIX_C_SOURCE=199506L -D__EXTENSIONS__ ;
 
         if $(TARGET_OSPLAT) = sparc9

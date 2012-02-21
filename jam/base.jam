@@ -696,7 +696,11 @@ rule Main
 
 rule Main-Build
 {
+    # we only need BS for the objects
+    # apply BS in MainFromObjects
     MainFromObjects $(<) : $(>:GBS=$(SUFOBJ)) ; # FIX was only S
+
+    # move call of Objects to MainFromObjects
     Objects $(>) ;
 }
 
@@ -993,15 +997,14 @@ rule SharedLibrary
     Depends $(<) : $(_target) ;
     NotFile $(<) ;
 
-    SharedLibraryFromObjects $(1) : $(2:GBS=$(SUFOBJ)) ; # FIX wasonly S
-    Objects $(2) ;
-
-    SharedLibraryImpl $(<) : $(>) ;
+    SharedLibrary-Build $(<) : $(>) ;
 }
 
 
-rule SharedLibraryImpl
+rule SharedLibrary-Build
 {
+    SharedLibraryFromObjects $(<) : $(>:GBS=$(SUFOBJ)) ; # FIX was only S
+    Objects $(>) ;
 }
 
 
@@ -1069,12 +1072,6 @@ rule SharedLibrary_MakeLocateImpl
 # @param > list of shared libraries to link
 #
 rule SharedLibrary_LinkSharedLibraries
-{
-    SharedLibrary_LinkSharedLibrariesImpl $(<) : $(>) : $(3) ;
-}
-
-
-rule SharedLibrary_LinkSharedLibrariesImpl
 {
 }
 

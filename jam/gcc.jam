@@ -49,8 +49,11 @@ rule Main_LinkSharedLibraries
 }
 
 
-rule SharedLibraryImpl
+rule SharedLibrary-Build
 {
+    SharedLibraryFromObjects $(<) : $(>:GBS=$(SUFOBJ)) ; # FIX was only S
+    Objects $(>) ;
+
     # Add library name decorations <lib><name><.so>
     local _target = $(PRELIB)$(<)$(SUFDLL) ;
 
@@ -71,7 +74,7 @@ rule SharedLibraryImpl
 }
 
 
-rule SharedLibrary_LinkSharedLibrariesImpl
+rule SharedLibrary_LinkSharedLibraries
 {
     local _target = $(PRELIB)$(<)$(SUFDLL) ;
     local _deps = $(PRELIB)$(>)$(SUFDLL) ;

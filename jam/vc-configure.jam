@@ -178,9 +178,14 @@ rule ConfigureC++
     if ! $(C++_CONFIGURED)
     {
         C++_CONFIGURED = 1 ;
+
         C++ = $(CC) ;
         Configure C++ ;
         Echo "Checking for C++ compiler..." $(C++:BS) ;
+
+        LINK++ = $(LINK) ;
+        Configure LINK++ ;
+        Echo "Checking for C++ linker" $(LINK++:BS) ;
 
         C++FLAGS += /EHsc /fp:fast /GR /TP /FD ;
 

@@ -65,8 +65,8 @@ rule Library_MakeLocate
 
 rule Main-Build
 {
-    MainFromObjects $(<) : $(>:GBS=$(SUFOBJ)) ; # FIX was only S
     Objects $(>) ;
+    MainFromObjects $(<) : $(>:GBS=$(SUFOBJ)) ; # FIX was only S
 
     local _target = $(<:S=$(SUFEXE)) ;
     
@@ -128,47 +128,50 @@ rule Main_MakeLocate
 }
 
 
-rule SharedLibraryImpl
+rule SharedLibrary-Build
 {
-  # Add grist to file names
-  local _sources = [ FGristFiles $(>) ] ;
-  local _objects = $(_sources:S=$(SUFOBJ)) ;
+    SharedLibraryFromObjects $(<) : $(>:GBS=$(SUFOBJ)) ; # FIX was only S
+    Objects $(>) ;
 
-  # Add library name decorations <name><.dll/.so>
-  local _target = $(PRELIB)$(<:S=$(SUFDLL)) ;
-
-  Clean clean : $(_target) ;
-  Clean clean : $(_target:S=.lib) ;
-  Clean clean : $(_target:S=.exp) ; 
-  Clean clean : $(_target:S=.pdb) ;
-  Clean clean : $(_target:S=.ilk) ;
-  Clean clean : $(_target:S=.idb) ;
-  Clean clean : $(_target).manifest ;
-
-  INSTALL_LIB on $(<) += $(_target:S=.lib) $(_target:S=.pdb) ;
-
-  PDB on $(_objects) = $(_target:S=.pdb) ;
-
-  Depends $(_sources) : first ;
-  Depends $(PRELIB)$(<:S=$(SUFLIB)) : $(_target) ;
-
-  # embed manifest into dll
-  if $(MT)
-  {
-    EmbedManifest $(_target) : $(_target).manifest ;
-  }
-
-  # The *.lib is created before its *.dll and therefore has an older timestamp.
-  # However, the lib depends on the dll and will be recreated everytime a 
-  # target is called using this dll because it seems to be 'old'.
-  # NOUPDATE will ignore the lib's timestamp once it has been created.
-  NOUPDATE $(PRELIB)$(<:S=$(SUFLIB)) ;
-
-  LINKFLAGS on $(_target) += /dll $(LINKFLAGS) ;
+    # Add grist to file names
+    local _sources = [ FGristFiles $(>) ] ;
+    local _objects = $(_sources:S=$(SUFOBJ)) ;
+    
+    # Add library name decorations <name><.dll/.so>
+    local _target = $(PRELIB)$(<:S=$(SUFDLL)) ;
+    
+    Clean clean : $(_target) ;
+    Clean clean : $(_target:S=.lib) ;
+    Clean clean : $(_target:S=.exp) ; 
+    Clean clean : $(_target:S=.pdb) ;
+    Clean clean : $(_target:S=.ilk) ;
+    Clean clean : $(_target:S=.idb) ;
+    Clean clean : $(_target).manifest ;
+    
+    INSTALL_LIB on $(<) += $(_target:S=.lib) $(_target:S=.pdb) ;
+    
+    PDB on $(_objects) = $(_target:S=.pdb) ;
+    
+    Depends $(_sources) : first ;
+    Depends $(PRELIB)$(<:S=$(SUFLIB)) : $(_target) ;
+    
+    # embed manifest into dll
+    if $(MT)
+    {
+        EmbedManifest $(_target) : $(_target).manifest ;
+    }
+    
+    # The *.lib is created before its *.dll and therefore has an older timestamp.
+    # However, the lib depends on the dll and will be recreated everytime a 
+    # target is called using this dll because it seems to be 'old'.
+    # NOUPDATE will ignore the lib's timestamp once it has been created.
+    NOUPDATE $(PRELIB)$(<:S=$(SUFLIB)) ;
+    
+    LINKFLAGS on $(_target) += /dll $(LINKFLAGS) ;
 }
 
 
-rule SharedLibrary_LinkSharedLibrariesImpl
+rule SharedLibrary_LinkSharedLibraries
 {
   # Add library name decorations <name><.dll/.so>
   local _target = $(PRELIB)$(<:S=$(SUFDLL)) ;
@@ -186,20 +189,22 @@ rule SharedLibrary_LinkSharedLibrariesImpl
 }
 
 
-rule SharedLibrary_MakeLocateImpl
+rule SharedLibrary_MakeLocate
 {
-  local _target = $(PRELIB)$(<:S=$(SUFDLL)) ;
+    local _target = $(PRELIB)$(<:S=$(SUFDLL)) ;
+    MakeLocate $(_target) : $(>) ;
 
-  MakeLocate $(_target:S=.lib) : $(>) ;
-  MakeLocate $(_target:S=.exp) : $(>) ;
-  MakeLocate $(_target:S=.pdb) : $(>) ;   
-  MakeLocate $(_target:S=.ilk) : $(>) ;
-  MakeLocate $(_target:S=.idb) : $(>) ;
-  MakeLocate $(_target:S=.dll.manifest) : $(>) ;
+    MakeLocate $(_target:S=.lib) : $(>) ;
+    MakeLocate $(_target:S=.exp) : $(>) ;
+    MakeLocate $(_target:S=.pdb) : $(>) ;   
+    MakeLocate $(_target:S=.ilk) : $(>) ;
+    MakeLocate $(_target:S=.idb) : $(>) ;
+    MakeLocate $(_target:S=.dll.manifest) : $(>) ;
     
-  # create dir before C++ rule creates .pdb files
-  Depends first : $(>) ;
+    # create dir before C++ rule creates .pdb files
+    Depends first : $(>) ;
 }
+
 
 ##########################################################################
 # Build Actions
