@@ -41,6 +41,7 @@ rule ConfigurePlatformSDK
         {
             PLATFORMSDK ?= [ W32_GETREG "HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Microsoft\\Microsoft SDKs\\Windows\\v6.0A\\" : "InstallationFolder" ] ;
             PLATFORMSDK ?= [ W32_GETREG "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Microsoft SDKs\\Windows\\v6.0A\\" : "InstallationFolder" ] ;
+            PLATFORMSDK ?= [ W32_GETREG "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Microsoft SDKs\\Windows\\" : "CurrentInstallFolder" ] ;
         }
         else if $(TARGET_OS:L) = "wince"
         {
