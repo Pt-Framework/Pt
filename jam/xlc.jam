@@ -10,7 +10,7 @@ rule FIncludes
 { return -I$(<) ; }
 
 
-rule Main_LinkSharedLibraries
+rule Main-LinkSharedLibraries
 {
     local _target = [ FAppendSuffix $(<) : $(SUFEXE) ] ;
     local _libs = $(PRELIB)$(>:S=$(SUFDLL)) ;
@@ -40,7 +40,7 @@ rule SharedLibrary-Build
 }
 
 
-rule SharedLibrary_LinkSharedLibraries
+rule SharedLibrary-LinkSharedLibraries
 {
     local _target = $(PRELIB)$(<)$(SUFDLL) ;
     local _libs = $(PRELIB)$(>)$(SUFDLL) ;

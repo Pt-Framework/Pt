@@ -607,7 +607,7 @@ rule LibraryFromObjects
 }
 
 
-rule Library_MakeLocate
+rule Library-MakeLocate
 {
     local _l = $(PRELIB)$(<:S=$(SUFLIB)) ;
     _MakeLocate $(_l) : $(2) ;
@@ -627,7 +627,7 @@ rule LinkFlags
     local _type = $($(<)_type) ;
     if $(_type)
     {
-        $(_type)_LinkFlags $(<) : $(>) ;
+        $(_type)-LinkFlags $(<) : $(>) ;
     }
     else
     {
@@ -641,7 +641,7 @@ rule LinkLibs
     local _type = $($(<)_type) ;
     if $(_type)
     {
-        $(_type)_LinkLibs $(<) : $(>) ;
+        $(_type)-LinkLibs $(<) : $(>) ;
     }
     else
     {
@@ -655,7 +655,7 @@ rule LinkLibraries
     local _type = $($(<)_type) ;
     if $(_type)
     {
-        $(_type)_LinkLibraries $(<) : $(>) : $(3) ;
+        $(_type)-LinkLibraries $(<) : $(>) : $(3) ;
     }
     else
     {
@@ -675,8 +675,8 @@ rule LinkSharedLibraries
     local _type = $($(<)_type) ;
     if $(_type)
     {
-        # Echo Calling $(_type)_LinkSharedLibraries for $(1) ;
-        $(_type)_LinkSharedLibraries $(<) : $(>) : $(3) : $(4) ;
+        # Echo Calling $(_type)-LinkSharedLibraries for $(1) ;
+        $(_type)-LinkSharedLibraries $(<) : $(>) : $(3) : $(4) ;
     }
     else
     {
@@ -705,21 +705,21 @@ rule Main-Build
 }
 
 
-rule Main_LinkFlags
+rule Main-LinkFlags
 {
     local _target = $(<:S=$(SUFEXE)) ;
     LINKFLAGS on $(_target) += $(>) ;
 }
 
 
-rule Main_LinkLibs
+rule Main-LinkLibs
 {
     local _target = $(<:S=$(SUFEXE)) ;
     LINKLIBS on $(_target) += $(>) ;
 }
 
 
-rule Main_LinkLibraries
+rule Main-LinkLibraries
 {
     local _t = $(<:S=$(SUFEXE)) ;
     DEPENDS $(_t) : $(PRELIB)$(>:S=$(SUFLIB)) ;
@@ -728,12 +728,12 @@ rule Main_LinkLibraries
 }
 
 
-rule Main_LinkSharedLibraries
+rule Main-LinkSharedLibraries
 {
 }
 
 
-rule Main_MakeLocate
+rule Main-MakeLocate
 {
     _MakeLocate $(<:S=$(SUFEXE)) : $(>) ;
 }
@@ -801,8 +801,8 @@ rule MakeLocate
     local _type = $($(<)_type) ;
     if $(_type)
     {
-        # Echo Calling $(_type)_MakeLocate for $(1) ;
-        $(_type)_MakeLocate $(<) : $(>) ;
+        # Echo Calling $(_type)-MakeLocate for $(1) ;
+        $(_type)-MakeLocate $(<) : $(>) ;
     }
     else
     {
@@ -1030,21 +1030,21 @@ rule SharedLibraryFromObjects
 }
 
 
-rule SharedLibrary_LinkFlags
+rule SharedLibrary-LinkFlags
 {
     local _target = $(PRELIB)$(<:S=$(SUFDLL)) ;
     LINKFLAGS on $(_target) += $(>) ;
 }
 
 
-rule SharedLibrary_LinkLibs
+rule SharedLibrary-LinkLibs
 {
     local _target = $(PRELIB)$(<:S=$(SUFDLL)) ;
     LINKLIBS on $(_target) += $(>) ;
 }
 
 
-rule SharedLibrary_LinkLibraries
+rule SharedLibrary-LinkLibraries
 {
     local _t = $(PRELIB)$(<)$(SUFDLL) ;
     DEPENDS $(_t) : $(PRELIB)$(>:S=$(SUFLIB)) ;
@@ -1053,16 +1053,10 @@ rule SharedLibrary_LinkLibraries
 }
 
 
-rule SharedLibrary_MakeLocate
+rule SharedLibrary-MakeLocate
 {
     local _target = $(PRELIB)$(<:S=$(SUFDLL)) ;
     MakeLocate $(_target) : $(>) ;
-    SharedLibrary_MakeLocateImpl $(<) : $(>) ;
-}
-
-
-rule SharedLibrary_MakeLocateImpl
-{
 }
 
 
@@ -1071,7 +1065,7 @@ rule SharedLibrary_MakeLocateImpl
 # @param < the target name
 # @param > list of shared libraries to link
 #
-rule SharedLibrary_LinkSharedLibraries
+rule SharedLibrary-LinkSharedLibraries
 {
 }
 

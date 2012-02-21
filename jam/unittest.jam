@@ -36,36 +36,41 @@ rule PtUnitTest
 }
 
 
-rule PtUnitTest_MakeLocate
+rule PtUnitTest-MakeLocate
 {
   local _output = $(<:S=.unit) ;
 
-  Main_MakeLocate $(<) : $(>) ;
+  Main-MakeLocate $(<) : $(>) ;
   MakeLocate $(_output) : $(>) ;
 }
 
 
-rule PtUnitTest_LinkFlags
+rule PtUnitTest-LinkLibs
 {
-  Main_LinkFlags $(<) : $(>) : $(3) : $(4) ;
+  Main-LinkLibs $(<) : $(>) : $(3) : $(4) ;
+}
+
+rule PtUnitTest-LinkFlags
+{
+  Main-LinkFlags $(<) : $(>) : $(3) : $(4) ;
 }
 
 
-rule PtUnitTest_LinkLibraries
+rule PtUnitTest-LinkLibraries
 {
-  Main_LinkLibraries $(<) : $(>) : $(3) : $(4) ;
+  Main-LinkLibraries $(<) : $(>) : $(3) : $(4) ;
 }
 
 
-rule PtUnitTest_LinkLibraries
+rule PtUnitTest-LinkLibraries
 {
-  Main_LinkLibraries $(<) : $(>) : $(3) : $(4) ;
+  Main-LinkLibraries $(<) : $(>) : $(3) : $(4) ;
 }
 
 
-rule PtUnitTest_LinkSharedLibraries
+rule PtUnitTest-LinkSharedLibraries
 {
-  Main_LinkSharedLibraries $(<) : $(>) : $(3) : $(4) ;
+  Main-LinkSharedLibraries $(<) : $(>) : $(3) : $(4) ;
 }
 
 

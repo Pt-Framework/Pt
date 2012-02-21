@@ -51,7 +51,7 @@ rule Library-Build
 }
 
 
-rule Library_MakeLocate
+rule Library-MakeLocate
 {
     local _l = $(PRELIB)$(<:S=$(SUFLIB)) ;
     _MakeLocate $(_l) : $(>) ;
@@ -94,7 +94,7 @@ rule Main-Build
 }
 
 
-rule Main_LinkSharedLibraries
+rule Main-LinkSharedLibraries
 {
     local _target = $(<:S=$(SUFEXE)) ;
     
@@ -105,13 +105,13 @@ rule Main_LinkSharedLibraries
     }
     else
     {
-        Main_LinkLibraries $(<) : $(>) ;
+        Main-LinkLibraries $(<) : $(>) ;
         Depends $(_target) : $(>:S=$(SUFDLL)) ;
     }
 }
 
 
-rule Main_MakeLocate
+rule Main-MakeLocate
 {
     local _target = $(<:S=$(SUFEXE)) ;
 
@@ -171,7 +171,7 @@ rule SharedLibrary-Build
 }
 
 
-rule SharedLibrary_LinkSharedLibraries
+rule SharedLibrary-LinkSharedLibraries
 {
   # Add library name decorations <name><.dll/.so>
   local _target = $(PRELIB)$(<:S=$(SUFDLL)) ;
@@ -183,13 +183,13 @@ rule SharedLibrary_LinkSharedLibraries
   }
   else
   {
-    SharedLibrary_LinkLibraries $(<) : $(>) ;
+    SharedLibrary-LinkLibraries $(<) : $(>) ;
     Depends $(_target) : $(>:S=$(SUFDLL)) ;
   }
 }
 
 
-rule SharedLibrary_MakeLocate
+rule SharedLibrary-MakeLocate
 {
     local _target = $(PRELIB)$(<:S=$(SUFDLL)) ;
     MakeLocate $(_target) : $(>) ;
