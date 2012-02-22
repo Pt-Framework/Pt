@@ -69,7 +69,7 @@ void ProcessTest::RedirectStdout()
 
     Pt::System::Process p(procInfo);
 
-    p.setEnvVar("PATH", ".");
+    //p.setEnvVar("PATH", ".");
     p.start();
     p.wait();
 
@@ -94,7 +94,7 @@ void ProcessTest::RedirectStderr()
 
     Pt::System::Process p(procInfo);
 
-    p.setEnvVar("PATH", ".");
+    //p.setEnvVar("PATH", ".");
     p.start();
     p.wait();
 
@@ -118,7 +118,7 @@ void ProcessTest::RedirectStdin()
 
     Pt::System::Process p(procInfo);
 
-    p.setEnvVar("PATH", ".");
+    //p.setEnvVar("PATH", ".");
     p.start();
 
     p.stdInput()->write("42", 2);
@@ -137,7 +137,7 @@ void ProcessTest::ProcessAbort()
 
     Pt::System::Process p(procInfo);
 
-    p.setEnvVar("PATH", ".");
+    //p.setEnvVar("PATH", ".");
     p.start();
     PT_UNIT_ASSERT_THROW(p.wait(), Pt::System::ProcessFailed);
 }

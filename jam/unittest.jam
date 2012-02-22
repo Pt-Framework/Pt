@@ -35,9 +35,8 @@ if $(UNIX)
 {
   actions PtUnitTestAction
   {
-    sh -c "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$(>:D) DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:$(>:D) ./$(>) -f $(<)"
+    sh -c "PATH=$PATH:$(>:D) LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$(>:D) DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:$(>:D) ./$(>) -f $(<)"
   }
-
 }
 else
 {
@@ -45,7 +44,6 @@ else
   {
     $(>) -f $(<)
   }
-
 }
 
 # old action for windows ce device simulator
