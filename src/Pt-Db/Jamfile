@@ -37,7 +37,8 @@ PT_DB_TESTS = ResultImplTest.cpp
               SqliteTest.cpp
               ValueImplTest.cpp
               ;
-PtUnitTest  Pt-Db-test : Pt-Db-test.cpp $(PT_DB_TESTS) ;
+Main  Pt-Db-test : Pt-Db-test.cpp $(PT_DB_TESTS) ;
 LinkSharedLibraries Pt-Db-test : Pt-Db Pt-Unit Pt-System Pt ;
 MakeLocate Pt-Db-test : $(OUTPUT_TARGET) ;
+RunUnitTest Pt-Db-test : $(OUTPUT_TEST) ;
 

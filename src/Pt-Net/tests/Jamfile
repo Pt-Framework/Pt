@@ -2,10 +2,11 @@ SubDir TOP src Pt-Net tests ;
 SubDirHdrs $(TOP)/include ;
 SubDirObjects $(OUTPUT_OBJECT) Pt-Net ;
 
-PtUnitTest Pt-Net-test : Pt-Net-test.cpp
-                         TcpSocketTest.cpp
-                         UdpSocketTest.cpp
-                         ;
+Main Pt-Net-test : Pt-Net-test.cpp
+                   TcpSocketTest.cpp
+                   UdpSocketTest.cpp
+                   ;
 LinkSharedLibraries Pt-Net-test : Pt Pt-Net Pt-System Pt-Unit ;
 MakeLocate Pt-Net-test : $(OUTPUT_TARGET) ;
+RunUnitTest Pt-Net-test : $(OUTPUT_TEST) ;
 

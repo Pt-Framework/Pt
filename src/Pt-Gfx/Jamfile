@@ -85,13 +85,15 @@ MakeLocate GfxPerf : $(OUTPUT_TARGET) ;
 
 }
 
-PtUnitTest ImagePainterTest : ImagePainterTest.cpp ;
+Main ImagePainterTest : ImagePainterTest.cpp ;
 LinkSharedLibraries ImagePainterTest : Pt Pt-System  Pt-Gfx Pt-Unit ;
 MakeLocate ImagePainterTest : $(OUTPUT_TARGET) ;
+RunUnitTest ImagePainterTest : $(OUTPUT_TEST) ;
 
-PtUnitTest PlanarImageTest : PlanarImageTest.cpp ;
+Main PlanarImageTest : PlanarImageTest.cpp ;
 LinkSharedLibraries PlanarImageTest : Pt Pt-Gfx  Pt-System Pt-Unit ;
 MakeLocate PlanarImageTest : $(OUTPUT_TARGET) ;
+RunUnitTest PlanarImageTest : $(OUTPUT_TEST) ;
 
 Main MakeFontHeader : MakeFontHeader.cpp ;
 MakeLocate MakeFontHeader : $(OUTPUT_TARGET) ;
@@ -103,7 +105,6 @@ MakeLocate ColorTest : $(OUTPUT_TARGET) ;
 Main ImageTest : ImageTest.cpp ;
 LinkSharedLibraries ImageTest : Pt Pt-System  Pt-Gfx ;
 MakeLocate ImageTest : $(OUTPUT_TARGET) ;
-
 
 if ! $(FREETYPE_LINKFLAGS)
 {

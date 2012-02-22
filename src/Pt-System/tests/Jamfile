@@ -14,9 +14,10 @@ PT_SYSTEM_TESTS = ApplicationTest.cpp
                   UriTest.cpp
                   ;
 
-PtUnitTest Pt-System-test : Pt-System-test.cpp $(PT_SYSTEM_TESTS) ;
+Main Pt-System-test : Pt-System-test.cpp $(PT_SYSTEM_TESTS) ;
 LinkSharedLibraries Pt-System-test : Pt Pt-System Pt-Unit ;
 MakeLocate Pt-System-test : $(OUTPUT_TARGET) ;
+RunUnitTest Pt-System-test : $(OUTPUT_TEST) ;
 
 Main ProcessTestChild : ProcessTestChild.cpp ;
 MakeLocate ProcessTestChild : $(OUTPUT_TARGET) ;

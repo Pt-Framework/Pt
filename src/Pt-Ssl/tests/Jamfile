@@ -2,8 +2,9 @@ SubDir TOP src Pt-Ssl tests ;
 SubDirHdrs $(TOP)/include ;
 SubDirObjects $(OUTPUT_OBJECT) Pt-Ssl ;
 
-PtUnitTest Pt-Ssl-test : Pt-Ssl-test.cpp
-                         ContextTest.cpp
-                         ;
+Main Pt-Ssl-test : Pt-Ssl-test.cpp
+                   ContextTest.cpp
+                   ;
 LinkSharedLibraries Pt-Ssl-test : Pt Pt-Net Pt-Ssl Pt-System Pt-Unit ;
 MakeLocate Pt-Ssl-test : $(OUTPUT_TARGET) ;
+RunUnitTest Pt-Ssl-test : $(OUTPUT_TEST) ;

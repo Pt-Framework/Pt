@@ -13,7 +13,7 @@ ALL_LOCATE_TARGET = build$(SLASH)$(CONFIG) ;
 # this is used by MakeLocate and SubDirObjects in the Jamfiles
 OUTPUT_TARGET = build$(SLASH)$(CONFIG) ;
 OUTPUT_OBJECT = tmp$(SLASH)$(CONFIG) ;
-OUTPUT_TEST = testing$(SLASH)$(CONFIG) ;
+OUTPUT_TEST = build$(SLASH)$(CONFIG) ;
 
 # installation directories
 INSTALL_DIR ?= [ FDirName $(TOP) deploy $(CONFIG) ] ;
@@ -37,6 +37,7 @@ Echo "Optimisation (OPTIM)..." $(OPTIM) ;
 Echo "Warnings (WARN)..." $(WARN) ;
 Echo "Build targets (OUTPUT_TARGET)..." $(OUTPUT_TARGET) ;
 Echo "Build objects (OUTPUT_OBJECT)..." $(OUTPUT_OBJECT) ;
+Echo "Unit tests (OUTPUT_TEST)..." $(OUTPUT_TEST) ;
 Echo "Install programs (INSTALL_BINDIR)..." $(INSTALL_BINDIR) ;
 Echo "Install includes (INSTALL_INCLUDEDIR)..." $(INSTALL_INCLUDEDIR) ;
 Echo "Install libraries (INSTALL_LIBDIR)..." $(INSTALL_LIBDIR) ;

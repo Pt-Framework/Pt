@@ -3,7 +3,7 @@ SubDirHdrs $(TOP)/include ;
 SubDirHdrs $(TOP)/src/Pt-Reflex ;
 SubDirObjects $(OUTPUT_OBJECT) Pt-Reflex ;
 
-PtUnitTest Pt-Reflex-test : ReflectableTest.cpp ;
+Main Pt-Reflex-test : ReflectableTest.cpp ;
 LinkSharedLibraries Pt-Reflex-test : Pt Pt-Reflex Pt-Unit ;
 MakeLocate Pt-Reflex-test : $(OUTPUT_TARGET) ;
-
+RunUnitTest Pt-Reflex-test : $(OUTPUT_TEST) ;
