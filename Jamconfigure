@@ -1,9 +1,16 @@
 #############################################################################
 # Compiler and linker settings
 #############################################################################
-# TODO: should be:
-# if $(DEBUG) { CONFIG ?= debug ; } else { CONFIG ?= release ; }
-CONFIG ?= release ;
+
+if $(WITH_DEBUG) 
+{ 
+    CONFIG ?= debug ; 
+}
+else 
+{ 
+    CONFIG ?= release ; 
+}
+
 Configure CONFIG ;
 Echo "Using configuration..." $(CONFIG) ;
 

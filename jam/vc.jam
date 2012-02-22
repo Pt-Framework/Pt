@@ -1,4 +1,215 @@
 ##########################################################################
+# Configuration rules
+##########################################################################
+
+rule TryBuild
+{
+    local _cc = "set PATH=$(VISUALC_PATH);%PATH% & " \""$(1)\"" ;
+    local _link = "set PATH=$(VISUALC_PATH);%PATH% & " \""$(LINK)\"" ;
+    local _src = $(2) ;
+    local _cflags = $(3) ;
+    local _l = $(4) ;
+    local _L = $(5) ;
+    local _obj = $(_src:S=$(SUFOBJ))  ;
+    local _out = $(_src:S=$(SUFDLL))  ;
+
+    local _cmd = $(_cc) /MDd $(_cflags) /c /Fo$(_obj) /I$(STDHDRS) /Tp $(_src) ;
+    local _r = [ TryCommand $(_cmd) ] ;
+
+    if $(_r) && $(4)
+    {
+        _cmd = $(_link) /dll $(LINKFLAGS) /out:$(_out) $(_obj) /LIBPATH:$(5) $(LINKLIBS) $(4) ;
+        _r = [ TryCommand $(_cmd) ] ;
+        TryCommand $(RM) $(_out) ;
+        TryCommand $(RM) $(_out).manifest ;
+    }
+
+    TryCommand $(RM) $(_obj) ;
+    TryCommand $(RM) $(_obj:S=.ilk) ;
+    TryCommand $(RM) $(_obj:S=.pdb) ;
+    
+    return $(_r) ;
+}
+
+
+rule TryBuildCc
+{
+    local _cflags = $(CCFLAGS) $(2) ;
+    return [ TryBuild $(CC) : $(1) : $(_cflags) : $(3) : $(4) ] ;
+}
+
+
+rule TryBuildC++
+{
+    local _cflags = $(C++FLAGS) $(2) ;
+    return [ TryBuild $(C++) : $(1) : $(_cflags) : $(3) : $(4) ] ;
+}
+
+
+rule ConfigureCc
+{
+    ConfigureVisualC ;
+
+    if ! $(CC_CONFIGURED)
+    {
+        CC_CONFIGURED = 1 ;
+
+        if $(TARGET_OS:L) = "nt"
+        {
+            ConfigureMt ;
+
+            LINKFLAGS += /MANIFEST ;
+
+            if $(TARGET_OSPLAT:L) = "x64"
+            {
+                if $(PROCESSOR_ARCHITECTURE:L) = "amd64"
+                {
+                    # TODO: we could use the 32-bit compiler programs too...
+                    AS   = $(VISUALC)\\vc\\bin\\amd64\\ml64 ;
+                    AR   = $(VISUALC)\\vc\\bin\\amd64\\lib ;
+                    CC   = $(VISUALC)\\vc\\bin\\amd64\\cl /nologo ;
+                    LINK = $(VISUALC)\\vc\\bin\\amd64\\link /nologo ;
+                }
+                else # PROCESSOR_ARCHITECTURE = "x86"
+                {
+                    AS   = $(VISUALC)\\vc\\bin\\x86_amd64\\ml64 ;
+                    AR   = $(VISUALC)\\vc\\bin\\x86_amd64\\lib ;
+                    CC   = $(VISUALC)\\vc\\bin\\x86_amd64\\cl /nologo ;
+                    LINK = $(VISUALC)\\vc\\bin\\x86_amd64\\link /nologo ;
+                }
+            }
+            else if $(TARGET_OSPLAT:L) = "x86"
+            {
+                AS        = $(VISUALC)\\vc\\bin\\ml ;
+                AR        = $(VISUALC)\\vc\\bin\\lib ;
+                CC        = $(VISUALC)\\vc\\bin\\cl /nologo ;
+                LINK      = $(VISUALC)\\vc\\bin\\link /nologo ;
+            }
+        }
+        else if $(TARGET_OS:L) = "wince"
+        {
+            MAINLINKFLAGS += /ENTRY:mainWCRTStartup ;
+            LINKFLAGS += /MANIFEST:NO ;
+            LINKLIBS += "corelibc.lib ccrtrtti.lib secchk.lib" ;
+
+            if $(TARGET_OSPLAT:L) = "arm"
+            {
+                AS   = $(VISUALC)\\VC\\ce\\bin\\x86_arm\\armasm ;
+                AR   = $(VISUALC)\\VC\\bin\\lib ;
+                CC   = $(VISUALC)\\VC\\ce\\bin\\x86_arm\\cl /nologo ;
+                LINK = $(VISUALC)\\VC\\ce\\bin\\x86_arm\\link /nologo ;
+            }
+        }
+
+        Configure AS : $(AS) ;
+        Echo "Checking for assember..." $(AS:BS) ;
+    
+        Configure AR : $(AR) ;
+        Echo "Checking for archiver..." $(AR:BS) ;
+    
+        Configure CC : $(CC) ;
+        Echo "Checking for C compiler..." $(CC:BS) ;
+    
+        Configure LINK : $(LINK) ;
+        Echo "Checking for linker..." $(LINK:BS) ;
+
+        Configure MAINLINKFLAGS ;
+        Configure LINKFLAGS ;
+        Configure LINKLIBS ;
+        
+        if $(TARGET_OS:L) = "nt"
+        {
+            STDHDRS += \""$(VISUALC)\\vc\\include\"" ;
+
+            if $(TARGET_OSPLAT:L) = "x64"
+            {   
+                LINKFLAGS += /LIBPATH:\""$(VISUALC)\\vc\\lib\\amd64\"" ;
+            }
+            else if $(TARGET_OSPLAT:L) = "x86"
+            {
+                LINKFLAGS += /LIBPATH:\""$(VISUALC)\\vc\\lib\"" ;
+            }
+        }
+        else if $(TARGET_OS:L) = "wince"
+        {
+            STDHDRS += \"$(VISUALC)\\vc\\ce\\include\" ;
+
+            if $(TARGET_OSPLAT:L) = "arm"
+            {
+                LINKFLAGS += /LIBPATH:\""$(VISUALC)\\VC\\ce\\lib\\armv4\"" ;
+            }
+        }
+
+        Configure STDHDRS ;
+        Configure LINKFLAGS ;
+
+        if $(CONFIG:L) = debug 
+        {
+            CCFLAGS   += /MDd /D "DEBUG" /D "_DEBUG" ;
+            OPTIM     ?= /Od /Zi ;
+            LINKFLAGS += /DEBUG ;
+        }
+        else 
+        {
+            CCFLAGS += /MD /D "NDEBUG" ;
+            OPTIM   ?= /Ox /Ot /Oy ;
+        }
+
+        WARN      ?= /W3 ;
+        UNDEFFLAG  = "/u _" ;
+
+        Configure CCFLAGS ;
+        Configure LINKFLAGS ;
+        Configure OPTIM ;
+        Configure WARN ;
+        Configure UNDEFFLAG ;
+
+        ConfigurePlatformSDK ;
+    }
+}
+
+
+rule ConfigureC++
+{
+    ConfigureVisualC ;
+
+    ConfigureCc ;
+
+    if ! $(C++_CONFIGURED)
+    {
+        C++_CONFIGURED = 1 ;
+
+        C++ = $(CC) ;
+        Configure C++ ;
+        Echo "Checking for C++ compiler..." $(C++:BS) ;
+
+        LINK++ = $(LINK) ;
+        Configure LINK++ ;
+        Echo "Checking for C++ linker" $(LINK++:BS) ;
+
+        C++FLAGS += /EHsc /fp:fast /GR /TP /FD ;
+
+        if $(CONFIG:L) = debug 
+        {
+            C++FLAGS  += /MDd /D "DEBUG" /D "_DEBUG" ;
+        }
+        else
+        {
+            C++FLAGS += /MD /D "NDEBUG" ;
+        }
+
+        Configure C++FLAGS ;
+
+        local _r = [ CheckBuildC++ "#include <iostream>"
+                                   "int main() { std::cout << 42; return 0; }" ] ;
+        if ! $(_r)
+        {
+            Exit "ERROR: configured C++ compiler does not work" ;
+        }
+    }
+}
+
+##########################################################################
 # Build Rules
 ##########################################################################
 
@@ -204,7 +415,6 @@ rule SharedLibrary-MakeLocate
     # create dir before C++ rule creates .pdb files
     Depends first : $(>) ;
 }
-
 
 ##########################################################################
 # Build Actions

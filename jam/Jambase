@@ -33,6 +33,7 @@ if $(CONFIGURE)
         if $(_arg) = --debug
         {
             CONFIG = debug ;
+            WITH_DEBUG = yes ;
         }
     }
 

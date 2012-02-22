@@ -19,6 +19,37 @@ CONFIG_JAM = config.jam ;
 
 CONFIGURED_VARIABLES = ;
 
+# Replaces occurrences of a match string in a given string and returns the new
+# string. The match string can be a regex expression.
+#
+# example: s = [ replace "Feet\\Street" "\\\\" "\\\\" ] ;
+#
+# replaces one backslash with two. 
+# Note that the match argument must be doubly escaped.
+#
+rule Replace (
+    string  # The string to modify.
+    match  # The characters to replace.
+    replacement  # The string to replace with.
+    )
+{
+    local result = "" ;
+    local parts = 1 ;
+    while $(parts)
+    {
+        parts = [ MATCH ^(.*)($(match))(.*) : $(string) ] ;
+        if $(parts)
+        {
+            parts += "" ;
+            result = "$(replacement)$(parts[3])$(result)" ;
+            string = $(parts[1]) ;
+        }
+    }
+    string ?= "" ;
+    result = "$(string)$(result)" ;
+    return $(result) ;
+}
+
 rule Configure
 {
     local _found ;
@@ -51,7 +82,12 @@ rule ConfigureExit
         local _value ;
         for _v in $($(_var))
         {
-            local _valtmp = [ Escape $(_v) ] ;
+            # TODO remove this from builtins.c
+            #local _valtmp = [ Escape $(_v) ] ;
+
+            local _valtmp ;
+            _valtmp = [ Replace $(_v) "\\\\" "\\\\" ] ;
+            _valtmp = [ Replace $(_valtmp) "\"" "\\\"" ] ;
             _value += "\"$(_valtmp)\"" ;
         }
     
@@ -354,7 +390,7 @@ rule ConfigureToolset
 
     Echo "Checking for toolset..."$(TOOLSET:L) ;
     Configure TOOLSET : $(TOOLSET) ;
-    Load $(TOOLSET:L)-configure.jam ;
+    Load $(TOOLSET:L).jam ;
 }
 
 
