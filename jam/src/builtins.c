@@ -2452,6 +2452,7 @@ LIST *builtin_exec( FRAME * frame, int flags)
     LIST*                command = 0;
     OBJECT*              varname = 0;
     LIST*                shell = 0;
+    int                  oldval = 0;
     exec_ret_val_closure ervc;
 
     command = lol_get( frame->args, 0 );
@@ -2462,8 +2463,7 @@ LIST *builtin_exec( FRAME * frame, int flags)
     shell = var_get( varname );
     object_free( varname );
 
-
-    int oldval = globs.pipe_action;
+    oldval = globs.pipe_action;
     globs.pipe_action = 2; // Only output stderr
 
     exec_cmd( object_str( command->value ), exec_closure, &ervc, shell, 0, 0);
