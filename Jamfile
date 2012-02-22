@@ -55,24 +55,27 @@ PT_INSTALL_INCLUDES += [ GLOB $(PT_INCLUDES_SUBDIR) : *.tpp  ] ;
 InstallFile [ FDirName $(INSTALL_INCLUDEDIR) Pt Db ] : $(PT_INSTALL_INCLUDES:BS) ;
 
 SubInclude TOP src Pt ;
-SubInclude TOP src Pt-System ;
-SubInclude TOP src Pt-Net ;
 SubInclude TOP src Pt-Reflex ;
-SubInclude TOP src Pt-Cma ;
-SubInclude TOP src Pt-Http ;
-SubInclude TOP src Pt-Db ;
-SubInclude TOP src Pt-Gfx ;
 SubInclude TOP src Pt-Unit ;
 SubInclude TOP src Pt-Xml ;
-SubInclude TOP src Pt-XmlRpc ;
+SubInclude TOP src Pt-Gfx ;
 
-if $(WITH_OPENSSL) = yes
+if $(SYS)
 {
-    SubInclude TOP src Pt-Ssl ;
-}
+    SubInclude TOP src Pt-System ;
+    SubInclude TOP src Pt-Net ;
+    SubInclude TOP src Pt-Cma ;
+    SubInclude TOP src Pt-Db ;
+    SubInclude TOP src Pt-Http ;
+    SubInclude TOP src Pt-XmlRpc ;
 
-if $(GUI)
-{
-    SubInclude TOP src Pt-Gui ;
+    if $(WITH_OPENSSL) = yes
+    {
+        SubInclude TOP src Pt-Ssl ;
+    }
+    
+    if $(GUI)
+    {
+        SubInclude TOP src Pt-Gui ;
+    }
 }
-

@@ -32,38 +32,28 @@ if ! $(SYS)
                                  "int main() { return 0; }" ] ;
     if $(WITH_WIN32)
     {
+        Load win32.jam ;
+    
+        ConfigurePsapi ;
+    
+        if $(WITH_PSAPI)
+        {
+            SYSLIBS += $(PSAPI_LIBS) ;
+        }
+    
+        ConfigureWsa ;
+    
+        if ! $(WITH_WSA)
+        {
+            Exit "ERROR: WSA is required." ;
+        }
+    
+        NETLIBS = $(WSA_LIBS) ;
         SYS = win32 ;
     }
-    else
-    {
-        SYS = posix ;
-    }
 }
 
-Echo "Checking for subsystem ..." $(SYS) ;
-Configure SYS ;
-
-if $(SYS) = "win32"
-{
-    Load win32.jam ;
-
-    ConfigurePsapi ;
-
-    if $(WITH_PSAPI)
-    {
-        SYSLIBS += $(PSAPI_LIBS) ;
-    }
-
-    ConfigureWsa ;
-
-    if ! $(WITH_WSA)
-    {
-        Exit "ERROR: WSA is required." ;
-    }
-
-    NETLIBS = $(WSA_LIBS) ;
-}
-else if $(SYS) = "posix"
+if ! $(SYS)
 {
     Load posix.jam ;
 
@@ -98,12 +88,16 @@ else if $(SYS) = "posix"
     }  
 
     NETLIBS = $(UNIX_SOCKET_LIBS) $(NSL_LIBS) ;
+    SYS = posix ;
 }
 
 if $(TARGET_OS) = "aix"
 {
     LINKLIBS += $(SYSLIBS) ;
 }
+
+Echo "Using subsystem ..." $(SYS) ;
+Configure SYS ;
 
 Configure SYSLIBS ;
 Echo "Using system libraries..." $(SYSLIBS) ;
@@ -152,32 +146,7 @@ if ! $(FREETYPE_INCLUDES) || ! $(FREETYPE_LINKFLAGS)
 # GUI libraries and includes
 #############################################################################
 
-if $(TARGET_OS:L) = "qnxnto"
-{
-    GUI     ?= photon ;
-    GUILIBS = -lphrender -lph ;
-    WITH_GUI = $(YES) ;
-}
-if $(TARGET_OS:L) = "symbian"
-{
-    GUI = symbian-eikon ;
-    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\apparc.dso ;
-    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\cone.dso ;
-    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\eikcore.dso ;
-    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\avkon.dso ;
-    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\commonengine.dso ;
-    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\estor.dso ;
-    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\hlplch.dso ;
-    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\bafl.dso ;
-    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\charconv.dso ;
-    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\ws32.dso ;
-    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\fbscli.dso ;
-    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\bitgdi.dso ;
-    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\gdi.dso ;
-    WITH_GUI = $(YES) ;
-}
-
-if ! $(WITH_GUI)
+if ! $(GUI) || GUI = "gdi"
 {
     WITH_GUI = [ CheckBuildC++ "#include <windows.h>"
                                "int main() { WNDCLASS wc; RegisterClass(&wc); return 0; }" ] ;
@@ -195,7 +164,7 @@ if ! $(WITH_GUI)
     }
 }
 
-if ! $(WITH_GUI)
+if ! $(GUI)  || GUI = "x11"
 {
     Load x11.jam ;
 
@@ -213,7 +182,7 @@ if ! $(WITH_GUI)
     }
 }
 
-if ! $(WITH_GUI)
+if ! $(GUI) || GUI = "cocoa"
 {
     WITH_GUI = [ CheckBuildC++ "#include <CoreFoundation/CFRunLoop.h>"
                                "int main() {"
@@ -231,6 +200,30 @@ if ! $(WITH_GUI)
     # iOS aspen:
     #GUI     ?= uikit ;
     #GUILIBS = -framework UIKit -framework Foundation -framework CoreGraphics ;
+}
+
+if ! $(GUI) || $(GUI:L) = "photon"
+{
+    GUI     ?= photon ;
+    GUILIBS = -lphrender -lph ;
+}
+
+if ! $(GUI) || $(GUI:L) = "symbian-eikon"
+{
+    GUI = symbian-eikon ;
+    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\apparc.dso ;
+    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\cone.dso ;
+    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\eikcore.dso ;
+    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\avkon.dso ;
+    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\commonengine.dso ;
+    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\estor.dso ;
+    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\hlplch.dso ;
+    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\bafl.dso ;
+    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\charconv.dso ;
+    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\ws32.dso ;
+    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\fbscli.dso ;
+    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\bitgdi.dso ;
+    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\gdi.dso ;
 }
 
 Configure GUI ;

@@ -34,7 +34,9 @@ SharedLibrary Pt-Gfx : ARgbColor.cpp
                        Stroke.cpp
                        ;
 
-LinkSharedLibraries Pt-Gfx : Pt  Pt-System ;
+LinkSharedLibraries Pt-Gfx : Pt ;
+MakeLocate Pt-Gfx : $(OUTPUT_TARGET) ;
+
 if $(FREETYPE_LINKFLAGS)
 {
     LinkFlags Pt-Gfx : $(FREETYPE_LINKFLAGS) ;
@@ -43,17 +45,8 @@ else
 {
     LinkLibraries Pt-Gfx : Pt-Gfx-freetype ;
 }
-MakeLocate Pt-Gfx : $(OUTPUT_TARGET) ;
 
-Main GreyscaleTest : GreyscaleTest.cpp ;
-LinkSharedLibraries GreyscaleTest : Pt Pt-System  Pt-Gfx ;
-MakeLocate GreyscaleTest : $(OUTPUT_TARGET) ;
-
-Main BlockscaleTest : BlockscaleTest.cpp ;
-LinkSharedLibraries BlockscaleTest : Pt Pt-System  Pt-Gfx ;
-MakeLocate BlockscaleTest : $(OUTPUT_TARGET) ;
-
-if $(GUI) != none
+if $(GUI)
 {
 Main ImagePainterDemo : ImagePainterDemo.cpp ;
 LinkSharedLibraries ImagePainterDemo : Pt Pt-System  Pt-Gfx Pt-Gui ;
@@ -85,13 +78,21 @@ MakeLocate GfxPerf : $(OUTPUT_TARGET) ;
 
 }
 
+Main GreyscaleTest : GreyscaleTest.cpp ;
+LinkSharedLibraries GreyscaleTest : Pt Pt-Gfx ;
+MakeLocate GreyscaleTest : $(OUTPUT_TARGET) ;
+
+Main BlockscaleTest : BlockscaleTest.cpp ;
+LinkSharedLibraries BlockscaleTest : Pt Pt-Gfx ;
+MakeLocate BlockscaleTest : $(OUTPUT_TARGET) ;
+
 Main ImagePainterTest : ImagePainterTest.cpp ;
-LinkSharedLibraries ImagePainterTest : Pt Pt-System  Pt-Gfx Pt-Unit ;
+LinkSharedLibraries ImagePainterTest : Pt Pt-Gfx Pt-Unit ;
 MakeLocate ImagePainterTest : $(OUTPUT_TARGET) ;
 RunUnitTest ImagePainterTest : $(OUTPUT_TEST) ;
 
 Main PlanarImageTest : PlanarImageTest.cpp ;
-LinkSharedLibraries PlanarImageTest : Pt Pt-Gfx  Pt-System Pt-Unit ;
+LinkSharedLibraries PlanarImageTest : Pt Pt-Gfx Pt-Unit ;
 MakeLocate PlanarImageTest : $(OUTPUT_TARGET) ;
 RunUnitTest PlanarImageTest : $(OUTPUT_TEST) ;
 
@@ -99,11 +100,11 @@ Main MakeFontHeader : MakeFontHeader.cpp ;
 MakeLocate MakeFontHeader : $(OUTPUT_TARGET) ;
 
 Main ColorTest : ColorTest.cpp ;
-LinkSharedLibraries ColorTest : Pt Pt-System  Pt-Gfx ;
+LinkSharedLibraries ColorTest : Pt Pt-Gfx ;
 MakeLocate ColorTest : $(OUTPUT_TARGET) ;
 
 Main ImageTest : ImageTest.cpp ;
-LinkSharedLibraries ImageTest : Pt Pt-System  Pt-Gfx ;
+LinkSharedLibraries ImageTest : Pt Pt-Gfx ;
 MakeLocate ImageTest : $(OUTPUT_TARGET) ;
 
 if ! $(FREETYPE_LINKFLAGS)

@@ -15,6 +15,6 @@ PT_UNIT_SOURCES = Application.cpp
                  ;
 
 SharedLibrary Pt-Unit : $(PT_UNIT_SOURCES) ;
-LinkSharedLibraries Pt-Unit : Pt Pt-System ;
+LinkSharedLibraries Pt-Unit : Pt ;
 MakeLocate Pt-Unit : $(OUTPUT_TARGET) ;
 MakeInstall Pt-Unit : $(INSTALL_LIBDIR) ;

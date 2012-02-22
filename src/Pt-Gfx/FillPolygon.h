@@ -26,7 +26,6 @@
 #include <Pt/Gfx/ARgbImage.h>
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/Point.h>
-#include <Pt/System/Clock.h>
 #include <Pt/Gfx/ClipPolygon.h>
 #include "Edge.h"
 #include "EdgeTable.h"
@@ -92,7 +91,6 @@ class FillPolygon
         EdgeSet           _globalEdgeTable;
         ActiveEdgeTable   _activeEdgeTable;
         EdgeSet::iterator _currentPos;
-        Pt::System::Clock _clock;
 };
 
 } //namespace Gfx

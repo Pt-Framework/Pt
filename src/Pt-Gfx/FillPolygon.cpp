@@ -30,8 +30,6 @@
  */
 #include "FillPolygon.h"
 #include "Pt/Gfx/Rect.h"
-#include "Pt/System/Clock.h"
-
 #include <iostream>
 #include <algorithm>
 
