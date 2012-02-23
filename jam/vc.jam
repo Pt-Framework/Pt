@@ -143,7 +143,7 @@ rule ConfigureCc
         Configure STDHDRS ;
         Configure LINKFLAGS ;
 
-        if $(CONFIG:L) = debug 
+        if $(WITH_DEBUG)
         {
             CCFLAGS   += /MDd /D "DEBUG" /D "_DEBUG" ;
             OPTIM     ?= /Od /Zi ;
@@ -189,7 +189,7 @@ rule ConfigureC++
 
         C++FLAGS += /EHsc /fp:fast /GR /TP /FD ;
 
-        if $(CONFIG:L) = debug 
+        if $(WITH_DEBUG)
         {
             C++FLAGS  += /MDd /D "DEBUG" /D "_DEBUG" ;
         }

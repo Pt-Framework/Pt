@@ -165,7 +165,7 @@ rule ConfigureCc
             CCFLAGS += -fPIC ;
         }
 
-        if $(CONFIG:L) = debug
+        if $(WITH_DEBUG)
         {
             CCFLAGS += -DDEBUG ;
             OPTIM   ?= -O0 -g ;
@@ -237,7 +237,7 @@ rule ConfigureC++
             C++FLAGS += -fPIC ;
         }
 
-        if $(CONFIG:L) = debug
+        if $(WITH_DEBUG)
         {
             C++FLAGS += -DDEBUG ;
         }

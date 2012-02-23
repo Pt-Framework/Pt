@@ -71,12 +71,12 @@ rule ConfigureCc
         Configure RANLIB ;
         Echo "Checking for ranlib..." $(RANLIB:BS) ;
     
-        if $(CONFIG:L) = debug
+        if $(WITH_DEBUG)
         {
             CCFLAGS += -DEBUG -g ;
             OPTIM   ?= ;
         }
-        else if $(CONFIG:L) = release
+        else
         {
             CCFLAGS += -DNDEBUG ;
             OPTIM   ?= -fast ;
@@ -125,11 +125,11 @@ rule ConfigureC++
             LINKFLAGS += -xtarget=ultra -xarch=v9 ;
         }
 
-        if $(CONFIG:L) = debug
+        if $(WITH_DEBUG)
         {
             C++FLAGS += -DEBUG -g ;
         }
-        else if $(CONFIG:L) = release
+        else
         {
             C++FLAGS += -DNDEBUG ;
         }

@@ -73,7 +73,7 @@ rule ConfigureCc
     
         LINKFLAGS += -bh:5 ;
 
-        if $(CONFIG:L) = debug
+        if $(WITH_DEBUG)
         {
             CCFLAGS += -DDEBUG ;
             OPTIM   ?= -O0 -g ;
@@ -112,7 +112,7 @@ rule ConfigureC++
 
         C++FLAGS += -qrtti -qlanglvl=newexcp -qeh -qstaticinline ;
         
-        if $(CONFIG:L) = debug
+        if $(WITH_DEBUG)
         {
             C++FLAGS  += -DDEBUG ;
         }

@@ -82,9 +82,6 @@ rule ConfigureExit
         local _value ;
         for _v in $($(_var))
         {
-            # TODO remove this from builtins.c
-            #local _valtmp = [ Escape $(_v) ] ;
-
             local _valtmp ;
             _valtmp = [ Replace $(_v) "\\\\" "\\\\" ] ;
             _valtmp = [ Replace $(_valtmp) "\"" "\\\"" ] ;
