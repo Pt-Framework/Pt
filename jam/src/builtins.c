@@ -420,21 +420,18 @@ void load_builtins()
           bind_builtin( "MAKEDIR", builtin_makedir, 0, args );
       }
 
-      /* Pt extension:
-       */
+      /* Pt extension */
       {
           /* char * args[] = { "exec", ":", "*", 0 }; */
           bind_builtin( "EXEC",
               builtin_exec, 0, 0 );
       }
 
-    /* Pt extension */
-    bind_builtin( "WriteFile" ,
-                  builtin_writefile, 0, 0 );
+      /* Pt extension */
+      bind_builtin( "WriteFile" ,
+                    builtin_writefile, 0, 0 );
 
-    /* Pt extension */
-    bind_builtin( "Escape" ,
-                  builtin_escape, 0, 0 );
+
 
       /* Initialize builtin modules. */
       init_set();
@@ -2495,38 +2492,3 @@ LIST* builtin_writefile( FRAME * frame, int flags )
     return L0;
 }
 
-/* Pt extension:
- */
-LIST* builtin_escape( FRAME * frame, int flags )
-{
-    const char* c = 0;
-    string s;
-    LIST* result = 0;
-    LIST* arg = lol_get( frame->args, 0 );
-
-    string_new( &s );
-
-    if(arg)
-    {
-        for(c = object_str(arg->value); *c != '\0' ; ++c)
-        {
-            if(*c == '"')
-            {
-                string_push_back( &s, '\\' );
-            }
-
-            string_push_back( &s, *c );
-
-            if(*c == '\\')
-            {
-                string_push_back( &s, *c );
-            }
-        }
-
-    }
-
-    result = list_new( L0, object_new(s.value) );
-    string_free(&s);
-
-    return result;
-}
