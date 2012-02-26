@@ -202,13 +202,13 @@ if ! $(GUI)  || GUI = "x11"
     }
 }
 
-if ! $(GUI) || $(GUI:L) = "photon"
+if $(GUI:L) = "photon"
 {
     GUI     ?= photon ;
     GUILIBS = -lphrender -lph ;
 }
 
-if ! $(GUI) || $(GUI:L) = "symbian-eikon"
+if $(GUI:L) = "symbian-eikon"
 {
     GUI = symbian-eikon ;
     GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\apparc.dso ;
@@ -225,6 +225,7 @@ if ! $(GUI) || $(GUI:L) = "symbian-eikon"
     GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\bitgdi.dso ;
     GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\gdi.dso ;
 }
+
 
 Configure GUI ;
 Echo "Checking for graphics UI..." $(GUI) ;
