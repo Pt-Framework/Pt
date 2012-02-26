@@ -14,9 +14,9 @@ if $(GUI:L) = x11
 
 PT_GUI_SUBDIR = [ FDirName $(TOP) src Pt-Gui $(GUI:L) ] ;
 PT_GUI_IMPL += [ GLOB $(PT_GUI_SUBDIR) : *.cpp  ] ;
+PT_GUI_IMPL += [ GLOB $(PT_GUI_SUBDIR) : *.mm  ] ;
 
-SharedLibrary Pt-Gui :  $(PT_GUI_IMPL)
-                        Application.cpp
+SharedLibrary Pt-Gui :  Application.cpp
                         Pixmap.cpp
                         Widget.cpp
                         CloseEvent.cpp
@@ -38,7 +38,8 @@ SharedLibrary Pt-Gui :  $(PT_GUI_IMPL)
                         ResizeEvent.cpp
                         BorderLayout.cpp
                         SimpleGridLayout.cpp
-                        VerticalLayout.cpp ;
+                        VerticalLayout.cpp 
+                        $(PT_GUI_IMPL) ;
 LinkSharedLibraries Pt-Gui : Pt Pt-System Pt-Gfx  ;
 LinkLibs Pt-Gui : $(GUILIBS) ;
 MakeLocate Pt-Gui : $(OUTPUT_TARGET) ;
@@ -54,5 +55,3 @@ MakeLocate GuiDemo : $(OUTPUT_TARGET) ;
 Main Scribble : Scribble.cpp ;
 LinkSharedLibraries Scribble : Pt Pt-System Pt-Gfx Pt-Gui  ;
 MakeLocate Scribble : $(OUTPUT_TARGET) ;
-
-#SubInclude TOP src Pt-Gui $(GUI:L) ;
