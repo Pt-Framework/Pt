@@ -16,6 +16,7 @@ rule FreeTypeIncludes
 }
 
 FREETYPE_LIBRARY_PATHS = /usr/lib
+                         /usr/lib/i386-linux-gnu
                          /usr/sfw/lib ;
 
 rule FreeTypeLinkFlags
