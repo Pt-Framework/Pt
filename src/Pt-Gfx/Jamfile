@@ -40,6 +40,7 @@ MakeLocate Pt-Gfx : $(OUTPUT_TARGET) ;
 if $(FREETYPE_LINKFLAGS)
 {
     LinkFlags Pt-Gfx : $(FREETYPE_LINKFLAGS) ;
+    LinkLibs Pt-Gfx : $(FREETYPE_LINKLIBS) ;
 }
 else
 {
@@ -75,7 +76,6 @@ MakeLocate DrawEllipseDemo : $(OUTPUT_TARGET) ;
 Main GfxPerf : GfxPerf.cpp ;
 LinkSharedLibraries GfxPerf : Pt Pt-System  Pt-Gfx Pt-Gui ;
 MakeLocate GfxPerf : $(OUTPUT_TARGET) ;
-
 }
 
 Main GreyscaleTest : GreyscaleTest.cpp ;

@@ -5,7 +5,18 @@ SubDirHdrs $(TOP)/src/Pt-System ;
 SubDirC++Flags [ FDefines PT_GUI_API_EXPORT ] ;
 SubDirObjects $(OUTPUT_OBJECT) Pt-Gui ;
 
-SharedLibrary Pt-Gui :  Application.cpp
+if $(GUI:L) = x11
+{
+    SubDirHdrs $(FREETYPE_INCLUDES) ;
+    SubDirHdrs $(X11_INCLUDES) ;
+    SubDirHdrs $(XFT_INCLUDES) ;
+}
+
+PT_GUI_SUBDIR = [ FDirName $(TOP) src Pt-Gui $(GUI:L) ] ;
+PT_GUI_IMPL += [ GLOB $(PT_GUI_SUBDIR) : *.cpp  ] ;
+
+SharedLibrary Pt-Gui :  $(PT_GUI_IMPL)
+                        Application.cpp
                         Pixmap.cpp
                         Widget.cpp
                         CloseEvent.cpp
@@ -27,9 +38,7 @@ SharedLibrary Pt-Gui :  Application.cpp
                         ResizeEvent.cpp
                         BorderLayout.cpp
                         SimpleGridLayout.cpp
-                        VerticalLayout.cpp
-                       ;
-LinkLibraries Pt-Gui : Pt-Gui-$(GUI:L) ;
+                        VerticalLayout.cpp ;
 LinkSharedLibraries Pt-Gui : Pt Pt-System Pt-Gfx  ;
 LinkLibs Pt-Gui : $(GUILIBS) ;
 MakeLocate Pt-Gui : $(OUTPUT_TARGET) ;
@@ -46,4 +55,4 @@ Main Scribble : Scribble.cpp ;
 LinkSharedLibraries Scribble : Pt Pt-System Pt-Gfx Pt-Gui  ;
 MakeLocate Scribble : $(OUTPUT_TARGET) ;
 
-SubInclude TOP src Pt-Gui $(GUI:L) ;
+#SubInclude TOP src Pt-Gui $(GUI:L) ;

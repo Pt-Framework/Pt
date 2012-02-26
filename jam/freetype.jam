@@ -24,7 +24,7 @@ rule FreeTypeLinkFlags
     local libs = [ GLOB $(FREETYPE_LIBRARY_PATHS) : *freetype.* ] ;
     #Echo "Checking for freetype libraries... " $(libs[0]:P) ;
 
-    return -L$(libs[0]:P)" -lfreetype" ;
+    return -L$(libs[0]:P) ;
 }
 
 rule ConfigureFreetype
@@ -34,12 +34,15 @@ rule ConfigureFreetype
 
     if $(FREETYPE_INCLUDES) && $(FREETYPE_LINKFLAGS)
     {
-        Configure FREETYPE_INCLUDES : $(FREETYPE_INCLUDES) ;
-        Configure FREETYPE_LINKFLAGS : $(FREETYPE_LINKFLAGS) ;
+	FREETYPE_LINKLIBS = -lfreetype ;
+        Configure FREETYPE_INCLUDES ;
+        Configure FREETYPE_LINKFLAGS ;
+        Configure FREETYPE_LINKLIBS ;
     }
 
     Echo "Checking for freetype includes..." $(FREETYPE_INCLUDES) ;
     Echo "Checking for freetype linkflags..." $(FREETYPE_LINKFLAGS) ;
+    Echo "Checking for freetype linklibs..." $(FREETYPE_LINKLIBS) ;
 }
 
 } # FREETYPE_JAM
