@@ -16,7 +16,7 @@ rule TryBuild
 
     if $(4)
     {
-        _cmd = $(_cc) $(LINKFLAGS) -o $(_out) $(_cflags) -I$(STDHDRS) -L$(5) -bdynamic $(4) $(_src) ;
+        _cmd = $(_cc) $(LINKFLAGS) -o $(_out) $(_cflags) -I$(STDHDRS) -L$(5) $(_src) -bdynamic $(4) ;
     }
     else
     {
