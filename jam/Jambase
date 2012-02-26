@@ -37,6 +37,7 @@ if $(CONFIGURE)
         }
     }
 
+    Load base.jam ;
     Load configure.jam ;
 
     TryCommand "rm -f config.jam" ;
