@@ -217,7 +217,10 @@ inline Base64Codec::result Base64Codec::do_out(Pt::MBState& state,
         *(toNext++) = toBase64( *third & 0x3f );
 
         if(toEnd - toNext < 4)
+        {
+            state = MBState();
             return std::codecvt_base::partial;
+        }
 
         if( fromEnd - fromNext < 3 )
             break;
