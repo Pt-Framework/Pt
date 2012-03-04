@@ -100,22 +100,12 @@ rule ConfigureCc
     {
         CC_CONFIGURED = 1 ;
 
-        if $(TOOLSET_ROOT)
-        {
-            TOOLSET_PATH = $(TOOLSET_ROOT:J=" ")$(SLASH)bin$(SLASH) ;
-        }
-        else if $(TOOLSET_PATH)
-        {
-            TOOLSET_PATH  =  $(TOOLSET_PATH:J=" ")$(SLASH) ;
-        }
-    
-        TOOLSET_PREFIX ?= "" ;
-    
-        AS     ?= $(TOOLSET_PATH:E="")$(TOOLSET_PREFIX)as ;
-        CC     ?= $(TOOLSET_PATH:E="")$(TOOLSET_PREFIX)gcc ;
-        RANLIB ?= $(TOOLSET_PATH:E="")$(TOOLSET_PREFIX)ranlib ;
-        AR     ?= $(TOOLSET_PATH:E="")$(TOOLSET_PREFIX)ar ru ;
-        LINK   ?= $(CC) ;
+        TOOLSET_ROOT ?= "" ;
+        AS           ?= $(TOOLSET_ROOT)as ;
+        CC           ?= $(TOOLSET_ROOT)gcc ;
+        RANLIB       ?= $(TOOLSET_ROOT)ranlib ;
+        AR           ?= $(TOOLSET_ROOT)ar ru ;
+        LINK         ?= $(CC) ;
     
         Configure AS ;
         Echo "Checking for assember..." $(AS:BS) ;
