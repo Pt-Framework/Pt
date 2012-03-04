@@ -189,18 +189,9 @@ rule ConfigureC++
     {
         C++_CONFIGURED = 1 ;
 
-        if $(TOOLSET_ROOT)
-        {
-            TOOLSET_PATH = $(TOOLSET_ROOT:J=" ")$(SLASH)bin$(SLASH) ;
-        }
-        else if $(TOOLSET_PATH)
-        {
-            TOOLSET_PATH  =  $(TOOLSET_PATH:J=" ")$(SLASH) ;
-        }
+        TOOLSET_ROOT ?= "" ;
     
-        TOOLSET_PREFIX ?= "" ;
-    
-        C++ ?= $(TOOLSET_PATH:E="")$(TOOLSET_PREFIX)g++ ;
+        C++ ?= $(TOOLSET_ROOT)g++ ;
         Configure C++ ;
         Echo "Checking for C++ compiler..." $(C++:BS) ;
 
