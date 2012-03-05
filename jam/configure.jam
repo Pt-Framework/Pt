@@ -278,11 +278,11 @@ rule ConfigureChMod
 
         EXEMODE ?= 711 ;
         Configure EXEMODE ;
-        EchoVar EXEMODE : "executable mode" ;
+        EchoOption EXEMODE : "Executable mode" ;
 
         FILEMODE ?= 644 ;
         Configure FILEMODE ;
-        EchoVar FILEMODE : "file mode" ;
+        EchoOption FILEMODE : "File mode" ;
     }
 
     TryCommand $(RM) "check.in" ;
