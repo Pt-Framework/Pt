@@ -5,7 +5,7 @@
 YES ?= "yes" ;
 NO ?= "no" ;
 
-#windows batch and posix shell
+# windows batch and posix shell
 STDERR_TO_STDOUT = " 2>&1" ; 
 
 TONULL = " 2>/dev/null 1>/dev/null" ;
@@ -92,6 +92,15 @@ rule ConfigureExit
     }
 
     Exit "Configuration successful." ;
+}
+
+rule SubConfigure
+{
+    # Jamconfigure from subdir needs to keep its paths, so ConfigureDefine 
+    # works correctly and generates def header at correct place
+
+    local _s = [ FDirName $(<[1-]) ] ;
+	include $(_s) ;
 }
 
 rule TryCommand
@@ -255,13 +264,25 @@ rule ConfigureChMod
 
     if ! $(CHMOD) && [ TryCommand "chmod 777 check.in" ]
     {
-        CHMOD = "chmod" ;
-        Configure CHMOD : $(CHMOD) ;
-        Configure CHGRP :  chgrp ;
-        Configure CHOWN :  chown ;
+        CHMOD = chmod ;
+        CHGRP = chgrp ;
+        CHOWN = chown ;
+
+        Configure CHMOD ;
+        Configure CHGRP ;
+        Configure CHOWN ;
+
         Echo "Checking for chmod command..." $(CHMOD) ;
         Echo "Checking for chgrp command..." $(CHGRP) ;
         Echo "Checking for chown command..." $(CHOWN) ;
+
+        EXEMODE ?= 711 ;
+        Configure EXEMODE ;
+        EchoVar EXEMODE : "executable mode" ;
+
+        FILEMODE ?= 644 ;
+        Configure FILEMODE ;
+        EchoVar FILEMODE : "file mode" ;
     }
 
     TryCommand $(RM) "check.in" ;
@@ -353,12 +374,12 @@ rule ConfigureDotSlash
 rule ConfigureTarget
 {
     TARGET_OS ?= $(OS:L) ;
-    Echo "Building for target OS..." $(TARGET_OS:L) ;
+    EchoOption TARGET_OS : "Target OS"  ;
     Configure TARGET_OS ;
     Load $(TARGET_OS:L).jam ;
 
     TARGET_OSPLAT ?= $(OSPLAT:L) ;
-    Echo "Building for target platform..." $(TARGET_OSPLAT:L) ;
+    EchoOption TARGET_OSPLAT : "Target Platform" ;
     Configure TARGET_OSPLAT ;
 
     Echo "Using object file suffix... " $(SUFOBJ) ;
@@ -385,7 +406,7 @@ rule ConfigureToolset
         Exit "Checking for toolset... FAILED! (Please set the TOOLSET variable)" ;
     }
 
-    Echo "Checking for toolset..."$(TOOLSET:L) ;
+    EchoOption TOOLSET : "Toolset" ;
     Configure TOOLSET : $(TOOLSET) ;
     Load $(TOOLSET:L).jam ;
 }

@@ -1,0 +1,50 @@
+# 01/08/95 (seiwald) - Shell now handled with awk, not sed
+# shell - parent of all Shell targets 
+
+SHELLHEADER ?= "#!/bin/sh" ;
+SHELLMODE   ?= 755 ;
+
+AWK ?= awk ;
+RCP ?= rcp ;
+RSH ?= rsh ;
+SED ?= sed ;
+
+DEPENDS all : shell ;
+DEPENDS shell : first ;
+NOTFILE shell ;
+
+# make a shell executable
+# Shell exe : source ;
+#
+rule Shell
+{
+    DEPENDS shell : $(<) ;
+    DEPENDS $(<) : $(>) ;
+    SEARCH on $(>) = $(SEARCH_SOURCE) ;
+    MODE on $(<) = $(SHELLMODE) ;
+    Clean clean : $(<) ;
+    Chmod $(<) ;
+}
+
+# install shell scripts
+# InstallShell dir : sources ;   
+#
+rule InstallShell
+{
+    InstallInto $(<) : $(>) ;
+
+    local _grist = [ FGrist $(INSTALLGRIST) $(SUBDIR_TOKENS) ] ;
+    MODE on $(>:G=$(_grist)) = $(SHELLMODE) ;
+}
+
+actions Shell
+{
+    $(AWK) '
+        NR == 1 { print "$(SHELLHEADER)" }
+        NR == 1 && /^[#:]/ { next }
+        /^##/ { next }
+        { print }
+    ' < $(>) > $(<)
+}
+
+rule SHELL { Shell $(<) : $(>) ; }

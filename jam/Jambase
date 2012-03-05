@@ -14,31 +14,26 @@ rule Load
     include $(_s) ;
 }
 
+Load base.jam ;
+
 ##########################################################################
 # Configure Step
 ##########################################################################
 
-for _arg in $(ARGV)
+if configure in $(ARGV)
 {
-    if $(_arg) = configure
-    {
-        CONFIGURE = 1 ;
-    }
-}
-
-if $(CONFIGURE)
-{
-    for _arg in $(ARGV)
-    {
-        if $(_arg) = --debug
-        {
-            CONFIG = debug ;
-            WITH_DEBUG = yes ;
-        }
-    }
-
-    Load base.jam ;
     Load configure.jam ;
+
+    EchoOption JAMBASE : "Using Jambase" : $(JAMBASE) ;
+    EchoOption OS : "Build Host OS" : $(OS:L) ;
+    EchoOption OSPLAT : "Host Platform" ;
+
+    if --debug in $(ARGV)
+    {
+        WITH_DEBUG = yes ;
+    }
+
+    EchoOption --debug : "Debug Build" : $(WITH_DEBUG:E="no") ;
 
     TryCommand "rm -f config.jam" ;
     TryCommand "del /f/q config.jam" ;
@@ -46,10 +41,7 @@ if $(CONFIGURE)
     TryCommand "rm -f config.log" ;
     TryCommand "del /f/q config.log" ;
 
-    Echo "Checking for host platform..." $(OS:L) ;
-
     ConfigureLog "[ Configure ]" ;
-
     ConfigureRm ;
     ConfigureMv ;
     ConfigureCp ;
@@ -57,13 +49,19 @@ if $(CONFIGURE)
     ConfigureChMod ;
     ConfigureLn ;
     ConfigureDotSlash ;
-
     ConfigureTarget ;
     ConfigureToolset ;
 
     # Project specific configuration
     ConfigureLog "\n[ Jamconfigure ]" ;
     include Jamconfigure ;
+
+    # move this to toolset.jam
+    EchoOption OPTIM : "Optimisation" ;
+    EchoOption WARN : "Warning Level" ;
+    EchoOption CCFLAGS : "C Flags" ;
+    EchoOption C++FLAGS : "C++ Flags" ;
+    EchoOption LINKFLAGS : "Linker Flags" ;
 
     ConfigureExit ;
 }
@@ -79,12 +77,8 @@ include config.jam ;
 # Build Step
 ##########################################################################
 
-# Basic variables and rules
-Load base.jam ;
-
 # Toolset specific variables and rules
 Load $(TOOLSET:L).jam ;
 
 # Project root Jamfile
 include Jamfile ;
-

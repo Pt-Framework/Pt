@@ -142,50 +142,39 @@
 # Initialize variables
 #
 
-ASFLAGS      ?= ;
-AWK          ?= awk ;
-BINDIR       ?= /usr/local/bin ;
-C++FLAGS     ?= ;
-CCFLAGS      ?= ;
-CRELIB       ?= ;
-EXEMODE      ?= 711 ;
-FILEMODE     ?= 644 ;
-HDRS         ?= ;
-INSTALLGRIST ?= installed ;
 JAMFILE      ?= Jamfile ;
 JAMRULES     ?= Jamrules ;
-LIBDIR       ?= /usr/local/lib ;
-LINKFLAGS    ?= ;
-LINKLIBS     ?= ;
-MANDIR       ?= /usr/local/man ;
-NOARSCAN     ?= true ;
-RCP          ?= rcp ;
-RSH          ?= rsh ;
-SED          ?= sed ;
-SHELLHEADER  ?= "#!/bin/sh" ;
-SHELLMODE    ?= 755 ;
-#STDHDRS     ?= /usr/include ;
-UNDEFFLAG    ?= "-u _" ;
 SPACE        ?= " " ;
+INSTALLGRIST ?= installed ;
 
 HDRPATTERN = 
     "^[     ]*#[    ]*include[  ]*[<\"]([^\">]*)[\">].*$" ;
 
 OSFULL = $(OS)$(OSVER)$(OSPLAT) $(OS)$(OSPLAT) $(OS)$(OSVER) $(OS) ;
 
+#EXEMODE      ?= 711 ;
+#FILEMODE     ?= 644 ;
+#ASFLAGS      ?= ;
+#C++FLAGS     ?= ;
+#CCFLAGS      ?= ;
+#CRELIB       ?= ;
+#HDRS         ?= ;
+#LINKFLAGS    ?= ;
+#LINKLIBS     ?= ;
+NOARSCAN     ?= true ;
+UNDEFFLAG    ?= "-u _" ;
 
+#
 # Base dependencies - first for "bootstrap" kinds of rules
 #
-DEPENDS all : shell files lib exe obj ;
-DEPENDS all shell files lib exe obj : first ;
-NOTFILE all first shell files lib exe obj dirs clean install uninstall ;
+DEPENDS all : files lib exe obj ;
+DEPENDS all files lib exe obj : first ;
+NOTFILE all first files lib exe obj dirs clean install uninstall ;
 ALWAYS clean uninstall ;
 
 #
 # Rules
 #
-
-Load configure.jam ;
 
 rule As
 {
@@ -276,6 +265,44 @@ rule C++
 rule Chmod
 {
     if $(CHMOD) { Chmod1 $(<) ; }
+}
+
+#
+# EchoVar OS : "Host Operating system" [ : $(OS:L) ] ;
+#
+rule EchoOption
+{
+    local _opts = ;
+    local _vals = ;
+    for local _v in $(1)
+    {
+        _opts += $(_v) ;
+        _vals += $($(_v)) ;
+    }
+    
+    if $(3)
+    {
+        Echo $(2) [$(_opts:J=",")]"..." $(3) ;
+    }
+    else
+    {
+        Echo $(2) [$(_opts:J=",")]"..." $(_vals) ;
+    }
+}
+
+
+rule HeaderDefines
+{
+    local _cmd  = $(RM) $(<) $(STDERR_TO_STDOUT) ;
+    local _result = [ EXEC $(_cmd:J=" ") ] ;
+    
+    for local _v in $(2)
+    {
+        WriteFile $(<) : "" ;
+        WriteFile $(<) : "#ifndef "$(_v) ;
+        WriteFile $(<) : "#define "$(_v)" "$($(_v)) ;
+        WriteFile $(<) : "#endif" ;
+    }
 }
 
 
@@ -458,15 +485,6 @@ rule InstallMan
 
     local _grist = [ FGrist $(INSTALLGRIST) $(SUBDIR_TOKENS) ] ;
     MODE on $(>:G=$(_grist)) = $(FILEMODE) ;
-}
-
-
-rule InstallShell
-{
-    InstallInto $(<) : $(>) ;
-
-    local _grist = [ FGrist $(INSTALLGRIST) $(SUBDIR_TOKENS) ] ;
-    MODE on $(>:G=$(_grist)) = $(SHELLMODE) ;
 }
 
 
@@ -1068,17 +1086,6 @@ rule SharedLibrary-LinkSharedLibraries
 }
 
 
-rule Shell
-{
-    DEPENDS shell : $(<) ;
-    DEPENDS $(<) : $(>) ;
-    SEARCH on $(>) = $(SEARCH_SOURCE) ;
-    MODE on $(<) = $(SHELLMODE) ;
-    Clean clean : $(<) ;
-    Chmod $(<) ;
-}
-
-
 rule SubDir
 {
     local _r _s ;
@@ -1102,7 +1109,7 @@ rule SubDir
     {
         if ! $(<[1])
         {
-        EXIT SubDir syntax error ;
+            EXIT SubDir syntax error ;
         }
 
         $(<[1]) = [ FSubDir $(<[2-]) ] ;
@@ -1218,6 +1225,25 @@ rule SubInclude
     include $(JAMFILE:D=$(_s):R=$($(<[1]))) ;
 }
 
+#
+# SubTree TOP d1 [ d2 [ d3 [ d4 ] ] ] : SUB_TOP
+#
+rule SubTree
+{
+    # in case both root variables have the same name - save
+    local _oldroot = $($(<[1])) ;
+	
+    $($(2)) = [ FDirName $($(<[1])) $(<[2-]) ] ;
+    Echo $(2) is now $($(2)) ;
+    
+    SubInclude $(<) ;
+
+    # TODO: ensure that Jamrules of subtree top is included
+
+    # in case both root variables have the same name - restore
+    $($(<[1])) = $(_oldroot) ;
+}
+
 
 rule Undefines
 {
@@ -1229,8 +1255,6 @@ rule UserObject
 {
     EXIT "Unknown suffix on" $(>) "- see UserObject rule in Jamfile(5)." ;
 }
-
-
 
 
 #
@@ -1578,15 +1602,6 @@ actions quietly updated piecemeal together RmTemps
     $(RM) $(>)
 }
 
-actions Shell
-{
-    $(AWK) '
-        NR == 1 { print "$(SHELLHEADER)" }
-        NR == 1 && /^[#:]/ { next }
-        /^##/ { next }
-        { print }
-    ' < $(>) > $(<)
-}
 
 #
 # RELOCATE - for compilers with broken -o flags
@@ -1636,10 +1651,13 @@ rule LIBS { LinkLibraries $(<) : $(>) ; }
 rule LINK { Link $(<) : $(>) ; }
 rule MAIN { Main $(<) : $(>) ; }
 rule SETUID { Setuid $(<) ; }
-rule SHELL { Shell $(<) : $(>) ; }
 rule UNDEFINES { Undefines $(<) : $(>) ; }
 
 # Old INSTALL* didn't take dest directory.
+
+BINDIR       ?= /usr/local/bin ;
+LIBDIR       ?= /usr/local/lib ;
+MANDIR       ?= /usr/local/man ;
 
 rule INSTALLBIN { InstallBin $(BINDIR) : $(<) ; }
 rule INSTALLLIB { InstallLib $(LIBDIR) : $(<) ; }

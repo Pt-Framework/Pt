@@ -6,39 +6,11 @@
 Load unittest.jam ;
 
 # set directory to build objects and targets
-ALL_LOCATE_OBJECTS = tmp$(SLASH)$(CONFIG) ;
-ALL_LOCATE_TARGET = build$(SLASH)$(CONFIG) ;
+ALL_LOCATE_OBJECTS = [ FDirName $(TOP) tmp $(CONFIG) ] ;
+ALL_LOCATE_TARGET = [ FDirName $(TOP) build $(CONFIG) ] ;
 
 # set directory to build objects and targets
 # this is used by MakeLocate and SubDirObjects in the Jamfiles
-OUTPUT_TARGET = build$(SLASH)$(CONFIG) ;
-OUTPUT_OBJECT = tmp$(SLASH)$(CONFIG) ;
-OUTPUT_TEST = build$(SLASH)$(CONFIG) ;
-
-# installation directories
-INSTALL_DIR ?= [ FDirName $(TOP) deploy $(CONFIG) ] ;
-INSTALL_BINDIR ?= [ FDirName $(INSTALL_DIR) bin ] ; 
-INSTALL_INCLUDEDIR ?= [ FDirName $(INSTALL_DIR) include ] ; 
-INSTALL_LIBDIR ?= [ FDirName $(INSTALL_DIR) lib ] ; 
-
-Echo "Host Operating System (OS)..." $(OS:L) ;
-Echo "Host Platform (OSPLAT)..." $(OSPLAT:L) ;
-Echo "Target OS (TARGET_OS)..." $(TARGET_OS:L) ;
-Echo "Target Platform (TARGET_OSPLAT)..." $(TARGET_OSPLAT:L) ;
-Echo "Configuration (CONFIG)..." $(CONFIG) ;
-Echo "Toolset (TOOLSET)..." $(TOOLSET) ;
-Echo "Use OpenSSL (--with-openssl)..." $(WITH_OPENSSL) ;
-Echo "Graphic User Interface (GUI)..." $(GUI) ;
-Echo "System Interface (SYS)..." $(SYS) ;
-Echo "C++ Flags (C++FLAGS)..." $(C++FLAGS) ;
-Echo "C Flags (CCFLAGS)..." $(CCFLAGS) ;
-Echo "Linker Flags (LINKFLAGS)..." $(LINKFLAGS) ;
-Echo "Optimisation (OPTIM)..." $(OPTIM) ;
-Echo "Warnings (WARN)..." $(WARN) ;
-Echo "Build targets (OUTPUT_TARGET)..." $(OUTPUT_TARGET) ;
-Echo "Build objects (OUTPUT_OBJECT)..." $(OUTPUT_OBJECT) ;
-Echo "Unit tests (OUTPUT_TEST)..." $(OUTPUT_TEST) ;
-Echo "Install programs (INSTALL_BINDIR)..." $(INSTALL_BINDIR) ;
-Echo "Install includes (INSTALL_INCLUDEDIR)..." $(INSTALL_INCLUDEDIR) ;
-Echo "Install libraries (INSTALL_LIBDIR)..." $(INSTALL_LIBDIR) ;
-
+OUTPUT_TARGET = [ FDirName $(TOP) build $(CONFIG) ] ;
+OUTPUT_OBJECT = [ FDirName $(TOP) tmp $(CONFIG) ] ;
+OUTPUT_TEST = [ FDirName $(TOP) build $(CONFIG) ] ;

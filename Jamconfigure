@@ -20,7 +20,20 @@ ConfigureCc ;
 # configure basic C++ compiler
 ConfigureC++ ;
 
-# ConfigureDefine test.h : PT_WITH_STD_LOCALE : $(WITH_STD_LOCALE) ;
+# installation directories
+INSTALL_DIR ?= [ FDirName deploy $(CONFIG) ] ;
+
+INSTALL_BINDIR ?= [ FDirName $(INSTALL_DIR) bin ] ; 
+EchoOption INSTALL_BINDIR : "Binary Install Dir" ;
+Configure INSTALL_BINDIR ;
+
+INSTALL_INCLUDEDIR ?= [ FDirName $(INSTALL_DIR) include ] ; 
+EchoOption INSTALL_INCLUDEDIR : "Include Install Dir" ;
+Configure INSTALL_INCLUDEDIR ;
+
+INSTALL_LIBDIR ?= [ FDirName $(INSTALL_DIR) lib ] ;
+EchoOption INSTALL_LIBDIR : "Library Install Dir" ; 
+Configure INSTALL_LIBDIR ;
 
 #############################################################################
 # Platform settings

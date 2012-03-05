@@ -139,7 +139,6 @@ namespace Pt {
     struct IntTraits
     {};
     
-
     template <>
     struct IntTraits<signed char>
     {
@@ -153,7 +152,6 @@ namespace Pt {
         typedef unsigned char Unsigned;
         typedef signed char Signed;
     };
-
 
     template <>
     struct IntTraits<short>
@@ -169,7 +167,6 @@ namespace Pt {
         typedef signed short Signed;
     };
 
-
     template <>
     struct IntTraits<int>
     {
@@ -184,14 +181,12 @@ namespace Pt {
         typedef signed int Signed;
     };
 
-
     template <>
     struct IntTraits<long>
     {
         typedef unsigned long Unsigned;
         typedef signed long Signed;
     };
-
 
     template <>
     struct IntTraits<unsigned long>
@@ -200,14 +195,12 @@ namespace Pt {
         typedef signed long Signed;
     };
 
-
     template <>
     struct IntTraits<long long>
     {
         typedef unsigned long long Unsigned;
         typedef signed long long Signed;
     };
-
 
     template <>
     struct IntTraits<unsigned long long>
