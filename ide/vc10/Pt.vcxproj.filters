@@ -1,0 +1,1000 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Pt">
+      <UniqueIdentifier>{68f7f493-b610-4eb0-afe0-3a51697f9e7f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt\tests">
+      <UniqueIdentifier>{f41c8635-4f48-45aa-aa1c-6618869b5706}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-System">
+      <UniqueIdentifier>{ceb1ead8-53f0-4ffb-87f8-0299471604fb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-System\win32">
+      <UniqueIdentifier>{fe1edbb6-5538-4be8-b23a-e5662bb2e291}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-System\tests">
+      <UniqueIdentifier>{fdfe1576-4e5e-47e9-9540-18942f247956}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-Unit">
+      <UniqueIdentifier>{e0cbb3cb-25ea-40cf-ab69-700bff30e5a7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-Net">
+      <UniqueIdentifier>{6b216f21-af11-4799-8065-264f02daf3a6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-Net\tests">
+      <UniqueIdentifier>{61530c12-8d19-4916-b304-f8ad0522d32f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-Net\win32">
+      <UniqueIdentifier>{becd4ff9-210b-4b91-b31d-5948b6563157}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\include\Pt\Allocator.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Any.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Api.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Arg.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Atomicity.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Base64Codec.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Byteorder.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Callable.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Char.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Composer.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Connectable.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Connection.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\ConstMethod.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\ConversionError.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Convert.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Date.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\DateTime.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Decomposer.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Delegate.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Deserializer.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Event.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Facets.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\FixupInfo.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Formatter.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Function.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Invokable.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\LiteralPtr.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Locale.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Main.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Math.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Method.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\NonCopyable.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Pack1.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\PackPop.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\PageAllocator.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\PoolAllocator.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\RefCounted.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Regex.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\SerializationContext.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\SerializationError.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\SerializationInfo.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\SerializationSurrogate.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Serializer.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Settings.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Signal.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Singleton.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Slot.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\SmartPtr.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\SourceInfo.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\String.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\StringStream.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\TextBuffer.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\TextCodec.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\TextStream.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Time.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Timespan.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\TypeInfo.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Types.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\TypeTraits.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Utf8Codec.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Variant.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Void.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt\Chunk.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt\regexp.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt\SerializationData.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt\SettingsReader.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt\SettingsWriter.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt\Unicode.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-System\ConsoleChannel.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-System\FileChannel.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-System\LogManager.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-System\SelectableList.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-System\SerialChannel.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-System\win32\ApplicationImpl.h">
+      <Filter>Pt-System\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-System\win32\ClockImpl.h">
+      <Filter>Pt-System\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-System\win32\ConditionImpl.h">
+      <Filter>Pt-System\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-System\win32\DirectoryImpl.h">
+      <Filter>Pt-System\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-System\win32\FileDeviceImpl.h">
+      <Filter>Pt-System\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-System\win32\FileImpl.h">
+      <Filter>Pt-System\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-System\win32\FileInfoImpl.h">
+      <Filter>Pt-System\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-System\win32\IODeviceImpl.h">
+      <Filter>Pt-System\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-System\win32\LibraryImpl.h">
+      <Filter>Pt-System\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-System\win32\MainLoopImpl.h">
+      <Filter>Pt-System\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-System\win32\MutexImpl.h">
+      <Filter>Pt-System\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-System\win32\PipeImpl.h">
+      <Filter>Pt-System\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-System\win32\ProcessImpl.h">
+      <Filter>Pt-System\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-System\win32\ProcessImplBase.h">
+      <Filter>Pt-System\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-System\win32\Selector.h">
+      <Filter>Pt-System\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-System\win32\SemaphoreImpl.h">
+      <Filter>Pt-System\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-System\win32\SerialDeviceImpl.h">
+      <Filter>Pt-System\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-System\win32\ThreadImpl.h">
+      <Filter>Pt-System\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-System\win32\win32.h">
+      <Filter>Pt-System\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\System\Api.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\System\Application.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\System\Clock.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\System\Condition.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\System\Directory.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\System\EventLoop.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\System\EventSink.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\System\EventSource.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\System\File.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\System\FileDevice.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\System\FileInfo.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\System\IODevice.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\System\IOError.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\System\IOStream.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\System\Library.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\System\LogChannel.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\System\Logger.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\System\LogLevel.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\System\MainLoop.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\System\Mutex.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\System\Pipe.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\System\Plugin.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\System\Process.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\System\Queue.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\System\Selectable.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\System\Semaphore.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\System\SerialDevice.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\System\StreamBuffer.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\System\SystemError.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\System\Thread.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\System\Timer.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\System\Uri.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Unit\Api.h">
+      <Filter>Pt-Unit</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Unit\Application.h">
+      <Filter>Pt-Unit</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Unit\Assertion.h">
+      <Filter>Pt-Unit</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Unit\RegisterTest.h">
+      <Filter>Pt-Unit</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Unit\Reporter.h">
+      <Filter>Pt-Unit</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Unit\Test.h">
+      <Filter>Pt-Unit</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Unit\TestCase.h">
+      <Filter>Pt-Unit</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Unit\TestContext.h">
+      <Filter>Pt-Unit</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Unit\TestFixture.h">
+      <Filter>Pt-Unit</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Unit\TestMain.h">
+      <Filter>Pt-Unit</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Unit\TestMethod.h">
+      <Filter>Pt-Unit</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Unit\TestProtocol.h">
+      <Filter>Pt-Unit</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Unit\TestSuite.h">
+      <Filter>Pt-Unit</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Unit\TextProtocol.h">
+      <Filter>Pt-Unit</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Net\win32\AddrInfoImpl.h">
+      <Filter>Pt-Net\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Net\win32\TcpServerImpl.h">
+      <Filter>Pt-Net\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Net\win32\TcpSocketImpl.h">
+      <Filter>Pt-Net\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Net\win32\UdpSocketImpl.h">
+      <Filter>Pt-Net\win32</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\include\Pt\Callable.tpp">
+      <Filter>Pt</Filter>
+    </None>
+    <None Include="..\..\include\Pt\ConstMethod.tpp">
+      <Filter>Pt</Filter>
+    </None>
+    <None Include="..\..\include\Pt\Delegate.tpp">
+      <Filter>Pt</Filter>
+    </None>
+    <None Include="..\..\include\Pt\Function.tpp">
+      <Filter>Pt</Filter>
+    </None>
+    <None Include="..\..\include\Pt\Invokable.tpp">
+      <Filter>Pt</Filter>
+    </None>
+    <None Include="..\..\include\Pt\Method.tpp">
+      <Filter>Pt</Filter>
+    </None>
+    <None Include="..\..\include\Pt\Signal.tpp">
+      <Filter>Pt</Filter>
+    </None>
+    <None Include="..\..\include\Pt\Slot.tpp">
+      <Filter>Pt</Filter>
+    </None>
+    <None Include="..\..\include\Pt\String.tpp">
+      <Filter>Pt</Filter>
+    </None>
+    <None Include="..\..\src\Pt\itest.mm">
+      <Filter>Pt</Filter>
+    </None>
+    <None Include="..\..\src\Pt\Jamfile">
+      <Filter>Pt</Filter>
+    </None>
+    <None Include="..\..\src\Pt\Makefile.am">
+      <Filter>Pt</Filter>
+    </None>
+    <None Include="..\..\src\Pt\tests\Jamfile">
+      <Filter>Pt\tests</Filter>
+    </None>
+    <None Include="..\..\src\Pt\tests\Makefile.am">
+      <Filter>Pt\tests</Filter>
+    </None>
+    <None Include="..\..\src\Pt-System\Jamfile">
+      <Filter>Pt-System</Filter>
+    </None>
+    <None Include="..\..\src\Pt-System\Makefile.am">
+      <Filter>Pt-System</Filter>
+    </None>
+    <None Include="..\..\src\Pt-System\tests\Jamfile">
+      <Filter>Pt-System\tests</Filter>
+    </None>
+    <None Include="..\..\src\Pt-System\tests\Makefile.am">
+      <Filter>Pt-System\tests</Filter>
+    </None>
+    <None Include="..\..\jam.bat" />
+    <None Include="..\..\Jambase" />
+    <None Include="..\..\Jamconfigure" />
+    <None Include="..\..\Jamfile" />
+    <None Include="..\..\Jamrules" />
+    <None Include="..\..\src\Pt-Unit\Jamfile">
+      <Filter>Pt-Unit</Filter>
+    </None>
+    <None Include="..\..\src\Pt-Unit\Makefile.am">
+      <Filter>Pt-Unit</Filter>
+    </None>
+    <None Include="..\..\src\Pt-Net\Jamfile">
+      <Filter>Pt-Net</Filter>
+    </None>
+    <None Include="..\..\src\Pt-Net\Makefile.am">
+      <Filter>Pt-Net</Filter>
+    </None>
+    <None Include="..\..\src\Pt-Net\tests\Jamfile">
+      <Filter>Pt-Net\tests</Filter>
+    </None>
+    <None Include="..\..\src\Pt-Net\tests\Makefile.am">
+      <Filter>Pt-Net\tests</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\Pt\Atomicity.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt\Atomicity.cw.x86.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt\Atomicity.gcc.arm.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt\Atomicity.gcc.avr32.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt\Atomicity.gcc.mips.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt\Atomicity.gcc.ppc.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt\Atomicity.gcc.sparc.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt\Atomicity.gcc.x86.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt\Atomicity.gcc.x86_64.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt\Atomicity.generic.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt\Atomicity.pthread.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt\Atomicity.sun.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt\Atomicity.windows.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt\Char.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt\Chunk.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt\Connectable.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt\Connection.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt\ConversionError.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt\Convert.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt\Date.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt\DateTime.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt\Deserializer.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt\Facets.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt\PageAllocator.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt\PoolAllocator.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt\Regex.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt\regexp.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt\SerializationContext.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt\SerializationError.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt\SerializationInfo.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt\Serializer.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt\Settings.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt\SettingsReader.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt\SettingsWriter.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt\Signal.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt\String.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt\StringStream.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt\TextBuffer.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt\TextStream.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt\Time.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt\Unicode.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt\UnicodeTable.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt\Utf8Codec.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt\tests\AllocatorTest.cpp">
+      <Filter>Pt\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt\tests\AnyTest.cpp">
+      <Filter>Pt\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt\tests\AtomicTest.cpp">
+      <Filter>Pt\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt\tests\ByteorderTest.cpp">
+      <Filter>Pt\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt\tests\CharTest.cpp">
+      <Filter>Pt\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt\tests\ConversionTest.cpp">
+      <Filter>Pt\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt\tests\DateTest.cpp">
+      <Filter>Pt\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt\tests\DateTimeTest.cpp">
+      <Filter>Pt\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt\tests\DelegateTest.cpp">
+      <Filter>Pt\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt\tests\ExceptionTest.cpp">
+      <Filter>Pt\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt\tests\NonCopyableTest.cpp">
+      <Filter>Pt\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt\tests\Pt-test.cpp">
+      <Filter>Pt\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt\tests\RegExpTest.cpp">
+      <Filter>Pt\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt\tests\SerializationTest.cpp">
+      <Filter>Pt\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt\tests\SettingsTest.cpp">
+      <Filter>Pt\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt\tests\SignalTest.cpp">
+      <Filter>Pt\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt\tests\SingletonTest.cpp">
+      <Filter>Pt\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt\tests\SmartPtrTest.cpp">
+      <Filter>Pt\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt\tests\StringStreamTest.cpp">
+      <Filter>Pt\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt\tests\StringTest.cpp">
+      <Filter>Pt\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt\tests\TextStreamTest.cpp">
+      <Filter>Pt\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt\tests\TimespanTest.cpp">
+      <Filter>Pt\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt\tests\TimeTest.cpp">
+      <Filter>Pt\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt\tests\TypesTest.cpp">
+      <Filter>Pt\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt\tests\TypeTraitsTest.cpp">
+      <Filter>Pt\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt\tests\VariantTest.cpp">
+      <Filter>Pt\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-System\Application.cpp">
+      <Filter>Pt-System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-System\Clock.cpp">
+      <Filter>Pt-System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-System\Condition.cpp">
+      <Filter>Pt-System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-System\ConsoleChannel.cpp">
+      <Filter>Pt-System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-System\Directory.cpp">
+      <Filter>Pt-System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-System\EventLoop.cpp">
+      <Filter>Pt-System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-System\EventSink.cpp">
+      <Filter>Pt-System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-System\EventSource.cpp">
+      <Filter>Pt-System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-System\File.cpp">
+      <Filter>Pt-System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-System\FileChannel.cpp">
+      <Filter>Pt-System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-System\FileDevice.cpp">
+      <Filter>Pt-System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-System\FileInfo.cpp">
+      <Filter>Pt-System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-System\IODevice.cpp">
+      <Filter>Pt-System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-System\IOError.cpp">
+      <Filter>Pt-System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-System\IOStream.cpp">
+      <Filter>Pt-System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-System\Library.cpp">
+      <Filter>Pt-System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-System\Logger.cpp">
+      <Filter>Pt-System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-System\LogManager.cpp">
+      <Filter>Pt-System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-System\MainLoop.cpp">
+      <Filter>Pt-System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-System\Mutex.cpp">
+      <Filter>Pt-System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-System\Pipe.cpp">
+      <Filter>Pt-System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-System\Plugin.cpp">
+      <Filter>Pt-System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-System\Process.cpp">
+      <Filter>Pt-System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-System\Selectable.cpp">
+      <Filter>Pt-System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-System\Semaphore.cpp">
+      <Filter>Pt-System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-System\SerialChannel.cpp">
+      <Filter>Pt-System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-System\SerialDevice.cpp">
+      <Filter>Pt-System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-System\StreamBuffer.cpp">
+      <Filter>Pt-System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-System\SystemError.cpp">
+      <Filter>Pt-System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-System\Thread.cpp">
+      <Filter>Pt-System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-System\Timer.cpp">
+      <Filter>Pt-System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-System\Uri.cpp">
+      <Filter>Pt-System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-System\win32\ApplicationImpl.cpp">
+      <Filter>Pt-System\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-System\win32\ClockImpl.cpp">
+      <Filter>Pt-System\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-System\win32\ConditionImpl.cpp">
+      <Filter>Pt-System\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-System\win32\DirectoryImpl.cpp">
+      <Filter>Pt-System\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-System\win32\FileDeviceImpl.cpp">
+      <Filter>Pt-System\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-System\win32\FileImpl.cpp">
+      <Filter>Pt-System\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-System\win32\IODeviceImpl.cpp">
+      <Filter>Pt-System\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-System\win32\LibraryImpl.cpp">
+      <Filter>Pt-System\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-System\win32\MainLoopImpl.cpp">
+      <Filter>Pt-System\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-System\win32\MutexImpl.cpp">
+      <Filter>Pt-System\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-System\win32\PipeImpl.cpp">
+      <Filter>Pt-System\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-System\win32\ProcessImpl.cpp">
+      <Filter>Pt-System\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-System\win32\ProcessImplBase.cpp">
+      <Filter>Pt-System\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-System\win32\Selector.cpp">
+      <Filter>Pt-System\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-System\win32\SemaphoreImpl.cpp">
+      <Filter>Pt-System\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-System\win32\SerialDeviceImpl.cpp">
+      <Filter>Pt-System\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-System\win32\ThreadImpl.cpp">
+      <Filter>Pt-System\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-System\tests\ApplicationTest.cpp">
+      <Filter>Pt-System\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-System\tests\DirectoryTest.cpp">
+      <Filter>Pt-System\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-System\tests\EventLoopTest.cpp">
+      <Filter>Pt-System\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-System\tests\LoggerTest.cpp">
+      <Filter>Pt-System\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-System\tests\PipeTest.cpp">
+      <Filter>Pt-System\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-System\tests\ProcessTest.cpp">
+      <Filter>Pt-System\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-System\tests\ProcessTestChild.cpp">
+      <Filter>Pt-System\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-System\tests\Pt-System-test.cpp">
+      <Filter>Pt-System\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-System\tests\SerialDeviceTest.cpp">
+      <Filter>Pt-System\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-System\tests\ThreadTest.cpp">
+      <Filter>Pt-System\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-System\tests\TimerTest.cpp">
+      <Filter>Pt-System\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-System\tests\UriTest.cpp">
+      <Filter>Pt-System\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Unit\Application.cpp">
+      <Filter>Pt-Unit</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Unit\Assertion.cpp">
+      <Filter>Pt-Unit</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Unit\RegisterTest.cpp">
+      <Filter>Pt-Unit</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Unit\Reporter.cpp">
+      <Filter>Pt-Unit</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Unit\Test.cpp">
+      <Filter>Pt-Unit</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Unit\TestCase.cpp">
+      <Filter>Pt-Unit</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Unit\TestContext.cpp">
+      <Filter>Pt-Unit</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Unit\TestProtocol.cpp">
+      <Filter>Pt-Unit</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Unit\TestSuite.cpp">
+      <Filter>Pt-Unit</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Unit\TextProtocol.cpp">
+      <Filter>Pt-Unit</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Unit\TextProtocolTest.cpp">
+      <Filter>Pt-Unit</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Net\AddressInUse.cpp">
+      <Filter>Pt-Net</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Net\AddrInfo.cpp">
+      <Filter>Pt-Net</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Net\TcpServer.cpp">
+      <Filter>Pt-Net</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Net\TcpSocket.cpp">
+      <Filter>Pt-Net</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Net\UdpSocket.cpp">
+      <Filter>Pt-Net</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Net\tests\Pt-Net-test.cpp">
+      <Filter>Pt-Net\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Net\tests\TcpSocketTest.cpp">
+      <Filter>Pt-Net\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Net\tests\UdpSocketTest.cpp">
+      <Filter>Pt-Net\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Net\win32\AddrInfoImpl.cpp">
+      <Filter>Pt-Net\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Net\win32\TcpServerImpl.cpp">
+      <Filter>Pt-Net\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Net\win32\TcpSocketImpl.cpp">
+      <Filter>Pt-Net\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Net\win32\UdpSocketImpl.cpp">
+      <Filter>Pt-Net\win32</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
