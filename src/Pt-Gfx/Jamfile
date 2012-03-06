@@ -1,8 +1,16 @@
 SubDir TOP src Pt-Gfx ;
 SubDirHdrs $(TOP)/include ;
-SubDirHdrs $(FREETYPE_INCLUDES) ;
 SubDirC++Flags [ FDefines PT_GFX_API_EXPORT ] ;
 SubDirObjects $(OUTPUT_OBJECT) Pt-Gfx ;
+
+if $(FREETYPE_LINKFLAGS)
+{
+    SubDirHdrs $(FREETYPE_INCLUDES) ;
+}
+else
+{
+    SubDirHdrs $(TOP)/src/Pt-Gfx/freetype/include ;
+}
 
 SharedLibrary Pt-Gfx : ARgbColor.cpp
                        ARgbFColor.cpp
