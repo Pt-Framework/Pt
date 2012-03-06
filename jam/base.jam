@@ -1221,7 +1221,7 @@ rule SubInclude
     }
 
     _s = [ FDirName $(<[2-]) ] ;
-    
+
     include $(JAMFILE:D=$(_s):R=$($(<[1]))) ;
 }
 
@@ -1230,18 +1230,24 @@ rule SubInclude
 #
 rule SubTree
 {
-    # in case both root variables have the same name - save
-    local _oldroot = $($(<[1])) ;
-	
-    $($(2)) = [ FDirName $($(<[1])) $(<[2-]) ] ;
-    Echo $(2) is now $($(2)) ;
-    
-    SubInclude $(<) ;
+    if $(<[1]) = $(>[1]) 
+    {
+        Exit SubTree can not use parent root variable ;
+    }
 
-    # TODO: ensure that Jamrules of subtree top is included
+    if ! $($(<[1]))
+    {
+        EXIT Top level of source tree has not been set with $(<[1]) ;
+    }
 
-    # in case both root variables have the same name - restore
-    $($(<[1])) = $(_oldroot) ;
+    # path to subtree Jamfile
+    local _s = [ FDirName $($(<[1])) $(<[2-]) ] ;
+
+    # set subtree root variable
+    $(2) = $(_s) ;
+
+    # include Jamfile of the subtree
+    include $(JAMFILE:D=$(_s)) ;
 }
 
 
