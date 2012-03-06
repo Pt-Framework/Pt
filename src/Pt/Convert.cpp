@@ -29,6 +29,20 @@
 #include <Pt/Convert.h>
 #include <cassert>
 
+namespace {
+
+void throwConversionError(const char* typeto, const char* typefrom)
+{
+    std::string msg = "conversion from ";
+    msg += typefrom;
+    msg += " to ";
+    msg += typeto;
+    msg += " failed";
+    throw Pt::ConversionError(msg);
+}
+
+}
+
 namespace Pt {
 
 template <typename IterT>
@@ -204,13 +218,13 @@ void convert(bool& n, const String& str)
     else if (str == L"false" || str == L"0")
         n = false;
     else
-        ConversionError::doThrow("bool", "Pt::String");
+        throwConversionError("bool", "Pt::String");
 }
 
 void convert(char& c, const String& str)
 {
     if ( str.empty() )
-        ConversionError::doThrow("char", "Pt::String");
+        throwConversionError("char", "Pt::String");
 
     int n = str[0];
     c = n;
@@ -225,7 +239,7 @@ void convert(unsigned char& n, const String& str)
         _skipws(r, str.end());
 
     if( r != str.end() || ! ok )
-        ConversionError::doThrow("unsigned char", "Pt::String");
+        throwConversionError("unsigned char", "Pt::String");
 }
 
 
@@ -238,7 +252,7 @@ void convert(signed char& n, const String& str)
         _skipws(r, str.end());
 
     if( r != str.end() || ! ok )
-        ConversionError::doThrow("signed char", "Pt::String");
+        throwConversionError("signed char", "Pt::String");
 }
 
 
@@ -251,7 +265,7 @@ void convert(short& n, const Pt::String& str)
         _skipws(r, str.end());
 
     if( r != str.end() || ! ok )
-        ConversionError::doThrow("short", "Pt::String");
+        throwConversionError("short", "Pt::String");
 }
 
 
@@ -264,7 +278,7 @@ void convert(unsigned short& n, const Pt::String& str)
         _skipws(r, str.end());
 
     if( r != str.end() || ! ok )
-        ConversionError::doThrow("unsigned short", "Pt::String");
+        throwConversionError("unsigned short", "Pt::String");
 }
 
 
@@ -277,7 +291,7 @@ void convert(int& n, const Pt::String& str)
         _skipws(r, str.end());
 
     if( r != str.end() || ! ok )
-        ConversionError::doThrow("int", "Pt::String");
+        throwConversionError("int", "Pt::String");
 }
 
 
@@ -290,7 +304,7 @@ void convert(unsigned int& n, const Pt::String& str)
         _skipws(r, str.end());
 
     if( r != str.end() || ! ok )
-        ConversionError::doThrow("unsigned int", "Pt::String");
+        throwConversionError("unsigned int", "Pt::String");
 }
 
 
@@ -303,7 +317,7 @@ void convert(long& n, const Pt::String& str)
         _skipws(r, str.end());
 
     if( r != str.end() || ! ok )
-        ConversionError::doThrow("long", "Pt::String");
+        throwConversionError("long", "Pt::String");
 }
 
 
@@ -316,7 +330,7 @@ void convert(unsigned long& n, const Pt::String& str)
         _skipws(r, str.end());
 
     if( r != str.end() || ! ok )
-        ConversionError::doThrow("unsigned long", "Pt::String");
+        throwConversionError("unsigned long", "Pt::String");
 }
 
 
@@ -329,7 +343,7 @@ void convert(float& n, const String& str)
         _skipws(r, str.end());
 
     if(r != str.end() || ! ok)
-        ConversionError::doThrow("float", "Pt::String");
+        throwConversionError("float", "Pt::String");
 }
 
 
@@ -342,7 +356,7 @@ void convert(double& n, const String& str)
         _skipws(r, str.end());
 
     if(r != str.end() || ! ok)
-        ConversionError::doThrow("double", "Pt::String");
+        throwConversionError("double", "Pt::String");
 }
 
 
@@ -355,7 +369,7 @@ void convert(long double& n, const String& str)
         _skipws(r, str.end());
 
     if(r != str.end() || ! ok)
-        ConversionError::doThrow("long double", "Pt::String");
+        throwConversionError("long double", "Pt::String");
 }
 
 //
@@ -373,7 +387,7 @@ void convert(int& n, const Pt::Char* str)
         _skipws(it, end);
 
     if( it != end || ! ok )
-        ConversionError::doThrow("int", "const char*");
+        throwConversionError("int", "const char*");
 }
 
 //
@@ -488,14 +502,14 @@ void convert(bool& n, const std::string& str)
     else if (str == "false" || str == "0")
         n = false;
     else
-        ConversionError::doThrow("bool", "std::string");
+        throwConversionError("bool", "std::string");
 }
 
 
 void convert(char& c, const std::string& str)
 {
     if ( str.empty() )
-        ConversionError::doThrow("char", "std::string");
+        throwConversionError("char", "std::string");
 
     int n = str[0];
     c = n;
@@ -508,7 +522,7 @@ void convert(signed char& n, const std::string& str)
     std::string::const_iterator r = getInt( str.begin(), str.end(), ok, n );
 
     if( r != str.end() || ! ok )
-        ConversionError::doThrow("signed char", "std::string");
+        throwConversionError("signed char", "std::string");
 }
 
 
@@ -521,7 +535,7 @@ void convert(unsigned char& n, const std::string& str)
         _skipws(r, str.end());
 
     if( r != str.end() || ! ok )
-        ConversionError::doThrow("unsigned char", "std::string");
+        throwConversionError("unsigned char", "std::string");
 }
 
 
@@ -534,7 +548,7 @@ void convert(short& n, const std::string& str)
         _skipws(r, str.end());
 
     if( r != str.end() || ! ok )
-        ConversionError::doThrow("short", "std::string");
+        throwConversionError("short", "std::string");
 }
 
 
@@ -547,7 +561,7 @@ void convert(unsigned short& n, const std::string& str)
         _skipws(r, str.end());
 
     if( r != str.end() || ! ok )
-        ConversionError::doThrow("unsigned short", "std::string");
+        throwConversionError("unsigned short", "std::string");
 }
 
 
@@ -560,7 +574,7 @@ void convert(int& n, const std::string& str)
         _skipws(r, str.end());
 
     if( r != str.end() || ! ok )
-        ConversionError::doThrow("int", "std::string");
+        throwConversionError("int", "std::string");
 }
 
 
@@ -573,7 +587,7 @@ void convert(unsigned int& n, const std::string& str)
         _skipws(r, str.end());
 
     if( r != str.end() || ! ok )
-        ConversionError::doThrow("unsigned int", "std::string");
+        throwConversionError("unsigned int", "std::string");
 }
 
 
@@ -586,7 +600,7 @@ void convert(long& n, const std::string& str)
         _skipws(r, str.end());
 
     if( r != str.end() || ! ok )
-        ConversionError::doThrow("long", "std::string");
+        throwConversionError("long", "std::string");
 }
 
 
@@ -599,7 +613,7 @@ void convert(unsigned long& n, const std::string& str)
         _skipws(r, str.end());
 
     if( r != str.end() || ! ok )
-        ConversionError::doThrow("unsigned long", "std::string");
+        throwConversionError("unsigned long", "std::string");
 }
 
 
@@ -612,7 +626,7 @@ void convert(float& n, const std::string& str)
         _skipws(r, str.end());
 
     if(r != str.end() || ! ok)
-        ConversionError::doThrow("float", "std::string");
+        throwConversionError("float", "std::string");
 }
 
 
@@ -625,7 +639,7 @@ void convert(double& n, const std::string& str)
         _skipws(r, str.end());
 
     if(r != str.end() || ! ok)
-        ConversionError::doThrow("double", "std::string");
+        throwConversionError("double", "std::string");
 }
 
 
@@ -638,7 +652,7 @@ void convert(long double& n, const std::string& str)
         _skipws(r, str.end());
 
     if(r != str.end() || ! ok)
-        ConversionError::doThrow("long double", "std::string");
+        throwConversionError("long double", "std::string");
 }
 
 //
@@ -656,7 +670,7 @@ void convert(int& n, const char* str)
         _skipws(it, end);
 
     if( it != end || ! ok )
-        ConversionError::doThrow("int", "const char*");
+        throwConversionError("int", "const char*");
 }
 
 }

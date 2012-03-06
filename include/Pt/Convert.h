@@ -108,7 +108,7 @@ inline void convert(T& t, const String& str)
     Char ch;
     is >> t;
     if (is.fail() || !(is >> ch).eof())
-        ConversionError::doThrow("T", "Pt::String");
+        throw ConversionError("conversion from Pt::String failed");
 }
 
 //
@@ -181,7 +181,7 @@ inline void convert(T& t, const std::string& str)
     char ch;
     is >> t;
     if (is.fail() || !(is >> ch).eof())
-        ConversionError::doThrow("T", "std::string");
+        throw ConversionError("conversion from std::string failed");
 }
 
 //
@@ -199,21 +199,8 @@ void convert(T& to, const S& from)
 {
     StringStream ss;
     if( !(ss << from && ss >> to) )
-        throw ConversionError("conversion between streamable types failed");
+        throw ConversionError("conversion failed");
 }
-
-
-template<typename T, typename S>
-struct Convert
-{
-    T operator()(const S& from) const
-    {
-        T value = T();
-        convert(value, from);
-        return value;
-    }
-};
-
 
 template<typename T, typename S>
 T convert(const S& from)
@@ -227,7 +214,7 @@ T convert(const S& from)
 // number formatting
 //
 
-/** @brief Formats an integer in a given format format.
+/** @brief Formats an integer in a given format.
  */
 template <typename OutIterT, typename T, typename FormatT>
 inline OutIterT putInt(OutIterT it, T i, const FormatT& fmt);

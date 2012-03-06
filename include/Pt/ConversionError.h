@@ -42,9 +42,6 @@ class PT_API ConversionError : public std::runtime_error
 
         ~ConversionError() throw()
         {}
-
-        static void doThrow(const char* typeto, const char* typefrom);
-
 };
 
 } // namespace Pt
