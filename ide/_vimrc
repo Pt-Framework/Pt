@@ -15,17 +15,18 @@ set guifont=Consolas:h9
 " MiniBufExplorer
 let g:miniBufExplSortBy = "name"
 let g:miniBufExplVSplit = 30
-let g:miniBufExplSplitBelow = 1
+let g:miniBufExplSplitBelow = 0
+
+:nmap <F1> :TMiniBufExplorer<CR>
 
 " Taglist
-let g:Tlist_Auto_Open = 1
+let g:Tlist_Auto_Open = 0
 let g:Tlist_Show_One_File = 1
 let g:Tlist_WinWidth = 40
 
+:nmap <F2> :TlistToggle<CR>
 
-"
-" Some Project like functionality
-"
+" File Open Dialog
 set tags=c:\Pt\tags
 
 function OpenBufferDir()
@@ -33,15 +34,15 @@ function OpenBufferDir()
   e %:p:h
 endfunction
 
-:nmap <F8> :call OpenBufferDir()<CR>
+:nmap <F3> :call OpenBufferDir()<CR>
 
 "
 " Build command
 "
-let s:makeprg_line="start jam $*"
+let s:makeprg_line="jam.bat -q $*"
 let &makeprg=s:makeprg_line
 
-let g:make_target='debug Pt'
+let g:make_target=''
 let g:build_root='c:\Pt'
 
 " See also (very nice!!!) http://blog.vicshih.com/2011/03/fast-make-for-vim.html
@@ -62,21 +63,21 @@ function BuildMake(make_args)
   " http://stackoverflow.com/questions/4596932/vim-cd-to-path-stored-in-variable
   " and we should _not_ run exe on the raw line directly, since this will execute _output_
   " results given by make!
-  let cmd_make="make -q -sTOOLSET=vc8 -sVISUALC=\"c:\\Program Files\\Microsoft Visual Studio 8\" -sCONFIG=" . a:make_args
+  let cmd_make="make" . a:make_args
   exe cmd_make
   
   " open quickfix win if there are errors
   cw
 
-  copen
+  "copen
   "cc 1 " this does not appear to be necessary since opening the window will jump to first issue anyway
   sil lcd -
 endfunction
 
-:nmap <F7> :call BuildMake(g:make_target)<CR>
+:nmap <F5> :call BuildMake(g:make_target)<CR>
 
 "
-" Color Scheme
+" Color Scheme (derived from desert)
 "
 set background=dark
 
@@ -120,19 +121,22 @@ hi WarningMsg	guifg=salmon
 "hi Tooltip
 
 " syntax highlighting groups
-hi Comment	guifg=lightsteelblue 
-hi PreProc	guifg=palegreen
-hi Constant	guifg=palegreen
+hi Comment	guifg=#99968b 
+hi PreProc	guifg=navajowhite
 hi String	guifg=lightred
-hi Float	guifg=palegreen
-hi Number	guifg=palegreen
-hi Boolean	gui=bold guifg=white
-hi Identifier	guifg=palegreen
+
+hi Constant	guifg=lightsteelblue
+hi Float	guifg=lightsteelblue
+hi Number	guifg=lightsteelblue
+hi Boolean	guifg=lightsteelblue
+hi Type		guifg=lightsteelblue
+
+hi Identifier	gui=bold guifg=white
 hi Statement	gui=bold guifg=white
-hi Type		gui=bold guifg=white
-hi TypeModifier	gui=none guifg=lightred
 hi StorageClass gui=bold guifg=white
 hi Structure    gui=bold guifg=white
+"hi TypeModifier	gui=none guifg=lightsteelblue
+
 hi Special	guifg=navajowhite
 "hi Underlined
 hi Ignore	guifg=grey40 guibg=grey20
