@@ -44,26 +44,6 @@
 namespace Pt {
 
 //
-// Generic stream-based conversions
-//
-
-template<typename T, typename S>
-void convert(T& to, const S& from)
-{
-    StringStream ss;
-    if( !(ss << from && ss >> to) )
-        throw ConversionError("conversion failed");
-}
-
-template<typename T, typename S>
-T convert(const S& from)
-{
-    T value = T();
-    convert(value, from);
-    return value;
-}
-
-//
 // Conversions to Pt::String
 //
 
@@ -185,6 +165,26 @@ inline void convert(T& t, const std::string& str)
     is >> t;
     if (is.fail() || !(is >> ch).eof())
         throw ConversionError("conversion from std::string failed");
+}
+
+//
+// Generic stream-based conversions
+//
+
+template<typename T, typename S>
+void convert(T& to, const S& from)
+{
+    StringStream ss;
+    if( !(ss << from && ss >> to) )
+        throw ConversionError("conversion failed");
+}
+
+template<typename T, typename S>
+T convert(const S& from)
+{
+    T value = T();
+    convert(value, from);
+    return value;
 }
 
 //
