@@ -44,101 +44,71 @@ rule TryBuildC++
 }
 
 
-rule ConfigureCc
+rule CheckCc
 {
-    if ! $(CC_CONFIGURED)
+    AS     ?= as ;
+    CC     ?= xlC_r ;
+    RANLIB ?= ranlib ;
+    AR     ?= ar ru ;
+    LINK   ?= $(CC) ;
+
+    Configure AS ;
+    Configure AR ;
+    Configure CC ;
+    Configure LINK ;
+    Configure RANLIB ;
+
+    LINKFLAGS += -bh:5 ;
+
+    if $(WITH_DEBUG)
     {
-        CC_CONFIGURED = 1 ;
-   
-        AS     ?= as ;
-        CC     ?= xlC_r ;
-        RANLIB ?= ranlib ;
-        AR     ?= ar ru ;
-        LINK   ?= $(CC) ;
-    
-        Configure AS ;
-        Echo "Checking for assember..." $(AS:BS) ;
-    
-        Configure AR ;
-        Echo "Checking for archiver..." $(AR:BS) ;
-    
-        Configure CC ;
-        Echo "Checking for C compiler..." $(CC:BS) ;
-    
-        Configure LINK ;
-        Echo "Checking for linker..." $(LINK:BS) ;
-    
-        Configure RANLIB ;
-        Echo "Checking for ranlib..." $(RANLIB:BS) ;
-    
-        LINKFLAGS += -bh:5 ;
-
-        if $(WITH_DEBUG)
-        {
-            CCFLAGS += -DDEBUG -g ;
-            
-        }
-        else
-        {
-            CCFLAGS += -DNDEBUG ;
-            
-        }
-
-        if $(WITH_OPTIM)
-        {
-            OPTIM ?= -O2 ;
-        }
-        else 
-        {
-            OPTIM ?= -O0 ;
-        }
-
-        WARN ?= -qinfo=lan ;
-
-        Configure CCFLAGS ;
-        Configure OPTIM ;
-        Configure WARN ;
-        Configure LINKFLAGS ;
+        CCFLAGS += -DDEBUG -g ;
     }
+    else
+    {
+        CCFLAGS += -DNDEBUG ;
+    }
+
+    if $(WITH_OPTIM)
+    {
+        OPTIM ?= -O2 ;
+    }
+    else 
+    {
+        OPTIM ?= -O0 ;
+    }
+
+    WARN ?= -qinfo=lan ;
+
+    Configure CCFLAGS ;
+    Configure OPTIM ;
+    Configure WARN ;
+    Configure LINKFLAGS ;
 }
 
 
-rule ConfigureC++
+rule CheckC++
 {
     ConfigureCc ;
 
-    if ! $(C++_CONFIGURED)
+    CC++ ?= xlC_r ;
+    Configure C++ ;
+
+    LINK++ = $(C++) ;
+    Configure LINK++ ;
+
+    C++FLAGS += -qrtti -qlanglvl=newexcp -qeh -qstaticinline ;
+    
+    if $(WITH_DEBUG)
     {
-        C++_CONFIGURED = 1 ;
-
-        CC++ ?= xlC_r ;
-        Configure C++ ;
-        Echo "Checking for C++ compiler..." $(C++:BS) ;
-
-        LINK++ = $(C++) ;
-        Configure LINK++ ;
-        Echo "Checking for C++ linker" $(LINK++:BS) ;
-
-        C++FLAGS += -qrtti -qlanglvl=newexcp -qeh -qstaticinline ;
-        
-        if $(WITH_DEBUG)
-        {
-            C++FLAGS  += -DDEBUG ;
-        }
-        else
-        {
-            C++FLAGS  += -DNDEBUG ;
-        }
-
-        Configure C++FLAGS ;
-
-        local _r = [ CheckBuildC++ "#include <iostream>"
-                                   "int main() { std::cout << 42; return 0; }" ] ;
-        if ! $(_r)
-        {
-            Exit "ERROR: configured C++ compiler does not work" ;
-        }
+        C++FLAGS  += -DDEBUG ;
     }
+    else
+    {
+        C++FLAGS  += -DNDEBUG ;
+    }
+
+    Configure C++FLAGS ;
 }
 
 

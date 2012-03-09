@@ -94,149 +94,121 @@ rule TryBuildC++
 }
 
 
-rule ConfigureCc
+rule CheckCc
 {
-    if ! $(CC_CONFIGURED)
+    TOOLSET_ROOT ?= "" ;
+    AS           ?= $(TOOLSET_ROOT)as ;
+    CC           ?= $(TOOLSET_ROOT)gcc ;
+    RANLIB       ?= $(TOOLSET_ROOT)ranlib ;
+    AR           ?= $(TOOLSET_ROOT)ar ru ;
+    LINK         ?= $(CC) ;
+
+    Configure AS ;
+    Configure AR ;
+    Configure CC ;
+    Configure LINK ;
+    Configure RANLIB ;
+
+    if $(TARGET_OS:L) = macosx
     {
-        CC_CONFIGURED = 1 ;
-
-        TOOLSET_ROOT ?= "" ;
-        AS           ?= $(TOOLSET_ROOT)as ;
-        CC           ?= $(TOOLSET_ROOT)gcc ;
-        RANLIB       ?= $(TOOLSET_ROOT)ranlib ;
-        AR           ?= $(TOOLSET_ROOT)ar ru ;
-        LINK         ?= $(CC) ;
-    
-        Configure AS ;
-        Echo "Checking for assember..." $(AS:BS) ;
-    
-        Configure AR ;
-        Echo "Checking for archiver..." $(AR:BS) ;
-    
-        Configure CC ;
-        Echo "Checking for C compiler..." $(CC:BS) ;
-    
-        Configure LINK ;
-        Echo "Checking for linker..." $(LINK:BS) ;
-    
-        Configure RANLIB ;
-        Echo "Checking for ranlib..." $(RANLIB:BS) ;
-    
-        if $(TARGET_OS:L) = macosx
-        {
-            DLL_LINKFLAGS = -dynamiclib ;
-        }
-        else if $(TARGET_OS:L) = nt
-        {
-            DLL_LINKFLAGS = -shared ;
-            LINKFLAGS  += "-Wl,--enable-runtime-pseudo-reloc"  ;
-            GCC_START_GROUP = "-Wl,--start-group" ;
-            GCC_END_GROUP = "-Wl,--end-group" ;
-            RPATH_LINKFLAGS = "-Wl,-rpath-link" ;
-        }
-        else
-        {
-            # linker flag -E: export global symbols from the executable
-            MAIN_LINKFLAGS = "-Wl,-E" ;
-            DLL_LINKFLAGS = -shared ;
-            GCC_START_GROUP = "-Wl,--start-group" ;
-            GCC_END_GROUP = "-Wl,--end-group" ;
-            RPATH_LINKFLAGS = "-Wl,-rpath-link" ;
-        }
-
-        if $(WITH_GCC_FLAG_VISIBILITY)
-        {
-            CCFLAGS    += -fvisibility=hidden ;
-            LINKFLAGS  += -fvisibility=hidden ;
-        }
-
-        # only use -fPIC for non-X86 CPUs
-        if $(TARGET_OSPLAT:U) != X86
-        {
-            CCFLAGS += -fPIC ;
-        }
-
-        if $(WITH_DEBUG)
-        {
-            CCFLAGS += -DDEBUG -g ;
-        }
-        else
-        {
-            CCFLAGS += -DNDEBUG ;
-        }
-
-        if $(WITH_OPTIM)
-        {
-            OPTIM ?= -O2 ;
-        }
-        else 
-        {
-            OPTIM ?= -O0 ;
-        }
-
-        WARN ?= -Wall ;
-
-        Configure CCFLAGS ;
-        Configure WARN ;
-        Configure OPTIM ;
-        Configure LINKFLAGS ;
-        Configure DLL_LINKFLAGS ;
-        Configure MAIN_LINKFLAGS ;
-        Configure RPATH_LINKFLAGS ;
-        Configure GCC_START_GROUP ;
-        Configure GCC_END_GROUP ;
+        DLL_LINKFLAGS = -dynamiclib ;
     }
+    else if $(TARGET_OS:L) = nt
+    {
+        DLL_LINKFLAGS = -shared ;
+        LINKFLAGS  += "-Wl,--enable-runtime-pseudo-reloc"  ;
+        GCC_START_GROUP = "-Wl,--start-group" ;
+        GCC_END_GROUP = "-Wl,--end-group" ;
+        RPATH_LINKFLAGS = "-Wl,-rpath-link" ;
+    }
+    else
+    {
+        # linker flag -E: export global symbols from the executable
+        MAIN_LINKFLAGS = "-Wl,-E" ;
+        DLL_LINKFLAGS = -shared ;
+        GCC_START_GROUP = "-Wl,--start-group" ;
+        GCC_END_GROUP = "-Wl,--end-group" ;
+        RPATH_LINKFLAGS = "-Wl,-rpath-link" ;
+    }
+
+    if $(WITH_GCC_FLAG_VISIBILITY)
+    {
+        CCFLAGS    += -fvisibility=hidden ;
+        LINKFLAGS  += -fvisibility=hidden ;
+    }
+
+    # only use -fPIC for non-X86 CPUs
+    if $(TARGET_OSPLAT:U) != X86
+    {
+        CCFLAGS += -fPIC ;
+    }
+
+    if $(WITH_DEBUG)
+    {
+        CCFLAGS += -DDEBUG -g ;
+    }
+    else
+    {
+        CCFLAGS += -DNDEBUG ;
+    }
+
+    if $(WITH_OPTIM)
+    {
+        OPTIM ?= -O2 ;
+    }
+    else 
+    {
+        OPTIM ?= -O0 ;
+    }
+
+    WARN ?= -Wall ;
+
+    Configure CCFLAGS ;
+    Configure WARN ;
+    Configure OPTIM ;
+    Configure LINKFLAGS ;
+    Configure DLL_LINKFLAGS ;
+    Configure MAIN_LINKFLAGS ;
+    Configure RPATH_LINKFLAGS ;
+    Configure GCC_START_GROUP ;
+    Configure GCC_END_GROUP ;
 }
 
 
-rule ConfigureC++
+rule CheckC++
 {
     ConfigureCc ;
 
-    if ! $(C++_CONFIGURED)
+    TOOLSET_ROOT ?= "" ;
+
+    C++ ?= $(TOOLSET_ROOT)g++ ;
+    Configure C++ ;
+
+    LINK++ = $(C++) ;
+    Configure LINK++ ;
+
+    #if $(WITH_GCC_FLAG_VISIBILITY)
+    #{
+    #    C++FLAGS += -fvisibility-inlines-hidden ;
+    #    LINKFLAGS += -fvisibility-inlines-hidden ;
+    #}
+
+    # only use -fPIC for non-X86 CPUs
+    if $(TARGET_OSPLAT:U) != X86
     {
-        C++_CONFIGURED = 1 ;
-
-        TOOLSET_ROOT ?= "" ;
-    
-        C++ ?= $(TOOLSET_ROOT)g++ ;
-        Configure C++ ;
-        Echo "Checking for C++ compiler..." $(C++:BS) ;
-
-        LINK++ = $(C++) ;
-        Configure LINK++ ;
-        Echo "Checking for C++ linker" $(LINK++:BS) ;
-
-        #if $(WITH_GCC_FLAG_VISIBILITY)
-        #{
-        #    C++FLAGS += -fvisibility-inlines-hidden ;
-        #    LINKFLAGS += -fvisibility-inlines-hidden ;
-        #}
-
-        local _r = [ CheckBuildC++ "#include <iostream>"
-                                   "int main() { std::cout << 42; return 0; }" ] ;
-        if ! $(_r)
-        {
-            Exit "ERROR: configured C++ compiler does not work" ;
-        }
-
-        # only use -fPIC for non-X86 CPUs
-        if $(TARGET_OSPLAT:U) != X86
-        {
-            C++FLAGS += -fPIC ;
-        }
-
-        if $(WITH_DEBUG)
-        {
-            C++FLAGS += -DDEBUG ;
-        }
-        else
-        {
-            C++FLAGS += -DNDEBUG ;
-        }
-
-        Configure C++FLAGS ;
+        C++FLAGS += -fPIC ;
     }
+
+    if $(WITH_DEBUG)
+    {
+        C++FLAGS += -DDEBUG ;
+    }
+    else
+    {
+        C++FLAGS += -DNDEBUG ;
+    }
+
+    Configure C++FLAGS ;
 }
 
 ##############################################################################

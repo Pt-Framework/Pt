@@ -189,53 +189,6 @@ rule CheckC++
 }
 
 
-rule ConfigureCc
-{
-    if ! $(CC_CONFIGURED)
-    {
-        CheckCc ;
-
-        EchoOption AS : "Assember" : $(AS:BS) ;
-        EchoOption AR : "Archiver" : $(AR:BS) ;
-        EchoOption CC : "C compiler" : $(CC:BS) ;
-        EchoOption LINK : "Linker" : $(LINK:BS) ;
-
-        EchoOption OPTIM : "Optimisation" ;
-        EchoOption WARN : "Warning Level" ;
-        EchoOption CCFLAGS : "C Flags" ;
-        EchoOption STDHDRS : "Standard Headers" ;
-        EchoOption LINKFLAGS : "Link Flags" ;
-        EchoOption MAIN_LINKFLAGS : "Main Link Flags" ;
-        EchoOption DLL_LINKFLAGS : "Dll Link Flags" ;
-
-        CC_CONFIGURED = 1 ;
-    }
-}
-
-
-rule ConfigureC++
-{
-    if ! $(C++_CONFIGURED)
-    {
-        CheckC++ ;
-
-        EchoOption C++ : "C++ compiler" : $(C++:BS) ;
-        EchoOption LINK++ : "C++ Linker" : $(LINK++:BS) ;
-
-        EchoOption C++FLAGS : "C++ Flags" ;
-        EchoOption C++LINKFLAGS : "C++ Link Flags" ;
-
-        local _r = [ CheckBuildC++ "#include <iostream>"
-                                    "int main() { std::cout << 42; return 0; }" ] ;
-        if ! $(_r)
-        {
-            Exit "ERROR: configured C++ compiler does not work" ;
-        }
-
-        C++_CONFIGURED = 1 ;
-    }
-}
-
 ##########################################################################
 # Build Rules
 ##########################################################################

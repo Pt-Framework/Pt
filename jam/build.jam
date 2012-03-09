@@ -597,17 +597,17 @@ rule MainFromObjects
     local _t = [ FAppendSuffix $(<) : $(SUFEXE) ] ;
 
     # TODO:  move this to Objects rule
-    LINKFLAGS on $(_t) += $(LINKFLAGS) $(MAIN_LINKFLAGS) ;
+    LINKFLAGS on $(_t) += $(MAIN_LINKFLAGS) ;
 
     # TODO:  move this to Objects rule
     switch $(>:S)
     {
-        case .C :   LINK on $(_target) = $(LINK++) ;
-                    LINKFLAGS on $(_target) += $(C++LINKFLAGS) ;
-        case .cc :  LINK on $(_target) = $(LINK++) ;
-                    LINKFLAGS on $(_target) += $(C++LINKFLAGS) ;
-        case .cpp : LINK on $(_target) = $(LINK++) ;
-                    LINKFLAGS on $(_target) += $(C++LINKFLAGS) ;
+        case .C :   LINK on $(_t) = $(LINK++) ;
+                    LINKFLAGS on $(_t) += $(C++LINKFLAGS) ;
+        case .cc :  LINK on $(_t) = $(LINK++) ;
+                    LINKFLAGS on $(_t) += $(C++LINKFLAGS) ;
+        case .cpp : LINK on $(_t) = $(LINK++) ;
+                    LINKFLAGS on $(_t) += $(C++LINKFLAGS) ;
     }
 
     # build objects from source files
