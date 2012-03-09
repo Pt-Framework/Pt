@@ -597,7 +597,7 @@ rule MainFromObjects
     local _t = [ FAppendSuffix $(<) : $(SUFEXE) ] ;
 
     # TODO:  move this to Objects rule
-    LINKFLAGS on $(_t) += $(MAIN_LINKFLAGS) ;
+    LINKFLAGS on $(_t) += $(LINKFLAGS) $(MAIN_LINKFLAGS) ;
 
     # TODO:  move this to Objects rule
     switch $(>:S)
