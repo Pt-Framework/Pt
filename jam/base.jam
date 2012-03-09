@@ -198,6 +198,11 @@ rule Cc
 {
     local _h ;
 
+    if ! $(C++)
+    {
+        Exit C compiler not configured. ;
+    }
+
     DEPENDS $(<) : $(>) ;
 
     # Just to clarify here: this sets the per-target CCFLAGS to
@@ -234,6 +239,11 @@ rule Cc
 rule C++
 {
     local _h ;
+
+    if ! $(C++)
+    {
+        Exit C++ compiler not configured. ;
+    }
 
     DEPENDS $(<) : $(>) ;
     C++FLAGS on $(<) += $(C++FLAGS) $(SUBDIRC++FLAGS) ;
