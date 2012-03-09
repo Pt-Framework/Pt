@@ -74,12 +74,15 @@ rule ConfigureCc
         if $(WITH_DEBUG)
         {
             CCFLAGS += -DEBUG -g ;
-            OPTIM   ?= ;
         }
         else
         {
             CCFLAGS += -DNDEBUG ;
-            OPTIM   ?= -fast ;
+        }
+
+        if $(WITH_OPTIM)
+        {
+            OPTIM ?= -fast ;
         }
 
         WARN ?= +w  -erroff=doubunder -errtags=yes ; # , hidef,hidevf -errtags=yes ;
@@ -122,7 +125,6 @@ rule ConfigureC++
         if $(TARGET_OSPLAT) = sparc9
         {
             C++FLAGS += -xtarget=ultra -xarch=v9 ;
-            LINKFLAGS += -xtarget=ultra -xarch=v9 ;
         }
 
         if $(WITH_DEBUG)
@@ -133,8 +135,6 @@ rule ConfigureC++
         {
             C++FLAGS += -DNDEBUG ;
         }
-
-        C++LINKFLAGS += $(LINKFLAGS) ;
 
         Configure C++FLAGS ;
         Configure C++LINKFLAGS ;
@@ -174,25 +174,25 @@ rule FIncludes
 { return -I$(<) ; }
 
 
-rule Main-Build
-{
-    MainFromObjects $(<) : $(>:GBS=$(SUFOBJ)) ; # FIX was only S
-    Objects $(>) ;
-
-    # Add executable name decoration
-    local _target = $(<:S=$(SUFEXE)) ;
-
-    switch $(>:S)
-    {
-        case .C :   LINK on $(_target) = $(C++) ;
-                    LINKFLAGS on $(_target) += $(C++LINKFLAGS) ;
-        case .cc :  LINK on $(_target) = $(C++) ;
-                    LINKFLAGS on $(_target) += $(C++LINKFLAGS) ;
-        case .cpp : LINK on $(_target) = $(C++) ;
-                    LINKFLAGS on $(_target) += $(C++LINKFLAGS) ;
-        case * :    LINK on $(_target) = $(CC) ;
-    }
-}
+#rule Main-Build
+#{
+#    MainFromObjects $(<) : $(>:GBS=$(SUFOBJ)) ; # FIX was only S
+#    Objects $(>) ;
+#
+#    # Add executable name decoration
+#    local _target = $(<:S=$(SUFEXE)) ;
+#
+#    switch $(>:S)
+#    {
+#        case .C :   LINK on $(_target) = $(C++) ;
+#                    LINKFLAGS on $(_target) += $(C++LINKFLAGS) ;
+#        case .cc :  LINK on $(_target) = $(C++) ;
+#                    LINKFLAGS on $(_target) += $(C++LINKFLAGS) ;
+#        case .cpp : LINK on $(_target) = $(C++) ;
+#                    LINKFLAGS on $(_target) += $(C++LINKFLAGS) ;
+#        case * :    LINK on $(_target) = $(CC) ;
+#    }
+#}
 
 
 rule Main-LinkSharedLibraries

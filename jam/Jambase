@@ -33,7 +33,13 @@ if configure in $(ARGV)
         WITH_DEBUG = yes ;
     }
 
+    if --optimize in $(ARGV)
+    {
+        WITH_OPTIM = yes ;
+    }
+
     EchoOption --debug : "Debug Build" : $(WITH_DEBUG:E="no") ;
+    EchoOption --optimize OPTIM : "Optimized Build" : $(WITH_OPTIM:E="no") ;
 
     TryCommand "rm -f config.jam" ;
     TryCommand "del /f/q config.jam" ;
@@ -56,13 +62,6 @@ if configure in $(ARGV)
     ConfigureLog "\n[ Jamconfigure ]" ;
     include Jamconfigure ;
 
-    # move this to toolset.jam
-    EchoOption OPTIM : "Optimisation" ;
-    EchoOption WARN : "Warning Level" ;
-    EchoOption CCFLAGS : "C Flags" ;
-    EchoOption C++FLAGS : "C++ Flags" ;
-    EchoOption LINKFLAGS : "Linker Flags" ;
-
     ConfigureExit ;
 }
 
@@ -76,6 +75,8 @@ include config.jam ;
 ##########################################################################
 # Build Step
 ##########################################################################
+
+Load build.jam ;
 
 # Toolset specific variables and rules
 Load $(TOOLSET:L).jam ;

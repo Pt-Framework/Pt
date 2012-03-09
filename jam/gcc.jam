@@ -124,11 +124,11 @@ rule ConfigureCc
     
         if $(TARGET_OS:L) = macosx
         {
-            SHLIB_LINKFLAGS = -dynamiclib ;
+            DLL_LINKFLAGS = -dynamiclib ;
         }
         else if $(TARGET_OS:L) = nt
         {
-            SHLIB_LINKFLAGS = -shared ;
+            DLL_LINKFLAGS = -shared ;
             LINKFLAGS  += "-Wl,--enable-runtime-pseudo-reloc"  ;
             GCC_START_GROUP = "-Wl,--start-group" ;
             GCC_END_GROUP = "-Wl,--end-group" ;
@@ -136,8 +136,9 @@ rule ConfigureCc
         }
         else
         {
-            SHLIB_LINKFLAGS = -shared ;
+            # linker flag -E: export global symbols from the executable
             MAIN_LINKFLAGS = "-Wl,-E" ;
+            DLL_LINKFLAGS = -shared ;
             GCC_START_GROUP = "-Wl,--start-group" ;
             GCC_END_GROUP = "-Wl,--end-group" ;
             RPATH_LINKFLAGS = "-Wl,-rpath-link" ;
@@ -157,13 +158,20 @@ rule ConfigureCc
 
         if $(WITH_DEBUG)
         {
-            CCFLAGS += -DDEBUG ;
-            OPTIM   ?= -O0 -g ;
+            CCFLAGS += -DDEBUG -g ;
         }
         else
         {
             CCFLAGS += -DNDEBUG ;
-            OPTIM   ?= -O2 ;
+        }
+
+        if $(WITH_OPTIM)
+        {
+            OPTIM ?= -O2 ;
+        }
+        else 
+        {
+            OPTIM ?= -O0 ;
         }
 
         WARN ?= -Wall ;
@@ -172,7 +180,7 @@ rule ConfigureCc
         Configure WARN ;
         Configure OPTIM ;
         Configure LINKFLAGS ;
-        Configure SHLIB_LINKFLAGS ;
+        Configure DLL_LINKFLAGS ;
         Configure MAIN_LINKFLAGS ;
         Configure RPATH_LINKFLAGS ;
         Configure GCC_START_GROUP ;
@@ -243,25 +251,24 @@ rule FIncludes
 { return -I$(<) ; }
 
 
-rule Main-Build
-{
-    MainFromObjects $(<) : $(>:GBS=$(SUFOBJ)) ; # FIX was only S
-    Objects $(>) ;
-
-    # Add executable name decoration
-    local _target = $(<:S=$(SUFEXE)) ;
-
-    # linker flag -E: export global symbols from the executable
-    LINKFLAGS on $(_target) += $(LINKFLAGS) $(MAIN_LINKFLAGS) ;
-
-    switch $(>:S)
-    {
-        case .C :   LINK on $(_target) = $(C++) ;
-        case .cc :  LINK on $(_target) = $(C++) ;
-        case .cpp : LINK on $(_target) = $(C++) ;
-        case * :    LINK on $(_target) = $(CC) ;
-    }
-}
+#rule Main-Build
+#{
+#    MainFromObjects $(<) : $(>:GBS=$(SUFOBJ)) ; # FIX was only S
+#    Objects $(>) ;
+#
+#    # Add executable name decoration
+#    local _target = $(<:S=$(SUFEXE)) ;
+#
+#    LINKFLAGS on $(_target) += $(LINKFLAGS) $(MAIN_LINKFLAGS) ;
+#
+#    switch $(>:S)
+#    {
+#        case .C :   LINK on $(_target) = $(C++) ;
+#        case .cc :  LINK on $(_target) = $(C++) ;
+#        case .cpp : LINK on $(_target) = $(C++) ;
+#        case * :    LINK on $(_target) = $(CC) ;
+#    }
+#}
 
 
 rule Main-LinkSharedLibraries
@@ -290,7 +297,7 @@ rule SharedLibrary-Build
     # Add library name decorations <lib><name><.so>
     local _target = $(PRELIB)$(<)$(SUFDLL) ;
 
-    LINKFLAGS on $(_target) += $(LINKFLAGS) $(SHLIB_LINKFLAGS) ;
+    LINKFLAGS on $(_target) += $(LINKFLAGS) $(DLL_LINKFLAGS) ;
 
     if $(INSTALL_PATH) # macosx feature
     {

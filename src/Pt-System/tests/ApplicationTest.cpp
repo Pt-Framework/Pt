@@ -27,7 +27,10 @@
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/RegisterTest.h"
 #include "Pt/System/Application.h"
-#include <csignal>
+
+#ifndef WINCE
+#include <signal.h>
+#endif
 
 #ifndef SIGUSR1
 #define SIGUSR1 -1

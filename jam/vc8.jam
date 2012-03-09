@@ -71,16 +71,16 @@ rule ConfigurePlatformSDK
         else if $(TARGET_OS:L) = "wince"
         {
             STDHDRS += \""$(PLATFORMSDK)\\include\"" ;
-            CCFLAGS += "/D _WIN32_WCE=0x420 /D WINCE /D UNDER_CE /D WIN32_PLATFORM_PSPC /D _CONSOLE /D _UNICODE /D UNICODE" ;
-            C++FLAGS += "/D _WIN32_WCE=0x420 /D WINCE /D UNDER_CE /D WIN32_PLATFORM_PSPC /D _CONSOLE /D _UNICODE /D UNICODE" ;
+            CCFLAGS += /D _WIN32_WCE=0x420 /D WINCE /D UNDER_CE /D WIN32_PLATFORM_PSPC /D _CONSOLE /D _UNICODE /D UNICODE ;
+            C++FLAGS += /D _WIN32_WCE=0x420 /D WINCE /D UNDER_CE /D WIN32_PLATFORM_PSPC /D _CONSOLE /D _UNICODE /D UNICODE ;
             LINKLIBS += coredll.lib ;
 
             if $(TARGET_OSPLAT:L) = "arm"
             {
-                CCFLAGS += "/D ARM /D _ARM_ /QRarch4" ;
-                C++FLAGS += "/D ARM /D _ARM_ /QRarch4" ;
+                CCFLAGS += /D ARM /D _ARM_ /QRarch4 ;
+                C++FLAGS += /D ARM /D _ARM_ /QRarch4 ;
                 LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)\\Lib\\armv4\"" ;
-                LINKFLAGS += "/NODEFAULTLIB:oldnames.lib /subsystem:windowsce,4.20 /ERRORREPORT:PROMPT /ARMPADCODE /machine:ARM" ;
+                LINKFLAGS += /NODEFAULTLIB:oldnames.lib /subsystem:windowsce,4.20 /ERRORREPORT:PROMPT /ARMPADCODE /machine:ARM ;
             }
         }
 

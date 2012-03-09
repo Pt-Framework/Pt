@@ -75,13 +75,22 @@ rule ConfigureCc
 
         if $(WITH_DEBUG)
         {
-            CCFLAGS += -DDEBUG ;
-            OPTIM   ?= -O0 -g ;
+            CCFLAGS += -DDEBUG -g ;
+            
         }
         else
         {
             CCFLAGS += -DNDEBUG ;
-            OPTIM	  ?= -O2 ;
+            
+        }
+
+        if $(WITH_OPTIM)
+        {
+            OPTIM ?= -O2 ;
+        }
+        else 
+        {
+            OPTIM ?= -O0 ;
         }
 
         WARN ?= -qinfo=lan ;

@@ -17,7 +17,8 @@ if $(GCCVERSION) = 3.3.5
 
 
 BYTEORDER ?= LE ;
-PRELIB = lib ;
+
+PRELIB = lib ;
 
 C++FLAGS    += $(CCFLAGS) -lang-c++ -fexceptions ;
 LINKFLAGS   = -lang-c++ -Wl,-Bsymbolic ;
