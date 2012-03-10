@@ -12,7 +12,7 @@ else
 }
 
 Configure CONFIG ;
-Echo "Using configuration..." $(CONFIG) ;
+EchoOption CONFIG : "Build configuration" ;
 
 # configure basic C compiler
 ConfigureCc ;
@@ -109,14 +109,14 @@ if $(TARGET_OS) = "aix"
     LINKLIBS += $(SYSLIBS) ;
 }
 
-Echo "Using subsystem ..." $(SYS) ;
+EchoOption SYS : "Using subsystem" ;
 Configure SYS ;
 
 Configure SYSLIBS ;
-Echo "Using system libraries..." $(SYSLIBS) ;
+EchoOption SYSLIBS : "System lib flags" ;
 
 Configure NETLIBS ;
-Echo "Using network libraries..." $(NETLIBS) ;
+EchoOption NETLIBS : "Network lib flags" ;
 
 
 #############################################################################
@@ -134,7 +134,7 @@ for local arg in $(ARGV)
 }
 
 Configure WITH_OPENSSL ;
-Echo "Checking for OpenSSL (--with-openssl)..." $(WITH_OPENSSL) ;
+EchoOption WITH_OPENSSL : "OpenSSL library" ;
 
 
 #############################################################################
@@ -151,7 +151,7 @@ if ! $(FREETYPE_INCLUDES) || ! $(FREETYPE_LINKFLAGS)
     FREETYPE_LINKFLAGS = "" ;
 
     Configure FREETYPE_INCLUDES ;
-    Echo "Using builtin freetype library..." $(FREETYPE_INCLUDES) ;
+    EchoOption FREETYPE_INCLUDES : "Builtin freetype library" ;
 }
 
 
@@ -241,11 +241,11 @@ if $(GUI:L) = "symbian-eikon"
 
 
 Configure GUI ;
-Echo "Checking for graphics UI..." $(GUI) ;
+EchoOption GUI : "Graphics UI" ;
 
 if $(GUI)
 {
     Configure GUILIBS ;
-    Echo "Using gui libs..." $(GUILIBS) ;
+    EchoOption GUILIBS : "Graphics UI lib flags" ;
 }
 

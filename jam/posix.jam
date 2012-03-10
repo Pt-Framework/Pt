@@ -19,12 +19,12 @@ rule ConfigureDl
         }
     }
 
-    Echo "Checking for dl..." $(WITH_DL) ;
+    EchoOption WITH_DL : "Dl library" ;
     Configure WITH_DL ;
 
     if $(WITH_DL)
     {
-        Echo "Checking for dl libs..." $(DL_LIBS) ;
+        EchoOption DL_LIBS : "Dl lib flags" ;
         Configure DL_LIBS ;
     }
 }
@@ -49,12 +49,12 @@ rule ConfigurePThread
         }
     }
 
-    Echo "Checking for pthread..." $(WITH_PTHREADS) ;
+    EchoOption WITH_PTHREADS : "Pthreads library" ;
     Configure WITH_PTHREADS ;
 
     if $(WITH_PTHREADS)
     {
-        Echo "Checking for pthread libs..." $(PTHREAD_LIBS) ;
+        EchoOption PTHREAD_LIBS : "Pthread lib flags"  ;
         Configure PTHREAD_LIBS ;
     }
 }
@@ -81,12 +81,12 @@ rule ConfigureUnixSockets
         }
     }
 
-    Echo "Checking for unix sockets..." $(WITH_UNIX_SOCKETS) ;
+    EchoOption WITH_UNIX_SOCKETS : "Unix sockets..." ;
     Configure WITH_UNIX_SOCKETS ;
 
     if $(WITH_UNIX_SOCKETS)
     {
-        Echo "Checking for unix socket libs..." $(UNIX_SOCKET_LIBS) ;
+        EchoOption UNIX_SOCKET_LIBS : "Unix socket lib flags" ;
         Configure UNIX_SOCKET_LIBS ;
     }
 }
@@ -112,12 +112,12 @@ rule ConfigureNsl
         }
     }
     
-    Echo "Checking for nsl..." $(WITH_NSL) ;
+    EchoOption WITH_NSL : "Nsl library" ;
     Configure WITH_NSL ;
 
     if $(WITH_NSL)
     {
-        Echo "Checking for nsl libs..." $(NSL_LIBS) ;
+        EchoOption NSL_LIBS : "Nsl lib flags" ;
         Configure NSL_LIBS ;
     }
 }
