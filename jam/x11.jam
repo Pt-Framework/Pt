@@ -81,8 +81,8 @@ rule ConfigureX11
         Configure X11_LIBS ;
     }
 
-    Echo "Checking for x11 includes..." $(X11_INCLUDES) ;
-    Echo "Checking for x11 libs..." $(X11_LIBS) ;
+    EchoOption X11_INCLUDES : "X11 includes" ;
+    EchoOption X11_LIBS : "X11 lib flags" ;
 }
 
 rule ConfigureXExt
@@ -94,7 +94,7 @@ rule ConfigureXExt
         Configure XEXT_LIBS ;
     }
 
-    Echo "Checking for xext libs..." $(XEXT_LIBS) ;
+    EchoOption XEXT_LIBS : "Xext lib flags" ;
 }
 
 rule ConfigureXft
@@ -108,8 +108,8 @@ rule ConfigureXft
         Configure XFT_LIBS ;
     }
 
-    Echo "Checking for xft includes..." $(XFT_INCLUDES) ;
-    Echo "Checking for xft libs..." $(XFT_LIBS) ;
+    EchoOption XFT_INCLUDES : "Xft includes" ;
+    EchoOption XFT_LIBS : "Xft libs" ;
 }
 
 } # X11_JAM

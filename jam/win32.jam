@@ -9,14 +9,14 @@ rule ConfigurePsapi
                                         : ""
                                         : Psapi.lib ] ;
 
-    Echo "Checking for psapi..." $(WITH_PSAPI) ;
+    EchoOption WITH_PSAPI : "PsApi library" ;
     Configure WITH_PSAPI ;
 
     if $(WITH_PSAPI)
     {
         PSAPI_LIBS += Psapi.lib ;
 
-        Echo "Checking for psapi libs..." $(PSAPI_LIBS) ;
+        EchoOption PSAPI_LIBS : "PsAapi lib flags" ;
         Configure PSAPI_LIBS ;
     }
 }
@@ -51,12 +51,12 @@ rule ConfigureWsa
         }
     }
 
-    Echo "Checking for wsa..." $(WITH_WSA) ;
+    EchoOption WITH_WSA : "WSA2 library" ;
     Configure WITH_WSA ;
 
     if $(WITH_WSA)
     {
-        Echo "Checking for wsa2 libs..." $(WSA_LIBS) ;
+        EchoOption WSA_LIBS : "WSA2 lib flags" ;
         Configure WSA_LIBS ;
     }
 }
@@ -82,12 +82,12 @@ rule ConfigureGdi
                                   : coredll.lib ] ;
     }
     
-    Echo "Checking for gdi..." $(WITH_GDI) ;
+    EchoOption WITH_GDI : "GDI library" ;
     Configure WITH_GDI ;
 
     if $(WITH_GDI)
     {
-        Echo "Checking for gdi libs..." $(GDI_LIBS) ;
+        EchoOption GDI_LIBS : "GDI lib flags" ;
         Configure GDI_LIBS ;
     }
 }
@@ -113,12 +113,12 @@ rule ConfigureWinUI
                                       : "coredll.lib" ] ;
     }
 
-    Echo "Checking for windows UI..." $(WITH_WINUI) ;
+    EchoOption WITH_WINUI : "Windows UI" ;
     Configure WITH_WINUI ;
 
     if $(WITH_WINUI)
     {
-        Echo "Checking for user32 libs..." $(WINUI_LIBS) ;
+        EchoOption WINUI_LIBS : "User32 lib flags" ;
         Configure WINUI_LIBS ;
     }
 }
