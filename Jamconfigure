@@ -24,15 +24,15 @@ ConfigureC++ ;
 INSTALL_DIR ?= [ FDirName deploy $(CONFIG) ] ;
 
 INSTALL_BINDIR ?= [ FDirName $(INSTALL_DIR) bin ] ; 
-EchoOption INSTALL_BINDIR : "Binary Install Dir" ;
+EchoOption INSTALL_BINDIR : "Pt Binary Install Dir" ;
 Configure INSTALL_BINDIR ;
 
 INSTALL_INCLUDEDIR ?= [ FDirName $(INSTALL_DIR) include ] ; 
-EchoOption INSTALL_INCLUDEDIR : "Include Install Dir" ;
+EchoOption INSTALL_INCLUDEDIR : "Pt Include Install Dir" ;
 Configure INSTALL_INCLUDEDIR ;
 
 INSTALL_LIBDIR ?= [ FDirName $(INSTALL_DIR) lib ] ;
-EchoOption INSTALL_LIBDIR : "Library Install Dir" ; 
+EchoOption INSTALL_LIBDIR : "Pt Library Install Dir" ; 
 Configure INSTALL_LIBDIR ;
 
 #############################################################################

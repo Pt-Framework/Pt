@@ -68,8 +68,8 @@ rule SubConfigure
     # Jamconfigure from subdir needs to keep its paths, so ConfigureDefine 
     # works correctly and generates def header at correct place
 
-    local _s = [ FDirName $(<[1-]) ] ;
-	include $(_s) ;
+    local _s = [ FDirName $(<[1-]) Jamconfigure ] ;
+    include $(_s) ;
 }
 
 rule TryCommand
