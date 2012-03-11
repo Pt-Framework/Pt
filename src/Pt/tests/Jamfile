@@ -31,4 +31,4 @@ Main Pt-test : Pt-test.cpp
 
 LinkSharedLibraries Pt-test : Pt-System Pt-Unit Pt ;
 MakeLocate Pt-test : $(OUTPUT_TARGET) ;
-RunUnitTest Pt-test : $(OUTPUT_TEST) ;
+#RunUnitTest Pt-test : $(OUTPUT_TEST) ;

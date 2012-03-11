@@ -634,26 +634,28 @@ rule MainFromObjects
 
 rule _MakeLocate
 {
-    if $(SUBDIR) = $(>)
+    local _dir = $(>:G=dir) ;
+
+    if $(SUBDIR) = $(_dir)
     {
         # directory already exists, because it is part of the source tree,
         # so only set LOCATE
         LOCATE on $(<) = $(>:DBS) ;
     }
-    else if $(>)
+    else if $(_dir)
     {
         # directory possibly does not exist, so create it and
         # add a dependency to the directory, besides setting LOCATE
         LOCATE on $(<) = $(>:DBS) ;
-        Depends $(<) : $(>[1]) ;
-        MkDir $(>[1]) ;
+        Depends $(<) : $(_dir[1]) ;
+        MkDir $(_dir[1]) ;
     }
 
     if $(<:D) # TODO this may be obsolete
     {
         # target to be located is passed with a path, so we create it
         # and add a dependency to the directory
-        local _dir = [ FDirName $(>) $(<:D) ] ;
+        local _dir = [ FDirName $(_dir) $(<:D) ] ;
         Depends $(<) : $(_dir) ;
         MkDir $(_dir) ;
     }
