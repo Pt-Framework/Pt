@@ -6,8 +6,8 @@
 Load unittest.jam ;
 
 # set directory to build objects and targets
-ALL_LOCATE_OBJECTS = [ FDirName $(TOP) tmp $(CONFIG) ] ;
-ALL_LOCATE_TARGET = [ FDirName $(TOP) build $(CONFIG) ] ;
+ALL_LOCATE_OBJECTS ?= [ FDirName $(TOP) tmp $(CONFIG) ] ;
+ALL_LOCATE_TARGET ?= [ FDirName $(TOP) build $(CONFIG) ] ;
 
 # set directory to build objects and targets
 # this is used by MakeLocate and SubDirObjects in the Jamfiles

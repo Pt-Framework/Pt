@@ -638,13 +638,13 @@ rule _MakeLocate
     {
         # directory already exists, because it is part of the source tree,
         # so only set LOCATE
-        LOCATE on $(<) = $(>) ;
+        LOCATE on $(<) = $(>:DBS) ;
     }
     else if $(>)
     {
         # directory possibly does not exist, so create it and
         # add a dependency to the directory, besides setting LOCATE
-        LOCATE on $(<) = $(>) ;
+        LOCATE on $(<) = $(>:DBS) ;
         Depends $(<) : $(>[1]) ;
         MkDir $(>[1]) ;
     }
@@ -663,14 +663,16 @@ rule _MakeLocate
 rule MakeLocate
 {
     local _type = $($(<)_type) ;
+    local _dir = $(>:G=dir) ;
+
     if $(_type)
     {
         # Echo Calling $(_type)-MakeLocate for $(1) ;
-        $(_type)-MakeLocate $(<) : $(>) ;
+        $(_type)-MakeLocate $(<) : $(_dir) ;
     }
     else
     {
-        _MakeLocate $(1) : $(2) : $(3) ;
+        _MakeLocate $(1) : $(_dir) : $(3) ;
     }
 }
 
@@ -920,6 +922,7 @@ rule SharedLibrary-LinkLibraries
 rule SharedLibrary-MakeLocate
 {
     local _target = $(PRELIB)$(<:S=$(SUFDLL)) ;
+
     MakeLocate $(_target) : $(>) ;
 }
 
