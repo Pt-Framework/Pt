@@ -65,7 +65,7 @@ ClientImpl::ClientImpl(Client* client)
 , _reconnectOnError(false)
 , _errorPending(false)
 {
-    _stream.attachDevice(_socket);
+    _stream.attach(_socket);
     _socket.connected() += Pt::slot(*this, &ClientImpl::onConnect);
     Pt::connect(_stream.buffer().outputReady(), *this, &ClientImpl::onOutput);
     Pt::connect(_stream.buffer().inputReady(), *this, &ClientImpl::onInput);
@@ -86,7 +86,7 @@ ClientImpl::ClientImpl(Client* client, const Net::AddrInfo& addrinfo)
 , _reconnectOnError(false)
 , _errorPending(false)
 {
-    _stream.attachDevice(_socket);
+    _stream.attach(_socket);
     _socket.connected() += Pt::slot(*this, &ClientImpl::onConnect);
     Pt::connect(_stream.buffer().outputReady(), *this, &ClientImpl::onOutput);
     Pt::connect(_stream.buffer().inputReady(), *this, &ClientImpl::onInput);
@@ -107,7 +107,7 @@ ClientImpl::ClientImpl(Client* client, System::EventLoop& loop, const Net::AddrI
 , _reconnectOnError(false)
 , _errorPending(false)
 {
-    _stream.attachDevice(_socket);
+    _stream.attach(_socket);
     _socket.connected() += Pt::slot(*this, &ClientImpl::onConnect);
     Pt::connect(_stream.buffer().outputReady(), *this, &ClientImpl::onOutput);
     Pt::connect(_stream.buffer().inputReady(), *this, &ClientImpl::onInput);

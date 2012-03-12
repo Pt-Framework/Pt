@@ -138,7 +138,7 @@ TcpConnection::TcpConnection(Server& server, Net::TcpServer& tcpServer)
 , _loop(0)
 , _responder(0)
 {
-    _stream.attachDevice(*this);
+    _stream.attach(*this);
     _stream.buffer().inputReady() += Pt::slot(*this, &TcpConnection::onInput);
     _stream.buffer().outputReady() += Pt::slot(*this, &TcpConnection::onOutput);
     _timer.timeout() += Pt::slot(*this, &TcpConnection::onTimeout);

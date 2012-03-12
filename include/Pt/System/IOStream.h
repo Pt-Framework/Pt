@@ -48,9 +48,9 @@ class IStream : public std::basic_istream<char>
 
         StreamBuffer& buffer();
 
-        IODevice* attachDevice(IODevice& device);
+        IODevice* attach(IODevice& device);
 
-        IODevice* attachedDevice();
+        IODevice* device();
 
         //! @brief Peeks bytes in the stream buffer.
         /**
@@ -76,9 +76,9 @@ class OStream : public std::basic_ostream<char>
 
         StreamBuffer& buffer();
 
-        IODevice* attachDevice(IODevice& device);
+        IODevice* attach(IODevice& device);
 
-        IODevice* attachedDevice();
+        IODevice* device();
 
         std::streamsize writesome(char* buffer, std::streamsize n);
     
@@ -98,9 +98,9 @@ class IOStream : public std::basic_iostream<char>
 
         StreamBuffer& buffer();
 
-        IODevice* attachDevice(IODevice& device);
+        IODevice* attach(IODevice& device);
 
-        IODevice* attachedDevice();
+        IODevice* device();
 
         //! @brief Peeks bytes in the stream buffer.
         /**
@@ -144,15 +144,15 @@ inline StreamBuffer& IStream::buffer()
 }
 
 
-inline IODevice* IStream::attachDevice(IODevice& device)
+inline IODevice* IStream::attach(IODevice& dev)
 {
-    IODevice* ret = attachedDevice();
-    _buffer.attach(device);
+    IODevice* ret = this->device();
+    _buffer.attach(dev);
     return ret;
 }
 
 
-inline IODevice* IStream::attachedDevice()
+inline IODevice* IStream::device()
 {
     return _buffer.device();
 }
@@ -200,15 +200,15 @@ inline StreamBuffer& OStream::buffer()
 }
 
 
-inline IODevice* OStream::attachDevice(IODevice& device)
+inline IODevice* OStream::attach(IODevice& dev)
 {
-    IODevice* ret = attachedDevice();
-    _buffer.attach(device);
+    IODevice* ret = this->device();
+    _buffer.attach(dev);
     return ret;
 }
 
 
-inline IODevice* OStream::attachedDevice()
+inline IODevice* OStream::device()
 {
     return _buffer.device();
 }
@@ -257,15 +257,15 @@ inline StreamBuffer& IOStream::buffer()
 }
 
 
-inline IODevice* IOStream::attachDevice(IODevice& device)
+inline IODevice* IOStream::attach(IODevice& dev)
 {
-    IODevice* ret = attachedDevice();
-    _buffer.attach(device);
+    IODevice* ret = this->device();
+    _buffer.attach(dev);
     return ret;
 }
 
 
-inline IODevice* IOStream::attachedDevice()
+inline IODevice* IOStream::device()
 {
     return _buffer.device();
 }
