@@ -222,22 +222,21 @@ size_t OverlappedIODeviceImpl::read(char* buffer, size_t count, bool& eof)
     DWORD readBytes = 0;
     if( FALSE == ReadFile(handle(), (void*)buffer, count, &readBytes, &_readOv) )
     {
-        if( ERROR_HANDLE_EOF == GetLastError() || 
-            ERROR_BROKEN_PIPE == GetLastError() )
+        DWORD err = GetLastError();
+        if(ERROR_HANDLE_EOF == err|| ERROR_BROKEN_PIPE == err)
         {
             eof = true;
             readBytes = 0;
         }
-        else if( ERROR_IO_PENDING == GetLastError() )
+        
+        if(ERROR_IO_PENDING != err)
         {
-            if(FALSE == GetOverlappedResult(handle(), &_readOv, &readBytes, TRUE) )
-            {
-                throw IOError( PT_ERROR_MSG("Could not read from file handle") );
-            }
+            throw IOError("ReadFile failed");
         }
-        else
+
+        if(FALSE == GetOverlappedResult(handle(), &_readOv, &readBytes, TRUE) )
         {
-            throw IOError( PT_ERROR_MSG("Could not read from file handle") );
+            throw IOError("GetOverlappedResult failed");
         }
     }
 
@@ -293,11 +292,12 @@ size_t OverlappedIODeviceImpl::write(const char* buffer, size_t count)
     {
         if( ERROR_IO_PENDING != GetLastError() )
         {
-            throw IOError(PT_ERROR_MSG("Could not write to file handle") );
+            throw IOError("WriteFile");
         }
-        if(GetOverlappedResult(handle(), &_readOv, &writtenBytes, FALSE) == FALSE )
+        
+        if(FALSE == GetOverlappedResult(handle(), &_writeOv, &writtenBytes, FALSE) )
         {
-            writtenBytes = 0;
+            throw IOError("GetOverlappedResult");
         }
     }
 
