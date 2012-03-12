@@ -1,0 +1,139 @@
+/** \page jam-tutorial Jam Tutorial
+
+@section JamTutorialJambase Adding Jam Support
+
+This tutorial will show you how to create a project with a self-contained jam
+based build system. Therefore, you do not have to install anything on
+the build host, but include all necessary files with your project.
+The first thing to do is to add a Jambase and the other required support files
+to your project. Most of this has to be in a subdirectory named jam in your
+project root. Simply copy the files from here:
+
+- https://pt-framework.svn.sourceforge.net/svnroot/pt-framework/trunk/jam/
+
+This directory includes the implementation of the Jambase and the jam sources
+used for bootstrapping. To provide a completely self-contained build system,
+we also have to make the jam program available. 
+
+For Windows hosts, we can place a precompiled jam binary in the project root. 
+You can download jam.exe here:
+
+- https://pt-framework.svn.sourceforge.net/svnroot/pt-framework/trunk/jam.exe
+
+For Unix hosts we add a simple wrapper shell script named jam.sh to the 
+project root:
+
+@code
+#!/bin/sh
+
+JAM_SOURCES="./builtins.c ./class.c ./command.c ./compile.c ./constants.c 
+             ./debug.c ./execunix.c ./expand.c ./fileunix.c ./filesys.c 
+             ./function.c ./glob.c ./hash.c ./hcache.c ./hdrmacro.c ./headers.c
+             ./jam.c ./jambase.c ./jamgram.c ./lists.c ./make.c ./make1.c 
+             ./md5.c ./mem.c ./modules.c ./native.c ./object.c ./option.c 
+             ./output.c ./parse.c ./pathunix.c ./pwd.c ./regexp.c ./rules.c 
+             ./scan.c ./search.c ./strings.c ./subst.c ./timestamp.c ./variable.c 
+             ./w32_getreg.c ./modules/set.c ./modules/path.c ./modules/regex.c 
+             ./modules/property-set.c ./modules/sequence.c ./modules/order.c"
+
+if test ! -f ./jam.bin; then
+    echo "Building jam executable version..."
+    cd jam/src
+    cc -o ../../jam.bin $JAM_SOURCES
+    cd ../..
+    echo "Built jam.bin"
+fi
+
+./jam.bin $*
+@endcode
+
+The script bootstraps and runs the jam program. This way, we don't have to include 
+all possible jam binaries in our project, but rather build it on demand. You can 
+also get the script here:
+
+- https://pt-framework.svn.sourceforge.net/svnroot/pt-framework/trunk/jam.sh
+
+When jam is run, it will look for a file named Jambase in the project root,
+that references the actual Jambase. For self-contained projects, it will 
+simply include the Jambase from the jam subdirectory:
+
+@code
+JAMDIR  ?= jam ;
+JAMBASE ?= Jambase ;
+JAMBASE = $(JAMBASE:R=$(JAMDIR)) ;
+
+include $(JAMBASE) ;
+@endcode
+
+Your project directory should now contain the following files:
+
+@verbatim
+- [jam]
+    - Jambase
+    - ... (jam implementation files)
+- Jambase
+- jam.sh
+- jam.exe
+@endverbatim
+
+@section JamTutorialConfigure Build Configuration
+
+Now we have to take care of the build configuration. Before a project can be
+built, it needs to be configured, so the toolset is detected etc... The 
+input for this 'configure' step is a file named Jamconfigure located in the 
+project root:
+
+@code
+# configure basic C compiler
+ConfigureCc ;
+
+# configure basic C++ compiler
+ConfigureC++ ;
+@endcode
+
+So far, we only need to configure basic C and C++ support. This allows us to
+build programs, static libraries and shared libraries using standard C and 
+C++. You should be able to run the configure step now sucessfully.
+
+@verbatim
+On Unix:
+  ./jam.sh configure
+
+On Windows:
+  jam.exe configure
+@endverbatim
+
+@section JamTutorialBuildPrograms Building Programs 
+
+Let's use jam now to build a simple 'hello world' program. When jam is run
+to build its targets in a so-called 'build' step, it looks for a file named
+Jamfile in the project root. Here we can define our build targets:
+
+@code
+SubDir MY_TOP ;
+Main hello : main.cpp ;
+@endcode
+
+This Jamfile will build a main program named 'hello' from the source file
+main.cpp. The first statement also defines the so-called root variable.
+The SubDir rules makes all following statements refer to a specific directory. 
+Thus, main.cpp will be looked for in the project root. If you run jam now 
+(either the wrapper script or the windows binary without any arguments) a
+program will be built named 'hello' on Unix or 'hello.exe' on windows, 
+respectively. 
+
+@section JamTutorialClean Cleaning the Build
+
+Jam can not only build programs, but also delete all previously built targets
+from your project directory. To do so you need to execute jam with the clean 
+target:
+
+@verbatim
+On Unix:
+  ./jam.sh clean
+
+On Windows:
+  jam.exe clean
+@endverbatim
+
+*/
