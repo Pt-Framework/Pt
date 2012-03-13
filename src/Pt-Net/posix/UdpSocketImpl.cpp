@@ -310,11 +310,6 @@ std::string UdpSocketImpl::socketAddress() const
     std::string ret;
     sockaddrToString(_servaddr, ret);
     return ret;
-
-//  const sockaddr_in* sa = reinterpret_cast<const sockaddr_in*>(&_servaddr);
-//  char strbuf[INET6_ADDRSTRLEN + 1];
-//  const char* p = inet_ntop(sa->sin_family, &sa->sin_addr, strbuf, sizeof(strbuf));
-//  return p ? strbuf: "-";
 }
 
 
@@ -323,11 +318,6 @@ std::string UdpSocketImpl::peerAddress() const
     std::string ret;
     sockaddrToString(_peeraddr, ret);
     return ret;
-
-//  const sockaddr_in* sa = reinterpret_cast<const sockaddr_in*>(&_peeraddr);
-//  char strbuf[INET6_ADDRSTRLEN + 1];
-//  const char* p = inet_ntop(sa->sin_family, &sa->sin_addr, strbuf, sizeof(strbuf));
-//  return p ? strbuf: "-";
 }
 
 
