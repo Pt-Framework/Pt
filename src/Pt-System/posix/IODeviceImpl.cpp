@@ -110,28 +110,6 @@ void IODeviceImpl::close()
 }
 
 
-void IODeviceImpl::attach(EventLoop& loop)
-{ 
-    /*if( this->isOpen() )
-    {
-        loop.impl().enable(_ioh);
-    }*/
-
-    // we do not need to enable the i/o handle now, but defer it
-    // until we call impl().beginRead or impl().beginWrite on the i/o handle.
-    // The EventLoopImpl can check internally...
-}
-
-
-void IODeviceImpl::detach(EventLoop& loop)
-{
-    /*if( this->isOpen() )
-    {
-        loop.impl().disable(_ioh);
-    }*/
-}
-
-
 void IODeviceImpl::cancel(EventLoop& loop)
 {
     // disable the handle, we know cancel is always called before close

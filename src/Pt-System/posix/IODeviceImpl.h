@@ -82,10 +82,6 @@ namespace System {
 
             bool isOpen() const;
 
-            virtual void attach(EventLoop& s);
-
-            virtual void detach(EventLoop& s);
-
             virtual void cancel(EventLoop& loop);
 
             virtual void close();
