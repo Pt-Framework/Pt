@@ -9,6 +9,7 @@ set number
 set ruler
 syntax enable
 set guifont=Consolas:h9
+set sessionoptions=buffers
 
 " Colors and Syntax Highlighting
 
@@ -34,8 +35,8 @@ function OpenBufferDir()
   e %:p:h
 endfunction
 
-:nmap <F3> :call OpenBufferDir()<CR>
-
+:nmap <F3> <C-o>:call OpenBufferDir()<CR>
+:map! <F3> <C-o>:call OpenBufferDir()<CR>
 "
 " Build command
 "
