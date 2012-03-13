@@ -38,35 +38,13 @@
 #include <cerrno>
 #include <cstring>
 #include <cassert>
-#include <fcntl.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <sys/select.h>
+#include <sys/time.h>
 
 log_define("Pt.Net.TcpSocket");
-
-namespace {
-
-void addressToString(const sockaddr_storage& addr, std::string& str)
-{
-#ifdef PT_WITH_INET_NTOA
-    static Pt::System::Mutex monitor;
-    Pt::System::MutexLock lock(monitor);
-
-    const sockaddr_in* sa = reinterpret_cast<const sockaddr_in*>(&addr);
-    const char* p = inet_ntoa(sa->sin_addr);
-    if (p)
-        str = p;
-    else
-        str.clear();
-#else
-    const sockaddr_in* sa = reinterpret_cast<const sockaddr_in*>(&addr);
-    char strbuf[INET6_ADDRSTRLEN + 1];
-    const char* p = inet_ntop(sa->sin_family, &sa->sin_addr, strbuf, sizeof(strbuf));
-    str = (p == 0 ? "-" : strbuf);
-#endif
-}
-
-}
 
 namespace Pt {
 
@@ -441,7 +419,7 @@ std::string TcpSocketImpl::socketAddress() const
         throw System::SystemError("getsockname");
 
     std::string ret;
-    addressToString(addr, ret);
+    sockaddrToString(addr, ret);
     return ret;
 }
 
@@ -455,7 +433,7 @@ std::string TcpSocketImpl::peerAddress() const
         throw System::SystemError("getsockname");
 
     std::string ret;
-    addressToString(addr, ret);
+    sockaddrToString(addr, ret);
     return ret;
 }
 

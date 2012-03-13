@@ -25,7 +25,6 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-
 #ifndef PT_NET_ADDRINFOIMPL_H
 #define PT_NET_ADDRINFOIMPL_H
 
@@ -33,7 +32,6 @@
 #include <string>
 #include <iterator>
 #include <cassert>
-#include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
 
@@ -109,6 +107,8 @@ class AddrInfoImpl : public Pt::RefCounted
         const_iterator end() const    
         { return const_iterator(); }
 };
+
+void sockaddrToString(const sockaddr_storage& addr, std::string& str);
 
 } // namespace Net
 

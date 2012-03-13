@@ -32,6 +32,7 @@
 #include <string>
 #include <sstream>
 #include <cstring>
+#include <arpa/inet.h>
 
 namespace Pt {
 
@@ -56,6 +57,7 @@ AddrInfoImpl::~AddrInfoImpl()
         freeaddrinfo(_ai);
 }
 
+
 void AddrInfoImpl::init(const std::string& host, unsigned short port, const addrinfo& hints)
 {
     if (_ai)
@@ -77,6 +79,27 @@ void AddrInfoImpl::init(const std::string& host, unsigned short port, const addr
 
     if (0 != ::getaddrinfo(node, p.str().c_str(), &hints, &_ai))
         throw System::AccessFailed(_host + ':' + p.str());
+}
+
+
+void sockaddrToString(const sockaddr_storage& addr, std::string& str)
+{
+#ifdef PT_WITH_INET_NTOA
+    static Pt::System::Mutex monitor;
+    Pt::System::MutexLock lock(monitor);
+
+    const sockaddr_in* sa = reinterpret_cast<const sockaddr_in*>(&addr);
+    const char* p = inet_ntoa(sa->sin_addr);
+    if (p)
+        str = p;
+    else
+        str.clear();
+#else
+    const sockaddr_in* sa = reinterpret_cast<const sockaddr_in*>(&addr);
+    char strbuf[INET6_ADDRSTRLEN + 1];
+    const char* p = inet_ntop(sa->sin_family, &sa->sin_addr, strbuf, sizeof(strbuf));
+    str = (p == 0 ? "-" : strbuf);
+#endif
 }
 
 } // namespace Net

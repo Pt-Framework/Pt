@@ -99,6 +99,9 @@ class UdpSocketTest : public Pt::Unit::TestSuite
             _sender->outputReady() += Pt::slot(*this, &UdpSocketTest::onUnicastOutput);
             _sender->beginWrite("Hello UNICAST!", 14);
 
+            std::cerr << _receiver->socketAddress() << ", " << _receiver->peerAddress() << std::endl;
+            std::cerr << _sender->socketAddress() << ", " << _sender->peerAddress() << std::endl;
+
             _loop->run();
 
             PT_UNIT_ASSERT( 0 == std::strncmp(inbuf, "Hello UNICAST!", 14) );
