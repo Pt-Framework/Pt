@@ -158,6 +158,9 @@ struct IOHandle
     bool isOpen() const
     { return fd != -1; }
 
+    bool isActive() const
+    { return id != InvalidId; }
+
     Selectable* sel;
     int fd;
     size_t id;

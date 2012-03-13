@@ -235,7 +235,7 @@ class SelectorImpl : public Selector
                 --avail;
                 isWake = _wakePipe.isReady();
             }
-        
+
             try
             {
                 for( _current = _devices.first(); _current != 0; )

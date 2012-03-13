@@ -101,6 +101,7 @@ class SelectorImpl  : public Selector
             // remove from epoll
             epoll_ctl(_epfd, EPOLL_CTL_DEL, h.fd, NULL);
 
+            h.id = IOHandle::InvalidId;
             h.events = 0;
             h.changed = 0;
             h.ready = 0;
@@ -112,6 +113,7 @@ class SelectorImpl  : public Selector
             if(! isAdded)
                 _changelist.push_back(h);
 
+            h->id = 1;
             h->changed |= IOHandle::Read;
         }
 
@@ -131,6 +133,7 @@ class SelectorImpl  : public Selector
             if(! isAdded)
                 _changelist.push_back(h);
 
+            h->id = 1;
             h->changed |= IOHandle::Write;
         }
 

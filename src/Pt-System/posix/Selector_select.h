@@ -113,7 +113,7 @@ class SelectorImpl : public Selector
         void enableSelect(IOHandle* h)
         {
             Selectable* s = h->sel;
-            if( ! h->id != IOHandle::InvalidId )
+            if( h->id == IOHandle::InvalidId )
             {
                 _devices.insert(*s);
                 FD_SET(h->fd, &_efds);

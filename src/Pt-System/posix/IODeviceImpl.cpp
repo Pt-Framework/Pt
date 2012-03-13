@@ -47,6 +47,9 @@ IODeviceImpl::IODeviceImpl(IODevice& device)
 
 IODeviceImpl::~IODeviceImpl()
 {
+    // make sure all operations were cancelled
+    assert( ! _ioh.isActive() );
+
     if(_sentry)
         _sentry->detach();
 }
@@ -90,6 +93,9 @@ void IODeviceImpl::close()
 {
     // TODO: we know cancel is always called before close, so we do not need
     // a loop to disable the i/o handle
+
+    // make sure all operations were cancelled
+    assert( ! _ioh.isActive() );
 
     if( this->isOpen() )
     {
