@@ -71,7 +71,7 @@ class TcpSocketImpl : public System::IODeviceImpl
 
     protected:
         void connect();
-        bool beginConnect();
+        bool beginConnect(System::EventLoop& loop);
         //bool beginConnect(System::EventLoop& loop, const ::addrinfo& ai);
 
     private:

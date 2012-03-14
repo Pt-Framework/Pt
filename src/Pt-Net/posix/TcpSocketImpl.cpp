@@ -213,13 +213,13 @@ bool TcpSocketImpl::beginConnect(System::EventLoop& loop, const AddrInfo& addrIn
     }*/
 
     /// NEW:
-    _isConnected = beginConnect();
+    _isConnected = beginConnect(loop);
 
     return _isConnected;
 }
 
 
-bool TcpSocketImpl::beginConnect()
+bool TcpSocketImpl::beginConnect(System::EventLoop& loop)
 {
     for( ; ; ++_addrInfoPtr)
     {
@@ -397,7 +397,7 @@ bool TcpSocketImpl::runConnect(System::EventLoop& loop)
         try
         {
             ++_addrInfoPtr;
-            _isConnected = this->beginConnect();
+            _isConnected = this->beginConnect(loop);
         }
         catch(const System::AccessFailed& )
         { 
@@ -459,7 +459,7 @@ bool TcpSocketImpl::runConnect(System::EventLoop& loop)
         try
         {
             ++_addrInfoPtr;
-            _isConnected = this->beginConnect();
+            _isConnected = this->beginConnect(loop);
         }
         catch(const System::AccessFailed& )
         { 
