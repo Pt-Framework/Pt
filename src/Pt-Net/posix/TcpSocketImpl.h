@@ -70,7 +70,9 @@ class TcpSocketImpl : public System::IODeviceImpl
         void accept(const TcpServer& server, unsigned inherit);
 
     protected:
-        bool beginConnect(System::EventLoop& loop, const ::addrinfo& ai);
+        void connect();
+        bool beginConnect();
+        //bool beginConnect(System::EventLoop& loop, const ::addrinfo& ai);
 
     private:
         TcpSocket& _socket;

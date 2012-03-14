@@ -118,34 +118,45 @@ void TcpSocketImpl::connect(const AddrInfo& addrinfo)
     _addrInfo = addrinfo;
     _addrInfoPtr = _addrInfo.impl()->begin();
 
-    for( ; _addrInfoPtr != _addrInfo.impl()->end(); ++_addrInfoPtr)
+    this->connect();
+}
+
+
+void TcpSocketImpl::connect()
+{
+    assert( ! _isConnected );
+
+    for( ; ; ++_addrInfoPtr)
     {
-        _fd = WSASocket(_addrInfoPtr->ai_family, SOCK_STREAM, 0, NULL, 0, 0);
-
-        if (_fd < 0)
-            continue;
-
-       //Set socket to bloking mode
-       u_long argp = 0;
-       ::ioctlsocket(_fd, FIONBIO, &argp);
+        if(_addrInfoPtr == _addrInfo.impl()->end())
+        {
+            log_debug("no more address informations");
+            throw System::AccessFailed( _addrInfo.host() );
+        }
         
+        _fd = WSASocket(_addrInfoPtr->ai_family, SOCK_STREAM, 0, NULL, 0, 0);
+        if (_fd < 0)
+        {
+            log_debug("failed to create socket for address");
+            continue;
+        }
+        
+        //Set socket to bloking mode
+        u_long argp = 0;
+        ::ioctlsocket(_fd, FIONBIO, &argp);
         log_debug("created socket " << _fd);
-
+        
         if( ::connect(_fd, _addrInfoPtr->ai_addr, _addrInfoPtr->ai_addrlen) == 0 )
         {
             _isConnected = true;
+        
             //Set socket to non-blocking mode
             argp = 1;
             ::ioctlsocket(_fd, FIONBIO, &argp);
             break;
         }
-        close();
-    }
 
-    if(_addrInfoPtr == _addrInfo.impl()->end())
-    {
-        log_debug("no more address informations");
-        throw System::AccessFailed( _addrInfo.host() );
+        close();
     }
 }
 
@@ -224,48 +235,45 @@ void TcpSocketImpl::endConnect(System::EventLoop& loop)
 
     log_info("async connect not yet ready socket=" << _fd);
 
-    while (true)
+    _eventFlags |= FD_CONNECT;
+    setEventFlags(_ioh.handle(), _eventFlags);
+
+    bool avail = this->wait(_timeout);
+
+    _eventFlags &= ~FD_CONNECT;
+    setEventFlags(_ioh.handle(), _eventFlags);
+
+    if(avail)
     {
-        _eventFlags |= FD_CONNECT;
-        setEventFlags(_ioh.handle(), _eventFlags);
+        WSANETWORKEVENTS events;
+        if( WSAEnumNetworkEvents(_fd, NULL, &events) == SOCKET_ERROR )
+            throw System::SystemError("WSAEnumNetworkEvents failed");
 
-        bool avail = this->wait(_timeout);
-
-        _eventFlags &= ~FD_CONNECT;
-        setEventFlags(_ioh.handle(), _eventFlags);
-
-        if(avail)
+        if( (events.lNetworkEvents & FD_CLOSE) == FD_CLOSE )
         {
-            WSANETWORKEVENTS events;
-            if( WSAEnumNetworkEvents(_fd, NULL, &events) == SOCKET_ERROR )
-                throw System::SystemError("WSAEnumNetworkEvents failed");
-
-            if( (events.lNetworkEvents & FD_CLOSE) == FD_CLOSE )
+            log_debug("received close event " << _fd);
+        }
+        else if( (events.lNetworkEvents & FD_CONNECT) == FD_CONNECT )
+        {
+            int s = FD_CONNECT_BIT;
+            if(events.iErrorCode[s] == 0)
             {
-                log_debug("received close event " << _fd);
-            }
-            else if( (events.lNetworkEvents & FD_CONNECT) == FD_CONNECT )
-            {
-                int s = FD_CONNECT_BIT;
-                if(events.iErrorCode[s] == 0)
-                {
-                    log_debug("connected " << _fd);
-                    _isConnected = true;
-                    return;
-                }
-            }
-            else
-            {
-                log_debug("received unknown network event " << _fd);
-                continue;
+                log_debug("connected " << _fd);
+                _isConnected = true;
+                return;
             }
         }
-        
-        log_debug("failed to connect, try next address " << _fd);
-        this->close();
-        ++_addrInfoPtr;
-        _isConnected = beginConnect();
+        else
+        {
+            log_debug("received unknown network event " << _fd);
+        }
     }
+    
+    log_debug("failed to connect, try next address " << _fd);
+    this->close();
+
+    ++_addrInfoPtr;
+    this->connect();
 }
 
 
@@ -298,20 +306,20 @@ bool TcpSocketImpl::runConnect(System::EventLoop& loop)
     }
 
     log_debug("closing socket to try next address");
+
     this->close();
-    ++_addrInfoPtr;
 
     try 
     {
+        ++_addrInfoPtr;
         _isConnected = beginConnect();
     }
     catch(const System::IOError&)
     {
         _errorPending = true;
-        return true;
     }
 
-    return _isConnected;
+    return _isConnected || _errorPending;
 }
 
 

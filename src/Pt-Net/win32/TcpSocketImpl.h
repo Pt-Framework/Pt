@@ -110,6 +110,7 @@ class TcpSocketImpl
         bool wait(std::size_t msecs);
 
     private:
+        void connect();
         bool beginConnect();
         void setEventFlags(HANDLE ev, long events);
 
