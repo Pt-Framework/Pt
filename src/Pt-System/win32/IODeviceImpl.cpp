@@ -295,7 +295,7 @@ size_t OverlappedIODeviceImpl::write(const char* buffer, size_t count)
             throw IOError("WriteFile");
         }
         
-        if(FALSE == GetOverlappedResult(handle(), &_writeOv, &writtenBytes, FALSE) )
+        if(FALSE == GetOverlappedResult(handle(), &_writeOv, &writtenBytes, TRUE) )
         {
             throw IOError("GetOverlappedResult");
         }
