@@ -10,6 +10,7 @@ set ruler
 syntax enable
 set guifont=Consolas:h9
 set sessionoptions=buffers
+startinsert
 
 " Undo
 :noremap <C-z> u<CR>
@@ -38,7 +39,9 @@ set sessionoptions=buffers
 :noremap! <C-b> <C-o><C-v>
 
 " Find selected text
-:noremap <C-f> "fy<C-o>/<C-r>f
+:vnoremap <C-f> "fy/<C-r>f<CR>
+:inoremap <C-f> <C-o>/<C-r>f<CR>
+:nnoremap <C-f> /<C-r>f<CR>
 
 " Replace selected text
 :noremap <C-h> "fh<C-o>:%s/<C-r>f
