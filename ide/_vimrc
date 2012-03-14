@@ -11,32 +11,55 @@ syntax enable
 set guifont=Consolas:h9
 set sessionoptions=buffers
 
-" Colors and Syntax Highlighting
+" Undo
+:noremap <C-z> u<CR>
+:noremap! <C-z> <C-o>u
+
+" Redo
+:noremap <C-r> <C-r><CR>
+:noremap! <C-r> <C-o><C-r>
+
+" Copy text
+:noremap <C-y> "+y<CR>
+:noremap! <C-y> <C-o>"+y
+
+" Cut text
+:noremap <C-x> "+x<CR>
+:noremap! <C-x> <C-o>"+x
+
+" Paste text
+:noremap <C-v> "+gP<CR>
+:noremap! <C-v> <C-o>"+gP
+
+" Paste text
+:noremap <C-b> <C-v><CR>
+:noremap! <C-b> <C-o><C-v>
+
+" Open File
+:noremap <C-e> :e %:p:h<CR>
+:noremap! <C-e> <C-o>:e %:p:h<CR>
+
+" Save current file
+:noremap <C-w> :w<CR>
+:noremap! <C-w> <C-o>:w
 
 " MiniBufExplorer
 let g:miniBufExplSortBy = "name"
 let g:miniBufExplVSplit = 30
 let g:miniBufExplSplitBelow = 0
 
-:nmap <F1> :TMiniBufExplorer<CR>
+:map <F2> :TMiniBufExplorer<CR>
+:map! <F2> <C-o>:TMiniBufExplorer
 
 " Taglist
 let g:Tlist_Auto_Open = 0
 let g:Tlist_Show_One_File = 1
 let g:Tlist_WinWidth = 40
-
-:nmap <F2> :TlistToggle<CR>
-
-" File Open Dialog
 set tags=c:\Pt\tags
 
-function OpenBufferDir()
-  "sf %:p:h
-  e %:p:h
-endfunction
+:map <F3> :TlistToggle<CR>
+:map! <F3> <C-o>:TlistToggle
 
-:nmap <F3> <C-o>:call OpenBufferDir()<CR>
-:map! <F3> <C-o>:call OpenBufferDir()<CR>
 "
 " Build command
 "
@@ -75,7 +98,8 @@ function BuildMake(make_args)
   sil lcd -
 endfunction
 
-:nmap <F5> :call BuildMake(g:make_target)<CR>
+:noremap <F5> :call BuildMake(g:make_target)<CR>
+:noremap! <F5> <C-o>:call BuildMake(g:make_target)
 
 "
 " Color Scheme (derived from desert)
