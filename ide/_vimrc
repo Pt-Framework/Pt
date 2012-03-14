@@ -49,7 +49,7 @@ let g:miniBufExplVSplit = 30
 let g:miniBufExplSplitBelow = 0
 
 :map <F2> :TMiniBufExplorer<CR>
-:map! <F2> <C-o>:TMiniBufExplorer
+:map! <F2> <C-o>:TMiniBufExplorer<CR>
 
 " Taglist
 let g:Tlist_Auto_Open = 0
@@ -58,7 +58,7 @@ let g:Tlist_WinWidth = 40
 set tags=c:\Pt\tags
 
 :map <F3> :TlistToggle<CR>
-:map! <F3> <C-o>:TlistToggle
+:map! <F3> <C-o>:TlistToggle<CR>
 
 "
 " Build command
