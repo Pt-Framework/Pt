@@ -121,7 +121,7 @@ endif
 
 let g:colors_name="platinum-dark"
 
-hi Normal	guifg=white guibg=grey20
+hi Normal	guifg=grey90 guibg=grey20
 " highlight groups
 hi Cursor	guibg=yellow guifg=darkgrey
 "hi CursorIM
