@@ -14,6 +14,8 @@ set sessionoptions=buffers
 " Undo
 :noremap <C-z> u<CR>
 :noremap! <C-z> <C-o>u
+:noremap <C-u> u<CR>
+:noremap! <C-u> <C-o>u
 
 " Redo
 :noremap <C-r> <C-r><CR>
@@ -31,9 +33,15 @@ set sessionoptions=buffers
 :noremap <C-v> "+gP<CR>
 :noremap! <C-v> <C-o>"+gP
 
-" Paste text
+" Enter block mode
 :noremap <C-b> <C-v><CR>
 :noremap! <C-b> <C-o><C-v>
+
+" Find selected text
+:noremap <C-f> "fy<C-o>/<C-r>f
+
+" Replace selected text
+:noremap <C-h> "fh<C-o>:%s/<C-r>f
 
 " Open File
 :noremap <C-e> :e %:p:h<CR>
