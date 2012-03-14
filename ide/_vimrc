@@ -155,7 +155,7 @@ hi WarningMsg	guifg=salmon
 
 " syntax highlighting groups
 hi Comment	guifg=#99968b 
-hi PreProc	guifg=navajowhite
+hi PreProc	guifg=palegreen
 hi String	guifg=lightred
 
 hi Constant	guifg=lightsteelblue
