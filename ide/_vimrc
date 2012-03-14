@@ -33,6 +33,8 @@ startinsert
 " Paste text
 :noremap <C-v> "+gP<CR>
 :noremap! <C-v> <C-o>"+gP
+:noremap <C-p> "+gP<CR>
+:noremap! <C-p> <C-o>"+gP
 
 " Enter block mode
 :noremap <C-b> <C-v><CR>
@@ -45,6 +47,14 @@ startinsert
 
 " Replace selected text
 :noremap <C-h> "fh<C-o>:%s/<C-r>f
+
+" Jump to tag
+:noremap <C-s>. g<C-]>
+:noremap! <C-s>. <C-o>g<C-]>
+
+" Jump to last tag
+:noremap <C-s>, <C-T>
+:noremap! <C-s>, <C-o><C-T>
 
 " Open File
 :noremap <C-e> :e %:p:h<CR>
@@ -66,7 +76,7 @@ let g:miniBufExplSplitBelow = 0
 let g:Tlist_Auto_Open = 0
 let g:Tlist_Show_One_File = 1
 let g:Tlist_WinWidth = 40
-set tags=c:\Pt\tags
+set tags=c:\Pt\ide\tags
 
 :map <F3> :TlistToggle<CR>
 :map! <F3> <C-o>:TlistToggle<CR>
