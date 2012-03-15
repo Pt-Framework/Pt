@@ -201,7 +201,7 @@ rule CheckC++
 
     if $(WITH_DEBUG)
     {
-        C++FLAGS += -DDEBUG ;
+        C++FLAGS += -DDEBUG -g ;
     }
     else
     {
