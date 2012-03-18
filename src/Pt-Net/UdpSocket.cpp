@@ -118,21 +118,15 @@ std::string UdpSocket::peerAddress() const
 }
 
 
-void UdpSocket::setTimeout(std::size_t msecs)
-{
-    _impl->setTimeout(msecs);
-}
-
-
-std::size_t UdpSocket::timeout() const
-{
-    return _impl->timeout();
-}
-
-
 void UdpSocket::onClose()
 {
     _impl->close();
+}
+
+
+void UdpSocket::onSetTimeout(size_t timeout)
+{
+    _impl->setTimeout(timeout);
 }
 
 

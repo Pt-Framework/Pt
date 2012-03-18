@@ -69,10 +69,6 @@ class PT_NET_API TcpSocket : public System::IODevice
 
         std::string peerAddress() const;
 
-        void setTimeout(std::size_t msecs);
-
-        std::size_t timeout() const;
-
         void accept(const TcpServer& server, unsigned flags = 0);
 
         void connect(const AddrInfo& addrinfo, unsigned flags = 0);
@@ -97,6 +93,8 @@ class PT_NET_API TcpSocket : public System::IODevice
     protected:
         // inherit doc
         virtual void onClose();
+
+        virtual void onSetTimeout(size_t timeout);
 
         // inherit doc
         virtual bool onRun();

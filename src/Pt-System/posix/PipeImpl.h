@@ -61,6 +61,8 @@ class PipeIODevice : public Pt::System::IODevice
 
         void onClose();
 
+        void onSetTimeout(size_t timeout);
+
         bool onRun();
 
         size_t onBeginRead(char* buffer, size_t n, bool& eof);

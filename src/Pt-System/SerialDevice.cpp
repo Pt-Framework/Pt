@@ -79,6 +79,12 @@ void SerialDevice::onCancel()
 }
 
 
+void SerialDevice::onSetTimeout(size_t timeout)
+{
+    _impl->setTimeout(timeout);
+}
+
+
 size_t SerialDevice::onBeginRead(char* buffer, size_t n, bool& eof)
 {
     return _impl->beginRead(*parent(), buffer, n, eof);
@@ -165,17 +171,6 @@ SerialDevice::FlowControl SerialDevice::flowControl() const
 bool SerialDevice::setSignal(SerialDevice::SerialLine signal)
 {
     return _impl->setSignal(signal);
-}
-
-void SerialDevice::setTimeout( size_t msec )
-{
-    _impl->setTimeout( msec );
-}
-
-
-size_t SerialDevice::timeout() const
-{
-    return _impl->timeout();
 }
 
 

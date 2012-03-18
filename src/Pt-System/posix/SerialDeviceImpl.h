@@ -65,9 +65,9 @@ class SerialDeviceImpl : public IODeviceImpl
         
         bool setSignal(SerialDevice::SerialLine signal);
 
-        void setTimeout( size_t msec );
+        //void setTimeout( size_t msec );
 
-        size_t timeout() const;
+        //size_t timeout() const;
 
         void sync() const;
 

@@ -415,7 +415,7 @@ void SerialDeviceImpl::setFlowControl( SerialDevice::FlowControl flowControl )
     _flowControl = flowControl;
 }
 
-void SerialDeviceImpl::setTimeout( size_t msec )
+/*void SerialDeviceImpl::setTimeout( size_t msec )
 {
     struct termios ios;
 
@@ -426,9 +426,9 @@ void SerialDeviceImpl::setTimeout( size_t msec )
 
     tcsetattr(IODeviceImpl::fd(), TCSANOW, &ios);
 
-}
+}*/
 
-size_t SerialDeviceImpl::timeout() const
+/*size_t SerialDeviceImpl::timeout() const
 {
     struct termios ios;
 
@@ -436,7 +436,7 @@ size_t SerialDeviceImpl::timeout() const
         throw IOError( PT_ERROR_MSG("tcgetattr failed") );
 
     return ios.c_cc[VTIME] * 100 ;
-}
+}*/
 
 SerialDevice::FlowControl SerialDeviceImpl::flowControl() const
 {

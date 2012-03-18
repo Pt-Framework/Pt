@@ -110,18 +110,6 @@ std::string TcpSocket::peerAddress() const
 }
 
 
-void TcpSocket::setTimeout(std::size_t msecs)
-{
-    _impl->setTimeout(msecs);
-}
-
-
-std::size_t TcpSocket::timeout() const
-{
-    return _impl->timeout();
-}
-
-
 void TcpSocket::accept(const TcpServer& server, unsigned flags)
 {
     this->close();
@@ -194,6 +182,12 @@ bool TcpSocket::isConnected() const
 void TcpSocket::onClose()
 {
     _impl->close();
+}
+
+
+void TcpSocket::onSetTimeout(size_t timeout)
+{
+    _impl->setTimeout(timeout);
 }
 
 

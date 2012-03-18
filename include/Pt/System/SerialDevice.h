@@ -177,15 +177,12 @@ class PT_SYSTEM_API SerialDevice : public IODevice
         //! @brief Gets the current flow control kind
         FlowControl flowControl() const;
 
-        // If device is async this call has no effect.
-        void setTimeout( size_t msec );
-
-        size_t timeout() const;
-
         bool setSignal(SerialDevice::SerialLine signal);
 
     protected:
         void onClose();
+
+        void onSetTimeout(size_t timeout);
 
         size_t onBeginRead(char* buffer, size_t n, bool& eof);
 

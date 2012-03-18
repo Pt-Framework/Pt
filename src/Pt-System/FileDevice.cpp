@@ -76,6 +76,12 @@ void FileDevice::onClose()
 }
 
 
+void FileDevice::onSetTimeout(size_t timeout)
+{
+    _impl->setTimeout(timeout);
+}
+
+
 size_t FileDevice::onBeginRead(char* buffer, size_t n, bool& eof)
 {
     return _impl->beginRead(*parent(), buffer, n, eof);

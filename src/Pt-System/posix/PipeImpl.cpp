@@ -68,6 +68,12 @@ void PipeIODevice::onClose()
 }
 
 
+void PipeIODevice::onSetTimeout(size_t timeout)
+{
+    _impl.setTimeout(timeout);
+}
+
+
 bool PipeIODevice::onRun()
 { 
     if( this->reading() )

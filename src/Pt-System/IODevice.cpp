@@ -58,6 +58,12 @@ void IODevice::close()
 }
 
 
+void IODevice::setTimeout(size_t timeout)
+{
+    this->onSetTimeout(timeout);
+}
+
+
 void IODevice::beginRead(char* buffer, size_t n)
 {
     if( ! isActive() )

@@ -65,6 +65,8 @@ class PT_SYSTEM_API IODevice : public Selectable
 
         void close();
 
+        void setTimeout(size_t timeout);
+
         void beginRead(char* buffer, size_t n);
 
         size_t endRead();
@@ -205,6 +207,8 @@ class PT_SYSTEM_API IODevice : public Selectable
 
         //! @brief Closes all resources and cancels any outstanding operations
         virtual void onClose() = 0;
+
+        virtual void onSetTimeout(size_t timeout) = 0;
 
         virtual size_t onBeginRead(char* buffer, size_t n, bool& eof) = 0;
 

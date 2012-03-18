@@ -69,6 +69,8 @@ class PT_SYSTEM_API FileDevice : public IODevice
 
         void onClose();
 
+        void onSetTimeout(size_t timeout);
+
         bool onSeekable() const
         { return true; }
 

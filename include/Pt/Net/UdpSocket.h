@@ -73,13 +73,11 @@ class PT_NET_API UdpSocket : public System::IODevice
 
         std::string peerAddress() const;
 
-        void setTimeout(std::size_t msecs);
-
-        std::size_t timeout() const;
-
     protected:
         // inherit doc
         virtual void onClose();
+
+        void onSetTimeout(size_t timeout);
 
         virtual bool onRun();
 
