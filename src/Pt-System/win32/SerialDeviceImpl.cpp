@@ -313,6 +313,34 @@ size_t SerialDeviceImpl::write( const char* buffer, size_t count )
     return length;
 }
 
+
+void SerialDeviceImpl::setTimeout( size_t msec )
+{
+    COMMTIMEOUTS comTimeOut;
+    comTimeOut.ReadIntervalTimeout          = MAXDWORD;
+    comTimeOut.ReadTotalTimeoutMultiplier   = MAXDWORD;
+    comTimeOut.ReadTotalTimeoutConstant     = msec;
+
+#ifdef _WIN32_WCE
+    comTimeOut.WriteTotalTimeoutMultiplier  = 0;
+    comTimeOut.WriteTotalTimeoutConstant    = msec;
+#else
+    comTimeOut.WriteTotalTimeoutMultiplier  = 10;
+    comTimeOut.WriteTotalTimeoutConstant    = 100;
+#endif
+
+    if( !SetCommTimeouts( handle(), &comTimeOut ) )
+        throw IOError("SetCommTimeouts");
+}
+
+
+size_t SerialDeviceImpl::timeout() const
+{
+    COMMTIMEOUTS comTimeOut;
+    GetCommTimeouts( handle(), &comTimeOut );
+    return  comTimeOut.ReadTotalTimeoutConstant;
+}
+
 #else // normal WIN32
 
 SerialDeviceImpl::SerialDeviceImpl(SerialDevice& device)
@@ -644,34 +672,6 @@ SerialDevice::FlowControl SerialDeviceImpl::flowControl() const
     throw std::runtime_error( "Unknown flow control" + PT_SOURCEINFO );
 
     return SerialDevice::FlowControlBoth;
-}
-
-
-void SerialDeviceImpl::setTimeout( size_t msec )
-{
-    COMMTIMEOUTS comTimeOut;
-    comTimeOut.ReadIntervalTimeout          = MAXDWORD;
-    comTimeOut.ReadTotalTimeoutMultiplier   = MAXDWORD;
-    comTimeOut.ReadTotalTimeoutConstant     = msec;
-
-#ifdef _WIN32_WCE
-    comTimeOut.WriteTotalTimeoutMultiplier  = 0;
-    comTimeOut.WriteTotalTimeoutConstant    = msec;
-#else
-    comTimeOut.WriteTotalTimeoutMultiplier  = 10;
-    comTimeOut.WriteTotalTimeoutConstant    = 100;
-#endif
-
-    if( !SetCommTimeouts( handle(), &comTimeOut ) )
-        throw IOError("SetCommTimeouts");
-}
-
-
-size_t SerialDeviceImpl::timeout() const
-{
-    COMMTIMEOUTS comTimeOut;
-    GetCommTimeouts( handle(), &comTimeOut );
-    return  comTimeOut.ReadTotalTimeoutConstant;
 }
 
 }//namespace System

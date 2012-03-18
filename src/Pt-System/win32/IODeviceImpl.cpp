@@ -72,6 +72,7 @@ void IODeviceImpl::close()
 
 OverlappedIODeviceImpl::OverlappedIODeviceImpl(IODevice& dev)
 : _ioh(dev)
+, _timeout(System::EventLoop::WaitInfinite)
 {
     _readOv.Offset = 0;
     _readOv.OffsetHigh = 0;

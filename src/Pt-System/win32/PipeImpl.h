@@ -114,6 +114,8 @@ class PipeIODevice : public IODevice
     protected:
         bool onRun();
 
+        void onSetTimeout(size_t timeout);
+
         size_t onBeginRead(char* buffer, size_t n, bool& eof);
 
         size_t onEndRead(char* buffer, size_t n, bool& eof);

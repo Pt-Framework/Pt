@@ -69,10 +69,6 @@ class SerialDeviceImpl : public OverlappedIODeviceImpl
         
         SerialDevice::FlowControl flowControl() const;
         
-        void setTimeout( size_t msec );
-        
-        size_t timeout() const;    
-        
         bool setSignal(SerialDevice::SerialLine signal);
         
 #ifdef _WIN32_WCE
@@ -91,6 +87,10 @@ class SerialDeviceImpl : public OverlappedIODeviceImpl
         size_t endWrite(EventLoop& loop, const char* buffer, size_t n);
 
         size_t write( const char* buffer, size_t count );
+
+        void setTimeout( size_t msec );
+        
+        size_t timeout() const;    
 #endif
 
     private:

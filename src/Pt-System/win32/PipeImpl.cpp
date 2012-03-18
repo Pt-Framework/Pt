@@ -83,6 +83,11 @@ void PipeIODevice::open(HANDLE h)
 }
 
 
+void PipeIODevice::onSetTimeout(size_t timeout)
+{
+}
+
+
 void PipeIODevice::onClose()
 {
     if(handle() != INVALID_HANDLE_VALUE)
@@ -369,6 +374,12 @@ PipeIODevice::~PipeIODevice()
 void PipeIODevice::open(HANDLE handle)
 {
     _impl.setHandle(handle);
+}
+
+
+void PipeIODevice::onSetTimeout(size_t timeout)
+{
+    _impl.setTimeout(timeout);
 }
 
 

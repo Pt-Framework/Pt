@@ -68,6 +68,12 @@ class OverlappedIODeviceImpl : public IODeviceImpl
 
         ~OverlappedIODeviceImpl();
 
+        void setTimeout(std::size_t msecs)
+        { _timeout = msecs; }
+
+        std::size_t timeout() const
+        { return _timeout; }
+
         void attach(EventLoop& loop);
 
         void detach(EventLoop& loop);
@@ -96,6 +102,7 @@ class OverlappedIODeviceImpl : public IODeviceImpl
         IOHandle _ioh;
         OVERLAPPED _readOv;
         OVERLAPPED _writeOv;
+        std::size_t _timeout;
 };
 
 #endif
