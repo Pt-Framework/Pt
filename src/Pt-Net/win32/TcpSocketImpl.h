@@ -107,8 +107,6 @@ class TcpSocketImpl
         std::size_t timeout() const
         { return _timeout; }
 
-
-
     private:
         void connect();
         bool beginConnect();

@@ -64,6 +64,7 @@ static struct WsaInit
 TcpServerImpl::TcpServerImpl(TcpServer& server)
 : _ioh(server)
 , _fd(INVALID_SOCKET)
+, _timeout(Pt::System::EventLoop::WaitInfinite)
 {
 }
 
@@ -202,24 +203,55 @@ void TcpServerImpl::listen(const std::string& ipaddr,
 }
 
 
+//SOCKET TcpServerImpl::accept()
+//{
+//    // set the server socket to blocking-mode
+//    u_long argp = 0;
+//    setEventFlags(0, 0);
+//    ::ioctlsocket(_fd, FIONBIO, &argp);
+//
+//    SOCKET fd = ::WSAAccept(_fd, NULL, NULL, NULL, 0);
+//
+//    if( fd == SOCKET_ERROR)
+//    {
+//        log_debug("accept failed: " << WSAGetLastError());
+//        throw System::IOError( PT_ERROR_MSG("accept failed") );
+//    }
+//
+//    // reset the blocking mode
+//    if(_ioh.handle() != INVALID_HANDLE_VALUE)
+//        setEventFlags(_ioh.handle(), FD_ACCEPT);
+//
+//    log_debug(fd << " accepted ");
+//    return fd;
+//}
+
+
 SOCKET TcpServerImpl::accept()
 {
-    // set the server socket to blocking-mode
-    u_long argp = 0;
-    setEventFlags(0, 0);
-    ::ioctlsocket(_fd, FIONBIO, &argp);
-    
     SOCKET fd = ::WSAAccept(_fd, NULL, NULL, NULL, 0);
-    
-    if( fd == SOCKET_ERROR)
+    if(fd == INVALID_SOCKET)
     {
-        log_debug("accept failed: " << WSAGetLastError());
-        throw System::IOError( PT_ERROR_MSG("accept failed") );
-    }
+        DWORD err = WSAGetLastError();
+        if(WSAEWOULDBLOCK != err) // WSAEINPROGRESS only for blocking WSA 1.1
+        {
+            log_debug("socket error on " << _fd);
+            throw System::IOError("WSAAccept");
+        }
+        
+        fd_set fds;
+        FD_ZERO(&fds);
+        FD_SET(_fd, &fds);
     
-    // reset the blocking mode
-    if(_ioh.handle() != INVALID_HANDLE_VALUE)
-        setEventFlags(_ioh.handle(), FD_ACCEPT);
+        this->waitSelect(&fds, 0, 0, _timeout);
+
+        fd = ::WSAAccept(_fd, NULL, NULL, NULL, 0);
+        if(fd == INVALID_SOCKET)
+        {
+            log_debug("socket error on " << _fd);
+            throw System::IOError("WSAAccept");
+        }
+    }
 
     log_debug(fd << " accepted ");
     return fd;
@@ -251,6 +283,27 @@ void TcpServerImpl::setEventFlags(HANDLE ev, long events)
         log_debug("Set event failed: "<< WSAGetLastError());
         throw System::SystemError( PT_ERROR_MSG("attach event to server socket failed") );
     }
+}
+
+
+int TcpServerImpl::waitSelect(fd_set* rfds, fd_set* wfds, fd_set* efds, size_t timeout)
+{
+    struct timeval* tval = 0;
+    struct timeval tv;
+    if(timeout != System::EventLoop::WaitInfinite)
+    {
+        tv.tv_sec = timeout / 1000;
+        tv.tv_usec = (timeout % 1000) * 1000;
+        tval = &tv;
+    }
+
+    int ret = select(FD_SETSIZE, rfds, wfds, efds, tval);
+    if(0 == ret)
+        throw System::IOError("socket write timeout");
+    else if(SOCKET_ERROR == ret)
+        throw System::IOError("select failed");
+
+    return ret;
 }
 
 } // namespace Net

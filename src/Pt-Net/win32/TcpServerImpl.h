@@ -76,12 +76,20 @@ class TcpServerImpl
 
         bool run();
 
+        void setTimeout(std::size_t msecs)
+        { _timeout = msecs; }
+
+        std::size_t timeout() const
+        { return _timeout; }
+
     protected:
         void setEventFlags(HANDLE ev, long events);
+        int waitSelect(fd_set* rfds, fd_set* wfds, fd_set* efds, size_t timeout);
 
     private:
         System::IOHandle _ioh;
         SOCKET _fd;
+        size_t _timeout;
 };
 
 } // namespace Net
