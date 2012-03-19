@@ -74,10 +74,6 @@ class OverlappedIODeviceImpl : public IODeviceImpl
         std::size_t timeout() const
         { return _timeout; }
 
-        void attach(EventLoop& loop);
-
-        void detach(EventLoop& loop);
-
         bool runRead(EventLoop&);
 
         bool runWrite(EventLoop&);
@@ -102,6 +98,7 @@ class OverlappedIODeviceImpl : public IODeviceImpl
         IOHandle _ioh;
         OVERLAPPED _readOv;
         OVERLAPPED _writeOv;
+        HANDLE _ioEvent;
         std::size_t _timeout;
 };
 

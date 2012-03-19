@@ -498,16 +498,13 @@ size_t TcpSocketImpl::endRead(System::EventLoop& loop, char* buffer, size_t n, b
 
 size_t TcpSocketImpl::read(char* buffer, size_t count, bool& eof)
 {
-    //Set socket to blocking mode
-    u_long argp = 0;
-    ::ioctlsocket(_fd, FIONBIO, &argp);
+    fd_set fds;
+    FD_ZERO(&fds);
+    FD_SET(_fd, &fds);
+
+    this->waitSelect(&fds, 0, 0, _timeout);
 
     int len = ::recv(_fd, buffer, count, 0);
-
-    //Set socket to non-blocking mode
-    argp = 1;
-    ::ioctlsocket(_fd, FIONBIO, &argp);
-
     if( len == 0)
         eof = true;
     else if(len < 0)
@@ -585,27 +582,44 @@ size_t TcpSocketImpl::endWrite(System::EventLoop& loop, const char* buffer, size
 
 size_t TcpSocketImpl::write(const char* buffer, size_t count)
 {
-    log_debug(_fd << " endWrite");
+    log_debug(_fd << " write");
+
+    fd_set fds;
+    FD_ZERO(&fds);
+    FD_SET(_fd, &fds);
+
+    this->waitSelect(0, &fds, 0, _timeout);
 
     _sendBuffer.buf = const_cast<char*>(buffer);
     _sendBuffer.len = count;
 
-    //Set socket to blocking mode
-    u_long argp = 0;
-    ::ioctlsocket(_fd, FIONBIO, &argp);
-
     DWORD numberOfBytesSent = 0;
-
     int rc = WSASend(_fd, &_sendBuffer, 1, &numberOfBytesSent, 0, NULL, NULL);
-
-    //Set socket to non-blocking mode
-    argp = 1;
-    ::ioctlsocket(_fd, FIONBIO, &argp);
-
     if(rc == SOCKET_ERROR)
         throw System::IOError("WSASend");
 
-    return  numberOfBytesSent;
+    return numberOfBytesSent;
+}
+
+
+int TcpSocketImpl::waitSelect(fd_set* rfds, fd_set* wfds, fd_set* efds, size_t timeout)
+{
+    struct timeval* tval = 0;
+    struct timeval tv;
+    if(timeout != System::EventLoop::WaitInfinite)
+    {
+        tv.tv_sec = timeout / 1000;
+        tv.tv_usec = (timeout % 1000) * 1000;
+        tval = &tv;
+    }
+
+    int ret = select(FD_SETSIZE, rfds, wfds, efds, tval);
+    if(0 == ret)
+        throw System::IOError("socket write timeout");
+    else if(SOCKET_ERROR == ret)
+        throw System::IOError("select failed");
+
+    return ret;
 }
 
 } // namespace Net

@@ -396,21 +396,14 @@ size_t UdpSocketImpl::read(char* buffer, size_t count, bool& eof)
 
     if( len == -1 && WSAGetLastError() == WSAEWOULDBLOCK)
     {
-        //Set socket to blocking mode
-        setEventFlags(0,0);
-
-        u_long argp = 0;
-        ::ioctlsocket(_fd, FIONBIO, &argp);
+        fd_set fds;
+        FD_ZERO(&fds);
+        FD_SET(_fd, &fds);
+    
+        this->waitSelect(&fds, 0, 0, _timeout);
 
         len = recvfrom( _fd, recvbuf.buf, recvbuf.len, 0,
                         (sockaddr*) &_peeraddr,  &addrlen );
-
-        //Set socket to non-blocking mode
-        argp = 1;
-        ::ioctlsocket(_fd, FIONBIO, &argp);
-
-        if(_ioh.handle() != INVALID_HANDLE_VALUE)
-            setEventFlags(_ioh.handle(), _eventFlags);
 
         if(len < 0)
             throw System::IOError("recvfrom");
@@ -474,24 +467,18 @@ size_t UdpSocketImpl::endRead(System::EventLoop& loop, char* buffer, size_t n, b
 
 size_t UdpSocketImpl::write(const char* buffer, size_t n)
 {
+    fd_set fds;
+    FD_ZERO(&fds);
+    FD_SET(_fd, &fds);
+
+    this->waitSelect(0, &fds, 0, _timeout);
+
     WSABUF sendbuf;
     sendbuf.buf = const_cast<char*>(buffer);
     sendbuf.len = n;
 
-    //Set socket to blocking mode
-    setEventFlags(0, 0);
-    u_long argp = 0;
-    ::ioctlsocket(_fd, FIONBIO, &argp);
-
     DWORD bytesSent = 0;
     int rc = WSASend(_fd, &sendbuf, 1, &bytesSent, 0, NULL, NULL);
-
-    //Set socket to non-blocking mode
-    argp = 1;
-    ::ioctlsocket(_fd, FIONBIO, &argp);
-
-    if(_ioh.handle() != INVALID_HANDLE_VALUE)
-        setEventFlags(_ioh.handle(), _eventFlags);
 
     if(rc == SOCKET_ERROR)
         throw System::IOError("WSASend");  
@@ -556,6 +543,27 @@ size_t UdpSocketImpl::endWrite(System::EventLoop& loop, const char* buffer, size
         throw System::IOError("WSASend");
 
     return  bytesSend;
+}
+
+
+int UdpSocketImpl::waitSelect(fd_set* rfds, fd_set* wfds, fd_set* efds, size_t timeout)
+{
+    struct timeval* tval = 0;
+    struct timeval tv;
+    if(timeout != System::EventLoop::WaitInfinite)
+    {
+        tv.tv_sec = timeout / 1000;
+        tv.tv_usec = (timeout % 1000) * 1000;
+        tval = &tv;
+    }
+
+    int ret = select(FD_SETSIZE, rfds, wfds, efds, tval);
+    if(0 == ret)
+        throw System::IOError("socket write timeout");
+    else if(SOCKET_ERROR == ret)
+        throw System::IOError("select failed");
+
+    return ret;
 }
 
 } // namespace Net

@@ -101,6 +101,7 @@ class UdpSocketImpl
 
     protected:
         void setEventFlags(HANDLE ev, long events);
+        int waitSelect(fd_set* rfds, fd_set* wfds, fd_set* efds, size_t timeout);
 
     private:
         System::IOHandle             _ioh;

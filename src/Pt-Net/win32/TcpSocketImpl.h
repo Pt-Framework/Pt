@@ -107,12 +107,14 @@ class TcpSocketImpl
         std::size_t timeout() const
         { return _timeout; }
 
-        bool wait(std::size_t msecs);
+
 
     private:
         void connect();
         bool beginConnect();
         void setEventFlags(HANDLE ev, long events);
+        bool wait(std::size_t msecs);
+        int waitSelect(fd_set* rfds, fd_set* wfds, fd_set* efds, size_t timeout);
 
     private:
         AddrInfo _addrInfo;

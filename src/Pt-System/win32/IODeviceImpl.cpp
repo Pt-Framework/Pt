@@ -29,6 +29,7 @@
 #include "IODeviceImpl.h"
 #include "MainLoopImpl.h"
 #include "Pt/System/IOError.h"
+#include "Pt/System/SystemError.h"
 #include "Pt/System/IODevice.h"
 #include "Pt/System/EventLoop.h"
 
@@ -72,6 +73,7 @@ void IODeviceImpl::close()
 
 OverlappedIODeviceImpl::OverlappedIODeviceImpl(IODevice& dev)
 : _ioh(dev)
+, _ioEvent(NULL)
 , _timeout(System::EventLoop::WaitInfinite)
 {
     _readOv.Offset = 0;
@@ -86,6 +88,8 @@ OverlappedIODeviceImpl::OverlappedIODeviceImpl(IODevice& dev)
 
 OverlappedIODeviceImpl::~OverlappedIODeviceImpl()
 {
+    if(_ioEvent)
+        CloseHandle(_ioEvent);
 }
 
 
@@ -119,24 +123,6 @@ void OverlappedIODeviceImpl::cancel(EventLoop& loop)
     _readOv.hEvent = NULL;
     _writeOv.hEvent = NULL;
 
-}
-
-
-void OverlappedIODeviceImpl::attach(EventLoop& loop)
-{
-    /*HANDLE h = loop.impl().enable(_device);
-
-    _readOv.hEvent = h;
-    _writeOv.hEvent = h;*/
-}
-
-
-void OverlappedIODeviceImpl::detach(EventLoop& loop)
-{
-    /*loop.impl().disable(_device);
-
-    _readOv.hEvent = NULL;
-    _writeOv.hEvent = NULL;*/
 }
 
 
@@ -220,14 +206,29 @@ size_t OverlappedIODeviceImpl::endRead(EventLoop& loop, char* buffer, size_t n, 
 
 size_t OverlappedIODeviceImpl::read(char* buffer, size_t count, bool& eof)
 {
+    DWORD timeout = _timeout == EventLoop::WaitInfinite ? INFINITE 
+                                                        : static_cast<size_t>(_timeout);
+
+    if( ! _ioEvent)
+    {
+        _ioEvent = CreateEvent( NULL, FALSE, FALSE, NULL );
+        if( _ioEvent == NULL )
+            throw SystemError("CreateEvent failed");
+    }
+
+    OVERLAPPED ov;
+    ov.Offset = _readOv.Offset;
+    ov.OffsetHigh = _readOv.OffsetHigh;
+    ov.hEvent = _ioEvent;
+
     DWORD readBytes = 0;
-    if( FALSE == ReadFile(handle(), (void*)buffer, count, &readBytes, &_readOv) )
+    if( FALSE == ReadFile(handle(), (void*)buffer, count, &readBytes, &ov) )
     {
         DWORD err = GetLastError();
-        if(ERROR_HANDLE_EOF == err|| ERROR_BROKEN_PIPE == err)
+        if(ERROR_HANDLE_EOF == err || ERROR_BROKEN_PIPE == err)
         {
             eof = true;
-            readBytes = 0;
+            return 0;
         }
         
         if(ERROR_IO_PENDING != err)
@@ -235,7 +236,13 @@ size_t OverlappedIODeviceImpl::read(char* buffer, size_t count, bool& eof)
             throw IOError("ReadFile failed");
         }
 
-        if(FALSE == GetOverlappedResult(handle(), &_readOv, &readBytes, TRUE) )
+        DWORD result = WaitForSingleObject(ov.hEvent, timeout);
+        if(result != WAIT_OBJECT_0)
+        {
+            throw IOError("ReadFile timeout");
+        }
+    
+        if(FALSE == GetOverlappedResult(handle(), &ov, &readBytes, TRUE) )
         {
             throw IOError("GetOverlappedResult failed");
         }
@@ -287,16 +294,37 @@ size_t OverlappedIODeviceImpl::endWrite(EventLoop& loop, const char* buffer, siz
 
 size_t OverlappedIODeviceImpl::write(const char* buffer, size_t count)
 {
-    DWORD writtenBytes = 0;
+    DWORD timeout = _timeout == EventLoop::WaitInfinite ? INFINITE 
+                                                        : static_cast<size_t>(_timeout);
 
-    if( FALSE == WriteFile(handle(), (void*)buffer, count, &writtenBytes, &_writeOv) )
+    if( ! _ioEvent)
     {
-        if( ERROR_IO_PENDING != GetLastError() )
+        _ioEvent = CreateEvent( NULL, FALSE, FALSE, NULL );
+        if( _ioEvent == NULL )
+            throw SystemError("CreateEvent failed");
+    }
+
+    OVERLAPPED ov;
+    ov.Offset = _writeOv.Offset;
+    ov.OffsetHigh = _writeOv.OffsetHigh;
+    ov.hEvent = _ioEvent;
+
+    DWORD writtenBytes = 0;
+    if( FALSE == WriteFile(handle(), (void*)buffer, count, &writtenBytes, &ov) )
+    {
+        DWORD err = GetLastError();
+        if( ERROR_IO_PENDING != err )
         {
             throw IOError("WriteFile");
         }
         
-        if(FALSE == GetOverlappedResult(handle(), &_writeOv, &writtenBytes, TRUE) )
+        DWORD result = WaitForSingleObject(ov.hEvent, timeout);
+        if(result != WAIT_OBJECT_0)
+        {
+            throw IOError("ReadFile timeout");
+        }
+
+        if(FALSE == GetOverlappedResult(handle(), &ov, &writtenBytes, TRUE) )
         {
             throw IOError("GetOverlappedResult");
         }
