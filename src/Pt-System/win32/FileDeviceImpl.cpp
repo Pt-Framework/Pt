@@ -193,13 +193,9 @@ void FileDeviceImpl::cancel(EventLoop& loop)
 }
 
 
-void FileDeviceImpl::attach(EventLoop& loop)
+void FileDeviceImpl::setTimeout(size_t)
 {
-}
-
-
-void FileDeviceImpl::detach(EventLoop& loop)
-{
+    // wince file systems never block...
 }
 
 

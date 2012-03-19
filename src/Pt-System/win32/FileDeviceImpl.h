@@ -55,9 +55,7 @@ class FileDeviceImpl  : public OverlappedIODeviceImpl
         size_t peek( char* buffer, size_t count );
 
 #ifdef _WIN32_WCE
-        void attach(EventLoop& loop);
-
-        void detach(EventLoop& loop);
+        void setTimeout(size_t timeout);
 
         bool runRead(EventLoop&);
 
@@ -83,7 +81,6 @@ class FileDeviceImpl  : public OverlappedIODeviceImpl
         IODevice& _device;
         OVERLAPPED _readOv;
         OVERLAPPED _writeOv;
-
 #endif
 };
 

@@ -46,7 +46,8 @@ namespace System {
 #ifdef _WIN32_WCE
 
 PipeIODevice::PipeIODevice(Mode mode)
-: _mode(mode)
+: _timeout(System::EventLoop::WaitInfinite)
+, _mode(mode)
 , _msgSize(0)
 , _bufferSize(0)
 {
@@ -85,6 +86,7 @@ void PipeIODevice::open(HANDLE h)
 
 void PipeIODevice::onSetTimeout(size_t timeout)
 {
+    _timeout = timeout;
 }
 
 
@@ -106,18 +108,6 @@ void PipeIODevice::onClose()
 void PipeIODevice::onCancel()
 {
     parent()->selector().disable(_ioh);
-}
-
-
-void PipeIODevice::onAttach(EventLoop& loop)
-{
-}
-
-
-void PipeIODevice::onDetach(EventLoop& loop)
-{
-    assert( ! reading() ); 
-    assert( ! writing() ); 
 }
 
 
@@ -224,13 +214,16 @@ size_t PipeIODevice::onRead(char* buffer, size_t count, bool& eof)
     DWORD flags     = 0;
     eof = false;
 
+    DWORD timeout = _timeout == EventLoop::WaitInfinite ? INFINITE 
+                                                        : static_cast<size_t>(_timeout);
+
     if(_bufferSize) 
     {
         readBytes = _bufferSize;
     }
-    else if ( FALSE == ReadMsgQueue(handle(), &_buffer[0], _msgSize, &readBytes, INFINITE, &flags) ) 
+    else if ( FALSE == ReadMsgQueue(handle(), &_buffer[0], _msgSize, &readBytes, timeout, &flags) ) 
     {
-        throw IOError( PT_ERROR_MSG("ReadMsgQueue failed") );
+        throw IOError("ReadMsgQueue failed");
     }
 
     memcpy(buffer, &_buffer[0], count);
@@ -250,8 +243,11 @@ size_t PipeIODevice::onRead(char* buffer, size_t count, bool& eof)
 
 void PipeIODevice::writeMessage(const char* buffer, size_t count)
 {
-    if( FALSE == WriteMsgQueue(handle(), (LPVOID) buffer, count, INFINITE, 0) )
-        throw IOError( PT_ERROR_MSG("WriteMsgQueue failed") );
+    DWORD timeout = _timeout == EventLoop::WaitInfinite ? INFINITE 
+                                                        : static_cast<size_t>(_timeout);
+
+    if( FALSE == WriteMsgQueue(handle(), (LPVOID) buffer, count, timeout, 0) )
+        throw IOError("WriteMsgQueue failed");
 }
 
 
@@ -260,20 +256,17 @@ size_t PipeIODevice::onWrite(const char* buffer, size_t count)
     if( Write != _mode )
         throw IOError( PT_ERROR_MSG("Could not write on a read only pipe") );
 
-    size_t offset = 0;
-    for(size_t n = count; ; n -= _msgSize )
-    {
-        if (n <= _msgSize)
-        {
-            writeMessage( (buffer + offset), n );
-            break;
-        }
+    
+    DWORD timeout = _timeout == EventLoop::WaitInfinite ? INFINITE 
+                                                        : static_cast<size_t>(_timeout);
 
-        writeMessage( (buffer + offset), _msgSize );
-        offset += _msgSize;
+    DWORD bytesToWrite = std::min<DWORD>(count, _msgSize);
+    if ( FALSE == WriteMsgQueue(handle(), (LPVOID) buffer, bytesToWrite, timeout, 0))
+    {
+        throw IOError("WriteMsgQueue failed");
     }
 
-    return count;
+    return bytesToWrite;
 }
 
 

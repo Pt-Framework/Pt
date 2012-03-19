@@ -43,9 +43,7 @@ class PipeIODevice : public IODevice, private IODeviceImpl
         void open(HANDLE handle);
     
     protected:
-        void onAttach(EventLoop& loop);
-    
-        void onDetach(EventLoop& loop);
+        void onSetTimeout(size_t timeout);
     
         void onCancel();
     
@@ -74,10 +72,11 @@ class PipeIODevice : public IODevice, private IODeviceImpl
         void writeMessage(const char* buffer, size_t count);
     
     private:
-        IOHandle _ioh;
-        Mode     _mode;
-        DWORD    _msgSize;
-        size_t   _bufferSize;
+        IOHandle    _ioh;
+        std::size_t _timeout;
+        Mode        _mode;
+        DWORD       _msgSize;
+        size_t      _bufferSize;
         std::vector<char> _buffer;
 };
 
