@@ -81,6 +81,16 @@ set tags=c:\Pt\ide\tags
 :map <F3> :TlistToggle<CR>
 :map! <F3> <C-o>:TlistToggle<CR>
 
+function LM()
+  if bufname('%') == '-MiniBufExplorer-'
+    execute "normal \<2-leftmouse>"
+  else
+    execute "normal \<2-leftmouse>" 
+  endif
+endfunction
+
+noremap! <2-LEFTMOUSE> <C-o>:call LM()<CR>
+
 "
 " Build command
 "
