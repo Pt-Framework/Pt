@@ -38,9 +38,16 @@ namespace Net {
 
 class AddrInfoImpl;
 
-/** @brief Resolves hostnames to network addresses
+/** @brief Represents a Network Host
     
+    AddrInfo are constructed from an IP address string or a hostname. Hostnames
+    are resolved and may result in a number of possible endpoints. Thus, this
+    class represents also the result of resolving a hostname. An implementation
+    might cache the resolved addresses in the %AddrInfo, so that a reconnect 
+    does not require to call the resolver again.
+
     @todo Provide special constructors for INADDR_ANY and such.
+    @todo Defer hostname resolution until connect
  */
 class PT_NET_API AddrInfo
 {
