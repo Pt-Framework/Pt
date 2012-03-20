@@ -50,6 +50,7 @@ namespace Net {
 TcpServerImpl::TcpServerImpl(TcpServer& server)
 : _server(server)
 , _ioh(server)
+, _timeout(Pt::System::EventLoop::WaitInfinite)
 {
 }
 

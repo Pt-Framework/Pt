@@ -91,18 +91,38 @@ void TcpSocketImpl::cancel(System::EventLoop& loop)
 
 void TcpSocketImpl::accept(const TcpServer& server, unsigned flags)
 {
-    bool inherit = false;
-
     sockaddr_storage peeraddr;
     socklen_t peeraddr_len = sizeof(peeraddr);
+
+    //TODO ECONNABORTED EINTR EPERM
 
     log_debug( "accept " << server.impl().fd() );
     int fd = ::accept(server.impl().fd(), reinterpret_cast <struct sockaddr*>(&peeraddr), &peeraddr_len);
     if( fd < 0 )
-      throw System::IOError("accept");
+    {
+        if (errno != EINPROGRESS)
+        {
+            log_debug("connect failed " << this->fd());
+            throw System::IOError("accept");
+        }
+        
+        fd_set rfds;
+        FD_ZERO(&rfds);
+        FD_SET(server.impl().fd(), &rfds);
+        bool avail = this->wait(server.impl().timeout(), &rfds, 0, 0);
+        if(avail)
+        {
+            fd = ::accept(server.impl().fd(), reinterpret_cast <struct sockaddr*>(&peeraddr), &peeraddr_len);
+            if( fd < 0 )
+            {
+                log_debug("connect failed " << this->fd());
+                throw System::IOError("accept");
+            }
+        }
+    }
 
+    bool inherit = false;
     System::IODeviceImpl::open(fd, inherit);
-    //TODO ECONNABORTED EINTR EPERM
 
     _isConnected = true;
     log_debug( "accepted " << server.impl().fd() << " => " << this->fd() );

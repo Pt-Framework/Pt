@@ -54,6 +54,7 @@ class TcpServerImpl
     private:
         TcpServer& _server;
         System::IOHandle _ioh;
+        size_t _timeout;
         struct sockaddr_storage _servaddr;
 
     public:
@@ -61,6 +62,12 @@ class TcpServerImpl
 
         virtual ~TcpServerImpl() 
         {}
+
+        void setTimeout(std::size_t msecs)
+        { _timeout = msecs; }
+
+        std::size_t timeout() const
+        { return _timeout; }
 
         void create(int domain, int type, int protocol);
 
