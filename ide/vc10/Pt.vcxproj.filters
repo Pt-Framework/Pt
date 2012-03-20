@@ -456,6 +456,24 @@
     <ClInclude Include="..\..\src\Pt-Net\win32\UdpSocketImpl.h">
       <Filter>Pt-Net\win32</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Net\AddressInUse.h">
+      <Filter>Pt-Net</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Net\AddrInfo.h">
+      <Filter>Pt-Net</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Net\Api.h">
+      <Filter>Pt-Net</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Net\TcpServer.h">
+      <Filter>Pt-Net</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Net\TcpSocket.h">
+      <Filter>Pt-Net</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Net\UdpSocket.h">
+      <Filter>Pt-Net</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">

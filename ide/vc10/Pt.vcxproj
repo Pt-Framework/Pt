@@ -38,6 +38,12 @@
     <ClInclude Include="..\..\include\Pt\Main.h" />
     <ClInclude Include="..\..\include\Pt\Math.h" />
     <ClInclude Include="..\..\include\Pt\Method.h" />
+    <ClInclude Include="..\..\include\Pt\Net\AddressInUse.h" />
+    <ClInclude Include="..\..\include\Pt\Net\AddrInfo.h" />
+    <ClInclude Include="..\..\include\Pt\Net\Api.h" />
+    <ClInclude Include="..\..\include\Pt\Net\TcpServer.h" />
+    <ClInclude Include="..\..\include\Pt\Net\TcpSocket.h" />
+    <ClInclude Include="..\..\include\Pt\Net\UdpSocket.h" />
     <ClInclude Include="..\..\include\Pt\NonCopyable.h" />
     <ClInclude Include="..\..\include\Pt\Pack1.h" />
     <ClInclude Include="..\..\include\Pt\PackPop.h" />
