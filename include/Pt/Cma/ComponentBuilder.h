@@ -32,7 +32,6 @@
 #include <Pt/Cma/Component.h>
 #include <Pt/Cma/IComponentBuilder.h>
 
-
 namespace Pt {
 
 namespace Cma {
@@ -76,7 +75,7 @@ class PT_EXPORT ComponentBuilder : public IComponentBuilder
         { }
 
         /** creates a component
-        \return the interface object of the component
+            \return the interface object of the component
         */
         IUnknown* createComponent()
         {

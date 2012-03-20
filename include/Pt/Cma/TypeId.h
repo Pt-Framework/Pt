@@ -26,8 +26,8 @@
 #ifndef PT_CMA_TYPEID_H
 #define PT_CMA_TYPEID_H
 
+#include <Pt/Cma/Api.h>
 #include <string>
-
 
 namespace Pt {
 
