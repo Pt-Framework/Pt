@@ -273,6 +273,7 @@ void TcpSocket::onCancel()
     if( isActive() )
     {
         _impl->cancel( *parent() );
+        _connecting = false;
     }
 
     IODevice::onCancel();
