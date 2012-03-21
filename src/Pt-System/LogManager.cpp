@@ -140,8 +140,12 @@ LogManager::~LogManager()
     std::map<std::string, LogChannel*>::iterator iter;
     for( iter = _channelMap.begin(); iter != _channelMap.end(); ++iter )
     {
-        iter->second->close();
-        _pluginManager.destroy( iter->second );
+        LogChannel* channel = iter->second;
+        if( 0 == channel->unref() )
+        {
+            channel->close();
+            _pluginManager.destroy( channel );
+        }
     }
 
     _channelMap.clear();
@@ -339,11 +343,18 @@ void LogManager::setChannel(LogTarget& target, const std::string& url)
         std::map<std::string, LogChannel*>::iterator it;
         for(it = _channelMap.begin(); it != _channelMap.end(); ++it)
         {
-            if(it->second == target.channel())
+            LogChannel* channel = it->second;
+            if( channel == target.channel() )
             {
-                it->second->close();
-                _pluginManager.destroy( it->second );
-                _channelMap.erase(it);
+                target.removeChannel();
+
+                if( 0 == channel->unref() )
+                {
+                    channel->close();
+                    _pluginManager.destroy( channel );
+                    _channelMap.erase(it);
+                }
+
                 break;
             }
         }
@@ -377,6 +388,7 @@ void LogManager::setChannel(LogTarget& target, const std::string& url)
         _channelMap[url] =  ch;
     }
 
+    ch->ref();
     target.assignChannel( *ch );
 }
 

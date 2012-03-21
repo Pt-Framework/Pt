@@ -132,6 +132,13 @@ bool LogTarget::inheritsChannel() const
 }
 
 
+void LogTarget::removeChannel()
+{
+    _channel = 0;
+    _inheritChannel = true;
+}
+
+
 void LogTarget::assignChannel(LogChannel& ch)
 {
     _channel = &ch;

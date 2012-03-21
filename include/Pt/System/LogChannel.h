@@ -53,6 +53,7 @@ class PT_SYSTEM_API LogChannel : protected Pt::NonCopyable
         /** @brief Default constructor
         */
         LogChannel()
+        : _refs(0)
         {}
 
     public:
@@ -60,6 +61,12 @@ class PT_SYSTEM_API LogChannel : protected Pt::NonCopyable
         */
         virtual ~LogChannel()
         {}
+
+        size_t ref()
+        { return ++_refs; }
+
+        size_t unref()
+        { return --_refs; }
 
         const std::string& url() const
         { return _url; }
@@ -106,6 +113,7 @@ class PT_SYSTEM_API LogChannel : protected Pt::NonCopyable
         
     private:
         std::string _url;
+        size_t _refs;
 };
 
 }

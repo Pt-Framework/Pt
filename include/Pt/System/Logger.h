@@ -278,6 +278,9 @@ class PT_SYSTEM_API LogTarget : protected Pt::NonCopyable
         { return _channel; }
 
         //! @internal
+        void removeChannel();
+
+        //! @internal
         void assignChannel(LogChannel& ch);
 
     private:
