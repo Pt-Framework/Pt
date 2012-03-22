@@ -4,6 +4,8 @@ set hidden
 set noerrorbells
 set novisualbell
 set showmode
+set nobackup
+set noswapfile
 winpos 0 0
 set lines=999 columns=180
 set guioptions -=L
