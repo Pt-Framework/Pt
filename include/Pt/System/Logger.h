@@ -101,6 +101,13 @@ class PT_SYSTEM_API LogMessage : protected Pt::NonCopyable
         template <typename T>
         LogMessage& operator<<(const T& value);
 
+        //! @brief Use the PT_SOURCEINFO macro to generate a SourceInfo object.
+        LogMessage& operator<<( const Pt::SourceInfo& si )
+        {
+            setSourceInfo(si);
+            return *this;
+        }
+
         LogMessage& operator<<( LogLevel (*pf)() )
         {
             setLogLevel( pf() );
@@ -391,50 +398,18 @@ class PT_SYSTEM_API Logger : protected Pt::NonCopyable
 
         /** @brief Start a new log-message
 
-            This method begins a new log-message. Use the PT_SOURCEINFO
-            macro to generate a SourceInfo object. This method call is
-            usually followed by several calls of the output operator. If
-            the logger is disabled this function only performs a integer
-            comparison.
+            This method begins a new log-message. This method call is usually
+            followed by several calls of the output operator. If the logger is
+            disabled this function only performs a integer comparison.
         */
-        LogMessage beginLog(const Pt::SourceInfo& si)
+        LogMessage beginLog()
         {
-            return LogMessage(*this, Pt::System::Trace, si);
+            return LogMessage(*this, Pt::System::Trace);
         }
 
-        LogMessage beginLog(LogLevel level, const Pt::SourceInfo& si)
+        LogMessage beginLog(LogLevel level)
         {
-            return LogMessage(*this, level, si);
-        }
-
-        LogMessage trace(const Pt::SourceInfo& si)
-        {
-            return LogMessage(*this, Pt::System::Trace, si);
-        }
-
-        LogMessage debug(const Pt::SourceInfo& si)
-        {
-            return LogMessage(*this, Pt::System::Debug, si);
-        }
-
-        LogMessage info(const Pt::SourceInfo& si)
-        {
-            return LogMessage(*this, Pt::System::Info, si);
-        }
-
-        LogMessage warn(const Pt::SourceInfo& si)
-        {
-            return LogMessage(*this, Pt::System::Warn, si);
-        }
-
-        LogMessage error(const Pt::SourceInfo& si)
-        {
-            return LogMessage(*this, Pt::System::Error, si);
-        }
-
-        LogMessage fatal(const Pt::SourceInfo& si)
-        {
-            return LogMessage(*this, Pt::System::Fatal, si);
+            return LogMessage(*this, level);
         }
 
         LogMessage trace()
@@ -472,7 +447,7 @@ class PT_SYSTEM_API Logger : protected Pt::NonCopyable
             return LogMessage( *this, pf() );
         }
 
-        //! @internal
+        //! @internal Only for unit-tests
         LogTarget& target() const
         { return *_target; }
 
@@ -542,7 +517,7 @@ class LoggedScope
         , _si(si)
         , _level(level)
         {
-            _logger.beginLog(_level, _si) << "Enter " << _si.func() << endlog;
+            _logger.beginLog(_level) << _si << "Enter " << _si.func() << endlog;
         }
 
         /** @brief Destructor
@@ -551,7 +526,7 @@ class LoggedScope
         */
         ~LoggedScope()
         {
-            _logger.beginLog(_level, _si) << "Leave " << _si.func() << endlog;;
+            _logger.beginLog(_level) << _si << "Leave " << _si.func() << endlog;;
         }
 
     private:
@@ -574,28 +549,28 @@ class LoggedScope
     #define log_message_impl(logger, level, expr)            \
     if( logger.enabled( Pt::System::level() ) )              \
     {                                                        \
-        logger.beginLog( Pt::System::level(), PT_SOURCEINFO) \
-            << expr << Pt::System::endlog;                   \
+        logger.beginLog( Pt::System::level() )                   \
+            << PT_SOURCEINFO << expr << Pt::System::endlog;  \
     }
 
     #define log_init(file) \
     Pt::System::LogTarget::initTargets(file);
 
-    #define log_define(category)                                   \
-    static Pt::System::Logger& getStaticLogger()                   \
-    {                                                              \
-        static Pt::System::Logger pt_logger(category);             \
-        return pt_logger;                                          \
-    }                                                              \
+    #define log_define(category)                                         \
+    static Pt::System::Logger& getStaticLogger()                         \
+    {                                                                    \
+        static Pt::System::Logger pt_logger(category);                   \
+        return pt_logger;                                                \
+    }                                                                    \
     static Pt::System::Logger& pt_static_logger_init = getStaticLogger();
 
-    #define log_xxxx(level, expr)                                        \
-    do {                                                                 \
-        if( getStaticLogger().enabled(Pt::System::level) )               \
-        {                                                                \
-            getStaticLogger().beginLog(Pt::System::level, PT_SOURCEINFO) \
-                << expr << Pt::System::endlog;                           \
-        }                                                                \
+    #define log_xxxx(level, expr)                                \
+    do {                                                         \
+        if( getStaticLogger().enabled(Pt::System::level) )       \
+        {                                                        \
+            getStaticLogger().beginLog(Pt::System::level)        \
+                << PT_SOURCEINFO << expr << Pt::System::endlog;  \
+        }                                                        \
     } while (false)
 #endif
 

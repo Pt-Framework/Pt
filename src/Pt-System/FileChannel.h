@@ -62,7 +62,7 @@ class FileChannel : public LogChannel
 		std::string _file;
         std::size_t _maxSize;
         std::size_t _numBackup;
-        std::size_t _curSize;
+        std::streamoff _curSize;
 };
 
 } // namespace System
