@@ -29,6 +29,7 @@
 
 #include "LogManager.h"
 #include "Pt/System/Logger.h"
+#include <cassert>
 
 namespace Pt {
 
@@ -128,6 +129,7 @@ void LogTarget::assignLogLevel(int level, bool inherited)
 
 bool LogTarget::inheritsChannel() const
 {
+    assert(_inheritChannel == (! _channel) );
     return _inheritChannel;
 }
 

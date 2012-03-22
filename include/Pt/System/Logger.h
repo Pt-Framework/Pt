@@ -546,12 +546,15 @@ class LoggedScope
     #define log_define(category)
     #define log_xxxx(level, expr)
 #else
-    #define log_message_impl(logger, level, expr)            \
-    if( logger.enabled( Pt::System::level() ) )              \
-    {                                                        \
-        logger.beginLog( Pt::System::level() )                   \
-            << PT_SOURCEINFO << expr << Pt::System::endlog;  \
-    }
+    #define log_message_impl(logger, level, expr) \
+       ( logger.enabled( Pt::System::level() ) && &(logger.beginLog( Pt::System::level() ) << expr << Pt::System::endlog) )
+
+//  #define log_message_impl(logger, level, expr)            \
+//  if( logger.enabled( Pt::System::level() ) )              \
+//  {                                                        \
+//      logger.beginLog( Pt::System::level() )                   \
+//          << PT_SOURCEINFO << expr << Pt::System::endlog;  \
+//  }
 
     #define log_init(file) \
     Pt::System::LogTarget::initTargets(file);
@@ -564,14 +567,17 @@ class LoggedScope
     }                                                                    \
     static Pt::System::Logger& pt_static_logger_init = getStaticLogger();
 
-    #define log_xxxx(level, expr)                                \
-    do {                                                         \
-        if( getStaticLogger().enabled(Pt::System::level) )       \
-        {                                                        \
-            getStaticLogger().beginLog(Pt::System::level)        \
-                << PT_SOURCEINFO << expr << Pt::System::endlog;  \
-        }                                                        \
-    } while (false)
+    #define log_xxxx(level, expr) \
+       ( getStaticLogger().enabled(Pt::System::level) && &(getStaticLogger().beginLog(Pt::System::level) << expr << Pt::System::endlog) )
+
+//  #define log_xxxx(level, expr)                                \
+//  do {                                                         \
+//      if( getStaticLogger().enabled(Pt::System::level) )       \
+//      {                                                        \
+//          getStaticLogger().beginLog(Pt::System::level)        \
+//              << PT_SOURCEINFO << expr << Pt::System::endlog;  \
+//      }                                                        \
+//  } while (false)
 #endif
 
 #define log_fatal(expr) log_xxxx(Fatal, expr)

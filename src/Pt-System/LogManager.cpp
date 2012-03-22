@@ -384,8 +384,16 @@ void LogManager::setChannel(LogTarget& target, const std::string& url)
             throw std::invalid_argument("No such channel");
         }
 
-        ch->open(url);
-        _channelMap[url] =  ch;
+        try
+        {
+            ch->open(url);
+            _channelMap[url] =  ch;
+        } 
+        catch(...)
+        {
+            _pluginManager.destroy(ch);
+            throw;
+        }
     }
 
     ch->ref();
