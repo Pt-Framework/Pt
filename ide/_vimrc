@@ -1,30 +1,100 @@
 " General
+set nocompatible
+set hidden
+set noerrorbells
+set novisualbell
+set showmode
 winpos 0 0
 set lines=999 columns=180
 set guioptions -=L
 set mouse=a
 set bs=2
+set backspace=indent,eol,start
 filetype on
 set number
 set ruler
-syntax enable
+set cursorline
+set showmatch
+set incsearch
+set nofoldenable
+set wrap
+set wrapscan
+set ignorecase
+set expandtab
+set shiftwidth=4
+set softtabstop=4
+set tabstop=4
+set autoindent
+set virtualedit=block
+syntax on
 colors pt
 set guifont=Consolas:h9
 set sessionoptions=buffers
 
+" %= = sep. betweeen l/r-aligned      %n = buffer number
+" %F = full path to file              %y = type of file
+" %m = modified                       %r = readonly
+" %b = value of byte                  %B = value of byte in HEX
+set statusline=[%n]\ %F%y%m%r\ %=\ %b\ 0x%B\ \ \ %c,%l/%L\ \ %P
+
+"set insertmode
+
+function StartInsertOnModifiable()
+  
+  "let is_modified=getbufvar(bufnr('%'), '&modified')  
+
+  if getbufvar(bufnr('%'), '&modifiable') == 1
+    "startinsert
+  else
+    stopinsert
+  endif
+
+  "let is_modified2=getbufvar(bufnr('%'), '&modified') 
+
+  "if is_modified == 0
+  "  set nomodified
+  "  call setbufvar( bufnr('%') , "&modified" , 0 ) 
+  "endif
+
+endfunction
+
+autocmd BufEnter * call StartInsertOnModifiable()
+
+"autocmd BufLeave -MiniBufExplorer- startinsert
+"autocmd BufEnter -MiniBufExplorer- stopinsert
+
+" Escape switches between insert and normal mode
+:noremap <Esc> :startinsert<CR>
+
+" Window commands for insert mode
+:inoremap <C-w>q <C-o><C-w>q
+
+" backspace in Visual mode deletes selection
+vnoremap <BS> d
+
+" Execute Comand
+:noremap <C-e> :
+:noremap! <C-e> <C-o>:
+
+" Open File :e %:p:h
+:noremap <C-o> :NERDTreeFind<CR>
+:noremap! <C-o> <C-o>:NERDTreeFind<CR>
+
+" Save current file
+:noremap <C-s> :w<CR>
+:noremap! <C-s> <C-o>:w<CR>
+
 " Undo
 :noremap <C-z> u<CR>
-:noremap! <C-z> <C-o>u
-:noremap <C-u> u<CR>
-:noremap! <C-u> <C-o>u
+:inoremap <C-z> <C-o>u
 
 " Redo
-:noremap <C-r> <C-r><CR>
-:noremap! <C-r> <C-o><C-r>
+:noremap <C-y> <C-r><CR>
+:noremap! <C-y> <C-o><C-r>
 
 " Copy text
-:noremap <C-y> "+y<CR>
-:noremap! <C-y> <C-o>"+y
+:noremap <C-c> "+y<CR>
+:inoremap <C-c> <C-o>"+y
 
 " Cut text
 :noremap <C-x> "+x<CR>
@@ -33,8 +103,6 @@ set sessionoptions=buffers
 " Paste text
 :noremap <C-v> "+gP<CR>
 :noremap! <C-v> <C-o>"+gP
-:noremap <C-p> "+gP<CR>
-:noremap! <C-p> <C-o>"+gP
 
 " Enter block mode
 :noremap <C-b> <C-v><CR>
@@ -49,28 +117,24 @@ set sessionoptions=buffers
 :noremap <C-h> "fh<C-o>:%s/<C-r>f
 
 " Jump to tag
-:noremap <C-s>. g<C-]>
-:noremap! <C-s>. <C-o>g<C-]>
+:noremap <C-t> g<C-]>
+:noremap! <C-t> <C-o>g<C-]>
 
 " Jump to last tag
-:noremap <C-s>, <C-T>
-:noremap! <C-s>, <C-o><C-T>
-
-" Open File
-:noremap <C-e> :e %:p:h<CR>
-:noremap! <C-e> <C-o>:e %:p:h<CR>
-
-" Save current file
-:noremap <C-w> :w<CR>
-:noremap! <C-w> <C-o>:w
+:noremap <C-r> <C-T>
+:noremap! <C-r> <C-o><C-T>
 
 " MiniBufExplorer
 let g:miniBufExplSortBy = "name"
 let g:miniBufExplVSplit = 30
 let g:miniBufExplSplitBelow = 0
+let g:miniBufExplorerMoreThanOne=1
 
-:map <F2> :TMiniBufExplorer<CR>
-:map! <F2> <C-o>:TMiniBufExplorer<CR>
+:noremap <F2> :TMiniBufExplorer<CR>
+:noremap! <F2> <C-o>:TMiniBufExplorer<CR>
+
+:noremap <F3> :NERDTreeToggle<CR>
+:noremap! <F3> <C-o>:NERDTreeToggle<CR>
 
 " Taglist
 let g:Tlist_Auto_Open = 0
@@ -78,18 +142,18 @@ let g:Tlist_Show_One_File = 1
 let g:Tlist_WinWidth = 40
 set tags=c:\Pt\ide\tags
 
-:map <F3> :TlistToggle<CR>
-:map! <F3> <C-o>:TlistToggle<CR>
+:noremap <F4> :TlistToggle<CR>
+:noremap! <F4> <C-o>:TlistToggle<CR>
 
-function LM()
-  if bufname('%') == '-MiniBufExplorer-'
-    execute "normal \<2-leftmouse>"
-  else
-    execute "normal \<2-leftmouse>" 
-  endif
-endfunction
+"function LM()
+"  if bufname('%') == '-MiniBufExplorer-'
+"    execute "normal \<2-leftmouse>"
+"  else
+"    execute "normal \<2-leftmouse>" 
+"  endif
+"endfunction
 
-noremap! <2-LEFTMOUSE> <C-o>:call LM()<CR>
+"noremap! <2-LEFTMOUSE> <C-o>:call LM()<CR>
 
 "
 " Build command
