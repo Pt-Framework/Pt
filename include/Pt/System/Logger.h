@@ -549,11 +549,11 @@ class LoggedScope
     #define log_message_impl(logger, level, expr) \
        ( logger.enabled( Pt::System::level() ) && &(logger.beginLog( Pt::System::level() ) << expr << Pt::System::endlog) )
 
-//  #define log_message_impl(logger, level, expr)            \
-//  if( logger.enabled( Pt::System::level() ) )              \
-//  {                                                        \
-//      logger.beginLog( Pt::System::level() )                   \
-//          << PT_SOURCEINFO << expr << Pt::System::endlog;  \
+//  #define log_message_impl(logger, level, expr)
+//  if( logger.enabled( Pt::System::level() ) )
+//  {
+//      logger.beginLog( Pt::System::level() )
+//          << PT_SOURCEINFO << expr << Pt::System::endlog;
 //  }
 
     #define log_init(file) \
@@ -570,13 +570,13 @@ class LoggedScope
     #define log_xxxx(level, expr) \
        ( getStaticLogger().enabled(Pt::System::level) && &(getStaticLogger().beginLog(Pt::System::level) << expr << Pt::System::endlog) )
 
-//  #define log_xxxx(level, expr)                                \
-//  do {                                                         \
-//      if( getStaticLogger().enabled(Pt::System::level) )       \
-//      {                                                        \
-//          getStaticLogger().beginLog(Pt::System::level)        \
-//              << PT_SOURCEINFO << expr << Pt::System::endlog;  \
-//      }                                                        \
+//  #define log_xxxx(level, expr)
+//  do {
+//      if( getStaticLogger().enabled(Pt::System::level) )
+//      {
+//          getStaticLogger().beginLog(Pt::System::level)
+//              << PT_SOURCEINFO << expr << Pt::System::endlog;
+//      }
 //  } while (false)
 #endif
 
