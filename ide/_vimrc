@@ -63,7 +63,7 @@ autocmd BufEnter * call StartInsertOnModifiable()
 
 " Switch to insert mode
 :noremap <Esc> :startinsert<CR>
-:noremap! <Esc> :startinsert<CR>
+:noremap! <Esc> <C-o>:startinsert<CR>
 
 " Switch to normal mode
 :noremap <C-e> <Esc>
@@ -167,7 +167,7 @@ else
     let s:makeprg_line="./jam.sh -q $*"
     let &makeprg=s:makeprg_line
     let g:make_target=''
-    let g:build_root=''
+    let g:build_root='.'
 endif
 
 " See also (very nice!!!) http://blog.vicshih.com/2011/03/fast-make-for-vim.html
@@ -200,5 +200,5 @@ function BuildMake(make_args)
 endfunction
 
 :noremap <F5> :call BuildMake(g:make_target)<CR>
-:noremap! <F5> <C-o>:call BuildMake(g:make_target)
+:noremap! <F5> <C-o>:call BuildMake(g:make_target)<CR>
 
