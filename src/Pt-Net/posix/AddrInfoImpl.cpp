@@ -31,8 +31,10 @@
 #include "Pt/System/SystemError.h"
 #include <string>
 #include <sstream>
+#include <iostream>
 #include <cstring>
-#include <arpa/inet.h>
+#include <arpa/inet.h> // inet_ntop
+#include <ifaddrs.h> // getifaddr
 
 namespace Pt {
 
@@ -79,6 +81,26 @@ void AddrInfoImpl::init(const std::string& host, unsigned short port, const addr
 
     if (0 != ::getaddrinfo(node, p.str().c_str(), &hints, &_ai))
         throw System::AccessFailed(_host + ':' + p.str());
+}
+
+
+void AddrInfoImpl::hostAddresses(std::vector<std::string>& ips)
+{
+  struct ifaddrs *ifaddr, *ifa;
+  if( -1 == getifaddrs(&ifaddr) )
+      return;
+
+  for (ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next) 
+  {
+    if (ifa->ifa_addr == NULL)
+       continue;
+
+    std::string addr;
+    sockaddrToString(*((sockaddr_storage*)(ifa->ifa_addr)), addr);
+    ips.push_back(addr);
+  }
+
+  freeifaddrs(ifaddr);
 }
 
 

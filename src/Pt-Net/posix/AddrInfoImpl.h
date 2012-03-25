@@ -29,9 +29,11 @@
 #define PT_NET_ADDRINFOIMPL_H
 
 #include <Pt/RefCounted.h>
+#include <vector>
 #include <string>
 #include <iterator>
 #include <cassert>
+#include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <netdb.h>
 
@@ -106,6 +108,8 @@ class AddrInfoImpl : public Pt::RefCounted
 
         const_iterator end() const    
         { return const_iterator(); }
+
+        static void hostAddresses(std::vector<std::string>& ips);
 };
 
 void sockaddrToString(const sockaddr_storage& addr, std::string& str);
