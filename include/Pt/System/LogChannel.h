@@ -31,6 +31,7 @@
 #include <Pt/System/Api.h>
 #include <Pt/NonCopyable.h>
 #include <string>
+#include <cstddef>
 
 namespace Pt {
 
@@ -62,10 +63,10 @@ class PT_SYSTEM_API LogChannel : protected Pt::NonCopyable
         virtual ~LogChannel()
         {}
 
-        size_t ref()
+        std::size_t ref()
         { return ++_refs; }
 
-        size_t unref()
+        std::size_t unref()
         { return --_refs; }
 
         const std::string& url() const
@@ -113,7 +114,7 @@ class PT_SYSTEM_API LogChannel : protected Pt::NonCopyable
         
     private:
         std::string _url;
-        size_t _refs;
+        std::size_t _refs;
 };
 
 }
