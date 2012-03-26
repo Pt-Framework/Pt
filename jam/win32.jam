@@ -29,11 +29,11 @@ rule ConfigureWsa
                                       "int main() { WSADATA wd; WSAStartup(MAKEWORD(2,2), &wd);"
                                       "return 0; }"
                                       : ""
-                                      : wsock32.lib ws2_32.lib ] ;
+                                      : wsock32.lib ws2_32.lib Iphlpapi.lib ] ;
 
     if $(WITH_WSA)
     {
-        WSA_LIBS = wsock32.lib ws2_32.lib ;
+        WSA_LIBS = wsock32.lib ws2_32.lib Iphlpapi.lib ;
     }
 
     if ! $(WITH_WSA)
@@ -44,10 +44,10 @@ rule ConfigureWsa
                                     "int main() { WSADATA wd; WSAStartup(MAKEWORD(2,2), &wd);"
                                     "return 0; }"
                                     : ""
-                                    : winsock.lib Ws2.lib ] ;
+                                    : winsock.lib Ws2.lib Iphlpapi.lib ] ;
         if $(WITH_WSA)
         {
-            WSA_LIBS = winsock.lib Ws2.lib ;
+            WSA_LIBS = winsock.lib Ws2.lib Iphlpapi.lib ;
         }
     }
 

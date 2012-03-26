@@ -35,9 +35,11 @@
 #include <Pt/Net/Api.h>
 #include <Pt/RefCounted.h>
 #include <string>
+#include <vector>
 #include <cassert>
 #include <winsock2.h>
 #include <ws2tcpip.h>
+#include <iphlpapi.h>
 
 namespace Pt {
 
@@ -124,6 +126,8 @@ class AddrInfoImpl : public Pt::RefCounted
 
         inline unsigned short port() const
         { return _port; }
+
+        static void hostAddresses(std::vector<std::string>& ips);
 };
 
 } // namespace Net
