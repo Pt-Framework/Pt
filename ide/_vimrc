@@ -8,7 +8,8 @@ set nobackup
 set noswapfile
 winpos 0 0
 set lines=999 columns=180
-set guioptions -=L
+set guioptions-=L
+set guioptions-=T
 set mouse=a
 set bs=2
 set backspace=indent,eol,start
@@ -75,9 +76,23 @@ autocmd BufEnter * call StartInsertOnModifiable()
 " backspace in Visual mode deletes selection
 vnoremap <BS> d
 
-" Open File :e %:p:h
-:noremap <C-o> :CMiniBufExplorer<CR>:NERDTreeFind<CR>
-:noremap! <C-o> <C-o>:CMiniBufExplorer<CR><C-o>:NERDTreeFind<CR>
+" Open File something like :e %:p:h
+let s:OpenWindow = 0
+
+function ToggleOpenWindow()
+    if s:OpenWindow == 0
+        :CMiniBufExplorer
+        :NERDTreeFind
+        let s:OpenWindow = 1
+    else
+        :NERDTreeClose
+        :MiniBufExplorer
+        let s:OpenWindow = 0
+    endif
+endfunction
+
+:noremap <C-o> :ToggleOpenWindow<CR>
+:noremap! <C-o> <C-o>:ToggleOpenWindow<CR>
 
 " Save current file
 :noremap <C-s> :w<CR>
@@ -129,12 +144,6 @@ let g:miniBufExplVSplit = 30
 let g:miniBufExplSplitBelow = 0
 let g:miniBufExplorerMoreThanOne=1
 
-:noremap <F2> :NERDTreeClose<CR>:MiniBufExplorer<CR>
-:noremap! <F2> <C-o>:NERDTreeClose<CR><C-o>:MiniBufExplorer<CR>
-
-:noremap <F3> :CMiniBufExplorer<CR>:NERDTree<CR>
-:noremap! <F3> <C-o>:CMiniBufExplorer<CR><C-o>:NERDTree<CR>
-
 " Taglist
 let g:Tlist_Auto_Open = 0
 let g:Tlist_Show_One_File = 1
@@ -142,8 +151,8 @@ let g:Tlist_WinWidth = 40
 let Tlist_Use_Right_Window = 1
 set tags=c:\Pt\ide\tags
 
-:noremap <F4> :TlistToggle<CR>
-:noremap! <F4> <C-o>:TlistToggle<CR>
+:noremap <C-l> :TlistToggle<CR>
+:noremap! <C-l> <C-o>:TlistToggle<CR>
 
 "function LM()
 "  if bufname('%') == '-MiniBufExplorer-'
@@ -162,12 +171,12 @@ if has('win32')
     let s:makeprg_line="jam.bat -q $*"
     let &makeprg=s:makeprg_line
     let g:make_target=''
-    let g:build_root='c:\Pt'
+    let g:build_root=''
 else
     let s:makeprg_line="./jam.sh -q $*"
     let &makeprg=s:makeprg_line
     let g:make_target=''
-    let g:build_root='.'
+    let g:build_root=''
 endif
 
 " See also (very nice!!!) http://blog.vicshih.com/2011/03/fast-make-for-vim.html
@@ -192,7 +201,7 @@ function BuildMake(make_args)
   exe cmd_make
   
   " open quickfix win if there are errors
-  botright cw
+  botright copen
 
   "copen
   "cc 1 " this does not appear to be necessary since opening the window will jump to first issue anyway
