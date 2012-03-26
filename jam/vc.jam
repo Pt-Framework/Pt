@@ -178,7 +178,7 @@ rule CheckC++
 
     if $(WITH_DEBUG)
     {
-        C++FLAGS  += /MDd /D "DEBUG" /D "_DEBUG" ;
+        C++FLAGS  += /MDd /D "DEBUG" /D "_DEBUG" /Zi ;
     }
     else
     {
