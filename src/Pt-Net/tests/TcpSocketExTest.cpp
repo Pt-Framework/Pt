@@ -51,7 +51,7 @@ class TcpSocketExTest : public Pt::Unit::TestSuite
         void setUp()
         {
 			_readBuffer.resize(100);
-			_mainLoopThread = new Pt::System::AttachedThread(Pt::callable(*this, &TcpSocketExTest::run));
+			_mainLoopThread = new Pt::System::AttachedThread(Pt::callable(*this, &TcpSocketExTest::loopRun));
         }
 
         void tearDown()
@@ -61,15 +61,10 @@ class TcpSocketExTest : public Pt::Unit::TestSuite
         }
 
 		void SendReceiveTest()
-		{
-			Pt::Net::TcpServer _server("127.0.0.1", 5050);
-			
-			_server.connectionPending() += Pt::slot(*this, &TcpSocketExTest::onAccept);
-			_server.setActive(_loop);		
-
+		{			
 			_mainLoopThread->start();	
 			
-			Pt::System::Thread::sleep(1000);
+			Pt::System::Thread::sleep(5000);
 
 			Pt::Net::TcpSocket socket("127.0.0.1", 5050);
 			std::vector<Pt::uint8_t> data(1024);
@@ -85,14 +80,19 @@ class TcpSocketExTest : public Pt::Unit::TestSuite
 			socket.close();			
 
 			Pt::System::Thread::sleep(2000);	
+			PT_UNIT_ASSERT(_serverSocket != 0);
 			_serverSocket->close();
-			_server.close();
 			_loop.exit();
 			_mainLoopThread->join();
 		}
 		
-		void run()
+		void loopRun()
 		{
+			Pt::Net::TcpServer server("127.0.0.1",5050);
+			server.connectionPending() += Pt::slot(*this, &TcpSocketExTest::onAccept);
+			server.setActive(_loop);					
+			server.beginAccept();
+
 			_loop.run();
 		}
 
@@ -108,10 +108,11 @@ class TcpSocketExTest : public Pt::Unit::TestSuite
         void onInput(Pt::System::IODevice& device)
         {
 			size_t count = device.endRead();
-
-			PT_UNIT_ASSERT(count < 1014);
-
-			device.beginRead((char*) & _readBuffer[0],  _readBuffer.size());
+			if(!device.eof())
+			{
+				PT_UNIT_ASSERT(count != 0);
+				device.beginRead((char*) & _readBuffer[0],  _readBuffer.size());
+			}
         }
 
 
@@ -119,7 +120,7 @@ class TcpSocketExTest : public Pt::Unit::TestSuite
         Pt::System::MainLoop _loop;
 		Pt::System::AttachedThread* _mainLoopThread;
 		Pt::Net::TcpSocket* _serverSocket;
-		std::vector<Pt::uint8_t> _readBuffer; 
+		std::vector<Pt::uint8_t> _readBuffer; 		
 };
 
 Pt::Unit::RegisterTest<TcpSocketExTest> register_TcpSocketExTest;
