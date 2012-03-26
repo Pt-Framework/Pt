@@ -35,6 +35,9 @@
 #include <string>
 #include <iostream>
 
+//Configuration
+std::string g_portReceiver("COM2:");
+std::string g_portSender("COM3:");
 
 class SerialDeviceManualTest : public Pt::Unit::TestSuite
 {
@@ -42,12 +45,12 @@ class SerialDeviceManualTest : public Pt::Unit::TestSuite
         SerialDeviceManualTest()
         : Pt::Unit::TestSuite("SerialDeviceManualTest")
         {
-//            Pt::Unit::TestSuite::registerMethod( "SerSendReceiveTest", *this, &SerialDeviceManualTest::SendReceiveTest);
+            Pt::Unit::TestSuite::registerMethod( "SerSendReceiveTest", *this, &SerialDeviceManualTest::SendReceiveTest);
         }
 
         void setUp()
         {
-			_readBuffer.resize(33);
+			_readBuffer.resize(1024);
 			_mainLoopThread = new Pt::System::AttachedThread(Pt::callable(*this, &SerialDeviceManualTest::loopRun));
         }
 
@@ -60,17 +63,14 @@ class SerialDeviceManualTest : public Pt::Unit::TestSuite
 
 		void loopRun()
 		{
-#if defined(WIN32) || defined(_WIN32)
-    std::string portReceiver("COM2:");
-#else
-    std::string portReceiver("/dev/ttyS1");
-#endif
-			Pt::System::SerialDevice receiverDevice( portReceiver,  std::ios_base::out |std::ios_base::in );
+			
+			Pt::System::SerialDevice receiverDevice( g_portReceiver,  std::ios_base::out |std::ios_base::in );
 
 			receiverDevice.setBaudRate(Pt::System::SerialDevice::BaudRate115200);
 			receiverDevice.setCharSize(8);
 			receiverDevice.setStopBits(Pt::System::SerialDevice::OneStopBit);
 			receiverDevice.setParity(Pt::System::SerialDevice::ParityNone);
+			receiverDevice.setTimeout(1000);
 			receiverDevice.inputReady() += Pt::slot(*this, &SerialDeviceManualTest::onInput);	
 			receiverDevice.setActive(_loop);
 
@@ -86,7 +86,7 @@ class SerialDeviceManualTest : public Pt::Unit::TestSuite
 		Pt::System::AttachedThread* _mainLoopThread;
 		std::vector<Pt::uint8_t> _readBuffer; 
 		size_t _sendedBytes;
-		size_t _receivedByte;
+		size_t _receivedBytes;
 
 
 };
@@ -98,45 +98,29 @@ void SerialDeviceManualTest::onInput(Pt::System::IODevice& device)
 {
 	size_t count = device.endRead();
 
-	if(!device.eof())
-	{
-		PT_UNIT_ASSERT(count != 0);
-		_receivedByte += count;
-		device.beginRead((char*) & _readBuffer[0],  _readBuffer.size());
-	}
-	else
-	{
-		for( size_t i = 0; i < _readBuffer.size(); ++i)
-		 PT_UNIT_ASSERT(_readBuffer[i] == i);
-	}
+	if(device.eof())
+		return;
+
+	PT_UNIT_ASSERT(count != 0);
+	_receivedBytes += count;
+	device.beginRead((char*) & _readBuffer[0],  _readBuffer.size());
 }
 
 void SerialDeviceManualTest::SendReceiveTest()
 {
-#if defined(WIN32) || defined(_WIN32)
-    std::string portSender("COM3:");
-#else
-    std::string portSender("/dev/ttyS0");
-#endif
-
 	_sendedBytes = 0;
-	_receivedByte = 0;
+	_receivedBytes = 0;
 
 	//Set up sender
-    Pt::System::SerialDevice senderDevice( portSender,  std::ios_base::out|std::ios_base::in );
+    Pt::System::SerialDevice senderDevice(g_portSender,  std::ios_base::out|std::ios_base::in );
 
     senderDevice.setBaudRate(Pt::System::SerialDevice::BaudRate115200);
     senderDevice.setCharSize(8);
     senderDevice.setStopBits(Pt::System::SerialDevice::OneStopBit);
     senderDevice.setParity(Pt::System::SerialDevice::ParityNone);
-	
-	
-	//Sent up receiver
-	_mainLoopThread->start();	
-				
-	Pt::System::Thread::sleep(2000);
+	senderDevice.setTimeout(1000);
 
-
+	//Send some data
 	std::vector<Pt::uint8_t> data(33);
 	
 	for( size_t i = 0; i < data.size(); ++i)
@@ -147,19 +131,32 @@ void SerialDeviceManualTest::SendReceiveTest()
 		size_t pos = 0;
 		
 		while( pos < 33)
-		{
 			pos += senderDevice.write((char*) &data[pos], 33 - pos);
-		}
+
+		_sendedBytes += 33;
+	}
+
+		//Start receiver
+	_mainLoopThread->start();				
+	Pt::System::Thread::sleep(2000);
+
+	//Send again
+	for( size_t i = 0; i < 1024*100; i+= 33)
+	{
+		size_t pos = 0;
+		
+		while( pos < 33)
+			pos += senderDevice.write((char*) &data[pos], 33 - pos);
 
 		_sendedBytes += 33;
 
-		Pt::System::Thread::sleep(1000);
+		Pt::System::Thread::sleep(10);
 	}
 
-	Pt::System::Thread::sleep(100);
-	senderDevice.close();			
-	Pt::System::Thread::sleep(2000);	
+	Pt::System::Thread::sleep(2000);
+	senderDevice.close();		
 	_loop.exit();
 	_mainLoopThread->join();
+	PT_UNIT_ASSERT(_sendedBytes == _receivedBytes);
 
 }
