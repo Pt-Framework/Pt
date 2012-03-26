@@ -31,6 +31,7 @@
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/RegisterTest.h"
+#include "Pt/System/MainLoop.h"
 #include <string>
 #include <iostream>
 
@@ -41,94 +42,123 @@ class SerialDeviceManualTest : public Pt::Unit::TestSuite
         SerialDeviceManualTest()
         : Pt::Unit::TestSuite("SerialDeviceManualTest")
         {
-            Pt::Unit::TestSuite::registerMethod( "SendReceiveTest", *this, &SerialDeviceManualTest::SendReceive);
+//            Pt::Unit::TestSuite::registerMethod( "SerSendReceiveTest", *this, &SerialDeviceManualTest::SendReceiveTest);
         }
 
         void setUp()
         {
-			_readBuffer.resize(100);
-			_mainLoopThread = new Pt::System::AttachedThread(Pt::callable(*this, &SerialDeviceManualTest::run));
+			_readBuffer.resize(33);
+			_mainLoopThread = new Pt::System::AttachedThread(Pt::callable(*this, &SerialDeviceManualTest::loopRun));
         }
+
+		void SendReceiveTest();
 
         void tearDown()
         {
 			delete _mainLoopThread;
-			delete _serverSocket;
         }
 
+		void loopRun()
+		{
+#if defined(WIN32) || defined(_WIN32)
+    std::string portReceiver("COM2:");
+#else
+    std::string portReceiver("/dev/ttyS1");
+#endif
+			Pt::System::SerialDevice receiverDevice( portReceiver,  std::ios_base::out |std::ios_base::in );
+
+			receiverDevice.setBaudRate(Pt::System::SerialDevice::BaudRate115200);
+			receiverDevice.setCharSize(8);
+			receiverDevice.setStopBits(Pt::System::SerialDevice::OneStopBit);
+			receiverDevice.setParity(Pt::System::SerialDevice::ParityNone);
+			receiverDevice.inputReady() += Pt::slot(*this, &SerialDeviceManualTest::onInput);	
+			receiverDevice.setActive(_loop);
+
+			receiverDevice.beginRead((char*) & _readBuffer[0],  _readBuffer.size());
+			_loop.run();
+			receiverDevice.close();
+		}
+
+		void onInput(Pt::System::IODevice& device);
 
     protected:
 		Pt::System::MainLoop _loop;
 		Pt::System::AttachedThread* _mainLoopThread;
-		Pt::Net::TcpSocket* _serverSocket;
 		std::vector<Pt::uint8_t> _readBuffer; 
+		size_t _sendedBytes;
+		size_t _receivedByte;
 
 
 };
 
-Pt::Unit::RegisterTest<SerialDeviceTest> register_SerialDeviceTest;
+Pt::Unit::RegisterTest<SerialDeviceManualTest> register_SerialDeviceManualTest;
 
 
 void SerialDeviceManualTest::onInput(Pt::System::IODevice& device)
 {
 	size_t count = device.endRead();
 
-	PT_UNIT_ASSERT(count < 1014);
-
-	device.beginRead((char*) & _readBuffer[0],  _readBuffer.size());
+	if(!device.eof())
+	{
+		PT_UNIT_ASSERT(count != 0);
+		_receivedByte += count;
+		device.beginRead((char*) & _readBuffer[0],  _readBuffer.size());
+	}
+	else
+	{
+		for( size_t i = 0; i < _readBuffer.size(); ++i)
+		 PT_UNIT_ASSERT(_readBuffer[i] == i);
+	}
 }
 
 void SerialDeviceManualTest::SendReceiveTest()
 {
 #if defined(WIN32) || defined(_WIN32)
-    std::string portSender("COM1:");
+    std::string portSender("COM3:");
 #else
     std::string portSender("/dev/ttyS0");
 #endif
 
-#if defined(WIN32) || defined(_WIN32)
-    std::string portReceiver("COM3:");
-#else
-    std::string portReceiver("/dev/ttyS1");
-#endif
+	_sendedBytes = 0;
+	_receivedByte = 0;
 
-	//Senup sender
-    Pt::System::SerialDevice senderDevice( portSender,  std::ios_base::out );
+	//Set up sender
+    Pt::System::SerialDevice senderDevice( portSender,  std::ios_base::out|std::ios_base::in );
 
     senderDevice.setBaudRate(Pt::System::SerialDevice::BaudRate115200);
     senderDevice.setCharSize(8);
     senderDevice.setStopBits(Pt::System::SerialDevice::OneStopBit);
     senderDevice.setParity(Pt::System::SerialDevice::ParityNone);
-
+	
+	
 	//Sent up receiver
 	_mainLoopThread->start();	
+				
+	Pt::System::Thread::sleep(2000);
+
+
+	std::vector<Pt::uint8_t> data(33);
+	
+	for( size_t i = 0; i < data.size(); ++i)
+		data[i] = i;
 			
-	Pt::System::Thread::sleep(1000);
-
-	Pt::System::SerialDevice receiverDevice( portReceiver,  std::ios_base::in );
-
-	receiverDevice.setBaudRate(Pt::System::SerialDevice::BaudRate115200);
-    receiverDevice.setCharSize(8);
-    receiverDevice.setStopBits(Pt::System::SerialDevice::OneStopBit);
-    receiverDevice.setParity(Pt::System::SerialDevice::ParityNone);
-	receiverDevice.inputReady() += Pt::slot(*this, &SerialDeviceTest::onInput);	
-	receiverDevicesetActive(_loop);
-	receiverDevice.beginRead((char*) & _readBuffer[0],  _readBuffer.size());
-
-
-	std::vector<Pt::uint8_t> data(1024);
-	memset(&data[0],234,data.size());
-			
-	for( size_t i = 0; i < data.size(); i+= 100)
+	for( size_t i = 0; i < 1024; i+= 33)
 	{
-		senderDevice.write((char*) &data[i], 100);
-		Pt::System::Thread::sleep(10);
+		size_t pos = 0;
+		
+		while( pos < 33)
+		{
+			pos += senderDevice.write((char*) &data[pos], 33 - pos);
+		}
+
+		_sendedBytes += 33;
+
+		Pt::System::Thread::sleep(1000);
 	}
 
 	Pt::System::Thread::sleep(100);
 	senderDevice.close();			
 	Pt::System::Thread::sleep(2000);	
-	receiverDevice.close();
 	_loop.exit();
 	_mainLoopThread->join();
 

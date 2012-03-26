@@ -2,7 +2,8 @@ SubDir TOP src Pt-System tests ;
 SubDirHdrs $(TOP)/include ;
 SubDirObjects $(OUTPUT_OBJECT) Pt-System ;
 
-PT_SYSTEM_TESTS = ApplicationTest.cpp
+PT_SYSTEM_TESTS = 
+                  ApplicationTest.cpp
                   DirectoryTest.cpp
                   EventLoopTest.cpp
                   LoggerTest.cpp
@@ -12,7 +13,7 @@ PT_SYSTEM_TESTS = ApplicationTest.cpp
                   ThreadTest.cpp
                   TimerTest.cpp
                   UriTest.cpp
-#				  SerialDeviceManualTest.cpp
+				  SerialDeviceManualTest.cpp
                   ;
 
 Main Pt-System-test : Pt-System-test.cpp $(PT_SYSTEM_TESTS) ;
