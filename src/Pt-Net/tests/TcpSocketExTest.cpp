@@ -85,7 +85,7 @@ class TcpSocketExTest : public Pt::Unit::TestSuite
 			socket.close();			
 
 			Pt::System::Thread::sleep(2000);	
-			_serverSocket.close();
+			_serverSocket->close();
 			_server.close();
 			_loop.exit();
 			_mainLoopThread->join();

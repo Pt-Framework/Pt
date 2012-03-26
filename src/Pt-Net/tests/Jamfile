@@ -3,6 +3,7 @@ SubDirHdrs $(TOP)/include ;
 SubDirObjects $(OUTPUT_OBJECT) Pt-Net ;
 
 Main Pt-Net-test : Pt-Net-test.cpp
+				   TcpSocketExTest.cpp
                    TcpSocketTest.cpp
                    UdpSocketTest.cpp
                    ;
