@@ -17,7 +17,7 @@
                 SaveOption="SaveWorkspaceFiles"
                 NoVSBUILD="1"
                 RunFromDir="%rp">
-                <Exec CmdLine="%(JAMCMD) -q -sCONFIG=debug"/>
+                <Exec CmdLine="%(JAMCMD) -q"/>
             </Target>
             <Target
                 Name="Clean"
@@ -25,7 +25,7 @@
                 RunFromDir="%rp"
                 CaptureOutputWith="ProcessBuffer"
                 SaveOption="SaveNone">
-                <Exec CmdLine="%(JAMCMD) -q -sCONFIG=debug clean"/>
+                <Exec CmdLine="%(JAMCMD) -q clean"/>
             </Target>
             <Target
                 Name="Debug"
