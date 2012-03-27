@@ -150,10 +150,10 @@ bool Timer::update(const Timespan& now)
     {
         _finished += (_interval * 1000);
 
+        timeout().send();
+
         if( ! sentry )
             return hasElapsed;
-
-        timeout().send();
     }
 
     //_remaining = _finished - now;
