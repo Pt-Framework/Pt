@@ -10,6 +10,8 @@ let &path = g:build_root . "/include," . g:build_root . "/src/Pt," . g:build_roo
 
 :silent! so Session.vim
 
+:nmap _g :grep <C-R>=expand("<cword>")<CR><CR>
+
 if filereadable(g:build_root . "/pt.tags")
     let &tags = g:build_root . "/pt.tags"
 else
