@@ -6,7 +6,7 @@ exec "cd " . s:project_dir
 exec "cd .."
 let g:build_root = getcwd()
 
-:so Session.vim
+:silent! so Session.vim
 
 if filereadable(g:build_root . "/pt.tags")
     let &tags = g:build_root . "/pt.tags"
