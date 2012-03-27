@@ -45,7 +45,7 @@ class SerialDeviceManualTest : public Pt::Unit::TestSuite
         SerialDeviceManualTest()
         : Pt::Unit::TestSuite("SerialDeviceManualTest")
         {
-            Pt::Unit::TestSuite::registerMethod( "SerSendReceiveTest", *this, &SerialDeviceManualTest::SendReceiveTest);
+            //Pt::Unit::TestSuite::registerMethod( "SerSendReceiveTest", *this, &SerialDeviceManualTest::SendReceiveTest);
         }
 
         void setUp()
