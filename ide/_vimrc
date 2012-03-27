@@ -7,7 +7,7 @@ set showmode
 set nobackup
 set noswapfile
 winpos 0 0
-set lines=999 columns=180
+set lines=999 columns=200
 set guioptions-=L
 set guioptions-=T
 set mouse=a
@@ -40,6 +40,16 @@ set sessionoptions=buffers
 " %b = value of byte                  %B = value of byte in HEX
 set statusline=[%n]\ %F%y%m%r\ %=\ %b\ 0x%B\ \ \ %c,%l/%L\ \ %P
 
+"function LM()
+"  if bufname('%') == '-MiniBufExplorer-'
+"    execute "normal \<2-leftmouse>"
+"  else
+"    execute "normal \<2-leftmouse>" 
+"  endif
+"endfunction
+
+"noremap! <2-LEFTMOUSE> <C-o>:call LM()<CR>
+
 function StartInsertOnModifiable()
   "let is_modified=getbufvar(bufnr('%'), '&modified')  
 
@@ -62,21 +72,31 @@ autocmd BufEnter * call StartInsertOnModifiable()
 "autocmd BufLeave -MiniBufExplorer- startinsert
 "autocmd BufEnter -MiniBufExplorer- stopinsert
 
-" Switch to insert mode
-:noremap <Esc> :startinsert<CR>
-:noremap! <Esc> <C-o>:startinsert<CR>
+" MiniBufExplorer
+let g:miniBufExplSortBy = "name"
+let g:miniBufExplVSplit = 30
+let g:miniBufExplSplitBelow = 0
+let g:miniBufExplorerMoreThanOne=1
 
-" Switch to normal mode
-:noremap <C-e> <Esc>
-:noremap! <C-e> <Esc>
+" Taglist
+let g:Tlist_Auto_Open = 0
+let g:Tlist_Show_One_File = 1
+let g:Tlist_WinWidth = 40
+let Tlist_Use_Right_Window = 1
+" let g:Tlist_Ctags_Cmd = 
 
-" Window commands for insert mode
-:inoremap <C-w>q <C-o><C-w>q
+:noremap <C-l> :TlistToggle<CR>
+:noremap! <C-l> <C-o>:TlistToggle<CR>
 
-" backspace in Visual mode deletes selection
-vnoremap <BS> d
+" Jump to tag
+:noremap <C-t> g<C-]>
+:noremap! <C-t> <C-o>g<C-]>
 
-" Open File something like :e %:p:h
+" Jump to last tag
+:noremap <C-r> <C-T>
+:noremap! <C-r> <C-o><C-T>
+
+" Open file (something like :e %:p:h)
 let s:OpenWindow = 0
 
 function ToggleOpenWindow()
@@ -91,18 +111,32 @@ function ToggleOpenWindow()
     endif
 endfunction
 
-:noremap <C-o> :ToggleOpenWindow<CR>
-:noremap! <C-o> <C-o>:ToggleOpenWindow<CR>
+:noremap <C-o> :call ToggleOpenWindow()<CR>
+:noremap! <C-o> <C-o>:call ToggleOpenWindow()<CR>
 
 " Save current file
 :noremap <C-s> :w<CR>
 :noremap! <C-s> <C-o>:w<CR>
 
-" Undo
+" Switch to insert mode
+:noremap <Esc> :startinsert<CR>
+:noremap! <Esc> <C-o>:startinsert<CR>
+
+" Switch to normal mode
+:noremap <C-e> <Esc>
+:noremap! <C-e> <Esc>
+
+" Window commands for insert mode
+:inoremap <C-w>q <C-o><C-w>q
+
+" backspace in Visual mode deletes selection
+vnoremap <BS> d
+
+" Undo changes
 :noremap <C-z> u<CR>
 :inoremap <C-z> <C-o>u
 
-" Redo
+" Redo changes
 :noremap <C-y> <C-r><CR>
 :noremap! <C-y> <C-o><C-r>
 
@@ -129,85 +163,4 @@ endfunction
 
 " Replace selected text
 :noremap <C-h> "fh<C-o>:%s/<C-r>f
-
-" Jump to tag
-:noremap <C-t> g<C-]>
-:noremap! <C-t> <C-o>g<C-]>
-
-" Jump to last tag
-:noremap <C-r> <C-T>
-:noremap! <C-r> <C-o><C-T>
-
-" MiniBufExplorer
-let g:miniBufExplSortBy = "name"
-let g:miniBufExplVSplit = 30
-let g:miniBufExplSplitBelow = 0
-let g:miniBufExplorerMoreThanOne=1
-
-" Taglist
-let g:Tlist_Auto_Open = 0
-let g:Tlist_Show_One_File = 1
-let g:Tlist_WinWidth = 40
-let Tlist_Use_Right_Window = 1
-set tags=c:\Pt\ide\tags
-
-:noremap <C-l> :TlistToggle<CR>
-:noremap! <C-l> <C-o>:TlistToggle<CR>
-
-"function LM()
-"  if bufname('%') == '-MiniBufExplorer-'
-"    execute "normal \<2-leftmouse>"
-"  else
-"    execute "normal \<2-leftmouse>" 
-"  endif
-"endfunction
-
-"noremap! <2-LEFTMOUSE> <C-o>:call LM()<CR>
-
-"
-" Build command
-"
-if has('win32')
-    let s:makeprg_line="jam.bat -q $*"
-    let &makeprg=s:makeprg_line
-    let g:make_target=''
-    let g:build_root=''
-else
-    let s:makeprg_line="./jam.sh -q $*"
-    let &makeprg=s:makeprg_line
-    let g:make_target=''
-    let g:build_root=''
-endif
-
-" See also (very nice!!!) http://blog.vicshih.com/2011/03/fast-make-for-vim.html
-function BuildMake(make_args)
-  " close QuickFix window (content is now outdated due to new build run)
-  cclose
-
-  " Force write
-  sil write!
-
-  " http://vim.1045645.n5.nabble.com/Working-directory-for-make-td1172840.html
-  " http://stackoverflow.com/questions/1043432/omit-pattern-not-found-error-message-in-vim-script
-  let cmd_cd='sil lcd ' . g:build_root
-  exe cmd_cd
-  
-  " pwd
-  " need to use "exe" to get variables evaluated properly:
-  " http://stackoverflow.com/questions/4596932/vim-cd-to-path-stored-in-variable
-  " and we should _not_ run exe on the raw line directly, since this will execute _output_
-  " results given by make!
-  let cmd_make="make" . a:make_args
-  exe cmd_make
-  
-  " open quickfix win if there are errors
-  botright copen
-
-  "copen
-  "cc 1 " this does not appear to be necessary since opening the window will jump to first issue anyway
-  sil lcd -
-endfunction
-
-:noremap <F5> :call BuildMake(g:make_target)<CR>
-:noremap! <F5> <C-o>:call BuildMake(g:make_target)<CR>
 
