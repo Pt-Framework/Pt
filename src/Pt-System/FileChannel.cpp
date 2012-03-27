@@ -60,8 +60,12 @@ void FileChannel::onOpen(const std::string& urlstring)
       Key, Value
     } state = Key;
 
+    // adding a '&' to the end makes the parser simpler
+    std::string query = url.query();
+    if( ! query.empty() )
+        query += '&';
+
     std::string key, value;
-    std::string query = url.query() + '&';
     for(std::string::iterator it = query.begin(); it != query.end(); ++it)
     {
         char ch = *it;
