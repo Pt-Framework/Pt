@@ -68,6 +68,38 @@ void AddrInfoImpl::init(const std::string& ipaddr, unsigned short port, const ad
 
     if (0 != ::getaddrinfo(ipaddr.c_str(), p.str().c_str(), &hints, &ai))
          throw System::AccessFailed(_host + ':' + p.str());
+
+    /*std::vector<std::string> ips;
+    hostAddresses(ips);
+
+    struct addrinfo hints2;
+    memset(&hints2, 0, sizeof(hints2));
+
+    ::addrinfo* ai2;
+    ::getaddrinfo("", "", &hints2, &ai2);
+
+    for(::addrinfo* current = ai2; current; current = current->ai_next)
+    {
+        sockaddr* saddr = current->ai_addr;
+
+        DWORD len = 64;
+        TCHAR adr[64];
+        INT ret = WSAAddressToString(saddr, current->ai_addrlen, NULL, adr, &len);
+        if(ret == 0)
+        {
+            std::string address;
+            for(unsigned n = 0; n < len; n++)
+            {
+                if(adr[n] != 0)
+                    address.push_back( int(adr[n]) );
+            }
+        
+            std::cout << "YYYY: " << address << std::endl;
+        }
+
+    }
+
+    ::freeaddrinfo(ai2);*/
 }
 
 
@@ -109,6 +141,7 @@ void AddrInfoImpl::hostAddresses(std::vector<std::string>& ips)
             address.push_back( int(adr[n]) );
         }
     
+        std::cout << "XXXXX: " << address << std::endl;
         ips.push_back(address);
     }
 
