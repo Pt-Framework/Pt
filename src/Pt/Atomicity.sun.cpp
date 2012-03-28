@@ -41,14 +41,15 @@ atomic_t::atomic_t(int v)
 
 int atomicGet(volatile atomic_t& val)
 {
-    membar_consumer();
-    return val.l;
+    long temp = val.l;
+    membar_enter();
+    return temp;
 }
 
 void atomicSet(volatile atomic_t& val, int n)
 {
+    membar_exit();
     val.l = n;
-    membar_producer();
 }
 
 int atomicIncrement(volatile atomic_t& val)
