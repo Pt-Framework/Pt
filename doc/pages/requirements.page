@@ -1,8 +1,6 @@
 /** \page requirements Requirements
 
-@section Requirements Requirements
-
-@subsection GeneralRequirements General Requirements
+@section GeneralRequirements General Requirements
 
 The Platinum C++ framework can be compiled for any platform, which provides
 an ISO C++ implementation. Exception support is a strong requirement, i.e.
@@ -20,32 +18,32 @@ information.
 It is useful to install subversion on the build host to get the source code
 directly from the repository.
 
-@subsection Linux and Unix
+@section Unix Linux and Unix
 
 In order to compile %Pt, you need to install the gnu toolchain, i.e. the
 gnu C and C++ compiler, the linker and binutils. The UI module requires 
 X11 headers and libraries to be installed. If possible, install also the
 freetype headers and libraries, as Xft often depends on that.
 
-@subsection Windows
+@section Windows Windows
 
 Install one of the Visual Studio versions mentioned on the "Supported 
 Platforms" page. An express version will also work. Only the Windows UI
 library is required to build the UI module.
 
-@subsection Mac OS-X
+@section OSX Mac OS-X
 
 Install the Xcode developer tools to get a C and C++ and the other required
 tools, headers and libraries. The UI module uses the CoreFoundation and 
 cocoa frameworks. The system and networking modules requires the posix APIs.
 
-@subsection Windows CE
+@section WindowsCE Windows CE
 
 Only Visual Studio 2005 and 2008 have support for Windows CE and Windows Mobile.
 Older toolsets are not supported. Only the Windows UI library is required to 
 build the UI module.
 
-@subsection QNX
+@section QNX QNX
 
 The QNX developer tools must be installed. Cross compiling on a windows host, 
 is supported as well as compiling directly on a QNX system. Only QNX Neutrino

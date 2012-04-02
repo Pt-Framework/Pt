@@ -1,38 +1,34 @@
-/** \page Installing Installing from Source
+/** \page installing Installing from Source
 
 \htmlonly
 <P>
-The Jam build-tool provides a versatile, unified build process 
-across many platforms including, build-configuration, cross-compilation, automated 
+The Jam build-tool provides a versatile, unified build process across many
+platforms including, build-configuration, cross-compilation, automated 
 unit-tests, and concurrent execution of build steps. This is a a step-by-step
 introduction to the Jam-based build system, demonstrating the usage of jam on
-a Windows NT build host, on POSIX-based systems such as UNIX, Linux, Mac OS-X or QNX
-and show how to cross-compile.
+a Windows NT build host, on POSIX-based systems such as UNIX, Linux, Mac OS-X
+or QNX and show how to cross-compile. The complete build and installation 
+process consists of the following four steps:
 
 <UL>
     <LI>
-        <h3><a href="#build_instructions">Build Instructions</h3></b>
-        <UL>
-            <LI>
-                <b><a href="#configuring">Configuring the Build</a></b>
-            <LI>
-                <b><a href="#building">Building</a></b>
-            <LI>
-                <b><a href="#testing">Build Verification</a></b>
-        </UL>
+        <b><a href="#configuring">Configuring the Build</a></b>
+    <LI>
+        <b><a href="#building">Building</a></b>
+    <LI>
+        <b><a href="#testing">Build Verification</a></b>
+    <LI>
+        <b><a href="#installation">Installation</a></b>
 </UL>
 <P>
-<br>
-
-/endhtmlonly
-
-
-@section configuring Configuring the Build
+\endhtmlonly
 
 The jam tool must be invoked in the project root, where the files named 'Jamconfigure',
 'Jamrules' and 'Jamfile' are located. A batch script is provided for Windows platforms 
 and a POSIX shell-script for all other platforms, which builds the jam executable the 
 first time it is excuted.
+
+@section configuring Configuring the Build
 
 The first thing that needs to be done is to configure the build. If no 
 further arguments are passed to jam during configuration, default build 
@@ -199,3 +195,4 @@ jam.sh test
 @endcode
 
 */
+
