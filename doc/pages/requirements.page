@@ -1,13 +1,55 @@
 /** \page requirements Requirements
 
-@section SupportedTools Supported Platforms and Toolsets
+@section Requirements Requirements
 
-Most modules of the Platinum C++ framework can be compiled for any platform
-that provides an ISO C++ implementation, the system dependent parts of %Pt 
-are designed to be very portable. The %Pt build process supports a variety
-of platforms and compilers. The supported operating systems include Windows
-2000/XP/Vista, Windows Mobile 5.x/6.x, Linux, MacOS-X, AIX, Solaris and QNX.
-Big-endian as well as little-endian architectures are supported,
-including X86, X86-64, PPC, Sparc, ARM, MIPS and SH. 64-bit support
-is available for the respective platforms.
+@subsection GeneralRequirements General Requirements
+
+The Platinum C++ framework can be compiled for any platform, which provides
+an ISO C++ implementation. Exception support is a strong requirement, i.e.
+it is and will never be possible to compile the framework without support
+for exceptions. At the moment, RTTI is required, but might be optional in
+the future. Usage of the C++ standard library (STL, IOStreams...) is limited
+to a subset that works across many platforms. If you encounter a problem here
+we would like to hear from you and solve it.
+
+The system dependent parts of %Pt, such as the systems programming module, 
+are designed to be very portable. The build process supports a variety
+of platforms and compilers. See the "Supported Platforms" page for more
+information.
+
+It is useful to install subversion on the build host to get the source code
+directly from the repository.
+
+@subsection Linux and Unix
+
+In order to compile %Pt, you need to install the gnu toolchain, i.e. the
+gnu C and C++ compiler, the linker and binutils. The UI module requires 
+X11 headers and libraries to be installed. If possible, install also the
+freetype headers and libraries, as Xft often depends on that.
+
+@subsection Windows
+
+Install one of the Visual Studio versions mentioned on the "Supported 
+Platforms" page. An express version will also work. Only the Windows UI
+library is required to build the UI module.
+
+@subsection Mac OS-X
+
+Install the Xcode developer tools to get a C and C++ and the other required
+tools, headers and libraries. The UI module uses the CoreFoundation and 
+cocoa frameworks. The system and networking modules requires the posix APIs.
+
+@subsection Windows CE
+
+Only Visual Studio 2005 and 2008 have support for Windows CE and Windows Mobile.
+Older toolsets are not supported. Only the Windows UI library is required to 
+build the UI module.
+
+@subsection QNX
+
+The QNX developer tools must be installed. Cross compiling on a windows host, 
+is supported as well as compiling directly on a QNX system. Only QNX Neutrino
+is supported. To build the UI library Photon is required which normally comes
+with the developer tools.
+
 */
