@@ -38,6 +38,7 @@
 #include "Pt/Timespan.h"
 #include <string>
 
+log_define("Pt.System.LoggerTest")
 
 class LoggerTest : public Pt::Unit::TestSuite
 {

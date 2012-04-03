@@ -535,6 +535,21 @@ class LoggedScope
         LogLevel _level;
 };
 
+struct LogStatement
+{
+    LogStatement(Logger& logger, Pt::System::LogLevel level)
+    : _msg( logger, level )
+    {}
+
+    ~LogStatement()
+    { _msg.send(); }
+
+    LogMessage& msg()
+    { return _msg; }
+
+    LogMessage _msg;
+};
+
 }
 
 }
@@ -578,6 +593,10 @@ class LoggedScope
 //              << PT_SOURCEINFO << expr << Pt::System::endlog;
 //      }
 //  } while (false)
+
+    #define PT_LOG_MSG_IMPL(logger, level)   \
+        if( ! logger.enabled(Pt::System::level) ) ; \
+        else Pt::System::LogStatement(logger, Pt::System::level).msg()
 #endif
 
 #define log_fatal(expr) log_xxxx(Fatal, expr)
@@ -594,12 +613,6 @@ class LoggedScope
 #define log_message_denug(logger, expr) log_message_impl(logger, debug, expr)
 #define log_message_trace(logger, expr) log_message_impl(logger, trace, expr)
 
-// deprecated
-#define PT_LOG_FATAL(logger, expr) log_message_impl(logger, fatal, expr)
-#define PT_LOG_ERROR(logger, expr) log_message_impl(logger, error, expr)
-#define PT_LOG_WARN(logger, expr)  log_message_impl(logger, warn, expr)
-#define PT_LOG_INFO(logger, expr)  log_message_impl(logger, info, expr)
-#define PT_LOG_DEBUG(logger, expr) log_message_impl(logger, debug, expr)
-#define PT_LOG_TRACE(logger, expr) log_message_impl(logger, trace, expr)
+#define PT_LOG_MSG_INFO(logger) PT_LOG_MSG_IMPL(logger, Info)
 
 #endif
