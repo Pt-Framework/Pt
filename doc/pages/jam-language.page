@@ -1,25 +1,6 @@
-/** \page jam-language Introduction to Jam
+/** \page jam-language Language Features
 
 \htmlonly
-
-<UL>
-    <LI>
-        <b><a href="#jam_usage">Overview</a></b>
-    <LI>
-        <b><a href="#jam_description">Lexical Features</a></b>
-    <LI>
-        <b><a href="#jam_options">Datatype</a></b>
-    <LI>
-        <b><a href="#jam_diagnostics">Rules</a></b>
-    <LI>
-        <b><a href="#jam_bugs">Updating Actions</a></b>
-    <LI>
-        <b><a href="#jam_author">Statements</a></b>
-<BR>
-
-<A NAME="language">
-<DT> <P> <H2> Language Features </H2> <DD>
-</A>
 
 <DT> <P> <H3> Overview </H3> <DD>
 

@@ -1,17 +1,6 @@
-/** \page jam-intro Introduction to Jam
+/** \page jam-jambase Jambase Reference
 
 \htmlonly
-
-<UL>
-    <LI>
-        <b><a href="#RULES">Rules</a></b>
-    <LI>
-        <b><a href="#PSEUDOTARGETS">Pseudotargets</a></b>
-    <LI>
-        <b><a href="#VARS">Variables</a></b>
-</UL>
-
-<A NAME="jam_reference"><H1>Jambase Reference</H1></A>
 
 <P>
        Jambase is a base set of Jam rules which

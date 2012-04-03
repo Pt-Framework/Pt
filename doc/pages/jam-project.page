@@ -1,31 +1,6 @@
-/** \page jam-project Project Setup
+/** \page jam-project Setting Up Projects
 
 \htmlonly
-
-<UL>
-    <LI>
-        <h3><a href="#jam_projects">Setting up Projects</h3></b>
-        <UL>
-        <LI>
-            <b><a href="#jam_overview">Overview</a></b>
-        <LI>
-            <b><a href="#jam_subdirs">Handling Directory Trees</a></b>
-        <LI>
-            <b><a href="#jam_building">Building Executables and Libraries</a></b>
-        <LI>
-            <b><a href="#jam_compiling">Compiling</a></b>
-        <LI>
-            <b><a href="#jam_headers">Header File Processing</a></b>
-        <LI>
-            <b><a href="#jam_files">Copying Files</a></b>
-        <LI>
-            <b><a href="#jam_install">Installing Files</a></b>
-        <LI>
-            <b><a href="#jam_misc">Miscellaneous Rules</a></b>
-        </UL>
-</UL>
-
-<A NAME="jam_projects"><H1>Setting up Projects</H1></A>
 
 <A NAME="jam_overview"><H2>Overview</H2></A>
 <P>

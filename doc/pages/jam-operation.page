@@ -2,16 +2,134 @@
 
 \htmlonly
 
-<UL>
-    <LI>
-        <b><a href="#jam_usage">Start-up</a></b>
-    <LI>
-        <b><a href="#jam_description">Parsing</a></b>
-    <LI>
-        <b><a href="#jam_options">Binding</a></b>
-    <LI>
-        <b><a href="#jam_diagnostics">Updating</a></b>
-<BR>
+<A NAME="jam_usage">
+<DT><P><H2>Usage</H2><DD>
+</A>
+
+<PRE>
+jam [ -a ] [ -g ] [ -n ] [ -q ] [ -v ]
+    [ -d <I>debug</I> ] 
+    [ -f <I>jambase</I> ] 
+    [ -j <I>jobs</I> ] 
+    [ -o <I>actionsfile</I> ] 
+    [ -s <I>var</I>=<I>value</I> ] 
+    [ -t <I>target</I> ] 
+    [ <I>target</I> ... ]
+</PRE>
+
+<A NAME="jam_description">
+<DT> <P> <H2> Description </H2> <DD>
+</A>
+    <P>
+
+    <B>Jam</B> is a program construction tool, like <B>make</B>(1).
+
+    <P>
+
+    <B>Jam</B> recursively builds target files from source files,
+    using dependency information and updating actions expressed in
+    the Jambase file, which is written in <B>jam</B>'s own interpreted
+    language.  The default Jambase is compiled into <B>jam</B> and
+    provides a boilerplate for common use, relying on a user-provide
+    file "Jamfile" to enumerate actual targets and sources.
+
+    <P>
+
+    The Jambase is described in the <a href="Jambase.html">Jambase
+    Reference</a> and the document <a href="Jamfile.html">Using
+    Jamfiles and Jambase</A>.
+
+<A NAME="jam_options">
+<DT> <P> <H2> Command Line Options </H2> <DD>
+</A>
+
+    <P>
+
+    If <I>target</I> is provided on the command line, <B>jam</B>
+    builds <I>target;</I> otherwise <B>jam</B> builds the target
+    'all'.
+
+    <P>
+
+    <B>Jam</b> may be invoked with the following options:
+
+    <P> <TABLE WIDTH=85% ALIGN=CENTER BORDER=1 CELLPADDING=2>
+
+        <TR><TD VALIGN=TOP WIDTH=20%><CODE> -a </CODE>
+        <TD> Build all targets anyway, even if they are up-to-date.
+
+        <TR><TD VALIGN=TOP><CODE> -d <I>c</I>  </CODE>
+        <TD> Turn on display option <I>c</I> and off the default 
+        display (summary info and actions):
+
+        <DL COMPACT>
+        <DT> a <DD> Show summary info, actions, quiet actions, and the
+        use of temporary targets
+        <DT> c <DD> Show the names of files that cause rebuilds, i.e.
+        new sources, missing targets, etc.
+        <DT> d <DD> Display a dependency graph (in <B>jam</B> syntax).
+        <DT> m <DD> Display the dependency analysis, and target/source
+                timestamps and paths
+        <DT> x <DD> Show shell arguments
+        </DL>
+
+        <TR><TD VALIGN=TOP><CODE> -d <I>n</I>  </CODE>
+        <TD> Enable cummulative debugging levels from 1 to <I>n</I>.  
+        Interesting values are:
+
+        <DL COMPACT>
+        <DT> 1 <DD> Show actions and summary info (the default) 
+        <DT> 3 <DD> Old name for -dm (described above)
+        <DT> 5 <DD> Show rule invocations and variable expansions 
+        <DT> 6 <DD> Show directory/header file/archive scans 
+        <DT> 7 <DD> Show variable settings 
+        <DT> 8 <DD> Show variable fetches 
+        <DT> 9 <DD> Show variable manipulation, scanner tokens 
+        </DL>
+
+        <TR><TD VALIGN=TOP><CODE> -d +<I>n</I> </CODE>
+        <TD> Enable debugging level <I>n</I>.
+
+        <TR><TD VALIGN=TOP><CODE> -d 0 </CODE>
+        <TD> Turn off all debugging levels.  Only errors are emitted.
+
+        <TR><TD VALIGN=TOP><CODE> -f <I>jambase</I></CODE>
+        <TD>Read <I>jambase</I> instead of using the built-in Jambase.
+        Multiple -f flags are permitted.
+
+        <TR><TD VALIGN=TOP><CODE> -g </CODE>
+        <TD> Build targets with the newest sources first, rather than
+        in the order of appearance in the Jambase/Jamfiles.
+
+        <TR><TD VALIGN=TOP><CODE> -j <I>n</I></CODE>
+        <TD> Run up to <I>n</I> shell commands concurrently (UNIX 
+        and NT only).  The default is 1.
+
+        <TR><TD VALIGN=TOP><CODE> -n</CODE>
+        <TD> Don't actually execute the updating actions, but do
+        everything else.  This changes the debug level to -dax.
+
+        <TR><TD VALIGN=TOP><CODE> -o <I>file</I></CODE>
+        <TD> Write the updating actions to the specified file instead
+        of running them (or outputting them, as on the Mac).
+
+        <TR><TD VALIGN=TOP><CODE> -q </CODE>
+        <TD> Quit quickly (as if an interrupt was received)
+        as soon as any target build fails.
+
+        <TR><TD VALIGN=TOP><CODE> -s <I>var</I>=<I>value</I></CODE>
+        <TD> Set the variable <I>var</I> to <I>value</I>, overriding
+        both internal variables and variables imported from the
+        environment.
+
+        <TR><TD VALIGN=TOP><CODE> -t <I>target</I></CODE>
+        <TD> Rebuild <I>target</I> and everything that depends on it, 
+         even if it is up-to-date.
+
+        <TR><TD VALIGN=TOP><CODE> -v</CODE>
+        <TD> Print the version of <B>jam</B> and exit.
+
+    </TABLE>
 
 <A NAME="jam_operation">
 <DT> <P> <H2> Program Operation </H2> <DD>
@@ -142,6 +260,97 @@
     they are run sequentially.   The -g flag reorders builds so that
     targets with newest sources are built first.  Normally, they are
     built in the order of appearance in the Jamfiles.
+
+<A NAME="jam_diagnostics">
+<DT> <P> <H2> Diagnostics </H2>  <DD>
+</A>
+
+    <P>
+
+       In addition to generic error messages, <B>jam</B> may emit one of
+       the following:
+
+       <P><TABLE WIDTH=75% ALIGN=CENTER><TR><TD><DL>
+
+       <P><DT><CODE> warning: unknown rule X </CODE> <DD>
+
+              A rule was invoked that has not been defined with
+              an "actions" or "rule" statement.
+
+       <P><DT><CODE> using N temp target(s) </CODE> <DD>
+
+              Targets marked as being temporary (but nonetheless
+              present) have been found.
+
+       <P><DT><CODE> updating N target(s) </CODE> <DD>
+
+              Targets are out-of-date and will be updated.
+
+       <P><DT><CODE> can't find N target(s) </CODE> <DD>
+
+              Source files can't be found and there are no
+              actions to create them.
+
+       <P><DT><CODE> can't make N target(s) </CODE> <DD>
+
+              Due to sources not being found, other targets cannot be made.
+
+       <P><DT><CODE> warning: X depends on itself </CODE> <DD>
+
+              A target depends on itself either directly or
+              through its sources.
+
+       <P><DT><CODE> don't know how to make X </CODE> <DD>
+
+              A target is not present and no actions have been
+              defined to create it.
+
+       <P><DT><CODE> X skipped for lack of Y </CODE> <DD>
+
+              A source failed to build, and thus a target cannot
+              be built.
+
+       <P><DT><CODE> warning: using independent target X </CODE> <DD>
+
+              A target that is not a dependency of any other
+              target is being referenced with &#36;(&lt;) or &#36;(&gt;).
+
+       <P><DT><CODE> X removed </CODE> <DD>
+
+              <b>Jam</b>  removed a  partially built target after being
+              interrupted.
+
+    </DL></TABLE>
+
+<A NAME="jam_bugs">
+<DT> <P> <H2> Bugs, Limitations </H2> <DD>
+</A>
+
+    <P>
+
+    The -j flag can cause <B>jam</B> to get confused when single
+    actions update more than one target at a time. <B>jam</B> may
+    proceed as if the targets were built even though they are still
+    under construction.
+
+    <P>
+
+    For parallel building to be successful, the dependencies among
+    files must be properly spelled out, as targets tend to get built
+    in a quickest-first ordering.  Also, beware of un-parallelizable
+    commands that drop fixed-named files into the current directory,
+    like <b>yacc</b>(1) does.
+
+    <P>
+
+    With the -j flag, errors from failed commands can get staggeringly
+    mixed up.  
+
+    <P>
+
+    A poorly set &#36;(JAMSHELL) is likely to result in silent failure.
+
+
 
 \endhtmlonly
 

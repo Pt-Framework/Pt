@@ -26,16 +26,19 @@ The jam tool must always be invoked in the project root, where the files
 named 'Jamconfigure', 'Jamrules' and 'Jamfile' are located. A batch script 
 is provided for Windows platforms and a POSIX shell-script for all other 
 platforms, which builds the jam executable the first time it is excuted.
+Most examples will use the posix shell script when commands are shown. On 
+Windows hosts you can use the script 'jam.bat' with exactly the same arguments.
 
 @section configuring Configuring the Build
 
-The first thing that needs to be done is to configure the build. In this step
+The first thing that needs to be done is to configure the build. In this step,
 tests will be run to detect what features the target platform offers. Tests
 may fail if requirements are not met, in which case additional preparations
 must be taken like installing additional system headers or libraries. To 
 configure the build with default build options, simply change to the project
-root directory and execute the appropriate build script. The command
-below configures the project on Windows when executed from a command shell:
+root directory and execute the appropriate build script with the 'configure'
+target. The command below configures the project on Windows when executed 
+from a command shell:
 
 @code
 jam.bat configure
@@ -48,10 +51,8 @@ the build:
 ./jam.sh configure
 @endcode
 
-Note that after a checkout the jam script might need to be made executable
-with the chmod command (chmod +x ./jam.sh). The following examples will use 
-the posix shell script when commands are shown. On Windows hosts you can 
-use the script 'jam.bat' with exactly the same arguments.
+Note, that after a checkout the jam script might need to be made executable
+with the chmod command (chmod +x ./jam.sh). 
 
 During configuration, all build options will be printed out. Most of them 
 can be changed and you can repeat the configure step as often as you like, 
@@ -63,10 +64,10 @@ build and the option '--optimize' to enable optimized builds. Both options
 can be mixed, to build binaries with optimization and debugging support: 
 
 @code
-./jam.sh --debug --optimize
+./jam.sh configure --debug --optimize
 @endcode
 
-Normally,release builds only use the option '--optimize', while debug builds
+Normally, release builds only use the option '--optimize', while debug builds
 only use the option '--debug', respectively.
 
 The other build options are set by setting jam variables on the command line
@@ -79,7 +80,7 @@ the OPTIM variable. The following example sets the compiler flags used for
 optimization to -O3:
 
 @code
-./jam.sh -sCONFIG=release -sOPTIM=-O3
+./jam.sh configure -sOPTIM=-O3
 @endcode
 
 If multiple toolsets are installed on the build host, one can be selected by
@@ -91,7 +92,7 @@ Workshop compiler. The GNU compiler can be used instead of the systems default
 compiler by setting the option TOOLSET to 'gcc' explicitly:
 
 @code
-./jam.sh -sTOOLSET=gcc
+./jam.sh configure -sTOOLSET=gcc
 @endcode
 
 On windows systems you can also select a specific visual studio compiler if
@@ -99,7 +100,7 @@ more than one version of visual studio is installed. The following example
 selects the Visual Studio 2008 compiler:
 
 @code
-./jam.bat -sTOOLSET=vc9
+./jam.bat configure -sTOOLSET=vc9
 @endcode
 
 The build options TARGET_OS and TARGET_OSPLAT need to be set for cross 
@@ -165,11 +166,11 @@ will remove all artefacts that were created by a build with default options:
 jam.sh clean
 @endcode
 
-Finally, two command line options can make the build more convenient. you can
-use the command line option '-j N' to specify how many actions should be 
-executed in parallel, where N is the maximum number of parallel actions. 
-The command line option '-q' will stop the build when the first error is 
-encountered.
+Finally, two command line options can make the build more convenient. You can
+use the command line option '-jN' to specify how many actions should be 
+executed in parallel, where N is the maximum number of parallel actions 
+(e.g. -j2 to use up to two CPUs). The command line option '-q' will stop 
+the build when the first error is encountered.
 
 @section testing Build Verification
 

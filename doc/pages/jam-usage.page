@@ -2,25 +2,6 @@
 
 \htmlonly
 
-<UL>
-    <LI>
-        <b><a href="#jam_usage">Usage</a></b>
-    <LI>
-        <b><a href="#jam_description">Description</a></b>
-    <LI>
-        <b><a href="#jam_options">Command Line Options</a></b>
-    <LI>
-        <b><a href="#jam_diagnostics">Diagnostics</a></b>
-    <LI>
-        <b><a href="#jam_bugs">Bugs and Limitations</a></b>
-    <LI>
-        <b><a href="#jam_author">Author</a></b>
-<BR>
-
-<A NAME="jam_intro"><H1>An Introduction to Jam</H1></A>
-
-<DL>
-
 <A NAME="jam_usage">
 <DT><P><H2>Usage</H2><DD>
 </A>

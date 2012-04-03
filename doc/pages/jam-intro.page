@@ -73,4 +73,19 @@ Free
 
 Jam is free and can be incorporated into commercial products without licensing restrictions.
 
+\htmlonly
+
+<A NAME="jam_author">
+<DT> <P> <H2> Author </H2>   <DD>
+</A>
+
+    <P>
+    Jam's author is Christopher Seiwald (<a
+    href="mailto:seiwald@perforce.com">seiwald@perforce.com</A>).
+    Documentation is provided by
+    <A HREF="http://www.perforce.com">Perforce Software, Inc.</A>
+
+</DL>
+
+\endhtmlonly
 */
