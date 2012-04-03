@@ -1,0 +1,148 @@
+/** \page jam-operation Program Operation
+
+\htmlonly
+
+<UL>
+    <LI>
+        <b><a href="#jam_usage">Start-up</a></b>
+    <LI>
+        <b><a href="#jam_description">Parsing</a></b>
+    <LI>
+        <b><a href="#jam_options">Binding</a></b>
+    <LI>
+        <b><a href="#jam_diagnostics">Updating</a></b>
+<BR>
+
+<A NAME="jam_operation">
+<DT> <P> <H2> Program Operation </H2> <DD>
+</A>
+    <P>
+
+    <b>Jam</b> has four phases of operation: start-up, parsing, 
+    binding, and updating.
+
+<DT> <P> <H3> Start-up </H3> <DD>
+
+    <P>
+
+    Upon start-up, <b>jam</b> imports environment variable settings
+    into <b>jam</b> variables.  Environment variables are split at
+    blanks with each word becoming an element in the variable's list
+    of values.  Environment variables whose names end in PATH are
+    split at &#36;(SPLITPATH) characters (e.g., ":" for Unix).
+
+    <P>
+
+    To set a variable's value on the command line, overriding the
+    variable's environment value, use the -s option.  To see variable
+    assignments made during <b>jam</b>'s execution, use the -d+7
+    option.
+
+<DT> <P> <H3> Parsing </H3> <DD>
+
+    <P>
+
+    In the parsing phase, <b>jam</b> reads and executes the Jambase
+    file, by default the built-in one.  It is written in the <b>jam</b>
+    language.  See <a href="#language"> Language</a> below.  The
+    last action of the Jambase is to read (via the "include" rule)
+    a user-provided file called "Jamfile".
+
+    <P>
+
+    Collectively, the purpose of the Jambase and the Jamfile is to
+    name built target and source files, construct the dependency
+    graph among them, and associate build actions with targets.
+    The Jambase defines boilerplate rules and variable assignments,
+    and the Jamfile uses these to specify the actual relationship
+    among the target and source files.  See the <a
+    href="Jambase.html">Jambase Reference</a> and the document <a
+    href="Jamfile.html">Using Jamfiles and Jambase</A> for information.
+
+<A NAME="binding">
+<DT> <P> <H3> Binding </H3> 
+</A> <DD>
+
+    <P> <H5> Binding </H5>
+
+    After parsing, <B>jam</B> recursively descends the dependency
+    graph and binds every file target with a location in the
+    filesystem.  
+
+    <P> <H5> Targets </H5>
+
+    Any string value in <b>jam</b> can represent a target, and it
+    does so if the DEPENDS or INCLUDES rules make it part of the
+    dependency graph.  Build targets are files to be updated.  Source
+    targets are the files used in updating build targets.  Build
+    targets and source targets are collectively referred to as file
+    targets, and frequently build targets are source targets for
+    other build targets.  Pseudotargets are symbols which represent
+    dependencies on other targets, but which are not themselves
+    associated with any real file.
+
+    <P>
+
+    A file target's identifier is generally the file's name, which can
+    be absolutely rooted, relative to the directory of <b>jam</b>'s
+    invocation, or simply local (no directory).  Most often it is the
+    last case, and the actual file path is bound using the &#36;(SEARCH)
+    and &#36;(LOCATE) special variables.  See <A HREF="#search"> SEARCH
+    and LOCATE Variables</A> below.  A local filename is optionally
+    qualified with "grist," a string value used to assure uniqueness.
+    A file target with an identifier of the form <I>file(member)</I>
+    is a library member (usually an ar(1) archive on UNIX).
+
+    <P>
+
+    The use of &#36;(SEARCH) and &#36;(LOCATE) allows <b>jam</b> to separate
+    the the location of files from their names, so that Jamfiles can
+    refer to files locally (i.e. relative to the Jamfile's directory),
+    yet still be usable when <b>jam</b> is invoked from a distant
+    directory.  The use of grist allows files with the same name
+    to be identified uniquely, so that <b>jam</b> can read a whole
+    directory tree of Jamfiles and not mix up same-named targets.
+
+    <P> <H5> Update Determination </H5>
+
+    After binding each target, <B>jam</B> determines whether the
+    target needs updating, and if so marks the target for the updating
+    phase.  A target is normally so marked if it is missing, it is
+    older than any of its sources, or any of its sources are marked
+    for updating.  This behavior can be modified by the application
+    of special built-in rules.  See <A HREF="#bindingmods">Modifying
+    Binding</A> below.
+
+    <P> <H5> Header File Scanning </H5>
+
+    During the binding phase, <b>jam</b> also performs header file
+    scanning, where it looks inside source files for the implicit
+    dependencies on other files caused by C's #include syntax.  This
+    is controlled by the special variables &#36;(HDRSCAN) and &#36;(HDRRULE).
+    The result of the scan is formed into a rule invocation, with
+    the scanned file as the target and the found included file names
+    as the sources.  Note that this is the only case where rules
+    are invoked outside the parsing phase.  See <A
+    HREF="#hdrscan">HDRSCAN and HDRRULE Variables</A> below.
+
+<DT> <P> <H3> Updating </H3> <DD>
+
+    <P>
+
+    After binding, <B>jam</B> again recursively descends the dependency
+    graph,  this time executing the update actions for each target
+    marked for update during the binding phase.  If a  target's
+    updating actions fail, then all other targets which depend on
+    that target are skipped.
+
+    <P>
+
+    The -j flag instructs <B>jam</B> to build more than one target
+    at a time.  If there are multiple actions on a single target,
+    they are run sequentially.   The -g flag reorders builds so that
+    targets with newest sources are built first.  Normally, they are
+    built in the order of appearance in the Jamfiles.
+
+\endhtmlonly
+
+*/

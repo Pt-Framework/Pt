@@ -5,9 +5,8 @@
 The Jam build-tool provides a versatile, unified build process across many
 platforms including, build-configuration, cross-compilation, automated 
 unit-tests, and concurrent execution of build steps. This is a a step-by-step
-introduction to the Jam-based build system, demonstrating the usage of jam on
-a Windows NT build host, on POSIX-based systems such as UNIX, Linux, Mac OS-X
-or QNX and show how to cross-compile. The complete build and installation 
+introduction to the Jam-based build system, demonstrating how to build
+the Platinum framework on various platforms. The complete build and installation 
 process consists of the following four steps:
 
 <UL>
@@ -23,48 +22,45 @@ process consists of the following four steps:
 <P>
 \endhtmlonly
 
-The jam tool must be invoked in the project root, where the files named 'Jamconfigure',
-'Jamrules' and 'Jamfile' are located. A batch script is provided for Windows platforms 
-and a POSIX shell-script for all other platforms, which builds the jam executable the 
-first time it is excuted.
+The jam tool must always be invoked in the project root, where the files 
+named 'Jamconfigure', 'Jamrules' and 'Jamfile' are located. A batch script 
+is provided for Windows platforms and a POSIX shell-script for all other 
+platforms, which builds the jam executable the first time it is excuted.
 
 @section configuring Configuring the Build
 
-The first thing that needs to be done is to configure the build. If no 
-further arguments are passed to jam during configuration, default build 
-options are deduced from the environment, if possible. 
-To configure the build with default build options, simply change to the 
-project root directory and execute the appropriate build script. The command
+The first thing that needs to be done is to configure the build. In this step
+tests will be run to detect what features the target platform offers. Tests
+may fail if requirements are not met, in which case additional preparations
+must be taken like installing additional system headers or libraries. To 
+configure the build with default build options, simply change to the project
+root directory and execute the appropriate build script. The command
 below configures the project on Windows when executed from a command shell:
 
 @code
 jam.bat configure
 @endcode
 
-Accordingly, on POSIX systems, a script named jam.sh can be used to configure the build:
+Accordingly, on POSIX systems, a script named jam.sh can be used to configure
+the build:
 
 @code
 ./jam.sh configure
 @endcode
 
-The following examples will use the posix shell script when commands are shown. On Windows
-hosts you can use the script 'jam.bat' with exactly the same arguments.
+Note that after a checkout the jam script might need to be made executable
+with the chmod command (chmod +x ./jam.sh). The following examples will use 
+the posix shell script when commands are shown. On Windows hosts you can 
+use the script 'jam.bat' with exactly the same arguments.
 
-@b NOTE: \n
-After a checkout the jam script might need to be made executable with the chmod command:
+During configuration, all build options will be printed out. Most of them 
+can be changed and you can repeat the configure step as often as you like, 
+until the configuration matches your needs.
 
-@verbatim
-chmod +x ./jam.sh
-@endverbatim
-
-During configuration, all build options will be printed out. Most of them can changed and
-you can repeat the configure step as often as you like, until the configuration matches
-your needs.
-
-Debugging support and optimizations can be enabled when the build is configured. Use the 
-command line option '--debug' to enable a debugable build and the option '--optimize' to
-enable optimized builds. Both options can be mixed, to build binaries with optimization and
-debugging support: 
+Debugging support and optimizations can be enabled when the build is 
+configured. Use the command line option '--debug' to enable a debugable 
+build and the option '--optimize' to enable optimized builds. Both options 
+can be mixed, to build binaries with optimization and debugging support: 
 
 @code
 ./jam.sh --debug --optimize
@@ -78,7 +74,6 @@ or setting environment variables with the same names. When jam is invoked,
 all environment variables will be available as jam variables in the build 
 scripts. A jam variable can be set with the command line option -s followed 
 by a variable/valuepair separated by the equal sign (-sVARIABLE=VALUE). 
-
 For example, if you do not like the flags used for optimization you can set
 the OPTIM variable. The following example sets the compiler flags used for
 optimization to -O3:
@@ -88,15 +83,12 @@ optimization to -O3:
 @endcode
 
 If multiple toolsets are installed on the build host, one can be selected by
-setting the TOOLSET build option. The default TOOLSET on a Unix host may not
-be gcc, but the compiler/linker of the respective vendor. For example, the 
-default TOOLSET on AIX is the XLC compiler and the default TOOSET on Solaris 
-is the Sun Workshop compiler. Some possible TOOLSETs are:
-
-<b>Compiler/Toolchain (TOOLSET):</b> vc8, vc9, vc10, gcc, qcc, xlc, sunpro \n
-
-On unix systems, the GNU compiler can be used instead of the systems default
-compiler by setting the TOOLSET to 'gcc' explicitly:
+setting the TOOLSET build option. Possible toolsets are vc8, vc9, vc10, gcc, 
+qcc, xlc and sunpro. The default toolset on a Unix host may not be gcc, but 
+the compiler/linker of the respective vendor. For example, the default toolset
+on AIX is the XLC compiler and the default toolset on Solaris is the Sun 
+Workshop compiler. The GNU compiler can be used instead of the systems default
+compiler by setting the option TOOLSET to 'gcc' explicitly:
 
 @code
 ./jam.sh -sTOOLSET=gcc
@@ -110,11 +102,10 @@ selects the Visual Studio 2008 compiler:
 ./jam.bat -sTOOLSET=vc9
 @endcode
 
-The build options TARGET_OS and TARGET_OSPLAT need to be set for cross compiling.
-Here is a list of possible values:
-
-<b>Target Platform (TARGET_OS):</b> nt, linux, macosx, wince, qnx \n
-<b>Target Platform (TARGET_OSPLAT):</b> x86, ppc, arm, mips, sh4, sparc \n
+The build options TARGET_OS and TARGET_OSPLAT need to be set for cross 
+compiling. Possible values for the target operating system are nt, linux,
+macosx, wince or qnxnto. Possible values for the target CPU platform are
+x86, ppc, arm, mips, sh4 or sparc.
 
 Windows CE targets need to be cross compiled under Windows hosts. Therefore 
 the TARGET_OS and TARGET_OSPLAT variables need to be set when the build is
@@ -140,17 +131,16 @@ All artefacts that are created during the build process are refered to as
 'targets'. A target can be a binary file, such as a executable, or a so-called
 pseudo-target, which usually references other targets. All targets form
 a dependency tree. If jam is invoked to build a target, all dependencies
-will be resolved automatically and be built first.
-
-If jam is invoked without any further options, all targets will be built:
+will be resolved automatically and be built first. If jam is invoked without 
+any further options, all targets will be built:
 
 @code
 jam.sh
 @endcode
 
-To build a specific target of the project simply invoke jam with 
-a target name. The following command will build the target libPt.so and
-all its dependencies:
+To build a specific target of the project simply invoke jam with a target 
+name. The following command will build the target libPt.so and all its 
+dependencies:
 
 @code
 jam.sh libPt.so
@@ -193,6 +183,28 @@ the unit-test.
 @code
 jam.sh test
 @endcode
+
+@section installation Installation
+
+Installation of the built artifacts is performed by the means of a
+pseudo-target 'install'. With default settings, no real installation will
+be performed, but the relevant files will onyl copied to a directory named
+'deploy'. If you dare to copy files to your system directories you can set
+the INSTALL_DIR (root directory of the installation), INSTALL_BINDIR (directory
+to install programs), INSTALL_INCLUDEDIR (directory to install header files
+and INSTALL_LIBDIR (directroy to install libraries). You can set these
+at configuration time or just before installation. The following command
+will install the files in the '/opt' directory:
+
+@code
+jam.sh -sINSTALL_DIR=/opt/Pt
+@endcode
+
+This means that a directory named Pt will be created with three subdirectories
+named 'include', 'lib' and 'bin'. As you may have guessed, INSTALL_DIR is used
+as the base for the other variables INSTALL_BINDIR, INSTALL_INCLUDEDIR and
+INSTALL_LIBDIR. Alternatively, you can set the three latter variables to
+separate directories to have full control of the installation.
 
 */
 
