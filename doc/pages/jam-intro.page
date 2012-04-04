@@ -1,77 +1,63 @@
 /** \page jam-intro Introduction to Jam
 
-Jam is a small open-source build tool that can be used as a replacement for Make. Even though Jam is a lot simpler to use than Make, it is far more powerful and easy to master. It already works on a large variety of platforms (Unix, Windows, OS/2, VMS, MacOS, BeOS, etc.), it is trivial to port, and its design is sufficiently clear to allow any average programmer to extend it with advanced features at will.
+@section jam_overview Overview
 
-The main differences between Jam and Make are as follows.
+Jam is a software build tool that makes building simple things simple and 
+building complicated things manageable. It has been developed by Christopher
+Seiwald (Perforce) and then improved by various people over time. It is 
+freely available as C source and is widely used to build commercial and 
+academic software. Jam is a very good solution for conventional C/C++ 
+compile-and-link builds.
 
-    Jam uses ‘Jamfiles’ instead of ‘Makefiles’.
+Jam is somewhat comparable to Make, but it is a lot simpler to use than Make,
+it is far more powerful and easy to master. It already works on a large 
+variety of platforms (Unix, Windows, Linux, MacOS, BeOS, etc.), it is trivial
+to port, and its design is sufficiently clear to allow any average programmer
+to extend it with advanced features at will. It is a self-contained tool and
+does not require installation of any scripting languages or libraries. In
+fact, a Jam based build process can be bootstrapped only with a C compiler
+in the path.
 
-    Jamfiles do not normally contain toolset-specific rules or actions. They are thus portable among distinct compilers.
+Because Jam understands C/C++ dependencies, there is no need to declare header
+or object files. The built-in Jam rules handle header file dependencies and 
+object files both automatically and on-the-fly. Before any targets are updated,
+Jam gathers complete dependency information for C/C++ source files, allowing 
+Jam to:
 
-    Jamfiles are a lot simpler than Makefiles to write and understand, while providing the same functionality, and much, much more.
+- Build as much as possible, instead of halting on the first build error
 
-Jam is a software build tool that makes building simple things simple and building complicated things manageable. It has been freely available as C source for many years from the Perforce Public Depot and is widely used to build commercial and academic software. Jam is a very good solution for conventional C/C++ compile-and-link builds.
+- Avoid building targets if targets on which they depend fail to build
 
-Because Jam understands C/C++ dependencies, there is no need to declare header or object files. The built-in Jam rule "Main" handles header file dependencies and object files both automatically and on-the-fly. Table 1 compares a Makefile and a Jamfile for building a simple program.
-
-Before any targets are updated, Jam gathers complete dependency information for C/C++ source files, allowing Jam to:
-
-    Build as much as possible, instead of halting on the first build error.
-    Avoid building targets if targets on which they depend fail to build.
-    Build across parallel paths with multiple, concurrent processes.
+- Build across parallel paths with multiple, concurrent processes
 
 
+@section jam_features Jam Features
 
-
-Additional Jam features
 There really are a lot of reasons, we name just a few of them.
 
-    Compiling simple things with Jam is trivial. However, compiling complex projects (usually with complex directory hierarchies) is still very simple.
+- Building projects with complex directory hierarchies is still simple 
 
-    Jam automatically scans source files for #include statements and computes header dependencies automatically, and it does so fast.
+- Jam is able to build large projects spread across many directories in a single pass
 
-    The Jam language is simple and expressive, and lets you define your own build rules, actions, and functions very easily, unlike the ALGOL-like syntax of Makefiles.
+- It knows the full dependency graph and can do parallel builds safely with the ‘-j’ flag
 
-    Jam knows about platform-specific directory separators.
+- The same buid scripts work for all platforms, compilers and toolsets
 
-    Jam is fully customizable, and easy to extend.
+- Scans source files for #include statements and computes header dependencies automatically, and it does so fast
 
-    Jam has a tiny footprint, and is a lot faster than Make at building large projects (independent of target build times, of course).
+- A configuration step can test and detect platform capabilities
 
-    We have already mentioned that you don't need to modify Jamfiles in order to compile the same project with distinct compilers and toolsets.
+- Lets you define your own build rules, actions, and functions very easily, unlike the ALGOL-like syntax of Makefiles
 
-    Jam parses all Jamfiles in a project before beginning to build targets. It knows the full dependency graph and can do parallel builds safely with the ‘-j’ flag.
+- Jam is fully customizable, and easy to extend
 
-    Jam is compatible with Autoconf. All configuration-specific definitions are gathered in a single file named ‘Jamrules’ that is shared by all Jamfiles of the same project. The ‘Jamrules’ file is generally generated by processing a ‘Jamrules.in’ template with the ‘configure’ script on Unix systems.
+- Jam has a tiny footprint, and is a lot faster than Make at building large projects (independent of target build times, of course)
 
-Unintrusive and clean
+- Highly portable Jam runs on UNIX, Windows, Linux, Mac OS X, etc...
+
+- Unintrusive, clean and no hard dependencies besides the C compiler
 	
-
-Jam is small, it has negligible CPU overhead, and it doesn't create or leave behind temporary files.
-Scalable
-	
-
-Jam is able to build large projects spread across many directories in a single pass and can manage and distribute build steps to multiple processors on one or more networked machines.
-Highly portable
-	
-
-Jam runs on UNIX, VMS, NT, OS/2, Mac OS X, and Mac MPW. Most Jamfiles (like the sample above) are also portable.
-Multiplatform
-	
-
-Platform independent rules and platform specific actions can be defined separately from dependency rules.
-Customizable
-	
-
-Developers can enhance/extend Jam by creating user defined rules to utilize other built-in directives.
-Language
-	
-
-Jam includes flow-control statments, variables, and a few other features of general purpose languages.
-Free
-	
-
-Jam is free and can be incorporated into commercial products without licensing restrictions.
+- Jam is free and can be incorporated into commercial products without licensing restrictions
 
 \htmlonly
 
@@ -80,12 +66,13 @@ Jam is free and can be incorporated into commercial products without licensing r
 </A>
 
     <P>
-    Jam's author is Christopher Seiwald (<a
-    href="mailto:seiwald@perforce.com">seiwald@perforce.com</A>).
+    Jam's author is Christopher Seiwald (
+      <A href="mailto:seiwald@perforce.com">seiwald@perforce.com</A>).
     Documentation is provided by
-    <A HREF="http://www.perforce.com">Perforce Software, Inc.</A>
+      <A HREF="http://www.perforce.com">Perforce Software, Inc.</A>
 
 </DL>
 
 \endhtmlonly
+
 */
