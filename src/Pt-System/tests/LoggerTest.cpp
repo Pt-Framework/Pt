@@ -105,7 +105,7 @@ class LoggerTest : public Pt::Unit::TestSuite
             clock.start();
             for(unsigned n = 0; n < count; n++)
             {
-                log_message_trace(logger, "Hallo");
+                logger_begin_trace(logger) << "Hallo";
             }
 
             Pt::Timespan ts = clock.stop();
@@ -197,37 +197,37 @@ class LoggerTest : public Pt::Unit::TestSuite
         void LogFatal()
         {
             Pt::System::Logger logger("LoggerTest");
-            logger.fatal() << "Fatal message" << Pt::System::endlog;
+            logger << Pt::System::fatal << "Fatal message" << Pt::System::endlog;
         }
 
         void LogError()
         {
             Pt::System::Logger logger("LoggerTest");
-            logger.error() << "Error message" << Pt::System::endlog;
+            logger << Pt::System::error << "Error message" << Pt::System::endlog;
         }
 
         void LogWarn()
         {
             Pt::System::Logger logger("LoggerTest");
-            logger.warn() << "Warn message" << Pt::System::endlog;
+            logger << Pt::System::warn << "Warn message" << Pt::System::endlog;
         }
 
         void LogInfo()
         {
             Pt::System::Logger logger("LoggerTest");
-            logger.info() << "Info message" << Pt::System::endlog;
+            logger << Pt::System::info << "Info message" << Pt::System::endlog;
         }
 
         void LogDebug()
         {
             Pt::System::Logger logger("LoggerTest");
-            logger.debug() << "Debug message" << Pt::System::endlog;
+            logger << Pt::System::debug << "Debug message" << Pt::System::endlog;
         }
 
         void LogTrace()
         {
             Pt::System::Logger logger("LoggerTest");
-            logger.trace() << "Trace message" << Pt::System::endlog;
+            logger << Pt::System::trace << "Trace message" << Pt::System::endlog;
         }
 
         //void DllLoggerTest()
@@ -245,7 +245,7 @@ class LoggerTest : public Pt::Unit::TestSuite
 
             for(int n = 0; n < 10; ++n)
             {
-                logger.info() << "log message #" << n << Pt::System::endlog;
+                logger << Pt::System::info << "log message #" << n << Pt::System::endlog;
             }
 
             Pt::System::LogTarget::get("LoggerTest.FileChannel").setChannel("console://");
@@ -271,7 +271,7 @@ class LoggerTest : public Pt::Unit::TestSuite
 
                 for(int n = 0; n < 10; ++n)
                 {
-                    logger.info() << "Info Message on serial device" << Pt::System::endlog;
+                    logger << Pt::System::info << "Info Message on serial device" << Pt::System::endlog;
                 }
             }
             catch( const Pt::System::AccessFailed& )
