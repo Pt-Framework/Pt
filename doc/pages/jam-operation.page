@@ -37,8 +37,8 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -v ]
     <P>
 
     The Jambase is described in the <a href="jam-jambase.html">Jambase
-    Reference</a> and the document <a href="jam-process.html">Jam Build 
-    Process</A>.
+    Reference</a> and the document <a href="jam-buildprocess.html">Jam 
+    Build Process</A>.
 
 <A NAME="jam_options">
 <DT> <P> <H2> Command Line Options </H2> <DD>
@@ -137,8 +137,10 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -v ]
 </A>
     <P>
 
-    <b>Jam</b> has four phases of operation: start-up, parsing, 
-    binding, and updating.
+    The <b>Jam</b> program has four phases of operation: start-up, parsing, 
+    binding, and updating. These phases are performed whenever the jam 
+    program is executed to perform a build step. Do not confuse the four 
+    phases of operation with the steps of the build process.
 
 <DT> <P> <H3> Start-up </H3> <DD>
 
@@ -162,21 +164,21 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -v ]
     <P>
 
     In the parsing phase, <b>jam</b> reads and executes the Jambase
-    file, by default the built-in one.  It is written in the <b>jam</b>
-    language.  See <a href="#language"> Language</a> below.  The
-    last action of the Jambase is to read (via the "include" rule)
-    a user-provided file called "Jamfile".
+    file, by default the built-in one. It is written in the <b>jam</b>
+    language. See <a href="jam-language.html"> Language</a> below. The
+    Jambase reads (via the "include" rule) the a user-provided files 
+    called "Jamconfigure" and "Jamfile".
 
     <P>
 
-    Collectively, the purpose of the Jambase and the Jamfile is to
-    name built target and source files, construct the dependency
-    graph among them, and associate build actions with targets.
+    Collectively, the purpose of the Jambase, Jamconfigure and the 
+    Jamfile is to name built targets and source files, construct the 
+    dependency graph among them, and associate build actions with targets.
     The Jambase defines boilerplate rules and variable assignments,
-    and the Jamfile uses these to specify the actual relationship
-    among the target and source files.  See the <a
-    href="Jambase.html">Jambase Reference</a> and the document <a
-    href="Jamfile.html">Using Jamfiles and Jambase</A> for information.
+    and the Jamconfigure and Jamfile uses these to specify the actual 
+    relationship among the target and source files.  See the <a
+    href="jam-jambase.html">Jambase Reference</a> and the document <a
+    href="jam-buildprocess.html">Jam Build Process</A> for information.
 
 <A NAME="binding">
 <DT> <P> <H3> Binding </H3> 
@@ -186,7 +188,8 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -v ]
 
     After parsing, <B>jam</B> recursively descends the dependency
     graph and binds every file target with a location in the
-    filesystem.  
+    filesystem. The binding phase is not important for the configure
+    step, where no dependency graph is set up.
 
     <P> <H5> Targets </H5>
 
@@ -252,7 +255,8 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -v ]
     graph,  this time executing the update actions for each target
     marked for update during the binding phase.  If a  target's
     updating actions fail, then all other targets which depend on
-    that target are skipped.
+    that target are skipped. The updating phase is not important for 
+    the configure build step, where no dependency graph is set up.
 
     <P>
 
@@ -350,8 +354,6 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -v ]
     <P>
 
     A poorly set &#36;(JAMSHELL) is likely to result in silent failure.
-
-
 
 \endhtmlonly
 

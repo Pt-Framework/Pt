@@ -2,7 +2,7 @@
 
 \htmlonly
 
-<DT> <P> <H3> Overview </H3> <DD>
+<DT> <P> <H2> Overview </H2> <DD>
 
     <B>Jam</b> has a interpreted, procedural language with a few
     select features to effect program construction.  Statements in
@@ -10,7 +10,7 @@
     updating action definitions, flow-of-control structures, variable
     assignments, and sundry language support.
 
-<DT> <P> <H3> Lexical Features </H3> <DD>
+<DT> <P> <H2> Lexical Features </H2> <DD>
 
     <P>
 
@@ -33,7 +33,7 @@
     and generally must be quoted with double quotes (") to be used
     as arbitrary tokens, such as variable or target names.
 
-<DT> <P> <H3> Datatype </H3> <DD>
+<DT> <P> <H2> Datatype </H2> <DD>
 
     <P>
 
@@ -42,7 +42,7 @@
     the Jambase or included files, as the result of variable expansion
     of those tokens, or as the return value from a rule invocation.
 
-<DT> <P> <H3> Rules </H3> <DD>
+<DT> <P> <H2> Rules </H2> <DD>
 
     <P>
 
@@ -59,7 +59,7 @@
     value can be expanded in a list by enclosing the rule invocation
     with <tt>[</tt> and <tt>]</tt>.
 
-<DT> <P> <H3> Updating Actions </H3> <DD>
+<DT> <P> <H2> Updating Actions </H2> <DD>
 
     <P>
 
@@ -78,7 +78,7 @@
     See <A HREF="#binding"> Binding</A> above.
 
 
-<DT> <P> <H3> Statements </H3> <DD>
+<DT> <P> <H2> Statements </H2> <DD>
 
     <P>
 
@@ -349,7 +349,7 @@
     </DL></TABLE>
 
 
-<DT> <P> <H3> Variables </H3> <DD>
+<DT> <P> <H2> Variables </H2> <DD>
 
     <P>
 
@@ -416,7 +416,7 @@
     actions can reference <b>jam</b> variables with &#36;(<I>variable</I>).
 
 <A NAME="varexp">
-<DT> <P> <H3> Variable Expansion </H3> 
+<DT> <P> <H2> Variable Expansion </H2> 
 </A> <DD>
 
     <P>
@@ -563,7 +563,7 @@
     and NT, &#36;(var:P) and &#36;(var:D) are the same.
 
 
-<DT> <P> <H3> Built-in Rules </H3> <DD>
+<DT> <P> <H2> Built-in Rules </H2> <DD>
 
     <P>
     <B>Jam</b> has twelve built-in rules, all of which are pure
@@ -572,7 +572,7 @@
     the second modifies it; and the third are just utility
     rules.
 
-    <P> <H5> Dependency Building </H5> 
+    <P> <H3> Dependency Building </H3> 
 
     <P><TABLE WIDTH=75% ALIGN=CENTER><TR><TD><DL>
 
@@ -608,7 +608,7 @@
     </DL></TABLE>
 
     <A NAME="bindingmods">
-    <P> <H5> Modifying Binding </H5> 
+    <P> <H3> Modifying Binding </H3> 
     </A>
 
     <P>
@@ -696,7 +696,7 @@
 
     </DL></TABLE>
 
-    <P> <H5> Utility Rules </H5> 
+    <P> <H3> Utility Rules </H3> 
 
     The remaining rules are utility rules.
 
@@ -742,7 +742,7 @@
 
     </DL></TABLE>
 
-<DT> <P> <H3> Built-in Variables </H3> <DD>
+<DT> <P> <H2> Built-in Variables </H2> <DD>
 
     <P>
 
@@ -750,7 +750,7 @@
     <b>jam</b>.
 
     <A NAME="search">
-    <P> <H4> SEARCH and LOCATE Variables </H4>
+    <P> <H3> SEARCH and LOCATE Variables </H3>
     </A>
 
     <P>
@@ -795,7 +795,7 @@
     sources they are looking for and targets they create, respectively.
 
     <A NAME="hdrscan">
-    <P> <H4> HDRSCAN and HDRRULE Variables </H4>
+    <P> <H3> HDRSCAN and HDRRULE Variables </H3>
     </A>
 
     <P>
@@ -837,7 +837,7 @@
     handle languages that allow including files using variable names
     (as the Jam language itself does).
 
-    <P> <H4> Platform Identifier Variables </H4>
+    <P> <H3> Platform Identifier Variables </H3>
 
     <P>
 
@@ -858,7 +858,7 @@
 
     </TABLE>
 
-    <P> <H4> Jam Version Variables </H4>
+    <P> <H3> Jam Version Variables </H3>
 
     <P>
 
@@ -870,7 +870,7 @@
 
     </TABLE>
 
-    <P> <H4> JAMSHELL Variable </H4>
+    <P> <H3> JAMSHELL Variable </H3>
 
     <P>
 
