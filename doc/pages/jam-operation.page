@@ -28,16 +28,17 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -v ]
 
     <B>Jam</B> recursively builds target files from source files,
     using dependency information and updating actions expressed in
-    the Jambase file, which is written in <B>jam</B>'s own interpreted
-    language.  The default Jambase is compiled into <B>jam</B> and
-    provides a boilerplate for common use, relying on a user-provide
-    file "Jamfile" to enumerate actual targets and sources.
+    the Jambase, which is written in <B>jam</B>'s own interpreted
+    language. The default Jambase is provided with <B>jam</B> and
+    provides a boilerplate for common use, relying on the user-provided
+    files named "Jamfile" to enumerate actual targets and sources and
+    Jamconfigure to define the build configuration.
 
     <P>
 
-    The Jambase is described in the <a href="Jambase.html">Jambase
-    Reference</a> and the document <a href="Jamfile.html">Using
-    Jamfiles and Jambase</A>.
+    The Jambase is described in the <a href="jam-jambase.html">Jambase
+    Reference</a> and the document <a href="jam-process.html">Jam Build 
+    Process</A>.
 
 <A NAME="jam_options">
 <DT> <P> <H2> Command Line Options </H2> <DD>

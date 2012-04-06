@@ -13,16 +13,16 @@ Jam is somewhat comparable to Make, but it is a lot simpler to use than Make,
 it is far more powerful and easy to master. It already works on a large 
 variety of platforms (Unix, Windows, Linux, MacOS, BeOS, etc.), it is trivial
 to port, and its design is sufficiently clear to allow any average programmer
-to extend it with advanced features at will. It is a self-contained tool and
-does not require installation of any scripting languages or libraries. In
-fact, a Jam based build process can be bootstrapped only with a C compiler
+to extend it with advanced features at will. It also is a self-contained tool
+and does not require installation of any scripting languages or libraries. 
+In fact, a Jam based build process can be bootstrapped only with a C compiler
 in the path.
 
-Because Jam understands C/C++ dependencies, there is no need to declare header
-or object files. The built-in Jam rules handle header file dependencies and 
-object files both automatically and on-the-fly. Before any targets are updated,
-Jam gathers complete dependency information for C/C++ source files, allowing 
-Jam to:
+Most importantly, Jam understands C/C++ dependencies, there is no need to
+declare header or object files. The built-in Jam rules handle header file 
+dependencies and object files both automatically and on-the-fly. Before any
+targets are updated, Jam gathers complete dependency information for C/C++ 
+source files, allowing Jam to:
 
 - Build as much as possible, instead of halting on the first build error
 
@@ -33,7 +33,7 @@ Jam to:
 
 @section jam_features Jam Features
 
-There really are a lot of reasons, we name just a few of them.
+There really are a lot of features, we name just a few of them.
 
 - Building projects with complex directory hierarchies is still simple 
 
@@ -41,7 +41,7 @@ There really are a lot of reasons, we name just a few of them.
 
 - It knows the full dependency graph and can do parallel builds safely with the ‘-j’ flag
 
-- The same buid scripts work for all platforms, compilers and toolsets
+- The same build scripts work for all platforms, compilers and toolsets
 
 - Scans source files for #include statements and computes header dependencies automatically, and it does so fast
 
@@ -49,30 +49,20 @@ There really are a lot of reasons, we name just a few of them.
 
 - Lets you define your own build rules, actions, and functions very easily, unlike the ALGOL-like syntax of Makefiles
 
+- Unintrusive, clean and no hard dependencies besides the C compiler
+
+- Highly portable, Jam runs on UNIX, Windows, Linux, Mac OS X, etc...
+
 - Jam is fully customizable, and easy to extend
 
 - Jam has a tiny footprint, and is a lot faster than Make at building large projects (independent of target build times, of course)
 
-- Highly portable Jam runs on UNIX, Windows, Linux, Mac OS X, etc...
-
-- Unintrusive, clean and no hard dependencies besides the C compiler
-	
 - Jam is free and can be incorporated into commercial products without licensing restrictions
 
-\htmlonly
 
-<A NAME="jam_author">
-<DT> <P> <H2> Author </H2>   <DD>
-</A>
+@section jam_author Author
 
-    <P>
-    Jam's author is Christopher Seiwald (
-      <A href="mailto:seiwald@perforce.com">seiwald@perforce.com</A>).
-    Documentation is provided by
-      <A HREF="http://www.perforce.com">Perforce Software, Inc.</A>
-
-</DL>
-
-\endhtmlonly
+Jam's author is Christopher Seiwald (<a href="mailto:seiwald@perforce.com">seiwald@perforce.com</a>).
+Documentation is provided by <a href="http://www.perforce.com">Perforce Software, Inc.</a>
 
 */

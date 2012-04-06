@@ -1,59 +1,77 @@
 /** \page requirements Requirements
 
-@section Knowledge What you need to know
+@section requirements_features C++ Features
 
-TODO
+Generally, the Platinum C++ framework can be compiled for any platform, 
+which provides an ISO C++ implementation. Some C++ features are only 
+supported on some systems or have an impact on application code using 
+the framwork. The following section will discuss, what constructs you 
+will find in the source code.
 
-@section LibraryRequirements Library Requirements
+@subsection requirements_std Standard Template Library and IOStreams
 
-The Platinum C++ framework can be compiled for any platform, which provides
-an ISO C++ implementation. Exception support is a strong requirement, i.e.
-it is and will never be possible to compile the framework without support
-for exceptions. At the moment, RTTI is required, but might be optional in
-the future. Usage of the C++ standard library (STL, IOStreams...) is limited
-to a subset that works across many platforms. If you encounter a problem here
-we would like to hear from you and solve it.
+The C++ standard library (STL and IOStreams) is used, so that it works with
+the native implementations on many platforms. Some platforms omit support for 
+std::locale and its use in the IOStreams library. In that case %Pt can be 
+built with or without support for it.
 
-The system dependent parts of %Pt, such as the systems programming module, 
-are designed to be very portable. The build process supports a variety
-of platforms and compilers. See the "Supported Platforms" page for more
-information.
+@subsection requirements_templates Templates
+
+C++ Templates are used extensively in the %Pt source code. Support for
+templates has improved enormously in the past years, only very few features 
+are still not available on all platforms. Some advanced template features
+required to build %Pt are full and partial template specialization and default
+template parameters.
+
+@subsection requirements_exceptions Exceptions
+
+Exception support is a strong requirement, i.e. it will never be possible
+to build the framework without support for exceptions. In fact, exceptions 
+have such a profound impact on reliability and performance, that ignoring
+them would reduce the quality of implementation by orders of magnitude.
+Exception handling can not be left out without giving up high-performance 
+and high-reliability and all other forms of error handling are simply not 
+competitive.
+
+@subsection requirements_rtti Runtime Type Information
+
+At the moment, RTTI is required, but might be optional in the future. It is
+not dynamic_cast that is required, but rather the typeid operator. It might
+be possible the provide a library based fallback for systems that do not
+support it.
+
+@section requirements_libraries Library Specific Requirements
+
+Some of the frameworks library modules have no dependencies besides standard
+c++ as described before, others have dependencies to system libraries or
+external libraries. Dependencies to system libraries are usually resolved when
+the developer tools are installed. If your system is listed on the "Supported 
+Platforms" page you should easily be able to install the missing dependencies,
+if any are missing at all.
+
+The build system will detect if a dependency is not available and skip the 
+respective library module in the build. Installing the missing dependency 
+will make the library module available for the build. The following sections 
+list the external dependencies.
+
+@subsection requirements_openssl OpenSSL
+
+The openssl library is required to build the Pt-Ssl library. On some systems,
+openssl has the status of a systems library, and using the implementation
+provided by the vendor is preferred. A built-in version is distributed with
+the %Pt source code for systems that do not have openssl.
+
+@subsection requirements_freetype Freetype
+
+The freetype library is required to build the Pt-Gfx library. Especially
+on systems with the X11 windowing system, the locally installed version
+must be used for compatibility reasons. A built-in version of freetype
+is provided for platforms that do not have freetype by default.
+
+@section requirements_tools Tools
 
 It is useful to install subversion on the build host to get the source code
-directly from the repository.
-
-@section PlatformRequirements Platform Specific Requirements
-
-@subsection Unix Linux and Unix
-
-In order to compile %Pt, you need to install the gnu toolchain, i.e. the
-gnu C and C++ compiler, the linker and binutils. The UI module requires 
-X11 headers and libraries to be installed. If possible, install also the
-freetype headers and libraries, as Xft often depends on that.
-
-@subsection Windows Windows
-
-Install one of the Visual Studio versions mentioned on the "Supported 
-Platforms" page. An express version will also work. Only the Windows UI
-library is required to build the UI module.
-
-@subsection OSX Mac OS-X
-
-Install the Xcode developer tools to get a C and C++ and the other required
-tools, headers and libraries. The UI module uses the CoreFoundation and 
-cocoa frameworks. The system and networking modules requires the posix APIs.
-
-@subsection WindowsCE Windows CE
-
-Only Visual Studio 2005 and 2008 have support for Windows CE and Windows Mobile.
-Older toolsets are not supported. Only the Windows UI library is required to 
-build the UI module.
-
-@subsection QNX QNX
-
-The QNX developer tools must be installed. Cross compiling on a windows host, 
-is supported as well as compiling directly on a QNX system. Only QNX Neutrino
-is supported. To build the UI library Photon is required which normally comes
-with the developer tools.
+directly from the repository. If you want to build the documentation you need
+to install doxygen.
 
 */
