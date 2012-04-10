@@ -68,7 +68,7 @@ on systems with the X11 windowing system, the locally installed version
 must be used for compatibility reasons. A built-in version of freetype
 is provided for platforms that do not have freetype by default.
 
-@section requirements_tools Tools
+@section requirements_tools Required Tools
 
 It is useful to install subversion on the build host to get the source code
 directly from the repository. If you want to build the documentation you need

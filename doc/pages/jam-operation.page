@@ -1,4 +1,4 @@
-/** \page jam-operation Program Operation
+/** \page jam-usage Basic Usage
 
 \htmlonly
 
@@ -24,21 +24,26 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -v ]
 
     <B>Jam</B> is a program construction tool, like <B>make</B>(1).
 
-    <P>
-
-    <B>Jam</B> recursively builds target files from source files,
-    using dependency information and updating actions expressed in
-    the Jambase, which is written in <B>jam</B>'s own interpreted
-    language. The default Jambase is provided with <B>jam</B> and
-    provides a boilerplate for common use, relying on the user-provided
-    files named "Jamfile" to enumerate actual targets and sources and
-    Jamconfigure to define the build configuration.
-
-    <P>
+<P>
+    <B>jam,</B> the Jam executable program, recursively builds targets
+    from source files using dependency and build specifications defined
+    in Jam build scripts, written in <B>jam</B>'s own interpreted
+    language. <B>jam</B> parses the build scripts to identify targets and
+    sources, examines the filesystem to determine which targets need updating,
+    and issues OS commands to update targets. The build scripts consist of
+    the Jambase which is distributed with jam and provides a boilerplate 
+    dependency information and updating actions for common use. It relies 
+    on the user-provided files named "Jamconfigure" and "Jamfile", to define
+    the build configuration and to enumerate actual targets and sources.
+    The build process is arranged in a several steps, normally consisting
+    of a build configuration step, followed by a build step and finally a
+    deployment or installation step.
+<P>
 
     The Jambase is described in the <a href="jam-jambase.html">Jambase
     Reference</a> and the document <a href="jam-buildprocess.html">Jam 
     Build Process</A>.
+<P>
 
 <A NAME="jam_options">
 <DT> <P> <H2> Command Line Options </H2> <DD>
@@ -131,6 +136,82 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -v ]
         <TD> Print the version of <B>jam</B> and exit.
 
     </TABLE>
+
+<A NAME="jam_required_files">
+<DT> <P> <H2> Required Files </H2> <DD>
+</A>
+
+<P>
+<DT> <P> <H3> The Jambase </H3> <DD>
+<P>
+    The Jambase file defines rules and variables which support standard
+    software build operations, like compiling, linking, etc. When <B>jam</B>
+    is invoked, a file named Jambase will be looked for in the project root 
+    directory, that is the entry point to the Jambase. The actual Jambase 
+    resides in a directory named "jam", also located in the project root 
+    directory.
+    
+<DT> <P> <H3> Project Specific Jam Scripts </H3> <DD>
+<P>
+    When the Jambase is loaded, <B>jam</B> reads up to three other user-defined
+    files from the project root, the Jamconfigure script, the Jamfile and the 
+    Jamrules. All three are written in the jam script language. The file 
+    Jamconfigure is mandatory and describes the build configuration. The 
+    Jamfile describes what to do with the source files in its directory. It 
+    may also cause Jamfiles in other directories to be read. Under certain 
+    circumstances, the first Jamfile read also causes a "Jamrules" file to be
+    read. The Jamrules file is an optional set of rule and variable definitions
+    used to define project-specific processing.
+<P>
+
+<DT> <P> <H3> Jam Executable Wrappers </H3> <DD>
+<P>
+    Two scripts come with the jam distribution that simplify boostrapping the
+    build process. One script named jam.sh runs on posix compatible build 
+    hosts, the other one named jam.bat runs on windows based build hosts.
+    These scripts bootstrap and run the jam executable, so that jam executables
+    do not have to be included for all possible build hosts, but rather built
+    on demand. A precompiled version for windows hosts is distributed with
+    the scripts named jam.exe.
+<P>
+
+<A NAME="jam_build_steps">
+<DT> <P> <H2> Build Steps </H2> <DD>
+</A>
+<P>
+    The build process usually consists of several steps, such as:
+
+    <UL>
+        <li>Build configuration</li>
+        <li>Building the targets</li>
+        <li>Cleaning the build</li>
+        <li>Installing targets</li>
+        <li>Uninstalling targets</li>
+    </UL>
+
+    The build must be configured before any other build steps can be performed.
+    The Jambase will read in a file named Jamconfigure, which describes what
+    aspects should be configured. Build configuration is started when jam is
+    executed for the target named "configure".
+<P>
+    After sucessful build configuration, the actual build can be started. For
+    this, the Jamfile is read, which describes which targets are built from the
+    source files etc. Optionally, a Jamrules file is read, which can provide
+    project specific rules and definitions. The build is initiated when jam
+    is executed for a build target or without any further command line 
+    arguments in which case all build targets are updated.
+<P>
+    The build can be cleaned up, i.e. all build targets can be removed by 
+    the clean step. Running jam for the "clean" target will work without
+    error even if the build has failed or not all build targets are present
+    for other reasons. The Jamfile provides information what files can be
+    cleaned up.
+<P>
+    When targets have been built sucessfully, they can be installed. This is
+    done by running jam for the target 'install'. The Jamfile also has to
+    provide information what files are to be installed. The target named
+    "uninstall" will remove any previously installed targets.
+<P>
 
 <A NAME="jam_operation">
 <DT> <P> <H2> Program Operation </H2> <DD>
@@ -265,6 +346,191 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -v ]
     they are run sequentially.   The -g flag reorders builds so that
     targets with newest sources are built first.  Normally, they are
     built in the order of appearance in the Jamfiles.
+
+
+<A NAME="jam_build_scripts">
+<DT> <P> <H2>Jam Build Scripts</H2>  <DD>
+</A>
+
+<P>
+    Jam build scripts contain rule invocations, which usually look like:
+<PRE>
+    <I>RuleName</I> <I>targets</I> : <I>targets</I> ;
+</PRE>
+    The target(s) to the left of the colon usually indicate what gets built,
+    and the target(s) to the right of the colon usually indicate what it is
+    built from.
+<P>
+    Elements in jam scripts are delimited by whitespace (blanks, tabs, or newlines).
+    Elements to be delimited include rule names, targets, colons, and semicolons.
+    A common mistake users make is to forget the whitespace, e.g.,
+<PRE>
+    Main myprog: main.c util.c ; #<I>WRONG!</I>
+</PRE>
+    Jam doesn't distinguish between a typo and a target called "myprog:", so 
+    if you get strange results, the first thing you should check for in your
+    Jamfile is missing whitespace.
+<P>
+
+<DT> <P> <H3> Jamconfigure </H3> <DD>
+<P>
+    A Jamconfigure script can be very simple:
+<PRE>
+    ConfigureCc ;
+</PRE>
+    This specifies that the C compiler should be configured. The rule named
+    ConfigureCc does not require any arguments, therefore the statement
+    consists just of the rulename followed by a semicolon. The build can
+    then be configured by executing:
+<PRE>
+    jam configure
+</PRE>
+<P>
+
+<DT> <P> <H3> Jamfile </H3> <DD>
+<P>
+    A Jamfile can be as simple as this:
+<PRE>
+    Main myprog : main.c util.c ;
+</PRE>
+    This specifies that there is a main.c and util.c file in the same directory
+    as the Jamfile, and that those source files should bec ompiled and linked
+    into an executable called myprog. If you cd to the directory where this 
+    Jamfile lives, you can see the exactly how <b>jam</b> would build myprog
+    with:
+<PRE>
+    jam -n
+</PRE>
+    Or, you can actually build myprog with the command:
+<PRE>
+    jam
+</PRE>
+
+<DT> <P> <H3> Filenames, Target Identifiers, and Buildable Targets</H3> <DD>
+<P>
+    Consider this Jamfile:
+<PRE>
+    Main myprog : main.c util.c ;                   
+    LinkLibraries myprog : tree ;     
+    Library tree : treemake.c treetrav.c ;    
+</PRE>
+<P>
+    The Main rule specifies that an executable called myprog will be built.
+    The compiled main.c and util.c objects will be linked to produce myprog. 
+    The LinkLibraries rule specifies that tree will be linked into myprog
+    as well. The Library rule specifies which source files will be compiled 
+    and archived into the tree library.
+<P>
+    The Jamfile above refers to targets like "myprog" and "libtree". However,
+    depending on the platform you're building on, the actual filenames of 
+    those targets could be "myprog.exe" and "tree.lib". Most Jambase rules
+    supply the actual filenames of targets, so that Jamfiles themselves need
+    not make any platform-specific filename references.
+<P>
+    The <b>jam</b> program builds up a list of unique target identifiers.
+    Unless you are using the SubDir rules (described later), the default 
+    identifier for a file target is its filename. In the above example, the
+    target identifiers are the filenames: myprog.exe, tree.lib, main.obj, etc.
+<P>
+    You can use any buildable target on the <b>jam</b> command line to build a
+    subset of defined targets. In our example:
+<PRE>
+    jam libtree.a 
+</PRE>
+    on Unix builds the libtree library and all the compiled objects that go 
+    in it.
+<P>
+
+<DT> <P> <H3> Pseudotargets </H3> <DD>
+<P>
+    While most Jambase rules refer to "targets", not all targets are buildable.
+    There are two kinds of buildable targets: file targets and pseudotargets.
+    File targets are objects that can be found in the filesystem. Pseudotargets
+    are symbolic, and represent other targets. Examples for preudotargets are
+    "configure" or "install", which start the configure step and the install
+    step, respectively.
+<P>
+    Most Jambase rules that define file targets also define pseudotargets
+    which are dependent on types of file targets. For example, Jambase defines
+    a pseudotarget called "clean", which is dependent on all targets created in
+    the build step. So the command:  
+<PRE>
+        jam clean
+</PRE> 
+    used with the above example would cause the program myprog, the tree
+    library, and all object files to be removed and thus clean the build.
+    Also, there is one pseudotarget built into <b>jam</b> itself, called
+    "all". Jambase sets "all" dependent on (almost) all other targets.
+<P>
+    In the unfortunate case where you have a buildable target whose name
+    is the same as one of the Jambase pseudotargets, you'll have problems
+    with the conflicting target name. Your workaround choices are:
+<P>
+<ol>
+    <lI>Change the name of your buildable file or directory that conflicts.
+<p>
+    <li>Modify your Jambase and change the name of the conflicting pseudotarget.
+    (Pseudotargets are defined in Jambase using the NOTFILE rule.)
+<p>
+    <li>Use grist on the conflicting target name in your Jamfile. E.g., 
+        instead of
+    <PRE>
+        File lib : libfoo.a ;
+    </PRE>
+    try
+    <PRE>
+        File &lt;dir&gt;lib : libfoo.a ;
+    </PRE>
+</ol>
+<P>
+
+<DT> <P> <H3> Dependencies </H3> <DD>
+<P>
+    Jambase rules set dependencies on targets, so that if you update a source
+    file, all the file targets that depend on that source file, and only the
+    ones that depend on that source file, will be updated (rebuilt) the next
+    time you run <b>jam</b>. 
+<P>
+    Here are some of the dependencies that get set when <b>jam</b> runs on NT
+    using the example Jamfile above:
+<CENTER>
+    <TABLE> 
+        <TR><TD><B>Target</B><TD>&nbsp;&nbsp;&nbsp;<TD><B>Depends on</B></TD>
+        <TR><TD>myprog.exe<TD><TD>main.obj, util.obj, libtree.lib
+        <TR><TD>libtree.lib<TD><TD>treemake.obj, treetrav.obj
+        <TR><TD>treetrav.obj<TD><TD>treetrav.c
+    </TABLE>
+</CENTER>
+<P>
+    Furthermore, the Main and Library rules set up recursive header scanning
+    on their source targets. So after <b>jam</b> has finished parsing the
+    Jamfile and setting the rule-driven dependencies, it scans the source 
+    files for "#include" lines. All #include files found during this scan
+    become dependencies of the compiled object. E.g., all header files used
+    to compile treetrav.c would be made dependencies of treetrav.obj.
+<P>
+    As a result, when you run <b>jam</b>, it will rebuild targets if either
+    the source files change or the header files change. You can't tell by 
+    looking at a Jamfile which header files are dependencies, but you can 
+    easily display those dependencies with:
+<PRE>
+    jam -nd+3
+</PRE>
+
+<DT> <P> <H3> Rule Ordering </H3> <DD>
+<P>
+    Rules that define a target, like the Main, Library and SharedLibrary rule
+    must be invoked before any other rule using the same target is invoked. 
+    For example, the LinkLibraries rule for the target myprog must be called
+    after the Main rule defined the target myprog. However, do not expect the
+    actions to be executed later in the order the rules were invoked, as the
+    rules only specify dependencies and <b>jam</b> figures out the order in 
+    which targets are built from their dependencies.
+<P>
+    Some rules, set variables which are used by subsequent rule invocations,
+    and their ordering is important. For example, the SubDir* rules (discussed
+    later) must be invoked in a particular order. 
+<P>
 
 <A NAME="jam_diagnostics">
 <DT> <P> <H2> Diagnostics </H2>  <DD>

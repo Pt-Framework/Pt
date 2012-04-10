@@ -2,15 +2,13 @@
 
 \htmlonly
 
-<DT> <P> <H2> Overview </H2> <DD>
+<DT> <P> <H2> Lexical Features </H2> <DD>
 
     <B>Jam</b> has a interpreted, procedural language with a few
     select features to effect program construction.  Statements in
     <b>jam</b> are rule (procedure) definitions, rule invocations,
     updating action definitions, flow-of-control structures, variable
     assignments, and sundry language support.
-
-<DT> <P> <H2> Lexical Features </H2> <DD>
 
     <P>
 

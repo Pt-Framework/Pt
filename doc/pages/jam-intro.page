@@ -2,7 +2,7 @@
 
 Jam is a software build tool that makes building simple things simple and 
 building complicated things manageable. It has been developed by 
-<a href="mailto:seiwald@perforce.com">Christopher Seiwald</a>) at
+<a href="mailto:seiwald@perforce.com">Christopher Seiwald</a> at
 <a href="http://www.perforce.com">Perforce</a> and then improved by various
 people over time. It is freely available as C source and is widely used to
 build commercial and academic software. Jam is a very good solution for 
