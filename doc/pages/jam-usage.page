@@ -442,7 +442,7 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -v ]
     as well. The Library rule specifies which source files will be compiled 
     and archived into the tree library.
 <P>
-    The Jamfile above refers to targets like "myprog" and "libtree". However,
+    The Jamfile above refers to targets like "myprog" and "tree". However,
     depending on the platform you're building on, the actual filenames of 
     those targets could be "myprog.exe" and "tree.lib". Most Jambase rules
     supply the actual filenames of targets, so that Jamfiles themselves need

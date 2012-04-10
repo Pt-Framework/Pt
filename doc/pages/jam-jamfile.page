@@ -6,9 +6,9 @@
 <P>
     This document describes how to use the various Jambase rules from a 
     functional point of view. You can see the summary of available Jambase
-    rules in the<a href="jam-jambase.html">Jambase Reference</A>. The detailed
-    specifications for any Jambase rule can be found by reading the rule
-    definition itself in the Jambase.
+    rules in the <a href="jam-jambase.html">Jambase Reference</A>. The
+    detailed specifications for any Jambase rule can be found by reading the
+    rule definition itself in the Jambase.
 <P>
 
 <A NAME="jam_building"><H2>Build Configuration</H2></A>
@@ -24,7 +24,7 @@
 <H4> CheckBuildC, CheckBuildC++ Rules </H4>
 <P>
     Once the toolset has been configured with the ConfigureC or the 
-    ConfigureC++ rule, the rule CheckBuildC and CheckBuildC++ can be used 
+    ConfigureC++ rule, the rules CheckBuildC and CheckBuildC++ can be used 
     to build small test programs to find out if headers and libraries are 
     available.
 <PRE>
@@ -66,7 +66,7 @@
 <H4> ConfigureCc, ConfigureC++ Rules </H4>
 <P>
     The ConfigureCc and ConfigureC++ rules can be used to configure the 
-    toolset so that C or C++ programs can be built with the build rules 
+    toolset, so that C or C++ programs can be built with the build rules 
     like Main, Library and SharedLibrary. They do not require any arguments
     and have to be invoked before any other tests are done that require 
     the toolsets to be functional.
@@ -74,7 +74,8 @@
     ConfigureCc ; # configure C compiler
     ConfigureC++ ; # configure C++ compiler
 </PRE>
-    All tests will be logged in the file config.log.
+    Most, if not all Jamconfigure scripts call one or both rules at the
+    beginning. All tests will be logged in the file config.log.
 <P>
 
 <H4> EchoOption </H4>
@@ -121,7 +122,8 @@
 <P>
     The rules to build targets can only be used in the Jamfiles and the
     Jamrules script. All build options that were configured are available
-    in the build step
+    in the build step. Some rules like Main, Library and SharedLibray
+    can only work if the toolset has been configured previously.
 <P>
 
 <A NAME="jam_subdirs"><H3>Handling Directory Trees</H3></A>
@@ -1292,6 +1294,23 @@
 <P>
 
 <A NAME="jam_install"><H2>Installing Files</H2></A>
+
+<H4> MakeInstall Rule <H4>
+<P>
+    The MakeInstall rule installs a target at a given location. It works for
+    all targets defined by the Main, Library and SharedLibrary rules.
+
+<PRE>
+    Main myprog : main.c ;
+    MakeInstall myprog : $(MY_INSTALL_BINDIR) ;
+</PRE>
+
+    This installs the program "myprog" to the path given by the variable
+    MY_INSTALL_BINDIR. This rule calls one or more of the other Install*
+    rules as appropriate.
+<P>
+
+<H4> Install Rules <H4>
 
 Jambase provides a set of Install* rules to copy files
 into an destination directory and set permissions on them.

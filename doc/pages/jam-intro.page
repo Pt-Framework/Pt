@@ -23,7 +23,7 @@ dependencies and object files both automatically and on-the-fly. Before any
 targets are updated, Jam gathers complete dependency information for C/C++ 
 source files.
 
-<b>All this allows Jam to:<\b>
+<b>All this allows Jam to:</b>
 
 - build projects with complex directory hierarchies is still simple 
 
