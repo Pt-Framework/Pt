@@ -193,8 +193,15 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -v ]
 <P>
     The build must be configured before any other build steps can be performed.
     The Jambase will read in a file named Jamconfigure, which describes what
-    aspects should be configured. Build configuration is started when jam is
-    executed for the target named "configure".
+    aspects should be configured i.e. tests are run to determine if all 
+    required dependencies, such as system headers and libraries are present. 
+    Build configuration is started when jam is executed for the target named 
+    "configure" and a log is written to a file named config.log. The result 
+    of the configuration is stored in a file named config.jam and all variables
+    in this file are available to the following build steps. Before the
+    user-defined tests are executed, the built-in tests are run to detect
+    some basic capabilities of the build host platform for example how to 
+    delete files or create directories.
 
 <DT> <P> <H3> Building Targets </H3> <DD>
 <P>
@@ -247,6 +254,11 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -v ]
     variable's environment value, use the -s option.  To see variable
     assignments made during <b>jam</b>'s execution, use the -d+7
     option.
+
+    <P>
+
+    All command line options are also passed to the jam build scripts
+    in a global variable named ARGS.
 
 <DT> <P> <H3> Parsing </H3> <DD>
 
@@ -385,11 +397,12 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -v ]
     A Jamconfigure script can be very simple:
 <PRE>
     ConfigureCc ;
+    ConfigureC++ ;
 </PRE>
-    This specifies that the C compiler should be configured. The rule named
-    ConfigureCc does not require any arguments, therefore the statement
-    consists just of the rulename followed by a semicolon. The build can
-    then be configured by executing:
+    This specifies that the C and C++ compiler should be configured. The rules
+    named ConfigureCc and ConfigureC++ do not require any arguments, therefore
+    the statement consists just of the rulename followed by a semicolon. The 
+    build can then be configured by executing:
 <PRE>
     jam configure
 </PRE>

@@ -3,29 +3,135 @@
 \htmlonly
 
 <A NAME="jam_overview"><H2>Overview</H2></A>
-
 <P>
-This document describes how to use various Jambase rules
-from a functional point of view.
-You can see the summary of available Jambase rules in the
-
-<a href="jam-jambase.html">Jambase Reference</A>.
-The detailed specifications for any Jambase rule
-can be found by reading the rule definition itself
-in the Jambase file.
+    This document describes how to use the various Jambase rules from a 
+    functional point of view. You can see the summary of available Jambase
+    rules in the<a href="jam-jambase.html">Jambase Reference</A>. The detailed
+    specifications for any Jambase rule can be found by reading the rule
+    definition itself in the Jambase.
 <P>
 
-<A NAME="jam_subdirs"><H2>Handling Directory Trees</H2></A>
+<A NAME="jam_building"><H2>Build Configuration</H2></A>
+<P>
+    The build configuration rules can only be used in the Jamconfigure script
+    and perform all necessary tests to determine whether all dependencies
+    required for the build are present. When the Jamconfigure script is run
+    in the build configuration step, the results of the executed tests are 
+    stored in a result file named config.jam. All variables stored in this 
+    file are available to the following build steps.
+<P>
 
-       The SubDir* rules are used to
-       define source code directory hierarchies.
-       With SubDir and SubInclude, you can use <b>jam</b>
-       to build software from source files and Jamfiles spread
-       across many directories, as is typical for large projects.
-       The SubDir* rules unify an entire
-       source code tree so that <b>jam</b> can read in
-       all the Jamfiles in one pass and 
-       compute dependencies across the entire project.
+<H4> CheckBuildC, CheckBuildC++ Rules </H4>
+<P>
+    Once the toolset has been configured with the ConfigureC or the 
+    ConfigureC++ rule, the rule CheckBuildC and CheckBuildC++ can be used 
+    to build small test programs to find out if headers and libraries are 
+    available.
+<PRE>
+    WITH_DL = [ CheckBuildC++ "#include <dlfcn.h>"
+                              "int main() { dlopen(0,0); return 0; }"
+                             : ""
+                             : -ldl ] ; 
+</PRE>
+
+    This uses the C++ toolset to compile a small program calling a function
+    of the dl library. The program is linked with the linker flag -ldl. The
+    third argument passed to CheckBuildC++ is empty, but additional compiler
+    flags could be passed here. An optional fifth argument allows to pass
+    linker paths to the build command.The rule will return nothing if the 
+    program can not be built. The command will be logged in the file 
+    config.log.
+<P>
+
+<H4> Configure Rule </H4>
+<P>
+    The Configure rule can be used to make the result of a test available to
+    the following build steps.
+<PRE>
+    WITH_FOO = ;
+    if --with-foo in $(ARGS)
+    {
+        WITH_FOO = yes ;
+    }
+
+    Configure WITH_FOO ; 
+</PRE>
+
+    This tests if the command line option "--with-foo" was set and if so,
+    the jam variable named WITH_FOO is stored in the build configuration
+    result file. Note, that empty variables are not stored, so later in the
+    Jamfiles it can simply be tested if WITH_FOO is set or not.
+<P>
+
+<H4> ConfigureCc, ConfigureC++ Rules </H4>
+<P>
+    The ConfigureCc and ConfigureC++ rules can be used to configure the 
+    toolset so that C or C++ programs can be built with the build rules 
+    like Main, Library and SharedLibrary. They do not require any arguments
+    and have to be invoked before any other tests are done that require 
+    the toolsets to be functional.
+<PRE>
+    ConfigureCc ; # configure C compiler
+    ConfigureC++ ; # configure C++ compiler
+</PRE>
+    All tests will be logged in the file config.log.
+<P>
+
+<H4> EchoOption </H4>
+<P>
+    This rule formats and prints the value and description of a configured 
+    value. It has the purpose to indicate progress during the configuration
+    step.
+<PRE>
+    EchoOption --with-foo : "Enable foo module" : $(WITH_FOO:E="no") ;
+</PRE>
+    The first argument is the option itself, the second one the description
+    and the third one the value configured for the option. The third
+    argument is optional and if left away, the first argument will be taken
+    as the name of the jam variable that holds the value:
+<PRE>
+    EchoOption MY_INSTALL_BINDIR : "Program installation directory" ;
+</PRE>
+    If this form is used, it will be indicated that the MY_INSTALL_BINDIR
+    variable can be overridden with the -s command line switch, in this case
+    something like -sMY_INSTALL_BINDIR=/some/dir.
+<P>
+
+<H4> TryCommand </H4>
+<P>
+    The TryCommand rule takes one argument and that is a shell command to
+    execute. It can be used to check if a required tool is in the path:
+<PRE>
+    if [ TryCommand "ls" ]
+    {
+        Echo The ls command is available ;
+    }
+    else
+    {
+        Echo The ls command is not available ;
+    }
+</PRE>
+    The rule returns nothing if the return code of the shell command indicates
+    failure. All output of the command will be written to the logfile 
+    config.log. This is the most basic form to perform tests, but usually one 
+    of the more high-level configuration rules will be used.
+<P>
+
+<A NAME="jam_building"><H2>Building Executables and Libraries</H2></A>
+<P>
+    The rules to build targets can only be used in the Jamfiles and the
+    Jamrules script. All build options that were configured are available
+    in the build step
+<P>
+
+<A NAME="jam_subdirs"><H3>Handling Directory Trees</H3></A>
+
+       The SubDir* rules are used to define source code directory hierarchies.
+       With SubDir and SubInclude, you can use <b>jam</b> to build software 
+       from source files and Jamfiles spread across many directories, as is 
+       typical for large projects. The SubDir* rules unify an entire source 
+       code tree so that <b>jam</b> can read in all the Jamfiles in one pass 
+       and compute dependencies across the entire project.
 
 <P>
     To use the SubDir* rules, you must:
@@ -294,14 +400,7 @@ in the Jambase file.
        definition must end in a period (more VMS rules).
 <P>
 
-<A NAME="jam_building"><H2>Building Executables and Libraries</H2></A>
-<P>
-
-The rules that build executables and libraries are: Main, Library,
-and LinkLibraries.
-<H4>
-   Main Rule
-</H4>
+<H4> Main Rule </H4>
        The Main rule compiles source files and links the  resulting 
        objects into an executable.  For example:
 <PRE>
