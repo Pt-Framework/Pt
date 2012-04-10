@@ -144,9 +144,9 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -v ]
 <P>
 <DT> <P> <H3> The Jambase </H3> <DD>
 <P>
-    The Jambase file defines rules and variables which support standard
-    software build operations, like compiling, linking, etc. When <B>jam</B>
-    is invoked, a file named Jambase will be looked for in the project root 
+    The Jambase defines rules and variables which support standard software
+    build operations, like compiling, linking, etc. When <B>jam</B> is
+    invoked, a file named Jambase will be looked for in the project root 
     directory, that is the entry point to the Jambase. The actual Jambase 
     resides in a directory named "jam", also located in the project root 
     directory.

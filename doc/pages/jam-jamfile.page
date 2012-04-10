@@ -49,7 +49,7 @@
     the following build steps.
 <PRE>
     WITH_FOO = ;
-    if --with-foo in $(ARGS)
+    if --with-foo in &#36;(ARGS)
     {
         WITH_FOO = yes ;
     }
@@ -1295,7 +1295,7 @@
 
 <A NAME="jam_install"><H2>Installing Files</H2></A>
 
-<H4> MakeInstall Rule <H4>
+<H4> MakeInstall Rule </H4>
 <P>
     The MakeInstall rule installs a target at a given location. It works for
     all targets defined by the Main, Library and SharedLibrary rules.
@@ -1310,7 +1310,7 @@
     rules as appropriate.
 <P>
 
-<H4> Install Rules <H4>
+<H4> Install Rules </H4>
 
 Jambase provides a set of Install* rules to copy files
 into an destination directory and set permissions on them.
