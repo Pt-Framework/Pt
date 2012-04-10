@@ -41,8 +41,8 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -v ]
 <P>
 
     The Jambase is described in the <a href="jam-jambase.html">Jambase
-    Reference</a> and the document <a href="jam-buildprocess.html">Jam 
-    Build Process</A>.
+    Reference</a> and the document <a href="jam-jamfile.html">Using the 
+    Jambase</A>.
 <P>
 
 <A NAME="jam_options">
@@ -267,7 +267,7 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -v ]
     and the Jamconfigure and Jamfile uses these to specify the actual 
     relationship among the target and source files.  See the <a
     href="jam-jambase.html">Jambase Reference</a> and the document <a
-    href="jam-buildprocess.html">Jam Build Process</A> for information.
+    href="jam-jamfile.html">Using the Jambase</A> for information.
 
 <A NAME="binding">
 <DT> <P> <H3> Binding </H3> 

@@ -1,4 +1,4 @@
-/** \page jam-jamfile Jam Build Process
+/** \page jam-jamfile Using the Jambase
 
 \htmlonly
 
@@ -9,7 +9,7 @@ This document describes how to use various Jambase rules
 from a functional point of view.
 You can see the summary of available Jambase rules in the
 
-<a href="Jambase.html">Jambase Reference</A>.
+<a href="jam-jambase.html">Jambase Reference</A>.
 The detailed specifications for any Jambase rule
 can be found by reading the rule definition itself
 in the Jambase file.
