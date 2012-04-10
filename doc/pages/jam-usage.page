@@ -175,8 +175,8 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -v ]
     the scripts named jam.exe.
 <P>
 
-<A NAME="jam_build_steps">
-<DT> <P> <H2> Build Steps </H2> <DD>
+<A NAME="jam_build_layout">
+<DT> <P> <H2> Build Process Layout </H2> <DD>
 </A>
 <P>
     The build process usually consists of several steps, such as:
@@ -189,10 +189,14 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -v ]
         <li>Uninstalling targets</li>
     </UL>
 
+<DT> <P> <H3> Build Configuration </H3> <DD>
+<P>
     The build must be configured before any other build steps can be performed.
     The Jambase will read in a file named Jamconfigure, which describes what
     aspects should be configured. Build configuration is started when jam is
     executed for the target named "configure".
+
+<DT> <P> <H3> Building Targets </H3> <DD>
 <P>
     After sucessful build configuration, the actual build can be started. For
     this, the Jamfile is read, which describes which targets are built from the
@@ -200,12 +204,16 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -v ]
     project specific rules and definitions. The build is initiated when jam
     is executed for a build target or without any further command line 
     arguments in which case all build targets are updated.
+
+<DT> <P> <H3> Clean Up </H3> <DD>
 <P>
     The build can be cleaned up, i.e. all build targets can be removed by 
     the clean step. Running jam for the "clean" target will work without
     error even if the build has failed or not all build targets are present
     for other reasons. The Jamfile provides information what files can be
     cleaned up.
+
+<DT> <P> <H3> Installation and Deployment </H3> <DD>
 <P>
     When targets have been built sucessfully, they can be installed. This is
     done by running jam for the target 'install'. The Jamfile also has to
@@ -213,8 +221,8 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -v ]
     "uninstall" will remove any previously installed targets.
 <P>
 
-<A NAME="jam_operation">
-<DT> <P> <H2> Program Operation </H2> <DD>
+<A NAME="jam_execution">
+<DT> <P> <H2> Program Execution </H2> <DD>
 </A>
     <P>
 
