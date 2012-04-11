@@ -13,7 +13,6 @@ PT_SYSTEM_TESTS =
                   ThreadTest.cpp
                   TimerTest.cpp
                   UriTest.cpp
-				  SerialDeviceManualTest.cpp
                   ;
 
 Main Pt-System-test : Pt-System-test.cpp $(PT_SYSTEM_TESTS) ;
