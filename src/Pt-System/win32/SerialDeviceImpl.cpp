@@ -321,14 +321,8 @@ void SerialDeviceImpl::setTimeout( size_t msec )
     comTimeOut.ReadTotalTimeoutMultiplier   = MAXDWORD;
     comTimeOut.ReadTotalTimeoutConstant     = msec;
 
-#ifdef _WIN32_WCE
     comTimeOut.WriteTotalTimeoutMultiplier  = 0;
     comTimeOut.WriteTotalTimeoutConstant    = msec;
-#else
-    comTimeOut.WriteTotalTimeoutMultiplier  = 10;
-    comTimeOut.WriteTotalTimeoutConstant    = 100;
-#endif
-
     if( !SetCommTimeouts( handle(), &comTimeOut ) )
         throw IOError("SetCommTimeouts");
 }
@@ -396,11 +390,11 @@ void SerialDeviceImpl::open( const std::string& port_, std::ios::openmode mode)
 
         // Do not use timeouts, return read data immediately.
         COMMTIMEOUTS comTimeOut;
-        comTimeOut.ReadIntervalTimeout          = MAXDWORD;
-        comTimeOut.ReadTotalTimeoutMultiplier   = MAXDWORD;
-        comTimeOut.ReadTotalTimeoutConstant     = MAXDWORD-1; // MAXDWORD does not apply for all drivers
+        comTimeOut.ReadIntervalTimeout          = 0;
+        comTimeOut.ReadTotalTimeoutMultiplier   = 0;
+        comTimeOut.ReadTotalTimeoutConstant     = 100;
         comTimeOut.WriteTotalTimeoutMultiplier  = 0;
-        comTimeOut.WriteTotalTimeoutConstant    = 1;
+        comTimeOut.WriteTotalTimeoutConstant    = 100;
 
         if( !SetCommTimeouts( h, &comTimeOut ) )
             throw IOError("SetCommTimeouts");
