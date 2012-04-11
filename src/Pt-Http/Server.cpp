@@ -562,6 +562,26 @@ Server::Server(System::EventLoop& eventLoop, const std::string& ip, unsigned sho
     _serverSocket.connectionPending() += Pt::slot(*this, &Server::onAccept);
 }
 
+Server::Server(System::EventLoop& eventLoop, const Pt::Net::AddrInfo& addr, int backlog)
+: _loop(eventLoop)
+, _serverSocket(addr, backlog)
+, _useWorker(0)
+, _minThreads(1)
+, _maxThreads(1)
+, _readTimeout(20000)
+, _writeTimeout(20000)
+, _keepAliveTimeout(30000)
+{
+    _defaultService = new NotFoundService();
+    _noAuthService = new NotAuthenticatedService();
+
+    _serverSocket.setActive(_loop);
+    _serverSocket.beginAccept();
+
+    this->startWorker();
+    
+    _serverSocket.connectionPending() += Pt::slot(*this, &Server::onAccept);
+}
 
 Server::~Server()
 {
@@ -580,6 +600,14 @@ Server::~Server()
 
     delete _defaultService;
     delete _noAuthService;
+}
+
+
+void Server::listen(const Pt::Net::AddrInfo& addr, int backlog)
+{
+    this->startWorker();
+    _serverSocket.listen(addr, backlog);
+    _serverSocket.beginAccept();
 }
 
 

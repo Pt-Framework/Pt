@@ -64,10 +64,12 @@ class PT_HTTP_API Server : public Pt::Connectable
         explicit Server(System::EventLoop& eventLoop);
 
         Server(System::EventLoop& eventLoop, const std::string& ip, unsigned short int port, int backlog = 5);
+		Server(System::EventLoop& eventLoop, const Pt::Net::AddrInfo& addr, int backlog = 5);
 
         ~Server();
 
         void listen(const std::string& ip, unsigned short int port, int backlog = 5);
+		void listen(const Pt::Net::AddrInfo& addr, int backlog = 5);
 
         void addService(const std::string& url, Service& service);
 
