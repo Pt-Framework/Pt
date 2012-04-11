@@ -76,16 +76,8 @@ void TcpServerImpl::close()
     _ioh.fd = -1;
 }
 
-
-void TcpServerImpl::listen(const std::string& ipaddr,
-                           unsigned short int port,
-                           int backlog, unsigned flags)
+void TcpServerImpl::listen(const AddrInfo& ai, int backlog, unsigned flags)
 {
-    log_debug("listen on " << ipaddr << " port " << port
-              << " backlog " << backlog << " flags " << flags);
-
-    AddrInfo ai(ipaddr, port, true);
-
     static const int on = 1;
 
     // getaddrinfo() may return more than one addrinfo structure, so work
@@ -169,9 +161,22 @@ void TcpServerImpl::listen(const std::string& ipaddr,
     close();
 
     if (errno == EADDRINUSE)
-        throw AddressInUse(ipaddr, port);
+        throw AddressInUse(ai.host(), ai.port());
     else
         throw System::IOError("bind");
+}
+                    
+void TcpServerImpl::listen(const std::string& ipaddr,
+                           unsigned short int port,
+                           int backlog, unsigned flags)
+{
+
+    log_debug("listen on " << ipaddr << " port " << port
+              << " backlog " << backlog << " flags " << flags);
+
+    AddrInfo ai(ipaddr, port, true);
+    
+    listen(ai, backlog, flags); 
 }
 
 

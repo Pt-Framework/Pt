@@ -40,8 +40,15 @@ namespace Pt {
 
 namespace Net {
 
+AddrInfoImpl::AddrInfoImpl()
+: _ai(0)
+, _ainfo(0)
+{
+}
+
 AddrInfoImpl::AddrInfoImpl(const std::string& host, unsigned short port, bool listen)
 : _ai(0)
+, _ainfo(0)
 { 
     struct addrinfo hints;
     std::memset(&hints, 0, sizeof(hints));
@@ -55,16 +62,17 @@ AddrInfoImpl::AddrInfoImpl(const std::string& host, unsigned short port, bool li
 
 AddrInfoImpl::~AddrInfoImpl()
 {
-    if (_ai)
-        freeaddrinfo(_ai);
+    if (_ainfo)
+        freeaddrinfo(_ainfo);
 }
 
 
 void AddrInfoImpl::init(const std::string& host, unsigned short port, const addrinfo& hints)
 {
-    if (_ai)
+    if (_ainfo)
     {
-        freeaddrinfo(_ai);
+        freeaddrinfo(_ainfo);
+        _ainfo = 0;
         _ai = 0;
     }
 
@@ -79,8 +87,10 @@ void AddrInfoImpl::init(const std::string& host, unsigned short port, const addr
     if( ! host.empty() )
         node = host.c_str();
 
-    if (0 != ::getaddrinfo(node, p.str().c_str(), &hints, &_ai))
+    if (0 != ::getaddrinfo(node, p.str().c_str(), &hints, &_ainfo))
         throw System::AccessFailed(_host + ':' + p.str());
+        
+    _ai= _ainfo;
 }
 
 
@@ -122,6 +132,29 @@ void sockaddrToString(const sockaddr_storage& addr, std::string& str)
     const char* p = inet_ntop(sa->sin_family, &sa->sin_addr, strbuf, sizeof(strbuf));
     str = (p == 0 ? "-" : strbuf);
 #endif
+}
+
+
+AddrInfoImpl* AddrInfoImpl::bindAnyIp4(unsigned short port)
+{
+	AddrInfoImpl* impl = new AddrInfoImpl();
+
+    sockaddr_in* addr = reinterpret_cast<sockaddr_in*>(&(impl->_specialAddr));
+	memset( &(impl->_specialAddr), 0, sizeof(sockaddr_storage) );
+    addr->sin_family = AF_INET;
+    addr->sin_port = htons(port);
+    addr->sin_addr.s_addr = INADDR_ANY;
+
+    memset( &(impl->_special), 0, sizeof(addrinfo) );
+	impl->_special.ai_family = AF_INET;
+    impl->_special.ai_flags |= AI_PASSIVE;
+    impl->_special.ai_addr = (sockaddr*)(addr);
+	impl->_special.ai_addrlen = sizeof(sockaddr_in);
+	impl->_special.ai_next = 0;
+
+	impl->_ai = &(impl->_special);
+
+	return impl;
 }
 
 } // namespace Net

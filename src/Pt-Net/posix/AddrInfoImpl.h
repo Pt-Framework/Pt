@@ -46,6 +46,9 @@ class AddrInfoImpl : public Pt::RefCounted
         std::string _host;
         unsigned short _port;
         struct addrinfo* _ai;
+		struct addrinfo* _ainfo;
+		struct addrinfo _special;
+		struct sockaddr_storage _specialAddr;
 
     public:
         class const_iterator : public std::iterator<std::forward_iterator_tag, addrinfo>
@@ -91,6 +94,8 @@ class AddrInfoImpl : public Pt::RefCounted
                 }
         };
 
+		AddrInfoImpl();
+		
         AddrInfoImpl(const std::string& host, unsigned short port, bool listen);
 
         ~AddrInfoImpl();
@@ -110,6 +115,8 @@ class AddrInfoImpl : public Pt::RefCounted
         { return const_iterator(); }
 
         static void hostAddresses(std::vector<std::string>& ips);
+        
+        static AddrInfoImpl* bindAnyIp4(unsigned short port); 
 };
 
 void sockaddrToString(const sockaddr_storage& addr, std::string& str);

@@ -201,7 +201,7 @@ void TcpServerImpl::listen(const AddrInfo& ai, int backlog, unsigned)
     close();
 
     if (WSAGetLastError() == WSAEADDRINUSE)
-        throw AddressInUse();
+        throw AddressInUse( ai.host(), ai.port() );
     else
         throw System::IOError("bind");
 }
