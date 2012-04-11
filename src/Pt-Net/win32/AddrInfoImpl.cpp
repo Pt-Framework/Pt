@@ -38,8 +38,16 @@ namespace Pt {
 
 namespace Net {
 
+AddrInfoImpl::AddrInfoImpl()
+: ai(0)
+, ainfo(0)
+{
+}
+
+
 AddrInfoImpl::AddrInfoImpl(const std::string& ipaddr, unsigned short port, bool listen)
 : ai(0)
+, ainfo(0)
 {
     struct addrinfo hints;
     memset(&hints, 0, sizeof(hints));
@@ -53,53 +61,53 @@ AddrInfoImpl::AddrInfoImpl(const std::string& ipaddr, unsigned short port, bool 
 
 AddrInfoImpl::~AddrInfoImpl()
 {
-    if (ai)
-        ::freeaddrinfo(ai);
+    if (ainfo)
+        ::freeaddrinfo(ainfo);
+}
+
+
+AddrInfoImpl* AddrInfoImpl::bindAnyIp4(unsigned short port)
+{
+	AddrInfoImpl* impl = new AddrInfoImpl();
+
+    sockaddr_in* addr = reinterpret_cast<sockaddr_in*>(&(impl->_specialAddr));
+	memset( &(impl->_specialAddr), 0, sizeof(sockaddr_storage) );
+    addr->sin_family = AF_INET;
+    addr->sin_port = htons(port);
+    addr->sin_addr.s_addr = INADDR_ANY;
+
+    memset( &(impl->_special), 0, sizeof(addrinfo) );
+	impl->_special.ai_family = AF_INET;
+    impl->_special.ai_flags |= AI_PASSIVE;
+    impl->_special.ai_addr = (sockaddr*)(addr);
+	impl->_special.ai_addrlen = sizeof(sockaddr_in);
+	impl->_special.ai_next = 0;
+
+	impl->ai = &(impl->_special);
+
+	return impl;
 }
 
 
 void AddrInfoImpl::init(const std::string& ipaddr, unsigned short port, const addrinfo& hints)
 {
+    if(ainfo)
+    {
+        freeaddrinfo(ainfo);
+        ai = 0;
+		ainfo = 0;
+    }
+
     std::ostringstream p;
     p << port;
-    
+
     _host = ipaddr;
     _port = port;
 
-    if (0 != ::getaddrinfo(ipaddr.c_str(), p.str().c_str(), &hints, &ai))
-         throw System::AccessFailed(_host + ':' + p.str());
+    if( 0 != ::getaddrinfo(ipaddr.c_str(), p.str().c_str(), &hints, &ainfo) )
+		throw System::AccessFailed(_host + ':' + p.str());
 
-    /*std::vector<std::string> ips;
-    hostAddresses(ips);
-
-    struct addrinfo hints2;
-    memset(&hints2, 0, sizeof(hints2));
-
-    ::addrinfo* ai2;
-    ::getaddrinfo("", "", &hints2, &ai2);
-
-    for(::addrinfo* current = ai2; current; current = current->ai_next)
-    {
-        sockaddr* saddr = current->ai_addr;
-
-        DWORD len = 64;
-        TCHAR adr[64];
-        INT ret = WSAAddressToString(saddr, current->ai_addrlen, NULL, adr, &len);
-        if(ret == 0)
-        {
-            std::string address;
-            for(unsigned n = 0; n < len; n++)
-            {
-                if(adr[n] != 0)
-                    address.push_back( int(adr[n]) );
-            }
-        
-            std::cout << "YYYY: " << address << std::endl;
-        }
-
-    }
-
-    ::freeaddrinfo(ai2);*/
+	ai = ainfo;
 }
 
 

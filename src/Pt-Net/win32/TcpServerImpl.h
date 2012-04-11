@@ -49,6 +49,7 @@ namespace System {
 namespace Net {
 
 class TcpServer;
+class AddrInfo;
 
 class TcpServerImpl
 {
@@ -68,6 +69,8 @@ class TcpServerImpl
         void listen(const std::string& ipaddr,
                     unsigned short int port,
                     int backlog = 5, unsigned flags = 0);
+
+		void listen(const AddrInfo& ipaddr, int backlog = 5, unsigned flags = 0);
 
         inline SOCKET fd() const
         { return _fd; }

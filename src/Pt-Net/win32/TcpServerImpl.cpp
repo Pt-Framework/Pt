@@ -126,15 +126,19 @@ void TcpServerImpl::beginAccept(System::EventLoop& loop)
 }
 
 
-void TcpServerImpl::listen(const std::string& ipaddr,
-                           unsigned short int port,
-                           int backlog, unsigned)
+void TcpServerImpl::listen(const std::string& ipaddr, unsigned short int port,
+                           int backlog, unsigned flags)
 {
     log_debug("listen on " << ipaddr << " port " << port << 
-              " backlog " << backlog << " flags " << 0);
+              " backlog " << backlog << " flags " << flags);
 
     AddrInfo ai(ipaddr, port, true);
+	listen(ai, backlog, flags);
+}
 
+
+void TcpServerImpl::listen(const AddrInfo& ai, int backlog, unsigned)
+{
     BOOL reuseAddr = TRUE;
     static const int on = 1;
 

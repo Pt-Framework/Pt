@@ -29,6 +29,7 @@
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/RegisterTest.h"
+#include "Pt/Net/AddrInfo.h"
 #include "Pt/Net/TcpServer.h"
 #include "Pt/Net/TcpSocket.h"
 #include "Pt/System/MainLoop.h"
@@ -144,7 +145,7 @@ class TcpSocketTest : public Pt::Unit::TestSuite
 
         void CloseOnConnect()
         {
-            Pt::Net::TcpServer server("127.0.0.1", 9000);
+            Pt::Net::TcpServer server( Pt::Net::AddrInfo::bindAnyIp4(9000) );
             server.connectionPending() += Pt::slot(*this, &TcpSocketTest::onAcceptAndBeginRead);
             server.setActive(*_loop);
             server.beginAccept();

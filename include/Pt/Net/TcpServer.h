@@ -38,6 +38,7 @@ namespace Pt {
 namespace Net {
 
 class TcpServerImpl;
+class AddrInfo;
 
 /** @brief TCP server socket
  */
@@ -56,10 +57,14 @@ class PT_NET_API TcpServer : public System::Selectable
         /** @brief Creates a server socket and listens on an address
         */
         TcpServer(const std::string& ipaddr, unsigned short int port, int backlog = 5, unsigned flags = 0);
+
+		TcpServer(const AddrInfo& ipaddr, int backlog = 5, unsigned flags = 0);
         
         ~TcpServer();
         
         void listen(const std::string& ipaddr, unsigned short int port, int backlog = 5, unsigned flags = 0);
+
+		void listen(const AddrInfo& ipaddr, int backlog = 5, unsigned flags = 0);
         
         void beginAccept();
         

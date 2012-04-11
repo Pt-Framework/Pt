@@ -52,7 +52,7 @@ class AddrInfoImpl;
 class PT_NET_API AddrInfo
 {
     public:
-        AddrInfo();
+		AddrInfo();
 
         explicit AddrInfo(AddrInfoImpl* impl);
 
@@ -74,6 +74,16 @@ class PT_NET_API AddrInfo
         //! @internal
         const AddrInfoImpl* impl() const;
 
+		static AddrInfo bindAnyIp4(unsigned short port);
+
+		/* Any 	
+           Broadcast 	
+           IPv6Any 	
+           IPv6Loopback 	
+           IPv6None
+           Loopback
+           None
+       */
     private:
         AddrInfoImpl* _impl;
 };

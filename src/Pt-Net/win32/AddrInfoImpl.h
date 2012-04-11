@@ -47,14 +47,6 @@ namespace Net {
 
 class AddrInfoImpl : public Pt::RefCounted
 {
-    private:
-        ::addrinfo* ai;
-         std::string _host;
-         unsigned short _port;
-
-    protected:
-        void init(const std::string& ipaddr, unsigned short port, const addrinfo& hints);
-
     public:  
         class const_iterator
         {
@@ -108,6 +100,8 @@ class AddrInfoImpl : public Pt::RefCounted
         };
 
     public:
+		AddrInfoImpl();
+
         AddrInfoImpl(const std::string& ipaddr, unsigned short port, bool listen);
 
         ~AddrInfoImpl();
@@ -128,6 +122,21 @@ class AddrInfoImpl : public Pt::RefCounted
         { return _port; }
 
         static void hostAddresses(std::vector<std::string>& ips);
+
+		static AddrInfoImpl* bindAnyIp4(unsigned short port);
+
+    protected:
+        void init(const std::string& ipaddr, unsigned short port, const addrinfo& hints);
+
+    private:
+        ::addrinfo* ai;
+		::addrinfo* ainfo;
+
+		::addrinfo _special;
+		sockaddr_storage _specialAddr;
+
+         std::string _host;
+         unsigned short _port;
 };
 
 } // namespace Net

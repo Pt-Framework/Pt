@@ -55,6 +55,18 @@ TcpServer::TcpServer(const std::string& ipaddr, unsigned short int port, int bac
 }
 
 
+TcpServer::TcpServer(const AddrInfo& ipaddr, int backlog, unsigned flags)
+: _impl(0)
+{
+    _impl = new TcpServerImpl(*this);
+    std::auto_ptr<TcpServerImpl> impl(_impl);
+
+    this->listen(ipaddr, backlog, flags);
+
+    impl.release();
+}
+
+
 TcpServer::~TcpServer()
 {
     try
@@ -72,6 +84,13 @@ void TcpServer::listen(const std::string& ipaddr, unsigned short int port, int b
 {
     this->close();
     _impl->listen(ipaddr, port, backlog, flags);
+}
+
+
+void TcpServer::listen(const AddrInfo& ipaddr, int backlog, unsigned flags)
+{
+    this->close();
+    _impl->listen(ipaddr, backlog, flags);
 }
 
 
