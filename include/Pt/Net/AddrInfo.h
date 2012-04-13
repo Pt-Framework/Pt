@@ -46,7 +46,6 @@ class AddrInfoImpl;
     might cache the resolved addresses in the %AddrInfo, so that a reconnect 
     does not require to call the resolver again.
 
-    @todo Provide special constructors for INADDR_ANY and such.
     @todo Defer hostname resolution until connect
  */
 class PT_NET_API AddrInfo
