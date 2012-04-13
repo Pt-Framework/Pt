@@ -67,11 +67,60 @@ AddrInfoImpl::~AddrInfoImpl()
 }
 
 
-AddrInfoImpl* AddrInfoImpl::anyIp4(unsigned short port)
+AddrInfoImpl* AddrInfoImpl::ip4Any(unsigned short port)
 {
     AddrInfoImpl* impl = new AddrInfoImpl();
     impl->initIp4Any(port);
     return impl;
+}
+
+
+AddrInfoImpl* AddrInfoImpl::ip4Loopback(unsigned short port)
+{
+    AddrInfoImpl* impl = new AddrInfoImpl();
+    impl->initIp4Loopback(port);
+    return impl;
+}
+
+
+AddrInfoImpl* AddrInfoImpl::ip4Broadcast(unsigned short port)
+{
+    AddrInfoImpl* impl = new AddrInfoImpl();
+    impl->initIp4Broadcast(port);
+    return impl;
+}
+
+
+AddrInfoImpl* AddrInfoImpl::ip6Any(unsigned short port)
+{
+    AddrInfoImpl* impl = new AddrInfoImpl();
+    impl->initIp6Any(port);
+    return impl;
+}
+
+
+AddrInfoImpl* AddrInfoImpl::ip6Loopback(unsigned short port)
+{
+    AddrInfoImpl* impl = new AddrInfoImpl();
+    impl->initIp6Loopback(port);
+    return impl;
+}
+
+
+void AddrInfoImpl::clear()
+{  
+    if(_ainfo)
+    {
+        freeaddrinfo(_ainfo);
+        _ainfo = 0;
+    }
+
+    memset( &_special, 0, sizeof(_special) );
+    memset( &_specialAddr, 0, sizeof(_specialAddr) );
+    _ai = 0;
+
+    _host.clear();
+    _port = 0;
 }
 
 
@@ -105,7 +154,6 @@ void AddrInfoImpl::initIp4Any(unsigned short port)
 
     sockaddr_in* addr = reinterpret_cast<sockaddr_in*>(&_specialAddr);
     addr->sin_family = AF_INET;
-    addr->sin_len = sizeof(sockaddr_in);
     addr->sin_port = htons(port);
     addr->sin_addr.s_addr = INADDR_ANY;
     
@@ -127,7 +175,6 @@ void AddrInfoImpl::initIp4Loopback(unsigned short port)
 
     sockaddr_in* addr = reinterpret_cast<sockaddr_in*>(&_specialAddr);
     addr->sin_family = AF_INET;
-    addr->sin_len = sizeof(sockaddr_in);
     addr->sin_port = htons(port);
     addr->sin_addr.s_addr = INADDR_LOOPBACK;
     
@@ -148,7 +195,6 @@ void AddrInfoImpl::initIp4Broadcast(unsigned short port)
 
     sockaddr_in* addr = reinterpret_cast<sockaddr_in*>(&_specialAddr);
     addr->sin_family = AF_INET;
-    addr->sin_len = sizeof(sockaddr_in);
     addr->sin_port = htons(port);
     addr->sin_addr.s_addr = INADDR_BROADCAST;
     
@@ -169,7 +215,6 @@ void AddrInfoImpl::initIp6Any(unsigned short port)
 
     sockaddr_in6* addr = reinterpret_cast<sockaddr_in6*>(&_specialAddr);
     addr->sin6_family = AF_INET6;
-    addr->sin6_len = sizeof(sockaddr_in6);
     addr->sin6_port = htons(port);
     addr->sin6_addr = in6addr_any;
     
@@ -191,7 +236,6 @@ void AddrInfoImpl::initIp6Loopback(unsigned short port)
 
     sockaddr_in6* addr = reinterpret_cast<sockaddr_in6*>(&_specialAddr);
     addr->sin6_family = AF_INET6;
-    addr->sin6_len = sizeof(sockaddr_in6);
     addr->sin6_port = htons(port);
     addr->sin6_addr = in6addr_loopback;
     
@@ -201,23 +245,6 @@ void AddrInfoImpl::initIp6Loopback(unsigned short port)
     _special.ai_next = 0;
     
     _ai = &_special;
-}
-
-
-void AddrInfoImpl::clear()
-{  
-    if(_ainfo)
-    {
-        freeaddrinfo(_ainfo);
-        _ainfo = 0;
-    }
-
-    memset( &_special, 0, sizeof(_special) );
-    memset( &_specialAddr, 0, sizeof(_specialAddr) );
-    _ai = 0;
-
-    _host.clear();
-    _port = 0;
 }
 
 

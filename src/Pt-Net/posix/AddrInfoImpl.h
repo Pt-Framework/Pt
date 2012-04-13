@@ -103,10 +103,20 @@ class AddrInfoImpl : public Pt::RefCounted
         const_iterator end() const    
         { return const_iterator(); }
         
-        static AddrInfoImpl* anyIp4(unsigned short port); 
+        static AddrInfoImpl* ip4Any(unsigned short port); 
+
+        static AddrInfoImpl* ip4Loopback(unsigned short port);
+
+        static AddrInfoImpl* ip4Broadcast(unsigned short port);
+
+        static AddrInfoImpl* ip6Any(unsigned short port);
+
+        static AddrInfoImpl* ip6Loopback(unsigned short port);
 
     protected:
         AddrInfoImpl();
+
+        void clear();
 
         void init(const std::string& host, unsigned short port, const addrinfo& hints);
 
@@ -120,15 +130,13 @@ class AddrInfoImpl : public Pt::RefCounted
 
         void initIp6Loopback(unsigned short port);
 
-        void clear();
-
     private:
-        std::string _host;
-        unsigned short _port;
         struct addrinfo* _ai;
         struct addrinfo* _ainfo;
         struct addrinfo _special;
         struct sockaddr_storage _specialAddr;
+        std::string _host;
+        unsigned short _port;
 };
 
 void sockaddrToString(const sockaddr_storage& addr, std::string& str);
