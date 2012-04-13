@@ -68,15 +68,22 @@ class PT_NET_API AddrInfo
 
         unsigned short port() const;
 
-        /* Any
-           Broadcast
-           IPv6Any
-           IPv6Loopback
+        /*  Broadcast
+
+
            IPv6None
-           Loopback
+
            None
        */
-        static AddrInfo anyIp4(unsigned short port);
+        static AddrInfo ip4Any(unsigned short port);
+
+        static AddrInfo ip4Loopback(unsigned short port);
+
+        static AddrInfo ip4Broadcast(unsigned short port);
+
+        static AddrInfo ip6Any(unsigned short port);
+
+        static AddrInfo ip6Loopback(unsigned short port);
 
         //! @internal
         AddrInfoImpl* impl();

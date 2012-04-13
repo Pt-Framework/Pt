@@ -29,7 +29,6 @@
 #define PT_NET_ADDRINFOIMPL_H
 
 #include <Pt/RefCounted.h>
-#include <vector>
 #include <string>
 #include <iterator>
 #include <cassert>
@@ -43,18 +42,9 @@ namespace Net {
 
 class AddrInfoImpl : public Pt::RefCounted
 {
-        std::string _host;
-        unsigned short _port;
-        struct addrinfo* _ai;
-		struct addrinfo* _ainfo;
-		struct addrinfo _special;
-		struct sockaddr_storage _specialAddr;
-
     public:
         class const_iterator : public std::iterator<std::forward_iterator_tag, addrinfo>
         {
-                struct addrinfo* current;
-
             public:
                 explicit const_iterator(struct addrinfo* ai = 0)
                 : current(ai)
@@ -92,15 +82,14 @@ class AddrInfoImpl : public Pt::RefCounted
                     assert(current); 
                     return current; 
                 }
+
+            private:
+                struct addrinfo* current;
         };
 
-		AddrInfoImpl();
-		
         AddrInfoImpl(const std::string& host, unsigned short port, bool listen);
 
         ~AddrInfoImpl();
-
-        void init(const std::string& host, unsigned short port, const addrinfo& hints);
 
         const std::string& host() const
         { return _host; }
@@ -113,10 +102,33 @@ class AddrInfoImpl : public Pt::RefCounted
 
         const_iterator end() const    
         { return const_iterator(); }
-
-        static void hostAddresses(std::vector<std::string>& ips);
         
-        static AddrInfoImpl* bindAnyIp4(unsigned short port); 
+        static AddrInfoImpl* anyIp4(unsigned short port); 
+
+    protected:
+        AddrInfoImpl();
+
+        void init(const std::string& host, unsigned short port, const addrinfo& hints);
+
+        void initIp4Any(unsigned short port);
+
+        void initIp4Loopback(unsigned short port);
+
+        void initIp4Broadcast(unsigned short port);
+
+        void initIp6Any(unsigned short port);
+
+        void initIp6Loopback(unsigned short port);
+
+        void clear();
+
+    private:
+        std::string _host;
+        unsigned short _port;
+        struct addrinfo* _ai;
+        struct addrinfo* _ainfo;
+        struct addrinfo _special;
+        struct sockaddr_storage _specialAddr;
 };
 
 void sockaddrToString(const sockaddr_storage& addr, std::string& str);
