@@ -68,13 +68,6 @@ class PT_NET_API AddrInfo
 
         unsigned short port() const;
 
-        /*  Broadcast
-
-
-           IPv6None
-
-           None
-       */
         static AddrInfo ip4Any(unsigned short port);
 
         static AddrInfo ip4Loopback(unsigned short port);

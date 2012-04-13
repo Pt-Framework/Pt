@@ -49,9 +49,6 @@ class AddrInfoImpl : public Pt::RefCounted
     public:  
         class const_iterator
         {
-            private:
-                ::addrinfo* current;
-
             public:
                 typedef ::addrinfo value_type;
                 typedef std::ptrdiff_t difference_type;
@@ -96,6 +93,9 @@ class AddrInfoImpl : public Pt::RefCounted
                     assert(current); 
                     return current; 
                 }
+
+            private:
+                ::addrinfo* current;
         };
 
     public:
@@ -115,16 +115,32 @@ class AddrInfoImpl : public Pt::RefCounted
         inline unsigned short port() const
         { return _port; }
 
-        static AddrInfoImpl* anyIp4(unsigned short port);
+        static AddrInfoImpl* ip4Any(unsigned short port);
+
+        static AddrInfoImpl* ip4Loopback(unsigned short port);
+
+        static AddrInfoImpl* ip4Broadcast(unsigned short port);
+
+        static AddrInfoImpl* ip6Any(unsigned short port);
+
+        static AddrInfoImpl* ip6Loopback(unsigned short port);
 
     protected:
         AddrInfoImpl();
 
+        void clear();
+
         void init(const std::string& ipaddr, unsigned short port, const addrinfo& hints);
 
-        void initAnyIp4(unsigned short port);
+        void initIp4Any(unsigned short port);
 
-        void clear();
+        void initIp4Loopback(unsigned short port);
+
+        void initIp4Broadcast(unsigned short port);
+
+        void initIp6Any(unsigned short port);
+
+        void initIp6Loopback(unsigned short port);
 
     private:
         ::addrinfo* _ai;

@@ -56,6 +56,7 @@ AddrInfo::AddrInfo(const AddrInfo& src)
     _impl->addRef();
 }
 
+
 AddrInfo::~AddrInfo()
 {
     if (_impl)
@@ -91,9 +92,34 @@ unsigned short AddrInfo::port() const
     return _impl->port();
 }
 
+
 AddrInfo AddrInfo::ip4Any(unsigned short port)
 {
-    return AddrInfo( AddrInfoImpl::anyIp4(port) );
+    return AddrInfo( AddrInfoImpl::ip4Any(port) );
+}
+
+
+AddrInfo AddrInfo::ip4Loopback(unsigned short port)
+{
+    return AddrInfo( AddrInfoImpl::ip4Loopback(port) );
+}
+
+
+AddrInfo AddrInfo::ip4Broadcast(unsigned short port)
+{
+    return AddrInfo( AddrInfoImpl::ip4Broadcast(port) );
+}
+
+
+AddrInfo AddrInfo::ip6Any(unsigned short port)
+{
+    return AddrInfo( AddrInfoImpl::ip6Any(port) );
+}
+
+
+AddrInfo AddrInfo::ip6Loopback(unsigned short port)
+{
+    return AddrInfo( AddrInfoImpl::ip6Loopback(port) );
 }
 
 }
