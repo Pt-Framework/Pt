@@ -35,7 +35,6 @@
 #include <Pt/Net/Api.h>
 #include <Pt/RefCounted.h>
 #include <string>
-#include <vector>
 #include <cassert>
 #include <winsock2.h>
 #include <ws2tcpip.h>
@@ -100,17 +99,12 @@ class AddrInfoImpl : public Pt::RefCounted
         };
 
     public:
-		AddrInfoImpl();
-
         AddrInfoImpl(const std::string& ipaddr, unsigned short port, bool listen);
 
         ~AddrInfoImpl();
 
-        ::addrinfo* first() const
-        { return ai; }
-
         const_iterator begin() const
-        { return const_iterator(ai); }
+        { return const_iterator(_ai); }
 
         const_iterator end() const
         { return const_iterator(); }
@@ -121,22 +115,24 @@ class AddrInfoImpl : public Pt::RefCounted
         inline unsigned short port() const
         { return _port; }
 
-        static void hostAddresses(std::vector<std::string>& ips);
-
-		static AddrInfoImpl* bindAnyIp4(unsigned short port);
+        static AddrInfoImpl* anyIp4(unsigned short port);
 
     protected:
+        AddrInfoImpl();
+
         void init(const std::string& ipaddr, unsigned short port, const addrinfo& hints);
 
+        void initAnyIp4(unsigned short port);
+
+        void clear();
+
     private:
-        ::addrinfo* ai;
-		::addrinfo* ainfo;
-
-		::addrinfo _special;
-		sockaddr_storage _specialAddr;
-
-         std::string _host;
-         unsigned short _port;
+        ::addrinfo* _ai;
+        ::addrinfo* _ainfo;
+        ::addrinfo _special;
+        ::sockaddr_storage _specialAddr;
+        std::string _host;
+        unsigned short _port;
 };
 
 } // namespace Net

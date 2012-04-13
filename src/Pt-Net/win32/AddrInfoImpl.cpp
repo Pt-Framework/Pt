@@ -26,12 +26,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "AddrInfoImpl.h"
-#include "Pt/SourceInfo.h"
 #include "Pt/System/IOError.h"
-#include "Pt/System/SystemError.h"
-#include <iostream>
 #include <sstream>
-#include <stdexcept>
 #include <string.h>
 
 namespace Pt {
@@ -39,15 +35,15 @@ namespace Pt {
 namespace Net {
 
 AddrInfoImpl::AddrInfoImpl()
-: ai(0)
-, ainfo(0)
+: _ai(0)
+, _ainfo(0)
 {
 }
 
 
 AddrInfoImpl::AddrInfoImpl(const std::string& ipaddr, unsigned short port, bool listen)
-: ai(0)
-, ainfo(0)
+: _ai(0)
+, _ainfo(0)
 {
     struct addrinfo hints;
     memset(&hints, 0, sizeof(hints));
@@ -61,241 +57,71 @@ AddrInfoImpl::AddrInfoImpl(const std::string& ipaddr, unsigned short port, bool 
 
 AddrInfoImpl::~AddrInfoImpl()
 {
-    if (ainfo)
-        ::freeaddrinfo(ainfo);
+    clear();
 }
 
 
-AddrInfoImpl* AddrInfoImpl::bindAnyIp4(unsigned short port)
+AddrInfoImpl* AddrInfoImpl::anyIp4(unsigned short port)
 {
-	AddrInfoImpl* impl = new AddrInfoImpl();
-
-    sockaddr_in* addr = reinterpret_cast<sockaddr_in*>(&(impl->_specialAddr));
-	memset( &(impl->_specialAddr), 0, sizeof(sockaddr_storage) );
-    addr->sin_family = AF_INET;
-    addr->sin_port = htons(port);
-    addr->sin_addr.s_addr = INADDR_ANY;
-
-    memset( &(impl->_special), 0, sizeof(addrinfo) );
-	impl->_special.ai_family = AF_INET;
-    impl->_special.ai_flags |= AI_PASSIVE;
-    impl->_special.ai_addr = (sockaddr*)(addr);
-	impl->_special.ai_addrlen = sizeof(sockaddr_in);
-	impl->_special.ai_next = 0;
-
-	impl->ai = &(impl->_special);
-
-	return impl;
+    AddrInfoImpl* impl = new AddrInfoImpl();
+    impl->initAnyIp4(port);
+    return impl;
 }
 
 
 void AddrInfoImpl::init(const std::string& ipaddr, unsigned short port, const addrinfo& hints)
 {
-    if(ainfo)
-    {
-        freeaddrinfo(ainfo);
-        ai = 0;
-		ainfo = 0;
-    }
-
+    clear();
+    
     std::ostringstream p;
     p << port;
-
+    
     _host = ipaddr;
     _port = port;
-
-    if( 0 != ::getaddrinfo(ipaddr.c_str(), p.str().c_str(), &hints, &ainfo) )
-		throw System::AccessFailed(_host + ':' + p.str());
-
-	ai = ainfo;
+    
+    if( 0 != ::getaddrinfo(ipaddr.c_str(), p.str().c_str(), &hints, &_ainfo) )
+        throw System::AccessFailed(_host + ':' + p.str());
+    
+    _ai = _ainfo;
 }
 
 
-void AddrInfoImpl::hostAddresses(std::vector<std::string>& ips)
-{
-    SOCKET sock;
-    DWORD bytesRet;
-    int ret;
-    
-    sock = socket(AF_INET, SOCK_STREAM, IPPROTO_IP);
-    if (SOCKET_ERROR == sock)
-    {
-        std::cerr << "sockerr" << WSAGetLastError() << std::endl;
-        return;
-    }
-    
-    char buffer[4096];
-    ret = WSAIoctl(sock, SIO_ADDRESS_LIST_QUERY, NULL, 0, buffer, sizeof(buffer), &bytesRet, NULL, NULL);
-    if (SOCKET_ERROR == ret)
-    {
-        closesocket(sock);
-        std::cerr << "WSAIoctl error "<< WSAGetLastError() << std::endl;
-        return;
-    }
-       
-    SOCKET_ADDRESS_LIST* slist = reinterpret_cast<SOCKET_ADDRESS_LIST*>(buffer);
-    closesocket(sock);
+void AddrInfoImpl::initAnyIp4(unsigned short port)
+{  
+    clear();
 
-    for (int i = 0; i <= (slist->iAddressCount-1); i++)
-    {
-        SOCKADDR* saddr = slist->Address[i].lpSockaddr;
-        DWORD len = 64;
-        TCHAR adr[64];
-        WSAAddressToString(saddr, sizeof(SOCKADDR), NULL, adr, &len);
-        
-        std::string address;
-        for(unsigned n = 0; n < len; n++)
-        {
-            address.push_back( int(adr[n]) );
-        }
-    
-        std::cout << "XXXXX: " << address << std::endl;
-        ips.push_back(address);
-    }
+    _port = port;
 
-    // TODO: IPv6
+    sockaddr_in* addr = reinterpret_cast<sockaddr_in*>(&_specialAddr);
+    addr->sin_family = AF_INET;
+    addr->sin_port = htons(port);
+    addr->sin_addr.s_addr = INADDR_ANY;
+    
+    _special.ai_family = AF_INET;
+    _special.ai_flags |= AI_PASSIVE;
+    _special.ai_addr = (sockaddr*)(addr);
+    _special.ai_addrlen = sizeof(sockaddr_in);
+    _special.ai_next = 0;
+    
+    _ai = &_special;
 }
 
 
-/*void AddrInfoImpl::hostAddresses(std::vector<std::string>& ips)
-{
-
-    DWORD dwSize = 0;
-    DWORD dwRetVal = 0;
-
-    unsigned int i = 0;
-
-    // Set the flags to pass to GetAdaptersAddresses
-    ULONG flags = GAA_FLAG_INCLUDE_PREFIX;
-
-    // default to unspecified address family (both)
-    ULONG family = AF_UNSPEC;
-
-    LPVOID lpMsgBuf = NULL;
-
-    PIP_ADAPTER_ADDRESSES pAddresses = NULL;
-    ULONG outBufLen = 0;
-
-    PIP_ADAPTER_ADDRESSES pCurrAddresses = NULL;
-    PIP_ADAPTER_UNICAST_ADDRESS pUnicast = NULL;
-    PIP_ADAPTER_ANYCAST_ADDRESS pAnycast = NULL;
-    PIP_ADAPTER_MULTICAST_ADDRESS pMulticast = NULL;
-    IP_ADAPTER_DNS_SERVER_ADDRESS *pDnServer = NULL;
-    IP_ADAPTER_PREFIX *pPrefix = NULL;
-
-    outBufLen = 4096;
-
-    unsigned tries = 1;
-    do 
+void AddrInfoImpl::clear()
+{  
+    if(_ainfo)
     {
-        pAddresses = (IP_ADAPTER_ADDRESSES *) malloc(outBufLen*tries);
-        if (pAddresses == NULL) 
-        {
-            return;
-        }
-
-        dwRetVal = GetAdaptersAddresses(family, flags, NULL, pAddresses, &outBufLen);
-
-        if (dwRetVal == ERROR_BUFFER_OVERFLOW) 
-        {
-            free(pAddresses);
-            pAddresses = NULL;
-        } 
-        else 
-        {
-            break;
-        }
-    } 
-    while ((dwRetVal == ERROR_BUFFER_OVERFLOW) && (++tries <= 4));
-
-    if (dwRetVal == NO_ERROR) 
-    {
-        // If successful, output some information from the data we received
-        pCurrAddresses = pAddresses;
-        while (pCurrAddresses) 
-        {
-            printf("\tLength of the IP_ADAPTER_ADDRESS struct: %ld\n",
-                   pCurrAddresses->Length);
-            printf("\tIfIndex (IPv4 interface): %u\n", pCurrAddresses->IfIndex);
-            printf("\tAdapter name: %s\n", pCurrAddresses->AdapterName);
-
-            pUnicast = pCurrAddresses->FirstUnicastAddress;
-            if (pUnicast != NULL) {
-                for (i = 0; pUnicast != NULL; i++)
-                    pUnicast = pUnicast->Next;
-                printf("\tNumber of Unicast Addresses: %d\n", i);
-            } else
-                printf("\tNo Unicast Addresses\n");
-
-            pAnycast = pCurrAddresses->FirstAnycastAddress;
-            if (pAnycast) {
-                for (i = 0; pAnycast != NULL; i++)
-                    pAnycast = pAnycast->Next;
-                printf("\tNumber of Anycast Addresses: %d\n", i);
-            } else
-                printf("\tNo Anycast Addresses\n");
-
-            pMulticast = pCurrAddresses->FirstMulticastAddress;
-            if (pMulticast) {
-                for (i = 0; pMulticast != NULL; i++)
-                    pMulticast = pMulticast->Next;
-                printf("\tNumber of Multicast Addresses: %d\n", i);
-            } else
-                printf("\tNo Multicast Addresses\n");
-
-            pDnServer = pCurrAddresses->FirstDnsServerAddress;
-            if (pDnServer) {
-                for (i = 0; pDnServer != NULL; i++)
-                    pDnServer = pDnServer->Next;
-                printf("\tNumber of DNS Server Addresses: %d\n", i);
-            } else
-                printf("\tNo DNS Server Addresses\n");
-
-            printf("\tDNS Suffix: %wS\n", pCurrAddresses->DnsSuffix);
-            printf("\tDescription: %wS\n", pCurrAddresses->Description);
-            printf("\tFriendly name: %wS\n", pCurrAddresses->FriendlyName);
-
-            if (pCurrAddresses->PhysicalAddressLength != 0) {
-                printf("\tPhysical address: ");
-                for (i = 0; i < (int) pCurrAddresses->PhysicalAddressLength;
-                     i++) {
-                    if (i == (pCurrAddresses->PhysicalAddressLength - 1))
-                        printf("%.2X\n",
-                               (int) pCurrAddresses->PhysicalAddress[i]);
-                    else
-                        printf("%.2X-",
-                               (int) pCurrAddresses->PhysicalAddress[i]);
-                }
-            }
-            printf("\tFlags: %ld\n", pCurrAddresses->Flags);
-            printf("\tMtu: %lu\n", pCurrAddresses->Mtu);
-            printf("\tIfType: %ld\n", pCurrAddresses->IfType);
-            printf("\tOperStatus: %ld\n", pCurrAddresses->OperStatus);
-            printf("\tIpv6IfIndex (IPv6 interface): %u\n",
-                   pCurrAddresses->Ipv6IfIndex);
-            printf("\tZoneIndices (hex): ");
-            for (i = 0; i < 16; i++)
-                printf("%lx ", pCurrAddresses->ZoneIndices[i]);
-            printf("\n");
-
-            pPrefix = pCurrAddresses->FirstPrefix;
-            if (pPrefix) {
-                for (i = 0; pPrefix != NULL; i++)
-                    pPrefix = pPrefix->Next;
-                printf("\tNumber of IP Adapter Prefix entries: %d\n", i);
-            } else
-                printf("\tNumber of IP Adapter Prefix entries: 0\n");
-
-            printf("\n");
-
-            pCurrAddresses = pCurrAddresses->Next;
-        }
+        freeaddrinfo(_ainfo);
+        _ainfo = 0;
     }
 
-    if (pAddresses) {
-        free(pAddresses);
-    }
-}*/
+    memset( &_special, 0, sizeof(_special) );
+    memset( &_specialAddr, 0, sizeof(_specialAddr) );
+    _ai = 0;
+
+    _host.clear();
+    _port = 0;
+}
 
 }
 

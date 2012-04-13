@@ -91,9 +91,9 @@ unsigned short AddrInfo::port() const
     return _impl->port();
 }
 
-AddrInfo AddrInfo::bindAnyIp4(unsigned short port)
+AddrInfo AddrInfo::anyIp4(unsigned short port)
 {
-	return AddrInfo( AddrInfoImpl::bindAnyIp4(port) );
+    return AddrInfo( AddrInfoImpl::anyIp4(port) );
 }
 
 }
