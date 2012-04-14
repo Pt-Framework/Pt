@@ -1,5 +1,26 @@
 SubDir TOP ;
 
+#############################################################################
+# General values and settings
+#############################################################################
+
+# include rules an actions to build unit tests
+Load unittest.jam ;
+
+# set directory to build objects and targets
+ALL_LOCATE_OBJECTS ?= [ FDirName $(TOP) tmp $(CONFIG) ] ;
+ALL_LOCATE_TARGET ?= [ FDirName $(TOP) build $(CONFIG) ] ;
+
+# set directory to build objects and targets
+# this is used by MakeLocate and SubDirObjects in the Jamfiles
+OUTPUT_TARGET = [ FDirName $(TOP) build $(CONFIG) ] ;
+OUTPUT_OBJECT = [ FDirName $(TOP) tmp $(CONFIG) ] ;
+OUTPUT_TEST = [ FDirName $(TOP) build $(CONFIG) ] ;
+
+#############################################################################
+# Pt Header Files
+#############################################################################
+
 SubDir TOP include Pt ;
 PT_INCLUDES_SUBDIR = [ FDirName $(TOP) include Pt ] ;
 PT_INSTALL_INCLUDES = [ GLOB $(PT_INCLUDES_SUBDIR) : *.h  ] ;
@@ -53,6 +74,10 @@ PT_INCLUDES_SUBDIR = [ FDirName $(TOP) include Pt Db ] ;
 PT_INSTALL_INCLUDES = [ GLOB $(PT_INCLUDES_SUBDIR) : *.h  ] ;
 PT_INSTALL_INCLUDES += [ GLOB $(PT_INCLUDES_SUBDIR) : *.tpp  ] ;
 InstallFile [ FDirName $(INSTALL_INCLUDEDIR) Pt Db ] : $(PT_INSTALL_INCLUDES:BS) ;
+
+#############################################################################
+# Pt Build Directories
+#############################################################################
 
 SubInclude TOP src Pt ;
 SubInclude TOP src Pt-Reflex ;
