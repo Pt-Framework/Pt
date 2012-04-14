@@ -30,12 +30,12 @@ if has('win32')
     let s:makeprg_line="jam.bat -q $*"
     let &makeprg=s:makeprg_line
     let g:make_target=''
-    let g:build_root=''
+    "let g:build_root=''
 else
     let s:makeprg_line="./jam.sh -q $*"
     let &makeprg=s:makeprg_line
     let g:make_target=''
-    let g:build_root=''
+    "let g:build_root=''
 endif
 
 " See also (very nice!!!) http://blog.vicshih.com/2011/03/fast-make-for-vim.html
