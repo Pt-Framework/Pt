@@ -197,11 +197,10 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -v ]
     required dependencies, such as system headers and libraries are present. 
     Build configuration is started when jam is executed for the target named 
     "configure" and a log is written to a file named config.log. The result 
-    of the configuration is stored in a file named config.jam and all variables
-    in this file are available to the following build steps. Before the
-    user-defined tests are executed, the built-in tests are run to detect
-    some basic capabilities of the build host platform for example how to 
-    delete files or create directories.
+    of the configuration is the Jamrules file, which in turn is loaded at the
+    begin of the build step. Before the user-defined tests are executed, the 
+    built-in tests are run to detect some basic capabilities of the build host
+    platform for example how to delete files or create directories.
 
 <DT> <P> <H3> Building Targets </H3> <DD>
 <P>

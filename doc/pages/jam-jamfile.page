@@ -14,11 +14,10 @@
 <A NAME="jam_building"><H2>Build Configuration</H2></A>
 <P>
     The build configuration rules can only be used in the Jamconfigure script
-    and perform all necessary tests to determine whether all dependencies
+    and perform the necessary tests to determine whether all dependencies
     required for the build are present. When the Jamconfigure script is run
-    in the build configuration step, the results of the executed tests are 
-    stored in a result file named config.jam. All variables stored in this 
-    file are available to the following build steps.
+    in the build configuration step, the Jamrules file is generated. This file
+    is loaded at the beginning of the build step.
 <P>
 
 <H4> CheckBuildC, CheckBuildC++ Rules </H4>
