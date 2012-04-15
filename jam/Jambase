@@ -41,8 +41,8 @@ if configure in $(ARGV)
     EchoOption --debug : "Debug Build" : $(WITH_DEBUG:E="no") ;
     EchoOption --optimize OPTIM : "Optimized Build" : $(WITH_OPTIM:E="no") ;
 
-    TryCommand "rm -f config.jam" ;
-    TryCommand "del /f/q config.jam" ;
+    TryCommand "rm -f "$(JAMRULES) ;
+    TryCommand "del /f/q "$(JAMRULES) ;
 
     TryCommand "rm -f config.log" ;
     TryCommand "del /f/q config.log" ;
@@ -65,21 +65,16 @@ if configure in $(ARGV)
     ConfigureExit ;
 }
 
-if ! [ CHECK_IF_FILE config.jam ]
+if ! [ CHECK_IF_FILE Jamrules ]
 {
     Exit "Build not configured. Run jam configure first." ;
 }
-
-include config.jam ;
 
 ##########################################################################
 # Build Step
 ##########################################################################
 
 Load build.jam ;
-
-# Toolset specific variables and rules
-Load $(TOOLSET:L).jam ;
 
 # Project root Jamfile
 include Jamfile ;

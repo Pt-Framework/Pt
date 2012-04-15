@@ -958,6 +958,36 @@ rule SubDir
     # directory elements in order to set search&locate stuff.
     # 
 
+    #
+    # If $(TOP)/Jamrules hasn't been included, do so.
+    #
+
+    if ! $($(<[1])-included)
+    {
+        # Gated entry.
+        $(<[1])-included = TRUE ;
+
+        # File is $(TOPRULES) or $(TOP)/Jamrules or Jamrules.
+        _r = $($(<[1])RULES) ;
+
+        if ! $(_r)
+        {
+            _r = $(JAMRULES:R=$($(<[1]))) ;
+        }
+
+        if ! $(_r)
+        {
+            _r = $(JAMRULES) ;
+        }
+
+        # Include it.
+        include $(_r) ;
+    }
+
+    #
+    # Set root variable to current subdir
+    #
+
     if ! $($(<[1]))
     {
         if ! $(<[1])
@@ -966,29 +996,6 @@ rule SubDir
         }
 
         $(<[1]) = [ FSubDir $(<[2-]) ] ;
-    }
-
-    #
-    # If $(TOP)/Jamrules hasn't been included, do so.
-    #
-
-    if ! $($(<[1])-included)
-    {
-        # Gated entry.
-
-        $(<[1])-included = TRUE ;
-
-        # File is $(TOPRULES) or $(TOP)/Jamrules.
-
-        _r = $($(<[1])RULES) ;
-
-        if ! $(_r)
-        {
-        _r = $(JAMRULES:R=$($(<[1]))) ;
-        }
-
-        # Include it.
-        include $(_r) ;
     }
 
     # Get path to current directory from root using SubDir.

@@ -15,7 +15,7 @@ if $(OS:L) = "nt"
 }
 
 CONFIG_LOG = config.log ;
-CONFIG_JAM = config.jam ;
+CONFIG_JAM = Jamrules ;
 
 CONFIGURED_VARIABLES = ;
 
@@ -60,17 +60,49 @@ rule ConfigureExit
         WriteFile $(CONFIG_JAM) : $(_var)" ?= "$(_value:J=" ")" ;" ;
     }
 
+    # Toolset specific variables and rules
+    WriteFile $(CONFIG_JAM) : "" ;
+    WriteFile $(CONFIG_JAM) : "Load $(TOOLSET:L).jam ;" ;
+
     Exit "Configuration successful." ;
 }
 
 rule SubConfigure
 {
+    # TODO:
     # Jamconfigure from subdir needs to keep its paths, so ConfigureDefine 
     # works correctly and generates def header at correct place
 
+    local _output = [ FDirName $(<[1-]) $(CONFIG_JAM) ] ;
+
+    TryCommand "rm -f "$(_output) ;
+    TryCommand "del /f/q "$(_output) ;
+
+    local config_vars = $(CONFIGURED_VARIABLES) ;
+    CONFIGURED_VARIABLES = ;
+
     local _s = [ FDirName $(<[1-]) Jamconfigure ] ;
     include $(_s) ;
+
+    for local _var in $(CONFIGURED_VARIABLES)
+    {
+        local _value ;
+        for _v in $($(_var))
+        {
+            local _valtmp ;
+            _valtmp = [ Replace $(_v) "\\\\" "\\\\" ] ;
+            _valtmp = [ Replace $(_valtmp) "\"" "\\\"" ] ;
+            _value += "\"$(_valtmp)\"" ;
+        }
+    
+        WriteFile $(_output) : $(_var)" ?= "$(_value:J=" ")" ;" ;
+    }
+
+    Echo "Subconfiguration $(_s) successful." ;
+
+    CONFIGURED_VARIABLES = $(config_vars) ;
 }
+
 
 rule TryCommand
 {
