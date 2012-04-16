@@ -158,10 +158,11 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -v ]
     Jamrules. All three are written in the jam script language. The file 
     Jamconfigure is mandatory and describes the build configuration. The 
     Jamfile describes what to do with the source files in its directory. It 
-    may also cause Jamfiles in other directories to be read. Under certain 
-    circumstances, the first Jamfile read also causes a "Jamrules" file to be
-    read. The Jamrules file is an optional set of rule and variable definitions
-    used to define project-specific processing.
+    may also cause Jamfiles in other directories to be read. The Jamrules file
+    is generated when the Jamconfigure script is executed in the configure step
+    and contains a set of project-specific rule and variable definitions. The
+    first Jamfile normally causes the Jamrules file to be read, when it calls
+    the SubDir rule. 
 <P>
 
 <DT> <P> <H3> Jam Executable Wrappers </H3> <DD>
@@ -189,31 +190,36 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -v ]
         <li>Uninstalling targets</li>
     </UL>
 
+    The build steps are triggered by the targets configure, clean, all,
+    install and uninstall.
+
 <DT> <P> <H3> Build Configuration </H3> <DD>
 <P>
     The build must be configured before any other build steps can be performed.
-    The Jambase will read in a file named Jamconfigure, which describes what
-    aspects should be configured i.e. tests are run to determine if all 
-    required dependencies, such as system headers and libraries are present. 
-    Build configuration is started when jam is executed for the target named 
-    "configure" and a log is written to a file named config.log. The result 
+    Build configuration is started when jam is executed for the target named
+    "configure" and a log is written to a file named Jamrules.log. The result 
     of the configuration is the Jamrules file, which in turn is loaded at the
     begin of the build step. Before the user-defined tests are executed, the 
-    built-in tests are run to detect some basic capabilities of the build host
-    platform for example how to delete files or create directories.
+    built-in tests are always run to detect some basic capabilities of the
+    build host platform for example how to delete files or create directories.
+    The Jambase will then read in a file named Jamconfigure, which describes
+    the project-specific configuration i.e. wich tests are run to determine 
+    if all required dependencies, such as system headers and libraries are 
+    present. 
 
 <DT> <P> <H3> Building Targets </H3> <DD>
 <P>
     After sucessful build configuration, the actual build can be started. For
     this, the Jamfile is read, which describes which targets are built from the
-    source files etc. Optionally, a Jamrules file is read, which can provide
-    project specific rules and definitions. The build is initiated when jam
-    is executed for a build target or without any further command line 
-    arguments in which case all build targets are updated.
+    source files etc. The Jamrules file is read by the first Jamfile when the 
+    SubDir rue is called for the first time, which is usually as the first
+    statement in a Jamfile. The build step is initiated when jam is executed
+    for a build target (no target implies the target "all", which updates all
+    build targets).
 
 <DT> <P> <H3> Clean Up </H3> <DD>
 <P>
-    The build can be cleaned up, i.e. all build targets can be removed by 
+    The build can be cleaned up, i.e. all built targets can be removed by 
     the clean step. Running jam for the "clean" target will work without
     error even if the build has failed or not all build targets are present
     for other reasons. The Jamfile provides information what files can be
@@ -411,13 +417,18 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -v ]
 <P>
     A Jamfile can be as simple as this:
 <PRE>
+    SubDir $(MY_TOP) ;
     Main myprog : main.c util.c ;
 </PRE>
-    This specifies that there is a main.c and util.c file in the same directory
-    as the Jamfile, and that those source files should bec ompiled and linked
-    into an executable called myprog. If you cd to the directory where this 
-    Jamfile lives, you can see the exactly how <b>jam</b> would build myprog
-    with:
+    The first statement in a Jamfile is usally the first call of the SubDir
+    rule. This causes the previously generated Jamrules to be read and it
+    sets the directory context of all following build rules, e.g. in where
+    the sources can be found.
+    This Main rule specifies that there is a main.c and util.c file in the
+    same directory as specified by the SubDir rule, and that those source
+    files should be compiled and linked into an executable called myprog. 
+    If you cd to the directory where this Jamfile lives, you can see the 
+    exactly how <b>jam</b> would build myprog with:
 <PRE>
     jam -n
 </PRE>
@@ -430,6 +441,7 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -v ]
 <P>
     Consider this Jamfile:
 <PRE>
+    SubDir $(MY_TOP) ;
     Main myprog : main.c util.c ;                   
     LinkLibraries myprog : tree ;     
     Library tree : treemake.c treetrav.c ;    
@@ -448,9 +460,9 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -v ]
     not make any platform-specific filename references.
 <P>
     The <b>jam</b> program builds up a list of unique target identifiers.
-    Unless you are using the SubDir rules (described later), the default 
-    identifier for a file target is its filename. In the above example, the
-    target identifiers are the filenames: myprog.exe, tree.lib, main.obj, etc.
+    The default identifier for a file target is its filename prefixed with
+    the path specified by the SubDir rule. In the above example, the target
+    identifiers are simply the filenames: myprog.exe, tree.lib, main.obj, etc.
 <P>
     You can use any buildable target on the <b>jam</b> command line to build a
     subset of defined targets. In our example:

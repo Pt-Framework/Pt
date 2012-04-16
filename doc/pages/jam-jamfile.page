@@ -31,15 +31,19 @@
                               "int main() { dlopen(0,0); return 0; }"
                              : ""
                              : -ldl ] ; 
+    if ! $(WITH_DL)
+    {
+        Exit "dlopen not available" ;
+    }
 </PRE>
 
     This uses the C++ toolset to compile a small program calling a function
     of the dl library. The program is linked with the linker flag -ldl. The
     third argument passed to CheckBuildC++ is empty, but additional compiler
     flags could be passed here. An optional fifth argument allows to pass
-    linker paths to the build command.The rule will return nothing if the 
-    program can not be built. The command will be logged in the file 
-    config.log.
+    linker paths to the build command. The rule will return nothing if the 
+    program can not be built and a boolean-like value on success. The command
+    will be logged in the file Jamrules.log.
 <P>
 
 <H4> Configure Rule </H4>
@@ -70,11 +74,11 @@
     and have to be invoked before any other tests are done that require 
     the toolsets to be functional.
 <PRE>
-    ConfigureCc ; # configure C compiler
-    ConfigureC++ ; # configure C++ compiler
+    ConfigureCc ;
+    ConfigureC++ ;
 </PRE>
     Most, if not all Jamconfigure scripts call one or both rules at the
-    beginning. All tests will be logged in the file config.log.
+    beginning. All tests will be logged in the file Jamrules.log.
 <P>
 
 <H4> EchoOption </H4>
@@ -127,31 +131,22 @@
 
 <A NAME="jam_subdirs"><H3>Handling Directory Trees</H3></A>
 
-       The SubDir* rules are used to define source code directory hierarchies.
-       With SubDir and SubInclude, you can use <b>jam</b> to build software 
-       from source files and Jamfiles spread across many directories, as is 
-       typical for large projects. The SubDir* rules unify an entire source 
-       code tree so that <b>jam</b> can read in all the Jamfiles in one pass 
-       and compute dependencies across the entire project.
+    The SubDir* rules are used to define source code directory hierarchies.
+    With SubDir and SubInclude, you can use <b>jam</b> to build software 
+    from source files and Jamfiles spread across many directories, as is 
+    typical for large projects. The SubDir* rules unify an entire source 
+    code tree so that <b>jam</b> can read in all the Jamfiles in one pass 
+    and compute dependencies across the entire project.
 
 <P>
     To use the SubDir* rules, you must:
 <P>
 <OL>
-       <LI>     Preface the Jamfile in each directory with an invocation 
+    <LI> Preface the Jamfile in each directory with an invocation 
        of the SubDir rule.
 <P>
-       <LI>     Place  at  the  root  of the tree a file named Jamrules.  
-          This file could be empty,  but  in
-              practice  it contains user-provided rules and variable 
-          definitions that  are  shared  throughout  the
-              tree.   Examples  of  such  definitions are library
-              names,  header  directories,  install  directories,
-              compiler  flags,  etc.  This file is good candidate
-              for automatic customizing with autoconf(GNU).
-<P>
-    <LI>    Optionally, set an environment variable pointing
-        to the root directory of the srouce tree. The
+    <LI> Optionally, set an environment variable pointing
+        to the root directory of the source tree. The
         variable's name is left up to you, but in these
         examples, we use TOP.
 </OL>
@@ -175,28 +170,17 @@
 </PRE>
        This  compiles  four  files  in  &#36;(TOP)/src/util, archives
        two of the objects into libtree, and links  the  whole
-       thing into myprog. 
-       Outputs are placed in the &#36;(TOP)/src/util
-       directory. 
-       <P>
-       This doesn't appear to be any different from 
-       the previous example that didn't have a SubDir rule,
-       but two things are happening behind the scenes:
-       <UL>
+       thing into myprog. Outputs are placed in the &#36;(TOP)/src/util
+       directory. Two things are happening behind the scenes:
+    <UL>
 
-       <LI>The SubDir rule causes <b>jam</b> to read
-       in the &#36;(TOP)/Jamrules file.
-           (The Jamrules file can alternately be named by  the
-              variable  &#36;(xxxRULES), where xxx is the name of the
-              root variable, e.g., &#36;(TOPRULES)).
-          <P>
-       The Jamrules file can contain variable definitions
-       and rule definitions specific to your codeline.
-       It allows you to completely customize your build 
-       environment without having to rewrite Jambase.
-       Jamrules is only read
-       in once, at the first SubDir invocation.
-       <P>
+    <LI>The SubDir rule causes <b>jam</b> to read in the &#36;(TOP)/Jamrules
+        file. (The Jamrules file can alternately be named by the variable  
+        &#36;(xxxRULES), where xxx is the name of the root variable, e.g., 
+        &#36;(TOPRULES)).
+        <P>
+        Jamrules is only read in once, at the first SubDir invocation.
+        <P>
     <LI>
        The SubDir rule initializes a set of variables
        that are used by Main and other rules to 
@@ -216,15 +200,15 @@
        You'll see how this is useful later.
     <P>
 
-       </UL>
+    </UL>
 
 <P>
-       The SubDir rule takes  as  its  first  argument  the  root
-       variable's  name  and  takes  as  subsequent arguments the
-       directory names leading from the root to the directory  of
-       the  current Jamfile.  Note that the name of the subdirectory 
-       is given as individual  elements:   the  SubDir  rule
-       does not use system-specific directory name syntax.
+    The SubDir rule takes  as  its  first  argument  the  root
+    variable's  name  and  takes  as  subsequent arguments the
+    directory names leading from the root to the directory  of
+    the  current Jamfile.  Note that the name of the subdirectory 
+    is given as individual  elements:   the  SubDir  rule
+    does not use system-specific directory name syntax.
 <P>
 <P>
 <H4>
@@ -346,7 +330,7 @@
        &#36;(SEARCH_SOURCE) for the sources they use.
 <P>
        &#36;(LOCATE) and &#36;(SEARCH) are better  explained  in
-       <A HREF="Jam.html">The Jam Executable Program</A>
+       <A HREF="jam-usage.html">Basic Usage</A>
        but in brief they tell <B>jam</B> where to create new targets and
        where to find existing ones, respectively.
 <P>
@@ -402,192 +386,169 @@
 <P>
 
 <H4> Main Rule </H4>
-       The Main rule compiles source files and links the  resulting 
-       objects into an executable.  For example:
-<PRE>
-              Main myprog : main.c util.c ;
-</PRE>
-       This  compiles  main.c  and  util.c  and  links main.o and
-       util.o into myprog. The object files and resulting 
-       executable are named appropriately for the platform.
-<P>
-    Main can also be used to build shared libraries and/or
-    dynamic link libraries, since those are also linked
-    objects. Though, this feature is deprecated and the rule
-    SharedLibrary should be used instead.
-    <PRE>
 
-        Main driver&#36;(SUFSHR) : driver.c ;
-    </PRE>
-    Normally, Main uses &#36;(SUFEXE) to determine the suffix on
-    the filename of the built target. To override it,
-    you can supply a suffix explicity.
-    In this case,
-    &#36;(SUFSHR) is assumed to be the OS-specific shared library
-    suffix, defined in Jamrules with something
-    like:
+    The Main rule compiles source files and links the  resulting 
+    objects into an executable.  For example:
+
     <PRE>
-        if &#36;(UNIX)      { SUFSHR = .so ; }
-        else if &#36;(NT)   { SUFSHR = .dll ; }
+        Main myprog : main.c util.c ;
     </PRE>
+
+    This  compiles  main.c  and  util.c  and  links main.o and
+    util.o into myprog. The object files and resulting 
+    executable are named appropriately for the platform.
     <P>
+    
     Main uses the Objects rule to compile source targets. 
+    <P>
 
-<H4>
-   Library Rule
-</H4>
+<H4> Library Rule </H4>
 
-       The Library  rule  compiles  source  files,  archives  the
-       resulting  object  files  into a library, and then deletes
-       the object files.  For example:
-<PRE>
-              Library libstring : strcmp.c strcpy.c strlen.c ;
-              Library libtree : treemake.c treetrav.c ;
-</PRE>
-       This compiles five source files,  archives  three  of  the
-       object  files into libstring and the other two into libtree.  
-       Actual library filenames are formed with the &#36;(SUFLIB) suffix.
-       Once the objects are safely in the libraries, the
-       objects are deleted.
-       <P>
-       Library uses the Objects rule to compile source files.
-<P>
+    The Library  rule  compiles  source  files,  archives  the
+    resulting  object  files  into a static library, and then deletes
+    the object files.  For example:
 
+    <PRE>
+        Library libstring : strcmp.c strcpy.c strlen.c ;
+        Library libtree : treemake.c treetrav.c ;
+    </PRE>
 
-<H4>
-    SharedLibrary Rule
-</H4>
+    This compiles five source files,  archives  three  of  the
+    object  files into libstring and the other two into libtree.  
+    Actual library filenames are formed with the &#36;(SUFLIB) suffix.
+    Once the objects are safely in the libraries, the
+    objects are deleted.
+    <P>
+
+    Library uses the Objects rule to compile source files.
+    <P>
+
+<H4> SharedLibrary </H4>
+
     The rule 'SharedLibrary' compiles source files and links the resulting
     objects into a shared library. For example:
 
-<PRE>
-              SharedLibrary example : example.c util.c ;
-</PRE>
-       This  compiles  example.c  and  util.c  and  links example.o and
-       util.o into example. The object files and resulting
-       executable are named appropriately for the platform.
-       Main uses the Objects rule to compile source targets.
-<P>
+    <PRE>
+        SharedLibrary example : example.c util.c ;
+    </PRE>
+
+    This  compiles  example.c  and  util.c  and  links example.o and
+    util.o into example. The object files and resulting
+    executable are named appropriately for the platform.
+    Main uses the Objects rule to compile source targets.
+    <P>
+
     Normally, SharedLibrary uses &#36;(SUFLIB) and &#36;(SUFDLL) to determine the
     prefix/suffix on the filename of the built target. Under windows the
     resulting library will be called example.dll and a import library
     called example.lib will be created. Under unix, one shared library
     called libexample.so will be created. To override it,  you can supply
     a prefix/suffix explicity.
+    <P>
 
-<H4>
-   LinkLibraries Rule
-</H4>
-       To link executables or shared libraries with built static libraries,
-       use the LinkLibraries rule.  For example:
+<H4> LinkLibraries Rule </H4>
 
-<PRE>
-              Main myprog : main.c util.c ;
-              LinkLibraries myprog : libstring libtree ;
+    To link executables or shared libraries with built static libraries,
+    use the LinkLibraries rule. For example:
 
-              SharedLibrary mydll : dll.c stuff.c ;
-              LinkLibraries mydll : libstring libtree ;
-</PRE>
-       The LinkLibraries rule  does  two  things:  it  makes  the
-       libraries dependencies of the executable, so that they get
-       built first; and it makes the libraries  show  up  on  the
-       command  line  that links the executable.  The ordering of
-       the lines above is important, because the preceeding Main
-       or SharedLibrary Rule type its target.
-<P>
-       You  can  put multiple libraries on a single invocation of
-       the LinkLibraries rule, or you can provide them in  multiple  
-       invocations.   In both cases, the libraries appear on
-       the link command line in the  order  in  which  they  were
-       encountered.  You can also provide multiple executables to
-       the LinkLibraries rule, if they need the same libraries,
-       e.g.:
-<PRE>
-              LinkLibraries prog1 prog2 prog3 : libstring libtree ;
-</PRE>
-<P>
-       The LinkLibraries rule accepts a third optional parameter
-       to add linker flags to the command line that links the target.
-       The rule does so by settimg the LINKLIBS variable on the targets
-       specified in the first argument. The following example uses the
-       linker flags conatined in FLAGS when myprog is linked:
-<PRE>
-              Main myprog : main.c util.c ;
-              LinkLibraries myprog : libstring libtree : &#36;(FLAGS) ;
-</PRE>
-<P>
+    <PRE>
+        Library tree : tree.c ;
+        Library string : string.c ;
 
-<H4>
-   LinkSharedLibraries Rule
-</H4>
-       To link executables or shared libraries with built shared libraries,
-       use the LinkSharedLibraries rule.  For example:
+        Main myprog : main.c util.c ;
+        LinkLibraries myprog : tree ;
 
-<PRE>
-              Main myprog : main.c util.c ;
-              LinkSharedLibraries myprog : example ;
+        SharedLibrary mydll : dll.c stuff.c ;
+        LinkLibraries mydll : string tree ;
+    </PRE>
 
-              SharedLibrary mydll : dll.c stuff.c ;
-              LinkSharedLibraries mydll : example ;
-</PRE>
-       The LinkSharedLibraries rule  does  two  things:  it  makes  the
-       libraries dependencies of the executable, so that they get
-       built first; and it makes the libraries  show  up  on  the
-       command  line  that links the executable. The ordering of
-       the lines above is important, because the preceeding Main
-       or SharedLibrary Rules type its target.
-<P>
-       You  can  put multiple libraries on a single invocation of
-       the LinkSharedLibraries rule, or you can provide them in multiple
-       invocations. In both cases, the libraries appear on
-       the link command line in the  order  in  which  they  were
-       encountered. E. g.:
-<PRE>
-              LinkSharedLibraries myprog : example1 example2 ;
-</PRE>
-<P>
-       The LinkSharedLibraries rule accepts a third optional parameter
-       to add linker flags to the command line that links the executable
-       or shared library. The following example assumes that a variable
-       FLAGS contains additional linker flags:
+    The LinkLibraries rule  does  two  things:  it  makes  the
+    libraries dependencies of the executable, so that they get
+    built first; and it makes the libraries  show  up  on  the
+    command  line  that links the executable.  The ordering of
+    the lines above is important, because the preceeding Main
+    or SharedLibrary Rule define its target.
+    <P>
 
-<PRE>
-              Main myprog : main.c util.c ;
-              LinkSharedLibraries myprog : libstring libtree : &#36;(FLAGS) ;
-</PRE>
-<P>
-       The LinkSharedLibraries rule accepts a third optional parameter
-       to add linker flags to the command line that links the target.
-       The rule does so by settimg the LINKLIBS variable on the targets
-       specified in the first argument. The following example uses the
-       linker flags conatined in FLAGS when myprog is linked:
-<PRE>
-              Main myprog : main.c util.c ;
-              LinkSharedLibraries myprog : libstring libtree : &#36;(FLAGS) ;
-</PRE>
-<P>
+    You  can  put multiple libraries on a single invocation of
+    the LinkLibraries rule, or you can provide them in multiple
+    invocations. In both cases, the libraries appear on
+    the link command line in the  order  in  which  they  were
+    encountered.
+    <P>
 
-<H4>
-   LinkFlags Rule
-</H4>
+<H4> LinkSharedLibraries Rule </H4>
+
+    To link executables or shared libraries with built shared libraries,
+    use the LinkSharedLibraries rule.  For example:
+
+    <PRE>
+        SharedLibrary mydll : dll.c stuff.c ;
+
+        Main myprog : main.c util.c ;
+        LinkSharedLibraries myprog : mydll ;
+    </PRE>
+
+    The LinkSharedLibraries rule  does  two  things:  it  makes  the
+    libraries dependencies of the executable, so that they get
+    built first; and it makes the libraries  show  up  on  the
+    command  line  that links the executable. The ordering of
+    the lines above is important, because the preceeding Main
+    or SharedLibrary Rules type its target.
+    <P>
+
+    You  can  put multiple libraries on a single invocation of
+    the LinkSharedLibraries rule, or you can provide them in multiple
+    invocations. In both cases, the libraries appear on
+    the link command line in the  order  in  which  they  were
+    encountered. E. g.:
+
+    <PRE>
+        LinkSharedLibraries myprog : dll1 dll2 ;
+    </PRE>
+    <P>
+
+<H4> LinkLibs Rule </H4>
+    The LinkLibs rule adds library linker flags for a target such as an 
+    executable of shared library. The rule does so by setting the LINKLIBS
+    variable on the targets specified in the first argument. The following 
+    example uses the library linker flags contained in MYPROG_LINKLIBS when
+    myprog is linked:
+
+    <PRE>
+        Main myprog : main.c util.c ;
+        LinkLibs myprog : $(MYPROG_LINKLIBS) ;
+    </PRE>
+    <P>
+
+    This rule is useful for linker flags that specify which libraries should
+    be linked, like the -lxxx flags for most unix toolsets, because these
+    flags must be placed at a special position in the linker command line.
+    Use the LinkFlags rule for other linker flags.
+    <P>
+
+<H4> LinkFlags Rule </H4>
+
     The LinkFlags adds specific linker flag for a target such as an executable
     or shared library. For example:
-<PRE>
-              Main myprog : main.c util.c ;
-              LinkFlags myprog : &#36;(FLAGS) ;
 
-              SharedLibrary mydll : dll.c stuff.c ;
-              LinkFlags mydll : &#36;(FLAGS) ;
-</PRE>
-       This  adds the linker flags contained in &#36;(FLAGS) to the
-       to the command line that links the targets myprog or mydll.
-       It is possible to link against external libraries by adding
-       the actual link command flag.
-<P>
+    <PRE>
+        Main myprog : main.c util.c ;
+        LinkFlags myprog : &#36;(FLAGS) ;
 
-<H4>
-   Variables Used in Building Executables and Libraries
-</H4>
+        SharedLibrary mydll : dll.c stuff.c ;
+        LinkFlags mydll : &#36;(FLAGS) ;
+    </PRE>
+
+    This  adds the linker flags contained in &#36;(FLAGS) to the command line
+    that links the targets myprog or mydll.
+    Do not use this rule for linker flags that specify which libraries should
+    be linked, like the -lxxx flags required by most unix toolsets. Use the
+    LinkLibs rule for this, because these library linker flags have to be
+    placed at a special position in the linker command line.
+    <P>
+
+<H4> Variables Used in Building Executables and Libraries </H4>
 <CENTER>
 <TABLE>
 <TR><TD>
@@ -627,61 +588,45 @@
 </CENTER>
 
 <P>
-    Variables above marked with "*" are used by the Main,
-    Library, and LinkLibraries rules. Their values at the 
-    time the rules are invoked are used to set target-specific
+    Variables above marked with "*" are used by the build rules. Their 
+    values at the time the rules are invoked are used to set target-specific 
     variables.
-    <P>
-    All other variables listed above are globally defined,
-    and are used in actions that update Main and Library
-    targets. This means that the global values of those
-    variables are used, uness target-specific values have
-    been set. 
-    (For instance, a target-specific MODE value is set by 
-    the Main rule.)
-    The target-specific values always override
-    global values.
+<P>
+    All other variables listed above are globally defined, and are used in 
+    actions that update build targets. This means that the global values of 
+    those variables are used, unless target-specific values have been set. 
+    (For instance, a target-specific MODE value is set by the Main rule.)
+    The target-specific values always override global values.
 <P>
     Note that there are several ways to specify link libraries for
     executables: 
     <UL>
+        <LI>Use the LinkLibraries rule 
+        to specify built libraries; i.e., libraries
+        that are built by Library rules. This assures that
+        these libraries are built first, and that Main targets are 
+        rebuilt when the libraries are updated.
+        <P>
 
-    <LI>Use the LinkLibraries rule 
-    to specify built libraries; i.e., libraries
-    that are built by Library rules. This assures that
-    these libraries are built first, and that Main targets are 
-    rebuilt when the libraries are updated.
-    <P>
-    <LI>Use the LINKLIBS variable to specify external
-     libraries; e.g., system libraries or third-party libraries.
-     The LINKLIBS variable must be set to the the actual
-     link command flag that specifies the libraries.
-     <P>
-    <LI>Use the LinkFlags, LinkLibraries or LinkSharedLibraries
-     rules to specify external libraries in the thirg argument;
-      e.g., system libraries or third-party libraries.
-     The actual link command flag that specifies the libraries
-     must be used.
-     <P>
+        <LI>Use the LinkLibs rule or LINKLIBS variable to specify external
+         libraries; e.g., system libraries or third-party libraries.
+         The actual link command flag that specifies the libraries has to be used.
+         <P>
      </UL>
      <P>
      For example:
 <PRE>
     <I>#In Jamrules:</I>
-              if &#36;(UNIX) { X11LINKLIBS = -lXext -lX11 ; }
-              if &#36;(NT)   { X11LINKLIBS = libext.lib libX11.lib ; }
+        X11LINKLIBS ?= -lXext -lX11 ;
 
     <I>#In Jamfile:</I>
+        Library libxutil : xtop.c xbottom.c xutil.c ;
+        
+        Main xprog : xprog.c ;
+        LinkLibraries xprog : libxutil ;
 
-              Main xprog : xprog.c ;
-
-              LinkFlags xprog : &#36;(X11LINKLIBS) ;
-              # Or: LINKLIBS on xprog&#36;(SUFEXE) = &#36;(X11LINKLIBS) ;
-
-              LinkLibraries xprog : libxutil ;
-              # Or: LinkLibraries xprog : libxutil : &#36;(X11LINKLIBS) ;
-
-              Library libxutil : xtop.c xbottom.c xutil.c ;
+        LinkLibs xprog : &#36;(X11LINKLIBS) ;
+        # Or: LINKLIBS on xprog&#36;(SUFEXE) = &#36;(X11LINKLIBS) ;
 </PRE>
        This  example  uses the Jam syntax "variable on target" to
        set a target-specific variable.  In this way,  only  xprog
@@ -690,7 +635,9 @@
        by  the  same Jamfile. Note that when you set a variable
        on a target, you have to specify the target identifer
        exactly, which in this case is the suffixed filename of
-       the executable.
+       the executable. Therefore you should always prefer to use
+       the LinkLibs rule instead of setting the LINKLIBS variable
+       directly.
        The actual link command line on Unix, for example, would
        look something like this:
 <PRE>
