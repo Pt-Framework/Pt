@@ -14,8 +14,7 @@ if $(OS:L) = "nt"
     TONULL = " 2>NUL 1>NUL" ;
 }
 
-CONFIG_LOG = config.log ;
-
+CONFIGURE_LOG = $(JAMRULES:S=.log) ;
 CONFIGURED_VARIABLES = ;
 
 rule Configure
@@ -35,11 +34,22 @@ rule Configure
     }
 }
 
+rule ConfigureClean
+{
+    local _jamrules = $(JAMRULES:R=$(1)) ;
+
+    TryCommand "rm -f "$(JAMRULES) ;
+    TryCommand "del /f/q "$(JAMRULES) ;
+
+    TryCommand "rm -f "$(CONFIGURE_LOG) ;
+    TryCommand "del /f/q "$(CONFIGURE_LOG) ;
+}
+
 rule ConfigureLog
 {
     for local _line in $(1)
     {
-        WriteFile $(CONFIG_LOG) : $(_line) ;
+        WriteFile $(CONFIGURE_LOG) : $(_line) ;
     }
 }
 
@@ -72,15 +82,15 @@ rule SubConfigure
     # Jamconfigure from subdir needs to keep its paths, so ConfigureDefine 
     # works correctly and generates def header at correct place
 
-    local _subrules = [ FDirName $(<[1-]) $(JAMRULES) ] ;
+    local _subdir = [ FDirName $(<[1-]) ] ;
+    local _subrules = [ $(_subdir) $(JAMRULES) ] ;
 
-    TryCommand "rm -f "$(_subrules) ;
-    TryCommand "del /f/q "$(_subrules) ;
+    ConfigureClean $(_subdir) ;
 
     local config_vars = $(CONFIGURED_VARIABLES) ;
     CONFIGURED_VARIABLES = ;
 
-    include [ FDirName $(<[1-]) Jamconfigure ] ;
+    include [ $(_subdir) Jamconfigure ] ;
 
     for local _var in $(CONFIGURED_VARIABLES)
     {

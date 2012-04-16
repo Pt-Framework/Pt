@@ -41,11 +41,7 @@ if configure in $(ARGV)
     EchoOption --debug : "Debug Build" : $(WITH_DEBUG:E="no") ;
     EchoOption --optimize OPTIM : "Optimized Build" : $(WITH_OPTIM:E="no") ;
 
-    TryCommand "rm -f "$(JAMRULES) ;
-    TryCommand "del /f/q "$(JAMRULES) ;
-
-    TryCommand "rm -f config.log" ;
-    TryCommand "del /f/q config.log" ;
+    ConfigureClean ;
 
     ConfigureLog "[ Configure ]" ;
     ConfigureRm ;
