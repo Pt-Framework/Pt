@@ -1,5 +1,5 @@
-SubDir TOP src Pt-System tests ;
-SubDirHdrs $(TOP)/include ;
+SubDir PT_TOP src Pt-System tests ;
+SubDirHdrs $(PT_TOP)/include ;
 SubDirObjects $(OUTPUT_OBJECT) Pt-System ;
 
 PT_SYSTEM_TESTS = 

@@ -1,6 +1,6 @@
-SubDir TOP src Pt-Http tests ;
-SubDirHdrs $(TOP)/include ;
-SubDirHdrs $(TOP)/src/Pt-Http ;
+SubDir PT_TOP src Pt-Http tests ;
+SubDirHdrs $(PT_TOP)/include ;
+SubDirHdrs $(PT_TOP)/src/Pt-Http ;
 SubDirObjects $(OUTPUT_OBJECT) Pt-Http ;
 
 Main Pt-Http-test : Pt-Http-test.cpp

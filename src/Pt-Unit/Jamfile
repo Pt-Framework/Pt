@@ -1,5 +1,5 @@
-SubDir TOP src Pt-Unit ;
-SubDirHdrs $(TOP)/include ;
+SubDir PT_TOP src Pt-Unit ;
+SubDirHdrs $(PT_TOP)/include ;
 SubDirC++Flags [ FDefines PT_UNIT_API_EXPORT ] ;
 SubDirObjects $(OUTPUT_OBJECT) Pt-Unit ;
 

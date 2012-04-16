@@ -1,5 +1,5 @@
-SubDir TOP src Pt-XmlRpc tests ;
-SubDirHdrs $(TOP)/include ;
+SubDir PT_TOP src Pt-XmlRpc tests ;
+SubDirHdrs $(PT_TOP)/include ;
 SubDirObjects $(OUTPUT_OBJECT) Pt-XmlRpc ;
 
 Main Pt-XmlRpc-test : Pt-XmlRpc-test.cpp $(PT_XMLRPC_TESTS) ;

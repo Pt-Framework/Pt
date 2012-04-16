@@ -1,5 +1,5 @@
-SubDir TOP src Pt-Xml tests ;
-SubDirHdrs $(TOP)/include ;
+SubDir PT_TOP src Pt-Xml tests ;
+SubDirHdrs $(PT_TOP)/include ;
 SubDirObjects $(OUTPUT_OBJECT) Pt-Xml ;
 
 Main Pt-Xml-test : Pt-Xml-test.cpp

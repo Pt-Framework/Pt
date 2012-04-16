@@ -1,8 +1,8 @@
-SubDir TOP src Pt-Gui x11 ;
-SubDirHdrs $(TOP)/include ;
+SubDir PT_TOP src Pt-Gui x11 ;
+SubDirHdrs $(PT_TOP)/include ;
 SubDirHdrs $(FREETYPE_INCLUDES) ;
 SubDirHdrs /usr/include/X11 ;
-SubDirHdrs $(TOP)/src/Pt-System ;
+SubDirHdrs $(PT_TOP)/src/Pt-System ;
 SubDirC++Flags [ FDefines PT_GUI_API_EXPORT ] ;
 SubDirObjects $(OUTPUT_OBJECT) Pt-Gui ;
 

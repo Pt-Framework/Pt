@@ -1,7 +1,7 @@
-SubDir TOP src Pt-Http ;
-SubDirHdrs $(TOP)/include ;
+SubDir PT_TOP src Pt-Http ;
+SubDirHdrs $(PT_TOP)/include ;
 SubDirC++Flags [ FDefines PT_HTTP_API_EXPORT ] ;
-SubDirHdrs $(TOP)/src/Pt-Http/$(SYS:L) ;
+SubDirHdrs $(PT_TOP)/src/Pt-Http/$(SYS:L) ;
 SubDirObjects $(OUTPUT_OBJECT) Pt-Http ;
 
 SharedLibrary Pt-Http : Client.cpp
@@ -22,4 +22,4 @@ LinkSharedLibraries Pt-Http : Pt Pt-System Pt-Net ;
 MakeLocate Pt-Http : $(OUTPUT_TARGET) ;
 MakeInstall Pt-Http : $(INSTALL_LIBDIR) ;
 
-SubInclude TOP src Pt-Http tests ;
+SubInclude PT_TOP src Pt-Http tests ;

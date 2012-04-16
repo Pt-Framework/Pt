@@ -1,4 +1,4 @@
-SubDir TOP ;
+SubDir PT_TOP ;
 
 #############################################################################
 # General values and settings
@@ -8,99 +8,99 @@ SubDir TOP ;
 Load unittest.jam ;
 
 # set directory to build objects and targets
-ALL_LOCATE_OBJECTS ?= [ FDirName $(TOP) tmp $(CONFIG) ] ;
-ALL_LOCATE_TARGET ?= [ FDirName $(TOP) build $(CONFIG) ] ;
+ALL_LOCATE_OBJECTS ?= [ FDirName $(PT_TOP) tmp $(CONFIG) ] ;
+ALL_LOCATE_TARGET ?= [ FDirName $(PT_TOP) build $(CONFIG) ] ;
 
 # set directory to build objects and targets
 # this is used by MakeLocate and SubDirObjects in the Jamfiles
-OUTPUT_TARGET = [ FDirName $(TOP) build $(CONFIG) ] ;
-OUTPUT_OBJECT = [ FDirName $(TOP) tmp $(CONFIG) ] ;
-OUTPUT_TEST = [ FDirName $(TOP) build $(CONFIG) ] ;
+OUTPUT_TARGET = [ FDirName $(PT_TOP) build $(CONFIG) ] ;
+OUTPUT_OBJECT = [ FDirName $(PT_TOP) tmp $(CONFIG) ] ;
+OUTPUT_TEST = [ FDirName $(PT_TOP) build $(CONFIG) ] ;
 
 #############################################################################
 # Pt Header Files
 #############################################################################
 
-SubDir TOP include Pt ;
-PT_INCLUDES_SUBDIR = [ FDirName $(TOP) include Pt ] ;
+SubDir PT_TOP include Pt ;
+PT_INCLUDES_SUBDIR = [ FDirName $(PT_TOP) include Pt ] ;
 PT_INSTALL_INCLUDES = [ GLOB $(PT_INCLUDES_SUBDIR) : *.h  ] ;
 PT_INSTALL_INCLUDES += [ GLOB $(PT_INCLUDES_SUBDIR) : *.tpp  ] ;
 InstallFile [ FDirName $(INSTALL_INCLUDEDIR) Pt ] : $(PT_INSTALL_INCLUDES:BS) ;
 
-SubDir TOP include Pt System ;
-PT_INCLUDES_SUBDIR = [ FDirName $(TOP) include Pt System ] ;
+SubDir PT_TOP include Pt System ;
+PT_INCLUDES_SUBDIR = [ FDirName $(PT_TOP) include Pt System ] ;
 PT_INSTALL_INCLUDES = [ GLOB $(PT_INCLUDES_SUBDIR) : *.h  ] ;
 PT_INSTALL_INCLUDES += [ GLOB $(PT_INCLUDES_SUBDIR) : *.tpp  ] ;
 InstallFile [ FDirName $(INSTALL_INCLUDEDIR) Pt System ] : $(PT_INSTALL_INCLUDES:BS) ;
 
-SubDir TOP include Pt Net ;
-PT_INCLUDES_SUBDIR = [ FDirName $(TOP) include Pt Net ] ;
+SubDir PT_TOP include Pt Net ;
+PT_INCLUDES_SUBDIR = [ FDirName $(PT_TOP) include Pt Net ] ;
 PT_INSTALL_INCLUDES = [ GLOB $(PT_INCLUDES_SUBDIR) : *.h  ] ;
 PT_INSTALL_INCLUDES += [ GLOB $(PT_INCLUDES_SUBDIR) : *.tpp  ] ;
 InstallFile [ FDirName $(INSTALL_INCLUDEDIR) Pt Net ] : $(PT_INSTALL_INCLUDES:BS) ;
 
-SubDir TOP include Pt Reflex ;
-PT_INCLUDES_SUBDIR = [ FDirName $(TOP) include Pt Reflex ] ;
+SubDir PT_TOP include Pt Reflex ;
+PT_INCLUDES_SUBDIR = [ FDirName $(PT_TOP) include Pt Reflex ] ;
 PT_INSTALL_INCLUDES = [ GLOB $(PT_INCLUDES_SUBDIR) : *.h  ] ;
 PT_INSTALL_INCLUDES += [ GLOB $(PT_INCLUDES_SUBDIR) : *.tpp  ] ;
 InstallFile [ FDirName $(INSTALL_INCLUDEDIR) Pt Reflex ] : $(PT_INSTALL_INCLUDES:BS) ;
 
-SubDir TOP include Pt Http ;
-PT_INCLUDES_SUBDIR = [ FDirName $(TOP) include Pt Http ] ;
+SubDir PT_TOP include Pt Http ;
+PT_INCLUDES_SUBDIR = [ FDirName $(PT_TOP) include Pt Http ] ;
 PT_INSTALL_INCLUDES = [ GLOB $(PT_INCLUDES_SUBDIR) : *.h  ] ;
 PT_INSTALL_INCLUDES += [ GLOB $(PT_INCLUDES_SUBDIR) : *.tpp  ] ;
 InstallFile [ FDirName $(INSTALL_INCLUDEDIR) Pt Http ] : $(PT_INSTALL_INCLUDES:BS) ;
 
-SubDir TOP include Pt Xml ;
-PT_INCLUDES_SUBDIR = [ FDirName $(TOP) include Pt Xml ] ;
+SubDir PT_TOP include Pt Xml ;
+PT_INCLUDES_SUBDIR = [ FDirName $(PT_TOP) include Pt Xml ] ;
 PT_INSTALL_INCLUDES = [ GLOB $(PT_INCLUDES_SUBDIR) : *.h  ] ;
 PT_INSTALL_INCLUDES += [ GLOB $(PT_INCLUDES_SUBDIR) : *.tpp  ] ;
 InstallFile [ FDirName $(INSTALL_INCLUDEDIR) Pt Xml ] : $(PT_INSTALL_INCLUDES:BS) ;
 
-SubDir TOP include Pt XmlRpc ;
-PT_INCLUDES_SUBDIR = [ FDirName $(TOP) include Pt XmlRpc ] ;
+SubDir PT_TOP include Pt XmlRpc ;
+PT_INCLUDES_SUBDIR = [ FDirName $(PT_TOP) include Pt XmlRpc ] ;
 PT_INSTALL_INCLUDES = [ GLOB $(PT_INCLUDES_SUBDIR) : *.h  ] ;
 PT_INSTALL_INCLUDES += [ GLOB $(PT_INCLUDES_SUBDIR) : *.tpp  ] ;
 InstallFile [ FDirName $(INSTALL_INCLUDEDIR) Pt XmlRpc ] : $(PT_INSTALL_INCLUDES:BS) ;
 
-SubDir TOP include Pt Unit ;
-PT_INCLUDES_SUBDIR = [ FDirName $(TOP) include Pt Unit ] ;
+SubDir PT_TOP include Pt Unit ;
+PT_INCLUDES_SUBDIR = [ FDirName $(PT_TOP) include Pt Unit ] ;
 PT_INSTALL_INCLUDES = [ GLOB $(PT_INCLUDES_SUBDIR) : *.h  ] ;
 PT_INSTALL_INCLUDES += [ GLOB $(PT_INCLUDES_SUBDIR) : *.tpp  ] ;
 InstallFile [ FDirName $(INSTALL_INCLUDEDIR) Pt Unit ] : $(PT_INSTALL_INCLUDES:BS) ;
 
-SubDir TOP include Pt Db ;
-PT_INCLUDES_SUBDIR = [ FDirName $(TOP) include Pt Db ] ;
+SubDir PT_TOP include Pt Db ;
+PT_INCLUDES_SUBDIR = [ FDirName $(PT_TOP) include Pt Db ] ;
 PT_INSTALL_INCLUDES = [ GLOB $(PT_INCLUDES_SUBDIR) : *.h  ] ;
 PT_INSTALL_INCLUDES += [ GLOB $(PT_INCLUDES_SUBDIR) : *.tpp  ] ;
 InstallFile [ FDirName $(INSTALL_INCLUDEDIR) Pt Db ] : $(PT_INSTALL_INCLUDES:BS) ;
 
 #############################################################################
-# Pt Build Directories
+# Pt Build Targets
 #############################################################################
 
-SubInclude TOP src Pt ;
-SubInclude TOP src Pt-Reflex ;
-SubInclude TOP src Pt-Unit ;
-SubInclude TOP src Pt-Xml ;
-SubInclude TOP src Pt-Gfx ;
+SubInclude PT_TOP src Pt ;
+SubInclude PT_TOP src Pt-Reflex ;
+SubInclude PT_TOP src Pt-Unit ;
+SubInclude PT_TOP src Pt-Xml ;
+SubInclude PT_TOP src Pt-Gfx ;
 
 if $(SYS)
 {
-    SubInclude TOP src Pt-System ;
-    SubInclude TOP src Pt-Net ;
-    SubInclude TOP src Pt-Cma ;
-    SubInclude TOP src Pt-Db ;
-    SubInclude TOP src Pt-Http ;
-    SubInclude TOP src Pt-XmlRpc ;
+    SubInclude PT_TOP src Pt-System ;
+    SubInclude PT_TOP src Pt-Net ;
+    SubInclude PT_TOP src Pt-Cma ;
+    SubInclude PT_TOP src Pt-Db ;
+    SubInclude PT_TOP src Pt-Http ;
+    SubInclude PT_TOP src Pt-XmlRpc ;
 
     if $(WITH_OPENSSL) = yes
     {
-        SubInclude TOP src Pt-Ssl ;
+        SubInclude PT_TOP src Pt-Ssl ;
     }
     
     if $(GUI)
     {
-        SubInclude TOP src Pt-Gui ;
+        SubInclude PT_TOP src Pt-Gui ;
     }
 }

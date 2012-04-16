@@ -1,2 +1,2 @@
-SubDir TOP src Pt-Gfx freetype ;
-SubInclude TOP src Pt-Gfx freetype src ;
+SubDir PT_TOP src Pt-Gfx freetype ;
+SubInclude PT_TOP src Pt-Gfx freetype src ;

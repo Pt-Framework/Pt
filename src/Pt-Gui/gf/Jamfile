@@ -1,5 +1,5 @@
-SubDir TOP src Pt-Gui gf ;
-SubDirHdrs $(TOP)/include ;
+SubDir PT_TOP src Pt-Gui gf ;
+SubDirHdrs $(PT_TOP)/include ;
 SubDirC++Flags [ FDefines PT_GUI_API_EXPORT ] ;
 
 

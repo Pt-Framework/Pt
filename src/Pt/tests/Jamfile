@@ -1,5 +1,5 @@
-SubDir TOP src Pt tests ;
-SubDirHdrs $(TOP)/include ;
+SubDir PT_TOP src Pt tests ;
+SubDirHdrs $(PT_TOP)/include ;
 SubDirObjects $(OUTPUT_OBJECT) Pt ;
 
 Main Pt-test : Pt-test.cpp

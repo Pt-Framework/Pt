@@ -1,6 +1,6 @@
-SubDir TOP src Pt-Gui cocoa ;
-SubDirHdrs $(TOP)/include ;
-SubDirHdrs $(TOP)/src/Pt-System ;
+SubDir PT_TOP src Pt-Gui cocoa ;
+SubDirHdrs $(PT_TOP)/include ;
+SubDirHdrs $(PT_TOP)/src/Pt-System ;
 SubDirC++Flags [ FDefines PT_GUI_API_EXPORT ] ;
 SubDirObjects $(OUTPUT_OBJECT) Pt-Gui ;
 

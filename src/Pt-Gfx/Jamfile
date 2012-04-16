@@ -1,5 +1,5 @@
-SubDir TOP src Pt-Gfx ;
-SubDirHdrs $(TOP)/include ;
+SubDir PT_TOP src Pt-Gfx ;
+SubDirHdrs $(PT_TOP)/include ;
 SubDirC++Flags [ FDefines PT_GFX_API_EXPORT ] ;
 SubDirObjects $(OUTPUT_OBJECT) Pt-Gfx ;
 
@@ -9,7 +9,7 @@ if $(FREETYPE_LINKFLAGS)
 }
 else
 {
-    SubDirHdrs $(TOP)/src/Pt-Gfx/freetype/include ;
+    SubDirHdrs $(PT_TOP)/src/Pt-Gfx/freetype/include ;
 }
 
 SharedLibrary Pt-Gfx : ARgbColor.cpp
@@ -117,5 +117,5 @@ MakeLocate ImageTest : $(OUTPUT_TARGET) ;
 
 if ! $(FREETYPE_LINKFLAGS)
 {
-    SubInclude TOP src Pt-Gfx freetype ;
+    SubInclude PT_TOP src Pt-Gfx freetype ;
 }

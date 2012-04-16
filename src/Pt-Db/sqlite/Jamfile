@@ -1,5 +1,5 @@
-SubDir TOP src Pt-Db sqlite ;
-SubDirHdrs $(TOP)/include ;
+SubDir PT_TOP src Pt-Db sqlite ;
+SubDirHdrs $(PT_TOP)/include ;
 SubDirC++Flags [ FDefines PT_DB_API_EXPORT ] ;
 
 # sqlite.org's codebase has a file for the OSm specific code.

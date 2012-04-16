@@ -1,6 +1,6 @@
-SubDir TOP src Pt-Reflex tests ;
-SubDirHdrs $(TOP)/include ;
-SubDirHdrs $(TOP)/src/Pt-Reflex ;
+SubDir PT_TOP src Pt-Reflex tests ;
+SubDirHdrs $(PT_TOP)/include ;
+SubDirHdrs $(PT_TOP)/src/Pt-Reflex ;
 SubDirObjects $(OUTPUT_OBJECT) Pt-Reflex ;
 
 Main Pt-Reflex-test : ReflectableTest.cpp ;

@@ -1,5 +1,5 @@
-SubDir TOP src Pt-Net tests ;
-SubDirHdrs $(TOP)/include ;
+SubDir PT_TOP src Pt-Net tests ;
+SubDirHdrs $(PT_TOP)/include ;
 SubDirObjects $(OUTPUT_OBJECT) Pt-Net ;
 
 Main Pt-Net-test : Pt-Net-test.cpp

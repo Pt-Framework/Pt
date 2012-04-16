@@ -1,5 +1,5 @@
-SubDir TOP src Pt-Xml ;
-SubDirHdrs $(TOP)/include ;
+SubDir PT_TOP src Pt-Xml ;
+SubDirHdrs $(PT_TOP)/include ;
 SubDirC++Flags [ FDefines PT_XML_API_EXPORT ] ;
 SubDirObjects $(OUTPUT_OBJECT) Pt-Xml ;
 
@@ -21,4 +21,4 @@ LinkSharedLibraries Pt-Xml :  Pt ;
 MakeLocate Pt-Xml : $(OUTPUT_TARGET) ;
 MakeInstall Pt-Xml : $(INSTALL_LIBDIR) ;
 
-SubInclude TOP src Pt-Xml tests ;
+SubInclude PT_TOP src Pt-Xml tests ;

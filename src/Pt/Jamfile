@@ -1,5 +1,5 @@
-SubDir TOP src Pt ;
-SubDirHdrs $(TOP)/include ;
+SubDir PT_TOP src Pt ;
+SubDirHdrs $(PT_TOP)/include ;
 SubDirC++Flags [ FDefines PT_API_EXPORT ] ;
 SubDirObjects $(OUTPUT_OBJECT) Pt ;
 
@@ -38,5 +38,5 @@ MakeInstall Pt : $(INSTALL_LIBDIR) ;
 #Main itest : itest.mm ;
 #Main_AddLibraries itest : -framework UIKit -framework Foundation -framework CoreGraphics ;
 
-SubInclude TOP src Pt tests ;
+SubInclude PT_TOP src Pt tests ;
 

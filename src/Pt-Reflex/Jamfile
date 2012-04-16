@@ -1,5 +1,5 @@
-SubDir TOP src Pt-Reflex ;
-SubDirHdrs $(TOP)/include ;
+SubDir PT_TOP src Pt-Reflex ;
+SubDirHdrs $(PT_TOP)/include ;
 SubDirC++Flags [ FDefines PT_REFLEX_API_EXPORT ] ;
 SubDirObjects $(OUTPUT_OBJECT) Pt-Reflex ;
 
@@ -12,4 +12,4 @@ LinkSharedLibraries Pt-Reflex : Pt ;
 MakeLocate Pt-Reflex : $(OUTPUT_TARGET) ;
 MakeInstall Pt-Reflex : $(INSTALL_LIBDIR) ;
 
-SubInclude TOP src Pt-Reflex tests ;
+SubInclude PT_TOP src Pt-Reflex tests ;

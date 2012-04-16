@@ -1,5 +1,5 @@
-SubDir TOP src Pt-Ssl tests ;
-SubDirHdrs $(TOP)/include ;
+SubDir PT_TOP src Pt-Ssl tests ;
+SubDirHdrs $(PT_TOP)/include ;
 SubDirObjects $(OUTPUT_OBJECT) Pt-Ssl ;
 
 Main Pt-Ssl-test : Pt-Ssl-test.cpp

@@ -1,5 +1,5 @@
-SubDir TOP src Pt-Cma ;
-SubDirHdrs $(TOP)/include ;
+SubDir PT_TOP src Pt-Cma ;
+SubDirHdrs $(PT_TOP)/include ;
 SubDirC++Flags [ FDefines PT_CMA_API_EXPORT ] ;
 SubDirObjects $(OUTPUT_OBJECT) Pt-Cma ;
 

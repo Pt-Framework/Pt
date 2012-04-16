@@ -361,9 +361,9 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Configured|Win32'">
-    <NMakeBuildCommandLine>cd ..\.. &amp;&amp; jam.bat -q -j2 -sTOP=$(SolutionDir)..\..\</NMakeBuildCommandLine>
-    <NMakeCleanCommandLine>cd ..\.. &amp;&amp; jam.bat clean -sTOP=$(SolutionDir)..\..\</NMakeCleanCommandLine>
-    <NMakeReBuildCommandLine>cd ..\.. &amp;&amp; jam.bat -qa -j2 -sTOP=$(SolutionDir)..\..\</NMakeReBuildCommandLine>
+    <NMakeBuildCommandLine>cd ..\.. &amp;&amp; jam.bat -q -j2 -sPT_TOP=$(SolutionDir)..\..\</NMakeBuildCommandLine>
+    <NMakeCleanCommandLine>cd ..\.. &amp;&amp; jam.bat clean -sPT_TOP=$(SolutionDir)..\..\</NMakeCleanCommandLine>
+    <NMakeReBuildCommandLine>cd ..\.. &amp;&amp; jam.bat -qa -j2 -sPT_TOP=$(SolutionDir)..\..\</NMakeReBuildCommandLine>
     <NMakePreprocessorDefinitions>WIN32;_DEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
   </PropertyGroup>
   <ItemDefinitionGroup>
