@@ -64,33 +64,24 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -v ]
         <TR><TD VALIGN=TOP WIDTH=20%><CODE> -a </CODE>
         <TD> Build all targets anyway, even if they are up-to-date.
 
-        <TR><TD VALIGN=TOP><CODE> -d <I>c</I>  </CODE>
-        <TD> Turn on display option <I>c</I> and off the default 
-        display (summary info and actions):
-
-        <DL COMPACT>
-        <DT> a <DD> Show summary info, actions, quiet actions, and the
-        use of temporary targets
-        <DT> c <DD> Show the names of files that cause rebuilds, i.e.
-        new sources, missing targets, etc.
-        <DT> d <DD> Display a dependency graph (in <B>jam</B> syntax).
-        <DT> m <DD> Display the dependency analysis, and target/source
-                timestamps and paths
-        <DT> x <DD> Show shell arguments
-        </DL>
-
         <TR><TD VALIGN=TOP><CODE> -d <I>n</I>  </CODE>
         <TD> Enable cummulative debugging levels from 1 to <I>n</I>.  
         Interesting values are:
 
         <DL COMPACT>
-        <DT> 1 <DD> Show actions and summary info (the default) 
-        <DT> 3 <DD> Old name for -dm (described above)
+        <DT> 1 <DD> Show actions and summary info (the default)
+        <DT> 2 <DD> Show "quiet" actions and display all action text, as they are executed
+        <DT> 3 <DD> Show dependency analysis, and target/source timestamps/paths
+        <DT> 4 <DD> Show arguments and timming of shell invocations
         <DT> 5 <DD> Show rule invocations and variable expansions 
-        <DT> 6 <DD> Show directory/header file/archive scans 
+        <DT> 6 <DD> Show directory/header file/archive scans, and attempts at binding to targets 
         <DT> 7 <DD> Show variable settings 
-        <DT> 8 <DD> Show variable fetches 
-        <DT> 9 <DD> Show variable manipulation, scanner tokens 
+        <DT> 8 <DD> Show variable fetches, variable expansions, and evaluation of '"if"' expressions 
+        <DT> 9 <DD> Show variable manipulation, scanner tokens, and memory usage
+        <DT> 10 <DD> Show profile information for rules, both timing and memory
+        <DT> 11 <DD> Show parsing progress of Jamfiles
+        <DT> 12 <DD> Show graph of target dependencies
+        <DT> 13 <DD> Show change target status (fate)
         </DL>
 
         <TR><TD VALIGN=TOP><CODE> -d +<I>n</I> </CODE>
