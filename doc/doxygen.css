@@ -40,17 +40,49 @@ H2 {
 	font-size: 20px;
     color: #000000;
     font-weight: normal;
-    margin-top: 15px;}
+    margin-top: 15px;
+    margin-bottom: 4px;
+}
 H2 A {
 	font-size: 20px;
     color: #000000;
     font-weight: normal;
     margin-top: 15px;
+    margin-bottom: 4px;
 }
-H3 {
-    font-size: 14px;
+H3 
+{
+	font-size: 14px;
     color: #000000;
+    margin-bottom: 4px;
 }
+H3 A 
+{
+	font-size: 14px;
+    color: #000000;
+    margin-bottom: 4px;
+}
+H4
+{
+    color: #000000;
+    margin-bottom: 4px;
+}
+H4 A 
+{
+    color: #000000;
+    margin-bottom: 4px;
+}
+H5
+{
+    color: #000000;
+    margin-bottom: 4px;
+}
+H5 A 
+{
+    color: #000000;
+    margin-bottom: 4px;
+}
+
 CAPTION {
     font-weight: bold
 }
@@ -67,7 +99,9 @@ A:hover {
 a:visited {
     color: #2d378c;
 }
-
+p {
+    margin-top: 4px;
+}
 /* Doxygen styles */
 
 DIV.header DIV.summary {
@@ -229,8 +263,8 @@ DL.el { margin-left: -1cm }
 PRE.fragment {
 	/* border: 1px solid #CBCCCC; */
 	/* background-color: #eff0f0; */
-	margin-top: 4px;
-	margin-bottom: 4px;
+	/*margin-top: 4px;*/
+	/*margin-bottom: 4px;*/
 	margin-left: 2px;
 	margin-right: 8px;
 	padding-left: 6px;
