@@ -40,17 +40,15 @@ set sessionoptions=buffers
 " %b = value of byte                  %B = value of byte in HEX
 set statusline=[%n]\ %F%y%m%r\ %=\ %b\ 0x%B\ \ \ %c,%l/%L\ \ %P
 
-"function LM()
-"  if bufname('%') == '-MiniBufExplorer-'
-"    execute "normal \<2-leftmouse>"
-"  else
-"    execute "normal \<2-leftmouse>" 
-"  endif
-"endfunction
+function StartInsertIfModifiable()
+  if getbufvar(bufnr('%'), '&modifiable') == 1
+    startinsert
+  endif
+endfunction
 
-"noremap! <2-LEFTMOUSE> <C-o>:call LM()<CR>
+:noremap <LEFTMOUSE> :call StartInsertIfModifiable()<CR><LEFTMOUSE>
 
-function StartInsertOnModifiable()
+function StopInsertIfNotModifiable()
   "let is_modified=getbufvar(bufnr('%'), '&modified')  
 
   if getbufvar(bufnr('%'), '&modifiable') == 1
@@ -68,7 +66,7 @@ function StartInsertOnModifiable()
 endfunction
 
 " Auto commands
-autocmd BufEnter * call StartInsertOnModifiable()
+autocmd BufEnter * call StopInsertIfNotModifiable()
 "autocmd BufLeave -MiniBufExplorer- startinsert
 "autocmd BufEnter -MiniBufExplorer- stopinsert
 
@@ -151,8 +149,8 @@ vnoremap <BS> d
 
 " Find selected text
 :vnoremap <C-f> "fy/<C-r>f<CR>
-:inoremap <C-f> <C-o>/<C-r>f<CR>
-:nnoremap <C-f> /<C-r>f<CR>
+:inoremap <C-f> <ESC>/
+:nnoremap <C-f> /
 
 " Replace selected text
 :noremap <C-h> "fh<C-o>:%s/<C-r>f
