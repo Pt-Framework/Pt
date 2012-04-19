@@ -111,6 +111,7 @@ function ToggleOpenWindow()
     endif
 endfunction
 
+" Toggle open buffer sidebar
 :noremap <C-o> :call ToggleOpenWindow()<CR>
 :noremap! <C-o> <C-o>:call ToggleOpenWindow()<CR>
 
@@ -118,15 +119,7 @@ endfunction
 :noremap <C-s> :w<CR>
 :noremap! <C-s> <C-o>:w<CR>
 
-" Switch to insert mode
-:noremap <Esc> :startinsert<CR>
-:noremap! <Esc> <C-o>:startinsert<CR>
-
-" Switch to normal mode
-:noremap <C-e> <Esc>
-:noremap! <C-e> <Esc>
-
-" Window commands for insert mode
+" Window commands also for insert mode
 :inoremap <C-w>q <C-o><C-w>q
 
 " backspace in Visual mode deletes selection
