@@ -53,12 +53,6 @@ else
     }
 }
 
-Echo [ GLOB [ FDirName $(PT_TOP) src Pt-Ssl openssl crypto ] : *.h ] ;
-
-Exit EEEEEEEEEEEEE ;
-
-Bulk [ FDirName $(PT_TOP) src Pt-Ssl openssl include openssl ] : [ FDirName $(PT_TOP) src Pt-Ssl openssl crypto aes aes.h ] ;
-
 File [ FDirName $(PT_TOP) src Pt-Ssl openssl include openssl aes.h         ] : [ FDirName $(PT_TOP) src Pt-Ssl openssl crypto aes aes.h            ] ;
 File [ FDirName $(PT_TOP) src Pt-Ssl openssl include openssl asn1.h        ] : [ FDirName $(PT_TOP) src Pt-Ssl openssl crypto asn1 asn1.h          ] ;
 File [ FDirName $(PT_TOP) src Pt-Ssl openssl include openssl asn1_mac.h    ] : [ FDirName $(PT_TOP) src Pt-Ssl openssl crypto asn1 asn1_mac.h      ] ;
