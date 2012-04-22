@@ -45,9 +45,9 @@ class Client : public Pt::Connectable {
         {
             PT_SSL_LOG_C("Connecting to server");
 
-            _socket.connected += Pt::slot(*this, &Client::onTCPConnect);
+            _socket.connected() += Pt::slot(*this, &Client::onTCPConnect);
             _socket.beginConnect(addr, port);
-            _loop.add(_socket);
+            _socket.setActive(_loop);
         }
 
         ~Client()
@@ -57,7 +57,7 @@ class Client : public Pt::Connectable {
         void onTCPConnect(Pt::Net::TcpSocket& socket)
         {
             _socket.endConnect();
-            _ios.attachDevice(socket);
+            _ios.attach(socket);
 
             PT_SSL_LOG_C("Starting handshake");
             _ssl = new Pt::Ssl::SSLClient(_ios, _sslContext, 0);
@@ -81,8 +81,8 @@ class Client : public Pt::Connectable {
             PT_SSL_LOG_C("Peer CN = " << _ssl->buffer().getPeerCN());
             PT_SSL_LOG_C("Current cipher = \n" << _ssl->buffer().currentCipher().dump());
 
-            _ios.buffer().inputReady += Pt::slot(*this, &Client::onInput);
-            _ios.buffer().outputReady += Pt::slot(*this, &Client::onOutput);
+            _ios.buffer().inputReady() += Pt::slot(*this, &Client::onInput);
+            _ios.buffer().outputReady() += Pt::slot(*this, &Client::onOutput);
 
             PT_SSL_LOG_C("Sending request to the server ...");
             *_ssl <<
@@ -128,8 +128,8 @@ class Client : public Pt::Connectable {
                 if(avail == -1) {
                     PT_SSL_LOG_C("*** The stream has been shutdown by the other peer ***");
                     _ssl->buffer().shutdown();
-                    _ios.buffer().inputReady -= Pt::slot(*this, &Client::onInput);
-                    _ios.buffer().outputReady -= Pt::slot(*this, &Client::onOutput);
+                    _ios.buffer().inputReady() -= Pt::slot(*this, &Client::onInput);
+                    _ios.buffer().outputReady() -= Pt::slot(*this, &Client::onOutput);
                     std::cerr
                         << "############################################################################################# CLIENT RECEIVED BEFORE SHUTDOWN: "
                         << std::endl << _result << std::endl;
@@ -179,8 +179,8 @@ class Client : public Pt::Connectable {
                 << std::endl << _result << std::endl;
 
             PT_SSL_LOG_C("Shutting down the stream");
-            _ios.buffer().inputReady -= Pt::slot(*this, &Client::onInput);
-            _ios.buffer().outputReady -= Pt::slot(*this, &Client::onOutput);
+            _ios.buffer().inputReady() -= Pt::slot(*this, &Client::onInput);
+            _ios.buffer().outputReady() -= Pt::slot(*this, &Client::onOutput);
             _ssl->buffer().shutdown();
         }
 
@@ -234,7 +234,7 @@ int main(int argc, char** argv)
         Client client(loop, addr, port, clientContext);
 
         loop.setIdleTimeout(5000);
-        loop.timeout += Pt::slot(loop, &Pt::System::EventLoop::exit);
+        loop.timeout() += Pt::slot(loop, &Pt::System::EventLoop::exit);
         loop.run();
 
         PT_SSL_LOG_M("OpenSSL HTTP test progam ended");

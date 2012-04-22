@@ -32,6 +32,7 @@
 #include "Utils.h"
 
 #include <openssl/rand.h>
+#include <cassert>
 
 namespace Pt {
 namespace Ssl {
