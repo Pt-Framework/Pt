@@ -67,7 +67,7 @@ hi MyTagListFileName guifg=white guibg=NONE gui=bold
 hi Comment guifg=#808080 guibg=NONE gui=none ctermfg=244
 hi Todo    guifg=#8f8f8f guibg=#e6ea50 gui=italic ctermfg=245
 
-hi PreProc  guifg=#87DF8C gui=none ctermfg=230
+hi PreProc  guifg=#87DF99 gui=none ctermfg=230
 
 hi String   guifg=#DF8787 gui=none ctermfg=148
 hi Character   guifg=#DF9987 gui=none ctermfg=148
