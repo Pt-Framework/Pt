@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010-2010 by Marc Boris Duerner
+ * Copyright (C) 2010-2012 by Marc Boris Duerner
  * Copyright (C) 2010-2010 by Aloysius Indrayanto
  *
  * This library is free software; you can redistribute it and/or
@@ -29,44 +29,52 @@
 #ifndef PT_SSL_SSLSTREAMBUF_H
 #define PT_SSL_SSLSTREAMBUF_H
 
-#include <Pt/Signal.h>
+#include <Pt/Ssl/Api.h>
 #include <Pt/Ssl/SSLContext.h>
 #include <Pt/Ssl/SSLSession.h>
+#include <Pt/Signal.h>
 #include <string>
 
 namespace Pt {
+
 namespace Ssl {
 
-/**
- * \brief SSL stream buffer.
- */
+/** @brief SSL stream buffer.
+*/
 class PT_SSL_API SSLStreamBuf : public Connectable, public std::streambuf
 {
     public:
-        /** \brief Construct an SSL stream buffer that uses the given IO stream and SSL context. */
+        /** \brief Construct an SSL stream buffer that uses the given IO stream and SSL context. 
+        */
         SSLStreamBuf(std::iostream& ios, SSLContext& ctx, const char* sessionID = 0, size_t bufferSize = 1024);
 
-        /** \brief Standard dtor. */
+        /** \brief Standard dtor. 
+        */
         virtual ~SSLStreamBuf();
 
-        /** \brief Return the current protocol. */
+        /** \brief Return the current protocol. 
+        */
         inline SSLContext::Protocol protocol() const
         { return _protocol; }
 
-        /** \brief Return a list of available ciphers for the current protocol. */
-        inline const std::vector<SSLCipherInfo>& availableCiphers() const
-        { return _availCiphers; }
+        /** \brief Return a list of available ciphers for the current protocol. 
+        */
+        std::vector<SSLCipherInfo> availableCiphers() const;
 
-        /** \brief Return the currently used cipher (the cipher that are actually used to form the SSL channel). */
-        const SSLCipherInfo& currentCipher() const;
+        /** \brief Return the currently used cipher (the cipher that are actually used to form the SSL channel). 
+        */
+        SSLCipherInfo currentCipher() const;
 
-        /** \brief Check if this SSL stream buffer has been connected to the SSL stream buffer at the other end. */
+        /** \brief Check if this SSL stream buffer has been connected to the SSL stream buffer at the other end. 
+        */
         bool connected() const;
 
-        /** \brief Get the current status string of this SSL stream buffer. */
+        /** \brief Get the current status string of this SSL stream buffer. 
+        */
         const char* getStatusString() const;
 
-        /** \brief Get the peer CN (Common Name). */
+        /** \brief Get the peer CN (Common Name). 
+        */
         const std::string getPeerCN() const;
 
         /** @brief Get the current session data.
@@ -115,7 +123,8 @@ class PT_SSL_API SSLStreamBuf : public Connectable, public std::streambuf
         */
         std::streamsize import();
 
-        /** \brief Shutdown this SSL stream buffer. */
+        /** \brief Shutdown this SSL stream buffer. 
+        */
         void shutdown();
 
     protected:
@@ -131,27 +140,19 @@ class PT_SSL_API SSLStreamBuf : public Connectable, public std::streambuf
         std::iostream* _ios; // IO
 
     private:
-
-        // Get current cipher
-        void getCurrentCipher();
-
-    private:
-        size_t       _ibufferSize;
-        char*        _ibuffer;
-        std::size_t  _obufferSize;
-        char*        _obuffer;
-        const size_t _pbmax;
-        bool         _oextend;
-        bool         _handshakeStarted;
-        bool         _handshakeError;
-
-        SSLContext::Protocol       _protocol;       // Selected SSL protocol
-        std::vector<SSLCipherInfo> _availCiphers;   // List of all available ciphers for the current protocol
-        SSLCipherInfo              _currentCipher;  // Currently used cipher
+        size_t               _ibufferSize;
+        char*                _ibuffer;
+        std::size_t          _obufferSize;
+        char*                _obuffer;
+        const size_t         _pbmax;
+        bool                 _oextend;
+        bool                 _handshakeStarted;
+        bool                 _handshakeError;
+        SSLContext::Protocol _protocol; // Selected SSL protocol
 };
 
-
 } // namespace Ssl
+
 } // namespace Pt
 
 #endif

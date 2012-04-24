@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010-2010 by Marc Boris Duerner
+ * Copyright (C) 2010-2012 by Marc Boris Duerner
  * Copyright (C) 2010-2010 by Aloysius Indrayanto
  *
  * This library is free software; you can redistribute it and/or
@@ -28,11 +28,11 @@
  */
 
 #include <Pt/Ssl/SSLStreamBuf.h>
-
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 
 namespace Pt {
+
 namespace Ssl {
 
 ///// Logger for Pt-SSL ////////////////////////////////////////////////////////////////////////////
@@ -52,8 +52,7 @@ SSLStreamBuf::SSLStreamBuf(std::iostream& ios, SSLContext& ctx, const char* sess
   _pbmax(4),
   _handshakeStarted(false),
   _handshakeError(false),
-  _protocol( ctx.protocol() ),
-  _availCiphers( ctx.availableCiphers() )
+  _protocol( ctx.protocol() )
 {
     // Create the SSL objects
     _in  = BIO_new( BIO_s_mem() );
@@ -69,19 +68,71 @@ SSLStreamBuf::SSLStreamBuf(std::iostream& ios, SSLContext& ctx, const char* sess
     SSL_set_verify(_ssl, SSL_VERIFY_NONE, NULL);
 
     // Set session ID
-    if(sessionID) {
-        SSL_set_session_id_context(
-            _ssl,
-            reinterpret_cast<const unsigned char*>(sessionID), strlen(sessionID)
-        );
+    if(sessionID) 
+    {
+        SSL_set_session_id_context( _ssl,
+                                    reinterpret_cast<const unsigned char*>(sessionID), 
+                                    strlen(sessionID) );
     }
 }
 
+
 SSLStreamBuf::~SSLStreamBuf()
-{ SSL_free(_ssl); }
+{ 
+    SSL_free(_ssl); 
+}
+
+
+std::vector<SSLCipherInfo> SSLStreamBuf::availableCiphers() const
+{
+    std::vector<SSLCipherInfo> availCiphers;
+
+    STACK_OF(SSL_CIPHER)* chp = SSL_get_ciphers(_ssl);
+    for(int i = 0; i < sk_SSL_CIPHER_num(chp); ++i)
+    {
+        // Skip if not valid
+        const SSL_CIPHER* c = sk_SSL_CIPHER_value(chp, i);
+        if( ! c->valid )
+            continue;
+
+        // Get the ID and split it
+        const unsigned long id  = c->id;
+        const int           id0 = (int) (  id >> 24);
+        const int           id1 = (int) ( (id >> 16) & 0xFFL );
+        const int           id2 = (int) ( (id >>  8) & 0xFFL );
+        const int           id3 = (int) (  id        & 0xFFL );
+
+        // Convert the ID to a readable string
+        char strid[64];
+        if((id & 0xFF000000L) == 0x02000000L)
+            sprintf(strid, "0x%02X,0x%02X,0x%02X", id1, id2, id3);
+        else if((id & 0xFF000000L) == 0x03000000L)
+            sprintf(strid, "0x%02X,0x%02X", id2, id3);
+        else
+            sprintf(strid, "0x%02X,0x%02X,0x%02X,0x%02X", id0, id1, id2, id3);
+
+        // Get some information
+        char desc[512];
+        SSL_CIPHER_description(c, desc, sizeof(desc));
+        const int dlen = strlen(desc);
+        if(desc[dlen - 1] == '\n')
+            desc[dlen - 1] = 0;
+
+        // Store the chiper information
+        int np;
+        SSLCipherInfo cipher(id, strid, SSL_CIPHER_get_name(c), 
+                             SSL_CIPHER_get_bits(c, &np), 
+                             SSL_CIPHER_get_version(c), desc);
+        cipher.usedBits = np;
+        
+        availCiphers.push_back(cipher);
+    }
+
+    return availCiphers;
+}
 
 /*
-void SSLStreamBuf::setEnabledCiphers(const std::vector<SSLCipherInfo>& ciphers)
+void SSLStreamBuf::setCiphers(const std::vector<SSLCipherInfo>& ciphers)
 {
     if(_handshakeStarted)
         throw SSLRuntimeError(
@@ -101,22 +152,62 @@ void SSLStreamBuf::setEnabledCiphers(const std::vector<SSLCipherInfo>& ciphers)
 }
 */
 
-const SSLCipherInfo& SSLStreamBuf::currentCipher() const
+SSLCipherInfo SSLStreamBuf::currentCipher() const
 {
-    if(!_currentCipher.id) {
-        throw SSLRuntimeError(
-            "Cannot get the currently used cipher before completing a handshaking process!",
-            PT_SOURCEINFO );
-    }
+    SSLCipherInfo currentCipher;
 
-    return _currentCipher;
+    const SSL_CIPHER* c = SSL_get_current_cipher(_ssl);
+    if( ! c) 
+        throw SSLRuntimeError("Failed inquiring the currently used SSL cipher!", PT_SOURCEINFO);
+
+    // Get the ID and split it
+    const unsigned long id  = c->id;
+    const int           id0 = (int) (  id >> 24);
+    const int           id1 = (int) ( (id >> 16) & 0xFFL );
+    const int           id2 = (int) ( (id >>  8) & 0xFFL );
+    const int           id3 = (int) (  id        & 0xFFL );
+
+    // Convert the ID to a readable string
+    char strid[64];
+    if((id & 0xFF000000L) == 0x02000000L)
+        sprintf(strid, "0x%02X,0x%02X,0x%02X", id1, id2, id3);
+    else if((id & 0xFF000000L) == 0x03000000L)
+        sprintf(strid, "0x%02X,0x%02X", id2, id3);
+    else
+        sprintf(strid, "0x%02X,0x%02X,0x%02X,0x%02X", id0, id1, id2, id3);
+
+    // Get some information
+    char desc[512];
+    SSL_CIPHER_description(c, desc, sizeof(desc));
+    const int dlen = strlen(desc);
+    if(desc[dlen - 1] == '\n')
+        desc[dlen - 1] = 0;
+
+    // Store the chiper information
+    int np;
+    currentCipher.id       = id;
+    currentCipher.strid    = strid;
+    currentCipher.name     = SSL_CIPHER_get_name(c);
+    currentCipher.bits     = SSL_CIPHER_get_bits(c, &np);
+    currentCipher.usedBits = np;
+    currentCipher.version  = SSL_CIPHER_get_version(c);
+    currentCipher.desc     = desc;
+
+    return currentCipher;
 }
 
+
 bool SSLStreamBuf::connected() const
-{ return SSL_get_state(_ssl) == SSL_ST_OK; }
+{ 
+    return SSL_get_state(_ssl) == SSL_ST_OK; 
+}
+
 
 const char* SSLStreamBuf::getStatusString() const
-{ return SSL_state_string_long(_ssl); }
+{ 
+  return SSL_state_string_long(_ssl); 
+}
+
 
 const std::string SSLStreamBuf::getPeerCN() const
 {
@@ -130,6 +221,7 @@ const std::string SSLStreamBuf::getPeerCN() const
     return (ret > 0) ? peerCN : "";
 }
 
+
 const SSLSession SSLStreamBuf::getSession() const
 {
     if(!_ssl) return SSLSession();
@@ -140,6 +232,7 @@ const SSLSession SSLStreamBuf::getSession() const
    return SSLSession(sess);
 }
 
+
 void SSLStreamBuf::setSession(const SSLSession& sess)
 {
     SSL_SESSION* rsess = sess.impl(true);
@@ -149,6 +242,7 @@ void SSLStreamBuf::setSession(const SSLSession& sess)
     if(SSL_set_session(_ssl, rsess) == 0)
         throw SSLRuntimeError("Could not set session!", PT_SOURCEINFO);
 }
+
 
 void SSLStreamBuf::beginServerHandshake(bool verifyClientCert, bool requireCertBasedAuth)
 {
@@ -162,6 +256,7 @@ void SSLStreamBuf::beginServerHandshake(bool verifyClientCert, bool requireCertB
     SSL_set_accept_state(_ssl);
 }
 
+
 void SSLStreamBuf::beginClientHandshake(bool verifyServerCert)
 {
     _handshakeStarted = true;
@@ -171,6 +266,7 @@ void SSLStreamBuf::beginClientHandshake(bool verifyServerCert)
     SSL_set_connect_state(_ssl);
     this->writeHandshake();
 }
+
 
 bool SSLStreamBuf::writeHandshake()
 {
@@ -205,9 +301,9 @@ bool SSLStreamBuf::writeHandshake()
         return true;
     }
 
-    if(connected()) getCurrentCipher();
     return false;
 }
+
 
 bool SSLStreamBuf::readHandshake()
 {
@@ -247,13 +343,14 @@ bool SSLStreamBuf::readHandshake()
         }
     }
 
-    if( BIO_pending(_out) > 0 || SSL_get_state(_ssl) == SSL_ST_OK ) {
-        if(connected()) getCurrentCipher();
+    if( BIO_pending(_out) > 0 || SSL_get_state(_ssl) == SSL_ST_OK ) 
+    {
         return false;
     }
 
     return true;
 }
+
 
 std::streamsize SSLStreamBuf::import()
 {
@@ -281,6 +378,7 @@ std::streamsize SSLStreamBuf::import()
     return this->in_avail();
 }
 
+
 void SSLStreamBuf::shutdown()
 {
     const int res = SSL_shutdown(_ssl);
@@ -306,9 +404,8 @@ void SSLStreamBuf::shutdown()
 
     _handshakeStarted = false;
     _handshakeError   = false;
-
-    _currentCipher.id = 0;
 }
+
 
 int SSLStreamBuf::sync()
 {
@@ -329,6 +426,7 @@ int SSLStreamBuf::sync()
     return 0;
 }
 
+
 SSLStreamBuf::int_type SSLStreamBuf::underflow()
 {
     if( ! _ios )
@@ -344,6 +442,7 @@ SSLStreamBuf::int_type SSLStreamBuf::underflow()
 
     return traits_type::eof();
 }
+
 
 std::streamsize SSLStreamBuf::do_underflow(std::streamsize isize)
 {
@@ -436,6 +535,7 @@ std::streamsize SSLStreamBuf::do_underflow(std::streamsize isize)
     return 0;
 }
 
+
 SSLStreamBuf::int_type SSLStreamBuf::overflow(int_type ch)
 {
     // We are being called when _obuffer, the output buffer area of the
@@ -493,44 +593,6 @@ SSLStreamBuf::int_type SSLStreamBuf::overflow(int_type ch)
     return traits_type::not_eof(ch);
 }
 
-void SSLStreamBuf::getCurrentCipher()
-{
-    const SSL_CIPHER* c = SSL_get_current_cipher(_ssl);
-    if(!c) throw SSLRuntimeError("Failed inquiring the currently used SSL cipher!", PT_SOURCEINFO);
-
-    // Get the ID and split it
-    const unsigned long id  = c->id;
-    const int           id0 = (int) (  id >> 24);
-    const int           id1 = (int) ( (id >> 16) & 0xFFL );
-    const int           id2 = (int) ( (id >>  8) & 0xFFL );
-    const int           id3 = (int) (  id        & 0xFFL );
-
-    // Convert the ID to a readable string
-    char strid[64];
-    if((id & 0xFF000000L) == 0x02000000L)
-        sprintf(strid, "0x%02X,0x%02X,0x%02X", id1, id2, id3);
-    else if((id & 0xFF000000L) == 0x03000000L)
-        sprintf(strid, "0x%02X,0x%02X", id2, id3);
-    else
-        sprintf(strid, "0x%02X,0x%02X,0x%02X,0x%02X", id0, id1, id2, id3);
-
-    // Get some information
-    char desc[512];
-    SSL_CIPHER_description(c, desc, sizeof(desc));
-    const int dlen = strlen(desc);
-    if(desc[dlen - 1] == '\n')
-        desc[dlen - 1] = 0;
-
-    // Store the chiper information
-    int np;
-    _currentCipher.id       = id;
-    _currentCipher.strid    = strid;
-    _currentCipher.name     = SSL_CIPHER_get_name(c);
-    _currentCipher.bits     = SSL_CIPHER_get_bits(c, &np);
-    _currentCipher.usedBits = np;
-    _currentCipher.version  = SSL_CIPHER_get_version(c);
-    _currentCipher.desc     = desc;
-}
-
 } // namespace Ssl
+
 } // namespace Pt

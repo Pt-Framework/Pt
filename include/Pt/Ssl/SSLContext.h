@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2010 by Aloysius Indrayanto
+ * Copyright (C) 2010-2012 by Marc Duerner
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -31,22 +32,25 @@
 #include <Pt/Ssl/SSLPrivateKey.h>
 #include <Pt/Ssl/SSLCertificateList.h>
 #include <string>
-#include <vector>
 
 namespace Pt {
+
 namespace Ssl {
 
 //! @internal Library initialization.
-static struct PT_SSL_API SSLInit {
+static struct PT_SSL_API SSLInit 
+{
     SSLInit();
     ~SSLInit();
 } ssl_init;
 
-//! \brief SSL context.
-class PT_SSL_API SSLContext {
+//! @brief Context for SSL connections.
+class PT_SSL_API SSLContext
+{
     public:
-        //! \brief Available protocol.
-        enum Protocol {
+        //! @brief Available protocol.
+        enum Protocol 
+        {
             DefaultProtocol, //!< Select the default protocol (for now it is SSL version 3).
             TLSv1,           //!< Select TLS version 1 (it is the latest standard for secure TCP communication).
             SSLv3,           //!< Select SSL version 3 (recommended for modern system).
@@ -55,35 +59,32 @@ class PT_SSL_API SSLContext {
         };
 
     public:
-        /** \brief Construct an SSL context that uses the given certificate-key file and password. */
+        //! @brief Construct an SSL context that uses the given certificate-key file and password. 
         SSLContext(const char* sessionID = 0, Protocol protocol = DefaultProtocol);
 
-        //! \brief Standard dtor.
+        //! @brief Standard dtor.
         ~SSLContext();
 
-        /** \brief Return the current protocol. */
+        //! @brief Returns the current protocol. 
         inline Protocol protocol() const
         { return _protocol; }
 
-        /** \brief Set the current protocol. */
+        //! @brief Sets the current protocol. 
         void setProtocol(Protocol protocol);
 
-        /** \brief Return a list of available ciphers for the current protocol. */
-        inline const std::vector<SSLCipherInfo>& availableCiphers() const
-        { return _availCiphers; }
-
-        /** \brief Set the list of trusted CA certificates for this context.
-         * Setting the list of trusted CA certificates is needed if you would like to check if
-         * the other peer's certificate is signed by a trusted Certificate Authority. In this case
-         * the 'trustedCert' parameter must contain the certificates of all CA that you trust.
+        /** @brief Set the list of trusted CA certificates for this context.
+            Setting the list of trusted CA certificates is needed if you would like to check if
+            the other peer's certificate is signed by a trusted Certificate Authority. In this case
+            the 'trustedCert' parameter must contain the certificates of all CA that you trust.
          */
         void setTrustedCACertificate(const SSLCertificateList& trustedCert);
 
-        /** \brief Return the list of trusted CA certificates that is currently attached to this context. */
+        /** @brief Return the list of trusted CA certificates that is currently attached to this context. 
+        */
         const SSLCertificateList trustedCACertificate() const
         { return SSLCertificateList(_trustedCACert); }
 
-        /** \brief Set the main certificate and add certificate chain to this context.
+        /** @brief Set the main certificate and add certificate chain to this context.
          * Set the first certificate in the list as the main certificate of this context and add
          * the remaining certificates into the certificate chain (no certificates in the existing chain
          * will be deleted).
@@ -99,7 +100,7 @@ class PT_SSL_API SSLContext {
          */
         void setCertificateChain(const SSLCertificateList& certList);
 
-        /** \brief Set the main certificate of this context.
+        /** @brief Set the main certificate of this context.
          * Set the first certificate in the list as the main certificate of this context.
          * \n
          * Setting a main certificate is mandatory for a server context.
@@ -111,7 +112,7 @@ class PT_SSL_API SSLContext {
          */
         void setCertificate(const SSLCertificateList& certList);
 
-        /** \brief Add certificate chain to this context.
+        /** @brief Add certificate chain to this context.
          * Add the certificates in the list into the certificate chain of this context
          * (no certificates in the existing chain will be deleted). By default the first
          * certificate in the list is skipped.
@@ -123,7 +124,7 @@ class PT_SSL_API SSLContext {
          */
         void addCertificateChain(const SSLCertificateList& certList, bool skipFirstCert = true);
 
-        /** \brief Set the private key to be attached to this context.
+        /** @brief Set the private key to be attached to this context.
          * Setting a private key is mandatory for a server context.
          * \n
          * Setting a private key is for a client context is only needed for certificate-based
@@ -131,30 +132,24 @@ class PT_SSL_API SSLContext {
          */
         void setPrivateKey(const SSLPrivateKey& privKey);
 
-        /** \brief Return the private key that is currently attached to this context. */
+        //! @brief Returns the currently used private key.
         const SSLPrivateKey privateKey() const
         { return _privKey; }
         
-        /// \internal Return the raw OpenSSL context handle.
+        //! @internal
         inline ssl_ctx_st* impl() const
         { return _ctx; }
 
     private:
-        // Get available ciphers
-        void getAvailableCiphers();
-
-    private:
         ssl_ctx_st*                _ctx;             // OpenSSL's SSL context
         Protocol                   _protocol;        // Selected SSL protocol
-        std::vector<SSLCipherInfo> _availCiphers;    // List of all available ciphers for the current protocol
-
         SSLCertificateList         _trustedCACert;  // List of trusted CA certificates
         SSLPrivateKey              _privKey;        // Private key
         bool                       _certChainExist; // Flag
 };
 
-
 } // namespace Ssl
+
 } // namespace Pt
 
 #endif

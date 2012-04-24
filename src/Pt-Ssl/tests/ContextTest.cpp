@@ -38,7 +38,6 @@ class ContextTest : public Pt::Unit::TestSuite
         ContextTest()
         : Pt::Unit::TestSuite("ContextTest")
         {
-            this->registerMethod( "Ciphers", *this, &ContextTest::Ciphers);
         }
 
         void setUp()
@@ -46,12 +45,6 @@ class ContextTest : public Pt::Unit::TestSuite
 
         void tearDown()
         { }
-
-        void Ciphers()
-        {
-            Pt::Ssl::SSLContext ctx(0, Pt::Ssl::SSLContext::SSLv3or2);
-            PT_UNIT_ASSERT( ctx.availableCiphers().size() > 0 );
-        }
 };
 
 Pt::Unit::RegisterTest<ContextTest> register_ContextTestTest;
