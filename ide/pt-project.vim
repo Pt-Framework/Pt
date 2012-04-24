@@ -19,6 +19,7 @@ else
     if s:confirmed == 1
         :call system("ctags -f pt.tags --c-kinds=+p --fields=+iaS --extra=+q --language-force=C++ -IPT_API include/Pt/*.h src/Pt/*.cpp")
         :call system("ctags --append=on -f pt.tags --c-kinds=+p --fields=+iaS --extra=+q --language-force=C++ -IPT_SYSTEM_API include/Pt/System/*.h src/Pt-System/*.cpp")
+        :call system("ctags --append=on -f pt.tags --c-kinds=+p --fields=+iaS --extra=+q --language-force=C++ -IPT_XMLRPC_API include/Pt/XmlRpc/*.h src/Pt-XmlRpc/*.cpp")
         let &tags = g:build_root . "/pt.tags" 
     endif
 endif
