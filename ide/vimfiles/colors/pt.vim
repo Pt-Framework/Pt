@@ -22,19 +22,24 @@ if version >= 700
 endif
 
 " General colors
-hi Cursor       guifg=NONE    guibg=#626262 gui=none ctermbg=241
-hi Normal       guifg=#c0c0c0 guibg=#202020 gui=none ctermfg=253 ctermbg=234
-hi NonText      guifg=#303030 guibg=#202020 gui=none ctermfg=244 ctermbg=235
-hi LineNr       guifg=#808080 guibg=#202020 gui=none ctermfg=244 ctermbg=232
-hi StatusLine   guifg=#d3d3d5 guibg=#444444 gui=italic ctermfg=253 ctermbg=238 cterm=italic
-hi StatusLineNC guifg=#939395 guibg=#444444 gui=none ctermfg=246 ctermbg=238
+hi Cursor       guifg=#faf4c6 guibg=#656565 gui=none ctermbg=241
+hi Normal       guifg=#c0c0c0 guibg=#151515 gui=none ctermfg=253 ctermbg=234
+hi NonText      guifg=#151515 guibg=#151515 gui=none ctermfg=244 ctermbg=235
+hi LineNr       guifg=#808080 guibg=#151515 gui=none ctermfg=244 ctermbg=232
+hi StatusLine   guifg=#dddddd guibg=#444444 gui=none ctermfg=253 ctermbg=238 cterm=none
+hi StatusLineNC guifg=#959595 guibg=#444444 gui=none ctermfg=246 ctermbg=238
 hi VertSplit    guifg=#000000 guibg=#444444 gui=none ctermfg=238 ctermbg=238
 hi Folded       guibg=#384048 guifg=#a0a8b0 gui=none ctermbg=4 ctermfg=248
-hi FoldColumn   guibg=#202020 
+hi FoldColumn   guibg=#151515 guifg=darkyellow 
 hi Title        guifg=#f6f3e8 guibg=NONE	gui=bold ctermfg=254 cterm=bold
 hi Visual       guifg=#faf4c6 guibg=#3c414c gui=none ctermfg=254 ctermbg=4
 hi SpecialKey   guifg=#808080 guibg=#343434 gui=none ctermfg=244 ctermbg=236
-hi IncSearch    guifg=slategrey guibg=khaki
+hi IncSearch    guifg=#3c414c guibg=#faf4c6
+hi Search       guifg=cyan guibg=NONE
+hi Title        guifg=white guibg=NONE
+
+" Taglist plugin
+hi MyTagListFileName guifg=white guibg=NONE gui=bold
 
 " highlight groups
 "hi CursorIM
@@ -59,7 +64,7 @@ hi IncSearch    guifg=slategrey guibg=khaki
 "hi Tooltip
 
 " Syntax highlighting
-hi Comment guifg=#808080 gui=none ctermfg=244
+hi Comment guifg=#808080 guibg=NONE gui=none ctermfg=244
 hi Todo    guifg=#8f8f8f guibg=#e6ea50 gui=italic ctermfg=245
 
 hi PreProc  guifg=#87DF8C gui=none ctermfg=230
