@@ -6,7 +6,7 @@ SubDirObjects $(OUTPUT_OBJECT) Pt-Ssl ;
 
 SharedLibrary Pt-Ssl : Exception.cpp
                        Utils.cpp
-                       SSLCipherInfo.cpp
+                       CipherInfo.cpp
                        SSLPublicKey.cpp
                        SSLPrivateKey.cpp
                        SSLCertificateList.cpp

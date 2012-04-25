@@ -29,7 +29,7 @@
 #define PT_SSL_SSLPRIVATEKEY_H
 
 #include <Pt/SmartPtr.h>
-#include <Pt/Ssl/SSLCipherInfo.h>
+#include <Pt/Ssl/CipherInfo.h>
 
 namespace Pt {
 namespace Ssl {
