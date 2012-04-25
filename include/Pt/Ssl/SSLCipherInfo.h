@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2010 by Aloysius Indrayanto
+ * Copyright (C) 2010-2012 by Marc duerner
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,50 +26,90 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef PT_SSL_SSLCIPHERINFO_H
-#define PT_SSL_SSLCIPHERINFO_H
+#ifndef PT_SSL_CIPHERINFO_H
+#define PT_SSL_CIPHERINFO_H
 
-#include <Pt/Ssl/SSLCertificateInfo.h>
+#include <Pt/Ssl/Api.h>
+#include <string>
 
 namespace Pt {
+
 namespace Ssl {
 
-//! \brief Chipher information.
-class PT_SSL_API SSLCipherInfo {
+//! @brief Provides information about chiphers.
+class PT_SSL_API CipherInfo 
+{
     public:
-        unsigned long id;       //!< Numerical ID of the cipher.
-        std::string   strid;    //!< Sring ID of the cipher.
-        std::string   name;     //!< Name of the cipher.
-        int           bits;     //!< Number of bits supported by the cipher.
-        int           usedBits; //!< Number of bits actually used by the cipher.
-        std::string   version;  //!< Version of the cipher.
-        std::string   desc;     //!< Description of the cipher.
+        //! @brief Default constructor.
+        CipherInfo();
 
-        //! \brief Convert the cipher information into a string.
-        const std::string dump() const;
+        //! @brief Constructs from cipher properties.
+        CipherInfo(unsigned long id,
+                      const std::string& strid,
+                      const std::string& name,
+                      int bits,
+                      int usedBits,
+                      const std::string& version,
+                      const std::string& desc);
 
-        /// \internal
-        inline SSLCipherInfo()
-        : id(0), bits(0)
-        {}
+        //! @brief Returns the numerical ID of the cipher.
+        unsigned long id() const
+        { return _id; }
 
-        /// \internal
-        inline SSLCipherInfo(unsigned long      id_,
-                             const std::string& strid_,
-                             const std::string& name_,
-                             int                bits_,
-                             const std::string& version_,
-                             const std::string& desc_)
-        : id(id_), strid(strid_), name(name_), bits(bits_), version(version_), desc(desc_)
-        {}
+        //! @brief Returns the string ID of the cipher.
+        const std::string& stringId() const
+        { return _strid; }
+
+        //! @brief Returns the name of the cipher.
+        const std::string& name() const
+        { return _name; }
+
+        //! @brief Returns the number of bits supported by the cipher.
+        int bits() const
+        { return _bits; }
+
+        //! @brief Returns the number of bits actually used by the cipher.
+        int usedBits() const
+        { return _usedBits; }
+
+        //! @brief Returns the version of the cipher.
+        const std::string& version() const
+        { return _version; }
+
+        //! @brief Returns the description of the cipher.
+        const std::string& description() const
+        { return _desc; }
+
+    private:
+        unsigned long _id;
+        std::string   _strid;
+        std::string   _name;
+        int           _bits;
+        int           _usedBits;
+        std::string   _version;
+        std::string   _desc;
 };
 
-inline bool operator==(const SSLCipherInfo& a, const SSLCipherInfo& b)
+//! @brief Compares two ciphers.
+inline bool operator==(const CipherInfo& a, const CipherInfo& b)
 {
-    return a.id == b.id;
+    return a.id() == b.id();
+}
+
+//! @brief Compares two ciphers.
+inline bool operator!=(const CipherInfo& a, const CipherInfo& b)
+{
+    return a.id() != b.id();
+}
+
+//! @brief Compares two ciphers.
+inline bool operator<(const CipherInfo& a, const CipherInfo& b)
+{
+    return a.id() < b.id();
 }
 
 } // namespace Ssl
+
 } // namespace Pt
 
 #endif

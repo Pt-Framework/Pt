@@ -79,7 +79,7 @@ class Client : public Pt::Connectable {
             }
             
             PT_SSL_LOG_C("Peer CN = " << _ssl->buffer().getPeerCN());
-            PT_SSL_LOG_C("Current cipher = \n" << _ssl->buffer().currentCipher().dump());
+            PT_SSL_LOG_C("Current cipher = \n" << _ssl->buffer().currentCipher().name());
 
             _ios.buffer().inputReady() += Pt::slot(*this, &Client::onInput);
             _ios.buffer().outputReady() += Pt::slot(*this, &Client::onOutput);
@@ -143,9 +143,10 @@ class Client : public Pt::Connectable {
 
                 while(true) {
                     char buf[512];
-                    unsigned n =_ssl->readsome(buf, 512);
-                    if(n <= 0) break;
-                    _result += std::string(buf, n);
+                    std::streamsize n =_ssl->readsome(buf, 512);
+                    if(n <= 0) 
+                      break;
+                    _result += std::string(buf, static_cast<size_t>(n));
                 }
             }
 

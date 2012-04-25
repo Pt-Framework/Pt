@@ -28,6 +28,7 @@
 #ifndef PT_SSL_SSLCERTIFICATELIST_H
 #define PT_SSL_SSLCERTIFICATELIST_H
 
+#include <Pt/Ssl/SSLCertificateInfo.h>
 #include <Pt/Ssl/SSLPublicKey.h>
 #include <vector>
 

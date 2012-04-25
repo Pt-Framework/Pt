@@ -27,7 +27,7 @@
  */
 
 #include <Pt/Ssl/SSLPrivateKey.h>
-
+#include <Pt/Ssl/Exception.h>
 #include "Utils.h"
 
 namespace Pt {

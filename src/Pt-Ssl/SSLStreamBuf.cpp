@@ -83,9 +83,9 @@ SSLStreamBuf::~SSLStreamBuf()
 }
 
 
-std::vector<SSLCipherInfo> SSLStreamBuf::availableCiphers() const
+std::vector<CipherInfo> SSLStreamBuf::availableCiphers() const
 {
-    std::vector<SSLCipherInfo> availCiphers;
+    std::vector<CipherInfo> availCiphers;
 
     STACK_OF(SSL_CIPHER)* chp = SSL_get_ciphers(_ssl);
     for(int i = 0; i < sk_SSL_CIPHER_num(chp); ++i)
@@ -119,11 +119,10 @@ std::vector<SSLCipherInfo> SSLStreamBuf::availableCiphers() const
             desc[dlen - 1] = 0;
 
         // Store the chiper information
-        int np;
-        SSLCipherInfo cipher(id, strid, SSL_CIPHER_get_name(c), 
-                             SSL_CIPHER_get_bits(c, &np), 
-                             SSL_CIPHER_get_version(c), desc);
-        cipher.usedBits = np;
+        int usedBits;
+        int bits = SSL_CIPHER_get_bits(c, &usedBits);
+        CipherInfo cipher(id, strid, SSL_CIPHER_get_name(c), bits, usedBits, 
+                          SSL_CIPHER_get_version(c), desc);
         
         availCiphers.push_back(cipher);
     }
@@ -152,10 +151,8 @@ void SSLStreamBuf::setCiphers(const std::vector<SSLCipherInfo>& ciphers)
 }
 */
 
-SSLCipherInfo SSLStreamBuf::currentCipher() const
+CipherInfo SSLStreamBuf::currentCipher() const
 {
-    SSLCipherInfo currentCipher;
-
     const SSL_CIPHER* c = SSL_get_current_cipher(_ssl);
     if( ! c) 
         throw SSLRuntimeError("Failed inquiring the currently used SSL cipher!", PT_SOURCEINFO);
@@ -184,16 +181,11 @@ SSLCipherInfo SSLStreamBuf::currentCipher() const
         desc[dlen - 1] = 0;
 
     // Store the chiper information
-    int np;
-    currentCipher.id       = id;
-    currentCipher.strid    = strid;
-    currentCipher.name     = SSL_CIPHER_get_name(c);
-    currentCipher.bits     = SSL_CIPHER_get_bits(c, &np);
-    currentCipher.usedBits = np;
-    currentCipher.version  = SSL_CIPHER_get_version(c);
-    currentCipher.desc     = desc;
+    int usedBits;
+    int bits = SSL_CIPHER_get_bits(c, &usedBits);
 
-    return currentCipher;
+    return CipherInfo(id, strid,  SSL_CIPHER_get_name(c), bits, usedBits,
+                      SSL_CIPHER_get_version(c), desc);
 }
 
 
@@ -316,20 +308,21 @@ bool SSLStreamBuf::readHandshake()
 
     while(true)
     {
-        unsigned n = _ios->readsome(buf, sizeof(buf));
-        if(n == 0) break;
+        std::streamsize n = _ios->readsome(buf, sizeof(buf));
+        if(n == 0) 
+          break;
 
         while(n)
         {
-            const int written = BIO_write(_in, buf, n);
+            const int written = BIO_write(_in, buf, static_cast<int>(n));
             if(written <= 0)
-            throw SSLRuntimeError("Failed writing to OpenSSL input BIO!", PT_SOURCEINFO);
+              throw SSLRuntimeError("Failed writing to OpenSSL input BIO!", PT_SOURCEINFO);
 
             n -= written;
             PT_SSL_LOG("Wrote " << written << " bytes from _ios to _in BIO; leftover = " << n << " bytes");
 
             if(n > 0)
-                std::memcpy(buf, buf + written, n);
+                std::memcpy(buf, buf + written, static_cast<size_t>(n));
 
             int ret = SSL_do_handshake(_ssl);
             if( ret <= 0 )
@@ -361,7 +354,7 @@ std::streamsize SSLStreamBuf::import()
 
         if(avail >= 0 )
         {
-            const int n = do_underflow(avail);
+            const std::streamsize n = do_underflow(avail);
             PT_SSL_LOG("do_underflow() = " << n << " bytes");
             PT_SSL_LOG("_ios->rdbuf()->in_avail() = " << _ios->rdbuf()->in_avail() << " bytes");
 
@@ -477,16 +470,19 @@ std::streamsize SSLStreamBuf::do_underflow(std::streamsize isize)
     }
 
     BUF_MEM* bm = 0;
-    while(true) {
+    while(true) 
+    {
         // Refill the BIO with encoded bytes for decoding
         BIO_get_mem_ptr(_in, &bm);
-        if(bm->max > bm->length && isize > 0) {
-            const size_t avail  = std::min<size_t>(_ios->rdbuf()->in_avail(), isize);
-            const size_t refill = std::min<size_t>(bm->max - bm->length, avail);
+        if(bm->max > bm->length && isize > 0) 
+        {
+            const std::streamsize avail  = std::min(_ios->rdbuf()->in_avail(), isize);
+            const std::streamsize refill = std::min(static_cast<std::streamsize>(bm->max - bm->length), avail);
             isize -= refill;
 
             _ios->read(bm->data + bm->length, refill);
-            if(_ios->gcount() > 0) bm->length += _ios->gcount();
+            if(_ios->gcount() > 0) 
+              bm->length += static_cast<int>( _ios->gcount() );
 
             PT_SSL_LOG("Wrote " << _ios->gcount() << " bytes from _ios to _in BUF_MEM");
         }

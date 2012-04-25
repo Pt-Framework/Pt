@@ -146,7 +146,7 @@ void SSLCertificateList::Impl::loadFromFile(const std::string& fileName)
     ifs.open(fileName.c_str(), std::ios::binary);
     while(ifs) {
         ifs.read( rbuf, sizeof(rbuf) );
-        data += std::string( rbuf, ifs.gcount() );
+        data += std::string( rbuf, static_cast<size_t>( ifs.gcount() ) );
     }
 
     loadFromString(data);

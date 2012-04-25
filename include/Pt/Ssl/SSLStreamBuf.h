@@ -59,11 +59,11 @@ class PT_SSL_API SSLStreamBuf : public Connectable, public std::streambuf
 
         /** \brief Return a list of available ciphers for the current protocol. 
         */
-        std::vector<SSLCipherInfo> availableCiphers() const;
+        std::vector<CipherInfo> availableCiphers() const;
 
         /** \brief Return the currently used cipher (the cipher that are actually used to form the SSL channel). 
         */
-        SSLCipherInfo currentCipher() const;
+        CipherInfo currentCipher() const;
 
         /** \brief Check if this SSL stream buffer has been connected to the SSL stream buffer at the other end. 
         */

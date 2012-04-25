@@ -89,7 +89,7 @@ class Server : public Pt::Connectable {
             }
 
             PT_SSL_LOG_S("Peer CN = " << _ssl->buffer().getPeerCN());
-            PT_SSL_LOG_S("Current cipher = \n" << _ssl->buffer().currentCipher().dump());
+            PT_SSL_LOG_S("Current cipher = \n" << _ssl->buffer().currentCipher().name());
 
             _ios.buffer().inputReady() += Pt::slot(*this, &Server::onInput);
             _ios.buffer().outputReady() += Pt::slot(*this, &Server::onOutput);
@@ -105,7 +105,7 @@ class Server : public Pt::Connectable {
             std::string msg;
             while(true)
             {
-                const int importResult = _ssl->buffer().import();
+                const std::streamsize importResult = _ssl->buffer().import();
                 if(importResult == -1) {
                     PT_SSL_LOG_S("*** The stream has been shutdown by the other peer ***");
                     _ssl->buffer().shutdown();
@@ -120,9 +120,10 @@ class Server : public Pt::Connectable {
 
                 while(true) {
                     char buf[512];
-                    unsigned n =_ssl->readsome(buf, 512);
-                    if(n <= 0) break;
-                    msg += std::string(buf, n);
+                    std::streamsize n =_ssl->readsome(buf, 512);
+                    if(n <= 0) 
+                      break;
+                    msg += std::string(buf, static_cast<size_t>(n));
                 }
             }
 
@@ -141,7 +142,7 @@ class Server : public Pt::Connectable {
 #endif
             while(ifs) {
                 ifs.read( rbuf, sizeof(rbuf) );
-                lmsg += std::string( rbuf, ifs.gcount() );
+                lmsg += std::string( rbuf, static_cast<size_t>(ifs.gcount()) );
             }
 
             PT_SSL_LOG_S("Sending response to the client ... body size = " << lmsg.length());
@@ -229,7 +230,7 @@ class Client : public Pt::Connectable {
             }
 
             PT_SSL_LOG_C("Peer CN = " << _ssl->buffer().getPeerCN());
-            PT_SSL_LOG_C("Current cipher = \n" << _ssl->buffer().currentCipher().dump());
+            PT_SSL_LOG_C("Current cipher = \n" << _ssl->buffer().currentCipher().name());
             
             _ios.buffer().inputReady() += Pt::slot(*this, &Client::onInput);
             _ios.buffer().outputReady() += Pt::slot(*this, &Client::onOutput);
@@ -276,9 +277,10 @@ class Client : public Pt::Connectable {
 
                 while(true) {
                     char buf[512];
-                    unsigned n =_ssl->readsome(buf, 512);
-                    if(n <= 0) break;
-                    _result += std::string(buf, n);
+                    std::streamsize n =_ssl->readsome(buf, 512);
+                    if(n <= 0) 
+                      break;
+                    _result += std::string(buf, static_cast<size_t>(n));
                 }
             }
 

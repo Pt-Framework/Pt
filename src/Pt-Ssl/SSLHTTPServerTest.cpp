@@ -94,7 +94,7 @@ class Server : public Pt::Connectable {
             }
 
             PT_SSL_LOG_S("Peer CN = " << _ssl->buffer().getPeerCN());
-            PT_SSL_LOG_S("Current cipher = \n" << _ssl->buffer().currentCipher().dump());
+            PT_SSL_LOG_S("Current cipher = \n" << _ssl->buffer().currentCipher().name());
 
             _ios->buffer().inputReady() += Pt::slot(*this, &Server::onInput);
             _ios->buffer().outputReady() += Pt::slot(*this, &Server::onOutput);
@@ -118,7 +118,7 @@ class Server : public Pt::Connectable {
             PT_SSL_LOG_S("Received decoded = " << _ssl->buffer().in_avail());
 
             char buf[512];
-            unsigned n =_ssl->readsome(buf, 512);
+            std::streamsize n =_ssl->readsome(buf, 512);
             if(n <= 0) return;
 
             std::cerr
@@ -137,7 +137,7 @@ class Server : public Pt::Connectable {
 #endif
             while(ifs) {
                 ifs.read( rbuf, sizeof(rbuf) );
-                lmsg += std::string( rbuf, ifs.gcount() );
+                lmsg += std::string( rbuf, static_cast<size_t>(ifs.gcount()) );
             }
 
             PT_SSL_LOG_S("Sending response to the client ... body size = " << lmsg.length());

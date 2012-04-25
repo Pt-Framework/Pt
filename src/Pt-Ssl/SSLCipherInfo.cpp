@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2010 by Aloysius Indrayanto
+ * Copyright (C) 2010-2012 by Marc Duerner
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -27,33 +28,30 @@
  */
 
 #include <Pt/Ssl/SSLCipherInfo.h>
-#include <cstdio>
 
 namespace Pt {
+
 namespace Ssl {
 
-const std::string SSLCipherInfo::dump() const
-{
-    std::string str;
+CipherInfo::CipherInfo()
+: _id(0)
+, _bits(0)
+, _usedBits(0)
+{}
 
-    char tmp[64];
-    sprintf(tmp, "%lu", id);
 
-    str += "ID          = " + std::string(tmp);
-    str += "\nString ID   = " + strid;
-    str += "\nName        = " + name;
-
-    sprintf(tmp, "%d", bits);
-    str += "\nBits        = " + std::string(tmp);
-
-    sprintf(tmp, "%d", usedBits);
-    str += "\nUsed bits   = " + std::string(tmp);
-
-    str += "\nVersion     = " + version;
-    str += "\nDescription = " + desc;
-
-    return str;
-}
+CipherInfo::CipherInfo(unsigned long id, const std::string& strid,
+                       const std::string& name, int bits, int usedBits,
+                       const std::string& version, const std::string& desc)
+: _id(id)
+, _strid(strid)
+, _name(name)
+, _bits(bits)
+, _usedBits(usedBits)
+, _version(version)
+, _desc(desc)
+{}
 
 } // namespace Ssl
+
 } // namespace Pt
