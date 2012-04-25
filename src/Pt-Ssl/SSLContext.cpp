@@ -365,7 +365,7 @@ void SSLContext::addCertificateChain(const SSLCertificateList& certList, bool sk
     _certChainExist = true;
 }
 
-void SSLContext::setPrivateKey(const SSLPrivateKey& privKey)
+void SSLContext::setPrivateKey(const PrivateKey& privKey)
 {
     // Try to use the private key
     if( ! SSL_CTX_use_PrivateKey( _ctx, privKey.impl() ) )
@@ -383,5 +383,5 @@ void SSLContext::setPrivateKey(const SSLPrivateKey& privKey)
 }
 
 } // namespace Ssl
-} // namespace Pt
 
+} // namespace Pt

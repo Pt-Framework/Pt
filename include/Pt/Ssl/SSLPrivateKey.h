@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2010 by Aloysius Indrayanto
+ * Copyright (C) 2010-2012 by Marc Duerner
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,17 +26,20 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef PT_SSL_SSLPRIVATEKEY_H
-#define PT_SSL_SSLPRIVATEKEY_H
+#ifndef PT_SSL_PRIVATEKEY_H
+#define PT_SSL_PRIVATEKEY_H
 
+#include <Pt/Ssl/Api.h>
+#include <Pt/Ssl/SslError.h>
 #include <Pt/SmartPtr.h>
-#include <Pt/Ssl/CipherInfo.h>
 
 namespace Pt {
+
 namespace Ssl {
 
 //! \brief Private key.
-class PT_SSL_API SSLPrivateKey {
+class PT_SSL_API PrivateKey 
+{
     public:
         //! \brief Padding mode for string decryption.
         enum PaddingMode {
@@ -45,19 +49,19 @@ class PT_SSL_API SSLPrivateKey {
 
     public:
         //! \brief Instantiate an empty private-key.
-        SSLPrivateKey();
+        PrivateKey();
 
         //! \brief Copy ctor.
-        SSLPrivateKey(const SSLPrivateKey& pkey);
+        PrivateKey(const PrivateKey& pkey);
 
         //! \brief Instantiate an empty private-key.
-        SSLPrivateKey(const std::string& password);
+        PrivateKey(const std::string& password);
 
         //! \brief Instantiate a private-key using the given key data.
-        SSLPrivateKey(const std::string& keyData, const std::string& password);
+        PrivateKey(const std::string& keyData, const std::string& password);
 
         //! \brief Standard dtor.
-        ~SSLPrivateKey();
+        ~PrivateKey();
 
         //! \brief Load private-key from the given data.
         void loadFromString(const std::string& keyData);
@@ -83,28 +87,33 @@ class PT_SSL_API SSLPrivateKey {
 };
 
 //! \internal
-class PT_SSL_API SSLPrivateKey::Impl {
+class PT_SSL_API PrivateKey::Impl 
+{
+    friend class SSLContext;
+    friend class PrivateKey;
+
     public:
         Impl();
+        
         Impl(const std::string& password);
+        
         ~Impl();
 
         void loadFromString(const std::string& keyData);
+        
         void loadFromFile(const std::string& fileName);
 
-        friend class SSLContext;
-        friend class SSLPrivateKey;
-
-    private:
         void clear();
 
         static int passwordCallback(char* buff, int num, int /*rwflag*/, void* userdata);
 
+    private:
         std::string  _pswd;
         evp_pkey_st* _pkey;
 };
 
 } // namespace Ssl
+
 } // namespace Pt
 
-#endif
+#endif // PT_SSL_PRIVATEKEY_H

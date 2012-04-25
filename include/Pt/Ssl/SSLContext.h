@@ -130,10 +130,10 @@ class PT_SSL_API SSLContext
          * Setting a private key is for a client context is only needed for certificate-based
          * client authentication.
          */
-        void setPrivateKey(const SSLPrivateKey& privKey);
+        void setPrivateKey(const PrivateKey& privKey);
 
         //! @brief Returns the currently used private key.
-        const SSLPrivateKey privateKey() const
+        const PrivateKey privateKey() const
         { return _privKey; }
         
         //! @internal
@@ -141,11 +141,11 @@ class PT_SSL_API SSLContext
         { return _ctx; }
 
     private:
-        ssl_ctx_st*                _ctx;             // OpenSSL's SSL context
-        Protocol                   _protocol;        // Selected SSL protocol
-        SSLCertificateList         _trustedCACert;  // List of trusted CA certificates
-        SSLPrivateKey              _privKey;        // Private key
-        bool                       _certChainExist; // Flag
+        ssl_ctx_st*        _ctx;            // OpenSSL's SSL context
+        Protocol           _protocol;       // Selected SSL protocol
+        SSLCertificateList _trustedCACert;  // List of trusted CA certificates
+        PrivateKey         _privKey;        // Private key
+        bool               _certChainExist; // Flag
 };
 
 } // namespace Ssl

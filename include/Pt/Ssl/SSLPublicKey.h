@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2010 by Aloysius Indrayanto
+ * Copyright (C) 2010-2012 by Marc Duerner
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,17 +26,20 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef PT_SSL_SSLPUBLICKEY_H
-#define PT_SSL_SSLPUBLICKEY_H
+#ifndef PT_SSL_PUBLICKEY_H
+#define PT_SSL_PUBLICKEY_H
 
+#include <Pt/Ssl/Api.h>
+#include <Pt/Ssl/SslError.h>
 #include <Pt/SmartPtr.h>
-#include <Pt/Ssl/CipherInfo.h>
 
 namespace Pt {
+
 namespace Ssl {
 
 //! \brief Public key.
-class PT_SSL_API SSLPublicKey {
+class PT_SSL_API PublicKey 
+{
     public:
         //! \brief Padding mode for string encryption.
         enum PaddingMode {
@@ -45,16 +49,16 @@ class PT_SSL_API SSLPublicKey {
 
     public:
         //! \brief Instantiate an empty public-key.
-        SSLPublicKey();
+        PublicKey();
 
         //! \brief Copy ctor.
-        SSLPublicKey(const SSLPublicKey& pkey);
+        PublicKey(const PublicKey& pkey);
 
         //! \brief Instantiate a public-key using the given key data.
-        SSLPublicKey(const std::string& keyData);
+        PublicKey(const std::string& keyData);
         
         //! \brief Standard dtor.
-        ~SSLPublicKey();
+        ~PublicKey();
 
         //! \brief Load public-key from the given data.
         void loadFromString(const std::string& keyData);
@@ -67,7 +71,7 @@ class PT_SSL_API SSLPublicKey {
 
     public:
         //! \internal Instantiate a public-key from the given OpenSSL raw private key handle.
-        SSLPublicKey(evp_pkey_st* pkey);
+        PublicKey(evp_pkey_st* pkey);
 
         //! \internal Return the raw OpenSSL public key handle.
         evp_pkey_st* impl() const;
@@ -82,25 +86,30 @@ class PT_SSL_API SSLPublicKey {
         ImplPtr _impl;
 };
 
-//! \internal
-class PT_SSL_API SSLPublicKey::Impl {
+//! @internal
+class PT_SSL_API PublicKey::Impl 
+{
+    friend class PublicKey;
+
     public:
         Impl();
+
         Impl(evp_pkey_st* pkey);
+
         ~Impl();
 
         void loadFromString(const std::string& keyData);
+
         void loadFromFile(const std::string& fileName);
 
-        friend class SSLPublicKey;
-
-    private:
         void clear();
 
+    private:
         evp_pkey_st* _pkey;
 };
 
 } // namespace Ssl
+
 } // namespace Pt
 
-#endif
+#endif // PT_SSL_PUBLICKEY_H

@@ -60,7 +60,7 @@ class PT_SSL_API SSLCertificateList {
         const std::vector<SSLCertificateInfo>& certInfo() const;
 
         //! \brief Get the public key of the main (first) certificate.
-        const SSLPublicKey getPublicKey() const;
+        PublicKey publicKey() const;
 
         /// \internal Return a list of raw OpenSSL X509 certificate handle.
         const std::vector<x509_st*>& impl() const;
@@ -79,24 +79,27 @@ class PT_SSL_API SSLCertificateList {
 };
 
 //! \internal
-class PT_SSL_API SSLCertificateList::Impl {
+class PT_SSL_API SSLCertificateList::Impl 
+{
+    friend class SSLCertificateList;
+
     public:
         Impl();
+
         ~Impl();
 
         void loadFromString(const std::string& certData);
+
         void loadFromFile(const std::string& fileName);
 
         inline const std::vector<SSLCertificateInfo>& certInfo() const
         { return _certInfo; }
 
-        const SSLPublicKey getPublicKey() const;
+        PublicKey publicKey() const;
 
-        friend class SSLCertificateList;
-
-    private:
         void clear();
 
+    private:
         std::vector<x509_st*>           _cert;
         std::vector<SSLCertificateInfo> _certInfo;
 };

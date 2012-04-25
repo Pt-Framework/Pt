@@ -65,8 +65,8 @@ void SSLCertificateList::loadFromFile(const std::string& fileName)
 void SSLCertificateList::clear()
 { _impl = new Impl(); }
 
-const SSLPublicKey SSLCertificateList::getPublicKey() const
-{ return _impl->getPublicKey(); }
+PublicKey SSLCertificateList::publicKey() const
+{ return _impl->publicKey(); }
 
 const std::vector<x509_st*>& SSLCertificateList::impl() const
 { return _impl->_cert; }
@@ -162,14 +162,13 @@ void SSLCertificateList::Impl::clear()
     _certInfo.clear();
 }
 
-const SSLPublicKey SSLCertificateList::Impl::getPublicKey() const
+PublicKey SSLCertificateList::Impl::publicKey() const
 {
     EVP_PKEY* pkey = X509_get_pubkey(*_cert.begin());
-    if(!pkey) {
+    if( ! pkey)
         throw InvalidCertificate("Could not extract the main certificate's public key!");
-    }
 
-    return SSLPublicKey(pkey);
+    return PublicKey(pkey);
 }
 
 } // namespace Ssl

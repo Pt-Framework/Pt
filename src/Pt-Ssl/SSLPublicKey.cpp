@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2010 by Aloysius Indrayanto
+ * Copyright (C) 2010-2012 by Marc Duerner
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -27,24 +28,88 @@
  */
 
 #include <Pt/Ssl/SSLPublicKey.h>
-#include <Pt/Ssl/SslError.h>
+
 #include "Utils.h"
 
 namespace Pt {
+
 namespace Ssl {
 
-SSLPublicKey::Impl::Impl()
+PublicKey::PublicKey()
+: _impl( new Impl() )
+{
+}
+
+
+PublicKey::PublicKey(const PublicKey& pkey)
+: _impl( pkey._impl )
+{
+}
+
+
+PublicKey::PublicKey(const std::string& keyData)
+: _impl( new Impl() )
+{ 
+    _impl->loadFromString(keyData); 
+}
+
+
+PublicKey::~PublicKey()
+{
+}
+
+
+void PublicKey::loadFromString(const std::string& keyData)
+{
+    _impl = new Impl();
+    _impl->loadFromString(keyData);
+}
+
+
+void PublicKey::loadFromFile(const std::string& fileName)
+{
+    _impl = new Impl();
+    _impl->loadFromFile(fileName);
+}
+
+
+void PublicKey::clear()
+{ 
+    _impl = new Impl(); 
+}
+
+
+PublicKey::PublicKey(EVP_PKEY* pkey)
+: _impl( new Impl(pkey) )
+{
+}
+
+
+evp_pkey_st* PublicKey::impl() const
+{ 
+    return _impl->_pkey; 
+}
+
+
+PublicKey::Impl::Impl()
 : _pkey(0)
-{}
+{
+}
 
-SSLPublicKey::Impl::Impl(EVP_PKEY* pkey)
+
+PublicKey::Impl::Impl(EVP_PKEY* pkey)
 : _pkey(pkey)
-{}
+{
+}
 
-SSLPublicKey::Impl::~Impl()
-{ clear(); }
 
-void SSLPublicKey::Impl::loadFromString(const std::string& keyData)
+PublicKey::Impl::~Impl()
+{ 
+    clear();
+}
+
+
+void PublicKey::Impl::loadFromString(const std::string& keyData)
 {
     // Clear previous key (if any)
     clear();
@@ -58,64 +123,23 @@ void SSLPublicKey::Impl::loadFromString(const std::string& keyData)
         throw InvalidKey("Could not read/parse/decode public-key data!");
 }
 
-void SSLPublicKey::Impl::loadFromFile(const std::string& fileName)
+
+void PublicKey::Impl::loadFromFile(const std::string& fileName)
 {
     std::string data;
     readFileToString(fileName, data);
     loadFromString(data);
 }
 
-void SSLPublicKey::Impl::clear()
+
+void PublicKey::Impl::clear()
 {
     if(_pkey) {
         EVP_PKEY_free(_pkey);
         _pkey = 0;
     }
 }
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-SSLPublicKey::SSLPublicKey()
-: _impl( new Impl() )
-{}
-
-SSLPublicKey::SSLPublicKey(const SSLPublicKey& pkey)
-: _impl( pkey._impl )
-{}
-
-SSLPublicKey::SSLPublicKey(const std::string& keyData)
-: _impl( new Impl() )
-{ _impl->loadFromString(keyData); }
-
-SSLPublicKey::~SSLPublicKey()
-{}
-
-void SSLPublicKey::loadFromString(const std::string& keyData)
-{
-    _impl = new Impl();
-    _impl->loadFromString(keyData);
-}
-
-void SSLPublicKey::loadFromFile(const std::string& fileName)
-{
-    _impl = new Impl();
-    _impl->loadFromFile(fileName);
-}
-
-void SSLPublicKey::clear()
-{ _impl = new Impl(); }
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-SSLPublicKey::SSLPublicKey(EVP_PKEY* pkey)
-: _impl( new Impl(pkey) )
-{}
-
-evp_pkey_st* SSLPublicKey::impl() const
-{ return _impl->_pkey; }
     
 } // namespace Ssl
-} // namespace Pt
 
+} // namespace Pt
