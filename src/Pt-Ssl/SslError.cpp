@@ -27,7 +27,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <Pt/Ssl/Exception.h>
+#include <Pt/Ssl/SslError.h>
 
 namespace Pt {
 

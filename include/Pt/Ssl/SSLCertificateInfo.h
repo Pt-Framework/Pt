@@ -28,7 +28,7 @@
 #ifndef PT_SSL_SSLCERTIFICATEINFO_H
 #define PT_SSL_SSLCERTIFICATEINFO_H
 
-#include <Pt/Ssl/Exception.h>
+#include <Pt/Ssl/SslError.h>
 
 namespace Pt {
 namespace Ssl {

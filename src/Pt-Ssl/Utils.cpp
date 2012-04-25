@@ -118,7 +118,7 @@ unsigned int string2ssldata(const std::string& str, unsigned char* md, unsigned 
 {
     const char*          ptrcur = str.c_str();
     const char*          ptrmax = ptrcur + str.length();
-          unsigned char* mdcur  = md;
+    unsigned char*       mdcur  = md;
     const unsigned char* mdmax  = mdcur + nmax;
     char                 cnv[3] = { 0, 0, 0 };
 
@@ -128,7 +128,7 @@ unsigned int string2ssldata(const std::string& str, unsigned char* md, unsigned 
         cnv[0] = *ptrcur++;
         cnv[1] = (ptrcur < ptrmax) ? (*ptrcur++) : 0;
 
-        *mdcur++ = strtoul(cnv, 0, 16);
+        *mdcur++ = static_cast<unsigned char>( strtoul(cnv, 0, 16) );
     }
 
     return mdcur - md;
@@ -148,7 +148,7 @@ unsigned int string2ssldata(const char* str, int slen, unsigned char* md, unsign
         cnv[0] = *ptrcur++;
         cnv[1] = (ptrcur < ptrmax) ? (*ptrcur++) : 0;
 
-        *mdcur++ = strtoul(cnv, 0, 16);
+        *mdcur++ = static_cast<unsigned char>( strtoul(cnv, 0, 16) );
     }
 
     return mdcur - md;
@@ -162,7 +162,7 @@ void readFileToString(const std::string& fileName, std::string& dst)
     ifs.open(fileName.c_str(), std::ios::binary);
     while(ifs) {
         ifs.read( rbuf, sizeof(rbuf) );
-        dst += std::string( rbuf, ifs.gcount() );
+        dst += std::string( rbuf, static_cast<size_t>(ifs.gcount()) );
     }
 }
 
