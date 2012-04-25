@@ -10,7 +10,7 @@ if exists("syntax_on")
   syntax reset
 endif
 
-let colors_name = "mustang"
+let colors_name = "pt"
 
 " Vim >= 7.0 specific colors
 if version >= 700
@@ -73,7 +73,7 @@ hi String   guifg=#DF8787 gui=none ctermfg=148
 hi Character   guifg=#DF9987 gui=none ctermfg=148
 hi Constant guifg=#87afdf gui=none  ctermfg=208
 hi Number   guifg=#87afdf gui=none ctermfg=208
-hi Special  guifg=#DFD487 gui=none ctermfg=208
+hi Special  guifg=white gui=none ctermfg=208
 
 hi Identifier guifg=orange gui=none ctermfg=148
 hi link Function Normal
