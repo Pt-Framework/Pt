@@ -133,7 +133,7 @@ class PT_SSL_API SSLContext
         void setPrivateKey(const PrivateKey& privKey);
 
         //! @brief Returns the currently used private key.
-        const PrivateKey privateKey() const
+        PrivateKey privateKey() const
         { return _privKey; }
         
         //! @internal
