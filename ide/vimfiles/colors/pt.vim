@@ -67,17 +67,17 @@ hi MyTagListFileName guifg=white guibg=NONE gui=bold
 hi Comment guifg=#808080 guibg=NONE gui=none ctermfg=244
 hi Todo    guifg=#8f8f8f guibg=#e6ea50 gui=italic ctermfg=245
 
-hi PreProc  guifg=#87DF99 gui=none ctermfg=230
 
-hi String   guifg=#DF8787 gui=none ctermfg=148
-hi Character   guifg=#DF9987 gui=none ctermfg=148
-hi Constant guifg=#87afdf gui=none  ctermfg=208
-hi Number   guifg=#87afdf gui=none ctermfg=208
-hi Special  guifg=white gui=none ctermfg=208
+hi String    guifg=#DF8787 gui=none ctermfg=148
+hi Character guifg=#DF9987 gui=none ctermfg=148
+hi Constant  guifg=#87afdf gui=none  ctermfg=208
+hi Number    guifg=#87afdf gui=none ctermfg=208
+hi Float     guifg=#87DF99 gui=none 
 
 hi Identifier guifg=orange gui=none ctermfg=148
 hi link Function Normal
 
+hi Special      guifg=white gui=none ctermfg=208
 hi Type         guifg=white gui=none ctermfg=103
 hi Statement    guifg=white gui=none ctermfg=103
 hi Identifier   guifg=white gui=none
@@ -87,6 +87,7 @@ hi Keyword      guifg=white gui=none
 hi Boolean      guifg=white gui=none ctermfg=148
 
 "hi TypeModifier guifg=#87afdf gui=none
-hi StorageClass guifg=#87afdf gui=none
-hi cType guifg=#87afdf gui=none
-hi cppType guifg=#87afdf gui=none
+hi PreProc       guifg=#87afdf gui=none ctermfg=230
+hi StorageClass  guifg=#87afdf gui=none
+hi cType         guifg=#87afdf gui=none
+hi cppType       guifg=#87afdf gui=none
