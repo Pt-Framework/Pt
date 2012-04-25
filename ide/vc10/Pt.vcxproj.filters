@@ -28,6 +28,9 @@
     <Filter Include="Pt-Net\win32">
       <UniqueIdentifier>{becd4ff9-210b-4b91-b31d-5948b6563157}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Pt-Ssl">
+      <UniqueIdentifier>{7602e37c-c282-473a-9994-6f3f2aa3d84f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\Pt\Allocator.h">
@@ -474,6 +477,21 @@
     <ClInclude Include="..\..\include\Pt\Net\UdpSocket.h">
       <Filter>Pt-Net</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Ssl\Api.h">
+      <Filter>Pt-Ssl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Ssl\CipherInfo.h">
+      <Filter>Pt-Ssl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Ssl\PrivateKey.h">
+      <Filter>Pt-Ssl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Ssl\PublicKey.h">
+      <Filter>Pt-Ssl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Ssl\SslError.h">
+      <Filter>Pt-Ssl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -552,6 +570,9 @@
     </None>
     <None Include="..\..\src\Pt-Net\tests\Makefile.am">
       <Filter>Pt-Net\tests</Filter>
+    </None>
+    <None Include="..\..\src\Pt-Ssl\Jamfile">
+      <Filter>Pt-Ssl</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -1013,6 +1034,18 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Net\win32\UdpSocketImpl.cpp">
       <Filter>Pt-Net\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Ssl\CipherInfo.cpp">
+      <Filter>Pt-Ssl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Ssl\PrivateKey.cpp">
+      <Filter>Pt-Ssl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Ssl\PublicKey.cpp">
+      <Filter>Pt-Ssl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Ssl\SslError.cpp">
+      <Filter>Pt-Ssl</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

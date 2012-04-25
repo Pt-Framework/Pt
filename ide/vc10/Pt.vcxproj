@@ -62,6 +62,11 @@
     <ClInclude Include="..\..\include\Pt\Slot.h" />
     <ClInclude Include="..\..\include\Pt\SmartPtr.h" />
     <ClInclude Include="..\..\include\Pt\SourceInfo.h" />
+    <ClInclude Include="..\..\include\Pt\Ssl\Api.h" />
+    <ClInclude Include="..\..\include\Pt\Ssl\CipherInfo.h" />
+    <ClInclude Include="..\..\include\Pt\Ssl\PrivateKey.h" />
+    <ClInclude Include="..\..\include\Pt\Ssl\PublicKey.h" />
+    <ClInclude Include="..\..\include\Pt\Ssl\SslError.h" />
     <ClInclude Include="..\..\include\Pt\String.h" />
     <ClInclude Include="..\..\include\Pt\StringStream.h" />
     <ClInclude Include="..\..\include\Pt\System\Api.h" />
@@ -175,6 +180,7 @@
     <None Include="..\..\src\Pt-Net\Makefile.am" />
     <None Include="..\..\src\Pt-Net\tests\Jamfile" />
     <None Include="..\..\src\Pt-Net\tests\Makefile.am" />
+    <None Include="..\..\src\Pt-Ssl\Jamfile" />
     <None Include="..\..\src\Pt-System\Jamfile" />
     <None Include="..\..\src\Pt-System\Makefile.am" />
     <None Include="..\..\src\Pt-System\tests\Jamfile" />
@@ -200,6 +206,10 @@
     <ClCompile Include="..\..\src\Pt-Net\win32\TcpServerImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Net\win32\TcpSocketImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Net\win32\UdpSocketImpl.cpp" />
+    <ClCompile Include="..\..\src\Pt-Ssl\CipherInfo.cpp" />
+    <ClCompile Include="..\..\src\Pt-Ssl\PrivateKey.cpp" />
+    <ClCompile Include="..\..\src\Pt-Ssl\PublicKey.cpp" />
+    <ClCompile Include="..\..\src\Pt-Ssl\SslError.cpp" />
     <ClCompile Include="..\..\src\Pt-System\Application.cpp" />
     <ClCompile Include="..\..\src\Pt-System\Clock.cpp" />
     <ClCompile Include="..\..\src\Pt-System\Condition.cpp" />
