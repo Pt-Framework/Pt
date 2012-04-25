@@ -28,9 +28,8 @@
  */
 
 #include <Pt/Ssl/SSLContext.h>
-#include <Pt/Ssl/SSLCertificateList.h>
 #include <Pt/Ssl/CipherStreamBuf.h>
-#include <Pt/Ssl/RSACipher.h>
+#include <Pt/Ssl/AESCipher.h>
 #include <Pt/System/Logger.h>
 
 #include <sstream>
@@ -47,17 +46,6 @@ int main(int argc, char** argv)
         PT_SSL_LOG_M("OpenSSL test progam started");
         PT_SSL_LOG_M("################################################################################");
 
-        // Load certificate 
-        Pt::Ssl::SSLCertificateList serverCertChain;
-        serverCertChain.loadFromFile("server.pem");
-
-        // Extract the public key from the certificate
-        Pt::Ssl::SSLPublicKey serverPubKey = serverCertChain.getPublicKey();
-
-        // Load private key
-        Pt::Ssl::SSLPrivateKey serverPrivKey("abc123");
-        serverPrivKey.loadFromFile("server.key");
-
         // Test texts
         const std::string textShort = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec vitae quam quis velit gravida vestibulum.";
         const std::string textLong  = textShort + ' ' + textShort + ' ' + textShort + ' '
@@ -69,8 +57,10 @@ int main(int argc, char** argv)
         std::cerr << std::endl;
 
         // Instantiate the ciphers
-        Pt::Ssl::RSACipher cipher1(serverPubKey, serverPrivKey, Pt::Ssl::RSACipher::RSA_PKCS1);
-        Pt::Ssl::RSACipher cipher2(serverPubKey, serverPrivKey, Pt::Ssl::RSACipher::RSA_PKCS1_OAEP);
+        Pt::Ssl::AESCipher cipher1("password1", Pt::Ssl::AESCipher::K128, Pt::Ssl::AESCipher::CBC);
+        Pt::Ssl::AESCipher cipher2("password2", Pt::Ssl::AESCipher::K256, Pt::Ssl::AESCipher::OFB);
+        cipher1.genSalt(Pt::Ssl::AESCipher::StrongSalt);
+        cipher2.genSalt(Pt::Ssl::AESCipher::NormalSalt);
 
         // Instantiate the string-streams
         std::stringstream ss1("", std::ios_base::in | std::ios_base::out | std::ios_base::binary);
@@ -83,7 +73,7 @@ int main(int argc, char** argv)
         // Instantiate the io-streams
         std::iostream ios1(&csb1);
         std::iostream ios2(&csb2);
-        
+
         // Start encryption test
         ios1.write(textShort.c_str(), textShort.length());
         ios1.write(" ", 1);
@@ -91,7 +81,7 @@ int main(int argc, char** argv)
         ios2.write(textShort.c_str(), textShort.length());
         ios2.write(" ", 1);
         ios2.write(textLong.c_str(), textLong.length());
-        
+
         std::cerr << "tinp1 = " << (textShort + " " ).size() << " bytes." << std::endl;
         std::cerr << "tinp2 = " << (textShort + " " + textLong).size() << " bytes." << std::endl;
         std::cerr << std::endl;
@@ -125,7 +115,7 @@ int main(int argc, char** argv)
             if(got <= 0) break;
             tdec2+= std::string(buff, got);
         }
-        
+
         // End the decryption tests
         csb1.finish();
         csb2.finish();

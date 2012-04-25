@@ -37,27 +37,49 @@ namespace Ssl {
 class PT_SSL_API AESCipher  : public BasicSymmetricCipher {
     public:
         using BasicSymmetricCipher::SaltType;
+        using BasicSymmetricCipher::OperationMode;
         using BasicSymmetricCipher::KeySize;
-        using BasicSymmetricCipher::Mode;
 
     public:
-        //! \brief Instantiate an empty symmetric-block-cipher object.
-        AESCipher(std::iostream& ios, KeySize keySize = K128, Mode mode = CBC);
+        //! \brief Instantiate a symmetric-block-cipher with the given password, key size, and mode of operation.
+        AESCipher(const std::string& password, KeySize keySize = K128, OperationMode operMode = CBC);
 
         //! \brief Standard dtor.
         virtual ~AESCipher();
 
-        //! \brief Set the key-size of the cipher.
-        virtual void setKeySize(KeySize keySize = K128);
+        //! \brief Set the key size of the cipher.
+        void setKeySize(KeySize keySize);
+        
+        /** \brief Returns the expected input block (chunk) size for encoding data.
+            For maximum efficiency, upon calling encode() the user must ensure that the
+            'from' pointer has the minimum available data (unless of course at the end of
+            the stream).
+         */
+        virtual size_t encodingInputBlockSize() const;
 
-        //! \brief Set the mode of operation of the cipher.
-        virtual void setMode(Mode mode = CBC);
+        /** \brief Returns the minimum output block (chunk) size for encoding data.
+            Upon calling encode(), the user must ensure that the 'to' pointer has
+            the minimum available space or the process will fail.
+         */
+        virtual size_t encodingOutputBlockSize() const;
+
+        /** \brief Returns the expected input block (chunk) size for decoding data.
+            Upon calling decode() the user must ensure that the 'from' pointer
+            has the minimum available data or the decoding process may fail
+            (unless of course at the end of the stream).
+         */
+        virtual size_t decodingInputBlockSize() const;
+
+        /** \brief Returns the minimum output block (chunk) size for decoding data.
+            Upon calling decode(), the user must ensure that the 'to' pointer has
+            the minimum available space or the process will fail.
+         */
+        virtual size_t decodingOutputBlockSize() const ;
 
     protected:
         virtual const char* getOpenSSLCipherName() const;
 
     private:
-        Mode    _mode;
         KeySize _keySize;
 };
 

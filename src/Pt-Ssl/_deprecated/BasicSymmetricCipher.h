@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2010 by Aloysius Indrayanto
+ * Copyright (C) 2010-2010 by Marc Boris Duerner
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,34 +26,28 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef PT_SSL_BASICSYMETRICCIPHER_H
-#define PT_SSL_BASICSYMETRICCIPHER_H
+#ifndef PT_SSL_BASICSYMMETRICCIPHER_H
+#define PT_SSL_BASICSYMMETRICCIPHER_H
 
 #include <Pt/Ssl/BasicCipher.h>
-#include <Pt/Ssl/Exception.h>
-
-#include <vector>
 
 namespace Pt {
 namespace Ssl {
 
-//! \brief The base of all symmetric-block-cipher classes.
-//! Symmetric-cipher needs password. Therefore we specify a method
-//! to set a password in this class.
+//! \brief RSA cipher classes.
 class PT_SSL_API BasicSymmetricCipher : public BasicCipher {
     public:
-        //! \brief Salt type
+        //! \brief Salt generation type.
         enum SaltType {
-            NoSalt,     //!< No salt.
-            NormalSalt, //!< Use pseudo-random bytes as salt.
-            StrongSalt  //!< Use strong pseudo-random bytes as salt.
+            NormalSalt, //!< Cerate a sequence of pseudo-random bytes to be used as salt.
+            StrongSalt  //!< Cerate a sequence of strong pseudo-random bytes to be used as salt.
         };
 
         /** \brief Cipher mode of operations.
             Please refer to http://en.wikipedia.org/wiki/Block_cipher_modes_of_operation for more details.
             Please note that not all ciphers will support all the modes.
          */
-        enum Mode {
+        enum OperationMode {
             ECB,  //!< Electronic Codebook Book; not secure for long message that with many redundancies.
             CBC,  //!< Cipher-Block Chaining; standard operational mode for block symmetric ciphers.
             CFB1, //!< Cipher Feedback 1 bit; encrypting data as if it is a stream cipher.
@@ -71,73 +66,83 @@ class PT_SSL_API BasicSymmetricCipher : public BasicCipher {
         };
 
     public:
-        //! \brief Instantiate an empty symmetric-block-cipher object.
-        BasicSymmetricCipher(std::iostream& ios);
+        //! \brief Instantiate a symmetric-block-cipher with the given password and mode of operation.
+        BasicSymmetricCipher(const std::string& password, OperationMode operMode = CBC);
 
         //! \brief Standard dtor.
         virtual ~BasicSymmetricCipher();
 
-        //! \brief Set the mode of operation of the cipher.
-        virtual void setMode(Mode mode) = 0;
-
-        /** \brief Start a data encryption process.
-            If the useSalt parameter is set to NormalSalt or StrongSalt, the system will generate a random salt
-            to improve the security of the encryption. The salt will be returned as a string.
-         */ 
-        virtual const std::string startEncrypt(const std::string& password, SaltType saltType = NoSalt);
-
-        /** \brief Start a data decryption process.
-            If the salt parameter is not an empty string, it will be used in the decryption process.
-            It must be the same salt that was returned by startEncrypt().
+        /** \brief Set the mode of operation of the cipher.
+            Override this function if the specific cipher does not support all the modes.
          */
-        virtual void startDecrypt(const std::string& password, const std::string& saltStr = "");
+        virtual void setMode(OperationMode operMode);
 
-        //! \brief Finish a data encryption/decryption process.
-        void finish();
+        //! \brief Set the password of the cipher.
+        void setPassword(const std::string& password);
 
-        /** \brief Returns the block (chunk) size.
-            The system expect that upon calling encode() or decode(), the user ensure that the
-            'to' pointer has at least 'block size' available space.
+        //! \brief Return the length of the salt.
+        size_t saltLength() const;
+        
+        /** \brief Set the salt.
+            Except the salt empty, its length must be exactly saltLength() bytes.
          */
-        virtual size_t blockSize() const;
+        void setSalt(const std::string& salt);
+        
+        //! \brief Get the salt.
+        const std::string& getSalt() const;
+
+        //! \brief Generate a new random salt.
+        void genSalt(SaltType saltType = NormalSalt);
 
         /** \brief Encode bytes from the 'from' pointers to the 'to' pointers.
-            Returns the number of written (encoded) bytes.
-            Returns zero if there is not enough input bytes or the 'to' pointer does not have enough space.
-            Returns -1 if EOF.
+            Returns -1 if the 'to' pointer does not have enough space.
+            <br/>
+            Returns  0 if there is not enough input data.
+            <br/>
+            Returns  1 if success.
+            <br/>
             Updates the 'from_next' and 'to_next' pointers as needed.
          */
         virtual int encode(const char* from, const char* from_end, const char*& from_next, char* to, char* to_end, char*& to_next);
 
-        /** \brief Encode/decode any remaining bytes to the 'to' pointers.
-            Returns the number of written (encoded/decoded) bytes.
-            Returns zero if the 'to' pointer does not have enough space.
-            Returns -1 if EOF.
+        /** \brief Get the any left-over encoded bytes.
+            Returns true if there is no more byte left.
+         */
+        virtual bool finishEncode(char* to, char* to_end, char*& to_next);
+        
+        /** \brief Decode bytes from the 'from' pointers to the 'to' pointers.
+            Returns -1 if the 'to' pointer does not have enough space.
+            <br/>
+            Returns  0 if there is not enough input data.
+            <br/>
+            Returns  1 if success.
+            <br/>
             Updates the 'from_next' and 'to_next' pointers as needed.
          */
-        virtual int finish(const char* from, const char* from_end, const char*& from_next, char* to, char* to_end, char*& to_next);
+        virtual int decode(const char* from, const char* from_end, const char*& from_next, char* to, char* to_end, char*& to_next);
         
-    protected:
-        virtual int sync();
-        virtual int_type underflow();
-        virtual int_type overflow(int_type ch);
+        /** \brief Get the any left-over decoded bytes.
+            Returns true if there is no more byte left.
+         */
+        virtual bool finishDecode(char* to, char* to_end, char*& to_next);
 
+    protected:
         //! \brief Override this to return the OpenSSL cipher string ID.
         virtual const char* getOpenSSLCipherName() const = 0;
 
-        // Helper function to store the encrypted data to the attached iostream
-        void storeEncryptedData();
+        // Data
+        OperationMode _operMode;
+        std::string   _password;
+        std::string   _salt;
 
-    protected:
-        bio_st*           _bioEnc; // Encryption BIO
-        bio_st*           _bioDec; // Decryption BIO
-        bio_st*           _bioIO;  // Input/output BIO
-        
-        std::vector<char> _ioBuf;  // Input/output buffer
-        std::vector<char> _cnvBuf; // Conversion buffer
+        bio_st* _bioEncIn;  // Input BIO for encryption (the cipher BIO)
+        bio_st* _bioEncOut; // Output BIO for encryption
+
+        bio_st* _bioDecIn;  // Input BIO for decryption (the cipher BIO)
+        bio_st* _bioDecOut; // Output BIO for decryption
 };
 
-} // namespace Pt
 } // namespace Ssl
+} // namespace Pt
 
 #endif

@@ -27,313 +27,268 @@
  */
 
 #include <Pt/Ssl/BasicSymmetricCipher.h>
+#include <Pt/Ssl/Exception.h>
 
 #include "Utils.h"
 
 #include <openssl/rand.h>
+#include <cassert>
 
 namespace Pt {
 namespace Ssl {
-    
-BasicSymmetricCipher::BasicSymmetricCipher(std::iostream& ios)
-: BasicCipher(ios), _bioEnc(0), _bioDec(0), _bioIO(0)
-{
-    _ioBuf.resize(1024);
-    _cnvBuf.resize(1024);
-}
+
+BasicSymmetricCipher::BasicSymmetricCipher(const std::string& password, OperationMode operMode)
+: _operMode (operMode),
+  _password (password),
+  _salt     (""),
+  _bioEncIn (0),
+  _bioEncOut(0),
+  _bioDecIn (0),
+  _bioDecOut(0)
+{}
+
 
 BasicSymmetricCipher::~BasicSymmetricCipher()
 {
-    if(_bioEnc) BIO_free(_bioEnc);
-    if(_bioDec) BIO_free(_bioDec);
-    if(_bioIO ) BIO_free(_bioIO );
+    if(_bioEncIn ) BIO_free(_bioEncIn );
+    if(_bioEncOut) BIO_free(_bioEncOut);
+
+    if(_bioDecIn ) BIO_free(_bioDecIn );
+    if(_bioDecOut) BIO_free(_bioDecOut);
 }
 
-const std::string BasicSymmetricCipher::startEncrypt(const std::string& password, SaltType saltType)
-{
-    if( _bioEnc )
-        throw SSLRuntimeError("An encryption process is already active!", PT_SOURCEINFO);
-    if( _bioDec )
-        throw SSLRuntimeError("An decryption process is already active!", PT_SOURCEINFO);
+void BasicSymmetricCipher::setMode(OperationMode operMode)
+{ _operMode = operMode; }
 
-    // Generate salt
-    unsigned char  saltBuff[PKCS5_SALT_LEN];
-    unsigned char* salt = 0;
+void BasicSymmetricCipher::setPassword(const std::string& password)
+{ _password = password; }
+
+size_t BasicSymmetricCipher::saltLength() const
+{ return PKCS5_SALT_LEN; }
+
+void BasicSymmetricCipher::setSalt(const std::string& salt)
+{
+    if( !salt.empty() && salt.length() != saltLength() )
+        throw SSLRuntimeError("Invalid salt length!", PT_SOURCEINFO);
+}
+
+const std::string& BasicSymmetricCipher::getSalt() const
+{ return _salt; }
+
+void BasicSymmetricCipher::genSalt(SaltType saltType)
+{
+    unsigned char saltBuff[PKCS5_SALT_LEN];
+
     switch(saltType) {
         case StrongSalt:
-            if(RAND_bytes(saltBuff, sizeof saltBuff) < 0)
-                throw SSLRuntimeError("Could not generate a random salt!", PT_SOURCEINFO);
-            salt = saltBuff;
+            if(RAND_bytes(saltBuff, sizeof(saltBuff)) < 0)
+                throw SSLRuntimeError("Could not generate a new random salt!", PT_SOURCEINFO);
             break;
 
         case NormalSalt:
-            if(RAND_pseudo_bytes(saltBuff, sizeof saltBuff) < 0)
-                throw SSLRuntimeError("Could not generate a random salt!", PT_SOURCEINFO);
-            salt = saltBuff;
+            if(RAND_pseudo_bytes(saltBuff, sizeof(saltBuff)) < 0)
+                throw SSLRuntimeError("Could not generate a new random salt!", PT_SOURCEINFO);
             break;
 
         default:
-            // Nothing to do
-            break;
+            throw SSLRuntimeError("Invalid salt type!", PT_SOURCEINFO);
     }
 
-    // Get the cipher
-    const EVP_CIPHER* cipher = EVP_get_cipherbyname(getOpenSSLCipherName());
-    if(!cipher)
-        throw SSLRuntimeError("Could not acquire cipher!", PT_SOURCEINFO);
-
-    // Derives a key and an IV from teh user password and salt
-    unsigned char key[EVP_MAX_KEY_LENGTH], iv[EVP_MAX_IV_LENGTH];
-    EVP_BytesToKey( cipher, EVP_get_digestbyname("SHA1"), salt, (unsigned char *) password.c_str(), password.length(), 1, key, iv );
-
-    // Initialize a cipher BIO
-    BioAutoPtr benc( BIO_new(BIO_f_cipher()) );
-    if(!benc)
-        throw SSLRuntimeError("Could not initialize cipher BIO!", PT_SOURCEINFO);
-
-    // Initialize a cipher context
-    // (there is no need to free this context because it is owned by the cihper BIO)
-    EVP_CIPHER_CTX* pcctx = 0;
-    if(!BIO_get_cipher_ctx(benc.get(), &pcctx))
-        throw SSLRuntimeError("Could not initialize cipher context!", PT_SOURCEINFO);
-
-    // Initialize the cipher
-    if(!EVP_CipherInit_ex(pcctx, cipher, 0, 0, 0, 1))
-        throw SSLRuntimeError("Could not initialize cipher context!", PT_SOURCEINFO);
-    
-    if(!EVP_CipherInit_ex(pcctx, NULL, NULL, key, iv, 1))
-        throw SSLRuntimeError("Could not initialize cipher context!", PT_SOURCEINFO);
-
-    // Copy the cipher BIO
-    _bioEnc = benc.get();
-    benc.release();
-
-    // Create an input/output BIO
-    _bioIO = BIO_new(BIO_s_mem());
-    BIO_push(_bioEnc, _bioIO);
-        
-    // Set the put pointers and reset the get pointers
-    this->setp(&_ioBuf[0], &_ioBuf[0] + _ioBuf.size());
-    this->setg(0, 0, 0);
-
-    // Return the salt
-    if(salt) return std::string((char*) salt, PKCS5_SALT_LEN);
-    return "";
+    _salt = std::string((char*) saltBuff, PKCS5_SALT_LEN);
 }
 
-void BasicSymmetricCipher::startDecrypt(const std::string& password, const std::string& saltStr)
-{
-    if( _bioEnc )
-        throw SSLRuntimeError("An encryption process is already active!", PT_SOURCEINFO);
-    if( _bioDec )
-        throw SSLRuntimeError("An decryption process is already active!", PT_SOURCEINFO);
-
-    // Use salt?
-    unsigned char* salt = 0;
-    if(!saltStr.empty()) {
-        if(saltStr.length() != PKCS5_SALT_LEN)
-            throw SSLRuntimeError("The salt string has an invalid length!", PT_SOURCEINFO);
-        salt = (unsigned char*) saltStr.c_str();
-    }
-    
-    // Get the cipher
-    const EVP_CIPHER* cipher = EVP_get_cipherbyname(getOpenSSLCipherName());
-    if(!cipher)
-        throw SSLRuntimeError("Could not acquire cipher!", PT_SOURCEINFO);
-
-    // Derives a key and an IV from teh user password and salt
-    unsigned char key[EVP_MAX_KEY_LENGTH], iv[EVP_MAX_IV_LENGTH];
-    EVP_BytesToKey( cipher, EVP_get_digestbyname("SHA1"), salt, (unsigned char *) password.c_str(), password.length(), 1, key, iv );
-
-    // Initialize a cipher BIO
-    BioAutoPtr bdec( BIO_new(BIO_f_cipher()) );
-    if(!bdec)
-        throw SSLRuntimeError("Could not initialize cipher BIO!", PT_SOURCEINFO);
-
-    // Initialize a cipher context
-    // (there is no need to free this context because it is owned by the cihper BIO)
-    EVP_CIPHER_CTX* pcctx = 0;
-    if(!BIO_get_cipher_ctx(bdec.get(), &pcctx))
-        throw SSLRuntimeError("Could not initialize cipher context!", PT_SOURCEINFO);
-
-    // Initialize the cipher
-    if(!EVP_CipherInit_ex(pcctx, cipher, 0, 0, 0, 0))
-        throw SSLRuntimeError("Could not initialize cipher context!", PT_SOURCEINFO);
-
-    if(!EVP_CipherInit_ex(pcctx, NULL, NULL, key, iv, 0))
-        throw SSLRuntimeError("Could not initialize cipher context!", PT_SOURCEINFO);
-
-    // Copy the cipher BIO
-    _bioDec = bdec.get();
-    bdec.release();
-
-    // Create an input/output BIO
-    _bioIO = BIO_new(BIO_s_mem());
-    BIO_push(_bioDec, _bioIO);
-
-    // Reset the put and set pointers
-    this->setp(0, 0);
-    this->setg(&_ioBuf[0], &_ioBuf[0] + _ioBuf.size(), &_ioBuf[0] + _ioBuf.size());
-}
-
-void BasicSymmetricCipher::finish()
-{
-    // Data encryption mode?
-    if(_bioEnc) {
-        // Encrypt the remaining data
-        sync();
-        (void) BIO_flush(_bioEnc);
-        storeEncryptedData();
-        // Free the BIO
-        BIO_free(_bioEnc);
-        _bioEnc = 0;
-    }
-
-    // Data decryption mode?
-    if(_bioDec) {
-        BIO_free(_bioDec);
-        _bioDec = 0;
-    }
-
-    BIO_free(_bioIO);
-    _bioIO = 0;
-}
-
-int BasicSymmetricCipher::sync()
-{
-    if( this->pptr() ) {
-        while( this->pptr() > this->pbase() ) {
-            const int_type ch = this->overflow( traits_type::eof() );
-            if( ch == traits_type::eof() ) return -1;
-        }
-    }
-
-    return 0;
-}
-
-BasicSymmetricCipher::int_type BasicSymmetricCipher::underflow()
-{
-    if( ! _bioDec )
-        throw SSLRuntimeError("No active decryption process!", PT_SOURCEINFO);
-    if( this->pptr() )
-        throw SSLRuntimeError("The cipher is currently in data encryption mode!", PT_SOURCEINFO);
-
-    // Check if we still have anything left if the get buffer
-    if( this->gptr() && this->gptr() < this->egptr() )
-        return traits_type::to_int_type( *this->gptr() );
-
-    // Check if there is any data left in the input/output BIO
-    const int leftOver = BIO_read(_bioIO, &_ioBuf[0], _ioBuf.size());
-    if(leftOver > 0) {
-        // Set the get pointers
-        this->setg(&_ioBuf[0], &_ioBuf[0], &_ioBuf[0] + leftOver);
-        return traits_type::to_int_type( *this->gptr() );
-    }
-
-    // Get the amount of data data in the attached stream?
-    size_t avail = _ios->rdbuf()->in_avail();
-    
-    // Decrypt the data
-    if(avail) {
-        // Read from the attached iostream
-        _ios->read(&_cnvBuf[0], _cnvBuf.size());
-        const size_t got = _ios->gcount();
-        if(!got) return traits_type::eof();
-
-        // Decrypt the data
-        const int written = BIO_write(_bioDec, &_cnvBuf[0], got);
-        if(written < 0)
-            throw SSLRuntimeError("Failed decrypting a string chunk!", PT_SOURCEINFO);
-        avail -= written;
-
-        // Read the decrypted data to the get buffer
-        const int read = BIO_read(_bioIO, &_ioBuf[0], _ioBuf.size());
-        if(read <= 0) return traits_type::eof();
-
-        // Set the get pointers
-        this->setg(&_ioBuf[0], &_ioBuf[0], &_ioBuf[0] + read);
-        return traits_type::to_int_type( *this->gptr() );
-    }
-
-    // Ensure that the remaining data is decrypted
-    else {
-        // Flush the BIO
-        (void) BIO_flush(_bioDec);
-
-        // Read the decrypted data to the get buffer
-        const int read = BIO_read(_bioIO, &_ioBuf[0], _ioBuf.size());
-        if(read <= 0) return traits_type::eof();
-
-        // Set the get pointers
-        this->setg(&_ioBuf[0], &_ioBuf[0], &_ioBuf[0] + read);
-        return traits_type::to_int_type( *this->gptr() );
-    }
-
-    // EOF
-    return traits_type::eof();
-}
-
-BasicSymmetricCipher::int_type BasicSymmetricCipher::overflow(int_type ch)
-{
-    if( ! _bioEnc )
-        throw SSLRuntimeError("No active encryption process!", PT_SOURCEINFO);
-    if( this->gptr() )
-        throw SSLRuntimeError("The cipher is currently in data decryption mode!", PT_SOURCEINFO);
-
-    // Is there any data to be encrypted?
-    size_t avail = this->pptr() - this->pbase();
-
-    if(avail) {
-        while(avail > 0) {
-            // Encrypt the data
-            const int written = BIO_write(_bioEnc, &_ioBuf[0], avail);
-            if(written < 0)
-                throw SSLRuntimeError("Failed encrypting a string chunk!", PT_SOURCEINFO);
-            avail -= written;
-
-            // Store the encrypted data to the atatched output stream
-            storeEncryptedData();
-        }
-        // Reset the put pointers
-        setp(&_ioBuf[0], &_ioBuf[0] + _ioBuf.size());
-    }
-    
-    // If the overflow char is not EOF, put it in the buffer area
-    if( ! traits_type::eq_int_type( ch, traits_type::eof() ) )
-    {
-        *(this->pptr()) = traits_type::to_char_type(ch);
-        this->pbump(1);
-    }
-
-    return traits_type::not_eof(ch);
-}
-
-void BasicSymmetricCipher::storeEncryptedData()
-{
-    // Read the encrypted data and write it to the output stream
-    while(true) {
-        const int read = BIO_read(_bioIO, &_cnvBuf[0], _cnvBuf.size());
-        if(read <= 0) break;
-        _ios->write((const char*) &_cnvBuf[0], read);
-    }
-}
-
-// Not implemented yet!
-size_t BasicSymmetricCipher::blockSize() const
-{
-    return 0;
-}
-
-// Not implemented yet!
 int BasicSymmetricCipher::encode(const char* from, const char* from_end, const char*& from_next, char* to, char* to_end, char*& to_next)
 {
-    return 0;
+    // Use salt?
+    unsigned char* salt = 0;
+    if( !_salt.empty() ) {
+        assert( _salt.length() == PKCS5_SALT_LEN );
+        salt = (unsigned char*) _salt.c_str();
+    }
+
+    // Initialize the cipher (if not yet)
+    if(!_bioEncIn) {
+        // Get the cipher
+        const EVP_CIPHER* cipher = EVP_get_cipherbyname(getOpenSSLCipherName());
+        if(!cipher)
+            throw SSLRuntimeError("Could not acquire cipher!", PT_SOURCEINFO);
+        // Derives a key and an IV from the user password and salt
+        unsigned char key[EVP_MAX_KEY_LENGTH], iv[EVP_MAX_IV_LENGTH];
+        EVP_BytesToKey( cipher, EVP_get_digestbyname("SHA1"), salt, (unsigned char *) _password.c_str(), _password.length(), 1, key, iv );
+        // Initialize a cipher BIO
+        BioAutoPtr benc( BIO_new(BIO_f_cipher()) );
+        if(!benc)
+            throw SSLRuntimeError("Could not initialize cipher BIO!", PT_SOURCEINFO);
+        // Initialize a cipher context
+        // (there is no need to free this context because it is owned by the cihper BIO)
+        EVP_CIPHER_CTX* pcctx = 0;
+        if(!BIO_get_cipher_ctx(benc.get(), &pcctx))
+            throw SSLRuntimeError("Could not initialize cipher context!", PT_SOURCEINFO);
+        // Initialize the cipher
+        if(!EVP_CipherInit_ex(pcctx, cipher, 0, 0, 0, 1))
+            throw SSLRuntimeError("Could not initialize cipher context!", PT_SOURCEINFO);
+        if(!EVP_CipherInit_ex(pcctx, NULL, NULL, key, iv, 1))
+            throw SSLRuntimeError("Could not initialize cipher context!", PT_SOURCEINFO);
+        // Copy the cipher BIO
+        _bioEncIn = benc.get();
+        benc.release();
+        // Create the output BIO
+        _bioEncOut = BIO_new(BIO_s_mem());
+        BIO_push(_bioEncIn, _bioEncOut);
+    }
+
+    // Is the output area large enough?
+    const size_t outAvail = to_end - to;
+    if(outAvail < encodingOutputBlockSize()) return -1;
+
+    // Is there any left-over data to be read
+    const int leftToRead = BIO_read(_bioEncOut, to, outAvail);
+    if(leftToRead > 0) {
+        to_next = to + leftToRead;
+        return 1;
+    }
+
+    // Is there any data to be encrypted?
+    const size_t inAvail = from_end - from;
+    if(!inAvail) return -1;
+
+    // Write the data to the encryption BIO
+    const int written = BIO_write(_bioEncIn, from, inAvail);
+    if(written < 0)
+        throw SSLRuntimeError("Failed encrypting a string chunk!", PT_SOURCEINFO);
+
+    // Read the encrypted data
+    const int read = BIO_read(_bioEncOut, to, outAvail);
+    //std::cerr << "E: written " << written << " bytes; read " << read << " bytes\n";
+
+    // Adjust the pointers
+    from_next = from + written;
+    if(read > 0) to_next = to + read;
+
+    // Done happily :D
+    return (read > 0) ? 1 : 0;
 }
 
-// Not implemented yet!
-int BasicSymmetricCipher::finish(const char* from, const char* from_end, const char*& from_next, char* to, char* to_end, char*& to_next)
+bool BasicSymmetricCipher::finishEncode(char* to, char* to_end, char*& to_next)
 {
-    return 0;
+    // Flush the BIO
+    (void) BIO_flush(_bioEncIn);
+
+    // Read the encrypted data
+    const size_t outAvail = to_end - to;
+    const int    read     = BIO_read(_bioEncOut, to, outAvail);
+    //std::cerr << "E: finish read " << read << " bytes\n";
+
+    // Finished already?
+    if(read <= 0) {
+        BIO_free(_bioEncIn ); _bioEncIn  = 0;
+        BIO_free(_bioEncOut); _bioEncOut = 0;
+        return true;
+    }
+    // Adjust the pointer
+    else {
+        to_next = to + read;
+    }
+
+    // Assume not finished
+    return false;
+}
+
+int BasicSymmetricCipher::decode(const char* from, const char* from_end, const char*& from_next, char* to, char* to_end, char*& to_next)
+{
+    // Use salt?
+    unsigned char* salt = 0;
+    if( !_salt.empty() ) {
+        assert( _salt.length() == PKCS5_SALT_LEN );
+        salt = (unsigned char*) _salt.c_str();
+    }
+    
+    // Initialize the cipher (if not yet)
+    if(!_bioDecIn) {
+        // Get the cipher
+        const EVP_CIPHER* cipher = EVP_get_cipherbyname(getOpenSSLCipherName());
+        if(!cipher)
+            throw SSLRuntimeError("Could not acquire cipher!", PT_SOURCEINFO);
+        // Derives a key and an IV from the user password and salt
+        unsigned char key[EVP_MAX_KEY_LENGTH], iv[EVP_MAX_IV_LENGTH];
+        EVP_BytesToKey( cipher, EVP_get_digestbyname("SHA1"), salt, (unsigned char *) _password.c_str(), _password.length(), 1, key, iv );
+        // Initialize a cipher BIO
+        BioAutoPtr bdec( BIO_new(BIO_f_cipher()) );
+        if(!bdec)
+            throw SSLRuntimeError("Could not initialize cipher BIO!", PT_SOURCEINFO);
+        // Initialize a cipher context
+        // (there is no need to free this context because it is owned by the cihper BIO)
+        EVP_CIPHER_CTX* pcctx = 0;
+        if(!BIO_get_cipher_ctx(bdec.get(), &pcctx))
+            throw SSLRuntimeError("Could not initialize cipher context!", PT_SOURCEINFO);
+        // Initialize the cipher
+        if(!EVP_CipherInit_ex(pcctx, cipher, 0, 0, 0, 0))
+            throw SSLRuntimeError("Could not initialize cipher context!", PT_SOURCEINFO);
+        if(!EVP_CipherInit_ex(pcctx, NULL, NULL, key, iv, 0))
+            throw SSLRuntimeError("Could not initialize cipher context!", PT_SOURCEINFO);
+        // Copy the cipher BIO
+        _bioDecIn = bdec.get();
+        bdec.release();
+        // Create the output BIO
+        _bioDecOut = BIO_new(BIO_s_mem());
+        BIO_push(_bioDecIn, _bioDecOut);
+    }
+
+    // Is the output area large enough?
+    const size_t outAvail = to_end - to;
+    if(outAvail < decodingOutputBlockSize()) return -1;
+
+    // Is there any left-over data to be read
+    const int leftToRead = BIO_read(_bioDecOut, to, outAvail);
+    if(leftToRead > 0) {
+        to_next = to + leftToRead;
+        return 1;
+    }
+
+    // Is there any data to be decrypted?
+    const size_t inAvail = from_end - from;
+    if(!inAvail) return -1;
+
+    // Write the data to the decryption BIO
+    const int written = BIO_write(_bioDecIn, from, inAvail);
+    if(written < 0)
+        throw SSLRuntimeError("Failed decrypting a string chunk!", PT_SOURCEINFO);
+
+    // Read the decrypted data
+    const int read = BIO_read(_bioDecOut, to, outAvail);
+    //std::cerr << "D: written " << written << " bytes; read " << read << " bytes\n";
+
+    // Adjust the pointers
+    from_next = from + written;
+    if(read > 0) to_next = to + read;
+
+    // Done happily :D
+    return (read > 0) ? 1 : 0;
+}
+
+bool BasicSymmetricCipher::finishDecode(char* to, char* to_end, char*& to_next)
+{
+    // Flush the BIO
+    (void) BIO_flush(_bioDecIn);
+
+    // Read the encrypted data
+    const size_t outAvail = to_end - to;
+    const int    read     = BIO_read(_bioDecOut, to, outAvail);
+    //std::cerr << "D: finish read " << read << " bytes\n";
+
+    // Finished already?
+    if(read <= 0) {
+        BIO_free(_bioDecIn ); _bioDecIn  = 0;
+        BIO_free(_bioDecOut); _bioDecOut = 0;
+        return true;
+    }
+    // Adjust the pointer
+    else {
+        to_next = to + read;
+    }
+
+    // Assume not finished
+    return false;
 }
 
 } // namespace Pt
