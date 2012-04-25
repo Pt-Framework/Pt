@@ -15,12 +15,6 @@ SharedLibrary Pt-Ssl : Exception.cpp
                        SSLServer.cpp
                        SSLClient.cpp
                        SSLSession.cpp
-                       SecureDigest.cpp
-                       CipherStreamBuf.cpp
-                       BasicCipher.cpp
-                       RSACipher.cpp
-                       BasicSymmetricCipher.cpp
-                       AESCipher.cpp
                        ;
 
 LinkSharedLibraries Pt-Ssl : Pt Pt-Net Pt-System ;
@@ -42,18 +36,6 @@ MakeLocate SSLHTTPServerTest : $(OUTPUT_TARGET) ;
 Main SSLHTTPServerClientTest : SSLHTTPServerClientTest.cpp ;
 LinkSharedLibraries SSLHTTPServerClientTest : Pt-Ssl Pt-Net Pt-System Pt ;
 MakeLocate SSLHTTPServerClientTest : $(OUTPUT_TARGET) ;
-
-Main SecureDigestTest : SecureDigestTest.cpp ;
-LinkSharedLibraries SecureDigestTest : Pt-Ssl Pt-System Pt ;
-MakeLocate SecureDigestTest : $(OUTPUT_TARGET) ;
-
-Main RSACipherTest : RSACipherTest.cpp ;
-LinkSharedLibraries RSACipherTest : Pt-Ssl Pt-System Pt ;
-MakeLocate RSACipherTest : $(OUTPUT_TARGET) ;
-
-Main AESCipherTest : AESCipherTest.cpp ;
-LinkSharedLibraries AESCipherTest : Pt-Ssl Pt-System Pt ;
-MakeLocate AESCipherTest : $(OUTPUT_TARGET) ;
 
 if $(TARGET_OS) = "nt"
 {
