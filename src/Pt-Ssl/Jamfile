@@ -5,16 +5,16 @@ SubDirC++Flags [ FDefines PT_SSL_API_EXPORT ] ;
 SubDirObjects $(OUTPUT_OBJECT) Pt-Ssl ;
 
 SharedLibrary Pt-Ssl : CipherInfo.cpp
-                       SSLPublicKey.cpp
-                       SSLPrivateKey.cpp
+                       PrivateKey.cpp
+                       PublicKey.cpp
+                       SslError.cpp
+                       Utils.cpp
                        SSLCertificateList.cpp
                        SSLContext.cpp
                        SSLStreamBuf.cpp
                        SSLServer.cpp
                        SSLClient.cpp
-                       SslError.cpp
-                       SSLSession.cpp
-                       Utils.cpp ;
+                       SSLSession.cpp ;
 
 LinkSharedLibraries Pt-Ssl : Pt Pt-Net Pt-System ;
 LinkLibraries Pt-Ssl : Pt-Ssl-openssl ;

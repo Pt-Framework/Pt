@@ -29,7 +29,7 @@
 #ifndef PT_SSL_SSLCONTEXT_H
 #define PT_SSL_SSLCONTEXT_H
 
-#include <Pt/Ssl/SSLPrivateKey.h>
+#include <Pt/Ssl/PrivateKey.h>
 #include <Pt/Ssl/SSLCertificateList.h>
 #include <string>
 

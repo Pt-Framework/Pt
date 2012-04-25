@@ -29,7 +29,7 @@
 #define PT_SSL_SSLCERTIFICATELIST_H
 
 #include <Pt/Ssl/SSLCertificateInfo.h>
-#include <Pt/Ssl/SSLPublicKey.h>
+#include <Pt/Ssl/PublicKey.h>
 #include <vector>
 
 namespace Pt {
