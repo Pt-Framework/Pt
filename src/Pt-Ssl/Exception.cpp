@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2010 by Aloysius Indrayanto
+ * Copyright (C) 2010-2012 by Marc Duerner
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -29,22 +30,48 @@
 #include <Pt/Ssl/Exception.h>
 
 namespace Pt {
+
 namespace Ssl {
 
-SSLRuntimeError::SSLRuntimeError(const std::string& what, const SourceInfo& si) throw()
-: std::runtime_error(what + si)
+SslError::SslError(const std::string& what)
+: std::runtime_error(what)
 {}
 
-SSLRuntimeError::~SSLRuntimeError() throw()
+SslError::~SslError() throw()
 {}
 
 
-SSLHandshakeFailedError::SSLHandshakeFailedError(const std::string& what, const SourceInfo& si) throw()
-: SSLRuntimeError(what, si)
+HandshakeFailed::HandshakeFailed(const std::string& what) throw()
+: SslError(what)
 {}
 
-SSLHandshakeFailedError::~SSLHandshakeFailedError() throw()
+HandshakeFailed::~HandshakeFailed() throw()
+{}
+
+
+InvalidKey::InvalidKey(const std::string& what) throw()
+: SslError(what)
+{}
+
+InvalidKey::~InvalidKey() throw()
+{}
+
+
+InvalidCertificate::InvalidCertificate(const std::string& what) throw()
+: SslError(what)
+{}
+
+InvalidCertificate::~InvalidCertificate() throw()
+{}
+
+
+SessionFailed::SessionFailed(const std::string& what) throw()
+: SslError(what)
+{}
+
+SessionFailed::~SessionFailed() throw()
 {}
 
 } // namespace Ssl
+
 } // namespace Pt

@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2010 by Aloysius Indrayanto
+ * Copyright (C) 2010-2012 by Marc Duerner
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,56 +26,79 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef PT_SSL_EXCEPTION_H
-#define PT_SSL_EXCEPTION_H
+#ifndef PT_SSL_SSLERROR_H
+#define PT_SSL_SSLERROR_H
 
 #include <Pt/Ssl/Api.h>
-#include <Pt/SourceInfo.h>
-#include <Pt/System/Logger.h>
-
-//#undef NLOG
-
-#ifndef NLOG
-#define PT_SSL_LOGGER_CATEGORY "Pt.SSL.Logger"
-#define PT_SSL_LOG_INFO(NAME, CODE) log_info("[" << NAME << "] " << CODE)
-#else
-#define PT_SSL_LOGGER_CATEGORY
-#define PT_SSL_LOG_INFO(NAME, CODE)
-#endif
-
 #include <string>
-#include <exception>
 #include <stdexcept>
 
 namespace Pt {
+
 namespace Ssl {
 
-    /** @brief Generic SSL run-time error.
-     */
-    class PT_SSL_API SSLRuntimeError : public std::runtime_error {
-        public:
-            //! @see Exception()
-            SSLRuntimeError(const std::string& what, const SourceInfo& si) throw();
+/** @brief Generic SSL run-time error.
+  */
+class PT_SSL_API SslError : public std::runtime_error 
+{
+    public:
+        //! @brief Contructs with message.
+        SslError(const std::string& what);
 
-            //! @brief Destructor.
-            ~SSLRuntimeError() throw();
-    };
+        //! @brief Destructor.
+        ~SslError() throw();
+};
 
+/** @brief SSL Handshake failed.
+  */
+class PT_SSL_API HandshakeFailed : public SslError 
+{
+    public:
+        //! @brief Contructs with message.
+        HandshakeFailed(const std::string& what) throw();
 
-    /** @brief SSL handshake-failed error.
-     */
-    class PT_SSL_API SSLHandshakeFailedError : public SSLRuntimeError {
-        public:
-            //! @see Exception()
-            SSLHandshakeFailedError(const std::string& what, const SourceInfo& si) throw();
+        //! @brief Destructor.
+        ~HandshakeFailed() throw();
+};
 
-            //! @brief Destructor.
-            ~SSLHandshakeFailedError() throw();
-    };
+/** @brief Invalid public or private key.
+  */
+class PT_SSL_API InvalidKey : public SslError 
+{
+    public:
+        //! @brief Contructs with message.
+        InvalidKey(const std::string& what) throw();
 
+        //! @brief Destructor.
+        ~InvalidKey() throw();
+};
+
+/** @brief Invalid SSL certificate or certificate chain.
+  */
+class PT_SSL_API InvalidCertificate : public SslError 
+{
+    public:
+        //! @brief Contructs with message.
+        InvalidCertificate(const std::string& what) throw();
+
+        //! @brief Destructor.
+        ~InvalidCertificate() throw();
+};
+
+/** @brief SSL session failure.
+  */
+class PT_SSL_API SessionFailed : public SslError 
+{
+    public:
+        //! @brief Contructs with message.
+        SessionFailed(const std::string& what) throw();
+
+        //! @brief Destructor.
+        ~SessionFailed() throw();
+};
 
 } // namespace Ssl
+
 } // namespace Pt
 
-#endif
-
+#endif // PT_SSL_SSLERROR_H

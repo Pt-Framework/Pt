@@ -248,23 +248,27 @@ SSLContext::~SSLContext()
 
 void SSLContext::setProtocol(Protocol protocol)
 {
-    int  ret = 0;
-    bool v2  = false;
+    bool v2 = false;
+    const SSL_METHOD* method = 0;
 
     switch(_protocol) 
     {
-        case SSLv2           : ret = SSL_CTX_set_ssl_version( _ctx, SSLv2_method () ); v2 = true; break;
-        case SSLv3or2        : ret = SSL_CTX_set_ssl_version( _ctx, SSLv23_method() ); v2 = true; break;
-        case TLSv1           : ret = SSL_CTX_set_ssl_version( _ctx, TLSv1_method () );            break;
-        case SSLv3           : /* Fall through */
-        case DefaultProtocol : /* Fall through */
-        default              : ret = SSL_CTX_set_ssl_version( _ctx, SSLv3_method () );
+        case SSLv2           : method = SSLv2_method();  v2 = true; break;
+        case SSLv3or2        : method = SSLv23_method(); v2 = true; break;
+        case TLSv1           : method = TLSv1_method(); break;
+        case SSLv3           : // Fall through
+        case DefaultProtocol : // Fall through
+        default              : method = SSLv3_method();
     }
 
-    if(!ret) throw SSLRuntimeError("Failed setting the SSL protocol!", PT_SOURCEINFO);
+    int ret = SSL_CTX_set_ssl_version(_ctx, method);
+    if( 0 == ret)
+        throw std::logic_error("Unknown protocol");
 
-    if( ! SSL_CTX_set_cipher_list(_ctx, v2 ? "ALL:!aNULL:!eNULL" : "ALL:!aNULL:!eNULL:!SSLv2"))
-        throw SSLRuntimeError("Failed selecting the default SSL ciphers!", PT_SOURCEINFO);
+    const char* list = v2 ? "ALL:!aNULL:!eNULL" : "ALL:!aNULL:!eNULL:!SSLv2";
+    ret = SSL_CTX_set_cipher_list(_ctx, list);
+    if( 0 == ret )
+        throw std::logic_error("Invalid default cipher list");
 }
 
 /*
@@ -297,7 +301,7 @@ void SSLContext::setTrustedCACertificate(const SSLCertificateList& trustedCert)
     X509_STOREAutoPtr cert_store(X509_STORE_new());
     for(std::vector<X509*>::const_iterator it = trustedCert.impl().begin(); it != trustedCert.impl().end(); ++it) {
         if( ! X509_STORE_add_cert(cert_store.get(), *it) )
-            throw SSLRuntimeError("Could not store the CA certificate as a trusted certificate!", PT_SOURCEINFO);
+            throw InvalidCertificate("Could not store the CA certificate as a trusted certificate!");
     }
 
     // Set it to the context
@@ -319,7 +323,7 @@ void SSLContext::setCertificate(const SSLCertificateList& certList)
     ERR_clear_error();
     
     if( ! SSL_CTX_use_certificate( _ctx, *certList.impl().begin() ) || ERR_peek_error() )
-        throw SSLRuntimeError("Invalid/mismatched certificate!", PT_SOURCEINFO);
+        throw InvalidCertificate("Invalid/mismatched certificate!");
 }
 
 void SSLContext::addCertificateChain(const SSLCertificateList& certList, bool skipFirstCert)
@@ -330,7 +334,7 @@ void SSLContext::addCertificateChain(const SSLCertificateList& certList, bool sk
 
     // Check if we do not have any CA certificates
     if(it == certList.impl().end())
-        throw SSLRuntimeError("Could not find any CA certificate in the certificate list!", PT_SOURCEINFO);
+        throw InvalidCertificate("Could not find any CA certificate in the certificate list!");
 
     // Add the CA X509 certificates
     for(; it != certList.impl().end(); ++it) {
@@ -340,20 +344,20 @@ void SSLContext::addCertificateChain(const SSLCertificateList& certList, bool sk
         unsigned char* buf = 0;
         int            len = i2d_X509(*it, &buf);
         if(len < 0)
-            throw SSLRuntimeError("Could not convert the CA certificate to raw binary data!", PT_SOURCEINFO);
+            throw InvalidCertificate("Could not convert the CA certificate to raw binary data!");
         // Convert the raw binary data back to an X509 certificate
         const unsigned char* tbf  = buf;
         X509*                x509 = d2i_X509(0, &tbf, len);
         OPENSSL_free(buf);
         if(!x509)
-            throw SSLRuntimeError("Could not convert the raw binary data back to a CA certificate!", PT_SOURCEINFO);
+            throw InvalidCertificate("Could not convert the raw binary data back to a CA certificate!");
         // Add the certificate
         if( ! SSL_CTX_add_extra_chain_cert( _ctx, x509 ) )
-            throw SSLRuntimeError("Could not add CA certificate!", PT_SOURCEINFO);
+            throw InvalidCertificate("Could not add CA certificate!");
 #else        
         // Add the certificate
         if( ! SSL_CTX_add_extra_chain_cert( _ctx, *it ) )
-            throw SSLRuntimeError("Could not add CA certificate!", PT_SOURCEINFO);
+            throw InvalidCertificate("Could not add CA certificate!");
 #endif
     }
 
@@ -365,17 +369,16 @@ void SSLContext::setPrivateKey(const SSLPrivateKey& privKey)
 {
     // Try to use the private key
     if( ! SSL_CTX_use_PrivateKey( _ctx, privKey.impl() ) )
-        throw SSLRuntimeError("Invalid private-key!", PT_SOURCEINFO);
+        throw InvalidKey("Invalid private-key!");
 
     // Store a reference to the private key
     _privKey = privKey;
     
     // Check the private key (if needed)
-    if(!_certChainExist) {
-        if(!SSL_CTX_check_private_key(_ctx))
-            throw SSLRuntimeError(
-                "The private key does not agree with the corresponding public key in the certificate!",
-                PT_SOURCEINFO );
+    if( ! _certChainExist) 
+    {
+        if( ! SSL_CTX_check_private_key(_ctx) )
+            throw InvalidKey("The private key does not agree with the corresponding public key in the certificate!");
     }
 }
 

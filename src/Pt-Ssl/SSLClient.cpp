@@ -27,6 +27,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#include "Utils.h"
 #include <Pt/Ssl/SSLClient.h>
 
 namespace Pt {
@@ -64,9 +65,7 @@ void SSLClient::endHandshake()
 {
     if(_sslbuf.handshakeError())
     {
-        throw SSLHandshakeFailedError(
-            "The client has failed to complete the handshaking process!",
-            PT_SOURCEINFO );
+        throw HandshakeFailed("The client has failed to complete the handshaking process!");
     }
 }
 

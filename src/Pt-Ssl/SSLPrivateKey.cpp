@@ -55,7 +55,7 @@ void SSLPrivateKey::Impl::loadFromString(const std::string& keyData)
     // Try to read/parse the private key
     _pkey = PEM_read_bio_PrivateKey(in.get(), 0, SSLPrivateKey::Impl::passwordCallback, (void*) &_pswd);
     if(!_pkey)
-        throw SSLRuntimeError("Could not read/parse/decode private-key data!", PT_SOURCEINFO);
+        throw InvalidKey("Could not read/parse/decode private-key data!");
 }
 
 void SSLPrivateKey::Impl::loadFromFile(const std::string& fileName)

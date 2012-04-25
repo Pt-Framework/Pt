@@ -27,6 +27,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#include "Utils.h"
 #include <Pt/Ssl/SSLServer.h>
 
 namespace Pt {
@@ -61,9 +62,7 @@ void SSLServer::beginHandshake(bool verifyClientCert, bool requireCertBasedAuth)
 void SSLServer::endHandshake()
 {
     if(_sslbuf.handshakeError()) {
-        throw SSLHandshakeFailedError(
-            "The server has failed to complete the handshaking process!",
-            PT_SOURCEINFO );
+        throw HandshakeFailed("The server has failed to complete the handshaking process!");
     }
 }
 

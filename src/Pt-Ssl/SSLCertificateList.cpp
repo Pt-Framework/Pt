@@ -102,7 +102,7 @@ void SSLCertificateList::Impl::loadFromString(const std::string& certData)
         // Calculate the fingerprint hash of the certificate
         X509* ptrCert = cert.get();
         if(!X509_digest(ptrCert, fdig, md, &n))
-            throw SSLRuntimeError("Could not calculate the certificate's fingerprint hash!", PT_SOURCEINFO);
+            throw InvalidCertificate("Could not calculate the certificate's fingerprint hash!");
 
         // Store the certificate
         _cert.push_back(ptrCert);
@@ -166,7 +166,7 @@ const SSLPublicKey SSLCertificateList::Impl::getPublicKey() const
 {
     EVP_PKEY* pkey = X509_get_pubkey(*_cert.begin());
     if(!pkey) {
-        throw SSLRuntimeError("Could not extract the main certificate's public key!", PT_SOURCEINFO);
+        throw InvalidCertificate("Could not extract the main certificate's public key!");
     }
 
     return SSLPublicKey(pkey);

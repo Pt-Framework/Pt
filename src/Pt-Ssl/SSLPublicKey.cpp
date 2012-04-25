@@ -55,7 +55,7 @@ void SSLPublicKey::Impl::loadFromString(const std::string& keyData)
     // Try to read/parse the public key
     _pkey = PEM_read_bio_PUBKEY(in.get(), 0, 0, 0);//SSLPublicKey::Impl::passwordCallback, (void*) &_pswd);
     if(!_pkey)
-        throw SSLRuntimeError("Could not read/parse/decode public-key data!", PT_SOURCEINFO);
+        throw InvalidKey("Could not read/parse/decode public-key data!");
 }
 
 void SSLPublicKey::Impl::loadFromFile(const std::string& fileName)

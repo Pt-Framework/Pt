@@ -29,10 +29,20 @@
 #define PT_SSL_UTILS_H
 
 #include <Pt/SmartPtr.h>
-
+#include <Pt/System/Logger.h>
 #include <openssl/ssl.h>
 #include <openssl/pem.h>
 #include <openssl/err.h>
+
+//#undef NLOG
+
+#ifndef NLOG
+#define PT_SSL_LOGGER_CATEGORY "Pt.SSL.Logger"
+#define PT_SSL_LOG_INFO(NAME, CODE) log_info("[" << NAME << "] " << CODE)
+#else
+#define PT_SSL_LOGGER_CATEGORY
+#define PT_SSL_LOG_INFO(NAME, CODE)
+#endif
 
 namespace Pt {
 namespace Ssl {
