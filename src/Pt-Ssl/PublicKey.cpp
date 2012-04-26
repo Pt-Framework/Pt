@@ -73,6 +73,12 @@ void PublicKey::loadFromFile(const std::string& fileName)
 }
 
 
+void PublicKey::toPem(std::string& keyData) const
+{
+    _impl->toPem(keyData);
+}
+
+
 void PublicKey::clear()
 { 
     _impl = new Impl(); 
@@ -129,6 +135,23 @@ void PublicKey::Impl::loadFromFile(const std::string& fileName)
     std::string data;
     readFileToString(fileName, data);
     loadFromString(data);
+}
+
+
+void PublicKey::Impl::toPem(std::string& keyData) const
+{
+    BioAutoPtr out( BIO_new(BIO_s_mem()) );
+
+    if( ! _pkey)
+        return;
+
+    int ret = PEM_write_bio_PUBKEY(out.get(), _pkey);
+    if( ! ret)
+        throw InvalidKey("Could not write key in pem format");
+
+    char* data = 0;
+    long len = BIO_get_mem_data(out.get(), &data);
+    keyData.assign(data, len);
 }
 
 

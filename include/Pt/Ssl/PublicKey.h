@@ -66,6 +66,8 @@ class PT_SSL_API PublicKey
         //! \brief Load public-key from the given file.
         void loadFromFile(const std::string& fileName);
 
+        void toPem(std::string& keyData) const;
+
         //! \brief Clear (delete) any loaded key.
         void clear();
 
@@ -101,6 +103,8 @@ class PT_SSL_API PublicKey::Impl
         void loadFromString(const std::string& keyData);
 
         void loadFromFile(const std::string& fileName);
+
+        void toPem(std::string& fileName) const;
 
         void clear();
 
