@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2010 by Aloysius Indrayanto
+ * Copyright (C) 2010-2012 by Marc Duerner
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,14 +26,15 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef PT_SSL_SSLCERTIFICATELIST_H
-#define PT_SSL_SSLCERTIFICATELIST_H
+#ifndef PT_SSL_CERTIFICATELIST_H
+#define PT_SSL_CERTIFICATELIST_H
 
 #include <Pt/Ssl/SSLCertificateInfo.h>
 #include <Pt/Ssl/PublicKey.h>
 #include <vector>
 
 namespace Pt {
+
 namespace Ssl {
 
 //! \brief Certificate list.
@@ -57,7 +59,7 @@ class PT_SSL_API SSLCertificateList {
         void clear();
 
         //! \brief Returns a list of certificates' informations.
-        const std::vector<SSLCertificateInfo>& certInfo() const;
+        std::vector<SSLCertificateInfo> certificateInfo() const;
 
         //! \brief Get the public key of the main (first) certificate.
         PublicKey publicKey() const;
@@ -92,19 +94,18 @@ class PT_SSL_API SSLCertificateList::Impl
 
         void loadFromFile(const std::string& fileName);
 
-        inline const std::vector<SSLCertificateInfo>& certInfo() const
-        { return _certInfo; }
+        std::vector<SSLCertificateInfo> certificateInfo() const;
 
         PublicKey publicKey() const;
 
         void clear();
 
     private:
-        std::vector<x509_st*>           _cert;
-        std::vector<SSLCertificateInfo> _certInfo;
+        std::vector<x509_st*> _cert;
 };
 
 } // namespace Ssl
+
 } // namespace Pt
 
-#endif
+#endif // PT_SSL_CERTIFICATELIST_H
