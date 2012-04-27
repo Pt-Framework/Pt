@@ -28,6 +28,8 @@
  */
 
 #include <Pt/Ssl/CipherInfo.h>
+#include <openssl/ssl.h>
+#include <openssl/err.h>
 
 namespace Pt {
 
@@ -51,6 +53,89 @@ CipherInfo::CipherInfo(unsigned long id, const std::string& strid,
 , _version(version)
 , _desc(desc)
 {}
+
+
+
+
+
+
+
+CipherList::CipherList()
+: _sslCiphers(0)
+{
+}
+
+
+CipherList::CipherList(const CipherList& list)
+: _sslCiphers(0)
+{
+}
+
+
+CipherList::~CipherList()
+{
+}
+
+
+void CipherList::clear()
+{ 
+    _ciphers.clear();
+    _sslCiphers = 0;
+}
+
+
+CipherList& CipherList::operator=(const CipherList& list)
+{
+    clear();
+
+    if(list._sslCiphers)
+    {
+        STACK_OF(SSL_CIPHER)* chp = reinterpret_cast<STACK_OF(SSL_CIPHER)*>(list._sslCiphers);
+
+        for(int i = 0; i < sk_SSL_CIPHER_num(chp); ++i)
+        {
+            // Skip if not valid
+            const SSL_CIPHER* c = sk_SSL_CIPHER_value(chp, i);
+            if( ! c->valid )
+                continue;
+
+            // Get the ID and split it
+            const unsigned long id  = c->id;
+            const int           id0 = (int) (  id >> 24);
+            const int           id1 = (int) ( (id >> 16) & 0xFFL );
+            const int           id2 = (int) ( (id >>  8) & 0xFFL );
+            const int           id3 = (int) (  id        & 0xFFL );
+
+            // Convert the ID to a readable string
+            char strid[64];
+            if((id & 0xFF000000L) == 0x02000000L)
+                sprintf(strid, "0x%02X,0x%02X,0x%02X", id1, id2, id3);
+            else if((id & 0xFF000000L) == 0x03000000L)
+                sprintf(strid, "0x%02X,0x%02X", id2, id3);
+            else
+                sprintf(strid, "0x%02X,0x%02X,0x%02X,0x%02X", id0, id1, id2, id3);
+
+            // Get some information
+            char desc[512];
+            SSL_CIPHER_description(c, desc, sizeof(desc));
+            const int dlen = strlen(desc);
+            if(desc[dlen - 1] == '\n')
+                desc[dlen - 1] = 0;
+
+            // Store the chiper information
+            int usedBits;
+            int bits = SSL_CIPHER_get_bits(c, &usedBits);
+            CipherInfo cipher(id, strid, SSL_CIPHER_get_name(c), bits, usedBits, 
+                              SSL_CIPHER_get_version(c), desc);
+        
+            _ciphers.push_back(cipher);
+        }
+    }
+
+    _ciphers.assign(list._ciphers.begin(), list._ciphers.end());
+
+    return *this;
+}
 
 } // namespace Ssl
 

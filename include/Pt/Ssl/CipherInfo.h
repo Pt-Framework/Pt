@@ -30,14 +30,28 @@
 #define PT_SSL_CIPHERINFO_H
 
 #include <Pt/Ssl/Api.h>
+#include <Pt/SmartPtr.h>
 #include <string>
+#include <cassert>
 
 namespace Pt {
 
 namespace Ssl {
 
+class Cipher
+{
+    public:
+        Cipher()
+        {}
+
+        virtual ~Cipher()
+        {}
+
+        virtual const std::string& name() const = 0;
+};
+
 //! @brief Provides information about chiphers.
-class PT_SSL_API CipherInfo 
+class PT_SSL_API CipherInfo : public Cipher
 {
     public:
         //! @brief Default constructor.
@@ -107,6 +121,117 @@ inline bool operator<(const CipherInfo& a, const CipherInfo& b)
 {
     return a.id() < b.id();
 }
+
+
+class CipherRefPtr : public CipherInfo
+{
+    public:
+        CipherRefPtr()
+        : _sslCipher(0)
+        {}
+
+        CipherRefPtr(void* sslCipher)
+        : _sslCipher(sslCipher)
+        {}
+
+        CipherRefPtr(const CipherRefPtr& other)
+        : _sslCipher(other._sslCipher)
+        {}
+
+        virtual ~CipherRefPtr()
+        {}
+
+        virtual const std::string& name() const
+        { return _name; }
+
+        void advance()
+        {
+            assert(false);
+            //++_sslCipher;
+        }
+
+        CipherRefPtr& operator=(const CipherRefPtr& other)
+        {
+            _sslCipher = other._sslCipher;
+            return *this;
+        }
+
+        bool isValid() const
+        { return _sslCipher != 0;}
+
+    private:
+        void* _sslCipher;
+        std::string _name;
+};
+
+
+class PT_SSL_API CipherIterator
+{
+    public:
+        // CipherIterator(CipherRefPtr(_sslCiphers), _ciphers.begin())
+        CipherIterator(CipherRefPtr cipher, std::vector<CipherInfo>::iterator iter)
+        : _iter(iter)
+        , _cipher(cipher)
+        {}
+
+        ~CipherIterator()
+        { }
+
+        CipherIterator& operator=(const CipherIterator& iter)
+        {
+            _cipher = iter._cipher;
+            _iter = iter._iter;
+            return *this;
+        }
+
+        CipherIterator operator++()
+        { 
+            if(_cipher.isValid() ) 
+            {
+                _cipher.advance();
+            }
+            else
+            {
+                ++_iter;
+            }
+            
+            return *this;
+        }
+
+        const Cipher& operator*() const
+        { 
+            if( ! _cipher.isValid() )
+                return *_iter; 
+
+            return _cipher;
+        }
+
+    private:
+        std::vector<CipherInfo>::iterator _iter;
+        CipherRefPtr _cipher;
+};
+
+
+//! @brief Cipher list.
+class PT_SSL_API CipherList 
+{
+    public:
+        CipherList();
+
+        CipherList(const CipherList& list);
+
+        //! \brief Standard dtor.
+        ~CipherList();
+
+        //! \brief Clears the list.
+        void clear();
+
+        CipherList& operator=(const CipherList& list);
+   
+    private:
+        std::vector<CipherInfo> _ciphers;
+        void* _sslCiphers;
+};
 
 } // namespace Ssl
 
