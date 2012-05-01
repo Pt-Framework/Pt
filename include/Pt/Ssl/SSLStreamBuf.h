@@ -62,7 +62,7 @@ class PT_SSL_API SSLStreamBuf : public Connectable, public std::streambuf
         */
         //std::vector<CipherInfo> availableCiphers() const;
 
-        CipherList& ciphers();
+        const CipherList& ciphers() const;
 
         /** \brief Return the currently used cipher (the cipher that are actually used to form the SSL channel). 
         */

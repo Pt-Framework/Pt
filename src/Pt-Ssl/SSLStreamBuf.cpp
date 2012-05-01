@@ -78,7 +78,7 @@ SSLStreamBuf::SSLStreamBuf(std::iostream& ios, SSLContext& ctx, const char* sess
     }
 
     STACK_OF(SSL_CIPHER)* chiphers = SSL_get_ciphers(_ssl);
-    _ciphers.set(chiphers);
+    _ciphers.setRef(chiphers);
 }
 
 
@@ -136,7 +136,7 @@ SSLStreamBuf::~SSLStreamBuf()
 }*/
 
 
-CipherList& SSLStreamBuf::ciphers()
+const CipherList& SSLStreamBuf::ciphers() const
 {
     return _ciphers;
 }
@@ -169,7 +169,7 @@ const Cipher& SSLStreamBuf::currCipher() const
     if( ! c) 
         return _currentCipher;
 
-    _currentCipher.set(c);
+    _currentCipher.setRef(c);
     return _currentCipher;
 }
 
