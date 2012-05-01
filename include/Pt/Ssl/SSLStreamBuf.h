@@ -32,6 +32,7 @@
 #include <Pt/Ssl/Api.h>
 #include <Pt/Ssl/SSLContext.h>
 #include <Pt/Ssl/SSLSession.h>
+#include <Pt/Ssl/CipherInfo.h>
 #include <Pt/Signal.h>
 #include <string>
 
@@ -59,11 +60,14 @@ class PT_SSL_API SSLStreamBuf : public Connectable, public std::streambuf
 
         /** \brief Return a list of available ciphers for the current protocol. 
         */
-        std::vector<CipherInfo> availableCiphers() const;
+        //std::vector<CipherInfo> availableCiphers() const;
+
+        CipherList& ciphers();
 
         /** \brief Return the currently used cipher (the cipher that are actually used to form the SSL channel). 
         */
-        CipherInfo currentCipher() const;
+        //CipherInfo currentCipher() const;
+        const Cipher& currCipher() const;
 
         /** \brief Check if this SSL stream buffer has been connected to the SSL stream buffer at the other end. 
         */
@@ -138,6 +142,8 @@ class PT_SSL_API SSLStreamBuf : public Connectable, public std::streambuf
         bio_st*        _out; // Output BIO
         ssl_st*        _ssl; // OpenSSL SSL handle
         std::iostream* _ios; // IO
+        CipherList     _ciphers;
+        mutable Cipher _currentCipher;
 
     private:
         size_t               _ibufferSize;

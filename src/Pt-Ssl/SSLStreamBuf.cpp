@@ -76,6 +76,9 @@ SSLStreamBuf::SSLStreamBuf(std::iostream& ios, SSLContext& ctx, const char* sess
                                     reinterpret_cast<const unsigned char*>(sessionID), 
                                     strlen(sessionID) );
     }
+
+    STACK_OF(SSL_CIPHER)* chiphers = SSL_get_ciphers(_ssl);
+    _ciphers.set(chiphers);
 }
 
 
@@ -85,7 +88,7 @@ SSLStreamBuf::~SSLStreamBuf()
 }
 
 
-std::vector<CipherInfo> SSLStreamBuf::availableCiphers() const
+/*std::vector<CipherInfo> SSLStreamBuf::availableCiphers() const
 {
     std::vector<CipherInfo> availCiphers;
 
@@ -130,7 +133,14 @@ std::vector<CipherInfo> SSLStreamBuf::availableCiphers() const
     }
 
     return availCiphers;
+}*/
+
+
+CipherList& SSLStreamBuf::ciphers()
+{
+    return _ciphers;
 }
+
 
 /*
 void SSLStreamBuf::setCiphers(const std::vector<SSLCipherInfo>& ciphers)
@@ -153,7 +163,18 @@ void SSLStreamBuf::setCiphers(const std::vector<SSLCipherInfo>& ciphers)
 }
 */
 
-CipherInfo SSLStreamBuf::currentCipher() const
+const Cipher& SSLStreamBuf::currCipher() const
+{
+    const SSL_CIPHER* c = SSL_get_current_cipher(_ssl);
+    if( ! c) 
+        return _currentCipher;
+
+    _currentCipher.set(c);
+    return _currentCipher;
+}
+
+
+/*CipherInfo SSLStreamBuf::currentCipher() const
 {
     const SSL_CIPHER* c = SSL_get_current_cipher(_ssl);
     if( ! c) 
@@ -188,7 +209,7 @@ CipherInfo SSLStreamBuf::currentCipher() const
 
     return CipherInfo(id, strid,  SSL_CIPHER_get_name(c), bits, usedBits,
                       SSL_CIPHER_get_version(c), desc);
-}
+}*/
 
 
 bool SSLStreamBuf::connected() const
@@ -376,6 +397,8 @@ std::streamsize SSLStreamBuf::import()
 
 void SSLStreamBuf::shutdown()
 {
+    _ciphers.clear();
+
     const int res = SSL_shutdown(_ssl);
     PT_SSL_LOG("SSL_shutdown() = " << res);
 

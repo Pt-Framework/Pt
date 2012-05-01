@@ -30,28 +30,43 @@
 #define PT_SSL_CIPHERINFO_H
 
 #include <Pt/Ssl/Api.h>
-#include <Pt/SmartPtr.h>
+#include <Pt/NonCopyable.h>
 #include <string>
+#include <vector>
 #include <cassert>
+
+struct ssl_cipher_st;
 
 namespace Pt {
 
 namespace Ssl {
 
-class Cipher
+class CipherInfo;
+
+class PT_SSL_API Cipher : private NonCopyable
 {
     public:
         Cipher()
         {}
 
-        virtual ~Cipher()
+        ~Cipher()
         {}
 
-        virtual const std::string& name() const = 0;
+        const char* name() const;
+
+        void set(const ssl_cipher_st* c)
+        {_sslCipher = c; _cipherInfo = 0; }
+
+        void set(const CipherInfo* c)
+        {_sslCipher = 0; _cipherInfo = c; }
+
+    private:
+        const ssl_cipher_st* _sslCipher;
+        const CipherInfo* _cipherInfo;
 };
 
 //! @brief Provides information about chiphers.
-class PT_SSL_API CipherInfo : public Cipher
+class PT_SSL_API CipherInfo
 {
     public:
         //! @brief Default constructor.
@@ -75,8 +90,8 @@ class PT_SSL_API CipherInfo : public Cipher
         { return _strid; }
 
         //! @brief Returns the name of the cipher.
-        const std::string& name() const
-        { return _name; }
+        const char* name() const
+        { return _name.c_str(); }
 
         //! @brief Returns the number of bits supported by the cipher.
         int bits() const
@@ -122,99 +137,13 @@ inline bool operator<(const CipherInfo& a, const CipherInfo& b)
     return a.id() < b.id();
 }
 
-
-class CipherRefPtr : public CipherInfo
-{
-    public:
-        CipherRefPtr()
-        : _sslCipher(0)
-        {}
-
-        CipherRefPtr(void* sslCipher)
-        : _sslCipher(sslCipher)
-        {}
-
-        CipherRefPtr(const CipherRefPtr& other)
-        : _sslCipher(other._sslCipher)
-        {}
-
-        virtual ~CipherRefPtr()
-        {}
-
-        virtual const std::string& name() const
-        { return _name; }
-
-        void advance()
-        {
-            assert(false);
-            //++_sslCipher;
-        }
-
-        CipherRefPtr& operator=(const CipherRefPtr& other)
-        {
-            _sslCipher = other._sslCipher;
-            return *this;
-        }
-
-        bool isValid() const
-        { return _sslCipher != 0;}
-
-    private:
-        void* _sslCipher;
-        std::string _name;
-};
-
-
-class PT_SSL_API CipherIterator
-{
-    public:
-        // CipherIterator(CipherRefPtr(_sslCiphers), _ciphers.begin())
-        CipherIterator(CipherRefPtr cipher, std::vector<CipherInfo>::iterator iter)
-        : _iter(iter)
-        , _cipher(cipher)
-        {}
-
-        ~CipherIterator()
-        { }
-
-        CipherIterator& operator=(const CipherIterator& iter)
-        {
-            _cipher = iter._cipher;
-            _iter = iter._iter;
-            return *this;
-        }
-
-        CipherIterator operator++()
-        { 
-            if(_cipher.isValid() ) 
-            {
-                _cipher.advance();
-            }
-            else
-            {
-                ++_iter;
-            }
-            
-            return *this;
-        }
-
-        const Cipher& operator*() const
-        { 
-            if( ! _cipher.isValid() )
-                return *_iter; 
-
-            return _cipher;
-        }
-
-    private:
-        std::vector<CipherInfo>::iterator _iter;
-        CipherRefPtr _cipher;
-};
-
+class CipherIterator;
 
 //! @brief Cipher list.
 class PT_SSL_API CipherList 
 {
+    friend class CipherIterator;
+
     public:
         CipherList();
 
@@ -227,10 +156,67 @@ class PT_SSL_API CipherList
         void clear();
 
         CipherList& operator=(const CipherList& list);
+
+        CipherIterator begin() const;
+
+        CipherIterator end() const;
    
+        const ssl_cipher_st* sslCipher(int n) const;
+
+        const CipherInfo* cipherInfo(int n) const;
+
+        void set(void* sslCiphers)
+        { _sslCiphers = sslCiphers; }
+
     private:
         std::vector<CipherInfo> _ciphers;
         void* _sslCiphers;
+};
+
+class CipherIteratorImpl;
+
+class PT_SSL_API CipherIterator
+{
+    public:
+        CipherIterator(const CipherList& list, const ssl_cipher_st* cipher, int n);
+
+        CipherIterator(const CipherList& list, const CipherInfo* info, int n);
+
+        CipherIterator(const CipherIterator& other)
+        : _list(other._list)
+        , _n(other._n)
+        {}
+
+        CipherIterator()
+        : _list(0)
+        , _n(0)
+        { }
+        
+        ~CipherIterator()
+        { }
+
+        CipherIterator operator++();
+
+        const Cipher& operator*() const
+        { return _cipher; }
+
+        CipherIterator& operator=(const CipherIterator& other)
+        { 
+            _list = other._list; 
+            _n = other._n; 
+            return *this; 
+        }
+
+        bool operator !=(const CipherIterator& other) const
+        { return _list != other._list || _n != other._n; }
+
+        bool operator ==(const CipherIterator& other) const
+        { return _list == other._list && _n == other._n;; }
+
+    private:
+        const CipherList* _list;
+        int _n;
+        Cipher _cipher;
 };
 
 } // namespace Ssl

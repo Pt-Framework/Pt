@@ -35,6 +35,18 @@ namespace Pt {
 
 namespace Ssl {
 
+const char* Cipher::name() const
+{ 
+    if(_sslCipher)
+        return SSL_CIPHER_get_name(_sslCipher); 
+
+    if(_cipherInfo)
+        return _cipherInfo->name();
+
+    return "";
+}
+
+
 CipherInfo::CipherInfo()
 : _id(0)
 , _bits(0)
@@ -53,11 +65,6 @@ CipherInfo::CipherInfo(unsigned long id, const std::string& strid,
 , _version(version)
 , _desc(desc)
 {}
-
-
-
-
-
 
 
 CipherList::CipherList()
@@ -133,6 +140,76 @@ CipherList& CipherList::operator=(const CipherList& list)
     }
 
     _ciphers.assign(list._ciphers.begin(), list._ciphers.end());
+
+    return *this;
+}
+
+
+const ssl_cipher_st* CipherList::sslCipher(int n) const
+{
+    if(_sslCiphers)
+    {
+        STACK_OF(SSL_CIPHER)* chp = reinterpret_cast<STACK_OF(SSL_CIPHER)*>(_sslCiphers);
+        if( n < sk_SSL_CIPHER_num(chp) )
+        {
+            const SSL_CIPHER* c = sk_SSL_CIPHER_value(chp, n);
+            return c;
+        }
+    }
+
+    return 0;
+}
+
+
+const CipherInfo* CipherList::cipherInfo(int n) const
+{
+    unsigned offset = static_cast<unsigned>(n); 
+    if( offset < _ciphers.size() )
+    {
+        return &_ciphers[offset];
+    }
+
+    return 0;
+}
+
+
+CipherIterator CipherList::begin() const
+{ 
+    if(_sslCiphers)
+        return CipherIterator(*this, sslCipher(0), 0);
+
+    return CipherIterator(*this, cipherInfo(0), 0); 
+}
+
+
+CipherIterator CipherList::end() const
+{ 
+    return CipherIterator(); 
+}
+
+
+CipherIterator::CipherIterator(const CipherList& list, const ssl_cipher_st* cipher, int n)
+: _list(&list)
+, _n(n)
+{
+    _cipher.set( _list->sslCipher(_n) );
+}
+
+
+CipherIterator::CipherIterator(const CipherList& list, const CipherInfo* info, int n)
+: _list(&list)
+, _n(n)
+{
+    _cipher.set( _list->cipherInfo(_n) );
+}
+
+
+CipherIterator CipherIterator::operator++()
+{        
+    if( _list->_sslCiphers ) 
+        _cipher.set( _list->sslCipher(++_n) );
+    else
+        _cipher.set( _list->cipherInfo(++_n) );
 
     return *this;
 }
