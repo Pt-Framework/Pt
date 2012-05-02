@@ -29,25 +29,55 @@
 #ifndef PT_SSL_CERTIFICATELIST_H
 #define PT_SSL_CERTIFICATELIST_H
 
+#include <Pt/Ssl/Api.h>
 #include <Pt/Ssl/SSLCertificateInfo.h>
 #include <Pt/Ssl/PublicKey.h>
+#include <Pt/NonCopyable.h>
 #include <vector>
+
+struct x509_st;
 
 namespace Pt {
 
 namespace Ssl {
 
+class PT_SSL_API Certificate : private NonCopyable
+{
+    public:     
+        explicit Certificate(x509_st* x509);
+
+        Certificate(const Certificate& cert);
+
+        ~Certificate();
+
+        Certificate& operator=(const Certificate& cert);
+
+        PublicKey publicKey() const;
+
+        x509_st* getX509() const;
+
+    private:
+        class CertificateImpl* _impl;
+};
+
+
 //! \brief Certificate list.
-class PT_SSL_API SSLCertificateList {
+class PT_SSL_API CertificateList
+{
+    public:
+        //! @brief Forward iterator for certificate lists
+        class Iterator;
+
     public:
         //! \brief Instantiate an empty certificate-list.
-        SSLCertificateList();
+        CertificateList();
 
-        //! \brief Instantiate a certificate-list using the given certificate data.
-        SSLCertificateList(const std::string& certData);
+        CertificateList(const CertificateList& list);
 
-        //! \brief Stanndard dtor.
-        ~SSLCertificateList();
+        //! \brief Standard dtor.
+        ~CertificateList();
+
+        CertificateList& operator=(const CertificateList& list);
 
         //! \brief Load certificate from the given data.
         void loadFromString(const std::string& certData);
@@ -58,50 +88,60 @@ class PT_SSL_API SSLCertificateList {
         //! \brief Clear (delete) any loaded certificate.
         void clear();
 
-        //! \brief Returns a list of certificates' informations.
-        std::vector<SSLCertificateInfo> certificateInfo() const;
+        bool empty() const;
 
-        //! \brief Get the public key of the main (first) certificate.
-        PublicKey publicKey() const;
+        size_t size() const;
 
-        /// \internal Return a list of raw OpenSSL X509 certificate handle.
-        const std::vector<x509_st*>& impl() const;
+        Iterator begin() const;
         
-    private:
-        class Impl;
-        typedef SmartPtr<Impl> ImplPtr;
-
-        // Copy ctor
-        inline SSLCertificateList(ImplPtr ptr)
-        : _impl(ptr)
-        {}
+        Iterator end() const;
 
     private:
-        ImplPtr _impl;
+        class CertificateListImpl* _impl;
 };
 
-//! \internal
-class PT_SSL_API SSLCertificateList::Impl 
+//! @brief Forward iterator for certificate lists
+class CertificateList::Iterator
 {
-    friend class SSLCertificateList;
-
     public:
-        Impl();
+        Iterator()
+        : _c(0)
+        {}
 
-        ~Impl();
+        Iterator(const Iterator& other)
+        : _c(other._c)
+        {}
 
-        void loadFromString(const std::string& certData);
+        explicit Iterator(const Certificate* c)
+        : _c(c)
+        {}
 
-        void loadFromFile(const std::string& fileName);
+        Iterator& operator=(const Iterator& other)
+        {
+            _c = other._c;
+            return *this;
+        }
 
-        std::vector<SSLCertificateInfo> certificateInfo() const;
+        Iterator& operator++()
+        {
+            ++_c;
+            return *this;
+        }
 
-        PublicKey publicKey() const;
+        const Certificate& operator*() const
+        { return *_c; }
 
-        void clear();
+        const Certificate* operator->() const
+        { return _c; }
+
+        bool operator!=(const Iterator& other) const
+        { return _c != other._c; }
+
+        bool operator==(const Iterator& other) const
+        { return _c == other._c; }
 
     private:
-        std::vector<x509_st*> _cert;
+        const Certificate* _c;
 };
 
 } // namespace Ssl

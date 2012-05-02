@@ -29,6 +29,7 @@
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/RegisterTest.h"
+#include "Pt/Ssl/CertificateList.h"
 #include "Pt/Ssl/SSLContext.h"
 #include "Pt/Ssl/SSLStreamBuf.h"
 #include "Pt/System/Logger.h"
@@ -43,6 +44,8 @@ class ContextTest : public Pt::Unit::TestSuite
             //Pt::System::Logger::getTarget("Pt.Ssl").setLogLevel(Pt::System::Trace);
 
             this->registerMethod("Ciphers", *this, &ContextTest::Ciphers);
+
+            this->registerMethod("Certificates", *this, &ContextTest::Certificates);
         }
 
         void setUp()
@@ -52,6 +55,8 @@ class ContextTest : public Pt::Unit::TestSuite
         { }
 
         void Ciphers();
+
+        void Certificates();
 };
 
 Pt::Unit::RegisterTest<ContextTest> register_ContextTestTest;
@@ -59,6 +64,8 @@ Pt::Unit::RegisterTest<ContextTest> register_ContextTestTest;
 
 void ContextTest::Ciphers()
 {
+
+
     std::vector<std::string> cipherNames1;
     std::vector<std::string> cipherNames2;
     Pt::Ssl::SSLContext ctx;
@@ -69,9 +76,9 @@ void ContextTest::Ciphers()
     const Pt::Ssl::CipherList& ciphers1 = sb.ciphers();
     PT_UNIT_ASSERT(ciphers1.size() > 0);
 
-    Pt::Ssl::CipherList::Iterator it;
     Pt::Ssl::CipherList::Iterator end = ciphers1.end();
-    for(it = ciphers1.begin(); it != end; ++it)
+
+    for(Pt::Ssl::CipherList::Iterator it = ciphers1.begin(); it != end; ++it)
     {
         cipherNames1.push_back( it->name() );
     }
@@ -80,11 +87,22 @@ void ContextTest::Ciphers()
     PT_UNIT_ASSERT(ciphers2.size() > 0);
 
     end = ciphers2.end();
+    Pt::Ssl::CipherList::Iterator it;
     for(it = ciphers2.begin(); it != end; ++it)
     {
         cipherNames2.push_back( it->name() );
     }
     
     PT_UNIT_ASSERT(cipherNames1 == cipherNames2);
+}
+
+void ContextTest::Certificates()
+{
+    Pt::Ssl::CertificateList certs;
+    Pt::Ssl::CertificateList::Iterator it;
+    for(it = certs.begin(); it != certs.end(); ++it)
+    {
+        std::cerr << "certificate" << std::endl;
+    }
 }
 

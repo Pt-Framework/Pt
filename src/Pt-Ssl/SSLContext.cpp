@@ -236,7 +236,8 @@ SSLContext::SSLContext(const char* sessionID, Protocol protocol)
 SSLContext::~SSLContext()
 {
 #ifndef COPY_EXTRA_CERT
-    if(_ctx->extra_certs) {
+    if(_ctx->extra_certs) 
+    {
         sk_X509_pop(_ctx->extra_certs);
         _ctx->extra_certs = 0;
     }
@@ -295,69 +296,87 @@ void SSLContext::setEnabledCiphers(const std::vector<SSLCipherInfo>& ciphers)
 }
 */
 
-void SSLContext::setTrustedCACertificate(const SSLCertificateList& trustedCert)
+// certificates to validate certificate presented by peer
+void SSLContext::setCACertificates(const CertificateList& trustedCert)
 {
     // Try to add the CA X509 certificates (if any)
-    X509_STOREAutoPtr cert_store(X509_STORE_new());
-    for(std::vector<X509*>::const_iterator it = trustedCert.impl().begin(); it != trustedCert.impl().end(); ++it) {
-        if( ! X509_STORE_add_cert(cert_store.get(), *it) )
-            throw InvalidCertificate("Could not store the CA certificate as a trusted certificate!");
+    X509_STOREAutoPtr cert_store( X509_STORE_new() );
+
+    for(CertificateList::Iterator it = trustedCert.begin(); it != trustedCert.end(); ++it) 
+    {
+        if( ! X509_STORE_add_cert(cert_store.get(), it->getX509()) )
+            throw InvalidCertificate("Could not store the CA certificate as a trusted certificate");
     }
 
     // Set it to the context
     SSL_CTX_set_cert_store(_ctx, cert_store.get());
     cert_store.release();
-
-    // Store a reference to the certificate list
-    _trustedCACert = trustedCert;
 }
 
-void SSLContext::setCertificateChain(const SSLCertificateList& certList)
+
+void SSLContext::setCertificateChain(const CertificateList& certList)
 {
     setCertificate(certList);
-    if(certList.impl().size() > 1) addCertificateChain(certList, true);
+    
+    if(certList.size() > 1) 
+        addCertificateChain(certList, true);
 }
 
-void SSLContext::setCertificate(const SSLCertificateList& certList)
+
+// certificate to present to peer
+void SSLContext::setCertificate(const CertificateList& certList)
 {
     ERR_clear_error();
     
-    if( ! SSL_CTX_use_certificate( _ctx, *certList.impl().begin() ) || ERR_peek_error() )
-        throw InvalidCertificate("Invalid/mismatched certificate!");
+    if( certList.empty() )
+        throw InvalidCertificate("Invalid empty certificate");
+
+    X509* x509 = certList.begin()->getX509();
+
+    if( ! SSL_CTX_use_certificate(_ctx, x509) || ERR_peek_error() )
+        throw InvalidCertificate("Invalid/mismatched certificate");
 }
 
-void SSLContext::addCertificateChain(const SSLCertificateList& certList, bool skipFirstCert)
+// certificate chain to present to peer
+void SSLContext::addCertificateChain(const CertificateList& certList, bool skipFirstCert)
 {
     // Skip the first certificate (if needed)
-    std::vector<X509*>::const_iterator it = certList.impl().begin();
-    if(skipFirstCert) ++it;
+    CertificateList::Iterator it = certList.begin();
+    if(skipFirstCert) 
+        ++it;
 
     // Check if we do not have any CA certificates
-    if(it == certList.impl().end())
-        throw InvalidCertificate("Could not find any CA certificate in the certificate list!");
+    if( it == certList.end() )
+        throw InvalidCertificate("CA certificate list too short");
 
     // Add the CA X509 certificates
-    for(; it != certList.impl().end(); ++it) {
+    for( ; it != certList.end(); ++it) 
+    {
 #ifdef COPY_EXTRA_CERT
-        // NOTE: OpenSSL do not copy the X509 certificate, so we must "copy" it manually
+        // NOTE: SSL_CTX_add_extra_chain_cert does not copy the X509 certificate, 
+        // or increase the refcount, so we must "copy" it manually, because SSL_CTX
+        // will take ownership
+
         // Convert the X509 certificate to raw binary data
         unsigned char* buf = 0;
-        int            len = i2d_X509(*it, &buf);
+        int len = i2d_X509(it->getX509(), &buf);
         if(len < 0)
-            throw InvalidCertificate("Could not convert the CA certificate to raw binary data!");
+            throw InvalidCertificate("Could not convert the CA certificate to raw binary data");
+        
         // Convert the raw binary data back to an X509 certificate
-        const unsigned char* tbf  = buf;
-        X509*                x509 = d2i_X509(0, &tbf, len);
+        const unsigned char* tbf = buf;
+        X509* x509 = d2i_X509(0, &tbf, len);
         OPENSSL_free(buf);
-        if(!x509)
-            throw InvalidCertificate("Could not convert the raw binary data back to a CA certificate!");
+        if( ! x509)
+            throw InvalidCertificate("Could not convert the raw binary data back to a CA certificate");
+        
         // Add the certificate
         if( ! SSL_CTX_add_extra_chain_cert( _ctx, x509 ) )
-            throw InvalidCertificate("Could not add CA certificate!");
+            throw InvalidCertificate("Could not add CA certificate");
 #else        
         // Add the certificate
         if( ! SSL_CTX_add_extra_chain_cert( _ctx, *it ) )
-            throw InvalidCertificate("Could not add CA certificate!");
+            throw InvalidCertificate("Could not add CA certificate");
 #endif
     }
 

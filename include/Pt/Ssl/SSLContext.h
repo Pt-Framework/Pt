@@ -77,12 +77,7 @@ class PT_SSL_API SSLContext
             the other peer's certificate is signed by a trusted Certificate Authority. In this case
             the 'trustedCert' parameter must contain the certificates of all CA that you trust.
          */
-        void setTrustedCACertificate(const SSLCertificateList& trustedCert);
-
-        /** @brief Return the list of trusted CA certificates that is currently attached to this context. 
-        */
-        const SSLCertificateList trustedCACertificate() const
-        { return SSLCertificateList(_trustedCACert); }
+        void setCACertificates(const CertificateList& trustedCert);
 
         /** @brief Set the main certificate and add certificate chain to this context.
          * Set the first certificate in the list as the main certificate of this context and add
@@ -98,7 +93,7 @@ class PT_SSL_API SSLContext
          * parameter must be the client certificate. The remaining certificates are the certificates of
          * the intermediate CAs.
          */
-        void setCertificateChain(const SSLCertificateList& certList);
+        void setCertificateChain(const CertificateList& certList);
 
         /** @brief Set the main certificate of this context.
          * Set the first certificate in the list as the main certificate of this context.
@@ -110,7 +105,7 @@ class PT_SSL_API SSLContext
          * \n
          * You may want to also set the certificate-chain.
          */
-        void setCertificate(const SSLCertificateList& certList);
+        void setCertificate(const CertificateList& certList);
 
         /** @brief Add certificate chain to this context.
          * Add the certificates in the list into the certificate chain of this context
@@ -122,7 +117,7 @@ class PT_SSL_API SSLContext
          * Setting a certificate chain for a client context is only needed for certificate-based
          * client authentication.
          */
-        void addCertificateChain(const SSLCertificateList& certList, bool skipFirstCert = true);
+        void addCertificateChain(const CertificateList& certList, bool skipFirstCert = true);
 
         /** @brief Set the private key to be attached to this context.
          * Setting a private key is mandatory for a server context.
@@ -143,7 +138,6 @@ class PT_SSL_API SSLContext
     private:
         ssl_ctx_st*        _ctx;            // OpenSSL's SSL context
         Protocol           _protocol;       // Selected SSL protocol
-        SSLCertificateList _trustedCACert;  // List of trusted CA certificates
         PrivateKey         _privKey;        // Private key
         bool               _certChainExist; // Flag
 };

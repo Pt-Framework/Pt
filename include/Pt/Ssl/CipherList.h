@@ -64,7 +64,7 @@ class PT_SSL_API Cipher : private NonCopyable
         { _sslCipher = 0; _cipherData = c; }
 
         //! @internal 
-        void moveFrom(Cipher& c)
+        void copyRef(Cipher& c)
         { 
             _sslCipher = c._sslCipher; 
             _cipherData = c._cipherData; 
@@ -85,11 +85,10 @@ class PT_SSL_API CipherList
             public:
                 Iterator()
                 : _list(0)
-                , _n(-1)
-                , _move(true)
+                , _n(0)
                 { }
         
-                Iterator(const CipherList& list, int n, bool move = false);
+                Iterator(const CipherList& list, int n);
         
                 Iterator(const Iterator& other);
                 
@@ -116,7 +115,6 @@ class PT_SSL_API CipherList
                 const CipherList* _list;
                 int _n;
                 mutable Cipher _cipher;
-                bool _move;
         };
 
     public:
@@ -135,10 +133,10 @@ class PT_SSL_API CipherList
         size_t size() const;
 
         Iterator begin() const
-        { return Iterator(*this, 0, true); }
+        { return Iterator(*this, 0); }
         
         Iterator end() const
-        { return Iterator(*this, size(), true); }
+        { return Iterator(*this, size()); }
 
         //! @internal
         void setRef(void* sslCiphers);

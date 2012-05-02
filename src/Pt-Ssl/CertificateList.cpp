@@ -31,121 +31,13 @@
 #include <Pt/System/Logger.h>
 #include <fstream>
 
-log_define("Pt.Ssl.SSLCertificateList")
+log_define("Pt.Ssl.CertificateList")
 
 namespace Pt {
 
 namespace Ssl {
 
-SSLCertificateList::SSLCertificateList()
-: _impl(new Impl())
-{
-}
-
-
-SSLCertificateList::SSLCertificateList(const std::string& certData)
-: _impl(new Impl())
-{ 
-    _impl->loadFromString(certData); 
-}
-
-
-SSLCertificateList::~SSLCertificateList()
-{
-}
-
-
-void SSLCertificateList::loadFromString(const std::string& certData)
-{
-    _impl = new Impl();
-    _impl->loadFromString(certData);
-}
-
-
-void SSLCertificateList::loadFromFile(const std::string& fileName)
-{
-    _impl = new Impl();
-    _impl->loadFromFile(fileName);
-}
-
-
-void SSLCertificateList::clear()
-{ 
-    _impl = new Impl(); 
-}
-
-
-PublicKey SSLCertificateList::publicKey() const
-{ 
-    return _impl->publicKey(); 
-}
-
-
-std::vector<SSLCertificateInfo> SSLCertificateList::certificateInfo() const
-{ 
-    return _impl->certificateInfo(); 
-}
-
-const std::vector<x509_st*>& SSLCertificateList::impl() const
-{ 
-    return _impl->_cert; 
-}
-
-
-SSLCertificateList::Impl::Impl()
-: _cert(0)
-{
-}
-
-
-SSLCertificateList::Impl::~Impl()
-{ 
-    clear(); 
-}
-
-
-void SSLCertificateList::Impl::loadFromString(const std::string& certData)
-{
-    // Clear previous certificates
-    clear();
-
-    // Create a read-only memory BIO from the given string
-    BioAutoPtr in( BIO_new_mem_buf( (void*) certData.c_str(), certData.length() ) );
-
-    // Try to read/parse the CA X509 certificates
-    while(true) 
-    {
-        // Read the certificate
-        X509AutoPtr cert ( PEM_read_bio_X509_AUX(in.get(), 0, 0, 0) );
-        if( ! cert) 
-          break;
-
-        _cert.push_back(cert.get());
-        cert.release();
-    }
-}
-
-
-void SSLCertificateList::Impl::loadFromFile(const std::string& fileName)
-{
-    log_info("Loading certificate from file: " << fileName);
-
-    char rbuf[4096];
-    const std::streamsize rbufSize = sizeof(rbuf);
-    
-    std::string data;
-    std::ifstream ifs( fileName.c_str(), std::ios::binary );
-    while( ifs.read(rbuf, rbufSize) ) 
-    {
-        size_t count = size_t( ifs.gcount() );
-        data += std::string(rbuf, count);
-    }
-
-    loadFromString(data);
-}
-
-
-std::vector<SSLCertificateInfo> SSLCertificateList::Impl::certificateInfo() const
+/*std::vector<SSLCertificateInfo> CertificateListImpl::certificateInfo() const
 {
     std::vector<SSLCertificateInfo> cinfos;
     
@@ -177,27 +69,224 @@ std::vector<SSLCertificateInfo> SSLCertificateList::Impl::certificateInfo() cons
     }
 
     return cinfos;
+}*/
+
+class CertificateImpl
+{
+    public:
+        explicit CertificateImpl(x509_st* x509)
+        : _x509(x509)
+        , _refs(1)
+        {}
+
+        ~CertificateImpl()
+        {
+            if(_x509)
+                X509_free(_x509);
+        }
+
+        void ref()
+        { ++_refs; }
+
+        unsigned unref()
+        { return --_refs; }
+
+        x509_st* getX509() const
+        { return _x509; }
+
+    private:
+        x509_st* _x509;
+        unsigned _refs;
+};
+
+
+Certificate::Certificate(x509_st* x509)
+: _impl( new CertificateImpl(x509) )
+{
 }
 
 
-void SSLCertificateList::Impl::clear()
+Certificate::Certificate(const Certificate& cert)
+: _impl(cert._impl)
 {
-    for(std::vector<X509*>::const_iterator it = _cert.begin(); it != _cert.end(); ++it) 
+    _impl->ref();
+}
+
+
+Certificate::~Certificate()
+{
+    if( 0 == _impl->unref() )
     {
-        X509_free(*it);
+        delete _impl;
     }
-    
-    _cert.clear();
 }
 
 
-PublicKey SSLCertificateList::Impl::publicKey() const
+Certificate& Certificate::operator=(const Certificate& cert)
 {
-    EVP_PKEY* pkey = _cert.empty() ? 0 : X509_get_pubkey( _cert[0] );
+    if( 0 == _impl->unref() )
+    {
+        delete _impl;
+    }
+
+    _impl = cert._impl;
+    _impl->ref();
+
+    return *this;
+}
+
+
+PublicKey Certificate::publicKey() const
+{
+    EVP_PKEY* pkey = _impl->getX509() ? 0 : X509_get_pubkey( _impl->getX509()  );
     if( ! pkey)
         throw InvalidCertificate("Could not extract the main certificate's public key!");
 
     return PublicKey(pkey);
+}
+
+
+x509_st* Certificate::getX509() const
+{
+    return _impl->getX509();
+}
+
+
+
+class CertificateListImpl
+{
+    public:
+        CertificateListImpl()
+        { }
+
+        CertificateListImpl(const CertificateListImpl& list)
+        { _certificates = list._certificates; }
+
+        ~CertificateListImpl()
+        { clear(); }
+
+        void push_back(const Certificate& cert)
+        { _certificates.push_back(cert); }
+
+        void clear()
+        { _certificates.clear(); }
+
+        std::vector<Certificate>& get()
+        { return _certificates; }
+
+        const std::vector<Certificate>& get() const
+        { return _certificates; }
+
+    private:
+        std::vector<Certificate> _certificates;
+};
+
+
+CertificateList::CertificateList()
+: _impl( new CertificateListImpl() )
+{
+}
+
+
+CertificateList::CertificateList(const CertificateList& list)
+: _impl( new CertificateListImpl( *(list._impl) ) )
+{
+}
+
+
+CertificateList::~CertificateList()
+{
+    delete _impl;
+}
+
+
+CertificateList& CertificateList::operator=(const CertificateList& list)
+{
+    const std::vector<Certificate>& certs = list._impl->get();
+    for(std::vector<Certificate>::const_iterator it = certs.begin(); it != certs.end(); ++it) 
+    {
+        _impl->push_back(*it);
+    }
+
+    return *this;
+}
+
+
+void CertificateList::loadFromString(const std::string& certData)
+{
+    _impl->clear();
+
+    // Create a read-only memory BIO from the given string
+    BioAutoPtr in( BIO_new_mem_buf( (void*) certData.c_str(), certData.length() ) );
+
+    // Try to read/parse the CA X509 certificates
+    while(true) 
+    {
+        // Read the certificate
+        X509AutoPtr x509 ( PEM_read_bio_X509_AUX(in.get(), 0, 0, 0) );
+        if( ! x509) 
+          break;
+
+        Certificate cert( x509.get() );
+        _impl->push_back(cert);
+        
+        x509.release();
+    }
+}
+
+
+void CertificateList::loadFromFile(const std::string& fileName)
+{
+    _impl->clear();
+
+    log_info("Loading certificate from file: " << fileName);
+
+    char rbuf[4096];
+    const std::streamsize rbufSize = sizeof(rbuf);
+    
+    std::string data;
+    std::ifstream ifs( fileName.c_str(), std::ios::binary );
+    while( ifs.read(rbuf, rbufSize) ) 
+    {
+        size_t count = size_t( ifs.gcount() );
+        data += std::string(rbuf, count);
+    }
+
+    loadFromString(data);
+}
+
+
+void CertificateList::clear()
+{ 
+    _impl->clear(); 
+}
+
+
+bool CertificateList::empty() const
+{
+    return _impl->get().empty();
+}
+
+
+size_t CertificateList::size() const
+{
+    return _impl->get().size();
+}
+
+
+CertificateList::Iterator CertificateList::begin() const
+{ 
+    const std::vector<Certificate>& certs = _impl->get();
+    const Certificate* c = certs.empty() ? 0 : &certs[0];
+    return Iterator(c); 
+}
+        
+
+CertificateList::Iterator CertificateList::end() const
+{ 
+    const std::vector<Certificate>& certs = _impl->get();
+    const Certificate* c = certs.empty() ? 0 : &certs[0] + certs.size();
+    return Iterator(c); 
 }
 
 } // namespace Ssl

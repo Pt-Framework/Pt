@@ -230,10 +230,9 @@ void CipherList::setRef(void* sslCiphers)
 
 
 
-CipherList::Iterator::Iterator(const CipherList& list, int n, bool move)
+CipherList::Iterator::Iterator(const CipherList& list, int n)
 : _list(&list)
 , _n(n)
-, _move(move)
 {
     if( _list->_sslCiphers ) 
         _cipher.setRef( _list->sslCipher(_n) );
@@ -245,19 +244,8 @@ CipherList::Iterator::Iterator(const CipherList& list, int n, bool move)
 CipherList::Iterator::Iterator(const Iterator& other)
 : _list(other._list)
 , _n(other._n)
-, _move(false)
 {
-    if(other._move)
-    {
-        _cipher.moveFrom(other._cipher);
-    }
-    else
-    {
-        if( _list->_sslCiphers ) 
-            _cipher.setRef( _list->sslCipher(_n) );
-        else
-            _cipher.setRef( _list->cipherInfo(_n) );
-    }
+    _cipher.copyRef(other._cipher);
 }
 
 
@@ -265,19 +253,7 @@ CipherList::Iterator& CipherList::Iterator::operator=(const Iterator& other)
 { 
     _list = other._list; 
     _n = other._n;
-    _move = false;
-
-    if(other._move)
-    {
-        _cipher.moveFrom(other._cipher);
-    }
-    else
-    {
-        if( _list->_sslCiphers ) 
-            _cipher.setRef( _list->sslCipher(_n) );
-        else
-            _cipher.setRef( _list->cipherInfo(_n) );
-    }
+    _cipher.copyRef(other._cipher);
 
     return *this; 
 }

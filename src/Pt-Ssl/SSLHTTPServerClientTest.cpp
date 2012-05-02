@@ -350,24 +350,24 @@ int main(int argc, char** argv)
         std::string          addr("127.0.0.1");
         unsigned short       port = 8000;
 
-        Pt::Ssl::SSLCertificateList trustedCACert;
+        Pt::Ssl::CertificateList trustedCACert;
         trustedCACert.loadFromFile("ca.pem");
 
-        Pt::Ssl::SSLCertificateList serverCertChain;
+        Pt::Ssl::CertificateList serverCertChain;
         Pt::Ssl::PrivateKey      serverPrivKey("abc123");
         Pt::Ssl::SSLContext         serverContext(0, Pt::Ssl::SSLContext::DefaultProtocol);
         serverCertChain.loadFromFile           ("server.pem");
         serverPrivKey  .loadFromFile           ("server.key");
-        serverContext  .setTrustedCACertificate(trustedCACert);
+        serverContext  .setCACertificates(trustedCACert);
         serverContext  .setCertificateChain    (serverCertChain);
         serverContext  .setPrivateKey          (serverPrivKey);
 
-        Pt::Ssl::SSLCertificateList clientCertChain;
+        Pt::Ssl::CertificateList clientCertChain;
         Pt::Ssl::PrivateKey      clientPrivKey("");
         Pt::Ssl::SSLContext         clientContext(0, Pt::Ssl::SSLContext::DefaultProtocol);
         clientCertChain.loadFromFile           ("client.pem");
         clientPrivKey  .loadFromFile           ("client.key");
-        clientContext  .setTrustedCACertificate(trustedCACert);
+        clientContext  .setCACertificates(trustedCACert);
         clientContext  .setCertificateChain    (clientCertChain);
         clientContext  .setPrivateKey          (clientPrivKey);
 
