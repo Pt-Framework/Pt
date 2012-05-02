@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2010 by Aloysius Indrayanto
+ * Copyright (C) 2010-2010 by Marc Duerner
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -28,14 +29,16 @@
 #ifndef PT_SSL_SSLSESSION_H
 #define PT_SSL_SSLSESSION_H
 
+#include <Pt/Ssl/Api.h>
 #include <Pt/SmartPtr.h>
-#include <Pt/Ssl/CipherInfo.h>
 
 namespace Pt {
+
 namespace Ssl {
 
 //! \brief SSL session.
-class PT_SSL_API SSLSession {
+class PT_SSL_API SSLSession 
+{
     public:
         //! \brief Instantiate an empty SSL session.
         SSLSession();
@@ -57,6 +60,7 @@ class PT_SSL_API SSLSession {
 };
 
 } // namespace Ssl
+
 } // namespace Pt
 
 #endif

@@ -27,7 +27,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <Pt/Ssl/CipherInfo.h>
+#include <Pt/Ssl/CipherList.h>
 #include <Pt/System/Logger.h>
 #include <cassert>
 #include <openssl/ssl.h>

@@ -32,7 +32,7 @@
 #include <Pt/Ssl/Api.h>
 #include <Pt/Ssl/SSLContext.h>
 #include <Pt/Ssl/SSLSession.h>
-#include <Pt/Ssl/CipherInfo.h>
+#include <Pt/Ssl/CipherList.h>
 #include <Pt/Signal.h>
 #include <string>
 

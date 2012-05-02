@@ -480,9 +480,6 @@
     <ClInclude Include="..\..\include\Pt\Ssl\Api.h">
       <Filter>Pt-Ssl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Ssl\CipherInfo.h">
-      <Filter>Pt-Ssl</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Ssl\PrivateKey.h">
       <Filter>Pt-Ssl</Filter>
     </ClInclude>
@@ -490,6 +487,9 @@
       <Filter>Pt-Ssl</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Ssl\SslError.h">
+      <Filter>Pt-Ssl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Ssl\CipherList.h">
       <Filter>Pt-Ssl</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1035,9 +1035,6 @@
     <ClCompile Include="..\..\src\Pt-Net\win32\UdpSocketImpl.cpp">
       <Filter>Pt-Net\win32</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Ssl\CipherInfo.cpp">
-      <Filter>Pt-Ssl</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Pt-Ssl\PrivateKey.cpp">
       <Filter>Pt-Ssl</Filter>
     </ClCompile>
@@ -1045,6 +1042,9 @@
       <Filter>Pt-Ssl</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Ssl\SslError.cpp">
+      <Filter>Pt-Ssl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Ssl\CipherList.cpp">
       <Filter>Pt-Ssl</Filter>
     </ClCompile>
   </ItemGroup>

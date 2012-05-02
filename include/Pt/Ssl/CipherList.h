@@ -26,8 +26,8 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef PT_SSL_CIPHER_H
-#define PT_SSL_CIPHER_H
+#ifndef PT_SSL_CIPHERLIST_H
+#define PT_SSL_CIPHERLIST_H
 
 #include <Pt/Ssl/Api.h>
 #include <Pt/NonCopyable.h>
@@ -157,5 +157,5 @@ class PT_SSL_API CipherList
 
 } // namespace Pt
 
-#endif
+#endif // PT_SSL_CIPHERLIST_H
 
