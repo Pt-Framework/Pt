@@ -63,6 +63,7 @@
     <ClInclude Include="..\..\include\Pt\SmartPtr.h" />
     <ClInclude Include="..\..\include\Pt\SourceInfo.h" />
     <ClInclude Include="..\..\include\Pt\Ssl\Api.h" />
+    <ClInclude Include="..\..\include\Pt\Ssl\CertificateList.h" />
     <ClInclude Include="..\..\include\Pt\Ssl\CipherList.h" />
     <ClInclude Include="..\..\include\Pt\Ssl\PrivateKey.h" />
     <ClInclude Include="..\..\include\Pt\Ssl\PublicKey.h" />
@@ -206,6 +207,7 @@
     <ClCompile Include="..\..\src\Pt-Net\win32\TcpServerImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Net\win32\TcpSocketImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Net\win32\UdpSocketImpl.cpp" />
+    <ClCompile Include="..\..\src\Pt-Ssl\CertificateList.cpp" />
     <ClCompile Include="..\..\src\Pt-Ssl\CipherList.cpp" />
     <ClCompile Include="..\..\src\Pt-Ssl\PrivateKey.cpp" />
     <ClCompile Include="..\..\src\Pt-Ssl\PublicKey.cpp" />

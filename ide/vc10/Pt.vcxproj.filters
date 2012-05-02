@@ -492,6 +492,9 @@
     <ClInclude Include="..\..\include\Pt\Ssl\CipherList.h">
       <Filter>Pt-Ssl</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Ssl\CertificateList.h">
+      <Filter>Pt-Ssl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -1045,6 +1048,9 @@
       <Filter>Pt-Ssl</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Ssl\CipherList.cpp">
+      <Filter>Pt-Ssl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Ssl\CertificateList.cpp">
       <Filter>Pt-Ssl</Filter>
     </ClCompile>
   </ItemGroup>

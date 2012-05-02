@@ -30,7 +30,7 @@
 #define PT_SSL_SSLCONTEXT_H
 
 #include <Pt/Ssl/PrivateKey.h>
-#include <Pt/Ssl/SSLCertificateList.h>
+#include <Pt/Ssl/CertificateList.h>
 #include <string>
 
 namespace Pt {
