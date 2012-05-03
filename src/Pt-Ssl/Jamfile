@@ -6,11 +6,11 @@ SubDirObjects $(OUTPUT_OBJECT) Pt-Ssl ;
 
 SharedLibrary Pt-Ssl : CertificateList.cpp
                        CipherList.cpp
+                       Context.cpp
                        PrivateKey.cpp
                        PublicKey.cpp
                        SslError.cpp
                        Utils.cpp
-                       SSLContext.cpp
                        SSLStreamBuf.cpp
                        SSLServer.cpp
                        SSLClient.cpp

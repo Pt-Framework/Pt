@@ -30,7 +30,7 @@
 #define PT_SSL_SSLSTREAMBUF_H
 
 #include <Pt/Ssl/Api.h>
-#include <Pt/Ssl/SSLContext.h>
+#include <Pt/Ssl/Context.h>
 #include <Pt/Ssl/SSLSession.h>
 #include <Pt/Ssl/CipherList.h>
 #include <Pt/Signal.h>

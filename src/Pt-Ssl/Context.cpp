@@ -28,7 +28,7 @@
  */
 
 #include "Utils.h"
-#include <Pt/Ssl/SSLContext.h>
+#include <Pt/Ssl/Context.h>
 #include <Pt/System/Logger.h>
 #include <openssl/ssl.h>
 #include <openssl/err.h>
