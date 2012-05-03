@@ -40,39 +40,30 @@ namespace Pt {
 
 namespace Ssl {
 
-struct CipherData;
-
 //! @brief Represents a cipher algorithm
-class PT_SSL_API Cipher : private NonCopyable
+class PT_SSL_API Cipher
 {
     public:
-        Cipher()
-        : _sslCipher(0)
-        , _cipherData(0)
-        {}
+        Cipher();
+
+        Cipher(const ssl_cipher_st* cipher);
+
+        Cipher(const Cipher& ciph);
 
         ~Cipher();
 
+        Cipher& operator=(const Cipher& ciph);
+
         const char* name() const;
 
-        //! @internal 
-        void setRef(const ssl_cipher_st* c)
-        { _sslCipher = c; _cipherData = 0; }
+        const char* version() const;
 
-        //! @internal 
-        void setRef(const CipherData* c)
-        { _sslCipher = 0; _cipherData = c; }
+        int bits() const;
 
-        //! @internal 
-        void copyRef(Cipher& c)
-        { 
-            _sslCipher = c._sslCipher; 
-            _cipherData = c._cipherData; 
-        }
+        int usedBits() const;
 
     private:
-        const ssl_cipher_st* _sslCipher;
-        const CipherData* _cipherData;
+        class CipherData* _cipherData;
 };
 
 //! @brief List of cipher alogorithms.
@@ -80,75 +71,76 @@ class PT_SSL_API CipherList
 {
     public:
         //! @brief Forward iterator for %CipherList
-        class PT_SSL_API Iterator
-        {
-            public:
-                Iterator()
-                : _list(0)
-                , _n(0)
-                { }
-        
-                Iterator(const CipherList& list, int n);
-        
-                Iterator(const Iterator& other);
-                
-                ~Iterator()
-                { }
-        
-                Iterator& operator=(const Iterator& other);
-        
-                Iterator& operator++();
-        
-                const Cipher& operator*() const
-                { return _cipher; }
-        
-                const Cipher* operator->() const
-                { return &_cipher; }
-        
-                bool operator !=(const Iterator& other) const
-                { return _n != other._n; }
-        
-                bool operator ==(const Iterator& other) const
-                { return _n == other._n; }
-        
-            private:
-                const CipherList* _list;
-                int _n;
-                mutable Cipher _cipher;
-        };
+        class Iterator;
 
     public:
         CipherList();
 
+        CipherList(void* sslCiphers);
+
         CipherList(const CipherList& list);
 
-        //! \brief Standard dtor.
+        //! \brief Destructor.
         ~CipherList();
 
         CipherList& operator=(const CipherList& list);
 
-        //! \brief Clears the list.
-        void clear();
+        Iterator begin() const;
+        
+        Iterator end() const;
+
+        bool empty() const;
 
         size_t size() const;
 
-        Iterator begin() const
-        { return Iterator(*this, 0); }
-        
-        Iterator end() const
-        { return Iterator(*this, size()); }
-
-        //! @internal
-        void setRef(void* sslCiphers);
-
-    protected:
-        const ssl_cipher_st* sslCipher(int n) const;
-
-        const CipherData* cipherInfo(int n) const;
+        void clear();
 
     private:
-        std::vector<CipherData> _ciphers;
-        void* _sslCiphers;
+        class CipherListImpl* _impl;
+};
+
+//! @brief Forward iterator for certificate lists
+class CipherList::Iterator
+{
+    public:
+        Iterator()
+        : _c(0)
+        {}
+
+        Iterator(const Iterator& other)
+        : _c(other._c)
+        {}
+
+        explicit Iterator(const Cipher* c)
+        : _c(c)
+        {}
+
+        Iterator& operator=(const Iterator& other)
+        {
+            _c = other._c;
+            return *this;
+        }
+
+        Iterator& operator++()
+        {
+            ++_c;
+            return *this;
+        }
+
+        const Cipher& operator*() const
+        { return *_c; }
+
+        const Cipher* operator->() const
+        { return _c; }
+
+        bool operator!=(const Iterator& other) const
+        { return _c != other._c; }
+
+        bool operator==(const Iterator& other) const
+        { return _c == other._c; }
+
+    private:
+        const Cipher* _c;
 };
 
 } // namespace Ssl

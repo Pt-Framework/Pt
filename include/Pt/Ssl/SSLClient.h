@@ -42,7 +42,7 @@ class PT_SSL_API SSLClient : public std::iostream, public Pt::Connectable
 {
     public:
         /** \brief Construct an SSL stream buffer client that uses the given IO stream and SSL context. */
-        SSLClient(Pt::System::IOStream& ios, SSLContext& ctx, const char* sessionID = 0);
+        SSLClient(Pt::System::IOStream& ios, Context& ctx, const char* sessionID = 0);
 
         /** \brief Standard dtor. */
         virtual ~SSLClient();

@@ -41,7 +41,7 @@ log_define(PT_SSL_LOGGER_CATEGORY);
 
 class Client : public Pt::Connectable {
     public:
-        Client(Pt::System::EventLoop& loop, const std::string& addr, unsigned short port, Pt::Ssl::SSLContext& sslClientContext)
+        Client(Pt::System::EventLoop& loop, const std::string& addr, unsigned short port, Pt::Ssl::Context& sslClientContext)
         : _sslContext(sslClientContext), _ssl(0), _loop(loop), _header(""), _result(""), _httpSize(0)
         {
             PT_SSL_LOG_C("Connecting to server");
@@ -80,7 +80,7 @@ class Client : public Pt::Connectable {
             }
             
             PT_SSL_LOG_C("Peer CN = " << _ssl->buffer().getPeerCN());
-            PT_SSL_LOG_C("Current cipher = \n" << _ssl->buffer().currCipher().name());
+            PT_SSL_LOG_C("Current cipher = \n" << _ssl->buffer().currentCipher().name());
 
             _ios.buffer().inputReady() += Pt::slot(*this, &Client::onInput);
             _ios.buffer().outputReady() += Pt::slot(*this, &Client::onOutput);
@@ -202,7 +202,7 @@ class Client : public Pt::Connectable {
         }
 
     private:
-        Pt::Ssl::SSLContext&   _sslContext;
+        Pt::Ssl::Context&   _sslContext;
         Pt::Ssl::SSLClient*    _ssl;
         Pt::System::IOStream   _ios;
         Pt::System::EventLoop& _loop;
@@ -225,9 +225,9 @@ int main(int argc, char** argv)
         Pt::Ssl::CertificateList trustedCACert;
         Pt::Ssl::CertificateList clientCertChain;
         Pt::Ssl::PrivateKey      clientPrivKey("");
-        Pt::Ssl::SSLContext         clientContext(0, Pt::Ssl::SSLContext::DefaultProtocol);
-        trustedCACert  .loadFromFile           ("ca.pem");
-        clientCertChain.loadFromFile           ("client.pem");
+        Pt::Ssl::Context         clientContext(0, Pt::Ssl::Context::DefaultProtocol);
+        trustedCACert  .fromPemFile           ("ca.pem");
+        clientCertChain.fromPemFile           ("client.pem");
         clientPrivKey  .loadFromFile           ("client.key");
         clientContext  .setCACertificates(trustedCACert);
         clientContext  .setCertificateChain    (clientCertChain);

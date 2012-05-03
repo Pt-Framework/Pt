@@ -109,6 +109,11 @@
             Name="Source Files"
             Filters="*.c;*.C;*.cc;*.cpp;*.cp;*.cxx;*.c++;*.prg;*.pas;*.dpr;*.asm;*.s;*.bas;*.java;*.cs;*.sc;*.e;*.cob;*.html;*.rc;*.tcl;*.py;*.pl;*.d">
             <F
+                N="*.c"
+                Recurse="1"
+                Refilter="0"
+                Excludes=""/>
+            <F
                 N="*.cpp"
                 Recurse="1"
                 Refilter="0"

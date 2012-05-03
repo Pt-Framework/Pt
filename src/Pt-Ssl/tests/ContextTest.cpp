@@ -35,6 +35,30 @@
 #include "Pt/System/Logger.h"
 #include <string>
 
+const char clientPem [] = 
+    "-----BEGIN CERTIFICATE-----\n"
+    "MIIDkjCCAnqgAwIBAgIBZTANBgkqhkiG9w0BAQUFADBVMQswCQYDVQQGEwJVUzEa\n"
+    "MBgGA1UEBxMRQ2hleWVubmUgTW91bnRhaW4xGTAXBgNVBAoTEFN0YXJnYXRlIENv\n"
+    "bW1hbmQxDzANBgNVBAMTBlNHQyBDQTAeFw0xMTA2MDcwMjU0NDdaFw0xMjA2MDYw\n"
+    "MjU0NDdaMFMxCzAJBgNVBAYTAlhYMRAwDgYDVQQHEwdMYW50YW5hMRYwFAYDVQQK\n"
+    "Ew1BdGxhbnRpcyBDaXR5MRowGAYDVQQDExFBbmNpZW50IE1haW5mcmFtZTCCASIw\n"
+    "DQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAL1wssBiOCiEHc033rcg7XPzx/ka\n"
+    "Ol1XPvowBwPhOBrNpVMogC+CU9f9C4qFzjPwYXd07CE/wMcbEepbYNqW5u810rWF\n"
+    "SM1y6E5f1Ow5d+lb81ZAtrauhZsrNheJ9qJWPgcOhQ4RfCP9JNW/hUkzXuBN+G5F\n"
+    "swpI9xwksjW8AOLXyn0ayFGcVQT/4Lz7eFHGdr7rVVi5GtnV6UmKkQe6dvjBqKxn\n"
+    "s3V/gtFffZDsZj9IxWmNubdUiUHru1PTmHpGZ+684w86+ldJEb3RCeteaGnJR1kR\n"
+    "+qliCA06O0DVQ685hrnfuH4Dbk8mmBsNAi/MfSjExE3ZLP7Y/2vKukHCX70CAwEA\n"
+    "AaNvMG0wCQYDVR0TBAIwADALBgNVHQ8EBAMCBLAwEwYDVR0lBAwwCgYIKwYBBQUH\n"
+    "AwIwEQYJYIZIAYb4QgEBBAQDAgeAMCsGA1UdHwQkMCIwIKAeoByGGmh0dHA6Ly90\n"
+    "ZXN0Y2EubG9jYWwvY2EuY3JsMA0GCSqGSIb3DQEBBQUAA4IBAQC2RzOA/D5XPKfi\n"
+    "46oznIVx13cHMxoAf/0ACWZVpcXtyfXLr1/SzuLisXf5nCuk0jSKhbo0eeQAXxEW\n"
+    "/xFFo1bABBoKRQnFy0eyGeTicUf6o0O2V9vEs6rc8PM9IZo9mLIVuJBOJMDxFG7u\n"
+    "YHSgY9ZgQ1nkoOE8oO1gPSjCsYHI2SlUJ8kURedKwLxErwUpkXTquEclgQZWW5f6\n"
+    "niGdGfNUWlP/y4KTd+RyGXNfrITKG63uCEqFBeJuBfA0FjLroxxyL6umI6XRgiH0\n"
+    "nAHRivMOTNZjyft/nmHlbpGeHuQ6dBTMCGhHc+krzm/uf2vyy8guphBZNO/1A4SQ\n"
+    "jhoJkRV8\n"
+    "-----END CERTIFICATE-----\n";
+
 class ContextTest : public Pt::Unit::TestSuite
 {
     public:
@@ -64,45 +88,35 @@ Pt::Unit::RegisterTest<ContextTest> register_ContextTestTest;
 
 void ContextTest::Ciphers()
 {
-
-
     std::vector<std::string> cipherNames1;
     std::vector<std::string> cipherNames2;
-    Pt::Ssl::SSLContext ctx;
+    Pt::Ssl::Context ctx;
 
     std::iostream ios(0);
     Pt::Ssl::SSLStreamBuf sb(ios, ctx);
 
-    const Pt::Ssl::CipherList& ciphers1 = sb.ciphers();
-    PT_UNIT_ASSERT(ciphers1.size() > 0);
-
-    Pt::Ssl::CipherList::Iterator end = ciphers1.end();
-
-    for(Pt::Ssl::CipherList::Iterator it = ciphers1.begin(); it != end; ++it)
+    Pt::Ssl::CipherList::Iterator it;
+    Pt::Ssl::CipherList ciphers1 = sb.ciphers();
+    for(it = ciphers1.begin(); it != ciphers1.end(); ++it)
     {
         cipherNames1.push_back( it->name() );
     }
 
     Pt::Ssl::CipherList ciphers2 = ciphers1;
-    PT_UNIT_ASSERT(ciphers2.size() > 0);
-
-    end = ciphers2.end();
-    Pt::Ssl::CipherList::Iterator it;
-    for(it = ciphers2.begin(); it != end; ++it)
+    for(it = ciphers2.begin(); it != ciphers2.end(); ++it)
     {
         cipherNames2.push_back( it->name() );
     }
     
+    PT_UNIT_ASSERT(cipherNames1.size() > 0);
     PT_UNIT_ASSERT(cipherNames1 == cipherNames2);
 }
 
 void ContextTest::Certificates()
 {
     Pt::Ssl::CertificateList certs;
-    Pt::Ssl::CertificateList::Iterator it;
-    for(it = certs.begin(); it != certs.end(); ++it)
-    {
-        std::cerr << "certificate" << std::endl;
-    }
+    certs.fromPem(clientPem, sizeof(clientPem));
+    Pt::Ssl::CertificateList::Iterator it =  certs.begin();
+    PT_UNIT_ASSERT(it != certs.end());
 }
 

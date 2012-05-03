@@ -100,6 +100,45 @@ class CertificateImpl
 };
 
 
+class CertificateListImpl
+{
+    public:
+        CertificateListImpl()
+        { }
+
+        CertificateListImpl(const CertificateListImpl& list)
+        { _certificates = list._certificates; }
+
+        ~CertificateListImpl()
+        { clear(); }
+
+        void push_back(const Certificate& cert)
+        { _certificates.push_back(cert); }
+
+        void clear()
+        { _certificates.clear(); }
+
+        size_t size() const
+        { return _certificates.size(); }
+
+        bool empty() const
+        { return _certificates.empty(); }
+
+        const Certificate* begin() const
+        { 
+            return _certificates.empty() ? 0 : &_certificates[0]; 
+        }
+
+        const Certificate* end() const
+        { 
+            return _certificates.empty() ? 0 : &_certificates[0] + _certificates.size(); 
+        }
+
+    private:
+        std::vector<Certificate> _certificates;
+};
+
+
 Certificate::Certificate(x509_st* x509)
 : _impl( new CertificateImpl(x509) )
 {
@@ -152,36 +191,6 @@ x509_st* Certificate::getX509() const
 }
 
 
-
-class CertificateListImpl
-{
-    public:
-        CertificateListImpl()
-        { }
-
-        CertificateListImpl(const CertificateListImpl& list)
-        { _certificates = list._certificates; }
-
-        ~CertificateListImpl()
-        { clear(); }
-
-        void push_back(const Certificate& cert)
-        { _certificates.push_back(cert); }
-
-        void clear()
-        { _certificates.clear(); }
-
-        std::vector<Certificate>& get()
-        { return _certificates; }
-
-        const std::vector<Certificate>& get() const
-        { return _certificates; }
-
-    private:
-        std::vector<Certificate> _certificates;
-};
-
-
 CertificateList::CertificateList()
 : _impl( new CertificateListImpl() )
 {
@@ -202,22 +211,30 @@ CertificateList::~CertificateList()
 
 CertificateList& CertificateList::operator=(const CertificateList& list)
 {
-    const std::vector<Certificate>& certs = list._impl->get();
-    for(std::vector<Certificate>::const_iterator it = certs.begin(); it != certs.end(); ++it) 
-    {
-        _impl->push_back(*it);
-    }
-
+    *_impl = *(list._impl);
     return *this;
 }
 
 
-void CertificateList::loadFromString(const std::string& certData)
+//For PEM we use:
+//   PEM_read_PUBKEY
+//   PEM_read_bio_PrivateKey
+//
+//For reading  ASN1 (DER) we use:
+//  d2i_PUBKEY_bio
+//  d2i_PrivateKey_bio
+//
+//For writing, I believe the functions are:
+//   PEM_write_bio_PUBKEY
+//   PEM_write_bio_PrivateKey
+//   i2d_PUBKEY_bio
+//   i2d_PrivateKey_bio
+
+void CertificateList::fromPem(const char* data, size_t len)
 {
     _impl->clear();
 
-    // Create a read-only memory BIO from the given string
-    BioAutoPtr in( BIO_new_mem_buf( (void*) certData.c_str(), certData.length() ) );
+    BioAutoPtr in( BIO_new_mem_buf( (void*) data, len ) );
 
     // Try to read/parse the CA X509 certificates
     while(true) 
@@ -235,24 +252,26 @@ void CertificateList::loadFromString(const std::string& certData)
 }
 
 
-void CertificateList::loadFromFile(const std::string& fileName)
+void CertificateList::fromPem(std::istream& is)
 {
-    _impl->clear();
-
-    log_info("Loading certificate from file: " << fileName);
-
     char rbuf[4096];
     const std::streamsize rbufSize = sizeof(rbuf);
-    
     std::string data;
-    std::ifstream ifs( fileName.c_str(), std::ios::binary );
-    while( ifs.read(rbuf, rbufSize) ) 
+    while( is ) 
     {
-        size_t count = size_t( ifs.gcount() );
-        data += std::string(rbuf, count);
+        is.read(rbuf, rbufSize);
+        size_t count = size_t( is.gcount() );
+        data.append(rbuf, count);
     }
 
-    loadFromString(data);
+    fromPem( data.c_str(), data.size() );
+}
+
+
+void CertificateList::fromPemFile(const char* path)
+{
+    std::ifstream ifs(path, std::ios::binary);
+    fromPem(ifs);
 }
 
 
@@ -264,29 +283,25 @@ void CertificateList::clear()
 
 bool CertificateList::empty() const
 {
-    return _impl->get().empty();
+    return _impl->empty();
 }
 
 
 size_t CertificateList::size() const
 {
-    return _impl->get().size();
+    return _impl->size();
 }
 
 
 CertificateList::Iterator CertificateList::begin() const
 { 
-    const std::vector<Certificate>& certs = _impl->get();
-    const Certificate* c = certs.empty() ? 0 : &certs[0];
-    return Iterator(c); 
+    return Iterator( _impl->begin() );
 }
         
 
 CertificateList::Iterator CertificateList::end() const
 { 
-    const std::vector<Certificate>& certs = _impl->get();
-    const Certificate* c = certs.empty() ? 0 : &certs[0] + certs.size();
-    return Iterator(c); 
+    return Iterator( _impl->end() ); 
 }
 
 } // namespace Ssl

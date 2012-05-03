@@ -44,7 +44,7 @@ log_define(PT_SSL_LOGGER_CATEGORY);
 
 class Server : public Pt::Connectable {
     public:
-        Server(Pt::System::EventLoop& loop, const std::string& addr, unsigned short port, Pt::Ssl::SSLContext& sslServerContext)
+        Server(Pt::System::EventLoop& loop, const std::string& addr, unsigned short port, Pt::Ssl::Context& sslServerContext)
         : _sslContext(sslServerContext), _ssl(0), _ios(8192, true), _loop(loop), _client(0)
         {
             PT_SSL_LOG_S("Waiting connection from client");
@@ -90,7 +90,7 @@ class Server : public Pt::Connectable {
             }
 
             PT_SSL_LOG_S("Peer CN = " << _ssl->buffer().getPeerCN());
-            PT_SSL_LOG_S("Current cipher = \n" << _ssl->buffer().currCipher().name());
+            PT_SSL_LOG_S("Current cipher = \n" << _ssl->buffer().currentCipher().name());
 
             _ios.buffer().inputReady() += Pt::slot(*this, &Server::onInput);
             _ios.buffer().outputReady() += Pt::slot(*this, &Server::onOutput);
@@ -183,7 +183,7 @@ class Server : public Pt::Connectable {
         }
 
     private:
-        Pt::Ssl::SSLContext&    _sslContext;
+        Pt::Ssl::Context&    _sslContext;
         Pt::Ssl::SSLServer*     _ssl;
         Pt::System::IOStream    _ios;
         Pt::System::EventLoop&  _loop;
@@ -193,7 +193,7 @@ class Server : public Pt::Connectable {
 
 class Client : public Pt::Connectable {
     public:
-        Client(Pt::System::EventLoop& loop, const std::string& addr, unsigned short port, Pt::Ssl::SSLContext& sslClientContext)
+        Client(Pt::System::EventLoop& loop, const std::string& addr, unsigned short port, Pt::Ssl::Context& sslClientContext)
         : _sslContext(sslClientContext), _ssl(0), _loop(loop), _header(""), _result(""), _httpSize(0)
         {
             PT_SSL_LOG_C("Connecting to server");
@@ -231,7 +231,7 @@ class Client : public Pt::Connectable {
             }
 
             PT_SSL_LOG_C("Peer CN = " << _ssl->buffer().getPeerCN());
-            PT_SSL_LOG_C("Current cipher = \n" << _ssl->buffer().currCipher().name());
+            PT_SSL_LOG_C("Current cipher = \n" << _ssl->buffer().currentCipher().name());
             
             _ios.buffer().inputReady() += Pt::slot(*this, &Client::onInput);
             _ios.buffer().outputReady() += Pt::slot(*this, &Client::onOutput);
@@ -331,7 +331,7 @@ class Client : public Pt::Connectable {
         }
 
     private:
-        Pt::Ssl::SSLContext&   _sslContext;
+        Pt::Ssl::Context&   _sslContext;
         Pt::Ssl::SSLClient*    _ssl;
         Pt::System::IOStream   _ios;
         Pt::System::EventLoop& _loop;
@@ -351,12 +351,12 @@ int main(int argc, char** argv)
         unsigned short       port = 8000;
 
         Pt::Ssl::CertificateList trustedCACert;
-        trustedCACert.loadFromFile("ca.pem");
+        trustedCACert.fromPemFile("ca.pem");
 
         Pt::Ssl::CertificateList serverCertChain;
         Pt::Ssl::PrivateKey      serverPrivKey("abc123");
-        Pt::Ssl::SSLContext         serverContext(0, Pt::Ssl::SSLContext::DefaultProtocol);
-        serverCertChain.loadFromFile           ("server.pem");
+        Pt::Ssl::Context         serverContext(0, Pt::Ssl::Context::DefaultProtocol);
+        serverCertChain.fromPemFile           ("server.pem");
         serverPrivKey  .loadFromFile           ("server.key");
         serverContext  .setCACertificates(trustedCACert);
         serverContext  .setCertificateChain    (serverCertChain);
@@ -364,8 +364,8 @@ int main(int argc, char** argv)
 
         Pt::Ssl::CertificateList clientCertChain;
         Pt::Ssl::PrivateKey      clientPrivKey("");
-        Pt::Ssl::SSLContext         clientContext(0, Pt::Ssl::SSLContext::DefaultProtocol);
-        clientCertChain.loadFromFile           ("client.pem");
+        Pt::Ssl::Context         clientContext(0, Pt::Ssl::Context::DefaultProtocol);
+        clientCertChain.fromPemFile           ("client.pem");
         clientPrivKey  .loadFromFile           ("client.key");
         clientContext  .setCACertificates(trustedCACert);
         clientContext  .setCertificateChain    (clientCertChain);

@@ -26,8 +26,8 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef PT_SSL_SSLCONTEXT_H
-#define PT_SSL_SSLCONTEXT_H
+#ifndef PT_SSL_CONTEXT_H
+#define PT_SSL_CONTEXT_H
 
 #include <Pt/Ssl/PrivateKey.h>
 #include <Pt/Ssl/CertificateList.h>
@@ -45,101 +45,89 @@ static struct PT_SSL_API SSLInit
 } ssl_init;
 
 //! @brief Context for SSL connections.
-class PT_SSL_API SSLContext
+class PT_SSL_API Context
 {
     public:
-        //! @brief Available protocol.
+        //! @brief Communication protocol.
         enum Protocol 
         {
-            DefaultProtocol, //!< Select the default protocol (for now it is SSL version 3).
-            TLSv1,           //!< Select TLS version 1 (it is the latest standard for secure TCP communication).
-            SSLv3,           //!< Select SSL version 3 (recommended for modern system).
-            SSLv3or2,        //!< Select SSL version 3 if available, if not, fallback to version 2 (recommended for the most compatibility).
-            SSLv2            //!< Select SSL version 2 (unsecure, not recommended).
+            DefaultProtocol, //!< not less than SSL version 3.
+            TLSv1,           //!< the latest standard for secure TCP communication.
+            SSLv3,           //!< recommended for modern systems.
+            SSLv3or2,        //!< Srecommended for the most compatibility.
+            SSLv2            //!< unsecure, not recommended.
         };
 
     public:
-        //! @brief Construct an SSL context that uses the given certificate-key file and password. 
-        SSLContext(const char* sessionID = 0, Protocol protocol = DefaultProtocol);
+        //! @brief Construct with session id and protocol. 
+        Context(const char* sessionID = 0, Protocol protocol = DefaultProtocol);
 
-        //! @brief Standard dtor.
-        ~SSLContext();
+        //! @brief Destructor.
+        ~Context();
 
         //! @brief Returns the current protocol. 
-        inline Protocol protocol() const
-        { return _protocol; }
+        Protocol protocol() const;
 
         //! @brief Sets the current protocol. 
         void setProtocol(Protocol protocol);
 
         /** @brief Set the list of trusted CA certificates for this context.
-            Setting the list of trusted CA certificates is needed if you would like to check if
-            the other peer's certificate is signed by a trusted Certificate Authority. In this case
-            the 'trustedCert' parameter must contain the certificates of all CA that you trust.
+            
+            Setting the list of trusted CA certificates is needed if you 
+            would like to check if the other peer's certificate is signed
+            by a trusted Certificate Authority. In this case \a trustedCert
+            must contain the certificates of all CAs that you trust.
          */
         void setCACertificates(const CertificateList& trustedCert);
 
-        /** @brief Set the main certificate and add certificate chain to this context.
-         * Set the first certificate in the list as the main certificate of this context and add
-         * the remaining certificates into the certificate chain (no certificates in the existing chain
-         * will be deleted).
-         * \n
-         * Setting a main certificate and certificate chain is mandatory for a server context.
-         * In this case the first certificate in the 'certChain' parameter must be the server certificate.
-         * The remaining certificates are the certificates of the intermediate CAs.
-         * \n
-         * Setting a main certificate and certificate chain for a client context is only needed for
-         * certificate-based client authentication. In this case the first certificate in the 'certChain'
-         * parameter must be the client certificate. The remaining certificates are the certificates of
-         * the intermediate CAs.
-         */
-        void setCertificateChain(const CertificateList& certList);
-
         /** @brief Set the main certificate of this context.
-         * Set the first certificate in the list as the main certificate of this context.
-         * \n
-         * Setting a main certificate is mandatory for a server context.
-         * \n
-         * Setting a main certificate for a client context is only needed for certificate-based
-         * client authentication.
-         * \n
-         * You may want to also set the certificate-chain.
-         */
-        void setCertificate(const CertificateList& certList);
 
-        /** @brief Add certificate chain to this context.
-         * Add the certificates in the list into the certificate chain of this context
-         * (no certificates in the existing chain will be deleted). By default the first
-         * certificate in the list is skipped.
-         * \n
-         * Setting a certificate chain is mandatory for a server context.
-         * \n
-         * Setting a certificate chain for a client context is only needed for certificate-based
-         * client authentication.
+            Setting a main certificate is mandatory for a server context. 
+            Setting a main certificate for a client context is only needed 
+            for certificate-based client authentication.
          */
-        void addCertificateChain(const CertificateList& certList, bool skipFirstCert = true);
+        void setCertificate(const Certificate& cert);
 
-        /** @brief Set the private key to be attached to this context.
-         * Setting a private key is mandatory for a server context.
-         * \n
-         * Setting a private key is for a client context is only needed for certificate-based
-         * client authentication.
-         */
+        /** @brief Add certificate to chain of this context.
+
+            Additionally to the main certificate of this context, more certificates
+            of the intermediate CAs can be added to the certificate chain. Setting 
+            a main certificate and certificate chain for a client context is only 
+            needed for  certificate-based client authentication. In this case the
+            main certificate must be the client certificate. The remaining certificates 
+            are the certificates of the intermediate CAs.
+        */
+        void addCertificate(const Certificate& cert);
+
+        /** @brief Sets main certificate and certificate chain.
+
+            The first certificate in the given list of certificates will
+            be used as the main certificate, the remaining certificates
+            will be added to the intermediate CA certificate chain. For
+            a server context the main certificate should be the server
+            certificate.
+        */
+        void setCertificateChain(const CertificateList& certs);
+
+        /** @brief Set the private key for this context.
+
+            Setting a private key is mandatory for a server context. Setting
+            a private key is for a client context is only needed for 
+            certificate-based client authentication.
+        */
         void setPrivateKey(const PrivateKey& privKey);
 
         //! @brief Returns the currently used private key.
-        PrivateKey privateKey() const
-        { return _privKey; }
+        PrivateKey privateKey() const;
         
         //! @internal
-        inline ssl_ctx_st* impl() const
-        { return _ctx; }
+        ssl_ctx_st* impl() const;
 
     private:
-        ssl_ctx_st*        _ctx;            // OpenSSL's SSL context
-        Protocol           _protocol;       // Selected SSL protocol
-        PrivateKey         _privKey;        // Private key
-        bool               _certChainExist; // Flag
+        ssl_ctx_st*        _ctx;
+        Protocol           _protocol;
+        PrivateKey         _privKey;
+        bool               _certChainExist;
 };
 
 } // namespace Ssl

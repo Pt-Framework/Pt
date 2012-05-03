@@ -29,6 +29,7 @@
 
 #include "Utils.h"
 #include <Pt/Ssl/SSLContext.h>
+#include <Pt/System/Logger.h>
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 #include <cstdio>
@@ -37,10 +38,7 @@ namespace Pt {
 
 namespace Ssl {
 
-///// Logger for Pt-SSL ////////////////////////////////////////////////////////////////////////////
-log_define(PT_SSL_LOGGER_CATEGORY);
-#define PT_SSL_LOG(CODE) PT_SSL_LOG_INFO("SSLContext  ", CODE)
-////////////////////////////////////////////////////////////////////////////////////////////////////
+log_define("Pt.Ssl.Context")
 
 #define COPY_EXTRA_CERT
 
@@ -76,10 +74,6 @@ SSLInit::SSLInit()
         EVP_add_cipher(EVP_aes_256_cfb1());
         EVP_add_cipher(EVP_aes_256_cfb8());
         EVP_add_cipher(EVP_aes_256_ofb());
-
-        Pt::System::LogTarget& target = Pt::System::LogTarget::get(PT_SSL_LOGGER_CATEGORY);
-        target.setLogLevel(Pt::System::Info);
-        target.setChannel("console://");
     }
 }
 
@@ -93,7 +87,7 @@ SSLInit::~SSLInit()
 }
 
 
-SSLContext::SSLContext(const char* sessionID, Protocol protocol)
+Context::Context(const char* sessionID, Protocol protocol)
 : _protocol(protocol)
 , _certChainExist(false)
 {
@@ -233,7 +227,7 @@ SSLContext::SSLContext(const char* sessionID, Protocol protocol)
 }
 
 
-SSLContext::~SSLContext()
+Context::~Context()
 {
 #ifndef COPY_EXTRA_CERT
     if(_ctx->extra_certs) 
@@ -247,7 +241,13 @@ SSLContext::~SSLContext()
 }
 
 
-void SSLContext::setProtocol(Protocol protocol)
+Context::Protocol Context::protocol() const
+{ 
+    return _protocol; 
+}
+
+
+void Context::setProtocol(Protocol protocol)
 {
     bool v2 = false;
     const SSL_METHOD* method = 0;
@@ -281,7 +281,7 @@ std::vector<SSLCipherInfo> SSLStreamBuf::availableCiphers() const
 }
 */
 /*
-void SSLContext::setEnabledCiphers(const std::vector<SSLCipherInfo>& ciphers)
+void Context::setEnabledCiphers(const std::vector<SSLCipherInfo>& ciphers)
 {
     std::string str;
     for(size_t i = 0; i < ciphers.size(); ++i) {
@@ -297,7 +297,7 @@ void SSLContext::setEnabledCiphers(const std::vector<SSLCipherInfo>& ciphers)
 */
 
 // certificates to validate certificate presented by peer
-void SSLContext::setCACertificates(const CertificateList& trustedCert)
+void Context::setCACertificates(const CertificateList& trustedCert)
 {
     // Try to add the CA X509 certificates (if any)
     X509_STOREAutoPtr cert_store( X509_STORE_new() );
@@ -313,78 +313,69 @@ void SSLContext::setCACertificates(const CertificateList& trustedCert)
     cert_store.release();
 }
 
-
-void SSLContext::setCertificateChain(const CertificateList& certList)
-{
-    setCertificate(certList);
-    
-    if(certList.size() > 1) 
-        addCertificateChain(certList, true);
-}
-
-
 // certificate to present to peer
-void SSLContext::setCertificate(const CertificateList& certList)
+void Context::setCertificate(const Certificate& cert)
 {
     ERR_clear_error();
     
-    if( certList.empty() )
-        throw InvalidCertificate("Invalid empty certificate");
-
-    X509* x509 = certList.begin()->getX509();
+    X509* x509 = cert.getX509();
 
     if( ! SSL_CTX_use_certificate(_ctx, x509) || ERR_peek_error() )
+    {
         throw InvalidCertificate("Invalid/mismatched certificate");
+    }
 }
 
-// certificate chain to present to peer
-void SSLContext::addCertificateChain(const CertificateList& certList, bool skipFirstCert)
+
+// intermediate certificates to present to peer
+void Context::addCertificate(const Certificate& cert)
 {
-    // Skip the first certificate (if needed)
-    CertificateList::Iterator it = certList.begin();
-    if(skipFirstCert) 
-        ++it;
-
-    // Check if we do not have any CA certificates
-    if( it == certList.end() )
-        throw InvalidCertificate("CA certificate list too short");
-
-    // Add the CA X509 certificates
-    for( ; it != certList.end(); ++it) 
-    {
 #ifdef COPY_EXTRA_CERT
-        // NOTE: SSL_CTX_add_extra_chain_cert does not copy the X509 certificate, 
-        // or increase the refcount, so we must "copy" it manually, because SSL_CTX
-        // will take ownership
+    // NOTE: SSL_CTX_add_extra_chain_cert does not copy the X509 certificate, 
+    // or increase the refcount, so we must "copy" it manually, because SSL_CTX
+    // will take ownership
 
-        // Convert the X509 certificate to raw binary data
-        unsigned char* buf = 0;
-        int len = i2d_X509(it->getX509(), &buf);
-        if(len < 0)
-            throw InvalidCertificate("Could not convert the CA certificate to raw binary data");
+    // Convert the X509 certificate to raw binary data
+    unsigned char* buf = 0;
+    int len = i2d_X509(cert.getX509(), &buf);
+    if(len < 0)
+        throw InvalidCertificate("Could not convert the CA certificate to raw binary data");
         
-        // Convert the raw binary data back to an X509 certificate
-        const unsigned char* tbf = buf;
-        X509* x509 = d2i_X509(0, &tbf, len);
-        OPENSSL_free(buf);
-        if( ! x509)
-            throw InvalidCertificate("Could not convert the raw binary data back to a CA certificate");
+    // Convert the raw binary data back to an X509 certificate
+    const unsigned char* tbf = buf;
+    X509* x509 = d2i_X509(0, &tbf, len);
+    OPENSSL_free(buf);
+    if( ! x509)
+        throw InvalidCertificate("Could not convert the raw binary data back to a CA certificate");
         
-        // Add the certificate
-        if( ! SSL_CTX_add_extra_chain_cert( _ctx, x509 ) )
-            throw InvalidCertificate("Could not add CA certificate");
+    if( ! SSL_CTX_add_extra_chain_cert( _ctx, x509 ) )
+        throw InvalidCertificate("Could not add CA certificate");
 #else        
-        // Add the certificate
-        if( ! SSL_CTX_add_extra_chain_cert( _ctx, *it ) )
-            throw InvalidCertificate("Could not add CA certificate");
+    if( ! SSL_CTX_add_extra_chain_cert( _ctx, cert.getX509() ) )
+        throw InvalidCertificate("Could not add CA certificate");
 #endif
-    }
 
-    // Set flag
     _certChainExist = true;
 }
 
-void SSLContext::setPrivateKey(const PrivateKey& privKey)
+
+void Context::setCertificateChain(const CertificateList& certs)
+{
+    CertificateList::Iterator it = certs.begin();
+    if( it == certs.end() )
+        throw InvalidCertificate("certificate list too short");
+
+    this->setCertificate(*it);
+    ++it;
+
+    for(; it == certs.end(); ++it)
+    {
+        this->addCertificate(*it);
+    }
+}
+
+
+void Context::setPrivateKey(const PrivateKey& privKey)
 {
     // Try to use the private key
     if( ! SSL_CTX_use_PrivateKey( _ctx, privKey.impl() ) )
@@ -399,6 +390,18 @@ void SSLContext::setPrivateKey(const PrivateKey& privKey)
         if( ! SSL_CTX_check_private_key(_ctx) )
             throw InvalidKey("The private key does not agree with the corresponding public key in the certificate!");
     }
+}
+
+
+PrivateKey Context::privateKey() const
+{
+    return _privKey;
+}
+
+
+ssl_ctx_st* Context::impl() const
+{ 
+    return _ctx; 
 }
 
 } // namespace Ssl

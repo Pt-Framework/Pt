@@ -42,7 +42,7 @@ log_define(PT_SSL_LOGGER_CATEGORY);
 #define PT_SSL_LOG(CODE) PT_SSL_LOG_INFO("SSLStreamBuf", CODE)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-SSLStreamBuf::SSLStreamBuf(std::iostream& ios, SSLContext& ctx, const char* sessionID, size_t bufferSize)
+SSLStreamBuf::SSLStreamBuf(std::iostream& ios, Context& ctx, const char* sessionID, size_t bufferSize)
 : _in (0),
   _out(0),
   _ssl(0),
@@ -76,9 +76,6 @@ SSLStreamBuf::SSLStreamBuf(std::iostream& ios, SSLContext& ctx, const char* sess
                                     reinterpret_cast<const unsigned char*>(sessionID), 
                                     strlen(sessionID) );
     }
-
-    STACK_OF(SSL_CIPHER)* chiphers = SSL_get_ciphers(_ssl);
-    _ciphers.setRef(chiphers);
 }
 
 
@@ -135,13 +132,6 @@ SSLStreamBuf::~SSLStreamBuf()
     return availCiphers;
 }*/
 
-
-const CipherList& SSLStreamBuf::ciphers() const
-{
-    return _ciphers;
-}
-
-
 /*
 void SSLStreamBuf::setCiphers(const std::vector<SSLCipherInfo>& ciphers)
 {
@@ -163,53 +153,21 @@ void SSLStreamBuf::setCiphers(const std::vector<SSLCipherInfo>& ciphers)
 }
 */
 
-const Cipher& SSLStreamBuf::currCipher() const
+CipherList SSLStreamBuf::ciphers() const
 {
-    const SSL_CIPHER* c = SSL_get_current_cipher(_ssl);
-    if( ! c) 
-        return _currentCipher;
-
-    _currentCipher.setRef(c);
-    return _currentCipher;
+    // TODO: possibly cache the available ciphers in the context
+    STACK_OF(SSL_CIPHER)* ciphers = SSL_get_ciphers(_ssl);
+    return CipherList(ciphers);
 }
 
 
-/*CipherInfo SSLStreamBuf::currentCipher() const
+Cipher SSLStreamBuf::currentCipher() const
 {
+    // TODO: possibly return a Cipher that has internally a reference to a 
+    //       CipherData in the context cache
     const SSL_CIPHER* c = SSL_get_current_cipher(_ssl);
-    if( ! c) 
-        return CipherInfo();
-
-    // Get the ID and split it
-    const unsigned long id  = c->id;
-    const int           id0 = (int) (  id >> 24);
-    const int           id1 = (int) ( (id >> 16) & 0xFFL );
-    const int           id2 = (int) ( (id >>  8) & 0xFFL );
-    const int           id3 = (int) (  id        & 0xFFL );
-
-    // Convert the ID to a readable string
-    char strid[64];
-    if((id & 0xFF000000L) == 0x02000000L)
-        sprintf(strid, "0x%02X,0x%02X,0x%02X", id1, id2, id3);
-    else if((id & 0xFF000000L) == 0x03000000L)
-        sprintf(strid, "0x%02X,0x%02X", id2, id3);
-    else
-        sprintf(strid, "0x%02X,0x%02X,0x%02X,0x%02X", id0, id1, id2, id3);
-
-    // Get some information
-    char desc[512];
-    SSL_CIPHER_description(c, desc, sizeof(desc));
-    const int dlen = strlen(desc);
-    if(desc[dlen - 1] == '\n')
-        desc[dlen - 1] = 0;
-
-    // Store the chiper information
-    int usedBits;
-    int bits = SSL_CIPHER_get_bits(c, &usedBits);
-
-    return CipherInfo(id, strid,  SSL_CIPHER_get_name(c), bits, usedBits,
-                      SSL_CIPHER_get_version(c), desc);
-}*/
+    return Cipher(c);
+}
 
 
 bool SSLStreamBuf::connected() const
@@ -397,8 +355,6 @@ std::streamsize SSLStreamBuf::import()
 
 void SSLStreamBuf::shutdown()
 {
-    _ciphers.clear();
-
     const int res = SSL_shutdown(_ssl);
     PT_SSL_LOG("SSL_shutdown() = " << res);
 

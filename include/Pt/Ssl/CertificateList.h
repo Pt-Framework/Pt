@@ -60,7 +60,6 @@ class PT_SSL_API Certificate : private NonCopyable
         class CertificateImpl* _impl;
 };
 
-
 //! \brief Certificate list.
 class PT_SSL_API CertificateList
 {
@@ -79,11 +78,13 @@ class PT_SSL_API CertificateList
 
         CertificateList& operator=(const CertificateList& list);
 
-        //! \brief Load certificate from the given data.
-        void loadFromString(const std::string& certData);
+        //! \brief Read certifictates in PEM format.
+        void fromPem(const char* data, size_t len);
 
-        //! \brief Load certificate from the given file.
-        void loadFromFile(const std::string& fileName);
+        //! \brief Read certifictates in PEM format from a stream.
+        void fromPem(std::istream& is);
+
+        void fromPemFile(const char* path);
 
         //! \brief Clear (delete) any loaded certificate.
         void clear();

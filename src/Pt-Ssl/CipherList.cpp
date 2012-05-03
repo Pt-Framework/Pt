@@ -39,235 +39,214 @@ namespace Pt {
 
 namespace Ssl {
 
-struct CipherData
+class CipherData
 {
-    CipherData()
-    : id(0)
-    , bits(0)
-    , usedBits(0)
-    {}
+    public:
+        CipherData()
+        : bits(0)
+        , usedBits(0)
+        {}
 
-    CipherData(const SSL_CIPHER* c)
-    {
-        // Get the numeric ID and split it
-        id  = c->id;
-        const int id0 = (int) (  id >> 24);
-        const int id1 = (int) ( (id >> 16) & 0xFFL );
-        const int id2 = (int) ( (id >>  8) & 0xFFL );
-        const int id3 = (int) (  id        & 0xFFL );
+        CipherData(const SSL_CIPHER* c)
+        {
+            // Get the numeric ID and split it
+            //id  = c->id;
+            //const int id0 = (int) (  id >> 24);
+            //const int id1 = (int) ( (id >> 16) & 0xFFL );
+            //const int id2 = (int) ( (id >>  8) & 0xFFL );
+            //const int id3 = (int) (  id        & 0xFFL );
 
-        // build string id
-        char strid[64];
-        if((id & 0xFF000000L) == 0x02000000L)
-            sprintf(strid, "0x%02X,0x%02X,0x%02X", id1, id2, id3);
-        else if((id & 0xFF000000L) == 0x03000000L)
-            sprintf(strid, "0x%02X,0x%02X", id2, id3);
-        else
-            sprintf(strid, "0x%02X,0x%02X,0x%02X,0x%02X", id0, id1, id2, id3);
+            // build string id
+            //char strid[64];
+            //if((id & 0xFF000000L) == 0x02000000L)
+            //    sprintf(strid, "0x%02X,0x%02X,0x%02X", id1, id2, id3);
+            //else if((id & 0xFF000000L) == 0x03000000L)
+            //    sprintf(strid, "0x%02X,0x%02X", id2, id3);
+            //else
+            //    sprintf(strid, "0x%02X,0x%02X,0x%02X,0x%02X", id0, id1, id2, id3);
 
-        stringId = strid;
+            //stringId = strid;
 
-        // cipher description
-        char desc[512];
-        SSL_CIPHER_description(c, desc, sizeof(desc));
-        const int dlen = strlen(desc);
-        if(desc[dlen - 1] == '\n')
-            desc[dlen - 1] = 0;
+            // cipher description
+            //char desc[512];
+            //SSL_CIPHER_description(c, desc, sizeof(desc));
+            //const int dlen = strlen(desc);
+            //if(desc[dlen - 1] == '\n')
+            //    desc[dlen - 1] = 0;
 
-        desciption = desciption;
+            //desciption = desciption;
 
-        // other cipher fields
-        bits = SSL_CIPHER_get_bits(c, &usedBits);
-        name = SSL_CIPHER_get_name(c);
-        version = SSL_CIPHER_get_version(c);
-    }
+            // other cipher fields
+            bits = SSL_CIPHER_get_bits(c, &usedBits);
+            name = SSL_CIPHER_get_name(c);
+            version = SSL_CIPHER_get_version(c);
+        }
 
-    unsigned long id;
-    std::string   stringId;
-    std::string   name;
-    int           bits;
-    int           usedBits;
-    std::string   version;
-    std::string   desciption;
+        std::string   name;
+        std::string   version;
+        int           bits;
+        int           usedBits;
 };
 
 
+class CipherListImpl
+{
+    public:
+        CipherListImpl()
+        { }
+
+        ~CipherListImpl()
+        { clear(); }
+
+        void push_back(const Cipher& cert)
+        { _ciphers.push_back(cert); }
+
+        void clear()
+        { _ciphers.clear(); }
+
+        size_t size() const
+        { return _ciphers.size(); }
+
+        bool empty() const
+        { return _ciphers.empty(); }
+
+        const Cipher* begin()
+        { 
+            return _ciphers.empty() ? 0 : &_ciphers[0]; 
+        }
+
+        const Cipher* end() const
+        { 
+            return _ciphers.empty() ? 0 : &_ciphers[0] + _ciphers.size(); 
+        }
+
+    private:
+        std::vector<Cipher> _ciphers;
+};
+
+
+Cipher::Cipher()
+: _cipherData( new CipherData() )
+{}
+
+
+Cipher::Cipher(const SSL_CIPHER* c)
+: _cipherData( new CipherData(c) )
+{
+}
+
+
+Cipher::Cipher(const Cipher& ciph)
+: _cipherData( new CipherData() )
+{
+    const CipherData* other = ciph._cipherData;
+    _cipherData = new CipherData(*other);
+}
 
 
 Cipher::~Cipher()
-{}
+{
+    delete _cipherData;
+}
+
+        
+Cipher& Cipher::operator=(const Cipher& ciph)
+{
+    *_cipherData = *(ciph._cipherData);
+    return *this;
+}
 
 
 const char* Cipher::name() const
 {
-    if(_sslCipher)
-    {
-        if( ! _sslCipher->valid )
-            return "INVALID";
-
-        return SSL_CIPHER_get_name(_sslCipher);
-    }
-
-    if(_cipherData)
-        return _cipherData->name.c_str();
-
-    log_warn("using uninitialized cipher");
-    return "";
+    return _cipherData->name.c_str();
 }
 
 
+const char* Cipher::version() const
+{
+    return _cipherData->version.c_str();
+}
+
+
+int Cipher::bits() const
+{
+    return _cipherData->bits;
+}
+
+
+int Cipher::usedBits() const
+{
+    return _cipherData->usedBits;
+}
 
 
 CipherList::CipherList()
-: _sslCiphers(0)
+: _impl( new CipherListImpl() )
 {
+}
+
+
+CipherList::CipherList(void* sslCiphers)
+: _impl( new CipherListImpl() )
+{
+    STACK_OF(SSL_CIPHER)* chp = reinterpret_cast<STACK_OF(SSL_CIPHER)*>(sslCiphers);
+    for(int i = 0; i < sk_SSL_CIPHER_num(chp); ++i)
+    {
+        const SSL_CIPHER* c = sk_SSL_CIPHER_value(chp, i);
+
+        // Skip if not valid
+        if( c->valid )
+        {
+          _impl->push_back( Cipher(c) ) ;
+        }
+    }
 }
 
 
 CipherList::CipherList(const CipherList& list)
-: _sslCiphers(0)
+: _impl( new CipherListImpl( *(list._impl) ) )
 {
-    *this = list;
 }
 
 
 CipherList::~CipherList()
 {
+    delete _impl;
 }
 
 
-CipherList& CipherList::operator=(const CipherList& list)
+CipherList::Iterator CipherList::begin() const
+{ 
+    return Iterator( _impl->begin() ); 
+}
+
+        
+CipherList::Iterator CipherList::end() const
+{ 
+    return Iterator( _impl->end() ); 
+}
+
+
+bool CipherList::empty() const
 {
-    log_trace("CipherList::operator=()");
-    clear();
-
-    if(list._sslCiphers)
-    {
-        STACK_OF(SSL_CIPHER)* chp = reinterpret_cast<STACK_OF(SSL_CIPHER)*>(list._sslCiphers);
-        log_trace(sk_SSL_CIPHER_num(chp) << " ciphers to copy");
-
-        for(int i = 0; i < sk_SSL_CIPHER_num(chp); ++i)
-        {
-            // Skip if not valid
-            const SSL_CIPHER* c = sk_SSL_CIPHER_value(chp, i);
-            if( ! c->valid )
-                continue;
-
-            CipherData cipher(c);
-            log_trace("copied cipher: " << cipher.name );
-            _ciphers.push_back(cipher);
-        }
-    }
-    else
-    {
-        log_trace("assigned " << list._ciphers.size() << " ciphers");
-        _ciphers.assign(list._ciphers.begin(), list._ciphers.end());
-    }
-
-    return *this;
+    return _impl->empty();
 }
 
 
 void CipherList::clear()
-{ 
-    _ciphers.clear();
-    _sslCiphers = 0;
+{
+    _impl->clear();
 }
-
 
 size_t CipherList::size() const
 {
-    size_t n = _ciphers.size();
-
-    if(_sslCiphers)
-    {
-        STACK_OF(SSL_CIPHER)* chp = reinterpret_cast<STACK_OF(SSL_CIPHER)*>(_sslCiphers);
-        n = static_cast<size_t>( sk_SSL_CIPHER_num(chp) );
-    }
-
-    return n;
+    return _impl->size();
 }
 
-
-const ssl_cipher_st* CipherList::sslCipher(int n) const
+CipherList& CipherList::operator=(const CipherList& list)
 {
-    log_trace("CipherList::sslCipher(" << n << ")");
-
-    STACK_OF(SSL_CIPHER)* chp = reinterpret_cast<STACK_OF(SSL_CIPHER)*>(_sslCiphers);
-    if( chp && n < sk_SSL_CIPHER_num(chp) )
-    {
-        const SSL_CIPHER* c = sk_SSL_CIPHER_value(chp, n);
-        log_trace("CipherList::sslCipher() -> " << c);
-        return c;
-    }
-
-    log_trace("CipherList::sslCipher() -> " << 0);
-    return 0;
-}
-
-
-const CipherData* CipherList::cipherInfo(int n) const
-{
-    log_trace("CipherList::cipherInfo(" << n << ")");
-
-    unsigned offset = static_cast<unsigned>(n); 
-    if( offset < _ciphers.size() )
-    {
-        const CipherData* c = &_ciphers[offset];
-        log_trace("CipherList::cipherInfo() -> " << c);
-        return c;
-    }
-
-    log_trace("CipherList::cipherInfo() -> " << 0);
-    return 0;
-}
-
-
-void CipherList::setRef(void* sslCiphers)
-{ 
-    _sslCiphers = sslCiphers; 
-}
-
-
-
-CipherList::Iterator::Iterator(const CipherList& list, int n)
-: _list(&list)
-, _n(n)
-{
-    if( _list->_sslCiphers ) 
-        _cipher.setRef( _list->sslCipher(_n) );
-    else
-        _cipher.setRef(_list->cipherInfo(_n) );
-}
-
-
-CipherList::Iterator::Iterator(const Iterator& other)
-: _list(other._list)
-, _n(other._n)
-{
-    _cipher.copyRef(other._cipher);
-}
-
-
-CipherList::Iterator& CipherList::Iterator::operator=(const Iterator& other)
-{ 
-    _list = other._list; 
-    _n = other._n;
-    _cipher.copyRef(other._cipher);
-
-    return *this; 
-}
-
-
-CipherList::Iterator& CipherList::Iterator::operator++()
-{        
-    ++_n;
-
-    if( _list->_sslCiphers ) 
-        _cipher.setRef( _list->sslCipher(_n) );
-    else
-        _cipher.setRef( _list->cipherInfo(_n) );
-
+    *_impl = *(list._impl);
     return *this;
 }
 

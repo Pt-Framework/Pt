@@ -47,7 +47,7 @@ class PT_SSL_API SSLStreamBuf : public Connectable, public std::streambuf
     public:
         /** \brief Construct an SSL stream buffer that uses the given IO stream and SSL context. 
         */
-        SSLStreamBuf(std::iostream& ios, SSLContext& ctx, const char* sessionID = 0, size_t bufferSize = 1024);
+        SSLStreamBuf(std::iostream& ios, Context& ctx, const char* sessionID = 0, size_t bufferSize = 1024);
 
         /** \brief Standard dtor. 
         */
@@ -55,19 +55,19 @@ class PT_SSL_API SSLStreamBuf : public Connectable, public std::streambuf
 
         /** \brief Return the current protocol. 
         */
-        inline SSLContext::Protocol protocol() const
+        inline Context::Protocol protocol() const
         { return _protocol; }
 
         /** \brief Return a list of available ciphers for the current protocol. 
         */
         //std::vector<CipherInfo> availableCiphers() const;
 
-        const CipherList& ciphers() const;
+        CipherList ciphers() const;
 
         /** \brief Return the currently used cipher (the cipher that are actually used to form the SSL channel). 
         */
         //CipherInfo currentCipher() const;
-        const Cipher& currCipher() const;
+        Cipher currentCipher() const;
 
         /** \brief Check if this SSL stream buffer has been connected to the SSL stream buffer at the other end. 
         */
@@ -142,8 +142,6 @@ class PT_SSL_API SSLStreamBuf : public Connectable, public std::streambuf
         bio_st*        _out; // Output BIO
         ssl_st*        _ssl; // OpenSSL SSL handle
         std::iostream* _ios; // IO
-        CipherList     _ciphers;
-        mutable Cipher _currentCipher;
 
     private:
         size_t               _ibufferSize;
@@ -154,7 +152,7 @@ class PT_SSL_API SSLStreamBuf : public Connectable, public std::streambuf
         bool                 _oextend;
         bool                 _handshakeStarted;
         bool                 _handshakeError;
-        SSLContext::Protocol _protocol; // Selected SSL protocol
+        Context::Protocol _protocol; // Selected SSL protocol
 };
 
 } // namespace Ssl

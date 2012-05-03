@@ -39,7 +39,7 @@ log_define(PT_SSL_LOGGER_CATEGORY);
 #define PT_SSL_LOG(CODE) PT_SSL_LOG_INFO("SSLClient   ", CODE)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-SSLClient::SSLClient(Pt::System::IOStream& ios, SSLContext& ctx, const char* sessionID)
+SSLClient::SSLClient(Pt::System::IOStream& ios, Context& ctx, const char* sessionID)
 : std::iostream(0),
   _ios         (&ios),
   _sslbuf      (ios, ctx, sessionID, 1 * 1024)

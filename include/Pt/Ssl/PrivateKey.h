@@ -89,7 +89,7 @@ class PT_SSL_API PrivateKey
 //! \internal
 class PT_SSL_API PrivateKey::Impl 
 {
-    friend class SSLContext;
+    friend class Context;
     friend class PrivateKey;
 
     public:
