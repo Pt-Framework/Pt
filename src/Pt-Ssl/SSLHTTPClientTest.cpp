@@ -225,10 +225,10 @@ int main(int argc, char** argv)
         Pt::Ssl::CertificateList trustedCACert;
         Pt::Ssl::CertificateList clientCertChain;
         Pt::Ssl::PrivateKey      clientPrivKey("");
-        Pt::Ssl::Context         clientContext(0, Pt::Ssl::Context::DefaultProtocol);
+        Pt::Ssl::Context         clientContext(0, Pt::Ssl::Context::Default);
         trustedCACert  .fromPemFile           ("ca.pem");
         clientCertChain.fromPemFile           ("client.pem");
-        clientPrivKey  .loadFromFile           ("client.key");
+        clientPrivKey  .fromPemFile           ("client.key");
         clientContext  .setCACertificates(trustedCACert);
         clientContext  .setCertificateChain    (clientCertChain);
         clientContext  .setPrivateKey          (clientPrivKey);

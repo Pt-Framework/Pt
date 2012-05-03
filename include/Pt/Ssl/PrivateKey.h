@@ -32,10 +32,13 @@
 #include <Pt/Ssl/Api.h>
 #include <Pt/Ssl/SslError.h>
 #include <Pt/SmartPtr.h>
+#include <iosfwd>
 
 namespace Pt {
 
 namespace Ssl {
+
+class PrivateKeyImpl;
 
 //! \brief Private key.
 class PT_SSL_API PrivateKey 
@@ -55,19 +58,19 @@ class PT_SSL_API PrivateKey
         PrivateKey(const PrivateKey& pkey);
 
         //! \brief Instantiate an empty private-key.
-        PrivateKey(const std::string& password);
-
-        //! \brief Instantiate a private-key using the given key data.
-        PrivateKey(const std::string& keyData, const std::string& password);
+        explicit PrivateKey(const std::string& password);
 
         //! \brief Standard dtor.
         ~PrivateKey();
 
-        //! \brief Load private-key from the given data.
-        void loadFromString(const std::string& keyData);
+        //! \brief Read key in PEM format.
+        void fromPem(const char* data, size_t len);
 
-        //! \brief Load private-key from the given file.
-        void loadFromFile(const std::string& fileName);
+        //! \brief Read key in PEM format from a stream.
+        void fromPem(std::istream& is);
+
+        //! \brief Read key in PEM format from a file.
+        void fromPemFile(const char* path);
 
         //! \brief Clear (delete) any loaded key.
         void clear();
@@ -77,35 +80,34 @@ class PT_SSL_API PrivateKey
         evp_pkey_st* impl() const;
         
     private:
-        // Foward declaration of the shared implementation class
-        class Impl;
-        typedef SmartPtr<Impl> ImplPtr;
+        typedef SmartPtr<PrivateKeyImpl> ImplPtr;
 
-    private:
         // Shared implementation of the class (COW)
         ImplPtr _impl;
 };
 
 //! \internal
-class PT_SSL_API PrivateKey::Impl 
+class PT_SSL_API PrivateKeyImpl 
 {
-    friend class Context;
-    friend class PrivateKey;
-
     public:
-        Impl();
+        PrivateKeyImpl();
         
-        Impl(const std::string& password);
+        PrivateKeyImpl(const std::string& password);
         
-        ~Impl();
+        ~PrivateKeyImpl();
 
-        void loadFromString(const std::string& keyData);
-        
-        void loadFromFile(const std::string& fileName);
+        void fromPem(const char* data, size_t len);
+
+        void fromPem(std::istream& is);
+
+        void fromPemFile(const char* path);
 
         void clear();
 
         static int passwordCallback(char* buff, int num, int /*rwflag*/, void* userdata);
+
+        evp_pkey_st* evp()
+        { return _pkey; }
 
     private:
         std::string  _pswd;

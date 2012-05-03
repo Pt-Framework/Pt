@@ -33,6 +33,7 @@
 #include <Pt/Ssl/SSLServer.h>
 #include <Pt/Ssl/SSLClient.h>
 #include <Pt/System/MainLoop.h>
+#include <Pt/System/Logger.h>
 
 ///// Logger for Pt-SSL ////////////////////////////////////////////////////////////////////////////
 log_define(PT_SSL_LOGGER_CATEGORY);
@@ -49,10 +50,11 @@ class Server : public Pt::Connectable {
         {
             PT_SSL_LOG_S("Waiting connection from client");
 
-            _server.listen(addr, port);
+            _server.setActive(_loop);
             _server.connectionPending() += Pt::slot(*this, &Server::onTCPAccept);
 
-            _server.setActive(_loop);
+            _server.listen(addr, port);
+            _server.beginAccept();
         }
 
         ~Server()
@@ -66,9 +68,9 @@ class Server : public Pt::Connectable {
         {
             PT_SSL_LOG_S("Accepting connection from client");
             _client = new Pt::Net::TcpSocket;
-            _client->accept(server);
-
             _client->setActive(_loop);
+
+            _client->accept(server);
             _ios.attach(*_client);
 
             PT_SSL_LOG_S("Starting handshake");
@@ -174,9 +176,9 @@ class Client : public Pt::Connectable {
         {
             PT_SSL_LOG_C("Connecting to server");
 
+            _socket.setActive(_loop);
             _socket.connected() += Pt::slot(*this, &Client::onTCPConnect);
             _socket.beginConnect(addr, port);
-            _socket.setActive(_loop);
         }
 
         ~Client()
@@ -305,6 +307,7 @@ class Client : public Pt::Connectable {
 int main(int argc, char** argv)
 {
     try {
+        Pt::System::Logger::getTarget("").setLogLevel(Pt::System::Trace);
         PT_SSL_LOG_M("OpenSSL test progam started");
 
         Pt::System::MainLoop loop;
@@ -316,18 +319,18 @@ int main(int argc, char** argv)
 
         Pt::Ssl::CertificateList serverCertChain;
         Pt::Ssl::PrivateKey      serverPrivKey("abc123");
-        Pt::Ssl::Context         serverContext(0, Pt::Ssl::Context::DefaultProtocol);
+        Pt::Ssl::Context         serverContext(0, Pt::Ssl::Context::Default);
         serverCertChain.fromPemFile("server.pem");
-        serverPrivKey.loadFromFile("server.key");
+        serverPrivKey.fromPemFile("server.key");
         serverContext.setCACertificates(trustedCACert);
         serverContext.setCertificateChain(serverCertChain);
         serverContext.setPrivateKey(serverPrivKey);
 
         Pt::Ssl::CertificateList clientCertChain;
         Pt::Ssl::PrivateKey      clientPrivKey("");
-        Pt::Ssl::Context         clientContext(0, Pt::Ssl::Context::DefaultProtocol);
+        Pt::Ssl::Context         clientContext(0, Pt::Ssl::Context::Default);
         clientCertChain.fromPemFile           ("client.pem");
-        clientPrivKey  .loadFromFile           ("client.key");
+        clientPrivKey  .fromPemFile           ("client.key");
         clientContext  .setCACertificates(trustedCACert);
         clientContext  .setCertificateChain    (clientCertChain);
         clientContext  .setPrivateKey          (clientPrivKey);
@@ -350,5 +353,6 @@ int main(int argc, char** argv)
     {
         PT_SSL_LOG_M("Error: " << ex);
     }
+
     return 1;
 }

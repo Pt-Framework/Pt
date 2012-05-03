@@ -30,7 +30,6 @@
 #define PT_SSL_CERTIFICATELIST_H
 
 #include <Pt/Ssl/Api.h>
-#include <Pt/Ssl/SSLCertificateInfo.h>
 #include <Pt/Ssl/PublicKey.h>
 #include <Pt/NonCopyable.h>
 #include <vector>
@@ -84,6 +83,7 @@ class PT_SSL_API CertificateList
         //! \brief Read certifictates in PEM format from a stream.
         void fromPem(std::istream& is);
 
+        //! \brief Read certifictates in PEM format from a file.
         void fromPemFile(const char* path);
 
         //! \brief Clear (delete) any loaded certificate.

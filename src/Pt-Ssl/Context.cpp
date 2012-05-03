@@ -94,12 +94,12 @@ Context::Context(const char* sessionID, Protocol protocol)
     // Create the context for the given protocol
     switch(_protocol) 
     {
-        case SSLv2           : _ctx = SSL_CTX_new( SSLv2_method () ); break;
-        case SSLv3or2        : _ctx = SSL_CTX_new( SSLv23_method() ); break;
-        case TLSv1           : _ctx = SSL_CTX_new( TLSv1_method () ); break;
-        case DefaultProtocol : // Fall through
-        case SSLv3           : // Fall through
-        default              :  _ctx = SSL_CTX_new( SSLv3_method () ); break;
+        case SSLv2    : _ctx = SSL_CTX_new( SSLv2_method () ); break;
+        case SSLv3or2 : _ctx = SSL_CTX_new( SSLv23_method() ); break;
+        case TLSv1    : _ctx = SSL_CTX_new( TLSv1_method () ); break;
+        case Default  : // Fall through
+        case SSLv3    : // Fall through
+        default       :  _ctx = SSL_CTX_new( SSLv3_method () ); break;
     }
 
     // Set some options
@@ -254,12 +254,12 @@ void Context::setProtocol(Protocol protocol)
 
     switch(_protocol) 
     {
-        case SSLv2           : method = SSLv2_method();  v2 = true; break;
-        case SSLv3or2        : method = SSLv23_method(); v2 = true; break;
-        case TLSv1           : method = TLSv1_method(); break;
-        case SSLv3           : // Fall through
-        case DefaultProtocol : // Fall through
-        default              : method = SSLv3_method();
+        case SSLv2    : method = SSLv2_method();  v2 = true; break;
+        case SSLv3or2 : method = SSLv23_method(); v2 = true; break;
+        case TLSv1    : method = TLSv1_method(); break;
+        case SSLv3    : // Fall through
+        case Default  : // Fall through
+        default       : method = SSLv3_method();
     }
 
     int ret = SSL_CTX_set_ssl_version(_ctx, method);
@@ -368,7 +368,7 @@ void Context::setCertificateChain(const CertificateList& certs)
     this->setCertificate(*it);
     ++it;
 
-    for(; it == certs.end(); ++it)
+    for(; it != certs.end(); ++it)
     {
         this->addCertificate(*it);
     }

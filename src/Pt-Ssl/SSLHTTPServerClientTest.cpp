@@ -355,18 +355,18 @@ int main(int argc, char** argv)
 
         Pt::Ssl::CertificateList serverCertChain;
         Pt::Ssl::PrivateKey      serverPrivKey("abc123");
-        Pt::Ssl::Context         serverContext(0, Pt::Ssl::Context::DefaultProtocol);
+        Pt::Ssl::Context         serverContext(0, Pt::Ssl::Context::Default);
         serverCertChain.fromPemFile           ("server.pem");
-        serverPrivKey  .loadFromFile           ("server.key");
+        serverPrivKey  .fromPemFile           ("server.key");
         serverContext  .setCACertificates(trustedCACert);
         serverContext  .setCertificateChain    (serverCertChain);
         serverContext  .setPrivateKey          (serverPrivKey);
 
         Pt::Ssl::CertificateList clientCertChain;
         Pt::Ssl::PrivateKey      clientPrivKey("");
-        Pt::Ssl::Context         clientContext(0, Pt::Ssl::Context::DefaultProtocol);
+        Pt::Ssl::Context         clientContext(0, Pt::Ssl::Context::Default);
         clientCertChain.fromPemFile           ("client.pem");
-        clientPrivKey  .loadFromFile           ("client.key");
+        clientPrivKey  .fromPemFile           ("client.key");
         clientContext  .setCACertificates(trustedCACert);
         clientContext  .setCertificateChain    (clientCertChain);
         clientContext  .setPrivateKey          (clientPrivKey);

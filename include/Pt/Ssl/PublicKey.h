@@ -32,10 +32,13 @@
 #include <Pt/Ssl/Api.h>
 #include <Pt/Ssl/SslError.h>
 #include <Pt/SmartPtr.h>
+#include <iosfwd>
 
 namespace Pt {
 
 namespace Ssl {
+
+class PublicKeyImpl;
 
 //! \brief Public key.
 class PT_SSL_API PublicKey 
@@ -53,20 +56,20 @@ class PT_SSL_API PublicKey
 
         //! \brief Copy ctor.
         PublicKey(const PublicKey& pkey);
-
-        //! \brief Instantiate a public-key using the given key data.
-        PublicKey(const std::string& keyData);
         
         //! \brief Standard dtor.
         ~PublicKey();
 
-        //! \brief Load public-key from the given data.
-        void loadFromString(const std::string& keyData);
+        //! \brief Read key in PEM format.
+        void fromPem(const char* data, size_t len);
 
-        //! \brief Load public-key from the given file.
-        void loadFromFile(const std::string& fileName);
+        //! \brief Read key in PEM format from a stream.
+        void fromPem(std::istream& is);
 
-        void toPem(std::string& keyData) const;
+        //! \brief Read key in PEM format from a file.
+        void fromPemFile(const char* path);
+
+        void toPem(std::ostream& os) const;
 
         //! \brief Clear (delete) any loaded key.
         void clear();
@@ -79,32 +82,31 @@ class PT_SSL_API PublicKey
         evp_pkey_st* impl() const;
         
     private:
-        // Foward declaration of the shared implementation class
-        class Impl;
-        typedef SmartPtr<Impl> ImplPtr;
+        typedef SmartPtr<PublicKeyImpl> ImplPtr;
 
-    private:
         // Shared implementation of the class (COW)
         ImplPtr _impl;
 };
 
 //! @internal
-class PT_SSL_API PublicKey::Impl 
+class PT_SSL_API PublicKeyImpl 
 {
     friend class PublicKey;
 
     public:
-        Impl();
+        PublicKeyImpl();
 
-        Impl(evp_pkey_st* pkey);
+        PublicKeyImpl(evp_pkey_st* pkey);
 
-        ~Impl();
+        ~PublicKeyImpl();
 
-        void loadFromString(const std::string& keyData);
+        void fromPem(const char* data, size_t len);
 
-        void loadFromFile(const std::string& fileName);
+        void fromPem(std::istream& is);
 
-        void toPem(std::string& fileName) const;
+        void fromPemFile(const char* path);
+
+        void toPem(std::ostream& os) const;
 
         void clear();
 

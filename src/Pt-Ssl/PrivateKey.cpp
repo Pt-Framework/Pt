@@ -30,13 +30,15 @@
 #include <Pt/Ssl/PrivateKey.h>
 #include <Pt/Ssl/SslError.h>
 #include "Utils.h"
+#include <iostream>
+#include <fstream>
 
 namespace Pt {
 
 namespace Ssl {
 
 PrivateKey::PrivateKey()
-: _impl( new Impl() )
+: _impl( new PrivateKeyImpl() )
 {
 }
 
@@ -48,15 +50,8 @@ PrivateKey::PrivateKey(const PrivateKey& pkey)
 
 
 PrivateKey::PrivateKey(const std::string& password)
-: _impl( new Impl(password) )
+: _impl( new PrivateKeyImpl(password) )
 {
-}
-
-
-PrivateKey::PrivateKey(const std::string& keyData, const std::string& password)
-: _impl( new Impl(password) )
-{ 
-    _impl->loadFromString(keyData); 
 }
 
 
@@ -65,73 +60,95 @@ PrivateKey::~PrivateKey()
 }
 
 
-void PrivateKey::loadFromString(const std::string& keyData)
+void PrivateKey::fromPem(const char* data, size_t len)
 {
-    _impl = new Impl(_impl->_pswd);
-    _impl->loadFromString(keyData);
+    _impl = new PrivateKeyImpl(*_impl);
+    _impl->fromPem(data, len);
 }
 
 
-void PrivateKey::loadFromFile(const std::string& fileName)
+void PrivateKey::fromPem(std::istream& is)
 {
-    _impl = new Impl(_impl->_pswd);
-    _impl->loadFromFile(fileName);
+    _impl = new PrivateKeyImpl(*_impl);
+    _impl->fromPem(is);
+}
+
+
+void PrivateKey::fromPemFile(const char* fileName)
+{
+    _impl = new PrivateKeyImpl(*_impl);
+    _impl->fromPemFile(fileName);
 }
 
 
 void PrivateKey::clear()
 { 
-    _impl = new Impl(); 
+    _impl = new PrivateKeyImpl(); 
 }
 
 
 evp_pkey_st* PrivateKey::impl() const
 { 
-    return _impl->_pkey; 
+    return _impl->evp(); 
 }
 
 
-PrivateKey::Impl::Impl()
+PrivateKeyImpl::PrivateKeyImpl()
 : _pswd(), _pkey(0)
 {
 }
 
-PrivateKey::Impl::Impl(const std::string& password)
+PrivateKeyImpl::PrivateKeyImpl(const std::string& password)
 : _pswd(password), _pkey(0)
 {
 }
 
 
-PrivateKey::Impl::~Impl()
+PrivateKeyImpl::~PrivateKeyImpl()
 { 
     clear(); 
 }
 
 
-void PrivateKey::Impl::loadFromString(const std::string& keyData)
+void PrivateKeyImpl::fromPem(const char* data, size_t len)
 {
     // Clear previous key (if any)
     clear();
 
     // Create a read-only memory BIO from the given string
-    BioAutoPtr in( BIO_new_mem_buf( (void*) keyData.c_str(), keyData.length() ) );
+    BioAutoPtr in( BIO_new_mem_buf( (void*) data, len ) );
 
     // Try to read/parse the private key
-    _pkey = PEM_read_bio_PrivateKey(in.get(), 0, &PrivateKey::Impl::passwordCallback, (void*) &_pswd);
+    _pkey = PEM_read_bio_PrivateKey(in.get(), 0, &PrivateKeyImpl::passwordCallback, (void*) &_pswd);
     if(!_pkey)
         throw InvalidKey("Could not read/parse/decode private-key data!");
 }
 
 
-void PrivateKey::Impl::loadFromFile(const std::string& fileName)
+void PrivateKeyImpl::fromPem(std::istream& is)
 {
+    char rbuf[4096];
+    const std::streamsize rbufSize = sizeof(rbuf);
     std::string data;
-    readFileToString(fileName, data);
-    loadFromString(data);
+    while( is ) 
+    {
+        is.read(rbuf, rbufSize);
+        size_t count = size_t( is.gcount() );
+        data.append(rbuf, count);
+    }
+
+    fromPem( data.c_str(), data.size() );
 }
 
 
-void PrivateKey::Impl::clear()
+void PrivateKeyImpl::fromPemFile(const char* path)
+{
+    std::ifstream ifs(path, std::ios::binary);
+    fromPem(ifs);
+}
+
+
+void PrivateKeyImpl::clear()
 {
     if(_pkey) {
         EVP_PKEY_free(_pkey);
@@ -140,7 +157,7 @@ void PrivateKey::Impl::clear()
 }
 
 
-int PrivateKey::Impl::passwordCallback(char* buff, int num, int /*rwflag*/, void* userdata)
+int PrivateKeyImpl::passwordCallback(char* buff, int num, int /*rwflag*/, void* userdata)
 {
     // Get the password
     const std::string& password = *((std::string*) userdata);

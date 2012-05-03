@@ -51,16 +51,16 @@ class PT_SSL_API Context
         //! @brief Communication protocol.
         enum Protocol 
         {
-            DefaultProtocol, //!< not less than SSL version 3.
+            Default, //!< not less than SSL version 3.
             TLSv1,           //!< the latest standard for secure TCP communication.
             SSLv3,           //!< recommended for modern systems.
-            SSLv3or2,        //!< Srecommended for the most compatibility.
+            SSLv3or2,        //!< recommended for the most compatibility.
             SSLv2            //!< unsecure, not recommended.
         };
 
     public:
         //! @brief Construct with session id and protocol. 
-        Context(const char* sessionID = 0, Protocol protocol = DefaultProtocol);
+        Context(const char* sessionID = 0, Protocol protocol = Default);
 
         //! @brief Destructor.
         ~Context();
