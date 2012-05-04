@@ -50,10 +50,9 @@ class Server : public Pt::Connectable {
         {
             PT_SSL_LOG_S("Waiting connection from client");
 
-            _server.setActive(_loop);
-            _server.connectionPending() += Pt::slot(*this, &Server::onTCPAccept);
-
             _server.listen(addr, port);
+            _server.connectionPending() += Pt::slot(*this, &Server::onTCPAccept);
+            _server.setActive(_loop);
             _server.beginAccept();
         }
 
@@ -69,7 +68,6 @@ class Server : public Pt::Connectable {
             PT_SSL_LOG_S("Accepting connection from client");
             _client = new Pt::Net::TcpSocket;
             _client->setActive(_loop);
-
             _client->accept(server);
             _ios.attach(*_client);
 
@@ -338,7 +336,7 @@ int main(int argc, char** argv)
         Server server(loop, addr, port, serverContext);
         Client client(loop, addr, port, clientContext);
 
-        loop.setIdleTimeout(2000);
+        loop.setIdleTimeout(10000);
         loop.timeout() += Pt::slot(loop, &Pt::System::EventLoop::exit);
         loop.run();
 
