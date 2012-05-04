@@ -183,6 +183,7 @@
     <None Include="..\..\src\Pt-Net\tests\Jamfile" />
     <None Include="..\..\src\Pt-Net\tests\Makefile.am" />
     <None Include="..\..\src\Pt-Ssl\Jamfile" />
+    <None Include="..\..\src\Pt-Ssl\tests\Jamfile" />
     <None Include="..\..\src\Pt-System\Jamfile" />
     <None Include="..\..\src\Pt-System\Makefile.am" />
     <None Include="..\..\src\Pt-System\tests\Jamfile" />
@@ -214,6 +215,8 @@
     <ClCompile Include="..\..\src\Pt-Ssl\PrivateKey.cpp" />
     <ClCompile Include="..\..\src\Pt-Ssl\PublicKey.cpp" />
     <ClCompile Include="..\..\src\Pt-Ssl\SslError.cpp" />
+    <ClCompile Include="..\..\src\Pt-Ssl\tests\Pt-Ssl-test.cpp" />
+    <ClCompile Include="..\..\src\Pt-Ssl\tests\StreamBufferTest.cpp" />
     <ClCompile Include="..\..\src\Pt-System\Application.cpp" />
     <ClCompile Include="..\..\src\Pt-System\Clock.cpp" />
     <ClCompile Include="..\..\src\Pt-System\Condition.cpp" />

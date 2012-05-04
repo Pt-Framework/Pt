@@ -31,6 +31,9 @@
     <Filter Include="Pt-Ssl">
       <UniqueIdentifier>{7602e37c-c282-473a-9994-6f3f2aa3d84f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Pt-Ssl\tests">
+      <UniqueIdentifier>{391de8f1-84b5-444f-ba83-c095d53caabd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\Pt\Allocator.h">
@@ -580,6 +583,9 @@
     <None Include="..\..\src\Pt-Ssl\Jamfile">
       <Filter>Pt-Ssl</Filter>
     </None>
+    <None Include="..\..\src\Pt-Ssl\tests\Jamfile">
+      <Filter>Pt-Ssl\tests</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Pt\Atomicity.cpp">
@@ -1058,6 +1064,12 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Ssl\Context.cpp">
       <Filter>Pt-Ssl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Ssl\tests\Pt-Ssl-test.cpp">
+      <Filter>Pt-Ssl\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Ssl\tests\StreamBufferTest.cpp">
+      <Filter>Pt-Ssl\tests</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
