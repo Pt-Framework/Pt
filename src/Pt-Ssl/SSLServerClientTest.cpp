@@ -206,7 +206,7 @@ class Client : public Pt::Connectable {
                 return;
             }
 
-            const Pt::Ssl::SSLSession& sess = _ssl->buffer().getSession();
+            const Pt::Ssl::Session& sess = _ssl->buffer().session();
 
             PT_SSL_LOG_C("Peer CN = " << _ssl->buffer().getPeerCN());
             PT_SSL_LOG_C("Current cipher = \n" << _ssl->buffer().currentCipher().name());
@@ -310,7 +310,7 @@ int main(int argc, char** argv)
 
         Pt::System::MainLoop loop;
         std::string          addr("127.0.0.1");
-        unsigned short       port = 8000;
+        unsigned short       port = 6000;
 
         Pt::Ssl::CertificateList trustedCACert;
         trustedCACert.fromPemFile("ca.pem");
@@ -336,7 +336,7 @@ int main(int argc, char** argv)
         Server server(loop, addr, port, serverContext);
         Client client(loop, addr, port, clientContext);
 
-        loop.setIdleTimeout(10000);
+        loop.setIdleTimeout(30000);
         loop.timeout() += Pt::slot(loop, &Pt::System::EventLoop::exit);
         loop.run();
 

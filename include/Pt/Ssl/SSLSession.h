@@ -26,37 +26,38 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef PT_SSL_SSLSESSION_H
-#define PT_SSL_SSLSESSION_H
+#ifndef PT_SSL_SESSION_H
+#define PT_SSL_SESSION_H
 
 #include <Pt/Ssl/Api.h>
-#include <Pt/SmartPtr.h>
+#include <Pt/NonCopyable.h>
 
 namespace Pt {
 
 namespace Ssl {
 
 //! \brief SSL session.
-class PT_SSL_API SSLSession 
+class PT_SSL_API Session : public NonCopyable
 {
     public:
         //! \brief Instantiate an empty SSL session.
-        SSLSession();
-
-        //! \brief Copy ctor.
-        SSLSession(const SSLSession& sess);
-
-        //! \brief Standard dtor.
-        ~SSLSession();
+        Session();
 
         /// \internal Instantiate an SSL session from the given OpenSSL raw session handle.
-        SSLSession(ssl_session_st* sess);
+        Session(ssl_session_st* sess);
+
+        Session(const Session& sess);
+
+        //! \Session Standard dtor.
+        ~Session();
+
+        Session& operator=(const Session& sess);
 
         /// \internal Return the raw OpenSSL session handle.
-        ssl_session_st* impl(bool incRef) const;
+        ssl_session_st* impl() const;
         
     private:
-        ssl_session_st* _sess;
+        class SessionImpl* _impl;
 };
 
 } // namespace Ssl

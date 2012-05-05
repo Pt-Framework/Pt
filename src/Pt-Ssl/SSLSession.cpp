@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2010 by Aloysius Indrayanto
+ * Copyright (C) 2010-2012 by Marc Duerner
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -28,50 +29,93 @@
 
 #include <Pt/Ssl/SSLSession.h>
 #include <fstream>
-
 #include <openssl/ssl.h>
 
 namespace Pt {
+
 namespace Ssl {
 
-SSLSession::SSLSession()
-: _sess(0)
+class SessionImpl : private NonCopyable
+{
+    public:
+        SessionImpl(ssl_session_st* sess)
+        : _sess(sess)
+        , _refs(1)
+        {
+        }
+
+        ~SessionImpl()
+        { 
+            if(_sess)
+                SSL_SESSION_free(_sess); 
+        }
+
+        void addRef()
+        {
+            ++_refs;
+        }
+
+        void unref()
+        {
+            if(--_refs == 0)
+                delete this;
+        }
+
+        ssl_session_st* sslSession() const
+        { return _sess; }
+
+    private:
+        ssl_session_st* _sess;
+        unsigned _refs;
+};
+
+Session::Session()
+: _impl(0)
 {}
 
-SSLSession::SSLSession(const SSLSession& sess)
-: _sess(0)
-{
-    CRYPTO_w_lock(CRYPTO_LOCK_SSL_SESSION);
-    sess._sess->references++;
-    CRYPTO_w_unlock(CRYPTO_LOCK_SSL_SESSION);
 
-    _sess = sess._sess;
+Session::Session(ssl_session_st* sess)
+: _impl( new SessionImpl(sess) )
+{
 }
 
-SSLSession::~SSLSession()
-{ SSL_SESSION_free(_sess); }
 
-SSLSession::SSLSession(ssl_session_st* sess)
+Session::Session(const Session& sess)
+: _impl(sess._impl)
 {
-    CRYPTO_w_lock(CRYPTO_LOCK_SSL_SESSION);
-    sess->references++;
-    CRYPTO_w_unlock(CRYPTO_LOCK_SSL_SESSION);
-    
-    _sess = sess;
+    if(_impl)
+        _impl->addRef();
 }
 
-ssl_session_st* SSLSession::impl(bool incRef) const
-{
-    if(!_sess) return 0;
 
-    if(incRef) {
-        CRYPTO_w_lock(CRYPTO_LOCK_SSL_SESSION);
-        _sess->references++;
-        CRYPTO_w_unlock(CRYPTO_LOCK_SSL_SESSION);
-    }
-    
-    return _sess;
+Session::~Session()
+{ 
+    if(_impl)
+        _impl->unref();
+}
+
+
+Session& Session::operator=(const Session& sess)
+{
+    if(_impl)
+        _impl->unref();
+
+    _impl = sess._impl;
+    _impl->addRef();
+
+    return *this;
+}
+
+
+ssl_session_st* Session::impl() const
+{
+    if( ! _impl) 
+        return 0;
+
+    return _impl->sslSession();;
 }
 
 } // namespace Ssl
+
 } // namespace Pt
+

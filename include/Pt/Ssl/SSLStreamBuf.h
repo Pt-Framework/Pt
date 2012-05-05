@@ -85,12 +85,12 @@ class PT_SSL_API SSLStreamBuf : public Connectable, public std::streambuf
             The value returned by this function is only meaningful after a
             successful handshake.
         */
-        const SSLSession getSession() const;
+        Session session() const;
 
         /** @brief Set the current session data.
             It is only meaningful to call this function before starting any handshake.
         */
-        void setSession(const SSLSession& sess);
+        void setSession(const Session& sess);
 
         /** @brief Starts the server handshake
             After this method has been called, the first handshake message

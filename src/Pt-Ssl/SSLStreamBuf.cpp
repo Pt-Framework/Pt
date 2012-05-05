@@ -195,20 +195,22 @@ const std::string SSLStreamBuf::getPeerCN() const
 }
 
 
-const SSLSession SSLStreamBuf::getSession() const
+Session SSLStreamBuf::session() const
 {
-    if(!_ssl) return SSLSession();
+    if(!_ssl) 
+        return Session();
 
-    SSL_SESSION* sess = SSL_get0_session(_ssl);
-    if(!_ssl) return SSLSession(); // No session available
+    SSL_SESSION* sess = SSL_get1_session(_ssl);
+    if( ! sess) 
+        return Session(); // No session available
 
-   return SSLSession(sess);
+   return Session(sess);
 }
 
 
-void SSLStreamBuf::setSession(const SSLSession& sess)
+void SSLStreamBuf::setSession(const Session& sess)
 {
-    SSL_SESSION* rsess = sess.impl(true);
+    SSL_SESSION* rsess = sess.impl();
     if(!rsess)
         throw SessionFailed("Invalid session data!");
 

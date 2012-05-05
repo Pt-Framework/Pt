@@ -29,8 +29,10 @@
 #ifndef PT_SSL_CONTEXT_H
 #define PT_SSL_CONTEXT_H
 
+#include <Pt/Ssl/Api.h>
 #include <Pt/Ssl/PrivateKey.h>
 #include <Pt/Ssl/CertificateList.h>
+#include <Pt/NonCopyable.h>
 #include <string>
 
 namespace Pt {
@@ -45,7 +47,7 @@ static struct PT_SSL_API SSLInit
 } ssl_init;
 
 //! @brief Context for SSL connections.
-class PT_SSL_API Context
+class PT_SSL_API Context : public NonCopyable
 {
     public:
         //! @brief Communication protocol.
