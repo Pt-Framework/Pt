@@ -76,6 +76,13 @@ class Server : public Pt::Connectable {
             _ssl->beginHandshake(true, true);
 
             _ssl->handshakeFinished += Pt::slot(*this, &Server::onSSLHandshakeFinished);
+            _ssl->shutdownFinished += Pt::slot(*this, &Server::onSSLShutdownFinished);
+        }
+
+        void onSSLShutdownFinished(Pt::Ssl::SSLServer& ssl)
+        {
+            PT_SSL_LOG_S("*** HANDSHAKE FINISHED ***");
+            _loop.exit();
         }
 
         void onSSLHandshakeFinished(Pt::Ssl::SSLServer& ssl)

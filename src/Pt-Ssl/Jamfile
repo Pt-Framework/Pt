@@ -9,12 +9,12 @@ SharedLibrary Pt-Ssl : CertificateList.cpp
                        Context.cpp
                        PrivateKey.cpp
                        PublicKey.cpp
+                       Session.cpp
                        SslError.cpp
                        Utils.cpp
                        SSLStreamBuf.cpp
                        SSLServer.cpp
-                       SSLClient.cpp
-                       SSLSession.cpp ;
+                       SSLClient.cpp ;
 
 LinkSharedLibraries Pt-Ssl : Pt Pt-Net Pt-System ;
 LinkLibraries Pt-Ssl : Pt-Ssl-openssl ;

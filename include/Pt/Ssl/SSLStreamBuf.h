@@ -31,7 +31,7 @@
 
 #include <Pt/Ssl/Api.h>
 #include <Pt/Ssl/Context.h>
-#include <Pt/Ssl/SSLSession.h>
+#include <Pt/Ssl/Session.h>
 #include <Pt/Ssl/CipherList.h>
 #include <Pt/Signal.h>
 #include <string>
