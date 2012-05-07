@@ -47,8 +47,10 @@ SSLClient::SSLClient(Pt::System::IOStream& ios, Context& ctx, const char* sessio
     std::iostream::init(&_sslbuf);
 }
 
+
 SSLClient::~SSLClient()
 {}
+
 
 void SSLClient::beginHandshake(bool verifyServerCert)
 {

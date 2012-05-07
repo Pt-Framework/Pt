@@ -176,18 +176,20 @@ bool StreamBuffer::connected() const
 }
 
 
-const char* StreamBuffer::getStatusString() const
+const char* StreamBuffer::getStatus() const
 { 
-  return SSL_state_string_long(_ssl); 
+    return SSL_state_string_long(_ssl); 
 }
 
 
-const std::string StreamBuffer::getPeerCN() const
+std::string StreamBuffer::peerName() const
 {
-    if(SSL_get_verify_result(_ssl) != X509_V_OK) return "";
+    if(SSL_get_verify_result(_ssl) != X509_V_OK) 
+        return std::string();
 
     X509* peer = SSL_get_peer_certificate(_ssl);
-    if(!peer) return "";
+    if( ! peer) 
+        return std::string();
 
     char peerCN[256];
     int  ret = X509_NAME_get_text_by_NID(X509_get_subject_name(peer), NID_commonName, peerCN, sizeof(peerCN));
@@ -223,9 +225,12 @@ void StreamBuffer::beginServerHandshake(bool verifyClientCert, bool requireCertB
 {
     _handshakeStarted = true;
 
-    if(verifyClientCert) {
-        if(requireCertBasedAuth) SSL_set_verify(_ssl, SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT, NULL);
-        else                     SSL_set_verify(_ssl, SSL_VERIFY_PEER, NULL);
+    if(verifyClientCert) 
+    {
+        if(requireCertBasedAuth) 
+            SSL_set_verify(_ssl, SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT, NULL);
+        else                     
+            SSL_set_verify(_ssl, SSL_VERIFY_PEER, NULL);
     }
 
     SSL_set_accept_state(_ssl);
@@ -236,7 +241,8 @@ void StreamBuffer::beginClientHandshake(bool verifyServerCert)
 {
     _handshakeStarted = true;
 
-    if(verifyServerCert) SSL_set_verify(_ssl, SSL_VERIFY_PEER, NULL);
+    if(verifyServerCert) 
+        SSL_set_verify(_ssl, SSL_VERIFY_PEER, NULL);
 
     SSL_set_connect_state(_ssl);
     this->writeHandshake();
@@ -245,9 +251,9 @@ void StreamBuffer::beginClientHandshake(bool verifyServerCert)
 
 bool StreamBuffer::writeHandshake()
 {
-    PT_SSL_LOG("getStatusString() = " << getStatusString());
+    PT_SSL_LOG("getStatus() = " << getStatus());
 
-    if(!SSL_want_read(_ssl))
+    if( ! SSL_want_read(_ssl) )
     {
         const int ret = SSL_do_handshake(_ssl);
         PT_SSL_LOG("SSL_do_handshake() = " << ret);
@@ -255,14 +261,15 @@ bool StreamBuffer::writeHandshake()
         if(ret <= 0)
         {
             const int sslerr = SSL_get_error(_ssl, ret);
-            if(sslerr != SSL_ERROR_WANT_READ && sslerr != SSL_ERROR_WANT_WRITE) {
+            if(sslerr != SSL_ERROR_WANT_READ && sslerr != SSL_ERROR_WANT_WRITE) 
+            {
                 _handshakeError = true;
                 return false;
             }
         }
     }
 
-    if(BIO_pending(_out))
+    if( BIO_pending(_out) )
     {
         char buff[1000];
         const int n = BIO_read(_out, buff, sizeof(buff));
@@ -282,7 +289,7 @@ bool StreamBuffer::writeHandshake()
 
 bool StreamBuffer::readHandshake()
 {
-    PT_SSL_LOG("getStatusString() = " << getStatusString());
+    PT_SSL_LOG("getStatus() = " << getStatus());
 
     char buf[1000];
 
@@ -311,7 +318,8 @@ bool StreamBuffer::readHandshake()
             if( ret <= 0 )
             {
                 int sslerr = SSL_get_error(_ssl, ret);
-                if( sslerr != SSL_ERROR_WANT_READ && sslerr != SSL_ERROR_WANT_WRITE) {
+                if( sslerr != SSL_ERROR_WANT_READ && sslerr != SSL_ERROR_WANT_WRITE) 
+                {
                     _handshakeError = true;
                     return false;
                 }
@@ -325,6 +333,12 @@ bool StreamBuffer::readHandshake()
     }
 
     return true;
+}
+
+
+bool StreamBuffer::handshakeError() const
+{ 
+    return _handshakeError; 
 }
 
 
@@ -343,7 +357,8 @@ std::streamsize StreamBuffer::import()
 
             // Shutdown?
             const int shutdownState = SSL_get_shutdown(_ssl);
-            if(shutdownState & SSL_RECEIVED_SHUTDOWN) {
+            if(shutdownState & SSL_RECEIVED_SHUTDOWN) 
+            {
                 PT_SSL_LOG("Received shutdown notification");
                 //this->shutdown();
                 return -1;

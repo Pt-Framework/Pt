@@ -96,7 +96,7 @@ class Server : public Pt::Connectable {
                 return;
             }
 
-            PT_SSL_LOG_S("Peer CN = " << _ssl->buffer().getPeerCN());
+            PT_SSL_LOG_S("Peer CN = " << _ssl->buffer().peerName());
             PT_SSL_LOG_S("Current cipher = \n" << _ssl->buffer().currentCipher().name());
 
             _ios.buffer().inputReady() += Pt::slot(*this, &Server::onInput);
@@ -215,7 +215,7 @@ class Client : public Pt::Connectable {
 
             const Pt::Ssl::Session& sess = _ssl->buffer().session();
 
-            PT_SSL_LOG_C("Peer CN = " << _ssl->buffer().getPeerCN());
+            PT_SSL_LOG_C("Peer CN = " << _ssl->buffer().peerName());
             PT_SSL_LOG_C("Current cipher = \n" << _ssl->buffer().currentCipher().name());
 
             _ios.buffer().inputReady() += Pt::slot(*this, &Client::onInput);

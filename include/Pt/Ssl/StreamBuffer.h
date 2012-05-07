@@ -70,13 +70,9 @@ class PT_SSL_API StreamBuffer : public Connectable, public std::streambuf
         */
         bool connected() const;
 
-        /** @brief Get the current status string of this SSL stream buffer. 
-        */
-        const char* getStatusString() const;
-
         /** @brief Get the peer CN (Common Name). 
         */
-        const std::string getPeerCN() const;
+        std::string peerName() const;
 
         /** @brief Get the current session data.
             
@@ -123,8 +119,7 @@ class PT_SSL_API StreamBuffer : public Connectable, public std::streambuf
             
             Returns true if the handshake was a failure
         */
-        inline bool handshakeError() const
-        { return _handshakeError; }
+        bool handshakeError() const;
 
         /** @brief Reads user message from the underlying stream
             
@@ -141,6 +136,10 @@ class PT_SSL_API StreamBuffer : public Connectable, public std::streambuf
         virtual int_type underflow();
         virtual int_type overflow(int_type ch);
         std::streamsize do_underflow(std::streamsize size);
+
+        /** @brief Get the current status string of this SSL stream buffer. 
+        */
+        const char* getStatus() const;
 
     protected:
         bio_st*        _in;  // Input BIO
