@@ -14,7 +14,7 @@ let colors_name = "pt"
 
 " Vim >= 7.0 specific colors
 if version >= 700
-  hi CursorLine guibg=#202020 ctermbg=236
+  hi CursorLine guibg=#161616 ctermbg=236
   hi CursorColumn guibg=#2d2d2d ctermbg=236
   hi MatchParen guifg=#d0ffc0 guibg=#2f2f2f gui=bold ctermfg=157 ctermbg=237 cterm=bold
   hi Pmenu 		guifg=#ffffff guibg=#444444 ctermfg=255 ctermbg=238
@@ -22,7 +22,7 @@ if version >= 700
 endif
 
 " General colors
-hi Cursor       guifg=#faf4c6 guibg=#656565 gui=none ctermbg=241
+hi cursor       guifg=black   guibg=yellow gui=none ctermbg=241
 hi Normal       guifg=#c0c0c0 guibg=#101010 gui=none ctermfg=253 ctermbg=234
 hi NonText      guifg=#101010 guibg=#101010 gui=none ctermfg=244 ctermbg=235
 hi LineNr       guifg=#808080 guibg=#151515 gui=none ctermfg=244 ctermbg=232
@@ -32,7 +32,7 @@ hi VertSplit    guifg=#000000 guibg=#444444 gui=none ctermfg=238 ctermbg=238
 hi Folded       guibg=#384048 guifg=#a0a8b0 gui=none ctermbg=4 ctermfg=248
 hi FoldColumn   guibg=#151515 guifg=darkyellow 
 hi Title        guifg=#f6f3e8 guibg=NONE	gui=bold ctermfg=254 cterm=bold
-hi Visual       guifg=#faf4c6 guibg=#3c414c gui=none ctermfg=254 ctermbg=4
+hi Visual       guifg=#ffffff guibg=#3c414c gui=none ctermfg=254 ctermbg=4
 hi SpecialKey   guifg=#808080 guibg=#343434 gui=none ctermfg=244 ctermbg=236
 hi IncSearch    guifg=#3c414c guibg=#faf4c6
 hi Search       guifg=cyan guibg=NONE

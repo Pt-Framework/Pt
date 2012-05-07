@@ -114,8 +114,8 @@ endfunction
 :noremap! <C-o> <C-o>:call ToggleOpenWindow()<CR>
 
 " Save current file
-:noremap <C-s> :w<CR>
-:noremap! <C-s> <C-o>:w<CR>
+:noremap <C-s> :w!<CR>
+:noremap! <C-s> <C-o>:w!<CR>
 
 " Window commands also for insert mode
 :inoremap <C-w>q <C-o><C-w>q

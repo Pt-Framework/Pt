@@ -1,73 +1,72 @@
-
-let s:project_file = expand("<sfile>")
-
-let s:project_dir = strpart(s:project_file, 0, match(s:project_file, "pt-project.vim"))
-exec "cd " . s:project_dir
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Set project directory
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+exec "cd " . expand("<sfile>:h")
 exec "cd .."
-let g:build_root = getcwd()
+let g:pt_project_root = getcwd()
 
-let &path = g:build_root . "/include," . g:build_root . "/src/Pt," . g:build_root . "/src/Pt-System," . ","
-
+"
+" Load last session
+"
 :silent! so Session.vim
 
 :nmap _g :grep <C-R>=expand("<cword>")<CR><CR>
 
-if filereadable(g:build_root . "/pt.tags")
-    let &tags = g:build_root . "/pt.tags"
-else
-    let s:confirmed = confirm("Do you want to generate tags?", "&Yes\n&No", 2)
-    if s:confirmed == 1
-        :call system("ctags -f pt.tags --c-kinds=+p --fields=+iaS --extra=+q --language-force=C++ -IPT_API include/Pt/*.h src/Pt/*.cpp")
-        :call system("ctags --append=on -f pt.tags --c-kinds=+p --fields=+iaS --extra=+q --language-force=C++ -IPT_SYSTEM_API include/Pt/System/*.h src/Pt-System/*.cpp")
-        :call system("ctags --append=on -f pt.tags --c-kinds=+p --fields=+iaS --extra=+q --language-force=C++ -IPT_XMLRPC_API include/Pt/XmlRpc/*.h src/Pt-XmlRpc/*.cpp")
-        let &tags = g:build_root . "/pt.tags" 
-    endif
-endif
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" C-Tags support
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+let s:ctags_file   = "pt.tags"
+let s:ctags_create = "ctags -f " . s:ctags_file . " --c-kinds=+p --fields=+iaS --extra=+q --language-force=C++ "  
+let s:ctags_append = "ctags --append=on -f " . s:ctags_file . " --c-kinds=+p --fields=+iaS --extra=+q --language-force=C++ "
 
-"
-" Build command
-"
-if has('win32')
-    let s:makeprg_line="jam.bat -q $*"
-    let &makeprg=s:makeprg_line
-    let g:make_target=''
-    "let g:build_root=''
-else
-    let s:makeprg_line="./jam.sh -q $*"
-    let &makeprg=s:makeprg_line
-    let g:make_target=''
-    "let g:build_root=''
-endif
-
-" See also (very nice!!!) http://blog.vicshih.com/2011/03/fast-make-for-vim.html
-function BuildMake(make_args)
-  " close QuickFix window (content is now outdated due to new build run)
-  cclose
-
-  " Force write
-  sil write!
-
-  " http://vim.1045645.n5.nabble.com/Working-directory-for-make-td1172840.html
-  " http://stackoverflow.com/questions/1043432/omit-pattern-not-found-error-message-in-vim-script
-  let cmd_cd='sil lcd ' . g:build_root
-  exe cmd_cd
-  
-  " pwd
-  " need to use "exe" to get variables evaluated properly:
-  " http://stackoverflow.com/questions/4596932/vim-cd-to-path-stored-in-variable
-  " and we should _not_ run exe on the raw line directly, since this will execute _output_
-  " results given by make!
-  let cmd_make="make" . a:make_args
-  exe cmd_make
-  
-  " open quickfix win if there are errors
-  botright copen
-
-  "copen
-  "cc 1 " this does not appear to be necessary since opening the window will jump to first issue anyway
-  sil lcd -
+function TagsBuild()
+    :call system(s:ctags_create . "-IPT_API include/Pt/*.h src/Pt/*.cpp")
+    :call system(s:ctags_append . "-IPT_SYSTEM_API include/Pt/System/*.h src/Pt-System/*.cpp")
+    :call system(s:ctags_append . "-IPT_NET_API include/Pt/Net/*.h src/Pt-Net/*.cpp")
+    :call system(s:ctags_append . "-IPT_UNIT_API include/Pt/Unit/*.h src/Pt-Unit/*.cpp")
+    :call system(s:ctags_append . "-IPT_SSL_API include/Pt/Ssl/*.h src/Pt-Ssl/*.cpp")
+    :call system(s:ctags_append . "-IPT_HTTP_API include/Pt/Http/*.h src/Pt-Http/*.cpp")
+    :call system(s:ctags_append . "-IPT_XML_API include/Pt/Xml/*.h src/Pt-Xml/*.cpp")
+    :call system(s:ctags_append . "-IPT_XMLRPC_API include/Pt/XmlRpc/*.h src/Pt-XmlRpc/*.cpp")
+    let &tags = g:pt_project_root . "/" . s:ctags_file
 endfunction
 
-:noremap <F5> :call BuildMake(g:make_target)<CR>
-:noremap! <F5> <C-o>:call BuildMake(g:make_target)<CR>
+if ! filereadable(g:pt_project_root . "/" . s:ctags_file)
+    let s:confirmed = confirm("Do you want to generate tags?", "&Yes\n&No", 2)
+    if s:confirmed == 1
+        :call TagsBuild()
+    endif
+else
+    let &tags = g:pt_project_root . "/" . s:ctags_file
+endif
+
+command! PtTagsBuild :call TagsBuild()
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Jam build support
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+let g:jam_args = ''
+
+if has('win32')
+    let &makeprg = "jam.bat -q $*"
+else
+    let &makeprg = "./jam.sh -q $*"
+endif
+
+function Build(args)
+    " See also (very nice!!!) http://blog.vicshih.com/2011/03/fast-make-for-vim.html
+    " close QuickFix window (content is now outdated due to new build run)
+    cclose
+    sil wall!
+    exe "sil lcd " . g:pt_project_root
+    exe "make " . a:args 
+    botright copen
+    "cc 1 "j umps to first error
+    sil lcd -
+endfunction
+
+:noremap <F5> :call Build(g:jam_args)<CR>
+:noremap! <F5> <C-o>:call Build(g:jam_args)<CR>
+
+command! PtBuild :call Build('')
 
