@@ -24,8 +24,8 @@ SharedLibrary Pt-Ssl : CertificateList.cpp
                        PublicKey.cpp
                        Session.cpp
                        SslError.cpp
+                       StreamBuffer.cpp
                        Utils.cpp
-                       SSLStreamBuf.cpp
                        SSLServer.cpp
                        SSLClient.cpp ;
 

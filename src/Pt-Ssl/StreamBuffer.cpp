@@ -28,7 +28,7 @@
  */
 
 #include "Utils.h"
-#include <Pt/Ssl/SSLStreamBuf.h>
+#include <Pt/Ssl/StreamBuffer.h>
 #include <Pt/System/IOError.h>
 #include <openssl/ssl.h>
 #include <openssl/err.h>

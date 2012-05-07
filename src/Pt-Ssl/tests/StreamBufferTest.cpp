@@ -31,7 +31,7 @@
 #include "Pt/Unit/RegisterTest.h"
 #include "Pt/Ssl/CertificateList.h"
 #include "Pt/Ssl/Context.h"
-#include "Pt/Ssl/SSLStreamBuf.h"
+#include "Pt/Ssl/StreamBuffer.h"
 #include "Pt/System/Logger.h"
 #include <sstream>
 

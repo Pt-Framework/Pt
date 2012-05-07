@@ -29,7 +29,7 @@
 #ifndef PT_SSL_CLIENT_H
 #define PT_SSL_CLIENT_H
 
-#include <Pt/Ssl/SSLStreamBuf.h>
+#include <Pt/Ssl/StreamBuffer.h>
 #include <Pt/System/IOStream.h>
 
 namespace Pt {

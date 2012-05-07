@@ -501,6 +501,9 @@
     <ClInclude Include="..\..\include\Pt\Ssl\Context.h">
       <Filter>Pt-Ssl</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Ssl\StreamBuffer.h">
+      <Filter>Pt-Ssl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -1070,6 +1073,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Ssl\tests\StreamBufferTest.cpp">
       <Filter>Pt-Ssl\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Ssl\StreamBuffer.cpp">
+      <Filter>Pt-Ssl</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
