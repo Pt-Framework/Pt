@@ -45,89 +45,94 @@ namespace Ssl {
 class PT_SSL_API StreamBuffer : public Connectable, public std::streambuf
 {
     public:
-        /** \brief Construct an SSL stream buffer that uses the given IO stream and SSL context. 
+        /** @brief Construct an SSL stream buffer that uses the given IO stream and SSL context. 
         */
         StreamBuffer(std::iostream& ios, Context& ctx, const char* sessionID = 0, size_t bufferSize = 1024);
 
-        /** \brief Standard dtor. 
+        /** @brief Standard dtor. 
         */
         virtual ~StreamBuffer();
 
-        /** \brief Return the current protocol. 
+        /** @brief Return the current protocol. 
         */
         inline Context::Protocol protocol() const
         { return _protocol; }
 
-        /** \brief Return a list of available ciphers for the current protocol. 
+        /** @brief Return a list of available ciphers for the current protocol. 
         */
-        //std::vector<CipherInfo> availableCiphers() const;
-
         CipherList ciphers() const;
 
-        /** \brief Return the currently used cipher (the cipher that are actually used to form the SSL channel). 
+        /** @brief Return the currently used cipher (the cipher that are actually used to form the SSL channel). 
         */
-        //CipherInfo currentCipher() const;
         Cipher currentCipher() const;
 
-        /** \brief Check if this SSL stream buffer has been connected to the SSL stream buffer at the other end. 
+        /** @brief Check if this SSL stream buffer has been connected to the SSL stream buffer at the other end. 
         */
         bool connected() const;
 
-        /** \brief Get the current status string of this SSL stream buffer. 
+        /** @brief Get the current status string of this SSL stream buffer. 
         */
         const char* getStatusString() const;
 
-        /** \brief Get the peer CN (Common Name). 
+        /** @brief Get the peer CN (Common Name). 
         */
         const std::string getPeerCN() const;
 
         /** @brief Get the current session data.
+            
             The value returned by this function is only meaningful after a
             successful handshake.
         */
         Session session() const;
 
         /** @brief Set the current session data.
+            
             It is only meaningful to call this function before starting any handshake.
         */
         void setSession(const Session& sess);
 
         /** @brief Starts the server handshake
+            
             After this method has been called, the first handshake message
             can be read from the client.
         */
         void beginServerHandshake(bool verifyClientCert, bool requireCertBasedAuth);
 
         /** @brief Starts the client handshake
+            
             After this method has been called, the first handshake message
             can be written to the server.
         */
         void beginClientHandshake(bool verifyServerCert);
 
         /** @brief Writes a handshake message to the underlying stream
+            
             Returns true if at least a part of the handshake message was
             written, false if the handshake message is complete.
         */
         bool writeHandshake();
 
         /** @brief Reads handshake message from the underlying stream
+            
             Returns true if more handshake data needs to be read, false
             if the handshake message is complete.
         */
         bool readHandshake();
 
         /** @brief Reads the handshake status
+            
             Returns true if the handshake was a failure
         */
         inline bool handshakeError() const
         { return _handshakeError; }
 
         /** @brief Reads user message from the underlying stream
+            
             Returns the number bytes in the message or -1 if the other peer has shutdown the stream.
         */
         std::streamsize import();
 
-        /** \brief Shutdown this SSL stream buffer. 
+        /** @brief Shutdown this SSL stream buffer. 
         */
         void shutdown();
 
@@ -144,15 +149,14 @@ class PT_SSL_API StreamBuffer : public Connectable, public std::streambuf
         std::iostream* _ios; // IO
 
     private:
-        size_t               _ibufferSize;
-        char*                _ibuffer;
-        std::size_t          _obufferSize;
-        char*                _obuffer;
-        const size_t         _pbmax;
-        bool                 _oextend;
-        bool                 _handshakeStarted;
-        bool                 _handshakeError;
-        Context::Protocol _protocol; // Selected SSL protocol
+        size_t            _ibufferSize;
+        char*             _ibuffer;
+        std::size_t       _obufferSize;
+        char*             _obuffer;
+        const size_t      _pbmax;
+        bool              _handshakeStarted;
+        bool              _handshakeError;
+        Context::Protocol _protocol;
 };
 
 } // namespace Ssl
