@@ -26,8 +26,8 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef PT_SSL_SSLSTREAMBUF_H
-#define PT_SSL_SSLSTREAMBUF_H
+#ifndef PT_SSL_StreamBuffer_H
+#define PT_SSL_StreamBuffer_H
 
 #include <Pt/Ssl/Api.h>
 #include <Pt/Ssl/Context.h>
@@ -42,16 +42,16 @@ namespace Ssl {
 
 /** @brief SSL stream buffer.
 */
-class PT_SSL_API SSLStreamBuf : public Connectable, public std::streambuf
+class PT_SSL_API StreamBuffer : public Connectable, public std::streambuf
 {
     public:
         /** \brief Construct an SSL stream buffer that uses the given IO stream and SSL context. 
         */
-        SSLStreamBuf(std::iostream& ios, Context& ctx, const char* sessionID = 0, size_t bufferSize = 1024);
+        StreamBuffer(std::iostream& ios, Context& ctx, const char* sessionID = 0, size_t bufferSize = 1024);
 
         /** \brief Standard dtor. 
         */
-        virtual ~SSLStreamBuf();
+        virtual ~StreamBuffer();
 
         /** \brief Return the current protocol. 
         */
@@ -159,4 +159,4 @@ class PT_SSL_API SSLStreamBuf : public Connectable, public std::streambuf
 
 } // namespace Pt
 
-#endif
+#endif // PT_SSL_StreamBuffer_H

@@ -48,11 +48,11 @@ class PT_SSL_API SSLClient : public std::iostream, public Pt::Connectable
         virtual ~SSLClient();
 
         /** \brief Return the internal SSLStreamBuf instance. */
-        inline SSLStreamBuf& buffer()
+        inline StreamBuffer& buffer()
         { return _sslbuf; }
 
-        /** \brief Return the internal SSLStreamBuf instance. */
-        inline const SSLStreamBuf& buffer() const
+        /** \brief Return the internal StreamBuffer instance. */
+        inline const StreamBuffer& buffer() const
         { return _sslbuf; }
 
         /** @brief Starts the client handshake
@@ -84,7 +84,7 @@ class PT_SSL_API SSLClient : public std::iostream, public Pt::Connectable
 
     private:
         System::IOStream* _ios;
-        SSLStreamBuf      _sslbuf;
+        StreamBuffer      _sslbuf;
 };
 
 } // namespace Ssl

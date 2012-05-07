@@ -39,10 +39,10 @@ namespace Ssl {
 
 ///// Logger for Pt-SSL ////////////////////////////////////////////////////////////////////////////
 log_define(PT_SSL_LOGGER_CATEGORY);
-#define PT_SSL_LOG(CODE) PT_SSL_LOG_INFO("SSLStreamBuf", CODE)
+#define PT_SSL_LOG(CODE) PT_SSL_LOG_INFO("StreamBuffer", CODE)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-SSLStreamBuf::SSLStreamBuf(std::iostream& ios, Context& ctx, const char* sessionID, size_t bufferSize)
+StreamBuffer::StreamBuffer(std::iostream& ios, Context& ctx, const char* sessionID, size_t bufferSize)
 : _in (0),
   _out(0),
   _ssl(0),
@@ -79,13 +79,13 @@ SSLStreamBuf::SSLStreamBuf(std::iostream& ios, Context& ctx, const char* session
 }
 
 
-SSLStreamBuf::~SSLStreamBuf()
+StreamBuffer::~StreamBuffer()
 { 
     SSL_free(_ssl); 
 }
 
 
-/*std::vector<CipherInfo> SSLStreamBuf::availableCiphers() const
+/*std::vector<CipherInfo> StreamBuffer::availableCiphers() const
 {
     std::vector<CipherInfo> availCiphers;
 
@@ -133,7 +133,7 @@ SSLStreamBuf::~SSLStreamBuf()
 }*/
 
 /*
-void SSLStreamBuf::setCiphers(const std::vector<SSLCipherInfo>& ciphers)
+void StreamBuffer::setCiphers(const std::vector<SSLCipherInfo>& ciphers)
 {
     if(_handshakeStarted)
         throw SSLRuntimeError(
@@ -153,7 +153,7 @@ void SSLStreamBuf::setCiphers(const std::vector<SSLCipherInfo>& ciphers)
 }
 */
 
-CipherList SSLStreamBuf::ciphers() const
+CipherList StreamBuffer::ciphers() const
 {
     // TODO: possibly cache the available ciphers in the context
     STACK_OF(SSL_CIPHER)* ciphers = SSL_get_ciphers(_ssl);
@@ -161,7 +161,7 @@ CipherList SSLStreamBuf::ciphers() const
 }
 
 
-Cipher SSLStreamBuf::currentCipher() const
+Cipher StreamBuffer::currentCipher() const
 {
     // TODO: possibly return a Cipher that has internally a reference to a 
     //       CipherData in the context cache
@@ -170,19 +170,19 @@ Cipher SSLStreamBuf::currentCipher() const
 }
 
 
-bool SSLStreamBuf::connected() const
+bool StreamBuffer::connected() const
 { 
     return SSL_get_state(_ssl) == SSL_ST_OK; 
 }
 
 
-const char* SSLStreamBuf::getStatusString() const
+const char* StreamBuffer::getStatusString() const
 { 
   return SSL_state_string_long(_ssl); 
 }
 
 
-const std::string SSLStreamBuf::getPeerCN() const
+const std::string StreamBuffer::getPeerCN() const
 {
     if(SSL_get_verify_result(_ssl) != X509_V_OK) return "";
 
@@ -195,7 +195,7 @@ const std::string SSLStreamBuf::getPeerCN() const
 }
 
 
-Session SSLStreamBuf::session() const
+Session StreamBuffer::session() const
 {
     if(!_ssl) 
         return Session();
@@ -208,7 +208,7 @@ Session SSLStreamBuf::session() const
 }
 
 
-void SSLStreamBuf::setSession(const Session& sess)
+void StreamBuffer::setSession(const Session& sess)
 {
     SSL_SESSION* rsess = sess.impl();
     if(!rsess)
@@ -219,7 +219,7 @@ void SSLStreamBuf::setSession(const Session& sess)
 }
 
 
-void SSLStreamBuf::beginServerHandshake(bool verifyClientCert, bool requireCertBasedAuth)
+void StreamBuffer::beginServerHandshake(bool verifyClientCert, bool requireCertBasedAuth)
 {
     _handshakeStarted = true;
 
@@ -232,7 +232,7 @@ void SSLStreamBuf::beginServerHandshake(bool verifyClientCert, bool requireCertB
 }
 
 
-void SSLStreamBuf::beginClientHandshake(bool verifyServerCert)
+void StreamBuffer::beginClientHandshake(bool verifyServerCert)
 {
     _handshakeStarted = true;
 
@@ -243,7 +243,7 @@ void SSLStreamBuf::beginClientHandshake(bool verifyServerCert)
 }
 
 
-bool SSLStreamBuf::writeHandshake()
+bool StreamBuffer::writeHandshake()
 {
     PT_SSL_LOG("getStatusString() = " << getStatusString());
 
@@ -280,7 +280,7 @@ bool SSLStreamBuf::writeHandshake()
 }
 
 
-bool SSLStreamBuf::readHandshake()
+bool StreamBuffer::readHandshake()
 {
     PT_SSL_LOG("getStatusString() = " << getStatusString());
 
@@ -328,7 +328,7 @@ bool SSLStreamBuf::readHandshake()
 }
 
 
-std::streamsize SSLStreamBuf::import()
+std::streamsize StreamBuffer::import()
 {
     if(_ios)
     {
@@ -355,7 +355,7 @@ std::streamsize SSLStreamBuf::import()
 }
 
 
-void SSLStreamBuf::shutdown()
+void StreamBuffer::shutdown()
 {
     const int res = SSL_shutdown(_ssl);
     PT_SSL_LOG("SSL_shutdown() = " << res);
@@ -383,7 +383,7 @@ void SSLStreamBuf::shutdown()
 }
 
 
-int SSLStreamBuf::sync()
+int StreamBuffer::sync()
 {
     if( ! _ios ) return 0;
 
@@ -403,7 +403,7 @@ int SSLStreamBuf::sync()
 }
 
 
-SSLStreamBuf::int_type SSLStreamBuf::underflow()
+StreamBuffer::int_type StreamBuffer::underflow()
 {
     if( ! _ios )
         return traits_type::eof();
@@ -420,7 +420,7 @@ SSLStreamBuf::int_type SSLStreamBuf::underflow()
 }
 
 
-std::streamsize SSLStreamBuf::do_underflow(std::streamsize isize)
+std::streamsize StreamBuffer::do_underflow(std::streamsize isize)
 {
     if(! _ios) return 0;
 
@@ -515,11 +515,11 @@ std::streamsize SSLStreamBuf::do_underflow(std::streamsize isize)
 }
 
 
-SSLStreamBuf::int_type SSLStreamBuf::overflow(int_type ch)
+StreamBuffer::int_type StreamBuffer::overflow(int_type ch)
 {
     // We are being called when _obuffer, the output buffer area of the
     // i/o stream is full, or needs to be flushed. In case of a flush,
-    // the eof character is passed to overflow(). When SSLStreamBuf is
+    // the eof character is passed to overflow(). When StreamBuffer is
     // constructed no output buffer area exists, therefore when overflow
     // is called for the first time, we need to set it up.
     if( ! _ios )
