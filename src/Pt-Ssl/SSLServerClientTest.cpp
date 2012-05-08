@@ -42,66 +42,63 @@ log_define(PT_SSL_LOGGER_CATEGORY);
 #define PT_SSL_LOG_M(CODE) PT_SSL_LOG_INFO("@@ main() @@", CODE)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class Server : public Pt::Connectable {
+class Server : public Pt::Connectable 
+{
     public:
-        Server(Pt::System::EventLoop& loop, const std::string& addr, unsigned short port,
-               Pt::Ssl::Context& sslServerContext)
-        : _sslContext(sslServerContext), _ssl(0), _ios(8192, true), _loop(loop), _client(0)
+        Server(Pt::System::EventLoop& loop, Pt::Ssl::Context& ctx,
+               const std::string& addr, unsigned short port)
+        : _sslContext(ctx)
+        , _ssl(0)
+        , _ios(8192, true)
+        , _loop(loop)
+        , _socket(0)
         {
             PT_SSL_LOG_S("Waiting connection from client");
-
             _server.listen(addr, port);
-            _server.connectionPending() += Pt::slot(*this, &Server::onTCPAccept);
+            _server.connectionPending() += Pt::slot(*this, &Server::onAccept);
             _server.setActive(_loop);
             _server.beginAccept();
         }
 
         ~Server()
         {
-            delete _client;
+            delete _socket;
             delete _ssl;
         }
 
    private:
-        void onTCPAccept(Pt::Net::TcpServer& server)
+        void onAccept(Pt::Net::TcpServer& server)
         {
             PT_SSL_LOG_S("Accepting connection from client");
-            _client = new Pt::Net::TcpSocket;
-            _client->setActive(_loop);
-            _client->accept(server);
-            _ios.attach(*_client);
+            _socket = new Pt::Net::TcpSocket(server);
+            _socket->setActive(_loop);
+            _ios.attach(*_socket);
 
             PT_SSL_LOG_S("Starting handshake");
-            _ssl = new Pt::Ssl::SSLServer(_ios, _sslContext, 0);
+            _ssl = new Pt::Ssl::Server(_ios, _sslContext, 0);
+            _ssl->handshakeFinished += Pt::slot(*this, &Server::onHandshakeFinished);
+            _ssl->shutdownFinished += Pt::slot(*this, &Server::onShutdownFinished);
             _ssl->beginHandshake(true, true);
-
-            _ssl->handshakeFinished += Pt::slot(*this, &Server::onSSLHandshakeFinished);
-            _ssl->shutdownFinished += Pt::slot(*this, &Server::onSSLShutdownFinished);
         }
 
-        void onSSLShutdownFinished(Pt::Ssl::SSLServer& ssl)
+        void onHandshakeFinished(Pt::Ssl::Server& ssl)
         {
-            PT_SSL_LOG_S("*** HANDSHAKE FINISHED ***");
-            _loop.exit();
-        }
-
-        void onSSLHandshakeFinished(Pt::Ssl::SSLServer& ssl)
-        {
-            try {
-                ssl.endHandshake();
+            try 
+            {
+                _ssl->endHandshake();
             }
-            catch(...) {
+            catch(...) 
+            {
                 PT_SSL_LOG_S("*** HANDSHAKE FAILED ***");
                 _loop.exit();
                 return;
             }
 
-            PT_SSL_LOG_S("Peer CN = " << _ssl->buffer().peerName());
-            PT_SSL_LOG_S("Current cipher = \n" << _ssl->buffer().currentCipher().name());
+            PT_SSL_LOG_S("peer name = " << _ssl->buffer().peerName());
+            PT_SSL_LOG_S("current cipher = \n" << _ssl->buffer().currentCipher().name());
 
             _ios.buffer().inputReady() += Pt::slot(*this, &Server::onInput);
             _ios.buffer().outputReady() += Pt::slot(*this, &Server::onOutput);
-
             _ios.buffer().beginRead();
         }
 
@@ -110,41 +107,34 @@ class Server : public Pt::Connectable {
             sb.endRead();
             PT_SSL_LOG_S("Received raw = " << sb.in_avail());
 
-            std::string msg;
-            while(true)
+            while(true) 
             {
-                const std::streamsize importResult = _ssl->buffer().import();
-                if(importResult == -1) {
-                    PT_SSL_LOG_S("*** The stream has been shutdown by the other peer ***");
-                    _ssl->buffer().shutdown();
-                    _ios.buffer().inputReady() -= Pt::slot(*this, &Server::onInput);
-                    _ios.buffer().outputReady() -= Pt::slot(*this, &Server::onOutput);
-                    PT_SSL_LOG_S("Sending shutdown = " << _ios.buffer().out_avail());
-                    return;
-                }
-                if( ! importResult )
+                std::streamsize result = _ssl->buffer().import();
+                PT_SSL_LOG_S("Received decoded = " << _ssl->buffer().in_avail());
+                
+                if(result == 0)
                     break;
 
-                PT_SSL_LOG_S("Received decoded = " << _ssl->buffer().in_avail());
+                if(result < 0) 
+                {                   
+                    PT_SSL_LOG_S("*** The stream has been shutdown by the other peer ***");
+                    _ssl->beginShutdown();
+                    return;
+                }  
 
-                while(true) {
-                    char buf[512];
-                    std::streamsize n =_ssl->readsome(buf, 512);
-                    if(n <= 0) break;
-                    msg += std::string(buf, static_cast<size_t>(n));
+                char buf[512];
+                while( _ssl->readsome(buf, 512) > 0 ) 
+                {
+                    std::cerr << "SERVER RECEIVED: " << _ssl->gcount() << std::endl;
+                    std::cerr.write(buf, _ssl->gcount() ); 
                 }
             }
 
-            std::cerr
-                << "############################################################### SERVER RECEIVED: "
-                << std::endl << msg << std::endl;
-
             // Send reply
-            std::string lmsg = "Hello world from server!";
-            for(int i = 0; i < 1024; ++i) lmsg += "_12345678X";
-            lmsg += "!!!";
-
-            *_ssl << lmsg << std::flush;
+            *_ssl << "Hello world from server!";
+            for(int i = 0; i < 1024; ++i) 
+                *_ssl << "_12345678X";
+            *_ssl << "!!!" << std::flush;
 
             PT_SSL_LOG_S("Sending message to the client ... out_avail = " << _ios.buffer().out_avail());
             _ios.buffer().beginWrite();
@@ -164,14 +154,23 @@ class Server : public Pt::Connectable {
             _ios.buffer().beginRead();
         }
 
+        void onShutdownFinished(Pt::Ssl::Server& ssl)
+        {
+            PT_SSL_LOG_S("*** SHUTDOWN FINISHED ***");
+            _loop.exit();
+        }
+
     private:
         Pt::Ssl::Context&    _sslContext;
-        Pt::Ssl::SSLServer*     _ssl;
+        Pt::Ssl::Server*     _ssl;
         Pt::System::IOStream    _ios;
         Pt::System::EventLoop&  _loop;
         Pt::Net::TcpServer      _server;
-        Pt::Net::TcpSocket*     _client;
+        Pt::Net::TcpSocket*     _socket;
 };
+
+
+
 
 class Client : public Pt::Connectable {
     public:
@@ -230,7 +229,7 @@ class Client : public Pt::Connectable {
 
         void onShutdownFinished(Pt::Ssl::SSLClient& ssl)
         {
-            PT_SSL_LOG_C("finished shutdown");
+            PT_SSL_LOG_C("*** SHUTDOWN FINISHED ***");
         }
 
         void onInput(Pt::System::StreamBuffer& sb)
@@ -340,7 +339,7 @@ int main(int argc, char** argv)
         clientContext  .setCertificateChain    (clientCertChain);
         clientContext  .setPrivateKey          (clientPrivKey);
 
-        Server server(loop, addr, port, serverContext);
+        Server server(loop, serverContext, addr, port);
         Client client(loop, addr, port, clientContext);
 
         loop.setIdleTimeout(30000);
