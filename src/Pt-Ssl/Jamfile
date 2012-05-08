@@ -4,18 +4,17 @@ SubDirHdrs $(PT_TOP)/src/Pt-Ssl/openssl/include ;
 SubDirC++Flags [ FDefines PT_SSL_API_EXPORT ] ;
 SubDirObjects $(OUTPUT_OBJECT) Pt-Ssl ;
 
-SubDirC++Flags [ FDefines OPENSSL_NO_DEPRECATED ] ;
-SubDirC++Flags [ FDefines OPENSSL_NO_ENGINE ] ;
-SubDirC++Flags [ FDefines OPENSSL_NO_SOCK ] ;
-SubDirC++Flags [ FDefines OPENSSL_NO_TLSEXT ] ;
-
-SubDirC++Flags [ FDefines OPENSSL_NO_CAMELLIA ] ;
-SubDirC++Flags [ FDefines OPENSSL_NO_COMP ] ;
-SubDirC++Flags [ FDefines OPENSSL_NO_IDEA ] ;
-SubDirC++Flags [ FDefines OPENSSL_NO_KRB5 ] ;
-SubDirC++Flags [ FDefines OPENSSL_NO_PSK ] ;
-SubDirC++Flags [ FDefines OPENSSL_NO_RC2 ] ;
-SubDirC++Flags [ FDefines OPENSSL_NO_RC4 ] ;
+#SubDirC++Flags [ FDefines OPENSSL_NO_DEPRECATED ] ;
+#SubDirC++Flags [ FDefines OPENSSL_NO_ENGINE ] ;
+#SubDirC++Flags [ FDefines OPENSSL_NO_SOCK ] ;
+#SubDirC++Flags [ FDefines OPENSSL_NO_TLSEXT ] ;
+#SubDirC++Flags [ FDefines OPENSSL_NO_CAMELLIA ] ;
+#SubDirC++Flags [ FDefines OPENSSL_NO_COMP ] ;
+#SubDirC++Flags [ FDefines OPENSSL_NO_IDEA ] ;
+#SubDirC++Flags [ FDefines OPENSSL_NO_KRB5 ] ;
+#SubDirC++Flags [ FDefines OPENSSL_NO_PSK ] ;
+#SubDirC++Flags [ FDefines OPENSSL_NO_RC2 ] ;
+#SubDirC++Flags [ FDefines OPENSSL_NO_RC4 ] ;
 
 SharedLibrary Pt-Ssl : CertificateList.cpp
                        Client.cpp
