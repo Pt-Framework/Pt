@@ -1,20 +1,23 @@
 SubDir PT_TOP src Pt-Ssl ;
 SubDirHdrs $(PT_TOP)/include ;
-SubDirHdrs $(PT_TOP)/src/Pt-Ssl/openssl/include ;
 SubDirC++Flags [ FDefines PT_SSL_API_EXPORT ] ;
 SubDirObjects $(OUTPUT_OBJECT) Pt-Ssl ;
 
-#SubDirC++Flags [ FDefines OPENSSL_NO_DEPRECATED ] ;
-#SubDirC++Flags [ FDefines OPENSSL_NO_ENGINE ] ;
-#SubDirC++Flags [ FDefines OPENSSL_NO_SOCK ] ;
-#SubDirC++Flags [ FDefines OPENSSL_NO_TLSEXT ] ;
-#SubDirC++Flags [ FDefines OPENSSL_NO_CAMELLIA ] ;
-#SubDirC++Flags [ FDefines OPENSSL_NO_COMP ] ;
-#SubDirC++Flags [ FDefines OPENSSL_NO_IDEA ] ;
-#SubDirC++Flags [ FDefines OPENSSL_NO_KRB5 ] ;
-#SubDirC++Flags [ FDefines OPENSSL_NO_PSK ] ;
-#SubDirC++Flags [ FDefines OPENSSL_NO_RC2 ] ;
-#SubDirC++Flags [ FDefines OPENSSL_NO_RC4 ] ;
+if $(OPENSSL_INCLUDES)
+{
+    SubDirHdrs $(OPENSSL_INCLUDES) ;
+    # SubDirC++Flags [ FDefines OPENSSL_NO_DEPRECATED ] ;
+    # SubDirC++Flags [ FDefines OPENSSL_NO_ENGINE ] ;
+    # SubDirC++Flags [ FDefines OPENSSL_NO_SOCK ] ;
+    # SubDirC++Flags [ FDefines OPENSSL_NO_TLSEXT ] ;
+    # SubDirC++Flags [ FDefines OPENSSL_NO_CAMELLIA ] ;
+    # SubDirC++Flags [ FDefines OPENSSL_NO_COMP ] ;
+    # SubDirC++Flags [ FDefines OPENSSL_NO_IDEA ] ;
+    # SubDirC++Flags [ FDefines OPENSSL_NO_KRB5 ] ;
+    # SubDirC++Flags [ FDefines OPENSSL_NO_PSK ] ;
+    # SubDirC++Flags [ FDefines OPENSSL_NO_RC2 ] ;
+    # SubDirC++Flags [ FDefines OPENSSL_NO_RC4 ] ;
+}
 
 SharedLibrary Pt-Ssl : CertificateList.cpp
                        Client.cpp
@@ -29,8 +32,17 @@ SharedLibrary Pt-Ssl : CertificateList.cpp
                        Utils.cpp ;
 
 LinkSharedLibraries Pt-Ssl : Pt Pt-Net Pt-System ;
-LinkLibraries Pt-Ssl : Pt-Ssl-openssl ;
 MakeLocate Pt-Ssl : $(OUTPUT_TARGET) ;
+
+if $(OPENSSL_LINKLIBS)
+{
+    LinkFlags Pt-Ssl : $(OPENSSL_LINKFLAGS) ;
+    LinkLibs Pt-Ssl : $(OPENSSL_LINKLIBS) ;
+}
+else
+{
+    LinkLibraries Pt-Ssl : Pt-Ssl-openssl ;
+}
 
 Main SSLServerClientTest : SSLServerClientTest.cpp ;
 LinkSharedLibraries SSLServerClientTest : Pt-Ssl Pt-Net Pt-System Pt ;
@@ -48,18 +60,6 @@ Main SSLHTTPServerClientTest : SSLHTTPServerClientTest.cpp ;
 LinkSharedLibraries SSLHTTPServerClientTest : Pt-Ssl Pt-Net Pt-System Pt ;
 MakeLocate SSLHTTPServerClientTest : $(OUTPUT_TARGET) ;
 
-if $(TARGET_OS) = "nt"
-{
-    if $(MINGW) || $(TOOLSET) = "gcc"
-    {
-        LINKLIBS on $(PRELIB)Pt-Ssl$(SUFDLL) += -luser32 -lgdi32 -ladvapi32 -lws2_32 ;
-    }
-    else
-    {
-        LINKLIBS on $(PRELIB)Pt-Ssl$(SUFDLL) += user32.lib gdi32.lib advapi32.lib ws2_32.lib ;
-    }
-}
-
 File [ FDirName $(OUTPUT_TARGET) ca.pem         ] : cert$(SLASH)ca.pem         ;
 File [ FDirName $(OUTPUT_TARGET) client.pem     ] : cert$(SLASH)client.pem     ;
 File [ FDirName $(OUTPUT_TARGET) client.key     ] : cert$(SLASH)client.key     ;
@@ -68,5 +68,22 @@ File [ FDirName $(OUTPUT_TARGET) server.key     ] : cert$(SLASH)server.key     ;
 File [ FDirName $(OUTPUT_TARGET) dsakey1.pem    ] : cert$(SLASH)dsakey1.pem    ;
 File [ FDirName $(OUTPUT_TARGET) dsapubkey1.pem ] : cert$(SLASH)dsapubkey1.pem ;
 
-SubInclude PT_TOP src Pt-Ssl openssl ;
+if ! $(OPENSSL_LINKLIBS)
+{
+    # TODO: is this still needed ???
+    if $(TARGET_OS) = "nt"
+    {
+        if $(MINGW) || $(TOOLSET) = "gcc"
+        {
+            LinkLibs Pt-Ssl : -luser32 -lgdi32 -ladvapi32 -lws2_32 ;
+        }
+        else
+        {
+            LinkLibs Pt-Ssl : user32.lib gdi32.lib advapi32.lib ws2_32.lib ;
+        }
+    }
+
+    SubInclude PT_TOP src Pt-Ssl openssl ;
+}
+
 SubInclude PT_TOP src Pt-Ssl tests ;

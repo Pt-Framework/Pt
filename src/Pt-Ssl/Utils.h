@@ -76,9 +76,9 @@ class FreeX509_STORE {
 typedef Pt::AutoPtr<X509_STORE, FreeX509_STORE> X509_STOREAutoPtr;
 
 // Converter functions for converting OpenSSL values into STL strings
-extern const std::string asn1int2string(const ASN1_INTEGER* asn1Val);
-extern const std::string asn1str2string(const ASN1_STRING* asn1Val);
-extern const std::string asn1tim2string(const ASN1_TIME* asn1Val);
+extern const std::string asn1int2string(ASN1_INTEGER* asn1Val);
+extern const std::string asn1str2string(ASN1_STRING* asn1Val);
+extern const std::string asn1tim2string(ASN1_TIME* asn1Val);
 extern const std::string x509nam2string(const X509_NAME* x509Val);
 
 extern const std::string sslhash2string(long md);

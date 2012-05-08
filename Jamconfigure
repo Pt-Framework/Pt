@@ -136,6 +136,29 @@ for local arg in $(ARGV)
 Configure WITH_OPENSSL ;
 EchoOption WITH_OPENSSL : "OpenSSL library" ;
 
+if $(WITH_OPENSSL)
+{
+    OPENSSL_LINK = [ CheckBuildC++ "#include <openssl/ssl.h>"
+                                    "int main() {"
+                                    "SSL_library_init();"
+                                    "return 0; }"
+                                  : ""
+                                  : -lssl -lcrypto ] ;
+
+    if $(OPENSSL_LINK)
+    {
+        OPENSSL_LINKLIBS = -lssl -lcrypto ;
+        Configure OPENSSL_LINKLIBS ;
+        EchoOption OPENSSL_LINKLIBS : "System openssl library" ;
+    }
+    else
+    {
+        OPENSSL_INCLUDES = src/Pt-Ssl/openssl/include ;
+        Configure OPENSSL_INCLUDES ;
+        EchoOption OPENSSL_INCLUDES : "Builtin openssl library" ;
+    }
+}
+
 
 #############################################################################
 # Gfx libraries and includes

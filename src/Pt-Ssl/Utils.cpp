@@ -36,7 +36,7 @@ namespace Ssl {
 
 // Internal SSL utilities
 
-const std::string asn1int2string(const ASN1_INTEGER* asn1Val)
+const std::string asn1int2string(ASN1_INTEGER* asn1Val)
 {
     long a = ASN1_INTEGER_get(asn1Val);
     char buf[1024];
@@ -46,7 +46,7 @@ const std::string asn1int2string(const ASN1_INTEGER* asn1Val)
     return buf;
 }
 
-const std::string asn1str2string(const ASN1_STRING* asn1Val)
+const std::string asn1str2string(ASN1_STRING* asn1Val)
 {
     BioAutoPtr out( BIO_new(BIO_s_mem()) );
     if(!ASN1_STRING_print(out.get(), asn1Val)) return "";
@@ -57,7 +57,7 @@ const std::string asn1str2string(const ASN1_STRING* asn1Val)
     return len ? std::string(buf, len) : "";
 }
 
-const std::string asn1tim2string(const ASN1_TIME* asn1Val)
+const std::string asn1tim2string(ASN1_TIME* asn1Val)
 {
     BioAutoPtr out( BIO_new(BIO_s_mem()) );
     if(!ASN1_TIME_print(out.get(), asn1Val)) return "";

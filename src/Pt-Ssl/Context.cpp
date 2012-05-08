@@ -250,19 +250,18 @@ Context::Protocol Context::protocol() const
 void Context::setProtocol(Protocol protocol)
 {
     bool v2 = false;
-    const SSL_METHOD* method = 0;
+    int ret = 0;
 
     switch(_protocol) 
     {
-        case SSLv2    : method = SSLv2_method();  v2 = true; break;
-        case SSLv3or2 : method = SSLv23_method(); v2 = true; break;
-        case TLSv1    : method = TLSv1_method(); break;
+        case SSLv2    : ret = SSL_CTX_set_ssl_version(_ctx, SSLv2_method());  v2 = true; break;
+        case SSLv3or2 : ret = SSL_CTX_set_ssl_version(_ctx, SSLv23_method()); v2 = true; break;
+        case TLSv1    : ret = SSL_CTX_set_ssl_version(_ctx, TLSv1_method()); break;
         case SSLv3    : // Fall through
         case Default  : // Fall through
-        default       : method = SSLv3_method();
+        default       : ret = SSL_CTX_set_ssl_version(_ctx, SSLv3_method());
     }
 
-    int ret = SSL_CTX_set_ssl_version(_ctx, method);
     if( 0 == ret)
         throw std::logic_error("Unknown protocol");
 
@@ -335,16 +334,19 @@ void Context::addCertificate(const Certificate& cert)
     // or increase the refcount, so we must "copy" it manually, because SSL_CTX
     // will take ownership
 
-    // Convert the X509 certificate to raw binary data
-    unsigned char* buf = 0;
-    int len = i2d_X509(cert.getX509(), &buf);
-    if(len < 0)
-        throw InvalidCertificate("Could not convert the CA certificate to raw binary data");
-        
-    // Convert the raw binary data back to an X509 certificate
-    const unsigned char* tbf = buf;
-    X509* x509 = d2i_X509(0, &tbf, len);
-    OPENSSL_free(buf);
+    X509* x509 = X509_dup( cert.getX509() );
+
+    // // Convert the X509 certificate to raw binary data
+    // unsigned char* buf = 0;
+    // int len = i2d_X509(cert.getX509(), &buf);
+    // if(len < 0)
+    //     throw InvalidCertificate("Could not convert the CA certificate to raw binary data");
+    // 
+    // // Convert the raw binary data back to an X509 certificate
+    // unsigned char** tbf = &buf;
+    // X509* x509 = d2i_X509(0, tbf, len);
+    // OPENSSL_free(buf);
+
     if( ! x509)
         throw InvalidCertificate("Could not convert the raw binary data back to a CA certificate");
         
