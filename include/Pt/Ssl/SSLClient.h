@@ -33,19 +33,20 @@
 #include <Pt/System/IOStream.h>
 
 namespace Pt {
+
 namespace Ssl {
 
 /**
  * \brief SSL stream buffer client.
  */
-class PT_SSL_API SSLClient : public std::iostream, public Pt::Connectable
+class PT_SSL_API Client : public std::iostream, public Pt::Connectable
 {
     public:
         /** \brief Construct an SSL stream buffer client that uses the given IO stream and SSL context. */
-        SSLClient(Pt::System::IOStream& ios, Context& ctx, const char* sessionID = 0);
+        Client(Pt::System::IOStream& ios, Context& ctx, const char* sessionID = 0);
 
         /** \brief Standard dtor. */
-        virtual ~SSLClient();
+        virtual ~Client();
 
         /** \brief Return the internal SSLStreamBuf instance. */
         inline StreamBuffer& buffer()
@@ -71,10 +72,10 @@ class PT_SSL_API SSLClient : public std::iostream, public Pt::Connectable
         void endShutdown();
 
         /** @brief This signal will be fired if the SLL system has finished the handshake */
-        Pt::Signal<SSLClient&> handshakeFinished;
+        Pt::Signal<Client&> handshakeFinished;
 
         /** @brief This signal will be fired if the SLL system has finished the shutdown */
-        Pt::Signal<SSLClient&> shutdownFinished;
+        Pt::Signal<Client&> shutdownFinished;
 
     private:
         void onWriteHandshake(Pt::System::StreamBuffer& sb);

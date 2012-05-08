@@ -66,7 +66,6 @@
     <ClInclude Include="..\..\include\Pt\Ssl\CertificateList.h" />
     <ClInclude Include="..\..\include\Pt\Ssl\CipherList.h" />
     <ClInclude Include="..\..\include\Pt\Ssl\Context.h" />
-    <ClInclude Include="..\..\include\Pt\Ssl\IOStream.h" />
     <ClInclude Include="..\..\include\Pt\Ssl\PrivateKey.h" />
     <ClInclude Include="..\..\include\Pt\Ssl\PublicKey.h" />
     <ClInclude Include="..\..\include\Pt\Ssl\SslError.h" />
@@ -214,7 +213,6 @@
     <ClCompile Include="..\..\src\Pt-Ssl\CertificateList.cpp" />
     <ClCompile Include="..\..\src\Pt-Ssl\CipherList.cpp" />
     <ClCompile Include="..\..\src\Pt-Ssl\Context.cpp" />
-    <ClCompile Include="..\..\src\Pt-Ssl\IOStream.cpp" />
     <ClCompile Include="..\..\src\Pt-Ssl\PrivateKey.cpp" />
     <ClCompile Include="..\..\src\Pt-Ssl\PublicKey.cpp" />
     <ClCompile Include="..\..\src\Pt-Ssl\SslError.cpp" />
