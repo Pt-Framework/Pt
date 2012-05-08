@@ -156,6 +156,7 @@ class Server : public Pt::Connectable
 
         void onShutdownFinished(Pt::Ssl::Server& ssl)
         {
+            _ssl->endShutdown();
             PT_SSL_LOG_S("*** SHUTDOWN FINISHED ***");
             _loop.exit();
         }
@@ -229,6 +230,7 @@ class Client : public Pt::Connectable {
 
         void onShutdownFinished(Pt::Ssl::Client& ssl)
         {
+            _ssl->endShutdown();
             PT_SSL_LOG_C("*** SHUTDOWN FINISHED ***");
         }
 

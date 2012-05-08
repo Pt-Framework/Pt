@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010-2010 by Marc Boris Duerner
+ * Copyright (C) 2010-2012 by Marc Boris Duerner
  * Copyright (C) 2010-2010 by Aloysius Indrayanto
  *
  * This library is free software; you can redistribute it and/or
@@ -36,33 +36,38 @@ namespace Pt {
 
 namespace Ssl {
 
-/**
- * \brief SSL stream buffer server.
+/** @brief SSL stream buffer server.
  */
 class PT_SSL_API Server : public std::iostream, public Pt::Connectable
 {
     public:
-        /** \brief Construct an SSL stream buffer client that uses the given IO stream and SSL context. */
+        /** @brief Construct an SSL server that uses the given I/O stream and SSL context. 
+        */
         Server(Pt::System::IOStream& ios, Context& ctx, const char* sessionID = 0);
 
-        /** \brief Standard dtor. */
+        /** @brief Standard dtor. 
+        */
         virtual ~Server();
 
-        /** \brief Return the internal SSLStreamBuf instance. */
+        /** @brief Return the internal SSLStreamBuf instance. 
+        */
         inline StreamBuffer& buffer()
         { return _sslbuf; }
 
-        /** \brief Return the internal StreamBuffer instance. */
+        /** @brief Return the internal StreamBuffer instance. 
+        */
         inline const StreamBuffer& buffer() const
         { return _sslbuf; }
 
-        /** @brief Starts the client handshake
+        /** @brief Starts the client handshake.
+            
             After this method has been called, the first handshake message
             can be written to the server.
         */
         void beginHandshake(bool verifyClientCert, bool requireCertBasedAuth);
 
-        /** @brief Ends the client handshake
+        /** @brief Ends the client handshake.
+            
             This function must be called after the handshake message is complete.
         */
         void endHandshake();
@@ -71,10 +76,12 @@ class PT_SSL_API Server : public std::iostream, public Pt::Connectable
 
         void endShutdown();
 
-        /** @brief This signal will be fired if the SLL system has finished the handshake */
+        /** @brief This signal will be fired if the SLL system has finished the handshake 
+        */
         Pt::Signal<Server&> handshakeFinished;
 
-        /** @brief This signal will be fired if the SLL system has finished the shutdown */
+        /** @brief This signal will be fired if the SLL system has finished the shutdown 
+        */
         Pt::Signal<Server&> shutdownFinished;
 
     private:
@@ -85,7 +92,8 @@ class PT_SSL_API Server : public std::iostream, public Pt::Connectable
 
     private:
         System::IOStream* _ios;
-        StreamBuffer      _sslbuf;
+        StreamBuffer _sslbuf;
+        int _errorPending;
 };
 
 } // namespace Ssl

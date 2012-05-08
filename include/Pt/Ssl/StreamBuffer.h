@@ -115,12 +115,6 @@ class PT_SSL_API StreamBuffer : public Connectable, public std::streambuf
         */
         bool readHandshake();
 
-        /** @brief Reads the handshake status
-            
-            Returns true if the handshake was a failure
-        */
-        bool handshakeError() const;
-
         /** @brief Reads user message from the underlying stream
             
             Returns the number bytes in the message or -1 if the other peer has shutdown the stream.

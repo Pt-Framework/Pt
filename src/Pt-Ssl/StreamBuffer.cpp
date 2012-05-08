@@ -53,7 +53,6 @@ StreamBuffer::StreamBuffer(std::iostream& ios, Context& ctx, const char* session
   _obuffer(0),
   _pbmax(4),
   _handshakeStarted(false),
-  _handshakeError(false),
   _protocol( ctx.protocol() )
 {
     // Create the SSL objects
@@ -263,8 +262,7 @@ bool StreamBuffer::writeHandshake()
             const int sslerr = SSL_get_error(_ssl, ret);
             if(sslerr != SSL_ERROR_WANT_READ && sslerr != SSL_ERROR_WANT_WRITE) 
             {
-                _handshakeError = true;
-                return false;
+                throw HandshakeFailed("SSL handshake failed");
             }
         }
     }
@@ -320,8 +318,7 @@ bool StreamBuffer::readHandshake()
                 int sslerr = SSL_get_error(_ssl, ret);
                 if( sslerr != SSL_ERROR_WANT_READ && sslerr != SSL_ERROR_WANT_WRITE) 
                 {
-                    _handshakeError = true;
-                    return false;
+                    throw HandshakeFailed("SSL handshake failed");
                 }
             }
         }
@@ -333,12 +330,6 @@ bool StreamBuffer::readHandshake()
     }
 
     return true;
-}
-
-
-bool StreamBuffer::handshakeError() const
-{ 
-    return _handshakeError; 
 }
 
 
@@ -394,7 +385,6 @@ void StreamBuffer::shutdown()
     delete [] _obuffer; _obuffer = 0;
 
     _handshakeStarted = false;
-    _handshakeError   = false;
 }
 
 

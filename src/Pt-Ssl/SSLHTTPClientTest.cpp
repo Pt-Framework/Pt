@@ -46,9 +46,9 @@ class Client : public Pt::Connectable {
         {
             PT_SSL_LOG_C("Connecting to server");
 
+            _socket.setActive(_loop);
             _socket.connected() += Pt::slot(*this, &Client::onTCPConnect);
             _socket.beginConnect(addr, port);
-            _socket.setActive(_loop);
         }
 
         ~Client()
@@ -111,6 +111,13 @@ class Client : public Pt::Connectable {
             _ios.buffer().beginWrite();
         }
 
+        void onShutdownFinished(Pt::Ssl::Client& ssl)
+        {
+            _ssl->endShutdown();
+            PT_SSL_LOG_C("*** SHUTDOWN FINISHED ***");
+            _loop.exit();
+        }
+
         void onInput(Pt::System::StreamBuffer& sb)
         {
             sb.endRead();
@@ -128,12 +135,14 @@ class Client : public Pt::Connectable {
 
                 if(avail == -1) {
                     PT_SSL_LOG_C("*** The stream has been shutdown by the other peer ***");
-                    _ssl->buffer().shutdown();
                     _ios.buffer().inputReady() -= Pt::slot(*this, &Client::onInput);
                     _ios.buffer().outputReady() -= Pt::slot(*this, &Client::onOutput);
                     std::cerr
-                        << "############################################################################################# CLIENT RECEIVED BEFORE SHUTDOWN: "
+                        << "############### CLIENT RECEIVED BEFORE SHUTDOWN: "
                         << std::endl << _result << std::endl;
+
+                    _ssl->beginShutdown();
+                    _ssl->shutdownFinished += Pt::slot(*this, &Client::onShutdownFinished);
                     return;
                 }
 
@@ -158,7 +167,7 @@ class Client : public Pt::Connectable {
                     _result = _result.substr(pos);
                 }
                 std::cerr
-                    << "############################################################################################# CLIENT RECEIVED HEADER: "
+                    << "############### CLIENT RECEIVED HEADER: "
                     << std::endl << _header << std::endl;
 
                 pos = _header.find("Content-Length:");
@@ -215,6 +224,7 @@ class Client : public Pt::Connectable {
 int main(int argc, char** argv)
 {
     try {
+        Pt::System::Logger::getTarget("").setLogLevel(Pt::System::Trace);
         PT_SSL_LOG_M("OpenSSL HTTP test progam started");
 
         Pt::System::MainLoop loop;
@@ -235,7 +245,7 @@ int main(int argc, char** argv)
 
         Client client(loop, addr, port, clientContext);
 
-        loop.setIdleTimeout(5000);
+        loop.setIdleTimeout(30000);
         loop.timeout() += Pt::slot(loop, &Pt::System::EventLoop::exit);
         loop.run();
 

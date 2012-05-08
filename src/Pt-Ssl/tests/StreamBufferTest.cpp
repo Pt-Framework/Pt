@@ -239,7 +239,6 @@ void StreamBufferTest::Handshake()
         while( client.writeHandshake() )
             ;
     
-        PT_UNIT_ASSERT( ! client.handshakeError() );
         PT_UNIT_ASSERT(data.str().size() > 0);
         data.clear();
 
@@ -247,14 +246,12 @@ void StreamBufferTest::Handshake()
         while( server.readHandshake() )
             ;
     
-        PT_UNIT_ASSERT( ! server.handshakeError() );
         data.clear();
         data.str( std::string() );
     
         while( server.writeHandshake() )
             ;
     
-        PT_UNIT_ASSERT( ! server.handshakeError() );
         PT_UNIT_ASSERT(data.str().size() > 0);
         data.clear();
 
@@ -262,7 +259,6 @@ void StreamBufferTest::Handshake()
         while( client.readHandshake() )
             ;
 
-        PT_UNIT_ASSERT( ! client.handshakeError() );
         data.clear();
         data.str( std::string() );
 
