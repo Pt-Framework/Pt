@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2010-2011 by Marc Boris Duerner
- * Copyright (C) 2010-2011 by Aloysius Indrayanto
+ * Copyright (C) 2010-2010 by Marc Boris Duerner
+ * Copyright (C) 2010-2010 by Aloysius Indrayanto
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,12 +23,12 @@
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
+ * License along with this library; if not, weriwrite to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "Utils.h"
-#include <Pt/Ssl/SSLClient.h>
+#include <Pt/Ssl/Server.h>
 
 namespace Pt {
 
@@ -36,42 +36,38 @@ namespace Ssl {
 
 ///// Logger for Pt-SSL ////////////////////////////////////////////////////////////////////////////
 log_define(PT_SSL_LOGGER_CATEGORY);
-#define PT_SSL_LOG(CODE) PT_SSL_LOG_INFO("Client   ", CODE)
+#define PT_SSL_LOG(CODE) PT_SSL_LOG_INFO("Server   ", CODE)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-Client::Client(Pt::System::IOStream& ios, Context& ctx, const char* sessionID)
+Server::Server(Pt::System::IOStream& ios, Context& ctx, const char* sessionID)
 : std::iostream(0),
   _ios         (&ios),
   _sslbuf      (ios, ctx, sessionID, 1 * 1024)
-{
-    std::iostream::init(&_sslbuf);
-}
+{ std::iostream::init(&_sslbuf); }
 
-
-Client::~Client()
+Server::~Server()
 {}
 
-
-void Client::beginHandshake(bool verifyServerCert)
+void Server::beginHandshake(bool verifyClientCert, bool requireCertBasedAuth)
 {
-    PT_SSL_LOG("_sslbuf.beginClientHandshake(verifyServerCert = " << verifyServerCert << ")");
-    _sslbuf.beginClientHandshake(verifyServerCert);
+    PT_SSL_LOG("_sslbuf.beginClientHandshake(verifyServerCert = "
+               << verifyClientCert << ", requireCertBasedAuth = " << requireCertBasedAuth << ")");
+    _sslbuf.beginServerHandshake(verifyClientCert, requireCertBasedAuth);
 
-    PT_SSL_LOG("_ios->buffer().beginWrite()");
-    _ios->buffer().beginWrite();
-    _ios->buffer().outputReady() += Pt::slot(*this, &Client::onWriteHandshake);
-    _ios->buffer().inputReady()  += Pt::slot(*this, &Client::onReadHandshake);
+    PT_SSL_LOG("_ios->buffer().beginRead()");
+    _ios->buffer().beginRead();
+    _ios->buffer().outputReady() += Pt::slot(*this, &Server::onWriteHandshake);
+    _ios->buffer().inputReady()  += Pt::slot(*this, &Server::onReadHandshake);
 }
 
-void Client::endHandshake()
+void Server::endHandshake()
 {
-    if(_sslbuf.handshakeError())
-    {
-        throw HandshakeFailed("The client has failed to complete the handshaking process!");
+    if(_sslbuf.handshakeError()) {
+        throw HandshakeFailed("The server has failed to complete the handshaking process!");
     }
 }
 
-void Client::onWriteHandshake(Pt::System::StreamBuffer& sb)
+void Server::onWriteHandshake(Pt::System::StreamBuffer& sb)
 {
     PT_SSL_LOG("_ios->buffer().endWrite()");
     _ios->buffer().endWrite();
@@ -87,8 +83,17 @@ void Client::onWriteHandshake(Pt::System::StreamBuffer& sb)
     if(_sslbuf.handshakeError())
     {
         PT_SSL_LOG("Handshake failed");
-        _ios->buffer().outputReady() -= Pt::slot(*this, &Client::onWriteHandshake);
-        _ios->buffer().inputReady()  -= Pt::slot(*this, &Client::onReadHandshake);
+        _ios->buffer().outputReady() -= Pt::slot(*this, &Server::onWriteHandshake);
+        _ios->buffer().inputReady()  -= Pt::slot(*this, &Server::onReadHandshake);
+        handshakeFinished.send(*this);
+        return;
+    }
+
+    if(_sslbuf.connected())
+    {
+        PT_SSL_LOG("Handshake finished");
+        _ios->buffer().outputReady() -= Pt::slot(*this, &Server::onWriteHandshake);
+        _ios->buffer().inputReady()  -= Pt::slot(*this, &Server::onReadHandshake);
         handshakeFinished.send(*this);
         return;
     }
@@ -97,7 +102,8 @@ void Client::onWriteHandshake(Pt::System::StreamBuffer& sb)
     _ios->buffer().beginRead();
 }
 
-void Client::onReadHandshake(Pt::System::StreamBuffer& sb)
+
+void Server::onReadHandshake(Pt::System::StreamBuffer& sb)
 {
     PT_SSL_LOG("_ios->buffer().endRead()");
     _ios->buffer().endRead();
@@ -113,17 +119,8 @@ void Client::onReadHandshake(Pt::System::StreamBuffer& sb)
     if(_sslbuf.handshakeError())
     {
         PT_SSL_LOG("Handshake failed");
-        _ios->buffer().outputReady() -= Pt::slot(*this, &Client::onWriteHandshake);
-        _ios->buffer().inputReady()  -= Pt::slot(*this, &Client::onReadHandshake);
-        handshakeFinished.send(*this);
-        return;
-    }
-
-    if(_sslbuf.connected())
-    {
-        PT_SSL_LOG("Handshake finished");
-        _ios->buffer().outputReady() -= Pt::slot(*this, &Client::onWriteHandshake);
-        _ios->buffer().inputReady()  -= Pt::slot(*this, &Client::onReadHandshake);
+        _ios->buffer().outputReady() -= Pt::slot(*this, &Server::onWriteHandshake);
+        _ios->buffer().inputReady()  -= Pt::slot(*this, &Server::onReadHandshake);
         handshakeFinished.send(*this);
         return;
     }
@@ -138,17 +135,17 @@ void Client::onReadHandshake(Pt::System::StreamBuffer& sb)
     if(_sslbuf.handshakeError())
     {
         PT_SSL_LOG("Handshake failed");
-        _ios->buffer().outputReady() -= Pt::slot(*this, &Client::onWriteHandshake);
-        _ios->buffer().inputReady()  -= Pt::slot(*this, &Client::onReadHandshake);
+        _ios->buffer().outputReady() -= Pt::slot(*this, &Server::onWriteHandshake);
+        _ios->buffer().inputReady()  -= Pt::slot(*this, &Server::onReadHandshake);
         handshakeFinished.send(*this);
         return;
     }
 }
 
-void Client::beginShutdown()
+void Server::beginShutdown()
 {
-    _ios->buffer().outputReady() += Pt::slot(*this, &Client::onWriteShutdown);
-    _ios->buffer().inputReady()  += Pt::slot(*this, &Client::onReadShutdown);
+    _ios->buffer().outputReady() += Pt::slot(*this, &Server::onWriteShutdown);
+    _ios->buffer().inputReady()  += Pt::slot(*this, &Server::onReadShutdown);
 
     PT_SSL_LOG("_sslbuf.beginShutdown()");
     _sslbuf.shutdown();
@@ -157,15 +154,15 @@ void Client::beginShutdown()
     _ios->buffer().beginWrite();
 }
 
-void Client::endShutdown()
+void Server::endShutdown()
 {
 }
 
-void Client::onReadShutdown(Pt::System::StreamBuffer& sb)
+void Server::onReadShutdown(Pt::System::StreamBuffer& sb)
 {
 }
 
-void Client::onWriteShutdown(Pt::System::StreamBuffer& sb)
+void Server::onWriteShutdown(Pt::System::StreamBuffer& sb)
 {
     sb.endWrite();
     PT_SSL_LOG("Sent shutdown; remaining = " << sb.out_avail());
@@ -174,4 +171,5 @@ void Client::onWriteShutdown(Pt::System::StreamBuffer& sb)
 }
 
 } // namespace Ssl
+
 } // namespace Pt

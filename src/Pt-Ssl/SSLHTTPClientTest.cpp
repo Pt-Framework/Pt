@@ -30,7 +30,7 @@
 #include "Utils.h"
 #include <Pt/Net/TcpSocket.h>
 #include <Pt/Net/TcpServer.h>
-#include <Pt/Ssl/SSLClient.h>
+#include <Pt/Ssl/Client.h>
 #include <Pt/System/MainLoop.h>
 
 ///// Logger for Pt-SSL ////////////////////////////////////////////////////////////////////////////

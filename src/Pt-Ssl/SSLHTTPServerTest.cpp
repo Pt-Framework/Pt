@@ -30,7 +30,7 @@
 #include "Utils.h"
 #include <Pt/Net/TcpSocket.h>
 #include <Pt/Net/TcpServer.h>
-#include <Pt/Ssl/SSLServer.h>
+#include <Pt/Ssl/Server.h>
 #include <Pt/System/MainLoop.h>
 #include <fstream>
 

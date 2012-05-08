@@ -18,16 +18,16 @@ SubDirC++Flags [ FDefines OPENSSL_NO_RC2 ] ;
 SubDirC++Flags [ FDefines OPENSSL_NO_RC4 ] ;
 
 SharedLibrary Pt-Ssl : CertificateList.cpp
+                       Client.cpp
                        CipherList.cpp
                        Context.cpp
                        PrivateKey.cpp
                        PublicKey.cpp
+                       Server.cpp
                        Session.cpp
                        SslError.cpp
                        StreamBuffer.cpp
-                       Utils.cpp
-                       SSLServer.cpp
-                       SSLClient.cpp ;
+                       Utils.cpp ;
 
 LinkSharedLibraries Pt-Ssl : Pt Pt-Net Pt-System ;
 LinkLibraries Pt-Ssl : Pt-Ssl-openssl ;
