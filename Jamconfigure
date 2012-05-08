@@ -153,7 +153,7 @@ if $(WITH_OPENSSL)
     }
     else
     {
-        OPENSSL_INCLUDES = src/Pt-Ssl/openssl/include ;
+        OPENSSL_INCLUDES = [ FDirName src Pt-Ssl openssl include ] ;
         Configure OPENSSL_INCLUDES ;
         EchoOption OPENSSL_INCLUDES : "Builtin openssl library" ;
     }
