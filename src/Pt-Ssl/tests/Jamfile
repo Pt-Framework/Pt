@@ -9,3 +9,11 @@ Main Pt-Ssl-test : Pt-Ssl-test.cpp
 LinkSharedLibraries Pt-Ssl-test : Pt Pt-Net Pt-Ssl Pt-System Pt-Unit ;
 MakeLocate Pt-Ssl-test : $(OUTPUT_TARGET) ;
 RunUnitTest Pt-Ssl-test : $(OUTPUT_TEST) ;
+
+Main SSLServerClientTest : SSLServerClientTest.cpp ;
+LinkSharedLibraries SSLServerClientTest : Pt-Ssl Pt-Net Pt-System Pt ;
+MakeLocate SSLServerClientTest : $(OUTPUT_TARGET) ;
+
+Main SSLHTTPClientTest : SSLHTTPClientTest.cpp ;
+LinkSharedLibraries SSLHTTPClientTest : Pt-Ssl Pt-Net Pt-System Pt ;
+MakeLocate SSLHTTPClientTest : $(OUTPUT_TARGET) ;

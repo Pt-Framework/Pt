@@ -27,6 +27,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#include "PemData.h"
 #include <Pt/Ssl/Client.h>
 #include <Pt/Net/TcpSocket.h>
 #include <Pt/Net/TcpServer.h>
@@ -232,9 +233,9 @@ int main(int argc, char** argv)
         Pt::Ssl::CertificateList clientCertChain;
         Pt::Ssl::PrivateKey      clientPrivKey("");
         Pt::Ssl::Context         clientContext(0, Pt::Ssl::Context::Default);
-        trustedCACert  .fromPemFile           ("ca.pem");
-        clientCertChain.fromPemFile           ("client.pem");
-        clientPrivKey  .fromPemFile           ("client.key");
+        trustedCACert.fromPem(caPemData, sizeof(caPemData));
+        clientCertChain.fromPem(clientCertPemData, sizeof(clientCertPemData));
+        clientPrivKey.fromPem(clientKeyData, sizeof(clientKeyData));
         clientContext  .setCACertificates(trustedCACert);
         clientContext  .setCertificateChain    (clientCertChain);
         clientContext  .setPrivateKey          (clientPrivKey);
