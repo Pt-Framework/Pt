@@ -45,15 +45,6 @@ else
 }
 
 
-
-Main SSLHTTPServerTest : SSLHTTPServerTest.cpp ;
-LinkSharedLibraries SSLHTTPServerTest : Pt-Ssl Pt-Net Pt-System Pt ;
-MakeLocate SSLHTTPServerTest : $(OUTPUT_TARGET) ;
-
-Main SSLHTTPServerClientTest : SSLHTTPServerClientTest.cpp ;
-LinkSharedLibraries SSLHTTPServerClientTest : Pt-Ssl Pt-Net Pt-System Pt ;
-MakeLocate SSLHTTPServerClientTest : $(OUTPUT_TARGET) ;
-
 File [ FDirName $(OUTPUT_TARGET) ca.pem         ] : cert$(SLASH)ca.pem         ;
 File [ FDirName $(OUTPUT_TARGET) client.pem     ] : cert$(SLASH)client.pem     ;
 File [ FDirName $(OUTPUT_TARGET) client.key     ] : cert$(SLASH)client.key     ;

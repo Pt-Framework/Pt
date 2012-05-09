@@ -27,6 +27,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#include "PemData.h"
 #include <Pt/Ssl/Server.h>
 #include <Pt/Ssl/Client.h>
 #include <Pt/Net/TcpSocket.h>
@@ -346,25 +347,25 @@ int main(int argc, char** argv)
         unsigned short       port = 8000;
 
         Pt::Ssl::CertificateList trustedCACert;
-        trustedCACert.fromPemFile("ca.pem");
+        trustedCACert.fromPem(caPemData, sizeof(caPemData));
 
         Pt::Ssl::CertificateList serverCertChain;
-        Pt::Ssl::PrivateKey      serverPrivKey("abc123");
-        Pt::Ssl::Context         serverContext(0, Pt::Ssl::Context::Default);
-        serverCertChain.fromPemFile           ("server.pem");
-        serverPrivKey  .fromPemFile           ("server.key");
-        serverContext  .setCACertificates(trustedCACert);
-        serverContext  .setCertificateChain    (serverCertChain);
-        serverContext  .setPrivateKey          (serverPrivKey);
+        Pt::Ssl::PrivateKey serverPrivKey("abc123");
+        Pt::Ssl::Context serverContext(0, Pt::Ssl::Context::Default);
+        serverCertChain.fromPem(serverCertPemData, sizeof(serverCertPemData));
+        serverPrivKey.fromPem(serverKeyData, sizeof(serverKeyData));
+        serverContext.setCACertificates(trustedCACert);
+        serverContext.setCertificateChain    (serverCertChain);
+        serverContext.setPrivateKey          (serverPrivKey);
 
         Pt::Ssl::CertificateList clientCertChain;
-        Pt::Ssl::PrivateKey      clientPrivKey("");
-        Pt::Ssl::Context         clientContext(0, Pt::Ssl::Context::Default);
-        clientCertChain.fromPemFile           ("client.pem");
-        clientPrivKey  .fromPemFile           ("client.key");
-        clientContext  .setCACertificates(trustedCACert);
-        clientContext  .setCertificateChain    (clientCertChain);
-        clientContext  .setPrivateKey          (clientPrivKey);
+        Pt::Ssl::PrivateKey clientPrivKey("");
+        Pt::Ssl::Context clientContext(0, Pt::Ssl::Context::Default);
+        clientCertChain.fromPem(clientCertPemData, sizeof(clientCertPemData));
+        clientPrivKey.fromPem(clientKeyData, sizeof(clientKeyData));
+        clientContext.setCACertificates(trustedCACert);
+        clientContext.setCertificateChain    (clientCertChain);
+        clientContext.setPrivateKey          (clientPrivKey);
 
         Server server(loop, addr, port, serverContext);
         Client client(loop, addr, port, clientContext);

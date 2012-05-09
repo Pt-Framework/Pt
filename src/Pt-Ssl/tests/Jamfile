@@ -17,3 +17,11 @@ MakeLocate SSLServerClientTest : $(OUTPUT_TARGET) ;
 Main SSLHTTPClientTest : SSLHTTPClientTest.cpp ;
 LinkSharedLibraries SSLHTTPClientTest : Pt-Ssl Pt-Net Pt-System Pt ;
 MakeLocate SSLHTTPClientTest : $(OUTPUT_TARGET) ;
+
+Main SSLHTTPServerTest : SSLHTTPServerTest.cpp ;
+LinkSharedLibraries SSLHTTPServerTest : Pt-Ssl Pt-Net Pt-System Pt ;
+MakeLocate SSLHTTPServerTest : $(OUTPUT_TARGET) ;
+
+Main SSLHTTPServerClientTest : SSLHTTPServerClientTest.cpp ;
+LinkSharedLibraries SSLHTTPServerClientTest : Pt-Ssl Pt-Net Pt-System Pt ;
+MakeLocate SSLHTTPServerClientTest : $(OUTPUT_TARGET) ;
