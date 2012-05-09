@@ -738,69 +738,69 @@ static void readtimer(void)
 static void readscreen(void)
 {
 #if !defined(OPENSSL_SYS_WINCE) && !defined(OPENSSL_SYS_WIN32_CYGWIN)
-  HDC		hScrDC;		/* screen DC */
-  HDC		hMemDC;		/* memory DC */
-  HBITMAP	hBitmap;	/* handle for our bitmap */
-  HBITMAP	hOldBitmap;	/* handle for previous bitmap */
-  BITMAP	bm;		/* bitmap properties */
-  unsigned int	size;		/* size of bitmap */
-  char		*bmbits;	/* contents of bitmap */
-  int		w;		/* screen width */
-  int		h;		/* screen height */
-  int		y;		/* y-coordinate of screen lines to grab */
-  int		n = 16;		/* number of screen lines to grab at a time */
-
-  if (GetVersion() < 0x80000000 && OPENSSL_isservice()>0)
-    return;
-
-  /* Create a screen DC and a memory DC compatible to screen DC */
-  hScrDC = CreateDC(TEXT("DISPLAY"), NULL, NULL, NULL);
-  hMemDC = CreateCompatibleDC(hScrDC);
-
-  /* Get screen resolution */
-  w = GetDeviceCaps(hScrDC, HORZRES);
-  h = GetDeviceCaps(hScrDC, VERTRES);
-
-  /* Create a bitmap compatible with the screen DC */
-  hBitmap = CreateCompatibleBitmap(hScrDC, w, n);
-
-  /* Select new bitmap into memory DC */
-  hOldBitmap = SelectObject(hMemDC, hBitmap);
-
-  /* Get bitmap properties */
-  GetObject(hBitmap, sizeof(BITMAP), (LPSTR)&bm);
-  size = (unsigned int)bm.bmWidthBytes * bm.bmHeight * bm.bmPlanes;
-
-  bmbits = OPENSSL_malloc(size);
-  if (bmbits) {
-    /* Now go through the whole screen, repeatedly grabbing n lines */
-    for (y = 0; y < h-n; y += n)
-    	{
-	unsigned char md[MD_DIGEST_LENGTH];
-
-	/* Bitblt screen DC to memory DC */
-	BitBlt(hMemDC, 0, 0, w, n, hScrDC, 0, y, SRCCOPY);
-
-	/* Copy bitmap bits from memory DC to bmbits */
-	GetBitmapBits(hBitmap, size, bmbits);
-
-	/* Get the hash of the bitmap */
-	MD(bmbits,size,md);
-
-	/* Seed the random generator with the hash value */
-	RAND_add(md, MD_DIGEST_LENGTH, 0);
-	}
-
-    OPENSSL_free(bmbits);
-  }
-
-  /* Select old bitmap back into memory DC */
-  hBitmap = SelectObject(hMemDC, hOldBitmap);
-
-  /* Clean up */
-  DeleteObject(hBitmap);
-  DeleteDC(hMemDC);
-  DeleteDC(hScrDC);
+//  HDC		hScrDC;		/* screen DC */
+//  HDC		hMemDC;		/* memory DC */
+//  HBITMAP	hBitmap;	/* handle for our bitmap */
+//  HBITMAP	hOldBitmap;	/* handle for previous bitmap */
+//  BITMAP	bm;		/* bitmap properties */
+//  unsigned int	size;		/* size of bitmap */
+//  char		*bmbits;	/* contents of bitmap */
+//  int		w;		/* screen width */
+//  int		h;		/* screen height */
+//  int		y;		/* y-coordinate of screen lines to grab */
+//  int		n = 16;		/* number of screen lines to grab at a time */
+//
+//  if (GetVersion() < 0x80000000 && OPENSSL_isservice()>0)
+//    return;
+//
+//  /* Create a screen DC and a memory DC compatible to screen DC */
+//  hScrDC = CreateDC(TEXT("DISPLAY"), NULL, NULL, NULL);
+//  hMemDC = CreateCompatibleDC(hScrDC);
+//
+//  /* Get screen resolution */
+//  w = GetDeviceCaps(hScrDC, HORZRES);
+//  h = GetDeviceCaps(hScrDC, VERTRES);
+//
+//  /* Create a bitmap compatible with the screen DC */
+//  hBitmap = CreateCompatibleBitmap(hScrDC, w, n);
+//
+//  /* Select new bitmap into memory DC */
+//  hOldBitmap = SelectObject(hMemDC, hBitmap);
+//
+//  /* Get bitmap properties */
+//  GetObject(hBitmap, sizeof(BITMAP), (LPSTR)&bm);
+//  size = (unsigned int)bm.bmWidthBytes * bm.bmHeight * bm.bmPlanes;
+//
+//  bmbits = OPENSSL_malloc(size);
+//  if (bmbits) {
+//    /* Now go through the whole screen, repeatedly grabbing n lines */
+//    for (y = 0; y < h-n; y += n)
+//    	{
+//	unsigned char md[MD_DIGEST_LENGTH];
+//
+//	/* Bitblt screen DC to memory DC */
+//	BitBlt(hMemDC, 0, 0, w, n, hScrDC, 0, y, SRCCOPY);
+//
+//	/* Copy bitmap bits from memory DC to bmbits */
+//	GetBitmapBits(hBitmap, size, bmbits);
+//
+//	/* Get the hash of the bitmap */
+//	MD(bmbits,size,md);
+//
+//	/* Seed the random generator with the hash value */
+//	RAND_add(md, MD_DIGEST_LENGTH, 0);
+//	}
+//
+//    OPENSSL_free(bmbits);
+//  }
+//
+//  /* Select old bitmap back into memory DC */
+//  hBitmap = SelectObject(hMemDC, hOldBitmap);
+//
+//  /* Clean up */
+//  DeleteObject(hBitmap);
+//  DeleteDC(hMemDC);
+//  DeleteDC(hScrDC);
 #endif /* !OPENSSL_SYS_WINCE */
 }
 

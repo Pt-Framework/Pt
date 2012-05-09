@@ -123,40 +123,38 @@ EchoOption NETLIBS : "Network lib flags" ;
 # OpenSSL libraries and includes
 #############################################################################
 
-WITH_OPENSSL ?= "no" ;
-
-for local arg in $(ARGV)
-{
-    if $(arg) = "--with-openssl"
-    {
-        WITH_OPENSSL = "yes" ;
-    }
+if --with-builtin-openssl in $(ARGV)
+{   
+    WITH_OPENSSL = yes ;
+    OPENSSL_INCLUDES = [ FDirName src Pt-Ssl openssl include ] ;
 }
 
-Configure WITH_OPENSSL ;
-EchoOption WITH_OPENSSL : "OpenSSL library" ;
-
-if $(WITH_OPENSSL)
+if ! $(WITH_OPENSSL)
 {
-    OPENSSL_LINK = [ CheckBuildC++ "#include <openssl/ssl.h>"
+    WITH_OPENSSL = [ CheckBuildC++ "#include <openssl/ssl.h>"
                                     "int main() {"
                                     "SSL_library_init();"
                                     "return 0; }"
-                                  : ""
-                                  : -lssl -lcrypto ] ;
+                                    : [ FIncludes $(OPENSSL_INCLUDES) ]
+                                    : -lssl -lcrypto ] ;
 
-    if $(OPENSSL_LINK)
+    if $(WITH_OPENSSL)
     {
         OPENSSL_LINKLIBS = -lssl -lcrypto ;
-        Configure OPENSSL_LINKLIBS ;
-        EchoOption OPENSSL_LINKLIBS : "System openssl library" ;
     }
-    else
-    {
-        OPENSSL_INCLUDES = [ FDirName src Pt-Ssl openssl include ] ;
-        Configure OPENSSL_INCLUDES ;
-        EchoOption OPENSSL_INCLUDES : "Builtin openssl library" ;
-    }
+}
+
+EchoOption WITH_OPENSSL : "OpenSSL support" ;
+
+if $(WITH_OPENSSL)
+{
+    Configure WITH_OPENSSL ;
+
+    Configure OPENSSL_INCLUDES ;
+    EchoOption OPENSSL_INCLUDES : "OpenSSL includes" ;
+
+    Configure OPENSSL_LINKLIBS ;
+    EchoOption OPENSSL_LINKLIBS : "OpenSSL library" ;
 }
 
 

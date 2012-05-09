@@ -75,11 +75,11 @@ if ! $(OPENSSL_LINKLIBS)
     {
         if $(MINGW) || $(TOOLSET) = "gcc"
         {
-            LinkLibs Pt-Ssl : -luser32 -lgdi32 -ladvapi32 -lws2_32 ;
+            #LinkLibs Pt-Ssl : -luser32 -lgdi32 -ladvapi32 -lws2_32 ;
         }
         else
         {
-            LinkLibs Pt-Ssl : user32.lib gdi32.lib advapi32.lib ws2_32.lib ;
+            #LinkLibs Pt-Ssl : user32.lib gdi32.lib advapi32.lib ws2_32.lib ;
         }
     }
 
