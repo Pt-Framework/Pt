@@ -127,6 +127,40 @@ if --with-builtin-openssl in $(ARGV)
 {   
     WITH_OPENSSL = yes ;
     OPENSSL_INCLUDES = [ FDirName src Pt-Ssl openssl include ] ;
+
+    local opensslconf = ;
+
+    if $(TARGET_OS) = "wince"
+    {
+        opensslconf = opensslconf-wince.h ;
+    }
+    else if $(TARGET_OS) = "nt" && $(TARGET_OSPLAT) = "x86_64"
+    {
+        opensslconf = opensslconf-win-x86_64.h ;
+    }
+    else if $(TARGET_OS) = "nt" && $(TARGET_OSPLAT) = "x86"
+    {
+        opensslconf = opensslconf-win-x86.h ;
+    }
+    else if $(TARGET_OSPLAT) = "x86_64"
+    {
+        opensslconf = opensslconf-linux-x86_64.h ;
+    }
+    else if $(TARGET_OSPLAT) = "x86"
+    {
+        opensslconf = opensslconf-linux-x86.h ;
+    }
+    else
+    {
+        Exit "ERROR: Ccould not configure builtin OpenSSL for selected target." ;
+    }
+
+    local openssldir = [ FDirName src Pt-Ssl openssl include openssl ] ;
+    local r = [ TryCommand $(CP) $(opensslconf:D=$(openssldir)) [ FDirName $(openssldir) opensslconf.h ] ] ;
+    if ! $(r)
+    {
+        Exit "ERROR: Could not create" $(opensslconf:D=$(openssldir)) ;
+    }
 }
 
 if ! $(WITH_OPENSSL)
