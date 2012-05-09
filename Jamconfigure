@@ -153,7 +153,7 @@ if --with-builtin-openssl in $(ARGV)
     }
     else
     {
-        Exit "ERROR: Ccould not configure builtin OpenSSL for selected target." ;
+        Exit "ERROR: Could not configure builtin OpenSSL for selected target." ;
     }
 
     opensslconf_target = [ FDirName src Pt-Ssl openssl $(opensslconf_target) ] ;
