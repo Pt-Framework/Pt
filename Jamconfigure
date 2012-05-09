@@ -128,38 +128,40 @@ if --with-builtin-openssl in $(ARGV)
     WITH_OPENSSL = yes ;
     OPENSSL_INCLUDES = [ FDirName src Pt-Ssl openssl include ] ;
 
-    local opensslconf = ;
+    local opensslconf = [ FDirName src Pt-Ssl openssl include openssl opensslconf.h ] ;
+    local opensslconf_target = ;
 
-    if $(TARGET_OS) = "wince"
+    if $(TARGET_OS:L) = "wince"
     {
-        opensslconf = opensslconf-wince.h ;
+        opensslconf_target = opensslconf-wince.h ;
     }
-    else if $(TARGET_OS) = "nt" && $(TARGET_OSPLAT) = "x86_64"
+    else if $(TARGET_OS:L) = "nt" && $(TARGET_OSPLAT:L) = "x86_64"
     {
-        opensslconf = opensslconf-win-x86_64.h ;
+        opensslconf_target = opensslconf-win-x86_64.h ;
     }
-    else if $(TARGET_OS) = "nt" && $(TARGET_OSPLAT) = "x86"
+    else if $(TARGET_OS:L) = "nt" && $(TARGET_OSPLAT:L) = "x86"
     {
-        opensslconf = opensslconf-win-x86.h ;
+        opensslconf_target = opensslconf-win-x86.h ;
     }
-    else if $(TARGET_OSPLAT) = "x86_64"
+    else if $(TARGET_OSPLAT:L) = "x86_64"
     {
-        opensslconf = opensslconf-linux-x86_64.h ;
+        opensslconf_target = opensslconf-linux-x86_64.h ;
     }
-    else if $(TARGET_OSPLAT) = "x86"
+    else if $(TARGET_OSPLAT:L) = "x86"
     {
-        opensslconf = opensslconf-linux-x86.h ;
+        opensslconf_target = opensslconf-linux-x86.h ;
     }
     else
     {
         Exit "ERROR: Ccould not configure builtin OpenSSL for selected target." ;
     }
 
-    local openssldir = [ FDirName src Pt-Ssl openssl include openssl ] ;
-    local r = [ TryCommand $(CP) $(opensslconf:D=$(openssldir)) [ FDirName $(openssldir) opensslconf.h ] ] ;
+    opensslconf_target = [ FDirName src Pt-Ssl openssl $(opensslconf_target) ] ;
+
+    local r = [ TryCommand $(CP) $(opensslconf_target) $(opensslconf) ] ;
     if ! $(r)
     {
-        Exit "ERROR: Could not create" $(opensslconf:D=$(openssldir)) ;
+        Exit "ERROR: Could not create opensslconf.h" ;
     }
 }
 
