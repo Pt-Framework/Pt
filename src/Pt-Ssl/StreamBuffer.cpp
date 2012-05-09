@@ -27,20 +27,17 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "Utils.h"
 #include <Pt/Ssl/StreamBuffer.h>
+#include <Pt/System/Logger.h>
 #include <Pt/System/IOError.h>
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 
+log_define("Pt.Ssl.StreamBuffer")
+
 namespace Pt {
 
 namespace Ssl {
-
-///// Logger for Pt-SSL ////////////////////////////////////////////////////////////////////////////
-log_define(PT_SSL_LOGGER_CATEGORY);
-#define PT_SSL_LOG(CODE) PT_SSL_LOG_INFO("StreamBuffer", CODE)
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 StreamBuffer::StreamBuffer(std::iostream& ios, Context& ctx, const char* sessionID, size_t bufferSize)
 : _in (0),
@@ -250,12 +247,12 @@ void StreamBuffer::beginClientHandshake(bool verifyServerCert)
 
 bool StreamBuffer::writeHandshake()
 {
-    PT_SSL_LOG("getStatus() = " << getStatus());
+    log_debug("getStatus() = " << getStatus());
 
     if( ! SSL_want_read(_ssl) )
     {
         const int ret = SSL_do_handshake(_ssl);
-        PT_SSL_LOG("SSL_do_handshake() = " << ret);
+        log_debug("SSL_do_handshake() = " << ret);
 
         if(ret <= 0)
         {
@@ -275,7 +272,7 @@ bool StreamBuffer::writeHandshake()
         if(n <= 0)
             throw System::IOError("Failed reading from OpenSSL output BIO!");
 
-        PT_SSL_LOG("Wrote " << n << " bytes from _out BIO to _ios");
+        log_debug("Wrote " << n << " bytes from _out BIO to _ios");
         _ios->write(buff, n);
 
         return true;
@@ -287,7 +284,7 @@ bool StreamBuffer::writeHandshake()
 
 bool StreamBuffer::readHandshake()
 {
-    PT_SSL_LOG("getStatus() = " << getStatus());
+    log_debug("getStatus() = " << getStatus());
 
     char buf[1000];
 
@@ -307,7 +304,7 @@ bool StreamBuffer::readHandshake()
               throw System::IOError("Failed writing to OpenSSL input BIO!");
 
             n -= written;
-            PT_SSL_LOG("Wrote " << written << " bytes from _ios to _in BIO; leftover = " << n << " bytes");
+            log_debug("Wrote " << written << " bytes from _ios to _in BIO; leftover = " << n << " bytes");
 
             if(n > 0)
                 std::memcpy(buf, buf + written, static_cast<size_t>(n));
@@ -338,19 +335,19 @@ std::streamsize StreamBuffer::import()
     if(_ios)
     {
         const std::streamsize avail = _ios->rdbuf()->in_avail();
-        PT_SSL_LOG("_ios->rdbuf()->in_avail() = " << avail << " bytes");
+        log_debug("_ios->rdbuf()->in_avail() = " << avail << " bytes");
 
         if(avail >= 0 )
         {
             const std::streamsize n = do_underflow(avail);
-            PT_SSL_LOG("do_underflow() = " << n << " bytes");
-            PT_SSL_LOG("_ios->rdbuf()->in_avail() = " << _ios->rdbuf()->in_avail() << " bytes");
+            log_debug("do_underflow() = " << n << " bytes");
+            log_debug("_ios->rdbuf()->in_avail() = " << _ios->rdbuf()->in_avail() << " bytes");
 
             // Shutdown?
             const int shutdownState = SSL_get_shutdown(_ssl);
             if(shutdownState & SSL_RECEIVED_SHUTDOWN) 
             {
-                PT_SSL_LOG("Received shutdown notification");
+                log_debug("Received shutdown notification");
                 //this->shutdown();
                 return -1;
             }
@@ -364,7 +361,7 @@ std::streamsize StreamBuffer::import()
 void StreamBuffer::shutdown()
 {
     const int res = SSL_shutdown(_ssl);
-    PT_SSL_LOG("SSL_shutdown() = " << res);
+    log_debug("SSL_shutdown() = " << res);
 
     // Send shutdown message to the other peer
     char buff[1000];
@@ -374,7 +371,7 @@ void StreamBuffer::shutdown()
 
     _ios->write(buff, n);
     //_ios->flush();
-    PT_SSL_LOG("Wrote " << n << " bytes from _out BIO to _ios");
+    log_debug("Wrote " << n << " bytes from _out BIO to _ios");
 
     // Reset all
     (void) BIO_reset(_in);
@@ -430,14 +427,14 @@ std::streamsize StreamBuffer::do_underflow(std::streamsize isize)
     if(! _ios) return 0;
 
     if(!_ibuffer) {
-        PT_SSL_LOG("Allocating _ibuffer of size " << _ibufferSize);
+        log_debug("Allocating _ibuffer of size " << _ibufferSize);
         _ibuffer = new char[_ibufferSize];
     }
 
     // Return 0 if full
     if(_ibufferSize == (size_t)(this->egptr() - this->gptr()))
     {
-        PT_SSL_LOG("_ibuffer is full");
+        log_debug("_ibuffer is full");
         return 0;
     }
 
@@ -472,7 +469,7 @@ std::streamsize StreamBuffer::do_underflow(std::streamsize isize)
             if(_ios->gcount() > 0) 
               bm->length += static_cast<int>( _ios->gcount() );
 
-            PT_SSL_LOG("Wrote " << _ios->gcount() << " bytes from _ios to _in BUF_MEM");
+            log_debug("Wrote " << _ios->gcount() << " bytes from _ios to _in BUF_MEM");
         }
         if(bm->length == 0) return 0;
 
@@ -484,8 +481,8 @@ std::streamsize StreamBuffer::do_underflow(std::streamsize isize)
             break;
 
         const int readSize = SSL_read(_ssl, _ibuffer + used, avail);
-        PT_SSL_LOG("Read " << readSize << " bytes from _ssl");
-        PT_SSL_LOG("SSL_get_shutdown() = " << SSL_get_shutdown(_ssl));
+        log_debug("Read " << readSize << " bytes from _ssl");
+        log_debug("SSL_get_shutdown() = " << SSL_get_shutdown(_ssl));
 
         long sslerr = SSL_get_error(_ssl, readSize);
         switch(sslerr) {
@@ -510,7 +507,7 @@ std::streamsize StreamBuffer::do_underflow(std::streamsize isize)
             // Opps - we got a big problem here :(
             default:
                 while( ( sslerr = ERR_get_error() ) ) {
-                    PT_SSL_LOG("ERR_error_string = " << ERR_error_string(sslerr, 0));
+                    log_debug("ERR_error_string = " << ERR_error_string(sslerr, 0));
                 }
                 throw System::IOError("Failed reading decrypted data from OpenSSL!");
         }
@@ -532,7 +529,7 @@ StreamBuffer::int_type StreamBuffer::overflow(int_type ch)
 
     // No buffer area etablished yet
     if( ! _obuffer ) {
-        PT_SSL_LOG("Allocating _obuffer of size " << _obufferSize);
+        log_debug("Allocating _obuffer of size " << _obufferSize);
 
         _obuffer = new char[_obufferSize];
         this->setp(_obuffer, _obuffer + _obufferSize);
@@ -547,7 +544,7 @@ StreamBuffer::int_type StreamBuffer::overflow(int_type ch)
 
         // Feed _obuffer to openssl
         int written = SSL_write(_ssl, _obuffer, avail);
-        PT_SSL_LOG("Wrote " << written << " bytes to _ssl");
+        log_debug("Wrote " << written << " bytes to _ssl");
 
         // Move leftover in _obuffer to the front
         const size_t leftover = avail - written;
@@ -562,7 +559,7 @@ StreamBuffer::int_type StreamBuffer::overflow(int_type ch)
         if(bm->length > 0)
         {
             _ios->write(bm->data, bm->length);
-            PT_SSL_LOG("Wrote " << bm->length << " bytes from _ios to _out BUF_MEM");
+            log_debug("Wrote " << bm->length << " bytes from _ios to _out BUF_MEM");
             bm->length = 0;
         }
     }

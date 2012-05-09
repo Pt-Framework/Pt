@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2010 by Aloysius Indrayanto
+ * Copyright (C) 2010-2012 by Marc Duerner
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -29,27 +30,13 @@
 #define PT_SSL_UTILS_H
 
 #include <Pt/SmartPtr.h>
-#include <Pt/System/Logger.h>
 #include <openssl/ssl.h>
 #include <openssl/pem.h>
 #include <openssl/err.h>
 
-//#undef NLOG
-
-#ifndef NLOG
-#define PT_SSL_LOGGER_CATEGORY "Pt.SSL.Logger"
-#define PT_SSL_LOG_INFO(NAME, CODE) log_info("[" << NAME << "] " << CODE)
-#else
-#define PT_SSL_LOGGER_CATEGORY
-#define PT_SSL_LOG_INFO(NAME, CODE)
-#endif
-
 namespace Pt {
-namespace Ssl {
 
-//
-// Internal SSL classes, typedefs, and functions
-//
+namespace Ssl {
 
 // Used to automatically free a BIO*
 class FreeBIO {
@@ -76,21 +63,19 @@ class FreeX509_STORE {
 typedef Pt::AutoPtr<X509_STORE, FreeX509_STORE> X509_STOREAutoPtr;
 
 // Converter functions for converting OpenSSL values into STL strings
-extern const std::string asn1int2string(ASN1_INTEGER* asn1Val);
-extern const std::string asn1str2string(ASN1_STRING* asn1Val);
-extern const std::string asn1tim2string(ASN1_TIME* asn1Val);
-extern const std::string x509nam2string(const X509_NAME* x509Val);
+extern std::string asn1str2string(ASN1_STRING* asn1Val);
+extern std::string asn1tim2string(ASN1_TIME* asn1Val);
+extern std::string x509nam2string(const X509_NAME* x509Val);
 
-extern const std::string sslhash2string(long md);
-extern const std::string sslhash2string(const unsigned char* md, unsigned int n);
+extern std::string sslhash2string(long md);
+extern std::string sslhash2string(const unsigned char* md, unsigned int n);
 
-extern const std::string ssldata2string(const unsigned char* md, unsigned int n);
-extern unsigned int      string2ssldata(const std::string& str, unsigned char* md, unsigned int nmax);
-extern unsigned int      string2ssldata(const char* str, int slen, unsigned char* md, unsigned int nmax);
-
-extern void readFileToString(const std::string& fileName, std::string& dst);
+extern std::string ssldata2string(const unsigned char* md, unsigned int n);
+extern unsigned int string2ssldata(const std::string& str, unsigned char* md, unsigned int nmax);
+extern unsigned int string2ssldata(const char* str, int slen, unsigned char* md, unsigned int nmax);
 
 } // namespace Ssl
+
 } // namespace Pt
 
 #endif

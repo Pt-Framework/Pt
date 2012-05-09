@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2010 by Aloysius Indrayanto
+ * Copyright (C) 2010-2012 by Marc Duerner
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,27 +27,15 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#include "Utils.h"
 #include <fstream>
 #include <cstdio>
 
-#include "Utils.h"
-
 namespace Pt {
+
 namespace Ssl {
 
-// Internal SSL utilities
-
-const std::string asn1int2string(ASN1_INTEGER* asn1Val)
-{
-    long a = ASN1_INTEGER_get(asn1Val);
-    char buf[1024];
-
-    sprintf(buf, "%ld", a);
-
-    return buf;
-}
-
-const std::string asn1str2string(ASN1_STRING* asn1Val)
+std::string asn1str2string(ASN1_STRING* asn1Val)
 {
     BioAutoPtr out( BIO_new(BIO_s_mem()) );
     if(!ASN1_STRING_print(out.get(), asn1Val)) return "";
@@ -57,7 +46,7 @@ const std::string asn1str2string(ASN1_STRING* asn1Val)
     return len ? std::string(buf, len) : "";
 }
 
-const std::string asn1tim2string(ASN1_TIME* asn1Val)
+std::string asn1tim2string(ASN1_TIME* asn1Val)
 {
     BioAutoPtr out( BIO_new(BIO_s_mem()) );
     if(!ASN1_TIME_print(out.get(), asn1Val)) return "";
@@ -68,7 +57,7 @@ const std::string asn1tim2string(ASN1_TIME* asn1Val)
     return len ? std::string(buf, len) : "";
 }
 
-const std::string x509nam2string(const X509_NAME* x509Val)
+std::string x509nam2string(const X509_NAME* x509Val)
 {
     BioAutoPtr out( BIO_new(BIO_s_mem()) );
     if(!X509_NAME_print(out.get(), (X509_NAME*) x509Val, 0)) return "";
@@ -79,15 +68,14 @@ const std::string x509nam2string(const X509_NAME* x509Val)
     return len ? std::string(buf, len) : "";
 }
 
-const std::string sslhash2string(long md)
+std::string sslhash2string(long md)
 {
     char buf[1024];
     sprintf(buf, "%08lx", md);
-
     return buf;
 }
 
-const std::string sslhash2string(const unsigned char* md, unsigned int n)
+std::string sslhash2string(const unsigned char* md, unsigned int n)
 {
     std::string hash;
 
@@ -101,7 +89,7 @@ const std::string sslhash2string(const unsigned char* md, unsigned int n)
     return hash;
 }
 
-const std::string ssldata2string(const unsigned char* md, unsigned int n)
+std::string ssldata2string(const unsigned char* md, unsigned int n)
 {
     std::string hash;
 
@@ -154,17 +142,6 @@ unsigned int string2ssldata(const char* str, int slen, unsigned char* md, unsign
     return mdcur - md;
 }
 
-void readFileToString(const std::string& fileName, std::string& dst)
-{
-    std::ifstream ifs;
-    char          rbuf[4096];
-
-    ifs.open(fileName.c_str(), std::ios::binary);
-    while(ifs) {
-        ifs.read( rbuf, sizeof(rbuf) );
-        dst += std::string( rbuf, static_cast<size_t>(ifs.gcount()) );
-    }
-}
-
 } // namespace Pt
+
 } // namespace Ssl

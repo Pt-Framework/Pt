@@ -27,25 +27,21 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "Utils.h"
+#include <Pt/Ssl/Server.h>
 #include <Pt/Net/TcpSocket.h>
 #include <Pt/Net/TcpServer.h>
-#include <Pt/Ssl/Server.h>
 #include <Pt/System/MainLoop.h>
+#include <Pt/System/Logger.h>
 #include <fstream>
 
-///// Logger for Pt-SSL ////////////////////////////////////////////////////////////////////////////
-log_define(PT_SSL_LOGGER_CATEGORY);
-#define PT_SSL_LOG_S(CODE) PT_SSL_LOG_INFO("@@ Server @@", CODE)
-#define PT_SSL_LOG_M(CODE) PT_SSL_LOG_INFO("@@ main() @@", CODE)
-////////////////////////////////////////////////////////////////////////////////////////////////////
+log_define("Pt.Ssl.HttpCServerTest")
 
 class Server : public Pt::Connectable {
     public:
         Server(Pt::System::EventLoop& loop, const std::string& addr, unsigned short port, Pt::Ssl::Context& sslServerContext)
         : _sslContext(sslServerContext), _ssl(0), _ios(0), _loop(loop), _client(0)
         {
-            PT_SSL_LOG_S("*** Waiting connection from client ***");
+            log_debug("server *** Waiting connection from client ***");
 
             _server.listen(addr, port);
             _server.connectionPending() += Pt::slot(*this, &Server::onTCPAccept);
@@ -61,7 +57,7 @@ class Server : public Pt::Connectable {
    private:
         void onTCPAccept(Pt::Net::TcpServer& server)
         {
-            PT_SSL_LOG_S("Accepting connection from client");
+            log_debug("server Accepting connection from client");
             _client = new Pt::Net::TcpSocket;
             _client->accept(server);
 
@@ -70,7 +66,7 @@ class Server : public Pt::Connectable {
             _ios = new Pt::System::IOStream;
             _ios->attach(*_client);
 
-            PT_SSL_LOG_S("Starting handshake");
+            log_debug("server Starting handshake");
             _ssl = new Pt::Ssl::Server(*_ios, _sslContext, 0);
             _ssl->beginHandshake(true, false);
           //_ssl->beginHandshake(true, true);
@@ -84,18 +80,18 @@ class Server : public Pt::Connectable {
                 ssl.endHandshake();
             }
             catch(...) {
-                PT_SSL_LOG_S("*** HANDSHAKE FAILED ***");
+                log_debug("server *** HANDSHAKE FAILED ***");
                 _client->detach();
                 delete _client; _client = 0;
                 delete _ios; _ios = 0;
                 delete _ssl; _ssl = 0;
 
-                PT_SSL_LOG_S("*** Waiting connection from client ***");
+                log_debug("server *** Waiting connection from client ***");
                 return;
             }
 
-            PT_SSL_LOG_S("Peer CN = " << _ssl->buffer().peerName());
-            PT_SSL_LOG_S("Current cipher = \n" << _ssl->buffer().currentCipher().name());
+            log_debug("server Peer CN = " << _ssl->buffer().peerName());
+            log_debug("server Current cipher = \n" << _ssl->buffer().currentCipher().name());
 
             _ios->buffer().inputReady() += Pt::slot(*this, &Server::onInput);
             _ios->buffer().outputReady() += Pt::slot(*this, &Server::onOutput);
@@ -106,17 +102,17 @@ class Server : public Pt::Connectable {
         void onInput(Pt::System::StreamBuffer& sb)
         {
             sb.endRead();
-            PT_SSL_LOG_S("Received raw = " << sb.in_avail());
+            log_debug("server Received raw = " << sb.in_avail());
 
             if(_ssl->buffer().import() == -1) {
-                PT_SSL_LOG_S("*** The stream has been shutdown by the other peer ***");
+                log_debug("server *** The stream has been shutdown by the other peer ***");
                 _ssl->buffer().shutdown();
                 _ios->buffer().inputReady() -= Pt::slot(*this, &Server::onInput);
                 _ios->buffer().outputReady() -= Pt::slot(*this, &Server::onOutput);
                 return;
             }
 
-            PT_SSL_LOG_S("Received decoded = " << _ssl->buffer().in_avail());
+            log_debug("server Received decoded = " << _ssl->buffer().in_avail());
 
             char buf[512];
             std::streamsize n =_ssl->readsome(buf, 512);
@@ -141,7 +137,7 @@ class Server : public Pt::Connectable {
                 lmsg += std::string( rbuf, static_cast<size_t>(ifs.gcount()) );
             }
 
-            PT_SSL_LOG_S("Sending response to the client ... body size = " << lmsg.length());
+            log_debug("server Sending response to the client ... body size = " << lmsg.length());
             *_ssl << "HTTP/1.1 200 OK\r\n"
                      "Date: Fri, 18 Feb 2011 05:36:00 GMT\r\n"
                      "Server: Apache/2.2.13 (Fedora)\r\n"
@@ -153,21 +149,21 @@ class Server : public Pt::Connectable {
                   << lmsg
                   << std::flush;
 
-            PT_SSL_LOG_S("Sending response to the client ... out_avail = " << _ios->buffer().out_avail());
+            log_debug("server Sending response to the client ... out_avail = " << _ios->buffer().out_avail());
             _ios->buffer().beginWrite();
         }
 
         void onOutput(Pt::System::StreamBuffer& sb)
         {
             sb.endWrite();
-            PT_SSL_LOG_S("Sent raw; remaining = " << sb.out_avail());
+            log_debug("server Sent raw; remaining = " << sb.out_avail());
 
             if(sb.out_avail() > 0) {
                 sb.beginWrite();
                 return;
             }
 
-            PT_SSL_LOG_S("Done sending response to the client");
+            log_debug("server Done sending response to the client");
 
             _ios->buffer().inputReady() -= Pt::slot(*this, &Server::onInput);
             _ios->buffer().outputReady() -= Pt::slot(*this, &Server::onOutput);
@@ -181,7 +177,7 @@ class Server : public Pt::Connectable {
             delete _ios; _ios = 0;
             delete _ssl; _ssl = 0;
 
-            PT_SSL_LOG_S("*** Waiting connection from client ***");
+            log_debug("server *** Waiting connection from client ***");
         }
 
     private:
@@ -196,7 +192,7 @@ class Server : public Pt::Connectable {
 int main(int argc, char** argv)
 {
     try {
-        PT_SSL_LOG_M("OpenSSL test progam started");
+        log_debug("OpenSSL test progam started");
 
         Pt::System::MainLoop loop;
         std::string          addr("127.0.0.1");
@@ -218,16 +214,16 @@ int main(int argc, char** argv)
         loop.timeout() += Pt::slot(loop, &Pt::System::EventLoop::exit);
         loop.run();
 
-        PT_SSL_LOG_M("OpenSSL test progam ended");
+        log_debug("OpenSSL test progam ended");
         return 0;
     }
     catch(const std::exception& ex)
     {
-        PT_SSL_LOG_M("Error: " << ex.what());
+        log_debug("Error: " << ex.what());
     }
     catch(const char* ex)
     {
-        PT_SSL_LOG_M("Error: " << ex);
+        log_debug("Error: " << ex);
     }
     return 1;
 }
