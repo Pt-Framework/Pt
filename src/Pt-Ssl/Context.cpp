@@ -346,10 +346,13 @@ void Context::addCertificate(const Certificate& cert)
     // unsigned char** tbf = &buf;
     // X509* x509 = d2i_X509(0, tbf, len);
     // OPENSSL_free(buf);
+    //
+    //if( ! x509)
+    //    throw InvalidCertificate("Could not convert the raw binary data back to a CA certificate");
 
-    if( ! x509)
-        throw InvalidCertificate("Could not convert the raw binary data back to a CA certificate");
-        
+    if( ! x509 )
+        throw InvalidCertificate("Could not duplicate the CA certificate");
+
     if( ! SSL_CTX_add_extra_chain_cert( _ctx, x509 ) )
         throw InvalidCertificate("Could not add CA certificate");
 #else        
