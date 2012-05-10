@@ -141,8 +141,26 @@ vnoremap <BS> d
 :noremap! <C-x> <C-o>"+x
 
 " Paste text
+let s:paste_atend = 0
+
+function OnPasteInsertLeave()
+    let s:paste_atend = col(".") == strlen( getline(".") )
+endfunction
+
+autocmd InsertLeave * call OnPasteInsertLeave()
+
+function OnPaste()
+    if s:paste_atend
+        normal! "+gp
+        startinsert!
+    else
+        normal! "+gp
+        startinsert
+    endif
+endfunction
+
 :noremap <C-v> "+gP<CR>
-:noremap! <C-v> <C-o>"+gP
+:noremap! <C-v> <Esc>:call OnPaste()<CR>
 
 " Enter block mode
 :noremap <C-b> <C-v><CR>
@@ -155,4 +173,3 @@ vnoremap <BS> d
 
 " Replace selected text
 :noremap <C-h> "fh<C-o>:%s/<C-r>f
-
