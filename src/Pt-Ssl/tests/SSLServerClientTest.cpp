@@ -235,6 +235,37 @@ class Client : public Pt::Connectable {
             log_debug("client received raw = " << sb.in_avail());
 
             std::string result;
+            while(true) 
+            {
+                std::streamsize res = _ssl->buffer().import();
+                log_debug("server received decoded = " << _ssl->buffer().in_avail());
+                
+                if(res == 0)
+                    break;
+
+                if(res < 0) 
+                {                   
+                    log_debug("server *** The stream has been shutdown by the other peer ***");
+                    _ssl->beginShutdown();
+                    return;
+                }  
+
+                char buf[512];
+                while( _ssl->readsome(buf, 512) > 0 ) 
+                {
+                    size_t n = static_cast<size_t>( _ssl->gcount() );
+                    log_debug("client received: " << n);
+                    result.append(buf, n);
+                }
+            }
+
+
+
+
+            /*sb.endRead();
+            log_debug("client received raw = " << sb.in_avail());
+
+            std::string result;
             while(true)
             {
                 std::streamsize avail = _ssl->buffer().import();
@@ -258,7 +289,7 @@ class Client : public Pt::Connectable {
                     if(n <= 0) break;
                     result += std::string(buf, static_cast<size_t>(n));
                 }
-            }
+            }*/
 
             log_debug("client received: " << result);
 
