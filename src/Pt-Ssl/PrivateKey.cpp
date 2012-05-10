@@ -60,6 +60,12 @@ PrivateKey::~PrivateKey()
 }
 
 
+void PrivateKey::setPassword(const std::string& password)
+{
+    _impl->setPassword(password);;
+}
+
+
 void PrivateKey::fromPem(const char* data, size_t len)
 {
     _impl = new PrivateKeyImpl(*_impl);
@@ -78,6 +84,12 @@ void PrivateKey::fromPemFile(const char* fileName)
 {
     _impl = new PrivateKeyImpl(*_impl);
     _impl->fromPemFile(fileName);
+}
+
+
+void PrivateKey::toPem(std::ostream& os) const
+{
+    _impl->toPem(os);
 }
 
 
@@ -107,6 +119,12 @@ PrivateKeyImpl::PrivateKeyImpl(const std::string& password)
 PrivateKeyImpl::~PrivateKeyImpl()
 { 
     clear(); 
+}
+
+
+void PrivateKeyImpl::setPassword(const std::string& password)
+{
+    _pswd = password;
 }
 
 
@@ -145,6 +163,24 @@ void PrivateKeyImpl::fromPemFile(const char* path)
 {
     std::ifstream ifs(path, std::ios::binary);
     fromPem(ifs);
+}
+
+
+void PrivateKeyImpl::toPem(std::ostream& os) const
+{
+    if( ! _pkey)
+        return;
+    
+    BioAutoPtr out( BIO_new(BIO_s_mem()) );
+
+    int ret = PEM_write_bio_PrivateKey(out.get(), _pkey, EVP_des_ede3_cbc(), NULL, 0, 
+                                       &PrivateKeyImpl::passwordCallback, (void*) &_pswd);
+    if( ! ret)
+        throw InvalidKey("Could not write key in pem format");
+
+    char* data = 0;
+    long len = BIO_get_mem_data(out.get(), &data);
+    os.write(data, len);
 }
 
 

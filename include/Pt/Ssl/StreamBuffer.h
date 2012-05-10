@@ -47,16 +47,11 @@ class PT_SSL_API StreamBuffer : public Connectable, public std::streambuf
     public:
         /** @brief Construct an SSL stream buffer that uses the given IO stream and SSL context. 
         */
-        StreamBuffer(std::iostream& ios, Context& ctx, const char* sessionID = 0, size_t bufferSize = 1024);
+        StreamBuffer(Context& ctx, std::iostream& ios, const char* sessionID = 0, size_t bufferSize = 1024);
 
         /** @brief Standard dtor. 
         */
         virtual ~StreamBuffer();
-
-        /** @brief Return the current protocol. 
-        */
-        inline Context::Protocol protocol() const
-        { return _protocol; }
 
         /** @brief Return a list of available ciphers for the current protocol. 
         */
@@ -148,8 +143,6 @@ class PT_SSL_API StreamBuffer : public Connectable, public std::streambuf
         char*             _obuffer;
         const size_t      _pbmax;
         bool              _handshakeStarted;
-        bool              _handshakeError;
-        Context::Protocol _protocol;
 };
 
 } // namespace Ssl

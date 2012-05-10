@@ -51,6 +51,16 @@ class PT_SSL_API Certificate : private NonCopyable
 
         Certificate& operator=(const Certificate& cert);
 
+        int serialNumber() const;
+
+        std::string issuer() const;
+
+        std::string subject() const;
+          
+        std::string notBefore() const;
+
+        std::string notAfter() const;
+        
         PublicKey publicKey() const;
 
         x509_st* getX509() const;

@@ -39,7 +39,7 @@ namespace Pt {
 
 namespace Ssl {
 
-StreamBuffer::StreamBuffer(std::iostream& ios, Context& ctx, const char* sessionID, size_t bufferSize)
+StreamBuffer::StreamBuffer(Context& ctx, std::iostream& ios, const char* sessionID, size_t bufferSize)
 : _in (0),
   _out(0),
   _ssl(0),
@@ -49,8 +49,7 @@ StreamBuffer::StreamBuffer(std::iostream& ios, Context& ctx, const char* session
   _obufferSize(bufferSize),
   _obuffer(0),
   _pbmax(4),
-  _handshakeStarted(false),
-  _protocol( ctx.protocol() )
+  _handshakeStarted(false)
 {
     // Create the SSL objects
     _in  = BIO_new( BIO_s_mem() );

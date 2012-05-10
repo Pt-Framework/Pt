@@ -43,13 +43,13 @@ class PT_SSL_API Server : public std::iostream, public Pt::Connectable
     public:
         /** @brief Construct an SSL server that uses the given I/O stream and SSL context. 
         */
-        Server(Pt::System::IOStream& ios, Context& ctx, const char* sessionID = 0);
+        Server(Context& ctx, Pt::System::IOStream& ios, const char* sessionID = 0);
 
         /** @brief Standard dtor. 
         */
         virtual ~Server();
 
-        /** @brief Return the internal SSLStreamBuf instance. 
+        /** @brief Return the internal StreamBuffer instance. 
         */
         inline StreamBuffer& buffer()
         { return _sslbuf; }
@@ -78,11 +78,13 @@ class PT_SSL_API Server : public std::iostream, public Pt::Connectable
 
         /** @brief This signal will be fired if the SLL system has finished the handshake 
         */
-        Pt::Signal<Server&> handshakeFinished;
+        Pt::Signal<Server&>& handshakeFinished()
+        { return _handshakeFinished; }
 
         /** @brief This signal will be fired if the SLL system has finished the shutdown 
         */
-        Pt::Signal<Server&> shutdownFinished;
+        Pt::Signal<Server&>& shutdownFinished()
+        { return _shutdownFinished; }
 
     private:
         void onWriteHandshake(Pt::System::StreamBuffer& sb);
@@ -93,6 +95,8 @@ class PT_SSL_API Server : public std::iostream, public Pt::Connectable
     private:
         System::IOStream* _ios;
         StreamBuffer _sslbuf;
+        Pt::Signal<Server&> _handshakeFinished;
+        Pt::Signal<Server&> _shutdownFinished;
         int _errorPending;
 };
 

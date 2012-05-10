@@ -44,24 +44,20 @@ class PrivateKeyImpl;
 class PT_SSL_API PrivateKey 
 {
     public:
-        //! \brief Padding mode for string decryption.
-        enum PaddingMode {
-            RSA_PKCS1,      //!< The most widely used mode.
-            RSA_PKCS1_OAEP  //!< Recommended for new applications.
-        };
-
-    public:
         //! \brief Instantiate an empty private-key.
         PrivateKey();
 
         //! \brief Copy ctor.
         PrivateKey(const PrivateKey& pkey);
 
-        //! \brief Instantiate an empty private-key.
+        //! \brief Construct an empty key with a password used to reading and writing.
         explicit PrivateKey(const std::string& password);
 
         //! \brief Standard dtor.
         ~PrivateKey();
+
+        // @brief Set the password used for reading and writing
+        void setPassword(const std::string& password);
 
         //! \brief Read key in PEM format.
         void fromPem(const char* data, size_t len);
@@ -71,6 +67,9 @@ class PT_SSL_API PrivateKey
 
         //! \brief Read key in PEM format from a file.
         void fromPemFile(const char* path);
+
+        //! \brief Write key in PEM format.
+        void toPem(std::ostream& os) const;
 
         //! \brief Clear (delete) any loaded key.
         void clear();
@@ -96,11 +95,15 @@ class PT_SSL_API PrivateKeyImpl
         
         ~PrivateKeyImpl();
 
+        void setPassword(const std::string& password);
+
         void fromPem(const char* data, size_t len);
 
         void fromPem(std::istream& is);
 
         void fromPemFile(const char* path);
+
+        void toPem(std::ostream& os) const;
 
         void clear();
 

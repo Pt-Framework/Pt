@@ -43,7 +43,7 @@ class PT_SSL_API Client : public std::iostream, public Pt::Connectable
     public:
         /** @brief Construct a SSL client that uses the given I/O stream and SSL context. 
         */
-        Client(Pt::System::IOStream& ios, Context& ctx, const char* sessionID = 0);
+        Client(Context& ctx, Pt::System::IOStream& ios, const char* sessionID = 0);
 
         /** @brief Standard dtor. 
         */
@@ -78,11 +78,13 @@ class PT_SSL_API Client : public std::iostream, public Pt::Connectable
 
         /** @brief This signal will be fired if the SLL system has finished the handshake 
         */
-        Pt::Signal<Client&> handshakeFinished;
+        Pt::Signal<Client&>& handshakeFinished()
+        { return _handshakeFinished; }
 
         /** @brief This signal will be fired if the SLL system has finished the shutdown 
         */
-        Pt::Signal<Client&> shutdownFinished;
+        Pt::Signal<Client&>& shutdownFinished()
+        { return _shutdownFinished; }
 
     private:
         void onWriteHandshake(Pt::System::StreamBuffer& sb);
@@ -93,6 +95,8 @@ class PT_SSL_API Client : public std::iostream, public Pt::Connectable
     private:
         System::IOStream* _ios;
         StreamBuffer _sslbuf;
+        Pt::Signal<Client&> _handshakeFinished;
+        Pt::Signal<Client&> _shutdownFinished;
         int _errorPending;
 };
 

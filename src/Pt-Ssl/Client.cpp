@@ -36,10 +36,10 @@ namespace Pt {
 
 namespace Ssl {
 
-Client::Client(Pt::System::IOStream& ios, Context& ctx, const char* sessionID)
+Client::Client(Context& ctx, Pt::System::IOStream& ios, const char* sessionID)
 : std::iostream(0)
 , _ios(&ios)
-, _sslbuf(ios, ctx, sessionID, 1024)
+, _sslbuf(ctx,ios, sessionID, 1024)
 , _errorPending(0)
 {
     std::iostream::init(&_sslbuf);
@@ -98,7 +98,7 @@ void Client::onWriteHandshake(Pt::System::StreamBuffer& sb)
         _errorPending = 1;
         _ios->buffer().outputReady() -= Pt::slot(*this, &Client::onWriteHandshake);
         _ios->buffer().inputReady()  -= Pt::slot(*this, &Client::onReadHandshake);
-        handshakeFinished.send(*this);
+        _handshakeFinished.send(*this);
         
         if(_errorPending)
         {
@@ -128,7 +128,7 @@ void Client::onReadHandshake(Pt::System::StreamBuffer& sb)
             log_debug("Handshake finished");
             _ios->buffer().outputReady() -= Pt::slot(*this, &Client::onWriteHandshake);
             _ios->buffer().inputReady()  -= Pt::slot(*this, &Client::onReadHandshake);
-            handshakeFinished.send(*this);
+            _handshakeFinished.send(*this);
             return;
         }
 
@@ -145,7 +145,7 @@ void Client::onReadHandshake(Pt::System::StreamBuffer& sb)
         _errorPending = 1;
         _ios->buffer().outputReady() -= Pt::slot(*this, &Client::onWriteHandshake);
         _ios->buffer().inputReady()  -= Pt::slot(*this, &Client::onReadHandshake);
-        handshakeFinished.send(*this);
+        _handshakeFinished.send(*this);
 
         if(_errorPending)
         {
@@ -199,14 +199,14 @@ void Client::onWriteShutdown(Pt::System::StreamBuffer& sb)
 
         _ios->buffer().outputReady() -= Pt::slot(*this, &Client::onWriteShutdown);
         _ios->buffer().inputReady()  -= Pt::slot(*this, &Client::onReadShutdown);
-        shutdownFinished.send(*this);
+        _shutdownFinished.send(*this);
     }
     catch(...)
     {
         _errorPending = 1;
         _ios->buffer().outputReady() -= Pt::slot(*this, &Client::onWriteShutdown);
         _ios->buffer().inputReady()  -= Pt::slot(*this, &Client::onReadShutdown);
-        shutdownFinished.send(*this);
+        _shutdownFinished.send(*this);
         
         if(_errorPending)
         {

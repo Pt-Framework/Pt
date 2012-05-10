@@ -70,9 +70,9 @@ class Server : public Pt::Connectable
             _ios.attach(*_socket);
 
             log_debug("server starts handshake");
-            _ssl = new Pt::Ssl::Server(_ios, _sslContext, 0);
-            _ssl->handshakeFinished += Pt::slot(*this, &Server::onHandshakeFinished);
-            _ssl->shutdownFinished += Pt::slot(*this, &Server::onShutdownFinished);
+            _ssl = new Pt::Ssl::Server(_sslContext, _ios, 0);
+            _ssl->handshakeFinished() += Pt::slot(*this, &Server::onHandshakeFinished);
+            _ssl->shutdownFinished() += Pt::slot(*this, &Server::onShutdownFinished);
             _ssl->beginHandshake(true, true);
         }
 
@@ -191,10 +191,10 @@ class Client : public Pt::Connectable {
             _ios.attach(socket);
 
             log_debug("client starting handshake");
-            _ssl = new Pt::Ssl::Client(_ios, _sslContext, 0);
+            _ssl = new Pt::Ssl::Client(_sslContext, _ios, 0);
             _ssl->beginHandshake(true);
 
-            _ssl->handshakeFinished += Pt::slot(*this, &Client::onSSLHandshakeFinished);
+            _ssl->handshakeFinished() += Pt::slot(*this, &Client::onSSLHandshakeFinished);
         }
 
         void onSSLHandshakeFinished(Pt::Ssl::Client& ssl)
@@ -283,7 +283,7 @@ class Client : public Pt::Connectable {
                 _ios.buffer().outputReady() -= Pt::slot(*this, &Client::onOutput);
 
                 _ssl->beginShutdown();
-                _ssl->shutdownFinished += Pt::slot(*this, &Client::onShutdownFinished);
+                _ssl->shutdownFinished() += Pt::slot(*this, &Client::onShutdownFinished);
             }
         }
 
@@ -319,7 +319,7 @@ int main(int argc, char** argv)
 
         Pt::Ssl::CertificateList serverCertChain;
         Pt::Ssl::PrivateKey      serverPrivKey("abc123");
-        Pt::Ssl::Context         serverContext(0, Pt::Ssl::Context::Default);
+        Pt::Ssl::Context         serverContext(Pt::Ssl::Context::Default);
         serverCertChain.fromPem(serverCertPemData, sizeof(serverCertPemData));
 
         serverPrivKey.fromPem(serverKeyData, sizeof(serverKeyData));
@@ -329,7 +329,7 @@ int main(int argc, char** argv)
 
         Pt::Ssl::CertificateList clientCertChain;
         Pt::Ssl::PrivateKey      clientPrivKey("");
-        Pt::Ssl::Context         clientContext(0, Pt::Ssl::Context::Default);
+        Pt::Ssl::Context         clientContext(Pt::Ssl::Context::Default);
         clientCertChain.fromPem(clientCertPemData, sizeof(clientCertPemData));
         clientPrivKey  .fromPem(clientKeyData, sizeof(clientKeyData));
         clientContext  .setCACertificates(trustedCACert);

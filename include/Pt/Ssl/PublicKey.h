@@ -44,13 +44,6 @@ class PublicKeyImpl;
 class PT_SSL_API PublicKey 
 {
     public:
-        //! \brief Padding mode for string encryption.
-        enum PaddingMode {
-            RSA_PKCS1,      //!< The most widely used mode. 
-            RSA_PKCS1_OAEP  //!< Recommended for new applications.
-        };
-
-    public:
         //! \brief Instantiate an empty public-key.
         PublicKey();
 
@@ -69,6 +62,7 @@ class PT_SSL_API PublicKey
         //! \brief Read key in PEM format from a file.
         void fromPemFile(const char* path);
 
+        //! \brief Write key in PEM format.
         void toPem(std::ostream& os) const;
 
         //! \brief Clear (delete) any loaded key.

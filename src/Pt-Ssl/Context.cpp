@@ -87,7 +87,7 @@ SSLInit::~SSLInit()
 }
 
 
-Context::Context(const char* sessionID, Protocol protocol)
+Context::Context(Protocol protocol, const char* sessionID)
 : _protocol(protocol)
 , _certChainExist(false)
 {

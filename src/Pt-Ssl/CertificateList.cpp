@@ -199,6 +199,36 @@ Certificate& Certificate::operator=(const Certificate& cert)
 }
 
 
+int Certificate::serialNumber() const
+{
+    return _impl->serialNumber();
+}
+
+
+std::string Certificate::issuer() const
+{
+    return _impl->issuer();
+}
+
+
+std::string Certificate::subject() const
+{
+    return _impl->subject();
+}
+   
+        
+std::string Certificate::notBefore() const
+{
+    return _impl->notBefore();
+}
+
+
+std::string Certificate::notAfter() const
+{
+    return _impl->notAfter();
+}
+
+
 PublicKey Certificate::publicKey() const
 {
     EVP_PKEY* pkey = _impl->getX509() ? 0 : X509_get_pubkey( _impl->getX509()  );

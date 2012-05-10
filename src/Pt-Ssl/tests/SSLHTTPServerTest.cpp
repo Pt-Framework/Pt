@@ -68,11 +68,11 @@ class Server : public Pt::Connectable {
             _ios->attach(*_client);
 
             log_debug("server Starting handshake");
-            _ssl = new Pt::Ssl::Server(*_ios, _sslContext, 0);
+            _ssl = new Pt::Ssl::Server(_sslContext, *_ios, 0);
             _ssl->beginHandshake(true, false);
           //_ssl->beginHandshake(true, true);
 
-            _ssl->handshakeFinished += Pt::slot(*this, &Server::onSSLHandshakeFinished);
+            _ssl->handshakeFinished() += Pt::slot(*this, &Server::onSSLHandshakeFinished);
         }
 
         void onSSLHandshakeFinished(Pt::Ssl::Server& ssl)
@@ -202,7 +202,7 @@ int main(int argc, char** argv)
         Pt::Ssl::CertificateList trustedCACert;
         Pt::Ssl::CertificateList serverCertChain;
         Pt::Ssl::PrivateKey      serverPrivKey("abc123");
-        Pt::Ssl::Context         serverContext(0, Pt::Ssl::Context::Default);
+        Pt::Ssl::Context         serverContext(Pt::Ssl::Context::Default);
         trustedCACert.fromPem(caPemData, sizeof(caPemData));
         serverCertChain.fromPem(serverCertPemData, sizeof(serverCertPemData));
         serverPrivKey.fromPem(serverKeyData, sizeof(serverKeyData));

@@ -53,16 +53,16 @@ class PT_SSL_API Context : public NonCopyable
         //! @brief Communication protocol.
         enum Protocol 
         {
-            Default, //!< not less than SSL version 3.
-            TLSv1,           //!< the latest standard for secure TCP communication.
-            SSLv3,           //!< recommended for modern systems.
-            SSLv3or2,        //!< recommended for the most compatibility.
-            SSLv2            //!< unsecure, not recommended.
+            Default,  //!< not less than SSL version 3.
+            TLSv1,    //!< the latest standard for secure TCP communication.
+            SSLv3,    //!< recommended for modern systems.
+            SSLv3or2, //!< recommended for the most compatibility.
+            SSLv2     //!< unsecure, not recommended.
         };
 
     public:
         //! @brief Construct with session id and protocol. 
-        Context(const char* sessionID = 0, Protocol protocol = Default);
+        Context(Protocol protocol = Default, const char* sessionID = 0);
 
         //! @brief Destructor.
         ~Context();

@@ -156,10 +156,10 @@ void PublicKeyImpl::fromPemFile(const char* path)
 
 void PublicKeyImpl::toPem(std::ostream& os) const
 {
-    BioAutoPtr out( BIO_new(BIO_s_mem()) );
-
     if( ! _pkey)
         return;
+    
+    BioAutoPtr out( BIO_new(BIO_s_mem()) );
 
     int ret = PEM_write_bio_PUBKEY(out.get(), _pkey);
     if( ! ret)
