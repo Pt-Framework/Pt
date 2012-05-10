@@ -259,38 +259,6 @@ class Client : public Pt::Connectable {
                 }
             }
 
-
-
-
-            /*sb.endRead();
-            log_debug("client received raw = " << sb.in_avail());
-
-            std::string result;
-            while(true)
-            {
-                std::streamsize avail = _ssl->buffer().import();
-
-                if(avail == -1) {
-                    log_debug("client *** The stream has been shutdown by the other peer ***");
-                    _ssl->buffer().shutdown();
-                    _ios.buffer().inputReady() -= Pt::slot(*this, &Client::onInput);
-                    _ios.buffer().outputReady() -= Pt::slot(*this, &Client::onOutput);
-                    return;
-                }
-
-                if( ! avail )
-                    break;
-
-                log_debug("client received decoded = " << _ssl->buffer().in_avail());
-
-                while(true) {
-                    char buf[512];
-                    std::streamsize n =_ssl->readsome(buf, 512);
-                    if(n <= 0) break;
-                    result += std::string(buf, static_cast<size_t>(n));
-                }
-            }*/
-
             log_debug("client received: " << result);
 
             if( result.find("!!!") == std::string::npos )
