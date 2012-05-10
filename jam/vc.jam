@@ -56,7 +56,7 @@ rule CheckCc
 
         LINKFLAGS += /MANIFEST ;
 
-        if $(TARGET_OSPLAT:L) = "x64"
+        if $(TARGET_OSPLAT:L) = "x86_64"
         {
             if $(PROCESSOR_ARCHITECTURE:L) = "amd64"
             {
@@ -110,7 +110,7 @@ rule CheckCc
     {
         STDHDRS += \""$(VISUALC)\\vc\\include\"" ;
 
-        if $(TARGET_OSPLAT:L) = "x64"
+        if $(TARGET_OSPLAT:L) = "x86_64"
         {   
             LINKFLAGS += /LIBPATH:\""$(VISUALC)\\vc\\lib\\amd64\"" ;
         }

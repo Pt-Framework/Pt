@@ -4,7 +4,7 @@ SubDir PT_TOP ;
 # General values and settings
 #############################################################################
 
-# include rules an actions to build unit tests
+# include rules and actions to build unit tests
 Load unittest.jam ;
 
 # set directory to build objects and targets

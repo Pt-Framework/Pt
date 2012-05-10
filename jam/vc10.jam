@@ -50,7 +50,7 @@ rule ConfigurePlatformSDK
         CCFLAGS  += /DWIN32 ;
         C++FLAGS += /DWIN32 ;
 
-        if $(TARGET_OSPLAT:L) = "x64"
+        if $(TARGET_OSPLAT:L) = "x86_64"
         {
             LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)\\lib\\x64\"" ;
         }
