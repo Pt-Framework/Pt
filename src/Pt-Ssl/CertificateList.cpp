@@ -26,7 +26,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#include "Utils.h"
+#include "OpenSsl.h"
 #include <Pt/Ssl/CertificateList.h>
 #include <Pt/System/Logger.h>
 #include <fstream>
@@ -332,87 +332,4 @@ CertificateList::Iterator CertificateList::end() const
 
 } // namespace Pt
 
-/*   
-std::string asn1str2string(ASN1_STRING* asn1Val)
-{
-    BioAutoPtr out( BIO_new(BIO_s_mem()) );
-    if(!ASN1_STRING_print(out.get(), asn1Val)) return "";
 
-    char      buf[1024];
-    const int len = BIO_read(out.get(), buf, sizeof(buf));
-
-    return len ? std::string(buf, len) : "";
-}
-
-
-std::string ssldata2string(const unsigned char* md, unsigned int n)
-{
-    std::string hash;
-
-    char buf[1024];
-    for(unsigned int i = 0; i < n; ++i) {
-        sprintf(buf, "%02X", md[i]);
-        hash += buf;
-    }
-
-    return hash;
-}
-
-unsigned int string2ssldata(const char* str, int slen, unsigned char* md, unsigned int nmax)
-{
-    const char*          ptrcur = str;
-    const char*          ptrmax = ptrcur + slen;
-          unsigned char* mdcur  = md;
-    const unsigned char* mdmax  = mdcur + nmax;
-    char                 cnv[3] = { 0, 0, 0 };
-
-    for(;;) {
-        if(ptrcur >= ptrmax || md >= mdmax) break;
-
-        cnv[0] = *ptrcur++;
-        cnv[1] = (ptrcur < ptrmax) ? (*ptrcur++) : 0;
-
-        *mdcur++ = static_cast<unsigned char>( strtoul(cnv, 0, 16) );
-    }
-
-    return mdcur - md;
-}
-
-std::string sslhash2string(long md)
-{
-    char buf[1024];
-    sprintf(buf, "%08lx", md);
-    return buf;
-}
-
-std::string sslhash2string(const unsigned char* md, unsigned int n)
-{
-    std::string hash;
-
-    char buf[1024];
-    for(unsigned int i = 0; i < n; ++i) {
-        sprintf(buf, "%02X", md[i]);
-        if(!hash.empty()) hash += ':';
-        hash += buf;
-    }
-
-    return hash;
-}
-
-void dumpCertInfo(X509* ptrCert)
-
-    // For calculating the fingerprint hash of the certificate
-    const EVP_MD* fdig = EVP_sha1();
-    unsigned char md[EVP_MAX_MD_SIZE];
-    unsigned int  n;
-
-    if( ! X509_digest(ptrCert, fdig, md, &n) )
-        throw InvalidCertificate("Could not calculate the certificate's fingerprint hash!");
-
-    X509_get_version(ptrCert),
-    sslhash2string  ( X509_issuer_name_hash (ptrCert) ),
-    sslhash2string  ( X509_subject_name_hash(ptrCert) ),
-    OBJ_nid2sn( EVP_MD_type(fdig) ),
-    sslhash2string(md, n) );
-}
-*/

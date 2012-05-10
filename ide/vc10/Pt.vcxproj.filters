@@ -510,6 +510,9 @@
     <ClInclude Include="..\..\include\Pt\Ssl\Server.h">
       <Filter>Pt-Ssl</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Ssl\OpenSsl.h">
+      <Filter>Pt-Ssl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">

@@ -27,7 +27,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "Utils.h"
+#include "OpenSsl.h"
 #include <Pt/Ssl/Context.h>
 #include <Pt/System/Logger.h>
 #include <openssl/ssl.h>
