@@ -62,18 +62,6 @@ class FreeX509_STORE {
 };
 typedef Pt::AutoPtr<X509_STORE, FreeX509_STORE> X509_STOREAutoPtr;
 
-// Converter functions for converting OpenSSL values into STL strings
-extern std::string asn1str2string(ASN1_STRING* asn1Val);
-extern std::string asn1tim2string(ASN1_TIME* asn1Val);
-extern std::string x509nam2string(const X509_NAME* x509Val);
-
-extern std::string sslhash2string(long md);
-extern std::string sslhash2string(const unsigned char* md, unsigned int n);
-
-extern std::string ssldata2string(const unsigned char* md, unsigned int n);
-extern unsigned int string2ssldata(const std::string& str, unsigned char* md, unsigned int nmax);
-extern unsigned int string2ssldata(const char* str, int slen, unsigned char* md, unsigned int nmax);
-
 } // namespace Ssl
 
 } // namespace Pt

@@ -17,8 +17,7 @@ SharedLibrary Pt-Ssl : CertificateList.cpp
                        Server.cpp
                        Session.cpp
                        SslError.cpp
-                       StreamBuffer.cpp
-                       Utils.cpp ;
+                       StreamBuffer.cpp ;
 
 LinkSharedLibraries Pt-Ssl : Pt Pt-Net Pt-System ;
 MakeLocate Pt-Ssl : $(OUTPUT_TARGET) ;

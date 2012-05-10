@@ -30,6 +30,10 @@
 #include <Pt/Ssl/CertificateList.h>
 #include <Pt/System/Logger.h>
 #include <fstream>
+#include <cassert>
+#include <openssl/ssl.h>
+#include <openssl/pem.h>
+#include <openssl/err.h>
 
 log_define("Pt.Ssl.CertificateList")
 
@@ -37,39 +41,33 @@ namespace Pt {
 
 namespace Ssl {
 
-/*std::vector<SSLCertificateInfo> CertificateListImpl::certificateInfo() const
+std::string toString(const X509_NAME* val)
 {
-    std::vector<SSLCertificateInfo> cinfos;
+    int len = 0;
+    char buf[1024];
     
-    // For calculating the fingerprint hash of the certificate
-    const EVP_MD* fdig = EVP_sha1();
-    unsigned char md[EVP_MAX_MD_SIZE];
-    unsigned int  n;
-
-    std::vector<x509_st*>::const_iterator it;
-    for(it = _cert.begin(); it != _cert.end(); ++it)
+    BioAutoPtr out( BIO_new(BIO_s_mem()) );
+    if( X509_NAME_print( out.get(), (X509_NAME*) val, 0) ) 
     {
-        X509* ptrCert = *it;
-        if( ! X509_digest(ptrCert, fdig, md, &n) )
-            throw InvalidCertificate("Could not calculate the certificate's fingerprint hash!");
+        len = BIO_read( out.get(), buf, sizeof(buf) );
+    }
+    
+    return std::string(buf, len);
+}
 
-        SSLCertificateInfo ci( X509_get_version(ptrCert),
-                               ASN1_INTEGER_get( X509_get_serialNumber (ptrCert) ),
-                               x509nam2string  ( X509_get_issuer_name  (ptrCert) ),
-                               sslhash2string  ( X509_issuer_name_hash (ptrCert) ),
-                               x509nam2string  ( X509_get_subject_name (ptrCert) ),
-                               sslhash2string  ( X509_subject_name_hash(ptrCert) ),
-                               asn1tim2string  ( X509_get_notBefore    (ptrCert) ),
-                               asn1tim2string  ( X509_get_notAfter     (ptrCert) ),
-                               OBJ_nid2sn( EVP_MD_type(fdig) ),
-                               sslhash2string(md, n) );
+std::string toString(ASN1_TIME* val)
+{
+    int len = 0;
+    char buf[1024];
 
-        // Store some information about the certificate
-        cinfos.push_back(ci);
+    BioAutoPtr out( BIO_new(BIO_s_mem()) );
+    if( ASN1_TIME_print( out.get(), val) )
+    {
+        len = BIO_read( out.get(), buf, sizeof(buf) );
     }
 
-    return cinfos;
-}*/
+    return std::string(buf, len);
+}
 
 class CertificateImpl
 {
@@ -77,12 +75,13 @@ class CertificateImpl
         explicit CertificateImpl(x509_st* x509)
         : _x509(x509)
         , _refs(1)
-        {}
+        {
+            assert(_x509);
+        }
 
         ~CertificateImpl()
         {
-            if(_x509)
-                X509_free(_x509);
+            X509_free(_x509);
         }
 
         void ref()
@@ -90,6 +89,31 @@ class CertificateImpl
 
         unsigned unref()
         { return --_refs; }
+
+        int serialNumber() const
+        {
+            return ASN1_INTEGER_get( X509_get_serialNumber(_x509) );
+        }
+
+        std::string issuer() const
+        {
+            return toString( X509_get_issuer_name(_x509) );
+        }
+
+        std::string subject() const
+        {
+            return toString( X509_get_subject_name(_x509) );
+        }
+        
+        std::string notBefore() const
+        {
+            return toString( X509_get_notBefore(_x509) );
+        }
+
+        std::string notAfter() const
+        {
+            return toString( X509_get_notBefore(_x509) );
+        }
 
         x509_st* getX509() const
         { return _x509; }
@@ -307,3 +331,88 @@ CertificateList::Iterator CertificateList::end() const
 } // namespace Ssl
 
 } // namespace Pt
+
+/*   
+std::string asn1str2string(ASN1_STRING* asn1Val)
+{
+    BioAutoPtr out( BIO_new(BIO_s_mem()) );
+    if(!ASN1_STRING_print(out.get(), asn1Val)) return "";
+
+    char      buf[1024];
+    const int len = BIO_read(out.get(), buf, sizeof(buf));
+
+    return len ? std::string(buf, len) : "";
+}
+
+
+std::string ssldata2string(const unsigned char* md, unsigned int n)
+{
+    std::string hash;
+
+    char buf[1024];
+    for(unsigned int i = 0; i < n; ++i) {
+        sprintf(buf, "%02X", md[i]);
+        hash += buf;
+    }
+
+    return hash;
+}
+
+unsigned int string2ssldata(const char* str, int slen, unsigned char* md, unsigned int nmax)
+{
+    const char*          ptrcur = str;
+    const char*          ptrmax = ptrcur + slen;
+          unsigned char* mdcur  = md;
+    const unsigned char* mdmax  = mdcur + nmax;
+    char                 cnv[3] = { 0, 0, 0 };
+
+    for(;;) {
+        if(ptrcur >= ptrmax || md >= mdmax) break;
+
+        cnv[0] = *ptrcur++;
+        cnv[1] = (ptrcur < ptrmax) ? (*ptrcur++) : 0;
+
+        *mdcur++ = static_cast<unsigned char>( strtoul(cnv, 0, 16) );
+    }
+
+    return mdcur - md;
+}
+
+std::string sslhash2string(long md)
+{
+    char buf[1024];
+    sprintf(buf, "%08lx", md);
+    return buf;
+}
+
+std::string sslhash2string(const unsigned char* md, unsigned int n)
+{
+    std::string hash;
+
+    char buf[1024];
+    for(unsigned int i = 0; i < n; ++i) {
+        sprintf(buf, "%02X", md[i]);
+        if(!hash.empty()) hash += ':';
+        hash += buf;
+    }
+
+    return hash;
+}
+
+void dumpCertInfo(X509* ptrCert)
+
+    // For calculating the fingerprint hash of the certificate
+    const EVP_MD* fdig = EVP_sha1();
+    unsigned char md[EVP_MAX_MD_SIZE];
+    unsigned int  n;
+
+    if( ! X509_digest(ptrCert, fdig, md, &n) )
+        throw InvalidCertificate("Could not calculate the certificate's fingerprint hash!");
+
+    X509_get_version(ptrCert),
+    sslhash2string  ( X509_issuer_name_hash (ptrCert) ),
+    sslhash2string  ( X509_subject_name_hash(ptrCert) ),
+    OBJ_nid2sn( EVP_MD_type(fdig) ),
+    sslhash2string(md, n) );
+}
+*/
