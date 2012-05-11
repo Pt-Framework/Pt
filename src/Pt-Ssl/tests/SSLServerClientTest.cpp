@@ -200,6 +200,8 @@ class Client : public Pt::Connectable
             _ssl->beginHandshake(true);
             _ssl->handshakeFinished() += Pt::slot(*this, &Client::onHandshake);
             _ssl->shutdownFinished() += Pt::slot(*this, &Client::onShutdown);
+            _ssl->inputReady() += Pt::slot(*this, &Client::onInput2);
+            _ssl->outputReady() += Pt::slot(*this, &Client::onOutput2);
         }
 
         void onHandshake(Pt::Ssl::Client& ssl)
@@ -218,14 +220,14 @@ class Client : public Pt::Connectable
             log_debug("client Peer CN = " << _ssl->buffer().peerName());
             log_debug("client Current cipher = \n" << _ssl->buffer().currentCipher().name());
 
-            _ios.buffer().inputReady() += Pt::slot(*this, &Client::onInput);
-            _ios.buffer().outputReady() += Pt::slot(*this, &Client::onOutput);
+            //_ios.buffer().inputReady() += Pt::slot(*this, &Client::onInput);
+            //_ios.buffer().outputReady() += Pt::slot(*this, &Client::onOutput);
 
             std::string lmsg = "Hello world from client!";
 
             log_debug("client sending message... size = " << lmsg.length());
             *_ssl << lmsg << std::flush;
-            _ios.buffer().beginWrite();
+            _ssl->beginWrite();
         }
 
         void onShutdown(Pt::Ssl::Client& ssl)
@@ -243,14 +245,14 @@ class Client : public Pt::Connectable
             while(true) 
             {
                 std::streamsize res = _ssl->buffer().import();
-                log_debug("server received decoded = " << _ssl->buffer().in_avail());
+                log_debug("client received decoded = " << _ssl->buffer().in_avail());
                 
                 if(res == 0)
                     break;
 
                 if(res < 0) 
                 {                   
-                    log_debug("server *** The stream has been shutdown by the other peer ***");
+                    log_debug("client *** The stream has been shutdown by the other peer ***");
                     _ssl->beginShutdown();
                     return;
                 }  
@@ -284,19 +286,26 @@ class Client : public Pt::Connectable
                 _ssl->beginShutdown();
             }
         }
-
-        void onInput2(Pt::Ssl::Client& client)
+        
+        void onOutput(Pt::System::StreamBuffer& sb)
         {
-            std::streamsize res = client.endRead();
-            if(res < 0) 
+            sb.endWrite();
+            log_debug("client sent raw; remaining = " << sb.out_avail());
+            _ios.buffer().beginRead();
+        }
+        
+        void onInput2(Pt::Ssl::Client& client, bool shutdown)
+        {
+            client.endRead();
+            if(shutdown) 
             {                   
-                log_debug("server *** The stream has been shutdown by the other peer ***");
+                log_debug("client *** The stream has been shutdown by the other peer ***");
                 client.beginShutdown();
                 return;
             }
 
             std::string msg;
-            while(true) 
+            while(true)
             {
                 char buf[512];
                 while( client.readsome(buf, 512) > 0 ) 
@@ -305,8 +314,19 @@ class Client : public Pt::Connectable
                     log_debug("client received: " << n);
                     msg.append(buf, n);
                 }
+
+                std::streamsize r = client.buffer().import();
+                if(r < 0) 
+                {                   
+                    log_debug("client *** The stream has been shutdown by the other peer ***");
+                    client.beginShutdown();
+                    return;
+                }
+
+                if(r == 0)
+                    break;
             }
-                
+
             log_debug("client received: " << msg);
             if( msg.find("!!!") == std::string::npos )
             {
@@ -322,17 +342,14 @@ class Client : public Pt::Connectable
             else 
             {
                 log_debug("client shutting down the stream");
-                //_ios.buffer().inputReady() -= Pt::slot(*this, &Client::onInput);
-                _ios.buffer().outputReady() -= Pt::slot(*this, &Client::onOutput);
                 client.beginShutdown();
             }
         }
 
-        void onOutput(Pt::System::StreamBuffer& sb)
+        void onOutput2(Pt::Ssl::Client& client)
         {
-            sb.endWrite();
-            log_debug("client sent raw; remaining = " << sb.out_avail());
-            _ios.buffer().beginRead();
+            client.endWrite();
+            client.beginRead();
         }
 
     private:

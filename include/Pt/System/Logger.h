@@ -390,6 +390,17 @@ class PT_SYSTEM_API Logger : protected Pt::NonCopyable
         static LogTarget& getTarget(const std::string& name)
         { return LogTarget::get(name); }
 
+        /** @brief Sets the log-level of the target and its children.
+
+            This method is thread-safe. The log-level can also be set
+            in the settings file of the used for initialization. All
+            children of this target inherit the given LogLevel unless
+            they are already set to a log level explicitly i.e. this
+            method has een called on a child before.
+        */
+        static void setLogLevel(const std::string& target, LogLevel level)
+        { LogTarget::get(target).setLogLevel(level); }
+
         /** @brief Returns true if the log level is enabled for the target
         */
         bool enabled(LogLevel level) const

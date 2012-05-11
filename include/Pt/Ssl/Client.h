@@ -82,7 +82,7 @@ class PT_SSL_API Client : public std::iostream, public Pt::Connectable
 
         void beginWrite();
 
-        std::streamsize endWrite();
+        void endWrite();
 
         /** @brief This signal will be fired if the SLL system has finished the handshake 
         */
@@ -94,7 +94,7 @@ class PT_SSL_API Client : public std::iostream, public Pt::Connectable
         Pt::Signal<Client&>& shutdownFinished()
         { return _shutdownFinished; }
 
-        Pt::Signal<Client&>& inputReady()
+        Pt::Signal<Client&, bool>& inputReady()
         { return _inputReady; }
 
         Pt::Signal<Client&>& outputReady()
@@ -107,13 +107,14 @@ class PT_SSL_API Client : public std::iostream, public Pt::Connectable
         void onWriteShutdown(Pt::System::StreamBuffer& sb);
 
         void onInput(Pt::System::StreamBuffer& sb);
+        void onOutput(Pt::System::StreamBuffer& sb);
 
     private:
         System::IOStream* _ios;
         StreamBuffer _sslbuf;
         Pt::Signal<Client&> _handshakeFinished;
         Pt::Signal<Client&> _shutdownFinished;
-        Pt::Signal<Client&> _inputReady;
+        Pt::Signal<Client&, bool> _inputReady;
         Pt::Signal<Client&> _outputReady;
         int _errorPending;
 };

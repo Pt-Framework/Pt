@@ -128,6 +128,8 @@ void Client::onReadHandshake(Pt::System::StreamBuffer& sb)
             log_debug("Handshake finished");
             _ios->buffer().outputReady() -= Pt::slot(*this, &Client::onWriteHandshake);
             _ios->buffer().inputReady()  -= Pt::slot(*this, &Client::onReadHandshake);
+            _ios->buffer().outputReady() += Pt::slot(*this, &Client::onOutput);
+            _ios->buffer().inputReady()  += Pt::slot(*this, &Client::onInput);
             _handshakeFinished.send(*this);
             return;
         }
@@ -157,6 +159,8 @@ void Client::onReadHandshake(Pt::System::StreamBuffer& sb)
 
 void Client::beginShutdown()
 {
+    _ios->buffer().outputReady() -= Pt::slot(*this, &Client::onOutput);
+    _ios->buffer().inputReady()  -= Pt::slot(*this, &Client::onInput);
     _ios->buffer().outputReady() += Pt::slot(*this, &Client::onWriteShutdown);
     _ios->buffer().inputReady()  += Pt::slot(*this, &Client::onReadShutdown);
 
@@ -218,12 +222,28 @@ void Client::onWriteShutdown(Pt::System::StreamBuffer& sb)
 
 void Client::beginRead()
 {
+    log_debug("begin reading");
+    _ios->buffer().beginRead();
 }
 
 
 std::streamsize Client::endRead()
 {
+    log_debug("end reading");
     return 0;
+}
+
+
+void Client::beginWrite()
+{
+    log_debug("begin writing");
+    _ios->buffer().beginWrite();
+}
+
+
+void Client::endWrite()
+{
+    log_debug("end writing");
 }
 
 
@@ -232,22 +252,29 @@ void Client::onInput(Pt::System::StreamBuffer& sb)
     sb.endRead();
     log_debug("client received raw = " << sb.in_avail());
 
-    while(true) 
-    {
-        std::streamsize res = _sslbuf.import();
-        log_debug("client received decoded = " << buffer().in_avail());
+    std::streamsize res = _sslbuf.import();
+    log_debug("client received decoded = " << buffer().in_avail());
                 
-        if(res == 0)
-            break;
+    if(res == 0)
+        return;
 
-        if(res < 0) 
-        {                   
-            log_debug("client *** The stream has been shutdown by the other peer ***");
-            this->beginShutdown();
-            break;
-        }  
+    if(res < 0) 
+    {                   
+        log_debug("client *** The stream has been shutdown by the other peer ***");
+    }  
 
-        _inputReady.send(*this);
+    log_debug("input is ready " << res);
+    _inputReady.send(*this, res < 0);
+}
+
+void Client::onOutput(Pt::System::StreamBuffer& sb)
+{
+    sb.endWrite();
+    log_debug("client sent raw; remaining = " << sb.out_avail());
+    
+    if( sb.out_avail() == 0)
+    {
+        _outputReady.send(*this);
     }
 }
 
