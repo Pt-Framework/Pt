@@ -14,17 +14,17 @@ let colors_name = "pt"
 
 " Vim >= 7.0 specific colors
 if version >= 700
-  hi CursorLine guibg=#161616 ctermbg=236
+  hi CursorLine guibg=#131313 ctermbg=236
   hi CursorColumn guibg=#2d2d2d ctermbg=236
-  hi MatchParen guifg=#d0ffc0 guibg=#2f2f2f gui=bold ctermfg=157 ctermbg=237 cterm=bold
+  hi MatchParen guifg=yellow guibg=#000000 gui=bold ctermfg=157 ctermbg=237 cterm=bold
   hi Pmenu 		guifg=#ffffff guibg=#444444 ctermfg=255 ctermbg=238
   hi PmenuSel 	guifg=#000000 guibg=#b1d631 ctermfg=0 ctermbg=148
 endif
 
 " General colors
 hi cursor       guifg=black   guibg=yellow gui=none ctermbg=241
-hi Normal       guifg=#c0c0c0 guibg=#101010 gui=none ctermfg=253 ctermbg=234
-hi NonText      guifg=#101010 guibg=#101010 gui=none ctermfg=244 ctermbg=235
+hi Normal       guifg=#c0c0c0 guibg=#000000 gui=none ctermfg=253 ctermbg=234
+hi NonText      guifg=#000000 guibg=#000000 gui=none ctermfg=244 ctermbg=235
 hi LineNr       guifg=#808080 guibg=#151515 gui=none ctermfg=244 ctermbg=232
 hi StatusLine   guifg=#dddddd guibg=#444444 gui=none ctermfg=253 ctermbg=238 cterm=none
 hi StatusLineNC guifg=#959595 guibg=#444444 gui=none ctermfg=246 ctermbg=238
