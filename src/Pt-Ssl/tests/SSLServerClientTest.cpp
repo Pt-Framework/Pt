@@ -168,16 +168,21 @@ class Server : public Pt::Connectable
 
 
 
-class Client : public Pt::Connectable {
+class Client : public Pt::Connectable 
+{
     public:
-        Client(Pt::System::EventLoop& loop, const std::string& addr, unsigned short port,
-               Pt::Ssl::Context& sslClientContext)
-        : _sslContext(sslClientContext), _ssl(0), _ios(8192, true), _loop(loop), _msgCnt(0)
+        Client(Pt::System::EventLoop& loop, Pt::Ssl::Context& ctx, 
+               const std::string& addr, unsigned short port)
+        : _sslContext(ctx)
+        , _ssl(0)
+        , _ios(8192, true)
+        , _loop(loop)
+        , _msgCnt(0)
         {
             log_debug("client connecting");
 
             _socket.setActive(_loop);
-            _socket.connected() += Pt::slot(*this, &Client::onTCPConnect);
+            _socket.connected() += Pt::slot(*this, &Client::onConnect);
             _socket.beginConnect(addr, port);
         }
 
@@ -185,7 +190,7 @@ class Client : public Pt::Connectable {
         { delete _ssl; }
 
     private:
-        void onTCPConnect(Pt::Net::TcpSocket& socket)
+        void onConnect(Pt::Net::TcpSocket& socket)
         {
             _socket.endConnect();
             _ios.attach(socket);
@@ -193,22 +198,22 @@ class Client : public Pt::Connectable {
             log_debug("client starting handshake");
             _ssl = new Pt::Ssl::Client(_sslContext, _ios, 0);
             _ssl->beginHandshake(true);
-
-            _ssl->handshakeFinished() += Pt::slot(*this, &Client::onSSLHandshakeFinished);
+            _ssl->handshakeFinished() += Pt::slot(*this, &Client::onHandshake);
+            _ssl->shutdownFinished() += Pt::slot(*this, &Client::onShutdown);
         }
 
-        void onSSLHandshakeFinished(Pt::Ssl::Client& ssl)
+        void onHandshake(Pt::Ssl::Client& ssl)
         {
-            try {
+            try 
+            {
                 ssl.endHandshake();
             }
-            catch(...) {
+            catch(...) 
+            {
                 log_debug("client *** HANDSHAKE FAILED ***");
                 _loop.exit();
                 return;
             }
-
-            const Pt::Ssl::Session& sess = _ssl->buffer().session();
 
             log_debug("client Peer CN = " << _ssl->buffer().peerName());
             log_debug("client Current cipher = \n" << _ssl->buffer().currentCipher().name());
@@ -223,7 +228,7 @@ class Client : public Pt::Connectable {
             _ios.buffer().beginWrite();
         }
 
-        void onShutdownFinished(Pt::Ssl::Client& ssl)
+        void onShutdown(Pt::Ssl::Client& ssl)
         {
             _ssl->endShutdown();
             log_debug("client *** SHUTDOWN FINISHED ***");
@@ -234,7 +239,7 @@ class Client : public Pt::Connectable {
             sb.endRead();
             log_debug("client received raw = " << sb.in_avail());
 
-            std::string result;
+            std::string msg;
             while(true) 
             {
                 std::streamsize res = _ssl->buffer().import();
@@ -255,34 +260,71 @@ class Client : public Pt::Connectable {
                 {
                     size_t n = static_cast<size_t>( _ssl->gcount() );
                     log_debug("client received: " << n);
-                    result.append(buf, n);
+                    msg.append(buf, n);
                 }
             }
 
-            log_debug("client received: " << result);
-
-            if( result.find("!!!") == std::string::npos )
+            log_debug("client received: " << msg);
+            if( msg.find("!!!") == std::string::npos )
             {
                 log_debug("client message not complete ");
                 _ios.buffer().beginRead();
-                return;
             }
-
-            // Send more messages
-            if(_msgCnt < 2) {
-                ++_msgCnt;
+            else if(_msgCnt++ < 2) 
+            {
                 log_debug("client sending another message to the server ...");
                 *_ssl << "Good morning from client!" << std::flush;
                 _ios.buffer().beginWrite();
             }
-            // Shutdown
-            else {
+            else 
+            {
                 log_debug("client shutting down the stream");
                 _ios.buffer().inputReady() -= Pt::slot(*this, &Client::onInput);
                 _ios.buffer().outputReady() -= Pt::slot(*this, &Client::onOutput);
-
                 _ssl->beginShutdown();
-                _ssl->shutdownFinished() += Pt::slot(*this, &Client::onShutdownFinished);
+            }
+        }
+
+        void onInput2(Pt::Ssl::Client& client)
+        {
+            std::streamsize res = client.endRead();
+            if(res < 0) 
+            {                   
+                log_debug("server *** The stream has been shutdown by the other peer ***");
+                client.beginShutdown();
+                return;
+            }
+
+            std::string msg;
+            while(true) 
+            {
+                char buf[512];
+                while( client.readsome(buf, 512) > 0 ) 
+                {
+                    size_t n = static_cast<size_t>( client.gcount() );
+                    log_debug("client received: " << n);
+                    msg.append(buf, n);
+                }
+            }
+                
+            log_debug("client received: " << msg);
+            if( msg.find("!!!") == std::string::npos )
+            {
+                log_debug("client message not complete ");
+                client.beginRead();
+            }
+            else if(_msgCnt++ < 2) 
+            {
+                log_debug("client sending another message to the server ...");
+                client << "Good morning from client!" << std::flush;
+                client.beginWrite();
+            }
+            else 
+            {
+                log_debug("client shutting down the stream");
+                //_ios.buffer().inputReady() -= Pt::slot(*this, &Client::onInput);
+                _ios.buffer().outputReady() -= Pt::slot(*this, &Client::onOutput);
+                client.beginShutdown();
             }
         }
 
@@ -290,7 +332,6 @@ class Client : public Pt::Connectable {
         {
             sb.endWrite();
             log_debug("client sent raw; remaining = " << sb.out_avail());
-
             _ios.buffer().beginRead();
         }
 
@@ -336,7 +377,7 @@ int main(int argc, char** argv)
         clientContext  .setPrivateKey          (clientPrivKey);
 
         Server server(loop, serverContext, addr, port);
-        Client client(loop, addr, port, clientContext);
+        Client client(loop, clientContext, addr, port);
 
         loop.setIdleTimeout(30000);
         loop.timeout() += Pt::slot(loop, &Pt::System::EventLoop::exit);

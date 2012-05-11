@@ -215,6 +215,42 @@ void Client::onWriteShutdown(Pt::System::StreamBuffer& sb)
     }
 }
 
+
+void Client::beginRead()
+{
+}
+
+
+std::streamsize Client::endRead()
+{
+    return 0;
+}
+
+
+void Client::onInput(Pt::System::StreamBuffer& sb)
+{
+    sb.endRead();
+    log_debug("client received raw = " << sb.in_avail());
+
+    while(true) 
+    {
+        std::streamsize res = _sslbuf.import();
+        log_debug("client received decoded = " << buffer().in_avail());
+                
+        if(res == 0)
+            break;
+
+        if(res < 0) 
+        {                   
+            log_debug("client *** The stream has been shutdown by the other peer ***");
+            this->beginShutdown();
+            break;
+        }  
+
+        _inputReady.send(*this);
+    }
+}
+
 } // namespace Ssl
 
 } // namespace Pt
