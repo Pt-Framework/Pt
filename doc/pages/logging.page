@@ -2,9 +2,9 @@
 
 @section LoggingCode Adding Logging Support to Programs
 
-There are two ways to log fome a program , either by using static loggers
+There are two ways to log fome a program, either by using static loggers
 or by using specific logger instances within a program scope. To use a
-static logger it has to be defined first in a source file, and
+static logger, it has to be defined first in a source file, and
 then log macros can be used to send log messages via the static logger:
 
 @code

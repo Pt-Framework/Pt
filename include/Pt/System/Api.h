@@ -47,7 +47,7 @@
     The logging framework offers an efficient, extensible system to
     log messages from programs with multiple threads to a number of
     channels. Logging can be completely disabled at compile time, when the
-    logging macros were used. At runtime, log messages are filteed by
+    logging macros are used. At runtime, log messages are filtered by
     a level of severity. Filtering is very efficient, because log messages
     are not even built if their log level is too low.
     Currently three types of output channels exist, logging to files
