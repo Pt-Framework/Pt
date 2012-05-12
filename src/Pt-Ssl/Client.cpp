@@ -41,6 +41,8 @@ Client::Client(Context& ctx, Pt::System::IOStream& ios, const char* sessionID)
 , _ios(&ios)
 , _sslbuf(ctx,ios, sessionID, 1024)
 , _errorPending(0)
+, _reading(false)
+, _input(false)
 {
     std::iostream::init(&_sslbuf);
 }
@@ -223,14 +225,47 @@ void Client::onWriteShutdown(Pt::System::StreamBuffer& sb)
 void Client::beginRead()
 {
     log_debug("begin reading");
-    _ios->buffer().beginRead();
+    _reading = true;
+
+    if( ! _input || _sslbuf.import() == 0 )
+    {
+        log_debug("begin ios reading");
+        _ios->buffer().beginRead();
+    }
 }
 
 
 std::streamsize Client::endRead()
 {
     log_debug("end reading");
-    return 0;
+    _reading = false;
+    
+    std::streamsize res = _sslbuf.import();
+    log_debug("client received decoded = " << buffer().in_avail());
+
+    if(res < 0)
+    {                   
+        log_debug("client *** The stream has been shutdown by the other peer ***");
+    }
+
+    log_debug("imported: " << res);
+    return res;
+}
+
+
+void Client::onInput(Pt::System::StreamBuffer& sb)
+{
+    _ios->buffer().endRead();
+    log_debug("client received raw = " << _ios->buffer().in_avail());
+
+    _input = true;
+    do
+    {
+        _inputReady.send(*this);
+    }
+    while( _reading && _sslbuf.in_avail() );
+
+    _input = false;
 }
 
 
@@ -247,32 +282,12 @@ void Client::endWrite()
 }
 
 
-void Client::onInput(Pt::System::StreamBuffer& sb)
-{
-    sb.endRead();
-    log_debug("client received raw = " << sb.in_avail());
-
-    std::streamsize res = _sslbuf.import();
-    log_debug("client received decoded = " << buffer().in_avail());
-                
-    if(res == 0)
-        return;
-
-    if(res < 0) 
-    {                   
-        log_debug("client *** The stream has been shutdown by the other peer ***");
-    }  
-
-    log_debug("input is ready " << res);
-    _inputReady.send(*this, res < 0);
-}
-
 void Client::onOutput(Pt::System::StreamBuffer& sb)
 {
     sb.endWrite();
     log_debug("client sent raw; remaining = " << sb.out_avail());
     
-    if( sb.out_avail() == 0)
+    if( sb.out_avail() == 0 )
     {
         _outputReady.send(*this);
     }

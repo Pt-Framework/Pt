@@ -94,7 +94,7 @@ class PT_SSL_API Client : public std::iostream, public Pt::Connectable
         Pt::Signal<Client&>& shutdownFinished()
         { return _shutdownFinished; }
 
-        Pt::Signal<Client&, bool>& inputReady()
+        Pt::Signal<Client&>& inputReady()
         { return _inputReady; }
 
         Pt::Signal<Client&>& outputReady()
@@ -114,9 +114,11 @@ class PT_SSL_API Client : public std::iostream, public Pt::Connectable
         StreamBuffer _sslbuf;
         Pt::Signal<Client&> _handshakeFinished;
         Pt::Signal<Client&> _shutdownFinished;
-        Pt::Signal<Client&, bool> _inputReady;
+        Pt::Signal<Client&> _inputReady;
         Pt::Signal<Client&> _outputReady;
         int _errorPending;
+        bool _reading;
+        bool _input;
 };
 
 } // namespace Ssl

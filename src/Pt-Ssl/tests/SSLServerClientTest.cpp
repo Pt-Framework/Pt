@@ -200,8 +200,8 @@ class Client : public Pt::Connectable
             _ssl->beginHandshake(true);
             _ssl->handshakeFinished() += Pt::slot(*this, &Client::onHandshake);
             _ssl->shutdownFinished() += Pt::slot(*this, &Client::onShutdown);
-            _ssl->inputReady() += Pt::slot(*this, &Client::onInput2);
-            _ssl->outputReady() += Pt::slot(*this, &Client::onOutput2);
+            _ssl->inputReady() += Pt::slot(*this, &Client::onInput);
+            _ssl->outputReady() += Pt::slot(*this, &Client::onOutput);
         }
 
         void onHandshake(Pt::Ssl::Client& ssl)
@@ -220,11 +220,7 @@ class Client : public Pt::Connectable
             log_debug("client Peer CN = " << _ssl->buffer().peerName());
             log_debug("client Current cipher = \n" << _ssl->buffer().currentCipher().name());
 
-            //_ios.buffer().inputReady() += Pt::slot(*this, &Client::onInput);
-            //_ios.buffer().outputReady() += Pt::slot(*this, &Client::onOutput);
-
             std::string lmsg = "Hello world from client!";
-
             log_debug("client sending message... size = " << lmsg.length());
             *_ssl << lmsg << std::flush;
             _ssl->beginWrite();
@@ -235,96 +231,26 @@ class Client : public Pt::Connectable
             _ssl->endShutdown();
             log_debug("client *** SHUTDOWN FINISHED ***");
         }
-
-        void onInput(Pt::System::StreamBuffer& sb)
-        {
-            sb.endRead();
-            log_debug("client received raw = " << sb.in_avail());
-
-            std::string msg;
-            while(true) 
-            {
-                std::streamsize res = _ssl->buffer().import();
-                log_debug("client received decoded = " << _ssl->buffer().in_avail());
-                
-                if(res == 0)
-                    break;
-
-                if(res < 0) 
-                {                   
-                    log_debug("client *** The stream has been shutdown by the other peer ***");
-                    _ssl->beginShutdown();
-                    return;
-                }  
-
-                char buf[512];
-                while( _ssl->readsome(buf, 512) > 0 ) 
-                {
-                    size_t n = static_cast<size_t>( _ssl->gcount() );
-                    log_debug("client received: " << n);
-                    msg.append(buf, n);
-                }
-            }
-
-            log_debug("client received: " << msg);
-            if( msg.find("!!!") == std::string::npos )
-            {
-                log_debug("client message not complete ");
-                _ios.buffer().beginRead();
-            }
-            else if(_msgCnt++ < 2) 
-            {
-                log_debug("client sending another message to the server ...");
-                *_ssl << "Good morning from client!" << std::flush;
-                _ios.buffer().beginWrite();
-            }
-            else 
-            {
-                log_debug("client shutting down the stream");
-                _ios.buffer().inputReady() -= Pt::slot(*this, &Client::onInput);
-                _ios.buffer().outputReady() -= Pt::slot(*this, &Client::onOutput);
-                _ssl->beginShutdown();
-            }
-        }
         
-        void onOutput(Pt::System::StreamBuffer& sb)
+        void onInput(Pt::Ssl::Client& client)
         {
-            sb.endWrite();
-            log_debug("client sent raw; remaining = " << sb.out_avail());
-            _ios.buffer().beginRead();
-        }
-        
-        void onInput2(Pt::Ssl::Client& client, bool shutdown)
-        {
-            client.endRead();
-            if(shutdown) 
+            std::streamsize r = client.endRead();
+            if(r < 0) 
             {                   
                 log_debug("client *** The stream has been shutdown by the other peer ***");
                 client.beginShutdown();
                 return;
             }
+            
+            log_debug("client ends read, shutdown: " << r);
 
             std::string msg;
-            while(true)
+            char buf[512];
+            while( client.readsome(buf, 512) > 0 ) 
             {
-                char buf[512];
-                while( client.readsome(buf, 512) > 0 ) 
-                {
-                    size_t n = static_cast<size_t>( client.gcount() );
-                    log_debug("client received: " << n);
-                    msg.append(buf, n);
-                }
-
-                std::streamsize r = client.buffer().import();
-                if(r < 0) 
-                {                   
-                    log_debug("client *** The stream has been shutdown by the other peer ***");
-                    client.beginShutdown();
-                    return;
-                }
-
-                if(r == 0)
-                    break;
+                size_t n = static_cast<size_t>( client.gcount() );
+                log_debug("client received: " << n);
+                msg.append(buf, n);
             }
 
             log_debug("client received: " << msg);
@@ -346,19 +272,19 @@ class Client : public Pt::Connectable
             }
         }
 
-        void onOutput2(Pt::Ssl::Client& client)
+        void onOutput(Pt::Ssl::Client& client)
         {
             client.endWrite();
             client.beginRead();
         }
 
     private:
-        Pt::Ssl::Context&   _sslContext;
-        Pt::Ssl::Client*    _ssl;
-        Pt::System::IOStream   _ios;
+        Pt::Ssl::Context& _sslContext;
+        Pt::Ssl::Client* _ssl;
+        Pt::System::IOStream _ios;
         Pt::System::EventLoop& _loop;
-        Pt::Net::TcpSocket     _socket;
-        int                    _msgCnt;
+        Pt::Net::TcpSocket _socket;
+        unsigned _msgCnt;
 };
 
 int main(int argc, char** argv)
@@ -396,7 +322,7 @@ int main(int argc, char** argv)
         Server server(loop, serverContext, addr, port);
         Client client(loop, clientContext, addr, port);
 
-        loop.setIdleTimeout(30000);
+        //loop.setIdleTimeout(30000);
         loop.timeout() += Pt::slot(loop, &Pt::System::EventLoop::exit);
         loop.run();
 
