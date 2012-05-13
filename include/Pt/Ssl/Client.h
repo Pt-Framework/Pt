@@ -66,6 +66,8 @@ class PT_SSL_API Client : public std::iostream, public Pt::Connectable
         */
         void beginHandshake(bool verifyServerCert);
 
+        void beginAcceptHandshake(bool verifyClientCert, bool requireCertBasedAuth);
+
         /** @brief Ends the client handshake
             
             This function must be called after the handshake message is complete.
@@ -103,6 +105,11 @@ class PT_SSL_API Client : public std::iostream, public Pt::Connectable
     private:
         void onWriteHandshake(Pt::System::StreamBuffer& sb);
         void onReadHandshake(Pt::System::StreamBuffer& sb);
+
+        void onReadServerHandshake(Pt::System::StreamBuffer& sb);
+        void onWriteServerHandshake(Pt::System::StreamBuffer& sb);
+
+
         void onReadShutdown(Pt::System::StreamBuffer& sb);
         void onWriteShutdown(Pt::System::StreamBuffer& sb);
 

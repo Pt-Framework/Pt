@@ -71,12 +71,12 @@ class Server : public Pt::Connectable
 
             log_debug("server starts handshake");
             _ssl = new Pt::Ssl::Server(_sslContext, _ios, 0);
-            _ssl->handshakeFinished() += Pt::slot(*this, &Server::onHandshakeFinished);
-            _ssl->shutdownFinished() += Pt::slot(*this, &Server::onShutdownFinished);
+            _ssl->handshakeFinished() += Pt::slot(*this, &Server::onHandshake);
+            _ssl->shutdownFinished() += Pt::slot(*this, &Server::onShutdown);
             _ssl->beginHandshake(true, true);
         }
 
-        void onHandshakeFinished(Pt::Ssl::Server& ssl)
+        void onHandshake(Pt::Ssl::Server& ssl)
         {
             try 
             {
@@ -149,11 +149,51 @@ class Server : public Pt::Connectable
             _ios.buffer().beginRead();
         }
 
-        void onShutdownFinished(Pt::Ssl::Server& ssl)
+        void onShutdown(Pt::Ssl::Server& ssl)
         {
             _ssl->endShutdown();
             log_debug("server *** SHUTDOWN FINISHED ***");
             _loop.exit();
+        }
+
+        void onInput2(Pt::Ssl::Client& client)
+        {
+            std::streamsize r = client.endRead();
+            if(r < 0) 
+            {                   
+                log_debug("server *** The stream has been shutdown by the other peer ***");
+                client.beginShutdown();
+                return;
+            }
+            
+            log_debug("server ends read, shutdown: " << r);
+
+            std::string msg;
+            char buf[512];
+            while( client.readsome(buf, 512) > 0 ) 
+            {
+                size_t n = static_cast<size_t>( client.gcount() );
+                log_debug("server received: " << n);
+                msg.append(buf, n);
+            }
+
+            log_debug("server received message: " << msg);
+
+            // Send reply
+            *_ssl << "Hello world from server!";
+            for(int i = 0; i < 1024; ++i) 
+                client << "_12345678X";
+            client << "!!!" << std::flush;
+
+            log_debug("server sends message to the client ... out_avail = " << _ios.buffer().out_avail());
+            _ios.buffer().beginWrite();
+
+        }
+
+        void onOutput2(Pt::Ssl::Client& client)
+        {
+            client.endWrite();
+            client.beginRead();
         }
 
     private:
@@ -222,8 +262,8 @@ class Client : public Pt::Connectable
 
             std::string lmsg = "Hello world from client!";
             log_debug("client sending message... size = " << lmsg.length());
-            *_ssl << lmsg << std::flush;
-            _ssl->beginWrite();
+            ssl << lmsg << std::flush;
+            ssl.beginWrite();
         }
 
         void onShutdown(Pt::Ssl::Client& ssl)

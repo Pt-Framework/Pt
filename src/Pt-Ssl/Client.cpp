@@ -66,6 +66,21 @@ void Client::beginHandshake(bool verifyServerCert)
 }
 
 
+void Client::beginAcceptHandshake(bool verifyClientCert, bool requireCertBasedAuth)
+{
+    log_debug("_sslbuf.beginClientHandshake(verifyServerCert = "
+               << verifyClientCert << ", requireCertBasedAuth = " << requireCertBasedAuth << ")");
+
+    _errorPending = 0;
+    _sslbuf.beginServerHandshake(verifyClientCert, requireCertBasedAuth);
+
+    log_debug("_ios->buffer().beginRead()");
+    _ios->buffer().beginRead();
+    _ios->buffer().outputReady() += Pt::slot(*this, &Client::onWriteServerHandshake);
+    _ios->buffer().inputReady()  += Pt::slot(*this, &Client::onReadServerHandshake);
+}
+
+
 void Client::endHandshake()
 {
     if( _errorPending ) 
@@ -108,6 +123,50 @@ void Client::onWriteHandshake(Pt::System::StreamBuffer& sb)
         }
     }
 }
+
+
+void Client::onWriteServerHandshake(Pt::System::StreamBuffer& sb)
+{
+    try
+    {
+        log_debug("_ios->buffer().endWrite()");
+        _ios->buffer().endWrite();
+
+        log_debug("_sslbuf.writeHandshake()");
+        if(_sslbuf.writeHandshake() || _ios->buffer().out_avail() > 0)
+        {
+            log_debug("_ios->buffer().beginWrite()");
+            _ios->buffer().beginWrite();
+            return;
+        }
+
+        if( _sslbuf.connected() )
+        {
+            log_debug("Handshake finished");
+            _ios->buffer().outputReady() -= Pt::slot(*this, &Client::onWriteServerHandshake);
+            _ios->buffer().inputReady()  -= Pt::slot(*this, &Client::onReadServerHandshake);
+            _handshakeFinished.send(*this);
+            return;
+        }
+
+        log_debug("_ios->buffer().beginRead()");
+        _ios->buffer().beginRead();
+    } 
+    catch(...)
+    {
+        log_debug("Handshake failed");
+        _errorPending = 1;
+        _ios->buffer().outputReady() -= Pt::slot(*this, &Client::onWriteServerHandshake);
+        _ios->buffer().inputReady()  -= Pt::slot(*this, &Client::onReadServerHandshake);
+        _handshakeFinished.send(*this);
+
+        if(_errorPending)
+        {
+            throw;
+        }
+    }
+}
+
 
 
 void Client::onReadHandshake(Pt::System::StreamBuffer& sb)
@@ -159,6 +218,45 @@ void Client::onReadHandshake(Pt::System::StreamBuffer& sb)
 }
 
 
+void Client::onReadServerHandshake(Pt::System::StreamBuffer& sb)
+{
+    try
+    {
+        log_debug("_ios->buffer().endRead()");
+        _ios->buffer().endRead();
+
+        log_debug("_sslbuf.readHandshake()");
+        if(_sslbuf.readHandshake())
+        {
+            log_debug("_ios->buffer().beginRead()");
+            _ios->buffer().beginRead();
+            return;
+        }
+
+        log_debug("_sslbuf.writeHandshake()");
+        if(_sslbuf.writeHandshake()) {
+            log_debug("_ios->buffer().beginWrite()");
+            _ios->buffer().beginWrite();
+            return;
+        }
+    } 
+    catch(...)
+    {
+        log_debug("Handshake failed");
+        _errorPending = 1;
+        _ios->buffer().outputReady() -= Pt::slot(*this, &Client::onWriteServerHandshake);
+        _ios->buffer().inputReady()  -= Pt::slot(*this, &Client::onReadServerHandshake);
+        _handshakeFinished.send(*this);
+
+        if(_errorPending)
+        {
+            throw;
+        }
+    }
+}
+
+
+
 void Client::beginShutdown()
 {
     _ios->buffer().outputReady() -= Pt::slot(*this, &Client::onOutput);
@@ -172,6 +270,7 @@ void Client::beginShutdown()
     log_debug("_ios->buffer().beginWrite() " << _ios->buffer().out_avail() << " bytes");
     _ios->buffer().beginWrite();
 }
+
 
 
 void Client::endShutdown()
@@ -222,6 +321,7 @@ void Client::onWriteShutdown(Pt::System::StreamBuffer& sb)
 }
 
 
+
 void Client::beginRead()
 {
     log_debug("begin reading");
@@ -255,17 +355,31 @@ std::streamsize Client::endRead()
 
 void Client::onInput(Pt::System::StreamBuffer& sb)
 {
-    _ios->buffer().endRead();
-    log_debug("client received raw = " << _ios->buffer().in_avail());
-
-    _input = true;
-    do
+    try
     {
-        _inputReady.send(*this);
-    }
-    while( _reading && _sslbuf.in_avail() );
+        _ios->buffer().endRead();
+        log_debug("client received raw = " << _ios->buffer().in_avail());
 
-    _input = false;
+        _input = true;
+        do
+        {
+            _inputReady.send(*this);
+        }
+        while( _reading && _sslbuf.in_avail() );
+
+        _input = false;
+    }
+    catch(...)
+    {
+        _input = false;
+        _errorPending = 1;
+        _outputReady.send(*this);
+        if(_errorPending)
+        {
+            throw;
+        }
+    }
+
 }
 
 
@@ -279,20 +393,38 @@ void Client::beginWrite()
 void Client::endWrite()
 {
     log_debug("end writing");
+    if( _errorPending ) 
+    {
+        _errorPending = 0;
+        throw;
+    }
 }
 
 
 void Client::onOutput(Pt::System::StreamBuffer& sb)
 {
-    sb.endWrite();
-    log_debug("client sent raw; remaining = " << sb.out_avail());
-    
-    if( sb.out_avail() == 0 )
+    try
     {
+        sb.endWrite();
+        log_debug("client sent raw; remaining = " << sb.out_avail());
+        
+        if( sb.out_avail() == 0 )
+        {
+            _outputReady.send(*this);
+        }
+    }
+    catch(...)
+    {
+        _errorPending = 1;
         _outputReady.send(*this);
+        if(_errorPending)
+        {
+            throw;
+        }
     }
 }
 
 } // namespace Ssl
 
 } // namespace Pt
+
