@@ -60,7 +60,7 @@ class Client : public Pt::Connectable {
             log_debug("client Starting handshake");
             _ssl = new Pt::Ssl::Client(_sslContext, _ios, 0);
           //_ssl->beginHandshake(true);
-            _ssl->beginHandshake(false);
+            _ssl->beginConnectHandshake(false);
 
             _ssl->handshakeFinished() += Pt::slot(*this, &Client::onSSLHandshakeFinished);
         }

@@ -36,18 +36,19 @@ namespace Pt {
 
 namespace Ssl {
 
-/** @brief SSL stream buffer client.
+/** @brief SSL i/o stream
  */
-class PT_SSL_API Client : public std::iostream, public Pt::Connectable
+class PT_SSL_API IOStream : public std::iostream
+                          , public Pt::Connectable
 {
     public:
         /** @brief Construct a SSL client that uses the given I/O stream and SSL context. 
         */
-        Client(Context& ctx, Pt::System::IOStream& ios, const char* sessionID = 0);
+        IOStream(Context& ctx, Pt::System::IOStream& ios, const char* sessionID = 0);
 
         /** @brief Standard dtor. 
         */
-        virtual ~Client();
+        virtual ~IOStream();
 
         /** @brief Return the internal SSLStreamBuf instance. 
         */
@@ -64,7 +65,7 @@ class PT_SSL_API Client : public std::iostream, public Pt::Connectable
             After this method has been called, the first handshake message
             can be written to the server.
         */
-        void beginHandshake(bool verifyServerCert);
+        void beginConnectHandshake(bool verifyServerCert);
 
         void beginAcceptHandshake(bool verifyClientCert, bool requireCertBasedAuth);
 
@@ -88,18 +89,18 @@ class PT_SSL_API Client : public std::iostream, public Pt::Connectable
 
         /** @brief This signal will be fired if the SLL system has finished the handshake 
         */
-        Pt::Signal<Client&>& handshakeFinished()
+        Pt::Signal<IOStream&>& handshakeFinished()
         { return _handshakeFinished; }
 
         /** @brief This signal will be fired if the SLL system has finished the shutdown 
         */
-        Pt::Signal<Client&>& shutdownFinished()
+        Pt::Signal<IOStream&>& shutdownFinished()
         { return _shutdownFinished; }
 
-        Pt::Signal<Client&>& inputReady()
+        Pt::Signal<IOStream&>& inputReady()
         { return _inputReady; }
 
-        Pt::Signal<Client&>& outputReady()
+        Pt::Signal<IOStream&>& outputReady()
         { return _outputReady; }
 
     private:
@@ -108,7 +109,6 @@ class PT_SSL_API Client : public std::iostream, public Pt::Connectable
 
         void onReadServerHandshake(Pt::System::StreamBuffer& sb);
         void onWriteServerHandshake(Pt::System::StreamBuffer& sb);
-
 
         void onReadShutdown(Pt::System::StreamBuffer& sb);
         void onWriteShutdown(Pt::System::StreamBuffer& sb);
@@ -119,14 +119,16 @@ class PT_SSL_API Client : public std::iostream, public Pt::Connectable
     private:
         System::IOStream* _ios;
         StreamBuffer _sslbuf;
-        Pt::Signal<Client&> _handshakeFinished;
-        Pt::Signal<Client&> _shutdownFinished;
-        Pt::Signal<Client&> _inputReady;
-        Pt::Signal<Client&> _outputReady;
+        Pt::Signal<IOStream&> _handshakeFinished;
+        Pt::Signal<IOStream&> _shutdownFinished;
+        Pt::Signal<IOStream&> _inputReady;
+        Pt::Signal<IOStream&> _outputReady;
         int _errorPending;
         bool _reading;
         bool _input;
 };
+
+typedef IOStream Client;
 
 } // namespace Ssl
 

@@ -36,10 +36,10 @@ namespace Pt {
 
 namespace Ssl {
 
-Client::Client(Context& ctx, Pt::System::IOStream& ios, const char* sessionID)
+IOStream::IOStream(Context& ctx, Pt::System::IOStream& ios, const char* sessionID)
 : std::iostream(0)
 , _ios(&ios)
-, _sslbuf(ctx,ios, sessionID, 1024)
+, _sslbuf(ctx, ios, sessionID, 1024)
 , _errorPending(0)
 , _reading(false)
 , _input(false)
@@ -48,11 +48,11 @@ Client::Client(Context& ctx, Pt::System::IOStream& ios, const char* sessionID)
 }
 
 
-Client::~Client()
+IOStream::~IOStream()
 {}
 
 
-void Client::beginHandshake(bool verifyServerCert)
+void IOStream::beginConnectHandshake(bool verifyServerCert)
 {
     log_debug("_sslbuf.beginClientHandshake(verifyServerCert = " << verifyServerCert << ")");
     
@@ -61,12 +61,12 @@ void Client::beginHandshake(bool verifyServerCert)
 
     log_debug("_ios->buffer().beginWrite()");
     _ios->buffer().beginWrite();
-    _ios->buffer().outputReady() += Pt::slot(*this, &Client::onWriteHandshake);
-    _ios->buffer().inputReady()  += Pt::slot(*this, &Client::onReadHandshake);
+    _ios->buffer().outputReady() += Pt::slot(*this, &IOStream::onWriteHandshake);
+    _ios->buffer().inputReady()  += Pt::slot(*this, &IOStream::onReadHandshake);
 }
 
 
-void Client::beginAcceptHandshake(bool verifyClientCert, bool requireCertBasedAuth)
+void IOStream::beginAcceptHandshake(bool verifyClientCert, bool requireCertBasedAuth)
 {
     log_debug("_sslbuf.beginClientHandshake(verifyServerCert = "
                << verifyClientCert << ", requireCertBasedAuth = " << requireCertBasedAuth << ")");
@@ -76,12 +76,12 @@ void Client::beginAcceptHandshake(bool verifyClientCert, bool requireCertBasedAu
 
     log_debug("_ios->buffer().beginRead()");
     _ios->buffer().beginRead();
-    _ios->buffer().outputReady() += Pt::slot(*this, &Client::onWriteServerHandshake);
-    _ios->buffer().inputReady()  += Pt::slot(*this, &Client::onReadServerHandshake);
+    _ios->buffer().outputReady() += Pt::slot(*this, &IOStream::onWriteServerHandshake);
+    _ios->buffer().inputReady()  += Pt::slot(*this, &IOStream::onReadServerHandshake);
 }
 
 
-void Client::endHandshake()
+void IOStream::endHandshake()
 {
     if( _errorPending ) 
     {
@@ -91,7 +91,7 @@ void Client::endHandshake()
 }
 
 
-void Client::onWriteHandshake(Pt::System::StreamBuffer& sb)
+void IOStream::onWriteHandshake(Pt::System::StreamBuffer& sb)
 {
     try
     {
@@ -113,8 +113,8 @@ void Client::onWriteHandshake(Pt::System::StreamBuffer& sb)
     {
         log_debug("Handshake failed");
         _errorPending = 1;
-        _ios->buffer().outputReady() -= Pt::slot(*this, &Client::onWriteHandshake);
-        _ios->buffer().inputReady()  -= Pt::slot(*this, &Client::onReadHandshake);
+        _ios->buffer().outputReady() -= Pt::slot(*this, &IOStream::onWriteHandshake);
+        _ios->buffer().inputReady()  -= Pt::slot(*this, &IOStream::onReadHandshake);
         _handshakeFinished.send(*this);
         
         if(_errorPending)
@@ -125,7 +125,7 @@ void Client::onWriteHandshake(Pt::System::StreamBuffer& sb)
 }
 
 
-void Client::onWriteServerHandshake(Pt::System::StreamBuffer& sb)
+void IOStream::onWriteServerHandshake(Pt::System::StreamBuffer& sb)
 {
     try
     {
@@ -142,9 +142,11 @@ void Client::onWriteServerHandshake(Pt::System::StreamBuffer& sb)
 
         if( _sslbuf.connected() )
         {
-            log_debug("Handshake finished");
-            _ios->buffer().outputReady() -= Pt::slot(*this, &Client::onWriteServerHandshake);
-            _ios->buffer().inputReady()  -= Pt::slot(*this, &Client::onReadServerHandshake);
+            log_debug("SERVER Handshake finished");
+            _ios->buffer().outputReady() -= Pt::slot(*this, &IOStream::onWriteServerHandshake);
+            _ios->buffer().inputReady()  -= Pt::slot(*this, &IOStream::onReadServerHandshake);
+            _ios->buffer().outputReady() += Pt::slot(*this, &IOStream::onOutput);
+            _ios->buffer().inputReady()  += Pt::slot(*this, &IOStream::onInput);
             _handshakeFinished.send(*this);
             return;
         }
@@ -156,8 +158,8 @@ void Client::onWriteServerHandshake(Pt::System::StreamBuffer& sb)
     {
         log_debug("Handshake failed");
         _errorPending = 1;
-        _ios->buffer().outputReady() -= Pt::slot(*this, &Client::onWriteServerHandshake);
-        _ios->buffer().inputReady()  -= Pt::slot(*this, &Client::onReadServerHandshake);
+        _ios->buffer().outputReady() -= Pt::slot(*this, &IOStream::onWriteServerHandshake);
+        _ios->buffer().inputReady()  -= Pt::slot(*this, &IOStream::onReadServerHandshake);
         _handshakeFinished.send(*this);
 
         if(_errorPending)
@@ -168,8 +170,7 @@ void Client::onWriteServerHandshake(Pt::System::StreamBuffer& sb)
 }
 
 
-
-void Client::onReadHandshake(Pt::System::StreamBuffer& sb)
+void IOStream::onReadHandshake(Pt::System::StreamBuffer& sb)
 {
     try
     {
@@ -187,10 +188,10 @@ void Client::onReadHandshake(Pt::System::StreamBuffer& sb)
         if(_sslbuf.connected())
         {
             log_debug("Handshake finished");
-            _ios->buffer().outputReady() -= Pt::slot(*this, &Client::onWriteHandshake);
-            _ios->buffer().inputReady()  -= Pt::slot(*this, &Client::onReadHandshake);
-            _ios->buffer().outputReady() += Pt::slot(*this, &Client::onOutput);
-            _ios->buffer().inputReady()  += Pt::slot(*this, &Client::onInput);
+            _ios->buffer().outputReady() -= Pt::slot(*this, &IOStream::onWriteHandshake);
+            _ios->buffer().inputReady()  -= Pt::slot(*this, &IOStream::onReadHandshake);
+            _ios->buffer().outputReady() += Pt::slot(*this, &IOStream::onOutput);
+            _ios->buffer().inputReady()  += Pt::slot(*this, &IOStream::onInput);
             _handshakeFinished.send(*this);
             return;
         }
@@ -206,8 +207,8 @@ void Client::onReadHandshake(Pt::System::StreamBuffer& sb)
     {
         log_debug("Handshake failed");
         _errorPending = 1;
-        _ios->buffer().outputReady() -= Pt::slot(*this, &Client::onWriteHandshake);
-        _ios->buffer().inputReady()  -= Pt::slot(*this, &Client::onReadHandshake);
+        _ios->buffer().outputReady() -= Pt::slot(*this, &IOStream::onWriteHandshake);
+        _ios->buffer().inputReady()  -= Pt::slot(*this, &IOStream::onReadHandshake);
         _handshakeFinished.send(*this);
 
         if(_errorPending)
@@ -218,7 +219,7 @@ void Client::onReadHandshake(Pt::System::StreamBuffer& sb)
 }
 
 
-void Client::onReadServerHandshake(Pt::System::StreamBuffer& sb)
+void IOStream::onReadServerHandshake(Pt::System::StreamBuffer& sb)
 {
     try
     {
@@ -244,8 +245,8 @@ void Client::onReadServerHandshake(Pt::System::StreamBuffer& sb)
     {
         log_debug("Handshake failed");
         _errorPending = 1;
-        _ios->buffer().outputReady() -= Pt::slot(*this, &Client::onWriteServerHandshake);
-        _ios->buffer().inputReady()  -= Pt::slot(*this, &Client::onReadServerHandshake);
+        _ios->buffer().outputReady() -= Pt::slot(*this, &IOStream::onWriteServerHandshake);
+        _ios->buffer().inputReady()  -= Pt::slot(*this, &IOStream::onReadServerHandshake);
         _handshakeFinished.send(*this);
 
         if(_errorPending)
@@ -257,12 +258,12 @@ void Client::onReadServerHandshake(Pt::System::StreamBuffer& sb)
 
 
 
-void Client::beginShutdown()
+void IOStream::beginShutdown()
 {
-    _ios->buffer().outputReady() -= Pt::slot(*this, &Client::onOutput);
-    _ios->buffer().inputReady()  -= Pt::slot(*this, &Client::onInput);
-    _ios->buffer().outputReady() += Pt::slot(*this, &Client::onWriteShutdown);
-    _ios->buffer().inputReady()  += Pt::slot(*this, &Client::onReadShutdown);
+    _ios->buffer().outputReady() -= Pt::slot(*this, &IOStream::onOutput);
+    _ios->buffer().inputReady()  -= Pt::slot(*this, &IOStream::onInput);
+    _ios->buffer().outputReady() += Pt::slot(*this, &IOStream::onWriteShutdown);
+    _ios->buffer().inputReady()  += Pt::slot(*this, &IOStream::onReadShutdown);
 
     log_debug("_sslbuf.beginShutdown()");
     _sslbuf.shutdown();
@@ -302,15 +303,15 @@ void Client::onWriteShutdown(Pt::System::StreamBuffer& sb)
             return;
         }
 
-        _ios->buffer().outputReady() -= Pt::slot(*this, &Client::onWriteShutdown);
-        _ios->buffer().inputReady()  -= Pt::slot(*this, &Client::onReadShutdown);
+        _ios->buffer().outputReady() -= Pt::slot(*this, &IOStream::onWriteShutdown);
+        _ios->buffer().inputReady()  -= Pt::slot(*this, &IOStream::onReadShutdown);
         _shutdownFinished.send(*this);
     }
     catch(...)
     {
         _errorPending = 1;
-        _ios->buffer().outputReady() -= Pt::slot(*this, &Client::onWriteShutdown);
-        _ios->buffer().inputReady()  -= Pt::slot(*this, &Client::onReadShutdown);
+        _ios->buffer().outputReady() -= Pt::slot(*this, &IOStream::onWriteShutdown);
+        _ios->buffer().inputReady()  -= Pt::slot(*this, &IOStream::onReadShutdown);
         _shutdownFinished.send(*this);
         
         if(_errorPending)
@@ -322,7 +323,7 @@ void Client::onWriteShutdown(Pt::System::StreamBuffer& sb)
 
 
 
-void Client::beginRead()
+void IOStream::beginRead()
 {
     log_debug("begin reading");
     _reading = true;
@@ -335,7 +336,7 @@ void Client::beginRead()
 }
 
 
-std::streamsize Client::endRead()
+std::streamsize IOStream::endRead()
 {
     log_debug("end reading");
     _reading = false;
@@ -353,7 +354,7 @@ std::streamsize Client::endRead()
 }
 
 
-void Client::onInput(Pt::System::StreamBuffer& sb)
+void IOStream::onInput(Pt::System::StreamBuffer& sb)
 {
     try
     {
@@ -383,14 +384,14 @@ void Client::onInput(Pt::System::StreamBuffer& sb)
 }
 
 
-void Client::beginWrite()
+void IOStream::beginWrite()
 {
     log_debug("begin writing");
     _ios->buffer().beginWrite();
 }
 
 
-void Client::endWrite()
+void IOStream::endWrite()
 {
     log_debug("end writing");
     if( _errorPending ) 
@@ -401,7 +402,7 @@ void Client::endWrite()
 }
 
 
-void Client::onOutput(Pt::System::StreamBuffer& sb)
+void IOStream::onOutput(Pt::System::StreamBuffer& sb)
 {
     try
     {
@@ -412,6 +413,8 @@ void Client::onOutput(Pt::System::StreamBuffer& sb)
         {
             _outputReady.send(*this);
         }
+
+        // TODO: call beginWrite again if still bytes in underlying stream?
     }
     catch(...)
     {

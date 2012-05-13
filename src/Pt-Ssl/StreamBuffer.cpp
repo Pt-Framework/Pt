@@ -80,74 +80,6 @@ StreamBuffer::~StreamBuffer()
 }
 
 
-/*std::vector<CipherInfo> StreamBuffer::availableCiphers() const
-{
-    std::vector<CipherInfo> availCiphers;
-
-    STACK_OF(SSL_CIPHER)* chp = SSL_get_ciphers(_ssl);
-    for(int i = 0; i < sk_SSL_CIPHER_num(chp); ++i)
-    {
-        // Skip if not valid
-        const SSL_CIPHER* c = sk_SSL_CIPHER_value(chp, i);
-        if( ! c->valid )
-            continue;
-
-        // Get the ID and split it
-        const unsigned long id  = c->id;
-        const int           id0 = (int) (  id >> 24);
-        const int           id1 = (int) ( (id >> 16) & 0xFFL );
-        const int           id2 = (int) ( (id >>  8) & 0xFFL );
-        const int           id3 = (int) (  id        & 0xFFL );
-
-        // Convert the ID to a readable string
-        char strid[64];
-        if((id & 0xFF000000L) == 0x02000000L)
-            sprintf(strid, "0x%02X,0x%02X,0x%02X", id1, id2, id3);
-        else if((id & 0xFF000000L) == 0x03000000L)
-            sprintf(strid, "0x%02X,0x%02X", id2, id3);
-        else
-            sprintf(strid, "0x%02X,0x%02X,0x%02X,0x%02X", id0, id1, id2, id3);
-
-        // Get some information
-        char desc[512];
-        SSL_CIPHER_description(c, desc, sizeof(desc));
-        const int dlen = strlen(desc);
-        if(desc[dlen - 1] == '\n')
-            desc[dlen - 1] = 0;
-
-        // Store the chiper information
-        int usedBits;
-        int bits = SSL_CIPHER_get_bits(c, &usedBits);
-        CipherInfo cipher(id, strid, SSL_CIPHER_get_name(c), bits, usedBits, 
-                          SSL_CIPHER_get_version(c), desc);
-        
-        availCiphers.push_back(cipher);
-    }
-
-    return availCiphers;
-}*/
-
-/*
-void StreamBuffer::setCiphers(const std::vector<SSLCipherInfo>& ciphers)
-{
-    if(_handshakeStarted)
-        throw SSLRuntimeError(
-            "Cannot set the list of enabled cipher when a handshaking process is already started!",
-            PT_SOURCEINFO );
-
-    std::string str;
-    for(size_t i = 0; i < ciphers.size(); ++i) {
-        if(!str.empty()) str += ":";
-        str += ciphers[i].name;
-    }
-
-    if(!SSL_set_cipher_list(_ssl, str.c_str()))
-        throw SSLRuntimeError("Failed selecting SSL ciphers!", PT_SOURCEINFO);
-
-    _enabledCiphers = ciphers;
-}
-*/
-
 CipherList StreamBuffer::ciphers() const
 {
     // TODO: possibly cache the available ciphers in the context
@@ -572,6 +504,75 @@ StreamBuffer::int_type StreamBuffer::overflow(int_type ch)
 
     return traits_type::not_eof(ch);
 }
+
+/*
+std::vector<CipherInfo> StreamBuffer::availableCiphers() const
+{
+    std::vector<CipherInfo> availCiphers;
+
+    STACK_OF(SSL_CIPHER)* chp = SSL_get_ciphers(_ssl);
+    for(int i = 0; i < sk_SSL_CIPHER_num(chp); ++i)
+    {
+        // Skip if not valid
+        const SSL_CIPHER* c = sk_SSL_CIPHER_value(chp, i);
+        if( ! c->valid )
+            continue;
+
+        // Get the ID and split it
+        const unsigned long id  = c->id;
+        const int           id0 = (int) (  id >> 24);
+        const int           id1 = (int) ( (id >> 16) & 0xFFL );
+        const int           id2 = (int) ( (id >>  8) & 0xFFL );
+        const int           id3 = (int) (  id        & 0xFFL );
+
+        // Convert the ID to a readable string
+        char strid[64];
+        if((id & 0xFF000000L) == 0x02000000L)
+            sprintf(strid, "0x%02X,0x%02X,0x%02X", id1, id2, id3);
+        else if((id & 0xFF000000L) == 0x03000000L)
+            sprintf(strid, "0x%02X,0x%02X", id2, id3);
+        else
+            sprintf(strid, "0x%02X,0x%02X,0x%02X,0x%02X", id0, id1, id2, id3);
+
+        // Get some information
+        char desc[512];
+        SSL_CIPHER_description(c, desc, sizeof(desc));
+        const int dlen = strlen(desc);
+        if(desc[dlen - 1] == '\n')
+            desc[dlen - 1] = 0;
+
+        // Store the chiper information
+        int usedBits;
+        int bits = SSL_CIPHER_get_bits(c, &usedBits);
+        CipherInfo cipher(id, strid, SSL_CIPHER_get_name(c), bits, usedBits, 
+                          SSL_CIPHER_get_version(c), desc);
+        
+        availCiphers.push_back(cipher);
+    }
+
+    return availCiphers;
+}*/
+
+/*
+void StreamBuffer::setCiphers(const std::vector<SSLCipherInfo>& ciphers)
+{
+    if(_handshakeStarted)
+        throw SSLRuntimeError(
+            "Cannot set the list of enabled cipher when a handshaking process is already started!",
+            PT_SOURCEINFO );
+
+    std::string str;
+    for(size_t i = 0; i < ciphers.size(); ++i) {
+        if(!str.empty()) str += ":";
+        str += ciphers[i].name;
+    }
+
+    if(!SSL_set_cipher_list(_ssl, str.c_str()))
+        throw SSLRuntimeError("Failed selecting SSL ciphers!", PT_SOURCEINFO);
+
+    _enabledCiphers = ciphers;
+}
+*/
 
 } // namespace Ssl
 
