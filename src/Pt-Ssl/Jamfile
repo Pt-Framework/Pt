@@ -9,9 +9,9 @@ if $(OPENSSL_INCLUDES)
 }
 
 SharedLibrary Pt-Ssl : CertificateList.cpp
-                       Client.cpp
                        CipherList.cpp
                        Context.cpp
+                       IOStream.cpp
                        PrivateKey.cpp
                        PublicKey.cpp
                        Server.cpp

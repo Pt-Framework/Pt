@@ -4,6 +4,7 @@ SubDirObjects $(OUTPUT_OBJECT) Pt-Ssl ;
 
 Main Pt-Ssl-test : Pt-Ssl-test.cpp
                    ContextTest.cpp
+                   IOStreamTest.cpp
                    StreamBufferTest.cpp
                    ;
 LinkSharedLibraries Pt-Ssl-test : Pt Pt-Net Pt-Ssl Pt-System Pt-Unit ;

@@ -42,7 +42,8 @@ namespace Ssl {
 
 /** @brief SSL stream buffer.
 */
-class PT_SSL_API StreamBuffer : public Connectable, public std::streambuf
+class PT_SSL_API StreamBuffer : public std::streambuf
+                              , public Connectable
 {
     public:
         /** @brief Construct an SSL stream buffer that uses the given IO stream and SSL context. 

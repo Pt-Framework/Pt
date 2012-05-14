@@ -30,7 +30,7 @@
 #include "PemData.h"
 #include <Pt/Net/TcpSocket.h>
 #include <Pt/Net/TcpServer.h>
-#include <Pt/Ssl/Client.h>
+#include <Pt/Ssl/IOStream.h>
 #include <Pt/System/MainLoop.h>
 #include <Pt/System/Logger.h>
 
@@ -132,7 +132,7 @@ class Server : public Pt::Connectable
             client << "!!!" << std::flush;
 
             log_debug("server sends message to the client ... out_avail = " << _ios.buffer().out_avail());
-            _ios.buffer().beginWrite();
+            client.beginWrite();
 
         }
 

@@ -27,14 +27,27 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <Pt/Ssl/Client.h>
+#include <Pt/Ssl/IOStream.h>
 #include <Pt/System/Logger.h>
 
-log_define("Pt.Ssl.Client")
+log_define("Pt.Ssl.IOStream")
 
 namespace Pt {
 
 namespace Ssl {
+
+IOBuffer::IOBuffer(Context& ctx, Pt::System::IOStream& ios, const char* sessionID, size_t bufsize)
+: StreamBuffer(ctx, ios, sessionID, bufsize)
+, _errorPending(0)
+, _reading(false)
+, _input(false)
+{
+}
+
+
+IOBuffer::~IOBuffer()
+{}
+
 
 IOStream::IOStream(Context& ctx, Pt::System::IOStream& ios, const char* sessionID)
 : std::iostream(0)
@@ -257,7 +270,6 @@ void IOStream::onReadServerHandshake(Pt::System::StreamBuffer& sb)
 }
 
 
-
 void IOStream::beginShutdown()
 {
     _ios->buffer().outputReady() -= Pt::slot(*this, &IOStream::onOutput);
@@ -273,8 +285,7 @@ void IOStream::beginShutdown()
 }
 
 
-
-void Client::endShutdown()
+void IOStream::endShutdown()
 {
     if( _errorPending ) 
     {
@@ -284,12 +295,12 @@ void Client::endShutdown()
 }
 
 
-void Client::onReadShutdown(Pt::System::StreamBuffer& sb)
+void IOStream::onReadShutdown(Pt::System::StreamBuffer& sb)
 {
 }
 
 
-void Client::onWriteShutdown(Pt::System::StreamBuffer& sb)
+void IOStream::onWriteShutdown(Pt::System::StreamBuffer& sb)
 {
     try
     {

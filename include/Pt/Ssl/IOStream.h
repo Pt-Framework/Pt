@@ -36,7 +36,26 @@ namespace Pt {
 
 namespace Ssl {
 
-/** @brief SSL i/o stream
+class IOBuffer : public StreamBuffer
+{
+    public:
+        IOBuffer(Context& ctx, Pt::System::IOStream& ios, const char* sessionID = 0, size_t bufsize = 1024);
+
+        /** @brief Standard dtor. 
+        */
+        virtual ~IOBuffer();
+
+    private:
+        Pt::Signal<IOBuffer&> _handshakeFinished;
+        Pt::Signal<IOBuffer&> _shutdownFinished;
+        Pt::Signal<IOBuffer&> _inputReady;
+        Pt::Signal<IOBuffer&> _outputReady;
+        int _errorPending;
+        bool _reading;
+        bool _input;
+};
+
+/** @brief SSL I/O stream
  */
 class PT_SSL_API IOStream : public std::iostream
                           , public Pt::Connectable
@@ -118,7 +137,7 @@ class PT_SSL_API IOStream : public std::iostream
 
     private:
         System::IOStream* _ios;
-        StreamBuffer _sslbuf;
+        IOBuffer _sslbuf;
         Pt::Signal<IOStream&> _handshakeFinished;
         Pt::Signal<IOStream&> _shutdownFinished;
         Pt::Signal<IOStream&> _inputReady;

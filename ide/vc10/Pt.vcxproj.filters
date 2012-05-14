@@ -504,13 +504,13 @@
     <ClInclude Include="..\..\include\Pt\Ssl\StreamBuffer.h">
       <Filter>Pt-Ssl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Ssl\Client.h">
-      <Filter>Pt-Ssl</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Ssl\Server.h">
       <Filter>Pt-Ssl</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Ssl\OpenSsl.h">
+      <Filter>Pt-Ssl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Ssl\IOStream.h">
       <Filter>Pt-Ssl</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1086,11 +1086,14 @@
     <ClCompile Include="..\..\src\Pt-Ssl\StreamBuffer.cpp">
       <Filter>Pt-Ssl</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Ssl\Client.cpp">
-      <Filter>Pt-Ssl</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Pt-Ssl\Server.cpp">
       <Filter>Pt-Ssl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Ssl\IOStream.cpp">
+      <Filter>Pt-Ssl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Ssl\tests\IOStreamTest.cpp">
+      <Filter>Pt-Ssl\tests</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
