@@ -178,6 +178,9 @@ void StreamBuffer::beginConnectHandshake(bool verifyServerCert)
 
 bool StreamBuffer::writeHandshake()
 {
+    if( ! _ios)
+        throw System::IOError("StreamBuffer not attached");
+
     log_debug("getStatus() = " << getStatus());
 
     if( ! SSL_want_read(_ssl) )
@@ -215,6 +218,9 @@ bool StreamBuffer::writeHandshake()
 
 bool StreamBuffer::readHandshake()
 {
+    if( ! _ios)
+        throw System::IOError("StreamBuffer not attached");
+
     log_debug("getStatus() = " << getStatus());
 
     char buf[1000];
@@ -291,6 +297,9 @@ std::streamsize StreamBuffer::import()
 
 void StreamBuffer::shutdown()
 {
+    if( ! _ios)
+        throw System::IOError("StreamBuffer not attached");
+
     const int res = SSL_shutdown(_ssl);
     log_debug("SSL_shutdown() = " << res);
 

@@ -36,16 +36,82 @@ namespace Pt {
 
 namespace Ssl {
 
-class IOBuffer : public StreamBuffer
+/** @brief SSL I/O stream
+ */
+class PT_SSL_API IOBuffer : public StreamBuffer
+                          , public Pt::Connectable
 {
     public:
-        IOBuffer(Context& ctx, Pt::System::IOStream& ios, const char* sessionID = 0, size_t bufsize = 1024);
+        /** @brief Construct a SSL client that uses the given I/O stream and SSL context. 
+        */
+        IOBuffer(Context& ctx, Pt::System::IOStream& ios, const char* sessionID = 0);
 
         /** @brief Standard dtor. 
         */
         virtual ~IOBuffer();
 
+        /** @brief Starts the client handshake
+            
+            After this method has been called, the first handshake message
+            can be written to the server.
+        */
+        void beginConnect(bool verifyServerCert);
+
+        void beginAccept(bool verifyClientCert, bool requireCertBasedAuth);
+
+        /** @brief Ends the client handshake
+            
+            This function must be called after the handshake message is complete.
+        */
+        void endHandshake();
+
+        void beginShutdown();
+
+        void endShutdown();
+
+        void beginRead();
+
+        std::streamsize endRead();
+
+        void beginWrite();
+
+        void endWrite();
+
+        /** @brief This signal is sent when the handshake has finished. 
+        */
+        Pt::Signal<IOBuffer&>& handshakeFinished()
+        { return _handshakeFinished; }
+
+        /** @brief This signal is sent when the shutdown has finished. 
+        */
+        Pt::Signal<IOBuffer&>& shutdownFinished()
+        { return _shutdownFinished; }
+
+        /** @brief This signal is sent when data is available. 
+        */
+        Pt::Signal<IOBuffer&>& inputReady()
+        { return _inputReady; }
+
+        /** @brief This signal is sent when all data has been sent. 
+        */
+        Pt::Signal<IOBuffer&>& outputReady()
+        { return _outputReady; }
+
     private:
+        void onWriteHandshake(Pt::System::StreamBuffer& sb);
+        void onReadHandshake(Pt::System::StreamBuffer& sb);
+
+        void onReadServerHandshake(Pt::System::StreamBuffer& sb);
+        void onWriteServerHandshake(Pt::System::StreamBuffer& sb);
+
+        void onReadShutdown(Pt::System::StreamBuffer& sb);
+        void onWriteShutdown(Pt::System::StreamBuffer& sb);
+
+        void onInput(Pt::System::StreamBuffer& sb);
+        void onOutput(Pt::System::StreamBuffer& sb);
+
+    private:
+        System::IOStream* _ios;
         Pt::Signal<IOBuffer&> _handshakeFinished;
         Pt::Signal<IOBuffer&> _shutdownFinished;
         Pt::Signal<IOBuffer&> _inputReady;
@@ -54,6 +120,7 @@ class IOBuffer : public StreamBuffer
         bool _reading;
         bool _input;
 };
+
 
 /** @brief SSL I/O stream
  */
@@ -137,7 +204,7 @@ class PT_SSL_API IOStream : public std::iostream
 
     private:
         System::IOStream* _ios;
-        IOBuffer _sslbuf;
+        StreamBuffer _sslbuf;
         Pt::Signal<IOStream&> _handshakeFinished;
         Pt::Signal<IOStream&> _shutdownFinished;
         Pt::Signal<IOStream&> _inputReady;

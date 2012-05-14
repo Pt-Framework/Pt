@@ -36,8 +36,9 @@ namespace Pt {
 
 namespace Ssl {
 
-IOBuffer::IOBuffer(Context& ctx, Pt::System::IOStream& ios, const char* sessionID, size_t bufsize)
-: StreamBuffer(ctx, ios, sessionID, bufsize)
+IOBuffer::IOBuffer(Context& ctx, Pt::System::IOStream& ios, const char* sessionID)
+: StreamBuffer(ctx, ios, sessionID, 1024)
+, _ios(&ios)
 , _errorPending(0)
 , _reading(false)
 , _input(false)
@@ -47,6 +48,416 @@ IOBuffer::IOBuffer(Context& ctx, Pt::System::IOStream& ios, const char* sessionI
 
 IOBuffer::~IOBuffer()
 {}
+
+
+void IOBuffer::beginConnect(bool verifyServerCert)
+{
+    log_debug("_sslbuf.beginClientHandshake(verifyServerCert = " << verifyServerCert << ")");
+    
+    _errorPending = 0;
+    StreamBuffer::beginConnectHandshake(verifyServerCert);
+
+    log_debug("_ios->buffer().beginWrite()");
+    _ios->buffer().beginWrite();
+    _ios->buffer().outputReady() += Pt::slot(*this, &IOBuffer::onWriteHandshake);
+    _ios->buffer().inputReady()  += Pt::slot(*this, &IOBuffer::onReadHandshake);
+}
+
+
+void IOBuffer::beginAccept(bool verifyClientCert, bool requireCertBasedAuth)
+{
+    log_debug("_sslbuf.beginClientHandshake(verifyServerCert = "
+               << verifyClientCert << ", requireCertBasedAuth = " << requireCertBasedAuth << ")");
+
+    _errorPending = 0;
+    StreamBuffer::beginAcceptHandshake(verifyClientCert, requireCertBasedAuth);
+
+    log_debug("_ios->buffer().beginRead()");
+    _ios->buffer().beginRead();
+    _ios->buffer().outputReady() += Pt::slot(*this, &IOBuffer::onWriteServerHandshake);
+    _ios->buffer().inputReady()  += Pt::slot(*this, &IOBuffer::onReadServerHandshake);
+}
+
+
+void IOBuffer::endHandshake()
+{
+    if( _errorPending ) 
+    {
+        _errorPending = 0;
+        throw;
+    }
+}
+
+
+void IOBuffer::onWriteHandshake(Pt::System::StreamBuffer& sb)
+{
+    try
+    {
+        log_debug("_ios->buffer().endWrite()");
+        _ios->buffer().endWrite();
+
+        log_debug("_sslbuf.writeHandshake()");
+        if(StreamBuffer::writeHandshake() || _ios->buffer().out_avail() > 0)
+        {
+            log_debug("_ios->buffer().beginWrite()");
+            _ios->buffer().beginWrite();
+            return;
+        }
+
+        log_debug("_ios->buffer().beginRead()");
+        _ios->buffer().beginRead();
+    }
+    catch(...)
+    {
+        log_debug("Handshake failed");
+        _errorPending = 1;
+        _ios->buffer().outputReady() -= Pt::slot(*this, &IOBuffer::onWriteHandshake);
+        _ios->buffer().inputReady()  -= Pt::slot(*this, &IOBuffer::onReadHandshake);
+        _handshakeFinished.send(*this);
+        
+        if(_errorPending)
+        {
+            throw;
+        }
+    }
+}
+
+
+void IOBuffer::onWriteServerHandshake(Pt::System::StreamBuffer& sb)
+{
+    try
+    {
+        log_debug("_ios->buffer().endWrite()");
+        _ios->buffer().endWrite();
+
+        log_debug("_sslbuf.writeHandshake()");
+        if(StreamBuffer::writeHandshake() || _ios->buffer().out_avail() > 0)
+        {
+            log_debug("_ios->buffer().beginWrite()");
+            _ios->buffer().beginWrite();
+            return;
+        }
+
+        if( StreamBuffer::connected() )
+        {
+            log_debug("SERVER Handshake finished");
+            _ios->buffer().outputReady() -= Pt::slot(*this, &IOBuffer::onWriteServerHandshake);
+            _ios->buffer().inputReady()  -= Pt::slot(*this, &IOBuffer::onReadServerHandshake);
+            _ios->buffer().outputReady() += Pt::slot(*this, &IOBuffer::onOutput);
+            _ios->buffer().inputReady()  += Pt::slot(*this, &IOBuffer::onInput);
+            _handshakeFinished.send(*this);
+            return;
+        }
+
+        log_debug("_ios->buffer().beginRead()");
+        _ios->buffer().beginRead();
+    } 
+    catch(...)
+    {
+        log_debug("Handshake failed");
+        _errorPending = 1;
+        _ios->buffer().outputReady() -= Pt::slot(*this, &IOBuffer::onWriteServerHandshake);
+        _ios->buffer().inputReady()  -= Pt::slot(*this, &IOBuffer::onReadServerHandshake);
+        _handshakeFinished.send(*this);
+
+        if(_errorPending)
+        {
+            throw;
+        }
+    }
+}
+
+
+void IOBuffer::onReadHandshake(Pt::System::StreamBuffer& sb)
+{
+    try
+    {
+        log_debug("_ios->buffer().endRead()");
+        _ios->buffer().endRead();
+
+        log_debug("_sslbuf.readHandshake()");
+        if( StreamBuffer::readHandshake() )
+        {
+            log_debug("_ios->buffer().beginRead()");
+            _ios->buffer().beginRead();
+            return;
+        }
+
+        if(StreamBuffer::connected())
+        {
+            log_debug("Handshake finished");
+            _ios->buffer().outputReady() -= Pt::slot(*this, &IOBuffer::onWriteHandshake);
+            _ios->buffer().inputReady()  -= Pt::slot(*this, &IOBuffer::onReadHandshake);
+            _ios->buffer().outputReady() += Pt::slot(*this, &IOBuffer::onOutput);
+            _ios->buffer().inputReady()  += Pt::slot(*this, &IOBuffer::onInput);
+            _handshakeFinished.send(*this);
+            return;
+        }
+
+        log_debug("_sslbuf.writeHandshake()");
+        if(StreamBuffer::writeHandshake()) {
+            log_debug("_ios->buffer().beginWrite()");
+            _ios->buffer().beginWrite();
+            return;
+        }
+    }
+    catch(...)
+    {
+        log_debug("Handshake failed");
+        _errorPending = 1;
+        _ios->buffer().outputReady() -= Pt::slot(*this, &IOBuffer::onWriteHandshake);
+        _ios->buffer().inputReady()  -= Pt::slot(*this, &IOBuffer::onReadHandshake);
+        _handshakeFinished.send(*this);
+
+        if(_errorPending)
+        {
+            throw;
+        }
+    }
+}
+
+
+void IOBuffer::onReadServerHandshake(Pt::System::StreamBuffer& sb)
+{
+    try
+    {
+        log_debug("_ios->buffer().endRead()");
+        _ios->buffer().endRead();
+
+        log_debug("_sslbuf.readHandshake()");
+        if(StreamBuffer::readHandshake())
+        {
+            log_debug("_ios->buffer().beginRead()");
+            _ios->buffer().beginRead();
+            return;
+        }
+
+        log_debug("_sslbuf.writeHandshake()");
+        if(StreamBuffer::writeHandshake()) {
+            log_debug("_ios->buffer().beginWrite()");
+            _ios->buffer().beginWrite();
+            return;
+        }
+    } 
+    catch(...)
+    {
+        log_debug("Handshake failed");
+        _errorPending = 1;
+        _ios->buffer().outputReady() -= Pt::slot(*this, &IOBuffer::onWriteServerHandshake);
+        _ios->buffer().inputReady()  -= Pt::slot(*this, &IOBuffer::onReadServerHandshake);
+        _handshakeFinished.send(*this);
+
+        if(_errorPending)
+        {
+            throw;
+        }
+    }
+}
+
+
+void IOBuffer::beginShutdown()
+{
+    _ios->buffer().outputReady() -= Pt::slot(*this, &IOBuffer::onOutput);
+    _ios->buffer().inputReady()  -= Pt::slot(*this, &IOBuffer::onInput);
+    _ios->buffer().outputReady() += Pt::slot(*this, &IOBuffer::onWriteShutdown);
+    _ios->buffer().inputReady()  += Pt::slot(*this, &IOBuffer::onReadShutdown);
+
+    log_debug("_sslbuf.beginShutdown()");
+    StreamBuffer::shutdown();
+
+    log_debug("_ios->buffer().beginWrite() " << _ios->buffer().out_avail() << " bytes");
+    _ios->buffer().beginWrite();
+}
+
+
+void IOBuffer::endShutdown()
+{
+    if( _errorPending ) 
+    {
+        _errorPending = 0;
+        throw;
+    }
+}
+
+
+void IOBuffer::onReadShutdown(Pt::System::StreamBuffer& sb)
+{
+}
+
+
+void IOBuffer::onWriteShutdown(Pt::System::StreamBuffer& sb)
+{
+    try
+    {
+        sb.endWrite();
+        log_debug("Sent shutdown; remaining = " << sb.out_avail());
+
+        if( _ios->buffer().out_avail() > 0 )
+        {
+            log_debug("_ios->buffer().beginWrite() " << _ios->buffer().out_avail() << " bytes");
+            _ios->buffer().beginWrite();
+            return;
+        }
+
+        _ios->buffer().outputReady() -= Pt::slot(*this, &IOBuffer::onWriteShutdown);
+        _ios->buffer().inputReady()  -= Pt::slot(*this, &IOBuffer::onReadShutdown);
+        _shutdownFinished.send(*this);
+    }
+    catch(...)
+    {
+        _errorPending = 1;
+        _ios->buffer().outputReady() -= Pt::slot(*this, &IOBuffer::onWriteShutdown);
+        _ios->buffer().inputReady()  -= Pt::slot(*this, &IOBuffer::onReadShutdown);
+        _shutdownFinished.send(*this);
+        
+        if(_errorPending)
+        {
+            throw;
+        }
+    }
+}
+
+
+void IOBuffer::beginRead()
+{
+    log_debug("begin reading");
+    _reading = true;
+
+    if( ! _input || StreamBuffer::import() == 0 )
+    {
+        log_debug("begin ios reading");
+        _ios->buffer().beginRead();
+    }
+}
+
+
+std::streamsize IOBuffer::endRead()
+{
+    log_debug("end reading");
+    _reading = false;
+    
+    std::streamsize res = StreamBuffer::import();
+    log_debug("client received decoded = " << this->in_avail());
+
+    if(res < 0)
+    {                   
+        log_debug("client *** The stream has been shutdown by the other peer ***");
+    }
+
+    log_debug("imported: " << res);
+    return res;
+}
+
+
+void IOBuffer::onInput(Pt::System::StreamBuffer& sb)
+{
+    try
+    {
+        _ios->buffer().endRead();
+        log_debug("client received raw = " << _ios->buffer().in_avail());
+
+        _input = true;
+        do
+        {
+            _inputReady.send(*this);
+        }
+        while( _reading && this->in_avail() );
+
+        _input = false;
+    }
+    catch(...)
+    {
+        _input = false;
+        _errorPending = 1;
+        _inputReady.send(*this);
+        if(_errorPending)
+        {
+            throw;
+        }
+    }
+
+}
+
+
+void IOBuffer::beginWrite()
+{
+    log_debug("begin writing");
+    _ios->buffer().beginWrite();
+}
+
+
+void IOBuffer::endWrite()
+{
+    log_debug("end writing");
+    if( _errorPending ) 
+    {
+        _errorPending = 0;
+        throw;
+    }
+}
+
+
+void IOBuffer::onOutput(Pt::System::StreamBuffer& sb)
+{
+    try
+    {
+        sb.endWrite();
+        log_debug("client sent raw; remaining = " << sb.out_avail());
+        
+        if(sb.out_avail() > 0)
+        {
+            sb.beginWrite();
+            return;
+        }
+
+        _outputReady.send(*this);
+    }
+    catch(...)
+    {
+        _errorPending = 1;
+        _outputReady.send(*this);
+        if(_errorPending)
+        {
+            throw;
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 IOStream::IOStream(Context& ctx, Pt::System::IOStream& ios, const char* sessionID)
@@ -384,7 +795,7 @@ void IOStream::onInput(Pt::System::StreamBuffer& sb)
     {
         _input = false;
         _errorPending = 1;
-        _outputReady.send(*this);
+        _inputReady.send(*this);
         if(_errorPending)
         {
             throw;

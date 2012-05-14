@@ -47,8 +47,8 @@ class TcpAcceptor : public Pt::Connectable
         TcpAcceptor(Pt::System::EventLoop& loop, Pt::Ssl::Context& ctx,
                     const std::string& addr, unsigned short port)
         : _loop(loop)
-        , _ssl(0)
         , _ios(8192, true)
+        , _ssl(ctx, _ios)
         , _socket(0)
         {
             log_debug("listening on " << addr << ':' << port);
@@ -56,18 +56,15 @@ class TcpAcceptor : public Pt::Connectable
             _server.connectionPending() += Pt::slot(*this, &TcpAcceptor::onAccept);
             _server.setActive(_loop);
             _server.beginAccept();
-
-            _ssl = new Pt::Ssl::IOStream(ctx, _ios, 0);
         }
 
         ~TcpAcceptor()
         {
             delete _socket;
-            delete _ssl;
         }
 
-        Pt::Ssl::IOStream& sslStream()
-        { return *_ssl; }
+        Pt::Ssl::IOBuffer& buffer()
+        { return _ssl; }
 
    private:
         void onAccept(Pt::Net::TcpServer& server)
@@ -78,14 +75,15 @@ class TcpAcceptor : public Pt::Connectable
             _ios.attach(*_socket);
 
             log_debug("starting accept handshake");
-            _ssl->beginAcceptHandshake(true, true);
+            //_ssl.attach(_ios);
+            _ssl.beginAccept(true, true);
         }
 
     private:
         Pt::System::EventLoop& _loop;
-        Pt::Ssl::IOStream* _ssl;
-        Pt::System::IOStream _ios;
         Pt::Net::TcpServer _server;
+        Pt::System::IOStream _ios;
+        Pt::Ssl::IOBuffer _ssl;
         Pt::Net::TcpSocket* _socket;
 };
 
@@ -95,23 +93,21 @@ class TcpConnector : public Pt::Connectable
         TcpConnector(Pt::System::EventLoop& loop, Pt::Ssl::Context& ctx, 
                      const std::string& addr, unsigned short port)
         : _loop(loop)
-        , _ssl(0)
         , _ios(8192, true)
+        , _ssl(ctx, _ios)
         {
             log_debug("connecting to " << addr << ':' << port);
 
             _socket.setActive(_loop);
             _socket.connected() += Pt::slot(*this, &TcpConnector::onConnect);
             _socket.beginConnect(addr, port);
-
-            _ssl = new Pt::Ssl::IOStream(ctx, _ios, 0);
         }
 
         ~TcpConnector()
-        { delete _ssl; }
+        { }
 
-        Pt::Ssl::IOStream& sslStream()
-        { return *_ssl; }
+        Pt::Ssl::IOBuffer& buffer()
+        { return _ssl; }
 
     private:
         void onConnect(Pt::Net::TcpSocket& socket)
@@ -120,14 +116,14 @@ class TcpConnector : public Pt::Connectable
             _ios.attach(socket);
 
             log_debug("starting connect handshake");
-            _ssl->beginConnectHandshake(true);
+            _ssl.beginConnect(true);
         }
 
     private:
         Pt::System::EventLoop& _loop;
-        Pt::Ssl::IOStream* _ssl;
-        Pt::System::IOStream _ios;
         Pt::Net::TcpSocket _socket;
+        Pt::System::IOStream _ios;
+        Pt::Ssl::IOBuffer _ssl;
 };
 
 
@@ -164,7 +160,7 @@ class IOStreamTest : public Pt::Unit::TestSuite
             _loop = 0;
         }
 
-        void onAcceptHandshake(Pt::Ssl::IOStream& ssl)
+        void onAcceptHandshake(Pt::Ssl::IOBuffer& ssl)
         {
             log_trace("IOStreamTest::onAcceptHandshake");
             try 
@@ -178,19 +174,19 @@ class IOStreamTest : public Pt::Unit::TestSuite
                 return;
             }
 
-            log_debug("peer name = " << ssl.buffer().peerName());
-            log_debug("current cipher = " << ssl.buffer().currentCipher().name());
+            log_debug("peer name = " << ssl.peerName());
+            log_debug("current cipher = " << ssl.currentCipher().name());
             ssl.beginRead();
         }
 
-        void onServerShutdown(Pt::Ssl::IOStream& ssl)
+        void onServerShutdown(Pt::Ssl::IOBuffer& ssl)
         {
             ssl.endShutdown();
             log_info("server finished shutdown");
             _loop->exit();
         }
 
-        void onServerInput(Pt::Ssl::IOStream& ssl)
+        void onServerInput(Pt::Ssl::IOBuffer& ssl)
         {
             std::streamsize r = ssl.endRead();
             if(r < 0) 
@@ -201,12 +197,13 @@ class IOStreamTest : public Pt::Unit::TestSuite
             }
             
             log_debug("server ends read, shutdown: " << r);
-
+            std::iostream ios(&ssl);
+            
             std::string msg;
             char buf[512];
-            while( ssl.readsome(buf, 512) > 0 ) 
+            while( ios.readsome(buf, 512) > 0 ) 
             {
-                size_t n = static_cast<size_t>( ssl.gcount() );
+                size_t n = static_cast<size_t>( ios.gcount() );
                 log_debug("server received: " << n);
                 msg.append(buf, n);
             }
@@ -214,21 +211,21 @@ class IOStreamTest : public Pt::Unit::TestSuite
             log_debug("server received message: " << msg);
 
             // Send reply
-            ssl << "Hello world from server!";
+            ios << "Hello world from server!";
             for(int i = 0; i < 1024; ++i) 
-                ssl << "_12345678X";
-            ssl << "!!!" << std::flush;
+                ios << "_12345678X";
+            ios << "!!!" << std::flush;
 
             ssl.beginWrite();
         }
 
-        void onServerOutput(Pt::Ssl::IOStream& ssl)
+        void onServerOutput(Pt::Ssl::IOBuffer& ssl)
         {
             ssl.endWrite();
             ssl.beginRead();
         }
 
-        void onConnectHandshake(Pt::Ssl::IOStream& ssl)
+        void onConnectHandshake(Pt::Ssl::IOBuffer& ssl)
         {
             log_trace("IOStreamTest::onConnectHandshake");
             
@@ -243,22 +240,25 @@ class IOStreamTest : public Pt::Unit::TestSuite
                 return;
             }
 
-            log_debug("peer name = " << ssl.buffer().peerName());
-            log_debug("current cipher = " << ssl.buffer().currentCipher().name());
+            log_debug("peer name = " << ssl.peerName());
+            log_debug("current cipher = " << ssl.currentCipher().name());
 
             std::string lmsg = "Hello world from client!";
             log_debug("client sending message... size = " << lmsg.length());
-            ssl << lmsg << std::flush;
+
+            std::ostream os(&ssl);
+            os << lmsg << std::flush;
+
             ssl.beginWrite();
         }
 
-        void onClientShutdown(Pt::Ssl::IOStream& ssl)
+        void onClientShutdown(Pt::Ssl::IOBuffer& ssl)
         {
             ssl.endShutdown();
             log_info("client finished shutdown");
         }
 
-        void onClientInput(Pt::Ssl::IOStream& ssl)
+        void onClientInput(Pt::Ssl::IOBuffer& ssl)
         {
             std::streamsize r = ssl.endRead();
             if(r < 0) 
@@ -269,12 +269,12 @@ class IOStreamTest : public Pt::Unit::TestSuite
             }
             
             log_debug("client ends read, shutdown: " << r);
-
+            std::iostream ios(&ssl);
             std::string msg;
             char buf[512];
-            while( ssl.readsome(buf, 512) > 0 ) 
+            while( ios.readsome(buf, 512) > 0 ) 
             {
-                size_t n = static_cast<size_t>( ssl.gcount() );
+                size_t n = static_cast<size_t>( ios.gcount() );
                 log_debug("client received: " << n);
                 msg.append(buf, n);
             }
@@ -288,7 +288,7 @@ class IOStreamTest : public Pt::Unit::TestSuite
             else if(++_msgCnt < 3) 
             {
                 log_debug("client sending another message to the server ...");
-                ssl << "Good morning from client!" << std::flush;
+                ios << "Good morning from client!" << std::flush;
                 ssl.beginWrite();
             }
             else 
@@ -298,7 +298,7 @@ class IOStreamTest : public Pt::Unit::TestSuite
             }
         }
 
-        void onClientOutput(Pt::Ssl::IOStream& ssl)
+        void onClientOutput(Pt::Ssl::IOBuffer& ssl)
         {
             ssl.endWrite();
             ssl.beginRead();
@@ -336,16 +336,16 @@ void IOStreamTest::ReadWrite()
     unsigned short port = 6000;
 
     TcpAcceptor acceptor(*_loop, serverContext, addr, port);
-    acceptor.sslStream().handshakeFinished() += Pt::slot(*this, &IOStreamTest::onAcceptHandshake);
-    acceptor.sslStream().shutdownFinished() += Pt::slot(*this, &IOStreamTest::onServerShutdown);
-    acceptor.sslStream().inputReady() += Pt::slot(*this, &IOStreamTest::onServerInput);
-    acceptor.sslStream().outputReady() += Pt::slot(*this, &IOStreamTest::onServerOutput);
+    acceptor.buffer().handshakeFinished() += Pt::slot(*this, &IOStreamTest::onAcceptHandshake);
+    acceptor.buffer().shutdownFinished() += Pt::slot(*this, &IOStreamTest::onServerShutdown);
+    acceptor.buffer().inputReady() += Pt::slot(*this, &IOStreamTest::onServerInput);
+    acceptor.buffer().outputReady() += Pt::slot(*this, &IOStreamTest::onServerOutput);
 
     TcpConnector connector(*_loop, clientContext, addr, port);
-    connector.sslStream().handshakeFinished() += Pt::slot(*this, &IOStreamTest::onConnectHandshake);
-    connector.sslStream().shutdownFinished() += Pt::slot(*this, &IOStreamTest::onClientShutdown);
-    connector.sslStream().inputReady() += Pt::slot(*this, &IOStreamTest::onClientInput);
-    connector.sslStream().outputReady() += Pt::slot(*this, &IOStreamTest::onClientOutput);
+    connector.buffer().handshakeFinished() += Pt::slot(*this, &IOStreamTest::onConnectHandshake);
+    connector.buffer().shutdownFinished() += Pt::slot(*this, &IOStreamTest::onClientShutdown);
+    connector.buffer().inputReady() += Pt::slot(*this, &IOStreamTest::onClientInput);
+    connector.buffer().outputReady() += Pt::slot(*this, &IOStreamTest::onClientOutput);
 
     _loop->run();
 
