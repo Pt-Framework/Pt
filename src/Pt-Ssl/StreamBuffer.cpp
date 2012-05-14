@@ -148,7 +148,7 @@ void StreamBuffer::setSession(const Session& sess)
 }
 
 
-void StreamBuffer::beginServerHandshake(bool verifyClientCert, bool requireCertBasedAuth)
+void StreamBuffer::beginAcceptHandshake(bool verifyClientCert, bool requireCertBasedAuth)
 {
     _handshakeStarted = true;
 
@@ -164,7 +164,7 @@ void StreamBuffer::beginServerHandshake(bool verifyClientCert, bool requireCertB
 }
 
 
-void StreamBuffer::beginClientHandshake(bool verifyServerCert)
+void StreamBuffer::beginConnectHandshake(bool verifyServerCert)
 {
     _handshakeStarted = true;
 

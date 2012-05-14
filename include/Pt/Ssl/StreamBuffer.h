@@ -87,14 +87,14 @@ class PT_SSL_API StreamBuffer : public Connectable, public std::streambuf
             After this method has been called, the first handshake message
             can be read from the client.
         */
-        void beginServerHandshake(bool verifyClientCert, bool requireCertBasedAuth);
+        void beginAcceptHandshake(bool verifyClientCert, bool requireCertBasedAuth);
 
         /** @brief Starts the client handshake
             
             After this method has been called, the first handshake message
             can be written to the server.
         */
-        void beginClientHandshake(bool verifyServerCert);
+        void beginConnectHandshake(bool verifyServerCert);
 
         /** @brief Writes a handshake message to the underlying stream
             
@@ -126,23 +126,22 @@ class PT_SSL_API StreamBuffer : public Connectable, public std::streambuf
         virtual int_type overflow(int_type ch);
         std::streamsize do_underflow(std::streamsize size);
 
+    private:
         /** @brief Get the current status string of this SSL stream buffer. 
         */
         const char* getStatus() const;
 
-    protected:
+    private:
         bio_st*        _in;  // Input BIO
         bio_st*        _out; // Output BIO
         ssl_st*        _ssl; // OpenSSL SSL handle
         std::iostream* _ios; // IO
-
-    private:
-        size_t            _ibufferSize;
-        char*             _ibuffer;
-        std::size_t       _obufferSize;
-        char*             _obuffer;
-        const size_t      _pbmax;
-        bool              _handshakeStarted;
+        size_t         _ibufferSize;
+        char*          _ibuffer;
+        std::size_t    _obufferSize;
+        char*          _obuffer;
+        const size_t   _pbmax;
+        bool           _handshakeStarted;
 };
 
 } // namespace Ssl

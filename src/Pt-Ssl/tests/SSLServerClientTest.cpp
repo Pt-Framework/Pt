@@ -30,7 +30,6 @@
 #include "PemData.h"
 #include <Pt/Net/TcpSocket.h>
 #include <Pt/Net/TcpServer.h>
-#include <Pt/Ssl/Server.h>
 #include <Pt/Ssl/Client.h>
 #include <Pt/System/MainLoop.h>
 #include <Pt/System/Logger.h>

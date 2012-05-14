@@ -56,7 +56,7 @@ void Server::beginHandshake(bool verifyClientCert, bool requireCertBasedAuth)
                << verifyClientCert << ", requireCertBasedAuth = " << requireCertBasedAuth << ")");
 
     _errorPending = 0;
-    _sslbuf.beginServerHandshake(verifyClientCert, requireCertBasedAuth);
+    _sslbuf.beginAcceptHandshake(verifyClientCert, requireCertBasedAuth);
 
     log_debug("_ios->buffer().beginRead()");
     _ios->buffer().beginRead();

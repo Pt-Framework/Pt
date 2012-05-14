@@ -57,7 +57,7 @@ void IOStream::beginConnectHandshake(bool verifyServerCert)
     log_debug("_sslbuf.beginClientHandshake(verifyServerCert = " << verifyServerCert << ")");
     
     _errorPending = 0;
-    _sslbuf.beginClientHandshake(verifyServerCert);
+    _sslbuf.beginConnectHandshake(verifyServerCert);
 
     log_debug("_ios->buffer().beginWrite()");
     _ios->buffer().beginWrite();
@@ -72,7 +72,7 @@ void IOStream::beginAcceptHandshake(bool verifyClientCert, bool requireCertBased
                << verifyClientCert << ", requireCertBasedAuth = " << requireCertBasedAuth << ")");
 
     _errorPending = 0;
-    _sslbuf.beginServerHandshake(verifyClientCert, requireCertBasedAuth);
+    _sslbuf.beginAcceptHandshake(verifyClientCert, requireCertBasedAuth);
 
     log_debug("_ios->buffer().beginRead()");
     _ios->buffer().beginRead();
@@ -322,7 +322,6 @@ void Client::onWriteShutdown(Pt::System::StreamBuffer& sb)
 }
 
 
-
 void IOStream::beginRead()
 {
     log_debug("begin reading");
@@ -409,12 +408,13 @@ void IOStream::onOutput(Pt::System::StreamBuffer& sb)
         sb.endWrite();
         log_debug("client sent raw; remaining = " << sb.out_avail());
         
-        if( sb.out_avail() == 0 )
+        if(sb.out_avail() > 0)
         {
-            _outputReady.send(*this);
+            sb.beginWrite();
+            return;
         }
 
-        // TODO: call beginWrite again if still bytes in underlying stream?
+        _outputReady.send(*this);
     }
     catch(...)
     {
@@ -430,4 +430,3 @@ void IOStream::onOutput(Pt::System::StreamBuffer& sb)
 } // namespace Ssl
 
 } // namespace Pt
-
