@@ -209,13 +209,13 @@ class Client : public Pt::Connectable {
             _ios.attach(socket);
 
             log_debug("client Starting handshake");
-            _ssl = new Pt::Ssl::Client(_sslContext, _ios, 0);
+            _ssl = new Pt::Ssl::IOStream(_sslContext, _ios, 0);
             _ssl->beginConnectHandshake(true);
 
             _ssl->handshakeFinished() += Pt::slot(*this, &Client::onSSLHandshakeFinished);
         }
 
-        void onSSLHandshakeFinished(Pt::Ssl::Client& ssl)
+        void onSSLHandshakeFinished(Pt::Ssl::IOStream& ssl)
         {
             try {
                 ssl.endHandshake();
@@ -328,7 +328,7 @@ class Client : public Pt::Connectable {
 
     private:
         Pt::Ssl::Context&   _sslContext;
-        Pt::Ssl::Client*    _ssl;
+        Pt::Ssl::IOStream*    _ssl;
         Pt::System::IOStream   _ios;
         Pt::System::EventLoop& _loop;
         Pt::Net::TcpSocket     _socket;

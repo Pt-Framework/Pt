@@ -147,8 +147,6 @@ class PT_SSL_API IOStream : public std::iostream
         bool _input;
 };
 
-typedef IOStream Client;
-
 } // namespace Ssl
 
 } // namespace Pt

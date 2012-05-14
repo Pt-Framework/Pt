@@ -69,7 +69,7 @@ class Server : public Pt::Connectable
             _ios.attach(*_socket);
 
             log_debug("server starts handshake");
-            _ssl = new Pt::Ssl::Client(_sslContext, _ios, 0);
+            _ssl = new Pt::Ssl::IOStream(_sslContext, _ios, 0);
             _ssl->handshakeFinished() += Pt::slot(*this, &Server::onHandshake);
             _ssl->shutdownFinished() += Pt::slot(*this, &Server::onShutdown);
             _ssl->inputReady() += Pt::slot(*this, &Server::onInput);
@@ -77,7 +77,7 @@ class Server : public Pt::Connectable
             _ssl->beginAcceptHandshake(true, true);
         }
 
-        void onHandshake(Pt::Ssl::Client& ssl)
+        void onHandshake(Pt::Ssl::IOStream& ssl)
         {
             try 
             {
@@ -95,14 +95,14 @@ class Server : public Pt::Connectable
             ssl.beginRead();
         }
 
-        void onShutdown(Pt::Ssl::Client& ssl)
+        void onShutdown(Pt::Ssl::IOStream& ssl)
         {
             ssl.endShutdown();
             log_debug("server *** SHUTDOWN FINISHED ***");
             _loop.exit();
         }
 
-        void onInput(Pt::Ssl::Client& client)
+        void onInput(Pt::Ssl::IOStream& client)
         {
             std::streamsize r = client.endRead();
             if(r < 0) 
@@ -136,7 +136,7 @@ class Server : public Pt::Connectable
 
         }
 
-        void onOutput(Pt::Ssl::Client& client)
+        void onOutput(Pt::Ssl::IOStream& client)
         {
             client.endWrite();
             client.beginRead();
@@ -144,7 +144,7 @@ class Server : public Pt::Connectable
 
     private:
         Pt::Ssl::Context& _sslContext;
-        Pt::Ssl::Client* _ssl;
+        Pt::Ssl::IOStream* _ssl;
         Pt::System::IOStream _ios;
         Pt::System::EventLoop& _loop;
         Pt::Net::TcpServer _server;
@@ -182,7 +182,7 @@ class Client : public Pt::Connectable
             _ios.attach(socket);
 
             log_debug("client starting handshake");
-            _ssl = new Pt::Ssl::Client(_sslContext, _ios, 0);
+            _ssl = new Pt::Ssl::IOStream(_sslContext, _ios, 0);
             _ssl->beginConnectHandshake(true);
             _ssl->handshakeFinished() += Pt::slot(*this, &Client::onHandshake);
             _ssl->shutdownFinished() += Pt::slot(*this, &Client::onShutdown);
@@ -190,7 +190,7 @@ class Client : public Pt::Connectable
             _ssl->outputReady() += Pt::slot(*this, &Client::onOutput);
         }
 
-        void onHandshake(Pt::Ssl::Client& ssl)
+        void onHandshake(Pt::Ssl::IOStream& ssl)
         {
             try 
             {
@@ -212,13 +212,13 @@ class Client : public Pt::Connectable
             ssl.beginWrite();
         }
 
-        void onShutdown(Pt::Ssl::Client& ssl)
+        void onShutdown(Pt::Ssl::IOStream& ssl)
         {
             _ssl->endShutdown();
             log_debug("client *** SHUTDOWN FINISHED ***");
         }
         
-        void onInput(Pt::Ssl::Client& client)
+        void onInput(Pt::Ssl::IOStream& client)
         {
             std::streamsize r = client.endRead();
             if(r < 0) 
@@ -258,7 +258,7 @@ class Client : public Pt::Connectable
             }
         }
 
-        void onOutput(Pt::Ssl::Client& client)
+        void onOutput(Pt::Ssl::IOStream& client)
         {
             client.endWrite();
             client.beginRead();
@@ -266,7 +266,7 @@ class Client : public Pt::Connectable
 
     private:
         Pt::Ssl::Context& _sslContext;
-        Pt::Ssl::Client* _ssl;
+        Pt::Ssl::IOStream* _ssl;
         Pt::System::IOStream _ios;
         Pt::System::EventLoop& _loop;
         Pt::Net::TcpSocket _socket;
