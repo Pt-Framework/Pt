@@ -26,8 +26,8 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef PT_SSL_IOSTREAM_H
-#define PT_SSL_IOSTREAM_H
+#ifndef PT_SSL_IOBUFFER_H
+#define PT_SSL_IOBUFFER_H
 
 #include <Pt/Ssl/StreamBuffer.h>
 #include <Pt/System/IOStream.h>
@@ -58,7 +58,7 @@ class PT_SSL_API IOBuffer : public StreamBuffer
         */
         void beginAccept(bool verifyClientCert, bool requireCertBasedAuth);
 
-        /** @brief Ends the client handshake
+        /** @brief Ends the client or server handshake
         */
         void endHandshake();
 
