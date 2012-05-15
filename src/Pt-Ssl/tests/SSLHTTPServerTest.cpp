@@ -28,7 +28,7 @@
  */
 
 #include "PemData.h"
-#include <Pt/Ssl/Server.h>
+#include <Pt/Ssl/IOStream.h>
 #include <Pt/Net/TcpSocket.h>
 #include <Pt/Net/TcpServer.h>
 #include <Pt/System/MainLoop.h>
@@ -45,7 +45,7 @@ class Server : public Pt::Connectable {
             log_debug("server *** Waiting connection from client ***");
 
             _server.listen(addr, port);
-            _server.connectionPending() += Pt::slot(*this, &Server::onTCPAccept);
+            _server.connectionPending() += Pt::slot(*this, &Server::onAccept);
             _server.setActive(_loop);
         }
 
@@ -56,7 +56,7 @@ class Server : public Pt::Connectable {
         }
 
    private:
-        void onTCPAccept(Pt::Net::TcpServer& server)
+        void onAccept(Pt::Net::TcpServer& server)
         {
             log_debug("server Accepting connection from client");
             _client = new Pt::Net::TcpSocket;
@@ -68,17 +68,20 @@ class Server : public Pt::Connectable {
             _ios->attach(*_client);
 
             log_debug("server Starting handshake");
-            _ssl = new Pt::Ssl::Server(_sslContext, *_ios, 0);
-            _ssl->beginHandshake(true, false);
+            _ssl = new Pt::Ssl::IOBuffer(_sslContext, *_ios, 0);
+            _ssl->beginAccept(true, false);
           //_ssl->beginHandshake(true, true);
 
-            _ssl->handshakeFinished() += Pt::slot(*this, &Server::onSSLHandshakeFinished);
+            _ssl->handshakeFinished() += Pt::slot(*this, &Server::onHandshake);
+            //_ssl->shutdownFinished() += Pt::slot(*this, &Server::onShutdown);
+            _ssl->inputReady() += Pt::slot(*this, &Server::onInput);
+            _ssl->outputReady() += Pt::slot(*this, &Server::onOutput);
         }
 
-        void onSSLHandshakeFinished(Pt::Ssl::Server& ssl)
+        void onHandshake(Pt::Ssl::IOBuffer& ssl)
         {
             try {
-                ssl.endHandshake();
+                ssl.endAccept();
             }
             catch(...) {
                 log_debug("server *** HANDSHAKE FAILED ***");
@@ -91,37 +94,33 @@ class Server : public Pt::Connectable {
                 return;
             }
 
-            log_debug("server Peer CN = " << _ssl->buffer().peerName());
-            log_debug("server Current cipher = \n" << _ssl->buffer().currentCipher().name());
+            log_debug("server Peer CN = " << ssl.peerName());
+            log_debug("server Current cipher = \n" << ssl.currentCipher().name());
 
-            _ios->buffer().inputReady() += Pt::slot(*this, &Server::onInput);
-            _ios->buffer().outputReady() += Pt::slot(*this, &Server::onOutput);
-
-            _ios->buffer().beginRead();
+            ssl.beginRead();
         }
 
-        void onInput(Pt::System::StreamBuffer& sb)
+        void onInput(Pt::Ssl::IOBuffer& ssl)
         {
-            sb.endRead();
-            log_debug("server Received raw = " << sb.in_avail());
+            std::streamsize r = ssl.endRead();
+            log_debug("server Received raw = " << _ios->buffer().in_avail());
 
-            if(_ssl->buffer().import() == -1) {
+            if(r < 0) 
+            {
                 log_debug("server *** The stream has been shutdown by the other peer ***");
-                _ssl->buffer().writeShutdown();
-                _ios->buffer().inputReady() -= Pt::slot(*this, &Server::onInput);
-                _ios->buffer().outputReady() -= Pt::slot(*this, &Server::onOutput);
+                ssl.beginShutdown();
                 return;
             }
 
-            log_debug("server Received decoded = " << _ssl->buffer().in_avail());
+            log_debug("server Received decoded = " << ssl.in_avail());
 
             char buf[512];
-            std::streamsize n =_ssl->readsome(buf, 512);
-            if(n <= 0) return;
+            std::istream is(&ssl);
+            std::streamsize n = is.readsome(buf, 512);
+            if(n <= 0) 
+                return;
 
-            std::cerr
-                << "############################################################################################# SERVER RECEIVED: "
-                << std::endl;
+            std::cerr  << "######## SERVER RECEIVED: " << std::endl;
             std::cerr.write(buf, n);
 
             // Send reply
@@ -133,13 +132,15 @@ class Server : public Pt::Connectable {
 #else
             ifs.open("../../src/Pt-Ssl/long_html.html", std::ios::binary);
 #endif
-            while(ifs) {
+            while(ifs) 
+            {
                 ifs.read( rbuf, sizeof(rbuf) );
-                lmsg += std::string( rbuf, static_cast<size_t>(ifs.gcount()) );
+                lmsg.append( rbuf, static_cast<size_t>(ifs.gcount()) );
             }
 
+            std::ostream os(&ssl);
             log_debug("server Sending response to the client ... body size = " << lmsg.length());
-            *_ssl << "HTTP/1.1 200 OK\r\n"
+            os << "HTTP/1.1 200 OK\r\n"
                      "Date: Fri, 18 Feb 2011 05:36:00 GMT\r\n"
                      "Server: Apache/2.2.13 (Fedora)\r\n"
                      "Last-Modified: Wed, 09 Feb 2011 14:01:41 GMT\r\n"
@@ -151,27 +152,19 @@ class Server : public Pt::Connectable {
                   << std::flush;
 
             log_debug("server Sending response to the client ... out_avail = " << _ios->buffer().out_avail());
-            _ios->buffer().beginWrite();
+            ssl.beginWrite();
         }
 
-        void onOutput(Pt::System::StreamBuffer& sb)
+        void onOutput(Pt::Ssl::IOBuffer& ssl)
         {
-            sb.endWrite();
-            log_debug("server Sent raw; remaining = " << sb.out_avail());
+            ssl.endWrite();
+            log_debug("server Sent raw; remaining = " << _ios->buffer().out_avail());
 
-            if(sb.out_avail() > 0) {
-                sb.beginWrite();
-                return;
-            }
 
             log_debug("server Done sending response to the client");
-
-            _ios->buffer().inputReady() -= Pt::slot(*this, &Server::onInput);
-            _ios->buffer().outputReady() -= Pt::slot(*this, &Server::onOutput);
-
             // NOTE: If we uncomment this, the client will get the shutdown notification before receiving
             //       the full HTML body that will cause the client to never get the full HTML body.
-            // _ssl->buffer().shutdown();
+            // ssl.beginShutdown();
 
             _client->detach();
             delete _client; _client = 0;
@@ -183,7 +176,7 @@ class Server : public Pt::Connectable {
 
     private:
         Pt::Ssl::Context&    _sslContext;
-        Pt::Ssl::Server*     _ssl;
+        Pt::Ssl::IOBuffer*     _ssl;
         Pt::System::IOStream*   _ios;
         Pt::System::EventLoop&  _loop;
         Pt::Net::TcpServer      _server;

@@ -371,13 +371,15 @@ void IOBuffer::onInput(Pt::System::StreamBuffer& sb)
         do
         {
             _inputReady.send(*this);
+            log_debug("keep reading: " << _reading << " avail: " << this->in_avail());
         }
-        while( _reading && this->in_avail() );
+        while( _reading && this->in_avail() > 0);
 
         _input = false;
     }
-    catch(...)
+    catch(const std::exception& ex)
     {
+        log_error("EXCEPTION onInput: " << ex.what());
         _input = false;
         _errorPending = 1;
         _inputReady.send(*this);

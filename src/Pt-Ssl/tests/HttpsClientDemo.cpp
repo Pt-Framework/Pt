@@ -34,17 +34,23 @@
 #include <Pt/System/MainLoop.h>
 #include <Pt/System/Logger.h>
 
-log_define("Pt.Ssl.HttpClientTest")
+log_define("Pt.Ssl.HttpClientDemo")
 
 class Client : public Pt::Connectable {
     public:
-        Client(Pt::System::EventLoop& loop, const std::string& addr, unsigned short port, Pt::Ssl::Context& sslClientContext)
-        : _sslContext(sslClientContext), _ssl(0), _loop(loop), _header(""), _result(""), _httpSize(0)
+        Client(Pt::System::EventLoop& loop, Pt::Ssl::Context& sslClientContext,
+               const std::string& addr, unsigned short port)
+        : _sslContext(sslClientContext)
+        , _ssl(0)
+        , _loop(loop)
+        , _header("")
+        , _result("")
+        , _httpSize(0)
         {
             log_debug("client Connecting to server");
 
             _socket.setActive(_loop);
-            _socket.connected() += Pt::slot(*this, &Client::onTCPConnect);
+            _socket.connected() += Pt::slot(*this, &Client::onConnect);
             _socket.beginConnect(addr, port);
         }
 
@@ -52,38 +58,39 @@ class Client : public Pt::Connectable {
         { delete _ssl; }
 
     private:
-        void onTCPConnect(Pt::Net::TcpSocket& socket)
+        void onConnect(Pt::Net::TcpSocket& socket)
         {
             _socket.endConnect();
             _ios.attach(socket);
 
             log_debug("client Starting handshake");
-            _ssl = new Pt::Ssl::IOStream(_sslContext, _ios, 0);
-          //_ssl->beginHandshake(true);
-            _ssl->beginConnectHandshake(false);
-
-            _ssl->handshakeFinished() += Pt::slot(*this, &Client::onSSLHandshakeFinished);
+            _ssl = new Pt::Ssl::IOBuffer(_sslContext, _ios);
+            _ssl->beginConnect(false);
+            _ssl->handshakeFinished() += Pt::slot(*this, &Client::onHandshake);
+            _ssl->shutdownFinished() += Pt::slot(*this, &Client::onShutdown);
+            _ssl->inputReady() += Pt::slot(*this, &Client::onInput);
+            _ssl->outputReady() += Pt::slot(*this, &Client::onOutput);
         }
 
-        void onSSLHandshakeFinished(Pt::Ssl::IOStream& ssl)
+        void onHandshake(Pt::Ssl::IOBuffer& ssl)
         {
-            try {
-                ssl.endHandshake();
+            try 
+            {
+                ssl.endConnect();
             }
-            catch(...) {
+            catch(...) 
+            {
                 log_debug("client *** HANDSHAKE FAILED ***");
                 _loop.exit();
                 return;
             }
             
-            log_debug("client Peer CN = " << _ssl->buffer().peerName());
-            log_debug("client Current cipher = \n" << _ssl->buffer().currentCipher().name());
+            log_debug("client Peer CN = " << _ssl->peerName());
+            log_debug("client Current cipher = \n" << _ssl->currentCipher().name());
 
-            _ios.buffer().inputReady() += Pt::slot(*this, &Client::onInput);
-            _ios.buffer().outputReady() += Pt::slot(*this, &Client::onOutput);
-
+            std::ostream os(&ssl);
             log_debug("client Sending request to the server ...");
-            *_ssl <<
+            os <<
                 "GET / HTTP/1.1\r\n"
                 "Host: localhost:443\r\n"
                 "User-Agent: Platinum\r\n"
@@ -94,7 +101,7 @@ class Client : public Pt::Connectable {
                 "Cache-Control: max-age=0\r\n\r\n"
             << std::flush;
 /*            
-            *_ssl <<
+            os <<
                 "GET /long_html.html HTTP/1.1\r\n"
                 "Host: localhost:443\r\n"
                 "User-Agent: Platinum\r\n"
@@ -105,70 +112,58 @@ class Client : public Pt::Connectable {
             << std::flush;
 */
 
-            _ios.buffer().beginWrite();
+            ssl.beginWrite();
         }
 
-        void onShutdownFinished(Pt::Ssl::IOStream& ssl)
+        void onShutdown(Pt::Ssl::IOBuffer& ssl)
         {
-            _ssl->endShutdown();
+            ssl.endShutdown();
             log_debug("client *** SHUTDOWN FINISHED ***");
             _loop.exit();
         }
 
-        void onInput(Pt::System::StreamBuffer& sb)
+        void onInput(Pt::Ssl::IOBuffer& ssl)
         {
-            sb.endRead();
-            log_debug("client Received raw = " << sb.in_avail());
-
-            if( sb.device()->eof() )
+            std::streamsize r = ssl.endRead();
+            log_debug("client ends read, shutdown: " << r);            
+            
+            if( _ios.buffer().device()->eof() )
             {
-                log_debug("client Received EOF ");
+                log_debug("client received EOF ");
                 return;
             }
 
-            while(true)
+            if(r < 0) 
+            {                   
+                log_info("received shutdown from server");
+                ssl.beginShutdown();
+                return;
+            }
+ 
+            std::iostream ios(&ssl);
+            std::string msg;
+            char buf[512];
+            while( ios.readsome(buf, 512) > 0 ) 
             {
-                std::streamsize avail = _ssl->buffer().import();
-
-                if(avail == -1) {
-                    log_debug("client *** The stream has been shutdown by the other peer ***");
-                    _ios.buffer().inputReady() -= Pt::slot(*this, &Client::onInput);
-                    _ios.buffer().outputReady() -= Pt::slot(*this, &Client::onOutput);
-                    std::cerr
-                        << "############### CLIENT RECEIVED BEFORE SHUTDOWN: "
-                        << std::endl << _result << std::endl;
-
-                    _ssl->beginShutdown();
-                    _ssl->shutdownFinished() += Pt::slot(*this, &Client::onShutdownFinished);
-                    return;
-                }
-
-                if( ! avail )
-                    break;
-
-                log_debug("client Received decoded = " << _ssl->buffer().in_avail());
-
-                while(true) {
-                    char buf[512];
-                    std::streamsize n =_ssl->readsome(buf, 512);
-                    if(n <= 0) 
-                      break;
-                    _result += std::string(buf, static_cast<size_t>(n));
-                }
+                size_t n = static_cast<size_t>( ios.gcount() );
+                log_debug("client received: " << n);
+                msg.append(buf, n);
             }
 
-            if(_header.empty()) {
+            log_debug("client received: " << msg);
+
+            if( _header.empty() ) 
+            {
                 size_t pos = _result.find("\r\n\r\n");
-                if(pos != std::string::npos) {
+                if(pos != std::string::npos) 
+                {
                     _header = _result.substr(0, pos);
                     _result = _result.substr(pos);
                 }
-                std::cerr
-                    << "############### CLIENT RECEIVED HEADER: "
-                    << std::endl << _header << std::endl;
 
                 pos = _header.find("Content-Length:");
-                if(pos != std::string::npos) {
+                if(pos != std::string::npos) 
+                {
                     size_t start = _header.find(" ", pos);
                     size_t end   = _header.find("\r\n", start);
                     _httpSize = atol(_header.substr(start + 1, end - start - 1).c_str());
@@ -176,40 +171,29 @@ class Client : public Pt::Connectable {
                 }
             }
 
-            if(_httpSize && _result.length() < _httpSize) {
+            if(_httpSize == 0 || _result.length() < _httpSize) 
+            {
                 log_debug("client Message not complete; current size = " << _result.length());
-                _ios.buffer().beginRead();
+                ssl.beginRead();
                 return;
             }
-
-            std::cerr
-                << "############################################################################################# CLIENT RECEIVED CONTENT: "
-                << std::endl << _result << std::endl;
 
             log_debug("client Shutting down the stream");
-            _ios.buffer().inputReady() -= Pt::slot(*this, &Client::onInput);
-            _ios.buffer().outputReady() -= Pt::slot(*this, &Client::onOutput);
-            _ssl->buffer().writeShutdown();
+            ssl.beginShutdown();
         }
 
-        void onOutput(Pt::System::StreamBuffer& sb)
+        void onOutput(Pt::Ssl::IOBuffer& ssl)
         {
-            sb.endWrite();
-            log_debug("client Sent raw; remaining = " << sb.out_avail());
-
-            if(sb.out_avail() > 0) {
-                sb.beginWrite();
-                return;
-            }
+            ssl.endWrite();
+            log_debug("client Sent raw; remaining = " << _ios.buffer().out_avail());
 
             log_debug("client Done sending request to the server");
-
-            _ios.buffer().beginRead();
+            ssl.beginRead();
         }
 
     private:
-        Pt::Ssl::Context&   _sslContext;
-        Pt::Ssl::IOStream*    _ssl;
+        Pt::Ssl::Context&      _sslContext;
+        Pt::Ssl::IOBuffer*     _ssl;
         Pt::System::IOStream   _ios;
         Pt::System::EventLoop& _loop;
         Pt::Net::TcpSocket     _socket;
@@ -220,29 +204,30 @@ class Client : public Pt::Connectable {
 
 int main(int argc, char** argv)
 {
-    try {
+    try 
+    {
         Pt::System::Logger::getTarget("").setLogLevel(Pt::System::Trace);
         log_debug("OpenSSL HTTP test progam started");
 
         Pt::System::MainLoop loop;
-      //std::string          addr("127.0.0.1");
+        //std::string          addr("127.0.0.1");
         std::string          addr("www.pt-framework.org");
         unsigned short       port = 443;
 
         Pt::Ssl::CertificateList trustedCACert;
         Pt::Ssl::CertificateList clientCertChain;
-        Pt::Ssl::PrivateKey      clientPrivKey("");
-        Pt::Ssl::Context         clientContext(Pt::Ssl::Context::Default);
+        Pt::Ssl::PrivateKey clientPrivKey("");
+        Pt::Ssl::Context clientContext(Pt::Ssl::Context::Default);
         trustedCACert.fromPem(caPemData, sizeof(caPemData));
         clientCertChain.fromPem(clientCertPemData, sizeof(clientCertPemData));
         clientPrivKey.fromPem(clientKeyData, sizeof(clientKeyData));
-        clientContext  .setCACertificates(trustedCACert);
-        clientContext  .setCertificateChain    (clientCertChain);
-        clientContext  .setPrivateKey          (clientPrivKey);
+        clientContext.setCACertificates(trustedCACert);
+        clientContext.setCertificateChain(clientCertChain);
+        clientContext.setPrivateKey(clientPrivKey);
 
-        Client client(loop, addr, port, clientContext);
+        Client client(loop, clientContext, addr, port);
 
-        loop.setIdleTimeout(30000);
+        //loop.setIdleTimeout(60000);
         loop.timeout() += Pt::slot(loop, &Pt::System::EventLoop::exit);
         loop.run();
 
