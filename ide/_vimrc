@@ -159,7 +159,8 @@ function OnPaste()
     endif
 endfunction
 
-:noremap <C-v> "+gP<CR>
+:vnoremap <C-v> <DEL>"+gP
+:nnoremap <C-v> "+gP
 :noremap! <C-v> <Esc>:call OnPaste()<CR>
 
 " Enter block mode
