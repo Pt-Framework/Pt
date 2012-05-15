@@ -66,7 +66,7 @@
     <ClInclude Include="..\..\include\Pt\Ssl\CertificateList.h" />
     <ClInclude Include="..\..\include\Pt\Ssl\CipherList.h" />
     <ClInclude Include="..\..\include\Pt\Ssl\Context.h" />
-    <ClInclude Include="..\..\include\Pt\Ssl\IOStream.h" />
+    <ClInclude Include="..\..\include\Pt\Ssl\IOBuffer.h" />
     <ClInclude Include="..\..\include\Pt\Ssl\PrivateKey.h" />
     <ClInclude Include="..\..\include\Pt\Ssl\PublicKey.h" />
     <ClInclude Include="..\..\include\Pt\Ssl\Server.h" />
@@ -216,13 +216,13 @@
     <ClCompile Include="..\..\src\Pt-Ssl\CertificateList.cpp" />
     <ClCompile Include="..\..\src\Pt-Ssl\CipherList.cpp" />
     <ClCompile Include="..\..\src\Pt-Ssl\Context.cpp" />
-    <ClCompile Include="..\..\src\Pt-Ssl\IOStream.cpp" />
+    <ClCompile Include="..\..\src\Pt-Ssl\IOBuffer.cpp" />
     <ClCompile Include="..\..\src\Pt-Ssl\PrivateKey.cpp" />
     <ClCompile Include="..\..\src\Pt-Ssl\PublicKey.cpp" />
     <ClCompile Include="..\..\src\Pt-Ssl\Server.cpp" />
     <ClCompile Include="..\..\src\Pt-Ssl\SslError.cpp" />
     <ClCompile Include="..\..\src\Pt-Ssl\StreamBuffer.cpp" />
-    <ClCompile Include="..\..\src\Pt-Ssl\tests\IOStreamTest.cpp" />
+    <ClCompile Include="..\..\src\Pt-Ssl\tests\IOBufferTest.cpp" />
     <ClCompile Include="..\..\src\Pt-Ssl\tests\Pt-Ssl-test.cpp" />
     <ClCompile Include="..\..\src\Pt-Ssl\tests\StreamBufferTest.cpp" />
     <ClCompile Include="..\..\src\Pt-System\Application.cpp" />

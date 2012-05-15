@@ -28,7 +28,7 @@
  */
 
 #include "PemData.h"
-#include <Pt/Ssl/IOStream.h>
+#include <Pt/Ssl/IOBuffer.h>
 #include <Pt/Net/TcpSocket.h>
 #include <Pt/Net/TcpServer.h>
 #include <Pt/System/MainLoop.h>

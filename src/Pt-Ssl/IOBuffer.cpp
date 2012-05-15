@@ -27,7 +27,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <Pt/Ssl/IOStream.h>
+#include <Pt/Ssl/IOBuffer.h>
 #include <Pt/System/Logger.h>
 
 log_define("Pt.Ssl.IOStream")

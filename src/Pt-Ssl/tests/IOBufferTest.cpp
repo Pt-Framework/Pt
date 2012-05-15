@@ -30,7 +30,7 @@
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/RegisterTest.h"
-#include <Pt/Ssl/IOStream.h>
+#include <Pt/Ssl/IOBuffer.h>
 #include "Pt/Ssl/CertificateList.h"
 #include "Pt/Ssl/Context.h"
 #include <Pt/Net/TcpSocket.h>
@@ -39,7 +39,7 @@
 #include "Pt/System/Logger.h"
 #include <sstream>
 
-log_define("Pt.Ssl.IOStreamTest")
+log_define("Pt.Ssl.IOBufferTest")
 
 class TcpAcceptor : public Pt::Connectable 
 {
@@ -127,11 +127,11 @@ class TcpConnector : public Pt::Connectable
 };
 
 
-class IOStreamTest : public Pt::Unit::TestSuite
+class IOBufferTest : public Pt::Unit::TestSuite
 {
     public:
-        IOStreamTest()
-        : Pt::Unit::TestSuite("IOStreamTest")
+        IOBufferTest()
+        : Pt::Unit::TestSuite("IOBufferTest")
         , _serverPrivKey("abc123")
         , _clientPrivKey("")
         , _loop(0)
@@ -139,7 +139,7 @@ class IOStreamTest : public Pt::Unit::TestSuite
         {
             //Pt::System::Logger::getTarget("Pt.Ssl").setLogLevel(Pt::System::Trace);
 
-            this->registerMethod("ReadWrite", *this, &IOStreamTest::ReadWrite);
+            this->registerMethod("ReadWrite", *this, &IOBufferTest::ReadWrite);
 
             _cACert.fromPem(caPemData, sizeof(caPemData));
             _serverCertChain.fromPem(serverCertPemData, sizeof(serverCertPemData));
@@ -162,7 +162,7 @@ class IOStreamTest : public Pt::Unit::TestSuite
 
         void onAcceptHandshake(Pt::Ssl::IOBuffer& ssl)
         {
-            log_trace("IOStreamTest::onAcceptHandshake");
+            log_trace("IOBufferTest::onAcceptHandshake");
             try 
             {
                 ssl.endHandshake();
@@ -317,10 +317,10 @@ class IOStreamTest : public Pt::Unit::TestSuite
 };
 
 
-Pt::Unit::RegisterTest<IOStreamTest> register_IOStreamTest;
+Pt::Unit::RegisterTest<IOBufferTest> register_IOBufferTest;
 
 
-void IOStreamTest::ReadWrite()
+void IOBufferTest::ReadWrite()
 {
     Pt::Ssl::Context serverContext(Pt::Ssl::Context::Default);
     serverContext.setCACertificates(_cACert);
@@ -336,16 +336,16 @@ void IOStreamTest::ReadWrite()
     unsigned short port = 6000;
 
     TcpAcceptor acceptor(*_loop, serverContext, addr, port);
-    acceptor.buffer().handshakeFinished() += Pt::slot(*this, &IOStreamTest::onAcceptHandshake);
-    acceptor.buffer().shutdownFinished() += Pt::slot(*this, &IOStreamTest::onServerShutdown);
-    acceptor.buffer().inputReady() += Pt::slot(*this, &IOStreamTest::onServerInput);
-    acceptor.buffer().outputReady() += Pt::slot(*this, &IOStreamTest::onServerOutput);
+    acceptor.buffer().handshakeFinished() += Pt::slot(*this, &IOBufferTest::onAcceptHandshake);
+    acceptor.buffer().shutdownFinished() += Pt::slot(*this, &IOBufferTest::onServerShutdown);
+    acceptor.buffer().inputReady() += Pt::slot(*this, &IOBufferTest::onServerInput);
+    acceptor.buffer().outputReady() += Pt::slot(*this, &IOBufferTest::onServerOutput);
 
     TcpConnector connector(*_loop, clientContext, addr, port);
-    connector.buffer().handshakeFinished() += Pt::slot(*this, &IOStreamTest::onConnectHandshake);
-    connector.buffer().shutdownFinished() += Pt::slot(*this, &IOStreamTest::onClientShutdown);
-    connector.buffer().inputReady() += Pt::slot(*this, &IOStreamTest::onClientInput);
-    connector.buffer().outputReady() += Pt::slot(*this, &IOStreamTest::onClientOutput);
+    connector.buffer().handshakeFinished() += Pt::slot(*this, &IOBufferTest::onConnectHandshake);
+    connector.buffer().shutdownFinished() += Pt::slot(*this, &IOBufferTest::onClientShutdown);
+    connector.buffer().inputReady() += Pt::slot(*this, &IOBufferTest::onClientInput);
+    connector.buffer().outputReady() += Pt::slot(*this, &IOBufferTest::onClientOutput);
 
     _loop->run();
 
