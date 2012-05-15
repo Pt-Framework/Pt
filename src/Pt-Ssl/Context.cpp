@@ -51,6 +51,10 @@ SSLInit::SSLInit()
         SSL_load_error_strings();
         ERR_load_crypto_strings();
 
+        //OpenSSL_add_all_algorithms();
+        //CRYPTO_set_locking_callback( SSL_locking_function );
+        //CRYPTO_set_id_callback( SSL_id_function );
+
         EVP_add_cipher(EVP_des_ede3_cfb());
         EVP_add_cipher(EVP_des_ede3_cfb1());
         EVP_add_cipher(EVP_des_ede3_cfb8());
