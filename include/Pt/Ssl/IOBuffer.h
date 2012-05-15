@@ -36,7 +36,7 @@ namespace Pt {
 
 namespace Ssl {
 
-/** @brief SSL I/O stream
+/** @brief SSL I/O stream buffer.
  */
 class PT_SSL_API IOBuffer : public StreamBuffer
                           , public Pt::Connectable
