@@ -81,7 +81,7 @@ class Server : public Pt::Connectable {
         void onHandshake(Pt::Ssl::IOBuffer& ssl)
         {
             try {
-                ssl.endAccept();
+                ssl.endHandshake();
             }
             catch(...) {
                 log_debug("server *** HANDSHAKE FAILED ***");

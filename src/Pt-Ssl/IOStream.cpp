@@ -80,17 +80,7 @@ void IOBuffer::beginAccept(bool verifyClientCert, bool requireCertBasedAuth)
 }
 
 
-void IOBuffer::endAccept()
-{
-    if( _errorPending ) 
-    {
-        _errorPending = 0;
-        throw;
-    }
-}
-
-
-void IOBuffer::endConnect()
+void IOBuffer::endHandshake()
 {
     if( _errorPending ) 
     {
@@ -472,7 +462,7 @@ void IOBuffer::onOutput(Pt::System::StreamBuffer& sb)
 
 
 
-
+/*
 IOStream::IOStream(Context& ctx, Pt::System::IOStream& ios, const char* sessionID)
 : std::iostream(0)
 , _ios(&ios)
@@ -862,6 +852,7 @@ void IOStream::onOutput(Pt::System::StreamBuffer& sb)
         }
     }
 }
+*/
 
 } // namespace Ssl
 

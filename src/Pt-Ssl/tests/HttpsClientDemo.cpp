@@ -76,7 +76,7 @@ class Client : public Pt::Connectable {
         {
             try 
             {
-                ssl.endConnect();
+                ssl.endHandshake();
             }
             catch(...) 
             {

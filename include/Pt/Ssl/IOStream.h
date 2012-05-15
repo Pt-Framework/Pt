@@ -54,17 +54,13 @@ class PT_SSL_API IOBuffer : public StreamBuffer
         */
         void beginConnect(bool verifyServerCert);
 
-        /** @brief Ends the client handshake
-        */
-        void endConnect();
-
         /** @brief Starts the server accept handshake
         */
         void beginAccept(bool verifyClientCert, bool requireCertBasedAuth);
 
         /** @brief Ends the client handshake
         */
-        void endAccept();
+        void endHandshake();
 
         void beginShutdown();
 
@@ -117,99 +113,6 @@ class PT_SSL_API IOBuffer : public StreamBuffer
         Pt::Signal<IOBuffer&> _shutdownFinished;
         Pt::Signal<IOBuffer&> _inputReady;
         Pt::Signal<IOBuffer&> _outputReady;
-        int _errorPending;
-        bool _reading;
-        bool _input;
-};
-
-
-/** @brief SSL I/O stream
- */
-class PT_SSL_API IOStream : public std::iostream
-                          , public Pt::Connectable
-{
-    public:
-        /** @brief Construct a SSL client that uses the given I/O stream and SSL context. 
-        */
-        IOStream(Context& ctx, Pt::System::IOStream& ios, const char* sessionID = 0);
-
-        /** @brief Standard dtor. 
-        */
-        virtual ~IOStream();
-
-        /** @brief Return the internal SSLStreamBuf instance. 
-        */
-        inline StreamBuffer& buffer()
-        { return _sslbuf; }
-
-        /** @brief Return the internal StreamBuffer instance. 
-        */
-        inline const StreamBuffer& buffer() const
-        { return _sslbuf; }
-
-        /** @brief Starts the client handshake
-            
-            After this method has been called, the first handshake message
-            can be written to the server.
-        */
-        void beginConnectHandshake(bool verifyServerCert);
-
-        void beginAcceptHandshake(bool verifyClientCert, bool requireCertBasedAuth);
-
-        /** @brief Ends the client handshake
-            
-            This function must be called after the handshake message is complete.
-        */
-        void endHandshake();
-
-        void beginShutdown();
-
-        void endShutdown();
-
-        void beginRead();
-
-        std::streamsize endRead();
-
-        void beginWrite();
-
-        void endWrite();
-
-        /** @brief This signal will be fired if the SLL system has finished the handshake 
-        */
-        Pt::Signal<IOStream&>& handshakeFinished()
-        { return _handshakeFinished; }
-
-        /** @brief This signal will be fired if the SLL system has finished the shutdown 
-        */
-        Pt::Signal<IOStream&>& shutdownFinished()
-        { return _shutdownFinished; }
-
-        Pt::Signal<IOStream&>& inputReady()
-        { return _inputReady; }
-
-        Pt::Signal<IOStream&>& outputReady()
-        { return _outputReady; }
-
-    private:
-        void onWriteHandshake(Pt::System::StreamBuffer& sb);
-        void onReadHandshake(Pt::System::StreamBuffer& sb);
-
-        void onReadServerHandshake(Pt::System::StreamBuffer& sb);
-        void onWriteServerHandshake(Pt::System::StreamBuffer& sb);
-
-        void onReadShutdown(Pt::System::StreamBuffer& sb);
-        void onWriteShutdown(Pt::System::StreamBuffer& sb);
-
-        void onInput(Pt::System::StreamBuffer& sb);
-        void onOutput(Pt::System::StreamBuffer& sb);
-
-    private:
-        System::IOStream* _ios;
-        StreamBuffer _sslbuf;
-        Pt::Signal<IOStream&> _handshakeFinished;
-        Pt::Signal<IOStream&> _shutdownFinished;
-        Pt::Signal<IOStream&> _inputReady;
-        Pt::Signal<IOStream&> _outputReady;
         int _errorPending;
         bool _reading;
         bool _input;
