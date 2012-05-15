@@ -87,14 +87,14 @@ class PT_SSL_API StreamBuffer : public std::streambuf
             After this method has been called, the first handshake message
             can be read from the client.
         */
-        void beginAcceptHandshake(bool verifyClientCert, bool requireCertBasedAuth);
+        void setAccepting(bool verifyClientCert, bool requireCertBasedAuth);
 
         /** @brief Starts the client handshake
             
             After this method has been called, the first handshake message
             can be written to the server.
         */
-        void beginConnectHandshake(bool verifyServerCert);
+        void setConnecting(bool verifyServerCert);
 
         /** @brief Writes a handshake message to the underlying stream
             
@@ -110,23 +110,32 @@ class PT_SSL_API StreamBuffer : public std::streambuf
         */
         bool readHandshake();
 
+        /** @brief Shutdown this SSL stream buffer. 
+        */
+        void writeShutdown();
+
         /** @brief Reads user message from the underlying stream
             
             Returns the number bytes in the message or -1 if the other peer has shutdown the stream.
         */
         std::streamsize import();
 
-        /** @brief Shutdown this SSL stream buffer. 
-        */
-        void shutdown();
-
     protected:
+        StreamBuffer(Context& ctx, const char* sessionID = 0, size_t bufferSize = 1024);
+
+        void attach(std::iostream& ios);
+        
         virtual int sync();
+        
         virtual int_type underflow();
+        
         virtual int_type overflow(int_type ch);
+        
         std::streamsize do_underflow(std::streamsize size);
 
     private:
+        void init(Context& ctx, const char* sessionID = 0, std::iostream* ios = 0);
+
         /** @brief Get the current status string of this SSL stream buffer. 
         */
         const char* getStatus() const;
@@ -141,7 +150,6 @@ class PT_SSL_API StreamBuffer : public std::streambuf
         std::size_t    _obufferSize;
         char*          _obuffer;
         const size_t   _pbmax;
-        bool           _handshakeStarted;
 };
 
 } // namespace Ssl

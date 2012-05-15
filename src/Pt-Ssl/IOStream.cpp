@@ -55,7 +55,8 @@ void IOBuffer::beginConnect(bool verifyServerCert)
     log_debug("_sslbuf.beginClientHandshake(verifyServerCert = " << verifyServerCert << ")");
     
     _errorPending = 0;
-    StreamBuffer::beginConnectHandshake(verifyServerCert);
+    StreamBuffer::setConnecting(verifyServerCert);
+    StreamBuffer::writeHandshake();
 
     log_debug("_ios->buffer().beginWrite()");
     _ios->buffer().beginWrite();
@@ -70,7 +71,7 @@ void IOBuffer::beginAccept(bool verifyClientCert, bool requireCertBasedAuth)
                << verifyClientCert << ", requireCertBasedAuth = " << requireCertBasedAuth << ")");
 
     _errorPending = 0;
-    StreamBuffer::beginAcceptHandshake(verifyClientCert, requireCertBasedAuth);
+    StreamBuffer::setAccepting(verifyClientCert, requireCertBasedAuth);
 
     log_debug("_ios->buffer().beginRead()");
     _ios->buffer().beginRead();
@@ -79,7 +80,17 @@ void IOBuffer::beginAccept(bool verifyClientCert, bool requireCertBasedAuth)
 }
 
 
-void IOBuffer::endHandshake()
+void IOBuffer::endAccept()
+{
+    if( _errorPending ) 
+    {
+        _errorPending = 0;
+        throw;
+    }
+}
+
+
+void IOBuffer::endConnect()
 {
     if( _errorPending ) 
     {
@@ -263,7 +274,7 @@ void IOBuffer::beginShutdown()
     _ios->buffer().inputReady()  += Pt::slot(*this, &IOBuffer::onReadShutdown);
 
     log_debug("_sslbuf.beginShutdown()");
-    StreamBuffer::shutdown();
+    StreamBuffer::writeShutdown();
 
     log_debug("_ios->buffer().beginWrite() " << _ios->buffer().out_avail() << " bytes");
     _ios->buffer().beginWrite();
@@ -481,7 +492,8 @@ void IOStream::beginConnectHandshake(bool verifyServerCert)
     log_debug("_sslbuf.beginClientHandshake(verifyServerCert = " << verifyServerCert << ")");
     
     _errorPending = 0;
-    _sslbuf.beginConnectHandshake(verifyServerCert);
+    _sslbuf.setConnecting(verifyServerCert);
+    _sslbuf.writeHandshake();
 
     log_debug("_ios->buffer().beginWrite()");
     _ios->buffer().beginWrite();
@@ -496,7 +508,7 @@ void IOStream::beginAcceptHandshake(bool verifyClientCert, bool requireCertBased
                << verifyClientCert << ", requireCertBasedAuth = " << requireCertBasedAuth << ")");
 
     _errorPending = 0;
-    _sslbuf.beginAcceptHandshake(verifyClientCert, requireCertBasedAuth);
+    _sslbuf.setAccepting(verifyClientCert, requireCertBasedAuth);
 
     log_debug("_ios->buffer().beginRead()");
     _ios->buffer().beginRead();
@@ -689,7 +701,7 @@ void IOStream::beginShutdown()
     _ios->buffer().inputReady()  += Pt::slot(*this, &IOStream::onReadShutdown);
 
     log_debug("_sslbuf.beginShutdown()");
-    _sslbuf.shutdown();
+    _sslbuf.writeShutdown();
 
     log_debug("_ios->buffer().beginWrite() " << _ios->buffer().out_avail() << " bytes");
     _ios->buffer().beginWrite();

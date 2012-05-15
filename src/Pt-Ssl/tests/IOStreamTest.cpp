@@ -165,7 +165,7 @@ class IOStreamTest : public Pt::Unit::TestSuite
             log_trace("IOStreamTest::onAcceptHandshake");
             try 
             {
-                ssl.endHandshake();
+                ssl.endAccept();
             }
             catch(...) 
             {
@@ -231,7 +231,7 @@ class IOStreamTest : public Pt::Unit::TestSuite
             
             try 
             {
-                ssl.endHandshake();
+                ssl.endConnect();
             }
             catch(...) 
             {

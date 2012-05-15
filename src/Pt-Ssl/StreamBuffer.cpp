@@ -40,17 +40,45 @@ namespace Pt {
 namespace Ssl {
 
 StreamBuffer::StreamBuffer(Context& ctx, std::iostream& ios, const char* sessionID, size_t bufferSize)
-: _in (0),
-  _out(0),
-  _ssl(0),
-  _ios(&ios),
-  _ibufferSize(bufferSize+4),
-  _ibuffer(0),
-  _obufferSize(bufferSize),
-  _obuffer(0),
-  _pbmax(4),
-  _handshakeStarted(false)
+: _in(0)
+, _out(0)
+, _ssl(0)
+, _ios(0)
+, _ibufferSize(bufferSize + 4)
+, _ibuffer(0)
+, _obufferSize(bufferSize)
+, _obuffer(0)
+, _pbmax(4)
 {
+    this->init(ctx, sessionID, &ios);
+}
+
+
+StreamBuffer::StreamBuffer(Context& ctx, const char* sessionID, size_t bufferSize)
+: _in(0)
+, _out(0)
+, _ssl(0)
+, _ios(0)
+, _ibufferSize(bufferSize + 4)
+, _ibuffer(0)
+, _obufferSize(bufferSize)
+, _obuffer(0)
+, _pbmax(4)
+{
+    this->init(ctx, sessionID);
+}
+
+
+StreamBuffer::~StreamBuffer()
+{ 
+    SSL_free(_ssl); 
+}
+
+
+void StreamBuffer::init(Context& ctx, const char* sessionID, std::iostream* ios)
+{
+    _ios = ios;
+
     // Create the SSL objects
     _in  = BIO_new( BIO_s_mem() );
     _out = BIO_new( BIO_s_mem() );
@@ -73,10 +101,9 @@ StreamBuffer::StreamBuffer(Context& ctx, std::iostream& ios, const char* session
     }
 }
 
-
-StreamBuffer::~StreamBuffer()
-{ 
-    SSL_free(_ssl); 
+void StreamBuffer::attach(std::iostream& ios)
+{
+    _ios = &ios;
 }
 
 
@@ -148,10 +175,8 @@ void StreamBuffer::setSession(const Session& sess)
 }
 
 
-void StreamBuffer::beginAcceptHandshake(bool verifyClientCert, bool requireCertBasedAuth)
+void StreamBuffer::setAccepting(bool verifyClientCert, bool requireCertBasedAuth)
 {
-    _handshakeStarted = true;
-
     if(verifyClientCert) 
     {
         if(requireCertBasedAuth) 
@@ -164,15 +189,12 @@ void StreamBuffer::beginAcceptHandshake(bool verifyClientCert, bool requireCertB
 }
 
 
-void StreamBuffer::beginConnectHandshake(bool verifyServerCert)
+void StreamBuffer::setConnecting(bool verifyServerCert)
 {
-    _handshakeStarted = true;
-
     if(verifyServerCert) 
         SSL_set_verify(_ssl, SSL_VERIFY_PEER, NULL);
 
     SSL_set_connect_state(_ssl);
-    this->writeHandshake();
 }
 
 
@@ -267,6 +289,34 @@ bool StreamBuffer::readHandshake()
 }
 
 
+void StreamBuffer::writeShutdown()
+{
+    if( ! _ios)
+        throw System::IOError("StreamBuffer not attached");
+
+    const int res = SSL_shutdown(_ssl);
+    log_debug("SSL_shutdown() = " << res);
+
+    // Send shutdown message to the other peer
+    char buff[1000];
+    const int n = BIO_read(_out, buff, sizeof(buff));
+    if(n <= 0)
+        throw System::IOError("Failed reading from OpenSSL ouput BIO!");
+
+    _ios->write(buff, n);
+    //_ios->flush();
+    log_debug("Wrote " << n << " bytes from _out BIO to _ios");
+
+    // Reset all
+    (void) BIO_reset(_in);
+    (void) BIO_reset(_out);
+    SSL_clear(_ssl);
+
+    delete [] _ibuffer; _ibuffer = 0;
+    delete [] _obuffer; _obuffer = 0;
+}
+
+
 std::streamsize StreamBuffer::import()
 {
     if(_ios)
@@ -292,36 +342,6 @@ std::streamsize StreamBuffer::import()
     }
 
     return this->in_avail();
-}
-
-
-void StreamBuffer::shutdown()
-{
-    if( ! _ios)
-        throw System::IOError("StreamBuffer not attached");
-
-    const int res = SSL_shutdown(_ssl);
-    log_debug("SSL_shutdown() = " << res);
-
-    // Send shutdown message to the other peer
-    char buff[1000];
-    const int n = BIO_read(_out, buff, sizeof(buff));
-    if(n <= 0)
-        throw System::IOError("Failed reading from OpenSSL ouput BIO!");
-
-    _ios->write(buff, n);
-    //_ios->flush();
-    log_debug("Wrote " << n << " bytes from _out BIO to _ios");
-
-    // Reset all
-    (void) BIO_reset(_in);
-    (void) BIO_reset(_out);
-    SSL_clear(_ssl);
-
-    delete [] _ibuffer; _ibuffer = 0;
-    delete [] _obuffer; _obuffer = 0;
-
-    _handshakeStarted = false;
 }
 
 
@@ -565,11 +585,6 @@ std::vector<CipherInfo> StreamBuffer::availableCiphers() const
 /*
 void StreamBuffer::setCiphers(const std::vector<SSLCipherInfo>& ciphers)
 {
-    if(_handshakeStarted)
-        throw SSLRuntimeError(
-            "Cannot set the list of enabled cipher when a handshaking process is already started!",
-            PT_SOURCEINFO );
-
     std::string str;
     for(size_t i = 0; i < ciphers.size(); ++i) {
         if(!str.empty()) str += ":";

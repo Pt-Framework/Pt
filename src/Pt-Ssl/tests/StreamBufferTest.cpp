@@ -93,11 +93,11 @@ void StreamBufferTest::Handshake()
 
     // client begins the handshake
     Pt::Ssl::StreamBuffer client(clientContext, data);
-    client.beginConnectHandshake(true);
+    client.setConnecting(true);
 
     // server begins the handskake
     Pt::Ssl::StreamBuffer server(serverContext, data);
-    server.beginAcceptHandshake(true, true);
+    server.setAccepting(true, true);
 
     for( ; ; )
     {

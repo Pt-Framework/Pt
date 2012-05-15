@@ -56,7 +56,7 @@ void Server::beginHandshake(bool verifyClientCert, bool requireCertBasedAuth)
                << verifyClientCert << ", requireCertBasedAuth = " << requireCertBasedAuth << ")");
 
     _errorPending = 0;
-    _sslbuf.beginAcceptHandshake(verifyClientCert, requireCertBasedAuth);
+    _sslbuf.setAccepting(verifyClientCert, requireCertBasedAuth);
 
     log_debug("_ios->buffer().beginRead()");
     _ios->buffer().beginRead();
@@ -162,7 +162,7 @@ void Server::beginShutdown()
     _ios->buffer().inputReady()  += Pt::slot(*this, &Server::onReadShutdown);
 
     log_debug("_sslbuf.beginShutdown()");
-    _sslbuf.shutdown();
+    _sslbuf.writeShutdown();
 
     log_debug("_ios->buffer().beginWrite() " << _ios->buffer().out_avail() << " bytes");
     _ios->buffer().beginWrite();

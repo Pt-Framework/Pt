@@ -189,7 +189,7 @@ class Client : public Pt::Connectable {
             log_debug("client Shutting down the stream");
             _ios.buffer().inputReady() -= Pt::slot(*this, &Client::onInput);
             _ios.buffer().outputReady() -= Pt::slot(*this, &Client::onOutput);
-            _ssl->buffer().shutdown();
+            _ssl->buffer().writeShutdown();
         }
 
         void onOutput(Pt::System::StreamBuffer& sb)

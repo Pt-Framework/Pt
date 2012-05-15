@@ -105,7 +105,7 @@ class Server : public Pt::Connectable {
                 const std::streamsize importResult = _ssl->buffer().import();
                 if(importResult == -1) {
                     log_debug("server *** The stream has been shutdown by the other peer ***");
-                    _ssl->buffer().shutdown();
+                    _ssl->buffer().writeShutdown();
                     _ios.buffer().inputReady() -= Pt::slot(*this, &Server::onInput);
                     _ios.buffer().outputReady() -= Pt::slot(*this, &Server::onOutput);
                     return;
@@ -258,7 +258,7 @@ class Client : public Pt::Connectable {
 
                 if(avail == -1) {
                     log_debug("client *** The stream has been shutdown by the other peer ***");
-                    _ssl->buffer().shutdown();
+                    _ssl->buffer().writeShutdown();
                     _ios.buffer().inputReady() -= Pt::slot(*this, &Client::onInput);
                     _ios.buffer().outputReady() -= Pt::slot(*this, &Client::onOutput);
                     std::cerr

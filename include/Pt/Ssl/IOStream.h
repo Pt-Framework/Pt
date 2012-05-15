@@ -50,20 +50,21 @@ class PT_SSL_API IOBuffer : public StreamBuffer
         */
         virtual ~IOBuffer();
 
-        /** @brief Starts the client handshake
-            
-            After this method has been called, the first handshake message
-            can be written to the server.
+        /** @brief Starts the client connect handshake
         */
         void beginConnect(bool verifyServerCert);
 
+        /** @brief Ends the client handshake
+        */
+        void endConnect();
+
+        /** @brief Starts the server accept handshake
+        */
         void beginAccept(bool verifyClientCert, bool requireCertBasedAuth);
 
         /** @brief Ends the client handshake
-            
-            This function must be called after the handshake message is complete.
         */
-        void endHandshake();
+        void endAccept();
 
         void beginShutdown();
 
