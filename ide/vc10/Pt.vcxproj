@@ -69,7 +69,6 @@
     <ClInclude Include="..\..\include\Pt\Ssl\IOBuffer.h" />
     <ClInclude Include="..\..\include\Pt\Ssl\PrivateKey.h" />
     <ClInclude Include="..\..\include\Pt\Ssl\PublicKey.h" />
-    <ClInclude Include="..\..\include\Pt\Ssl\Server.h" />
     <ClInclude Include="..\..\include\Pt\Ssl\Session.h" />
     <ClInclude Include="..\..\include\Pt\Ssl\SslError.h" />
     <ClInclude Include="..\..\include\Pt\Ssl\StreamBuffer.h" />
@@ -220,7 +219,6 @@
     <ClCompile Include="..\..\src\Pt-Ssl\IOBuffer.cpp" />
     <ClCompile Include="..\..\src\Pt-Ssl\PrivateKey.cpp" />
     <ClCompile Include="..\..\src\Pt-Ssl\PublicKey.cpp" />
-    <ClCompile Include="..\..\src\Pt-Ssl\Server.cpp" />
     <ClCompile Include="..\..\src\Pt-Ssl\Session.cpp" />
     <ClCompile Include="..\..\src\Pt-Ssl\SslError.cpp" />
     <ClCompile Include="..\..\src\Pt-Ssl\StreamBuffer.cpp" />

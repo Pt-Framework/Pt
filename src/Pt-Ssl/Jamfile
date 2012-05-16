@@ -14,7 +14,6 @@ SharedLibrary Pt-Ssl : CertificateList.cpp
                        IOBuffer.cpp
                        PrivateKey.cpp
                        PublicKey.cpp
-                       Server.cpp
                        Session.cpp
                        SslError.cpp
                        StreamBuffer.cpp ;

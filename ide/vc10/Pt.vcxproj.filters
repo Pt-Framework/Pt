@@ -504,9 +504,6 @@
     <ClInclude Include="..\..\include\Pt\Ssl\StreamBuffer.h">
       <Filter>Pt-Ssl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Ssl\Server.h">
-      <Filter>Pt-Ssl</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Pt-Ssl\OpenSsl.h">
       <Filter>Pt-Ssl</Filter>
     </ClInclude>
@@ -1087,9 +1084,6 @@
       <Filter>Pt-Ssl\tests</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Ssl\StreamBuffer.cpp">
-      <Filter>Pt-Ssl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Ssl\Server.cpp">
       <Filter>Pt-Ssl</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Ssl\IOBuffer.cpp">
