@@ -91,7 +91,7 @@ SSLInit::~SSLInit()
 }
 
 
-Context::Context(Protocol protocol, const char* sessionID)
+Context::Context(Protocol protocol)
 : _protocol(protocol)
 , _certChainExist(false)
 {
@@ -114,14 +114,29 @@ Context::Context(Protocol protocol, const char* sessionID)
     SSL_CTX_set_mode(_ctx, SSL_MODE_NO_AUTO_CHAIN);
     SSL_CTX_set_mode(_ctx, SSL_MODE_ENABLE_PARTIAL_WRITE);
     //SSL_CTX_set_read_ahead(_ctx, 1);
+}
 
-    // Set session ID
-    if(sessionID) 
+
+Context::~Context()
+{
+#ifndef COPY_EXTRA_CERT
+    if(_ctx->extra_certs) 
     {
-        SSL_CTX_set_session_id_context(_ctx,
-                                       reinterpret_cast<const unsigned char*>(sessionID),
-                                       strlen(sessionID));
+        sk_X509_pop(_ctx->extra_certs);
+        _ctx->extra_certs = 0;
     }
+#endif
+
+    SSL_CTX_free(_ctx);
+}
+
+
+void Context::setId(const char* id)
+{
+    SSL_CTX_set_session_id_context(_ctx,
+                                    reinterpret_cast<const unsigned char*>(id),
+                                    strlen(id));
+
 
     /* Possible functions that will allow us to store/retrieve session data to/from disk.
 
@@ -228,20 +243,6 @@ Context::Context(Protocol protocol, const char* sessionID)
             by first calling i2d_SSL_SESSION() with pp=NULL, and obtain the size needed, then allocate the memory and call
             i2d_SSL_SESSION() again.
   */
-}
-
-
-Context::~Context()
-{
-#ifndef COPY_EXTRA_CERT
-    if(_ctx->extra_certs) 
-    {
-        sk_X509_pop(_ctx->extra_certs);
-        _ctx->extra_certs = 0;
-    }
-#endif
-
-    SSL_CTX_free(_ctx);
 }
 
 

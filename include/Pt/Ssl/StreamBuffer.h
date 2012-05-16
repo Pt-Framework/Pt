@@ -47,7 +47,7 @@ class PT_SSL_API StreamBuffer : public std::streambuf
     public:
         /** @brief Construct an SSL stream buffer that uses the given IO stream and SSL context. 
         */
-        StreamBuffer(Context& ctx, std::iostream& ios, const char* sessionID = 0, size_t bufferSize = 1024);
+        StreamBuffer(Context& ctx, std::iostream& ios, size_t bufferSize = 1024);
 
         /** @brief Standard dtor. 
         */
@@ -121,7 +121,7 @@ class PT_SSL_API StreamBuffer : public std::streambuf
         std::streamsize import();
 
     protected:
-        StreamBuffer(Context& ctx, const char* sessionID = 0, size_t bufferSize = 1024);
+        StreamBuffer(Context& ctx, size_t bufferSize = 1024);
 
         void attach(std::iostream& ios);
         
@@ -134,7 +134,7 @@ class PT_SSL_API StreamBuffer : public std::streambuf
         std::streamsize do_underflow(std::streamsize size);
 
     private:
-        void init(Context& ctx, const char* sessionID = 0, std::iostream* ios = 0);
+        void init(Context& ctx, std::iostream* ios = 0);
 
         /** @brief Get the current status string of this SSL stream buffer. 
         */

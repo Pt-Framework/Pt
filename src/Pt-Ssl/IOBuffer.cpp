@@ -36,8 +36,8 @@ namespace Pt {
 
 namespace Ssl {
 
-IOBuffer::IOBuffer(Context& ctx, Pt::System::IOStream& ios, const char* sessionID)
-: StreamBuffer(ctx, ios, sessionID, 1024)
+IOBuffer::IOBuffer(Context& ctx, Pt::System::IOStream& ios)
+: StreamBuffer(ctx, ios, 1024)
 , _ios(&ios)
 , _errorPending(0)
 , _reading(false)

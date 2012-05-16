@@ -44,7 +44,7 @@ class PT_SSL_API IOBuffer : public StreamBuffer
     public:
         /** @brief Construct a SSL client that uses the given I/O stream and SSL context. 
         */
-        IOBuffer(Context& ctx, Pt::System::IOStream& ios, const char* sessionID = 0);
+        IOBuffer(Context& ctx, Pt::System::IOStream& ios);
 
         /** @brief Standard dtor. 
         */

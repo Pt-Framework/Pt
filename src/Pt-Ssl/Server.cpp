@@ -36,10 +36,10 @@ namespace Pt {
 
 namespace Ssl {
 
-Server::Server(Context& ctx, Pt::System::IOStream& ios, const char* sessionID)
+Server::Server(Context& ctx, Pt::System::IOStream& ios)
 : std::iostream(0)
 , _ios(&ios)
-, _sslbuf(ctx, ios, sessionID, 1024)
+, _sslbuf(ctx, ios, 1024)
 , _errorPending(0)
 { 
     std::iostream::init(&_sslbuf); 

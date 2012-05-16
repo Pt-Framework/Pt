@@ -62,10 +62,12 @@ class PT_SSL_API Context : public NonCopyable
 
     public:
         //! @brief Construct with session id and protocol. 
-        Context(Protocol protocol = Default, const char* sessionID = 0);
+        Context(Protocol protocol = Default);
 
         //! @brief Destructor.
         ~Context();
+
+        void setId(const char* sessionID);
 
         //! @brief Returns the current protocol. 
         Protocol protocol() const;

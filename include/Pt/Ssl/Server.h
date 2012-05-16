@@ -43,7 +43,7 @@ class PT_SSL_API Server : public std::iostream, public Pt::Connectable
     public:
         /** @brief Construct an SSL server that uses the given I/O stream and SSL context. 
         */
-        Server(Context& ctx, Pt::System::IOStream& ios, const char* sessionID = 0);
+        Server(Context& ctx, Pt::System::IOStream& ios);
 
         /** @brief Standard dtor. 
         */

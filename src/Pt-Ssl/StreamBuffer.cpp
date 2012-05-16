@@ -39,7 +39,7 @@ namespace Pt {
 
 namespace Ssl {
 
-StreamBuffer::StreamBuffer(Context& ctx, std::iostream& ios, const char* sessionID, size_t bufferSize)
+StreamBuffer::StreamBuffer(Context& ctx, std::iostream& ios, size_t bufferSize)
 : _in(0)
 , _out(0)
 , _ssl(0)
@@ -50,11 +50,11 @@ StreamBuffer::StreamBuffer(Context& ctx, std::iostream& ios, const char* session
 , _obuffer(0)
 , _pbmax(4)
 {
-    this->init(ctx, sessionID, &ios);
+    this->init(ctx, &ios);
 }
 
 
-StreamBuffer::StreamBuffer(Context& ctx, const char* sessionID, size_t bufferSize)
+StreamBuffer::StreamBuffer(Context& ctx, size_t bufferSize)
 : _in(0)
 , _out(0)
 , _ssl(0)
@@ -65,7 +65,7 @@ StreamBuffer::StreamBuffer(Context& ctx, const char* sessionID, size_t bufferSiz
 , _obuffer(0)
 , _pbmax(4)
 {
-    this->init(ctx, sessionID);
+    this->init(ctx);
 }
 
 
@@ -75,7 +75,7 @@ StreamBuffer::~StreamBuffer()
 }
 
 
-void StreamBuffer::init(Context& ctx, const char* sessionID, std::iostream* ios)
+void StreamBuffer::init(Context& ctx, std::iostream* ios)
 {
     _ios = ios;
 
@@ -91,14 +91,6 @@ void StreamBuffer::init(Context& ctx, const char* sessionID, std::iostream* ios)
 
     // By default we do not care about the other peer's certificate
     SSL_set_verify(_ssl, SSL_VERIFY_NONE, NULL);
-
-    // Set session ID
-    if(sessionID) 
-    {
-        SSL_set_session_id_context( _ssl,
-                                    reinterpret_cast<const unsigned char*>(sessionID), 
-                                    strlen(sessionID) );
-    }
 }
 
 void StreamBuffer::attach(std::iostream& ios)
