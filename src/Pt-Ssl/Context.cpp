@@ -114,6 +114,8 @@ Context::Context(Protocol protocol)
     SSL_CTX_set_mode(_ctx, SSL_MODE_NO_AUTO_CHAIN);
     SSL_CTX_set_mode(_ctx, SSL_MODE_ENABLE_PARTIAL_WRITE);
     //SSL_CTX_set_read_ahead(_ctx, 1);
+
+    SSL_CTX_set_session_cache_mode(_ctx, SSL_SESS_CACHE_OFF);
 }
 
 
@@ -131,13 +133,24 @@ Context::~Context()
 }
 
 
-void Context::setId(const char* id)
+void Context::enableSessions(const char* id, unsigned long timeout, unsigned long cacheSize)
 {
+    SSL_CTX_set_session_cache_mode(_ctx, SSL_SESS_CACHE_SERVER);
+
     SSL_CTX_set_session_id_context(_ctx,
                                     reinterpret_cast<const unsigned char*>(id),
                                     strlen(id));
 
+    if(timeout == DefaultTimeout)
+        SSL_CTX_set_timeout(_ctx, 300);
+    else
+        SSL_CTX_set_timeout( _ctx, static_cast<long>(timeout) );
 
+    if(cacheSize == DefaultCacheSize)
+        SSL_CTX_sess_set_cache_size(_ctx, SSL_SESSION_CACHE_MAX_SIZE_DEFAULT);
+    else
+        SSL_CTX_sess_set_cache_size( _ctx, static_cast<long>(cacheSize) );
+    
     /* Possible functions that will allow us to store/retrieve session data to/from disk.
 
       long SSL_CTX_set_session_cache_mode(SSL_CTX ctx, long mode);

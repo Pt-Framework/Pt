@@ -60,6 +60,10 @@ class PT_SSL_API Context : public NonCopyable
             SSLv2     //!< unsecure, not recommended.
         };
 
+        static const unsigned long DefaultTimeout = static_cast<unsigned long>(-1);
+        static const unsigned long DefaultCacheSize = static_cast<unsigned long>(-1);
+        static const unsigned long UnlimitedCacheSize = 0;
+
     public:
         //! @brief Construct with session id and protocol. 
         Context(Protocol protocol = Default);
@@ -67,7 +71,16 @@ class PT_SSL_API Context : public NonCopyable
         //! @brief Destructor.
         ~Context();
 
-        void setId(const char* sessionID);
+        /** @brief Enables session caching on the server side
+
+            The @cacheId is a application specific ID for the session cache,
+            so that two application domains do not mix up their caches. The
+            @timeout is in maximum lifetime of a session in seconds. The size
+            of the session cache can be limited with @cacheSize.
+        */
+        void enableSessions(const char* cacheId, 
+                            unsigned long timeout = DefaultTimeout, 
+                            unsigned long cacheSize = DefaultCacheSize);
 
         //! @brief Returns the current protocol. 
         Protocol protocol() const;
