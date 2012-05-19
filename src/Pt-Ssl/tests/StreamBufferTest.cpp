@@ -135,3 +135,4 @@ void StreamBufferTest::Handshake()
     PT_UNIT_ASSERT( client.connected() );
     PT_UNIT_ASSERT( server.connected() );
 }
+

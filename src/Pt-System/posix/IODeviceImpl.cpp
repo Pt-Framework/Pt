@@ -29,8 +29,11 @@
 
 #include "IODeviceImpl.h"
 #include "Pt/System/IOError.h"
+#include "Pt/System/Logger.h"
 #include <cerrno>
 #include <cassert>
+
+log_define("Pt.System.IODevice")
 
 namespace Pt {
 
@@ -63,6 +66,8 @@ bool IODeviceImpl::isOpen() const
 
 void IODeviceImpl::open(int fd, bool inherit)
 {
+    log_debug("opening fd:" << fd);
+
     // TODO: we do not need to enable the i/o handle now, but defer it
     // until we call impl().beginRead or impl().beginWrite on the i/o handle.
     // The EventLoopImpl can check internally...
@@ -112,6 +117,8 @@ void IODeviceImpl::close()
             if( errno != EINTR )
                 throw IOError( PT_ERROR_MSG("close failed") );
         }
+
+        log_debug("closed fd:" << fd);
     }
 }
 
@@ -122,12 +129,40 @@ void IODeviceImpl::cancel(EventLoop& loop)
     // if this is attached to a loop
 
     if( this->isOpen() )
+    {
         loop.selector().cancel(_ioh);
+        log_debug("cancelling fd:" << _ioh.fd);
+    }
 }
 
 
-size_t IODeviceImpl::beginRead(EventLoop& loop, char* buffer, size_t n, bool&)
+size_t IODeviceImpl::beginRead(EventLoop& loop, char* buffer, size_t n, bool& eof)
 {
+    log_debug("begin read on fd:" << _ioh.fd);
+    
+    for(;;)
+    {
+        ssize_t ret = ::read( _ioh.fd, (void*)buffer, n);
+        if (ret > 0)
+        {
+            log_debug("read:" << ret << " bytes");
+            return static_cast<size_t>(ret);
+        }
+
+        if(ret == 0 || errno == ECONNRESET)
+        {
+            eof = true;
+            log_debug("read: EOF");
+            return 0;
+        }
+
+        if(errno == EAGAIN)
+            break;
+
+        if(errno != EINTR)
+            throw IOError("read failed");
+    }
+
     loop.selector().beginRead( &_ioh );
     return 0;
 }
@@ -135,6 +170,8 @@ size_t IODeviceImpl::beginRead(EventLoop& loop, char* buffer, size_t n, bool&)
 
 size_t IODeviceImpl::endRead(EventLoop& loop, char* buffer, size_t n, bool& eof)
 {
+    log_debug("end read on fd:" << _ioh.fd);
+
     loop.selector().endRead( &_ioh );
 
     if (_errorPending)
@@ -160,6 +197,7 @@ size_t IODeviceImpl::read( char* buffer, size_t count, bool& eof )
         if(ret == 0 || errno == ECONNRESET)
         {
             eof = true;
+            log_debug("read: EOF");
             return 0;
         }
 
@@ -179,20 +217,34 @@ size_t IODeviceImpl::read( char* buffer, size_t count, bool& eof )
         }
     }
 
+    log_debug("read: " << ret << " bytes");
     return ret;
 }
 
 
 size_t IODeviceImpl::beginWrite(EventLoop& loop, const char* buffer, size_t n)
 {
-    ssize_t ret = ::write(_ioh.fd, (const void*)buffer, n);
+    log_debug("begin write on fd:" << _ioh.fd);
 
-    if (ret > 0)
-        return static_cast<size_t>(ret);
+    for(;;)
+    {
+        ssize_t ret = ::write(_ioh.fd, (const void*)buffer, n);
+        if (ret > 0)
+        {
+            log_debug("wrote:" << ret << " bytes");
+            return static_cast<size_t>(ret);
+        }
 
-    if (ret == 0 || errno == ECONNRESET || errno == EPIPE)
-        throw System::IOError("lost connection to peer");
+        if (ret == 0 || errno == ECONNRESET || errno == EPIPE)
+            throw System::IOError("lost connection to peer");
 
+        if(errno == EAGAIN)
+            break;
+
+        if(errno != EINTR)
+            throw System::IOError("write failed");
+    }
+    
     loop.selector().beginWrite( &_ioh );
     return 0;
 }
@@ -200,6 +252,8 @@ size_t IODeviceImpl::beginWrite(EventLoop& loop, const char* buffer, size_t n)
 
 size_t IODeviceImpl::endWrite(EventLoop& loop, const char* buffer, size_t n)
 {
+    log_debug("end write on fd:" << _ioh.fd);
+
     loop.selector().endWrite( &_ioh );
 
     if (_errorPending)
@@ -241,6 +295,7 @@ size_t IODeviceImpl::write( const char* buffer, size_t count )
         }
     }
 
+    log_debug("wrote: " << ret << " bytes");
     return ret;
 }
 
@@ -282,6 +337,8 @@ bool IODeviceImpl::runRead(EventLoop& loop)
     if( ! this->isOpen() )
         return false;
 
+    log_debug("run read on fd:" << _ioh.fd);
+
     Selector& selector = loop.selector();
 
     if ( selector.isError(&_ioh) )
@@ -296,8 +353,11 @@ bool IODeviceImpl::runRead(EventLoop& loop)
 
 bool IODeviceImpl::runWrite(EventLoop& loop)
 {
+
     if( ! this->isOpen() )
         return false;
+
+    log_debug("run write on fd:" << _ioh.fd);
 
     Selector& selector = loop.selector();
 

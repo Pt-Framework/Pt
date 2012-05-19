@@ -137,7 +137,7 @@ class IOBufferTest : public Pt::Unit::TestSuite
         , _loop(0)
         , _msgCnt(0)
         {
-            //Pt::System::Logger::getTarget("Pt.Ssl").setLogLevel(Pt::System::Trace);
+            //Pt::System::Logger::getTarget("Pt").setLogLevel(Pt::System::Trace);
 
             this->registerMethod("ReadWrite", *this, &IOBufferTest::ReadWrite);
 
