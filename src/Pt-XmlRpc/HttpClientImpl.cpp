@@ -28,11 +28,9 @@
 
 #include "HttpClientImpl.h"
 #include "Pt/Http/ReplyHeader.h"
+#include <Pt/System/Logger.h>
 
-#define log_define(x)
-#define log_debug(x)
-
-log_define("Pt.XmlRpc.httpclient.impl")
+log_define("Pt.XmlRpc.HttpClient")
 
 namespace Pt {
 

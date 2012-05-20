@@ -46,12 +46,12 @@ log macro.
 @code
 int Calculator::multiply(int a, int b)
 {
-    log_message_info(_logger, "multipy " << a << " by " << b);
+    logger_log_info(_logger, "multipy " << a << " by " << b);
     return a*b;
 }
 @endcode
 
-As before log_message_info expands to nothing if NLOG is defined.
+As before logger_log_info expands to nothing if NLOG is defined.
 It is also possible to not use any macros, but create message
 objects and write them with logger instances.
 

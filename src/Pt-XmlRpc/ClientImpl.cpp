@@ -35,9 +35,10 @@
 #include "Pt/Xml/Characters.h"
 #include "Pt/Xml/EndElement.h"
 #include "Pt/System/Selectable.h"
+#include "Pt/System/Logger.h"
 #include "Pt/Utf8Codec.h"
 
-#define log_debug(x)
+log_define("Pt.XmlRpc.Client")
 
 namespace Pt {
 

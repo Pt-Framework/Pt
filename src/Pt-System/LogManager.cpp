@@ -401,7 +401,7 @@ void LogManager::setChannel(LogTarget& target, const std::string& url)
 }
 
 
-void LogManager::log(LogTarget& target, const LogMessage& message)
+void LogManager::log(LogTarget& target, const LogRecord& record)
 {
     Pt::System::RecursiveLock lock( _mutex );
 
@@ -411,10 +411,10 @@ void LogManager::log(LogTarget& target, const LogMessage& message)
         if( current->channel() )
         {
             // format the message string
-            std::string level = toString( message.logLevel() );
+            std::string level = toString( record.logLevel() );
             Pt::DateTime time = System::Clock::getLocalTime();
             std::string str = time.toIsoString() + " [" + target.name() + "] " +
-                              level + " - "  + message.text() + "\n";
+                              level + " - "  + record.text() + "\n";
 
             // write data to channel
             current->channel()->write(str);

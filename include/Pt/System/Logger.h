@@ -27,8 +27,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef Pt_SystemDevice_h
-#define Pt_SystemDevice_h
+#ifndef Pt_System_Logger_h
+#define Pt_System_Logger_h
 
 #include <Pt/System/Api.h>
 #include <Pt/System/LogLevel.h>
@@ -54,35 +54,33 @@ class LogChannel;
     - use formatting optimizations (cxxtools log)
 */
 
-/** @brief %Log message. 
- 
-    Log message caching can be used for faster logging.
+/** @brief Log records.
+
+    Log record caching can be used for faster logging or to write the same
+    record to multiple loggers.
  
     @code
-    Pt::System::LogMessage msg(mylogger, Pt::System::Info);
+    Pt::System::LogRecord record(Pt::System::Info);
     msg << "pi is: " << 3.1415;
  
-    // send later...
-    msg.send();
+    // log to logger1
+    logger1->log(record);
  
-    // send again even later...
-    msg.send();
+    // same record goes to logger2
+    logger2->log(record);
     @endcode
  
     @ingroup Logging
 */
-class PT_SYSTEM_API LogMessage : protected Pt::NonCopyable
+class LogRecord : protected Pt::NonCopyable
 {
-    friend class Logger;
-
     public:
-        LogMessage(Logger& logger, const LogLevel level)
-        : _logger(&logger)
-        , _level(level)
+        explicit LogRecord(const LogLevel& level)
+        : _level(level)
         , _source("unknown", "unknown", "unknown")
-        {}
+        { }
 
-        ~LogMessage()
+        ~LogRecord()
         {}
 
         void clear()
@@ -107,31 +105,73 @@ class PT_SYSTEM_API LogMessage : protected Pt::NonCopyable
         { _source = source; }
 
         template <typename T>
-        LogMessage& operator<<(const T& value);
+        LogRecord& operator<<(const T& value)
+        {
+            _text << value;
+            return *this;
+        }
 
         //! @brief Use the PT_SOURCEINFO macro to generate a SourceInfo object.
-        LogMessage& operator<<( const Pt::SourceInfo& si )
+        LogRecord& operator<<( const Pt::SourceInfo& si )
         {
             setSourceInfo(si);
             return *this;
         }
 
-        LogMessage& operator<<( LogLevel (*pf)() )
+        LogRecord& operator<<( LogLevel (*pf)() )
         {
             setLogLevel( pf() );
             return *this;
         }
 
-        LogMessage& operator<<( LogMessage& (*pf)(LogMessage&) )
-        {
-            return pf(*this);
-        }
-
-        inline LogMessage& operator<<(std::ios_base& (*pf)(std::ios_base&))
+        LogRecord& operator<<(std::ios_base& (*pf)(std::ios_base&))
         {
             pf(_text);
             return *this;
         }
+
+    protected:
+        LogRecord(const LogRecord& other)
+        : _level(other._level)
+        , _source(other._source)
+        { }
+
+    private:
+        std::ostringstream _text;
+        LogLevel           _level;
+        Pt::SourceInfo     _source;
+};
+
+
+/** @brief Log message. 
+ 
+    Log message caching can be used for faster logging.
+ 
+    @code
+    Pt::System::LogMessage msg(mylogger, Pt::System::Info);
+    msg << "pi is: " << 3.1415;
+ 
+    // send later...
+    msg.send();
+ 
+    // send again even later...
+    msg.send();
+    @endcode
+ 
+    @ingroup Logging
+*/
+class PT_SYSTEM_API LogMessage : protected Pt::NonCopyable
+{
+    friend class Logger;
+
+    public:
+        LogMessage(Logger& logger, const LogLevel& level)
+        : _record(level)
+        , _logger(&logger)
+        { }
+
+        ~LogMessage()
+        {}
 
         /** @brief Sends a log message
 
@@ -142,21 +182,43 @@ class PT_SYSTEM_API LogMessage : protected Pt::NonCopyable
         */
         void send();
 
+        bool enabled() const;
+
+        operator bool() const
+        { return enabled(); }
+
+        bool operator!() const
+        { return ! enabled(); }
+
+        template <typename T>
+        LogMessage& operator<<(const T& value)
+        {
+            _record << value;
+            return *this;
+        }
+
+        const LogRecord& record() const
+        { return _record; }
+
     protected:
         LogMessage(const LogMessage& other)
-        : _logger(other._logger)
-        , _level(other._level)
-        , _source(other._source)
-        {}
+        : _record(other._record.logLevel())
+        , _logger(other._logger)
+        { }
 
     private:
-        Logger*            _logger;
-        std::ostringstream _text;
-        LogLevel           _level;
-        Pt::SourceInfo     _source;
+        LogRecord _record;
+        Logger* _logger;
 };
 
-/** @brief Manipulator to end a log-message
+
+inline LogMessage& operator<<( LogMessage& msg, LogMessage& (*pf)(LogMessage&) )
+{
+    return pf(msg);
+}
+
+
+/** @brief Manipulator to end and send a log-message
 */
 inline LogMessage& endlog(LogMessage& msg)
 {
@@ -240,7 +302,7 @@ class PT_SYSTEM_API LogTarget : protected Pt::NonCopyable
         void setChannel(const std::string& url);
 
         //! @brief Write log message to this target
-        void log(const LogMessage& msg);
+        void log(const LogRecord& record);
 
         /** @brief Initialize logging targets with a settings file
 
@@ -341,7 +403,7 @@ class PT_SYSTEM_API LogTarget : protected Pt::NonCopyable
 
     @code
     Pt::System::Logger logger("mylog");
-    logger.beginLog() << Pt::System::info << PT_SOURCEINFO)
+    logger.beginLog() << Pt::System::info << PT_SOURCEINFO
                       << "Pi is exactly " << 3
                       << " No, I was kidding, its really " << 3.1415
                       << Pt::System::endlog;
@@ -408,33 +470,29 @@ class PT_SYSTEM_API Logger : protected Pt::NonCopyable
             return level <= _target->logLevel();
         }
 
-        void log(const LogMessage& msg)
+        /** @brief Returns true if the log level is enabled for the target
+        */
+        bool enabled(const LogRecord& record) const
         {
-            if( this->enabled( msg.logLevel() ) )
+            return record.logLevel() <= _target->logLevel();
+        }
+
+        void log(const LogRecord& record)
+        {
+            if( this->enabled( record.logLevel() ) )
             {
-                _target->log( msg );
+                _target->log( record );
             }
         }
 
         /** @brief Start a new log-message
 
             This method begins a new log-message. This method call is usually
-            followed by several calls of the output operator. If the logger is
-            disabled this function only performs a integer comparison.
+            followed by several calls of the output operator.
         */
         LogMessage beginLog()
         {
             return LogMessage(*this, Pt::System::Trace);
-        }
-
-        LogMessage beginLog(LogLevel level)
-        {
-            return LogMessage(*this, level);
-        }
-
-        LogMessage operator<<( LogLevel (*pf)() )
-        {
-            return LogMessage( *this, pf() );
         }
 
         //! @internal Only for unit-tests
@@ -455,36 +513,15 @@ class PT_SYSTEM_API Logger : protected Pt::NonCopyable
         LogTarget* _target;
 };
 
-template <typename T>
-inline LogMessage& LogMessage::operator<<(const T& value)
-{
-    if( _logger->enabled(_level) )
-        _text << value;
-
-    return *this;
-}
-
 inline void LogMessage::send()
 {
-    _logger->log(*this);
+    _logger->log( this->record() );
 }
 
-/** @internal
- */
-struct LogStmt
-{
-    LogStmt(Logger& logger, Pt::System::LogLevel level)
-    : _msg( logger, level )
-    {}
-
-    ~LogStmt()
-    { _msg.send(); }
-
-    LogMessage& msg()
-    { return _msg; }
-
-    LogMessage _msg;
-};
+inline bool LogMessage::enabled() const
+{ 
+    return _logger->enabled( _record.logLevel() ); 
+}
 
 }
 
@@ -492,35 +529,54 @@ struct LogStmt
 
 #ifdef NLOG
     #define log_init(file)
-    #define log_define(category)
-    #define log_impl(level, expr)
-    #define logger_log_impl(logger, level, message)
+    #define log_define_impl(instance, category)
+    #define log_to_impl(instance, level, message)
+    #define logger_log_impl(logger, level, expr)
 #else
+    /** @brief Initialize the logging library
+    */
     #define log_init(file) \
     Pt::System::LogTarget::initTargets(file);
 
-    #define log_define(category)                                         \
-    static Pt::System::Logger& getStaticLogger()                         \
+    /** @internal @brief Define a named global logger instance
+    */
+    #define log_define_impl(instance, category)                          \
+    inline static Pt::System::Logger& instance()                    \
     {                                                                    \
-        static Pt::System::Logger pt_logger(category);                   \
-        return pt_logger;                                                \
+        static Pt::System::Logger instance##_instance(category);           \
+        return instance##_instance;                                        \
     }                                                                    \
-    static Pt::System::Logger& pt_static_logger_init = getStaticLogger();
+    static Pt::System::Logger& instance##_static_init = instance();
 
-    #define log_impl(level, expr) \
-       ( getStaticLogger().enabled(Pt::System::level) && &(getStaticLogger().beginLog(Pt::System::level) << expr << Pt::System::endlog) )
+    /** @internal @brief Log to a named global logger instance
+    */
+    #define log_to_impl(instance, level, expr) logger_log_impl(instance(), level, expr )
 
-    #define logger_log_impl(logger, level, expr) \
-       ( logger.enabled( Pt::System::level() ) && &(logger.beginLog( Pt::System::level() ) << expr << Pt::System::endlog) )
-
+    /** @internal @brief Log to a logger instance
+        TODO: add a log() method to logger that does not check the loglevel
+        since we already have checked it within this macro
+    */
+    #define logger_log_impl(logger, level, expr)        \
+        if( ! logger.enabled( Pt::System::level() ) )   \
+            ;                                           \
+        else Pt::System::LogMessage(logger, Pt::System::level()) << expr << Pt::System::endlog
 #endif
 
-#define log_fatal(expr) log_impl(Fatal, expr)
-#define log_error(expr) log_impl(Error, expr)
-#define log_warn(expr)  log_impl(Warn, expr)
-#define log_info(expr)  log_impl(Info, expr)
-#define log_debug(expr) log_impl(Debug, expr)
-#define log_trace(expr) log_impl(Trace, expr)
+#define log_define(category) log_define_impl(static_logger, category)
+#define log_fatal(expr) log_to_impl(static_logger, fatal, expr)
+#define log_error(expr) log_to_impl(static_logger, error, expr)
+#define log_warn(expr)  log_to_impl(static_logger, warn, expr)
+#define log_info(expr)  log_to_impl(static_logger, info, expr)
+#define log_debug(expr) log_to_impl(static_logger, debug, expr)
+#define log_trace(expr) log_to_impl(static_logger, trace, expr)
+
+#define log_define_instance(instance, category) log_define_impl(instance, category)
+#define log_fatal_to(instance, expr) log_to_impl(instance, fatal, expr)
+#define log_error_to(instance, expr) log_to_impl(instance, error, expr)
+#define log_warn_to(instance, expr)  log_to_impl(instance, warn, expr)
+#define log_info_to(instance, expr)  log_to_impl(instance, info, expr)
+#define log_debug_to(instance, expr) log_to_impl(instance, debug, expr)
+#define log_trace_to(instance, expr) log_to_impl(instance, trace, expr)
 
 #define logger_log_fatal(logger, expr) logger_log_impl(logger, fatal, expr)
 #define logger_log_error(logger, expr) logger_log_impl(logger, error, expr)
@@ -529,15 +585,19 @@ struct LogStmt
 #define logger_log_debug(logger, expr) logger_log_impl(logger, debug, expr)
 #define logger_log_trace(logger, expr) logger_log_impl(logger, trace, expr)
 
-#define logger_begin_impl(logger, level)   \
-    if( ! logger.enabled(Pt::System::level) ) ; \
-    else Pt::System::LogStmt(logger, Pt::System::level).msg()
+/** @internal @brief Log to a logger if the log level permits it
+*/
+#define logger_begin_impl(logger, level)      \
+    if( ! logger.enabled( Pt::System::level() ) )   \
+        ;                                           \
+    else logger.beginLog() << Pt::System::level
 
-#define logger_begin_fatal(logger) logger_begin_impl(logger, Fatal)
-#define logger_begin_error(logger) logger_begin_impl(logger, Error)
-#define logger_begin_warn(logger)  logger_begin_impl(logger, Warn)
-#define logger_begin_info(logger)  logger_begin_impl(logger, Info)
-#define logger_begin_debug(logger) logger_begin_impl(logger, Debug)
-#define logger_begin_trace(logger) logger_begin_impl(logger, Trace)
+#define logger_begin_fatal(logger) logger_begin_impl(logger, fatal)
+#define logger_begin_error(logger) logger_begin_impl(logger, error)
+#define logger_begin_warn(logger) logger_begin_impl(logger, warn)
+#define logger_begin_info(logger) logger_begin_impl(logger, info)
+#define logger_begin_debug(logger) logger_begin_impl(logger, debug)
+#define logger_begin_trace(logger) logger_begin_impl(logger, trace)
 
 #endif
+

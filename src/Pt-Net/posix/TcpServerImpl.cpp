@@ -34,6 +34,7 @@
 #include <Pt/Net/TcpServer.h>
 #include <Pt/System/SystemError.h>
 #include <Pt/System/EventLoop.h>
+#include <Pt/System/Logger.h>
 #include <cerrno>
 #include <cassert>
 #include <cstring>
@@ -41,7 +42,7 @@
 #include <unistd.h>
 #include <netinet/tcp.h>
 
-#define log_debug(x)
+log_define("Pt.Net.TcpServer")
 
 namespace Pt {
 

@@ -30,18 +30,12 @@
 #include <Pt/Http/Client.h>
 #include "Parser.h"
 #include <Pt/System/IOError.h>
+#include <Pt/System/Logger.h>
 #include <Pt/TextStream.h>
 #include <Pt/Base64Codec.h>
 #include <sstream>
 
-#define log_define(a)
-#define log_trace(a)
-#define log_debug(a)
-#define log_info(a)
-#define log_warn(a)
-#define log_error(a)
-
-log_define("Pt.http.client")
+log_define("Pt.Http.Client")
 
 namespace Pt {
 
@@ -455,7 +449,7 @@ void ClientImpl::onOutput(System::StreamBuffer& sb)
             throw;
         }
     }
-    catch (const std::exception&)
+    catch (const std::exception& e)
     {
         log_warn("exception occured: " << e.what());
 

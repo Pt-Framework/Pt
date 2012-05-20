@@ -107,10 +107,10 @@ LogTarget& LogTarget::get(const std::string& name)
 }
 
 
-void LogTarget::log(const LogMessage& message)
+void LogTarget::log(const LogRecord& record)
 {
     // thread-safe
-    LogManager::instance().log(*this, message);
+    LogManager::instance().log(*this, record);
 }
 
 

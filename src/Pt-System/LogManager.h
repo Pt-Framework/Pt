@@ -45,7 +45,7 @@ namespace Pt {
 namespace System {
 
 class LogTarget;
-class LogMessage;
+class LogRecord;
 
 class LogManager
 {
@@ -65,7 +65,7 @@ class LogManager
 
         void setChannel(LogTarget& target, const std::string& url);
 
-        void log(LogTarget& target, const LogMessage& message);
+        void log(LogTarget& target, const LogRecord& record);
 
         void setLogLevel(LogTarget &target, LogLevel level);
 
