@@ -85,21 +85,6 @@ void LogTarget::setChannel(const std::string& url)
 }
 
 
-void LogTarget::initTargets(const std::string& file)
-{
-    // thread-safe
-    LogManager::instance().init(file);
-}
-
-
-void LogTarget::initTargets(const Settings& settings)
-{
-    // thread-safe
-    LogManager::instance().init(settings);
-}
-
-
-
 LogTarget& LogTarget::get(const std::string& name)
 {
     // thread-safe
@@ -187,6 +172,19 @@ LogTarget& Logger::init(const std::string& name)
         lm.release();
         throw;
     }
+}
+
+void Logger::initTargets(const std::string& file)
+{
+    // thread-safe
+    LogManager::instance().init(file);
+}
+
+
+void Logger::initTargets(const Settings& settings)
+{
+    // thread-safe
+    LogManager::instance().init(settings);
 }
 
 //bool Logger::enabled(LogLevel level) const

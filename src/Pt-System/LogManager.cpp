@@ -413,11 +413,8 @@ void LogManager::log(LogTarget& target, const LogRecord& record)
         {
             _msg.clear();
             
-            Pt::DateTime time = System::Clock::getLocalTime();
-            _msg += time.toIsoString();
-
             bool percent = false;
-            const char* c = "[%T] %L - %M";
+            const char* c = "%t [%T] %L - %M";
             
             for( ; *c != '\0'; ++c)
             {
@@ -439,7 +436,11 @@ void LogManager::log(LogTarget& target, const LogRecord& record)
                 case'L':
                   _msg += toString( record.logLevel() ); 
                   break;
-                  
+                
+                case't':
+                  _msg += System::Clock::getLocalTime().toIsoString(); 
+                  break;             
+                
                 case 'M':
                   _msg += record.text(); 
                   break;

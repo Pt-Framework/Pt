@@ -50,42 +50,6 @@ enum LogLevel {
     Trace = 600
 };
 
-
-inline LogLevel trace()
-{
-    return Pt::System::Trace;
-}
-
-
-inline LogLevel info()
-{
-    return Pt::System::Info;
-}
-
-
-inline LogLevel debug()
-{
-    return Pt::System::Debug;
-}
-
-
-inline LogLevel warn()
-{
-    return Pt::System::Warn;
-}
-
-
-inline LogLevel error()
-{
-    return Pt::System::Error;
-}
-
-
-inline LogLevel fatal()
-{
-    return Pt::System::Fatal;
-}
-
 }
 
 }
