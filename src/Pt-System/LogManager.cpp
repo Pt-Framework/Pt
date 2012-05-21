@@ -108,6 +108,7 @@ LogManager::LogManager()
 , _rootTarget(0)
 , _concurrency(1)
 , _loggerCount(0)
+, _msg(255, ' ')
 {
     // builtin plugins
     _pluginManager.registerPlugin( _consolePlugin );
@@ -410,14 +411,51 @@ void LogManager::log(LogTarget& target, const LogRecord& record)
     {
         if( current->channel() )
         {
-            // format the message string
-            std::string level = toString( record.logLevel() );
+            _msg.clear();
+            
             Pt::DateTime time = System::Clock::getLocalTime();
-            std::string str = time.toIsoString() + " [" + target.name() + "] " +
-                              level + " - "  + record.text() + "\n";
+            _msg += time.toIsoString();
 
+            bool percent = false;
+            const char* c = "[%T] %L - %M";
+            
+            for( ; *c != '\0'; ++c)
+            {
+              if(*c == '%')
+              {
+                percent = true;
+                continue;
+              }
+              if( ! percent)
+              {
+                _msg += *c;
+                continue;
+              }
+
+              percent = false;
+                
+              switch(*c)
+              {
+                case'L':
+                  _msg += toString( record.logLevel() ); 
+                  break;
+                  
+                case 'M':
+                  _msg += record.text(); 
+                  break;
+                  
+                case 'T':
+                  _msg += target.name(); 
+                  break;
+                  
+                default:
+                  break;
+              }
+            }
+
+            _msg += "\n";
             // write data to channel
-            current->channel()->write(str);
+            current->channel()->write(_msg);
             return;
         }
     }

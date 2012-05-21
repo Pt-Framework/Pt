@@ -116,6 +116,7 @@ class LogManager
         Pt::System::RecursiveMutex _mutex;
         int _concurrency;
         size_t _loggerCount;
+        std::string _msg;
 
     private:
         static LogManager* _instance;
