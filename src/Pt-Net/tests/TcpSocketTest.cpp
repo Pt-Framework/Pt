@@ -45,7 +45,7 @@ class TcpSocketTest : public Pt::Unit::TestSuite
         , _client(0)
         , _loop(0)
         {
-          Pt::System::Logger::getTarget("").setLogLevel(Pt::System::Warn);
+          Pt::System::Logger::setLogLevel("", Pt::System::Warn);
 
           this->registerMethod( "NonBlockingWithLoop", *this,
                                 &TcpSocketTest::NonBlockingWithLoop);

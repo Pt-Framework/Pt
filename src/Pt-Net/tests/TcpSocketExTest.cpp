@@ -43,7 +43,7 @@ class TcpSocketExTest : public Pt::Unit::TestSuite
         TcpSocketExTest()
         : Pt::Unit::TestSuite("TcpSocketExTest")
         {
-          Pt::System::Logger::getTarget("").setLogLevel(Pt::System::Warn);
+          Pt::System::Logger::setLogLevel("", Pt::System::Warn);
 
           this->registerMethod("SendReceiveTest", *this, &TcpSocketExTest::SendReceiveTest);
         }

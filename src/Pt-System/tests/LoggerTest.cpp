@@ -207,7 +207,7 @@ class LoggerTest : public Pt::Unit::TestSuite
                 msg << "Fatal message 2" << Pt::System::endlog;
             }
 
-            msg.send();
+            msg.log();
         }
 
         void LogError()

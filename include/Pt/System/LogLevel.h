@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005-2010 by Dr. Marc Boris Duerner
+ * Copyright (C) 2005-2012 by Dr. Marc Boris Duerner
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -37,7 +37,7 @@ namespace Pt {
 
 namespace System {
 
-/** @brief Severity of the log-message
+/** @brief Severity of the log-message.
     @ingroup Logging
 */
 enum LogLevel {

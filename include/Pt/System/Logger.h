@@ -32,13 +32,10 @@
 
 #include <Pt/System/Api.h>
 #include <Pt/System/LogLevel.h>
-#include <Pt/SourceInfo.h>
-#include <Pt/DateTime.h>
+#include <Pt/System/LogTarget.h>
+#include <Pt/System/LogRecord.h>
 #include <Pt/NonCopyable.h>
-#include <Pt/Atomicity.h>
 #include <string>
-#include <iostream>
-#include <sstream>
 
 namespace Pt {
 
@@ -46,242 +43,71 @@ class Settings;
 
 namespace System {
 
-class Logger;
-class LogChannel;
+/** @brief Writes log records to a target.
 
-/** @brief Log records.
+    The Logger is the central class of the logging framework on the client
+    side. It is used to write log records to a logging target maintained
+    by the logging framework. A logger is created with a category string that
+    identifies it's target to log to. The category string is in dot syntax, so
+    the category string "app.module" refers to the target named "module", which
+    is a child of the target named "app", which is a child of the root target.
+    See LogTarget for more information.
 
-    Log record caching can be used for faster logging or to write the same
-    record to multiple loggers.
- 
+    If the target of a logger does not exist yet, it will be created. If several
+    loggers are created with the same target string they will indeed use the
+    same target. The creation of a logger requires a target lookup in the logging 
+    manager, so it is beneficial to keep created loggers at the class level 
+    for as long as they are needed. The logger provides a set of static methods
+    to configure targets. The following code configures a log level and a channel
+    for a target named "app.module":
+
     @code
-    Pt::System::LogRecord record(Pt::System::Info);
-    msg << "pi is: " << 3.1415;
- 
-    // log to logger1
-    logger1->log(record);
- 
-    // same record goes to logger2
-    logger2->log(record);
+    Pt::System::Logger::setLogLevel("app.module", Pt::System::Info);
+    Pt::System::Logger::setChannel("app.module", "console://");
     @endcode
- 
-    @ingroup Logging
-*/
-class LogRecord : protected Pt::NonCopyable
-{
-    public:
-        explicit LogRecord(const LogLevel& level)
-        : _level(level)
-        , _source("unknown", "unknown", "unknown")
-        { }
 
-        ~LogRecord()
-        {}
-
-        void clear()
-        {
-            _text.str( std::string() );
-            _text.clear();
-        }
-
-        std::string text() const
-        { return _text.str(); }
-
-        LogLevel logLevel() const
-        { return _level; }
-
-        const Pt::SourceInfo& sourceInfo() const
-        { return _source; }
-
-        template <typename T>
-        LogRecord& operator<<(const T& value)
-        {
-            _text << value;
-            return *this;
-        }
-
-        //! @brief Use the PT_SOURCEINFO macro to generate a SourceInfo object.
-        LogRecord& operator<<( const Pt::SourceInfo& si )
-        {
-            _source = si;
-            return *this;
-        }
-
-        LogRecord& operator<<(std::ios_base& (*pf)(std::ios_base&))
-        {
-            pf(_text);
-            return *this;
-        }
-
-    private:
-        std::ostringstream _text;
-        LogLevel           _level;
-        Pt::SourceInfo     _source;
-};
-
-/** @brief Target of log-messages.
-
-    All created targets form a hierachy within the logging manager.
-    To add an instance to this hierachy use the static Target::get
-    method. The naming scheme of the targets follows the property
-    dot-syntax. If there is a target foobar.ping and a target foobar.pong
-    it means that ping and pong are children of the foobar target.
-    Once a target is created a channel can be assigned to it. If no channel
-    is assigned to a target, it will use the channel of the next of its parent
-    targets. Channels can either be assigned by the class API or in
-    the properties file that the logging-manager reads on startup.
-    Here is an example of how ping and pong would be configured:
+    Channels and log levels can either be assigned by the API or in the 
+    settings file that is loaded by calling Pt::System::Logger::init.
+    Here is an example of a settings file:
 
     @code
     foobar.channel = console://
 
-    foobar.ping.channel = comm:///dev/ttyS0
-    foobar.ping.logLevel = Error
-
     foobar.pong.logLevel = Trace
+
+    foobar.ping.channel = file:///log.txt
+    foobar.ping.logLevel = Error
     @endcode
 
-    In the example, pong would write messages with a log-level of Trace
-    or higher to the console channel it inherited from its parent. The
-    target ping writes messages with a log-level of Error of higher
-    asnychronously to the serial port.
+    In the example, pong would write messages with a log level of Trace
+    or higher to the console channel, which it inherited from its parent.
+    The target ping writes messages with a log level of Error of higher
+    to a file.
 
-    @ingroup Logging
-*/
-class PT_SYSTEM_API LogTarget : protected Pt::NonCopyable
-{
-    friend class LogManager;
-
-    protected:
-        //! @internal Used within logging-manager
-        LogTarget(const std::string& name, int concurrency, LogTarget* parent = 0);
-
-    public:
-        //! @brief Destructor.
-        virtual ~LogTarget();
-
-        /** @brief Returns the name of the target.
-        */
-        const std::string& name() const;
-
-        //! @brief Returns the log-level of the target.
-        int logLevel() const
-        {
-            return atomicGet(_loglevel);
-        }
-
-        /** @brief Sets the log-level of the target and its children.
-
-            This method is thread-safe. The log-level can also be set
-            in the settings file of the used for initialization. All
-            children of this target inherit the given LogLevel unless
-            they are already set to a log level explicitly i.e. this
-            method has een called on a child before.
-        */
-        void setLogLevel(LogLevel level);
-
-        /** @brief Returns the URL of the channel used by the target
-        */
-        std::string channelUrl() const;
-
-        /** @brief Sets the channel to be used by this target
-
-            Throws a invalid_argument exception if the channel can not
-            be created. This function might block until the channel could
-            be opened. This method is thread-safe. The channel can also be
-            set in the properties file of the logging-manager.
-        */
-        void setChannel(const std::string& url);
-
-        //! @brief Write log message to this target
-        void log(const LogRecord& record);
-
-        /** @brief Get a target from the logging manager
-
-            The target is created if it does not exist, otherwise the
-            existing target is returned. If the target is created it is
-            initialised with the properties from the configuration file
-            of the loggin manager. This method is thread-safe.
-        */
-        static LogTarget& get(const std::string& name);
-
-    protected:
-        //! @internal
-        LogTarget* parent() const
-        { return _parent; }
-
-        //! @internal
-        bool inheritsLogLevel() const;
-
-        //! @internal
-        void assignLogLevel(int level, bool inherited);
-
-        //! @internal
-        bool inheritsChannel() const;
-
-        //! @internal
-        LogChannel* channel() const
-        { return _channel; }
-
-        //! @internal
-        void removeChannel();
-
-        //! @internal
-        void assignChannel(LogChannel& ch);
-
-    private:
-        //! @internal
-        LogTarget* _parent;
-
-        //! @internal
-        std::string _name;
-
-        //! @internal
-        mutable volatile atomic_t _loglevel;
-
-        //! @internal
-        bool _inheritLogLevel;
-
-        //! @internal
-        LogChannel* _channel;
-
-        //! @internal
-        bool _inheritChannel;
-
-        //! @internal
-        void* _reserved;
-};
-
-/** @brief Write log-messages to a target.
-
-    The Logger is the central class of the logging framework on the client
-    side. It is used to write log-messages to a logging target maintained
-    by the logging framework. A logger is created by passing a string that
-    identifies the target uniquely to the constructor. If the target does not
-    exist yet, it will be created. If several loggers are created with the
-    same target string they will indeed use the same target. The creation of
-    a logger requires a lookup in the logging manager, so it is beneficial to
-    keep created loggers at the class level for as-long as they are needed.
-    Logging is most convenient using the stream API. The complete IOStreams
-    API is supported, but a few manipulators should be avoided that would
-    conflict with the typical format of a log-message. Some extra manipulators
-    exist to set the state of the logger, most notably endlog or the manipulators
-    to set the log-level. This is a typical example how a logger is used to
-    produce a log-message:
+    The main purpose of the logger is to route log records to its target. If
+    the log level of the record is less severe than the current log level of
+    the target, the logger will discard the record. If a target has a log
+    level of Info, the logger will reject records with the levels Trace or
+    Debug. See LogRecord and LogMessage for more information. 
+    
+    Macros are provided to make logging more convenient. The easiest way to 
+    log is to use the logging macros for a static logger instance. A logger 
+    instance can be defined for each compilation unit and then logged to:
 
     @code
-    Pt::System::Logger logger("mylog");
-    logger.beginLog() << Pt::System::info << PT_SOURCEINFO
-                      << "Pi is exactly " << 3
-                      << " No, I was kidding, its really " << 3.1415
-                      << Pt::System::endlog;
+    log_define("app.module")
+
+    void foobar(int n)
+    {
+        log_info("foobar was called with: " << n);
+    }
     @endcode
 
-    If the logger is disabled, meaning that the log-level of its target is
-    lower than the log-level of its target, the log message is discarded.
-    To avoid this cost, either check wheter the logger is enabled at the
-    desired level by calling Logger::enabled, or use one of the logging
-    macros instead.
+    The advantage of the macros is that they will expand to nothing if NLOG
+    is defined, so logging support can be conditionally compiled. The macro
+    log_init wraps the call to Pt::System::Logger::init, and more macros exist
+    for the various log levels: log_trace, log_debug, log_info, log_warn,
+    log_error log_fatal.
 
     @ingroup Logging
 */
@@ -310,16 +136,6 @@ class PT_SYSTEM_API Logger : protected Pt::NonCopyable
         */
         ~Logger();
 
-        /** @brief Get a target from the logging manager
-
-            The target is created if it does not exist, otherwise the
-            existing target is returned. If the target is created it is
-            initialised with the properties from the configuration file
-            of the loggin manager. This method is thread-safe.
-        */
-        static LogTarget& getTarget(const std::string& name)
-        { return LogTarget::get(name); }
-
         /** @brief Initialize logging targets with a settings file
 
             The given settings file is parsed and all listed targets are
@@ -328,11 +144,11 @@ class PT_SYSTEM_API Logger : protected Pt::NonCopyable
 
             @param file Path to a settings file
         */
-        static void initTargets(const std::string& file);
+        static void init(const std::string& file);
 
         //! @internal
         static void initTargets()
-        { initTargets("log.properties"); }
+        { init("log.properties"); }
 
         /** @brief Initialize logging targets with a settings
 
@@ -341,7 +157,7 @@ class PT_SYSTEM_API Logger : protected Pt::NonCopyable
 
             @param settings Settings to apply to target list
         */
-        static void initTargets(const Settings& settings);
+        static void init(const Settings& settings);
 
         /** @brief Sets the log-level of the target and its children.
 
@@ -353,6 +169,16 @@ class PT_SYSTEM_API Logger : protected Pt::NonCopyable
         */
         static void setLogLevel(const std::string& target, LogLevel level)
         { LogTarget::get(target).setLogLevel(level); }
+
+        /** @brief Sets the channel to be used by the target and its children
+
+            Throws a invalid_argument exception if the channel can not
+            be created. This function might block until the channel could
+            be opened. This method is thread-safe. The channel can also be
+            set in the properties file of the logging-manager.
+        */
+        static void setChannel(const std::string& target, const std::string& url)
+        { LogTarget::get(target).setChannel(url); }
 
         /** @brief Returns true if the log level is enabled for the target
         */
@@ -393,26 +219,47 @@ class PT_SYSTEM_API Logger : protected Pt::NonCopyable
         {}
 
     private:
-        LogTarget& init(const std::string& name);
+        LogTarget& initLogger(const std::string& name);
 
     private:
         //! @internal
         LogTarget* _target;
 };
 
-/** @brief Log message. 
+/** @brief Logs records with a logger. 
  
-    Log message caching can be used for faster logging.
+    Log messages can be used to log records with a specific logger. They
+    maintain a log record and a reference to a logger. The log record text
+    can be formatted with the stream output operator, just like for the log 
+    records itself:
+
+    @code
+    Pt::System::Logger logger("app.module");
+
+    Pt::System::LogMessage msg(logger, Pt::System::Info);
+    if(msg)
+    {
+      msg << "Pi is exactly " << 3
+          << " No, I was kidding, its really " << 3.1415
+          << Pt::System::endlog;
+    }
+    @endcode
+
+    To avoid the costs for formatting, it can be checked if the log level is
+    enabled for the target. A log message can be send mutliple times, so
+    formatting has to be done only once and the logging  performance can be
+    increased.
  
     @code
-    Pt::System::LogMessage msg(mylogger, Pt::System::Info);
+    Pt::System::Logger logger("app.module");
+    Pt::System::LogMessage msg(logger, Pt::System::Info);
     msg << "pi is: " << 3.1415;
  
-    // send later...
-    msg.send();
+    // log for the first time...
+    msg.log();
  
-    // send again even later...
-    msg.send();
+    // ... and later the second time
+    msg.log();
     @endcode
  
     @ingroup Logging
@@ -423,7 +270,7 @@ class LogMessage : protected Pt::NonCopyable
         /** @brief Constructs a log message for a logger
 
             Contructs a log message, which uses @a logger to log records of
-            the log level specified by @a level. 
+            the severity level specified by @a level. 
             If @a enabled is true, the message is send to the target without 
             checking the log level. It is assumed that the caller has already
             checked the log level of the underlying logger and set this flag
@@ -445,7 +292,7 @@ class LogMessage : protected Pt::NonCopyable
         { return _record; }
 
         //! @brief Sends the message's log record to the logger.
-        void send()
+        void log()
         { 
             _logger->log( _record, _enabled ); 
             _enabled = false;
@@ -488,11 +335,10 @@ class LogMessage : protected Pt::NonCopyable
         bool _enabled;
 };
 
-/** @brief Manipulator to end and send a log-message
-*/
+//! @brief Manipulator to end and send a log-message
 inline LogMessage& endlog(LogMessage& msg)
 {
-    msg.send();
+    msg.log();
     return msg;
 }
 
@@ -520,7 +366,7 @@ inline LogMessage& endlog(LogMessage& msg)
     #define logger_log_impl(logger, level, expr)
 #else
     //! @brief Initialize the logging library.
-    #define log_init(file) Pt::System::LogTarget::initTargets(file);
+    #define log_init(file) Pt::System::Logger::init(file);
 
     //! @internal @brief Define a named global logger instance.
     #define log_define_impl(instance, category)                   \

@@ -24,6 +24,7 @@ SharedLibrary Pt-System : $(PT_SYSTEM_IMPL)
                           Library.cpp
                           Logger.cpp
                           LogManager.cpp
+                          LogTarget.cpp
                           MainLoop.cpp
                           Mutex.cpp
                           Pipe.cpp

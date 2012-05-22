@@ -513,6 +513,12 @@
     <ClInclude Include="..\..\include\Pt\Ssl\Session.h">
       <Filter>Pt-Ssl</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\System\LogRecord.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\System\LogTarget.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -1094,6 +1100,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Ssl\Session.cpp">
       <Filter>Pt-Ssl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-System\LogTarget.cpp">
+      <Filter>Pt-System</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

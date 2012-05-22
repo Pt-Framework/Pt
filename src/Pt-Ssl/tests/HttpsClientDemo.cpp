@@ -206,7 +206,7 @@ int main(int argc, char** argv)
 {
     try 
     {
-        Pt::System::Logger::getTarget("").setLogLevel(Pt::System::Trace);
+        Pt::System::Logger::setLogLevel("", Pt::System::Trace);
         log_debug("OpenSSL HTTP test progam started");
 
         Pt::System::MainLoop loop;
