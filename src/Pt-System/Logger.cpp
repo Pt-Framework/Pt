@@ -85,6 +85,12 @@ void Logger::init(const Settings& settings)
     LogManager::instance().init(settings);
 }
 
+
+void Logger::setPattern(const std::string& pattern)
+{
+    LogManager::instance().setPattern(pattern);
+}
+
 } // namespace System
 
 } // namespace Pt

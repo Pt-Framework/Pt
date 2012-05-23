@@ -60,7 +60,10 @@ class LogManager
         void init(const Settings& settings);
 
         LogTarget& target(const std::string& name = std::string());
-        
+
+        void setPattern(const std::string& pattern)
+        { _msgPattern= pattern; }
+
         std::string getChannel(const LogTarget& target);
 
         void setChannel(LogTarget& target, const std::string& url);
@@ -116,6 +119,7 @@ class LogManager
         Pt::System::RecursiveMutex _mutex;
         size_t _loggerCount;
         std::string _msg;
+        std::string _msgPattern;
 
     private:
         static LogManager* _instance;

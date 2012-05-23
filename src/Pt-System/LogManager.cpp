@@ -108,6 +108,7 @@ LogManager::LogManager()
 , _rootTarget(0)
 , _loggerCount(0)
 , _msg(255, ' ')
+, _msgPattern("%t [%c] %l - %m")
 {
     // builtin plugins
     _pluginManager.registerPlugin( _consolePlugin );
@@ -415,24 +416,26 @@ void LogManager::log(LogTarget& target, const LogRecord& record)
             _msg.clear();
             
             bool percent = false;
-            const char* c = "%t [%c] %l - %m";
+            //const char* c = "%t [%c] %l - %m";
+
+            std::string::const_iterator it;
             
-            for( ; *c != '\0'; ++c)
+            for( it = _msgPattern.begin(); it != _msgPattern.end(); ++it)
             {
-              if(*c == '%')
+              if(*it == '%')
               {
                 percent = true;
                 continue;
               }
               if( ! percent)
               {
-                _msg += *c;
+                _msg += *it;
                 continue;
               }
 
               percent = false;
                 
-              switch(*c)
+              switch(*it)
               {
                 case'l':
                   _msg += toString( record.logLevel() ); 

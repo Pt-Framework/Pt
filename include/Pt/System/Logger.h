@@ -159,6 +159,9 @@ class PT_SYSTEM_API Logger : protected Pt::NonCopyable
         */
         static void init(const Settings& settings);
 
+        //! @brief Set the pattern for log records
+        static void setPattern(const std::string& pattern);
+
         /** @brief Sets the log-level of the target and its children.
 
             This method is thread-safe. The log-level can also be set
