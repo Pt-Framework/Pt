@@ -65,7 +65,7 @@ class PT_SYSTEM_API LogTarget : protected Pt::NonCopyable
 
     protected:
         //! @internal Used within logging-manager
-        LogTarget(const std::string& name, int concurrency, LogTarget* parent = 0);
+        LogTarget(const std::string& name, LogTarget* parent = 0);
 
     public:
         //! @brief Destructor.
@@ -156,9 +156,6 @@ class PT_SYSTEM_API LogTarget : protected Pt::NonCopyable
 
         //! @internal
         bool _inheritChannel;
-
-        //! @internal
-        void* _reserved;
 };
 
 } // namespace System

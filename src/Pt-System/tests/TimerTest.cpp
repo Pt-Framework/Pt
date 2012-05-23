@@ -80,8 +80,8 @@ class TimerTest : public Pt::Unit::TestSuite
             Pt::Timespan elapsed = clock.stop();
 
             PT_UNIT_ASSERT(_count == 3);
-            PT_UNIT_ASSERT(elapsed.totalMSecs() > 280);
-            PT_UNIT_ASSERT(elapsed.totalMSecs() < 320);
+            PT_UNIT_ASSERT(elapsed.toMSecs() > 280);
+            PT_UNIT_ASSERT(elapsed.toMSecs() < 320);
         }
 
         void RemoveOnTimeout()

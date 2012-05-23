@@ -230,12 +230,6 @@ class Date
         */
         bool leapYear() const;
 
-        // TODO: move to Pt:.System
-        //static Date localDate();
-
-        // TODO: move to Pt:.System
-        //static Date universalDate();
-
         /** @brief Assignment operator
         */
         Date& operator=(const Date& date)
@@ -421,7 +415,7 @@ inline bool Date::leapYear() const
 }
 
 
-inline bool Date::isValid(int y, int m, int d)
+inline bool Date::isValid(int, int m, int d)
 {
     if(m<1 || m>12 || d<1 || d>31)
     {

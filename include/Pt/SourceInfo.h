@@ -1,6 +1,5 @@
 /*
  * Copyright (C) 2004-2008 Marc Boris Duerner
- * Copyright (C)      2006 Aloysius Indrayanto
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -56,19 +55,16 @@
 #define PT_STRINGIFY(x) #x
 #define PT_TOSTRING(x) PT_STRINGIFY(x)
 
+/** @brief Builds a source info string literal
+*/
 #define PT_SOURCEINFO_STR __FILE__ ":" PT_TOSTRING(__LINE__)
 
-/** @brief Builds an error message including source information
-    @ingroup Pt
+/** @brief Builds a string literal containing an error message and source information
 */
 #define PT_ERROR_MSG(msg) __FILE__ ":" PT_TOSTRING(__LINE__) ": " #msg
 
 /** @brief Construct a Pt::SourceInfo object
-    @ingroup Pt
 */
-//#define PT_SOURCEINFO Pt::SourceInfo(__FILE__, __LINE__, PT_FUNCTION, 
-//                                     __FILE__ ":" PT_TOSTRING(__LINE__) )
-
 #define PT_SOURCEINFO Pt::SourceInfo(__FILE__, PT_TOSTRING(__LINE__), PT_FUNCTION)
 
 namespace Pt {
@@ -91,7 +87,8 @@ namespace Pt {
         std::cout << si.where() << std::endl;
     @endcode
 */
-class SourceInfo {
+class SourceInfo 
+{
     public:
         /** @brief Constructor
 

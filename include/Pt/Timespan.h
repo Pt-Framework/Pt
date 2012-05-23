@@ -1,4 +1,6 @@
 /*
+ * Copyright (C) 2006-2008 by Marc Boris Duerner
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -40,21 +42,21 @@ class Timespan
     public:
         //! @brief Creates a zero Timespan.
         Timespan()
-		: _span(0)
-		{}
+        : _span(0)
+        {}
 
         //! @brief Creates a Timespan.
         Timespan(Pt::int64_t microseconds)
-		: _span(microseconds)
-		{ }
+        : _span(microseconds)
+        { }
 
         /** @brief Creates a Timespan.
             Useful for creating a Timespan from a struct timeval.
         */
         Timespan(long seconds, long microseconds)
-		: _span(Pt::int64_t(seconds)*Seconds + microseconds)
-		{
-		}
+        : _span(Pt::int64_t(seconds)*Seconds + microseconds)
+        {
+        }
         //! @brief Creates a Timespan.
         Timespan(int days, int hours, int minutes, int seconds, int microseconds);
 
@@ -63,7 +65,7 @@ class Timespan
 
         //! @brief Destroys the Timespan.
         ~Timespan()
-		{}
+        {}
 
         //! @brief Assignment operator.
         Timespan& operator=(const Timespan& timespan);
@@ -129,58 +131,38 @@ class Timespan
         int hours() const;
 
         //! @brief Returns the total number of hours.
-        int totalHours() const;
+        int toHours() const;
 
         //! @brief Returns the number of minutes (0 to 59).
         int minutes() const;
 
         //! @brief Returns the total number of minutes.
-        int totalMinutes() const;
+        int toMinutes() const;
 
         //! @brief Returns the number of seconds (0 to 59).
         int seconds() const;
 
         //! @brief Returns the total number of seconds.
-        int totalSeconds() const;
+        int toSeconds() const;
 
         //! @brief Returns the number of milliseconds (0 to 999).
         int msecs() const;
 
         //! @brief Returns the total number of milliseconds.
-        Pt::int64_t totalMSecs() const;
+        Pt::int64_t toMSecs() const;
 
-        /** @brief Returns the fractions of a millisecond in microseconds (0 to 999).
-        */
-        int microseconds() const;
-
-        /** @brief Returns the fractions of a second in microseconds (0 to 999).
-        */
-        int useconds() const;
+        //! @brief Returns the fractions of a millisecond in microseconds (0 to 999).
+        int usecs() const;
 
         //! @brief Returns the total number of microseconds.
         Pt::int64_t toUSecs() const;
 
-        //! @brief The number of microseconds in a millisecond.
-        //static const Pt::int64_t Milliseconds;
+        static const Pt::int64_t Milliseconds = 1000;
+        static const Pt::int64_t Seconds      = 1000 * Timespan::Milliseconds;
+        static const Pt::int64_t Minutes      =   60 * Timespan::Seconds;
+        static const Pt::int64_t Hours        =   60 * Timespan::Minutes;
+        static const Pt::int64_t Days         =   24 * Timespan::Hours;
 
-        //! @brief The number of microseconds in a second.
-        //static const Pt::int64_t Seconds;
-
-        //! @brief The number of microseconds in a minute.
-        //static const Pt::int64_t Minutes;
-
-        //! @brief The number of microseconds in a hour.
-        //static const Pt::int64_t Hours;
-
-        //! @brief The number of microseconds in a day.
-        //static const Pt::int64_t Days;
-
-static const Pt::int64_t Milliseconds = 1000;
-static const Pt::int64_t Seconds      = 1000 * Timespan::Milliseconds;
-static const Pt::int64_t Minutes      =   60 * Timespan::Seconds;
-static const Pt::int64_t Hours        =   60 * Timespan::Minutes;
-static const Pt::int64_t Days         =   24 * Timespan::Hours;
-		
     private:
         Pt::int64_t _span;
 };
@@ -188,151 +170,145 @@ static const Pt::int64_t Days         =   24 * Timespan::Hours;
 
 inline int Timespan::days() const
 {
-	return int(_span/Days);
+    return int(_span/Days);
 }
 
 
 inline int Timespan::hours() const
 {
-	return int((_span/Hours) % 24);
+    return int((_span/Hours) % 24);
 }
 
 
-inline int Timespan::totalHours() const
+inline int Timespan::toHours() const
 {
-	return int(_span/Hours);
+    return int(_span/Hours);
 }
 
 
 inline int Timespan::minutes() const
 {
-	return int((_span/Minutes) % 60);
+    return int((_span/Minutes) % 60);
 }
 
 
-inline int Timespan::totalMinutes() const
+inline int Timespan::toMinutes() const
 {
-	return int(_span/Minutes);
+    return int(_span/Minutes);
 }
 
 
 inline int Timespan::seconds() const
 {
-	return int((_span/Seconds) % 60);
+    return int((_span/Seconds) % 60);
 }
 
 
-inline int Timespan::totalSeconds() const
+inline int Timespan::toSeconds() const
 {
-	return int(_span/Seconds);
+    return int(_span/Seconds);
 }
 
 
 inline int Timespan::msecs() const
 {
-	return int((_span/Milliseconds) % 1000);
+    return int((_span/Milliseconds) % 1000);
 }
 
 
-inline Pt::int64_t Timespan::totalMSecs() const
+inline Pt::int64_t Timespan::toMSecs() const
 {
-	return _span/Milliseconds;
+    return _span/Milliseconds;
 }
 
 
-inline int Timespan::microseconds() const
+inline int Timespan::usecs() const
 {
-	return int(_span % 1000);
-}
-
-
-inline int Timespan::useconds() const
-{
-	return int(_span % 1000000);
+    return int(_span % 1000);
 }
 
 
 inline Pt::int64_t Timespan::toUSecs() const
 {
-	return _span;
+    return _span;
 }
 
 
 inline bool Timespan::operator == (const Timespan& ts) const
 {
-	return _span == ts._span;
+    return _span == ts._span;
 }
 
 
 inline bool Timespan::operator != (const Timespan& ts) const
 {
-	return _span != ts._span;
+    return _span != ts._span;
 }
 
 
 inline bool Timespan::operator >  (const Timespan& ts) const
 {
-	return _span > ts._span;
+    return _span > ts._span;
 }
 
 
 inline bool Timespan::operator >= (const Timespan& ts) const
 {
-	return _span >= ts._span;
+    return _span >= ts._span;
 }
 
 
 inline bool Timespan::operator <  (const Timespan& ts) const
 {
-	return _span < ts._span;
+    return _span < ts._span;
 }
 
 
 inline bool Timespan::operator <= (const Timespan& ts) const
 {
-	return _span <= ts._span;
+    return _span <= ts._span;
 }
 
 
 inline bool Timespan::operator == (Pt::int64_t microseconds) const
 {
-	return _span == microseconds;
+    return _span == microseconds;
 }
 
 
 inline bool Timespan::operator != (Pt::int64_t microseconds) const
 {
-	return _span != microseconds;
+    return _span != microseconds;
 }
 
 
 inline bool Timespan::operator >  (Pt::int64_t microseconds) const
 {
-	return _span > microseconds;
+    return _span > microseconds;
 }
 
 
 inline bool Timespan::operator >= (Pt::int64_t microseconds) const
 {
-	return _span >= microseconds;
+    return _span >= microseconds;
 }
 
 
 inline bool Timespan::operator <  (Pt::int64_t microseconds) const
 {
-	return _span < microseconds;
+    return _span < microseconds;
 }
 
 
 inline bool Timespan::operator <= (Pt::int64_t microseconds) const
 {
-	return _span <= microseconds;
+    return _span <= microseconds;
 }
 
 
 inline void swap(Timespan& s1, Timespan& s2)
 {
-	s1.swap(s2);
+    s1.swap(s2);
 }
 
 
@@ -354,91 +330,91 @@ inline Timespan::Timespan(const Timespan& timespan)
 
 inline Timespan& Timespan::operator=(const Timespan& timespan)
 {
-	_span = timespan._span;
-	return *this;
+    _span = timespan._span;
+    return *this;
 }
 
 
 inline Timespan& Timespan::operator=(Pt::int64_t microseconds)
 {
-	_span = microseconds;
-	return *this;
+    _span = microseconds;
+    return *this;
 }
 
 
 inline Timespan& Timespan::set(int days, int hours, int minutes, int seconds, int microseconds)
 {
-	_span = Pt::int64_t(microseconds) +
+    _span = Pt::int64_t(microseconds) +
             Pt::int64_t(seconds)*Seconds +
             Pt::int64_t(minutes)*Minutes +
             Pt::int64_t(hours)*Hours +
             Pt::int64_t(days)*Days;
-	return *this;
+    return *this;
 }
 
 
 inline Timespan& Timespan::set(long seconds, long microseconds)
 {
-	_span = Pt::int64_t(seconds)*Seconds + Pt::int64_t(microseconds);
-	return *this;
+    _span = Pt::int64_t(seconds)*Seconds + Pt::int64_t(microseconds);
+    return *this;
 }
 
 
 inline void Timespan::swap(Timespan& timespan)
 {
-	std::swap(_span, timespan._span);
+    std::swap(_span, timespan._span);
 }
 
 
 inline Timespan Timespan::operator + (const Timespan& d) const
 {
-	return Timespan(_span + d._span);
+    return Timespan(_span + d._span);
 }
 
 
 inline Timespan Timespan::operator - (const Timespan& d) const
 {
-	return Timespan(_span - d._span);
+    return Timespan(_span - d._span);
 }
 
 
 inline Timespan& Timespan::operator += (const Timespan& d)
 {
-	_span += d._span;
-	return *this;
+    _span += d._span;
+    return *this;
 }
 
 
 inline Timespan& Timespan::operator -= (const Timespan& d)
 {
-	_span -= d._span;
-	return *this;
+    _span -= d._span;
+    return *this;
 }
 
 
 inline Timespan Timespan::operator + (Pt::int64_t microseconds) const
 {
-	return Timespan(_span + microseconds);
+    return Timespan(_span + microseconds);
 }
 
 
 inline Timespan Timespan::operator - (Pt::int64_t microseconds) const
 {
-	return Timespan(_span - microseconds);
+    return Timespan(_span - microseconds);
 }
 
 
 inline Timespan& Timespan::operator += (Pt::int64_t microseconds)
 {
-	_span += microseconds;
-	return *this;
+    _span += microseconds;
+    return *this;
 }
 
 
 inline Timespan& Timespan::operator -= (Pt::int64_t microseconds)
 {
-	_span -= microseconds;
-	return *this;
+    _span -= microseconds;
+    return *this;
 }
 
 } // namespace Pt

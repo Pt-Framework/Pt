@@ -106,7 +106,6 @@ LogManager::LogManager()
 , _filePlugin("file", "1.0.0")
 , _serialPlugin("comm", "1.0.0")
 , _rootTarget(0)
-, _concurrency(1)
 , _loggerCount(0)
 , _msg(255, ' ')
 {
@@ -116,7 +115,7 @@ LogManager::LogManager()
     _pluginManager.registerPlugin( _serialPlugin );
 
     // Set root target to logLevel 'Error' and output channel to 'console://'
-    std::auto_ptr<LogTarget> rootTarget( new LogTarget("", _concurrency, 0) );
+    std::auto_ptr<LogTarget> rootTarget( new LogTarget("", 0) );
     _rootTarget = rootTarget.get();
     _targetMap[""] = _rootTarget;
     _rootTarget->assignLogLevel(Pt::System::Error, false);
@@ -267,7 +266,7 @@ LogTarget& LogManager::target(const std::string& name)
         else
         {
             // The target inherits the log level of the parent upon construction
-            foundTarget = new LogTarget(targetName, _concurrency, foundTarget);
+            foundTarget = new LogTarget(targetName, foundTarget);
             _targetMap[targetName] = foundTarget;
         }
     }
@@ -405,6 +404,8 @@ void LogManager::setChannel(LogTarget& target, const std::string& url)
 void LogManager::log(LogTarget& target, const LogRecord& record)
 {
     Pt::System::RecursiveLock lock( _mutex );
+    Pt::DateTime timeOfLog;
+    bool timeOfLogUpdated = false;
 
     // search target hierachy upwards for a valid channel
     for( LogTarget* current = &target; current != 0; current = current->parent() )
@@ -414,7 +415,7 @@ void LogManager::log(LogTarget& target, const LogRecord& record)
             _msg.clear();
             
             bool percent = false;
-            const char* c = "%t [%T] %L - %M";
+            const char* c = "%t [%c] %l - %m";
             
             for( ; *c != '\0'; ++c)
             {
@@ -433,19 +434,29 @@ void LogManager::log(LogTarget& target, const LogRecord& record)
                 
               switch(*c)
               {
-                case'L':
+                case'l':
                   _msg += toString( record.logLevel() ); 
                   break;
+             
+                case'd':
+                  if( ! timeOfLogUpdated )
+                      timeOfLog = System::Clock::getLocalTime();
+                  
+                  _msg += timeOfLog.date().toIsoString();
+                  break; 
                 
                 case't':
-                  _msg += System::Clock::getLocalTime().toIsoString(); 
+                  if( ! timeOfLogUpdated )
+                      timeOfLog = System::Clock::getLocalTime();
+                  
+                  _msg += timeOfLog.time().toIsoString();
                   break;             
                 
-                case 'M':
+                case 'm':
                   _msg += record.text(); 
                   break;
                   
-                case 'T':
+                case 'c':
                   _msg += target.name(); 
                   break;
                   

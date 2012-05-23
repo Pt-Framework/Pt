@@ -154,7 +154,7 @@ class DrawLineDemo : public Pt::Gui::Widget
             this->drawStar( _imagePainter, Pt::Gfx::Point(360, 150), 8);
             time = clock.stop();
 
-             ss << "Image: " << time.totalMSecs() << " ms";
+             ss << "Image: " << time.toMSecs() << " ms";
             _imageTime.setText( ss.str() );
 
             painter().drawImage( Pt::Gfx::Point( 0, 0 ), _image );
@@ -172,7 +172,7 @@ class DrawLineDemo : public Pt::Gui::Widget
             ss.str(L"");
             ss.clear();
 
-            ss << "Native: " << time.totalMSecs() << " ms";
+            ss << "Native: " << time.toMSecs() << " ms";
             _nativeTime.setText( ss.str() );
 
         }

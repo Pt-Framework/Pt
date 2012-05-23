@@ -128,8 +128,8 @@ class EventLoopTest : public Pt::Unit::TestSuite
             el.run();
             Pt::Timespan elapsed = clock.stop();
 
-            PT_UNIT_ASSERT(elapsed.totalMSecs() > 280);
-            PT_UNIT_ASSERT(elapsed.totalMSecs() < 320);
+            PT_UNIT_ASSERT(elapsed.toMSecs() > 280);
+            PT_UNIT_ASSERT(elapsed.toMSecs() < 320);
         }
 
         // Pt::System::MainLoop* _loop;
@@ -150,7 +150,7 @@ class EventLoopTest : public Pt::Unit::TestSuite
         //     el.run();
         //     Pt::Timespan elapsed = clock.stop();
 
-        //     std::cerr << "\n#### LoopTime: " << ( 5000000/elapsed.totalMSecs() ) * 1000 << " ev/s" << std::endl;
+        //     std::cerr << "\n#### LoopTime: " << ( 5000000/elapsed.toMSecs() ) * 1000 << " ev/s" << std::endl;
         //     std::exit(1);
         // }
 

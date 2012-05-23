@@ -1,7 +1,5 @@
 /*
- * Copyright (C) 2006 by Tommi Maekitalo
  * Copyright (C) 2006 by Marc Boris Duerner
- * Copyright (C) 2006 by Stefan Bueder
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -162,7 +160,7 @@ class DateTime
         Pt::int64_t msecsSinceEpoch() const
         {
             static const DateTime dt(1970, 1, 1);
-            return (*this - dt).totalMSecs();
+            return (*this - dt).toMSecs();
         }
 
         std::string toIsoString() const;
@@ -187,7 +185,7 @@ class DateTime
         */
         DateTime& operator+=(const Timespan& ts)
         {
-            Pt::int64_t totalMSecs = ts.totalMSecs();
+            Pt::int64_t totalMSecs = ts.toMSecs();
             Pt::int64_t days = totalMSecs / Time::MSecsPerDay;
             Pt::int64_t overrun = totalMSecs % Time::MSecsPerDay;
 
@@ -209,7 +207,7 @@ class DateTime
         */
         DateTime& operator-=(const Timespan& ts)
         {
-            Pt::int64_t totalMSecs = ts.totalMSecs();
+            Pt::int64_t totalMSecs = ts.toMSecs();
             Pt::int64_t days = totalMSecs / Time::MSecsPerDay;
             Pt::int64_t overrun = totalMSecs % Time::MSecsPerDay;
 

@@ -68,8 +68,9 @@ void jul2greg(unsigned jd, int& y, int& m, int& d)
 
 inline unsigned short getNumber2(const char* s)
 {
-    if (!std::isdigit(s[0]) || !std::isdigit(s[1]))
-    throw ConversionError( PT_ERROR_MSG("Invalid date format.") );
+    if (! std::isdigit(static_cast<unsigned char>(s[0])) 
+     || ! std::isdigit(static_cast<unsigned char>(s[1])))
+    throw ConversionError("Invalid date format.");
     return (s[0] - '0') * 10
         + (s[1] - '0');
 }
@@ -77,9 +78,11 @@ inline unsigned short getNumber2(const char* s)
 
 inline unsigned short getNumber4(const char* s)
 {
-    if ( ! std::isdigit(s[0]) || !std::isdigit(s[1])
-        || !std::isdigit(s[2])  || !std::isdigit(s[3]))
-    throw ConversionError( PT_ERROR_MSG("Invalid date format.") );
+    if ( ! std::isdigit(static_cast<unsigned char>(s[0])) 
+      || ! std::isdigit(static_cast<unsigned char>(s[1]))
+      || ! std::isdigit(static_cast<unsigned char>(s[2]))  
+      || ! std::isdigit(static_cast<unsigned char>(s[3])))
+    throw ConversionError("Invalid date format.");
 
     return (s[0] - '0') * 1000
         + (s[1] - '0') * 100
@@ -97,7 +100,7 @@ void convert(std::string& str, const Date& date)
     jul2greg(date.julian(), year, month, day);
 
     char ret[10];
-    unsigned short n = year;
+    unsigned int n = year;
 
     ret[3] = '0' + n % 10;
     n /= 10;
@@ -107,10 +110,10 @@ void convert(std::string& str, const Date& date)
     n /= 10;
     ret[0] = '0' + n % 10;
     ret[4] = '-';
-    ret[5] = '0' + month / 10;
+    ret[5] = static_cast<char>('0' + month / 10);
     ret[6] = '0' + month % 10;
     ret[7] = '-';
-    ret[8] = '0' + day / 10;
+    ret[8] = static_cast<char>('0' + day / 10);
     ret[9] = '0' + day % 10;
 
     str.assign(ret, 10);
@@ -120,7 +123,7 @@ void convert(std::string& str, const Date& date)
 void convert(Date& date, const std::string& s)
 {
     if (s.size() < 10 || s.at(4) != '-' || s.at(7) != '-')
-        throw ConversionError( PT_ERROR_MSG("Illegal date format") );
+        throw ConversionError("Illegal date format");
 
     const char* d = s.data();
     date= Date(getNumber4(d), getNumber2(d + 5), getNumber2(d + 8));

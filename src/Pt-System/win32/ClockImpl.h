@@ -1,3 +1,6 @@
+#ifndef PT_SYSTEM_CLOCK_IMPL_H
+#define PT_SYSTEM_CLOCK_IMPL_H
+
 #include "Pt/DateTime.h"
 #include "Pt/Timespan.h"
 #include <windows.h>
@@ -35,3 +38,4 @@ class ClockImpl
 
 } // namespace System
 
+#endif

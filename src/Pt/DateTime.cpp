@@ -1,7 +1,5 @@
 /*
- * Copyright (C) 2006 by Tommi Maekitalo
  * Copyright (C) 2006 by Marc Boris Duerner
- * Copyright (C) 2006 by Stefan Bueder
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -62,8 +60,9 @@ void operator <<=(SerializationInfo& si, const DateTime& datetime)
 
 inline unsigned short getNumber2(const char* s)
 {
-    if( ! std::isdigit(s[0]) || !std::isdigit(s[1]) )
-        throw ConversionError( PT_ERROR_MSG("Invalid DateTime format") );
+    if( ! std::isdigit(static_cast<unsigned char>(s[0])) 
+     || ! std::isdigit(static_cast<unsigned char>(s[1])) )
+        throw ConversionError("Invalid DateTime format");
 
     return (s[0] - '0') * 10 + (s[1] - '0');
 }
@@ -71,8 +70,10 @@ inline unsigned short getNumber2(const char* s)
 
 inline unsigned short getNumber3(const char* s)
 {
-    if (!std::isdigit(s[0]) || !std::isdigit(s[1]) || !std::isdigit(s[2]))
-        throw ConversionError( PT_ERROR_MSG("Invalid DateTime format") );
+    if (! std::isdigit(static_cast<unsigned char>(s[0])) 
+     || ! std::isdigit(static_cast<unsigned char>(s[1])) 
+     || ! std::isdigit(static_cast<unsigned char>(s[2])) )
+        throw ConversionError("Invalid DateTime format");
 
     return (s[0] - '0') * 100
         + (s[1] - '0') * 10
@@ -82,9 +83,11 @@ inline unsigned short getNumber3(const char* s)
 
 inline unsigned short getNumber4(const char* s)
 {
-    if( ! std::isdigit(s[0]) || ! std::isdigit(s[1]) ||
-        ! std::isdigit(s[2]) || ! std::isdigit(s[3]) )
-        throw ConversionError( PT_ERROR_MSG("Invalid DateTime format") );
+    if( ! std::isdigit(static_cast<unsigned char>(s[0])) 
+     || ! std::isdigit(static_cast<unsigned char>(s[1])) 
+     || ! std::isdigit(static_cast<unsigned char>(s[2])) 
+     || ! std::isdigit(static_cast<unsigned char>(s[3])) )
+        throw ConversionError("Invalid DateTime format");
 
     return (s[0] - '0') * 1000
         + (s[1] - '0') * 100
@@ -102,7 +105,7 @@ void convert(DateTime& dt, const std::string& s)
         || s.at(13) != ':'
         || s.at(16) != ':'
         || s.at(19) != '.')
-        throw ConversionError( PT_ERROR_MSG("Invalid DateTime format") );
+        throw ConversionError("Invalid DateTime format");
 
     const char* d = s.data();
 
@@ -121,7 +124,7 @@ void convert(std::string& str, const DateTime& dt)
     // format YYYY-MM-DD hh:mm:ss.sssss
     //        0....+....1....+....2....+
     char ret[25];
-    unsigned short n = dt.date().year();
+    unsigned int n = dt.date().year();
     ret[3] = '0' + n % 10;
     n /= 10;
     ret[2] = '0' + n % 10;
@@ -130,19 +133,19 @@ void convert(std::string& str, const DateTime& dt)
     n /= 10;
     ret[0] = '0' + n % 10;
     ret[4] = '-';
-    ret[5] = '0' + dt.date().month() / 10;
+    ret[5] = static_cast<char>('0' + dt.date().month() / 10);
     ret[6] = '0' + dt.date().month() % 10;
     ret[7] = '-';
-    ret[8] = '0' + dt.date().day() / 10;
+    ret[8] = static_cast<char>('0' + dt.date().day() / 10);
     ret[9] = '0' + dt.date().day() % 10;
     ret[10] = ' ';
-    ret[11] = '0' + dt.time().hour() / 10;
+    ret[11] = static_cast<char>('0' + dt.time().hour() / 10);
     ret[12] = '0' + dt.time().hour() % 10;
     ret[13] = ':';
-    ret[14] = '0' + dt.time().minute() / 10;
+    ret[14] = static_cast<char>('0' + dt.time().minute() / 10);
     ret[15] = '0' + dt.time().minute() % 10;
     ret[16] = ':';
-    ret[17] = '0' + dt.time().second() / 10;
+    ret[17] = static_cast<char>('0' + dt.time().second() / 10);
     ret[18] = '0' + dt.time().second() % 10;
     ret[19] = '.';
     n = dt.time().msec();

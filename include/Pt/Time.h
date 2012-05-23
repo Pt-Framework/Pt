@@ -1,7 +1,5 @@
 /*
- * Copyright (C) 2006 by Tommi Maekitalo
  * Copyright (C) 2006-2008 by Marc Boris Duerner
- * Copyright (C) 2006 by Stefan Bueder
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -46,7 +44,7 @@ class PT_API InvalidTime : public std::invalid_argument
         InvalidTime();
 
         ~InvalidTime() throw()
-		{}
+        {}
 };
 
 /** @brief %Time expressed in hours, minutes, seconds and milliseconds
@@ -79,38 +77,38 @@ class Time
 
             InvalidTime is thrown if one or more of the values are out of range
         */
-		inline Time(unsigned h, unsigned m, unsigned s = 0, unsigned ms = 0)
-		{
-		    set(h, m, s, ms);
-		}
+        inline Time(unsigned h, unsigned m, unsigned s = 0, unsigned ms = 0)
+        {
+            set(h, m, s, ms);
+        }
 
         /** \brief Returns the hour-part of the Time.
         */
         unsigned hour() const
-		{
-		    return _msecs / MSecsPerHour;
-		}
+        {
+            return _msecs / MSecsPerHour;
+        }
 
         /** \brief Returns the minute-part of the Time.
         */
         unsigned minute() const
-		{
-		    return (_msecs % MSecsPerHour) / MSecsPerMinute;
-		}
+        {
+            return (_msecs % MSecsPerHour) / MSecsPerMinute;
+        }
 
         /** \brief Returns the second-part of the Time.
         */
         unsigned second() const
-		{
-		    return (_msecs / 1000) % SecondsPerMinute;
-		}
+        {
+            return (_msecs / 1000) % SecondsPerMinute;
+        }
 
         /** \brief Returns the millisecond-part of the Time.
         */
         unsigned msec() const
-		{
-		    return _msecs % 1000;
-		}
+        {
+            return _msecs % 1000;
+        }
 
         unsigned totalMSecs() const
         { return _msecs; }
@@ -124,74 +122,74 @@ class Time
             InvalidTime is thrown if one or more of the values are out of range
         */
         void set(unsigned hour, unsigned min, unsigned sec, unsigned msec = 0)
-		{
-		    if ( ! isValid(hour, min, sec , msec) )
-		    {
-		        throw InvalidTime();
-		    }
+        {
+            if ( ! isValid(hour, min, sec , msec) )
+            {
+                throw InvalidTime();
+            }
 
-		    _msecs = (hour*SecondsPerHour + min*SecondsPerMinute + sec) * 1000 + msec;
-		}
+            _msecs = (hour*SecondsPerHour + min*SecondsPerMinute + sec) * 1000 + msec;
+        }
 
         /** @brief Get the time values
 
             Gets the hour, minute, second and millisecond parts of the time.
         */
         void get(unsigned& h, unsigned& m, unsigned& s, unsigned& ms) const
-		{
-		    h = hour();
-		    m = minute();
-		    s = second();
-		    ms = msec();
-		}
+        {
+            h = hour();
+            m = minute();
+            s = second();
+            ms = msec();
+        }
 
-		/** @brief Adds seconds to the time
+        /** @brief Adds seconds to the time
 
             This method does not change the time, but returns the time
             with the seconds added.
         */
-		Time addSecs(int secs) const
-		{
-		    return addMSecs(secs * 1000);
-		}
+        Time addSecs(int secs) const
+        {
+            return addMSecs(secs * 1000);
+        }
 
         /** @brief Determines seconds until another time
         */
-		int secsTo(const Time &t) const
-		{
-		    return static_cast<int>( msecsTo(t) / 1000 );
-		}
+        int secsTo(const Time &t) const
+        {
+            return static_cast<int>( msecsTo(t) / 1000 );
+        }
 
-		/** @brief Adds milliseconds to the time
+        /** @brief Adds milliseconds to the time
 
             This method does not change the time, but returns the time
             with the milliseconds added.
         */
-		inline Time addMSecs(Pt::int64_t ms) const
-		{
-		    Time t;
-		    if (ms < 0)
-		    {
-		        Pt::int64_t negdays = (MSecsPerDay - ms) / MSecsPerDay;
-		        t._msecs = static_cast<unsigned>((_msecs + ms + negdays * MSecsPerDay) % MSecsPerDay);
-		    }
-		    else
-		    {
-		        t._msecs = static_cast<unsigned>((_msecs + ms) % MSecsPerDay);
-		    }
+        inline Time addMSecs(Pt::int64_t ms) const
+        {
+            Time t;
+            if (ms < 0)
+            {
+                Pt::int64_t negdays = (MSecsPerDay - ms) / MSecsPerDay;
+                t._msecs = static_cast<unsigned>((_msecs + ms + negdays * MSecsPerDay) % MSecsPerDay);
+            }
+            else
+            {
+                t._msecs = static_cast<unsigned>((_msecs + ms) % MSecsPerDay);
+            }
 
-		    return t;
-		}
+            return t;
+        }
 
         /** @brief Determines milliseconds until another time
         */
-		Pt::int64_t msecsTo(const Time &t) const
-		{
-		    if(t._msecs > _msecs)
-		        return t._msecs - _msecs;
+        Pt::int64_t msecsTo(const Time &t) const
+        {
+            if(t._msecs > _msecs)
+                return t._msecs - _msecs;
 
-		    return MSecsPerDay - (_msecs - t._msecs);
-		}
+            return MSecsPerDay - (_msecs - t._msecs);
+        }
 
         /** @brief Assignment operator
         */
@@ -232,7 +230,7 @@ class Time
         */
         Time& operator+=(const Timespan& ts)
         {
-            Pt::int64_t msecs = ( _msecs + ts.totalMSecs() ) % MSecsPerDay;
+            Pt::int64_t msecs = ( _msecs + ts.toMSecs() ) % MSecsPerDay;
             msecs = msecs < 0 ? MSecsPerDay + msecs : msecs;
             _msecs = static_cast<unsigned>(msecs);
             return *this;
@@ -242,7 +240,7 @@ class Time
         */
         Time& operator-=(const Timespan& ts)
         {
-            Pt::int64_t msecs = ( _msecs - ts.totalMSecs() ) % MSecsPerDay;
+            Pt::int64_t msecs = ( _msecs - ts.toMSecs() ) % MSecsPerDay;
             msecs = msecs < 0 ? MSecsPerDay + msecs : msecs;
             _msecs = static_cast<unsigned>(msecs);
             return *this;
@@ -252,14 +250,14 @@ class Time
         */
         friend Time operator+(const Time& time, const Timespan& ts)
         {
-            return time.addMSecs( ts.totalMSecs() );
+            return time.addMSecs( ts.toMSecs() );
         }
 
         /** @brief Substraction operator
         */
         friend Time operator-(const Time& time, const Timespan& ts)
         {
-            return time.addMSecs( -ts.totalMSecs() );
+            return time.addMSecs( -ts.toMSecs() );
         }
 
         /** @brief Substraction operator
@@ -275,12 +273,12 @@ class Time
 
         /** \brief Returns true if values are a valid time
         */
-		static bool isValid(unsigned h, unsigned m, unsigned s, unsigned ms)
-		{
-		    return h < 24 && m < 60 && s < 60 && ms < 1000;
-		}
+        static bool isValid(unsigned h, unsigned m, unsigned s, unsigned ms)
+        {
+            return h < 24 && m < 60 && s < 60 && ms < 1000;
+        }
 
-		/** \brief Convert from an ISO time string
+        /** \brief Convert from an ISO time string
 
             Interprets the passed string as a time-string in ISO-format
             (hh:mm:ss.hhh) and returns a Time-object. If the string is not
@@ -291,29 +289,30 @@ class Time
     private:
         //! @internal
         unsigned _msecs;
-    };
+};
 
-    PT_API void operator >>=(const SerializationInfo& si, Time& time);
+PT_API void operator >>=(const SerializationInfo& si, Time& time);
 
-    PT_API void operator <<=(SerializationInfo& si, const Time& time);
+PT_API void operator <<=(SerializationInfo& si, const Time& time);
 
-    PT_API void convert(std::string& str, const Pt::Time& time);
+PT_API void convert(std::string& str, const Pt::Time& time);
 
-    PT_API void convert(Pt::Time& time, const std::string& s);
+PT_API void convert(Pt::Time& time, const std::string& s);
 
-    inline std::string Time::toIsoString() const
-    {
-        std::string str;
-        convert(str, *this);
-        return str;
-    }
+inline std::string Time::toIsoString() const
+{
+    std::string str;
+    convert(str, *this);
+    return str;
+}
 
-    inline Time Time::fromIsoString(const std::string& s)
-    {
-        Time time;
-        convert(time, s);
-        return time;
-    }
+inline Time Time::fromIsoString(const std::string& s)
+{
+    Time time;
+    convert(time, s);
+    return time;
+}
+
 }
 
 #endif // PT_TIME_H

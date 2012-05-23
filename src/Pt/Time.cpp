@@ -1,7 +1,5 @@
 /*
- * Copyright (C) 2006 by Tommi Maekitalo
  * Copyright (C) 2006 by Marc Boris Duerner
- * Copyright (C) 2006 by Stefan Bueder
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -43,7 +41,7 @@ InvalidTime::InvalidTime()
 inline unsigned short getNumber2(const char* s)
 {
     if ( ! std::isdigit(s[0]) || ! std::isdigit(s[1]) )
-        throw ConversionError( PT_ERROR_MSG("Invalid Time format") );
+        throw ConversionError("Invalid Time format");
 
     return (s[0] - '0') * 10 + (s[1] - '0');
 }
@@ -52,7 +50,7 @@ inline unsigned short getNumber2(const char* s)
 inline unsigned short getNumber3(const char* s)
 {
     if( ! std::isdigit(s[0]) || ! std::isdigit(s[1]) || ! std::isdigit(s[2]) )
-       throw ConversionError( PT_ERROR_MSG("Invalid Time format") );
+       throw ConversionError("Invalid Time format");
 
     return ( s[0] - '0') * 100 + (s[1] - '0') * 10 + (s[2] - '0' );
 }
@@ -63,7 +61,7 @@ void convert(Time& time, const std::string& s)
     unsigned hour = 0, min = 0, sec = 0, msec = 0;
 
     if( s.size() < 11 || s.at(2) != ':' || s.at(5) != ':' || s.at(8) != '.')
-        throw ConversionError( PT_ERROR_MSG("Invalid Time format") );
+        throw ConversionError("Invalid Time format");
 
 	const char* d = s.data();
 	hour = getNumber2(d);
@@ -83,16 +81,16 @@ void convert(std::string& str, const Time& time)
     // format hh:mm:ss.sssss
     //        0....+....1....+
     char ret[14];
-    ret[0] = '0' + hour / 10;
+    ret[0] = static_cast<char>('0' + hour / 10);
     ret[1] = '0' + hour % 10;
     ret[2] = ':';
-    ret[3] = '0' + minute / 10;
+    ret[3] = static_cast<char>('0' + minute / 10);
     ret[4] = '0' + minute % 10;
     ret[5] = ':';
-    ret[6] = '0' + second / 10;
+    ret[6] = static_cast<char>('0' + second / 10);
     ret[7] = '0' + second % 10;
     ret[8] = '.';
-    unsigned short n = msec;
+    unsigned int n = msec;
     ret[11] = '0' + n % 10;
     n /= 10;
     ret[10] = '0' + n % 10;
@@ -101,7 +99,6 @@ void convert(std::string& str, const Time& time)
 
     str.assign(ret, 12);
 }
-
 
 /*void operator >>=(const SerializationInfo& si, Time& time)
 {

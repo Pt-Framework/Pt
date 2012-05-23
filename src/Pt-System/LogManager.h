@@ -114,7 +114,6 @@ class LogManager
         std::map<std::string, LogTarget*> _targetMap;
         std::map<std::string, LogChannel*> _channelMap;
         Pt::System::RecursiveMutex _mutex;
-        int _concurrency;
         size_t _loggerCount;
         std::string _msg;
 

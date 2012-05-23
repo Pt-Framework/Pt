@@ -767,5 +767,5 @@ void XmlTest::CheckPerformance()
     for(Pt::Xml::XmlReader::Iterator it = reader.current(); it != reader.end(); ++it)
     {}
     Pt::Timespan ts = c.stop();
-    std::cerr << "msecs: " << ts.totalMSecs() << std::endl;
+    std::cerr << "msecs: " << ts.toMSecs() << std::endl;
 }

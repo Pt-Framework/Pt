@@ -105,14 +105,14 @@ class GfxPerf : public Pt::Gui::Widget
            _imagePainter.fillPolygon( &points[0], points.size() );
            _time = _clock.stop();
 
-           _out<<"ImagePainter-> FillPolygon SolidBrush :"<< _time.totalMSecs() <<std::endl;
+           _out<<"ImagePainter-> FillPolygon SolidBrush :"<< _time.toMSecs() <<std::endl;
 
            _clock.start();
            painter().setBrush( _solidBrush );
            painter().fillPolygon( &points[0], points.size() );
            _time = _clock.stop();
 
-           _out<<"Native-> FillPolygon SolidBrush :"<< _time.totalMSecs()<<std::endl;
+           _out<<"Native-> FillPolygon SolidBrush :"<< _time.toMSecs()<<std::endl;
            _out<<std::endl;
 
             _clock.start();
@@ -120,14 +120,14 @@ class GfxPerf : public Pt::Gui::Widget
            _imagePainter.fillPolygon( &points[0], points.size() );
            _time = _clock.stop();
 
-           _out<<"ImagePainter-> FillPolygon TextureBrush :"<< _time.totalMSecs()<<std::endl;
+           _out<<"ImagePainter-> FillPolygon TextureBrush :"<< _time.toMSecs()<<std::endl;
 
            _clock.start();
            painter().setBrush( _textureBrush );
            painter().fillPolygon( &points[0], points.size() );
            _time = _clock.stop();
 
-           _out<<"Native-> FillPolygon TextureBrush :"<< _time.totalMSecs()<<std::endl;
+           _out<<"Native-> FillPolygon TextureBrush :"<< _time.toMSecs()<<std::endl;
            _out<<std::endl;
         }
 
@@ -148,7 +148,7 @@ class GfxPerf : public Pt::Gui::Widget
 
                _time = _clock.stop();
 
-               _out<<"ImagePainter-> DrawText :"<< _time.totalMSecs() <<std::endl;
+               _out<<"ImagePainter-> DrawText :"<< _time.toMSecs() <<std::endl;
 
                painter().setFont( Pt::Gfx::Font( "Bitstream Vera Sans", 24, Pt::Gfx::Font::NormalStyle, 370*i ) );
 
@@ -157,7 +157,7 @@ class GfxPerf : public Pt::Gui::Widget
 
                _time = _clock.stop();
 
-               _out<<"Native-> DrawText :"<< _time.totalMSecs() <<std::endl;
+               _out<<"Native-> DrawText :"<< _time.toMSecs() <<std::endl;
                _out<<std::endl;
            }
         }
@@ -173,7 +173,7 @@ class GfxPerf : public Pt::Gui::Widget
 
             _time = _clock.stop();
 
-            _out<<"ImagePainter-> DrawThinLine:"<< _time.totalMSecs() <<std::endl;
+            _out<<"ImagePainter-> DrawThinLine:"<< _time.toMSecs() <<std::endl;
 
             _clock.start();
 
@@ -184,7 +184,7 @@ class GfxPerf : public Pt::Gui::Widget
 
             _time = _clock.stop();
 
-            _out<<"Native-> DrawThinLine:"<< _time.totalMSecs() <<std::endl;
+            _out<<"Native-> DrawThinLine:"<< _time.toMSecs() <<std::endl;
 
             _out<<std::endl;
 
@@ -197,7 +197,7 @@ class GfxPerf : public Pt::Gui::Widget
 
             _time = _clock.stop();
 
-            _out<<"ImagePainter-> DrawThickLine:"<< _time.totalMSecs() <<std::endl;
+            _out<<"ImagePainter-> DrawThickLine:"<< _time.toMSecs() <<std::endl;
 
             _clock.start();
 
@@ -208,7 +208,7 @@ class GfxPerf : public Pt::Gui::Widget
 
             _time = _clock.stop();
 
-            _out<<"Native-> DrawThickLine:"<< _time.totalMSecs() <<std::endl;
+            _out<<"Native-> DrawThickLine:"<< _time.toMSecs() <<std::endl;
             _out<<std::endl;
         }
 

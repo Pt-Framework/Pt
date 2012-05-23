@@ -91,14 +91,11 @@ Timespan ClockImpl::stop()
     {
         return Timespan(secondDelta / 1000 , ( secondDelta * 1000 ) % 1000000 );
     }
-    else
-    {
-        const long secs = static_cast<long>(delta.QuadPart / _frequency.QuadPart);
-        const long usecs = static_cast<long>(((delta.QuadPart * 1000000) / _frequency.QuadPart ) % 1000000);
-        return Timespan(secs, usecs);
-    }
 
-    return Timespan();
+    const long secs = static_cast<long>(delta.QuadPart / _frequency.QuadPart);
+    const long usecs = static_cast<long>(((delta.QuadPart * 1000000) / _frequency.QuadPart ) % 1000000);
+           
+    return Timespan(secs, usecs);
 }
 
 

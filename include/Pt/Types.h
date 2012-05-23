@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2004 Marc Boris Duerner
- * Copyright (C) 2005 Aloysius Indrayanto
+ * Copyright (C) 2004-2012 Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public

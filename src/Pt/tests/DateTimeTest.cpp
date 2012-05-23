@@ -131,10 +131,10 @@ void DateTimeTest::testOperators()
                             Pt::Time::MSecsPerSecond + 300;
 
     Pt::Timespan ts(dt - dt2);
-    PT_UNIT_ASSERT( ts.totalMSecs() == msecsDiff );
+    PT_UNIT_ASSERT( ts.toMSecs() == msecsDiff );
     
     ts = dt2 - dt;
-    PT_UNIT_ASSERT( ts.totalMSecs() == -msecsDiff );
+    PT_UNIT_ASSERT( ts.toMSecs() == -msecsDiff );
 }
 
 

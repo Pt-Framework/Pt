@@ -72,7 +72,8 @@ void TimeSpanTest::testConstructors()
         PT_UNIT_ASSERT(ts.hours() == 13);
         PT_UNIT_ASSERT(ts.minutes() == 34);
         PT_UNIT_ASSERT(ts.seconds() == 11);
-        PT_UNIT_ASSERT(ts.useconds() == 567891);
+        PT_UNIT_ASSERT(ts.msecs() == 567);
+        PT_UNIT_ASSERT(ts.usecs() == 891);
     }
 
     {
@@ -81,7 +82,8 @@ void TimeSpanTest::testConstructors()
         PT_UNIT_ASSERT(ts.hours() == 13);
         PT_UNIT_ASSERT(ts.minutes() == 34);
         PT_UNIT_ASSERT(ts.seconds() == 11);
-        PT_UNIT_ASSERT(ts.useconds() == 567891);
+        PT_UNIT_ASSERT(ts.msecs() == 567);
+        PT_UNIT_ASSERT(ts.usecs() == 891);
     }
 
     {
@@ -90,7 +92,8 @@ void TimeSpanTest::testConstructors()
         PT_UNIT_ASSERT(ts.hours() == 13);
         PT_UNIT_ASSERT(ts.minutes() == 34);
         PT_UNIT_ASSERT(ts.seconds() == 11);
-        PT_UNIT_ASSERT(ts.useconds() == 567891);
+        PT_UNIT_ASSERT(ts.msecs() == 567);
+        PT_UNIT_ASSERT(ts.usecs() == 891);
     }
     
     {
@@ -100,7 +103,8 @@ void TimeSpanTest::testConstructors()
         PT_UNIT_ASSERT(ts.hours() == 13);
         PT_UNIT_ASSERT(ts.minutes() == 34);
         PT_UNIT_ASSERT(ts.seconds() == 11);
-        PT_UNIT_ASSERT(ts.useconds() == 567891);
+        PT_UNIT_ASSERT(ts.msecs() == 567);
+        PT_UNIT_ASSERT(ts.usecs() == 891);
     }
 
     {
@@ -110,7 +114,8 @@ void TimeSpanTest::testConstructors()
         PT_UNIT_ASSERT(ts.hours() == 13);
         PT_UNIT_ASSERT(ts.minutes() == 34);
         PT_UNIT_ASSERT(ts.seconds() == 11);
-        PT_UNIT_ASSERT(ts.useconds() == 567891);
+        PT_UNIT_ASSERT(ts.msecs() == 567);
+        PT_UNIT_ASSERT(ts.usecs() == 891);
     }
 }
 
@@ -120,15 +125,15 @@ void TimeSpanTest::testEmptyTimespan()
     
     PT_UNIT_ASSERT(ts.days() == 0);
     PT_UNIT_ASSERT(ts.hours() == 0);
-    PT_UNIT_ASSERT(ts.totalHours() == 0);
+    PT_UNIT_ASSERT(ts.toHours() == 0);
     PT_UNIT_ASSERT(ts.minutes() == 0);
-    PT_UNIT_ASSERT(ts.totalMinutes() == 0);
+    PT_UNIT_ASSERT(ts.toMinutes() == 0);
     PT_UNIT_ASSERT(ts.seconds() == 0);
-    PT_UNIT_ASSERT(ts.totalSeconds() == 0);
+    PT_UNIT_ASSERT(ts.toSeconds() == 0);
     PT_UNIT_ASSERT(ts.msecs() == 0);
-    PT_UNIT_ASSERT(ts.totalMSecs() == 0);
-    PT_UNIT_ASSERT(ts.microseconds() == 0);
-    PT_UNIT_ASSERT(ts.useconds() == 0);
+    PT_UNIT_ASSERT(ts.toMSecs() == 0);
+    PT_UNIT_ASSERT(ts.msecs() == 0);
+    PT_UNIT_ASSERT(ts.usecs() == 0);
     PT_UNIT_ASSERT(ts.toUSecs() == 0);
 }
 
@@ -139,15 +144,14 @@ void TimeSpanTest::testGetters()
 
     PT_UNIT_ASSERT(ts.days() == 12);
     PT_UNIT_ASSERT(ts.hours() == 23);
-    PT_UNIT_ASSERT(ts.totalHours() == 12 * 24 + 23);
+    PT_UNIT_ASSERT(ts.toHours() == 12 * 24 + 23);
     PT_UNIT_ASSERT(ts.minutes() == 34);
-    PT_UNIT_ASSERT(ts.totalMinutes() == (12 * 24 + 23) * 60 + 34);
+    PT_UNIT_ASSERT(ts.toMinutes() == (12 * 24 + 23) * 60 + 34);
     PT_UNIT_ASSERT(ts.seconds() == 45);
-    PT_UNIT_ASSERT(ts.totalSeconds() == ((12 * 24 + 23) * 60 + 34) * 60 + 45);
+    PT_UNIT_ASSERT(ts.toSeconds() == ((12 * 24 + 23) * 60 + 34) * 60 + 45);
     PT_UNIT_ASSERT(ts.msecs() == 999);
-    PT_UNIT_ASSERT(ts.totalMSecs() == (((12 * 24 + 23) * 60 + 34) * 60 + 45) * 1000 + 999);
-    PT_UNIT_ASSERT(ts.microseconds() == 999);
-    PT_UNIT_ASSERT(ts.useconds() == 999999);
+    PT_UNIT_ASSERT(ts.toMSecs() == (((12 * 24 + 23) * 60 + 34) * 60 + 45) * 1000 + 999);
+    PT_UNIT_ASSERT(ts.usecs() == 999);
     PT_UNIT_ASSERT(ts.toUSecs() == (((12 * 24 + 23) * 60 + 34) * 60 + 45) * Pt::uint64_t(1000000) + 999999);
 }
 
