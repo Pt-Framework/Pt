@@ -118,7 +118,7 @@
 #endif
 
 
-/** @defgroup DateTime
+/** @defgroup DateTime Dates and Times
     @brief Dates and Times
 
     The Pt core module contains some simple types to represent times and

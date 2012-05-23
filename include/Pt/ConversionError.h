@@ -33,13 +33,22 @@
 
 namespace Pt {
 
+/** @brief Indicates a failed conversion.
+
+    This exception is thrown, when conversions between types fail. For
+    example, converting a string to an integer can fail if the string does
+    not represent a number. 
+*/
 class PT_API ConversionError : public std::runtime_error
 {
     public:
+        //! @brief Construct with error message.
         explicit ConversionError(const std::string& msg);
 
+        //! @brief Construct with error message.
         explicit ConversionError(const char* msg);
 
+        //! @brief Destructor.
         ~ConversionError() throw()
         {}
 };

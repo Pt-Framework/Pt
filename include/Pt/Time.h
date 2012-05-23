@@ -38,11 +38,20 @@ namespace Pt {
 
 class SerializationInfo;
 
+/** @brief Indicates an invalid time value.
+
+    This exception is thrown, when a invalid values are used for a time,
+    such as a value greater than 23 for the hour. 
+
+    @ingroup DateTime
+*/
 class PT_API InvalidTime : public std::invalid_argument
 {
     public:
+        //! @brief Constructor.
         InvalidTime();
 
+        //! @brief Destructor.
         ~InvalidTime() throw()
         {}
 };

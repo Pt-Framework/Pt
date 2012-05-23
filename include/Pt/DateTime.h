@@ -36,7 +36,8 @@
 
 namespace Pt {
 
-/** @brief Combined %Date and %Time value
+/** @brief Combined %Date and %Time value.
+
     @ingroup DateTime
 */
 class DateTime

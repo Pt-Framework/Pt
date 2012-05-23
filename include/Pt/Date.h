@@ -37,17 +37,28 @@ namespace Pt {
 
 class SerializationInfo;
 
+/** @brief Indicates an invalid date value.
+
+    This exception is thrown, when a invalid values are used for a date,
+    such as a value greater than twelve for the month. 
+
+    @ingroup DateTime
+*/
 class PT_API InvalidDate : public std::invalid_argument
 {
     public:
+        //! @brief Constructor.
         InvalidDate();
 
+        //! @brief Destructor.
         ~InvalidDate() throw()
         {}
 };
 
+//! @internal
 PT_API void greg2jul(unsigned& jd, int y, int m, int d);
 
+//! @internal
 PT_API void jul2greg(unsigned jd, int& y, int& m, int& d);
 
 /*
@@ -55,6 +66,7 @@ PT_API void jul2greg(unsigned jd, int& y, int& m, int& d);
   - Henry F. Fliegel and Thomas C. Van Flandern, "A Machine Algorithm for
     Processing Calendar Dates". CACM, Vol. 11, No. 10, October 1968, pp 657.
 */
+
 /** @brief %Date expressed in year, month, and day
     @ingroup DateTime
 */

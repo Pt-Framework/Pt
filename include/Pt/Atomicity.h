@@ -35,8 +35,10 @@
 namespace Pt {
 
 /** @brief Atomic integers to be used with atomicity functions.
-  * A variable of this type must not be accessed directly by users. Use the provided atomicity functions.
-  */
+
+    A variable of this type must not be accessed directly, but used the 
+    provided atomicity functions atomicSet() and atomicGet().
+*/
 union PT_API atomic_t
 {
     int     i;   // 32 bit in both 32 bit and 64 bit platforms
@@ -45,55 +47,65 @@ union PT_API atomic_t
     int64_t i64; // Always 64-bit in any platform
     void*   p;   // should follow the system word size (and hence will be 128 bit in a hypothetical 128 bit platform ;)
 #ifdef __cplusplus
+    //! @brief Construct with initial value.
     explicit atomic_t(int v = 0);
 #endif
 };
 
-/** @brief Atomically get a value
-  * Returns the value after employing a memory fence.
-  */
+/** @brief Atomically get a value.
+
+    Returns the value after employing a memory fence.
+*/
 PT_API int atomicGet(volatile atomic_t& val);
 
-/** @brief Atomically set a value
-  * Sets the value and employs a memory fence.
-  */
+/** @brief Atomically set a value.
+
+    Sets the value and employs a memory fence.
+*/
 PT_API void atomicSet(volatile atomic_t& val, int n);
 
-/** @brief Increases a value by one as an atomic operation
-  * Returns the resulting incremented value.
-  */
+/** @brief Increases a value by one as an atomic operation.
+
+    Returns the resulting incremented value.
+*/
 PT_API int atomicIncrement(volatile atomic_t& val);
 
-/** @brief Decreases a value by one as an atomic operation
-  * Returns the resulting decremented value.
+/** @brief Decreases a value by one as an atomic operation.
+
+    Returns the resulting decremented value.
   */
 PT_API int atomicDecrement(volatile atomic_t& val);
 
-/** @brief Performs an atomic exchange operation
-  * Sets \a val to \a exch and returns the initial value of \a val.
-  */
+/** @brief Performs an atomic exchange operation.
+
+    Sets \a val to \a exch and returns the initial value of \a val.
+*/
 PT_API int atomicExchange(volatile atomic_t& val, int exch);
 
-/** @brief Performs an atomic compare-and-exchange operation
-  * If \a val is equal to \a comp, \a val is replaced by \a exch. The initial
-  * value of of \a val is returned.
-  */
+/** @brief Performs an atomic compare-and-exchange operation.
+
+    If \a val is equal to \a comp, \a val is replaced by \a exch. The initial
+    value of of \a val is returned.
+*/
 PT_API int atomicCompareExchange(volatile atomic_t& val, int exch, int comp);
 
-/** @brief Performs atomic addition of two values
-  *  Returns the initial value of the addend.
-  */
+/** @brief Performs atomic addition of two values.
+
+     Returns the initial value of the addend.
+*/
 PT_API int atomicExchangeAdd(volatile atomic_t& val, int add);
 
-/** @brief Performs an atomic exchange operation
-  * Sets \a val to \a exch and returns the initial value of \a val.
-  */
+/** @brief Performs an atomic exchange operation.
+
+    Sets \a val to \a exch and returns the initial value of \a val.
+*/
 PT_API void* atomicExchange(void* volatile& val, void* exch);
 
-/** @brief Performs an atomic compare-and-exchange operation
-  * If \a val is equal to \a comp, \a val is replaced by \a exch. The initial
-  * value of \a ptr is returned.
-  */
+/** @brief Performs an atomic compare-and-exchange operation.
+
+    If \a val is equal to \a comp, \a val is replaced by \a exch. The initial
+    value of \a ptr is returned.
+*/
 PT_API void* atomicCompareExchange(void* volatile& val, void* exch, void* comp);
 
 }

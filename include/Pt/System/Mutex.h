@@ -175,7 +175,7 @@ class MutexLock : private NonCopyable
             bool _isLocked;
 };
 
-/** @brief Recursive mutual exclusion device
+/** @brief Recursive mutual exclusion device.
 */
 class PT_SYSTEM_API RecursiveMutex : private NonCopyable
 {
@@ -183,12 +183,16 @@ class PT_SYSTEM_API RecursiveMutex : private NonCopyable
         class MutexImpl* _impl;
 
     public:
+        //! @brief Constructor.
         RecursiveMutex();
 
+        //! @brief Destructor.
         ~RecursiveMutex();
 
+        //! @brief Locks the mutex.
         void lock();
 
+        //! @brief Returns true if the mutex could be locked..
         bool tryLock();
 
         /** @brief Unlocks the mutex.
@@ -199,6 +203,7 @@ class PT_SYSTEM_API RecursiveMutex : private NonCopyable
         **/
         void unlock();
 
+        //! @internal
         bool unlockNoThrow();
 };
 
@@ -229,6 +234,7 @@ class RecursiveLock : private NonCopyable
                 _mutex.unlockNoThrow();
         }
 
+        //! @brief Locks the mutex.
         void lock()
         {
             if(!_isLocked)
