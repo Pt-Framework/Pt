@@ -89,25 +89,6 @@ namespace System {
     the target, the logger will discard the record. If a target has a log
     level of Info, the logger will reject records with the levels Trace or
     Debug. See LogRecord and LogMessage for more information. 
-    
-    Macros are provided to make logging more convenient. The easiest way to 
-    log is to use the logging macros for a static logger instance. A logger 
-    instance can be defined for each compilation unit and then logged to:
-
-    @code
-    log_define("app.module")
-
-    void foobar(int n)
-    {
-        log_info("foobar was called with: " << n);
-    }
-    @endcode
-
-    The advantage of the macros is that they will expand to nothing if NLOG
-    is defined, so logging support can be conditionally compiled. The macro
-    log_init wraps the call to Pt::System::Logger::init, and more macros exist
-    for the various log levels: log_trace, log_debug, log_info, log_warn,
-    log_error log_fatal.
 
     @ingroup Logging
 */
@@ -159,7 +140,33 @@ class PT_SYSTEM_API Logger : protected Pt::NonCopyable
         */
         static void init(const Settings& settings);
 
-        //! @brief Set the pattern for log records
+        /** @brief Set the pattern for log records.
+
+            This determines how the logging records are formatted to the
+            channels. The format pattern can contain text and specifiers, 
+            which are placeholders for the various elements of the log
+            records. Specifiers are escaped with a percent sign in the
+            format pattern string. For example, the following pattern would
+            write out the time and the message for each log record:
+
+            @code
+            olib::log::Logger::setPattern("%t - %m");
+            @endcode
+
+            Here is a list of possible specifiers:
+            - %c logging category
+            - %d current date
+            - %l log level (severity)
+            - %m message text
+            - %t current time
+            - %F file where the record was logged
+            - %L line number where the record was logged
+            - %M method/function where the record was logged
+
+            @todo
+            - %T thread id
+            - %P process id
+        */
         static void setPattern(const std::string& pattern);
 
         /** @brief Sets the log-level of the target and its children.

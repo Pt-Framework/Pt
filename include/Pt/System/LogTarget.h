@@ -46,7 +46,7 @@ class LogRecord;
 
     The logging manager singleton maintains a hierachy of log targets, which
     is used to route the log records to a channel. To add an instance
-    to this hierachy use the static Target::get method. The scheme of the
+    to this hierachy use the static LogTarget::get method. The scheme of the
     target category name follows the property dot-syntax. If there is a target
     foobar.ping and a target foobar.pong it means that ping and pong are
     children of the foobar target, which is a child of the root target. 
