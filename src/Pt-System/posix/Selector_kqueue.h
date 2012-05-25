@@ -248,7 +248,7 @@ class SelectorImpl : public Selector
         
                 _clock.start();
                 _avail = ::kevent(_kd, &changedEvents[0], changedEvents.size(), _events, EVENTS_SIZE, timeout);
-                Pt::int64_t elapsed = _clock.stop().totalMSecs();
+                Pt::int64_t elapsed = _clock.stop().toMSecs();
         
                 if( _avail < 0 && errno != EINTR )
                     throw IOError( PT_ERROR_MSG("select failed") );

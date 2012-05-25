@@ -191,7 +191,7 @@ class SelectorImpl : public Selector
         
                 _clock.start();
                 avail = ::select(FD_SETSIZE, &_rfdsOut, &_wfdsOut, &_efdsOut, timeout);
-                Pt::int64_t elapsed = _clock.stop().totalMSecs();
+                Pt::int64_t elapsed = _clock.stop().toMSecs();
         
                 if( avail < 0 && errno != EINTR )
                 {
