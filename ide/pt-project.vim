@@ -5,9 +5,9 @@ exec "cd " . expand("<sfile>:h")
 exec "cd .."
 let g:pt_project_root = getcwd()
 
-"
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Load last session
-"
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 :silent! so Session.vim
 
 :nmap _g :grep <C-R>=expand("<cword>")<CR><CR>
@@ -18,7 +18,7 @@ let g:pt_project_root = getcwd()
 let s:ctags_file   = "pt.tags"
 let s:ctags_create = "ctags -f " . s:ctags_file . " --c-kinds=+p --fields=+iaS --extra=+q --language-force=C++ "  
 let s:ctags_append = "ctags --append=on -f " . s:ctags_file . " --c-kinds=+p --fields=+iaS --extra=+q --language-force=C++ "
-
+" ctags -R --sort=1 --c++-kinds=+p --fields=+iaS --extra=+q --language-force=C++ -IPT_API -f pt.tags src include
 function TagsBuild()
     :call system(s:ctags_create . "-IPT_API include/Pt/*.h src/Pt/*.cpp")
     :call system(s:ctags_append . "-IPT_SYSTEM_API include/Pt/System/*.h src/Pt-System/*.cpp")
@@ -49,6 +49,7 @@ let g:jam_args = ''
 
 if has('win32')
     let &makeprg = "jam.bat -q $*"
+    let &shellpipe = "2>&1| ide\\tee.exe"
 else
     let &makeprg = "./jam.sh -q $*"
 endif
