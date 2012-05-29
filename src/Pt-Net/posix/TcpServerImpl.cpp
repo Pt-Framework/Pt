@@ -186,8 +186,20 @@ void TcpServerImpl::beginAccept(System::EventLoop& loop)
     if( this->fd() < 0 )
         return;
 
+    // TODO: call accept() and setReady() if we can accept right away.
+    // only beginRead() if accept() would block. Open server fd non-blocking.
+    // If we can accept now, keep fd in member variable for later use.
+
     loop.selector().beginRead( &_ioh );
 }
+
+
+//int TcpServerImpl::accept()
+//{
+//    return cached fd;
+//    
+//    same as TcpSocketImpl::accept
+//}
 
 
 void TcpServerImpl::cancel(System::EventLoop& loop)
