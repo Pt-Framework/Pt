@@ -202,16 +202,19 @@ if ! $(FREETYPE_INCLUDES) || ! $(FREETYPE_LINKFLAGS)
 
 if ! $(GUI) || GUI = "gdi"
 {
-    ConfigureWinUI ;
-   
-    if $(WITH_WINUI)
+    if $(WITH_WIN32)
     {
-        ConfigureGdi ;
-   
-        if $(WITH_GDI) 
+        ConfigureWinUI ;
+       
+        if $(WITH_WINUI)
         {
-            GUI = gdi ;
-            GUILIBS = $(GDI_LIBS) $(WINUI_LIBS) ;
+            ConfigureGdi ;
+       
+            if $(WITH_GDI) 
+            {
+                GUI = gdi ;
+                GUILIBS = $(GDI_LIBS) $(WINUI_LIBS) ;
+            }
         }
     }
 }
