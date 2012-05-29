@@ -202,15 +202,13 @@ if ! $(FREETYPE_INCLUDES) || ! $(FREETYPE_LINKFLAGS)
 
 if ! $(GUI) || GUI = "gdi"
 {
-    WITH_GUI = [ CheckBuildC++ "#include <windows.h>"
-                               "int main() { WNDCLASS wc; RegisterClass(&wc); return 0; }" ] ;
-    
-    if $(WITH_GUI)
+    ConfigureWinUI ;
+   
+    if $(WITH_WINUI)
     {
         ConfigureGdi ;
-        ConfigureWinUI ;
-    
-        if $(WITH_GDI) && $(WITH_WINUI)
+   
+        if $(WITH_GDI) 
         {
             GUI = gdi ;
             GUILIBS = $(GDI_LIBS) $(WINUI_LIBS) ;
