@@ -270,7 +270,7 @@ void Context::setProtocol(Protocol protocol)
     bool v2 = false;
     int ret = 0;
 
-    switch(_protocol) 
+    switch(protocol) 
     {
         case SSLv2    : ret = SSL_CTX_set_ssl_version(_ctx, SSLv2_method());  v2 = true; break;
         case SSLv3or2 : ret = SSL_CTX_set_ssl_version(_ctx, SSLv23_method()); v2 = true; break;
@@ -282,6 +282,8 @@ void Context::setProtocol(Protocol protocol)
 
     if( 0 == ret)
         throw std::logic_error("Unknown protocol");
+
+    _protocol = protocol;
 
     const char* list = v2 ? "ALL:!aNULL:!eNULL" : "ALL:!aNULL:!eNULL:!SSLv2";
     ret = SSL_CTX_set_cipher_list(_ctx, list);
