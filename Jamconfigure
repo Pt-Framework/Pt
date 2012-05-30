@@ -202,20 +202,15 @@ if ! $(FREETYPE_INCLUDES) || ! $(FREETYPE_LINKFLAGS)
 
 if ! $(GUI) || GUI = "gdi"
 {
-    if $(WITH_WIN32)
+    Load winui.jam ;
+
+    ConfigureWinUI ;
+    ConfigureGdi ;
+
+    if $(WITH_GDI) && $(WITH_WINUI)
     {
-        ConfigureWinUI ;
-       
-        if $(WITH_WINUI)
-        {
-            ConfigureGdi ;
-       
-            if $(WITH_GDI) 
-            {
-                GUI = gdi ;
-                GUILIBS = $(GDI_LIBS) $(WINUI_LIBS) ;
-            }
-        }
+        GUI = gdi ;
+        GUILIBS = $(GDI_LIBS) $(WINUI_LIBS) ;
     }
 }
 
