@@ -34,6 +34,12 @@
     <Filter Include="Pt-Ssl\tests">
       <UniqueIdentifier>{391de8f1-84b5-444f-ba83-c095d53caabd}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Pt-Reflex">
+      <UniqueIdentifier>{6a6cd8d2-6e46-485d-b16a-ee77a613f248}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-Reflex\tests">
+      <UniqueIdentifier>{845e5483-7c93-405b-9cd9-dd7828d695ab}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\Pt\Allocator.h">
@@ -519,6 +525,54 @@
     <ClInclude Include="..\..\include\Pt\System\LogTarget.h">
       <Filter>Pt-System</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Reflex\Api.h">
+      <Filter>Pt-Reflex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Reflex\Argument.h">
+      <Filter>Pt-Reflex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Reflex\ArgumentTraits.h">
+      <Filter>Pt-Reflex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Reflex\ConstructorInfo.h">
+      <Filter>Pt-Reflex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Reflex\ConstructorProxy.h">
+      <Filter>Pt-Reflex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Reflex\FunctionInfo.h">
+      <Filter>Pt-Reflex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Reflex\FunctionProxy.h">
+      <Filter>Pt-Reflex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Reflex\GenericType.h">
+      <Filter>Pt-Reflex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Reflex\MethodInfo.h">
+      <Filter>Pt-Reflex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Reflex\MethodProxy.h">
+      <Filter>Pt-Reflex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Reflex\PropertyInfo.h">
+      <Filter>Pt-Reflex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Reflex\PropertyProxy.h">
+      <Filter>Pt-Reflex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Reflex\Reflectable.h">
+      <Filter>Pt-Reflex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Reflex\Type.h">
+      <Filter>Pt-Reflex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Reflex\TypeManager.h">
+      <Filter>Pt-Reflex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Reflex\TypeSpecifier.h">
+      <Filter>Pt-Reflex</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -603,6 +657,12 @@
     </None>
     <None Include="..\..\src\Pt-Ssl\tests\Jamfile">
       <Filter>Pt-Ssl\tests</Filter>
+    </None>
+    <None Include="..\..\src\Pt-Reflex\Jamfile">
+      <Filter>Pt-Reflex</Filter>
+    </None>
+    <None Include="..\..\src\Pt-Reflex\Makefile.am">
+      <Filter>Pt-Reflex</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -1103,6 +1163,21 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-System\LogTarget.cpp">
       <Filter>Pt-System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Reflex\GenericType.cpp">
+      <Filter>Pt-Reflex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Reflex\Reflectable.cpp">
+      <Filter>Pt-Reflex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Reflex\Type.cpp">
+      <Filter>Pt-Reflex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Reflex\TypeManager.cpp">
+      <Filter>Pt-Reflex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Reflex\tests\ReflectableTest.cpp">
+      <Filter>Pt-Reflex\tests</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
