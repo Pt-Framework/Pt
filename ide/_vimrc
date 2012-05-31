@@ -28,7 +28,7 @@ set shiftwidth=4
 set softtabstop=4
 set tabstop=4
 set autoindent
-set virtualedit=block
+set virtualedit=block,onemore
 syntax on
 colors pt
 set guifont=Monaco:h10,Consolas:h9,Courier\ New:h10
@@ -46,7 +46,8 @@ function StartInsertIfModifiable()
   endif
 endfunction
 
-:noremap <LEFTMOUSE> :call StartInsertIfModifiable()<CR><LEFTMOUSE>
+":noremap <LEFTMOUSE> :call StartInsertIfModifiable()<CR><LEFTMOUSE>
+:noremap <SPACE> :call StartInsertIfModifiable()<CR>
 
 function StopInsertIfNotModifiable()
   "let is_modified=getbufvar(bufnr('%'), '&modified')  
