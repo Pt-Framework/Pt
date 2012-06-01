@@ -352,6 +352,13 @@ inline LogMessage& endlog(LogMessage& msg)
     return msg;
 }
 
+struct LoggerStaticInit
+{
+    template <typename F>
+    LoggerStaticInit(F initfunc)
+    { initfunc(); }
+};
+
 } // namespace System
 
 } // namespace Pt
@@ -385,7 +392,7 @@ inline LogMessage& endlog(LogMessage& msg)
         static Pt::System::Logger instance##_instance(category);  \
         return instance##_instance;                               \
     }                                                             \
-    static Pt::System::Logger& instance##_static_init = instance();
+    static const Pt::System::LoggerStaticInit instance##_static_init( &instance );
 
     //! @internal @brief Log to a named global logger instance.
     #define log_to_impl(instance, level, expr) logger_log_impl(instance(), level, expr)
