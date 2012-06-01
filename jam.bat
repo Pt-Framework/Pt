@@ -1,6 +1,6 @@
 @ECHO OFF
 
-if not exist jam.exe (
+if not exist .\jam\jam.exe (
     echo "jam.exe not found"
 
     cl.exe
@@ -11,6 +11,6 @@ if not exist jam.exe (
     goto :eof
 )
 
-call .\jam.exe %*
+call .\jam\jam.exe %*
 goto :eof
 
