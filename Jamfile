@@ -15,7 +15,7 @@ ALL_LOCATE_TARGET ?= [ FDirName $(PT_TOP) build $(CONFIG) ] ;
 # this is used by MakeLocate and SubDirObjects in the Jamfiles
 OUTPUT_TARGET = [ FDirName $(PT_TOP) build $(CONFIG) ] ;
 OUTPUT_OBJECT = [ FDirName $(PT_TOP) tmp $(CONFIG) ] ;
-OUTPUT_TEST = [ FDirName $(PT_TOP) build $(CONFIG) ] ;
+OUTPUT_TEST = $(OUTPUT_TARGET) ;
 
 #############################################################################
 # Pt Header Files

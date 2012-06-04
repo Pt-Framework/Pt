@@ -94,7 +94,7 @@ rule SubTree
 
     # path to subtree Jamconfigure and Jamrules
     local _subdir = [ FDirName $($(<[1])) $(<[2-]) ] ;
-    local _subrules = [ $(_subdir) $(JAMRULES) ] ;    
+    local _subrules = [ FDirName $(_subdir) $(JAMRULES) ] ;    
 
     ConfigureClean $(_subdir) ;
 
@@ -104,7 +104,7 @@ rule SubTree
     # set subconfigure root variable
     $(2) = $(_subdir) ;
 
-    include [ $(_subdir) Jamconfigure ] ;
+    include [ FDirName $(_subdir) Jamconfigure ] ;
 
     for local _var in $(CONFIGURED_VARIABLES)
     {
