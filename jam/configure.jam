@@ -81,6 +81,7 @@ rule SubConfigure
     # TODO:
     # Jamconfigure from subdir needs to keep its paths, so ConfigureDefine 
     # works correctly and generates def header at correct place
+    # We should introduce a SubDir rule that works like the one for builds
 
     local _subdir = [ FDirName $(<[1-]) ] ;
     local _subrules = [ $(_subdir) $(JAMRULES) ] ;

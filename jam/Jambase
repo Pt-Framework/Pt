@@ -10,8 +10,15 @@ JAMDIR ?= jam ;
 
 rule Load
 {
-    local _s = $(<:R=$(JAMDIR)) ;
-    include $(_s) ;
+    local _inc = $(<[1]) ;
+    
+    for local _i in $(<[2-])
+    {
+        _inc = $(_i:R=$(_inc)) ;
+    }
+    
+    _inc = $(_inc:R=$(JAMDIR)) ;
+    include $(_inc) ;
 }
 
 Load base.jam ;
