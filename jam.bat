@@ -1,5 +1,12 @@
 @ECHO OFF
 
+set JAMDIR=jam
+
+if not exist %JAMDIR%\Jambase (
+    echo Jambase not found, please set JAMDIR.
+    goto :eof
+)
+
 if not exist .\jam\jam.exe (
     echo "jam.exe not found"
 
