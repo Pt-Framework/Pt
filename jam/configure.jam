@@ -76,20 +76,33 @@ rule ConfigureExit
     Exit "Configuration successful." ;
 }
 
-rule SubConfigure
+rule SubTree
 {
-    # TODO:
-    # Jamconfigure from subdir needs to keep its paths, so ConfigureDefine 
-    # works correctly and generates def header at correct place
-    # We should introduce a SubDir rule that works like the one for builds
+    #
+    # SubConfigure TOP d1 [ d2 [ d3 [ d4 ] ] ] : SUB_TOP
+    #
 
-    local _subdir = [ FDirName $(<[1-]) ] ;
-    local _subrules = [ $(_subdir) $(JAMRULES) ] ;
+    if $(<[1]) = $(>[1]) 
+    {
+        Exit SubConfigure can not use parent root variable ;
+    }
+
+    if ! $($(<[1]))
+    {
+        EXIT Top level of source tree has not been set with $(<[1]) ;
+    }
+
+    # path to subtree Jamconfigure and Jamrules
+    local _subdir = [ FDirName $($(<[1])) $(<[2-]) ] ;
+    local _subrules = [ $(_subdir) $(JAMRULES) ] ;    
 
     ConfigureClean $(_subdir) ;
 
     local config_vars = $(CONFIGURED_VARIABLES) ;
     CONFIGURED_VARIABLES = ;
+
+    # set subconfigure root variable
+    $(2) = $(_subdir) ;
 
     include [ $(_subdir) Jamconfigure ] ;
 
@@ -110,6 +123,31 @@ rule SubConfigure
     CONFIGURED_VARIABLES = $(config_vars) ;
 }
 
+rule SubDir
+{
+    local _r _s ;
+
+    #
+    # SubDir TOP
+    #
+    # This introduces a Jamconfigure that is part of a project tree 
+    # rooted at $(TOP). This allows the Jamconfigure of a project to be
+    # used as a sub project.
+    #
+
+    #
+    # Set root variable to current subdir
+    #
+    if ! $($(<[1]))
+    {
+        if ! $(<[1])
+        {
+            EXIT SubDir syntax error ;
+        }
+
+        $(<[1]) = [ FSubDir $(<[2-]) ] ;
+    }
+}
 
 rule TryCommand
 {

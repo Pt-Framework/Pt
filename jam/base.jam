@@ -141,6 +141,7 @@
 # Initialize variables
 #
 
+JAMCONFIGURE ?= Jamconfigure ;
 JAMFILE      ?= Jamfile ;
 JAMRULES     ?= Jamrules ;
 SPACE        ?= " " ;
