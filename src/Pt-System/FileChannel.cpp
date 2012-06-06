@@ -106,6 +106,10 @@ void FileChannel::onOpen(const std::string& urlstring)
                     throw std::invalid_argument("invalid query string");
 
                 break;
+
+            default:
+                throw std::invalid_argument("invalid query string");
+                break;
         }
     }
 

@@ -29,6 +29,7 @@
 #include <Pt/Types.h>
 #include <Pt/DateTime.h>
 #include <Pt/Timespan.h>
+#include <Pt/NonCopyable.h>
 #include <Pt/System/Api.h>
 
 namespace Pt {
@@ -40,7 +41,7 @@ namespace System {
     The clock class can be used like a stop-watch by calling Clock::start()
     and Clock::stop(). The latter method returns the elapsed time.
 */
-class PT_SYSTEM_API Clock
+class PT_SYSTEM_API Clock : private NonCopyable
 {
     public:
         /** @brief Constructs a Clock

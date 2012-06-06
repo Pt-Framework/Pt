@@ -33,6 +33,7 @@ namespace Pt {
 namespace System {
 
 Mutex::Mutex()
+: _impl(0)
 {
     _impl = new MutexImpl();
 }

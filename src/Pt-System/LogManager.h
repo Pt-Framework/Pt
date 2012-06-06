@@ -36,6 +36,7 @@
 #include "Pt/System/LogLevel.h"
 #include "Pt/System/Mutex.h"
 #include "Pt/System/Plugin.h"
+#include "Pt/NonCopyable.h"
 #include "Pt/Settings.h"
 #include <string>
 #include <map>
@@ -47,7 +48,7 @@ namespace System {
 class LogTarget;
 class LogRecord;
 
-class LogManager
+class LogManager : private NonCopyable
 {
     protected:
         LogManager();

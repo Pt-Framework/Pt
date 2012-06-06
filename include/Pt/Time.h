@@ -87,6 +87,7 @@ class Time
             InvalidTime is thrown if one or more of the values are out of range
         */
         inline Time(unsigned h, unsigned m, unsigned s = 0, unsigned ms = 0)
+        : _msecs(0)
         {
             set(h, m, s, ms);
         }
