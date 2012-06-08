@@ -152,6 +152,8 @@ size_t PipeIODevice::onEndRead(char* buffer, size_t n, bool& eof)
     DWORD flags     = 0;
     eof = false;
 
+    // TODO: can we receive EOF?
+
     if (_bufferSize)
     {
         readBytes = _bufferSize;
@@ -408,16 +410,22 @@ void PipeIODevice::onCancel()
 
 bool PipeIODevice::onRun()
 {
-    if( this->writing() && _impl.runWrite( *parent() ) )
+    if( this->reading() )
     {
-        outputReady().send(*this);
-        return true;
+        if( _ravail || eof() || _impl.runRead( *parent() ) )
+        {
+            inputReady().send(*this);
+            return true;
+        }
     }
 
-    if( this->reading() && _impl.runRead( *parent() ) )
+    if( this->writing() )
     {
-        inputReady().send(*this);
-        return true;
+        if( _wavail || _impl->runWrite( *parent() ) )
+        {
+            outputReady().send(*this);
+            return true;
+        }
     }
 
     return false;

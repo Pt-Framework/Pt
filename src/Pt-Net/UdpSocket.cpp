@@ -146,7 +146,7 @@ bool UdpSocket::onRun()
         if( _wavail || _impl->runWrite( *parent() ) )
         {
             outputReady().send(*this);
-            return false;
+            return true;
         }
     }
 

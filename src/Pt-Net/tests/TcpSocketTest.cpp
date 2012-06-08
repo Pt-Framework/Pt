@@ -96,18 +96,23 @@ class TcpSocketTest : public Pt::Unit::TestSuite
 
         void ConnectFailed()
         {
+            // some OS do not recognize that the IP is not reachable and connect runs for
+            // 75 sec timeout for each resolved address. I this case, the slot to report
+            // finished connects is alled only after a very long time and the idle timeout
+            // of the event loop comes first.
+
             Pt::Net::TcpSocket client;
             client.setActive(*_loop);
             client.connected() += Pt::slot(*this, &TcpSocketTest::onConnectFailed);
 
             try
             {
-                client.beginConnect("127.0.0.2", 9000);
+                client.beginConnect("127.0.0.5", 9000);
             }
             catch(const Pt::System::IOError&)
             {
                 // early success
-                this->reportMessage("handled beginConnect directly");
+                //this->reportMessage("handled beginConnect directly");
                 return;
             }
 
@@ -117,7 +122,7 @@ class TcpSocketTest : public Pt::Unit::TestSuite
 
         void onConnectFailed(Pt::Net::TcpSocket& socket)
         {
-            this->reportMessage("reached connect callback");
+            //this->reportMessage("reached connect callback");
             _loop->exit();
             PT_UNIT_ASSERT_THROW(socket.endConnect(), Pt::System::IOError);
         }
@@ -186,6 +191,7 @@ class TcpSocketTest : public Pt::Unit::TestSuite
 
         void onInputExpectEof(Pt::System::IODevice& device)
         {
+            //this->reportMessage("on read EOF");
             std::size_t n = device.endRead();
             PT_UNIT_ASSERT(n == 0);
             PT_UNIT_ASSERT(device.eof());

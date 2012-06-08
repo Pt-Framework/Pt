@@ -29,6 +29,7 @@
 #include "TcpServerImpl.h"
 #include "AddrInfoImpl.h"
 #include "MainLoopImpl.h"
+#include "IODeviceImpl.h"
 #include <Pt/Net/AddrInfo.h>
 #include <Pt/Net/AddressInUse.h>
 #include <Pt/Net/TcpServer.h>
@@ -52,6 +53,7 @@ TcpServerImpl::TcpServerImpl(TcpServer& server)
 : _server(server)
 , _ioh(server)
 , _timeout(Pt::System::EventLoop::WaitInfinite)
+, _acceptedFd(-1)
 {
 }
 
@@ -59,6 +61,12 @@ TcpServerImpl::TcpServerImpl(TcpServer& server)
 void TcpServerImpl::create(int domain, int type, int protocol)
 {
     log_debug("create socket");
+    
+    if(_ioh.fd != -1)
+    {
+        log_debug("closing socket " << _ioh.fd);
+        ::close(_ioh.fd);
+    }
     
     _ioh.fd = ::socket(domain, type, protocol);
     if (_ioh.fd < 0)
@@ -68,14 +76,21 @@ void TcpServerImpl::create(int domain, int type, int protocol)
 
 void TcpServerImpl::close()
 {
+    if(_acceptedFd != -1)
+    {
+        ::close(_acceptedFd);
+        _acceptedFd = -1;
+    }
+
     if (_ioh.fd < 0)
       return;
 
-    log_debug("close socket");
+    log_debug("close socket " << _ioh.fd);
 
     ::close(_ioh.fd);
     _ioh.fd = -1;
 }
+
 
 void TcpServerImpl::listen(const AddrInfo& ai, int backlog, unsigned flags)
 {
@@ -114,13 +129,29 @@ void TcpServerImpl::listen(const AddrInfo& ai, int backlog, unsigned flags)
         }
 #endif
 
-        log_debug("bind");
+        log_debug("bind " << _ioh.fd);
         if (::bind(this->fd(), it->ai_addr, it->ai_addrlen) == 0)
         {
+            int flags = ::fcntl(_ioh.fd , F_GETFL);
+            flags |= O_NONBLOCK;
+            if( -1 == ::fcntl(_ioh.fd, F_SETFL, flags) )
+            {
+                close();
+                throw System::SystemError("Could not set O_NONBLOCK");
+            }
+
+            flags = ::fcntl(_ioh.fd, F_GETFD);
+            flags |= FD_CLOEXEC;
+            if( -1 == ::fcntl(_ioh.fd, F_SETFD, flags) )
+            {
+                close();
+                throw System::SystemError("Could not set FD_CLOEXEC");
+            }
+
             // save our information
             std::memmove(&_servaddr, it->ai_addr, it->ai_addrlen);
 
-            log_debug("listen");
+            log_debug("listen " << this->fd());
             if( ::listen(this->fd(), backlog) < 0 )
             {
                 close();
@@ -129,15 +160,6 @@ void TcpServerImpl::listen(const AddrInfo& ai, int backlog, unsigned flags)
                     throw AddressInUse();
                 else
                     throw System::IOError("listen");
-            }
-
-            int flags = ::fcntl(this->fd(), F_GETFD);
-            flags |= FD_CLOEXEC ;
-            int ret = ::fcntl(this->fd(), F_SETFD, flags);
-            if (ret == -1)
-            {
-                close();
-                throw System::SystemError("Could not set FD_CLOEXEC");
             }
 
 #ifdef TCP_DEFER_ACCEPT
@@ -155,6 +177,7 @@ void TcpServerImpl::listen(const AddrInfo& ai, int backlog, unsigned flags)
             }
 #endif
 
+            log_debug("successfully listening " << this->fd());
             return;
         }
     }
@@ -186,24 +209,86 @@ void TcpServerImpl::beginAccept(System::EventLoop& loop)
     if( this->fd() < 0 )
         return;
 
-    // TODO: call accept() and setReady() if we can accept right away.
-    // only beginRead() if accept() would block. Open server fd non-blocking.
-    // If we can accept now, keep fd in member variable for later use.
+    log_debug("begin accept " << this->fd());
 
+    sockaddr_storage peeraddr;
+    socklen_t peeraddr_len = sizeof(peeraddr);
+    int fd = ::accept(this->fd(), reinterpret_cast <struct sockaddr*>(&peeraddr), &peeraddr_len);
+    log_debug("accepted: " << fd);
+
+    if(fd != -1)
+    {
+        _acceptedFd = fd;
+        log_debug("immediate accept " << this->fd());
+        _server.setReady();
+        return;
+    }
+
+    if(errno != EAGAIN && errno != EINPROGRESS) // EWOULDBLOCK
+    {
+        log_debug("accept failed " << this->fd());
+        throw System::IOError("accept");
+    }
+
+    log_debug("wait for accept " << this->fd());
     loop.selector().beginRead( &_ioh );
 }
 
 
-//int TcpServerImpl::accept()
-//{
-//    return cached fd;
-//    
-//    same as TcpSocketImpl::accept
-//}
+int TcpServerImpl::accept(unsigned flags)
+{
+    log_debug( "accept " << this->fd() );
+
+    if(_acceptedFd != -1)
+    {
+        int fd = _acceptedFd;
+        _acceptedFd = -1;
+        return fd;
+    }
+
+    if( _server.parent() )
+    {
+         log_debug("end accept " << this->fd());
+        _server.parent()->selector().endRead( &_ioh );
+    }
+    
+    //TODO ECONNABORTED EINTR EPERM    
+    sockaddr_storage peeraddr;
+    socklen_t peeraddr_len = sizeof(peeraddr);
+    int fd = -1;
+
+    while(fd < 0)
+    {
+        fd = ::accept(this->fd(), reinterpret_cast <struct sockaddr*>(&peeraddr), &peeraddr_len);
+        if(fd >= 0)
+            break;
+
+        if(errno != EAGAIN && errno != EINPROGRESS)
+        {
+            log_debug("accept failed " << this->fd());
+            throw System::IOError("accept");
+        }
+        
+        fd_set rfds;
+        FD_ZERO(&rfds);
+        FD_SET(this->fd(), &rfds);
+        bool avail = System::IODeviceImpl::wait(this->timeout(), &rfds, 0, 0);
+        if( ! avail)
+            throw System::IOError("accept timeout");
+    }
+
+    return fd;
+}
 
 
 void TcpServerImpl::cancel(System::EventLoop& loop)
 {
+    if(_acceptedFd != -1)
+    {
+        ::close(_acceptedFd);
+        _acceptedFd = -1;
+    }
+
     if( this->fd() < 0 )
         return;
 
@@ -216,8 +301,12 @@ bool TcpServerImpl::run()
     if(this->fd() < 0)
         return false;
 
-    System::Selector& selector = _server.parent()->selector();
+    if(_acceptedFd != -1)
+    {
+        return true;
+    }
 
+    System::Selector& selector = _server.parent()->selector();
     return selector.isReadable(&_ioh);
 }
 

@@ -116,16 +116,6 @@ void TcpServerImpl::cancel(System::EventLoop& loop)
 }
 
 
-void TcpServerImpl::beginAccept(System::EventLoop& loop)
-{
-    assert(_ioh.handle() == INVALID_HANDLE_VALUE);
-
-    log_debug("begin accepting " << _fd);
-    loop.selector().enableOverlapped(_ioh);
-    setEventFlags(_ioh.handle(), FD_ACCEPT);
-}
-
-
 void TcpServerImpl::listen(const std::string& ipaddr, unsigned short int port,
                            int backlog, unsigned flags)
 {
@@ -231,8 +221,24 @@ void TcpServerImpl::listen(const AddrInfo& ai, int backlog, unsigned)
 //}
 
 
+void TcpServerImpl::beginAccept(System::EventLoop& loop)
+{
+    log_debug("begin accepting " << _fd);
+
+    if(_ioh.handle() == INVALID_HANDLE_VALUE)
+    {
+        loop.selector().enableOverlapped(_ioh);
+        log_debug("enabled i/o handle " << _ioh.handle());
+    }
+
+    setEventFlags(_ioh.handle(), FD_ACCEPT);
+}
+
+
 SOCKET TcpServerImpl::accept()
 {
+    setEventFlags(_ioh.handle(), 0);
+
     SOCKET fd = ::WSAAccept(_fd, NULL, NULL, NULL, 0);
     if(fd == INVALID_SOCKET)
     {

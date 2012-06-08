@@ -202,7 +202,7 @@ bool SerialDevice::onRun()
 {
     if( this->reading() )
     {
-        if( _ravail || _impl->runRead( *parent() ) )
+        if( _ravail || eof() || _impl->runRead( *parent() ) )
         {
             inputReady().send(*this);
             return true;
@@ -214,7 +214,7 @@ bool SerialDevice::onRun()
         if( _wavail || _impl->runWrite( *parent() ) )
         {
             outputReady().send(*this);
-            return false;
+            return true;
         }
     }
 
@@ -224,3 +224,4 @@ bool SerialDevice::onRun()
 }//namespace System
 
 }//namespace Pt
+

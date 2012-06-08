@@ -163,7 +163,7 @@ bool FileDevice::onRun()
 
     if( this->reading() )
     {
-        if( _ravail || _impl->runRead( *parent() ) )
+        if( _ravail || eof() || _impl->runRead( *parent() ) )
         {
             inputReady().send(*this);
             return true;
@@ -175,7 +175,7 @@ bool FileDevice::onRun()
         if( _wavail || _impl->runWrite( *parent() ) )
         {
             outputReady().send(*this);
-            return false;
+            return true;
         }
     }
 

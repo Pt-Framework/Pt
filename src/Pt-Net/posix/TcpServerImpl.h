@@ -55,6 +55,7 @@ class TcpServerImpl
         TcpServer& _server;
         System::IOHandle _ioh;
         size_t _timeout;
+        int _acceptedFd;
         struct sockaddr_storage _servaddr;
 
     public:
@@ -86,6 +87,8 @@ class TcpServerImpl
 
         int fd() const
         { return _ioh.fd; }
+
+        int accept(unsigned flags);
 
         void cancel(System::EventLoop& s);
     

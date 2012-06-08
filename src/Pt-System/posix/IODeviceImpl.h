@@ -104,8 +104,7 @@ namespace System {
 
             bool runWrite(EventLoop& loop);
 
-        protected:
-            bool wait(std::size_t msecs, fd_set* rfds, fd_set* wfds, fd_set* efds);
+            static bool wait(std::size_t msecs, fd_set* rfds, fd_set* wfds, fd_set* efds);
 
         protected:
             IOHandle _ioh;

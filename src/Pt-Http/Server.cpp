@@ -649,6 +649,8 @@ void Server::onAccept(Net::TcpServer& server)
         conn->timeout += Pt::slot(*this, &Server::onConnectionTimeout);
         _useWorker = 0;
     }
+
+    _serverSocket.beginAccept();
 }
 
 
