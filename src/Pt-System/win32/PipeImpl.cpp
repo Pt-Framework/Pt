@@ -421,7 +421,7 @@ bool PipeIODevice::onRun()
 
     if( this->writing() )
     {
-        if( _wavail || _impl->runWrite( *parent() ) )
+        if( _wavail || _impl.runWrite( *parent() ) )
         {
             outputReady().send(*this);
             return true;
