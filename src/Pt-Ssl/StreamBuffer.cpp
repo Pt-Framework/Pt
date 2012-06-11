@@ -192,6 +192,8 @@ void StreamBuffer::setConnecting(bool verifyServerCert)
 
 bool StreamBuffer::writeHandshake()
 {
+    log_trace("StreamBuffer::writeHandshake");
+    
     if( ! _ios)
         throw System::IOError("StreamBuffer not attached");
 
@@ -232,6 +234,8 @@ bool StreamBuffer::writeHandshake()
 
 bool StreamBuffer::readHandshake()
 {
+    log_trace("StreamBuffer::readHandshake");
+    
     if( ! _ios)
         throw System::IOError("StreamBuffer not attached");
 
@@ -263,9 +267,19 @@ bool StreamBuffer::readHandshake()
             int ret = SSL_do_handshake(_ssl);
             if( ret <= 0 )
             {
+                
                 int sslerr = SSL_get_error(_ssl, ret);
                 if( sslerr != SSL_ERROR_WANT_READ && sslerr != SSL_ERROR_WANT_WRITE) 
                 {
+                    char buf[255];
+                    std::string msg = "SSL handshake failed";
+                    if(sslerr == SSL_ERROR_SSL)
+                    {
+                        msg += ' ';
+                        msg += ERR_error_string(ERR_get_error(), buf);
+                    }
+
+                    log_warn("handshake failed: " << msg);
                     throw HandshakeFailed("SSL handshake failed");
                 }
             }

@@ -112,7 +112,7 @@ class CertificateImpl
 
         std::string notAfter() const
         {
-            return toString( X509_get_notBefore(_x509) );
+            return toString( X509_get_notAfter(_x509) );
         }
 
         x509_st* getX509() const
