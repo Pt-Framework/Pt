@@ -12,7 +12,7 @@ set guioptions-=L
 set guioptions-=T
 set mouse=a
 set bs=2
-set backspace=indent,eol,start
+set backspace=indent,eol,start whichwrap+=<,>,[,]
 filetype on
 set number
 set ruler
