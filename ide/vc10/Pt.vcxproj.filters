@@ -40,6 +40,12 @@
     <Filter Include="Pt-Reflex\tests">
       <UniqueIdentifier>{845e5483-7c93-405b-9cd9-dd7828d695ab}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Pt-Http">
+      <UniqueIdentifier>{979d26c6-a946-4525-9eda-0d112464c4f3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-Http\tests">
+      <UniqueIdentifier>{44bd165a-2ad0-4af4-8d5f-9f0ce39d5acd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\Pt\Allocator.h">
@@ -573,6 +579,63 @@
     <ClInclude Include="..\..\include\Pt\Reflex\TypeSpecifier.h">
       <Filter>Pt-Reflex</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Http\Api.h">
+      <Filter>Pt-Http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Http\Client.h">
+      <Filter>Pt-Http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Http\Message.h">
+      <Filter>Pt-Http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Http\MessageHeader.h">
+      <Filter>Pt-Http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Http\Reply.h">
+      <Filter>Pt-Http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Http\ReplyHeader.h">
+      <Filter>Pt-Http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Http\Request.h">
+      <Filter>Pt-Http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Http\RequestHeader.h">
+      <Filter>Pt-Http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Http\Responder.h">
+      <Filter>Pt-Http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Http\Server.h">
+      <Filter>Pt-Http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Http\Service.h">
+      <Filter>Pt-Http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Http\ChunkedReader.h">
+      <Filter>Pt-Http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Http\ClientImpl.h">
+      <Filter>Pt-Http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Http\Listener.h">
+      <Filter>Pt-Http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Http\NotAuthenticatedResponder.h">
+      <Filter>Pt-Http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Http\NotAuthenticatedService.h">
+      <Filter>Pt-Http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Http\NotFoundResponder.h">
+      <Filter>Pt-Http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Http\NotFoundService.h">
+      <Filter>Pt-Http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Http\Parser.h">
+      <Filter>Pt-Http</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -663,6 +726,12 @@
     </None>
     <None Include="..\..\src\Pt-Reflex\Makefile.am">
       <Filter>Pt-Reflex</Filter>
+    </None>
+    <None Include="..\..\src\Pt-Http\Jamfile">
+      <Filter>Pt-Http</Filter>
+    </None>
+    <None Include="..\..\src\Pt-Http\tests\Jamfile">
+      <Filter>Pt-Http\tests</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -1178,6 +1247,51 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Reflex\tests\ReflectableTest.cpp">
       <Filter>Pt-Reflex\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Http\ChunkedReader.cpp">
+      <Filter>Pt-Http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Http\Client.cpp">
+      <Filter>Pt-Http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Http\ClientImpl.cpp">
+      <Filter>Pt-Http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Http\MessageHeader.cpp">
+      <Filter>Pt-Http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Http\NotAuthenticatedResponder.cpp">
+      <Filter>Pt-Http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Http\NotAuthenticatedService.cpp">
+      <Filter>Pt-Http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Http\NotFoundResponder.cpp">
+      <Filter>Pt-Http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Http\NotFoundService.cpp">
+      <Filter>Pt-Http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Http\Parser.cpp">
+      <Filter>Pt-Http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Http\Responder.cpp">
+      <Filter>Pt-Http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Http\Server.cpp">
+      <Filter>Pt-Http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Http\Service.cpp">
+      <Filter>Pt-Http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Http\tests\ParserTest.cpp">
+      <Filter>Pt-Http\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Http\tests\Pt-Http-test.cpp">
+      <Filter>Pt-Http\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Http\tests\ServerTest.cpp">
+      <Filter>Pt-Http\tests</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
