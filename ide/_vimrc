@@ -133,6 +133,23 @@ vnoremap <BS> d
 :noremap <C-y> <C-r><CR>
 :noremap! <C-y> <C-o><C-r>
 
+" select text
+:inoremap <S-Left> <C-o>vh
+:nnoremap <S-Left> vh
+:vnoremap <S-Left> h
+
+:inoremap <S-Right> <C-o>vl
+:nnoremap <S-Right> vl
+:vnoremap <S-Right> l
+
+:inoremap <S-Up> <C-o>vk
+:nnoremap <S-Up> vk
+:vnoremap <S-Up> k
+
+:inoremap <S-Down> <C-o>vj
+:nnoremap <S-Down> vj
+:vnoremap <S-Down> j
+
 " Copy text
 :noremap <C-c> "+y<CR>
 :inoremap <C-c> <C-o>"+y
