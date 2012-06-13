@@ -94,7 +94,6 @@ class ClientImpl : public Connectable
 
         void reexecute(const Request& request);
         void reexecuteBegin(const Request& request);
-        void doparse();
 
     protected:
         void onConnect(Net::TcpSocket& socket);

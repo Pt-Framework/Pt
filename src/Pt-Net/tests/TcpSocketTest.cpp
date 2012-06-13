@@ -146,6 +146,8 @@ class TcpSocketTest : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT( ! _client->eof() );
             _loop->run();
             PT_UNIT_ASSERT( _client->eof() );
+
+            //std::cerr << "RESULT: " << _client->eof() << " " << _client->isConnected() << std::endl;
         }
 
         void CloseOnConnect()

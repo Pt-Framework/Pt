@@ -38,10 +38,6 @@
 
 namespace Pt {
 
-namespace System {
-    class EventLoop;
-}
-
 namespace Net {
     class AddrInfo;
 }
@@ -58,23 +54,29 @@ class PT_HTTP_API Client : private NonCopyable
 
     public:
         Client();
+        
         Client(const std::string& host, unsigned short int port);
+        
         Client(const Net::AddrInfo& addr);
 
         Client(System::EventLoop& loop, const std::string& host, unsigned short int port);
+        
         Client(System::EventLoop& loop, const Net::AddrInfo& addrinfo);
 
         ~Client();
 
+        void setActive(System::EventLoop& loop);
+
         // Sets the host and port. No actual network connect is done.
         void connect(const Net::AddrInfo& addrinfo);
+        
         void connect(const std::string& host, unsigned short int port);
 
         // Sends the passed request to the server and parses the headers.
         // The body must be read with readBody.
         // This method blocks or times out until the body is parsed.
-        const ReplyHeader& execute(const Request& request,
-            std::size_t timeout = System::EventLoop::WaitInfinite);
+        const ReplyHeader& execute(const Request& request, 
+                                   std::size_t timeout = System::EventLoop::WaitInfinite);
 
         const ReplyHeader& header();
 
@@ -94,7 +96,7 @@ class PT_HTTP_API Client : private NonCopyable
         // Combines the execute and readBody methods in one call.
         // This method blocks until the reply is recieved.
         std::string get(const std::string& url,
-            std::size_t timeout = System::EventLoop::WaitInfinite);
+                        std::size_t timeout = System::EventLoop::WaitInfinite);
 
         // Starts a new request.
         // This method does not block. To actually process the request, the
@@ -105,8 +107,6 @@ class PT_HTTP_API Client : private NonCopyable
         void beginExecute(const Request& request);
 
         void endExecute();
-
-        void setActive(System::EventLoop& loop);
 
         // Executes the underlying selector until a event occures or the
         // specified timeout is reached.

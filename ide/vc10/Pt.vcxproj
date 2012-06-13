@@ -162,7 +162,6 @@
     <ClInclude Include="..\..\include\Pt\Void.h" />
     <ClInclude Include="..\..\src\Pt-Http\ChunkedReader.h" />
     <ClInclude Include="..\..\src\Pt-Http\ClientImpl.h" />
-    <ClInclude Include="..\..\src\Pt-Http\Listener.h" />
     <ClInclude Include="..\..\src\Pt-Http\NotAuthenticatedResponder.h" />
     <ClInclude Include="..\..\src\Pt-Http\NotAuthenticatedService.h" />
     <ClInclude Include="..\..\src\Pt-Http\NotFoundResponder.h" />

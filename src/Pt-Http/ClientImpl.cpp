@@ -155,8 +155,8 @@ const ReplyHeader& ClientImpl::execute(const Request& request, std::size_t timeo
 
     _socket.setTimeout(timeout);
 
-    bool shouldReconnect = _socket.isConnected();
-    if (!shouldReconnect)
+    bool connected = _socket.isConnected();
+    if( ! connected)
     {
         log_debug("connect");
         _socket.connect(_addrInfo);
@@ -165,13 +165,17 @@ const ReplyHeader& ClientImpl::execute(const Request& request, std::size_t timeo
     log_debug("send request");
     sendRequest(request);
     _stream.flush();
-
-    if (!_stream && shouldReconnect)
+    
+    //
+    // when connected, but eof close and reconnect
+    //
+    
+    /*if( ! _stream && connected)
     {
         // sending failed and we were not connected before, so try again
         reexecute(request);
-        shouldReconnect = false;
-    }
+        connected = false;
+    }*/
 
     if (!_stream)
         throw System::IOError( PT_ERROR_MSG("error sending HTTP request") );
@@ -182,7 +186,7 @@ const ReplyHeader& ClientImpl::execute(const Request& request, std::size_t timeo
     _readHeader = true;
     doparse();
 
-    if (_parser.begin() && shouldReconnect)
+    /*if (_parser.begin() && connected)
     {
         // reading failed and we were not connected before, so try again
         reexecute(request);
@@ -191,7 +195,7 @@ const ReplyHeader& ClientImpl::execute(const Request& request, std::size_t timeo
             throw System::IOError( PT_ERROR_MSG("error sending HTTP request") );
 
         doparse();
-    }
+    }*/
 
     log_debug("reply ready");
 
