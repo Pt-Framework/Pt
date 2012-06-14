@@ -28,6 +28,7 @@
 
 #include "HttpClientImpl.h"
 #include "Pt/Http/ReplyHeader.h"
+#include "Pt/Net/AddrInfo.h"
 #include <Pt/System/Logger.h>
 
 log_define("Pt.XmlRpc.HttpClient")
@@ -69,9 +70,9 @@ std::string HttpClientImpl::url() const
 {
     std::ostringstream s;
     s << "http://"
-      << _client.host()
+      << _client.host().host()
       << ':'
-      << _client.port()
+      << _client.host().port()
       << _request.url();
 
     return s.str();
@@ -115,7 +116,8 @@ void HttpClientImpl::endExecute()
 
 std::string HttpClientImpl::execute()
 {
-    _client.execute(_request, timeout());
+    _client.setTimeout( timeout() );
+    _client.execute(_request);
 
     std::string body;
 

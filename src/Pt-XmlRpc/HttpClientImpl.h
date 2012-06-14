@@ -55,14 +55,14 @@ class HttpClientImpl : public ClientImpl
 
         void connect(const Net::AddrInfo& addrinfo, const std::string& url)
         {
-            _client.connect(addrinfo);
+            _client.setHost(addrinfo);
             _request.url(url);
         }
 
         void connect(const std::string& addr, unsigned short port,
                      const std::string& url)
         {
-            _client.connect(addr, port);
+            _client.setHost(addr, port);
             _request.url(url);
         }
 
@@ -73,7 +73,7 @@ class HttpClientImpl : public ClientImpl
 
         void auth(const std::string& username, const std::string& password)
         {
-            _client.auth(username, password);
+            _client.setAuth(username, password);
         }
 
         void clearAuth()

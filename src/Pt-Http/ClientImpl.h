@@ -88,6 +88,7 @@ class ClientImpl : public Connectable
         bool _reconnectOnError;
         bool _errorPending;
 
+        void doparse();
         void sendRequest(const Request& request);
         void processHeaderAvailable(System::StreamBuffer& sb);
         void processBodyAvailable(System::StreamBuffer& sb);
@@ -105,8 +106,10 @@ class ClientImpl : public Connectable
         ClientImpl(Client* client, const Net::AddrInfo& addrinfo);
         ClientImpl(Client* client, System::EventLoop& selector, const Net::AddrInfo& addrinfo);
 
+        void setTimeout(std::size_t timeout);
+
         // Sets the server and port. No actual network connect is done.
-        void connect(const Net::AddrInfo& addrinfo)
+        void setHost(const Net::AddrInfo& addrinfo)
         {
             _addrInfo = addrinfo;
             _socket.close();
@@ -115,8 +118,7 @@ class ClientImpl : public Connectable
         // Sends the passed request to the server and parses the headers.
         // The body must be read with readBody.
         // This method blocks or times out until the body is parsed.
-        const ReplyHeader& execute(const Request& request,
-            std::size_t timeout = System::EventLoop::WaitInfinite);
+        const ReplyHeader& execute(const Request& request);
 
         const ReplyHeader& header()
         { return _replyHeader; }
@@ -136,8 +138,7 @@ class ClientImpl : public Connectable
 
         // Combines the execute and readBody methods in one call.
         // This method blocks until the reply is recieved.
-        std::string get(const std::string& url,
-            std::size_t timeout = System::EventLoop::WaitInfinite);
+        std::string get(const std::string& url);
 
         // Starts a new request.
         // This method does not block. To actually process the request, the
@@ -151,10 +152,6 @@ class ClientImpl : public Connectable
 
         void setActive(System::EventLoop& loop);
 
-        // Executes the underlying selector until a event occures or the
-        // specified timeout is reached.
-        //void wait(std::size_t msecs);
-
         // Returns the underlying stream, where the reply may be read from.
         std::istream& in()
         {
@@ -162,22 +159,23 @@ class ClientImpl : public Connectable
                                     : static_cast<std::istream&>(_stream);
         }
 
-        const std::string& host() const
+        const Net::AddrInfo& host() const
         {
-            return _addrInfo.host();
-        }
-
-        unsigned short port() const
-        {
-            return _addrInfo.port();
+            return _addrInfo;
         }
 
         // Sets the username and password for all subsequent requests.
-        void auth(const std::string& username, const std::string& password)
-        { _username = username; _password = password; }
+        void setAuth(const std::string& username, const std::string& password)
+        { 
+            _username = username; 
+            _password = password; 
+        }
 
         void clearAuth()
-        { _username.clear(); _password.clear(); }
+        { 
+            _username.clear(); 
+            _password.clear(); 
+        }
 
         void cancel();
 };

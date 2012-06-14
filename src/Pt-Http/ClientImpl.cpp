@@ -115,6 +115,12 @@ void ClientImpl::setActive(System::EventLoop& loop)
 }
 
 
+void ClientImpl::setTimeout(std::size_t timeout)
+{
+    _socket.setTimeout(timeout);
+}
+
+
 void ClientImpl::reexecute(const Request& request)
 {
     log_debug("reexecute");
@@ -147,16 +153,14 @@ void ClientImpl::doparse()
 
 }
 
-const ReplyHeader& ClientImpl::execute(const Request& request, std::size_t timeout)
+const ReplyHeader& ClientImpl::execute(const Request& request)
 {
     log_trace("execute request " << request.url());
 
     _replyHeader.clear();
 
-    _socket.setTimeout(timeout);
-
-    bool connected = _socket.isConnected();
-    if( ! connected)
+    bool reuseConnection = _socket.isConnected();
+    if( ! reuseConnection)
     {
         log_debug("connect");
         _socket.connect(_addrInfo);
@@ -164,20 +168,17 @@ const ReplyHeader& ClientImpl::execute(const Request& request, std::size_t timeo
 
     log_debug("send request");
     sendRequest(request);
+
     _stream.flush();
     
-    //
-    // when connected, but eof close and reconnect
-    //
-    
-    /*if( ! _stream && connected)
+    if( ! _stream && reuseConnection)
     {
-        // sending failed and we were not connected before, so try again
+        // received pending EOF from previous response -> reconnect
         reexecute(request);
-        connected = false;
-    }*/
+        reuseConnection = false;
+    }
 
-    if (!_stream)
+    if( ! _stream)
         throw System::IOError( PT_ERROR_MSG("error sending HTTP request") );
 
     log_debug("read reply");
@@ -186,26 +187,26 @@ const ReplyHeader& ClientImpl::execute(const Request& request, std::size_t timeo
     _readHeader = true;
     doparse();
 
-    /*if (_parser.begin() && connected)
+    if( ! _stream && _parser.begin() && reuseConnection)
     {
-        // reading failed and we were not connected before, so try again
+        // received pending EOF from previous response -> reconnect
         reexecute(request);
 
-        if (!_stream)
+        if( ! _stream )
             throw System::IOError( PT_ERROR_MSG("error sending HTTP request") );
 
         doparse();
-    }*/
+    }
 
     log_debug("reply ready");
 
-    if (_stream.fail())
+    if(_stream.fail())
         throw System::IOError( PT_ERROR_MSG("failed to read HTTP reply") );
 
-    if (_parser.fail())
+    if(_parser.fail())
         throw System::IOError( PT_ERROR_MSG("invalid HTTP reply") );
 
-    if (!_parser.end())
+    if( ! _parser.end() )
         throw System::IOError( PT_ERROR_MSG("incomplete HTTP reply header") );
 
     return _replyHeader;
@@ -262,10 +263,10 @@ void ClientImpl::readBody(std::string& s)
 }
 
 
-std::string ClientImpl::get(const std::string& url, std::size_t timeout)
+std::string ClientImpl::get(const std::string& url)
 {
     Request request(url);
-    execute(request, timeout);
+    execute(request);
     return readBody();
 }
 
@@ -274,33 +275,33 @@ void ClientImpl::beginExecute(const Request& request)
 {
     log_trace("beginExecute");
 
+    _reconnectOnError = false;
     _errorPending = false;
     _request = &request;
     _replyHeader.clear();
-    if (_socket.isConnected())
+    
+    if(  ! _socket.isConnected() )
     {
-        log_debug("we are connected already");
-        sendRequest(*_request);
-        try
-        {
-            _stream.buffer().beginWrite();
-            _reconnectOnError = true;
-        }
-        catch (const System::IOError&)
-        {
-            log_debug("first write failed, so connection is not active any more");
-
-            _stream.clear();
-            _stream.buffer().discard();
-            _socket.beginConnect(_addrInfo);
-            _reconnectOnError = false;
-        }
-    }
-    else
-    {
-        log_debug("not yet connected - do it now");
+        log_debug("begin connect");
         _socket.beginConnect(_addrInfo);
-        _reconnectOnError = false;
+        return;
+    }
+
+    log_debug("reusing connection");
+    sendRequest(*_request);
+        
+    try
+    {
+        _stream.buffer().beginWrite();
+        _reconnectOnError = true;
+    }
+    catch (const System::IOError&)
+    {
+        log_debug("write to reused connection failed -> reconnecting");
+
+        _stream.clear();
+        _stream.buffer().discard();
+        _socket.beginConnect(_addrInfo);
     }
 }
 
@@ -313,12 +314,6 @@ void ClientImpl::endExecute()
         throw;
     }
 }
-
-
-/*void ClientImpl::wait(std::size_t msecs)
-{
-    _socket.wait(msecs);
-}*/
 
 
 void ClientImpl::sendRequest(const Request& request)
@@ -394,10 +389,10 @@ void ClientImpl::sendRequest(const Request& request)
 
 void ClientImpl::onConnect(Net::TcpSocket& socket)
 {
+    log_trace("onConnect");
+
     try
     {
-        log_trace("onConnect");
-
         _errorPending = false;
         socket.endConnect();
         sendRequest(*_request);
@@ -405,7 +400,7 @@ void ClientImpl::onConnect(Net::TcpSocket& socket)
         log_debug("request sent - begin write");
         _stream.buffer().beginWrite();
     }
-    catch (const std::exception& )
+    catch(...)
     {
         _errorPending = true;
         _client->replyFinished(*_client);
@@ -458,7 +453,6 @@ void ClientImpl::onOutput(System::StreamBuffer& sb)
         log_warn("exception occured: " << e.what());
 
         _errorPending = true;
-
         _client->replyFinished(*_client);
 
         if (_errorPending)
@@ -468,49 +462,44 @@ void ClientImpl::onOutput(System::StreamBuffer& sb)
 
 void ClientImpl::onInput(System::StreamBuffer& sb)
 {
+    log_trace("ClientImpl::onInput; readHeader=" << _readHeader);
+
     try
     {
-        try
+        _errorPending = false;
+
+        sb.endRead();
+
+        // reconnect when received pending EOF from previous response
+        if( sb.device()->eof() )
         {
-            log_trace("ClientImpl::onInput; readHeader=" << _readHeader);
-
-            _errorPending = false;
-
-            sb.endRead();
-
-            if (sb.device()->eof())
-                throw System::IOError( PT_ERROR_MSG("end of input") );
-
-            _reconnectOnError = false;
-
-            if (_readHeader)
-            {
-                processHeaderAvailable(sb);
-            }
-            else
-            {
-                processBodyAvailable(sb);
-            }
-        }
-        catch (const System::IOError&)
-        {
-            // after writing the request, the first read request may
-            // detect, that the server has already closed the connection,
-            // so check it here
             if (_readHeader && _reconnectOnError && _request != 0)
             {
-                log_debug("reconnect on error");
+                log_debug("reconnect on EOF");
                 _socket.close();
                 _reconnectOnError = false;
                 reexecuteBegin(*_request);
                 return;
             }
 
-            throw;
+            throw System::IOError("unexpected EOF");
+        }
+
+        _reconnectOnError = false;
+
+        if (_readHeader)
+        {
+            processHeaderAvailable(sb);
+        }
+        else
+        {
+            processBodyAvailable(sb);
         }
     }
-    catch (const std::exception&)
+    catch (const std::exception& e)
     {
+        log_warn("exception occured: " << e.what());
+
         _errorPending = true;
         _client->replyFinished(*_client);
 

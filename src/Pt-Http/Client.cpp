@@ -65,21 +65,36 @@ Client::~Client()
     delete _impl;
 }
 
-void Client::connect(const Net::AddrInfo& addrinfo)
+void Client::setHost(const Net::AddrInfo& addrinfo)
 {
-    _impl->connect(addrinfo);
+    _impl->setHost(addrinfo);
 }
 
-void Client::connect(const std::string& host, unsigned short int port)
+void Client::setHost(const std::string& host, unsigned short int port)
 {
-    _impl->connect(Net::AddrInfo(host, port));
+    _impl->setHost(Net::AddrInfo(host, port));
 }
 
-const ReplyHeader& Client::execute(const Request& request, std::size_t timeout)
+const Net::AddrInfo& Client::host() const
+{
+    return _impl->host();
+}
+
+void Client::setActive(System::EventLoop& selector)
+{
+    _impl->setActive(selector);
+}
+
+void Client::setTimeout(std::size_t timeout)
+{
+    _impl->setTimeout(timeout);
+}
+
+const ReplyHeader& Client::execute(const Request& request)
 {
     try
     {
-        return _impl->execute(request, timeout);
+        return _impl->execute(request);
     }
     catch (...)
     {
@@ -98,9 +113,9 @@ void Client::readBody(std::string& s)
     _impl->readBody(s);
 }
 
-std::string Client::get(const std::string& url, std::size_t timeout)
+std::string Client::get(const std::string& url)
 {
-    return _impl->get(url, timeout);
+    return _impl->get(url);
 }
 
 void Client::beginExecute(const Request& request)
@@ -113,35 +128,15 @@ void Client::endExecute()
     _impl->endExecute();
 }
 
-void Client::setActive(System::EventLoop& selector)
-{
-    _impl->setActive(selector);
-}
-
-/*void Client::wait(std::size_t msecs)
-{
-    _impl->wait(msecs);
-}*/
-
 std::istream& Client::in()
 {
     return _impl->in();
 }
 
-const std::string& Client::host() const
-{
-    return _impl->host();
-}
-
-unsigned short int Client::port() const
-{
-    return _impl->port();
-}
-
 // Sets the username and password for all subsequent requests.
-void Client::auth(const std::string& username, const std::string& password)
+void Client::setAuth(const std::string& username, const std::string& password)
 {
-    _impl->auth(username, password);
+    _impl->setAuth(username, password);
 }
 
 void Client::clearAuth()

@@ -67,16 +67,19 @@ class PT_HTTP_API Client : private NonCopyable
 
         void setActive(System::EventLoop& loop);
 
+        void setTimeout(std::size_t timeout);
+
         // Sets the host and port. No actual network connect is done.
-        void connect(const Net::AddrInfo& addrinfo);
+        void setHost(const Net::AddrInfo& addrinfo);
         
-        void connect(const std::string& host, unsigned short int port);
+        void setHost(const std::string& host, unsigned short int port);
+
+        const Net::AddrInfo& host() const;
 
         // Sends the passed request to the server and parses the headers.
         // The body must be read with readBody.
         // This method blocks or times out until the body is parsed.
-        const ReplyHeader& execute(const Request& request, 
-                                   std::size_t timeout = System::EventLoop::WaitInfinite);
+        const ReplyHeader& execute(const Request& request);
 
         const ReplyHeader& header();
 
@@ -95,8 +98,7 @@ class PT_HTTP_API Client : private NonCopyable
 
         // Combines the execute and readBody methods in one call.
         // This method blocks until the reply is recieved.
-        std::string get(const std::string& url,
-                        std::size_t timeout = System::EventLoop::WaitInfinite);
+        std::string get(const std::string& url);
 
         // Starts a new request.
         // This method does not block. To actually process the request, the
@@ -108,19 +110,11 @@ class PT_HTTP_API Client : private NonCopyable
 
         void endExecute();
 
-        // Executes the underlying selector until a event occures or the
-        // specified timeout is reached.
-        //void wait(std::size_t msecs);
-
         // Returns the underlying stream, where the reply may be read from.
         std::istream& in();
 
-        const std::string& host() const;
-
-        unsigned short int port() const;
-
         // Sets the username and password for all subsequent requests.
-        void auth(const std::string& username, const std::string& password);
+        void setAuth(const std::string& username, const std::string& password);
 
         void clearAuth();
 

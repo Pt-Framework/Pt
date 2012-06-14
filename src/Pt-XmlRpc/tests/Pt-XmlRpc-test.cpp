@@ -78,7 +78,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
         PtXmlRpcTest()
         : Pt::Unit::TestSuite("Pt-XmlRpc-Test")
         {
-            Pt::System::Logger::setLogLevel("", Pt::System::Warn);
+            Pt::System::Logger::setLogLevel("", Pt::System::Error);
 
             registerMethod("Fault", *this, &PtXmlRpcTest::Fault);
             registerMethod("Exception", *this, &PtXmlRpcTest::Exception);
