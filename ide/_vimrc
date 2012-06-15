@@ -150,6 +150,10 @@ vnoremap <BS> d
 :nnoremap <S-Down> vj
 :vnoremap <S-Down> j
 
+" Shift text blocks
+:vnoremap <Tab> >gv
+:vnoremap <S-Tab> <gv
+
 " Copy text
 :noremap <C-c> "+y<CR>
 :inoremap <C-c> <C-o>"+y
