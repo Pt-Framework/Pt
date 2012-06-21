@@ -64,12 +64,14 @@ class PT_HTTP_API Server : public Pt::Connectable
         explicit Server(System::EventLoop& eventLoop);
 
         Server(System::EventLoop& eventLoop, const std::string& ip, unsigned short int port, int backlog = 5);
-		Server(System::EventLoop& eventLoop, const Pt::Net::AddrInfo& addr, int backlog = 5);
+
+        Server(System::EventLoop& eventLoop, const Pt::Net::AddrInfo& addr, int backlog = 5);
 
         ~Server();
 
         void listen(const std::string& ip, unsigned short int port, int backlog = 5);
-		void listen(const Pt::Net::AddrInfo& addr, int backlog = 5);
+
+        void listen(const Pt::Net::AddrInfo& addr, int backlog = 5);
 
         void addService(const std::string& url, Service& service);
 
@@ -91,23 +93,9 @@ class PT_HTTP_API Server : public Pt::Connectable
 
         void keepAliveTimeout(std::size_t ms);
 
-        unsigned minThreads() const;
-
-        void minThreads(unsigned m);
-
         unsigned maxThreads() const;
 
-        void maxThreads(unsigned m);
-
-        enum Runmode {
-          Stopped,
-          Starting,
-          Running,
-          Terminating,
-          Failed
-        };
-
-        Signal<Runmode> runmodeChanged;
+        void setMaxThreads(unsigned m);
 
         System::EventLoop& loop()
         {return _loop; }
@@ -125,15 +113,14 @@ class PT_HTTP_API Server : public Pt::Connectable
         std::vector<TcpConnection*> _connections;
         std::vector<ServerThread*> _serverThreads;
         unsigned _useWorker;
-        unsigned _minThreads;
         unsigned _maxThreads;
         std::size_t _readTimeout;
         std::size_t _writeTimeout;
         std::size_t _keepAliveTimeout;
 
-        typedef std::multimap<std::string, Service*> ServicesType;
+        typedef std::multimap<std::string, Service*> ServiceMap;
         System::ReadWriteMutex _serviceMutex;
-        ServicesType _services;
+        ServiceMap _services;
         NotFoundService* _defaultService;
         NotAuthenticatedService* _noAuthService;
 };

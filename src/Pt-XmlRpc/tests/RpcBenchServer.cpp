@@ -78,8 +78,7 @@ int main(int argc, char* argv[])
 
     Pt::System::MainLoop loop;
     Pt::Http::Server server(loop, ip, port);
-    server.minThreads(threads);
-    server.maxThreads(maxThreads);
+    server.setMaxThreads(maxThreads);
 
     EchoService service;
     //service.registerFunction("echo", echo);

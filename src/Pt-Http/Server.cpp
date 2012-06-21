@@ -527,7 +527,6 @@ class ServerThread : public Connectable
 Server::Server(System::EventLoop& eventLoop)
 : _loop(eventLoop)
 , _useWorker(0)
-, _minThreads(1)
 , _maxThreads(1)
 , _readTimeout(20000)
 , _writeTimeout(20000)
@@ -545,7 +544,6 @@ Server::Server(System::EventLoop& eventLoop, const std::string& ip, unsigned sho
 : _loop(eventLoop)
 , _serverSocket(ip, port, backlog)
 , _useWorker(0)
-, _minThreads(1)
 , _maxThreads(1)
 , _readTimeout(20000)
 , _writeTimeout(20000)
@@ -566,7 +564,6 @@ Server::Server(System::EventLoop& eventLoop, const Pt::Net::AddrInfo& addr, int 
 : _loop(eventLoop)
 , _serverSocket(addr, backlog)
 , _useWorker(0)
-, _minThreads(1)
 , _maxThreads(1)
 , _readTimeout(20000)
 , _writeTimeout(20000)
@@ -672,7 +669,7 @@ void Server::onConnectionTimeout(TcpConnection& conn)
 void Server::addService(const std::string& url, Service& service)
 {
     System::WriteLock serviceLock(_serviceMutex);
-    _services.insert(ServicesType::value_type(url, &service));
+    _services.insert(ServiceMap::value_type(url, &service));
 }
 
 
@@ -681,7 +678,7 @@ void Server::removeService(Service& service)
     System::WriteLock serviceLock(_serviceMutex);
     service.waitIdle();
 
-    ServicesType::iterator it = _services.begin();
+    ServiceMap::iterator it = _services.begin();
     while (it != _services.end())
     {
         if (it->second == &service)
@@ -700,7 +697,7 @@ Responder* Server::getResponder(const Request& request)
 {
     System::ReadLock serviceLock(_serviceMutex);
 
-    for (ServicesType::const_iterator it = _services.lower_bound(request.url());
+    for (ServiceMap::const_iterator it = _services.lower_bound(request.url());
         it != _services.end() && it->first == request.url(); ++it)
     {
         if (!it->second->checkAuth(request))
@@ -761,25 +758,13 @@ void Server::keepAliveTimeout(std::size_t ms)
 }
 
 
-unsigned Server::minThreads() const
-{
-    return _minThreads;
-}
-
-
-void Server::minThreads(unsigned m)
-{
-    _minThreads = m;
-}
-
-
 unsigned Server::maxThreads() const
 {
     return _maxThreads;
 }
 
 
-void Server::maxThreads(unsigned m)
+void Server::setMaxThreads(unsigned m)
 {
     _maxThreads = m;
 }
