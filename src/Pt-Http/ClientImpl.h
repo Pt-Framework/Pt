@@ -50,6 +50,65 @@ namespace Http {
 
 class Client;
 
+class Client2 : public Connectable
+{
+        class PT_HTTP_API ParseEvent : public HeaderParser::MessageHeaderEvent
+        {
+                ReplyHeader& _replyHeader;
+
+            public:
+                explicit ParseEvent(ReplyHeader& replyHeader)
+                    : HeaderParser::MessageHeaderEvent(replyHeader),
+                      _replyHeader(replyHeader)
+                    { }
+
+                void onHttpReturn(unsigned ret, const std::string& text) {}
+        };
+
+    public:
+        Client2(std::iostream& ios);
+
+        void beginExecute(const Request& request, const Net::AddrInfo& addrInfo);
+
+        bool advance();
+
+        // Signals that the header is received.
+        Signal<Client2&> headerReceived;
+
+        // This delegate is called, when data is arrived while reading the
+        // body. The connected functor must return the number of bytes read.
+        Pt::Delegate<std::size_t, Client2&, std::istream&> bodyAvailable;
+
+        // Signals that the reply is completely processed.
+        Signal<Client2&> replyFinished;
+
+    private:
+        void parseHeader();
+
+        bool parseBody();
+
+    private:
+        std::iostream* _ios;
+        std::string _username;
+        std::string _password;
+        HeaderParser _parser;
+        ParseEvent _parseEvent;
+        ReplyHeader _replyHeader;
+        long _contentLength;
+        ChunkedIStream _chunkedIStream;
+        bool _readHeader;
+};
+
+
+class IOClient
+{
+    public:
+        IOClient();
+
+        ~IOClient();
+};
+
+
 class ClientImpl : public Connectable
 {
         friend class ParseEvent;

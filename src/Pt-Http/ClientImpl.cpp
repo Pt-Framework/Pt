@@ -41,6 +41,251 @@ namespace Pt {
 
 namespace Http {
 
+Client2::Client2(std::iostream& ios)
+: _ios(&ios)
+, _readHeader(true)
+, _parser(_parseEvent, true)
+, _parseEvent(_replyHeader)
+, _chunkedIStream( ios.rdbuf() )
+{
+}
+
+
+void Client2::beginExecute(const Request& request, const Net::AddrInfo& addrInfo)
+{
+    log_debug("send request " << request.url());
+    
+    if( ! _ios )
+        return;
+
+    static const char* contentLength = "Content-Length";
+    static const char* connection = "Connection";
+    static const char* date = "Date";
+    static const char* host = "Host";
+    static const char* authorization = "Authorization";
+    static const char* userAgent = "User-Agent";
+
+    *_ios << request.method() << ' '
+            << request.url() << " HTTP/"
+            << request.header().httpVersionMajor() << '.'
+            << request.header().httpVersionMinor() << "\r\n";
+
+    for (RequestHeader::const_iterator it = request.header().begin();
+        it != request.header().end(); ++it)
+    {
+        *_ios << it->first << ": " << it->second << "\r\n";
+    }
+
+   if (!request.header().hasHeader(contentLength))
+    {
+        *_ios << "Content-Length: " << request.bodySize() << "\r\n";
+    }
+
+    if (!request.header().hasHeader(connection))
+    {
+        *_ios << "Connection: keep-alive\r\n";
+    }
+
+    if (!request.header().hasHeader(date))
+    {
+        char buffer[50];
+        *_ios << "Date: " << MessageHeader::htdateCurrent(buffer) << "\r\n";
+    }
+
+    if (!request.header().hasHeader(host))
+    {
+        *_ios << "Host: " << addrInfo.host();
+        unsigned short port = addrInfo.port();
+        if (port != 80)
+            *_ios << ':' << port;
+        *_ios << "\r\n";
+    }
+
+    if (!request.header().hasHeader(userAgent))
+    {
+        *_ios << "User-Agent: Pt-Http-client\r\n";
+    }
+
+    if (!_username.empty() && !request.header().hasHeader(authorization))
+    {
+        std::ostringstream d;
+        BasicTextOStream<char, char> b(d, new Base64Codec());
+        b << _username
+          << ':'
+          << _password;
+        b.terminate();
+        log_debug("set Authorization to " << d.str());
+        *_ios << "Authorization: Basic " << d.str() << "\r\n";
+    }
+
+    *_ios << "\r\n";
+
+    log_debug("send body; " << request.bodySize() << " bytes");
+
+    request.sendBody(*_ios);
+
+    _readHeader = true;
+}
+
+
+bool Client2::advance()
+{
+    if (_readHeader)
+    {
+        parseHeader();
+    }
+    else
+    {
+        parseBody();
+    }
+
+    return _ios->rdbuf()->in_avail() == 0;
+}
+
+
+void Client2::parseHeader()
+{
+    if( ! _ios )
+        return;
+
+    _parser.advance(*_ios);
+
+    if( _parser.fail() )
+        throw std::runtime_error("http parser failed"); // TODO define exception class
+
+    if( ! _parser.end() )
+        return;
+    
+    bool chunkedEncoding = _replyHeader.chunkedTransferEncoding();
+
+    headerReceived.send(*this);
+    _readHeader = false;
+
+    if (chunkedEncoding)
+    {
+        log_debug("chunked transfer encoding used");
+
+        _chunkedIStream.reset();
+
+        if( _ios->rdbuf()->in_avail() > 0 )
+        {
+            parseBody();
+            return;
+        }
+    }
+    else
+    {
+        _contentLength = _replyHeader.contentLength();
+        log_debug("header received - content-length=" << _contentLength);
+
+        if (_contentLength > 0)
+        {
+            if( _ios->rdbuf()->in_avail() > 0 )
+            {
+                parseBody();
+                return;
+            }
+        }
+
+        // TODO: caller must react to close/keepalive in Connection field of reply            
+        return;
+    }
+    
+    return;
+}
+
+bool Client2::parseBody()
+{
+    log_trace("processBodyAvailable");
+
+    bool chunkedEncoding = _replyHeader.chunkedTransferEncoding();
+
+    if (chunkedEncoding)
+    {
+        if (_chunkedIStream.rdbuf()->in_avail() > 0)
+        {
+            if (!_chunkedIStream.eod())
+            {
+                log_debug("read chunked encoding body");
+
+                while (_chunkedIStream.good()
+                    && _chunkedIStream.rdbuf()->in_avail() > 0
+                    && !_chunkedIStream.eod())
+                {
+                    log_debug("bodyAvailable");
+                    bodyAvailable(*this, _chunkedIStream);
+                }
+
+                log_debug("in_avail=" << _chunkedIStream.rdbuf()->in_avail() << " eod=" << _chunkedIStream.eod());
+                if( _chunkedIStream.eod() )
+                {
+                    if( _replyHeader.hasHeader("Trailer") )
+                        _parser.readHeader();
+                    else
+                        replyFinished(*this);
+                }
+            }
+
+            if (_chunkedIStream.eod() && _ios->rdbuf()->in_avail() > 0)
+            {
+                log_debug("read chunked encoding post headers");
+
+                _parser.advance( *(_ios->rdbuf()) );
+                if (_parser.fail())
+                    throw std::runtime_error("http parser failed"); // TODO define exception class
+
+                if( _parser.end() )
+                {
+                    log_debug("reply finished");
+                    replyFinished(*this);
+                }
+            }
+
+            if (_chunkedIStream.fail())
+                throw System::IOError( PT_ERROR_MSG("error reading HTTP reply body") );
+        }
+        else if( _chunkedIStream.eod() )
+        {
+            if( _replyHeader.hasHeader("Trailer") )
+                _parser.readHeader();
+            else
+                replyFinished(*this);
+        }
+    }
+    else
+    {
+        log_debug("content-length(pre)=" << _contentLength);
+
+        while (_ios->good() && _contentLength > 0 && _ios->rdbuf()->in_avail() > 0)
+        {
+            _contentLength -= bodyAvailable(*this, *_ios); // TODO: may throw exception
+            log_debug("content-length(post)=" << _contentLength);
+        }
+
+        if (_ios->fail())
+            throw System::IOError( PT_ERROR_MSG("error reading HTTP reply body") );
+
+        if( _contentLength <= 0 )
+        {
+            log_debug("reply finished");
+            replyFinished(*this);
+        }
+    }
+
+    return false;
+}
+
+
+IOClient::IOClient()
+{
+}
+
+
+IOClient::~IOClient()
+{
+}
+
+
 void ClientImpl::ParseEvent::onHttpReturn(unsigned ret, const std::string& text)
 {
     _replyHeader.httpReturn(ret, text);
