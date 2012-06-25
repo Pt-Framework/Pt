@@ -51,7 +51,17 @@ Client2::Client2(std::iostream& ios)
 }
 
 
-void Client2::beginExecute(const Request& request, const Net::AddrInfo& addrInfo)
+Client2::Client2()
+: _ios(0)
+, _readHeader(true)
+, _parser(_parseEvent, true)
+, _parseEvent(_replyHeader)
+, _chunkedIStream()
+{
+}
+
+
+void Client2::writeRequest(const Request& request)
 {
     log_debug("send request " << request.url());
     
@@ -92,14 +102,14 @@ void Client2::beginExecute(const Request& request, const Net::AddrInfo& addrInfo
         *_ios << "Date: " << MessageHeader::htdateCurrent(buffer) << "\r\n";
     }
 
-    if (!request.header().hasHeader(host))
+    /*if (!request.header().hasHeader(host))
     {
         *_ios << "Host: " << addrInfo.host();
         unsigned short port = addrInfo.port();
         if (port != 80)
             *_ios << ':' << port;
         *_ios << "\r\n";
-    }
+    }*/
 
     if (!request.header().hasHeader(userAgent))
     {
@@ -128,7 +138,7 @@ void Client2::beginExecute(const Request& request, const Net::AddrInfo& addrInfo
 }
 
 
-bool Client2::advance()
+bool Client2::readReply()
 {
     if (_readHeader)
     {
@@ -276,20 +286,15 @@ bool Client2::parseBody()
 }
 
 
-IOClient::IOClient()
-{
-}
-
-
-IOClient::~IOClient()
-{
-}
-
+//////////////////////////////////////////////////////////////////////////////
+// ClientImpl
+//////////////////////////////////////////////////////////////////////////////
 
 void ClientImpl::ParseEvent::onHttpReturn(unsigned ret, const std::string& text)
 {
     _replyHeader.httpReturn(ret, text);
 }
+
 
 ClientImpl::ClientImpl(Client* client)
 : _client(client)
@@ -298,11 +303,11 @@ ClientImpl::ClientImpl(Client* client)
 , _request(0)
 , _stream(8192, true)
 , _chunkedIStream(_stream.rdbuf())
+, _ctx(0)
 , _contentLength(0)
-, _readHeader(true)
-, _chunkedEncoding(false)
-, _reconnectOnError(false)
+, _reusedConnection(false)
 , _errorPending(false)
+, _state( &ClientImpl::processHeader )
 {
     _stream.attach(_socket);
     _socket.connected() += Pt::slot(*this, &ClientImpl::onConnect);
@@ -319,11 +324,11 @@ ClientImpl::ClientImpl(Client* client, const Net::AddrInfo& addrinfo)
 , _addrInfo(addrinfo)
 , _stream(8192, true)
 , _chunkedIStream(_stream.rdbuf())
+, _ctx(0)
 , _contentLength(0)
-, _readHeader(true)
-, _chunkedEncoding(false)
-, _reconnectOnError(false)
+, _reusedConnection(false)
 , _errorPending(false)
+, _state( &ClientImpl::processHeader )
 {
     _stream.attach(_socket);
     _socket.connected() += Pt::slot(*this, &ClientImpl::onConnect);
@@ -340,11 +345,11 @@ ClientImpl::ClientImpl(Client* client, System::EventLoop& loop, const Net::AddrI
 , _addrInfo(addrinfo)
 , _stream(8192, true)
 , _chunkedIStream(_stream.rdbuf())
+, _ctx(0)
 , _contentLength(0)
-, _readHeader(true)
-, _chunkedEncoding(false)
-, _reconnectOnError(false)
+, _reusedConnection(false)
 , _errorPending(false)
+, _state( &ClientImpl::processHeader )
 {
     _stream.attach(_socket);
     _socket.connected() += Pt::slot(*this, &ClientImpl::onConnect);
@@ -366,93 +371,59 @@ void ClientImpl::setTimeout(std::size_t timeout)
 }
 
 
-void ClientImpl::reexecute(const Request& request)
-{
-    log_debug("reexecute");
-
-    _stream.clear();
-    _stream.buffer().discard();
-
-    _socket.connect(_addrInfo);
-
-    sendRequest(request);
-    _stream.flush();
-}
-
-void ClientImpl::reexecuteBegin(const Request& request)
-{
-    log_debug("reexecuteBegin");
-
-    _stream.clear();
-    _stream.buffer().discard();
-
-    _socket.beginConnect(_addrInfo);
-    _reconnectOnError = false;
-}
-
-void ClientImpl::doparse()
-{
-    char ch;
-    while (!_parser.end() && _stream.get(ch))
-        _parser.parse(ch);
-
-}
-
 const ReplyHeader& ClientImpl::execute(const Request& request)
 {
     log_trace("execute request " << request.url());
 
     _replyHeader.clear();
-
-    bool reuseConnection = _socket.isConnected();
-    if( ! reuseConnection)
-    {
-        log_debug("connect");
-        _socket.connect(_addrInfo);
-    }
-
-    log_debug("send request");
-    sendRequest(request);
-
-    _stream.flush();
-    
-    if( ! _stream && reuseConnection)
-    {
-        // received pending EOF from previous response -> reconnect
-        reexecute(request);
-        reuseConnection = false;
-    }
-
-    if( ! _stream)
-        throw System::IOError( PT_ERROR_MSG("error sending HTTP request") );
-
-    log_debug("read reply");
-
     _parser.reset(true);
-    _readHeader = true;
-    doparse();
 
-    if( ! _stream && _parser.begin() && reuseConnection)
+    for(;;)
     {
-        // received pending EOF from previous response -> reconnect
-        reexecute(request);
+        bool reuseConnection = _socket.isConnected();
+        if( ! reuseConnection)
+        {
+            log_debug("connect");
+            _socket.connect(_addrInfo);
+        }
+        
+        log_debug("sending request");
+        sendRequest(request);
+        _stream.flush();
 
-        if( ! _stream )
-            throw System::IOError( PT_ERROR_MSG("error sending HTTP request") );
+        log_debug("reading reply");
+        char ch = ' ';
+        while( ! _parser.end() && _stream.get(ch) )
+        {
+            _parser.parse(ch);
+        }
 
-        doparse();
+        if( _parser.fail() )
+        {
+            log_debug("invalid HTTP reply");
+            throw System::IOError( PT_ERROR_MSG("invalid HTTP reply") );
+        }
+
+        if( _parser.end() )
+        {
+            log_debug("reply ready");
+            break;
+        }
+
+        if( ! _stream && _parser.begin() && reuseConnection)
+        {
+            // received pending EOF from previous response -> reconnect
+            log_debug("reconnect to lost connection");
+            reuseConnection = false;
+            _socket.close();
+            _stream.clear();
+            _stream.buffer().discard();
+            continue;  
+        }
+
+        log_debug("HTTP I/O error");
+        throw System::IOError("HTTP I/O error");
     }
-
-    log_debug("reply ready");
-
-    if(_stream.fail())
-        throw System::IOError( PT_ERROR_MSG("failed to read HTTP reply") );
-
-    if(_parser.fail())
-        throw System::IOError( PT_ERROR_MSG("invalid HTTP reply") );
-
-    if( ! _parser.end() )
-        throw System::IOError( PT_ERROR_MSG("incomplete HTTP reply header") );
 
     return _replyHeader;
 }
@@ -462,10 +433,10 @@ void ClientImpl::readBody(std::string& s)
 {
     s.clear();
 
-    _chunkedEncoding = _replyHeader.chunkedTransferEncoding();
+    bool chunkedEncoding = _replyHeader.chunkedTransferEncoding();
     _chunkedIStream.reset();
 
-    if (_chunkedEncoding)
+    if(chunkedEncoding)
     {
         log_debug("read body with chunked encoding");
 
@@ -508,41 +479,35 @@ void ClientImpl::readBody(std::string& s)
 }
 
 
-std::string ClientImpl::get(const std::string& url)
-{
-    Request request(url);
-    execute(request);
-    return readBody();
-}
-
-
-void ClientImpl::beginExecute(const Request& request)
+void ClientImpl::beginRequest(const Request& request)
 {
     log_trace("beginExecute");
 
-    _reconnectOnError = false;
+    _reusedConnection = false;
     _errorPending = false;
     _request = &request;
     _replyHeader.clear();
+    _parser.reset(true);
+    _state = &ClientImpl::processHeader;
     
     if(  ! _socket.isConnected() )
     {
-        log_debug("begin connect");
+        log_debug("opening new connection to " << _addrInfo.host());
         _socket.beginConnect(_addrInfo);
         return;
     }
 
-    log_debug("reusing connection");
+    log_debug("reusing previous connection");
+    _reusedConnection = true;
     sendRequest(*_request);
         
     try
     {
         _stream.buffer().beginWrite();
-        _reconnectOnError = true;
     }
     catch (const System::IOError&)
     {
-        log_debug("write to reused connection failed -> reconnecting");
+        log_debug("write failed, reconnecting");
 
         _stream.clear();
         _stream.buffer().discard();
@@ -553,6 +518,8 @@ void ClientImpl::beginExecute(const Request& request)
 
 void ClientImpl::endExecute()
 {
+    _request = 0;
+
     if (_errorPending)
     {
         _errorPending = false;
@@ -632,13 +599,13 @@ void ClientImpl::sendRequest(const Request& request)
     request.sendBody(_stream);
 }
 
+
 void ClientImpl::onConnect(Net::TcpSocket& socket)
 {
     log_trace("onConnect");
 
     try
     {
-        _errorPending = false;
         socket.endConnect();
         sendRequest(*_request);
 
@@ -647,159 +614,221 @@ void ClientImpl::onConnect(Net::TcpSocket& socket)
     }
     catch(...)
     {
-        _errorPending = true;
-        _client->replyFinished(*_client);
-
-        if (_errorPending)
-            throw;
+        this->onError();
     }
 }
+
 
 void ClientImpl::onOutput(System::StreamBuffer& sb)
 {
-    log_trace("ClientImpl::onOutput; out_avail=" << sb.out_avail());
+    log_trace("onOutput: out_avail=" << sb.out_avail());
 
     try
     {
-        try
+        sb.endWrite();
+
+        if( sb.out_avail() > 0 )
         {
-            _errorPending = false;
-
-            sb.endWrite();
-
-            if( sb.out_avail() > 0 )
-            {
-                sb.beginWrite();
-            }
-            else
-            {
-                sb.beginRead();
-                _client->requestSent(*_client);
-                _parser.reset(true);
-                _readHeader = true;
-            }
+            sb.beginWrite();
         }
-        catch (const System::IOError&)
+        else
         {
-            if (_reconnectOnError && _request != 0)
-            {
-                log_debug("reconnect on error");
-                _socket.close();
-                _reconnectOnError = false;
-                reexecuteBegin(*_request);
-                return;
-            }
-
-            throw;
+            sb.beginRead();
+            _client->requestSent(*_client);
         }
+    }
+    catch (const System::IOError&)
+    {
+        if (_reusedConnection)
+        {
+            log_debug("reconnect on error");
+            cancel();
+            beginRequest(*_request);
+            return;
+        }
+
+        this->onError();
     }
     catch (const std::exception& e)
     {
         log_warn("exception occured: " << e.what());
-
-        _errorPending = true;
-        _client->replyFinished(*_client);
-
-        if (_errorPending)
-            throw;
+        this->onError();
     }
 }
+
 
 void ClientImpl::onInput(System::StreamBuffer& sb)
 {
-    log_trace("ClientImpl::onInput; readHeader=" << _readHeader);
+    log_trace("ClientImpl::onInput");
 
     try
     {
-        _errorPending = false;
-
         sb.endRead();
-
-        // reconnect when received pending EOF from previous response
-        if( sb.device()->eof() )
-        {
-            if (_readHeader && _reconnectOnError && _request != 0)
-            {
-                log_debug("reconnect on EOF");
-                _socket.close();
-                _reconnectOnError = false;
-                reexecuteBegin(*_request);
-                return;
-            }
-
-            throw System::IOError("unexpected EOF");
-        }
-
-        _reconnectOnError = false;
-
-        if (_readHeader)
-        {
-            processHeaderAvailable(sb);
-        }
-        else
-        {
-            processBodyAvailable(sb);
-        }
+        (this->*_state)(sb);
     }
     catch (const std::exception& e)
     {
         log_warn("exception occured: " << e.what());
-
-        _errorPending = true;
-        _client->replyFinished(*_client);
-
-        if (_errorPending)
-            throw;
+        this->onError();
     }
 }
 
-void ClientImpl::processHeaderAvailable(System::StreamBuffer& sb)
+
+void ClientImpl::onError()
 {
+    _errorPending = true;
+    _client->replyFinished(*_client);
+
+    if (_errorPending)
+    {
+        _errorPending = false;
+        throw;
+    }
+}
+
+
+void ClientImpl::processHeader(System::StreamBuffer& sb)
+{
+    // reconnect when received pending EOF from previous response
+    if( sb.device()->eof() )
+    {
+        if(_reusedConnection)
+        {
+            log_debug("reconnect on EOF");
+            cancel();
+            beginRequest(*_request);
+            return;
+        }
+
+        throw System::IOError("unexpected EOF");
+    }
+
+    _reusedConnection = false;
     _parser.advance(sb);
 
-    if (_parser.fail())
+    if( _parser.fail() )
         throw std::runtime_error("http parser failed"); // TODO define exception class
 
-    if( _parser.end() )
+    if( ! _parser.end() )
     {
-        _chunkedEncoding = _replyHeader.chunkedTransferEncoding();
+        sb.beginRead();
+        return;
+    }
 
-        _client->headerReceived(*_client);
-        _readHeader = false;
+    _client->headerReceived(*_client);
+    
+    bool chunkedEncoding = _replyHeader.chunkedTransferEncoding();
+    if(chunkedEncoding)
+    {
+        log_debug("chunked transfer encoding used");
+        _state = &ClientImpl::processChunkedBody;
+        _chunkedIStream.reset();
+    }
+    else
+    {
+      _state = &ClientImpl::processBody;
+      _contentLength = _replyHeader.contentLength();
+      log_debug("received header, content-length=" << _contentLength);
+      
+      if (_contentLength <= 0)
+      {
+          if( ! _replyHeader.keepAlive() )
+          {
+              log_debug("close socket - no keep alive");
+              _socket.close();
+          }
 
-        if (_chunkedEncoding)
+          _client->replyFinished(*_client);
+          return;
+      }
+    }
+
+    if( sb.in_avail() <= 0 )
+    {
+        sb.beginRead();
+        return;
+    }
+
+    (this->*_state)(sb);
+}
+
+
+void ClientImpl::processBody(System::StreamBuffer& sb)
+{
+    log_trace("processBody: content-length(pre)=" << _contentLength);
+
+    while( _stream.good() && _contentLength > 0 && sb.in_avail() > 0 )
+    {
+        _contentLength -= _client->bodyAvailable(*_client); // TODO: may throw exception
+        log_debug("content-length(post)=" << _contentLength);
+    }
+
+    if( _stream.fail() )
+        throw System::IOError( PT_ERROR_MSG("error reading HTTP reply body") );
+
+    if( _contentLength <= 0 )
+    {
+        log_debug("reply finished");
+
+        if( ! _replyHeader.keepAlive() )
         {
-            log_debug("chunked transfer encoding used");
+            log_debug("close socket - no keep alive");
+            _socket.close();
+        }
 
-            _chunkedIStream.reset();
+        _client->replyFinished(*_client);
+    }
+    else if (_socket.isConnected() && _stream.good())
+    {
+        sb.beginRead();
+    }
+    else
+    {
+        cancel();
+    }
+}
 
-            if( sb.in_avail() > 0 )
+
+void ClientImpl::processChunkedBody(System::StreamBuffer& sb)
+{
+    log_trace("processChunkedBody");
+
+    if( _chunkedIStream.rdbuf()->in_avail() > 0 )
+    {
+        if( ! _chunkedIStream.eod() )
+        {
+            log_debug("read chunked encoding body");
+
+            while (_chunkedIStream.good()
+                && _chunkedIStream.rdbuf()->in_avail() > 0
+                && !_chunkedIStream.eod())
             {
-                processBodyAvailable(sb);
+                log_debug("bodyAvailable");
+                _client->bodyAvailable(*_client);
             }
-            else
+
+            log_debug("in_avail=" << _chunkedIStream.rdbuf()->in_avail() << " eod=" << _chunkedIStream.eod());
+            if( _chunkedIStream.eod() )
             {
-                sb.beginRead();
+                if( _replyHeader.hasHeader("Trailer") )
+                    _parser.readHeader();
+                else
+                    _client->replyFinished(*_client);
             }
         }
-        else
-        {
-            _contentLength = _replyHeader.contentLength();
-            log_debug("header received - content-length=" << _contentLength);
 
-            if (_contentLength > 0)
+        if (_chunkedIStream.eod() && sb.in_avail() > 0)
+        {
+            log_debug("read chunked encoding post headers");
+
+            _parser.advance(sb);
+            if (_parser.fail())
+                throw std::runtime_error("http parser failed"); // TODO define exception class
+
+            if( _parser.end() )
             {
-                if( sb.in_avail() > 0 )
-                {
-                    processBodyAvailable(sb);
-                }
-                else
-                {
-                    sb.beginRead();
-                }
-            }
-            else
-            {
+                log_debug("reply finished");
+
                 if (!_replyHeader.keepAlive())
                 {
                     log_debug("close socket - no keep alive");
@@ -809,124 +838,32 @@ void ClientImpl::processHeaderAvailable(System::StreamBuffer& sb)
                 _client->replyFinished(*_client);
             }
         }
-    }
-    else
-    {
-        sb.beginRead();
-    }
-}
 
-void ClientImpl::processBodyAvailable(System::StreamBuffer& sb)
-{
-    log_trace("processBodyAvailable");
-
-    if (_chunkedEncoding)
-    {
-        if (_chunkedIStream.rdbuf()->in_avail() > 0)
-        {
-            if (!_chunkedIStream.eod())
-            {
-                log_debug("read chunked encoding body");
-
-                while (_chunkedIStream.good()
-                    && _chunkedIStream.rdbuf()->in_avail() > 0
-                    && !_chunkedIStream.eod())
-                {
-                    log_debug("bodyAvailable");
-                    _client->bodyAvailable(*_client);
-                }
-
-                log_debug("in_avail=" << _chunkedIStream.rdbuf()->in_avail() << " eod=" << _chunkedIStream.eod());
-                if( _chunkedIStream.eod() )
-                {
-                    if( _replyHeader.hasHeader("Trailer") )
-                        _parser.readHeader();
-                    else
-                        _client->replyFinished(*_client);
-                }
-            }
-
-            if (_chunkedIStream.eod() && sb.in_avail() > 0)
-            {
-                log_debug("read chunked encoding post headers");
-
-                _parser.advance(sb);
-                if (_parser.fail())
-                    throw std::runtime_error("http parser failed"); // TODO define exception class
-
-                if( _parser.end() )
-                {
-                    log_debug("reply finished");
-
-                    if (!_replyHeader.keepAlive())
-                    {
-                        log_debug("close socket - no keep alive");
-                        _socket.close();
-                    }
-
-                    _client->replyFinished(*_client);
-                }
-            }
-
-            if (_chunkedIStream.fail())
-                throw System::IOError( PT_ERROR_MSG("error reading HTTP reply body") );
-        }
-        else if( _chunkedIStream.eod() )
-        {
-            if( _replyHeader.hasHeader("Trailer") )
-                _parser.readHeader();
-            else
-                _client->replyFinished(*_client);
-        }
-
-        if (_socket.isConnected())
-        {
-            if ((!_chunkedIStream.eod() || !_parser.end()))
-            {
-                log_debug("call beginRead");
-                sb.beginRead();
-            }
-        }
-        else
-        {
-            cancel();
-        }
-    }
-    else
-    {
-        log_debug("content-length(pre)=" << _contentLength);
-
-        while (_stream.good() && _contentLength > 0 && sb.in_avail() > 0)
-        {
-            _contentLength -= _client->bodyAvailable(*_client); // TODO: may throw exception
-            log_debug("content-length(post)=" << _contentLength);
-        }
-
-        if (_stream.fail())
+        if (_chunkedIStream.fail())
             throw System::IOError( PT_ERROR_MSG("error reading HTTP reply body") );
-
-        if( _contentLength <= 0 )
-        {
-            log_debug("reply finished");
-
-            if (!_replyHeader.keepAlive())
-            {
-                log_debug("close socket - no keep alive");
-                _socket.close();
-            }
-
+    }
+    else if( _chunkedIStream.eod() )
+    {
+        if( _replyHeader.hasHeader("Trailer") )
+            _parser.readHeader();
+        else
             _client->replyFinished(*_client);
-        }
-        else if (_socket.isConnected() && _stream.good())
+    }
+
+    if (_socket.isConnected())
+    {
+        if ((!_chunkedIStream.eod() || !_parser.end()))
         {
+            log_debug("call beginRead");
             sb.beginRead();
         }
-        else
-        {
-            cancel();
-        }
+    }
+    else
+    {
+        cancel();
     }
 }
+
 
 void ClientImpl::cancel()
 {
@@ -936,7 +873,6 @@ void ClientImpl::cancel()
 
     _chunkedIStream.reset();
 }
-
 
 } // namespace Http
 

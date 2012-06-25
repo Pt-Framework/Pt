@@ -46,6 +46,10 @@
 
 namespace Pt {
 
+namespace Ssl {
+  class Context;
+}
+
 namespace Http {
 
 class Client;
@@ -68,9 +72,9 @@ class Client2 : public Connectable
     public:
         Client2(std::iostream& ios);
 
-        void beginExecute(const Request& request, const Net::AddrInfo& addrInfo);
+        void writeRequest(const Request& request);
 
-        bool advance();
+        bool readReply();
 
         // Signals that the header is received.
         Signal<Client2&> headerReceived;
@@ -81,6 +85,12 @@ class Client2 : public Connectable
 
         // Signals that the reply is completely processed.
         Signal<Client2&> replyFinished;
+
+    protected:
+        Client2();
+
+        void init(std::iostream& ios)
+        { _ios = &ios; }
 
     private:
         void parseHeader();
@@ -100,22 +110,143 @@ class Client2 : public Connectable
 };
 
 
-class IOClient
+class TcpClient : public Client2
 {
     public:
-        IOClient();
+        TcpClient()
+        : _reusedConnection(false)
+        {
+            _socket.connected() += Pt::slot(*this, &TcpClient::onConnect);
+            
+            _stream.attach(_socket);
+            _stream.buffer().outputReady() += Pt::slot(*this, &TcpClient::onOutput);
+            _stream.buffer().inputReady() += Pt::slot(*this, &TcpClient::onInput);
+            
+            Client2::init(_stream);
+        }
 
-        ~IOClient();
+        ~TcpClient()
+        {
+        }
+
+        void setActive(System::EventLoop& loop)
+        {
+            _socket.setActive(loop);
+        }
+
+        void setHost(const Net::AddrInfo& addrinfo)
+        {
+            _addrInfo = addrinfo;
+            _socket.close();
+        }
+
+        void beginRequest(const Request& request)
+        {
+            _socket.beginConnect(_addrInfo);
+        }
+
+    private:
+        void onConnect(Net::TcpSocket& socket)
+        {
+            _socket.endConnect();
+            _stream.buffer().beginRead();
+        }
+
+        void onOutput(System::StreamBuffer& sb)
+        {
+        }
+
+        void onInput(System::StreamBuffer& sb)
+        {
+        }
+
+    private:
+        Net::AddrInfo _addrInfo;
+        Net::TcpSocket _socket;
+        System::IOStream _stream;
+        bool _reusedConnection;
 };
 
 
 class ClientImpl : public Connectable
 {
-        friend class ParseEvent;
+    friend class ParseEvent;
 
-        Client* _client;
+    public:
+        ClientImpl(Client* client);
+        
+        ClientImpl(Client* client, const Net::AddrInfo& addrinfo);
+        
+        ClientImpl(Client* client, System::EventLoop& selector, const Net::AddrInfo& addrinfo);
 
-        class PT_HTTP_API ParseEvent : public HeaderParser::MessageHeaderEvent
+        void setTimeout(std::size_t timeout);
+
+        void setActive(System::EventLoop& loop);
+
+        void setHost(const Net::AddrInfo& addrinfo)
+        {
+            _addrInfo = addrinfo;
+            _socket.close();
+        }
+
+        const Net::AddrInfo& host() const
+        {
+            return _addrInfo;
+        }
+
+        void setAuth(const std::string& username, const std::string& password)
+        { 
+            _username = username; 
+            _password = password; 
+        }
+
+        void clearAuth()
+        { 
+            _username.clear(); 
+            _password.clear(); 
+        }
+
+        void setSecure(Ssl::Context& ctx)
+        {
+            _ctx = &ctx;
+        }
+
+        const ReplyHeader& execute(const Request& request);
+
+        const ReplyHeader& header()
+        { return _replyHeader; }
+
+        void readBody(std::string& s);
+
+        std::string get(const std::string& url);
+
+        void beginRequest(const Request& request);
+
+        void endExecute();
+
+        std::istream& in()
+        {
+            return _state == &ClientImpl::processChunkedBody ? static_cast<std::istream&>(_chunkedIStream)
+                                                             : static_cast<std::istream&>(_stream);
+        }
+
+        void cancel();
+
+    protected:
+        void onConnect(Net::TcpSocket& socket);
+        void onOutput(System::StreamBuffer& sb);
+        void onInput(System::StreamBuffer& sb);
+        void onError();
+
+    private:
+        void sendRequest(const Request& request);
+        void processInput(System::StreamBuffer& sb);
+        void processHeader(System::StreamBuffer& sb);
+        void processBody(System::StreamBuffer& sb);
+        void processChunkedBody(System::StreamBuffer& sb);
+
+    private:
+        class ParseEvent : public HeaderParser::MessageHeaderEvent
         {
                 ReplyHeader& _replyHeader;
 
@@ -127,7 +258,8 @@ class ClientImpl : public Connectable
 
                 void onHttpReturn(unsigned ret, const std::string& text);
         };
-
+        
+        Client* _client;
         ParseEvent _parseEvent;
         HeaderParser _parser;
 
@@ -141,102 +273,13 @@ class ClientImpl : public Connectable
         std::string _username;
         std::string _password;
 
+        Ssl::Context* _ctx;
+
         long _contentLength;
-        bool _readHeader;
-        bool _chunkedEncoding;
-        bool _reconnectOnError;
+        bool _reusedConnection;
         bool _errorPending;
 
-        void doparse();
-        void sendRequest(const Request& request);
-        void processHeaderAvailable(System::StreamBuffer& sb);
-        void processBodyAvailable(System::StreamBuffer& sb);
-
-        void reexecute(const Request& request);
-        void reexecuteBegin(const Request& request);
-
-    protected:
-        void onConnect(Net::TcpSocket& socket);
-        void onOutput(System::StreamBuffer& sb);
-        void onInput(System::StreamBuffer& sb);
-
-    public:
-        ClientImpl(Client* client);
-        ClientImpl(Client* client, const Net::AddrInfo& addrinfo);
-        ClientImpl(Client* client, System::EventLoop& selector, const Net::AddrInfo& addrinfo);
-
-        void setTimeout(std::size_t timeout);
-
-        // Sets the server and port. No actual network connect is done.
-        void setHost(const Net::AddrInfo& addrinfo)
-        {
-            _addrInfo = addrinfo;
-            _socket.close();
-        }
-
-        // Sends the passed request to the server and parses the headers.
-        // The body must be read with readBody.
-        // This method blocks or times out until the body is parsed.
-        const ReplyHeader& execute(const Request& request);
-
-        const ReplyHeader& header()
-        { return _replyHeader; }
-
-        // Reads the http body after header read with execute.
-        // This method blocks until the body is received.
-        void readBody(std::string& s);
-
-        // Reads the http body after header read with execute.
-        // This method blocks until the body is received.
-        std::string readBody()
-        {
-            std::string ret;
-            readBody(ret);
-            return ret;
-        }
-
-        // Combines the execute and readBody methods in one call.
-        // This method blocks until the reply is recieved.
-        std::string get(const std::string& url);
-
-        // Starts a new request.
-        // This method does not block. To actually process the request, the
-        // event loop must be executed. The state of the request is signaled
-        // with the corresponding signals and delegates.
-        // The delegate "bodyAvailable" must be connected, if a body is
-        // received.
-        void beginExecute(const Request& request);
-
-        void endExecute();
-
-        void setActive(System::EventLoop& loop);
-
-        // Returns the underlying stream, where the reply may be read from.
-        std::istream& in()
-        {
-            return _chunkedEncoding ? static_cast<std::istream&>(_chunkedIStream)
-                                    : static_cast<std::istream&>(_stream);
-        }
-
-        const Net::AddrInfo& host() const
-        {
-            return _addrInfo;
-        }
-
-        // Sets the username and password for all subsequent requests.
-        void setAuth(const std::string& username, const std::string& password)
-        { 
-            _username = username; 
-            _password = password; 
-        }
-
-        void clearAuth()
-        { 
-            _username.clear(); 
-            _password.clear(); 
-        }
-
-        void cancel();
+        void (ClientImpl::*_state)(System::StreamBuffer&);
 };
 
 } // namespace Http

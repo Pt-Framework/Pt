@@ -74,11 +74,16 @@ namespace Pt
     // ChunkedReader
 
     ChunkedReader::ChunkedReader(std::streambuf* ib, unsigned bufsize)
-        : _ib(ib),
-          _buffer(0),
-          _bufsize(bufsize),
-          _state(&ChunkedReader::onBegin)
+    : _ib(ib),
+      _buffer(0),
+      _bufsize(bufsize),
+      _state(&ChunkedReader::onBegin)
     {
+    }
+
+    void ChunkedReader::init(std::streambuf& ib)
+    { 
+        _ib = &ib; 
     }
 
     std::streamsize ChunkedReader::showmanyc()

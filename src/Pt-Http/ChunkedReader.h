@@ -33,58 +33,69 @@
 #include <streambuf>
 #include <iostream>
 
-namespace Pt
+namespace Pt {
+
+
+namespace Http {
+
+class ChunkedReader : public std::streambuf
 {
-    namespace Http
-    {
-        class ChunkedReader : public std::streambuf
-        {
-                std::streambuf* _ib;
-                char* _buffer;
-                unsigned _bufsize;
-                unsigned _chunkSize;
+        std::streambuf* _ib;
+        char* _buffer;
+        unsigned _bufsize;
+        unsigned _chunkSize;
 
-                void (ChunkedReader::*_state)();
+        void (ChunkedReader::*_state)();
 
-                void onBegin();
-                void onSize();
-                void onEndl();
-                void onExtension();
-                void onData();
-                void onDataEnd0();
-                void onDataEnd();
-                void onTrailer();
-                void onTrailerData();
+        void onBegin();
+        void onSize();
+        void onEndl();
+        void onExtension();
+        void onData();
+        void onDataEnd0();
+        void onDataEnd();
+        void onTrailer();
+        void onTrailerData();
 
-            public:
-                explicit ChunkedReader(std::streambuf* ib, unsigned bufsize = 8192);
-                ~ChunkedReader()  { delete[] _buffer; }
+    public:
+        explicit ChunkedReader(std::streambuf* ib = 0, unsigned bufsize = 8192);
+        ~ChunkedReader()  { delete[] _buffer; }
 
-                void reset()      { _state = &ChunkedReader::onBegin; setg(0, 0, 0); }
-                bool eod() const  { return _state == 0; }
+        void reset()      { _state = &ChunkedReader::onBegin; setg(0, 0, 0); }
+        bool eod() const  { return _state == 0; }
 
-                std::streamsize showmanyc();
-                virtual int sync();
-                virtual int_type overflow(int_type ch);
-                virtual int_type underflow();
+        std::streamsize showmanyc();
+        virtual int sync();
+        virtual int_type overflow(int_type ch);
+        virtual int_type underflow();
 
-        };
+        void init(std::streambuf& ib);
 
-        class ChunkedIStream : public std::istream
-        {
-                ChunkedReader _streambuf;
+};
 
-            public:
-                explicit ChunkedIStream(std::streambuf* ib)
-                  : std::istream(&_streambuf),
-                    _streambuf(ib)
-                  { }
+class ChunkedIStream : public std::istream
+{
+    public:
+        explicit ChunkedIStream(std::streambuf* ib = 0)
+        : std::istream(&_streambuf),
+        _streambuf(ib)
+        { }
 
-                void reset()        { _streambuf.reset(); clear(); }
-                bool eod() const    { return _streambuf.eod(); }
-        };
+        void init(std::streambuf& ib)
+        { _streambuf.init(ib); }
 
-    }
-}
+        void reset()        
+        { _streambuf.reset(); clear(); }
+        
+        bool eod() const    
+        { return _streambuf.eod(); }
+
+    private:
+        ChunkedReader _streambuf;
+};
+
+} // namespace Http
+
+} // namespace Pt
 
 #endif // PT_HTTP_CHUNKEDREADER_H

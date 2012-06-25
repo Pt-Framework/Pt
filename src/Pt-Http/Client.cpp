@@ -115,12 +115,14 @@ void Client::readBody(std::string& s)
 
 std::string Client::get(const std::string& url)
 {
-    return _impl->get(url);
+    Request request(url);
+    execute(request);
+    return readBody();
 }
 
 void Client::beginExecute(const Request& request)
 {
-    _impl->beginExecute(request);
+    _impl->beginRequest(request);
 }
 
 void Client::endExecute()
