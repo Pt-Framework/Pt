@@ -79,15 +79,16 @@ let g:miniBufExplSplitBelow = 0
 let g:miniBufExplorerMoreThanOne=1
 let g:miniBufExplCheckDupeBufs = 0
 
-" Taglist
+" Taglist or Tagbar
 let g:Tlist_Auto_Open = 0
 let g:Tlist_Show_One_File = 1
 let g:Tlist_WinWidth = 40
 let Tlist_Use_Right_Window = 1
 " let g:Tlist_Ctags_Cmd = 
+" let g:tagbar_ctags_bin =
 
-:noremap <C-l> :TlistToggle<CR>
-:noremap! <C-l> <C-o>:TlistToggle<CR>
+:noremap <C-l> :TagbarToggle<CR>
+:noremap! <C-l> <C-o>:TagbarToggle<CR>
 
 " Jump to tag
 :noremap <C-t> g<C-]>
@@ -197,4 +198,4 @@ vnoremap <BS> d
 :nnoremap <C-f> /
 
 " Replace selected text
-:noremap <C-h> "fh<C-o>:%s/<C-r>f
+:vnoremap <C-h> "fy<C-o>:%s/<C-r>f/XXX/gc
