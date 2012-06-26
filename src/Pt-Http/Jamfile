@@ -4,6 +4,11 @@ SubDirC++Flags [ FDefines PT_HTTP_API_EXPORT ] ;
 SubDirHdrs $(PT_TOP)/src/Pt-Http/$(SYS:L) ;
 SubDirObjects $(OUTPUT_OBJECT) Pt-Http ;
 
+#if $(WITH_OPENSSL)
+#{
+#    SubDirC++Flags [ FDefines PT_HTTP_WITH_SSL ] ;
+#}
+
 SharedLibrary Pt-Http : Client.cpp
                         ClientImpl.cpp
                         ChunkedReader.cpp

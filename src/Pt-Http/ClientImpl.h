@@ -29,10 +29,15 @@
 #ifndef Pt_Http_ClientImpl_h
 #define Pt_Http_ClientImpl_h
 
-#include <Pt/Net/TcpServer.h>
-#include <Pt/Net/TcpSocket.h>
 #include <Pt/Http/Request.h>
 #include <Pt/Http/Reply.h>
+#include <Pt/Net/TcpServer.h>
+#include <Pt/Net/TcpSocket.h>
+
+#ifdef PT_HTTP_WITH_SSL
+#include <Pt/Ssl/IOBuffer.h>
+#endif
+
 #include <Pt/System/Selectable.h>
 #include <Pt/System/IOStream.h>
 #include <Pt/System/Timer.h>
@@ -179,9 +184,15 @@ class ClientImpl : public Connectable
         
         ClientImpl(Client* client, System::EventLoop& selector, const Net::AddrInfo& addrinfo);
 
-        void setTimeout(std::size_t timeout);
+        void setActive(System::EventLoop& loop)
+        {
+            _socket.setActive(loop);
+        }
 
-        void setActive(System::EventLoop& loop);
+        void setTimeout(std::size_t timeout)
+        {
+            _socket.setTimeout(timeout);
+        }
 
         void setHost(const Net::AddrInfo& addrinfo)
         {
@@ -206,10 +217,12 @@ class ClientImpl : public Connectable
             _password.clear(); 
         }
 
+#ifdef PT_HTTP_WITH_SSL
         void setSecure(Ssl::Context& ctx)
         {
             _ctx = &ctx;
         }
+#endif
 
         const ReplyHeader& execute(const Request& request);
 
@@ -227,7 +240,7 @@ class ClientImpl : public Connectable
         std::istream& in()
         {
             return _state == &ClientImpl::processChunkedBody ? static_cast<std::istream&>(_chunkedIStream)
-                                                             : static_cast<std::istream&>(_stream);
+                                                             : static_cast<std::istream&>(_ios);
         }
 
         void cancel();
@@ -268,13 +281,16 @@ class ClientImpl : public Connectable
 
         Net::AddrInfo _addrInfo;
         Net::TcpSocket _socket;
-        System::IOStream _stream;
+        System::IOStream _ios;
         ChunkedIStream _chunkedIStream;
+        
+#ifdef PT_HTTP_WITH_SSL
+        Ssl::Context* _ctx;
+        Ssl::IOBuffer _sslbuf;
+#endif
+
         std::string _username;
         std::string _password;
-
-        Ssl::Context* _ctx;
-
         long _contentLength;
         bool _reusedConnection;
         bool _errorPending;

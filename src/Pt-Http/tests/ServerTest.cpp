@@ -83,13 +83,13 @@ class ServerTest : public Pt::Unit::TestSuite
         {
         }
 
-        std::size_t onReply(Pt::Http::Client& client)
+        std::size_t onReply(Pt::Http::Client& client, std::istream& is)
         {
             std::size_t ret = 0;
-            while ( client.in().rdbuf()->in_avail() )
+            while ( is.rdbuf()->in_avail() )
             {
                 char ch;
-                client.in().get(ch);
+                is.get(ch);
                 ++ret;
                 std::cout << ch;
             }

@@ -126,9 +126,8 @@ class PT_HTTP_API Client : private NonCopyable
         // Signals that the header is received.
         Signal<Client&> headerReceived;
 
-        // This delegate is called, when data is arrived while reading the
-        // body. The connected functor must return the number of bytes read.
-        Pt::Delegate<std::size_t, Client&> bodyAvailable;
+        // Signals that body data has arrived.
+        Signal<Client&, std::istream&> bodyAvailable;
 
         // Signals that the reply is completely processed.
         Signal<Client&> replyFinished;

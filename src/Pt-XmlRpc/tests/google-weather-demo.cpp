@@ -168,7 +168,7 @@ class GoogleWeatherClient : public Pt::Connectable
             _ts.attach( client.in() );
         }
 
-        size_t onBodyAvailable(Pt::Http::Client& client)
+        size_t onBodyAvailable(Pt::Http::Client& client, std::istream&)
         {
             // this callback can be called multiple times. Each time we
             // advance the XML parser.

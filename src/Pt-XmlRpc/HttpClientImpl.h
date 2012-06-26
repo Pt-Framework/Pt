@@ -86,7 +86,7 @@ class HttpClientImpl : public ClientImpl
     protected:
         void onReplyHeader(Http::Client& client);
 
-        std::size_t onReplyBody(Http::Client& client);
+        std::size_t onReplyBody(Http::Client& client, std::istream&);
 
         void onReplyFinished(Http::Client& client);
 

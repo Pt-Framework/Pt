@@ -45,6 +45,14 @@ namespace Ssl {
 class PT_SSL_API StreamBuffer : public std::streambuf
 {
     public:
+        /** @brief Construct an SSL stream buffer that uses the given IO stream. 
+        */
+        StreamBuffer(std::iostream& ios, size_t bufferSize = 1024);
+
+        /** @brief Construct an SSL stream buffer that uses the given SSL context. 
+        */
+        StreamBuffer(Context& ctx, size_t bufferSize = 1024);
+
         /** @brief Construct an SSL stream buffer that uses the given IO stream and SSL context. 
         */
         StreamBuffer(Context& ctx, std::iostream& ios, size_t bufferSize = 1024);
@@ -52,6 +60,10 @@ class PT_SSL_API StreamBuffer : public std::streambuf
         /** @brief Standard dtor. 
         */
         virtual ~StreamBuffer();
+
+        /** @brief Initializes the SSL stream to use the given context. 
+        */
+        void init(Context& ctx);
 
         /** @brief Return a list of available ciphers for the current protocol. 
         */
@@ -121,10 +133,8 @@ class PT_SSL_API StreamBuffer : public std::streambuf
         std::streamsize import();
 
     protected:
-        StreamBuffer(Context& ctx, size_t bufferSize = 1024);
-
         void attach(std::iostream& ios);
-        
+
         virtual int sync();
         
         virtual int_type underflow();
@@ -134,8 +144,6 @@ class PT_SSL_API StreamBuffer : public std::streambuf
         std::streamsize do_underflow(std::streamsize size);
 
     private:
-        void init(Context& ctx, std::iostream* ios = 0);
-
         /** @brief Get the current status string of this SSL stream buffer. 
         */
         const char* getStatus() const;

@@ -36,6 +36,16 @@ namespace Pt {
 
 namespace Ssl {
 
+IOBuffer::IOBuffer(Pt::System::IOStream& ios)
+: StreamBuffer(ios, 1024)
+, _ios(&ios)
+, _errorPending(0)
+, _reading(false)
+, _input(false)
+{
+}
+
+
 IOBuffer::IOBuffer(Context& ctx, Pt::System::IOStream& ios)
 : StreamBuffer(ctx, ios, 1024)
 , _ios(&ios)
@@ -53,7 +63,10 @@ IOBuffer::~IOBuffer()
 void IOBuffer::beginConnect(bool verifyServerCert)
 {
     log_debug("_sslbuf.beginClientHandshake(verifyServerCert = " << verifyServerCert << ")");
-    
+
+    if( ! _ios)
+        return;
+
     _errorPending = 0;
     StreamBuffer::setConnecting(verifyServerCert);
     StreamBuffer::writeHandshake();
@@ -67,6 +80,9 @@ void IOBuffer::beginConnect(bool verifyServerCert)
 
 void IOBuffer::beginAccept(bool verifyClientCert, bool requireCertBasedAuth)
 {
+    if( ! _ios)
+        return;
+
     log_debug("_sslbuf.beginClientHandshake(verifyServerCert = "
                << verifyClientCert << ", requireCertBasedAuth = " << requireCertBasedAuth << ")");
 
@@ -258,6 +274,9 @@ void IOBuffer::onReadServerHandshake(Pt::System::StreamBuffer& sb)
 
 void IOBuffer::beginShutdown()
 {
+    if( ! _ios)
+        return;
+
     _ios->buffer().outputReady() -= Pt::slot(*this, &IOBuffer::onOutput);
     _ios->buffer().inputReady()  -= Pt::slot(*this, &IOBuffer::onInput);
     _ios->buffer().outputReady() += Pt::slot(*this, &IOBuffer::onWriteShutdown);
@@ -321,6 +340,9 @@ void IOBuffer::onWriteShutdown(Pt::System::StreamBuffer& sb)
 
 void IOBuffer::beginRead()
 {
+    if( ! _ios)
+        return;
+
     log_debug("begin reading");
     _reading = true;
 
@@ -384,6 +406,9 @@ void IOBuffer::onInput(Pt::System::StreamBuffer& sb)
 
 void IOBuffer::beginWrite()
 {
+    if( ! _ios)
+        return;
+
     log_debug("begin writing");
     _ios->buffer().beginWrite();
 }

@@ -39,18 +39,32 @@ namespace Pt {
 
 namespace Ssl {
 
-StreamBuffer::StreamBuffer(Context& ctx, std::iostream& ios, size_t bufferSize)
+StreamBuffer::StreamBuffer(std::iostream& ios, size_t bufferSize)
 : _in(0)
 , _out(0)
 , _ssl(0)
-, _ios(0)
+, _ios(&ios)
 , _ibufferSize(bufferSize + 4)
 , _ibuffer(0)
 , _obufferSize(bufferSize)
 , _obuffer(0)
 , _pbmax(4)
 {
-    this->init(ctx, &ios);
+}
+
+
+StreamBuffer::StreamBuffer(Context& ctx, std::iostream& ios, size_t bufferSize)
+: _in(0)
+, _out(0)
+, _ssl(0)
+, _ios(&ios)
+, _ibufferSize(bufferSize + 4)
+, _ibuffer(0)
+, _obufferSize(bufferSize)
+, _obuffer(0)
+, _pbmax(4)
+{
+    this->init(ctx);
 }
 
 
@@ -71,13 +85,18 @@ StreamBuffer::StreamBuffer(Context& ctx, size_t bufferSize)
 
 StreamBuffer::~StreamBuffer()
 { 
-    SSL_free(_ssl); 
+    if(_ssl)
+        SSL_free(_ssl); 
 }
 
 
-void StreamBuffer::init(Context& ctx, std::iostream* ios)
+void StreamBuffer::init(Context& ctx)
 {
-    _ios = ios;
+    if(_ssl)
+    {
+        SSL_free(_ssl); 
+        _ssl = 0;
+    }
 
     // Create the SSL objects
     _in  = BIO_new( BIO_s_mem() );
@@ -93,6 +112,7 @@ void StreamBuffer::init(Context& ctx, std::iostream* ios)
     SSL_set_verify(_ssl, SSL_VERIFY_NONE, NULL);
 }
 
+
 void StreamBuffer::attach(std::iostream& ios)
 {
     _ios = &ios;
@@ -101,6 +121,9 @@ void StreamBuffer::attach(std::iostream& ios)
 
 CipherList StreamBuffer::ciphers() const
 {
+    if( ! _ssl )
+        return CipherList();
+
     // TODO: possibly cache the available ciphers in the context
     STACK_OF(SSL_CIPHER)* ciphers = SSL_get_ciphers(_ssl);
     return CipherList(ciphers);
@@ -109,6 +132,9 @@ CipherList StreamBuffer::ciphers() const
 
 Cipher StreamBuffer::currentCipher() const
 {
+    if( ! _ssl )
+        return Cipher();
+
     // TODO: possibly return a Cipher that has internally a reference to a 
     //       CipherData in the context cache
     const SSL_CIPHER* c = SSL_get_current_cipher(_ssl);
@@ -118,18 +144,27 @@ Cipher StreamBuffer::currentCipher() const
 
 bool StreamBuffer::connected() const
 { 
+    if( ! _ssl )
+        return false;
+
     return SSL_get_state(_ssl) == SSL_ST_OK; 
 }
 
 
 const char* StreamBuffer::getStatus() const
 { 
+    if( ! _ssl )
+        return "uninitialized";
+
     return SSL_state_string_long(_ssl); 
 }
 
 
 std::string StreamBuffer::peerName() const
 {
+    if( ! _ssl )
+        return std::string();
+
     if(SSL_get_verify_result(_ssl) != X509_V_OK) 
         return std::string();
 
@@ -145,7 +180,7 @@ std::string StreamBuffer::peerName() const
 
 Session StreamBuffer::session() const
 {
-    if(!_ssl) 
+    if( ! _ssl ) 
         return Session();
 
     SSL_SESSION* sess = SSL_get1_session(_ssl);
@@ -158,6 +193,9 @@ Session StreamBuffer::session() const
 
 void StreamBuffer::setSession(const Session& sess)
 {
+    if( ! _ssl)
+        return;
+
     SSL_SESSION* rsess = sess.impl();
     if(!rsess)
         throw SessionFailed("Invalid session data!");
@@ -169,6 +207,9 @@ void StreamBuffer::setSession(const Session& sess)
 
 void StreamBuffer::setAccepting(bool verifyClientCert, bool requireCertBasedAuth)
 {
+    if( ! _ssl)
+        return;
+
     if(verifyClientCert) 
     {
         if(requireCertBasedAuth) 
@@ -183,6 +224,9 @@ void StreamBuffer::setAccepting(bool verifyClientCert, bool requireCertBasedAuth
 
 void StreamBuffer::setConnecting(bool verifyServerCert)
 {
+    if( ! _ssl)
+        return;
+
     if(verifyServerCert) 
         SSL_set_verify(_ssl, SSL_VERIFY_PEER, NULL);
 
@@ -194,8 +238,8 @@ bool StreamBuffer::writeHandshake()
 {
     log_trace("StreamBuffer::writeHandshake");
     
-    if( ! _ios)
-        throw System::IOError("StreamBuffer not attached");
+    if( ! _ios || ! _ssl)
+        throw System::IOError("SSL Buffer not initialized");
 
     log_debug("getStatus() = " << getStatus());
 
@@ -236,8 +280,8 @@ bool StreamBuffer::readHandshake()
 {
     log_trace("StreamBuffer::readHandshake");
     
-    if( ! _ios)
-        throw System::IOError("StreamBuffer not attached");
+    if( ! _ios || ! _ssl)
+        throw System::IOError("SSL Buffer not initialized");
 
     log_debug("getStatus() = " << getStatus());
 
@@ -297,8 +341,8 @@ bool StreamBuffer::readHandshake()
 
 void StreamBuffer::writeShutdown()
 {
-    if( ! _ios)
-        throw System::IOError("StreamBuffer not attached");
+    if( ! _ios || ! _ssl)
+        throw System::IOError("SSL Buffer not initialized");
 
     const int res = SSL_shutdown(_ssl);
     log_debug("SSL_shutdown() = " << res);
@@ -325,7 +369,7 @@ void StreamBuffer::writeShutdown()
 
 std::streamsize StreamBuffer::import()
 {
-    if(_ios)
+    if(_ios && _ssl)
     {
         const std::streamsize avail = _ios->rdbuf()->in_avail();
         log_debug("_ios->rdbuf()->in_avail() = " << avail << " bytes");
@@ -373,7 +417,7 @@ int StreamBuffer::sync()
 
 StreamBuffer::int_type StreamBuffer::underflow()
 {
-    if( ! _ios )
+    if( ! _ios || ! _ssl )
         return traits_type::eof();
 
     if( this->gptr() < this->egptr() )
@@ -390,7 +434,8 @@ StreamBuffer::int_type StreamBuffer::underflow()
 
 std::streamsize StreamBuffer::do_underflow(std::streamsize isize)
 {
-    if(! _ios) return 0;
+    if(! _ios || ! _ssl ) 
+        return 0;
 
     if(!_ibuffer) {
         log_debug("Allocating _ibuffer of size " << _ibufferSize);
@@ -490,7 +535,7 @@ StreamBuffer::int_type StreamBuffer::overflow(int_type ch)
     // the eof character is passed to overflow(). When StreamBuffer is
     // constructed no output buffer area exists, therefore when overflow
     // is called for the first time, we need to set it up.
-    if( ! _ios )
+    if( ! _ios || ! _ssl )
         return traits_type::eof();
 
     // No buffer area etablished yet
