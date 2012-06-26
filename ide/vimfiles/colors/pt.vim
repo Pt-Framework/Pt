@@ -23,8 +23,8 @@ hi Normal       guifg=#c0c0c0 guibg=#000000 gui=none ctermfg=253 ctermbg=234
 hi NonText      guifg=#000000 guibg=#000000 gui=none ctermfg=244 ctermbg=235
 hi LineNr       guifg=#808080 guibg=#151515 gui=none ctermfg=244 ctermbg=232
 hi StatusLine   guifg=#dddddd guibg=#444444 gui=none ctermfg=253 ctermbg=238 cterm=none
-hi StatusLineNC guifg=#959595 guibg=#444444 gui=none ctermfg=246 ctermbg=238
-hi VertSplit    guifg=#808080 guibg=#151515 gui=none ctermfg=238 ctermbg=238
+hi StatusLineNC guifg=#999999 guibg=#444444 gui=none ctermfg=246 ctermbg=238
+hi VertSplit    guifg=#000000 guibg=#444444 gui=none ctermfg=238 ctermbg=238
 hi Folded       guibg=#384048 guifg=#a0a8b0 gui=none ctermbg=4 ctermfg=248
 hi FoldColumn   guibg=#151515 guifg=darkyellow 
 hi Title        guifg=#f6f3e8 guibg=NONE	gui=bold ctermfg=254 cterm=bold
@@ -62,7 +62,6 @@ hi MyTagListFileName guifg=white guibg=NONE gui=bold
 " Syntax highlighting
 hi Comment guifg=#808080 guibg=NONE gui=none ctermfg=244
 hi Todo    guifg=#8f8f8f guibg=#e6ea50 gui=italic ctermfg=245
-
 
 hi String    guifg=#DF8787 gui=none ctermfg=148
 hi Character guifg=#DF9987 gui=none ctermfg=148

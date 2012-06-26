@@ -15,6 +15,7 @@ set bs=2
 set backspace=indent,eol,start whichwrap+=<,>,[,]
 filetype on
 set number
+set numberwidth=5
 set ruler
 set cursorline
 set showmatch
