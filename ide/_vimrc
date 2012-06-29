@@ -66,6 +66,8 @@ endif
 :noremap <C-l> :TagbarToggle<CR>
 :noremap! <C-l> <C-o>:TagbarToggle<CR>
 
+let s:stayNormal = 0
+
 " Insert/normal switching
 function StartInsertIfModifiable()
   "let is_modified = getbufvar(bufnr('%'), '&modified')
@@ -73,14 +75,27 @@ function StartInsertIfModifiable()
   " sl 1
 
   if getbufvar(bufnr('%'), '&modifiable') == 1
-    startinsert
+    if s:stayNormal == 0
+      startinsert
+    endif
   endif
+endfunction
+
+function StartNormal()
+  let s:stayNormal = 1
+  stopinsert
+endfunction
+
+function StartInsert()
+  let s:stayNormal = 0
+  startinsert
 endfunction
 
 autocmd CursorMoved * call StartInsertIfModifiable()
 autocmd BufEnter * stopinsert
 autocmd WinEnter * stopinsert
-:noremap <SPACE> :call StartInsertIfModifiable()<CR>
+:noremap <SPACE> :call StartInsert()<CR>
+:inoremap <Esc> <C-o>:call StartNormal()<CR>
 
 " Jump to tag
 :noremap <C-t> g<C-]>
@@ -171,7 +186,9 @@ endfunction
 
 " Find selected text
 :vnoremap <C-f> "fy/<C-r>f<CR>
+:vnoremap <M-f> "fy/<C-r>f<CR>NN
 :inoremap <C-f> <C-o>n
+:inoremap <M-f> <C-o>N
 :nnoremap <C-f> /
 
 " Replace selected text
