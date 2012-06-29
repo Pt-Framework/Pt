@@ -62,7 +62,7 @@ function Build(args)
     cclose
     sil wall!
     exe "sil lcd " . g:pt_project_root
-    exe "make " . a:args 
+    exe "make " . a:args
     botright copen
     "cc 1 "j umps to first error
     sil lcd -
