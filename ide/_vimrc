@@ -42,52 +42,6 @@ set sessionoptions=buffers
 " %b = value of byte                  %B = value of byte in HEX
 set statusline=[%n]\ %F%y%m%r\ %=\ %b\ 0x%B\ \ \ %c,%l/%L\ \ %P
 
-function StartInsertIfModifiable()
-  if getbufvar(bufnr('%'), '&modifiable') == 1
-    startinsert
-  endif
-endfunction
-
-":noremap <LEFTMOUSE> :call StartInsertIfModifiable()<CR><LEFTMOUSE>
-:noremap <SPACE> :call StartInsertIfModifiable()<CR>
-
-let s:xxx = 0
-
-function StopInsertIfNotModifiable()
-  let is_modified = getbufvar(bufnr('%'), '&modified')  
-
-  let s:xxx = s:xxx + 1
-  if getbufvar(bufnr('%'), '&modifiable') == 1
-
-    "startinsert
-    
-    "if is_modified == 0
-    "  echo "UNMODIFY"
-    "  sl 1
-    "  silent! undo
-    "  set nomodified
-    "endif
-    
-    "let is_modified2 = getbufvar(bufnr('%'), '&modified')
-    "echo s:xxx bufname('%') is_modified is_modified2
-    "sl 1
-
-  else
-    stopinsert
-  endif
-
-  "let is_modified2=getbufvar(bufnr('%'), '&modified')
-
-  "if is_modified == 0
-  "  set nomodified
-  "  call setbufvar( bufnr('%') , "&modified" , 0 ) 
-  "endif
-endfunction
-
-" Auto commands
-autocmd CursorMoved * call StartInsertIfModifiable()
-autocmd BufEnter * call StopInsertIfNotModifiable()
-
 " MiniBufExplorer
 let g:miniBufExplSortBy = "name"
 let g:miniBufExplVSplit = 35
@@ -111,6 +65,22 @@ endif
 
 :noremap <C-l> :TagbarToggle<CR>
 :noremap! <C-l> <C-o>:TagbarToggle<CR>
+
+" Insert/normal switching
+function StartInsertIfModifiable()
+  "let is_modified = getbufvar(bufnr('%'), '&modified')
+  "echo bufname('%') is_modified
+  " sl 1
+
+  if getbufvar(bufnr('%'), '&modifiable') == 1
+    startinsert
+  endif
+endfunction
+
+autocmd CursorMoved * call StartInsertIfModifiable()
+autocmd BufEnter * stopinsert
+autocmd WinEnter * stopinsert
+:noremap <SPACE> :call StartInsertIfModifiable()<CR>
 
 " Jump to tag
 :noremap <C-t> g<C-]>
@@ -145,6 +115,10 @@ endfunction
 
 " Window commands also for insert mode
 :inoremap <C-w>q <C-o><C-w>q
+:inoremap <C-w><Left> <C-o><C-w><Left>
+:inoremap <C-w><Right> <C-o><C-w><Right>
+:inoremap <C-w><Up> <C-o><C-w><Up>
+:inoremap <C-w><Down> <C-o><C-w><Down>
 
 " backspace in Visual mode deletes selection
 :vnoremap <BS> d
@@ -187,27 +161,8 @@ endfunction
 :noremap! <C-x> <C-o>"+x
 
 " Paste text
-"let s:paste_atend = 0
-
-"function OnPasteInsertLeave()
-"    let s:paste_atend = col(".") == strlen( getline(".") )
-"endfunction
-
-"autocmd InsertLeave * call OnPasteInsertLeave()
-
-"function OnPaste()
-"    if s:paste_atend
-"        normal! "+gp
-"        startinsert!
-"    else
-"        normal! "+gp
-"        startinsert
-"    endif
-"endfunction
-
 :vnoremap <C-v> <DEL>"+gP
 :nnoremap <C-v> "+gP
-":noremap! <C-v> <Esc>:call OnPaste()<CR>
 :noremap! <C-v> <C-o>"+gP
 
 " Enter block mode
