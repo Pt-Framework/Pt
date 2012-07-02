@@ -12,7 +12,7 @@ MakeLocate Pt-Ssl-test : $(OUTPUT_TARGET) ;
 RunUnitTest Pt-Ssl-test : $(OUTPUT_TEST) ;
 
 Main HttpsClientDemo : HttpsClientDemo.cpp ;
-LinkSharedLibraries HttpsClientDemo : Pt-Ssl Pt-Net Pt-System Pt ;
+LinkSharedLibraries HttpsClientDemo : Pt-Ssl Pt-Net Pt-System Pt Pt-Http ;
 MakeLocate HttpsClientDemo : $(OUTPUT_TARGET) ;
 
 Main HttpsServerDemo : HttpsServerDemo.cpp ;

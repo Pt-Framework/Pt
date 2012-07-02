@@ -452,7 +452,8 @@ std::streamsize StreamBuffer::do_underflow(std::streamsize isize)
     // Move unread bytes and putback to front
     size_t putback  = _pbmax;
     size_t leftover = 0;
-    if( this->gptr() ) {
+    if( this->gptr() ) 
+    {
         putback = std::min<size_t>( this->gptr() - this->eback(), _pbmax);
         char* to = _ibuffer + _pbmax - putback;
         char* from = this->gptr() - putback;
@@ -482,7 +483,12 @@ std::streamsize StreamBuffer::do_underflow(std::streamsize isize)
 
             log_debug("Wrote " << _ios->gcount() << " bytes from _ios to _in BUF_MEM");
         }
-        if(bm->length == 0) return 0;
+        
+        /*if(bm->length == 0)
+        {
+            log_debug("no progress was made");
+            return 0;
+        }*/
 
         // We do not need to read all bytes from _ssl, but only make some progress
         size_t used = _pbmax + leftover;
@@ -491,12 +497,14 @@ std::streamsize StreamBuffer::do_underflow(std::streamsize isize)
         if( ! avail )
             break;
 
+        // even if we could not refill the BIO, we might still get data from the SSL
         const int readSize = SSL_read(_ssl, _ibuffer + used, avail);
         log_debug("Read " << readSize << " bytes from _ssl");
         log_debug("SSL_get_shutdown() = " << SSL_get_shutdown(_ssl));
 
         long sslerr = SSL_get_error(_ssl, readSize);
-        switch(sslerr) {
+        switch(sslerr) 
+        {
             // No error - good :)
             case SSL_ERROR_NONE:
 

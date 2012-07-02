@@ -59,18 +59,32 @@ class ChunkedReader : public std::streambuf
 
     public:
         explicit ChunkedReader(std::streambuf* ib = 0, unsigned bufsize = 8192);
-        ~ChunkedReader()  { delete[] _buffer; }
+        
+        ~ChunkedReader()  
+        { delete[] _buffer; }
 
-        void reset()      { _state = &ChunkedReader::onBegin; setg(0, 0, 0); }
-        bool eod() const  { return _state == 0; }
+        void reset()      
+        { _state = &ChunkedReader::onBegin; setg(0, 0, 0); }
+
+        void reset(std::streambuf* ib)      
+        { 
+            _ib = ib;
+            _state = &ChunkedReader::onBegin; 
+            setg(0, 0, 0); 
+        }
+        
+        bool eod() const  
+        { return _state == 0; }
 
         std::streamsize showmanyc();
+        
         virtual int sync();
+        
         virtual int_type overflow(int_type ch);
+        
         virtual int_type underflow();
 
         void init(std::streambuf& ib);
-
 };
 
 class ChunkedIStream : public std::istream
@@ -84,8 +98,17 @@ class ChunkedIStream : public std::istream
         void init(std::streambuf& ib)
         { _streambuf.init(ib); }
 
+        void reset(std::streambuf* ib)        
+        { 
+            _streambuf.reset(ib); 
+            clear(); 
+        }
+     
         void reset()        
-        { _streambuf.reset(); clear(); }
+        { 
+            _streambuf.reset(); 
+            clear(); 
+        }
         
         bool eod() const    
         { return _streambuf.eod(); }

@@ -4,10 +4,10 @@ SubDirC++Flags [ FDefines PT_HTTP_API_EXPORT ] ;
 SubDirHdrs $(PT_TOP)/src/Pt-Http/$(SYS:L) ;
 SubDirObjects $(OUTPUT_OBJECT) Pt-Http ;
 
-#if $(WITH_OPENSSL)
-#{
-#    SubDirC++Flags [ FDefines PT_HTTP_WITH_SSL ] ;
-#}
+if $(WITH_OPENSSL)
+{
+    SubDirC++Flags [ FDefines PT_HTTP_WITH_SSL ] ;
+}
 
 SharedLibrary Pt-Http : Client.cpp
                         ClientImpl.cpp
@@ -23,7 +23,15 @@ SharedLibrary Pt-Http : Client.cpp
                         Service.cpp
                         ;
 
-LinkSharedLibraries Pt-Http : Pt Pt-System Pt-Net ;
+if $(WITH_OPENSSL)
+{
+    LinkSharedLibraries Pt-Http : Pt Pt-System Pt-Net Pt-Ssl ;
+}
+else
+{
+    LinkSharedLibraries Pt-Http : Pt Pt-System Pt-Net ;
+}
+
 MakeLocate Pt-Http : $(OUTPUT_TARGET) ;
 MakeInstall Pt-Http : $(INSTALL_LIBDIR) ;
 

@@ -184,6 +184,11 @@ class ClientImpl : public Connectable
         
         ClientImpl(Client* client, System::EventLoop& selector, const Net::AddrInfo& addrinfo);
 
+        System::EventLoop* loop() const
+        {
+            return _socket.parent();
+        }
+
         void setActive(System::EventLoop& loop)
         {
             _socket.setActive(loop);
@@ -217,12 +222,7 @@ class ClientImpl : public Connectable
             _password.clear(); 
         }
 
-#ifdef PT_HTTP_WITH_SSL
-        void setSecure(Ssl::Context& ctx)
-        {
-            _ctx = &ctx;
-        }
-#endif
+        void setSecure(Ssl::Context& ctx);
 
         const ReplyHeader& execute(const Request& request);
 
@@ -251,12 +251,23 @@ class ClientImpl : public Connectable
         void onInput(System::StreamBuffer& sb);
         void onError();
 
+#ifdef PT_HTTP_WITH_SSL
+        void onSslHandshake(Ssl::IOBuffer& sb);
+        void onSslOutput(Ssl::IOBuffer& sb);
+        void onSslInput(Ssl::IOBuffer& sb);
+#endif
+
     private:
-        void sendRequest(const Request& request);
+        void init();
+
+        void sendRequest(std::ostream& os, const Request& request);
         void processInput(System::StreamBuffer& sb);
-        void processHeader(System::StreamBuffer& sb);
         void processBody(System::StreamBuffer& sb);
         void processChunkedBody(System::StreamBuffer& sb);
+
+        bool onHeader(std::streambuf& sb);
+        void onHttpsHeader(System::StreamBuffer& sbuf);
+        void onHttpHeader(System::StreamBuffer& sbuf);
 
     private:
         class ParseEvent : public HeaderParser::MessageHeaderEvent

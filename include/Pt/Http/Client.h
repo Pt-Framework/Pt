@@ -42,6 +42,10 @@ namespace Net {
     class AddrInfo;
 }
 
+namespace Ssl {
+  class Context;
+}
+
 namespace Http {
 
 class ClientImpl;
@@ -65,6 +69,8 @@ class PT_HTTP_API Client : private NonCopyable
 
         ~Client();
 
+        System::EventLoop* loop() const;
+
         void setActive(System::EventLoop& loop);
 
         void setTimeout(std::size_t timeout);
@@ -75,6 +81,8 @@ class PT_HTTP_API Client : private NonCopyable
         void setHost(const std::string& host, unsigned short int port);
 
         const Net::AddrInfo& host() const;
+
+        void setSecure(Ssl::Context& ctx);
 
         // Sends the passed request to the server and parses the headers.
         // The body must be read with readBody.

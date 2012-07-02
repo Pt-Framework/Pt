@@ -80,6 +80,11 @@ const Net::AddrInfo& Client::host() const
     return _impl->host();
 }
 
+System::EventLoop* Client::loop() const
+{
+    return _impl->loop();
+}
+
 void Client::setActive(System::EventLoop& selector)
 {
     _impl->setActive(selector);
@@ -88,6 +93,11 @@ void Client::setActive(System::EventLoop& selector)
 void Client::setTimeout(std::size_t timeout)
 {
     _impl->setTimeout(timeout);
+}
+
+void Client::setSecure(Ssl::Context& ctx)
+{
+    _impl->setSecure(ctx);
 }
 
 const ReplyHeader& Client::execute(const Request& request)

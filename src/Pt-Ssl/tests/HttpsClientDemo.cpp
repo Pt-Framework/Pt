@@ -29,6 +29,8 @@
 
 #include "PemData.h"
 #include <Pt/Ssl/IOBuffer.h>
+#include <Pt/Http/Client.h>
+#include <Pt/Http/Request.h>
 #include <Pt/Net/TcpSocket.h>
 #include <Pt/Net/TcpServer.h>
 #include <Pt/System/MainLoop.h>
@@ -202,30 +204,68 @@ class Client : public Pt::Connectable {
         size_t                 _httpSize;
 };
 
+
+void onReply(Pt::Http::Client& client, std::istream& is)
+{
+    while ( is.rdbuf()->in_avail() )
+    {
+        char ch;
+        is.get(ch);
+        std::cout << ch;
+    }
+}
+
+void onReplyFinished(Pt::Http::Client& client)
+{
+    if( client.loop() )
+        client.loop()->exit();
+}
+
 int main(int argc, char** argv)
 {
     try 
     {
-        Pt::System::Logger::setLogLevel("", Pt::System::Trace);
+        Pt::System::Logger::setLogLevel("", Pt::System::Error);
         log_debug("OpenSSL HTTP test progam started");
 
         Pt::System::MainLoop loop;
-        //std::string          addr("127.0.0.1");
-        std::string          addr("www.pt-framework.org");
-        unsigned short       port = 443;
 
         Pt::Ssl::CertificateList trustedCACert;
-        Pt::Ssl::CertificateList clientCertChain;
-        Pt::Ssl::PrivateKey clientPrivKey("");
-        Pt::Ssl::Context clientContext(Pt::Ssl::Context::Default);
         trustedCACert.fromPem(caPemData, sizeof(caPemData));
+
+        Pt::Ssl::CertificateList clientCertChain;
         clientCertChain.fromPem(clientCertPemData, sizeof(clientCertPemData));
+
+        Pt::Ssl::PrivateKey clientPrivKey("");
         clientPrivKey.fromPem(clientKeyData, sizeof(clientKeyData));
+        
+        Pt::Ssl::Context clientContext(Pt::Ssl::Context::Default);        
         clientContext.setCACertificates(trustedCACert);
         clientContext.setCertificateChain(clientCertChain);
         clientContext.setPrivateKey(clientPrivKey);
 
-        Client client(loop, clientContext, addr, port);
+        //std::string addr("127.0.0.1");
+        std::string  addr("www.pt-framework.org");
+        unsigned short port = 443;
+        Pt::Http::Client client(loop, addr, port);
+        client.setSecure(clientContext);
+
+        //client.headerReceived += Pt::slot(&onReplyHeader);
+        client.bodyAvailable += Pt::slot(&onReply);
+        client.replyFinished += Pt::slot(&onReplyFinished);
+
+        //"GET / HTTP/1.1\r\n"
+        //"Host: localhost:443\r\n"
+        //"User-Agent: Platinum\r\n"
+        //"Accept: text/html\r\n"
+        //"Accept-Language: en-us,en;q=0.5\r\n"
+        //"Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7\r\n"
+        //"Connection: close\r\n"
+        //"Cache-Control: max-age=0\r\n\r\n"
+ 
+        Pt::Http::Request request("/index.html");
+        request.setHeader("User-Agent", "Platinum");
+        client.beginExecute(request);
 
         //loop.setIdleTimeout(60000);
         loop.timeout() += Pt::slot(loop, &Pt::System::EventLoop::exit);
@@ -244,3 +284,46 @@ int main(int argc, char** argv)
     }
     return 1;
 }
+
+//int main(int argc, char** argv)
+//{
+//    try 
+//    {
+//        Pt::System::Logger::setLogLevel("", Pt::System::Trace);
+//        log_debug("OpenSSL HTTP test progam started");
+//
+//        Pt::System::MainLoop loop;
+//        //std::string          addr("127.0.0.1");
+//        std::string          addr("www.pt-framework.org");
+//        unsigned short       port = 443;
+//
+//        Pt::Ssl::CertificateList trustedCACert;
+//        Pt::Ssl::CertificateList clientCertChain;
+//        Pt::Ssl::PrivateKey clientPrivKey("");
+//        Pt::Ssl::Context clientContext(Pt::Ssl::Context::Default);
+//        trustedCACert.fromPem(caPemData, sizeof(caPemData));
+//        clientCertChain.fromPem(clientCertPemData, sizeof(clientCertPemData));
+//        clientPrivKey.fromPem(clientKeyData, sizeof(clientKeyData));
+//        clientContext.setCACertificates(trustedCACert);
+//        clientContext.setCertificateChain(clientCertChain);
+//        clientContext.setPrivateKey(clientPrivKey);
+//
+//        Client client(loop, clientContext, addr, port);
+//
+//        //loop.setIdleTimeout(60000);
+//        loop.timeout() += Pt::slot(loop, &Pt::System::EventLoop::exit);
+//        loop.run();
+//
+//        log_debug("OpenSSL HTTP test progam ended");
+//        return 0;
+//    }
+//    catch(const std::exception& ex)
+//    {
+//        log_debug("Error: " << ex.what());
+//    }
+//    catch(const char* ex)
+//    {
+//        log_debug("Error: " << ex);
+//    }
+//    return 1;
+//}
