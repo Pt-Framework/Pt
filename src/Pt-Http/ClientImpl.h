@@ -239,8 +239,8 @@ class ClientImpl : public Connectable
 
         std::istream& in()
         {
-            return _state == &ClientImpl::processChunkedBody ? static_cast<std::istream&>(_chunkedIStream)
-                                                             : static_cast<std::istream&>(_ios);
+            return _replyHeader.chunkedTransferEncoding() ? static_cast<std::istream&>(_chunkedIStream)
+                                                          : static_cast<std::istream&>(_ios);
         }
 
         void cancel();
@@ -261,13 +261,18 @@ class ClientImpl : public Connectable
         void init();
 
         void sendRequest(std::ostream& os, const Request& request);
-        void processInput(System::StreamBuffer& sb);
-        void processBody(System::StreamBuffer& sb);
-        void processChunkedBody(System::StreamBuffer& sb);
 
-        bool onHeader(std::streambuf& sb);
+        bool onHeader(std::streambuf& sb, bool ssl);
         void onHttpsHeader(System::StreamBuffer& sbuf);
         void onHttpHeader(System::StreamBuffer& sbuf);
+
+        bool onBody(std::istream& is);
+        void onHttpsBody(System::StreamBuffer& sbuf);
+        void onHttpBody(System::StreamBuffer& sbuf);
+
+        bool onChunkedBody();
+        void onHttpsChunkedBody(System::StreamBuffer& sbuf);
+        void onHttpChunkedBody(System::StreamBuffer& sbuf);
 
     private:
         class ParseEvent : public HeaderParser::MessageHeaderEvent
