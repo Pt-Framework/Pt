@@ -92,11 +92,11 @@ void StreamBufferTest::Handshake()
     clientContext.setPrivateKey(clientPrivKey);
 
     // client begins the handshake
-    Pt::Ssl::StreamBuffer client(clientContext, data);
+    Pt::Ssl::StreamBuffer client(clientContext, *data.rdbuf());
     client.setConnecting(true);
 
     // server begins the handskake
-    Pt::Ssl::StreamBuffer server(serverContext, data);
+    Pt::Ssl::StreamBuffer server(serverContext, *data.rdbuf());
     server.setAccepting(true, true);
 
     for( ; ; )

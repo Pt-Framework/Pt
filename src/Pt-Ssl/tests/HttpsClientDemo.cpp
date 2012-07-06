@@ -66,7 +66,7 @@ class Client : public Pt::Connectable {
             _ios.attach(socket);
 
             log_debug("client Starting handshake");
-            _ssl = new Pt::Ssl::IOBuffer(_sslContext, _ios);
+            _ssl = new Pt::Ssl::IOBuffer(_sslContext, _ios.buffer());
             _ssl->beginConnect(false);
             _ssl->handshakeFinished() += Pt::slot(*this, &Client::onHandshake);
             _ssl->shutdownFinished() += Pt::slot(*this, &Client::onShutdown);

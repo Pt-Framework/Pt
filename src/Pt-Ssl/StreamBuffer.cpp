@@ -39,11 +39,11 @@ namespace Pt {
 
 namespace Ssl {
 
-StreamBuffer::StreamBuffer(std::iostream& ios, size_t bufferSize)
+StreamBuffer::StreamBuffer(std::streambuf& sb, size_t bufferSize)
 : _in(0)
 , _out(0)
 , _ssl(0)
-, _ios(&ios)
+, _ios(&sb)
 , _ibufferSize(bufferSize + 4)
 , _ibuffer(0)
 , _obufferSize(bufferSize)
@@ -53,11 +53,11 @@ StreamBuffer::StreamBuffer(std::iostream& ios, size_t bufferSize)
 }
 
 
-StreamBuffer::StreamBuffer(Context& ctx, std::iostream& ios, size_t bufferSize)
+StreamBuffer::StreamBuffer(Context& ctx, std::streambuf& sb, size_t bufferSize)
 : _in(0)
 , _out(0)
 , _ssl(0)
-, _ios(&ios)
+, _ios(&sb)
 , _ibufferSize(bufferSize + 4)
 , _ibuffer(0)
 , _obufferSize(bufferSize)
@@ -115,7 +115,7 @@ void StreamBuffer::init(Context& ctx)
 
 void StreamBuffer::attach(std::iostream& ios)
 {
-    _ios = &ios;
+    _ios = ios.rdbuf();
 }
 
 
@@ -262,13 +262,12 @@ bool StreamBuffer::writeHandshake()
     {
         char buff[1000];
         const int n = BIO_read(_out, buff, sizeof(buff));
+        log_debug("Wrote " << n << " bytes from _out BIO to _ios");
 
         if(n <= 0)
             throw System::IOError("Failed reading from OpenSSL output BIO!");
 
-        log_debug("Wrote " << n << " bytes from _out BIO to _ios");
-        _ios->write(buff, n);
-
+        _ios->sputn(buff, n);
         return true;
     }
 
@@ -285,14 +284,16 @@ bool StreamBuffer::readHandshake()
 
     log_debug("getStatus() = " << getStatus());
 
-    char buf[1000];
+    const std::streamsize bufsize = 1000;
+    char buf[bufsize];
 
     // Block until data can be read from the stream
-    _ios->rdbuf()->sgetc();
+    _ios->sgetc();
 
     while(true)
     {
-        std::streamsize n = _ios->readsome(buf, sizeof(buf));
+        std::streamsize gsize = std::min(_ios->in_avail(), bufsize);
+        std::streamsize n = gsize > 0 ? _ios->sgetn(buf, gsize) : 0;
         if(n == 0) 
           break;
 
@@ -353,7 +354,7 @@ void StreamBuffer::writeShutdown()
     if(n <= 0)
         throw System::IOError("Failed reading from OpenSSL ouput BIO!");
 
-    _ios->write(buff, n);
+    _ios->sputn(buff, n);
     //_ios->flush();
     log_debug("Wrote " << n << " bytes from _out BIO to _ios");
 
@@ -371,14 +372,14 @@ std::streamsize StreamBuffer::import()
 {
     if(_ios && _ssl)
     {
-        const std::streamsize avail = _ios->rdbuf()->in_avail();
-        log_debug("_ios->rdbuf()->in_avail() = " << avail << " bytes");
+        const std::streamsize avail = _ios->in_avail();
+        log_debug("_ios->in_avail() = " << avail << " bytes");
 
         if(avail >= 0 )
         {
             const std::streamsize n = do_underflow(avail);
             log_debug("do_underflow() = " << n << " bytes");
-            log_debug("_ios->rdbuf()->in_avail() = " << _ios->rdbuf()->in_avail() << " bytes");
+            log_debug("_ios->in_avail() = " << _ios->in_avail() << " bytes");
 
             // Shutdown?
             const int shutdownState = SSL_get_shutdown(_ssl);
@@ -473,15 +474,15 @@ std::streamsize StreamBuffer::do_underflow(std::streamsize isize)
         BIO_get_mem_ptr(_in, &bm);
         if(bm->max > bm->length && isize > 0) 
         {
-            const std::streamsize avail  = std::min(_ios->rdbuf()->in_avail(), isize);
+            const std::streamsize avail  = std::min(_ios->in_avail(), isize);
             const std::streamsize refill = std::min(static_cast<std::streamsize>(bm->max - bm->length), avail);
             isize -= refill;
 
-            _ios->read(bm->data + bm->length, refill);
-            if(_ios->gcount() > 0) 
-              bm->length += static_cast<int>( _ios->gcount() );
+            std::streamsize gcount = _ios->sgetn(bm->data + bm->length, refill);
+            if(gcount > 0) 
+              bm->length += static_cast<int>( gcount );
 
-            log_debug("Wrote " << _ios->gcount() << " bytes from _ios to _in BUF_MEM");
+            log_debug("Wrote " << gcount << " bytes from _ios to _in BUF_MEM");
         }
         
         /*if(bm->length == 0)
@@ -577,7 +578,7 @@ StreamBuffer::int_type StreamBuffer::overflow(int_type ch)
         BIO_get_mem_ptr(_out, &bm);
         if(bm->length > 0)
         {
-            _ios->write(bm->data, bm->length);
+            _ios->sputn(bm->data, bm->length);
             log_debug("Wrote " << bm->length << " bytes from _ios to _out BUF_MEM");
             bm->length = 0;
         }

@@ -93,7 +93,7 @@ void ContextTest::Ciphers()
     Pt::Ssl::Context ctx;
 
     std::iostream ios(0);
-    Pt::Ssl::StreamBuffer sb(ctx, ios);
+    Pt::Ssl::StreamBuffer sb(ctx, *ios.rdbuf());
 
     Pt::Ssl::CipherList::Iterator it;
     Pt::Ssl::CipherList ciphers1 = sb.ciphers();

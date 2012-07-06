@@ -39,7 +39,7 @@
 #endif
 
 #include <Pt/System/Selectable.h>
-#include <Pt/System/IOStream.h>
+#include <Pt/System/StreamBuffer.h>
 #include <Pt/System/Timer.h>
 #include <Pt/Connectable.h>
 #include <Pt/Delegate.h>
@@ -240,8 +240,6 @@ class ClientImpl : public Connectable
         std::istream& in()
         {
             return _stream;
-            //return _replyHeader.chunkedTransferEncoding() ? static_cast<std::istream&>(_chunkedIStream)
-            //                                              : static_cast<std::istream&>(_ios);
         }
 
         void cancel();
@@ -298,15 +296,15 @@ class ClientImpl : public Connectable
 
         Net::AddrInfo _addrInfo;
         Net::TcpSocket _socket;
-        System::IOStream _ios;
+        System::StreamBuffer _sockbuf;
         ChunkedReader _chunkedBuffer;
-        std::iostream _stream;
         
 #ifdef PT_HTTP_WITH_SSL
         Ssl::Context* _ctx;
         Ssl::IOBuffer _sslbuf;
 #endif
 
+        std::iostream _stream;
         std::string _username;
         std::string _password;
         long _contentLength;

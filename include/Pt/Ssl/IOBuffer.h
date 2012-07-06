@@ -42,13 +42,13 @@ class PT_SSL_API IOBuffer : public StreamBuffer
                           , public Pt::Connectable
 {
     public:
-        /** @brief Construct a SSL buffer that uses the given I/O stream. 
+        /** @brief Construct a SSL buffer that uses the given I/O buffer. 
         */
-        IOBuffer(Pt::System::IOStream& ios);
+        IOBuffer(Pt::System::StreamBuffer& sb);
         
-        /** @brief Construct a SSL client that uses the given I/O stream and SSL context. 
+        /** @brief Construct a SSL client that uses the given I/O buffer and SSL context. 
         */
-        IOBuffer(Context& ctx, Pt::System::IOStream& ios);
+        IOBuffer(Context& ctx, Pt::System::StreamBuffer& sb);
 
         /** @brief Standard dtor. 
         */
@@ -112,7 +112,7 @@ class PT_SSL_API IOBuffer : public StreamBuffer
         void onOutput(Pt::System::StreamBuffer& sb);
 
     private:
-        System::IOStream* _ios;
+        System::StreamBuffer* _ios;
         Pt::Signal<IOBuffer&> _handshakeFinished;
         Pt::Signal<IOBuffer&> _shutdownFinished;
         Pt::Signal<IOBuffer&> _inputReady;

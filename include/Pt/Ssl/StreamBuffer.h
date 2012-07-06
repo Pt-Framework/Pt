@@ -47,7 +47,7 @@ class PT_SSL_API StreamBuffer : public std::streambuf
     public:
         /** @brief Construct an SSL stream buffer that uses the given IO stream. 
         */
-        StreamBuffer(std::iostream& ios, size_t bufferSize = 1024);
+        StreamBuffer(std::streambuf& sb, size_t bufferSize = 1024);
 
         /** @brief Construct an SSL stream buffer that uses the given SSL context. 
         */
@@ -55,7 +55,7 @@ class PT_SSL_API StreamBuffer : public std::streambuf
 
         /** @brief Construct an SSL stream buffer that uses the given IO stream and SSL context. 
         */
-        StreamBuffer(Context& ctx, std::iostream& ios, size_t bufferSize = 1024);
+        StreamBuffer(Context& ctx, std::streambuf& sb, size_t bufferSize = 1024);
 
         /** @brief Standard dtor. 
         */
@@ -152,7 +152,7 @@ class PT_SSL_API StreamBuffer : public std::streambuf
         bio_st*        _in;  // Input BIO
         bio_st*        _out; // Output BIO
         ssl_st*        _ssl; // OpenSSL SSL handle
-        std::iostream* _ios; // IO
+        std::streambuf* _ios; // IO
         size_t         _ibufferSize;
         char*          _ibuffer;
         std::size_t    _obufferSize;

@@ -302,13 +302,13 @@ ClientImpl::ClientImpl(Client* client)
 , _parseEvent(_replyHeader)
 , _parser(_parseEvent, true)
 , _request(0)
-, _ios(8192, true)
-, _chunkedBuffer(_ios.rdbuf())
+, _sockbuf(8192, true)
+, _chunkedBuffer(&_sockbuf)
 #ifdef PT_HTTP_WITH_SSL
 , _ctx(0)
-, _sslbuf(_ios)
+, _sslbuf(_sockbuf)
 #endif
-, _stream(_ios.rdbuf())
+, _stream(&_sockbuf)
 , _contentLength(0)
 , _reusedConnection(false)
 , _errorPending(false)
@@ -324,13 +324,13 @@ ClientImpl::ClientImpl(Client* client, const Net::AddrInfo& addrinfo)
 , _parser(_parseEvent, true)
 , _request(0)
 , _addrInfo(addrinfo)
-, _ios(8192, true)
-, _chunkedBuffer(_ios.rdbuf())
+, _sockbuf(8192, true)
+, _chunkedBuffer(&_sockbuf)
 #ifdef PT_HTTP_WITH_SSL
 , _ctx(0)
-, _sslbuf(_ios)
+, _sslbuf(_sockbuf)
 #endif
-, _stream(_ios.rdbuf())
+, _stream(&_sockbuf)
 , _contentLength(0)
 , _reusedConnection(false)
 , _errorPending(false)
@@ -346,13 +346,13 @@ ClientImpl::ClientImpl(Client* client, System::EventLoop& loop, const Net::AddrI
 , _parser(_parseEvent, true)
 , _request(0)
 , _addrInfo(addrinfo)
-, _ios(8192, true)
-, _chunkedBuffer(_ios.rdbuf())
+, _sockbuf(8192, true)
+, _chunkedBuffer(&_sockbuf)
 #ifdef PT_HTTP_WITH_SSL
 , _ctx(0)
-, _sslbuf(_ios)
+, _sslbuf(_sockbuf)
 #endif
-, _stream(_ios.rdbuf())
+, _stream(&_sockbuf)
 , _contentLength(0)
 , _reusedConnection(false)
 , _errorPending(false)
@@ -365,10 +365,11 @@ ClientImpl::ClientImpl(Client* client, System::EventLoop& loop, const Net::AddrI
 
 void ClientImpl::init()
 {
-    _ios.attach(_socket);
     _socket.connected() += Pt::slot(*this, &ClientImpl::onConnect);
-    _ios.buffer().outputReady() += slot(*this, &ClientImpl::onOutput);
-    _ios.buffer().inputReady() += slot(*this, &ClientImpl::onInput);
+
+    _sockbuf.attach(_socket);
+    _sockbuf.outputReady() += slot(*this, &ClientImpl::onOutput);
+    _sockbuf.inputReady() += slot(*this, &ClientImpl::onInput);
 }
 
 
@@ -376,8 +377,8 @@ void ClientImpl::init()
 
 void ClientImpl::setSecure(Ssl::Context& ctx)
 {
-    _ios.buffer().outputReady() -= slot(*this, &ClientImpl::onOutput);
-    _ios.buffer().inputReady() -= slot(*this, &ClientImpl::onInput);
+    _sockbuf.outputReady() -= slot(*this, &ClientImpl::onOutput);
+    _sockbuf.inputReady() -= slot(*this, &ClientImpl::onInput);
 
     _ctx = &ctx;
     _sslbuf.init(ctx);
@@ -441,8 +442,8 @@ const ReplyHeader& ClientImpl::execute(const Request& request)
             log_debug("reconnect to lost connection");
             reuseConnection = false;
             _socket.close();
-            _ios.clear();
-            _ios.buffer().discard();
+            _stream.clear();
+            _sockbuf.discard();
             continue;  
         }
 
@@ -529,15 +530,14 @@ void ClientImpl::beginRequest(const Request& request)
         
     try
     {
-        _ios.buffer().beginWrite();
+        _sockbuf.beginWrite();
     }
     catch (const System::IOError&)
     {
         log_debug("write failed, reconnecting");
 
-        _ios.clear();
         _stream.clear();
-        _ios.buffer().discard();
+        _sockbuf.discard();
         _socket.beginConnect(_addrInfo);
     }
 }
@@ -647,7 +647,7 @@ void ClientImpl::onConnect(Net::TcpSocket& socket)
         sendRequest(_stream, *_request);
         
         log_debug("request sent - begin write");
-        _ios.buffer().beginWrite();
+        _sockbuf.beginWrite();
         _state = &ClientImpl::onHttpHeader;
     }
     catch(...)
@@ -781,7 +781,7 @@ void ClientImpl::onSslInput(Ssl::IOBuffer& sb)
     try
     {
         sb.endRead();
-        (this->*_state)(_ios.buffer());
+        (this->*_state)(_sockbuf);
     }
     catch (const std::exception& e)
     {
@@ -796,7 +796,7 @@ bool ClientImpl::onHeader(std::streambuf& sb, bool ssl)
     log_trace("onHeader");
 
     // reconnect when received pending EOF from previous response
-    if( _ios.device()->eof() )
+    if( _sockbuf.device()->eof() )
     {
         if(_reusedConnection)
         {
@@ -863,7 +863,7 @@ bool ClientImpl::onHeader(std::streambuf& sb, bool ssl)
     
         if(sb.in_avail() > 0)
         {
-            (this->*_state)( _ios.buffer() );
+            (this->*_state)( _sockbuf );
             return false;
         }
     }
@@ -1083,8 +1083,8 @@ void ClientImpl::onHttpChunkedBody(System::StreamBuffer& sbuf)
 void ClientImpl::cancel()
 {
     _socket.close();
-    _ios.clear();
-    _ios.buffer().discard();
+
+    _sockbuf.discard();
 
     _stream.clear();
 

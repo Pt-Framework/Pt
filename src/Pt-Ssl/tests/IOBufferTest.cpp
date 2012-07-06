@@ -48,7 +48,7 @@ class TcpAcceptor : public Pt::Connectable
                     const std::string& addr, unsigned short port)
         : _loop(loop)
         , _ios(8192, true)
-        , _ssl(ctx, _ios)
+        , _ssl(ctx, _ios.buffer())
         , _socket(0)
         {
             log_debug("listening on " << addr << ':' << port);
@@ -94,7 +94,7 @@ class TcpConnector : public Pt::Connectable
                      const std::string& addr, unsigned short port)
         : _loop(loop)
         , _ios(8192, true)
-        , _ssl(ctx, _ios)
+        , _ssl(ctx, _ios.buffer())
         {
             log_debug("connecting to " << addr << ':' << port);
 

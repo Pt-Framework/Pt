@@ -68,7 +68,7 @@ class Server : public Pt::Connectable {
             _ios->attach(*_client);
 
             log_debug("server Starting handshake");
-            _ssl = new Pt::Ssl::IOBuffer(_sslContext, *_ios);
+            _ssl = new Pt::Ssl::IOBuffer(_sslContext, _ios->buffer());
             _ssl->beginAccept(true, false);
           //_ssl->beginHandshake(true, true);
 
