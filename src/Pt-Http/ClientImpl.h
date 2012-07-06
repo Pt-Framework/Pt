@@ -239,8 +239,9 @@ class ClientImpl : public Connectable
 
         std::istream& in()
         {
-            return _replyHeader.chunkedTransferEncoding() ? static_cast<std::istream&>(_chunkedIStream)
-                                                          : static_cast<std::istream&>(_ios);
+            return _stream;
+            //return _replyHeader.chunkedTransferEncoding() ? static_cast<std::istream&>(_chunkedIStream)
+            //                                              : static_cast<std::istream&>(_ios);
         }
 
         void cancel();
@@ -298,7 +299,8 @@ class ClientImpl : public Connectable
         Net::AddrInfo _addrInfo;
         Net::TcpSocket _socket;
         System::IOStream _ios;
-        ChunkedIStream _chunkedIStream;
+        ChunkedReader _chunkedBuffer;
+        std::iostream _stream;
         
 #ifdef PT_HTTP_WITH_SSL
         Ssl::Context* _ctx;

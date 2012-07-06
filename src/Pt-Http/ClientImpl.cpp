@@ -303,11 +303,12 @@ ClientImpl::ClientImpl(Client* client)
 , _parser(_parseEvent, true)
 , _request(0)
 , _ios(8192, true)
-, _chunkedIStream(_ios.rdbuf())
+, _chunkedBuffer(_ios.rdbuf())
 #ifdef PT_HTTP_WITH_SSL
 , _ctx(0)
 , _sslbuf(_ios)
 #endif
+, _stream(_ios.rdbuf())
 , _contentLength(0)
 , _reusedConnection(false)
 , _errorPending(false)
@@ -324,11 +325,12 @@ ClientImpl::ClientImpl(Client* client, const Net::AddrInfo& addrinfo)
 , _request(0)
 , _addrInfo(addrinfo)
 , _ios(8192, true)
-, _chunkedIStream(_ios.rdbuf())
+, _chunkedBuffer(_ios.rdbuf())
 #ifdef PT_HTTP_WITH_SSL
 , _ctx(0)
 , _sslbuf(_ios)
 #endif
+, _stream(_ios.rdbuf())
 , _contentLength(0)
 , _reusedConnection(false)
 , _errorPending(false)
@@ -345,11 +347,12 @@ ClientImpl::ClientImpl(Client* client, System::EventLoop& loop, const Net::AddrI
 , _request(0)
 , _addrInfo(addrinfo)
 , _ios(8192, true)
-, _chunkedIStream(_ios.rdbuf())
+, _chunkedBuffer(_ios.rdbuf())
 #ifdef PT_HTTP_WITH_SSL
 , _ctx(0)
 , _sslbuf(_ios)
 #endif
+, _stream(_ios.rdbuf())
 , _contentLength(0)
 , _reusedConnection(false)
 , _errorPending(false)
@@ -366,7 +369,6 @@ void ClientImpl::init()
     _socket.connected() += Pt::slot(*this, &ClientImpl::onConnect);
     _ios.buffer().outputReady() += slot(*this, &ClientImpl::onOutput);
     _ios.buffer().inputReady() += slot(*this, &ClientImpl::onInput);
-
 }
 
 
@@ -379,6 +381,7 @@ void ClientImpl::setSecure(Ssl::Context& ctx)
 
     _ctx = &ctx;
     _sslbuf.init(ctx);
+    _stream.rdbuf(&_sslbuf);
 
     _sslbuf.handshakeFinished() += slot(*this, &ClientImpl::onSslHandshake);
     _sslbuf.outputReady() += slot(*this, &ClientImpl::onSslOutput);
@@ -410,12 +413,12 @@ const ReplyHeader& ClientImpl::execute(const Request& request)
         }
         
         log_debug("sending request");
-        sendRequest(_ios, request);
-        _ios.flush();
+        sendRequest(_stream, request);
+        _stream.flush();
 
         log_debug("reading reply");
         char ch = ' ';
-        while( ! _parser.end() && _ios.get(ch) )
+        while( ! _parser.end() && _stream.get(ch) )
         {
             _parser.parse(ch);
         }
@@ -432,7 +435,7 @@ const ReplyHeader& ClientImpl::execute(const Request& request)
             break;
         }
 
-        if( ! _ios && _parser.begin() && reuseConnection)
+        if( ! _stream && _parser.begin() && reuseConnection)
         {
             // received pending EOF from previous response -> reconnect
             log_debug("reconnect to lost connection");
@@ -456,19 +459,20 @@ void ClientImpl::readBody(std::string& s)
     s.clear();
 
     bool chunkedEncoding = _replyHeader.chunkedTransferEncoding();
-    _chunkedIStream.reset();
+    _chunkedBuffer.reset();
+    _stream.rdbuf(&_chunkedBuffer);
 
     if(chunkedEncoding)
     {
         log_debug("read body with chunked encoding");
 
         char ch;
-        while (_chunkedIStream.get(ch))
+        while( _stream.get(ch) )
             s += ch;
 
-        log_debug("eod=" << _chunkedIStream.eod());
+        log_debug("eod=" << _chunkedBuffer.eod());
 
-        if (!_chunkedIStream.eod())
+        if( ! _chunkedBuffer.eod() )
             throw System::IOError( PT_ERROR_MSG("error reading HTTP reply body: incomplete chunked data stream") );
     }
     else
@@ -480,10 +484,10 @@ void ClientImpl::readBody(std::string& s)
         s.reserve(n);
 
         char ch;
-        while (n-- && _ios.get(ch))
+        while (n-- && _stream.get(ch))
             s += ch;
 
-        if (_ios.fail())
+        if( _stream.fail() )
             throw System::IOError( PT_ERROR_MSG("error reading HTTP reply body") );
 
         //log_debug("body read: \"" << s << '"');
@@ -521,7 +525,7 @@ void ClientImpl::beginRequest(const Request& request)
 
     log_debug("reusing previous connection");
     _reusedConnection = true;
-    sendRequest(_ios, *_request);
+    sendRequest(_stream, *_request);
         
     try
     {
@@ -532,6 +536,7 @@ void ClientImpl::beginRequest(const Request& request)
         log_debug("write failed, reconnecting");
 
         _ios.clear();
+        _stream.clear();
         _ios.buffer().discard();
         _socket.beginConnect(_addrInfo);
     }
@@ -639,7 +644,7 @@ void ClientImpl::onConnect(Net::TcpSocket& socket)
             return;
         }
 #endif
-        sendRequest(_ios, *_request);
+        sendRequest(_stream, *_request);
         
         log_debug("request sent - begin write");
         _ios.buffer().beginWrite();
@@ -726,9 +731,8 @@ void ClientImpl::onSslHandshake(Ssl::IOBuffer& ssl)
         log_trace("onSslHandshake");
         ssl.endHandshake();
 
-        std::ostream os(&ssl);
-        sendRequest(os, *_request);
-        os << std::flush;
+        sendRequest(_stream, *_request);
+        _stream << std::flush;
 
         log_debug("request sent - begin write");
         ssl.beginWrite();
@@ -831,7 +835,8 @@ bool ClientImpl::onHeader(std::streambuf& sb, bool ssl)
             else
                 _state = &ClientImpl::onHttpChunkedBody;
 
-            _chunkedIStream.reset(&sb);
+            _chunkedBuffer.reset(&sb);
+            _stream.rdbuf(&_chunkedBuffer);
         }
         else
         {
@@ -947,9 +952,7 @@ void ClientImpl::onHttpsBody(System::StreamBuffer& sbuf)
     log_trace("onHttpsBody");
 
 #ifdef PT_HTTP_WITH_SSL
-    std::istream sslios(&_sslbuf);
-
-    bool cont = this->onBody(sslios);
+    bool cont = this->onBody(_stream);
     if(cont)
     {
         log_debug("body not finished- begin read(SSL)");
@@ -963,7 +966,7 @@ void ClientImpl::onHttpBody(System::StreamBuffer& sbuf)
 {
     log_trace("onHttpBody");
 
-    bool cont = this->onBody(_ios);
+    bool cont = this->onBody(_stream);
     if(cont)
     {
         sbuf.beginRead();
@@ -974,23 +977,24 @@ void ClientImpl::onHttpBody(System::StreamBuffer& sbuf)
 bool ClientImpl::onChunkedBody()
 {
     log_trace("onChunkedBody");
+    assert(&_chunkedBuffer == _stream.rdbuf());
 
-    if( _chunkedIStream.rdbuf()->in_avail() > 0 )
+    if( _chunkedBuffer.in_avail() > 0 )
     {
-        if( ! _chunkedIStream.eod() )
+        if( ! _chunkedBuffer.eod() )
         {
             log_debug("read chunked encoding body");
 
-            while (_chunkedIStream.good()
-                && _chunkedIStream.rdbuf()->in_avail() > 0
-                && !_chunkedIStream.eod())
+            while( _stream.good() && 
+                   _chunkedBuffer.in_avail() > 0 && 
+                   ! _chunkedBuffer.eod() )
             {
                 log_debug("bodyAvailable");
-                _client->bodyAvailable(*_client, _chunkedIStream);
+                _client->bodyAvailable(*_client, _stream);
             }
 
-            log_debug("in_avail=" << _chunkedIStream.rdbuf()->in_avail() << " eod=" << _chunkedIStream.eod());
-            if( _chunkedIStream.eod() )
+            log_debug("in_avail=" << _chunkedBuffer.in_avail() << " eod=" << _chunkedBuffer.eod());
+            if( _chunkedBuffer.eod() )
             {
                 if( _replyHeader.hasHeader("Trailer") )
                     _parser.readHeader();
@@ -999,11 +1003,11 @@ bool ClientImpl::onChunkedBody()
             }
         }
 
-        if (_chunkedIStream.eod() && _chunkedIStream.rdbuf()->in_avail() > 0)
+        if (_chunkedBuffer.eod() && _chunkedBuffer.in_avail() > 0)
         {
             log_debug("read chunked encoding post headers");
 
-            _parser.advance(_chunkedIStream);
+            _parser.advance(_chunkedBuffer);
             if( _parser.fail() )
                 throw std::runtime_error("http parser failed"); // TODO define exception class
 
@@ -1021,10 +1025,10 @@ bool ClientImpl::onChunkedBody()
             }
         }
 
-        if( _chunkedIStream.fail() )
+        if( _stream.fail() )
             throw System::IOError( PT_ERROR_MSG("error reading HTTP reply body") );
     }
-    else if( _chunkedIStream.eod() )
+    else if( _chunkedBuffer.eod() )
     {
         if( _replyHeader.hasHeader("Trailer") )
             _parser.readHeader();
@@ -1034,7 +1038,7 @@ bool ClientImpl::onChunkedBody()
 
     if (_socket.isConnected())
     {
-        if ((!_chunkedIStream.eod() || !_parser.end()))
+        if( ! _chunkedBuffer.eod() || ! _parser.end() )
         {
             log_debug("call beginRead");
             return true;
@@ -1076,19 +1080,18 @@ void ClientImpl::onHttpChunkedBody(System::StreamBuffer& sbuf)
 }
 
 
-
-
-
 void ClientImpl::cancel()
 {
     _socket.close();
     _ios.clear();
     _ios.buffer().discard();
 
+    _stream.clear();
+
     // TODO:
     //_sslbuf.clear();
 
-    _chunkedIStream.reset();
+    _chunkedBuffer.reset();
 }
 
 } // namespace Http
