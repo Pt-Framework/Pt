@@ -112,6 +112,7 @@
     <ClInclude Include="..\..\include\Pt\System\File.h" />
     <ClInclude Include="..\..\include\Pt\System\FileDevice.h" />
     <ClInclude Include="..\..\include\Pt\System\FileInfo.h" />
+    <ClInclude Include="..\..\include\Pt\System\IOBuffer.h" />
     <ClInclude Include="..\..\include\Pt\System\IODevice.h" />
     <ClInclude Include="..\..\include\Pt\System\IOError.h" />
     <ClInclude Include="..\..\include\Pt\System\IOStream.h" />

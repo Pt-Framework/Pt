@@ -633,6 +633,9 @@
     <ClInclude Include="..\..\src\Pt-Http\Parser.h">
       <Filter>Pt-Http</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\System\IOBuffer.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
