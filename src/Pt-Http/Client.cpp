@@ -39,24 +39,24 @@ Client::Client()
 {
 }
 
-Client::Client(const Net::AddrInfo& addrinfo)
-: _impl(new ClientImpl(this, addrinfo))
+Client::Client(const Net::AddrInfo& addrinfo, bool ssl)
+: _impl(new ClientImpl(this, addrinfo, ssl))
 {
 }
 
-Client::Client(const std::string& host, unsigned short int port)
-: _impl(new ClientImpl(this, Net::AddrInfo(host, port)))
+Client::Client(const std::string& host, unsigned short int port, bool ssl)
+: _impl(new ClientImpl(this, Net::AddrInfo(host, port), ssl))
 {
 }
 
 
-Client::Client(System::EventLoop& selector, const Net::AddrInfo& addrinfo)
-: _impl(new ClientImpl(this, selector, addrinfo))
+Client::Client(System::EventLoop& selector, const Net::AddrInfo& addrinfo, bool ssl)
+: _impl(new ClientImpl(this, selector, addrinfo, ssl))
 {
 }
 
-Client::Client(System::EventLoop& selector, const std::string& host, unsigned short int port)
-: _impl(new ClientImpl(this, selector, Net::AddrInfo(host, port)))
+Client::Client(System::EventLoop& selector, const std::string& host, unsigned short int port, bool ssl)
+: _impl(new ClientImpl(this, selector, Net::AddrInfo(host, port), ssl))
 {
 }
 
@@ -65,14 +65,14 @@ Client::~Client()
     delete _impl;
 }
 
-void Client::setHost(const Net::AddrInfo& addrinfo)
+void Client::setHost(const Net::AddrInfo& addrinfo, bool ssl)
 {
-    _impl->setHost(addrinfo);
+    _impl->setHost(addrinfo, ssl);
 }
 
-void Client::setHost(const std::string& host, unsigned short int port)
+void Client::setHost(const std::string& host, unsigned short int port, bool ssl)
 {
-    _impl->setHost(Net::AddrInfo(host, port));
+    _impl->setHost(Net::AddrInfo(host, port), ssl);
 }
 
 const Net::AddrInfo& Client::host() const
@@ -95,9 +95,9 @@ void Client::setTimeout(std::size_t timeout)
     _impl->setTimeout(timeout);
 }
 
-void Client::setSecure(Ssl::Context& ctx)
+void Client::setContext(Ssl::Context& ctx)
 {
-    _impl->setSecure(ctx);
+    _impl->setContext(ctx);
 }
 
 const ReplyHeader& Client::execute(const Request& request)

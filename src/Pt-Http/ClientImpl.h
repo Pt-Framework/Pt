@@ -180,9 +180,9 @@ class ClientImpl : public Connectable
     public:
         ClientImpl(Client* client);
         
-        ClientImpl(Client* client, const Net::AddrInfo& addrinfo);
+        ClientImpl(Client* client, const Net::AddrInfo& addrinfo, bool ssl);
         
-        ClientImpl(Client* client, System::EventLoop& selector, const Net::AddrInfo& addrinfo);
+        ClientImpl(Client* client, System::EventLoop& selector, const Net::AddrInfo& addrinfo, bool ssl);
 
         System::EventLoop* loop() const
         {
@@ -199,11 +199,7 @@ class ClientImpl : public Connectable
             _socket.setTimeout(timeout);
         }
 
-        void setHost(const Net::AddrInfo& addrinfo)
-        {
-            _addrInfo = addrinfo;
-            _socket.close();
-        }
+        void setHost(const Net::AddrInfo& addrinfo, bool ssl);
 
         const Net::AddrInfo& host() const
         {
@@ -222,7 +218,7 @@ class ClientImpl : public Connectable
             _password.clear(); 
         }
 
-        void setSecure(Ssl::Context& ctx);
+        void setContext(Ssl::Context& ctx);
 
         const ReplyHeader& execute(const Request& request);
 
@@ -295,12 +291,13 @@ class ClientImpl : public Connectable
         ReplyHeader _replyHeader;
 
         Net::AddrInfo _addrInfo;
+        bool _ssl;
         Net::TcpSocket _socket;
         System::StreamBuffer _sockbuf;
         ChunkedReader _chunkedBuffer;
         
 #ifdef PT_HTTP_WITH_SSL
-        Ssl::Context* _ctx;
+        //Ssl::Context* _ctx;
         Ssl::IOBuffer _sslbuf;
 #endif
 

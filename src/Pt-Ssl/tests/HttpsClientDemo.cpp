@@ -247,8 +247,8 @@ int main(int argc, char** argv)
         //std::string addr("127.0.0.1");
         std::string  addr("www.pt-framework.org");
         unsigned short port = 443;
-        Pt::Http::Client client(loop, addr, port);
-        client.setSecure(clientContext);
+        Pt::Http::Client client(loop, addr, port, true);
+        client.setContext(clientContext);
 
         //client.headerReceived += Pt::slot(&onReplyHeader);
         client.bodyAvailable += Pt::slot(&onReply);

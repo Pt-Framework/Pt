@@ -302,10 +302,10 @@ ClientImpl::ClientImpl(Client* client)
 , _parseEvent(_replyHeader)
 , _parser(_parseEvent, true)
 , _request(0)
+, _ssl(false)
 , _sockbuf(8192, true)
 , _chunkedBuffer(&_sockbuf)
 #ifdef PT_HTTP_WITH_SSL
-, _ctx(0)
 , _sslbuf(_sockbuf)
 #endif
 , _stream(&_sockbuf)
@@ -318,16 +318,15 @@ ClientImpl::ClientImpl(Client* client)
 }
 
 
-ClientImpl::ClientImpl(Client* client, const Net::AddrInfo& addrinfo)
+ClientImpl::ClientImpl(Client* client, const Net::AddrInfo& addrinfo, bool ssl)
 : _client(client)
 , _parseEvent(_replyHeader)
 , _parser(_parseEvent, true)
 , _request(0)
-, _addrInfo(addrinfo)
+, _ssl(false)
 , _sockbuf(8192, true)
 , _chunkedBuffer(&_sockbuf)
 #ifdef PT_HTTP_WITH_SSL
-, _ctx(0)
 , _sslbuf(_sockbuf)
 #endif
 , _stream(&_sockbuf)
@@ -337,19 +336,19 @@ ClientImpl::ClientImpl(Client* client, const Net::AddrInfo& addrinfo)
 , _state( &ClientImpl::onHttpHeader )
 {
     init();
+    setHost(addrinfo, ssl);
 }
 
 
-ClientImpl::ClientImpl(Client* client, System::EventLoop& loop, const Net::AddrInfo& addrinfo)
+ClientImpl::ClientImpl(Client* client, System::EventLoop& loop, const Net::AddrInfo& addrinfo, bool ssl)
 : _client(client)
 , _parseEvent(_replyHeader)
 , _parser(_parseEvent, true)
 , _request(0)
-, _addrInfo(addrinfo)
+, _ssl(false)
 , _sockbuf(8192, true)
 , _chunkedBuffer(&_sockbuf)
 #ifdef PT_HTTP_WITH_SSL
-, _ctx(0)
 , _sslbuf(_sockbuf)
 #endif
 , _stream(&_sockbuf)
@@ -360,6 +359,7 @@ ClientImpl::ClientImpl(Client* client, System::EventLoop& loop, const Net::AddrI
 {
     setActive(loop);
     init();
+    setHost(addrinfo, ssl);
 }
 
 
@@ -367,31 +367,67 @@ void ClientImpl::init()
 {
     _socket.connected() += Pt::slot(*this, &ClientImpl::onConnect);
 
-    _sockbuf.attach(_socket);
     _sockbuf.outputReady() += slot(*this, &ClientImpl::onOutput);
     _sockbuf.inputReady() += slot(*this, &ClientImpl::onInput);
+    _sockbuf.attach(_socket);
+
+#ifdef PT_HTTP_WITH_SSL
+    _sslbuf.handshakeFinished() += slot(*this, &ClientImpl::onSslHandshake);
+#endif
+}
+
+
+void ClientImpl::setHost(const Net::AddrInfo& addrinfo, bool ssl)
+{
+    _addrInfo = addrinfo;
+    _socket.close();
+
+#ifdef PT_HTTP_WITH_SSL
+      if(ssl)
+      {
+          log_debug("begining SSL handshake");
+          if( ! _ssl)
+          {
+              _sockbuf.outputReady() -= slot(*this, &ClientImpl::onOutput);
+              _sockbuf.inputReady() -= slot(*this, &ClientImpl::onInput);
+
+              _sslbuf.outputReady() += slot(*this, &ClientImpl::onSslOutput);
+              _sslbuf.inputReady() += slot(*this, &ClientImpl::onSslInput);
+
+              _stream.rdbuf(&_sslbuf);
+              _ssl = true;
+          }
+          
+          return;
+      }
+
+      log_debug("begining HTTP request");
+      if(_ssl)
+      {
+          _sslbuf.outputReady() -= slot(*this, &ClientImpl::onSslOutput);
+          _sslbuf.inputReady() -= slot(*this, &ClientImpl::onSslInput);
+
+          _sockbuf.outputReady() += slot(*this, &ClientImpl::onOutput);
+          _sockbuf.inputReady() += slot(*this, &ClientImpl::onInput);
+
+          _stream.rdbuf(&_sockbuf);
+          _ssl = false;
+      }
+
+#endif
 }
 
 
 #ifdef PT_HTTP_WITH_SSL
 
-void ClientImpl::setSecure(Ssl::Context& ctx)
+void ClientImpl::setContext(Ssl::Context& ctx)
 {
-    _sockbuf.outputReady() -= slot(*this, &ClientImpl::onOutput);
-    _sockbuf.inputReady() -= slot(*this, &ClientImpl::onInput);
-
-    _ctx = &ctx;
     _sslbuf.init(ctx);
-    _stream.rdbuf(&_sslbuf);
-
-    _sslbuf.handshakeFinished() += slot(*this, &ClientImpl::onSslHandshake);
-    _sslbuf.outputReady() += slot(*this, &ClientImpl::onSslOutput);
-    _sslbuf.inputReady() += slot(*this, &ClientImpl::onSslInput);
 }
 
 #else
 
-void ClientImpl::setSecure(Ssl::Context& )
+void ClientImpl::setContext(Ssl::Context& )
 {
 }
 
@@ -515,7 +551,11 @@ void ClientImpl::beginRequest(const Request& request)
     _request = &request;
     _replyHeader.clear();
     _parser.reset(true);
-    _state = &ClientImpl::onHttpHeader;
+
+    if(_ssl)
+        _state = &ClientImpl::onHttpsHeader;
+    else
+        _state = &ClientImpl::onHttpHeader;
     
     if(  ! _socket.isConnected() )
     {
@@ -636,11 +676,10 @@ void ClientImpl::onConnect(Net::TcpSocket& socket)
         socket.endConnect();
 
 #ifdef PT_HTTP_WITH_SSL
-        if(_ctx)
+        if(_ssl)
         {
             log_debug("begining SSL handshake");
             _sslbuf.beginConnect(false);
-            _state = &ClientImpl::onHttpsHeader;
             return;
         }
 #endif
@@ -648,7 +687,6 @@ void ClientImpl::onConnect(Net::TcpSocket& socket)
         
         log_debug("request sent - begin write");
         _sockbuf.beginWrite();
-        _state = &ClientImpl::onHttpHeader;
     }
     catch(...)
     {

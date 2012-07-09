@@ -59,13 +59,13 @@ class PT_HTTP_API Client : private NonCopyable
     public:
         Client();
         
-        Client(const std::string& host, unsigned short int port);
+        Client(const std::string& host, unsigned short int port, bool ssl = false);
         
-        Client(const Net::AddrInfo& addr);
+        Client(const Net::AddrInfo& addr, bool ssl = false);
 
-        Client(System::EventLoop& loop, const std::string& host, unsigned short int port);
+        Client(System::EventLoop& loop, const std::string& host, unsigned short int port, bool ssl = false);
         
-        Client(System::EventLoop& loop, const Net::AddrInfo& addrinfo);
+        Client(System::EventLoop& loop, const Net::AddrInfo& addrinfo, bool ssl = false);
 
         ~Client();
 
@@ -76,13 +76,13 @@ class PT_HTTP_API Client : private NonCopyable
         void setTimeout(std::size_t timeout);
 
         // Sets the host and port. No actual network connect is done.
-        void setHost(const Net::AddrInfo& addrinfo);
+        void setHost(const Net::AddrInfo& addrinfo, bool ssl = false);
         
-        void setHost(const std::string& host, unsigned short int port);
+        void setHost(const std::string& host, unsigned short int port, bool ssl = false);
 
         const Net::AddrInfo& host() const;
 
-        void setSecure(Ssl::Context& ctx);
+        void setContext(Ssl::Context& ctx);
 
         // Sends the passed request to the server and parses the headers.
         // The body must be read with readBody.
