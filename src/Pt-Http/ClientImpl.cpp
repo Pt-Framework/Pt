@@ -452,6 +452,7 @@ const ReplyHeader& ClientImpl::execute(const Request& request)
         log_debug("sending request");
         sendRequest(_stream, request);
         _stream.flush();
+        _sockbuf.pubsync(); // for https: _stream -> _sslbuf -> _sockbuf
 
         log_debug("reading reply");
         char ch = ' ';
@@ -496,7 +497,6 @@ void ClientImpl::readBody(std::string& s)
     s.clear();
 
     bool chunkedEncoding = _replyHeader.chunkedTransferEncoding();
-
 
     if(chunkedEncoding)
     {
