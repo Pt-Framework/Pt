@@ -77,13 +77,16 @@ int main(int argc, char* argv[])
               << std::endl;
 
     Pt::System::MainLoop loop;
-    Pt::Http::Server server(loop, ip, port);
-    server.setMaxThreads(maxThreads);
-
+    
     EchoService service;
     //service.registerFunction("echo", echo);
+    
+    Pt::Http::Server server(loop, ip, port);
+    server.setMaxThreads(maxThreads);
     server.addService("/myservice", service);
 
+    //loop.setIdleTimeout(5000);
+    //loop.timeout() += Pt::slot(loop, &Pt::System::EventLoop::exit);
     loop.run();
   }
   catch (const std::exception& e)

@@ -33,6 +33,7 @@
 #include <Pt/System/Thread.h>
 #include <Pt/System/Mutex.h>
 #include <Pt/System/Clock.h>
+#include <Pt/System/Logger.h>
 #include <Pt/Timespan.h>
 #include <Pt/Atomicity.h>
 #include <Pt/Main.h>
@@ -113,6 +114,8 @@ int main(int argc, char* argv[])
 {
   try
   {
+    Pt::System::Logger::setLogLevel("", Pt::System::Error);
+
     Pt::Arg<std::string> ip(argc, argv, 'i');
     Pt::Arg<unsigned short> port(argc, argv, 'p', 7002);
     Pt::Arg<unsigned> threads(argc, argv, 't', 4);

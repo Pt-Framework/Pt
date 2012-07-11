@@ -496,12 +496,14 @@ void ClientImpl::readBody(std::string& s)
     s.clear();
 
     bool chunkedEncoding = _replyHeader.chunkedTransferEncoding();
-    _chunkedBuffer.reset();
-    _stream.rdbuf(&_chunkedBuffer);
+
 
     if(chunkedEncoding)
     {
         log_debug("read body with chunked encoding");
+
+        _chunkedBuffer.reset();
+        _stream.rdbuf(&_chunkedBuffer);
 
         char ch;
         while( _stream.get(ch) )
