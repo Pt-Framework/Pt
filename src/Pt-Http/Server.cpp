@@ -473,15 +473,9 @@ class ServerThread : public Connectable
 
         void stop()
         {
-            ExitEvent ev;
-            _loop.commitEvent(ev);
-
+            _loop.exit();
             _thread.join();
-        }
 
-    private:
-        void onExitEvent(const ExitEvent& ev)
-        {
             std::vector<TcpConnection*>::iterator it;
             for(it = _connections.begin(); it != _connections.end(); ++it)
             {
@@ -489,7 +483,11 @@ class ServerThread : public Connectable
             }
 
             _connections.clear();
-            _loop.exit();
+        }
+
+    private:
+        void onExitEvent(const ExitEvent& ev)
+        {
         }
 
         void onAcceptEvent(const AcceptEvent& ev)
