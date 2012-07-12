@@ -54,6 +54,8 @@ class PT_SSL_API IOBuffer : public StreamBuffer
         */
         virtual ~IOBuffer();
 
+        void connect(bool verifyServerCert);
+
         /** @brief Starts the client connect handshake
         */
         void beginConnect(bool verifyServerCert);
@@ -112,7 +114,7 @@ class PT_SSL_API IOBuffer : public StreamBuffer
         void onOutput(Pt::System::StreamBuffer& sb);
 
     private:
-        System::StreamBuffer* _ios;
+        System::StreamBuffer* _sb;
         Pt::Signal<IOBuffer&> _handshakeFinished;
         Pt::Signal<IOBuffer&> _shutdownFinished;
         Pt::Signal<IOBuffer&> _inputReady;

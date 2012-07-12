@@ -32,6 +32,7 @@
 #include <Pt/System/IOError.h>
 #include <openssl/ssl.h>
 #include <openssl/err.h>
+#include <cassert>
 
 log_define("Pt.Ssl.StreamBuffer")
 
@@ -87,6 +88,9 @@ StreamBuffer::~StreamBuffer()
 { 
     if(_ssl)
         SSL_free(_ssl); 
+
+    delete [] _ibuffer;
+    delete [] _obuffer;
 }
 
 
@@ -110,6 +114,21 @@ void StreamBuffer::init(Context& ctx)
 
     // By default we do not care about the other peer's certificate
     SSL_set_verify(_ssl, SSL_VERIFY_NONE, NULL);
+}
+
+
+void StreamBuffer::discard()
+{
+    if( ! _ssl)
+        return;
+
+    // Reset all
+    (void) BIO_reset(_in);
+    (void) BIO_reset(_out);
+    SSL_clear(_ssl);
+
+    delete [] _ibuffer; _ibuffer = 0;
+    delete [] _obuffer; _obuffer = 0;
 }
 
 
@@ -418,13 +437,28 @@ int StreamBuffer::sync()
 
 StreamBuffer::int_type StreamBuffer::underflow()
 {
+    log_trace("StreamBuffer::underflow");
+
     if( ! _ios || ! _ssl )
         return traits_type::eof();
 
     if( this->gptr() < this->egptr() )
         return traits_type::to_int_type( *this->gptr() );
 
-    this->do_underflow(_ibufferSize);
+    while( 0 == this->do_underflow(_ibufferSize) )
+    {
+        if(SSL_RECEIVED_SHUTDOWN & SSL_get_shutdown(_ssl)) 
+        {
+            log_debug("Received shutdown notification");
+            return traits_type::eof();
+        }
+
+        if( traits_type::eof() == _ios->sgetc() )
+        {
+            log_debug("underlying streambuf is EOF");
+            return traits_type::eof();
+        }
+    }
 
     if( this->gptr() < this->egptr() )
         return traits_type::to_int_type( *this->gptr() );
@@ -435,6 +469,8 @@ StreamBuffer::int_type StreamBuffer::underflow()
 
 std::streamsize StreamBuffer::do_underflow(std::streamsize isize)
 {
+    log_trace("StreamBuffer::do_underflow");
+
     if(! _ios || ! _ssl ) 
         return 0;
 
@@ -444,7 +480,7 @@ std::streamsize StreamBuffer::do_underflow(std::streamsize isize)
     }
 
     // Return 0 if full
-    if(_ibufferSize == (size_t)(this->egptr() - this->gptr()))
+    if(_ibufferSize == (size_t)(this->egptr() - this->gptr() + _pbmax))
     {
         log_debug("_ibuffer is full");
         return 0;
@@ -470,67 +506,66 @@ std::streamsize StreamBuffer::do_underflow(std::streamsize isize)
     BUF_MEM* bm = 0;
     while(true) 
     {
-        // Refill the BIO with encoded bytes for decoding
-        BIO_get_mem_ptr(_in, &bm);
-        if(bm->max > bm->length && isize > 0) 
-        {
-            const std::streamsize avail  = std::min(_ios->in_avail(), isize);
-            const std::streamsize refill = std::min(static_cast<std::streamsize>(bm->max - bm->length), avail);
-            isize -= refill;
-
-            std::streamsize gcount = _ios->sgetn(bm->data + bm->length, refill);
-            if(gcount > 0) 
-              bm->length += static_cast<int>( gcount );
-
-            log_debug("Wrote " << gcount << " bytes from _ios to _in BUF_MEM");
-        }
-        
-        /*if(bm->length == 0)
-        {
-            log_debug("no progress was made");
-            return 0;
-        }*/
-
         // We do not need to read all bytes from _ssl, but only make some progress
         size_t used = _pbmax + leftover;
-        size_t avail = _ibufferSize - used;
+        size_t unused = _ibufferSize - used;
 
-        if( ! avail )
-            break;
+        log_debug("available to fill: " << unused);
+        assert(unused);
 
         // even if we could not refill the BIO, we might still get data from the SSL
-        const int readSize = SSL_read(_ssl, _ibuffer + used, avail);
+        const int readSize = SSL_read(_ssl, _ibuffer + used, unused);
         log_debug("Read " << readSize << " bytes from _ssl");
         log_debug("SSL_get_shutdown() = " << SSL_get_shutdown(_ssl));
 
-        long sslerr = SSL_get_error(_ssl, readSize);
-        switch(sslerr) 
+        if(readSize > 0)
         {
-            // No error - good :)
-            case SSL_ERROR_NONE:
-
-                this->setg( _ibuffer + (_pbmax - putback), // start of get area
-                            _ibuffer + _pbmax,             // gptr position
-                            _ibuffer + used + readSize );  // end of get area
-                return readSize;
-
-            // This error may indicate that the other peer wants re-handshaking,
-            // or, there is just not enough raw bytes to be decoded
-            case SSL_ERROR_WANT_READ:
-                if(readSize < 0 && isize > 0) continue;
-                return 0;
-
-            // This error may indicate that the other peer has send shutdown message
-            case SSL_ERROR_ZERO_RETURN:
-                return 0;
-
-            // Opps - we got a big problem here :(
-            default:
-                while( ( sslerr = ERR_get_error() ) ) {
-                    log_debug("ERR_error_string = " << ERR_error_string(sslerr, 0));
-                }
-                throw System::IOError("Failed reading decrypted data from OpenSSL!");
+            log_debug("place decoded data in buffer");
+            this->setg( _ibuffer + (_pbmax - putback), // start of get area
+                        _ibuffer + _pbmax,             // gptr position
+                        _ibuffer + used + readSize );  // end of get area
+            
+            return readSize;
         }
+
+        long sslerr = SSL_get_error(_ssl, readSize);
+        if(sslerr != SSL_ERROR_WANT_READ)
+        {
+            // This error may indicate that the other peer has send shutdown message
+            if(sslerr == SSL_ERROR_ZERO_RETURN)
+            {
+                log_debug("SSL_ERROR_ZERO_RETURN");
+                return 0;
+            }
+
+            log_debug("ssl error occured");
+            while( ( sslerr = ERR_get_error() ) ) {
+                log_debug("ERR_error_string = " << ERR_error_string(sslerr, 0));
+            }
+            
+            throw System::IOError("Failed reading decrypted data from OpenSSL!");
+        }
+
+        if(isize == 0)
+            return 0;
+
+        // Refill the BIO with encoded bytes for decoding
+        BIO_get_mem_ptr(_in, &bm);
+        if(bm->max == bm->length)
+            continue;
+
+        // Block until data can be read from the stream
+        if( traits_type::eof() == _ios->sgetc() )
+            return 0;
+
+        const std::streamsize avail  = std::min(_ios->in_avail(), isize);
+        const std::streamsize refill = std::min(static_cast<std::streamsize>(bm->max - bm->length), avail);
+        isize -= refill;
+        log_debug("get " << refill << " bytes from _ios");
+        
+        std::streamsize gcount = _ios->sgetn(bm->data + bm->length, refill);
+        bm->length += static_cast<int>( gcount );
+        log_debug("Wrote " << gcount << " bytes from _ios to _in BUF_MEM");
     }
 
     return 0;

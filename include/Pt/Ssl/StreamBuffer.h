@@ -65,6 +65,8 @@ class PT_SSL_API StreamBuffer : public std::streambuf
         */
         void init(Context& ctx);
 
+        void discard();
+
         /** @brief Return a list of available ciphers for the current protocol. 
         */
         CipherList ciphers() const;

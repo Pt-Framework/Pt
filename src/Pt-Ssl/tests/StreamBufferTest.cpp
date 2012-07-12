@@ -42,7 +42,7 @@ class StreamBufferTest : public Pt::Unit::TestSuite
         StreamBufferTest()
         : Pt::Unit::TestSuite("StreamBufferTest")
         {
-            //Pt::System::Logger::getTarget("Pt.Ssl").setLogLevel(Pt::System::Trace);
+            Pt::System::Logger::setLogLevel("", Pt::System::Error);
 
             this->registerMethod("Handshake", *this, &StreamBufferTest::Handshake);
         }

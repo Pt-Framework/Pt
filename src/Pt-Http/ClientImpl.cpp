@@ -435,7 +435,7 @@ void ClientImpl::setContext(Ssl::Context& )
 
 const ReplyHeader& ClientImpl::execute(const Request& request)
 {
-    log_trace("execute request " << request.url());
+    log_trace("ClientImpl::execute " << request.url());
 
     _replyHeader.clear();
     _parser.reset(true);
@@ -448,11 +448,19 @@ const ReplyHeader& ClientImpl::execute(const Request& request)
             log_debug("connect");
             _socket.connect(_addrInfo);
         }
+
+        if(_ssl)
+        {
+            log_debug("ssl handshake");
+            _sslbuf.connect(false);
+        }
         
         log_debug("sending request");
         sendRequest(_stream, request);
         _stream.flush();
-        _sockbuf.pubsync(); // for https: _stream -> _sslbuf -> _sockbuf
+
+        // extra flush for https: _stream -> _sslbuf -> _sockbuf
+        _sockbuf.pubsync();
 
         log_debug("reading reply");
         char ch = ' ';
@@ -479,8 +487,9 @@ const ReplyHeader& ClientImpl::execute(const Request& request)
             log_debug("reconnect to lost connection");
             reuseConnection = false;
             _socket.close();
-            _stream.clear();
             _sockbuf.discard();
+            _sslbuf.discard();
+            _stream.clear();
             continue;  
         }
 
@@ -502,7 +511,8 @@ void ClientImpl::readBody(std::string& s)
     {
         log_debug("read body with chunked encoding");
 
-        _chunkedBuffer.reset();
+        // _stream -> _chunkedBuffer (-> _sslbuf) -> _sockbuf
+        _chunkedBuffer.reset( _stream.rdbuf() );
         _stream.rdbuf(&_chunkedBuffer);
 
         char ch;
@@ -580,6 +590,7 @@ void ClientImpl::beginRequest(const Request& request)
 
         _stream.clear();
         _sockbuf.discard();
+        _sslbuf.discard();
         _socket.beginConnect(_addrInfo);
     }
 }
@@ -1123,9 +1134,8 @@ void ClientImpl::onHttpChunkedBody(System::StreamBuffer& sbuf)
 void ClientImpl::cancel()
 {
     _socket.close();
-
     _sockbuf.discard();
-
+    _sslbuf.discard();
     _stream.clear();
 
     // TODO:

@@ -31,6 +31,7 @@
 #include <Pt/Ssl/IOBuffer.h>
 #include <Pt/Http/Client.h>
 #include <Pt/Http/Request.h>
+#include <Pt/Http/Reply.h>
 #include <Pt/Net/TcpSocket.h>
 #include <Pt/Net/TcpServer.h>
 #include <Pt/System/MainLoop.h>
@@ -221,11 +222,12 @@ void onReplyFinished(Pt::Http::Client& client)
         client.loop()->exit();
 }
 
+
 int main(int argc, char** argv)
 {
     try 
     {
-        Pt::System::Logger::setLogLevel("", Pt::System::Error);
+        Pt::System::Logger::setLogLevel("", Pt::System::Trace);
         log_debug("OpenSSL HTTP test progam started");
 
         Pt::System::MainLoop loop;
@@ -265,11 +267,24 @@ int main(int argc, char** argv)
  
         Pt::Http::Request request("/index.html");
         request.setHeader("User-Agent", "Platinum");
-        client.beginExecute(request);
+        
+        bool noblock = true;
+        if(noblock)
+        {
+            log_debug("excuting non-blocking HTTPS request");
+            client.beginExecute(request);
 
-        //loop.setIdleTimeout(60000);
-        loop.timeout() += Pt::slot(loop, &Pt::System::EventLoop::exit);
-        loop.run();
+            //loop.setIdleTimeout(60000);
+            loop.timeout() += Pt::slot(loop, &Pt::System::EventLoop::exit);
+            loop.run();
+        }
+        else
+        {
+            log_debug("excuting blocking HTTPS request");
+            client.execute(request);
+            std::string body = client.readBody();
+            std::cout << body << std::endl;
+        }
 
         log_debug("OpenSSL HTTP test progam ended");
         return 0;

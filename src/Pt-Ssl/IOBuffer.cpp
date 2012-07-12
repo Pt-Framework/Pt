@@ -37,8 +37,8 @@ namespace Pt {
 namespace Ssl {
 
 IOBuffer::IOBuffer(Pt::System::StreamBuffer& sb)
-: StreamBuffer(sb , 1024)
-, _ios(&sb)
+: StreamBuffer(sb)
+, _sb(&sb)
 , _errorPending(0)
 , _reading(false)
 , _input(false)
@@ -47,8 +47,8 @@ IOBuffer::IOBuffer(Pt::System::StreamBuffer& sb)
 
 
 IOBuffer::IOBuffer(Context& ctx, Pt::System::StreamBuffer& sb)
-: StreamBuffer(ctx, sb , 1024)
-, _ios(&sb)
+: StreamBuffer(ctx, sb)
+, _sb(&sb)
 , _errorPending(0)
 , _reading(false)
 , _input(false)
@@ -60,27 +60,54 @@ IOBuffer::~IOBuffer()
 {}
 
 
+void IOBuffer::connect(bool verifyServerCert)
+{
+    log_trace("IOBuffer::connect");
+    
+    this->setConnecting(verifyServerCert);
+
+    for( ; ; )
+    {
+        log_debug("writing handshake");
+        while( this->writeHandshake() )
+            ;
+
+        log_debug("syncing buffer");
+        _sb->pubsync();
+
+        log_debug("reading handshake");
+        while( this->readHandshake() )
+            ;
+
+        if( this->connected() )
+            break;
+
+        log_debug("continuing handshake");
+    }
+}
+
+
 void IOBuffer::beginConnect(bool verifyServerCert)
 {
     log_debug("_sslbuf.beginClientHandshake(verifyServerCert = " << verifyServerCert << ")");
 
-    if( ! _ios)
+    if( ! _sb)
         return;
 
     _errorPending = 0;
     StreamBuffer::setConnecting(verifyServerCert);
     StreamBuffer::writeHandshake();
 
-    log_debug("_ios->beginWrite()");
-    _ios->beginWrite();
-    _ios->outputReady() += Pt::slot(*this, &IOBuffer::onWriteHandshake);
-    _ios->inputReady()  += Pt::slot(*this, &IOBuffer::onReadHandshake);
+    log_debug("_sb->beginWrite()");
+    _sb->beginWrite();
+    _sb->outputReady() += Pt::slot(*this, &IOBuffer::onWriteHandshake);
+    _sb->inputReady()  += Pt::slot(*this, &IOBuffer::onReadHandshake);
 }
 
 
 void IOBuffer::beginAccept(bool verifyClientCert, bool requireCertBasedAuth)
 {
-    if( ! _ios)
+    if( ! _sb)
         return;
 
     log_debug("_sslbuf.beginClientHandshake(verifyServerCert = "
@@ -89,10 +116,10 @@ void IOBuffer::beginAccept(bool verifyClientCert, bool requireCertBasedAuth)
     _errorPending = 0;
     StreamBuffer::setAccepting(verifyClientCert, requireCertBasedAuth);
 
-    log_debug("_ios->beginRead()");
-    _ios->beginRead();
-    _ios->outputReady() += Pt::slot(*this, &IOBuffer::onWriteServerHandshake);
-    _ios->inputReady()  += Pt::slot(*this, &IOBuffer::onReadServerHandshake);
+    log_debug("_sb->beginRead()");
+    _sb->beginRead();
+    _sb->outputReady() += Pt::slot(*this, &IOBuffer::onWriteServerHandshake);
+    _sb->inputReady()  += Pt::slot(*this, &IOBuffer::onReadServerHandshake);
 }
 
 
@@ -110,26 +137,26 @@ void IOBuffer::onWriteHandshake(Pt::System::StreamBuffer& sb)
 {
     try
     {
-        log_debug("_ios->endWrite()");
-        _ios->endWrite();
+        log_debug("_sb->endWrite()");
+        _sb->endWrite();
 
         log_debug("_sslbuf.writeHandshake()");
-        if(StreamBuffer::writeHandshake() || _ios->out_avail() > 0)
+        if(StreamBuffer::writeHandshake() || _sb->out_avail() > 0)
         {
-            log_debug("_ios->beginWrite()");
-            _ios->beginWrite();
+            log_debug("_sb->beginWrite()");
+            _sb->beginWrite();
             return;
         }
 
-        log_debug("_ios->beginRead()");
-        _ios->beginRead();
+        log_debug("_sb->beginRead()");
+        _sb->beginRead();
     }
     catch(...)
     {
         log_debug("Handshake failed");
         _errorPending = 1;
-        _ios->outputReady() -= Pt::slot(*this, &IOBuffer::onWriteHandshake);
-        _ios->inputReady()  -= Pt::slot(*this, &IOBuffer::onReadHandshake);
+        _sb->outputReady() -= Pt::slot(*this, &IOBuffer::onWriteHandshake);
+        _sb->inputReady()  -= Pt::slot(*this, &IOBuffer::onReadHandshake);
         _handshakeFinished.send(*this);
         
         if(_errorPending)
@@ -144,37 +171,37 @@ void IOBuffer::onWriteServerHandshake(Pt::System::StreamBuffer& sb)
 {
     try
     {
-        log_debug("_ios->endWrite()");
-        _ios->endWrite();
+        log_debug("_sb->endWrite()");
+        _sb->endWrite();
 
         log_debug("_sslbuf.writeHandshake()");
-        if(StreamBuffer::writeHandshake() || _ios->out_avail() > 0)
+        if(StreamBuffer::writeHandshake() || _sb->out_avail() > 0)
         {
-            log_debug("_ios->beginWrite()");
-            _ios->beginWrite();
+            log_debug("_sb->beginWrite()");
+            _sb->beginWrite();
             return;
         }
 
         if( StreamBuffer::connected() )
         {
             log_debug("SERVER Handshake finished");
-            _ios->outputReady() -= Pt::slot(*this, &IOBuffer::onWriteServerHandshake);
-            _ios->inputReady()  -= Pt::slot(*this, &IOBuffer::onReadServerHandshake);
-            _ios->outputReady() += Pt::slot(*this, &IOBuffer::onOutput);
-            _ios->inputReady()  += Pt::slot(*this, &IOBuffer::onInput);
+            _sb->outputReady() -= Pt::slot(*this, &IOBuffer::onWriteServerHandshake);
+            _sb->inputReady()  -= Pt::slot(*this, &IOBuffer::onReadServerHandshake);
+            _sb->outputReady() += Pt::slot(*this, &IOBuffer::onOutput);
+            _sb->inputReady()  += Pt::slot(*this, &IOBuffer::onInput);
             _handshakeFinished.send(*this);
             return;
         }
 
-        log_debug("_ios->beginRead()");
-        _ios->beginRead();
+        log_debug("_sb->beginRead()");
+        _sb->beginRead();
     } 
     catch(...)
     {
         log_debug("Handshake failed");
         _errorPending = 1;
-        _ios->outputReady() -= Pt::slot(*this, &IOBuffer::onWriteServerHandshake);
-        _ios->inputReady()  -= Pt::slot(*this, &IOBuffer::onReadServerHandshake);
+        _sb->outputReady() -= Pt::slot(*this, &IOBuffer::onWriteServerHandshake);
+        _sb->inputReady()  -= Pt::slot(*this, &IOBuffer::onReadServerHandshake);
         _handshakeFinished.send(*this);
 
         if(_errorPending)
@@ -189,32 +216,32 @@ void IOBuffer::onReadHandshake(Pt::System::StreamBuffer& sb)
 {
     try
     {
-        log_debug("_ios->endRead()");
-        _ios->endRead();
+        log_debug("_sb->endRead()");
+        _sb->endRead();
 
         log_debug("_sslbuf.readHandshake()");
         if( StreamBuffer::readHandshake() )
         {
-            log_debug("_ios->beginRead()");
-            _ios->beginRead();
+            log_debug("_sb->beginRead()");
+            _sb->beginRead();
             return;
         }
 
         if(StreamBuffer::connected())
         {
             log_debug("Handshake finished");
-            _ios->outputReady() -= Pt::slot(*this, &IOBuffer::onWriteHandshake);
-            _ios->inputReady()  -= Pt::slot(*this, &IOBuffer::onReadHandshake);
-            _ios->outputReady() += Pt::slot(*this, &IOBuffer::onOutput);
-            _ios->inputReady()  += Pt::slot(*this, &IOBuffer::onInput);
+            _sb->outputReady() -= Pt::slot(*this, &IOBuffer::onWriteHandshake);
+            _sb->inputReady()  -= Pt::slot(*this, &IOBuffer::onReadHandshake);
+            _sb->outputReady() += Pt::slot(*this, &IOBuffer::onOutput);
+            _sb->inputReady()  += Pt::slot(*this, &IOBuffer::onInput);
             _handshakeFinished.send(*this);
             return;
         }
 
         log_debug("_sslbuf.writeHandshake()");
         if(StreamBuffer::writeHandshake()) {
-            log_debug("_ios->beginWrite()");
-            _ios->beginWrite();
+            log_debug("_sb->beginWrite()");
+            _sb->beginWrite();
             return;
         }
     }
@@ -222,8 +249,8 @@ void IOBuffer::onReadHandshake(Pt::System::StreamBuffer& sb)
     {
         log_debug("Handshake failed");
         _errorPending = 1;
-        _ios->outputReady() -= Pt::slot(*this, &IOBuffer::onWriteHandshake);
-        _ios->inputReady()  -= Pt::slot(*this, &IOBuffer::onReadHandshake);
+        _sb->outputReady() -= Pt::slot(*this, &IOBuffer::onWriteHandshake);
+        _sb->inputReady()  -= Pt::slot(*this, &IOBuffer::onReadHandshake);
         _handshakeFinished.send(*this);
 
         if(_errorPending)
@@ -238,21 +265,21 @@ void IOBuffer::onReadServerHandshake(Pt::System::StreamBuffer& sb)
 {
     try
     {
-        log_debug("_ios->endRead()");
-        _ios->endRead();
+        log_debug("_sb->endRead()");
+        _sb->endRead();
 
         log_debug("_sslbuf.readHandshake()");
         if(StreamBuffer::readHandshake())
         {
-            log_debug("_ios->beginRead()");
-            _ios->beginRead();
+            log_debug("_sb->beginRead()");
+            _sb->beginRead();
             return;
         }
 
         log_debug("_sslbuf.writeHandshake()");
         if(StreamBuffer::writeHandshake()) {
-            log_debug("_ios->beginWrite()");
-            _ios->beginWrite();
+            log_debug("_sb->beginWrite()");
+            _sb->beginWrite();
             return;
         }
     } 
@@ -260,8 +287,8 @@ void IOBuffer::onReadServerHandshake(Pt::System::StreamBuffer& sb)
     {
         log_debug("Handshake failed");
         _errorPending = 1;
-        _ios->outputReady() -= Pt::slot(*this, &IOBuffer::onWriteServerHandshake);
-        _ios->inputReady()  -= Pt::slot(*this, &IOBuffer::onReadServerHandshake);
+        _sb->outputReady() -= Pt::slot(*this, &IOBuffer::onWriteServerHandshake);
+        _sb->inputReady()  -= Pt::slot(*this, &IOBuffer::onReadServerHandshake);
         _handshakeFinished.send(*this);
 
         if(_errorPending)
@@ -274,19 +301,19 @@ void IOBuffer::onReadServerHandshake(Pt::System::StreamBuffer& sb)
 
 void IOBuffer::beginShutdown()
 {
-    if( ! _ios)
+    if( ! _sb)
         return;
 
-    _ios->outputReady() -= Pt::slot(*this, &IOBuffer::onOutput);
-    _ios->inputReady()  -= Pt::slot(*this, &IOBuffer::onInput);
-    _ios->outputReady() += Pt::slot(*this, &IOBuffer::onWriteShutdown);
-    _ios->inputReady()  += Pt::slot(*this, &IOBuffer::onReadShutdown);
+    _sb->outputReady() -= Pt::slot(*this, &IOBuffer::onOutput);
+    _sb->inputReady()  -= Pt::slot(*this, &IOBuffer::onInput);
+    _sb->outputReady() += Pt::slot(*this, &IOBuffer::onWriteShutdown);
+    _sb->inputReady()  += Pt::slot(*this, &IOBuffer::onReadShutdown);
 
     log_debug("_sslbuf.beginShutdown()");
     StreamBuffer::writeShutdown();
 
-    log_debug("_ios->beginWrite() " << _ios->out_avail() << " bytes");
-    _ios->beginWrite();
+    log_debug("_sb->beginWrite() " << _sb->out_avail() << " bytes");
+    _sb->beginWrite();
 }
 
 
@@ -312,22 +339,22 @@ void IOBuffer::onWriteShutdown(Pt::System::StreamBuffer& sb)
         sb.endWrite();
         log_debug("Sent shutdown; remaining = " << sb.out_avail());
 
-        if( _ios->out_avail() > 0 )
+        if( _sb->out_avail() > 0 )
         {
-            log_debug("_ios->beginWrite() " << _ios->out_avail() << " bytes");
-            _ios->beginWrite();
+            log_debug("_sb->beginWrite() " << _sb->out_avail() << " bytes");
+            _sb->beginWrite();
             return;
         }
 
-        _ios->outputReady() -= Pt::slot(*this, &IOBuffer::onWriteShutdown);
-        _ios->inputReady()  -= Pt::slot(*this, &IOBuffer::onReadShutdown);
+        _sb->outputReady() -= Pt::slot(*this, &IOBuffer::onWriteShutdown);
+        _sb->inputReady()  -= Pt::slot(*this, &IOBuffer::onReadShutdown);
         _shutdownFinished.send(*this);
     }
     catch(...)
     {
         _errorPending = 1;
-        _ios->outputReady() -= Pt::slot(*this, &IOBuffer::onWriteShutdown);
-        _ios->inputReady()  -= Pt::slot(*this, &IOBuffer::onReadShutdown);
+        _sb->outputReady() -= Pt::slot(*this, &IOBuffer::onWriteShutdown);
+        _sb->inputReady()  -= Pt::slot(*this, &IOBuffer::onReadShutdown);
         _shutdownFinished.send(*this);
         
         if(_errorPending)
@@ -340,7 +367,7 @@ void IOBuffer::onWriteShutdown(Pt::System::StreamBuffer& sb)
 
 void IOBuffer::beginRead()
 {
-    if( ! _ios)
+    if( ! _sb)
         return;
 
     log_debug("begin reading");
@@ -349,7 +376,7 @@ void IOBuffer::beginRead()
     if( ! _input || StreamBuffer::import() == 0 )
     {
         log_debug("begin ios reading");
-        _ios->beginRead();
+        _sb->beginRead();
     }
 }
 
@@ -376,8 +403,8 @@ void IOBuffer::onInput(Pt::System::StreamBuffer& sb)
 {
     try
     {
-        _ios->endRead();
-        log_debug("client received raw = " << _ios->in_avail());
+        _sb->endRead();
+        log_debug("client received raw = " << _sb->in_avail());
 
         _input = true;
         do
@@ -406,11 +433,11 @@ void IOBuffer::onInput(Pt::System::StreamBuffer& sb)
 
 void IOBuffer::beginWrite()
 {
-    if( ! _ios)
+    if( ! _sb)
         return;
 
     log_debug("begin writing");
-    _ios->beginWrite();
+    _sb->beginWrite();
 }
 
 
