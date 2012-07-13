@@ -448,13 +448,13 @@ const ReplyHeader& ClientImpl::execute(const Request& request)
             log_debug("connect");
             _socket.connect(_addrInfo);
         }
-
+#ifdef PT_HTTP_WITH_SSL
         if(_ssl)
         {
             log_debug("ssl handshake");
             _sslbuf.connect(false);
         }
-        
+#endif
         log_debug("sending request");
         sendRequest(_stream, request);
         _stream.flush();
@@ -488,7 +488,9 @@ const ReplyHeader& ClientImpl::execute(const Request& request)
             reuseConnection = false;
             _socket.close();
             _sockbuf.discard();
+#ifdef PT_HTTP_WITH_SSL
             _sslbuf.discard();
+#endif
             _stream.clear();
             continue;  
         }
@@ -590,7 +592,9 @@ void ClientImpl::beginRequest(const Request& request)
 
         _stream.clear();
         _sockbuf.discard();
+#ifdef PT_HTTP_WITH_SSL
         _sslbuf.discard();
+#endif
         _socket.beginConnect(_addrInfo);
     }
 }
@@ -1135,11 +1139,10 @@ void ClientImpl::cancel()
 {
     _socket.close();
     _sockbuf.discard();
+#ifdef PT_HTTP_WITH_SSL
     _sslbuf.discard();
+#endif
     _stream.clear();
-
-    // TODO:
-    //_sslbuf.clear();
 
     _chunkedBuffer.reset();
 }

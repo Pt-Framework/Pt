@@ -39,6 +39,7 @@
 #endif
 
 #include <Pt/System/Selectable.h>
+#include <Pt/System/IOStream.h>
 #include <Pt/System/StreamBuffer.h>
 #include <Pt/System/Timer.h>
 #include <Pt/Connectable.h>
