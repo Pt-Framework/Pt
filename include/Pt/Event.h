@@ -79,17 +79,13 @@ class BasicEvent : public Event
 {
     public:
         BasicEvent()
-        {
-        }
+        { }
 
         BasicEvent(const BasicEvent& src)
-        {
-        }
+        { }
 
         virtual const std::type_info& typeInfo() const
-        {
-            return typeid(T);
-        }
+        { return typeid(T); }
 
         virtual Event& clone(Allocator& allocator) const
         {
@@ -103,6 +99,42 @@ class BasicEvent : public Event
             allocator.deallocate(this, sizeof(T));
         }
 };
+
+/*template <typename D>
+class BasicEvent2 : public Event
+                  , public D
+{
+    public:
+        BasicEvent2()
+        { }
+
+        BasicEvent2(const D& data)
+        : D(data)
+        { }
+
+        BasicEvent2(const BasicEvent2& e)
+        : D(e._data)
+        { }
+
+        virtual const std::type_info& typeInfo() const
+        { return typeid(BasicEvent2); }
+
+        virtual Event& clone(Allocator& allocator) const
+        {
+            void* pEvent = allocator.allocate(sizeof(BasicEvent2));
+            return *(new (pEvent)BasicEvent2(*this));
+        }
+
+        virtual void destroy(Allocator& allocator)
+        {
+            this->~BasicEvent2();
+            allocator.deallocate(this, sizeof(BasicEvent2));
+        }
+    private:
+        ~BasicEvent2()
+        {}
+};
+*/
 
 } // namespace Pt
 

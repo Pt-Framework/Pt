@@ -166,22 +166,20 @@ bool EventQueue::processEvents(Signal<const Event&>& eventSignal)
         MutexLock lock(_mutex);
         isActive = ! _exited;
 
-        if ( _eventQueue.empty() || ! isActive )
+        if ( _eventQueue.empty() || _exited )
             break;
 
         Event* ev = _eventQueue.front();
+        _eventQueue.pop_front();
 
         try
         {
             lock.unlock();
             eventSignal.send(*ev);
-
-            _eventQueue.pop_front();
             ev->destroy( this->allocator() );
         }
         catch(...)
         {
-            _eventQueue.pop_front();
             ev->destroy( this->allocator() );
             throw;
         }
