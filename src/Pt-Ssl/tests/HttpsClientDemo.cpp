@@ -254,8 +254,8 @@ int main(int argc, char** argv)
         client.setContext(clientContext);
 
         //client.headerReceived += Pt::slot(&onReplyHeader);
-        client.bodyAvailable += Pt::slot(&onReply);
-        client.replyFinished += Pt::slot(&onReplyFinished);
+        client.bodyAvailable() += Pt::slot(&onReply);
+        client.replyFinished() += Pt::slot(&onReplyFinished);
 
         //"GET / HTTP/1.1\r\n"
         //"Host: localhost:443\r\n"

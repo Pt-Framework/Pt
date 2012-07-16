@@ -80,9 +80,9 @@ class GoogleWeatherClient : public Pt::Connectable
             // hook up to the events of the http client. We will receive headerReceived first
             // then bodyAvailable if the reply has a body, and finally replyFinished. All Errors
             // are deferred until replyFinished, so we can handle them in a callback.
-            _client.headerReceived += Pt::slot(*this,  &GoogleWeatherClient::onHeaderReceived);
-            _client.bodyAvailable += Pt::slot( *this, &GoogleWeatherClient::onBodyAvailable);
-            _client.replyFinished += Pt::slot( *this, &GoogleWeatherClient::onReplyFinished);
+            _client.headerReceived() += Pt::slot(*this,  &GoogleWeatherClient::onHeaderReceived);
+            _client.bodyAvailable() += Pt::slot( *this, &GoogleWeatherClient::onBodyAvailable);
+            _client.replyFinished() += Pt::slot( *this, &GoogleWeatherClient::onReplyFinished);
 
             // the timeout signal is called when the interval has expired
             _timer.timeout() += Pt::slot(*this, &GoogleWeatherClient::beginRequest);

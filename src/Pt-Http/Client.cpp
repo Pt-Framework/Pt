@@ -123,13 +123,6 @@ void Client::readBody(std::string& s)
     _impl->readBody(s);
 }
 
-std::string Client::get(const std::string& url)
-{
-    Request request(url);
-    execute(request);
-    return readBody();
-}
-
 void Client::beginExecute(const Request& request)
 {
     _impl->beginRequest(request);
@@ -146,12 +139,12 @@ std::istream& Client::in()
 }
 
 // Sets the username and password for all subsequent requests.
-void Client::setAuth(const std::string& username, const std::string& password)
+void Client::setAuthorization(const std::string& username, const std::string& password)
 {
     _impl->setAuth(username, password);
 }
 
-void Client::clearAuth()
+void Client::clearAuthorization()
 {
     _impl->clearAuth();
 }

@@ -84,12 +84,20 @@ class PT_HTTP_API Client : private NonCopyable
 
         void setContext(Ssl::Context& ctx);
 
+        // Sets the username and password for all subsequent requests.
+        void setAuthorization(const std::string& username, const std::string& password);
+
+        void clearAuthorization();
+
         // Sends the passed request to the server and parses the headers.
         // The body must be read with readBody.
         // This method blocks or times out until the body is parsed.
         const ReplyHeader& execute(const Request& request);
 
         const ReplyHeader& header();
+
+        // Returns the underlying stream, where the reply may be read from.
+        std::istream& in();
 
         // Reads the http body after header read with execute.
         // This method blocks until the body is received.
@@ -104,10 +112,6 @@ class PT_HTTP_API Client : private NonCopyable
             return ret;
         }
 
-        // Combines the execute and readBody methods in one call.
-        // This method blocks until the reply is recieved.
-        std::string get(const std::string& url);
-
         // Starts a new request.
         // This method does not block. To actually process the request, the
         // event loop must be executed. The state of the request is signaled
@@ -118,27 +122,36 @@ class PT_HTTP_API Client : private NonCopyable
 
         void endExecute();
 
-        // Returns the underlying stream, where the reply may be read from.
-        std::istream& in();
-
-        // Sets the username and password for all subsequent requests.
-        void setAuth(const std::string& username, const std::string& password);
-
-        void clearAuth();
-
         void cancel();
 
         // Signals that the request is sent to the server.
-        Signal<Client&> requestSent;
+        Signal<Client&>& requestSent()
+        { return _requestSent; }
 
         // Signals that the header is received.
-        Signal<Client&> headerReceived;
+        Signal<Client&>& headerReceived()
+        { return _headerReceived; }
 
         // Signals that body data has arrived.
-        Signal<Client&, std::istream&> bodyAvailable;
+        Signal<Client&, std::istream&>& bodyAvailable()
+        { return _bodyAvailable; }
 
         // Signals that the reply is completely processed.
-        Signal<Client&> replyFinished;
+        Signal<Client&>& replyFinished()
+        { return _replyFinished; }
+
+    private:
+        // Signals that the request is sent to the server.
+        Signal<Client&> _requestSent;
+
+        // Signals that the header is received.
+        Signal<Client&> _headerReceived;
+
+        // Signals that body data has arrived.
+        Signal<Client&, std::istream&> _bodyAvailable;
+
+        // Signals that the reply is completely processed.
+        Signal<Client&> _replyFinished;
 };
 
 } // namespace Http

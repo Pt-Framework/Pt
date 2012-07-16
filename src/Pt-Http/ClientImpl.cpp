@@ -726,7 +726,7 @@ void ClientImpl::onOutput(System::StreamBuffer& sb)
         else
         {
             sb.beginRead();
-            _client->requestSent(*_client);
+            _client->requestSent().send(*_client);
         }
     }
     catch (const System::IOError&)
@@ -769,7 +769,7 @@ void ClientImpl::onInput(System::StreamBuffer& sb)
 void ClientImpl::onError()
 {
     _errorPending = true;
-    _client->replyFinished(*_client);
+    _client->replyFinished().send(*_client);
 
     if (_errorPending)
     {
@@ -807,7 +807,7 @@ void ClientImpl::onSslOutput(Ssl::IOBuffer& sb)
     {
         sb.endWrite();
         sb.beginRead();
-        _client->requestSent(*_client);
+        _client->requestSent().send(*_client);
     }
     catch (const System::IOError&)
     {
@@ -878,7 +878,7 @@ bool ClientImpl::onHeader(std::streambuf& sb, bool ssl)
     if( _parser.end() )
     {
         log_debug("http header complete");
-        _client->headerReceived(*_client);
+        _client->headerReceived().send(*_client);
     
         bool chunkedEncoding = _replyHeader.chunkedTransferEncoding();
         if(chunkedEncoding)
@@ -911,7 +911,7 @@ bool ClientImpl::onHeader(std::streambuf& sb, bool ssl)
                   _socket.close();
               }
 
-              _client->replyFinished(*_client);
+              _client->replyFinished().send(*_client);
               return false;
           }
         }
@@ -966,7 +966,7 @@ bool ClientImpl::onBody(std::istream& is)
         std::streamsize avail = is.rdbuf()->in_avail();
         
         // TODO: may throw exception
-        _client->bodyAvailable(*_client, is); 
+        _client->bodyAvailable().send(*_client, is); 
         
         std::streamsize consumed = avail - is.rdbuf()->in_avail();
         _contentLength -= consumed;
@@ -987,7 +987,7 @@ bool ClientImpl::onBody(std::istream& is)
             _socket.close();
         }
 
-        _client->replyFinished(*_client);
+        _client->replyFinished().send(*_client);
     }
     else if (_socket.isConnected() && is.good())
     {
@@ -1045,7 +1045,7 @@ bool ClientImpl::onChunkedBody()
                    ! _chunkedBuffer.eod() )
             {
                 log_debug("bodyAvailable");
-                _client->bodyAvailable(*_client, _stream);
+                _client->bodyAvailable().send(*_client, _stream);
             }
 
             log_debug("in_avail=" << _chunkedBuffer.in_avail() << " eod=" << _chunkedBuffer.eod());
@@ -1054,7 +1054,7 @@ bool ClientImpl::onChunkedBody()
                 if( _replyHeader.hasHeader("Trailer") )
                     _parser.readHeader();
                 else
-                    _client->replyFinished(*_client);
+                    _client->replyFinished().send(*_client);
             }
         }
 
@@ -1076,7 +1076,7 @@ bool ClientImpl::onChunkedBody()
                     _socket.close();
                 }
 
-                _client->replyFinished(*_client);
+                _client->replyFinished().send(*_client);
             }
         }
 
@@ -1088,7 +1088,7 @@ bool ClientImpl::onChunkedBody()
         if( _replyHeader.hasHeader("Trailer") )
             _parser.readHeader();
         else
-            _client->replyFinished(*_client);
+            _client->replyFinished().send(*_client);
     }
 
     if (_socket.isConnected())

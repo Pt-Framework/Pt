@@ -73,12 +73,12 @@ class HttpClientImpl : public ClientImpl
 
         void auth(const std::string& username, const std::string& password)
         {
-            _client.setAuth(username, password);
+            _client.setAuthorization(username, password);
         }
 
         void clearAuth()
         {
-            _client.clearAuth();
+            _client.clearAuthorization();
         }
 
         std::string url() const;

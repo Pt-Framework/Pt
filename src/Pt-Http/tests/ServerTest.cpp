@@ -65,9 +65,9 @@ class ServerTest : public Pt::Unit::TestSuite
 
             Pt::Http::Client client("127.0.0.1", 8001);
             client.setActive(*loop);
-            connect(client.headerReceived, *this, &ServerTest::onReplyHeader);
-            connect(client.bodyAvailable, *this, &ServerTest::onReply);
-            connect(client.replyFinished, *this, &ServerTest::onReplyFinished);
+            connect(client.headerReceived(), *this, &ServerTest::onReplyHeader);
+            connect(client.bodyAvailable(), *this, &ServerTest::onReply);
+            connect(client.replyFinished(), *this, &ServerTest::onReplyFinished);
 
             Pt::Http::Request request("/index.html");
             request.setHeader("foo", "bar");
