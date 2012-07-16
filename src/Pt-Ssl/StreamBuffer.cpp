@@ -111,9 +111,6 @@ void StreamBuffer::init(Context& ctx)
     BIO_set_nbio(_in, 1);
     BIO_set_nbio(_out, 1);
     SSL_set_bio(_ssl, _in, _out);
-
-    // By default we do not care about the other peer's certificate
-    SSL_set_verify(_ssl, SSL_VERIFY_NONE, NULL);
 }
 
 
@@ -224,30 +221,19 @@ void StreamBuffer::setSession(const Session& sess)
 }
 
 
-void StreamBuffer::setAccepting(bool verifyClientCert, bool requireCertBasedAuth)
+void StreamBuffer::setAccepting()
 {
     if( ! _ssl)
         return;
-
-    if(verifyClientCert) 
-    {
-        if(requireCertBasedAuth) 
-            SSL_set_verify(_ssl, SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT, NULL);
-        else                     
-            SSL_set_verify(_ssl, SSL_VERIFY_PEER, NULL);
-    }
 
     SSL_set_accept_state(_ssl);
 }
 
 
-void StreamBuffer::setConnecting(bool verifyServerCert)
+void StreamBuffer::setConnecting()
 {
     if( ! _ssl)
         return;
-
-    if(verifyServerCert) 
-        SSL_set_verify(_ssl, SSL_VERIFY_PEER, NULL);
 
     SSL_set_connect_state(_ssl);
 }

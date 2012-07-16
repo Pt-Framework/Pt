@@ -76,7 +76,7 @@ class TcpAcceptor : public Pt::Connectable
 
             log_debug("starting accept handshake");
             //_ssl.attach(_ios);
-            _ssl.beginAccept(true, true);
+            _ssl.beginAccept();
         }
 
     private:
@@ -116,7 +116,7 @@ class TcpConnector : public Pt::Connectable
             _ios.attach(socket);
 
             log_debug("starting connect handshake");
-            _ssl.beginConnect(true);
+            _ssl.beginConnect();
         }
 
     private:
@@ -322,15 +322,17 @@ Pt::Unit::RegisterTest<IOBufferTest> register_IOBufferTest;
 
 void IOBufferTest::ReadWrite()
 {
-    Pt::Ssl::Context serverContext(Pt::Ssl::Context::Default);
+    Pt::Ssl::Context serverContext;
     serverContext.setCACertificates(_cACert);
     serverContext.setCertificateChain(_serverCertChain);
     serverContext.setPrivateKey(_serverPrivKey);
+    serverContext.setVerifyMode(Pt::Ssl::Context::VerifyPeerRequired);
 
-    Pt::Ssl::Context clientContext(Pt::Ssl::Context::Default);
+    Pt::Ssl::Context clientContext;
     clientContext.setCACertificates(_cACert);
     clientContext.setCertificateChain(_clientCertChain);
     clientContext.setPrivateKey(_clientPrivKey);
+    clientContext.setVerifyMode(Pt::Ssl::Context::VerifyPeer);
 
     std::string addr("127.0.0.1");
     unsigned short port = 6000;

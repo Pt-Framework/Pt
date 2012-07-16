@@ -452,7 +452,7 @@ const ReplyHeader& ClientImpl::execute(const Request& request)
         if(_ssl)
         {
             log_debug("ssl handshake");
-            _sslbuf.connect(false);
+            _sslbuf.connect();
         }
 #endif
         log_debug("sending request");
@@ -696,7 +696,7 @@ void ClientImpl::onConnect(Net::TcpSocket& socket)
         if(_ssl)
         {
             log_debug("begining SSL handshake");
-            _sslbuf.beginConnect(false);
+            _sslbuf.beginConnect();
             return;
         }
 #endif

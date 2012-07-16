@@ -101,14 +101,14 @@ class PT_SSL_API StreamBuffer : public std::streambuf
             After this method has been called, the first handshake message
             can be read from the client.
         */
-        void setAccepting(bool verifyClientCert, bool requireCertBasedAuth);
+        void setAccepting();
 
         /** @brief Starts the client handshake
             
             After this method has been called, the first handshake message
             can be written to the server.
         */
-        void setConnecting(bool verifyServerCert);
+        void setConnecting();
 
         /** @brief Writes a handshake message to the underlying stream
             

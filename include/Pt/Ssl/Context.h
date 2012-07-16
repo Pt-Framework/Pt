@@ -50,10 +50,18 @@ static struct PT_SSL_API SSLInit
 class PT_SSL_API Context : public NonCopyable
 {
     public:
+        //! @brief Verification mode.
+        enum VerifyMode
+        {
+            VerifyNone = 0,
+            VerifyPeer = 1,
+            VerifyPeerRequired = 2
+        };
+
         //! @brief Communication protocol.
         enum Protocol 
         {
-            Default,  //!< not less than SSL version 3.
+            DefaultProtocol,  //!< not less than SSL version 3.
             TLSv1,    //!< the latest standard for secure TCP communication.
             SSLv3,    //!< recommended for modern systems.
             SSLv3or2, //!< recommended for the most compatibility.
@@ -66,7 +74,7 @@ class PT_SSL_API Context : public NonCopyable
 
     public:
         //! @brief Construct with session id and protocol. 
-        Context(Protocol protocol = Default);
+        Context(Protocol protocol = DefaultProtocol);
 
         //! @brief Destructor.
         ~Context();
@@ -87,6 +95,8 @@ class PT_SSL_API Context : public NonCopyable
 
         //! @brief Sets the current protocol. 
         void setProtocol(Protocol protocol);
+
+        void setVerifyMode(VerifyMode mode);
 
         /** @brief Set the list of trusted CA certificates for this context.
             

@@ -68,7 +68,7 @@ class Client : public Pt::Connectable {
 
             log_debug("client Starting handshake");
             _ssl = new Pt::Ssl::IOBuffer(_sslContext, _ios.buffer());
-            _ssl->beginConnect(false);
+            _ssl->beginConnect();
             _ssl->handshakeFinished() += Pt::slot(*this, &Client::onHandshake);
             _ssl->shutdownFinished() += Pt::slot(*this, &Client::onShutdown);
             _ssl->inputReady() += Pt::slot(*this, &Client::onInput);
@@ -241,10 +241,11 @@ int main(int argc, char** argv)
         Pt::Ssl::PrivateKey clientPrivKey("");
         clientPrivKey.fromPem(clientKeyData, sizeof(clientKeyData));
         
-        Pt::Ssl::Context clientContext(Pt::Ssl::Context::Default);        
+        Pt::Ssl::Context clientContext;        
         clientContext.setCACertificates(trustedCACert);
         clientContext.setCertificateChain(clientCertChain);
         clientContext.setPrivateKey(clientPrivKey);
+        clientContext.setVerifyMode(Pt::Ssl::Context::VerifyNone);
 
         //std::string addr("127.0.0.1");
         std::string  addr("www.pt-framework.org");

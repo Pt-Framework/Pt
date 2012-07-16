@@ -60,11 +60,11 @@ IOBuffer::~IOBuffer()
 {}
 
 
-void IOBuffer::connect(bool verifyServerCert)
+void IOBuffer::connect()
 {
     log_trace("IOBuffer::connect");
     
-    this->setConnecting(verifyServerCert);
+    this->setConnecting();
 
     for( ; ; )
     {
@@ -87,15 +87,15 @@ void IOBuffer::connect(bool verifyServerCert)
 }
 
 
-void IOBuffer::beginConnect(bool verifyServerCert)
+void IOBuffer::beginConnect()
 {
-    log_debug("_sslbuf.beginClientHandshake(verifyServerCert = " << verifyServerCert << ")");
+    log_trace("IOBuffer::beginConnect");
 
     if( ! _sb)
         return;
 
     _errorPending = 0;
-    StreamBuffer::setConnecting(verifyServerCert);
+    StreamBuffer::setConnecting();
     StreamBuffer::writeHandshake();
 
     log_debug("_sb->beginWrite()");
@@ -105,16 +105,15 @@ void IOBuffer::beginConnect(bool verifyServerCert)
 }
 
 
-void IOBuffer::beginAccept(bool verifyClientCert, bool requireCertBasedAuth)
+void IOBuffer::beginAccept()
 {
+    log_trace("IOBuffer::beginAccept");
+
     if( ! _sb)
         return;
 
-    log_debug("_sslbuf.beginClientHandshake(verifyServerCert = "
-               << verifyClientCert << ", requireCertBasedAuth = " << requireCertBasedAuth << ")");
-
     _errorPending = 0;
-    StreamBuffer::setAccepting(verifyClientCert, requireCertBasedAuth);
+    StreamBuffer::setAccepting();
 
     log_debug("_sb->beginRead()");
     _sb->beginRead();

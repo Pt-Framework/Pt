@@ -101,7 +101,7 @@ Context::Context(Protocol protocol)
         case SSLv2    : _ctx = SSL_CTX_new( SSLv2_method () ); break;
         case SSLv3or2 : _ctx = SSL_CTX_new( SSLv23_method() ); break;
         case TLSv1    : _ctx = SSL_CTX_new( TLSv1_method () ); break;
-        case Default  : // Fall through
+        case DefaultProtocol  : // Fall through
         case SSLv3    : // Fall through
         default       :  _ctx = SSL_CTX_new( SSLv3_method () ); break;
     }
@@ -276,7 +276,7 @@ void Context::setProtocol(Protocol protocol)
         case SSLv3or2 : ret = SSL_CTX_set_ssl_version(_ctx, SSLv23_method()); v2 = true; break;
         case TLSv1    : ret = SSL_CTX_set_ssl_version(_ctx, TLSv1_method()); break;
         case SSLv3    : // Fall through
-        case Default  : // Fall through
+        case DefaultProtocol  : // Fall through
         default       : ret = SSL_CTX_set_ssl_version(_ctx, SSLv3_method());
     }
 
@@ -290,6 +290,28 @@ void Context::setProtocol(Protocol protocol)
     if( 0 == ret )
         throw std::logic_error("Invalid default cipher list");
 }
+
+
+void Context::setVerifyMode(VerifyMode m)
+{
+    int mode = 0;
+    switch(m)
+    {
+        case VerifyPeer:
+            mode = SSL_VERIFY_PEER;
+            break;
+    
+        case VerifyPeerRequired:
+            mode = SSL_VERIFY_PEER|SSL_VERIFY_FAIL_IF_NO_PEER_CERT;
+            break;
+
+        default:
+            mode = SSL_VERIFY_NONE;
+    }
+
+    SSL_CTX_set_verify(_ctx, mode, 0);
+}
+
 
 /*
 std::vector<SSLCipherInfo> SSLStreamBuf::availableCiphers() const

@@ -78,6 +78,7 @@ void StreamBufferTest::Handshake()
     serverContext.setCACertificates(caCert);
     serverContext.setCertificateChain(serverCert);
     serverContext.setPrivateKey(serverPrivKey);
+    serverContext.setVerifyMode(Pt::Ssl::Context::VerifyPeerRequired);
 
     // client-side SSL context
     Pt::Ssl::CertificateList clientCert;
@@ -90,14 +91,15 @@ void StreamBufferTest::Handshake()
     clientContext.setCACertificates(caCert);
     clientContext.setCertificateChain(clientCert);
     clientContext.setPrivateKey(clientPrivKey);
+    clientContext.setVerifyMode(Pt::Ssl::Context::VerifyPeer);
 
     // client begins the handshake
     Pt::Ssl::StreamBuffer client(clientContext, *data.rdbuf());
-    client.setConnecting(true);
+    client.setConnecting();
 
     // server begins the handskake
     Pt::Ssl::StreamBuffer server(serverContext, *data.rdbuf());
-    server.setAccepting(true, true);
+    server.setAccepting();
 
     for( ; ; )
     {

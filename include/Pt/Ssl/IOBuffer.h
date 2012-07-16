@@ -54,15 +54,15 @@ class PT_SSL_API IOBuffer : public StreamBuffer
         */
         virtual ~IOBuffer();
 
-        void connect(bool verifyServerCert);
+        void connect();
 
         /** @brief Starts the client connect handshake
         */
-        void beginConnect(bool verifyServerCert);
+        void beginConnect();
 
         /** @brief Starts the server accept handshake
         */
-        void beginAccept(bool verifyClientCert, bool requireCertBasedAuth);
+        void beginAccept();
 
         /** @brief Ends the client or server handshake
         */
