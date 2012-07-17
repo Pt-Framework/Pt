@@ -173,7 +173,8 @@ class PT_API MemoryPool : public NonCopyable
 };
 
 
-class PT_API PoolAllocator : public NonCopyable
+class PT_API PoolAllocator : public Allocator 
+                           , protected NonCopyable
 {
     public:
         PoolAllocator(std::size_t maxElemSize, std::size_t step = 16, std::size_t maxPagesize = 8192);

@@ -31,11 +31,13 @@
 
 #include <Pt/Api.h>
 #include <Pt/Allocator.h>
+#include <Pt/NonCopyable.h>
 #include <cstddef>
 
 namespace Pt {
 
 class PT_API PageAllocator : public Pt::Allocator
+                           , protected NonCopyable
 {
     public:
         class Page
