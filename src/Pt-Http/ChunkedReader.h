@@ -87,7 +87,7 @@ class ChunkedReader : public std::streambuf
         void init(std::streambuf& ib);
 };
 
-class ChunkedIStream : public std::istream
+/*class ChunkedIStream : public std::istream
 {
     public:
         explicit ChunkedIStream(std::streambuf* ib = 0)
@@ -115,7 +115,7 @@ class ChunkedIStream : public std::istream
 
     private:
         ChunkedReader _streambuf;
-};
+};*/
 
 } // namespace Http
 

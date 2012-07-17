@@ -90,9 +90,9 @@ namespace Pt
     {
       log_trace("showmanyc");
 
-      while (_state != 0
-        && gptr() == egptr()
-        && _ib->in_avail())
+      while( _state != 0
+            && gptr() == egptr()
+            && _ib->in_avail() )
       {
         (this->*_state)();
       }
