@@ -112,6 +112,8 @@ class ClientImpl : public Connectable
         const ReplyHeader& header()
         { return _replyHeader; }
 
+        std::istream& getBody();
+
         void readBody(std::string& s);
 
         std::string get(const std::string& url);

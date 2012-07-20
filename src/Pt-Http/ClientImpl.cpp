@@ -250,6 +250,8 @@ const ReplyHeader& ClientImpl::execute(const Request& request)
         throw System::IOError("HTTP I/O error");
     }
 
+    log_debug("content-length: " << _replyHeader.contentLength());
+    _contentLength = _replyHeader.contentLength();
     return _replyHeader;
 }
 
@@ -303,6 +305,38 @@ void ClientImpl::readBody(std::string& s)
     else
     {
         log_debug("do not close socket - keep alive");
+    }
+}
+
+
+std::istream& ClientImpl::getBody()
+{
+    bool chunkedEncoding = _replyHeader.chunkedTransferEncoding();
+    if(chunkedEncoding)
+    {
+
+    }
+    else
+    {
+        log_debug("content-length: " << _contentLength);
+
+        if( _stream.fail() )
+            throw System::IOError( PT_ERROR_MSG("error reading HTTP reply body") );
+
+        if(_ssl)
+        {
+            std::streamsize n = _sslbuf.import();
+            _contentLength -= n;
+        }
+        else
+        {
+        }
+    }
+
+    log_debug("keep alive: " << _replyHeader.keepAlive());
+    if( ! _replyHeader.keepAlive() )
+    {
+        _socket.close();
     }
 }
 
