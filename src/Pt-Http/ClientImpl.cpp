@@ -309,6 +309,8 @@ void ClientImpl::readBody(std::string& s)
 }
 
 
+// implement a Ssl::IOBuffer or System::IOBuffer that overwrites underflow 
+// etc... to count bytes and go EOF when end of reply is reached.
 std::istream& ClientImpl::getBody()
 {
     bool chunkedEncoding = _replyHeader.chunkedTransferEncoding();
@@ -319,6 +321,10 @@ std::istream& ClientImpl::getBody()
     else
     {
         log_debug("content-length: " << _contentLength);
+        if(_contentLength <= 0)
+        {
+            _stream.setstate(std::ios::eofbit);
+        }
 
         if( _stream.fail() )
             throw System::IOError( PT_ERROR_MSG("error reading HTTP reply body") );
@@ -330,14 +336,23 @@ std::istream& ClientImpl::getBody()
         }
         else
         {
+            char ch;
+            std::streamsize avail = _stream.rdbuf()->in_avail();
+            _stream.get(ch);
+
+            std::streamsize consumed = avail - _stream.rdbuf()->in_avail();
+            _contentLength -= consumed;
+
         }
     }
 
     log_debug("keep alive: " << _replyHeader.keepAlive());
-    if( ! _replyHeader.keepAlive() )
+    if( _stream.eof() || ! _replyHeader.keepAlive() )
     {
         _socket.close();
     }
+
+    return _stream;
 }
 
 
