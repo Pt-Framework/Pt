@@ -343,15 +343,18 @@ const ReplyHeader& ClientImpl::execute(const Request& request)
     }
     else
     {
-#ifdef PT_HTTP_WITH_SSL
-        if(_ssl)
+        if( ! _ssl)
         {
-            _sslbuf.setContentLength(_replyHeader.keepAlive());
+            _sockbuf.setKeepAlive(_replyHeader.keepAlive());
+            _sockbuf.setContentLength(_contentLength);
+        }
+#ifdef PT_HTTP_WITH_SSL
+        else
+        {
+            _sslbuf.setKeepAlive(_replyHeader.keepAlive());
             _sslbuf.setContentLength(_contentLength);
         }
 #endif
-
-        // TODO: implement InputBuffer for non-ssl case
     }
 
     return _replyHeader;
