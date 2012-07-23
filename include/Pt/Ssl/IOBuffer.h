@@ -54,6 +54,9 @@ class PT_SSL_API IOBuffer : public StreamBuffer
         */
         virtual ~IOBuffer();
 
+        System::StreamBuffer& buffer()
+        { return *_sb; }
+
         void connect();
 
         /** @brief Starts the client connect handshake

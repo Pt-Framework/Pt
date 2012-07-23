@@ -97,7 +97,7 @@ class PT_HTTP_API Client : private NonCopyable
         const ReplyHeader& header();
 
         // Returns the underlying stream, where the reply may be read from.
-        std::istream& in();
+        std::istream& body();
 
         // Reads the http body after header read with execute.
         // This method blocks until the body is received.

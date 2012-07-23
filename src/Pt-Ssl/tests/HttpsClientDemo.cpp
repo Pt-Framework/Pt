@@ -283,8 +283,10 @@ int main(int argc, char** argv)
         {
             log_debug("excuting blocking HTTPS request");
             client.execute(request);
-            std::string body = client.readBody();
-            std::cout << body << std::endl;
+
+            char ch = ' ';
+            while( client.body().get(ch) )
+                std::cout << ch;
         }
 
         log_debug("OpenSSL HTTP test progam ended");

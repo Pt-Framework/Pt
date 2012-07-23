@@ -85,7 +85,7 @@ void HttpClientImpl::onReplyHeader(Http::Client& client)
 
     verifyHeader(client.header());
 
-    ClientImpl::onReadReplyBegin(client.in());
+    ClientImpl::onReadReplyBegin(client.body());
 }
 
 std::size_t HttpClientImpl::onReplyBody(Http::Client& client, std::istream&)

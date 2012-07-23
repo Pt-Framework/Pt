@@ -40,7 +40,7 @@
 
 #include <Pt/System/Selectable.h>
 #include <Pt/System/IOStream.h>
-#include <Pt/System/StreamBuffer.h>
+#include <Pt/System/IOBuffer.h>
 #include <Pt/System/Timer.h>
 #include <Pt/Connectable.h>
 #include <Pt/Delegate.h>
@@ -59,6 +59,52 @@ namespace Ssl {
 namespace Http {
 
 class Client;
+
+#ifdef PT_HTTP_WITH_SSL
+class SslInputBuffer : public Ssl::IOBuffer
+{
+    public:
+        SslInputBuffer(Pt::System::StreamBuffer& sb)
+        : Ssl::IOBuffer(sb)
+        , _contentLength(-1)
+        , _keepAlive(false)
+        {}
+
+        void setKeepAlive(bool keepAlive)
+        { _keepAlive = keepAlive; }
+
+        void setContentLength(long n);
+
+    protected:
+        virtual int_type underflow();
+
+    private:
+        long _contentLength;
+        bool _keepAlive;
+};
+#endif
+
+class InputBuffer : public System::IOBuffer
+{
+    public:
+        InputBuffer()
+        : System::IOBuffer(8192, true)
+        , _contentLength(-1)
+        , _keepAlive(false)
+        {}
+
+        void setKeepAlive(bool keepAlive)
+        { _keepAlive = keepAlive; }
+
+        void setContentLength(long n);
+
+    protected:
+        virtual int_type underflow();
+
+    private:
+        long _contentLength;
+        bool _keepAlive;
+};
 
 class ClientImpl : public Connectable
 {
@@ -111,8 +157,6 @@ class ClientImpl : public Connectable
 
         const ReplyHeader& header()
         { return _replyHeader; }
-
-        std::istream& getBody();
 
         void readBody(std::string& s);
 
@@ -182,14 +226,13 @@ class ClientImpl : public Connectable
         Net::AddrInfo _addrInfo;
         bool _ssl;
         Net::TcpSocket _socket;
-        System::StreamBuffer _sockbuf;
-        ChunkedReader _chunkedBuffer;
-        
+
+        InputBuffer _sockbuf;
 #ifdef PT_HTTP_WITH_SSL
-        //Ssl::Context* _ctx;
-        Ssl::IOBuffer _sslbuf;
+        SslInputBuffer _sslbuf;
 #endif
 
+        ChunkedReader _chunkedBuffer;
         std::iostream _stream;
         std::string _username;
         std::string _password;

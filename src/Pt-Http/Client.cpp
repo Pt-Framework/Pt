@@ -133,7 +133,7 @@ void Client::endExecute()
     _impl->endExecute();
 }
 
-std::istream& Client::in()
+std::istream& Client::body()
 {
     return _impl->in();
 }

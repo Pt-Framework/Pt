@@ -165,7 +165,7 @@ class GoogleWeatherClient : public Pt::Connectable
 
             // we have the expected reply and prepare our text stream to process
             // the incomimg body
-            _ts.attach( client.in() );
+            _ts.attach( client.body() );
         }
 
         size_t onBodyAvailable(Pt::Http::Client& client, std::istream&)
