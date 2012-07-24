@@ -99,19 +99,6 @@ class PT_HTTP_API Client : private NonCopyable
         // Returns the underlying stream, where the reply may be read from.
         std::istream& body();
 
-        // Reads the http body after header read with execute.
-        // This method blocks until the body is received.
-        void readBody(std::string& s);
-
-        // Reads the http body after header read with execute.
-        // This method blocks until the body is received.
-        std::string readBody()
-        {
-            std::string ret;
-            readBody(ret);
-            return ret;
-        }
-
         // Starts a new request.
         // This method does not block. To actually process the request, the
         // event loop must be executed. The state of the request is signaled

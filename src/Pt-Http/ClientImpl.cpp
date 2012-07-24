@@ -42,12 +42,6 @@ namespace Pt {
 
 namespace Http {
 
-void SslInputBuffer::setContentLength(long n)
-{
-    log_trace("available content: " << n);
-    _contentLength = n;
-}
-
 SslInputBuffer::int_type SslInputBuffer::underflow()
 { 
     log_trace("SslInputBuffer::underflow()");
@@ -77,14 +71,6 @@ SslInputBuffer::int_type SslInputBuffer::underflow()
     return ret;
 }
 
-
-
-
-void InputBuffer::setContentLength(long n)
-{
-    log_trace("available content: " << n);
-    _contentLength = n;
-}
 
 InputBuffer::int_type InputBuffer::underflow()
 { 
@@ -261,15 +247,13 @@ const ReplyHeader& ClientImpl::execute(const Request& request)
 {
     log_trace("ClientImpl::execute " << request.url());
 
+#ifdef PT_HTTP_WITH_SSL
+    _sslbuf.reset();
+#endif
+    _sockbuf.reset();
     _replyHeader.clear();
     _parser.reset(true);
-
-#ifdef PT_HTTP_WITH_SSL
-    _sslbuf.setContentLength(-1);
-#endif
-
-    _sockbuf.setContentLength(-1);
-
+    
     for(;;)
     {
         bool reuseConnection = _socket.isConnected();
@@ -290,70 +274,45 @@ const ReplyHeader& ClientImpl::execute(const Request& request)
         log_debug("sending request");
         sendRequest(_stream, request);
         _stream.flush();
-
-        // extra flush for https: _stream -> _sslbuf -> _sockbuf
-        _sockbuf.pubsync();
+        _sockbuf.pubsync(); // extra flush for https: _stream -> _sslbuf -> _sockbuf
 
         log_debug("reading reply");
-        char ch = ' ';
-        while( ! _parser.end() && _stream.get(ch) )
-        {
-            _parser.parse(ch);
-        }
-
-        if( _parser.fail() )
-        {
-            log_debug("invalid HTTP reply");
-            throw System::IOError( PT_ERROR_MSG("invalid HTTP reply") );
-        }
-
-        if( _parser.end() )
-        {
-            log_debug("reply ready");
+        _stream.peek();
+        
+        if( _stream || ! reuseConnection)
             break;
-        }
 
-        if( ! _stream && _parser.begin() && reuseConnection)
-        {
-            // received pending EOF from previous response -> reconnect
-            log_debug("reconnect to lost connection");
-            reuseConnection = false;
-            _socket.close();
-            _sockbuf.discard();
-#ifdef PT_HTTP_WITH_SSL
-            _sslbuf.discard();
-#endif
-            _stream.clear();
-            continue;  
-        }
+        cancel();
+    }
 
-        log_debug("HTTP I/O error");
-        throw System::IOError("HTTP I/O error");
+    char ch = ' ';
+    while( ! _parser.end() && _stream.get(ch) )
+    {
+        _parser.parse(ch);
+    }
+         
+    if( ! _parser.end() )
+    {
+        log_info("invalid HTTP reply");
+        throw System::IOError( PT_ERROR_MSG("invalid HTTP reply") );
     }
 
     log_debug("content-length: " << _replyHeader.contentLength());
-    _contentLength = _replyHeader.contentLength();
+    log_debug("chunked: " << _replyHeader.chunkedTransferEncoding());
 
     if( _replyHeader.chunkedTransferEncoding() )
     {
         _chunkedBuffer.reset( _stream.rdbuf() );
         _stream.rdbuf(&_chunkedBuffer);
-
         // TODO: close if not keepalive
     }
     else
     {
         if( ! _ssl)
-        {
-            _sockbuf.setKeepAlive(_replyHeader.keepAlive());
-            _sockbuf.setContentLength(_contentLength);
-        }
+            _sockbuf.beginReply(_replyHeader);
 #ifdef PT_HTTP_WITH_SSL
         else
-        {
-            _sslbuf.setKeepAlive(_replyHeader.keepAlive());
-            _sslbuf.setContentLength(_contentLength);
-        }
+            _sslbuf.beginReply(_replyHeader);
 #endif
     }
 
@@ -416,25 +375,26 @@ void ClientImpl::readBody(std::string& s)
 
 void ClientImpl::beginRequest(const Request& request)
 {
-    log_trace("beginExecute");
+    log_trace("beginRequest");
 
-    _reusedConnection = false;
     _errorPending = false;
     _request = &request;
     _replyHeader.clear();
     _parser.reset(true);
+    _sockbuf.reset();
 
 #ifdef PT_HTTP_WITH_SSL
-    _sslbuf.setContentLength(-1);
+    _sslbuf.reset();
 #endif
-    _sockbuf.setContentLength(-1);
 
     if(_ssl)
         _state = &ClientImpl::onHttpsHeader;
     else
         _state = &ClientImpl::onHttpHeader;
     
-    if(  ! _socket.isConnected() )
+    _reusedConnection = _socket.isConnected();
+
+    if( ! _reusedConnection )
     {
         log_debug("opening new connection to " << _addrInfo.host());
         _socket.beginConnect(_addrInfo);
@@ -442,7 +402,6 @@ void ClientImpl::beginRequest(const Request& request)
     }
 
     log_debug("reusing previous connection");
-    _reusedConnection = true;
     sendRequest(_stream, *_request);
         
     try

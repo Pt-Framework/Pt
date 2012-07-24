@@ -118,11 +118,6 @@ const ReplyHeader& Client::header()
     return _impl->header();
 }
 
-void Client::readBody(std::string& s)
-{
-    _impl->readBody(s);
-}
-
 void Client::beginExecute(const Request& request)
 {
     _impl->beginRequest(request);

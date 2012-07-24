@@ -124,7 +124,12 @@ std::string HttpClientImpl::execute()
     try
     {
         verifyHeader(_client.header());
-        _client.readBody(body);
+
+        char ch = ' ';
+        while( _client.body().get(ch) )
+            body += ch;
+        
+        //_client.readBody(body);
     }
     catch (...)
     {

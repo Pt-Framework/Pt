@@ -70,10 +70,17 @@ class SslInputBuffer : public Ssl::IOBuffer
         , _keepAlive(false)
         {}
 
-        void setKeepAlive(bool keepAlive)
-        { _keepAlive = keepAlive; }
+        void reset()
+        { 
+            _contentLength = -1;
+            _keepAlive = false;
+        }
 
-        void setContentLength(long n);
+        void beginReply(const ReplyHeader& reply)
+        {
+            _keepAlive = reply.keepAlive();
+            _contentLength = reply.contentLength();
+        }
 
     protected:
         virtual int_type underflow();
@@ -93,10 +100,17 @@ class InputBuffer : public System::IOBuffer
         , _keepAlive(false)
         {}
 
-        void setKeepAlive(bool keepAlive)
-        { _keepAlive = keepAlive; }
+        void reset()
+        { 
+            _contentLength = -1;
+            _keepAlive = false;
+        }
 
-        void setContentLength(long n);
+        void beginReply(const ReplyHeader& reply)
+        {
+            _keepAlive = reply.keepAlive();
+            _contentLength = reply.contentLength();
+        }
 
     protected:
         virtual int_type underflow();

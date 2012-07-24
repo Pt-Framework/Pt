@@ -87,6 +87,39 @@ class ChunkedReader : public std::streambuf
         void init(std::streambuf& ib);
 };
 
+class ChunkParser
+{
+    public: 
+        ChunkParser();
+
+        void reset();
+
+        void parse(char ch);
+
+        bool hasChunk() const
+        { return _state == &ChunkParser::onData; }
+
+        unsigned chunkSize() const
+        { return _chunkSize; }
+
+        bool end() const  
+        { return _state == 0; }
+
+    private:
+        void onBegin(char ch);
+        void onSize(char ch);
+        void onEndl(char ch);
+        void onExtension(char ch);
+        void onData(char ch);
+        void onDataEnd(char ch);
+        void onTrailer(char ch);
+        void onTrailerData(char ch);
+
+    private:
+        void (ChunkParser::*_state)(char ch);
+        unsigned _chunkSize;
+};
+
 /*class ChunkedIStream : public std::istream
 {
     public:
