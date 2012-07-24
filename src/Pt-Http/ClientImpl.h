@@ -76,7 +76,7 @@ class SslInputBuffer : public Ssl::IOBuffer
             _keepAlive = false;
         }
 
-        void beginReply(const ReplyHeader& reply)
+        void beginBody(const ReplyHeader& reply)
         {
             _keepAlive = reply.keepAlive();
             _contentLength = reply.contentLength();
@@ -106,7 +106,7 @@ class InputBuffer : public System::IOBuffer
             _keepAlive = false;
         }
 
-        void beginReply(const ReplyHeader& reply)
+        void beginBody(const ReplyHeader& reply)
         {
             _keepAlive = reply.keepAlive();
             _contentLength = reply.contentLength();

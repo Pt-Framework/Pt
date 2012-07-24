@@ -373,11 +373,11 @@ void StreamBuffer::writeShutdown()
 }
 
 
-std::streamsize StreamBuffer::import()
+std::streamsize StreamBuffer::import(std::streamsize n)
 {
     if(_ios && _ssl)
     {
-        const std::streamsize avail = _ios->in_avail();
+        const std::streamsize avail = n == 0 ? _ios->in_avail() : n;
         log_debug("_ios->in_avail() = " << avail << " bytes");
 
         if(avail >= 0 )

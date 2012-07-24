@@ -82,6 +82,17 @@ InputBuffer::int_type InputBuffer::underflow()
         return System::IOBuffer::underflow();
     }
     
+    bool chunked = false;
+    if(chunked)
+    {
+        // parse chunked meta info if no leftover
+        // if end consume trailer and return eof()
+        // import chunk into IOBuffer
+        // if less imported than available store leftover count
+        InputBuffer::int_type ret = traits_type::eof();
+        return ret;
+    }
+
     if(_contentLength == 0)
     {
         log_trace("received all content -> EOF");
@@ -309,10 +320,10 @@ const ReplyHeader& ClientImpl::execute(const Request& request)
     else
     {
         if( ! _ssl)
-            _sockbuf.beginReply(_replyHeader);
+            _sockbuf.beginBody(_replyHeader);
 #ifdef PT_HTTP_WITH_SSL
         else
-            _sslbuf.beginReply(_replyHeader);
+            _sslbuf.beginBody(_replyHeader);
 #endif
     }
 

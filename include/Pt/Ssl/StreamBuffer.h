@@ -132,7 +132,7 @@ class PT_SSL_API StreamBuffer : public std::streambuf
             
             Returns the number bytes in the message or -1 if the other peer has shutdown the stream.
         */
-        std::streamsize import();
+        std::streamsize import(std::streamsize maxImport = 0);
 
     protected:
         void attach(std::iostream& ios);
