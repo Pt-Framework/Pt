@@ -7,6 +7,7 @@
 #include <Pt/System/Thread.h>
 #include <Pt/System/Timer.h>
 #include <Pt/System/EventSink.h>
+#include <Pt/System/Logger.h>
 #include <Pt/Xml/XmlReader.h>
 #include <Pt/Xml/StartElement.h>
 #include <Pt/Xml/EndElement.h>
@@ -349,6 +350,7 @@ int main(int argc, char** argv)
 {
     try 
     {
+        Pt::System::Logger::setLogLevel("", Pt::System::Trace);
         WeatherApplet app;
         app.run();
         return 0;

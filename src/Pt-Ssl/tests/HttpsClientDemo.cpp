@@ -37,6 +37,9 @@
 #include <Pt/System/MainLoop.h>
 #include <Pt/System/Logger.h>
 
+#include <Pt/Timespan.h>
+#include <Pt/System/Clock.h>
+
 log_define("Pt.Ssl.HttpClientDemo")
 
 class Client : public Pt::Connectable {
@@ -222,11 +225,36 @@ void onReplyFinished(Pt::Http::Client& client)
         client.loop()->exit();
 }
 
+void testMemMove(unsigned size)
+{
+  std::vector<char> buf(size*2);
+
+  Pt::System::Clock clock;
+
+  clock.start();
+  unsigned m = 1000000;
+  for(unsigned n = 0; n < m; ++n)
+  {
+      std::memcpy(&buf[0], &buf[size], size);
+  }
+
+  Pt::Timespan end = clock.stop();
+
+  std::cerr << "RESULT MEMMOVE(" << size << "): " << double(end.toUSecs())/m  << " usecs" << std::endl;
+}
+
 
 int main(int argc, char** argv)
 {
     try 
     {
+        //testMemMove(16);
+        //testMemMove(64);
+        //testMemMove(256);
+        //testMemMove(1024);
+        //testMemMove(2048);
+        //testMemMove(4096);
+
         Pt::System::Logger::setLogLevel("", Pt::System::Trace);
         log_debug("OpenSSL HTTP test progam started");
 

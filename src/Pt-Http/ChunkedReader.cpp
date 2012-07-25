@@ -27,17 +27,11 @@
  */
 
 #include "ChunkedReader.h"
+#include <Pt/System/Logger.h>
 #include <stdexcept>
 #include <sstream>
 
-#define log_define(a)
-#define log_trace(a)
-#define log_debug(a)
-#define log_info(a)
-#define log_warn(a)
-#define log_error(a)
-
-log_define("Pt.http.chunkedreader")
+log_define("Pt.Http.ChunkedReader")
 
 namespace {
 
@@ -412,7 +406,7 @@ void ChunkParser::onTrailerData(char ch)
 
   void ChunkedReader::onData()
   {
-    log_trace("onData");
+    log_trace("onData " << _chunkSize);
 
     std::streamsize n = _ib->in_avail();
 

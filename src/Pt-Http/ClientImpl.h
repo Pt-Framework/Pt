@@ -76,11 +76,7 @@ class SslInputBuffer : public Ssl::IOBuffer
             _keepAlive = false;
         }
 
-        void beginBody(const ReplyHeader& reply)
-        {
-            _keepAlive = reply.keepAlive();
-            _contentLength = reply.contentLength();
-        }
+        void beginBody(const ReplyHeader& reply);
 
     protected:
         virtual int_type underflow();
@@ -106,11 +102,7 @@ class InputBuffer : public System::IOBuffer
             _keepAlive = false;
         }
 
-        void beginBody(const ReplyHeader& reply)
-        {
-            _keepAlive = reply.keepAlive();
-            _contentLength = reply.contentLength();
-        }
+        void beginBody(const ReplyHeader& reply);
 
     protected:
         virtual int_type underflow();
@@ -119,6 +111,34 @@ class InputBuffer : public System::IOBuffer
         long _contentLength;
         bool _keepAlive;
 };
+
+class HttpBuffer : public std::streambuf
+{
+    public:
+        HttpBuffer()
+        {}
+
+        void attach(std::streambuf& sbuf)
+        { _sbuf = &sbuf; }
+
+        void beginBody(const ReplyHeader& reply);
+
+        std::streamsize import(std::streamsize n = 0);
+
+        bool isEnd() const;
+
+    protected:
+        virtual int_type underflow();
+
+    private:
+        std::streambuf* _sbuf;
+        Pt::System::IODevice* _iodev;
+        char _buffer[4096];
+        long _contentLength;
+        bool _chunked;
+        bool _keepAlive;
+};
+
 
 class ClientImpl : public Connectable
 {

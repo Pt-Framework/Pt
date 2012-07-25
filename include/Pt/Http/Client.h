@@ -48,14 +48,11 @@ namespace Ssl {
 
 namespace Http {
 
-class ClientImpl;
 class ReplyHeader;
 class Request;
 
 class PT_HTTP_API Client : private NonCopyable
 {
-        ClientImpl* _impl;
-
     public:
         Client();
         
@@ -139,6 +136,8 @@ class PT_HTTP_API Client : private NonCopyable
 
         // Signals that the reply is completely processed.
         Signal<Client&> _replyFinished;
+
+        class ClientImpl* _impl;
 };
 
 } // namespace Http

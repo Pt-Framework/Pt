@@ -42,6 +42,22 @@ namespace Pt {
 
 namespace Http {
 
+void SslInputBuffer::beginBody(const ReplyHeader& reply)
+{
+    log_trace("SslInputBuffer::beginBody()");
+
+    std::streamsize avail = this->in_avail();
+    _keepAlive = reply.keepAlive();
+    _contentLength = reply.contentLength();
+
+    if(avail > _contentLength)
+        throw std::runtime_error("reply larger than content length");
+
+    _contentLength -= avail;
+    log_debug("remaining: " << _contentLength);
+    log_debug("avail: " << this->in_avail());
+}
+
 SslInputBuffer::int_type SslInputBuffer::underflow()
 { 
     log_trace("SslInputBuffer::underflow()");
@@ -65,10 +81,24 @@ SslInputBuffer::int_type SslInputBuffer::underflow()
         return traits_type::eof();
     }
     
-    SslInputBuffer::int_type ret = Ssl::IOBuffer::underflow(); 
+    SslInputBuffer::int_type ret = Ssl::IOBuffer::underflow();
+
+    if(avail > _contentLength)
+        throw std::runtime_error("reply larger than content length");
+
     _contentLength -= this->in_avail();
     log_trace("remaining: " << _contentLength);
     return ret;
+}
+
+
+void InputBuffer::beginBody(const ReplyHeader& reply)
+{
+    log_trace("InputBuffer::beginBody()");
+
+    _keepAlive = reply.keepAlive();
+    _contentLength = reply.contentLength();
+    log_debug("remaining: " << _contentLength);
 }
 
 
@@ -108,11 +138,82 @@ InputBuffer::int_type InputBuffer::underflow()
     
     InputBuffer::int_type ret = System::IOBuffer::underflow(); 
     _contentLength -= this->in_avail();
-    log_trace("remaining: " << _contentLength);
+    log_debug("remaining: " << _contentLength);
     return ret;
 }
 
 
+
+
+void HttpBuffer::beginBody(const ReplyHeader& reply)
+{
+    log_trace("HttpBuffer::beginBody()");
+
+    _keepAlive = reply.keepAlive();
+    _contentLength = reply.contentLength();
+    _chunked = reply.chunkedTransferEncoding();
+
+    log_debug("keep-alive: " << _keepAlive);
+    log_debug("chunked: " << _chunked);
+    log_debug("content-length: " << _contentLength);
+}
+
+
+bool HttpBuffer::isEnd() const
+{
+    return _contentLength == 0 || ! _chunked;
+}
+
+
+std::streamsize HttpBuffer::import(std::streamsize n)
+{
+    if(n == 0)
+        n = _sbuf->in_avail();
+
+    if(n > _contentLength)
+        n = _contentLength;
+
+    if(n > sizeof(_buffer)) 
+        n = sizeof(_buffer);
+
+    // memmove leftover
+
+    if(_chunked)
+    {
+        // use ChunkParser to refill buffer area
+        return 0;
+    }
+
+    if(_contentLength == 0)
+    {
+        log_trace("received all content -> EOF");
+
+        if( ! _keepAlive)
+        {
+            log_debug("closing socket, no keep alive");
+            _iodev->close();
+        }
+
+        return traits_type::eof();
+    }
+
+    n = _sbuf->sgetn(_buffer, n);
+    setg(_buffer, _buffer, _buffer + n);
+
+    _contentLength -= n;
+    return n;
+}
+
+HttpBuffer::int_type HttpBuffer::underflow()
+{ 
+    log_trace("HttpBuffer::underflow()");
+    std::streamsize n = import( sizeof(_buffer) );
+
+    if( this->gptr() < this->egptr() )
+        return traits_type::to_int_type( *this->gptr() );
+
+    return traits_type::eof();
+}
 
 
 void ClientImpl::ParseEvent::onHttpReturn(unsigned ret, const std::string& text)
@@ -296,10 +397,12 @@ const ReplyHeader& ClientImpl::execute(const Request& request)
         cancel();
     }
 
+    unsigned headerSize = 0;
     char ch = ' ';
     while( ! _parser.end() && _stream.get(ch) )
     {
         _parser.parse(ch);
+        ++headerSize;
     }
          
     if( ! _parser.end() )
@@ -310,6 +413,7 @@ const ReplyHeader& ClientImpl::execute(const Request& request)
 
     log_debug("content-length: " << _replyHeader.contentLength());
     log_debug("chunked: " << _replyHeader.chunkedTransferEncoding());
+    log_debug("header-size: " << headerSize);
 
     if( _replyHeader.chunkedTransferEncoding() )
     {
@@ -853,6 +957,18 @@ void ClientImpl::onHttpsBody(System::StreamBuffer& sbuf)
 void ClientImpl::onHttpBody(System::StreamBuffer& sbuf)
 {
     log_trace("onHttpBody");
+
+    /*
+    while(_httpbuf.import() > 0 || _httpbuf.in_avail() > 0)
+    {
+        _client->bodyAvailable().send(*_client, is);
+    }
+    
+    if( ! _httpbuf.isEnd() )
+    {
+        sbuf.beginRead();
+    }
+    */
 
     bool cont = this->onBody(_stream);
     if(cont)
