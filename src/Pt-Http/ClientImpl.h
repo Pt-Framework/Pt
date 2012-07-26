@@ -62,7 +62,7 @@ class Client;
 
 class HttpBuffer : public std::streambuf
 {
-    static const std::size_t MaxPutback = 4;
+    static const unsigned int MaxPutback = 4;
 
     public:
         HttpBuffer(Pt::System::IODevice& iodev)
