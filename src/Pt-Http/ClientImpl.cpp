@@ -42,112 +42,12 @@ namespace Pt {
 
 namespace Http {
 
-void SslInputBuffer::beginBody(const ReplyHeader& reply)
-{
-    log_trace("SslInputBuffer::beginBody()");
-
-    std::streamsize avail = this->in_avail();
-    _keepAlive = reply.keepAlive();
-    _contentLength = reply.contentLength();
-
-    if(avail > _contentLength)
-        throw std::runtime_error("reply larger than content length");
-
-    _contentLength -= avail;
-    log_debug("remaining: " << _contentLength);
-    log_debug("avail: " << this->in_avail());
-}
-
-SslInputBuffer::int_type SslInputBuffer::underflow()
-{ 
-    log_trace("SslInputBuffer::underflow()");
-
-    std::streamsize avail = this->in_avail();
-    if(avail > 0 || _contentLength == -1)
-    {
-        return Ssl::IOBuffer::underflow();
-    }
-    
-    if(_contentLength == 0)
-    {
-        log_trace("received all content -> EOF");
-
-        if( ! _keepAlive)
-        {
-            log_debug("closing socket, no keep alive");
-            this->buffer().device()->close();
-        }
-
-        return traits_type::eof();
-    }
-    
-    SslInputBuffer::int_type ret = Ssl::IOBuffer::underflow();
-
-    if(avail > _contentLength)
-        throw std::runtime_error("reply larger than content length");
-
-    _contentLength -= this->in_avail();
-    log_trace("remaining: " << _contentLength);
-    return ret;
-}
-
-
-void InputBuffer::beginBody(const ReplyHeader& reply)
-{
-    log_trace("InputBuffer::beginBody()");
-
-    _keepAlive = reply.keepAlive();
-    _contentLength = reply.contentLength();
-    log_debug("remaining: " << _contentLength);
-}
-
-
-InputBuffer::int_type InputBuffer::underflow()
-{ 
-    log_trace("InputBuffer::underflow()");
-
-    std::streamsize avail = this->in_avail();
-    if(avail > 0 || _contentLength == -1)
-    {
-        return System::IOBuffer::underflow();
-    }
-    
-    bool chunked = false;
-    if(chunked)
-    {
-        // parse chunked meta info if no leftover
-        // if end consume trailer and return eof()
-        // import chunk into IOBuffer
-        // if less imported than available store leftover count
-        InputBuffer::int_type ret = traits_type::eof();
-        return ret;
-    }
-
-    if(_contentLength == 0)
-    {
-        log_trace("received all content -> EOF");
-
-        if( ! _keepAlive)
-        {
-            log_debug("closing socket, no keep alive");
-            this->device()->close();
-        }
-
-        return traits_type::eof();
-    }
-    
-    InputBuffer::int_type ret = System::IOBuffer::underflow(); 
-    _contentLength -= this->in_avail();
-    log_debug("remaining: " << _contentLength);
-    return ret;
-}
-
-
-
-
 void HttpBuffer::beginBody(const ReplyHeader& reply)
 {
     log_trace("HttpBuffer::beginBody()");
+    _chunkParser.reset();
+
+    setg(0,0,0);
 
     _keepAlive = reply.keepAlive();
     _contentLength = reply.contentLength();
@@ -161,28 +61,60 @@ void HttpBuffer::beginBody(const ReplyHeader& reply)
 
 bool HttpBuffer::isEnd() const
 {
-    return _contentLength == 0 || ! _chunked;
+    log_trace("HttpBuffer::isEnd()");
+    return _contentLength == 0;
 }
 
 
-std::streamsize HttpBuffer::import(std::streamsize n)
+void HttpBuffer::import(std::streamsize n)
 {
+    log_trace("HttpBuffer::import(" << n << ")");
+
+    if( ! _sbuf)
+        return;
+
     if(n == 0)
         n = _sbuf->in_avail();
 
-    if(n > _contentLength)
-        n = _contentLength;
+    // Move unread bytes and putback to front
+    size_t putback  = MaxPutback;
+    size_t leftover = 0;
+    
+    if( this->gptr() ) 
+    {
+        putback = std::min<std::size_t>( this->gptr() - this->eback(), MaxPutback);
+        char* to = _buffer + MaxPutback - putback;
+        char* from = this->gptr() - putback;
 
-    if(n > sizeof(_buffer)) 
-        n = sizeof(_buffer);
+        leftover = this->egptr() - this->gptr();
+        std::memmove( to, from, putback + leftover );
 
-    // memmove leftover
+        this->setg( _buffer + (MaxPutback - putback),  // start of get area
+                    _buffer + MaxPutback,              // gptr position
+                    _buffer + MaxPutback + leftover ); // end of get area
+    }
 
     if(_chunked)
     {
-        // use ChunkParser to refill buffer area
-        return 0;
+        _contentLength = 0;
+        while(n-- && ! _chunkParser.end())
+        {
+            char ch = _sbuf->sbumpc();
+            _chunkParser.parse(ch);
+            if( _chunkParser.hasChunk() )
+            {
+                _contentLength = _chunkParser.chunkSize();
+                break;
+            }
+        }
     }
+
+    size_t unused = sizeof(_buffer) - (MaxPutback + leftover);
+    if(n > unused)
+        n = unused;
+
+    if(n > _contentLength)
+        n = _contentLength;
 
     if(_contentLength == 0)
     {
@@ -194,20 +126,33 @@ std::streamsize HttpBuffer::import(std::streamsize n)
             _iodev->close();
         }
 
-        return traits_type::eof();
+        return;
     }
 
-    n = _sbuf->sgetn(_buffer, n);
-    setg(_buffer, _buffer, _buffer + n);
+    if(n == 0)
+        return;
+
+    log_debug("http buffer refill: " << n);
+    n = _sbuf->sgetn(_buffer + MaxPutback + leftover, n);
+
+    setg(_buffer + MaxPutback - putback, // eback - start of get area
+         _buffer + MaxPutback,           // gptr - current position
+         _buffer + MaxPutback + n);      // egptr - end of get area
 
     _contentLength -= n;
-    return n;
+    log_debug("remaining content length: " << _contentLength);
+    return ;
 }
+
 
 HttpBuffer::int_type HttpBuffer::underflow()
 { 
     log_trace("HttpBuffer::underflow()");
-    std::streamsize n = import( sizeof(_buffer) );
+
+    if(this->gptr() < this->egptr())
+        return traits_type::to_int_type(*(this->gptr()));
+
+    import( sizeof(_buffer) );
 
     if( this->gptr() < this->egptr() )
         return traits_type::to_int_type( *this->gptr() );
@@ -231,12 +176,12 @@ ClientImpl::ClientImpl(Client* client)
 #ifdef PT_HTTP_WITH_SSL
 , _sslbuf(_sockbuf)
 #endif
+, _httpbuf(_socket)
 , _chunkedBuffer(&_sockbuf)
-, _stream(&_sockbuf)
-, _contentLength(0)
+, _stream(&_httpbuf)
 , _reusedConnection(false)
 , _errorPending(false)
-, _state( &ClientImpl::onHttpHeader )
+, _state( &ClientImpl::onHeader )
 {
     init();
 }
@@ -251,12 +196,12 @@ ClientImpl::ClientImpl(Client* client, const Net::AddrInfo& addrinfo, bool ssl)
 #ifdef PT_HTTP_WITH_SSL
 , _sslbuf(_sockbuf)
 #endif
+, _httpbuf(_socket)
 , _chunkedBuffer(&_sockbuf)
-, _stream(&_sockbuf)
-, _contentLength(0)
+, _stream(&_httpbuf)
 , _reusedConnection(false)
 , _errorPending(false)
-, _state( &ClientImpl::onHttpHeader )
+, _state( &ClientImpl::onHeader )
 {
     init();
     setHost(addrinfo, ssl);
@@ -272,12 +217,12 @@ ClientImpl::ClientImpl(Client* client, System::EventLoop& loop, const Net::AddrI
 #ifdef PT_HTTP_WITH_SSL
 , _sslbuf(_sockbuf)
 #endif
+, _httpbuf(_socket)
 , _chunkedBuffer(&_sockbuf)
-, _stream(&_sockbuf)
-, _contentLength(0)
+, _stream(&_httpbuf)
 , _reusedConnection(false)
 , _errorPending(false)
-, _state( &ClientImpl::onHttpHeader )
+, _state( &ClientImpl::onHeader )
 {
     setActive(loop);
     init();
@@ -296,6 +241,8 @@ void ClientImpl::init()
 #ifdef PT_HTTP_WITH_SSL
     _sslbuf.handshakeFinished() += slot(*this, &ClientImpl::onSslHandshake);
 #endif
+
+    _httpbuf.attach(_sockbuf);
 }
 
 
@@ -316,7 +263,7 @@ void ClientImpl::setHost(const Net::AddrInfo& addrinfo, bool ssl)
               _sslbuf.outputReady() += slot(*this, &ClientImpl::onSslOutput);
               _sslbuf.inputReady() += slot(*this, &ClientImpl::onSslInput);
 
-              _stream.rdbuf(&_sslbuf);
+              _httpbuf.attach(_sslbuf);
               _ssl = true;
           }
           
@@ -332,7 +279,7 @@ void ClientImpl::setHost(const Net::AddrInfo& addrinfo, bool ssl)
           _sockbuf.outputReady() += slot(*this, &ClientImpl::onOutput);
           _sockbuf.inputReady() += slot(*this, &ClientImpl::onInput);
 
-          _stream.rdbuf(&_sockbuf);
+          _httpbuf.attach(_sockbuf);
           _ssl = false;
       }
 
@@ -359,10 +306,9 @@ const ReplyHeader& ClientImpl::execute(const Request& request)
 {
     log_trace("ClientImpl::execute " << request.url());
 
-#ifdef PT_HTTP_WITH_SSL
-    _sslbuf.reset();
-#endif
-    _sockbuf.reset();
+    _stream.rdbuf( _httpbuf.buffer() );
+    _errorPending = false;
+    _request = &request;
     _replyHeader.clear();
     _parser.reset(true);
     
@@ -415,22 +361,8 @@ const ReplyHeader& ClientImpl::execute(const Request& request)
     log_debug("chunked: " << _replyHeader.chunkedTransferEncoding());
     log_debug("header-size: " << headerSize);
 
-    if( _replyHeader.chunkedTransferEncoding() )
-    {
-        _chunkedBuffer.reset( _stream.rdbuf() );
-        _stream.rdbuf(&_chunkedBuffer);
-        // TODO: close if not keepalive
-    }
-    else
-    {
-        if( ! _ssl)
-            _sockbuf.beginBody(_replyHeader);
-#ifdef PT_HTTP_WITH_SSL
-        else
-            _sslbuf.beginBody(_replyHeader);
-#endif
-    }
-
+    _stream.rdbuf(&_httpbuf);
+    _httpbuf.beginBody(_replyHeader);
     return _replyHeader;
 }
 
@@ -492,20 +424,12 @@ void ClientImpl::beginRequest(const Request& request)
 {
     log_trace("beginRequest");
 
+    _stream.rdbuf( _httpbuf.buffer() );
     _errorPending = false;
     _request = &request;
     _replyHeader.clear();
     _parser.reset(true);
-    _sockbuf.reset();
-
-#ifdef PT_HTTP_WITH_SSL
-    _sslbuf.reset();
-#endif
-
-    if(_ssl)
-        _state = &ClientImpl::onHttpsHeader;
-    else
-        _state = &ClientImpl::onHttpHeader;
+    _state = &ClientImpl::onHeader;
     
     _reusedConnection = _socket.isConnected();
 
@@ -526,12 +450,7 @@ void ClientImpl::beginRequest(const Request& request)
     catch (const System::IOError&)
     {
         log_debug("write failed, reconnecting");
-
-        _stream.clear();
-        _sockbuf.discard();
-#ifdef PT_HTTP_WITH_SSL
-        _sslbuf.discard();
-#endif
+        cancel();
         _socket.beginConnect(_addrInfo);
     }
 }
@@ -783,7 +702,7 @@ void ClientImpl::onSslInput(Ssl::IOBuffer& sb)
 }
 #endif
 
-bool ClientImpl::onHeader(std::streambuf& sb, bool ssl)
+void ClientImpl::onHeader(System::StreamBuffer& sbuf)
 {
     log_trace("onHeader");
 
@@ -795,7 +714,7 @@ bool ClientImpl::onHeader(std::streambuf& sb, bool ssl)
             log_debug("reconnect on EOF");
             cancel();
             beginRequest(*_request);
-            return false;
+            return;
         }
 
         throw System::IOError("unexpected EOF");
@@ -804,7 +723,7 @@ bool ClientImpl::onHeader(std::streambuf& sb, bool ssl)
     _reusedConnection = false;
 
     log_debug("advancing parser");
-    _parser.advance(sb);
+    _parser.advance(_stream);
 
     if( _parser.fail() )
     {
@@ -812,168 +731,70 @@ bool ClientImpl::onHeader(std::streambuf& sb, bool ssl)
         throw std::runtime_error("http parser failed"); // TODO define exception class
     }
 
-    if( _parser.end() )
+    if( ! _parser.end() )
     {
-        log_debug("http header complete");
-        _client->headerReceived().send(*_client);
-    
-        bool chunkedEncoding = _replyHeader.chunkedTransferEncoding();
-        if(chunkedEncoding)
-        {
-            log_debug("chunked transfer encoding used");
-
-            if(ssl)
-                _state = &ClientImpl::onHttpsChunkedBody;
-            else
-                _state = &ClientImpl::onHttpChunkedBody;
-
-            _chunkedBuffer.reset(&sb);
-            _stream.rdbuf(&_chunkedBuffer);
-        }
+        log_debug("continue reading");
+        if(_ssl)
+            _sslbuf.beginRead();
         else
-        {
-          if(ssl)
-              _state = &ClientImpl::onHttpsBody;
-          else
-              _state = &ClientImpl::onHttpBody;
-
-          _contentLength = _replyHeader.contentLength();
-          log_debug("received header, content-length=" << _contentLength);
-      
-          if (_contentLength <= 0)
-          {
-              if( ! _replyHeader.keepAlive() )
-              {
-                  log_debug("close socket - no keep alive");
-                  _socket.close();
-              }
-
-              _client->replyFinished().send(*_client);
-              return false;
-          }
-        }
+            sbuf.beginRead();
+    }
     
-        if(sb.in_avail() > 0)
-        {
-            (this->*_state)( _sockbuf );
-            return false;
-        }
+    log_debug("http header complete");
+    _stream.rdbuf(&_httpbuf);
+    _httpbuf.beginBody(_replyHeader);
+    _client->headerReceived().send(*_client);
+    _state = &ClientImpl::onBody;
+    
+    /*
+    bool chunkedEncoding = _replyHeader.chunkedTransferEncoding();
+    if(chunkedEncoding)
+    {
+        log_debug("chunked transfer encoding used");
+
+        if(_ssl)
+            _state = &ClientImpl::onHttpsChunkedBody;
+        else
+            _state = &ClientImpl::onHttpChunkedBody;
+
+        _chunkedBuffer.reset(_stream.rdbuf());
+        _stream.rdbuf(&_chunkedBuffer);
     }
-
-    assert(sb.in_avail() <= 0);
-
-    return true;
+    */
+    
+    (this->*_state)( _sockbuf );
 }
 
 
-void ClientImpl::onHttpsHeader(System::StreamBuffer& sbuf)
-{
-    log_trace("onHttpsHeader");
-
-#ifdef PT_HTTP_WITH_SSL
-    bool cont = onHeader(_sslbuf, true);
-    if(cont)
-    {
-        log_debug("begin reading body (SSL)");
-        _sslbuf.beginRead();
-    }
-#endif
-}
-
-
-void ClientImpl::onHttpHeader(System::StreamBuffer& sbuf)
-{
-    log_trace("onHttpHeader");
-
-    bool cont = onHeader(sbuf, false);
-    if(cont)
-    {
-        log_debug("begin reading body (SSL)");
-        sbuf.beginRead();
-    }
-}
-
-
-bool ClientImpl::onBody(std::istream& is)
-{
-    log_trace("onBody");
-
-    while( is.good() && _contentLength > 0 && is.rdbuf()->in_avail() > 0 )
-    {
-        std::streamsize avail = is.rdbuf()->in_avail();
-        
-        // TODO: may throw exception
-        _client->bodyAvailable().send(*_client, is); 
-        
-        std::streamsize consumed = avail - is.rdbuf()->in_avail();
-        _contentLength -= consumed;
-        
-        log_debug("content-length:" << _contentLength << " left:" << is.rdbuf()->in_avail());
-    }
-
-    if( is.fail() )
-        throw System::IOError( PT_ERROR_MSG("error reading HTTP reply body") );
-
-    if( _contentLength <= 0 )
-    {
-        log_debug("reply finished");
-
-        if( ! _replyHeader.keepAlive() )
-        {
-            log_debug("close socket - no keep alive");
-            _socket.close();
-        }
-
-        _client->replyFinished().send(*_client);
-    }
-    else if (_socket.isConnected() && is.good())
-    {
-        return true;
-    }
-    else
-    {
-        cancel();
-    }
-
-    return false;
-}
-
-
-void ClientImpl::onHttpsBody(System::StreamBuffer& sbuf)
+void ClientImpl::onBody(System::StreamBuffer& sbuf)
 {
     log_trace("onHttpsBody");
 
-#ifdef PT_HTTP_WITH_SSL
-    bool cont = this->onBody(_stream);
-    if(cont)
+    do
     {
-        log_debug("body not finished- begin read(SSL)");
-        _sslbuf.beginRead();
-    }
-#endif
-}
+        _httpbuf.import();
+        log_debug("available: " << _httpbuf.in_avail());
 
-
-void ClientImpl::onHttpBody(System::StreamBuffer& sbuf)
-{
-    log_trace("onHttpBody");
-
-    /*
-    while(_httpbuf.import() > 0 || _httpbuf.in_avail() > 0)
-    {
-        _client->bodyAvailable().send(*_client, is);
-    }
+        if( _httpbuf.in_avail() )
+            _client->bodyAvailable().send(*_client, _stream);
+    } 
+    while( _httpbuf.in_avail() );
     
-    if( ! _httpbuf.isEnd() )
-    {
-        sbuf.beginRead();
-    }
-    */
+    if( _stream.fail() )
+        throw System::IOError( PT_ERROR_MSG("error reading HTTP reply body") );
 
-    bool cont = this->onBody(_stream);
-    if(cont)
+    if( _httpbuf.isEnd() )
     {
-        sbuf.beginRead();
+        log_debug("reply finished");
+        _client->replyFinished().send(*_client);
+    }
+    else
+    {
+        log_debug("continue reading body");
+        if(_ssl)
+            _sslbuf.beginRead();
+        else
+            sbuf.beginRead();
     }
 }
 
@@ -1099,257 +920,3 @@ void ClientImpl::cancel()
 } // namespace Http
 
 } // namespace Pt
-
-
-
-
-/*
-
-void ClientImpl::processHeader(System::StreamBuffer& sbuf)
-{
-    log_trace("processHeader");
-
-    std::streambuf* sb = &sbuf;
-
-#ifdef PT_HTTP_WITH_SSL
-    if(_ctx)
-        sb = &_sslbuf;
-#endif
-
-    // reconnect when received pending EOF from previous response
-    if( sbuf.device()->eof() )
-    {
-        if(_reusedConnection)
-        {
-            log_debug("reconnect on EOF");
-            cancel();
-            beginRequest(*_request);
-            return;
-        }
-
-        throw System::IOError("unexpected EOF");
-    }
-
-    _reusedConnection = false;
-
-    log_debug("advancing parser");
-    _parser.advance(*sb);
-
-    if( _parser.fail() )
-    {
-        log_warn("http parser failed");
-        throw std::runtime_error("http parser failed"); // TODO define exception class
-    }
-
-    if( _parser.end() )
-    {
-        log_debug("http header complete");
-        _client->headerReceived(*_client);
-    
-        bool chunkedEncoding = _replyHeader.chunkedTransferEncoding();
-        if(chunkedEncoding)
-        {
-            log_debug("chunked transfer encoding used");
-            _state = &ClientImpl::processChunkedBody;
-            _chunkedIStream.reset(sb);
-        }
-        else
-        {
-          _state = &ClientImpl::processBody;
-          _contentLength = _replyHeader.contentLength();
-          log_debug("received header, content-length=" << _contentLength);
-      
-          if (_contentLength <= 0)
-          {
-              if( ! _replyHeader.keepAlive() )
-              {
-                  log_debug("close socket - no keep alive");
-                  _socket.close();
-              }
-
-              _client->replyFinished(*_client);
-              return;
-          }
-        }
-    
-        if(sb->in_avail() > 0)
-        {
-            (this->*_state)(sbuf);
-            return;
-        }
-    }
-
-#ifdef PT_HTTP_WITH_SSL
-    if(_ctx)
-    {
-        if(_sslbuf.in_avail() <= 0)
-        {
-          log_debug("begin reading body (SSL)");
-          _sslbuf.beginRead();
-          return;
-        }
-    }
-    else
-#endif
-    if( sbuf.in_avail() <= 0 )
-    {
-        log_debug("begin reading body");
-        sbuf.beginRead();
-        return;
-    }
-}
-
-void ClientImpl::processBody(System::StreamBuffer& sbuf)
-{
-    log_trace("processBody: content-length:" << _contentLength);
-
-    std::streambuf* sb = &sbuf;
-    std::istream* is = &_ios;
-
-#ifdef PT_HTTP_WITH_SSL
-    std::istream sslios(0);
-    if(_ctx)
-    {
-        sslios.rdbuf(&_sslbuf);
-        is = &sslios;
-        sb = &_sslbuf;
-    }
-#endif
-
-    while( is->good() && _contentLength > 0 && sb->in_avail() > 0 )
-    {
-        std::streamsize avail = sb->in_avail();
-        
-        // TODO: may throw exception
-        _client->bodyAvailable(*_client, *is); 
-        
-        std::streamsize consumed = avail - sb->in_avail();
-        _contentLength -= consumed;
-        
-        log_debug("content-length:" << _contentLength << " left:" << sb->in_avail());
-    }
-
-    if( is->fail() )
-        throw System::IOError( PT_ERROR_MSG("error reading HTTP reply body") );
-
-    if( _contentLength <= 0 )
-    {
-        log_debug("reply finished");
-
-        if( ! _replyHeader.keepAlive() )
-        {
-            log_debug("close socket - no keep alive");
-            _socket.close();
-        }
-
-        _client->replyFinished(*_client);
-    }
-    else if (_socket.isConnected() && is->good())
-    {
-#ifdef PT_HTTP_WITH_SSL
-        if(_ctx)
-        {
-            log_debug("body not finished- begin read(SSL)");
-            _sslbuf.beginRead();
-        }
-        else
-#endif
-        sbuf.beginRead();
-    }
-    else
-    {
-        cancel();
-    }
-}
-
-void ClientImpl::processChunkedBody(System::StreamBuffer& sbuf)
-{
-    log_trace("processChunkedBody");
-
-    std::streambuf* sb = &sbuf;
-
-#ifdef PT_HTTP_WITH_SSL
-
-    if(_ctx)
-    {
-        sb = &_sslbuf;
-    }
-#endif
-
-    if( _chunkedIStream.rdbuf()->in_avail() > 0 )
-    {
-        if( ! _chunkedIStream.eod() )
-        {
-            log_debug("read chunked encoding body");
-
-            while (_chunkedIStream.good()
-                && _chunkedIStream.rdbuf()->in_avail() > 0
-                && !_chunkedIStream.eod())
-            {
-                log_debug("bodyAvailable");
-                _client->bodyAvailable(*_client, _chunkedIStream);
-            }
-
-            log_debug("in_avail=" << _chunkedIStream.rdbuf()->in_avail() << " eod=" << _chunkedIStream.eod());
-            if( _chunkedIStream.eod() )
-            {
-                if( _replyHeader.hasHeader("Trailer") )
-                    _parser.readHeader();
-                else
-                    _client->replyFinished(*_client);
-            }
-        }
-
-        if (_chunkedIStream.eod() && sb->in_avail() > 0)
-        {
-            log_debug("read chunked encoding post headers");
-
-            _parser.advance(*sb);
-            if( _parser.fail() )
-                throw std::runtime_error("http parser failed"); // TODO define exception class
-
-            if( _parser.end() )
-            {
-                log_debug("reply finished");
-
-                if( ! _replyHeader.keepAlive())
-                {
-                    log_debug("close socket - no keep alive");
-                    _socket.close();
-                }
-
-                _client->replyFinished(*_client);
-            }
-        }
-
-        if( _chunkedIStream.fail() )
-            throw System::IOError( PT_ERROR_MSG("error reading HTTP reply body") );
-    }
-    else if( _chunkedIStream.eod() )
-    {
-        if( _replyHeader.hasHeader("Trailer") )
-            _parser.readHeader();
-        else
-            _client->replyFinished(*_client);
-    }
-
-    if (_socket.isConnected())
-    {
-        if ((!_chunkedIStream.eod() || !_parser.end()))
-        {
-            log_debug("call beginRead");
-
-#ifdef PT_HTTP_WITH_SSL
-            if(_ctx)
-                _sslbuf.beginRead();
-            else
-#endif
-            sbuf.beginRead();
-        }
-    }
-    else
-    {
-        cancel();
-    }
-}
-*/

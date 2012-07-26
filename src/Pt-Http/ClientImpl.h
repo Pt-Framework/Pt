@@ -60,70 +60,30 @@ namespace Http {
 
 class Client;
 
-#ifdef PT_HTTP_WITH_SSL
-class SslInputBuffer : public Ssl::IOBuffer
-{
-    public:
-        SslInputBuffer(Pt::System::StreamBuffer& sb)
-        : Ssl::IOBuffer(sb)
-        , _contentLength(-1)
-        , _keepAlive(false)
-        {}
-
-        void reset()
-        { 
-            _contentLength = -1;
-            _keepAlive = false;
-        }
-
-        void beginBody(const ReplyHeader& reply);
-
-    protected:
-        virtual int_type underflow();
-
-    private:
-        long _contentLength;
-        bool _keepAlive;
-};
-#endif
-
-class InputBuffer : public System::IOBuffer
-{
-    public:
-        InputBuffer()
-        : System::IOBuffer(8192, true)
-        , _contentLength(-1)
-        , _keepAlive(false)
-        {}
-
-        void reset()
-        { 
-            _contentLength = -1;
-            _keepAlive = false;
-        }
-
-        void beginBody(const ReplyHeader& reply);
-
-    protected:
-        virtual int_type underflow();
-
-    private:
-        long _contentLength;
-        bool _keepAlive;
-};
-
 class HttpBuffer : public std::streambuf
 {
-    public:
-        HttpBuffer()
-        {}
+    static const std::size_t MaxPutback = 4;
 
+    public:
+        HttpBuffer(Pt::System::IODevice& iodev)
+        : _sbuf(0)
+        , _iodev(&iodev)
+        , _contentLength(0)
+        , _chunked(false)
+        , _keepAlive(false)
+        {
+            setg(0,0,0);
+        }
+        
         void attach(std::streambuf& sbuf)
         { _sbuf = &sbuf; }
 
+        std::streambuf* buffer()
+        { return _sbuf; }
+
         void beginBody(const ReplyHeader& reply);
 
-        std::streamsize import(std::streamsize n = 0);
+        void import(std::streamsize n = 0);
 
         bool isEnd() const;
 
@@ -131,6 +91,7 @@ class HttpBuffer : public std::streambuf
         virtual int_type underflow();
 
     private:
+        ChunkParser _chunkParser;
         std::streambuf* _sbuf;
         Pt::System::IODevice* _iodev;
         char _buffer[4096];
@@ -138,7 +99,6 @@ class HttpBuffer : public std::streambuf
         bool _chunked;
         bool _keepAlive;
 };
-
 
 class ClientImpl : public Connectable
 {
@@ -224,13 +184,8 @@ class ClientImpl : public Connectable
 
         void sendRequest(std::ostream& os, const Request& request);
 
-        bool onHeader(std::streambuf& sb, bool ssl);
-        void onHttpsHeader(System::StreamBuffer& sbuf);
-        void onHttpHeader(System::StreamBuffer& sbuf);
-
-        bool onBody(std::istream& is);
-        void onHttpsBody(System::StreamBuffer& sbuf);
-        void onHttpBody(System::StreamBuffer& sbuf);
+        void onHeader(System::StreamBuffer& sbuf);
+        void onBody(System::StreamBuffer& sbuf);
 
         bool onChunkedBody();
         void onHttpsChunkedBody(System::StreamBuffer& sbuf);
@@ -260,17 +215,15 @@ class ClientImpl : public Connectable
         Net::AddrInfo _addrInfo;
         bool _ssl;
         Net::TcpSocket _socket;
-
-        InputBuffer _sockbuf;
+        System::IOBuffer _sockbuf;
 #ifdef PT_HTTP_WITH_SSL
-        SslInputBuffer _sslbuf;
+        Ssl::IOBuffer _sslbuf;
 #endif
-
+        HttpBuffer _httpbuf;
         ChunkedReader _chunkedBuffer;
         std::iostream _stream;
         std::string _username;
         std::string _password;
-        long _contentLength;
         bool _reusedConnection;
         bool _errorPending;
 
