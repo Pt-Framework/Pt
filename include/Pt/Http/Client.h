@@ -117,7 +117,7 @@ class PT_HTTP_API Client : private NonCopyable
         { return _headerReceived; }
 
         // Signals that body data has arrived.
-        Signal<Client&, std::istream&>& bodyAvailable()
+        Signal<Client&>& bodyAvailable()
         { return _bodyAvailable; }
 
         // Signals that the reply is completely processed.
@@ -132,7 +132,7 @@ class PT_HTTP_API Client : private NonCopyable
         Signal<Client&> _headerReceived;
 
         // Signals that body data has arrived.
-        Signal<Client&, std::istream&> _bodyAvailable;
+        Signal<Client&> _bodyAvailable;
 
         // Signals that the reply is completely processed.
         Signal<Client&> _replyFinished;

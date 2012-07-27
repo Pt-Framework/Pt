@@ -149,7 +149,8 @@ std::size_t ClientImpl::onReadReply()
 
         while(true)
         {
-            std::streamsize m = _ts.buffer().import();
+            _ts.buffer().import();
+            std::streamsize m = _ts.buffer().in_avail();
             if( ! m )
                 break;
 

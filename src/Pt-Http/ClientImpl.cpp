@@ -185,7 +185,6 @@ ClientImpl::ClientImpl(Client* client)
 , _sslbuf(_sockbuf)
 #endif
 , _httpbuf(_socket)
-//, _chunkedBuffer(&_sockbuf)
 , _stream(&_httpbuf)
 , _reusedConnection(false)
 , _errorPending(false)
@@ -205,7 +204,6 @@ ClientImpl::ClientImpl(Client* client, const Net::AddrInfo& addrinfo, bool ssl)
 , _sslbuf(_sockbuf)
 #endif
 , _httpbuf(_socket)
-//, _chunkedBuffer(&_sockbuf)
 , _stream(&_httpbuf)
 , _reusedConnection(false)
 , _errorPending(false)
@@ -226,7 +224,6 @@ ClientImpl::ClientImpl(Client* client, System::EventLoop& loop, const Net::AddrI
 , _sslbuf(_sockbuf)
 #endif
 , _httpbuf(_socket)
-//, _chunkedBuffer(&_sockbuf)
 , _stream(&_httpbuf)
 , _reusedConnection(false)
 , _errorPending(false)
@@ -689,9 +686,12 @@ void ClientImpl::onHeader(System::StreamBuffer& sbuf)
     if( ! _parser.end() )
     {
         log_debug("continue reading");
+
+#ifdef PT_HTTP_WITH_SSL
         if(_ssl)
             _sslbuf.beginRead();
         else
+#endif
             sbuf.beginRead();
     }
     
@@ -715,7 +715,7 @@ void ClientImpl::onBody(System::StreamBuffer& sbuf)
     do
     {
         if( _httpbuf.in_avail() )
-            _client->bodyAvailable().send(*_client, _stream);
+            _client->bodyAvailable().send(*_client);
 
         _httpbuf.import();
         log_debug("available: " << _httpbuf.in_avail());
@@ -733,9 +733,11 @@ void ClientImpl::onBody(System::StreamBuffer& sbuf)
     else
     {
         log_debug("continue reading body");
+#ifdef PT_HTTP_WITH_SSL
         if(_ssl)
             _sslbuf.beginRead();
         else
+#endif
             sbuf.beginRead();
     }
 }
@@ -749,8 +751,6 @@ void ClientImpl::cancel()
     _sslbuf.discard();
 #endif
     _stream.clear();
-
-    //_chunkedBuffer.reset();
 }
 
 } // namespace Http

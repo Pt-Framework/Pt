@@ -172,15 +172,15 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
             return 0;
         }
 
-        std::streamsize import()
+        void import(std::streamsize n = 0)
         {
             if( _target )
             {
-                std::streamsize n = _target->rdbuf()->in_avail();
-                return do_underflow(n).second;
-            }
+                if(n == 0)
+                    n = _target->rdbuf()->in_avail();
 
-            return this->in_avail();
+                do_underflow(n);
+            }
         }
 
     protected:
@@ -294,9 +294,9 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
 
         std::pair<int_type, std::streamsize> do_underflow(std::streamsize size)
         {
-			typedef std::pair<int_type, std::streamsize> ret_type;
+            typedef std::pair<int_type, std::streamsize> ret_type;
 
-			std::streamsize n = 0;
+            std::streamsize n = 0;
 
             if( this->pptr() )
             {

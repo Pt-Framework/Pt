@@ -94,7 +94,8 @@ std::size_t XmlRpcResponder::readBody(std::istream& is)
    {
         while(true)
         {
-            std::streamsize m = _ts.buffer().import();
+            _ts.buffer().import();
+            std::streamsize m = _ts.buffer().in_avail();
             if( ! m)
                 break;
 

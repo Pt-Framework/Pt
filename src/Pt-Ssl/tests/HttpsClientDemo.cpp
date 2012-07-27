@@ -37,12 +37,12 @@
 
 log_define("Pt.Ssl.HttpClientDemo")
 
-void onReply(Pt::Http::Client& client, std::istream& is)
+void onReply(Pt::Http::Client& client)
 {
-    while ( is.rdbuf()->in_avail() )
+    while ( client.body().rdbuf()->in_avail() )
     {
         char ch;
-        is.get(ch);
+        client.body().get(ch);
         std::cout << ch;
     }
 }
@@ -90,7 +90,7 @@ int main(int argc, char** argv)
         Pt::Http::Request request("/index.html");
         request.setHeader("User-Agent", "Platinum");
         
-        bool noblock = false;
+        bool noblock = true;
         if(noblock)
         {
             log_debug("excuting non-blocking HTTPS request");

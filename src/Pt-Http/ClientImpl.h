@@ -152,8 +152,6 @@ class ClientImpl : public Connectable
         const ReplyHeader& header()
         { return _replyHeader; }
 
-        //void readBody(std::string& s);
-
         std::string get(const std::string& url);
 
         void beginRequest(const Request& request);
@@ -181,15 +179,9 @@ class ClientImpl : public Connectable
 
     private:
         void init();
-
         void sendRequest(std::ostream& os, const Request& request);
-
         void onHeader(System::StreamBuffer& sbuf);
         void onBody(System::StreamBuffer& sbuf);
-
-        //bool onChunkedBody();
-        //void onHttpsChunkedBody(System::StreamBuffer& sbuf);
-        //void onHttpChunkedBody(System::StreamBuffer& sbuf);
 
     private:
         class ParseEvent : public HeaderParser::MessageHeaderEvent
@@ -220,7 +212,6 @@ class ClientImpl : public Connectable
         Ssl::IOBuffer _sslbuf;
 #endif
         HttpBuffer _httpbuf;
-        //ChunkedReader _chunkedBuffer;
         std::iostream _stream;
         std::string _username;
         std::string _password;
