@@ -188,15 +188,14 @@ class IOBufferTest : public Pt::Unit::TestSuite
 
         void onServerInput(Pt::Ssl::IOBuffer& ssl)
         {
-            std::streamsize r = ssl.endRead();
-            if(r < 0) 
+            ssl.endRead();
+            if( ssl.isShutdown() ) 
             {                   
                 log_info("received shutdown from client");
                 ssl.beginShutdown();
                 return;
             }
             
-            log_debug("server ends read, shutdown: " << r);
             std::iostream ios(&ssl);
             
             std::string msg;
@@ -260,15 +259,14 @@ class IOBufferTest : public Pt::Unit::TestSuite
 
         void onClientInput(Pt::Ssl::IOBuffer& ssl)
         {
-            std::streamsize r = ssl.endRead();
-            if(r < 0) 
+            ssl.endRead();
+            if( ssl.isShutdown() ) 
             {                   
                 log_info("received shutdown from server");
                 ssl.beginShutdown();
                 return;
             }
             
-            log_debug("client ends read, shutdown: " << r);
             std::iostream ios(&ssl);
             std::string msg;
             char buf[512];

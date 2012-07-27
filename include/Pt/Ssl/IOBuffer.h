@@ -77,7 +77,7 @@ class PT_SSL_API IOBuffer : public StreamBuffer
 
         void beginRead();
 
-        std::streamsize endRead();
+        void endRead();
 
         void beginWrite();
 

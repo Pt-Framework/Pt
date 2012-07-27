@@ -101,10 +101,10 @@ class Server : public Pt::Connectable {
 
         void onInput(Pt::Ssl::IOBuffer& ssl)
         {
-            std::streamsize r = ssl.endRead();
+            ssl.endRead();
             log_debug("server Received raw = " << _ios->buffer().in_avail());
 
-            if(r < 0) 
+            if( ssl.isShutdown() ) 
             {
                 log_debug("server *** The stream has been shutdown by the other peer ***");
                 ssl.beginShutdown();

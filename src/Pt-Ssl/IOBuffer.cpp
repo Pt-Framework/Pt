@@ -372,7 +372,9 @@ void IOBuffer::beginRead()
     log_debug("begin reading");
     _reading = true;
 
-    if( ! _input || StreamBuffer::import() == 0 )
+    StreamBuffer::import();
+
+    if( ! _input || this->in_avail() == 0 )
     {
         log_debug("begin ios reading");
         _sb->beginRead();
@@ -380,21 +382,12 @@ void IOBuffer::beginRead()
 }
 
 
-std::streamsize IOBuffer::endRead()
+void IOBuffer::endRead()
 {
     log_debug("end reading");
     _reading = false;
     
-    std::streamsize res = StreamBuffer::import();
-    log_debug("client received decoded = " << this->in_avail());
-
-    if(res < 0)
-    {                   
-        log_debug("client *** The stream has been shutdown by the other peer ***");
-    }
-
-    log_debug("imported: " << res);
-    return res;
+    StreamBuffer::import();
 }
 
 

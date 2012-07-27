@@ -373,7 +373,22 @@ void StreamBuffer::writeShutdown()
 }
 
 
-std::streamsize StreamBuffer::import(std::streamsize n)
+bool StreamBuffer::isShutdown() const
+{
+    if(_ssl)
+    {
+        const int shutdownState = SSL_get_shutdown(_ssl);
+        if(shutdownState & SSL_RECEIVED_SHUTDOWN) 
+        {
+            log_debug("Received shutdown notification");
+            return true;
+        }
+    }
+    return false;
+}
+
+
+void StreamBuffer::import(std::streamsize n)
 {
     if(_ios && _ssl)
     {
@@ -385,19 +400,8 @@ std::streamsize StreamBuffer::import(std::streamsize n)
             const std::streamsize n = do_underflow(avail);
             log_debug("do_underflow() = " << n << " bytes");
             log_debug("_ios->in_avail() = " << _ios->in_avail() << " bytes");
-
-            // Shutdown?
-            const int shutdownState = SSL_get_shutdown(_ssl);
-            if(shutdownState & SSL_RECEIVED_SHUTDOWN) 
-            {
-                log_debug("Received shutdown notification");
-                //this->shutdown();
-                return -1;
-            }
         }
     }
-
-    return this->in_avail();
 }
 
 
