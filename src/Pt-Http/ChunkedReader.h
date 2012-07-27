@@ -38,7 +38,7 @@ namespace Pt {
 
 namespace Http {
 
-class ChunkedReader : public std::streambuf
+/*class ChunkedReader : public std::streambuf
 {
         std::streambuf* _ib;
         char* _buffer;
@@ -85,7 +85,7 @@ class ChunkedReader : public std::streambuf
         virtual int_type underflow();
 
         void init(std::streambuf& ib);
-};
+};*/
 
 class ChunkParser
 {

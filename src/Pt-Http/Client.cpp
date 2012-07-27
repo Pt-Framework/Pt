@@ -130,7 +130,7 @@ void Client::endExecute()
 
 std::istream& Client::body()
 {
-    return _impl->in();
+    return _impl->body();
 }
 
 // Sets the username and password for all subsequent requests.

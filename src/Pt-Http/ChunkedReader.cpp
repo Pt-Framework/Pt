@@ -210,6 +210,8 @@ void ChunkParser::onDataEnd(char ch)
 
 void ChunkParser::onTrailer(char ch)
 {
+    log_trace("onTrailer, ch=" << charToPrint(ch));
+
     if (ch == '\n')
         _state = 0;
     else if (ch == '\r')
@@ -220,6 +222,8 @@ void ChunkParser::onTrailer(char ch)
 
 void ChunkParser::onTrailerData(char ch)
 {
+    log_trace("onTrailerData, ch=" << charToPrint(ch));
+
     // the trailer is actually ignored
     if (ch == '\n')
         _state = &ChunkParser::onTrailer;
@@ -237,7 +241,7 @@ void ChunkParser::onTrailerData(char ch)
   ////////////////////////////////////////////////////////////////////
   // ChunkedReader
 
-  ChunkedReader::ChunkedReader(std::streambuf* ib, unsigned bufsize)
+  /*ChunkedReader::ChunkedReader(std::streambuf* ib, unsigned bufsize)
   : _ib(ib),
     _buffer(0),
     _bufsize(bufsize),
@@ -483,7 +487,7 @@ void ChunkParser::onTrailerData(char ch)
     if (ch == '\n')
       _state = &ChunkedReader::onTrailer;
   }
-
+  */
 }
 
 }

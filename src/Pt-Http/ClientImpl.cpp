@@ -62,6 +62,9 @@ void HttpBuffer::beginBody(const ReplyHeader& reply)
 bool HttpBuffer::isEnd() const
 {
     log_trace("HttpBuffer::isEnd()");
+    if(_chunked)
+        return _chunkParser.end();
+
     return _contentLength == 0;
 }
 
@@ -74,7 +77,10 @@ void HttpBuffer::import(std::streamsize n)
         return;
 
     if(n == 0)
+    {
         n = _sbuf->in_avail();
+        log_debug("available: " << n);
+    }
 
     // Move unread bytes and putback to front
     size_t putback  = MaxPutback;
@@ -96,6 +102,7 @@ void HttpBuffer::import(std::streamsize n)
 
     if(_chunked)
     {
+        log_debug("getting next chunk");
         _contentLength = 0;
         while(n-- && ! _chunkParser.end())
         {
@@ -110,13 +117,15 @@ void HttpBuffer::import(std::streamsize n)
     }
 
     size_t unused = sizeof(_buffer) - (MaxPutback + leftover);
+    log_debug("unused buffer area: " << unused);
     if(n > unused)
         n = unused;
 
+    log_debug("content-length: " << _contentLength);
     if(n > _contentLength)
         n = _contentLength;
 
-    if(_contentLength == 0)
+    if( this->isEnd() )
     {
         log_trace("received all content -> EOF");
 
@@ -129,10 +138,10 @@ void HttpBuffer::import(std::streamsize n)
         return;
     }
 
+    log_debug("http buffer refill: " << n);
     if(n == 0)
         return;
 
-    log_debug("http buffer refill: " << n);
     n = _sbuf->sgetn(_buffer + MaxPutback + leftover, n);
 
     setg(_buffer + MaxPutback - putback, // eback - start of get area
@@ -141,7 +150,6 @@ void HttpBuffer::import(std::streamsize n)
 
     _contentLength -= n;
     log_debug("remaining content length: " << _contentLength);
-    return ;
 }
 
 
@@ -177,7 +185,7 @@ ClientImpl::ClientImpl(Client* client)
 , _sslbuf(_sockbuf)
 #endif
 , _httpbuf(_socket)
-, _chunkedBuffer(&_sockbuf)
+//, _chunkedBuffer(&_sockbuf)
 , _stream(&_httpbuf)
 , _reusedConnection(false)
 , _errorPending(false)
@@ -197,7 +205,7 @@ ClientImpl::ClientImpl(Client* client, const Net::AddrInfo& addrinfo, bool ssl)
 , _sslbuf(_sockbuf)
 #endif
 , _httpbuf(_socket)
-, _chunkedBuffer(&_sockbuf)
+//, _chunkedBuffer(&_sockbuf)
 , _stream(&_httpbuf)
 , _reusedConnection(false)
 , _errorPending(false)
@@ -218,7 +226,7 @@ ClientImpl::ClientImpl(Client* client, System::EventLoop& loop, const Net::AddrI
 , _sslbuf(_sockbuf)
 #endif
 , _httpbuf(_socket)
-, _chunkedBuffer(&_sockbuf)
+//, _chunkedBuffer(&_sockbuf)
 , _stream(&_httpbuf)
 , _reusedConnection(false)
 , _errorPending(false)
@@ -364,59 +372,6 @@ const ReplyHeader& ClientImpl::execute(const Request& request)
     _stream.rdbuf(&_httpbuf);
     _httpbuf.beginBody(_replyHeader);
     return _replyHeader;
-}
-
-
-void ClientImpl::readBody(std::string& s)
-{
-    s.clear();
-
-    bool chunkedEncoding = _replyHeader.chunkedTransferEncoding();
-
-    if(chunkedEncoding)
-    {
-        log_debug("read body with chunked encoding");
-
-        // _stream -> _chunkedBuffer (-> _sslbuf) -> _sockbuf
-        _chunkedBuffer.reset( _stream.rdbuf() );
-        _stream.rdbuf(&_chunkedBuffer);
-
-        char ch;
-        while( _stream.get(ch) )
-            s += ch;
-
-        log_debug("eod=" << _chunkedBuffer.eod());
-
-        if( ! _chunkedBuffer.eod() )
-            throw System::IOError( PT_ERROR_MSG("error reading HTTP reply body: incomplete chunked data stream") );
-    }
-    else
-    {
-        unsigned n = _replyHeader.contentLength();
-
-        log_debug("read body; content-size: " << n);
-
-        s.reserve(n);
-
-        char ch;
-        while (n-- && _stream.get(ch))
-            s += ch;
-
-        if( _stream.fail() )
-            throw System::IOError( PT_ERROR_MSG("error reading HTTP reply body") );
-
-        //log_debug("body read: \"" << s << '"');
-    }
-
-    if (!_replyHeader.keepAlive())
-    {
-        log_debug("close socket - no keep alive");
-        _socket.close();
-    }
-    else
-    {
-        log_debug("do not close socket - keep alive");
-    }
 }
 
 
@@ -745,38 +700,25 @@ void ClientImpl::onHeader(System::StreamBuffer& sbuf)
     _httpbuf.beginBody(_replyHeader);
     _client->headerReceived().send(*_client);
     _state = &ClientImpl::onBody;
-    
-    /*
-    bool chunkedEncoding = _replyHeader.chunkedTransferEncoding();
-    if(chunkedEncoding)
-    {
-        log_debug("chunked transfer encoding used");
 
-        if(_ssl)
-            _state = &ClientImpl::onHttpsChunkedBody;
-        else
-            _state = &ClientImpl::onHttpChunkedBody;
-
-        _chunkedBuffer.reset(_stream.rdbuf());
-        _stream.rdbuf(&_chunkedBuffer);
-    }
-    */
-    
     (this->*_state)( _sockbuf );
 }
 
 
 void ClientImpl::onBody(System::StreamBuffer& sbuf)
 {
-    log_trace("onHttpsBody");
+    log_trace("onBody");
+
+    _httpbuf.import();
+    log_debug("available: " << _httpbuf.in_avail());
 
     do
     {
-        _httpbuf.import();
-        log_debug("available: " << _httpbuf.in_avail());
-
         if( _httpbuf.in_avail() )
             _client->bodyAvailable().send(*_client, _stream);
+
+        _httpbuf.import();
+        log_debug("available: " << _httpbuf.in_avail());
     } 
     while( _httpbuf.in_avail() );
     
@@ -799,6 +741,77 @@ void ClientImpl::onBody(System::StreamBuffer& sbuf)
 }
 
 
+void ClientImpl::cancel()
+{
+    _socket.close();
+    _sockbuf.discard();
+#ifdef PT_HTTP_WITH_SSL
+    _sslbuf.discard();
+#endif
+    _stream.clear();
+
+    //_chunkedBuffer.reset();
+}
+
+} // namespace Http
+
+} // namespace Pt
+
+
+/*void ClientImpl::readBody(std::string& s)
+{
+    s.clear();
+
+    bool chunkedEncoding = _replyHeader.chunkedTransferEncoding();
+
+    if(chunkedEncoding)
+    {
+        log_debug("read body with chunked encoding");
+
+        // _stream -> _chunkedBuffer (-> _sslbuf) -> _sockbuf
+        _chunkedBuffer.reset( _stream.rdbuf() );
+        _stream.rdbuf(&_chunkedBuffer);
+
+        char ch;
+        while( _stream.get(ch) )
+            s += ch;
+
+        log_debug("eod=" << _chunkedBuffer.eod());
+
+        if( ! _chunkedBuffer.eod() )
+            throw System::IOError( PT_ERROR_MSG("error reading HTTP reply body: incomplete chunked data stream") );
+    }
+    else
+    {
+        unsigned n = _replyHeader.contentLength();
+
+        log_debug("read body; content-size: " << n);
+
+        s.reserve(n);
+
+        char ch;
+        while (n-- && _stream.get(ch))
+            s += ch;
+
+        if( _stream.fail() )
+            throw System::IOError( PT_ERROR_MSG("error reading HTTP reply body") );
+
+        //log_debug("body read: \"" << s << '"');
+    }
+
+    if (!_replyHeader.keepAlive())
+    {
+        log_debug("close socket - no keep alive");
+        _socket.close();
+    }
+    else
+    {
+        log_debug("do not close socket - keep alive");
+    }
+}
+*/
+
+/*
 bool ClientImpl::onChunkedBody()
 {
     log_trace("onChunkedBody");
@@ -903,20 +916,4 @@ void ClientImpl::onHttpChunkedBody(System::StreamBuffer& sbuf)
         sbuf.beginRead();
     }
 }
-
-
-void ClientImpl::cancel()
-{
-    _socket.close();
-    _sockbuf.discard();
-#ifdef PT_HTTP_WITH_SSL
-    _sslbuf.discard();
-#endif
-    _stream.clear();
-
-    _chunkedBuffer.reset();
-}
-
-} // namespace Http
-
-} // namespace Pt
+*/

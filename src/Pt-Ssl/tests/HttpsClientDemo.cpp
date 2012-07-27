@@ -297,7 +297,7 @@ int main(int argc, char** argv)
         Pt::Http::Request request("/index.html");
         request.setHeader("User-Agent", "Platinum");
         
-        bool noblock = false;
+        bool noblock = true;
         if(noblock)
         {
             log_debug("excuting non-blocking HTTPS request");
