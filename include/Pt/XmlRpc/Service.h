@@ -60,6 +60,9 @@ class ServiceProcedure
         void setResponder(XmlRpcResponder& r)
         { _resp = &r; }
 
+        XmlRpcResponder* responder()
+        { return _resp; }
+
         Http::Connection* connection()
         { return _conn; }
 
