@@ -180,6 +180,7 @@ class Date
             InvalidDate is thrown if any of the values is out of range
         */
         Date(int y, unsigned m, unsigned d)
+        : _julian(0)
         {
             greg2jul(_julian, y, m, d);
         }
