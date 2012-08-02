@@ -30,6 +30,7 @@
 #define Pt_XmlRpc_Service_h
 
 #include <Pt/XmlRpc/Api.h>
+#include <Pt/XmlRpc/Responder.h>
 #include <Pt/Http/Service.h>
 #include <Pt/Http/Responder.h>
 #include <Pt/System/EventLoop.h>
@@ -56,6 +57,9 @@ class ServiceProcedure
         void setConnection(Http::Connection& conn)
         { _conn = &conn; }
 
+        void setResponder(XmlRpcResponder& r)
+        { _resp = &r; }
+
         Http::Connection* connection()
         { return _conn; }
 
@@ -76,7 +80,8 @@ class ServiceProcedure
         // TODO: rename beginCall
         virtual void beginAsync()
         {
-            _conn->replyFinished();
+            _resp->endReply();
+            //_conn->replyFinished();
         }
 
         // TODO: rename endCall
@@ -87,6 +92,7 @@ class ServiceProcedure
 
     private:
         Http::Connection* _conn;
+        XmlRpcResponder* _resp;
 };
 
 }

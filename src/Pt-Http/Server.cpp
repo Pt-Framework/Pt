@@ -82,6 +82,8 @@ class TcpConnection : public Http::Connection
 
         bool doReply();
 
+        void endReply();
+
         virtual void replyFinished();
 
         void sendReply();
@@ -292,6 +294,17 @@ bool TcpConnection::doReply()
     sendReply();
 
     return onOutput(_stream.buffer());
+}
+
+
+void TcpConnection::endReply()
+{
+    _responder->release();
+    _responder = 0;
+
+    sendReply();
+
+    onOutput(_stream.buffer());
 }
 
 

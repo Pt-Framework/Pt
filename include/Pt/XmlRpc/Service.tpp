@@ -1040,7 +1040,7 @@ class ServiceResult
         void set(const R& r)
         {
             _rv = r; 
-            _proc->connection()->replyFinished();
+            _proc->responder()->endReply();
         }
 
     private:

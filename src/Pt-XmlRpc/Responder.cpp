@@ -220,6 +220,9 @@ void XmlRpcResponder::beginReply(Http::Connection& conn, std::ostream& os, Http:
 {
     try
     {
+        _writer.begin(os);
+        reply.setHeader("Content-Type", "text/xml");
+
         if( ! _proc )
         {
             _fault.setRc(4);
@@ -238,6 +241,7 @@ void XmlRpcResponder::beginReply(Http::Connection& conn, std::ostream& os, Http:
             }
         }
 
+        _proc->setResponder(*this);
         _proc->setConnection(conn);
         _proc->beginAsync();
     }
@@ -249,15 +253,45 @@ void XmlRpcResponder::beginReply(Http::Connection& conn, std::ostream& os, Http:
 }
 
 
-void XmlRpcResponder::endReply(std::ostream& os, Http::Request& request, Http::Reply& reply)
+void XmlRpcResponder::endReply()
 {
     try
     {
         IDecomposer* rh = _proc->endAsync();
     
-        reply.setHeader("Content-Type", "text/xml");
+        _writer.writeStartTag( XMLRPC_METHODRESPONSE );
+        _writer.writeStartTag( XMLRPC_PARAMS );
+        _writer.writeStartTag( XMLRPC_PARAM );
+        rh->format(_formatter);
+        _writer.writeEndTag(XMLRPC_PARAM); // param
+        _writer.writeEndTag(XMLRPC_PARAMS); // params
+        _writer.writeEndTag(XMLRPC_METHODRESPONSE); // methodResponse
+        _writer.flush();
+
+        _proc->connection()->endReply();
+    }
+    catch (const Fault& fault)
+    {
+        _fault = fault;
+        // _responder->replyError(_reply.body(), _request, _reply, e);
+        throw;
+    }
+    catch (...)
+    {
+        _writer.flush();
+        // _responder->replyError(_reply.body(), _request, _reply, e);
+        throw;
+    }
+}
+
+
+void XmlRpcResponder::endReply(std::ostream& os, Http::Request& , Http::Reply& )
+{
+    try
+    {
+        IDecomposer* rh = _proc->endAsync();
     
-        _writer.begin(os);
+        //_writer.begin(os);
         _writer.writeStartTag( XMLRPC_METHODRESPONSE );
         _writer.writeStartTag( XMLRPC_PARAMS );
         _writer.writeStartTag( XMLRPC_PARAM );

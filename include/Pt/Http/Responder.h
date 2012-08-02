@@ -58,6 +58,8 @@ class Connection
         System::EventLoop* loop()
         { return _loop; }
 
+        virtual void endReply() = 0;
+
         virtual void replyFinished() = 0;
 
     private:
