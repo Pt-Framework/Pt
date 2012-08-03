@@ -36,6 +36,7 @@
 #include <Pt/Xml/XmlReader.h>
 #include <Pt/Xml/XmlWriter.h>
 #include <Pt/Http/Responder.h>
+#include <Pt/Http/Reply.h>
 #include <Pt/SerializationContext.h>
 #include <Pt/Serializer.h>
 #include <Pt/TextStream.h>
@@ -93,6 +94,8 @@ class PT_XMLRPC_API XmlRpcResponder : public Http::Responder
        Scanner _scanner;
        Formatter _formatter;
        Service* _service;
+       Http::Connection* _connection;
+       Http::Reply* _reply;
        SerializationContext _context;
        ServiceProcedure* _proc;
        IComposer** _args;

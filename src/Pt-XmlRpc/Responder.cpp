@@ -36,6 +36,7 @@
 #include "Pt/Http/Reply.h"
 #include "Pt/Utf8Codec.h"
 #include "Pt/Convert.h"
+#include <cassert>
 
 namespace Pt {
 
@@ -62,6 +63,8 @@ XmlRpcResponder::XmlRpcResponder(Service& service)
 , _reader(_ts)
 , _formatter(_writer)
 , _service(&service)
+, _connection(0)
+, _reply(0)
 , _proc(0)
 , _args(0)
 {
@@ -220,6 +223,8 @@ void XmlRpcResponder::beginReply(Http::Connection& conn, std::ostream& os, Http:
 {
     try
     {
+        _connection = &conn;
+        _reply = &reply;
         _writer.begin(os);
         reply.setHeader("Content-Type", "text/xml");
 
@@ -242,12 +247,14 @@ void XmlRpcResponder::beginReply(Http::Connection& conn, std::ostream& os, Http:
         }
 
         _proc->setResponder(*this);
-        _proc->setConnection(conn);
         _proc->beginAsync();
     }
     catch (const Fault& fault)
     {
         _fault = fault;
+        //reply.clear();
+        //replyError(reply.body(), request, reply, fault);
+        //_connection->endReply();
         throw;
     }
 }
@@ -257,8 +264,7 @@ void XmlRpcResponder::endReply()
 {
     try
     {
-        IDecomposer* rh = _proc->endAsync();
-    
+        IDecomposer* rh = _proc->endCall();
         _writer.writeStartTag( XMLRPC_METHODRESPONSE );
         _writer.writeStartTag( XMLRPC_PARAMS );
         _writer.writeStartTag( XMLRPC_PARAM );
@@ -268,18 +274,26 @@ void XmlRpcResponder::endReply()
         _writer.writeEndTag(XMLRPC_METHODRESPONSE); // methodResponse
         _writer.flush();
 
-        _proc->connection()->endReply();
+        assert(_connection);
+        if( ! _connection)
+            throw std::logic_error("XML-RPC responder without connection");
+
+        _connection->endReply();
     }
     catch (const Fault& fault)
     {
         _fault = fault;
+        //reply.clear();
         // _responder->replyError(_reply.body(), _request, _reply, e);
+        //_connection->endReply();
         throw;
     }
     catch (...)
     {
         _writer.flush();
+        //reply.clear();
         // _responder->replyError(_reply.body(), _request, _reply, e);
+        //_connection->endReply();
         throw;
     }
 }
@@ -289,8 +303,9 @@ void XmlRpcResponder::endReply(std::ostream& os, Http::Request& , Http::Reply& )
 {
     try
     {
-        IDecomposer* rh = _proc->endAsync();
-    
+        IDecomposer* rh = 0; //_proc->endAsync();
+        assert(rh);
+
         //_writer.begin(os);
         _writer.writeStartTag( XMLRPC_METHODRESPONSE );
         _writer.writeStartTag( XMLRPC_PARAMS );

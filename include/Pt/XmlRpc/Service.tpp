@@ -1031,9 +1031,6 @@ class ServiceResult
         void init(ServiceProcedure& proc)
         { _proc = &proc; }
 
-        System::EventLoop* loop()
-        { return _proc->loop(); }
-
         R& get()
         { return _rv; }
 
@@ -1087,8 +1084,9 @@ class AsyncServiceProcedure : public ServiceProcedure
             return endAsync();
         }
 
-        void beginAsync()
+        void beginAsync( /* System::EventLoop& loop */ )
         {
+            // _rv.init(loop);
             _cb->call(_rv, _v1);
         }
 

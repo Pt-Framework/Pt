@@ -53,7 +53,6 @@ class EchoService : public Pt::XmlRpc::Service
     protected:
         void beginEcho(Pt::XmlRpc::ServiceResult<std::string>& r, const std::string& msg)
         { 
-            r.loop();
             r.set(msg);
         }
 };

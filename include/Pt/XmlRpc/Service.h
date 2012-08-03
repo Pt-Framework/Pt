@@ -51,23 +51,14 @@ class ServiceProcedure
 {
     public:
         ServiceProcedure()
-        : _conn(0)
+        : _resp(0)
         {}
-
-        void setConnection(Http::Connection& conn)
-        { _conn = &conn; }
 
         void setResponder(XmlRpcResponder& r)
         { _resp = &r; }
 
         XmlRpcResponder* responder()
         { return _resp; }
-
-        Http::Connection* connection()
-        { return _conn; }
-
-        System::EventLoop* loop()
-        { return _conn->loop(); }
 
         virtual ~ServiceProcedure()
         {}
@@ -81,20 +72,19 @@ class ServiceProcedure
         virtual IDecomposer* endCall() = 0;
 
         // TODO: rename beginCall
-        virtual void beginAsync()
+        virtual void beginAsync( /* System::EventLoop& loop */ )
         {
+            IDecomposer* r = this->endCall();
             _resp->endReply();
-            //_conn->replyFinished();
         }
 
         // TODO: rename endCall
-        virtual IDecomposer* endAsync()
+        /*virtual IDecomposer* endAsync()
         {
             return endCall();
-        }
+        }*/
 
     private:
-        Http::Connection* _conn;
         XmlRpcResponder* _resp;
 };
 
