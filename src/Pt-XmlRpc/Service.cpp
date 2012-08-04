@@ -88,6 +88,9 @@ Http::Responder* Service::createResponder(const Http::Request& req)
     if (req.header().isHeaderValue("Content-Type", "text/xml"))
         return new XmlRpcResponder(*this);
 
+    if (req.header().isHeaderValue("Content-Type", "text/xml; charset=UTF-8")) //! ### Temporary fix ###
+        return new XmlRpcResponder(*this);
+
     return 0;
 }
 
