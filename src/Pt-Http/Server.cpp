@@ -34,6 +34,11 @@
 #include <Pt/Http/Reply.h>
 #include <Pt/Http/Service.h>
 #include <Pt/Http/Responder.h>
+
+#ifdef PT_HTTP_WITH_SSL
+#include <Pt/Ssl/IOBuffer.h>
+#endif
+
 #include <Pt/System/MainLoop.h>
 #include <Pt/System/Thread.h>
 #include <Pt/System/IOStream.h>
@@ -112,6 +117,10 @@ class TcpConnection : public Http::Connection
         int _contentLength;
         Responder* _responder;
         System::IOStream _stream;
+
+#ifdef PT_HTTP_WITH_SSL
+        Ssl::IOBuffer _sslbuf;
+#endif
 };
 
 
@@ -139,6 +148,9 @@ TcpConnection::TcpConnection(Server& server, Net::TcpServer& tcpServer)
 , _parser(_parseEvent, false)
 , _loop(0)
 , _responder(0)
+#ifdef PT_HTTP_WITH_SSL
+, _sslbuf( _stream.buffer() )
+#endif
 {
     _reply.init(*this);
 
