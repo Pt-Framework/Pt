@@ -73,6 +73,8 @@ class PT_HTTP_API Server : public Pt::Connectable
 
         void listen(const Pt::Net::AddrInfo& addr, int backlog = 5);
 
+        void setHttps();
+
         void addService(const std::string& url, Service& service);
 
         void removeService(Service& service);
@@ -83,15 +85,15 @@ class PT_HTTP_API Server : public Pt::Connectable
 
         std::size_t readTimeout() const;
 
+        void setReadTimeout(std::size_t ms);
+
         std::size_t writeTimeout() const;
+        
+        void setWriteTimeout(std::size_t ms);
 
         std::size_t keepAliveTimeout() const;
 
-        void readTimeout(std::size_t ms);
-
-        void writeTimeout(std::size_t ms);
-
-        void keepAliveTimeout(std::size_t ms);
+        void setKeepAliveTimeout(std::size_t ms);
 
         unsigned maxThreads() const;
 

@@ -592,6 +592,14 @@ void Server::listen(const std::string& ip, unsigned short int port, int backlog)
 }
 
 
+void Server::setHttps()
+{
+    // user must set a factory to create SSL context so we
+    // can assign each worker thread its own thread-local
+    // SSL context
+}
+
+
 void Server::startWorker()
 {
     for(unsigned n = 1; n < this->maxThreads(); ++n)
@@ -704,7 +712,7 @@ std::size_t Server::readTimeout() const
 }
 
 
-void Server::readTimeout(std::size_t ms)
+void Server::setReadTimeout(std::size_t ms)
 {
     _readTimeout = ms;
 }
@@ -716,7 +724,7 @@ std::size_t Server::writeTimeout() const
 }
 
 
-void Server::writeTimeout(std::size_t ms)
+void Server::setWriteTimeout(std::size_t ms)
 {
     _writeTimeout = ms;
 }
@@ -728,7 +736,7 @@ std::size_t Server::keepAliveTimeout() const
 }
 
 
-void Server::keepAliveTimeout(std::size_t ms)
+void Server::setKeepAliveTimeout(std::size_t ms)
 {
     _keepAliveTimeout = ms;
 }
