@@ -35,7 +35,7 @@ namespace Pt
 namespace Http
 {
 
-Responder* Service::doCreateResponder(const Request& request)
+Responder* Service::doCreateResponder(const RequestHeader& request)
 {
     System::MutexLock lock(_mutex);
     ++_responderCount;
@@ -57,7 +57,7 @@ void Service::waitIdle()
         _isIdle.wait(lock);
 }
 
-bool Service::checkAuth(const Request& request)
+bool Service::checkAuth(const RequestHeader& request)
 {
     for (std::vector<const Authenticator*>::const_iterator it = _authenticators.begin();
         it != _authenticators.end(); ++it)
@@ -75,7 +75,7 @@ CachedServiceBase::~CachedServiceBase()
         delete *it;
 }
 
-Responder* CachedServiceBase::createResponder(const Request& request)
+Responder* CachedServiceBase::createResponder(const RequestHeader& request)
 {
     if (responders.empty())
     {

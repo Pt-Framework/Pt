@@ -34,12 +34,12 @@ namespace Pt
 namespace Http
 {
 
-Responder* NotAuthenticatedService::createResponder(const Request& request)
+Responder* NotAuthenticatedService::createResponder(const RequestHeader& request)
 {
     return createResponder(request, std::string(), std::string());
 }
 
-Responder* NotAuthenticatedService::createResponder(const Request& request, const std::string& realm, const std::string& authContent)
+Responder* NotAuthenticatedService::createResponder(const RequestHeader& request, const std::string& realm, const std::string& authContent)
 {
     return new NotAuthenticatedResponder(*this, realm, authContent);
 }

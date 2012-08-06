@@ -39,9 +39,10 @@ namespace Pt {
 
 namespace Http {
 
-class Request;
+class RequestHeader;
 class Reply;
 
+// TODO: this is obsolete, TcpConnection can be opaque pointer in Reply
 class Connection
 {
     public:
@@ -60,8 +61,6 @@ class Connection
 
         virtual void endReply() = 0;
 
-        virtual void replyFinished() = 0;
-
     private:
         System::EventLoop* _loop;
 };
@@ -75,26 +74,17 @@ class PT_HTTP_API Responder
 
         virtual ~Responder() { }
 
-        virtual void beginRequest(std::istream& in, Request& request);
+        virtual void beginRequest(std::istream& in, RequestHeader& request);
         
-        virtual std::size_t readBody(std::istream&);
+        virtual std::size_t readBody(std::istream&, Reply& reply);
         
-        virtual void reply(std::ostream&, Request& request, Reply& reply) = 0;
+        virtual void reply(std::ostream& os, RequestHeader&, Reply& reply);
+
+        virtual void beginReply(std::ostream& os, RequestHeader& request, Http::Reply& reply);
         
-        virtual void replyError(std::ostream&, Request& request, Reply& reply, const std::exception& ex);
+        virtual void replyError(std::ostream& os, Http::Reply& reply);
 
-        void release()     
-        { _service.doReleaseResponder(this); }
-
-        virtual void beginReply(Connection& conn, std::ostream& os, Request& request, Reply& reply)
-        {
-            conn.replyFinished();
-        }
-
-        virtual void endReply(std::ostream& os, Http::Request& request, Http::Reply& reply) 
-        { 
-            this->reply(os, request, reply);
-        }
+        void release();
 
     private:
         Service& _service;

@@ -68,20 +68,15 @@ class PT_XMLRPC_API XmlRpcResponder : public Http::Responder
 
         ~XmlRpcResponder();
 
-        void beginRequest(std::istream& in, Http::Request& request);
+        void beginRequest(std::istream& in, Http::RequestHeader& request);
 
-        std::size_t readBody(std::istream& is);
+        std::size_t readBody(std::istream& is, Http::Reply& reply);
 
-        void replyError(std::ostream& os, Http::Request& request,
-                        Http::Reply& reply, const std::exception& ex);
+        void replyError(std::ostream& os, Http::Reply& reply);
 
-        void reply(std::ostream& os, Http::Request& request, Http::Reply& reply);
-
-        void beginReply(Http::Connection& connection, std::ostream& os, Http::Request& request, Http::Reply& reply);
+        void beginReply(std::ostream& os, Http::RequestHeader& request, Http::Reply& reply);
 
         void endReply();
-
-        void endReply(std::ostream& os, Http::Request& request, Http::Reply& reply);
 
     protected:
         void advance(const Pt::Xml::Node& node);
@@ -94,7 +89,6 @@ class PT_XMLRPC_API XmlRpcResponder : public Http::Responder
        Scanner _scanner;
        Formatter _formatter;
        Service* _service;
-       Http::Connection* _connection;
        Http::Reply* _reply;
        SerializationContext _context;
        ServiceProcedure* _proc;

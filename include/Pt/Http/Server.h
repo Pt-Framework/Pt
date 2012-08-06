@@ -48,7 +48,7 @@ class EventLoop;
 
 namespace Http {
 
-class Request;
+class RequestHeader;
 class Service;
 class TcpConnection;
 class Responder;
@@ -77,9 +77,9 @@ class PT_HTTP_API Server : public Pt::Connectable
 
         void removeService(Service& service);
 
-        Responder* getResponder(const Request& request);
+        Responder* getResponder(const RequestHeader& request);
 
-        Responder* getDefaultResponder(const Request& request);
+        Responder* getDefaultResponder(const RequestHeader& request);
 
         std::size_t readTimeout() const;
 

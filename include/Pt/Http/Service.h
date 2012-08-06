@@ -40,13 +40,13 @@ namespace Pt {
 namespace Http {
 
 class Responder;
-class Request;
+class RequestHeader;
 
 class Authenticator
 {
     public:
         virtual ~Authenticator() { }
-        virtual bool checkAuth(const Request&) const = 0;
+        virtual bool checkAuth(const RequestHeader&) const = 0;
 };
 
 class PT_HTTP_API Service
@@ -65,10 +65,10 @@ class PT_HTTP_API Service
         { }
 
         virtual ~Service() { }
-        Responder* doCreateResponder(const Request&);
+        Responder* doCreateResponder(const RequestHeader&);
         void doReleaseResponder(Responder*);
 
-        bool checkAuth(const Request& request);
+        bool checkAuth(const RequestHeader& request);
 
         void setRealm(const std::string& realm, const std::string& content = std::string())
             { _realm = realm; _authContent = content; }
@@ -82,7 +82,7 @@ class PT_HTTP_API Service
         void waitIdle();
 
     protected:
-        virtual Responder* createResponder(const Request&) = 0;
+        virtual Responder* createResponder(const RequestHeader&) = 0;
         virtual void releaseResponder(Responder*) = 0;
 };
 
@@ -96,7 +96,7 @@ class PT_HTTP_API CachedServiceBase : public Service
 
     protected:
         virtual Responder* newResponder() = 0;
-        Responder* createResponder(const Request& request);
+        Responder* createResponder(const RequestHeader& request);
         void releaseResponder(Responder* resp);
 
 };

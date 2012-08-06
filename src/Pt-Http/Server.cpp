@@ -51,11 +51,11 @@ class TcpConnection : public Http::Connection
 {
     class ParseEvent : public HeaderParser::MessageHeaderEvent
     {
-            Request& _request;
+            RequestHeader& _request;
 
         public:
-            explicit ParseEvent(Request& request)
-            : HeaderParser::MessageHeaderEvent(request.header())
+            explicit ParseEvent(RequestHeader& request)
+            : HeaderParser::MessageHeaderEvent(request)
             , _request(request)
             { }
 
@@ -80,18 +80,18 @@ class TcpConnection : public Http::Connection
 
         void onTimeout();
 
-        bool doReply();
+        void doReply();
 
         void endReply();
 
-        virtual void replyFinished();
+        //virtual void replyFinished();
 
         void sendReply();
 
         bool isReady() const
         { return _parser.end() && _contentLength == 0; }
 
-        const Request& request() const 
+        const RequestHeader& request() const 
         { return _request; }
 
         const Reply& reply() const     
@@ -104,7 +104,7 @@ class TcpConnection : public Http::Connection
         Server& _server;
         ParseEvent _parseEvent;
         HeaderParser _parser;
-        Request _request;
+        RequestHeader _request;
         Reply _reply;
 
         System::EventLoop* _loop;
@@ -140,6 +140,8 @@ TcpConnection::TcpConnection(Server& server, Net::TcpServer& tcpServer)
 , _loop(0)
 , _responder(0)
 {
+    _reply.init(*this);
+
     _stream.attach(*this);
     _stream.buffer().inputReady() += Pt::slot(*this, &TcpConnection::onInput);
     _stream.buffer().outputReady() += Pt::slot(*this, &TcpConnection::onOutput);
@@ -167,6 +169,8 @@ void TcpConnection::begin(System::EventLoop& loop)
     _timer.setActive(loop);
     _timer.start( _server.readTimeout() );
     _loop = &loop;
+
+    _reply.clear();
 }
 
 
@@ -190,38 +194,16 @@ void TcpConnection::onInput(System::StreamBuffer& sb)
         if (_parser.fail())
         {
             _responder = _server.getDefaultResponder(_request);
-            _responder->replyError(_reply.body(), _request, _reply,
-                std::runtime_error("invalid http header"));
-            _responder->release();
-            _responder = 0;
-
-            sendReply();
-
-            onOutput(sb);
+            _responder->replyError(_reply.body(), _reply);
+            _reply.finish();
             return;
         }
 
         if( _parser.end() )
         {
             _responder = _server.getResponder(_request);
-
-            try
-            {
-                _responder->beginRequest(_stream, _request);
-            }
-            catch (const std::exception& e)
-            {
-                _reply.setHeader("Connection", "close");
-                _responder->replyError(_reply.body(), _request, _reply, e);
-                _responder->release();
-                _responder = 0;
-                sendReply();
-
-                onOutput(sb);
-                return;
-            }
-
-            _contentLength = _request.header().contentLength();
+            _responder->beginRequest(_stream, _request);
+            _contentLength = _request.contentLength();
 
             //log_debug("content length of request is " << _contentLength);
             if (_contentLength == 0)
@@ -241,23 +223,12 @@ void TcpConnection::onInput(System::StreamBuffer& sb)
     {
         if (sb.in_avail() > 0)
         {
-            try
-            {
-                std::size_t s = _responder->readBody(_stream);
-                assert(s > 0);
-                _contentLength -= s;
-            }
-            catch (const std::exception& e)
-            {
-                _reply.setHeader("Connection", "close");
-                _responder->replyError(_reply.body(), _request, _reply, e);
-                _responder->release();
-                _responder = 0;
-                sendReply();
+            std::size_t s = _responder->readBody(_stream, _reply);
+            assert(s > 0);
+            _contentLength -= s;
 
-                onOutput(sb);
+            if( _reply.finished() )
                 return;
-            }
         }
 
         if (_contentLength <= 0)
@@ -273,27 +244,11 @@ void TcpConnection::onInput(System::StreamBuffer& sb)
 }
 
 
-bool TcpConnection::doReply()
+void TcpConnection::doReply()
 {
     //log_trace("http::Socket::doReply");
-    try
-    {
-        _responder->beginReply(*this, _reply.body(), _request, _reply);
-        return true;
-    }
-    catch (const std::exception& e)
-    {
-        //log_warn("responder reported error: " << e.what());
-        _reply.clear();
-        _responder->replyError(_reply.body(), _request, _reply, e);
-    }
 
-    _responder->release();
-    _responder = 0;
-
-    sendReply();
-
-    return onOutput(_stream.buffer());
+    _responder->beginReply(_reply.body(), _request, _reply);
 }
 
 
@@ -301,14 +256,12 @@ void TcpConnection::endReply()
 {
     _responder->release();
     _responder = 0;
-
     sendReply();
-
     onOutput(_stream.buffer());
 }
 
 
-void TcpConnection::replyFinished()
+/*void TcpConnection::replyFinished()
 {
     try
     {
@@ -326,7 +279,7 @@ void TcpConnection::replyFinished()
     sendReply();
 
     onOutput(_stream.buffer());
-}
+}*/
 
 
 bool TcpConnection::onOutput(System::StreamBuffer& sb)
@@ -346,7 +299,7 @@ bool TcpConnection::onOutput(System::StreamBuffer& sb)
         }
         else
         {
-            bool keepAlive = _request.header().keepAlive()
+            bool keepAlive = _request.keepAlive()
                           && _reply.header().keepAlive();
 
             if(keepAlive)
@@ -422,7 +375,7 @@ void TcpConnection::sendReply()
     if (!_reply.header().hasHeader(connection))
     {
         _stream << "Connection: "
-                << (_request.header().keepAlive() ? "keep-alive" : "close")
+                << (_request.keepAlive() ? "keep-alive" : "close")
                 << "\r\n";
     }
 
@@ -704,7 +657,7 @@ void Server::removeService(Service& service)
 }
 
 
-Responder* Server::getResponder(const Request& request)
+Responder* Server::getResponder(const RequestHeader& request)
 {
     System::ReadLock serviceLock(_serviceMutex);
 
@@ -727,7 +680,7 @@ Responder* Server::getResponder(const Request& request)
 }
 
 
-Responder* Server::getDefaultResponder(const Request& request)
+Responder* Server::getDefaultResponder(const RequestHeader& request)
 { 
     return _defaultService->createResponder(request); 
 }

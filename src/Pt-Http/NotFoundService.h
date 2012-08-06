@@ -44,7 +44,7 @@ class PT_HTTP_API NotFoundService : public Service
             : _responder(*this)
             { }
 
-        Responder* createResponder(const Request&);
+        Responder* createResponder(const RequestHeader&);
         void releaseResponder(Responder*);
 
     private:

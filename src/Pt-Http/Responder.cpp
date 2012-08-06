@@ -36,11 +36,11 @@ namespace Pt {
 
 namespace Http {
 
-void Responder::beginRequest(std::istream& in, Request& request)
+void Responder::beginRequest(std::istream& in, RequestHeader& request)
 {
 }
 
-std::size_t Responder::readBody(std::istream& in)
+std::size_t Responder::readBody(std::istream& in, Reply& reply)
 {
     std::streambuf* sb = in.rdbuf();
 
@@ -54,12 +54,28 @@ std::size_t Responder::readBody(std::istream& in)
     return ret;
 }
 
-void Responder::replyError(std::ostream& out, Request& request, Reply& reply, const std::exception& ex)
+void Responder::reply(std::ostream& os, RequestHeader&, Reply& reply)
+{ 
+    replyError(os, reply); 
+}
+
+void Responder::beginReply(std::ostream& os, RequestHeader& request, Http::Reply& reply)
+{
+    this->reply(os, request, reply);
+    reply.finish();
+}
+
+void Responder::replyError(std::ostream& out, Reply& reply)
 {
     reply.httpReturn(500, "internal server error");
     reply.setHeader("Content-Type", "text/plain");
     reply.setHeader("Connection", "close");
-    out << ex.what();
+    out << "Error 500";
+}
+
+void Responder::release()     
+{ 
+    _service.doReleaseResponder(this); 
 }
 
 } // namespace Http

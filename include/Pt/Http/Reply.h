@@ -31,6 +31,7 @@
 
 #include <Pt/Http/Api.h>
 #include <Pt/Http/ReplyHeader.h>
+#include <Pt/Http/Responder.h>
 #include <string>
 #include <sstream>
 
@@ -44,10 +45,34 @@ class Reply
 {
         ReplyHeader _header;
         std::ostringstream _body;
+        Http::Connection* _conn;
+        bool _finished;
 
     public:
         Reply()
-            { }
+        : _conn(0)
+        , _finished(false)
+        { }
+
+        void init(Http::Connection& conn)
+        {
+            _conn = &conn;
+            _finished = false;
+        }
+
+        void setFinished()
+        { 
+            _finished = true; 
+            setHeader("Connection", "close");
+        }
+
+        bool finished() const
+        { return _finished; }
+
+        void finish()
+        { 
+            _conn->endReply(); 
+        }
 
         ReplyHeader& header()
         { return _header; }
@@ -85,6 +110,7 @@ class Reply
             _header.clear();
             _body.clear();
             _body.str(std::string());
+            _finished = false;
         }
 
         unsigned httpReturnCode() const
