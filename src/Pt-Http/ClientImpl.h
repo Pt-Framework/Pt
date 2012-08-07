@@ -170,6 +170,7 @@ class ClientImpl : public Connectable
         void onOutput(System::StreamBuffer& sb);
         void onInput(System::StreamBuffer& sb);
         void onError();
+        void beginRead();
 
 #ifdef PT_HTTP_WITH_SSL
         void onSslHandshake(Ssl::IOBuffer& sb);
@@ -180,8 +181,8 @@ class ClientImpl : public Connectable
     private:
         void init();
         void sendRequest(std::ostream& os, const Request& request);
-        void onHeader(System::StreamBuffer& sbuf);
-        void onBody(System::StreamBuffer& sbuf);
+        void onHeader();
+        void onBody();
 
     private:
         class ParseEvent : public HeaderParser::MessageHeaderEvent
@@ -218,7 +219,7 @@ class ClientImpl : public Connectable
         bool _reusedConnection;
         bool _errorPending;
 
-        void (ClientImpl::*_state)(System::StreamBuffer&);
+        void (ClientImpl::*_state)();
 };
 
 } // namespace Http

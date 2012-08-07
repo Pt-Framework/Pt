@@ -564,7 +564,7 @@ void ClientImpl::onInput(System::StreamBuffer& sb)
     try
     {
         sb.endRead();
-        (this->*_state)(sb);
+        (this->*_state)();
     }
     catch (const std::exception& e)
     {
@@ -644,7 +644,7 @@ void ClientImpl::onSslInput(Ssl::IOBuffer& sb)
     try
     {
         sb.endRead();
-        (this->*_state)(_sockbuf);
+        (this->*_state)();
     }
     catch (const std::exception& e)
     {
@@ -654,7 +654,7 @@ void ClientImpl::onSslInput(Ssl::IOBuffer& sb)
 }
 #endif
 
-void ClientImpl::onHeader(System::StreamBuffer& sbuf)
+void ClientImpl::onHeader()
 {
     log_trace("onHeader");
 
@@ -686,13 +686,7 @@ void ClientImpl::onHeader(System::StreamBuffer& sbuf)
     if( ! _parser.end() )
     {
         log_debug("continue reading");
-
-#ifdef PT_HTTP_WITH_SSL
-        if(_ssl)
-            _sslbuf.beginRead();
-        else
-#endif
-            sbuf.beginRead();
+        beginRead();
     }
     
     log_debug("http header complete");
@@ -701,11 +695,11 @@ void ClientImpl::onHeader(System::StreamBuffer& sbuf)
     _client->headerReceived().send(*_client);
     _state = &ClientImpl::onBody;
 
-    (this->*_state)( _sockbuf );
+    (this->*_state)();
 }
 
 
-void ClientImpl::onBody(System::StreamBuffer& sbuf)
+void ClientImpl::onBody()
 {
     log_trace("onBody");
 
@@ -733,13 +727,19 @@ void ClientImpl::onBody(System::StreamBuffer& sbuf)
     else
     {
         log_debug("continue reading body");
-#ifdef PT_HTTP_WITH_SSL
-        if(_ssl)
-            _sslbuf.beginRead();
-        else
-#endif
-            sbuf.beginRead();
+        beginRead();
     }
+}
+
+
+void ClientImpl::beginRead()
+{
+#ifdef PT_HTTP_WITH_SSL
+    if(_ssl)
+        _sslbuf.beginRead();
+    else
+#endif
+        _sockbuf.beginRead();
 }
 
 
