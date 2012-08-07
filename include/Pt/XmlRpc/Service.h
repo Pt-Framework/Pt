@@ -74,15 +74,8 @@ class ServiceProcedure
         // TODO: rename beginCall
         virtual void beginAsync( /* System::EventLoop& loop */ )
         {
-            IDecomposer* r = this->endCall();
             _resp->endReply();
         }
-
-        // TODO: rename endCall
-        /*virtual IDecomposer* endAsync()
-        {
-            return endCall();
-        }*/
 
     private:
         XmlRpcResponder* _resp;

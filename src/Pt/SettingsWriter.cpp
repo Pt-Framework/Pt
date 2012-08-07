@@ -31,23 +31,24 @@ namespace Pt {
 
 void SettingsWriter::write(const SerializationInfo& si)
 {	
-	Pt::String value;
+    Pt::String value;
     SerializationInfo::ConstIterator it;
     for(it = si.begin(); it != si.end(); ++it)
     {
         if( it->isScalar() )
         {
-			it->getString(value);
+            it->getString(value);
             this->writeEntry( it->name(), value, it->typeName() );
             *_os << std::endl;
         }
-        else if( it->isStruct() )
+        else if( it->isStruct() || it->isSequence() )
         {
+            
             // Array types may have no instance-names
             if( it->findMember("") )
             {
                 *_os << Pt::String::widen( it->name() ) << Pt::String(L" = ");
-                *_os << Pt::String::widen( it->typeName() ) << Pt::String(L"{ ");
+                *_os << Pt::String(L"{ ");
                 this->writeParent( *it, "");
                 *_os << Pt::String(L" }") << std::endl;
                 continue;
@@ -62,31 +63,47 @@ void SettingsWriter::write(const SerializationInfo& si)
 
 void SettingsWriter::writeParent(const SerializationInfo& sd, const std::string& prefix)
 {
-	Pt::String value;
+    Pt::String value;
+    bool separate = false;
+
     SerializationInfo::ConstIterator it;
     for(it = sd.begin(); it != sd.end(); ++it)
     {
         if( it->isScalar() )
         {
-			it->getString(value);
-            *_os << Pt::String::widen( prefix ) << '.';
-            this->writeEntry( it->name(), value, it->typeName() );
-            *_os << std::endl;
+            if(separate)
+                *_os << Pt::String(L", ");
+
+             it->getString(value);
+             if( ! prefix.empty() )
+                *_os << Pt::String::widen( prefix ) << '.';
+
+            std::string name = it->name();
+            this->writeEntry( name, value, it->typeName() );
+
+            if(! name.empty() )
+                *_os << std::endl;
         }
-        else if( it->isStruct() )
+        else if( it->isStruct() || it->isSequence() )
         {
             *_os << Pt::String::widen( prefix ) << '.' << Pt::String::widen( it->name() ) << Pt::String(L" = ");
-            *_os<< Pt::String::widen( it->typeName() ) << Pt::String(L"{ ");
+
+            if( ! it->isSequence() )
+                *_os << Pt::String::widen( it->typeName() );
+                
+            *_os << Pt::String(L"{ ");
             this->writeChild(*it);
             *_os << Pt::String(L" }") << std::endl;
         }
+
+        separate = true;
     }
 }
 
 
 void SettingsWriter::writeChild(const SerializationInfo& sd)
 {
-	Pt::String value;
+    Pt::String value;
     bool separate = false;
 
     SerializationInfo::ConstIterator it;
@@ -97,7 +114,7 @@ void SettingsWriter::writeChild(const SerializationInfo& sd)
 
         if( it->isScalar() )
         {
-			it->getString(value);
+            it->getString(value);
             this->writeEntry( it->name(), value, it->typeName() );
         }
         else if( it->isStruct() || it->isSequence() )
