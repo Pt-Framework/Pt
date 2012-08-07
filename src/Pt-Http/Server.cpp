@@ -240,7 +240,9 @@ void TcpConnection::onInput(System::StreamBuffer& sb)
             _contentLength -= s;
 
             if( _reply.finished() )
+            {
                 return;
+            }
         }
 
         if (_contentLength <= 0)

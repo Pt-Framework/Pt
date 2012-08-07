@@ -337,37 +337,51 @@ bool Scanner::advance(const Pt::Xml::Node& node)
                 const Xml::Characters& chars = static_cast<const Xml::Characters&>(node);
                 log_debug("-> found bool " << chars.content().narrow());
 
-                bool found = false;
                 bool value = false;
                 const Pt::String& strval = chars.content();
-                for(Pt::String::const_iterator it = strval.begin(); it != strval.end(); ++it)
+                Pt::String::const_iterator it = strval.begin();
+
+                // skip leading whitespace
+                for( ; it != strval.end(); it++)
+                    if( ! Pt::isspace(*it) )
+                        break;
+
+                if( it == strval.end() )
+                    throwSerializationError();
+
+                if(*it == '0')
+                    value = false;
+                else if(*it == '1')
+                    value = true;
+                else if(*it == 'f')
                 {
-                    if( Pt::isspace(*it) )
-                        continue;
+                    if( ++it == strval.end() || *it != 'a')
+                        throwSerializationError();
+                    if( ++it == strval.end() || *it != 'l')
+                        throwSerializationError();
+                    if( ++it == strval.end() || *it != 's')
+                        throwSerializationError();
+                    if( ++it == strval.end() || *it != 'e')
+                        throwSerializationError();
 
-                    switch(*it)
-                    {
-                        case '0':
-                            if(found) 
-                                throwSerializationError();
-
-                            value = false;
-                            found = true;
-                            break;
-
-                        case '1': 
-                            if(found) 
-                                throwSerializationError();
-
-                            value = true;
-                            found = true;
-                            break;
-
-                        default:
-                            throwSerializationError();
-                            break;
-                    }
+                    value = false;
                 }
+                else if(*it == 't')
+                {
+                    if( ++it == strval.end() || *it != 'r')
+                        throwSerializationError();
+                    if( ++it == strval.end() || *it != 'u')
+                        throwSerializationError();
+                    if( ++it == strval.end() || *it != 'e')
+                        throwSerializationError();
+
+                    value = true;
+                }
+
+                // allow only trailing whitespace
+                for( ++it; it != strval.end(); it++)
+                    if( ! Pt::isspace(*it) )
+                        throwSerializationError();
 
                 _current->setBool(value);
                 _state = OnScalar;

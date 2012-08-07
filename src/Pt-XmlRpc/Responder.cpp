@@ -184,6 +184,7 @@ void XmlRpcResponder::beginReply(std::ostream& os, Http::RequestHeader& request,
 void XmlRpcResponder::replyError(std::ostream& os, Http::Reply& reply)
 {
     reply.setHeader("Content-Type", "text/xml");
+    reply.setHeader("Connection", "close");
 
     _writer.begin(os);
     _writer.writeStartTag( XMLRPC_METHODRESPONSE );

@@ -60,17 +60,12 @@ class Reply
             _finished = false;
         }
 
-        void setFinished()
-        { 
-            _finished = true; 
-            setHeader("Connection", "close");
-        }
-
         bool finished() const
         { return _finished; }
 
         void finish()
         { 
+            _finished = true; 
             _conn->endReply(); 
         }
 
