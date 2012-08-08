@@ -71,14 +71,16 @@ void SettingsWriter::writeParent(const SerializationInfo& sd, const std::string&
     {
         if( it->isScalar() )
         {
-            if(separate)
+            std::string name = it->name();
+
+            // only comma separate array members (which have no name)
+            if( separate && name.empty() )
                 *_os << Pt::String(L", ");
 
              it->getString(value);
              if( ! prefix.empty() )
                 *_os << Pt::String::widen( prefix ) << '.';
 
-            std::string name = it->name();
             this->writeEntry( name, value, it->typeName() );
 
             if(! name.empty() )

@@ -281,10 +281,21 @@ void SettingsTest::SimpleArray()
     std::stringstream ss;
     ss << "a={1,2,3}\n";
     ss << "b = { 4 , 5 , 6 } \n";
+    ss << "c.x = 5\n";
+    ss << "c.y = 6\n";
+
     Pt::TextIStream ts(ss, new Pt::Utf8Codec);
 
     Pt::Settings settings;
     settings.load(ts);
+
+    ss.clear();
+    ss.str("");
+    Pt::TextOStream to(ss, new Pt::Utf8Codec);
+    settings.save(to);
+
+    //std::cerr << ss.str() << std::endl;
+    //std::exit(0);
 }
 
 void SettingsTest::SimpleNamedArray()
