@@ -7,6 +7,15 @@ Main Pt-Http-test : Pt-Http-test.cpp
                     ServerTest.cpp
                     ParserTest.cpp
                     ;
-LinkSharedLibraries Pt-Http-test : Pt Pt-Http Pt-Net Pt-System Pt-Unit ;
+
+if $(WITH_OPENSSL)
+{
+    LinkSharedLibraries Pt-Http-test : Pt Pt-Http Pt-Net Pt-Ssl Pt-System Pt-Unit ;
+}
+else
+{
+    LinkSharedLibraries Pt-Http-test : Pt Pt-Http Pt-Net Pt-System Pt-Unit ;
+}
+
 MakeLocate Pt-Http-test : $(OUTPUT_TARGET) ;
 RunUnitTest Pt-Http-test : $(OUTPUT_TEST) ;

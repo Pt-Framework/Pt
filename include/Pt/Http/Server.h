@@ -46,6 +46,12 @@ class EventLoop;
 
 }
 
+namespace Ssl {
+
+class Context;
+
+}
+
 namespace Http {
 
 class RequestHeader;
@@ -102,6 +108,8 @@ class PT_HTTP_API Server : public Pt::Connectable
         System::EventLoop& loop()
         {return _loop; }
 
+        Signal<Ssl::Context&> sslConfigured;
+
     protected:
         void startWorker();
 
@@ -112,6 +120,8 @@ class PT_HTTP_API Server : public Pt::Connectable
     private:
         System::EventLoop& _loop;
         Net::TcpServer _serverSocket;
+        bool _ssl;
+        Ssl::Context* _sslctx;
         std::vector<TcpConnection*> _connections;
         std::vector<ServerThread*> _serverThreads;
         unsigned _useWorker;

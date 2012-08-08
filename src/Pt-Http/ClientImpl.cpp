@@ -394,10 +394,18 @@ void ClientImpl::beginRequest(const Request& request)
 
     log_debug("reusing previous connection");
     sendRequest(_stream, *_request);
-        
+
     try
     {
-        _sockbuf.beginWrite();
+#ifdef PT_HTTP_WITH_SSL
+        if(_ssl)
+        {
+            _stream << std::flush; // TODO: Ssl::IOBuffer::beginWrite should do this...
+            _sslbuf.beginWrite();
+        }
+        else
+#endif
+            _sockbuf.beginWrite();
     }
     catch (const System::IOError&)
     {
@@ -595,7 +603,7 @@ void ClientImpl::onSslHandshake(Ssl::IOBuffer& ssl)
         ssl.endHandshake();
 
         sendRequest(_stream, *_request);
-        _stream << std::flush;
+        _stream << std::flush; // TODO: Ssl::IOBuffer::beginWrite should do this...
 
         log_debug("request sent - begin write");
         ssl.beginWrite();

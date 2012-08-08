@@ -37,6 +37,9 @@
 #include "Pt/System/MainLoop.h"
 #include <string>
 
+#include <Pt/Ssl/Context.h>
+#include "../../Pt-Ssl/tests/PemData.h"
+
 class ServerTest : public Pt::Unit::TestSuite
 {
     public:
@@ -44,6 +47,7 @@ class ServerTest : public Pt::Unit::TestSuite
         : Pt::Unit::TestSuite("ServerTest")
         {
             this->registerMethod( "NotFoundRequest", *this, &ServerTest::NotFoundRequest);
+            //this->registerMethod( "NotFoundHttps", *this, &ServerTest::NotFoundHttps);
         }
 
         void setUp()
@@ -64,6 +68,58 @@ class ServerTest : public Pt::Unit::TestSuite
             Pt::Http::Server server(*loop, "127.0.0.1", 8001);
 
             Pt::Http::Client client("127.0.0.1", 8001);
+            client.setActive(*loop);
+            connect(client.headerReceived(), *this, &ServerTest::onReplyHeader);
+            connect(client.bodyAvailable(), *this, &ServerTest::onReply);
+            connect(client.replyFinished(), *this, &ServerTest::onReplyFinished);
+
+            Pt::Http::Request request("/index.html");
+            request.setHeader("foo", "bar");
+            client.beginExecute(request);
+
+            loop->run();
+        }
+
+        void NotFoundHttps()
+        {
+            loop->timeout() += Pt::slot(*loop, &Pt::System::MainLoop::exit);
+
+            // SSL configuration
+            Pt::Ssl::CertificateList caCert;
+            caCert.fromPem(caPemData, sizeof(caPemData));
+
+            // server-side SSL context
+            Pt::Ssl::CertificateList serverCert;
+            serverCert.fromPem(serverCertPemData, sizeof(serverCertPemData));
+
+            Pt::Ssl::PrivateKey serverPrivKey("abc123");
+            serverPrivKey.fromPem(serverKeyData, sizeof(serverKeyData));
+
+            Pt::Ssl::Context serverContext;
+            serverContext.setCACertificates(caCert);
+            serverContext.setCertificateChain(serverCert);
+            serverContext.setPrivateKey(serverPrivKey);
+            serverContext.setVerifyMode(Pt::Ssl::Context::VerifyPeerRequired);
+
+            // client-side SSL context
+            Pt::Ssl::CertificateList clientCert;
+            clientCert.fromPem(clientCertPemData, sizeof(clientCertPemData));
+
+            Pt::Ssl::PrivateKey clientPrivKey("");
+            clientPrivKey.fromPem(clientKeyData, sizeof(clientKeyData));
+
+            Pt::Ssl::Context clientContext;
+            clientContext.setCACertificates(caCert);
+            clientContext.setCertificateChain(clientCert);
+            clientContext.setPrivateKey(clientPrivKey);
+            clientContext.setVerifyMode(Pt::Ssl::Context::VerifyPeer);
+
+            // start HTTP server
+            Pt::Http::Server server(*loop, "127.0.0.1", 8001);
+
+            // start HTTP client
+            Pt::Http::Client client("127.0.0.1", 8001, true);
+            client.setContext(clientContext);
             client.setActive(*loop);
             connect(client.headerReceived(), *this, &ServerTest::onReplyHeader);
             connect(client.bodyAvailable(), *this, &ServerTest::onReply);

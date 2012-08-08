@@ -92,17 +92,19 @@ class TcpConnection : public Http::Connection
 #endif
         void onInput(System::StreamBuffer& sb);
 
-        bool onOutput(System::StreamBuffer& sb);
+        void onOutput(System::StreamBuffer& sb);
 
         void onTimeout();
 
         void beginRead();
 
+        bool beginWrite();
+
         void processInput();
 
         void endReply();
 
-        void sendReply();
+        void sendReply(std::ostream& os);
 
         bool isReady() const
         { return _parser.end() && _contentLength == 0; }
@@ -201,7 +203,8 @@ void TcpConnection::begin(System::EventLoop& loop)
         log_debug("beginning HTTPS connection");
         _sslbuf.outputReady() += slot(*this, &TcpConnection::onSslOutput);
         _sslbuf.inputReady() += slot(*this, &TcpConnection::onSslInput);
-        _stream.rdbuf(&_sockbuf);
+
+        _stream.rdbuf(&_sslbuf);
         _sslbuf.beginAccept();
         return;
     }
@@ -251,8 +254,67 @@ void TcpConnection::onSslInput(Pt::Ssl::IOBuffer& ssl)
 
 void TcpConnection::onSslOutput(Pt::Ssl::IOBuffer& ssl)
 {
+    try
+    {
+        ssl.endWrite();
+
+        if( ! beginWrite() )
+        {
+            bool keepAlive = _request.keepAlive() && _reply.header().keepAlive();
+
+            if(keepAlive)
+            {
+                //log_debug("do keep alive");
+                _timer.start(_server.keepAliveTimeout());
+                _request.clear();
+                _reply.clear();
+                _parser.reset(false);
+
+                 ssl.beginRead();
+            }
+            else
+            {
+                //log_debug("don't do keep alive");
+                close();
+                timeout(*this); // TODO: notify server that socket is done
+            }
+        }
+    }
+    catch (const std::exception& e)
+    {
+        //log_warn("exception occured when processing request: " << e.what());
+        close();
+        timeout(*this);
+    }
 }
 #endif
+
+
+bool TcpConnection::beginWrite()
+{
+#ifdef PT_HTTP_WITH_SSL
+    if(_ssl)
+    {
+        if ( _sslbuf.buffer().out_avail() )
+        {
+            _sslbuf.beginWrite();
+            _timer.start(_server.writeTimeout());
+            return true;
+        }
+        
+        return false;
+    }
+#endif
+    if ( _sockbuf.out_avail() )
+    {
+        _sockbuf.beginWrite();
+        _timer.start(_server.writeTimeout());
+        return true;
+    }
+
+    return false;
+}
+
 
 void TcpConnection::onInput(System::StreamBuffer& sb)
 {
@@ -346,27 +408,30 @@ void TcpConnection::endReply()
 {
     _responder->release();
     _responder = 0;
-    sendReply();
-    onOutput(_sockbuf);
+    sendReply(_stream);
+
+#ifdef PT_HTTP_WITH_SSL
+    if(_ssl)
+    {
+        _stream << std::flush; // Ssl::IOBuffer::beginWrite should do this
+        _sslbuf.beginWrite();
+    }
+    else
+#endif
+        _sockbuf.beginWrite();
+
+    _timer.start(_server.writeTimeout());
 }
 
 
-bool TcpConnection::onOutput(System::StreamBuffer& sb)
+void TcpConnection::onOutput(System::StreamBuffer& sb)
 {
-    //log_trace("onOutput");
-
-    //log_debug("send data to " << getPeerAddr());
-    
+    //log_trace("onOutput");   
     try
     {
         sb.endWrite();
 
-        if ( sb.out_avail() )
-        {
-            sb.beginWrite();
-            _timer.start(_server.writeTimeout());
-        }
-        else
+        if( ! beginWrite() )
         {
             bool keepAlive = _request.keepAlive() && _reply.header().keepAlive();
 
@@ -388,7 +453,6 @@ bool TcpConnection::onOutput(System::StreamBuffer& sb)
                 //log_debug("don't do keep alive");
                 close();
                 timeout(*this); // TODO: notify server that socket is done
-                return false;
             }
         }
     }
@@ -397,10 +461,7 @@ bool TcpConnection::onOutput(System::StreamBuffer& sb)
         //log_warn("exception occured when processing request: " << e.what());
         close();
         timeout(*this);
-        return false;
     }
-
-    return true;
 }
 
 
@@ -411,14 +472,14 @@ void TcpConnection::onTimeout()
 }
 
 
-void TcpConnection::sendReply()
+void TcpConnection::sendReply(std::ostream& os)
 {
     const char* contentLength = "Content-Length";
     const char* server = "Server";
     const char* connection = "Connection";
     const char* date = "Date";
 
-    _stream << "HTTP/"
+    os << "HTTP/"
         << _reply.header().httpVersionMajor() << '.'
         << _reply.header().httpVersionMinor() << ' '
         << _reply.header().httpReturnCode() << ' '
@@ -427,22 +488,22 @@ void TcpConnection::sendReply()
     for (ReplyHeader::const_iterator it = _reply.header().begin();
         it != _reply.header().end(); ++it)
     {
-        _stream << it->first << ": " << it->second << "\r\n";
+        os << it->first << ": " << it->second << "\r\n";
     }
 
     if (!_reply.header().hasHeader(contentLength))
     {
-        _stream << "Content-Length: " << _reply.bodySize() << "\r\n";
+        os << "Content-Length: " << _reply.bodySize() << "\r\n";
     }
 
     if (!_reply.header().hasHeader(server))
     {
-        _stream << "Server: Pt-Net-Server\r\n";
+        os << "Server: Pt-Net-Server\r\n";
     }
 
     if (!_reply.header().hasHeader(connection))
     {
-        _stream << "Connection: "
+        os << "Connection: "
                 << (_request.keepAlive() ? "keep-alive" : "close")
                 << "\r\n";
     }
@@ -450,12 +511,12 @@ void TcpConnection::sendReply()
     if (!_reply.header().hasHeader(date))
     {
         char buffer[50];
-        _stream << "Date: " << MessageHeader::htdateCurrent(buffer) << "\r\n";
+        os << "Date: " << MessageHeader::htdateCurrent(buffer) << "\r\n";
     }
 
-    _stream << "\r\n";
+    os << "\r\n";
 
-    _reply.sendBody(_stream);
+    _reply.sendBody(os);
 }
 
 
@@ -578,6 +639,8 @@ class ServerThread : public Connectable
 
 Server::Server(System::EventLoop& eventLoop)
 : _loop(eventLoop)
+, _ssl(false)
+, _sslctx(0)
 , _useWorker(0)
 , _maxThreads(1)
 , _readTimeout(20000)
@@ -595,6 +658,8 @@ Server::Server(System::EventLoop& eventLoop)
 Server::Server(System::EventLoop& eventLoop, const std::string& ip, unsigned short int port, int backlog)
 : _loop(eventLoop)
 , _serverSocket(ip, port, backlog)
+, _ssl(false)
+, _sslctx(0)
 , _useWorker(0)
 , _maxThreads(1)
 , _readTimeout(20000)
@@ -615,6 +680,8 @@ Server::Server(System::EventLoop& eventLoop, const std::string& ip, unsigned sho
 Server::Server(System::EventLoop& eventLoop, const Pt::Net::AddrInfo& addr, int backlog)
 : _loop(eventLoop)
 , _serverSocket(addr, backlog)
+, _ssl(false)
+, _sslctx(0)
 , _useWorker(0)
 , _maxThreads(1)
 , _readTimeout(20000)
@@ -649,6 +716,7 @@ Server::~Server()
 
     delete _defaultService;
     delete _noAuthService;
+    delete _sslctx;
 }
 
 
@@ -673,11 +741,15 @@ void Server::setHttps()
     // user must set a factory to create SSL context so we
     // can assign each worker thread its own thread-local
     // SSL context
+    _ssl = true;
 }
 
 
 void Server::startWorker()
 {
+    _sslctx = new Ssl::Context();
+    sslConfigured.send(*_sslctx);
+
     for(unsigned n = 1; n < this->maxThreads(); ++n)
     {
         ServerThread* st = new ServerThread(*this);
