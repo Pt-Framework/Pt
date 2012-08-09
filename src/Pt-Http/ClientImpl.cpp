@@ -400,7 +400,6 @@ void ClientImpl::beginRequest(const Request& request)
 #ifdef PT_HTTP_WITH_SSL
         if(_ssl)
         {
-            _stream << std::flush; // TODO: Ssl::IOBuffer::beginWrite should do this...
             _sslbuf.beginWrite();
         }
         else
@@ -603,7 +602,6 @@ void ClientImpl::onSslHandshake(Ssl::IOBuffer& ssl)
         ssl.endHandshake();
 
         sendRequest(_stream, *_request);
-        _stream << std::flush; // TODO: Ssl::IOBuffer::beginWrite should do this...
 
         log_debug("request sent - begin write");
         ssl.beginWrite();

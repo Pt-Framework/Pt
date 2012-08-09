@@ -428,6 +428,9 @@ void IOBuffer::beginWrite()
     if( ! _sb)
         return;
 
+    log_debug("sync with underlying strambuf");
+    this->pubsync();
+
     log_debug("begin writing");
     _sb->beginWrite();
 }

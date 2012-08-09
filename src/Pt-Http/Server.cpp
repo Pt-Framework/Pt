@@ -414,7 +414,7 @@ void TcpConnection::endReply()
 #ifdef PT_HTTP_WITH_SSL
     if(_ssl)
     {
-        _stream << std::flush; // Ssl::IOBuffer::beginWrite should do this
+        //_stream << std::flush; // Ssl::IOBuffer::beginWrite should do this
         _sslbuf.beginWrite();
     }
     else
