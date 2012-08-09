@@ -85,27 +85,33 @@ class TcpConnection : public Http::Connection
 
     protected:
 #ifdef PT_HTTP_WITH_SSL
-        void onSslHandshake(Pt::Ssl::IOBuffer& ssl);
+        void onHttpsHandshake(Pt::Ssl::IOBuffer& ssl);
 
-        void onSslInput(Pt::Ssl::IOBuffer& ssl);
+        void onHttpsInput(Pt::Ssl::IOBuffer& ssl);
 
-        void onSslOutput(Pt::Ssl::IOBuffer& ssl);
+        void onHttpsOutput(Pt::Ssl::IOBuffer& ssl);
 #endif
-        void onInput(System::StreamBuffer& sb);
+        void onHttpInput(System::StreamBuffer& sb);
 
-        void onOutput(System::StreamBuffer& sb);
-
-        void onTimeout();
+        void onHttpOutput(System::StreamBuffer& sb);
 
         void beginRead();
 
+        void endRead();
+
         bool beginWrite();
 
+        void endWrite();
+
         void processInput();
+
+        void processOutput();
 
         void endReply();
 
         void sendReply(std::ostream& os);
+
+        void onTimeout();
 
         bool isReady() const
         { return _parser.end() && _contentLength == 0; }
@@ -166,10 +172,6 @@ TcpConnection::TcpConnection(Server& server, Net::TcpServer& tcpServer)
 , _stream(0)
 {
     Net::TcpSocket::accept(tcpServer);
-
-#ifdef PT_HTTP_WITH_SSL
-    _sslbuf.handshakeFinished() += slot(*this, &TcpConnection::onSslHandshake);
-#endif
 }
 
 
@@ -202,8 +204,9 @@ void TcpConnection::begin(System::EventLoop& loop, Ssl::Context* ctx)
     {
         log_debug("beginning HTTPS connection");
         _sslbuf.init(*ctx);
-        _sslbuf.outputReady() += slot(*this, &TcpConnection::onSslOutput);
-        _sslbuf.inputReady() += slot(*this, &TcpConnection::onSslInput);
+        _sslbuf.handshakeFinished() += slot(*this, &TcpConnection::onHttpsHandshake);
+        _sslbuf.outputReady() += slot(*this, &TcpConnection::onHttpsOutput);
+        _sslbuf.inputReady() += slot(*this, &TcpConnection::onHttpsInput);
 
         _stream.rdbuf(&_sslbuf);
         _sslbuf.beginAccept();
@@ -211,15 +214,15 @@ void TcpConnection::begin(System::EventLoop& loop, Ssl::Context* ctx)
     }
 #endif
         log_debug("beginning HTTP connection");
-        _sockbuf.inputReady() += Pt::slot(*this, &TcpConnection::onInput);
-        _sockbuf.outputReady() += Pt::slot(*this, &TcpConnection::onOutput);
+        _sockbuf.inputReady() += Pt::slot(*this, &TcpConnection::onHttpInput);
+        _sockbuf.outputReady() += Pt::slot(*this, &TcpConnection::onHttpOutput);
 
         _stream.rdbuf(&_sockbuf);
         _sockbuf.beginRead();
 }
 
 #ifdef PT_HTTP_WITH_SSL
-void TcpConnection::onSslHandshake(Pt::Ssl::IOBuffer& ssl)
+void TcpConnection::onHttpsHandshake(Pt::Ssl::IOBuffer& ssl)
 {
     log_trace("TcpConnection::onAcceptHandshake");
     try 
@@ -237,58 +240,57 @@ void TcpConnection::onSslHandshake(Pt::Ssl::IOBuffer& ssl)
     ssl.beginRead();
 }
 
-void TcpConnection::onSslInput(Pt::Ssl::IOBuffer& ssl)
+void TcpConnection::onHttpsInput(Pt::Ssl::IOBuffer& ssl)
 {
-    log_trace("TcpConnection::onSslInput");
-
-    try
-    {
-        ssl.endRead();
-        processInput();
-    }
-    catch (const std::exception& e)
-    {
-        log_error("exception occured: " << e.what());
-        return;
-    }
+    log_trace("TcpConnection::onHttpsInput");
+    processInput();
 }
 
-void TcpConnection::onSslOutput(Pt::Ssl::IOBuffer& ssl)
+void TcpConnection::onHttpsOutput(Pt::Ssl::IOBuffer& ssl)
 {
-    try
-    {
-        ssl.endWrite();
-
-        if( ! beginWrite() )
-        {
-            bool keepAlive = _request.keepAlive() && _reply.header().keepAlive();
-
-            if(keepAlive)
-            {
-                //log_debug("do keep alive");
-                _timer.start(_server.keepAliveTimeout());
-                _request.clear();
-                _reply.clear();
-                _parser.reset(false);
-
-                 ssl.beginRead();
-            }
-            else
-            {
-                //log_debug("don't do keep alive");
-                close();
-                timeout(*this); // TODO: notify server that socket is done
-            }
-        }
-    }
-    catch (const std::exception& e)
-    {
-        //log_warn("exception occured when processing request: " << e.what());
-        close();
-        timeout(*this);
-    }
+    processOutput();
 }
 #endif
+
+
+void TcpConnection::onHttpInput(System::StreamBuffer& sb)
+{
+    processInput();
+}
+
+
+void TcpConnection::onHttpOutput(System::StreamBuffer& sb)
+{
+    processOutput();
+}
+
+
+void TcpConnection::beginRead()
+{
+#ifdef PT_HTTP_WITH_SSL
+    if(_ssl)
+        if( _sslbuf.in_avail() )
+            onHttpsInput(_sslbuf);
+        else
+            _sslbuf.beginRead();
+    else
+#endif
+        if( _sockbuf.in_avail() )
+            onHttpInput(_sockbuf);
+        else
+            _sockbuf.beginRead();
+}
+
+
+void TcpConnection::endRead()
+{
+#ifdef PT_HTTP_WITH_SSL
+    if(_ssl)
+        _sslbuf.endRead();
+    else
+#endif
+        _sockbuf.endRead();
+}
 
 
 bool TcpConnection::beginWrite()
@@ -296,6 +298,9 @@ bool TcpConnection::beginWrite()
 #ifdef PT_HTTP_WITH_SSL
     if(_ssl)
     {
+        // TODO: need to check _sslbuf.out_avail()
+        _sslbuf.pubsync();
+
         if ( _sslbuf.buffer().out_avail() )
         {
             _sslbuf.beginWrite();
@@ -317,26 +322,23 @@ bool TcpConnection::beginWrite()
 }
 
 
-void TcpConnection::onInput(System::StreamBuffer& sb)
-{
-    sb.endRead();
-    processInput();
-}
-
-
-void TcpConnection::beginRead()
+void TcpConnection::endWrite()
 {
 #ifdef PT_HTTP_WITH_SSL
     if(_ssl)
-        _sslbuf.beginRead();
+        _sslbuf.endWrite();
     else
 #endif
-        _sockbuf.beginRead();
+        _sockbuf.endWrite();
 }
 
 
 void TcpConnection::processInput()
 {
+    // TODO: handle exceptions correctly...
+
+    endRead();
+
     if (_stream.rdbuf()->in_avail() == 0 || Net::TcpSocket::eof())
     {
         close();
@@ -405,32 +407,13 @@ void TcpConnection::processInput()
 }
 
 
-void TcpConnection::endReply()
+void TcpConnection::processOutput()
 {
-    _responder->release();
-    _responder = 0;
-    sendReply(_stream);
+    // TODO: handle exceptions correctly...
 
-#ifdef PT_HTTP_WITH_SSL
-    if(_ssl)
-    {
-        //_stream << std::flush; // Ssl::IOBuffer::beginWrite should do this
-        _sslbuf.beginWrite();
-    }
-    else
-#endif
-        _sockbuf.beginWrite();
-
-    _timer.start(_server.writeTimeout());
-}
-
-
-void TcpConnection::onOutput(System::StreamBuffer& sb)
-{
-    //log_trace("onOutput");   
     try
     {
-        sb.endWrite();
+        endWrite();
 
         if( ! beginWrite() )
         {
@@ -444,10 +427,7 @@ void TcpConnection::onOutput(System::StreamBuffer& sb)
                 _reply.clear();
                 _parser.reset(false);
 
-                if( sb.in_avail() )
-                    onInput(sb);
-                else
-                    sb.beginRead();
+                beginRead();
             }
             else
             {
@@ -463,6 +443,18 @@ void TcpConnection::onOutput(System::StreamBuffer& sb)
         close();
         timeout(*this);
     }
+}
+
+
+void TcpConnection::endReply()
+{
+    _responder->release();
+    _responder = 0;
+    sendReply(_stream);
+
+    beginWrite();
+
+    _timer.start(_server.writeTimeout());
 }
 
 
@@ -520,26 +512,6 @@ void TcpConnection::sendReply(std::ostream& os)
     _reply.sendBody(os);
 }
 
-
-/*void TcpConnection::replyFinished()
-{
-    try
-    {
-        _responder->endReply(_reply.body(), _request, _reply);
-    }
-    catch (const std::exception& e)
-    {
-        _reply.clear();
-        _responder->replyError(_reply.body(), _request, _reply, e);
-    }
-    
-    _responder->release();
-    _responder = 0;
-
-    sendReply();
-
-    onOutput(_stream.buffer());
-}*/
 
 //////////////////////////////////////////////////////////////////////////
 // Server
