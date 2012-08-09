@@ -630,6 +630,17 @@ void SerializationInfo::load(void* type, FixupInfo::FixupHandler fh, unsigned m)
 }
 
 
+void SerializationInfo::setVoid()
+{
+    if(_type != Void)
+    {
+        this->clearValue();
+        _type = Void;
+        _isCompound = false;
+    }
+}
+
+
 const char* SerializationInfo::getBinary(std::size_t& length) const
 {
     const char* ret = 0;

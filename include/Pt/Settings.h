@@ -98,7 +98,10 @@ class PT_API Settings : public SerializationInfo
                 void set(const T& value)
                 {
                     if( _si )
+                    {
+                        _si->setVoid();
                         *_si <<= value;
+                    }
                 }
 
                 Entry add(const std::string& name)

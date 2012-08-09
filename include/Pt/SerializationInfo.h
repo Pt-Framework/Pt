@@ -141,6 +141,11 @@ class PT_API SerializationInfo
         inline Type type() const
         { return static_cast<Type>(_type); }
 
+        inline bool isVoid() const
+        { return _type == Void; }
+         
+        void setVoid();
+
         inline bool isScalar() const
         { return _isCompound == false; }
 
