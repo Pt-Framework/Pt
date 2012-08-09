@@ -60,12 +60,6 @@ PrivateKey::~PrivateKey()
 }
 
 
-void PrivateKey::setPassword(const std::string& password)
-{
-    _impl->setPassword(password);;
-}
-
-
 void PrivateKey::fromPem(const char* data, size_t len)
 {
     _impl = new PrivateKeyImpl(*_impl);
@@ -119,12 +113,6 @@ PrivateKeyImpl::PrivateKeyImpl(const std::string& password)
 PrivateKeyImpl::~PrivateKeyImpl()
 { 
     clear(); 
-}
-
-
-void PrivateKeyImpl::setPassword(const std::string& password)
-{
-    _pswd = password;
 }
 
 

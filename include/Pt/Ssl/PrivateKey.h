@@ -56,9 +56,6 @@ class PT_SSL_API PrivateKey
         //! \brief Standard dtor.
         ~PrivateKey();
 
-        // @brief Set the password used for reading and writing
-        void setPassword(const std::string& password);
-
         //! \brief Read key in PEM format.
         void fromPem(const char* data, size_t len);
 
@@ -94,8 +91,6 @@ class PT_SSL_API PrivateKeyImpl
         PrivateKeyImpl(const std::string& password);
         
         ~PrivateKeyImpl();
-
-        void setPassword(const std::string& password);
 
         void fromPem(const char* data, size_t len);
 

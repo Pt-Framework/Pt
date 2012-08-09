@@ -567,11 +567,17 @@ class ServerThread : public Connectable
         };
 
     public:
-        ServerThread(Server& server)
+        ServerThread(Server& server, Signal<Ssl::Context&>* sslConfig = 0)
         : _server(&server)
         , _thread(_loop)
         , _ssl(false)
         {
+            if(sslConfig)
+            {
+                sslConfig->send(_sslctx);
+                _ssl = true;
+            }
+
             _loop.event() += Pt::slot(*this, &ServerThread::onAcceptEvent);
             _loop.event() += Pt::slot(*this, &ServerThread::onExitEvent);
             _thread.start();
@@ -601,14 +607,6 @@ class ServerThread : public Connectable
 
             _connections.clear();
         }
-
-#ifdef PT_HTTP_WITH_SSL
-        Ssl::Context& setHttps()
-        { 
-            _ssl = true;
-            return _sslctx; 
-        }
-#endif
 
     private:
         void onExitEvent(const ExitEvent& ev)
@@ -656,7 +654,6 @@ class ServerThread : public Connectable
 
 Server::Server(System::EventLoop& eventLoop)
 : _loop(eventLoop)
-, _ssl(false)
 , _sslctx(0)
 , _useWorker(0)
 , _maxThreads(1)
@@ -675,7 +672,6 @@ Server::Server(System::EventLoop& eventLoop)
 Server::Server(System::EventLoop& eventLoop, const std::string& ip, unsigned short int port, int backlog)
 : _loop(eventLoop)
 , _serverSocket(ip, port, backlog)
-, _ssl(false)
 , _sslctx(0)
 , _useWorker(0)
 , _maxThreads(1)
@@ -697,7 +693,6 @@ Server::Server(System::EventLoop& eventLoop, const std::string& ip, unsigned sho
 Server::Server(System::EventLoop& eventLoop, const Pt::Net::AddrInfo& addr, int backlog)
 : _loop(eventLoop)
 , _serverSocket(addr, backlog)
-, _ssl(false)
 , _sslctx(0)
 , _useWorker(0)
 , _maxThreads(1)
@@ -737,35 +732,26 @@ Server::~Server()
 }
 
 
-void Server::listen(const Pt::Net::AddrInfo& addr, int backlog)
+void Server::listen(const Pt::Net::AddrInfo& addr, bool ssl, int backlog)
 {
-    this->startWorker();
+    this->startWorker(ssl);
     _serverSocket.listen(addr, backlog);
     _serverSocket.beginAccept();
 }
 
 
-void Server::listen(const std::string& ip, unsigned short int port, int backlog)
+void Server::listen(const std::string& ip, unsigned short int port, bool ssl, int backlog)
 {
-    this->startWorker();
+    this->startWorker(ssl);
     _serverSocket.listen(ip, port, backlog);
     _serverSocket.beginAccept();
 }
 
 
-void Server::setHttps()
-{
-    // user must set a factory to create SSL context so we
-    // can assign each worker thread its own thread-local
-    // SSL context
-    _ssl = true;
-}
-
-
-void Server::startWorker()
+void Server::startWorker(bool ssl)
 {
 #ifdef PT_HTTP_WITH_SSL
-    if(_ssl)
+    if(ssl)
     {
         _sslctx = new Ssl::Context();
         sslConfigured.send(*_sslctx);
@@ -774,16 +760,18 @@ void Server::startWorker()
 
     for(unsigned n = 1; n < this->maxThreads(); ++n)
     {
-        std::auto_ptr<ServerThread> st( new ServerThread(*this) );
+        ServerThread* st = 0;
 
 #ifdef PT_HTTP_WITH_SSL
-        if(_ssl)
+        if(ssl)
         {
-            sslConfigured.send( st->setHttps() );
+            st = new ServerThread(*this, &sslConfigured);
         }
+        else
 #endif
+            st = new ServerThread(*this);
 
-        _serverThreads.push_back( st.release() );
+        _serverThreads.push_back(st);
     }
 
     _useWorker = _serverThreads.size();

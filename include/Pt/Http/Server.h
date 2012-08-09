@@ -75,11 +75,9 @@ class PT_HTTP_API Server : public Pt::Connectable
 
         ~Server();
 
-        void listen(const std::string& ip, unsigned short int port, int backlog = 5);
+        void listen(const std::string& ip, unsigned short int port, bool ssl = false, int backlog = 5);
 
-        void listen(const Pt::Net::AddrInfo& addr, int backlog = 5);
-
-        void setHttps();
+        void listen(const Pt::Net::AddrInfo& addr, bool ssl = false, int backlog = 5);
 
         void addService(const std::string& url, Service& service);
 
@@ -106,12 +104,12 @@ class PT_HTTP_API Server : public Pt::Connectable
         void setMaxThreads(unsigned m);
 
         System::EventLoop& loop()
-        {return _loop; }
+        { return _loop; }
 
         Signal<Ssl::Context&> sslConfigured;
 
     protected:
-        void startWorker();
+        void startWorker(bool ssl = false);
 
         void onAccept(Net::TcpServer& server);
 
@@ -120,7 +118,6 @@ class PT_HTTP_API Server : public Pt::Connectable
     private:
         System::EventLoop& _loop;
         Net::TcpServer _serverSocket;
-        bool _ssl;
         Ssl::Context* _sslctx;
         std::vector<TcpConnection*> _connections;
         std::vector<ServerThread*> _serverThreads;
