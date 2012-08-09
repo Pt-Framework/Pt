@@ -46,6 +46,7 @@
 #include <Pt/System/Timer.h>
 #include <Pt/System/Logger.h>
 #include <iostream>
+#include <memory>
 #include <cassert>
 
 log_define("Pt.Http.Server")
@@ -78,7 +79,7 @@ class TcpConnection : public Http::Connection
 
         ~TcpConnection();
 
-        void begin(System::EventLoop& loop);
+        void begin(System::EventLoop& loop, Ssl::Context* ctx = 0);
 
         Signal<TcpConnection&> timeout;
 
@@ -179,7 +180,7 @@ TcpConnection::~TcpConnection()
 }
 
 
-void TcpConnection::begin(System::EventLoop& loop)
+void TcpConnection::begin(System::EventLoop& loop, Ssl::Context* ctx)
 {
     _reply.init(*this);
     _reply.clear();
@@ -195,12 +196,12 @@ void TcpConnection::begin(System::EventLoop& loop)
     _sockbuf.attach(*this);
 
 #ifdef PT_HTTP_WITH_SSL
-    // TODO: pass SSL context to TcpConnection::begin, which sets _ssl to true
-    _ssl = false;
+    _ssl = ctx != 0;
 
     if(_ssl)
     {
         log_debug("beginning HTTPS connection");
+        _sslbuf.init(*ctx);
         _sslbuf.outputReady() += slot(*this, &TcpConnection::onSslOutput);
         _sslbuf.inputReady() += slot(*this, &TcpConnection::onSslInput);
 
@@ -569,6 +570,7 @@ class ServerThread : public Connectable
         ServerThread(Server& server)
         : _server(&server)
         , _thread(_loop)
+        , _ssl(false)
         {
             _loop.event() += Pt::slot(*this, &ServerThread::onAcceptEvent);
             _loop.event() += Pt::slot(*this, &ServerThread::onExitEvent);
@@ -600,6 +602,14 @@ class ServerThread : public Connectable
             _connections.clear();
         }
 
+#ifdef PT_HTTP_WITH_SSL
+        Ssl::Context& setHttps()
+        { 
+            _ssl = true;
+            return _sslctx; 
+        }
+#endif
+
     private:
         void onExitEvent(const ExitEvent& ev)
         {
@@ -612,7 +622,10 @@ class ServerThread : public Connectable
             _connections.push_back(conn);
             conn->timeout += Pt::slot(*this, &ServerThread::onConnectionTimeout);
 
-            conn->begin(_loop);
+            if(_ssl)
+                conn->begin(_loop, &_sslctx);
+            else
+                conn->begin(_loop);
         }
 
         void onConnectionTimeout(TcpConnection& conn)
@@ -632,6 +645,10 @@ class ServerThread : public Connectable
     private:
         Server* _server;
         Pt::System::MainLoop _loop;
+#ifdef PT_HTTP_WITH_SSL
+        bool _ssl;
+        Ssl::Context _sslctx;
+#endif
         Pt::System::AttachedThread _thread;
         std::vector<TcpConnection*> _connections;
 };
@@ -747,13 +764,26 @@ void Server::setHttps()
 
 void Server::startWorker()
 {
-    _sslctx = new Ssl::Context();
-    sslConfigured.send(*_sslctx);
+#ifdef PT_HTTP_WITH_SSL
+    if(_ssl)
+    {
+        _sslctx = new Ssl::Context();
+        sslConfigured.send(*_sslctx);
+    }
+#endif
 
     for(unsigned n = 1; n < this->maxThreads(); ++n)
     {
-        ServerThread* st = new ServerThread(*this);
-        _serverThreads.push_back(st);
+        std::auto_ptr<ServerThread> st( new ServerThread(*this) );
+
+#ifdef PT_HTTP_WITH_SSL
+        if(_ssl)
+        {
+            sslConfigured.send( st->setHttps() );
+        }
+#endif
+
+        _serverThreads.push_back( st.release() );
     }
 
     _useWorker = _serverThreads.size();
@@ -773,7 +803,7 @@ void Server::onAccept(Net::TcpServer& server)
     }
     else
     {
-        conn->begin(_loop);
+        conn->begin(_loop, _sslctx);
         _connections.push_back(conn);
         conn->timeout += Pt::slot(*this, &Server::onConnectionTimeout);
         _useWorker = 0;
