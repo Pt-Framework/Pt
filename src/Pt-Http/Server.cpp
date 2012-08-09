@@ -109,8 +109,6 @@ class TcpConnection : public Http::Connection
 
         void endReply();
 
-        void sendReply(std::ostream& os);
-
         void onTimeout();
 
         bool isReady() const
@@ -450,7 +448,50 @@ void TcpConnection::endReply()
 {
     _responder->release();
     _responder = 0;
-    sendReply(_stream);
+
+    const char* contentLength = "Content-Length";
+    const char* server = "Server";
+    const char* connection = "Connection";
+    const char* date = "Date";
+
+    _stream << "HTTP/"
+        << _reply.header().httpVersionMajor() << '.'
+        << _reply.header().httpVersionMinor() << ' '
+        << _reply.header().httpReturnCode() << ' '
+        << _reply.header().httpReturnText() << "\r\n";
+
+    for (ReplyHeader::const_iterator it = _reply.header().begin();
+        it != _reply.header().end(); ++it)
+    {
+        _stream << it->first << ": " << it->second << "\r\n";
+    }
+
+    if (!_reply.header().hasHeader(contentLength))
+    {
+        _stream << "Content-Length: " << _reply.bodySize() << "\r\n";
+    }
+
+    if (!_reply.header().hasHeader(server))
+    {
+        _stream << "Server: Pt-Net-Server\r\n";
+    }
+
+    if (!_reply.header().hasHeader(connection))
+    {
+        _stream << "Connection: "
+                << (_request.keepAlive() ? "keep-alive" : "close")
+                << "\r\n";
+    }
+
+    if (!_reply.header().hasHeader(date))
+    {
+        char buffer[50];
+        _stream << "Date: " << MessageHeader::htdateCurrent(buffer) << "\r\n";
+    }
+
+    _stream << "\r\n";
+
+    _reply.sendBody(_stream);
 
     beginWrite();
 
@@ -462,54 +503,6 @@ void TcpConnection::onTimeout()
 {
     //log_debug("timeout");
     timeout(*this);
-}
-
-
-void TcpConnection::sendReply(std::ostream& os)
-{
-    const char* contentLength = "Content-Length";
-    const char* server = "Server";
-    const char* connection = "Connection";
-    const char* date = "Date";
-
-    os << "HTTP/"
-        << _reply.header().httpVersionMajor() << '.'
-        << _reply.header().httpVersionMinor() << ' '
-        << _reply.header().httpReturnCode() << ' '
-        << _reply.header().httpReturnText() << "\r\n";
-
-    for (ReplyHeader::const_iterator it = _reply.header().begin();
-        it != _reply.header().end(); ++it)
-    {
-        os << it->first << ": " << it->second << "\r\n";
-    }
-
-    if (!_reply.header().hasHeader(contentLength))
-    {
-        os << "Content-Length: " << _reply.bodySize() << "\r\n";
-    }
-
-    if (!_reply.header().hasHeader(server))
-    {
-        os << "Server: Pt-Net-Server\r\n";
-    }
-
-    if (!_reply.header().hasHeader(connection))
-    {
-        os << "Connection: "
-                << (_request.keepAlive() ? "keep-alive" : "close")
-                << "\r\n";
-    }
-
-    if (!_reply.header().hasHeader(date))
-    {
-        char buffer[50];
-        os << "Date: " << MessageHeader::htdateCurrent(buffer) << "\r\n";
-    }
-
-    os << "\r\n";
-
-    _reply.sendBody(os);
 }
 
 
