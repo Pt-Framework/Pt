@@ -20,6 +20,7 @@ SharedLibrary Pt-Ssl : CertificateList.cpp
 
 LinkSharedLibraries Pt-Ssl : Pt Pt-Net Pt-System ;
 MakeLocate Pt-Ssl : $(OUTPUT_TARGET) ;
+MakeInstall Pt-Ssl : $(INSTALL_LIBDIR) ;
 
 if $(OPENSSL_LINKLIBS)
 {
