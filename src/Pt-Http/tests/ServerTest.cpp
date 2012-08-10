@@ -47,7 +47,7 @@ class ServerTest : public Pt::Unit::TestSuite
         ServerTest()
         : Pt::Unit::TestSuite("ServerTest")
         {
-            //Pt::System::Logger::setLogLevel("", Pt::System::Trace);
+            //Pt::System::Logger::setLogLevel("Pt.Http.Server", Pt::System::Trace);
 
             this->registerMethod( "NotFound", *this, &ServerTest::NotFound);
 

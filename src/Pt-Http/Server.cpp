@@ -355,7 +355,7 @@ void TcpConnection::processInput()
     {
         _parser.advance(_stream);
 
-        if (_parser.fail())
+        if( _parser.fail() )
         {
             _responder = _server.getDefaultResponder(_request);
             _responder->replyError(_reply.body(), _reply);
@@ -377,7 +377,8 @@ void TcpConnection::processInput()
                 return;
             }
 
-            /// _stream.rdbuf(&_httpbuf);
+            // new code using HttpBuffer:
+            // _stream.rdbuf(&_httpbuf);
             _httpbuf.beginBody(_request);
         }
         else
@@ -388,6 +389,47 @@ void TcpConnection::processInput()
 
     if (_responder)
     {
+        // new code using HttpBuffer:
+        /*_httpbuf.import();
+        log_debug("available: " << _httpbuf.in_avail());
+
+        do
+        {
+            if( _httpbuf.in_avail() )
+            {
+                _responder->readBody(_stream, _reply);
+
+                // TODO: readBody could write to _reply and thus into httpbuffer
+                if( _reply.finished() )
+                {
+                    _stream.rdbuf( _httpbuf.buffer() );
+                    return;
+                }
+            }
+
+            _httpbuf.import();
+            log_debug("available: " << _httpbuf.in_avail());
+        } 
+        while( _httpbuf.in_avail() );
+    
+        if( _stream.fail() )
+            throw System::IOError( PT_ERROR_MSG("error reading HTTP reply body") );
+
+        // TODO: httpbuf closes socket on isEnd, but in server case we should not do that
+        if( _httpbuf.isEnd() )
+        {
+            log_debug("request body finished");
+            _timer.stop();
+
+            _stream.rdbuf( _httpbuf.buffer() );
+            _responder->beginReply(_reply.body(), _request, _reply);
+        }
+        else
+        {
+            log_debug("continue reading body");
+            beginRead();
+        }*/
+
         if (_stream.rdbuf()->in_avail() > 0)
         {
             std::size_t s = _responder->readBody(_stream, _reply);
@@ -404,7 +446,6 @@ void TcpConnection::processInput()
         {
             _timer.stop();
 
-            /// _stream.rdbuf( _httpbuf.buffer() );
             _responder->beginReply(_reply.body(), _request, _reply);
         }
         else
