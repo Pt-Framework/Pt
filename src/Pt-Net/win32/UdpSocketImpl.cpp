@@ -42,12 +42,15 @@ namespace Pt {
 
 namespace Net {
 
+const unsigned int DefaultHopLimit = static_cast<unsigned int>(-1);
+
 UdpSocketImpl::UdpSocketImpl(UdpSocket& socket)
 : _ioh(socket)
 , _fd(INVALID_SOCKET)
 , _broadcast(false)
 , _isConnected(false)
 , _isBound(false)
+, _hopLimit(DefaultHopLimit)
 , _eventFlags(FD_CLOSE)
 , _timeout(Pt::System::EventLoop::WaitInfinite)
 {
@@ -92,6 +95,7 @@ void UdpSocketImpl::close()
     _fd = INVALID_SOCKET;
     _isConnected = false;
     _isBound = false;
+    _hopLimit = DefaultHopLimit;
 }
 
 
@@ -196,6 +200,18 @@ void UdpSocketImpl::connect(const AddrInfo& ai)
             }
         }
 
+        if(_hopLimit != DefaultHopLimit)
+        {
+            try
+            {
+                this->setHopLimit(_hopLimit);
+            }
+            catch(...)
+            {
+                this->close();
+            }
+        }
+
         std::memmove(&_peeraddr, it->ai_addr, it->ai_addrlen);
 
         if( 0 == ::connect(_fd, it->ai_addr, it->ai_addrlen) )
@@ -227,6 +243,36 @@ bool UdpSocketImpl::isBound() const
 void UdpSocketImpl::setBroadcast()
 {
     _broadcast = true;
+}
+
+
+void UdpSocketImpl::setHopLimit(unsigned int n)
+{
+    _hopLimit = n;
+
+    if(_fd < 0 || n == DefaultHopLimit)
+        return;
+
+    sockaddr_storage* sa = _isBound ? &_peeraddr : &_servaddr;
+    if(sa->ss_family == AF_INET)
+    {
+        unsigned char ttl = static_cast<unsigned char>(_hopLimit);
+
+        if( 0 > ::setsockopt(_fd, IPPROTO_IP, IP_MULTICAST_TTL, (char*)&ttl, sizeof(ttl) ) )
+        {
+            throw System::SystemError("setsockopt IP_MULTICAST_TTL");
+        }
+    }
+#if defined(IPV6_V6ONLY)
+    else if(sa->ss_family == AF_INET6)
+    {
+        if( 0 > ::setsockopt(_fd, IPPROTO_IPV6, IPV6_MULTICAST_HOPS, (char*)&_hopLimit, sizeof(_hopLimit) ) )
+        {
+            throw System::SystemError("setsockopt IP_MULTICAST_TTL");
+        }
+
+    }
+#endif
 }
 
 

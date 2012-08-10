@@ -67,6 +67,8 @@ class UdpSocketImpl
 
         void setBroadcast();
 
+        void setHopLimit(unsigned int n);
+
         void joinMulticastGroup(const std::string& ipaddr);
 
         void dropMulticastGroup(const std::string& ipaddr);
@@ -111,6 +113,7 @@ class UdpSocketImpl
         bool                         _isBound;
         mutable sockaddr_storage     _peeraddr;
         mutable sockaddr_storage     _servaddr;
+        unsigned int                 _hopLimit;
         long                         _eventFlags;
         std::size_t                  _timeout;
         WSABUF                       _sendBuffer;
