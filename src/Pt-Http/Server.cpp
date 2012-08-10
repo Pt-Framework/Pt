@@ -29,6 +29,7 @@
 #include "Parser.h"
 #include "NotFoundService.h"
 #include "NotAuthenticatedService.h"
+#include "ClientImpl.h"
 #include <Pt/Http/Server.h>
 #include <Pt/Http/Request.h>
 #include <Pt/Http/Reply.h>
@@ -135,6 +136,7 @@ class TcpConnection : public Http::Connection
 #ifdef PT_HTTP_WITH_SSL
         Ssl::IOBuffer _sslbuf;
 #endif
+        HttpBuffer _httpbuf;
         std::iostream _stream;
 };
 
@@ -167,6 +169,7 @@ TcpConnection::TcpConnection(Server& server, Net::TcpServer& tcpServer)
 #ifdef PT_HTTP_WITH_SSL
 , _sslbuf( _sockbuf )
 #endif
+, _httpbuf(*this)
 , _stream(0)
 {
     Net::TcpSocket::accept(tcpServer);
@@ -206,6 +209,7 @@ void TcpConnection::begin(System::EventLoop& loop, Ssl::Context* ctx)
         _sslbuf.outputReady() += slot(*this, &TcpConnection::onHttpsOutput);
         _sslbuf.inputReady() += slot(*this, &TcpConnection::onHttpsInput);
 
+        _httpbuf.attach(_sslbuf);
         _stream.rdbuf(&_sslbuf);
         _sslbuf.beginAccept();
         return;
@@ -215,6 +219,7 @@ void TcpConnection::begin(System::EventLoop& loop, Ssl::Context* ctx)
         _sockbuf.inputReady() += Pt::slot(*this, &TcpConnection::onHttpInput);
         _sockbuf.outputReady() += Pt::slot(*this, &TcpConnection::onHttpOutput);
 
+        _httpbuf.attach(_sockbuf);
         _stream.rdbuf(&_sockbuf);
         _sockbuf.beginRead();
 }
@@ -371,6 +376,9 @@ void TcpConnection::processInput()
                 _responder->beginReply(_reply.body(), _request, _reply);
                 return;
             }
+
+            /// _stream.rdbuf(&_httpbuf);
+            _httpbuf.beginBody(_request);
         }
         else
         {
@@ -395,6 +403,8 @@ void TcpConnection::processInput()
         if (_contentLength <= 0)
         {
             _timer.stop();
+
+            /// _stream.rdbuf( _httpbuf.buffer() );
             _responder->beginReply(_reply.body(), _request, _reply);
         }
         else

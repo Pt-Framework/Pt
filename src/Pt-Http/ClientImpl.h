@@ -81,7 +81,7 @@ class HttpBuffer : public std::streambuf
         std::streambuf* buffer()
         { return _sbuf; }
 
-        void beginBody(const ReplyHeader& reply);
+        void beginBody(const MessageHeader& reply);
 
         void import(std::streamsize n = 0);
 

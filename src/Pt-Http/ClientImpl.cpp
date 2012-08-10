@@ -42,7 +42,7 @@ namespace Pt {
 
 namespace Http {
 
-void HttpBuffer::beginBody(const ReplyHeader& reply)
+void HttpBuffer::beginBody(const MessageHeader& reply)
 {
     log_trace("HttpBuffer::beginBody()");
     _chunkParser.reset();
