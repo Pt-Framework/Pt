@@ -36,9 +36,19 @@ namespace Pt {
 
 namespace Http {
 
+Responder::Responder(Service& service)
+: _service(service)
+{ }
+
+
+Responder::~Responder() 
+{ }
+
+
 void Responder::beginRequest(std::istream& in, RequestHeader& request)
 {
 }
+
 
 std::size_t Responder::readBody(std::istream& in, Reply& reply)
 {
@@ -54,10 +64,12 @@ std::size_t Responder::readBody(std::istream& in, Reply& reply)
     return ret;
 }
 
+// TODO: remove this method, its only here for backwards compatibility
 void Responder::reply(std::ostream& os, RequestHeader&, Reply& reply)
 { 
     replyError(os, reply); 
 }
+
 
 void Responder::beginReply(std::ostream& os, RequestHeader& request, Http::Reply& reply)
 {
@@ -65,6 +77,11 @@ void Responder::beginReply(std::ostream& os, RequestHeader& request, Http::Reply
     reply.finish();
 }
 
+// TODO: remove this method, responder specific errors are handled in 
+//       beginReply, otherwise http server knows better what to reply
+//       as error e.g. corrupt header, bad alloc, system error...
+//       This method was only neccessary because exceptions from beginReply
+//       where catched in the server and then forwarded to this method.
 void Responder::replyError(std::ostream& out, Reply& reply)
 {
     reply.httpReturn(500, "internal server error");
@@ -72,6 +89,7 @@ void Responder::replyError(std::ostream& out, Reply& reply)
     reply.setHeader("Connection", "close");
     out << "Error 500";
 }
+
 
 void Responder::release()     
 { 

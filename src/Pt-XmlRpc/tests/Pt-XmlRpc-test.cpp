@@ -248,6 +248,10 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             _count = 0;
             PT_UNIT_ASSERT_THROW(_loop->run(), std::runtime_error);
             PT_UNIT_ASSERT_EQUALS(_count, 1);
+
+            // service must live longer than server
+            delete _server;
+            _server = 0;
         }
 
         void onExceptionCallback(const Pt::XmlRpc::Result<bool>& r)

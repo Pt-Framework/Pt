@@ -68,11 +68,9 @@ class Connection
 class PT_HTTP_API Responder
 {
     public:
-        explicit Responder(Service& service)
-            : _service(service)
-        { }
+        explicit Responder(Service& service);
 
-        virtual ~Responder() { }
+        virtual ~Responder();
 
         virtual void beginRequest(std::istream& in, RequestHeader& request);
         

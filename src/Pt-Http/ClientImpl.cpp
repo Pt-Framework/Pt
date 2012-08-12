@@ -128,13 +128,7 @@ void HttpBuffer::import(std::streamsize n)
     if( this->isEnd() )
     {
         log_trace("received all content -> EOF");
-
-        if( ! _keepAlive)
-        {
-            log_debug("closing socket, no keep alive");
-            _iodev->close();
-        }
-
+        _bodyFinished.send();
         return;
     }
 
@@ -248,6 +242,7 @@ void ClientImpl::init()
 #endif
 
     _httpbuf.attach(_sockbuf);
+    _httpbuf.bodyFinished() += Pt::slot(*this, &ClientImpl::onBodyFinished);
 }
 
 
@@ -369,6 +364,18 @@ const ReplyHeader& ClientImpl::execute(const Request& request)
     _stream.rdbuf(&_httpbuf);
     _httpbuf.beginBody(_replyHeader);
     return _replyHeader;
+}
+
+
+void ClientImpl::onBodyFinished()
+{
+    log_trace("onBodyFinished");
+
+    if( ! _request->header().keepAlive() )
+    {
+        log_debug("cancelling, no keep alive");
+        this->cancel();
+    }
 }
 
 
@@ -712,15 +719,13 @@ void ClientImpl::onBody()
     _httpbuf.import();
     log_debug("available: " << _httpbuf.in_avail());
 
-    do
+    while( _httpbuf.in_avail() )
     {
-        if( _httpbuf.in_avail() )
-            _client->bodyAvailable().send(*_client);
+        _client->bodyAvailable().send(*_client);
 
         _httpbuf.import();
         log_debug("available: " << _httpbuf.in_avail());
     } 
-    while( _httpbuf.in_avail() );
     
     if( _stream.fail() )
         throw System::IOError( PT_ERROR_MSG("error reading HTTP reply body") );

@@ -87,12 +87,16 @@ class HttpBuffer : public std::streambuf
 
         bool isEnd() const;
 
+        Signal<>& bodyFinished()
+        { return _bodyFinished; }
+
     protected:
         virtual int_type underflow();
 
     private:
         ChunkParser _chunkParser;
         std::streambuf* _sbuf;
+        Signal<> _bodyFinished;
         Pt::System::IODevice* _iodev;
         char _buffer[4096];
         long _contentLength;
@@ -166,6 +170,8 @@ class ClientImpl : public Connectable
         void cancel();
 
     protected:
+        void onBodyFinished();
+
         void onConnect(Net::TcpSocket& socket);
         void onOutput(System::StreamBuffer& sb);
         void onInput(System::StreamBuffer& sb);

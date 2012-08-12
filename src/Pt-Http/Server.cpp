@@ -179,7 +179,9 @@ TcpConnection::TcpConnection(Server& server, Net::TcpServer& tcpServer)
 TcpConnection::~TcpConnection()
 {
     if(_responder)
+    {
         _responder->release();
+    }
 }
 
 
@@ -378,7 +380,7 @@ void TcpConnection::processInput()
             }
 
             // new code using HttpBuffer:
-            // _stream.rdbuf(&_httpbuf);
+            _stream.rdbuf(&_httpbuf);
             _httpbuf.beginBody(_request);
         }
         else
@@ -390,32 +392,29 @@ void TcpConnection::processInput()
     if (_responder)
     {
         // new code using HttpBuffer:
-        /*_httpbuf.import();
+        _httpbuf.import();
+
         log_debug("available: " << _httpbuf.in_avail());
 
-        do
+        while( _httpbuf.in_avail() )
         {
-            if( _httpbuf.in_avail() )
-            {
-                _responder->readBody(_stream, _reply);
+            _responder->readBody(_stream, _reply);
+            // TODO: readBody could write to _reply
 
-                // TODO: readBody could write to _reply and thus into httpbuffer
-                if( _reply.finished() )
-                {
-                    _stream.rdbuf( _httpbuf.buffer() );
-                    return;
-                }
+            if( _reply.finished() )
+            {
+                _stream.rdbuf( _httpbuf.buffer() );
+                return;
             }
 
             _httpbuf.import();
             log_debug("available: " << _httpbuf.in_avail());
         } 
-        while( _httpbuf.in_avail() );
+        
     
         if( _stream.fail() )
             throw System::IOError( PT_ERROR_MSG("error reading HTTP reply body") );
 
-        // TODO: httpbuf closes socket on isEnd, but in server case we should not do that
         if( _httpbuf.isEnd() )
         {
             log_debug("request body finished");
@@ -428,29 +427,6 @@ void TcpConnection::processInput()
         {
             log_debug("continue reading body");
             beginRead();
-        }*/
-
-        if (_stream.rdbuf()->in_avail() > 0)
-        {
-            std::size_t s = _responder->readBody(_stream, _reply);
-            assert(s > 0);
-            _contentLength -= s;
-
-            if( _reply.finished() )
-            {
-                return;
-            }
-        }
-
-        if (_contentLength <= 0)
-        {
-            _timer.stop();
-
-            _responder->beginReply(_reply.body(), _request, _reply);
-        }
-        else
-        {
-            beginRead();
         }
     }
 }
@@ -459,6 +435,12 @@ void TcpConnection::processInput()
 void TcpConnection::processOutput()
 {
     // TODO: handle exceptions correctly...
+
+    if(_responder)
+    {
+        _responder->release();
+        _responder = 0;
+    }
 
     try
     {
@@ -497,9 +479,6 @@ void TcpConnection::processOutput()
 
 void TcpConnection::endReply()
 {
-    _responder->release();
-    _responder = 0;
-
     const char* contentLength = "Content-Length";
     const char* server = "Server";
     const char* connection = "Connection";
@@ -938,4 +917,30 @@ void Server::setMaxThreads(unsigned m)
 } // namespace Http
 
 } // namespace Pt
+
+
+        /*if (_stream.rdbuf()->in_avail() > 0)
+        {
+            std::size_t s = _responder->readBody(_stream, _reply);
+            assert(s > 0);
+            _contentLength -= s;
+
+            if( _reply.finished() )
+            {
+                return;
+            }
+        }
+
+        if (_contentLength <= 0)
+        {
+            _timer.stop();
+
+            _responder->beginReply(_reply.body(), _request, _reply);
+        }
+        else
+        {
+            beginRead();
+        }*/
+
+
 
