@@ -272,6 +272,8 @@ void Connection::processInput()
             _httpbuf.beginBody(_request);
 
             _responder->beginRequest(_stream, _request);
+
+            //TODO: allow immediate reply from this method
         }
         else
         {
@@ -300,7 +302,6 @@ void Connection::processInput()
             _httpbuf.import();
             log_debug("available: " << _httpbuf.in_avail());
         } 
-        
     
         if( _stream.fail() )
             throw System::IOError( PT_ERROR_MSG("error reading HTTP reply body") );
@@ -373,7 +374,7 @@ void Connection::advanceReply()
 }
 
 
-void Connection::reply()
+void Connection::finishReply()
 {
     const char* contentLength = "Content-Length";
     const char* server = "Server";

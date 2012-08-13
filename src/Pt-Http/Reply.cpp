@@ -40,7 +40,7 @@ void Reply::advance()
 
 void Reply::finish()
 { 
-    _conn->reply(); 
+    _conn->finishReply(); 
     _finished = true; 
 }
 

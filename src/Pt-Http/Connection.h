@@ -79,7 +79,7 @@ class Connection : public Net::TcpSocket
 
         void advanceReply();
 
-        void reply();
+        void finishReply();
 
         Signal<Connection&> timeout;
 
