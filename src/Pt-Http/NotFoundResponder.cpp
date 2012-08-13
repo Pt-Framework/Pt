@@ -35,7 +35,7 @@ namespace Http {
 
 void NotFoundResponder::reply(std::ostream& os, RequestHeader& request, Reply& reply)
 {
-    reply.httpReturn(404, "Not found");
+    reply.header().httpReturn(404, "Not found");
     reply.finish();
 }
 

@@ -72,31 +72,6 @@ class PT_HTTP_API Reply
         const ReplyHeader& header() const
         { return _header; }
 
-        void setHeader(const char* key, const char* value)
-        {
-            _header.setHeader(key, value);
-        }
-
-        void addHeader(const char* key, const char* value)
-        {
-            _header.addHeader(key, value);
-        }
-
-        void removeHeader(const char* key)
-        {
-            _header.removeHeader(key);
-        }
-
-        const char* getHeader(const char* key) const
-        {
-            return _header.getHeader(key);
-        }
-
-        bool hasHeader(const char* key) const
-        {
-            return _header.hasHeader(key);
-        }
-
         void clear()
         {
             _header.clear();
@@ -104,15 +79,6 @@ class PT_HTTP_API Reply
             _body.str(std::string());
             _finished = false;
         }
-
-        unsigned httpReturnCode() const
-        { return _header.httpReturnCode(); }
-
-        const std::string& httpReturnText() const
-        { return _header.httpReturnText(); }
-
-        void httpReturn(unsigned c, const std::string& t)
-        { _header.httpReturn(c, t); }
 
         std::string bodyStr() const
         { return _body.str(); }

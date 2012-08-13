@@ -427,9 +427,9 @@ void Connection::reply()
 
 void Connection::replyError()
 {
-    _reply.httpReturn(500, "internal server error");
-    _reply.setHeader("Content-Type", "text/plain");
-    _reply.setHeader("Connection", "close");
+    _reply.header().httpReturn(500, "internal server error");
+    _reply.header().setHeader("Content-Type", "text/plain");
+    _reply.header().setHeader("Connection", "close");
     _stream << "Error 500";
 
     reply();

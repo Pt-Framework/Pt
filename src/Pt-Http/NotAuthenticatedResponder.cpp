@@ -35,9 +35,9 @@ namespace Http {
 
 void NotAuthenticatedResponder::reply(std::ostream& out, RequestHeader& request, Reply& reply)
 {
-    reply.setHeader("WWW-Authenticate", ("Basic realm=\"" + _realm + '"').c_str());
+    reply.header().setHeader("WWW-Authenticate", ("Basic realm=\"" + _realm + '"').c_str());
 
-    reply.httpReturn(401, "not authorized");
+    reply.header().httpReturn(401, "not authorized");
 
     if (_content.empty())
         out << "<html><body><h1>not authorized</h1></body></html>";
