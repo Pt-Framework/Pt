@@ -53,7 +53,7 @@ class PT_HTTP_API Responder
 
         virtual void beginRequest(std::istream& in, RequestHeader& request);
         
-        virtual std::size_t readBody(std::istream&, Reply& reply);
+        virtual void readBody(std::istream&, Reply& reply);
 
         virtual void beginReply(std::ostream& os, RequestHeader& request, Http::Reply& reply) = 0;
 

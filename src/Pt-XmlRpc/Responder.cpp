@@ -87,20 +87,16 @@ void XmlRpcResponder::beginRequest(std::istream& is, Http::RequestHeader& reques
 }
 
 
-std::size_t XmlRpcResponder::readBody(std::istream& is, Http::Reply& reply)
+void XmlRpcResponder::readBody(std::istream& is, Http::Reply& reply)
 {
-    std::size_t n = 0;
-
    try
    {
-        while(true)
+        for(;;)
         {
             _ts.buffer().import();
             std::streamsize m = _ts.buffer().in_avail();
             if( ! m)
                 break;
-
-            n += m;
 
             while( _reader.advance() )
             {
@@ -121,8 +117,6 @@ std::size_t XmlRpcResponder::readBody(std::istream& is, Http::Reply& reply)
     {
         replyError(reply.body(), reply, 3, error.what());
     }
-
-    return n;
 }
 
 

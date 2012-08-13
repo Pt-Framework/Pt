@@ -70,7 +70,7 @@ class PT_XMLRPC_API XmlRpcResponder : public Http::Responder
 
         void beginRequest(std::istream& in, Http::RequestHeader& request);
 
-        std::size_t readBody(std::istream& is, Http::Reply& reply);
+        void readBody(std::istream& is, Http::Reply& reply);
 
         void replyError(std::ostream& os, Http::Reply& reply, int rc, const char* msg);
 

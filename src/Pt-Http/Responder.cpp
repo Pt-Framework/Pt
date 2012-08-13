@@ -56,18 +56,9 @@ void Responder::beginRequest(std::istream& in, RequestHeader& request)
 }
 
 
-std::size_t Responder::readBody(std::istream& in, Reply& reply)
+void Responder::readBody(std::istream& is, Reply& reply)
 {
-    std::streambuf* sb = in.rdbuf();
-
-    std::size_t ret = 0;
-    while (sb->in_avail() > 0)
-    {
-        sb->sbumpc();
-        ++ret;
-    }
-
-    return ret;
+    is.ignore( is.rdbuf()->in_avail() );
 }
 
 

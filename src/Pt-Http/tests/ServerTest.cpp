@@ -54,16 +54,9 @@ class ChunkedResponder : public Pt::Http::Responder
         void beginRequest(std::istream& in, Pt::Http::RequestHeader& request)
         { _chunks = 5; }
 
-        std::size_t readBody(std::istream& is, Pt::Http::Reply& reply)
+        void readBody(std::istream& is, Pt::Http::Reply& reply)
         {
-            std::streambuf* sb = is.rdbuf();
-
-            while (sb->in_avail() > 0)
-            {
-                sb->sbumpc();
-            }
-
-            return 0;
+            is.ignore( is.rdbuf()->in_avail() );
         }
 
         void beginReply(std::ostream& os, Pt::Http::RequestHeader& request, Pt::Http::Reply& reply)
