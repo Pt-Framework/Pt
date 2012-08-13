@@ -267,10 +267,9 @@ void Connection::processInput()
         {
             _responder = _server.getResponder(_request);
             _responder->beginRequest(_stream, _request);
-            _contentLength = _request.contentLength();
 
-            //log_debug("content length of request is " << _contentLength);
-            if (_contentLength == 0)
+            //log_debug("content length of request is " << _request.contentLength());
+            if (_request.contentLength() == 0)
             {
                 _timer.stop();
                 _responder->beginReply(_reply.body(), _request, _reply);
@@ -296,9 +295,9 @@ void Connection::processInput()
 
         while( _httpbuf.in_avail() )
         {
-            _responder->readBody(_stream, _reply);
             // TODO: readBody could write to _reply
-
+            _responder->readBody(_stream, _reply);
+            
             if( _reply.finished() )
             {
                 _stream.rdbuf( _httpbuf.buffer() );
@@ -375,7 +374,13 @@ void Connection::processOutput()
 }
 
 
-void Connection::endReply()
+void Connection::advanceReply()
+{
+    _responder->beginReply(_reply.body(), _request, _reply);
+}
+
+
+void Connection::reply()
 {
     const char* contentLength = "Content-Length";
     const char* server = "Server";
@@ -434,7 +439,7 @@ void Connection::replyError()
     _reply.setHeader("Connection", "close");
     _stream << "Error 500";
 
-    endReply();
+    reply();
 }
 
 

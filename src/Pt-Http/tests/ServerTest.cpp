@@ -33,6 +33,8 @@
 #include "Pt/Http/Client.h"
 #include "Pt/Http/ReplyHeader.h"
 #include "Pt/Http/Request.h"
+#include "Pt/Http/Reply.h"
+#include "Pt/Http/Responder.h"
 #include "Pt/Net/TcpSocket.h"
 #include "Pt/System/MainLoop.h"
 #include "Pt/System/Logger.h"
@@ -40,6 +42,46 @@
 
 #include <Pt/Ssl/Context.h>
 #include "../../Pt-Ssl/tests/PemData.h"
+
+class ChunkedResponder : public Pt::Http::Responder
+{
+    public:
+        ChunkedResponder(Pt::Http::Service& service)
+        : Pt::Http::Responder(service)
+        , _chunks(5)
+        {}
+
+        void beginRequest(std::istream& in, Pt::Http::RequestHeader& request)
+        { _chunks = 5; }
+
+        std::size_t readBody(std::istream& is, Pt::Http::Reply& reply)
+        {
+            std::streambuf* sb = is.rdbuf();
+
+            while (sb->in_avail() > 0)
+            {
+                sb->sbumpc();
+            }
+
+            return 0;
+        }
+
+        void beginReply(std::ostream& os, Pt::Http::RequestHeader& request, Pt::Http::Reply& reply)
+        {
+            os << "Chunk" << _chunks--;
+
+            if(_chunks == 0)
+                reply.finish();
+            else
+                reply.advance();
+        }
+
+    private:
+        unsigned _chunks;
+};
+
+typedef Pt::Http::CachedService<ChunkedResponder> ChunkedService;
+
 
 class ServerTest : public Pt::Unit::TestSuite
 {
@@ -50,16 +92,19 @@ class ServerTest : public Pt::Unit::TestSuite
             //Pt::System::Logger::setLogLevel("Pt.Http.Server", Pt::System::Trace);
 
             this->registerMethod( "NotFound", *this, &ServerTest::NotFound);
-
 #ifdef PT_HTTP_WITH_SSL
             this->registerMethod( "NotFoundHttps", *this, &ServerTest::NotFoundHttps);
 #endif
+
+            this->registerMethod( "ChunkedReply", *this, &ServerTest::ChunkedReply);
         }
 
         void setUp()
         {
+            _reply.clear();
+
             loop = new Pt::System::MainLoop();
-            loop->setIdleTimeout(2000);
+            loop->setIdleTimeout(5000);
         }
 
         void tearDown()
@@ -75,9 +120,9 @@ class ServerTest : public Pt::Unit::TestSuite
 
             Pt::Http::Client client("127.0.0.1", 8001);
             client.setActive(*loop);
-            connect(client.headerReceived(), *this, &ServerTest::onReplyHeader);
-            connect(client.bodyAvailable(), *this, &ServerTest::onReply);
-            connect(client.replyFinished(), *this, &ServerTest::onReplyFinished);
+            connect(client.headerReceived(), *this, &ServerTest::onNotFoundHeader);
+            connect(client.bodyAvailable(), *this, &ServerTest::onNotFound);
+            connect(client.replyFinished(), *this, &ServerTest::onNotFoundFinished);
 
             Pt::Http::Request request("/index.html");
             request.setHeader("foo", "bar");
@@ -117,9 +162,9 @@ class ServerTest : public Pt::Unit::TestSuite
             Pt::Http::Client client("127.0.0.1", 8001, true);
             client.setContext(clientContext);
             client.setActive(*loop);
-            connect(client.headerReceived(), *this, &ServerTest::onReplyHeader);
-            connect(client.bodyAvailable(), *this, &ServerTest::onReply);
-            connect(client.replyFinished(), *this, &ServerTest::onReplyFinished);
+            connect(client.headerReceived(), *this, &ServerTest::onNotFoundHeader);
+            connect(client.bodyAvailable(), *this, &ServerTest::onNotFound);
+            connect(client.replyFinished(), *this, &ServerTest::onNotFoundFinished);
 
             Pt::Http::Request request("/index.html");
             request.setHeader("foo", "bar");
@@ -127,11 +172,7 @@ class ServerTest : public Pt::Unit::TestSuite
 
             loop->run();
         }
-#endif
-    private:
-        Pt::System::MainLoop* loop;
 
-#ifdef PT_HTTP_WITH_SSL
         static void loadSslContext(Pt::Ssl::Context& ctx)
         {
             // SSL configuration
@@ -152,11 +193,11 @@ class ServerTest : public Pt::Unit::TestSuite
         }
 #endif
 
-        void onReplyHeader(Pt::Http::Client& client)
+        void onNotFoundHeader(Pt::Http::Client& client)
         {
         }
 
-        std::size_t onReply(Pt::Http::Client& client)
+        std::size_t onNotFound(Pt::Http::Client& client)
         {
             std::size_t ret = 0;
             while ( client.body().rdbuf()->in_avail() )
@@ -170,11 +211,58 @@ class ServerTest : public Pt::Unit::TestSuite
             return ret;
         }
 
-        void onReplyFinished(Pt::Http::Client& client)
+        void onNotFoundFinished(Pt::Http::Client& client)
         {
             PT_UNIT_ASSERT_EQUALS(client.header().httpReturnCode(), 404);
             loop->exit();
         }
+
+        void ChunkedReply()
+        {
+            loop->timeout() += Pt::slot(*loop, &Pt::System::MainLoop::exit);
+
+            ChunkedService service;
+            Pt::Http::Server server(*loop, "127.0.0.1", 8001);
+            server.addService("/test", service);
+
+            Pt::Http::Client client("127.0.0.1", 8001);
+            client.setActive(*loop);
+            connect(client.headerReceived(), *this, &ServerTest::onChunkedHeader);
+            connect(client.bodyAvailable(), *this, &ServerTest::onChunkedReply);
+            connect(client.replyFinished(), *this, &ServerTest::onChunkedReplyFinished);
+
+            Pt::Http::Request request("/test");
+            client.beginExecute(request);
+
+            loop->run();
+        }
+
+        void onChunkedHeader(Pt::Http::Client& client)
+        {
+        }
+
+        void onChunkedReply(Pt::Http::Client& client)
+        {
+            std::size_t ret = 0;
+            while ( client.body().rdbuf()->in_avail() )
+            {
+                char ch;
+                client.body().get(ch);
+                ++ret;
+                _reply += ch;
+            }
+        }
+
+        void onChunkedReplyFinished(Pt::Http::Client& client)
+        {
+            PT_UNIT_ASSERT_EQUALS(client.header().httpReturnCode(), 200);
+            //std::clog << _reply << std::endl;
+            loop->exit();
+        }
+
+    private:
+        Pt::System::MainLoop* loop;
+        std::string _reply;
 };
 
 Pt::Unit::RegisterTest<ServerTest> register_HttpServerTest;

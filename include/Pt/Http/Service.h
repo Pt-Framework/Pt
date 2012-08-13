@@ -45,45 +45,57 @@ class RequestHeader;
 class Authenticator
 {
     public:
-        virtual ~Authenticator() { }
+        virtual ~Authenticator() 
+        { }
+        
         virtual bool checkAuth(const RequestHeader&) const = 0;
 };
 
 class PT_HTTP_API Service
 {
-        std::vector<const Authenticator*> _authenticators;
-        std::string _realm;
-        std::string _authContent;
-
-        unsigned _responderCount;
-        System::Mutex _mutex;
-        System::Condition _isIdle;
-
     public:
         Service()
-            : _responderCount(0)
+        : _responderCount(0)
         { }
 
-        virtual ~Service() { }
+        virtual ~Service() 
+        { }
+        
         Responder* doCreateResponder(const RequestHeader&);
+        
         void doReleaseResponder(Responder*);
 
         bool checkAuth(const RequestHeader& request);
 
-        void setRealm(const std::string& realm, const std::string& content = std::string())
-            { _realm = realm; _authContent = content; }
+        void setRealm(const std::string& realm, const std::string& content = std::string() )
+        { 
+            _realm = realm; 
+            _authContent = content; 
+        }
 
-        const std::string& realm() const        { return _realm; }
-        const std::string& authContent() const  { return _authContent; }
+        const std::string& realm() const        
+        { return _realm; }
+        
+        const std::string& authContent() const  
+        { return _authContent; }
 
         void addAuthenticator(const Authenticator* auth)
-            { _authenticators.push_back(auth); }
+        { _authenticators.push_back(auth); }
 
         void waitIdle();
 
     protected:
         virtual Responder* createResponder(const RequestHeader&) = 0;
+        
         virtual void releaseResponder(Responder*) = 0;
+
+    private:
+        std::vector<const Authenticator*> _authenticators;
+        std::string _realm;
+        std::string _authContent;
+        unsigned _responderCount;
+        System::Mutex _mutex;
+        System::Condition _isIdle;
 };
 
 class PT_HTTP_API CachedServiceBase : public Service

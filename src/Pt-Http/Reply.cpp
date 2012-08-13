@@ -33,10 +33,15 @@ namespace Pt {
 
 namespace Http {
 
+void Reply::advance()
+{ 
+    _conn->advanceReply(); 
+}
+
 void Reply::finish()
 { 
+    _conn->reply(); 
     _finished = true; 
-    _conn->endReply(); 
 }
 
 } // namespace Http

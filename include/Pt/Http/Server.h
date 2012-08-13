@@ -77,6 +77,8 @@ class PT_HTTP_API Server : public Pt::Connectable
 
         void listen(const Pt::Net::AddrInfo& addr, bool ssl = false, int backlog = 5);
 
+        void shutdown();
+
         void addService(const std::string& url, Service& service);
 
         void removeService(Service& service);

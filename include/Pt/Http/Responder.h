@@ -49,13 +49,13 @@ class PT_HTTP_API Responder
 
         virtual ~Responder();
 
+        void release();
+
         virtual void beginRequest(std::istream& in, RequestHeader& request);
         
         virtual std::size_t readBody(std::istream&, Reply& reply);
 
         virtual void beginReply(std::ostream& os, RequestHeader& request, Http::Reply& reply) = 0;
-
-        void release();
 
     private:
         Service& _service;

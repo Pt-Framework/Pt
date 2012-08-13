@@ -62,6 +62,8 @@ class PT_HTTP_API Reply
         bool finished() const
         { return _finished; }
 
+        void advance();
+
         void finish();
 
         ReplyHeader& header()
@@ -123,7 +125,6 @@ class PT_HTTP_API Reply
 
         void sendBody(std::ostream& out) const
         { out << _body.str(); }
-
 };
 
 } // namespace Http

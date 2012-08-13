@@ -213,6 +213,16 @@ Server::Server(System::EventLoop& eventLoop, const Pt::Net::AddrInfo& addr, int 
 
 Server::~Server()
 {
+    this->shutdown();
+
+    delete _defaultService;
+    delete _noAuthService;
+    delete _sslctx;
+}
+
+
+void Server::shutdown()
+{
     std::vector<ServerThread*>::iterator threadIt;
     for(threadIt = _serverThreads.begin(); threadIt != _serverThreads.end(); ++threadIt)
     {
@@ -225,10 +235,6 @@ Server::~Server()
     {
         delete *it;
     }
-
-    delete _defaultService;
-    delete _noAuthService;
-    delete _sslctx;
 }
 
 
@@ -251,7 +257,7 @@ void Server::listen(const std::string& ip, unsigned short int port, bool ssl, in
 void Server::startWorker(bool ssl)
 {
 #ifdef PT_HTTP_WITH_SSL
-    if(ssl)
+    if(ssl && ! _sslctx)
     {
         _sslctx = new Ssl::Context();
         sslConfigured.send(*_sslctx);

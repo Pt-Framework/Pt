@@ -77,7 +77,9 @@ class Connection : public Net::TcpSocket
 
         void begin(System::EventLoop& loop, Ssl::Context* ctx = 0);
 
-        void endReply();
+        void advanceReply();
+
+        void reply();
 
         Signal<Connection&> timeout;
 
@@ -109,9 +111,6 @@ class Connection : public Net::TcpSocket
 
         void onTimeout();
 
-        bool isReady() const
-        { return _parser.end() && _contentLength == 0; }
-
         const RequestHeader& request() const 
         { return _request; }
 
@@ -126,7 +125,6 @@ class Connection : public Net::TcpSocket
         Reply _reply;
         System::EventLoop* _loop;
         System::Timer _timer;
-        int _contentLength;
         Responder* _responder;
         System::IOBuffer _sockbuf;
         bool _ssl;

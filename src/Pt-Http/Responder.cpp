@@ -45,6 +45,12 @@ Responder::~Responder()
 { }
 
 
+void Responder::release()     
+{ 
+    _service.doReleaseResponder(this); 
+}
+
+
 void Responder::beginRequest(std::istream& in, RequestHeader& request)
 {
 }
@@ -70,12 +76,6 @@ std::size_t Responder::readBody(std::istream& in, Reply& reply)
     reply.httpReturn(501, "Not Implemented");
     reply.finish();
 }*/
-
-
-void Responder::release()     
-{ 
-    _service.doReleaseResponder(this); 
-}
 
 } // namespace Http
 
