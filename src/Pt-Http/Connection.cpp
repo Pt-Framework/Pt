@@ -327,7 +327,7 @@ void Connection::processOutput()
 {
     // TODO: handle exceptions correctly...
 
-    if(_responder)
+    if( _responder && _reply.finished() )
     {
         _responder->release();
         _responder = 0;
@@ -337,40 +337,91 @@ void Connection::processOutput()
     {
         endWrite();
 
-        if( ! beginWrite() )
+        if( beginWrite() )
+            return;
+
+        if( ! _reply.finished() )
         {
-            bool keepAlive = _request.keepAlive() && _reply.header().keepAlive();
+            _responder->reply(_reply.body(), _request, _reply);
+            return;
+        }
+  
+        bool keepAlive = _request.keepAlive() && _reply.header().keepAlive();
+        if(keepAlive)
+        {
+            //log_debug("do keep alive");
+            _timer.start(_server.keepAliveTimeout());
+            _request.clear();
+            _reply.clear();
+            _parser.reset(false);
 
-            if(keepAlive)
-            {
-                //log_debug("do keep alive");
-                _timer.start(_server.keepAliveTimeout());
-                _request.clear();
-                _reply.clear();
-                _parser.reset(false);
-
-                beginRead();
-            }
-            else
-            {
-                //log_debug("don't do keep alive");
-                close();
-                timeout(*this); // TODO: notify server that socket is done
-            }
+            beginRead();
+            return;
         }
     }
     catch (const std::exception& e)
     {
-        //log_warn("exception occured when processing request: " << e.what());
-        close();
-        timeout(*this);
+        log_warn("exception occured when processing request: " << e.what());
     }
+
+    close();
+    timeout(*this);
 }
 
 
 void Connection::advanceReply()
 {
-    _responder->reply(_reply.body(), _request, _reply);
+    bool allowChunked = false;
+
+    if( ! allowChunked)
+    {
+        _responder->reply(_reply.body(), _request, _reply);
+        return;
+    }
+
+    const char* server = "Server";
+    const char* connection = "Connection";
+    const char* date = "Date";
+
+    _stream << "HTTP/"
+        << _reply.header().httpVersionMajor() << '.'
+        << _reply.header().httpVersionMinor() << ' '
+        << _reply.header().httpReturnCode() << ' '
+        << _reply.header().httpReturnText() << "\r\n";
+
+    for (ReplyHeader::const_iterator it = _reply.header().begin();
+        it != _reply.header().end(); ++it)
+    {
+        _stream << it->first << ": " << it->second << "\r\n";
+    }
+
+    _stream << "Transfer-Encoding: chunked\r\n";
+
+    if( ! _reply.header().hasHeader(server) )
+    {
+        _stream << "Server: Pt-Net-Server\r\n";
+    }
+
+    if( ! _reply.header().hasHeader(connection) )
+    {
+        _stream << "Connection: "
+                << (_request.keepAlive() ? "keep-alive" : "close")
+                << "\r\n";
+    }
+
+    if( ! _reply.header().hasHeader(date) )
+    {
+        char buffer[50];
+        _stream << "Date: " << MessageHeader::htdateCurrent(buffer) << "\r\n";
+    }
+
+    _stream << "\r\n";
+
+    _reply.sendBody(_stream);
+
+    beginWrite();
+
+    _timer.start( _server.writeTimeout() );
 }
 
 
