@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 by Marc Boris Duerner, Tommi Maekitalo
+ * Copyright (C) 2012 by Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -64,31 +64,12 @@ std::size_t Responder::readBody(std::istream& in, Reply& reply)
     return ret;
 }
 
-// TODO: remove this method, its only here for backwards compatibility
-void Responder::reply(std::ostream& os, RequestHeader&, Reply& reply)
-{ 
-    replyError(os, reply); 
-}
 
-
-void Responder::beginReply(std::ostream& os, RequestHeader& request, Http::Reply& reply)
+/*void Responder::beginReply(std::ostream& os, RequestHeader& request, Http::Reply& reply)
 {
-    this->reply(os, request, reply);
+    reply.httpReturn(501, "Not Implemented");
     reply.finish();
-}
-
-// TODO: remove this method, responder specific errors are handled in 
-//       beginReply, otherwise http server knows better what to reply
-//       as error e.g. corrupt header, bad alloc, system error...
-//       This method was only neccessary because exceptions from beginReply
-//       where catched in the server and then forwarded to this method.
-void Responder::replyError(std::ostream& out, Reply& reply)
-{
-    reply.httpReturn(500, "internal server error");
-    reply.setHeader("Content-Type", "text/plain");
-    reply.setHeader("Connection", "close");
-    out << "Error 500";
-}
+}*/
 
 
 void Responder::release()     

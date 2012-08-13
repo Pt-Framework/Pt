@@ -12,12 +12,14 @@ if $(WITH_OPENSSL)
 SharedLibrary Pt-Http : Client.cpp
                         ClientImpl.cpp
                         ChunkedReader.cpp
+                        Connection.cpp
                         NotFoundResponder.cpp
                         NotFoundService.cpp
                         NotAuthenticatedResponder.cpp
                         NotAuthenticatedService.cpp
                         MessageHeader.cpp
                         Parser.cpp
+                        Reply.cpp
                         Responder.cpp
                         Server.cpp
                         Service.cpp

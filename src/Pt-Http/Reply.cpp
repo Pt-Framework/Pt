@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 Tommi Maekitalo
+ * Copyright (C) 2012 by Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,25 +26,17 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "NotAuthenticatedResponder.h"
+#include "Connection.h"
 #include <Pt/Http/Reply.h>
 
 namespace Pt {
 
 namespace Http {
 
-void NotAuthenticatedResponder::beginReply(std::ostream& out, RequestHeader& request, Reply& reply)
-{
-    reply.setHeader("WWW-Authenticate", ("Basic realm=\"" + _realm + '"').c_str());
-
-    reply.httpReturn(401, "not authorized");
-
-    if (_content.empty())
-        out << "<html><body><h1>not authorized</h1></body></html>";
-    else
-        out << _content;
-
-    reply.finish();
+void Reply::finish()
+{ 
+    _finished = true; 
+    _conn->endReply(); 
 }
 
 } // namespace Http

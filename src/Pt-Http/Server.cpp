@@ -26,27 +26,16 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "Parser.h"
+#include "Connection.h"
 #include "NotFoundService.h"
 #include "NotAuthenticatedService.h"
-#include "ClientImpl.h"
 #include <Pt/Http/Server.h>
 #include <Pt/Http/Request.h>
-#include <Pt/Http/Reply.h>
 #include <Pt/Http/Service.h>
 #include <Pt/Http/Responder.h>
-
-#ifdef PT_HTTP_WITH_SSL
-#include <Pt/Ssl/IOBuffer.h>
-#endif
-
 #include <Pt/System/MainLoop.h>
 #include <Pt/System/Thread.h>
-#include <Pt/System/IOStream.h>
-#include <Pt/System/IOBuffer.h>
-#include <Pt/System/Timer.h>
 #include <Pt/System/Logger.h>
-#include <iostream>
 #include <memory>
 #include <cassert>
 
@@ -55,490 +44,6 @@ log_define("Pt.Http.Server")
 namespace Pt {
 
 namespace Http {
-
-class TcpConnection : public Http::Connection
-                    , public Net::TcpSocket
-                    , public Connectable
-{
-    class ParseEvent : public HeaderParser::MessageHeaderEvent
-    {
-            RequestHeader& _request;
-
-        public:
-            explicit ParseEvent(RequestHeader& request)
-            : HeaderParser::MessageHeaderEvent(request)
-            , _request(request)
-            { }
-
-            virtual void onMethod(const std::string& method);
-            virtual void onUrl(const std::string& url);
-            virtual void onUrlParam(const std::string& q);
-    };
-
-    public:
-        TcpConnection(Server& server, Net::TcpServer& tcpServer);
-
-        ~TcpConnection();
-
-        void begin(System::EventLoop& loop, Ssl::Context* ctx = 0);
-
-        Signal<TcpConnection&> timeout;
-
-    protected:
-#ifdef PT_HTTP_WITH_SSL
-        void onHttpsHandshake(Pt::Ssl::IOBuffer& ssl);
-
-        void onHttpsInput(Pt::Ssl::IOBuffer& ssl);
-
-        void onHttpsOutput(Pt::Ssl::IOBuffer& ssl);
-#endif
-        void onHttpInput(System::StreamBuffer& sb);
-
-        void onHttpOutput(System::StreamBuffer& sb);
-
-        void beginRead();
-
-        void endRead();
-
-        bool beginWrite();
-
-        void endWrite();
-
-        void processInput();
-
-        void processOutput();
-
-        void endReply();
-
-        void onTimeout();
-
-        bool isReady() const
-        { return _parser.end() && _contentLength == 0; }
-
-        const RequestHeader& request() const 
-        { return _request; }
-
-        const Reply& reply() const     
-        { return _reply; }
-
-    private:
-        Server& _server;
-        ParseEvent _parseEvent;
-        HeaderParser _parser;
-        RequestHeader _request;
-        Reply _reply;
-        System::EventLoop* _loop;
-        System::Timer _timer;
-        int _contentLength;
-        Responder* _responder;
-        System::IOBuffer _sockbuf;
-        bool _ssl;
-#ifdef PT_HTTP_WITH_SSL
-        Ssl::IOBuffer _sslbuf;
-#endif
-        HttpBuffer _httpbuf;
-        std::iostream _stream;
-};
-
-
-void TcpConnection::ParseEvent::onMethod(const std::string& method)
-{
-    _request.method(method);
-}
-
-
-void TcpConnection::ParseEvent::onUrl(const std::string& url)
-{
-    _request.url(url);
-}
-
-
-void TcpConnection::ParseEvent::onUrlParam(const std::string& q)
-{
-    _request.qparams(q);
-}
-
-
-TcpConnection::TcpConnection(Server& server, Net::TcpServer& tcpServer)
-: _server(server)
-, _parseEvent(_request)
-, _parser(_parseEvent, false)
-, _loop(0)
-, _responder(0)
-, _ssl(false)
-#ifdef PT_HTTP_WITH_SSL
-, _sslbuf( _sockbuf )
-#endif
-, _httpbuf(*this)
-, _stream(0)
-{
-    Net::TcpSocket::accept(tcpServer);
-}
-
-
-TcpConnection::~TcpConnection()
-{
-    if(_responder)
-    {
-        _responder->release();
-    }
-}
-
-
-void TcpConnection::begin(System::EventLoop& loop, Ssl::Context* ctx)
-{
-    _reply.init(*this);
-    _reply.clear();
-    
-    _timer.timeout() += Pt::slot(*this, &TcpConnection::onTimeout);
-    _timer.setActive(loop);
-    _timer.start( _server.readTimeout() );
-
-    _loop = &loop;
-    Http::Connection::init(loop);
-    this->setActive(loop);
-    
-    _sockbuf.attach(*this);
-
-#ifdef PT_HTTP_WITH_SSL
-    _ssl = ctx != 0;
-
-    if(_ssl)
-    {
-        log_debug("beginning HTTPS connection");
-        _sslbuf.init(*ctx);
-        _sslbuf.handshakeFinished() += slot(*this, &TcpConnection::onHttpsHandshake);
-        _sslbuf.outputReady() += slot(*this, &TcpConnection::onHttpsOutput);
-        _sslbuf.inputReady() += slot(*this, &TcpConnection::onHttpsInput);
-
-        _httpbuf.attach(_sslbuf);
-        _stream.rdbuf(&_sslbuf);
-        _sslbuf.beginAccept();
-        return;
-    }
-#endif
-        log_debug("beginning HTTP connection");
-        _sockbuf.inputReady() += Pt::slot(*this, &TcpConnection::onHttpInput);
-        _sockbuf.outputReady() += Pt::slot(*this, &TcpConnection::onHttpOutput);
-
-        _httpbuf.attach(_sockbuf);
-        _stream.rdbuf(&_sockbuf);
-        _sockbuf.beginRead();
-}
-
-#ifdef PT_HTTP_WITH_SSL
-void TcpConnection::onHttpsHandshake(Pt::Ssl::IOBuffer& ssl)
-{
-    log_trace("TcpConnection::onAcceptHandshake");
-    try 
-    {
-        ssl.endHandshake();
-    }
-    catch(...) 
-    {
-        log_error("accept handshake failed");
-        return;
-    }
-
-    log_debug("peer name = " << ssl.peerName());
-    log_debug("current cipher = " << ssl.currentCipher().name());
-    ssl.beginRead();
-}
-
-void TcpConnection::onHttpsInput(Pt::Ssl::IOBuffer& ssl)
-{
-    log_trace("TcpConnection::onHttpsInput");
-    processInput();
-}
-
-void TcpConnection::onHttpsOutput(Pt::Ssl::IOBuffer& ssl)
-{
-    processOutput();
-}
-#endif
-
-
-void TcpConnection::onHttpInput(System::StreamBuffer& sb)
-{
-    processInput();
-}
-
-
-void TcpConnection::onHttpOutput(System::StreamBuffer& sb)
-{
-    processOutput();
-}
-
-
-void TcpConnection::beginRead()
-{
-#ifdef PT_HTTP_WITH_SSL
-    if(_ssl)
-        if( _sslbuf.in_avail() )
-            onHttpsInput(_sslbuf);
-        else
-            _sslbuf.beginRead();
-    else
-#endif
-        if( _sockbuf.in_avail() )
-            onHttpInput(_sockbuf);
-        else
-            _sockbuf.beginRead();
-}
-
-
-void TcpConnection::endRead()
-{
-#ifdef PT_HTTP_WITH_SSL
-    if(_ssl)
-        _sslbuf.endRead();
-    else
-#endif
-        _sockbuf.endRead();
-}
-
-
-bool TcpConnection::beginWrite()
-{
-#ifdef PT_HTTP_WITH_SSL
-    if(_ssl)
-    {
-        // TODO: need to check _sslbuf.out_avail()
-        _sslbuf.pubsync();
-
-        if ( _sslbuf.buffer().out_avail() )
-        {
-            _sslbuf.beginWrite();
-            _timer.start(_server.writeTimeout());
-            return true;
-        }
-        
-        return false;
-    }
-#endif
-    if ( _sockbuf.out_avail() )
-    {
-        _sockbuf.beginWrite();
-        _timer.start(_server.writeTimeout());
-        return true;
-    }
-
-    return false;
-}
-
-
-void TcpConnection::endWrite()
-{
-#ifdef PT_HTTP_WITH_SSL
-    if(_ssl)
-        _sslbuf.endWrite();
-    else
-#endif
-        _sockbuf.endWrite();
-}
-
-
-void TcpConnection::processInput()
-{
-    // TODO: handle exceptions correctly...
-
-    endRead();
-
-    if (_stream.rdbuf()->in_avail() == 0 || Net::TcpSocket::eof())
-    {
-        close();
-        timeout(*this);
-        return;
-    }
-
-    _timer.start(_server.readTimeout());
-
-    if ( _responder == 0 )
-    {
-        _parser.advance(_stream);
-
-        if( _parser.fail() )
-        {
-            _responder = _server.getDefaultResponder(_request);
-            _responder->replyError(_reply.body(), _reply);
-            _reply.finish();
-            return;
-        }
-
-        if( _parser.end() )
-        {
-            _responder = _server.getResponder(_request);
-            _responder->beginRequest(_stream, _request);
-            _contentLength = _request.contentLength();
-
-            //log_debug("content length of request is " << _contentLength);
-            if (_contentLength == 0)
-            {
-                _timer.stop();
-                _responder->beginReply(_reply.body(), _request, _reply);
-                return;
-            }
-
-            // new code using HttpBuffer:
-            _stream.rdbuf(&_httpbuf);
-            _httpbuf.beginBody(_request);
-        }
-        else
-        {
-            beginRead();
-        }
-    }
-
-    if (_responder)
-    {
-        // new code using HttpBuffer:
-        _httpbuf.import();
-
-        log_debug("available: " << _httpbuf.in_avail());
-
-        while( _httpbuf.in_avail() )
-        {
-            _responder->readBody(_stream, _reply);
-            // TODO: readBody could write to _reply
-
-            if( _reply.finished() )
-            {
-                _stream.rdbuf( _httpbuf.buffer() );
-                return;
-            }
-
-            _httpbuf.import();
-            log_debug("available: " << _httpbuf.in_avail());
-        } 
-        
-    
-        if( _stream.fail() )
-            throw System::IOError( PT_ERROR_MSG("error reading HTTP reply body") );
-
-        if( _httpbuf.isEnd() )
-        {
-            log_debug("request body finished");
-            _timer.stop();
-
-            _stream.rdbuf( _httpbuf.buffer() );
-            _responder->beginReply(_reply.body(), _request, _reply);
-        }
-        else
-        {
-            log_debug("continue reading body");
-            beginRead();
-        }
-    }
-}
-
-
-void TcpConnection::processOutput()
-{
-    // TODO: handle exceptions correctly...
-
-    if(_responder)
-    {
-        _responder->release();
-        _responder = 0;
-    }
-
-    try
-    {
-        endWrite();
-
-        if( ! beginWrite() )
-        {
-            bool keepAlive = _request.keepAlive() && _reply.header().keepAlive();
-
-            if(keepAlive)
-            {
-                //log_debug("do keep alive");
-                _timer.start(_server.keepAliveTimeout());
-                _request.clear();
-                _reply.clear();
-                _parser.reset(false);
-
-                beginRead();
-            }
-            else
-            {
-                //log_debug("don't do keep alive");
-                close();
-                timeout(*this); // TODO: notify server that socket is done
-            }
-        }
-    }
-    catch (const std::exception& e)
-    {
-        //log_warn("exception occured when processing request: " << e.what());
-        close();
-        timeout(*this);
-    }
-}
-
-
-void TcpConnection::endReply()
-{
-    const char* contentLength = "Content-Length";
-    const char* server = "Server";
-    const char* connection = "Connection";
-    const char* date = "Date";
-
-    _stream << "HTTP/"
-        << _reply.header().httpVersionMajor() << '.'
-        << _reply.header().httpVersionMinor() << ' '
-        << _reply.header().httpReturnCode() << ' '
-        << _reply.header().httpReturnText() << "\r\n";
-
-    for (ReplyHeader::const_iterator it = _reply.header().begin();
-        it != _reply.header().end(); ++it)
-    {
-        _stream << it->first << ": " << it->second << "\r\n";
-    }
-
-    if (!_reply.header().hasHeader(contentLength))
-    {
-        _stream << "Content-Length: " << _reply.bodySize() << "\r\n";
-    }
-
-    if (!_reply.header().hasHeader(server))
-    {
-        _stream << "Server: Pt-Net-Server\r\n";
-    }
-
-    if (!_reply.header().hasHeader(connection))
-    {
-        _stream << "Connection: "
-                << (_request.keepAlive() ? "keep-alive" : "close")
-                << "\r\n";
-    }
-
-    if (!_reply.header().hasHeader(date))
-    {
-        char buffer[50];
-        _stream << "Date: " << MessageHeader::htdateCurrent(buffer) << "\r\n";
-    }
-
-    _stream << "\r\n";
-
-    _reply.sendBody(_stream);
-
-    beginWrite();
-
-    _timer.start(_server.writeTimeout());
-}
-
-
-void TcpConnection::onTimeout()
-{
-    //log_debug("timeout");
-    timeout(*this);
-}
-
-
-//////////////////////////////////////////////////////////////////////////
-// Server
-//////////////////////////////////////////////////////////////////////////
 
 class ServerThread : public Connectable 
 {
@@ -550,15 +55,15 @@ class ServerThread : public Connectable
         class AcceptEvent : public Pt::BasicEvent<AcceptEvent>
         {
             public:
-                AcceptEvent(TcpConnection* conn)
+                AcceptEvent(Connection* conn)
                 : _conn(conn)
                 { }
     
-                TcpConnection* connection() const
+                Connection* connection() const
                 { return _conn; }
     
             private:
-                TcpConnection* _conn;
+                Connection* _conn;
         };
 
     public:
@@ -583,7 +88,7 @@ class ServerThread : public Connectable
             stop();
         }
 
-        void serve(TcpConnection* conn)
+        void serve(Connection* conn)
         {
             AcceptEvent ev(conn);
             _loop.commitEvent(ev);
@@ -594,7 +99,7 @@ class ServerThread : public Connectable
             _loop.exit();
             _thread.join();
 
-            std::vector<TcpConnection*>::iterator it;
+            std::vector<Connection*>::iterator it;
             for(it = _connections.begin(); it != _connections.end(); ++it)
             {
                 delete *it;
@@ -610,7 +115,7 @@ class ServerThread : public Connectable
 
         void onAcceptEvent(const AcceptEvent& ev)
         {
-            TcpConnection* conn = ev.connection();
+            Connection* conn = ev.connection();
 
             _connections.push_back(conn);
             conn->timeout += Pt::slot(*this, &ServerThread::onConnectionTimeout);
@@ -621,9 +126,9 @@ class ServerThread : public Connectable
                 conn->begin(_loop);
         }
 
-        void onConnectionTimeout(TcpConnection& conn)
+        void onConnectionTimeout(Connection& conn)
         {
-            std::vector<TcpConnection*>::iterator it;
+            std::vector<Connection*>::iterator it;
             for(it = _connections.begin(); it != _connections.end(); ++it)
             {
                 if(&conn == *it)
@@ -643,7 +148,7 @@ class ServerThread : public Connectable
         Ssl::Context _sslctx;
 #endif
         Pt::System::AttachedThread _thread;
-        std::vector<TcpConnection*> _connections;
+        std::vector<Connection*> _connections;
 };
 
 
@@ -715,7 +220,7 @@ Server::~Server()
         delete *threadIt;
     }
 
-    std::vector<TcpConnection*>::iterator it;
+    std::vector<Connection*>::iterator it;
     for(it = _connections.begin(); it != _connections.end(); ++it)
     {
         delete *it;
@@ -777,7 +282,7 @@ void Server::onAccept(Net::TcpServer& server)
 {
     // TODO: we should only pass the TcpSocket to the worker thread
     //       so that a Connection can be constructed with an event loop
-    TcpConnection* conn = new TcpConnection(*this, server);
+    Connection* conn = new Connection(*this, server);
 
     if(_useWorker < _serverThreads.size())
     {
@@ -796,9 +301,9 @@ void Server::onAccept(Net::TcpServer& server)
 }
 
 
-void Server::onConnectionTimeout(TcpConnection& conn)
+void Server::onConnectionTimeout(Connection& conn)
 {
-    std::vector<TcpConnection*>::iterator it;
+    std::vector<Connection*>::iterator it;
     for(it = _connections.begin(); it != _connections.end(); ++it)
     {
         if(&conn == *it)

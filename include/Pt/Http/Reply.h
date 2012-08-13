@@ -31,7 +31,6 @@
 
 #include <Pt/Http/Api.h>
 #include <Pt/Http/ReplyHeader.h>
-#include <Pt/Http/Responder.h>
 #include <string>
 #include <sstream>
 
@@ -39,9 +38,9 @@ namespace Pt {
 
 namespace Http {
 
-class Request;
+class Connection;
 
-class Reply
+class PT_HTTP_API Reply
 {
         ReplyHeader _header;
         std::ostringstream _body;
@@ -63,11 +62,7 @@ class Reply
         bool finished() const
         { return _finished; }
 
-        void finish()
-        { 
-            _finished = true; 
-            _conn->endReply(); 
-        }
+        void finish();
 
         ReplyHeader& header()
         { return _header; }

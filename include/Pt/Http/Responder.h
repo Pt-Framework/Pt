@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 by Marc Boris Duerner, Tommi Maekitalo
+ * Copyright (C) 2012 by Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -42,29 +42,6 @@ namespace Http {
 class RequestHeader;
 class Reply;
 
-// TODO: this is obsolete, TcpConnection can be opaque pointer in Reply
-class Connection
-{
-    public:
-        Connection()
-        : _loop(0)
-        { }
-
-        virtual ~Connection()
-        { }
-
-        void init(System::EventLoop& loop)
-        { _loop = &loop; }
-
-        System::EventLoop* loop()
-        { return _loop; }
-
-        virtual void endReply() = 0;
-
-    private:
-        System::EventLoop* _loop;
-};
-
 class PT_HTTP_API Responder
 {
     public:
@@ -75,12 +52,8 @@ class PT_HTTP_API Responder
         virtual void beginRequest(std::istream& in, RequestHeader& request);
         
         virtual std::size_t readBody(std::istream&, Reply& reply);
-        
-        virtual void reply(std::ostream& os, RequestHeader&, Reply& reply);
 
-        virtual void beginReply(std::ostream& os, RequestHeader& request, Http::Reply& reply);
-        
-        virtual void replyError(std::ostream& os, Http::Reply& reply);
+        virtual void beginReply(std::ostream& os, RequestHeader& request, Http::Reply& reply) = 0;
 
         void release();
 

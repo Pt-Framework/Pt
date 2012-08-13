@@ -72,7 +72,7 @@ class PT_XMLRPC_API XmlRpcResponder : public Http::Responder
 
         std::size_t readBody(std::istream& is, Http::Reply& reply);
 
-        void replyError(std::ostream& os, Http::Reply& reply);
+        void replyError(std::ostream& os, Http::Reply& reply, int rc, const char* msg);
 
         void beginReply(std::ostream& os, Http::RequestHeader& request, Http::Reply& reply);
 
@@ -94,7 +94,6 @@ class PT_XMLRPC_API XmlRpcResponder : public Http::Responder
        ServiceProcedure* _proc;
        IComposer** _args;
        IDecomposer* _result;
-       Fault _fault;
 };
 
 }

@@ -30,10 +30,9 @@
 #define Pt_Http_Server_h
 
 #include <Pt/Http/Api.h>
+#include <Pt/Net/TcpServer.h>
 #include <Pt/Signal.h>
 #include <Pt/NonCopyable.h>
-#include <Pt/Net/TcpServer.h>
-#include <Pt/Net/TcpSocket.h>
 #include <vector>
 #include <string>
 #include <cstddef>
@@ -56,11 +55,10 @@ namespace Http {
 
 class RequestHeader;
 class Service;
-class TcpConnection;
+class Connection;
 class Responder;
 class NotFoundService;
 class NotAuthenticatedService;
-
 class ServerThread;
 
 class PT_HTTP_API Server : public Pt::Connectable
@@ -113,13 +111,13 @@ class PT_HTTP_API Server : public Pt::Connectable
 
         void onAccept(Net::TcpServer& server);
 
-        void onConnectionTimeout(TcpConnection& conn);
+        void onConnectionTimeout(Connection& conn);
 
     private:
         System::EventLoop& _loop;
         Net::TcpServer _serverSocket;
         Ssl::Context* _sslctx;
-        std::vector<TcpConnection*> _connections;
+        std::vector<Connection*> _connections;
         std::vector<ServerThread*> _serverThreads;
         unsigned _useWorker;
         unsigned _maxThreads;

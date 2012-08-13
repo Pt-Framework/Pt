@@ -81,7 +81,6 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             Pt::System::Logger::setLogLevel("", Pt::System::Error);
 
             registerMethod("Fault", *this, &PtXmlRpcTest::Fault);
-            registerMethod("Exception", *this, &PtXmlRpcTest::Exception);
             registerMethod("CallbackException", *this, &PtXmlRpcTest::CallbackException);
             registerMethod("ConnectError", *this, &PtXmlRpcTest::ConnectError);
             registerMethod("Nothing", *this, &PtXmlRpcTest::Nothing);
@@ -157,46 +156,6 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
         bool throwFault()
         {
             throw Pt::XmlRpc::Fault("Fault", 7);
-            return false;
-        }
-
-        ////////////////////////////////////////////////////////////
-        // Exception
-        //
-        void Exception()
-        {
-            Pt::XmlRpc::Service service;
-            service.registerMethod("multiply", *this, &PtXmlRpcTest::throwException);
-            _server->addService("/calc", service);
-
-            Pt::XmlRpc::HttpClient client(*_loop, "127.0.0.1", 8001, "/calc");
-            Pt::XmlRpc::RemoteProcedure<bool> multiply(client, "multiply");
-            connect( multiply.finished, *this, &PtXmlRpcTest::onException );
-            multiply.begin();
-
-            _loop->run();
-        }
-
-        void onException(const Pt::XmlRpc::Result<bool>& result)
-        {
-            try
-            {
-                //bool v =
-                    result.get();
-                PT_UNIT_ASSERT(false);
-            }
-            catch (const Pt::XmlRpc::Fault& e)
-            {
-                PT_UNIT_ASSERT_EQUALS(e.rc(), 0);
-                //PT_UNIT_ASSERT_EQUALS(e.text(), "Exception");
-            }
-
-            _loop->exit();
-        }
-
-        bool throwException()
-        {
-            throw std::runtime_error("Exception");
             return false;
         }
 
