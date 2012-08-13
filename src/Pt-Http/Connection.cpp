@@ -266,19 +266,12 @@ void Connection::processInput()
         if( _parser.end() )
         {
             _responder = _server.getResponder(_request);
-            _responder->beginRequest(_stream, _request);
-
-            //log_debug("content length of request is " << _request.contentLength());
-            if (_request.contentLength() == 0)
-            {
-                _timer.stop();
-                _responder->beginReply(_reply.body(), _request, _reply);
-                return;
-            }
 
             // new code using HttpBuffer:
             _stream.rdbuf(&_httpbuf);
             _httpbuf.beginBody(_request);
+
+            _responder->beginRequest(_stream, _request);
         }
         else
         {
@@ -318,7 +311,7 @@ void Connection::processInput()
             _timer.stop();
 
             _stream.rdbuf( _httpbuf.buffer() );
-            _responder->beginReply(_reply.body(), _request, _reply);
+            _responder->reply(_reply.body(), _request, _reply);
         }
         else
         {
@@ -376,7 +369,7 @@ void Connection::processOutput()
 
 void Connection::advanceReply()
 {
-    _responder->beginReply(_reply.body(), _request, _reply);
+    _responder->reply(_reply.body(), _request, _reply);
 }
 
 

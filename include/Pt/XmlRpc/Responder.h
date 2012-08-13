@@ -74,7 +74,7 @@ class PT_XMLRPC_API XmlRpcResponder : public Http::Responder
 
         void replyError(std::ostream& os, Http::Reply& reply, int rc, const char* msg);
 
-        void beginReply(std::ostream& os, Http::RequestHeader& request, Http::Reply& reply);
+        void reply(std::ostream& os, Http::RequestHeader& request, Http::Reply& reply);
 
         void endReply();
 

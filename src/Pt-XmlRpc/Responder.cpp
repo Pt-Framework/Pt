@@ -120,7 +120,7 @@ void XmlRpcResponder::readBody(std::istream& is, Http::Reply& reply)
 }
 
 
-void XmlRpcResponder::beginReply(std::ostream& os, Http::RequestHeader& request, Http::Reply& reply)
+void XmlRpcResponder::reply(std::ostream& os, Http::RequestHeader& request, Http::Reply& reply)
 {
     try
     {

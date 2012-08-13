@@ -62,7 +62,7 @@ void Responder::readBody(std::istream& is, Reply& reply)
 }
 
 
-/*void Responder::beginReply(std::ostream& os, RequestHeader& request, Http::Reply& reply)
+/*void Responder::reply(std::ostream& os, RequestHeader& request, Http::Reply& reply)
 {
     reply.httpReturn(501, "Not Implemented");
     reply.finish();

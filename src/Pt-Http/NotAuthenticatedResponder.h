@@ -48,7 +48,7 @@ class NotAuthenticatedResponder : public Responder
               _content(content)
             { }
 
-        void beginReply(std::ostream&, RequestHeader& request, Reply& reply);
+        void reply(std::ostream&, RequestHeader& request, Reply& reply);
 };
 
 
