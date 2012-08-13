@@ -52,6 +52,12 @@ class PT_HTTP_API Responder
         void release();
 
         // TODO: use Request object -> all methods in Responder should use Request/Reply for each method.
+        //
+        // beginRequest(Request, Reply)
+        // readRequest(Request, Reply)
+        // beginReply(Request, Reply)
+        // writeReply(Request, Reply)
+
         virtual void beginRequest(std::istream& in, RequestHeader& request);
         
         virtual void readBody(std::istream&, Reply& reply);
