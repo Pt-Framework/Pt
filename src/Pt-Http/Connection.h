@@ -122,7 +122,6 @@ class Connection : public Net::TcpSocket
         ParseEvent _parseEvent;
         HeaderParser _parser;
         RequestHeader _request;
-        Reply _reply;
         System::EventLoop* _loop;
         System::Timer _timer;
         Responder* _responder;
@@ -133,6 +132,7 @@ class Connection : public Net::TcpSocket
 #endif
         HttpBuffer _httpbuf;
         std::iostream _stream;
+        Reply _reply;
 };
 
 } // namespace Http

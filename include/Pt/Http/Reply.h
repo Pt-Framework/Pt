@@ -43,13 +43,14 @@ class Connection;
 class PT_HTTP_API Reply
 {
         ReplyHeader _header;
-        std::ostringstream _body;
+        std::ostream& _body;
         Http::Connection* _conn;
         bool _finished;
 
     public:
-        Reply()
-        : _conn(0)
+        Reply(std::ostream& os)
+        : _body(os)
+        , _conn(0)
         , _finished(false)
         { }
 
@@ -76,21 +77,20 @@ class PT_HTTP_API Reply
         {
             _header.clear();
             _body.clear();
-            _body.str(std::string());
             _finished = false;
         }
 
-        std::string bodyStr() const
-        { return _body.str(); }
+        //std::string bodyStr() const
+        //{ return _body.str(); }
 
         std::ostream& body()
         { return _body; }
 
-        std::size_t bodySize() const
-        { return _body.str().size(); }
+        //std::size_t bodySize() const
+        //{ return _body.str().size(); }
 
-        void sendBody(std::ostream& out) const
-        { out << _body.str(); }
+        //void sendBody(std::ostream& out) const
+        //{ out << _body.str(); }
 };
 
 } // namespace Http

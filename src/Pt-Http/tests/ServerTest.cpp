@@ -58,6 +58,10 @@ class ChunkedResponder : public Pt::Http::Responder
         {
             is.ignore( is.rdbuf()->in_avail() );
         }
+
+        void beginReply(std::ostream& os, Pt::Http::Reply& reply)
+        {
+        }
         
         void reply(std::ostream& os, Pt::Http::RequestHeader& request, Pt::Http::Reply& reply)
         {

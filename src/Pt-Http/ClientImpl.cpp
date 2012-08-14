@@ -69,6 +69,13 @@ bool HttpBuffer::isEnd() const
 }
 
 
+void HttpBuffer::discard()
+{
+    setg(0,0,0);
+    setp(_obuffer, _obuffer + _obufferSize);
+}
+
+
 void HttpBuffer::import(std::streamsize n)
 {
     log_trace("HttpBuffer::import(" << n << ")");
@@ -160,6 +167,72 @@ HttpBuffer::int_type HttpBuffer::underflow()
         return traits_type::to_int_type( *this->gptr() );
 
     return traits_type::eof();
+}
+
+
+int HttpBuffer::sync()
+{ 
+    typedef HttpBuffer::traits_type traits_type;
+
+    if( this->pptr() )
+    {
+        while(this->pptr() > this->pbase())
+        {
+            const HttpBuffer::int_type ch = this->overflow(traits_type::eof());
+            if( ch == traits_type::eof() )
+                return -1;
+        }
+    }
+
+    return 0;
+}
+
+
+HttpBuffer::int_type HttpBuffer::overflow(int_type ch)
+{
+    typedef HttpBuffer::traits_type traits_type;
+
+    if( ! _obuffer)
+    {
+        _obufferSize = BufferSize;
+        _obuffer = _obuf; //new char[_obufferSize];
+        this->setp(_obuffer, _obuffer + _obufferSize);
+    }
+    else if( traits_type::eq_int_type(ch, traits_type::eof()) )
+    {
+        // normal blocking overflow case
+        size_t avail    = this->pptr() - _obuffer;
+        size_t written  = _sbuf->sputn(_obuffer, avail);
+        size_t leftover = avail - written;
+
+        if(leftover > 0)
+            traits_type::move(_obuffer, _obuffer + written, leftover);
+
+        this->setp(_obuffer, _obuffer + _obufferSize);
+        this->pbump(leftover);
+    }
+    else
+    {
+        // if overflow is not called by sync/flush we copy the output 
+        // buffer to a larger one
+        size_t bufsize = _obufferSize + BufferSize;
+        char* buf = new char[ bufsize ];
+        traits_type::copy(buf, _obuffer, _obufferSize);
+        std::swap(_obuffer, buf);
+        this->setp(_obuffer, _obuffer + bufsize);
+        this->pbump(_obufferSize);
+        _obufferSize = bufsize;
+        delete [] buf;
+    }
+
+    // if the overflow char is not EOF put it in buffer
+    if(traits_type::eq_int_type(ch, traits_type::eof()) == false)
+    {
+        *pptr() = traits_type::to_char_type(ch);
+        this->pbump(1);
+    }
+
+    return traits_type::not_eof(ch);
 }
 
 

@@ -63,16 +63,25 @@ class Client;
 class HttpBuffer : public std::streambuf
 {
     static const unsigned int MaxPutback = 4;
+    static const unsigned int BufferSize = 4096;
 
     public:
         HttpBuffer(Pt::System::IODevice& iodev)
         : _sbuf(0)
         , _iodev(&iodev)
+        , _obuffer(0)
+        , _obufferSize(0)
         , _contentLength(0)
         , _chunked(false)
         , _keepAlive(false)
         {
             setg(0,0,0);
+            setp(0,0);
+        }
+
+        ~HttpBuffer()
+        {
+            //delete [] _obuffer;
         }
         
         void attach(std::streambuf& sbuf)
@@ -81,11 +90,16 @@ class HttpBuffer : public std::streambuf
         std::streambuf* buffer()
         { return _sbuf; }
 
+        void discard();
+
         void beginBody(const MessageHeader& reply);
 
         void import(std::streamsize n = 0);
 
         bool isEnd() const;
+
+        std::size_t out_avail()
+        { return pptr() - pbase(); }
 
         Signal<>& bodyFinished()
         { return _bodyFinished; }
@@ -93,12 +107,19 @@ class HttpBuffer : public std::streambuf
     protected:
         virtual int_type underflow();
 
+        virtual int sync();
+
+        virtual int_type overflow(int_type ch);
+
     private:
         ChunkParser _chunkParser;
         std::streambuf* _sbuf;
         Signal<> _bodyFinished;
         Pt::System::IODevice* _iodev;
         char _buffer[4096];
+        char* _obuffer;
+        char _obuf[BufferSize];
+        std::size_t  _obufferSize;
         long _contentLength;
         bool _chunked;
         bool _keepAlive;

@@ -71,6 +71,7 @@ Connection::Connection(Server& server, Net::TcpServer& tcpServer)
 #endif
 , _httpbuf(*this)
 , _stream(0)
+, _reply(_stream)
 {
     Net::TcpSocket::accept(tcpServer);
 }
@@ -295,7 +296,7 @@ void Connection::processInput()
             
             if( _reply.finished() )
             {
-                _stream.rdbuf( _httpbuf.buffer() );
+                //_stream.rdbuf( _httpbuf.buffer() );
                 return;
             }
 
@@ -311,7 +312,7 @@ void Connection::processInput()
             log_debug("request body finished");
             _timer.stop();
 
-            _stream.rdbuf( _httpbuf.buffer() );
+            //_stream.rdbuf( _httpbuf.buffer() );
             _responder->reply(_reply.body(), _request, _reply);
         }
         else
@@ -379,45 +380,52 @@ void Connection::advanceReply()
         return;
     }
 
-    const char* server = "Server";
-    const char* connection = "Connection";
-    const char* date = "Date";
-
-    _stream << "HTTP/"
-        << _reply.header().httpVersionMajor() << '.'
-        << _reply.header().httpVersionMinor() << ' '
-        << _reply.header().httpReturnCode() << ' '
-        << _reply.header().httpReturnText() << "\r\n";
-
-    for (ReplyHeader::const_iterator it = _reply.header().begin();
-        it != _reply.header().end(); ++it)
+    bool headerSent = false;
+    if( ! headerSent )
     {
-        _stream << it->first << ": " << it->second << "\r\n";
+        _stream.rdbuf( _httpbuf.buffer() );
+
+        const char* server = "Server";
+        const char* connection = "Connection";
+        const char* date = "Date";
+
+        _stream << "HTTP/"
+            << _reply.header().httpVersionMajor() << '.'
+            << _reply.header().httpVersionMinor() << ' '
+            << _reply.header().httpReturnCode() << ' '
+            << _reply.header().httpReturnText() << "\r\n";
+
+        for (ReplyHeader::const_iterator it = _reply.header().begin();
+            it != _reply.header().end(); ++it)
+        {
+            _stream << it->first << ": " << it->second << "\r\n";
+        }
+
+        _stream << "Transfer-Encoding: chunked\r\n";
+
+        if( ! _reply.header().hasHeader(server) )
+        {
+            _stream << "Server: Pt-Net-Server\r\n";
+        }
+
+        if( ! _reply.header().hasHeader(connection) )
+        {
+            _stream << "Connection: "
+                    << (_request.keepAlive() ? "keep-alive" : "close")
+                    << "\r\n";
+        }
+
+        if( ! _reply.header().hasHeader(date) )
+        {
+            char buffer[50];
+            _stream << "Date: " << MessageHeader::htdateCurrent(buffer) << "\r\n";
+        }
+
+        _stream << "\r\n";
+        _stream.rdbuf( &_httpbuf );
     }
 
-    _stream << "Transfer-Encoding: chunked\r\n";
-
-    if( ! _reply.header().hasHeader(server) )
-    {
-        _stream << "Server: Pt-Net-Server\r\n";
-    }
-
-    if( ! _reply.header().hasHeader(connection) )
-    {
-        _stream << "Connection: "
-                << (_request.keepAlive() ? "keep-alive" : "close")
-                << "\r\n";
-    }
-
-    if( ! _reply.header().hasHeader(date) )
-    {
-        char buffer[50];
-        _stream << "Date: " << MessageHeader::htdateCurrent(buffer) << "\r\n";
-    }
-
-    _stream << "\r\n";
-
-    _reply.sendBody(_stream);
+    //_reply.sendBody(_stream);
 
     beginWrite();
 
@@ -431,6 +439,8 @@ void Connection::finishReply()
     const char* server = "Server";
     const char* connection = "Connection";
     const char* date = "Date";
+
+    _stream.rdbuf( _httpbuf.buffer() );
 
     _stream << "HTTP/"
         << _reply.header().httpVersionMajor() << '.'
@@ -446,7 +456,7 @@ void Connection::finishReply()
 
     if (!_reply.header().hasHeader(contentLength))
     {
-        _stream << "Content-Length: " << _reply.bodySize() << "\r\n";
+        _stream << "Content-Length: " << _httpbuf.out_avail() << "\r\n";
     }
 
     if (!_reply.header().hasHeader(server))
@@ -468,8 +478,10 @@ void Connection::finishReply()
     }
 
     _stream << "\r\n";
+    _stream.rdbuf( &_httpbuf );
 
-    _reply.sendBody(_stream);
+    //_reply.sendBody(_stream);
+    _httpbuf.pubsync();
 
     beginWrite();
 
