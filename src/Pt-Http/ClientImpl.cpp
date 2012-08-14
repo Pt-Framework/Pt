@@ -59,6 +59,64 @@ void HttpBuffer::beginBody(const MessageHeader& reply)
 }
 
 
+void HttpBuffer::beginOutput(const ReplyHeader& header)
+{
+    const char* server = "Server";
+    const char* connection = "Connection";
+    const char* date = "Date";
+
+    log_trace("HttpBuffer::beginOutput()");
+    setp(_obuffer, _obuffer + _obufferSize);
+
+    _keepAlive = header.keepAlive();
+    _contentLength = header.contentLength();
+    _chunked = header.chunkedTransferEncoding();
+
+    log_debug("keep-alive: " << _keepAlive);
+    log_debug("chunked: " << _chunked);
+    log_debug("content-length: " << _contentLength);
+
+    std::ostream os(_sbuf);
+
+    os <<"HTTP/"
+       << header.httpVersionMajor() << '.'
+       << header.httpVersionMinor() << ' '
+       << header.httpReturnCode() << ' '
+       << header.httpReturnText() << "\r\n";
+
+    ReplyHeader::const_iterator it;
+    for(it = header.begin(); it != header.end(); ++it)
+    {
+        os << it->first << ": " << it->second << "\r\n";
+    }
+
+    if( ! _chunked)
+    {
+        os << "Content-Length: " << this->out_avail() << "\r\n";
+    }
+
+    if( ! header.hasHeader(server) )
+    {
+        os << "Server: Pt-Net-Server\r\n";
+    }
+
+    if( ! header.hasHeader(connection) )
+    {
+        os << "Connection: "
+           << (_keepAlive ? "keep-alive" : "close")
+           << "\r\n";
+    }
+
+    if( ! header.hasHeader(date) )
+    {
+        char buffer[50];
+        os << "Date: " << MessageHeader::htdateCurrent(buffer) << "\r\n";
+    }
+
+    os << "\r\n";
+}
+
+
 bool HttpBuffer::isEnd() const
 {
     log_trace("HttpBuffer::isEnd()");
@@ -66,13 +124,6 @@ bool HttpBuffer::isEnd() const
         return _chunkParser.end();
 
     return _contentLength == 0;
-}
-
-
-void HttpBuffer::discard()
-{
-    setg(0,0,0);
-    setp(_obuffer, _obuffer + _obufferSize);
 }
 
 

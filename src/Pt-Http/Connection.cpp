@@ -478,6 +478,9 @@ void Connection::finishReply()
     }
 
     _stream << "\r\n";
+
+    //_httpbuf.beginOutput( _reply.header() );
+
     _stream.rdbuf( &_httpbuf );
 
     //_reply.sendBody(_stream);

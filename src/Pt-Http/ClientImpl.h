@@ -90,9 +90,9 @@ class HttpBuffer : public std::streambuf
         std::streambuf* buffer()
         { return _sbuf; }
 
-        void discard();
-
         void beginBody(const MessageHeader& reply);
+
+        void beginOutput(const ReplyHeader& reply);
 
         void import(std::streamsize n = 0);
 
