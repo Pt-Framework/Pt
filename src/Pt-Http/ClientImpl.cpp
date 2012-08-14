@@ -246,7 +246,7 @@ HttpBuffer::int_type HttpBuffer::overflow(int_type ch)
     if( ! _obuffer)
     {
         _obufferSize = BufferSize;
-        _obuffer = _obuf; //new char[_obufferSize];
+        _obuffer = new char[_obufferSize];
         this->setp(_obuffer, _obuffer + _obufferSize);
     }
     else if( traits_type::eq_int_type(ch, traits_type::eof()) )

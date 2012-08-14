@@ -296,7 +296,6 @@ void Connection::processInput()
             
             if( _reply.finished() )
             {
-                //_stream.rdbuf( _httpbuf.buffer() );
                 return;
             }
 
@@ -312,7 +311,6 @@ void Connection::processInput()
             log_debug("request body finished");
             _timer.stop();
 
-            //_stream.rdbuf( _httpbuf.buffer() );
             _responder->reply(_reply.body(), _request, _reply);
         }
         else
@@ -480,8 +478,6 @@ void Connection::finishReply()
     _stream << "\r\n";
 
     //_httpbuf.beginOutput( _reply.header() );
-
-    _stream.rdbuf( &_httpbuf );
 
     //_reply.sendBody(_stream);
     _httpbuf.pubsync();

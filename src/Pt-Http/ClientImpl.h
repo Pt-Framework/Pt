@@ -63,7 +63,7 @@ class Client;
 class HttpBuffer : public std::streambuf
 {
     static const unsigned int MaxPutback = 4;
-    static const unsigned int BufferSize = 4096;
+    static const unsigned int BufferSize = 512;
 
     public:
         HttpBuffer(Pt::System::IODevice& iodev)
@@ -81,7 +81,7 @@ class HttpBuffer : public std::streambuf
 
         ~HttpBuffer()
         {
-            //delete [] _obuffer;
+            delete [] _obuffer;
         }
         
         void attach(std::streambuf& sbuf)
@@ -118,7 +118,6 @@ class HttpBuffer : public std::streambuf
         Pt::System::IODevice* _iodev;
         char _buffer[4096];
         char* _obuffer;
-        char _obuf[BufferSize];
         std::size_t  _obufferSize;
         long _contentLength;
         bool _chunked;
