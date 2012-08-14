@@ -50,10 +50,10 @@ command! PtTagsBuild :call TagsBuild()
 let g:jam_args = ''
 
 if has('win32')
-    let &makeprg = "jam.bat -q $*"
+    let &makeprg = "jam.bat -q -j2 $*"
     let &shellpipe = "2>&1| ide\\tee.exe"
 else
-    let &makeprg = "./jam.sh -q $*"
+    let &makeprg = "./jam.sh -q -j2 $*"
 endif
 
 function Build(args)
@@ -64,7 +64,7 @@ function Build(args)
     exe "sil lcd " . g:pt_project_root
     exe "make " . a:args
     botright copen
-    "cc 1 "j umps to first error
+    "cc 1 "jumps to first error
     sil lcd -
 endfunction
 
