@@ -94,7 +94,6 @@ void Connection::begin(System::EventLoop& loop, Ssl::Context* ctx)
     
     _timer.timeout() += Pt::slot(*this, &Connection::onTimeout);
     _timer.setActive(loop);
-    _timer.start( _server.readTimeout() );
 
     _loop = &loop;
     this->setActive(loop);
@@ -114,6 +113,7 @@ void Connection::begin(System::EventLoop& loop, Ssl::Context* ctx)
 
         _httpbuf.attach(_sslbuf);
         _sslbuf.beginAccept();
+        _timer.start( _server.readTimeout() );
         return;
     }
 #endif
@@ -123,12 +123,14 @@ void Connection::begin(System::EventLoop& loop, Ssl::Context* ctx)
 
         _httpbuf.attach(_sockbuf);
         _sockbuf.beginRead();
+        _timer.start( _server.readTimeout() );
 }
 
 #ifdef PT_HTTP_WITH_SSL
 void Connection::onHttpsHandshake(Pt::Ssl::IOBuffer& ssl)
 {
     log_trace("Connection::onAcceptHandshake");
+
     try 
     {
         ssl.endHandshake();
@@ -152,6 +154,7 @@ void Connection::onHttpsInput(Pt::Ssl::IOBuffer& ssl)
 
 void Connection::onHttpsOutput(Pt::Ssl::IOBuffer& ssl)
 {
+    log_trace("Connection::onHttpsOutput");
     processOutput();
 }
 #endif
@@ -159,12 +162,14 @@ void Connection::onHttpsOutput(Pt::Ssl::IOBuffer& ssl)
 
 void Connection::onHttpInput(System::StreamBuffer& sb)
 {
+    log_trace("Connection::onHttpInput");
     processInput();
 }
 
 
 void Connection::onHttpOutput(System::StreamBuffer& sb)
 {
+    log_trace("Connection::onHttpOutput");
     processOutput();
 }
 
@@ -176,13 +181,17 @@ void Connection::beginRead()
         if( _sslbuf.in_avail() )
             onHttpsInput(_sslbuf);
         else
+        {
             _sslbuf.beginRead();
+        }
     else
 #endif
         if( _sockbuf.in_avail() )
             onHttpInput(_sockbuf);
         else
+        {
             _sockbuf.beginRead();
+        }
 }
 
 
@@ -208,7 +217,6 @@ bool Connection::beginWrite()
         if ( _sslbuf.buffer().out_avail() )
         {
             _sslbuf.beginWrite();
-            _timer.start(_server.writeTimeout());
             return true;
         }
         
@@ -218,7 +226,6 @@ bool Connection::beginWrite()
     if ( _sockbuf.out_avail() )
     {
         _sockbuf.beginWrite();
-        _timer.start(_server.writeTimeout());
         return true;
     }
 
@@ -250,10 +257,13 @@ void Connection::processInput()
         return;
     }
 
-    _timer.start(_server.readTimeout());
-
     if ( _responder == 0 )
     {
+        if( _parser.begin() && ! _timer.started() )
+        {
+            _timer.start( _server.readTimeout() );
+        }
+        
         _parser.advance( *_httpbuf.buffer() );
 
         if( _parser.fail() )
@@ -265,11 +275,9 @@ void Connection::processInput()
 
         if( _parser.end() )
         {
-            _responder = _server.getResponder(_request);
-
-            // new code using HttpBuffer:
             _httpbuf.beginBody(_request);
 
+            _responder = _server.getResponder(_request);
             _responder->beginRequest(_stream, _request);
 
             //TODO: allow immediate reply from this method
@@ -308,7 +316,7 @@ void Connection::processInput()
         {
             log_debug("request body finished");
             _timer.stop();
-
+            
             _httpbuf.reset();
             _responder->beginReply(_request, _reply);
         }
@@ -379,8 +387,8 @@ void Connection::advanceReply()
 
    _httpbuf.writeReply( _reply.header() );
     
-    beginWrite();
     _timer.start( _server.writeTimeout() );
+    beginWrite();
 }
 
 
@@ -388,8 +396,8 @@ void Connection::finishReply()
 {
     _httpbuf.finishReply( _reply.header() );
     
+    _timer.start( _server.writeTimeout() );
     beginWrite();
-    _timer.start(_server.writeTimeout());
 }
 
 
