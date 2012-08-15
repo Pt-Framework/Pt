@@ -181,6 +181,7 @@ class ClientImpl : public Connectable
         void setContext(Ssl::Context& ctx);
 
         const ReplyHeader& execute(const Request& request);
+        const ReplyHeader& execute(const RequestHeader& request);
 
         const ReplyHeader& header()
         { return _replyHeader; }

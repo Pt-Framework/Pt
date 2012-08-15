@@ -100,6 +100,20 @@ void Client::setContext(Ssl::Context& ctx)
     _impl->setContext(ctx);
 }
 
+const ReplyHeader& Client::execute(const RequestHeader& request)
+{
+    try
+    {
+        return _impl->execute(request);
+    }
+    catch (...)
+    {
+        cancel();
+        throw;
+    }
+}
+
+
 const ReplyHeader& Client::execute(const Request& request)
 {
     try
@@ -112,6 +126,7 @@ const ReplyHeader& Client::execute(const Request& request)
         throw;
     }
 }
+
 
 const ReplyHeader& Client::header()
 {

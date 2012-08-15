@@ -279,8 +279,6 @@ void Connection::processInput()
 
             _responder = _server.getResponder(_request);
             _responder->beginRequest(_stream, _request);
-
-            //TODO: allow immediate reply from this method
         }
         else
         {
@@ -297,11 +295,11 @@ void Connection::processInput()
 
         while( _httpbuf.in_avail() )
         {
-            // TODO: readBody could write to _reply
             _responder->readRequest(_stream, _reply);
             
             if( _reply.finished() )
             {
+                // TODO: skip unread body
                 return;
             }
 

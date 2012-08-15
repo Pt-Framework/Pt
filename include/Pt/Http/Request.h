@@ -123,7 +123,6 @@ class Request
         { out << _body.str(); }
 
         Auth auth() const;
-
 };
 
 } // namespace Http

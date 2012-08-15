@@ -455,7 +455,6 @@ const ReplyHeader& ClientImpl::execute(const Request& request)
 
     _stream.rdbuf( _httpbuf.buffer() );
     _errorPending = false;
-    _request = &request;
     _replyHeader.clear();
     _parser.reset(true);
     
@@ -478,6 +477,73 @@ const ReplyHeader& ClientImpl::execute(const Request& request)
 
         log_debug("sending request");
         sendRequest(_stream, request);
+        _stream.flush();
+        _sockbuf.pubsync(); // extra flush for https: _stream -> _sslbuf -> _sockbuf
+
+        log_debug("reading reply");
+        _stream.peek();
+        
+        if( _stream || ! reuseConnection)
+            break;
+
+        cancel();
+    }
+
+    unsigned headerSize = 0;
+    char ch = ' ';
+    while( ! _parser.end() && _stream.get(ch) )
+    {
+        _parser.parse(ch);
+        ++headerSize;
+    }
+         
+    if( ! _parser.end() )
+    {
+        log_info("invalid HTTP reply");
+        throw System::IOError( PT_ERROR_MSG("invalid HTTP reply") );
+    }
+
+    log_debug("content-length: " << _replyHeader.contentLength());
+    log_debug("chunked: " << _replyHeader.chunkedTransferEncoding());
+    log_debug("header-size: " << headerSize);
+
+    _stream.rdbuf(&_httpbuf);
+    _httpbuf.beginBody(_replyHeader);
+    return _replyHeader;
+}
+
+// TODO: something like:
+//
+// Request& ClientImpl::execute()
+//
+const ReplyHeader& ClientImpl::execute(const RequestHeader& request)
+{
+    log_trace("ClientImpl::execute " << request.url());
+
+    _stream.rdbuf( _httpbuf.buffer() );
+    _errorPending = false;
+    _replyHeader.clear();
+    _parser.reset(true);
+    
+    for(;;)
+    {
+        bool reuseConnection = _socket.isConnected();
+        if( ! reuseConnection)
+        {
+            log_debug("connect");
+            _socket.connect(_addrInfo);
+
+#ifdef PT_HTTP_WITH_SSL
+            if(_ssl)
+            {
+                log_debug("ssl handshake");
+                _sslbuf.connect();
+            }
+#endif
+        }
+
+        log_debug("sending request");
+        //sendRequest(_stream, request);
         _stream.flush();
         _sockbuf.pubsync(); // extra flush for https: _stream -> _sslbuf -> _sockbuf
 

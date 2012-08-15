@@ -49,6 +49,7 @@ namespace Ssl {
 namespace Http {
 
 class ReplyHeader;
+class RequestHeader;
 class Request;
 
 class PT_HTTP_API Client : private NonCopyable
@@ -89,6 +90,7 @@ class PT_HTTP_API Client : private NonCopyable
         // Sends the passed request to the server and parses the headers.
         // The body must be read with readBody.
         // This method blocks or times out until the body is parsed.
+        const ReplyHeader& execute(const RequestHeader& request);
         const ReplyHeader& execute(const Request& request);
 
         const ReplyHeader& header();
