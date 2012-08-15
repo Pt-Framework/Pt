@@ -60,12 +60,11 @@ class PT_HTTP_API Responder
 
         virtual void beginRequest(std::istream& in, RequestHeader& request);
         
-        virtual void readBody(std::istream&, Reply& reply);
+        virtual void readRequest(std::istream&, Reply& reply);
 
-        // TODO:
-        //virtual void beginReply(std::ostream& os, RequestHeader& request, Http::Reply& reply) = 0;
+        virtual void beginReply(RequestHeader& request, Http::Reply& reply);
 
-        virtual void reply(std::ostream& os, RequestHeader& request, Http::Reply& reply) = 0;
+        virtual void writeReply(RequestHeader& request, Http::Reply& reply) = 0;
 
     private:
         Service& _service;

@@ -124,6 +124,7 @@ class Connection : public Net::TcpSocket
         RequestHeader _request;
         System::EventLoop* _loop;
         System::Timer _timer;
+        bool _chunkedTransfer;
         Responder* _responder;
         System::IOBuffer _sockbuf;
         bool _ssl;

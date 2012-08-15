@@ -64,13 +64,14 @@ Connection::Connection(Server& server, Net::TcpServer& tcpServer)
 , _parseEvent(_request)
 , _parser(_parseEvent, false)
 , _loop(0)
+, _chunkedTransfer(true)
 , _responder(0)
 , _ssl(false)
 #ifdef PT_HTTP_WITH_SSL
 , _sslbuf( _sockbuf )
 #endif
 , _httpbuf(*this)
-, _stream(0)
+, _stream(&_httpbuf)
 , _reply(_stream)
 {
     Net::TcpSocket::accept(tcpServer);
@@ -112,7 +113,6 @@ void Connection::begin(System::EventLoop& loop, Ssl::Context* ctx)
         _sslbuf.inputReady() += slot(*this, &Connection::onHttpsInput);
 
         _httpbuf.attach(_sslbuf);
-        _stream.rdbuf(&_sslbuf);
         _sslbuf.beginAccept();
         return;
     }
@@ -122,7 +122,6 @@ void Connection::begin(System::EventLoop& loop, Ssl::Context* ctx)
         _sockbuf.outputReady() += Pt::slot(*this, &Connection::onHttpOutput);
 
         _httpbuf.attach(_sockbuf);
-        _stream.rdbuf(&_sockbuf);
         _sockbuf.beginRead();
 }
 
@@ -244,7 +243,7 @@ void Connection::processInput()
 
     endRead();
 
-    if (_stream.rdbuf()->in_avail() == 0 || Net::TcpSocket::eof())
+    if (_httpbuf.buffer()->in_avail() == 0 || Net::TcpSocket::eof())
     {
         close();
         timeout(*this);
@@ -255,7 +254,7 @@ void Connection::processInput()
 
     if ( _responder == 0 )
     {
-        _parser.advance(_stream);
+        _parser.advance( *_httpbuf.buffer() );
 
         if( _parser.fail() )
         {
@@ -269,7 +268,6 @@ void Connection::processInput()
             _responder = _server.getResponder(_request);
 
             // new code using HttpBuffer:
-            _stream.rdbuf(&_httpbuf);
             _httpbuf.beginBody(_request);
 
             _responder->beginRequest(_stream, _request);
@@ -292,7 +290,7 @@ void Connection::processInput()
         while( _httpbuf.in_avail() )
         {
             // TODO: readBody could write to _reply
-            _responder->readBody(_stream, _reply);
+            _responder->readRequest(_stream, _reply);
             
             if( _reply.finished() )
             {
@@ -311,7 +309,8 @@ void Connection::processInput()
             log_debug("request body finished");
             _timer.stop();
 
-            _responder->reply(_reply.body(), _request, _reply);
+            _httpbuf.reset();
+            _responder->beginReply(_request, _reply);
         }
         else
         {
@@ -341,14 +340,14 @@ void Connection::processOutput()
 
         if( ! _reply.finished() )
         {
-            _responder->reply(_reply.body(), _request, _reply);
+            _responder->writeReply(_request, _reply);
             return;
         }
   
         bool keepAlive = _request.keepAlive() && _reply.header().keepAlive();
         if(keepAlive)
         {
-            //log_debug("do keep alive");
+            log_debug("do keep alive");
             _timer.start(_server.keepAliveTimeout());
             _request.clear();
             _reply.clear();
@@ -370,120 +369,26 @@ void Connection::processOutput()
 
 void Connection::advanceReply()
 {
-    bool allowChunked = false;
-
-    if( ! allowChunked)
+    if( ! _chunkedTransfer)
     {
-        _responder->reply(_reply.body(), _request, _reply);
+        _responder->writeReply(_request, _reply);
         return;
     }
 
-    bool headerSent = false;
-    if( ! headerSent )
-    {
-        _stream.rdbuf( _httpbuf.buffer() );
+    _reply.header().setHeader("Transfer-Encoding", "chunked");
 
-        const char* server = "Server";
-        const char* connection = "Connection";
-        const char* date = "Date";
-
-        _stream << "HTTP/"
-            << _reply.header().httpVersionMajor() << '.'
-            << _reply.header().httpVersionMinor() << ' '
-            << _reply.header().httpReturnCode() << ' '
-            << _reply.header().httpReturnText() << "\r\n";
-
-        for (ReplyHeader::const_iterator it = _reply.header().begin();
-            it != _reply.header().end(); ++it)
-        {
-            _stream << it->first << ": " << it->second << "\r\n";
-        }
-
-        _stream << "Transfer-Encoding: chunked\r\n";
-
-        if( ! _reply.header().hasHeader(server) )
-        {
-            _stream << "Server: Pt-Net-Server\r\n";
-        }
-
-        if( ! _reply.header().hasHeader(connection) )
-        {
-            _stream << "Connection: "
-                    << (_request.keepAlive() ? "keep-alive" : "close")
-                    << "\r\n";
-        }
-
-        if( ! _reply.header().hasHeader(date) )
-        {
-            char buffer[50];
-            _stream << "Date: " << MessageHeader::htdateCurrent(buffer) << "\r\n";
-        }
-
-        _stream << "\r\n";
-        _stream.rdbuf( &_httpbuf );
-    }
-
-    //_reply.sendBody(_stream);
-
+   _httpbuf.writeReply( _reply.header() );
+    
     beginWrite();
-
     _timer.start( _server.writeTimeout() );
 }
 
 
 void Connection::finishReply()
 {
-    const char* contentLength = "Content-Length";
-    const char* server = "Server";
-    const char* connection = "Connection";
-    const char* date = "Date";
-
-    _stream.rdbuf( _httpbuf.buffer() );
-
-    _stream << "HTTP/"
-        << _reply.header().httpVersionMajor() << '.'
-        << _reply.header().httpVersionMinor() << ' '
-        << _reply.header().httpReturnCode() << ' '
-        << _reply.header().httpReturnText() << "\r\n";
-
-    for (ReplyHeader::const_iterator it = _reply.header().begin();
-        it != _reply.header().end(); ++it)
-    {
-        _stream << it->first << ": " << it->second << "\r\n";
-    }
-
-    if (!_reply.header().hasHeader(contentLength))
-    {
-        _stream << "Content-Length: " << _httpbuf.out_avail() << "\r\n";
-    }
-
-    if (!_reply.header().hasHeader(server))
-    {
-        _stream << "Server: Pt-Net-Server\r\n";
-    }
-
-    if (!_reply.header().hasHeader(connection))
-    {
-        _stream << "Connection: "
-                << (_request.keepAlive() ? "keep-alive" : "close")
-                << "\r\n";
-    }
-
-    if (!_reply.header().hasHeader(date))
-    {
-        char buffer[50];
-        _stream << "Date: " << MessageHeader::htdateCurrent(buffer) << "\r\n";
-    }
-
-    _stream << "\r\n";
-
-    //_httpbuf.beginOutput( _reply.header() );
-
-    //_reply.sendBody(_stream);
-    _httpbuf.pubsync();
-
+    _httpbuf.finishReply( _reply.header() );
+    
     beginWrite();
-
     _timer.start(_server.writeTimeout());
 }
 
@@ -493,9 +398,9 @@ void Connection::replyError()
     _reply.header().httpReturn(500, "internal server error");
     _reply.header().setHeader("Content-Type", "text/plain");
     _reply.header().setHeader("Connection", "close");
-    _stream << "Error 500";
+    _stream << "Error 500: Internal server error.";
 
-    reply();
+    finishReply();
 }
 
 

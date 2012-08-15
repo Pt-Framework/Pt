@@ -54,18 +54,14 @@ class ChunkedResponder : public Pt::Http::Responder
         void beginRequest(std::istream& in, Pt::Http::RequestHeader& request)
         { _chunks = 5; }
 
-        void readBody(std::istream& is, Pt::Http::Reply& reply)
+        void readRequest(std::istream& is, Pt::Http::Reply& reply)
         {
             is.ignore( is.rdbuf()->in_avail() );
         }
-
-        void beginReply(std::ostream& os, Pt::Http::Reply& reply)
-        {
-        }
         
-        void reply(std::ostream& os, Pt::Http::RequestHeader& request, Pt::Http::Reply& reply)
+        void writeReply(Pt::Http::RequestHeader& request, Pt::Http::Reply& reply)
         {
-            os << "Chunk" << _chunks--;
+            reply.body() << "Chunk" << _chunks--;
 
             if(_chunks == 0)
                 reply.finish();
@@ -86,7 +82,7 @@ class ServerTest : public Pt::Unit::TestSuite
         ServerTest()
         : Pt::Unit::TestSuite("ServerTest")
         {
-            //Pt::System::Logger::setLogLevel("Pt.Http.Server", Pt::System::Trace);
+            //Pt::System::Logger::setLogLevel("Pt.Http", Pt::System::Trace);
 
             this->registerMethod( "NotFound", *this, &ServerTest::NotFound);
 #ifdef PT_HTTP_WITH_SSL

@@ -87,7 +87,7 @@ void XmlRpcResponder::beginRequest(std::istream& is, Http::RequestHeader& reques
 }
 
 
-void XmlRpcResponder::readBody(std::istream& is, Http::Reply& reply)
+void XmlRpcResponder::readRequest(std::istream& is, Http::Reply& reply)
 {
    try
    {
@@ -107,25 +107,25 @@ void XmlRpcResponder::readBody(std::istream& is, Http::Reply& reply)
     }
     catch(const Xml::XmlError& error)
     {
-        replyError(reply.body(), reply, 1, error.what());
+        replyError(reply, 1, error.what());
     }
     catch(const SerializationError& error)
     {
-        replyError(reply.body(), reply, 2, error.what());
+        replyError(reply, 2, error.what());
     }
     catch(const ConversionError& error)
     {
-        replyError(reply.body(), reply, 3, error.what());
+        replyError(reply, 3, error.what());
     }
 }
 
 
-void XmlRpcResponder::reply(std::ostream& os, Http::RequestHeader& request, Http::Reply& reply)
+void XmlRpcResponder::writeReply(Http::RequestHeader& request, Http::Reply& reply)
 {
     try
     {
         _reply = &reply;
-        _writer.begin(os);
+        _writer.begin( _reply->body() );
         reply.header().setHeader("Content-Type", "text/xml");
 
         if( ! _proc )
@@ -147,18 +147,18 @@ void XmlRpcResponder::reply(std::ostream& os, Http::RequestHeader& request, Http
     }
     catch (const Fault& fault)
     {
-        replyError(reply.body(), reply, fault.rc(), fault.what());
+        replyError(reply, fault.rc(), fault.what());
     }
 }
 
 
-void XmlRpcResponder::replyError(std::ostream& os, Http::Reply& reply, int rc, const char* msg)
+void XmlRpcResponder::replyError(Http::Reply& reply, int rc, const char* msg)
 {
     reply.clear();
     reply.header().setHeader("Content-Type", "text/xml");
     reply.header().setHeader("Connection", "close");
 
-    _writer.begin(os);
+    _writer.begin( reply.body() );
     _writer.writeStartTag( XMLRPC_METHODRESPONSE );
     _writer.writeStartTag( XMLRPC_FAULT );
     _writer.writeStartTag( XMLRPC_VALUE );
@@ -213,22 +213,22 @@ void XmlRpcResponder::endReply()
     catch (const Fault& fault)
     {
         assert(_reply);
-        replyError(_reply->body(), *_reply, fault.rc(), fault.what());
+        replyError(*_reply, fault.rc(), fault.what());
     }
     catch(const Xml::XmlError& error)
     {
         assert(_reply);
-        replyError(_reply->body(), *_reply, 1, error.what());
+        replyError( *_reply, 1, error.what());
     }
     catch(const SerializationError& error)
     {
         assert(_reply);
-        replyError(_reply->body(), *_reply, 2, error.what());
+        replyError(*_reply, 2, error.what());
     }
     catch(const ConversionError& error)
     {
         assert(_reply);
-        replyError(_reply->body(), *_reply, 3, error.what());
+        replyError(*_reply, 3, error.what());
     }
 }
 

@@ -70,16 +70,16 @@ class PT_XMLRPC_API XmlRpcResponder : public Http::Responder
 
         void beginRequest(std::istream& in, Http::RequestHeader& request);
 
-        void readBody(std::istream& is, Http::Reply& reply);
+        void readRequest(std::istream& is, Http::Reply& reply);
 
-        void replyError(std::ostream& os, Http::Reply& reply, int rc, const char* msg);
-
-        void reply(std::ostream& os, Http::RequestHeader& request, Http::Reply& reply);
+        void writeReply(Http::RequestHeader& request, Http::Reply& reply);
 
         void endReply();
 
     protected:
         void advance(const Pt::Xml::Node& node);
+
+        void replyError(Http::Reply& reply, int rc, const char* msg);
 
     private:
        State _state;

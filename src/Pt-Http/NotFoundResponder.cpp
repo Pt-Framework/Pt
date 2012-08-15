@@ -33,7 +33,7 @@ namespace Pt {
 
 namespace Http {
 
-void NotFoundResponder::reply(std::ostream& os, RequestHeader& request, Reply& reply)
+void NotFoundResponder::writeReply(RequestHeader& request, Reply& reply)
 {
     reply.header().httpReturn(404, "Not found");
     reply.finish();

@@ -56,17 +56,16 @@ void Responder::beginRequest(std::istream& in, RequestHeader& request)
 }
 
 
-void Responder::readBody(std::istream& is, Reply& reply)
+void Responder::readRequest(std::istream& is, Reply& reply)
 {
     is.ignore( is.rdbuf()->in_avail() );
 }
 
 
-/*void Responder::reply(std::ostream& os, RequestHeader& request, Http::Reply& reply)
-{
-    reply.httpReturn(501, "Not Implemented");
-    reply.finish();
-}*/
+void Responder::beginReply(RequestHeader& request, Http::Reply& reply)
+{ 
+    this->writeReply(request, reply); 
+}
 
 } // namespace Http
 

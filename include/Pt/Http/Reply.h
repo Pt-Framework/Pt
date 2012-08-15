@@ -80,17 +80,8 @@ class PT_HTTP_API Reply
             _finished = false;
         }
 
-        //std::string bodyStr() const
-        //{ return _body.str(); }
-
         std::ostream& body()
         { return _body; }
-
-        //std::size_t bodySize() const
-        //{ return _body.str().size(); }
-
-        //void sendBody(std::ostream& out) const
-        //{ out << _body.str(); }
 };
 
 } // namespace Http
