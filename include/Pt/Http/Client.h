@@ -105,7 +105,7 @@ class PT_HTTP_API Client : private NonCopyable
         // received.
         void beginExecute(const Request& request);
 
-        void beginReply();
+        void advanceRequest(const Request& request);
 
         void endExecute();
 

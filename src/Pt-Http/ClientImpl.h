@@ -187,7 +187,7 @@ class ClientImpl : public Connectable
 
         void beginRequest(const Request& request);
 
-        void beginReply();
+        void advanceRequest(const Request& request);
 
         void endExecute();
 

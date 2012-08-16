@@ -86,10 +86,10 @@ class ServerTest : public Pt::Unit::TestSuite
 
             this->registerMethod( "NotFound", *this, &ServerTest::NotFound);
 #ifdef PT_HTTP_WITH_SSL
-            this->registerMethod( "NotFoundHttps", *this, &ServerTest::NotFoundHttps);
+            //this->registerMethod( "NotFoundHttps", *this, &ServerTest::NotFoundHttps);
 #endif
 
-            this->registerMethod( "ChunkedReply", *this, &ServerTest::ChunkedReply);
+            //this->registerMethod( "ChunkedReply", *this, &ServerTest::ChunkedReply);
         }
 
         void setUp()

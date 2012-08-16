@@ -567,9 +567,11 @@ void ClientImpl::beginRequest(const Request& request)
     }
 }
 
+// void ClientImpl::beginChunk(const Request& request)
 
-void ClientImpl::beginReply()
+void ClientImpl::advanceRequest(const Request& request)
 {
+    _stream.write( request.data(), request.size() );
 }
 
 
@@ -698,8 +700,15 @@ void ClientImpl::onOutput(System::StreamBuffer& sb)
         }
         else
         {
-            sb.beginRead();
+            //if( _request->header().chunkedTransferEncoding() )
+            
             _client->requestSent().send(*_client);
+
+            if( sb.out_avail() )
+                sb.beginWrite();
+            else
+                sb.beginRead();
+
         }
     }
     catch (const System::IOError&)

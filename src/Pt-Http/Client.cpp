@@ -123,9 +123,9 @@ void Client::beginExecute(const Request& request)
     _impl->beginRequest(request);
 }
 
-void Client::beginReply()
+void Client::advanceRequest(const Request& request)
 {
-    _impl->beginReply();
+    _impl->advanceRequest(request);
 }
 
 void Client::endExecute()
