@@ -75,6 +75,39 @@ int compareIgnoreCase(const char* s1, const char* s2)
 } 
 
 
+MessageBuffer::int_type MessageBuffer::overflow(int_type ch)
+{
+    typedef MessageBuffer::traits_type traits_type;
+
+    if( ! _obuffer)
+    {
+        _obufferSize = BufferSize;
+        _obuffer = new char[_obufferSize];
+        this->setp(_obuffer, _obuffer + _obufferSize);
+    }
+    else
+    {
+        size_t bufsize = _obufferSize + BufferSize;
+        char* buf = new char[ bufsize ];
+        traits_type::copy(buf, _obuffer, _obufferSize);
+        std::swap(_obuffer, buf);
+        this->setp(_obuffer, _obuffer + bufsize);
+        this->pbump(_obufferSize);
+        _obufferSize = bufsize;
+        delete [] buf;
+    }
+
+    // if the overflow char is not EOF put it in buffer
+    if(traits_type::eq_int_type(ch, traits_type::eof()) == false)
+    {
+        *pptr() = traits_type::to_char_type(ch);
+        this->pbump(1);
+    }
+
+    return traits_type::not_eof(ch);
+}
+
+
 const char* MessageHeader::getHeader(const char* key) const
 {
     for (const_iterator it = begin(); it != end(); ++it)

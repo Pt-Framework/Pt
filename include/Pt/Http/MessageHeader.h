@@ -31,12 +31,48 @@
 
 #include <Pt/Http/Api.h>
 #include <string>
+#include <streambuf>
 #include <cstring>
 #include <utility>
 
 namespace Pt {
 
 namespace Http {
+
+class PT_HTTP_API MessageBuffer : public std::streambuf
+{
+    static const unsigned int BufferSize = 512;
+
+    public:
+        MessageBuffer()
+        : _obuffer(0)
+        , _obufferSize(0)
+        {
+            setg(0,0,0);
+            setp(0,0);
+        }
+
+        ~MessageBuffer()
+        {
+            delete [] _obuffer;
+        }
+        
+        void reset()
+        { this->setp(_obuffer, _obuffer + _obufferSize); }
+
+        std::size_t size() const
+        { return pptr() - pbase(); }
+
+        const char* data() const
+        { return _obuffer; }
+
+    protected:
+        virtual int_type overflow(int_type ch);
+
+    private:
+        char* _obuffer;
+        std::size_t  _obufferSize;
+};
 
 class PT_HTTP_API MessageHeader
 {

@@ -143,7 +143,7 @@ std::string HttpClientImpl::execute()
 std::ostream& HttpClientImpl::prepareRequest()
 {
     _request.clear();
-    _request.setHeader("Content-Type", "text/xml");
+    _request.header().setHeader("Content-Type", "text/xml");
     _request.method("POST");
     return _request.body();
 }

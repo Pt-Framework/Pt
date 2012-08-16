@@ -38,20 +38,13 @@ namespace Pt {
 
 namespace Http {
 
-class Request
+class PT_HTTP_API Request
 {
-        RequestHeader _header;
-        std::ostringstream _body;
-
     public:
-        struct Auth
-        {
-            std::string user;
-            std::string password;
-        };
-
-        explicit Request(const std::string& url = std::string())
+        explicit Request( const std::string& url = std::string() )
         : _header(url)
+        , _buf()
+        , _body(&_buf)
         { }
 
         RequestHeader& header()
@@ -60,36 +53,11 @@ class Request
         const RequestHeader& header() const
         { return _header; }
 
-        void setHeader(const char* key, const char* value)
-        {
-            _header.setHeader(key, value);
-        }
-
-        void addHeader(const char* key, const char* value)
-        {
-            _header.addHeader(key, value);
-        }
-
-        void removeHeader(const char* key)
-        {
-            _header.removeHeader(key);
-        }
-
-        const char* getHeader(const char* key) const
-        {
-            return _header.getHeader(key);
-        }
-
-        bool hasHeader(const char* key) const
-        {
-            return _header.hasHeader(key);
-        }
-
         void clear()
         {
             _header.clear();
             _body.clear();
-            _body.str(std::string());
+            _buf.reset();
         }
 
         const std::string& url() const
@@ -110,19 +78,19 @@ class Request
         void qparams(const std::string& q)
         { _header.qparams(q); }
 
-        std::string bodyStr() const
-        { return _body.str(); }
+        const char* data() const
+        { return _buf.data(); }
 
         std::ostream& body()
         { return _body; }
 
-        std::size_t bodySize() const
-        { return _body.str().size(); }
+        std::size_t size() const
+        { return _buf.size(); }
 
-        void sendBody(std::ostream& out) const
-        { out << _body.str(); }
-
-        Auth auth() const;
+    private:
+        RequestHeader _header;
+        MessageBuffer _buf;
+        std::ostream _body;
 };
 
 } // namespace Http

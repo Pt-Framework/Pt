@@ -59,85 +59,85 @@ void HttpBuffer::beginBody(const MessageHeader& reply)
 }
 
 
-void HttpBuffer::writeReply(const ReplyHeader& header)
-{
-    log_trace("HttpBuffer::beginOutput()");
+//void HttpBuffer::writeReply(const ReplyHeader& header, const MessageBuffer& mbuf)
+//{
+//    log_trace("HttpBuffer::writeReply()");
+//
+//    if( ! _chunked && ! _contentLength)
+//    {
+//        const char* server = "Server";
+//        const char* connection = "Connection";
+//        const char* date = "Date";
+//
+//        _keepAlive = header.keepAlive();
+//        _contentLength = header.contentLength();
+//        _chunked = header.chunkedTransferEncoding();
+//
+//        log_debug("keep-alive: " << _keepAlive);
+//        log_debug("chunked: " << _chunked);
+//        log_debug("content-length: " << _contentLength);
+//
+//        std::ostream os(_sbuf);
+//
+//        os <<"HTTP/"
+//           << header.httpVersionMajor() << '.'
+//           << header.httpVersionMinor() << ' '
+//           << header.httpReturnCode() << ' '
+//           << header.httpReturnText() << "\r\n";
+//
+//        ReplyHeader::const_iterator it;
+//        for(it = header.begin(); it != header.end(); ++it)
+//        {
+//            os << it->first << ": " << it->second << "\r\n";
+//        }
+//
+//        if( ! _chunked)
+//        {
+//            os << "Content-Length: " << mbuf.size() << "\r\n";
+//        }
+//
+//        if( ! header.hasHeader(server) )
+//        {
+//            os << "Server: Pt-Net-Server\r\n";
+//        }
+//
+//        if( ! header.hasHeader(connection) )
+//        {
+//            os << "Connection: "
+//               << (_keepAlive ? "keep-alive" : "close")
+//               << "\r\n";
+//        }
+//
+//        if( ! header.hasHeader(date) )
+//        {
+//            char buffer[50];
+//            os << "Date: " << MessageHeader::htdateCurrent(buffer) << "\r\n";
+//        }
+//
+//        os << "\r\n";
+//    }
+//
+//    if(_chunked)
+//    {
+//        std::ostream os(_sbuf);
+//        os << std::hex << mbuf.size() << "\r\n";
+//    }
+//
+//    _sbuf->sputn( mbuf.data(), mbuf.size() );
+//
+//    if(_chunked)
+//        _sbuf->sputn("\r\n", 2);
+//}
 
-    if( ! _chunked && ! _contentLength)
-    {
-        const char* server = "Server";
-        const char* connection = "Connection";
-        const char* date = "Date";
 
-        _keepAlive = header.keepAlive();
-        _contentLength = header.contentLength();
-        _chunked = header.chunkedTransferEncoding();
-
-        log_debug("keep-alive: " << _keepAlive);
-        log_debug("chunked: " << _chunked);
-        log_debug("content-length: " << _contentLength);
-
-        std::ostream os(_sbuf);
-
-        os <<"HTTP/"
-           << header.httpVersionMajor() << '.'
-           << header.httpVersionMinor() << ' '
-           << header.httpReturnCode() << ' '
-           << header.httpReturnText() << "\r\n";
-
-        ReplyHeader::const_iterator it;
-        for(it = header.begin(); it != header.end(); ++it)
-        {
-            os << it->first << ": " << it->second << "\r\n";
-        }
-
-        if( ! _chunked)
-        {
-            os << "Content-Length: " << this->out_avail() << "\r\n";
-        }
-
-        if( ! header.hasHeader(server) )
-        {
-            os << "Server: Pt-Net-Server\r\n";
-        }
-
-        if( ! header.hasHeader(connection) )
-        {
-            os << "Connection: "
-               << (_keepAlive ? "keep-alive" : "close")
-               << "\r\n";
-        }
-
-        if( ! header.hasHeader(date) )
-        {
-            char buffer[50];
-            os << "Date: " << MessageHeader::htdateCurrent(buffer) << "\r\n";
-        }
-
-        os << "\r\n";
-    }
-
-    if(_chunked)
-    {
-        std::ostream os(_sbuf);
-        os << std::hex << this->out_avail() << "\r\n";
-    }
-
-    sync();
-
-    if(_chunked)
-        _sbuf->sputn("\r\n", 2);
-}
-
-
-void HttpBuffer::finishReply(const ReplyHeader& header)
-{
-    log_trace("HttpBuffer::beginOutput()");
-    writeReply(header);
-
-    if(_chunked)
-        _sbuf->sputn("0\r\n\r\n", 5);
-}
+//void HttpBuffer::finishReply(const ReplyHeader& header, const MessageBuffer& mbuf)
+//{
+//    log_trace("HttpBuffer::finishReply()");
+//    writeReply(header, mbuf);
+//
+//    if(_chunked)
+//        _sbuf->sputn("0\r\n\r\n", 5);
+//}
 
 
 bool HttpBuffer::isEnd() const
@@ -325,7 +325,7 @@ ClientImpl::ClientImpl(Client* client)
 #ifdef PT_HTTP_WITH_SSL
 , _sslbuf(_sockbuf)
 #endif
-, _httpbuf(_socket)
+, _httpbuf()
 , _stream(&_httpbuf)
 , _reusedConnection(false)
 , _errorPending(false)
@@ -344,7 +344,7 @@ ClientImpl::ClientImpl(Client* client, const Net::AddrInfo& addrinfo, bool ssl)
 #ifdef PT_HTTP_WITH_SSL
 , _sslbuf(_sockbuf)
 #endif
-, _httpbuf(_socket)
+, _httpbuf()
 , _stream(&_httpbuf)
 , _reusedConnection(false)
 , _errorPending(false)
@@ -364,7 +364,7 @@ ClientImpl::ClientImpl(Client* client, System::EventLoop& loop, const Net::AddrI
 #ifdef PT_HTTP_WITH_SSL
 , _sslbuf(_sockbuf)
 #endif
-, _httpbuf(_socket)
+, _httpbuf()
 , _stream(&_httpbuf)
 , _reusedConnection(false)
 , _errorPending(false)
@@ -512,73 +512,6 @@ const ReplyHeader& ClientImpl::execute(const Request& request)
     return _replyHeader;
 }
 
-// TODO: something like:
-//
-// Request& ClientImpl::execute()
-//
-const ReplyHeader& ClientImpl::execute(const RequestHeader& request)
-{
-    log_trace("ClientImpl::execute " << request.url());
-
-    _stream.rdbuf( _httpbuf.buffer() );
-    _errorPending = false;
-    _replyHeader.clear();
-    _parser.reset(true);
-    
-    for(;;)
-    {
-        bool reuseConnection = _socket.isConnected();
-        if( ! reuseConnection)
-        {
-            log_debug("connect");
-            _socket.connect(_addrInfo);
-
-#ifdef PT_HTTP_WITH_SSL
-            if(_ssl)
-            {
-                log_debug("ssl handshake");
-                _sslbuf.connect();
-            }
-#endif
-        }
-
-        log_debug("sending request");
-        //sendRequest(_stream, request);
-        _stream.flush();
-        _sockbuf.pubsync(); // extra flush for https: _stream -> _sslbuf -> _sockbuf
-
-        log_debug("reading reply");
-        _stream.peek();
-        
-        if( _stream || ! reuseConnection)
-            break;
-
-        cancel();
-    }
-
-    unsigned headerSize = 0;
-    char ch = ' ';
-    while( ! _parser.end() && _stream.get(ch) )
-    {
-        _parser.parse(ch);
-        ++headerSize;
-    }
-         
-    if( ! _parser.end() )
-    {
-        log_info("invalid HTTP reply");
-        throw System::IOError( PT_ERROR_MSG("invalid HTTP reply") );
-    }
-
-    log_debug("content-length: " << _replyHeader.contentLength());
-    log_debug("chunked: " << _replyHeader.chunkedTransferEncoding());
-    log_debug("header-size: " << headerSize);
-
-    _stream.rdbuf(&_httpbuf);
-    _httpbuf.beginBody(_replyHeader);
-    return _replyHeader;
-}
-
 
 void ClientImpl::onBodyFinished()
 {
@@ -635,6 +568,11 @@ void ClientImpl::beginRequest(const Request& request)
 }
 
 
+void ClientImpl::beginReply()
+{
+}
+
+
 void ClientImpl::endExecute()
 {
     _request = 0;
@@ -671,7 +609,7 @@ void ClientImpl::sendRequest(std::ostream& os, const Request& request)
 
    if (!request.header().hasHeader(contentLength))
     {
-        os << "Content-Length: " << request.bodySize() << "\r\n";
+        os << "Content-Length: " << request.size() << "\r\n";
     }
 
     if (!request.header().hasHeader(connection))
@@ -713,9 +651,9 @@ void ClientImpl::sendRequest(std::ostream& os, const Request& request)
 
     os << "\r\n";
 
-    log_debug("send body; " << request.bodySize() << " bytes");
+    log_debug("send body; " << request.size() << " bytes");
 
-    request.sendBody(os);
+    os.write(request.data(), request.size());
 }
 
 

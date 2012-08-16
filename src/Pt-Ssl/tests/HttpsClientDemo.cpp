@@ -88,7 +88,7 @@ int main(int argc, char** argv)
         client.replyFinished() += Pt::slot(&onReplyFinished);
  
         Pt::Http::Request request("/index.html");
-        request.setHeader("User-Agent", "Platinum");
+        request.header().setHeader("User-Agent", "Platinum");
         
         bool noblock = true;
         if(noblock)

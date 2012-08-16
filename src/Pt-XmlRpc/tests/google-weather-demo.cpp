@@ -146,8 +146,8 @@ class GoogleWeatherClient : public Pt::Connectable
             _req.clear();
             _req.url("/ig/api?weather=" + _weather.city());
             _req.method("GET");
-            _req.setHeader("Host", "www.google.com");
-            _req.setHeader("Accept-Charset", "UTF-8");
+            _req.header().setHeader("Host", "www.google.com");
+            _req.header().setHeader("Accept-Charset", "UTF-8");
 
             // begin a new request, non-blocking, incoming data is processed
             // via slots: onHeaderReceived, onBodyAvailable, onReplyFinished

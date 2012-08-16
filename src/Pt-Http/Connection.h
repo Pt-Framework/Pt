@@ -133,6 +133,7 @@ class Connection : public Net::TcpSocket
 #endif
         HttpBuffer _httpbuf;
         std::iostream _stream;
+        bool _chunked;
         Reply _reply;
 };
 

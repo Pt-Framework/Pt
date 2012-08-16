@@ -70,9 +70,10 @@ Connection::Connection(Server& server, Net::TcpServer& tcpServer)
 #ifdef PT_HTTP_WITH_SSL
 , _sslbuf( _sockbuf )
 #endif
-, _httpbuf(*this)
+, _httpbuf()
 , _stream(&_httpbuf)
-, _reply(_stream)
+, _chunked(false)
+, _reply()
 {
     Net::TcpSocket::accept(tcpServer);
 }
@@ -316,6 +317,7 @@ void Connection::processInput()
             _timer.stop();
             
             _httpbuf.reset();
+            _chunked = false;
             _responder->beginReply(_request, _reply);
         }
         else
@@ -383,8 +385,55 @@ void Connection::advanceReply()
 
     _reply.header().setHeader("Transfer-Encoding", "chunked");
 
-   _httpbuf.writeReply( _reply.header() );
-    
+   //_httpbuf.writeReply( _reply.header(), _reply.buffer()  );
+
+    ReplyHeader& header = _reply.header();
+    std::ostream os( _httpbuf.buffer() );
+    if( ! _chunked )
+    {
+        _chunked = true;
+
+        const char* server = "Server";
+        const char* connection = "Connection";
+        const char* date = "Date";
+
+        os <<"HTTP/"
+           << header.httpVersionMajor() << '.'
+           << header.httpVersionMinor() << ' '
+           << header.httpReturnCode() << ' '
+           << header.httpReturnText() << "\r\n";
+
+        ReplyHeader::const_iterator it;
+        for(it = header.begin(); it != header.end(); ++it)
+        {
+            os << it->first << ": " << it->second << "\r\n";
+        }
+
+        if( ! header.hasHeader(server) )
+        {
+            os << "Server: Pt-Net-Server\r\n";
+        }
+
+        if( ! header.hasHeader(connection) )
+        {
+            os << "Connection: "
+               << (header.keepAlive() ? "keep-alive" : "close")
+               << "\r\n";
+        }
+
+        if( ! header.hasHeader(date) )
+        {
+            char buffer[50];
+            os << "Date: " << MessageHeader::htdateCurrent(buffer) << "\r\n";
+        }
+
+        os << "\r\n";
+    }
+
+    os << std::hex << _reply.buffer().size() << std::dec << "\r\n";
+    os.write( _reply.buffer().data(), _reply.buffer().size() );
+    os.write("\r\n", 2);
+
     _timer.start( _server.writeTimeout() );
     beginWrite();
 }
@@ -392,7 +441,63 @@ void Connection::advanceReply()
 
 void Connection::finishReply()
 {
-    _httpbuf.finishReply( _reply.header() );
+    //_httpbuf.finishReply( _reply.header(), _reply.buffer() );
+    
+    ReplyHeader& header = _reply.header();
+    std::ostream os( _httpbuf.buffer() );
+    if( ! _chunked)
+    {
+        const char* server = "Server";
+        const char* connection = "Connection";
+        const char* date = "Date";
+
+        os <<"HTTP/"
+           << header.httpVersionMajor() << '.'
+           << header.httpVersionMinor() << ' '
+           << header.httpReturnCode() << ' '
+           << header.httpReturnText() << "\r\n";
+
+        ReplyHeader::const_iterator it;
+        for(it = header.begin(); it != header.end(); ++it)
+        {
+            os << it->first << ": " << it->second << "\r\n";
+        }
+
+        os << "Content-Length: " << _reply.buffer().size() << "\r\n";
+
+        if( ! header.hasHeader(server) )
+        {
+            os << "Server: Pt-Net-Server\r\n";
+        }
+
+        if( ! header.hasHeader(connection) )
+        {
+            os << "Connection: "
+               << (header.keepAlive() ? "keep-alive" : "close")
+               << "\r\n";
+        }
+
+        if( ! header.hasHeader(date) )
+        {
+            char buffer[50];
+            os << "Date: " << MessageHeader::htdateCurrent(buffer) << "\r\n";
+        }
+
+        os << "\r\n";
+    }
+
+    if(_chunked)
+    {
+        os << std::hex << _reply.buffer().size() << std::dec << "\r\n";
+    }
+
+    os.write( _reply.buffer().data(), _reply.buffer().size() );
+
+    if(_chunked)
+    {
+        os.write("\r\n", 2);
+        os.write("0\r\n\r\n", 5);
+    }
     
     _timer.start( _server.writeTimeout() );
     beginWrite();

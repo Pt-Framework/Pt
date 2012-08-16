@@ -36,6 +36,7 @@ namespace Http {
 void Reply::advance()
 { 
     _conn->advanceReply(); 
+    _advanced = true;
 }
 
 void Reply::finish()

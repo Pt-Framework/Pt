@@ -118,7 +118,7 @@ class ServerTest : public Pt::Unit::TestSuite
             connect(client.replyFinished(), *this, &ServerTest::onNotFoundFinished);
 
             Pt::Http::Request request("/index.html");
-            request.setHeader("foo", "bar");
+            request.header().setHeader("foo", "bar");
             client.beginExecute(request);
 
             loop->run();
@@ -160,7 +160,7 @@ class ServerTest : public Pt::Unit::TestSuite
             connect(client.replyFinished(), *this, &ServerTest::onNotFoundFinished);
 
             Pt::Http::Request request("/index.html");
-            request.setHeader("foo", "bar");
+            request.header().setHeader("foo", "bar");
             client.beginExecute(request);
 
             loop->run();

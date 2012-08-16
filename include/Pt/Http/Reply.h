@@ -43,20 +43,24 @@ class Connection;
 class PT_HTTP_API Reply
 {
         ReplyHeader _header;
-        std::ostream& _body;
+        MessageBuffer _buf;
+        std::ostream _body;
         Http::Connection* _conn;
+        bool _advanced;
         bool _finished;
 
     public:
-        Reply(std::ostream& os)
-        : _body(os)
-        , _conn(0)
+        Reply()
+        : _conn(0)
+        , _body(&_buf)
+        , _advanced(false)
         , _finished(false)
         { }
 
         void init(Http::Connection& conn)
         {
             _conn = &conn;
+            _advanced = false;
             _finished = false;
         }
 
@@ -77,8 +81,13 @@ class PT_HTTP_API Reply
         {
             _header.clear();
             _body.clear();
+            _buf.reset();
+            _advanced = false;
             _finished = false;
         }
+
+        const MessageBuffer& buffer()
+        { return _buf; }
 
         std::ostream& body()
         { return _body; }

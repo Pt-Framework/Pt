@@ -66,9 +66,8 @@ class HttpBuffer : public std::streambuf
     static const unsigned int BufferSize = 512;
 
     public:
-        HttpBuffer(Pt::System::IODevice& iodev)
+        HttpBuffer()
         : _sbuf(0)
-        , _iodev(&iodev)
         , _obuffer(0)
         , _obufferSize(0)
         , _contentLength(0)
@@ -99,9 +98,9 @@ class HttpBuffer : public std::streambuf
 
         void beginBody(const MessageHeader& reply);
 
-        void writeReply(const ReplyHeader& reply);
+        //void writeReply(const ReplyHeader& reply, const MessageBuffer& mbuf);
 
-        void finishReply(const ReplyHeader& reply);
+        //void finishReply(const ReplyHeader& reply, const MessageBuffer& mbuf);
 
         void import(std::streamsize n = 0);
 
@@ -124,7 +123,6 @@ class HttpBuffer : public std::streambuf
         ChunkParser _chunkParser;
         std::streambuf* _sbuf;
         Signal<> _bodyFinished;
-        Pt::System::IODevice* _iodev;
         char _buffer[4096];
         char* _obuffer;
         std::size_t  _obufferSize;
@@ -181,7 +179,6 @@ class ClientImpl : public Connectable
         void setContext(Ssl::Context& ctx);
 
         const ReplyHeader& execute(const Request& request);
-        const ReplyHeader& execute(const RequestHeader& request);
 
         const ReplyHeader& header()
         { return _replyHeader; }
@@ -189,6 +186,8 @@ class ClientImpl : public Connectable
         std::string get(const std::string& url);
 
         void beginRequest(const Request& request);
+
+        void beginReply();
 
         void endExecute();
 
@@ -239,6 +238,7 @@ class ClientImpl : public Connectable
         HeaderParser _parser;
 
         const Request* _request;
+        Request _req;
         ReplyHeader _replyHeader;
 
         Net::AddrInfo _addrInfo;
