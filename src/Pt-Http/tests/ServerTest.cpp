@@ -225,6 +225,12 @@ class ServerTest : public Pt::Unit::TestSuite
             connect(client.replyFinished(), *this, &ServerTest::onChunkedReplyFinished);
 
             Pt::Http::Request request("/test");
+
+            // TODO:
+            // request.setChunked(true);
+            // request.body() << "Chunk1" << std::endl;
+            // client.requestSent() += Pt::slot(*this, &ServerTest::onChunkedRequest);
+
             client.beginExecute(request);
 
             loop->run();
