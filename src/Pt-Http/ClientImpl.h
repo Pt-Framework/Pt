@@ -187,7 +187,7 @@ class ClientImpl : public Connectable
 
         void beginRequest(const Request& request);
 
-        void advanceRequest(const Request& request);
+        void beginRequest2(const Request& request);
 
         void endExecute();
 
@@ -215,6 +215,7 @@ class ClientImpl : public Connectable
 
     private:
         void init();
+        void sendChunked(std::ostream& os, const Request& request);
         void sendRequest(std::ostream& os, const Request& request);
         void onHeader();
         void onBody();

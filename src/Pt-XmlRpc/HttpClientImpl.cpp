@@ -41,7 +41,7 @@ HttpClientImpl::HttpClientImpl()
 {
     _request.method("POST");
     Pt::connect(_client.headerReceived(), *this, &HttpClientImpl::onReplyHeader);
-    Pt::connect(_client.bodyAvailable(), *this, &HttpClientImpl::onReplyBody);
+    Pt::connect(_client.bodyReceived(), *this, &HttpClientImpl::onReplyBody);
     Pt::connect(_client.replyFinished(), *this, &HttpClientImpl::onReplyFinished);
 }
 
@@ -52,7 +52,7 @@ HttpClientImpl::HttpClientImpl(System::EventLoop& selector, const std::string& a
 {
     _request.method("POST");
     Pt::connect(_client.headerReceived(), *this, &HttpClientImpl::onReplyHeader);
-    Pt::connect(_client.bodyAvailable(), *this, &HttpClientImpl::onReplyBody);
+    Pt::connect(_client.bodyReceived(), *this, &HttpClientImpl::onReplyBody);
     Pt::connect(_client.replyFinished(), *this, &HttpClientImpl::onReplyFinished);
 }
 
@@ -62,7 +62,7 @@ HttpClientImpl::HttpClientImpl(const std::string& addr, unsigned short port, con
 {
     _request.method("POST");
     Pt::connect(_client.headerReceived(), *this, &HttpClientImpl::onReplyHeader);
-    Pt::connect(_client.bodyAvailable(), *this, &HttpClientImpl::onReplyBody);
+    Pt::connect(_client.bodyReceived(), *this, &HttpClientImpl::onReplyBody);
     Pt::connect(_client.replyFinished(), *this, &HttpClientImpl::onReplyFinished);
 }
 

@@ -31,6 +31,7 @@
 
 #include <Pt/Http/Api.h>
 #include <Pt/System/Selectable.h>
+#include <Pt/System/IOError.h>
 #include <Pt/Signal.h>
 #include <Pt/Delegate.h>
 #include <Pt/NonCopyable.h>
@@ -51,6 +52,15 @@ namespace Http {
 class ReplyHeader;
 class RequestHeader;
 class Request;
+
+class PT_HTTP_API ConnectionClosed : public System::IOError
+{
+    public:
+        explicit ConnectionClosed();
+
+        ~ConnectionClosed() throw()
+        {}
+};
 
 class PT_HTTP_API Client : private NonCopyable
 {
@@ -105,25 +115,35 @@ class PT_HTTP_API Client : private NonCopyable
         // received.
         void beginExecute(const Request& request);
 
-        void advanceRequest(const Request& request);
-
         void endExecute();
 
         void cancel();
 
         // Signals that the request is sent to the server.
+        //
+        // beginRequest / endRequest reports error
+        //
         Signal<Client&>& requestSent()
         { return _requestSent; }
 
         // Signals that the header is received.
+        //
+        // beginReply -> no errors can occur
+        //
         Signal<Client&>& headerReceived()
         { return _headerReceived; }
 
         // Signals that body data has arrived.
-        Signal<Client&>& bodyAvailable()
+        //
+        // beginReply -> no errors can occur
+        //
+        Signal<Client&>& bodyReceived()
         { return _bodyAvailable; }
 
         // Signals that the reply is completely processed.
+        //
+        // beginReply / endReply reports error
+        //
         Signal<Client&>& replyFinished()
         { return _replyFinished; }
 

@@ -114,7 +114,7 @@ class ServerTest : public Pt::Unit::TestSuite
             Pt::Http::Client client("127.0.0.1", 8001);
             client.setActive(*loop);
             connect(client.headerReceived(), *this, &ServerTest::onNotFoundHeader);
-            connect(client.bodyAvailable(), *this, &ServerTest::onNotFound);
+            connect(client.bodyReceived(), *this, &ServerTest::onNotFound);
             connect(client.replyFinished(), *this, &ServerTest::onNotFoundFinished);
 
             Pt::Http::Request request("/index.html");
@@ -156,7 +156,7 @@ class ServerTest : public Pt::Unit::TestSuite
             client.setContext(clientContext);
             client.setActive(*loop);
             connect(client.headerReceived(), *this, &ServerTest::onNotFoundHeader);
-            connect(client.bodyAvailable(), *this, &ServerTest::onNotFound);
+            connect(client.bodyReceived(), *this, &ServerTest::onNotFound);
             connect(client.replyFinished(), *this, &ServerTest::onNotFoundFinished);
 
             Pt::Http::Request request("/index.html");
@@ -221,7 +221,7 @@ class ServerTest : public Pt::Unit::TestSuite
             Pt::Http::Client client("127.0.0.1", 8001);
             client.setActive(*loop);
             connect(client.headerReceived(), *this, &ServerTest::onChunkedHeader);
-            connect(client.bodyAvailable(), *this, &ServerTest::onChunkedReply);
+            connect(client.bodyReceived(), *this, &ServerTest::onChunkedReply);
             connect(client.replyFinished(), *this, &ServerTest::onChunkedReplyFinished);
 
             Pt::Http::Request request("/test");

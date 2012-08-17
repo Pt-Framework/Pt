@@ -34,6 +34,11 @@ namespace Pt {
 
 namespace Http {
 
+ConnectionClosed::ConnectionClosed()
+: IOError("HTTP connection closed")
+{
+}
+
 Client::Client()
 : _impl(new ClientImpl(this))
 {
@@ -121,11 +126,6 @@ const ReplyHeader& Client::header()
 void Client::beginExecute(const Request& request)
 {
     _impl->beginRequest(request);
-}
-
-void Client::advanceRequest(const Request& request)
-{
-    _impl->advanceRequest(request);
 }
 
 void Client::endExecute()

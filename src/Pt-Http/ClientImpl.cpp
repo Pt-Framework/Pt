@@ -567,12 +567,109 @@ void ClientImpl::beginRequest(const Request& request)
     }
 }
 
-// void ClientImpl::beginChunk(const Request& request)
 
-void ClientImpl::advanceRequest(const Request& request)
+//
+// user must call setChunked first.
+//
+void ClientImpl::beginRequest2(const Request& request)
 {
-    _stream.write( request.data(), request.size() );
+    bool _chunked = false;
+
+    _stream.rdbuf( _httpbuf.buffer() );
+    _errorPending = false;
+    _request = &request;
+    _replyHeader.clear();
+    _parser.reset(true);
+    _state = &ClientImpl::onHeader;
+    
+    _reusedConnection = _socket.isConnected();
+
+    if( ! _reusedConnection )
+    {
+        log_debug("opening new connection to " << _addrInfo.host());
+        _socket.beginConnect(_addrInfo);
+        return;
+    }
+
+    log_debug("reusing previous connection");
+
+    if(_chunked)
+        sendChunked(_stream, *_request);
+    else
+        sendRequest(_stream, *_request);
+
+    // TODO: only write when more than 8K are available
+    try
+    {
+#ifdef PT_HTTP_WITH_SSL
+        if(_ssl)
+        {
+            _sslbuf.beginWrite();
+        }
+        else
+#endif
+            _sockbuf.beginWrite();
+    }
+    catch (const System::IOError&)
+    {
+        log_debug("write failed, reconnecting");
+        cancel();
+        _socket.beginConnect(_addrInfo);
+    }
 }
+
+
+/*void ClientImpl::beginChunk(const Request& request)
+{
+    _stream << std::hex << request.size() << std::dec << "\r\n";
+    _stream.write( request.data(), request.size() );
+
+    try
+    {
+#ifdef PT_HTTP_WITH_SSL
+        if(_ssl)
+        {
+            _sslbuf.beginWrite();
+        }
+        else
+#endif
+            _sockbuf.beginWrite();
+    }
+    catch (const System::IOError&)
+    {
+        log_debug("write failed, reconnecting");
+        cancel();
+        _socket.beginConnect(_addrInfo);
+    }
+}
+
+
+void ClientImpl::beginReply(const Request& request)
+{
+    if(_chunked)
+    {
+        _stream.write("\r\n", 2);
+        _stream.write("0\r\n\r\n", 5);
+    }
+    
+    try
+    {
+#ifdef PT_HTTP_WITH_SSL
+        if(_ssl)
+        {
+            _sslbuf.beginWrite();
+        }
+        else
+#endif
+            _sockbuf.beginWrite();
+    }
+    catch (const System::IOError&)
+    {
+        log_debug("write failed, reconnecting");
+        cancel();
+        _socket.beginConnect(_addrInfo);
+    }
+}*/
 
 
 void ClientImpl::endExecute()
@@ -584,6 +681,75 @@ void ClientImpl::endExecute()
         _errorPending = false;
         throw;
     }
+}
+
+
+void ClientImpl::sendChunked(std::ostream& os, const Request& request)
+{
+    log_debug("send chunked request " << request.url());
+
+    static const char* contentLength = "Content-Length";
+    static const char* connection = "Connection";
+    static const char* date = "Date";
+    static const char* host = "Host";
+    static const char* authorization = "Authorization";
+    static const char* userAgent = "User-Agent";
+
+    os << request.method() << ' '
+       << request.url() << " HTTP/"
+       << request.header().httpVersionMajor() << '.'
+       << request.header().httpVersionMinor() << "\r\n";
+
+    for (RequestHeader::const_iterator it = request.header().begin();
+        it != request.header().end(); ++it)
+    {
+        os << it->first << ": " << it->second << "\r\n";
+    }
+
+    os << "Transfer-Encoding: chunked" << "\r\n";
+
+    if( ! request.header().hasHeader(connection) )
+    {
+        os << "Connection: keep-alive\r\n";
+    }
+
+    if (!request.header().hasHeader(date))
+    {
+        char buffer[50];
+        os << "Date: " << MessageHeader::htdateCurrent(buffer) << "\r\n";
+    }
+
+    if (!request.header().hasHeader(host))
+    {
+        os << "Host: " << _addrInfo.host();
+        unsigned short port = _addrInfo.port();
+        if (port != 80)
+            os << ':' << port;
+        os << "\r\n";
+    }
+
+    if (!request.header().hasHeader(userAgent))
+    {
+        os << "User-Agent: Pt-Http-client\r\n";
+    }
+
+    if (!_username.empty() && !request.header().hasHeader(authorization))
+    {
+        std::ostringstream d;
+        BasicTextOStream<char, char> b(d, new Base64Codec());
+        b << _username
+          << ':'
+          << _password;
+        b.terminate();
+        log_debug("set Authorization to " << d.str());
+        os << "Authorization: Basic " << d.str() << "\r\n";
+    }
+
+    os << "\r\n";
+
+    log_debug("send body; " << request.size() << " bytes");
+
+    os.write(request.data(), request.size());
 }
 
 
@@ -700,8 +866,6 @@ void ClientImpl::onOutput(System::StreamBuffer& sb)
         }
         else
         {
-            //if( _request->header().chunkedTransferEncoding() )
-            
             _client->requestSent().send(*_client);
 
             if( sb.out_avail() )
@@ -881,7 +1045,7 @@ void ClientImpl::onBody()
 
     while( _httpbuf.in_avail() )
     {
-        _client->bodyAvailable().send(*_client);
+        _client->bodyReceived().send(*_client);
 
         _httpbuf.import();
         log_debug("available: " << _httpbuf.in_avail());

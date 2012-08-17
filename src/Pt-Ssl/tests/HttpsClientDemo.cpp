@@ -84,7 +84,7 @@ int main(int argc, char** argv)
         client.setContext(clientContext);
 
         //client.headerReceived += Pt::slot(&onReplyHeader);
-        client.bodyAvailable() += Pt::slot(&onReply);
+        client.bodyReceived() += Pt::slot(&onReply);
         client.replyFinished() += Pt::slot(&onReplyFinished);
  
         Pt::Http::Request request("/index.html");
