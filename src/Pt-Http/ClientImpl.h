@@ -183,15 +183,19 @@ class ClientImpl : public Connectable
         const ReplyHeader& header()
         { return _replyHeader; }
 
-        std::string get(const std::string& url);
-
         void beginRequest(const Request& request);
 
-        void beginRequest2(const Request& request);
+        void beginRequest2(RequestHeader& request);
+
+        void beginOutput(Request& request);
+
+        void beginReply();
+
+        std::istream& endReply();
 
         void endExecute();
 
-        std::istream& body()
+        std::iostream& body()
         {
             return _stream;
         }
@@ -240,6 +244,7 @@ class ClientImpl : public Connectable
 
         const Request* _request;
         ReplyHeader _replyHeader;
+        Reply _reply;
 
         Net::AddrInfo _addrInfo;
         bool _ssl;

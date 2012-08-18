@@ -569,15 +569,16 @@ void ClientImpl::beginRequest(const Request& request)
 
 
 //
-// user must call setChunked first.
+// need both, beginRequst and beginOutput, so we can recognize when a new 
+// possibly pipelined request begins
 //
-void ClientImpl::beginRequest2(const Request& request)
+void ClientImpl::beginRequest2(RequestHeader& request)
 {
     bool _chunked = false;
 
     _stream.rdbuf( _httpbuf.buffer() );
     _errorPending = false;
-    _request = &request;
+    //_request = &request;
     _replyHeader.clear();
     _parser.reset(true);
     _state = &ClientImpl::onHeader;
@@ -597,25 +598,6 @@ void ClientImpl::beginRequest2(const Request& request)
         sendChunked(_stream, *_request);
     else
         sendRequest(_stream, *_request);
-
-    // TODO: only write when more than 8K are available
-    try
-    {
-#ifdef PT_HTTP_WITH_SSL
-        if(_ssl)
-        {
-            _sslbuf.beginWrite();
-        }
-        else
-#endif
-            _sockbuf.beginWrite();
-    }
-    catch (const System::IOError&)
-    {
-        log_debug("write failed, reconnecting");
-        cancel();
-        _socket.beginConnect(_addrInfo);
-    }
 }
 
 
@@ -642,10 +624,37 @@ void ClientImpl::beginRequest2(const Request& request)
         _socket.beginConnect(_addrInfo);
     }
 }
+*/
 
-
-void ClientImpl::beginReply(const Request& request)
+void ClientImpl::beginOutput(Request& request)
 {
+    _stream << std::hex << request.size() << std::dec << "\r\n";
+    _stream.write( request.data(), request.size() );
+
+    try
+    {
+#ifdef PT_HTTP_WITH_SSL
+        if(_ssl)
+        {
+            _sslbuf.beginWrite();
+        }
+        else
+#endif
+            _sockbuf.beginWrite();
+    }
+    catch (const System::IOError&)
+    {
+        log_debug("write failed, reconnecting");
+        cancel();
+        _socket.beginConnect(_addrInfo);
+    }
+}
+
+
+void ClientImpl::beginReply()
+{
+    bool _chunked = false;
+
     if(_chunked)
     {
         _stream.write("\r\n", 2);
@@ -669,7 +678,21 @@ void ClientImpl::beginReply(const Request& request)
         cancel();
         _socket.beginConnect(_addrInfo);
     }
-}*/
+}
+
+
+std::istream& ClientImpl::endReply()
+{
+    _request = 0;
+
+    if (_errorPending)
+    {
+        _errorPending = false;
+        throw;
+    }
+
+    return _stream;
+}
 
 
 void ClientImpl::endExecute()
