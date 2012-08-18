@@ -72,11 +72,13 @@ class ServerThread : public Connectable
         , _thread(_loop)
         , _ssl(false)
         {
+#ifdef PT_HTTP_WITH_SSL
             if(sslConfig)
             {
                 sslConfig->send(_sslctx);
                 _ssl = true;
             }
+#endif
 
             _loop.event() += Pt::slot(*this, &ServerThread::onAcceptEvent);
             _loop.event() += Pt::slot(*this, &ServerThread::onExitEvent);
@@ -143,8 +145,8 @@ class ServerThread : public Connectable
     private:
         Server* _server;
         Pt::System::MainLoop _loop;
-#ifdef PT_HTTP_WITH_SSL
         bool _ssl;
+#ifdef PT_HTTP_WITH_SSL
         Ssl::Context _sslctx;
 #endif
         Pt::System::AttachedThread _thread;
