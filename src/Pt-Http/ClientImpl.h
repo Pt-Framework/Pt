@@ -239,7 +239,6 @@ class ClientImpl : public Connectable
         HeaderParser _parser;
 
         const Request* _request;
-        Request _req;
         ReplyHeader _replyHeader;
 
         Net::AddrInfo _addrInfo;
