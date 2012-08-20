@@ -328,6 +328,7 @@ ClientImpl::ClientImpl(Client* client)
 , _httpbuf()
 , _stream(&_httpbuf)
 , _reusedConnection(false)
+, _chunked(false)
 , _errorPending(false)
 , _state( &ClientImpl::onHeader )
 {
@@ -347,6 +348,7 @@ ClientImpl::ClientImpl(Client* client, const Net::AddrInfo& addrinfo, bool ssl)
 , _httpbuf()
 , _stream(&_httpbuf)
 , _reusedConnection(false)
+, _chunked(false)
 , _errorPending(false)
 , _state( &ClientImpl::onHeader )
 {
@@ -367,6 +369,7 @@ ClientImpl::ClientImpl(Client* client, System::EventLoop& loop, const Net::AddrI
 , _httpbuf()
 , _stream(&_httpbuf)
 , _reusedConnection(false)
+, _chunked(false)
 , _errorPending(false)
 , _state( &ClientImpl::onHeader )
 {
@@ -568,116 +571,87 @@ void ClientImpl::beginRequest(const Request& request)
 }
 
 
-//
-// need both, beginRequst and beginOutput, so we can recognize when a new 
-// possibly pipelined request begins
-//
-void ClientImpl::beginRequest2(RequestHeader& request)
+void ClientImpl::beginRequest(bool started)
 {
-    bool _chunked = false;
-
-    _stream.rdbuf( _httpbuf.buffer() );
-    _errorPending = false;
-    //_request = &request;
-    _replyHeader.clear();
-    _parser.reset(true);
-    _state = &ClientImpl::onHeader;
+    if(started)
+    {
+        _chunked = false;
+        _stream.rdbuf( _httpbuf.buffer() );
+        _errorPending = false;
+        _replyHeader.clear();
+        _parser.reset(true);
+        _state = &ClientImpl::onHeader;
     
-    _reusedConnection = _socket.isConnected();
+        if(_chunked)
+            sendChunked(_stream, _req);
+        else
+            sendRequest(_stream, _req);
 
-    if( ! _reusedConnection )
-    {
-        log_debug("opening new connection to " << _addrInfo.host());
-        _socket.beginConnect(_addrInfo);
-        return;
+        if( ! _socket.isConnected() )
+        {
+            log_debug("opening new connection to " << _addrInfo.host());
+            _socket.beginConnect(_addrInfo);
+            return;
+        }
+
+        log_debug("reusing previous connection");
     }
 
-    log_debug("reusing previous connection");
+    _stream << std::hex << _req.size() << std::dec << "\r\n";
+    _stream.write( _req.data(), _req.size() );
+    _stream.write("\r\n", 2);
 
-    if(_chunked)
-        sendChunked(_stream, *_request);
+    //TODO: only write in 8K blocks
+#ifdef PT_HTTP_WITH_SSL
+    if(_ssl)
+        _sslbuf.beginWrite();
     else
-        sendRequest(_stream, *_request);
+#endif
+        _sockbuf.beginWrite();
 }
 
 
-/*void ClientImpl::beginChunk(const Request& request)
+void ClientImpl::endRequest()
 {
-    _stream << std::hex << request.size() << std::dec << "\r\n";
-    _stream.write( request.data(), request.size() );
-
-    try
+    if (_errorPending)
     {
-#ifdef PT_HTTP_WITH_SSL
-        if(_ssl)
-        {
-            _sslbuf.beginWrite();
-        }
-        else
-#endif
-            _sockbuf.beginWrite();
-    }
-    catch (const System::IOError&)
-    {
-        log_debug("write failed, reconnecting");
-        cancel();
-        _socket.beginConnect(_addrInfo);
-    }
-}
-*/
-
-void ClientImpl::beginOutput(Request& request)
-{
-    _stream << std::hex << request.size() << std::dec << "\r\n";
-    _stream.write( request.data(), request.size() );
-
-    try
-    {
-#ifdef PT_HTTP_WITH_SSL
-        if(_ssl)
-        {
-            _sslbuf.beginWrite();
-        }
-        else
-#endif
-            _sockbuf.beginWrite();
-    }
-    catch (const System::IOError&)
-    {
-        log_debug("write failed, reconnecting");
-        cancel();
-        _socket.beginConnect(_addrInfo);
+        _errorPending = false;
+        throw;
     }
 }
 
 
 void ClientImpl::beginReply()
 {
-    bool _chunked = false;
+    if (_errorPending)
+    {
+        _errorPending = false;
+        throw;
+    }
 
-    if(_chunked)
+    if( _chunked )
     {
         _stream.write("\r\n", 2);
         _stream.write("0\r\n\r\n", 5);
     }
-    
-    try
-    {
+
+    // only if write if out_avail()
+
+    // slots still send requestSent, send this signal only if
+    // _requesting flag is set. This flag also indicates if a
+    // new request header need to be written. When we beginReply
+    // we leave requesting state.
+
+    //TODO: only write in 8K blocks
 #ifdef PT_HTTP_WITH_SSL
         if(_ssl)
-        {
             _sslbuf.beginWrite();
-        }
         else
 #endif
-            _sockbuf.beginWrite();
-    }
-    catch (const System::IOError&)
-    {
-        log_debug("write failed, reconnecting");
-        cancel();
-        _socket.beginConnect(_addrInfo);
-    }
+           _sockbuf.beginWrite();
+
+    // if no
+    //beginRead();
 }
 
 
@@ -769,10 +743,6 @@ void ClientImpl::sendChunked(std::ostream& os, const Request& request)
     }
 
     os << "\r\n";
-
-    log_debug("send body; " << request.size() << " bytes");
-
-    os.write(request.data(), request.size());
 }
 
 
@@ -879,6 +849,10 @@ void ClientImpl::onOutput(System::StreamBuffer& sb)
 {
     log_trace("onOutput: out_avail=" << sb.out_avail());
 
+    /////////////////////////////////////////////////////////////////
+    // TODO: only send signal and call endWrite in endRequest !!!!
+    //       error handling gets much easier this way !!!!!!!!!!
+    /////////////////////////////////////////////////////////////////
     try
     {
         sb.endWrite();

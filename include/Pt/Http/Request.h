@@ -33,10 +33,13 @@
 #include <Pt/Http/RequestHeader.h>
 #include <string>
 #include <sstream>
+#include <cassert>
 
 namespace Pt {
 
 namespace Http {
+
+class Reply;
 
 class PT_HTTP_API Request
 {
@@ -45,6 +48,7 @@ class PT_HTTP_API Request
         : _header(url)
         , _buf()
         , _body(&_buf)
+        , _reply(0)
         { }
 
         RequestHeader& header()
@@ -58,6 +62,15 @@ class PT_HTTP_API Request
             _header.clear();
             _body.clear();
             _buf.reset();
+        }
+
+        void init(Reply& reply)
+        { _reply = &reply; }
+
+        Reply& reply()
+        { 
+            assert(_reply);
+            return *_reply; 
         }
 
         const std::string& url() const
@@ -91,6 +104,7 @@ class PT_HTTP_API Request
         RequestHeader _header;
         MessageBuffer _buf;
         std::ostream _body;
+        Reply* _reply;
 };
 
 } // namespace Http

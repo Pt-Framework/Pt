@@ -185,9 +185,9 @@ class ClientImpl : public Connectable
 
         void beginRequest(const Request& request);
 
-        void beginRequest2(RequestHeader& request);
+        void beginRequest(bool started);
 
-        void beginOutput(Request& request);
+        void endRequest();
 
         void beginReply();
 
@@ -244,6 +244,9 @@ class ClientImpl : public Connectable
 
         const Request* _request;
         ReplyHeader _replyHeader;
+
+        // new:
+        Request _req;
         Reply _reply;
 
         Net::AddrInfo _addrInfo;
@@ -258,6 +261,7 @@ class ClientImpl : public Connectable
         std::string _username;
         std::string _password;
         bool _reusedConnection;
+        bool _chunked;
         bool _errorPending;
 
         void (ClientImpl::*_state)();
