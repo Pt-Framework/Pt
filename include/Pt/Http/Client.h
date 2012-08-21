@@ -65,6 +65,17 @@ class PT_HTTP_API ConnectionClosed : public System::IOError
 class PT_HTTP_API Client : private NonCopyable
 {
     public:
+        enum Progress
+        {
+            Idle     = 0,
+            Header   = 1,
+            Body     = 2,
+            Trailer  = 3,
+            Finished = 4,
+            Invalid  = 0x7fffffff
+        };
+
+    public:
         Client();
         
         Client(const std::string& host, unsigned short int port, bool ssl = false);
@@ -116,6 +127,21 @@ class PT_HTTP_API Client : private NonCopyable
         void beginExecute(const Request& request);
 
         void endExecute();
+
+        // NEW API: //////////////////////
+        void beginSend(bool endOfRequest = true);
+
+        bool endSend();
+
+        void beginReceive();
+
+        bool endReceive();
+
+        bool isEnd() const;
+
+        Request& request();
+
+        //////////////////////////////////
 
         void cancel();
 

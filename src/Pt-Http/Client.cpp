@@ -138,6 +138,43 @@ std::istream& Client::body()
     return _impl->body();
 }
 
+
+void Client::beginSend(bool endOfRequest)
+{
+    _impl->beginSend(endOfRequest);
+}
+
+
+bool Client::endSend()
+{
+    return _impl->endSend();
+}
+
+
+void Client::beginReceive()
+{
+    _impl->beginReceive();
+}
+
+
+bool Client::endReceive()
+{
+    return _impl->endReceive();
+}
+
+
+bool Client::isEnd() const
+{
+    return _impl->isEnd();
+}
+
+
+Request& Client::request()
+{ 
+    return _impl->request();
+}
+
+
 // Sets the username and password for all subsequent requests.
 void Client::setAuthorization(const std::string& username, const std::string& password)
 {

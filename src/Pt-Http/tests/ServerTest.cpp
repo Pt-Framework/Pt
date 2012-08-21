@@ -113,15 +113,34 @@ class ServerTest : public Pt::Unit::TestSuite
 
             Pt::Http::Client client("127.0.0.1", 8001);
             client.setActive(*loop);
-            connect(client.headerReceived(), *this, &ServerTest::onNotFoundHeader);
-            connect(client.bodyReceived(), *this, &ServerTest::onNotFound);
-            connect(client.replyFinished(), *this, &ServerTest::onNotFoundFinished);
 
-            Pt::Http::Request request("/index.html");
-            request.header().setHeader("foo", "bar");
-            client.beginExecute(request);
+            connect(client.requestSent(), *this, &ServerTest::onNotFoundSent);
+            connect(client.replyReceived(), *this, &ServerTest::onNotFoundReceived);
+
+            client.request().url("/index.html");
+            client.request().header().setHeader("foo", "bar");
+            client.beginSend();
 
             loop->run();
+        }
+
+        void onNotFoundSent(Pt::Http::Client& client)
+        {
+            if( client.endSend() )
+                client.beginReceive();
+            else
+                client.beginSend();
+        }
+
+        void onNotFoundReceived(Pt::Http::Client& client)
+        {
+            if( client.endReceive() )
+            {
+                PT_UNIT_ASSERT_EQUALS(client.header().httpReturnCode(), 404);
+                loop->exit();
+            }
+            else
+                client.beginReceive();
         }
 
 #ifdef PT_HTTP_WITH_SSL

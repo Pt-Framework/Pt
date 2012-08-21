@@ -395,7 +395,7 @@ void ClientImpl::init()
 #endif
 
     _httpbuf.attach(_sockbuf);
-    _httpbuf.bodyFinished() += Pt::slot(*this, &ClientImpl::onBodyFinished);
+    //_httpbuf.bodyFinished() += Pt::slot(*this, &ClientImpl::onBodyFinished);
 }
 
 
@@ -760,6 +760,28 @@ void ClientImpl::processReply()
             this->cancel();
         }
     }
+}
+
+
+void ClientImpl::onConnect2(Net::TcpSocket& socket)
+{
+    log_trace("onConnect");
+
+    socket.endConnect();
+
+#ifdef PT_HTTP_WITH_SSL
+    if(_ssl)
+    {
+        log_debug("begining SSL handshake");
+        _sslbuf.beginConnect();
+        return;
+    }
+#endif
+    sendRequest(_stream, _req);
+        
+    log_debug("request sent - begin write");
+    beginWrite();
+
 }
 
 

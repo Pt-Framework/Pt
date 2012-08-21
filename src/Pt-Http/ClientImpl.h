@@ -187,7 +187,7 @@ class ClientImpl : public Connectable
 
         void endExecute();
 
-        void beginSend(bool endOfRequest = true);
+        void beginSend(bool endOfRequest);
 
         bool endSend();
 
@@ -196,6 +196,9 @@ class ClientImpl : public Connectable
         bool endReceive();
 
         bool isEnd() const;
+
+        Request& request()
+        { return _req; }
 
         std::iostream& body()
         {
@@ -211,6 +214,7 @@ class ClientImpl : public Connectable
         void onOutput(System::StreamBuffer& sb);
         void onInput(System::StreamBuffer& sb);
 
+        void onConnect2(Net::TcpSocket& socket);
         void onInput2(System::StreamBuffer& sb);
         void onOutput2(System::StreamBuffer& sb);
 
