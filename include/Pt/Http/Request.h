@@ -64,6 +64,11 @@ class PT_HTTP_API Request
             _buf.reset();
         }
 
+        void clearBody()
+        {
+            _buf.reset();
+        }
+
         void init(Reply& reply)
         { _reply = &reply; }
 

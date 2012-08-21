@@ -185,15 +185,17 @@ class ClientImpl : public Connectable
 
         void beginRequest(const Request& request);
 
-        void beginRequest(bool started);
-
-        void endRequest();
-
-        void beginReply();
-
-        std::istream& endReply();
-
         void endExecute();
+
+        void beginSend(bool endOfRequest = true);
+
+        bool endSend();
+
+        void beginReceive();
+
+        bool endReceive();
+
+        bool isEnd() const;
 
         std::iostream& body()
         {
@@ -208,19 +210,41 @@ class ClientImpl : public Connectable
         void onConnect(Net::TcpSocket& socket);
         void onOutput(System::StreamBuffer& sb);
         void onInput(System::StreamBuffer& sb);
+
+        void onInput2(System::StreamBuffer& sb);
+        void onOutput2(System::StreamBuffer& sb);
+
         void onError();
-        void beginRead();
 
 #ifdef PT_HTTP_WITH_SSL
         void onSslHandshake(Ssl::IOBuffer& sb);
         void onSslOutput(Ssl::IOBuffer& sb);
         void onSslInput(Ssl::IOBuffer& sb);
+
+        void onSslInput2(Ssl::IOBuffer& sb);
+        void onSslOutput2(Ssl::IOBuffer& sb);
 #endif
 
     private:
+        enum State
+        {
+            Idle,
+            OnRequest,
+            OnReplyHeader,
+            OnReply
+        };
+
         void init();
         void sendChunked(std::ostream& os, const Request& request);
         void sendRequest(std::ostream& os, const Request& request);
+
+        bool outputAvailable();
+        bool beginWrite();
+        void endWrite();
+        void beginRead();
+        void endRead();
+        void processReply();
+
         void onHeader();
         void onBody();
 
@@ -262,6 +286,7 @@ class ClientImpl : public Connectable
         std::string _password;
         bool _reusedConnection;
         bool _chunked;
+        State _hstate;
         bool _errorPending;
 
         void (ClientImpl::*_state)();

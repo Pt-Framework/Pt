@@ -126,6 +126,9 @@ class PT_HTTP_API Client : private NonCopyable
         Signal<Client&>& requestSent()
         { return _requestSent; }
 
+        Signal<Client&>& replyReceived()
+        { return _replyReceived; }
+
         // Signals that the header is received.
         //
         // beginReply -> no errors can occur
@@ -150,6 +153,8 @@ class PT_HTTP_API Client : private NonCopyable
     private:
         // Signals that the request is sent to the server.
         Signal<Client&> _requestSent;
+
+        Signal<Client&> _replyReceived;
 
         // Signals that the header is received.
         Signal<Client&> _headerReceived;
