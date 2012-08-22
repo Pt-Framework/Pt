@@ -273,10 +273,10 @@ class ServerTest : public Pt::Unit::TestSuite
         void onHelloSent(Pt::Http::Client& client)
         {
             Pt::Http::Progress progress = client.endSend();
-            
+
             if( progress == Pt::Http::Finished )
                 client.beginReceive();
-             else
+            else
                 client.beginSend();
         }
 
@@ -330,19 +330,19 @@ class ServerTest : public Pt::Unit::TestSuite
         {
             Pt::Http::Progress progress = client.endSend();
 
+            if( ! _chunks.empty() )
+            {
+              client.request().body() << _chunks.front();
+              _chunks.erase( _chunks.begin() );
+			  client.beginSend( _chunks.empty() );
+			  return;
+            }
+
             if( progress == Pt::Http::Finished )
             {
                 client.beginReceive();
                 return;
             }
-
-            if( ! _chunks.empty() )
-            {
-              client.request().body() << _chunks.front();
-              _chunks.erase( _chunks.begin() );
-            }
-
-            client.beginSend( _chunks.empty() );
         }
 
         void onChunkedReceived(Pt::Http::Client& client)

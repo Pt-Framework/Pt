@@ -641,11 +641,11 @@ void ClientImpl::beginRequest(const Request& request)
 }
 
 
-void ClientImpl::beginSend(bool endOfRequest)
+void ClientImpl::beginSend(bool)
 {
     log_trace("beginSend");
 
-    if( _hstate == Idle )
+    if( _hstate == Idle || _hstate == OnRequest )
     {
         if( ! _socket.isConnected() )
         {
@@ -656,20 +656,30 @@ void ClientImpl::beginSend(bool endOfRequest)
         }
 
         _stream.rdbuf( _httpbuf.buffer() );
-        _hstate = endOfRequest ? OnRequest : OnChunkedRequest;
+        //_hstate = endOfRequest ? OnRequest : OnChunkedRequest;
 
-        log_debug("sending http header");
+        log_debug("preparing request");
 
         // TODO:
         // do not send at once, but only send chunked when 8K are passed or
         // flush non-chunked once we are in the beginReceive/endReceive phase
+		_hstate = OnRequest;
 
-        if(_hstate == OnRequest)
+		if( _req.size() < 8000)
+		{
+			_client->requestSent().send(*_client);
+			return;
+		}
+
+        /*if(_hstate == OnRequest)
             sendRequest(_stream, _req);
-        else
-            sendChunked(_stream, _req);
+        else*/
+        
+		_hstate = OnChunkedRequest;
+		sendChunked(_stream, _req);
     }
-    else if(_hstate == OnSslHandshake)
+    
+	if(_hstate == OnSslHandshake)
     {
 #ifdef PT_HTTP_WITH_SSL
         log_debug("begining SSL handshake");
@@ -677,7 +687,8 @@ void ClientImpl::beginSend(bool endOfRequest)
         return;
 #endif
     }
-    else if(_hstate == OnChunkedRequest)
+    
+	if(_hstate == OnChunkedRequest)
     {
         log_debug("sending http chunk");
 
@@ -686,13 +697,13 @@ void ClientImpl::beginSend(bool endOfRequest)
         _stream.write("\r\n", 2);
         _req.clearBody();
 
-        if(endOfRequest)
+        /*if(endOfRequest)
         {
             log_debug("sent last chunk");
 
             _stream.write("0\r\n\r\n", 5);
             _hstate = OnRequest;
-        }
+        }*/
     }
     else if(_hstate != OnRequest)
     {
@@ -734,19 +745,24 @@ Progress ClientImpl::endSend()
         return Header;
     }
 
-    log_debug("sent http request");
-    endWrite();
+	if(_hstate == OnChunkedRequest)
+	{
+		log_debug("sent http request");
+		endWrite();
 
-    bool remaining = outputAvailable();
+		bool remaining = outputAvailable();
     
-    if(_hstate == OnRequest && ! remaining)
-    {
-        log_debug("http request finished");
-        _hstate = Idle;
-        return Finished;
-    }
+		if(_hstate == OnRequest && ! remaining)
+		{
+			log_debug("http request finished");
+			_hstate = Idle;
+			return Finished;
+		}
 
-    return Body;
+		return Body;
+	}
+
+    return Finished;
 }
 
 
@@ -756,7 +772,28 @@ void ClientImpl::beginReceive()
 
     _reading = false;
 
-    if(_hstate == Idle)
+	if(_hstate == OnRequest)
+	{
+		log_debug("begin sending cached request");
+		sendRequest(_stream, _req);
+		_req.clearBody();
+		beginWrite();
+		_hstate = OnRequestEnd;
+		return;
+	}
+
+	if(_hstate == OnRequestEnd)
+	{
+		log_debug("flushing cached request");
+		beginWrite();
+		return;
+	}
+
+	if(_hstate == OnChunkedRequest)
+	{
+	}
+    
+	if(_hstate == Idle)
     {
         _stream.rdbuf( _httpbuf.buffer() );
         _replyHeader.clear();
@@ -797,6 +834,20 @@ void ClientImpl::beginReceive()
 Progress ClientImpl::endReceive()
 {
     log_trace("endReceive");
+
+	if(_hstate == OnRequestEnd)
+	{
+		endWrite();
+
+		bool remaining = outputAvailable();
+		if( ! remaining)
+		{
+			log_debug("http request finished");
+			_hstate = Idle;
+		}
+
+		return Begin;
+	}
 
     if(_reading)
     {
@@ -892,7 +943,10 @@ void ClientImpl::onInput2(System::StreamBuffer& sb)
 void ClientImpl::onOutput2(System::StreamBuffer& sb)
 {
     log_trace("onOutput2");
-    _client->requestSent().send(*_client);
+	if(_hstate == OnRequestEnd)
+		_client->replyReceived().send(*_client);
+	else
+		_client->requestSent().send(*_client);
 }
 
 
@@ -911,7 +965,11 @@ void ClientImpl::onSslInput2(Ssl::IOBuffer& sb)
 
 void ClientImpl::onSslOutput2(Ssl::IOBuffer& sb)
 {
-    _client->requestSent().send(*_client);
+    log_trace("onOutput2");
+	if(_hstate == OnRequestEnd)
+		_client->replyReceived().send(*_client);
+	else
+		_client->requestSent().send(*_client);
 }
 #endif
 
