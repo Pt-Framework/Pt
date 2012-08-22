@@ -73,11 +73,20 @@ class ChunkedResponder : public Pt::Http::Responder
         {}
 
         void beginRequest(std::istream& in, Pt::Http::RequestHeader& request)
-        { _chunks = 5; }
+        { 
+            _chunks = 5;
+            //for (Pt::Http::RequestHeader::const_iterator it = request.begin();
+            //    it != request.end(); ++it)
+            //{
+            //    std::cerr << it->first << ": " << it->second << "\r\n";
+            //}
+        }
 
         void readRequest(std::istream& is, Pt::Http::Reply& reply)
         {
             is.ignore( is.rdbuf()->in_avail() );
+            //while ( is.rdbuf()->in_avail() )
+            //    std::cerr << char( is.get() );
         }
         
         void writeReply(Pt::Http::RequestHeader& request, Pt::Http::Reply& reply)
@@ -117,6 +126,13 @@ class ServerTest : public Pt::Unit::TestSuite
         void setUp()
         {
             _reply.clear();
+
+            _chunks.clear();
+            _chunks.push_back("ChunkA");
+            _chunks.push_back("ChunkB");
+            _chunks.push_back("ChunkC");
+            _chunks.push_back("ChunkD");
+            _chunks.push_back("ChunkE");
 
             loop = new Pt::System::MainLoop();
             loop->setIdleTimeout(5000);
@@ -299,7 +315,10 @@ class ServerTest : public Pt::Unit::TestSuite
             client.requestSent() += Pt::slot(*this, &ServerTest::onChunkedSent);
             client.replyReceived() += Pt::slot(*this, &ServerTest::onChunkedReceived);
             client.request().url("/test");
-            client.beginSend();
+            
+            client.request().body() << _chunks.front();
+            _chunks.erase( _chunks.begin() );
+            client.beginSend(false);
 
             loop->run();
 
@@ -310,11 +329,20 @@ class ServerTest : public Pt::Unit::TestSuite
         void onChunkedSent(Pt::Http::Client& client)
         {
             Pt::Http::Progress progress = client.endSend();
-            
+
             if( progress == Pt::Http::Finished )
+            {
                 client.beginReceive();
-             else
-                client.beginSend();
+                return;
+            }
+
+            if( ! _chunks.empty() )
+            {
+              client.request().body() << _chunks.front();
+              _chunks.erase( _chunks.begin() );
+            }
+
+            client.beginSend( _chunks.empty() );
         }
 
         void onChunkedReceived(Pt::Http::Client& client)
@@ -344,6 +372,7 @@ class ServerTest : public Pt::Unit::TestSuite
     private:
         Pt::System::MainLoop* loop;
         std::string _reply;
+        std::vector<std::string> _chunks;
 };
 
 Pt::Unit::RegisterTest<ServerTest> register_HttpServerTest;

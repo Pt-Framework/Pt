@@ -187,6 +187,11 @@ class ClientImpl : public Connectable
 
         void endExecute();
 
+        // NEW API:
+        void send(bool endOfRequest);
+
+        std::istream& receive();
+
         void beginSend(bool endOfRequest);
 
         Progress endSend();

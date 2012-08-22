@@ -525,6 +525,67 @@ const ReplyHeader& ClientImpl::execute(const Request& request)
 }
 
 
+void ClientImpl::send(bool endOfRequest)
+{
+    log_trace("ClientImpl::execute " << _req.url());
+
+    _stream.rdbuf( _httpbuf.buffer() );
+    _replyHeader.clear();
+    _parser.reset(true);
+    
+    if( ! _socket.isConnected() )
+    {
+        log_debug("connect");
+        _socket.connect(_addrInfo);
+
+#ifdef PT_HTTP_WITH_SSL
+        if(_ssl)
+        {
+            log_debug("ssl handshake");
+            _sslbuf.connect();
+        }
+#endif
+    }
+
+    log_debug("sending request");
+
+    if(endOfRequest)
+        sendRequest(_stream, _req);
+    else
+        sendChunked(_stream, _req);
+
+    _req.clearBody();
+
+    _stream.flush();
+    _sockbuf.pubsync(); // extra flush for https: _stream -> _sslbuf -> _sockbuf
+}
+
+
+std::istream& ClientImpl::receive()
+{
+    log_debug("reading reply");
+
+    char ch = ' ';
+    while( ! _parser.end() && _stream.get(ch) )
+    {
+        _parser.parse(ch);
+    }
+         
+    if( _parser.fail() )
+    {
+        log_error("invalid HTTP reply");
+        throw System::IOError("invalid HTTP reply");
+    }
+
+    log_debug("content-length: " << _replyHeader.contentLength());
+    log_debug("chunked: " << _replyHeader.chunkedTransferEncoding());
+
+    _stream.rdbuf(&_httpbuf);
+    _httpbuf.beginBody(_replyHeader);
+    return _stream;
+}
+
+
 void ClientImpl::onBodyFinished()
 {
     log_trace("onBodyFinished");
@@ -599,6 +660,10 @@ void ClientImpl::beginSend(bool endOfRequest)
 
         log_debug("sending http header");
 
+        // TODO:
+        // do not send at once, but only send chunked when 8K are passed or
+        // flush non-chunked once we are in the beginReceive/endReceive phase
+
         if(_hstate == OnRequest)
             sendRequest(_stream, _req);
         else
@@ -623,9 +688,9 @@ void ClientImpl::beginSend(bool endOfRequest)
 
         if(endOfRequest)
         {
-            _stream.write("\r\n", 2);
-            _stream.write("0\r\n\r\n", 5);
+            log_debug("sent last chunk");
 
+            _stream.write("0\r\n\r\n", 5);
             _hstate = OnRequest;
         }
     }

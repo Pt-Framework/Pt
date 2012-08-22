@@ -119,6 +119,10 @@ class PT_HTTP_API Client : private NonCopyable
         void endExecute();
 
         // NEW API: //////////////////////
+        void send(bool endOfRequest = true);
+
+        std::istream& receive();
+
         void beginSend(bool endOfRequest = true);
 
         Progress endSend();

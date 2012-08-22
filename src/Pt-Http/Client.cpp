@@ -139,6 +139,18 @@ std::istream& Client::body()
 }
 
 
+void Client::send(bool endOfRequest)
+{
+    return _impl->send(endOfRequest);
+}
+
+
+std::istream& Client::receive()
+{
+    return _impl->receive();
+}
+
+
 void Client::beginSend(bool endOfRequest)
 {
     _impl->beginSend(endOfRequest);
