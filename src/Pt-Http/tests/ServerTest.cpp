@@ -43,6 +43,27 @@
 #include <Pt/Ssl/Context.h>
 #include "../../Pt-Ssl/tests/PemData.h"
 
+class HelloResponder : public Pt::Http::Responder
+{
+    public:
+        HelloResponder(Pt::Http::Service& service)
+        : Pt::Http::Responder(service)
+        {}
+
+        void readRequest(std::istream& is, Pt::Http::Reply& reply)
+        {
+            is.ignore( is.rdbuf()->in_avail() );
+        }
+        
+        void writeReply(Pt::Http::RequestHeader& request, Pt::Http::Reply& reply)
+        {
+            reply.body() << "Hello World!";
+            reply.finish();
+        }
+};
+
+typedef Pt::Http::CachedService<HelloResponder> HelloService;
+
 class ChunkedResponder : public Pt::Http::Responder
 {
     public:
@@ -82,14 +103,15 @@ class ServerTest : public Pt::Unit::TestSuite
         ServerTest()
         : Pt::Unit::TestSuite("ServerTest")
         {
-            //Pt::System::Logger::setLogLevel("Pt.Http", Pt::System::Trace);
+            Pt::System::Logger::setLogLevel("Pt.Http", Pt::System::Error);
 
             this->registerMethod( "NotFound", *this, &ServerTest::NotFound);
 #ifdef PT_HTTP_WITH_SSL
-            //this->registerMethod( "NotFoundHttps", *this, &ServerTest::NotFoundHttps);
+            this->registerMethod( "NotFoundHttps", *this, &ServerTest::NotFoundHttps);
 #endif
 
-            //this->registerMethod( "ChunkedReply", *this, &ServerTest::ChunkedReply);
+            this->registerMethod( "ReplyWithBody", *this, &ServerTest::ReplyWithBody);
+            this->registerMethod( "ChunkedReply", *this, &ServerTest::ChunkedReply);
         }
 
         void setUp()
@@ -98,6 +120,7 @@ class ServerTest : public Pt::Unit::TestSuite
 
             loop = new Pt::System::MainLoop();
             loop->setIdleTimeout(5000);
+            loop->timeout() += Pt::slot(*loop, &Pt::System::MainLoop::exit);
         }
 
         void tearDown()
@@ -114,11 +137,12 @@ class ServerTest : public Pt::Unit::TestSuite
             Pt::Http::Client client("127.0.0.1", 8001);
             client.setActive(*loop);
 
-            connect(client.requestSent(), *this, &ServerTest::onNotFoundSent);
-            connect(client.replyReceived(), *this, &ServerTest::onNotFoundReceived);
+            client.requestSent() += Pt::slot(*this, &ServerTest::onNotFoundSent);
+            client.replyReceived() += Pt::slot(*this, &ServerTest::onNotFoundReceived);
 
             client.request().url("/index.html");
             client.request().header().setHeader("foo", "bar");
+
             client.beginSend();
 
             loop->run();
@@ -126,28 +150,36 @@ class ServerTest : public Pt::Unit::TestSuite
 
         void onNotFoundSent(Pt::Http::Client& client)
         {
-            if( client.endSend() )
+            Pt::Http::Progress progress = client.endSend();
+            
+            if( progress == Pt::Http::Finished )
                 client.beginReceive();
-            else
+             else
                 client.beginSend();
         }
 
         void onNotFoundReceived(Pt::Http::Client& client)
         {
-            if( client.endReceive() )
+            Pt::Http::Progress progress = client.endReceive();
+
+            if(progress == Pt::Http::Header)
+            {
+                PT_UNIT_ASSERT_EQUALS(client.header().httpReturnCode(), 404);
+            }
+            
+            if(progress == Pt::Http::Finished)
             {
                 PT_UNIT_ASSERT_EQUALS(client.header().httpReturnCode(), 404);
                 loop->exit();
+                return;
             }
-            else
-                client.beginReceive();
+
+            client.beginReceive();
         }
 
 #ifdef PT_HTTP_WITH_SSL
         void NotFoundHttps()
         {
-            loop->timeout() += Pt::slot(*loop, &Pt::System::MainLoop::exit);
-
             // SSL configuration
             Pt::Ssl::CertificateList caCert;
             caCert.fromPem(caPemData, sizeof(caPemData));
@@ -174,13 +206,11 @@ class ServerTest : public Pt::Unit::TestSuite
             Pt::Http::Client client("127.0.0.1", 8001, true);
             client.setContext(clientContext);
             client.setActive(*loop);
-            connect(client.headerReceived(), *this, &ServerTest::onNotFoundHeader);
-            connect(client.bodyReceived(), *this, &ServerTest::onNotFound);
-            connect(client.replyFinished(), *this, &ServerTest::onNotFoundFinished);
-
-            Pt::Http::Request request("/index.html");
-            request.header().setHeader("foo", "bar");
-            client.beginExecute(request);
+            client.requestSent() += Pt::slot(*this, &ServerTest::onNotFoundSent);
+            client.replyReceived() += Pt::slot(*this, &ServerTest::onNotFoundReceived);
+            client.request().url("/index.html");
+            client.request().header().setHeader("foo", "bar");
+            client.beginSend();
 
             loop->run();
         }
@@ -205,77 +235,110 @@ class ServerTest : public Pt::Unit::TestSuite
         }
 #endif
 
-        void onNotFoundHeader(Pt::Http::Client& client)
+        void ReplyWithBody()
         {
+            HelloService service;
+            Pt::Http::Server server(*loop, "127.0.0.1", 8001);
+            server.addService("/test", service);
+
+            Pt::Http::Client client("127.0.0.1", 8001);
+            client.setActive(*loop);
+            client.requestSent() += Pt::slot(*this, &ServerTest::onHelloSent);
+            client.replyReceived() += Pt::slot(*this, &ServerTest::onHelloReceived);
+            client.request().url("/test");
+            client.request().header().setHeader("foo", "bar");
+            client.beginSend();
+
+            loop->run();
+            PT_UNIT_ASSERT_EQUALS(client.header().httpReturnCode(), 200);
+            PT_UNIT_ASSERT_EQUALS(_reply, "Hello World!");
         }
 
-        std::size_t onNotFound(Pt::Http::Client& client)
+        void onHelloSent(Pt::Http::Client& client)
         {
-            std::size_t ret = 0;
-            while ( client.body().rdbuf()->in_avail() )
+            Pt::Http::Progress progress = client.endSend();
+            
+            if( progress == Pt::Http::Finished )
+                client.beginReceive();
+             else
+                client.beginSend();
+        }
+
+        void onHelloReceived(Pt::Http::Client& client)
+        {
+            Pt::Http::Progress progress = client.endReceive();
+
+            if(progress == Pt::Http::Header)
             {
-                char ch;
-                client.body().get(ch);
-                ++ret;
-                std::cout << ch;
+                PT_UNIT_ASSERT_EQUALS(client.header().httpReturnCode(), 200);
+            }
+            
+            if(progress == Pt::Http::Body)
+            {
+                while ( client.body().rdbuf()->in_avail() )
+                    _reply += client.body().get();
+            }
+            
+            if(progress == Pt::Http::Finished)
+            {
+                loop->exit();
+                return;
             }
 
-            return ret;
-        }
-
-        void onNotFoundFinished(Pt::Http::Client& client)
-        {
-            PT_UNIT_ASSERT_EQUALS(client.header().httpReturnCode(), 404);
-            loop->exit();
+            client.beginReceive();
         }
 
         void ChunkedReply()
         {
-            loop->timeout() += Pt::slot(*loop, &Pt::System::MainLoop::exit);
-
             ChunkedService service;
             Pt::Http::Server server(*loop, "127.0.0.1", 8001);
             server.addService("/test", service);
 
             Pt::Http::Client client("127.0.0.1", 8001);
             client.setActive(*loop);
-            connect(client.headerReceived(), *this, &ServerTest::onChunkedHeader);
-            connect(client.bodyReceived(), *this, &ServerTest::onChunkedReply);
-            connect(client.replyFinished(), *this, &ServerTest::onChunkedReplyFinished);
-
-            Pt::Http::Request request("/test");
-
-            // TODO:
-            // request.setChunked(true);
-            // request.body() << "Chunk1" << std::endl;
-            // client.requestSent() += Pt::slot(*this, &ServerTest::onChunkedRequest);
-
-            client.beginExecute(request);
+            client.requestSent() += Pt::slot(*this, &ServerTest::onChunkedSent);
+            client.replyReceived() += Pt::slot(*this, &ServerTest::onChunkedReceived);
+            client.request().url("/test");
+            client.beginSend();
 
             loop->run();
-        }
 
-        void onChunkedHeader(Pt::Http::Client& client)
-        {
-        }
-
-        void onChunkedReply(Pt::Http::Client& client)
-        {
-            std::size_t ret = 0;
-            while ( client.body().rdbuf()->in_avail() )
-            {
-                char ch;
-                client.body().get(ch);
-                ++ret;
-                _reply += ch;
-            }
-        }
-
-        void onChunkedReplyFinished(Pt::Http::Client& client)
-        {
             PT_UNIT_ASSERT_EQUALS(client.header().httpReturnCode(), 200);
-            //std::clog << _reply << std::endl;
-            loop->exit();
+            PT_UNIT_ASSERT_EQUALS(_reply, "Chunk5Chunk4Chunk3Chunk2Chunk1");
+        }
+
+        void onChunkedSent(Pt::Http::Client& client)
+        {
+            Pt::Http::Progress progress = client.endSend();
+            
+            if( progress == Pt::Http::Finished )
+                client.beginReceive();
+             else
+                client.beginSend();
+        }
+
+        void onChunkedReceived(Pt::Http::Client& client)
+        {
+            Pt::Http::Progress progress = client.endReceive();
+
+            if(progress == Pt::Http::Header)
+            {
+                PT_UNIT_ASSERT_EQUALS(client.header().httpReturnCode(), 200);
+            }
+            
+            if(progress == Pt::Http::Body)
+            {
+                while ( client.body().rdbuf()->in_avail() )
+                    _reply += client.body().get();
+            }
+            
+            if(progress == Pt::Http::Finished)
+            {
+                loop->exit();
+                return;
+            }
+
+            client.beginReceive();
         }
 
     private:

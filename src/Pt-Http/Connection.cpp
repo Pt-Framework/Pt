@@ -432,6 +432,7 @@ void Connection::advanceReply()
 
     os << std::hex << _reply.buffer().size() << std::dec << "\r\n";
     os.write( _reply.buffer().data(), _reply.buffer().size() );
+    _reply.clearBody();
     os.write("\r\n", 2);
 
     _timer.start( _server.writeTimeout() );

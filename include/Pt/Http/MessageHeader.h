@@ -39,6 +39,16 @@ namespace Pt {
 
 namespace Http {
 
+enum Progress
+{
+    Begin    = 0,
+    Header   = 1,
+    Body     = 2,
+    Trailer  = 3,
+    Finished = 4,
+    Invalid  = 0x7fffffff
+};
+
 class PT_HTTP_API MessageBuffer : public std::streambuf
 {
     static const unsigned int BufferSize = 512;

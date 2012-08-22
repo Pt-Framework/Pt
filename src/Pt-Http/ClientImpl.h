@@ -189,11 +189,11 @@ class ClientImpl : public Connectable
 
         void beginSend(bool endOfRequest);
 
-        bool endSend();
+        Progress endSend();
 
         void beginReceive();
 
-        bool endReceive();
+        Progress endReceive();
 
         bool isEnd() const;
 
@@ -225,6 +225,7 @@ class ClientImpl : public Connectable
         void onSslOutput(Ssl::IOBuffer& sb);
         void onSslInput(Ssl::IOBuffer& sb);
 
+        void onSslHandshake2(Ssl::IOBuffer& sb);
         void onSslInput2(Ssl::IOBuffer& sb);
         void onSslOutput2(Ssl::IOBuffer& sb);
 #endif
@@ -232,10 +233,14 @@ class ClientImpl : public Connectable
     private:
         enum State
         {
-            Idle,
-            OnRequest,
-            OnReplyHeader,
-            OnReply
+            Idle = 0,
+            OnConnect = 1,
+            OnSslHandshake = 2,
+            OnRequest = 3,
+            OnChunkedRequest = 4,
+            OnRequestEnd = 5,
+            OnReplyHeader = 6,
+            OnReply = 7
         };
 
         void init();
@@ -247,7 +252,7 @@ class ClientImpl : public Connectable
         void endWrite();
         void beginRead();
         void endRead();
-        void processReply();
+        Progress processReply();
 
         void onHeader();
         void onBody();
@@ -275,7 +280,6 @@ class ClientImpl : public Connectable
 
         // new:
         Request _req;
-        Reply _reply;
 
         Net::AddrInfo _addrInfo;
         bool _ssl;
@@ -291,6 +295,8 @@ class ClientImpl : public Connectable
         bool _reusedConnection;
         bool _chunked;
         State _hstate;
+        bool _endOfRequest;
+        bool _reading;
         bool _errorPending;
 
         void (ClientImpl::*_state)();

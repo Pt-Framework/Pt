@@ -145,7 +145,7 @@ void Client::beginSend(bool endOfRequest)
 }
 
 
-bool Client::endSend()
+Progress Client::endSend()
 {
     return _impl->endSend();
 }
@@ -157,7 +157,7 @@ void Client::beginReceive()
 }
 
 
-bool Client::endReceive()
+Progress Client::endReceive()
 {
     return _impl->endReceive();
 }

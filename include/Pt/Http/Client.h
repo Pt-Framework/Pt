@@ -30,6 +30,7 @@
 #define Pt_Http_Client_h
 
 #include <Pt/Http/Api.h>
+#include <Pt/Http/Request.h>
 #include <Pt/System/Selectable.h>
 #include <Pt/System/IOError.h>
 #include <Pt/Signal.h>
@@ -64,17 +65,6 @@ class PT_HTTP_API ConnectionClosed : public System::IOError
 
 class PT_HTTP_API Client : private NonCopyable
 {
-    public:
-        enum Progress
-        {
-            Idle     = 0,
-            Header   = 1,
-            Body     = 2,
-            Trailer  = 3,
-            Finished = 4,
-            Invalid  = 0x7fffffff
-        };
-
     public:
         Client();
         
@@ -131,11 +121,11 @@ class PT_HTTP_API Client : private NonCopyable
         // NEW API: //////////////////////
         void beginSend(bool endOfRequest = true);
 
-        bool endSend();
+        Progress endSend();
 
         void beginReceive();
 
-        bool endReceive();
+        Progress endReceive();
 
         bool isEnd() const;
 

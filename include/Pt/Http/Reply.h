@@ -64,6 +64,11 @@ class PT_HTTP_API Reply
             _finished = false;
         }
 
+        void clearBody()
+        {
+            _buf.reset();
+        }
+
         bool finished() const
         { return _finished; }
 
