@@ -180,7 +180,7 @@ class ClientImpl : public Connectable
 
         const ReplyHeader& execute(const Request& request);
 
-        const ReplyHeader& header()
+        const ReplyHeader& replyHeader()
         { return _replyHeader; }
 
         void beginRequest(const Request& request);
@@ -198,14 +198,14 @@ class ClientImpl : public Connectable
 
         void beginReceive();
 
-        Progress endReceive();
+        bool endReceive();
 
         bool isEnd() const;
 
         Request& request()
         { return _req; }
 
-        std::iostream& body()
+        std::iostream& reply()
         {
             return _stream;
         }
@@ -260,7 +260,7 @@ class ClientImpl : public Connectable
         void endWrite();
         void beginRead();
         void endRead();
-        Progress processReply();
+        bool processReply();
 
         void onHeader();
         void onBody();

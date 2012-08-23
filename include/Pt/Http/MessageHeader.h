@@ -39,7 +39,7 @@ namespace Pt {
 
 namespace Http {
 
-enum Progress
+/*enum Progress
 {
     Begin    = 0,
     Header   = 1,
@@ -47,7 +47,7 @@ enum Progress
     Trailer  = 3,
     Finished = 4,
     Invalid  = 0x7fffffff
-};
+};*/
 
 class PT_HTTP_API MessageBuffer : public std::streambuf
 {

@@ -162,16 +162,19 @@ class ServerTest : public Pt::Unit::TestSuite
 
         void onNotFoundReceived(Pt::Http::Client& client)
         {
-            Pt::Http::Progress progress = client.endReceive();
+            bool received = client.endReceive();
 
-            if(progress == Pt::Http::Header)
+            if(received)
             {
-                PT_UNIT_ASSERT_EQUALS(client.header().httpReturnCode(), 404);
+                PT_UNIT_ASSERT_EQUALS(client.replyHeader().httpReturnCode(), 404);
             }
-            
-            if(progress == Pt::Http::Finished)
+
+            while ( client.reply().rdbuf()->in_avail() )
+                _reply += client.reply().get();
+
+            if( client.isEnd() )
             {
-                PT_UNIT_ASSERT_EQUALS(client.header().httpReturnCode(), 404);
+                PT_UNIT_ASSERT_EQUALS(client.replyHeader().httpReturnCode(), 404);
                 loop->exit();
                 return;
             }
@@ -251,7 +254,7 @@ class ServerTest : public Pt::Unit::TestSuite
             client.beginSend();
 
             loop->run();
-            PT_UNIT_ASSERT_EQUALS(client.header().httpReturnCode(), 200);
+            PT_UNIT_ASSERT_EQUALS(client.replyHeader().httpReturnCode(), 200);
             PT_UNIT_ASSERT_EQUALS(_reply, "Hello World!");
         }
 
@@ -263,20 +266,17 @@ class ServerTest : public Pt::Unit::TestSuite
 
         void onHelloReceived(Pt::Http::Client& client)
         {
-            Pt::Http::Progress progress = client.endReceive();
+            bool received = client.endReceive();
 
-            if(progress == Pt::Http::Header)
+            if( received )
             {
-                PT_UNIT_ASSERT_EQUALS(client.header().httpReturnCode(), 200);
+                PT_UNIT_ASSERT_EQUALS(client.replyHeader().httpReturnCode(), 200);
             }
             
-            if(progress == Pt::Http::Body)
-            {
-                while ( client.body().rdbuf()->in_avail() )
-                    _reply += client.body().get();
-            }
-            
-            if(progress == Pt::Http::Finished)
+            while ( client.reply().rdbuf()->in_avail() )
+                _reply += client.reply().get();
+
+            if( client.isEnd() )
             {
                 loop->exit();
                 return;
@@ -303,7 +303,7 @@ class ServerTest : public Pt::Unit::TestSuite
 
             loop->run();
 
-            PT_UNIT_ASSERT_EQUALS(client.header().httpReturnCode(), 200);
+            PT_UNIT_ASSERT_EQUALS(client.replyHeader().httpReturnCode(), 200);
             PT_UNIT_ASSERT_EQUALS(_reply, "Chunk5Chunk4Chunk3Chunk2Chunk1");
         }
 
@@ -315,7 +315,7 @@ class ServerTest : public Pt::Unit::TestSuite
             {
               client.request().body() << _chunks.front();
               _chunks.erase( _chunks.begin() );
-              client.beginSend( _chunks.empty() );
+              client.beginSend();
               return;
             }
 
@@ -324,25 +324,22 @@ class ServerTest : public Pt::Unit::TestSuite
 
         void onChunkedReceived(Pt::Http::Client& client)
         {
-            Pt::Http::Progress progress = client.endReceive();
+            bool received = client.endReceive();
 
-            if(progress == Pt::Http::Header)
+            if(received)
             {
-                PT_UNIT_ASSERT_EQUALS(client.header().httpReturnCode(), 200);
+                PT_UNIT_ASSERT_EQUALS(client.replyHeader().httpReturnCode(), 200);
             }
-            
-            if(progress == Pt::Http::Body)
-            {
-                while ( client.body().rdbuf()->in_avail() )
-                    _reply += client.body().get();
-            }
-            
-            if(progress == Pt::Http::Finished)
+
+            while ( client.reply().rdbuf()->in_avail() )
+                _reply += client.reply().get();
+
+            if( client.isEnd() )
             {
                 loop->exit();
                 return;
             }
-
+            
             client.beginReceive();
         }
 

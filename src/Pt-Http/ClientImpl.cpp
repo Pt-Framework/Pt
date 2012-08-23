@@ -856,7 +856,7 @@ void ClientImpl::beginReceive()
 }
 
 
-Progress ClientImpl::endReceive()
+bool ClientImpl::endReceive()
 {
     log_trace("endReceive");
 
@@ -870,7 +870,7 @@ Progress ClientImpl::endReceive()
         else
             _hstate = OnSslHandshakeReceive;
 
-        return Begin;
+        return false;
     }
 
     if(_hstate == OnSslHandshakeReceive)
@@ -881,13 +881,13 @@ Progress ClientImpl::endReceive()
         _sslbuf.endHandshake();
 #endif
         _hstate = OnRequest;
-        return Begin;
+        return false;
     }
 
     if(_hstate == OnRequestEnd)
     {
         endWrite();
-        return Begin;
+        return false;
     }
 
     if(_reading)
@@ -901,7 +901,7 @@ Progress ClientImpl::endReceive()
 }
 
 
-Progress ClientImpl::processReply()
+bool ClientImpl::processReply()
 {
     log_trace("processReply");
 
@@ -927,14 +927,14 @@ Progress ClientImpl::processReply()
         if( ! _parser.end() )
         {
             log_debug("continue reading");
-            return Begin;
+            return false;
         }
     
         log_debug("http header complete");
         _stream.rdbuf(&_httpbuf);
         _httpbuf.beginBody(_replyHeader);
         _hstate = OnReply;
-        return Header;
+        return true;
     }
 
     if(_hstate != OnReply)
@@ -946,7 +946,7 @@ Progress ClientImpl::processReply()
     log_debug("available: " << _httpbuf.in_avail());
 
     if( ! _httpbuf.isEnd() || _httpbuf.in_avail() > 0)
-        return Body;
+        return false;
 
     _hstate = Idle;
 
@@ -957,7 +957,7 @@ Progress ClientImpl::processReply()
     }
 
     log_debug("http reply finished");
-    return Finished;
+    return false;
 }
 
 

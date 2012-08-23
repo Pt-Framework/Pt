@@ -103,10 +103,10 @@ class PT_HTTP_API Client : private NonCopyable
         // This method blocks or times out until the body is parsed.
         const ReplyHeader& execute(const Request& request);
 
-        const ReplyHeader& header();
+        const ReplyHeader& replyHeader();
 
         // Returns the underlying stream, where the reply may be read from.
-        std::istream& body();
+        std::istream& reply();
 
         // Starts a new request.
         // This method does not block. To actually process the request, the
@@ -129,7 +129,7 @@ class PT_HTTP_API Client : private NonCopyable
 
         void beginReceive();
 
-        Progress endReceive();
+        bool endReceive();
 
         bool isEnd() const;
 

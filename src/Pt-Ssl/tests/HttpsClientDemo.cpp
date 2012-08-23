@@ -39,10 +39,10 @@ log_define("Pt.Ssl.HttpClientDemo")
 
 void onReply(Pt::Http::Client& client)
 {
-    while ( client.body().rdbuf()->in_avail() )
+    while ( client.reply().rdbuf()->in_avail() )
     {
         char ch;
-        client.body().get(ch);
+        client.reply().get(ch);
         std::cout << ch;
     }
 }
@@ -106,7 +106,7 @@ int main(int argc, char** argv)
             client.execute(request);
 
             char ch = ' ';
-            while( client.body().get(ch) )
+            while( client.reply().get(ch) )
                 std::cout << ch;
         }
 

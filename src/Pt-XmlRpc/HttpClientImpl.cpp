@@ -80,12 +80,12 @@ std::string HttpClientImpl::url() const
 
 void HttpClientImpl::onReplyHeader(Http::Client& client)
 {
-    log_debug("httpReturnCode=" << client.header().httpReturnCode()
-        << " content-type=" << client.header().getHeader("Content-Type"));
+    log_debug("httpReturnCode=" << client.replyHeader().httpReturnCode()
+        << " content-type=" << client.replyHeader().getHeader("Content-Type"));
 
-    verifyHeader(client.header());
+    verifyHeader(client.replyHeader());
 
-    ClientImpl::onReadReplyBegin(client.body());
+    ClientImpl::onReadReplyBegin(client.reply());
 }
 
 std::size_t HttpClientImpl::onReplyBody(Http::Client& client)
@@ -123,10 +123,10 @@ std::string HttpClientImpl::execute()
 
     try
     {
-        verifyHeader(_client.header());
+        verifyHeader(_client.replyHeader());
 
         char ch = ' ';
-        while( _client.body().get(ch) )
+        while( _client.reply().get(ch) )
             body += ch;
         
         //_client.readBody(body);

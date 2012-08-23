@@ -118,9 +118,9 @@ const ReplyHeader& Client::execute(const Request& request)
     }
 }
 
-const ReplyHeader& Client::header()
+const ReplyHeader& Client::replyHeader()
 {
-    return _impl->header();
+    return _impl->replyHeader();
 }
 
 void Client::beginExecute(const Request& request)
@@ -133,9 +133,9 @@ void Client::endExecute()
     _impl->endExecute();
 }
 
-std::istream& Client::body()
+std::istream& Client::reply()
 {
-    return _impl->body();
+    return _impl->reply();
 }
 
 
@@ -169,7 +169,7 @@ void Client::beginReceive()
 }
 
 
-Progress Client::endReceive()
+bool Client::endReceive()
 {
     return _impl->endReceive();
 }
