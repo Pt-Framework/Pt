@@ -100,7 +100,7 @@ class HttpClientImpl : public ClientImpl
         static void verifyHeader(const Http::ReplyHeader& header);
 
         Http::Client _client;
-        bool _errorPending;
+        bool _error;
 };
 
 }

@@ -38,7 +38,7 @@ namespace Pt {
 namespace XmlRpc {
 
 HttpClientImpl::HttpClientImpl()
-: _errorPending(false)
+: _error(false)
 {
     _client.request().method("POST");
     _client.replyReceived() += Pt::slot( *this, &HttpClientImpl::onReply);
@@ -48,7 +48,7 @@ HttpClientImpl::HttpClientImpl()
 HttpClientImpl::HttpClientImpl(System::EventLoop& selector, const std::string& addr,
        unsigned short port, const std::string& url)
 : _client(selector, addr, port)
-, _errorPending(false)
+, _error(false)
 {
     _client.request().method("POST");
     _client.request().url(url);
@@ -58,7 +58,7 @@ HttpClientImpl::HttpClientImpl(System::EventLoop& selector, const std::string& a
 
 HttpClientImpl::HttpClientImpl(const std::string& addr, unsigned short port, const std::string& url)
 : _client(addr, port)
-, _errorPending(false)
+, _error(false)
 {
     _client.request().method("POST");
     _client.request().url(url);
@@ -103,16 +103,10 @@ void HttpClientImpl::onReply(Http::Client& client)
 
         client.beginReceive();
     }
-    catch(...)
+    catch(const std::exception& ex)
     {
-        _errorPending = true;
-
+        _error = true;
         ClientImpl::onReplyFinished();
-
-        if(_errorPending)
-        {
-            throw;
-        }
     }
 }
 
@@ -125,9 +119,9 @@ void HttpClientImpl::beginExecute()
 
 void HttpClientImpl::endExecute()
 {
-    if( _errorPending ) 
+    if( _errorPending || _error) 
     {
-        _errorPending = false;
+        _error = false;
         throw;
     }
 }
@@ -170,7 +164,7 @@ std::ostream& HttpClientImpl::prepareRequest()
 
 void HttpClientImpl::cancel()
 {
-    _errorPending = false;
+    _error = false;
     _client.cancel();
     ClientImpl::cancel();
 }
