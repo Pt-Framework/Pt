@@ -39,18 +39,22 @@ log_define("Pt.Ssl.HttpClientDemo")
 
 void onReply(Pt::Http::Client& client)
 {
+    bool received = client.endReceive();
+
     while ( client.reply().rdbuf()->in_avail() )
     {
         char ch;
         client.reply().get(ch);
         std::cout << ch;
     }
-}
 
-void onReplyFinished(Pt::Http::Client& client)
-{
-    if( client.loop() )
+    if( client.isEnd() )
+    {
         client.loop()->exit();
+        return;
+    }
+            
+    client.beginReceive();
 }
 
 int main(int argc, char** argv)
@@ -80,21 +84,18 @@ int main(int argc, char** argv)
         //std::string addr("127.0.0.1");
         std::string  addr("www.pt-framework.org");
         unsigned short port = 443;
-        Pt::Http::Client client(loop, addr, port, true);
-        client.setContext(clientContext);
-
-        //client.headerReceived += Pt::slot(&onReplyHeader);
-        client.bodyReceived() += Pt::slot(&onReply);
-        client.replyFinished() += Pt::slot(&onReplyFinished);
- 
-        Pt::Http::Request request("/index.html");
-        request.header().setHeader("User-Agent", "Platinum");
         
+        Pt::Http::Client client(loop, addr, port, true);
+        client.request().url("/index.html");
+        client.request().header().setHeader("User-Agent", "Platinum");
+        client.setContext(clientContext);
+        client.replyReceived() += Pt::slot(&onReply);
+ 
         bool noblock = true;
         if(noblock)
         {
             log_debug("excuting non-blocking HTTPS request");
-            client.beginExecute(request);
+            client.beginReceive();
 
             //loop.setIdleTimeout(60000);
             loop.timeout() += Pt::slot(loop, &Pt::System::EventLoop::exit);
@@ -103,7 +104,8 @@ int main(int argc, char** argv)
         else
         {
             log_debug("excuting blocking HTTPS request");
-            client.execute(request);
+            client.send();
+            client.receive();
 
             char ch = ' ';
             while( client.reply().get(ch) )

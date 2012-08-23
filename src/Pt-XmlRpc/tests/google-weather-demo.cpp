@@ -81,9 +81,7 @@ class GoogleWeatherClient : public Pt::Connectable
             // hook up to the events of the http client. We will receive headerReceived first
             // then bodyAvailable if the reply has a body, and finally replyFinished. All Errors
             // are deferred until replyFinished, so we can handle them in a callback.
-            _client.headerReceived() += Pt::slot(*this,  &GoogleWeatherClient::onHeaderReceived);
-            _client.bodyReceived() += Pt::slot( *this, &GoogleWeatherClient::onBodyAvailable);
-            _client.replyFinished() += Pt::slot( *this, &GoogleWeatherClient::onReplyFinished);
+            _client.replyReceived() += Pt::slot( *this, &GoogleWeatherClient::onReplyReceived);
 
             // the timeout signal is called when the interval has expired
             _timer.timeout() += Pt::slot(*this, &GoogleWeatherClient::beginRequest);
@@ -143,15 +141,15 @@ class GoogleWeatherClient : public Pt::Connectable
             _weather.clear();
             _parseFunc = &GoogleWeatherClient::onXmlBegin;
 
-            _req.clear();
-            _req.url("/ig/api?weather=" + _weather.city());
-            _req.method("GET");
-            _req.header().setHeader("Host", "www.google.com");
-            _req.header().setHeader("Accept-Charset", "UTF-8");
+            _client.request().clear();
+            _client.request().url("/ig/api?weather=" + _weather.city());
+            _client.request().method("GET");
+            _client.request().header().setHeader("Host", "www.google.com");
+            _client.request().header().setHeader("Accept-Charset", "UTF-8");
 
             // begin a new request, non-blocking, incoming data is processed
-            // via slots: onHeaderReceived, onBodyAvailable, onReplyFinished
-            _client.beginExecute(_req);
+            // via onReplyReceived
+            _client.beginReceive();
         }
 
         void onHeaderReceived(Pt::Http::Client& client)
@@ -160,8 +158,6 @@ class GoogleWeatherClient : public Pt::Connectable
             {
                 std::cerr << "unexpected http return: " << client.replyHeader().httpReturnCode() 
                           << " - " << client.replyHeader().httpReturnText() << std::endl;
-
-                // don't need to cancel here, because replyFinished will be sent
             }
 
             // we have the expected reply and prepare our text stream to process
@@ -220,11 +216,33 @@ class GoogleWeatherClient : public Pt::Connectable
                 _weather.setFailed(true);
             }
 
+            // notify parent thread
+            if(_sink)
+                _sink->commitEvent(_weather);
+
+            // next request in 2000 ms
+            _timer.start(2000);
+        }
+
+        void onReplyReceived(Pt::Http::Client& client)
+        {
             // we are being called when we have finished reading the body or
             // if an error occured.
             try
             {
-                client.endExecute();
+                if( client.endReceive() )
+                    onHeaderReceived(client);
+
+                if( client.reply().rdbuf()->in_avail() )
+                    onBodyAvailable(client);
+
+                if( client.isEnd() )
+                {
+                    onReplyFinished(client);
+                    return;
+                }
+            
+                client.beginReceive();
             }
             catch(Pt::System::IOError& e)
             {
@@ -232,15 +250,8 @@ class GoogleWeatherClient : public Pt::Connectable
                 client.cancel();
                 _weather.setFailed(true);
             }
-
-            // notify parent thread
-            if(_sink)
-                _sink->commitEvent(_weather);
-
-
-            // next request in 2000 ms
-            _timer.start(2000);
         }
+
 
     private:
         void onXmlBegin(const Pt::Xml::Node& node)
@@ -312,7 +323,6 @@ class GoogleWeatherClient : public Pt::Connectable
         Pt::System::Timer _timer;
         Pt::Http::Client _client;
         Pt::System::EventSink* _sink;
-        Pt::Http::Request _req;
         Pt::TextIStream _ts;
         Pt::Xml::XmlReader _reader;
         typedef void (GoogleWeatherClient::*ParseFunc)(const Pt::Xml::Node&);

@@ -299,7 +299,7 @@ class ServerTest : public Pt::Unit::TestSuite
             
             client.request().body() << _chunks.front();
             _chunks.erase( _chunks.begin() );
-            client.beginSend(false);
+            client.beginSend();
 
             loop->run();
 

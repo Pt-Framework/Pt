@@ -105,33 +105,33 @@ void Client::setContext(Ssl::Context& ctx)
     _impl->setContext(ctx);
 }
 
-const ReplyHeader& Client::execute(const Request& request)
-{
-    try
-    {
-        return _impl->execute(request);
-    }
-    catch (...)
-    {
-        cancel();
-        throw;
-    }
-}
+//const ReplyHeader& Client::execute(const Request& request)
+//{
+//    try
+//    {
+//        return _impl->execute(request);
+//    }
+//    catch (...)
+//    {
+//        cancel();
+//        throw;
+//    }
+//}
 
 const ReplyHeader& Client::replyHeader()
 {
     return _impl->replyHeader();
 }
 
-void Client::beginExecute(const Request& request)
-{
-    _impl->beginRequest(request);
-}
-
-void Client::endExecute()
-{
-    _impl->endExecute();
-}
+//void Client::beginExecute(const Request& request)
+//{
+//    _impl->beginRequest(request);
+//}
+//
+//void Client::endExecute()
+//{
+//    _impl->endExecute();
+//}
 
 std::istream& Client::reply()
 {
@@ -139,9 +139,9 @@ std::istream& Client::reply()
 }
 
 
-void Client::send(bool endOfRequest)
+void Client::send()
 {
-    return _impl->send(endOfRequest);
+    return _impl->send();
 }
 
 
@@ -151,9 +151,9 @@ std::istream& Client::receive()
 }
 
 
-void Client::beginSend(bool endOfRequest)
+void Client::beginSend()
 {
-    _impl->beginSend(endOfRequest);
+    _impl->beginSend();
 }
 
 
@@ -182,6 +182,12 @@ bool Client::isEnd() const
 
 
 Request& Client::request()
+{ 
+    return _impl->request();
+}
+
+
+const Request& Client::request() const
 { 
     return _impl->request();
 }

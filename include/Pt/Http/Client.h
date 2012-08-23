@@ -63,6 +63,12 @@ class PT_HTTP_API ConnectionClosed : public System::IOError
         {}
 };
 
+enum Protocol
+{
+  Http = 0,
+  Https = 1
+};
+
 class PT_HTTP_API Client : private NonCopyable
 {
     public:
@@ -101,7 +107,7 @@ class PT_HTTP_API Client : private NonCopyable
         // Sends the passed request to the server and parses the headers.
         // The body must be read with readBody.
         // This method blocks or times out until the body is parsed.
-        const ReplyHeader& execute(const Request& request);
+        //const ReplyHeader& execute(const Request& request);
 
         const ReplyHeader& replyHeader();
 
@@ -114,16 +120,16 @@ class PT_HTTP_API Client : private NonCopyable
         // with the corresponding signals and delegates.
         // The delegate "bodyAvailable" must be connected, if a body is
         // received.
-        void beginExecute(const Request& request);
+        //void beginExecute(const Request& request);
 
-        void endExecute();
+        //void endExecute();
 
         // NEW API: //////////////////////
-        void send(bool endOfRequest = true);
+        void send();
 
         std::istream& receive();
 
-        void beginSend(bool endOfRequest = true);
+        void beginSend();
 
         void endSend();
 
@@ -135,40 +141,40 @@ class PT_HTTP_API Client : private NonCopyable
 
         Request& request();
 
-        //////////////////////////////////
+        const Request& request() const;
 
         void cancel();
 
-        // Signals that the request is sent to the server.
-        //
-        // beginRequest / endRequest reports error
-        //
+        // Signals that the request was sent to the server.
         Signal<Client&>& requestSent()
         { return _requestSent; }
 
+        // Signals that part of the reply was received
         Signal<Client&>& replyReceived()
         { return _replyReceived; }
+
+        //////////////////////////////////
 
         // Signals that the header is received.
         //
         // beginReply -> no errors can occur
         //
-        Signal<Client&>& headerReceived()
-        { return _headerReceived; }
+        //Signal<Client&>& headerReceived()
+        //{ return _headerReceived; }
 
         // Signals that body data has arrived.
         //
         // beginReply -> no errors can occur
         //
-        Signal<Client&>& bodyReceived()
-        { return _bodyAvailable; }
+        //Signal<Client&>& bodyReceived()
+        //{ return _bodyAvailable; }
 
         // Signals that the reply is completely processed.
         //
         // beginReply / endReply reports error
         //
-        Signal<Client&>& replyFinished()
-        { return _replyFinished; }
+        //Signal<Client&>& replyFinished()
+        //{ return _replyFinished; }
 
     private:
         // Signals that the request is sent to the server.

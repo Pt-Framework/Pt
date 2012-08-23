@@ -38,33 +38,33 @@ namespace Pt {
 namespace XmlRpc {
 
 HttpClientImpl::HttpClientImpl()
+: _errorPending(false)
 {
-    _request.method("POST");
-    Pt::connect(_client.headerReceived(), *this, &HttpClientImpl::onReplyHeader);
-    Pt::connect(_client.bodyReceived(), *this, &HttpClientImpl::onReplyBody);
-    Pt::connect(_client.replyFinished(), *this, &HttpClientImpl::onReplyFinished);
+    _client.request().method("POST");
+    _client.replyReceived() += Pt::slot( *this, &HttpClientImpl::onReply);
 }
+
 
 HttpClientImpl::HttpClientImpl(System::EventLoop& selector, const std::string& addr,
        unsigned short port, const std::string& url)
 : _client(selector, addr, port)
-, _request(url)
+, _errorPending(false)
 {
-    _request.method("POST");
-    Pt::connect(_client.headerReceived(), *this, &HttpClientImpl::onReplyHeader);
-    Pt::connect(_client.bodyReceived(), *this, &HttpClientImpl::onReplyBody);
-    Pt::connect(_client.replyFinished(), *this, &HttpClientImpl::onReplyFinished);
+    _client.request().method("POST");
+    _client.request().url(url);
+    _client.replyReceived() += Pt::slot( *this, &HttpClientImpl::onReply);
 }
+
 
 HttpClientImpl::HttpClientImpl(const std::string& addr, unsigned short port, const std::string& url)
 : _client(addr, port)
-, _request(url)
+, _errorPending(false)
 {
-    _request.method("POST");
-    Pt::connect(_client.headerReceived(), *this, &HttpClientImpl::onReplyHeader);
-    Pt::connect(_client.bodyReceived(), *this, &HttpClientImpl::onReplyBody);
-    Pt::connect(_client.replyFinished(), *this, &HttpClientImpl::onReplyFinished);
+    _client.request().method("POST");
+    _client.request().url(url);
+    _client.replyReceived() += Pt::slot( *this, &HttpClientImpl::onReply);
 }
+
 
 std::string HttpClientImpl::url() const
 {
@@ -73,63 +73,81 @@ std::string HttpClientImpl::url() const
       << _client.host().host()
       << ':'
       << _client.host().port()
-      << _request.url();
+      << _client.request().url();
 
     return s.str();
 }
 
-void HttpClientImpl::onReplyHeader(Http::Client& client)
+
+void HttpClientImpl::onReply(Http::Client& client)
 {
-    log_debug("httpReturnCode=" << client.replyHeader().httpReturnCode()
-        << " content-type=" << client.replyHeader().getHeader("Content-Type"));
+    try
+    {
+        bool received = client.endReceive();
+        if(received)
+        {
+            verifyHeader(client.replyHeader());
+            ClientImpl::onReadReplyBegin(client.reply());
+        }
 
-    verifyHeader(client.replyHeader());
+        if( client.reply().rdbuf()->in_avail() )
+        {
+            ClientImpl::onReadReply();
+        }
 
-    ClientImpl::onReadReplyBegin(client.reply());
+        if( client.isEnd() )
+        {
+            ClientImpl::onReplyFinished();
+            return;
+        }
+
+        client.beginReceive();
+    }
+    catch(...)
+    {
+        _errorPending = true;
+
+        ClientImpl::onReplyFinished();
+
+        if(_errorPending)
+        {
+            throw;
+        }
+    }
 }
 
-std::size_t HttpClientImpl::onReplyBody(Http::Client& client)
-{
-    return ClientImpl::onReadReply();
-}
-
-void HttpClientImpl::onReplyFinished(Http::Client& client)
-{
-    ClientImpl::onReplyFinished();
-}
 
 void HttpClientImpl::beginExecute()
 {
-    _client.beginExecute(_request);
+    _client.beginReceive();
 }
+
 
 void HttpClientImpl::endExecute()
 {
-    if (_errorPending)
+    if( _errorPending ) 
     {
         _errorPending = false;
         throw;
     }
-
-    _client.endExecute();
 }
+
 
 std::string HttpClientImpl::execute()
 {
     _client.setTimeout( timeout() );
-    _client.execute(_request);
+    _client.send();
+    std::istream& is = _client.receive();
 
     std::string body;
 
     try
     {
-        verifyHeader(_client.replyHeader());
+        verifyHeader( _client.replyHeader() );
 
         char ch = ' ';
-        while( _client.reply().get(ch) )
+        while( is.get(ch) )
             body += ch;
-        
-        //_client.readBody(body);
     }
     catch (...)
     {
@@ -140,20 +158,23 @@ std::string HttpClientImpl::execute()
     return body;
 }
 
+
 std::ostream& HttpClientImpl::prepareRequest()
 {
-    _request.clear();
-    _request.header().setHeader("Content-Type", "text/xml");
-    _request.method("POST");
-    return _request.body();
+    _client.request().clear();
+    _client.request().header().setHeader("Content-Type", "text/xml");
+    _client.request().header().method("POST");
+    return _client.request().body();
 }
 
 
 void HttpClientImpl::cancel()
 {
+    _errorPending = false;
     _client.cancel();
     ClientImpl::cancel();
 }
+
 
 void HttpClientImpl::verifyHeader(const Http::ReplyHeader& header)
 {
@@ -175,7 +196,6 @@ void HttpClientImpl::verifyHeader(const Http::ReplyHeader& header)
     }
 
 }
-
 
 }
 

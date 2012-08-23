@@ -188,11 +188,11 @@ class ClientImpl : public Connectable
         void endExecute();
 
         // NEW API:
-        void send(bool endOfRequest);
+        void send();
 
         std::istream& receive();
 
-        void beginSend(bool endOfRequest);
+        void beginSend();
 
         void endSend();
 
@@ -203,6 +203,9 @@ class ClientImpl : public Connectable
         bool isEnd() const;
 
         Request& request()
+        { return _req; }
+
+        const Request& request() const
         { return _req; }
 
         std::iostream& reply()
@@ -301,9 +304,7 @@ class ClientImpl : public Connectable
         std::string _username;
         std::string _password;
         bool _reusedConnection;
-        bool _chunked;
         State _hstate;
-        bool _endOfRequest;
         bool _reading;
         bool _errorPending;
 

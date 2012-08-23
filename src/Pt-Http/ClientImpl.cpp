@@ -328,9 +328,7 @@ ClientImpl::ClientImpl(Client* client)
 , _httpbuf()
 , _stream(&_httpbuf)
 , _reusedConnection(false)
-, _chunked(false)
 , _hstate(Idle)
-, _endOfRequest(false)
 , _reading(false)
 , _errorPending(false)
 , _state( &ClientImpl::onHeader )
@@ -351,9 +349,7 @@ ClientImpl::ClientImpl(Client* client, const Net::AddrInfo& addrinfo, bool ssl)
 , _httpbuf()
 , _stream(&_httpbuf)
 , _reusedConnection(false)
-, _chunked(false)
 , _hstate(Idle)
-, _endOfRequest(false)
 , _reading(false)
 , _errorPending(false)
 , _state( &ClientImpl::onHeader )
@@ -375,9 +371,7 @@ ClientImpl::ClientImpl(Client* client, System::EventLoop& loop, const Net::AddrI
 , _httpbuf()
 , _stream(&_httpbuf)
 , _reusedConnection(false)
-, _chunked(false)
 , _hstate(Idle)
-, _endOfRequest(false)
 , _reading(false)
 , _errorPending(false)
 , _state( &ClientImpl::onHeader )
@@ -525,45 +519,87 @@ const ReplyHeader& ClientImpl::execute(const Request& request)
 }
 
 
-void ClientImpl::send(bool endOfRequest)
+void ClientImpl::send()
 {
     log_trace("ClientImpl::execute " << _req.url());
 
-    _stream.rdbuf( _httpbuf.buffer() );
-    _replyHeader.clear();
-    _parser.reset(true);
-    
-    if( ! _socket.isConnected() )
+    if( _hstate == Idle )
     {
-        log_debug("connect");
-        _socket.connect(_addrInfo);
-
-#ifdef PT_HTTP_WITH_SSL
-        if(_ssl)
+        _stream.rdbuf( _httpbuf.buffer() );
+        _replyHeader.clear();
+        _parser.reset(true);
+    
+        if( ! _socket.isConnected() )
         {
-            log_debug("ssl handshake");
-            _sslbuf.connect();
+            log_debug("connect");
+            _socket.connect(_addrInfo);
+
+    #ifdef PT_HTTP_WITH_SSL
+            if(_ssl)
+            {
+                log_debug("ssl handshake");
+                _sslbuf.connect();
+            }
+    #endif
         }
-#endif
+
+        _hstate = OnRequest;
     }
 
     log_debug("sending request");
 
-    if(endOfRequest)
-        sendRequest(_stream, _req);
-    else
-        sendChunked(_stream, _req);
+    if(_hstate == OnRequest)
+    {
+        if(_req.size() > 8192)
+        {
+             sendChunked(_stream, _req);
+             _req.clearBody();
+            _hstate = OnChunkedRequest;
+        }
+    }
 
-    _req.clearBody();
+    if(_hstate == OnChunkedRequest)
+    {
+        _stream << std::hex << _req.size() << std::dec << "\r\n";
+        _stream.write( _req.data(), _req.size() );
+        _stream.write("\r\n", 2);
+        _req.clearBody();
 
-    _stream.flush();
-    _sockbuf.pubsync(); // extra flush for https: _stream -> _sslbuf -> _sockbuf
+        _stream.flush();
+        _sockbuf.pubsync(); // extra flush for https: _stream -> _sslbuf -> _sockbuf
+    }
 }
 
 
 std::istream& ClientImpl::receive()
 {
     log_debug("reading reply");
+    if(_hstate == OnRequest)
+    {
+        sendRequest(_stream, _req);
+        _req.clearBody();
+
+        _stream.flush();
+        _sockbuf.pubsync(); // extra flush for https: _stream -> _sslbuf -> _sockbuf
+    }
+
+    if(_hstate == OnChunkedRequest)
+    {
+        if(_req.size() > 0)
+        {
+            _stream << std::hex << _req.size() << std::dec << "\r\n";
+            _stream.write( _req.data(), _req.size() );
+            _stream.write("\r\n", 2);
+            _req.clearBody();
+        }
+
+        _stream.write("0\r\n\r\n", 5);
+
+        _stream.flush();
+        _sockbuf.pubsync(); // extra flush for https: _stream -> _sslbuf -> _sockbuf
+    }
+    
+    _hstate = OnReplyHeader;
 
     char ch = ' ';
     while( ! _parser.end() && _stream.get(ch) )
@@ -579,7 +615,8 @@ std::istream& ClientImpl::receive()
 
     log_debug("content-length: " << _replyHeader.contentLength());
     log_debug("chunked: " << _replyHeader.chunkedTransferEncoding());
-
+    
+    _hstate = OnReply;
     _stream.rdbuf(&_httpbuf);
     _httpbuf.beginBody(_replyHeader);
     return _stream;
@@ -641,7 +678,7 @@ void ClientImpl::beginRequest(const Request& request)
 }
 
 
-void ClientImpl::beginSend(bool)
+void ClientImpl::beginSend()
 {
     log_trace("beginSend: " << _hstate);
 
@@ -689,7 +726,6 @@ void ClientImpl::beginSend(bool)
     {
         log_debug("sending http chunk");
 
-        std::cerr << ".";
         _stream << std::hex << _req.size() << std::dec << "\r\n";
         _stream.write( _req.data(), _req.size() );
         _stream.write("\r\n", 2);
@@ -826,29 +862,6 @@ void ClientImpl::beginReceive()
 
     if(_hstate == OnReply || _hstate == OnReplyHeader)
     {
-        _reading = false;
-
-#ifdef PT_HTTP_WITH_SSL
-        if( _ssl && _sslbuf.in_avail() )
-        {
-            _client->replyReceived().send(*_client);
-            return;
-        }
-#endif
-        if( _sockbuf.in_avail() )
-        {
-            _client->replyReceived().send(*_client);
-            return;
-        }
-
-        // http reply without body
-        if( _hstate == OnReply && _httpbuf.isEnd() )
-        {
-            _client->replyReceived().send(*_client);
-            return;
-        }
-        
-        _reading = true;
         beginRead();
     }
     else
@@ -890,12 +903,7 @@ bool ClientImpl::endReceive()
         return false;
     }
 
-    if(_reading)
-    {
-        _reading = false;
-        log_trace("endRead");
-        endRead();
-    }
+    endRead();
     
     return processReply();
 }
@@ -1073,6 +1081,35 @@ void ClientImpl::endWrite()
 
 void ClientImpl::beginRead()
 {
+    _reading = false;
+
+#ifdef PT_HTTP_WITH_SSL
+    if( _ssl )
+    {
+        if( _sslbuf.in_avail() )
+        {
+            _client->replyReceived().send(*_client);
+            return;
+        }
+    }
+    else
+#endif
+    if( _sockbuf.in_avail() )
+    {
+        _client->replyReceived().send(*_client);
+        return;
+    }
+
+    // http reply without body
+    if( _hstate == OnReply && _httpbuf.isEnd() )
+    {
+        _client->replyReceived().send(*_client);
+        return;
+    }
+        
+    log_debug("begin reading");
+    _reading = true;
+
 #ifdef PT_HTTP_WITH_SSL
     if(_ssl)
         _sslbuf.beginRead();
@@ -1084,12 +1121,18 @@ void ClientImpl::beginRead()
 
 void ClientImpl::endRead()
 {
+    if(_reading)
+    {
+        _reading = false;
+        log_trace("end reading");
+
 #ifdef PT_HTTP_WITH_SSL
-    if(_ssl)
-        _sslbuf.endRead();
-    else
+        if(_ssl)
+            _sslbuf.endRead();
+        else
 #endif
-        _sockbuf.endRead();
+            _sockbuf.endRead();
+    }
 }
 
 
@@ -1243,7 +1286,6 @@ void ClientImpl::sendRequest(std::ostream& os, const Request& request)
     os << "\r\n";
 
     log_debug("send body; " << request.size() << " bytes");
-
     os.write(request.data(), request.size());
 }
 
@@ -1342,7 +1384,7 @@ void ClientImpl::onInput(System::StreamBuffer& sb)
 void ClientImpl::onError()
 {
     _errorPending = true;
-    _client->replyFinished().send(*_client);
+    ///_client->replyFinished().send(*_client);
 
     if (_errorPending)
     {
@@ -1456,7 +1498,7 @@ void ClientImpl::onHeader()
     log_debug("http header complete");
     _stream.rdbuf(&_httpbuf);
     _httpbuf.beginBody(_replyHeader);
-    _client->headerReceived().send(*_client);
+    ///_client->headerReceived().send(*_client);
     _state = &ClientImpl::onBody;
 
     (this->*_state)();
@@ -1472,7 +1514,7 @@ void ClientImpl::onBody()
 
     while( _httpbuf.in_avail() )
     {
-        _client->bodyReceived().send(*_client);
+        ///_client->bodyReceived().send(*_client);
 
         _httpbuf.import();
         log_debug("available: " << _httpbuf.in_avail());
@@ -1484,7 +1526,7 @@ void ClientImpl::onBody()
     if( _httpbuf.isEnd() )
     {
         log_debug("reply finished");
-        _client->replyFinished().send(*_client);
+        ///_client->replyFinished().send(*_client);
     }
     else
     {

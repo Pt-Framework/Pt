@@ -56,19 +56,19 @@ class HttpClientImpl : public ClientImpl
         void connect(const Net::AddrInfo& addrinfo, const std::string& url)
         {
             _client.setHost(addrinfo);
-            _request.url(url);
+            _client.request().url(url);
         }
 
         void connect(const std::string& addr, unsigned short port,
                      const std::string& url)
         {
             _client.setHost(addr, port);
-            _request.url(url);
+            _client.request().url(url);
         }
 
         void url(const std::string& url)
         {
-            _request.url(url);
+            _client.request().url(url);
         }
 
         void auth(const std::string& username, const std::string& password)
@@ -84,11 +84,7 @@ class HttpClientImpl : public ClientImpl
         std::string url() const;
 
     protected:
-        void onReplyHeader(Http::Client& client);
-
-        std::size_t onReplyBody(Http::Client& client);
-
-        void onReplyFinished(Http::Client& client);
+        void onReply(Http::Client& client);
 
         virtual void beginExecute();
 
@@ -104,7 +100,7 @@ class HttpClientImpl : public ClientImpl
         static void verifyHeader(const Http::ReplyHeader& header);
 
         Http::Client _client;
-        Http::Request _request;
+        bool _errorPending;
 };
 
 }
