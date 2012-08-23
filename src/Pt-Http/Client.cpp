@@ -157,9 +157,9 @@ void Client::beginSend(bool endOfRequest)
 }
 
 
-Progress Client::endSend()
+void Client::endSend()
 {
-    return _impl->endSend();
+    _impl->endSend();
 }
 
 

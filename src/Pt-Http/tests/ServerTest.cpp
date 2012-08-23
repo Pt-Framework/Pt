@@ -152,26 +152,12 @@ class ServerTest : public Pt::Unit::TestSuite
 
             Pt::Http::Client client("127.0.0.1", 8001);
             client.setActive(*loop);
-
-            client.requestSent() += Pt::slot(*this, &ServerTest::onNotFoundSent);
             client.replyReceived() += Pt::slot(*this, &ServerTest::onNotFoundReceived);
-
             client.request().url("/index.html");
             client.request().header().setHeader("foo", "bar");
-
-            client.beginSend();
+            client.beginReceive();
 
             loop->run();
-        }
-
-        void onNotFoundSent(Pt::Http::Client& client)
-        {
-            Pt::Http::Progress progress = client.endSend();
-            
-            if( progress == Pt::Http::Finished )
-                client.beginReceive();
-             else
-                client.beginSend();
         }
 
         void onNotFoundReceived(Pt::Http::Client& client)
@@ -222,11 +208,10 @@ class ServerTest : public Pt::Unit::TestSuite
             Pt::Http::Client client("127.0.0.1", 8001, true);
             client.setContext(clientContext);
             client.setActive(*loop);
-            client.requestSent() += Pt::slot(*this, &ServerTest::onNotFoundSent);
             client.replyReceived() += Pt::slot(*this, &ServerTest::onNotFoundReceived);
             client.request().url("/index.html");
             client.request().header().setHeader("foo", "bar");
-            client.beginSend();
+            client.beginReceive();
 
             loop->run();
         }
@@ -272,12 +257,8 @@ class ServerTest : public Pt::Unit::TestSuite
 
         void onHelloSent(Pt::Http::Client& client)
         {
-            Pt::Http::Progress progress = client.endSend();
-
-            if( progress == Pt::Http::Finished )
-                client.beginReceive();
-            else
-                client.beginSend();
+            client.endSend();
+            client.beginReceive();
         }
 
         void onHelloReceived(Pt::Http::Client& client)
@@ -328,21 +309,17 @@ class ServerTest : public Pt::Unit::TestSuite
 
         void onChunkedSent(Pt::Http::Client& client)
         {
-            Pt::Http::Progress progress = client.endSend();
+            client.endSend();
 
             if( ! _chunks.empty() )
             {
               client.request().body() << _chunks.front();
               _chunks.erase( _chunks.begin() );
-			  client.beginSend( _chunks.empty() );
-			  return;
+              client.beginSend( _chunks.empty() );
+              return;
             }
 
-            if( progress == Pt::Http::Finished )
-            {
-                client.beginReceive();
-                return;
-            }
+            client.beginReceive();
         }
 
         void onChunkedReceived(Pt::Http::Client& client)

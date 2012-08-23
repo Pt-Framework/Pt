@@ -194,7 +194,7 @@ class ClientImpl : public Connectable
 
         void beginSend(bool endOfRequest);
 
-        Progress endSend();
+        void endSend();
 
         void beginReceive();
 
@@ -238,14 +238,17 @@ class ClientImpl : public Connectable
     private:
         enum State
         {
-            Idle = 0,
-            OnConnect = 1,
-            OnSslHandshake = 2,
-            OnRequest = 3,
-            OnChunkedRequest = 4,
-            OnRequestEnd = 5,
-            OnReplyHeader = 6,
-            OnReply = 7
+            //OnClosed         = 0,
+            Idle                  = 0,
+            OnConnect             = 1,
+            OnConnectReceive      = 2,
+            OnSslHandshake        = 3,
+            OnSslHandshakeReceive = 4,
+            OnRequest             = 5,
+            OnChunkedRequest      = 6,
+            OnRequestEnd          = 7,
+            OnReplyHeader         = 8,
+            OnReply               = 9
         };
 
         void init();

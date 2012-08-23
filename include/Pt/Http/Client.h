@@ -125,7 +125,7 @@ class PT_HTTP_API Client : private NonCopyable
 
         void beginSend(bool endOfRequest = true);
 
-        Progress endSend();
+        void endSend();
 
         void beginReceive();
 

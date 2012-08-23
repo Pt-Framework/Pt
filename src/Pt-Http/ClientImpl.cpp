@@ -643,10 +643,12 @@ void ClientImpl::beginRequest(const Request& request)
 
 void ClientImpl::beginSend(bool)
 {
-    log_trace("beginSend");
+    log_trace("beginSend: " << _hstate);
 
-    if( _hstate == Idle || _hstate == OnRequest )
+    if( _hstate == Idle )
     {
+        _stream.rdbuf( _httpbuf.buffer() );
+
         if( ! _socket.isConnected() )
         {
             log_debug("opening new connection to " << _addrInfo.host());
@@ -655,31 +657,26 @@ void ClientImpl::beginSend(bool)
             return;
         }
 
-        _stream.rdbuf( _httpbuf.buffer() );
-        //_hstate = endOfRequest ? OnRequest : OnChunkedRequest;
+        log_debug("reusing previous connection");
+        _hstate = OnRequest;
+    }
 
+    if(_hstate == OnRequest)
+    {
         log_debug("preparing request");
 
-        // TODO:
-        // do not send at once, but only send chunked when 8K are passed or
-        // flush non-chunked once we are in the beginReceive/endReceive phase
-		_hstate = OnRequest;
+        if( _req.size() < 8192)
+        {
+            _client->requestSent().send(*_client);
+            return;
+        }
 
-		if( _req.size() < 8000)
-		{
-			_client->requestSent().send(*_client);
-			return;
-		}
-
-        /*if(_hstate == OnRequest)
-            sendRequest(_stream, _req);
-        else*/
-        
-		_hstate = OnChunkedRequest;
-		sendChunked(_stream, _req);
+        log_debug("begin sending http chunk");
+        _hstate = OnChunkedRequest;
+        sendChunked(_stream, _req);
     }
-    
-	if(_hstate == OnSslHandshake)
+
+    if(_hstate == OnSslHandshake)
     {
 #ifdef PT_HTTP_WITH_SSL
         log_debug("begining SSL handshake");
@@ -688,50 +685,40 @@ void ClientImpl::beginSend(bool)
 #endif
     }
     
-	if(_hstate == OnChunkedRequest)
+    if(_hstate == OnChunkedRequest)
     {
         log_debug("sending http chunk");
 
+        std::cerr << ".";
         _stream << std::hex << _req.size() << std::dec << "\r\n";
         _stream.write( _req.data(), _req.size() );
         _stream.write("\r\n", 2);
         _req.clearBody();
 
-        /*if(endOfRequest)
-        {
-            log_debug("sent last chunk");
-
-            _stream.write("0\r\n\r\n", 5);
-            _hstate = OnRequest;
-        }*/
-    }
-    else if(_hstate != OnRequest)
-    {
-        log_error("pending http reply: " << _state);
-        throw System::IOPending("pending HTTP reply");
+        beginWrite();
+        return;
     }
 
-    //TODO: only write in 8K blocks
-    beginWrite();
+    log_error("pending http reply: " << _state);
+    throw System::IOPending("pending HTTP reply");
 }
 
 
-Progress ClientImpl::endSend()
+void ClientImpl::endSend()
 {
     log_trace("endSend: " << _hstate);
 
     if(_hstate == OnConnect)
     {
         log_debug("ending socket connect");
-            
         _socket.endConnect();
             
-        if(!_ssl)
+        if( ! _ssl)
             _hstate = Idle;
         else
             _hstate = OnSslHandshake;
 
-        return Header;
+        return;
     }
 
     if(_hstate == OnSslHandshake)
@@ -742,27 +729,20 @@ Progress ClientImpl::endSend()
         _sslbuf.endHandshake();
 #endif
         _hstate = Idle;
-        return Header;
+        return;
     }
 
-	if(_hstate == OnChunkedRequest)
-	{
-		log_debug("sent http request");
-		endWrite();
-
-		bool remaining = outputAvailable();
+    if(_hstate == OnRequest)
+    {
+        return;
+    }
     
-		if(_hstate == OnRequest && ! remaining)
-		{
-			log_debug("http request finished");
-			_hstate = Idle;
-			return Finished;
-		}
-
-		return Body;
-	}
-
-    return Finished;
+    if(_hstate == OnChunkedRequest)
+    {
+        log_debug("sent http request");
+        endWrite();
+        return;
+    }
 }
 
 
@@ -770,39 +750,84 @@ void ClientImpl::beginReceive()
 {
     log_debug("beginReceive: " << _hstate);
 
-    _reading = false;
-
-	if(_hstate == OnRequest)
-	{
-		log_debug("begin sending cached request");
-		sendRequest(_stream, _req);
-		_req.clearBody();
-		beginWrite();
-		_hstate = OnRequestEnd;
-		return;
-	}
-
-	if(_hstate == OnRequestEnd)
-	{
-		log_debug("flushing cached request");
-		beginWrite();
-		return;
-	}
-
-	if(_hstate == OnChunkedRequest)
-	{
-	}
-    
-	if(_hstate == Idle)
+    if( _hstate == Idle )
     {
+        _stream.rdbuf( _httpbuf.buffer() );
+
+        if( ! _socket.isConnected() )
+        {
+            log_debug("opening new connection to " << _addrInfo.host());
+            _socket.beginConnect(_addrInfo);
+            _hstate = OnConnectReceive;
+            return;
+        }
+
+        log_debug("reusing previous connection");
+        _hstate = OnRequest;
+    }
+
+    if(_hstate == OnSslHandshakeReceive)
+    {
+#ifdef PT_HTTP_WITH_SSL
+        log_debug("begining SSL handshake");
+        _sslbuf.beginConnect();
+        return;
+#endif
+    }
+
+    if(_hstate == OnRequest)
+    {
+        log_debug("begin sending cached request");
+        sendRequest(_stream, _req);
+        _req.clearBody();
+        _hstate = OnRequestEnd;
+
+        log_debug("begin write: " << outputAvailable());
+        beginWrite();
+        return;
+    }
+
+    if(_hstate == OnRequestEnd)
+    {
+        bool remaining = outputAvailable();
+        if(remaining)
+        {
+            beginWrite();
+            return;
+        }
+
+        log_debug("flushing cached request");
         _stream.rdbuf( _httpbuf.buffer() );
         _replyHeader.clear();
         _parser.reset(true);
         _hstate = OnReplyHeader;
     }
 
+    if(_hstate == OnChunkedRequest)
+    {
+        log_debug("sending http chunk");
+
+        if(_req.size() > 0)
+        {
+            _stream << std::hex << _req.size() << std::dec << "\r\n";
+            _stream.write( _req.data(), _req.size() );
+            _stream.write("\r\n", 2);
+            _req.clearBody();
+        }
+        else
+        {
+            _stream.write("0\r\n\r\n", 5);
+        }
+
+        _hstate = OnRequestEnd;
+        beginWrite();
+        return;
+    }
+
     if(_hstate == OnReply || _hstate == OnReplyHeader)
     {
+        _reading = false;
+
 #ifdef PT_HTTP_WITH_SSL
         if( _ssl && _sslbuf.in_avail() )
         {
@@ -835,19 +860,35 @@ Progress ClientImpl::endReceive()
 {
     log_trace("endReceive");
 
-	if(_hstate == OnRequestEnd)
-	{
-		endWrite();
+    if(_hstate == OnConnectReceive)
+    {
+        log_debug("ending socket connect");
+        _socket.endConnect();
+            
+        if( ! _ssl)
+            _hstate = OnRequest;
+        else
+            _hstate = OnSslHandshakeReceive;
 
-		bool remaining = outputAvailable();
-		if( ! remaining)
-		{
-			log_debug("http request finished");
-			_hstate = Idle;
-		}
+        return Begin;
+    }
 
-		return Begin;
-	}
+    if(_hstate == OnSslHandshakeReceive)
+    {
+        log_debug("ending ssl connect");
+
+#ifdef PT_HTTP_WITH_SSL
+        _sslbuf.endHandshake();
+#endif
+        _hstate = OnRequest;
+        return Begin;
+    }
+
+    if(_hstate == OnRequestEnd)
+    {
+        endWrite();
+        return Begin;
+    }
 
     if(_reading)
     {
@@ -929,7 +970,10 @@ bool ClientImpl::isEnd() const
 void ClientImpl::onConnect2(Net::TcpSocket& socket)
 {
     log_trace("onConnect2");
-    _client->requestSent().send(*_client);
+    if(_hstate == OnConnectReceive)
+        _client->replyReceived().send(*_client);
+    else
+        _client->requestSent().send(*_client);
 }
 
 
@@ -943,17 +987,20 @@ void ClientImpl::onInput2(System::StreamBuffer& sb)
 void ClientImpl::onOutput2(System::StreamBuffer& sb)
 {
     log_trace("onOutput2");
-	if(_hstate == OnRequestEnd)
-		_client->replyReceived().send(*_client);
-	else
-		_client->requestSent().send(*_client);
+    if(_hstate == OnRequestEnd)
+        _client->replyReceived().send(*_client);
+    else
+        _client->requestSent().send(*_client);
 }
 
 
 #ifdef PT_HTTP_WITH_SSL
 void ClientImpl::onSslHandshake2(Ssl::IOBuffer& sb)
 {
-    _client->requestSent().send(*_client);
+    if(_hstate == OnSslHandshakeReceive)
+        _client->replyReceived().send(*_client);
+    else
+        _client->requestSent().send(*_client);
 }
 
 
@@ -966,10 +1013,10 @@ void ClientImpl::onSslInput2(Ssl::IOBuffer& sb)
 void ClientImpl::onSslOutput2(Ssl::IOBuffer& sb)
 {
     log_trace("onOutput2");
-	if(_hstate == OnRequestEnd)
-		_client->replyReceived().send(*_client);
-	else
-		_client->requestSent().send(*_client);
+    if(_hstate == OnRequestEnd)
+        _client->replyReceived().send(*_client);
+    else
+        _client->requestSent().send(*_client);
 }
 #endif
 
@@ -1456,6 +1503,7 @@ void ClientImpl::cancel()
 #endif
     _stream.clear();
 
+    _hstate = Idle;
     _reading = false;
 }
 
