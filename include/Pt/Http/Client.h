@@ -57,7 +57,7 @@ class Request;
 class PT_HTTP_API ConnectionClosed : public System::IOError
 {
     public:
-        explicit ConnectionClosed();
+        ConnectionClosed();
 
         ~ConnectionClosed() throw()
         {}

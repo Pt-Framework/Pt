@@ -36,6 +36,11 @@ namespace Pt {
 
 namespace Http {
 
+ResponseFailed::ResponseFailed()
+: IOError("HTTP response failed")
+{}
+
+
 Responder::Responder(Service& service)
 : _service(service)
 { }

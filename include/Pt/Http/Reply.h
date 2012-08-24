@@ -72,6 +72,15 @@ class PT_HTTP_API Reply
         bool finished() const
         { return _finished; }
 
+        // TODO:
+        void beginSend()
+        { }
+
+        // TODO:
+        // terminate method for Request and Reply
+        void terminate()
+        { }
+
         void advance();
 
         void finish();

@@ -31,6 +31,7 @@
 
 #include <Pt/Http/Api.h>
 #include <Pt/Http/Service.h>
+#include <Pt/System/IOError.h>
 #include <Pt/System/EventLoop.h>
 #include <iosfwd>
 #include <exception>
@@ -41,6 +42,17 @@ namespace Http {
 
 class RequestHeader;
 class Reply;
+
+
+class PT_HTTP_API ResponseFailed : public System::IOError
+{
+    public:
+        ResponseFailed();
+
+        ~ResponseFailed() throw()
+        {}
+};
+
 
 class PT_HTTP_API Responder
 {
