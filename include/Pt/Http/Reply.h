@@ -44,8 +44,8 @@ class PT_HTTP_API Reply
 {
         ReplyHeader _header;
         MessageBuffer _buf;
-        std::ostream _body;
         Http::Connection* _conn;
+        std::ostream _body;
         bool _advanced;
         bool _finished;
 
