@@ -241,8 +241,7 @@ class ClientImpl : public Connectable
     private:
         enum State
         {
-            //OnClosed         = 0,
-            Idle                  = 0,
+             Idle                  = 0,
             OnConnect             = 1,
             OnConnectReceive      = 2,
             OnSslHandshake        = 3,
