@@ -37,6 +37,7 @@
 #include <Pt/System/IOBuffer.h>
 #include <Pt/System/Timer.h>
 #include <Pt/Signal.h>
+#include <Pt/Connectable.h>
 
 #ifdef PT_HTTP_WITH_SSL
 #include <Pt/Ssl/IOBuffer.h>
@@ -73,13 +74,19 @@ class Connection : public Net::TcpSocket
     public:
         Connection(Server& server, Net::TcpServer& tcpServer);
 
-        ~Connection();
+        virtual ~Connection();
 
-        void begin(System::EventLoop& loop, Ssl::Context* ctx = 0);
+        void beginAccept(System::EventLoop& loop, Ssl::Context* ctx = 0);
 
-        void advanceReply();
+        void beginReceiveRequest();
 
-        void finishReply();
+        bool endReceiveRequest();
+
+        void beginSendReply(bool finish = true);
+
+        void onReplySent(Reply& reply);
+
+        void endSendReply();
 
         Signal<Connection&> timeout;
 
@@ -102,10 +109,6 @@ class Connection : public Net::TcpSocket
         bool beginWrite();
 
         void endWrite();
-
-        void processInput();
-
-        void processOutput();
 
         void replyError();
 
@@ -135,6 +138,30 @@ class Connection : public Net::TcpSocket
         std::iostream _stream;
         bool _chunked;
         Reply _reply;
+};
+
+
+class RequestHandler : public Pt::Connectable
+{
+    public:
+        RequestHandler(Server& server, Net::TcpServer& tcpServer);
+
+        ~RequestHandler();
+
+        void begin(System::EventLoop& loop, Ssl::Context* ctx = 0)
+        { _conn.beginAccept(loop, ctx); }
+
+        Signal<RequestHandler&>& timeout()
+        { return _timeout; }
+
+    protected:
+        void onTimeout(Connection&)
+        { _timeout.send(*this); }
+
+    private:
+        Connection _conn;
+        //Request _req;
+        Signal<RequestHandler&> _timeout;
 };
 
 } // namespace Http

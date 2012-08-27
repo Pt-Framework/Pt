@@ -33,16 +33,22 @@ namespace Pt {
 
 namespace Http {
 
-void Reply::advance()
+void Reply::beginSend()
 { 
-    _conn->advanceReply(); 
-    _advanced = true;
+    _conn->beginSendReply(false); 
 }
+
 
 void Reply::finish()
 { 
-    _conn->finishReply(); 
+    _conn->beginSendReply(true); 
     _finished = true; 
+}
+
+
+void Reply::onOutput()
+{
+    _outputSent.send(*this);
 }
 
 } // namespace Http

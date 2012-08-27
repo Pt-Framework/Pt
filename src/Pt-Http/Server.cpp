@@ -55,15 +55,15 @@ class ServerThread : public Connectable
         class AcceptEvent : public Pt::BasicEvent<AcceptEvent>
         {
             public:
-                AcceptEvent(Connection* conn)
+                AcceptEvent(RequestHandler* conn)
                 : _conn(conn)
                 { }
     
-                Connection* connection() const
+                RequestHandler* connection() const
                 { return _conn; }
     
             private:
-                Connection* _conn;
+                RequestHandler* _conn;
         };
 
     public:
@@ -90,7 +90,7 @@ class ServerThread : public Connectable
             stop();
         }
 
-        void serve(Connection* conn)
+        void serve(RequestHandler* conn)
         {
             AcceptEvent ev(conn);
             _loop.commitEvent(ev);
@@ -101,7 +101,7 @@ class ServerThread : public Connectable
             _loop.exit();
             _thread.join();
 
-            std::vector<Connection*>::iterator it;
+            std::vector<RequestHandler*>::iterator it;
             for(it = _connections.begin(); it != _connections.end(); ++it)
             {
                 delete *it;
@@ -117,10 +117,10 @@ class ServerThread : public Connectable
 
         void onAcceptEvent(const AcceptEvent& ev)
         {
-            Connection* conn = ev.connection();
+            RequestHandler* conn = ev.connection();
 
             _connections.push_back(conn);
-            conn->timeout += Pt::slot(*this, &ServerThread::onConnectionTimeout);
+            conn->timeout() += Pt::slot(*this, &ServerThread::onConnectionTimeout);
 
             if(_ssl)
                 conn->begin(_loop, &_sslctx);
@@ -128,9 +128,9 @@ class ServerThread : public Connectable
                 conn->begin(_loop);
         }
 
-        void onConnectionTimeout(Connection& conn)
+        void onConnectionTimeout(RequestHandler& conn)
         {
-            std::vector<Connection*>::iterator it;
+            std::vector<RequestHandler*>::iterator it;
             for(it = _connections.begin(); it != _connections.end(); ++it)
             {
                 if(&conn == *it)
@@ -150,7 +150,7 @@ class ServerThread : public Connectable
         Ssl::Context _sslctx;
 #endif
         Pt::System::AttachedThread _thread;
-        std::vector<Connection*> _connections;
+        std::vector<RequestHandler*> _connections;
 };
 
 
@@ -232,7 +232,7 @@ void Server::shutdown()
         delete *threadIt;
     }
 
-    std::vector<Connection*>::iterator it;
+    std::vector<RequestHandler*>::iterator it;
     for(it = _connections.begin(); it != _connections.end(); ++it)
     {
         delete *it;
@@ -289,8 +289,8 @@ void Server::startWorker(bool ssl)
 void Server::onAccept(Net::TcpServer& server)
 {
     // TODO: we should only pass the TcpSocket to the worker thread
-    //       so that a Connection can be constructed with an event loop
-    Connection* conn = new Connection(*this, server);
+    //       so that a RequestHandler can be constructed with an event loop
+    RequestHandler* conn = new RequestHandler(*this, server);
 
     if(_useWorker < _serverThreads.size())
     {
@@ -301,7 +301,7 @@ void Server::onAccept(Net::TcpServer& server)
     {
         conn->begin(_loop, _sslctx);
         _connections.push_back(conn);
-        conn->timeout += Pt::slot(*this, &Server::onConnectionTimeout);
+        conn->timeout() += Pt::slot(*this, &Server::onConnectionTimeout);
         _useWorker = 0;
     }
 
@@ -309,9 +309,9 @@ void Server::onAccept(Net::TcpServer& server)
 }
 
 
-void Server::onConnectionTimeout(Connection& conn)
+void Server::onConnectionTimeout(RequestHandler& conn)
 {
-    std::vector<Connection*>::iterator it;
+    std::vector<RequestHandler*>::iterator it;
     for(it = _connections.begin(); it != _connections.end(); ++it)
     {
         if(&conn == *it)

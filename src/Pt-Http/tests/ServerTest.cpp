@@ -96,7 +96,7 @@ class ChunkedResponder : public Pt::Http::Responder
             if(_chunks == 0)
                 reply.finish();
             else
-                reply.advance();
+                reply.beginSend();
         }
 
     private:

@@ -31,6 +31,7 @@
 
 #include <Pt/Http/Api.h>
 #include <Pt/Http/ReplyHeader.h>
+#include <Pt/Signal.h>
 #include <string>
 #include <sstream>
 
@@ -42,25 +43,18 @@ class Connection;
 
 class PT_HTTP_API Reply
 {
-        ReplyHeader _header;
-        MessageBuffer _buf;
-        Http::Connection* _conn;
-        std::ostream _body;
-        bool _advanced;
-        bool _finished;
+    friend class Connection;
 
     public:
         Reply()
         : _conn(0)
         , _body(&_buf)
-        , _advanced(false)
         , _finished(false)
         { }
 
         void init(Http::Connection& conn)
         {
             _conn = &conn;
-            _advanced = false;
             _finished = false;
         }
 
@@ -73,15 +67,9 @@ class PT_HTTP_API Reply
         { return _finished; }
 
         // TODO:
-        void beginSend()
-        { }
+        void beginSend();
 
-        // TODO:
-        // terminate method for Request and Reply
-        void terminate()
-        { }
-
-        void advance();
+        void endSend();
 
         void finish();
 
@@ -96,7 +84,6 @@ class PT_HTTP_API Reply
             _header.clear();
             _body.clear();
             _buf.reset();
-            _advanced = false;
             _finished = false;
         }
 
@@ -105,6 +92,22 @@ class PT_HTTP_API Reply
 
         std::ostream& body()
         { return _body; }
+
+        Signal<Reply&>& outputSent()
+        {
+            return _outputSent;
+        }
+
+    protected:
+        void onOutput();
+
+    private:
+        ReplyHeader _header;
+        MessageBuffer _buf;
+        Signal<Reply&> _outputSent;
+        Http::Connection* _conn;
+        std::ostream _body;
+        bool _finished;
 };
 
 } // namespace Http
