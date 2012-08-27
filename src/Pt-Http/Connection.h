@@ -58,13 +58,19 @@ class Connection : public Net::TcpSocket
 {
     class ParseEvent : public HeaderParser::MessageHeaderEvent
     {
-            RequestHeader& _request;
+            RequestHeader* _request;
 
         public:
-            explicit ParseEvent(RequestHeader& request)
-            : HeaderParser::MessageHeaderEvent(request)
-            , _request(request)
+            explicit ParseEvent()
+            : HeaderParser::MessageHeaderEvent()
+            , _request(0)
             { }
+
+            void init(RequestHeader& request)
+            { 
+                _request = &request; 
+                HeaderParser::MessageHeaderEvent::init(request);
+            }
 
             virtual void onMethod(const std::string& method);
             virtual void onUrl(const std::string& url);
@@ -76,11 +82,14 @@ class Connection : public Net::TcpSocket
 
         virtual ~Connection();
 
-        void beginAccept(System::EventLoop& loop, Ssl::Context* ctx = 0);
+        void beginAccept(System::EventLoop& loop, Request& req, Ssl::Context* ctx = 0);
 
-        void beginReceiveRequest();
+        void beginReceiveRequest(Request& request);
 
         bool endReceiveRequest();
+
+        bool isEnd()
+        { return _responder && _httpbuf.isEnd(); }
 
         void beginSendReply(bool finish = true);
 
@@ -115,28 +124,33 @@ class Connection : public Net::TcpSocket
         void onTimeout();
 
         const RequestHeader& request() const 
-        { return _request; }
+        { return _request->header(); }
 
         const Reply& reply() const     
         { return _reply; }
 
-    private:
+    public:
         Server& _server;
+        Responder* _responder;
+
+    private:
         ParseEvent _parseEvent;
         HeaderParser _parser;
-        RequestHeader _request;
+        Request* _request;
         System::EventLoop* _loop;
         System::Timer _timer;
         bool _chunkedTransfer;
-        Responder* _responder;
         System::IOBuffer _sockbuf;
         bool _ssl;
 #ifdef PT_HTTP_WITH_SSL
         Ssl::IOBuffer _sslbuf;
 #endif
         HttpBuffer _httpbuf;
+
         std::iostream _stream;
         bool _chunked;
+
+    public:
         Reply _reply;
 };
 
@@ -149,7 +163,7 @@ class RequestHandler : public Pt::Connectable
         ~RequestHandler();
 
         void begin(System::EventLoop& loop, Ssl::Context* ctx = 0)
-        { _conn.beginAccept(loop, ctx); }
+        { _conn.beginAccept(loop, _req, ctx); }
 
         Signal<RequestHandler&>& timeout()
         { return _timeout; }
@@ -158,9 +172,11 @@ class RequestHandler : public Pt::Connectable
         void onTimeout(Connection&)
         { _timeout.send(*this); }
 
+        void onRequestReceived(Request& req);
+
     private:
         Connection _conn;
-        //Request _req;
+        Request _req;
         Signal<RequestHandler&> _timeout;
 };
 

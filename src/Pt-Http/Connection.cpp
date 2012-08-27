@@ -45,6 +45,8 @@ RequestHandler::RequestHandler(Server& server, Net::TcpServer& tcpServer)
 : _conn(server, tcpServer)
 {
     _conn.timeout += Pt::slot(*this, &RequestHandler::onTimeout);
+
+    _req.inputReceived() += Pt::slot(*this, &RequestHandler::onRequestReceived);
 }
 
 
@@ -53,31 +55,70 @@ RequestHandler::~RequestHandler()
 }
 
 
+void RequestHandler::onRequestReceived(Request& req)
+{
+    bool receivedHeader = _conn.endReceiveRequest();
+    log_debug("onRequestReceived: " << receivedHeader);
+
+    if(receivedHeader)
+    {
+        _conn._responder = _conn._server.getResponder(_req.header());
+        _conn._responder->beginRequest( _req.body(), _req.header() );
+    }
+    
+    if( _req.body().rdbuf()->in_avail() )
+    {
+        _conn._responder->readRequest(_req.body(), _conn._reply);
+            
+        if( _conn._reply.finished() )
+        {
+            // TODO: skip unread body
+            return;
+        }
+    } 
+    
+    if( _req.body().fail() )
+        throw System::IOError( PT_ERROR_MSG("error reading HTTP reply body") );
+
+    if( ! _conn.isEnd() )
+    {
+        log_debug("more data available");
+        _conn.beginReceiveRequest(_req);
+    }
+    else
+    {
+        log_debug("read request body");
+        _conn._responder->beginReply(_req.header(), _conn._reply);
+    }
+}
+
+
 void Connection::ParseEvent::onMethod(const std::string& method)
 {
-    _request.method(method);
+    _request->method(method);
 }
 
 
 void Connection::ParseEvent::onUrl(const std::string& url)
 {
-    _request.url(url);
+    _request->url(url);
 }
 
 
 void Connection::ParseEvent::onUrlParam(const std::string& q)
 {
-    _request.qparams(q);
+    _request->qparams(q);
 }
 
 
 Connection::Connection(Server& server, Net::TcpServer& tcpServer)
 : _server(server)
-, _parseEvent(_request)
+, _responder(0)
+, _parseEvent()
 , _parser(_parseEvent, false)
+, _request(0)
 , _loop(0)
 , _chunkedTransfer(true)
-, _responder(0)
 , _ssl(false)
 #ifdef PT_HTTP_WITH_SSL
 , _sslbuf( _sockbuf )
@@ -100,8 +141,11 @@ Connection::~Connection()
 }
 
 
-void Connection::beginAccept(System::EventLoop& loop, Ssl::Context* ctx)
+void Connection::beginAccept(System::EventLoop& loop, Request& req, Ssl::Context* ctx)
 {
+    _parseEvent.init(req.header());
+
+    _request = &req;
     _reply.outputSent() += Pt::slot(*this, &Connection::onReplySent);
     _reply.init(*this);
     _reply.clear();
@@ -165,7 +209,7 @@ void Connection::onHttpsHandshake(Pt::Ssl::IOBuffer& ssl)
 void Connection::onHttpsInput(Pt::Ssl::IOBuffer& ssl)
 {
     log_trace("Connection::onHttpsInput");
-    endReceiveRequest();
+    _request->onInput(_httpbuf);
 }
 
 void Connection::onHttpsOutput(Pt::Ssl::IOBuffer& ssl)
@@ -179,7 +223,7 @@ void Connection::onHttpsOutput(Pt::Ssl::IOBuffer& ssl)
 void Connection::onHttpInput(System::StreamBuffer& sb)
 {
     log_trace("Connection::onHttpInput");
-    endReceiveRequest();
+    _request->onInput(_httpbuf);
 }
 
 
@@ -260,7 +304,7 @@ void Connection::endWrite()
 }
 
 
-void Connection::beginReceiveRequest()
+void Connection::beginReceiveRequest(Request& request)
 {
     beginRead();
 }
@@ -280,7 +324,7 @@ bool Connection::endReceiveRequest()
         return false;
     }
 
-    if ( _responder == 0 )
+    if ( ! _parser.end() )
     {
         if( _parser.begin() && ! _timer.started() )
         {
@@ -291,48 +335,33 @@ bool Connection::endReceiveRequest()
 
         if( _parser.fail() )
         {
-            _responder = _server.getDefaultResponder(_request);
-            replyError();
+            log_warn("http parser failed");
+            throw std::runtime_error("http parser failed"); // TODO define exception class
+            //_responder = _server.getDefaultResponder(_request->header());
+            //replyError();
             return false;
         }
 
         if( _parser.end() )
         {
-            _httpbuf.beginBody(_request);
+            _httpbuf.beginBody(_request->header());
+            if( _httpbuf.isEnd() )
+            {
+                log_debug("request body finished");
+                _timer.stop();
+            }
 
-            _responder = _server.getResponder(_request);
-            _responder->beginRequest(_stream, _request);
-            receivedHeader = true;
+            return true;
         }
-        else
-        {
-            beginRead();
-        }
+
+        return false;
     }
 
-    if (_responder)
+    if( _parser.end() )
     {
         // new code using HttpBuffer:
         _httpbuf.import();
-
         log_debug("available: " << _httpbuf.in_avail());
-
-        while( _httpbuf.in_avail() )
-        {
-            _responder->readRequest(_stream, _reply);
-            
-            if( _reply.finished() )
-            {
-                // TODO: skip unread body
-                return false;
-            }
-
-            _httpbuf.import();
-            log_debug("available: " << _httpbuf.in_avail());
-        } 
-    
-        if( _stream.fail() )
-            throw System::IOError( PT_ERROR_MSG("error reading HTTP reply body") );
 
         if( _httpbuf.isEnd() )
         {
@@ -341,16 +370,10 @@ bool Connection::endReceiveRequest()
             
             _httpbuf.reset();
             _chunked = false;
-            _responder->beginReply(_request, _reply);
-        }
-        else
-        {
-            log_debug("continue reading body");
-            beginRead();
         }
     }
 
-    return receivedHeader;
+    return false;
 }
 
 
@@ -418,7 +441,7 @@ void Connection::beginSendReply(bool finish)
 
     if(_reply.buffer().size() < 8192)
     {
-        _responder->writeReply(_request, _reply);
+        _responder->writeReply(_request->header(), _reply);
         return;
     }
 
@@ -496,18 +519,20 @@ void Connection::endSendReply()
 
         if( ! _reply.finished() )
         {
-            _responder->writeReply(_request, _reply);
+            _responder->writeReply(_request->header(), _reply);
             return;
         }
   
-        bool keepAlive = _request.keepAlive() && _reply.header().keepAlive();
+        bool keepAlive = _request->header().keepAlive() && _reply.header().keepAlive();
         if(keepAlive)
         {
             log_debug("do keep alive");
             _timer.start(_server.keepAliveTimeout());
-            _request.clear();
+            _chunked = false;
+            _request->clear();
             _reply.clear();
             _parser.reset(false);
+            _httpbuf.reset();
 
             beginRead();
             return;

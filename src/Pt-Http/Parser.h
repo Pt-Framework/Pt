@@ -57,14 +57,21 @@ class PT_HTTP_API HeaderParser
 
         class PT_HTTP_API MessageHeaderEvent : public Event
         {
-                MessageHeader& _header;
+                MessageHeader* _header;
                 char _key[MessageHeader::MAXHEADERSIZE];
 
             public:
                 explicit MessageHeaderEvent(MessageHeader& header)
-                    : _header(header)
+                    : _header(&header)
                     { }
 
+                MessageHeaderEvent()
+                    : _header(0)
+                    { }
+
+                void init(MessageHeader& header)
+                { _header = &header; }
+                
                 virtual void onHttpVersion(unsigned major, unsigned minor);
                 virtual void onKey(const std::string& key);
                 virtual void onValue(const std::string& value);

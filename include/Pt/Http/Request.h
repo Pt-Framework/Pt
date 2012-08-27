@@ -31,24 +31,26 @@
 
 #include <Pt/Http/Api.h>
 #include <Pt/Http/RequestHeader.h>
+#include <Pt/Signal.h>
 #include <string>
-#include <sstream>
+#include <iostream>
 #include <cassert>
 
 namespace Pt {
 
 namespace Http {
 
-class Reply;
+class Connection;
 
 class PT_HTTP_API Request
 {
+    friend class Connection;
+
     public:
         explicit Request( const std::string& url = std::string() )
         : _header(url)
         , _buf()
         , _body(&_buf)
-        , _reply(0)
         { }
 
         RequestHeader& header()
@@ -67,15 +69,6 @@ class PT_HTTP_API Request
         void clearBody()
         {
             _buf.reset();
-        }
-
-        void init(Reply& reply)
-        { _reply = &reply; }
-
-        Reply& reply()
-        { 
-            assert(_reply);
-            return *_reply; 
         }
 
         const std::string& url() const
@@ -99,17 +92,29 @@ class PT_HTTP_API Request
         const char* data() const
         { return _buf.data(); }
 
-        std::ostream& body()
+        std::iostream& body()
         { return _body; }
 
         std::size_t size() const
         { return _buf.size(); }
 
+        Signal<Request&>& inputReceived()
+        {
+            return _inputReceived;
+        }
+
+    protected:
+        void onInput(std::streambuf& sb)
+        {
+            _body.rdbuf(&sb);
+            _inputReceived.send(*this);
+        }
+
     private:
         RequestHeader _header;
         MessageBuffer _buf;
-        std::ostream _body;
-        Reply* _reply;
+        std::iostream _body;
+        Signal<Request&> _inputReceived;
 };
 
 } // namespace Http

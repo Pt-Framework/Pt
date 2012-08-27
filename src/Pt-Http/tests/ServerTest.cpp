@@ -112,7 +112,7 @@ class ServerTest : public Pt::Unit::TestSuite
         ServerTest()
         : Pt::Unit::TestSuite("ServerTest")
         {
-            Pt::System::Logger::setLogLevel("Pt.Http", Pt::System::Error);
+            Pt::System::Logger::setLogLevel("Pt.Http.Server", Pt::System::Error);
 
             this->registerMethod( "NotFound", *this, &ServerTest::NotFound);
 #ifdef PT_HTTP_WITH_SSL

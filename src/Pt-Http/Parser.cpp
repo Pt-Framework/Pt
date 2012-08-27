@@ -106,7 +106,7 @@ namespace Http {
 
     void HeaderParser::MessageHeaderEvent::onHttpVersion(unsigned major, unsigned minor)
     {
-         _header.httpVersion(major, minor);
+         _header->httpVersion(major, minor);
     }
 
     void HeaderParser::MessageHeaderEvent::onKey(const std::string& key)
@@ -116,7 +116,7 @@ namespace Http {
 
     void HeaderParser::MessageHeaderEvent::onValue(const std::string& value)
     {
-        _header.addHeader(_key, value.c_str());
+        _header->addHeader(_key, value.c_str());
     }
 
     std::size_t HeaderParser::advance(std::streambuf& sb)
