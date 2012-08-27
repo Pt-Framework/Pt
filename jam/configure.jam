@@ -53,8 +53,11 @@ rule ConfigureLog
     }
 }
 
-rule ConfigureExit
+
+rule ConfigureCache
 {
+	local _file = $(1) ;
+
     for local _var in $(CONFIGURED_VARIABLES)
     {
         local _value ;
@@ -66,12 +69,23 @@ rule ConfigureExit
             _value += "\"$(_valtmp)\"" ;
         }
     
-        WriteFile $(JAMRULES) : $(_var)" ?= "$(_value:J=" ")" ;" ;
+        WriteFile $(_file) : $(_var)" ?= "$(_value:J=" ")" ;" ;
     }
 
     # Toolset specific variables and rules
-    WriteFile $(JAMRULES) : "" ;
-    WriteFile $(JAMRULES) : "Load $(TOOLSET:L).jam ;" ;
+    WriteFile $(_file) : "" ;
+    WriteFile $(_file) : "Load $(TOOLSET:L).jam ;" ;
+}
+
+
+rule ConfigureExit
+{
+	ConfigureCache $(JAMRULES) ;
+
+    if $(CONFIG)
+    {
+		ConfigureCache $(JAMRULES).$(CONFIG) ;
+    }
 
     Exit "Configuration successful." ;
 }

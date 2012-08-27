@@ -50,6 +50,14 @@ if configure in $(ARGV)
 
     ConfigureClean ;
 
+	if [ CHECK_IF_FILE Jamrules.$(CONFIG) ] # TODO: check timestamp against Jamconfigure
+	{
+		include Jamrules.$(CONFIG) ;
+		TryCommand $(CP) Jamrules.$(CONFIG) Jamrules ;
+		Echo "Using " Jamrules.$(CONFIG) ;
+		Exit ;
+	}
+
     ConfigureLog "[ Configure ]" ;
     ConfigureRm ;
     ConfigureMv ;
