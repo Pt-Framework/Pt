@@ -122,9 +122,11 @@ class ServerThread : public Connectable
             _connections.push_back(conn);
             conn->timeout() += Pt::slot(*this, &ServerThread::onConnectionTimeout);
 
+#ifdef PT_HTTP_WITH_SSL
             if(_ssl)
                 conn->begin(_loop, &_sslctx);
             else
+#endif            
                 conn->begin(_loop);
         }
 
