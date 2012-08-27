@@ -91,11 +91,11 @@ class Connection : public Net::TcpSocket
         bool isEnd()
         { return _responder && _httpbuf.isEnd(); }
 
-        void beginSendReply(bool finish = true);
-
-        void onReplySent(Reply& reply);
+        void beginSendReply(Reply& reply, bool finish = true);
 
         void endSendReply();
+
+        bool outputAvailable();
 
         Signal<Connection&> timeout;
 
@@ -115,8 +115,11 @@ class Connection : public Net::TcpSocket
 
         void endRead();
 
-        bool beginWrite();
 
+    public:
+        bool beginWrite(); // TODO !!!
+
+    private:
         void endWrite();
 
         void replyError();
@@ -126,9 +129,6 @@ class Connection : public Net::TcpSocket
         const RequestHeader& request() const 
         { return _request->header(); }
 
-        const Reply& reply() const     
-        { return _reply; }
-
     public:
         Server& _server;
         Responder* _responder;
@@ -137,6 +137,7 @@ class Connection : public Net::TcpSocket
         ParseEvent _parseEvent;
         HeaderParser _parser;
         Request* _request;
+        Reply* _reply;
         System::EventLoop* _loop;
         System::Timer _timer;
         bool _chunkedTransfer;
@@ -148,10 +149,7 @@ class Connection : public Net::TcpSocket
         HttpBuffer _httpbuf;
 
         std::iostream _stream;
-        bool _chunked;
-
-    public:
-        Reply _reply;
+        bool _chunked;  
 };
 
 
@@ -163,7 +161,14 @@ class RequestHandler : public Pt::Connectable
         ~RequestHandler();
 
         void begin(System::EventLoop& loop, Ssl::Context* ctx = 0)
-        { _conn.beginAccept(loop, _req, ctx); }
+        { 
+            
+            _reply.init(_conn);
+            _reply.clear();
+            
+            _conn.beginAccept(loop, _req, ctx); 
+        
+        }
 
         Signal<RequestHandler&>& timeout()
         { return _timeout; }
@@ -174,9 +179,12 @@ class RequestHandler : public Pt::Connectable
 
         void onRequestReceived(Request& req);
 
+        void onReplySent(Reply& r);
+
     private:
         Connection _conn;
         Request _req;
+        Reply _reply;
         Signal<RequestHandler&> _timeout;
 };
 

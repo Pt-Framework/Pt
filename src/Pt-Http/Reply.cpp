@@ -35,13 +35,13 @@ namespace Http {
 
 void Reply::beginSend()
 { 
-    _conn->beginSendReply(false); 
+    _conn->beginSendReply(*this, false); 
 }
 
 
 void Reply::finish()
 { 
-    _conn->beginSendReply(true); 
+    _conn->beginSendReply(*this, true); 
     _finished = true; 
 }
 
