@@ -26,107 +26,205 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-
 #include "Connection.h"
 #include <Pt/Http/Request.h>
-#include <Pt/Http/Server.h>
-#include <Pt/Http/Responder.h>
+#include <Pt/Http/Reply.h>
 #include <Pt/System/EventLoop.h>
 #include <Pt/System/Logger.h>
+#include <Pt/TextStream.h>
+#include <Pt/Base64Codec.h>
 #include <cassert>
 
-log_define("Pt.Http.Server")
+log_define("Pt.Http.Connection")
 
 namespace Pt {
 
 namespace Http {
 
-RequestHandler::RequestHandler(Server& server, Net::TcpServer& tcpServer)
-: _conn(server, tcpServer)
+void HttpBuffer::beginBody(const MessageHeader& reply)
 {
-    _conn.timeout += Pt::slot(*this, &RequestHandler::onTimeout);
+    log_trace("HttpBuffer::beginBody()");
+    _chunkParser.reset();
 
-    _req.inputReceived() += Pt::slot(*this, &RequestHandler::onRequestReceived);
-    _reply.outputSent() += Pt::slot(*this, &RequestHandler::onReplySent);
+    setg(0,0,0);
+
+    _keepAlive = reply.keepAlive();
+    _contentLength = reply.contentLength();
+    _chunked = reply.chunkedTransferEncoding();
+
+    log_debug("keep-alive: " << _keepAlive);
+    log_debug("chunked: " << _chunked);
+    log_debug("content-length: " << _contentLength);
 }
 
 
-RequestHandler::~RequestHandler()
+bool HttpBuffer::isEnd() const
 {
+    log_trace("HttpBuffer::isEnd()");
+    if(_chunked)
+        return _chunkParser.end();
+
+    return _contentLength == 0;
 }
 
 
-void RequestHandler::onRequestReceived(Request& req)
+void HttpBuffer::import(std::streamsize n)
 {
-    bool receivedHeader = _conn.endReceiveRequest();
-    log_debug("onRequestReceived: " << receivedHeader);
+    log_trace("HttpBuffer::import(" << n << ")");
 
-    if(receivedHeader)
+    if( ! _sbuf)
+        return;
+
+    if(n == 0)
     {
-        _conn._responder = _conn._server.getResponder(_req.header());
-        _conn._responder->beginRequest( _req.body(), _req.header() );
+        n = _sbuf->in_avail();
+        log_debug("available: " << n);
     }
-    
-    if( _req.body().rdbuf()->in_avail() )
-    {
-        _conn._responder->readRequest(_req.body(), _reply);
-            
-        if( _reply.finished() )
-        {
-            // TODO: skip unread body
-            return;
-        }
-    } 
-    
-    if( _req.body().fail() )
-        throw System::IOError( PT_ERROR_MSG("error reading HTTP reply body") );
 
-    if( ! _conn.isEnd() )
+    // Move unread bytes and putback to front
+    size_t putback  = MaxPutback;
+    size_t leftover = 0;
+    
+    if( this->gptr() ) 
     {
-        log_debug("more data available");
-        _conn.beginReceiveRequest(_req);
+        putback = std::min<std::size_t>( this->gptr() - this->eback(), MaxPutback);
+        char* to = _buffer + MaxPutback - putback;
+        char* from = this->gptr() - putback;
+
+        leftover = this->egptr() - this->gptr();
+        std::memmove( to, from, putback + leftover );
+
+        this->setg( _buffer + (MaxPutback - putback),  // start of get area
+                    _buffer + MaxPutback,              // gptr position
+                    _buffer + MaxPutback + leftover ); // end of get area
+    }
+
+    if(_chunked)
+    {
+        log_debug("getting next chunk");
+        _contentLength = 0;
+        while(n-- && ! _chunkParser.end())
+        {
+            char ch = _sbuf->sbumpc();
+            _chunkParser.parse(ch);
+            if( _chunkParser.hasChunk() )
+            {
+                _contentLength = _chunkParser.chunkSize();
+                break;
+            }
+        }
+    }
+
+    size_t unused = sizeof(_buffer) - (MaxPutback + leftover);
+    log_debug("unused buffer area: " << unused);
+    if(n > unused)
+        n = unused;
+
+    log_debug("content-length: " << _contentLength);
+    if(n > _contentLength)
+        n = _contentLength;
+
+    if( this->isEnd() )
+    {
+        log_trace("received all content -> EOF");
+        _bodyFinished.send();
+        return;
+    }
+
+    log_debug("http buffer refill: " << n);
+    if(n == 0)
+        return;
+
+    n = _sbuf->sgetn(_buffer + MaxPutback + leftover, n);
+
+    setg(_buffer + MaxPutback - putback, // eback - start of get area
+         _buffer + MaxPutback,           // gptr - current position
+         _buffer + MaxPutback + n);      // egptr - end of get area
+
+    _contentLength -= n;
+    log_debug("remaining content length: " << _contentLength);
+}
+
+
+HttpBuffer::int_type HttpBuffer::underflow()
+{ 
+    log_trace("HttpBuffer::underflow()");
+
+    if(this->gptr() < this->egptr())
+        return traits_type::to_int_type(*(this->gptr()));
+
+    import( sizeof(_buffer) );
+
+    if( this->gptr() < this->egptr() )
+        return traits_type::to_int_type( *this->gptr() );
+
+    return traits_type::eof();
+}
+
+
+int HttpBuffer::sync()
+{ 
+    typedef HttpBuffer::traits_type traits_type;
+
+    if( this->pptr() )
+    {
+        while(this->pptr() > this->pbase())
+        {
+            const HttpBuffer::int_type ch = this->overflow(traits_type::eof());
+            if( ch == traits_type::eof() )
+                return -1;
+        }
+    }
+
+    return 0;
+}
+
+
+HttpBuffer::int_type HttpBuffer::overflow(int_type ch)
+{
+    typedef HttpBuffer::traits_type traits_type;
+
+    if( ! _obuffer)
+    {
+        _obufferSize = BufferSize;
+        _obuffer = new char[_obufferSize];
+        this->setp(_obuffer, _obuffer + _obufferSize);
+    }
+    else if( traits_type::eq_int_type(ch, traits_type::eof()) )
+    {
+        // normal blocking overflow case
+        size_t avail    = this->pptr() - _obuffer;
+        size_t written  = _sbuf->sputn(_obuffer, avail);
+        size_t leftover = avail - written;
+
+        if(leftover > 0)
+            traits_type::move(_obuffer, _obuffer + written, leftover);
+
+        this->setp(_obuffer, _obuffer + _obufferSize);
+        this->pbump(leftover);
     }
     else
     {
-        log_debug("read request body");
-        _conn._responder->beginReply(_req.header(), _reply);
+        // if overflow is not called by sync/flush we copy the output 
+        // buffer to a larger one
+        size_t bufsize = _obufferSize + BufferSize;
+        char* buf = new char[ bufsize ];
+        traits_type::copy(buf, _obuffer, _obufferSize);
+        std::swap(_obuffer, buf);
+        this->setp(_obuffer, _obuffer + bufsize);
+        this->pbump(_obufferSize);
+        _obufferSize = bufsize;
+        delete [] buf;
     }
-}
 
-
-void RequestHandler::onReplySent(Reply& r)
-{
-    log_trace("RequestHandler::onReplySent");
-
-    _conn.endSendReply();
-
-    if( _conn.outputAvailable() )
+    // if the overflow char is not EOF put it in buffer
+    if(traits_type::eq_int_type(ch, traits_type::eof()) == false)
     {
-        log_debug("writing left over data");
-        _conn.beginWrite();
-        return;
+        *pptr() = traits_type::to_char_type(ch);
+        this->pbump(1);
     }
 
-    if( ! _reply.finished() )
-    {
-        log_debug("continuing response");
-        _conn._responder->writeReply(_req.header(), _reply);
-        return;
-    }
-
-    if( _conn._responder && _reply.finished() )
-    {
-        log_debug("response finished");
-        _reply.clear();
-        _req.clear();
-
-        _conn._responder->release();
-        _conn._responder = 0;
-    }
-
-    bool keepAlive = _req.header().keepAlive() && _reply.header().keepAlive();
-    if(keepAlive)
-        _conn.beginReceiveRequest(_req);
+    return traits_type::not_eof(ch);
 }
 
 
@@ -148,102 +246,604 @@ void Connection::ParseEvent::onUrlParam(const std::string& q)
 }
 
 
-Connection::Connection(Server& server, Net::TcpServer& tcpServer)
-: _server(server)
-, _responder(0)
-, _parseEvent()
+Connection::Connection(Net::TcpServer& tcpServer)
+: _parseEvent()
 , _parser(_parseEvent, false)
 , _request(0)
 , _reply(0)
 , _loop(0)
-, _chunkedTransfer(true)
 , _ssl(false)
 #ifdef PT_HTTP_WITH_SSL
 , _sslbuf( _sockbuf )
 #endif
 , _httpbuf()
+, _readTimeout(30000)
+, _writeTimeout(30000)
+, _keepaliveTimeout(45000)
 , _stream(&_httpbuf)
 , _chunked(false)
 {
     Net::TcpSocket::accept(tcpServer);
+
+    _sockbuf.attach(*this);
+
+    _timer.timeout() += Pt::slot(*this, &Connection::onTimeout);
+
+    this->connected() += Pt::slot(*this, &Connection::onConnect);
+}
+
+
+Connection::Connection()
+: _parseEvent()
+, _parser(_parseEvent, false)
+, _request(0)
+, _reply(0)
+, _loop(0)
+, _ssl(false)
+#ifdef PT_HTTP_WITH_SSL
+, _sslbuf( _sockbuf )
+#endif
+, _httpbuf()
+, _readTimeout(30000)
+, _writeTimeout(30000)
+, _keepaliveTimeout(45000)
+, _stream(&_httpbuf)
+, _chunked(false)
+{
+    _sockbuf.attach(*this);
+
+    _timer.timeout() += Pt::slot(*this, &Connection::onTimeout);
+
+    this->connected() += Pt::slot(*this, &Connection::onConnect);
 }
 
 
 Connection::~Connection()
 {
-    if(_responder)
-    {
-        _responder->release();
-    }
 }
 
 
-void Connection::beginAccept(System::EventLoop& loop, Request& req, Ssl::Context* ctx)
+#ifdef PT_HTTP_WITH_SSL
+void Connection::setContext(Ssl::Context& ctx)
 {
-    _parseEvent.init(req.header());
+    _sslbuf.init(ctx);
+}
+#else
+void Connection::setContext(Ssl::Context& )
+{
+}
+#endif
 
-    _request = &req;
 
-    _timer.timeout() += Pt::slot(*this, &Connection::onTimeout);
+void Connection::setEventLoop(System::EventLoop& loop)
+{
+    this->setActive(loop);
+    _timer.setActive(loop);
+    
+    _loop = &loop;
+}
+
+
+void Connection::setHost(const Net::AddrInfo& addrinfo, bool ssl)
+{
+    _addrInfo = addrinfo;
+    
+    close();
+
+#ifdef PT_HTTP_WITH_SSL
+      _sslbuf.handshakeFinished() -= slot(*this, &Connection::onHttpsHandshake);
+      _sslbuf.handshakeFinished() -= slot(*this, &Connection::onHttpsClientHandshake);
+      _sslbuf.handshakeFinished() += slot(*this, &Connection::onHttpsClientHandshake);
+
+      if(ssl)
+      {
+          log_debug("initialize HTTPS connection");
+          if( ! _ssl)
+          {
+              _sockbuf.outputReady() -= slot(*this, &Connection::onHttpOutput);
+              _sockbuf.inputReady() -= slot(*this, &Connection::onHttpInput);
+
+              _sslbuf.outputReady() += slot(*this, &Connection::onHttpsOutput);
+              _sslbuf.inputReady() += slot(*this, &Connection::onHttpsInput);
+
+              _httpbuf.attach(_sslbuf);
+              _ssl = true;
+          }
+          
+          return;
+      }
+
+      log_debug("initialize HTTP connection");
+      if(_ssl)
+      {
+          _sslbuf.outputReady() -= slot(*this, &Connection::onHttpsOutput);
+          _sslbuf.inputReady() -= slot(*this, &Connection::onHttpsInput);
+
+          _sockbuf.outputReady() += slot(*this, &Connection::onHttpOutput);
+          _sockbuf.inputReady() += slot(*this, &Connection::onHttpInput);
+
+          _httpbuf.attach(_sockbuf);
+          _ssl = false;
+      }
+
+#endif
+}
+
+
+void Connection::init(System::EventLoop& loop, Ssl::Context* ctx)
+{
+    log_trace("Connection::init");
+
     _timer.setActive(loop);
 
     _loop = &loop;
     this->setActive(loop);
     
-    _sockbuf.attach(*this);
-
 #ifdef PT_HTTP_WITH_SSL
     _ssl = ctx != 0;
 
+    _sslbuf.handshakeFinished() -= slot(*this, &Connection::onHttpsHandshake);
+    _sslbuf.handshakeFinished() -= slot(*this, &Connection::onHttpsClientHandshake);
+    _sslbuf.handshakeFinished() += slot(*this, &Connection::onHttpsHandshake);
+
     if(_ssl)
     {
-        log_debug("beginning HTTPS connection");
+        log_debug("initialize HTTPS connection");
         _sslbuf.init(*ctx);
-        _sslbuf.handshakeFinished() += slot(*this, &Connection::onHttpsHandshake);
         _sslbuf.outputReady() += slot(*this, &Connection::onHttpsOutput);
         _sslbuf.inputReady() += slot(*this, &Connection::onHttpsInput);
 
         _httpbuf.attach(_sslbuf);
-        _sslbuf.beginAccept();
-        _timer.start( _server.readTimeout() );
         return;
     }
 #endif
 
-    log_debug("beginning HTTP connection");
+    log_debug("initialize HTTP connection");
     _sockbuf.inputReady() += Pt::slot(*this, &Connection::onHttpInput);
     _sockbuf.outputReady() += Pt::slot(*this, &Connection::onHttpOutput);
 
     _httpbuf.attach(_sockbuf);
-    _sockbuf.beginRead();
-    _timer.start( _server.readTimeout() );
+}
+
+
+void Connection::beginSendRequest(Request& request)
+{
+    _request = &request;
+
+    if( ! isConnected() )
+    {
+        log_debug("opening new connection to " << _addrInfo.host());
+        _timer.start( _writeTimeout );
+        beginConnect(_addrInfo);
+        return;
+    }
+
+    RequestHeader& header = _request->header();
+    std::ostream os( _httpbuf.buffer() );
+
+    // TODO: only if finished or over 8K data to send
+    if( outputAvailable() )
+    {
+        _timer.start( _writeTimeout );
+        beginWrite();
+        return;
+    }
+
+    if( request.finished() )
+    {
+        if(_chunked)
+        {
+            os << std::hex << _request->size() << std::dec << "\r\n";
+            os.write( _request->data(), _request->size() );
+            
+            os.write("\r\n", 2);
+            os.write("0\r\n\r\n", 5);
+            _chunked = false;
+        }
+        else
+        {
+            log_debug("sending HTTP request");
+            sendRequest(os, *_request);
+         }
+
+        log_debug("begin writing reply");
+        _timer.start( _writeTimeout );
+        beginWrite();
+        return;
+    }
+
+    if( ! _chunked )
+    {
+        _chunked = true;
+        log_debug("sending chunked HTTP request");
+        sendChunked(os, *_request);
+    }
+
+    os << std::hex << _reply->buffer().size() << std::dec << "\r\n";
+    os.write( _reply->buffer().data(), _reply->buffer().size() );
+    os.write("\r\n", 2);
+    
+    _timer.start( _writeTimeout );
+    beginWrite();
+}
+
+
+bool Connection::endSendRequest()
+{
+    log_trace("Connection::endSendRequest");
+    // TODO: handle exceptions correctly...
+
+    endWrite();
+
+    if( outputAvailable() > 0)
+    {
+        log_debug("still data to send");
+        return false;
+    }
+
+    // indicates that request or chunk was completely written
+    log_debug("request data sent");
+    return true;
+}
+
+
+void Connection::beginSendReply(Reply& reply)
+{
+    _reply = &reply;
+
+    const char* server = "Server";
+    const char* connection = "Connection";
+    const char* date = "Date";
+
+    ReplyHeader& header = _reply->header();
+    std::ostream os( _httpbuf.buffer() );
+
+    // TODO: only if finished or over 8K data to send
+    if( outputAvailable() )
+    {
+        _timer.start( _writeTimeout );
+        beginWrite();
+        return;
+    }
+
+    if( reply.finished() )
+    {
+        if(_chunked)
+        {
+            os << std::hex << _reply->buffer().size() << std::dec << "\r\n";
+            os.write( _reply->buffer().data(), _reply->buffer().size() );
+            _reply->clearBody();
+            os.write("\r\n", 2);
+            os.write("0\r\n\r\n", 5);
+            _chunked = false;
+        }
+        else
+        {
+            log_debug("sending HTTP reply");
+
+            os <<"HTTP/"
+                << header.httpVersionMajor() << '.'
+                << header.httpVersionMinor() << ' '
+                << header.httpReturnCode() << ' '
+                << header.httpReturnText() << "\r\n";
+
+            ReplyHeader::const_iterator it;
+            for(it = header.begin(); it != header.end(); ++it)
+            {
+                os << it->first << ": " << it->second << "\r\n";
+            }
+
+            os << "Content-Length: " << _reply->buffer().size() << "\r\n";
+
+            if( ! header.hasHeader(server) )
+            {
+                os << "Server: Pt-Net-Server\r\n";
+            }
+
+            if( ! header.hasHeader(connection) )
+            {
+                os << "Connection: "
+                    << (header.keepAlive() ? "keep-alive" : "close")
+                    << "\r\n";
+            }
+
+            if( ! header.hasHeader(date) )
+            {
+                char buffer[50];
+                os << "Date: " << MessageHeader::htdateCurrent(buffer) << "\r\n";
+            }
+
+            os << "\r\n";
+            os.write( _reply->buffer().data(), _reply->buffer().size() );
+         }
+
+        log_debug("begin writing reply");
+        _timer.start( _writeTimeout );
+        beginWrite();
+        return;
+    }
+
+    if( ! _chunked )
+    {
+        _chunked = true;
+
+        os <<"HTTP/"
+           << header.httpVersionMajor() << '.'
+           << header.httpVersionMinor() << ' '
+           << header.httpReturnCode() << ' '
+           << header.httpReturnText() << "\r\n";
+
+        ReplyHeader::const_iterator it;
+        for(it = header.begin(); it != header.end(); ++it)
+        {
+            os << it->first << ": " << it->second << "\r\n";
+        }
+
+        os << "Transfer-Encoding: chunked\r\n";
+
+        if( ! header.hasHeader(server) )
+        {
+            os << "Server: Pt-Net-Server\r\n";
+        }
+
+        if( ! header.hasHeader(connection) )
+        {
+            os << "Connection: "
+               << (header.keepAlive() ? "keep-alive" : "close")
+               << "\r\n";
+        }
+
+        if( ! header.hasHeader(date) )
+        {
+            char buffer[50];
+            os << "Date: " << MessageHeader::htdateCurrent(buffer) << "\r\n";
+        }
+
+        os << "\r\n";
+    }
+
+    os << std::hex << _reply->buffer().size() << std::dec << "\r\n";
+    os.write( _reply->buffer().data(), _reply->buffer().size() );
+    _reply->clearBody();
+    os.write("\r\n", 2);
+
+    _timer.start( _writeTimeout );
+    beginWrite();
+}
+
+
+bool Connection::endSendReply()
+{
+    log_trace("Connection::endSendReply");
+    // TODO: handle exceptions correctly...
+
+    try
+    {
+        endWrite();
+
+        if( outputAvailable() > 0)
+        {
+            log_debug("still data to send");
+            return false;
+        }
+  
+        if( ! _reply->finished() )
+        {
+            // indicates that chunk was completely written
+            log_debug("reply is not finished");
+            return true;
+        }
+
+        _chunked = false;
+        _parser.reset(false);
+        _httpbuf.reset();
+
+        // TODO: only keepalive when request allows it
+        bool keepAlive = _reply->header().keepAlive();
+        if(keepAlive)
+        {
+            log_debug("do keep alive");
+            _timer.start(_keepaliveTimeout);
+
+            // indicates that request was completely written
+            return true;
+        }
+    }
+    catch (const std::exception& e)
+    {
+        log_warn("exception occured when processing request: " << e.what());
+    }
+
+    log_debug("closing connection");
+    close();
+
+    // indicates that request was completely written
+    return true;
+}
+
+
+void Connection::beginReceiveRequest(Request& request)
+{
+    _request = &request;
+
+    _parseEvent.init( request.header() );
+
+    if(_ssl && ! _sslbuf.connected() )
+    {
+        log_debug("beginning SSL handshake");
+        _sslbuf.beginAccept();
+        _timer.start( _readTimeout );
+        return;
+    }
+
+    _timer.start( _readTimeout );
+    beginRead();
+}
+
+
+bool Connection::endReceiveRequest()
+{
+    // TODO: handle exceptions correctly...
+    bool receivedHeader = false;
+
+    endRead();
+
+    if (_httpbuf.buffer()->in_avail() == 0 || Net::TcpSocket::eof())
+    {
+        close();
+        return false;
+    }
+
+    if ( ! _parser.end() )
+    {
+        if( _parser.begin() && ! _timer.started() )
+        {
+            _timer.start( _readTimeout );
+        }
+        
+        _parser.advance( *_httpbuf.buffer() );
+
+        if( _parser.fail() )
+        {
+            log_warn("http parser failed");
+            throw std::runtime_error("http parser failed"); // TODO define exception class
+            return false;
+        }
+
+        if( _parser.end() )
+        {
+            _httpbuf.beginBody(_request->header());
+            if( _httpbuf.isEnd() )
+            {
+                log_debug("request body finished");
+                _timer.stop();
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
+    if( _parser.end() )
+    {
+        _httpbuf.import();
+        log_debug("available: " << _httpbuf.in_avail());
+
+        if( _httpbuf.isEnd() )
+        {
+            log_debug("request body finished");
+            _timer.stop();
+            
+            _httpbuf.reset();
+            _chunked = false;
+        }
+    }
+
+    return false;
+}
+
+
+void Connection::beginReceiveReply(Reply& r)
+{
+    _reply = &r;
+
+    throw 1;
+    ///_parseEvent.init( _reply->header() );
+
+    _timer.start( _readTimeout );
+    beginRead();
+}
+
+
+bool Connection::endReceiveReply()
+{
+    // TODO: handle exceptions correctly...
+    bool receivedHeader = false;
+
+    endRead();
+
+    if ( ! _parser.end() )
+    {
+        if( Net::TcpSocket::eof() )
+            throw System::IOError("unexpected EOF");
+
+        if( _parser.begin() && ! _timer.started() )
+        {
+            _timer.start( _readTimeout );
+        }
+        
+        _parser.advance( *_httpbuf.buffer() );
+
+        if( _parser.fail() )
+        {
+            log_warn("http parser failed");
+            throw std::runtime_error("http parser failed"); // TODO define exception class
+            return false;
+        }
+
+        if( _parser.end() )
+        {
+            _httpbuf.beginBody( _reply->header() );
+
+            if( _httpbuf.isEnd() )
+            {
+                log_debug("reply body finished");
+                _timer.stop();
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
+    if( _parser.end() )
+    {
+        _httpbuf.import();
+        log_debug("available: " << _httpbuf.in_avail());
+
+        if( _httpbuf.isEnd() )
+        {
+            log_debug("reply body finished");
+            _timer.stop();
+            _httpbuf.reset();
+            _chunked = false;
+
+            if( ! _reply->header().keepAlive() )
+            {
+                log_debug("closing, no keep alive");
+                close();
+            }
+        }
+    }
+
+    return false;
 }
 
 
 #ifdef PT_HTTP_WITH_SSL
 void Connection::onHttpsHandshake(Pt::Ssl::IOBuffer& ssl)
 {
-    log_trace("Connection::onAcceptHandshake");
+    log_trace("Connection::onHttpsHandshake");
+    ssl.endHandshake();
 
-    try 
-    {
-        ssl.endHandshake();
-    }
-    catch(...) 
-    {
-        log_error("accept handshake failed");
-        return;
-    }
+    _timer.start( _readTimeout );
+    beginRead();
+}
 
-    log_debug("peer name = " << ssl.peerName());
-    log_debug("current cipher = " << ssl.currentCipher().name());
-    ssl.beginRead();
+void Connection::onHttpsClientHandshake(Pt::Ssl::IOBuffer& ssl)
+{
+    log_trace("Connection::onHttpsClientHandshake");
+    ssl.endHandshake();
+
+    beginSendRequest(*_request);
 }
 
 void Connection::onHttpsInput(Pt::Ssl::IOBuffer& ssl)
 {
     log_trace("Connection::onHttpsInput");
-    _request->onInput(_httpbuf);
+    _request->onInput();
 }
 
 void Connection::onHttpsOutput(Pt::Ssl::IOBuffer& ssl)
@@ -254,10 +854,30 @@ void Connection::onHttpsOutput(Pt::Ssl::IOBuffer& ssl)
 #endif
 
 
+void Connection::onConnect(Net::TcpSocket& socket)
+{
+    log_trace("Connection::onConnect");
+
+    endConnect();
+
+#ifdef PT_HTTP_WITH_SSL
+    if(_ssl)
+    {
+        log_debug("begining SSL handshake");
+        _timer.start( _writeTimeout );
+        _sslbuf.beginConnect();
+        return;
+    }
+#endif
+
+    beginSendRequest(*_request);
+}
+
+
 void Connection::onHttpInput(System::StreamBuffer& sb)
 {
     log_trace("Connection::onHttpInput");
-    _request->onInput(_httpbuf);
+    _request->onInput();
 }
 
 
@@ -363,263 +983,146 @@ void Connection::endWrite()
 }
 
 
-void Connection::beginReceiveRequest(Request& request)
-{
-    beginRead();
-}
-
-
-bool Connection::endReceiveRequest()
-{
-    // TODO: handle exceptions correctly...
-    bool receivedHeader = false;
-
-    endRead();
-
-    if (_httpbuf.buffer()->in_avail() == 0 || Net::TcpSocket::eof())
-    {
-        close();
-        timeout(*this);
-        return false;
-    }
-
-    if ( ! _parser.end() )
-    {
-        if( _parser.begin() && ! _timer.started() )
-        {
-            _timer.start( _server.readTimeout() );
-        }
-        
-        _parser.advance( *_httpbuf.buffer() );
-
-        if( _parser.fail() )
-        {
-            log_warn("http parser failed");
-            throw std::runtime_error("http parser failed"); // TODO define exception class
-            //_responder = _server.getDefaultResponder(_request->header());
-            //replyError();
-            return false;
-        }
-
-        if( _parser.end() )
-        {
-            _httpbuf.beginBody(_request->header());
-            if( _httpbuf.isEnd() )
-            {
-                log_debug("request body finished");
-                _timer.stop();
-            }
-
-            return true;
-        }
-
-        return false;
-    }
-
-    if( _parser.end() )
-    {
-        // new code using HttpBuffer:
-        _httpbuf.import();
-        log_debug("available: " << _httpbuf.in_avail());
-
-        if( _httpbuf.isEnd() )
-        {
-            log_debug("request body finished");
-            _timer.stop();
-            
-            _httpbuf.reset();
-            _chunked = false;
-        }
-    }
-
-    return false;
-}
-
-
-void Connection::beginSendReply(Reply& reply, bool finish)
-{
-    _reply = &reply;
-
-    const char* server = "Server";
-    const char* connection = "Connection";
-    const char* date = "Date";
-
-    ReplyHeader& header = _reply->header();
-    std::ostream os( _httpbuf.buffer() );
-
-    if(finish)
-    {
-        if(_chunked)
-        {
-            os << std::hex << _reply->buffer().size() << std::dec << "\r\n";
-            os.write( _reply->buffer().data(), _reply->buffer().size() );
-            _reply->clearBody();
-            os.write("\r\n", 2);
-            os.write("0\r\n\r\n", 5);
-        }
-        else
-        {
-            log_debug("sending HTTP reply");
-
-            os <<"HTTP/"
-                << header.httpVersionMajor() << '.'
-                << header.httpVersionMinor() << ' '
-                << header.httpReturnCode() << ' '
-                << header.httpReturnText() << "\r\n";
-
-            ReplyHeader::const_iterator it;
-            for(it = header.begin(); it != header.end(); ++it)
-            {
-                os << it->first << ": " << it->second << "\r\n";
-            }
-
-            os << "Content-Length: " << _reply->buffer().size() << "\r\n";
-
-            if( ! header.hasHeader(server) )
-            {
-                os << "Server: Pt-Net-Server\r\n";
-            }
-
-            if( ! header.hasHeader(connection) )
-            {
-                os << "Connection: "
-                    << (header.keepAlive() ? "keep-alive" : "close")
-                    << "\r\n";
-            }
-
-            if( ! header.hasHeader(date) )
-            {
-                char buffer[50];
-                os << "Date: " << MessageHeader::htdateCurrent(buffer) << "\r\n";
-            }
-
-            os << "\r\n";
-            os.write( _reply->buffer().data(), _reply->buffer().size() );
-        }
-
-        log_debug("begin writing reply");
-        _timer.start( _server.writeTimeout() );
-        beginWrite();
-        return;
-    }
-
-    if(_reply->buffer().size() < 8192)
-    {
-        _responder->writeReply(_request->header(), *_reply);
-        return;
-    }
-
-    if( ! _chunked )
-    {
-        _chunked = true;
-
-        os <<"HTTP/"
-           << header.httpVersionMajor() << '.'
-           << header.httpVersionMinor() << ' '
-           << header.httpReturnCode() << ' '
-           << header.httpReturnText() << "\r\n";
-
-        ReplyHeader::const_iterator it;
-        for(it = header.begin(); it != header.end(); ++it)
-        {
-            os << it->first << ": " << it->second << "\r\n";
-        }
-
-        os << "Transfer-Encoding: chunked\r\n";
-
-        if( ! header.hasHeader(server) )
-        {
-            os << "Server: Pt-Net-Server\r\n";
-        }
-
-        if( ! header.hasHeader(connection) )
-        {
-            os << "Connection: "
-               << (header.keepAlive() ? "keep-alive" : "close")
-               << "\r\n";
-        }
-
-        if( ! header.hasHeader(date) )
-        {
-            char buffer[50];
-            os << "Date: " << MessageHeader::htdateCurrent(buffer) << "\r\n";
-        }
-
-        os << "\r\n";
-    }
-
-    os << std::hex << _reply->buffer().size() << std::dec << "\r\n";
-    os.write( _reply->buffer().data(), _reply->buffer().size() );
-    _reply->clearBody();
-    os.write("\r\n", 2);
-
-    _timer.start( _server.writeTimeout() );
-    beginWrite();
-}
-
-
-void Connection::endSendReply()
-{
-    log_trace("Connection::endSendReply");
-    // TODO: handle exceptions correctly...
-
-    try
-    {
-        endWrite();
-
-        //if( beginWrite() )
-        //    return;
-
-        if( ! _reply->finished() )
-        {
-            log_debug("reply not finished");
-            //_responder->writeReply(_request->header(), *_reply);
-            return;
-        }
-
-        if( outputAvailable() > 0)
-        {
-            log_debug("still data to send");
-            return;
-        }
-  
-        bool keepAlive = _request->header().keepAlive() && _reply->header().keepAlive();
-        if(keepAlive)
-        {
-            log_debug("do keep alive");
-            _timer.start(_server.keepAliveTimeout());
-            _chunked = false;
-            _parser.reset(false);
-            _httpbuf.reset();
-            return;
-        }
-    }
-    catch (const std::exception& e)
-    {
-        log_warn("exception occured when processing request: " << e.what());
-    }
-
-    log_debug("closing connection");
-    close();
-    timeout(*this);
-}
-
-
-void Connection::replyError()
-{
-    _reply->header().httpReturn(500, "internal server error");
-    _reply->header().setHeader("Content-Type", "text/plain");
-    _reply->header().setHeader("Connection", "close");
-    _stream << "Error 500: Internal server error.";
-
-    beginSendReply(*_reply, true);
-}
-
-
 void Connection::onTimeout()
 {
     log_debug("timeout");
-    timeout(*this);
+    close();
+}
+
+
+void Connection::sendChunked(std::ostream& os, const Request& request)
+{
+    log_debug("send chunked request " << request.header().url());
+
+    static const char* contentLength = "Content-Length";
+    static const char* connection = "Connection";
+    static const char* date = "Date";
+    static const char* host = "Host";
+    static const char* authorization = "Authorization";
+    static const char* userAgent = "User-Agent";
+
+    os << request.header().method() << ' '
+       << request.header().url() << " HTTP/"
+       << request.header().httpVersionMajor() << '.'
+       << request.header().httpVersionMinor() << "\r\n";
+
+    for (RequestHeader::const_iterator it = request.header().begin();
+        it != request.header().end(); ++it)
+    {
+        os << it->first << ": " << it->second << "\r\n";
+    }
+
+    os << "Transfer-Encoding: chunked" << "\r\n";
+
+    if( ! request.header().hasHeader(connection) )
+    {
+        os << "Connection: keep-alive\r\n";
+    }
+
+    if (!request.header().hasHeader(date))
+    {
+        char buffer[50];
+        os << "Date: " << MessageHeader::htdateCurrent(buffer) << "\r\n";
+    }
+
+    if (!request.header().hasHeader(host))
+    {
+        os << "Host: " << _addrInfo.host();
+        unsigned short port = _addrInfo.port();
+        if (port != 80)
+            os << ':' << port;
+        os << "\r\n";
+    }
+
+    if (!request.header().hasHeader(userAgent))
+    {
+        os << "User-Agent: Pt-Http-client\r\n";
+    }
+
+    /*if (!_username.empty() && !request.header().hasHeader(authorization))
+    {
+        std::ostringstream d;
+        BasicTextOStream<char, char> b(d, new Base64Codec());
+        b << _username
+          << ':'
+          << _password;
+        b.terminate();
+        log_debug("set Authorization to " << d.str());
+        os << "Authorization: Basic " << d.str() << "\r\n";
+    }*/
+
+    os << "\r\n";
+}
+
+
+void Connection::sendRequest(std::ostream& os, const Request& request)
+{
+    log_debug("send request " << request.header().url());
+
+    static const char* contentLength = "Content-Length";
+    static const char* connection = "Connection";
+    static const char* date = "Date";
+    static const char* host = "Host";
+    static const char* authorization = "Authorization";
+    static const char* userAgent = "User-Agent";
+
+    os << request.header().method() << ' '
+       << request.header().url() << " HTTP/"
+       << request.header().httpVersionMajor() << '.'
+       << request.header().httpVersionMinor() << "\r\n";
+
+    for (RequestHeader::const_iterator it = request.header().begin();
+        it != request.header().end(); ++it)
+    {
+        os << it->first << ": " << it->second << "\r\n";
+    }
+
+   if (!request.header().hasHeader(contentLength))
+    {
+        os << "Content-Length: " << request.size() << "\r\n";
+    }
+
+    if (!request.header().hasHeader(connection))
+    {
+        os << "Connection: keep-alive\r\n";
+    }
+
+    if (!request.header().hasHeader(date))
+    {
+        char buffer[50];
+        os << "Date: " << MessageHeader::htdateCurrent(buffer) << "\r\n";
+    }
+
+    if (!request.header().hasHeader(host))
+    {
+        os << "Host: " << _addrInfo.host();
+        unsigned short port = _addrInfo.port();
+        if (port != 80)
+            os << ':' << port;
+        os << "\r\n";
+    }
+
+    if (!request.header().hasHeader(userAgent))
+    {
+        os << "User-Agent: Pt-Http-client\r\n";
+    }
+
+    /*if (!_username.empty() && !request.header().hasHeader(authorization))
+    {
+        std::ostringstream d;
+        BasicTextOStream<char, char> b(d, new Base64Codec());
+        b << _username
+          << ':'
+          << _password;
+        b.terminate();
+        log_debug("set Authorization to " << d.str());
+        os << "Authorization: Basic " << d.str() << "\r\n";
+    }*/
+
+    os << "\r\n";
+
+    log_debug("send body; " << request.size() << " bytes");
+    os.write(request.data(), request.size());
 }
 
 } // namespace Http

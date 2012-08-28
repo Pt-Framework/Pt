@@ -40,7 +40,7 @@ namespace XmlRpc {
 HttpClientImpl::HttpClientImpl()
 : _error(false)
 {
-    _client.request().method("POST");
+    _client.request().header().method("POST");
     _client.replyReceived() += Pt::slot( *this, &HttpClientImpl::onReply);
 }
 
@@ -50,8 +50,8 @@ HttpClientImpl::HttpClientImpl(System::EventLoop& selector, const std::string& a
 : _client(selector, addr, port)
 , _error(false)
 {
-    _client.request().method("POST");
-    _client.request().url(url);
+    _client.request().header().method("POST");
+    _client.request().header().url(url);
     _client.replyReceived() += Pt::slot( *this, &HttpClientImpl::onReply);
 }
 
@@ -60,8 +60,8 @@ HttpClientImpl::HttpClientImpl(const std::string& addr, unsigned short port, con
 : _client(addr, port)
 , _error(false)
 {
-    _client.request().method("POST");
-    _client.request().url(url);
+    _client.request().header().method("POST");
+    _client.request().header().url(url);
     _client.replyReceived() += Pt::slot( *this, &HttpClientImpl::onReply);
 }
 
@@ -73,7 +73,7 @@ std::string HttpClientImpl::url() const
       << _client.host().host()
       << ':'
       << _client.host().port()
-      << _client.request().url();
+      << _client.request().header().url();
 
     return s.str();
 }

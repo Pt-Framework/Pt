@@ -30,9 +30,10 @@
 #define Pt_Http_Connection_h
 
 #include "Parser.h"
-#include "ClientImpl.h"
+#include "ChunkedReader.h"
+
 #include <Pt/Http/Api.h>
-#include <Pt/Http/Reply.h>
+#include <Pt/Http/RequestHeader.h>
 #include <Pt/Net/TcpSocket.h>
 #include <Pt/System/IOBuffer.h>
 #include <Pt/System/Timer.h>
@@ -49,13 +50,83 @@ namespace Pt {
 
 namespace Http {
 
-class Server;
-class Responder;
-class RequestHeader;
+class Reply;
+class Request;
+
+class HttpBuffer : public std::streambuf
+{
+    static const unsigned int MaxPutback = 4;
+    static const unsigned int BufferSize = 512;
+
+    public:
+        HttpBuffer()
+        : _sbuf(0)
+        , _obuffer(0)
+        , _obufferSize(0)
+        , _contentLength(0)
+        , _chunked(false)
+        , _keepAlive(false)
+        {
+            setg(0,0,0);
+            setp(0,0);
+        }
+
+        ~HttpBuffer()
+        {
+            delete [] _obuffer;
+        }
+        
+        void attach(std::streambuf& sbuf)
+        { _sbuf = &sbuf; }
+
+        std::streambuf* buffer()
+        { return _sbuf; }
+
+        void reset()
+        { 
+            _contentLength = 0;
+            _chunked = false;
+            _keepAlive = false;
+        }
+
+        void beginBody(const MessageHeader& reply);
+
+        void import(std::streamsize n = 0);
+
+        bool isEnd() const;
+
+        std::size_t out_avail()
+        { return pptr() - pbase(); }
+
+        Signal<>& bodyFinished()
+        { return _bodyFinished; }
+
+    protected:
+        virtual int_type underflow();
+
+        virtual int sync();
+
+        virtual int_type overflow(int_type ch);
+
+    private:
+        ChunkParser _chunkParser;
+        std::streambuf* _sbuf;
+        Signal<> _bodyFinished;
+        char _buffer[4096];
+        char* _obuffer;
+        std::size_t  _obufferSize;
+        long _contentLength;
+        bool _chunked;
+        bool _keepAlive;
+};
+
 
 class Connection : public Net::TcpSocket
                  , public Connectable
 {
+    friend class Request;
+    friend class Reply;
+
     class ParseEvent : public HeaderParser::MessageHeaderEvent
     {
             RequestHeader* _request;
@@ -78,35 +149,57 @@ class Connection : public Net::TcpSocket
     };
 
     public:
-        Connection(Server& server, Net::TcpServer& tcpServer);
+        Connection(Net::TcpServer& tcpServer);
+
+        Connection();
 
         virtual ~Connection();
 
-        void beginAccept(System::EventLoop& loop, Request& req, Ssl::Context* ctx = 0);
+        void setContext(Ssl::Context& ctx);
 
-        void beginReceiveRequest(Request& request);
+        void setEventLoop(System::EventLoop& loop);
+
+        void setHost(const Net::AddrInfo& addrinfo, bool ssl);
+
+        void init(System::EventLoop& loop, Ssl::Context* ctx = 0);
+
+        bool isConnected()
+        { return TcpSocket::isConnected(); }
+
+    protected:
+        void beginSendRequest(Request& r);
+
+        bool endSendRequest();
+
+        void beginSendReply(Reply& r);
+
+        bool endSendReply();
+
+        void beginReceiveRequest(Request& r);
 
         bool endReceiveRequest();
 
-        bool isEnd()
-        { return _responder && _httpbuf.isEnd(); }
+        void beginReceiveReply(Reply& r);
 
-        void beginSendReply(Reply& reply, bool finish = true);
+        bool endReceiveReply();
 
-        void endSendReply();
+        bool isEnd() const
+        { return _httpbuf.isEnd(); }
 
-        bool outputAvailable();
+        std::streambuf& buffer()
+        { return _httpbuf; }
 
-        Signal<Connection&> timeout;
-
-    protected:
 #ifdef PT_HTTP_WITH_SSL
         void onHttpsHandshake(Pt::Ssl::IOBuffer& ssl);
+
+        void onHttpsClientHandshake(Pt::Ssl::IOBuffer& ssl);
 
         void onHttpsInput(Pt::Ssl::IOBuffer& ssl);
 
         void onHttpsOutput(Pt::Ssl::IOBuffer& ssl);
 #endif
+        void onConnect(Net::TcpSocket& socket);
+
         void onHttpInput(System::StreamBuffer& sb);
 
         void onHttpOutput(System::StreamBuffer& sb);
@@ -115,23 +208,17 @@ class Connection : public Net::TcpSocket
 
         void endRead();
 
+        bool beginWrite();
 
-    public:
-        bool beginWrite(); // TODO !!!
-
-    private:
         void endWrite();
 
-        void replyError();
+        bool outputAvailable();
 
         void onTimeout();
 
-        const RequestHeader& request() const 
-        { return _request->header(); }
-
-    public:
-        Server& _server;
-        Responder* _responder;
+        void sendChunked(std::ostream& os, const Request& request);
+        
+        void sendRequest(std::ostream& os, const Request& request);
 
     private:
         ParseEvent _parseEvent;
@@ -140,52 +227,20 @@ class Connection : public Net::TcpSocket
         Reply* _reply;
         System::EventLoop* _loop;
         System::Timer _timer;
-        bool _chunkedTransfer;
         System::IOBuffer _sockbuf;
+        Net::AddrInfo _addrInfo;
+
         bool _ssl;
 #ifdef PT_HTTP_WITH_SSL
         Ssl::IOBuffer _sslbuf;
 #endif
         HttpBuffer _httpbuf;
+        std::size_t _readTimeout;
+        std::size_t _writeTimeout;
+        std::size_t _keepaliveTimeout;
 
         std::iostream _stream;
-        bool _chunked;  
-};
-
-
-class RequestHandler : public Pt::Connectable
-{
-    public:
-        RequestHandler(Server& server, Net::TcpServer& tcpServer);
-
-        ~RequestHandler();
-
-        void begin(System::EventLoop& loop, Ssl::Context* ctx = 0)
-        { 
-            
-            _reply.init(_conn);
-            _reply.clear();
-            
-            _conn.beginAccept(loop, _req, ctx); 
-        
-        }
-
-        Signal<RequestHandler&>& timeout()
-        { return _timeout; }
-
-    protected:
-        void onTimeout(Connection&)
-        { _timeout.send(*this); }
-
-        void onRequestReceived(Request& req);
-
-        void onReplySent(Reply& r);
-
-    private:
-        Connection _conn;
-        Request _req;
-        Reply _reply;
-        Signal<RequestHandler&> _timeout;
+        bool _chunked;
 };
 
 } // namespace Http

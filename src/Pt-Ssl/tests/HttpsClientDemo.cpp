@@ -86,7 +86,7 @@ int main(int argc, char** argv)
         unsigned short port = 443;
         
         Pt::Http::Client client(loop, addr, port, true);
-        client.request().url("/index.html");
+        client.request().setUrl("/index.html");
         client.request().header().setHeader("User-Agent", "Platinum");
         client.setContext(clientContext);
         client.replyReceived() += Pt::slot(&onReply);

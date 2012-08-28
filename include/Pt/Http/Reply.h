@@ -63,15 +63,18 @@ class PT_HTTP_API Reply
             _buf.reset();
         }
 
-        bool finished() const
-        { return _finished; }
+        void beginReceive();
 
-        // TODO:
+        bool endReceive();
+
         void beginSend();
 
-        void endSend();
+        bool endSend();
 
         void finish();
+
+        bool finished() const
+        { return _finished; }
 
         ReplyHeader& header()
         { return _header; }
@@ -102,12 +105,12 @@ class PT_HTTP_API Reply
         void onOutput();
 
     private:
+        Http::Connection* _conn;
         ReplyHeader _header;
         MessageBuffer _buf;
-        Signal<Reply&> _outputSent;
-        Http::Connection* _conn;
         std::ostream _body;
         bool _finished;
+        Signal<Reply&> _outputSent;
 };
 
 } // namespace Http

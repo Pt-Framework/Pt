@@ -56,19 +56,19 @@ class HttpClientImpl : public ClientImpl
         void connect(const Net::AddrInfo& addrinfo, const std::string& url)
         {
             _client.setHost(addrinfo);
-            _client.request().url(url);
+            _client.request().setUrl(url);
         }
 
         void connect(const std::string& addr, unsigned short port,
                      const std::string& url)
         {
             _client.setHost(addr, port);
-            _client.request().url(url);
+            _client.request().setUrl(url);
         }
 
         void url(const std::string& url)
         {
-            _client.request().url(url);
+            _client.request().setUrl(url);
         }
 
         void auth(const std::string& username, const std::string& password)

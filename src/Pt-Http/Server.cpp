@@ -31,6 +31,7 @@
 #include "NotAuthenticatedService.h"
 #include <Pt/Http/Server.h>
 #include <Pt/Http/Request.h>
+#include <Pt/Http/Reply.h>
 #include <Pt/Http/Service.h>
 #include <Pt/Http/Responder.h>
 #include <Pt/System/MainLoop.h>
@@ -44,6 +45,174 @@ log_define("Pt.Http.Server")
 namespace Pt {
 
 namespace Http {
+
+class RequestHandler : public Pt::Connectable
+{
+    public:
+        RequestHandler(Server& server, Net::TcpServer& tcpServer);
+
+        ~RequestHandler();
+
+        void beginServe(System::EventLoop& loop, Ssl::Context* ctx = 0);
+
+        Signal<RequestHandler&>& timeout()
+        { return _timeout; }
+
+    protected:
+        void onTimeout(Connection&)
+        { _timeout.send(*this); }
+
+        void onRequestReceived(Request& req);
+
+        void onReplySent(Reply& r);
+
+        void replyError();
+
+    private:
+        Server& _server;
+        Responder* _responder;
+        Connection _conn;
+        Request _request;
+        Reply _reply;
+        Signal<RequestHandler&> _timeout;
+};
+
+
+RequestHandler::RequestHandler(Server& server, Net::TcpServer& tcpServer)
+: _server(server)
+, _responder(0)
+, _conn(tcpServer)
+{
+    _request.inputReceived() += Pt::slot(*this, &RequestHandler::onRequestReceived);
+    _reply.outputSent() += Pt::slot(*this, &RequestHandler::onReplySent);
+}
+
+
+RequestHandler::~RequestHandler()
+{
+    if(_responder)
+    {
+        _responder->release();
+    }
+}
+
+
+void RequestHandler::beginServe(System::EventLoop& loop, Ssl::Context* ctx)
+{  
+    log_trace("RequestHandler::beginServe");
+
+   _conn.init(loop, ctx);
+
+    _reply.init(_conn);
+    _reply.clear();
+
+    _request.init(_conn);
+    _request.clear();
+    _request.beginReceive();
+}
+
+
+void RequestHandler::onRequestReceived(Request& req)
+{
+    log_trace("RequestHandler::onRequestReceived");
+
+    // TODO: error reply on HTTP exception
+    //_responder = _server.getDefaultResponder(_request->header());
+    //replyError();
+
+    bool receivedHeader = _request.endReceive();
+    if(receivedHeader)
+    {
+        log_debug("receievd request header");
+        _responder = _server.getResponder(_request.header());
+        _responder->beginRequest( _request.body(), _request.header() );
+    }
+    
+    if( _request.body().rdbuf()->in_avail() )
+    {
+        log_debug("body available");
+        _responder->readRequest(_request.body(), _reply);
+            
+        if( _reply.finished() )
+        {
+            // TODO: skip unread body
+            return;
+        }
+    } 
+
+    if( _request.body().fail() )
+        throw System::IOError( PT_ERROR_MSG("error reading HTTP reply body") );
+
+    if( _request.isEnd() && _responder)
+    {
+        log_debug("request body finished, begin reply");
+        _responder->beginReply(_request.header(), _reply);
+    }
+    else
+    {
+        log_debug("more data available");
+        _request.beginReceive();
+    }
+}
+
+
+void RequestHandler::onReplySent(Reply& r)
+{
+    log_trace("RequestHandler::onReplySent");
+
+    bool dataSent = _reply.endSend();
+
+    if( ! _conn.isConnected() )
+    {
+        log_debug("not connected anymore");
+        _timeout.send(*this);
+        return;
+    }
+
+    if( ! dataSent )
+    {
+        log_debug("writing left over data");
+        _reply.beginSend();
+        return;
+    }
+
+    if( ! _reply.finished() )
+    {
+        log_debug("continuing response");
+        _responder->writeReply(_request.header(), _reply);
+        return;
+    }
+
+    if( _responder && _reply.finished() )
+    {
+        log_debug("response finished");
+        _reply.clear();
+        _request.clear();
+
+        _responder->release();
+        _responder = 0;
+    }
+
+    bool keepAlive = _request.header().keepAlive() && _reply.header().keepAlive();
+    if(keepAlive)
+    {
+        _request.beginReceive();
+    }
+}
+
+
+void RequestHandler::replyError()
+{
+    _reply.clear();
+
+    _reply.header().httpReturn(500, "internal server error");
+    _reply.header().setHeader("Content-Type", "text/plain");
+    _reply.header().setHeader("Connection", "close");
+    _reply.body() << "Error 500: Internal server error.";
+
+    _reply.finish();
+}
+
 
 class ServerThread : public Connectable 
 {
@@ -124,10 +293,10 @@ class ServerThread : public Connectable
 
 #ifdef PT_HTTP_WITH_SSL
             if(_ssl)
-                conn->begin(_loop, &_sslctx);
+                conn->beginServe(_loop, &_sslctx);
             else
 #endif            
-                conn->begin(_loop);
+                conn->beginServe(_loop);
         }
 
         void onConnectionTimeout(RequestHandler& conn)
@@ -301,7 +470,7 @@ void Server::onAccept(Net::TcpServer& server)
     }
     else
     {
-        conn->begin(_loop, _sslctx);
+        conn->beginServe(_loop, _sslctx);
         _connections.push_back(conn);
         conn->timeout() += Pt::slot(*this, &Server::onConnectionTimeout);
         _useWorker = 0;

@@ -48,10 +48,33 @@ class PT_HTTP_API Request
 
     public:
         explicit Request( const std::string& url = std::string() )
-        : _header(url)
-        , _buf()
+        : _conn(0)
+        , _header(url)
         , _body(&_buf)
+        , _finished(false)
         { }
+
+        void init(Http::Connection& conn)
+        { _conn = &conn; }
+
+        void beginReceive();
+
+        bool endReceive();
+
+        void beginSend();
+
+        bool endSend();
+
+        void finish()
+        { _finished = true; }
+
+        bool finished() const
+        { return _finished; }
+
+        Signal<Request&>& inputReceived()
+        { return _inputReceived; }
+
+        bool isEnd() const;
 
         RequestHeader& header()
         { return _header; }
@@ -67,27 +90,10 @@ class PT_HTTP_API Request
         }
 
         void clearBody()
-        {
-            _buf.reset();
-        }
+        { _buf.reset(); }
 
-        const std::string& url() const
-        { return _header.url(); }
-
-        void url(const std::string& u)
+        void setUrl(const std::string& u)
         { _header.url(u); }
-
-        const std::string& method() const
-        { return _header.method(); }
-
-        void method(const std::string& m)
-        { _header.method(m); }
-
-        const std::string& qparams() const
-        { return _header.qparams(); }
-
-        void qparams(const std::string& q)
-        { _header.qparams(q); }
 
         const char* data() const
         { return _buf.data(); }
@@ -98,22 +104,16 @@ class PT_HTTP_API Request
         std::size_t size() const
         { return _buf.size(); }
 
-        Signal<Request&>& inputReceived()
-        {
-            return _inputReceived;
-        }
-
     protected:
-        void onInput(std::streambuf& sb)
-        {
-            _body.rdbuf(&sb);
-            _inputReceived.send(*this);
-        }
+        void onInput()
+        { _inputReceived.send(*this); }
 
     private:
+        Http::Connection* _conn;
         RequestHeader _header;
         MessageBuffer _buf;
         std::iostream _body;
+        bool _finished;
         Signal<Request&> _inputReceived;
 };
 

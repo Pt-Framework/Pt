@@ -28,21 +28,75 @@
 
 #include "Connection.h"
 #include <Pt/Http/Reply.h>
+#include <Pt/Http/Request.h>
 
 namespace Pt {
 
 namespace Http {
 
+void Request::beginReceive()
+{ 
+    std::streambuf& sb = _conn->buffer();
+    _body.rdbuf(&sb);
+    _conn->beginReceiveRequest(*this); 
+}
+
+
+bool Request::endReceive()
+{ 
+    return _conn->endReceiveRequest(); 
+}
+
+
+void Request::beginSend()
+{ 
+    _conn->beginSendRequest(*this); 
+}
+
+
+bool Request::endSend()
+{ 
+    return _conn->endSendRequest(); 
+}
+
+
+bool Request::isEnd() const
+{
+    return _conn->isEnd();
+}
+
+
+
+void Reply::beginReceive()
+{ 
+    std::streambuf& sb = _conn->buffer();
+    _body.rdbuf(&sb);
+    _conn->beginReceiveReply(*this); 
+}
+
+
+bool Reply::endReceive()
+{ 
+    return _conn->endReceiveReply(); 
+}
+
+
 void Reply::beginSend()
 { 
-    _conn->beginSendReply(*this, false); 
+    _conn->beginSendReply(*this); 
+}
+
+
+bool Reply::endSend()
+{ 
+    return _conn->endSendReply(); 
 }
 
 
 void Reply::finish()
 { 
-    _conn->beginSendReply(*this, true); 
     _finished = true; 
+    this->beginSend(); 
 }
 
 

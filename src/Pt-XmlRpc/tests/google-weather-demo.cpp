@@ -142,8 +142,8 @@ class GoogleWeatherClient : public Pt::Connectable
             _parseFunc = &GoogleWeatherClient::onXmlBegin;
 
             _client.request().clear();
-            _client.request().url("/ig/api?weather=" + _weather.city());
-            _client.request().method("GET");
+            _client.request().header().url("/ig/api?weather=" + _weather.city());
+            _client.request().header().method("GET");
             _client.request().header().setHeader("Host", "www.google.com");
             _client.request().header().setHeader("Accept-Charset", "UTF-8");
 

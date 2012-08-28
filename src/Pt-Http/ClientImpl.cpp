@@ -42,274 +42,6 @@ namespace Pt {
 
 namespace Http {
 
-void HttpBuffer::beginBody(const MessageHeader& reply)
-{
-    log_trace("HttpBuffer::beginBody()");
-    _chunkParser.reset();
-
-    setg(0,0,0);
-
-    _keepAlive = reply.keepAlive();
-    _contentLength = reply.contentLength();
-    _chunked = reply.chunkedTransferEncoding();
-
-    log_debug("keep-alive: " << _keepAlive);
-    log_debug("chunked: " << _chunked);
-    log_debug("content-length: " << _contentLength);
-}
-
-
-//void HttpBuffer::writeReply(const ReplyHeader& header, const MessageBuffer& mbuf)
-//{
-//    log_trace("HttpBuffer::writeReply()");
-//
-//    if( ! _chunked && ! _contentLength)
-//    {
-//        const char* server = "Server";
-//        const char* connection = "Connection";
-//        const char* date = "Date";
-//
-//        _keepAlive = header.keepAlive();
-//        _contentLength = header.contentLength();
-//        _chunked = header.chunkedTransferEncoding();
-//
-//        log_debug("keep-alive: " << _keepAlive);
-//        log_debug("chunked: " << _chunked);
-//        log_debug("content-length: " << _contentLength);
-//
-//        std::ostream os(_sbuf);
-//
-//        os <<"HTTP/"
-//           << header.httpVersionMajor() << '.'
-//           << header.httpVersionMinor() << ' '
-//           << header.httpReturnCode() << ' '
-//           << header.httpReturnText() << "\r\n";
-//
-//        ReplyHeader::const_iterator it;
-//        for(it = header.begin(); it != header.end(); ++it)
-//        {
-//            os << it->first << ": " << it->second << "\r\n";
-//        }
-//
-//        if( ! _chunked)
-//        {
-//            os << "Content-Length: " << mbuf.size() << "\r\n";
-//        }
-//
-//        if( ! header.hasHeader(server) )
-//        {
-//            os << "Server: Pt-Net-Server\r\n";
-//        }
-//
-//        if( ! header.hasHeader(connection) )
-//        {
-//            os << "Connection: "
-//               << (_keepAlive ? "keep-alive" : "close")
-//               << "\r\n";
-//        }
-//
-//        if( ! header.hasHeader(date) )
-//        {
-//            char buffer[50];
-//            os << "Date: " << MessageHeader::htdateCurrent(buffer) << "\r\n";
-//        }
-//
-//        os << "\r\n";
-//    }
-//
-//    if(_chunked)
-//    {
-//        std::ostream os(_sbuf);
-//        os << std::hex << mbuf.size() << "\r\n";
-//    }
-//
-//    _sbuf->sputn( mbuf.data(), mbuf.size() );
-//
-//    if(_chunked)
-//        _sbuf->sputn("\r\n", 2);
-//}
-
-
-//void HttpBuffer::finishReply(const ReplyHeader& header, const MessageBuffer& mbuf)
-//{
-//    log_trace("HttpBuffer::finishReply()");
-//    writeReply(header, mbuf);
-//
-//    if(_chunked)
-//        _sbuf->sputn("0\r\n\r\n", 5);
-//}
-
-
-bool HttpBuffer::isEnd() const
-{
-    log_trace("HttpBuffer::isEnd()");
-    if(_chunked)
-        return _chunkParser.end();
-
-    return _contentLength == 0;
-}
-
-
-void HttpBuffer::import(std::streamsize n)
-{
-    log_trace("HttpBuffer::import(" << n << ")");
-
-    if( ! _sbuf)
-        return;
-
-    if(n == 0)
-    {
-        n = _sbuf->in_avail();
-        log_debug("available: " << n);
-    }
-
-    // Move unread bytes and putback to front
-    size_t putback  = MaxPutback;
-    size_t leftover = 0;
-    
-    if( this->gptr() ) 
-    {
-        putback = std::min<std::size_t>( this->gptr() - this->eback(), MaxPutback);
-        char* to = _buffer + MaxPutback - putback;
-        char* from = this->gptr() - putback;
-
-        leftover = this->egptr() - this->gptr();
-        std::memmove( to, from, putback + leftover );
-
-        this->setg( _buffer + (MaxPutback - putback),  // start of get area
-                    _buffer + MaxPutback,              // gptr position
-                    _buffer + MaxPutback + leftover ); // end of get area
-    }
-
-    if(_chunked)
-    {
-        log_debug("getting next chunk");
-        _contentLength = 0;
-        while(n-- && ! _chunkParser.end())
-        {
-            char ch = _sbuf->sbumpc();
-            _chunkParser.parse(ch);
-            if( _chunkParser.hasChunk() )
-            {
-                _contentLength = _chunkParser.chunkSize();
-                break;
-            }
-        }
-    }
-
-    size_t unused = sizeof(_buffer) - (MaxPutback + leftover);
-    log_debug("unused buffer area: " << unused);
-    if(n > unused)
-        n = unused;
-
-    log_debug("content-length: " << _contentLength);
-    if(n > _contentLength)
-        n = _contentLength;
-
-    if( this->isEnd() )
-    {
-        log_trace("received all content -> EOF");
-        _bodyFinished.send();
-        return;
-    }
-
-    log_debug("http buffer refill: " << n);
-    if(n == 0)
-        return;
-
-    n = _sbuf->sgetn(_buffer + MaxPutback + leftover, n);
-
-    setg(_buffer + MaxPutback - putback, // eback - start of get area
-         _buffer + MaxPutback,           // gptr - current position
-         _buffer + MaxPutback + n);      // egptr - end of get area
-
-    _contentLength -= n;
-    log_debug("remaining content length: " << _contentLength);
-}
-
-
-HttpBuffer::int_type HttpBuffer::underflow()
-{ 
-    log_trace("HttpBuffer::underflow()");
-
-    if(this->gptr() < this->egptr())
-        return traits_type::to_int_type(*(this->gptr()));
-
-    import( sizeof(_buffer) );
-
-    if( this->gptr() < this->egptr() )
-        return traits_type::to_int_type( *this->gptr() );
-
-    return traits_type::eof();
-}
-
-
-int HttpBuffer::sync()
-{ 
-    typedef HttpBuffer::traits_type traits_type;
-
-    if( this->pptr() )
-    {
-        while(this->pptr() > this->pbase())
-        {
-            const HttpBuffer::int_type ch = this->overflow(traits_type::eof());
-            if( ch == traits_type::eof() )
-                return -1;
-        }
-    }
-
-    return 0;
-}
-
-
-HttpBuffer::int_type HttpBuffer::overflow(int_type ch)
-{
-    typedef HttpBuffer::traits_type traits_type;
-
-    if( ! _obuffer)
-    {
-        _obufferSize = BufferSize;
-        _obuffer = new char[_obufferSize];
-        this->setp(_obuffer, _obuffer + _obufferSize);
-    }
-    else if( traits_type::eq_int_type(ch, traits_type::eof()) )
-    {
-        // normal blocking overflow case
-        size_t avail    = this->pptr() - _obuffer;
-        size_t written  = _sbuf->sputn(_obuffer, avail);
-        size_t leftover = avail - written;
-
-        if(leftover > 0)
-            traits_type::move(_obuffer, _obuffer + written, leftover);
-
-        this->setp(_obuffer, _obuffer + _obufferSize);
-        this->pbump(leftover);
-    }
-    else
-    {
-        // if overflow is not called by sync/flush we copy the output 
-        // buffer to a larger one
-        size_t bufsize = _obufferSize + BufferSize;
-        char* buf = new char[ bufsize ];
-        traits_type::copy(buf, _obuffer, _obufferSize);
-        std::swap(_obuffer, buf);
-        this->setp(_obuffer, _obuffer + bufsize);
-        this->pbump(_obufferSize);
-        _obufferSize = bufsize;
-        delete [] buf;
-    }
-
-    // if the overflow char is not EOF put it in buffer
-    if(traits_type::eq_int_type(ch, traits_type::eof()) == false)
-    {
-        *pptr() = traits_type::to_char_type(ch);
-        this->pbump(1);
-    }
-
-    return traits_type::not_eof(ch);
-}
-
-
 void ClientImpl::ParseEvent::onHttpReturn(unsigned ret, const std::string& text)
 {
     _replyHeader.httpReturn(ret, text);
@@ -384,6 +116,12 @@ ClientImpl::ClientImpl(Client* client, System::EventLoop& loop, const Net::AddrI
 
 void ClientImpl::init()
 {
+    _req.init(_conn);
+    //_req.inputReceived() += Pt::slot(*this, &RequestHandler::onRequestReceived);
+
+    _reply.init(_conn);
+    //_reply.outputSent() += Pt::slot(*this, &RequestHandler::onReplySent);
+
     _socket.connected() += Pt::slot(*this, &ClientImpl::onConnect2);
 
     _sockbuf.outputReady() += slot(*this, &ClientImpl::onOutput2);
@@ -395,12 +133,13 @@ void ClientImpl::init()
 #endif
 
     _httpbuf.attach(_sockbuf);
-    //_httpbuf.bodyFinished() += Pt::slot(*this, &ClientImpl::onBodyFinished);
 }
 
 
 void ClientImpl::setHost(const Net::AddrInfo& addrinfo, bool ssl)
 {
+    _conn.setHost(addrinfo, ssl);
+
     _addrInfo = addrinfo;
     _socket.close();
 
@@ -444,6 +183,7 @@ void ClientImpl::setHost(const Net::AddrInfo& addrinfo, bool ssl)
 
 void ClientImpl::setContext(Ssl::Context& ctx)
 {
+    _conn.setContext(ctx);
     _sslbuf.init(ctx);
 }
 
@@ -457,7 +197,7 @@ void ClientImpl::setContext(Ssl::Context& )
 
 const ReplyHeader& ClientImpl::execute(const Request& request)
 {
-    log_trace("ClientImpl::execute " << request.url());
+    log_trace("ClientImpl::execute " << request.header().url());
 
     _stream.rdbuf( _httpbuf.buffer() );
     _errorPending = false;
@@ -521,7 +261,7 @@ const ReplyHeader& ClientImpl::execute(const Request& request)
 
 void ClientImpl::send()
 {
-    log_trace("ClientImpl::execute " << _req.url());
+    log_trace("ClientImpl::execute " << _req.header().url());
 
     if( _hstate == Idle )
     {
@@ -737,6 +477,56 @@ void ClientImpl::beginSend()
 
     log_error("pending http reply: " << _state);
     throw System::IOPending("pending HTTP reply");
+}
+
+
+void ClientImpl::beginSend2()
+{
+    log_trace("beginSend2: " << _hstate);
+    if(_hstate == Idle)
+    {
+        // TODO: connect
+        _hstate = OnRequest;
+    }
+
+    if(_hstate == OnRequest)
+    {
+        if( _req.size() < 8192)
+        {
+            _client->requestSent().send(*_client);
+            return;
+        }
+
+        log_debug("begin sending http chunk");
+        _hstate = OnChunkedRequest;
+    }
+
+    if(_hstate == OnChunkedRequest)
+    {
+        _req.beginSend();
+        return;
+    }
+
+    log_error("sending HTTP request failed: " << _state);
+    throw System::IOPending("sending HTTP request failed");
+}
+
+
+bool ClientImpl::endSend2()
+{
+    if(_hstate == OnRequest)
+    {
+        return true;
+    }
+
+    if(_hstate == OnChunkedRequest)
+    {
+        log_debug("sent http request");
+        bool complete = _req.endSend();
+        return complete;
+    }
+
+    return false;
 }
 
 
@@ -1150,7 +940,7 @@ void ClientImpl::endExecute()
 
 void ClientImpl::sendChunked(std::ostream& os, const Request& request)
 {
-    log_debug("send chunked request " << request.url());
+    log_debug("send chunked request " << request.header().url());
 
     static const char* contentLength = "Content-Length";
     static const char* connection = "Connection";
@@ -1159,8 +949,8 @@ void ClientImpl::sendChunked(std::ostream& os, const Request& request)
     static const char* authorization = "Authorization";
     static const char* userAgent = "User-Agent";
 
-    os << request.method() << ' '
-       << request.url() << " HTTP/"
+    os << request.header().method() << ' '
+       << request.header().url() << " HTTP/"
        << request.header().httpVersionMajor() << '.'
        << request.header().httpVersionMinor() << "\r\n";
 
@@ -1221,7 +1011,7 @@ void ClientImpl::sendChunked(std::ostream& os, const Request& request)
 
 void ClientImpl::sendRequest(std::ostream& os, const Request& request)
 {
-    log_debug("send request " << request.url());
+    log_debug("send request " << request.header().url());
 
     static const char* contentLength = "Content-Length";
     static const char* connection = "Connection";
@@ -1230,8 +1020,8 @@ void ClientImpl::sendRequest(std::ostream& os, const Request& request)
     static const char* authorization = "Authorization";
     static const char* userAgent = "User-Agent";
 
-    os << request.method() << ' '
-       << request.url() << " HTTP/"
+    os << request.header().method() << ' '
+       << request.header().url() << " HTTP/"
        << request.header().httpVersionMajor() << '.'
        << request.header().httpVersionMinor() << "\r\n";
 

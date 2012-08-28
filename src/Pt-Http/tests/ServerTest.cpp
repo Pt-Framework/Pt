@@ -153,7 +153,7 @@ class ServerTest : public Pt::Unit::TestSuite
             Pt::Http::Client client("127.0.0.1", 8001);
             client.setActive(*loop);
             client.replyReceived() += Pt::slot(*this, &ServerTest::onNotFoundReceived);
-            client.request().url("/index.html");
+            client.request().setUrl("/index.html");
             client.request().header().setHeader("foo", "bar");
             client.beginReceive();
 
@@ -212,7 +212,7 @@ class ServerTest : public Pt::Unit::TestSuite
             client.setContext(clientContext);
             client.setActive(*loop);
             client.replyReceived() += Pt::slot(*this, &ServerTest::onNotFoundReceived);
-            client.request().url("/index.html");
+            client.request().setUrl("/index.html");
             client.request().header().setHeader("foo", "bar");
             client.beginReceive();
 
@@ -249,7 +249,7 @@ class ServerTest : public Pt::Unit::TestSuite
             client.setActive(*loop);
             client.requestSent() += Pt::slot(*this, &ServerTest::onHelloSent);
             client.replyReceived() += Pt::slot(*this, &ServerTest::onHelloReceived);
-            client.request().url("/test");
+            client.request().setUrl("/test");
             client.request().header().setHeader("foo", "bar");
             client.beginSend();
 
@@ -295,7 +295,7 @@ class ServerTest : public Pt::Unit::TestSuite
             client.setActive(*loop);
             client.requestSent() += Pt::slot(*this, &ServerTest::onChunkedSent);
             client.replyReceived() += Pt::slot(*this, &ServerTest::onChunkedReceived);
-            client.request().url("/test");
+            client.request().setUrl("/test");
             
             client.request().body() << _chunks.front();
             _chunks.erase( _chunks.begin() );

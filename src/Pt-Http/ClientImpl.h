@@ -29,6 +29,8 @@
 #ifndef Pt_Http_ClientImpl_h
 #define Pt_Http_ClientImpl_h
 
+#include "Connection.h"
+
 #include <Pt/Http/Request.h>
 #include <Pt/Http/Reply.h>
 #include <Pt/Net/TcpServer.h>
@@ -47,8 +49,6 @@
 #include <string>
 #include <sstream>
 #include <cstddef>
-#include "ChunkedReader.h"
-#include "Parser.h"
 
 namespace Pt {
 
@@ -60,76 +60,7 @@ namespace Http {
 
 class Client;
 
-class HttpBuffer : public std::streambuf
-{
-    static const unsigned int MaxPutback = 4;
-    static const unsigned int BufferSize = 512;
 
-    public:
-        HttpBuffer()
-        : _sbuf(0)
-        , _obuffer(0)
-        , _obufferSize(0)
-        , _contentLength(0)
-        , _chunked(false)
-        , _keepAlive(false)
-        {
-            setg(0,0,0);
-            setp(0,0);
-        }
-
-        ~HttpBuffer()
-        {
-            delete [] _obuffer;
-        }
-        
-        void attach(std::streambuf& sbuf)
-        { _sbuf = &sbuf; }
-
-        std::streambuf* buffer()
-        { return _sbuf; }
-
-        void reset()
-        { 
-            _contentLength = 0;
-            _chunked = false;
-            _keepAlive = false;
-        }
-
-        void beginBody(const MessageHeader& reply);
-
-        //void writeReply(const ReplyHeader& reply, const MessageBuffer& mbuf);
-
-        //void finishReply(const ReplyHeader& reply, const MessageBuffer& mbuf);
-
-        void import(std::streamsize n = 0);
-
-        bool isEnd() const;
-
-        std::size_t out_avail()
-        { return pptr() - pbase(); }
-
-        Signal<>& bodyFinished()
-        { return _bodyFinished; }
-
-    protected:
-        virtual int_type underflow();
-
-        virtual int sync();
-
-        virtual int_type overflow(int_type ch);
-
-    private:
-        ChunkParser _chunkParser;
-        std::streambuf* _sbuf;
-        Signal<> _bodyFinished;
-        char _buffer[4096];
-        char* _obuffer;
-        std::size_t  _obufferSize;
-        long _contentLength;
-        bool _chunked;
-        bool _keepAlive;
-};
 
 class ClientImpl : public Connectable
 {
@@ -149,6 +80,7 @@ class ClientImpl : public Connectable
 
         void setActive(System::EventLoop& loop)
         {
+            _conn.setEventLoop(loop);
             _socket.setActive(loop);
         }
 
@@ -193,6 +125,10 @@ class ClientImpl : public Connectable
         std::istream& receive();
 
         void beginSend();
+
+        void beginSend2();
+
+        bool endSend2();
 
         void endSend();
 
@@ -282,6 +218,7 @@ class ClientImpl : public Connectable
         };
         
         Client* _client;
+        Connection _conn;
         ParseEvent _parseEvent;
         HeaderParser _parser;
 
@@ -290,6 +227,7 @@ class ClientImpl : public Connectable
 
         // new:
         Request _req;
+        Reply _reply;
 
         Net::AddrInfo _addrInfo;
         bool _ssl;
