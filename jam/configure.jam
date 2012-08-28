@@ -53,8 +53,36 @@ rule ConfigureLog
     }
 }
 
+rule ConfigureLoad
+{
+    local _config = $(1) ;
 
-rule ConfigureCache
+    if $(_config)
+    {
+        # TODO: check timestamp against Jamconfigure
+	    if [ CHECK_IF_FILE $(JAMRULES).$(_config) ] 
+	    {
+		    include Jamrules.$(_config) ;
+		    TryCommand $(CP) $(JAMRULES).$(_config) Jamrules ;
+		    Exit "Using " $(JAMRULES).$(_config) ;
+	    }
+    }
+}
+
+rule ConfigureSave
+{
+    local _config = $(1) ;
+
+    if $(_config)
+    {
+        TryCommand "rm -f "$(JAMRULES).$(_config) ;
+        TryCommand "del /f/q "$(JAMRULES).$(_config) ;
+
+		ConfigureWrite $(JAMRULES).$(_config) ;
+    }
+}
+
+rule ConfigureWrite
 {
 	local _file = $(1) ;
 
@@ -80,13 +108,7 @@ rule ConfigureCache
 
 rule ConfigureExit
 {
-	ConfigureCache $(JAMRULES) ;
-
-    if $(CONFIG)
-    {
-		ConfigureCache $(JAMRULES).$(CONFIG) ;
-    }
-
+	ConfigureWrite $(JAMRULES) ;
     Exit "Configuration successful." ;
 }
 

@@ -31,6 +31,11 @@ if configure in $(ARGV)
 {
     Load configure.jam ;
 
+    ConfigureClean ;
+
+    # load existing valid configuration
+    ConfigureLoad $(CONFIG) ;
+
     EchoOption JAMBASE : "Using Jambase" : $(JAMBASE) ;
     EchoOption OS : "Build Host OS" : $(OS:L) ;
     EchoOption OSPLAT : "Host Platform" ;
@@ -40,24 +45,16 @@ if configure in $(ARGV)
         WITH_DEBUG = yes ;
     }
 
+    EchoOption --debug : "Debug Build" : $(WITH_DEBUG:E="no") ;
+
     if --optimize in $(ARGV)
     {
         WITH_OPTIM = yes ;
     }
 
-    EchoOption --debug : "Debug Build" : $(WITH_DEBUG:E="no") ;
     EchoOption --optimize OPTIM : "Optimized Build" : $(WITH_OPTIM:E="no") ;
 
-    ConfigureClean ;
-
-	if [ CHECK_IF_FILE Jamrules.$(CONFIG) ] # TODO: check timestamp against Jamconfigure
-	{
-		include Jamrules.$(CONFIG) ;
-		TryCommand $(CP) Jamrules.$(CONFIG) Jamrules ;
-		Echo "Using " Jamrules.$(CONFIG) ;
-		Exit ;
-	}
-
+    # configure build
     ConfigureLog "[ Configure ]" ;
     ConfigureRm ;
     ConfigureMv ;
@@ -72,6 +69,9 @@ if configure in $(ARGV)
     # Project specific configuration
     ConfigureLog "\n[ Jamconfigure ]" ;
     include Jamconfigure ;
+
+    # save configuration, so it can be reused
+    ConfigureSave $(CONFIG) ;
 
     ConfigureExit ;
 }
