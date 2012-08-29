@@ -40,29 +40,39 @@ ConnectionClosed::ConnectionClosed()
 }
 
 Client::Client()
-: _impl(new ClientImpl(this))
+: _impl( new ClientImpl(this) )
 {
 }
 
 Client::Client(const Net::AddrInfo& addrinfo, bool ssl)
-: _impl(new ClientImpl(this, addrinfo, ssl))
+: _impl( new ClientImpl(this) )
 {
+    _impl->setHost(addrinfo);
+    _impl->setHttps(ssl);
 }
 
 Client::Client(const std::string& host, unsigned short int port, bool ssl)
-: _impl(new ClientImpl(this, Net::AddrInfo(host, port), ssl))
+: _impl( new ClientImpl(this) )
 {
+    _impl->setHost( Net::AddrInfo(host, port) );
+    _impl->setHttps(ssl);
 }
 
 
-Client::Client(System::EventLoop& selector, const Net::AddrInfo& addrinfo, bool ssl)
-: _impl(new ClientImpl(this, selector, addrinfo, ssl))
+Client::Client(System::EventLoop& loop, const Net::AddrInfo& addrinfo, bool ssl)
+: _impl( new ClientImpl(this) )
 {
+    _impl->setActive(loop);
+    _impl->setHost(addrinfo);
+    _impl->setHttps(ssl);
 }
 
-Client::Client(System::EventLoop& selector, const std::string& host, unsigned short int port, bool ssl)
-: _impl(new ClientImpl(this, selector, Net::AddrInfo(host, port), ssl))
+Client::Client(System::EventLoop& loop, const std::string& host, unsigned short int port, bool ssl)
+: _impl( new ClientImpl(this) )
 {
+    _impl->setActive(loop);
+    _impl->setHost( Net::AddrInfo(host, port) );
+    _impl->setHttps(ssl);
 }
 
 Client::~Client()
@@ -72,12 +82,14 @@ Client::~Client()
 
 void Client::setHost(const Net::AddrInfo& addrinfo, bool ssl)
 {
-    _impl->setHost(addrinfo, ssl);
+    _impl->setHost(addrinfo);
+    _impl->setHttps(ssl);
 }
 
 void Client::setHost(const std::string& host, unsigned short int port, bool ssl)
 {
-    _impl->setHost(Net::AddrInfo(host, port), ssl);
+    _impl->setHost( Net::AddrInfo(host, port) );
+    _impl->setHttps(ssl);
 }
 
 const Net::AddrInfo& Client::host() const
@@ -103,12 +115,6 @@ void Client::setTimeout(std::size_t timeout)
 void Client::setContext(Ssl::Context& ctx)
 {
     _impl->setContext(ctx);
-}
-
-
-Reply& Client::reply()
-{
-    return _impl->reply();
 }
 
 
@@ -163,6 +169,18 @@ Request& Client::request()
 const Request& Client::request() const
 { 
     return _impl->request();
+}
+
+
+Reply& Client::reply()
+{
+    return _impl->reply();
+}
+
+
+const Reply& Client::reply() const
+{
+    return _impl->reply();
 }
 
 

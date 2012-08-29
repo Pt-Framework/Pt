@@ -166,7 +166,7 @@ class ServerTest : public Pt::Unit::TestSuite
 
             if(received)
             {
-                PT_UNIT_ASSERT_EQUALS(client.replyHeader().httpReturnCode(), 404);
+                PT_UNIT_ASSERT_EQUALS(client.reply().header().httpReturnCode(), 404);
             }
 
             while ( client.reply().body().rdbuf()->in_avail() )
@@ -174,7 +174,7 @@ class ServerTest : public Pt::Unit::TestSuite
 
             if( client.isEnd() )
             {
-                PT_UNIT_ASSERT_EQUALS(client.replyHeader().httpReturnCode(), 404);
+                PT_UNIT_ASSERT_EQUALS(client.reply().header().httpReturnCode(), 404);
                 loop->exit();
                 return;
             }
@@ -254,7 +254,7 @@ class ServerTest : public Pt::Unit::TestSuite
             client.beginSend();
 
             loop->run();
-            PT_UNIT_ASSERT_EQUALS(client.replyHeader().httpReturnCode(), 200);
+            PT_UNIT_ASSERT_EQUALS(client.reply().header().httpReturnCode(), 200);
             PT_UNIT_ASSERT_EQUALS(_reply, "Hello World!");
         }
 
@@ -270,7 +270,7 @@ class ServerTest : public Pt::Unit::TestSuite
 
             if( received )
             {
-                PT_UNIT_ASSERT_EQUALS(client.replyHeader().httpReturnCode(), 200);
+                PT_UNIT_ASSERT_EQUALS(client.reply().header().httpReturnCode(), 200);
             }
             
             while ( client.reply().body().rdbuf()->in_avail() )
@@ -303,7 +303,7 @@ class ServerTest : public Pt::Unit::TestSuite
 
             loop->run();
 
-            PT_UNIT_ASSERT_EQUALS(client.replyHeader().httpReturnCode(), 200);
+            PT_UNIT_ASSERT_EQUALS(client.reply().header().httpReturnCode(), 200);
             PT_UNIT_ASSERT_EQUALS(_reply, "Chunk5Chunk4Chunk3Chunk2Chunk1");
         }
 
@@ -328,7 +328,7 @@ class ServerTest : public Pt::Unit::TestSuite
 
             if(received)
             {
-                PT_UNIT_ASSERT_EQUALS(client.replyHeader().httpReturnCode(), 200);
+                PT_UNIT_ASSERT_EQUALS(client.reply().header().httpReturnCode(), 200);
             }
 
             while ( client.reply().body().rdbuf()->in_avail() )

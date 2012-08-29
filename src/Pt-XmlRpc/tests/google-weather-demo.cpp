@@ -154,10 +154,10 @@ class GoogleWeatherClient : public Pt::Connectable
 
         void onHeaderReceived(Pt::Http::Client& client)
         {
-            if(client.replyHeader().httpReturnCode() != 200)
+            if(client.reply().header().httpReturnCode() != 200)
             {
-                std::cerr << "unexpected http return: " << client.replyHeader().httpReturnCode() 
-                          << " - " << client.replyHeader().httpReturnText() << std::endl;
+                std::cerr << "unexpected http return: " << client.reply().header().httpReturnCode() 
+                          << " - " << client.reply().header().httpReturnText() << std::endl;
             }
 
             // we have the expected reply and prepare our text stream to process

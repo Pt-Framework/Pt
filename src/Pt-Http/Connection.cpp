@@ -187,33 +187,6 @@ void Connection::ReplyParseEvent::onHttpReturn(unsigned ret, const std::string& 
 }
 
 
-Connection::Connection(Net::TcpServer& tcpServer)
-: _parseEvent()
-, _parser(_parseEvent, false)
-, _replyParser(_replyParseEvent, true)
-, _request(0)
-, _reply(0)
-, _loop(0)
-, _ssl(false)
-#ifdef PT_HTTP_WITH_SSL
-, _sslbuf( _sockbuf )
-#endif
-, _httpbuf()
-, _readTimeout(30000)
-, _writeTimeout(30000)
-, _keepaliveTimeout(45000)
-, _chunked(false)
-{
-    Net::TcpSocket::accept(tcpServer);
-
-    _sockbuf.attach(*this);
-
-    _timer.timeout() += Pt::slot(*this, &Connection::onTimeout);
-
-    this->connected() += Pt::slot(*this, &Connection::onConnect);
-}
-
-
 Connection::Connection()
 : _parseEvent()
 , _parser(_parseEvent, false)
@@ -231,11 +204,15 @@ Connection::Connection()
 , _keepaliveTimeout(45000)
 , _chunked(false)
 {
+    Net::TcpSocket::connected() += Pt::slot(*this, &Connection::onConnect);
+
     _sockbuf.attach(*this);
+    _sockbuf.outputReady() += slot(*this, &Connection::onHttpOutput);
+    _sockbuf.inputReady() += slot(*this, &Connection::onHttpInput);
+
+    _httpbuf.attach(_sockbuf);
 
     _timer.timeout() += Pt::slot(*this, &Connection::onTimeout);
-
-    this->connected() += Pt::slot(*this, &Connection::onConnect);
 }
 
 
@@ -244,38 +221,29 @@ Connection::~Connection()
 }
 
 
-#ifdef PT_HTTP_WITH_SSL
-void Connection::setContext(Ssl::Context& ctx)
+void Connection::accept(Net::TcpServer& tcpServer)
 {
-    _sslbuf.init(ctx);
-}
-#else
-void Connection::setContext(Ssl::Context& )
-{
-}
-#endif
+    Net::TcpSocket::accept(tcpServer);
 
-
-void Connection::setEventLoop(System::EventLoop& loop)
-{
-    this->setActive(loop);
-    _timer.setActive(loop);
-    
-    _loop = &loop;
+    _sslbuf.handshakeFinished() -= slot(*this, &Connection::onHttpsHandshake);
+    _sslbuf.handshakeFinished() -= slot(*this, &Connection::onHttpsClientHandshake);
+    _sslbuf.handshakeFinished() += slot(*this, &Connection::onHttpsHandshake);
 }
 
 
-void Connection::setHost(const Net::AddrInfo& addrinfo, bool ssl)
+void Connection::setHost(const Net::AddrInfo& addrinfo)
 {
     _addrInfo = addrinfo;
-    
-    close();
 
+    _sslbuf.handshakeFinished() -= slot(*this, &Connection::onHttpsHandshake);
+    _sslbuf.handshakeFinished() -= slot(*this, &Connection::onHttpsClientHandshake);
+    _sslbuf.handshakeFinished() += slot(*this, &Connection::onHttpsClientHandshake);
+}
+
+
+void Connection::setHttps(bool ssl)
+{
 #ifdef PT_HTTP_WITH_SSL
-      _sslbuf.handshakeFinished() -= slot(*this, &Connection::onHttpsHandshake);
-      _sslbuf.handshakeFinished() -= slot(*this, &Connection::onHttpsClientHandshake);
-      _sslbuf.handshakeFinished() += slot(*this, &Connection::onHttpsClientHandshake);
-
       if(ssl)
       {
           log_debug("initialize HTTPS connection");
@@ -290,61 +258,54 @@ void Connection::setHost(const Net::AddrInfo& addrinfo, bool ssl)
           }
 
           _httpbuf.attach(_sslbuf);
-          
-          return;
       }
-
-      log_debug("initialize HTTP connection");
-      if(_ssl)
+      else
       {
-          _sslbuf.outputReady() -= slot(*this, &Connection::onHttpsOutput);
-          _sslbuf.inputReady() -= slot(*this, &Connection::onHttpsInput);
+          log_debug("initialize HTTP connection");
+          if(_ssl)
+          {
+              _sslbuf.outputReady() -= slot(*this, &Connection::onHttpsOutput);
+              _sslbuf.inputReady() -= slot(*this, &Connection::onHttpsInput);
 
-          _sockbuf.outputReady() += slot(*this, &Connection::onHttpOutput);
-          _sockbuf.inputReady() += slot(*this, &Connection::onHttpInput);
-          _ssl = false;
+              _sockbuf.outputReady() += slot(*this, &Connection::onHttpOutput);
+              _sockbuf.inputReady() += slot(*this, &Connection::onHttpInput);
+              _ssl = false;
+          }
+
+          _httpbuf.attach(_sockbuf);
       }
-
-      _sockbuf.outputReady() += slot(*this, &Connection::onHttpOutput);
-      _sockbuf.inputReady() += slot(*this, &Connection::onHttpInput);
-      _httpbuf.attach(_sockbuf);
 #endif
 }
 
 
-void Connection::init(System::EventLoop& loop, Ssl::Context* ctx)
-{
-    log_trace("Connection::init");
-
-    _timer.setActive(loop);
-
-    _loop = &loop;
-    this->setActive(loop);
-    
 #ifdef PT_HTTP_WITH_SSL
-    _ssl = ctx != 0;
-
-    _sslbuf.handshakeFinished() -= slot(*this, &Connection::onHttpsHandshake);
-    _sslbuf.handshakeFinished() -= slot(*this, &Connection::onHttpsClientHandshake);
-    _sslbuf.handshakeFinished() += slot(*this, &Connection::onHttpsHandshake);
-
-    if(_ssl)
-    {
-        log_debug("initialize HTTPS connection");
-        _sslbuf.init(*ctx);
-        _sslbuf.outputReady() += slot(*this, &Connection::onHttpsOutput);
-        _sslbuf.inputReady() += slot(*this, &Connection::onHttpsInput);
-
-        _httpbuf.attach(_sslbuf);
-        return;
-    }
+void Connection::setContext(Ssl::Context& ctx)
+{
+    _sslbuf.init(ctx);
+#else
+void Connection::setContext(Ssl::Context& )
+{
 #endif
+}
 
-    log_debug("initialize HTTP connection");
-    _sockbuf.inputReady() += Pt::slot(*this, &Connection::onHttpInput);
-    _sockbuf.outputReady() += Pt::slot(*this, &Connection::onHttpOutput);
 
-    _httpbuf.attach(_sockbuf);
+void Connection::setEventLoop(System::EventLoop& loop)
+{
+    this->setActive(loop);
+    _timer.setActive(loop);
+    _loop = &loop;
+}
+
+
+void Connection::cancel()
+{
+    close();
+    _reply = 0;
+    _request = 0;
+    _chunked = false;
+    _parser.reset(false);
+    _replyParser.reset(true);
+    _httpbuf.reset();
 }
 
 
@@ -388,7 +349,6 @@ void Connection::beginSendRequest(Request& request)
         }
         else
         {
-            log_debug("sending HTTP request");
             sendRequest(os, *_request);
          }
 
@@ -401,8 +361,7 @@ void Connection::beginSendRequest(Request& request)
     if( ! _chunked )
     {
         _chunked = true;
-        log_debug("sending chunked HTTP request");
-        sendChunked(os, *_request);
+        sendChunkedHeader(os, *_request);
     }
 
     log_debug("sending HTTP chunk");
@@ -431,9 +390,6 @@ bool Connection::endSendRequest()
     if( _request->finished() )
     {
         _request = 0;
-        _chunked = false;
-        _replyParser.reset(true);
-        _httpbuf.reset();
     }
 
     // indicates that the request or chunk was completely written
@@ -474,43 +430,8 @@ void Connection::beginSendReply(Reply& reply)
         }
         else
         {
-            log_debug("sending HTTP reply");
-
-            os <<"HTTP/"
-                << header.httpVersionMajor() << '.'
-                << header.httpVersionMinor() << ' '
-                << header.httpReturnCode() << ' '
-                << header.httpReturnText() << "\r\n";
-
-            ReplyHeader::const_iterator it;
-            for(it = header.begin(); it != header.end(); ++it)
-            {
-                os << it->first << ": " << it->second << "\r\n";
-            }
-
-            os << "Content-Length: " << _reply->buffer().size() << "\r\n";
-
-            if( ! header.hasHeader(server) )
-            {
-                os << "Server: Pt-Net-Server\r\n";
-            }
-
-            if( ! header.hasHeader(connection) )
-            {
-                os << "Connection: "
-                    << (header.keepAlive() ? "keep-alive" : "close")
-                    << "\r\n";
-            }
-
-            if( ! header.hasHeader(date) )
-            {
-                char buffer[50];
-                os << "Date: " << MessageHeader::htdateCurrent(buffer) << "\r\n";
-            }
-
-            os << "\r\n";
-            os.write( _reply->buffer().data(), _reply->buffer().size() );
-         }
+            sendReply(os, *_reply);
+        }
 
         log_debug("begin writing reply");
         _timer.start( _writeTimeout );
@@ -521,40 +442,7 @@ void Connection::beginSendReply(Reply& reply)
     if( ! _chunked )
     {
         _chunked = true;
-
-        os <<"HTTP/"
-           << header.httpVersionMajor() << '.'
-           << header.httpVersionMinor() << ' '
-           << header.httpReturnCode() << ' '
-           << header.httpReturnText() << "\r\n";
-
-        ReplyHeader::const_iterator it;
-        for(it = header.begin(); it != header.end(); ++it)
-        {
-            os << it->first << ": " << it->second << "\r\n";
-        }
-
-        os << "Transfer-Encoding: chunked\r\n";
-
-        if( ! header.hasHeader(server) )
-        {
-            os << "Server: Pt-Net-Server\r\n";
-        }
-
-        if( ! header.hasHeader(connection) )
-        {
-            os << "Connection: "
-               << (header.keepAlive() ? "keep-alive" : "close")
-               << "\r\n";
-        }
-
-        if( ! header.hasHeader(date) )
-        {
-            char buffer[50];
-            os << "Date: " << MessageHeader::htdateCurrent(buffer) << "\r\n";
-        }
-
-        os << "\r\n";
+        sendChunkedHeader(os, *_reply);
     }
 
     os << std::hex << _reply->buffer().size() << std::dec << "\r\n";
@@ -593,9 +481,6 @@ bool Connection::endSendReply()
         bool keepAlive = _reply->header().keepAlive();
         
         _reply = 0;
-        _chunked = false;
-        _parser.reset(false);
-        _httpbuf.reset();
 
         if(keepAlive)
         {
@@ -669,7 +554,9 @@ bool Connection::endReceiveRequest()
 
         if( _parser.end() )
         {
+            _httpbuf.reset();
             _httpbuf.beginBody(_request->header());
+            
             if( _httpbuf.isEnd() )
             {
                 log_debug("request body finished");
@@ -692,9 +579,7 @@ bool Connection::endReceiveRequest()
             log_debug("request body finished");
             _timer.stop();
             _request = 0;
-            
-            _httpbuf.reset();
-            _chunked = false;
+            _parser.reset(false);
         }
     }
 
@@ -740,6 +625,7 @@ bool Connection::endReceiveReply()
 
         if( _replyParser.end() )
         {
+            _httpbuf.reset();
             _httpbuf.beginBody( _reply->header() );
 
             if( _httpbuf.isEnd() )
@@ -767,8 +653,6 @@ bool Connection::endReceiveReply()
             _reply = 0;
             _replyParser.reset(true);
             _timer.stop();
-            _httpbuf.reset();
-            _chunked = false;
 
             if( ! keepalive )
             {
@@ -984,15 +868,60 @@ void Connection::endWrite()
 void Connection::onTimeout()
 {
     log_debug("timeout");
-    close();
+    cancel();
 }
 
 
-void Connection::sendChunked(std::ostream& os, const Request& request)
+void Connection::sendChunkedHeader(std::ostream& os, const Reply& reply)
 {
-    log_debug("send chunked request " << request.header().url());
+    log_debug("send chunked reply header");
 
-    static const char* contentLength = "Content-Length";
+    const char* server = "Server";
+    const char* connection = "Connection";
+    const char* date = "Date";
+
+    const ReplyHeader& header = reply.header();
+
+    os <<"HTTP/"
+        << header.httpVersionMajor() << '.'
+        << header.httpVersionMinor() << ' '
+        << header.httpReturnCode() << ' '
+        << header.httpReturnText() << "\r\n";
+
+    ReplyHeader::const_iterator it;
+    for(it = header.begin(); it != header.end(); ++it)
+    {
+        os << it->first << ": " << it->second << "\r\n";
+    }
+
+    os << "Transfer-Encoding: chunked\r\n";
+
+    if( ! header.hasHeader(server) )
+    {
+        os << "Server: Pt-Net-Server\r\n";
+    }
+
+    if( ! header.hasHeader(connection) )
+    {
+        os << "Connection: "
+            << (header.keepAlive() ? "keep-alive" : "close")
+            << "\r\n";
+    }
+
+    if( ! header.hasHeader(date) )
+    {
+        char buffer[50];
+        os << "Date: " << MessageHeader::htdateCurrent(buffer) << "\r\n";
+    }
+
+    os << "\r\n";
+}
+
+
+void Connection::sendChunkedHeader(std::ostream& os, const Request& request)
+{
+    log_debug("send chunked request header " << request.header().url());
+
     static const char* connection = "Connection";
     static const char* date = "Date";
     static const char* host = "Host";
@@ -1121,6 +1050,54 @@ void Connection::sendRequest(std::ostream& os, const Request& request)
 
     log_debug("send body; " << request.size() << " bytes");
     os.write(request.data(), request.size());
+}
+
+
+void Connection::sendReply(std::ostream& os, const Reply& reply)
+{
+    log_debug("sending HTTP reply");
+
+    const char* server = "Server";
+    const char* connection = "Connection";
+    const char* date = "Date";
+    static const char* contentLength = "Content-Length";
+
+    const ReplyHeader& header = reply.header();
+
+    os <<"HTTP/"
+        << header.httpVersionMajor() << '.'
+        << header.httpVersionMinor() << ' '
+        << header.httpReturnCode() << ' '
+        << header.httpReturnText() << "\r\n";
+
+    ReplyHeader::const_iterator it;
+    for(it = header.begin(); it != header.end(); ++it)
+    {
+        os << it->first << ": " << it->second << "\r\n";
+    }
+
+    os << contentLength << ": " << _reply->buffer().size() << "\r\n";
+
+    if( ! header.hasHeader(server) )
+    {
+        os << "Server: Pt-Net-Server\r\n";
+    }
+
+    if( ! header.hasHeader(connection) )
+    {
+        os << "Connection: "
+            << (header.keepAlive() ? "keep-alive" : "close")
+            << "\r\n";
+    }
+
+    if( ! header.hasHeader(date) )
+    {
+        char buffer[50];
+        os << "Date: " << MessageHeader::htdateCurrent(buffer) << "\r\n";
+    }
+
+    os << "\r\n";
+    os.write( _reply->buffer().data(), _reply->buffer().size() );
 }
 
 } // namespace Http

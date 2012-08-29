@@ -81,8 +81,9 @@ class RequestHandler : public Pt::Connectable
 RequestHandler::RequestHandler(Server& server, Net::TcpServer& tcpServer)
 : _server(server)
 , _responder(0)
-, _conn(tcpServer)
+, _conn()
 {
+    _conn.accept(tcpServer);
     _request.inputReceived() += Pt::slot(*this, &RequestHandler::onRequestReceived);
     _reply.outputSent() += Pt::slot(*this, &RequestHandler::onReplySent);
 }
@@ -101,7 +102,13 @@ void RequestHandler::beginServe(System::EventLoop& loop, Ssl::Context* ctx)
 {  
     log_trace("RequestHandler::beginServe");
 
-   _conn.init(loop, ctx);
+    _conn.setEventLoop(loop);
+
+    if(ctx)
+    {
+        _conn.setHttps(true);
+        _conn.setContext(*ctx);
+    }
 
     _reply.init(_conn);
     _reply.clear();

@@ -66,14 +66,9 @@ class ClientImpl : public Connectable
 
     public:
         ClientImpl(Client* client);
-        
-        ClientImpl(Client* client, const Net::AddrInfo& addrinfo, bool ssl);
-        
-        ClientImpl(Client* client, System::EventLoop& selector, const Net::AddrInfo& addrinfo, bool ssl);
 
         System::EventLoop* loop() const
-        { return _conn.loop();
-        }
+        { return _conn.loop(); }
 
         void setActive(System::EventLoop& loop)
         { _conn.setEventLoop(loop); }
@@ -81,8 +76,14 @@ class ClientImpl : public Connectable
         void setTimeout(std::size_t timeout)
         { _conn.setTimeout(timeout); }
 
-        void setHost(const Net::AddrInfo& addrinfo, bool ssl)
-        { _conn.setHost(addrinfo, ssl); }
+        void setHost(const Net::AddrInfo& addrinfo)
+        { 
+            _conn.setHost(addrinfo); 
+            _conn.close();
+        }
+
+        void setHttps(bool ssl)
+        { _conn.setHttps(ssl); }
 
         const Net::AddrInfo& host() const
         { return _conn.host(); }
@@ -122,6 +123,9 @@ class ClientImpl : public Connectable
         { return _req; }
 
         Reply& reply()
+        { return _reply; }
+
+        const Reply& reply() const
         { return _reply; }
 
         void cancel();

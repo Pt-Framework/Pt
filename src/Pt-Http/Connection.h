@@ -151,11 +151,18 @@ class Connection : public Net::TcpSocket
     };
 
     public:
-        Connection(Net::TcpServer& tcpServer);
-
         Connection();
 
         virtual ~Connection();
+
+        void accept(Net::TcpServer& tcpServer);
+
+        void setHost(const Net::AddrInfo& addrinfo);
+
+        const Net::AddrInfo& host() const
+        { return _addrInfo; }
+
+        void setHttps(bool ssl);
 
         void setContext(Ssl::Context& ctx);
 
@@ -164,15 +171,10 @@ class Connection : public Net::TcpSocket
         System::EventLoop* loop() const
         { return _loop; }
 
-        void setHost(const Net::AddrInfo& addrinfo, bool ssl);
-
-        const Net::AddrInfo& host() const
-        { return _addrInfo; }
-
-        void init(System::EventLoop& loop, Ssl::Context* ctx = 0);
-
         bool isConnected()
         { return TcpSocket::isConnected(); }
+
+        void cancel();
 
     protected:
         void beginSendRequest(Request& r);
@@ -224,9 +226,13 @@ class Connection : public Net::TcpSocket
 
         void onTimeout();
 
-        void sendChunked(std::ostream& os, const Request& request);
+        void sendChunkedHeader(std::ostream& os, const Request& request);
+
+        void sendChunkedHeader(std::ostream& os, const Reply& reply);
         
         void sendRequest(std::ostream& os, const Request& request);
+
+        void sendReply(std::ostream& os, const Reply& reply);
 
     private:
         ParseEvent _parseEvent;

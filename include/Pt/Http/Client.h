@@ -90,7 +90,6 @@ class PT_HTTP_API Client : private NonCopyable
 
         void setTimeout(std::size_t timeout);
 
-        // Sets the host and port. No actual network connect is done.
         void setHost(const Net::AddrInfo& addrinfo, bool ssl = false);
         
         void setHost(const std::string& host, unsigned short int port, bool ssl = false);
@@ -99,22 +98,27 @@ class PT_HTTP_API Client : private NonCopyable
 
         void setContext(Ssl::Context& ctx);
 
-        // Sets the username and password for all subsequent requests.
         void setAuthorization(const std::string& username, const std::string& password);
 
         void clearAuthorization();
-
-        void send();
-
-        std::istream& receive();
 
         void beginSend();
 
         void endSend();
 
+        /** @brief Signals that a part of the request was sent.
+        */
+        Signal<Client&>& requestSent()
+        { return _requestSent; }
+
         void beginReceive();
 
         bool endReceive();
+
+        /** @brief Signals that a part of the reply was received.
+        */
+        Signal<Client&>& replyReceived()
+        { return _replyReceived; }
 
         bool isEnd() const;
 
@@ -122,24 +126,21 @@ class PT_HTTP_API Client : private NonCopyable
 
         const Request& request() const;
 
-        // Returns the reply.
         Reply& reply();
 
-        ReplyHeader& replyHeader()
-        { return reply().header(); }
+        const Reply& reply() const;
 
         void cancel();
 
-        // Signals that the request was sent to the server.
-        Signal<Client&>& requestSent()
-        { return _requestSent; }
+        /** @brief Blocks until request is sent.
+        */
+        void send();
 
-        // Signals that part of the reply was received
-        Signal<Client&>& replyReceived()
-        { return _replyReceived; }
+        /** @brief Blocks until reply is received.
+        */
+        std::istream& receive();
 
     private:
-        // Signals that the request is sent to the server.
         Signal<Client&> _requestSent;
 
         Signal<Client&> _replyReceived;

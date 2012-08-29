@@ -86,7 +86,7 @@ void HttpClientImpl::onReply(Http::Client& client)
         bool received = client.endReceive();
         if(received)
         {
-            verifyHeader(client.replyHeader());
+            verifyHeader(client.reply().header());
             ClientImpl::onReadReplyBegin(client.reply().body());
         }
 
@@ -137,7 +137,7 @@ std::string HttpClientImpl::execute()
 
     try
     {
-        verifyHeader( _client.replyHeader() );
+        verifyHeader( _client.reply().header() );
 
         char ch = ' ';
         while( is.get(ch) )

@@ -46,32 +46,6 @@ ClientImpl::ClientImpl(Client* client)
 : _client(client)
 , _hstate(Idle)
 {
-    init();
-}
-
-
-ClientImpl::ClientImpl(Client* client, const Net::AddrInfo& addrinfo, bool ssl)
-: _client(client)
-, _hstate(Idle)
-{
-    init();
-    setHost(addrinfo, ssl);
-}
-
-
-ClientImpl::ClientImpl(Client* client, System::EventLoop& loop, const Net::AddrInfo& addrinfo, bool ssl)
-: _client(client)
-, _hstate(Idle)
-
-{
-    setActive(loop);
-    init();
-    setHost(addrinfo, ssl);
-}
-
-
-void ClientImpl::init()
-{
     _req.init(_conn);
     _req.outputSent() += Pt::slot(*this, &ClientImpl::onRequestSent);
 
@@ -268,6 +242,7 @@ bool ClientImpl::isEnd() const
 
 void ClientImpl::cancel()
 {
+    _conn.cancel();
     _hstate = Idle;
 }
 
