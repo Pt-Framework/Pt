@@ -207,12 +207,12 @@ class PT_SYSTEM_API Logger : protected Pt::NonCopyable
         /** @brief Write a log record to the target.
           
             The log record @a record will be written to the target of this
-            logger if the records log level allows it, or if @a enabled is
+            logger if the records log level allows it, or if @a always is
             set to true.
         */
-        void log(const LogRecord& record, bool enabled = false)
+        void log(const LogRecord& record, bool always = false)
         {
-            if( enabled || this->enabled( record.logLevel() ) )
+            if( always || this->enabled( record.logLevel() ) )
             {
                 _target->log( record );
             }
@@ -224,8 +224,8 @@ class PT_SYSTEM_API Logger : protected Pt::NonCopyable
 
     protected:
         //! @internal
-        Logger(LogTarget& target)
-        : _target( &target )
+        Logger(LogTarget& t)
+        : _target( &t )
         {}
 
     private:
@@ -281,16 +281,16 @@ class LogMessage : protected Pt::NonCopyable
 
             Contructs a log message, which uses @a logger to log records of
             the severity level specified by @a level. 
-            If @a enabled is true, the message is send to the target without 
+            If @a always is true, the message is send to the target without 
             checking the log level. It is assumed that the caller has already
             checked the log level of the underlying logger and set this flag
             accordingly. This flag only persists until the message has been 
             sent.
         */
-        LogMessage(Logger& logger, const LogLevel& level, bool enabled = false)
+        LogMessage(Logger& logger, const LogLevel& level, bool always = false)
         : _record(level)
         , _logger(&logger)
-        , _enabled(enabled)
+        , _enabled(always)
         { }
 
         //! @brief Destructor.

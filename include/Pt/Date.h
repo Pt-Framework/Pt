@@ -206,9 +206,9 @@ class Date
             Sets the date to a new year, month and day.
             InvalidDate is thrown if any of the values is out of range
         */
-        void set(int year, unsigned month, unsigned day)
+        void set(int y, unsigned m, unsigned d)
         {
-            greg2jul(_julian, year, month, day);
+            greg2jul(_julian, y, m, d);
         }
 
         /** @brief Gets the year, month and day
@@ -349,10 +349,10 @@ PT_API void convert(Date& date, const std::string& s);
 
 inline void Date::get(int& y, unsigned& m, unsigned& d) const
 {
-    int mon, day;
-    jul2greg(_julian, y, mon, day);
+    int mon, day_;
+    jul2greg(_julian, y, mon, day_);
     m = mon;
-    d = day;
+    d = day_;
 }
 
 

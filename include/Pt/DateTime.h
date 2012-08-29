@@ -46,11 +46,11 @@ class DateTime
         DateTime()
         { }
 
-        DateTime(int year, unsigned month, unsigned day,
-                           unsigned hour = 0, unsigned minute = 0, 
-                           unsigned second = 0, unsigned msec = 0)
-        : _date(year, month, day)
-        , _time(hour, minute, second, msec)
+        DateTime(int y, unsigned mon, unsigned d,
+                           unsigned h = 0, unsigned min = 0, 
+                           unsigned s = 0, unsigned ms = 0)
+        : _date(y, mon, d)
+        , _time(h, min, s, ms)
         { }
 
         DateTime(const DateTime& dateTime)
@@ -102,8 +102,8 @@ class DateTime
         Date& date()
         { return _date; }
 
-        DateTime& setDate(const Date& date)
-        { _date = date; return *this; }
+        DateTime& setDate(const Date& dt)
+        { _date = dt; return *this; }
 
         const Time& time() const
         { return _time; }
@@ -111,8 +111,8 @@ class DateTime
         Time& time()
         { return _time; }
 
-        DateTime& setTime(const Time& time)
-        { _time = time; return *this; }
+        DateTime& setTime(const Time& t)
+        { _time = t; return *this; }
 
         /** @brief Returns the day-part of the date.
         */
@@ -332,18 +332,18 @@ inline DateTime& DateTime::operator=(unsigned julianDay)
 }
 
 
-inline void DateTime::set(int year, unsigned month, unsigned day,
-                   unsigned hour, unsigned minute, unsigned second, unsigned msec)
+inline void DateTime::set(int y, unsigned mon, unsigned d,
+                   unsigned h, unsigned min, unsigned s, unsigned ms)
 {
-    _date.set(year, month, day);
-    _time.set(hour, minute, second, msec);
+    _date.set(y, mon, d);
+    _time.set(h, min, s, ms);
 }
 
 
-inline void DateTime::get(int& y, unsigned& month, unsigned& d,
+inline void DateTime::get(int& y, unsigned& mon, unsigned& d,
                    unsigned& h, unsigned& min, unsigned& s, unsigned& ms) const
 {
-    _date.get(y, month, d);
+    _date.get(y, mon, d);
     _time.get(h, min, s, ms);
 }
 

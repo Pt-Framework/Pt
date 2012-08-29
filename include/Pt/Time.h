@@ -131,14 +131,14 @@ class Time
             Sets the time to a new hour, minute, second, milli-second.
             InvalidTime is thrown if one or more of the values are out of range
         */
-        void set(unsigned hour, unsigned min, unsigned sec, unsigned msec = 0)
+        void set(unsigned h, unsigned m, unsigned s, unsigned ms = 0)
         {
-            if ( ! isValid(hour, min, sec , msec) )
+            if ( ! isValid(h, m, s , ms) )
             {
                 throw InvalidTime();
             }
 
-            _msecs = (hour*SecondsPerHour + min*SecondsPerMinute + sec) * 1000 + msec;
+            _msecs = (h * SecondsPerHour + m * SecondsPerMinute + s) * 1000 + ms;
         }
 
         /** @brief Get the time values

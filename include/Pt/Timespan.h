@@ -53,8 +53,8 @@ class Timespan
         /** @brief Creates a Timespan.
             Useful for creating a Timespan from a struct timeval.
         */
-        Timespan(long seconds, long microseconds)
-        : _span(Pt::int64_t(seconds)*Seconds + microseconds)
+        Timespan(long seconds, long usecs)
+        : _span(Pt::int64_t(seconds)*Seconds + usecs)
         {
         }
         //! @brief Creates a Timespan.
@@ -312,12 +312,12 @@ inline void swap(Timespan& s1, Timespan& s2)
 }
 
 
-inline Timespan::Timespan(int days, int hours, int minutes, int seconds, int microseconds)
-: _span( Pt::int64_t(microseconds) +
-         Pt::int64_t(seconds)*Seconds +
-         Pt::int64_t(minutes)*Minutes +
-         Pt::int64_t(hours)*Hours +
-         Pt::int64_t(days)*Days )
+inline Timespan::Timespan(int d, int h, int mins, int secs, int usecs)
+: _span( Pt::int64_t(usecs) +
+         Pt::int64_t(secs)*Seconds +
+         Pt::int64_t(mins)*Minutes +
+         Pt::int64_t(h)*Hours +
+         Pt::int64_t(d)*Days )
 {
 }
 
@@ -342,13 +342,13 @@ inline Timespan& Timespan::operator=(Pt::int64_t microseconds)
 }
 
 
-inline Timespan& Timespan::set(int days, int hours, int minutes, int seconds, int microseconds)
+inline Timespan& Timespan::set(int d, int h, int mins, int secs, int usecs)
 {
-    _span = Pt::int64_t(microseconds) +
-            Pt::int64_t(seconds)*Seconds +
-            Pt::int64_t(minutes)*Minutes +
-            Pt::int64_t(hours)*Hours +
-            Pt::int64_t(days)*Days;
+    _span = Pt::int64_t(usecs) +
+            Pt::int64_t(secs)*Seconds +
+            Pt::int64_t(mins)*Minutes +
+            Pt::int64_t(h)*Hours +
+            Pt::int64_t(d)*Days;
     return *this;
 }
 

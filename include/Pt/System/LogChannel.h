@@ -77,10 +77,10 @@ class PT_SYSTEM_API LogChannel : protected Pt::NonCopyable
             The URL is specific to the channel and may contain attributes
             to open it correctly.
         */
-        void open(const std::string url)
+        void open(const std::string urlstr)
         { 
-            _url = url;
-            this->onOpen(url); 
+          _url = urlstr;
+          this->onOpen(urlstr); 
         }
 
         /** @brief Closes the channel

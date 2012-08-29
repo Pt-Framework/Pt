@@ -96,8 +96,8 @@ class SourceInfo
             macro to take advantage of compiler specific macros to
             indicate the source file name, position and function name.
         */
-        inline SourceInfo(const char* file, const char* line, const char* func)
-        : _file(file), _line(line), _func(func)
+        inline SourceInfo(const char* f, const char* ln, const char* fn)
+        : _file(f), _line(ln), _func(fn)
         { }
 
         /**  @brief Returns the filename

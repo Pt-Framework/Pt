@@ -276,32 +276,32 @@ LogTarget& LogManager::target(const std::string& name)
 }
 
 
-void LogManager::setLogLevel(LogTarget &target, LogLevel level)
+void LogManager::setLogLevel(LogTarget &t, LogLevel level)
 {
     Pt::System::RecursiveLock lock( _mutex );
-    target.assignLogLevel(level, false);
-    this->updateChildren(target, level);
+    t.assignLogLevel(level, false);
+    this->updateChildren(t, level);
 }
 
 
-void LogManager::updateChildren(LogTarget& target, LogLevel level)
+void LogManager::updateChildren(LogTarget& t, LogLevel level)
 {
     // Find the direct children of this target and set their LogLevels,
     // if their LogLevels haven't been set explicitely
-    const std::string targetName = target.name() + '.';
+    const std::string targetName = t.name() + '.';
 
     // if target name is empty (root target) we must consider all entries
     // in the target map, otherwise jump to the first possible child target
     std::map<std::string, LogTarget*>::iterator it;
-    it = target.name().empty() ? _targetMap.begin()
-                               : _targetMap.upper_bound(targetName);
+    it = t.name().empty() ? _targetMap.begin()
+                          : _targetMap.upper_bound(targetName);
 
     for( ; it != _targetMap.end(); ++it)
     {
         LogTarget* foundTarget = it->second;
         const std::string& childTargetName = foundTarget->name();
 
-        if( target.name().size() > 0 && 0 != childTargetName.find(targetName) )
+        if( t.name().size() > 0 && 0 != childTargetName.find(targetName) )
         {
             break; // target is not a child
         }
@@ -311,19 +311,19 @@ void LogManager::updateChildren(LogTarget& target, LogLevel level)
         std::string::size_type endPos = childTargetName.find( '.', targetName.size() );
         if( endPos == std::string::npos && foundTarget->inheritsLogLevel() )
         {
-            foundTarget->assignLogLevel( target.logLevel(), true );
+            foundTarget->assignLogLevel( t.logLevel(), true );
             LogManager::instance().updateChildren( *foundTarget, level );
         }
     }
 }
 
 
-std::string LogManager::getChannel(const LogTarget& target)
+std::string LogManager::getChannel(const LogTarget& t)
 {
     Pt::System::RecursiveLock lock( _mutex );
 
     // search target hierachy upwards for a valid channel
-    for( const LogTarget* current = &target; current != 0; current = current->parent() )
+    for( const LogTarget* current = &t; current != 0; current = current->parent() )
     {
         if( current->channel() )
         {
@@ -335,19 +335,19 @@ std::string LogManager::getChannel(const LogTarget& target)
 }
 
 
-void LogManager::setChannel(LogTarget& target, const std::string& url)
+void LogManager::setChannel(LogTarget& t, const std::string& url)
 {
     Pt::System::RecursiveLock lock( _mutex );
 
-    if( ! target.inheritsChannel() )
+    if( ! t.inheritsChannel() )
     {
         std::map<std::string, LogChannel*>::iterator it;
         for(it = _channelMap.begin(); it != _channelMap.end(); ++it)
         {
             LogChannel* channel = it->second;
-            if( channel == target.channel() )
+            if( channel == t.channel() )
             {
-                target.removeChannel();
+                t.removeChannel();
 
                 if( 0 == channel->unref() )
                 {
@@ -398,18 +398,18 @@ void LogManager::setChannel(LogTarget& target, const std::string& url)
     }
 
     ch->ref();
-    target.assignChannel( *ch );
+    t.assignChannel( *ch );
 }
 
 
-void LogManager::log(LogTarget& target, const LogRecord& record)
+void LogManager::log(LogTarget& t, const LogRecord& record)
 {
     Pt::System::RecursiveLock lock( _mutex );
     Pt::DateTime timeOfLog;
     bool timeOfLogUpdated = false;
 
     // search target hierachy upwards for a valid channel
-    for( LogTarget* current = &target; current != 0; current = current->parent() )
+    for( LogTarget* current = &t; current != 0; current = current->parent() )
     {
         if( current->channel() )
         {
@@ -460,7 +460,7 @@ void LogManager::log(LogTarget& target, const LogRecord& record)
                   break;
                   
                 case 'c':
-                  _msg += target.name(); 
+                  _msg += t.name(); 
                   break;
                   
                 default:
