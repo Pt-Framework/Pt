@@ -42,28 +42,9 @@ namespace Pt {
 
 namespace Http {
 
-void ClientImpl::ParseEvent::onHttpReturn(unsigned ret, const std::string& text)
-{
-    _replyHeader.httpReturn(ret, text);
-}
-
-
 ClientImpl::ClientImpl(Client* client)
 : _client(client)
-, _parseEvent(_replyHeader)
-, _parser(_parseEvent, true)
-, _request(0)
-, _ssl(false)
-#ifdef PT_HTTP_WITH_SSL
-, _sslbuf(_sockbuf)
-#endif
-, _httpbuf()
-, _stream(&_httpbuf)
-, _reusedConnection(false)
 , _hstate(Idle)
-, _reading(false)
-, _errorPending(false)
-, _state( &ClientImpl::onHeader )
 {
     init();
 }
@@ -71,20 +52,7 @@ ClientImpl::ClientImpl(Client* client)
 
 ClientImpl::ClientImpl(Client* client, const Net::AddrInfo& addrinfo, bool ssl)
 : _client(client)
-, _parseEvent(_replyHeader)
-, _parser(_parseEvent, true)
-, _request(0)
-, _ssl(false)
-#ifdef PT_HTTP_WITH_SSL
-, _sslbuf(_sockbuf)
-#endif
-, _httpbuf()
-, _stream(&_httpbuf)
-, _reusedConnection(false)
 , _hstate(Idle)
-, _reading(false)
-, _errorPending(false)
-, _state( &ClientImpl::onHeader )
 {
     init();
     setHost(addrinfo, ssl);
@@ -93,20 +61,8 @@ ClientImpl::ClientImpl(Client* client, const Net::AddrInfo& addrinfo, bool ssl)
 
 ClientImpl::ClientImpl(Client* client, System::EventLoop& loop, const Net::AddrInfo& addrinfo, bool ssl)
 : _client(client)
-, _parseEvent(_replyHeader)
-, _parser(_parseEvent, true)
-, _request(0)
-, _ssl(false)
-#ifdef PT_HTTP_WITH_SSL
-, _sslbuf(_sockbuf)
-#endif
-, _httpbuf()
-, _stream(&_httpbuf)
-, _reusedConnection(false)
 , _hstate(Idle)
-, _reading(false)
-, _errorPending(false)
-, _state( &ClientImpl::onHeader )
+
 {
     setActive(loop);
     init();
@@ -117,65 +73,10 @@ ClientImpl::ClientImpl(Client* client, System::EventLoop& loop, const Net::AddrI
 void ClientImpl::init()
 {
     _req.init(_conn);
-    //_req.inputReceived() += Pt::slot(*this, &RequestHandler::onRequestReceived);
+    _req.outputSent() += Pt::slot(*this, &ClientImpl::onRequestSent);
 
     _reply.init(_conn);
-    //_reply.outputSent() += Pt::slot(*this, &RequestHandler::onReplySent);
-
-    _socket.connected() += Pt::slot(*this, &ClientImpl::onConnect2);
-
-    _sockbuf.outputReady() += slot(*this, &ClientImpl::onOutput2);
-    _sockbuf.inputReady() += slot(*this, &ClientImpl::onInput2);
-    _sockbuf.attach(_socket);
-
-#ifdef PT_HTTP_WITH_SSL
-    _sslbuf.handshakeFinished() += slot(*this, &ClientImpl::onSslHandshake2);
-#endif
-
-    _httpbuf.attach(_sockbuf);
-}
-
-
-void ClientImpl::setHost(const Net::AddrInfo& addrinfo, bool ssl)
-{
-    _conn.setHost(addrinfo, ssl);
-
-    _addrInfo = addrinfo;
-    _socket.close();
-
-#ifdef PT_HTTP_WITH_SSL
-      if(ssl)
-      {
-          log_debug("begining SSL handshake");
-          if( ! _ssl)
-          {
-              _sockbuf.outputReady() -= slot(*this, &ClientImpl::onOutput2);
-              _sockbuf.inputReady() -= slot(*this, &ClientImpl::onInput2);
-
-              _sslbuf.outputReady() += slot(*this, &ClientImpl::onSslOutput2);
-              _sslbuf.inputReady() += slot(*this, &ClientImpl::onSslInput2);
-
-              _httpbuf.attach(_sslbuf);
-              _ssl = true;
-          }
-          
-          return;
-      }
-
-      log_debug("begining HTTP request");
-      if(_ssl)
-      {
-          _sslbuf.outputReady() -= slot(*this, &ClientImpl::onSslOutput2);
-          _sslbuf.inputReady() -= slot(*this, &ClientImpl::onSslInput2);
-
-          _sockbuf.outputReady() += slot(*this, &ClientImpl::onOutput2);
-          _sockbuf.inputReady() += slot(*this, &ClientImpl::onInput2);
-
-          _httpbuf.attach(_sockbuf);
-          _ssl = false;
-      }
-
-#endif
+    _reply.inputReceived() += Pt::slot(*this, &ClientImpl::onReplyReceived);
 }
 
 
@@ -184,7 +85,6 @@ void ClientImpl::setHost(const Net::AddrInfo& addrinfo, bool ssl)
 void ClientImpl::setContext(Ssl::Context& ctx)
 {
     _conn.setContext(ctx);
-    _sslbuf.init(ctx);
 }
 
 #else
@@ -195,230 +95,187 @@ void ClientImpl::setContext(Ssl::Context& )
 
 #endif
 
-const ReplyHeader& ClientImpl::execute(const Request& request)
-{
-    log_trace("ClientImpl::execute " << request.header().url());
-
-    _stream.rdbuf( _httpbuf.buffer() );
-    _errorPending = false;
-    _replyHeader.clear();
-    _parser.reset(true);
-    
-    for(;;)
-    {
-        bool reuseConnection = _socket.isConnected();
-        if( ! reuseConnection)
-        {
-            log_debug("connect");
-            _socket.connect(_addrInfo);
-
-#ifdef PT_HTTP_WITH_SSL
-            if(_ssl)
-            {
-                log_debug("ssl handshake");
-                _sslbuf.connect();
-            }
-#endif
-        }
-
-        log_debug("sending request");
-        sendRequest(_stream, request);
-        _stream.flush();
-        _sockbuf.pubsync(); // extra flush for https: _stream -> _sslbuf -> _sockbuf
-
-        log_debug("reading reply");
-        _stream.peek();
-        
-        if( _stream || ! reuseConnection)
-            break;
-
-        cancel();
-    }
-
-    unsigned headerSize = 0;
-    char ch = ' ';
-    while( ! _parser.end() && _stream.get(ch) )
-    {
-        _parser.parse(ch);
-        ++headerSize;
-    }
-         
-    if( ! _parser.end() )
-    {
-        log_info("invalid HTTP reply");
-        throw System::IOError( PT_ERROR_MSG("invalid HTTP reply") );
-    }
-
-    log_debug("content-length: " << _replyHeader.contentLength());
-    log_debug("chunked: " << _replyHeader.chunkedTransferEncoding());
-    log_debug("header-size: " << headerSize);
-
-    _stream.rdbuf(&_httpbuf);
-    _httpbuf.beginBody(_replyHeader);
-    return _replyHeader;
-}
-
 
 void ClientImpl::send()
 {
-    log_trace("ClientImpl::execute " << _req.header().url());
-
-    if( _hstate == Idle )
-    {
-        _stream.rdbuf( _httpbuf.buffer() );
-        _replyHeader.clear();
-        _parser.reset(true);
-    
-        if( ! _socket.isConnected() )
-        {
-            log_debug("connect");
-            _socket.connect(_addrInfo);
-
-    #ifdef PT_HTTP_WITH_SSL
-            if(_ssl)
-            {
-                log_debug("ssl handshake");
-                _sslbuf.connect();
-            }
-    #endif
-        }
-
-        _hstate = OnRequest;
-    }
-
-    log_debug("sending request");
-
-    if(_hstate == OnRequest)
-    {
-        if(_req.size() > 8192)
-        {
-             sendChunked(_stream, _req);
-             _req.clearBody();
-            _hstate = OnChunkedRequest;
-        }
-    }
-
-    if(_hstate == OnChunkedRequest)
-    {
-        _stream << std::hex << _req.size() << std::dec << "\r\n";
-        _stream.write( _req.data(), _req.size() );
-        _stream.write("\r\n", 2);
-        _req.clearBody();
-
-        _stream.flush();
-        _sockbuf.pubsync(); // extra flush for https: _stream -> _sslbuf -> _sockbuf
-    }
 }
 
 
 std::istream& ClientImpl::receive()
 {
-    log_debug("reading reply");
-    if(_hstate == OnRequest)
-    {
-        sendRequest(_stream, _req);
-        _req.clearBody();
-
-        _stream.flush();
-        _sockbuf.pubsync(); // extra flush for https: _stream -> _sslbuf -> _sockbuf
-    }
-
-    if(_hstate == OnChunkedRequest)
-    {
-        if(_req.size() > 0)
-        {
-            _stream << std::hex << _req.size() << std::dec << "\r\n";
-            _stream.write( _req.data(), _req.size() );
-            _stream.write("\r\n", 2);
-            _req.clearBody();
-        }
-
-        _stream.write("0\r\n\r\n", 5);
-
-        _stream.flush();
-        _sockbuf.pubsync(); // extra flush for https: _stream -> _sslbuf -> _sockbuf
-    }
-    
-    _hstate = OnReplyHeader;
-
-    char ch = ' ';
-    while( ! _parser.end() && _stream.get(ch) )
-    {
-        _parser.parse(ch);
-    }
-         
-    if( _parser.fail() )
-    {
-        log_error("invalid HTTP reply");
-        throw System::IOError("invalid HTTP reply");
-    }
-
-    log_debug("content-length: " << _replyHeader.contentLength());
-    log_debug("chunked: " << _replyHeader.chunkedTransferEncoding());
-    
-    _hstate = OnReply;
-    _stream.rdbuf(&_httpbuf);
-    _httpbuf.beginBody(_replyHeader);
-    return _stream;
+    return _reply.body();
 }
 
 
-void ClientImpl::onBodyFinished()
+void ClientImpl::onRequestSent(Request& r)
 {
-    log_trace("onBodyFinished");
+    log_trace("onRequestSent: " << _hstate);
 
-    if( ! _request->header().keepAlive() )
-    {
-        log_debug("cancelling, no keep alive");
-        this->cancel();
-    }
+    if(_hstate == OnRequestEnd)
+        _client->replyReceived().send(*_client);
+    else
+        _client->requestSent().send(*_client);
 }
 
 
-void ClientImpl::beginRequest(const Request& request)
+void ClientImpl::onReplyReceived(Reply& r)
 {
-    log_trace("beginRequest");
-
-    _stream.rdbuf( _httpbuf.buffer() );
-    _errorPending = false;
-    _request = &request;
-    _replyHeader.clear();
-    _parser.reset(true);
-    _state = &ClientImpl::onHeader;
-    
-    _reusedConnection = _socket.isConnected();
-
-    if( ! _reusedConnection )
-    {
-        log_debug("opening new connection to " << _addrInfo.host());
-        _socket.beginConnect(_addrInfo);
-        return;
-    }
-
-    log_debug("reusing previous connection");
-    sendRequest(_stream, *_request);
-
-    try
-    {
-#ifdef PT_HTTP_WITH_SSL
-        if(_ssl)
-        {
-            _sslbuf.beginWrite();
-        }
-        else
-#endif
-            _sockbuf.beginWrite();
-    }
-    catch (const System::IOError&)
-    {
-        log_debug("write failed, reconnecting");
-        cancel();
-        _socket.beginConnect(_addrInfo);
-    }
+    log_trace("onReplyReceived: " << _hstate);
+    _client->replyReceived().send(*_client);
 }
 
 
 void ClientImpl::beginSend()
+{
+    log_trace("beginSend: " << _hstate);
+    if(_hstate == Idle)
+    {
+        // TODO: connect
+        _hstate = OnRequest;
+    }
+
+    if(_hstate == OnRequest)
+    {
+        if( _req.size() < 8192)
+        {
+            log_debug("caching request data");
+            _client->requestSent().send(*_client);
+            return;
+         }
+
+        log_debug("begin sending http chunk");
+        _req.beginSend();
+        return;
+    }
+
+    log_error("sending HTTP request failed: " << _hstate);
+    throw System::IOPending("sending HTTP request failed");
+}
+
+
+bool ClientImpl::endSend()
+{
+    log_trace("endSend: " << _hstate);
+
+    if(_hstate == OnRequest)
+    {
+        if(_req.size() < 8192)
+        {
+            log_debug("cached request data not yet sent");
+            return true;
+        }
+        else
+        {
+            log_debug("sent http request");
+            bool complete = _req.endSend();
+            if(complete)
+            {
+                log_debug("sent http request completed");
+                _req.clearBody();
+            }
+            
+            return complete;
+        }
+    }
+
+    return false;
+}
+
+
+void ClientImpl::beginReceive()
+{
+    log_debug("beginReceive: " << _hstate);
+    
+    if(_hstate == Idle)
+    {
+        // TODO: connect
+        _hstate = OnRequest;
+    }
+ 
+    if(_hstate == OnRequest)
+    {
+        log_debug("begin sending cached request");
+
+        _req.finish();
+        _hstate = OnRequestEnd;
+    }
+
+    if(_hstate == OnRequestEnd)
+    {
+        log_debug("flushing cached request");
+        _req.beginSend();
+        return;
+    }
+
+    if(_hstate == OnReply)
+    {
+        _reply.beginReceive();
+        return;
+    }
+
+    throw System::IOPending("failed receiving HTTP request");
+}
+
+
+bool ClientImpl::endReceive()
+{
+    log_debug("endReceive: " << _hstate);
+
+    if(_hstate == OnRequestEnd)
+    {
+        log_debug("flushed cached request");
+        bool completed = _req.endSend();
+        
+        if(completed)
+        {
+            log_debug("request completed");
+            _hstate = OnReply;
+            _req.clear();
+            _reply.clear();
+        }
+        
+        return false;
+    }
+    
+    if(_hstate == OnReply)
+    {   
+        log_debug("advancing reply");
+        bool receivedHeader = _reply.endReceive();
+
+        if( _reply.isEnd() )
+        {
+            log_debug("reply completed");
+            _hstate = Idle;
+
+            if( ! _conn.isConnected() )
+            {
+                log_debug("connection closed");
+            }
+        }
+
+        return receivedHeader;
+    }
+
+    return false;
+}
+
+
+bool ClientImpl::isEnd() const
+{
+    return _hstate == Idle;
+}
+
+
+void ClientImpl::cancel()
+{
+    _hstate = Idle;
+}
+
+} // namespace Http
+
+} // namespace Pt
+
+/*void ClientImpl::beginSend()
 {
     log_trace("beginSend: " << _hstate);
 
@@ -475,60 +332,9 @@ void ClientImpl::beginSend()
         return;
     }
 
-    log_error("pending http reply: " << _state);
+    log_error("pending http reply: " << _hstate);
     throw System::IOPending("pending HTTP reply");
 }
-
-
-void ClientImpl::beginSend2()
-{
-    log_trace("beginSend2: " << _hstate);
-    if(_hstate == Idle)
-    {
-        // TODO: connect
-        _hstate = OnRequest;
-    }
-
-    if(_hstate == OnRequest)
-    {
-        if( _req.size() < 8192)
-        {
-            _client->requestSent().send(*_client);
-            return;
-        }
-
-        log_debug("begin sending http chunk");
-        _hstate = OnChunkedRequest;
-    }
-
-    if(_hstate == OnChunkedRequest)
-    {
-        _req.beginSend();
-        return;
-    }
-
-    log_error("sending HTTP request failed: " << _state);
-    throw System::IOPending("sending HTTP request failed");
-}
-
-
-bool ClientImpl::endSend2()
-{
-    if(_hstate == OnRequest)
-    {
-        return true;
-    }
-
-    if(_hstate == OnChunkedRequest)
-    {
-        log_debug("sent http request");
-        bool complete = _req.endSend();
-        return complete;
-    }
-
-    return false;
-}
-
 
 void ClientImpl::endSend()
 {
@@ -570,7 +376,6 @@ void ClientImpl::endSend()
         return;
     }
 }
-
 
 void ClientImpl::beginReceive()
 {
@@ -658,6 +463,55 @@ void ClientImpl::beginReceive()
         throw System::IOPending("pending HTTP request");
 }
 
+void ClientImpl::onConnect2(Net::TcpSocket& socket)
+{
+    log_trace("onConnect2");
+    if(_hstate == OnConnectReceive)
+        _client->replyReceived().send(*_client);
+    else
+        _client->requestSent().send(*_client);
+}
+
+
+void ClientImpl::onInput2(System::StreamBuffer& sb)
+{
+    log_trace("onInput2");
+    _client->replyReceived().send(*_client);
+}
+
+
+void ClientImpl::onOutput2(System::StreamBuffer& sb)
+{
+    log_trace("onOutput2");
+    if(_hstate == OnRequestEnd)
+        _client->replyReceived().send(*_client);
+    else
+        _client->requestSent().send(*_client);
+}
+
+void ClientImpl::onSslHandshake2(Ssl::IOBuffer& sb)
+{
+    if(_hstate == OnSslHandshakeReceive)
+        _client->replyReceived().send(*_client);
+    else
+        _client->requestSent().send(*_client);
+}
+
+
+void ClientImpl::onSslInput2(Ssl::IOBuffer& sb)
+{
+    _client->replyReceived().send(*_client);
+}
+
+
+void ClientImpl::onSslOutput2(Ssl::IOBuffer& sb)
+{
+    log_trace("onOutput2");
+    if(_hstate == OnRequestEnd)
+        _client->replyReceived().send(*_client);
+    else
+        _client->requestSent().send(*_client);
+}
 
 bool ClientImpl::endReceive()
 {
@@ -764,742 +618,4 @@ bool ClientImpl::isEnd() const
     return _hstate == Idle;
 }
 
-
-void ClientImpl::onConnect2(Net::TcpSocket& socket)
-{
-    log_trace("onConnect2");
-    if(_hstate == OnConnectReceive)
-        _client->replyReceived().send(*_client);
-    else
-        _client->requestSent().send(*_client);
-}
-
-
-void ClientImpl::onInput2(System::StreamBuffer& sb)
-{
-    log_trace("onInput2");
-    _client->replyReceived().send(*_client);
-}
-
-
-void ClientImpl::onOutput2(System::StreamBuffer& sb)
-{
-    log_trace("onOutput2");
-    if(_hstate == OnRequestEnd)
-        _client->replyReceived().send(*_client);
-    else
-        _client->requestSent().send(*_client);
-}
-
-
-#ifdef PT_HTTP_WITH_SSL
-void ClientImpl::onSslHandshake2(Ssl::IOBuffer& sb)
-{
-    if(_hstate == OnSslHandshakeReceive)
-        _client->replyReceived().send(*_client);
-    else
-        _client->requestSent().send(*_client);
-}
-
-
-void ClientImpl::onSslInput2(Ssl::IOBuffer& sb)
-{
-    _client->replyReceived().send(*_client);
-}
-
-
-void ClientImpl::onSslOutput2(Ssl::IOBuffer& sb)
-{
-    log_trace("onOutput2");
-    if(_hstate == OnRequestEnd)
-        _client->replyReceived().send(*_client);
-    else
-        _client->requestSent().send(*_client);
-}
-#endif
-
-
-bool ClientImpl::outputAvailable()
-{
-#ifdef PT_HTTP_WITH_SSL
-    // TODO: need to check _sslbuf.out_avail()
-    if(_ssl)
-        _sslbuf.pubsync();
-#endif
-
-    return _sockbuf.out_avail() > 0;
-}
-
-
-bool ClientImpl::beginWrite()
-{
-#ifdef PT_HTTP_WITH_SSL
-    if(_ssl)
-    {
-        // TODO: need to check _sslbuf.out_avail()
-        _sslbuf.pubsync();
-
-        if ( _sslbuf.buffer().out_avail() )
-        {
-            _sslbuf.beginWrite();
-            return true;
-        }
-        
-        return false;
-    }
-#endif
-    if ( _sockbuf.out_avail() )
-    {
-        _sockbuf.beginWrite();
-        return true;
-    }
-
-    return false;
-}
-
-
-void ClientImpl::endWrite()
-{
-#ifdef PT_HTTP_WITH_SSL
-    if(_ssl)
-        _sslbuf.endWrite();
-    else
-#endif
-        _sockbuf.endWrite();
-}
-
-
-void ClientImpl::beginRead()
-{
-    _reading = false;
-
-#ifdef PT_HTTP_WITH_SSL
-    if( _ssl )
-    {
-        if( _sslbuf.in_avail() )
-        {
-            _client->replyReceived().send(*_client);
-            return;
-        }
-    }
-    else
-#endif
-    if( _sockbuf.in_avail() )
-    {
-        _client->replyReceived().send(*_client);
-        return;
-    }
-
-    // http reply without body
-    if( _hstate == OnReply && _httpbuf.isEnd() )
-    {
-        _client->replyReceived().send(*_client);
-        return;
-    }
-        
-    log_debug("begin reading");
-    _reading = true;
-
-#ifdef PT_HTTP_WITH_SSL
-    if(_ssl)
-        _sslbuf.beginRead();
-    else
-#endif
-        _sockbuf.beginRead();
-}
-
-
-void ClientImpl::endRead()
-{
-    if(_reading)
-    {
-        _reading = false;
-        log_trace("end reading");
-
-#ifdef PT_HTTP_WITH_SSL
-        if(_ssl)
-            _sslbuf.endRead();
-        else
-#endif
-            _sockbuf.endRead();
-    }
-}
-
-
-void ClientImpl::endExecute()
-{
-    _request = 0;
-
-    if (_errorPending)
-    {
-        _errorPending = false;
-        throw;
-    }
-}
-
-
-void ClientImpl::sendChunked(std::ostream& os, const Request& request)
-{
-    log_debug("send chunked request " << request.header().url());
-
-    static const char* contentLength = "Content-Length";
-    static const char* connection = "Connection";
-    static const char* date = "Date";
-    static const char* host = "Host";
-    static const char* authorization = "Authorization";
-    static const char* userAgent = "User-Agent";
-
-    os << request.header().method() << ' '
-       << request.header().url() << " HTTP/"
-       << request.header().httpVersionMajor() << '.'
-       << request.header().httpVersionMinor() << "\r\n";
-
-    for (RequestHeader::const_iterator it = request.header().begin();
-        it != request.header().end(); ++it)
-    {
-        os << it->first << ": " << it->second << "\r\n";
-    }
-
-    os << "Transfer-Encoding: chunked" << "\r\n";
-
-    if( ! request.header().hasHeader(connection) )
-    {
-        os << "Connection: keep-alive\r\n";
-    }
-
-    if (!request.header().hasHeader(date))
-    {
-        char buffer[50];
-        os << "Date: " << MessageHeader::htdateCurrent(buffer) << "\r\n";
-    }
-
-    if (!request.header().hasHeader(host))
-    {
-        os << "Host: " << _addrInfo.host();
-        unsigned short port = _addrInfo.port();
-        if (port != 80)
-            os << ':' << port;
-        os << "\r\n";
-    }
-
-    if (!request.header().hasHeader(userAgent))
-    {
-        os << "User-Agent: Pt-Http-client\r\n";
-    }
-
-    if (!_username.empty() && !request.header().hasHeader(authorization))
-    {
-        std::ostringstream d;
-        BasicTextOStream<char, char> b(d, new Base64Codec());
-        b << _username
-          << ':'
-          << _password;
-        b.terminate();
-        log_debug("set Authorization to " << d.str());
-        os << "Authorization: Basic " << d.str() << "\r\n";
-    }
-
-    os << "\r\n";
-
-    _stream << std::hex << _req.size() << std::dec << "\r\n";
-    _stream.write( _req.data(), _req.size() );
-    _stream.write("\r\n", 2);
-
-    _req.clearBody();
-}
-
-
-void ClientImpl::sendRequest(std::ostream& os, const Request& request)
-{
-    log_debug("send request " << request.header().url());
-
-    static const char* contentLength = "Content-Length";
-    static const char* connection = "Connection";
-    static const char* date = "Date";
-    static const char* host = "Host";
-    static const char* authorization = "Authorization";
-    static const char* userAgent = "User-Agent";
-
-    os << request.header().method() << ' '
-       << request.header().url() << " HTTP/"
-       << request.header().httpVersionMajor() << '.'
-       << request.header().httpVersionMinor() << "\r\n";
-
-    for (RequestHeader::const_iterator it = request.header().begin();
-        it != request.header().end(); ++it)
-    {
-        os << it->first << ": " << it->second << "\r\n";
-    }
-
-   if (!request.header().hasHeader(contentLength))
-    {
-        os << "Content-Length: " << request.size() << "\r\n";
-    }
-
-    if (!request.header().hasHeader(connection))
-    {
-        os << "Connection: keep-alive\r\n";
-    }
-
-    if (!request.header().hasHeader(date))
-    {
-        char buffer[50];
-        os << "Date: " << MessageHeader::htdateCurrent(buffer) << "\r\n";
-    }
-
-    if (!request.header().hasHeader(host))
-    {
-        os << "Host: " << _addrInfo.host();
-        unsigned short port = _addrInfo.port();
-        if (port != 80)
-            os << ':' << port;
-        os << "\r\n";
-    }
-
-    if (!request.header().hasHeader(userAgent))
-    {
-        os << "User-Agent: Pt-Http-client\r\n";
-    }
-
-    if (!_username.empty() && !request.header().hasHeader(authorization))
-    {
-        std::ostringstream d;
-        BasicTextOStream<char, char> b(d, new Base64Codec());
-        b << _username
-          << ':'
-          << _password;
-        b.terminate();
-        log_debug("set Authorization to " << d.str());
-        os << "Authorization: Basic " << d.str() << "\r\n";
-    }
-
-    os << "\r\n";
-
-    log_debug("send body; " << request.size() << " bytes");
-    os.write(request.data(), request.size());
-}
-
-
-void ClientImpl::onConnect(Net::TcpSocket& socket)
-{
-    log_trace("onConnect");
-
-    try
-    {
-        socket.endConnect();
-
-#ifdef PT_HTTP_WITH_SSL
-        if(_ssl)
-        {
-            log_debug("begining SSL handshake");
-            _sslbuf.beginConnect();
-            return;
-        }
-#endif
-        sendRequest(_stream, *_request);
-        
-        log_debug("request sent - begin write");
-        _sockbuf.beginWrite();
-    }
-    catch(...)
-    {
-        this->onError();
-    }
-}
-
-void ClientImpl::onOutput(System::StreamBuffer& sb)
-{
-    log_trace("onOutput: out_avail=" << sb.out_avail());
-
-    /////////////////////////////////////////////////////////////////
-    // TODO: only send signal and call endWrite in endRequest !!!!
-    //       error handling gets much easier this way !!!!!!!!!!
-    /////////////////////////////////////////////////////////////////
-    try
-    {
-        sb.endWrite();
-
-        if( sb.out_avail() > 0 )
-        {
-            sb.beginWrite();
-        }
-        else
-        {
-            _client->requestSent().send(*_client);
-
-            if( sb.out_avail() )
-                sb.beginWrite();
-            else
-                sb.beginRead();
-
-        }
-    }
-    catch (const System::IOError&)
-    {
-        if (_reusedConnection)
-        {
-            log_debug("reconnect on error");
-            cancel();
-            beginRequest(*_request);
-            return;
-        }
-
-        this->onError();
-    }
-    catch (const std::exception& e)
-    {
-        log_warn("exception occured: " << e.what());
-        this->onError();
-    }
-}
-
-
-void ClientImpl::onInput(System::StreamBuffer& sb)
-{
-    log_trace("ClientImpl::onInput");
-
-    try
-    {
-        sb.endRead();
-        (this->*_state)();
-    }
-    catch (const std::exception& e)
-    {
-        log_warn("exception occured: " << e.what());
-        this->onError();
-    }
-}
-
-
-void ClientImpl::onError()
-{
-    _errorPending = true;
-    ///_client->replyFinished().send(*_client);
-
-    if (_errorPending)
-    {
-        _errorPending = false;
-        throw;
-    }
-}
-
-#ifdef PT_HTTP_WITH_SSL
-void ClientImpl::onSslHandshake(Ssl::IOBuffer& ssl)
-{
-    try
-    {
-        log_trace("onSslHandshake");
-        ssl.endHandshake();
-
-        sendRequest(_stream, *_request);
-
-        log_debug("request sent - begin write");
-        ssl.beginWrite();
-    }
-    catch(...)
-    {
-        this->onError();
-    }
-}
-
-
-void ClientImpl::onSslOutput(Ssl::IOBuffer& sb)
-{
-    log_trace("onSslOutput");
-
-    try
-    {
-        sb.endWrite();
-        sb.beginRead();
-        _client->requestSent().send(*_client);
-    }
-    catch (const System::IOError&)
-    {
-        if (_reusedConnection)
-        {
-            log_debug("reconnect on error");
-            cancel();
-            beginRequest(*_request);
-            return;
-        }
-
-        this->onError();
-    }
-    catch (const std::exception& e)
-    {
-        log_warn("exception occured: " << e.what());
-        this->onError();
-    }
-}
-
-
-void ClientImpl::onSslInput(Ssl::IOBuffer& sb)
-{
-    log_trace("ClientImpl::onSslInput");
-
-    try
-    {
-        sb.endRead();
-        (this->*_state)();
-    }
-    catch (const std::exception& e)
-    {
-        log_warn("exception occured: " << e.what());
-        this->onError();
-    }
-}
-#endif
-
-void ClientImpl::onHeader()
-{
-    log_trace("onHeader");
-
-    // reconnect when received pending EOF from previous response
-    if( _sockbuf.device()->eof() )
-    {
-        if(_reusedConnection)
-        {
-            log_debug("reconnect on EOF");
-            cancel();
-            beginRequest(*_request);
-            return;
-        }
-
-        throw System::IOError("unexpected EOF");
-    }
-
-    _reusedConnection = false;
-
-    log_debug("advancing parser");
-    _parser.advance(_stream);
-
-    if( _parser.fail() )
-    {
-        log_warn("http parser failed");
-        throw std::runtime_error("http parser failed"); // TODO define exception class
-    }
-
-    if( ! _parser.end() )
-    {
-        log_debug("continue reading");
-        beginRead();
-    }
-    
-    log_debug("http header complete");
-    _stream.rdbuf(&_httpbuf);
-    _httpbuf.beginBody(_replyHeader);
-    ///_client->headerReceived().send(*_client);
-    _state = &ClientImpl::onBody;
-
-    (this->*_state)();
-}
-
-
-void ClientImpl::onBody()
-{
-    log_trace("onBody");
-
-    _httpbuf.import();
-    log_debug("available: " << _httpbuf.in_avail());
-
-    while( _httpbuf.in_avail() )
-    {
-        ///_client->bodyReceived().send(*_client);
-
-        _httpbuf.import();
-        log_debug("available: " << _httpbuf.in_avail());
-    } 
-    
-    if( _stream.fail() )
-        throw System::IOError( PT_ERROR_MSG("error reading HTTP reply body") );
-
-    if( _httpbuf.isEnd() )
-    {
-        log_debug("reply finished");
-        ///_client->replyFinished().send(*_client);
-    }
-    else
-    {
-        log_debug("continue reading body");
-        beginRead();
-    }
-}
-
-
-void ClientImpl::cancel()
-{
-    _socket.close();
-    _sockbuf.discard();
-#ifdef PT_HTTP_WITH_SSL
-    _sslbuf.discard();
-#endif
-    _stream.clear();
-
-    _hstate = Idle;
-    _reading = false;
-}
-
-} // namespace Http
-
-} // namespace Pt
-
-
-/*void ClientImpl::readBody(std::string& s)
-{
-    s.clear();
-
-    bool chunkedEncoding = _replyHeader.chunkedTransferEncoding();
-
-    if(chunkedEncoding)
-    {
-        log_debug("read body with chunked encoding");
-
-        // _stream -> _chunkedBuffer (-> _sslbuf) -> _sockbuf
-        _chunkedBuffer.reset( _stream.rdbuf() );
-        _stream.rdbuf(&_chunkedBuffer);
-
-        char ch;
-        while( _stream.get(ch) )
-            s += ch;
-
-        log_debug("eod=" << _chunkedBuffer.eod());
-
-        if( ! _chunkedBuffer.eod() )
-            throw System::IOError( PT_ERROR_MSG("error reading HTTP reply body: incomplete chunked data stream") );
-    }
-    else
-    {
-        unsigned n = _replyHeader.contentLength();
-
-        log_debug("read body; content-size: " << n);
-
-        s.reserve(n);
-
-        char ch;
-        while (n-- && _stream.get(ch))
-            s += ch;
-
-        if( _stream.fail() )
-            throw System::IOError( PT_ERROR_MSG("error reading HTTP reply body") );
-
-        //log_debug("body read: \"" << s << '"');
-    }
-
-    if (!_replyHeader.keepAlive())
-    {
-        log_debug("close socket - no keep alive");
-        _socket.close();
-    }
-    else
-    {
-        log_debug("do not close socket - keep alive");
-    }
-}
-*/
-
-/*
-bool ClientImpl::onChunkedBody()
-{
-    log_trace("onChunkedBody");
-    assert(&_chunkedBuffer == _stream.rdbuf());
-
-    if( _chunkedBuffer.in_avail() > 0 )
-    {
-        if( ! _chunkedBuffer.eod() )
-        {
-            log_debug("read chunked encoding body");
-
-            while( _stream.good() && 
-                   _chunkedBuffer.in_avail() > 0 && 
-                   ! _chunkedBuffer.eod() )
-            {
-                log_debug("bodyAvailable");
-                _client->bodyAvailable().send(*_client, _stream);
-            }
-
-            log_debug("in_avail=" << _chunkedBuffer.in_avail() << " eod=" << _chunkedBuffer.eod());
-            if( _chunkedBuffer.eod() )
-            {
-                if( _replyHeader.hasHeader("Trailer") )
-                    _parser.readHeader();
-                else
-                    _client->replyFinished().send(*_client);
-            }
-        }
-
-        if (_chunkedBuffer.eod() && _chunkedBuffer.in_avail() > 0)
-        {
-            log_debug("read chunked encoding post headers");
-
-            _parser.advance(_chunkedBuffer);
-            if( _parser.fail() )
-                throw std::runtime_error("http parser failed"); // TODO define exception class
-
-            if( _parser.end() )
-            {
-                log_debug("reply finished");
-
-                if( ! _replyHeader.keepAlive())
-                {
-                    log_debug("close socket - no keep alive");
-                    _socket.close();
-                }
-
-                _client->replyFinished().send(*_client);
-            }
-        }
-
-        if( _stream.fail() )
-            throw System::IOError( PT_ERROR_MSG("error reading HTTP reply body") );
-    }
-    else if( _chunkedBuffer.eod() )
-    {
-        if( _replyHeader.hasHeader("Trailer") )
-            _parser.readHeader();
-        else
-            _client->replyFinished().send(*_client);
-    }
-
-    if (_socket.isConnected())
-    {
-        if( ! _chunkedBuffer.eod() || ! _parser.end() )
-        {
-            log_debug("call beginRead");
-            return true;
-        }
-    }
-    else
-    {
-        cancel();
-    }
-
-    return false;
-}
-
-
-void ClientImpl::onHttpsChunkedBody(System::StreamBuffer& sbuf)
-{
-    log_trace("onHttpsChunkedBody");
-
-#ifdef PT_HTTP_WITH_SSL
-    bool cont = this->onChunkedBody();
-    if(cont)
-    {
-        log_debug("body not finished- begin read(SSL)");
-        _sslbuf.beginRead();
-    }
-#endif
-}
-
-
-void ClientImpl::onHttpChunkedBody(System::StreamBuffer& sbuf)
-{
-    log_trace("onHttpChunkedBody");
-
-    bool cont = this->onChunkedBody();
-    if(cont)
-    {
-        sbuf.beginRead();
-    }
-}
 */

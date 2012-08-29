@@ -127,7 +127,6 @@ void HttpBuffer::import(std::streamsize n)
     if( this->isEnd() )
     {
         log_trace("received all content -> EOF");
-        _bodyFinished.send();
         return;
     }
 
@@ -162,70 +161,6 @@ HttpBuffer::int_type HttpBuffer::underflow()
 }
 
 
-int HttpBuffer::sync()
-{ 
-    typedef HttpBuffer::traits_type traits_type;
-
-    if( this->pptr() )
-    {
-        while(this->pptr() > this->pbase())
-        {
-            const HttpBuffer::int_type ch = this->overflow(traits_type::eof());
-            if( ch == traits_type::eof() )
-                return -1;
-        }
-    }
-
-    return 0;
-}
-
-
-HttpBuffer::int_type HttpBuffer::overflow(int_type ch)
-{
-    typedef HttpBuffer::traits_type traits_type;
-
-    if( ! _obuffer)
-    {
-        _obufferSize = BufferSize;
-        _obuffer = new char[_obufferSize];
-        this->setp(_obuffer, _obuffer + _obufferSize);
-    }
-    else if( traits_type::eq_int_type(ch, traits_type::eof()) )
-    {
-        // normal blocking overflow case
-        size_t avail    = this->pptr() - _obuffer;
-        size_t written  = _sbuf->sputn(_obuffer, avail);
-        size_t leftover = avail - written;
-
-        if(leftover > 0)
-            traits_type::move(_obuffer, _obuffer + written, leftover);
-
-        this->setp(_obuffer, _obuffer + _obufferSize);
-        this->pbump(leftover);
-    }
-    else
-    {
-        // if overflow is not called by sync/flush we copy the output 
-        // buffer to a larger one
-        size_t bufsize = _obufferSize + BufferSize;
-        char* buf = new char[ bufsize ];
-        traits_type::copy(buf, _obuffer, _obufferSize);
-        std::swap(_obuffer, buf);
-        this->setp(_obuffer, _obuffer + bufsize);
-        this->pbump(_obufferSize);
-        _obufferSize = bufsize;
-        delete [] buf;
-    }
-
-    // if the overflow char is not EOF put it in buffer
-    if(traits_type::eq_int_type(ch, traits_type::eof()) == false)
-    {
-        *pptr() = traits_type::to_char_type(ch);
-        this->pbump(1);
-    }
-
-    return traits_type::not_eof(ch);
-}
 
 
 void Connection::ParseEvent::onMethod(const std::string& method)
@@ -246,9 +181,16 @@ void Connection::ParseEvent::onUrlParam(const std::string& q)
 }
 
 
+void Connection::ReplyParseEvent::onHttpReturn(unsigned ret, const std::string& text)
+{
+    _replyHeader->httpReturn(ret, text);
+}
+
+
 Connection::Connection(Net::TcpServer& tcpServer)
 : _parseEvent()
 , _parser(_parseEvent, false)
+, _replyParser(_replyParseEvent, true)
 , _request(0)
 , _reply(0)
 , _loop(0)
@@ -260,7 +202,6 @@ Connection::Connection(Net::TcpServer& tcpServer)
 , _readTimeout(30000)
 , _writeTimeout(30000)
 , _keepaliveTimeout(45000)
-, _stream(&_httpbuf)
 , _chunked(false)
 {
     Net::TcpSocket::accept(tcpServer);
@@ -276,6 +217,7 @@ Connection::Connection(Net::TcpServer& tcpServer)
 Connection::Connection()
 : _parseEvent()
 , _parser(_parseEvent, false)
+, _replyParser(_replyParseEvent, true)
 , _request(0)
 , _reply(0)
 , _loop(0)
@@ -287,7 +229,6 @@ Connection::Connection()
 , _readTimeout(30000)
 , _writeTimeout(30000)
 , _keepaliveTimeout(45000)
-, _stream(&_httpbuf)
 , _chunked(false)
 {
     _sockbuf.attach(*this);
@@ -345,10 +286,10 @@ void Connection::setHost(const Net::AddrInfo& addrinfo, bool ssl)
 
               _sslbuf.outputReady() += slot(*this, &Connection::onHttpsOutput);
               _sslbuf.inputReady() += slot(*this, &Connection::onHttpsInput);
-
-              _httpbuf.attach(_sslbuf);
               _ssl = true;
           }
+
+          _httpbuf.attach(_sslbuf);
           
           return;
       }
@@ -361,11 +302,12 @@ void Connection::setHost(const Net::AddrInfo& addrinfo, bool ssl)
 
           _sockbuf.outputReady() += slot(*this, &Connection::onHttpOutput);
           _sockbuf.inputReady() += slot(*this, &Connection::onHttpInput);
-
-          _httpbuf.attach(_sockbuf);
           _ssl = false;
       }
 
+      _sockbuf.outputReady() += slot(*this, &Connection::onHttpOutput);
+      _sockbuf.inputReady() += slot(*this, &Connection::onHttpInput);
+      _httpbuf.attach(_sockbuf);
 #endif
 }
 
@@ -423,7 +365,8 @@ void Connection::beginSendRequest(Request& request)
 
     // TODO: only if finished or over 8K data to send
     if( outputAvailable() )
-    {
+    { 
+        log_debug("output available");
         _timer.start( _writeTimeout );
         beginWrite();
         return;
@@ -431,8 +374,11 @@ void Connection::beginSendRequest(Request& request)
 
     if( request.finished() )
     {
+        log_debug("HTTP request finished");
+
         if(_chunked)
         {
+            log_debug("sending HTTP chunked request");
             os << std::hex << _request->size() << std::dec << "\r\n";
             os.write( _request->data(), _request->size() );
             
@@ -446,7 +392,7 @@ void Connection::beginSendRequest(Request& request)
             sendRequest(os, *_request);
          }
 
-        log_debug("begin writing reply");
+        log_debug("begin writing request");
         _timer.start( _writeTimeout );
         beginWrite();
         return;
@@ -459,6 +405,7 @@ void Connection::beginSendRequest(Request& request)
         sendChunked(os, *_request);
     }
 
+    log_debug("sending HTTP chunk");
     os << std::hex << _reply->buffer().size() << std::dec << "\r\n";
     os.write( _reply->buffer().data(), _reply->buffer().size() );
     os.write("\r\n", 2);
@@ -481,7 +428,15 @@ bool Connection::endSendRequest()
         return false;
     }
 
-    // indicates that request or chunk was completely written
+    if( _request->finished() )
+    {
+        _request = 0;
+        _chunked = false;
+        _replyParser.reset(true);
+        _httpbuf.reset();
+    }
+
+    // indicates that the request or chunk was completely written
     log_debug("request data sent");
     return true;
 }
@@ -634,12 +589,14 @@ bool Connection::endSendReply()
             return true;
         }
 
+        // TODO: only keepalive when request allows it
+        bool keepAlive = _reply->header().keepAlive();
+        
+        _reply = 0;
         _chunked = false;
         _parser.reset(false);
         _httpbuf.reset();
 
-        // TODO: only keepalive when request allows it
-        bool keepAlive = _reply->header().keepAlive();
         if(keepAlive)
         {
             log_debug("do keep alive");
@@ -734,6 +691,7 @@ bool Connection::endReceiveRequest()
         {
             log_debug("request body finished");
             _timer.stop();
+            _request = 0;
             
             _httpbuf.reset();
             _chunked = false;
@@ -747,9 +705,7 @@ bool Connection::endReceiveRequest()
 void Connection::beginReceiveReply(Reply& r)
 {
     _reply = &r;
-
-    throw 1;
-    ///_parseEvent.init( _reply->header() );
+    _replyParseEvent.init( _reply->header() );
 
     _timer.start( _readTimeout );
     beginRead();
@@ -763,26 +719,26 @@ bool Connection::endReceiveReply()
 
     endRead();
 
-    if ( ! _parser.end() )
+    if ( ! _replyParser.end() )
     {
         if( Net::TcpSocket::eof() )
             throw System::IOError("unexpected EOF");
 
-        if( _parser.begin() && ! _timer.started() )
+        if( _replyParser.begin() && ! _timer.started() )
         {
             _timer.start( _readTimeout );
         }
         
-        _parser.advance( *_httpbuf.buffer() );
+        _replyParser.advance( *_httpbuf.buffer() );
 
-        if( _parser.fail() )
+        if( _replyParser.fail() )
         {
             log_warn("http parser failed");
             throw std::runtime_error("http parser failed"); // TODO define exception class
             return false;
         }
 
-        if( _parser.end() )
+        if( _replyParser.end() )
         {
             _httpbuf.beginBody( _reply->header() );
 
@@ -798,7 +754,7 @@ bool Connection::endReceiveReply()
         return false;
     }
 
-    if( _parser.end() )
+    if( _replyParser.end() )
     {
         _httpbuf.import();
         log_debug("available: " << _httpbuf.in_avail());
@@ -806,11 +762,15 @@ bool Connection::endReceiveReply()
         if( _httpbuf.isEnd() )
         {
             log_debug("reply body finished");
+            bool keepalive = _reply->header().keepAlive();
+            
+            _reply = 0;
+            _replyParser.reset(true);
             _timer.stop();
             _httpbuf.reset();
             _chunked = false;
 
-            if( ! _reply->header().keepAlive() )
+            if( ! keepalive )
             {
                 log_debug("closing, no keep alive");
                 close();
@@ -843,13 +803,29 @@ void Connection::onHttpsClientHandshake(Pt::Ssl::IOBuffer& ssl)
 void Connection::onHttpsInput(Pt::Ssl::IOBuffer& ssl)
 {
     log_trace("Connection::onHttpsInput");
-    _request->onInput();
+
+    if(_request)
+    {
+        _request->onInput();
+        return;
+    }
+
+    if(_reply)
+        _reply->onInput();
 }
 
 void Connection::onHttpsOutput(Pt::Ssl::IOBuffer& ssl)
 {
     log_trace("Connection::onHttpsOutput");
-    _reply->onOutput();
+
+    if(_reply)
+    {
+        _reply->onOutput();
+        return;
+    }
+
+    if(_request)
+        _request->onOutput();
 }
 #endif
 
@@ -877,14 +853,30 @@ void Connection::onConnect(Net::TcpSocket& socket)
 void Connection::onHttpInput(System::StreamBuffer& sb)
 {
     log_trace("Connection::onHttpInput");
-    _request->onInput();
+
+    if(_request)
+    {
+        _request->onInput();
+        return;
+    }
+
+    if(_reply)
+        _reply->onInput();
 }
 
 
 void Connection::onHttpOutput(System::StreamBuffer& sb)
 {
     log_trace("Connection::onHttpOutput");
-    _reply->onOutput();
+
+    if(_reply)
+    {
+        _reply->onOutput();
+        return;
+    }
+
+    if(_request)
+        _request->onOutput();
 }
 
 
@@ -920,8 +912,10 @@ void Connection::endRead()
 }
 
 
-bool Connection::beginWrite()
+void Connection::beginWrite()
 {
+    log_debug("Connection::beginWrite");
+
 #ifdef PT_HTTP_WITH_SSL
     if(_ssl)
     {
@@ -930,20 +924,24 @@ bool Connection::beginWrite()
 
         if ( _sslbuf.buffer().out_avail() )
         {
+            log_debug("begin writing ssl buffer");
             _sslbuf.beginWrite();
-            return true;
+            return;
         }
         
-        return false;
+        log_debug("no ssl data to write");
+        return;
     }
 #endif
     if ( _sockbuf.out_avail() )
     {
+        log_debug("begin writing socket buffer");
         _sockbuf.beginWrite();
-        return true;
+        return;
     }
 
-    return false;
+    log_debug("no data to write");
+    return;
 }
 
 

@@ -112,7 +112,7 @@ class ServerTest : public Pt::Unit::TestSuite
         ServerTest()
         : Pt::Unit::TestSuite("ServerTest")
         {
-            Pt::System::Logger::setLogLevel("Pt.Http.Server", Pt::System::Error);
+            Pt::System::Logger::setLogLevel("Pt.Http", Pt::System::Error);
 
             this->registerMethod( "NotFound", *this, &ServerTest::NotFound);
 #ifdef PT_HTTP_WITH_SSL
@@ -169,8 +169,8 @@ class ServerTest : public Pt::Unit::TestSuite
                 PT_UNIT_ASSERT_EQUALS(client.replyHeader().httpReturnCode(), 404);
             }
 
-            while ( client.reply().rdbuf()->in_avail() )
-                _reply += client.reply().get();
+            while ( client.reply().body().rdbuf()->in_avail() )
+                _reply += client.reply().body().get();
 
             if( client.isEnd() )
             {
@@ -273,8 +273,8 @@ class ServerTest : public Pt::Unit::TestSuite
                 PT_UNIT_ASSERT_EQUALS(client.replyHeader().httpReturnCode(), 200);
             }
             
-            while ( client.reply().rdbuf()->in_avail() )
-                _reply += client.reply().get();
+            while ( client.reply().body().rdbuf()->in_avail() )
+                _reply += client.reply().body().get();
 
             if( client.isEnd() )
             {
@@ -331,8 +331,8 @@ class ServerTest : public Pt::Unit::TestSuite
                 PT_UNIT_ASSERT_EQUALS(client.replyHeader().httpReturnCode(), 200);
             }
 
-            while ( client.reply().rdbuf()->in_avail() )
-                _reply += client.reply().get();
+            while ( client.reply().body().rdbuf()->in_avail() )
+                _reply += client.reply().body().get();
 
             if( client.isEnd() )
             {

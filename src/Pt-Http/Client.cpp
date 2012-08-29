@@ -105,35 +105,8 @@ void Client::setContext(Ssl::Context& ctx)
     _impl->setContext(ctx);
 }
 
-//const ReplyHeader& Client::execute(const Request& request)
-//{
-//    try
-//    {
-//        return _impl->execute(request);
-//    }
-//    catch (...)
-//    {
-//        cancel();
-//        throw;
-//    }
-//}
 
-const ReplyHeader& Client::replyHeader()
-{
-    return _impl->replyHeader();
-}
-
-//void Client::beginExecute(const Request& request)
-//{
-//    _impl->beginRequest(request);
-//}
-//
-//void Client::endExecute()
-//{
-//    _impl->endExecute();
-//}
-
-std::istream& Client::reply()
+Reply& Client::reply()
 {
     return _impl->reply();
 }

@@ -87,10 +87,10 @@ void HttpClientImpl::onReply(Http::Client& client)
         if(received)
         {
             verifyHeader(client.replyHeader());
-            ClientImpl::onReadReplyBegin(client.reply());
+            ClientImpl::onReadReplyBegin(client.reply().body());
         }
 
-        if( client.reply().rdbuf()->in_avail() )
+        if( client.reply().body().rdbuf()->in_avail() )
         {
             ClientImpl::onReadReply();
         }

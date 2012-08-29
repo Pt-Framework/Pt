@@ -162,7 +162,7 @@ class GoogleWeatherClient : public Pt::Connectable
 
             // we have the expected reply and prepare our text stream to process
             // the incomimg body
-            _ts.attach( client.reply() );
+            _ts.attach( client.reply().body() );
         }
 
         size_t onBodyAvailable(Pt::Http::Client& client)
@@ -233,7 +233,7 @@ class GoogleWeatherClient : public Pt::Connectable
                 if( client.endReceive() )
                     onHeaderReceived(client);
 
-                if( client.reply().rdbuf()->in_avail() )
+                if( client.reply().body().rdbuf()->in_avail() )
                     onBodyAvailable(client);
 
                 if( client.isEnd() )

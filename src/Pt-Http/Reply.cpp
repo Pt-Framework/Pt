@@ -81,6 +81,12 @@ bool Reply::endReceive()
 }
 
 
+bool Reply::isEnd() const
+{
+        return _conn->isEnd();
+}
+
+
 void Reply::beginSend()
 { 
     _conn->beginSendReply(*this); 
@@ -97,12 +103,6 @@ void Reply::finish()
 { 
     _finished = true; 
     this->beginSend(); 
-}
-
-
-void Reply::onOutput()
-{
-    _outputSent.send(*this);
 }
 
 } // namespace Http

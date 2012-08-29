@@ -60,8 +60,6 @@ namespace Http {
 
 class Client;
 
-
-
 class ClientImpl : public Connectable
 {
     friend class ParseEvent;
@@ -74,27 +72,20 @@ class ClientImpl : public Connectable
         ClientImpl(Client* client, System::EventLoop& selector, const Net::AddrInfo& addrinfo, bool ssl);
 
         System::EventLoop* loop() const
-        {
-            return _socket.parent();
+        { return _conn.loop();
         }
 
         void setActive(System::EventLoop& loop)
-        {
-            _conn.setEventLoop(loop);
-            _socket.setActive(loop);
-        }
+        { _conn.setEventLoop(loop); }
 
         void setTimeout(std::size_t timeout)
-        {
-            _socket.setTimeout(timeout);
-        }
+        { _conn.setTimeout(timeout); }
 
-        void setHost(const Net::AddrInfo& addrinfo, bool ssl);
+        void setHost(const Net::AddrInfo& addrinfo, bool ssl)
+        { _conn.setHost(addrinfo, ssl); }
 
         const Net::AddrInfo& host() const
-        {
-            return _addrInfo;
-        }
+        { return _conn.host(); }
 
         void setAuth(const std::string& username, const std::string& password)
         { 
@@ -110,27 +101,13 @@ class ClientImpl : public Connectable
 
         void setContext(Ssl::Context& ctx);
 
-        const ReplyHeader& execute(const Request& request);
-
-        const ReplyHeader& replyHeader()
-        { return _replyHeader; }
-
-        void beginRequest(const Request& request);
-
-        void endExecute();
-
-        // NEW API:
         void send();
 
         std::istream& receive();
 
         void beginSend();
 
-        void beginSend2();
-
-        bool endSend2();
-
-        void endSend();
+        bool endSend();
 
         void beginReceive();
 
@@ -144,40 +121,20 @@ class ClientImpl : public Connectable
         const Request& request() const
         { return _req; }
 
-        std::iostream& reply()
-        {
-            return _stream;
-        }
+        Reply& reply()
+        { return _reply; }
 
         void cancel();
 
     protected:
-        void onBodyFinished();
+        void onRequestSent(Request& r);
 
-        void onConnect(Net::TcpSocket& socket);
-        void onOutput(System::StreamBuffer& sb);
-        void onInput(System::StreamBuffer& sb);
-
-        void onConnect2(Net::TcpSocket& socket);
-        void onInput2(System::StreamBuffer& sb);
-        void onOutput2(System::StreamBuffer& sb);
-
-        void onError();
-
-#ifdef PT_HTTP_WITH_SSL
-        void onSslHandshake(Ssl::IOBuffer& sb);
-        void onSslOutput(Ssl::IOBuffer& sb);
-        void onSslInput(Ssl::IOBuffer& sb);
-
-        void onSslHandshake2(Ssl::IOBuffer& sb);
-        void onSslInput2(Ssl::IOBuffer& sb);
-        void onSslOutput2(Ssl::IOBuffer& sb);
-#endif
+        void onReplyReceived(Reply& r);
 
     private:
         enum State
         {
-             Idle                  = 0,
+            Idle                  = 0,
             OnConnect             = 1,
             OnConnectReceive      = 2,
             OnSslHandshake        = 3,
@@ -190,62 +147,15 @@ class ClientImpl : public Connectable
         };
 
         void init();
-        void sendChunked(std::ostream& os, const Request& request);
-        void sendRequest(std::ostream& os, const Request& request);
 
-        bool outputAvailable();
-        bool beginWrite();
-        void endWrite();
-        void beginRead();
-        void endRead();
-        bool processReply();
-
-        void onHeader();
-        void onBody();
-
-    private:
-        class ParseEvent : public HeaderParser::MessageHeaderEvent
-        {
-                ReplyHeader& _replyHeader;
-
-            public:
-                explicit ParseEvent(ReplyHeader& replyHeader)
-                    : HeaderParser::MessageHeaderEvent(replyHeader),
-                      _replyHeader(replyHeader)
-                    { }
-
-                void onHttpReturn(unsigned ret, const std::string& text);
-        };
-        
+    private:   
         Client* _client;
+        State _hstate;
         Connection _conn;
-        ParseEvent _parseEvent;
-        HeaderParser _parser;
-
-        const Request* _request;
-        ReplyHeader _replyHeader;
-
-        // new:
         Request _req;
         Reply _reply;
-
-        Net::AddrInfo _addrInfo;
-        bool _ssl;
-        Net::TcpSocket _socket;
-        System::IOBuffer _sockbuf;
-#ifdef PT_HTTP_WITH_SSL
-        Ssl::IOBuffer _sslbuf;
-#endif
-        HttpBuffer _httpbuf;
-        std::iostream _stream;
         std::string _username;
         std::string _password;
-        bool _reusedConnection;
-        State _hstate;
-        bool _reading;
-        bool _errorPending;
-
-        void (ClientImpl::*_state)();
 };
 
 } // namespace Http

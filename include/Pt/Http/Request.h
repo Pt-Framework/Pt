@@ -74,6 +74,9 @@ class PT_HTTP_API Request
         Signal<Request&>& inputReceived()
         { return _inputReceived; }
 
+        Signal<Request&>& outputSent()
+        { return _outputSent; }
+
         bool isEnd() const;
 
         RequestHeader& header()
@@ -108,6 +111,9 @@ class PT_HTTP_API Request
         void onInput()
         { _inputReceived.send(*this); }
 
+        void onOutput()
+        { _outputSent.send(*this); }
+
     private:
         Http::Connection* _conn;
         RequestHeader _header;
@@ -115,6 +121,7 @@ class PT_HTTP_API Request
         std::iostream _body;
         bool _finished;
         Signal<Request&> _inputReceived;
+        Signal<Request&> _outputSent;
 };
 
 } // namespace Http

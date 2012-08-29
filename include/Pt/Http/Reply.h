@@ -33,7 +33,7 @@
 #include <Pt/Http/ReplyHeader.h>
 #include <Pt/Signal.h>
 #include <string>
-#include <sstream>
+#include <iostream>
 
 namespace Pt {
 
@@ -67,6 +67,8 @@ class PT_HTTP_API Reply
 
         bool endReceive();
 
+        bool isEnd() const;
+
         void beginSend();
 
         bool endSend();
@@ -93,23 +95,29 @@ class PT_HTTP_API Reply
         const MessageBuffer& buffer()
         { return _buf; }
 
-        std::ostream& body()
+        std::iostream& body()
         { return _body; }
 
+        Signal<Reply&>& inputReceived()
+        { return _inputReceived; }
+
         Signal<Reply&>& outputSent()
-        {
-            return _outputSent;
-        }
+        { return _outputSent; }
 
     protected:
-        void onOutput();
+        void onInput()
+        { _inputReceived.send(*this); }
+
+        void onOutput()
+        { _outputSent.send(*this); }
 
     private:
         Http::Connection* _conn;
         ReplyHeader _header;
         MessageBuffer _buf;
-        std::ostream _body;
+        std::iostream _body;
         bool _finished;
+        Signal<Reply&> _inputReceived;
         Signal<Reply&> _outputSent;
 };
 

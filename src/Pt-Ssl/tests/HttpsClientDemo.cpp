@@ -41,10 +41,10 @@ void onReply(Pt::Http::Client& client)
 {
     bool received = client.endReceive();
 
-    while ( client.reply().rdbuf()->in_avail() )
+    while ( client.reply().body().rdbuf()->in_avail() )
     {
         char ch;
-        client.reply().get(ch);
+        client.reply().body().get(ch);
         std::cout << ch;
     }
 
@@ -108,7 +108,7 @@ int main(int argc, char** argv)
             client.receive();
 
             char ch = ' ';
-            while( client.reply().get(ch) )
+            while( client.reply().body().get(ch) )
                 std::cout << ch;
         }
 

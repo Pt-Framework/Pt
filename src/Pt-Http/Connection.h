@@ -34,6 +34,7 @@
 
 #include <Pt/Http/Api.h>
 #include <Pt/Http/RequestHeader.h>
+#include <Pt/Http/ReplyHeader.h>
 #include <Pt/Net/TcpSocket.h>
 #include <Pt/System/IOBuffer.h>
 #include <Pt/System/Timer.h>
@@ -61,20 +62,15 @@ class HttpBuffer : public std::streambuf
     public:
         HttpBuffer()
         : _sbuf(0)
-        , _obuffer(0)
-        , _obufferSize(0)
         , _contentLength(0)
         , _chunked(false)
         , _keepAlive(false)
         {
             setg(0,0,0);
-            setp(0,0);
         }
 
         ~HttpBuffer()
-        {
-            delete [] _obuffer;
-        }
+        { }
         
         void attach(std::streambuf& sbuf)
         { _sbuf = &sbuf; }
@@ -95,26 +91,13 @@ class HttpBuffer : public std::streambuf
 
         bool isEnd() const;
 
-        std::size_t out_avail()
-        { return pptr() - pbase(); }
-
-        Signal<>& bodyFinished()
-        { return _bodyFinished; }
-
     protected:
         virtual int_type underflow();
-
-        virtual int sync();
-
-        virtual int_type overflow(int_type ch);
 
     private:
         ChunkParser _chunkParser;
         std::streambuf* _sbuf;
-        Signal<> _bodyFinished;
         char _buffer[4096];
-        char* _obuffer;
-        std::size_t  _obufferSize;
         long _contentLength;
         bool _chunked;
         bool _keepAlive;
@@ -148,6 +131,25 @@ class Connection : public Net::TcpSocket
             virtual void onUrlParam(const std::string& q);
     };
 
+    class ReplyParseEvent : public HeaderParser::MessageHeaderEvent
+    {
+            ReplyHeader* _replyHeader;
+
+        public:
+            explicit ReplyParseEvent()
+                : HeaderParser::MessageHeaderEvent(),
+                  _replyHeader(0)
+                { }
+
+            void init(ReplyHeader& replyHeader)
+            { 
+                _replyHeader = &replyHeader; 
+                HeaderParser::MessageHeaderEvent::init(replyHeader);
+            }
+
+            void onHttpReturn(unsigned ret, const std::string& text);
+    };
+
     public:
         Connection(Net::TcpServer& tcpServer);
 
@@ -159,7 +161,13 @@ class Connection : public Net::TcpSocket
 
         void setEventLoop(System::EventLoop& loop);
 
+        System::EventLoop* loop() const
+        { return _loop; }
+
         void setHost(const Net::AddrInfo& addrinfo, bool ssl);
+
+        const Net::AddrInfo& host() const
+        { return _addrInfo; }
 
         void init(System::EventLoop& loop, Ssl::Context* ctx = 0);
 
@@ -208,7 +216,7 @@ class Connection : public Net::TcpSocket
 
         void endRead();
 
-        bool beginWrite();
+        void beginWrite();
 
         void endWrite();
 
@@ -223,6 +231,10 @@ class Connection : public Net::TcpSocket
     private:
         ParseEvent _parseEvent;
         HeaderParser _parser;
+
+        ReplyParseEvent _replyParseEvent;
+        HeaderParser _replyParser;
+
         Request* _request;
         Reply* _reply;
         System::EventLoop* _loop;
@@ -239,7 +251,6 @@ class Connection : public Net::TcpSocket
         std::size_t _writeTimeout;
         std::size_t _keepaliveTimeout;
 
-        std::iostream _stream;
         bool _chunked;
 };
 
