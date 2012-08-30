@@ -34,15 +34,15 @@ namespace Pt {
 
 namespace System {
 
-LogTarget::LogTarget(const std::string& name, LogTarget* parent)
-: _parent(parent)
-, _name(name)
+LogTarget::LogTarget(const std::string& targetName, LogTarget* parentTarget)
+: _parent(parentTarget)
+, _name(targetName)
 , _loglevel(Fatal)
 , _inheritLogLevel(true)
 , _channel(0)
 , _inheritChannel(true)
 {
-    if(parent)
+    if(parentTarget)
         atomicSet(_loglevel, atomicGet(_parent->_loglevel));
 }
 
