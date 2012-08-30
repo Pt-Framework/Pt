@@ -77,10 +77,7 @@ class ClientImpl : public Connectable
         { _conn.setTimeout(timeout); }
 
         void setHost(const Net::AddrInfo& addrinfo)
-        { 
-            _conn.setHost(addrinfo); 
-            _conn.close();
-        }
+        { _conn.setHost(addrinfo); }
 
         void setHttps(bool ssl)
         { _conn.setHttps(ssl); }

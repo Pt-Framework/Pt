@@ -257,6 +257,14 @@ class Connection : public Net::TcpSocket
         std::size_t _writeTimeout;
         std::size_t _keepaliveTimeout;
 
+        enum State
+        {
+            NotConnected = 0,
+            Connected = 2,
+            SslHandshake = 3,
+            SslAccept = 4
+        } _state;
+
         bool _chunked;
 };
 

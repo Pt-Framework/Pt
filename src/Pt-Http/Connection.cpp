@@ -202,6 +202,7 @@ Connection::Connection()
 , _readTimeout(30000)
 , _writeTimeout(30000)
 , _keepaliveTimeout(45000)
+, _state(NotConnected)
 , _chunked(false)
 {
     Net::TcpSocket::connected() += Pt::slot(*this, &Connection::onConnect);
@@ -213,6 +214,8 @@ Connection::Connection()
     _httpbuf.attach(_sockbuf);
 
     _timer.timeout() += Pt::slot(*this, &Connection::onTimeout);
+
+    _sslbuf.handshakeFinished() += slot(*this, &Connection::onHttpsHandshake);
 }
 
 
@@ -223,21 +226,23 @@ Connection::~Connection()
 
 void Connection::accept(Net::TcpServer& tcpServer)
 {
+    log_trace("Connection::accept");
+
+    cancel();
+
     Net::TcpSocket::accept(tcpServer);
 
-    _sslbuf.handshakeFinished() -= slot(*this, &Connection::onHttpsHandshake);
-    _sslbuf.handshakeFinished() -= slot(*this, &Connection::onHttpsClientHandshake);
-    _sslbuf.handshakeFinished() += slot(*this, &Connection::onHttpsHandshake);
+    if(_ssl)
+        _state = SslAccept;
+    else
+        _state = Connected;
 }
 
 
 void Connection::setHost(const Net::AddrInfo& addrinfo)
 {
+    cancel();
     _addrInfo = addrinfo;
-
-    _sslbuf.handshakeFinished() -= slot(*this, &Connection::onHttpsHandshake);
-    _sslbuf.handshakeFinished() -= slot(*this, &Connection::onHttpsClientHandshake);
-    _sslbuf.handshakeFinished() += slot(*this, &Connection::onHttpsClientHandshake);
 }
 
 
@@ -302,6 +307,7 @@ void Connection::cancel()
     close();
     _reply = 0;
     _request = 0;
+    _state = NotConnected;
     _chunked = false;
     _parser.reset(false);
     _replyParser.reset(true);
@@ -320,6 +326,16 @@ void Connection::beginSendRequest(Request& request)
         beginConnect(_addrInfo);
         return;
     }
+
+#ifdef PT_HTTP_WITH_SSL
+    if(_state == SslHandshake)
+    {
+        log_debug("begining SSL handshake");
+        _timer.start( _writeTimeout );
+        _sslbuf.beginConnect();
+        return;
+    }
+#endif
 
     RequestHeader& header = _request->header();
     std::ostream os( _httpbuf.buffer() );
@@ -379,6 +395,32 @@ bool Connection::endSendRequest()
     log_trace("Connection::endSendRequest");
     // TODO: handle exceptions correctly...
 
+    if(_state == NotConnected)
+    {
+        _timer.stop();
+        endConnect();
+        log_debug("connected to " << _addrInfo.host());
+
+        if(_ssl)
+            _state = SslHandshake;
+        else
+            _state = Connected;
+
+        return false;
+    }
+
+#ifdef PT_HTTP_WITH_SSL
+    if(_state == SslHandshake)
+    {
+        _timer.stop();
+        _sslbuf.endHandshake();
+        _state = Connected;
+        log_debug("SSL handshake finished");
+        return false;
+    }
+#endif
+
+    _timer.stop();
     endWrite();
 
     if( outputAvailable() > 0)
@@ -400,6 +442,8 @@ bool Connection::endSendRequest()
 
 void Connection::beginSendReply(Reply& reply)
 {
+    log_trace("Connection::beginSendReply");
+
     _reply = &reply;
 
     const char* server = "Server";
@@ -462,6 +506,7 @@ bool Connection::endSendReply()
 
     try
     {
+        _timer.stop();
         endWrite();
 
         if( outputAvailable() > 0)
@@ -506,18 +551,23 @@ bool Connection::endSendReply()
 
 void Connection::beginReceiveRequest(Request& request)
 {
+    log_trace("Connection::beginReceiveRequest " << _state);
+
     _request = &request;
 
     _parseEvent.init( request.header() );
 
-    if(_ssl && ! _sslbuf.connected() )
+#ifdef PT_HTTP_WITH_SSL
+    if(_state == SslAccept)
     {
         log_debug("beginning SSL handshake");
         _sslbuf.beginAccept();
         _timer.start( _readTimeout );
         return;
     }
+#endif
 
+    log_debug("begin reading request");
     _timer.start( _readTimeout );
     beginRead();
 }
@@ -525,8 +575,21 @@ void Connection::beginReceiveRequest(Request& request)
 
 bool Connection::endReceiveRequest()
 {
+    log_trace("Connection::endReceiveRequest");
+
     // TODO: handle exceptions correctly...
     bool receivedHeader = false;
+
+#ifdef PT_HTTP_WITH_SSL
+    if(_state == SslAccept)
+    {
+        _timer.stop();
+        _sslbuf.endHandshake();
+        _state = Connected;
+        log_debug("SSL handshake finished");
+        return false;
+    }
+#endif
 
     endRead();
 
@@ -670,18 +733,33 @@ bool Connection::endReceiveReply()
 void Connection::onHttpsHandshake(Pt::Ssl::IOBuffer& ssl)
 {
     log_trace("Connection::onHttpsHandshake");
-    ssl.endHandshake();
+    if(_request && _state == SslHandshake)
+    {
+        _request->onOutput();
+        return;
+    }
 
-    _timer.start( _readTimeout );
-    beginRead();
+    if(_request && _state == SslAccept)
+    {
+        _request->onInput();
+        return;
+    }
 }
 
 void Connection::onHttpsClientHandshake(Pt::Ssl::IOBuffer& ssl)
 {
     log_trace("Connection::onHttpsClientHandshake");
-    ssl.endHandshake();
+    if(_request && _state == SslHandshake)
+    {
+        _request->onOutput();
+        return;
+    }
 
-    beginSendRequest(*_request);
+    if(_request && _state == SslAccept)
+    {
+        _request->onInput();
+        return;
+    }
 }
 
 void Connection::onHttpsInput(Pt::Ssl::IOBuffer& ssl)
@@ -717,20 +795,8 @@ void Connection::onHttpsOutput(Pt::Ssl::IOBuffer& ssl)
 void Connection::onConnect(Net::TcpSocket& socket)
 {
     log_trace("Connection::onConnect");
-
-    endConnect();
-
-#ifdef PT_HTTP_WITH_SSL
-    if(_ssl)
-    {
-        log_debug("begining SSL handshake");
-        _timer.start( _writeTimeout );
-        _sslbuf.beginConnect();
-        return;
-    }
-#endif
-
-    beginSendRequest(*_request);
+    if(_request)
+        _request->onOutput();
 }
 
 
