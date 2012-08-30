@@ -746,21 +746,6 @@ void Connection::onHttpsHandshake(Pt::Ssl::IOBuffer& ssl)
     }
 }
 
-void Connection::onHttpsClientHandshake(Pt::Ssl::IOBuffer& ssl)
-{
-    log_trace("Connection::onHttpsClientHandshake");
-    if(_request && _state == SslHandshake)
-    {
-        _request->onOutput();
-        return;
-    }
-
-    if(_request && _state == SslAccept)
-    {
-        _request->onInput();
-        return;
-    }
-}
 
 void Connection::onHttpsInput(Pt::Ssl::IOBuffer& ssl)
 {

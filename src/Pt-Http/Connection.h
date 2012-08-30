@@ -202,8 +202,6 @@ class Connection : public Net::TcpSocket
 #ifdef PT_HTTP_WITH_SSL
         void onHttpsHandshake(Pt::Ssl::IOBuffer& ssl);
 
-        void onHttpsClientHandshake(Pt::Ssl::IOBuffer& ssl);
-
         void onHttpsInput(Pt::Ssl::IOBuffer& ssl);
 
         void onHttpsOutput(Pt::Ssl::IOBuffer& ssl);
