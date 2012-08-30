@@ -73,7 +73,8 @@ class PT_HTTP_API Reply
 
         bool endSend();
 
-        void finish();
+        void finish()
+        { _finished = true; }
 
         bool finished() const
         { return _finished; }

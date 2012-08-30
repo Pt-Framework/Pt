@@ -34,6 +34,7 @@
 #include "Pt/Xml/Characters.h"
 #include "Pt/Xml/EndElement.h"
 #include "Pt/Http/Reply.h"
+#include <Pt/Http/Request.h>
 #include "Pt/Utf8Codec.h"
 #include "Pt/Convert.h"
 #include <cassert>
@@ -79,15 +80,15 @@ XmlRpcResponder::~XmlRpcResponder()
 }
 
 
-void XmlRpcResponder::beginRequest(std::istream& is, Http::RequestHeader& request)
+void XmlRpcResponder::beginRequest(Http::Request& request)
 {
     _state = OnBegin;
-    _ts.attach( is );
+    _ts.attach( request.body() );
     _args = 0;
 }
 
 
-void XmlRpcResponder::readRequest(std::istream& is, Http::Reply& reply)
+void XmlRpcResponder::readRequest(Http::Request& request, Http::Reply& reply)
 {
    try
    {
@@ -120,7 +121,7 @@ void XmlRpcResponder::readRequest(std::istream& is, Http::Reply& reply)
 }
 
 
-void XmlRpcResponder::writeReply(Http::RequestHeader& request, Http::Reply& reply)
+void XmlRpcResponder::writeReply(Http::Request& request, Http::Reply& reply)
 {
     try
     {
@@ -187,6 +188,7 @@ void XmlRpcResponder::replyError(Http::Reply& reply, int rc, const char* msg)
     _writer.flush();
 
     reply.finish();
+    reply.beginSend();
 }
 
 
@@ -209,6 +211,7 @@ void XmlRpcResponder::endReply()
             throw std::logic_error("XML-RPC responder without reply");
 
         _reply->finish();
+        _reply->beginSend();
     }
     catch (const Fault& fault)
     {

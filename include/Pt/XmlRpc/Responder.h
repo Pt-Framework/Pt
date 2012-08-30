@@ -36,7 +36,6 @@
 #include <Pt/Xml/XmlReader.h>
 #include <Pt/Xml/XmlWriter.h>
 #include <Pt/Http/Responder.h>
-#include <Pt/Http/Reply.h>
 #include <Pt/SerializationContext.h>
 #include <Pt/Serializer.h>
 #include <Pt/TextStream.h>
@@ -68,11 +67,11 @@ class PT_XMLRPC_API XmlRpcResponder : public Http::Responder
 
         ~XmlRpcResponder();
 
-        void beginRequest(std::istream& in, Http::RequestHeader& request);
+        void beginRequest(Http::Request& request);
 
-        void readRequest(std::istream& is, Http::Reply& reply);
+        void readRequest(Http::Request& request, Http::Reply& reply);
 
-        void writeReply(Http::RequestHeader& request, Http::Reply& reply);
+        void writeReply(Http::Request& request, Http::Reply& reply);
 
         void endReply();
 

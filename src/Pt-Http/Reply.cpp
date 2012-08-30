@@ -98,13 +98,6 @@ bool Reply::endSend()
     return _conn->endSendReply(); 
 }
 
-
-void Reply::finish()
-{ 
-    _finished = true; 
-    this->beginSend(); 
-}
-
 } // namespace Http
 
 } // namespace Pt

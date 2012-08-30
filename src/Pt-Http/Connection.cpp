@@ -315,8 +315,32 @@ void Connection::cancel()
 }
 
 
+// TODO: flush might not be needed if we write all pending data before replies
+//       are read (client) or before request are read (server)
+void Connection::beginFlush()
+{
+    log_trace("Connection::beginFlush");
+
+    // TODO: only call beginWrite if output is available
+    beginWrite();
+}
+
+
+bool Connection::endFlush()
+{ 
+    log_trace("Connection::endFlush");
+
+    // TODO: only call endWrite if output was available
+    endWrite();
+    bool avail = outputAvailable();
+    return ! avail;
+}
+
+
 void Connection::beginSendRequest(Request& request)
 {
+    log_trace("Connection::beginSendRequest");
+
     _request = &request;
 
     if( ! isConnected() )
@@ -337,17 +361,7 @@ void Connection::beginSendRequest(Request& request)
     }
 #endif
 
-    RequestHeader& header = _request->header();
     std::ostream os( _httpbuf.buffer() );
-
-    // TODO: only if finished or over 8K data to send
-    if( outputAvailable() )
-    { 
-        log_debug("output available");
-        _timer.start( _writeTimeout );
-        beginWrite();
-        return;
-    }
 
     if( request.finished() )
     {
@@ -355,36 +369,44 @@ void Connection::beginSendRequest(Request& request)
 
         if(_chunked)
         {
-            log_debug("sending HTTP chunked request");
-            os << std::hex << _request->size() << std::dec << "\r\n";
-            os.write( _request->data(), _request->size() );
+            log_debug("sending last HTTP chunk: "  << _request->size() << " bytes");
+            if(_request->size() > 0)
+            {
+                os << std::hex << _request->size() << std::dec << "\r\n";
+                os.write( _request->data(), _request->size() );
+                os.write("\r\n", 2);
+            }
             
-            os.write("\r\n", 2);
             os.write("0\r\n\r\n", 5);
             _chunked = false;
         }
         else
         {
             sendRequest(os, *_request);
-         }
+        }
 
-        log_debug("begin writing request");
-        _timer.start( _writeTimeout );
-        beginWrite();
+        log_debug("sending HTTP request");
+        _request->onOutput();
         return;
     }
 
     if( ! _chunked )
     {
+        log_debug("sending chunked header");
         _chunked = true;
         sendChunkedHeader(os, *_request);
     }
 
-    log_debug("sending HTTP chunk");
-    os << std::hex << _reply->buffer().size() << std::dec << "\r\n";
-    os.write( _reply->buffer().data(), _reply->buffer().size() );
-    os.write("\r\n", 2);
-    
+    log_debug("sending HTTP chunk: "  << _request->size() << " bytes");
+
+    if(_request->size() > 0)
+    {
+        os << std::hex << _request->size() << std::dec << "\r\n";
+        os.write( _request->data(), _request->size() );
+        os.write("\r\n", 2);
+    }
+
+    // TODO: only if over 8K data to send
     _timer.start( _writeTimeout );
     beginWrite();
 }
@@ -393,7 +415,6 @@ void Connection::beginSendRequest(Request& request)
 bool Connection::endSendRequest()
 {
     log_trace("Connection::endSendRequest");
-    // TODO: handle exceptions correctly...
 
     if(_state == NotConnected)
     {
@@ -420,20 +441,15 @@ bool Connection::endSendRequest()
     }
 #endif
 
-    _timer.stop();
-    endWrite();
+    Request* req = _request;
+    _request = 0;
 
-    if( outputAvailable() > 0)
+    if( ! req->finished() )
     {
-        log_debug("still data to send");
-        return false;
+        _timer.stop();
+        endWrite();
     }
-
-    if( _request->finished() )
-    {
-        _request = 0;
-    }
-
+ 
     // indicates that the request or chunk was completely written
     log_debug("request data sent");
     return true;
@@ -577,7 +593,6 @@ bool Connection::endReceiveRequest()
 {
     log_trace("Connection::endReceiveRequest");
 
-    // TODO: handle exceptions correctly...
     bool receivedHeader = false;
 
 #ifdef PT_HTTP_WITH_SSL
@@ -662,7 +677,6 @@ void Connection::beginReceiveReply(Reply& r)
 
 bool Connection::endReceiveReply()
 {
-    // TODO: handle exceptions correctly...
     bool receivedHeader = false;
 
     endRead();
@@ -772,7 +786,12 @@ void Connection::onHttpsOutput(Pt::Ssl::IOBuffer& ssl)
     }
 
     if(_request)
+    {
         _request->onOutput();
+        return;
+    }
+
+    outputReady.send(*this);
 }
 #endif
 
@@ -811,7 +830,12 @@ void Connection::onHttpOutput(System::StreamBuffer& sb)
     }
 
     if(_request)
+    {
         _request->onOutput();
+        return;
+    }
+
+    outputReady.send(*this);
 }
 
 
@@ -838,6 +862,8 @@ void Connection::beginRead()
 
 void Connection::endRead()
 {
+    // TODO: do not call endRead if data was available
+
 #ifdef PT_HTTP_WITH_SSL
     if(_ssl)
         _sslbuf.endRead();

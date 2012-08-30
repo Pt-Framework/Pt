@@ -74,6 +74,7 @@ class RequestHandler : public Pt::Connectable
         Connection _conn;
         Request _request;
         Reply _reply;
+        bool _ignoreBody;
         Signal<RequestHandler&> _timeout;
 };
 
@@ -82,6 +83,7 @@ RequestHandler::RequestHandler(Server& server, Net::TcpServer& tcpServer, bool s
 : _server(server)
 , _responder(0)
 , _conn()
+, _ignoreBody(false)
 {
     if(ssl)
         _conn.setHttps(true);
@@ -104,6 +106,8 @@ RequestHandler::~RequestHandler()
 void RequestHandler::beginServe(System::EventLoop& loop, Ssl::Context* ctx)
 {  
     log_trace("RequestHandler::beginServe");
+
+    _ignoreBody = false;
 
     _conn.setEventLoop(loop);
 
@@ -130,30 +134,39 @@ void RequestHandler::onRequestReceived(Request& req)
     bool receivedHeader = _request.endReceive();
     if(receivedHeader)
     {
-        log_debug("receievd request header");
+        log_debug("received request header");
         _responder = _server.getResponder(_request.header());
-        _responder->beginRequest( _request.body(), _request.header() );
+        _responder->beginRequest( _request );
     }
     
     if( _request.body().rdbuf()->in_avail() )
     {
         log_debug("body available");
-        _responder->readRequest(_request.body(), _reply);
-            
-        if( _reply.finished() )
-        {
-            // TODO: skip unread body
+        
+        if(_ignoreBody)
+            _request.body().ignore( _request.body().rdbuf()->in_avail() );
+        else
+            _responder->readRequest(_request, _reply);
+
+        if( _reply.finished() ) // NOTE: _reply.isSending()
             return;
-        }
     } 
 
-    if( _request.body().fail() )
-        throw System::IOError( PT_ERROR_MSG("error reading HTTP reply body") );
-
-    if( _request.isEnd() && _responder)
+    if( _request.isEnd() )
     {
         log_debug("request body finished, begin reply");
-        _responder->beginReply(_request.header(), _reply);
+        if(_responder)
+        {
+            _responder->beginReply(_request, _reply);
+        }
+        else
+        {
+            log_debug("consumed body of previous request");
+
+            _ignoreBody = false;
+            _request.clear();
+            _request.beginReceive();
+        }
     }
     else
     {
@@ -167,7 +180,7 @@ void RequestHandler::onReplySent(Reply& r)
 {
     log_trace("RequestHandler::onReplySent");
 
-    bool dataSent = _reply.endSend();
+    bool completed = _reply.endSend();
 
     if( ! _conn.isConnected() )
     {
@@ -176,7 +189,7 @@ void RequestHandler::onReplySent(Reply& r)
         return;
     }
 
-    if( ! dataSent )
+    if( ! completed )
     {
         log_debug("writing left over data");
         _reply.beginSend();
@@ -186,25 +199,32 @@ void RequestHandler::onReplySent(Reply& r)
     if( ! _reply.finished() )
     {
         log_debug("continuing response");
-        _responder->writeReply(_request.header(), _reply);
+        _responder->writeReply(_request, _reply);
         return;
     }
 
-    if( _responder && _reply.finished() )
-    {
-        log_debug("response finished");
-        _reply.clear();
-        _request.clear();
+    log_debug("response finished");
 
+    if( _responder )
+    {
         _responder->release();
         _responder = 0;
     }
 
-    bool keepAlive = _request.header().keepAlive() && _reply.header().keepAlive();
-    if(keepAlive)
+    _reply.clear();
+
+    if( _request.isEnd() )
     {
-        _request.beginReceive();
+        _request.clear();
     }
+    else
+    {
+        // request body was not completely consumed, set a flag to read the
+        // rest of the body later
+        _ignoreBody = true;
+    }
+
+    _request.beginReceive();
 }
 
 
@@ -218,6 +238,7 @@ void RequestHandler::replyError()
     _reply.body() << "Error 500: Internal server error.";
 
     _reply.finish();
+    _reply.beginSend();
 }
 
 
@@ -610,30 +631,3 @@ void Server::setMaxThreads(unsigned m)
 } // namespace Http
 
 } // namespace Pt
-
-
-        /*if (_stream.rdbuf()->in_avail() > 0)
-        {
-            std::size_t s = _responder->readBody(_stream, _reply);
-            assert(s > 0);
-            _contentLength -= s;
-
-            if( _reply.finished() )
-            {
-                return;
-            }
-        }
-
-        if (_contentLength <= 0)
-        {
-            _timer.stop();
-
-            _responder->beginReply(_reply.body(), _request, _reply);
-        }
-        else
-        {
-            beginRead();
-        }*/
-
-
-

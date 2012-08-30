@@ -40,7 +40,7 @@ namespace Pt {
 
 namespace Http {
 
-class RequestHeader;
+class Request;
 class Reply;
 
 
@@ -63,20 +63,13 @@ class PT_HTTP_API Responder
 
         void release();
 
-        // TODO: use Request object -> all methods in Responder should use Request/Reply for each method.
-        //
-        // beginRequest(Request, Reply)
-        // readRequest(Request, Reply)
-        // beginReply(Request, Reply)
-        // writeReply(Request, Reply)
-
-        virtual void beginRequest(std::istream& in, RequestHeader& request);
+        virtual void beginRequest(Request& request);
         
-        virtual void readRequest(std::istream&, Reply& reply);
+        virtual void readRequest(Request& request, Reply& reply);
 
-        virtual void beginReply(RequestHeader& request, Reply& reply);
+        virtual void beginReply(Request& request, Reply& reply);
 
-        virtual void writeReply(RequestHeader& request, Reply& reply) = 0;
+        virtual void writeReply(Request& request, Reply& reply) = 0;
 
     private:
         Service& _service;

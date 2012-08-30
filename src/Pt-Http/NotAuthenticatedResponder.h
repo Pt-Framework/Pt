@@ -48,7 +48,7 @@ class NotAuthenticatedResponder : public Responder
               _content(content)
             { }
 
-        void writeReply(RequestHeader& request, Reply& reply);
+        void writeReply(Request& request, Reply& reply);
 };
 
 

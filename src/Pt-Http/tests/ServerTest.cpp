@@ -55,10 +55,11 @@ class HelloResponder : public Pt::Http::Responder
             is.ignore( is.rdbuf()->in_avail() );
         }
         
-        void writeReply(Pt::Http::RequestHeader& request, Pt::Http::Reply& reply)
+        void writeReply(Pt::Http::Request& request, Pt::Http::Reply& reply)
         {
             reply.body() << "Hello World!";
             reply.finish();
+            reply.beginSend();
         }
 };
 
@@ -72,7 +73,7 @@ class ChunkedResponder : public Pt::Http::Responder
         , _chunks(5)
         {}
 
-        void beginRequest(std::istream& in, Pt::Http::RequestHeader& request)
+        void beginRequest(Pt::Http::Request& request)
         { 
             _chunks = 5;
             //for (Pt::Http::RequestHeader::const_iterator it = request.begin();
@@ -89,14 +90,14 @@ class ChunkedResponder : public Pt::Http::Responder
             //    std::cerr << char( is.get() );
         }
         
-        void writeReply(Pt::Http::RequestHeader& request, Pt::Http::Reply& reply)
+        void writeReply(Pt::Http::Request& request, Pt::Http::Reply& reply)
         {
             reply.body() << "Chunk" << _chunks--;
 
             if(_chunks == 0)
                 reply.finish();
-            else
-                reply.beginSend();
+
+            reply.beginSend();
         }
 
     private:
@@ -309,14 +310,18 @@ class ServerTest : public Pt::Unit::TestSuite
 
         void onChunkedSent(Pt::Http::Client& client)
         {
-            client.endSend();
+            if( ! client.endSend() )
+            {
+                client.beginSend();
+                return;
+            }
 
             if( ! _chunks.empty() )
             {
-              client.request().body() << _chunks.front();
-              _chunks.erase( _chunks.begin() );
-              client.beginSend();
-              return;
+                client.request().body() << _chunks.front();
+                _chunks.erase( _chunks.begin() );
+                client.beginSend();
+                return;
             }
 
             client.beginReceive();

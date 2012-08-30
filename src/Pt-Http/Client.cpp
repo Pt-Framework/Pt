@@ -136,9 +136,9 @@ void Client::beginSend()
 }
 
 
-void Client::endSend()
+bool Client::endSend()
 {
-    _impl->endSend();
+    return _impl->endSend();
 }
 
 
@@ -184,7 +184,7 @@ const Reply& Client::reply() const
 }
 
 
-// Sets the username and password for all subsequent requests.
+// TODO: Sets the username and password for all subsequent requests.
 void Client::setAuthorization(const std::string& username, const std::string& password)
 {
     _impl->setAuth(username, password);

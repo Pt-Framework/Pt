@@ -104,7 +104,7 @@ class PT_HTTP_API Client : private NonCopyable
 
         void beginSend();
 
-        void endSend();
+        bool endSend();
 
         /** @brief Signals that a part of the request was sent.
         */

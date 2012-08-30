@@ -28,6 +28,7 @@
 
 #include <Pt/Http/Responder.h>
 #include <Pt/Http/Reply.h>
+#include <Pt/Http/Request.h>
 #include <Pt/System/Logger.h>
 
 log_define("Pt.Http.Responder")
@@ -56,18 +57,18 @@ void Responder::release()
 }
 
 
-void Responder::beginRequest(std::istream& in, RequestHeader& request)
+void Responder::beginRequest(Request& request)
 {
 }
 
 
-void Responder::readRequest(std::istream& is, Reply& reply)
+void Responder::readRequest(Request& request, Reply& reply)
 {
-    is.ignore( is.rdbuf()->in_avail() );
+    request.body().ignore( request.body().rdbuf()->in_avail() );
 }
 
 
-void Responder::beginReply(RequestHeader& request, Http::Reply& reply)
+void Responder::beginReply(Request& request, Reply& reply)
 { 
     this->writeReply(request, reply); 
 }

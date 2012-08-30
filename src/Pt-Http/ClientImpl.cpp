@@ -46,6 +46,8 @@ ClientImpl::ClientImpl(Client* client)
 : _client(client)
 , _hstate(Idle)
 {
+    _conn.outputReady += Pt::slot(*this, &ClientImpl::onRequestFlushed);
+
     _req.init(_conn);
     _req.outputSent() += Pt::slot(*this, &ClientImpl::onRequestSent);
 
@@ -92,6 +94,12 @@ void ClientImpl::onRequestSent(Request& r)
 }
 
 
+void ClientImpl::onRequestFlushed(Connection& conn)
+{
+    _client->replyReceived().send(*_client);
+}
+
+
 void ClientImpl::onReplyReceived(Reply& r)
 {
     log_trace("onReplyReceived: " << _hstate);
@@ -102,21 +110,15 @@ void ClientImpl::onReplyReceived(Reply& r)
 void ClientImpl::beginSend()
 {
     log_trace("beginSend: " << _hstate);
+    
     if(_hstate == Idle)
     {
-        // TODO: connect
+        // NOTE: might want to handle connect here in the future
         _hstate = OnRequest;
     }
 
     if(_hstate == OnRequest)
     {
-        if( _req.size() < 8192)
-        {
-            log_debug("caching request data");
-            _client->requestSent().send(*_client);
-            return;
-         }
-
         log_debug("begin sending http chunk");
         _req.beginSend();
         return;
@@ -133,23 +135,15 @@ bool ClientImpl::endSend()
 
     if(_hstate == OnRequest)
     {
-        if(_req.size() < 8192)
+        log_debug("sent http request");
+        bool complete = _req.endSend();
+        if(complete)
         {
-            log_debug("cached request data not yet sent");
-            return true;
+            log_debug("sent http request completed");
+            _req.clearBody();
         }
-        else
-        {
-            log_debug("sent http request");
-            bool complete = _req.endSend();
-            if(complete)
-            {
-                log_debug("sent http request completed");
-                _req.clearBody();
-            }
             
-            return complete;
-        }
+        return complete;
     }
 
     return false;
@@ -162,7 +156,7 @@ void ClientImpl::beginReceive()
     
     if(_hstate == Idle)
     {
-        // TODO: connect
+        // NOTE: might want to handle connect here in the future
         _hstate = OnRequest;
     }
  
@@ -178,6 +172,14 @@ void ClientImpl::beginReceive()
     {
         log_debug("flushing cached request");
         _req.beginSend();
+        return;
+    }
+
+    if(_hstate == OnRequestFlush)
+    {
+        log_debug("flushing connection");
+
+        _conn.beginFlush();
         return;
     }
 
@@ -203,7 +205,7 @@ bool ClientImpl::endReceive()
         if(completed)
         {
             log_debug("request completed");
-            _hstate = OnReply;
+            _hstate = OnRequestFlush;
             _req.clear();
             _reply.clear();
         }
@@ -211,6 +213,16 @@ bool ClientImpl::endReceive()
         return false;
     }
     
+    if(_hstate == OnRequestFlush)
+    {
+        log_debug("flushed connection");
+        bool complete = _conn.endFlush();
+        if(complete)
+            _hstate = OnReply;
+
+        return false;
+    }
+
     if(_hstate == OnReply)
     {   
         log_debug("advancing reply");

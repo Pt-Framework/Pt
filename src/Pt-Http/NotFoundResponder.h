@@ -42,7 +42,7 @@ class PT_HTTP_API NotFoundResponder : public Responder
             : Responder(service)
             { }
 
-        void writeReply(RequestHeader& request, Reply& reply);
+        void writeReply(Request& request, Reply& reply);
 };
 
 } // namespace Http

@@ -162,6 +162,7 @@ class Connection : public Net::TcpSocket
         const Net::AddrInfo& host() const
         { return _addrInfo; }
 
+        // TODO: do this in the constructor
         void setHttps(bool ssl);
 
         void setContext(Ssl::Context& ctx);
@@ -176,6 +177,12 @@ class Connection : public Net::TcpSocket
 
         void cancel();
 
+        void beginFlush();
+
+        bool endFlush();
+
+        Signal<Connection&> outputReady;
+
     protected:
         void beginSendRequest(Request& r);
 
@@ -187,6 +194,7 @@ class Connection : public Net::TcpSocket
 
         void beginReceiveRequest(Request& r);
 
+        // TODO: return progress indicating end of reply and end of header
         bool endReceiveRequest();
 
         void beginReceiveReply(Reply& r);

@@ -90,6 +90,7 @@ class PT_HTTP_API Request
             _header.clear();
             _body.clear();
             _buf.reset();
+            _finished = false;
         }
 
         void clearBody()

@@ -33,10 +33,11 @@ namespace Pt {
 
 namespace Http {
 
-void NotFoundResponder::writeReply(RequestHeader& request, Reply& reply)
+void NotFoundResponder::writeReply(Request& request, Reply& reply)
 {
     reply.header().httpReturn(404, "Not found");
     reply.finish();
+    reply.beginSend();
 }
 
 } // namespace Http

@@ -33,7 +33,7 @@ namespace Pt {
 
 namespace Http {
 
-void NotAuthenticatedResponder::writeReply( RequestHeader& request, Reply& reply)
+void NotAuthenticatedResponder::writeReply( Request& request, Reply& reply)
 {
     reply.header().setHeader("WWW-Authenticate", ("Basic realm=\"" + _realm + '"').c_str());
 
@@ -45,6 +45,7 @@ void NotAuthenticatedResponder::writeReply( RequestHeader& request, Reply& reply
         reply.body() << _content;
 
     reply.finish();
+    reply.beginSend();
 }
 
 } // namespace Http

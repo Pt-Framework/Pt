@@ -132,6 +132,8 @@ class ClientImpl : public Connectable
 
         void onReplyReceived(Reply& r);
 
+        void onRequestFlushed(Connection& conn);
+
     private:
         enum State
         {
@@ -143,8 +145,9 @@ class ClientImpl : public Connectable
             OnRequest             = 5,
             OnChunkedRequest      = 6,
             OnRequestEnd          = 7,
-            OnReplyHeader         = 8,
-            OnReply               = 9
+            OnRequestFlush        = 8,
+            OnReplyHeader         = 9,
+            OnReply               = 10
         };
 
         void init();
