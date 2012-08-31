@@ -41,128 +41,6 @@ namespace Pt {
 
 namespace Http {
 
-void HttpBuffer::beginBody(const MessageHeader& reply)
-{
-    log_trace("HttpBuffer::beginBody()");
-    _chunkParser.reset();
-
-    setg(0,0,0);
-
-    _keepAlive = reply.keepAlive();
-    _contentLength = reply.contentLength();
-    _chunked = reply.chunkedTransferEncoding();
-
-    log_debug("keep-alive: " << _keepAlive);
-    log_debug("chunked: " << _chunked);
-    log_debug("content-length: " << _contentLength);
-}
-
-
-bool HttpBuffer::isEnd() const
-{
-    log_trace("HttpBuffer::isEnd()");
-    if(_chunked)
-        return _chunkParser.end();
-
-    return _contentLength == 0;
-}
-
-
-void HttpBuffer::import(std::streamsize n)
-{
-    log_trace("HttpBuffer::import(" << n << ")");
-
-    if( ! _sbuf)
-        return;
-
-    if(n == 0)
-    {
-        n = _sbuf->in_avail();
-        log_debug("available: " << n);
-    }
-
-    // Move unread bytes and putback to front
-    size_t putback  = MaxPutback;
-    size_t leftover = 0;
-    
-    if( this->gptr() ) 
-    {
-        putback = std::min<std::size_t>( this->gptr() - this->eback(), MaxPutback);
-        char* to = _buffer + MaxPutback - putback;
-        char* from = this->gptr() - putback;
-
-        leftover = this->egptr() - this->gptr();
-        std::memmove( to, from, putback + leftover );
-
-        this->setg( _buffer + (MaxPutback - putback),  // start of get area
-                    _buffer + MaxPutback,              // gptr position
-                    _buffer + MaxPutback + leftover ); // end of get area
-    }
-
-    if(_chunked)
-    {
-        log_debug("getting next chunk");
-        _contentLength = 0;
-        while(n-- && ! _chunkParser.end())
-        {
-            char ch = _sbuf->sbumpc();
-            _chunkParser.parse(ch);
-            if( _chunkParser.hasChunk() )
-            {
-                _contentLength = _chunkParser.chunkSize();
-                break;
-            }
-        }
-    }
-
-    size_t unused = sizeof(_buffer) - (MaxPutback + leftover);
-    log_debug("unused buffer area: " << unused);
-    if(n > unused)
-        n = unused;
-
-    log_debug("content-length: " << _contentLength);
-    if(n > _contentLength)
-        n = _contentLength;
-
-    if( this->isEnd() )
-    {
-        log_trace("received all content -> EOF");
-        return;
-    }
-
-    log_debug("http buffer refill: " << n);
-    if(n == 0)
-        return;
-
-    n = _sbuf->sgetn(_buffer + MaxPutback + leftover, n);
-
-    setg(_buffer + MaxPutback - putback, // eback - start of get area
-         _buffer + MaxPutback,           // gptr - current position
-         _buffer + MaxPutback + n);      // egptr - end of get area
-
-    _contentLength -= n;
-    log_debug("remaining content length: " << _contentLength);
-}
-
-
-HttpBuffer::int_type HttpBuffer::underflow()
-{ 
-    log_trace("HttpBuffer::underflow()");
-
-    if(this->gptr() < this->egptr())
-        return traits_type::to_int_type(*(this->gptr()));
-
-    import( sizeof(_buffer) );
-
-    if( this->gptr() < this->egptr() )
-        return traits_type::to_int_type( *this->gptr() );
-
-    return traits_type::eof();
-}
-
-
-
-
 void Connection::ParseEvent::onMethod(const std::string& method)
 {
     _request->method(method);
@@ -315,28 +193,6 @@ void Connection::cancel()
 }
 
 
-// TODO: flush might not be needed if we write all pending data before replies
-//       are read (client) or before request are read (server)
-void Connection::beginFlush()
-{
-    log_trace("Connection::beginFlush");
-
-    // TODO: only call beginWrite if output is available
-    beginWrite();
-}
-
-
-bool Connection::endFlush()
-{ 
-    log_trace("Connection::endFlush");
-
-    // TODO: only call endWrite if output was available
-    endWrite();
-    bool avail = outputAvailable();
-    return ! avail;
-}
-
-
 void Connection::beginSendRequest(Request& request)
 {
     log_trace("Connection::beginSendRequest");
@@ -469,7 +325,7 @@ void Connection::beginSendReply(Reply& reply)
     ReplyHeader& header = _reply->header();
     std::ostream os( _httpbuf.buffer() );
 
-    // TODO: only if finished or over 8K data to send
+    // TODO: no flush here
     if( outputAvailable() )
     {
         _timer.start( _writeTimeout );
@@ -481,10 +337,13 @@ void Connection::beginSendReply(Reply& reply)
     {
         if(_chunked)
         {
-            os << std::hex << _reply->buffer().size() << std::dec << "\r\n";
-            os.write( _reply->buffer().data(), _reply->buffer().size() );
-            _reply->clearBody();
-            os.write("\r\n", 2);
+            if(_reply->buffer().size() > 0)
+            {
+                os << std::hex << _reply->buffer().size() << std::dec << "\r\n";
+                os.write( _reply->buffer().data(), _reply->buffer().size() );
+                os.write("\r\n", 2);
+            }
+
             os.write("0\r\n\r\n", 5);
             _chunked = false;
         }
@@ -495,6 +354,8 @@ void Connection::beginSendReply(Reply& reply)
 
         log_debug("begin writing reply");
         _timer.start( _writeTimeout );
+
+        // _reply->onOutput(); need flush now
         beginWrite();
         return;
     }
@@ -505,11 +366,14 @@ void Connection::beginSendReply(Reply& reply)
         sendChunkedHeader(os, *_reply);
     }
 
-    os << std::hex << _reply->buffer().size() << std::dec << "\r\n";
-    os.write( _reply->buffer().data(), _reply->buffer().size() );
-    _reply->clearBody();
-    os.write("\r\n", 2);
+    if(_reply->buffer().size() > 0)
+    {
+        os << std::hex << _reply->buffer().size() << std::dec << "\r\n";
+        os.write( _reply->buffer().data(), _reply->buffer().size() );
+        os.write("\r\n", 2);
+    }
 
+    // TODO: only if over 8K data to send
     _timer.start( _writeTimeout );
     beginWrite();
 }
@@ -570,7 +434,6 @@ void Connection::beginReceiveRequest(Request& request)
     log_trace("Connection::beginReceiveRequest " << _state);
 
     _request = &request;
-
     _parseEvent.init( request.header() );
 
 #ifdef PT_HTTP_WITH_SSL
@@ -582,6 +445,14 @@ void Connection::beginReceiveRequest(Request& request)
         return;
     }
 #endif
+
+    if( outputAvailable() )
+    {
+        log_debug("sending remaining reply data");
+        beginWrite();
+        _state = ReplyOutputPending;
+        return;
+    }
 
     log_debug("begin reading request");
     _timer.start( _readTimeout );
@@ -605,6 +476,14 @@ bool Connection::endReceiveRequest()
         return false;
     }
 #endif
+
+    if(_state == ReplyOutputPending)
+    {
+        log_debug("sent remaining reply data");
+        endWrite();
+        _state = Connected;
+        return false;
+    }
 
     endRead();
 
@@ -670,6 +549,14 @@ void Connection::beginReceiveReply(Reply& r)
     _reply = &r;
     _replyParseEvent.init( _reply->header() );
 
+    if( outputAvailable() )
+    {
+        log_debug("sending remaining request data");
+        beginWrite();
+        _state = RequestOutputPending;
+        return;
+    }
+
     _timer.start( _readTimeout );
     beginRead();
 }
@@ -678,6 +565,14 @@ void Connection::beginReceiveReply(Reply& r)
 bool Connection::endReceiveReply()
 {
     bool receivedHeader = false;
+
+    if(_state == RequestOutputPending)
+    {
+        log_debug("sent remaining request data");
+        endWrite();
+        _state = Connected;
+        return false;
+    }
 
     endRead();
 
@@ -765,6 +660,12 @@ void Connection::onHttpsInput(Pt::Ssl::IOBuffer& ssl)
 {
     log_trace("Connection::onHttpsInput");
 
+    if(_state == ReplyOutputPending)
+    {
+        _reply->onOutput();
+        return;
+    }
+
     if(_request)
     {
         _request->onInput();
@@ -779,6 +680,12 @@ void Connection::onHttpsOutput(Pt::Ssl::IOBuffer& ssl)
 {
     log_trace("Connection::onHttpsOutput");
 
+    if(_state == RequestOutputPending)
+    {
+        _reply->onInput();
+        return;
+    }
+
     if(_reply)
     {
         _reply->onOutput();
@@ -790,8 +697,6 @@ void Connection::onHttpsOutput(Pt::Ssl::IOBuffer& ssl)
         _request->onOutput();
         return;
     }
-
-    outputReady.send(*this);
 }
 #endif
 
@@ -808,6 +713,12 @@ void Connection::onHttpInput(System::StreamBuffer& sb)
 {
     log_trace("Connection::onHttpInput");
 
+    if(_state == ReplyOutputPending)
+    {
+        _reply->onOutput();
+        return;
+    }
+
     if(_request)
     {
         _request->onInput();
@@ -823,6 +734,12 @@ void Connection::onHttpOutput(System::StreamBuffer& sb)
 {
     log_trace("Connection::onHttpOutput");
 
+    if(_state == RequestOutputPending)
+    {
+        _reply->onInput();
+        return;
+    }
+
     if(_reply)
     {
         _reply->onOutput();
@@ -834,8 +751,6 @@ void Connection::onHttpOutput(System::StreamBuffer& sb)
         _request->onOutput();
         return;
     }
-
-    outputReady.send(*this);
 }
 
 

@@ -1,0 +1,161 @@
+/*
+ * Copyright (C) 2011 by Marc Boris Duerner
+ * 
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ * 
+ * As a special exception, you may use this file as part of a free
+ * software library without restriction. Specifically, if other files
+ * instantiate templates or use macros or inline functions from this
+ * file, or you compile this file and link it with other files to
+ * produce an executable, this file does not by itself cause the
+ * resulting executable to be covered by the GNU General Public
+ * License. This exception does not however invalidate any other
+ * reasons why the executable file might be covered by the GNU Library
+ * General Public License.
+ * 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
+#include "HttpBuffer.h"
+#include <Pt/System/Logger.h>
+#include <cstring>
+#include <cassert>
+
+log_define("Pt.Http.HttpBuffer")
+
+namespace Pt {
+
+namespace Http {
+
+void HttpBuffer::beginBody(const MessageHeader& reply)
+{
+    log_trace("HttpBuffer::beginBody()");
+    _chunkParser.reset();
+
+    setg(0,0,0);
+
+    _keepAlive = reply.keepAlive();
+    _contentLength = reply.contentLength();
+    _chunked = reply.chunkedTransferEncoding();
+
+    log_debug("keep-alive: " << _keepAlive);
+    log_debug("chunked: " << _chunked);
+    log_debug("content-length: " << _contentLength);
+}
+
+
+bool HttpBuffer::isEnd() const
+{
+    log_trace("HttpBuffer::isEnd()");
+    if(_chunked)
+        return _chunkParser.end();
+
+    return _contentLength == 0;
+}
+
+
+void HttpBuffer::import(std::streamsize n)
+{
+    log_trace("HttpBuffer::import(" << n << ")");
+
+    if( ! _sbuf)
+        return;
+
+    if(n == 0)
+    {
+        n = _sbuf->in_avail();
+        log_debug("available: " << n);
+    }
+
+    // Move unread bytes and putback to front
+    size_t putback  = MaxPutback;
+    size_t leftover = 0;
+    
+    if( this->gptr() ) 
+    {
+        putback = std::min<std::size_t>( this->gptr() - this->eback(), MaxPutback);
+        char* to = _buffer + MaxPutback - putback;
+        char* from = this->gptr() - putback;
+
+        leftover = this->egptr() - this->gptr();
+        std::memmove( to, from, putback + leftover );
+
+        this->setg( _buffer + (MaxPutback - putback),  // start of get area
+                    _buffer + MaxPutback,              // gptr position
+                    _buffer + MaxPutback + leftover ); // end of get area
+    }
+
+    if(_chunked)
+    {
+        log_debug("getting next chunk");
+        _contentLength = 0;
+        while(n-- && ! _chunkParser.end())
+        {
+            char ch = _sbuf->sbumpc();
+            _chunkParser.parse(ch);
+            if( _chunkParser.hasChunk() )
+            {
+                _contentLength = _chunkParser.chunkSize();
+                break;
+            }
+        }
+    }
+
+    size_t unused = sizeof(_buffer) - (MaxPutback + leftover);
+    log_debug("unused buffer area: " << unused);
+    if(n > unused)
+        n = unused;
+
+    log_debug("content-length: " << _contentLength);
+    if(n > _contentLength)
+        n = _contentLength;
+
+    if( this->isEnd() )
+    {
+        log_trace("received all content -> EOF");
+        return;
+    }
+
+    log_debug("http buffer refill: " << n);
+    if(n == 0)
+        return;
+
+    n = _sbuf->sgetn(_buffer + MaxPutback + leftover, n);
+
+    setg(_buffer + MaxPutback - putback, // eback - start of get area
+         _buffer + MaxPutback,           // gptr - current position
+         _buffer + MaxPutback + n);      // egptr - end of get area
+
+    _contentLength -= n;
+    log_debug("remaining content length: " << _contentLength);
+}
+
+
+HttpBuffer::int_type HttpBuffer::underflow()
+{ 
+    log_trace("HttpBuffer::underflow()");
+
+    if(this->gptr() < this->egptr())
+        return traits_type::to_int_type(*(this->gptr()));
+
+    import( sizeof(_buffer) );
+
+    if( this->gptr() < this->egptr() )
+        return traits_type::to_int_type( *this->gptr() );
+
+    return traits_type::eof();
+}
+
+} // namespace Http
+
+} // namespace Pt

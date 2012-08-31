@@ -184,6 +184,8 @@ void RequestHandler::onReplySent(Reply& r)
 
     if( ! _conn.isConnected() )
     {
+        _reply.clear();
+        _request.clear();
         log_debug("not connected anymore");
         _timeout.send(*this);
         return;
@@ -199,6 +201,7 @@ void RequestHandler::onReplySent(Reply& r)
     if( ! _reply.finished() )
     {
         log_debug("continuing response");
+        _reply.clearBody();
         _responder->writeReply(_request, _reply);
         return;
     }

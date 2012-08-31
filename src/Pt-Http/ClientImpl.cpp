@@ -46,8 +46,6 @@ ClientImpl::ClientImpl(Client* client)
 : _client(client)
 , _hstate(Idle)
 {
-    _conn.outputReady += Pt::slot(*this, &ClientImpl::onRequestFlushed);
-
     _req.init(_conn);
     _req.outputSent() += Pt::slot(*this, &ClientImpl::onRequestSent);
 
@@ -91,12 +89,6 @@ void ClientImpl::onRequestSent(Request& r)
         _client->replyReceived().send(*_client);
     else
         _client->requestSent().send(*_client);
-}
-
-
-void ClientImpl::onRequestFlushed(Connection& conn)
-{
-    _client->replyReceived().send(*_client);
 }
 
 
@@ -175,15 +167,7 @@ void ClientImpl::beginReceive()
         return;
     }
 
-    if(_hstate == OnRequestFlush)
-    {
-        log_debug("flushing connection");
-
-        _conn.beginFlush();
-        return;
-    }
-
-    if(_hstate == OnReply)
+    if(_hstate == OnReply || _hstate == OnReplyHeader)
     {
         _reply.beginReceive();
         return;
@@ -205,28 +189,42 @@ bool ClientImpl::endReceive()
         if(completed)
         {
             log_debug("request completed");
-            _hstate = OnRequestFlush;
+            _hstate = OnReplyHeader;
             _req.clear();
             _reply.clear();
         }
         
         return false;
     }
-    
-    if(_hstate == OnRequestFlush)
-    {
-        log_debug("flushed connection");
-        bool complete = _conn.endFlush();
-        if(complete)
+
+    if(_hstate == OnReplyHeader)
+    {   
+        log_debug("receiving header");
+        bool receivedHeader = _reply.endReceive();
+
+        if(receivedHeader)
+        {
             _hstate = OnReply;
 
-        return false;
+            if( _reply.isEnd() )
+            {
+                log_debug("reply completed");
+                _hstate = Idle;
+
+                if( ! _conn.isConnected() )
+                {
+                    log_debug("connection closed");
+                }
+            }
+        }
+
+        return receivedHeader;
     }
 
     if(_hstate == OnReply)
     {   
         log_debug("advancing reply");
-        bool receivedHeader = _reply.endReceive();
+        _reply.endReceive();
 
         if( _reply.isEnd() )
         {
@@ -239,7 +237,7 @@ bool ClientImpl::endReceive()
             }
         }
 
-        return receivedHeader;
+        return false;
     }
 
     return false;

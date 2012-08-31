@@ -13,6 +13,7 @@ SharedLibrary Pt-Http : Client.cpp
                         ClientImpl.cpp
                         ChunkedReader.cpp
                         Connection.cpp
+                        HttpBuffer.cpp
                         NotFoundResponder.cpp
                         NotFoundService.cpp
                         NotAuthenticatedResponder.cpp

@@ -639,6 +639,9 @@
     <ClInclude Include="..\..\src\Pt-Http\Connection.h">
       <Filter>Pt-Http</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Http\HttpBuffer.h">
+      <Filter>Pt-Http</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -1300,6 +1303,9 @@
       <Filter>Pt-Http</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Http\Connection.cpp">
+      <Filter>Pt-Http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Http\HttpBuffer.cpp">
       <Filter>Pt-Http</Filter>
     </ClCompile>
   </ItemGroup>

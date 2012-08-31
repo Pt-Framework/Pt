@@ -30,7 +30,7 @@
 #define Pt_Http_Connection_h
 
 #include "Parser.h"
-#include "ChunkedReader.h"
+#include "HttpBuffer.h"
 
 #include <Pt/Http/Api.h>
 #include <Pt/Http/RequestHeader.h>
@@ -53,56 +53,6 @@ namespace Http {
 
 class Reply;
 class Request;
-
-class HttpBuffer : public std::streambuf
-{
-    static const unsigned int MaxPutback = 4;
-    static const unsigned int BufferSize = 512;
-
-    public:
-        HttpBuffer()
-        : _sbuf(0)
-        , _contentLength(0)
-        , _chunked(false)
-        , _keepAlive(false)
-        {
-            setg(0,0,0);
-        }
-
-        ~HttpBuffer()
-        { }
-        
-        void attach(std::streambuf& sbuf)
-        { _sbuf = &sbuf; }
-
-        std::streambuf* buffer()
-        { return _sbuf; }
-
-        void reset()
-        { 
-            _contentLength = 0;
-            _chunked = false;
-            _keepAlive = false;
-        }
-
-        void beginBody(const MessageHeader& reply);
-
-        void import(std::streamsize n = 0);
-
-        bool isEnd() const;
-
-    protected:
-        virtual int_type underflow();
-
-    private:
-        ChunkParser _chunkParser;
-        std::streambuf* _sbuf;
-        char _buffer[4096];
-        long _contentLength;
-        bool _chunked;
-        bool _keepAlive;
-};
-
 
 class Connection : public Net::TcpSocket
                  , public Connectable
@@ -176,12 +126,6 @@ class Connection : public Net::TcpSocket
         { return TcpSocket::isConnected(); }
 
         void cancel();
-
-        void beginFlush();
-
-        bool endFlush();
-
-        Signal<Connection&> outputReady;
 
     protected:
         void beginSendRequest(Request& r);
@@ -268,7 +212,10 @@ class Connection : public Net::TcpSocket
             NotConnected = 0,
             Connected = 2,
             SslHandshake = 3,
-            SslAccept = 4
+            SslAccept = 4,
+            RequestOutputPending = 5,
+            ReplyOutputPending = 6
+
         } _state;
 
         bool _chunked;
