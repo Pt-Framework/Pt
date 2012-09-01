@@ -141,7 +141,7 @@ void RequestHandler::onRequestReceived(Request& req)
     
     if( _request.body().rdbuf()->in_avail() )
     {
-        log_debug("body available");
+        log_debug("body available: " << _request.body().rdbuf()->in_avail() );
         
         if(_ignoreBody)
             _request.body().ignore( _request.body().rdbuf()->in_avail() );

@@ -31,7 +31,7 @@
 #include <Pt/Http/Request.h>
 #include <Pt/System/Logger.h>
 
-log_define("Pt.Http.Responder")
+log_define("Pt.Http.Server.Responder")
 
 namespace Pt {
 
@@ -64,7 +64,13 @@ void Responder::beginRequest(Request& request)
 
 void Responder::readRequest(Request& request, Reply& reply)
 {
-    request.body().ignore( request.body().rdbuf()->in_avail() );
+    log_debug("ignoring body");
+    while(request.body().rdbuf()->in_avail())
+    {
+        request.body().get();
+    }
+    
+    //request.body().ignore( request.body().rdbuf()->in_avail() );
 }
 
 
