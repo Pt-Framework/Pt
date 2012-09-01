@@ -127,6 +127,14 @@ class Connection : public Net::TcpSocket
 
         void cancel();
 
+		bool inputAvailable();
+
+		void beginFlush();
+
+		void endFlush();
+
+		Signal<Connection&> flushed;
+
     protected:
         void beginSendRequest(Request& r);
 
@@ -219,6 +227,7 @@ class Connection : public Net::TcpSocket
         } _state;
 
         bool _chunked;
+		bool _keepAlive;
 };
 
 } // namespace Http

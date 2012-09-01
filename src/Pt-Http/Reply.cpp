@@ -83,7 +83,7 @@ bool Reply::endReceive()
 
 bool Reply::isEnd() const
 {
-        return _conn->isEnd();
+    return _conn->isEnd();
 }
 
 

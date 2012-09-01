@@ -82,6 +82,7 @@ Connection::Connection()
 , _keepaliveTimeout(45000)
 , _state(NotConnected)
 , _chunked(false)
+, _keepAlive(false)
 {
     Net::TcpSocket::connected() += Pt::slot(*this, &Connection::onConnect);
 
@@ -187,6 +188,7 @@ void Connection::cancel()
     _request = 0;
     _state = NotConnected;
     _chunked = false;
+	_keepAlive = false;
     _parser.reset(false);
     _replyParser.reset(true);
     _httpbuf.reset();
@@ -312,21 +314,31 @@ bool Connection::endSendRequest()
 }
 
 
+void Connection::beginFlush()
+{
+    _timer.start( _writeTimeout );
+    beginWrite();
+}
+
+
+void Connection::endFlush()
+{
+    _timer.stop();
+    endWrite();
+}
+
+
+// NOTE: maybe add a flag to cause a flush in the future
 void Connection::beginSendReply(Reply& reply)
 {
     log_trace("Connection::beginSendReply");
 
     _reply = &reply;
 
-    const char* server = "Server";
-    const char* connection = "Connection";
-    const char* date = "Date";
-
     ReplyHeader& header = _reply->header();
     std::ostream os( _httpbuf.buffer() );
 
-    // TODO: no flush here
-    if( outputAvailable() )
+	if( ! _reply->header().keepAlive() && outputAvailable() )
     {
         _timer.start( _writeTimeout );
         beginWrite();
@@ -355,13 +367,17 @@ void Connection::beginSendReply(Reply& reply)
         log_debug("begin writing reply");
         _timer.start( _writeTimeout );
 
-        // _reply->onOutput(); need flush now
-        beginWrite();
+		if( _reply->header().keepAlive() )
+			_reply->onOutput(); 
+		else
+			beginWrite();
+
         return;
     }
 
     if( ! _chunked )
     {
+		log_debug("sending chunked header");
         _chunked = true;
         sendChunkedHeader(os, *_reply);
     }
@@ -384,12 +400,20 @@ bool Connection::endSendReply()
     log_trace("Connection::endSendReply");
     // TODO: handle exceptions correctly...
 
+    // TODO: only keepalive when request allows it
+    bool keepAlive = _reply->header().keepAlive();
+
     try
     {
+		//if(! _reply->finished() || ! keepAlive)
+		//{
         _timer.stop();
         endWrite();
-
-        if( outputAvailable() > 0)
+		//}
+		
+		// when keepalive, leave data in the output buffer, otherwise
+		// make sure we send all data
+        if( ! keepAlive && outputAvailable() )
         {
             log_debug("still data to send");
             return false;
@@ -402,9 +426,6 @@ bool Connection::endSendReply()
             return true;
         }
 
-        // TODO: only keepalive when request allows it
-        bool keepAlive = _reply->header().keepAlive();
-        
         _reply = 0;
 
         if(keepAlive)
@@ -446,7 +467,8 @@ void Connection::beginReceiveRequest(Request& request)
     }
 #endif
 
-    if( outputAvailable() )
+	// keep pipeling replies, until no more requests
+    if( outputAvailable() && ! inputAvailable() )
     {
         log_debug("sending remaining reply data");
         beginWrite();
@@ -489,6 +511,7 @@ bool Connection::endReceiveRequest()
 
     if (_httpbuf.buffer()->in_avail() == 0 || Net::TcpSocket::eof())
     {
+		// connection was closed prematurely
         close();
         return false;
     }
@@ -505,7 +528,11 @@ bool Connection::endReceiveRequest()
         if( _parser.fail() )
         {
             log_warn("http parser failed");
-            throw std::runtime_error("http parser failed"); // TODO define exception class
+
+			// TODO define exception class
+            throw std::runtime_error("http parser failed"); 
+			
+			// TODO: handle any previously pipelined reply
             return false;
         }
 
@@ -516,8 +543,10 @@ bool Connection::endReceiveRequest()
             
             if( _httpbuf.isEnd() )
             {
-                log_debug("request body finished");
-                _timer.stop();
+                log_debug("request body finished, no body");
+				_timer.stop();
+				_request = 0;
+				_parser.reset(false);
             }
 
             return true;
@@ -546,6 +575,8 @@ bool Connection::endReceiveRequest()
 
 void Connection::beginReceiveReply(Reply& r)
 {
+	log_trace("Connection::beginReceiveReply");
+
     _reply = &r;
     _replyParseEvent.init( _reply->header() );
 
@@ -564,6 +595,8 @@ void Connection::beginReceiveReply(Reply& r)
 
 bool Connection::endReceiveReply()
 {
+	log_trace("Connection::endReceiveReply");
+
     bool receivedHeader = false;
 
     if(_state == RequestOutputPending)
@@ -602,8 +635,10 @@ bool Connection::endReceiveReply()
 
             if( _httpbuf.isEnd() )
             {
-                log_debug("reply body finished");
-                _timer.stop();
+                log_debug("reply finished, no body");
+				_reply = 0;
+				_replyParser.reset(true);
+				_timer.stop();
             }
 
             return true;
@@ -660,12 +695,6 @@ void Connection::onHttpsInput(Pt::Ssl::IOBuffer& ssl)
 {
     log_trace("Connection::onHttpsInput");
 
-    if(_state == ReplyOutputPending)
-    {
-        _reply->onOutput();
-        return;
-    }
-
     if(_request)
     {
         _request->onInput();
@@ -686,6 +715,12 @@ void Connection::onHttpsOutput(Pt::Ssl::IOBuffer& ssl)
         return;
     }
 
+    if(_state == ReplyOutputPending)
+    {
+        _request->onInput();
+        return;
+    }
+
     if(_reply)
     {
         _reply->onOutput();
@@ -697,6 +732,8 @@ void Connection::onHttpsOutput(Pt::Ssl::IOBuffer& ssl)
         _request->onOutput();
         return;
     }
+
+	flushed.send(*this);
 }
 #endif
 
@@ -712,12 +749,6 @@ void Connection::onConnect(Net::TcpSocket& socket)
 void Connection::onHttpInput(System::StreamBuffer& sb)
 {
     log_trace("Connection::onHttpInput");
-
-    if(_state == ReplyOutputPending)
-    {
-        _reply->onOutput();
-        return;
-    }
 
     if(_request)
     {
@@ -740,6 +771,12 @@ void Connection::onHttpOutput(System::StreamBuffer& sb)
         return;
     }
 
+    if(_state == ReplyOutputPending)
+    {
+        _request->onInput();
+        return;
+    }
+
     if(_reply)
     {
         _reply->onOutput();
@@ -751,6 +788,8 @@ void Connection::onHttpOutput(System::StreamBuffer& sb)
         _request->onOutput();
         return;
     }
+
+	flushed.send(*this);
 }
 
 
@@ -818,6 +857,19 @@ void Connection::beginWrite()
 
     log_debug("no data to write");
     return;
+}
+
+
+bool Connection::inputAvailable()
+{
+#ifdef PT_HTTP_WITH_SSL
+    if(_ssl)
+    {  
+		return _sslbuf.in_avail() > 0;
+    }
+#endif
+
+    return _sockbuf.in_avail() > 0;
 }
 
 
@@ -996,7 +1048,7 @@ void Connection::sendRequest(std::ostream& os, const Request& request)
         os << it->first << ": " << it->second << "\r\n";
     }
 
-   if (!request.header().hasHeader(contentLength))
+    if (!request.header().hasHeader(contentLength))
     {
         os << "Content-Length: " << request.size() << "\r\n";
     }

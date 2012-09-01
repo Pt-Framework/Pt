@@ -143,8 +143,10 @@ class ClientImpl : public Connectable
             OnRequest             = 5,
             OnChunkedRequest      = 6,
             OnRequestEnd          = 7,
+			OnRequestComplete     = 8,
             OnReplyHeader         = 9,
-            OnReply               = 10
+            OnReply               = 10,
+			OnReplyComplete       = 11
         };
 
         void init();
@@ -155,6 +157,7 @@ class ClientImpl : public Connectable
         Connection _conn;
         Request _req;
         Reply _reply;
+		unsigned _requestCount;
         std::string _username;
         std::string _password;
 };

@@ -154,14 +154,14 @@ void RequestHandler::onRequestReceived(Request& req)
 
     if( _request.isEnd() )
     {
-        log_debug("request body finished, begin reply");
         if(_responder)
         {
+			log_debug("request body finished, begin reply");
             _responder->beginReply(_request, _reply);
         }
         else
         {
-            log_debug("consumed body of previous request");
+            log_debug("before request header");
 
             _ignoreBody = false;
             _request.clear();

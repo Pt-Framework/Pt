@@ -45,6 +45,7 @@ namespace Http {
 ClientImpl::ClientImpl(Client* client)
 : _client(client)
 , _hstate(Idle)
+, _requestCount(0)
 {
     _req.init(_conn);
     _req.outputSent() += Pt::slot(*this, &ClientImpl::onRequestSent);
@@ -103,7 +104,7 @@ void ClientImpl::beginSend()
 {
     log_trace("beginSend: " << _hstate);
     
-    if(_hstate == Idle)
+    if(_hstate == Idle || _hstate == OnRequestComplete)
     {
         // NOTE: might want to handle connect here in the future
         _hstate = OnRequest;
@@ -133,6 +134,12 @@ bool ClientImpl::endSend()
         {
             log_debug("sent http request completed");
             _req.clearBody();
+			
+			if( _req.finished() )
+			{
+				++_requestCount;
+				_hstate = OnRequestComplete;
+			}
         }
             
         return complete;
@@ -167,7 +174,7 @@ void ClientImpl::beginReceive()
         return;
     }
 
-    if(_hstate == OnReply || _hstate == OnReplyHeader)
+    if(_hstate == OnReply || _hstate == OnReplyHeader || _hstate == OnRequestComplete || _hstate == OnReplyComplete)
     {
         _reply.beginReceive();
         return;
@@ -185,11 +192,11 @@ bool ClientImpl::endReceive()
     {
         log_debug("flushed cached request");
         bool completed = _req.endSend();
-        
         if(completed)
         {
             log_debug("request completed");
             _hstate = OnReplyHeader;
+			++_requestCount;
             _req.clear();
             _reply.clear();
         }
@@ -197,7 +204,7 @@ bool ClientImpl::endReceive()
         return false;
     }
 
-    if(_hstate == OnReplyHeader)
+    if(_hstate == OnReplyHeader || _hstate == OnRequestComplete || _hstate == OnReplyComplete)
     {   
         log_debug("receiving header");
         bool receivedHeader = _reply.endReceive();
@@ -209,7 +216,12 @@ bool ClientImpl::endReceive()
             if( _reply.isEnd() )
             {
                 log_debug("reply completed");
-                _hstate = Idle;
+				assert(0 != _requestCount);
+
+				if( 0 == --_requestCount)
+					_hstate = Idle;
+				else
+					_hstate = OnReplyComplete;
 
                 if( ! _conn.isConnected() )
                 {
@@ -229,7 +241,12 @@ bool ClientImpl::endReceive()
         if( _reply.isEnd() )
         {
             log_debug("reply completed");
-            _hstate = Idle;
+			assert(0 != _requestCount);
+
+			if( 0 == --_requestCount)
+				_hstate = Idle;
+			else
+				_hstate = OnReplyComplete;
 
             if( ! _conn.isConnected() )
             {
@@ -246,7 +263,7 @@ bool ClientImpl::endReceive()
 
 bool ClientImpl::isEnd() const
 {
-    return _hstate == Idle;
+    return _hstate == Idle || _hstate == OnReplyComplete;
 }
 
 
@@ -254,6 +271,7 @@ void ClientImpl::cancel()
 {
     _conn.cancel();
     _hstate = Idle;
+	_requestCount = 0;
 }
 
 } // namespace Http

@@ -122,6 +122,7 @@ class ServerTest : public Pt::Unit::TestSuite
 
             this->registerMethod( "ReplyWithBody", *this, &ServerTest::ReplyWithBody);
             this->registerMethod( "ChunkedReply", *this, &ServerTest::ChunkedReply);
+			this->registerMethod( "PipelinedRequests", *this, &ServerTest::PipelinedRequests);
         }
 
         void setUp()
@@ -143,6 +144,74 @@ class ServerTest : public Pt::Unit::TestSuite
         void tearDown()
         {
             delete loop;
+        }
+
+        void PipelinedRequests()
+        {
+            HelloService service;
+            Pt::Http::Server server(*loop, "127.0.0.1", 8001);
+            server.addService("/test", service);
+
+            Pt::Http::Client client("127.0.0.1", 8001);
+            client.setActive(*loop);
+            client.requestSent() += Pt::slot(*this, &ServerTest::onPipelinedSent);
+            client.replyReceived() += Pt::slot(*this, &ServerTest::onPipelinedReceived);
+            client.request().setUrl("/test");
+            client.request().header().setHeader("foo", "bar");
+			PT_UNIT_ASSERT(client.request().header().hasHeader("foo") );
+			client.request().finish();
+            client.beginSend();
+
+            loop->run();
+            PT_UNIT_ASSERT_EQUALS(client.reply().header().httpReturnCode(), 200);
+
+            PT_UNIT_ASSERT_EQUALS(_reply, "Hello World!Hello World!");
+        }
+
+        void onPipelinedSent(Pt::Http::Client& client)
+        {
+            bool complete = client.endSend();
+			if( ! complete)
+			{
+				client.beginSend();
+				return;
+			}
+
+			if( ! client.request().header().hasHeader("foo2") )
+			{
+				client.request().header().setHeader("foo2", "bar2");
+				client.request().finish();
+				client.beginSend();
+				return;
+			}
+
+			client.beginReceive();
+        }
+
+        void onPipelinedReceived(Pt::Http::Client& client)
+        {
+            bool received = client.endReceive();
+
+            if( received )
+            {
+                PT_UNIT_ASSERT_EQUALS(client.reply().header().httpReturnCode(), 200);
+            }
+            
+            while ( client.reply().body().rdbuf()->in_avail() )
+			{
+                _reply += client.reply().body().get();
+			}
+
+            if( client.isEnd() )
+            {
+				if( _reply == "Hello World!Hello World!")
+				{
+					loop->exit();
+					return;
+				}
+            }
+
+            client.beginReceive();
         }
 
         void NotFound()
