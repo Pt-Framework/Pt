@@ -139,12 +139,18 @@ void RequestHandler::onRequestReceived(Request& req)
         _responder->beginRequest( _request );
     }
     
-    if( _request.body().rdbuf()->in_avail() )
+    std::streambuf* sb = _request.body().rdbuf();
+    std::streamsize avail = sb->in_avail();
+
+    if( avail > 0 )
     {
-        log_debug("body available: " << _request.body().rdbuf()->in_avail() );
+        log_debug("body available: " << avail );
         
         if(_ignoreBody)
-            _request.body().ignore( _request.body().rdbuf()->in_avail() );
+        {
+            while(avail--)
+                sb->sbumpc();
+        }
         else
             _responder->readRequest(_request, _reply);
 
@@ -269,8 +275,8 @@ class ServerThread : public Connectable
     public:
         ServerThread(Server& server, Signal<Ssl::Context&>* sslConfig = 0)
         : _server(&server)
-        , _thread(_loop)
         , _ssl(false)
+        , _thread(_loop)
         {
 #ifdef PT_HTTP_WITH_SSL
             if(sslConfig)

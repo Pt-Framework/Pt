@@ -64,13 +64,16 @@ void Responder::beginRequest(Request& request)
 
 void Responder::readRequest(Request& request, Reply& reply)
 {
-    log_debug("ignoring body");
-    while(request.body().rdbuf()->in_avail())
+    // cannot use std::streambuf::ignore, because on some implementations
+    // undeflow will be called when the last character is extracted
+
+    std::streambuf* sb = request.body().rdbuf();
+    if(sb)
     {
-        request.body().get();
+        std::streamsize n = sb->in_avail();
+        while(n--)
+            sb->sbumpc();
     }
-    
-    //request.body().ignore( request.body().rdbuf()->in_avail() );
 }
 
 
