@@ -49,11 +49,6 @@ class HelloResponder : public Pt::Http::Responder
         HelloResponder(Pt::Http::Service& service)
         : Pt::Http::Responder(service)
         {}
-
-        void readRequest(std::istream& is, Pt::Http::Reply& reply)
-        {
-            is.ignore( is.rdbuf()->in_avail() );
-        }
         
         void writeReply(Pt::Http::Request& request, Pt::Http::Reply& reply)
         {
@@ -81,13 +76,6 @@ class ChunkedResponder : public Pt::Http::Responder
             //{
             //    std::cerr << it->first << ": " << it->second << "\r\n";
             //}
-        }
-
-        void readRequest(std::istream& is, Pt::Http::Reply& reply)
-        {
-            is.ignore( is.rdbuf()->in_avail() );
-            //while ( is.rdbuf()->in_avail() )
-            //    std::cerr << char( is.get() );
         }
         
         void writeReply(Pt::Http::Request& request, Pt::Http::Reply& reply)
