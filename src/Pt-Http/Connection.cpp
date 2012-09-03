@@ -103,8 +103,7 @@ Connection::~Connection()
 
 void Connection::accept(Net::TcpServer& tcpServer)
 {
-    log_trace("Connection::accept");
-
+    log_trace("Connection::accept");    
     cancel();
 
     Net::TcpSocket::accept(tcpServer);
@@ -118,7 +117,11 @@ void Connection::accept(Net::TcpServer& tcpServer)
 
 void Connection::setHost(const Net::AddrInfo& addrinfo)
 {
-    cancel();
+    if(_state != NotConnected)
+    {
+        cancel();
+    }
+
     _addrInfo = addrinfo;
 }
 
@@ -129,12 +132,14 @@ void Connection::setSecure()
 
     if( ! _ssl)
     {
-        if(_state != NotConnected && _state != Accepted)
+        if(_state == Accepted)
+        {
+            _state = SslNotAccepted;
+        }
+        else if(_state != NotConnected)
         {
             cancel();
         }
-
-        _state = SslNotAccepted;
 
         _sockbuf.outputReady() -= slot(*this, &Connection::onHttpOutput);
         _sockbuf.inputReady() -= slot(*this, &Connection::onHttpInput);

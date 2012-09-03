@@ -495,6 +495,7 @@ void Server::onAccept(Net::TcpServer& server)
 
     // TODO: we should only pass the TcpSocket to the worker thread
     //       so that a RequestHandler can be constructed with an event loop
+
     RequestHandler* conn = new RequestHandler(*this, server);
 
     if(_useWorker < _serverThreads.size())
