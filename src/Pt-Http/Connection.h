@@ -127,34 +127,22 @@ class Connection : public Net::TcpSocket
 
         void cancel();
 
-		bool inputAvailable();
-
-		void beginFlush();
-
-		void endFlush();
-
-		Signal<Connection&> flushed;
-
     protected:
         void beginSendRequest(Request& r);
 
-        bool endSendRequest();
+        MessageProgress endSendRequest();
 
         void beginSendReply(Reply& r);
 
-        bool endSendReply();
+        MessageProgress endSendReply();
 
         void beginReceiveRequest(Request& r);
 
-        // TODO: return progress indicating end of reply and end of header
-        bool endReceiveRequest();
+        MessageProgress endReceiveRequest();
 
         void beginReceiveReply(Reply& r);
 
-        bool endReceiveReply();
-
-        bool isEnd() const
-        { return _httpbuf.isEnd(); }
+        MessageProgress endReceiveReply();
 
         std::streambuf& buffer()
         { return _httpbuf; }
@@ -180,17 +168,15 @@ class Connection : public Net::TcpSocket
 
         void endWrite();
 
+        bool inputAvailable();
+
         bool outputAvailable();
 
         void onTimeout();
+      
+        void writeRequestHeader(std::ostream& os, const Request& request);
 
-        void sendChunkedHeader(std::ostream& os, const Request& request);
-
-        void sendChunkedHeader(std::ostream& os, const Reply& reply);
-        
-        void sendRequest(std::ostream& os, const Request& request);
-
-        void sendReply(std::ostream& os, const Reply& reply);
+        void writeReplyHeader(std::ostream& os, const Reply& reply);
 
     private:
         ParseEvent _parseEvent;
@@ -227,7 +213,7 @@ class Connection : public Net::TcpSocket
         } _state;
 
         bool _chunked;
-		bool _keepAlive;
+        bool _keepAlive;
 };
 
 } // namespace Http

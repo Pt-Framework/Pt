@@ -105,13 +105,11 @@ class ClientImpl : public Connectable
 
         void beginSend();
 
-        bool endSend();
+        MessageProgress endSend();
 
         void beginReceive();
 
-        bool endReceive();
-
-        bool isEnd() const;
+        MessageProgress endReceive();
 
         Request& request()
         { return _req; }
@@ -143,10 +141,9 @@ class ClientImpl : public Connectable
             OnRequest             = 5,
             OnChunkedRequest      = 6,
             OnRequestEnd          = 7,
-			OnRequestComplete     = 8,
-            OnReplyHeader         = 9,
-            OnReply               = 10,
-			OnReplyComplete       = 11
+            OnRequestComplete     = 8,
+            OnReply               = 9,
+            OnReplyComplete       = 10
         };
 
         void init();
@@ -157,7 +154,7 @@ class ClientImpl : public Connectable
         Connection _conn;
         Request _req;
         Reply _reply;
-		unsigned _requestCount;
+        unsigned _requestCount;
         std::string _username;
         std::string _password;
 };

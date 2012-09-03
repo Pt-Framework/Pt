@@ -51,24 +51,6 @@ namespace Ssl {
 
 namespace Http {
 
-class Reply;
-class Request;
-
-class PT_HTTP_API ConnectionClosed : public System::IOError
-{
-    public:
-        ConnectionClosed();
-
-        ~ConnectionClosed() throw()
-        {}
-};
-
-enum Protocol
-{
-  Http = 0,
-  Https = 1
-};
-
 class PT_HTTP_API Client : private NonCopyable
 {
     public:
@@ -104,7 +86,7 @@ class PT_HTTP_API Client : private NonCopyable
 
         void beginSend();
 
-        bool endSend();
+        MessageProgress endSend();
 
         /** @brief Signals that a part of the request was sent.
         */
@@ -113,14 +95,12 @@ class PT_HTTP_API Client : private NonCopyable
 
         void beginReceive();
 
-        bool endReceive();
+        MessageProgress endReceive();
 
         /** @brief Signals that a part of the reply was received.
         */
         Signal<Client&>& replyReceived()
         { return _replyReceived; }
-
-        bool isEnd() const;
 
         Request& request();
 

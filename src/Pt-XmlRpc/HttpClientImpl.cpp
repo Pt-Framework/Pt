@@ -83,19 +83,19 @@ void HttpClientImpl::onReply(Http::Client& client)
 {
     try
     {
-        bool received = client.endReceive();
-        if(received)
+        Http::MessageProgress progress = client.endReceive();
+        if( progress.header() )
         {
             verifyHeader(client.reply().header());
             ClientImpl::onReadReplyBegin(client.reply().body());
         }
 
-        if( client.reply().body().rdbuf()->in_avail() )
+        if( progress.body() )
         {
             ClientImpl::onReadReply();
         }
 
-        if( client.isEnd() )
+        if( progress.finished() )
         {
             ClientImpl::onReplyFinished();
             return;
@@ -103,7 +103,7 @@ void HttpClientImpl::onReply(Http::Client& client)
 
         client.beginReceive();
     }
-    catch(const std::exception& ex)
+    catch(const std::exception&)
     {
         _error = true;
         ClientImpl::onReplyFinished();

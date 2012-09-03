@@ -131,19 +131,28 @@ void RequestHandler::onRequestReceived(Request& req)
     //_responder = _server.getDefaultResponder(_request->header());
     //replyError();
 
-    bool receivedHeader = _request.endReceive();
-    if(receivedHeader)
+    MessageProgress progress = _request.endReceive();
+
+    if( ! _conn.isConnected() )
+    {
+        log_debug("not connected anymore");
+        _timeout.send(*this);
+        return;
+    }
+
+    if( progress.header() )
     {
         log_debug("received request header");
         _responder = _server.getResponder(_request.header());
         _responder->beginRequest( _request );
+        _ignoreBody = false;
     }
     
-    std::streambuf* sb = _request.body().rdbuf();
-    std::streamsize avail = sb->in_avail();
-
-    if( avail > 0 )
+    if( progress.body() )
     {
+        std::streambuf* sb = _request.body().rdbuf();
+        std::streamsize avail = sb->in_avail();
+
         log_debug("body available: " << avail );
         
         if(_ignoreBody)
@@ -152,33 +161,31 @@ void RequestHandler::onRequestReceived(Request& req)
                 sb->sbumpc();
         }
         else
+        {
             _responder->readRequest(_request, _reply);
 
-        if( _reply.finished() ) // NOTE: _reply.isSending()
-            return;
-    } 
+            // TODO: _reply.isSending(), maybe only beginSend was called
+            //       for a chunked reply.
+            if( _reply.finished() )
+            {
+                _ignoreBody = true;
+                return;
+            }
+        }
+    }
 
-    if( _request.isEnd() )
+    if( progress.finished() )
     {
         if(_responder)
         {
-			log_debug("request body finished, begin reply");
+            log_debug("request body finished, begin reply");
             _responder->beginReply(_request, _reply);
+            return;
         }
-        else
-        {
-            log_debug("before request header");
+    }
 
-            _ignoreBody = false;
-            _request.clear();
-            _request.beginReceive();
-        }
-    }
-    else
-    {
-        log_debug("more data available");
-        _request.beginReceive();
-    }
+    log_debug("more data available");
+    _request.beginReceive();
 }
 
 
@@ -186,18 +193,16 @@ void RequestHandler::onReplySent(Reply& r)
 {
     log_trace("RequestHandler::onReplySent");
 
-    bool completed = _reply.endSend();
+    MessageProgress progress = _reply.endSend();
 
     if( ! _conn.isConnected() )
     {
-        _reply.clear();
-        _request.clear();
         log_debug("not connected anymore");
         _timeout.send(*this);
         return;
     }
 
-    if( ! completed )
+    if( ! progress.finished() )
     {
         log_debug("writing left over data");
         _reply.beginSend();
@@ -221,17 +226,7 @@ void RequestHandler::onReplySent(Reply& r)
     }
 
     _reply.clear();
-
-    if( _request.isEnd() )
-    {
-        _request.clear();
-    }
-    else
-    {
-        // request body was not completely consumed, set a flag to read the
-        // rest of the body later
-        _ignoreBody = true;
-    }
+    _request.clear();
 
     _request.beginReceive();
 }

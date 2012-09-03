@@ -39,15 +39,56 @@ namespace Pt {
 
 namespace Http {
 
-/*enum Progress
+enum Protocol
 {
-    Begin    = 0,
-    Header   = 1,
-    Body     = 2,
-    Trailer  = 3,
-    Finished = 4,
-    Invalid  = 0x7fffffff
-};*/
+  Http = 0,
+  Https = 1
+};
+
+class MessageProgress
+{
+    private:
+        enum Result
+        {
+            Finished   = 1,
+            InProgress = 2,
+            Header     = 4,
+            Body       = 8,
+            Trailer    = 16,
+        };
+
+    public:
+        MessageProgress()
+        : _result(InProgress)
+        {}
+
+        bool header() const
+        { return (_result & Header) == Header; }
+
+        bool body() const
+        { return (_result & Body) == Body; }
+
+        bool trailer() const
+        { return (_result & Trailer) == Trailer; }
+
+        bool finished() const
+        { return (_result & Finished) == Finished; }
+
+        void setFinished()
+        { _result |= Finished ; }
+
+        void setOnHeader()
+        { _result |= Header; }
+        
+        void setOnBody()
+        { _result |= Body; }
+
+        void setOnTrailer()
+        { _result |= Trailer; }
+
+    private:
+        unsigned long _result;
+};
 
 class PT_HTTP_API MessageBuffer : public std::streambuf
 {

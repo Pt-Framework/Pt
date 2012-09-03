@@ -110,7 +110,7 @@ class ServerTest : public Pt::Unit::TestSuite
 
             this->registerMethod( "ReplyWithBody", *this, &ServerTest::ReplyWithBody);
             this->registerMethod( "ChunkedReply", *this, &ServerTest::ChunkedReply);
-			this->registerMethod( "PipelinedRequests", *this, &ServerTest::PipelinedRequests);
+            this->registerMethod( "PipelinedRequests", *this, &ServerTest::PipelinedRequests);
         }
 
         void setUp()
@@ -146,8 +146,8 @@ class ServerTest : public Pt::Unit::TestSuite
             client.replyReceived() += Pt::slot(*this, &ServerTest::onPipelinedReceived);
             client.request().setUrl("/test");
             client.request().header().setHeader("foo", "bar");
-			PT_UNIT_ASSERT(client.request().header().hasHeader("foo") );
-			client.request().finish();
+            PT_UNIT_ASSERT(client.request().header().hasHeader("foo") );
+            client.request().finish();
             client.beginSend();
 
             loop->run();
@@ -158,45 +158,48 @@ class ServerTest : public Pt::Unit::TestSuite
 
         void onPipelinedSent(Pt::Http::Client& client)
         {
-            bool complete = client.endSend();
-			if( ! complete)
-			{
-				client.beginSend();
-				return;
-			}
+            Pt::Http::MessageProgress progress = client.endSend();
+            if( ! progress.finished() )
+            {
+                client.beginSend();
+                return;
+            }
 
-			if( ! client.request().header().hasHeader("foo2") )
-			{
-				client.request().header().setHeader("foo2", "bar2");
-				client.request().finish();
-				client.beginSend();
-				return;
-			}
+            if( ! client.request().header().hasHeader("foo2") )
+            {
+                client.request().header().setHeader("foo2", "bar2");
+                client.request().finish();
+                client.beginSend();
+                return;
+            }
 
-			client.beginReceive();
+            client.beginReceive();
         }
 
         void onPipelinedReceived(Pt::Http::Client& client)
         {
-            bool received = client.endReceive();
+            Pt::Http::MessageProgress progress = client.endReceive();
 
-            if( received )
+            if( progress.header() )
             {
                 PT_UNIT_ASSERT_EQUALS(client.reply().header().httpReturnCode(), 200);
             }
             
-            while ( client.reply().body().rdbuf()->in_avail() )
-			{
-                _reply += client.reply().body().get();
-			}
-
-            if( client.isEnd() )
+            if(progress.body())
             {
-				if( _reply == "Hello World!Hello World!")
-				{
-					loop->exit();
-					return;
-				}
+                while ( client.reply().body().rdbuf()->in_avail() )
+                {
+                    _reply += client.reply().body().get();
+                }
+            }
+
+            if( progress.finished() )
+            {
+                if( _reply == "Hello World!Hello World!")
+                {
+                    loop->exit();
+                    return;
+                }
             }
 
             client.beginReceive();
@@ -220,17 +223,18 @@ class ServerTest : public Pt::Unit::TestSuite
 
         void onNotFoundReceived(Pt::Http::Client& client)
         {
-            bool received = client.endReceive();
+            Pt::Http::MessageProgress progress = client.endReceive();
 
-            if(received)
+            if(progress.header())
             {
                 PT_UNIT_ASSERT_EQUALS(client.reply().header().httpReturnCode(), 404);
             }
 
-            while ( client.reply().body().rdbuf()->in_avail() )
-                _reply += client.reply().body().get();
+            if(progress.body())
+                while ( client.reply().body().rdbuf()->in_avail() )
+                    _reply += client.reply().body().get();
 
-            if( client.isEnd() )
+            if( progress.finished() )
             {
                 PT_UNIT_ASSERT_EQUALS(client.reply().header().httpReturnCode(), 404);
                 loop->exit();
@@ -324,17 +328,18 @@ class ServerTest : public Pt::Unit::TestSuite
 
         void onHelloReceived(Pt::Http::Client& client)
         {
-            bool received = client.endReceive();
+            Pt::Http::MessageProgress progress = client.endReceive();
 
-            if( received )
+            if( progress.header() )
             {
                 PT_UNIT_ASSERT_EQUALS(client.reply().header().httpReturnCode(), 200);
             }
             
-            while ( client.reply().body().rdbuf()->in_avail() )
-                _reply += client.reply().body().get();
+            if( progress.body() )
+                while ( client.reply().body().rdbuf()->in_avail() )
+                    _reply += client.reply().body().get();
 
-            if( client.isEnd() )
+            if( progress.finished() )
             {
                 loop->exit();
                 return;
@@ -367,7 +372,8 @@ class ServerTest : public Pt::Unit::TestSuite
 
         void onChunkedSent(Pt::Http::Client& client)
         {
-            if( ! client.endSend() )
+            Pt::Http::MessageProgress progress = client.endSend();
+            if( ! progress.finished() )
             {
                 client.beginSend();
                 return;
@@ -386,17 +392,18 @@ class ServerTest : public Pt::Unit::TestSuite
 
         void onChunkedReceived(Pt::Http::Client& client)
         {
-            bool received = client.endReceive();
+            Pt::Http::MessageProgress progress = client.endReceive();
 
-            if(received)
+            if( progress.header() )
             {
                 PT_UNIT_ASSERT_EQUALS(client.reply().header().httpReturnCode(), 200);
             }
 
-            while ( client.reply().body().rdbuf()->in_avail() )
-                _reply += client.reply().body().get();
+            if( progress.body() )
+                while ( client.reply().body().rdbuf()->in_avail() )
+                    _reply += client.reply().body().get();
 
-            if( client.isEnd() )
+            if( progress.finished() )
             {
                 loop->exit();
                 return;

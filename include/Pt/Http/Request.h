@@ -54,22 +54,22 @@ class PT_HTTP_API Request
         , _finished(false)
         { }
 
+        void setUrl(const std::string& u)
+        { _header.url(u); }
+
         void init(Http::Connection& conn)
         { _conn = &conn; }
 
+        Connection* connection()
+        { return _conn; }
+
         void beginReceive();
 
-        bool endReceive();
+        MessageProgress endReceive();
 
         void beginSend();
 
-        bool endSend();
-
-        void finish()
-        { _finished = true; }
-
-        bool finished() const
-        { return _finished; }
+        MessageProgress endSend();
 
         Signal<Request&>& inputReceived()
         { return _inputReceived; }
@@ -77,7 +77,11 @@ class PT_HTTP_API Request
         Signal<Request&>& outputSent()
         { return _outputSent; }
 
-        bool isEnd() const;
+        void finish()
+        { _finished = true; }
+
+        bool finished() const
+        { return _finished; }
 
         RequestHeader& header()
         { return _header; }
@@ -96,17 +100,14 @@ class PT_HTTP_API Request
         void clearBody()
         { _buf.reset(); }
 
-        void setUrl(const std::string& u)
-        { _header.url(u); }
-
         const char* data() const
         { return _buf.data(); }
 
-        std::iostream& body()
-        { return _body; }
-
         std::size_t size() const
         { return _buf.size(); }
+
+        std::iostream& body()
+        { return _body; }
 
     protected:
         void onInput()

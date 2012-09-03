@@ -57,21 +57,23 @@ class PT_HTTP_API Reply
             _conn = &conn;
             _finished = false;
         }
-
-        void clearBody()
-        {
-            _buf.reset();
-        }
-
+        
+        Connection* connection()
+        { return _conn; }
+        
         void beginReceive();
 
-        bool endReceive();
-
-        bool isEnd() const;
+        MessageProgress endReceive();
 
         void beginSend();
 
-        bool endSend();
+        MessageProgress endSend();
+
+        Signal<Reply&>& inputReceived()
+        { return _inputReceived; }
+
+        Signal<Reply&>& outputSent()
+        { return _outputSent; }
 
         void finish()
         { _finished = true; }
@@ -93,17 +95,17 @@ class PT_HTTP_API Reply
             _finished = false;
         }
 
-        const MessageBuffer& buffer()
-        { return _buf; }
+        void clearBody()
+        { _buf.reset(); }
+
+        const char* data() const
+        { return _buf.data(); }
+
+        std::size_t size() const
+        { return _buf.size(); }
 
         std::iostream& body()
         { return _body; }
-
-        Signal<Reply&>& inputReceived()
-        { return _inputReceived; }
-
-        Signal<Reply&>& outputSent()
-        { return _outputSent; }
 
     protected:
         void onInput()

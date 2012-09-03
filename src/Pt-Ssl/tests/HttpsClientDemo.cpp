@@ -39,16 +39,19 @@ log_define("Pt.Ssl.HttpClientDemo")
 
 void onReply(Pt::Http::Client& client)
 {
-    bool received = client.endReceive();
+    Pt::Http::MessageProgress progress  = client.endReceive();
 
-    while ( client.reply().body().rdbuf()->in_avail() )
+    if( progress.body() )
     {
-        char ch;
-        client.reply().body().get(ch);
-        std::cout << ch;
+        while ( client.reply().body().rdbuf()->in_avail() )
+        {
+            char ch;
+            client.reply().body().get(ch);
+            std::cout << ch;
+        }
     }
 
-    if( client.isEnd() )
+    if( progress.finished() )
     {
         client.loop()->exit();
         return;

@@ -42,7 +42,7 @@ void Request::beginReceive()
 }
 
 
-bool Request::endReceive()
+MessageProgress Request::endReceive()
 { 
     return _conn->endReceiveRequest(); 
 }
@@ -54,16 +54,11 @@ void Request::beginSend()
 }
 
 
-bool Request::endSend()
+MessageProgress Request::endSend()
 { 
     return _conn->endSendRequest(); 
 }
 
-
-bool Request::isEnd() const
-{
-    return _conn->isEnd();
-}
 
 
 
@@ -75,15 +70,9 @@ void Reply::beginReceive()
 }
 
 
-bool Reply::endReceive()
+MessageProgress Reply::endReceive()
 { 
     return _conn->endReceiveReply(); 
-}
-
-
-bool Reply::isEnd() const
-{
-    return _conn->isEnd();
 }
 
 
@@ -93,7 +82,7 @@ void Reply::beginSend()
 }
 
 
-bool Reply::endSend()
+MessageProgress Reply::endSend()
 { 
     return _conn->endSendReply(); 
 }

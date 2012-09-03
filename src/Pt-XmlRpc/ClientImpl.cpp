@@ -178,7 +178,7 @@ std::size_t ClientImpl::onReadReply()
         _method->setFault(Fault::invalidMethodParameters, error.what());
         _method->onFinished();
     }
-    catch(const std::exception& error)
+    catch(const std::exception&)
     {
         _errorPending = true;
         _method->onFinished();
@@ -197,7 +197,7 @@ void ClientImpl::onReplyFinished()
         _errorPending = false;
         endExecute();
     }
-    catch (const std::exception& e)
+    catch (const std::exception&)
     {
         if (!_method)
             throw;

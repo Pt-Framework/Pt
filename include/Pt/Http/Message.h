@@ -39,7 +39,7 @@ namespace Pt {
 
 namespace Http {
 
-class Message
+/*class Message
 {
         MessageHead _head;
 
@@ -111,7 +111,7 @@ class Message
         bool keepAlive() const
         { return _head.keepAlive(); }
 
-};
+};*/
 
 } // namespace Http
 

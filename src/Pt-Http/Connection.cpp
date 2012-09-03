@@ -188,7 +188,7 @@ void Connection::cancel()
     _request = 0;
     _state = NotConnected;
     _chunked = false;
-	_keepAlive = false;
+    _keepAlive = false;
     _parser.reset(false);
     _replyParser.reset(true);
     _httpbuf.reset();
@@ -240,7 +240,10 @@ void Connection::beginSendRequest(Request& request)
         }
         else
         {
-            sendRequest(os, *_request);
+            writeRequestHeader(os, request);
+
+            log_debug("writing body: " << request.size() << " bytes");
+            os.write(request.data(), request.size());
         }
 
         log_debug("sending HTTP request");
@@ -252,7 +255,7 @@ void Connection::beginSendRequest(Request& request)
     {
         log_debug("sending chunked header");
         _chunked = true;
-        sendChunkedHeader(os, *_request);
+        writeRequestHeader(os, request);
     }
 
     log_debug("sending HTTP chunk: "  << _request->size() << " bytes");
@@ -270,9 +273,10 @@ void Connection::beginSendRequest(Request& request)
 }
 
 
-bool Connection::endSendRequest()
+MessageProgress Connection::endSendRequest()
 {
     log_trace("Connection::endSendRequest");
+    MessageProgress progress;
 
     if(_state == NotConnected)
     {
@@ -285,7 +289,7 @@ bool Connection::endSendRequest()
         else
             _state = Connected;
 
-        return false;
+        return progress;
     }
 
 #ifdef PT_HTTP_WITH_SSL
@@ -295,7 +299,7 @@ bool Connection::endSendRequest()
         _sslbuf.endHandshake();
         _state = Connected;
         log_debug("SSL handshake finished");
-        return false;
+        return progress;
     }
 #endif
 
@@ -310,21 +314,8 @@ bool Connection::endSendRequest()
  
     // indicates that the request or chunk was completely written
     log_debug("request data sent");
-    return true;
-}
-
-
-void Connection::beginFlush()
-{
-    _timer.start( _writeTimeout );
-    beginWrite();
-}
-
-
-void Connection::endFlush()
-{
-    _timer.stop();
-    endWrite();
+    progress.setFinished();
+    return progress;
 }
 
 
@@ -338,7 +329,7 @@ void Connection::beginSendReply(Reply& reply)
     ReplyHeader& header = _reply->header();
     std::ostream os( _httpbuf.buffer() );
 
-	if( ! _reply->header().keepAlive() && outputAvailable() )
+    if( ! _reply->header().keepAlive() && outputAvailable() )
     {
         _timer.start( _writeTimeout );
         beginWrite();
@@ -349,10 +340,10 @@ void Connection::beginSendReply(Reply& reply)
     {
         if(_chunked)
         {
-            if(_reply->buffer().size() > 0)
+            if(_reply->size() > 0)
             {
-                os << std::hex << _reply->buffer().size() << std::dec << "\r\n";
-                os.write( _reply->buffer().data(), _reply->buffer().size() );
+                os << std::hex << _reply->size() << std::dec << "\r\n";
+                os.write( _reply->data(), _reply->size() );
                 os.write("\r\n", 2);
             }
 
@@ -360,32 +351,35 @@ void Connection::beginSendReply(Reply& reply)
             _chunked = false;
         }
         else
-        {
-            sendReply(os, *_reply);
+        {          
+            writeReplyHeader(os, reply);
+
+            log_debug("writing body: " << reply.size() << " bytes");
+            os.write( reply.data(), reply.size() );
         }
 
         log_debug("begin writing reply");
         _timer.start( _writeTimeout );
 
-		if( _reply->header().keepAlive() )
-			_reply->onOutput(); 
-		else
-			beginWrite();
+        if( _reply->header().keepAlive() )
+            _reply->onOutput(); 
+        else
+            beginWrite();
 
         return;
     }
 
     if( ! _chunked )
     {
-		log_debug("sending chunked header");
+        log_debug("sending chunked header");
         _chunked = true;
-        sendChunkedHeader(os, *_reply);
+        writeReplyHeader(os, *_reply);
     }
 
-    if(_reply->buffer().size() > 0)
+    if(_reply->size() > 0)
     {
-        os << std::hex << _reply->buffer().size() << std::dec << "\r\n";
-        os.write( _reply->buffer().data(), _reply->buffer().size() );
+        os << std::hex << _reply->size() << std::dec << "\r\n";
+        os.write( _reply->data(), _reply->size() );
         os.write("\r\n", 2);
     }
 
@@ -395,46 +389,49 @@ void Connection::beginSendReply(Reply& reply)
 }
 
 
-bool Connection::endSendReply()
+MessageProgress Connection::endSendReply()
 {
     log_trace("Connection::endSendReply");
     // TODO: handle exceptions correctly...
 
-    // TODO: only keepalive when request allows it
-    bool keepAlive = _reply->header().keepAlive();
+    MessageProgress progress;
+    _keepAlive = _keepAlive && _reply->header().keepAlive();
 
     try
     {
-		//if(! _reply->finished() || ! keepAlive)
-		//{
+        //if(! _reply->finished() || ! keepAlive)
+        //{
         _timer.stop();
         endWrite();
-		//}
-		
-		// when keepalive, leave data in the output buffer, otherwise
-		// make sure we send all data
-        if( ! keepAlive && outputAvailable() )
+        //}
+        
+        // when keepalive, leave data in the output buffer, otherwise
+        // make sure we send all data
+        if( ! _keepAlive && outputAvailable() )
         {
             log_debug("still data to send");
-            return false;
+            return progress;
         }
   
+        progress.setFinished();
+
         if( ! _reply->finished() )
         {
-            // indicates that chunk was completely written
             log_debug("reply is not finished");
-            return true;
+
+            // indicates that chunk was completely written
+            return progress;
         }
 
         _reply = 0;
 
-        if(keepAlive)
+        if(_keepAlive)
         {
             log_debug("do keep alive");
             _timer.start(_keepaliveTimeout);
 
             // indicates that request was completely written
-            return true;
+            return progress;
         }
     }
     catch (const std::exception& e)
@@ -443,10 +440,10 @@ bool Connection::endSendReply()
     }
 
     log_debug("closing connection");
-    close();
+    cancel();
 
     // indicates that request was completely written
-    return true;
+    return progress;
 }
 
 
@@ -455,7 +452,6 @@ void Connection::beginReceiveRequest(Request& request)
     log_trace("Connection::beginReceiveRequest " << _state);
 
     _request = &request;
-    _parseEvent.init( request.header() );
 
 #ifdef PT_HTTP_WITH_SSL
     if(_state == SslAccept)
@@ -467,7 +463,7 @@ void Connection::beginReceiveRequest(Request& request)
     }
 #endif
 
-	// keep pipeling replies, until no more requests
+    // keep pipeling replies, until no more requests
     if( outputAvailable() && ! inputAvailable() )
     {
         log_debug("sending remaining reply data");
@@ -477,16 +473,16 @@ void Connection::beginReceiveRequest(Request& request)
     }
 
     log_debug("begin reading request");
+    _parseEvent.init( request.header() );
     _timer.start( _readTimeout );
     beginRead();
 }
 
 
-bool Connection::endReceiveRequest()
+MessageProgress Connection::endReceiveRequest()
 {
     log_trace("Connection::endReceiveRequest");
-
-    bool receivedHeader = false;
+    MessageProgress progress;
 
 #ifdef PT_HTTP_WITH_SSL
     if(_state == SslAccept)
@@ -495,7 +491,7 @@ bool Connection::endReceiveRequest()
         _sslbuf.endHandshake();
         _state = Connected;
         log_debug("SSL handshake finished");
-        return false;
+        return progress;
     }
 #endif
 
@@ -504,19 +500,20 @@ bool Connection::endReceiveRequest()
         log_debug("sent remaining reply data");
         endWrite();
         _state = Connected;
-        return false;
+        return progress;
     }
 
     endRead();
 
-    if (_httpbuf.buffer()->in_avail() == 0 || Net::TcpSocket::eof())
+    if( Net::TcpSocket::eof() )
     {
-		// connection was closed prematurely
-        close();
-        return false;
+        // TODO: connection was closed prematurely
+        cancel();
+        progress.setFinished();
+        return progress;
     }
 
-    if ( ! _parser.end() )
+    if( ! _parser.end() )
     {
         if( _parser.begin() && ! _timer.started() )
         {
@@ -529,30 +526,20 @@ bool Connection::endReceiveRequest()
         {
             log_warn("http parser failed");
 
-			// TODO define exception class
+            // TODO define exception class
+            // TODO: handle any previously pipelined reply
             throw std::runtime_error("http parser failed"); 
-			
-			// TODO: handle any previously pipelined reply
-            return false;
         }
 
-        if( _parser.end() )
+        if( ! _parser.end() )
         {
-            _httpbuf.reset();
-            _httpbuf.beginBody(_request->header());
-            
-            if( _httpbuf.isEnd() )
-            {
-                log_debug("request body finished, no body");
-				_timer.stop();
-				_request = 0;
-				_parser.reset(false);
-            }
-
-            return true;
+            return progress;
         }
 
-        return false;
+        _keepAlive = _request->header().keepAlive();
+        progress.setOnHeader();
+        _httpbuf.reset();
+        _httpbuf.beginBody( _request->header() );
     }
 
     if( _parser.end() )
@@ -560,25 +547,29 @@ bool Connection::endReceiveRequest()
         _httpbuf.import();
         log_debug("available: " << _httpbuf.in_avail());
 
+        if(_httpbuf.in_avail() > 0)
+            progress.setOnBody();
+
         if( _httpbuf.isEnd() )
         {
             log_debug("request body finished");
+            progress.setFinished();
+
             _timer.stop();
             _request = 0;
             _parser.reset(false);
         }
     }
 
-    return false;
+    return progress;
 }
 
 
 void Connection::beginReceiveReply(Reply& r)
 {
-	log_trace("Connection::beginReceiveReply");
+    log_trace("Connection::beginReceiveReply");
 
     _reply = &r;
-    _replyParseEvent.init( _reply->header() );
 
     if( outputAvailable() )
     {
@@ -589,22 +580,22 @@ void Connection::beginReceiveReply(Reply& r)
     }
 
     _timer.start( _readTimeout );
+    _replyParseEvent.init( _reply->header() );
     beginRead();
 }
 
 
-bool Connection::endReceiveReply()
+MessageProgress Connection::endReceiveReply()
 {
-	log_trace("Connection::endReceiveReply");
-
-    bool receivedHeader = false;
+    log_trace("Connection::endReceiveReply");
+    MessageProgress progress;
 
     if(_state == RequestOutputPending)
     {
         log_debug("sent remaining request data");
         endWrite();
         _state = Connected;
-        return false;
+        return progress;
     }
 
     endRead();
@@ -625,26 +616,17 @@ bool Connection::endReceiveReply()
         {
             log_warn("http parser failed");
             throw std::runtime_error("http parser failed"); // TODO define exception class
-            return false;
         }
 
-        if( _replyParser.end() )
+        if( ! _replyParser.end() )
         {
-            _httpbuf.reset();
-            _httpbuf.beginBody( _reply->header() );
-
-            if( _httpbuf.isEnd() )
-            {
-                log_debug("reply finished, no body");
-				_reply = 0;
-				_replyParser.reset(true);
-				_timer.stop();
-            }
-
-            return true;
+            return progress;
         }
 
-        return false;
+        log_debug("received header");
+        progress.setOnHeader();
+        _httpbuf.reset();
+        _httpbuf.beginBody( _reply->header() );
     }
 
     if( _replyParser.end() )
@@ -652,9 +634,14 @@ bool Connection::endReceiveReply()
         _httpbuf.import();
         log_debug("available: " << _httpbuf.in_avail());
 
+        if(_httpbuf.in_avail() > 0)
+            progress.setOnBody();
+
         if( _httpbuf.isEnd() )
         {
             log_debug("reply body finished");
+            progress.setFinished();
+            
             bool keepalive = _reply->header().keepAlive();
             
             _reply = 0;
@@ -664,12 +651,12 @@ bool Connection::endReceiveReply()
             if( ! keepalive )
             {
                 log_debug("closing, no keep alive");
-                close();
+                cancel();
             }
         }
     }
 
-    return false;
+    return progress;
 }
 
 
@@ -732,8 +719,6 @@ void Connection::onHttpsOutput(Pt::Ssl::IOBuffer& ssl)
         _request->onOutput();
         return;
     }
-
-	flushed.send(*this);
 }
 #endif
 
@@ -788,8 +773,6 @@ void Connection::onHttpOutput(System::StreamBuffer& sb)
         _request->onOutput();
         return;
     }
-
-	flushed.send(*this);
 }
 
 
@@ -800,17 +783,13 @@ void Connection::beginRead()
         if( _sslbuf.in_avail() )
             onHttpsInput(_sslbuf);
         else
-        {
             _sslbuf.beginRead();
-        }
-    else
+     else
 #endif
         if( _sockbuf.in_avail() )
             onHttpInput(_sockbuf);
         else
-        {
             _sockbuf.beginRead();
-        }
 }
 
 
@@ -865,7 +844,7 @@ bool Connection::inputAvailable()
 #ifdef PT_HTTP_WITH_SSL
     if(_ssl)
     {  
-		return _sslbuf.in_avail() > 0;
+        return _sslbuf.in_avail() > 0;
     }
 #endif
 
@@ -916,61 +895,9 @@ void Connection::onTimeout()
 }
 
 
-void Connection::sendChunkedHeader(std::ostream& os, const Reply& reply)
+void Connection::writeRequestHeader(std::ostream& os, const Request& request)
 {
-    log_debug("send chunked reply header");
-
-    const char* server = "Server";
-    const char* connection = "Connection";
-    const char* date = "Date";
-
-    const ReplyHeader& header = reply.header();
-
-    os <<"HTTP/"
-        << header.httpVersionMajor() << '.'
-        << header.httpVersionMinor() << ' '
-        << header.httpReturnCode() << ' '
-        << header.httpReturnText() << "\r\n";
-
-    ReplyHeader::const_iterator it;
-    for(it = header.begin(); it != header.end(); ++it)
-    {
-        os << it->first << ": " << it->second << "\r\n";
-    }
-
-    os << "Transfer-Encoding: chunked\r\n";
-
-    if( ! header.hasHeader(server) )
-    {
-        os << "Server: Pt-Net-Server\r\n";
-    }
-
-    if( ! header.hasHeader(connection) )
-    {
-        os << "Connection: "
-            << (header.keepAlive() ? "keep-alive" : "close")
-            << "\r\n";
-    }
-
-    if( ! header.hasHeader(date) )
-    {
-        char buffer[50];
-        os << "Date: " << MessageHeader::htdateCurrent(buffer) << "\r\n";
-    }
-
-    os << "\r\n";
-}
-
-
-void Connection::sendChunkedHeader(std::ostream& os, const Request& request)
-{
-    log_debug("send chunked request header " << request.header().url());
-
-    static const char* connection = "Connection";
-    static const char* date = "Date";
-    static const char* host = "Host";
-    static const char* authorization = "Authorization";
-    static const char* userAgent = "User-Agent";
+    log_debug("writing request header " << request.header().url());
 
     os << request.header().method() << ' '
        << request.header().url() << " HTTP/"
@@ -983,88 +910,23 @@ void Connection::sendChunkedHeader(std::ostream& os, const Request& request)
         os << it->first << ": " << it->second << "\r\n";
     }
 
-    os << "Transfer-Encoding: chunked" << "\r\n";
-
-    if( ! request.header().hasHeader(connection) )
-    {
-        os << "Connection: keep-alive\r\n";
-    }
-
-    if (!request.header().hasHeader(date))
-    {
-        char buffer[50];
-        os << "Date: " << MessageHeader::htdateCurrent(buffer) << "\r\n";
-    }
-
-    if (!request.header().hasHeader(host))
-    {
-        os << "Host: " << _addrInfo.host();
-        unsigned short port = _addrInfo.port();
-        if (port != 80)
-            os << ':' << port;
-        os << "\r\n";
-    }
-
-    if (!request.header().hasHeader(userAgent))
-    {
-        os << "User-Agent: Pt-Http-client\r\n";
-    }
-
-    /*if (!_username.empty() && !request.header().hasHeader(authorization))
-    {
-        std::ostringstream d;
-        BasicTextOStream<char, char> b(d, new Base64Codec());
-        b << _username
-          << ':'
-          << _password;
-        b.terminate();
-        log_debug("set Authorization to " << d.str());
-        os << "Authorization: Basic " << d.str() << "\r\n";
-    }*/
-
-    os << "\r\n";
-}
-
-
-void Connection::sendRequest(std::ostream& os, const Request& request)
-{
-    log_debug("send request " << request.header().url());
-
-    static const char* contentLength = "Content-Length";
-    static const char* connection = "Connection";
-    static const char* date = "Date";
-    static const char* host = "Host";
-    static const char* authorization = "Authorization";
-    static const char* userAgent = "User-Agent";
-
-    os << request.header().method() << ' '
-       << request.header().url() << " HTTP/"
-       << request.header().httpVersionMajor() << '.'
-       << request.header().httpVersionMinor() << "\r\n";
-
-    for (RequestHeader::const_iterator it = request.header().begin();
-        it != request.header().end(); ++it)
-    {
-        os << it->first << ": " << it->second << "\r\n";
-    }
-
-    if (!request.header().hasHeader(contentLength))
-    {
+    if(_chunked)
+        os << "Transfer-Encoding: chunked\r\n";
+    else
         os << "Content-Length: " << request.size() << "\r\n";
-    }
 
-    if (!request.header().hasHeader(connection))
+    if( ! request.header().hasHeader("Connection") )
     {
         os << "Connection: keep-alive\r\n";
     }
 
-    if (!request.header().hasHeader(date))
+    if (!request.header().hasHeader("Date"))
     {
         char buffer[50];
         os << "Date: " << MessageHeader::htdateCurrent(buffer) << "\r\n";
     }
 
-    if (!request.header().hasHeader(host))
+    if (!request.header().hasHeader("Host"))
     {
         os << "Host: " << _addrInfo.host();
         unsigned short port = _addrInfo.port();
@@ -1073,12 +935,12 @@ void Connection::sendRequest(std::ostream& os, const Request& request)
         os << "\r\n";
     }
 
-    if (!request.header().hasHeader(userAgent))
+    if (!request.header().hasHeader("User-Agent"))
     {
         os << "User-Agent: Pt-Http-client\r\n";
     }
 
-    /*if (!_username.empty() && !request.header().hasHeader(authorization))
+    /*if (!_username.empty() && !request.header().hasHeader("Authorization"))
     {
         std::ostringstream d;
         BasicTextOStream<char, char> b(d, new Base64Codec());
@@ -1091,20 +953,12 @@ void Connection::sendRequest(std::ostream& os, const Request& request)
     }*/
 
     os << "\r\n";
-
-    log_debug("send body; " << request.size() << " bytes");
-    os.write(request.data(), request.size());
 }
 
 
-void Connection::sendReply(std::ostream& os, const Reply& reply)
+void Connection::writeReplyHeader(std::ostream& os, const Reply& reply)
 {
-    log_debug("sending HTTP reply");
-
-    const char* server = "Server";
-    const char* connection = "Connection";
-    const char* date = "Date";
-    static const char* contentLength = "Content-Length";
+    log_debug("writing reply header " << reply.header().httpReturnCode());
 
     const ReplyHeader& header = reply.header();
 
@@ -1120,28 +974,30 @@ void Connection::sendReply(std::ostream& os, const Reply& reply)
         os << it->first << ": " << it->second << "\r\n";
     }
 
-    os << contentLength << ": " << _reply->buffer().size() << "\r\n";
+    if( ! header.hasHeader("Connection") )
+    {
+        os << "Connection: "
+            << (_keepAlive ? "keep-alive" : "close")
+            << "\r\n";
+    }
 
-    if( ! header.hasHeader(server) )
+    if(_chunked)
+        os << "Transfer-Encoding: chunked\r\n";
+    else
+        os << "Content-Length: " << _reply->size() << "\r\n";
+
+    if( ! header.hasHeader("Server") )
     {
         os << "Server: Pt-Net-Server\r\n";
     }
 
-    if( ! header.hasHeader(connection) )
-    {
-        os << "Connection: "
-            << (header.keepAlive() ? "keep-alive" : "close")
-            << "\r\n";
-    }
-
-    if( ! header.hasHeader(date) )
+    if( ! header.hasHeader("Date") )
     {
         char buffer[50];
         os << "Date: " << MessageHeader::htdateCurrent(buffer) << "\r\n";
     }
 
     os << "\r\n";
-    os.write( _reply->buffer().data(), _reply->buffer().size() );
 }
 
 } // namespace Http

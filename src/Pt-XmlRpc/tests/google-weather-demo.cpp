@@ -230,13 +230,15 @@ class GoogleWeatherClient : public Pt::Connectable
             // if an error occured.
             try
             {
-                if( client.endReceive() )
+                Pt::Http::MessageProgress progress = client.endReceive();
+                
+                if( progress.header() )
                     onHeaderReceived(client);
 
-                if( client.reply().body().rdbuf()->in_avail() )
+                if(progress.body())
                     onBodyAvailable(client);
 
-                if( client.isEnd() )
+                if( progress.finished() )
                 {
                     onReplyFinished(client);
                     return;
