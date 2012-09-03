@@ -39,35 +39,25 @@ Client::Client()
 {
 }
 
-Client::Client(const Net::AddrInfo& addrinfo, bool ssl)
-: _impl( new ClientImpl(this) )
-{
-    _impl->setHost(addrinfo);
-    _impl->setHttps(ssl);
-}
-
-Client::Client(const std::string& host, unsigned short int port, bool ssl)
+Client::Client(const std::string& host, unsigned short int port)
 : _impl( new ClientImpl(this) )
 {
     _impl->setHost( Net::AddrInfo(host, port) );
-    _impl->setHttps(ssl);
 }
 
 
-Client::Client(System::EventLoop& loop, const Net::AddrInfo& addrinfo, bool ssl)
+Client::Client(System::EventLoop& loop, const Net::AddrInfo& addrinfo)
 : _impl( new ClientImpl(this) )
 {
     _impl->setActive(loop);
     _impl->setHost(addrinfo);
-    _impl->setHttps(ssl);
 }
 
-Client::Client(System::EventLoop& loop, const std::string& host, unsigned short int port, bool ssl)
+Client::Client(System::EventLoop& loop, const std::string& host, unsigned short int port)
 : _impl( new ClientImpl(this) )
 {
     _impl->setActive(loop);
     _impl->setHost( Net::AddrInfo(host, port) );
-    _impl->setHttps(ssl);
 }
 
 Client::~Client()
@@ -75,16 +65,14 @@ Client::~Client()
     delete _impl;
 }
 
-void Client::setHost(const Net::AddrInfo& addrinfo, bool ssl)
+void Client::setHost(const Net::AddrInfo& addrinfo)
 {
     _impl->setHost(addrinfo);
-    _impl->setHttps(ssl);
 }
 
-void Client::setHost(const std::string& host, unsigned short int port, bool ssl)
+void Client::setHost(const std::string& host, unsigned short int port)
 {
     _impl->setHost( Net::AddrInfo(host, port) );
-    _impl->setHttps(ssl);
 }
 
 const Net::AddrInfo& Client::host() const
@@ -102,9 +90,9 @@ void Client::setActive(System::EventLoop& selector)
     _impl->setActive(selector);
 }
 
-void Client::setTimeout(std::size_t timeout)
+void Client::setSecure()
 {
-    _impl->setTimeout(timeout);
+    _impl->setSecure();
 }
 
 void Client::setContext(Ssl::Context& ctx)
@@ -112,66 +100,60 @@ void Client::setContext(Ssl::Context& ctx)
     _impl->setContext(ctx);
 }
 
+void Client::setTimeout(std::size_t timeout)
+{
+    _impl->setTimeout(timeout);
+}
 
 void Client::send()
 {
     return _impl->send();
 }
 
-
 std::istream& Client::receive()
 {
     return _impl->receive();
 }
-
 
 void Client::beginSend()
 {
     _impl->beginSend();
 }
 
-
 MessageProgress Client::endSend()
 {
     return _impl->endSend();
 }
-
 
 void Client::beginReceive()
 {
     _impl->beginReceive();
 }
 
-
 MessageProgress Client::endReceive()
 {
     return _impl->endReceive();
 }
-
 
 Request& Client::request()
 { 
     return _impl->request();
 }
 
-
 const Request& Client::request() const
 { 
     return _impl->request();
 }
-
 
 Reply& Client::reply()
 {
     return _impl->reply();
 }
 
-
 const Reply& Client::reply() const
 {
     return _impl->reply();
 }
-
 
 // TODO: Sets the username and password for all subsequent requests.
 void Client::setAuthorization(const std::string& username, const std::string& password)

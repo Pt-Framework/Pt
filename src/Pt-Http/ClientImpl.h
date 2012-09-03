@@ -79,9 +79,6 @@ class ClientImpl : public Connectable
         void setHost(const Net::AddrInfo& addrinfo)
         { _conn.setHost(addrinfo); }
 
-        void setHttps(bool ssl)
-        { _conn.setHttps(ssl); }
-
         const Net::AddrInfo& host() const
         { return _conn.host(); }
 
@@ -96,6 +93,8 @@ class ClientImpl : public Connectable
             _username.clear(); 
             _password.clear(); 
         }
+
+        void setSecure();
 
         void setContext(Ssl::Context& ctx);
 

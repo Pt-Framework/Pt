@@ -49,7 +49,7 @@ namespace Http {
 class RequestHandler : public Pt::Connectable
 {
     public:
-        RequestHandler(Server& server, Net::TcpServer& tcpServer, bool ssl);
+        RequestHandler(Server& server, Net::TcpServer& tcpServer);
 
         ~RequestHandler();
 
@@ -79,15 +79,12 @@ class RequestHandler : public Pt::Connectable
 };
 
 
-RequestHandler::RequestHandler(Server& server, Net::TcpServer& tcpServer, bool ssl)
+RequestHandler::RequestHandler(Server& server, Net::TcpServer& tcpServer)
 : _server(server)
 , _responder(0)
 , _conn()
 , _ignoreBody(false)
 {
-    if(ssl)
-        _conn.setHttps(true);
-
     _conn.accept(tcpServer);
     _request.inputReceived() += Pt::slot(*this, &RequestHandler::onRequestReceived);
     _reply.outputSent() += Pt::slot(*this, &RequestHandler::onReplySent);
@@ -112,7 +109,10 @@ void RequestHandler::beginServe(System::EventLoop& loop, Ssl::Context* ctx)
     _conn.setEventLoop(loop);
 
     if(ctx)
+    {
+        _conn.setSecure();
         _conn.setContext(*ctx);
+    }
 
     _reply.init(_conn);
     _reply.clear();
@@ -491,11 +491,11 @@ void Server::startWorker(bool ssl)
 
 void Server::onAccept(Net::TcpServer& server)
 {
-    const bool ssl = _sslctx != 0;
+    const bool https = _sslctx != 0;
 
     // TODO: we should only pass the TcpSocket to the worker thread
     //       so that a RequestHandler can be constructed with an event loop
-    RequestHandler* conn = new RequestHandler(*this, server, ssl);
+    RequestHandler* conn = new RequestHandler(*this, server);
 
     if(_useWorker < _serverThreads.size())
     {

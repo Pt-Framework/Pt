@@ -39,12 +39,6 @@ namespace Pt {
 
 namespace Http {
 
-enum Protocol
-{
-  Http = 0,
-  Https = 1
-};
-
 class MessageProgress
 {
     private:

@@ -270,7 +270,8 @@ class ServerTest : public Pt::Unit::TestSuite
             server.listen("127.0.0.1", 8001, true);
 
             // start HTTP client
-            Pt::Http::Client client("127.0.0.1", 8001, true);
+            Pt::Http::Client client("127.0.0.1", 8001);
+            client.setSecure();
             client.setContext(clientContext);
             client.setActive(*loop);
             client.replyReceived() += Pt::slot(*this, &ServerTest::onNotFoundReceived);

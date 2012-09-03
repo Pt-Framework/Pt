@@ -93,8 +93,6 @@ Connection::Connection()
     _httpbuf.attach(_sockbuf);
 
     _timer.timeout() += Pt::slot(*this, &Connection::onTimeout);
-
-    _sslbuf.handshakeFinished() += slot(*this, &Connection::onHttpsHandshake);
 }
 
 
@@ -112,9 +110,9 @@ void Connection::accept(Net::TcpServer& tcpServer)
     Net::TcpSocket::accept(tcpServer);
 
     if(_ssl)
-        _state = SslAccept;
+        _state = SslNotAccepted;
     else
-        _state = Connected;
+        _state = Accepted;
 }
 
 
@@ -124,54 +122,48 @@ void Connection::setHost(const Net::AddrInfo& addrinfo)
     _addrInfo = addrinfo;
 }
 
-
-void Connection::setHttps(bool ssl)
-{
 #ifdef PT_HTTP_WITH_SSL
-      if(ssl)
-      {
-          log_debug("initialize HTTPS connection");
-          if( ! _ssl)
-          {
-              _sockbuf.outputReady() -= slot(*this, &Connection::onHttpOutput);
-              _sockbuf.inputReady() -= slot(*this, &Connection::onHttpInput);
+void Connection::setSecure()
+{
+    log_debug("initialize HTTPS connection");
 
-              _sslbuf.outputReady() += slot(*this, &Connection::onHttpsOutput);
-              _sslbuf.inputReady() += slot(*this, &Connection::onHttpsInput);
-              _ssl = true;
-          }
+    if( ! _ssl)
+    {
+        if(_state != NotConnected && _state != Accepted)
+        {
+            cancel();
+        }
 
-          _httpbuf.attach(_sslbuf);
-      }
-      else
-      {
-          log_debug("initialize HTTP connection");
-          if(_ssl)
-          {
-              _sslbuf.outputReady() -= slot(*this, &Connection::onHttpsOutput);
-              _sslbuf.inputReady() -= slot(*this, &Connection::onHttpsInput);
+        _state = SslNotAccepted;
 
-              _sockbuf.outputReady() += slot(*this, &Connection::onHttpOutput);
-              _sockbuf.inputReady() += slot(*this, &Connection::onHttpInput);
-              _ssl = false;
-          }
+        _sockbuf.outputReady() -= slot(*this, &Connection::onHttpOutput);
+        _sockbuf.inputReady() -= slot(*this, &Connection::onHttpInput);
 
-          _httpbuf.attach(_sockbuf);
-      }
-#endif
+        _sslbuf.outputReady() += slot(*this, &Connection::onHttpsOutput);
+        _sslbuf.inputReady() += slot(*this, &Connection::onHttpsInput);
+        _sslbuf.handshakeFinished() += slot(*this, &Connection::onHttpsHandshake);
+        _ssl = true;
+    }
+
+    _httpbuf.attach(_sslbuf);
 }
 
 
-#ifdef PT_HTTP_WITH_SSL
 void Connection::setContext(Ssl::Context& ctx)
 {
     _sslbuf.init(ctx);
+}
 #else
-void Connection::setContext(Ssl::Context& )
+
+void Connection::setSecure()
 {
-#endif
 }
 
+
+void Connection::setContext(Ssl::Context& )
+{
+}
+#endif
 
 void Connection::setEventLoop(System::EventLoop& loop)
 {
@@ -183,6 +175,8 @@ void Connection::setEventLoop(System::EventLoop& loop)
 
 void Connection::cancel()
 {
+    log_debug("cancelling connection");
+
     close();
     _reply = 0;
     _request = 0;
@@ -454,7 +448,7 @@ void Connection::beginReceiveRequest(Request& request)
     _request = &request;
 
 #ifdef PT_HTTP_WITH_SSL
-    if(_state == SslAccept)
+    if(_state == SslNotAccepted)
     {
         log_debug("beginning SSL handshake");
         _sslbuf.beginAccept();
@@ -485,11 +479,11 @@ MessageProgress Connection::endReceiveRequest()
     MessageProgress progress;
 
 #ifdef PT_HTTP_WITH_SSL
-    if(_state == SslAccept)
+    if(_state == SslNotAccepted)
     {
         _timer.stop();
         _sslbuf.endHandshake();
-        _state = Connected;
+        _state = Accepted;
         log_debug("SSL handshake finished");
         return progress;
     }
@@ -499,7 +493,7 @@ MessageProgress Connection::endReceiveRequest()
     {
         log_debug("sent remaining reply data");
         endWrite();
-        _state = Connected;
+        _state = Accepted;
         return progress;
     }
 
@@ -670,7 +664,7 @@ void Connection::onHttpsHandshake(Pt::Ssl::IOBuffer& ssl)
         return;
     }
 
-    if(_request && _state == SslAccept)
+    if(_request && _state == SslNotAccepted)
     {
         _request->onInput();
         return;

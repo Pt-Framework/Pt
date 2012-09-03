@@ -112,8 +112,7 @@ class Connection : public Net::TcpSocket
         const Net::AddrInfo& host() const
         { return _addrInfo; }
 
-        // TODO: do this in the constructor
-        void setHttps(bool ssl);
+        void setSecure();
 
         void setContext(Ssl::Context& ctx);
 
@@ -204,9 +203,10 @@ class Connection : public Net::TcpSocket
         enum State
         {
             NotConnected = 0,
+            Accepted = 1,
             Connected = 2,
             SslHandshake = 3,
-            SslAccept = 4,
+            SslNotAccepted = 4,
             RequestOutputPending = 5,
             ReplyOutputPending = 6
 

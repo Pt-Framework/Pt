@@ -56,13 +56,13 @@ class PT_HTTP_API Client : private NonCopyable
     public:
         Client();
         
-        Client(const std::string& host, unsigned short int port, bool ssl = false);
+        Client(const std::string& host, unsigned short int port);
         
-        Client(const Net::AddrInfo& addr, bool ssl = false);
+        Client(const Net::AddrInfo& addr);
 
-        Client(System::EventLoop& loop, const std::string& host, unsigned short int port, bool ssl = false);
+        Client(System::EventLoop& loop, const std::string& host, unsigned short int port);
         
-        Client(System::EventLoop& loop, const Net::AddrInfo& addrinfo, bool ssl = false);
+        Client(System::EventLoop& loop, const Net::AddrInfo& addrinfo);
 
         ~Client();
 
@@ -70,11 +70,11 @@ class PT_HTTP_API Client : private NonCopyable
 
         void setActive(System::EventLoop& loop);
 
-        void setTimeout(std::size_t timeout);
+        void setSecure();
 
-        void setHost(const Net::AddrInfo& addrinfo, bool ssl = false);
+        void setHost(const Net::AddrInfo& addrinfo);
         
-        void setHost(const std::string& host, unsigned short int port, bool ssl = false);
+        void setHost(const std::string& host, unsigned short int port);
 
         const Net::AddrInfo& host() const;
 
@@ -111,6 +111,8 @@ class PT_HTTP_API Client : private NonCopyable
         const Reply& reply() const;
 
         void cancel();
+
+        void setTimeout(std::size_t timeout);
 
         /** @brief Blocks until request is sent.
         */

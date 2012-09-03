@@ -38,7 +38,8 @@ namespace Pt {
 namespace XmlRpc {
 
 HttpClientImpl::HttpClientImpl()
-: _error(false)
+: _client()
+, _error(false)
 {
     _client.request().header().method("POST");
     _client.replyReceived() += Pt::slot( *this, &HttpClientImpl::onReply);

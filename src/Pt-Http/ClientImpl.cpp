@@ -45,6 +45,7 @@ namespace Http {
 ClientImpl::ClientImpl(Client* client)
 : _client(client)
 , _hstate(Idle)
+, _conn()
 , _requestCount(0)
 {
     _req.init(_conn);
@@ -57,12 +58,21 @@ ClientImpl::ClientImpl(Client* client)
 
 #ifdef PT_HTTP_WITH_SSL
 
+void ClientImpl::setSecure()
+{
+    _conn.setSecure();
+}
+
 void ClientImpl::setContext(Ssl::Context& ctx)
 {
     _conn.setContext(ctx);
 }
 
 #else
+
+void ClientImpl::setSecure()
+{
+}
 
 void ClientImpl::setContext(Ssl::Context& )
 {

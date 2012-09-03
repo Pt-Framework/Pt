@@ -88,7 +88,9 @@ int main(int argc, char** argv)
         std::string  addr("www.pt-framework.org");
         unsigned short port = 443;
         
-        Pt::Http::Client client(loop, addr, port, true);
+        Pt::Http::Client client(addr, port);
+        client.setActive(loop);
+        client.setSecure();
         client.request().setUrl("/index.html");
         client.request().header().setHeader("User-Agent", "Platinum");
         client.setContext(clientContext);
