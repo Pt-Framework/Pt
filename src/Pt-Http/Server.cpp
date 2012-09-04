@@ -360,6 +360,7 @@ class ServerThread : public Connectable
 Server::Server(System::EventLoop& eventLoop)
 : _loop(eventLoop)
 , _sslctx(0)
+, _ssl(false)
 , _useWorker(0)
 , _maxThreads(1)
 , _readTimeout(20000)
@@ -378,6 +379,7 @@ Server::Server(System::EventLoop& eventLoop, const std::string& ip, unsigned sho
 : _loop(eventLoop)
 , _serverSocket(ip, port, backlog)
 , _sslctx(0)
+, _ssl(false)
 , _useWorker(0)
 , _maxThreads(1)
 , _readTimeout(20000)
@@ -399,6 +401,7 @@ Server::Server(System::EventLoop& eventLoop, const Pt::Net::AddrInfo& addr, int 
 : _loop(eventLoop)
 , _serverSocket(addr, backlog)
 , _sslctx(0)
+, _ssl(false)
 , _useWorker(0)
 , _maxThreads(1)
 , _readTimeout(20000)
@@ -426,6 +429,22 @@ Server::~Server()
 }
 
 
+void Server::listen(const Pt::Net::AddrInfo& addr, int backlog)
+{
+    this->startWorker();
+    _serverSocket.listen(addr, backlog);
+    _serverSocket.beginAccept();
+}
+
+
+void Server::listen(const std::string& ip, unsigned short int port, int backlog)
+{
+    this->startWorker();
+    _serverSocket.listen(ip, port, backlog);
+    _serverSocket.beginAccept();
+}
+
+
 void Server::shutdown()
 {
     std::vector<ServerThread*>::iterator threadIt;
@@ -443,26 +462,120 @@ void Server::shutdown()
 }
 
 
-void Server::listen(const Pt::Net::AddrInfo& addr, bool ssl, int backlog)
+void Server::addService(const std::string& url, Service& service)
 {
-    this->startWorker(ssl);
-    _serverSocket.listen(addr, backlog);
-    _serverSocket.beginAccept();
+    System::WriteLock serviceLock(_serviceMutex);
+    _services.insert(ServiceMap::value_type(url, &service));
 }
 
 
-void Server::listen(const std::string& ip, unsigned short int port, bool ssl, int backlog)
+void Server::removeService(Service& service)
 {
-    this->startWorker(ssl);
-    _serverSocket.listen(ip, port, backlog);
-    _serverSocket.beginAccept();
+    System::WriteLock serviceLock(_serviceMutex);
+    service.waitIdle();
+
+    ServiceMap::iterator it = _services.begin();
+    while (it != _services.end())
+    {
+        if (it->second == &service)
+        {
+            _services.erase(it++);
+        }
+        else
+        {
+            ++it;
+        }
+    }
 }
 
 
-void Server::startWorker(bool ssl)
+void Server::setSecure()
+{
+    _ssl = true;
+}
+
+
+std::size_t Server::readTimeout() const
+{
+    return _readTimeout;
+}
+
+
+void Server::setReadTimeout(std::size_t ms)
+{
+    _readTimeout = ms;
+}
+
+
+std::size_t Server::writeTimeout() const
+{
+    return _writeTimeout;
+}
+
+
+void Server::setWriteTimeout(std::size_t ms)
+{
+    _writeTimeout = ms;
+}
+
+
+std::size_t Server::keepAliveTimeout() const
+{
+    return _keepAliveTimeout;
+}
+
+
+void Server::setKeepAliveTimeout(std::size_t ms)
+{
+    _keepAliveTimeout = ms;
+}
+
+
+unsigned Server::maxThreads() const
+{
+    return _maxThreads;
+}
+
+
+void Server::setMaxThreads(unsigned m)
+{
+    _maxThreads = m;
+}
+
+
+Responder* Server::getResponder(const RequestHeader& request)
+{
+    System::ReadLock serviceLock(_serviceMutex);
+
+    for (ServiceMap::const_iterator it = _services.lower_bound(request.url());
+        it != _services.end() && it->first == request.url(); ++it)
+    {
+        if (!it->second->checkAuth(request))
+        {
+            return _noAuthService->createResponder(request, it->second->realm(), it->second->authContent());
+        }
+
+        Responder* resp = it->second->doCreateResponder(request);
+        if (resp)
+        {
+            return resp;
+        }
+    }
+
+    return _defaultService->createResponder(request);
+}
+
+
+Responder* Server::getDefaultResponder(const RequestHeader& request)
+{ 
+    return _defaultService->createResponder(request); 
+}
+
+
+void Server::startWorker()
 {
 #ifdef PT_HTTP_WITH_SSL
-    if(ssl && ! _sslctx)
+    if(_ssl && ! _sslctx)
     {
         _sslctx = new Ssl::Context();
         sslConfigured.send(*_sslctx);
@@ -474,7 +587,7 @@ void Server::startWorker(bool ssl)
         ServerThread* st = 0;
 
 #ifdef PT_HTTP_WITH_SSL
-        if(ssl)
+        if(_ssl)
         {
             st = new ServerThread(*this, &sslConfigured);
         }
@@ -527,110 +640,6 @@ void Server::onConnectionTimeout(RequestHandler& conn)
             break;
         }
     }
-}
-
-
-void Server::addService(const std::string& url, Service& service)
-{
-    System::WriteLock serviceLock(_serviceMutex);
-    _services.insert(ServiceMap::value_type(url, &service));
-}
-
-
-void Server::removeService(Service& service)
-{
-    System::WriteLock serviceLock(_serviceMutex);
-    service.waitIdle();
-
-    ServiceMap::iterator it = _services.begin();
-    while (it != _services.end())
-    {
-        if (it->second == &service)
-        {
-            _services.erase(it++);
-        }
-        else
-        {
-            ++it;
-        }
-    }
-}
-
-
-Responder* Server::getResponder(const RequestHeader& request)
-{
-    System::ReadLock serviceLock(_serviceMutex);
-
-    for (ServiceMap::const_iterator it = _services.lower_bound(request.url());
-        it != _services.end() && it->first == request.url(); ++it)
-    {
-        if (!it->second->checkAuth(request))
-        {
-            return _noAuthService->createResponder(request, it->second->realm(), it->second->authContent());
-        }
-
-        Responder* resp = it->second->doCreateResponder(request);
-        if (resp)
-        {
-            return resp;
-        }
-    }
-
-    return _defaultService->createResponder(request);
-}
-
-
-Responder* Server::getDefaultResponder(const RequestHeader& request)
-{ 
-    return _defaultService->createResponder(request); 
-}
-
-
-std::size_t Server::readTimeout() const
-{
-    return _readTimeout;
-}
-
-
-void Server::setReadTimeout(std::size_t ms)
-{
-    _readTimeout = ms;
-}
-
-
-std::size_t Server::writeTimeout() const
-{
-    return _writeTimeout;
-}
-
-
-void Server::setWriteTimeout(std::size_t ms)
-{
-    _writeTimeout = ms;
-}
-
-
-std::size_t Server::keepAliveTimeout() const
-{
-    return _keepAliveTimeout;
-}
-
-
-void Server::setKeepAliveTimeout(std::size_t ms)
-{
-    _keepAliveTimeout = ms;
-}
-
-
-unsigned Server::maxThreads() const
-{
-    return _maxThreads;
-}
-
-
-void Server::setMaxThreads(unsigned m)
-{
-    _maxThreads = m;
 }
 
 } // namespace Http

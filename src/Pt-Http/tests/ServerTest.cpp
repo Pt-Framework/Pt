@@ -266,6 +266,7 @@ class ServerTest : public Pt::Unit::TestSuite
 
             // start HTTP server
             Pt::Http::Server server(*loop);
+            server.setSecure();
             server.sslConfigured += Pt::slot(&ServerTest::loadSslContext);
             server.listen("127.0.0.1", 8001, true);
 

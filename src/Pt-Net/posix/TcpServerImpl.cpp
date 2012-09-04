@@ -140,6 +140,7 @@ void TcpServerImpl::listen(const AddrInfo& ai, int backlog, unsigned flags)
                 throw System::SystemError("Could not set O_NONBLOCK");
             }
 
+            // do not allow any forked process to get this fd
             flags = ::fcntl(_ioh.fd, F_GETFD);
             flags |= FD_CLOEXEC;
             if( -1 == ::fcntl(_ioh.fd, F_SETFD, flags) )

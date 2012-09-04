@@ -62,6 +62,8 @@ class NotFoundService;
 class NotAuthenticatedService;
 class ServerThread;
 
+// TODO: It might make sense for the Server to derive from Selectable
+
 class PT_HTTP_API Server : public Pt::Connectable
                          , private Pt::NonCopyable
 {
@@ -74,9 +76,9 @@ class PT_HTTP_API Server : public Pt::Connectable
 
         ~Server();
 
-        void listen(const std::string& ip, unsigned short int port, bool ssl = false, int backlog = 5);
+        void listen(const std::string& ip, unsigned short int port, int backlog = 5);
 
-        void listen(const Pt::Net::AddrInfo& addr, bool ssl = false, int backlog = 5);
+        void listen(const Pt::Net::AddrInfo& addr, int backlog = 5);
 
         void shutdown();
 
@@ -84,9 +86,7 @@ class PT_HTTP_API Server : public Pt::Connectable
 
         void removeService(Service& service);
 
-        Responder* getResponder(const RequestHeader& request);
-
-        Responder* getDefaultResponder(const RequestHeader& request);
+        void setSecure();
 
         std::size_t readTimeout() const;
 
@@ -104,13 +104,17 @@ class PT_HTTP_API Server : public Pt::Connectable
 
         void setMaxThreads(unsigned m);
 
+        Responder* getResponder(const RequestHeader& request);
+
+        Responder* getDefaultResponder(const RequestHeader& request);
+
         System::EventLoop& loop()
         { return _loop; }
 
         Signal<Ssl::Context&> sslConfigured;
 
     protected:
-        void startWorker(bool ssl = false);
+        void startWorker();
 
         void onAccept(Net::TcpServer& server);
 
@@ -120,6 +124,7 @@ class PT_HTTP_API Server : public Pt::Connectable
         System::EventLoop& _loop;
         Net::TcpServer _serverSocket;
         Ssl::Context* _sslctx;
+        bool _ssl;
         std::vector<RequestHandler*> _connections;
         std::vector<ServerThread*> _serverThreads;
         unsigned _useWorker;
