@@ -84,9 +84,9 @@ Connection::Connection()
 , _chunked(false)
 , _keepAlive(false)
 {
-    Net::TcpSocket::connected() += Pt::slot(*this, &Connection::onConnect);
+    _socket.connected() += Pt::slot(*this, &Connection::onConnect);
 
-    _sockbuf.attach(*this);
+    _sockbuf.attach(_socket);
     _sockbuf.outputReady() += slot(*this, &Connection::onHttpOutput);
     _sockbuf.inputReady() += slot(*this, &Connection::onHttpInput);
 
@@ -106,7 +106,7 @@ void Connection::accept(Net::TcpServer& tcpServer)
     log_trace("Connection::accept");    
     cancel();
 
-    Net::TcpSocket::accept(tcpServer);
+    _socket.accept(tcpServer);
 
     if(_ssl)
         _state = SslNotAccepted;
@@ -170,9 +170,9 @@ void Connection::setContext(Ssl::Context& )
 }
 #endif
 
-void Connection::setEventLoop(System::EventLoop& loop)
+void Connection::setActive(System::EventLoop& loop)
 {
-    this->setActive(loop);
+    _socket.setActive(loop);
     _timer.setActive(loop);
     _loop = &loop;
 }
@@ -182,7 +182,7 @@ void Connection::cancel()
 {
     log_debug("cancelling connection");
 
-    close();
+    _socket.close();
     _reply = 0;
     _request = 0;
     _state = NotConnected;
@@ -204,7 +204,7 @@ void Connection::beginSendRequest(Request& request)
     {
         log_debug("opening new connection to " << _addrInfo.host());
         _timer.start( _writeTimeout );
-        beginConnect(_addrInfo);
+        _socket.beginConnect(_addrInfo);
         return;
     }
 
@@ -280,7 +280,7 @@ MessageProgress Connection::endSendRequest()
     if(_state == NotConnected)
     {
         _timer.stop();
-        endConnect();
+        _socket.endConnect();
         log_debug("connected to " << _addrInfo.host());
 
         if(_ssl)
@@ -504,7 +504,7 @@ MessageProgress Connection::endReceiveRequest()
 
     endRead();
 
-    if( Net::TcpSocket::eof() )
+    if( _socket.eof() )
     {
         // TODO: connection was closed prematurely
         cancel();
@@ -601,7 +601,7 @@ MessageProgress Connection::endReceiveReply()
 
     if ( ! _replyParser.end() )
     {
-        if( Net::TcpSocket::eof() )
+        if( _socket.eof() )
             throw System::IOError("unexpected EOF");
 
         if( _replyParser.begin() && ! _timer.started() )

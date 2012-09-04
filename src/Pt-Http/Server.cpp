@@ -106,7 +106,7 @@ void RequestHandler::beginServe(System::EventLoop& loop, Ssl::Context* ctx)
 
     _ignoreBody = false;
 
-    _conn.setEventLoop(loop);
+    _conn.setActive(loop);
 
     if(ctx)
     {

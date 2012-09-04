@@ -71,7 +71,7 @@ class ClientImpl : public Connectable
         { return _conn.loop(); }
 
         void setActive(System::EventLoop& loop)
-        { _conn.setEventLoop(loop); }
+        { _conn.setActive(loop); }
 
         void setTimeout(std::size_t timeout)
         { _conn.setTimeout(timeout); }

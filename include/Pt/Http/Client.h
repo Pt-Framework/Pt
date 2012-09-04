@@ -70,13 +70,14 @@ class PT_HTTP_API Client : private NonCopyable
 
         void setActive(System::EventLoop& loop);
 
-        void setSecure();
-
         void setHost(const Net::AddrInfo& addrinfo);
         
         void setHost(const std::string& host, unsigned short int port);
 
         const Net::AddrInfo& host() const;
+
+        // TODO: pass Context here?
+        void setSecure();
 
         void setContext(Ssl::Context& ctx);
 

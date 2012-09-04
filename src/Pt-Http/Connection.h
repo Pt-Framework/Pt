@@ -54,8 +54,7 @@ namespace Http {
 class Reply;
 class Request;
 
-class Connection : public Net::TcpSocket
-                 , public Connectable
+class Connection : public Connectable
 {
     friend class Request;
     friend class Reply;
@@ -116,13 +115,16 @@ class Connection : public Net::TcpSocket
 
         void setContext(Ssl::Context& ctx);
 
-        void setEventLoop(System::EventLoop& loop);
+        void setActive(System::EventLoop& loop);
 
         System::EventLoop* loop() const
         { return _loop; }
 
+        void setTimeout(std::size_t timeout)
+        { _socket.setTimeout(timeout); }
+
         bool isConnected()
-        { return TcpSocket::isConnected(); }
+        { return _socket.isConnected(); }
 
         void cancel();
 
@@ -188,6 +190,7 @@ class Connection : public Net::TcpSocket
         Reply* _reply;
         System::EventLoop* _loop;
         System::Timer _timer;
+        Net::TcpSocket _socket;
         System::IOBuffer _sockbuf;
         Net::AddrInfo _addrInfo;
 
