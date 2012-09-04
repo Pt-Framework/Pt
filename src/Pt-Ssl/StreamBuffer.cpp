@@ -28,6 +28,7 @@
  */
 
 #include <Pt/Ssl/StreamBuffer.h>
+#include <Pt/Ssl/SslError.h>
 #include <Pt/System/Logger.h>
 #include <Pt/System/IOError.h>
 #include <openssl/ssl.h>

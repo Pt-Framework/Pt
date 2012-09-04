@@ -29,6 +29,7 @@
 
 #include "OpenSsl.h"
 #include <Pt/Ssl/Context.h>
+#include <Pt/Ssl/SslError.h>
 #include <Pt/System/Logger.h>
 #include <openssl/ssl.h>
 #include <openssl/err.h>
@@ -94,8 +95,7 @@ SSLInit::~SSLInit()
 Context::Context(Protocol protocol)
 : _protocol(protocol)
 , _certChainExist(false)
-, _reserved0(0)
-, _reserved1(0)
+, _reserved(0)
 {
     // Create the context for the given protocol
     switch(_protocol) 
@@ -431,7 +431,7 @@ void Context::setPrivateKey(const PrivateKey& privKey)
         throw InvalidKey("Invalid private-key!");
 
     // Store a reference to the private key
-    //_privKey = privKey;
+    _privKey = privKey;
     
     // Check the private key (if needed)
     if( ! _certChainExist) 
@@ -442,10 +442,10 @@ void Context::setPrivateKey(const PrivateKey& privKey)
 }
 
 
-/*PrivateKey Context::privateKey() const
+const PrivateKey& Context::privateKey() const
 {
     return _privKey;
-}*/
+}
 
 
 ssl_ctx_st* Context::impl() const

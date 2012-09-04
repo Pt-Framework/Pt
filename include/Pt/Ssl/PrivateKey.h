@@ -30,9 +30,9 @@
 #define PT_SSL_PRIVATEKEY_H
 
 #include <Pt/Ssl/Api.h>
-#include <Pt/Ssl/SslError.h>
-#include <Pt/SmartPtr.h>
+#include <string>
 #include <iosfwd>
+#include <cstddef>
 
 namespace Pt {
 
@@ -44,20 +44,22 @@ class PrivateKeyImpl;
 class PT_SSL_API PrivateKey 
 {
     public:
-        //! \brief Instantiate an empty private-key.
+        //! \brief Contructs an empty private key.
         PrivateKey();
+
+        //! \brief Contructs an empty key with a password.
+        explicit PrivateKey(const std::string& password);
 
         //! \brief Copy ctor.
         PrivateKey(const PrivateKey& pkey);
 
-        //! \brief Construct an empty key with a password used to reading and writing.
-        explicit PrivateKey(const std::string& password);
-
         //! \brief Standard dtor.
         ~PrivateKey();
 
+        PrivateKey& operator=(const PrivateKey& key);
+
         //! \brief Read key in PEM format.
-        void fromPem(const char* data, size_t len);
+        void fromPem(const char* data, std::size_t len);
 
         //! \brief Read key in PEM format from a stream.
         void fromPem(std::istream& is);
@@ -68,48 +70,19 @@ class PT_SSL_API PrivateKey
         //! \brief Write key in PEM format.
         void toPem(std::ostream& os) const;
 
-        //! \brief Clear (delete) any loaded key.
-        void clear();
-        
-    public:
         //! \internal Return the raw OpenSSL private key handle.
         evp_pkey_st* impl() const;
         
     private:
-        typedef SmartPtr<PrivateKeyImpl> ImplPtr;
-
-        // Shared implementation of the class (COW)
-        ImplPtr _impl;
-};
-
-//! \internal
-class PT_SSL_API PrivateKeyImpl 
-{
-    public:
-        PrivateKeyImpl();
-        
-        PrivateKeyImpl(const std::string& password);
-        
-        ~PrivateKeyImpl();
-
-        void fromPem(const char* data, size_t len);
-
-        void fromPem(std::istream& is);
-
-        void fromPemFile(const char* path);
-
-        void toPem(std::ostream& os) const;
-
-        void clear();
-
-        static int passwordCallback(char* buff, int num, int /*rwflag*/, void* userdata);
-
-        evp_pkey_st* evp()
-        { return _pkey; }
+        //! @internal
+        void detach();
 
     private:
+        //! @internal
         std::string  _pswd;
-        evp_pkey_st* _pkey;
+
+        //! @internal
+        PrivateKeyImpl* _impl;
 };
 
 } // namespace Ssl

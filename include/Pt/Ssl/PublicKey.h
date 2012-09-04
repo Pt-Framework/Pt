@@ -30,9 +30,8 @@
 #define PT_SSL_PUBLICKEY_H
 
 #include <Pt/Ssl/Api.h>
-#include <Pt/Ssl/SslError.h>
-#include <Pt/SmartPtr.h>
 #include <iosfwd>
+#include <cstddef>
 
 namespace Pt {
 
@@ -44,8 +43,11 @@ class PublicKeyImpl;
 class PT_SSL_API PublicKey 
 {
     public:
-        //! \brief Instantiate an empty public-key.
+        //! \brief Contructs an empty public-key.
         PublicKey();
+
+        //! @internal
+        explicit PublicKey(evp_pkey_st* pkey);
 
         //! \brief Copy ctor.
         PublicKey(const PublicKey& pkey);
@@ -53,8 +55,10 @@ class PT_SSL_API PublicKey
         //! \brief Standard dtor.
         ~PublicKey();
 
+        PublicKey& operator=(const PublicKey& key);
+
         //! \brief Read key in PEM format.
-        void fromPem(const char* data, size_t len);
+        void fromPem(const char* data, std::size_t len);
 
         //! \brief Read key in PEM format from a stream.
         void fromPem(std::istream& is);
@@ -65,47 +69,15 @@ class PT_SSL_API PublicKey
         //! \brief Write key in PEM format.
         void toPem(std::ostream& os) const;
 
-        //! \brief Clear (delete) any loaded key.
-        void clear();
-
-    public:
-        //! \internal Instantiate a public-key from the given OpenSSL raw private key handle.
-        PublicKey(evp_pkey_st* pkey);
-
         //! \internal Return the raw OpenSSL public key handle.
         evp_pkey_st* impl() const;
-        
+ 
     private:
-        typedef SmartPtr<PublicKeyImpl> ImplPtr;
-
-        // Shared implementation of the class (COW)
-        ImplPtr _impl;
-};
-
-//! @internal
-class PT_SSL_API PublicKeyImpl 
-{
-    friend class PublicKey;
-
-    public:
-        PublicKeyImpl();
-
-        PublicKeyImpl(evp_pkey_st* pkey);
-
-        ~PublicKeyImpl();
-
-        void fromPem(const char* data, size_t len);
-
-        void fromPem(std::istream& is);
-
-        void fromPemFile(const char* path);
-
-        void toPem(std::ostream& os) const;
-
-        void clear();
+        void detach();
 
     private:
-        evp_pkey_st* _pkey;
+        //! @internal
+        PublicKeyImpl* _impl;
 };
 
 } // namespace Ssl

@@ -34,7 +34,6 @@
 #include <Pt/Ssl/CertificateList.h>
 #include <Pt/NonCopyable.h>
 #include <string>
-#include <cstddef>
 
 namespace Pt {
 
@@ -145,6 +144,8 @@ class PT_SSL_API Context : public NonCopyable
         */
         void setPrivateKey(const PrivateKey& privKey);
         
+        const PrivateKey& privateKey() const;
+
         //! @internal
         ssl_ctx_st* impl() const;
 
@@ -152,8 +153,8 @@ class PT_SSL_API Context : public NonCopyable
         ssl_ctx_st* _ctx;
         Protocol    _protocol;
         bool        _certChainExist;
-        void*       _reserved0;
-        std::size_t _reserved1;
+        PrivateKey  _privKey;
+        void*       _reserved;
 };
 
 } // namespace Ssl

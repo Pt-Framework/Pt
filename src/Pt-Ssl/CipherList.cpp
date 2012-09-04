@@ -89,42 +89,6 @@ class CipherData
 };
 
 
-class CipherListImpl
-{
-    public:
-        CipherListImpl()
-        { }
-
-        ~CipherListImpl()
-        { clear(); }
-
-        void push_back(const Cipher& cert)
-        { _ciphers.push_back(cert); }
-
-        void clear()
-        { _ciphers.clear(); }
-
-        size_t size() const
-        { return _ciphers.size(); }
-
-        bool empty() const
-        { return _ciphers.empty(); }
-
-        const Cipher* begin()
-        { 
-            return _ciphers.empty() ? 0 : &_ciphers[0]; 
-        }
-
-        const Cipher* end() const
-        { 
-            return _ciphers.empty() ? 0 : &_ciphers[0] + _ciphers.size(); 
-        }
-
-    private:
-        std::vector<Cipher> _ciphers;
-};
-
-
 Cipher::Cipher()
 : _cipherData( new CipherData() )
 {}
@@ -179,6 +143,44 @@ int Cipher::usedBits() const
 {
     return _cipherData->usedBits;
 }
+
+
+
+
+class CipherListImpl
+{
+    public:
+        CipherListImpl()
+        { }
+
+        ~CipherListImpl()
+        { clear(); }
+
+        void push_back(const Cipher& cert)
+        { _ciphers.push_back(cert); }
+
+        void clear()
+        { _ciphers.clear(); }
+
+        size_t size() const
+        { return _ciphers.size(); }
+
+        bool empty() const
+        { return _ciphers.empty(); }
+
+        const Cipher* begin()
+        { 
+            return _ciphers.empty() ? 0 : &_ciphers[0]; 
+        }
+
+        const Cipher* end() const
+        { 
+            return _ciphers.empty() ? 0 : &_ciphers[0] + _ciphers.size(); 
+        }
+
+    private:
+        std::vector<Cipher> _ciphers;
+};
 
 
 CipherList::CipherList()

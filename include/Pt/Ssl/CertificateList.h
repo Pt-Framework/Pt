@@ -40,7 +40,7 @@ namespace Pt {
 
 namespace Ssl {
 
-class PT_SSL_API Certificate : private NonCopyable
+class PT_SSL_API Certificate
 {
     public:     
         explicit Certificate(x509_st* x509);

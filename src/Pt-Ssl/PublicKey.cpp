@@ -29,6 +29,7 @@
 
 #include "OpenSsl.h"
 #include <Pt/Ssl/PublicKey.h>
+#include <Pt/Ssl/SslError.h>
 #include <iostream>
 #include <fstream>
 
@@ -36,91 +37,50 @@ namespace Pt {
 
 namespace Ssl {
 
-PublicKey::PublicKey()
-: _impl( new PublicKeyImpl() )
+class PublicKeyImpl 
 {
-}
+    friend class PublicKey;
+
+    public:
+        PublicKeyImpl()
+        : _pkey(0)
+        , _refs(1)
+        { }
 
 
-PublicKey::PublicKey(const PublicKey& pkey)
-: _impl( pkey._impl )
-{
-}
+        PublicKeyImpl(EVP_PKEY* pkey)
+        : _pkey(pkey)
+        , _refs(1)
+        { }
 
+        ~PublicKeyImpl()
+        {
+            if(_pkey)
+                EVP_PKEY_free(_pkey);
+        }
 
-PublicKey::~PublicKey()
-{
-}
+        void fromPem(const char* data, size_t len);
 
+        void fromPem(std::istream& is);
 
-void PublicKey::fromPem(const char* data, size_t len)
-{
-    _impl = new PublicKeyImpl();
-    _impl->fromPem(data, len);
-}
+        void fromPemFile(const char* path);
 
+        void toPem(std::ostream& os) const;
 
-void PublicKey::fromPem(std::istream& is)
-{
-    _impl = new PublicKeyImpl();
-    _impl->fromPem(is);
-}
+        void ref()
+        { atomicIncrement(_refs); }
 
+        int unref()
+        { return atomicDecrement(_refs); }
 
-void PublicKey::fromPemFile(const char* fileName)
-{
-    _impl = new PublicKeyImpl();
-    _impl->fromPemFile(fileName);
-}
-
-
-void PublicKey::toPem(std::ostream& os) const
-{
-    _impl->toPem(os);
-}
-
-
-void PublicKey::clear()
-{ 
-    _impl = new PublicKeyImpl(); 
-}
-
-
-PublicKey::PublicKey(EVP_PKEY* pkey)
-: _impl( new PublicKeyImpl(pkey) )
-{
-}
-
-
-evp_pkey_st* PublicKey::impl() const
-{ 
-    return _impl->_pkey; 
-}
-
-
-PublicKeyImpl::PublicKeyImpl()
-: _pkey(0)
-{
-}
-
-
-PublicKeyImpl::PublicKeyImpl(EVP_PKEY* pkey)
-: _pkey(pkey)
-{
-}
-
-
-PublicKeyImpl::~PublicKeyImpl()
-{ 
-    clear();
-}
+    private:
+        evp_pkey_st* _pkey;
+        Pt::atomic_t _refs;
+};
 
 
 void PublicKeyImpl::fromPem(const char* data, size_t len)
 {
-    // Clear previous key (if any)
-    clear();
-
     // Create a read-only memory BIO from the given string
     BioAutoPtr in( BIO_new_mem_buf( (void*) data, len ) );
 
@@ -171,12 +131,96 @@ void PublicKeyImpl::toPem(std::ostream& os) const
 }
 
 
-void PublicKeyImpl::clear()
+
+
+PublicKey::PublicKey()
+: _impl(0)
 {
-    if(_pkey) {
-        EVP_PKEY_free(_pkey);
-        _pkey = 0;
+}
+
+
+PublicKey::PublicKey(const PublicKey& pkey)
+: _impl( pkey._impl )
+{
+    if(_impl)
+        _impl->ref();
+}
+
+
+PublicKey::PublicKey(EVP_PKEY* pkey)
+: _impl( new PublicKeyImpl(pkey) )
+{
+}
+
+
+PublicKey::~PublicKey()
+{
+    if( _impl && 0 == _impl->unref() )
+    {
+        delete _impl;
     }
+}
+
+
+PublicKey& PublicKey::operator=(const PublicKey& key)
+{
+    if( _impl && 0 == _impl->unref() )
+    {
+        delete _impl;
+    }
+
+    _impl = key._impl;
+
+    if(_impl)
+        _impl->ref();
+
+    return *this;
+}
+
+
+void PublicKey::fromPem(const char* data, size_t len)
+{
+    detach();
+    _impl->fromPem(data, len);
+}
+
+
+void PublicKey::fromPem(std::istream& is)
+{
+    detach();
+    _impl->fromPem(is);
+}
+
+
+void PublicKey::fromPemFile(const char* fileName)
+{
+    detach();
+    _impl->fromPemFile(fileName);
+}
+
+
+void PublicKey::toPem(std::ostream& os) const
+{
+    _impl->toPem(os);
+}
+
+
+void PublicKey::detach()
+{
+    PublicKeyImpl* new_impl = new PublicKeyImpl();
+
+    if( _impl && 0 == _impl->unref() )
+    {
+        delete _impl;
+    }
+    
+    _impl = new_impl;
+}
+
+
+evp_pkey_st* PublicKey::impl() const
+{ 
+    return _impl ? _impl->_pkey : 0; 
 }
     
 } // namespace Ssl

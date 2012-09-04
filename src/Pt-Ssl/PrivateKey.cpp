@@ -30,6 +30,8 @@
 #include "OpenSsl.h"
 #include <Pt/Ssl/PrivateKey.h>
 #include <Pt/Ssl/SslError.h>
+#include <Pt/NonCopyable.h>
+#include <Pt/Atomicity.h>
 #include <iostream>
 #include <fstream>
 
@@ -37,90 +39,49 @@ namespace Pt {
 
 namespace Ssl {
 
-PrivateKey::PrivateKey()
-: _impl( new PrivateKeyImpl() )
+class PrivateKeyImpl : private Pt::NonCopyable
 {
-}
+    public:
+        PrivateKeyImpl(const std::string& password)
+        : _pswd(password)
+        , _pkey(0)
+        , _refs(1)
+        { }
+        
+        ~PrivateKeyImpl()
+        {
+            if(_pkey)
+                EVP_PKEY_free(_pkey);
+        }
 
+        void ref()
+        { atomicIncrement(_refs); }
 
-PrivateKey::PrivateKey(const PrivateKey& pkey)
-: _impl( pkey._impl )
-{
-}
+        int unref()
+        { return atomicDecrement(_refs); }
 
+        void fromPem(const char* data, size_t len);
 
-PrivateKey::PrivateKey(const std::string& password)
-: _impl( new PrivateKeyImpl(password) )
-{
-}
+        void fromPem(std::istream& is);
 
+        void fromPemFile(const char* path);
 
-PrivateKey::~PrivateKey()
-{
-}
+        void toPem(std::ostream& os) const;
 
+        static int passwordCallback(char* buff, int num, int /*rwflag*/, void* userdata);
 
-void PrivateKey::fromPem(const char* data, size_t len)
-{
-    _impl = new PrivateKeyImpl(*_impl);
-    _impl->fromPem(data, len);
-}
+        evp_pkey_st* evp()
+        { return _pkey; }
 
-
-void PrivateKey::fromPem(std::istream& is)
-{
-    _impl = new PrivateKeyImpl(*_impl);
-    _impl->fromPem(is);
-}
-
-
-void PrivateKey::fromPemFile(const char* fileName)
-{
-    _impl = new PrivateKeyImpl(*_impl);
-    _impl->fromPemFile(fileName);
-}
-
-
-void PrivateKey::toPem(std::ostream& os) const
-{
-    _impl->toPem(os);
-}
-
-
-void PrivateKey::clear()
-{ 
-    _impl = new PrivateKeyImpl(); 
-}
-
-
-evp_pkey_st* PrivateKey::impl() const
-{ 
-    return _impl->evp(); 
-}
-
-
-PrivateKeyImpl::PrivateKeyImpl()
-: _pswd(), _pkey(0)
-{
-}
-
-PrivateKeyImpl::PrivateKeyImpl(const std::string& password)
-: _pswd(password), _pkey(0)
-{
-}
-
-
-PrivateKeyImpl::~PrivateKeyImpl()
-{ 
-    clear(); 
-}
+    private:
+        const std::string&  _pswd;
+        evp_pkey_st* _pkey;
+        Pt::atomic_t _refs;
+};
 
 
 void PrivateKeyImpl::fromPem(const char* data, size_t len)
 {
-    // Clear previous key (if any)
-    clear();
-
     // Create a read-only memory BIO from the given string
     BioAutoPtr in( BIO_new_mem_buf( (void*) data, len ) );
 
@@ -172,15 +133,6 @@ void PrivateKeyImpl::toPem(std::ostream& os) const
 }
 
 
-void PrivateKeyImpl::clear()
-{
-    if(_pkey) {
-        EVP_PKEY_free(_pkey);
-        _pkey = 0;
-    }
-}
-
-
 int PrivateKeyImpl::passwordCallback(char* buff, int num, int /*rwflag*/, void* userdata)
 {
     // Get the password
@@ -193,6 +145,101 @@ int PrivateKeyImpl::passwordCallback(char* buff, int num, int /*rwflag*/, void* 
     // Copy the password to the buffer and return the length
     strcpy(buff, &password[0]);
     return password.length();
+}
+
+
+PrivateKey::PrivateKey()
+: _pswd()
+, _impl( 0 )
+{
+}
+
+
+PrivateKey::PrivateKey(const std::string& password)
+: _pswd(password)
+, _impl(0)
+{
+}
+
+
+PrivateKey::PrivateKey(const PrivateKey& pkey)
+: _impl( pkey._impl )
+, _pswd( pkey._pswd )
+{
+    if(_impl)
+      _impl->ref();
+}
+
+
+PrivateKey::~PrivateKey()
+{
+    if( _impl && 0 == _impl->unref() )
+    {
+        delete _impl;
+    }
+}
+
+
+PrivateKey& PrivateKey::operator=(const PrivateKey& key)
+{
+    if( _impl && 0 == _impl->unref() )
+    {
+        delete _impl;
+    }
+
+    _impl = key._impl;
+
+    if(_impl)
+        _impl->ref();
+
+    _pswd = key._pswd;
+    return *this;
+}
+
+
+void PrivateKey::fromPem(const char* data, std::size_t len)
+{
+    detach();
+    _impl->fromPem(data, len);
+}
+
+
+void PrivateKey::fromPem(std::istream& is)
+{
+    detach();
+    _impl->fromPem(is);
+}
+
+
+void PrivateKey::fromPemFile(const char* fileName)
+{
+    detach();
+    _impl->fromPemFile(fileName);
+}
+
+
+void PrivateKey::toPem(std::ostream& os) const
+{
+    _impl->toPem(os);
+}
+
+
+void PrivateKey::detach()
+{
+    PrivateKeyImpl* new_impl = new PrivateKeyImpl(_pswd);
+
+    if( _impl && 0 == _impl->unref() )
+    {
+        delete _impl;
+    }
+    
+    _impl = new_impl;
+}
+
+
+evp_pkey_st* PrivateKey::impl() const
+{ 
+    return _impl? _impl->evp() : 0; 
 }
 
 } // namespace Ssl

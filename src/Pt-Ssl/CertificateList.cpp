@@ -28,7 +28,9 @@
  */
 #include "OpenSsl.h"
 #include <Pt/Ssl/CertificateList.h>
+#include <Pt/Ssl/SslError.h>
 #include <Pt/System/Logger.h>
+#include <Pt/Atomicity.h>
 #include <fstream>
 #include <cassert>
 #include <openssl/ssl.h>
@@ -85,10 +87,10 @@ class CertificateImpl
         }
 
         void ref()
-        { ++_refs; }
+        { atomicIncrement(_refs); }
 
-        unsigned unref()
-        { return --_refs; }
+        int unref()
+        { return atomicDecrement(_refs); }
 
         int serialNumber() const
         {
@@ -120,46 +122,7 @@ class CertificateImpl
 
     private:
         x509_st* _x509;
-        unsigned _refs;
-};
-
-
-class CertificateListImpl
-{
-    public:
-        CertificateListImpl()
-        { }
-
-        CertificateListImpl(const CertificateListImpl& list)
-        { _certificates = list._certificates; }
-
-        ~CertificateListImpl()
-        { clear(); }
-
-        void push_back(const Certificate& cert)
-        { _certificates.push_back(cert); }
-
-        void clear()
-        { _certificates.clear(); }
-
-        size_t size() const
-        { return _certificates.size(); }
-
-        bool empty() const
-        { return _certificates.empty(); }
-
-        const Certificate* begin() const
-        { 
-            return _certificates.empty() ? 0 : &_certificates[0]; 
-        }
-
-        const Certificate* end() const
-        { 
-            return _certificates.empty() ? 0 : &_certificates[0] + _certificates.size(); 
-        }
-
-    private:
-        std::vector<Certificate> _certificates;
+        Pt::atomic_t _refs;
 };
 
 
@@ -243,6 +206,47 @@ x509_st* Certificate::getX509() const
 {
     return _impl->getX509();
 }
+
+
+
+
+class CertificateListImpl
+{
+    public:
+        CertificateListImpl()
+        { }
+
+        CertificateListImpl(const CertificateListImpl& list)
+        { _certificates = list._certificates; }
+
+        ~CertificateListImpl()
+        { clear(); }
+
+        void push_back(const Certificate& cert)
+        { _certificates.push_back(cert); }
+
+        void clear()
+        { _certificates.clear(); }
+
+        size_t size() const
+        { return _certificates.size(); }
+
+        bool empty() const
+        { return _certificates.empty(); }
+
+        const Certificate* begin() const
+        { 
+            return _certificates.empty() ? 0 : &_certificates[0]; 
+        }
+
+        const Certificate* end() const
+        { 
+            return _certificates.empty() ? 0 : &_certificates[0] + _certificates.size(); 
+        }
+
+    private:
+        std::vector<Certificate> _certificates;
+};
 
 
 CertificateList::CertificateList()
