@@ -34,6 +34,7 @@
 #include <Pt/Ssl/Session.h>
 #include <Pt/Ssl/CipherList.h>
 #include <Pt/Signal.h>
+#include <streambuf>
 #include <string>
 
 namespace Pt {

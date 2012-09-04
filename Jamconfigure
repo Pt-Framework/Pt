@@ -13,6 +13,12 @@ else
     CONFIG ?= release ; 
 }
 
+if --nlog in $(ARGV)
+{
+    CCFLAGS += [ FDefines NLOG ] ;
+    C++FLAGS += [ FDefines NLOG ] ;
+}
+
 Configure CONFIG ;
 EchoOption CONFIG : "Build configuration" ;
 

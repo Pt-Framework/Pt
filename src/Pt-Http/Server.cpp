@@ -604,8 +604,6 @@ void Server::startWorker()
 
 void Server::onAccept(Net::TcpServer& server)
 {
-    const bool https = _sslctx != 0;
-
     // TODO: we should only pass the TcpSocket to the worker thread
     //       so that a RequestHandler can be constructed with an event loop
 
