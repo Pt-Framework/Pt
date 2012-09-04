@@ -34,6 +34,7 @@
 #include <Pt/Ssl/CertificateList.h>
 #include <Pt/NonCopyable.h>
 #include <string>
+#include <cstddef>
 
 namespace Pt {
 
@@ -143,18 +144,16 @@ class PT_SSL_API Context : public NonCopyable
             certificate-based client authentication.
         */
         void setPrivateKey(const PrivateKey& privKey);
-
-        //! @brief Returns the currently used private key.
-        PrivateKey privateKey() const;
         
         //! @internal
         ssl_ctx_st* impl() const;
 
     private:
-        ssl_ctx_st*        _ctx;
-        Protocol           _protocol;
-        PrivateKey         _privKey;
-        bool               _certChainExist;
+        ssl_ctx_st* _ctx;
+        Protocol    _protocol;
+        bool        _certChainExist;
+        void*       _reserved0;
+        std::size_t _reserved1;
 };
 
 } // namespace Ssl

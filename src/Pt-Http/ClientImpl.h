@@ -65,6 +65,22 @@ class ClientImpl : public Connectable
     friend class ParseEvent;
 
     public:
+        enum State
+        {
+            Idle                  = 0,
+            OnConnect             = 1,
+            OnConnectReceive      = 2,
+            OnSslHandshake        = 3,
+            OnSslHandshakeReceive = 4,
+            OnRequest             = 5,
+            OnChunkedRequest      = 6,
+            OnRequestEnd          = 7,
+            OnRequestComplete     = 8,
+            OnReply               = 9,
+            OnReplyComplete       = 10
+        };
+
+    public:
         ClientImpl(Client* client);
 
         System::EventLoop* loop() const
@@ -124,31 +140,21 @@ class ClientImpl : public Connectable
 
         void cancel();
 
-    protected:
-        void onRequestSent(Request& r);
+        State state() const
+        { return _hstate; }
 
-        void onReplyReceived(Reply& r);
+        Signal<Client&>& requestSent()
+        { return _requestSent; }
+
+        Signal<Client&>& replyReceived()
+        { return _replyReceived; }
 
     private:
-        enum State
-        {
-            Idle                  = 0,
-            OnConnect             = 1,
-            OnConnectReceive      = 2,
-            OnSslHandshake        = 3,
-            OnSslHandshakeReceive = 4,
-            OnRequest             = 5,
-            OnChunkedRequest      = 6,
-            OnRequestEnd          = 7,
-            OnRequestComplete     = 8,
-            OnReply               = 9,
-            OnReplyComplete       = 10
-        };
-
         void init();
 
     private:   
-        Client* _client;
+        Signal<Client&> _requestSent;
+        Signal<Client&> _replyReceived;
         State _hstate;
         Connection _conn;
         Request _req;

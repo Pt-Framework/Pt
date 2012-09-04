@@ -43,16 +43,12 @@ namespace Pt {
 namespace Http {
 
 ClientImpl::ClientImpl(Client* client)
-: _client(client)
-, _hstate(Idle)
+: _hstate(Idle)
 , _conn()
 , _requestCount(0)
 {
     _req.init(_conn);
-    _req.outputSent() += Pt::slot(*this, &ClientImpl::onRequestSent);
-
     _reply.init(_conn);
-    _reply.inputReceived() += Pt::slot(*this, &ClientImpl::onReplyReceived);
 }
 
 
@@ -89,24 +85,6 @@ void ClientImpl::send()
 std::istream& ClientImpl::receive()
 {
     return _reply.body();
-}
-
-
-void ClientImpl::onRequestSent(Request& r)
-{
-    log_trace("onRequestSent: " << _hstate);
-
-    if(_hstate == OnRequestEnd)
-        _client->replyReceived().send(*_client);
-    else
-        _client->requestSent().send(*_client);
-}
-
-
-void ClientImpl::onReplyReceived(Reply& r)
-{
-    log_trace("onReplyReceived: " << _hstate);
-    _client->replyReceived().send(*_client);
 }
 
 

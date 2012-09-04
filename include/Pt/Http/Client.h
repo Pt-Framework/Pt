@@ -51,7 +51,8 @@ namespace Ssl {
 
 namespace Http {
 
-class PT_HTTP_API Client : private NonCopyable
+class PT_HTTP_API Client : public Connectable
+                         , private NonCopyable
 {
     public:
         Client();
@@ -76,7 +77,6 @@ class PT_HTTP_API Client : private NonCopyable
 
         const Net::AddrInfo& host() const;
 
-        // TODO: pass Context here?
         void setSecure();
 
         void setContext(Ssl::Context& ctx);
@@ -91,8 +91,7 @@ class PT_HTTP_API Client : private NonCopyable
 
         /** @brief Signals that a part of the request was sent.
         */
-        Signal<Client&>& requestSent()
-        { return _requestSent; }
+        Signal<Client&>& requestSent();
 
         void beginReceive();
 
@@ -100,8 +99,7 @@ class PT_HTTP_API Client : private NonCopyable
 
         /** @brief Signals that a part of the reply was received.
         */
-        Signal<Client&>& replyReceived()
-        { return _replyReceived; }
+        Signal<Client&>& replyReceived();
 
         Request& request();
 
@@ -123,11 +121,12 @@ class PT_HTTP_API Client : private NonCopyable
         */
         std::istream& receive();
 
+    protected:
+        void onRequestSent(Request& r);
+
+        void onReplyReceived(Reply& r);
+
     private:
-        Signal<Client&> _requestSent;
-
-        Signal<Client&> _replyReceived;
-
         class ClientImpl* _impl;
 };
 
