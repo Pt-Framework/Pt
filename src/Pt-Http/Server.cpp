@@ -34,6 +34,11 @@
 #include <Pt/Http/Reply.h>
 #include <Pt/Http/Service.h>
 #include <Pt/Http/Responder.h>
+
+#ifdef PT_HTTP_WITH_SSL
+#include <Pt/Ssl/Context.h>
+#endif
+
 #include <Pt/System/MainLoop.h>
 #include <Pt/System/Thread.h>
 #include <Pt/System/Logger.h>
@@ -53,7 +58,13 @@ class RequestHandler : public Pt::Connectable
 
         ~RequestHandler();
 
-        void beginServe(System::EventLoop& loop, Ssl::Context* ctx = 0);
+        void setSecure(Ssl::Context& ctx)
+        {
+            _conn.setSecure();
+            _conn.setContext(ctx);
+        }
+
+        void beginServe(System::EventLoop& loop);
 
         Signal<RequestHandler&>& timeout()
         { return _timeout; }
@@ -100,19 +111,13 @@ RequestHandler::~RequestHandler()
 }
 
 
-void RequestHandler::beginServe(System::EventLoop& loop, Ssl::Context* ctx)
+void RequestHandler::beginServe(System::EventLoop& loop)
 {  
     log_trace("RequestHandler::beginServe");
 
     _ignoreBody = false;
 
     _conn.setActive(loop);
-
-    if(ctx)
-    {
-        _conn.setSecure();
-        _conn.setContext(*ctx);
-    }
 
     _reply.init(_conn);
     _reply.clear();
@@ -268,15 +273,15 @@ class ServerThread : public Connectable
         };
 
     public:
-        ServerThread(Server& server, Signal<Ssl::Context&>* sslConfig = 0)
+        ServerThread(Server& server, Ssl::Context* sslctx = 0)
         : _server(&server)
         , _ssl(false)
         , _thread(_loop)
         {
 #ifdef PT_HTTP_WITH_SSL
-            if(sslConfig)
+            if(sslctx)
             {
-                sslConfig->send(_sslctx);
+                _sslctx.assign(*sslctx);
                 _ssl = true;
             }
 #endif
@@ -318,17 +323,17 @@ class ServerThread : public Connectable
 
         void onAcceptEvent(const AcceptEvent& ev)
         {
-            RequestHandler* conn = ev.connection();
+            RequestHandler* handler = ev.connection();
 
-            _connections.push_back(conn);
-            conn->timeout() += Pt::slot(*this, &ServerThread::onConnectionTimeout);
+            _connections.push_back(handler);
+            handler->timeout() += Pt::slot(*this, &ServerThread::onConnectionTimeout);
 
 #ifdef PT_HTTP_WITH_SSL
             if(_ssl)
-                conn->beginServe(_loop, &_sslctx);
-            else
-#endif            
-                conn->beginServe(_loop);
+                handler->setSecure(_sslctx);
+#endif
+
+            handler->beginServe(_loop);
         }
 
         void onConnectionTimeout(RequestHandler& conn)
@@ -425,7 +430,6 @@ Server::~Server()
 
     delete _defaultService;
     delete _noAuthService;
-    delete _sslctx;
 }
 
 
@@ -489,9 +493,10 @@ void Server::removeService(Service& service)
 }
 
 
-void Server::setSecure()
+void Server::setSecure(Ssl::Context& ctx)
 {
     _ssl = true;
+    _sslctx = &ctx;
 }
 
 
@@ -574,14 +579,6 @@ Responder* Server::getDefaultResponder(const RequestHeader& request)
 
 void Server::startWorker()
 {
-#ifdef PT_HTTP_WITH_SSL
-    if(_ssl && ! _sslctx)
-    {
-        _sslctx = new Ssl::Context();
-        sslConfigured.send(*_sslctx);
-    }
-#endif
-
     for(unsigned n = 1; n < this->maxThreads(); ++n)
     {
         ServerThread* st = 0;
@@ -589,7 +586,7 @@ void Server::startWorker()
 #ifdef PT_HTTP_WITH_SSL
         if(_ssl)
         {
-            st = new ServerThread(*this, &sslConfigured);
+            st = new ServerThread(*this, _sslctx);
         }
         else
 #endif
@@ -616,7 +613,10 @@ void Server::onAccept(Net::TcpServer& server)
     }
     else
     {
-        conn->beginServe(_loop, _sslctx);
+        if(_sslctx)
+            conn->setSecure(*_sslctx);
+        
+        conn->beginServe(_loop);
         _connections.push_back(conn);
         conn->timeout() += Pt::slot(*this, &Server::onConnectionTimeout);
         _useWorker = 0;

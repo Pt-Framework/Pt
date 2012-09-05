@@ -43,8 +43,6 @@ namespace Ssl {
 
 log_define("Pt.Ssl.Context")
 
-#define COPY_EXTRA_CERT
-
 static int ssl_init_counter = 0;
 
 static Pt::System::Mutex* sslmtx = 0;
@@ -122,7 +120,6 @@ SSLInit::~SSLInit()
 
 Context::Context(Protocol protocol)
 : _protocol(protocol)
-, _certChainExist(false)
 , _reserved(0)
 {
     // Create the context for the given protocol
@@ -151,14 +148,6 @@ Context::Context(Protocol protocol)
 
 Context::~Context()
 {
-#ifndef COPY_EXTRA_CERT
-    if(_ctx->extra_certs) 
-    {
-        sk_X509_pop(_ctx->extra_certs);
-        _ctx->extra_certs = 0;
-    }
-#endif
-
     SSL_CTX_free(_ctx);
 }
 
@@ -343,70 +332,13 @@ void Context::setVerifyMode(VerifyMode m)
 }
 
 
-/*
-std::vector<SSLCipherInfo> SSLStreamBuf::availableCiphers() const
+X509* addExtraCert(SSL_CTX* ctx, X509* x)
 {
-    NOTE: we could keep a ssl_st here to determine available ciphers, if a
-    new SSLStreamBuf is constricted we pass that ssl_st and create a new one
-    Also would need to recreate the sst_st if we change protocol.
-}
-*/
-/*
-void Context::setEnabledCiphers(const std::vector<SSLCipherInfo>& ciphers)
-{
-    std::string str;
-    for(size_t i = 0; i < ciphers.size(); ++i) {
-        if(!str.empty()) str += ":";
-        str += ciphers[i].name;
-    }
-
-    if(!SSL_CTX_set_cipher_list(_ctx, str.c_str()))
-        throw SSLRuntimeError("Failed selecting SSL ciphers!", PT_SOURCEINFO);
-
-    _enabledCiphers = ciphers;
-}
-*/
-
-// certificates to validate certificate presented by peer
-void Context::setCACertificates(const CertificateList& trustedCert)
-{
-    // Try to add the CA X509 certificates (if any)
-    X509_STOREAutoPtr cert_store( X509_STORE_new() );
-
-    for(CertificateList::Iterator it = trustedCert.begin(); it != trustedCert.end(); ++it) 
-    {
-        if( ! X509_STORE_add_cert(cert_store.get(), it->getX509()) )
-            throw InvalidCertificate("Could not store the CA certificate as a trusted certificate");
-    }
-
-    // Set it to the context
-    SSL_CTX_set_cert_store(_ctx, cert_store.get());
-    cert_store.release();
-}
-
-// certificate to present to peer
-void Context::setCertificate(const Certificate& cert)
-{
-    ERR_clear_error();
-    
-    X509* x509 = cert.getX509();
-
-    if( ! SSL_CTX_use_certificate(_ctx, x509) || ERR_peek_error() )
-    {
-        throw InvalidCertificate("Invalid/mismatched certificate");
-    }
-}
-
-
-// intermediate certificates to present to peer
-void Context::addCertificate(const Certificate& cert)
-{
-#ifdef COPY_EXTRA_CERT
     // NOTE: SSL_CTX_add_extra_chain_cert does not copy the X509 certificate, 
     // or increase the refcount, so we must "copy" it manually, because SSL_CTX
     // will take ownership
 
-    X509* x509 = X509_dup( cert.getX509() );
+    X509* dupX509 = X509_dup(x);
 
     // // Convert the X509 certificate to raw binary data
     // unsigned char* buf = 0;
@@ -422,23 +354,74 @@ void Context::addCertificate(const Certificate& cert)
     //if( ! x509)
     //    throw InvalidCertificate("Could not convert the raw binary data back to a CA certificate");
 
-    if( ! x509 )
+    if( ! dupX509 )
         throw InvalidCertificate("Could not duplicate the CA certificate");
 
-    if( ! SSL_CTX_add_extra_chain_cert( _ctx, x509 ) )
+    if( ! SSL_CTX_add_extra_chain_cert( ctx, dupX509 ) )
         throw InvalidCertificate("Could not add CA certificate");
-#else        
-    if( ! SSL_CTX_add_extra_chain_cert( _ctx, cert.getX509() ) )
-        throw InvalidCertificate("Could not add CA certificate");
-#endif
 
-    _certChainExist = true;
+    return dupX509;
+}
+
+
+void Context::assign(const Context& ctx)
+{
+    setProtocol(ctx._protocol);
+
+    setCACertificates(ctx._caCerts);
+    setCertificate(ctx._cert);
+
+    std::vector<X509*>::const_iterator it;
+    for(it = ctx._extraCerts.begin(); it != ctx._extraCerts.end(); ++it)
+    {
+        X509* x509 = addExtraCert(_ctx, *it);
+        _extraCerts.push_back(x509);
+    }
+
+    int mode = SSL_CTX_get_verify_mode(_ctx);
+    SSL_CTX_set_verify(_ctx, mode, 0);
+
+    setPrivateKey(ctx._privKey);
+}
+
+
+void Context::setCACertificates(const CertificateList& caCerts)
+{
+    // certificates to validate certificate presented by peer
+    _caCerts = caCerts;
+
+    // Try to add the CA X509 certificates (if any)
+    X509_STOREAutoPtr cert_store( X509_STORE_new() );
+
+    for(CertificateList::Iterator it = _caCerts.begin(); it != _caCerts.end(); ++it) 
+    {
+        if( ! X509_STORE_add_cert(cert_store.get(), it->getX509()) )
+            throw InvalidCertificate("Could not store the CA certificate as a trusted certificate");
+    }
+
+    // Set it to the context
+    SSL_CTX_set_cert_store(_ctx, cert_store.get());
+    cert_store.release();
+}
+
+
+void Context::setCertificate(const Certificate& cert)
+{
+    // certificate to present to peer
+    _cert = cert;
+
+    X509* x509 = _cert.getX509();
+
+    if( ! SSL_CTX_use_certificate(_ctx, x509) )
+    {
+        throw InvalidCertificate("Invalid/mismatched certificate");
+    }
 }
 
 
 void Context::setCertificateChain(const CertificateList& certs)
 {
-    CertificateList::Iterator it = certs.begin();
+    CertificateList::ConstIterator it = certs.begin();
     if( it == certs.end() )
         throw InvalidCertificate("certificate list too short");
 
@@ -447,32 +430,25 @@ void Context::setCertificateChain(const CertificateList& certs)
 
     for(; it != certs.end(); ++it)
     {
-        this->addCertificate(*it);
+        X509* x509 = addExtraCert(_ctx, it->getX509());
+        _extraCerts.push_back(x509);
     }
 }
 
 
-void Context::setPrivateKey(const PrivateKey& privKey)
+void Context::setPrivateKey(const PrivateKey& key)
 {
-    // Try to use the private key
-    if( ! SSL_CTX_use_PrivateKey( _ctx, privKey.impl() ) )
+    _privKey = key;
+
+    if( ! SSL_CTX_use_PrivateKey( _ctx, _privKey.impl() ) )
         throw InvalidKey("Invalid private-key!");
 
-    // Store a reference to the private key
-    _privKey = privKey;
-    
     // Check the private key (if needed)
-    if( ! _certChainExist) 
+    if( _extraCerts.empty() ) 
     {
         if( ! SSL_CTX_check_private_key(_ctx) )
             throw InvalidKey("The private key does not agree with the corresponding public key in the certificate!");
     }
-}
-
-
-const PrivateKey& Context::privateKey() const
-{
-    return _privKey;
 }
 
 

@@ -79,6 +79,9 @@ class PT_SSL_API Context : public NonCopyable
         //! @brief Destructor.
         ~Context();
 
+        //! @brief Assigns the certificates, keys, validation mode and protocol.
+        void assign(const Context& ctx);
+
         /** @brief Enables session caching on the server side
 
             The @cacheId is a application specific ID for the session cache,
@@ -96,6 +99,7 @@ class PT_SSL_API Context : public NonCopyable
         //! @brief Sets the current protocol. 
         void setProtocol(Protocol protocol);
 
+        //! @brief Sets the current validation mode.
         void setVerifyMode(VerifyMode mode);
 
         /** @brief Set the list of trusted CA certificates for this context.
@@ -115,17 +119,6 @@ class PT_SSL_API Context : public NonCopyable
          */
         void setCertificate(const Certificate& cert);
 
-        /** @brief Add certificate to chain of this context.
-
-            Additionally to the main certificate of this context, more certificates
-            of the intermediate CAs can be added to the certificate chain. Setting 
-            a main certificate and certificate chain for a client context is only 
-            needed for  certificate-based client authentication. In this case the
-            main certificate must be the client certificate. The remaining certificates 
-            are the certificates of the intermediate CAs.
-        */
-        void addCertificate(const Certificate& cert);
-
         /** @brief Sets main certificate and certificate chain.
 
             The first certificate in the given list of certificates will
@@ -133,6 +126,12 @@ class PT_SSL_API Context : public NonCopyable
             will be added to the intermediate CA certificate chain. For
             a server context the main certificate should be the server
             certificate.
+
+            Setting a main certificate and certificate chain for a client 
+            context is only needed for certificate-based client authentication. 
+            In this case the main certificate must be the client certificate. 
+            The remaining certificates are the certificates of the intermediate
+            CAs.
         */
         void setCertificateChain(const CertificateList& certs);
 
@@ -143,18 +142,18 @@ class PT_SSL_API Context : public NonCopyable
             certificate-based client authentication.
         */
         void setPrivateKey(const PrivateKey& privKey);
-        
-        const PrivateKey& privateKey() const;
 
         //! @internal
         ssl_ctx_st* impl() const;
 
     private:
-        ssl_ctx_st* _ctx;
-        Protocol    _protocol;
-        bool        _certChainExist;
-        PrivateKey  _privKey;
-        void*       _reserved;
+        ssl_ctx_st*     _ctx;
+        Protocol        _protocol;
+        CertificateList _caCerts;
+        Certificate     _cert;
+        std::vector<x509_st*> _extraCerts;
+        PrivateKey      _privKey;
+        void*           _reserved;
 };
 
 } // namespace Ssl

@@ -126,6 +126,12 @@ class CertificateImpl
 };
 
 
+Certificate::Certificate()
+: _impl(0)
+{
+}
+
+
 Certificate::Certificate(x509_st* x509)
 : _impl( new CertificateImpl(x509) )
 {
@@ -135,13 +141,14 @@ Certificate::Certificate(x509_st* x509)
 Certificate::Certificate(const Certificate& cert)
 : _impl(cert._impl)
 {
-    _impl->ref();
+    if(_impl)
+        _impl->ref();
 }
 
 
 Certificate::~Certificate()
 {
-    if( 0 == _impl->unref() )
+    if( _impl && 0 == _impl->unref() )
     {
         delete _impl;
     }
@@ -150,13 +157,15 @@ Certificate::~Certificate()
 
 Certificate& Certificate::operator=(const Certificate& cert)
 {
-    if( 0 == _impl->unref() )
+    if( _impl && 0 == _impl->unref() )
     {
         delete _impl;
     }
 
     _impl = cert._impl;
-    _impl->ref();
+
+    if(_impl)
+        _impl->ref();
 
     return *this;
 }
@@ -164,46 +173,64 @@ Certificate& Certificate::operator=(const Certificate& cert)
 
 int Certificate::serialNumber() const
 {
+    if( ! _impl)
+        return 0;
+
     return _impl->serialNumber();
 }
 
 
 std::string Certificate::issuer() const
 {
+    if( ! _impl)
+        return std::string();
+
     return _impl->issuer();
 }
 
 
 std::string Certificate::subject() const
 {
+    if( ! _impl)
+        return std::string();
+
     return _impl->subject();
 }
    
         
 std::string Certificate::notBefore() const
 {
+    if( ! _impl)
+        return std::string();
+
     return _impl->notBefore();
 }
 
 
 std::string Certificate::notAfter() const
 {
+    if( ! _impl)
+        return std::string();
+
     return _impl->notAfter();
 }
 
 
 PublicKey Certificate::publicKey() const
 {
-    EVP_PKEY* pkey = _impl->getX509() ? 0 : X509_get_pubkey( _impl->getX509()  );
-    if( ! pkey)
-        throw InvalidCertificate("Could not extract the main certificate's public key!");
-
+    if( ! _impl)
+        return PublicKey();
+    
+    EVP_PKEY* pkey = X509_get_pubkey( _impl->getX509() );
     return PublicKey(pkey);
 }
 
 
 x509_st* Certificate::getX509() const
 {
+    if( ! _impl)
+        return 0;
+
     return _impl->getX509();
 }
 
@@ -233,6 +260,16 @@ class CertificateListImpl
 
         bool empty() const
         { return _certificates.empty(); }
+
+        Certificate* begin()
+        { 
+            return _certificates.empty() ? 0 : &_certificates[0]; 
+        }
+
+        Certificate* end()
+        { 
+            return _certificates.empty() ? 0 : &_certificates[0] + _certificates.size(); 
+        }
 
         const Certificate* begin() const
         { 
@@ -339,6 +376,12 @@ void CertificateList::clear()
 }
 
 
+void CertificateList::push_back(const Certificate& cert)
+{
+    _impl->push_back(cert);
+}
+
+
 bool CertificateList::empty() const
 {
     return _impl->empty();
@@ -351,15 +394,27 @@ size_t CertificateList::size() const
 }
 
 
-CertificateList::Iterator CertificateList::begin() const
+CertificateList::Iterator CertificateList::begin()
 { 
     return Iterator( _impl->begin() );
 }
         
 
-CertificateList::Iterator CertificateList::end() const
+CertificateList::Iterator CertificateList::end()
 { 
     return Iterator( _impl->end() ); 
+}
+
+
+CertificateList::ConstIterator CertificateList::begin() const
+{ 
+    return ConstIterator( _impl->begin() );
+}
+        
+
+CertificateList::ConstIterator CertificateList::end() const
+{ 
+    return ConstIterator( _impl->end() ); 
 }
 
 } // namespace Ssl

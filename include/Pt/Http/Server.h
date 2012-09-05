@@ -86,7 +86,7 @@ class PT_HTTP_API Server : public Pt::Connectable
 
         void removeService(Service& service);
 
-        void setSecure();
+        void setSecure(Ssl::Context& ctx);
 
         std::size_t readTimeout() const;
 
@@ -110,8 +110,6 @@ class PT_HTTP_API Server : public Pt::Connectable
 
         System::EventLoop& loop()
         { return _loop; }
-
-        Signal<Ssl::Context&> sslConfigured;
 
     protected:
         void startWorker();

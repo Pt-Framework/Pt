@@ -43,6 +43,8 @@ namespace Ssl {
 class PT_SSL_API Certificate
 {
     public:     
+        Certificate();
+
         explicit Certificate(x509_st* x509);
 
         Certificate(const Certificate& cert);
@@ -76,6 +78,9 @@ class PT_SSL_API CertificateList
         //! @brief Forward iterator for certificate lists
         class Iterator;
 
+        //! @brief Forward iterator for constant certificate lists
+        class ConstIterator;
+
     public:
         //! \brief Instantiate an empty certificate-list.
         CertificateList();
@@ -99,13 +104,19 @@ class PT_SSL_API CertificateList
         //! \brief Clear (delete) any loaded certificate.
         void clear();
 
+        void push_back(const Certificate& cert);
+
         bool empty() const;
 
         size_t size() const;
 
-        Iterator begin() const;
+        Iterator begin();
         
-        Iterator end() const;
+        Iterator end();
+
+        ConstIterator begin() const;
+        
+        ConstIterator end() const;
 
     private:
         class CertificateListImpl* _impl;
@@ -123,7 +134,7 @@ class CertificateList::Iterator
         : _c(other._c)
         {}
 
-        explicit Iterator(const Certificate* c)
+        explicit Iterator(Certificate* c)
         : _c(c)
         {}
 
@@ -139,16 +150,60 @@ class CertificateList::Iterator
             return *this;
         }
 
-        const Certificate& operator*() const
+        Certificate& operator*() const
         { return *_c; }
 
-        const Certificate* operator->() const
+        Certificate* operator->() const
         { return _c; }
 
         bool operator!=(const Iterator& other) const
         { return _c != other._c; }
 
         bool operator==(const Iterator& other) const
+        { return _c == other._c; }
+
+    private:
+        Certificate* _c;
+};
+
+//! @brief Forward iterator for certificate lists
+class CertificateList::ConstIterator
+{
+    public:
+        ConstIterator()
+        : _c(0)
+        {}
+
+        ConstIterator(const ConstIterator& other)
+        : _c(other._c)
+        {}
+
+        explicit ConstIterator(const Certificate* c)
+        : _c(c)
+        {}
+
+        ConstIterator& operator=(const ConstIterator& other)
+        {
+            _c = other._c;
+            return *this;
+        }
+
+        ConstIterator& operator++()
+        {
+            ++_c;
+            return *this;
+        }
+
+        const Certificate& operator*() const
+        { return *_c; }
+
+        const Certificate* operator->() const
+        { return _c; }
+
+        bool operator!=(const ConstIterator& other) const
+        { return _c != other._c; }
+
+        bool operator==(const ConstIterator& other) const
         { return _c == other._c; }
 
     private:

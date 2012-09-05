@@ -265,9 +265,10 @@ class ServerTest : public Pt::Unit::TestSuite
             clientContext.setVerifyMode(Pt::Ssl::Context::VerifyPeer);
 
             // start HTTP server
+            Pt::Ssl::Context serverCtx;
+            setupSslServerContext(serverCtx);
             Pt::Http::Server server(*loop);
-            server.setSecure();
-            server.sslConfigured += Pt::slot(&ServerTest::loadSslContext);
+            server.setSecure(serverCtx);
             server.listen("127.0.0.1", 8001, true);
 
             // start HTTP client
@@ -283,7 +284,7 @@ class ServerTest : public Pt::Unit::TestSuite
             loop->run();
         }
 
-        static void loadSslContext(Pt::Ssl::Context& ctx)
+        static void setupSslServerContext(Pt::Ssl::Context& ctx)
         {
             // SSL configuration
             Pt::Ssl::CertificateList caCert;
