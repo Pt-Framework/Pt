@@ -70,8 +70,8 @@ class PT_SSL_API Cipher
 class PT_SSL_API CipherList 
 {
     public:
-        //! @brief Forward iterator for %CipherList
-        class Iterator;
+        //! @brief Forward iterator for constant cipher lists.
+        class ConstIterator;
 
     public:
         CipherList();
@@ -85,9 +85,9 @@ class PT_SSL_API CipherList
 
         CipherList& operator=(const CipherList& list);
 
-        Iterator begin() const;
+        ConstIterator begin() const;
         
-        Iterator end() const;
+        ConstIterator end() const;
 
         bool empty() const;
 
@@ -100,28 +100,28 @@ class PT_SSL_API CipherList
 };
 
 //! @brief Forward iterator for certificate lists
-class CipherList::Iterator
+class CipherList::ConstIterator
 {
     public:
-        Iterator()
+        ConstIterator()
         : _c(0)
         {}
 
-        Iterator(const Iterator& other)
+        ConstIterator(const ConstIterator& other)
         : _c(other._c)
         {}
 
-        explicit Iterator(const Cipher* c)
+        explicit ConstIterator(const Cipher* c)
         : _c(c)
         {}
 
-        Iterator& operator=(const Iterator& other)
+        ConstIterator& operator=(const ConstIterator& other)
         {
             _c = other._c;
             return *this;
         }
 
-        Iterator& operator++()
+        ConstIterator& operator++()
         {
             ++_c;
             return *this;
@@ -133,10 +133,10 @@ class CipherList::Iterator
         const Cipher* operator->() const
         { return _c; }
 
-        bool operator!=(const Iterator& other) const
+        bool operator!=(const ConstIterator& other) const
         { return _c != other._c; }
 
-        bool operator==(const Iterator& other) const
+        bool operator==(const ConstIterator& other) const
         { return _c == other._c; }
 
     private:

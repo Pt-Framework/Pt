@@ -218,15 +218,15 @@ CipherList::~CipherList()
 }
 
 
-CipherList::Iterator CipherList::begin() const
+CipherList::ConstIterator CipherList::begin() const
 { 
-    return Iterator( _impl->begin() ); 
+    return ConstIterator( _impl->begin() ); 
 }
 
         
-CipherList::Iterator CipherList::end() const
+CipherList::ConstIterator CipherList::end() const
 { 
-    return Iterator( _impl->end() ); 
+    return ConstIterator( _impl->end() ); 
 }
 
 
