@@ -30,8 +30,10 @@
 #include "OpenSsl.h"
 #include <Pt/Ssl/Context.h>
 #include <Pt/Ssl/SslError.h>
+#include <Pt/System/Mutex.h>
 #include <Pt/System/Logger.h>
 #include <openssl/ssl.h>
+#include <openssl/crypto.h>
 #include <openssl/err.h>
 #include <cstdio>
 
@@ -45,17 +47,41 @@ log_define("Pt.Ssl.Context")
 
 static int ssl_init_counter = 0;
 
+static Pt::System::Mutex* sslmtx = 0;
+
+void pt_locking_callback(int mode, int type, const char* file,  int line)
+{
+    log_trace("thread: " << ((mode&CRYPTO_LOCK)?"l":"u") 
+                         << ((type&CRYPTO_READ)?"r":"w")
+                         << ' ' << file << ':' << line );
+    
+    if (mode & CRYPTO_LOCK)
+    {
+        sslmtx[type].lock();
+    }
+    else
+    {
+        sslmtx[type].unlock();
+    }
+}
+
 SSLInit::SSLInit()
 {
-    if(0 == ssl_init_counter++) {
+    if(0 == ssl_init_counter++) 
+    {
+        log_info("OpenSSL library initialization");
+
         SSL_library_init();
         SSL_load_error_strings();
         ERR_load_crypto_strings();
 
-        //OpenSSL_add_all_algorithms();
-        //CRYPTO_set_locking_callback( SSL_locking_function );
-        //CRYPTO_set_id_callback( SSL_id_function );
+        int numLocks = CRYPTO_num_locks();
+        sslmtx = new Pt::System::Mutex[numLocks];
 
+	      //CRYPTO_set_id_callback((unsigned long (*)())pthreads_thread_id);
+	      CRYPTO_set_locking_callback(pt_locking_callback);
+
+        //OpenSSL_add_all_algorithms();
         EVP_add_cipher(EVP_des_ede3_cfb());
         EVP_add_cipher(EVP_des_ede3_cfb1());
         EVP_add_cipher(EVP_des_ede3_cfb8());
@@ -87,7 +113,9 @@ SSLInit::~SSLInit()
 {
     if(0 == --ssl_init_counter) 
     {
-        log_info(Pt::System::endlog);
+        log_info("OpenSSL library shutdown");
+        delete [] sslmtx;
+        sslmtx = 0;
     }
 }
 
