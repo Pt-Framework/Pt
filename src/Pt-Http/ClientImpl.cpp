@@ -54,23 +54,14 @@ ClientImpl::ClientImpl(Client* client)
 
 #ifdef PT_HTTP_WITH_SSL
 
-void ClientImpl::setSecure()
+void ClientImpl::setSecure(Ssl::Context& ctx)
 {
-    _conn.setSecure();
-}
-
-void ClientImpl::setContext(Ssl::Context& ctx)
-{
-    _conn.setContext(ctx);
+    _conn.setSecure(ctx);
 }
 
 #else
 
-void ClientImpl::setSecure()
-{
-}
-
-void ClientImpl::setContext(Ssl::Context& )
+void ClientImpl::setSecure(Ssl::Context& )
 {
 }
 

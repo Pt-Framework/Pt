@@ -123,8 +123,8 @@ class PT_HTTP_API Server : public Pt::Connectable
         Net::TcpServer _serverSocket;
         Ssl::Context* _sslctx;
         bool _ssl;
-        std::vector<RequestHandler*> _connections;
         std::vector<ServerThread*> _serverThreads;
+        std::vector<RequestHandler*> _handlers;
         unsigned _useWorker;
         unsigned _maxThreads;
         std::size_t _readTimeout;

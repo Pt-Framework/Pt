@@ -60,8 +60,7 @@ class RequestHandler : public Pt::Connectable
 
         void setSecure(Ssl::Context& ctx)
         {
-            _conn.setSecure();
-            _conn.setContext(ctx);
+            _conn.setSecure(ctx);
         }
 
         void beginServe(System::EventLoop& loop);
@@ -308,12 +307,12 @@ class ServerThread : public Connectable
             _thread.join();
 
             std::vector<RequestHandler*>::iterator it;
-            for(it = _connections.begin(); it != _connections.end(); ++it)
+            for(it = _handler.begin(); it != _handler.end(); ++it)
             {
                 delete *it;
             }
 
-            _connections.clear();
+            _handler.clear();
         }
 
     private:
@@ -325,7 +324,7 @@ class ServerThread : public Connectable
         {
             RequestHandler* handler = ev.connection();
 
-            _connections.push_back(handler);
+            _handler.push_back(handler);
             handler->timeout() += Pt::slot(*this, &ServerThread::onConnectionTimeout);
 
 #ifdef PT_HTTP_WITH_SSL
@@ -339,12 +338,12 @@ class ServerThread : public Connectable
         void onConnectionTimeout(RequestHandler& conn)
         {
             std::vector<RequestHandler*>::iterator it;
-            for(it = _connections.begin(); it != _connections.end(); ++it)
+            for(it = _handler.begin(); it != _handler.end(); ++it)
             {
                 if(&conn == *it)
                 {
                     delete *it;
-                    _connections.erase(it);
+                    _handler.erase(it);
                     break;
                 }
             }
@@ -358,7 +357,7 @@ class ServerThread : public Connectable
         Ssl::Context _sslctx;
 #endif
         Pt::System::AttachedThread _thread;
-        std::vector<RequestHandler*> _connections;
+        std::vector<RequestHandler*> _handler;
 };
 
 
@@ -459,7 +458,7 @@ void Server::shutdown()
     }
 
     std::vector<RequestHandler*>::iterator it;
-    for(it = _connections.begin(); it != _connections.end(); ++it)
+    for(it = _handlers.begin(); it != _handlers.end(); ++it)
     {
         delete *it;
     }
@@ -617,7 +616,7 @@ void Server::onAccept(Net::TcpServer& server)
             conn->setSecure(*_sslctx);
         
         conn->beginServe(_loop);
-        _connections.push_back(conn);
+        _handlers.push_back(conn);
         conn->timeout() += Pt::slot(*this, &Server::onConnectionTimeout);
         _useWorker = 0;
     }
@@ -629,12 +628,12 @@ void Server::onAccept(Net::TcpServer& server)
 void Server::onConnectionTimeout(RequestHandler& conn)
 {
     std::vector<RequestHandler*>::iterator it;
-    for(it = _connections.begin(); it != _connections.end(); ++it)
+    for(it = _handlers.begin(); it != _handlers.end(); ++it)
     {
         if(&conn == *it)
         {
             delete *it;
-            _connections.erase(it);
+            _handlers.erase(it);
             break;
         }
     }

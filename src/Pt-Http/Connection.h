@@ -111,9 +111,7 @@ class Connection : public Connectable
         const Net::AddrInfo& host() const
         { return _addrInfo; }
 
-        void setSecure();
-
-        void setContext(Ssl::Context& ctx);
+        void setSecure(Ssl::Context& ctx);
 
         void setActive(System::EventLoop& loop);
 

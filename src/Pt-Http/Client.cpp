@@ -104,14 +104,9 @@ void Client::setActive(System::EventLoop& selector)
     _impl->setActive(selector);
 }
 
-void Client::setSecure()
+void Client::setSecure(Ssl::Context& ctx)
 {
-    _impl->setSecure();
-}
-
-void Client::setContext(Ssl::Context& ctx)
-{
-    _impl->setContext(ctx);
+    _impl->setSecure(ctx);
 }
 
 void Client::setTimeout(std::size_t timeout)

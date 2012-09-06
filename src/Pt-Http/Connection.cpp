@@ -90,6 +90,8 @@ Connection::Connection()
     _sockbuf.outputReady() += slot(*this, &Connection::onHttpOutput);
     _sockbuf.inputReady() += slot(*this, &Connection::onHttpInput);
 
+    _sslbuf.handshakeFinished() += slot(*this, &Connection::onHttpsHandshake);
+
     _httpbuf.attach(_sockbuf);
 
     _timer.timeout() += Pt::slot(*this, &Connection::onTimeout);
@@ -126,9 +128,11 @@ void Connection::setHost(const Net::AddrInfo& addrinfo)
 }
 
 #ifdef PT_HTTP_WITH_SSL
-void Connection::setSecure()
+void Connection::setSecure(Ssl::Context& ctx)
 {
     log_debug("initialize HTTPS connection");
+
+    _sslbuf.init(ctx);
 
     if( ! _ssl)
     {
@@ -146,28 +150,18 @@ void Connection::setSecure()
 
         _sslbuf.outputReady() += slot(*this, &Connection::onHttpsOutput);
         _sslbuf.inputReady() += slot(*this, &Connection::onHttpsInput);
-        _sslbuf.handshakeFinished() += slot(*this, &Connection::onHttpsHandshake);
         _ssl = true;
     }
 
     _httpbuf.attach(_sslbuf);
 }
 
-
-void Connection::setContext(Ssl::Context& ctx)
-{
-    _sslbuf.init(ctx);
-}
 #else
 
-void Connection::setSecure()
+void Connection::setSecure(Ssl::Context&)
 {
 }
 
-
-void Connection::setContext(Ssl::Context& )
-{
-}
 #endif
 
 void Connection::setActive(System::EventLoop& loop)

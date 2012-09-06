@@ -77,9 +77,7 @@ class PT_HTTP_API Client : public Connectable
 
         const Net::AddrInfo& host() const;
 
-        void setSecure();
-
-        void setContext(Ssl::Context& ctx);
+        void setSecure(Ssl::Context& ctx);
 
         void setAuthorization(const std::string& username, const std::string& password);
 
@@ -101,6 +99,8 @@ class PT_HTTP_API Client : public Connectable
         */
         Signal<Client&>& replyReceived();
 
+        void cancel();
+
         Request& request();
 
         const Request& request() const;
@@ -109,8 +109,8 @@ class PT_HTTP_API Client : public Connectable
 
         const Reply& reply() const;
 
-        void cancel();
-
+        /** @brief Set timeout for blocking operations.
+        */
         void setTimeout(std::size_t timeout);
 
         /** @brief Blocks until request is sent.

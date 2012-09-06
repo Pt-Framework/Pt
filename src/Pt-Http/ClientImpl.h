@@ -110,9 +110,7 @@ class ClientImpl : public Connectable
             _password.clear(); 
         }
 
-        void setSecure();
-
-        void setContext(Ssl::Context& ctx);
+        void setSecure(Ssl::Context& ctx);
 
         void send();
 

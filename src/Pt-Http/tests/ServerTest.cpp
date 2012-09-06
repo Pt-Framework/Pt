@@ -247,6 +247,31 @@ class ServerTest : public Pt::Unit::TestSuite
 #ifdef PT_HTTP_WITH_SSL
         void NotFoundHttps()
         {
+            Pt::Ssl::Context serverCtx;
+            setupSslServerContext(serverCtx);
+            
+            // start HTTP server
+            Pt::Http::Server server(*loop);
+            server.setSecure(serverCtx);
+            server.listen("127.0.0.1", 8001, true);
+
+            Pt::Ssl::Context clientContext;
+            setupSslClientContext(serverCtx);
+            
+            // start HTTP client
+            Pt::Http::Client client("127.0.0.1", 8001);
+            client.setSecure(clientContext);
+            client.setActive(*loop);
+            client.replyReceived() += Pt::slot(*this, &ServerTest::onNotFoundReceived);
+            client.request().setUrl("/index.html");
+            client.request().header().setHeader("foo", "bar");
+            client.beginReceive();
+
+            loop->run();
+        }
+
+        static void setupSslClientContext(Pt::Ssl::Context& ctx)
+        {
             // SSL configuration
             Pt::Ssl::CertificateList caCert;
             caCert.fromPem(caPemData, sizeof(caPemData));
@@ -258,30 +283,10 @@ class ServerTest : public Pt::Unit::TestSuite
             Pt::Ssl::PrivateKey clientPrivKey("");
             clientPrivKey.fromPem(clientKeyData, sizeof(clientKeyData));
 
-            Pt::Ssl::Context clientContext;
-            clientContext.setCACertificates(caCert);
-            clientContext.setCertificateChain(clientCert);
-            clientContext.setPrivateKey(clientPrivKey);
-            clientContext.setVerifyMode(Pt::Ssl::Context::VerifyPeer);
-
-            // start HTTP server
-            Pt::Ssl::Context serverCtx;
-            setupSslServerContext(serverCtx);
-            Pt::Http::Server server(*loop);
-            server.setSecure(serverCtx);
-            server.listen("127.0.0.1", 8001, true);
-
-            // start HTTP client
-            Pt::Http::Client client("127.0.0.1", 8001);
-            client.setSecure();
-            client.setContext(clientContext);
-            client.setActive(*loop);
-            client.replyReceived() += Pt::slot(*this, &ServerTest::onNotFoundReceived);
-            client.request().setUrl("/index.html");
-            client.request().header().setHeader("foo", "bar");
-            client.beginReceive();
-
-            loop->run();
+            ctx.setCACertificates(caCert);
+            ctx.setCertificateChain(clientCert);
+            ctx.setPrivateKey(clientPrivKey);
+            ctx.setVerifyMode(Pt::Ssl::Context::VerifyPeer);
         }
 
         static void setupSslServerContext(Pt::Ssl::Context& ctx)
