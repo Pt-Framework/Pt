@@ -483,11 +483,15 @@ void Server::shutdown()
         delete *threadIt;
     }
 
+    _serverThreads.clear();
+
     std::vector<RequestHandler*>::iterator it;
     for(it = _handlers.begin(); it != _handlers.end(); ++it)
     {
         delete *it;
     }
+
+    _handlers.clear();
 
     ServiceMap::const_iterator srv;
     while( ! _services.empty() )
