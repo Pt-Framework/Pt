@@ -414,8 +414,11 @@ void Context::setCertificate(const Certificate& cert)
 
     if( ! SSL_CTX_use_certificate(_ctx, x509) )
     {
-        throw InvalidCertificate("Invalid/mismatched certificate");
+        throw InvalidCertificate("invalid or mismatched certificate");
     }
+    
+    // openssl will not check the private key of this context against the 
+    // certifictate. TO do so call SSL_CTX_check_private_key(_ctx)
 }
 
 
@@ -423,7 +426,7 @@ void Context::setCertificateChain(const CertificateList& certs)
 {
     CertificateList::ConstIterator it = certs.begin();
     if( it == certs.end() )
-        throw InvalidCertificate("certificate list too short");
+        throw InvalidCertificate("certificate chain too short");
 
     this->setCertificate(*it);
     ++it;
@@ -441,14 +444,7 @@ void Context::setPrivateKey(const PrivateKey& key)
     _privKey = key;
 
     if( ! SSL_CTX_use_PrivateKey( _ctx, _privKey.impl() ) )
-        throw InvalidKey("Invalid private-key!");
-
-    // Check the private key (if needed)
-    if( _extraCerts.empty() ) 
-    {
-        if( ! SSL_CTX_check_private_key(_ctx) )
-            throw InvalidKey("The private key does not agree with the corresponding public key in the certificate!");
-    }
+        throw InvalidKey("invalid private key");
 }
 
 
