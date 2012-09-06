@@ -53,21 +53,24 @@ class Context;
 
 namespace Http {
 
-class RequestHeader;
+class ServerThread;
 class Service;
-class Connection;
 class RequestHandler;
+class RequestHeader;
 class Responder;
 class NotFoundService;
 class NotAuthenticatedService;
-class ServerThread;
 
 // TODO: It might make sense for the Server to derive from Selectable
 
 class PT_HTTP_API Server : public Pt::Connectable
                          , private Pt::NonCopyable
 {
+    friend class Service;
+
     public:
+        Server();
+
         explicit Server(System::EventLoop& eventLoop);
 
         Server(System::EventLoop& eventLoop, const std::string& ip, unsigned short int port, int backlog = 5);
@@ -75,6 +78,11 @@ class PT_HTTP_API Server : public Pt::Connectable
         Server(System::EventLoop& eventLoop, const Pt::Net::AddrInfo& addr, int backlog = 5);
 
         ~Server();
+
+        System::EventLoop* loop()
+        { return _loop; }
+
+        void setActive(System::EventLoop& loop);
 
         void listen(const std::string& ip, unsigned short int port, int backlog = 5);
 
@@ -104,22 +112,22 @@ class PT_HTTP_API Server : public Pt::Connectable
 
         void setMaxThreads(unsigned m);
 
+        Service* findService(const RequestHeader& request);
+
         Responder* getResponder(const RequestHeader& request);
 
-        Responder* getDefaultResponder(const RequestHeader& request);
-
-        System::EventLoop& loop()
-        { return _loop; }
+        Responder* notFoundResponder(const RequestHeader& request);
 
     protected:
         void startWorker();
 
         void onAccept(Net::TcpServer& server);
 
+        // TODO: rename onHandlerFinished
         void onConnectionTimeout(RequestHandler& conn);
 
     private:
-        System::EventLoop& _loop;
+        System::EventLoop* _loop;
         Net::TcpServer _serverSocket;
         Ssl::Context* _sslctx;
         bool _ssl;
@@ -134,7 +142,7 @@ class PT_HTTP_API Server : public Pt::Connectable
         typedef std::multimap<std::string, Service*> ServiceMap;
         System::ReadWriteMutex _serviceMutex;
         ServiceMap _services;
-        NotFoundService* _defaultService;
+        NotFoundService* _notFoundService;
         NotAuthenticatedService* _noAuthService;
 };
 

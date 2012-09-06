@@ -57,14 +57,14 @@ HttpClientImpl::HttpClientImpl(System::EventLoop& selector, const std::string& a
 }
 
 
-HttpClientImpl::HttpClientImpl(const std::string& addr, unsigned short port, const std::string& url)
+/*HttpClientImpl::HttpClientImpl(const std::string& addr, unsigned short port, const std::string& url)
 : _client(addr, port)
 , _error(false)
 {
     _client.request().header().method("POST");
     _client.request().header().url(url);
     _client.replyReceived() += Pt::slot( *this, &HttpClientImpl::onReply);
-}
+}*/
 
 
 std::string HttpClientImpl::url() const

@@ -44,13 +44,13 @@ Client::Client()
     _impl->reply().inputReceived() += Pt::slot(*this, &Client::onReplyReceived);
 }
 
-Client::Client(const std::string& host, unsigned short int port)
+Client::Client(System::EventLoop& loop)
 : _impl( new ClientImpl(this) )
 {
     _impl->request().outputSent() += Pt::slot(*this, &Client::onRequestSent);
     _impl->reply().inputReceived() += Pt::slot(*this, &Client::onReplyReceived);
 
-    _impl->setHost( Net::AddrInfo(host, port) );
+    _impl->setActive(loop);
 }
 
 

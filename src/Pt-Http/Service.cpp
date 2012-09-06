@@ -27,11 +27,45 @@
  */
 
 #include <Pt/Http/Service.h>
+#include <Pt/Http/Server.h>
 #include <Pt/Http/Responder.h>
+#include <stdexcept>
 
 namespace Pt {
 
 namespace Http {
+
+Service::Service()
+: _server(0)
+, _responderCount(0)
+{ 
+}
+
+
+Service::~Service() 
+{ 
+    if(_server)
+        _server->removeService(*this);
+}
+
+
+void Service::registerServer(Server& server)
+{
+    if(_server)
+        _server->removeService(*this);
+
+    _server = &server;
+}
+
+
+void Service::unregisterServer(Server& server)
+{
+    if(_server == &server)
+    {
+        _server = 0;
+    }
+}
+
 
 Responder* Service::doCreateResponder(const RequestHeader& request)
 {

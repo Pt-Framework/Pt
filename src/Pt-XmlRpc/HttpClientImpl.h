@@ -51,7 +51,7 @@ class HttpClientImpl : public ClientImpl
         HttpClientImpl(System::EventLoop& selector, const std::string& addr,
                unsigned short port, const std::string& url);
 
-        HttpClientImpl(const std::string& addr, unsigned short port, const std::string& url);
+        //HttpClientImpl(const std::string& addr, unsigned short port, const std::string& url);
 
         void connect(const Net::AddrInfo& addrinfo, const std::string& url)
         {

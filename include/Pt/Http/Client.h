@@ -57,9 +57,7 @@ class PT_HTTP_API Client : public Connectable
     public:
         Client();
         
-        Client(const std::string& host, unsigned short int port);
-        
-        Client(const Net::AddrInfo& addr);
+        explicit Client(System::EventLoop& loop);
 
         Client(System::EventLoop& loop, const std::string& host, unsigned short int port);
         

@@ -56,7 +56,7 @@ class PT_XMLRPC_API HttpClient : public Client
         HttpClient(System::EventLoop& selector, const std::string& addr,
                unsigned short port, const std::string& url);
 
-        HttpClient(const std::string& addr, unsigned short port, const std::string& url);
+        //HttpClient(const std::string& addr, unsigned short port, const std::string& url);
 
         virtual ~HttpClient();
 

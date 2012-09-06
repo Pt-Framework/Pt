@@ -140,8 +140,7 @@ class ServerTest : public Pt::Unit::TestSuite
             Pt::Http::Server server(*loop, "127.0.0.1", 8001);
             server.addService("/test", service);
 
-            Pt::Http::Client client("127.0.0.1", 8001);
-            client.setActive(*loop);
+            Pt::Http::Client client(*loop, "127.0.0.1", 8001);
             client.requestSent() += Pt::slot(*this, &ServerTest::onPipelinedSent);
             client.replyReceived() += Pt::slot(*this, &ServerTest::onPipelinedReceived);
             client.request().setUrl("/test");
@@ -211,8 +210,7 @@ class ServerTest : public Pt::Unit::TestSuite
 
             Pt::Http::Server server(*loop, "127.0.0.1", 8001);
 
-            Pt::Http::Client client("127.0.0.1", 8001);
-            client.setActive(*loop);
+            Pt::Http::Client client(*loop, "127.0.0.1", 8001);
             client.replyReceived() += Pt::slot(*this, &ServerTest::onNotFoundReceived);
             client.request().setUrl("/index.html");
             client.request().header().setHeader("foo", "bar");
@@ -259,9 +257,8 @@ class ServerTest : public Pt::Unit::TestSuite
             setupSslClientContext(serverCtx);
             
             // start HTTP client
-            Pt::Http::Client client("127.0.0.1", 8001);
+            Pt::Http::Client client(*loop, "127.0.0.1", 8001);
             client.setSecure(clientContext);
-            client.setActive(*loop);
             client.replyReceived() += Pt::slot(*this, &ServerTest::onNotFoundReceived);
             client.request().setUrl("/index.html");
             client.request().header().setHeader("foo", "bar");
@@ -315,8 +312,7 @@ class ServerTest : public Pt::Unit::TestSuite
             Pt::Http::Server server(*loop, "127.0.0.1", 8001);
             server.addService("/test", service);
 
-            Pt::Http::Client client("127.0.0.1", 8001);
-            client.setActive(*loop);
+            Pt::Http::Client client(*loop, "127.0.0.1", 8001);
             client.requestSent() += Pt::slot(*this, &ServerTest::onHelloSent);
             client.replyReceived() += Pt::slot(*this, &ServerTest::onHelloReceived);
             client.request().setUrl("/test");
@@ -362,8 +358,7 @@ class ServerTest : public Pt::Unit::TestSuite
             Pt::Http::Server server(*loop, "127.0.0.1", 8001);
             server.addService("/test", service);
 
-            Pt::Http::Client client("127.0.0.1", 8001);
-            client.setActive(*loop);
+            Pt::Http::Client client(*loop, "127.0.0.1", 8001);
             client.requestSent() += Pt::slot(*this, &ServerTest::onChunkedSent);
             client.replyReceived() += Pt::slot(*this, &ServerTest::onChunkedReceived);
             client.request().setUrl("/test");

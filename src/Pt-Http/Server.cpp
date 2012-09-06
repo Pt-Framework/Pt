@@ -68,6 +68,9 @@ class RequestHandler : public Pt::Connectable
         Signal<RequestHandler&>& timeout()
         { return _timeout; }
 
+        Service* service()
+        { return _service; }
+
     protected:
         void onTimeout(Connection&)
         { _timeout.send(*this); }
@@ -80,6 +83,7 @@ class RequestHandler : public Pt::Connectable
 
     private:
         Server& _server;
+        Service* _service;
         Responder* _responder;
         Connection _conn;
         Request _request;
@@ -91,6 +95,7 @@ class RequestHandler : public Pt::Connectable
 
 RequestHandler::RequestHandler(Server& server, Net::TcpServer& tcpServer)
 : _server(server)
+, _service(0)
 , _responder(0)
 , _conn()
 , _ignoreBody(false)
@@ -361,8 +366,8 @@ class ServerThread : public Connectable
 };
 
 
-Server::Server(System::EventLoop& eventLoop)
-: _loop(eventLoop)
+Server::Server()
+: _loop(0)
 , _sslctx(0)
 , _ssl(false)
 , _useWorker(0)
@@ -371,16 +376,33 @@ Server::Server(System::EventLoop& eventLoop)
 , _writeTimeout(20000)
 , _keepAliveTimeout(30000)
 {
-    _defaultService = new NotFoundService();
+    _notFoundService = new NotFoundService();
     _noAuthService = new NotAuthenticatedService();
 
-    _serverSocket.setActive(eventLoop);
+    _serverSocket.connectionPending() += Pt::slot(*this, &Server::onAccept);
+}
+
+
+Server::Server(System::EventLoop& eventLoop)
+: _loop(&eventLoop)
+, _sslctx(0)
+, _ssl(false)
+, _useWorker(0)
+, _maxThreads(1)
+, _readTimeout(20000)
+, _writeTimeout(20000)
+, _keepAliveTimeout(30000)
+{
+    _notFoundService = new NotFoundService();
+    _noAuthService = new NotAuthenticatedService();
+
+    _serverSocket.setActive(*_loop);
     _serverSocket.connectionPending() += Pt::slot(*this, &Server::onAccept);
 }
 
 
 Server::Server(System::EventLoop& eventLoop, const std::string& ip, unsigned short int port, int backlog)
-: _loop(eventLoop)
+: _loop(&eventLoop)
 , _serverSocket(ip, port, backlog)
 , _sslctx(0)
 , _ssl(false)
@@ -390,19 +412,18 @@ Server::Server(System::EventLoop& eventLoop, const std::string& ip, unsigned sho
 , _writeTimeout(20000)
 , _keepAliveTimeout(30000)
 {
-    _defaultService = new NotFoundService();
+    _notFoundService = new NotFoundService();
     _noAuthService = new NotAuthenticatedService();
 
-    _serverSocket.setActive(_loop);
+    _serverSocket.setActive(*_loop);
     _serverSocket.beginAccept();
+    _serverSocket.connectionPending() += Pt::slot(*this, &Server::onAccept);
 
     this->startWorker();
-    
-    _serverSocket.connectionPending() += Pt::slot(*this, &Server::onAccept);
 }
 
 Server::Server(System::EventLoop& eventLoop, const Pt::Net::AddrInfo& addr, int backlog)
-: _loop(eventLoop)
+: _loop(&eventLoop)
 , _serverSocket(addr, backlog)
 , _sslctx(0)
 , _ssl(false)
@@ -412,23 +433,28 @@ Server::Server(System::EventLoop& eventLoop, const Pt::Net::AddrInfo& addr, int 
 , _writeTimeout(20000)
 , _keepAliveTimeout(30000)
 {
-    _defaultService = new NotFoundService();
+    _notFoundService = new NotFoundService();
     _noAuthService = new NotAuthenticatedService();
 
-    _serverSocket.setActive(_loop);
+    _serverSocket.setActive(*_loop);
     _serverSocket.beginAccept();
+    _serverSocket.connectionPending() += Pt::slot(*this, &Server::onAccept);
 
     this->startWorker();
-    
-    _serverSocket.connectionPending() += Pt::slot(*this, &Server::onAccept);
 }
 
 Server::~Server()
 {
     this->shutdown();
 
-    delete _defaultService;
+    delete _notFoundService;
     delete _noAuthService;
+}
+
+
+void Server::setActive(System::EventLoop& eventLoop)
+{
+     _serverSocket.setActive(eventLoop);
 }
 
 
@@ -462,33 +488,59 @@ void Server::shutdown()
     {
         delete *it;
     }
+
+    ServiceMap::const_iterator srv;
+    while( ! _services.empty() )
+    {
+        removeService( *(_services.begin()->second) );
+    }
 }
 
 
 void Server::addService(const std::string& url, Service& service)
 {
+    service.registerServer(*this);
+
     System::WriteLock serviceLock(_serviceMutex);
-    _services.insert(ServiceMap::value_type(url, &service));
+    _services.insert( ServiceMap::value_type(url, &service) );
 }
 
 
 void Server::removeService(Service& service)
 {
-    System::WriteLock serviceLock(_serviceMutex);
-    service.waitIdle();
+    // we can wait for shutdown by monitoring handler states in
+    // onConnectionTimeout which handles destruction of all handlers
 
-    ServiceMap::iterator it = _services.begin();
-    while (it != _services.end())
+    std::vector<RequestHandler*>::iterator it;
+    for(it = _handlers.begin(); it != _handlers.end(); ++it)
     {
-        if (it->second == &service)
+        RequestHandler* rh = *it;
+        if(rh->service() == &service)
         {
-            _services.erase(it++);
-        }
-        else
-        {
-            ++it;
+            delete rh;
         }
     }
+
+    {
+        System::WriteLock serviceLock(_serviceMutex);
+        ServiceMap::iterator it = _services.begin();
+        while( it != _services.end() )
+        {
+            if (it->second == &service)
+            {
+                _services.erase(it++);
+            }
+            else
+            {
+                ++it;
+            }
+        }
+    }
+
+    // TODO: simply delete all request handlers in each thread that
+    //       use this service
+    service.waitIdle();
+    service.unregisterServer(*this);
 }
 
 
@@ -566,13 +618,32 @@ Responder* Server::getResponder(const RequestHeader& request)
         }
     }
 
-    return _defaultService->createResponder(request);
+    return _notFoundService->createResponder(request);
 }
 
 
-Responder* Server::getDefaultResponder(const RequestHeader& request)
+Service* Server::findService(const RequestHeader& request)
+{
+    System::ReadLock serviceLock(_serviceMutex);
+
+    for (ServiceMap::const_iterator it = _services.lower_bound(request.url());
+        it != _services.end() && it->first == request.url(); ++it)
+    {
+        /*if (!it->second->checkAuth(request))
+        {
+            return _noAuthService->createResponder(request, it->second->realm(), it->second->authContent());
+        }*/
+
+        return it->second;
+    }
+
+    return _notFoundService;
+}
+
+
+Responder* Server::notFoundResponder(const RequestHeader& request)
 { 
-    return _defaultService->createResponder(request); 
+    return _notFoundService->createResponder(request); 
 }
 
 
@@ -615,7 +686,7 @@ void Server::onAccept(Net::TcpServer& server)
         if(_sslctx)
             conn->setSecure(*_sslctx);
         
-        conn->beginServe(_loop);
+        conn->beginServe(*_loop);
         _handlers.push_back(conn);
         conn->timeout() += Pt::slot(*this, &Server::onConnectionTimeout);
         _useWorker = 0;

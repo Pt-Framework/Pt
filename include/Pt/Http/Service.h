@@ -53,14 +53,13 @@ class Authenticator
 
 class PT_HTTP_API Service
 {
-    public:
-        Service()
-        : _responderCount(0)
-        { }
+    friend class Server;
 
-        virtual ~Service() 
-        { }
-        
+    public:
+        Service();
+
+        virtual ~Service();
+
         Responder* doCreateResponder(const RequestHeader&);
         
         void doReleaseResponder(Responder*);
@@ -90,6 +89,12 @@ class PT_HTTP_API Service
         virtual void releaseResponder(Responder*) = 0;
 
     private:
+        void registerServer(Server& server);
+
+        void unregisterServer(Server& server);
+
+    private:
+        Server* _server;
         std::vector<const Authenticator*> _authenticators;
         std::string _realm;
         std::string _authContent;

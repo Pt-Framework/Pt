@@ -54,10 +54,12 @@ class BenchClient
   public:
 
     explicit BenchClient(unsigned short port)
-      : client("", port, "/myservice"),
+      : client(),
         echo(client, "echo"),
         thread(Pt::callable(*this, &BenchClient::exec))
-    { }
+    { 
+        client.connect("", port, "/myservice");
+    }
 
     static unsigned numRequests()
     { return _numRequests; }
