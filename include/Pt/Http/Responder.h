@@ -30,7 +30,6 @@
 #define Pt_Http_Responder_h
 
 #include <Pt/Http/Api.h>
-#include <Pt/Http/Service.h>
 #include <Pt/System/IOError.h>
 #include <Pt/System/EventLoop.h>
 #include <iosfwd>

@@ -34,7 +34,7 @@
 #include "Pt/Http/ReplyHeader.h"
 #include "Pt/Http/Request.h"
 #include "Pt/Http/Reply.h"
-#include "Pt/Http/Responder.h"
+#include "Pt/Http/Service.h"
 #include "Pt/Net/TcpSocket.h"
 #include "Pt/System/MainLoop.h"
 #include "Pt/System/Logger.h"
@@ -136,7 +136,7 @@ class ServerTest : public Pt::Unit::TestSuite
         {
             HelloService service;
             Pt::Http::Server server(*loop, "127.0.0.1", 8001);
-            server.addService("/test", service);
+            server.addService(Pt::Http::MapUrl("/test"), service);
 
             Pt::Http::Client client(*loop, "127.0.0.1", 8001);
             client.requestSent() += Pt::slot(*this, &ServerTest::onPipelinedSent);
@@ -308,7 +308,7 @@ class ServerTest : public Pt::Unit::TestSuite
         {
             HelloService service;
             Pt::Http::Server server(*loop, "127.0.0.1", 8001);
-            server.addService("/test", service);
+            server.addService(Pt::Http::MapUrl("/test"), service);
 
             Pt::Http::Client client(*loop, "127.0.0.1", 8001);
             client.requestSent() += Pt::slot(*this, &ServerTest::onHelloSent);
@@ -354,7 +354,7 @@ class ServerTest : public Pt::Unit::TestSuite
         {
             ChunkedService service;
             Pt::Http::Server server(*loop, "127.0.0.1", 8001);
-            server.addService("/test", service);
+            server.addService(Pt::Http::MapUrl("/test"), service);
 
             Pt::Http::Client client(*loop, "127.0.0.1", 8001);
             client.requestSent() += Pt::slot(*this, &ServerTest::onChunkedSent);

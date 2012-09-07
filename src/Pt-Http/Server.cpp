@@ -513,13 +513,13 @@ Server::Server(System::EventLoop& eventLoop, const Pt::Net::AddrInfo& addr, int 
 
 Server::~Server()
 {
-    this->terminate();
+    this->cancel();
 
     System::WriteLock serviceLock(_serviceMutex);
     ServiceMap::iterator srv = _services.begin();
     while( srv != _services.end() )
     {
-        srv->second->unregisterServer(*this);
+        srv->first->unregisterServer(*this);
         _services.erase(srv++);
     }
 
@@ -531,6 +531,13 @@ Server::~Server()
 void Server::setActive(System::EventLoop& eventLoop)
 {
      _serverSocket.setActive(eventLoop);
+}
+
+
+void Server::setSecure(Ssl::Context& ctx)
+{
+    _ssl = true;
+    _sslctx = &ctx;
 }
 
 
@@ -552,7 +559,7 @@ void Server::listen(const std::string& ip, unsigned short int port, int backlog)
 }
 
 
-void Server::terminate()
+void Server::cancel()
 {
     _serverSocket.cancel();
 
@@ -575,12 +582,14 @@ void Server::terminate()
 }
 
 
-void Server::addService(const std::string& url, Service& service)
+void Server::registerService(ServiceMapper* m, Service& service)
 {
+    ServiceMap::value_type elem(&service, m);
+
     service.registerServer(*this);
 
     System::WriteLock serviceLock(_serviceMutex);
-    _services.insert( ServiceMap::value_type(url, &service) );
+    _services.insert(elem);
 }
 
 
@@ -588,37 +597,23 @@ void Server::removeService(Service& service)
 {
     // remove service, so no responders can be created anymore
     System::WriteLock serviceLock(_serviceMutex);
-    ServiceMap::iterator srv = _services.begin();
-    while( srv != _services.end() )
-    {
-        if (srv->second == &service)
-        {
-            _services.erase(srv++);
-        }
-        else
-        {
-            ++srv;
-        }
-    }
+    _services.erase(&service);
     serviceLock.unlock();
 
-    // close all handlers in this thread, which use the service
-    std::vector<RequestHandler*>::iterator it  = _handlers.begin();
-    while( it != _handlers.end() )
+    // close all connections in this thread, which use the service
+    std::vector<RequestHandler*>::iterator hit  = _handlers.begin();
+    while( hit != _handlers.end() )
     {
-        RequestHandler* rh = *it;
-        if(rh->service() == &service)
+        std::vector<RequestHandler*>::iterator handler = hit++;
+        
+        if( (*handler)->service() == &service )
         {
-            delete rh;
-            it = _handlers.erase(it);
-        }
-        else
-        {
-            ++it;
+            delete *handler;
+            hit = _handlers.erase(handler);
         }
     }
 
-    // close all handlers in the worker threads which use the service
+    // close all connections in the worker threads which use the service
     std::vector<ServerThread*>::iterator threadIt;
     for(threadIt = _serverThreads.begin(); threadIt != _serverThreads.end(); ++threadIt)
     {
@@ -629,10 +624,24 @@ void Server::removeService(Service& service)
 }
 
 
-void Server::setSecure(Ssl::Context& ctx)
+Service* Server::findService(const RequestHeader& request)
 {
-    _ssl = true;
-    _sslctx = &ctx;
+    System::ReadLock serviceLock(_serviceMutex);
+
+    for (ServiceMap::const_iterator it = _services.begin(); it != _services.end(); ++it)
+    {
+        if (! it->second->map(request) )
+            continue;
+
+        if( ! it->first->checkAuth(request))
+        {
+            return _noAuthService;
+        }
+
+        return it->first;
+    }
+
+    return _notFoundService;
 }
 
 
@@ -681,25 +690,6 @@ unsigned Server::maxThreads() const
 void Server::setMaxThreads(unsigned m)
 {
     _maxThreads = m;
-}
-
-
-Service* Server::findService(const RequestHeader& request)
-{
-    System::ReadLock serviceLock(_serviceMutex);
-
-    for (ServiceMap::const_iterator it = _services.lower_bound(request.url());
-        it != _services.end() && it->first == request.url(); ++it)
-    {
-        if( ! it->second->checkAuth(request))
-        {
-            return _noAuthService;
-        }
-
-        return it->second;
-    }
-
-    return _notFoundService;
 }
 
 

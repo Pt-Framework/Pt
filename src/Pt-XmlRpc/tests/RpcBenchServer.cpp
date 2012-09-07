@@ -82,7 +82,7 @@ int main(int argc, char* argv[])
     
     Pt::Http::Server server(loop, ip, port);
     server.setMaxThreads(maxThreads);
-    server.addService("/myservice", service);
+    server.addService(Pt::Http::MapUrl("/myservice"), service);
 
     //loop.setIdleTimeout(5000);
     //loop.timeout() += Pt::slot(loop, &Pt::System::EventLoop::exit);

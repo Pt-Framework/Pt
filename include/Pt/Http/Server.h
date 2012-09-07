@@ -30,8 +30,10 @@
 #define Pt_Http_Server_h
 
 #include <Pt/Http/Api.h>
+#include <Pt/Http/RequestHeader.h>
 #include <Pt/Net/TcpServer.h>
-#include <Pt/Signal.h>
+#include <Pt/Connectable.h>
+#include <Pt/SmartPtr.h>
 #include <Pt/NonCopyable.h>
 #include <vector>
 #include <string>
@@ -64,14 +66,43 @@ class NotAuthenticatedService;
 class ServiceMapper
 {
     public:
-        ServiceMapper()
-        {}
-
         virtual ~ServiceMapper()
         {}
 
-        virtual bool match(const RequestHeader& header) = 0;
+        virtual bool map(const RequestHeader& header) = 0;
 };
+
+
+class MapUrl : public ServiceMapper
+{
+    public:
+        MapUrl(const std::string& url)
+        : _url(url)
+        {}
+
+        bool map(const RequestHeader& header)
+        { return header.url() == _url; }
+
+    private:
+        std::string _url;
+};
+
+
+template <typename Predicate>
+class MapIf : public ServiceMapper
+{
+    public:
+        MapIf(Predicate p)
+        : _p(p)
+        {}
+
+        bool map(const RequestHeader& header)
+        { return _p(header); }
+
+    private:
+        Predicate _p;
+};
+
 
 // TODO: It might make sense for the Server to derive from Selectable
 class PT_HTTP_API Server : public Pt::Connectable
@@ -93,21 +124,29 @@ class PT_HTTP_API Server : public Pt::Connectable
 
         void setActive(System::EventLoop& loop);
 
+        void setSecure(Ssl::Context& ctx);
+
+        // TODO: 
+        // Pt::Net::SocketOptions options;
+        // options.setBacklog(5);
+        // options.setFlags(Pt::Net::DeferAccept);
+        // server.listen(ip, port, options);
         void listen(const std::string& ip, unsigned short int port, int backlog = 5);
 
         void listen(const Pt::Net::AddrInfo& addr, int backlog = 5);
 
-        void terminate();
+        void cancel();
 
-        void addService(const std::string& url, Service& service);
+        template <typename Mapper>
+        void addService(const Mapper& m, Service& service)
+        { 
+            ServiceMapper* mapper = new Mapper(m);
+            this->registerService(mapper, service); 
+        }
 
-        // TODO: what we really want is to terminate a service 
-        // -> implment Service::terminate !!!
         void removeService(Service& service);
 
         Service* findService(const RequestHeader& request);
-
-        void setSecure(Ssl::Context& ctx);
 
         std::size_t readTimeout() const;
 
@@ -125,8 +164,10 @@ class PT_HTTP_API Server : public Pt::Connectable
 
         void setMaxThreads(unsigned m);
 
-    protected:
+    private:
         void startWorker();
+
+        void registerService(ServiceMapper* mapper, Service& service);
 
         void onAccept(Net::TcpServer& server);
 
@@ -146,7 +187,7 @@ class PT_HTTP_API Server : public Pt::Connectable
         std::size_t _writeTimeout;
         std::size_t _keepAliveTimeout;
 
-        typedef std::multimap<std::string, Service*> ServiceMap;
+        typedef std::multimap<Service*, SmartPtr<ServiceMapper> > ServiceMap;
 
         System::ReadWriteMutex _serviceMutex;
         ServiceMap _services;
