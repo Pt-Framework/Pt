@@ -58,7 +58,7 @@ static const Pt::Char XMLRPC_INT[]     = { 'i', 'n', 't', '\0' };
 static const Pt::Char XMLRPC_STRING[]  = { 's', 't', 'r', 'i', 'n', 'g', '\0' };
 
 XmlRpcResponder::XmlRpcResponder(Service& service)
-: Http::Responder(service)
+: Http::Responder()
 , _state(OnBegin)
 , _ts(new Utf8Codec)
 , _reader(_ts)

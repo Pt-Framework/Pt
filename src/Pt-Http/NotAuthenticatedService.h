@@ -39,16 +39,14 @@ class PT_HTTP_API NotAuthenticatedService : public Service
 {
     public:
         NotAuthenticatedService()
-            { }
+        { }
 
         Responder* createResponder(const RequestHeader&);
 
         Responder* createResponder(const RequestHeader&, const std::string& realm, const std::string& authContent);
 
-        void releaseResponder(Responder* responder);
-
+        void destroyResponder(Responder* responder);
 };
-
 
 } // namespace Http
 

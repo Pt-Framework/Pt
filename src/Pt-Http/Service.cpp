@@ -36,7 +36,7 @@ namespace Pt {
 namespace Http {
 
 Service::Service()
-: _server(0)
+: _shutdown(false)
 , _responderCount(0)
 { 
 }
@@ -44,55 +44,63 @@ Service::Service()
 
 Service::~Service() 
 { 
-    if(_server)
-        _server->removeService(*this);
-}
-
-
-void Service::registerServer(Server& server)
-{
-    if(_server)
-        _server->removeService(*this);
-
-    _server = &server;
-}
-
-
-void Service::unregisterServer(Server& server)
-{
-    if(_server == &server)
+    while( ! _servers.empty() )
     {
-        _server = 0;
+        _servers[0]->removeService(*this);
     }
 }
 
 
-Responder* Service::doCreateResponder(const RequestHeader& request)
+Responder* Service::getResponder(const RequestHeader& request)
 {
     System::MutexLock lock(_mutex);
     
-    ++_responderCount;
+    if(_shutdown)
+        return 0;
     
+    ++_responderCount;    
     return createResponder(request);
 }
 
-void Service::doReleaseResponder(Responder* responder)
+
+void Service::releaseResponder(Responder* responder)
 {
     System::MutexLock lock(_mutex);
     
-    releaseResponder(responder);
+    destroyResponder(responder);
     
-    if (--_responderCount <= 0)
-        _isIdle.signal();
+    if (--_responderCount == 0 && _shutdown)
+        _isShutdown.signal();
 }
+
+
+void Service::setShutdown(bool shutdown)
+{
+    System::MutexLock lock(_mutex);
+    _shutdown = shutdown;
+}
+
+
+bool Service::isIdle()
+{
+    System::MutexLock lock(_mutex);
+    return _responderCount == 0;
+}
+
 
 void Service::waitIdle()
 {
     System::MutexLock lock(_mutex);
-    
+    bool shutdown = _shutdown;
+
+    _shutdown = true;
+
     while (_responderCount > 0)
-        _isIdle.wait(lock);
+        _isShutdown.wait(lock);
+
+    _shutdown = shutdown;
 }
+
 
 bool Service::checkAuth(const RequestHeader& request)
 {
@@ -106,29 +114,34 @@ bool Service::checkAuth(const RequestHeader& request)
     return true;
 }
 
-CachedServiceBase::~CachedServiceBase()
+
+void Service::registerServer(Server& server)
 {
-    for (Responders::iterator it = responders.begin(); it != responders.end(); ++it)
-        delete *it;
+    std::vector<Server*>::iterator it;
+    for(it = _servers.begin(); it != _servers.end(); ++it)
+    {
+        if( *it == &server )
+        {
+            break;
+        }
+    }
+
+    if( it == _servers.end() )
+        _servers.push_back(&server);
 }
 
-Responder* CachedServiceBase::createResponder(const RequestHeader& request)
-{
-    if (responders.empty())
-    {
-        return newResponder();
-    }
-    else
-    {
-        Responder* ret = responders.back();
-        responders.pop_back();
-        return ret;
-    }
-}
 
-void CachedServiceBase::releaseResponder(Responder* resp)
+void Service::unregisterServer(Server& server)
 {
-    responders.push_back(resp);
+    std::vector<Server*>::iterator it;
+    for(it = _servers.begin(); it != _servers.end(); ++it)
+    {
+        if(*it == &server)
+        {
+            _servers.erase(it);
+            break;
+        }
+    }
 }
 
 }

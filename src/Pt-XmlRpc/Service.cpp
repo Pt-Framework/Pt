@@ -95,7 +95,7 @@ Http::Responder* Service::createResponder(const Http::RequestHeader& req)
 }
 
 
-void Service::releaseResponder(Http::Responder* resp)
+void Service::destroyResponder(Http::Responder* resp)
 {
     delete resp;
 }

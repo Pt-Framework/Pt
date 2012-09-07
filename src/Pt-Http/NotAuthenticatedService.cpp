@@ -29,26 +29,27 @@
 #include "NotAuthenticatedService.h"
 #include "NotAuthenticatedResponder.h"
 
-namespace Pt
-{
-namespace Http
-{
+namespace Pt {
+
+namespace Http {
 
 Responder* NotAuthenticatedService::createResponder(const RequestHeader& request)
 {
     return createResponder(request, std::string(), std::string());
 }
 
+
 Responder* NotAuthenticatedService::createResponder(const RequestHeader& request, const std::string& realm, const std::string& authContent)
 {
-    return new NotAuthenticatedResponder(*this, realm, authContent);
+    return new NotAuthenticatedResponder(realm, authContent);
 }
 
-void NotAuthenticatedService::releaseResponder(Responder* responder)
+
+void NotAuthenticatedService::destroyResponder(Responder* responder)
 {
     delete responder;
 }
 
 }
-}
 
+}

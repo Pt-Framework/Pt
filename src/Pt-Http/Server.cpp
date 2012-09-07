@@ -75,6 +75,8 @@ class RequestHandler : public Pt::Connectable
         void onTimeout(Connection&)
         { _timeout.send(*this); }
 
+        Responder* getResponder(const RequestHeader& request);
+
         void onRequestReceived(Request& req);
 
         void onReplySent(Reply& r);
@@ -110,8 +112,20 @@ RequestHandler::~RequestHandler()
 {
     if(_responder)
     {
-        _responder->release();
+        _service->releaseResponder(_responder);
     }
+}
+
+
+Responder* RequestHandler::getResponder(const RequestHeader& request)
+{
+    Service* service = _server.findService(request);
+    
+    Responder* responder = service->getResponder(request);
+    if(responder)
+        _service = service;
+
+    return responder;
 }
 
 
@@ -152,7 +166,7 @@ void RequestHandler::onRequestReceived(Request& req)
     if( progress.header() )
     {
         log_debug("received request header");
-        _responder = _server.getResponder(_request.header());
+        _responder = getResponder(_request.header());
         _responder->beginRequest( _request );
         _ignoreBody = false;
     }
@@ -230,7 +244,7 @@ void RequestHandler::onReplySent(Reply& r)
 
     if( _responder )
     {
-        _responder->release();
+        _service->releaseResponder(_responder);
         _responder = 0;
     }
 
@@ -276,11 +290,26 @@ class ServerThread : public Connectable
                 RequestHandler* _conn;
         };
 
+        class RemoveServiceEvent : public Pt::BasicEvent<RemoveServiceEvent>
+        {
+            public:
+                RemoveServiceEvent(Service* s)
+                : _service(s)
+                { }
+    
+                Service* service() const
+                { return _service; }
+    
+            private:
+                Service* _service;
+        };
+
     public:
         ServerThread(Server& server, Ssl::Context* sslctx = 0)
         : _server(&server)
         , _ssl(false)
         , _thread(_loop)
+        , _removed(false)
         {
 #ifdef PT_HTTP_WITH_SSL
             if(sslctx)
@@ -290,8 +319,9 @@ class ServerThread : public Connectable
             }
 #endif
 
-            _loop.event() += Pt::slot(*this, &ServerThread::onAcceptEvent);
-            _loop.event() += Pt::slot(*this, &ServerThread::onExitEvent);
+            _loop.event() += Pt::slot(*this, &ServerThread::onAccept);
+            _loop.event() += Pt::slot(*this, &ServerThread::onRemoveService);
+            _loop.event() += Pt::slot(*this, &ServerThread::onExit);
             _thread.start();
         }
 
@@ -312,25 +342,37 @@ class ServerThread : public Connectable
             _thread.join();
 
             std::vector<RequestHandler*>::iterator it;
-            for(it = _handler.begin(); it != _handler.end(); ++it)
+            for(it = _handlers.begin(); it != _handlers.end(); ++it)
             {
                 delete *it;
             }
 
-            _handler.clear();
+            _handlers.clear();
+        }
+
+        void removeService(Service& service)
+        {
+            RemoveServiceEvent ev(&service);
+            _loop.commitEvent(ev);
+
+            System::MutexLock lock(_removedMutex);
+            _removed = false;
+
+            while( ! _removed)
+                _isRemoved.wait(lock);
         }
 
     private:
-        void onExitEvent(const ExitEvent& ev)
+        void onExit(const ExitEvent& ev)
         {
         }
 
-        void onAcceptEvent(const AcceptEvent& ev)
+        void onAccept(const AcceptEvent& ev)
         {
             RequestHandler* handler = ev.connection();
 
-            _handler.push_back(handler);
-            handler->timeout() += Pt::slot(*this, &ServerThread::onConnectionTimeout);
+            _handlers.push_back(handler);
+            handler->timeout() += Pt::slot(*this, &ServerThread::onHandlerFinished);
 
 #ifdef PT_HTTP_WITH_SSL
             if(_ssl)
@@ -340,15 +382,37 @@ class ServerThread : public Connectable
             handler->beginServe(_loop);
         }
 
-        void onConnectionTimeout(RequestHandler& conn)
+        void onRemoveService(const RemoveServiceEvent& ev)
+        {
+            std::vector<RequestHandler*>::iterator it  = _handlers.begin();
+            while( it != _handlers.end() )
+            {
+                RequestHandler* rh = *it;
+                if( rh->service() == ev.service() )
+                {
+                    delete rh;
+                    it = _handlers.erase(it);
+                }
+                else
+                {
+                    ++it;
+                }
+            }
+
+            System::MutexLock lock(_removedMutex);
+            _removed = true;
+            _isRemoved.signal();
+        }
+
+        void onHandlerFinished(RequestHandler& handler)
         {
             std::vector<RequestHandler*>::iterator it;
-            for(it = _handler.begin(); it != _handler.end(); ++it)
+            for(it = _handlers.begin(); it != _handlers.end(); ++it)
             {
-                if(&conn == *it)
+                if(&handler == *it)
                 {
                     delete *it;
-                    _handler.erase(it);
+                    _handlers.erase(it);
                     break;
                 }
             }
@@ -362,7 +426,11 @@ class ServerThread : public Connectable
         Ssl::Context _sslctx;
 #endif
         Pt::System::AttachedThread _thread;
-        std::vector<RequestHandler*> _handler;
+        std::vector<RequestHandler*> _handlers;
+
+        bool _removed;
+        System::Mutex _removedMutex;
+        System::Condition _isRemoved;
 };
 
 
@@ -445,7 +513,15 @@ Server::Server(System::EventLoop& eventLoop, const Pt::Net::AddrInfo& addr, int 
 
 Server::~Server()
 {
-    this->shutdown();
+    this->terminate();
+
+    System::WriteLock serviceLock(_serviceMutex);
+    ServiceMap::iterator srv = _services.begin();
+    while( srv != _services.end() )
+    {
+        srv->second->unregisterServer(*this);
+        _services.erase(srv++);
+    }
 
     delete _notFoundService;
     delete _noAuthService;
@@ -460,22 +536,26 @@ void Server::setActive(System::EventLoop& eventLoop)
 
 void Server::listen(const Pt::Net::AddrInfo& addr, int backlog)
 {
-    this->startWorker();
     _serverSocket.listen(addr, backlog);
     _serverSocket.beginAccept();
+
+    this->startWorker();
 }
 
 
 void Server::listen(const std::string& ip, unsigned short int port, int backlog)
 {
-    this->startWorker();
     _serverSocket.listen(ip, port, backlog);
     _serverSocket.beginAccept();
+
+    this->startWorker();
 }
 
 
-void Server::shutdown()
+void Server::terminate()
 {
+    _serverSocket.cancel();
+
     std::vector<ServerThread*>::iterator threadIt;
     for(threadIt = _serverThreads.begin(); threadIt != _serverThreads.end(); ++threadIt)
     {
@@ -492,12 +572,6 @@ void Server::shutdown()
     }
 
     _handlers.clear();
-
-    ServiceMap::const_iterator srv;
-    while( ! _services.empty() )
-    {
-        removeService( *(_services.begin()->second) );
-    }
 }
 
 
@@ -512,38 +586,45 @@ void Server::addService(const std::string& url, Service& service)
 
 void Server::removeService(Service& service)
 {
-    // we can wait for shutdown by monitoring handler states in
-    // onConnectionTimeout which handles destruction of all handlers
+    // remove service, so no responders can be created anymore
+    System::WriteLock serviceLock(_serviceMutex);
+    ServiceMap::iterator srv = _services.begin();
+    while( srv != _services.end() )
+    {
+        if (srv->second == &service)
+        {
+            _services.erase(srv++);
+        }
+        else
+        {
+            ++srv;
+        }
+    }
+    serviceLock.unlock();
 
-    std::vector<RequestHandler*>::iterator it;
-    for(it = _handlers.begin(); it != _handlers.end(); ++it)
+    // close all handlers in this thread, which use the service
+    std::vector<RequestHandler*>::iterator it  = _handlers.begin();
+    while( it != _handlers.end() )
     {
         RequestHandler* rh = *it;
         if(rh->service() == &service)
         {
             delete rh;
+            it = _handlers.erase(it);
         }
-    }
-
-    {
-        System::WriteLock serviceLock(_serviceMutex);
-        ServiceMap::iterator it = _services.begin();
-        while( it != _services.end() )
+        else
         {
-            if (it->second == &service)
-            {
-                _services.erase(it++);
-            }
-            else
-            {
-                ++it;
-            }
+            ++it;
         }
     }
 
-    // TODO: simply delete all request handlers in each thread that
-    //       use this service
-    service.waitIdle();
+    // close all handlers in the worker threads which use the service
+    std::vector<ServerThread*>::iterator threadIt;
+    for(threadIt = _serverThreads.begin(); threadIt != _serverThreads.end(); ++threadIt)
+    {
+        (*threadIt)->removeService(service);
+    }
+
     service.unregisterServer(*this);
 }
 
@@ -603,29 +684,6 @@ void Server::setMaxThreads(unsigned m)
 }
 
 
-Responder* Server::getResponder(const RequestHeader& request)
-{
-    System::ReadLock serviceLock(_serviceMutex);
-
-    for (ServiceMap::const_iterator it = _services.lower_bound(request.url());
-        it != _services.end() && it->first == request.url(); ++it)
-    {
-        if (!it->second->checkAuth(request))
-        {
-            return _noAuthService->createResponder(request, it->second->realm(), it->second->authContent());
-        }
-
-        Responder* resp = it->second->doCreateResponder(request);
-        if (resp)
-        {
-            return resp;
-        }
-    }
-
-    return _notFoundService->createResponder(request);
-}
-
-
 Service* Server::findService(const RequestHeader& request)
 {
     System::ReadLock serviceLock(_serviceMutex);
@@ -633,21 +691,15 @@ Service* Server::findService(const RequestHeader& request)
     for (ServiceMap::const_iterator it = _services.lower_bound(request.url());
         it != _services.end() && it->first == request.url(); ++it)
     {
-        /*if (!it->second->checkAuth(request))
+        if( ! it->second->checkAuth(request))
         {
-            return _noAuthService->createResponder(request, it->second->realm(), it->second->authContent());
-        }*/
+            return _noAuthService;
+        }
 
         return it->second;
     }
 
     return _notFoundService;
-}
-
-
-Responder* Server::notFoundResponder(const RequestHeader& request)
-{ 
-    return _notFoundService->createResponder(request); 
 }
 
 

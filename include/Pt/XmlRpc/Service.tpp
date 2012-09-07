@@ -1361,7 +1361,7 @@ class PT_XMLRPC_API Service : public Http::Service
     protected:
         virtual Http::Responder* createResponder(const Http::RequestHeader&);
 
-        virtual void releaseResponder(Http::Responder* resp);
+        virtual void destroyResponder(Http::Responder* resp);
 
         ServiceProcedure* getProcedure(const std::string& name, SerializationContext* ctx);
 

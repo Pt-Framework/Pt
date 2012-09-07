@@ -30,9 +30,11 @@
 #define Pt_Http_Service_h
 
 #include <Pt/Http/Api.h>
+#include <Pt/Allocator.h>
 #include <Pt/System/Mutex.h>
 #include <Pt/System/Condition.h>
 #include <vector>
+#include <memory>
 #include <string>
 
 namespace Pt {
@@ -60,9 +62,15 @@ class PT_HTTP_API Service
 
         virtual ~Service();
 
-        Responder* doCreateResponder(const RequestHeader&);
+        Responder* getResponder(const RequestHeader&);
         
-        void doReleaseResponder(Responder*);
+        void releaseResponder(Responder*);
+
+        void setShutdown(bool shutdown = true);
+
+        bool isIdle();
+
+        void waitIdle();
 
         bool checkAuth(const RequestHeader& request);
 
@@ -81,50 +89,52 @@ class PT_HTTP_API Service
         void addAuthenticator(const Authenticator* auth)
         { _authenticators.push_back(auth); }
 
-        void waitIdle();
-
     protected:
         virtual Responder* createResponder(const RequestHeader&) = 0;
         
-        virtual void releaseResponder(Responder*) = 0;
+        virtual void destroyResponder(Responder*) = 0;
 
     private:
+        // @internal
         void registerServer(Server& server);
 
+        // @internal
         void unregisterServer(Server& server);
 
     private:
-        Server* _server;
+        std::vector<Server*> _servers;
+        bool _shutdown;
+        unsigned _responderCount;
         std::vector<const Authenticator*> _authenticators;
         std::string _realm;
         std::string _authContent;
-        unsigned _responderCount;
         System::Mutex _mutex;
-        System::Condition _isIdle;
+        System::Condition _isShutdown;
 };
 
-class PT_HTTP_API CachedServiceBase : public Service
-{
-        typedef std::vector<Responder*> Responders;
-        Responders responders;
 
+template <typename R, typename Alloc = Allocator>
+class BasicService : public Service
+{
     public:
-        ~CachedServiceBase();
+        BasicService()
+        {}
 
     protected:
-        virtual Responder* newResponder() = 0;
-        Responder* createResponder(const RequestHeader& request);
-        void releaseResponder(Responder* resp);
+        virtual Responder* createResponder(const RequestHeader&)
+        {
+            void* r = _alloc.allocate( sizeof(R) );
+            return new(r) R();
+        }
 
-};
+        virtual void destroyResponder(Responder* r)
+        {
+            r->~Responder();
+            _alloc.deallocate( r, sizeof(R) );
+        }
 
-template <typename ResponderType>
-class CachedService : public CachedServiceBase
-{
-    virtual Responder* newResponder()
-    {
-        return new ResponderType(*this);
-    }
+    private:
+        Alloc _alloc;
 };
 
 } // namespace Http

@@ -46,8 +46,7 @@
 class HelloResponder : public Pt::Http::Responder
 {
     public:
-        HelloResponder(Pt::Http::Service& service)
-        : Pt::Http::Responder(service)
+        HelloResponder()
         {}
         
         void writeReply(Pt::Http::Request& request, Pt::Http::Reply& reply)
@@ -58,14 +57,13 @@ class HelloResponder : public Pt::Http::Responder
         }
 };
 
-typedef Pt::Http::CachedService<HelloResponder> HelloService;
+typedef Pt::Http::BasicService<HelloResponder> HelloService;
 
 class ChunkedResponder : public Pt::Http::Responder
 {
     public:
-        ChunkedResponder(Pt::Http::Service& service)
-        : Pt::Http::Responder(service)
-        , _chunks(5)
+        ChunkedResponder()
+        : _chunks(5)
         {}
 
         void beginRequest(Pt::Http::Request& request)
@@ -92,7 +90,7 @@ class ChunkedResponder : public Pt::Http::Responder
         unsigned _chunks;
 };
 
-typedef Pt::Http::CachedService<ChunkedResponder> ChunkedService;
+typedef Pt::Http::BasicService<ChunkedResponder> ChunkedService;
 
 
 class ServerTest : public Pt::Unit::TestSuite

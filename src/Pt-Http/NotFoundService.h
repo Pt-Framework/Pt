@@ -41,11 +41,11 @@ class PT_HTTP_API NotFoundService : public Service
 {
     public:
         NotFoundService()
-            : _responder(*this)
-            { }
+        { }
 
         Responder* createResponder(const RequestHeader&);
-        void releaseResponder(Responder*);
+        
+        void destroyResponder(Responder*);
 
     private:
         NotFoundResponder _responder;

@@ -61,13 +61,22 @@ class Responder;
 class NotFoundService;
 class NotAuthenticatedService;
 
-// TODO: It might make sense for the Server to derive from Selectable
+class ServiceMapper
+{
+    public:
+        ServiceMapper()
+        {}
 
+        virtual ~ServiceMapper()
+        {}
+
+        virtual bool match(const RequestHeader& header) = 0;
+};
+
+// TODO: It might make sense for the Server to derive from Selectable
 class PT_HTTP_API Server : public Pt::Connectable
                          , private Pt::NonCopyable
 {
-    friend class Service;
-
     public:
         Server();
 
@@ -88,11 +97,15 @@ class PT_HTTP_API Server : public Pt::Connectable
 
         void listen(const Pt::Net::AddrInfo& addr, int backlog = 5);
 
-        void shutdown();
+        void terminate();
 
         void addService(const std::string& url, Service& service);
 
+        // TODO: what we really want is to terminate a service 
+        // -> implment Service::terminate !!!
         void removeService(Service& service);
+
+        Service* findService(const RequestHeader& request);
 
         void setSecure(Ssl::Context& ctx);
 
@@ -111,12 +124,6 @@ class PT_HTTP_API Server : public Pt::Connectable
         unsigned maxThreads() const;
 
         void setMaxThreads(unsigned m);
-
-        Service* findService(const RequestHeader& request);
-
-        Responder* getResponder(const RequestHeader& request);
-
-        Responder* notFoundResponder(const RequestHeader& request);
 
     protected:
         void startWorker();
@@ -140,6 +147,7 @@ class PT_HTTP_API Server : public Pt::Connectable
         std::size_t _keepAliveTimeout;
 
         typedef std::multimap<std::string, Service*> ServiceMap;
+
         System::ReadWriteMutex _serviceMutex;
         ServiceMap _services;
         NotFoundService* _notFoundService;

@@ -42,19 +42,12 @@ ResponseFailed::ResponseFailed()
 {}
 
 
-Responder::Responder(Service& service)
-: _service(service)
+Responder::Responder()
 { }
 
 
 Responder::~Responder() 
 { }
-
-
-void Responder::release()     
-{ 
-    _service.doReleaseResponder(this); 
-}
 
 
 void Responder::beginRequest(Request& request)

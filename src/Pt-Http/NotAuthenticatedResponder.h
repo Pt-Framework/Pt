@@ -42,11 +42,10 @@ class NotAuthenticatedResponder : public Responder
         std::string _content;
 
     public:
-        explicit NotAuthenticatedResponder(Service& service, const std::string& realm, const std::string& content)
-            : Responder(service),
-              _realm(realm),
-              _content(content)
-            { }
+        explicit NotAuthenticatedResponder(const std::string& realm, const std::string& content)
+        : _realm(realm),
+          _content(content)
+        { }
 
         void writeReply(Request& request, Reply& reply);
 };

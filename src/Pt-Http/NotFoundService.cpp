@@ -37,7 +37,7 @@ Responder* NotFoundService::createResponder(const RequestHeader&)
     return &_responder;
 }
 
-void NotFoundService::releaseResponder(Responder*)
+void NotFoundService::destroyResponder(Responder*)
 { }
 
 } // namespace Http

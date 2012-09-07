@@ -57,11 +57,9 @@ class PT_HTTP_API ResponseFailed : public System::IOError
 class PT_HTTP_API Responder
 {
     public:
-        explicit Responder(Service& service);
+        Responder();
 
         virtual ~Responder();
-
-        void release();
 
         virtual void beginRequest(Request& request);
         
@@ -70,9 +68,6 @@ class PT_HTTP_API Responder
         virtual void beginReply(Request& request, Reply& reply);
 
         virtual void writeReply(Request& request, Reply& reply) = 0;
-
-    private:
-        Service& _service;
 };
 
 } // namespace Http
