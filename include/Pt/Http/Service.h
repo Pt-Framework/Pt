@@ -71,8 +71,6 @@ class PT_HTTP_API Service
 
         bool isIdle();
 
-        void waitIdle();
-
         bool checkAuth(const RequestHeader& request);
 
         void setRealm(const std::string& realm, const std::string& content = std::string() )
@@ -110,7 +108,6 @@ class PT_HTTP_API Service
         std::string _realm;
         std::string _authContent;
         System::Mutex _mutex;
-        System::Condition _isShutdown;
 };
 
 

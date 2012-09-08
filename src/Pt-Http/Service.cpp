@@ -58,19 +58,22 @@ Responder* Service::getResponder(const RequestHeader& request)
     if(_shutdown)
         return 0;
     
+    Responder* responder = createResponder(request);
     ++_responderCount;    
-    return createResponder(request);
+    
+    return responder;
 }
 
 
 void Service::releaseResponder(Responder* responder)
 {
+    if( ! responder)
+        return;
+
     System::MutexLock lock(_mutex);
     
     destroyResponder(responder);
-    
-    if (--_responderCount == 0 && _shutdown)
-        _isShutdown.signal();
+    --_responderCount;
 }
 
 
@@ -85,20 +88,6 @@ bool Service::isIdle()
 {
     System::MutexLock lock(_mutex);
     return _responderCount == 0;
-}
-
-
-void Service::waitIdle()
-{
-    System::MutexLock lock(_mutex);
-    bool shutdown = _shutdown;
-
-    _shutdown = true;
-
-    while (_responderCount > 0)
-        _isShutdown.wait(lock);
-
-    _shutdown = shutdown;
 }
 
 
@@ -121,9 +110,7 @@ void Service::registerServer(Server& server)
     for(it = _servers.begin(); it != _servers.end(); ++it)
     {
         if( *it == &server )
-        {
             break;
-        }
     }
 
     if( it == _servers.end() )
@@ -137,11 +124,11 @@ void Service::unregisterServer(Server& server)
     for(it = _servers.begin(); it != _servers.end(); ++it)
     {
         if(*it == &server)
-        {
-            _servers.erase(it);
             break;
-        }
     }
+
+    if(it != _servers.end())
+        _servers.erase(it);
 }
 
 }

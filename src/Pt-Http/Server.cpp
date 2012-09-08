@@ -77,6 +77,8 @@ class RequestHandler : public Pt::Connectable
 
         Responder* getResponder(const RequestHeader& request);
 
+        void releaseResponder();
+
         void onRequestReceived(Request& req);
 
         void onReplySent(Reply& r);
@@ -110,22 +112,34 @@ RequestHandler::RequestHandler(Server& server, Net::TcpServer& tcpServer)
 
 RequestHandler::~RequestHandler()
 {
-    if(_responder)
-    {
-        _service->releaseResponder(_responder);
-    }
+    releaseResponder();
 }
 
 
 Responder* RequestHandler::getResponder(const RequestHeader& request)
 {
-    Service* service = _server.findService(request);
-    
-    Responder* responder = service->getResponder(request);
-    if(responder)
-        _service = service;
+    _service = _server.findService(request);
+    _responder = _service->getResponder(request);
 
-    return responder;
+    if( ! _responder)
+    {
+        _service = _server.notFoundService();
+        _responder = _service->getResponder(request);
+    }
+
+    return _responder;
+}
+
+
+void RequestHandler::releaseResponder()
+{
+    if( _responder )
+    {
+        assert(_service);
+        _service->releaseResponder(_responder);
+        _responder = 0;
+        _service = 0;
+    }
 }
 
 
@@ -166,8 +180,8 @@ void RequestHandler::onRequestReceived(Request& req)
     if( progress.header() )
     {
         log_debug("received request header");
-        _responder = getResponder(_request.header());
-        _responder->beginRequest( _request );
+        Responder* responder = getResponder(_request.header());
+        responder->beginRequest( _request );
         _ignoreBody = false;
     }
     
@@ -185,6 +199,7 @@ void RequestHandler::onRequestReceived(Request& req)
         }
         else
         {
+            assert(_responder);
             _responder->readRequest(_request, _reply);
 
             // TODO: _reply.isSending(), maybe only beginSend was called
@@ -199,12 +214,10 @@ void RequestHandler::onRequestReceived(Request& req)
 
     if( progress.finished() )
     {
-        if(_responder)
-        {
-            log_debug("request body finished, begin reply");
-            _responder->beginReply(_request, _reply);
-            return;
-        }
+        assert(_responder);
+        log_debug("request body finished, begin reply");
+        _responder->beginReply(_request, _reply);
+        return;
     }
 
     log_debug("more data available");
@@ -236,18 +249,13 @@ void RequestHandler::onReplySent(Reply& r)
     {
         log_debug("continuing response");
         _reply.clearBody();
+        assert(_responder);
         _responder->writeReply(_request, _reply);
         return;
     }
 
     log_debug("response finished");
-
-    if( _responder )
-    {
-        _service->releaseResponder(_responder);
-        _responder = 0;
-    }
-
+    releaseResponder();
     _reply.clear();
     _request.clear();
 
@@ -515,12 +523,10 @@ Server::~Server()
 {
     this->cancel();
 
-    System::WriteLock serviceLock(_serviceMutex);
-    ServiceMap::iterator srv = _services.begin();
-    while( srv != _services.end() )
+    while( ! _services.empty() )
     {
-        srv->first->unregisterServer(*this);
-        _services.erase(srv++);
+        Service* service = _services.begin()->first;
+        unregisterService(*service);
     }
 
     delete _notFoundService;
@@ -582,23 +588,28 @@ void Server::cancel()
 }
 
 
-void Server::registerService(ServiceMapper* m, Service& service)
+void Server::registerService(MapService* m, Service& service)
 {
     ServiceMap::value_type elem(&service, m);
 
-    service.registerServer(*this);
-
     System::WriteLock serviceLock(_serviceMutex);
     _services.insert(elem);
+    service.registerServer(*this);
+}
+
+
+void Server::unregisterService(Service& service)
+{
+    System::WriteLock serviceLock(_serviceMutex);
+    _services.erase(&service);
+    service.unregisterServer(*this);
 }
 
 
 void Server::removeService(Service& service)
 {
     // remove service, so no responders can be created anymore
-    System::WriteLock serviceLock(_serviceMutex);
-    _services.erase(&service);
-    serviceLock.unlock();
+    unregisterService(service);
 
     // close all connections in this thread, which use the service
     std::vector<RequestHandler*>::iterator hit  = _handlers.begin();
@@ -617,10 +628,11 @@ void Server::removeService(Service& service)
     std::vector<ServerThread*>::iterator threadIt;
     for(threadIt = _serverThreads.begin(); threadIt != _serverThreads.end(); ++threadIt)
     {
+        // returns when all connections using the service are closed
         (*threadIt)->removeService(service);
     }
 
-    service.unregisterServer(*this);
+    //NOTE: in case of an exception, terminate the worker thread
 }
 
 
@@ -641,6 +653,12 @@ Service* Server::findService(const RequestHeader& request)
         return it->first;
     }
 
+    return _notFoundService;
+}
+
+
+Service* Server::notFoundService()
+{
     return _notFoundService;
 }
 

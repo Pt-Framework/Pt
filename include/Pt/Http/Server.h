@@ -63,17 +63,17 @@ class Responder;
 class NotFoundService;
 class NotAuthenticatedService;
 
-class ServiceMapper
+class MapService
 {
     public:
-        virtual ~ServiceMapper()
+        virtual ~MapService()
         {}
 
         virtual bool map(const RequestHeader& header) = 0;
 };
 
 
-class MapUrl : public ServiceMapper
+class MapUrl : public MapService
 {
     public:
         MapUrl(const std::string& url)
@@ -88,11 +88,11 @@ class MapUrl : public ServiceMapper
 };
 
 
-template <typename Predicate>
-class MapIf : public ServiceMapper
+template <typename PredicateT>
+class MapIf : public MapService
 {
     public:
-        MapIf(Predicate p)
+        MapIf(PredicateT p)
         : _p(p)
         {}
 
@@ -100,8 +100,14 @@ class MapIf : public ServiceMapper
         { return _p(header); }
 
     private:
-        Predicate _p;
+        PredicateT _p;
 };
+
+template <typename P>
+MapIf<P> mapIf(P p)
+{
+    return MapIf<P>(p);
+}
 
 
 // TODO: It might make sense for the Server to derive from Selectable
@@ -140,13 +146,15 @@ class PT_HTTP_API Server : public Pt::Connectable
         template <typename Mapper>
         void addService(const Mapper& m, Service& service)
         { 
-            ServiceMapper* mapper = new Mapper(m);
+            MapService* mapper = new Mapper(m);
             this->registerService(mapper, service); 
         }
 
         void removeService(Service& service);
 
         Service* findService(const RequestHeader& request);
+
+        Service* notFoundService();
 
         std::size_t readTimeout() const;
 
@@ -167,7 +175,9 @@ class PT_HTTP_API Server : public Pt::Connectable
     private:
         void startWorker();
 
-        void registerService(ServiceMapper* mapper, Service& service);
+        void registerService(MapService* mapper, Service& service);
+
+        void unregisterService(Service& service);
 
         void onAccept(Net::TcpServer& server);
 
@@ -187,7 +197,7 @@ class PT_HTTP_API Server : public Pt::Connectable
         std::size_t _writeTimeout;
         std::size_t _keepAliveTimeout;
 
-        typedef std::multimap<Service*, SmartPtr<ServiceMapper> > ServiceMap;
+        typedef std::multimap<Service*, SmartPtr<MapService> > ServiceMap;
 
         System::ReadWriteMutex _serviceMutex;
         ServiceMap _services;
