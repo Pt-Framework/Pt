@@ -46,7 +46,8 @@
 class HelloResponder : public Pt::Http::Responder
 {
     public:
-        HelloResponder()
+        HelloResponder(Pt::Http::Service& s)
+        : Pt::Http::Responder(s)
         {}
         
         void writeReply(Pt::Http::Request& request, Pt::Http::Reply& reply)
@@ -62,8 +63,9 @@ typedef Pt::Http::BasicService<HelloResponder> HelloService;
 class ChunkedResponder : public Pt::Http::Responder
 {
     public:
-        ChunkedResponder()
-        : _chunks(5)
+        ChunkedResponder(Pt::Http::Service& s)
+        : Pt::Http::Responder(s)
+        , _chunks(5)
         {}
 
         void beginRequest(Pt::Http::Request& request)

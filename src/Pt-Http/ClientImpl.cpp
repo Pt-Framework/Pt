@@ -42,7 +42,7 @@ namespace Pt {
 
 namespace Http {
 
-ClientImpl::ClientImpl(Client* client)
+ClientImpl::ClientImpl()
 : _hstate(Idle)
 , _conn()
 , _requestCount(0)
@@ -114,7 +114,7 @@ MessageProgress ClientImpl::endSend()
             log_debug("sent http request completed");
             _req.clearBody();
             
-            if( _req.finished() )
+            if( _req.isFinished() )
             {
                 ++_requestCount;
                 _hstate = OnRequestComplete;

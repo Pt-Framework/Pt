@@ -59,22 +59,25 @@ class RequestHandler : public Pt::Connectable
         ~RequestHandler();
 
         void setSecure(Ssl::Context& ctx)
-        {
-            _conn.setSecure(ctx);
-        }
+        { _conn.setSecure(ctx); }
+
+        void setTimeout(std::size_t timeout)
+        { _conn.setTimeout(timeout); }
+
+        void setKeepAliveTimeout(std::size_t timeout)
+        { _conn.setKeepAliveTimeout(timeout); }
 
         void beginServe(System::EventLoop& loop);
 
-        Signal<RequestHandler&>& timeout()
-        { return _timeout; }
+        Signal<RequestHandler&>& finished()
+        { return _finished; }
 
         Service* service()
-        { return _service; }
+        { 
+            return _responder ? &_responder->service() : 0; 
+        }
 
     protected:
-        void onTimeout(Connection&)
-        { _timeout.send(*this); }
-
         Responder* getResponder(const RequestHeader& request);
 
         void releaseResponder();
@@ -87,19 +90,17 @@ class RequestHandler : public Pt::Connectable
 
     private:
         Server& _server;
-        Service* _service;
         Responder* _responder;
         Connection _conn;
         Request _request;
         Reply _reply;
         bool _ignoreBody;
-        Signal<RequestHandler&> _timeout;
+        Signal<RequestHandler&> _finished;
 };
 
 
 RequestHandler::RequestHandler(Server& server, Net::TcpServer& tcpServer)
 : _server(server)
-, _service(0)
 , _responder(0)
 , _conn()
 , _ignoreBody(false)
@@ -117,15 +118,9 @@ RequestHandler::~RequestHandler()
 
 
 Responder* RequestHandler::getResponder(const RequestHeader& request)
-{
-    _service = _server.findService(request);
-    _responder = _service->getResponder(request);
-
-    if( ! _responder)
-    {
-        _service = _server.notFoundService();
-        _responder = _service->getResponder(request);
-    }
+{ 
+    _responder = _server.getResponder(request);
+    assert(_responder);
 
     return _responder;
 }
@@ -135,10 +130,9 @@ void RequestHandler::releaseResponder()
 {
     if( _responder )
     {
-        assert(_service);
-        _service->releaseResponder(_responder);
+        Service& service = _responder->service();
+        service.releaseResponder(_responder);
         _responder = 0;
-        _service = 0;
     }
 }
 
@@ -167,61 +161,72 @@ void RequestHandler::onRequestReceived(Request& req)
     // TODO: error reply on HTTP exception
     //_responder = _server.getDefaultResponder(_request->header());
     //replyError();
-
-    MessageProgress progress = _request.endReceive();
-
-    if( ! _conn.isConnected() )
-    {
-        log_debug("not connected anymore");
-        _timeout.send(*this);
-        return;
-    }
-
-    if( progress.header() )
-    {
-        log_debug("received request header");
-        Responder* responder = getResponder(_request.header());
-        responder->beginRequest( _request );
-        _ignoreBody = false;
-    }
     
-    if( progress.body() )
+    try
     {
-        std::streambuf* sb = _request.body().rdbuf();
-        std::streamsize avail = sb->in_avail();
+        MessageProgress progress = _request.endReceive();
 
-        log_debug("body available: " << avail );
-        
-        if(_ignoreBody)
+        if( ! _conn.isConnected() )
         {
-            while(avail--)
-                sb->sbumpc();
+            log_debug("not connected anymore");
+            _finished.send(*this);
+            return;
         }
-        else
-        {
-            assert(_responder);
-            _responder->readRequest(_request, _reply);
 
-            // TODO: _reply.isSending(), maybe only beginSend was called
-            //       for a chunked reply.
-            if( _reply.finished() )
+        if( progress.header() )
+        {
+            log_debug("received request header");
+            Responder* responder = getResponder(_request.header());
+            responder->beginRequest( _request );
+            _ignoreBody = false;
+        }
+    
+        if( progress.body() )
+        {
+            std::streambuf* sb = _request.body().rdbuf();
+            std::streamsize avail = sb->in_avail();
+
+            log_debug("body available: " << avail );
+        
+            if(_ignoreBody)
             {
-                _ignoreBody = true;
-                return;
+                while(avail--)
+                    sb->sbumpc();
+            }
+            else
+            {
+                assert(_responder);
+                log_debug("reading request");
+                _responder->readRequest(_request, _reply);
+
+                if( _reply.isSending() )
+                    std::exit(0);
+
+                if( _reply.isFinished() || _reply.isSending() )
+                {
+                    log_debug("ignoring body");
+                    _ignoreBody = true;
+                    return;
+                }
             }
         }
-    }
 
-    if( progress.finished() )
+        if( progress.finished() )
+        {
+            assert(_responder);
+            log_debug("request body finished, begin reply");
+            _responder->beginReply(_request, _reply);
+            return;
+        }
+
+        log_debug("more data available");
+        _request.beginReceive();
+    }
+    catch(const System::IOError&) // TODO: HttpError is also an IOError
     {
-        assert(_responder);
-        log_debug("request body finished, begin reply");
-        _responder->beginReply(_request, _reply);
-        return;
+        log_error("EXCEPTION");
+        _finished.send(*this);
     }
-
-    log_debug("more data available");
-    _request.beginReceive();
 }
 
 
@@ -229,37 +234,45 @@ void RequestHandler::onReplySent(Reply& r)
 {
     log_trace("RequestHandler::onReplySent");
 
-    MessageProgress progress = _reply.endSend();
-
-    if( ! _conn.isConnected() )
+    try
     {
-        log_debug("not connected anymore");
-        _timeout.send(*this);
-        return;
-    }
+        MessageProgress progress = _reply.endSend();
 
-    if( ! progress.finished() )
+        if( ! _conn.isConnected() )
+        {
+            log_debug("not connected anymore");
+            _finished.send(*this);
+            return;
+        }
+
+        if( ! progress.finished() )
+        {
+            log_debug("writing left over data");
+            _reply.beginSend();
+            return;
+        }
+
+        if( ! _reply.isFinished() )
+        {
+            log_debug("continuing response");
+            _reply.clearBody();
+            assert(_responder);
+            _responder->writeReply(_request, _reply);
+            return;
+        }
+
+        log_debug("response finished");
+        releaseResponder();
+        _reply.clear();
+        _request.clear();
+
+        _request.beginReceive();
+    }
+    catch(const System::IOError&) // TODO: HttpError is also an IOError
     {
-        log_debug("writing left over data");
-        _reply.beginSend();
-        return;
+        log_error("EXCEPTION");
+        _finished.send(*this);
     }
-
-    if( ! _reply.finished() )
-    {
-        log_debug("continuing response");
-        _reply.clearBody();
-        assert(_responder);
-        _responder->writeReply(_request, _reply);
-        return;
-    }
-
-    log_debug("response finished");
-    releaseResponder();
-    _reply.clear();
-    _request.clear();
-
-    _request.beginReceive();
 }
 
 
@@ -313,20 +326,12 @@ class ServerThread : public Connectable
         };
 
     public:
-        ServerThread(Server& server, Ssl::Context* sslctx = 0)
+        ServerThread(Server& server)
         : _server(&server)
         , _ssl(false)
         , _thread(_loop)
         , _removed(false)
         {
-#ifdef PT_HTTP_WITH_SSL
-            if(sslctx)
-            {
-                _sslctx.assign(*sslctx);
-                _ssl = true;
-            }
-#endif
-
             _loop.event() += Pt::slot(*this, &ServerThread::onAccept);
             _loop.event() += Pt::slot(*this, &ServerThread::onRemoveService);
             _loop.event() += Pt::slot(*this, &ServerThread::onExit);
@@ -338,6 +343,14 @@ class ServerThread : public Connectable
             stop();
         }
 
+        void setSecure(Ssl::Context& ctx)
+        {
+#ifdef PT_HTTP_WITH_SSL
+            _sslctx.assign(ctx);
+            _ssl = true;
+#endif
+        }
+        
         void serve(RequestHandler* conn)
         {
             AcceptEvent ev(conn);
@@ -380,7 +393,7 @@ class ServerThread : public Connectable
             RequestHandler* handler = ev.connection();
 
             _handlers.push_back(handler);
-            handler->timeout() += Pt::slot(*this, &ServerThread::onHandlerFinished);
+            handler->finished() += Pt::slot(*this, &ServerThread::onHandlerFinished);
 
 #ifdef PT_HTTP_WITH_SSL
             if(_ssl)
@@ -429,6 +442,7 @@ class ServerThread : public Connectable
     private:
         Server* _server;
         Pt::System::MainLoop _loop;
+        
         bool _ssl;
 #ifdef PT_HTTP_WITH_SSL
         Ssl::Context _sslctx;
@@ -448,8 +462,7 @@ Server::Server()
 , _ssl(false)
 , _useWorker(0)
 , _maxThreads(1)
-, _readTimeout(20000)
-, _writeTimeout(20000)
+, _timeout(30000)
 , _keepAliveTimeout(30000)
 {
     _notFoundService = new NotFoundService();
@@ -465,8 +478,7 @@ Server::Server(System::EventLoop& eventLoop)
 , _ssl(false)
 , _useWorker(0)
 , _maxThreads(1)
-, _readTimeout(20000)
-, _writeTimeout(20000)
+, _timeout(30000)
 , _keepAliveTimeout(30000)
 {
     _notFoundService = new NotFoundService();
@@ -484,8 +496,7 @@ Server::Server(System::EventLoop& eventLoop, const std::string& ip, unsigned sho
 , _ssl(false)
 , _useWorker(0)
 , _maxThreads(1)
-, _readTimeout(20000)
-, _writeTimeout(20000)
+, _timeout(30000)
 , _keepAliveTimeout(30000)
 {
     _notFoundService = new NotFoundService();
@@ -505,8 +516,7 @@ Server::Server(System::EventLoop& eventLoop, const Pt::Net::AddrInfo& addr, int 
 , _ssl(false)
 , _useWorker(0)
 , _maxThreads(1)
-, _readTimeout(20000)
-, _writeTimeout(20000)
+, _timeout(30000)
 , _keepAliveTimeout(30000)
 {
     _notFoundService = new NotFoundService();
@@ -636,54 +646,41 @@ void Server::removeService(Service& service)
 }
 
 
-Service* Server::findService(const RequestHeader& request)
+Responder* Server::getResponder(const RequestHeader& request)
 {
     System::ReadLock serviceLock(_serviceMutex);
 
-    for (ServiceMap::const_iterator it = _services.begin(); it != _services.end(); ++it)
+    Responder* responder = 0;
+    for(ServiceMap::const_iterator it = _services.begin(); it != _services.end(); ++it)
     {
-        if (! it->second->map(request) )
+        if( ! it->second->map(request) )
             continue;
 
-        if( ! it->first->checkAuth(request))
+        if( ! it->first->checkAuth(request) )
         {
-            return _noAuthService;
+            responder = _noAuthService->getResponder(request);
+            return responder;
         }
 
-        return it->first;
+        responder = it->first->getResponder(request);
+        if(responder)
+            return responder;
     }
 
-    return _notFoundService;
+    responder = _notFoundService->getResponder(request);
+    return responder;
 }
 
 
-Service* Server::notFoundService()
+std::size_t Server::timeout() const
 {
-    return _notFoundService;
+    return _timeout;
 }
 
 
-std::size_t Server::readTimeout() const
+void Server::setTimeout(std::size_t ms)
 {
-    return _readTimeout;
-}
-
-
-void Server::setReadTimeout(std::size_t ms)
-{
-    _readTimeout = ms;
-}
-
-
-std::size_t Server::writeTimeout() const
-{
-    return _writeTimeout;
-}
-
-
-void Server::setWriteTimeout(std::size_t ms)
-{
-    _writeTimeout = ms;
+    _timeout = ms;
 }
 
 
@@ -715,16 +712,14 @@ void Server::startWorker()
 {
     for(unsigned n = 1; n < this->maxThreads(); ++n)
     {
-        ServerThread* st = 0;
+        ServerThread* st = new ServerThread(*this);
 
 #ifdef PT_HTTP_WITH_SSL
         if(_ssl)
         {
-            st = new ServerThread(*this, _sslctx);
+            st->setSecure(*_sslctx);
         }
-        else
 #endif
-            st = new ServerThread(*this);
 
         _serverThreads.push_back(st);
     }
@@ -738,21 +733,23 @@ void Server::onAccept(Net::TcpServer& server)
     // TODO: we should only pass the TcpSocket to the worker thread
     //       so that a RequestHandler can be constructed with an event loop
 
-    RequestHandler* conn = new RequestHandler(*this, server);
+    RequestHandler* handler = new RequestHandler(*this, server);
+    handler->setTimeout(_timeout);
+    handler->setKeepAliveTimeout(_keepAliveTimeout);
 
     if(_useWorker < _serverThreads.size())
     {
-        _serverThreads[_useWorker]->serve(conn);
+        _serverThreads[_useWorker]->serve(handler);
         ++_useWorker;
     }
     else
     {
-        if(_sslctx)
-            conn->setSecure(*_sslctx);
+        if(_ssl)
+            handler->setSecure(*_sslctx);
         
-        conn->beginServe(*_loop);
-        _handlers.push_back(conn);
-        conn->timeout() += Pt::slot(*this, &Server::onConnectionTimeout);
+        handler->beginServe(*_loop);
+        _handlers.push_back(handler);
+        handler->finished() += Pt::slot(*this, &Server::onHandlerFinished);
         _useWorker = 0;
     }
 
@@ -760,12 +757,12 @@ void Server::onAccept(Net::TcpServer& server)
 }
 
 
-void Server::onConnectionTimeout(RequestHandler& conn)
+void Server::onHandlerFinished(RequestHandler& h)
 {
     std::vector<RequestHandler*>::iterator it;
     for(it = _handlers.begin(); it != _handlers.end(); ++it)
     {
-        if(&conn == *it)
+        if(&h == *it)
         {
             delete *it;
             _handlers.erase(it);

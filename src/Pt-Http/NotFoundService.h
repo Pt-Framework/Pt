@@ -40,8 +40,7 @@ namespace Http {
 class PT_HTTP_API NotFoundService : public Service
 {
     public:
-        NotFoundService()
-        { }
+        NotFoundService();
 
         Responder* createResponder(const RequestHeader&);
         

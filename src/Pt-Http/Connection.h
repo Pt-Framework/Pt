@@ -100,6 +100,9 @@ class Connection : public Connectable
     };
 
     public:
+        static const std::size_t WaitInfinite = static_cast<const std::size_t>(-1);
+
+    public:
         Connection();
 
         virtual ~Connection();
@@ -116,10 +119,18 @@ class Connection : public Connectable
         void setActive(System::EventLoop& loop);
 
         System::EventLoop* loop() const
-        { return _loop; }
+        { return _socket.parent(); }
 
         void setTimeout(std::size_t timeout)
-        { _socket.setTimeout(timeout); }
+        { 
+            _socket.setTimeout(timeout);
+            _timeout = timeout;
+        }
+
+        void setKeepAliveTimeout(std::size_t timeout)
+        { 
+            _keepaliveTimeout = timeout;
+        }
 
         bool isConnected()
         { return _socket.isConnected(); }
@@ -155,6 +166,8 @@ class Connection : public Connectable
 #endif
         void onConnect(Net::TcpSocket& socket);
 
+        void onTimeout();
+
         void onHttpInput(System::StreamBuffer& sb);
 
         void onHttpOutput(System::StreamBuffer& sb);
@@ -170,8 +183,6 @@ class Connection : public Connectable
         bool inputAvailable();
 
         bool outputAvailable();
-
-        void onTimeout();
       
         void writeRequestHeader(std::ostream& os, const Request& request);
 
@@ -186,7 +197,7 @@ class Connection : public Connectable
 
         Request* _request;
         Reply* _reply;
-        System::EventLoop* _loop;
+
         System::Timer _timer;
         Net::TcpSocket _socket;
         System::IOBuffer _sockbuf;
@@ -197,9 +208,9 @@ class Connection : public Connectable
         Ssl::IOBuffer _sslbuf;
 #endif
         HttpBuffer _httpbuf;
-        std::size_t _readTimeout;
-        std::size_t _writeTimeout;
+        std::size_t _timeout;
         std::size_t _keepaliveTimeout;
+        std::streamsize _readBytes;
 
         enum State
         {
@@ -215,6 +226,7 @@ class Connection : public Connectable
 
         bool _chunked;
         bool _keepAlive;
+        bool _onTimeout;
 };
 
 } // namespace Http

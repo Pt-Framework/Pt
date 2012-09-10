@@ -36,26 +36,31 @@ namespace Http {
 
 void Request::beginReceive()
 { 
+    _isReceiving = true;
     std::streambuf& sb = _conn->buffer();
     _body.rdbuf(&sb);
-    _conn->beginReceiveRequest(*this); 
+    _conn->beginReceiveRequest(*this);
+    
 }
 
 
 MessageProgress Request::endReceive()
 { 
+    _isReceiving = false;
     return _conn->endReceiveRequest(); 
 }
 
 
 void Request::beginSend()
 { 
+    _isSending = true;
     _conn->beginSendRequest(*this); 
 }
 
 
 MessageProgress Request::endSend()
 { 
+    _isSending = false;
     return _conn->endSendRequest(); 
 }
 
@@ -64,6 +69,7 @@ MessageProgress Request::endSend()
 
 void Reply::beginReceive()
 { 
+    _isReceiving = true;
     std::streambuf& sb = _conn->buffer();
     _body.rdbuf(&sb);
     _conn->beginReceiveReply(*this); 
@@ -72,18 +78,21 @@ void Reply::beginReceive()
 
 MessageProgress Reply::endReceive()
 { 
+    _isReceiving = false;
     return _conn->endReceiveReply(); 
 }
 
 
 void Reply::beginSend()
 { 
+    _isSending = true;
     _conn->beginSendReply(*this); 
 }
 
 
 MessageProgress Reply::endSend()
 { 
+    _isSending = false;
     return _conn->endSendReply(); 
 }
 

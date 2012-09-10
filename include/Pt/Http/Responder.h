@@ -34,6 +34,7 @@
 #include <Pt/System/EventLoop.h>
 #include <iosfwd>
 #include <exception>
+#include <cstddef>
 
 namespace Pt {
 
@@ -41,24 +42,17 @@ namespace Http {
 
 class Request;
 class Reply;
-
-
-class PT_HTTP_API ResponseFailed : public System::IOError
-{
-    public:
-        ResponseFailed();
-
-        ~ResponseFailed() throw()
-        {}
-};
-
+class Service;
 
 class PT_HTTP_API Responder
 {
     public:
-        Responder();
+        Responder(Service& s);
 
         virtual ~Responder();
+
+        Service& service()
+        { return _service; }
 
         virtual void beginRequest(Request& request);
         
@@ -67,6 +61,9 @@ class PT_HTTP_API Responder
         virtual void beginReply(Request& request, Reply& reply);
 
         virtual void writeReply(Request& request, Reply& reply) = 0;
+
+    private:
+        Service& _service;
 };
 
 } // namespace Http

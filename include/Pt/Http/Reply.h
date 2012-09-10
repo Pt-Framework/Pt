@@ -48,6 +48,8 @@ class PT_HTTP_API Reply
     public:
         Reply()
         : _conn(0)
+        , _isReceiving(false)
+        , _isSending(false)
         , _body(&_buf)
         , _finished(false)
         { }
@@ -65,9 +67,15 @@ class PT_HTTP_API Reply
 
         MessageProgress endReceive();
 
+        bool isReceiving() const
+        { return _isReceiving; }
+
         void beginSend();
 
         MessageProgress endSend();
+
+        bool isSending() const
+        { return _isSending; }
 
         Signal<Reply&>& inputReceived()
         { return _inputReceived; }
@@ -78,7 +86,7 @@ class PT_HTTP_API Reply
         void finish()
         { _finished = true; }
 
-        bool finished() const
+        bool isFinished() const
         { return _finished; }
 
         ReplyHeader& header()
@@ -93,6 +101,8 @@ class PT_HTTP_API Reply
             _body.clear();
             _buf.reset();
             _finished = false;
+            _isReceiving = false;
+            _isSending = false;
         }
 
         void clearBody()
@@ -116,6 +126,8 @@ class PT_HTTP_API Reply
 
     private:
         Http::Connection* _conn;
+        bool _isReceiving;
+        bool _isSending;
         ReplyHeader _header;
         MessageBuffer _buf;
         std::iostream _body;

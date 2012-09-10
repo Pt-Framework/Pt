@@ -122,7 +122,7 @@ class BasicService : public Service
         virtual Responder* createResponder(const RequestHeader&)
         {
             void* r = _alloc.allocate( sizeof(R) );
-            return new(r) R();
+            return new(r) R(*this);
         }
 
         virtual void destroyResponder(Responder* r)

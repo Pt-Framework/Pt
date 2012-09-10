@@ -41,7 +41,7 @@ Responder* NotAuthenticatedService::createResponder(const RequestHeader& request
 
 Responder* NotAuthenticatedService::createResponder(const RequestHeader& request, const std::string& realm, const std::string& authContent)
 {
-    return new NotAuthenticatedResponder(realm, authContent);
+    return new NotAuthenticatedResponder(*this, realm, authContent);
 }
 
 

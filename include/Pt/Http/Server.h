@@ -132,6 +132,18 @@ class PT_HTTP_API Server : public Pt::Connectable
 
         void setSecure(Ssl::Context& ctx);
 
+        std::size_t timeout() const;
+
+        void setTimeout(std::size_t ms);
+
+        std::size_t keepAliveTimeout() const;
+
+        void setKeepAliveTimeout(std::size_t ms);
+
+        unsigned maxThreads() const;
+
+        void setMaxThreads(unsigned m);
+
         // TODO: 
         // Pt::Net::SocketOptions options;
         // options.setBacklog(5);
@@ -152,25 +164,7 @@ class PT_HTTP_API Server : public Pt::Connectable
 
         void removeService(Service& service);
 
-        Service* findService(const RequestHeader& request);
-
-        Service* notFoundService();
-
-        std::size_t readTimeout() const;
-
-        void setReadTimeout(std::size_t ms);
-
-        std::size_t writeTimeout() const;
-        
-        void setWriteTimeout(std::size_t ms);
-
-        std::size_t keepAliveTimeout() const;
-
-        void setKeepAliveTimeout(std::size_t ms);
-
-        unsigned maxThreads() const;
-
-        void setMaxThreads(unsigned m);
+        Responder* getResponder(const RequestHeader& request);
 
     private:
         void startWorker();
@@ -181,8 +175,7 @@ class PT_HTTP_API Server : public Pt::Connectable
 
         void onAccept(Net::TcpServer& server);
 
-        // TODO: rename onHandlerFinished
-        void onConnectionTimeout(RequestHandler& conn);
+        void onHandlerFinished(RequestHandler& conn);
 
     private:
         System::EventLoop* _loop;
@@ -193,8 +186,7 @@ class PT_HTTP_API Server : public Pt::Connectable
         std::vector<RequestHandler*> _handlers;
         unsigned _useWorker;
         unsigned _maxThreads;
-        std::size_t _readTimeout;
-        std::size_t _writeTimeout;
+        std::size_t _timeout;
         std::size_t _keepAliveTimeout;
 
         typedef std::multimap<Service*, SmartPtr<MapService> > ServiceMap;

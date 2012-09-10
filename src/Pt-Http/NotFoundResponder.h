@@ -38,7 +38,8 @@ namespace Http {
 class PT_HTTP_API NotFoundResponder : public Responder
 {
     public:
-        explicit NotFoundResponder()
+        explicit NotFoundResponder(Service& s)
+        : Responder(s)
         { }
 
         void writeReply(Request& request, Reply& reply);

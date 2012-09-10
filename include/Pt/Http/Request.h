@@ -49,6 +49,8 @@ class PT_HTTP_API Request
     public:
         explicit Request( const std::string& url = std::string() )
         : _conn(0)
+        , _isReceiving(false)
+        , _isSending(false)
         , _header(url)
         , _body(&_buf)
         , _finished(false)
@@ -67,9 +69,15 @@ class PT_HTTP_API Request
 
         MessageProgress endReceive();
 
+        bool isReceiving() const
+        { return _isReceiving; }
+
         void beginSend();
 
         MessageProgress endSend();
+
+        bool isSending() const
+        { return _isSending; }
 
         Signal<Request&>& inputReceived()
         { return _inputReceived; }
@@ -80,7 +88,7 @@ class PT_HTTP_API Request
         void finish()
         { _finished = true; }
 
-        bool finished() const
+        bool isFinished() const
         { return _finished; }
 
         RequestHeader& header()
@@ -95,6 +103,8 @@ class PT_HTTP_API Request
             _body.clear();
             _buf.reset();
             _finished = false;
+            _isReceiving = false;
+            _isSending = false;
         }
 
         void clearBody()
@@ -118,6 +128,8 @@ class PT_HTTP_API Request
 
     private:
         Http::Connection* _conn;
+        bool _isReceiving;
+        bool _isSending;
         RequestHeader _header;
         MessageBuffer _buf;
         std::iostream _body;

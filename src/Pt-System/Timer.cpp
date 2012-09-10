@@ -69,6 +69,7 @@ Timer::Timer()
 , _interval(0)
 //, _remaining(0)
 , _finished(0)
+, _reserved(0)
 { }
 
 

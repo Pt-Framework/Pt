@@ -38,14 +38,14 @@ namespace Pt {
 namespace Http {
 
 Client::Client()
-: _impl( new ClientImpl(this) )
+: _impl( new ClientImpl() )
 {
     _impl->request().outputSent() += Pt::slot(*this, &Client::onRequestSent);
     _impl->reply().inputReceived() += Pt::slot(*this, &Client::onReplyReceived);
 }
 
 Client::Client(System::EventLoop& loop)
-: _impl( new ClientImpl(this) )
+: _impl( new ClientImpl() )
 {
     _impl->request().outputSent() += Pt::slot(*this, &Client::onRequestSent);
     _impl->reply().inputReceived() += Pt::slot(*this, &Client::onReplyReceived);
@@ -55,7 +55,7 @@ Client::Client(System::EventLoop& loop)
 
 
 Client::Client(System::EventLoop& loop, const Net::AddrInfo& addrinfo)
-: _impl( new ClientImpl(this) )
+: _impl( new ClientImpl() )
 {
     _impl->request().outputSent() += Pt::slot(*this, &Client::onRequestSent);
     _impl->reply().inputReceived() += Pt::slot(*this, &Client::onReplyReceived);
@@ -65,7 +65,7 @@ Client::Client(System::EventLoop& loop, const Net::AddrInfo& addrinfo)
 }
 
 Client::Client(System::EventLoop& loop, const std::string& host, unsigned short int port)
-: _impl( new ClientImpl(this) )
+: _impl( new ClientImpl() )
 {
     _impl->request().outputSent() += Pt::slot(*this, &Client::onRequestSent);
     _impl->reply().inputReceived() += Pt::slot(*this, &Client::onReplyReceived);
@@ -111,7 +111,7 @@ void Client::setSecure(Ssl::Context& ctx)
 
 void Client::setTimeout(std::size_t timeout)
 {
-    _impl->setTimeout(timeout);
+    // TODO !!!
 }
 
 void Client::send()

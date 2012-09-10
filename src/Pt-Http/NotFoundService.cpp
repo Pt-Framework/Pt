@@ -32,6 +32,10 @@ namespace Pt {
 
 namespace Http {
 
+NotFoundService::NotFoundService()
+: _responder(*this)
+{ }
+
 Responder* NotFoundService::createResponder(const RequestHeader&)
 {
     return &_responder;

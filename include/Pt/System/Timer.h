@@ -143,6 +143,7 @@ namespace System {
             std::size_t _interval;
             Timespan    _finished;
             Signal<>    _timeout;
+            void*       _reserved;
     };
 
 }

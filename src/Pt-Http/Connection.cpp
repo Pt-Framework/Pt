@@ -71,18 +71,18 @@ Connection::Connection()
 , _replyParser(_replyParseEvent, true)
 , _request(0)
 , _reply(0)
-, _loop(0)
 , _ssl(false)
 #ifdef PT_HTTP_WITH_SSL
 , _sslbuf( _sockbuf )
 #endif
 , _httpbuf()
-, _readTimeout(30000)
-, _writeTimeout(30000)
-, _keepaliveTimeout(45000)
+, _timeout(WaitInfinite)
+, _keepaliveTimeout(WaitInfinite)
+, _readBytes(0)
 , _state(NotConnected)
 , _chunked(false)
 , _keepAlive(false)
+, _onTimeout(false)
 {
     _socket.connected() += Pt::slot(*this, &Connection::onConnect);
 
@@ -93,8 +93,6 @@ Connection::Connection()
     _sslbuf.handshakeFinished() += slot(*this, &Connection::onHttpsHandshake);
 
     _httpbuf.attach(_sockbuf);
-
-    _timer.timeout() += Pt::slot(*this, &Connection::onTimeout);
 }
 
 
@@ -168,7 +166,6 @@ void Connection::setActive(System::EventLoop& loop)
 {
     _socket.setActive(loop);
     _timer.setActive(loop);
-    _loop = &loop;
 }
 
 
@@ -176,12 +173,15 @@ void Connection::cancel()
 {
     log_debug("cancelling connection");
 
+    _timer.stop();
+    _readBytes = 0;
     _socket.close();
     _reply = 0;
     _request = 0;
     _state = NotConnected;
     _chunked = false;
     _keepAlive = false;
+    _onTimeout = false;
     _parser.reset(false);
     _replyParser.reset(true);
     _httpbuf.reset();
@@ -197,7 +197,7 @@ void Connection::beginSendRequest(Request& request)
     if( ! isConnected() )
     {
         log_debug("opening new connection to " << _addrInfo.host());
-        _timer.start( _writeTimeout );
+        _timer.start( _timeout );
         _socket.beginConnect(_addrInfo);
         return;
     }
@@ -206,7 +206,7 @@ void Connection::beginSendRequest(Request& request)
     if(_state == SslHandshake)
     {
         log_debug("begining SSL handshake");
-        _timer.start( _writeTimeout );
+        _timer.start( _timeout );
         _sslbuf.beginConnect();
         return;
     }
@@ -214,7 +214,7 @@ void Connection::beginSendRequest(Request& request)
 
     std::ostream os( _httpbuf.buffer() );
 
-    if( request.finished() )
+    if( request.isFinished() )
     {
         log_debug("HTTP request finished");
 
@@ -261,7 +261,6 @@ void Connection::beginSendRequest(Request& request)
     }
 
     // TODO: only if over 8K data to send
-    _timer.start( _writeTimeout );
     beginWrite();
 }
 
@@ -270,6 +269,9 @@ MessageProgress Connection::endSendRequest()
 {
     log_trace("Connection::endSendRequest");
     MessageProgress progress;
+
+    if(_onTimeout)
+        throw Pt::System::IOError("timeout");
 
     if(_state == NotConnected)
     {
@@ -299,9 +301,8 @@ MessageProgress Connection::endSendRequest()
     Request* req = _request;
     _request = 0;
 
-    if( ! req->finished() )
+    if( ! req->isFinished() )
     {
-        _timer.stop();
         endWrite();
     }
  
@@ -324,12 +325,11 @@ void Connection::beginSendReply(Reply& reply)
 
     if( ! _reply->header().keepAlive() && outputAvailable() )
     {
-        _timer.start( _writeTimeout );
         beginWrite();
         return;
     }
 
-    if( reply.finished() )
+    if( reply.isFinished() )
     {
         if(_chunked)
         {
@@ -352,7 +352,6 @@ void Connection::beginSendReply(Reply& reply)
         }
 
         log_debug("begin writing reply");
-        _timer.start( _writeTimeout );
 
         if( _reply->header().keepAlive() )
             _reply->onOutput(); 
@@ -377,7 +376,7 @@ void Connection::beginSendReply(Reply& reply)
     }
 
     // TODO: only if over 8K data to send
-    _timer.start( _writeTimeout );
+    // this way the timeout can be for the 8K chunk
     beginWrite();
 }
 
@@ -388,18 +387,18 @@ MessageProgress Connection::endSendReply()
     // TODO: handle exceptions correctly...
 
     MessageProgress progress;
-    _keepAlive = _keepAlive && _reply->header().keepAlive();
+    
+    if(_onTimeout)
+        throw Pt::System::IOError("timeout");
 
     try
     {
-        //if(! _reply->finished() || ! keepAlive)
-        //{
-        _timer.stop();
-        endWrite();
-        //}
+        _keepAlive = _keepAlive && _reply->header().keepAlive();
         
-        // when keepalive, leave data in the output buffer, otherwise
-        // make sure we send all data
+        endWrite();
+
+        // keepalive -> leave data in the output buffer
+        // close -> make sure we sent all data
         if( ! _keepAlive && outputAvailable() )
         {
             log_debug("still data to send");
@@ -408,7 +407,7 @@ MessageProgress Connection::endSendReply()
   
         progress.setFinished();
 
-        if( ! _reply->finished() )
+        if( ! _reply->isFinished() )
         {
             log_debug("reply is not finished");
 
@@ -421,7 +420,6 @@ MessageProgress Connection::endSendReply()
         if(_keepAlive)
         {
             log_debug("do keep alive");
-            _timer.start(_keepaliveTimeout);
 
             // indicates that request was completely written
             return progress;
@@ -450,8 +448,8 @@ void Connection::beginReceiveRequest(Request& request)
     if(_state == SslNotAccepted)
     {
         log_debug("beginning SSL handshake");
+        _timer.start( _timeout );
         _sslbuf.beginAccept();
-        _timer.start( _readTimeout );
         return;
     }
 #endif
@@ -467,7 +465,21 @@ void Connection::beginReceiveRequest(Request& request)
 
     log_debug("begin reading request");
     _parseEvent.init( request.header() );
-    _timer.start( _readTimeout );
+
+    if( _parser.begin() )
+    {
+        _readBytes = 0;
+        if(_keepAlive)
+        {
+            log_debug("use keep alive timeout");
+            _timer.start(_keepaliveTimeout);
+        }
+        else
+        {
+            _timer.start( _timeout );
+        }
+    }
+    
     beginRead();
 }
 
@@ -476,6 +488,9 @@ MessageProgress Connection::endReceiveRequest()
 {
     log_trace("Connection::endReceiveRequest");
     MessageProgress progress;
+
+    if(_onTimeout)
+        throw Pt::System::IOError("timeout");
 
 #ifdef PT_HTTP_WITH_SSL
     if(_state == SslNotAccepted)
@@ -507,12 +522,11 @@ MessageProgress Connection::endReceiveRequest()
     }
 
     if( ! _parser.end() )
-    {
-        if( _parser.begin() && ! _timer.started() )
-        {
-            _timer.start( _readTimeout );
-        }
-        
+    {       
+        // switch from keepalive timeout to receive timeout
+        if( _parser.begin() && _keepAlive )
+            _timer.start(_timeout);
+
         _parser.advance( *_httpbuf.buffer() );
 
         if( _parser.fail() )
@@ -537,9 +551,15 @@ MessageProgress Connection::endReceiveRequest()
 
     if( _parser.end() )
     {
+        std::streamsize avail = _httpbuf.in_avail();
+        
         _httpbuf.import();
-        log_debug("available: " << _httpbuf.in_avail());
-
+        log_debug("bytes available: " << _httpbuf.in_avail());
+        
+        _readBytes += _httpbuf.in_avail() - avail;
+        if(_readBytes >= 8192)
+            _timer.start(_timeout);
+        
         if(_httpbuf.in_avail() > 0)
             progress.setOnBody();
 
@@ -549,6 +569,7 @@ MessageProgress Connection::endReceiveRequest()
             progress.setFinished();
 
             _timer.stop();
+            _readBytes = 0;
             _request = 0;
             _parser.reset(false);
         }
@@ -572,8 +593,14 @@ void Connection::beginReceiveReply(Reply& r)
         return;
     }
 
-    _timer.start( _readTimeout );
     _replyParseEvent.init( _reply->header() );
+
+    if( _parser.begin() )
+    {
+        _readBytes = 0;
+        _timer.start( _timeout );
+    }
+
     beginRead();
 }
 
@@ -582,6 +609,9 @@ MessageProgress Connection::endReceiveReply()
 {
     log_trace("Connection::endReceiveReply");
     MessageProgress progress;
+
+    if(_onTimeout)
+        throw Pt::System::IOError("timeout");
 
     if(_state == RequestOutputPending)
     {
@@ -597,11 +627,6 @@ MessageProgress Connection::endReceiveReply()
     {
         if( _socket.eof() )
             throw System::IOError("unexpected EOF");
-
-        if( _replyParser.begin() && ! _timer.started() )
-        {
-            _timer.start( _readTimeout );
-        }
         
         _replyParser.advance( *_httpbuf.buffer() );
 
@@ -624,8 +649,14 @@ MessageProgress Connection::endReceiveReply()
 
     if( _replyParser.end() )
     {
+        std::streamsize avail = _httpbuf.in_avail();
+        
         _httpbuf.import();
-        log_debug("available: " << _httpbuf.in_avail());
+        log_debug("bytes available: " << _httpbuf.in_avail());
+        
+        _readBytes += _httpbuf.in_avail() - avail;
+        if(_readBytes >= 8192)
+            _timer.start(_timeout);
 
         if(_httpbuf.in_avail() > 0)
             progress.setOnBody();
@@ -640,6 +671,7 @@ MessageProgress Connection::endReceiveReply()
             _reply = 0;
             _replyParser.reset(true);
             _timer.stop();
+            _readBytes = 0;
 
             if( ! keepalive )
             {
@@ -689,13 +721,13 @@ void Connection::onHttpsOutput(Pt::Ssl::IOBuffer& ssl)
 {
     log_trace("Connection::onHttpsOutput");
 
-    if(_state == RequestOutputPending)
+    if( _reply && _reply->isReceiving() )
     {
         _reply->onInput();
         return;
     }
 
-    if(_state == ReplyOutputPending)
+    if( _request && _request->isReceiving() )
     {
         _request->onInput();
         return;
@@ -724,6 +756,29 @@ void Connection::onConnect(Net::TcpSocket& socket)
 }
 
 
+void Connection::onTimeout()
+{
+    log_debug("cancelling connection");
+    _onTimeout = true;
+
+    if(_request)
+    {
+        if( _request->isSending() )
+            _request->onOutput();
+        else
+            _request->onInput();
+    }
+
+    if(_reply)
+    {
+        if( _reply->isSending() )
+            _reply->onOutput();
+        else
+            _reply->onInput();
+    }
+}
+
+
 void Connection::onHttpInput(System::StreamBuffer& sb)
 {
     log_trace("Connection::onHttpInput");
@@ -743,13 +798,13 @@ void Connection::onHttpOutput(System::StreamBuffer& sb)
 {
     log_trace("Connection::onHttpOutput");
 
-    if(_state == RequestOutputPending)
+    if( _reply && _reply->isReceiving() )
     {
         _reply->onInput();
         return;
     }
 
-    if(_state == ReplyOutputPending)
+    if( _request && _request->isReceiving() )
     {
         _request->onInput();
         return;
@@ -812,6 +867,7 @@ void Connection::beginWrite()
         if ( _sslbuf.buffer().out_avail() )
         {
             log_debug("begin writing ssl buffer");
+            _timer.start(_timeout);
             _sslbuf.beginWrite();
             return;
         }
@@ -823,6 +879,7 @@ void Connection::beginWrite()
     if ( _sockbuf.out_avail() )
     {
         log_debug("begin writing socket buffer");
+        _timer.start(_timeout);
         _sockbuf.beginWrite();
         return;
     }
@@ -872,19 +929,14 @@ bool Connection::outputAvailable()
 
 void Connection::endWrite()
 {
+    _timer.stop();
+
 #ifdef PT_HTTP_WITH_SSL
     if(_ssl)
         _sslbuf.endWrite();
     else
 #endif
         _sockbuf.endWrite();
-}
-
-
-void Connection::onTimeout()
-{
-    log_debug("timeout");
-    cancel();
 }
 
 
