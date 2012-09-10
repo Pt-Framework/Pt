@@ -50,6 +50,9 @@ inline std::string toString(Pt::System::LogLevel level)
         case Pt::System::Info:  return "Info";
         case Pt::System::Debug: return "Debug";
         case Pt::System::Trace: return "Trace";
+
+        default:
+            break;
     };
 
     return "None";
