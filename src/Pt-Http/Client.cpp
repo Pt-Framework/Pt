@@ -111,7 +111,7 @@ void Client::setSecure(Ssl::Context& ctx)
 
 void Client::setTimeout(std::size_t timeout)
 {
-    // TODO !!!
+    _impl->setTimeout(timeout);
 }
 
 void Client::send()

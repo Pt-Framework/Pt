@@ -89,8 +89,8 @@ class ClientImpl : public Connectable
         void setActive(System::EventLoop& loop)
         { _conn.setActive(loop); }
 
-        //void setTimeout(std::size_t timeout)
-        //{ _conn.setTimeout(timeout); }
+        void setTimeout(std::size_t timeout)
+        { _conn.setTimeout(timeout); }
 
         void setHost(const Net::AddrInfo& addrinfo)
         { _conn.setHost(addrinfo); }
