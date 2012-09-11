@@ -34,6 +34,7 @@
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 #include <cassert>
+#include <cstring>
 
 log_define("Pt.Ssl.StreamBuffer")
 

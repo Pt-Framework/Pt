@@ -31,6 +31,7 @@
 
 #include <Pt/Http/Api.h>
 #include <Pt/Http/Responder.h>
+#include <Pt/Http/Server.h>
 #include <Pt/Allocator.h>
 #include <Pt/System/Mutex.h>
 #include <Pt/System/Condition.h>
