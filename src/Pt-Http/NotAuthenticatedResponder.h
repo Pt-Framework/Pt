@@ -47,8 +47,17 @@ class NotAuthenticatedResponder : public Responder
         , _realm(realm)
         , _content(content)
         { }
+        
+        virtual void onBeginRequest(Request& request, Reply& reply)
+        {}
+        
+        virtual void onReadRequest(Request& request, Reply& reply)
+        {}
 
-        void writeReply(Request& request, Reply& reply);
+        virtual void onBeginReply(Request& request, Reply& reply);
+        
+        void onWriteReply(Request& request, Reply& reply)
+        {}
 };
 
 

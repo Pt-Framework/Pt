@@ -46,22 +46,16 @@ class PT_HTTP_API Reply
     friend class Connection;
 
     public:
-        Reply()
-        : _conn(0)
+        Reply(Http::Connection& conn)
+        : _conn(&conn)
         , _isReceiving(false)
         , _isSending(false)
         , _body(&_buf)
         , _finished(false)
         { }
-
-        void init(Http::Connection& conn)
-        {
-            _conn = &conn;
-            _finished = false;
-        }
         
-        Connection* connection()
-        { return _conn; }
+        Connection& connection()
+        { return *_conn; }
         
         void beginReceive();
 
@@ -101,12 +95,9 @@ class PT_HTTP_API Reply
             _body.clear();
             _buf.reset();
             _finished = false;
-            _isReceiving = false;
-            _isSending = false;
         }
 
-        void clearBody()
-        { _buf.reset(); }
+        void clearBody();
 
         const char* data() const
         { return _buf.data(); }
@@ -126,8 +117,8 @@ class PT_HTTP_API Reply
 
     private:
         Http::Connection* _conn;
-        bool _isReceiving;
-        bool _isSending;
+        bool _isReceiving; // TODO: move to Connection
+        bool _isSending; // TODO: move to Connection
         ReplyHeader _header;
         MessageBuffer _buf;
         std::iostream _body;

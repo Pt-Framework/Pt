@@ -41,8 +41,17 @@ class PT_HTTP_API NotFoundResponder : public Responder
         explicit NotFoundResponder(Service& s)
         : Responder(s)
         { }
+        
+        virtual void onBeginRequest(Request& request, Reply& reply)
+        {}
+        
+        virtual void onReadRequest(Request& request, Reply& reply)
+        {}
 
-        void writeReply(Request& request, Reply& reply);
+        virtual void onBeginReply(Request& request, Reply& reply);
+        
+        void onWriteReply(Request& request, Reply& reply)
+        {}
 };
 
 } // namespace Http

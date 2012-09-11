@@ -304,6 +304,11 @@ MessageProgress Connection::endSendRequest()
     if( ! req->isFinished() )
     {
         endWrite();
+
+        if( _socket.eof() )
+        {
+            throw Pt::System::IOError("connection lost while sending request");
+        }
     }
  
     // indicates that the request or chunk was completely written
@@ -384,54 +389,46 @@ void Connection::beginSendReply(Reply& reply)
 MessageProgress Connection::endSendReply()
 {
     log_trace("Connection::endSendReply");
-    // TODO: handle exceptions correctly...
 
     MessageProgress progress;
     
     if(_onTimeout)
         throw Pt::System::IOError("timeout");
 
-    try
-    {
-        _keepAlive = _keepAlive && _reply->header().keepAlive();
+    _keepAlive = _keepAlive && _reply->header().keepAlive();
         
-        endWrite();
+    endWrite();
 
-        // keepalive -> leave data in the output buffer
-        // close -> make sure we sent all data
-        if( ! _keepAlive && outputAvailable() )
-        {
-            log_debug("still data to send");
-            return progress;
-        }
-  
-        progress.setFinished();
-
-        if( ! _reply->isFinished() )
-        {
-            log_debug("reply is not finished");
-
-            // indicates that chunk was completely written
-            return progress;
-        }
-
-        _reply = 0;
-
-        if(_keepAlive)
-        {
-            log_debug("do keep alive");
-
-            // indicates that request was completely written
-            return progress;
-        }
-    }
-    catch (const std::exception& e)
+    if( _socket.eof() )
     {
-        log_warn("exception occured when processing request: " << e.what());
+        throw Pt::System::IOError("connection lost while sending reply");
     }
 
-    log_debug("closing connection");
-    cancel();
+    // keepalive -> leave data in the output buffer
+    // close -> make sure we sent all data
+    if( ! _keepAlive && outputAvailable() )
+    {
+        log_debug("still data to send");
+        return progress;
+    }
+  
+    progress.setFinished();
+
+    if( ! _reply->isFinished() )
+    {
+        log_debug("reply is not finished");
+
+        // indicates that chunk was completely written
+        return progress;
+    }
+
+    _reply = 0;
+
+    if( ! _keepAlive)
+    {
+        log_debug("no keep alive, closing connection");
+        cancel();
+    }
 
     // indicates that request was completely written
     return progress;
@@ -515,10 +512,7 @@ MessageProgress Connection::endReceiveRequest()
 
     if( _socket.eof() )
     {
-        // TODO: connection was closed prematurely
-        cancel();
-        progress.setFinished();
-        return progress;
+        throw Pt::System::IOError("connection lost while receiving request");
     }
 
     if( ! _parser.end() )
@@ -626,7 +620,9 @@ MessageProgress Connection::endReceiveReply()
     if ( ! _replyParser.end() )
     {
         if( _socket.eof() )
+        {
             throw System::IOError("unexpected EOF");
+        }
         
         _replyParser.advance( *_httpbuf.buffer() );
 
@@ -678,6 +674,10 @@ MessageProgress Connection::endReceiveReply()
                 log_debug("closing, no keep alive");
                 cancel();
             }
+        }
+        else if( _socket.eof() )
+        {
+            throw System::IOError("unexpected EOF");
         }
     }
 

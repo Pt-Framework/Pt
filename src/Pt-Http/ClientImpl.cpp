@@ -46,9 +46,9 @@ ClientImpl::ClientImpl()
 : _hstate(Idle)
 , _conn()
 , _requestCount(0)
+, _req(_conn)
+, _reply(_conn)
 {
-    _req.init(_conn);
-    _reply.init(_conn);
 }
 
 
@@ -190,8 +190,6 @@ MessageProgress ClientImpl::endReceive()
         log_debug("receiving header");
         MessageProgress progress = _reply.endReceive();
 
-        // TODO: handle connection close
-
         if( progress.finished() )
         {
             log_debug("reply completed");
@@ -205,6 +203,7 @@ MessageProgress ClientImpl::endReceive()
             if( ! _conn.isConnected() )
             {
                 log_debug("connection closed");
+                // connection will reconnect automatically
             }
         }
 

@@ -47,8 +47,8 @@ class PT_HTTP_API Request
     friend class Connection;
 
     public:
-        explicit Request( const std::string& url = std::string() )
-        : _conn(0)
+        explicit Request( Http::Connection& conn, const std::string& url = std::string() )
+        : _conn(&conn)
         , _isReceiving(false)
         , _isSending(false)
         , _header(url)
@@ -59,11 +59,8 @@ class PT_HTTP_API Request
         void setUrl(const std::string& u)
         { _header.url(u); }
 
-        void init(Http::Connection& conn)
-        { _conn = &conn; }
-
-        Connection* connection()
-        { return _conn; }
+        Connection& connection()
+        { return *_conn; }
 
         void beginReceive();
 
@@ -103,12 +100,9 @@ class PT_HTTP_API Request
             _body.clear();
             _buf.reset();
             _finished = false;
-            _isReceiving = false;
-            _isSending = false;
         }
 
-        void clearBody()
-        { _buf.reset(); }
+        void clearBody();
 
         const char* data() const
         { return _buf.data(); }
@@ -128,8 +122,8 @@ class PT_HTTP_API Request
 
     private:
         Http::Connection* _conn;
-        bool _isReceiving;
-        bool _isSending;
+        bool _isReceiving; // TODO: move to Connection
+        bool _isSending; // TODO: move to Connection
         RequestHeader _header;
         MessageBuffer _buf;
         std::iostream _body;

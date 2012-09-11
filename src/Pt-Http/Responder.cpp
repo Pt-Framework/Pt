@@ -46,19 +46,23 @@ Responder::~Responder()
 { }
 
 
-void Responder::beginRequest(Request& request)
+void Responder::beginRequest(Request& request, Reply& reply)
 {
+    onBeginRequest(request, reply);
 }
 
 
 void Responder::readRequest(Request& request, Reply& reply)
 {
-    // cannot use std::streambuf::ignore, because on some implementations
-    // undeflow will be called when the last character is extracted
+    onReadRequest(request, reply);
 
+    // ignore everything the responder didn't consume
     std::streambuf* sb = request.body().rdbuf();
     if(sb)
     {
+        // cannot use std::streambuf::ignore, because on some implementations
+        // undeflow will be called when the last character is extracted
+        
         std::streamsize n = sb->in_avail();
         while(n--)
             sb->sbumpc();
@@ -68,7 +72,13 @@ void Responder::readRequest(Request& request, Reply& reply)
 
 void Responder::beginReply(Request& request, Reply& reply)
 { 
-    this->writeReply(request, reply); 
+    onBeginReply(request, reply);
+}
+
+
+void Responder::writeReply(Request& request, Reply& reply)
+{ 
+    onWriteReply(request, reply); 
 }
 
 } // namespace Http

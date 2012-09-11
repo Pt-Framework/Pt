@@ -50,7 +50,16 @@ class HelloResponder : public Pt::Http::Responder
         : Pt::Http::Responder(s)
         {}
         
-        void writeReply(Pt::Http::Request& request, Pt::Http::Reply& reply)
+        virtual void onBeginRequest(Pt::Http::Request& request, Pt::Http::Reply& reply)
+        {}
+        
+        virtual void onReadRequest(Pt::Http::Request& request, Pt::Http::Reply& reply)
+        {}
+
+        virtual void onBeginReply(Pt::Http::Request& request, Pt::Http::Reply& reply)
+        { onWriteReply(request, reply); }
+
+        virtual void onWriteReply(Pt::Http::Request& request, Pt::Http::Reply& reply)
         {
             reply.body() << "Hello World!";
             reply.finish();
@@ -67,18 +76,17 @@ class ChunkedResponder : public Pt::Http::Responder
         : Pt::Http::Responder(s)
         , _chunks(5)
         {}
-
-        void beginRequest(Pt::Http::Request& request)
-        { 
-            _chunks = 5;
-            //for (Pt::Http::RequestHeader::const_iterator it = request.begin();
-            //    it != request.end(); ++it)
-            //{
-            //    std::cerr << it->first << ": " << it->second << "\r\n";
-            //}
-        }
+      
+        virtual void onBeginRequest(Pt::Http::Request& request, Pt::Http::Reply& reply)
+        { _chunks = 5; }
         
-        void writeReply(Pt::Http::Request& request, Pt::Http::Reply& reply)
+        virtual void onReadRequest(Pt::Http::Request& request, Pt::Http::Reply& reply)
+        {}
+
+        virtual void onBeginReply(Pt::Http::Request& request, Pt::Http::Reply& reply)
+        { onWriteReply(request, reply); }
+
+        virtual void onWriteReply(Pt::Http::Request& request, Pt::Http::Reply& reply)
         {
             reply.body() << "Chunk" << _chunks--;
 
@@ -354,8 +362,9 @@ class ServerTest : public Pt::Unit::TestSuite
 
         void ChunkedReply()
         {
-            ChunkedService service;
             Pt::Http::Server server(*loop, "127.0.0.1", 8001);
+
+            ChunkedService service;
             server.addService(Pt::Http::MapUrl("/test"), service);
 
             Pt::Http::Client client(*loop, "127.0.0.1", 8001);

@@ -65,6 +65,18 @@ MessageProgress Request::endSend()
 }
 
 
+void Request::clearBody()
+{ 
+    _buf.reset(); 
+
+    std::streambuf* sb = _body.rdbuf();
+    if(sb != &_buf)
+    {
+        std::streamsize avail = sb->in_avail();
+        while(avail--)
+            sb->sbumpc();
+    }
+}
 
 
 void Reply::beginReceive()
@@ -94,6 +106,20 @@ MessageProgress Reply::endSend()
 { 
     _isSending = false;
     return _conn->endSendReply(); 
+}
+
+
+void Reply::clearBody()
+{ 
+    _buf.reset(); 
+
+    std::streambuf* sb = _body.rdbuf();
+    if(sb != &_buf)
+    {
+        std::streamsize avail = sb->in_avail();
+        while(avail--)
+            sb->sbumpc();
+    }
 }
 
 } // namespace Http

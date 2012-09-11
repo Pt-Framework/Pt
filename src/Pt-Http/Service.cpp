@@ -30,6 +30,7 @@
 #include <Pt/Http/Server.h>
 #include <Pt/Http/Responder.h>
 #include <stdexcept>
+#include <cassert>
 
 namespace Pt {
 
@@ -43,11 +44,8 @@ Service::Service()
 
 
 Service::~Service() 
-{ 
-    while( ! _servers.empty() )
-    {
-        _servers[0]->removeService(*this);
-    }
+{
+    assert( _servers.empty() );
 }
 
 
@@ -88,6 +86,15 @@ bool Service::isIdle()
 {
     System::MutexLock lock(_mutex);
     return _responderCount == 0;
+}
+
+
+void Service::detach()
+{
+    while( ! _servers.empty() )
+    {
+        _servers[0]->removeService(*this);
+    }
 }
 
 

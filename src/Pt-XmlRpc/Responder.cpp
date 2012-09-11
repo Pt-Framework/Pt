@@ -80,7 +80,7 @@ XmlRpcResponder::~XmlRpcResponder()
 }
 
 
-void XmlRpcResponder::beginRequest(Http::Request& request)
+void XmlRpcResponder::onBeginRequest(Http::Request& request, Http::Reply& reply)
 {
     _state = OnBegin;
     _ts.attach( request.body() );
@@ -88,7 +88,7 @@ void XmlRpcResponder::beginRequest(Http::Request& request)
 }
 
 
-void XmlRpcResponder::readRequest(Http::Request& request, Http::Reply& reply)
+void XmlRpcResponder::onReadRequest(Http::Request& request, Http::Reply& reply)
 {
    try
    {
@@ -121,7 +121,7 @@ void XmlRpcResponder::readRequest(Http::Request& request, Http::Reply& reply)
 }
 
 
-void XmlRpcResponder::writeReply(Http::Request& request, Http::Reply& reply)
+void XmlRpcResponder::onBeginReply(Http::Request& request, Http::Reply& reply)
 {
     try
     {
@@ -150,6 +150,11 @@ void XmlRpcResponder::writeReply(Http::Request& request, Http::Reply& reply)
     {
         replyError(reply, fault.rc(), fault.what());
     }
+}
+
+
+void XmlRpcResponder::onWriteReply(Http::Request& request, Http::Reply& reply)
+{
 }
 
 

@@ -78,7 +78,7 @@ class RequestHandler : public Pt::Connectable
         }
 
     protected:
-        Responder* getResponder(const RequestHeader& request);
+        Responder& getResponder(const RequestHeader& request);
 
         void releaseResponder();
 
@@ -94,7 +94,6 @@ class RequestHandler : public Pt::Connectable
         Connection _conn;
         Request _request;
         Reply _reply;
-        bool _ignoreBody;
         Signal<RequestHandler&> _finished;
 };
 
@@ -103,7 +102,8 @@ RequestHandler::RequestHandler(Server& server, Net::TcpServer& tcpServer)
 : _server(server)
 , _responder(0)
 , _conn()
-, _ignoreBody(false)
+, _request(_conn)
+, _reply(_conn)
 {
     _conn.accept(tcpServer);
     _request.inputReceived() += Pt::slot(*this, &RequestHandler::onRequestReceived);
@@ -117,12 +117,12 @@ RequestHandler::~RequestHandler()
 }
 
 
-Responder* RequestHandler::getResponder(const RequestHeader& request)
+Responder& RequestHandler::getResponder(const RequestHeader& request)
 { 
     _responder = _server.getResponder(request);
     assert(_responder);
 
-    return _responder;
+    return *_responder;
 }
 
 
@@ -141,14 +141,9 @@ void RequestHandler::beginServe(System::EventLoop& loop)
 {  
     log_trace("RequestHandler::beginServe");
 
-    _ignoreBody = false;
-
     _conn.setActive(loop);
 
-    _reply.init(_conn);
     _reply.clear();
-
-    _request.init(_conn);
     _request.clear();
     _request.beginReceive();
 }
@@ -166,57 +161,54 @@ void RequestHandler::onRequestReceived(Request& req)
     {
         MessageProgress progress = _request.endReceive();
 
-        if( ! _conn.isConnected() )
-        {
-            log_debug("not connected anymore");
-            _finished.send(*this);
-            return;
-        }
-
         if( progress.header() )
         {
             log_debug("received request header");
-            Responder* responder = getResponder(_request.header());
-            responder->beginRequest( _request );
-            _ignoreBody = false;
+            getResponder( _request.header() ).beginRequest( _request, _reply );
+
+            if( _reply.isSending() )
+            {
+                log_debug("request interrupted");
+                return;
+            }
         }
     
         if( progress.body() )
-        {
-            std::streambuf* sb = _request.body().rdbuf();
-            std::streamsize avail = sb->in_avail();
-
-            log_debug("body available: " << avail );
-        
-            if(_ignoreBody)
+        {     
+            if( _responder)
             {
-                while(avail--)
-                    sb->sbumpc();
-            }
-            else
-            {
-                assert(_responder);
                 log_debug("reading request");
                 _responder->readRequest(_request, _reply);
 
                 if( _reply.isSending() )
-                    std::exit(0);
-
-                if( _reply.isFinished() || _reply.isSending() )
                 {
-                    log_debug("ignoring body");
-                    _ignoreBody = true;
+                    log_debug("request interrupted");
                     return;
                 }
+            }
+            else
+            {
+                log_debug("ignoring request body");
+                _request.clearBody();
             }
         }
 
         if( progress.finished() )
         {
-            assert(_responder);
-            log_debug("request body finished, begin reply");
-            _responder->beginReply(_request, _reply);
-            return;
+            if( ! _conn.isConnected() )
+            {
+                log_debug("not connected anymore");
+                _finished.send(*this);
+                return;
+            }
+
+            // only reply if not leftover body from interrupted request
+            if(_responder)
+            {
+                log_debug("request body finished, begin reply");
+                _responder->beginReply(_request, _reply);
+                return;
+            }
         }
 
         log_debug("more data available");
@@ -238,13 +230,6 @@ void RequestHandler::onReplySent(Reply& r)
     {
         MessageProgress progress = _reply.endSend();
 
-        if( ! _conn.isConnected() )
-        {
-            log_debug("not connected anymore");
-            _finished.send(*this);
-            return;
-        }
-
         if( ! progress.finished() )
         {
             log_debug("writing left over data");
@@ -265,6 +250,13 @@ void RequestHandler::onReplySent(Reply& r)
         releaseResponder();
         _reply.clear();
         _request.clear();
+
+        if( ! _conn.isConnected() )
+        {
+            log_debug("not connected anymore");
+            _finished.send(*this);
+            return;
+        }
 
         _request.beginReceive();
     }
@@ -293,10 +285,6 @@ void RequestHandler::replyError()
 class ServerThread : public Connectable 
 {
     public:
-        class ExitEvent : public Pt::BasicEvent<ExitEvent>
-        {};
-    
-    
         class AcceptEvent : public Pt::BasicEvent<AcceptEvent>
         {
             public:
@@ -334,7 +322,6 @@ class ServerThread : public Connectable
         {
             _loop.event() += Pt::slot(*this, &ServerThread::onAccept);
             _loop.event() += Pt::slot(*this, &ServerThread::onRemoveService);
-            _loop.event() += Pt::slot(*this, &ServerThread::onExit);
             _thread.start();
         }
 
@@ -384,10 +371,6 @@ class ServerThread : public Connectable
         }
 
     private:
-        void onExit(const ExitEvent& ev)
-        {
-        }
-
         void onAccept(const AcceptEvent& ev)
         {
             RequestHandler* handler = ev.connection();
@@ -557,6 +540,42 @@ void Server::setSecure(Ssl::Context& ctx)
 }
 
 
+std::size_t Server::timeout() const
+{
+    return _timeout;
+}
+
+
+void Server::setTimeout(std::size_t ms)
+{
+    _timeout = ms;
+}
+
+
+std::size_t Server::keepAliveTimeout() const
+{
+    return _keepAliveTimeout;
+}
+
+
+void Server::setKeepAliveTimeout(std::size_t ms)
+{
+    _keepAliveTimeout = ms;
+}
+
+
+unsigned Server::maxThreads() const
+{
+    return _maxThreads;
+}
+
+
+void Server::setMaxThreads(unsigned m)
+{
+    _maxThreads = m;
+}
+
+
 void Server::listen(const Pt::Net::AddrInfo& addr, int backlog)
 {
     _serverSocket.listen(addr, backlog);
@@ -669,42 +688,6 @@ Responder* Server::getResponder(const RequestHeader& request)
 
     responder = _notFoundService->getResponder(request);
     return responder;
-}
-
-
-std::size_t Server::timeout() const
-{
-    return _timeout;
-}
-
-
-void Server::setTimeout(std::size_t ms)
-{
-    _timeout = ms;
-}
-
-
-std::size_t Server::keepAliveTimeout() const
-{
-    return _keepAliveTimeout;
-}
-
-
-void Server::setKeepAliveTimeout(std::size_t ms)
-{
-    _keepAliveTimeout = ms;
-}
-
-
-unsigned Server::maxThreads() const
-{
-    return _maxThreads;
-}
-
-
-void Server::setMaxThreads(unsigned m)
-{
-    _maxThreads = m;
 }
 
 

@@ -128,11 +128,9 @@ class Connection : public Connectable
         }
 
         void setKeepAliveTimeout(std::size_t timeout)
-        { 
-            _keepaliveTimeout = timeout;
-        }
+        { _keepaliveTimeout = timeout; }
 
-        bool isConnected()
+        bool isConnected() const
         { return _socket.isConnected(); }
 
         void cancel();

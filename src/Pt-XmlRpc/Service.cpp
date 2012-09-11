@@ -46,6 +46,8 @@ Service::~Service()
     {
         delete it->second;
     }
+
+    detach();
 }
 
 

@@ -54,6 +54,7 @@ class Authenticator
         virtual bool checkAuth(const RequestHeader&) const = 0;
 };
 
+
 class PT_HTTP_API Service
 {
     friend class Server;
@@ -70,6 +71,8 @@ class PT_HTTP_API Service
         void setShutdown(bool shutdown = true);
 
         bool isIdle();
+
+        void detach();
 
         bool checkAuth(const RequestHeader& request);
 
@@ -89,8 +92,22 @@ class PT_HTTP_API Service
         { _authenticators.push_back(auth); }
 
     protected:
+        /** @brief Creates a responder to handle request received by a server.
+            
+            The implementer of this method must also make sure that no 
+            responders exists anymore when the derived class is destructed.
+            The easiest way to ensure this is to call Service::detach in
+            the derived class's destructor.
+        */
         virtual Responder* createResponder(const RequestHeader&) = 0;
         
+        /** @brief Destroys a responder created by a server.
+            
+            The implementer of this method must also make sure that no 
+            responders exists anymore when the derived class is destructed.
+            The easiest way to ensure this is to call Service::detach in
+            the derived class's destructor.
+        */
         virtual void destroyResponder(Responder*) = 0;
 
     private:
@@ -116,7 +133,12 @@ class BasicService : public Service
 {
     public:
         BasicService()
-        {}
+        { }
+
+        ~BasicService()
+        {
+            detach();
+        }
 
     protected:
         virtual Responder* createResponder(const RequestHeader&)

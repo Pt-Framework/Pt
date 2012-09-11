@@ -73,21 +73,6 @@ class MapService
 };
 
 
-class MapUrl : public MapService
-{
-    public:
-        MapUrl(const std::string& url)
-        : _url(url)
-        {}
-
-        bool map(const RequestHeader& header)
-        { return header.url() == _url; }
-
-    private:
-        std::string _url;
-};
-
-
 template <typename PredicateT>
 class MapIf : public MapService
 {
@@ -103,11 +88,20 @@ class MapIf : public MapService
         PredicateT _p;
 };
 
-template <typename P>
-MapIf<P> mapIf(P p)
+
+class MapUrl
 {
-    return MapIf<P>(p);
-}
+    public:
+        MapUrl(const std::string& url)
+        : _url(url)
+        {}
+
+        bool operator()(const RequestHeader& header) const
+        { return header.url() == _url; }
+
+    private:
+        std::string _url;
+};
 
 
 // TODO: It might make sense for the Server to derive from Selectable
@@ -158,7 +152,7 @@ class PT_HTTP_API Server : public Pt::Connectable
         template <typename Mapper>
         void addService(const Mapper& m, Service& service)
         { 
-            MapService* mapper = new Mapper(m);
+            MapService* mapper = new MapIf<Mapper>(m);
             this->registerService(mapper, service); 
         }
 
