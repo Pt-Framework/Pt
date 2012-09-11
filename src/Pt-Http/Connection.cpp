@@ -798,27 +798,23 @@ void Connection::onHttpOutput(System::StreamBuffer& sb)
 {
     log_trace("Connection::onHttpOutput");
 
-    if( _reply && _reply->isReceiving() )
-    {
-        _reply->onInput();
-        return;
-    }
-
-    if( _request && _request->isReceiving() )
-    {
-        _request->onInput();
-        return;
-    }
-
     if(_reply)
     {
-        _reply->onOutput();
+        if(_reply->isReceiving())
+            _reply->onInput();
+        else
+            _reply->onOutput();
+        
         return;
     }
 
     if(_request)
     {
-        _request->onOutput();
+        if( _request->isReceiving())
+            _request->onInput();
+        else
+            _request->onOutput();
+
         return;
     }
 }
@@ -889,6 +885,19 @@ void Connection::beginWrite()
 }
 
 
+void Connection::endWrite()
+{
+    _timer.stop();
+
+#ifdef PT_HTTP_WITH_SSL
+    if(_ssl)
+        _sslbuf.endWrite();
+    else
+#endif
+        _sockbuf.endWrite();
+}
+
+
 bool Connection::inputAvailable()
 {
 #ifdef PT_HTTP_WITH_SSL
@@ -924,19 +933,6 @@ bool Connection::outputAvailable()
     }
 
     return false;
-}
-
-
-void Connection::endWrite()
-{
-    _timer.stop();
-
-#ifdef PT_HTTP_WITH_SSL
-    if(_ssl)
-        _sslbuf.endWrite();
-    else
-#endif
-        _sockbuf.endWrite();
 }
 
 
@@ -1033,7 +1029,7 @@ void Connection::writeReplyHeader(std::ostream& os, const Reply& reply)
 
     if( ! header.hasHeader("Server") )
     {
-        os << "Server: Pt-Net-Server\r\n";
+        os << "Server: Platinum 1.0\r\n";
     }
 
     if( ! header.hasHeader("Date") )
