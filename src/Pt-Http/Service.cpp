@@ -103,7 +103,7 @@ bool Service::checkAuth(const RequestHeader& request)
     std::vector<const Authenticator*>::const_iterator it;
     for ( it = _authenticators.begin(); it != _authenticators.end(); ++it)
     {
-        if (!(*it)->checkAuth(request))
+        if (!(*it)->authenticate(request))
             return false;
     }
 

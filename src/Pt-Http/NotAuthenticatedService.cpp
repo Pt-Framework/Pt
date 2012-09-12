@@ -33,6 +33,32 @@ namespace Pt {
 
 namespace Http {
 
+class Challenge;
+
+class NotAuthenticatedResponder2 : public Responder
+{
+    Challenge* _callenge;
+
+    public:
+        explicit NotAuthenticatedResponder2(Service& s)
+        : Responder(s)
+        { }
+        
+        virtual void onBeginRequest(Request& request, Reply& reply)
+        {}
+        
+        virtual void onReadRequest(Request& request, Reply& reply)
+        {}
+
+        virtual void onBeginReply(Request& request, Reply& reply)
+        {
+            // _challenge->reply(reply); 
+        }
+        
+        void onWriteReply(Request& request, Reply& reply)
+        {}
+};
+
 Responder* NotAuthenticatedService::createResponder(const RequestHeader& request)
 {
     return createResponder(request, std::string(), std::string());

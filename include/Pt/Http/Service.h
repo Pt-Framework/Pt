@@ -45,14 +45,25 @@ namespace Http {
 
 class Responder;
 class RequestHeader;
+class ReplyHeader;
 
 class Authenticator
 {
     public:
         virtual ~Authenticator() 
         { }
+
+        void challengeReply(Request& req, Reply& rep)
+        {
+            //this->challenge(rep.header());
+            //rep.finish();
+            //rep.beginSend();
+        }
         
-        virtual bool checkAuth(const RequestHeader&) const = 0;
+        virtual bool authenticate(const RequestHeader&) const = 0;
+
+        virtual void challenge(const RequestHeader&, ReplyHeader&)
+        { }
 };
 
 
