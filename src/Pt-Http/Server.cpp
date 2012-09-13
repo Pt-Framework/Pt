@@ -94,6 +94,7 @@ class RequestHandler : public Pt::Connectable
         Connection _conn;
         Request _request;
         Reply _reply;
+        MessageProgress _requestProgress;
         Signal<RequestHandler&> _finished;
 };
 
@@ -164,7 +165,22 @@ void RequestHandler::onRequestReceived(Request& req)
         if( progress.header() )
         {
             log_debug("received request header");
-            getResponder( _request.header() ).beginRequest( _request, _reply );
+            //Authentication* _authorization = 0;
+            Responder& responder = getResponder( _request.header() );
+
+            //if(_authorization)
+            //{
+            //    // if NULL access is denied at once
+            //    _challenge = auth->authenticate(_request, _reply);
+
+            //    if(_challenge)
+            //    {
+            //        _requestProgress = progress;
+            //        _challenge->beginExecute(_request);
+            //    }
+            //}
+
+            responder.beginRequest( _request, _reply );
 
             if( _reply.isSending() )
             {
@@ -214,9 +230,9 @@ void RequestHandler::onRequestReceived(Request& req)
         log_debug("more data available");
         _request.beginReceive();
     }
-    catch(const System::IOError&) // TODO: HttpError is also an IOError
+    catch(const System::IOError& e) // TODO: HttpError is also an IOError
     {
-        log_error("EXCEPTION");
+        log_error("EXCEPTION: " << e.what());
         _finished.send(*this);
     }
 }
@@ -260,9 +276,9 @@ void RequestHandler::onReplySent(Reply& r)
 
         _request.beginReceive();
     }
-    catch(const System::IOError&) // TODO: HttpError is also an IOError
+    catch(const System::IOError& e) // TODO: HttpError is also an IOError
     {
-        log_error("EXCEPTION");
+        log_error("EXCEPTION: " << e.what());
         _finished.send(*this);
     }
 }
@@ -686,6 +702,7 @@ Responder* Server::getResponder(const RequestHeader& request)
             return responder;
     }
 
+    log_error("not found: " << request.url());
     responder = _notFoundService->getResponder(request);
     return responder;
 }

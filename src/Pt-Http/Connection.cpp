@@ -504,6 +504,8 @@ MessageProgress Connection::endReceiveRequest()
     {
         log_debug("sent remaining reply data");
         endWrite();
+
+        log_debug("remaining: " << _sockbuf.out_avail());
         _state = Accepted;
         return progress;
     }

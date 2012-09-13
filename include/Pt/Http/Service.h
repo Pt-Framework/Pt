@@ -53,13 +53,19 @@ class Authenticator
         virtual ~Authenticator() 
         { }
 
-        void challengeReply(Request& req, Reply& rep)
+        bool authenticateRequest(const RequestHeader& h) const
+        {
+            return authenticate(h);
+        }
+
+        void challengeReply(Request& req, Reply& reply)
         {
             //this->challenge(rep.header());
             //rep.finish();
             //rep.beginSend();
         }
         
+    protected:
         virtual bool authenticate(const RequestHeader&) const = 0;
 
         virtual void challenge(const RequestHeader&, ReplyHeader&)
@@ -167,6 +173,41 @@ class BasicService : public Service
 
     private:
         Alloc _alloc;
+};
+
+class Authentication
+{
+    public:
+        Authentication(const std::string realm)
+        : _realm(realm)
+        { }
+
+        virtual ~Authentication() 
+        { 
+        }
+        
+        const std::string& realm() const
+        { return _realm; }
+
+
+        virtual void beginAuthorize(const Request& req) = 0;
+
+    private:
+        std::string _realm;
+};
+
+class BasicAuthentication : public Authentication
+{
+    public:
+        BasicAuthentication(const std::string realm)
+        : Authentication(realm)
+        { }
+
+        ~BasicAuthentication()
+        {
+        }
+
+
 };
 
 } // namespace Http

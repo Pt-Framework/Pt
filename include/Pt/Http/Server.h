@@ -57,6 +57,7 @@ namespace Http {
 
 class ServerThread;
 class Service;
+class Authentication;
 class RequestHandler;
 class RequestHeader;
 class Responder;
@@ -182,6 +183,12 @@ class PT_HTTP_API Server : public Pt::Connectable
         unsigned _maxThreads;
         std::size_t _timeout;
         std::size_t _keepAliveTimeout;
+
+        struct ServiceInfo
+        {
+            SmartPtr<MapService> mapper;
+            Authentication* auth;
+        };
 
         typedef std::multimap<Service*, SmartPtr<MapService> > ServiceMap;
 

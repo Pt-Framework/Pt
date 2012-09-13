@@ -47,7 +47,7 @@ Responder::~Responder()
 
 
 void Responder::beginRequest(Request& request, Reply& reply)
-{
+{    
     onBeginRequest(request, reply);
 }
 
