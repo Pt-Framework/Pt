@@ -82,6 +82,8 @@ class RequestHandler : public Pt::Connectable
 
         void releaseResponder();
 
+        void onChallenge();
+
         void onRequestReceived(Request& req);
 
         void onReplySent(Reply& r);
@@ -115,6 +117,7 @@ RequestHandler::RequestHandler(Server& server, Net::TcpServer& tcpServer)
 RequestHandler::~RequestHandler()
 {
     releaseResponder();
+    //releaseAuthentication();
 }
 
 
@@ -150,6 +153,21 @@ void RequestHandler::beginServe(System::EventLoop& loop)
 }
 
 
+void RequestHandler::onChallenge()
+{
+    // bool granted = _authentication->endAuthenticate(_challenge, _request, _reply);
+    // if( ! granted)
+    // {
+    //     assert( _reply.finshed() );
+    //     releaseResponder();
+    //     assert( _reply.isSending() );
+    //     return;
+    // }
+
+    // onRequestProgress(_requestProgress);
+}
+
+
 void RequestHandler::onRequestReceived(Request& req)
 {
     log_trace("RequestHandler::onRequestReceived");
@@ -165,19 +183,26 @@ void RequestHandler::onRequestReceived(Request& req)
         if( progress.header() )
         {
             log_debug("received request header");
-            //Authentication* _authorization = 0;
+
+            // assert(_authorization == 0);
+            //Authentication* _authentication = 0;
             Responder& responder = getResponder( _request.header() );
 
-            //if(_authorization)
+            //if(_authentication)
             //{
-            //    // if NULL access is denied at once
-            //    _challenge = auth->authenticate(_request, _reply);
+            //    // if NULL, access is granted immediately
+            //    _challenge = _authentication->beginChallenge(_request, _reply);
 
             //    if(_challenge)
             //    {
             //        _requestProgress = progress;
-            //        _challenge->beginExecute(_request);
+            //
+            //        // TODO: maybe callback via Http::Connection* in _challenge
+            //        _challenge.finished() += Pt::slot(*this, RequestHandler::onChallenge);
+            //        return;
             //    }
+            //
+            //    releaseAuthentication();
             //}
 
             responder.beginRequest( _request, _reply );
@@ -264,6 +289,8 @@ void RequestHandler::onReplySent(Reply& r)
 
         log_debug("response finished");
         releaseResponder();
+        // releaseAuthentication();
+
         _reply.clear();
         _request.clear();
 

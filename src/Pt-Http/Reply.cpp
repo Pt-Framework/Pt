@@ -65,6 +65,7 @@ MessageProgress Request::endSend()
 }
 
 
+//TODO: call this method discard() ?
 void Request::clearBody()
 { 
     _buf.reset(); 

@@ -35,6 +35,7 @@
 #include <Pt/Allocator.h>
 #include <Pt/System/Mutex.h>
 #include <Pt/System/Condition.h>
+#include <Pt/Signal.h>
 #include <vector>
 #include <memory>
 #include <string>
@@ -175,6 +176,32 @@ class BasicService : public Service
         Alloc _alloc;
 };
 
+
+class Challenge
+{
+    public:
+        Challenge()
+        : _granted(false)
+        {}
+
+        virtual ~Challenge() 
+        { }
+
+        virtual bool endVerify() const = 0;
+
+    protected:
+        void setGranted(bool granted)
+        { 
+            _granted = granted;
+            _finished.send(*this); 
+        }
+
+    private:
+        bool _granted;
+        Signal<Challenge&> _finished; // RequestHandler*
+};
+
+
 class Authentication
 {
     public:
@@ -183,18 +210,35 @@ class Authentication
         { }
 
         virtual ~Authentication() 
-        { 
-        }
+        { }
         
         const std::string& realm() const
         { return _realm; }
 
 
-        virtual void beginAuthorize(const Request& req) = 0;
+        virtual Challenge* beginAuthenticate(const Request& req, Reply& reply) = 0;
+
+        virtual bool endAuthenticate(Challenge* challenge, const Request& req, Reply& reply) = 0;
 
     private:
         std::string _realm;
 };
+
+
+class BasicChallenge : public Challenge
+{
+    public:
+        BasicChallenge( )
+        { }
+        
+        virtual ~BasicChallenge() 
+        { }
+
+        virtual void beginVerify(const std::string& user, const std::string& passwd) = 0;
+
+        virtual bool endVerify() const = 0;
+};
+
 
 class BasicAuthentication : public Authentication
 {
@@ -207,7 +251,16 @@ class BasicAuthentication : public Authentication
         {
         }
 
+        virtual Challenge* beginAuthenticate(const Request& req, Reply& reply)
+        {
+            return 0;
+        }
 
+        virtual bool endAuthenticate(Challenge* challenge, const Request& req, Reply& reply)
+        {
+            bool granted = challenge->endVerify();
+            return granted;
+        }
 };
 
 } // namespace Http
