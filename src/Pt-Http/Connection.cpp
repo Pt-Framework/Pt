@@ -360,7 +360,7 @@ void Connection::beginSendReply(Reply& reply)
 
         log_debug("begin writing reply");
 
-        if( _reply->header().keepAlive() )
+        if( _keepAlive )
             _reply->onOutput(); 
         else
             beginWrite();
