@@ -49,9 +49,9 @@ static Pt::System::Mutex* sslmtx = 0;
 
 void pt_locking_callback(int mode, int type, const char* file,  int line)
 {
-    log_trace("thread: " << ((mode&CRYPTO_LOCK)?"l":"u") 
-                         << ((type&CRYPTO_READ)?"r":"w")
-                         << ' ' << file << ':' << line );
+    //log_trace("thread: " << ((mode&CRYPTO_LOCK)?"l":"u") 
+    //                     << ((type&CRYPTO_READ)?"r":"w")
+    //                     << ' ' << file << ':' << line );
     
     if (mode & CRYPTO_LOCK)
     {
