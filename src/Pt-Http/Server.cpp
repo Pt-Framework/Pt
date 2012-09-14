@@ -702,7 +702,7 @@ Responder* Server::getResponder(const RequestHeader& request)
             return responder;
     }
 
-    log_error("not found: " << request.url());
+    log_warn("not found: " << request.url());
     responder = _notFoundService->getResponder(request);
     return responder;
 }

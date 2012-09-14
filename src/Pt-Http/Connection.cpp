@@ -328,7 +328,9 @@ void Connection::beginSendReply(Reply& reply)
     ReplyHeader& header = _reply->header();
     std::ostream os( _httpbuf.buffer() );
 
-    if( ! _reply->header().keepAlive() && outputAvailable() )
+    _keepAlive = _keepAlive && _reply->header().keepAlive();
+
+    if( ! _keepAlive && outputAvailable() )
     {
         beginWrite();
         return;
@@ -394,8 +396,6 @@ MessageProgress Connection::endSendReply()
     
     if(_onTimeout)
         throw Pt::System::IOError("timeout");
-
-    _keepAlive = _keepAlive && _reply->header().keepAlive();
         
     endWrite();
 
