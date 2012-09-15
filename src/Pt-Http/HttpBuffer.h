@@ -42,8 +42,7 @@ namespace Http {
 
 class HttpBuffer : public std::streambuf
 {
-    static const unsigned int MaxPutback = 4;
-    static const unsigned int BufferSize = 512;
+    static const unsigned int MaxPutback;
 
     public:
         HttpBuffer()

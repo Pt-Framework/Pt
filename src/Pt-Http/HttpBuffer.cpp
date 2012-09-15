@@ -37,6 +37,8 @@ namespace Pt {
 
 namespace Http {
 
+const unsigned int HttpBuffer::MaxPutback = 4;
+
 void HttpBuffer::beginBody(const MessageHeader& reply)
 {
     log_trace("HttpBuffer::beginBody()");
