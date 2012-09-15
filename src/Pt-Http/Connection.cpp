@@ -512,6 +512,7 @@ MessageProgress Connection::endReceiveRequest()
 
     endRead();
 
+    // TODO: if we haven't read anything yet we maybe should not report is as an error
     if( _socket.eof() )
     {
         throw Pt::System::IOError("connection lost while receiving request");
