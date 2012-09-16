@@ -40,8 +40,10 @@
 #include "Pt/System/Logger.h"
 #include <string>
 
+#ifdef PT_HTTP_WITH_SSL
 #include <Pt/Ssl/Context.h>
 #include "../../Pt-Ssl/tests/PemData.h"
+#endif
 
 class HelloResponder : public Pt::Http::Responder
 {

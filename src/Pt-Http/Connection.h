@@ -49,6 +49,10 @@
 
 namespace Pt {
 
+namespace Ssl {
+    class Context;
+}
+
 namespace Http {
 
 class Reply;

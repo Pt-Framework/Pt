@@ -90,7 +90,9 @@ Connection::Connection()
     _sockbuf.outputReady() += slot(*this, &Connection::onHttpOutput);
     _sockbuf.inputReady() += slot(*this, &Connection::onHttpInput);
 
+#ifdef PT_HTTP_WITH_SSL
     _sslbuf.handshakeFinished() += slot(*this, &Connection::onHttpsHandshake);
+#endif
 
     _httpbuf.attach(_sockbuf);
 }
