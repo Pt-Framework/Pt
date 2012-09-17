@@ -30,6 +30,9 @@
 #include "Pt/System/Selectable.h"
 #include "Pt/System/Timer.h"
 #include "Pt/System/Clock.h"
+#include <Pt/System/Logger.h>
+
+log_define("Pt.System.EventLoop")
 
 namespace Pt {
 
@@ -233,17 +236,26 @@ void TimerQueue::removeTimer( Timer& timer )
 
 size_t TimerQueue::processTimers()
 {
+    log_trace("TimerQueue::processTimers");
+
     size_t lowestTimeout = EventLoop::WaitInfinite;
 
     if( _timers.empty() )
+    {
+        log_trace("no timers, returning: " << lowestTimeout);
         return lowestTimeout;
+    }
 
     Timespan now = Clock::getSystemTicks();
     Timer* timer = _timers.begin()->second;
     bool timerActive = now >= timer->finished();
 
+    log_trace("now: " << now.toMSecs());
+    log_trace("first timer at: " << timer->finished().toMSecs());
+
     while( ! _timers.empty() )
     {
+        log_trace("get front of timer queue");
         timer = _timers.begin()->second;
 
         if( now < timer->finished() )
@@ -253,13 +265,16 @@ size_t TimerQueue::processTimers()
             if(remaining % 1000 > 0) 
                 ++lowestTimeout;
 
+            log_trace("no more timer expired: " << timer->finished().toMSecs());
             break;
         }
 
+        log_trace("updating expired timer");
         timer->update(now);
 
         if( ! _timers.empty() )
         {
+            log_trace("resetting timer: " << timer->finished().toMSecs());
             timer = _timers.begin()->second;
             _timers.erase( _timers.begin() );
 
@@ -268,6 +283,7 @@ size_t TimerQueue::processTimers()
         }
     }
 
+    log_trace("TimerQueue::processTimers returns: " << lowestTimeout);
     return lowestTimeout;
 }
 

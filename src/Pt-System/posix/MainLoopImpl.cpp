@@ -27,6 +27,9 @@
  */
 
 #include "MainLoopImpl.h"
+#include <Pt/System/Logger.h>
+
+log_define("Pt.System.MainLoop")
 
 namespace Pt {
 
@@ -103,8 +106,12 @@ bool MainLoopImpl::processEvents()
 
 bool MainLoopImpl::waitNext()
 {
+    log_trace("MainLoopImpl::waitNext")
+
     bool isActive = true;
     size_t msecs = _timerQueue.processTimers();
+
+    log_debug("next timer expires in: " << msecs << " msecs");
 
     while(true)
     {
@@ -117,12 +124,16 @@ bool MainLoopImpl::waitNext()
         lock.unlock();
 
         msecs = 0;
+
+        log_debug("running selectable");
         selectable->run();
     }
 
+    log_debug("waiting for events");
     if( _selector.waitForWake(msecs) )
         isActive = _eventQueue.processEvents(*_event);
 
+    log_trace("returning activity: " << isActive);
     return isActive;
 }
 

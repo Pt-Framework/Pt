@@ -26,7 +26,10 @@
 #include "Pt/System/Timer.h"
 #include "Pt/System/Clock.h"
 #include "Pt/System/EventLoop.h"
+#include "Pt/System/Logger.h"
 #include <limits>
+
+log_define("Pt.System.Timer")
 
 namespace Pt {
 
@@ -140,23 +143,31 @@ bool Timer::update()
 
 bool Timer::update(const Timespan& now)
 {
+    log_trace("Timer::update " << now.toUSecs() << " usecs");
+
     if(started() == false)
         return false;
 
     bool hasElapsed = now >= _finished;
+    log_debug("hasElapsed: " << hasElapsed);
 
     Timer::Sentry sentry(_sentry);
 
     while( started() && now >= _finished )
     {
+        log_debug("executing timer: " << _finished.toUSecs() << " usecs");
         _finished += (_interval * 1000);
 
         timeout().send();
 
         if( ! sentry )
+        {
+            log_debug("timer deleted, returning: " << hasElapsed);
             return hasElapsed;
+        }
     }
 
+    log_debug("Timer::update returns: " << hasElapsed);
     //_remaining = _finished - now;
     return hasElapsed;
 }
