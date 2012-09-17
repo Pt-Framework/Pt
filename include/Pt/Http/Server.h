@@ -62,7 +62,6 @@ class RequestHandler;
 class RequestHeader;
 class Responder;
 class NotFoundService;
-class NotAuthenticatedService;
 
 class MapService
 {
@@ -102,6 +101,21 @@ class MapUrl
 
     private:
         std::string _url;
+};
+
+
+// TODO: extend this class 
+struct Servlet
+{ 
+    Servlet(SmartPtr<MapService>& m, Service& s, Authentication* a)
+    : mapper(m)
+    , service(&s)
+    , auth(a)
+    {}
+
+    SmartPtr<MapService> mapper;
+    Service* service;
+    Authentication* auth;
 };
 
 
@@ -159,12 +173,12 @@ class PT_HTTP_API Server : public Pt::Connectable
 
         void removeService(Service& service);
 
-        Responder* getResponder(const RequestHeader& request);
+        Service* getService(const RequestHeader& request, Authentication*& auth);
 
     private:
         void startWorker();
 
-        void registerService(MapService* mapper, Service& service);
+        void registerService(MapService* mapper, Service& service, Authentication* auth = 0);
 
         void unregisterService(Service& service);
 
@@ -184,18 +198,11 @@ class PT_HTTP_API Server : public Pt::Connectable
         std::size_t _timeout;
         std::size_t _keepAliveTimeout;
 
-        struct ServiceInfo
-        {
-            SmartPtr<MapService> mapper;
-            Authentication* auth;
-        };
-
-        typedef std::multimap<Service*, SmartPtr<MapService> > ServiceMap;
+        typedef std::vector<Servlet> ServiceMap;
 
         System::ReadWriteMutex _serviceMutex;
         ServiceMap _services;
         NotFoundService* _notFoundService;
-        NotAuthenticatedService* _noAuthService;
 };
 
 } // namespace Http

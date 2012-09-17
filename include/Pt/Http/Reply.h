@@ -64,6 +64,7 @@ class PT_HTTP_API Reply
         bool isReceiving() const
         { return _isReceiving; }
 
+        // TODO: pass finished flag to beginSend
         void beginSend();
 
         MessageProgress endSend();

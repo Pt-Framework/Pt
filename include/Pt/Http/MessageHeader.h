@@ -73,6 +73,9 @@ class MessageProgress
 
         void setOnHeader()
         { _result |= Header; }
+
+        void unsetHeader()
+        { _result &= ~Header; }
         
         void setOnBody()
         { _result |= Body; }

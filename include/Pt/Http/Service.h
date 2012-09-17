@@ -40,6 +40,13 @@
 #include <memory>
 #include <string>
 
+#include <Pt/Http/Reply.h>
+#include <Pt/Http/Request.h>
+#include <Pt/TextStream.h>
+#include <Pt/Base64Codec.h>
+#include <map>
+#include <sstream>
+
 namespace Pt {
 
 namespace Http {
@@ -47,32 +54,6 @@ namespace Http {
 class Responder;
 class RequestHeader;
 class ReplyHeader;
-
-class Authenticator
-{
-    public:
-        virtual ~Authenticator() 
-        { }
-
-        bool authenticateRequest(const RequestHeader& h) const
-        {
-            return authenticate(h);
-        }
-
-        void challengeReply(Request& req, Reply& reply)
-        {
-            //this->challenge(rep.header());
-            //rep.finish();
-            //rep.beginSend();
-        }
-        
-    protected:
-        virtual bool authenticate(const RequestHeader&) const = 0;
-
-        virtual void challenge(const RequestHeader&, ReplyHeader&)
-        { }
-};
-
 
 class PT_HTTP_API Service
 {
@@ -92,23 +73,6 @@ class PT_HTTP_API Service
         bool isIdle();
 
         void detach();
-
-        bool checkAuth(const RequestHeader& request);
-
-        void setRealm(const std::string& realm, const std::string& content = std::string() )
-        { 
-            _realm = realm; 
-            _authContent = content; 
-        }
-
-        const std::string& realm() const        
-        { return _realm; }
-        
-        const std::string& authContent() const  
-        { return _authContent; }
-
-        void addAuthenticator(const Authenticator* auth)
-        { _authenticators.push_back(auth); }
 
     protected:
         /** @brief Creates a responder to handle request received by a server.
@@ -137,13 +101,10 @@ class PT_HTTP_API Service
         void unregisterServer(Server& server);
 
     private:
+        System::Mutex _mutex;
         std::vector<Server*> _servers;
         bool _shutdown;
         unsigned _responderCount;
-        std::vector<const Authenticator*> _authenticators;
-        std::string _realm;
-        std::string _authContent;
-        System::Mutex _mutex;
 };
 
 
@@ -181,24 +142,24 @@ class Challenge
 {
     public:
         Challenge()
-        : _granted(false)
         {}
 
         virtual ~Challenge() 
         { }
 
-        virtual bool endVerify() const = 0;
+        Signal<Challenge&>& finished()
+        { return _finished; }
+
+        virtual void beginVerify() = 0;
+        
+        virtual bool endVerify()= 0;
 
     protected:
-        void setGranted(bool granted)
-        { 
-            _granted = granted;
-            _finished.send(*this); 
-        }
+        void setReady()
+        { _finished.send(*this); }
 
     private:
-        bool _granted;
-        Signal<Challenge&> _finished; // RequestHandler*
+        Signal<Challenge&> _finished;
 };
 
 
@@ -215,52 +176,110 @@ class Authentication
         const std::string& realm() const
         { return _realm; }
 
-
         virtual Challenge* beginAuthenticate(const Request& req, Reply& reply) = 0;
 
         virtual bool endAuthenticate(Challenge* challenge, const Request& req, Reply& reply) = 0;
+
+        virtual void cancelAuthenticate(Challenge* challenge) = 0;
 
     private:
         std::string _realm;
 };
 
 
-class BasicChallenge : public Challenge
-{
-    public:
-        BasicChallenge( )
-        { }
-        
-        virtual ~BasicChallenge() 
-        { }
-
-        virtual void beginVerify(const std::string& user, const std::string& passwd) = 0;
-
-        virtual bool endVerify() const = 0;
-};
-
-
 class BasicAuthentication : public Authentication
 {
+    class FailedChallenge : public Challenge
+    {
+        public:
+            FailedChallenge()
+            {}
+            
+            virtual void beginVerify()
+            { setReady(); }
+
+            virtual bool endVerify()
+            { return false; }
+    };
+
     public:
         BasicAuthentication(const std::string realm)
         : Authentication(realm)
         { }
 
         ~BasicAuthentication()
-        {
-        }
+        { }
+
+        void setUser(const std::string& user, const std::string& passwd)
+        { _passwd[user] = passwd; }
+
+        void removeUser(const std::string& user)
+        { _passwd.erase(user); }
+
+        void clear()
+        { _passwd.clear(); }
 
         virtual Challenge* beginAuthenticate(const Request& req, Reply& reply)
         {
-            return 0;
+            std::string user, passwd;
+
+            const char* auth = req.header().getHeader("Authorization");
+            if( auth )
+            {
+                std::istringstream iss(auth);
+
+                std::string type;
+                iss >> type;
+
+                for(std::string::size_type n = 0; n < type.size(); ++n)
+                    type[n] = std::tolower(type[n]);
+
+                if(type == "basic")
+                {
+                    iss >> std::skipws;
+
+                    BasicTextIStream<char, char> b64conv(iss, new Base64Codec());
+                    std::getline(b64conv, user, ':');
+                    b64conv >> passwd;
+
+                    std::map<std::string, std::string>::iterator it = _passwd.find(user);
+                    if(it != _passwd.end() && it->second == passwd)
+                    {
+                        return 0;
+                    }
+                }
+            }
+
+            Challenge* challenge = new FailedChallenge;
+            challenge->beginVerify();
+            return challenge;
         }
 
         virtual bool endAuthenticate(Challenge* challenge, const Request& req, Reply& reply)
         {
+            if( ! challenge )
+                return false;
+
             bool granted = challenge->endVerify();
+            cancelAuthenticate(challenge);
+
+            if( ! granted )
+            {
+                reply.header().httpReturn(401, "Not Authorized");
+                reply.header().setHeader("WWW-Authenticate", ("Basic realm=\"" + realm() + '"').c_str());
+                reply.finish();
+            }
+
             return granted;
         }
+
+        virtual void cancelAuthenticate(Challenge* challenge)
+        {
+            delete challenge;
+        }
+
+    private:
+        std::map<std::string, std::string> _passwd;
 };
 
 } // namespace Http

@@ -28,7 +28,6 @@
 
 #include "Connection.h"
 #include "NotFoundService.h"
-#include "NotAuthenticatedService.h"
 #include <Pt/Http/Server.h>
 #include <Pt/Http/Request.h>
 #include <Pt/Http/Reply.h>
@@ -73,18 +72,19 @@ class RequestHandler : public Pt::Connectable
         { return _finished; }
 
         Service* service()
-        { 
-            return _responder ? &_responder->service() : 0; 
-        }
+        { return _service; }
+
+        Authentication* authentication()
+        { return _authentication; }
 
     protected:
-        Responder& getResponder(const RequestHeader& request);
-
         void releaseResponder();
 
-        void onChallenge();
+        void onChallenge(Challenge& challenge);
 
         void onRequestReceived(Request& req);
+
+        void onRequestProgress(MessageProgress progress);
 
         void onReplySent(Reply& r);
 
@@ -92,6 +92,9 @@ class RequestHandler : public Pt::Connectable
 
     private:
         Server& _server;
+        Authentication* _authentication;
+        Challenge* _challenge;
+        Service* _service;
         Responder* _responder;
         Connection _conn;
         Request _request;
@@ -103,6 +106,9 @@ class RequestHandler : public Pt::Connectable
 
 RequestHandler::RequestHandler(Server& server, Net::TcpServer& tcpServer)
 : _server(server)
+, _authentication(0)
+, _challenge(0)
+, _service(0)
 , _responder(0)
 , _conn()
 , _request(_conn)
@@ -117,16 +123,12 @@ RequestHandler::RequestHandler(Server& server, Net::TcpServer& tcpServer)
 RequestHandler::~RequestHandler()
 {
     releaseResponder();
-    //releaseAuthentication();
-}
-
-
-Responder& RequestHandler::getResponder(const RequestHeader& request)
-{ 
-    _responder = _server.getResponder(request);
-    assert(_responder);
-
-    return *_responder;
+    
+    if(_challenge)
+    {
+        assert(_authentication);
+        _authentication->cancelAuthenticate(_challenge);
+    }
 }
 
 
@@ -134,8 +136,9 @@ void RequestHandler::releaseResponder()
 {
     if( _responder )
     {
-        Service& service = _responder->service();
-        service.releaseResponder(_responder);
+        assert(_service);
+        _service->releaseResponder(_responder);
+        _service = 0;
         _responder = 0;
     }
 }
@@ -153,18 +156,47 @@ void RequestHandler::beginServe(System::EventLoop& loop)
 }
 
 
-void RequestHandler::onChallenge()
+void RequestHandler::onChallenge(Challenge& challenge)
 {
-    // bool granted = _authentication->endAuthenticate(_challenge, _request, _reply);
-    // if( ! granted)
-    // {
-    //     assert( _reply.finshed() );
-    //     releaseResponder();
-    //     assert( _reply.isSending() );
-    //     return;
-    // }
+    log_trace("RequestHandler::onChallenge");
 
-    // onRequestProgress(_requestProgress);
+    try
+    {
+        bool granted = _authentication->endAuthenticate(_challenge, _request, _reply);
+
+        _challenge = 0;
+        _authentication = 0;
+    
+        if( ! granted )
+        {
+            log_debug("request not granted");
+        
+            if( ! _reply.isFinished() )
+                _reply.finish();
+
+            if( ! _reply.isSending() )
+                _reply.beginSend();
+        }
+        else
+        {
+            _responder = _service->getResponder( _request.header() );
+            assert(_responder);
+            _responder->beginRequest( _request, _reply );
+
+            if( _reply.isSending() )
+            {
+                log_debug("request interrupted");
+                return;
+            }
+
+            onRequestProgress(_requestProgress);
+        }
+    }
+    catch(const System::IOError& e) // TODO: HttpError is also an IOError
+    {
+        log_error("EXCEPTION: " << e.what());
+        _finished.send(*this);
+    }
 }
 
 
@@ -179,33 +211,72 @@ void RequestHandler::onRequestReceived(Request& req)
     try
     {
         MessageProgress progress = _request.endReceive();
+        onRequestProgress(progress);
+    }
+    catch(const System::IOError& e) // TODO: HttpError is also an IOError
+    {
+        log_error("EXCEPTION: " << e.what());
+        _finished.send(*this);
+    }
+}
 
-        if( progress.header() )
+
+void RequestHandler::onRequestProgress(MessageProgress progress)
+{
+    log_trace("RequestHandler::onRequestProgress");
+
+    // TODO: error reply on HTTP exception
+    //_responder = _server.getDefaultResponder(_request->header());
+    //replyError();
+    
+    if( progress.header() )
+    {
+        log_debug("received request header");
+
+        assert(_authentication == 0);
+        assert(_challenge == 0);
+        assert(_service == 0);
+
+        _service = _server.getService( _request.header(), _authentication );
+
+        if(_authentication)
         {
-            log_debug("received request header");
+            log_debug("authentication required");
 
-            // assert(_authorization == 0);
-            //Authentication* _authentication = 0;
-            Responder& responder = getResponder( _request.header() );
+            // if NULL, access is granted immediately
+            _challenge = _authentication->beginAuthenticate(_request, _reply);
 
-            //if(_authentication)
-            //{
-            //    // if NULL, access is granted immediately
-            //    _challenge = _authentication->beginChallenge(_request, _reply);
+            if(_challenge)
+            {
+                log_debug("authentication started");
+                _requestProgress = progress;
+                _requestProgress.unsetHeader();
 
-            //    if(_challenge)
-            //    {
-            //        _requestProgress = progress;
-            //
-            //        // TODO: maybe callback via Http::Connection* in _challenge
-            //        _challenge.finished() += Pt::slot(*this, RequestHandler::onChallenge);
-            //        return;
-            //    }
-            //
-            //    releaseAuthentication();
-            //}
+                _challenge->finished() += Pt::slot(*this, &RequestHandler::onChallenge);
+                return;
+            }
 
-            responder.beginRequest( _request, _reply );
+            log_debug("request immediately authenticated");
+            _authentication = 0;
+        }
+        
+        _responder = _service->getResponder( _request.header() );
+        assert(_responder);
+        _responder->beginRequest( _request, _reply );
+
+        if( _reply.isSending() )
+        {
+            log_debug("request interrupted");
+            return;
+        }
+    }
+    
+    if( progress.body() )
+    {     
+        if( _responder)
+        {
+            log_debug("reading request");
+            _responder->readRequest(_request, _reply);
 
             if( _reply.isSending() )
             {
@@ -213,53 +284,35 @@ void RequestHandler::onRequestReceived(Request& req)
                 return;
             }
         }
-    
-        if( progress.body() )
-        {     
-            if( _responder)
-            {
-                log_debug("reading request");
-                _responder->readRequest(_request, _reply);
-
-                if( _reply.isSending() )
-                {
-                    log_debug("request interrupted");
-                    return;
-                }
-            }
-            else
-            {
-                log_debug("ignoring request body");
-                _request.clearBody();
-            }
-        }
-
-        if( progress.finished() )
+        else
         {
-            if( ! _conn.isConnected() )
-            {
-                log_debug("not connected anymore");
-                _finished.send(*this);
-                return;
-            }
+            log_debug("ignoring request body");
+            _request.clearBody();
+        }
+    }
 
-            // only reply if not leftover body from interrupted request
-            if(_responder)
-            {
-                log_debug("request body finished, begin reply");
-                _responder->beginReply(_request, _reply);
-                return;
-            }
+    if( progress.finished() )
+    {
+        if( ! _conn.isConnected() )
+        {
+            log_debug("not connected anymore");
+            _finished.send(*this);
+            return;
         }
 
-        log_debug("more data available");
-        _request.beginReceive();
+        if(_responder)
+        {
+            log_debug("request body finished, begin reply");
+            _responder->beginReply(_request, _reply);
+            return;
+        }
+
+        // if there is no responder, the reply was already sent and a request
+        // interrupted at an early stage was just finished
     }
-    catch(const System::IOError& e) // TODO: HttpError is also an IOError
-    {
-        log_error("EXCEPTION: " << e.what());
-        _finished.send(*this);
-    }
+
+    log_debug("read request");
+    _request.beginReceive();
 }
 
 
@@ -289,7 +342,6 @@ void RequestHandler::onReplySent(Reply& r)
 
         log_debug("response finished");
         releaseResponder();
-        // releaseAuthentication();
 
         _reply.clear();
         _request.clear();
@@ -492,7 +544,6 @@ Server::Server()
 , _keepAliveTimeout(30000)
 {
     _notFoundService = new NotFoundService();
-    _noAuthService = new NotAuthenticatedService();
 
     _serverSocket.connectionPending() += Pt::slot(*this, &Server::onAccept);
 }
@@ -508,7 +559,6 @@ Server::Server(System::EventLoop& eventLoop)
 , _keepAliveTimeout(30000)
 {
     _notFoundService = new NotFoundService();
-    _noAuthService = new NotAuthenticatedService();
 
     _serverSocket.setActive(*_loop);
     _serverSocket.connectionPending() += Pt::slot(*this, &Server::onAccept);
@@ -526,7 +576,6 @@ Server::Server(System::EventLoop& eventLoop, const std::string& ip, unsigned sho
 , _keepAliveTimeout(30000)
 {
     _notFoundService = new NotFoundService();
-    _noAuthService = new NotAuthenticatedService();
 
     _serverSocket.setActive(*_loop);
     _serverSocket.beginAccept();
@@ -546,7 +595,6 @@ Server::Server(System::EventLoop& eventLoop, const Pt::Net::AddrInfo& addr, int 
 , _keepAliveTimeout(30000)
 {
     _notFoundService = new NotFoundService();
-    _noAuthService = new NotAuthenticatedService();
 
     _serverSocket.setActive(*_loop);
     _serverSocket.beginAccept();
@@ -561,12 +609,11 @@ Server::~Server()
 
     while( ! _services.empty() )
     {
-        Service* service = _services.begin()->first;
+        Service* service = _services.begin()->service;
         unregisterService(*service);
     }
 
     delete _notFoundService;
-    delete _noAuthService;
 }
 
 
@@ -660,12 +707,12 @@ void Server::cancel()
 }
 
 
-void Server::registerService(MapService* m, Service& service)
+void Server::registerService(MapService* m, Service& service, Authentication* auth)
 {
-    ServiceMap::value_type elem(&service, m);
-
+    Servlet s(SmartPtr<MapService>(m), service, auth);
+    
     System::WriteLock serviceLock(_serviceMutex);
-    _services.insert(elem);
+    _services.push_back(s);
     service.registerServer(*this);
 }
 
@@ -673,7 +720,19 @@ void Server::registerService(MapService* m, Service& service)
 void Server::unregisterService(Service& service)
 {
     System::WriteLock serviceLock(_serviceMutex);
-    _services.erase(&service);
+
+    for(unsigned n = 0; n < _services.size(); )
+    {
+        if(_services[n].service == &service)
+        {
+            ServiceMap::iterator it = _services.begin() + n;
+            _services.erase(it);
+            continue;
+        }
+    
+        ++n;
+    }
+
     service.unregisterServer(*this);
 }
 
@@ -708,30 +767,22 @@ void Server::removeService(Service& service)
 }
 
 
-Responder* Server::getResponder(const RequestHeader& request)
+Service* Server::getService(const RequestHeader& request, Authentication*& auth)
 {
     System::ReadLock serviceLock(_serviceMutex);
 
-    Responder* responder = 0;
-    for(ServiceMap::const_iterator it = _services.begin(); it != _services.end(); ++it)
+    for(ServiceMap::iterator it = _services.begin(); it != _services.end(); ++it)
     {
-        if( ! it->second->map(request) )
+        if( ! it->mapper->map(request) )
             continue;
 
-        if( ! it->first->checkAuth(request) )
-        {
-            responder = _noAuthService->getResponder(request);
-            return responder;
-        }
-
-        responder = it->first->getResponder(request);
-        if(responder)
-            return responder;
+        auth = it->auth;
+        return it->service;
     }
 
     log_warn("not found: " << request.url());
-    responder = _notFoundService->getResponder(request);
-    return responder;
+    auth = 0;
+    return _notFoundService;
 }
 
 
