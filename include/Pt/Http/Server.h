@@ -171,6 +171,13 @@ class PT_HTTP_API Server : public Pt::Connectable
             this->registerService(mapper, service); 
         }
 
+        template <typename Mapper>
+        void addService(const Mapper& m, Service& service, Authentication& auth)
+        { 
+            MapService* mapper = new MapIf<Mapper>(m);
+            this->registerService(mapper, service, &auth); 
+        }
+
         void removeService(Service& service);
 
         Service* getService(const RequestHeader& request, Authentication*& auth);

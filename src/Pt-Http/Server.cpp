@@ -195,6 +195,9 @@ void RequestHandler::onChallenge(Challenge& challenge)
     catch(const System::IOError& e) // TODO: HttpError is also an IOError
     {
         log_error("EXCEPTION: " << e.what());
+
+        // TODO: error reply on HTTP related exceptions
+        // replyError();
         _finished.send(*this);
     }
 }
@@ -204,9 +207,8 @@ void RequestHandler::onRequestReceived(Request& req)
 {
     log_trace("RequestHandler::onRequestReceived");
 
-    // TODO: error reply on HTTP exception
-    //_responder = _server.getDefaultResponder(_request->header());
-    //replyError();
+    // TODO: error reply on HTTP related exceptions
+    // replyError();
     
     try
     {
@@ -225,10 +227,6 @@ void RequestHandler::onRequestProgress(MessageProgress progress)
 {
     log_trace("RequestHandler::onRequestProgress");
 
-    // TODO: error reply on HTTP exception
-    //_responder = _server.getDefaultResponder(_request->header());
-    //replyError();
-    
     if( progress.header() )
     {
         log_debug("received request header");
@@ -243,9 +241,7 @@ void RequestHandler::onRequestProgress(MessageProgress progress)
         {
             log_debug("authentication required");
 
-            // if NULL, access is granted immediately
             _challenge = _authentication->beginAuthenticate(_request, _reply);
-
             if(_challenge)
             {
                 log_debug("authentication started");
@@ -253,6 +249,7 @@ void RequestHandler::onRequestProgress(MessageProgress progress)
                 _requestProgress.unsetHeader();
 
                 _challenge->finished() += Pt::slot(*this, &RequestHandler::onChallenge);
+                _challenge->beginVerify();
                 return;
             }
 
@@ -326,7 +323,7 @@ void RequestHandler::onReplySent(Reply& r)
 
         if( ! progress.finished() )
         {
-            log_debug("writing left over data");
+            log_debug("writing more reply data");
             _reply.beginSend();
             return;
         }

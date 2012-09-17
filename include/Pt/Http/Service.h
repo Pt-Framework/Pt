@@ -251,7 +251,6 @@ class BasicAuthentication : public Authentication
             }
 
             Challenge* challenge = new FailedChallenge;
-            challenge->beginVerify();
             return challenge;
         }
 

@@ -118,6 +118,7 @@ class ServerTest : public Pt::Unit::TestSuite
             this->registerMethod( "NotFoundHttps", *this, &ServerTest::NotFoundHttps);
 #endif
 
+            this->registerMethod( "NotAuthenticated", *this, &ServerTest::NotAuthenticated);
             this->registerMethod( "ReplyWithBody", *this, &ServerTest::ReplyWithBody);
             this->registerMethod( "ChunkedReply", *this, &ServerTest::ChunkedReply);
             this->registerMethod( "PipelinedRequests", *this, &ServerTest::PipelinedRequests);
@@ -315,6 +316,47 @@ class ServerTest : public Pt::Unit::TestSuite
             ctx.setVerifyMode(Pt::Ssl::Context::VerifyPeerRequired);
         }
 #endif
+
+        void NotAuthenticated()
+        {
+            Pt::Http::BasicAuthentication auth("test-realm");
+
+            HelloService service;
+            Pt::Http::Server server(*loop, "127.0.0.1", 8001);
+            server.addService(Pt::Http::MapUrl("/test"), service, auth);
+
+            Pt::Http::Client client(*loop, "127.0.0.1", 8001);
+            client.replyReceived() += Pt::slot(*this, &ServerTest::onNotAuthenticatedReceived);
+            client.request().setUrl("/test");
+            client.beginReceive();
+
+            loop->run();
+            PT_UNIT_ASSERT_EQUALS(client.reply().header().httpReturnCode(), 401);
+            PT_UNIT_ASSERT(client.reply().header().hasHeader("WWW-Authenticate"));
+        }
+
+        void onNotAuthenticatedReceived(Pt::Http::Client& client)
+        {
+            Pt::Http::MessageProgress progress = client.endReceive();
+
+            if( progress.header() )
+            {
+                PT_UNIT_ASSERT_EQUALS(client.reply().header().httpReturnCode(), 401);
+                PT_UNIT_ASSERT(client.reply().header().hasHeader("WWW-Authenticate"));
+            }
+            
+            if( progress.body() )
+                while ( client.reply().body().rdbuf()->in_avail() )
+                    _reply += client.reply().body().get();
+
+            if( progress.finished() )
+            {
+                loop->exit();
+                return;
+            }
+
+            client.beginReceive();
+        }
 
         void ReplyWithBody()
         {

@@ -514,7 +514,9 @@ MessageProgress Connection::endReceiveRequest()
 
     endRead();
 
-    // TODO: if we haven't read anything yet we maybe should not report is as an error
+    // TODO: if we haven't read anything yet we maybe should not report is as
+    //       an error, the client might have run into a keepalive timeout. 
+    //       Need another MessageProgress state to indicate CLOSED event
     if( _socket.eof() )
     {
         throw Pt::System::IOError("connection lost while receiving request");
