@@ -106,7 +106,7 @@ bool MainLoopImpl::processEvents()
 
 bool MainLoopImpl::waitNext()
 {
-    log_trace("MainLoopImpl::waitNext")
+    log_trace("MainLoopImpl::waitNext");
 
     bool isActive = true;
     size_t msecs = _timerQueue.processTimers();
