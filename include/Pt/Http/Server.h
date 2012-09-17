@@ -107,7 +107,7 @@ class MapUrl
 // TODO: extend this class 
 struct Servlet
 { 
-    Servlet(SmartPtr<MapService>& m, Service& s, Authentication* a)
+    Servlet(SmartPtr<MapService> m, Service& s, Authentication* a)
     : mapper(m)
     , service(&s)
     , auth(a)
