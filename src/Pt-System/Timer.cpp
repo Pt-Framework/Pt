@@ -31,6 +31,22 @@
 
 log_define("Pt.System.Timer")
 
+namespace {
+
+inline void checkInterval(std::size_t& interval, const Pt::Timespan& now)
+{
+    Pt::int64_t maxInterval = std::numeric_limits<Pt::int64_t>::max() / 1000;
+    maxInterval -= now.toMSecs();
+
+    if(interval > maxInterval)
+    { 
+        interval = maxInterval; 
+        log_debug("interval too large, truncated to " << interval);
+    }
+}
+
+}
+
 namespace Pt {
 
 namespace System {
@@ -68,9 +84,7 @@ class Timer::Sentry
 Timer::Timer()
 : _sentry(0)
 , _loop(0)
-//, _started(false)
 , _interval(0)
-//, _remaining(0)
 , _finished(0)
 , _reserved(0)
 { }
@@ -106,14 +120,14 @@ void Timer::start(std::size_t interval)
     if( started() )
         this->stop();
 
-    //_started = true;
     _interval = interval;
-
-    //_remaining = Pt::int64_t(_interval) * 1000;
-    //_finished = Clock::getSystemTicks() + _remaining;
-
+    log_debug("Timer started, interval: " << _interval);
+    
+    Timespan now = Clock::getSystemTicks();
+    checkInterval(_interval, now);
+    
     Timespan remaining = Pt::int64_t(_interval) * 1000;
-    _finished = Clock::getSystemTicks() + remaining;
+    _finished = now + remaining;
 
     if(_loop)
         _loop->onAttachTimer(*this);
@@ -122,8 +136,6 @@ void Timer::start(std::size_t interval)
 
 void Timer::stop()
 {
-    //_started = false;
-    //_remaining = 0;
     _finished = 0;
 
     if(_loop)
@@ -156,6 +168,8 @@ bool Timer::update(const Timespan& now)
     while( started() && now >= _finished )
     {
         log_debug("executing timer: " << _finished.toUSecs() << " usecs");
+
+        checkInterval(_interval, now);
         _finished += (_interval * 1000);
 
         timeout().send();
@@ -168,7 +182,6 @@ bool Timer::update(const Timespan& now)
     }
 
     log_debug("Timer::update returns: " << hasElapsed);
-    //_remaining = _finished - now;
     return hasElapsed;
 }
 
@@ -196,4 +209,3 @@ void Timer::detach()
 }
 
 }
-
