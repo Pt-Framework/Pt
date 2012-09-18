@@ -45,13 +45,12 @@ namespace Http {
 ClientImpl::ClientImpl()
 : _hstate(Idle)
 , _conn()
-, _requestCount(0)
 , _req(_conn)
 , _reply(_conn)
+, _requestCount(0)
 , _authorization(0)
 {
 }
-
 
 #ifdef PT_HTTP_WITH_SSL
 

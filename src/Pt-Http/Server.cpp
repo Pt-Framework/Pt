@@ -52,7 +52,28 @@ namespace Http {
 
 class RequestHandler : public Pt::Connectable
 {
-    friend class DeferRelease;
+    struct DeferRelease
+    {
+        DeferRelease(RequestHandler* r)
+        : _set(false), _r(r)
+        {}
+
+        ~DeferRelease()
+        {
+            if(_set)
+                _r->releaseResponder();
+
+            _r->_deferRelease = 0;
+        }
+
+        void set()
+        {
+            _set = true;
+        }
+
+        bool _set;
+        RequestHandler* _r;
+    };
 
     public:
         RequestHandler(Server& server, Net::TcpServer& tcpServer);
@@ -105,34 +126,6 @@ class RequestHandler : public Pt::Connectable
         MessageProgress _requestProgress;
         Signal<RequestHandler&> _finished;
 };
-
-
-// TODO: avoid sending signals from beginSend by deriving TcpSocket 
-// in Connection and reacting to setReady in onRun
-struct DeferRelease
-{
-    DeferRelease(RequestHandler* r)
-    : _r(r)
-    , _set(false)
-    {}
-
-    ~DeferRelease()
-    {
-        if(_set)
-            _r->releaseResponder();
-
-        _r->_deferRelease = 0;
-    }
-
-    void set()
-    {
-        _set = true;
-    }
-
-    bool _set;
-    RequestHandler* _r;
-};
-
 
 RequestHandler::RequestHandler(Server& server, Net::TcpServer& tcpServer)
 : _server(server)
