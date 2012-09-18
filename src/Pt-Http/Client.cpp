@@ -174,15 +174,14 @@ const Reply& Client::reply() const
     return _impl->reply();
 }
 
-// TODO: Sets the username and password for all subsequent requests.
-void Client::setAuthorization(const std::string& username, const std::string& password)
+void Client::setAuthorization(Authorization& auth)
 {
-    _impl->setAuth(username, password);
+    _impl->setAuthorization(auth);
 }
 
 void Client::clearAuthorization()
 {
-    _impl->clearAuth();
+    _impl->clearAuthorization();
 }
 
 void Client::cancel()

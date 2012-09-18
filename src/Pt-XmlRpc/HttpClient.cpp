@@ -77,16 +77,6 @@ void HttpClient::url(const std::string& url)
     _impl->url(url);
 }
 
-void HttpClient::auth(const std::string& username, const std::string& password)
-{
-    _impl->auth(username, password);
-}
-
-void HttpClient::clearAuth()
-{
-    _impl->clearAuth();
-}
-
 }
 
 }

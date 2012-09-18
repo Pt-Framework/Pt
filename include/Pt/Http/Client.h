@@ -39,6 +39,11 @@
 #include <Pt/NonCopyable.h>
 #include <string>
 
+// Authorization
+#include <Pt/TextStream.h>
+#include <Pt/Base64Codec.h>
+#include <sstream>
+
 namespace Pt {
 
 namespace Net {
@@ -50,6 +55,58 @@ namespace Ssl {
 }
 
 namespace Http {
+
+class PT_HTTP_API Authorization
+{
+    public:
+        virtual ~Authorization()
+        {}
+
+        void authorize(Request& request, const Reply& reply)
+        { onAuthorize(request, reply); }
+
+    protected:
+        virtual void onAuthorize(Request& request, const Reply& reply) = 0;
+};
+
+
+class PT_HTTP_API BasicAuthorization : public Authorization
+                                     , private NonCopyable
+{
+    public:
+        BasicAuthorization(const std::string& user, const std::string& passwd)
+        : _username(user)
+        , _password(passwd)
+        {}
+
+        void set(const std::string& user, const std::string& passwd)
+        {
+            _username = user;
+            _password = passwd;
+        }
+
+        virtual ~BasicAuthorization()
+        {}
+
+    protected:
+        void onAuthorize(Request& request, const Reply& reply)
+        {
+            std::ostringstream oss;
+            oss << "Basic ";
+               
+            BasicTextOStream<char, char> b64(oss, new Base64Codec());
+            b64 <<_username<< ':' << _password;
+            b64.terminate();
+
+            //log_debug("set Authorization to " << oss.str());
+            request.header().setHeader("Authorization", oss.str().c_str());
+        }
+
+    private:
+        std::string _username;
+        std::string _password;
+};
+
 
 class PT_HTTP_API Client : public Connectable
                          , private NonCopyable
@@ -77,7 +134,7 @@ class PT_HTTP_API Client : public Connectable
 
         void setSecure(Ssl::Context& ctx);
 
-        void setAuthorization(const std::string& username, const std::string& password);
+        void setAuthorization(Authorization& auth);
 
         void clearAuthorization();
 
@@ -107,7 +164,7 @@ class PT_HTTP_API Client : public Connectable
 
         const Reply& reply() const;
 
-        /** @brief Set timeout for blocking operations.
+        /** @brief Set timeout for I/O operations.
         */
         void setTimeout(std::size_t timeout);
 

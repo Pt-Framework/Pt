@@ -52,6 +52,8 @@ namespace Http {
 
 class RequestHandler : public Pt::Connectable
 {
+    friend class DeferRelease;
+
     public:
         RequestHandler(Server& server, Net::TcpServer& tcpServer);
 
@@ -96,11 +98,39 @@ class RequestHandler : public Pt::Connectable
         Challenge* _challenge;
         Service* _service;
         Responder* _responder;
+        DeferRelease* _deferRelease;
         Connection _conn;
         Request _request;
         Reply _reply;
         MessageProgress _requestProgress;
         Signal<RequestHandler&> _finished;
+};
+
+
+// TODO: avoid sending signals from beginSend by deriving TcpSocket 
+// in Connection and reacting to setReady in onRun
+struct DeferRelease
+{
+    DeferRelease(RequestHandler* r)
+    : _r(r)
+    , _set(false)
+    {}
+
+    ~DeferRelease()
+    {
+        if(_set)
+            _r->releaseResponder();
+
+        _r->_deferRelease = 0;
+    }
+
+    void set()
+    {
+        _set = true;
+    }
+
+    bool _set;
+    RequestHandler* _r;
 };
 
 
@@ -110,6 +140,7 @@ RequestHandler::RequestHandler(Server& server, Net::TcpServer& tcpServer)
 , _challenge(0)
 , _service(0)
 , _responder(0)
+, _deferRelease(0)
 , _conn()
 , _request(_conn)
 , _reply(_conn)
@@ -176,6 +207,8 @@ void RequestHandler::onChallenge(Challenge& challenge)
 
             if( ! _reply.isSending() )
                 _reply.beginSend();
+
+            _service = 0;
         }
         else
         {
@@ -241,6 +274,8 @@ void RequestHandler::onRequestProgress(MessageProgress progress)
         {
             log_debug("authentication required");
 
+            // TODO: only authenticate if we haven't already for this connection
+
             _challenge = _authentication->beginAuthenticate(_request, _reply);
             if(_challenge)
             {
@@ -300,6 +335,8 @@ void RequestHandler::onRequestProgress(MessageProgress progress)
         if(_responder)
         {
             log_debug("request body finished, begin reply");
+            
+            DeferRelease deferRelease(this);
             _responder->beginReply(_request, _reply);
             return;
         }
@@ -338,7 +375,11 @@ void RequestHandler::onReplySent(Reply& r)
         }
 
         log_debug("response finished");
-        releaseResponder();
+
+        if(_deferRelease)
+            _deferRelease->set();
+        else
+            releaseResponder();
 
         _reply.clear();
         _request.clear();

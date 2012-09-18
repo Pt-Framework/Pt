@@ -71,16 +71,6 @@ class HttpClientImpl : public ClientImpl
             _client.request().setUrl(url);
         }
 
-        void auth(const std::string& username, const std::string& password)
-        {
-            _client.setAuthorization(username, password);
-        }
-
-        void clearAuth()
-        {
-            _client.clearAuthorization();
-        }
-
         std::string url() const;
 
     protected:

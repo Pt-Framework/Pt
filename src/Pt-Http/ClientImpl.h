@@ -59,6 +59,7 @@ namespace Ssl {
 namespace Http {
 
 class Client;
+class Authorization;
 
 class ClientImpl : public Connectable
 {
@@ -98,17 +99,11 @@ class ClientImpl : public Connectable
         const Net::AddrInfo& host() const
         { return _conn.host(); }
 
-        void setAuth(const std::string& username, const std::string& password)
-        { 
-            _username = username; 
-            _password = password; 
-        }
+        void setAuthorization(Authorization& auth)
+        { _authorization = &auth; }
 
-        void clearAuth()
-        { 
-            _username.clear(); 
-            _password.clear(); 
-        }
+        void clearAuthorization()
+        { _authorization = 0; } 
 
         void setSecure(Ssl::Context& ctx);
 
@@ -158,8 +153,7 @@ class ClientImpl : public Connectable
         Request _req;
         Reply _reply;
         unsigned _requestCount;
-        std::string _username;
-        std::string _password;
+        Authorization* _authorization;
 };
 
 } // namespace Http

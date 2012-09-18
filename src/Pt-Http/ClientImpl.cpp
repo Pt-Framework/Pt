@@ -48,6 +48,7 @@ ClientImpl::ClientImpl()
 , _requestCount(0)
 , _req(_conn)
 , _reply(_conn)
+, _authorization(0)
 {
 }
 
@@ -91,6 +92,12 @@ void ClientImpl::beginSend()
 
     if(_hstate == OnRequest)
     {
+        if(_authorization)
+        {
+            log_debug("setting authorization header");
+            _authorization->authorize(_req, _reply);
+        }
+
         log_debug("begin sending http chunk");
         _req.beginSend();
         return;
@@ -142,6 +149,12 @@ void ClientImpl::beginReceive()
     if(_hstate == OnRequest)
     {
         log_debug("begin sending cached request");
+
+        if(_authorization)
+        {
+            log_debug("setting authorization header");
+            _authorization->authorize(_req, _reply);
+        }
 
         _req.finish();
         _hstate = OnRequestEnd;

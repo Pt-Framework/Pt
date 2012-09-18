@@ -110,15 +110,19 @@ class ServerTest : public Pt::Unit::TestSuite
     public:
         ServerTest()
         : Pt::Unit::TestSuite("ServerTest")
+        , _authent("test-realm")
+        , _author("testo", "testpwd")
         {
             Pt::System::Logger::setLogLevel("Pt.Http", Pt::System::Error);
+
+            _authent.setUser("testo", "testpwd");
 
             this->registerMethod( "NotFound", *this, &ServerTest::NotFound);
 #ifdef PT_HTTP_WITH_SSL
             this->registerMethod( "NotFoundHttps", *this, &ServerTest::NotFoundHttps);
 #endif
 
-            this->registerMethod( "NotAuthenticated", *this, &ServerTest::NotAuthenticated);
+            this->registerMethod( "BasicAuthentication", *this, &ServerTest::BasicAuthentication);
             this->registerMethod( "ReplyWithBody", *this, &ServerTest::ReplyWithBody);
             this->registerMethod( "ChunkedReply", *this, &ServerTest::ChunkedReply);
             this->registerMethod( "PipelinedRequests", *this, &ServerTest::PipelinedRequests);
@@ -317,32 +321,35 @@ class ServerTest : public Pt::Unit::TestSuite
         }
 #endif
 
-        void NotAuthenticated()
+        void BasicAuthentication()
         {
-            Pt::Http::BasicAuthentication auth("test-realm");
-
             HelloService service;
             Pt::Http::Server server(*loop, "127.0.0.1", 8001);
-            server.addService(Pt::Http::MapUrl("/test"), service, auth);
+            server.addService(Pt::Http::MapUrl("/test"), service, _authent);
 
             Pt::Http::Client client(*loop, "127.0.0.1", 8001);
-            client.replyReceived() += Pt::slot(*this, &ServerTest::onNotAuthenticatedReceived);
+            client.replyReceived() += Pt::slot(*this, &ServerTest::onBasicAuthenticationReceived);
             client.request().setUrl("/test");
             client.beginReceive();
 
             loop->run();
-            PT_UNIT_ASSERT_EQUALS(client.reply().header().httpReturnCode(), 401);
-            PT_UNIT_ASSERT(client.reply().header().hasHeader("WWW-Authenticate"));
+            PT_UNIT_ASSERT_EQUALS(client.reply().header().httpReturnCode(), 200);
+            PT_UNIT_ASSERT_EQUALS(_reply, "Authorization Required Hello World!");
         }
 
-        void onNotAuthenticatedReceived(Pt::Http::Client& client)
+        void onBasicAuthenticationReceived(Pt::Http::Client& client)
         {
             Pt::Http::MessageProgress progress = client.endReceive();
 
             if( progress.header() )
             {
-                PT_UNIT_ASSERT_EQUALS(client.reply().header().httpReturnCode(), 401);
-                PT_UNIT_ASSERT(client.reply().header().hasHeader("WWW-Authenticate"));
+                if( client.reply().header().httpReturnCode() == 401)
+                {
+                    PT_UNIT_ASSERT(client.reply().header().hasHeader("WWW-Authenticate"));
+                    client.setAuthorization(_author);
+                    _reply += client.reply().header().httpReturnText();
+                    _reply += ' ';
+                }               
             }
             
             if( progress.body() )
@@ -351,8 +358,13 @@ class ServerTest : public Pt::Unit::TestSuite
 
             if( progress.finished() )
             {
-                loop->exit();
-                return;
+                if( client.reply().header().httpReturnCode() == 200 )
+                {
+                    loop->exit();
+                    return;
+                }
+
+                PT_UNIT_ASSERT_EQUALS(_reply, "Authorization Required ");
             }
 
             client.beginReceive();
@@ -472,6 +484,8 @@ class ServerTest : public Pt::Unit::TestSuite
         Pt::System::MainLoop* loop;
         std::string _reply;
         std::vector<std::string> _chunks;
+        Pt::Http::BasicAuthentication _authent;
+        Pt::Http::BasicAuthorization _author;
 };
 
 Pt::Unit::RegisterTest<ServerTest> register_HttpServerTest;

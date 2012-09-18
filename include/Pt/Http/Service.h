@@ -182,6 +182,19 @@ class Authentication
 
         virtual void cancelAuthenticate(Challenge* challenge) = 0;
 
+    protected:
+        virtual bool onAuthenticate(const Request& req, Reply& reply)
+        { return false; }
+
+        virtual Challenge* onBeginChallenge(const Request& req, Reply& reply)
+        { return 0; }
+
+        virtual Challenge* onEndChallenge(const Request& req, Reply& reply)
+        { return 0; }
+
+        virtual void onDestroyChallenge(Challenge* challenge)
+        {}
+
     private:
         std::string _realm;
 };
@@ -221,22 +234,21 @@ class BasicAuthentication : public Authentication
 
         virtual Challenge* beginAuthenticate(const Request& req, Reply& reply)
         {
-            std::string user, passwd;
+            std::string user, passwd, token;
 
             const char* auth = req.header().getHeader("Authorization");
             if( auth )
             {
                 std::istringstream iss(auth);
+                iss >> token;
 
-                std::string type;
-                iss >> type;
+                for(std::string::size_type n = 0; n < token.size(); ++n)
+                    token[n] = std::tolower(token[n]);
 
-                for(std::string::size_type n = 0; n < type.size(); ++n)
-                    type[n] = std::tolower(type[n]);
-
-                if(type == "basic")
+                if(token == "basic")
                 {
-                    iss >> std::skipws;
+                    iss >> std::skipws >> token;
+                    iss.str(token);
 
                     BasicTextIStream<char, char> b64conv(iss, new Base64Codec());
                     std::getline(b64conv, user, ':');
@@ -264,7 +276,7 @@ class BasicAuthentication : public Authentication
 
             if( ! granted )
             {
-                reply.header().httpReturn(401, "Not Authorized");
+                reply.header().httpReturn(401, "Authorization Required");
                 reply.header().setHeader("WWW-Authenticate", ("Basic realm=\"" + realm() + '"').c_str());
                 reply.finish();
             }
