@@ -29,6 +29,7 @@
 #include "Connection.h"
 #include "NotFoundService.h"
 #include <Pt/Http/Server.h>
+#include <Pt/Http/Authentication.h>
 #include <Pt/Http/Request.h>
 #include <Pt/Http/Reply.h>
 #include <Pt/Http/Service.h>
@@ -40,7 +41,10 @@
 
 #include <Pt/System/MainLoop.h>
 #include <Pt/System/Thread.h>
+#include <Pt/System/Mutex.h>
+#include <Pt/System/Condition.h>
 #include <Pt/System/Logger.h>
+
 #include <memory>
 #include <cassert>
 
@@ -55,23 +59,34 @@ class RequestHandler : public Pt::Connectable
     struct DeferRelease
     {
         DeferRelease(RequestHandler* r)
-        : _set(false), _r(r)
-        {}
+        : _service(0)
+        , _responder(0)
+        , _r(r)
+        {
+            _r->_deferRelease = this;
+        }
 
         ~DeferRelease()
         {
-            if(_set)
-                _r->releaseResponder();
-
-            _r->_deferRelease = 0;
+            if(_service)
+            {
+                _service->releaseResponder(_responder);
+            }
+            else
+                _r->_deferRelease = 0;
         }
 
-        void set()
+        void set(Service* service, Responder* responder)
         {
-            _set = true;
+            _service = service;
+            _responder = responder;
+            _r->_deferRelease = 0;
+            _r->_service = 0;
+            _r->_responder = 0;
         }
 
-        bool _set;
+        Service* _service;
+        Responder* _responder;
         RequestHandler* _r;
     };
 
@@ -375,7 +390,9 @@ void RequestHandler::onReplySent(Reply& r)
         if(_deferRelease)
         {
             log_debug("defer responder release");
-            _deferRelease->set();
+            assert(_service);
+            assert(_responder);
+            _deferRelease->set(_service, _responder);
         }
         else
         {

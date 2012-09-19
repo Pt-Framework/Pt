@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 by Marc Boris Duerner, Tommi Maekitalo
+ * Copyright (C) 2012 by Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -30,22 +30,9 @@
 #define Pt_Http_Service_h
 
 #include <Pt/Http/Api.h>
-#include <Pt/Http/Responder.h>
-#include <Pt/Http/Server.h>
 #include <Pt/Allocator.h>
 #include <Pt/System/Mutex.h>
-#include <Pt/System/Condition.h>
-#include <Pt/Signal.h>
 #include <vector>
-#include <memory>
-#include <string>
-
-#include <Pt/Http/Reply.h>
-#include <Pt/Http/Request.h>
-#include <Pt/TextStream.h>
-#include <Pt/Base64Codec.h>
-#include <map>
-#include <sstream>
 
 namespace Pt {
 
@@ -53,7 +40,7 @@ namespace Http {
 
 class Responder;
 class RequestHeader;
-class ReplyHeader;
+class Server;
 
 class PT_HTTP_API Service
 {
@@ -135,162 +122,6 @@ class BasicService : public Service
 
     private:
         Alloc _alloc;
-};
-
-
-class Challenge
-{
-    public:
-        Challenge()
-        {}
-
-        virtual ~Challenge() 
-        { }
-
-        Signal<Challenge&>& finished()
-        { return _finished; }
-
-        virtual void beginVerify() = 0;
-        
-        virtual bool endVerify()= 0;
-
-    protected:
-        void setReady()
-        { _finished.send(*this); }
-
-    private:
-        Signal<Challenge&> _finished;
-};
-
-
-class Authentication
-{
-    public:
-        Authentication(const std::string realm)
-        : _realm(realm)
-        { }
-
-        virtual ~Authentication() 
-        { }
-        
-        const std::string& realm() const
-        { return _realm; }
-
-        virtual Challenge* beginAuthenticate(const Request& req, Reply& reply) = 0;
-
-        virtual bool endAuthenticate(Challenge* challenge, const Request& req, Reply& reply) = 0;
-
-        virtual void cancelAuthenticate(Challenge* challenge) = 0;
-
-    protected:
-        virtual bool onAuthenticate(const Request& req, Reply& reply)
-        { return false; }
-
-        virtual Challenge* onBeginChallenge(const Request& req, Reply& reply)
-        { return 0; }
-
-        virtual Challenge* onEndChallenge(const Request& req, Reply& reply)
-        { return 0; }
-
-        virtual void onDestroyChallenge(Challenge* challenge)
-        {}
-
-    private:
-        std::string _realm;
-};
-
-
-class BasicAuthentication : public Authentication
-{
-    class FailedChallenge : public Challenge
-    {
-        public:
-            FailedChallenge()
-            {}
-            
-            virtual void beginVerify()
-            { setReady(); }
-
-            virtual bool endVerify()
-            { return false; }
-    };
-
-    public:
-        BasicAuthentication(const std::string realm)
-        : Authentication(realm)
-        { }
-
-        ~BasicAuthentication()
-        { }
-
-        void setUser(const std::string& user, const std::string& passwd)
-        { _passwd[user] = passwd; }
-
-        void removeUser(const std::string& user)
-        { _passwd.erase(user); }
-
-        void clear()
-        { _passwd.clear(); }
-
-        virtual Challenge* beginAuthenticate(const Request& req, Reply& reply)
-        {
-            std::string user, passwd, token;
-
-            const char* auth = req.header().getHeader("Authorization");
-            if( auth )
-            {
-                std::istringstream iss(auth);
-                iss >> token;
-
-                for(std::string::size_type n = 0; n < token.size(); ++n)
-                    token[n] = std::tolower(token[n]);
-
-                if(token == "basic")
-                {
-                    iss >> std::skipws >> token;
-                    iss.str(token);
-
-                    BasicTextIStream<char, char> b64conv(iss, new Base64Codec());
-                    std::getline(b64conv, user, ':');
-                    b64conv >> passwd;
-
-                    std::map<std::string, std::string>::iterator it = _passwd.find(user);
-                    if(it != _passwd.end() && it->second == passwd)
-                    {
-                        return 0;
-                    }
-                }
-            }
-
-            Challenge* challenge = new FailedChallenge;
-            return challenge;
-        }
-
-        virtual bool endAuthenticate(Challenge* challenge, const Request& req, Reply& reply)
-        {
-            if( ! challenge )
-                return false;
-
-            bool granted = challenge->endVerify();
-            cancelAuthenticate(challenge);
-
-            if( ! granted )
-            {
-                reply.header().httpReturn(401, "Authorization Required");
-                reply.header().setHeader("WWW-Authenticate", ("Basic realm=\"" + realm() + '"').c_str());
-                reply.finish();
-            }
-
-            return granted;
-        }
-
-        virtual void cancelAuthenticate(Challenge* challenge)
-        {
-            delete challenge;
-        }
-
-    private:
-        std::map<std::string, std::string> _passwd;
 };
 
 } // namespace Http

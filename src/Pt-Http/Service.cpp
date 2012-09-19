@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 Tommi Maekitalo
+ * Copyright (C) 2012 Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -29,7 +29,6 @@
 #include <Pt/Http/Service.h>
 #include <Pt/Http/Server.h>
 #include <Pt/Http/Responder.h>
-#include <stdexcept>
 #include <cassert>
 
 namespace Pt {

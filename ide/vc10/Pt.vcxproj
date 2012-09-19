@@ -33,6 +33,7 @@
     <ClInclude Include="..\..\include\Pt\Formatter.h" />
     <ClInclude Include="..\..\include\Pt\Function.h" />
     <ClInclude Include="..\..\include\Pt\Http\Api.h" />
+    <ClInclude Include="..\..\include\Pt\Http\Authentication.h" />
     <ClInclude Include="..\..\include\Pt\Http\Client.h" />
     <ClInclude Include="..\..\include\Pt\Http\Message.h" />
     <ClInclude Include="..\..\include\Pt\Http\MessageHeader.h" />
@@ -244,6 +245,7 @@
     <None Include="..\..\src\Pt\tests\Makefile.am" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\src\Pt-Http\Authentication.cpp" />
     <ClCompile Include="..\..\src\Pt-Http\ChunkedReader.cpp" />
     <ClCompile Include="..\..\src\Pt-Http\Client.cpp" />
     <ClCompile Include="..\..\src\Pt-Http\ClientImpl.cpp" />

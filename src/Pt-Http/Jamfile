@@ -9,7 +9,8 @@ if $(WITH_OPENSSL)
     SubDirC++Flags [ FDefines PT_HTTP_WITH_SSL ] ;
 }
 
-SharedLibrary Pt-Http : Client.cpp
+SharedLibrary Pt-Http : Authentication.cpp
+                        Client.cpp
                         ClientImpl.cpp
                         ChunkedReader.cpp
                         Connection.cpp
