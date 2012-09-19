@@ -30,6 +30,7 @@
 #define Pt_Http_NotAuthenticatedService_h
 
 #include <Pt/Http/Service.h>
+#include <Pt/Http/Responder.h>
 
 namespace Pt {
 
