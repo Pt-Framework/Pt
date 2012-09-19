@@ -158,6 +158,7 @@ RequestHandler::~RequestHandler()
 
 void RequestHandler::releaseResponder()
 {
+    log_trace("RequestHandler::releaseResponder " << _responder);
     if( _responder )
     {
         assert(_service);
@@ -331,6 +332,8 @@ void RequestHandler::onRequestProgress(MessageProgress progress)
             
             DeferRelease deferRelease(this);
             _responder->beginReply(_request, _reply);
+            
+            log_debug("reply started");
             return;
         }
 
@@ -370,9 +373,14 @@ void RequestHandler::onReplySent(Reply& r)
         log_debug("response finished");
 
         if(_deferRelease)
+        {
+            log_debug("defer responder release");
             _deferRelease->set();
+        }
         else
+        {
             releaseResponder();
+        }
 
         _reply.clear();
         _request.clear();
