@@ -118,11 +118,11 @@ class RequestHandler : public Pt::Connectable
     protected:
         void releaseResponder();
 
-        void onChallenge(Challenge& challenge);
-
         void onRequestReceived(Request& req);
 
-        void onRequestProgress(MessageProgress progress);
+        void onChallenge(Challenge& challenge);
+
+        void onRequestBody(MessageProgress progress);
 
         void onReplySent(Reply& r);
 
@@ -166,7 +166,7 @@ RequestHandler::~RequestHandler()
     if(_challenge)
     {
         assert(_authentication);
-        _authentication->cancelAuthenticate(_challenge);
+        _authentication->cancelChallenge(_challenge);
     }
 }
 
@@ -196,13 +196,89 @@ void RequestHandler::beginServe(System::EventLoop& loop)
 }
 
 
+void RequestHandler::onRequestReceived(Request& req)
+{
+    log_trace("RequestHandler::onRequestReceived");
+
+    // TODO: error reply on HTTP related exceptions
+    // replyError();
+    
+    try
+    {
+        MessageProgress progress = _request.endReceive();
+        
+        if( progress.header() )
+        {
+            log_debug("received request header");
+
+            assert(_authentication == 0);
+            assert(_challenge == 0);
+            assert(_service == 0);
+
+            _service = _server.getService( _request.header(), _authentication );
+
+            if(_authentication)
+            {
+                log_debug("authentication required");
+
+                // TODO: only authenticate if we haven't already for this connection
+                bool granted = _authentication->authenticate(_request, _reply);
+                if( ! granted )
+                {
+                    _challenge = _authentication->beginChallenge(_request, _reply);
+                    if( _challenge )
+                    {
+                        log_debug("authentication started");
+                        _requestProgress = progress;
+                        _challenge->finished() += Pt::slot(*this, &RequestHandler::onChallenge);
+                        return;
+                    }
+
+                    log_debug("request immediately denied");
+        
+                    if( ! _reply.isFinished() )
+                        _reply.finish();
+
+                    if( ! _reply.isSending() )
+                        _reply.beginSend();
+
+                    _service = 0;
+                    _authentication = 0;
+                    return;
+                }
+
+                log_debug("request immediately authenticated");
+                _authentication = 0;
+            }
+        
+            _responder = _service->getResponder( _request.header() );
+            assert(_responder);
+            _responder->beginRequest( _request, _reply );
+
+            if( _reply.isSending() )
+            {
+                log_debug("request interrupted");
+                return;
+            }
+        }
+    
+        onRequestBody(progress);
+    }
+    catch(const System::IOError& e) // TODO: HttpError is also an IOError
+    {
+        log_error("EXCEPTION: " << e.what());
+        _finished.send(*this);
+    }
+}
+
+
 void RequestHandler::onChallenge(Challenge& challenge)
 {
     log_trace("RequestHandler::onChallenge");
 
     try
     {
-        bool granted = _authentication->endAuthenticate(_challenge, _request, _reply);
+        bool granted = _authentication->endChallenge(_challenge, _request, _reply);
 
         _challenge = 0;
         _authentication = 0;
@@ -231,7 +307,7 @@ void RequestHandler::onChallenge(Challenge& challenge)
                 return;
             }
 
-            onRequestProgress(_requestProgress);
+            onRequestBody(_requestProgress);
         }
     }
     catch(const System::IOError& e) // TODO: HttpError is also an IOError
@@ -245,73 +321,8 @@ void RequestHandler::onChallenge(Challenge& challenge)
 }
 
 
-void RequestHandler::onRequestReceived(Request& req)
-{
-    log_trace("RequestHandler::onRequestReceived");
-
-    // TODO: error reply on HTTP related exceptions
-    // replyError();
-    
-    try
-    {
-        MessageProgress progress = _request.endReceive();
-        onRequestProgress(progress);
-    }
-    catch(const System::IOError& e) // TODO: HttpError is also an IOError
-    {
-        log_error("EXCEPTION: " << e.what());
-        _finished.send(*this);
-    }
-}
-
-
-void RequestHandler::onRequestProgress(MessageProgress progress)
-{
-    log_trace("RequestHandler::onRequestProgress");
-
-    if( progress.header() )
-    {
-        log_debug("received request header");
-
-        assert(_authentication == 0);
-        assert(_challenge == 0);
-        assert(_service == 0);
-
-        _service = _server.getService( _request.header(), _authentication );
-
-        if(_authentication)
-        {
-            log_debug("authentication required");
-
-            // TODO: only authenticate if we haven't already for this connection
-
-            _challenge = _authentication->beginAuthenticate(_request, _reply);
-            if(_challenge)
-            {
-                log_debug("authentication started");
-                _requestProgress = progress;
-                _requestProgress.unsetHeader();
-
-                _challenge->finished() += Pt::slot(*this, &RequestHandler::onChallenge);
-                _challenge->beginVerify();
-                return;
-            }
-
-            log_debug("request immediately authenticated");
-            _authentication = 0;
-        }
-        
-        _responder = _service->getResponder( _request.header() );
-        assert(_responder);
-        _responder->beginRequest( _request, _reply );
-
-        if( _reply.isSending() )
-        {
-            log_debug("request interrupted");
-            return;
-        }
-    }
-    
+void RequestHandler::onRequestBody(MessageProgress progress)
+{    
     if( progress.body() )
     {     
         if( _responder)

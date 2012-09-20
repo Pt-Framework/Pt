@@ -37,18 +37,20 @@ namespace Pt {
 
 namespace Http {
 
-Challenge* Authentication::beginAuthenticate(const Request& req, Reply& reply) 
+bool Authentication::authenticate(const Request& req, Reply& reply) 
 {
     bool granted = this->onAuthenticate(req, reply);
+    return granted;
+}
 
-    if(granted)
-        return 0;
 
+Challenge* Authentication::beginChallenge(const Request& req, Reply& reply) 
+{
     return this->onBeginChallenge(req, reply);
 }
 
 
-bool Authentication::endAuthenticate(Challenge* challenge, const Request& req, Reply& reply) 
+bool Authentication::endChallenge(Challenge* challenge, const Request& req, Reply& reply) 
 {
     bool granted = this->onEndChallenge(challenge, req, reply);
 
@@ -58,7 +60,7 @@ bool Authentication::endAuthenticate(Challenge* challenge, const Request& req, R
 }
 
 
-void Authentication::cancelAuthenticate(Challenge* challenge) 
+void Authentication::cancelChallenge(Challenge* challenge) 
 {
     this->onDestroyChallenge(challenge);
 }
@@ -98,7 +100,10 @@ bool BasicAuthentication::onAuthenticate(const Request& req, Reply& reply)
 
 Challenge* BasicAuthentication::onBeginChallenge(const Request& req, Reply& reply)
 {
-    return new FailedChallenge;
+    reply.header().httpReturn(401, "Authorization Required");
+    reply.header().setHeader("WWW-Authenticate", ("Basic realm=\"" + realm() + '"').c_str());
+    reply.finish();
+    return 0;
 }
 
 
@@ -107,7 +112,7 @@ bool BasicAuthentication::onEndChallenge(Challenge* challenge, const Request& re
     if( ! challenge )
         return false;
 
-    bool granted = challenge->endVerify();
+    bool granted = challenge->getResult();
     if( ! granted )
     {
         reply.header().httpReturn(401, "Authorization Required");
@@ -120,7 +125,7 @@ bool BasicAuthentication::onEndChallenge(Challenge* challenge, const Request& re
 
 void BasicAuthentication::onDestroyChallenge(Challenge* challenge)
 {
-    delete challenge;
+    throw std::logic_error("BasicAuthentication::onDestroyChallenge not implemented");
 }
 
 }

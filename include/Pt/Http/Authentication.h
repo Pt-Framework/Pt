@@ -44,18 +44,13 @@ class Reply;
 class Challenge
 {
     public:
-        Challenge()
-        {}
-
         virtual ~Challenge() 
         { }
 
         Signal<Challenge&>& finished()
         { return _finished; }
-
-        virtual void beginVerify() = 0;
-        
-        virtual bool endVerify()= 0;
+       
+        virtual bool getResult() = 0;
 
     protected:
         void setReady()
@@ -79,11 +74,13 @@ class PT_HTTP_API Authentication
         const std::string& realm() const
         { return _realm; }
 
-        virtual Challenge* beginAuthenticate(const Request& req, Reply& reply);
+        bool authenticate(const Request& req, Reply& reply);
 
-        virtual bool endAuthenticate(Challenge* challenge, const Request& req, Reply& reply);
+        Challenge* beginChallenge(const Request& req, Reply& reply);
 
-        virtual void cancelAuthenticate(Challenge* challenge);
+        virtual bool endChallenge(Challenge* challenge, const Request& req, Reply& reply);
+
+        virtual void cancelChallenge(Challenge* challenge);
 
     protected:
         virtual bool onAuthenticate(const Request& req, Reply& reply) = 0;
@@ -101,19 +98,6 @@ class PT_HTTP_API Authentication
 
 class PT_HTTP_API BasicAuthentication : public Authentication
 {
-    class FailedChallenge : public Challenge
-    {
-        public:
-            FailedChallenge()
-            {}
-            
-            virtual void beginVerify()
-            { setReady(); }
-
-            virtual bool endVerify()
-            { return false; }
-    };
-
     public:
         BasicAuthentication(const std::string realm)
         : Authentication(realm)
