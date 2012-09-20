@@ -95,6 +95,8 @@ Connection::Connection()
 #endif
 
     _httpbuf.attach(_sockbuf);
+
+    _timer.timeout() += slot(*this, &Connection::onTimeout);
 }
 
 
@@ -470,11 +472,12 @@ void Connection::beginReceiveRequest(Request& request)
         _readBytes = 0;
         if(_keepAlive)
         {
-            log_debug("use keep alive timeout");
+            log_debug("use keep alive timeout: " << _keepaliveTimeout);
             _timer.start(_keepaliveTimeout);
         }
         else
         {
+            log_debug("use I/O timeout: " << _timeout);
             _timer.start( _timeout );
         }
     }
@@ -765,7 +768,7 @@ void Connection::onConnect(Net::TcpSocket& socket)
 
 void Connection::onTimeout()
 {
-    log_debug("cancelling connection");
+    log_trace("Connection::onTimeout");
     _onTimeout = true;
 
     if(_request)

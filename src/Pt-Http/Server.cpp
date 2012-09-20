@@ -864,10 +864,14 @@ void Server::startWorker()
 
 void Server::onAccept(Net::TcpServer& server)
 {
+    log_trace("Server::onAccept");
+
     // TODO: we should only pass the TcpSocket to the worker thread
     //       so that a RequestHandler can be constructed with an event loop
 
     RequestHandler* handler = new RequestHandler(*this, server);
+
+    log_debug("handler timeouts: " << _timeout << ", " << _keepAliveTimeout);
     handler->setTimeout(_timeout);
     handler->setKeepAliveTimeout(_keepAliveTimeout);
 
