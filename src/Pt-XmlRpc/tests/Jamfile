@@ -18,3 +18,7 @@ MakeLocate RpcBenchClient : $(OUTPUT_TARGET) ;
 Main RpcBenchServer : RpcBenchServer.cpp ;
 LinkSharedLibraries RpcBenchServer : Pt-XmlRpc Pt-Xml Pt-Http Pt-Net Pt-System Pt ;
 MakeLocate RpcBenchServer.cpp : $(OUTPUT_TARGET) ;
+
+#Main el-demo : el-demo.cpp ;
+#LinkSharedLibraries el-demo : Pt-Xml Pt-Http Pt-Net Pt-System Pt ;
+#MakeLocate el-demo : $(OUTPUT_TARGET) ;
