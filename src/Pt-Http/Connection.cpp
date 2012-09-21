@@ -894,31 +894,16 @@ void Connection::beginWrite()
 #ifdef PT_HTTP_WITH_SSL
     if(_ssl)
     {
-        // TODO: need to check _sslbuf.out_avail()
-        _sslbuf.pubsync();
-
-        if ( _sslbuf.buffer().out_avail() )
-        {
-            log_debug("begin writing ssl buffer");
-            _timer.start(_timeout);
-            _sslbuf.beginWrite();
-            return;
-        }
-        
-        log_debug("no ssl data to write");
+        log_debug("begin writing ssl buffer" << _sslbuf.buffer().out_avail());
+        _timer.start(_timeout);
+        _sslbuf.beginWrite();
         return;
     }
 #endif
-    if ( _sockbuf.out_avail() )
-    {
-        log_debug("begin writing socket buffer");
-        _timer.start(_timeout);
-        _sockbuf.beginWrite();
-        return;
-    }
 
-    log_debug("no data to write");
-    return;
+    log_debug("begin writing socket buffer: " << _sockbuf.out_avail());
+    _timer.start(_timeout);
+    _sockbuf.beginWrite();
 }
 
 
