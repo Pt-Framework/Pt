@@ -58,6 +58,49 @@ namespace Http {
 class Reply;
 class Request;
 
+class Socket : public Net::TcpSocket
+{
+    public:
+        Socket()
+        : _pipelinedReady(false)
+        {}
+
+        void setOutputPipelined()
+        { 
+            _pipelinedReady = true;
+            this->setReady(); 
+        }
+
+        Signal<>& outputPipelined()
+        { return _outputPipelined; }
+
+        Signal<>& inputPipelined()
+        { return _inputPipelined; }
+
+    protected:
+        virtual void onCancel()
+        {
+            _pipelinedReady = false;
+            Net::TcpSocket::onCancel();
+        }
+        
+        virtual bool onRun()
+        { 
+            if(_pipelinedReady)
+            {
+                _pipelinedReady = false;
+                _outputPipelined.send();
+            }
+            
+            return Net::TcpSocket::onRun(); 
+        }
+
+    private:
+        bool _pipelinedReady;
+        Signal<> _outputPipelined;
+        Signal<> _inputPipelined;
+};
+
 class Connection : public Connectable
 {
     friend class Request;
@@ -160,13 +203,15 @@ class Connection : public Connectable
         { return _httpbuf; }
 
 #ifdef PT_HTTP_WITH_SSL
-        void onHttpsHandshake(Pt::Ssl::IOBuffer& ssl);
+        void onHttpsHandshake(Ssl::IOBuffer& ssl);
 
-        void onHttpsInput(Pt::Ssl::IOBuffer& ssl);
+        void onHttpsInput(Ssl::IOBuffer& ssl);
 
-        void onHttpsOutput(Pt::Ssl::IOBuffer& ssl);
+        void onHttpsOutput(Ssl::IOBuffer& ssl);
 #endif
         void onConnect(Net::TcpSocket& socket);
+
+        void onOutputPipelined();
 
         void onTimeout();
 
@@ -201,7 +246,7 @@ class Connection : public Connectable
         Reply* _reply;
 
         System::Timer _timer;
-        Net::TcpSocket _socket;
+        Socket _socket;
         System::IOBuffer _sockbuf;
         Net::AddrInfo _addrInfo;
 

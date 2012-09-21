@@ -56,7 +56,7 @@ namespace Http {
 
 class RequestHandler : public Pt::Connectable
 {
-    struct DeferRelease
+    /*struct DeferRelease
     {
         DeferRelease(RequestHandler* r)
         : _service(0)
@@ -88,7 +88,7 @@ class RequestHandler : public Pt::Connectable
         Service* _service;
         Responder* _responder;
         RequestHandler* _r;
-    };
+    };*/
 
     public:
         RequestHandler(Server& server, Net::TcpServer& tcpServer);
@@ -134,7 +134,6 @@ class RequestHandler : public Pt::Connectable
         Challenge* _challenge;
         Service* _service;
         Responder* _responder;
-        DeferRelease* _deferRelease;
         Connection _conn;
         Request _request;
         Reply _reply;
@@ -148,7 +147,6 @@ RequestHandler::RequestHandler(Server& server, Net::TcpServer& tcpServer)
 , _challenge(0)
 , _service(0)
 , _responder(0)
-, _deferRelease(0)
 , _conn()
 , _request(_conn)
 , _reply(_conn)
@@ -355,11 +353,7 @@ void RequestHandler::onRequestBody(MessageProgress progress)
         if(_responder)
         {
             log_debug("request body finished, begin reply");
-            
-            DeferRelease deferRelease(this);
             _responder->beginReply(_request, _reply);
-            
-            log_debug("reply started");
             return;
         }
 
@@ -398,18 +392,7 @@ void RequestHandler::onReplySent(Reply& r)
 
         log_debug("response finished");
 
-        if(_deferRelease)
-        {
-            log_debug("defer responder release");
-            assert(_service);
-            assert(_responder);
-            _deferRelease->set(_service, _responder);
-        }
-        else
-        {
-            releaseResponder();
-        }
-
+        releaseResponder();
         _reply.clear();
         _request.clear();
 

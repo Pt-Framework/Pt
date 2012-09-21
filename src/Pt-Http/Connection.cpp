@@ -84,7 +84,8 @@ Connection::Connection()
 , _keepAlive(false)
 , _onTimeout(false)
 {
-    _socket.connected() += Pt::slot(*this, &Connection::onConnect);
+    _socket.connected() += slot(*this, &Connection::onConnect);
+    _socket.outputPipelined() += slot(*this, &Connection::onOutputPipelined);
 
     _sockbuf.attach(_socket);
     _sockbuf.outputReady() += slot(*this, &Connection::onHttpOutput);
@@ -244,7 +245,9 @@ void Connection::beginSendRequest(Request& request)
         }
 
         log_debug("sending HTTP request");
-        _request->onOutput();
+        // signal that output was sent, so the request data can be pipelined
+        // until we begin receiving the next reply from the server
+        _socket.setOutputPipelined(); //_request->onOutput();
         return;
     }
 
@@ -275,7 +278,7 @@ MessageProgress Connection::endSendRequest()
     MessageProgress progress;
 
     if(_onTimeout)
-        throw Pt::System::IOError("timeout");
+        throw System::IOError("timeout");
 
     if(_state == NotConnected)
     {
@@ -311,7 +314,7 @@ MessageProgress Connection::endSendRequest()
 
         if( _socket.eof() )
         {
-            throw Pt::System::IOError("connection lost while sending request");
+            throw System::IOError("connection lost while sending request");
         }
     }
  
@@ -365,7 +368,11 @@ void Connection::beginSendReply(Reply& reply)
         log_debug("begin writing reply");
 
         if( _keepAlive )
-            _reply->onOutput(); 
+        {
+            // signal that output was sent, so the reply data can be pipelined
+            // until we begin receiving the next request from the client
+            _socket.setOutputPipelined(); //_reply->onOutput(); 
+        }
         else
             beginWrite();
 
@@ -399,13 +406,14 @@ MessageProgress Connection::endSendReply()
     MessageProgress progress;
     
     if(_onTimeout)
-        throw Pt::System::IOError("timeout");
+        throw System::IOError("timeout");
         
+    //if(! _reply->isFinished() || _keepAlive)
     endWrite();
 
     if( _socket.eof() )
     {
-        throw Pt::System::IOError("connection lost while sending reply");
+        throw System::IOError("connection lost while sending reply");
     }
 
     // keepalive -> leave data in the output buffer
@@ -482,6 +490,7 @@ void Connection::beginReceiveRequest(Request& request)
         }
     }
     
+    // TODO: go through eventloop by calling _socket.setInputPipelined()
     beginRead();
 }
 
@@ -492,7 +501,7 @@ MessageProgress Connection::endReceiveRequest()
     MessageProgress progress;
 
     if(_onTimeout)
-        throw Pt::System::IOError("timeout");
+        throw System::IOError("timeout");
 
 #ifdef PT_HTTP_WITH_SSL
     if(_state == SslNotAccepted)
@@ -522,7 +531,7 @@ MessageProgress Connection::endReceiveRequest()
     //       Need another MessageProgress state to indicate CLOSED event
     if( _socket.eof() )
     {
-        throw Pt::System::IOError("connection lost while receiving request");
+        throw System::IOError("connection lost while receiving request");
     }
 
     if( ! _parser.end() )
@@ -605,6 +614,7 @@ void Connection::beginReceiveReply(Reply& r)
         _timer.start( _timeout );
     }
 
+    // TODO: go through eventloop by calling _socket.setInputPipelined()
     beginRead();
 }
 
@@ -615,7 +625,7 @@ MessageProgress Connection::endReceiveReply()
     MessageProgress progress;
 
     if(_onTimeout)
-        throw Pt::System::IOError("timeout");
+        throw System::IOError("timeout");
 
     if(_state == RequestOutputPending)
     {
@@ -696,7 +706,7 @@ MessageProgress Connection::endReceiveReply()
 
 
 #ifdef PT_HTTP_WITH_SSL
-void Connection::onHttpsHandshake(Pt::Ssl::IOBuffer& ssl)
+void Connection::onHttpsHandshake(Ssl::IOBuffer& ssl)
 {
     log_trace("Connection::onHttpsHandshake");
     if(_request && _state == SslHandshake)
@@ -713,7 +723,7 @@ void Connection::onHttpsHandshake(Pt::Ssl::IOBuffer& ssl)
 }
 
 
-void Connection::onHttpsInput(Pt::Ssl::IOBuffer& ssl)
+void Connection::onHttpsInput(Ssl::IOBuffer& ssl)
 {
     log_trace("Connection::onHttpsInput");
 
@@ -727,7 +737,7 @@ void Connection::onHttpsInput(Pt::Ssl::IOBuffer& ssl)
         _reply->onInput();
 }
 
-void Connection::onHttpsOutput(Pt::Ssl::IOBuffer& ssl)
+void Connection::onHttpsOutput(Ssl::IOBuffer& ssl)
 {
     log_trace("Connection::onHttpsOutput");
 
@@ -763,6 +773,23 @@ void Connection::onConnect(Net::TcpSocket& socket)
     log_trace("Connection::onConnect");
     if(_request)
         _request->onOutput();
+}
+
+
+void Connection::onOutputPipelined()
+{
+    log_trace("Connection::onOutputPipelined");
+    if(_request)
+    {
+        _request->onOutput();
+        return;
+    }
+
+    if(_reply)
+    {
+        _reply->onOutput();
+        return;
+    }
 }
 
 
