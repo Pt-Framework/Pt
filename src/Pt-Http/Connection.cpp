@@ -571,7 +571,10 @@ MessageProgress Connection::endReceiveRequest()
         
         _readBytes += _httpbuf.in_avail() - avail;
         if(_readBytes >= 8192)
+        {
+            _readBytes = 0;
             _timer.start(_timeout);
+        }
         
         if(_httpbuf.in_avail() > 0)
             progress.setOnBody();
@@ -672,7 +675,10 @@ MessageProgress Connection::endReceiveReply()
         
         _readBytes += _httpbuf.in_avail() - avail;
         if(_readBytes >= 8192)
+        {
+            _readBytes = 0;
             _timer.start(_timeout);
+        }
 
         if(_httpbuf.in_avail() > 0)
             progress.setOnBody();
