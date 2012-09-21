@@ -86,10 +86,18 @@ Signal<>& EventLoop::exited()
 
 void EventLoop::run()
 {
-    _idleTimer.setActive(*this);
-    this->onRun();
-    _idleTimer.detach();
-    exited();
+    try
+    {
+        _idleTimer.setActive(*this);
+        this->onRun();
+        _idleTimer.detach();
+        exited();
+    }
+    catch(...)
+    {
+        _idleTimer.detach();
+        throw;
+    }
 }
 
 
