@@ -80,6 +80,9 @@ class MessageProgress
         void setOnTrailer()
         { _result |= Trailer; }
 
+        unsigned long mask() const
+        { return _result; }
+
     private:
         unsigned long _result;
 };

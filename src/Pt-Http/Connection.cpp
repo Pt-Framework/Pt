@@ -640,6 +640,8 @@ MessageProgress Connection::endReceiveReply()
 
     endRead();
 
+    log_debug("input available: " << inputAvailable());
+
     if ( ! _replyParser.end() )
     {
         if( _socket.eof() )
@@ -657,6 +659,7 @@ MessageProgress Connection::endReceiveReply()
 
         if( ! _replyParser.end() )
         {
+            log_debug("received part of header");
             return progress;
         }
 
@@ -707,6 +710,7 @@ MessageProgress Connection::endReceiveReply()
         }
     }
 
+    log_debug("reply progress: " << progress.mask());
     return progress;
 }
 
