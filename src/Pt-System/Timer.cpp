@@ -28,21 +28,17 @@
 #include "Pt/System/EventLoop.h"
 #include "Pt/System/Logger.h"
 #include <limits>
+#include <cassert>
 
 log_define("Pt.System.Timer")
 
 namespace {
 
-inline void checkInterval(std::size_t& interval, const Pt::Timespan& now)
+inline bool checkInterval(std::size_t interval, const Pt::Timespan& now)
 {
     Pt::int64_t maxInterval = std::numeric_limits<Pt::int64_t>::max() / 1000;
     maxInterval -= now.toMSecs();
-
-    if(interval > maxInterval)
-    { 
-        interval = maxInterval; 
-        log_debug("interval too large, truncated to " << interval);
-    }
+    return interval > maxInterval;
 }
 
 }
@@ -124,11 +120,23 @@ void Timer::start(std::size_t interval)
     log_debug("Timer started, interval: " << _interval);
     
     Timespan now = Clock::getSystemTicks();
-    checkInterval(_interval, now);
     
-    Timespan remaining = Pt::int64_t(_interval) * 1000;
-    _finished = now + remaining;
+    bool overrun = checkInterval(_interval, now);
+    if(overrun)
+    {
+        Pt::int64_t maxTime = std::numeric_limits<Pt::int64_t>::max();
+        _finished = Timespan(maxTime);
+        log_debug("timer truncated to: " << _finished.toMSecs());
+    }
+    else
+    {
+        Timespan remaining = Pt::int64_t(_interval) * 1000;
+        _finished = now + remaining;
+        log_debug("timer set to: " << _finished.toMSecs());
+    }
 
+    assert(_finished.toUSecs() > 0);
+    
     if(_loop)
         _loop->onAttachTimer(*this);
 }
@@ -169,8 +177,21 @@ bool Timer::update(const Timespan& now)
     {
         log_debug("executing timer: " << _finished.toUSecs() << " usecs");
 
-        checkInterval(_interval, now);
-        _finished += (_interval * 1000);
+        bool overrun = checkInterval(_interval, now);
+        if(overrun)
+        {
+            Pt::int64_t maxTime = std::numeric_limits<Pt::int64_t>::max();
+            _finished = Timespan(maxTime);
+            log_debug("timer truncated to: " << _finished.toMSecs());
+        }
+        else
+        {
+            Timespan remaining = Pt::int64_t(_interval) * 1000;
+            _finished += remaining;
+            log_debug("timer set to: " << _finished.toMSecs());
+        }
+
+        assert(_finished.toUSecs() > 0);
 
         timeout().send();
 
@@ -209,3 +230,4 @@ void Timer::detach()
 }
 
 }
+
