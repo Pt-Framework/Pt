@@ -90,6 +90,7 @@ class Socket : public Net::TcpSocket
             {
                 _pipelinedReady = false;
                 _outputPipelined.send();
+                return true;
             }
             
             return Net::TcpSocket::onRun(); 
