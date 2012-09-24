@@ -160,7 +160,6 @@
     <ClInclude Include="..\..\include\Pt\Utf8Codec.h" />
     <ClInclude Include="..\..\include\Pt\Variant.h" />
     <ClInclude Include="..\..\include\Pt\Void.h" />
-    <ClInclude Include="..\..\src\Pt-Http\ChunkedReader.h" />
     <ClInclude Include="..\..\src\Pt-Http\ClientImpl.h" />
     <ClInclude Include="..\..\src\Pt-Http\Connection.h" />
     <ClInclude Include="..\..\src\Pt-Http\HttpBuffer.h" />
@@ -243,7 +242,6 @@
   <ItemGroup>
     <ClCompile Include="..\..\src\Pt-Http\Authentication.cpp" />
     <ClCompile Include="..\..\src\Pt-Http\Authorization.cpp" />
-    <ClCompile Include="..\..\src\Pt-Http\ChunkedReader.cpp" />
     <ClCompile Include="..\..\src\Pt-Http\Client.cpp" />
     <ClCompile Include="..\..\src\Pt-Http\ClientImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Http\Connection.cpp" />

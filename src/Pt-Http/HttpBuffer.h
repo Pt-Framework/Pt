@@ -29,11 +29,8 @@
 #ifndef Pt_Http_HttpBuffer_h
 #define Pt_Http_HttpBuffer_h
 
-#include "ChunkedReader.h"
-
 #include <Pt/Http/Api.h>
 #include <Pt/Http/Message.h>
-
 #include <streambuf>
 
 namespace Pt {

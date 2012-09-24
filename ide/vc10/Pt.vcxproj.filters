@@ -603,9 +603,6 @@
     <ClInclude Include="..\..\include\Pt\Http\Service.h">
       <Filter>Pt-Http</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Http\ChunkedReader.h">
-      <Filter>Pt-Http</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Pt-Http\ClientImpl.h">
       <Filter>Pt-Http</Filter>
     </ClInclude>
@@ -1244,9 +1241,6 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Reflex\tests\ReflectableTest.cpp">
       <Filter>Pt-Reflex\tests</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Http\ChunkedReader.cpp">
-      <Filter>Pt-Http</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Http\Client.cpp">
       <Filter>Pt-Http</Filter>
