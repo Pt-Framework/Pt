@@ -56,40 +56,6 @@ namespace Http {
 
 class RequestHandler : public Pt::Connectable
 {
-    /*struct DeferRelease
-    {
-        DeferRelease(RequestHandler* r)
-        : _service(0)
-        , _responder(0)
-        , _r(r)
-        {
-            _r->_deferRelease = this;
-        }
-
-        ~DeferRelease()
-        {
-            if(_service)
-            {
-                _service->releaseResponder(_responder);
-            }
-            else
-                _r->_deferRelease = 0;
-        }
-
-        void set(Service* service, Responder* responder)
-        {
-            _service = service;
-            _responder = responder;
-            _r->_deferRelease = 0;
-            _r->_service = 0;
-            _r->_responder = 0;
-        }
-
-        Service* _service;
-        Responder* _responder;
-        RequestHandler* _r;
-    };*/
-
     public:
         RequestHandler(Server& server, Net::TcpServer& tcpServer);
 
@@ -213,7 +179,7 @@ void RequestHandler::onRequestReceived(Request& req)
             assert(_challenge == 0);
             assert(_service == 0);
 
-            _service = _server.getService( _request.header(), _authentication );
+            _service = _server.getService( _request, _authentication );
 
             if(_authentication)
             {
@@ -249,7 +215,7 @@ void RequestHandler::onRequestReceived(Request& req)
                 _authentication = 0;
             }
         
-            _responder = _service->getResponder( _request.header() );
+            _responder = _service->getResponder( _request );
             assert(_responder);
             _responder->beginRequest( _request, _reply );
 
@@ -295,7 +261,7 @@ void RequestHandler::onChallenge(Challenge& challenge)
         }
         else
         {
-            _responder = _service->getResponder( _request.header() );
+            _responder = _service->getResponder( _request );
             assert(_responder);
             _responder->beginRequest( _request, _reply );
 
@@ -337,7 +303,7 @@ void RequestHandler::onRequestBody(MessageProgress progress)
         else
         {
             log_debug("ignoring request body");
-            _request.clearBody();
+            _request.body().discard();
         }
     }
 
@@ -384,7 +350,7 @@ void RequestHandler::onReplySent(Reply& r)
         if( ! _reply.isFinished() )
         {
             log_debug("continuing response");
-            _reply.clearBody();
+            _reply.body().discard();
             assert(_responder);
             _responder->writeReply(_request, _reply);
             return;
@@ -417,7 +383,7 @@ void RequestHandler::replyError()
 {
     _reply.clear();
 
-    _reply.header().httpReturn(500, "internal server error");
+    _reply.setReturn(500, "internal server error");
     _reply.header().setHeader("Content-Type", "text/plain");
     _reply.header().setHeader("Connection", "close");
     _reply.body() << "Error 500: Internal server error.";
@@ -817,7 +783,7 @@ void Server::removeService(Service& service)
 }
 
 
-Service* Server::getService(const RequestHeader& request, Authentication*& auth)
+Service* Server::getService(const Request& request, Authentication*& auth)
 {
     System::ReadLock serviceLock(_serviceMutex);
 

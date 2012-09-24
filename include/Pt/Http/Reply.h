@@ -30,7 +30,7 @@
 #define Pt_Http_Reply_h
 
 #include <Pt/Http/Api.h>
-#include <Pt/Http/ReplyHeader.h>
+#include <Pt/Http/MessageHeader.h>
 #include <Pt/Signal.h>
 #include <string>
 #include <iostream>
@@ -48,15 +48,28 @@ class PT_HTTP_API Reply
     public:
         Reply(Http::Connection& conn)
         : _conn(&conn)
+        , _httpReturnCode(200)
+        , _httpReturnText("OK")
         , _isReceiving(false)
         , _isSending(false)
-        , _body(&_buf)
         , _finished(false)
         { }
         
         Connection& connection()
         { return *_conn; }
         
+        void setReturn(unsigned c, const std::string& t)
+        {
+            _httpReturnCode = c;
+            _httpReturnText = t;
+        }
+
+        unsigned httpReturnCode() const
+        { return _httpReturnCode; }
+
+        const std::string& httpReturnText() const
+        { return _httpReturnText; }
+
         void beginReceive();
 
         MessageProgress endReceive();
@@ -84,30 +97,24 @@ class PT_HTTP_API Reply
         bool isFinished() const
         { return _finished; }
 
-        ReplyHeader& header()
+        MessageHeader& header()
         { return _header; }
 
-        const ReplyHeader& header() const
+        const MessageHeader& header() const
         { return _header; }
+
+        MessageBody& body()
+        { return _body; }
 
         void clear()
         {
+            _httpReturnCode = 200;
+            _httpReturnText = "OK";
             _header.clear();
             _body.clear();
-            _buf.reset();
+            _body.discard();
             _finished = false;
         }
-
-        void clearBody();
-
-        const char* data() const
-        { return _buf.data(); }
-
-        std::size_t size() const
-        { return _buf.size(); }
-
-        std::iostream& body()
-        { return _body; }
 
     protected:
         void onInput()
@@ -118,11 +125,12 @@ class PT_HTTP_API Reply
 
     private:
         Http::Connection* _conn;
+        unsigned _httpReturnCode;
+        std::string _httpReturnText;
         bool _isReceiving; // TODO: move to Connection
         bool _isSending; // TODO: move to Connection
-        ReplyHeader _header;
-        MessageBuffer _buf;
-        std::iostream _body;
+        MessageHeader _header;
+        MessageBody _body;
         bool _finished;
         Signal<Reply&> _inputReceived;
         Signal<Reply&> _outputSent;

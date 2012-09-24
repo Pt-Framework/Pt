@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 by Marc Boris Duerner, Tommi Maekitalo
+ * Copyright (C) 2012 by Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,32 +26,44 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef Pt_Http_NotFoundService_h
-#define Pt_Http_NotFoundService_h
-
-#include <Pt/Http/Api.h>
-#include <Pt/Http/Service.h>
-#include "NotFoundResponder.h"
+#include "Connection.h"
+#include <Pt/Http/Request.h>
+#include <cassert>
 
 namespace Pt {
 
 namespace Http {
 
-class PT_HTTP_API NotFoundService : public Service
-{
-    public:
-        NotFoundService();
+void Request::beginReceive()
+{ 
+    _isReceiving = true;
+    _body.setInput(_conn->buffer());
+    _conn->beginReceiveRequest(*this);
+    
+}
 
-        Responder* createResponder(const Request&);
-        
-        void destroyResponder(Responder*);
 
-    private:
-        NotFoundResponder _responder;
-};
+MessageProgress Request::endReceive()
+{ 
+    _isReceiving = false;
+    return _conn->endReceiveRequest(); 
+}
+
+
+void Request::beginSend()
+{ 
+    _isSending = true;
+    _body.setOutput();
+    _conn->beginSendRequest(*this); 
+}
+
+
+MessageProgress Request::endSend()
+{ 
+    _isSending = false;
+    return _conn->endSendRequest(); 
+}
 
 } // namespace Http
 
 } // namespace Pt
-
-#endif

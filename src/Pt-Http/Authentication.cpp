@@ -123,7 +123,7 @@ bool BasicAuthentication::onAuthenticate(const Request& req, Reply& reply)
 
 Challenge* BasicAuthentication::onBeginChallenge(const Request& req, Reply& reply)
 {
-    reply.header().httpReturn(401, "Authorization Required");
+    reply.setReturn(401, "Authorization Required");
     reply.header().setHeader("WWW-Authenticate", ("Basic realm=\"" + realm() + '"').c_str());
     reply.finish();
     return 0;
@@ -138,7 +138,7 @@ bool BasicAuthentication::onEndChallenge(Challenge* challenge, const Request& re
     bool granted = challenge->getResult();
     if( ! granted )
     {
-        reply.header().httpReturn(401, "Authorization Required");
+        reply.setReturn(401, "Authorization Required");
         reply.header().setHeader("WWW-Authenticate", ("Basic realm=\"" + realm() + '"').c_str());
         reply.finish();
     }

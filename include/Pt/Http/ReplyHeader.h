@@ -30,7 +30,7 @@
 #define Pt_Http_ReplyHeader_h
 
 #include <Pt/Http/Api.h>
-#include <Pt/Http/MessageHeader.h>
+
 
 namespace Pt {
 
@@ -38,37 +38,9 @@ namespace Http {
 
 class RequestHeader;
 
-class ReplyHeader : public MessageHeader
-{
-        unsigned _httpReturnCode;
-        std::string _httpReturnText;
 
-    public:
-        ReplyHeader()
-            : _httpReturnCode(200),
-              _httpReturnText("OK")
-            { }
 
-        void clear()
-        {
-            MessageHeader::clear();
-            _httpReturnCode = 200;
-            _httpReturnText = "OK";
-        }
 
-        unsigned httpReturnCode() const
-        { return _httpReturnCode; }
-
-        const std::string& httpReturnText() const
-        { return _httpReturnText; }
-
-        void httpReturn(unsigned c, const std::string& t)
-        {
-            _httpReturnCode = c;
-            _httpReturnText = t;
-        }
-
-};
 
 } // namespace Http
 

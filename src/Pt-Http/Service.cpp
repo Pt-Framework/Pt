@@ -48,7 +48,7 @@ Service::~Service()
 }
 
 
-Responder* Service::getResponder(const RequestHeader& request)
+Responder* Service::getResponder(const Request& request)
 {
     System::MutexLock lock(_mutex);
     

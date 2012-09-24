@@ -116,7 +116,7 @@ MessageProgress ClientImpl::endSend()
         if( progress.finished() )
         {
             log_debug("sent http request completed");
-            _req.clearBody();
+            _req.body().discard();
             
             if( _req.isFinished() )
             {

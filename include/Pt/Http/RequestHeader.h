@@ -37,49 +37,6 @@ namespace Pt {
 
 namespace Http {
 
-class RequestHeader : public MessageHeader
-{
-        std::string _url;
-        std::string _method;
-        std::string _qparams;
-
-    public:
-        explicit RequestHeader(const std::string& url = std::string())
-        : _url(url),
-          _method("GET")
-        { }
-
-        virtual ~RequestHeader()  {}
-
-        void clear()
-        {
-            MessageHeader::clear();
-            _method = "GET";
-            _qparams.clear();
-        }
-
-        const std::string& url() const
-        { return _url; }
-
-        void url(const std::string& u)
-        { _url = u; }
-
-        const std::string& method() const
-        { return _method; }
-
-        void method(const std::string& m)
-        { _method = m; }
-
-        const std::string& qparams() const
-        { return _qparams; }
-
-        void qparams(const std::string& q)
-        { _qparams = q; }
-
-        std::string query() const
-        { return _qparams.empty() ? _url : _url + '?' + _qparams; }
-};
-
 } // namespace Http
 
 } // namespace Pt

@@ -36,7 +36,7 @@ NotFoundService::NotFoundService()
 : _responder(*this)
 { }
 
-Responder* NotFoundService::createResponder(const RequestHeader&)
+Responder* NotFoundService::createResponder(const Request&)
 {
     return &_responder;
 }

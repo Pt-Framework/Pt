@@ -30,8 +30,9 @@
 #define Pt_Http_MessageHeader_h
 
 #include <Pt/Http/Api.h>
-#include <string>
+#include <iostream>
 #include <streambuf>
+#include <string>
 #include <cstring>
 #include <utility>
 
@@ -71,13 +72,13 @@ class MessageProgress
         void setFinished()
         { _result |= Finished ; }
 
-        void setOnHeader()
+        void setHeader()
         { _result |= Header; }
         
-        void setOnBody()
+        void setBody()
         { _result |= Body; }
 
-        void setOnTrailer()
+        void setTrailer()
         { _result |= Trailer; }
 
         unsigned long mask() const
@@ -120,6 +121,50 @@ class PT_HTTP_API MessageBuffer : public std::streambuf
     private:
         char* _obuffer;
         std::size_t  _obufferSize;
+};
+
+class PT_HTTP_API MessageBody : public std::iostream
+{
+    friend class Connection;
+
+    public:
+        MessageBody()
+        : std::iostream(0)
+        { 
+            std::iostream::init(&_buf);
+        }
+        
+        MessageBuffer& buffer()
+        { return _buf; }
+
+        void discard()
+        { 
+            _buf.reset(); 
+
+            std::streambuf* sb = this->rdbuf();
+            if(sb != &_buf)
+            {
+                std::streamsize avail = sb->in_avail();
+                while(avail--)
+                    sb->sbumpc();
+            }
+        }
+
+        void setInput(std::streambuf& sb)
+        {
+            this->rdbuf(&sb);
+        }
+
+        void setOutput()
+        {
+            this->rdbuf(&_buf);
+        }
+
+        void write(std::ostream& os)
+        { os.write( _buf.data(), _buf.size() ); }
+
+    private:
+        MessageBuffer _buf;
 };
 
 class PT_HTTP_API MessageHeader

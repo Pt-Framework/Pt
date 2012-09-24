@@ -40,7 +40,7 @@ namespace Pt {
 namespace Http {
 
 class Responder;
-class RequestHeader;
+class Request;
 class Server;
 
 class PT_HTTP_API Service
@@ -52,7 +52,7 @@ class PT_HTTP_API Service
 
         virtual ~Service();
 
-        Responder* getResponder(const RequestHeader&);
+        Responder* getResponder(const Request&);
         
         void releaseResponder(Responder*);
 
@@ -70,7 +70,7 @@ class PT_HTTP_API Service
             The easiest way to ensure this is to call Service::detach in
             the derived class's destructor.
         */
-        virtual Responder* createResponder(const RequestHeader&) = 0;
+        virtual Responder* createResponder(const Request&) = 0;
         
         /** @brief Destroys a responder created by a server.
             
@@ -109,7 +109,7 @@ class BasicService : public Service
         }
 
     protected:
-        virtual Responder* createResponder(const RequestHeader&)
+        virtual Responder* createResponder(const Request&)
         {
             void* r = _alloc.allocate( sizeof(R) );
             return new(r) R(*this);

@@ -85,7 +85,7 @@ void Service::registerProcedure(const std::string& name, ServiceProcedure* proc)
 }
 
 
-Http::Responder* Service::createResponder(const Http::RequestHeader& req)
+Http::Responder* Service::createResponder(const Http::Request& req)
 {
     //if (req.isHeaderValue("Content-Type", "text/xml"))
     //    return new XmlRpcResponder(*this);

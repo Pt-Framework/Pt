@@ -30,11 +30,9 @@
 #define Pt_Http_Request_h
 
 #include <Pt/Http/Api.h>
-#include <Pt/Http/RequestHeader.h>
+#include <Pt/Http/MessageHeader.h>
 #include <Pt/Signal.h>
 #include <string>
-#include <iostream>
-#include <cassert>
 
 namespace Pt {
 
@@ -49,15 +47,30 @@ class PT_HTTP_API Request
     public:
         explicit Request( Http::Connection& conn, const std::string& url = std::string() )
         : _conn(&conn)
+        , _url(url)
+        , _method("GET")
         , _isReceiving(false)
         , _isSending(false)
-        , _header(url)
-        , _body(&_buf)
         , _finished(false)
         { }
 
+        const std::string& url() const
+        { return _url; }
+
         void setUrl(const std::string& u)
-        { _header.url(u); }
+        { _url = u; }
+
+        const std::string& method() const
+        { return _method; }
+        
+        void setMethod(const std::string& m)
+        { _method = m; }
+
+        const std::string& qparams() const
+        { return _qparams; }
+
+        void setQParams(const std::string& p)
+        { _qparams = p; }
 
         Connection& connection()
         { return *_conn; }
@@ -88,30 +101,24 @@ class PT_HTTP_API Request
         bool isFinished() const
         { return _finished; }
 
-        RequestHeader& header()
+        MessageHeader& header()
         { return _header; }
 
-        const RequestHeader& header() const
+        const MessageHeader& header() const
         { return _header; }
+
+        MessageBody& body()
+        { return _body; }
 
         void clear()
         {
+            _method = "GET";
+            _qparams.clear();
             _header.clear();
             _body.clear();
-            _buf.reset();
+            _body.discard();
             _finished = false;
         }
-
-        void clearBody();
-
-        const char* data() const
-        { return _buf.data(); }
-
-        std::size_t size() const
-        { return _buf.size(); }
-
-        std::iostream& body()
-        { return _body; }
 
     protected:
         void onInput()
@@ -122,11 +129,13 @@ class PT_HTTP_API Request
 
     private:
         Http::Connection* _conn;
+        std::string _url;
+        std::string _method;
+        std::string _qparams;
         bool _isReceiving; // TODO: move to Connection
         bool _isSending; // TODO: move to Connection
-        RequestHeader _header;
-        MessageBuffer _buf;
-        std::iostream _body;
+        MessageHeader _header;
+        MessageBody _body;
         bool _finished;
         Signal<Request&> _inputReceived;
         Signal<Request&> _outputSent;

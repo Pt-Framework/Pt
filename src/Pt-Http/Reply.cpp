@@ -28,63 +28,16 @@
 
 #include "Connection.h"
 #include <Pt/Http/Reply.h>
-#include <Pt/Http/Request.h>
+#include <cassert>
 
 namespace Pt {
 
 namespace Http {
 
-void Request::beginReceive()
-{ 
-    _isReceiving = true;
-    std::streambuf& sb = _conn->buffer();
-    _body.rdbuf(&sb);
-    _conn->beginReceiveRequest(*this);
-    
-}
-
-
-MessageProgress Request::endReceive()
-{ 
-    _isReceiving = false;
-    return _conn->endReceiveRequest(); 
-}
-
-
-void Request::beginSend()
-{ 
-    _isSending = true;
-    _conn->beginSendRequest(*this); 
-}
-
-
-MessageProgress Request::endSend()
-{ 
-    _isSending = false;
-    return _conn->endSendRequest(); 
-}
-
-
-//TODO: call this method discard() ?
-void Request::clearBody()
-{ 
-    _buf.reset(); 
-
-    std::streambuf* sb = _body.rdbuf();
-    if(sb != &_buf)
-    {
-        std::streamsize avail = sb->in_avail();
-        while(avail--)
-            sb->sbumpc();
-    }
-}
-
-
 void Reply::beginReceive()
 { 
     _isReceiving = true;
-    std::streambuf& sb = _conn->buffer();
-    _body.rdbuf(&sb);
+    _body.setInput(_conn->buffer());
     _conn->beginReceiveReply(*this); 
 }
 
@@ -99,6 +52,7 @@ MessageProgress Reply::endReceive()
 void Reply::beginSend()
 { 
     _isSending = true;
+    _body.setOutput();
     _conn->beginSendReply(*this); 
 }
 
@@ -107,20 +61,6 @@ MessageProgress Reply::endSend()
 { 
     _isSending = false;
     return _conn->endSendReply(); 
-}
-
-
-void Reply::clearBody()
-{ 
-    _buf.reset(); 
-
-    std::streambuf* sb = _body.rdbuf();
-    if(sb != &_buf)
-    {
-        std::streamsize avail = sb->in_avail();
-        while(avail--)
-            sb->sbumpc();
-    }
 }
 
 } // namespace Http

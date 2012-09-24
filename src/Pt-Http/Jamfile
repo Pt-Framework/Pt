@@ -18,11 +18,10 @@ SharedLibrary Pt-Http : Authentication.cpp
                         HttpBuffer.cpp
                         NotFoundResponder.cpp
                         NotFoundService.cpp
-                        NotAuthenticatedResponder.cpp
-                        NotAuthenticatedService.cpp
                         MessageHeader.cpp
                         Parser.cpp
                         Reply.cpp
+                        Request.cpp
                         Responder.cpp
                         Server.cpp
                         Service.cpp

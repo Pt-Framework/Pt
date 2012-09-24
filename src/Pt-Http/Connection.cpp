@@ -43,25 +43,25 @@ namespace Http {
 
 void Connection::ParseEvent::onMethod(const std::string& method)
 {
-    _request->method(method);
+    _request->setMethod(method);
 }
 
 
 void Connection::ParseEvent::onUrl(const std::string& url)
 {
-    _request->url(url);
+    _request->setUrl(url);
 }
 
 
 void Connection::ParseEvent::onUrlParam(const std::string& q)
 {
-    _request->qparams(q);
+    _request->setQParams(q);
 }
 
 
 void Connection::ReplyParseEvent::onHttpReturn(unsigned ret, const std::string& text)
 {
-    _replyHeader->httpReturn(ret, text);
+    _reply->setReturn(ret, text);
 }
 
 
@@ -227,11 +227,11 @@ void Connection::beginSendRequest(Request& request)
 
         if(_chunked)
         {
-            log_debug("sending last HTTP chunk: "  << _request->size() << " bytes");
-            if(_request->size() > 0)
+            log_debug("sending last HTTP chunk: "  << _request->body().buffer().size() << " bytes");
+            if(_request->body().buffer().size() > 0)
             {
-                os << std::hex << _request->size() << std::dec << "\r\n";
-                os.write( _request->data(), _request->size() );
+                os << std::hex << _request->body().buffer().size() << std::dec << "\r\n";
+                _request->body().write(os);
                 os.write("\r\n", 2);
             }
             
@@ -242,8 +242,9 @@ void Connection::beginSendRequest(Request& request)
         {
             writeRequestHeader(os, request);
 
-            log_debug("writing body: " << request.size() << " bytes");
-            os.write(request.data(), request.size());
+            log_debug("writing body: " << request.body().buffer().size() << " bytes");
+            _request->body().write(os);
+            //os.write(request.data(), request.size());
         }
 
         log_debug("pipelining HTTP request");
@@ -260,12 +261,12 @@ void Connection::beginSendRequest(Request& request)
         writeRequestHeader(os, request);
     }
 
-    log_debug("sending HTTP chunk: "  << _request->size() << " bytes");
+    log_debug("sending HTTP chunk: "  << _request->body().buffer().size() << " bytes");
 
-    if(_request->size() > 0)
+    if(_request->body().buffer().size() > 0)
     {
-        os << std::hex << _request->size() << std::dec << "\r\n";
-        os.write( _request->data(), _request->size() );
+        os << std::hex << _request->body().buffer().size() << std::dec << "\r\n";
+        _request->body().write(os);
         os.write("\r\n", 2);
     }
 
@@ -334,7 +335,7 @@ void Connection::beginSendReply(Reply& reply)
 
     _reply = &reply;
 
-    ReplyHeader& header = _reply->header();
+    MessageHeader& header = _reply->header();
     std::ostream os( _httpbuf.buffer() );
 
     _keepAlive = _keepAlive && _reply->header().keepAlive();
@@ -349,10 +350,10 @@ void Connection::beginSendReply(Reply& reply)
     {
         if(_chunked)
         {
-            if(_reply->size() > 0)
+            if(_reply->body().buffer().size() > 0)
             {
-                os << std::hex << _reply->size() << std::dec << "\r\n";
-                os.write( _reply->data(), _reply->size() );
+                os << std::hex << _reply->body().buffer().size() << std::dec << "\r\n";
+                _reply->body().write(os);
                 os.write("\r\n", 2);
             }
 
@@ -363,8 +364,8 @@ void Connection::beginSendReply(Reply& reply)
         {          
             writeReplyHeader(os, reply);
 
-            log_debug("writing body: " << reply.size() << " bytes");
-            os.write( reply.data(), reply.size() );
+            log_debug("writing body: " << reply.body().buffer().size() << " bytes");
+            _reply->body().write(os);
         }
 
         log_debug("begin writing reply");
@@ -388,10 +389,10 @@ void Connection::beginSendReply(Reply& reply)
         writeReplyHeader(os, *_reply);
     }
 
-    if(_reply->size() > 0)
+    if(_reply->body().buffer().size() > 0)
     {
-        os << std::hex << _reply->size() << std::dec << "\r\n";
-        os.write( _reply->data(), _reply->size() );
+        os << std::hex << _reply->body().buffer().size() << std::dec << "\r\n";
+        _reply->body().write(os);
         os.write("\r\n", 2);
     }
 
@@ -475,7 +476,7 @@ void Connection::beginReceiveRequest(Request& request)
     }
 
     log_debug("begin reading request");
-    _parseEvent.init( request.header() );
+    _parseEvent.init( request );
 
     if( _parser.begin() )
     {
@@ -559,7 +560,7 @@ MessageProgress Connection::endReceiveRequest()
         }
 
         _keepAlive = _request->header().keepAlive();
-        progress.setOnHeader();
+        progress.setHeader();
         _httpbuf.reset();
         _httpbuf.beginBody( _request->header() );
     }
@@ -579,7 +580,7 @@ MessageProgress Connection::endReceiveRequest()
         }
         
         if(_httpbuf.in_avail() > 0)
-            progress.setOnBody();
+            progress.setBody();
 
         if( _httpbuf.isEnd() )
         {
@@ -611,7 +612,7 @@ void Connection::beginReceiveReply(Reply& r)
         return;
     }
 
-    _replyParseEvent.init( _reply->header() );
+    _replyParseEvent.init( *_reply );
 
     if( _parser.begin() )
     {
@@ -666,7 +667,7 @@ MessageProgress Connection::endReceiveReply()
         }
 
         log_debug("received header");
-        progress.setOnHeader();
+        progress.setHeader();
         _httpbuf.reset();
         _httpbuf.beginBody( _reply->header() );
     }
@@ -686,7 +687,7 @@ MessageProgress Connection::endReceiveReply()
         }
 
         if(_httpbuf.in_avail() > 0)
-            progress.setOnBody();
+            progress.setBody();
 
         if( _httpbuf.isEnd() )
         {
@@ -994,16 +995,16 @@ bool Connection::outputAvailable()
 }
 
 
-void Connection::writeRequestHeader(std::ostream& os, const Request& request)
+void Connection::writeRequestHeader(std::ostream& os, Request& request)
 {
-    log_debug("writing request header " << request.header().url());
+    log_debug("writing request header " << request.url());
 
-    os << request.header().method() << ' '
-       << request.header().url() << " HTTP/"
+    os << request.method() << ' '
+       << request.url() << " HTTP/"
        << request.header().httpVersionMajor() << '.'
        << request.header().httpVersionMinor() << "\r\n";
 
-    for (RequestHeader::const_iterator it = request.header().begin();
+    for (MessageHeader::const_iterator it = request.header().begin();
         it != request.header().end(); ++it)
     {
         os << it->first << ": " << it->second << "\r\n";
@@ -1012,7 +1013,7 @@ void Connection::writeRequestHeader(std::ostream& os, const Request& request)
     if(_chunked)
         os << "Transfer-Encoding: chunked\r\n";
     else
-        os << "Content-Length: " << request.size() << "\r\n";
+        os << "Content-Length: " << request.body().buffer().size() << "\r\n";
 
     if( ! request.header().hasHeader("Connection") )
     {
@@ -1055,19 +1056,19 @@ void Connection::writeRequestHeader(std::ostream& os, const Request& request)
 }
 
 
-void Connection::writeReplyHeader(std::ostream& os, const Reply& reply)
+void Connection::writeReplyHeader(std::ostream& os, Reply& reply)
 {
-    log_debug("writing reply header " << reply.header().httpReturnCode());
+    log_debug("writing reply header " << reply.httpReturnCode());
 
-    const ReplyHeader& header = reply.header();
+    const MessageHeader& header = reply.header();
 
     os <<"HTTP/"
         << header.httpVersionMajor() << '.'
         << header.httpVersionMinor() << ' '
-        << header.httpReturnCode() << ' '
-        << header.httpReturnText() << "\r\n";
+        << reply.httpReturnCode() << ' '
+        << reply.httpReturnText() << "\r\n";
 
-    ReplyHeader::const_iterator it;
+    MessageHeader::const_iterator it;
     for(it = header.begin(); it != header.end(); ++it)
     {
         os << it->first << ": " << it->second << "\r\n";
@@ -1083,7 +1084,7 @@ void Connection::writeReplyHeader(std::ostream& os, const Reply& reply)
     if(_chunked)
         os << "Transfer-Encoding: chunked\r\n";
     else
-        os << "Content-Length: " << _reply->size() << "\r\n";
+        os << "Content-Length: " << _reply->body().buffer().size() << "\r\n";
 
     if( ! header.hasHeader("Server") )
     {

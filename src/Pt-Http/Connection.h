@@ -33,8 +33,8 @@
 #include "HttpBuffer.h"
 
 #include <Pt/Http/Api.h>
-#include <Pt/Http/RequestHeader.h>
-#include <Pt/Http/ReplyHeader.h>
+#include <Pt/Http/Request.h>
+#include <Pt/Http/Reply.h>
 #include <Pt/Net/TcpSocket.h>
 #include <Pt/System/IOBuffer.h>
 #include <Pt/System/Timer.h>
@@ -125,7 +125,7 @@ class Connection : public Connectable
 
     class ParseEvent : public HeaderParser::MessageHeaderEvent
     {
-            RequestHeader* _request;
+            Request* _request;
 
         public:
             explicit ParseEvent()
@@ -133,10 +133,10 @@ class Connection : public Connectable
             , _request(0)
             { }
 
-            void init(RequestHeader& request)
+            void init(Request& request)
             { 
                 _request = &request; 
-                HeaderParser::MessageHeaderEvent::init(request);
+                HeaderParser::MessageHeaderEvent::init(request.header());
             }
 
             virtual void onMethod(const std::string& method);
@@ -146,18 +146,18 @@ class Connection : public Connectable
 
     class ReplyParseEvent : public HeaderParser::MessageHeaderEvent
     {
-            ReplyHeader* _replyHeader;
+            Reply* _reply;
 
         public:
             explicit ReplyParseEvent()
                 : HeaderParser::MessageHeaderEvent(),
-                  _replyHeader(0)
+                  _reply(0)
                 { }
 
-            void init(ReplyHeader& replyHeader)
+            void init(Reply& reply)
             { 
-                _replyHeader = &replyHeader; 
-                HeaderParser::MessageHeaderEvent::init(replyHeader);
+                _reply = &reply; 
+                HeaderParser::MessageHeaderEvent::init(reply.header());
             }
 
             void onHttpReturn(unsigned ret, const std::string& text);
@@ -250,9 +250,9 @@ class Connection : public Connectable
 
         bool outputAvailable();
       
-        void writeRequestHeader(std::ostream& os, const Request& request);
+        void writeRequestHeader(std::ostream& os, Request& request);
 
-        void writeReplyHeader(std::ostream& os, const Reply& reply);
+        void writeReplyHeader(std::ostream& os, Reply& reply);
 
     private:
         ParseEvent _parseEvent;

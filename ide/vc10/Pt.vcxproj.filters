@@ -594,13 +594,7 @@
     <ClInclude Include="..\..\include\Pt\Http\Reply.h">
       <Filter>Pt-Http</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Http\ReplyHeader.h">
-      <Filter>Pt-Http</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Http\Request.h">
-      <Filter>Pt-Http</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Http\RequestHeader.h">
       <Filter>Pt-Http</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Http\Responder.h">
@@ -616,12 +610,6 @@
       <Filter>Pt-Http</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Http\ClientImpl.h">
-      <Filter>Pt-Http</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Http\NotAuthenticatedResponder.h">
-      <Filter>Pt-Http</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Http\NotAuthenticatedService.h">
       <Filter>Pt-Http</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Http\NotFoundResponder.h">
@@ -1272,12 +1260,6 @@
     <ClCompile Include="..\..\src\Pt-Http\MessageHeader.cpp">
       <Filter>Pt-Http</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Http\NotAuthenticatedResponder.cpp">
-      <Filter>Pt-Http</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Http\NotAuthenticatedService.cpp">
-      <Filter>Pt-Http</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Pt-Http\NotFoundResponder.cpp">
       <Filter>Pt-Http</Filter>
     </ClCompile>
@@ -1318,6 +1300,9 @@
       <Filter>Pt-Http</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Http\Authorization.cpp">
+      <Filter>Pt-Http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Http\Request.cpp">
       <Filter>Pt-Http</Filter>
     </ClCompile>
   </ItemGroup>

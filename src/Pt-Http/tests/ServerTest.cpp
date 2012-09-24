@@ -168,7 +168,7 @@ class ServerTest : public Pt::Unit::TestSuite
             client.beginSend();
 
             loop->run();
-            PT_UNIT_ASSERT_EQUALS(client.reply().header().httpReturnCode(), 200);
+            PT_UNIT_ASSERT_EQUALS(client.reply().httpReturnCode(), 200);
 
             PT_UNIT_ASSERT_EQUALS(_reply, "Hello World!Hello World!");
         }
@@ -199,7 +199,7 @@ class ServerTest : public Pt::Unit::TestSuite
 
             if( progress.header() )
             {
-                PT_UNIT_ASSERT_EQUALS(client.reply().header().httpReturnCode(), 200);
+                PT_UNIT_ASSERT_EQUALS(client.reply().httpReturnCode(), 200);
             }
             
             if(progress.body())
@@ -243,7 +243,7 @@ class ServerTest : public Pt::Unit::TestSuite
 
             if(progress.header())
             {
-                PT_UNIT_ASSERT_EQUALS(client.reply().header().httpReturnCode(), 404);
+                PT_UNIT_ASSERT_EQUALS(client.reply().httpReturnCode(), 404);
             }
 
             if(progress.body())
@@ -252,7 +252,7 @@ class ServerTest : public Pt::Unit::TestSuite
 
             if( progress.finished() )
             {
-                PT_UNIT_ASSERT_EQUALS(client.reply().header().httpReturnCode(), 404);
+                PT_UNIT_ASSERT_EQUALS(client.reply().httpReturnCode(), 404);
                 loop->exit();
                 return;
             }
@@ -336,7 +336,7 @@ class ServerTest : public Pt::Unit::TestSuite
             client.beginReceive();
 
             loop->run();
-            PT_UNIT_ASSERT_EQUALS(client.reply().header().httpReturnCode(), 200);
+            PT_UNIT_ASSERT_EQUALS(client.reply().httpReturnCode(), 200);
             PT_UNIT_ASSERT_EQUALS(_reply, "Authorization Required Hello World!");
         }
 
@@ -346,11 +346,11 @@ class ServerTest : public Pt::Unit::TestSuite
 
             if( progress.header() )
             {
-                if( client.reply().header().httpReturnCode() == 401)
+                if( client.reply().httpReturnCode() == 401)
                 {
                     PT_UNIT_ASSERT(client.reply().header().hasHeader("WWW-Authenticate"));
                     client.setAuthorization(_author);
-                    _reply += client.reply().header().httpReturnText();
+                    _reply += client.reply().httpReturnText();
                     _reply += ' ';
                 }               
             }
@@ -361,7 +361,7 @@ class ServerTest : public Pt::Unit::TestSuite
 
             if( progress.finished() )
             {
-                if( client.reply().header().httpReturnCode() == 200 )
+                if( client.reply().httpReturnCode() == 200 )
                 {
                     loop->exit();
                     return;
@@ -387,7 +387,7 @@ class ServerTest : public Pt::Unit::TestSuite
             client.beginSend();
 
             loop->run();
-            PT_UNIT_ASSERT_EQUALS(client.reply().header().httpReturnCode(), 200);
+            PT_UNIT_ASSERT_EQUALS(client.reply().httpReturnCode(), 200);
             PT_UNIT_ASSERT_EQUALS(_reply, "Hello World!");
         }
 
@@ -403,7 +403,7 @@ class ServerTest : public Pt::Unit::TestSuite
 
             if( progress.header() )
             {
-                PT_UNIT_ASSERT_EQUALS(client.reply().header().httpReturnCode(), 200);
+                PT_UNIT_ASSERT_EQUALS(client.reply().httpReturnCode(), 200);
             }
             
             if( progress.body() )
@@ -437,7 +437,7 @@ class ServerTest : public Pt::Unit::TestSuite
 
             loop->run();
 
-            PT_UNIT_ASSERT_EQUALS(client.reply().header().httpReturnCode(), 200);
+            PT_UNIT_ASSERT_EQUALS(client.reply().httpReturnCode(), 200);
             PT_UNIT_ASSERT_EQUALS(_reply, "Chunk5Chunk4Chunk3Chunk2Chunk1");
         }
 
@@ -467,7 +467,7 @@ class ServerTest : public Pt::Unit::TestSuite
 
             if( progress.header() )
             {
-                PT_UNIT_ASSERT_EQUALS(client.reply().header().httpReturnCode(), 200);
+                PT_UNIT_ASSERT_EQUALS(client.reply().httpReturnCode(), 200);
             }
 
             if( progress.body() )

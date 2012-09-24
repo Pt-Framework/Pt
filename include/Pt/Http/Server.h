@@ -30,7 +30,7 @@
 #define Pt_Http_Server_h
 
 #include <Pt/Http/Api.h>
-#include <Pt/Http/RequestHeader.h>
+#include <Pt/Http/Request.h>
 #include <Pt/Net/TcpServer.h>
 #include <Pt/Connectable.h>
 #include <Pt/SmartPtr.h>
@@ -59,7 +59,7 @@ class ServerThread;
 class Service;
 class Authentication;
 class RequestHandler;
-class RequestHeader;
+class Request;
 class Responder;
 class NotFoundService;
 
@@ -69,7 +69,7 @@ class MapService
         virtual ~MapService()
         {}
 
-        virtual bool map(const RequestHeader& header) = 0;
+        virtual bool map(const Request& header) = 0;
 };
 
 
@@ -81,7 +81,7 @@ class MapIf : public MapService
         : _p(p)
         {}
 
-        bool map(const RequestHeader& header)
+        bool map(const Request& header)
         { return _p(header); }
 
     private:
@@ -96,8 +96,8 @@ class MapUrl
         : _url(url)
         {}
 
-        bool operator()(const RequestHeader& header) const
-        { return header.url() == _url; }
+        bool operator()(const Request& request) const
+        { return request.url() == _url; }
 
     private:
         std::string _url;
@@ -180,7 +180,7 @@ class PT_HTTP_API Server : public Pt::Connectable
 
         void removeService(Service& service);
 
-        Service* getService(const RequestHeader& request, Authentication*& auth);
+        Service* getService(const Request& request, Authentication*& auth);
 
     private:
         void startWorker();

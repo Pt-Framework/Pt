@@ -39,9 +39,7 @@
     <ClInclude Include="..\..\include\Pt\Http\Message.h" />
     <ClInclude Include="..\..\include\Pt\Http\MessageHeader.h" />
     <ClInclude Include="..\..\include\Pt\Http\Reply.h" />
-    <ClInclude Include="..\..\include\Pt\Http\ReplyHeader.h" />
     <ClInclude Include="..\..\include\Pt\Http\Request.h" />
-    <ClInclude Include="..\..\include\Pt\Http\RequestHeader.h" />
     <ClInclude Include="..\..\include\Pt\Http\Responder.h" />
     <ClInclude Include="..\..\include\Pt\Http\Server.h" />
     <ClInclude Include="..\..\include\Pt\Http\Service.h" />
@@ -167,8 +165,6 @@
     <ClInclude Include="..\..\src\Pt-Http\ClientImpl.h" />
     <ClInclude Include="..\..\src\Pt-Http\Connection.h" />
     <ClInclude Include="..\..\src\Pt-Http\HttpBuffer.h" />
-    <ClInclude Include="..\..\src\Pt-Http\NotAuthenticatedResponder.h" />
-    <ClInclude Include="..\..\src\Pt-Http\NotAuthenticatedService.h" />
     <ClInclude Include="..\..\src\Pt-Http\NotFoundResponder.h" />
     <ClInclude Include="..\..\src\Pt-Http\NotFoundService.h" />
     <ClInclude Include="..\..\src\Pt-Http\Parser.h" />
@@ -254,12 +250,11 @@
     <ClCompile Include="..\..\src\Pt-Http\Connection.cpp" />
     <ClCompile Include="..\..\src\Pt-Http\HttpBuffer.cpp" />
     <ClCompile Include="..\..\src\Pt-Http\MessageHeader.cpp" />
-    <ClCompile Include="..\..\src\Pt-Http\NotAuthenticatedResponder.cpp" />
-    <ClCompile Include="..\..\src\Pt-Http\NotAuthenticatedService.cpp" />
     <ClCompile Include="..\..\src\Pt-Http\NotFoundResponder.cpp" />
     <ClCompile Include="..\..\src\Pt-Http\NotFoundService.cpp" />
     <ClCompile Include="..\..\src\Pt-Http\Parser.cpp" />
     <ClCompile Include="..\..\src\Pt-Http\Reply.cpp" />
+    <ClCompile Include="..\..\src\Pt-Http\Request.cpp" />
     <ClCompile Include="..\..\src\Pt-Http\Responder.cpp" />
     <ClCompile Include="..\..\src\Pt-Http\Server.cpp" />
     <ClCompile Include="..\..\src\Pt-Http\Service.cpp" />

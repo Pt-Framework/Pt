@@ -35,7 +35,7 @@ namespace Http {
 
 void NotFoundResponder::onBeginReply(Request& request, Reply& reply)
 {
-    reply.header().httpReturn(404, "Not found");
+    reply.setReturn(404, "Not found");
     reply.finish();
     reply.beginSend();
 }

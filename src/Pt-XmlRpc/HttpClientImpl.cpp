@@ -41,7 +41,7 @@ HttpClientImpl::HttpClientImpl()
 : _client()
 , _error(false)
 {
-    _client.request().header().method("POST");
+    _client.request().setMethod("POST");
     _client.replyReceived() += Pt::slot( *this, &HttpClientImpl::onReply);
 }
 
@@ -51,8 +51,8 @@ HttpClientImpl::HttpClientImpl(System::EventLoop& selector, const std::string& a
 : _client(selector, addr, port)
 , _error(false)
 {
-    _client.request().header().method("POST");
-    _client.request().header().url(url);
+    _client.request().setMethod("POST");
+    _client.request().setUrl(url);
     _client.replyReceived() += Pt::slot( *this, &HttpClientImpl::onReply);
 }
 
@@ -74,7 +74,7 @@ std::string HttpClientImpl::url() const
       << _client.host().host()
       << ':'
       << _client.host().port()
-      << _client.request().header().url();
+      << _client.request().url();
 
     return s.str();
 }
@@ -87,7 +87,7 @@ void HttpClientImpl::onReply(Http::Client& client)
         Http::MessageProgress progress = client.endReceive();
         if( progress.header() )
         {
-            verifyHeader(client.reply().header());
+            verifyHeader(client.reply());
             ClientImpl::onReadReplyBegin(client.reply().body());
         }
 
@@ -138,7 +138,7 @@ std::string HttpClientImpl::execute()
 
     try
     {
-        verifyHeader( _client.reply().header() );
+        verifyHeader( _client.reply() );
 
         char ch = ' ';
         while( is.get(ch) )
@@ -158,7 +158,7 @@ std::ostream& HttpClientImpl::prepareRequest()
 {
     _client.request().clear();
     _client.request().header().setHeader("Content-Type", "text/xml");
-    _client.request().header().method("POST");
+    _client.request().setMethod("POST");
     return _client.request().body();
 }
 
@@ -171,22 +171,22 @@ void HttpClientImpl::cancel()
 }
 
 
-void HttpClientImpl::verifyHeader(const Http::ReplyHeader& header)
+void HttpClientImpl::verifyHeader(const Http::Reply& reply)
 {
-    if (header.httpReturnCode() != 200)
+    if (reply.httpReturnCode() != 200)
     {
         std::ostringstream msg;
         msg << "invalid http return code "
-            << header.httpReturnCode()
+            << reply.httpReturnCode()
             << ": "
-            << header.httpReturnText();
+            << reply.httpReturnText();
         throw std::runtime_error(msg.str());
     }
 
-    if (!header.isHeaderValue("Content-Type", "text/xml"))
+    if (! reply.header().isHeaderValue("Content-Type", "text/xml"))
     {
         std::ostringstream msg;
-        msg << "invalid content type " << header.getHeader("Content-Type");
+        msg << "invalid content type " << reply.header().getHeader("Content-Type");
         throw std::runtime_error(msg.str());
     }
 
