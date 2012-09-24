@@ -71,6 +71,7 @@ Connection::Connection()
 , _replyParser(_replyParseEvent, true)
 , _request(0)
 , _reply(0)
+, _sockbuf(8192, true)
 , _ssl(false)
 #ifdef PT_HTTP_WITH_SSL
 , _sslbuf( _sockbuf )
@@ -86,6 +87,7 @@ Connection::Connection()
 {
     _socket.connected() += slot(*this, &Connection::onConnect);
     _socket.outputPipelined() += slot(*this, &Connection::onOutputPipelined);
+    _socket.inputPipelined() += slot(*this, &Connection::onInputPipelined);
 
     _sockbuf.attach(_socket);
     _sockbuf.outputReady() += slot(*this, &Connection::onHttpOutput);
@@ -244,7 +246,7 @@ void Connection::beginSendRequest(Request& request)
             os.write(request.data(), request.size());
         }
 
-        log_debug("sending HTTP request");
+        log_debug("pipelining HTTP request");
         // signal that output was sent, so the request data can be pipelined
         // until we begin receiving the next reply from the server
         _socket.setOutputPipelined(); //_request->onOutput();
@@ -803,6 +805,24 @@ void Connection::onOutputPipelined()
 }
 
 
+void Connection::onInputPipelined()
+{
+    log_trace("Connection::onInputPipelined");
+
+    if(_request)
+    {
+        _request->onInput();
+        return;
+    }
+
+    if(_reply)
+    {
+        _reply->onInput();
+        return;
+    }
+}
+
+
 void Connection::onTimeout()
 {
     log_trace("Connection::onTimeout");
@@ -872,13 +892,19 @@ void Connection::beginRead()
 #ifdef PT_HTTP_WITH_SSL
     if(_ssl)
         if( _sslbuf.in_avail() )
-            onHttpsInput(_sslbuf);
+        {
+            //onHttpsInput(_sslbuf);
+            _socket.setInputPipelined();
+        }
         else
             _sslbuf.beginRead();
      else
 #endif
         if( _sockbuf.in_avail() )
-            onHttpInput(_sockbuf);
+        {
+            //onHttpInput(_sockbuf);
+            _socket.setInputPipelined();
+        }
         else
             _sockbuf.beginRead();
 }

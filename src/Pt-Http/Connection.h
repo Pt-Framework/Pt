@@ -62,12 +62,19 @@ class Socket : public Net::TcpSocket
 {
     public:
         Socket()
-        : _pipelinedReady(false)
+        : _output(false)
+        , _input(false)
         {}
+
+        void setInputPipelined()
+        { 
+            _input = true;
+            this->setReady(); 
+        }
 
         void setOutputPipelined()
         { 
-            _pipelinedReady = true;
+            _output = true;
             this->setReady(); 
         }
 
@@ -80,24 +87,33 @@ class Socket : public Net::TcpSocket
     protected:
         virtual void onCancel()
         {
-            _pipelinedReady = false;
+            _output = false;
+            _input = false;
             Net::TcpSocket::onCancel();
         }
         
         virtual bool onRun()
         { 
-            if(_pipelinedReady)
+            if(_output)
             {
-                _pipelinedReady = false;
+                _output = false;
                 _outputPipelined.send();
                 return true;
             }
             
+            if(_input)
+            {
+                _input = false;
+                _inputPipelined.send();
+                return true;
+            }
+
             return Net::TcpSocket::onRun(); 
         }
 
     private:
-        bool _pipelinedReady;
+        bool _output;
+        bool _input;
         Signal<> _outputPipelined;
         Signal<> _inputPipelined;
 };
@@ -213,6 +229,8 @@ class Connection : public Connectable
         void onConnect(Net::TcpSocket& socket);
 
         void onOutputPipelined();
+
+        void onInputPipelined();
 
         void onTimeout();
 
