@@ -78,10 +78,11 @@ int main(int argc, char* argv[])
     Pt::System::MainLoop loop;
     
     EchoService service;
-    //service.registerFunction("echo", echo);
+    service.registerFunction("echo", echo);
     
-    Pt::Http::Server server(loop, ip, port);
+    Pt::Http::Server server(loop);
     server.setMaxThreads(maxThreads);
+    server.listen(ip, port);
     server.addService(Pt::Http::MapUrl("/myservice"), service);
 
     //loop.setIdleTimeout(5000);
