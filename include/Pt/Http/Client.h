@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 by Marc Boris Duerner, Tommi Maekitalo
+ * Copyright (C) 2012 by Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -30,83 +30,30 @@
 #define Pt_Http_Client_h
 
 #include <Pt/Http/Api.h>
-#include <Pt/Http/Request.h>
-#include <Pt/Http/Reply.h>
-#include <Pt/System/Selectable.h>
-#include <Pt/System/IOError.h>
+#include <Pt/Http/MessageHeader.h>
 #include <Pt/Signal.h>
-#include <Pt/Delegate.h>
 #include <Pt/NonCopyable.h>
 #include <string>
 
-// Authorization
-#include <Pt/TextStream.h>
-#include <Pt/Base64Codec.h>
-#include <sstream>
-
 namespace Pt {
+
+namespace System {
+    class EventLoop;
+}
 
 namespace Net {
     class AddrInfo;
 }
 
 namespace Ssl {
-  class Context;
+    class Context;
 }
 
 namespace Http {
 
-class PT_HTTP_API Authorization
-{
-    public:
-        virtual ~Authorization()
-        {}
-
-        void authorize(Request& request, const Reply& reply)
-        { onAuthorize(request, reply); }
-
-    protected:
-        virtual void onAuthorize(Request& request, const Reply& reply) = 0;
-};
-
-
-class PT_HTTP_API BasicAuthorization : public Authorization
-                                     , private NonCopyable
-{
-    public:
-        BasicAuthorization(const std::string& user, const std::string& passwd)
-        : _username(user)
-        , _password(passwd)
-        {}
-
-        void set(const std::string& user, const std::string& passwd)
-        {
-            _username = user;
-            _password = passwd;
-        }
-
-        virtual ~BasicAuthorization()
-        {}
-
-    protected:
-        void onAuthorize(Request& request, const Reply& reply)
-        {
-            std::ostringstream oss;
-            oss << "Basic ";
-               
-            BasicTextOStream<char, char> b64(oss, new Base64Codec());
-            b64 <<_username<< ':' << _password;
-            b64.terminate();
-
-            //log_debug("set Authorization to " << oss.str());
-            request.header().setHeader("Authorization", oss.str().c_str());
-        }
-
-    private:
-        std::string _username;
-        std::string _password;
-};
-
+class Authorization;
+class Reply;
+class Request;
 
 class PT_HTTP_API Client : public Connectable
                          , private NonCopyable

@@ -37,6 +37,29 @@ namespace Pt {
 
 namespace Http {
 
+Challenge::~Challenge() 
+{ 
+}
+
+
+Signal<Challenge&>& Challenge::finished()
+{ 
+    return _finished; 
+}
+    
+       
+void Challenge::setReady()
+{ 
+    _finished.send(*this); 
+}
+
+
+bool Challenge::getResult()
+{ 
+    return onGetResult(); 
+}
+
+
 bool Authentication::authenticate(const Request& req, Reply& reply) 
 {
     bool granted = this->onAuthenticate(req, reply);

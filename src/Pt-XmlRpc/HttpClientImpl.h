@@ -30,6 +30,7 @@
 
 #include <Pt/Http/Client.h>
 #include <Pt/Http/Request.h>
+#include <Pt/Http/Reply.h>
 #include "ClientImpl.h"
 
 namespace Pt

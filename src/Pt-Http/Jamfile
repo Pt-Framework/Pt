@@ -10,6 +10,7 @@ if $(WITH_OPENSSL)
 }
 
 SharedLibrary Pt-Http : Authentication.cpp
+                        Authorization.cpp
                         Client.cpp
                         ClientImpl.cpp
                         ChunkedReader.cpp

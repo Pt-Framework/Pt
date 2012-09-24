@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 by Marc Boris Duerner, Tommi Maekitalo
+ * Copyright (C) 2012 by Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -27,13 +27,11 @@
  */
 
 #include "ClientImpl.h"
-#include <Pt/Http/Client.h>
 #include "Parser.h"
+#include <Pt/Http/Client.h>
+#include <Pt/Http/Authorization.h>
 #include <Pt/System/IOError.h>
 #include <Pt/System/Logger.h>
-#include <Pt/TextStream.h>
-#include <Pt/Base64Codec.h>
-#include <sstream>
 #include <cassert>
 
 log_define("Pt.Http.Client")

@@ -32,6 +32,7 @@
 #include "Pt/Http/Server.h"
 #include "Pt/Http/Client.h"
 #include "Pt/Http/Authentication.h"
+#include "Pt/Http/Authorization.h"
 #include "Pt/Http/ReplyHeader.h"
 #include "Pt/Http/Request.h"
 #include "Pt/Http/Reply.h"

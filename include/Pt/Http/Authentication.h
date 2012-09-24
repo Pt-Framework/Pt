@@ -41,20 +41,22 @@ namespace Http {
 class Request;
 class Reply;
 
-class Challenge
+class PT_HTTP_API Challenge : public Pt::NonCopyable
 {
     public:
-        virtual ~Challenge() 
-        { }
+        virtual ~Challenge();
 
-        Signal<Challenge&>& finished()
-        { return _finished; }
+        Signal<Challenge&>& finished();
        
-        virtual bool getResult() = 0;
+        bool getResult();
 
     protected:
-        void setReady()
-        { _finished.send(*this); }
+        Challenge()
+        {}
+
+        void setReady();
+
+        virtual bool onGetResult() = 0;
 
     private:
         Signal<Challenge&> _finished;
@@ -64,7 +66,7 @@ class Challenge
 class PT_HTTP_API Authentication
 {
     public:
-        Authentication(const std::string realm)
+        Authentication(const std::string& realm)
         : _realm(realm)
         { }
 
@@ -99,7 +101,7 @@ class PT_HTTP_API Authentication
 class PT_HTTP_API BasicAuthentication : public Authentication
 {
     public:
-        BasicAuthentication(const std::string realm)
+        BasicAuthentication(const std::string& realm)
         : Authentication(realm)
         { }
 
