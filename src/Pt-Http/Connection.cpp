@@ -493,7 +493,6 @@ void Connection::beginReceiveRequest(Request& request)
         }
     }
     
-    // TODO: go through eventloop by calling _socket.setInputPipelined()
     beginRead();
 }
 
@@ -620,7 +619,6 @@ void Connection::beginReceiveReply(Reply& r)
         _timer.start( _timeout );
     }
 
-    // TODO: go through eventloop by calling _socket.setInputPipelined()
     beginRead();
 }
 
@@ -975,7 +973,6 @@ bool Connection::outputAvailable()
 #ifdef PT_HTTP_WITH_SSL
     if(_ssl)
     {
-        // TODO: need to check _sslbuf.out_avail()
         _sslbuf.pubsync();
 
         if ( _sslbuf.buffer().out_avail() )
