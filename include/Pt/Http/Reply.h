@@ -48,27 +48,27 @@ class PT_HTTP_API Reply
     public:
         Reply(Http::Connection& conn)
         : _conn(&conn)
-        , _httpReturnCode(200)
-        , _httpReturnText("OK")
         , _isReceiving(false)
         , _isSending(false)
         , _finished(false)
+        , _statusCode(200)
+        , _statusText("OK")
         { }
         
         Connection& connection()
         { return *_conn; }
         
-        void setReturn(unsigned c, const std::string& t)
+        void setStatus(unsigned c, const std::string& t)
         {
-            _httpReturnCode = c;
-            _httpReturnText = t;
+            _statusCode = c;
+            _statusText = t;
         }
 
-        unsigned httpReturnCode() const
-        { return _httpReturnCode; }
+        unsigned statusCode() const
+        { return _statusCode; }
 
-        const std::string& httpReturnText() const
-        { return _httpReturnText; }
+        const std::string& statusText() const
+        { return _statusText; }
 
         void beginReceive();
 
@@ -108,8 +108,8 @@ class PT_HTTP_API Reply
 
         void clear()
         {
-            _httpReturnCode = 200;
-            _httpReturnText = "OK";
+            _statusCode = 200;
+            _statusText = "OK";
             _header.clear();
             _body.clear();
             _body.discard();
@@ -125,13 +125,13 @@ class PT_HTTP_API Reply
 
     private:
         Http::Connection* _conn;
-        unsigned _httpReturnCode;
-        std::string _httpReturnText;
         bool _isReceiving; // TODO: move to Connection
         bool _isSending; // TODO: move to Connection
+        bool _finished;
+        unsigned _statusCode;
+        std::string _statusText;
         MessageHeader _header;
         MessageBody _body;
-        bool _finished;
         Signal<Reply&> _inputReceived;
         Signal<Reply&> _outputSent;
 };

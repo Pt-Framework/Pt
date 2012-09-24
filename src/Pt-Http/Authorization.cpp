@@ -77,7 +77,7 @@ void BasicAuthorization::onAuthorize(Request& request, const Reply& reply)
     b64.terminate();
 
     //log_debug("set Authorization to " << oss.str());
-    request.header().setHeader("Authorization", oss.str().c_str());
+    request.header().set("Authorization", oss.str().c_str());
 }
 
 } // namespace Http

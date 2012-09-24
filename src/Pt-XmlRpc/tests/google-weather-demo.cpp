@@ -144,8 +144,8 @@ class GoogleWeatherClient : public Pt::Connectable
             _client.request().clear();
             _client.request().setUrl("/ig/api?weather=" + _weather.city());
             _client.request().setMethod("GET");
-            _client.request().header().setHeader("Host", "www.google.com");
-            _client.request().header().setHeader("Accept-Charset", "UTF-8");
+            _client.request().header().set("Host", "www.google.com");
+            _client.request().header().set("Accept-Charset", "UTF-8");
 
             // begin a new request, non-blocking, incoming data is processed
             // via onReplyReceived
@@ -154,10 +154,10 @@ class GoogleWeatherClient : public Pt::Connectable
 
         void onHeaderReceived(Pt::Http::Client& client)
         {
-            if(client.reply().httpReturnCode() != 200)
+            if(client.reply().statusCode() != 200)
             {
-                std::cerr << "unexpected http return: " << client.reply().httpReturnCode() 
-                          << " - " << client.reply().httpReturnText() << std::endl;
+                std::cerr << "unexpected http return: " << client.reply().statusCode() 
+                          << " - " << client.reply().statusText() << std::endl;
             }
 
             // we have the expected reply and prepare our text stream to process

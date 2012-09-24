@@ -105,17 +105,17 @@ namespace Http {
 
     void HeaderParser::MessageHeaderEvent::onHttpVersion(unsigned major, unsigned minor)
     {
-         _header->httpVersion(major, minor);
+         _header->setVersion(major, minor);
     }
 
     void HeaderParser::MessageHeaderEvent::onKey(const std::string& key)
     {
-        strncpy(_key, key.c_str(), MessageHeader::MAXHEADERSIZE);
+        strncpy(_key, key.c_str(), MessageHeader::MaxHeaderSize);
     }
 
     void HeaderParser::MessageHeaderEvent::onValue(const std::string& value)
     {
-        _header->addHeader(_key, value.c_str());
+        _header->add(_key, value.c_str());
     }
 
     std::size_t HeaderParser::advance(std::streambuf& sb)

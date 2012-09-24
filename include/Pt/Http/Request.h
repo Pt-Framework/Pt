@@ -47,11 +47,11 @@ class PT_HTTP_API Request
     public:
         explicit Request( Http::Connection& conn, const std::string& url = std::string() )
         : _conn(&conn)
-        , _url(url)
-        , _method("GET")
         , _isReceiving(false)
         , _isSending(false)
         , _finished(false)
+        , _url(url)
+        , _method("GET")
         { }
 
         const std::string& url() const
@@ -129,14 +129,14 @@ class PT_HTTP_API Request
 
     private:
         Http::Connection* _conn;
+        bool _isReceiving; // TODO: move to Connection
+        bool _isSending; // TODO: move to Connection
+        bool _finished;
         std::string _url;
         std::string _method;
         std::string _qparams;
-        bool _isReceiving; // TODO: move to Connection
-        bool _isSending; // TODO: move to Connection
         MessageHeader _header;
         MessageBody _body;
-        bool _finished;
         Signal<Request&> _inputReceived;
         Signal<Request&> _outputSent;
 };

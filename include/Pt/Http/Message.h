@@ -30,6 +30,7 @@
 #define Pt_Http_Message_h
 
 #include <Pt/Http/Api.h>
+#include <Pt/NonCopyable.h>
 #include <iostream>
 #include <streambuf>
 #include <string>
@@ -139,115 +140,113 @@ class PT_HTTP_API MessageBody : public std::iostream
         MessageBuffer _buf;
 };
 
-class PT_HTTP_API MessageHeader
+class PT_HTTP_API MessageHeader : protected Pt::NonCopyable
 {
     public:
-        static const unsigned MAXHEADERSIZE = 4096;
-
-    private:
-        char _rawdata[MAXHEADERSIZE];  // key_1\0value_1\0key_2\0value_2\0...key_n\0value_n\0\0
-        unsigned _endOffset;
-        char* eptr() { return _rawdata + _endOffset; }
-        unsigned _httpVersionMajor;
-        unsigned _httpVersionMinor;
-
-    public:
         typedef std::pair<const char*, const char*> value_type;
-        class const_iterator
-            : public std::iterator<std::forward_iterator_tag, value_type>
+
+        static const unsigned MaxHeaderSize = 4096;
+        
+        class ConstIterator
         {
             friend class MessageHeader;
 
-            value_type current_value;
-
-            void fixup()
-            {
-                if (*current_value.first)
-                    current_value.second = current_value.first + std::strlen(current_value.first) + 1;
-                else
-                    current_value.first = current_value.second = 0;
-            }
-
-            void moveForward()
-            {
-                current_value.first = current_value.second + std::strlen(current_value.second) + 1;
-                fixup();
-            }
-
-          public:
-            const_iterator()
+            public:
+                ConstIterator()
                 : current_value((char*)0, (char*)0)
-            { }
+                { }
 
-            explicit const_iterator(const char* p)
+                explicit ConstIterator(const char* p)
                 : current_value(p, p)
-            {
-                fixup();
-            }
+                {
+                    fixup();
+                }
 
-            bool operator== (const const_iterator& it) const
-            { return current_value.first == it.current_value.first; }
+                bool operator== (const ConstIterator& it) const
+                { return current_value.first == it.current_value.first; }
 
-            bool operator!= (const const_iterator& it) const
-            { return current_value.first != it.current_value.first; }
+                bool operator!= (const ConstIterator& it) const
+                { return current_value.first != it.current_value.first; }
 
-            const_iterator& operator++()
-            {
-                moveForward();
-                return *this;
-            }
+                ConstIterator& operator++()
+                {
+                    moveForward();
+                    return *this;
+                }
 
-            const_iterator operator++(int)
-            {
-                const_iterator ret = *this;
-                moveForward();
-                return ret;
-            }
+                ConstIterator operator++(int)
+                {
+                    ConstIterator ret = *this;
+                    moveForward();
+                    return ret;
+                }
 
-            const value_type& operator* () const   { return current_value; }
-            const value_type* operator-> () const  { return &current_value; }
+                const value_type& operator* () const   
+                { return current_value; }
+                
+                const value_type* operator-> () const  
+                { return &current_value; }
+
+            private:
+                void fixup()
+                {
+                    if (*current_value.first)
+                        current_value.second = current_value.first + std::strlen(current_value.first) + 1;
+                    else
+                        current_value.first = current_value.second = 0;
+                }
+
+                void moveForward()
+                {
+                    current_value.first = current_value.second + std::strlen(current_value.second) + 1;
+                    fixup();
+                }
+
+            private:
+                value_type current_value;
         };
 
-
+    public:
         MessageHeader()
-            : _endOffset(0),
-              _httpVersionMajor(1),
-              _httpVersionMinor(1)
+        : _endOffset(0)
+        , _httpVersionMajor(1)
+        , _httpVersionMinor(1)
         {
             _rawdata[0] = _rawdata[1] = '\0';
         }
 
-        virtual ~MessageHeader()  {}
+        ~MessageHeader()  
+        {}
 
         void clear();
 
-        void setHeader(const char* key, const char* value, bool replace = true);
+        void set(const char* key, const char* value, bool replace = true);
 
-        void addHeader(const char* key, const char* value)
-        { setHeader(key, value, false); }
+        void add(const char* key, const char* value)
+        { set(key, value, false); }
 
-        void removeHeader(const char* key);
+        void remove(const char* key);
 
-        const char* getHeader(const char* key) const;
+        const char* get(const char* key) const;
 
-        bool hasHeader(const char* key) const
-        { return getHeader(key) != 0; }
+        bool has(const char* key) const
+        { return get(key) != 0; }
 
-        bool isHeaderValue(const char* key, const char* value) const;
+        bool isValue(const char* key, const char* value) const;
 
-        const_iterator begin() const
-        { return const_iterator(_rawdata); }
+        ConstIterator begin() const
+        { return ConstIterator(_rawdata); }
 
-        const_iterator end() const
-        { return const_iterator(); }
+        ConstIterator end() const
+        { return ConstIterator(); }
 
-        unsigned httpVersionMajor() const
+        unsigned versionMajor() const
         { return _httpVersionMajor; }
 
-        unsigned httpVersionMinor() const
+        unsigned versionMinor() const
         { return _httpVersionMinor; }
 
-        void httpVersion(unsigned major, unsigned minor)
+        void setVersion(unsigned major, unsigned minor)
         {
             _httpVersionMajor = major;
             _httpVersionMinor = minor;
@@ -263,6 +262,15 @@ class PT_HTTP_API MessageHeader
         /// The buffer must have at least 30 bytes.
         static char* htdateCurrent(char* buffer);
 
+    private:
+        char* eptr() 
+        { return _rawdata + _endOffset; }
+
+    private:
+        char _rawdata[MaxHeaderSize];  // key_1\0value_1\0key_2\0value_2\0...key_n\0value_n\0\0
+        unsigned _endOffset;
+        unsigned _httpVersionMajor;
+        unsigned _httpVersionMinor;
 };
 
 } // namespace Http

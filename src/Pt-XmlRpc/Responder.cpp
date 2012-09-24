@@ -127,7 +127,7 @@ void XmlRpcResponder::onBeginReply(Http::Request& request, Http::Reply& reply)
     {
         _reply = &reply;
         _writer.begin( _reply->body() );
-        reply.header().setHeader("Content-Type", "text/xml");
+        reply.header().set("Content-Type", "text/xml");
 
         if( ! _proc )
         {
@@ -161,8 +161,8 @@ void XmlRpcResponder::onWriteReply(Http::Request& request, Http::Reply& reply)
 void XmlRpcResponder::replyError(Http::Reply& reply, int rc, const char* msg)
 {
     reply.clear();
-    reply.header().setHeader("Content-Type", "text/xml");
-    reply.header().setHeader("Connection", "close");
+    reply.header().set("Content-Type", "text/xml");
+    reply.header().set("Connection", "close");
 
     _writer.begin( reply.body() );
     _writer.writeStartTag( XMLRPC_METHODRESPONSE );

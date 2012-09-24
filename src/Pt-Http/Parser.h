@@ -58,7 +58,7 @@ class PT_HTTP_API HeaderParser
         class PT_HTTP_API MessageHeaderEvent : public Event
         {
                 MessageHeader* _header;
-                char _key[MessageHeader::MAXHEADERSIZE];
+                char _key[MessageHeader::MaxHeaderSize];
 
             public:
                 explicit MessageHeaderEvent(MessageHeader& header)

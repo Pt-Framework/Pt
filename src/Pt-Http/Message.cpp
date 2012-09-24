@@ -42,12 +42,8 @@
 
 log_define("Pt.Http.Message")
 
-namespace Pt {
 
-namespace Http {
-
-namespace
-{
+namespace {
 
 int compareIgnoreCase(const char* s1, const char* s2)
 {
@@ -74,6 +70,9 @@ int compareIgnoreCase(const char* s1, const char* s2)
 
 } 
 
+namespace Pt {
+
+namespace Http {
 
 MessageBuffer::MessageBuffer()
 : _obuffer(0)
@@ -144,9 +143,9 @@ void MessageBody::discard()
 }
 
 
-const char* MessageHeader::getHeader(const char* key) const
+const char* MessageHeader::get(const char* key) const
 {
-    for (const_iterator it = begin(); it != end(); ++it)
+    for (ConstIterator it = begin(); it != end(); ++it)
     {
         if (compareIgnoreCase(key, it->first) == 0)
             return it->second;
@@ -155,13 +154,15 @@ const char* MessageHeader::getHeader(const char* key) const
     return 0;
 }
 
-bool MessageHeader::isHeaderValue(const char* key, const char* value) const
+
+bool MessageHeader::isValue(const char* key, const char* value) const
 {
-    const char* h = getHeader(key);
+    const char* h = get(key);
     if (h == 0)
         return false;
     return compareIgnoreCase(h, value) == 0;
 }
+
 
 void MessageHeader::clear()
 {
@@ -171,7 +172,8 @@ void MessageHeader::clear()
     _httpVersionMinor = 1;
 }
 
-void MessageHeader::setHeader(const char* key, const char* value, bool replace)
+
+void MessageHeader::set(const char* key, const char* value, bool replace)
 {
     log_debug("setHeader(\"" << key << "\", \"" << value << "\", " << replace << ')');
 
@@ -179,14 +181,14 @@ void MessageHeader::setHeader(const char* key, const char* value, bool replace)
         throw std::runtime_error("empty key not allowed in messageheader");
 
     if (replace)
-        removeHeader(key);
+        remove(key);
 
     char* p = eptr();
 
     size_t lk = strlen(key);     // length of key
     size_t lv = strlen(value);   // length of value
 
-    if (p - _rawdata + lk + lv + 2 > MAXHEADERSIZE)
+    if (p - _rawdata + lk + lv + 2 > MaxHeaderSize)
         throw std::runtime_error("message header too big");
 
     std::strcpy(p, key);   // copy key
@@ -197,14 +199,15 @@ void MessageHeader::setHeader(const char* key, const char* value, bool replace)
     _endOffset = (p + lv + 1) - _rawdata;
 }
 
-void MessageHeader::removeHeader(const char* key)
+
+void MessageHeader::remove(const char* key)
 {
     if (!*key)
         throw std::runtime_error("empty key not allowed in messageheader");
 
     char* p = eptr();
 
-    const_iterator it = begin();
+    ConstIterator it = begin();
     while (it != end())
     {
         if (compareIgnoreCase(key, it->first) == 0)
@@ -227,14 +230,16 @@ void MessageHeader::removeHeader(const char* key)
     _endOffset = p - _rawdata;
 }
 
+
 bool MessageHeader::chunkedTransferEncoding() const
 {
-    return isHeaderValue("Transfer-Encoding", "chunked");
+    return isValue("Transfer-Encoding", "chunked");
 }
+
 
 std::size_t MessageHeader::contentLength() const
 {
-    const char* s = getHeader("Content-Length");
+    const char* s = get("Content-Length");
     if (s == 0)
         return 0;
 
@@ -245,16 +250,18 @@ std::size_t MessageHeader::contentLength() const
     return size;
 }
 
+
 bool MessageHeader::keepAlive() const
 {
-    const char* ch = getHeader("Connection");
+    const char* ch = get("Connection");
 
     if (ch == 0)
-        return httpVersionMajor() == 1
-            && httpVersionMinor() >= 1;
+        return versionMajor() == 1
+            && versionMinor() >= 1;
     else
         return compareIgnoreCase(ch, "keep-alive") == 0;
 }
+
 
 char* MessageHeader::htdateCurrent(char* buffer)
 {

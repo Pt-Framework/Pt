@@ -61,7 +61,7 @@ void Connection::ParseEvent::onUrlParam(const std::string& q)
 
 void Connection::ReplyParseEvent::onHttpReturn(unsigned ret, const std::string& text)
 {
-    _reply->setReturn(ret, text);
+    _reply->setStatus(ret, text);
 }
 
 
@@ -1001,10 +1001,10 @@ void Connection::writeRequestHeader(std::ostream& os, Request& request)
 
     os << request.method() << ' '
        << request.url() << " HTTP/"
-       << request.header().httpVersionMajor() << '.'
-       << request.header().httpVersionMinor() << "\r\n";
+       << request.header().versionMajor() << '.'
+       << request.header().versionMinor() << "\r\n";
 
-    for (MessageHeader::const_iterator it = request.header().begin();
+    for (MessageHeader::ConstIterator it = request.header().begin();
         it != request.header().end(); ++it)
     {
         os << it->first << ": " << it->second << "\r\n";
@@ -1015,18 +1015,18 @@ void Connection::writeRequestHeader(std::ostream& os, Request& request)
     else
         os << "Content-Length: " << request.body().buffer().size() << "\r\n";
 
-    if( ! request.header().hasHeader("Connection") )
+    if( ! request.header().has("Connection") )
     {
         os << "Connection: keep-alive\r\n";
     }
 
-    if (!request.header().hasHeader("Date"))
+    if (!request.header().has("Date"))
     {
         char buffer[50];
         os << "Date: " << MessageHeader::htdateCurrent(buffer) << "\r\n";
     }
 
-    if (!request.header().hasHeader("Host"))
+    if (!request.header().has("Host"))
     {
         os << "Host: " << _addrInfo.host();
         unsigned short port = _addrInfo.port();
@@ -1035,7 +1035,7 @@ void Connection::writeRequestHeader(std::ostream& os, Request& request)
         os << "\r\n";
     }
 
-    if (!request.header().hasHeader("User-Agent"))
+    if (!request.header().has("User-Agent"))
     {
         os << "User-Agent: Pt-Http-client\r\n";
     }
@@ -1058,23 +1058,23 @@ void Connection::writeRequestHeader(std::ostream& os, Request& request)
 
 void Connection::writeReplyHeader(std::ostream& os, Reply& reply)
 {
-    log_debug("writing reply header " << reply.httpReturnCode());
+    log_debug("writing reply header " << reply.statusCode());
 
     const MessageHeader& header = reply.header();
 
     os <<"HTTP/"
-        << header.httpVersionMajor() << '.'
-        << header.httpVersionMinor() << ' '
-        << reply.httpReturnCode() << ' '
-        << reply.httpReturnText() << "\r\n";
+        << header.versionMajor() << '.'
+        << header.versionMinor() << ' '
+        << reply.statusCode() << ' '
+        << reply.statusText() << "\r\n";
 
-    MessageHeader::const_iterator it;
+    MessageHeader::ConstIterator it;
     for(it = header.begin(); it != header.end(); ++it)
     {
         os << it->first << ": " << it->second << "\r\n";
     }
 
-    if( ! header.hasHeader("Connection") )
+    if( ! header.has("Connection") )
     {
         os << "Connection: "
             << (_keepAlive ? "keep-alive" : "close")
@@ -1086,12 +1086,12 @@ void Connection::writeReplyHeader(std::ostream& os, Reply& reply)
     else
         os << "Content-Length: " << _reply->body().buffer().size() << "\r\n";
 
-    if( ! header.hasHeader("Server") )
+    if( ! header.has("Server") )
     {
         os << "Server: Platinum 1.0\r\n";
     }
 
-    if( ! header.hasHeader("Date") )
+    if( ! header.has("Date") )
     {
         char buffer[50];
         os << "Date: " << MessageHeader::htdateCurrent(buffer) << "\r\n";

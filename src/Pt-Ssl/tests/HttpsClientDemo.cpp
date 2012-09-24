@@ -91,7 +91,7 @@ int main(int argc, char** argv)
         Pt::Http::Client client(loop, addr, port);
         client.setSecure(clientContext);
         client.request().setUrl("/index.html");
-        client.request().header().setHeader("User-Agent", "Platinum");
+        client.request().header().set("User-Agent", "Platinum");
         client.replyReceived() += Pt::slot(&onReply);
  
         bool noblock = true;

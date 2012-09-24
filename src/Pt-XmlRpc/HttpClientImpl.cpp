@@ -156,7 +156,7 @@ std::string HttpClientImpl::execute()
 std::ostream& HttpClientImpl::prepareRequest()
 {
     _client.request().clear();
-    _client.request().header().setHeader("Content-Type", "text/xml");
+    _client.request().header().set("Content-Type", "text/xml");
     _client.request().setMethod("POST");
     return _client.request().body();
 }
@@ -172,20 +172,20 @@ void HttpClientImpl::cancel()
 
 void HttpClientImpl::verifyHeader(const Http::Reply& reply)
 {
-    if (reply.httpReturnCode() != 200)
+    if (reply.statusCode() != 200)
     {
         std::ostringstream msg;
         msg << "invalid http return code "
-            << reply.httpReturnCode()
+            << reply.statusCode()
             << ": "
-            << reply.httpReturnText();
+            << reply.statusText();
         throw std::runtime_error(msg.str());
     }
 
-    if (! reply.header().isHeaderValue("Content-Type", "text/xml"))
+    if (! reply.header().isValue("Content-Type", "text/xml"))
     {
         std::ostringstream msg;
-        msg << "invalid content type " << reply.header().getHeader("Content-Type");
+        msg << "invalid content type " << reply.header().get("Content-Type");
         throw std::runtime_error(msg.str());
     }
 

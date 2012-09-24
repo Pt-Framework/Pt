@@ -37,15 +37,15 @@
 namespace Pt {
 
 namespace System {
-    class EventLoop;
+class EventLoop;
 }
 
 namespace Net {
-    class AddrInfo;
+class AddrInfo;
 }
 
 namespace Ssl {
-    class Context;
+class Context;
 }
 
 namespace Http {

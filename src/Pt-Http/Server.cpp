@@ -383,9 +383,9 @@ void RequestHandler::replyError()
 {
     _reply.clear();
 
-    _reply.setReturn(500, "internal server error");
-    _reply.header().setHeader("Content-Type", "text/plain");
-    _reply.header().setHeader("Connection", "close");
+    _reply.setStatus(500, "internal server error");
+    _reply.header().set("Content-Type", "text/plain");
+    _reply.header().set("Connection", "close");
     _reply.body() << "Error 500: Internal server error.";
 
     _reply.finish();
@@ -551,8 +551,7 @@ class ServerThread : public Connectable
 
 
 Server::Server()
-: _loop(0)
-, _sslctx(0)
+: _sslctx(0)
 , _ssl(false)
 , _useWorker(0)
 , _maxThreads(1)
@@ -565,9 +564,8 @@ Server::Server()
 }
 
 
-Server::Server(System::EventLoop& eventLoop)
-: _loop(&eventLoop)
-, _sslctx(0)
+Server::Server(System::EventLoop& loop)
+: _sslctx(0)
 , _ssl(false)
 , _useWorker(0)
 , _maxThreads(1)
@@ -576,14 +574,13 @@ Server::Server(System::EventLoop& eventLoop)
 {
     _notFoundService = new NotFoundService();
 
-    _serverSocket.setActive(*_loop);
+    _serverSocket.setActive(loop);
     _serverSocket.connectionPending() += Pt::slot(*this, &Server::onAccept);
 }
 
 
-Server::Server(System::EventLoop& eventLoop, const std::string& ip, unsigned short int port, int backlog)
-: _loop(&eventLoop)
-, _serverSocket(ip, port, backlog)
+Server::Server(System::EventLoop& loop, const std::string& ip, unsigned short int port, int backlog)
+: _serverSocket(ip, port, backlog)
 , _sslctx(0)
 , _ssl(false)
 , _useWorker(0)
@@ -593,16 +590,15 @@ Server::Server(System::EventLoop& eventLoop, const std::string& ip, unsigned sho
 {
     _notFoundService = new NotFoundService();
 
-    _serverSocket.setActive(*_loop);
+    _serverSocket.setActive(loop);
     _serverSocket.beginAccept();
     _serverSocket.connectionPending() += Pt::slot(*this, &Server::onAccept);
 
     this->startWorker();
 }
 
-Server::Server(System::EventLoop& eventLoop, const Pt::Net::AddrInfo& addr, int backlog)
-: _loop(&eventLoop)
-, _serverSocket(addr, backlog)
+Server::Server(System::EventLoop& loop, const Pt::Net::AddrInfo& addr, int backlog)
+: _serverSocket(addr, backlog)
 , _sslctx(0)
 , _ssl(false)
 , _useWorker(0)
@@ -612,7 +608,7 @@ Server::Server(System::EventLoop& eventLoop, const Pt::Net::AddrInfo& addr, int 
 {
     _notFoundService = new NotFoundService();
 
-    _serverSocket.setActive(*_loop);
+    _serverSocket.setActive(loop);
     _serverSocket.beginAccept();
     _serverSocket.connectionPending() += Pt::slot(*this, &Server::onAccept);
 
@@ -829,7 +825,7 @@ void Server::onAccept(Net::TcpServer& server)
     // TODO: we should only pass the TcpSocket to the worker thread
     //       so that a RequestHandler can be constructed with an event loop
 
-    RequestHandler* handler = new RequestHandler(*this, server);
+    std::auto_ptr<RequestHandler> handler( new RequestHandler(*this, server) );
 
     log_debug("handler timeouts: " << _timeout << ", " << _keepAliveTimeout);
     handler->setTimeout(_timeout);
@@ -837,7 +833,7 @@ void Server::onAccept(Net::TcpServer& server)
 
     if(_useWorker < _serverThreads.size())
     {
-        _serverThreads[_useWorker]->serve(handler);
+        _serverThreads[_useWorker]->serve( handler.release() );
         ++_useWorker;
     }
     else
@@ -845,9 +841,20 @@ void Server::onAccept(Net::TcpServer& server)
         if(_ssl)
             handler->setSecure(*_sslctx);
         
-        handler->beginServe(*_loop);
-        _handlers.push_back(handler);
+        System::EventLoop* loop = this->loop();
+        if( ! loop)
+        {
+            // NOTE: this can not really happen, because the signal is only
+            // sent when a loop is present
+            throw std::logic_error("http server has no event loop");
+        }
+
+
+        handler->beginServe(*loop);
         handler->finished() += Pt::slot(*this, &Server::onHandlerFinished);
+        _handlers.push_back( handler.get() );
+        handler.release();
+
         _useWorker = 0;
     }
 

@@ -94,7 +94,7 @@ bool BasicAuthentication::onAuthenticate(const Request& req, Reply& reply)
     bool granted = false;
     std::string user, passwd, token;
 
-    const char* auth = req.header().getHeader("Authorization");
+    const char* auth = req.header().get("Authorization");
     if( auth )
     {
         std::istringstream iss(auth);
@@ -123,8 +123,8 @@ bool BasicAuthentication::onAuthenticate(const Request& req, Reply& reply)
 
 Challenge* BasicAuthentication::onBeginChallenge(const Request& req, Reply& reply)
 {
-    reply.setReturn(401, "Authorization Required");
-    reply.header().setHeader("WWW-Authenticate", ("Basic realm=\"" + realm() + '"').c_str());
+    reply.setStatus(401, "Authorization Required");
+    reply.header().set("WWW-Authenticate", ("Basic realm=\"" + realm() + '"').c_str());
     reply.finish();
     return 0;
 }
@@ -138,8 +138,8 @@ bool BasicAuthentication::onEndChallenge(Challenge* challenge, const Request& re
     bool granted = challenge->getResult();
     if( ! granted )
     {
-        reply.setReturn(401, "Authorization Required");
-        reply.header().setHeader("WWW-Authenticate", ("Basic realm=\"" + realm() + '"').c_str());
+        reply.setStatus(401, "Authorization Required");
+        reply.header().set("WWW-Authenticate", ("Basic realm=\"" + realm() + '"').c_str());
         reply.finish();
     }
 

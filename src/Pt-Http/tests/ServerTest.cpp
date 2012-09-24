@@ -161,13 +161,13 @@ class ServerTest : public Pt::Unit::TestSuite
             client.requestSent() += Pt::slot(*this, &ServerTest::onPipelinedSent);
             client.replyReceived() += Pt::slot(*this, &ServerTest::onPipelinedReceived);
             client.request().setUrl("/test");
-            client.request().header().setHeader("foo", "bar");
-            PT_UNIT_ASSERT(client.request().header().hasHeader("foo") );
+            client.request().header().set("foo", "bar");
+            PT_UNIT_ASSERT(client.request().header().has("foo") );
             client.request().finish();
             client.beginSend();
 
             loop->run();
-            PT_UNIT_ASSERT_EQUALS(client.reply().httpReturnCode(), 200);
+            PT_UNIT_ASSERT_EQUALS(client.reply().statusCode(), 200);
 
             PT_UNIT_ASSERT_EQUALS(_reply, "Hello World!Hello World!");
         }
@@ -181,9 +181,9 @@ class ServerTest : public Pt::Unit::TestSuite
                 return;
             }
 
-            if( ! client.request().header().hasHeader("foo2") )
+            if( ! client.request().header().has("foo2") )
             {
-                client.request().header().setHeader("foo2", "bar2");
+                client.request().header().set("foo2", "bar2");
                 client.request().finish();
                 client.beginSend();
                 return;
@@ -198,7 +198,7 @@ class ServerTest : public Pt::Unit::TestSuite
 
             if( progress.header() )
             {
-                PT_UNIT_ASSERT_EQUALS(client.reply().httpReturnCode(), 200);
+                PT_UNIT_ASSERT_EQUALS(client.reply().statusCode(), 200);
             }
             
             if(progress.body())
@@ -230,7 +230,7 @@ class ServerTest : public Pt::Unit::TestSuite
             Pt::Http::Client client(*loop, "127.0.0.1", 8001);
             client.replyReceived() += Pt::slot(*this, &ServerTest::onNotFoundReceived);
             client.request().setUrl("/index.html");
-            client.request().header().setHeader("foo", "bar");
+            client.request().header().set("foo", "bar");
             client.beginReceive();
 
             loop->run();
@@ -242,7 +242,7 @@ class ServerTest : public Pt::Unit::TestSuite
 
             if(progress.header())
             {
-                PT_UNIT_ASSERT_EQUALS(client.reply().httpReturnCode(), 404);
+                PT_UNIT_ASSERT_EQUALS(client.reply().statusCode(), 404);
             }
 
             if(progress.body())
@@ -251,7 +251,7 @@ class ServerTest : public Pt::Unit::TestSuite
 
             if( progress.finished() )
             {
-                PT_UNIT_ASSERT_EQUALS(client.reply().httpReturnCode(), 404);
+                PT_UNIT_ASSERT_EQUALS(client.reply().statusCode(), 404);
                 loop->exit();
                 return;
             }
@@ -278,7 +278,7 @@ class ServerTest : public Pt::Unit::TestSuite
             client.setSecure(clientContext);
             client.replyReceived() += Pt::slot(*this, &ServerTest::onNotFoundReceived);
             client.request().setUrl("/index.html");
-            client.request().header().setHeader("foo", "bar");
+            client.request().header().set("foo", "bar");
             client.beginReceive();
 
             loop->run();
@@ -335,7 +335,7 @@ class ServerTest : public Pt::Unit::TestSuite
             client.beginReceive();
 
             loop->run();
-            PT_UNIT_ASSERT_EQUALS(client.reply().httpReturnCode(), 200);
+            PT_UNIT_ASSERT_EQUALS(client.reply().statusCode(), 200);
             PT_UNIT_ASSERT_EQUALS(_reply, "Authorization Required Hello World!");
         }
 
@@ -345,11 +345,11 @@ class ServerTest : public Pt::Unit::TestSuite
 
             if( progress.header() )
             {
-                if( client.reply().httpReturnCode() == 401)
+                if( client.reply().statusCode() == 401)
                 {
-                    PT_UNIT_ASSERT(client.reply().header().hasHeader("WWW-Authenticate"));
+                    PT_UNIT_ASSERT(client.reply().header().has("WWW-Authenticate"));
                     client.setAuthorization(_author);
-                    _reply += client.reply().httpReturnText();
+                    _reply += client.reply().statusText();
                     _reply += ' ';
                 }               
             }
@@ -360,7 +360,7 @@ class ServerTest : public Pt::Unit::TestSuite
 
             if( progress.finished() )
             {
-                if( client.reply().httpReturnCode() == 200 )
+                if( client.reply().statusCode() == 200 )
                 {
                     loop->exit();
                     return;
@@ -382,11 +382,11 @@ class ServerTest : public Pt::Unit::TestSuite
             client.requestSent() += Pt::slot(*this, &ServerTest::onHelloSent);
             client.replyReceived() += Pt::slot(*this, &ServerTest::onHelloReceived);
             client.request().setUrl("/test");
-            client.request().header().setHeader("foo", "bar");
+            client.request().header().set("foo", "bar");
             client.beginSend();
 
             loop->run();
-            PT_UNIT_ASSERT_EQUALS(client.reply().httpReturnCode(), 200);
+            PT_UNIT_ASSERT_EQUALS(client.reply().statusCode(), 200);
             PT_UNIT_ASSERT_EQUALS(_reply, "Hello World!");
         }
 
@@ -402,7 +402,7 @@ class ServerTest : public Pt::Unit::TestSuite
 
             if( progress.header() )
             {
-                PT_UNIT_ASSERT_EQUALS(client.reply().httpReturnCode(), 200);
+                PT_UNIT_ASSERT_EQUALS(client.reply().statusCode(), 200);
             }
             
             if( progress.body() )
@@ -436,7 +436,7 @@ class ServerTest : public Pt::Unit::TestSuite
 
             loop->run();
 
-            PT_UNIT_ASSERT_EQUALS(client.reply().httpReturnCode(), 200);
+            PT_UNIT_ASSERT_EQUALS(client.reply().statusCode(), 200);
             PT_UNIT_ASSERT_EQUALS(_reply, "Chunk5Chunk4Chunk3Chunk2Chunk1");
         }
 
@@ -466,7 +466,7 @@ class ServerTest : public Pt::Unit::TestSuite
 
             if( progress.header() )
             {
-                PT_UNIT_ASSERT_EQUALS(client.reply().httpReturnCode(), 200);
+                PT_UNIT_ASSERT_EQUALS(client.reply().statusCode(), 200);
             }
 
             if( progress.body() )

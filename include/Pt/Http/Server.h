@@ -42,15 +42,11 @@
 namespace Pt {
 
 namespace System {
-
 class EventLoop;
-
 }
 
 namespace Ssl {
-
 class Context;
-
 }
 
 namespace Http {
@@ -119,7 +115,6 @@ struct Servlet
 };
 
 
-// TODO: It might make sense for the Server to derive from Selectable
 class PT_HTTP_API Server : public Pt::Connectable
                          , private Pt::NonCopyable
 {
@@ -135,7 +130,7 @@ class PT_HTTP_API Server : public Pt::Connectable
         ~Server();
 
         System::EventLoop* loop()
-        { return _loop; }
+        { return _serverSocket.parent(); }
 
         void setActive(System::EventLoop& loop);
 
@@ -194,7 +189,6 @@ class PT_HTTP_API Server : public Pt::Connectable
         void onHandlerFinished(RequestHandler& conn);
 
     private:
-        System::EventLoop* _loop;
         Net::TcpServer _serverSocket;
         Ssl::Context* _sslctx;
         bool _ssl;
