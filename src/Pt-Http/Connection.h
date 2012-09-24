@@ -274,6 +274,8 @@ class Connection : public Connectable
         Ssl::IOBuffer _sslbuf;
 #endif
         HttpBuffer _httpbuf;
+        std::ostream _os;
+
         std::size_t _timeout;
         std::size_t _keepaliveTimeout;
         std::streamsize _readBytes;

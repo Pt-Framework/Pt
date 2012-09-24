@@ -77,6 +77,7 @@ Connection::Connection()
 , _sslbuf( _sockbuf )
 #endif
 , _httpbuf()
+, _os(&_sockbuf)
 , _timeout(WaitInfinite)
 , _keepaliveTimeout(WaitInfinite)
 , _readBytes(0)
@@ -159,6 +160,7 @@ void Connection::setSecure(Ssl::Context& ctx)
     }
 
     _httpbuf.attach(_sslbuf);
+    _os.rdbuf(&_sslbuf);
 }
 
 #else
@@ -192,6 +194,7 @@ void Connection::cancel()
     _parser.reset(false);
     _replyParser.reset(true);
     _httpbuf.reset();
+    _os.clear();
 }
 
 
@@ -219,7 +222,7 @@ void Connection::beginSendRequest(Request& request)
     }
 #endif
 
-    std::ostream os( _httpbuf.buffer() );
+    std::ostream& os = _os; //( _httpbuf.buffer() );
 
     if( request.isFinished() )
     {
@@ -336,9 +339,9 @@ void Connection::beginSendReply(Reply& reply)
     _reply = &reply;
 
     MessageHeader& header = _reply->header();
-    std::ostream os( _httpbuf.buffer() );
+    std::ostream& os =  _os; //( _httpbuf.buffer() );
 
-    _keepAlive = _keepAlive && _reply->header().keepAlive();
+    _keepAlive = _keepAlive && header.keepAlive();
 
     if( ! _keepAlive && outputAvailable() )
     {
@@ -411,8 +414,10 @@ MessageProgress Connection::endSendReply()
     if(_onTimeout)
         throw System::IOError("timeout");
         
-    //if(! _reply->isFinished() || _keepAlive)
-    endWrite();
+    if( ! _reply->isFinished() || ! _keepAlive)
+    {
+        endWrite();
+    }
 
     if( _socket.eof() )
     {
@@ -891,19 +896,13 @@ void Connection::beginRead()
 #ifdef PT_HTTP_WITH_SSL
     if(_ssl)
         if( _sslbuf.in_avail() )
-        {
-            //onHttpsInput(_sslbuf);
             _socket.setInputPipelined();
-        }
         else
             _sslbuf.beginRead();
      else
 #endif
         if( _sockbuf.in_avail() )
-        {
-            //onHttpInput(_sockbuf);
             _socket.setInputPipelined();
-        }
         else
             _sockbuf.beginRead();
 }
@@ -974,21 +973,10 @@ bool Connection::outputAvailable()
     if(_ssl)
     {
         _sslbuf.pubsync();
-
-        if ( _sslbuf.buffer().out_avail() )
-        {
-            return true;
-        }
-        
-        return false;
+        return _sslbuf.buffer().out_avail() > 0;
     }
 #endif
-    if ( _sockbuf.out_avail() )
-    {
-        return true;
-    }
-
-    return false;
+    return _sockbuf.out_avail() > 0;
 }
 
 
@@ -1036,18 +1024,6 @@ void Connection::writeRequestHeader(std::ostream& os, Request& request)
     {
         os << "User-Agent: Pt-Http-client\r\n";
     }
-
-    /*if (!_username.empty() && !request.header().hasHeader("Authorization"))
-    {
-        std::ostringstream d;
-        BasicTextOStream<char, char> b(d, new Base64Codec());
-        b << _username
-          << ':'
-          << _password;
-        b.terminate();
-        log_debug("set Authorization to " << d.str());
-        os << "Authorization: Basic " << d.str() << "\r\n";
-    }*/
 
     os << "\r\n";
 }
