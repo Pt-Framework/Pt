@@ -27,7 +27,6 @@
  */
 
 #include "Parser.h"
-#include <Pt/Http/MessageHeader.h>
 #include <cctype>
 #include <algorithm>
 #include <string.h>

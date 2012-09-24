@@ -13,12 +13,11 @@ SharedLibrary Pt-Http : Authentication.cpp
                         Authorization.cpp
                         Client.cpp
                         ClientImpl.cpp
-                        ChunkedReader.cpp
                         Connection.cpp
                         HttpBuffer.cpp
                         NotFoundResponder.cpp
                         NotFoundService.cpp
-                        MessageHeader.cpp
+                        Message.cpp
                         Parser.cpp
                         Reply.cpp
                         Request.cpp

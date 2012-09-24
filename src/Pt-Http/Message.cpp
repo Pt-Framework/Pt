@@ -40,7 +40,7 @@
 #define log_warn(a)
 #define log_error(a)
 
-log_define("Pt.Http.messageheader")
+log_define("Pt.Http.Message")
 
 namespace Pt {
 
@@ -75,6 +75,21 @@ int compareIgnoreCase(const char* s1, const char* s2)
 } 
 
 
+MessageBuffer::MessageBuffer()
+: _obuffer(0)
+, _obufferSize(0)
+{
+    setg(0,0,0);
+    setp(0,0);
+}
+
+
+MessageBuffer::~MessageBuffer()
+{
+    delete [] _obuffer;
+}
+
+
 MessageBuffer::int_type MessageBuffer::overflow(int_type ch)
 {
     typedef MessageBuffer::traits_type traits_type;
@@ -105,6 +120,27 @@ MessageBuffer::int_type MessageBuffer::overflow(int_type ch)
     }
 
     return traits_type::not_eof(ch);
+}
+
+
+MessageBody::MessageBody()
+: std::iostream(0)
+{ 
+    std::iostream::init(&_buf);
+}
+
+
+void MessageBody::discard()
+{ 
+    _buf.reset(); 
+
+    std::streambuf* sb = this->rdbuf();
+    if(sb != &_buf)
+    {
+        std::streamsize avail = sb->in_avail();
+        while(avail--)
+            sb->sbumpc();
+    }
 }
 
 

@@ -93,18 +93,9 @@ class PT_HTTP_API MessageBuffer : public std::streambuf
     static const unsigned int BufferSize = 512;
 
     public:
-        MessageBuffer()
-        : _obuffer(0)
-        , _obufferSize(0)
-        {
-            setg(0,0,0);
-            setp(0,0);
-        }
+        MessageBuffer();
 
-        ~MessageBuffer()
-        {
-            delete [] _obuffer;
-        }
+        ~MessageBuffer();
         
         void reset()
         { this->setp(_obuffer, _obuffer + _obufferSize); }
@@ -128,37 +119,18 @@ class PT_HTTP_API MessageBody : public std::iostream
     friend class Connection;
 
     public:
-        MessageBody()
-        : std::iostream(0)
-        { 
-            std::iostream::init(&_buf);
-        }
+        MessageBody();
         
         MessageBuffer& buffer()
         { return _buf; }
 
-        void discard()
-        { 
-            _buf.reset(); 
-
-            std::streambuf* sb = this->rdbuf();
-            if(sb != &_buf)
-            {
-                std::streamsize avail = sb->in_avail();
-                while(avail--)
-                    sb->sbumpc();
-            }
-        }
+        void discard();
 
         void setInput(std::streambuf& sb)
-        {
-            this->rdbuf(&sb);
-        }
+        { this->rdbuf(&sb); }
 
         void setOutput()
-        {
-            this->rdbuf(&_buf);
-        }
+        { this->rdbuf(&_buf); }
 
         void write(std::ostream& os)
         { os.write( _buf.data(), _buf.size() ); }

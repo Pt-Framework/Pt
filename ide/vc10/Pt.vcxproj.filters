@@ -588,9 +588,6 @@
     <ClInclude Include="..\..\include\Pt\Http\Message.h">
       <Filter>Pt-Http</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Http\MessageHeader.h">
-      <Filter>Pt-Http</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Http\Reply.h">
       <Filter>Pt-Http</Filter>
     </ClInclude>
@@ -1257,9 +1254,6 @@
     <ClCompile Include="..\..\src\Pt-Http\ClientImpl.cpp">
       <Filter>Pt-Http</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Http\MessageHeader.cpp">
-      <Filter>Pt-Http</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Pt-Http\NotFoundResponder.cpp">
       <Filter>Pt-Http</Filter>
     </ClCompile>
@@ -1303,6 +1297,9 @@
       <Filter>Pt-Http</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Http\Request.cpp">
+      <Filter>Pt-Http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Http\Message.cpp">
       <Filter>Pt-Http</Filter>
     </ClCompile>
   </ItemGroup>

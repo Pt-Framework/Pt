@@ -28,14 +28,211 @@
 
 #include "HttpBuffer.h"
 #include <Pt/System/Logger.h>
+#include <stdexcept>
+#include <sstream>
 #include <cstring>
 #include <cassert>
 
 log_define("Pt.Http.HttpBuffer")
 
+namespace {
+
+  std::string charToPrint(char ch)
+  {
+    std::ostringstream s;
+    if (ch >= 32 && ch <= 127)
+      s << '<' << ch << '>';
+
+    s << '(' << static_cast<unsigned>(static_cast<unsigned char>(ch)) << ')';
+    return s.str();
+  }
+
+  void throwInvalidCharacter(char ch)
+  {
+    std::ostringstream s;
+    s << "invalid character ";
+    if (ch >= 32 && ch <= 127)
+      s << '<' << ch << '>';
+
+    s << '(' << static_cast<unsigned>(static_cast<unsigned char>(ch)) << ") in chunked encoding";
+
+    throw std::runtime_error(s.str());
+  }
+
+}
+
 namespace Pt {
 
 namespace Http {
+
+ChunkParser::ChunkParser()
+: _state(&ChunkParser::onBegin)
+, _chunkSize(0)
+{
+}
+
+
+void ChunkParser::reset()
+{
+    _state = &ChunkParser::onBegin;
+    _chunkSize = 0;
+}
+
+
+void ChunkParser::parse(char ch)
+{
+    if(_state)
+        (this->*_state)(ch);
+}
+
+
+void ChunkParser::onBegin(char ch)
+{
+    log_trace("onBegin, ch=" << charToPrint(ch));
+
+    if (ch >= '0' && ch <= '9')
+    {
+        _chunkSize = ch - '0';
+        _state = &ChunkParser::onSize;
+    }
+    else if (ch >= 'a' && ch <= 'f')
+    {
+        _chunkSize = ch - 'a' + 10;
+        _state = &ChunkParser::onSize;
+    }
+    else if (ch >= 'A' && ch <= 'F')
+    {
+        _chunkSize = ch - 'A' + 10;
+        _state = &ChunkParser::onSize;
+    }
+    else
+        throwInvalidCharacter(ch);
+}
+
+void ChunkParser::onSize(char ch)
+{
+    log_trace("onSize, ch=" << charToPrint(ch));
+
+    if (ch >= '0' && ch <= '9')
+    {
+        _chunkSize = _chunkSize * 16 + (ch - '0');
+    }
+    else if (ch >= 'a' && ch <= 'f')
+    {
+        _chunkSize = _chunkSize * 16 + (ch - 'a' + 10);
+    }
+    else if (ch >= 'A' && ch <= 'F')
+    {
+        _chunkSize = _chunkSize * 16 + (ch - 'A' + 10);
+    }
+    else
+    {
+      log_debug("chunk size=" << _chunkSize);
+
+      if (ch == '\r')
+      {
+          _state = &ChunkParser::onEndl;
+      }
+      else if (ch == '\n')
+      {
+          if (_chunkSize > 0)
+              _state = &ChunkParser::onData;
+          else
+              _state = 0;
+      }
+      else
+      {
+          _state = &ChunkParser::onExtension;
+      }
+    }
+}
+
+void ChunkParser::onEndl(char ch)
+{
+    log_trace("onEndl, ch=" << charToPrint(ch));
+
+    if (ch == '\n')
+    {
+      if (_chunkSize > 0)
+          _state = &ChunkParser::onData;
+      else
+          _state = &ChunkParser::onTrailer;
+    }
+    else
+        throwInvalidCharacter(ch);
+}
+
+void ChunkParser::onExtension(char ch)
+{
+    log_trace("onExtension");
+
+    if (ch == '\r')
+    {
+        _state = &ChunkParser::onEndl;
+    }
+    else if (ch == '\n')
+    {
+      if (_chunkSize > 0)
+          _state = &ChunkParser::onData;
+      else
+          _state = 0;
+    }
+}
+
+void ChunkParser::onData(char ch)
+{
+    log_trace("onData, ch=" << charToPrint(ch));
+
+    if (ch == '\r')
+    {
+        log_debug("=> onDataEnd");
+        _state = &ChunkParser::onDataEnd;
+    }
+    else if (ch == '\n')
+    {
+        log_debug("=> onBegin");
+        _state = &ChunkParser::onBegin;
+    }
+    else
+        throwInvalidCharacter(ch);
+}
+
+void ChunkParser::onDataEnd(char ch)
+{
+    log_trace("onDataEnd, ch=" << charToPrint(ch));
+
+    if (ch == '\n')
+    {
+        log_debug("=> onBegin");
+        _state = &ChunkParser::onBegin;
+    }
+    else
+        throwInvalidCharacter(ch);
+}
+
+void ChunkParser::onTrailer(char ch)
+{
+    log_trace("onTrailer, ch=" << charToPrint(ch));
+
+    if (ch == '\n')
+        _state = 0;
+    else if (ch == '\r')
+        ;
+    else
+        _state = &ChunkParser::onTrailerData;
+}
+
+void ChunkParser::onTrailerData(char ch)
+{
+    log_trace("onTrailerData, ch=" << charToPrint(ch));
+
+    // the trailer is actually ignored
+    if (ch == '\n')
+        _state = &ChunkParser::onTrailer;
+}
+
+
+
 
 const unsigned int HttpBuffer::MaxPutback = 4;
 
