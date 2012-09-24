@@ -30,7 +30,6 @@
 #define Pt_Http_Client_h
 
 #include <Pt/Http/Api.h>
-#include <Pt/Http/MessageHeader.h>
 #include <Pt/Signal.h>
 #include <Pt/NonCopyable.h>
 #include <string>
@@ -54,6 +53,7 @@ namespace Http {
 class Authorization;
 class Reply;
 class Request;
+class MessageProgress;
 
 class PT_HTTP_API Client : public Connectable
                          , private NonCopyable

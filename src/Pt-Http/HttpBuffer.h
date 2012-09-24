@@ -32,7 +32,7 @@
 #include "ChunkedReader.h"
 
 #include <Pt/Http/Api.h>
-#include <Pt/Http/MessageHeader.h>
+#include <Pt/Http/Message.h>
 
 #include <streambuf>
 

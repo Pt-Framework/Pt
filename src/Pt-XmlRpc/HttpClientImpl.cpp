@@ -27,7 +27,6 @@
  */
 
 #include "HttpClientImpl.h"
-#include "Pt/Http/ReplyHeader.h"
 #include "Pt/Net/AddrInfo.h"
 #include <Pt/System/Logger.h>
 

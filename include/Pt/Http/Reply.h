@@ -30,7 +30,7 @@
 #define Pt_Http_Reply_h
 
 #include <Pt/Http/Api.h>
-#include <Pt/Http/MessageHeader.h>
+#include <Pt/Http/Message.h>
 #include <Pt/Signal.h>
 #include <string>
 #include <iostream>

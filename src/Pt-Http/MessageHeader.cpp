@@ -26,7 +26,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <Pt/Http/MessageHeader.h>
+#include <Pt/Http/Message.h>
 #include <Pt/System/Clock.h>
 #include <cctype>
 #include <sstream>

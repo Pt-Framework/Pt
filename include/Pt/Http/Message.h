@@ -30,13 +30,268 @@
 #define Pt_Http_Message_h
 
 #include <Pt/Http/Api.h>
-#include <Pt/NonCopyable.h>
 #include <iostream>
+#include <streambuf>
+#include <string>
+#include <cstring>
+#include <utility>
  
 namespace Pt {
 
 namespace Http {
 
+class MessageProgress
+{
+    private:
+        enum Result
+        {
+            Finished   = 1,
+            InProgress = 2,
+            Header     = 4,
+            Body       = 8,
+            Trailer    = 16,
+        };
+
+    public:
+        MessageProgress()
+        : _result(InProgress)
+        {}
+
+        bool header() const
+        { return (_result & Header) == Header; }
+
+        bool body() const
+        { return (_result & Body) == Body; }
+
+        bool trailer() const
+        { return (_result & Trailer) == Trailer; }
+
+        bool finished() const
+        { return (_result & Finished) == Finished; }
+
+        void setFinished()
+        { _result |= Finished ; }
+
+        void setHeader()
+        { _result |= Header; }
+        
+        void setBody()
+        { _result |= Body; }
+
+        void setTrailer()
+        { _result |= Trailer; }
+
+        unsigned long mask() const
+        { return _result; }
+
+    private:
+        unsigned long _result;
+};
+
+class PT_HTTP_API MessageBuffer : public std::streambuf
+{
+    static const unsigned int BufferSize = 512;
+
+    public:
+        MessageBuffer()
+        : _obuffer(0)
+        , _obufferSize(0)
+        {
+            setg(0,0,0);
+            setp(0,0);
+        }
+
+        ~MessageBuffer()
+        {
+            delete [] _obuffer;
+        }
+        
+        void reset()
+        { this->setp(_obuffer, _obuffer + _obufferSize); }
+
+        std::size_t size() const
+        { return pptr() - pbase(); }
+
+        const char* data() const
+        { return _obuffer; }
+
+    protected:
+        virtual int_type overflow(int_type ch);
+
+    private:
+        char* _obuffer;
+        std::size_t  _obufferSize;
+};
+
+class PT_HTTP_API MessageBody : public std::iostream
+{
+    friend class Connection;
+
+    public:
+        MessageBody()
+        : std::iostream(0)
+        { 
+            std::iostream::init(&_buf);
+        }
+        
+        MessageBuffer& buffer()
+        { return _buf; }
+
+        void discard()
+        { 
+            _buf.reset(); 
+
+            std::streambuf* sb = this->rdbuf();
+            if(sb != &_buf)
+            {
+                std::streamsize avail = sb->in_avail();
+                while(avail--)
+                    sb->sbumpc();
+            }
+        }
+
+        void setInput(std::streambuf& sb)
+        {
+            this->rdbuf(&sb);
+        }
+
+        void setOutput()
+        {
+            this->rdbuf(&_buf);
+        }
+
+        void write(std::ostream& os)
+        { os.write( _buf.data(), _buf.size() ); }
+
+    private:
+        MessageBuffer _buf;
+};
+
+class PT_HTTP_API MessageHeader
+{
+    public:
+        static const unsigned MAXHEADERSIZE = 4096;
+
+    private:
+        char _rawdata[MAXHEADERSIZE];  // key_1\0value_1\0key_2\0value_2\0...key_n\0value_n\0\0
+        unsigned _endOffset;
+        char* eptr() { return _rawdata + _endOffset; }
+        unsigned _httpVersionMajor;
+        unsigned _httpVersionMinor;
+
+    public:
+        typedef std::pair<const char*, const char*> value_type;
+        class const_iterator
+            : public std::iterator<std::forward_iterator_tag, value_type>
+        {
+            friend class MessageHeader;
+
+            value_type current_value;
+
+            void fixup()
+            {
+                if (*current_value.first)
+                    current_value.second = current_value.first + std::strlen(current_value.first) + 1;
+                else
+                    current_value.first = current_value.second = 0;
+            }
+
+            void moveForward()
+            {
+                current_value.first = current_value.second + std::strlen(current_value.second) + 1;
+                fixup();
+            }
+
+          public:
+            const_iterator()
+                : current_value((char*)0, (char*)0)
+            { }
+
+            explicit const_iterator(const char* p)
+                : current_value(p, p)
+            {
+                fixup();
+            }
+
+            bool operator== (const const_iterator& it) const
+            { return current_value.first == it.current_value.first; }
+
+            bool operator!= (const const_iterator& it) const
+            { return current_value.first != it.current_value.first; }
+
+            const_iterator& operator++()
+            {
+                moveForward();
+                return *this;
+            }
+
+            const_iterator operator++(int)
+            {
+                const_iterator ret = *this;
+                moveForward();
+                return ret;
+            }
+
+            const value_type& operator* () const   { return current_value; }
+            const value_type* operator-> () const  { return &current_value; }
+        };
+
+
+        MessageHeader()
+            : _endOffset(0),
+              _httpVersionMajor(1),
+              _httpVersionMinor(1)
+        {
+            _rawdata[0] = _rawdata[1] = '\0';
+        }
+
+        virtual ~MessageHeader()  {}
+
+        void clear();
+
+        void setHeader(const char* key, const char* value, bool replace = true);
+
+        void addHeader(const char* key, const char* value)
+        { setHeader(key, value, false); }
+
+        void removeHeader(const char* key);
+
+        const char* getHeader(const char* key) const;
+
+        bool hasHeader(const char* key) const
+        { return getHeader(key) != 0; }
+
+        bool isHeaderValue(const char* key, const char* value) const;
+
+        const_iterator begin() const
+        { return const_iterator(_rawdata); }
+
+        const_iterator end() const
+        { return const_iterator(); }
+
+        unsigned httpVersionMajor() const
+        { return _httpVersionMajor; }
+
+        unsigned httpVersionMinor() const
+        { return _httpVersionMinor; }
+
+        void httpVersion(unsigned major, unsigned minor)
+        {
+            _httpVersionMajor = major;
+            _httpVersionMinor = minor;
+        }
+
+        bool chunkedTransferEncoding() const;
+
+        std::size_t contentLength() const;
+
+        bool keepAlive() const;
+
+        /// Returns a properly formatted current time-string, as needed in http.
+        /// The buffer must have at least 30 bytes.
+        static char* htdateCurrent(char* buffer);
+
+};
 
 } // namespace Http
 
