@@ -33,6 +33,8 @@
 #include <Pt/System/Logger.h>
 #include <Pt/TextStream.h>
 #include <Pt/Base64Codec.h>
+#include <Pt/Convert.h>
+#include <iterator>
 #include <cassert>
 
 log_define("Pt.Http.Connection")
@@ -984,13 +986,18 @@ void Connection::writeRequestHeader(std::ostream& os, Request& request)
 {
     log_debug("writing request header " << request.url());
 
-    os << request.method() << ' '
-       << request.url() << " HTTP/"
-       << request.header().versionMajor() << '.'
-       << request.header().versionMinor() << "\r\n";
+    const MessageHeader& header = request.header();
 
-    for (MessageHeader::ConstIterator it = request.header().begin();
-        it != request.header().end(); ++it)
+    std::ostream_iterator<char> oit (os);
+    os << request.method() << ' ';
+    os << request.url() << " HTTP/";
+    putInt(oit, header.versionMajor());
+    os << '.';
+    putInt(oit, header.versionMinor());
+    os << "\r\n";
+
+    MessageHeader::ConstIterator it;
+    for (it = header.begin(); it != header.end(); ++it)
     {
         os << it->first << ": " << it->second << "\r\n";
     }
@@ -998,29 +1005,36 @@ void Connection::writeRequestHeader(std::ostream& os, Request& request)
     if(_chunked)
         os << "Transfer-Encoding: chunked\r\n";
     else
-        os << "Content-Length: " << request.body().buffer().size() << "\r\n";
+    {
+        os << "Content-Length: ";
+        putInt( oit, request.body().buffer().size() );
+        os<< "\r\n";
+    }
 
-    if( ! request.header().has("Connection") )
+    if( ! header.has("Connection") )
     {
         os << "Connection: keep-alive\r\n";
     }
 
-    if (!request.header().has("Date"))
+    if( ! header.has("Date"))
     {
         char buffer[50];
         os << "Date: " << MessageHeader::htdateCurrent(buffer) << "\r\n";
     }
 
-    if (!request.header().has("Host"))
+    if( ! header.has("Host"))
     {
         os << "Host: " << _addrInfo.host();
         unsigned short port = _addrInfo.port();
         if (port != 80)
-            os << ':' << port;
+        {
+            os << ':';
+            putInt(oit, port);
+        }
         os << "\r\n";
     }
 
-    if (!request.header().has("User-Agent"))
+    if( ! header.has("User-Agent") )
     {
         os << "User-Agent: Pt-Http-client\r\n";
     }
@@ -1035,11 +1049,16 @@ void Connection::writeReplyHeader(std::ostream& os, Reply& reply)
 
     const MessageHeader& header = reply.header();
 
-    os <<"HTTP/"
-        << header.versionMajor() << '.'
-        << header.versionMinor() << ' '
-        << reply.statusCode() << ' '
-        << reply.statusText() << "\r\n";
+    std::ostream_iterator<char> oit (os);
+    os.write("HTTP/", 5);
+    putInt(oit, header.versionMajor());
+    os << '.';
+    putInt(oit, header.versionMinor()); 
+    os << ' ';
+    putInt(oit, reply.statusCode());
+    os << ' ';
+    os << reply.statusText();
+    os.write("\r\n", 2);
 
     MessageHeader::ConstIterator it;
     for(it = header.begin(); it != header.end(); ++it)
@@ -1055,13 +1074,17 @@ void Connection::writeReplyHeader(std::ostream& os, Reply& reply)
     }
 
     if(_chunked)
-        os << "Transfer-Encoding: chunked\r\n";
+        os.write("Transfer-Encoding: chunked\r\n", 28);
     else
-        os << "Content-Length: " << _reply->body().buffer().size() << "\r\n";
+    {
+        os.write("Content-Length: ", 16);
+        putInt( oit, _reply->body().buffer().size() ); 
+        os.write("\r\n", 2);
+    }
 
     if( ! header.has("Server") )
     {
-        os << "Server: Platinum 1.0\r\n";
+        os.write("Server: Platinum 1.0\r\n", 22);
     }
 
     if( ! header.has("Date") )
@@ -1070,7 +1093,7 @@ void Connection::writeReplyHeader(std::ostream& os, Reply& reply)
         os << "Date: " << MessageHeader::htdateCurrent(buffer) << "\r\n";
     }
 
-    os << "\r\n";
+    os.write("\r\n", 2);
 }
 
 } // namespace Http
