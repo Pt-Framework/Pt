@@ -34,87 +34,96 @@
 
 namespace Pt {
 
-    /// @internal
-    typedef unsigned char  uchar;
-    /// @internal
+    /// @brief Same as unsigned char
+    typedef unsigned char uchar;
+    
+    /// @brief Same as unsigned short
     typedef unsigned short ushort;
-    /// @internal
-    typedef unsigned int   uint;
-    /// @internal
-    typedef unsigned long  ulong;
+    
+    /// @brief Same as unsigned int
+    typedef unsigned int uint;
+    
+    /// @brief Same as unsigned long
+    typedef unsigned long ulong;
 
-    /// @internal
+    /// @brief Unsigned integer type large enough to store object sizes
     using std::size_t;
-    /// @internal
+    
+    /// @brief Signed integer varint of Pt::size_t 
     typedef std::ptrdiff_t ssize_t;
 
-    /// @internal
+    /// @brief Signed 8-bit integer type
     typedef signed char int8_t;
-    /// @internal
+    
+    /// @brief Unsigned -8bit integer type
     typedef unsigned char uint8_t;
 
 #if USHRT_MAX == 0xffff
-    /// @internal
+
+    /// @brief Signed 16-bit integer type
     typedef short int16_t;
-    /// @internal
+
+    /// @brief Unsigned 16-bit integer type
     typedef unsigned short uint16_t;
+
 #elif UINT_MAX == 0xffff
-    /// @internal
+
+    /// @brief Signed 16-bit integer type
     typedef int int16_t;
-    /// @internal
+
+    /// @brief Unsigned 16-bit integer type
     typedef unsigned int uint16_t;
-#elif ULONG_MAX == 0xffff
-    /// @internal
-    typedef long int16_t;
-    /// @internal
-    typedef unsigned long uint16_t;
+
 #endif
 
-#if USHRT_MAX == 0xffffffffUL
-    /// @internal
-    typedef short int32_t;
-    /// @internal
-    typedef unsigned short uint32_t;
-#elif UINT_MAX == 0xffffffffUL
-    /// @internal
+#if UINT_MAX == 0xffffffffUL
+
+    /// @brief Signed 32-bit integer type
     typedef int int32_t;
-    /// @internal
+
+    /// @brief Unsigned 32-bit integer type
     typedef unsigned int uint32_t;
+
 #elif ULONG_MAX == 0xffffffffUL
-    /// @internal
+
+    /// @brief Signed 32-bit integer type
     typedef long int32_t;
-    /// @internal
+
+    /// @brief Unsigned 32-bit integer type
     typedef unsigned long uint32_t;
+
 #endif
 
-#if UINT_MAX == 18446744073709551615ULL
+#if ULONG_MAX == 18446744073709551615ULL
     #define PT_WITH_INT64 1
     #define PT_WITH_LONG_LONG 1
-    /// @internal
-    typedef int int64_t;
-    /// @internal
-    typedef unsigned int uint64_t;
-#elif ULONG_MAX == 18446744073709551615ULL
-    #define PT_WITH_INT64 1
-    #define PT_WITH_LONG_LONG 1
-    /// @internal
+
+    /// @brief Signed 64-bit integer type
     typedef long int64_t;
-    /// @internal
+
+    /// @brief Unsigned 64-bit integer type
     typedef unsigned long uint64_t;
+
 #elif ULLONG_MAX == 18446744073709551615ULL
     #define PT_WITH_INT64 1
     #define PT_WITH_LONG_LONG 1
-    /// @internal
+
+    /// @brief Signed 64-bit integer type
     typedef long long int64_t;
-    /// @internal
+
+    /// @brief Unsigned 64-bit integer type
     typedef unsigned long long uint64_t;
+
 #elif defined(__GNUC__) || defined(__MWERKS_SYMBIAN__)
     #define PT_WITH_INT64 1
     #define PT_WITH_LONG_LONG 1
-    /// @internal
+
+    /// @brief Signed 64-bit integer type
     typedef long long int64_t;
-    /// @internal
+
+    /// @brief Unsigned 64-bit integer type
     typedef unsigned long long uint64_t;
+
 #endif
 
 } // namespace Pt
