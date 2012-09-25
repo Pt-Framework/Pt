@@ -990,11 +990,12 @@ void Connection::writeRequestHeader(std::ostream& os, Request& request)
 
     std::ostream_iterator<char> oit (os);
     os << request.method() << ' ';
-    os << request.url() << " HTTP/";
+    os << request.url();
+    os.write(" HTTP/", 6);
     putInt(oit, header.versionMajor());
     os << '.';
     putInt(oit, header.versionMinor());
-    os << "\r\n";
+    os.write("\r\n", 2);
 
     MessageHeader::ConstIterator it;
     for (it = header.begin(); it != header.end(); ++it)
@@ -1003,23 +1004,27 @@ void Connection::writeRequestHeader(std::ostream& os, Request& request)
     }
 
     if(_chunked)
-        os << "Transfer-Encoding: chunked\r\n";
+    {
+        os.write("Transfer-Encoding: chunked\r\n", 28);
+    }
     else
     {
-        os << "Content-Length: ";
+        os.write("Content-Length: ", 16);
         putInt( oit, request.body().buffer().size() );
-        os<< "\r\n";
+        os.write("\r\n", 2);
     }
 
     if( ! header.has("Connection") )
     {
-        os << "Connection: keep-alive\r\n";
+        os.write("Connection: keep-alive\r\n", 24);
     }
 
     if( ! header.has("Date"))
     {
         char buffer[50];
-        os << "Date: " << MessageHeader::htdateCurrent(buffer) << "\r\n";
+        os.write("Date: ", 6);
+        os << MessageHeader::htdateCurrent(buffer);
+        os.write("\r\n", 2);
     }
 
     if( ! header.has("Host"))
@@ -1031,15 +1036,15 @@ void Connection::writeRequestHeader(std::ostream& os, Request& request)
             os << ':';
             putInt(oit, port);
         }
-        os << "\r\n";
+        os.write("\r\n", 2);
     }
 
     if( ! header.has("User-Agent") )
     {
-        os << "User-Agent: Pt-Http-client\r\n";
+        os.write("User-Agent: Pt-Http-client\r\n", 28);
     }
 
-    os << "\r\n";
+    os.write("\r\n", 2);
 }
 
 
@@ -1068,9 +1073,9 @@ void Connection::writeReplyHeader(std::ostream& os, Reply& reply)
 
     if( ! header.has("Connection") )
     {
-        os << "Connection: "
-            << (_keepAlive ? "keep-alive" : "close")
-            << "\r\n";
+        os.write("Connection: ", 12);
+        os << (_keepAlive ? "keep-alive" : "close");
+        os.write("\r\n", 2);
     }
 
     if(_chunked)
@@ -1090,7 +1095,9 @@ void Connection::writeReplyHeader(std::ostream& os, Reply& reply)
     if( ! header.has("Date") )
     {
         char buffer[50];
-        os << "Date: " << MessageHeader::htdateCurrent(buffer) << "\r\n";
+        os.write("Date: ", 6); 
+        os << MessageHeader::htdateCurrent(buffer);
+        os.write("\r\n", 2);
     }
 
     os.write("\r\n", 2);
