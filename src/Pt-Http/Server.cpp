@@ -788,6 +788,7 @@ Service* Server::getService(const Request& request, Authentication*& auth)
         if( ! it->mapper->map(request) )
             continue;
 
+        log_info("serving: " << request.url());
         auth = it->auth;
         return it->service;
     }
