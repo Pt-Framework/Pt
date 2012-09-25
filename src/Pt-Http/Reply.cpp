@@ -49,8 +49,9 @@ MessageProgress Reply::endReceive()
 }
 
 
-void Reply::beginSend()
+void Reply::beginSend(bool finish)
 { 
+    _finished = finish;
     _isSending = true;
     _body.setOutput();
     _conn->beginSendReply(*this); 
@@ -61,6 +62,16 @@ MessageProgress Reply::endSend()
 { 
     _isSending = false;
     return _conn->endSendReply(); 
+}
+
+void Reply::clear()
+{
+    _statusCode = 200;
+    _statusText = "OK";
+    _header.clear();
+    _body.clear();
+    _body.discard();
+    _finished = false;
 }
 
 } // namespace Http

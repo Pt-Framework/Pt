@@ -77,25 +77,21 @@ class PT_HTTP_API Reply
         bool isReceiving() const
         { return _isReceiving; }
 
-        // TODO: pass finished flag to beginSend
-        void beginSend();
+        void beginSend(bool finish = true);
 
         MessageProgress endSend();
 
         bool isSending() const
         { return _isSending; }
 
+        bool isFinished() const
+        { return _finished; }
+
         Signal<Reply&>& inputReceived()
         { return _inputReceived; }
 
         Signal<Reply&>& outputSent()
         { return _outputSent; }
-
-        void finish()
-        { _finished = true; }
-
-        bool isFinished() const
-        { return _finished; }
 
         MessageHeader& header()
         { return _header; }
@@ -106,15 +102,7 @@ class PT_HTTP_API Reply
         MessageBody& body()
         { return _body; }
 
-        void clear()
-        {
-            _statusCode = 200;
-            _statusText = "OK";
-            _header.clear();
-            _body.clear();
-            _body.discard();
-            _finished = false;
-        }
+        void clear();
 
     protected:
         void onInput()

@@ -66,8 +66,7 @@ class HelloResponder : public Pt::Http::Responder
         virtual void onWriteReply(Pt::Http::Request& request, Pt::Http::Reply& reply)
         {
             reply.body() << "Hello World!";
-            reply.finish();
-            reply.beginSend();
+            reply.beginSend(true);
         }
 };
 
@@ -95,9 +94,9 @@ class ChunkedResponder : public Pt::Http::Responder
             reply.body() << "Chunk" << _chunks--;
 
             if(_chunks == 0)
-                reply.finish();
-
-            reply.beginSend();
+                reply.beginSend(true);
+            else
+                reply.beginSend(false);
         }
 
     private:
@@ -163,8 +162,7 @@ class ServerTest : public Pt::Unit::TestSuite
             client.request().setUrl("/test");
             client.request().header().set("foo", "bar");
             PT_UNIT_ASSERT(client.request().header().has("foo") );
-            client.request().finish();
-            client.beginSend();
+            client.beginSend(true);
 
             loop->run();
             PT_UNIT_ASSERT_EQUALS(client.reply().statusCode(), 200);
@@ -177,15 +175,14 @@ class ServerTest : public Pt::Unit::TestSuite
             Pt::Http::MessageProgress progress = client.endSend();
             if( ! progress.finished() )
             {
-                client.beginSend();
+                client.beginSend(true);
                 return;
             }
 
             if( ! client.request().header().has("foo2") )
             {
                 client.request().header().set("foo2", "bar2");
-                client.request().finish();
-                client.beginSend();
+                client.beginSend(true);
                 return;
             }
 
@@ -379,21 +376,14 @@ class ServerTest : public Pt::Unit::TestSuite
             server.addService(Pt::Http::MapUrl("/test"), service);
 
             Pt::Http::Client client(*loop, "127.0.0.1", 8001);
-            client.requestSent() += Pt::slot(*this, &ServerTest::onHelloSent);
             client.replyReceived() += Pt::slot(*this, &ServerTest::onHelloReceived);
             client.request().setUrl("/test");
             client.request().header().set("foo", "bar");
-            client.beginSend();
+            client.beginReceive();
 
             loop->run();
             PT_UNIT_ASSERT_EQUALS(client.reply().statusCode(), 200);
             PT_UNIT_ASSERT_EQUALS(_reply, "Hello World!");
-        }
-
-        void onHelloSent(Pt::Http::Client& client)
-        {
-            client.endSend();
-            client.beginReceive();
         }
 
         void onHelloReceived(Pt::Http::Client& client)
@@ -432,7 +422,7 @@ class ServerTest : public Pt::Unit::TestSuite
             
             client.request().body() << _chunks.front();
             _chunks.erase( _chunks.begin() );
-            client.beginSend();
+            client.beginSend(false);
 
             loop->run();
 
@@ -445,7 +435,7 @@ class ServerTest : public Pt::Unit::TestSuite
             Pt::Http::MessageProgress progress = client.endSend();
             if( ! progress.finished() )
             {
-                client.beginSend();
+                client.beginSend(false);
                 return;
             }
 
@@ -453,7 +443,7 @@ class ServerTest : public Pt::Unit::TestSuite
             {
                 client.request().body() << _chunks.front();
                 _chunks.erase( _chunks.begin() );
-                client.beginSend();
+                client.beginSend(false);
                 return;
             }
 

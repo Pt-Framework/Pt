@@ -124,9 +124,9 @@ std::istream& Client::receive()
     return _impl->receive();
 }
 
-void Client::beginSend()
+void Client::beginSend(bool finished)
 {
-    _impl->beginSend();
+    _impl->beginSend(finished);
 }
 
 MessageProgress Client::endSend()

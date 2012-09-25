@@ -50,8 +50,9 @@ MessageProgress Request::endReceive()
 }
 
 
-void Request::beginSend()
+void Request::beginSend(bool finished)
 { 
+    _finished = finished;
     _isSending = true;
     _body.setOutput();
     _conn->beginSendRequest(*this); 
@@ -62,6 +63,17 @@ MessageProgress Request::endSend()
 { 
     _isSending = false;
     return _conn->endSendRequest(); 
+}
+
+
+void Request::clear()
+{
+    _method = "GET";
+    _qparams.clear();
+    _header.clear();
+    _body.clear();
+    _body.discard();
+    _finished = false;
 }
 
 } // namespace Http

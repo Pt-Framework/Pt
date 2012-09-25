@@ -82,24 +82,21 @@ class PT_HTTP_API Request
         bool isReceiving() const
         { return _isReceiving; }
 
-        void beginSend();
+        void beginSend(bool finish = true);
 
         MessageProgress endSend();
 
         bool isSending() const
         { return _isSending; }
 
+        bool isFinished() const
+        { return _finished; }
+
         Signal<Request&>& inputReceived()
         { return _inputReceived; }
 
         Signal<Request&>& outputSent()
         { return _outputSent; }
-
-        void finish()
-        { _finished = true; }
-
-        bool isFinished() const
-        { return _finished; }
 
         MessageHeader& header()
         { return _header; }
@@ -110,15 +107,7 @@ class PT_HTTP_API Request
         MessageBody& body()
         { return _body; }
 
-        void clear()
-        {
-            _method = "GET";
-            _qparams.clear();
-            _header.clear();
-            _body.clear();
-            _body.discard();
-            _finished = false;
-        }
+        void clear();
 
     protected:
         void onInput()

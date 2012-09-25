@@ -111,7 +111,7 @@ class ClientImpl : public Connectable
 
         std::istream& receive();
 
-        void beginSend();
+        void beginSend(bool finished);
 
         MessageProgress endSend();
 

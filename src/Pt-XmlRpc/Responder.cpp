@@ -192,8 +192,7 @@ void XmlRpcResponder::replyError(Http::Reply& reply, int rc, const char* msg)
     _writer.writeEndTag(XMLRPC_METHODRESPONSE); // methodResponse
     _writer.flush();
 
-    reply.finish();
-    reply.beginSend();
+    reply.beginSend(true);
 }
 
 
@@ -215,8 +214,7 @@ void XmlRpcResponder::endReply()
         if( ! _reply)
             throw std::logic_error("XML-RPC responder without reply");
 
-        _reply->finish();
-        _reply->beginSend();
+        _reply->beginSend(true);
     }
     catch (const Fault& fault)
     {

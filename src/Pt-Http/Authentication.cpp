@@ -125,7 +125,7 @@ Challenge* BasicAuthentication::onBeginChallenge(const Request& req, Reply& repl
 {
     reply.setStatus(401, "Authorization Required");
     reply.header().set("WWW-Authenticate", ("Basic realm=\"" + realm() + '"').c_str());
-    reply.finish();
+    //reply.finish();
     return 0;
 }
 
@@ -140,7 +140,7 @@ bool BasicAuthentication::onEndChallenge(Challenge* challenge, const Request& re
     {
         reply.setStatus(401, "Authorization Required");
         reply.header().set("WWW-Authenticate", ("Basic realm=\"" + realm() + '"').c_str());
-        reply.finish();
+        //reply.finish();
     }
 
     return granted;

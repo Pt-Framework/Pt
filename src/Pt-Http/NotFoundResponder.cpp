@@ -36,8 +36,8 @@ namespace Http {
 void NotFoundResponder::onBeginReply(Request& request, Reply& reply)
 {
     reply.setStatus(404, "Not found");
-    reply.finish();
-    reply.beginSend();
+    //reply.finish();
+    reply.beginSend(true);
 }
 
 } // namespace Http

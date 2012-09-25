@@ -77,7 +77,7 @@ std::istream& ClientImpl::receive()
 }
 
 
-void ClientImpl::beginSend()
+void ClientImpl::beginSend(bool finished)
 {
     log_trace("beginSend: " << _hstate);
     
@@ -96,7 +96,7 @@ void ClientImpl::beginSend()
         }
 
         log_debug("begin sending http chunk");
-        _req.beginSend();
+        _req.beginSend(finished);
         return;
     }
 
@@ -153,14 +153,14 @@ void ClientImpl::beginReceive()
             _authorization->authorize(_req, _reply);
         }
 
-        _req.finish();
+        ///_req.finish();
         _hstate = OnRequestEnd;
     }
 
     if(_hstate == OnRequestEnd)
     {
         log_debug("flushing cached request");
-        _req.beginSend();
+        _req.beginSend(true);
         return;
     }
 

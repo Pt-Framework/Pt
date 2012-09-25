@@ -85,7 +85,7 @@ class PT_HTTP_API Client : public Connectable
 
         void clearAuthorization();
 
-        void beginSend();
+        void beginSend(bool finished = true);
 
         MessageProgress endSend();
 

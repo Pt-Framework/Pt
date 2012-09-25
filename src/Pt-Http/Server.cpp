@@ -199,12 +199,9 @@ void RequestHandler::onRequestReceived(Request& req)
                     }
 
                     log_debug("request immediately denied");
-        
-                    if( ! _reply.isFinished() )
-                        _reply.finish();
 
                     if( ! _reply.isSending() )
-                        _reply.beginSend();
+                        _reply.beginSend(true);
 
                     _service = 0;
                     _authentication = 0;
@@ -250,12 +247,9 @@ void RequestHandler::onChallenge(Challenge& challenge)
         if( ! granted )
         {
             log_debug("request not granted");
-        
-            if( ! _reply.isFinished() )
-                _reply.finish();
 
             if( ! _reply.isSending() )
-                _reply.beginSend();
+                _reply.beginSend(true);
 
             _service = 0;
         }
@@ -343,7 +337,8 @@ void RequestHandler::onReplySent(Reply& r)
         if( ! progress.finished() )
         {
             log_debug("writing more reply data");
-            _reply.beginSend();
+            bool finished = _reply.isFinished();
+            _reply.beginSend(finished);
             return;
         }
 
@@ -388,8 +383,8 @@ void RequestHandler::replyError()
     _reply.header().set("Connection", "close");
     _reply.body() << "Error 500: Internal server error.";
 
-    _reply.finish();
-    _reply.beginSend();
+    //.finish();
+    _reply.beginSend(true);
 }
 
 
