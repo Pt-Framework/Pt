@@ -85,7 +85,7 @@ class ImagePainterDemo : public Pt::Gui::Widget
 
 	void drawEllipse()
 	{
-		size_t pens = 1;
+		Pt::size_t pens = 1;
 		Pt::Gfx::Point point( 40 ,50 );
 		Pt::Gfx::Size	size( 70, 50 );
 
@@ -100,7 +100,7 @@ class ImagePainterDemo : public Pt::Gui::Widget
 
 	void drawLines()
 	{
-		size_t pens = 11;
+		Pt::size_t pens = 11;
 		_imagePainter.setPen(Pt::Gfx::Pen(pens, Pt::Gfx::ARgbColor( 0xffff,0,0)));
 		Pt::System::Clock  clock;
 

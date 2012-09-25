@@ -47,7 +47,7 @@ namespace Pt {
     typedef unsigned long ulong;
 
     /// @brief Unsigned integer type large enough to store object sizes
-    using std::size_t;
+    typedef std::size_t size_t;
     
     /// @brief Signed integer varint of Pt::size_t 
     typedef std::ptrdiff_t ssize_t;

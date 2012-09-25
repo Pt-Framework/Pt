@@ -1310,7 +1310,7 @@ INCLUDE_FILE_PATTERNS  =
 # undefined via #undef or recursively expanded use the := operator 
 # instead of the = operator.
 
-PREDEFINED             = PT_API=
+PREDEFINED             = PT_API= USHRT_MAX=0xffff UINT_MAX=0xffffffffUL ULONG_MAX=18446744073709551615ULL
 
 # If the MACRO_EXPANSION and EXPAND_ONLY_PREDEF tags are set to YES then 
 # this tag can be used to specify a list of macro names that should be expanded. 

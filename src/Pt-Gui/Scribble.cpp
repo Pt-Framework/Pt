@@ -207,9 +207,9 @@ class ScribbleWidget : public Pt::Gui::Widget
         std::auto_ptr<Button> _blueButton;
         std::auto_ptr<Button> _clearButton;
         std::auto_ptr<Pixmap> _pixmap;
-        size_t _lastX;
-        size_t _lastY;
-        size_t _penSize;
+        Pt::size_t _lastX;
+        Pt::size_t _lastY;
+        Pt::size_t _penSize;
         ARgbColor _penColor;
 };
 

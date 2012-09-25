@@ -90,7 +90,7 @@ class DrawEllipseDemo : public Pt::Gui::Widget
 
     virtual void _paintEvent(const Pt::Gui::PaintEvent& event)
     {
-        size_t pens = 1;
+        Pt::size_t pens = 1;
 
         Size  size1( 40, 60 );
         Size  size2( 10, 10 );

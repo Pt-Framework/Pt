@@ -353,8 +353,8 @@ class ImagePainterTest : public Pt::Unit::TestSuite
 
     bool checkImage()
     {
-        for( size_t i = 0; i < _image.width(); ++i )
-            for( size_t j = 0; j < _image.height(); ++j )
+        for( Pt::size_t i = 0; i < _image.width(); ++i )
+            for( Pt::size_t j = 0; j < _image.height(); ++j )
                 if( _image.pixel( i, j ) != _bkColor )
                     return true;
 

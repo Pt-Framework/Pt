@@ -64,7 +64,7 @@ class DrawLineDemo : public Pt::Gui::Widget
             this->setTitle(L"DrawLineDemo");
         }
 
-        void drawStar(Gfx::Painter& painter, const Pt::Gfx::Point& center, size_t lineWidth)
+        void drawStar(Gfx::Painter& painter, const Pt::Gfx::Point& center, Pt::size_t lineWidth)
         {
             painter.setPen( Pt::Gfx::Pen( lineWidth, Pt::Gfx::ARgbColor(0, 0xcccc, 0) ));
             painter.drawLine( Pt::Gfx::Point( center.x(), center.y()-120 ),
