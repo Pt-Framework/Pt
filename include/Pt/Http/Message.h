@@ -133,9 +133,6 @@ class PT_HTTP_API MessageBody : public std::iostream
         void setOutput()
         { this->rdbuf(&_buf); }
 
-        void write(std::ostream& os)
-        { os.write( _buf.data(), _buf.size() ); }
-
     private:
         MessageBuffer _buf;
 };

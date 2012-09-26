@@ -225,18 +225,19 @@ void Connection::beginSendRequest(Request& request)
 #endif
 
     std::ostream& os = _os; //( _httpbuf.buffer() );
+    MessageBuffer& mbuf = _request->body().buffer();
 
     if( request.isFinished() )
     {
         log_debug("HTTP request finished");
-
+        
         if(_chunked)
         {
             log_debug("sending last HTTP chunk: "  << _request->body().buffer().size() << " bytes");
-            if(_request->body().buffer().size() > 0)
+            if(mbuf.size() > 0)
             {
-                os << std::hex << _request->body().buffer().size() << std::dec << "\r\n";
-                _request->body().write(os);
+                os << std::hex << mbuf.size() << std::dec << "\r\n";
+                os.write( mbuf.data(), mbuf.size() );
                 os.write("\r\n", 2);
             }
             
@@ -246,10 +247,8 @@ void Connection::beginSendRequest(Request& request)
         else
         {
             writeRequestHeader(os, request);
-
-            log_debug("writing body: " << request.body().buffer().size() << " bytes");
-            _request->body().write(os);
-            //os.write(request.data(), request.size());
+            log_debug("writing body: " << mbuf.size() << " bytes");
+            os.write( mbuf.data(), mbuf.size() );
         }
 
         log_debug("pipelining HTTP request");
@@ -270,8 +269,8 @@ void Connection::beginSendRequest(Request& request)
 
     if(_request->body().buffer().size() > 0)
     {
-        os << std::hex << _request->body().buffer().size() << std::dec << "\r\n";
-        _request->body().write(os);
+        os << std::hex << mbuf.size() << std::dec << "\r\n";
+        os.write( mbuf.data(), mbuf.size() );
         os.write("\r\n", 2);
     }
 
@@ -342,6 +341,7 @@ void Connection::beginSendReply(Reply& reply)
 
     MessageHeader& header = _reply->header();
     std::ostream& os =  _os; //( _httpbuf.buffer() );
+    MessageBuffer& mbuf = _reply->body().buffer();
 
     _keepAlive = _keepAlive && header.keepAlive();
 
@@ -357,8 +357,8 @@ void Connection::beginSendReply(Reply& reply)
         {
             if(_reply->body().buffer().size() > 0)
             {
-                os << std::hex << _reply->body().buffer().size() << std::dec << "\r\n";
-                _reply->body().write(os);
+                os << std::hex << mbuf.size() << std::dec << "\r\n";
+                os.write( mbuf.data(), mbuf.size() );
                 os.write("\r\n", 2);
             }
 
@@ -369,8 +369,8 @@ void Connection::beginSendReply(Reply& reply)
         {          
             writeReplyHeader(os, reply);
 
-            log_debug("writing body: " << reply.body().buffer().size() << " bytes");
-            _reply->body().write(os);
+            log_debug("writing body: " << mbuf.size() << " bytes");
+            os.write( mbuf.data(), mbuf.size() );
         }
 
         log_debug("begin writing reply");
@@ -396,8 +396,8 @@ void Connection::beginSendReply(Reply& reply)
 
     if(_reply->body().buffer().size() > 0)
     {
-        os << std::hex << _reply->body().buffer().size() << std::dec << "\r\n";
-        _reply->body().write(os);
+        os << std::hex << mbuf.size() << std::dec << "\r\n";
+        os.write( mbuf.data(), mbuf.size() );
         os.write("\r\n", 2);
     }
 
