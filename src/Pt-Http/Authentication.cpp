@@ -60,6 +60,17 @@ bool Challenge::getResult()
 }
 
 
+Authentication::Authentication(const std::string& realm)
+: _realm(realm)
+, _useCount(0)
+, _shutdown(false)
+{ }
+
+
+Authentication::~Authentication() 
+{ }
+
+
 bool Authentication::authenticate(const Request& req, Reply& reply) 
 {
     bool granted = this->onAuthenticate(req, reply);

@@ -54,12 +54,16 @@ class PT_HTTP_API Service
 
         Responder* getResponder(const Request&);
         
+        // TODO: only allow Servlet to create Responders
         void releaseResponder(Responder*);
 
+        // TODO: remove this
         void setShutdown(bool shutdown = true);
 
+        // TODO: remove this
         bool isIdle();
 
+        // TODO: remove this
         void detach();
 
     protected:

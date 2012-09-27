@@ -38,6 +38,7 @@
 #include <vector>
 #include <string>
 #include <cstddef>
+#include <cassert>
 
 namespace Pt {
 
@@ -51,6 +52,9 @@ class Context;
 
 namespace Http {
 
+class Challenge;
+class Reply;
+
 class ServerThread;
 class Service;
 class Authentication;
@@ -58,6 +62,7 @@ class RequestHandler;
 class Request;
 class Responder;
 class NotFoundService;
+class Server;
 
 class MapService
 {
@@ -99,6 +104,131 @@ class MapUrl
         std::string _url;
 };
 
+class Servlet2 : private NonCopyable
+{
+    friend class Server;
+
+    public:
+        // ServiceDispatch, ServiceRoute
+        class Mapping
+        {
+            public:
+                virtual ~Mapping()
+                {}
+
+                virtual bool map(const Request& request) = 0;
+        };
+
+        template <typename PredicateT>
+        class MapIf : public Mapping
+        {
+            public:
+                MapIf(PredicateT p)
+                : _p(p)
+                {}
+
+                bool map(const Request& request)
+                { return _p(request); }
+
+            private:
+                PredicateT _p;
+        };
+
+        class MapUrl : public Mapping
+        {
+            public:
+                MapUrl(const std::string& url)
+                : _url(url)
+                {}
+
+                bool map(const Request& request)
+                { return request.url() == _url; }
+
+            private:
+                std::string _url;
+        };
+
+    public:
+        template <typename PredicateT>
+        Servlet2(const PredicateT& map, Service& s, Authentication& a)
+        : _server(0)
+        , _mapping(0)
+        , _service(0)
+        , _auth(0)
+        {
+            _mapping = new MapIf<PredicateT>(map);
+        }
+        
+        Servlet2(const std::string& url, Service& s)
+        : _server(0)
+        , _mapping(0)
+        , _service(0)
+        , _auth(0)
+        {
+            _mapping = new MapUrl(url);
+        }
+
+        ~Servlet2()
+        {
+            delete _mapping;
+            assert( _server == 0 );
+        }
+
+        void setShutdown(bool shutdown = true)
+        {
+            // if(_server)
+            // {
+            //     _server->setShutdown(*this);
+            // } 
+        }
+
+        bool isIdle()
+        { return false; }
+
+        void detach()
+        { }
+
+        bool isMapped(const Request& request)
+        { return _mapping ? _mapping->map(request) : false; }
+
+        Responder* getResponder()
+        { return 0; }
+
+        void releaseResponder(Responder* r)
+        { }
+
+        bool authenticate(const Request& req, Reply& reply)
+        { return true; }
+
+        Challenge* beginChallenge(const Request& req, Reply& reply)
+        { return 0; }
+
+        bool endChallenge(Challenge* challenge, const Request& req, Reply& reply)
+        { return false; }
+
+        void cancelChallenge(Challenge* challenge)
+        { }
+
+    protected:
+        // @internal
+        void registerServer(Server& server)
+        {
+            _server = &server;
+        }
+        
+        // @internal
+        void unregisterServer(Server& server)
+        {
+            _server = 0;
+        }
+
+    private:
+        Server* _server;
+        Mapping* _mapping;
+        Service* _service;
+        Authentication* _auth;
+};
+
 
 // TODO: extend this class 
 struct Servlet
@@ -115,9 +245,11 @@ struct Servlet
 };
 
 
-class PT_HTTP_API Server : public Pt::Connectable
-                         , private Pt::NonCopyable
+class PT_HTTP_API Server : public Connectable
+                         , private NonCopyable
 {
+    friend class Servlet2;
+
     public:
         Server();
 

@@ -30,6 +30,7 @@
 #define Pt_Http_Authentication_h
 
 #include <Pt/Http/Api.h>
+#include <Pt/System/Mutex.h>
 #include <Pt/Signal.h>
 #include <string>
 #include <map>
@@ -66,12 +67,9 @@ class PT_HTTP_API Challenge : public Pt::NonCopyable
 class PT_HTTP_API Authentication
 {
     public:
-        Authentication(const std::string& realm)
-        : _realm(realm)
-        { }
+        Authentication(const std::string& realm);
 
-        virtual ~Authentication() 
-        { }
+        virtual ~Authentication();
         
         const std::string& realm() const
         { return _realm; }
@@ -80,9 +78,9 @@ class PT_HTTP_API Authentication
 
         Challenge* beginChallenge(const Request& req, Reply& reply);
 
-        virtual bool endChallenge(Challenge* challenge, const Request& req, Reply& reply);
+        bool endChallenge(Challenge* challenge, const Request& req, Reply& reply);
 
-        virtual void cancelChallenge(Challenge* challenge);
+        void cancelChallenge(Challenge* challenge);
 
     protected:
         virtual bool onAuthenticate(const Request& req, Reply& reply) = 0;
@@ -94,7 +92,10 @@ class PT_HTTP_API Authentication
         virtual void onDestroyChallenge(Challenge* challenge) = 0;
 
     private:
+        System::Mutex _mutex;
         std::string _realm;
+        unsigned _useCount;
+        bool _shutdown;
 };
 
 
