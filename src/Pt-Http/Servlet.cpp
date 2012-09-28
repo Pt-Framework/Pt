@@ -54,9 +54,18 @@ class MapUrl2 : public Servlet2::Mapping
 Servlet2::Servlet2(const std::string& url, Service& s)
 : _server(0)
 , _mapping(0)
-, _service(0)
+, _service(&s)
 , _auth(0)
-, _useCount(0)
+{
+    _mapping = new MapUrl2(url);
+}
+
+
+Servlet2::Servlet2(const std::string& url, Service& s, Authentication& a)
+: _server(0)
+, _mapping(0)
+, _service(&s)
+, _auth(&a)
 {
     _mapping = new MapUrl2(url);
 }
@@ -90,8 +99,8 @@ bool Servlet2::isIdle()
 
 void Servlet2::detach()
 { 
-    // if(_server)
-    //     _server->removeServlet(*this);
+    if(_server)
+        _server->removeServlet(*this);
 }
 
 

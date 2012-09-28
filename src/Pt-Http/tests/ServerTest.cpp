@@ -36,6 +36,7 @@
 #include "Pt/Http/Request.h"
 #include "Pt/Http/Reply.h"
 #include "Pt/Http/Service.h"
+#include "Pt/Http/Servlet.h"
 #include "Pt/Http/Responder.h"
 #include "Pt/Net/TcpSocket.h"
 #include "Pt/System/MainLoop.h"
@@ -153,8 +154,10 @@ class ServerTest : public Pt::Unit::TestSuite
         void PipelinedRequests()
         {
             HelloService service;
+            Pt::Http::Servlet2 servlet("/test", service);
+
             Pt::Http::Server server(*loop, "127.0.0.1", 8001);
-            server.addService(Pt::Http::MapUrl("/test"), service);
+            server.addServlet(servlet);
 
             Pt::Http::Client client(*loop, "127.0.0.1", 8001);
             client.requestSent() += Pt::slot(*this, &ServerTest::onPipelinedSent);
@@ -322,9 +325,11 @@ class ServerTest : public Pt::Unit::TestSuite
 
         void BasicAuthentication()
         {
-            HelloService service;
             Pt::Http::Server server(*loop, "127.0.0.1", 8001);
-            server.addService(Pt::Http::MapUrl("/test"), service, _authent);
+
+            HelloService service;
+            Pt::Http::Servlet2 helloServlet("/test", service, _authent);
+            server.addServlet(helloServlet);
 
             Pt::Http::Client client(*loop, "127.0.0.1", 8001);
             client.replyReceived() += Pt::slot(*this, &ServerTest::onBasicAuthenticationReceived);
@@ -372,8 +377,10 @@ class ServerTest : public Pt::Unit::TestSuite
         void ReplyWithBody()
         {
             HelloService service;
+            Pt::Http::Servlet2 servlet("/test", service);
+
             Pt::Http::Server server(*loop, "127.0.0.1", 8001);
-            server.addService(Pt::Http::MapUrl("/test"), service);
+            server.addServlet(servlet);
 
             Pt::Http::Client client(*loop, "127.0.0.1", 8001);
             client.replyReceived() += Pt::slot(*this, &ServerTest::onHelloReceived);
@@ -413,7 +420,8 @@ class ServerTest : public Pt::Unit::TestSuite
             Pt::Http::Server server(*loop, "127.0.0.1", 8001);
 
             ChunkedService service;
-            server.addService(Pt::Http::MapUrl("/test"), service);
+            Pt::Http::Servlet2 servlet("/test", service);
+            server.addServlet(servlet);
 
             Pt::Http::Client client(*loop, "127.0.0.1", 8001);
             client.requestSent() += Pt::slot(*this, &ServerTest::onChunkedSent);

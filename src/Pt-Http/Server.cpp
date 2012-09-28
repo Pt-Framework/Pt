@@ -80,10 +80,10 @@ class RequestHandler : public Pt::Connectable
         { return _servlet; }
 
         Service* service()
-        { return _service; }
+        { return 0; }
 
         Authentication* authentication()
-        { return _authentication; }
+        { return 0; }
 
     protected:
         void releaseResponder();
@@ -102,10 +102,8 @@ class RequestHandler : public Pt::Connectable
 
     private:
         Server& _server;
-        Authentication* _authentication;
         Challenge* _challenge;
         Servlet2* _servlet;
-        Service* _service;
         Responder* _responder;
         Connection _conn;
         Request _request;
@@ -116,10 +114,8 @@ class RequestHandler : public Pt::Connectable
 
 RequestHandler::RequestHandler(Server& server, Net::TcpServer& tcpServer)
 : _server(server)
-, _authentication(0)
 , _challenge(0)
 , _servlet(0)
-, _service(0)
 , _responder(0)
 , _conn()
 , _request(_conn)
@@ -137,8 +133,9 @@ RequestHandler::~RequestHandler()
     
     if(_challenge)
     {
-        assert(_authentication);
-        _authentication->cancelChallenge(_challenge);
+        assert(_servlet);
+        assert(_servlet->authentication());
+        _servlet->authentication()->cancelChallenge(_challenge);
     }
 }
 
@@ -148,9 +145,9 @@ void RequestHandler::releaseResponder()
     log_trace("RequestHandler::releaseResponder " << _responder);
     if( _responder )
     {
-        assert(_service);
-        _service->releaseResponder(_responder);
-        _service = 0;
+        assert(_servlet);
+        _servlet->service()->releaseResponder(_responder);
+        _servlet = 0;
         _responder = 0;
     }
 }
@@ -183,50 +180,50 @@ void RequestHandler::onRequestReceived(Request& req)
         {
             log_debug("received request header");
 
-            assert(_authentication == 0);
-            assert(_challenge == 0);
-            assert(_service == 0);
-
-            _service = _server.getService( _request, _authentication );
-            if( ! _service )
+            assert(_servlet == 0);
+            _servlet = _server.getServlet(_request);
+            if( ! _servlet )
             {
                 _reply.setStatus(404, "Not found");
                 _reply.beginSend();
                 return;
             }
 
-            if(_authentication)
+            Authentication* authentication = _servlet->authentication();
+            if( authentication )
             {
                 log_debug("authentication required");
 
                 // TODO: only authenticate if we haven't already for this connection
-                bool granted = _authentication->authenticate(_request, _reply);
+                bool granted = authentication->authenticate(_request, _reply);
                 if( ! granted )
                 {
-                    _challenge = _authentication->beginChallenge(_request, _reply);
-                    if( _challenge )
+                    _challenge = authentication->beginChallenge(_request, _reply);
+                    if( ! _challenge)
+                    {
+                        log_debug("request immediately denied");
+
+                        if( ! _reply.isSending() )
+                            _reply.beginSend(true);
+
+                        _servlet = 0;
+                    }
+                    else
                     {
                         log_debug("authentication started");
                         _requestProgress = progress;
                         _challenge->finished() += Pt::slot(*this, &RequestHandler::onChallenge);
-                        return;
                     }
 
-                    log_debug("request immediately denied");
-
-                    if( ! _reply.isSending() )
-                        _reply.beginSend(true);
-
-                    _service = 0;
-                    _authentication = 0;
                     return;
                 }
 
                 log_debug("request immediately authenticated");
-                _authentication = 0;
             }
         
-            _responder = _service->getResponder( _request );
+            assert(_responder == 0);
+            _responder = _servlet->service()->getResponder( _request );
+            
             assert(_responder);
             _responder->beginRequest( _request, _reply );
 
@@ -266,10 +263,9 @@ void RequestHandler::onChallenge(Challenge& challenge)
 
     try
     {
-        bool granted = _authentication->endChallenge(_challenge, _request, _reply);
+        bool granted = _servlet->authentication()->endChallenge(_challenge, _request, _reply);
 
         _challenge = 0;
-        _authentication = 0;
     
         if( ! granted )
         {
@@ -278,11 +274,13 @@ void RequestHandler::onChallenge(Challenge& challenge)
             if( ! _reply.isSending() )
                 _reply.beginSend(true);
 
-            _service = 0;
+            _servlet = 0;
         }
         else
         {
-            _responder = _service->getResponder( _request );
+            assert(_responder == 0);
+            _responder = _servlet->service()->getResponder( _request );
+            
             assert(_responder);
             _responder->beginRequest( _request, _reply );
 
@@ -421,7 +419,6 @@ void RequestHandler::replyError()
     _reply.header().set("Connection", "close");
     _reply.body() << "Error 500: Internal server error.";
 
-    //.finish();
     _reply.beginSend(true);
 }
 

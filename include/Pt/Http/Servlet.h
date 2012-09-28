@@ -46,7 +46,7 @@ class Responder;
 class Server;
 class Service;
 
-class Servlet2 : private NonCopyable
+class PT_HTTP_API Servlet2 : private NonCopyable
 {
     // @internal
     friend class Server;
@@ -79,16 +79,18 @@ class Servlet2 : private NonCopyable
 
     public:
         template <typename PredicateT>
-        Servlet2(const PredicateT& map, Service& s, Authentication& a)
+        Servlet2(Service& s, Authentication& a, const PredicateT& map)
         : _server(0)
         , _mapping(0)
-        , _service(0)
-        , _auth(0)
+        , _service(&s)
+        , _auth(&a)
         {
             _mapping = new MapIf<PredicateT>(map);
         }
         
         Servlet2(const std::string& url, Service& s);
+
+        Servlet2(const std::string& url, Service& s, Authentication& a);
 
         ~Servlet2();
 
@@ -116,7 +118,6 @@ class Servlet2 : private NonCopyable
 
     private:
         Server* _server;
-        std::size_t _useCount;
         Mapping* _mapping;
         Service* _service;
         Authentication* _auth;
