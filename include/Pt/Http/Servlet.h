@@ -46,6 +46,9 @@ class Responder;
 class Server;
 class Service;
 
+// TODO: instead of setting a mapping, derive Servlet and override a virtual
+// map() method.
+
 class PT_HTTP_API Servlet2 : private NonCopyable
 {
     // @internal
