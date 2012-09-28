@@ -33,6 +33,7 @@
 #include "Pt/XmlRpc/Fault.h"
 #include "Pt/XmlRpc/RemoteProcedure.h"
 #include "Pt/Http/Server.h"
+#include "Pt/Http/Servlet.h"
 #include "Pt/System/MainLoop.h"
 #include "Pt/System/Clock.h"
 #include "Pt/System/Logger.h"
@@ -474,7 +475,9 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
         {
             Pt::XmlRpc::Service service;
             service.registerMethod("mergeVector", *this, &PtXmlRpcTest::mergeVector);
-            _server->addService(Pt::Http::MapUrl("/calc"), service);
+            
+            Pt::Http::Servlet2 servlet("/calc", service);
+            _server->addServlet(servlet);
 
             Pt::XmlRpc::HttpClient client(*_loop, "127.0.0.1", 8001, "/calc");
             Pt::XmlRpc::RemoteProcedure< std::vector<int>, std::vector<int>, std::vector<int> > proc(client, "mergeVector");
