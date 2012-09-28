@@ -29,6 +29,7 @@
 #include "Connection.h"
 #include "NotFoundService.h"
 #include <Pt/Http/Server.h>
+#include <Pt/Http/Servlet.h>
 #include <Pt/Http/Authentication.h>
 #include <Pt/Http/Request.h>
 #include <Pt/Http/Reply.h>
@@ -75,6 +76,9 @@ class RequestHandler : public Pt::Connectable
         Signal<RequestHandler&>& finished()
         { return _finished; }
 
+        Servlet2* servlet()
+        { return _servlet; }
+
         Service* service()
         { return _service; }
 
@@ -88,7 +92,9 @@ class RequestHandler : public Pt::Connectable
 
         void onChallenge(Challenge& challenge);
 
-        void onRequestBody(MessageProgress progress);
+        bool onRequestBody();
+
+        bool onRequestFinished();
 
         void onReplySent(Reply& r);
 
@@ -98,6 +104,7 @@ class RequestHandler : public Pt::Connectable
         Server& _server;
         Authentication* _authentication;
         Challenge* _challenge;
+        Servlet2* _servlet;
         Service* _service;
         Responder* _responder;
         Connection _conn;
@@ -111,6 +118,7 @@ RequestHandler::RequestHandler(Server& server, Net::TcpServer& tcpServer)
 : _server(server)
 , _authentication(0)
 , _challenge(0)
+, _servlet(0)
 , _service(0)
 , _responder(0)
 , _conn()
@@ -180,6 +188,12 @@ void RequestHandler::onRequestReceived(Request& req)
             assert(_service == 0);
 
             _service = _server.getService( _request, _authentication );
+            if( ! _service )
+            {
+                _reply.setStatus(404, "Not found");
+                _reply.beginSend();
+                return;
+            }
 
             if(_authentication)
             {
@@ -223,7 +237,20 @@ void RequestHandler::onRequestReceived(Request& req)
             }
         }
     
-        onRequestBody(progress);
+        if( progress.body() )
+        {     
+            if( ! this->onRequestBody() )
+                return;
+        }
+
+        if( progress.finished() )
+        {
+            if( ! this->onRequestFinished() )
+                return;
+        }
+
+        log_debug("read request");
+        _request.beginReceive();
     }
     catch(const System::IOError& e) // TODO: HttpError is also an IOError
     {
@@ -265,7 +292,20 @@ void RequestHandler::onChallenge(Challenge& challenge)
                 return;
             }
 
-            onRequestBody(_requestProgress);
+            if( _requestProgress.body() )
+            {     
+                if( ! this->onRequestBody() )
+                    return;
+            }
+
+            if( _requestProgress.finished() )
+            {
+                if( ! this->onRequestFinished() )
+                    return;
+            }
+
+            log_debug("read request");
+            _request.beginReceive();
         }
     }
     catch(const System::IOError& e) // TODO: HttpError is also an IOError
@@ -279,50 +319,48 @@ void RequestHandler::onChallenge(Challenge& challenge)
 }
 
 
-void RequestHandler::onRequestBody(MessageProgress progress)
-{    
-    if( progress.body() )
-    {     
-        if( _responder)
-        {
-            log_debug("reading request");
-            _responder->readRequest(_request, _reply);
-
-            if( _reply.isSending() )
-            {
-                log_debug("request interrupted");
-                return;
-            }
-        }
-        else
-        {
-            log_debug("ignoring request body");
-            _request.body().discard();
-        }
-    }
-
-    if( progress.finished() )
+bool RequestHandler::onRequestBody()
+{      
+    if( _responder)
     {
-        if( ! _conn.isConnected() )
-        {
-            log_debug("not connected anymore");
-            _finished.send(*this);
-            return;
-        }
+        log_debug("reading request");
+        _responder->readRequest(_request, _reply);
 
-        if(_responder)
+        if( _reply.isSending() )
         {
-            log_debug("request body finished, begin reply");
-            _responder->beginReply(_request, _reply);
-            return;
+            log_debug("request interrupted");
+            return false;
         }
-
-        // if there is no responder, the reply was already sent and a request
-        // interrupted at an early stage was just finished
+    }
+    else
+    {
+        log_debug("ignoring request body");
+        _request.body().discard();
     }
 
-    log_debug("read request");
-    _request.beginReceive();
+    return true;
+}
+
+
+bool RequestHandler::onRequestFinished()
+{
+    if( ! _conn.isConnected() )
+    {
+        log_debug("not connected anymore");
+        _finished.send(*this);
+        return false;
+    }
+
+    if(_responder)
+    {
+        log_debug("request body finished, begin reply");
+        _responder->beginReply(_request, _reply);
+        return false;
+    }
+
+    // if there is no responder, the reply was already sent, because a 
+    // request, interrupted at an early stage, was just finished
+    return true;
 }
 
 
@@ -419,6 +457,20 @@ class ServerThread : public Connectable
                 Service* _service;
         };
 
+        class RemoveServletEvent : public Pt::BasicEvent<RemoveServiceEvent>
+        {
+            public:
+                RemoveServletEvent(Servlet2* s)
+                : _servlet(s)
+                { }
+    
+                Servlet2* servlet() const
+                { return _servlet; }
+    
+            private:
+                Servlet2* _servlet;
+        };
+
     public:
         ServerThread(Server& server)
         : _server(&server)
@@ -428,6 +480,7 @@ class ServerThread : public Connectable
         {
             _loop.event() += Pt::slot(*this, &ServerThread::onAccept);
             _loop.event() += Pt::slot(*this, &ServerThread::onRemoveService);
+            _loop.event() += Pt::slot(*this, &ServerThread::onRemoveServlet);
             _thread.start();
         }
 
@@ -476,6 +529,18 @@ class ServerThread : public Connectable
                 _isRemoved.wait(lock);
         }
 
+        void removeServlet(Servlet2& servlet)
+        {
+            RemoveServletEvent ev(&servlet);
+            _loop.commitEvent(ev);
+
+            System::MutexLock lock(_removedMutex);
+            _removed = false;
+
+            while( ! _removed)
+                _isRemoved.wait(lock);
+        }
+
     private:
         void onAccept(const AcceptEvent& ev)
         {
@@ -499,6 +564,28 @@ class ServerThread : public Connectable
             {
                 RequestHandler* rh = *it;
                 if( rh->service() == ev.service() )
+                {
+                    delete rh;
+                    it = _handlers.erase(it);
+                }
+                else
+                {
+                    ++it;
+                }
+            }
+
+            System::MutexLock lock(_removedMutex);
+            _removed = true;
+            _isRemoved.signal();
+        }
+
+        void onRemoveServlet(const RemoveServletEvent& ev)
+        {
+            std::vector<RequestHandler*>::iterator it  = _handlers.begin();
+            while( it != _handlers.end() )
+            {
+                RequestHandler* rh = *it;
+                if( rh->servlet() == ev.servlet() )
                 {
                     delete rh;
                     it = _handlers.erase(it);
@@ -553,8 +640,6 @@ Server::Server()
 , _timeout(30000)
 , _keepAliveTimeout(30000)
 {
-    _notFoundService = new NotFoundService();
-
     _serverSocket.connectionPending() += Pt::slot(*this, &Server::onAccept);
 }
 
@@ -567,8 +652,6 @@ Server::Server(System::EventLoop& loop)
 , _timeout(30000)
 , _keepAliveTimeout(30000)
 {
-    _notFoundService = new NotFoundService();
-
     _serverSocket.setActive(loop);
     _serverSocket.connectionPending() += Pt::slot(*this, &Server::onAccept);
 }
@@ -583,8 +666,6 @@ Server::Server(System::EventLoop& loop, const std::string& ip, unsigned short in
 , _timeout(30000)
 , _keepAliveTimeout(30000)
 {
-    _notFoundService = new NotFoundService();
-
     _serverSocket.setActive(loop);
     _serverSocket.beginAccept();
     _serverSocket.connectionPending() += Pt::slot(*this, &Server::onAccept);
@@ -601,8 +682,6 @@ Server::Server(System::EventLoop& loop, const Pt::Net::AddrInfo& addr, int backl
 , _timeout(30000)
 , _keepAliveTimeout(30000)
 {
-    _notFoundService = new NotFoundService();
-
     _serverSocket.setActive(loop);
     _serverSocket.beginAccept();
     _serverSocket.connectionPending() += Pt::slot(*this, &Server::onAccept);
@@ -620,7 +699,11 @@ Server::~Server()
         unregisterService(*service);
     }
 
-    delete _notFoundService;
+    while( ! _servlets.empty() )
+    {
+        Servlet2* servlet = _servlets.front();
+        removeServlet(*servlet);
+    }
 }
 
 
@@ -724,6 +807,19 @@ void Server::registerService(MapService* m, Service& service, Authentication* au
 }
 
 
+
+void Server::addServlet(Servlet2& servlet)
+{
+    System::WriteLock serviceLock(_serviceMutex);
+    _servlets.push_back(&servlet);
+    servlet.registerServer(*this);
+}
+
+
+
+
+
+
 void Server::unregisterService(Service& service)
 {
     System::WriteLock serviceLock(_serviceMutex);
@@ -774,6 +870,57 @@ void Server::removeService(Service& service)
 }
 
 
+void Server::removeServlet(Servlet2& servlet)
+{
+    System::WriteLock serviceLock(_serviceMutex);
+
+    ServletList::iterator it;
+    for(it = _servlets.begin(); it != _servlets.end(); ++it)
+    {
+        if(*it == &servlet)
+        {
+            _servlets.erase(it);
+            break;
+        }
+    }
+
+    servlet.unregisterServer(*this);
+
+    serviceLock.unlock();
+
+    // close all connections in this thread, which use the servlet
+    std::vector<RequestHandler*>::iterator hit  = _handlers.begin();
+    while( hit != _handlers.end() )
+    {
+        std::vector<RequestHandler*>::iterator handler = hit++;
+        
+        if( (*handler)->servlet() == &servlet )
+        {
+            delete *handler;
+            hit = _handlers.erase(handler);
+        }
+    }
+
+    // close all connections in the worker threads which use the servlet
+    std::vector<ServerThread*>::iterator threadIt;
+    for(threadIt = _serverThreads.begin(); threadIt != _serverThreads.end(); ++threadIt)
+    {
+        // returns when all connections using the service are closed
+        (*threadIt)->removeServlet(servlet);
+    }
+
+    //NOTE: in case of an exception, terminate the worker thread
+}
+
+
+
+
+
+
+
+
+
+
 Service* Server::getService(const Request& request, Authentication*& auth)
 {
     System::ReadLock serviceLock(_serviceMutex);
@@ -790,8 +937,34 @@ Service* Server::getService(const Request& request, Authentication*& auth)
 
     log_warn("not found: " << request.url());
     auth = 0;
-    return _notFoundService;
+    return 0;
 }
+
+
+Servlet2* Server::getServlet(const Request& request)
+{
+    System::ReadLock serviceLock(_serviceMutex);
+
+    for(ServletList::iterator it = _servlets.begin(); it != _servlets.end(); ++it)
+    {
+        if( ! (*it)->isMapped(request) )
+            continue;
+
+        log_info("serving: " << request.url());
+        return *it;
+    }
+
+    log_warn("not found: " << request.url());
+    return 0;
+}
+
+
+
+
+
+
+
+
 
 
 void Server::startWorker()

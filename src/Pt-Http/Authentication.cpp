@@ -63,7 +63,6 @@ bool Challenge::getResult()
 Authentication::Authentication(const std::string& realm)
 : _realm(realm)
 , _useCount(0)
-, _shutdown(false)
 { }
 
 
@@ -71,8 +70,17 @@ Authentication::~Authentication()
 { }
 
 
+bool Authentication::isIdle()
+{
+    System::MutexLock lock(_mutex);
+    return _useCount == 0;
+}
+
+
 bool Authentication::authenticate(const Request& req, Reply& reply) 
 {
+    System::MutexLock lock(_mutex);
+
     bool granted = this->onAuthenticate(req, reply);
     return granted;
 }
@@ -80,23 +88,30 @@ bool Authentication::authenticate(const Request& req, Reply& reply)
 
 Challenge* Authentication::beginChallenge(const Request& req, Reply& reply) 
 {
+    System::MutexLock lock(_mutex);
+
+    ++_useCount;
     return this->onBeginChallenge(req, reply);
 }
 
 
 bool Authentication::endChallenge(Challenge* challenge, const Request& req, Reply& reply) 
 {
+    System::MutexLock lock(_mutex);
+
     bool granted = this->onEndChallenge(challenge, req, reply);
-
     this->onDestroyChallenge(challenge);
-
+    --_useCount;
     return granted;
 }
 
 
 void Authentication::cancelChallenge(Challenge* challenge) 
 {
+    System::MutexLock lock(_mutex);
+
     this->onDestroyChallenge(challenge);
+    --_useCount;
 }
 
 
@@ -136,7 +151,6 @@ Challenge* BasicAuthentication::onBeginChallenge(const Request& req, Reply& repl
 {
     reply.setStatus(401, "Authorization Required");
     reply.header().set("WWW-Authenticate", ("Basic realm=\"" + realm() + '"').c_str());
-    //reply.finish();
     return 0;
 }
 
@@ -151,7 +165,6 @@ bool BasicAuthentication::onEndChallenge(Challenge* challenge, const Request& re
     {
         reply.setStatus(401, "Authorization Required");
         reply.header().set("WWW-Authenticate", ("Basic realm=\"" + realm() + '"').c_str());
-        //reply.finish();
     }
 
     return granted;

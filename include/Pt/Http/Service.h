@@ -60,7 +60,6 @@ class PT_HTTP_API Service
         // TODO: remove this
         void setShutdown(bool shutdown = true);
 
-        // TODO: remove this
         bool isIdle();
 
         // TODO: remove this

@@ -70,6 +70,8 @@ class PT_HTTP_API Authentication
         Authentication(const std::string& realm);
 
         virtual ~Authentication();
+
+        bool isIdle();
         
         const std::string& realm() const
         { return _realm; }
@@ -93,9 +95,8 @@ class PT_HTTP_API Authentication
 
     private:
         System::Mutex _mutex;
+        std::size_t _useCount;
         std::string _realm;
-        unsigned _useCount;
-        bool _shutdown;
 };
 
 

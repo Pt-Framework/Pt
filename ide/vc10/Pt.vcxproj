@@ -42,6 +42,7 @@
     <ClInclude Include="..\..\include\Pt\Http\Responder.h" />
     <ClInclude Include="..\..\include\Pt\Http\Server.h" />
     <ClInclude Include="..\..\include\Pt\Http\Service.h" />
+    <ClInclude Include="..\..\include\Pt\Http\Servlet.h" />
     <ClInclude Include="..\..\include\Pt\Invokable.h" />
     <ClInclude Include="..\..\include\Pt\LiteralPtr.h" />
     <ClInclude Include="..\..\include\Pt\Locale.h" />
@@ -255,6 +256,7 @@
     <ClCompile Include="..\..\src\Pt-Http\Responder.cpp" />
     <ClCompile Include="..\..\src\Pt-Http\Server.cpp" />
     <ClCompile Include="..\..\src\Pt-Http\Service.cpp" />
+    <ClCompile Include="..\..\src\Pt-Http\Servlet.cpp" />
     <ClCompile Include="..\..\src\Pt-Http\tests\ParserTest.cpp" />
     <ClCompile Include="..\..\src\Pt-Http\tests\Pt-Http-test.cpp" />
     <ClCompile Include="..\..\src\Pt-Http\tests\ServerTest.cpp" />

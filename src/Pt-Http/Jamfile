@@ -24,6 +24,7 @@ SharedLibrary Pt-Http : Authentication.cpp
                         Responder.cpp
                         Server.cpp
                         Service.cpp
+                        Servlet.cpp
                         ;
 
 if $(WITH_OPENSSL)
