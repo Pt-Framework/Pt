@@ -46,56 +46,17 @@ class Responder;
 class Server;
 class Service;
 
-// TODO: instead of setting a mapping, derive Servlet and override a virtual
-// map() method.
-
 class PT_HTTP_API Servlet2 : private NonCopyable
 {
     // @internal
     friend class Server;
 
     public:
-        // ServiceDispatch, ServiceRoute
-        class Mapping
-        {
-            public:
-                virtual ~Mapping()
-                {}
+        Servlet2(Service& s);
 
-                virtual bool map(const Request& request) = 0;
-        };
+        Servlet2(Service& s, Authentication& a);
 
-        template <typename PredicateT>
-        class MapIf : public Mapping
-        {
-            public:
-                MapIf(PredicateT p)
-                : _p(p)
-                {}
-
-                bool map(const Request& request)
-                { return _p(request); }
-
-            private:
-                PredicateT _p;
-        };
-
-    public:
-        template <typename PredicateT>
-        Servlet2(Service& s, Authentication& a, const PredicateT& map)
-        : _server(0)
-        , _mapping(0)
-        , _service(&s)
-        , _auth(&a)
-        {
-            _mapping = new MapIf<PredicateT>(map);
-        }
-        
-        Servlet2(const std::string& url, Service& s);
-
-        Servlet2(const std::string& url, Service& s, Authentication& a);
-
-        ~Servlet2();
+        virtual ~Servlet2();
 
         void setShutdown(bool shutdown = true);
 
@@ -104,7 +65,7 @@ class PT_HTTP_API Servlet2 : private NonCopyable
         void detach();
 
         bool isMapped(const Request& request) const
-        { return _mapping->map(request); }
+        { return this->onMap(request); }
 
         Service* service()
         { return _service; }
@@ -113,6 +74,9 @@ class PT_HTTP_API Servlet2 : private NonCopyable
         { return _auth; }
 
     protected:
+        virtual bool onMap(const Request& request) const = 0;
+
+    private:
         // @internal
         void registerServer(Server& server);
         
@@ -121,9 +85,28 @@ class PT_HTTP_API Servlet2 : private NonCopyable
 
     private:
         Server* _server;
-        Mapping* _mapping;
         Service* _service;
         Authentication* _auth;
+};
+
+class PT_HTTP_API MapUrl3 : public Servlet2
+{
+    public:
+        MapUrl3(const std::string& url, Service& s)
+        : Servlet2(s)
+        , _url(url)
+        {}
+
+        MapUrl3(const std::string& url, Service& s, Authentication& a)
+        : Servlet2(s, a)
+        , _url(url)
+        {}
+
+    protected:
+        bool onMap(const Request& request) const;
+
+    private:
+        std::string _url;
 };
 
 } // namespace Http
@@ -131,4 +114,3 @@ class PT_HTTP_API Servlet2 : private NonCopyable
 } // namespace Pt
 
 #endif
-

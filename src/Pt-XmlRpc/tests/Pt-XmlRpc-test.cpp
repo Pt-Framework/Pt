@@ -476,8 +476,8 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             Pt::XmlRpc::Service service;
             service.registerMethod("mergeVector", *this, &PtXmlRpcTest::mergeVector);
             
-            Pt::Http::Servlet2 servlet("/calc", service);
-            _server->addServlet(servlet);
+            Pt::Http::MapUrl3 mapurl("/calc", service);
+            _server->addServlet(mapurl);
 
             Pt::XmlRpc::HttpClient client(*_loop, "127.0.0.1", 8001, "/calc");
             Pt::XmlRpc::RemoteProcedure< std::vector<int>, std::vector<int>, std::vector<int> > proc(client, "mergeVector");

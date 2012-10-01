@@ -37,44 +37,24 @@ namespace Pt {
 
 namespace Http {
 
-class MapUrl2 : public Servlet2::Mapping
-{
-    public:
-        MapUrl2(const std::string& url)
-        : _url(url)
-        {}
-
-        bool map(const Request& request)
-        { return request.url() == _url; }
-
-    private:
-        std::string _url;
-};
-
-Servlet2::Servlet2(const std::string& url, Service& s)
+Servlet2::Servlet2(Service& s)
 : _server(0)
-, _mapping(0)
 , _service(&s)
 , _auth(0)
 {
-    _mapping = new MapUrl2(url);
 }
 
 
-Servlet2::Servlet2(const std::string& url, Service& s, Authentication& a)
+Servlet2::Servlet2(Service& s, Authentication& a)
 : _server(0)
-, _mapping(0)
 , _service(&s)
 , _auth(&a)
 {
-    _mapping = new MapUrl2(url);
 }
 
 
 Servlet2::~Servlet2()
 {
-    delete _mapping;
-
     detach();
 }
 
@@ -113,6 +93,11 @@ void Servlet2::registerServer(Server& server)
 void Servlet2::unregisterServer(Server& server)
 {
     _server = 0;
+}
+
+bool MapUrl3::onMap(const Request& request) const
+{ 
+    return _url == request.url(); 
 }
 
 } // namespace Http

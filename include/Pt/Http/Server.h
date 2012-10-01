@@ -184,7 +184,6 @@ class PT_HTTP_API Server : public Connectable
 
         Service* getService(const Request& request, Authentication*& auth);
 
-
         void addServlet(Servlet2& servlet);
 
         void removeServlet(Servlet2& servlet);
