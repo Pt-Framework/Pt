@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 by Marc Boris Duerner
+ * Copyright (C) 2011-2012 by Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -33,7 +33,6 @@
 #include <Pt/Http/Request.h>
 #include <Pt/Net/TcpServer.h>
 #include <Pt/Connectable.h>
-#include <Pt/SmartPtr.h>
 #include <Pt/NonCopyable.h>
 #include <vector>
 #include <string>
@@ -52,78 +51,15 @@ class Context;
 
 namespace Http {
 
-class Challenge;
-class Reply;
-
 class ServerThread;
-class Service;
-class Authentication;
 class RequestHandler;
-class Request;
-class Responder;
-class NotFoundService;
-class Servlet2;
-
-class MapService
-{
-    public:
-        virtual ~MapService()
-        {}
-
-        virtual bool map(const Request& header) = 0;
-};
-
-
-template <typename PredicateT>
-class MapIf : public MapService
-{
-    public:
-        MapIf(PredicateT p)
-        : _p(p)
-        {}
-
-        bool map(const Request& header)
-        { return _p(header); }
-
-    private:
-        PredicateT _p;
-};
-
-
-class MapUrl
-{
-    public:
-        MapUrl(const std::string& url)
-        : _url(url)
-        {}
-
-        bool operator()(const Request& request) const
-        { return request.url() == _url; }
-
-    private:
-        std::string _url;
-};
-
-
-// TODO: extend this class 
-struct Servlet
-{ 
-    Servlet(SmartPtr<MapService> m, Service& s, Authentication* a)
-    : mapper(m)
-    , service(&s)
-    , auth(a)
-    {}
-
-    SmartPtr<MapService> mapper;
-    Service* service;
-    Authentication* auth;
-};
-
+class Reply;
+class Servlet;
 
 class PT_HTTP_API Server : public Connectable
                          , private NonCopyable
 {
-    friend class Servlet2;
+    friend class Servlet;
 
     public:
         Server();
@@ -166,36 +102,14 @@ class PT_HTTP_API Server : public Connectable
 
         void cancel();
 
-        template <typename Mapper>
-        void addService(const Mapper& m, Service& service)
-        { 
-            MapService* mapper = new MapIf<Mapper>(m);
-            this->registerService(mapper, service); 
-        }
+        void addServlet(Servlet& servlet);
 
-        template <typename Mapper>
-        void addService(const Mapper& m, Service& service, Authentication& auth)
-        { 
-            MapService* mapper = new MapIf<Mapper>(m);
-            this->registerService(mapper, service, &auth); 
-        }
+        void removeServlet(Servlet& servlet);
 
-        void removeService(Service& service);
-
-        Service* getService(const Request& request, Authentication*& auth);
-
-        void addServlet(Servlet2& servlet);
-
-        void removeServlet(Servlet2& servlet);
-
-        Servlet2* getServlet(const Request& request);
+        Servlet* getServlet(const Request& request);
 
     private:
         void startWorker();
-
-        void registerService(MapService* mapper, Service& service, Authentication* auth = 0);
-
-        void unregisterService(Service& service);
 
         void onAccept(Net::TcpServer& server);
 
@@ -212,13 +126,9 @@ class PT_HTTP_API Server : public Connectable
         std::size_t _timeout;
         std::size_t _keepAliveTimeout;
 
-        typedef std::vector<Servlet> ServiceMap;
-
-        typedef std::vector<Servlet2*> ServletList;
-        ServletList _servlets;
-
         System::ReadWriteMutex _serviceMutex;
-        ServiceMap _services;
+        typedef std::vector<Servlet*> ServletList;
+        ServletList _servlets;
 };
 
 } // namespace Http

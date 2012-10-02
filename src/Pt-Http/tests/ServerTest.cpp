@@ -154,7 +154,7 @@ class ServerTest : public Pt::Unit::TestSuite
         void PipelinedRequests()
         {
             HelloService service;
-            Pt::Http::MapUrl3 mapurl("/test", service);
+            Pt::Http::MapUrl mapurl("/test", service);
 
             Pt::Http::Server server(*loop, "127.0.0.1", 8001);
             server.addServlet(mapurl);
@@ -328,7 +328,7 @@ class ServerTest : public Pt::Unit::TestSuite
             Pt::Http::Server server(*loop, "127.0.0.1", 8001);
 
             HelloService service;
-            Pt::Http::MapUrl3 mapurl("/test", service, _authent);
+            Pt::Http::MapUrl mapurl("/test", service, _authent);
             server.addServlet(mapurl);
 
             Pt::Http::Client client(*loop, "127.0.0.1", 8001);
@@ -380,7 +380,7 @@ class ServerTest : public Pt::Unit::TestSuite
 
             Pt::Http::Server server(*loop, "127.0.0.1", 8001);
 
-            Pt::Http::MapUrl3 mapurl("/test", service);
+            Pt::Http::MapUrl mapurl("/test", service);
             server.addServlet(mapurl);
 
             Pt::Http::Client client(*loop, "127.0.0.1", 8001);
@@ -421,7 +421,7 @@ class ServerTest : public Pt::Unit::TestSuite
             Pt::Http::Server server(*loop, "127.0.0.1", 8001);
 
             ChunkedService service;
-            Pt::Http::MapUrl3 servlet("/test", service);
+            Pt::Http::MapUrl servlet("/test", service);
             server.addServlet(servlet);
 
             Pt::Http::Client client(*loop, "127.0.0.1", 8001);

@@ -44,7 +44,6 @@ Service::Service()
 
 Service::~Service() 
 {
-    assert( _servers.empty() );
 }
 
 
@@ -87,43 +86,7 @@ bool Service::isIdle()
     return _responderCount == 0;
 }
 
-
-void Service::detach()
-{
-    while( ! _servers.empty() )
-    {
-        _servers[0]->removeService(*this);
-    }
-}
-
-
-void Service::registerServer(Server& server)
-{
-    std::vector<Server*>::iterator it;
-    for(it = _servers.begin(); it != _servers.end(); ++it)
-    {
-        if( *it == &server )
-            break;
-    }
-
-    if( it == _servers.end() )
-        _servers.push_back(&server);
-}
-
-
-void Service::unregisterServer(Server& server)
-{
-    std::vector<Server*>::iterator it;
-    for(it = _servers.begin(); it != _servers.end(); ++it)
-    {
-        if(*it == &server)
-            break;
-    }
-
-    if(it != _servers.end())
-        _servers.erase(it);
 }
 
 }
 
-}

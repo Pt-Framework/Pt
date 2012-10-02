@@ -37,7 +37,7 @@ namespace Pt {
 
 namespace Http {
 
-Servlet2::Servlet2(Service& s)
+Servlet::Servlet(Service& s)
 : _server(0)
 , _service(&s)
 , _auth(0)
@@ -45,7 +45,7 @@ Servlet2::Servlet2(Service& s)
 }
 
 
-Servlet2::Servlet2(Service& s, Authentication& a)
+Servlet::Servlet(Service& s, Authentication& a)
 : _server(0)
 , _service(&s)
 , _auth(&a)
@@ -53,7 +53,7 @@ Servlet2::Servlet2(Service& s, Authentication& a)
 }
 
 
-Servlet2::~Servlet2()
+Servlet::~Servlet()
 {
     detach();
 }
@@ -68,7 +68,7 @@ void setShutdown(bool shutdown)
 }
 
 
-bool Servlet2::isIdle()
+bool Servlet::isIdle()
 { 
     // if(_server)
     //     return _server->isServletIdle(*this);
@@ -77,25 +77,25 @@ bool Servlet2::isIdle()
 }
 
 
-void Servlet2::detach()
+void Servlet::detach()
 { 
     if(_server)
         _server->removeServlet(*this);
 }
 
 
-void Servlet2::registerServer(Server& server)
+void Servlet::registerServer(Server& server)
 {
     _server = &server;
 }
         
 
-void Servlet2::unregisterServer(Server& server)
+void Servlet::unregisterServer(Server& server)
 {
     _server = 0;
 }
 
-bool MapUrl3::onMap(const Request& request) const
+bool MapUrl::onMap(const Request& request) const
 { 
     return _url == request.url(); 
 }

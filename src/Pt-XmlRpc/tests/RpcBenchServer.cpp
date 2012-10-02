@@ -30,6 +30,7 @@
 #include <Pt/Arg.h>
 #include <Pt/System/MainLoop.h>
 #include <Pt/Http/Server.h>
+#include <Pt/Http/Servlet.h>
 #include <Pt/XmlRpc/Service.h>
 #include <Pt/Main.h>
 
@@ -83,7 +84,9 @@ int main(int argc, char* argv[])
     Pt::Http::Server server(loop);
     server.setMaxThreads(maxThreads);
     server.listen(ip, port);
-    server.addService(Pt::Http::MapUrl("/myservice"), service);
+    
+    Pt::Http::MapUrl servlet("/myservice", service);
+    server.addServlet(servlet);
 
     //loop.setIdleTimeout(5000);
     //loop.timeout() += Pt::slot(loop, &Pt::System::EventLoop::exit);

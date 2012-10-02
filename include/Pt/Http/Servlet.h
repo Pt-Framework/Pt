@@ -32,31 +32,28 @@
 #include <Pt/Http/Api.h>
 #include <Pt/NonCopyable.h>
 #include <string>
-#include <cstddef>
 
 namespace Pt {
 
 namespace Http {
 
 class Authentication;
-class Challenge;
 class Request;
 class Reply;
-class Responder;
 class Server;
 class Service;
 
-class PT_HTTP_API Servlet2 : private NonCopyable
+class PT_HTTP_API Servlet : private NonCopyable
 {
     // @internal
     friend class Server;
 
     public:
-        Servlet2(Service& s);
+        Servlet(Service& s);
 
-        Servlet2(Service& s, Authentication& a);
+        Servlet(Service& s, Authentication& a);
 
-        virtual ~Servlet2();
+        virtual ~Servlet();
 
         void setShutdown(bool shutdown = true);
 
@@ -89,16 +86,16 @@ class PT_HTTP_API Servlet2 : private NonCopyable
         Authentication* _auth;
 };
 
-class PT_HTTP_API MapUrl3 : public Servlet2
+class PT_HTTP_API MapUrl : public Servlet
 {
     public:
-        MapUrl3(const std::string& url, Service& s)
-        : Servlet2(s)
+        MapUrl(const std::string& url, Service& s)
+        : Servlet(s)
         , _url(url)
         {}
 
-        MapUrl3(const std::string& url, Service& s, Authentication& a)
-        : Servlet2(s, a)
+        MapUrl(const std::string& url, Service& s, Authentication& a)
+        : Servlet(s, a)
         , _url(url)
         {}
 
@@ -114,3 +111,4 @@ class PT_HTTP_API MapUrl3 : public Servlet2
 } // namespace Pt
 
 #endif
+

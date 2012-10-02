@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 by Marc Boris Duerner
+ * Copyright (C) 2011-2012 by Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -76,14 +76,8 @@ class RequestHandler : public Pt::Connectable
         Signal<RequestHandler&>& finished()
         { return _finished; }
 
-        Servlet2* servlet()
+        Servlet* servlet()
         { return _servlet; }
-
-        Service* service()
-        { return 0; }
-
-        Authentication* authentication()
-        { return 0; }
 
     protected:
         void releaseResponder();
@@ -103,7 +97,7 @@ class RequestHandler : public Pt::Connectable
     private:
         Server& _server;
         Challenge* _challenge;
-        Servlet2* _servlet;
+        Servlet* _servlet;
         Responder* _responder;
         Connection _conn;
         Request _request;
@@ -440,32 +434,18 @@ class ServerThread : public Connectable
                 RequestHandler* _conn;
         };
 
-        class RemoveServiceEvent : public Pt::BasicEvent<RemoveServiceEvent>
+        class RemoveServletEvent : public Pt::BasicEvent<RemoveServletEvent>
         {
             public:
-                RemoveServiceEvent(Service* s)
-                : _service(s)
-                { }
-    
-                Service* service() const
-                { return _service; }
-    
-            private:
-                Service* _service;
-        };
-
-        class RemoveServletEvent : public Pt::BasicEvent<RemoveServiceEvent>
-        {
-            public:
-                RemoveServletEvent(Servlet2* s)
+                RemoveServletEvent(Servlet* s)
                 : _servlet(s)
                 { }
     
-                Servlet2* servlet() const
+                Servlet* servlet() const
                 { return _servlet; }
     
             private:
-                Servlet2* _servlet;
+                Servlet* _servlet;
         };
 
     public:
@@ -476,7 +456,6 @@ class ServerThread : public Connectable
         , _removed(false)
         {
             _loop.event() += Pt::slot(*this, &ServerThread::onAccept);
-            _loop.event() += Pt::slot(*this, &ServerThread::onRemoveService);
             _loop.event() += Pt::slot(*this, &ServerThread::onRemoveServlet);
             _thread.start();
         }
@@ -514,19 +493,7 @@ class ServerThread : public Connectable
             _handlers.clear();
         }
 
-        void removeService(Service& service)
-        {
-            RemoveServiceEvent ev(&service);
-            _loop.commitEvent(ev);
-
-            System::MutexLock lock(_removedMutex);
-            _removed = false;
-
-            while( ! _removed)
-                _isRemoved.wait(lock);
-        }
-
-        void removeServlet(Servlet2& servlet)
+        void removeServlet(Servlet& servlet)
         {
             RemoveServletEvent ev(&servlet);
             _loop.commitEvent(ev);
@@ -552,28 +519,6 @@ class ServerThread : public Connectable
 #endif
 
             handler->beginServe(_loop);
-        }
-
-        void onRemoveService(const RemoveServiceEvent& ev)
-        {
-            std::vector<RequestHandler*>::iterator it  = _handlers.begin();
-            while( it != _handlers.end() )
-            {
-                RequestHandler* rh = *it;
-                if( rh->service() == ev.service() )
-                {
-                    delete rh;
-                    it = _handlers.erase(it);
-                }
-                else
-                {
-                    ++it;
-                }
-            }
-
-            System::MutexLock lock(_removedMutex);
-            _removed = true;
-            _isRemoved.signal();
         }
 
         void onRemoveServlet(const RemoveServletEvent& ev)
@@ -690,15 +635,9 @@ Server::~Server()
 {
     this->cancel();
 
-    while( ! _services.empty() )
-    {
-        Service* service = _services.begin()->service;
-        unregisterService(*service);
-    }
-
     while( ! _servlets.empty() )
     {
-        Servlet2* servlet = _servlets.front();
+        Servlet* servlet = _servlets.front();
         removeServlet(*servlet);
     }
 }
@@ -794,18 +733,7 @@ void Server::cancel()
 }
 
 
-void Server::registerService(MapService* m, Service& service, Authentication* auth)
-{
-    Servlet s(SmartPtr<MapService>(m), service, auth);
-    
-    System::WriteLock serviceLock(_serviceMutex);
-    _services.push_back(s);
-    service.registerServer(*this);
-}
-
-
-
-void Server::addServlet(Servlet2& servlet)
+void Server::addServlet(Servlet& servlet)
 {
     System::WriteLock serviceLock(_serviceMutex);
     _servlets.push_back(&servlet);
@@ -813,61 +741,7 @@ void Server::addServlet(Servlet2& servlet)
 }
 
 
-
-
-
-
-void Server::unregisterService(Service& service)
-{
-    System::WriteLock serviceLock(_serviceMutex);
-
-    for(unsigned n = 0; n < _services.size(); )
-    {
-        if(_services[n].service == &service)
-        {
-            ServiceMap::iterator it = _services.begin() + n;
-            _services.erase(it);
-            continue;
-        }
-    
-        ++n;
-    }
-
-    service.unregisterServer(*this);
-}
-
-
-void Server::removeService(Service& service)
-{
-    // remove service, so no responders can be created anymore
-    unregisterService(service);
-
-    // close all connections in this thread, which use the service
-    std::vector<RequestHandler*>::iterator hit  = _handlers.begin();
-    while( hit != _handlers.end() )
-    {
-        std::vector<RequestHandler*>::iterator handler = hit++;
-        
-        if( (*handler)->service() == &service )
-        {
-            delete *handler;
-            hit = _handlers.erase(handler);
-        }
-    }
-
-    // close all connections in the worker threads which use the service
-    std::vector<ServerThread*>::iterator threadIt;
-    for(threadIt = _serverThreads.begin(); threadIt != _serverThreads.end(); ++threadIt)
-    {
-        // returns when all connections using the service are closed
-        (*threadIt)->removeService(service);
-    }
-
-    //NOTE: in case of an exception, terminate the worker thread
-}
-
-
-void Server::removeServlet(Servlet2& servlet)
+void Server::removeServlet(Servlet& servlet)
 {
     System::WriteLock serviceLock(_serviceMutex);
 
@@ -910,35 +784,7 @@ void Server::removeServlet(Servlet2& servlet)
 }
 
 
-
-
-
-
-
-
-
-
-Service* Server::getService(const Request& request, Authentication*& auth)
-{
-    System::ReadLock serviceLock(_serviceMutex);
-
-    for(ServiceMap::iterator it = _services.begin(); it != _services.end(); ++it)
-    {
-        if( ! it->mapper->map(request) )
-            continue;
-
-        log_info("serving: " << request.url());
-        auth = it->auth;
-        return it->service;
-    }
-
-    log_warn("not found: " << request.url());
-    auth = 0;
-    return 0;
-}
-
-
-Servlet2* Server::getServlet(const Request& request)
+Servlet* Server::getServlet(const Request& request)
 {
     System::ReadLock serviceLock(_serviceMutex);
 
@@ -954,14 +800,6 @@ Servlet2* Server::getServlet(const Request& request)
     log_warn("not found: " << request.url());
     return 0;
 }
-
-
-
-
-
-
-
-
 
 
 void Server::startWorker()

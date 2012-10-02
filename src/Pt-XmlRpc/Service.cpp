@@ -38,7 +38,6 @@ namespace Pt {
 
 namespace XmlRpc {
 
-
 Service::~Service()
 {
     ProcedureMap::iterator it;
@@ -46,8 +45,6 @@ Service::~Service()
     {
         delete it->second;
     }
-
-    detach();
 }
 
 

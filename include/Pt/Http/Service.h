@@ -54,16 +54,11 @@ class PT_HTTP_API Service
 
         Responder* getResponder(const Request&);
         
-        // TODO: only allow Servlet to create Responders
         void releaseResponder(Responder*);
 
-        // TODO: remove this
         void setShutdown(bool shutdown = true);
 
         bool isIdle();
-
-        // TODO: remove this
-        void detach();
 
     protected:
         /** @brief Creates a responder to handle request received by a server.
@@ -85,15 +80,7 @@ class PT_HTTP_API Service
         virtual void destroyResponder(Responder*) = 0;
 
     private:
-        // @internal
-        void registerServer(Server& server);
-
-        // @internal
-        void unregisterServer(Server& server);
-
-    private:
         System::Mutex _mutex;
-        std::vector<Server*> _servers;
         bool _shutdown;
         unsigned _responderCount;
 };
@@ -108,7 +95,6 @@ class BasicService : public Service
 
         ~BasicService()
         {
-            detach();
         }
 
     protected:
