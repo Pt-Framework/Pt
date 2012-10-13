@@ -109,7 +109,7 @@ rule ConfigureWrite
 rule ConfigureExit
 {
 	ConfigureWrite $(JAMRULES) ;
-    Exit "Configuration successful." ;
+    Exit "Configuration successful." : 0 ;
 }
 
 rule SubTree
