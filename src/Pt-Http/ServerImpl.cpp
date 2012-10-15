@@ -357,10 +357,12 @@ void Acceptor::replyError()
 ServerThread::ServerThread()
 : _ssl(false)
 , _thread(_loop)
-, _removed(false)
+, _isReturned(false)
+, _isServletIdle(false)
 {
     _loop.event() += Pt::slot(*this, &ServerThread::onAccept);
     _loop.event() += Pt::slot(*this, &ServerThread::onRemoveServlet);
+    _loop.event() += Pt::slot(*this, &ServerThread::onIsServletIdle);
     _thread.start();
 }
 
@@ -407,11 +409,28 @@ void ServerThread::removeServlet(Servlet& servlet)
     RemoveServletEvent ev(&servlet);
     _loop.commitEvent(ev);
 
-    System::MutexLock lock(_removedMutex);
-    _removed = false;
+    System::MutexLock lock(_invokeMutex);
+    _isReturned = false;
 
-    while( ! _removed)
-        _isRemoved.wait(lock);
+    while( ! _isReturned)
+        _hasReturned.wait(lock);
+}
+
+
+bool ServerThread::isServletIdle(Servlet& servlet)
+{
+    ServletIdleEvent ev(&servlet);
+    _loop.commitEvent(ev);
+
+    System::MutexLock lock(_invokeMutex);
+
+    _isServletIdle = false;
+    _isReturned = false;
+
+    while( ! _isReturned)
+        _hasReturned.wait(lock);
+
+    return _isServletIdle;
 }
 
 
@@ -448,9 +467,27 @@ void ServerThread::onRemoveServlet(const RemoveServletEvent& ev)
         }
     }
 
-    System::MutexLock lock(_removedMutex);
-    _removed = true;
-    _isRemoved.signal();
+    System::MutexLock lock(_invokeMutex);
+    _isReturned = true;
+    _hasReturned.signal();
+}
+
+
+void ServerThread::onIsServletIdle(const ServletIdleEvent& ev)
+{
+    std::vector<Acceptor*>::iterator it;
+    for( it  = _handlers.begin(); it != _handlers.end(); ++it )
+    {
+        if( (*it)->servlet() == ev.servlet() )
+        {
+            break;
+        }
+    }
+
+    System::MutexLock lock(_invokeMutex);
+    _isReturned = true;
+    _isServletIdle = (it == _handlers.end());
+    _hasReturned.signal();
 }
 
 
@@ -487,7 +524,7 @@ ServerImpl::~ServerImpl()
 
     while( ! _servlets.empty() )
     {
-        _servlets.front()->detach();
+        _servlets.front().servlet()->detach();
     }
 }
 
@@ -552,7 +589,8 @@ void ServerImpl::cancel()
 void ServerImpl::addServlet(Servlet& servlet)
 {
     System::WriteLock serviceLock(_serviceMutex);
-    _servlets.push_back(&servlet);
+    ServletListEntry entry(&servlet);
+    _servlets.push_back(entry);
 }
 
 
@@ -564,7 +602,7 @@ void ServerImpl::removeServlet(Servlet& servlet)
     ServletList::iterator it;
     for(it = _servlets.begin(); it != _servlets.end(); ++it)
     {
-        if(*it == &servlet)
+        if(it->servlet() == &servlet)
         {
             _servlets.erase(it);
             break;
@@ -598,17 +636,63 @@ void ServerImpl::removeServlet(Servlet& servlet)
 }
 
 
+void ServerImpl::shutdownServlet(Servlet& servlet, bool shutdown)
+{
+    System::WriteLock serviceLock(_serviceMutex);
+
+    ServletList::iterator it;
+    for(it = _servlets.begin(); it != _servlets.end(); ++it)
+    {
+        if(it->servlet() == &servlet)
+        {
+            it->setShutdown(shutdown);
+            break;
+        }
+    }
+}
+
+
+bool ServerImpl::isServletIdle(Servlet& servlet)
+{
+    // check all connections in this thread
+    std::vector<Acceptor*>::iterator it;
+    for( it = _handlers.begin(); it != _handlers.end(); ++it)
+    {      
+        if( (*it)->servlet() == &servlet )
+        {
+            return false;
+        }
+    }
+
+    // check all worker threads
+    std::vector<ServerThread*>::iterator thread;
+    for(thread = _serverThreads.begin(); thread != _serverThreads.end(); ++thread)
+    {
+        // returns when all connections using the service are closed
+        bool idle = (*thread)->isServletIdle(servlet);
+
+        if( ! idle)
+            return false;
+    }
+
+    return true;
+}
+
+
 Servlet* ServerImpl::getServlet(const Request& request)
 {
     System::ReadLock serviceLock(_serviceMutex);
 
     for(ServletList::iterator it = _servlets.begin(); it != _servlets.end(); ++it)
     {
-        if( ! (*it)->isMapped(request) )
+        if( it->isShutdown() )
+            continue;
+
+        if( ! it->servlet()->isMapped(request) )
             continue;
 
         log_info("serving: " << request.url());
-        return *it;
+        return it->servlet();
     }
 
     log_warn("not found: " << request.url());

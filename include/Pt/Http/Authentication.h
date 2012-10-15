@@ -64,15 +64,13 @@ class PT_HTTP_API Challenge : public Pt::NonCopyable
 };
 
 
-class PT_HTTP_API Authentication
+class PT_HTTP_API Authentication : public Pt::NonCopyable
 {
     public:
         Authentication(const std::string& realm);
 
         virtual ~Authentication();
-
-        bool isIdle();
-        
+       
         const std::string& realm() const
         { return _realm; }
 
@@ -93,6 +91,9 @@ class PT_HTTP_API Authentication
 
         virtual void onDestroyChallenge(Challenge* challenge) = 0;
 
+        System::Mutex& mutex()
+        { return _mutex; }
+
     private:
         System::Mutex _mutex;
         std::size_t _useCount;
@@ -108,16 +109,25 @@ class PT_HTTP_API BasicAuthentication : public Authentication
         { }
 
         ~BasicAuthentication()
-        { }
+        { clear(); }
 
         void setUser(const std::string& user, const std::string& passwd)
-        { _passwd[user] = passwd; }
+        { 
+            System::MutexLock lock( mutex() );
+            _passwd[user] = passwd; 
+        }
 
         void removeUser(const std::string& user)
-        { _passwd.erase(user); }
+        { 
+            System::MutexLock lock( mutex() );
+            _passwd.erase(user); 
+        }
 
         void clear()
-        { _passwd.clear(); }
+        { 
+            System::MutexLock lock( mutex() );
+            _passwd.clear(); 
+        }
 
     protected:
         virtual bool onAuthenticate(const Request& req, Reply& reply);

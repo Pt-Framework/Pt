@@ -70,13 +70,6 @@ Authentication::~Authentication()
 { }
 
 
-bool Authentication::isIdle()
-{
-    System::MutexLock lock(_mutex);
-    return _useCount == 0;
-}
-
-
 bool Authentication::authenticate(const Request& req, Reply& reply) 
 {
     System::MutexLock lock(_mutex);
@@ -157,22 +150,26 @@ Challenge* BasicAuthentication::onBeginChallenge(const Request& req, Reply& repl
 
 bool BasicAuthentication::onEndChallenge(Challenge* challenge, const Request& req, Reply& reply)
 {
-    if( ! challenge )
-        return false;
+    throw std::logic_error("BasicAuthentication should not create Challanges");
+    return false;
 
-    bool granted = challenge->getResult();
-    if( ! granted )
-    {
-        reply.setStatus(401, "Authorization Required");
-        reply.header().set("WWW-Authenticate", ("Basic realm=\"" + realm() + '"').c_str());
-    }
+    //if( ! challenge )
+    //    return false;
 
-    return granted;
+    //bool granted = challenge->getResult();
+    //if( ! granted )
+    //{
+    //    reply.setStatus(401, "Authorization Required");
+    //    reply.header().set("WWW-Authenticate", ("Basic realm=\"" + realm() + '"').c_str());
+    //}
+
+    //return granted;
 }
+
 
 void BasicAuthentication::onDestroyChallenge(Challenge* challenge)
 {
-    throw std::logic_error("BasicAuthentication::onDestroyChallenge not implemented");
+    throw std::logic_error("BasicAuthentication should not create Challanges");
 }
 
 }

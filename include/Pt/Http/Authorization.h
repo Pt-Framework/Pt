@@ -30,7 +30,6 @@
 #define Pt_Http_Authorization_h
 
 #include <Pt/Http/Api.h>
-#include <Pt/NonCopyable.h>
 #include <string>
 
 namespace Pt {
@@ -53,7 +52,6 @@ class PT_HTTP_API Authorization
 
 
 class PT_HTTP_API BasicAuthorization : public Authorization
-                                     , private NonCopyable
 {
     public:
         BasicAuthorization(const std::string& user, const std::string& passwd);

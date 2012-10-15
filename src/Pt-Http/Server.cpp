@@ -143,6 +143,18 @@ void Server::removeServlet(Servlet& servlet)
 }
 
 
+void Server::shutdownServlet(Servlet& servlet, bool shutdown)
+{
+    _impl->shutdownServlet(servlet, shutdown);
+}
+
+
+bool Server::isServletIdle(Servlet& servlet)
+{
+    return _impl->isServletIdle(servlet);
+}
+
+
 Servlet* Server::getServlet(const Request& request)
 {
     return _impl->getServlet(request);

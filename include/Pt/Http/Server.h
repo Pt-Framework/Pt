@@ -125,6 +125,10 @@ class PT_HTTP_API Server : public Connectable
 
         void removeServlet(Servlet& servlet);
 
+        void shutdownServlet(Servlet& servlet, bool shutdown);
+
+        bool isServletIdle(Servlet& servlet);
+
         Servlet* getServlet(const Request& request);
 
     private:

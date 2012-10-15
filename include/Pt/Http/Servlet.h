@@ -71,6 +71,8 @@ class PT_HTTP_API Servlet : private NonCopyable
         { return _auth; }
 
     protected:
+        /** @brief Returns true if the servlet should process the request.
+        */
         virtual bool onRequest(const Request& request) const = 0;
 
     private:

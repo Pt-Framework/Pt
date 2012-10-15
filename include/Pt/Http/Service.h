@@ -56,10 +56,6 @@ class PT_HTTP_API Service
         
         void releaseResponder(Responder*);
 
-        void setShutdown(bool shutdown = true);
-
-        bool isIdle();
-
     protected:
         /** @brief Creates a responder to handle request received by a server.
             
@@ -79,9 +75,11 @@ class PT_HTTP_API Service
         */
         virtual void destroyResponder(Responder*) = 0;
 
+        System::Mutex& mutex()
+        { return _mutex; }
+
     private:
         System::Mutex _mutex;
-        bool _shutdown;
         unsigned _responderCount;
 };
 

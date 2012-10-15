@@ -143,6 +143,20 @@ class ServerThread : public Connectable
                 Servlet* _servlet;
         };
 
+        class ServletIdleEvent : public Pt::BasicEvent<ServletIdleEvent>
+        {
+            public:
+                ServletIdleEvent(Servlet* s)
+                : _servlet(s)
+                { }
+    
+                Servlet* servlet() const
+                { return _servlet; }
+    
+            private:
+                Servlet* _servlet;
+        };
+
     public:
         ServerThread();
 
@@ -156,10 +170,14 @@ class ServerThread : public Connectable
 
         void removeServlet(Servlet& servlet);
 
+        bool isServletIdle(Servlet& servlet);
+
     private:
         void onAccept(const AcceptEvent& ev);
 
         void onRemoveServlet(const RemoveServletEvent& ev);
+
+        void onIsServletIdle(const ServletIdleEvent& ev);
 
         void onHandlerFinished(Acceptor& handler);
 
@@ -173,9 +191,10 @@ class ServerThread : public Connectable
         Pt::System::AttachedThread _thread;
         std::vector<Acceptor*> _handlers;
 
-        bool _removed;
-        System::Mutex _removedMutex;
-        System::Condition _isRemoved;
+        bool _isReturned;
+        bool _isServletIdle;
+        System::Mutex _invokeMutex;
+        System::Condition _hasReturned;
 };
 
 class ServerImpl : public Connectable
@@ -212,6 +231,10 @@ class ServerImpl : public Connectable
 
         void removeServlet(Servlet& servlet);
 
+        void shutdownServlet(Servlet& servlet, bool shutdown);
+
+        bool isServletIdle(Servlet& servlet);
+
         Servlet* getServlet(const Request& request);
 
     private:
@@ -220,6 +243,26 @@ class ServerImpl : public Connectable
         void onHandlerFinished(Acceptor& conn);
 
     private:
+        struct ServletListEntry
+        {
+            explicit ServletListEntry(Servlet* srv)
+            : _servlet(srv)
+            , _shutdown(false)
+            {}
+
+            Servlet* servlet()
+            { return _servlet; }
+
+            bool isShutdown() const
+            { return _shutdown; }
+            
+            void setShutdown(bool shutdown)
+            { _shutdown = shutdown; }
+
+            Servlet* _servlet;
+            bool _shutdown;
+        };
+
         Net::TcpServer _serverSocket;
         Ssl::Context* _sslctx;
         std::vector<ServerThread*> _serverThreads;
@@ -228,7 +271,7 @@ class ServerImpl : public Connectable
         std::size_t _timeout;
         std::size_t _keepAliveTimeout;
         System::ReadWriteMutex _serviceMutex;
-        typedef std::vector<Servlet*> ServletList;
+        typedef std::vector<ServletListEntry> ServletList;
         ServletList _servlets;
 };
 

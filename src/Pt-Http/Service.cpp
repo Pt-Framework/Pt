@@ -36,8 +36,7 @@ namespace Pt {
 namespace Http {
 
 Service::Service()
-: _shutdown(false)
-, _responderCount(0)
+: _responderCount(0)
 { 
 }
 
@@ -50,9 +49,6 @@ Service::~Service()
 Responder* Service::getResponder(const Request& request)
 {
     System::MutexLock lock(_mutex);
-    
-    if(_shutdown)
-        return 0;
     
     Responder* responder = createResponder(request);
     ++_responderCount;    
@@ -70,20 +66,6 @@ void Service::releaseResponder(Responder* responder)
     
     destroyResponder(responder);
     --_responderCount;
-}
-
-
-void Service::setShutdown(bool shutdown)
-{
-    System::MutexLock lock(_mutex);
-    _shutdown = shutdown;
-}
-
-
-bool Service::isIdle()
-{
-    System::MutexLock lock(_mutex);
-    return _responderCount == 0;
 }
 
 }

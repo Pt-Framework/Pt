@@ -61,19 +61,21 @@ Servlet::~Servlet()
 
 void Servlet::setShutdown(bool shutdown)
 {
-    // if(_server)
-    // {
-    //     _server->setServletShutdown(*this);
-    // } 
+    if(_server)
+    {
+        _server->shutdownServlet(*this, shutdown);
+    } 
 }
 
 
 bool Servlet::isIdle()
 { 
-    // if(_server)
-    //     return _server->isServletIdle(*this);
+    if(_server)
+    {
+        return _server->isServletIdle(*this);
+    }
 
-    return false; 
+    return true; 
 }
 
 
