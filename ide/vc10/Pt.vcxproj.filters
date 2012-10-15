@@ -606,12 +606,6 @@
     <ClInclude Include="..\..\src\Pt-Http\ClientImpl.h">
       <Filter>Pt-Http</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Http\NotFoundResponder.h">
-      <Filter>Pt-Http</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Http\NotFoundService.h">
-      <Filter>Pt-Http</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Pt-Http\Parser.h">
       <Filter>Pt-Http</Filter>
     </ClInclude>
@@ -1252,12 +1246,6 @@
       <Filter>Pt-Http</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Http\ClientImpl.cpp">
-      <Filter>Pt-Http</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Http\NotFoundResponder.cpp">
-      <Filter>Pt-Http</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Http\NotFoundService.cpp">
       <Filter>Pt-Http</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Http\Parser.cpp">

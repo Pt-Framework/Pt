@@ -15,8 +15,6 @@ SharedLibrary Pt-Http : Authentication.cpp
                         ClientImpl.cpp
                         Connection.cpp
                         HttpBuffer.cpp
-                        NotFoundResponder.cpp
-                        NotFoundService.cpp
                         Message.cpp
                         Parser.cpp
                         Reply.cpp
