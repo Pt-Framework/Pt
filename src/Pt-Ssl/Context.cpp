@@ -137,6 +137,7 @@ Context::Context(Protocol protocol)
 #if (OPENSSL_VERSION_NUMBER < 0x00905100L)
     SSL_CTX_set_verify_depth(_ctx, 1);
 #endif
+    
     SSL_CTX_set_options(_ctx, SSL_OP_SINGLE_DH_USE);
     SSL_CTX_set_mode(_ctx, SSL_MODE_NO_AUTO_CHAIN);
     SSL_CTX_set_mode(_ctx, SSL_MODE_ENABLE_PARTIAL_WRITE);
@@ -308,6 +309,12 @@ void Context::setProtocol(Protocol protocol)
     ret = SSL_CTX_set_cipher_list(_ctx, list);
     if( 0 == ret )
         throw std::logic_error("Invalid default cipher list");
+}
+
+
+void Context::setVerifyDepth(int n)
+{
+    SSL_CTX_set_verify_depth(_ctx, n);
 }
 
 

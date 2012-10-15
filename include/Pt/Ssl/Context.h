@@ -99,6 +99,9 @@ class PT_SSL_API Context : public NonCopyable
         //! @brief Sets the current protocol. 
         void setProtocol(Protocol protocol);
 
+        //! @brief Limits the number of certificates checked in the peer's certificate chain.
+        void setVerifyDepth(int n);
+
         //! @brief Sets the current validation mode.
         void setVerifyMode(VerifyMode mode);
 
