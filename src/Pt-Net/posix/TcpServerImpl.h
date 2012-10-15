@@ -29,7 +29,8 @@
 #ifndef PT_NET_TcpServerImpl_H
 #define PT_NET_TcpServerImpl_H
 
-#include "Pt/Net/Api.h"
+#include <Pt/Net/Api.h>
+#include <Pt/Net/TcpServer.h>
 #include "Selector.h"
 #include <string>
 #include <sys/types.h>
@@ -76,9 +77,9 @@ class TcpServerImpl
 
         void listen(const std::string& ipaddr,
                     unsigned short int port,
-                    int backlog = 5, unsigned flags = 0);
+                    const TcpServer::Options& options);
 
-		void listen(const AddrInfo& ipaddr, int backlog = 5, unsigned flags = 0);
+		void listen(const AddrInfo& ipaddr, const TcpServer::Options& options);
 
         void beginAccept(System::EventLoop& loop);
 

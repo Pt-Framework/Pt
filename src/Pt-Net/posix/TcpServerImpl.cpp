@@ -92,7 +92,7 @@ void TcpServerImpl::close()
 }
 
 
-void TcpServerImpl::listen(const AddrInfo& ai, int backlog, unsigned flags)
+void TcpServerImpl::listen(const AddrInfo& ai, const TcpServer::Options& options)
 {
     static const int on = 1;
 
@@ -153,7 +153,7 @@ void TcpServerImpl::listen(const AddrInfo& ai, int backlog, unsigned flags)
             std::memmove(&_servaddr, it->ai_addr, it->ai_addrlen);
 
             log_debug("listen " << this->fd());
-            if( ::listen(this->fd(), backlog) < 0 )
+            if( ::listen(this->fd(), options.backlog()) < 0 )
             {
                 close();
 
@@ -164,7 +164,7 @@ void TcpServerImpl::listen(const AddrInfo& ai, int backlog, unsigned flags)
             }
 
 #ifdef TCP_DEFER_ACCEPT
-            if( (flags & TcpServer::DeferAccept) != 0 )
+            if( options.deferAccept() )
             {
                 int deferSecs = 30;
 
@@ -191,17 +191,14 @@ void TcpServerImpl::listen(const AddrInfo& ai, int backlog, unsigned flags)
         throw System::IOError("bind");
 }
                     
-void TcpServerImpl::listen(const std::string& ipaddr,
-                           unsigned short int port,
-                           int backlog, unsigned flags)
+void TcpServerImpl::listen(const std::string& ipaddr,  unsigned short int port,
+                           const TcpServer::Options& options)
 {
 
-    log_debug("listen on " << ipaddr << " port " << port
-              << " backlog " << backlog << " flags " << flags);
+    log_debug("listen on " << ipaddr << " port " << port);
 
     AddrInfo ai(ipaddr, port, true);
-    
-    listen(ai, backlog, flags); 
+    listen(ai, options); 
 }
 
 
