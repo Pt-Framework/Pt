@@ -30,19 +30,19 @@
 #define Pt_Http_Server_h
 
 #include <Pt/Http/Api.h>
-#include <Pt/Http/Request.h>
-#include <Pt/Net/TcpServer.h>
 #include <Pt/Connectable.h>
 #include <Pt/NonCopyable.h>
-#include <vector>
 #include <string>
 #include <cstddef>
-#include <cassert>
 
 namespace Pt {
 
 namespace System {
 class EventLoop;
+}
+
+namespace Net {
+class AddrInfo;
 }
 
 namespace Ssl {
@@ -51,29 +51,25 @@ class Context;
 
 namespace Http {
 
-class ServerThread;
-class RequestHandler;
-class Reply;
+class Request;
 class Servlet;
+class ServerImpl;
 
 class PT_HTTP_API Server : public Connectable
                          , private NonCopyable
 {
-    friend class Servlet;
-
     public:
         Server();
 
-        explicit Server(System::EventLoop& eventLoop);
+        explicit Server(System::EventLoop& loop);
 
-        Server(System::EventLoop& eventLoop, const std::string& ip, unsigned short int port, int backlog = 5);
+        Server(System::EventLoop& loop, const std::string& ip, unsigned short int port, int backlog = 5);
 
-        Server(System::EventLoop& eventLoop, const Pt::Net::AddrInfo& addr, int backlog = 5);
+        Server(System::EventLoop& loop, const Net::AddrInfo& addr, int backlog = 5);
 
         ~Server();
 
-        System::EventLoop* loop()
-        { return _serverSocket.parent(); }
+        System::EventLoop* loop();
 
         void setActive(System::EventLoop& loop);
 
@@ -91,14 +87,9 @@ class PT_HTTP_API Server : public Connectable
 
         void setMaxThreads(unsigned m);
 
-        // TODO: 
-        // Pt::Net::SocketOptions options;
-        // options.setBacklog(5);
-        // options.setFlags(Pt::Net::DeferAccept);
-        // server.listen(ip, port, options);
         void listen(const std::string& ip, unsigned short int port, int backlog = 5);
 
-        void listen(const Pt::Net::AddrInfo& addr, int backlog = 5);
+        void listen(const Net::AddrInfo& addr, int backlog = 5);
 
         void cancel();
 
@@ -109,26 +100,7 @@ class PT_HTTP_API Server : public Connectable
         Servlet* getServlet(const Request& request);
 
     private:
-        void startWorker();
-
-        void onAccept(Net::TcpServer& server);
-
-        void onHandlerFinished(RequestHandler& conn);
-
-    private:
-        Net::TcpServer _serverSocket;
-        Ssl::Context* _sslctx;
-        bool _ssl;
-        std::vector<ServerThread*> _serverThreads;
-        std::vector<RequestHandler*> _handlers;
-        unsigned _useWorker;
-        unsigned _maxThreads;
-        std::size_t _timeout;
-        std::size_t _keepAliveTimeout;
-
-        System::ReadWriteMutex _serviceMutex;
-        typedef std::vector<Servlet*> ServletList;
-        ServletList _servlets;
+        ServerImpl* _impl;
 };
 
 } // namespace Http
@@ -136,4 +108,3 @@ class PT_HTTP_API Server : public Connectable
 } // namespace Pt
 
 #endif
-

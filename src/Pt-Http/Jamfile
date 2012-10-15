@@ -23,6 +23,7 @@ SharedLibrary Pt-Http : Authentication.cpp
                         Request.cpp
                         Responder.cpp
                         Server.cpp
+                        ServerImpl.cpp
                         Service.cpp
                         Servlet.cpp
                         ;

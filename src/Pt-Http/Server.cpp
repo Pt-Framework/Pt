@@ -26,858 +26,144 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "Connection.h"
-#include "NotFoundService.h"
+#include "ServerImpl.h"
 #include <Pt/Http/Server.h>
 #include <Pt/Http/Servlet.h>
-#include <Pt/Http/Authentication.h>
-#include <Pt/Http/Request.h>
-#include <Pt/Http/Reply.h>
-#include <Pt/Http/Service.h>
-#include <Pt/Http/Responder.h>
-
-#ifdef PT_HTTP_WITH_SSL
-#include <Pt/Ssl/Context.h>
-#endif
-
-#include <Pt/System/MainLoop.h>
-#include <Pt/System/Thread.h>
-#include <Pt/System/Mutex.h>
-#include <Pt/System/Condition.h>
-#include <Pt/System/Logger.h>
-
-#include <memory>
-#include <cassert>
-
-log_define("Pt.Http.Server")
+#include <Pt/Net/AddrInfo.h>
 
 namespace Pt {
 
 namespace Http {
 
-class RequestHandler : public Pt::Connectable
-{
-    public:
-        RequestHandler(Server& server, Net::TcpServer& tcpServer);
-
-        ~RequestHandler();
-
-        void setSecure(Ssl::Context& ctx)
-        { _conn.setSecure(ctx); }
-
-        void setTimeout(std::size_t timeout)
-        { _conn.setTimeout(timeout); }
-
-        void setKeepAliveTimeout(std::size_t timeout)
-        { _conn.setKeepAliveTimeout(timeout); }
-
-        void beginServe(System::EventLoop& loop);
-
-        Signal<RequestHandler&>& finished()
-        { return _finished; }
-
-        Servlet* servlet()
-        { return _servlet; }
-
-    protected:
-        void releaseResponder();
-
-        void onRequestReceived(Request& req);
-
-        void onChallenge(Challenge& challenge);
-
-        bool onRequestBody();
-
-        bool onRequestFinished();
-
-        void onReplySent(Reply& r);
-
-        void replyError();
-
-    private:
-        Server& _server;
-        Challenge* _challenge;
-        Servlet* _servlet;
-        Responder* _responder;
-        Connection _conn;
-        Request _request;
-        Reply _reply;
-        MessageProgress _requestProgress;
-        Signal<RequestHandler&> _finished;
-};
-
-RequestHandler::RequestHandler(Server& server, Net::TcpServer& tcpServer)
-: _server(server)
-, _challenge(0)
-, _servlet(0)
-, _responder(0)
-, _conn()
-, _request(_conn)
-, _reply(_conn)
-{
-    _conn.accept(tcpServer);
-    _request.inputReceived() += Pt::slot(*this, &RequestHandler::onRequestReceived);
-    _reply.outputSent() += Pt::slot(*this, &RequestHandler::onReplySent);
-}
-
-
-RequestHandler::~RequestHandler()
-{
-    releaseResponder();
-    
-    if(_challenge)
-    {
-        assert(_servlet);
-        assert(_servlet->authentication());
-        _servlet->authentication()->cancelChallenge(_challenge);
-    }
-}
-
-
-void RequestHandler::releaseResponder()
-{
-    log_trace("RequestHandler::releaseResponder " << _responder);
-    if( _responder )
-    {
-        assert(_servlet);
-        _servlet->service()->releaseResponder(_responder);
-        _servlet = 0;
-        _responder = 0;
-    }
-}
-
-
-void RequestHandler::beginServe(System::EventLoop& loop)
-{  
-    log_trace("RequestHandler::beginServe");
-
-    _conn.setActive(loop);
-
-    _reply.clear();
-    _request.clear();
-    _request.beginReceive();
-}
-
-
-void RequestHandler::onRequestReceived(Request& req)
-{
-    log_trace("RequestHandler::onRequestReceived");
-
-    // TODO: error reply on HTTP related exceptions
-    // replyError();
-    
-    try
-    {
-        MessageProgress progress = _request.endReceive();
-        
-        if( progress.header() )
-        {
-            log_debug("received request header");
-
-            assert(_servlet == 0);
-            _servlet = _server.getServlet(_request);
-            if( ! _servlet )
-            {
-                _reply.setStatus(404, "Not found");
-                _reply.beginSend();
-                return;
-            }
-
-            Authentication* authentication = _servlet->authentication();
-            if( authentication )
-            {
-                log_debug("authentication required");
-
-                // TODO: only authenticate if we haven't already for this connection
-                bool granted = authentication->authenticate(_request, _reply);
-                if( ! granted )
-                {
-                    _challenge = authentication->beginChallenge(_request, _reply);
-                    if( ! _challenge)
-                    {
-                        log_debug("request immediately denied");
-
-                        if( ! _reply.isSending() )
-                            _reply.beginSend(true);
-
-                        _servlet = 0;
-                    }
-                    else
-                    {
-                        log_debug("authentication started");
-                        _requestProgress = progress;
-                        _challenge->finished() += Pt::slot(*this, &RequestHandler::onChallenge);
-                    }
-
-                    return;
-                }
-
-                log_debug("request immediately authenticated");
-            }
-        
-            assert(_responder == 0);
-            _responder = _servlet->service()->getResponder( _request );
-            
-            assert(_responder);
-            _responder->beginRequest( _request, _reply );
-
-            if( _reply.isSending() )
-            {
-                log_debug("request interrupted");
-                return;
-            }
-        }
-    
-        if( progress.body() )
-        {     
-            if( ! this->onRequestBody() )
-                return;
-        }
-
-        if( progress.finished() )
-        {
-            if( ! this->onRequestFinished() )
-                return;
-        }
-
-        log_debug("read request");
-        _request.beginReceive();
-    }
-    catch(const System::IOError& e) // TODO: HttpError is also an IOError
-    {
-        log_error("EXCEPTION: " << e.what());
-        _finished.send(*this);
-    }
-}
-
-
-void RequestHandler::onChallenge(Challenge& challenge)
-{
-    log_trace("RequestHandler::onChallenge");
-
-    try
-    {
-        bool granted = _servlet->authentication()->endChallenge(_challenge, _request, _reply);
-
-        _challenge = 0;
-    
-        if( ! granted )
-        {
-            log_debug("request not granted");
-
-            if( ! _reply.isSending() )
-                _reply.beginSend(true);
-
-            _servlet = 0;
-        }
-        else
-        {
-            assert(_responder == 0);
-            _responder = _servlet->service()->getResponder( _request );
-            
-            assert(_responder);
-            _responder->beginRequest( _request, _reply );
-
-            if( _reply.isSending() )
-            {
-                log_debug("request interrupted");
-                return;
-            }
-
-            if( _requestProgress.body() )
-            {     
-                if( ! this->onRequestBody() )
-                    return;
-            }
-
-            if( _requestProgress.finished() )
-            {
-                if( ! this->onRequestFinished() )
-                    return;
-            }
-
-            log_debug("read request");
-            _request.beginReceive();
-        }
-    }
-    catch(const System::IOError& e) // TODO: HttpError is also an IOError
-    {
-        log_error("EXCEPTION: " << e.what());
-
-        // TODO: error reply on HTTP related exceptions
-        // replyError();
-        _finished.send(*this);
-    }
-}
-
-
-bool RequestHandler::onRequestBody()
-{      
-    if( _responder)
-    {
-        log_debug("reading request");
-        _responder->readRequest(_request, _reply);
-
-        if( _reply.isSending() )
-        {
-            log_debug("request interrupted");
-            return false;
-        }
-    }
-    else
-    {
-        log_debug("ignoring request body");
-        _request.body().discard();
-    }
-
-    return true;
-}
-
-
-bool RequestHandler::onRequestFinished()
-{
-    if( ! _conn.isConnected() )
-    {
-        log_debug("not connected anymore");
-        _finished.send(*this);
-        return false;
-    }
-
-    if(_responder)
-    {
-        log_debug("request body finished, begin reply");
-        _responder->beginReply(_request, _reply);
-        return false;
-    }
-
-    // if there is no responder, the reply was already sent, because a 
-    // request, interrupted at an early stage, was just finished
-    return true;
-}
-
-
-void RequestHandler::onReplySent(Reply& r)
-{
-    log_trace("RequestHandler::onReplySent");
-
-    try
-    {
-        MessageProgress progress = _reply.endSend();
-
-        if( ! progress.finished() )
-        {
-            log_debug("writing more reply data");
-            bool finished = _reply.isFinished();
-            _reply.beginSend(finished);
-            return;
-        }
-
-        if( ! _reply.isFinished() )
-        {
-            log_debug("continuing response");
-            _reply.body().discard();
-            assert(_responder);
-            _responder->writeReply(_request, _reply);
-            return;
-        }
-
-        log_debug("response finished");
-
-        releaseResponder();
-        _reply.clear();
-        _request.clear();
-
-        if( ! _conn.isConnected() )
-        {
-            log_debug("not connected anymore");
-            _finished.send(*this);
-            return;
-        }
-
-        _request.beginReceive();
-    }
-    catch(const System::IOError& e) // TODO: HttpError is also an IOError
-    {
-        log_error("EXCEPTION: " << e.what());
-        _finished.send(*this);
-    }
-}
-
-
-void RequestHandler::replyError()
-{
-    _reply.clear();
-
-    _reply.setStatus(500, "internal server error");
-    _reply.header().set("Content-Type", "text/plain");
-    _reply.header().set("Connection", "close");
-    _reply.body() << "Error 500: Internal server error.";
-
-    _reply.beginSend(true);
-}
-
-
-class ServerThread : public Connectable 
-{
-    public:
-        class AcceptEvent : public Pt::BasicEvent<AcceptEvent>
-        {
-            public:
-                AcceptEvent(RequestHandler* conn)
-                : _conn(conn)
-                { }
-    
-                RequestHandler* connection() const
-                { return _conn; }
-    
-            private:
-                RequestHandler* _conn;
-        };
-
-        class RemoveServletEvent : public Pt::BasicEvent<RemoveServletEvent>
-        {
-            public:
-                RemoveServletEvent(Servlet* s)
-                : _servlet(s)
-                { }
-    
-                Servlet* servlet() const
-                { return _servlet; }
-    
-            private:
-                Servlet* _servlet;
-        };
-
-    public:
-        ServerThread(Server& server)
-        : _server(&server)
-        , _ssl(false)
-        , _thread(_loop)
-        , _removed(false)
-        {
-            _loop.event() += Pt::slot(*this, &ServerThread::onAccept);
-            _loop.event() += Pt::slot(*this, &ServerThread::onRemoveServlet);
-            _thread.start();
-        }
-
-        ~ServerThread()
-        {
-            stop();
-        }
-
-        void setSecure(Ssl::Context& ctx)
-        {
-#ifdef PT_HTTP_WITH_SSL
-            _sslctx.assign(ctx);
-            _ssl = true;
-#endif
-        }
-        
-        void serve(RequestHandler* conn)
-        {
-            AcceptEvent ev(conn);
-            _loop.commitEvent(ev);
-        }
-
-        void stop()
-        {
-            _loop.exit();
-            _thread.join();
-
-            std::vector<RequestHandler*>::iterator it;
-            for(it = _handlers.begin(); it != _handlers.end(); ++it)
-            {
-                delete *it;
-            }
-
-            _handlers.clear();
-        }
-
-        void removeServlet(Servlet& servlet)
-        {
-            RemoveServletEvent ev(&servlet);
-            _loop.commitEvent(ev);
-
-            System::MutexLock lock(_removedMutex);
-            _removed = false;
-
-            while( ! _removed)
-                _isRemoved.wait(lock);
-        }
-
-    private:
-        void onAccept(const AcceptEvent& ev)
-        {
-            RequestHandler* handler = ev.connection();
-
-            _handlers.push_back(handler);
-            handler->finished() += Pt::slot(*this, &ServerThread::onHandlerFinished);
-
-#ifdef PT_HTTP_WITH_SSL
-            if(_ssl)
-                handler->setSecure(_sslctx);
-#endif
-
-            handler->beginServe(_loop);
-        }
-
-        void onRemoveServlet(const RemoveServletEvent& ev)
-        {
-            std::vector<RequestHandler*>::iterator it  = _handlers.begin();
-            while( it != _handlers.end() )
-            {
-                RequestHandler* rh = *it;
-                if( rh->servlet() == ev.servlet() )
-                {
-                    delete rh;
-                    it = _handlers.erase(it);
-                }
-                else
-                {
-                    ++it;
-                }
-            }
-
-            System::MutexLock lock(_removedMutex);
-            _removed = true;
-            _isRemoved.signal();
-        }
-
-        void onHandlerFinished(RequestHandler& handler)
-        {
-            std::vector<RequestHandler*>::iterator it;
-            for(it = _handlers.begin(); it != _handlers.end(); ++it)
-            {
-                if(&handler == *it)
-                {
-                    delete *it;
-                    _handlers.erase(it);
-                    break;
-                }
-            }
-        }
-
-    private:
-        Server* _server;
-        Pt::System::MainLoop _loop;
-        
-        bool _ssl;
-#ifdef PT_HTTP_WITH_SSL
-        Ssl::Context _sslctx;
-#endif
-        Pt::System::AttachedThread _thread;
-        std::vector<RequestHandler*> _handlers;
-
-        bool _removed;
-        System::Mutex _removedMutex;
-        System::Condition _isRemoved;
-};
-
-
 Server::Server()
-: _sslctx(0)
-, _ssl(false)
-, _useWorker(0)
-, _maxThreads(1)
-, _timeout(30000)
-, _keepAliveTimeout(30000)
+: _impl(0)
 {
-    _serverSocket.connectionPending() += Pt::slot(*this, &Server::onAccept);
+    _impl = new ServerImpl();
 }
 
 
 Server::Server(System::EventLoop& loop)
-: _sslctx(0)
-, _ssl(false)
-, _useWorker(0)
-, _maxThreads(1)
-, _timeout(30000)
-, _keepAliveTimeout(30000)
+: _impl(0)
 {
-    _serverSocket.setActive(loop);
-    _serverSocket.connectionPending() += Pt::slot(*this, &Server::onAccept);
+    _impl = new ServerImpl();
+    setActive(loop);
 }
 
 
 Server::Server(System::EventLoop& loop, const std::string& ip, unsigned short int port, int backlog)
-: _serverSocket(ip, port, backlog)
-, _sslctx(0)
-, _ssl(false)
-, _useWorker(0)
-, _maxThreads(1)
-, _timeout(30000)
-, _keepAliveTimeout(30000)
+: _impl(0)
 {
-    _serverSocket.setActive(loop);
-    _serverSocket.beginAccept();
-    _serverSocket.connectionPending() += Pt::slot(*this, &Server::onAccept);
-
-    this->startWorker();
+    _impl = new ServerImpl();
+    setActive(loop);
+    listen(ip, port, backlog);
 }
+
 
 Server::Server(System::EventLoop& loop, const Pt::Net::AddrInfo& addr, int backlog)
-: _serverSocket(addr, backlog)
-, _sslctx(0)
-, _ssl(false)
-, _useWorker(0)
-, _maxThreads(1)
-, _timeout(30000)
-, _keepAliveTimeout(30000)
+: _impl(0)
 {
-    _serverSocket.setActive(loop);
-    _serverSocket.beginAccept();
-    _serverSocket.connectionPending() += Pt::slot(*this, &Server::onAccept);
-
-    this->startWorker();
+    _impl = new ServerImpl();
+    setActive(loop);
+    listen(addr, backlog);
 }
+
 
 Server::~Server()
 {
-    this->cancel();
-
-    while( ! _servlets.empty() )
-    {
-        Servlet* servlet = _servlets.front();
-        removeServlet(*servlet);
-    }
+    delete _impl;
 }
 
 
-void Server::setActive(System::EventLoop& eventLoop)
+System::EventLoop* Server::loop()
+{ 
+    return _impl->loop(); 
+}
+
+
+void Server::setActive(System::EventLoop& loop)
 {
-     _serverSocket.setActive(eventLoop);
+     _impl->setActive(loop);
 }
 
 
 void Server::setSecure(Ssl::Context& ctx)
 {
-    _ssl = true;
-    _sslctx = &ctx;
+    _impl->setSecure(ctx);
 }
 
 
 std::size_t Server::timeout() const
 {
-    return _timeout;
+    return _impl->timeout();
 }
 
 
 void Server::setTimeout(std::size_t ms)
 {
-    _timeout = ms;
+    _impl->setTimeout(ms);
 }
 
 
 std::size_t Server::keepAliveTimeout() const
 {
-    return _keepAliveTimeout;
+    return _impl->keepAliveTimeout();
 }
 
 
 void Server::setKeepAliveTimeout(std::size_t ms)
 {
-    _keepAliveTimeout = ms;
+    _impl->setKeepAliveTimeout(ms);
 }
 
 
 unsigned Server::maxThreads() const
 {
-    return _maxThreads;
+    return _impl->maxThreads();
 }
 
 
 void Server::setMaxThreads(unsigned m)
 {
-    _maxThreads = m;
+    _impl->setMaxThreads(m);
 }
 
 
 void Server::listen(const Pt::Net::AddrInfo& addr, int backlog)
 {
-    _serverSocket.listen(addr, backlog);
-    _serverSocket.beginAccept();
-
-    this->startWorker();
+    _impl->listen(addr, backlog);
 }
 
 
 void Server::listen(const std::string& ip, unsigned short int port, int backlog)
 {
-    _serverSocket.listen(ip, port, backlog);
-    _serverSocket.beginAccept();
-
-    this->startWorker();
+    Net::AddrInfo ai(ip, port, true);
+    _impl->listen(ai, backlog);
 }
 
 
 void Server::cancel()
 {
-    _serverSocket.cancel();
-
-    std::vector<ServerThread*>::iterator threadIt;
-    for(threadIt = _serverThreads.begin(); threadIt != _serverThreads.end(); ++threadIt)
-    {
-        (*threadIt)->stop();
-        delete *threadIt;
-    }
-
-    _serverThreads.clear();
-
-    std::vector<RequestHandler*>::iterator it;
-    for(it = _handlers.begin(); it != _handlers.end(); ++it)
-    {
-        delete *it;
-    }
-
-    _handlers.clear();
+    _impl->cancel();
 }
 
 
 void Server::addServlet(Servlet& servlet)
 {
-    System::WriteLock serviceLock(_serviceMutex);
-    _servlets.push_back(&servlet);
+    _impl->addServlet(servlet);
     servlet.registerServer(*this);
 }
 
 
 void Server::removeServlet(Servlet& servlet)
 {
-    System::WriteLock serviceLock(_serviceMutex);
-
-    ServletList::iterator it;
-    for(it = _servlets.begin(); it != _servlets.end(); ++it)
-    {
-        if(*it == &servlet)
-        {
-            _servlets.erase(it);
-            break;
-        }
-    }
-
+    _impl->removeServlet(servlet);
     servlet.unregisterServer(*this);
-
-    serviceLock.unlock();
-
-    // close all connections in this thread, which use the servlet
-    std::vector<RequestHandler*>::iterator hit  = _handlers.begin();
-    while( hit != _handlers.end() )
-    {
-        std::vector<RequestHandler*>::iterator handler = hit++;
-        
-        if( (*handler)->servlet() == &servlet )
-        {
-            delete *handler;
-            hit = _handlers.erase(handler);
-        }
-    }
-
-    // close all connections in the worker threads which use the servlet
-    std::vector<ServerThread*>::iterator threadIt;
-    for(threadIt = _serverThreads.begin(); threadIt != _serverThreads.end(); ++threadIt)
-    {
-        // returns when all connections using the service are closed
-        (*threadIt)->removeServlet(servlet);
-    }
-
-    //NOTE: in case of an exception, terminate the worker thread
 }
 
 
 Servlet* Server::getServlet(const Request& request)
 {
-    System::ReadLock serviceLock(_serviceMutex);
-
-    for(ServletList::iterator it = _servlets.begin(); it != _servlets.end(); ++it)
-    {
-        if( ! (*it)->isMapped(request) )
-            continue;
-
-        log_info("serving: " << request.url());
-        return *it;
-    }
-
-    log_warn("not found: " << request.url());
-    return 0;
-}
-
-
-void Server::startWorker()
-{
-    for(unsigned n = 1; n < this->maxThreads(); ++n)
-    {
-        ServerThread* st = new ServerThread(*this);
-
-#ifdef PT_HTTP_WITH_SSL
-        if(_ssl)
-        {
-            st->setSecure(*_sslctx);
-        }
-#endif
-
-        _serverThreads.push_back(st);
-    }
-
-    _useWorker = _serverThreads.size();
-}
-
-
-void Server::onAccept(Net::TcpServer& server)
-{
-    log_trace("Server::onAccept");
-
-    // TODO: we should only pass the TcpSocket to the worker thread
-    //       so that a RequestHandler can be constructed with an event loop
-
-    std::auto_ptr<RequestHandler> handler( new RequestHandler(*this, server) );
-
-    log_debug("handler timeouts: " << _timeout << ", " << _keepAliveTimeout);
-    handler->setTimeout(_timeout);
-    handler->setKeepAliveTimeout(_keepAliveTimeout);
-
-    if(_useWorker < _serverThreads.size())
-    {
-        _serverThreads[_useWorker]->serve( handler.release() );
-        ++_useWorker;
-    }
-    else
-    {
-        if(_ssl)
-            handler->setSecure(*_sslctx);
-        
-        System::EventLoop* loop = this->loop();
-        if( ! loop)
-        {
-            // NOTE: this can not really happen, because the signal is only
-            // sent when a loop is present
-            throw std::logic_error("http server has no event loop");
-        }
-
-
-        handler->beginServe(*loop);
-        handler->finished() += Pt::slot(*this, &Server::onHandlerFinished);
-        _handlers.push_back( handler.get() );
-        handler.release();
-
-        _useWorker = 0;
-    }
-
-    _serverSocket.beginAccept();
-}
-
-
-void Server::onHandlerFinished(RequestHandler& h)
-{
-    std::vector<RequestHandler*>::iterator it;
-    for(it = _handlers.begin(); it != _handlers.end(); ++it)
-    {
-        if(&h == *it)
-        {
-            delete *it;
-            _handlers.erase(it);
-            break;
-        }
-    }
+    return _impl->getServlet(request);
 }
 
 } // namespace Http

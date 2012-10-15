@@ -167,6 +167,7 @@
     <ClInclude Include="..\..\src\Pt-Http\NotFoundResponder.h" />
     <ClInclude Include="..\..\src\Pt-Http\NotFoundService.h" />
     <ClInclude Include="..\..\src\Pt-Http\Parser.h" />
+    <ClInclude Include="..\..\src\Pt-Http\ServerImpl.h" />
     <ClInclude Include="..\..\src\Pt-Net\win32\AddrInfoImpl.h" />
     <ClInclude Include="..\..\src\Pt-Net\win32\TcpServerImpl.h" />
     <ClInclude Include="..\..\src\Pt-Net\win32\TcpSocketImpl.h" />
@@ -255,6 +256,7 @@
     <ClCompile Include="..\..\src\Pt-Http\Request.cpp" />
     <ClCompile Include="..\..\src\Pt-Http\Responder.cpp" />
     <ClCompile Include="..\..\src\Pt-Http\Server.cpp" />
+    <ClCompile Include="..\..\src\Pt-Http\ServerImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Http\Service.cpp" />
     <ClCompile Include="..\..\src\Pt-Http\Servlet.cpp" />
     <ClCompile Include="..\..\src\Pt-Http\tests\ParserTest.cpp" />
