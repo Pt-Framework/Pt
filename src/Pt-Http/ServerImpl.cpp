@@ -474,7 +474,6 @@ void ServerThread::onHandlerFinished(Acceptor& handler)
 ServerImpl::ServerImpl()
 : _sslctx(0)
 , _useWorker(0)
-, _maxThreads(1)
 , _timeout(30000)
 , _keepAliveTimeout(30000)
 {
@@ -493,7 +492,7 @@ ServerImpl::~ServerImpl()
 }
 
 
-void ServerImpl::listen(const Pt::Net::AddrInfo& addr, int backlog)
+void ServerImpl::listen(const Pt::Net::AddrInfo& addr, const Server::Options& options)
 {
     std::vector<ServerThread*>::iterator thread;
     for(thread = _serverThreads.begin(); thread != _serverThreads.end(); ++thread)
@@ -504,18 +503,20 @@ void ServerImpl::listen(const Pt::Net::AddrInfo& addr, int backlog)
 
     _serverThreads.clear();
 
-    _serverSocket.listen(addr, backlog);
+#ifdef PT_HTTP_WITH_SSL
+        _sslctx = options.sslContext();
+#endif
+
+    _serverSocket.listen(addr, options.tcpOptions());
     _serverSocket.beginAccept();
 
-    for(unsigned n = 1; n < this->maxThreads(); ++n)
+    for(unsigned n = 1; n < options.maxThreads(); ++n)
     {
         ServerThread* st = new ServerThread();
 
 #ifdef PT_HTTP_WITH_SSL
         if(_sslctx)
-        {
             st->setSecure(*_sslctx);
-        }
 #endif
 
         _serverThreads.push_back(st);

@@ -95,9 +95,16 @@ void Servlet::unregisterServer(Server& server)
     _server = 0;
 }
 
-bool MapUrl::onMap(const Request& request) const
+
+bool MapUrl::onRequest(const Request& request) const
 { 
     return _url == request.url(); 
+}
+
+
+bool MapAny::onRequest(const Request& request) const
+{ 
+    return true; 
 }
 
 } // namespace Http

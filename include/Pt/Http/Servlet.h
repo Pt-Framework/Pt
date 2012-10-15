@@ -62,7 +62,7 @@ class PT_HTTP_API Servlet : private NonCopyable
         void detach();
 
         bool isMapped(const Request& request) const
-        { return this->onMap(request); }
+        { return this->onRequest(request); }
 
         Service* service()
         { return _service; }
@@ -71,7 +71,7 @@ class PT_HTTP_API Servlet : private NonCopyable
         { return _auth; }
 
     protected:
-        virtual bool onMap(const Request& request) const = 0;
+        virtual bool onRequest(const Request& request) const = 0;
 
     private:
         // @internal
@@ -100,10 +100,25 @@ class PT_HTTP_API MapUrl : public Servlet
         {}
 
     protected:
-        bool onMap(const Request& request) const;
+        bool onRequest(const Request& request) const;
 
     private:
         std::string _url;
+};
+
+class PT_HTTP_API MapAny : public Servlet
+{
+    public:
+        MapAny(Service& s)
+        : Servlet(s)
+        {}
+
+        MapAny(Service& s, Authentication& a)
+        : Servlet(s, a)
+        {}
+
+    protected:
+        bool onRequest(const Request& request) const;
 };
 
 } // namespace Http

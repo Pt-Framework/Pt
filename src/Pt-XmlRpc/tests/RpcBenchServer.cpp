@@ -82,8 +82,10 @@ int main(int argc, char* argv[])
     service.registerFunction("echo", echo);
     
     Pt::Http::Server server(loop);
-    server.setMaxThreads(maxThreads);
-    server.listen(ip, port);
+
+    Pt::Http::Server::Options options;
+    options.setMaxThreads(maxThreads);
+    server.listen(ip, port, options);
     
     Pt::Http::MapUrl servlet("/myservice", service);
     server.addServlet(servlet);

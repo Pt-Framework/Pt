@@ -30,6 +30,7 @@
 #define Pt_Http_Server_h
 
 #include <Pt/Http/Api.h>
+#include <Pt/Net/TcpServer.h>
 #include <Pt/Connectable.h>
 #include <Pt/NonCopyable.h>
 #include <string>
@@ -59,21 +60,52 @@ class PT_HTTP_API Server : public Connectable
                          , private NonCopyable
 {
     public:
+        class Options
+        {
+            public:
+                Options()
+                : _maxThreads(0)
+                , _sslctx(0)
+                {}
+
+                unsigned maxThreads() const
+                { return _maxThreads; }
+
+                void setMaxThreads(unsigned m)
+                { _maxThreads = m; }
+
+                void setSecure(Ssl::Context& ctx)
+                { _sslctx = &ctx; }
+
+                Ssl::Context* sslContext() const
+                { return _sslctx; }
+
+                Net::TcpServer::Options& tcpOptions()
+                { return _tcpOptions; }
+
+                const Net::TcpServer::Options& tcpOptions() const
+                { return _tcpOptions; }
+
+            private:
+                Net::TcpServer::Options _tcpOptions;
+                std::size_t _maxThreads;
+                Ssl::Context* _sslctx;
+        };
+
+    public:
         Server();
 
         explicit Server(System::EventLoop& loop);
 
-        Server(System::EventLoop& loop, const std::string& ip, unsigned short int port, int backlog = 5);
+        Server(System::EventLoop& loop, const std::string& ip, unsigned short int port, const Options& = Options());
 
-        Server(System::EventLoop& loop, const Net::AddrInfo& addr, int backlog = 5);
+        Server(System::EventLoop& loop, const Net::AddrInfo& addr, const Options& = Options());
 
         ~Server();
 
         System::EventLoop* loop();
 
         void setActive(System::EventLoop& loop);
-
-        void setSecure(Ssl::Context& ctx);
 
         std::size_t timeout() const;
 
@@ -83,13 +115,9 @@ class PT_HTTP_API Server : public Connectable
 
         void setKeepAliveTimeout(std::size_t ms);
 
-        unsigned maxThreads() const;
+        void listen(const std::string& ip, unsigned short int port, const Options& options = Options());
 
-        void setMaxThreads(unsigned m);
-
-        void listen(const std::string& ip, unsigned short int port, int backlog = 5);
-
-        void listen(const Net::AddrInfo& addr, int backlog = 5);
+        void listen(const Net::AddrInfo& addr, const Options& options = Options());
 
         void cancel();
 

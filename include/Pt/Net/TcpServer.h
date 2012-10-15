@@ -45,26 +45,51 @@ class AddrInfo;
 class PT_NET_API TcpServer : public System::Selectable
 {
     public:
-        enum SocketFlags 
-        { 
-            None = 0,
-            DeferAccept = 2,
-            ALL_SOCKET_FLAGS = 0xffffffff
+        class Options
+        {
+            public:
+                explicit Options(int backlog = 5)
+                : _flags(0)
+                , _backlog(backlog)
+                {}
+
+                bool deferAccept() const
+                { return (_flags & DeferAccept) != 0; }
+                
+                void setDeferAccept()
+                { _flags |= DeferAccept; }
+
+                int backlog() const
+                { return _backlog; }
+
+                void setBacklog(int backlog)
+                { _backlog = backlog; }
+
+            private:
+                enum SocketFlags 
+                { 
+                    DeferAccept = 1,
+                };
+
+            private:
+                unsigned long _flags;
+                int _backlog;
         };
 
+    public:
         TcpServer();
         
         /** @brief Creates a server socket and listens on an address
         */
-        TcpServer(const std::string& ipaddr, unsigned short int port, int backlog = 5, unsigned flags = 0);
+        TcpServer(const std::string& ipaddr, unsigned short int port, const Options& options = Options());
 
-        TcpServer(const AddrInfo& ipaddr, int backlog = 5, unsigned flags = 0);
+        TcpServer(const AddrInfo& ipaddr, const Options& options = Options());
         
         ~TcpServer();
         
-        void listen(const std::string& ipaddr, unsigned short int port, int backlog = 5, unsigned flags = 0);
+        void listen(const std::string& ipaddr, unsigned short int port, const Options& options = Options());
 
-        void listen(const AddrInfo& ipaddr, int backlog = 5, unsigned flags = 0);
+        void listen(const AddrInfo& ipaddr, const Options& options = Options());
         
         void beginAccept();
         

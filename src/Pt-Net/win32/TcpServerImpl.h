@@ -35,6 +35,7 @@
 #endif
 
 #include "Selector.h"
+#include <Pt/Net/TcpServer.h>
 #include <string>
 #include <winsock2.h>
 #include <ws2tcpip.h>
@@ -66,11 +67,10 @@ class TcpServerImpl
 
         void beginAccept(System::EventLoop& loop);
 
-        void listen(const std::string& ipaddr,
-                    unsigned short int port,
-                    int backlog = 5, unsigned flags = 0);
+        void listen(const std::string& ipaddr, unsigned short int port,
+                    const TcpServer::Options& options);
 
-		void listen(const AddrInfo& ipaddr, int backlog = 5, unsigned flags = 0);
+        void listen(const AddrInfo& ipaddr, const TcpServer::Options& options);
 
         inline SOCKET fd() const
         { return _fd; }

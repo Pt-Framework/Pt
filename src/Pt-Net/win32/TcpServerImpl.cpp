@@ -117,17 +117,16 @@ void TcpServerImpl::cancel(System::EventLoop& loop)
 
 
 void TcpServerImpl::listen(const std::string& ipaddr, unsigned short int port,
-                           int backlog, unsigned flags)
+                           const TcpServer::Options& options)
 {
-    log_debug("listen on " << ipaddr << " port " << port << 
-              " backlog " << backlog << " flags " << flags);
+    log_debug("listen on " << ipaddr << " port " << port);
 
     AddrInfo ai(ipaddr, port, true);
-	listen(ai, backlog, flags);
+    listen(ai, options);
 }
 
 
-void TcpServerImpl::listen(const AddrInfo& ai, int backlog, unsigned)
+void TcpServerImpl::listen(const AddrInfo& ai, const TcpServer::Options& options)
 {
     BOOL reuseAddr = TRUE;
     static const int on = 1;
@@ -172,7 +171,7 @@ void TcpServerImpl::listen(const AddrInfo& ai, int backlog, unsigned)
    
             log_debug("listen ");
     
-            if (::listen(_fd, backlog) == SOCKET_ERROR)
+            if (::listen(_fd, options.backlog()) == SOCKET_ERROR)
             {
                 close();
     

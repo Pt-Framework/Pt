@@ -43,25 +43,25 @@ TcpServer::TcpServer()
 }
 
 
-TcpServer::TcpServer(const std::string& ipaddr, unsigned short int port, int backlog, unsigned flags)
+TcpServer::TcpServer(const std::string& ipaddr, unsigned short int port, const Options& options)
 : _impl(0)
 {
     _impl = new TcpServerImpl(*this);
     std::auto_ptr<TcpServerImpl> impl(_impl);
 
-    this->listen(ipaddr, port, backlog, flags);
+    this->listen(ipaddr, port, options);
 
     impl.release();
 }
 
 
-TcpServer::TcpServer(const AddrInfo& ipaddr, int backlog, unsigned flags)
+TcpServer::TcpServer(const AddrInfo& ipaddr, const Options& options)
 : _impl(0)
 {
     _impl = new TcpServerImpl(*this);
     std::auto_ptr<TcpServerImpl> impl(_impl);
 
-    this->listen(ipaddr, backlog, flags);
+    this->listen(ipaddr, options);
 
     impl.release();
 }
@@ -80,17 +80,17 @@ TcpServer::~TcpServer()
 }
 
 
-void TcpServer::listen(const std::string& ipaddr, unsigned short int port, int backlog, unsigned flags)
+void TcpServer::listen(const std::string& ipaddr, unsigned short int port, const Options& options)
 {
     this->close();
-    _impl->listen(ipaddr, port, backlog, flags);
+    _impl->listen(ipaddr, port, options);
 }
 
 
-void TcpServer::listen(const AddrInfo& ipaddr, int backlog, unsigned flags)
+void TcpServer::listen(const AddrInfo& ipaddr, const Options& options)
 {
     this->close();
-    _impl->listen(ipaddr, backlog, flags);
+    _impl->listen(ipaddr, options);
 }
 
 

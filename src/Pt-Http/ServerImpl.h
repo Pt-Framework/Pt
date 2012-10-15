@@ -33,6 +33,7 @@
 #include <Pt/Http/Api.h>
 #include <Pt/Http/Request.h>
 #include <Pt/Http/Reply.h>
+#include <Pt/Http/Server.h>
 #include <Pt/Net/TcpServer.h>
 #include <Pt/System/MainLoop.h>
 #include <Pt/System/Thread.h>
@@ -191,9 +192,6 @@ class ServerImpl : public Connectable
         void setActive(System::EventLoop& eventLoop)
         { _serverSocket.setActive(eventLoop); }
 
-        void setSecure(Ssl::Context& ctx)
-        { _sslctx = &ctx; }
-
         std::size_t timeout() const
         { return _timeout; }
 
@@ -206,18 +204,7 @@ class ServerImpl : public Connectable
         void setKeepAliveTimeout(std::size_t ms)
         { _keepAliveTimeout = ms; }
 
-        unsigned maxThreads() const
-        { return _maxThreads; }
-
-        void setMaxThreads(unsigned m)
-        { _maxThreads = m; }
-
-        // TODO: 
-        // Pt::Net::SocketOptions options;
-        // options.setBacklog(5);
-        // options.setFlags(Pt::Net::DeferAccept);
-        // server.listen(addr, options);
-        void listen(const Pt::Net::AddrInfo& addr, int backlog = 5);
+        void listen(const Pt::Net::AddrInfo& addr, const Server::Options& options);
 
         void cancel();
 
@@ -238,7 +225,6 @@ class ServerImpl : public Connectable
         std::vector<ServerThread*> _serverThreads;
         std::vector<Acceptor*> _handlers;
         unsigned _useWorker;
-        unsigned _maxThreads;
         std::size_t _timeout;
         std::size_t _keepAliveTimeout;
         System::ReadWriteMutex _serviceMutex;

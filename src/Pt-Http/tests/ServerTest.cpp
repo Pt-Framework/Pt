@@ -266,9 +266,11 @@ class ServerTest : public Pt::Unit::TestSuite
             setupSslServerContext(serverCtx);
             
             // start HTTP server
+            Pt::Http::Server::Options options;
+            options.setSecure(serverCtx);
+            
             Pt::Http::Server server(*loop);
-            server.setSecure(serverCtx);
-            server.listen("127.0.0.1", 8001, true);
+            server.listen("127.0.0.1", 8001, options);
 
             Pt::Ssl::Context clientContext;
             setupSslClientContext(serverCtx);

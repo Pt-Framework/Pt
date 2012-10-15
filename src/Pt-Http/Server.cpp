@@ -50,21 +50,21 @@ Server::Server(System::EventLoop& loop)
 }
 
 
-Server::Server(System::EventLoop& loop, const std::string& ip, unsigned short int port, int backlog)
+Server::Server(System::EventLoop& loop, const std::string& ip, unsigned short int port, const Options& options)
 : _impl(0)
 {
     _impl = new ServerImpl();
     setActive(loop);
-    listen(ip, port, backlog);
+    listen(ip, port, options);
 }
 
 
-Server::Server(System::EventLoop& loop, const Pt::Net::AddrInfo& addr, int backlog)
+Server::Server(System::EventLoop& loop, const Pt::Net::AddrInfo& addr, const Options& options)
 : _impl(0)
 {
     _impl = new ServerImpl();
     setActive(loop);
-    listen(addr, backlog);
+    listen(addr, options);
 }
 
 
@@ -83,12 +83,6 @@ System::EventLoop* Server::loop()
 void Server::setActive(System::EventLoop& loop)
 {
      _impl->setActive(loop);
-}
-
-
-void Server::setSecure(Ssl::Context& ctx)
-{
-    _impl->setSecure(ctx);
 }
 
 
@@ -116,28 +110,16 @@ void Server::setKeepAliveTimeout(std::size_t ms)
 }
 
 
-unsigned Server::maxThreads() const
+void Server::listen(const Pt::Net::AddrInfo& addr, const Options& options)
 {
-    return _impl->maxThreads();
+    _impl->listen(addr, options);
 }
 
 
-void Server::setMaxThreads(unsigned m)
-{
-    _impl->setMaxThreads(m);
-}
-
-
-void Server::listen(const Pt::Net::AddrInfo& addr, int backlog)
-{
-    _impl->listen(addr, backlog);
-}
-
-
-void Server::listen(const std::string& ip, unsigned short int port, int backlog)
+void Server::listen(const std::string& ip, unsigned short int port, const Options& options)
 {
     Net::AddrInfo ai(ip, port, true);
-    _impl->listen(ai, backlog);
+    _impl->listen(ai, options);
 }
 
 
