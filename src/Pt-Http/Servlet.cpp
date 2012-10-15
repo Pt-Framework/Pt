@@ -59,7 +59,7 @@ Servlet::~Servlet()
 }
 
 
-void setShutdown(bool shutdown)
+void Servlet::setShutdown(bool shutdown)
 {
     // if(_server)
     // {
