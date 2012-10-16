@@ -61,8 +61,8 @@ bool Challenge::getResult()
 
 
 Authentication::Authentication(const std::string& realm)
-: _realm(realm)
-, _useCount(0)
+: _useCount(0)
+, _realm(realm)
 { }
 
 

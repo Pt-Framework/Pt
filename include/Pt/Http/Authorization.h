@@ -39,6 +39,22 @@ namespace Http {
 class Request;
 class Reply;
 
+class Authorizer
+{
+    public:
+        Authorizer()
+        {}
+
+        bool authorize(Request& request, const Reply& reply)
+        { 
+            // 1. extract auth scheme from reply
+            // 2. extract realm from reply
+            // 3. get credentials by realm from list
+            // 4. use credentials and auth scheme to authorize request
+            return false; 
+        }
+};
+
 class PT_HTTP_API Authorization
 {
     public:

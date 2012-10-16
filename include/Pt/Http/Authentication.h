@@ -74,8 +74,10 @@ class PT_HTTP_API Authentication : public Pt::NonCopyable
         const std::string& realm() const
         { return _realm; }
 
+        // TODO: isAuthentic
         bool authenticate(const Request& req, Reply& reply);
 
+        // TODO: beginAuthentication
         Challenge* beginChallenge(const Request& req, Reply& reply);
 
         bool endChallenge(Challenge* challenge, const Request& req, Reply& reply);
