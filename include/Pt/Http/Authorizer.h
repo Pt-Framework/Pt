@@ -31,6 +31,7 @@
 
 #include <Pt/Http/Api.h>
 #include <Pt/System/Mutex.h>
+#include <Pt/Atomicity.h>
 #include <Pt/Signal.h>
 #include <string>
 #include <map>
@@ -52,7 +53,8 @@ class PT_HTTP_API Authorization : public Pt::NonCopyable
         bool getResult();
 
     protected:
-        Authorization()
+        Authorization(const Request& request)
+        : _request(&request)
         {}
 
         void setReady();
@@ -61,6 +63,7 @@ class PT_HTTP_API Authorization : public Pt::NonCopyable
 
     private:
         Signal<Authorization&> _finished;
+        const Request* _request;
 };
 
 
@@ -91,7 +94,8 @@ class PT_HTTP_API Authorizer : public Pt::NonCopyable
         { return _mutex; }
 
     private:
-        System::Mutex _mutex;
+        System::Mutex _mutex; // TODO: use atomics
+        atomic_t _refCount;
         std::size_t _useCount;
         std::string _realm;
 };
@@ -105,6 +109,24 @@ class PT_HTTP_API BasicAuthorizer : public Authorizer
         { }
 
         ~BasicAuthorizer()
+        { }
+
+    protected:
+        virtual Authorization* onAuthorize(const Request& req, Reply& reply, bool& granted);
+
+        // TODO: use credentials
+        virtual Authorization* onAuthorizeUser(const Request& req, Reply& reply, const std::string& user, const std::string& passwd, bool& granted) = 0;
+};
+
+
+class PT_HTTP_API BasicUserListAuthorizer : public BasicAuthorizer
+{
+    public:
+        BasicUserListAuthorizer(const std::string& realm)
+        : BasicAuthorizer(realm)
+        { }
+
+        ~BasicUserListAuthorizer()
         { clear(); }
 
         void setUser(const std::string& user, const std::string& passwd)
@@ -126,7 +148,7 @@ class PT_HTTP_API BasicAuthorizer : public Authorizer
         }
 
     protected:
-        virtual Authorization* onAuthorize(const Request& req, Reply& reply, bool& granted);
+        virtual Authorization* onAuthorizeUser(const Request& req, Reply& reply, const std::string& user, const std::string& passwd, bool& granted);
 
         virtual bool onEndAuthorization(Authorization* auth, const Request& req, Reply& reply);
 

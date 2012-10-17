@@ -107,9 +107,11 @@ void Authorizer::cancelAuthorization(Authorization* auth)
 Authorization* BasicAuthorizer::onAuthorize(const Request& req, Reply& reply, bool& granted)
 {
     std::string user, passwd, token;
+    Authorization* author = 0;
+    granted = false;
 
     const char* auth = req.header().get("Authorization");
-    if( auth )
+    if(auth)
     {
         std::istringstream iss(auth);
         iss >> token;
@@ -117,31 +119,38 @@ Authorization* BasicAuthorizer::onAuthorize(const Request& req, Reply& reply, bo
         for(std::string::size_type n = 0; n < token.size(); ++n)
             token[n] = std::tolower(token[n]);
 
-        if(token == "basic")
-        {
-            iss >> std::skipws >> token;
-            iss.str(token);
+        if(token != "basic")
+            throw std::runtime_error("HTTP auth header parse error");
 
-            BasicTextIStream<char, char> b64conv(iss, new Base64Codec());
-            std::getline(b64conv, user, ':');
-            b64conv >> passwd;
+        iss >> std::skipws >> token;
+        iss.str(token);
 
-            std::map<std::string, std::string>::iterator it = _passwd.find(user);
-            granted = (it != _passwd.end() && it->second == passwd);
-        }
+        BasicTextIStream<char, char> b64conv(iss, new Base64Codec());
+        std::getline(b64conv, user, ':');
+        b64conv >> passwd;
+
+        author = onAuthorizeUser(req, reply, user, passwd, granted);
     }
 
-    if( ! granted)
+    if( ! author && ! granted )
     {
         reply.setStatus(401, "Authorization Required");
         reply.header().set("WWW-Authenticate", ("Basic realm=\"" + realm() + '"').c_str());
     }
 
+    return author;
+}
+
+
+Authorization* BasicUserListAuthorizer::onAuthorizeUser(const Request& req, Reply& reply, const std::string& user, const std::string& passwd, bool& granted)
+{
+    std::map<std::string, std::string>::iterator it = _passwd.find(user);
+    granted = (it != _passwd.end() && it->second == passwd);
     return 0;
 }
 
 
-bool BasicAuthorizer::onEndAuthorization(Authorization* auth, const Request& req, Reply& reply)
+bool BasicUserListAuthorizer::onEndAuthorization(Authorization* auth, const Request& req, Reply& reply)
 {
     throw std::logic_error("BasicAuthorizer can not end Authorization");
     return false;
@@ -157,7 +166,7 @@ bool BasicAuthorizer::onEndAuthorization(Authorization* auth, const Request& req
 }
 
 
-void BasicAuthorizer::onDestroyAuthorization(Authorization* auth)
+void BasicUserListAuthorizer::onDestroyAuthorization(Authorization* auth)
 {
     throw std::logic_error("BasicAuthorizer can not destroy Authorization");
 }

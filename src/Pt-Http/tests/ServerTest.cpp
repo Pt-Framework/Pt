@@ -491,7 +491,7 @@ class ServerTest : public Pt::Unit::TestSuite
         Pt::System::MainLoop* loop;
         std::string _reply;
         std::vector<std::string> _chunks;
-        Pt::Http::BasicAuthorizer _authent;
+        Pt::Http::BasicUserListAuthorizer _authent;
 };
 
 Pt::Unit::RegisterTest<ServerTest> register_HttpServerTest;
