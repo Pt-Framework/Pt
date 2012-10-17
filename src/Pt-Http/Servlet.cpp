@@ -28,7 +28,7 @@
 
 #include <Pt/Http/Servlet.h>
 #include <Pt/Http/Server.h>
-#include <Pt/Http/Authentication.h>
+#include <Pt/Http/Authorizer.h>
 #include <Pt/Http/Service.h>
 #include <Pt/Http/Request.h>
 #include <Pt/Http/Reply.h>

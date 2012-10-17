@@ -30,7 +30,7 @@
 #include <Pt/Http/Servlet.h>
 #include <Pt/Http/Service.h>
 #include <Pt/Http/Responder.h>
-#include <Pt/Http/Authentication.h>
+#include <Pt/Http/Authorizer.h>
 #include <Pt/System/Logger.h>
 #include <memory>
 #include <cassert>

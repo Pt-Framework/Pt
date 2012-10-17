@@ -33,8 +33,8 @@
     <ClInclude Include="..\..\include\Pt\Formatter.h" />
     <ClInclude Include="..\..\include\Pt\Function.h" />
     <ClInclude Include="..\..\include\Pt\Http\Api.h" />
-    <ClInclude Include="..\..\include\Pt\Http\Authentication.h" />
     <ClInclude Include="..\..\include\Pt\Http\Authenticator.h" />
+    <ClInclude Include="..\..\include\Pt\Http\Authorizer.h" />
     <ClInclude Include="..\..\include\Pt\Http\Client.h" />
     <ClInclude Include="..\..\include\Pt\Http\Message.h" />
     <ClInclude Include="..\..\include\Pt\Http\Reply.h" />
@@ -240,8 +240,8 @@
     <None Include="..\..\src\Pt\tests\Makefile.am" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\Pt-Http\Authentication.cpp" />
     <ClCompile Include="..\..\src\Pt-Http\Authenticator.cpp" />
+    <ClCompile Include="..\..\src\Pt-Http\Authorizer.cpp" />
     <ClCompile Include="..\..\src\Pt-Http\Client.cpp" />
     <ClCompile Include="..\..\src\Pt-Http\ClientImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Http\Connection.cpp" />

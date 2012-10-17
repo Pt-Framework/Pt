@@ -90,4 +90,4 @@ class PT_HTTP_API Authenticator
 
 } // namespace Pt
 
-#endif // Pt_Http_Authorization_h
+#endif // Pt_Http_Authenticator_h

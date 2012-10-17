@@ -26,7 +26,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <Pt/Http/Authentication.h>
+#include <Pt/Http/Authorizer.h>
 #include <Pt/Http/Reply.h>
 #include <Pt/Http/Request.h>
 #include <Pt/TextStream.h>

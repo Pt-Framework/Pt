@@ -618,9 +618,6 @@
     <ClInclude Include="..\..\src\Pt-Http\HttpBuffer.h">
       <Filter>Pt-Http</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Http\Authentication.h">
-      <Filter>Pt-Http</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Http\Servlet.h">
       <Filter>Pt-Http</Filter>
     </ClInclude>
@@ -628,6 +625,9 @@
       <Filter>Pt-Http</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Http\Authenticator.h">
+      <Filter>Pt-Http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Http\Authorizer.h">
       <Filter>Pt-Http</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1278,9 +1278,6 @@
     <ClCompile Include="..\..\src\Pt-Http\HttpBuffer.cpp">
       <Filter>Pt-Http</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Http\Authentication.cpp">
-      <Filter>Pt-Http</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Pt-Http\Request.cpp">
       <Filter>Pt-Http</Filter>
     </ClCompile>
@@ -1294,6 +1291,9 @@
       <Filter>Pt-Http</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Http\Authenticator.cpp">
+      <Filter>Pt-Http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Http\Authorizer.cpp">
       <Filter>Pt-Http</Filter>
     </ClCompile>
   </ItemGroup>

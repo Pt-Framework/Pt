@@ -29,7 +29,6 @@
 #include "ClientImpl.h"
 #include "Parser.h"
 #include <Pt/Http/Client.h>
-#include <Pt/Http/Authorization.h>
 #include <Pt/System/IOError.h>
 #include <Pt/System/Logger.h>
 #include <cassert>
