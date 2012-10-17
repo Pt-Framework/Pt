@@ -37,7 +37,7 @@ namespace Pt {
 
 namespace Http {
 
-class Authentication;
+class Authorizer;
 class Request;
 class Reply;
 class Server;
@@ -51,7 +51,7 @@ class PT_HTTP_API Servlet : private NonCopyable
     public:
         Servlet(Service& s);
 
-        Servlet(Service& s, Authentication& a);
+        Servlet(Service& s, Authorizer& a);
 
         virtual ~Servlet();
 
@@ -67,7 +67,7 @@ class PT_HTTP_API Servlet : private NonCopyable
         Service* service()
         { return _service; }
 
-        Authentication* authentication()
+        Authorizer* authorizer()
         { return _auth; }
 
     protected:
@@ -85,7 +85,7 @@ class PT_HTTP_API Servlet : private NonCopyable
     private:
         Server* _server;
         Service* _service;
-        Authentication* _auth;
+        Authorizer* _auth;
 };
 
 class PT_HTTP_API MapUrl : public Servlet
@@ -96,7 +96,7 @@ class PT_HTTP_API MapUrl : public Servlet
         , _url(url)
         {}
 
-        MapUrl(const std::string& url, Service& s, Authentication& a)
+        MapUrl(const std::string& url, Service& s, Authorizer& a)
         : Servlet(s, a)
         , _url(url)
         {}
@@ -115,7 +115,7 @@ class PT_HTTP_API MapAny : public Servlet
         : Servlet(s)
         {}
 
-        MapAny(Service& s, Authentication& a)
+        MapAny(Service& s, Authorizer& a)
         : Servlet(s, a)
         {}
 

@@ -174,15 +174,6 @@ const Reply& Client::reply() const
     return _impl->reply();
 }
 
-void Client::setAuthorization(Authorization& auth)
-{
-    _impl->setAuthorization(auth);
-}
-
-void Client::clearAuthorization()
-{
-    _impl->clearAuthorization();
-}
 
 void Client::cancel()
 {

@@ -31,6 +31,7 @@
 
 #include <Pt/Http/Api.h>
 #include <string>
+#include <map>
 
 namespace Pt {
 
@@ -39,49 +40,50 @@ namespace Http {
 class Request;
 class Reply;
 
-class Authorizer
+class Credentials
 {
     public:
-        Authorizer()
+        Credentials()
         {}
 
-        bool authorize(Request& request, const Reply& reply)
-        { 
-            // 1. extract auth scheme from reply
-            // 2. extract realm from reply
-            // 3. get credentials by realm from list
-            // 4. use credentials and auth scheme to authorize request
-            return false; 
+        Credentials(const std::string& user, const std::string& passwd)
+        : _user(user)
+        , _passwd(passwd)
+        {}
+
+        void set(const std::string& user, const std::string& passwd)
+        {
+            _user = user;
+            _passwd = passwd;
         }
-};
 
-class PT_HTTP_API Authorization
-{
-    public:
-        virtual ~Authorization();
+        const std::string& user() const
+        { return _user; }
 
-        void authorize(Request& request, const Reply& reply);
-
-    protected:
-        virtual void onAuthorize(Request& request, const Reply& reply) = 0;
-};
-
-
-class PT_HTTP_API BasicAuthorization : public Authorization
-{
-    public:
-        BasicAuthorization(const std::string& user, const std::string& passwd);
-
-        ~BasicAuthorization();
-
-        void set(const std::string& user, const std::string& passwd);
-
-    protected:
-        void onAuthorize(Request& request, const Reply& reply);
+        const std::string& password() const
+        { return _passwd; }
 
     private:
-        std::string _username;
-        std::string _password;
+        std::string _user;
+        std::string _passwd;
+};
+
+// TODO: Authenticator -> client authenticates
+class PT_HTTP_API Authenticator
+{
+    typedef std::map<std::string, Credentials> CredentialsMap;
+
+    public:
+        Authenticator()
+        {}
+        
+        void setCredentials(const std::string& realm, const Credentials& cred)
+        { _credentials[realm] = cred; }
+        
+        bool authenticate(Request& request, const Reply& reply);
+
+    private:
+        std::map<std::string, Credentials> _credentials;
 };
 
 } // namespace Http

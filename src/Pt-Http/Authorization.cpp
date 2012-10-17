@@ -37,47 +37,39 @@ namespace Pt {
 
 namespace Http {
 
-Authorization::~Authorization()
-{
-}
-
-
-void Authorization::authorize(Request& request, const Reply& reply)
+bool Authenticator::authenticate(Request& request, const Reply& reply)
 { 
-    onAuthorize(request, reply); 
-}
+    const char* auth = reply.header().get("WWW-Authenticate");
+    if( ! auth)
+        return true;
 
+    std::string token;
+    std::istringstream iss(auth);
+    iss >> token;
 
-BasicAuthorization::BasicAuthorization(const std::string& user, const std::string& passwd)
-: _username(user)
-, _password(passwd)
-{}
+    for(std::string::size_type n = 0; n < token.size(); ++n)
+            token[n] = std::tolower(token[n]);
 
+    if(token != "basic")
+        return false;
 
+    getline(iss, token, '"');
+    getline(iss, token, '"');
 
-void BasicAuthorization::set(const std::string& user, const std::string& passwd)
-{
-    _username = user;
-    _password = passwd;
-}
+    CredentialsMap::iterator it = _credentials.find(token);
+    if( it == _credentials.end() )
+        return false;
 
-
-BasicAuthorization::~BasicAuthorization()
-{
-}
-
-
-void BasicAuthorization::onAuthorize(Request& request, const Reply& reply)
-{
     std::ostringstream oss;
     oss << "Basic ";
                
     BasicTextOStream<char, char> b64(oss, new Base64Codec());
-    b64 <<_username<< ':' << _password;
+    b64 << it->second.user() << ':' << it->second.password();
     b64.terminate();
 
     //log_debug("set Authorization to " << oss.str());
     request.header().set("Authorization", oss.str().c_str());
+    return true; 
 }
 
 } // namespace Http

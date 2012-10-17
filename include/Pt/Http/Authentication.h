@@ -26,8 +26,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef Pt_Http_Authentication_h
-#define Pt_Http_Authentication_h
+#ifndef Pt_Http_Authorizer_h
+#define Pt_Http_Authorizer_h
 
 #include <Pt/Http/Api.h>
 #include <Pt/System/Mutex.h>
@@ -42,17 +42,17 @@ namespace Http {
 class Request;
 class Reply;
 
-class PT_HTTP_API Challenge : public Pt::NonCopyable
+class PT_HTTP_API Authorization : public Pt::NonCopyable
 {
     public:
-        virtual ~Challenge();
+        virtual ~Authorization();
 
-        Signal<Challenge&>& finished();
+        Signal<Authorization&>& finished();
        
         bool getResult();
 
     protected:
-        Challenge()
+        Authorization()
         {}
 
         void setReady();
@@ -60,38 +60,32 @@ class PT_HTTP_API Challenge : public Pt::NonCopyable
         virtual bool onGetResult() = 0;
 
     private:
-        Signal<Challenge&> _finished;
+        Signal<Authorization&> _finished;
 };
 
 
-class PT_HTTP_API Authentication : public Pt::NonCopyable
+class PT_HTTP_API Authorizer : public Pt::NonCopyable
 {
     public:
-        Authentication(const std::string& realm);
+        Authorizer(const std::string& realm);
 
-        virtual ~Authentication();
+        virtual ~Authorizer();
        
         const std::string& realm() const
         { return _realm; }
 
-        // TODO: isAuthentic
-        bool authenticate(const Request& req, Reply& reply);
+        Authorization* authorize(const Request& req, Reply& reply, bool& granted);
 
-        // TODO: beginAuthentication
-        Challenge* beginChallenge(const Request& req, Reply& reply);
+        bool endAuthorization(Authorization* auth, const Request& req, Reply& reply);
 
-        bool endChallenge(Challenge* challenge, const Request& req, Reply& reply);
-
-        void cancelChallenge(Challenge* challenge);
+        void cancelAuthorization(Authorization* auth);
 
     protected:
-        virtual bool onAuthenticate(const Request& req, Reply& reply) = 0;
+        virtual Authorization* onAuthorize(const Request& req, Reply& reply, bool& granted) = 0;
 
-        virtual Challenge* onBeginChallenge(const Request& req, Reply& reply) = 0;
+        virtual bool onEndAuthorization(Authorization* auth, const Request& req, Reply& reply) = 0;
 
-        virtual bool onEndChallenge(Challenge* challenge, const Request& req, Reply& reply) = 0;
-
-        virtual void onDestroyChallenge(Challenge* challenge) = 0;
+        virtual void onDestroyAuthorization(Authorization* auth) = 0;
 
         System::Mutex& mutex()
         { return _mutex; }
@@ -103,14 +97,14 @@ class PT_HTTP_API Authentication : public Pt::NonCopyable
 };
 
 
-class PT_HTTP_API BasicAuthentication : public Authentication
+class PT_HTTP_API BasicAuthorizer : public Authorizer
 {
     public:
-        BasicAuthentication(const std::string& realm)
-        : Authentication(realm)
+        BasicAuthorizer(const std::string& realm)
+        : Authorizer(realm)
         { }
 
-        ~BasicAuthentication()
+        ~BasicAuthorizer()
         { clear(); }
 
         void setUser(const std::string& user, const std::string& passwd)
@@ -132,13 +126,11 @@ class PT_HTTP_API BasicAuthentication : public Authentication
         }
 
     protected:
-        virtual bool onAuthenticate(const Request& req, Reply& reply);
+        virtual Authorization* onAuthorize(const Request& req, Reply& reply, bool& granted);
 
-        virtual Challenge* onBeginChallenge(const Request& req, Reply& reply);
+        virtual bool onEndAuthorization(Authorization* auth, const Request& req, Reply& reply);
 
-        virtual bool onEndChallenge(Challenge* challenge, const Request& req, Reply& reply);
-
-        virtual void onDestroyChallenge(Challenge* challenge);
+        virtual void onDestroyAuthorization(Authorization* auth);
 
     private:
         std::map<std::string, std::string> _passwd;

@@ -55,7 +55,7 @@ namespace Pt {
 
 namespace Http {
 
-class Challenge;
+class Authorization;
 class Responder;
 class Servlet;
 class ServerImpl;
@@ -90,7 +90,9 @@ class Acceptor : public Pt::Connectable
 
         void onRequestReceived(Request& req);
 
-        void onChallenge(Challenge& challenge);
+        void onAuthorization(Authorization& auth);
+
+        bool onRequestBegin();
 
         bool onRequestBody();
 
@@ -102,7 +104,7 @@ class Acceptor : public Pt::Connectable
 
     private:
         ServerImpl& _server;
-        Challenge* _challenge;
+        Authorization* _auth;
         Servlet* _servlet;
         Responder* _responder;
         Connection _conn;
@@ -143,10 +145,10 @@ class ServerThread : public Connectable
                 Servlet* _servlet;
         };
 
-        class ServletIdleEvent : public Pt::BasicEvent<ServletIdleEvent>
+        class ServletInfoEvent : public Pt::BasicEvent<ServletInfoEvent>
         {
             public:
-                ServletIdleEvent(Servlet* s)
+                ServletInfoEvent(Servlet* s)
                 : _servlet(s)
                 { }
     
@@ -177,7 +179,7 @@ class ServerThread : public Connectable
 
         void onRemoveServlet(const RemoveServletEvent& ev);
 
-        void onIsServletIdle(const ServletIdleEvent& ev);
+        void onIsServletIdle(const ServletInfoEvent& ev);
 
         void onHandlerFinished(Acceptor& handler);
 

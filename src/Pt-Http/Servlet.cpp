@@ -45,7 +45,7 @@ Servlet::Servlet(Service& s)
 }
 
 
-Servlet::Servlet(Service& s, Authentication& a)
+Servlet::Servlet(Service& s, Authorizer& a)
 : _server(0)
 , _service(&s)
 , _auth(&a)

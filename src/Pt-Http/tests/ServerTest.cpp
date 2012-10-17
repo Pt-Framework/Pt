@@ -113,7 +113,6 @@ class ServerTest : public Pt::Unit::TestSuite
         ServerTest()
         : Pt::Unit::TestSuite("ServerTest")
         , _authent("test-realm")
-        , _author("testo", "testpwd")
         {
             Pt::System::Logger::setLogLevel("Pt.Http", Pt::System::Error);
 
@@ -352,7 +351,12 @@ class ServerTest : public Pt::Unit::TestSuite
                 if( client.reply().statusCode() == 401)
                 {
                     PT_UNIT_ASSERT(client.reply().header().has("WWW-Authenticate"));
-                    client.setAuthorization(_author);
+
+                    Pt::Http::Authenticator auth;
+                    auth.setCredentials("test-realm", Pt::Http::Credentials("testo", "testpwd"));
+                    bool authOk = auth.authenticate(client.request(), client.reply());
+                    PT_UNIT_ASSERT(authOk);
+
                     _reply += client.reply().statusText();
                     _reply += ' ';
                 }               
@@ -487,8 +491,7 @@ class ServerTest : public Pt::Unit::TestSuite
         Pt::System::MainLoop* loop;
         std::string _reply;
         std::vector<std::string> _chunks;
-        Pt::Http::BasicAuthentication _authent;
-        Pt::Http::BasicAuthorization _author;
+        Pt::Http::BasicAuthorizer _authent;
 };
 
 Pt::Unit::RegisterTest<ServerTest> register_HttpServerTest;

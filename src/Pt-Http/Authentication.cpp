@@ -37,80 +37,75 @@ namespace Pt {
 
 namespace Http {
 
-Challenge::~Challenge() 
+Authorization::~Authorization() 
 { 
 }
 
 
-Signal<Challenge&>& Challenge::finished()
+Signal<Authorization&>& Authorization::finished()
 { 
     return _finished; 
 }
     
        
-void Challenge::setReady()
+void Authorization::setReady()
 { 
     _finished.send(*this); 
 }
 
 
-bool Challenge::getResult()
+bool Authorization::getResult()
 { 
     return onGetResult(); 
 }
 
 
-Authentication::Authentication(const std::string& realm)
+Authorizer::Authorizer(const std::string& realm)
 : _useCount(0)
 , _realm(realm)
 { }
 
 
-Authentication::~Authentication() 
+Authorizer::~Authorizer() 
 { }
 
 
-bool Authentication::authenticate(const Request& req, Reply& reply) 
+Authorization* Authorizer::authorize(const Request& req, Reply& reply, bool& granted) 
 {
     System::MutexLock lock(_mutex);
-
-    bool granted = this->onAuthenticate(req, reply);
-    return granted;
+    
+    granted = false;
+    
+    Authorization* auth = this->onAuthorize(req, reply, granted);
+    if(auth)
+        ++_useCount;
+    
+    return auth;
 }
 
 
-Challenge* Authentication::beginChallenge(const Request& req, Reply& reply) 
+bool Authorizer::endAuthorization(Authorization* auth, const Request& req, Reply& reply) 
 {
     System::MutexLock lock(_mutex);
 
-    ++_useCount;
-    return this->onBeginChallenge(req, reply);
-}
-
-
-bool Authentication::endChallenge(Challenge* challenge, const Request& req, Reply& reply) 
-{
-    System::MutexLock lock(_mutex);
-
-    bool granted = this->onEndChallenge(challenge, req, reply);
-    this->onDestroyChallenge(challenge);
+    bool granted = this->onEndAuthorization(auth, req, reply);
+    this->onDestroyAuthorization(auth);
     --_useCount;
     return granted;
 }
 
 
-void Authentication::cancelChallenge(Challenge* challenge) 
+void Authorizer::cancelAuthorization(Authorization* auth) 
 {
     System::MutexLock lock(_mutex);
 
-    this->onDestroyChallenge(challenge);
+    this->onDestroyAuthorization(auth);
     --_useCount;
 }
 
 
-bool BasicAuthentication::onAuthenticate(const Request& req, Reply& reply)
+Authorization* BasicAuthorizer::onAuthorize(const Request& req, Reply& reply, bool& granted)
 {
-    bool granted = false;
     std::string user, passwd, token;
 
     const char* auth = req.header().get("Authorization");
@@ -136,27 +131,22 @@ bool BasicAuthentication::onAuthenticate(const Request& req, Reply& reply)
         }
     }
 
-    return granted;
-}
+    if( ! granted)
+    {
+        reply.setStatus(401, "Authorization Required");
+        reply.header().set("WWW-Authenticate", ("Basic realm=\"" + realm() + '"').c_str());
+    }
 
-
-Challenge* BasicAuthentication::onBeginChallenge(const Request& req, Reply& reply)
-{
-    reply.setStatus(401, "Authorization Required");
-    reply.header().set("WWW-Authenticate", ("Basic realm=\"" + realm() + '"').c_str());
     return 0;
 }
 
 
-bool BasicAuthentication::onEndChallenge(Challenge* challenge, const Request& req, Reply& reply)
+bool BasicAuthorizer::onEndAuthorization(Authorization* auth, const Request& req, Reply& reply)
 {
-    throw std::logic_error("BasicAuthentication should not create Challanges");
+    throw std::logic_error("BasicAuthorizer can not end Authorization");
     return false;
 
-    //if( ! challenge )
-    //    return false;
-
-    //bool granted = challenge->getResult();
+    //bool granted = auth->getResult();
     //if( ! granted )
     //{
     //    reply.setStatus(401, "Authorization Required");
@@ -167,9 +157,9 @@ bool BasicAuthentication::onEndChallenge(Challenge* challenge, const Request& re
 }
 
 
-void BasicAuthentication::onDestroyChallenge(Challenge* challenge)
+void BasicAuthorizer::onDestroyAuthorization(Authorization* auth)
 {
-    throw std::logic_error("BasicAuthentication should not create Challanges");
+    throw std::logic_error("BasicAuthorizer can not destroy Authorization");
 }
 
 }

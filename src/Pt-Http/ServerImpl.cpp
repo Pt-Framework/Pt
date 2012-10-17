@@ -43,7 +43,7 @@ namespace Http {
 
 Acceptor::Acceptor(ServerImpl& server, Net::TcpServer& tcpServer)
 : _server(server)
-, _challenge(0)
+, _auth(0)
 , _servlet(0)
 , _responder(0)
 , _conn()
@@ -60,11 +60,11 @@ Acceptor::~Acceptor()
 {
     releaseResponder();
     
-    if(_challenge)
+    if(_auth)
     {
         assert(_servlet);
-        assert(_servlet->authentication());
-        _servlet->authentication()->cancelChallenge(_challenge);
+        assert(_servlet->authorizer());
+        _servlet->authorizer()->cancelAuthorization(_auth);
     }
 }
 
@@ -118,49 +118,37 @@ void Acceptor::onRequestReceived(Request& req)
                 return;
             }
 
-            Authentication* authentication = _servlet->authentication();
-            if( authentication )
+            Authorizer* authorizer = _servlet->authorizer();
+            if( authorizer )
             {
-                log_debug("authentication required");
+                log_debug("authorization required");
 
-                // TODO: only authenticate if we haven't already for this connection
-                bool granted = authentication->authenticate(_request, _reply);
+                bool granted = false;
+                _auth = authorizer->authorize(_request, _reply, granted);
+                if(_auth)
+                {
+                    log_debug("authorization started");
+                    _requestProgress = progress;
+                    _auth->finished() += Pt::slot(*this, &Acceptor::onAuthorization);
+                    return;
+                }
+                
                 if( ! granted )
                 {
-                    _challenge = authentication->beginChallenge(_request, _reply);
-                    if( ! _challenge)
-                    {
-                        log_debug("request immediately denied");
+                    log_debug("access immediately denied");
 
-                        if( ! _reply.isSending() )
-                            _reply.beginSend(true);
+                    if( ! _reply.isSending() )
+                        _reply.beginSend(true);
 
-                        _servlet = 0;
-                    }
-                    else
-                    {
-                        log_debug("authentication started");
-                        _requestProgress = progress;
-                        _challenge->finished() += Pt::slot(*this, &Acceptor::onChallenge);
-                    }
-
+                    _servlet = 0;
                     return;
                 }
 
-                log_debug("request immediately authenticated");
+                log_debug("access immediately granted");
             }
-        
-            assert(_responder == 0);
-            _responder = _servlet->service()->getResponder( _request );
-            
-            assert(_responder);
-            _responder->beginRequest( _request, _reply );
 
-            if( _reply.isSending() )
-            {
-                log_debug("request interrupted");
+            if( ! this->onRequestBegin() )
                 return;
-            }
         }
     
         if( progress.body() )
@@ -186,15 +174,15 @@ void Acceptor::onRequestReceived(Request& req)
 }
 
 
-void Acceptor::onChallenge(Challenge& challenge)
+void Acceptor::onAuthorization(Authorization& auth)
 {
-    log_trace("Acceptor::onChallenge");
+    log_trace("Acceptor::onAuthorization");
 
     try
     {
-        bool granted = _servlet->authentication()->endChallenge(_challenge, _request, _reply);
+        bool granted = _servlet->authorizer()->endAuthorization(_auth, _request, _reply);
 
-        _challenge = 0;
+        _auth = 0;
     
         if( ! granted )
         {
@@ -207,17 +195,8 @@ void Acceptor::onChallenge(Challenge& challenge)
         }
         else
         {
-            assert(_responder == 0);
-            _responder = _servlet->service()->getResponder( _request );
-            
-            assert(_responder);
-            _responder->beginRequest( _request, _reply );
-
-            if( _reply.isSending() )
-            {
-                log_debug("request interrupted");
+            if( ! this->onRequestBegin() )
                 return;
-            }
 
             if( _requestProgress.body() )
             {     
@@ -243,6 +222,24 @@ void Acceptor::onChallenge(Challenge& challenge)
         // replyError();
         _finished.send(*this);
     }
+}
+
+
+bool Acceptor::onRequestBegin()
+{   
+    assert(_responder == 0);
+    _responder = _servlet->service()->getResponder( _request );
+            
+    assert(_responder);
+    _responder->beginRequest( _request, _reply );
+
+    if( _reply.isSending() )
+    {
+        log_debug("request interrupted");
+        return false;
+    }
+
+    return true;
 }
 
 
@@ -419,7 +416,7 @@ void ServerThread::removeServlet(Servlet& servlet)
 
 bool ServerThread::isServletIdle(Servlet& servlet)
 {
-    ServletIdleEvent ev(&servlet);
+    ServletInfoEvent ev(&servlet);
     _loop.commitEvent(ev);
 
     System::MutexLock lock(_invokeMutex);
@@ -473,7 +470,7 @@ void ServerThread::onRemoveServlet(const RemoveServletEvent& ev)
 }
 
 
-void ServerThread::onIsServletIdle(const ServletIdleEvent& ev)
+void ServerThread::onIsServletIdle(const ServletInfoEvent& ev)
 {
     std::vector<Acceptor*>::iterator it;
     for( it  = _handlers.begin(); it != _handlers.end(); ++it )

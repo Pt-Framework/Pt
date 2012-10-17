@@ -50,7 +50,6 @@ class Context;
 
 namespace Http {
 
-class Authorization;
 class Reply;
 class Request;
 class MessageProgress;
@@ -80,10 +79,6 @@ class PT_HTTP_API Client : public Connectable
         const Net::AddrInfo& host() const;
 
         void setSecure(Ssl::Context& ctx);
-
-        void setAuthorization(Authorization& auth);
-
-        void clearAuthorization();
 
         void beginSend(bool finished = true);
 
