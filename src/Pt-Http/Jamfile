@@ -10,7 +10,7 @@ if $(WITH_OPENSSL)
 }
 
 SharedLibrary Pt-Http : Authentication.cpp
-                        Authorization.cpp
+                        Authenticator.cpp
                         Client.cpp
                         ClientImpl.cpp
                         Connection.cpp

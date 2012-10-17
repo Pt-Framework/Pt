@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Marc Boris Duerner
+ * Copyright (C) 2009 by Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,52 +26,68 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <Pt/Http/Authorization.h>
-#include <Pt/Http/Reply.h>
-#include <Pt/Http/Request.h>
-#include <Pt/TextStream.h>
-#include <Pt/Base64Codec.h>
-#include <sstream>
+#ifndef Pt_Http_Authenticator_h
+#define Pt_Http_Authenticator_h
+
+#include <Pt/Http/Api.h>
+#include <string>
+#include <map>
 
 namespace Pt {
 
 namespace Http {
 
-bool Authenticator::authenticate(Request& request, const Reply& reply)
-{ 
-    const char* auth = reply.header().get("WWW-Authenticate");
-    if( ! auth)
-        return true;
+class Request;
+class Reply;
 
-    std::string token;
-    std::istringstream iss(auth);
-    iss >> token;
+class Credentials
+{
+    public:
+        Credentials()
+        {}
 
-    for(std::string::size_type n = 0; n < token.size(); ++n)
-            token[n] = std::tolower(token[n]);
+        Credentials(const std::string& user, const std::string& passwd)
+        : _user(user)
+        , _passwd(passwd)
+        {}
 
-    if(token != "basic")
-        return false;
+        void set(const std::string& user, const std::string& passwd)
+        {
+            _user = user;
+            _passwd = passwd;
+        }
 
-    getline(iss, token, '"');
-    getline(iss, token, '"');
+        const std::string& user() const
+        { return _user; }
 
-    CredentialsMap::iterator it = _credentials.find(token);
-    if( it == _credentials.end() )
-        return false;
+        const std::string& password() const
+        { return _passwd; }
 
-    std::ostringstream oss;
-    oss << "Basic ";
-               
-    BasicTextOStream<char, char> b64(oss, new Base64Codec());
-    b64 << it->second.user() << ':' << it->second.password();
-    b64.terminate();
+    private:
+        std::string _user;
+        std::string _passwd;
+};
 
-    //log_debug("set Authorization to " << oss.str());
-    request.header().set("Authorization", oss.str().c_str());
-    return true; 
-}
+
+class PT_HTTP_API Authenticator
+{
+    typedef std::map<std::string, Credentials> CredentialsMap;
+
+    public:
+        Authenticator()
+        {}
+        
+        void setCredentials(const std::string& realm, const Credentials& cred)
+        { _credentials[realm] = cred; }
+        
+        bool authenticate(Request& request, const Reply& reply);
+
+    private:
+        std::map<std::string, Credentials> _credentials;
+};
 
 } // namespace Http
 
 } // namespace Pt
+
+#endif // Pt_Http_Authorization_h
