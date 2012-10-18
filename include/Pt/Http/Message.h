@@ -122,8 +122,6 @@ class PT_HTTP_API MessageBuffer : public std::streambuf
 
 class PT_HTTP_API MessageBody : public std::iostream
 {
-    friend class Connection;
-
     public:
         MessageBody();
         

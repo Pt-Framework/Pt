@@ -46,6 +46,7 @@ void Request::beginReceive()
 void Request::send(bool finish)
 {
     _finished = finish;
+    _body.setOutput();
     _conn->sendRequest(*this); 
 }
 
