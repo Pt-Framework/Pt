@@ -70,6 +70,8 @@ class PT_HTTP_API Reply
         const std::string& statusText() const
         { return _statusText; }
 
+        void receive();
+
         void beginReceive();
 
         MessageProgress endReceive();

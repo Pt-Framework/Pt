@@ -200,6 +200,10 @@ class Connection : public Connectable
         void cancel();
 
     protected:
+        void sendRequest(Request& r);
+
+        void receiveReply(Reply& r);
+
         void beginSendRequest(Request& r);
 
         MessageProgress endSendRequest();
@@ -274,7 +278,7 @@ class Connection : public Connectable
         Ssl::IOBuffer _sslbuf;
 #endif
         HttpBuffer _httpbuf;
-        std::ostream _os;
+        std::iostream _os;
 
         std::size_t _timeout;
         std::size_t _keepaliveTimeout;

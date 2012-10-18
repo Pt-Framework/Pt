@@ -97,9 +97,12 @@ class PT_HTTP_API MessageBuffer : public std::streambuf
         MessageBuffer();
 
         ~MessageBuffer();
-        
+       
         void reset()
-        { this->setp(_obuffer, _obuffer + _obufferSize); }
+        { 
+            this->setp(_obuffer, _obuffer + _obufferSize); 
+            this->setg(0,0,0);
+        }
 
         std::size_t size() const
         { return pptr() - pbase(); }
@@ -109,6 +112,8 @@ class PT_HTTP_API MessageBuffer : public std::streambuf
 
     protected:
         virtual int_type overflow(int_type ch);
+
+        virtual int_type underflow();
 
     private:
         char* _obuffer;

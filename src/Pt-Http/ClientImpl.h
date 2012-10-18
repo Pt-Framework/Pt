@@ -100,7 +100,7 @@ class ClientImpl : public Connectable
 
         void setSecure(Ssl::Context& ctx);
 
-        void send();
+        void send(bool finished);
 
         std::istream& receive();
 

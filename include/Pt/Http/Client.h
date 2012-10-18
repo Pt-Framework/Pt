@@ -112,7 +112,7 @@ class PT_HTTP_API Client : public Connectable
 
         /** @brief Blocks until request is sent.
         */
-        void send();
+        void send(bool finished = true);
 
         /** @brief Blocks until reply is received.
         */

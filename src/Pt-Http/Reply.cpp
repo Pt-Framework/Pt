@@ -34,8 +34,17 @@ namespace Pt {
 
 namespace Http {
 
+void Reply::receive()
+{
+  _conn->receiveReply(*this);
+  _body.setInput( _body.buffer() );
+}
+
+
 void Reply::beginReceive()
 { 
+    // TODO: clear now ???
+
     _isReceiving = true;
     _body.setInput(_conn->buffer());
     _conn->beginReceiveReply(*this); 

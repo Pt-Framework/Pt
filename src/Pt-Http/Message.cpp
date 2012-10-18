@@ -98,6 +98,7 @@ MessageBuffer::int_type MessageBuffer::overflow(int_type ch)
         _obufferSize = BufferSize;
         _obuffer = new char[_obufferSize];
         this->setp(_obuffer, _obuffer + _obufferSize);
+        this->setg(_obuffer, _obuffer, _obuffer);
     }
     else
     {
@@ -105,8 +106,13 @@ MessageBuffer::int_type MessageBuffer::overflow(int_type ch)
         char* buf = new char[ bufsize ];
         traits_type::copy(buf, _obuffer, _obufferSize);
         std::swap(_obuffer, buf);
+        
         this->setp(_obuffer, _obuffer + bufsize);
         this->pbump(_obufferSize);
+
+        std::size_t gsize = gptr() - eback();
+        this->setg(_obuffer, _obuffer + gsize, pptr());
+        
         _obufferSize = bufsize;
         delete [] buf;
     }
@@ -119,6 +125,21 @@ MessageBuffer::int_type MessageBuffer::overflow(int_type ch)
     }
 
     return traits_type::not_eof(ch);
+}
+
+
+MessageBuffer::int_type MessageBuffer::underflow()
+{ 
+    if( this->gptr() < this->pptr() )
+    {
+        std::size_t gsize = gptr() - eback();
+        this->setg(_obuffer, _obuffer + gsize, this->pptr());
+    }
+    
+    if( this->gptr() < this->egptr() )
+        return traits_type::to_int_type(*(this->gptr()));
+
+    return traits_type::eof();
 }
 
 

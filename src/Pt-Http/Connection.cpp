@@ -200,6 +200,120 @@ void Connection::cancel()
 }
 
 
+void Connection::sendRequest(Request& request)
+{
+    log_debug("Connection::sendRequest");
+
+    if( ! isConnected() )
+    {
+        log_debug("opening new connection to " << _addrInfo.host());
+        _socket.connect(_addrInfo);
+
+        if(_ssl)
+        {
+            log_debug("SSL connect");
+            _sslbuf.connect();
+        }
+    }
+    
+    std::ostream& os = _os; 
+    MessageBuffer& mbuf = request.body().buffer();
+
+    if( request.isFinished() )
+    {
+        log_debug("HTTP request finished");
+        
+        if(_chunked)
+        {
+            log_debug("sending last HTTP chunk: "  << request.body().buffer().size() << " bytes");
+            if(mbuf.size() > 0)
+            {
+                os << std::hex << mbuf.size() << std::dec << "\r\n";
+                os.write( mbuf.data(), mbuf.size() );
+                os.write("\r\n", 2);
+            }
+            
+            os.write("0\r\n\r\n", 5);
+            _chunked = false;
+        }
+        else
+        {
+            writeRequestHeader(os, request);
+            log_debug("writing body: " << mbuf.size() << " bytes");
+            os.write( mbuf.data(), mbuf.size() );
+        }
+    }
+    else
+    {
+        if( ! _chunked )
+        {
+            log_debug("sending chunked header");
+            _chunked = true;
+            writeRequestHeader(os, request);
+        }
+
+        log_debug("sending HTTP chunk: "  << request.body().buffer().size() << " bytes");
+
+        if(request.body().buffer().size() > 0)
+        {
+            os << std::hex << mbuf.size() << std::dec << "\r\n";
+            os.write( mbuf.data(), mbuf.size() );
+            os.write("\r\n", 2);
+        }
+    }
+
+#ifdef PT_HTTP_WITH_SSL
+    if(_ssl)
+    {
+        log_debug("writing ssl buffer" << _sslbuf.buffer().out_avail());
+        _sslbuf.pubsync();
+    }
+#endif
+
+    log_debug("writing socket buffer: " << _sockbuf.out_avail());
+    _sockbuf.pubsync();
+}
+
+
+void Connection::receiveReply(Reply& reply)
+{
+    log_debug("Connection::receiveReply");
+    
+    char ch = ' ';
+    std::istream is( _httpbuf.buffer() );
+
+    _replyParseEvent.init( reply );
+        
+    while( ! _replyParser.end() && is.get(ch) )
+    {
+        _replyParser.parse(ch);
+    }
+
+    if( _parser.fail() )
+    {
+        log_debug("invalid HTTP reply");
+        throw System::IOError( PT_ERROR_MSG("invalid HTTP reply") );
+    }
+
+    _httpbuf.reset();
+    _httpbuf.beginBody( reply.header() );
+    log_debug("reply size: " << reply.header().contentLength() << ", chunked: " << reply.header().chunkedTransferEncoding());
+
+    // stuff whole body into MessageBuffer...
+    reply.body() << &_httpbuf;
+    log_debug("reply body finished");
+
+    _replyParser.reset(true);
+            
+    bool keepalive = reply.header().keepAlive();
+    if( ! keepalive )
+    {
+        log_debug("closing, no keep alive");
+        cancel();
+    }
+}
+
+
 void Connection::beginSendRequest(Request& request)
 {
     log_trace("Connection::beginSendRequest");
@@ -620,7 +734,7 @@ void Connection::beginReceiveReply(Reply& r)
 
     _replyParseEvent.init( *_reply );
 
-    if( _parser.begin() )
+    if( _replyParser.begin() )
     {
         _readBytes = 0;
         _timer.start( _timeout );

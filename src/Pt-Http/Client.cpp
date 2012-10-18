@@ -114,9 +114,9 @@ void Client::setTimeout(std::size_t timeout)
     _impl->setTimeout(timeout);
 }
 
-void Client::send()
+void Client::send(bool finished)
 {
-    return _impl->send();
+    return _impl->send(finished);
 }
 
 std::istream& Client::receive()

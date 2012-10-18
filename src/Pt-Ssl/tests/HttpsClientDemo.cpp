@@ -94,7 +94,7 @@ int main(int argc, char** argv)
         client.request().header().set("User-Agent", "Platinum");
         client.replyReceived() += Pt::slot(&onReply);
  
-        bool noblock = true;
+        bool noblock = false;
         if(noblock)
         {
             log_debug("excuting non-blocking HTTPS request");

@@ -75,6 +75,8 @@ class PT_HTTP_API Request
         Connection& connection()
         { return *_conn; }
 
+        void send(bool finish = true);
+
         void beginReceive();
 
         MessageProgress endReceive();

@@ -64,13 +64,84 @@ void ClientImpl::setSecure(Ssl::Context& )
 #endif
 
 
-void ClientImpl::send()
+void ClientImpl::send(bool finished)
 {
+    if(_hstate == Idle || _hstate == OnRequestComplete)
+    {
+        // NOTE: might want to handle connect here in the future
+        _hstate = OnRequest;
+    }
+
+    if(_hstate == OnRequest)
+    {
+        log_debug("begin sending request");
+        _req.send(finished);
+
+        log_debug("sent http request completed");
+        _req.body().discard();
+            
+        if( _req.isFinished() )
+        {
+            ++_requestCount;
+            _hstate = OnRequestComplete;
+        }
+        return;
+    }
+
+    log_error("sending HTTP request failed: " << _hstate);
+    throw System::IOPending("sending HTTP request failed");
 }
 
 
 std::istream& ClientImpl::receive()
 {
+    if(_hstate == Idle)
+    {
+        // NOTE: might want to handle connect here in the future
+        _hstate = OnRequest;
+    }
+ 
+    if(_hstate == OnRequest)
+    {
+        log_debug("begin sending cached request");
+        _hstate = OnRequestEnd;
+    }
+
+    if(_hstate == OnRequestEnd)
+    {
+        log_debug("flushing cached request");
+        _req.send(true);
+
+        log_debug("request completed");
+        _hstate = OnReply;
+        ++_requestCount;
+        _req.clear();
+        _reply.clear();
+    }
+
+    if(_hstate == OnReply || _hstate == OnRequestComplete || _hstate == OnReplyComplete)
+    {
+        _hstate = OnReply;
+        _reply.receive();
+
+        log_debug("reply completed");
+        assert(0 != _requestCount);
+
+        if( 0 == --_requestCount)
+            _hstate = Idle;
+        else
+            _hstate = OnReplyComplete;
+
+        if( ! _conn.isConnected() )
+        {
+            log_debug("connection closed");
+            // connection will reconnect automatically
+        }
+        
+        return _reply.body();
+    }
+
+    throw System::IOPending("failed receiving HTTP request");
     return _reply.body();
 }
 

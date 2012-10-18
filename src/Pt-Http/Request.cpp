@@ -43,6 +43,13 @@ void Request::beginReceive()
 }
 
 
+void Request::send(bool finish)
+{
+    _finished = finish;
+    _conn->sendRequest(*this); 
+}
+
+
 MessageProgress Request::endReceive()
 { 
     _isReceiving = false;
