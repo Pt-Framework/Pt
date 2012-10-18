@@ -49,22 +49,23 @@ class PT_HTTP_API Authorization : public Pt::NonCopyable
     public:
         virtual ~Authorization();
 
+        void beginAuthorize(const Request& req, Reply& reply);
+
+        bool endAuthorize();
+
         Signal<Authorization&>& finished();
-       
-        bool getResult();
 
     protected:
-        Authorization(const Request& request)
-        : _request(&request)
-        {}
+        Authorization();
 
         void setReady();
 
-        virtual bool onGetResult() = 0;
+        virtual void onBeginAuthorize(const Request& req, Reply& reply) = 0;
+
+        virtual bool onEndAuthorize() = 0;
 
     private:
         Signal<Authorization&> _finished;
-        const Request* _request;
 };
 
 
@@ -75,21 +76,16 @@ class PT_HTTP_API Authorizer : public Pt::NonCopyable
 
         virtual ~Authorizer();
        
-        const std::string& realm() const
-        { return _realm; }
+        const std::string& realm() const;
 
         Authorization* authorize(const Request& req, Reply& reply, bool& granted);
 
-        bool endAuthorization(Authorization* auth, const Request& req, Reply& reply);
-
-        void cancelAuthorization(Authorization* auth);
+        void releaseAuthorization(Authorization* auth);
 
     protected:
         virtual Authorization* onAuthorize(const Request& req, Reply& reply, bool& granted) = 0;
 
-        virtual bool onEndAuthorization(Authorization* auth, const Request& req, Reply& reply) = 0;
-
-        virtual void onDestroyAuthorization(Authorization* auth) = 0;
+        virtual void onReleaseAuthorization(Authorization* auth) = 0;
 
     private:
         atomic_t _useCount;
@@ -100,17 +96,14 @@ class PT_HTTP_API Authorizer : public Pt::NonCopyable
 class PT_HTTP_API BasicAuthorizer : public Authorizer
 {
     public:
-        BasicAuthorizer(const std::string& realm)
-        : Authorizer(realm)
-        { }
+        BasicAuthorizer(const std::string& realm);
 
-        ~BasicAuthorizer()
-        { }
+        ~BasicAuthorizer();
 
     protected:
         virtual Authorization* onAuthorize(const Request& req, Reply& reply, bool& granted);
 
-        virtual Authorization* onAuthorizeUser(const Request& req, Reply& reply, const Credentials& cred, bool& granted) = 0;
+        virtual Authorization* onAuthorizeCredentials(const Credentials& cred, bool& granted) = 0;
 };
 
 
@@ -128,11 +121,9 @@ class PT_HTTP_API BasicUserListAuthorizer : public BasicAuthorizer
         void clear();
 
     protected:
-        virtual Authorization* onAuthorizeUser(const Request& req, Reply& reply, const Credentials& cred, bool& granted);
+        virtual Authorization* onAuthorizeCredentials(const Credentials& cred, bool& granted);
 
-        virtual bool onEndAuthorization(Authorization* auth, const Request& req, Reply& reply);
-
-        virtual void onDestroyAuthorization(Authorization* auth);
+        virtual void onReleaseAuthorization(Authorization* auth);
 
     private:
         System::Mutex _mutex;

@@ -46,11 +46,9 @@ class PT_HTTP_API Authenticator
     typedef std::map<std::string, Credentials> CredentialsMap;
 
     public:
-        Authenticator()
-        {}
+        Authenticator();
         
-        void setCredentials(const std::string& realm, const Credentials& cred)
-        { _credentials[realm] = cred; }
+        void setCredentials(const std::string& realm, const Credentials& cred);
         
         bool authenticate(Request& request, const Reply& reply);
 

@@ -53,9 +53,15 @@ class Credentials
             _passwd = passwd;
         }
 
+        std::string& user()
+        { return _user; }
+        
         const std::string& user() const
         { return _user; }
 
+        std::string& password()
+        { return _passwd; }
+        
         const std::string& password() const
         { return _passwd; }
 

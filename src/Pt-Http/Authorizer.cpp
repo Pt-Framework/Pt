@@ -37,8 +37,26 @@ namespace Pt {
 
 namespace Http {
 
+// Authorization
+
+Authorization::Authorization()
+{}
+
+
 Authorization::~Authorization() 
 { 
+}
+
+
+void Authorization::beginAuthorize(const Request& req, Reply& reply)
+{ 
+    onBeginAuthorize(req, reply); 
+}
+
+
+bool Authorization::endAuthorize()
+{ 
+    return onEndAuthorize(); 
 }
 
 
@@ -54,11 +72,7 @@ void Authorization::setReady()
 }
 
 
-bool Authorization::getResult()
-{ 
-    return onGetResult(); 
-}
-
+// Authorizer
 
 Authorizer::Authorizer(const std::string& realm)
 : _useCount(0)
@@ -68,6 +82,12 @@ Authorizer::Authorizer(const std::string& realm)
 
 Authorizer::~Authorizer() 
 { }
+
+
+const std::string& Authorizer::realm() const
+{ 
+    return _realm; 
+}
 
 
 Authorization* Authorizer::authorize(const Request& req, Reply& reply, bool& granted) 
@@ -82,27 +102,30 @@ Authorization* Authorizer::authorize(const Request& req, Reply& reply, bool& gra
 }
 
 
-bool Authorizer::endAuthorization(Authorization* auth, const Request& req, Reply& reply) 
+void Authorizer::releaseAuthorization(Authorization* auth) 
 {
-    bool granted = this->onEndAuthorization(auth, req, reply);
-    this->onDestroyAuthorization(auth);
-    atomicDecrement(_useCount);
-    return granted;
-}
-
-
-void Authorizer::cancelAuthorization(Authorization* auth) 
-{
-    this->onDestroyAuthorization(auth);
+    this->onReleaseAuthorization(auth);
     atomicDecrement(_useCount);
 }
 
 
 // BasicAuthorizer
 
+BasicAuthorizer::BasicAuthorizer(const std::string& realm)
+: Authorizer(realm)
+{ 
+}
+
+
+BasicAuthorizer::~BasicAuthorizer()
+{ 
+}
+
+
 Authorization* BasicAuthorizer::onAuthorize(const Request& req, Reply& reply, bool& granted)
 {
-    std::string user, passwd, token;
+    std::string token;
+    Credentials cred;
     Authorization* author = 0;
     granted = false;
 
@@ -122,10 +145,10 @@ Authorization* BasicAuthorizer::onAuthorize(const Request& req, Reply& reply, bo
         iss.str(token);
 
         BasicTextIStream<char, char> b64conv(iss, new Base64Codec());
-        std::getline(b64conv, user, ':');
-        b64conv >> passwd;
+        std::getline(b64conv, cred.user(), ':');
+        b64conv >> cred.password();
 
-        author = onAuthorizeUser(req, reply, Credentials(user, passwd), granted);
+        author = onAuthorizeCredentials(cred, granted);
     }
 
     if( ! author && ! granted )
@@ -173,7 +196,7 @@ void BasicUserListAuthorizer::clear()
 }
 
 
-Authorization* BasicUserListAuthorizer::onAuthorizeUser(const Request& req, Reply& reply, const Credentials& cred, bool& granted)
+Authorization* BasicUserListAuthorizer::onAuthorizeCredentials(const Credentials& cred, bool& granted)
 {
     std::map<std::string, std::string>::iterator it = _passwd.find(cred.user());
     granted = (it != _passwd.end() && it->second == cred.password());
@@ -181,16 +204,9 @@ Authorization* BasicUserListAuthorizer::onAuthorizeUser(const Request& req, Repl
 }
 
 
-bool BasicUserListAuthorizer::onEndAuthorization(Authorization* auth, const Request& req, Reply& reply)
+void BasicUserListAuthorizer::onReleaseAuthorization(Authorization* auth)
 {
-    throw std::logic_error("BasicUserListAuthorizer::onEndAuthorization");
-    return false;
-}
-
-
-void BasicUserListAuthorizer::onDestroyAuthorization(Authorization* auth)
-{
-    throw std::logic_error("BasicUserListAuthorizer::onDestroyAuthorization");
+    throw std::logic_error("BasicUserListAuthorizer::onReleaseAuthorization");
 }
 
 }

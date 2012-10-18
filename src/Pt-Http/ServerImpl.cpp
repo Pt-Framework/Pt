@@ -64,7 +64,7 @@ Acceptor::~Acceptor()
     {
         assert(_servlet);
         assert(_servlet->authorizer());
-        _servlet->authorizer()->cancelAuthorization(_auth);
+        _servlet->authorizer()->releaseAuthorization(_auth);
     }
 }
 
@@ -129,6 +129,7 @@ void Acceptor::onRequestReceived(Request& req)
                 {
                     log_debug("authorization started");
                     _requestProgress = progress;
+                    _auth->beginAuthorize(_request, _reply);
                     _auth->finished() += Pt::slot(*this, &Acceptor::onAuthorization);
                     return;
                 }
@@ -180,8 +181,8 @@ void Acceptor::onAuthorization(Authorization& auth)
 
     try
     {
-        bool granted = _servlet->authorizer()->endAuthorization(_auth, _request, _reply);
-
+        bool granted = auth.endAuthorize();
+        _servlet->authorizer()->releaseAuthorization(_auth);
         _auth = 0;
     
         if( ! granted )

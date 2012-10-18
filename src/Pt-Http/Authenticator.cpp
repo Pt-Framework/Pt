@@ -37,6 +37,17 @@ namespace Pt {
 
 namespace Http {
 
+Authenticator::Authenticator()
+{
+}
+     
+        
+void Authenticator::setCredentials(const std::string& realm, const Credentials& cred)
+{ 
+    _credentials[realm] = cred; 
+}
+
+
 bool Authenticator::authenticate(Request& request, const Reply& reply)
 { 
     const char* auth = reply.header().get("WWW-Authenticate");
