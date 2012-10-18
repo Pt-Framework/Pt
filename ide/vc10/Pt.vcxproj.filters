@@ -630,6 +630,9 @@
     <ClInclude Include="..\..\include\Pt\Http\Authorizer.h">
       <Filter>Pt-Http</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Http\Credentials.h">
+      <Filter>Pt-Http</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">

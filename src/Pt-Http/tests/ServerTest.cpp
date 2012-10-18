@@ -116,7 +116,7 @@ class ServerTest : public Pt::Unit::TestSuite
         {
             Pt::System::Logger::setLogLevel("Pt.Http", Pt::System::Error);
 
-            _authent.setUser("testo", "testpwd");
+            _authent.setUser( Pt::Http::Credentials("testo", "testpwd") );
 
             this->registerMethod( "NotFound", *this, &ServerTest::NotFound);
 #ifdef PT_HTTP_WITH_SSL

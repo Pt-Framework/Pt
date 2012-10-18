@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Marc Boris Duerner
+ * Copyright (C) 2012 by Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,45 +26,46 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <Pt/Http/Service.h>
-#include <Pt/Http/Server.h>
-#include <Pt/Http/Responder.h>
-#include <cassert>
+#ifndef Pt_Http_Credentials_h
+#define Pt_Http_Credentials_h
+
+#include <Pt/Http/Api.h>
+#include <string>
 
 namespace Pt {
 
 namespace Http {
 
-Service::Service()
-: _responderCount(0)
-{ 
-}
-
-
-Service::~Service() 
+class Credentials
 {
-}
+    public:
+        Credentials()
+        {}
 
+        Credentials(const std::string& user, const std::string& passwd)
+        : _user(user)
+        , _passwd(passwd)
+        {}
 
-Responder* Service::getResponder(const Request& request)
-{
-    Responder* responder = createResponder(request);
-    atomicIncrement(_responderCount);    
-    
-    return responder;
-}
+        void set(const std::string& user, const std::string& passwd)
+        {
+            _user = user;
+            _passwd = passwd;
+        }
 
+        const std::string& user() const
+        { return _user; }
 
-void Service::releaseResponder(Responder* responder)
-{
-    if( ! responder)
-        return;
-    
-    destroyResponder(responder);
-    atomicDecrement(_responderCount);
-}
+        const std::string& password() const
+        { return _passwd; }
 
-}
+    private:
+        std::string _user;
+        std::string _passwd;
+};
 
-}
+} // namespace Http
 
+} // namespace Pt
+
+#endif // Pt_Http_Credentials_h

@@ -72,13 +72,11 @@ Authorizer::~Authorizer()
 
 Authorization* Authorizer::authorize(const Request& req, Reply& reply, bool& granted) 
 {
-    System::MutexLock lock(_mutex);
-    
     granted = false;
     
     Authorization* auth = this->onAuthorize(req, reply, granted);
     if(auth)
-        ++_useCount;
+        atomicIncrement(_useCount);
     
     return auth;
 }
@@ -86,23 +84,21 @@ Authorization* Authorizer::authorize(const Request& req, Reply& reply, bool& gra
 
 bool Authorizer::endAuthorization(Authorization* auth, const Request& req, Reply& reply) 
 {
-    System::MutexLock lock(_mutex);
-
     bool granted = this->onEndAuthorization(auth, req, reply);
     this->onDestroyAuthorization(auth);
-    --_useCount;
+    atomicDecrement(_useCount);
     return granted;
 }
 
 
 void Authorizer::cancelAuthorization(Authorization* auth) 
 {
-    System::MutexLock lock(_mutex);
-
     this->onDestroyAuthorization(auth);
-    --_useCount;
+    atomicDecrement(_useCount);
 }
 
+
+// BasicAuthorizer
 
 Authorization* BasicAuthorizer::onAuthorize(const Request& req, Reply& reply, bool& granted)
 {
@@ -129,7 +125,7 @@ Authorization* BasicAuthorizer::onAuthorize(const Request& req, Reply& reply, bo
         std::getline(b64conv, user, ':');
         b64conv >> passwd;
 
-        author = onAuthorizeUser(req, reply, user, passwd, granted);
+        author = onAuthorizeUser(req, reply, Credentials(user, passwd), granted);
     }
 
     if( ! author && ! granted )
@@ -142,33 +138,59 @@ Authorization* BasicAuthorizer::onAuthorize(const Request& req, Reply& reply, bo
 }
 
 
-Authorization* BasicUserListAuthorizer::onAuthorizeUser(const Request& req, Reply& reply, const std::string& user, const std::string& passwd, bool& granted)
+// BasicUserListAuthorizer
+
+BasicUserListAuthorizer::BasicUserListAuthorizer(const std::string& realm)
+: BasicAuthorizer(realm)
+{ 
+}
+
+
+BasicUserListAuthorizer::~BasicUserListAuthorizer()
+{ 
+    clear(); 
+}
+
+
+void BasicUserListAuthorizer::setUser(const Credentials& cred)
+{ 
+    System::MutexLock lock(_mutex);
+    _passwd[cred.user()] = cred.password(); 
+}
+
+
+void BasicUserListAuthorizer::removeUser(const std::string& user)
+{ 
+    System::MutexLock lock(_mutex);
+    _passwd.erase(user); 
+}
+
+
+void BasicUserListAuthorizer::clear()
+{ 
+    System::MutexLock lock(_mutex);
+    _passwd.clear(); 
+}
+
+
+Authorization* BasicUserListAuthorizer::onAuthorizeUser(const Request& req, Reply& reply, const Credentials& cred, bool& granted)
 {
-    std::map<std::string, std::string>::iterator it = _passwd.find(user);
-    granted = (it != _passwd.end() && it->second == passwd);
+    std::map<std::string, std::string>::iterator it = _passwd.find(cred.user());
+    granted = (it != _passwd.end() && it->second == cred.password());
     return 0;
 }
 
 
 bool BasicUserListAuthorizer::onEndAuthorization(Authorization* auth, const Request& req, Reply& reply)
 {
-    throw std::logic_error("BasicAuthorizer can not end Authorization");
+    throw std::logic_error("BasicUserListAuthorizer::onEndAuthorization");
     return false;
-
-    //bool granted = auth->getResult();
-    //if( ! granted )
-    //{
-    //    reply.setStatus(401, "Authorization Required");
-    //    reply.header().set("WWW-Authenticate", ("Basic realm=\"" + realm() + '"').c_str());
-    //}
-
-    //return granted;
 }
 
 
 void BasicUserListAuthorizer::onDestroyAuthorization(Authorization* auth)
 {
-    throw std::logic_error("BasicAuthorizer can not destroy Authorization");
+    throw std::logic_error("BasicUserListAuthorizer::onDestroyAuthorization");
 }
 
 }

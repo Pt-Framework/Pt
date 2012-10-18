@@ -31,6 +31,7 @@
 
 #include <Pt/Http/Api.h>
 #include <Pt/Http/Responder.h>
+#include <Pt/Atomicity.h>
 #include <Pt/Allocator.h>
 #include <Pt/System/Mutex.h>
 #include <vector>
@@ -75,12 +76,8 @@ class PT_HTTP_API Service
         */
         virtual void destroyResponder(Responder*) = 0;
 
-        System::Mutex& mutex()
-        { return _mutex; }
-
     private:
-        System::Mutex _mutex;
-        unsigned _responderCount;
+        Pt::atomic_t _responderCount;
 };
 
 
@@ -92,8 +89,7 @@ class BasicService : public Service
         { }
 
         ~BasicService()
-        {
-        }
+        { }
 
     protected:
         virtual Responder* createResponder(const Request&)

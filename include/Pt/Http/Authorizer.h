@@ -30,6 +30,7 @@
 #define Pt_Http_Authorizer_h
 
 #include <Pt/Http/Api.h>
+#include <Pt/Http/Credentials.h>
 #include <Pt/System/Mutex.h>
 #include <Pt/Atomicity.h>
 #include <Pt/Signal.h>
@@ -90,13 +91,8 @@ class PT_HTTP_API Authorizer : public Pt::NonCopyable
 
         virtual void onDestroyAuthorization(Authorization* auth) = 0;
 
-        System::Mutex& mutex()
-        { return _mutex; }
-
     private:
-        System::Mutex _mutex; // TODO: use atomics
-        atomic_t _refCount;
-        std::size_t _useCount;
+        atomic_t _useCount;
         std::string _realm;
 };
 
@@ -114,47 +110,32 @@ class PT_HTTP_API BasicAuthorizer : public Authorizer
     protected:
         virtual Authorization* onAuthorize(const Request& req, Reply& reply, bool& granted);
 
-        // TODO: use credentials
-        virtual Authorization* onAuthorizeUser(const Request& req, Reply& reply, const std::string& user, const std::string& passwd, bool& granted) = 0;
+        virtual Authorization* onAuthorizeUser(const Request& req, Reply& reply, const Credentials& cred, bool& granted) = 0;
 };
 
 
 class PT_HTTP_API BasicUserListAuthorizer : public BasicAuthorizer
 {
     public:
-        BasicUserListAuthorizer(const std::string& realm)
-        : BasicAuthorizer(realm)
-        { }
+        BasicUserListAuthorizer(const std::string& realm);
 
-        ~BasicUserListAuthorizer()
-        { clear(); }
+        ~BasicUserListAuthorizer();
 
-        void setUser(const std::string& user, const std::string& passwd)
-        { 
-            System::MutexLock lock( mutex() );
-            _passwd[user] = passwd; 
-        }
+        void setUser(const Credentials& cred);
 
-        void removeUser(const std::string& user)
-        { 
-            System::MutexLock lock( mutex() );
-            _passwd.erase(user); 
-        }
+        void removeUser(const std::string& user);
 
-        void clear()
-        { 
-            System::MutexLock lock( mutex() );
-            _passwd.clear(); 
-        }
+        void clear();
 
     protected:
-        virtual Authorization* onAuthorizeUser(const Request& req, Reply& reply, const std::string& user, const std::string& passwd, bool& granted);
+        virtual Authorization* onAuthorizeUser(const Request& req, Reply& reply, const Credentials& cred, bool& granted);
 
         virtual bool onEndAuthorization(Authorization* auth, const Request& req, Reply& reply);
 
         virtual void onDestroyAuthorization(Authorization* auth);
 
     private:
+        System::Mutex _mutex;
         std::map<std::string, std::string> _passwd;
 };
 

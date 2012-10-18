@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 by Marc Boris Duerner
+ * Copyright (C) 2012 by Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -30,6 +30,7 @@
 #define Pt_Http_Authenticator_h
 
 #include <Pt/Http/Api.h>
+#include <Pt/Http/Credentials.h>
 #include <string>
 #include <map>
 
@@ -39,35 +40,6 @@ namespace Http {
 
 class Request;
 class Reply;
-
-class Credentials
-{
-    public:
-        Credentials()
-        {}
-
-        Credentials(const std::string& user, const std::string& passwd)
-        : _user(user)
-        , _passwd(passwd)
-        {}
-
-        void set(const std::string& user, const std::string& passwd)
-        {
-            _user = user;
-            _passwd = passwd;
-        }
-
-        const std::string& user() const
-        { return _user; }
-
-        const std::string& password() const
-        { return _passwd; }
-
-    private:
-        std::string _user;
-        std::string _passwd;
-};
-
 
 class PT_HTTP_API Authenticator
 {
