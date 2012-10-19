@@ -66,7 +66,6 @@ int main(int argc, char* argv[])
     Pt::Arg<std::string> ip(argc, argv, 'i');
     Pt::Arg<unsigned short> port(argc, argv, 'p', 7002);
     Pt::Arg<unsigned> threads(argc, argv, 't', 4);
-    Pt::Arg<unsigned> maxThreads(argc, argv, 'T', 200);
 
     std::cout << "rpc echo server running on port " << port.getValue() << "\n\n"
                  "options:\n\n"
@@ -84,7 +83,7 @@ int main(int argc, char* argv[])
     Pt::Http::Server server(loop);
 
     Pt::Http::Server::Options options;
-    options.setMaxThreads(maxThreads);
+    options.setMaxThreads(threads);
     server.listen(ip, port, options);
     
     Pt::Http::MapUrl servlet("/myservice", service);

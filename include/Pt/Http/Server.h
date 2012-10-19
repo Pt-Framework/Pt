@@ -64,7 +64,7 @@ class PT_HTTP_API Server : public Connectable
         {
             public:
                 Options()
-                : _maxThreads(0)
+                : _maxThreads(1)
                 , _sslctx(0)
                 {}
 
