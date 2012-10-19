@@ -115,13 +115,14 @@ std::istream& ClientImpl::receive()
         log_debug("request completed");
         _hstate = OnReply;
         ++_requestCount;
-        _req.clear();
-        _reply.clear();
+        _req.body().discard();
     }
 
     if(_hstate == OnReply || _hstate == OnRequestComplete || _hstate == OnReplyComplete)
     {
         _hstate = OnReply;
+
+        _reply.clear();
         _reply.receive();
 
         log_debug("reply completed");
@@ -185,6 +186,7 @@ MessageProgress ClientImpl::endSend()
             {
                 ++_requestCount;
                 _hstate = OnRequestComplete;
+                _reply.clear(); // TODO: find better place to clear reply !!!
             }
         }
             
@@ -243,10 +245,11 @@ MessageProgress ClientImpl::endReceive()
         if( progress.finished() )
         {
             log_debug("request completed");
+            _req.body().discard();
+
             _hstate = OnReply;
             ++_requestCount;
-            _req.clear();
-            _reply.clear();
+            _reply.clear(); // TODO: find better place to clear reply !!!
         }
         
         return MessageProgress();
