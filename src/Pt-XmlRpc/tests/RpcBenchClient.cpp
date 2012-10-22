@@ -114,6 +114,8 @@ void BenchClient::exec()
 
 int main(int argc, char* argv[])
 {
+  BenchClients clients;
+
   try
   {
     Pt::System::Logger::setLogLevel("", Pt::System::Error);
@@ -130,8 +132,6 @@ int main(int argc, char* argv[])
                  "   -t number  set number of threads (default: 4)\n"
                  "   -n number  set number of requests (default: 10000)\n"
               << std::endl;
-
-    BenchClients clients;
 
     while (clients.size() < threads)
       clients.push_back(new BenchClient(port));
@@ -155,7 +155,10 @@ int main(int argc, char* argv[])
   }
   catch (const std::exception& e)
   {
-    std::cerr << e.what() << std::endl;
+    std::cerr << "ERROR: " << e.what() << std::endl;
+
+    for (BenchClients::iterator it = clients.begin(); it != clients.end(); ++it)
+      delete *it;
   }
 }
 

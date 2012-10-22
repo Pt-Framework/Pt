@@ -69,10 +69,9 @@ int main(int argc, char* argv[])
 
     std::cout << "rpc echo server running on port " << port.getValue() << "\n\n"
                  "options:\n\n"
-                 "   -i ip      set interface address to listen on (default: all interfaces)\n"
-                 "   -p number  set port number (default: 7002)\n"
-                 "   -t number  set minimum number of threads (default: 4)\n"
-                 "   -T number  set maximum number of threads (default: 200)\n"
+                 "   -i ip      set listen address (default: all interfaces)\n"
+                 "   -p number  set listen port (default: 7002)\n"
+                 "   -t number  set number of server threads (default: 4)\n"
               << std::endl;
 
     Pt::System::MainLoop loop;

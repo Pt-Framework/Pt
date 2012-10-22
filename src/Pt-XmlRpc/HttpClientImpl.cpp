@@ -185,7 +185,8 @@ void HttpClientImpl::verifyHeader(const Http::Reply& reply)
     if (! reply.header().isValue("Content-Type", "text/xml"))
     {
         std::ostringstream msg;
-        msg << "invalid content type " << reply.header().get("Content-Type");
+        const char* ct = reply.header().get("Content-Type");
+        msg << "invalid content type " << (ct ? ct : "");
         throw std::runtime_error(msg.str());
     }
 
