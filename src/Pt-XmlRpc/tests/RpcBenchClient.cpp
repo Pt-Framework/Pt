@@ -147,6 +147,7 @@ int main(int argc, char* argv[])
 
     Pt::Timespan t = cl.stop();
 
+    std::cerr << "--- DONE ---" << std:endl;
     std::cout << BenchClient::numRequests() << " requests in " << t.toMSecs()/1e3 << " s => " << (BenchClient::requestsStarted() / (t.toMSecs()/1e3)) << "#/s\n"
               << BenchClient::requestsFinished() << " finished " << BenchClient::requestsFailed() << " failed" << std::endl;
 

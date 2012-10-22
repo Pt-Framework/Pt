@@ -31,6 +31,7 @@
 
 #include <Pt/Net/Api.h>
 #include <Pt/Net/TcpServer.h>
+#include <Pt/Net/TcpSocket.h>
 #include "Selector.h"
 #include <string>
 #include <sys/types.h>
