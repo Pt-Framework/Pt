@@ -102,7 +102,7 @@ void TcpSocketImpl::close()
 }
 
 
-void TcpSocketImpl::accept(const TcpServer& server, unsigned flags)
+void TcpSocketImpl::accept(const TcpServer& server, const TcpSocket::Options&)
 {
     _fd = server.impl().accept();
     _isConnected = true;

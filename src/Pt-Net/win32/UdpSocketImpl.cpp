@@ -99,7 +99,7 @@ void UdpSocketImpl::close()
 }
 
 
-void UdpSocketImpl::bind(const std::string& ipaddr, unsigned short int port, unsigned flags)
+void UdpSocketImpl::bind(const std::string& ipaddr, unsigned short int port, const UdpSocket::Options&)
 {
     AddrInfo ai(ipaddr, port, true);
 

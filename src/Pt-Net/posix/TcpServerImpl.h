@@ -79,7 +79,7 @@ class TcpServerImpl
                     unsigned short int port,
                     const TcpServer::Options& options);
 
-		void listen(const AddrInfo& ipaddr, const TcpServer::Options& options);
+        void listen(const AddrInfo& ipaddr, const TcpServer::Options& options);
 
         void beginAccept(System::EventLoop& loop);
 
@@ -89,7 +89,7 @@ class TcpServerImpl
         int fd() const
         { return _ioh.fd; }
 
-        int accept(unsigned flags);
+        int accept(const TcpSocket::Options& o);
 
         void cancel(System::EventLoop& s);
     

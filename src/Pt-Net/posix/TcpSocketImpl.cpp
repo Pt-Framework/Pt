@@ -89,9 +89,9 @@ void TcpSocketImpl::cancel(System::EventLoop& loop)
 }
 
 
-void TcpSocketImpl::accept(const TcpServer& server, unsigned flags)
+void TcpSocketImpl::accept(const TcpServer& server, , const TcpSocket::Options& o)
 {
-    int fd = server.impl().accept(flags);
+    int fd = server.impl().accept(o);
 
     bool inherit = false;
     System::IODeviceImpl::open(fd, inherit);

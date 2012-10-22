@@ -43,25 +43,29 @@ namespace Net {
 class PT_NET_API TcpSocket : public System::IODevice
 {
     public:
-        enum SocketFlags 
-        { 
-            None = 0,
-            //Inherit = 1, 
-            ALL_SOCKET_FLAGS = 0xffffffff
+        class Options
+        {
+            public:
+                explicit Options()
+                : _flags(0)
+                {}
+
+            private:
+                unsigned long _flags;
         };
 
     public:
         TcpSocket();
 
-        TcpSocket(const TcpServer& server, unsigned flags = 0);
+        TcpSocket(const TcpServer& server, const Options& o = Options());
 
         /** @brief Connect to a host
             
             @throw System::AccessFailed if the host is not reachable
          */
-        TcpSocket(const std::string& ipaddr, unsigned short int port, unsigned flags = 0);
+        TcpSocket(const std::string& ipaddr, unsigned short int port, const Options& o = Options());
 
-        explicit TcpSocket(const AddrInfo& addrinfo, unsigned flags = 0);
+        explicit TcpSocket(const AddrInfo& addrinfo, const Options& o = Options());
 
         ~TcpSocket();
 
@@ -69,19 +73,19 @@ class PT_NET_API TcpSocket : public System::IODevice
 
         std::string peerAddress() const;
 
-        void accept(const TcpServer& server, unsigned flags = 0);
+        void accept(const TcpServer& server, const Options& o = Options());
 
-        void connect(const AddrInfo& addrinfo, unsigned flags = 0);
+        void connect(const AddrInfo& addrinfo, const Options& o = Options());
 
         /** @brief Connect to a host
             
             @throw System::AccessFailed if the host is not reachable
          */
-        void connect(const std::string& ipaddr, unsigned short int port, unsigned flags = 0);
+        void connect(const std::string& ipaddr, unsigned short int port, const Options& o = Options());
 
-        bool beginConnect(const AddrInfo& addrinfo, unsigned flags = 0);
+        bool beginConnect(const AddrInfo& addrinfo, const Options& o = Options());
 
-        bool beginConnect(const std::string& ipaddr, unsigned short int port, unsigned flags = 0);
+        bool beginConnect(const std::string& ipaddr, unsigned short int port, const Options& o = Options());
 
         void endConnect();
 

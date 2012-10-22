@@ -42,10 +42,15 @@ namespace Net {
 class PT_NET_API UdpSocket : public System::IODevice
 {
     public:
-        enum SocketFlags 
-        { 
-            None = 0,
-            ALL_SOCKET_FLAGS = 0xffffffff
+        class Options
+        {
+            public:
+                explicit Options()
+                : _flags(0)
+                {}
+
+            private:
+                unsigned long _flags;
         };
 
     public:
@@ -53,11 +58,11 @@ class PT_NET_API UdpSocket : public System::IODevice
 
         ~UdpSocket();
 
-        void bind(const std::string& ipaddr, unsigned short int port, unsigned flags = 0);
+        void bind(const std::string& ipaddr, unsigned short int port, const Options& o = Options());
 
-        void connect(const std::string& ipaddr, unsigned short int port, unsigned flags = 0);
+        void connect(const std::string& ipaddr, unsigned short int port, const Options& o = Options());
 
-        void connect(const AddrInfo& addrinfo, unsigned flags = 0);
+        void connect(const AddrInfo& addrinfo, const Options& o = Options());
 
         bool isConnected() const;
 

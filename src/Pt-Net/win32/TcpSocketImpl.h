@@ -35,10 +35,10 @@
 #endif
 
 #include "Selector.h"
+#include "AddrInfoImpl.h"
 #include "Pt/Net/Api.h"
 #include "Pt/Net/AddrInfo.h"
-#include "Pt/Signal.h"
-#include "AddrInfoImpl.h"
+#include <Pt/Net/TcpSocket.h>
 
 #include <string>
 #include <windows.h>
@@ -71,7 +71,7 @@ class TcpSocketImpl
         bool isConnected() const
         { return _isConnected; }
 
-        void accept(const TcpServer& server, unsigned flags);
+        void accept(const TcpServer& server, const TcpSocket::Options& o);
 
         void connect(const AddrInfo& addrinfo);
 

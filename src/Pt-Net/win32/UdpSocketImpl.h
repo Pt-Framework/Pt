@@ -37,6 +37,7 @@
 #include "AddrInfoImpl.h"
 #include "Pt/Net/Api.h"
 #include "Pt/Net/AddrInfo.h"
+#include "Pt/Net/UdpSocket.h"
 #include <string>
 #include <windows.h>
 #include <winsock2.h>
@@ -57,7 +58,7 @@ class UdpSocketImpl
 
         void close();
 
-        void bind(const std::string& ipaddr, unsigned short int port, unsigned flags);
+        void bind(const std::string& ipaddr, unsigned short int port, const UdpSocket::Options& o);
 
         void connect(const AddrInfo& addrinfo);
 

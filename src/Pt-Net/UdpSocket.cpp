@@ -56,20 +56,20 @@ UdpSocket::~UdpSocket()
 }
 
 
-void UdpSocket::bind(const std::string& ipaddr, unsigned short int port, unsigned flags)
+void UdpSocket::bind(const std::string& ipaddr, unsigned short int port, const Options& o)
 {
-    _impl->bind(ipaddr, port, flags);
+    _impl->bind(ipaddr, port, o);
     this->setEof(false);
 }
 
 
-void UdpSocket::connect(const std::string& ipaddr, unsigned short int port, unsigned)
+void UdpSocket::connect(const std::string& ipaddr, unsigned short int port, const Options&)
 {
     connect( AddrInfo(ipaddr, port) );
 }
 
 
-void UdpSocket::connect(const AddrInfo& addrinfo, unsigned)
+void UdpSocket::connect(const AddrInfo& addrinfo, const Options&)
 {
     _impl->connect(addrinfo);
     this->setEof(false);

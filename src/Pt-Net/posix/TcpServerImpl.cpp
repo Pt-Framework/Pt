@@ -233,7 +233,7 @@ void TcpServerImpl::beginAccept(System::EventLoop& loop)
 }
 
 
-int TcpServerImpl::accept(unsigned flags)
+int TcpServerImpl::accept(const TcpSocket::Options& o)
 {
     log_debug( "accept " << this->fd() );
 

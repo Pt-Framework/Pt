@@ -37,10 +37,11 @@
 #include "IODeviceImpl.h"
 #include "Pt/Net/Api.h"
 #include "Pt/Net/AddrInfo.h"
+#include "Pt/Net/UdpSocket.h"
 #include <string>
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <sys/select.h>
+#include <sys/select.h> // is this still needed?
 #include <sys/time.h>
 #include <unistd.h>
 
@@ -59,7 +60,7 @@ class UdpSocketImpl : public System::IODeviceImpl
 
         void close();
 
-        void bind(const std::string& ipaddr, unsigned short int port, unsigned flags);
+        void bind(const std::string& ipaddr, unsigned short int port, const UdpSocket::Options& o);
 
         void connect(const AddrInfo& addrinfo);
 
@@ -84,11 +85,11 @@ class UdpSocketImpl : public System::IODeviceImpl
         size_t write(const char* buffer, size_t n);
 
     private:
-        bool                         _broadcast;
-        bool                         _isConnected;
-        bool                         _isBound;
-        sockaddr_storage             _peeraddr;
-        sockaddr_storage			 _servaddr;
+        bool             _broadcast;
+        bool             _isConnected;
+        bool             _isBound;
+        sockaddr_storage _peeraddr;
+        sockaddr_storage _servaddr;
 };
 
 } // namespace Net

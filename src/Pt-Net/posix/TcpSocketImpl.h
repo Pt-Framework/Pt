@@ -30,8 +30,9 @@
 #define PT_NET_TcpSocketImpl_H
 
 #include "IODeviceImpl.h"
-#include "Pt/Net/AddrInfo.h"
 #include "AddrInfoImpl.h"
+#include "Pt/Net/AddrInfo.h"
+#include "Pt/Net/TcpSocket.h"
 #include <string>
 
 namespace Pt {
@@ -67,7 +68,7 @@ class TcpSocketImpl : public System::IODeviceImpl
 
         void endConnect(System::EventLoop& loop);
 
-        void accept(const TcpServer& server, unsigned inherit);
+        void accept(const TcpServer& server, const TcpSocket::Options& o);
 
     protected:
         void connect();

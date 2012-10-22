@@ -46,20 +46,20 @@ TcpSocket::TcpSocket()
 }
 
 
-TcpSocket::TcpSocket(const TcpServer& server, unsigned flags)
+TcpSocket::TcpSocket(const TcpServer& server, const Options& o)
 : _impl(0)
 , _connecting(false)
 {
     _impl = new TcpSocketImpl(*this);
     std::auto_ptr<TcpSocketImpl> impl(_impl);
 
-    this->accept(server, flags);
+    this->accept(server, o);
 
     impl.release();
 }
 
 
-TcpSocket::TcpSocket(const std::string& ipaddr, unsigned short int port, unsigned /*flags*/)
+TcpSocket::TcpSocket(const std::string& ipaddr, unsigned short int port, const Options&)
 : _impl(0)
 , _connecting(false)
 {
@@ -72,7 +72,7 @@ TcpSocket::TcpSocket(const std::string& ipaddr, unsigned short int port, unsigne
 }
 
 
-TcpSocket::TcpSocket(const AddrInfo& addrinfo, unsigned /*flags*/)
+TcpSocket::TcpSocket(const AddrInfo& addrinfo, const Options&)
 : _impl(0)
 , _connecting(false)
 {
@@ -110,34 +110,34 @@ std::string TcpSocket::peerAddress() const
 }
 
 
-void TcpSocket::accept(const TcpServer& server, unsigned flags)
+void TcpSocket::accept(const TcpServer& server, const Options& o)
 {
     this->close();
 
-    _impl->accept(server, flags);
+    _impl->accept(server, o);
 }
 
 
-void TcpSocket::connect(const AddrInfo& addrinfo, unsigned /*flags*/)
+void TcpSocket::connect(const AddrInfo& addrinfo, const Options&)
 {
     this->close();
     _impl->connect(addrinfo);
 }
 
 
-void TcpSocket::connect(const std::string& ipaddr, unsigned short int port, unsigned /*flags*/)
+void TcpSocket::connect(const std::string& ipaddr, unsigned short int port, const Options&)
 { 
     connect(AddrInfo(ipaddr, port)); 
 }
 
 
-bool TcpSocket::beginConnect(const std::string& ipaddr, unsigned short int port, unsigned /*flags*/)
+bool TcpSocket::beginConnect(const std::string& ipaddr, unsigned short int port, const Options&)
 { 
     return beginConnect(AddrInfo(ipaddr, port)); 
 }
 
 
-bool TcpSocket::beginConnect(const AddrInfo& addrinfo, unsigned /*flags*/)
+bool TcpSocket::beginConnect(const AddrInfo& addrinfo, const Options&)
 {
     if( ! isActive() )
         throw std::logic_error( PT_ERROR_MSG("socket not active") );
