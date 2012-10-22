@@ -824,6 +824,8 @@ MessageProgress Connection::endReceiveReply()
             {
                 log_debug("closing, no keep alive");
                 cancel();
+
+                //TODO: start SSL shutdown here
             }
         }
         else if( _socket.eof() )
