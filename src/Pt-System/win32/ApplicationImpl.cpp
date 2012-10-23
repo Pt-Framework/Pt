@@ -44,6 +44,12 @@ void ApplicationImpl::init(EventLoop& s)
 }
 
 
+bool ApplicationImpl::ignoreSystemSignal(int sig)
+{
+    return false;
+}
+
+
 bool ApplicationImpl::catchSystemSignal(int sig)
 {
     return false;

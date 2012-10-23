@@ -88,6 +88,8 @@ class PT_SYSTEM_API Application : public Pt::Connectable
         void exit()
         { _loop->exit(); }
 
+        bool ignoreSystemSignal(int sig);
+
         bool catchSystemSignal(int sig);
 
         bool raiseSystemSignal(int sig);

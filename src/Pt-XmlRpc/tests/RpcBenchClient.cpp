@@ -26,10 +26,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <iostream>
-#include <Pt/Arg.h>
+
 #include <Pt/XmlRpc/RemoteProcedure.h>
 #include <Pt/XmlRpc/HttpClient.h>
+#include <Pt/System/Application.h>
 #include <Pt/System/Thread.h>
 #include <Pt/System/Mutex.h>
 #include <Pt/System/Clock.h>
@@ -37,6 +37,17 @@
 #include <Pt/Timespan.h>
 #include <Pt/Atomicity.h>
 #include <Pt/Main.h>
+#include <Pt/Arg.h>
+
+#include <iostream>
+
+#ifndef WINCE
+#include <signal.h>
+#endif
+
+#ifndef SIGPIPE
+#define SIGPIPE -1
+#endif
 
 class BenchClient
 {
@@ -93,23 +104,24 @@ static Pt::System::Mutex mutex;
 
 void BenchClient::exec()
 {
-  while (static_cast<unsigned>(Pt::atomicIncrement(_requestsStarted)) <= _numRequests)
-  {
-    try
+    while (static_cast<unsigned>(Pt::atomicIncrement(_requestsStarted)) <= _numRequests)
     {
-      echo("hi");
-      Pt::atomicIncrement(_requestsFinished);
-    }
-    catch (const std::exception& e)
-    {
-      {
-        Pt::System::MutexLock lock(mutex);
-        std::cerr << "request failed with error " << e.what() << std::endl;
-      }
+        try
+        {
+            echo("hi");
+            Pt::atomicIncrement(_requestsFinished);
+        }
+        catch(const std::exception& e)
+        {
+            {
+                Pt::System::MutexLock lock(mutex);
+                std::cerr << "request failed: " << e.what() << std::endl;
+                client.cancel();
+            }
 
-      Pt::atomicIncrement(_requestsFailed);
+            Pt::atomicIncrement(_requestsFailed);
+        }
     }
-  }
 }
 
 int main(int argc, char* argv[])
@@ -118,6 +130,9 @@ int main(int argc, char* argv[])
 
   try
   {
+    Pt::System::Application app;
+    app.ignoreSystemSignal(SIGPIPE);
+
     Pt::System::Logger::setLogLevel("", Pt::System::Error);
 
     Pt::Arg<std::string> ip(argc, argv, 'i');
@@ -147,7 +162,7 @@ int main(int argc, char* argv[])
 
     Pt::Timespan t = cl.stop();
 
-    std::cerr << "--- DONE ---" << std:endl;
+    std::cerr << "--- DONE ---" << std::endl;
     std::cout << BenchClient::numRequests() << " requests in " << t.toMSecs()/1e3 << " s => " << (BenchClient::requestsStarted() / (t.toMSecs()/1e3)) << "#/s\n"
               << BenchClient::requestsFinished() << " finished " << BenchClient::requestsFailed() << " failed" << std::endl;
 

@@ -111,6 +111,21 @@ void ApplicationImpl::init(EventLoop& loop)
 }
 
 
+bool ApplicationImpl::ignoreSystemSignal(int sig)
+{
+    if (sig > 0 && sig < NSIG)
+    {
+        if( SIG_ERR == ::signal(sig, SIG_IGN) )
+        {
+            throw SystemError("signal() failed");
+        }
+
+        return true;
+    }
+
+    return false;
+}
+
 
 bool ApplicationImpl::catchSystemSignal(int sig)
 {

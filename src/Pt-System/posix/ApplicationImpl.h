@@ -18,6 +18,8 @@ class ApplicationImpl
 
         void init(EventLoop& s);
 
+        bool ignoreSystemSignal(int sig);
+
         bool catchSystemSignal(int sig);
 
         bool raiseSystemSignal(int sig);

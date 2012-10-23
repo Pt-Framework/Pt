@@ -100,6 +100,12 @@ Application& Application::instance()
 }
 
 
+bool Application::ignoreSystemSignal(int sig)
+{
+    return _impl->ignoreSystemSignal(sig);
+}
+
+
 bool Application::catchSystemSignal(int sig)
 {
     return _impl->catchSystemSignal(sig);

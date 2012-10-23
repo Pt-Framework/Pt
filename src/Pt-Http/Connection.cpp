@@ -183,7 +183,6 @@ void Connection::setActive(System::EventLoop& loop)
 void Connection::cancel()
 {
     log_debug("cancelling connection");
-
     _timer.stop();
     _readBytes = 0;
     _socket.close();
