@@ -27,6 +27,7 @@
  */
 
 #include <Pt/Http/Message.h>
+#include <Pt/Http/HttpError.h>
 #include <Pt/System/Clock.h>
 #include <cctype>
 #include <sstream>
@@ -41,7 +42,6 @@
 #define log_error(a)
 
 log_define("Pt.Http.Message")
-
 
 namespace {
 
@@ -198,8 +198,8 @@ void MessageHeader::set(const char* key, const char* value, bool replace)
 {
     log_debug("setHeader(\"" << key << "\", \"" << value << "\", " << replace << ')');
 
-    if (!*key)
-        throw std::runtime_error("empty key not allowed in messageheader");
+    if( ! *key)
+        throw std::invalid_argument("header key is NULL");
 
     if (replace)
         remove(key);
@@ -210,7 +210,7 @@ void MessageHeader::set(const char* key, const char* value, bool replace)
     size_t lv = strlen(value);   // length of value
 
     if (p - _rawdata + lk + lv + 2 > MaxHeaderSize)
-        throw std::runtime_error("message header too big");
+        throw HttpError("message header too big");
 
     std::strcpy(p, key);   // copy key
     p += lk + 1;
@@ -223,8 +223,8 @@ void MessageHeader::set(const char* key, const char* value, bool replace)
 
 void MessageHeader::remove(const char* key)
 {
-    if (!*key)
-        throw std::runtime_error("empty key not allowed in messageheader");
+    if( ! *key)
+        throw std::invalid_argument("header key is NULL");
 
     char* p = eptr();
 

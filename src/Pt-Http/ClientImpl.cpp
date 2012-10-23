@@ -29,6 +29,7 @@
 #include "ClientImpl.h"
 #include "Parser.h"
 #include <Pt/Http/Client.h>
+#include <Pt/Http/HttpError.h>
 #include <Pt/System/IOError.h>
 #include <Pt/System/Logger.h>
 #include <cassert>
@@ -89,7 +90,7 @@ void ClientImpl::send(bool finished)
     }
 
     log_error("sending HTTP request failed: " << _hstate);
-    throw System::IOPending("sending HTTP request failed");
+    throw HttpError("HTTP message pending");
 }
 
 
@@ -142,7 +143,7 @@ std::istream& ClientImpl::receive()
         return _reply.body();
     }
 
-    throw System::IOPending("failed receiving HTTP request");
+    throw HttpError("HTTP message pending");
     return _reply.body();
 }
 
@@ -165,7 +166,7 @@ void ClientImpl::beginSend(bool finished)
     }
 
     log_error("sending HTTP request failed: " << _hstate);
-    throw System::IOPending("sending HTTP request failed");
+    throw HttpError("HTTP message pending");
 }
 
 
@@ -193,7 +194,7 @@ MessageProgress ClientImpl::endSend()
         return progress;
     }
 
-    throw System::IOPending("sending HTTP request failed");
+    throw HttpError("HTTP message pending");
     return MessageProgress();
 }
 
@@ -230,7 +231,7 @@ void ClientImpl::beginReceive()
         return;
     }
 
-    throw System::IOPending("failed receiving HTTP request");
+    throw HttpError("HTTP message pending");
 }
 
 
@@ -280,7 +281,7 @@ MessageProgress ClientImpl::endReceive()
         return progress;
     }
 
-    throw System::IOPending("failed receiving HTTP request");
+    throw HttpError("HTTP message pending");
     return MessageProgress();
 }
 

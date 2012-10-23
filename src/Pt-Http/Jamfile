@@ -15,6 +15,7 @@ SharedLibrary Pt-Http : Authorizer.cpp
                         ClientImpl.cpp
                         Connection.cpp
                         HttpBuffer.cpp
+                        HttpError.cpp
                         Message.cpp
                         Parser.cpp
                         Reply.cpp

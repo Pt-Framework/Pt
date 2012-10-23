@@ -29,6 +29,7 @@
 #include <Pt/Http/Authorizer.h>
 #include <Pt/Http/Reply.h>
 #include <Pt/Http/Request.h>
+#include <Pt/Http/HttpError.h>
 #include <Pt/TextStream.h>
 #include <Pt/Base64Codec.h>
 #include <sstream>
@@ -139,7 +140,7 @@ Authorization* BasicAuthorizer::onAuthorize(const Request& req, Reply& reply, bo
             token[n] = std::tolower(token[n]);
 
         if(token != "basic")
-            throw std::runtime_error("HTTP auth header parse error");
+            throw HttpError("invalid HTTP message");
 
         iss >> std::skipws >> token;
         iss.str(token);

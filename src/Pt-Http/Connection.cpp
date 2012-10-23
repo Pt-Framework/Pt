@@ -29,6 +29,7 @@
 #include "Connection.h"
 #include <Pt/Http/Request.h>
 #include <Pt/Http/Reply.h>
+#include <Pt/Http/HttpError.h>
 #include <Pt/System/EventLoop.h>
 #include <Pt/System/Logger.h>
 #include <Pt/TextStream.h>
@@ -290,8 +291,8 @@ void Connection::receiveReply(Reply& reply)
 
     if( _parser.fail() )
     {
-        log_debug("invalid HTTP reply");
-        throw System::IOError( PT_ERROR_MSG("invalid HTTP reply") );
+        log_info("invalid HTTP reply");
+        throw HttpError("invalid HTTP message");
     }
 
     _httpbuf.reset();
@@ -309,6 +310,8 @@ void Connection::receiveReply(Reply& reply)
     {
         log_debug("closing, no keep alive");
         cancel();
+
+        // TODO: do SSL shutdown here
     }
 }
 
@@ -434,7 +437,7 @@ MessageProgress Connection::endSendRequest()
 
         if( _socket.eof() )
         {
-            throw System::IOError("connection lost while sending request");
+            throw HttpError("connection lost");
         }
     }
  
@@ -536,7 +539,7 @@ MessageProgress Connection::endSendReply()
 
     if( _socket.eof() )
     {
-        throw System::IOError("connection lost while sending reply");
+        throw HttpError("connection lost");
     }
 
     // keepalive -> leave data in the output buffer
@@ -563,6 +566,8 @@ MessageProgress Connection::endSendReply()
     {
         log_debug("no keep alive, closing connection");
         cancel();
+
+        //TODO: start SSL shutdown here
     }
 
     // indicates that request was completely written
@@ -650,10 +655,10 @@ MessageProgress Connection::endReceiveRequest()
 
     // TODO: if we haven't read anything yet we maybe should not report is as
     //       an error, the client might have run into a keepalive timeout. 
-    //       Need another MessageProgress state to indicate CLOSED event
+    //       Might need another MessageProgress state to indicate CLOSED event
     if( _socket.eof() )
     {
-        throw System::IOError("connection lost while receiving request");
+        throw HttpError("connection lost");
     }
 
     if( ! _parser.end() )
@@ -670,7 +675,7 @@ MessageProgress Connection::endReceiveRequest()
 
             // TODO define exception class
             // TODO: handle any previously pipelined reply
-            throw std::runtime_error("http parser failed"); 
+            throw HttpError("invalid HTTP message"); 
         }
 
         if( ! _parser.end() )
@@ -767,7 +772,7 @@ MessageProgress Connection::endReceiveReply()
     {
         if( _socket.eof() )
         {
-            throw System::IOError("unexpected EOF");
+            throw HttpError("connection lost");
         }
         
         _replyParser.advance( *_httpbuf.buffer() );
@@ -775,7 +780,7 @@ MessageProgress Connection::endReceiveReply()
         if( _replyParser.fail() )
         {
             log_warn("http parser failed");
-            throw std::runtime_error("http parser failed"); // TODO define exception class
+            throw HttpError("invalid HTTP message"); // TODO define exception class
         }
 
         if( ! _replyParser.end() )
@@ -829,7 +834,7 @@ MessageProgress Connection::endReceiveReply()
         }
         else if( _socket.eof() )
         {
-            throw System::IOError("unexpected EOF");
+            throw HttpError("connection lost");
         }
     }
 

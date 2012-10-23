@@ -27,6 +27,7 @@
  */
 
 #include "HttpBuffer.h"
+#include <Pt/Http/HttpError.h>
 #include <Pt/System/Logger.h>
 #include <stdexcept>
 #include <sstream>
@@ -39,24 +40,25 @@ namespace {
 
   std::string charToPrint(char ch)
   {
-    std::ostringstream s;
+    std::string s;
+    
     if (ch >= 32 && ch <= 127)
-      s << '<' << ch << '>';
+    {
+      s += '<' ;
+      s += ch; 
+      s += '>';
+    }
 
-    s << '(' << static_cast<unsigned>(static_cast<unsigned char>(ch)) << ')';
-    return s.str();
+    s += '(';
+    s += static_cast<unsigned>(static_cast<unsigned char>(ch));
+    s += ')';
+    return s;
   }
 
   void throwInvalidCharacter(char ch)
   {
-    std::ostringstream s;
-    s << "invalid character ";
-    if (ch >= 32 && ch <= 127)
-      s << '<' << ch << '>';
-
-    s << '(' << static_cast<unsigned>(static_cast<unsigned char>(ch)) << ") in chunked encoding";
-
-    throw std::runtime_error(s.str());
+    log_info("invalid character: " << charToPrint(ch));
+    throw Pt::Http::HttpError("invalid HTTP message");
   }
 
 }

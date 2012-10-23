@@ -729,7 +729,6 @@ void ServerImpl::onAccept(Net::TcpServer& server)
             throw std::logic_error("http server has no event loop");
         }
 
-
         handler->beginServe(*loop);
         handler->finished() += Pt::slot(*this, &ServerImpl::onHandlerFinished);
         _handlers.push_back( handler.get() );

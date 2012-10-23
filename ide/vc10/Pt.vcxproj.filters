@@ -633,6 +633,9 @@
     <ClInclude Include="..\..\include\Pt\Http\Credentials.h">
       <Filter>Pt-Http</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Http\HttpError.h">
+      <Filter>Pt-Http</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -1297,6 +1300,9 @@
       <Filter>Pt-Http</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Http\Authorizer.cpp">
+      <Filter>Pt-Http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Http\HttpError.cpp">
       <Filter>Pt-Http</Filter>
     </ClCompile>
   </ItemGroup>

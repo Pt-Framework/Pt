@@ -30,8 +30,8 @@
 #define PT_SSL_SSLERROR_H
 
 #include <Pt/Ssl/Api.h>
+#include <Pt/System/IOError.h>
 #include <string>
-#include <stdexcept>
 
 namespace Pt {
 
@@ -39,7 +39,7 @@ namespace Ssl {
 
 /** @brief Generic SSL run-time error.
   */
-class PT_SSL_API SslError : public std::runtime_error 
+class PT_SSL_API SslError : public System::IOError
 {
     public:
         //! @brief Contructs with message.

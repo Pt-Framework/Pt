@@ -37,6 +37,7 @@
     <ClInclude Include="..\..\include\Pt\Http\Authorizer.h" />
     <ClInclude Include="..\..\include\Pt\Http\Client.h" />
     <ClInclude Include="..\..\include\Pt\Http\Credentials.h" />
+    <ClInclude Include="..\..\include\Pt\Http\HttpError.h" />
     <ClInclude Include="..\..\include\Pt\Http\Message.h" />
     <ClInclude Include="..\..\include\Pt\Http\Reply.h" />
     <ClInclude Include="..\..\include\Pt\Http\Request.h" />
@@ -247,6 +248,7 @@
     <ClCompile Include="..\..\src\Pt-Http\ClientImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Http\Connection.cpp" />
     <ClCompile Include="..\..\src\Pt-Http\HttpBuffer.cpp" />
+    <ClCompile Include="..\..\src\Pt-Http\HttpError.cpp" />
     <ClCompile Include="..\..\src\Pt-Http\Message.cpp" />
     <ClCompile Include="..\..\src\Pt-Http\Parser.cpp" />
     <ClCompile Include="..\..\src\Pt-Http\Reply.cpp" />
