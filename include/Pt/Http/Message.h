@@ -98,17 +98,19 @@ class PT_HTTP_API MessageBuffer : public std::streambuf
 
         ~MessageBuffer();
        
-        void reset()
+        void discard()
         { 
-            this->setp(_obuffer, _obuffer + _obufferSize); 
+            this->setp(_buffer, _buffer + _bufferSize); 
             this->setg(0,0,0);
         }
 
+        // TODO: out_avail
         std::size_t size() const
         { return pptr() - pbase(); }
 
+        //! @brief Returns a pointer to the data written to the buffer.
         const char* data() const
-        { return _obuffer; }
+        { return _buffer; }
 
     protected:
         virtual int_type overflow(int_type ch);
@@ -116,10 +118,13 @@ class PT_HTTP_API MessageBuffer : public std::streambuf
         virtual int_type underflow();
 
     private:
-        char* _obuffer;
-        std::size_t  _obufferSize;
+        char* _buffer;
+        std::size_t _bufferSize;
 };
 
+
+// TODO: put this directly in Request/Reply
+// derive Request/Reply from Message and Message from std::iosstream (like MessageBody is now)
 class PT_HTTP_API MessageBody : public std::iostream
 {
     public:
@@ -143,6 +148,7 @@ class PT_HTTP_API MessageBody : public std::iostream
 class PT_HTTP_API MessageHeader : protected Pt::NonCopyable
 {
     public:
+        // TODO: make this a distinct class e.g. Field
         typedef std::pair<const char*, const char*> value_type;
 
         static const unsigned MaxHeaderSize = 4096;
@@ -232,6 +238,7 @@ class PT_HTTP_API MessageHeader : protected Pt::NonCopyable
         bool has(const char* key) const
         { return get(key) != 0; }
 
+        // TODO: isSet
         bool isValue(const char* key, const char* value) const;
 
         ConstIterator begin() const
@@ -252,6 +259,7 @@ class PT_HTTP_API MessageHeader : protected Pt::NonCopyable
             _httpVersionMinor = minor;
         }
 
+        // TODO: chunked
         bool chunkedTransferEncoding() const;
 
         std::size_t contentLength() const;

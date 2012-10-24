@@ -75,8 +75,8 @@ namespace Pt {
 namespace Http {
 
 MessageBuffer::MessageBuffer()
-: _obuffer(0)
-, _obufferSize(0)
+: _buffer(0)
+, _bufferSize(0)
 {
     setg(0,0,0);
     setp(0,0);
@@ -85,7 +85,7 @@ MessageBuffer::MessageBuffer()
 
 MessageBuffer::~MessageBuffer()
 {
-    delete [] _obuffer;
+    delete [] _buffer;
 }
 
 
@@ -93,27 +93,27 @@ MessageBuffer::int_type MessageBuffer::overflow(int_type ch)
 {
     typedef MessageBuffer::traits_type traits_type;
 
-    if( ! _obuffer)
+    if( ! _buffer)
     {
-        _obufferSize = BufferSize;
-        _obuffer = new char[_obufferSize];
-        this->setp(_obuffer, _obuffer + _obufferSize);
-        this->setg(_obuffer, _obuffer, _obuffer);
+        _bufferSize = BufferSize;
+        _buffer = new char[_bufferSize];
+        this->setp(_buffer, _buffer + _bufferSize);
+        this->setg(_buffer, _buffer, _buffer);
     }
     else
     {
-        size_t bufsize = _obufferSize + BufferSize;
+        size_t bufsize = _bufferSize + BufferSize;
         char* buf = new char[ bufsize ];
-        traits_type::copy(buf, _obuffer, _obufferSize);
-        std::swap(_obuffer, buf);
+        traits_type::copy(buf, _buffer, _bufferSize);
+        std::swap(_buffer, buf);
         
-        this->setp(_obuffer, _obuffer + bufsize);
-        this->pbump(_obufferSize);
+        this->setp(_buffer, _buffer + bufsize);
+        this->pbump(_bufferSize);
 
         std::size_t gsize = gptr() - eback();
-        this->setg(_obuffer, _obuffer + gsize, pptr());
+        this->setg(_buffer, _buffer + gsize, pptr());
         
-        _obufferSize = bufsize;
+        _bufferSize = bufsize;
         delete [] buf;
     }
 
@@ -133,7 +133,7 @@ MessageBuffer::int_type MessageBuffer::underflow()
     if( this->gptr() < this->pptr() )
     {
         std::size_t gsize = gptr() - eback();
-        this->setg(_obuffer, _obuffer + gsize, this->pptr());
+        this->setg(_buffer, _buffer + gsize, this->pptr());
     }
     
     if( this->gptr() < this->egptr() )
@@ -152,7 +152,7 @@ MessageBody::MessageBody()
 
 void MessageBody::discard()
 { 
-    _buf.reset(); 
+    _buf.discard(); 
 
     std::streambuf* sb = this->rdbuf();
     if(sb != &_buf)

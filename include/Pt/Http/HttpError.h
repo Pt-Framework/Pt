@@ -43,7 +43,10 @@ class PT_HTTP_API HttpError : public System::IOError
 {
     public:
         //! @brief Contruct with message.
-        HttpError(const std::string& what);
+        explicit HttpError(const char* what);
+
+        //! @brief Contruct with message.
+        explicit HttpError(const std::string& what);
 
         //! @brief Destructor.
         ~HttpError() throw();

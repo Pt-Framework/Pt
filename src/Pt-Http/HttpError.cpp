@@ -32,6 +32,12 @@ namespace Pt {
 
 namespace Http {
 
+HttpError::HttpError(const char* what)
+: System::IOError(what)
+{
+}
+
+
 HttpError::HttpError(const std::string& what)
 : System::IOError(what)
 {
