@@ -80,10 +80,10 @@ class PT_HTTP_API Server : public Connectable
                 Ssl::Context* sslContext() const
                 { return _sslctx; }
 
-                Net::TcpServer::Options& tcpOptions()
+                Net::TcpServer::Options& tcp()
                 { return _tcpOptions; }
 
-                const Net::TcpServer::Options& tcpOptions() const
+                const Net::TcpServer::Options& tcp() const
                 { return _tcpOptions; }
 
             private:

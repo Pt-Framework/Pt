@@ -542,7 +542,7 @@ void ServerImpl::listen(const Pt::Net::AddrInfo& addr, const Server::Options& op
         _sslctx = options.sslContext();
 #endif
 
-    _serverSocket.listen(addr, options.tcpOptions());
+    _serverSocket.listen(addr, options.tcp());
     _serverSocket.beginAccept();
 
     for(unsigned n = 1; n < options.maxThreads(); ++n)

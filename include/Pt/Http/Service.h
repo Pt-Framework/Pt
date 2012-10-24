@@ -33,21 +33,15 @@
 #include <Pt/Http/Responder.h>
 #include <Pt/Atomicity.h>
 #include <Pt/Allocator.h>
-#include <Pt/System/Mutex.h>
-#include <vector>
 
 namespace Pt {
 
 namespace Http {
 
-class Responder;
 class Request;
-class Server;
 
 class PT_HTTP_API Service
 {
-    friend class Server;
-
     public:
         Service();
 
@@ -78,6 +72,8 @@ class PT_HTTP_API Service
 
     private:
         Pt::atomic_t _responderCount;
+        void* _reserved0;
+        std::size_t _reserved1;
 };
 
 

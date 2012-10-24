@@ -35,8 +35,8 @@
 #include <streambuf>
 #include <string>
 #include <cstring>
-#include <utility>
- 
+#include <cstddef>
+
 namespace Pt {
 
 namespace Http {
@@ -194,7 +194,7 @@ class PT_HTTP_API MessageHeader : private Pt::NonCopyable
     private:
         static const unsigned MaxHeaderSize = 4096;
         char _rawdata[MaxHeaderSize];  // key_1\0value_1\0key_2\0value_2\0...key_n\0value_n\0\0
-        unsigned _endOffset;
+        std::size_t _endOffset;
         unsigned _httpVersionMajor;
         unsigned _httpVersionMinor;
 };

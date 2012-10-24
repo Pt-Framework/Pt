@@ -37,6 +37,8 @@ namespace Http {
 
 Service::Service()
 : _responderCount(0)
+, _reserved0(0)
+, _reserved1(0)
 { 
 }
 

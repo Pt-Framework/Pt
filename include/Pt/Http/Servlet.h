@@ -88,6 +88,7 @@ class PT_HTTP_API Servlet : private NonCopyable
         Authorizer* _auth;
 };
 
+// TODO: use RegExp for URL matching
 class PT_HTTP_API MapUrl : public Servlet
 {
     public:

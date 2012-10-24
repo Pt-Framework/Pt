@@ -33,7 +33,6 @@
 #include <Pt/Http/Message.h>
 #include <Pt/Signal.h>
 #include <string>
-#include <iostream>
 
 namespace Pt {
 
@@ -48,13 +47,12 @@ class PT_HTTP_API Reply : public Message
         : Message(conn)
         , _statusCode(200)
         , _statusText("OK")
-        { 
-        }
+        { }
         
-        void setStatus(unsigned c, const std::string& t)
+        void setStatus(unsigned code, const std::string& txt)
         {
-            _statusCode = c;
-            _statusText = t;
+            _statusCode = code;
+            _statusText = txt;
         }
 
         unsigned statusCode() const
