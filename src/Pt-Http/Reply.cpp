@@ -36,49 +36,50 @@ namespace Http {
 
 void Reply::receive()
 {
-  _body.setInput( _body.buffer() );
-  _conn->receiveReply(*this);
+    Message::setBuffer( Message::buffer() );
+    connection().receiveReply(*this);
 }
 
 
 void Reply::beginReceive()
 { 
-    _isReceiving = true;
-    _body.setInput(_conn->buffer());
-    _conn->beginReceiveReply(*this); 
+    setReceiving(true);
+    Message::setBuffer(connection().buffer());
+    connection().beginReceiveReply(*this); 
 }
 
 
 MessageProgress Reply::endReceive()
 { 
-    _isReceiving = false;
-    return _conn->endReceiveReply(); 
+    setReceiving(false);
+    return connection().endReceiveReply(); 
 }
 
 
 void Reply::beginSend(bool finish)
 { 
-    _finished = finish;
-    _isSending = true;
-    _body.setOutput();
-    _conn->beginSendReply(*this); 
+    setFinished(finish);
+    setSending(true);
+    Message::setBuffer(Message::buffer());
+    connection().beginSendReply(*this); 
 }
 
 
 MessageProgress Reply::endSend()
 { 
-    _isSending = false;
-    return _conn->endSendReply(); 
+    setSending(false);
+    return connection().endSendReply(); 
 }
+
 
 void Reply::clear()
 {
     _statusCode = 200;
     _statusText = "OK";
-    _header.clear();
-    _body.clear();
-    _body.discard();
-    _finished = false;
+    Message::header().clear();
+    Message::body().clear();
+    Message::discard();
+    setFinished(false);
 }
 
 } // namespace Http

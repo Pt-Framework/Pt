@@ -37,6 +37,7 @@
 #include "Pt/System/Selectable.h"
 #include "Pt/System/Logger.h"
 #include "Pt/Utf8Codec.h"
+#include <cassert>
 
 log_define("Pt.XmlRpc.Client")
 
@@ -154,7 +155,8 @@ std::size_t ClientImpl::onReadReply()
             if( ! m )
                 break;
 
-            n += m;
+            assert(m > 0);
+            n += static_cast<std::size_t>(m);
 
             while( _reader.advance() ) // Xml::ParseError
             {

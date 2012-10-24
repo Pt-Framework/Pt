@@ -260,7 +260,7 @@ bool Acceptor::onRequestBody()
     else
     {
         log_debug("ignoring request body");
-        _request.body().discard();
+        _request.discard();
     }
 
     return true;
@@ -308,7 +308,7 @@ void Acceptor::onReplySent(Reply& r)
         if( ! _reply.isFinished() )
         {
             log_debug("continuing response");
-            _reply.body().discard();
+            _reply.discard();
             assert(_responder);
             _responder->writeReply(_request, _reply);
             return;

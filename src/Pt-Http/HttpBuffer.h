@@ -49,7 +49,7 @@ class ChunkParser
         bool hasChunk() const
         { return _state == &ChunkParser::onData; }
 
-        unsigned chunkSize() const
+        std::size_t chunkSize() const
         { return _chunkSize; }
 
         bool end() const  
@@ -67,7 +67,7 @@ class ChunkParser
 
     private:
         void (ChunkParser::*_state)(char ch);
-        unsigned _chunkSize;
+        std::size_t _chunkSize;
 };
 
 class HttpBuffer : public std::streambuf
@@ -113,7 +113,7 @@ class HttpBuffer : public std::streambuf
         ChunkParser _chunkParser;
         std::streambuf* _sbuf;
         char _buffer[4096];
-        long _contentLength;
+        std::size_t _contentLength;
         bool _chunked;
         bool _keepAlive;
 };

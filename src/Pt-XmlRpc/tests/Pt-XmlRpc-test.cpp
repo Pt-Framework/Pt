@@ -239,7 +239,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             {
                 multiply.begin();
             }
-            catch (const std::exception& e)
+            catch (const std::exception&)
             {
                 //PT_UNIT_ASSERT_MSG(false, std::string("unexpected exception ") + typeid(e).name() + ": " + e.what());
                 //Boolean();

@@ -182,7 +182,7 @@ void HttpClientImpl::verifyHeader(const Http::Reply& reply)
         throw std::runtime_error(msg.str());
     }
 
-    if (! reply.header().isValue("Content-Type", "text/xml"))
+    if (! reply.header().isSet("Content-Type", "text/xml"))
     {
         std::ostringstream msg;
         const char* ct = reply.header().get("Content-Type");

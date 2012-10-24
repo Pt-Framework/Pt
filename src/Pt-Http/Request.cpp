@@ -36,41 +36,41 @@ namespace Http {
 
 void Request::beginReceive()
 { 
-    _isReceiving = true;
-    _body.setInput(_conn->buffer());
-    _conn->beginReceiveRequest(*this);
+    setReceiving(true);
+    Message::setBuffer( connection().buffer() );
+    connection().beginReceiveRequest(*this);
     
 }
 
 
 void Request::send(bool finish)
 {
-    _finished = finish;
-    _body.setOutput();
-    _conn->sendRequest(*this); 
+    setFinished(finish);
+    Message::setBuffer(Message::buffer());
+    connection().sendRequest(*this); 
 }
 
 
 MessageProgress Request::endReceive()
 { 
-    _isReceiving = false;
-    return _conn->endReceiveRequest(); 
+    setReceiving(false);
+    return connection().endReceiveRequest(); 
 }
 
 
 void Request::beginSend(bool finished)
 { 
-    _finished = finished;
-    _isSending = true;
-    _body.setOutput();
-    _conn->beginSendRequest(*this); 
+    setFinished(finished);
+    setSending(true);
+    Message::setBuffer( Message::buffer() );
+    connection().beginSendRequest(*this); 
 }
 
 
 MessageProgress Request::endSend()
 { 
-    _isSending = false;
-    return _conn->endSendRequest(); 
+    setSending(false);
+    return connection().endSendRequest(); 
 }
 
 
@@ -78,10 +78,10 @@ void Request::clear()
 {
     _method = "GET";
     _qparams.clear();
-    _header.clear();
-    _body.clear();
-    _body.discard();
-    _finished = false;
+    Message::header().clear();
+    Message::body().clear();
+    Message::discard();
+    setFinished(false);
 }
 
 } // namespace Http

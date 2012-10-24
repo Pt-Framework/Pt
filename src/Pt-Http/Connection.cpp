@@ -217,7 +217,7 @@ void Connection::sendRequest(Request& request)
     }
     
     std::ostream& os = _os; 
-    MessageBuffer& mbuf = request.body().buffer();
+    MessageBuffer& mbuf = request.buffer();
 
     if( request.isFinished() )
     {
@@ -225,7 +225,7 @@ void Connection::sendRequest(Request& request)
         
         if(_chunked)
         {
-            log_debug("sending last HTTP chunk: "  << request.body().buffer().size() << " bytes");
+            log_debug("sending last HTTP chunk: "  << mbuf.size() << " bytes");
             if(mbuf.size() > 0)
             {
                 os << std::hex << mbuf.size() << std::dec << "\r\n";
@@ -252,9 +252,9 @@ void Connection::sendRequest(Request& request)
             writeRequestHeader(os, request);
         }
 
-        log_debug("sending HTTP chunk: "  << request.body().buffer().size() << " bytes");
+        log_debug("sending HTTP chunk: "  << mbuf.size() << " bytes");
 
-        if(request.body().buffer().size() > 0)
+        if(mbuf.size() > 0)
         {
             os << std::hex << mbuf.size() << std::dec << "\r\n";
             os.write( mbuf.data(), mbuf.size() );
@@ -297,7 +297,7 @@ void Connection::receiveReply(Reply& reply)
 
     _httpbuf.reset();
     _httpbuf.beginBody( reply.header() );
-    log_debug("reply size: " << reply.header().contentLength() << ", chunked: " << reply.header().chunkedTransferEncoding());
+    log_debug("reply size: " << reply.header().contentLength() << ", chunked: " << reply.header().isChunked());
 
     // stuff whole body into MessageBuffer...
     reply.body() << &_httpbuf;
@@ -305,7 +305,7 @@ void Connection::receiveReply(Reply& reply)
 
     _replyParser.reset(true);
             
-    bool keepalive = reply.header().keepAlive();
+    bool keepalive = reply.header().isKeepAlive();
     if( ! keepalive )
     {
         log_debug("closing, no keep alive");
@@ -341,7 +341,7 @@ void Connection::beginSendRequest(Request& request)
 #endif
 
     std::ostream& os = _os; //( _httpbuf.buffer() );
-    MessageBuffer& mbuf = _request->body().buffer();
+    MessageBuffer& mbuf = _request->buffer();
 
     if( request.isFinished() )
     {
@@ -349,7 +349,7 @@ void Connection::beginSendRequest(Request& request)
         
         if(_chunked)
         {
-            log_debug("sending last HTTP chunk: "  << _request->body().buffer().size() << " bytes");
+            log_debug("sending last HTTP chunk: "  << mbuf.size() << " bytes");
             if(mbuf.size() > 0)
             {
                 os << std::hex << mbuf.size() << std::dec << "\r\n";
@@ -381,9 +381,9 @@ void Connection::beginSendRequest(Request& request)
         writeRequestHeader(os, request);
     }
 
-    log_debug("sending HTTP chunk: "  << _request->body().buffer().size() << " bytes");
+    log_debug("sending HTTP chunk: "  << mbuf.size() << " bytes");
 
-    if(_request->body().buffer().size() > 0)
+    if(mbuf.size() > 0)
     {
         os << std::hex << mbuf.size() << std::dec << "\r\n";
         os.write( mbuf.data(), mbuf.size() );
@@ -457,9 +457,9 @@ void Connection::beginSendReply(Reply& reply)
 
     MessageHeader& header = _reply->header();
     std::ostream& os =  _os; //( _httpbuf.buffer() );
-    MessageBuffer& mbuf = _reply->body().buffer();
+    MessageBuffer& mbuf = _reply->buffer();
 
-    _keepAlive = _keepAlive && header.keepAlive();
+    _keepAlive = _keepAlive && header.isKeepAlive();
 
     if( ! _keepAlive && outputAvailable() )
     {
@@ -471,7 +471,7 @@ void Connection::beginSendReply(Reply& reply)
     {
         if(_chunked)
         {
-            if(_reply->body().buffer().size() > 0)
+            if(mbuf.size() > 0)
             {
                 os << std::hex << mbuf.size() << std::dec << "\r\n";
                 os.write( mbuf.data(), mbuf.size() );
@@ -510,7 +510,7 @@ void Connection::beginSendReply(Reply& reply)
         writeReplyHeader(os, *_reply);
     }
 
-    if(_reply->body().buffer().size() > 0)
+    if(mbuf.size() > 0)
     {
         os << std::hex << mbuf.size() << std::dec << "\r\n";
         os.write( mbuf.data(), mbuf.size() );
@@ -683,7 +683,7 @@ MessageProgress Connection::endReceiveRequest()
             return progress;
         }
 
-        _keepAlive = _request->header().keepAlive();
+        _keepAlive = _request->header().isKeepAlive();
         progress.setHeader();
         _httpbuf.reset();
         _httpbuf.beginBody( _request->header() );
@@ -817,7 +817,7 @@ MessageProgress Connection::endReceiveReply()
             log_debug("reply body finished");
             progress.setFinished();
             
-            bool keepalive = _reply->header().keepAlive();
+            bool keepalive = _reply->header().isKeepAlive();
             
             _reply = 0;
             _replyParser.reset(true);
@@ -1120,7 +1120,7 @@ void Connection::writeRequestHeader(std::ostream& os, Request& request)
     MessageHeader::ConstIterator it;
     for (it = header.begin(); it != header.end(); ++it)
     {
-        os << it->first << ": " << it->second << "\r\n";
+        os << it->name() << ": " << it->value() << "\r\n";
     }
 
     if(_chunked)
@@ -1130,7 +1130,7 @@ void Connection::writeRequestHeader(std::ostream& os, Request& request)
     else
     {
         os.write("Content-Length: ", 16);
-        putInt( oit, request.body().buffer().size() );
+        putInt( oit, request.buffer().size() );
         os.write("\r\n", 2);
     }
 
@@ -1188,7 +1188,7 @@ void Connection::writeReplyHeader(std::ostream& os, Reply& reply)
     MessageHeader::ConstIterator it;
     for(it = header.begin(); it != header.end(); ++it)
     {
-        os << it->first << ": " << it->second << "\r\n";
+        os << it->name() << ": " << it->value() << "\r\n";
     }
 
     if( ! header.has("Connection") )
@@ -1203,7 +1203,7 @@ void Connection::writeReplyHeader(std::ostream& os, Reply& reply)
     else
     {
         os.write("Content-Length: ", 16);
-        putInt( oit, _reply->body().buffer().size() ); 
+        putInt( oit, _reply->buffer().size() ); 
         os.write("\r\n", 2);
     }
 

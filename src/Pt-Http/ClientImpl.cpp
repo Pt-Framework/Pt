@@ -79,7 +79,7 @@ void ClientImpl::send(bool finished)
         _req.send(finished);
 
         log_debug("sent http request completed");
-        _req.body().discard();
+        _req.discard();
             
         if( _req.isFinished() )
         {
@@ -116,7 +116,7 @@ std::istream& ClientImpl::receive()
         log_debug("request completed");
         _hstate = OnReply;
         ++_requestCount;
-        _req.body().discard();
+        _req.discard();
     }
 
     if(_hstate == OnReply || _hstate == OnRequestComplete || _hstate == OnReplyComplete)
@@ -181,7 +181,7 @@ MessageProgress ClientImpl::endSend()
         if( progress.finished() )
         {
             log_debug("sent http request completed");
-            _req.body().discard();
+            _req.discard();
             
             if( _req.isFinished() )
             {
@@ -246,7 +246,7 @@ MessageProgress ClientImpl::endReceive()
         if( progress.finished() )
         {
             log_debug("request completed");
-            _req.body().discard();
+            _req.discard();
 
             _hstate = OnReply;
             ++_requestCount;

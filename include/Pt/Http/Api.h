@@ -33,7 +33,7 @@
 #define PT_HTTP_VERSION_MAJOR 1
 #define PT_HTTP_VERSION_MINOR 0
 #define PT_HTTP_VERSION_REVISION 0
- 
+
 #if defined(PT_HTTP_API_EXPORT)
 #    define PT_HTTP_API PT_EXPORT
 #  else
@@ -50,5 +50,5 @@ namespace Http {
 } // namespace Net
 
 } // namespace Pt
- 
+
 #endif

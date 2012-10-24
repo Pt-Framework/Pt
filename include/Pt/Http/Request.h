@@ -38,18 +38,13 @@ namespace Pt {
 
 namespace Http {
 
-class Connection;
-
-class PT_HTTP_API Request
+class PT_HTTP_API Request : public Message
 {
     friend class Connection;
 
     public:
         explicit Request( Http::Connection& conn, const std::string& url = std::string() )
-        : _conn(&conn)
-        , _isReceiving(false)
-        , _isSending(false)
-        , _finished(false)
+        : Message(conn)
         , _url(url)
         , _method("GET")
         { }
@@ -72,42 +67,21 @@ class PT_HTTP_API Request
         void setQParams(const std::string& p)
         { _qparams = p; }
 
-        Connection& connection()
-        { return *_conn; }
-
-        void send(bool finish = true);
-
         void beginReceive();
 
         MessageProgress endReceive();
 
-        bool isReceiving() const
-        { return _isReceiving; }
+        void send(bool finish = true);
 
         void beginSend(bool finish = true);
 
         MessageProgress endSend();
-
-        bool isSending() const
-        { return _isSending; }
-
-        bool isFinished() const
-        { return _finished; }
 
         Signal<Request&>& inputReceived()
         { return _inputReceived; }
 
         Signal<Request&>& outputSent()
         { return _outputSent; }
-
-        MessageHeader& header()
-        { return _header; }
-
-        const MessageHeader& header() const
-        { return _header; }
-
-        MessageBody& body()
-        { return _body; }
 
         void clear();
 
@@ -119,15 +93,9 @@ class PT_HTTP_API Request
         { _outputSent.send(*this); }
 
     private:
-        Http::Connection* _conn;
-        bool _isReceiving; // TODO: move to Connection
-        bool _isSending; // TODO: move to Connection
-        bool _finished;
         std::string _url;
         std::string _method;
         std::string _qparams;
-        MessageHeader _header;
-        MessageBody _body;
         Signal<Request&> _inputReceived;
         Signal<Request&> _outputSent;
 };

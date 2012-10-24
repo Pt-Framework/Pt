@@ -39,24 +39,17 @@ namespace Pt {
 
 namespace Http {
 
-class Connection;
-
-class PT_HTTP_API Reply
+class PT_HTTP_API Reply : public Message
 {
     friend class Connection;
 
     public:
-        Reply(Http::Connection& conn)
-        : _conn(&conn)
-        , _isReceiving(false)
-        , _isSending(false)
-        , _finished(false)
+        explicit Reply(Http::Connection& conn)
+        : Message(conn)
         , _statusCode(200)
         , _statusText("OK")
-        { }
-        
-        Connection& connection()
-        { return *_conn; }
+        { 
+        }
         
         void setStatus(unsigned c, const std::string& t)
         {
@@ -76,33 +69,15 @@ class PT_HTTP_API Reply
 
         MessageProgress endReceive();
 
-        bool isReceiving() const
-        { return _isReceiving; }
-
         void beginSend(bool finish = true);
 
         MessageProgress endSend();
-
-        bool isSending() const
-        { return _isSending; }
-
-        bool isFinished() const
-        { return _finished; }
 
         Signal<Reply&>& inputReceived()
         { return _inputReceived; }
 
         Signal<Reply&>& outputSent()
         { return _outputSent; }
-
-        MessageHeader& header()
-        { return _header; }
-
-        const MessageHeader& header() const
-        { return _header; }
-
-        MessageBody& body()
-        { return _body; }
 
         void clear();
 
@@ -114,14 +89,8 @@ class PT_HTTP_API Reply
         { _outputSent.send(*this); }
 
     private:
-        Http::Connection* _conn;
-        bool _isReceiving; // TODO: move to Connection
-        bool _isSending; // TODO: move to Connection
-        bool _finished;
         unsigned _statusCode;
         std::string _statusText;
-        MessageHeader _header;
-        MessageBody _body;
         Signal<Reply&> _inputReceived;
         Signal<Reply&> _outputSent;
 };

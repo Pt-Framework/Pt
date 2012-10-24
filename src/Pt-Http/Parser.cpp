@@ -110,7 +110,7 @@ namespace Http {
 
     void HeaderParser::MessageHeaderEvent::onKey(const std::string& key)
     {
-        strncpy(_key, key.c_str(), MessageHeader::MaxHeaderSize);
+        strncpy(_key, key.c_str(), MaxKeySize);
     }
 
     void HeaderParser::MessageHeaderEvent::onValue(const std::string& value)

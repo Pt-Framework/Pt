@@ -74,6 +74,169 @@ namespace Pt {
 
 namespace Http {
 
+MessageHeader::MessageHeader()
+: _endOffset(0)
+, _httpVersionMajor(1)
+, _httpVersionMinor(1)
+{
+    _rawdata[0] = _rawdata[1] = '\0';
+}
+
+
+MessageHeader::~MessageHeader()  
+{
+}
+
+
+const char* MessageHeader::get(const char* key) const
+{
+    for (ConstIterator it = begin(); it != end(); ++it)
+    {
+        if (compareIgnoreCase(key, it->name()) == 0)
+            return it->value();
+    }
+
+    return 0;
+}
+
+
+bool MessageHeader::isSet(const char* key, const char* value) const
+{
+    const char* h = get(key);
+    if (h == 0)
+        return false;
+    return compareIgnoreCase(h, value) == 0;
+}
+
+
+void MessageHeader::clear()
+{
+    _rawdata[0] = _rawdata[1] = '\0';
+    _endOffset = 0;
+    _httpVersionMajor = 1;
+    _httpVersionMinor = 1;
+}
+
+
+void MessageHeader::set(const char* key, const char* value)
+{
+    log_debug("MessageHeader::set(\"" << key << "\", \"" << value << "\", " << replace << ')');
+    remove(key);
+    add(key, value);
+}
+
+
+void MessageHeader::add(const char* key, const char* value)
+{ 
+    log_debug("MessageHeader::add(\"" << key << "\", \"" << value << "\", " << replace << ')');
+
+    if( ! *key)
+        throw std::invalid_argument("header key is NULL");
+
+    char* p = eptr();
+
+    size_t lk = strlen(key);     // length of key
+    size_t lv = strlen(value);   // length of value
+
+    if (p - _rawdata + lk + lv + 2 > MaxHeaderSize)
+        throw HttpError("message header too big");
+
+    std::strcpy(p, key);   // copy key
+    p += lk + 1;
+    std::strcpy(p, value); // copy value
+    p[lv + 1] = '\0';      // put new message end marker in place
+
+    _endOffset = (p + lv + 1) - _rawdata;
+}
+
+
+void MessageHeader::remove(const char* key)
+{
+    if( ! *key)
+        throw std::invalid_argument("header key is NULL");
+
+    char* p = eptr();
+
+    ConstIterator it = begin();
+    while (it != end())
+    {
+        if (compareIgnoreCase(key, it->name()) == 0)
+        {
+            unsigned slen = it->value() - it->name() + std::strlen(it->value()) + 1;
+
+            std::memcpy(
+                const_cast<char*>(it->name()),
+                it->name() + slen,
+                p - it->name() + slen);
+
+            p -= slen;
+
+            it.fixup();
+        }
+        else
+            ++it;
+    }
+
+    _endOffset = p - _rawdata;
+}
+
+
+bool MessageHeader::isChunked() const
+{
+    return isSet("Transfer-Encoding", "chunked");
+}
+
+
+std::size_t MessageHeader::contentLength() const
+{
+    const char* s = get("Content-Length");
+    if (s == 0)
+        return 0;
+
+    std::size_t size = 0;
+    while (*s >= '0' && *s <= '9')
+        size = size * 10 + (*s++ - '0');
+
+    return size;
+}
+
+
+bool MessageHeader::isKeepAlive() const
+{
+    const char* ch = get("Connection");
+
+    if (ch == 0)
+        return versionMajor() == 1
+            && versionMinor() >= 1;
+    else
+        return compareIgnoreCase(ch, "keep-alive") == 0;
+}
+
+
+char* MessageHeader::htdateCurrent(char* buffer)
+{
+    int year = 0;
+    unsigned month = 0;
+    unsigned day = 0;
+    unsigned hour = 0;
+    unsigned min = 0;
+    unsigned sec = 0;
+    unsigned msec = 0;
+
+    DateTime dt = System::Clock::getSystemTime();
+    dt.get(year, month, day, hour, min, sec, msec);
+    unsigned dayOfWeek = dt.date().dayOfWeek();
+
+    static const char* wdays[] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
+    static const char* months[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                                   "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+    sprintf(buffer, "%s, %02d %s %d %02d:%02d:%02d GMT",
+                    wdays[dayOfWeek], day, months[month-1], year, hour, min, sec);
+
+    return buffer;
+}
+
+
 MessageBuffer::MessageBuffer()
 : _buffer(0)
 , _bufferSize(0)
@@ -143,168 +306,27 @@ MessageBuffer::int_type MessageBuffer::underflow()
 }
 
 
-MessageBody::MessageBody()
-: std::iostream(0)
+Message::Message(Http::Connection& conn)
+: _conn(&conn)
+, _ios(&_buf)
+, _isSending(false)
+, _isReceiving(false)
+, _finished(false)
 { 
-    std::iostream::init(&_buf);
 }
 
 
-void MessageBody::discard()
+void Message::discard()
 { 
     _buf.discard(); 
 
-    std::streambuf* sb = this->rdbuf();
+    std::streambuf* sb = _ios.rdbuf();
     if(sb != &_buf)
     {
         std::streamsize avail = sb->in_avail();
         while(avail--)
             sb->sbumpc();
     }
-}
-
-
-const char* MessageHeader::get(const char* key) const
-{
-    for (ConstIterator it = begin(); it != end(); ++it)
-    {
-        if (compareIgnoreCase(key, it->first) == 0)
-            return it->second;
-    }
-
-    return 0;
-}
-
-
-bool MessageHeader::isValue(const char* key, const char* value) const
-{
-    const char* h = get(key);
-    if (h == 0)
-        return false;
-    return compareIgnoreCase(h, value) == 0;
-}
-
-
-void MessageHeader::clear()
-{
-    _rawdata[0] = _rawdata[1] = '\0';
-    _endOffset = 0;
-    _httpVersionMajor = 1;
-    _httpVersionMinor = 1;
-}
-
-
-void MessageHeader::set(const char* key, const char* value, bool replace)
-{
-    log_debug("setHeader(\"" << key << "\", \"" << value << "\", " << replace << ')');
-
-    if( ! *key)
-        throw std::invalid_argument("header key is NULL");
-
-    if (replace)
-        remove(key);
-
-    char* p = eptr();
-
-    size_t lk = strlen(key);     // length of key
-    size_t lv = strlen(value);   // length of value
-
-    if (p - _rawdata + lk + lv + 2 > MaxHeaderSize)
-        throw HttpError("message header too big");
-
-    std::strcpy(p, key);   // copy key
-    p += lk + 1;
-    std::strcpy(p, value); // copy value
-    p[lv + 1] = '\0';      // put new message end marker in place
-
-    _endOffset = (p + lv + 1) - _rawdata;
-}
-
-
-void MessageHeader::remove(const char* key)
-{
-    if( ! *key)
-        throw std::invalid_argument("header key is NULL");
-
-    char* p = eptr();
-
-    ConstIterator it = begin();
-    while (it != end())
-    {
-        if (compareIgnoreCase(key, it->first) == 0)
-        {
-            unsigned slen = it->second - it->first + std::strlen(it->second) + 1;
-
-            std::memcpy(
-                const_cast<char*>(it->first),
-                it->first + slen,
-                p - it->first + slen);
-
-            p -= slen;
-
-            it.fixup();
-        }
-        else
-            ++it;
-    }
-
-    _endOffset = p - _rawdata;
-}
-
-
-bool MessageHeader::chunkedTransferEncoding() const
-{
-    return isValue("Transfer-Encoding", "chunked");
-}
-
-
-std::size_t MessageHeader::contentLength() const
-{
-    const char* s = get("Content-Length");
-    if (s == 0)
-        return 0;
-
-    std::size_t size = 0;
-    while (*s >= '0' && *s <= '9')
-        size = size * 10 + (*s++ - '0');
-
-    return size;
-}
-
-
-bool MessageHeader::keepAlive() const
-{
-    const char* ch = get("Connection");
-
-    if (ch == 0)
-        return versionMajor() == 1
-            && versionMinor() >= 1;
-    else
-        return compareIgnoreCase(ch, "keep-alive") == 0;
-}
-
-
-char* MessageHeader::htdateCurrent(char* buffer)
-{
-    int year = 0;
-    unsigned month = 0;
-    unsigned day = 0;
-    unsigned hour = 0;
-    unsigned min = 0;
-    unsigned sec = 0;
-    unsigned msec = 0;
-
-    DateTime dt = System::Clock::getSystemTime();
-    dt.get(year, month, day, hour, min, sec, msec);
-    unsigned dayOfWeek = dt.date().dayOfWeek();
-
-    static const char* wday[] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
-    static const char* monthn[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun",
-                                   "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
-    sprintf(buffer, "%s, %02d %s %d %02d:%02d:%02d GMT",
-                    wday[dayOfWeek], day, monthn[month-1], year, hour, min, sec);
-
-    return buffer;
 }
 
 } // namespace Http

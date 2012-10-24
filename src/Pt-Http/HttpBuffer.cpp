@@ -245,9 +245,9 @@ void HttpBuffer::beginBody(const MessageHeader& reply)
 
     setg(0,0,0);
 
-    _keepAlive = reply.keepAlive();
+    _keepAlive = reply.isKeepAlive();
     _contentLength = reply.contentLength();
-    _chunked = reply.chunkedTransferEncoding();
+    _chunked = reply.isChunked();
 
     log_debug("keep-alive: " << _keepAlive);
     log_debug("chunked: " << _chunked);
@@ -337,7 +337,7 @@ void HttpBuffer::import(std::streamsize n)
          _buffer + MaxPutback,           // gptr - current position
          _buffer + MaxPutback + n);      // egptr - end of get area
 
-    _contentLength -= n;
+    _contentLength -= static_cast<std::size_t>(n);
     log_debug("remaining content length: " << _contentLength);
 }
 

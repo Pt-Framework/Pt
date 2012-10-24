@@ -61,7 +61,7 @@ class ParserTest : public Pt::Unit::TestSuite, private Pt::Http::HeaderParser::E
 
             std::istringstream msg("GET /foo HTTP/1.0\r\n\r\n");
 
-            bool end = parser.advance(msg);
+            bool end = parser.advance(msg) != 0;
 
             PT_UNIT_ASSERT(parser.end());
             PT_UNIT_ASSERT(end);
@@ -76,7 +76,7 @@ class ParserTest : public Pt::Unit::TestSuite, private Pt::Http::HeaderParser::E
 
             std::istringstream msg("GET /foo HTTP/1.0\r\nUser-Agent: Pt-Unit\nContent-Size:47\r\n\r\n");
 
-            bool end = parser.advance(msg);
+            bool end = parser.advance(msg) != 0;
 
             PT_UNIT_ASSERT(parser.end());
             PT_UNIT_ASSERT(end);
@@ -91,7 +91,7 @@ class ParserTest : public Pt::Unit::TestSuite, private Pt::Http::HeaderParser::E
 
             std::istringstream msg("GET /foo HTTP/1.0\r\nContent-Size:47\nFoo:line1\r\n line2\n line3\nBar:bar\r\n\r\n");
 
-            bool end = parser.advance(msg);
+            bool end = parser.advance(msg) != 0;
 
             PT_UNIT_ASSERT(parser.end());
             PT_UNIT_ASSERT(end);
@@ -106,7 +106,7 @@ class ParserTest : public Pt::Unit::TestSuite, private Pt::Http::HeaderParser::E
 
             std::istringstream msg("PUT   /foo   HTTP  /  1  .  0  \r\n  Content-Size  :  47  \r\n\r\n");
 
-            bool end = parser.advance(msg);
+            bool end = parser.advance(msg) != 0;
 
             PT_UNIT_ASSERT(parser.end());
             PT_UNIT_ASSERT(end);
@@ -121,7 +121,7 @@ class ParserTest : public Pt::Unit::TestSuite, private Pt::Http::HeaderParser::E
 
             std::istringstream msg("GET /foo+bar?a=4&b=Hello+World HTTP/1.1\r\n\r\n");
 
-            bool end = parser.advance(msg);
+            bool end = parser.advance(msg) != 0;
 
             PT_UNIT_ASSERT(parser.end());
             PT_UNIT_ASSERT(end);
@@ -136,7 +136,7 @@ class ParserTest : public Pt::Unit::TestSuite, private Pt::Http::HeaderParser::E
 
             std::istringstream msg("HTTP/1.1 200 OK\r\nConnection:close\nContent-Type : text/xml\r\n\r\n");
 
-            bool end = parser.advance(msg);
+            bool end = parser.advance(msg) != 0;
 
             PT_UNIT_ASSERT(parser.end());
             PT_UNIT_ASSERT(end);

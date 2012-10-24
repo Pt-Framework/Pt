@@ -57,8 +57,9 @@ class PT_HTTP_API HeaderParser
 
         class PT_HTTP_API MessageHeaderEvent : public Event
         {
+                static const unsigned MaxKeySize = 512;
                 MessageHeader* _header;
-                char _key[MessageHeader::MaxHeaderSize];
+                char _key[MaxKeySize];
 
             public:
                 explicit MessageHeaderEvent(MessageHeader& header)

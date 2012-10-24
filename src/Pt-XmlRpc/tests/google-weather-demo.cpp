@@ -18,6 +18,7 @@
 #include <Pt/Event.h>
 #include <Pt/Main.h>
 #include <iostream>
+#include <cassert>
 #include <ctime>
 
 // This event object can be passed accross thread borders, stored in
@@ -182,7 +183,8 @@ class GoogleWeatherClient : public Pt::Connectable
                     if( ! m )
                         break;
         
-                    n += m;
+                    assert(m >= 0);
+                    n += static_cast<std::size_t>(m);
         
                     while( _reader.advance() ) // Xml::ParseError
                     {
