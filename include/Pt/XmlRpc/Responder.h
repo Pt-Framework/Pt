@@ -70,13 +70,13 @@ class PT_XMLRPC_API XmlRpcResponder : public Http::Responder
         void endReply();
 
     protected:
-        void onBeginRequest(Http::Request& request, Http::Reply& reply);
+        void onBeginRequest(Http::Request& request, Http::Reply& reply, System::EventLoop& loop);
 
-        void onReadRequest(Http::Request& request, Http::Reply& reply);
+        void onReadRequest(Http::Request& request, Http::Reply& reply, System::EventLoop& loop);
 
-        void onBeginReply(Http::Request& request, Http::Reply& reply);
+        void onBeginReply(Http::Request& request, Http::Reply& reply, System::EventLoop& loop);
 
-        void onWriteReply(Http::Request& request, Http::Reply& reply);
+        void onWriteReply(Http::Request& request, Http::Reply& reply, System::EventLoop& loop);
 
         void advance(const Pt::Xml::Node& node);
 

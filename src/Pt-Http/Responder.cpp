@@ -46,15 +46,15 @@ Responder::~Responder()
 { }
 
 
-void Responder::beginRequest(Request& request, Reply& reply)
+void Responder::beginRequest(Request& request, Reply& reply, System::EventLoop& loop)
 {    
-    onBeginRequest(request, reply);
+    onBeginRequest(request, reply, loop);
 }
 
 
-void Responder::readRequest(Request& request, Reply& reply)
+void Responder::readRequest(Request& request, Reply& reply, System::EventLoop& loop)
 {
-    onReadRequest(request, reply);
+    onReadRequest(request, reply, loop);
 
     // ignore everything the responder didn't consume
     std::streambuf* sb = request.body().rdbuf();
@@ -70,15 +70,15 @@ void Responder::readRequest(Request& request, Reply& reply)
 }
 
 
-void Responder::beginReply(Request& request, Reply& reply)
+void Responder::beginReply(Request& request, Reply& reply, System::EventLoop& loop)
 { 
-    onBeginReply(request, reply);
+    onBeginReply(request, reply, loop);
 }
 
 
-void Responder::writeReply(Request& request, Reply& reply)
+void Responder::writeReply(Request& request, Reply& reply, System::EventLoop& loop)
 { 
-    onWriteReply(request, reply); 
+    onWriteReply(request, reply, loop); 
 }
 
 } // namespace Http

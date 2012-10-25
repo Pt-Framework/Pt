@@ -80,7 +80,7 @@ XmlRpcResponder::~XmlRpcResponder()
 }
 
 
-void XmlRpcResponder::onBeginRequest(Http::Request& request, Http::Reply& reply)
+void XmlRpcResponder::onBeginRequest(Http::Request& request, Http::Reply& reply, System::EventLoop& loop)
 {
     _state = OnBegin;
     _ts.attach( request.body() );
@@ -88,7 +88,7 @@ void XmlRpcResponder::onBeginRequest(Http::Request& request, Http::Reply& reply)
 }
 
 
-void XmlRpcResponder::onReadRequest(Http::Request& request, Http::Reply& reply)
+void XmlRpcResponder::onReadRequest(Http::Request& request, Http::Reply& reply, System::EventLoop& loop)
 {
    try
    {
@@ -121,7 +121,7 @@ void XmlRpcResponder::onReadRequest(Http::Request& request, Http::Reply& reply)
 }
 
 
-void XmlRpcResponder::onBeginReply(Http::Request& request, Http::Reply& reply)
+void XmlRpcResponder::onBeginReply(Http::Request& request, Http::Reply& reply, System::EventLoop& loop)
 {
     try
     {
@@ -143,8 +143,8 @@ void XmlRpcResponder::onBeginReply(Http::Request& request, Http::Reply& reply)
             }
         }
 
-        _proc->setResponder(*this);
-        _proc->beginAsync();
+        _proc->init(*this, loop);
+        _proc->beginCall();
     }
     catch (const Fault& fault)
     {
@@ -153,7 +153,7 @@ void XmlRpcResponder::onBeginReply(Http::Request& request, Http::Reply& reply)
 }
 
 
-void XmlRpcResponder::onWriteReply(Http::Request& request, Http::Reply& reply)
+void XmlRpcResponder::onWriteReply(Http::Request& request, Http::Reply& reply, System::EventLoop& loop)
 {
 }
 
@@ -334,7 +334,7 @@ void XmlRpcResponder::advance(const Pt::Xml::Node& node)
                 if( ! _args )
                 {
                     //std::cerr << "-> begin call" << std::endl;
-                    _args = _proc->beginCall();
+                    _args = _proc->beginArgs();
                     if( ! *_args)
                         throw std::runtime_error("too many arguments");
                 }

@@ -55,16 +55,16 @@ class HelloResponder : public Pt::Http::Responder
         : Pt::Http::Responder(s)
         {}
         
-        virtual void onBeginRequest(Pt::Http::Request& request, Pt::Http::Reply& reply)
+        virtual void onBeginRequest(Pt::Http::Request& request, Pt::Http::Reply& reply, Pt::System::EventLoop& loop)
         {}
         
-        virtual void onReadRequest(Pt::Http::Request& request, Pt::Http::Reply& reply)
+        virtual void onReadRequest(Pt::Http::Request& request, Pt::Http::Reply& reply, Pt::System::EventLoop& loop)
         {}
 
-        virtual void onBeginReply(Pt::Http::Request& request, Pt::Http::Reply& reply)
-        { onWriteReply(request, reply); }
+        virtual void onBeginReply(Pt::Http::Request& request, Pt::Http::Reply& reply, Pt::System::EventLoop& loop)
+        { onWriteReply(request, reply, loop); }
 
-        virtual void onWriteReply(Pt::Http::Request& request, Pt::Http::Reply& reply)
+        virtual void onWriteReply(Pt::Http::Request& request, Pt::Http::Reply& reply, Pt::System::EventLoop& loop)
         {
             reply.body() << "Hello World!";
             reply.beginSend(true);
@@ -81,16 +81,16 @@ class ChunkedResponder : public Pt::Http::Responder
         , _chunks(5)
         {}
       
-        virtual void onBeginRequest(Pt::Http::Request& request, Pt::Http::Reply& reply)
+        virtual void onBeginRequest(Pt::Http::Request& request, Pt::Http::Reply& reply, Pt::System::EventLoop& loop)
         { _chunks = 5; }
         
-        virtual void onReadRequest(Pt::Http::Request& request, Pt::Http::Reply& reply)
+        virtual void onReadRequest(Pt::Http::Request& request, Pt::Http::Reply& reply, Pt::System::EventLoop& loop)
         {}
 
-        virtual void onBeginReply(Pt::Http::Request& request, Pt::Http::Reply& reply)
-        { onWriteReply(request, reply); }
+        virtual void onBeginReply(Pt::Http::Request& request, Pt::Http::Reply& reply, Pt::System::EventLoop& loop)
+        { onWriteReply(request, reply, loop); }
 
-        virtual void onWriteReply(Pt::Http::Request& request, Pt::Http::Reply& reply)
+        virtual void onWriteReply(Pt::Http::Request& request, Pt::Http::Reply& reply, Pt::System::EventLoop& loop)
         {
             reply.body() << "Chunk" << _chunks--;
 

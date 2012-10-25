@@ -45,15 +45,18 @@ class EchoService : public Pt::XmlRpc::Service
     public:
         EchoService()
         {
-            registerAsyncMethod("echo", *this, &EchoService::beginEcho);
+            // TODO: better derive from AsyncProcedure
+            registerProcedure("echo", new Pt::XmlRpc::AsyncServiceProcedure<std::string, const std::string&>( Pt::callable(*this, &EchoService::beginEcho) ));
         }
 
         ~EchoService()
         {}
 
     protected:
-        void beginEcho(Pt::XmlRpc::ServiceResult<std::string>& r, const std::string& msg)
+        void beginEcho(Pt::XmlRpc::AsyncResult<std::string>& r, const std::string& msg)
         { 
+            std::cerr << "beginEcho" << std::endl;
+            r.loop();
             r.set(msg);
         }
 };
@@ -78,7 +81,7 @@ int main(int argc, char* argv[])
     Pt::System::MainLoop loop;
     
     EchoService service;
-    service.registerFunction("echo", echo);
+    //service.registerFunction("echo", echo);
     
     Pt::Http::Server server(loop);
 

@@ -86,7 +86,7 @@ class BasicServiceProcedure : public ServiceProcedure
             return new BasicServiceProcedure(*_cb, ctx);
         }
 
-        IComposer** beginCall()
+        IComposer** beginArgs()
         {
             _a1.begin(_v1);
             _a2.begin(_v2);
@@ -204,7 +204,7 @@ class BasicServiceProcedure<R, A1, A2, A3, A4, A5, A6, A7, A8, A9,
             return new BasicServiceProcedure(*_cb, ctx);
         }
 
-        IComposer** beginCall()
+        IComposer** beginArgs()
         {
             _a1.begin(_v1);
             _a2.begin(_v2);
@@ -316,7 +316,7 @@ class BasicServiceProcedure<R, A1, A2, A3, A4, A5, A6, A7, A8,
             return new BasicServiceProcedure(*_cb, ctx);
         }
 
-        IComposer** beginCall()
+        IComposer** beginArgs()
         {
             _a1.begin(_v1);
             _a2.begin(_v2);
@@ -422,7 +422,7 @@ class BasicServiceProcedure<R, A1, A2, A3, A4, A5, A6, A7,
             return new BasicServiceProcedure(*_cb, ctx);
         }
 
-        IComposer** beginCall()
+        IComposer** beginArgs()
         {
             _a1.begin(_v1);
             _a2.begin(_v2);
@@ -522,7 +522,7 @@ class BasicServiceProcedure<R, A1, A2, A3, A4, A5, A6,
             return new BasicServiceProcedure(*_cb, ctx);
         }
 
-        IComposer** beginCall()
+        IComposer** beginArgs()
         {
             _a1.begin(_v1);
             _a2.begin(_v2);
@@ -616,7 +616,7 @@ class BasicServiceProcedure<R, A1, A2, A3, A4, A5,
             return new BasicServiceProcedure(*_cb, ctx);
         }
 
-        IComposer** beginCall()
+        IComposer** beginArgs()
         {
             _a1.begin(_v1);
             _a2.begin(_v2);
@@ -704,7 +704,7 @@ class BasicServiceProcedure<R, A1, A2, A3, A4,
             return new BasicServiceProcedure(*_cb, ctx);
         }
 
-        IComposer** beginCall()
+        IComposer** beginArgs()
         {
             _a1.begin(_v1);
             _a2.begin(_v2);
@@ -786,7 +786,7 @@ class BasicServiceProcedure<R, A1, A2, A3,
             return new BasicServiceProcedure(*_cb, ctx);
         }
 
-        IComposer** beginCall()
+        IComposer** beginArgs()
         {
             _a1.begin(_v1);
             _a2.begin(_v2);
@@ -862,7 +862,7 @@ class BasicServiceProcedure<R, A1, A2,
             return new BasicServiceProcedure(*_cb, ctx);
         }
 
-        IComposer** beginCall()
+        IComposer** beginArgs()
         {
             _a1.begin(_v1);
             _a2.begin(_v2);
@@ -932,7 +932,7 @@ class BasicServiceProcedure<R, A1,
             return new BasicServiceProcedure(*_cb, ctx);
         }
 
-        IComposer** beginCall()
+        IComposer** beginArgs()
         {
             _a1.begin(_v1);
 
@@ -996,9 +996,8 @@ class BasicServiceProcedure<R,
             return new BasicServiceProcedure(*_cb, ctx);
         }
 
-        IComposer** beginCall()
+        IComposer** beginArgs()
         {
-
             return _args;
         }
 
@@ -1021,15 +1020,19 @@ class BasicServiceProcedure<R,
 
 
 template <typename R>
-class ServiceResult
+class AsyncResult
 {
     public:
-        ServiceResult(ServiceProcedure* proc = 0)
-        : _proc(proc)
+        AsyncResult()
+        : _proc(0)
         {}
 
+        // TODO: no init method, pass loop and Responder to AsyncResult
         void init(ServiceProcedure& proc)
         { _proc = &proc; }
+
+        System::EventLoop& loop()
+        { return _proc->loop(); }
 
         R& get()
         { return _rv; }
@@ -1037,7 +1040,7 @@ class ServiceResult
         void set(const R& r)
         {
             _rv = r; 
-            _proc->responder()->endReply();
+            _proc->setReady();
         }
 
     private:
@@ -1050,13 +1053,14 @@ template <typename R, typename A1>
 class AsyncServiceProcedure : public ServiceProcedure
 {
     public:
-        AsyncServiceProcedure( const Callable<void, ServiceResult<R>&, A1>& cb,
+        AsyncServiceProcedure( const Callable<void, AsyncResult<R>&, A1>& cb,
                                SerializationContext* ctx = 0)
         : ServiceProcedure()
         , _cb(0)
         , _a1(ctx)
         , _r(ctx)
         {
+            // TODO: no init method, pass loop and Responder to AsyncResult
             _rv.init(*this);
             _cb = cb.clone();
 
@@ -1072,25 +1076,18 @@ class AsyncServiceProcedure : public ServiceProcedure
             return new AsyncServiceProcedure(*_cb, ctx);
         }
 
-        IComposer** beginCall()
+        IComposer** beginArgs()
         {
             _a1.begin(_v1);
             return _args;
         }
 
-        IDecomposer* endCall()
+        void beginCall()
         {
-            this->beginAsync();
-            return endAsync();
-        }
-
-        void beginAsync( /* System::EventLoop& loop */ )
-        {
-            // _rv.init(loop);
             _cb->call(_rv, _v1);
         }
 
-        IDecomposer* endAsync()
+        IDecomposer* endCall()
         {
             _r.begin(_rv.get(), "");
             return &_r;
@@ -1100,8 +1097,8 @@ class AsyncServiceProcedure : public ServiceProcedure
         typedef typename TypeTraits<A1>::Value V1;
         typedef typename TypeTraits<R>::Value RV;
 
-        Callable<void, ServiceResult<R>&, A1>* _cb;
-        ServiceResult<RV> _rv;
+        Callable<void, AsyncResult<R>&, A1>* _cb;
+        AsyncResult<RV> _rv;
         V1 _v1;
 
         IComposer* _args[2];
@@ -1352,7 +1349,7 @@ class PT_XMLRPC_API Service : public Http::Service
         }
 
         template <typename R, class C, typename A1>
-        void registerAsyncMethod(const std::string& name, C& obj, void (C::*beginMethod)(ServiceResult<R>&, A1) )
+        void registerAsyncMethod(const std::string& name, C& obj, void (C::*beginMethod)(AsyncResult<R>&, A1) )
         {
             ServiceProcedure* proc = new AsyncServiceProcedure<R, A1>( callable(obj, beginMethod) );
             this->registerProcedure(name, proc);

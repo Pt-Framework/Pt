@@ -52,33 +52,36 @@ class ServiceProcedure
     public:
         ServiceProcedure()
         : _resp(0)
+        , _loop(0)
         {}
 
-        void setResponder(XmlRpcResponder& r)
+        // TODO: no init method, pass all to ctor
+        void init(XmlRpcResponder& r, System::EventLoop& loop)
         { _resp = &r; }
 
-        XmlRpcResponder* responder()
-        { return _resp; }
+        System::EventLoop& loop()
+        { return *_loop; }
+
+        void setReady()
+        { _resp->endReply(); }
 
         virtual ~ServiceProcedure()
         {}
 
         virtual ServiceProcedure* clone(SerializationContext* ctx) const = 0;
 
-        // TODO: rename beginArgs
-        virtual IComposer** beginCall() = 0;
+        virtual IComposer** beginArgs() = 0;
 
-        // TODO: obsolete
-        virtual IDecomposer* endCall() = 0;
-
-        // TODO: rename beginCall
-        virtual void beginAsync( /* System::EventLoop& loop */ )
+        virtual void beginCall()
         {
             _resp->endReply();
         }
 
+        virtual IDecomposer* endCall() = 0;      
+
     private:
         XmlRpcResponder* _resp;
+        System::EventLoop* _loop;
 };
 
 }

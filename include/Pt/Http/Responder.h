@@ -33,6 +33,10 @@
 
 namespace Pt {
 
+namespace System {
+class EventLoop;
+}
+
 namespace Http {
 
 class Request;
@@ -52,22 +56,22 @@ class PT_HTTP_API Responder
         const Service& service() const
         { return _service; }
 
-        void beginRequest(Request& request, Reply& reply);
+        void beginRequest(Request& request, Reply& reply, System::EventLoop& loop);
         
-        void readRequest(Request& request, Reply& reply);
+        void readRequest(Request& request, Reply& reply, System::EventLoop& loop);
 
-        void beginReply(Request& request, Reply& reply);
+        void beginReply(Request& request, Reply& reply, System::EventLoop& loop);
 
-        void writeReply(Request& request, Reply& reply);
+        void writeReply(Request& request, Reply& reply, System::EventLoop& loop);
 
     protected:
-        virtual void onBeginRequest(Request& request, Reply& reply) = 0;
+        virtual void onBeginRequest(Request& request, Reply& reply, System::EventLoop& loop) = 0;
         
-        virtual void onReadRequest(Request& request, Reply& reply) = 0;
+        virtual void onReadRequest(Request& request, Reply& reply, System::EventLoop& loop) = 0;
 
-        virtual void onBeginReply(Request& request, Reply& reply) = 0;
+        virtual void onBeginReply(Request& request, Reply& reply, System::EventLoop& loop) = 0;
 
-        virtual void onWriteReply(Request& request, Reply& reply) = 0;
+        virtual void onWriteReply(Request& request, Reply& reply, System::EventLoop& loop) = 0;
 
     private:
         Service& _service;

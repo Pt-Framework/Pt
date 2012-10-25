@@ -232,7 +232,7 @@ bool Acceptor::onRequestBegin()
     _responder = _servlet->service()->getResponder( _request );
             
     assert(_responder);
-    _responder->beginRequest( _request, _reply );
+    _responder->beginRequest( _request, _reply, *_conn.loop() );
 
     if( _reply.isSending() )
     {
@@ -249,7 +249,7 @@ bool Acceptor::onRequestBody()
     if( _responder)
     {
         log_debug("reading request");
-        _responder->readRequest(_request, _reply);
+        _responder->readRequest(_request, _reply, *_conn.loop());
 
         if( _reply.isSending() )
         {
@@ -279,7 +279,7 @@ bool Acceptor::onRequestFinished()
     if(_responder)
     {
         log_debug("request body finished, begin reply");
-        _responder->beginReply(_request, _reply);
+        _responder->beginReply(_request, _reply, *_conn.loop());
         return false;
     }
 
@@ -310,7 +310,7 @@ void Acceptor::onReplySent(Reply& r)
             log_debug("continuing response");
             _reply.discard();
             assert(_responder);
-            _responder->writeReply(_request, _reply);
+            _responder->writeReply(_request, _reply, *_conn.loop());
             return;
         }
 
