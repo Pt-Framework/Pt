@@ -52,7 +52,8 @@ class AsyncEcho : public Pt::XmlRpc::AsyncServiceProcedure<std::string, std::str
             return new AsyncEcho(ctx);
         }
         
-        virtual void beginExecute(const std::string& msg)
+    protected:
+        virtual void onBeginCall(const std::string& msg)
         {
             std::cerr << "beginEcho " << this << std::endl;
             this->loop();

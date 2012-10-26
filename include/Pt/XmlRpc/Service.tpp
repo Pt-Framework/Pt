@@ -948,7 +948,6 @@ class BasicServiceProcedure<R, A1,
 
     private:
         typedef typename TypeTraits<A1>::Value V1;
-
         typedef typename TypeTraits<R>::Value RV;
 
         Callable<R, A1>* _cb;
@@ -1053,41 +1052,17 @@ template <typename R, typename A1>
 class AsyncServiceProcedure : public ServiceProcedure
 {
     public:
-        AsyncServiceProcedure( const Callable<void, AsyncResult<R>&, A1>& cb,
-                               SerializationContext* ctx = 0)
-        : ServiceProcedure()
-        , _cb(0)
-        , _a1(ctx)
-        , _r(ctx)
-        {
-            // TODO: no init method, pass loop and Responder to AsyncResult
-            _rv.init(*this);
-            _cb = cb.clone();
-
-            _args[0] = &_a1;
-            _args[1] = 0;
-        }
-
         AsyncServiceProcedure( SerializationContext* ctx = 0)
         : ServiceProcedure()
-        , _cb(0)
         , _a1(ctx)
         , _r(ctx)
         {
-            // TODO: no init method, pass loop and Responder to AsyncResult
-            _rv.init(*this);
-
             _args[0] = &_a1;
             _args[1] = 0;
         }
 
         ~AsyncServiceProcedure()
         { }
-
-        ServiceProcedure* clone(SerializationContext* ctx) const
-        {
-            return new AsyncServiceProcedure(*_cb, ctx);
-        }
 
         IComposer** beginArgs()
         {
@@ -1097,36 +1072,30 @@ class AsyncServiceProcedure : public ServiceProcedure
 
         void beginCall()
         {
-            //_cb->call(_rv, _v1);
-            beginExecute(_v1);
+            onBeginCall(_v1);
         }
 
         IDecomposer* endCall()
         {
-            _r.begin(_rv.get(), "");
+            _r.begin(_rv, "");
             return &_r;
         }
 
+    protected:
+        virtual void onBeginCall(const A1& a1) = 0;
+
         void setResult(const R& r)
         {
-            _rv.set(r);
-        }
-
-        virtual void beginExecute(const A1& a1)
-        {
+            _rv = r;
+            setReady();
         }
 
     private:
-        typedef typename TypeTraits<A1>::Value V1;
-        typedef typename TypeTraits<R>::Value RV;
-
-        Callable<void, AsyncResult<R>&, A1>* _cb;
-        AsyncResult<RV> _rv;
-        V1 _v1;
-
+        R _rv;
+        A1 _v1;
         IComposer* _args[2];
-        Composer<V1> _a1;
-        Decomposer<RV> _r;
+        Composer<A1> _a1;
+        Decomposer<R> _r;
 };
 
 
@@ -1368,13 +1337,6 @@ class PT_XMLRPC_API Service : public Http::Service
         void registerMethod(const std::string& name, C& obj, R (C::*method)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10) )
         {
             ServiceProcedure* proc = new BasicServiceProcedure<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>( callable(obj, method) );
-            this->registerProcedure(name, proc);
-        }
-
-        template <typename R, class C, typename A1>
-        void registerAsyncMethod(const std::string& name, C& obj, void (C::*beginMethod)(AsyncResult<R>&, A1) )
-        {
-            ServiceProcedure* proc = new AsyncServiceProcedure<R, A1>( callable(obj, beginMethod) );
             this->registerProcedure(name, proc);
         }
 
