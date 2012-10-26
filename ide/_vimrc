@@ -187,8 +187,9 @@ endfunction
 " Find selected text
 :vnoremap <C-f> "fy/<C-r>f<CR>
 :vnoremap <M-f> "fy/<C-r>f<CR>NN
-:inoremap <C-f> <C-o>n
-:inoremap <M-f> <C-o>N
+:inoremap <C-f> <C-o>/
+:inoremap <C-n> <C-o>n
+:inoremap <C-j> <C-o>N
 :nnoremap <C-f> /
 
 " Replace selected text
