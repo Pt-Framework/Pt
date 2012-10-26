@@ -40,13 +40,35 @@ std::string echo(const std::string& msg)
 }
 
 
+class AsyncEcho : public Pt::XmlRpc::AsyncServiceProcedure<std::string, std::string>
+{
+    public:   
+        AsyncEcho(Pt::SerializationContext* ctx = 0)
+        : Pt::XmlRpc::AsyncServiceProcedure<std::string, std::string>(ctx)
+        {}
+
+        Pt::XmlRpc::ServiceProcedure* clone(Pt::SerializationContext* ctx) const
+        {
+            return new AsyncEcho(ctx);
+        }
+        
+        virtual void beginExecute(const std::string& msg)
+        {
+            std::cerr << "beginEcho " << this << std::endl;
+            this->loop();
+            this->setResult(msg);
+        }
+};
+
+
 class EchoService : public Pt::XmlRpc::Service
 {
     public:
         EchoService()
         {
             // TODO: better derive from AsyncProcedure
-            registerProcedure("echo", new Pt::XmlRpc::AsyncServiceProcedure<std::string, const std::string&>( Pt::callable(*this, &EchoService::beginEcho) ));
+            //registerProcedure("echo", new Pt::XmlRpc::AsyncServiceProcedure<std::string, const std::string&>( Pt::callable(*this, &EchoService::beginEcho) ));
+            registerProcedure("echo", new AsyncEcho() );
         }
 
         ~EchoService()

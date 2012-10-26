@@ -34,6 +34,7 @@
 #include <Pt/Http/Service.h>
 #include <Pt/Http/Responder.h>
 #include <Pt/System/EventLoop.h>
+#include <Pt/System/Mutex.h>
 #include <Pt/Decomposer.h>
 #include <Pt/Composer.h>
 #include <Pt/Void.h>

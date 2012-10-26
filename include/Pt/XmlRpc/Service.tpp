@@ -1068,6 +1068,19 @@ class AsyncServiceProcedure : public ServiceProcedure
             _args[1] = 0;
         }
 
+        AsyncServiceProcedure( SerializationContext* ctx = 0)
+        : ServiceProcedure()
+        , _cb(0)
+        , _a1(ctx)
+        , _r(ctx)
+        {
+            // TODO: no init method, pass loop and Responder to AsyncResult
+            _rv.init(*this);
+
+            _args[0] = &_a1;
+            _args[1] = 0;
+        }
+
         ~AsyncServiceProcedure()
         { }
 
@@ -1084,13 +1097,23 @@ class AsyncServiceProcedure : public ServiceProcedure
 
         void beginCall()
         {
-            _cb->call(_rv, _v1);
+            //_cb->call(_rv, _v1);
+            beginExecute(_v1);
         }
 
         IDecomposer* endCall()
         {
             _r.begin(_rv.get(), "");
             return &_r;
+        }
+
+        void setResult(const R& r)
+        {
+            _rv.set(r);
+        }
+
+        virtual void beginExecute(const A1& a1)
+        {
         }
 
     private:
@@ -1369,6 +1392,7 @@ class PT_XMLRPC_API Service : public Http::Service
     private:
         typedef std::map<std::string, ServiceProcedure*> ProcedureMap;
         ProcedureMap _procedures;
+        System::Mutex _mtx;
 };
 
 }
