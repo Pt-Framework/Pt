@@ -86,7 +86,7 @@ Authenticator::Authenticator()
         
 void Authenticator::addAuthentication(const Authentication& auth)
 {
-    _auths[auth.name()] = &auth;
+    _auths.push_back(&auth);
 }
 
 
@@ -109,16 +109,16 @@ bool Authenticator::authenticate(Request& request, const Reply& reply)
     for(std::string::size_type n = 0; n < authType.size(); ++n)
         authType[n] = std::tolower(authType[n]);
 
-    const Authentication* authent = 0;
-    std::map<std::string, const Authentication*>::const_iterator it;
-    it = _auths.find(authType );
-    if( it != _auths.end() )
-       authent = it->second;
-
-    if( ! authent)
-       return false;
-
-    return authent->authenticate(_credentials, request, reply);
+    std::vector<const Authentication*>::const_iterator it;
+    for(it = _auths.begin(); it != _auths.end(); it++)
+    {
+        if(authType == (*it)->name())
+        {
+            return (*it)->authenticate(_credentials, request, reply);
+        }
+    }
+    
+    return false;
 }
 
 } // namespace Http

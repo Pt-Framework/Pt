@@ -33,6 +33,7 @@
 #include <Pt/Http/Credentials.h>
 #include <string>
 #include <map>
+#include <vector>
 
 namespace Pt {
 
@@ -88,7 +89,7 @@ class PT_HTTP_API Authenticator
 
     private:
         std::map<std::string, Credentials> _credentials;
-        std::map<std::string, const Authentication*> _auths;
+        std::vector<const Authentication*> _auths;
         BasicAuthentication _basicAuth;
 };
 
