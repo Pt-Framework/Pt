@@ -37,18 +37,12 @@ namespace Pt {
 
 namespace Http {
 
-Authenticator::Authenticator()
+Authentication::~Authentication()
 {
 }
-     
-        
-void Authenticator::setCredentials(const std::string& realm, const Credentials& cred)
-{ 
-    _credentials[realm] = cred; 
-}
 
 
-bool Authenticator::authenticate(Request& request, const Reply& reply)
+bool BasicAuthentication::authenticate(CredentialsMap& credentials, Request& request, const Reply& reply) const
 { 
     const char* auth = reply.header().get("WWW-Authenticate");
     if( ! auth)
@@ -67,8 +61,8 @@ bool Authenticator::authenticate(Request& request, const Reply& reply)
     getline(iss, token, '"');
     getline(iss, token, '"');
 
-    CredentialsMap::iterator it = _credentials.find(token);
-    if( it == _credentials.end() )
+    CredentialsMap::iterator it = credentials.find(token);
+    if( it == credentials.end() )
         return false;
 
     std::ostringstream oss;
@@ -81,6 +75,50 @@ bool Authenticator::authenticate(Request& request, const Reply& reply)
     //log_debug("set Authorization to " << oss.str());
     request.header().set("Authorization", oss.str().c_str());
     return true; 
+}
+
+
+Authenticator::Authenticator()
+{
+    addAuthentication(_basicAuth);
+}
+     
+        
+void Authenticator::addAuthentication(const Authentication& auth)
+{
+    _auths[auth.name()] = &auth;
+}
+
+
+void Authenticator::setCredentials(const std::string& realm, const Credentials& cred)
+{ 
+    _credentials[realm] = cred; 
+}
+
+
+bool Authenticator::authenticate(Request& request, const Reply& reply)
+{ 
+    const char* auth = reply.header().get("WWW-Authenticate");
+    if( ! auth)
+        return true;
+
+    std::string authType;
+    std::istringstream iss(auth);
+    iss >> authType;
+
+    for(std::string::size_type n = 0; n < authType.size(); ++n)
+        authType[n] = std::tolower(authType[n]);
+
+    const Authentication* authent = 0;
+    std::map<std::string, const Authentication*>::const_iterator it;
+    it = _auths.find(authType );
+    if( it != _auths.end() )
+       authent = it->second;
+
+    if( ! authent)
+       return false;
+
+    return authent->authenticate(_credentials, request, reply);
 }
 
 } // namespace Http

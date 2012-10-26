@@ -41,12 +41,46 @@ namespace Http {
 class Request;
 class Reply;
 
+typedef std::map<std::string, Credentials> CredentialsMap;
+
+class PT_HTTP_API Authentication
+{
+    public:
+        Authentication(const std::string& name)
+        : _name(name) 
+        {}
+
+        virtual ~Authentication();
+
+        const std::string& name() const
+        { return _name; }
+
+        virtual bool authenticate(CredentialsMap& credentials, Request& request, const Reply& reply) const = 0;
+
+    private:
+        std::string _name;
+};
+
+
+class PT_HTTP_API BasicAuthentication : public Authentication
+{
+    public:
+        BasicAuthentication()
+        : Authentication("basic")
+        {}
+
+        virtual ~BasicAuthentication()
+        {}
+
+        virtual bool authenticate(CredentialsMap& credentials, Request& request, const Reply& reply) const;
+};
+
 class PT_HTTP_API Authenticator
 {
-    typedef std::map<std::string, Credentials> CredentialsMap;
-
     public:
         Authenticator();
+
+        void addAuthentication(const Authentication& auth);
         
         void setCredentials(const std::string& realm, const Credentials& cred);
         
@@ -54,6 +88,8 @@ class PT_HTTP_API Authenticator
 
     private:
         std::map<std::string, Credentials> _credentials;
+        std::map<std::string, const Authentication*> _auths;
+        BasicAuthentication _basicAuth;
 };
 
 } // namespace Http
