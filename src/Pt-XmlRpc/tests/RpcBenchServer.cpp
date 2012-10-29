@@ -34,24 +34,16 @@
 #include <Pt/XmlRpc/Service.h>
 #include <Pt/Main.h>
 
-std::string echo(const std::string& msg)
-{
-  return msg;
-}
-
+class EchoService;
 
 class AsyncEcho : public Pt::XmlRpc::AsyncServiceProcedure<std::string, std::string>
 {
     public:   
-        AsyncEcho(Pt::SerializationContext* ctx = 0)
+        AsyncEcho(Pt::SerializationContext& ctx, EchoService& srv)
         : Pt::XmlRpc::AsyncServiceProcedure<std::string, std::string>(ctx)
+        , _srv(&srv)
         {}
 
-        Pt::XmlRpc::ServiceProcedure* clone(Pt::SerializationContext* ctx) const
-        {
-            return new AsyncEcho(ctx);
-        }
-        
     protected:
         virtual void onBeginCall(const std::string& msg)
         {
@@ -59,6 +51,27 @@ class AsyncEcho : public Pt::XmlRpc::AsyncServiceProcedure<std::string, std::str
             this->loop();
             this->setResult(msg);
         }
+
+    private:
+        EchoService* _srv;
+};
+
+
+class AsyncEcho2 : public Pt::XmlRpc::AsyncCall<std::string>
+{
+    public:   
+        AsyncEcho2(Pt::XmlRpc::AsyncResult& result, EchoService& srv, const std::string& msg)
+        : Pt::XmlRpc::AsyncCall<std::string>(result)
+        , _srv(&srv)
+        {}
+
+        virtual void beginCall()
+        {
+            std::cerr << "beginEcho " << this << std::endl;
+        }
+
+    private:
+        EchoService* _srv;
 };
 
 
@@ -67,20 +80,20 @@ class EchoService : public Pt::XmlRpc::Service
     public:
         EchoService()
         {
-            // TODO: better derive from AsyncProcedure
-            //registerProcedure("echo", new Pt::XmlRpc::AsyncServiceProcedure<std::string, const std::string&>( Pt::callable(*this, &EchoService::beginEcho) ));
-            registerProcedure("echo", new AsyncEcho() );
+            registerProcedure("echo", new Pt::XmlRpc::AsyncDef<EchoService, AsyncEcho>(*this));
+
+            /// registerAsync("echo", *this, &EchoService::beginEcho);
+            registerMethod("echo2", *this, &EchoService::echo);
         }
 
-        ~EchoService()
-        {}
+        std::string echo(const std::string& msg)
+        {
+            return msg;
+        }
 
-    protected:
-        void beginEcho(Pt::XmlRpc::AsyncResult<std::string>& r, const std::string& msg)
-        { 
-            std::cerr << "beginEcho" << std::endl;
-            r.loop();
-            r.set(msg);
+        Pt::XmlRpc::AsyncCall<std::string>* beginEcho(Pt::XmlRpc::AsyncResult& result, const std::string& msg)
+        {
+            return new AsyncEcho2(result, *this, msg);
         }
 };
 

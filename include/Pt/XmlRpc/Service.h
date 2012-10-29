@@ -46,19 +46,18 @@ namespace Pt {
 
 namespace XmlRpc {
 
-class XmlRpcResponder;
-
 class ServiceProcedure
 {
     public:
-        ServiceProcedure()
-        : _resp(0)
-        , _loop(0)
+        virtual ~ServiceProcedure()
         {}
 
         // TODO: no init method, pass all to ctor
         void init(XmlRpcResponder& r, System::EventLoop& loop)
-        { _resp = &r; }
+        { 
+            _resp = &r; 
+            _loop = &loop;
+        }
 
         System::EventLoop& loop()
         { return *_loop; }
@@ -66,30 +65,44 @@ class ServiceProcedure
         void setReady()
         { _resp->endReply(); }
 
-        virtual ~ServiceProcedure()
-        {}
-
-        virtual ServiceProcedure* clone(SerializationContext* ctx) const = 0;
-
         virtual IComposer** beginArgs() = 0;
 
-        virtual void beginCall()
-        {
-            _resp->endReply();
-        }
+        virtual void beginCall() = 0;
 
         virtual IDecomposer* endCall() = 0;      
+
+    protected:
+        ServiceProcedure()
+        : _resp(0)
+        , _loop(0)
+        {}
 
     private:
         XmlRpcResponder* _resp;
         System::EventLoop* _loop;
 };
 
-}
 
-}
+class ServiceProcedureDef
+{
+    public:
+        virtual ~ServiceProcedureDef()
+        {}
+
+        ServiceProcedure* createProcedure(SerializationContext& ctx) const
+        { return this->onCreateProcedure(ctx); }
+
+    protected:
+        ServiceProcedureDef()
+        {}
+
+        virtual ServiceProcedure* onCreateProcedure(SerializationContext& ctx) const = 0;
+};
+
+} // namespace XmlRpc
+
+} // namespace Pt
 
 #include <Pt/XmlRpc/Service.tpp>
 
 #endif
-

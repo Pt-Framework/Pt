@@ -48,7 +48,7 @@ Service::~Service()
 }
 
 
-ServiceProcedure* Service::getProcedure(const std::string& name, SerializationContext* ctx)
+ServiceProcedure* Service::getProcedure(const std::string& name, SerializationContext& ctx)
 {
     System::MutexLock lock(_mtx);
 
@@ -57,7 +57,7 @@ ServiceProcedure* Service::getProcedure(const std::string& name, SerializationCo
     ProcedureMap::iterator it = _procedures.find( name );
     if( it != _procedures.end() )
     {
-        proc = it->second->clone(ctx);
+        proc = it->second->createProcedure(ctx);
     }
 
     return proc;
@@ -70,20 +70,20 @@ void Service::releaseProcedure(ServiceProcedure* proc)
 }
 
 
-void Service::registerProcedure(const std::string& name, ServiceProcedure* proc)
+void Service::registerProcedure(const std::string& name, ServiceProcedureDef* procDef)
 {
     System::MutexLock lock(_mtx);
 
     ProcedureMap::iterator it = _procedures.find( name );
     if (it == _procedures.end())
     {
-        std::pair<const std::string, ServiceProcedure*> p( name, proc );
+        std::pair<const std::string, ServiceProcedureDef*> p( name, procDef );
         _procedures.insert( p );
     }
     else
     {
         delete it->second;
-        it->second = proc;
+        it->second = procDef;
     }
 }
 
