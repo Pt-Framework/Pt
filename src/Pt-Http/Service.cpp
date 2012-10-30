@@ -50,7 +50,7 @@ Service::~Service()
 
 Responder* Service::getResponder(const Request& request)
 {
-    Responder* responder = createResponder(request);
+    Responder* responder = onGetResponder(request);
     atomicIncrement(_responderCount);    
     
     return responder;
@@ -62,7 +62,7 @@ void Service::releaseResponder(Responder* responder)
     if( ! responder)
         return;
     
-    destroyResponder(responder);
+    onReleaseResponder(responder);
     atomicDecrement(_responderCount);
 }
 

@@ -64,7 +64,7 @@ Acceptor::~Acceptor()
     {
         assert(_servlet);
         assert(_servlet->authorizer());
-        _servlet->authorizer()->releaseAuthorization(_auth);
+        _servlet->authorizer()->cancelAuthorization(_auth);
     }
 }
 
@@ -124,7 +124,7 @@ void Acceptor::onRequestReceived(Request& req)
                 log_debug("authorization required");
 
                 bool granted = false;
-                _auth = authorizer->authorize(_request, _reply, granted);
+                _auth = authorizer->beginAuthorize(_request, _reply, granted);
                 if(_auth)
                 {
                     log_debug("authorization started");
@@ -181,8 +181,7 @@ void Acceptor::onAuthorization(Authorization& auth)
 
     try
     {
-        bool granted = auth.endAuthorize();
-        _servlet->authorizer()->releaseAuthorization(_auth);
+        bool granted = _servlet->authorizer()->endAuthorization(_auth);
         _auth = 0;
     
         if( ! granted )

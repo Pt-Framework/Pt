@@ -59,7 +59,7 @@ class PT_HTTP_API Service
             The easiest way to ensure this is to call Service::detach in
             the derived class's destructor.
         */
-        virtual Responder* createResponder(const Request&) = 0;
+        virtual Responder* onGetResponder(const Request&) = 0;
         
         /** @brief Destroys a responder created by a server.
             
@@ -68,7 +68,7 @@ class PT_HTTP_API Service
             The easiest way to ensure this is to call Service::detach in
             the derived class's destructor.
         */
-        virtual void destroyResponder(Responder*) = 0;
+        virtual void onReleaseResponder(Responder*) = 0;
 
     private:
         Pt::atomic_t _responderCount;
@@ -88,13 +88,13 @@ class BasicService : public Service
         { }
 
     protected:
-        virtual Responder* createResponder(const Request&)
+        virtual Responder* onGetResponder(const Request&)
         {
             void* r = _alloc.allocate( sizeof(R) );
             return new(r) R(*this);
         }
 
-        virtual void destroyResponder(Responder* r)
+        virtual void onReleaseResponder(Responder* r)
         {
             r->~Responder();
             _alloc.deallocate( r, sizeof(R) );

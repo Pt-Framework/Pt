@@ -91,11 +91,11 @@ const std::string& Authorizer::realm() const
 }
 
 
-Authorization* Authorizer::authorize(const Request& req, Reply& reply, bool& granted) 
+Authorization* Authorizer::beginAuthorize(const Request& req, Reply& reply, bool& granted) 
 {
     granted = false;
     
-    Authorization* auth = this->onAuthorize(req, reply, granted);
+    Authorization* auth = this->onBeginAuthorize(req, reply, granted);
     if(auth)
         atomicIncrement(_useCount);
     
@@ -103,7 +103,18 @@ Authorization* Authorizer::authorize(const Request& req, Reply& reply, bool& gra
 }
 
 
-void Authorizer::releaseAuthorization(Authorization* auth) 
+bool Authorizer::endAuthorization(Authorization* auth) 
+{
+    bool granted = auth->endAuthorize();
+    
+    this->onReleaseAuthorization(auth);
+    atomicDecrement(_useCount);
+    
+    return granted;
+}
+
+
+void Authorizer::cancelAuthorization(Authorization* auth) 
 {
     this->onReleaseAuthorization(auth);
     atomicDecrement(_useCount);
@@ -123,7 +134,7 @@ BasicAuthorizer::~BasicAuthorizer()
 }
 
 
-Authorization* BasicAuthorizer::onAuthorize(const Request& req, Reply& reply, bool& granted)
+Authorization* BasicAuthorizer::onBeginAuthorize(const Request& req, Reply& reply, bool& granted)
 {
     std::string token;
     Credentials cred;
