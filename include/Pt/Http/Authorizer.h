@@ -44,7 +44,7 @@ namespace Http {
 class Request;
 class Reply;
 
-class PT_HTTP_API Authorization : public Pt::NonCopyable
+class PT_HTTP_API Authorization : private Pt::NonCopyable
 {
     public:
         virtual ~Authorization();
@@ -69,7 +69,7 @@ class PT_HTTP_API Authorization : public Pt::NonCopyable
 };
 
 
-class PT_HTTP_API Authorizer : public Pt::NonCopyable
+class PT_HTTP_API Authorizer : private Pt::NonCopyable
 {
     public:
         Authorizer(const std::string& realm);
