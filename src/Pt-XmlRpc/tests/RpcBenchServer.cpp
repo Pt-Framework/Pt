@@ -64,7 +64,6 @@ class AsyncEcho : public Pt::XmlRpc::AsyncCall<std::string, std::string>
         EchoService* _srv;
 };
 
-
 class EchoService : public Pt::XmlRpc::Service
 {
     public:

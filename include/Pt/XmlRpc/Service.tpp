@@ -1133,8 +1133,8 @@ class AsyncCall<R,
 {
     public:
         typedef typename R ReturnT;
-        typedef typename Pt::Void A1;
-        typedef typename Pt::Void A2;
+        typedef typename Pt::Void Arg1T;
+        typedef typename Pt::Void Arg2T;
 
     public:
         AsyncCall(ServiceProcedure& proc)
@@ -1145,7 +1145,7 @@ class AsyncCall<R,
         { this->onBeginCall(); }
 
     protected:
-        virtual void onBeginCall(const A1& a1) = 0;
+        virtual void onBeginCall() = 0;
 };
 
 
@@ -1182,12 +1182,14 @@ class AsyncServiceProcedure<R,
 
         IDecomposer* endCall()
         {
-            _r.begin(_call->get(), "");
+            const R& r = _call->endCall();
+            _r.begin(r, "");
             return &_r;
         }
 
     private:
         AsyncCall<R>* _call;
+        IComposer* _args[1];
         Decomposer<R> _r;
 };
 
