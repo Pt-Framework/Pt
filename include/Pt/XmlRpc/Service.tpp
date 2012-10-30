@@ -1504,7 +1504,7 @@ class PT_XMLRPC_API Service : public Http::Service
         }
 
         template <typename CallT, class C>
-        void registerAsync(const std::string& name, C& obj, CallT* (C::*method)(ServiceProcedure&) )
+        void registerAsyncMethod(const std::string& name, C& obj, CallT* (C::*method)(ServiceProcedure&) )
         {
             ServiceProcedureDef* proc = new AsyncProcedureDef<CallT>( callable(obj, method) );
             this->registerProcedure(name, proc);

@@ -69,7 +69,7 @@ class EchoService : public Pt::XmlRpc::Service
     public:
         EchoService()
         {
-            registerAsync("echo", *this, &EchoService::asyncEcho);
+            registerAsyncMethod("echo", *this, &EchoService::asyncEcho);
             registerMethod("echo2", *this, &EchoService::echo);
         }
 
