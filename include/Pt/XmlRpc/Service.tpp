@@ -153,42 +153,6 @@ class BasicServiceProcedure : public ServiceProcedure
 };
 
 
-template < typename R,
-           typename A1 = Pt::Void,
-           typename A2 = Pt::Void,
-           typename A3 = Pt::Void,
-           typename A4 = Pt::Void,
-           typename A5 = Pt::Void,
-           typename A6 = Pt::Void,
-           typename A7 = Pt::Void,
-           typename A8 = Pt::Void,
-           typename A9 = Pt::Void,
-           typename A10 = Pt::Void >
-class BasicServiceProcedureDef : public ServiceProcedureDef
-{
-    public:
-        BasicServiceProcedureDef(const Callable<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>& cb)
-        : _cb(0)
-        {
-            _cb = cb.clone();
-        }
-
-        ~BasicServiceProcedureDef()
-        {
-            delete _cb;
-        }
-
-    protected:
-        virtual ServiceProcedure* onCreateProcedure(SerializationContext& ctx) const
-        { 
-            return new BasicServiceProcedure<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>(*_cb, ctx); 
-        }
-
-    private:
-        Callable<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>* _cb;
-};
-
-
 // BasicServiceProcedure with 9 arguments
 template < typename R,
            typename A1,
@@ -999,128 +963,6 @@ class BasicServiceProcedure<R, A1,
 
 
 //
-// AsyncServiceProcedure with 1 arguments
-//
-
-// _result has loop
-class AsyncResult
-{
-    public:
-        AsyncResult()
-        {}     
-        
-        void setReady()
-        {}   
-};
-
-
-template <typename R>
-class AsyncCall
-{
-    public:
-        AsyncCall(AsyncResult& result)
-        : _res(&result)
-        {
-        }
-
-        virtual void beginCall()
-        {
-            std::cerr << "beginEcho " << this << std::endl;
-        }
-
-        void setResult(const R& r)
-        {
-            _rv = r;
-            _res->setReady();
-        }
-
-    private:
-        R _rv;
-        AsyncResult* _res;
-};
-
-
-template <typename R, typename A1>
-class AsyncServiceProcedure : public ServiceProcedure
-{
-    public:
-        AsyncServiceProcedure(SerializationContext& ctx)
-        : ServiceProcedure()
-        , _a1(&ctx)
-        , _r(&ctx)
-        {
-            _args[0] = &_a1;
-            _args[1] = 0;
-        }
-
-        IComposer** beginArgs()
-        {
-            _a1.begin(_v1);
-            return _args;
-        }
-
-        virtual void beginCall()
-        {
-            this->onBeginCall(_v1);
-        }
-
-        IDecomposer* endCall()
-        {
-            _r.begin(_rv, "");
-            return &_r;
-        }
-
-    protected:
-        virtual void onBeginCall(const A1& a1) = 0;
-
-        virtual void onBeginCall2(const A1& a1)
-        {
-            // _result has loop
-            AsyncCall<R>* _call = 0 ; //_cb->call(_result, a1);
-            _call->beginCall();
-        }
-
-        void setResult(const R& r)
-        {
-            _rv = r;
-            setReady();
-        }
-
-    private:
-        R _rv;
-        A1 _v1;
-        IComposer* _args[2];
-        Composer<A1> _a1;
-        Decomposer<R> _r;
-};
-
-
-template <typename ServiceT, typename ProcedureT>
-class AsyncDef : public ServiceProcedureDef
-{
-    public:
-        AsyncDef(ServiceT& service)
-        : _service(&service)
-        {
-        }
-
-        virtual ~AsyncDef()
-        {
-        }
-
-    protected:
-        virtual ServiceProcedure* onCreateProcedure(SerializationContext& ctx) const
-        {
-            ProcedureT* proc = new ProcedureT(ctx, *_service);
-            return proc;
-        }
-
-    private:
-        ServiceT* _service;
-};
-
-
-//
 // BasicServiceProcedure with 0 arguments
 //
 
@@ -1181,6 +1023,242 @@ class BasicServiceProcedure<R,
 };
 
 
+//
+// AsyncServiceProcedure with 1 arguments
+//
+
+template <typename R, 
+          typename A1 = Pt::Void>
+class AsyncCall
+{
+    public:
+        typedef typename R ReturnT;
+        typedef typename A1 Arg1T;
+        typedef typename Pt::Void A2;
+
+    public:
+        AsyncCall(ServiceProcedure& proc)
+        : _proc(&proc)
+        { }
+
+        virtual void beginCall(const A1& a1) = 0;
+
+        virtual const R& endCall() = 0;
+
+        void setReady()
+        { _proc->setReady(); }
+
+        System::EventLoop& loop()
+        { return _proc->loop(); }
+
+    private:
+        R _rv;
+        ServiceProcedure* _proc;
+};
+
+
+template <typename R, 
+          typename A1 = Pt::Void>
+class AsyncServiceProcedure : public ServiceProcedure
+{
+    public:
+        AsyncServiceProcedure(SerializationContext& ctx)
+        : ServiceProcedure()
+        , _call(0)
+        , _a1(&ctx)
+        , _r(&ctx)
+        {
+            _args[0] = &_a1;
+            _args[1] = 0;
+        }
+
+        ~AsyncServiceProcedure()
+        {
+            delete _call;
+        }
+
+        void init(AsyncCall<R, A1>* call)
+        { _call = call; }
+
+        IComposer** beginArgs()
+        {
+            _a1.begin(_v1);
+            return _args;
+        }
+
+        virtual void beginCall()
+        {
+            _call->beginCall(_v1);
+        }
+
+        IDecomposer* endCall()
+        {
+            const R& r = _call->endCall();
+            _r.begin(r, "");
+            return &_r;
+        }
+
+    private:
+        AsyncCall<R, A1>* _call;
+        A1 _v1;
+        IComposer* _args[2];
+        Composer<A1> _a1;
+        Decomposer<R> _r;
+};
+
+
+//
+// AsyncServiceProcedure with 0 arguments
+//
+
+template <typename R>
+class AsyncCall<R, 
+                Pt::Void>
+{
+    public:
+        typedef typename R ReturnT;
+        typedef typename Pt::Void A1;
+        typedef typename Pt::Void A2;
+
+    public:
+        AsyncCall(ServiceProcedure& proc)
+        : _proc(&proc)
+        { }
+
+        virtual void beginCall() = 0;
+
+        R& get()
+        { return _rv; }
+
+        void setResult(const R& r)
+        {
+            _rv = r;
+            _proc->setReady();
+        }   
+
+        void setReady()
+        { _proc->setReady(); }
+
+        System::EventLoop& loop()
+        { return _proc->loop(); }
+
+    private:
+        R _rv;
+        ServiceProcedure* _proc;
+};
+
+
+template <typename R>
+class AsyncServiceProcedure<R, 
+                            Pt::Void> : public ServiceProcedure
+{
+    public:
+        AsyncServiceProcedure(SerializationContext& ctx)
+        : ServiceProcedure()
+        , _call(0)
+        , _r(&ctx)
+        {
+            _args[0] = 0;
+        }
+
+        void init(AsyncCall<R>* call)
+        { _call = call; }
+
+        ~AsyncServiceProcedure()
+        {
+            delete _call;
+        }
+
+        IComposer** beginArgs()
+        {
+            return _args;
+        }
+
+        virtual void beginCall()
+        {
+            _call->beginCall();
+        }
+
+        IDecomposer* endCall()
+        {
+            _r.begin(_call->get(), "");
+            return &_r;
+        }
+
+    private:
+        AsyncCall<R>* _call;
+        Decomposer<R> _r;
+};
+
+
+template < typename R,
+           typename A1 = Pt::Void,
+           typename A2 = Pt::Void,
+           typename A3 = Pt::Void,
+           typename A4 = Pt::Void,
+           typename A5 = Pt::Void,
+           typename A6 = Pt::Void,
+           typename A7 = Pt::Void,
+           typename A8 = Pt::Void,
+           typename A9 = Pt::Void,
+           typename A10 = Pt::Void >
+class BasicProcedureDef : public ServiceProcedureDef
+{
+    public:
+        BasicProcedureDef(const Callable<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>& cb)
+        : _cb(0)
+        {
+            _cb = cb.clone();
+        }
+
+        ~BasicProcedureDef()
+        {
+            delete _cb;
+        }
+
+    protected:
+        virtual ServiceProcedure* onCreateProcedure(SerializationContext& ctx) const
+        { 
+            return new BasicServiceProcedure<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>(*_cb, ctx); 
+        }
+
+    private:
+        Callable<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>* _cb;
+};
+
+
+template <typename CallT>
+class AsyncProcedureDef : public ServiceProcedureDef
+{
+    public:
+        AsyncProcedureDef(const Callable<CallT*, ServiceProcedure&>& cb)
+        : _cb(0)
+        {
+            _cb = cb.clone();
+        }
+
+        ~AsyncProcedureDef()
+        {
+            delete _cb;
+        }
+
+    protected:
+        virtual ServiceProcedure* onCreateProcedure(SerializationContext& ctx) const
+        {
+            typedef typename CallT::ReturnT R;
+            typedef typename CallT::Arg1T A1;
+            
+            AsyncServiceProcedure<R, A1>* proc = new AsyncServiceProcedure<R, A1>(ctx);
+            AsyncCall<R, A1>* call = _cb->call(*proc);
+            proc->init(call);
+            return proc;
+        }
+
+    private:
+        const Callable<CallT*, ServiceProcedure&>* _cb;
+};
+
+
 class PT_XMLRPC_API Service : public Http::Service
 {
         friend class XmlRpcResponder;
@@ -1194,231 +1272,238 @@ class PT_XMLRPC_API Service : public Http::Service
         template <typename R>
         void registerFunction(const std::string& name, R (*fn)())
         {
-            ServiceProcedureDef* proc = new BasicServiceProcedureDef<R>(Pt::callable(fn));
+            ServiceProcedureDef* proc = new BasicProcedureDef<R>(Pt::callable(fn));
             this->registerProcedure(name, proc);
         }
 
         template <typename R, typename A1>
         void registerFunction(const std::string& name, R (*fn)(A1))
         {
-            ServiceProcedureDef* proc = new BasicServiceProcedureDef<R, A1>(Pt::callable(fn));
+            ServiceProcedureDef* proc = new BasicProcedureDef<R, A1>(Pt::callable(fn));
             this->registerProcedure(name, proc);
         }
 
         template <typename R, typename A1, typename A2>
         void registerFunction(const std::string& name, R (*fn)(A1, A2))
         {
-            ServiceProcedureDef* proc = new BasicServiceProcedureDef<R, A1, A2>(Pt::callable(fn));
+            ServiceProcedureDef* proc = new BasicProcedureDef<R, A1, A2>(Pt::callable(fn));
             this->registerProcedure(name, proc);
         }
 
         template <typename R, typename A1, typename A2, typename A3>
         void registerFunction(const std::string& name, R (*fn)(A1, A2, A3))
         {
-            ServiceProcedureDef* proc = new BasicServiceProcedureDef<R, A1, A2, A3>(Pt::callable(fn));
+            ServiceProcedureDef* proc = new BasicProcedureDef<R, A1, A2, A3>(Pt::callable(fn));
             this->registerProcedure(name, proc);
         }
 
         template <typename R, typename A1, typename A2, typename A3, typename A4>
         void registerFunction(const std::string& name, R (*fn)(A1, A2, A3, A4))
         {
-            ServiceProcedureDef* proc = new BasicServiceProcedureDef<R, A1, A2, A3, A4>(Pt::callable(fn));
+            ServiceProcedureDef* proc = new BasicProcedureDef<R, A1, A2, A3, A4>(Pt::callable(fn));
             this->registerProcedure(name, proc);
         }
 
         template <typename R, typename A1, typename A2, typename A3, typename A4, typename A5>
         void registerFunction(const std::string& name, R (*fn)(A1, A2, A3, A4, A5))
         {
-            ServiceProcedureDef* proc = new BasicServiceProcedureDef<R, A1, A2, A3, A4, A5>(Pt::callable(fn));
+            ServiceProcedureDef* proc = new BasicProcedureDef<R, A1, A2, A3, A4, A5>(Pt::callable(fn));
             this->registerProcedure(name, proc);
         }
 
         template <typename R, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6>
         void registerFunction(const std::string& name, R (*fn)(A1, A2, A3, A4, A5, A6))
         {
-            ServiceProcedureDef* proc = new BasicServiceProcedureDef<R, A1, A2, A3, A4, A5, A6>(Pt::callable(fn));
+            ServiceProcedureDef* proc = new BasicProcedureDef<R, A1, A2, A3, A4, A5, A6>(Pt::callable(fn));
             this->registerProcedure(name, proc);
         }
 
         template <typename R, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6, typename A7>
         void registerFunction(const std::string& name, R (*fn)(A1, A2, A3, A4, A5, A6, A7))
         {
-            ServiceProcedureDef* proc = new BasicServiceProcedureDef<R, A1, A2, A3, A4, A5, A6, A7>(Pt::callable(fn));
+            ServiceProcedureDef* proc = new BasicProcedureDef<R, A1, A2, A3, A4, A5, A6, A7>(Pt::callable(fn));
             this->registerProcedure(name, proc);
         }
 
         template <typename R, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6, typename A7, typename A8>
         void registerFunction(const std::string& name, R (*fn)(A1, A2, A3, A4, A5, A6, A7, A8))
         {
-            ServiceProcedureDef* proc = new BasicServiceProcedureDef<R, A1, A2, A3, A4, A5, A6, A7, A8>(Pt::callable(fn));
+            ServiceProcedureDef* proc = new BasicProcedureDef<R, A1, A2, A3, A4, A5, A6, A7, A8>(Pt::callable(fn));
             this->registerProcedure(name, proc);
         }
 
         template <typename R, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6, typename A7, typename A8, typename A9>
         void registerFunction(const std::string& name, R (*fn)(A1, A2, A3, A4, A5, A6, A7, A8, A9))
         {
-            ServiceProcedureDef* proc = new BasicServiceProcedureDef<R, A1, A2, A3, A4, A5, A6, A7, A8, A9>(Pt::callable(fn));
+            ServiceProcedureDef* proc = new BasicProcedureDef<R, A1, A2, A3, A4, A5, A6, A7, A8, A9>(Pt::callable(fn));
             this->registerProcedure(name, proc);
         }
 
         template <typename R, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6, typename A7, typename A8, typename A9, typename A10>
         void registerFunction(const std::string& name, R (*fn)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10))
         {
-            ServiceProcedureDef* proc = new BasicServiceProcedureDef<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>(Pt::callable(fn));
+            ServiceProcedureDef* proc = new BasicProcedureDef<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>(Pt::callable(fn));
             this->registerProcedure(name, proc);
         }
 
         template <typename R>
         void registerCallable(const std::string& name, const Callable<R>& cb)
         {
-            ServiceProcedureDef* proc = new BasicServiceProcedureDef<R>(cb);
+            ServiceProcedureDef* proc = new BasicProcedureDef<R>(cb);
             this->registerProcedure(name, proc);
         }
 
         template <typename R, typename A1>
         void registerCallable(const std::string& name, const Callable<R, A1>& cb)
         {
-            ServiceProcedureDef* proc = new BasicServiceProcedureDef<R, A1>(cb);
+            ServiceProcedureDef* proc = new BasicProcedureDef<R, A1>(cb);
             this->registerProcedure(name, proc);
         }
 
         template <typename R, typename A1, typename A2>
         void registerCallable(const std::string& name, const Callable<R, A1, A2>& cb)
         {
-            ServiceProcedureDef* proc = new BasicServiceProcedureDef<R, A1, A2>(cb);
+            ServiceProcedureDef* proc = new BasicProcedureDef<R, A1, A2>(cb);
             this->registerProcedure(name, proc);
         }
 
         template <typename R, typename A1, typename A2, typename A3>
         void registerCallable(const std::string& name, const Callable<R, A1, A2, A3>& cb)
         {
-            ServiceProcedureDef* proc = new BasicServiceProcedureDef<R, A1, A2, A3>(cb);
+            ServiceProcedureDef* proc = new BasicProcedureDef<R, A1, A2, A3>(cb);
             this->registerProcedure(name, proc);
         }
 
         template <typename R, typename A1, typename A2, typename A3, typename A4>
         void registerCallable(const std::string& name, const Callable<R, A1, A2, A3, A4>& cb)
         {
-            ServiceProcedureDef* proc = new BasicServiceProcedureDef<R, A1, A2, A3, A4>(cb);
+            ServiceProcedureDef* proc = new BasicProcedureDef<R, A1, A2, A3, A4>(cb);
             this->registerProcedure(name, proc);
         }
 
         template <typename R, typename A1, typename A2, typename A3, typename A4, typename A5>
         void registerCallable(const std::string& name, const Callable<R, A1, A2, A3, A4, A5>& cb)
         {
-            ServiceProcedureDef* proc = new BasicServiceProcedureDef<R, A1, A2, A3, A4, A5>(cb);
+            ServiceProcedureDef* proc = new BasicProcedureDef<R, A1, A2, A3, A4, A5>(cb);
             this->registerProcedure(name, proc);
         }
 
         template <typename R, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6>
         void registerCallable(const std::string& name, const Callable<R, A1, A2, A3, A4, A5, A6>& cb)
         {
-            ServiceProcedureDef* proc = new BasicServiceProcedureDef<R, A1, A2, A3, A4, A5, A6>(cb);
+            ServiceProcedureDef* proc = new BasicProcedureDef<R, A1, A2, A3, A4, A5, A6>(cb);
             this->registerProcedure(name, proc);
         }
 
         template <typename R, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6, typename A7>
         void registerCallable(const std::string& name, const Callable<R, A1, A2, A3, A4, A5, A6, A7>& cb)
         {
-            ServiceProcedureDef* proc = new BasicServiceProcedureDef<R, A1, A2, A3, A4, A5, A6, A7>(cb);
+            ServiceProcedureDef* proc = new BasicProcedureDef<R, A1, A2, A3, A4, A5, A6, A7>(cb);
             this->registerProcedure(name, proc);
         }
 
         template <typename R, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6, typename A7, typename A8>
         void registerCallable(const std::string& name, const Callable<R, A1, A2, A3, A4, A5, A6, A7, A8>& cb)
         {
-            ServiceProcedureDef* proc = new BasicServiceProcedureDef<R, A1, A2, A3, A4, A5, A6, A7, A8>(cb);
+            ServiceProcedureDef* proc = new BasicProcedureDef<R, A1, A2, A3, A4, A5, A6, A7, A8>(cb);
             this->registerProcedure(name, proc);
         }
 
         template <typename R, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6, typename A7, typename A8, typename A9>
         void registerCallable(const std::string& name, const Callable<R, A1, A2, A3, A4, A5, A6, A7, A8, A9>& cb)
         {
-            ServiceProcedureDef* proc = new BasicServiceProcedureDef<R, A1, A2, A3, A4, A5, A6, A7, A8, A9>(cb);
+            ServiceProcedureDef* proc = new BasicProcedureDef<R, A1, A2, A3, A4, A5, A6, A7, A8, A9>(cb);
             this->registerProcedure(name, proc);
         }
 
         template <typename R, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6, typename A7, typename A8, typename A9, typename A10>
         void registerCallable(const std::string& name, const Callable<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>& cb)
         {
-            ServiceProcedureDef* proc = new BasicServiceProcedureDef<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>(cb);
+            ServiceProcedureDef* proc = new BasicProcedureDef<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>(cb);
             this->registerProcedure(name, proc);
         }
 
         template <typename R, class C>
         void registerMethod(const std::string& name, C& obj, R (C::*method)() )
         {
-            ServiceProcedureDef* proc = new BasicServiceProcedureDef<R>( callable(obj, method) );
+            ServiceProcedureDef* proc = new BasicProcedureDef<R>( callable(obj, method) );
             this->registerProcedure(name, proc);
         }
 
         template <typename R, class C, typename A1>
         void registerMethod(const std::string& name, C& obj, R (C::*method)(A1) )
         {
-            ServiceProcedureDef* proc = new BasicServiceProcedureDef<R, A1>( callable(obj, method) );
+            ServiceProcedureDef* proc = new BasicProcedureDef<R, A1>( callable(obj, method) );
             this->registerProcedure(name, proc);
         }
 
         template <typename R, class C, typename A1, typename A2>
         void registerMethod(const std::string& name, C& obj, R (C::*method)(A1, A2) )
         {
-            ServiceProcedureDef* proc = new BasicServiceProcedureDef<R, A1, A2>( callable(obj, method) );
+            ServiceProcedureDef* proc = new BasicProcedureDef<R, A1, A2>( callable(obj, method) );
             this->registerProcedure(name, proc);
         }
 
         template <typename R, class C, typename A1, typename A2, typename A3>
         void registerMethod(const std::string& name, C& obj, R (C::*method)(A1, A2, A3) )
         {
-            ServiceProcedureDef* proc = new BasicServiceProcedureDef<R, A1, A2, A3>( callable(obj, method) );
+            ServiceProcedureDef* proc = new BasicProcedureDef<R, A1, A2, A3>( callable(obj, method) );
             this->registerProcedure(name, proc);
         }
 
         template <typename R, class C, typename A1, typename A2, typename A3, typename A4>
         void registerMethod(const std::string& name, C& obj, R (C::*method)(A1, A2, A3, A4) )
         {
-            ServiceProcedureDef* proc = new BasicServiceProcedureDef<R, A1, A2, A3, A4>( callable(obj, method) );
+            ServiceProcedureDef* proc = new BasicProcedureDef<R, A1, A2, A3, A4>( callable(obj, method) );
             this->registerProcedure(name, proc);
         }
 
         template <typename R, class C, typename A1, typename A2, typename A3, typename A4, typename A5>
         void registerMethod(const std::string& name, C& obj, R (C::*method)(A1, A2, A3, A4, A5) )
         {
-            ServiceProcedureDef* proc = new BasicServiceProcedureDef<R, A1, A2, A3, A4, A5>( callable(obj, method) );
+            ServiceProcedureDef* proc = new BasicProcedureDef<R, A1, A2, A3, A4, A5>( callable(obj, method) );
             this->registerProcedure(name, proc);
         }
 
         template <typename R, class C, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6>
         void registerMethod(const std::string& name, C& obj, R (C::*method)(A1, A2, A3, A4, A5, A6) )
         {
-            ServiceProcedureDef* proc = new BasicServiceProcedureDef<R, A1, A2, A3, A4, A5, A6>( callable(obj, method) );
+            ServiceProcedureDef* proc = new BasicProcedureDef<R, A1, A2, A3, A4, A5, A6>( callable(obj, method) );
             this->registerProcedure(name, proc);
         }
 
         template <typename R, class C, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6, typename A7>
         void registerMethod(const std::string& name, C& obj, R (C::*method)(A1, A2, A3, A4, A5, A6, A7) )
         {
-            ServiceProcedureDef* proc = new BasicServiceProcedureDef<R, A1, A2, A3, A4, A5, A6, A7>( callable(obj, method) );
+            ServiceProcedureDef* proc = new BasicProcedureDef<R, A1, A2, A3, A4, A5, A6, A7>( callable(obj, method) );
             this->registerProcedure(name, proc);
         }
 
         template <typename R, class C, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6, typename A7, typename A8>
         void registerMethod(const std::string& name, C& obj, R (C::*method)(A1, A2, A3, A4, A5, A6, A7, A8) )
         {
-            ServiceProcedureDef* proc = new BasicServiceProcedureDef<R, A1, A2, A3, A4, A5, A6, A7, A8>( callable(obj, method) );
+            ServiceProcedureDef* proc = new BasicProcedureDef<R, A1, A2, A3, A4, A5, A6, A7, A8>( callable(obj, method) );
             this->registerProcedure(name, proc);
         }
 
         template <typename R, class C, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6, typename A7, typename A8, typename A9>
         void registerMethod(const std::string& name, C& obj, R (C::*method)(A1, A2, A3, A4, A5, A6, A7, A8, A9) )
         {
-            ServiceProcedureDef* proc = new BasicServiceProcedureDef<R, A1, A2, A3, A4, A5, A6, A7, A8, A9>( callable(obj, method) );
+            ServiceProcedureDef* proc = new BasicProcedureDef<R, A1, A2, A3, A4, A5, A6, A7, A8, A9>( callable(obj, method) );
             this->registerProcedure(name, proc);
         }
 
         template <typename R, class C, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6, typename A7, typename A8, typename A9, typename A10>
         void registerMethod(const std::string& name, C& obj, R (C::*method)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10) )
         {
-            ServiceProcedureDef* proc = new BasicServiceProcedureDef<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>( callable(obj, method) );
+            ServiceProcedureDef* proc = new BasicProcedureDef<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>( callable(obj, method) );
+            this->registerProcedure(name, proc);
+        }
+
+        template <typename CallT, class C>
+        void registerAsync(const std::string& name, C& obj, CallT* (C::*method)(ServiceProcedure&) )
+        {
+            ServiceProcedureDef* proc = new AsyncProcedureDef<CallT>( callable(obj, method) );
             this->registerProcedure(name, proc);
         }
 

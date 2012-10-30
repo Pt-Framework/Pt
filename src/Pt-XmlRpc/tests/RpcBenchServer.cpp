@@ -36,41 +36,30 @@
 
 class EchoService;
 
-class AsyncEcho : public Pt::XmlRpc::AsyncServiceProcedure<std::string, std::string>
+class AsyncEcho : public Pt::XmlRpc::AsyncCall<std::string, std::string>
 {
     public:   
-        AsyncEcho(Pt::SerializationContext& ctx, EchoService& srv)
-        : Pt::XmlRpc::AsyncServiceProcedure<std::string, std::string>(ctx)
+        AsyncEcho(Pt::XmlRpc::ServiceProcedure& proc, EchoService& srv)
+        : Pt::XmlRpc::AsyncCall<std::string, std::string>(proc)
         , _srv(&srv)
         {}
 
-    protected:
-        virtual void onBeginCall(const std::string& msg)
+        virtual void beginCall(const std::string& msg)
         {
-            std::cerr << "beginEcho " << this << std::endl;
+            std::cerr << "AsyncEcho::beginCall [" << this << "]" << std::endl;
+            _r = msg;
             this->loop();
-            this->setResult(msg);
+            this->setReady();
         }
 
-    private:
-        EchoService* _srv;
-};
-
-
-class AsyncEcho2 : public Pt::XmlRpc::AsyncCall<std::string>
-{
-    public:   
-        AsyncEcho2(Pt::XmlRpc::AsyncResult& result, EchoService& srv, const std::string& msg)
-        : Pt::XmlRpc::AsyncCall<std::string>(result)
-        , _srv(&srv)
-        {}
-
-        virtual void beginCall()
+        virtual const std::string& endCall()
         {
-            std::cerr << "beginEcho " << this << std::endl;
+            std::cerr << "AsyncEcho::endCall [" << this << "] " << _r << std::endl;
+            return _r;
         }
 
     private:
+        std::string _r;
         EchoService* _srv;
 };
 
@@ -80,9 +69,7 @@ class EchoService : public Pt::XmlRpc::Service
     public:
         EchoService()
         {
-            registerProcedure("echo", new Pt::XmlRpc::AsyncDef<EchoService, AsyncEcho>(*this));
-
-            /// registerAsync("echo", *this, &EchoService::beginEcho);
+            registerAsync("echo", *this, &EchoService::asyncEcho);
             registerMethod("echo2", *this, &EchoService::echo);
         }
 
@@ -91,9 +78,9 @@ class EchoService : public Pt::XmlRpc::Service
             return msg;
         }
 
-        Pt::XmlRpc::AsyncCall<std::string>* beginEcho(Pt::XmlRpc::AsyncResult& result, const std::string& msg)
+        AsyncEcho* asyncEcho(Pt::XmlRpc::ServiceProcedure& proc)
         {
-            return new AsyncEcho2(result, *this, msg);
+            return new AsyncEcho(proc, *this);
         }
 };
 
@@ -115,16 +102,13 @@ int main(int argc, char* argv[])
               << std::endl;
 
     Pt::System::MainLoop loop;
-    
-    EchoService service;
-    //service.registerFunction("echo", echo);
-    
     Pt::Http::Server server(loop);
 
     Pt::Http::Server::Options options;
     options.setMaxThreads(threads);
     server.listen(ip, port, options);
     
+    EchoService service;
     Pt::Http::MapUrl servlet("/myservice", service);
     server.addServlet(servlet);
 
