@@ -1035,6 +1035,9 @@ class AsyncResult
         : _proc(&proc)
         { }
 
+        virtual ~AsyncResult()
+        {}
+
         const R& endCall()
         { return this->onEndCall(); }
 
@@ -1056,8 +1059,8 @@ template <typename R,
 class AsyncCall : public AsyncResult<R>
 {
     public:
-        typedef typename R ReturnT;
-        typedef typename A1 Arg1T;
+        typedef R ReturnT;
+        typedef  A1 Arg1T;
         typedef typename Pt::Void A2;
 
     public:
@@ -1132,8 +1135,8 @@ class AsyncCall<R,
                 Pt::Void>  : public AsyncResult<R>
 {
     public:
-        typedef typename R ReturnT;
-        typedef typename Pt::Void Arg1T;
+        typedef R ReturnT;
+        typedef Pt::Void Arg1T;
         typedef typename Pt::Void Arg2T;
 
     public:
