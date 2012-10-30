@@ -44,7 +44,8 @@ class AsyncEcho : public Pt::XmlRpc::AsyncCall<std::string, std::string>
         , _srv(&srv)
         {}
 
-        virtual void beginCall(const std::string& msg)
+    protected:
+        virtual void onBeginCall(const std::string& msg)
         {
             std::cerr << "AsyncEcho::beginCall [" << this << "]" << std::endl;
             _r = msg;
@@ -52,7 +53,7 @@ class AsyncEcho : public Pt::XmlRpc::AsyncCall<std::string, std::string>
             this->setReady();
         }
 
-        virtual const std::string& endCall()
+        virtual const std::string& onEndCall()
         {
             std::cerr << "AsyncEcho::endCall [" << this << "] " << _r << std::endl;
             return _r;

@@ -1027,9 +1027,33 @@ class BasicServiceProcedure<R,
 // AsyncServiceProcedure with 1 arguments
 //
 
+template <typename R>
+class AsyncResult
+{
+    public:
+        AsyncResult(ServiceProcedure& proc)
+        : _proc(&proc)
+        { }
+
+        const R& endCall()
+        { return this->onEndCall(); }
+
+        void setReady()
+        { _proc->setReady(); }
+
+        System::EventLoop& loop()
+        { return _proc->loop(); }
+
+    protected:
+        virtual const R& onEndCall() = 0;
+
+    private:
+        ServiceProcedure* _proc;
+};
+
 template <typename R, 
           typename A1 = Pt::Void>
-class AsyncCall
+class AsyncCall : public AsyncResult<R>
 {
     public:
         typedef typename R ReturnT;
@@ -1038,22 +1062,14 @@ class AsyncCall
 
     public:
         AsyncCall(ServiceProcedure& proc)
-        : _proc(&proc)
+        : AsyncResult<R>(proc)
         { }
 
-        virtual void beginCall(const A1& a1) = 0;
+        void beginCall(const A1& a1)
+        { this->onBeginCall(a1); }
 
-        virtual const R& endCall() = 0;
-
-        void setReady()
-        { _proc->setReady(); }
-
-        System::EventLoop& loop()
-        { return _proc->loop(); }
-
-    private:
-        R _rv;
-        ServiceProcedure* _proc;
+    protected:
+        virtual void onBeginCall(const A1& a1) = 0;
 };
 
 
@@ -1113,7 +1129,7 @@ class AsyncServiceProcedure : public ServiceProcedure
 
 template <typename R>
 class AsyncCall<R, 
-                Pt::Void>
+                Pt::Void>  : public AsyncResult<R>
 {
     public:
         typedef typename R ReturnT;
@@ -1122,29 +1138,14 @@ class AsyncCall<R,
 
     public:
         AsyncCall(ServiceProcedure& proc)
-        : _proc(&proc)
+        : AsyncResult<R>(proc)
         { }
 
-        virtual void beginCall() = 0;
+        void beginCall()
+        { this->onBeginCall(); }
 
-        R& get()
-        { return _rv; }
-
-        void setResult(const R& r)
-        {
-            _rv = r;
-            _proc->setReady();
-        }   
-
-        void setReady()
-        { _proc->setReady(); }
-
-        System::EventLoop& loop()
-        { return _proc->loop(); }
-
-    private:
-        R _rv;
-        ServiceProcedure* _proc;
+    protected:
+        virtual void onBeginCall(const A1& a1) = 0;
 };
 
 
