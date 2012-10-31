@@ -37,30 +37,40 @@
 class EchoService;
 
 class AsyncEcho : public Pt::XmlRpc::AsyncCall<std::string, std::string>
+                , public Pt::Connectable
 {
     public:   
         AsyncEcho(Pt::XmlRpc::ServiceProcedure& proc, EchoService& srv)
         : Pt::XmlRpc::AsyncCall<std::string, std::string>(proc)
         , _srv(&srv)
-        {}
+        {
+            _timer.timeout() += Pt::slot(*this, &AsyncEcho::onTimeout);
+        }
 
     protected:
         virtual void onBeginCall(const std::string& msg)
         {
-            std::cerr << "AsyncEcho::beginCall [" << this << "]" << std::endl;
             _r = msg;
-            this->loop();
-            this->setReady();
+            _timer.setActive( this->loop() );
+            _timer.start(1000);         
         }
 
         virtual const std::string& onEndCall()
         {
-            std::cerr << "AsyncEcho::endCall [" << this << "] " << _r << std::endl;
+            std::cerr << ".";
             return _r;
+        }
+
+        void onTimeout()
+        {
+            _timer.stop();
+            _timer.detach();
+            this->setReady();
         }
 
     private:
         std::string _r;
+        Pt::System::Timer _timer;
         EchoService* _srv;
 };
 

@@ -1,6 +1,274 @@
 /** \page xmlrpc XML-RPC Communication
 
-@section xmlrpc_Overwiew Overview
+@section xmlrpc_Intro Introduction
+
+The XmlRpc module of the Pt framework support both, the client and server
+side of XML-RPC. Blocking and non-blocking APIs exist to implement and
+call XML-RPC service procedures. The XmlRpc module builds on top of the
+Http module and uses the HTTP client and server implementation thereof.
+Custom data-types can be used in XML-RPC procedures if they are serializable
+using Pt's serialization API.
+
+
+@section xmlrpc_Service Implementation of XML-RPC services
+
+The XML-RPC server side API is implemented as a service for the Pt HTTP
+server. Regular C++ functions or methods can be registered as XML-RPC 
+procedures with a Pt::XmlRpc::Service. XML-RPC requests are processed
+and dispatched to the respective procedure. The registered function or
+method will potentially be called from one of the HTTP server threads.
+
+
+@subsection xmlrpc_Service_1 Adding service class methods to a XML-RPC service
+
+The following example shows a typical XML-RPC service, where member functions
+are registered as XML-RPC procedures:
+
+@code
+class CalculatorService : public Pt::XmlRpc::Service
+{
+  public:
+    CalculatorService()
+    {
+      registerMethod("add", *this, &CalculatorService::add);
+      registerMethod("sub", *this, &CalculatorService::sub);
+      registerMethod("multiply", *this, &CalculatorService::multiply);
+      registerMethod("div", *this, &CalculatorService::div);
+    }
+
+    int add(int a, int b)
+    { return a+b; }
+
+    int sub(int a, int b)
+    { return a-b; }
+
+    int multiply(int a, int b)
+    { return a*b; }
+
+    int div(int a, int b)
+    { return a/b; }
+};
+@endcode
+
+The service needs to inherit Pt::XmlRpc::Service and register the XML-RPC
+procedures in the constructor. The string passed to registerMethod() is
+the name of the procedure and all XML-RPC requests with this 'methodName' 
+XML tag will be dispatched to that method.
+
+
+@subsection xmlrpc_Client_2 Non-Blocking XML-RPC service procedures
+
+Since the server has only a limited number of worker threads, the XML-RPC
+procedures should not block, for example to perform long I/O operations,
+otherwise the performance of the HTTP server will be degraded.
+Instead, the asynchronous API allows using a Pt::System::EventLoop from
+within a XML-RPC procedure, as shown in the next example:
+
+@code
+class AsyncEcho : public Pt::XmlRpc::AsyncCall<std::string, std::string>
+                , public Pt::Connectable
+{
+  public:   
+    AsyncEcho(Pt::XmlRpc::ServiceProcedure& proc)
+    : Pt::XmlRpc::AsyncCall<std::string, std::string>(proc)
+    {
+      _timer.timeout() += Pt::slot(*this, &AsyncEcho::onTimeout);
+    }
+
+  protected:
+    virtual void onBeginCall(const std::string& msg)
+    {
+      _r = msg;
+
+      _timer.setActive( this->loop() );
+      _timer.start(1000);         
+    }
+
+    virtual const std::string& onEndCall()
+    {
+      return _r;
+    }
+
+    void onTimeout()
+    {
+      _timer.stop();
+      _timer.detach();
+      this->setReady();
+    }
+
+    private:
+      std::string _r;
+      Pt::System::Timer _timer;
+};
+
+class MyService : public Pt::XmlRpc::Service
+{
+  public:
+    MyService()
+    {
+      registerAsyncMethod("async", *this, &CalculatorService::async);
+    }
+
+    AsyncEcho* asyncEcho(Pt::XmlRpc::ServiceProcedure& proc)
+    {
+      return new AsyncEcho(proc);
+    }
+};
+@endcode
+
+A member function is registered as a XML-RPC procedure in the constructor of
+the service, but the registered member function is only a factory method for
+an asynchronous XML-RPC call. The class AsyncEcho is an example of such an
+asynchronous call and it needs to derive from Pt::XmlRpc::AsyncCall, where the 
+template parameters describe the signature of the XML-RPC procedure. The first
+parameter is the return type and the following parameters are the argument
+types. In this case, the XML-RPC procedure returns a std::string and takes one
+argument, also a std::string, when invoked. Two virtual functions have to be
+implemented as part of the Pt::XmlRpc::AsyncCall interface. When the procedure
+is invoked, onBeginCall() will be called and the arguments, as defined by the 
+template parameters of AsyncCall, are passed. In the example, we use the event 
+loop inherited from Pt::XmlRpc::AsyncCall, to start a timer. This is also the 
+event loop of the server thread from which the procedure was invoked. When the 
+timer runs out, AsyncCall::setReady() is called in the timer callback, to
+notify the XML-RPC service that the asynchronous call has finished and finally
+onEndCall() will be called to obtain the return value.
+
+
+@subsection xmlrpc_Service_2 Using User-Defined Types in XML-RPC procedures
+
+@code
+struct Address
+{
+  std::string country;
+  std::string city;
+  std::string street;
+  int code;
+};
+
+void operator>>=(const Pt::SerializationInfo& si, Address& address);
+void operator<<=(Pt::SerializationInfo& si, const Address& address);
+
+class MyService : public Pt::xmlrpc::Service
+{
+  public:
+    MyService()
+    {
+      registerMethod("getPosition", *this, &MyService::getPosition);
+    }
+
+    Address getPosition();
+};
+@endcode
+
+@code
+void operator>>=(const Pt::SerializationInfo& si, Address& address)
+{
+  si.getMember("year")   >>= address.country;
+  si.getMember("city")   >>= address.city;
+  si.getMember("street") >>= address.street;
+  si.getMember("code")   >>= address.code;
+}
+
+void operator<<=(Pt::SerializationInfo& si, const Address& address)
+{
+  si.addMember("country") <<= address.country;
+  si.addMember("city")    <<= address.city;
+  si.addMember("street")  <<= address.street;
+  si.addMember("code")    <<= address.code;
+  si.setTypeName("Address");
+}
+@endcode
+
+@subsection xmlrpc_Service_3 Adding XML-RPC services to a HTTP Server
+
+@code
+int main(int argc, char** argv)
+{
+  Pt::System::MainLoop loop;
+
+  // constructor takes address and port for listen
+  Pt::Http::HttpServer server(loop, "127.0.0.1", 7002);
+
+  // add the service to the server
+  CalculatorService calc;
+  Pt::Http::MapUrl mapurl("/Calc", calc);
+  server.addServlet(mapurl);
+
+  // begin accepting connections
+  loop.run();
+  return 0;
+};
+@endcode
+
+
+@section xmlrpc_Client Implementation of a XML-RPC clients
+
+@subsection xmlrpc_Client_1 Blocking calls to a XML-RPC service
+
+@code
+int main(int argc, char** argv)
+{
+  try
+  {
+    Pt::XmlRpc::HttpClient client("127.0.0.1", 7002, "/Calc");
+
+    Pt::XmlRpc::RemoteProcedure<int, int, int> multiply(client, "multiply");
+    int r = multiply(6, 7);
+
+    std::cout << "Result: " << r << std::endl;
+    return 0;
+  }
+  catch(std::exception& ex)  // may be Pt::xmlrpc::Fault
+  {
+    std::cerr << "Error: " << ex.what() << std::endl;
+  }
+
+  return 1
+};
+@endcode
+
+
+@subsection xmlrpc_Client_2 Non-Blocking calls to a XML-RPC procedures
+
+@code
+
+void onResult(const Pt::XmlRpc::Result<int>& r)
+{
+  try
+  {
+    std::cout << "Result: " << r.get() << std::endl;
+  }
+  catch(const std::exception& ex)
+  {
+    std::cerr << "Error: " << ex.what() << std::endl;
+  }
+}
+
+int main(int argc, char** argv)
+{
+  try
+  {
+    Pt::System::MainLoop loop;
+    Pt::XmlRpc::HttpClient client(loop, "127.0.0.1", 7002, "/Calc");
+
+    Pt::XmlRpc::RemoteProcedure<int, int, int> multiply(client, "multiply");
+    multiply.finished += Pt::slot(&onResult);
+    multiply.begin(6, 7);
+
+    loop.run();
+  }
+  catch(const std::exception& ex)
+  {
+    std::cerr << "Error: " << ex.what() << std::endl;
+    return 1;
+  }
+
+  return 0;
+};
+
+@endcode
+
+@section xmlrpc_Protocol Protocol Details
 
 XML-RPC is a Remote Procedure Calling protocol that works over the network.
 
@@ -139,170 +407,6 @@ The \<methodResponse\> could also contain a \<fault\> which contains a
 \<faultCode\>, an <int> and one named \<faultString\>, a \<string\>.
 
 A <methodResponse> can not contain both a <fault> and a <params>.
-
-
-@section xmlrpc_Service Implementation of XML-RPC services
-
-@subsection xmlrpc_Service_1 Adding service methods to a XML-RPC service
-
-@code
-class CalculatorService : public Pt::XmlRpc::Service
-{
-  public:
-    CalculatorService()
-    {
-      registerMethod("add", *this, &CalculatorService::add);
-      registerMethod("sub", *this, &CalculatorService::sub);
-      registerMethod("multiply", *this, &CalculatorService::multiply);
-      registerMethod("div", *this, &CalculatorService::div);
-    }
-
-    int add(int a, int b)
-    { return a+b; }
-
-    int sub(int a, int b)
-    { return a-b; }
-
-    int multiply(int a, int b)
-    { return a*b; }
-
-    int div(int a, int b)
-    { return a/b; }
-};
-@endcode
-
-
-@subsection xmlrpc_Service_2 User-defined Types
-
-@code
-struct Address
-{
-  std::string country;
-  std::string city;
-  std::string street;
-  int code;
-};
-
-void operator>>=(const Pt::SerializationInfo& si, Address& address);
-void operator<<=(Pt::SerializationInfo& si, const Address& address);
-
-class MyService : public Pt::xmlrpc::Service
-{
-  public:
-    MyService()
-    {
-      registerMethod("getPosition", *this, &MyService::getPosition);
-    }
-
-     Address getPosition();
-};
-@endcode
-
-@code
-void operator>>=(const Pt::SerializationInfo& si, Address& address)
-{
-  address.country = si.getValue<std::string>("country");
-  address.city = si.getValue<std::string>("city");
-  address.street = si.getValue<std::string>("street");
-  address.code = si.getValue<int>("code");
-}
-
-void operator<<=(Pt::SerializationInfo& si, const Address& address)
-{
-  si.addMember("country") <<= address.country;
-  si.addMember("city")    <<= address.city;
-  si.addMember("street")  <<= address.street;
-  si.addMember("code")    <<= address.code;
-}
-@endcode
-
-@subsection xmlrpc_Service_3 Adding XML-RPC services to a HTTP Server
-
-@code
-int main(int argc, char** argv)
-{
-  // constructor takes address and port for listen
-  Pt::Http::HttpServer server("127.0.0.1", 7002);
-
-  // add the service to the server
-  CalculatorService service;
-  server.addService("/Calc", service);
-
-  // begin accepting connections
-  server.run();
-  return 0;
-};
-@endcode
-
-
-@section xmlrpc_Client Implementation of a XML-RPC clients
-
-@subsection xmlrpc_Client_1 Blocking calls to a XML-RPC service
-
-@code
-int main(int argc, char** argv)
-{
-  try
-  {
-    Pt::xmlrpc::Client client("127.0.0.1", 7002, "/Calc");
-
-    Pt::xmlrpc::RemoteProcedure<int, int, int> multiply(client, "multiply");
-
-    int r = multiply(6, 7);
-
-    std::cout << "Result: " << r << std::endl;
-    return 0;
-  }
-  catch(std::exception& ex)  // may be Pt::xmlrpc::Fault
-  {
-    std::cerr << "Error: " << ex.what() << std::endl;
-  }
-
-  return 1
-};
-@endcode
-
-
-@subsection xmlrpc_Client_2 Non-Blocking calls to a XML-RPC service
-
-@code
-
-void onResult(const Pt::XmlRpc::Result<int>& r)
-{
-  try
-  {
-    std::cout << "Result: " << r.get() << std::endl;
-  }
-  catch(const std::exception& ex)
-  {
-    std::cerr << "Error: " << ex.what() << std::endl;
-  }
-}
-
-int main(int argc, char** argv)
-{
-  try
-  {
-    Pt::System::MainLoop loop;
-    Pt::XmlRpc::Client client(loop), "127.0.0.1", 7002, "/Calc");
-
-    Pt::XmlRpc::RemoteProcedure<int, int, int> multiply(client, "multiply");
-    multiply.finished += Pt::slot(&onResult);
-
-    multiply.begin(6, 7);
-
-    loop.run();
-  }
-  catch(const std::exception& ex)
-  {
-    std::cerr << "Error: " << ex.what() << std::endl;
-    return 1;
-  }
-
-  return 0;
-};
-
-@endcode
 
 
 @section xmlrpc_Copyright Copyright and Disclaimer

@@ -50,11 +50,13 @@ HttpClient::HttpClient(System::EventLoop& selector, const std::string& server,
 }
 
 
-/*HttpClient::HttpClient(const std::string& server, unsigned short port, const std::string& url)
-: _impl(new HttpClientImpl(server, port, url))
+HttpClient::HttpClient(const std::string& addr, unsigned short port, const std::string& url)
+: _impl( new HttpClientImpl() )
 {
     impl(_impl);
-}*/
+
+    connect(addr, port, url);
+}
 
 
 HttpClient::~HttpClient()
