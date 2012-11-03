@@ -208,12 +208,13 @@ void Connection::sendRequest(Request& request)
     {
         log_debug("opening new connection to " << _addrInfo.host());
         _socket.connect(_addrInfo);
-
+#ifdef PT_HTTP_WITH_SSL
         if(_ssl)
         {
             log_debug("SSL connect");
-            _sslbuf.connect();
+            _ssl.buf.connect();
         }
+#endif
     }
     
     std::ostream& os = _os; 
