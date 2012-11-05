@@ -2,20 +2,20 @@
 
 @section xmlrpc_Intro Introduction
 
-The XmlRpc module of the Pt framework support both, the client and server
-side of XML-RPC. Blocking and non-blocking APIs exist to implement and
-call XML-RPC service procedures. The XmlRpc module builds on top of the
-Http module and uses the HTTP client and server implementation thereof.
-Custom data-types can be used in XML-RPC procedures if they are serializable
-using Pt's serialization API.
+The XML-RPC module (Pt::XmlRpc) of the Pt framework provides a client API to
+call remote procedures and a server API to implement remote procedures.
+Blocking and non-blocking APIs exist in either case. The XML-RPC module builds
+on top of the HTTP module (Pt::Http) and uses the HTTP client and server 
+implementation thereof. Custom data-types can be used in XML-RPC procedures
+if they are serializable using Pt's serialization API.
 
 
 @section xmlrpc_Service Implementation of XML-RPC services
 
-The XML-RPC server side API is implemented as a service for the Pt HTTP
-server. Regular C++ functions or methods can be registered as XML-RPC 
-procedures with a Pt::XmlRpc::Service. XML-RPC requests are processed
-and dispatched to the respective procedure. The registered function or
+The XML-RPC server side API is implemented as a service for Pt's HTTP server.
+Regular C++ functions or methods can be registered as XML-RPC remote procedures
+with a Pt::XmlRpc::Service. XML-RPC requests are processed and dispatched to
+the respective procedure by the service. Mind that the registered function or
 method will potentially be called from one of the HTTP server threads.
 
 
@@ -60,7 +60,7 @@ XML tag will be dispatched to that method.
 
 Since the server has only a limited number of worker threads, the XML-RPC
 procedures should not block, for example to perform long I/O operations,
-otherwise the performance of the HTTP server will be degraded.
+otherwise the performance of the HTTP server will degrade.
 Instead, the asynchronous API allows using a Pt::System::EventLoop from
 within a XML-RPC procedure, as shown in the next example:
 
@@ -136,6 +136,11 @@ onEndCall() will be called to obtain the return value.
 
 @subsection xmlrpc_Service_2 Using User-Defined Types in XML-RPC procedures
 
+The Pt framework already provides serialization support for builtin types and
+the types provided by the C++ standard library, like std::string or std::vector.
+To use custom types as arguments or return types in remote procedures, the 
+serialization operator must be implemented.
+
 @code
 struct Address
 {
@@ -178,6 +183,14 @@ void operator<<=(Pt::SerializationInfo& si, const Address& address)
   si.setTypeName("Address");
 }
 @endcode
+
+The XML-RPC service shown above returns a custom type named 'Address' from
+its procedure named 'getPosition'. The two serialization operators are
+implemented, so the framework knows how to serialize and deserialize this
+custom type. The two operators can be used for the implementation of the
+remote procedures on the server side and to call the remote procedure on the
+client side.
+
 
 @subsection xmlrpc_Service_3 Adding XML-RPC services to a HTTP Server
 
