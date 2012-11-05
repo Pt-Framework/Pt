@@ -212,7 +212,7 @@ void Connection::sendRequest(Request& request)
         if(_ssl)
         {
             log_debug("SSL connect");
-            _ssl.buf.connect();
+            _sslbuf.connect();
         }
 #endif
     }
