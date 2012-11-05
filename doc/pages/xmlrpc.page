@@ -194,29 +194,45 @@ client side.
 
 @subsection xmlrpc_Service_3 Adding XML-RPC services to a HTTP Server
 
+Once the XML-RPC service is implemented, it can be run within an instance
+of Pt's HTTP server. The incoming requests are mapped by the service name
+to the XML-RPC service and then processed and dispatched in the service to
+the registered procedure.
+
+
 @code
 int main(int argc, char** argv)
 {
   Pt::System::MainLoop loop;
 
-  // constructor takes address and port for listen
   Pt::Http::HttpServer server(loop, "127.0.0.1", 7002);
 
-  // add the service to the server
   CalculatorService calc;
   Pt::Http::MapUrl mapurl("/Calc", calc);
   server.addServlet(mapurl);
 
-  // begin accepting connections
   loop.run();
   return 0;
 };
 @endcode
 
+The code above constructs a HTTP server instance and adds an XML-RPC service
+with the name '/Calc'. HTTP services are not directly added to a HTTP server,
+but as part of a servlet. The servlet of type %Pt::Http::MapUrl instructs the
+server to route all requests for the URL '/Calc' to the CalculatorService.
+The server requires an event loop to run, in this case a program main loop.
+
 
 @section xmlrpc_Client Implementation of a XML-RPC clients
 
+The XML-RPC client API is implemented as function objects using Pt's HTTP
+client. Calling a remote procedure with the blocking API looks similar to
+calling local functions, the non-blocking API uses Pt's signals and slots.
+
 @subsection xmlrpc_Client_1 Blocking calls to a XML-RPC service
+
+The following example uses the blocking API to call a remote procedure,
+which expects two integer values as arguments and returns an interger value.
 
 @code
 int main(int argc, char** argv)
@@ -231,7 +247,7 @@ int main(int argc, char** argv)
     std::cout << "Result: " << r << std::endl;
     return 0;
   }
-  catch(std::exception& ex)  // may be Pt::xmlrpc::Fault
+  catch(std::exception& ex) // might be Pt::XmlRpc::Fault
   {
     std::cerr << "Error: " << ex.what() << std::endl;
   }
@@ -240,18 +256,35 @@ int main(int argc, char** argv)
 };
 @endcode
 
+A HTTP client has to be constructed first, with the name of the XML-RPC service
+to be accessed. The HTTP client maintains a connection to the server and can
+be used for multiple remote procedure calls to the same XML-RPC service. A
+function object of type %Pt::XmlRpc::RemoteProcedure is constructed then and
+the template parameters describe the signature of the remote procedure. The 
+first template parameter is the return value and the following ones are the 
+arguments. The actual call might throw an exception, especially one of type 
+%Pt::XmlRpc::Fault, if an error occurs in the XML-RPC layer.
+
 
 @subsection xmlrpc_Client_2 Non-Blocking calls to a XML-RPC procedures
 
-@code
+A non-blocking API also exists, to make XML-RPC calls concurrently to other
+code. A remote procedure call is started using the same function objects like
+for the blocking calls and a signal gives notification when the remote call 
+is ready to return a value. No additional threads are started to accomplish
+this, but I/O is dispatched through an event loop. Note that this is the
+preferred way of calling XML-RPC remote procedures, because even if no code
+is run concurrently, the calls can be cancelled.
 
+
+@code
 void onResult(const Pt::XmlRpc::Result<int>& r)
 {
   try
   {
     std::cout << "Result: " << r.get() << std::endl;
   }
-  catch(const std::exception& ex)
+  catch(const std::exception& ex) // might be Pt::XmlRpc::Fault
   {
     std::cerr << "Error: " << ex.what() << std::endl;
   }
@@ -278,8 +311,18 @@ int main(int argc, char** argv)
 
   return 0;
 };
-
 @endcode
+
+The example above shows how the signal named 'finished' is connected to the
+slot 'onResult', which is called when the return value was received. The
+remote call is then only started calling begin() and all processing starts
+when the event loop is run. Once the remote procedure call returns, the result
+is passed to the slot in form of a %Pt::XmlRpc::Result object. To retrieve the
+actual return value, get() must be called on this object, which might also 
+throw an exception, if an error occured. The exception should be handled in 
+the slot, if it is allowed to propagate, the event loop will be stopped and
+the program ends.
+
 
 @section xmlrpc_Protocol Protocol Details
 
