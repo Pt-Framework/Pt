@@ -89,7 +89,7 @@
             of the best documented pieces of software in the C++ world and a great
             example how both, good design and high performance can be achieved. Pt
             truly embraces the C++ standard library like few others do and benefits
-            greatly from the effort the designers have put into it. IO is done
+            greatly from the effort the designers have put into it. I/O is done
             with real iostreams and there is no need for yet another string class or
             set of container classes. All exceptions thrown by Pt are derived from
             std::exception and std::allocators can be used when needed.
@@ -97,28 +97,29 @@
         </p>
             In traditional C/C++ programs without exceptions, approximately half of
             the code is required for error handling. Error states constantly have to
-            be checked and passed through the many layers that form a big application.
+            be checked and passed through the many layers that form a large application.
             This is not only troublesome and error-prone, but can also have a very negative
-            effect on the performance. It requires to check for errors even in situations
+            effect on performance. It requires to check for errors even in situations
             when no error has occured. Exceptions have been introduced to the C++
             language to solve these problems. They effectively separate error handling
             from the normal program flow, which lets the program run faster and eliminates
             many lines of code.
         <p>
         </p>
-            Platinum makes good use of templates and generic programming and this is the
-            main reason why it beats many other toolkits in performance. This technique is
-            sometimes refered to as compile time polymorphism, because a compiler is able
-            to inline code more often and this eliminate many function calls. But
-            performance is is not the only reason for templates. Generic programming
-            offers flexibility and code reuse that can not easily achieved with classic
-            object-oriented methods.
+            Platinum makes good use of templates and generic programming and this is one
+            reason for its excellent performance. The technique is sometimes refered to 
+            as compile time polymorphism, because a compiler is able to inline code more 
+            often and this eliminate many function calls. But performance is is not the
+            only reason for templates. Generic programming offers flexibility and code 
+            reuse that can not be easily achieved with classic object-oriented methods.
         <p>
         </p>
-            Most of the framework consists of classes - it is a class library after all!
-            Multiple inheritance and RTTI are supported, and there are some prime example
-            within Pt how these - often misunderstood - features can lead to elegant and
-            robust code.
+            Potentially slow or lengthy operations like I/O are designed to execute 
+            asynchronously or non-blocking. This is not limited to low-level I/O
+            classes, but also available for higher-level classes like the XML parser.
+            The XML parser in Pt can consume only the available characters from a stream
+            and then continue and finish later when more data is available. This "asynchronous
+            software stack" allows very good responsiveness without using many threads.
         </p>
 
     </div>
