@@ -41,26 +41,27 @@ H2 {
 	font-size: 20px;
     color: #000000;
     font-weight: normal;
-    margin-top: 15px;
+    margin-top: 18px;
     margin-bottom: 4px;
 }
 H2 A {
 	font-size: 20px;
     color: #000000;
     font-weight: normal;
-    margin-top: 15px;
+    margin-top: 18px;
     margin-bottom: 4px;
 }
 H3 
 {
 	font-size: 14px;
     color: #000000;
+    margin-top: 16px;
     margin-bottom: 4px;
 }
 H3 A 
 {
-	font-size: 14px;
     color: #000000;
+    margin-top: 16px;
     margin-bottom: 4px;
 }
 H4
