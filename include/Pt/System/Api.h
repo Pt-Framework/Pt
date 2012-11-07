@@ -55,6 +55,16 @@
     framework can be extended by new channels.
 */
 
+/** @defgroup FileSystem File System Access
+    
+    The Pt::System library provides facilities to identify, create, rename,
+    move or remove files and directories. The Directory class can be seen
+    as a container for file system entries. The DirectoryIterator can be used
+    to traverse through the entries in a Directory. It can be used with the
+    iterator based algorithms in the C++ standard library.
+
+*/
+
 namespace Pt {
 
 /** @namespace Pt::System

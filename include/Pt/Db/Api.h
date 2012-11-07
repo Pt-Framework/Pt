@@ -60,19 +60,19 @@ namespace Pt {
 
 }
 
-/** 
+//
+// NOTE: normal comments, so doxygen does not pick this up until the docs are usable
+//
+
+/*
 \page "Opening Connections"
 !!! Opening Connections
 TODO.
-*/
 
-/**
 \page "Transactions"
 !!! Transactions
 TODO.
-*/
 
-/**
 \page "Retreiving Data"
 !!! Retreiving Data
 The DB Module offers two ways of retreiving data from a database: the Result set and

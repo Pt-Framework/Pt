@@ -54,6 +54,8 @@ namespace System {
         ++it;
     }
     \endcode
+
+    @ingroup FileSystem
 */
 class PT_SYSTEM_API DirectoryIterator
 {
@@ -121,6 +123,8 @@ class PT_SYSTEM_API DirectoryIterator
         ++it;
     }
     \endcode
+
+    @ingroup FileSystem
 */
 class PT_SYSTEM_API Directory
 {

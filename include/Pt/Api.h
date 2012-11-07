@@ -119,7 +119,6 @@
 
 
 /** @defgroup DateTime Dates and Times
-    @brief Dates and Times
 
     The Pt core module contains some simple types to represent times and
     dates. They can be used for comparison, sorting and in calculations
@@ -127,7 +126,6 @@
 */
 
 /** @defgroup Unicode
-    @brief Unicode string handling
 
     Pt extends the string handling of the standard C++ library by
     a unicode capable character type and a specialization of the

@@ -40,6 +40,8 @@ namespace Pt {
 namespace System {
 
 /** @brief Provides common operations on files.
+
+    @ingroup FileSystem
  */
 class PT_SYSTEM_API File
 {

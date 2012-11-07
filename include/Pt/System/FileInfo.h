@@ -36,6 +36,8 @@ namespace Pt {
 namespace System {
 
 /** @brief Provides information about a node in the file-system.
+
+    @ingroup FileSystem
 */
 class PT_SYSTEM_API FileInfo
 {

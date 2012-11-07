@@ -1,6 +1,6 @@
 /** \page requirements Requirements
 
-@section requirements_features C++ Features
+@section requirements_cpplang C++ Language Requirements
 
 Generally, the Platinum C++ framework can be compiled for any platform, 
 which provides an ISO C++ implementation. Some C++ features are only 
