@@ -24,6 +24,7 @@ H1 {
     font-size: 24px;
     font-weight: normal;
     margin-top: 24px;
+    margin-bottom: 24px;
 }
 H1 A {
     color: #000000;
@@ -41,38 +42,40 @@ H2 {
 	font-size: 20px;
     color: #000000;
     font-weight: normal;
-    margin-top: 18px;
-    margin-bottom: 4px;
+    margin-top: 24px;
+    margin-bottom: 10px;
 }
 H2 A {
 	font-size: 20px;
     color: #000000;
     font-weight: normal;
-    margin-top: 18px;
-    margin-bottom: 4px;
+    margin-top: 24px;
+    margin-bottom: 10px;
 }
 H3 
 {
 	font-size: 14px;
     color: #000000;
-    margin-top: 16px;
-    margin-bottom: 4px;
+    margin-top: 20px;
+    margin-bottom: 8px;
 }
 H3 A 
 {
     color: #000000;
-    margin-top: 16px;
-    margin-bottom: 4px;
+    margin-top: 20px;
+    margin-bottom: 8px;
 }
 H4
 {
     color: #000000;
-    margin-bottom: 4px;
+    margin-top: 16px;
+    margin-bottom: 8px;
 }
 H4 A 
 {
     color: #000000;
-    margin-bottom: 4px;
+    margin-top: 16px;
+    margin-bottom: 8px;
 }
 H5
 {

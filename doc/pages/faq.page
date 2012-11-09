@@ -10,8 +10,6 @@
             inline code from the Pt header files (i.e. C++ class templates).
         </p>
 
-        <br/>
-
         <h3>Why is Pt licensed under the LGPL with exceptions?</h3>
         <p>
             The LGPL requires that users must be able to replace the LGPL
@@ -29,8 +27,6 @@
             The special exception permits convenient use of the library in
             proprietary and non-GPL open source applications.
         </p>
-
-        <br/>
 
         <h3>May I use Code from Platinum directly?</h3>
         <p>
