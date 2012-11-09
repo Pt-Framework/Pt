@@ -65,12 +65,12 @@ Instead, the asynchronous API allows using a Pt::System::EventLoop from
 within a XML-RPC procedure, as shown in the next example:
 
 @code
-class AsyncEcho : public Pt::XmlRpc::AsyncCall<std::string, std::string>
+class AsyncEcho : public Pt::XmlRpc::AsyncProcedure<std::string, std::string>
                 , public Pt::Connectable
 {
   public:   
     AsyncEcho(Pt::XmlRpc::ServiceProcedure& proc)
-    : Pt::XmlRpc::AsyncCall<std::string, std::string>(proc)
+    : Pt::XmlRpc::AsyncProcedure<std::string, std::string>(proc)
     {
       _timer.timeout() += Pt::slot(*this, &AsyncEcho::onTimeout);
     }
@@ -109,7 +109,7 @@ class MyService : public Pt::XmlRpc::Service
       registerAsyncMethod("async", *this, &CalculatorService::async);
     }
 
-    AsyncEcho* asyncEcho(Pt::XmlRpc::ServiceProcedure& proc)
+    AsyncEcho* asyncEcho(Pt::XmlRpc::Context& proc)
     {
       return new AsyncEcho(proc);
     }
@@ -119,17 +119,17 @@ class MyService : public Pt::XmlRpc::Service
 A member function is registered as a XML-RPC procedure in the constructor of
 the service, but the registered member function is only a factory method for
 an asynchronous XML-RPC call. The class AsyncEcho is an example of such an
-asynchronous call and it needs to derive from Pt::XmlRpc::AsyncCall, where the 
+asynchronous call and it needs to derive from Pt::XmlRpc::AsyncProcedure, where the 
 template parameters describe the signature of the XML-RPC procedure. The first
 parameter is the return type and the following parameters are the argument
 types. In this case, the XML-RPC procedure returns a std::string and takes one
 argument, also a std::string, when invoked. Two virtual functions have to be
-implemented as part of the Pt::XmlRpc::AsyncCall interface. When the procedure
+implemented as part of the Pt::XmlRpc::AsyncProcedure interface. When the procedure
 is invoked, onBeginCall() will be called and the arguments, as defined by the 
-template parameters of AsyncCall, are passed. In the example, we use the event 
-loop inherited from Pt::XmlRpc::AsyncCall, to start a timer. This is also the 
+template parameters of AsyncProcedure, are passed. In the example, we use the event 
+loop inherited from Pt::XmlRpc::AsyncProcedure, to start a timer. This is also the 
 event loop of the server thread from which the procedure was invoked. When the 
-timer runs out, AsyncCall::setReady() is called in the timer callback, to
+timer runs out, AsyncProcedure::setReady() is called in the timer callback, to
 notify the XML-RPC service that the asynchronous call has finished and finally
 onEndCall() will be called to obtain the return value.
 
