@@ -48,10 +48,11 @@ Service::~Service()
 }
 
 
-ServiceProcedure* Service::getProcedure(const std::string& name, SerializationContext& ctx)
+ServiceProcedure* Service::getProcedure(const std::string& name, SerializationContext& sctx, XmlRpcResponder& resp, System::EventLoop& loop)
 {
     System::MutexLock lock(_mtx);
 
+    Context ctx(sctx, resp, loop);
     ServiceProcedure* proc = 0;
 
     ProcedureMap::iterator it = _procedures.find( name );

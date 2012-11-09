@@ -78,7 +78,7 @@ class PT_XMLRPC_API XmlRpcResponder : public Http::Responder
 
         void onWriteReply(Http::Request& request, Http::Reply& reply, System::EventLoop& loop);
 
-        void advance(const Pt::Xml::Node& node);
+        void advance(const Pt::Xml::Node& node, System::EventLoop& loop);
 
         void replyError(Http::Reply& reply, int rc, const char* msg);
 

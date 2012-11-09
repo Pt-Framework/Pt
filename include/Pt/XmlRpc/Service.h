@@ -46,24 +46,43 @@ namespace Pt {
 
 namespace XmlRpc {
 
+// TODO: derive Responder from this class or find other way to make ownership
+//       more explicit and clearer.
+class Context
+{
+    public:
+        Context(SerializationContext& ctx, XmlRpcResponder& r, System::EventLoop& loop)
+        : _ctx()
+        , _resp(&r)
+        , _loop(&loop)
+        {}
+
+        SerializationContext& sctx()
+        { return *_ctx; }
+
+        System::EventLoop& loop()
+        { return *_loop; }
+
+        XmlRpcResponder& responder()
+        { return *_resp; }
+
+    private:
+        SerializationContext* _ctx;
+        XmlRpcResponder* _resp;
+        System::EventLoop* _loop;
+};
+
 class ServiceProcedure
 {
     public:
         virtual ~ServiceProcedure()
         {}
 
-        // TODO: no init method, pass all to ctor
-        void init(XmlRpcResponder& r, System::EventLoop& loop)
-        { 
-            _resp = &r; 
-            _loop = &loop;
-        }
-
         System::EventLoop& loop()
         { return *_loop; }
 
         void setReady()
-        { _resp->endReply(); }
+        { if(_resp) _resp->endReply(); }
 
         virtual IComposer** beginArgs() = 0;
 
@@ -72,9 +91,9 @@ class ServiceProcedure
         virtual IDecomposer* endCall() = 0;      
 
     protected:
-        ServiceProcedure()
-        : _resp(0)
-        , _loop(0)
+        ServiceProcedure(Context& ctx)
+        : _resp( &ctx.responder() )
+        , _loop( &ctx.loop() )
         {}
 
     private:
@@ -89,14 +108,14 @@ class ServiceProcedureDef
         virtual ~ServiceProcedureDef()
         {}
 
-        ServiceProcedure* createProcedure(SerializationContext& ctx) const
+        ServiceProcedure* createProcedure(Context& ctx) const
         { return this->onCreateProcedure(ctx); }
 
     protected:
         ServiceProcedureDef()
         {}
 
-        virtual ServiceProcedure* onCreateProcedure(SerializationContext& ctx) const = 0;
+        virtual ServiceProcedure* onCreateProcedure(Context& ctx) const = 0;
 };
 
 } // namespace XmlRpc

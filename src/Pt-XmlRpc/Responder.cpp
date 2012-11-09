@@ -102,7 +102,7 @@ void XmlRpcResponder::onReadRequest(Http::Request& request, Http::Reply& reply, 
             while( _reader.advance() )
             {
                 const Xml::Node& node = _reader.get();
-                this->advance(node);
+                this->advance(node, loop);
             }
         }
     }
@@ -143,7 +143,6 @@ void XmlRpcResponder::onBeginReply(Http::Request& request, Http::Reply& reply, S
             }
         }
 
-        _proc->init(*this, loop);
         _proc->beginCall();
     }
     catch (const Fault& fault)
@@ -239,7 +238,7 @@ void XmlRpcResponder::endReply()
 }
 
 
-void XmlRpcResponder::advance(const Pt::Xml::Node& node)
+void XmlRpcResponder::advance(const Pt::Xml::Node& node, System::EventLoop& loop)
 {
     switch(_state)
     {
@@ -275,7 +274,7 @@ void XmlRpcResponder::advance(const Pt::Xml::Node& node)
                 if(_proc)
                     _service->releaseProcedure(_proc);
 
-                _proc = _service->getProcedure( chars.content().narrow(), _context );
+                _proc = _service->getProcedure( chars.content().narrow(), _context, *this, loop );
                 if( ! _proc )
                     throw std::runtime_error("no such procedure");
 
