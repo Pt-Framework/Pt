@@ -35,6 +35,10 @@
 
 namespace Pt {
 
+/** @brief Manages the decomposition of types during serialization.
+
+    @ingroup Serialization
+*/
 class IDecomposer
 {
     public:
@@ -52,7 +56,10 @@ class IDecomposer
         {}
 };
 
+/** @brief Manages the decomposition of types during serialization.
 
+    @ingroup Serialization
+*/
 template <typename T>
 class Decomposer : public IDecomposer
 {

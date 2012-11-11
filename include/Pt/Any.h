@@ -35,9 +35,7 @@
 
 namespace Pt {
 
-/** @brief Contains an arbitrary type
-
-    @ingroup Reflection
+/** @brief Contains an arbitrary type.
 
     Any can contain any other type that is default- and copy constructible
     and less-than and equality comparable. When a value is assigned to an
@@ -75,6 +73,8 @@ namespace Pt {
     // implementation dependent
     d \< c;
     @endcode
+
+    @ingroup CoreTypes
 */
 class Any
 {

@@ -36,7 +36,6 @@
 
 namespace Pt {
 
-
 /** @brief Converts character sequences with different encodings.
 
     This class derives from std::basic_streambuf which is the super-class of all stream buffer
@@ -53,7 +52,7 @@ namespace Pt {
     The Codec object which is passed as pointer to the constructor will afterwards be completely
     managed by this class and also be deleted by this class when it's destructed!
 
-  @see std::basic_streambuf
+    @ingroup Unicode
 */
 template <typename CharT, typename ByteT>
 class BasicTextBuffer : public std::basic_streambuf<CharT>

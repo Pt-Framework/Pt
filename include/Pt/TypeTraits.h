@@ -43,11 +43,13 @@ namespace Pt {
         typedef const T* ConstPointer;
     };
 
-    /** @brief Type-traits for for non-const value types
+    /** @brief Type-traits for for non-const value types.
 
         Compile time type information (CTTI) is implemented in Pt by the
         means of TypeTraits. A number of specialisations allows
         compile type branching in gerneric code depending on the type.
+
+        @ingroup CoreTypes
     */
     template <typename T>
     struct TypeTraits : public TypeTraitsBase<T>

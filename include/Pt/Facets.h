@@ -40,6 +40,7 @@ template <typename T>
 class __numpunct_cache;
 
 /** @brief Numpunct localization facet
+
     @ingroup Unicode
 */
 template <>
@@ -82,7 +83,10 @@ class PT_API numpunct<Pt::Char> : public locale::facet {
         virtual string_type do_falsename() const;
 };
 
+/** @brief Numput localization facet
 
+    @ingroup Unicode
+*/
 template <>
 class PT_API num_put< Pt::Char, 
                       ostreambuf_iterator<Pt::Char> > : public locale::facet 
@@ -154,7 +158,10 @@ class PT_API num_put< Pt::Char,
         virtual iter_type do_put(iter_type s, ios_base& f, char_type fill,  const void*) const;
 };
 
+/** @brief Numget localization facet
 
+    @ingroup Unicode
+*/
 template<>
 class PT_API num_get< Pt::Char, 
                       istreambuf_iterator<Pt::Char> > : public locale::facet
@@ -329,10 +336,18 @@ class PT_API num_get< Pt::Char,
 #if (defined _MSC_VER || defined __QNX__)
 
 template<>
+/** @brief Codecvt localization facet
+
+    @ingroup Unicode
+*/
 class PT_API codecvt<Pt::Char, char, Pt::MBState> : public codecvt_base {
 
 #else
 
+/** @brief Codecvt localization facet
+
+    @ingroup Unicode
+*/
 template<>
 class PT_API codecvt<Pt::Char, char, Pt::MBState> : public codecvt_base, public locale::facet {
 

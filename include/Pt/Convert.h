@@ -171,6 +171,10 @@ inline void convert(T& t, const std::string& str)
 // Generic stream-based conversions
 //
 
+/** @brief Convert between two types.
+
+    @ingroup CoreTypes
+*/
 template<typename T, typename S>
 void convert(T& to, const S& from)
 {
@@ -179,6 +183,10 @@ void convert(T& to, const S& from)
         throw ConversionError("conversion failed");
 }
 
+/** @brief Convert between two types.
+
+    @ingroup CoreTypes
+*/
 template<typename T, typename S>
 T convert(const S& from)
 {
@@ -192,21 +200,29 @@ T convert(const S& from)
 //
 
 /** @brief Formats an integer in a given format.
+
+    @ingroup CoreTypes
  */
 template <typename OutIterT, typename T, typename FormatT>
 inline OutIterT putInt(OutIterT it, T i, const FormatT& fmt);
 
 /** @brief Formats an integer in a decimal format.
+
+    @ingroup CoreTypes
  */
 template <typename OutIterT, typename T>
 inline OutIterT putInt(OutIterT it, T i);
 
 /** @brief Formats a floating point value in a given format.
+
+    @ingroup CoreTypes
  */
 template <typename OutIterT, typename T, typename FormatT>
 OutIterT putFloat(OutIterT it, T d, const FormatT& fmt, int precision, bool scientific);
 
 /** @brief Formats a floating point value in default format.
+
+    @ingroup CoreTypes
  */
 template <typename OutIterT, typename T>
 OutIterT putFloat(OutIterT it, T d);
@@ -216,21 +232,29 @@ OutIterT putFloat(OutIterT it, T d);
 //
 
 /** @brief Parses an integer value in a given format.
+
+    @ingroup CoreTypes
  */
 template <typename InIterT, typename T, typename FormatT>
 InIterT getInt(InIterT it, InIterT end, bool& ok, T& n, const FormatT& fmt);
 
 /** @brief Parses an integer value in decimal format.
+
+    @ingroup CoreTypes
  */
 template <typename InIterT, typename T>
 InIterT getInt(InIterT it, InIterT end, bool& ok, T& n);
 
 /** @brief Parses a floating point value in a given format.
+
+    @ingroup CoreTypes
  */
 template <typename InIterT, typename T, typename FormatT>
 InIterT getFloat(InIterT it, InIterT end, bool& ok, T& n, const FormatT& fmt);
 
 /** @brief Parses a floating point value.
+
+    @ingroup CoreTypes
  */
 template <typename InIterT, typename T>
 InIterT getFloat(InIterT it, InIterT end, bool& ok, T& n);
@@ -477,6 +501,8 @@ inline unsigned long long formatAbs(unsigned long long i, bool& isNeg)
 }
 
 /** @brief Formats an integer in a given format.
+
+    @ingroup CoreTypes
  */
 template <typename CharT, typename T, typename FormatT>
 inline CharT* formatInt(CharT* buf, std::size_t buflen, T si, const FormatT& fmt)

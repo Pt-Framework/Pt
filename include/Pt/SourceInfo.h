@@ -86,6 +86,8 @@ namespace Pt {
         // print combined string
         std::cout << si.where() << std::endl;
     @endcode
+
+    @ingroup CoreTypes
 */
 class SourceInfo 
 {

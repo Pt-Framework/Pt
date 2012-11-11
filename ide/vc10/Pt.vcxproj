@@ -197,7 +197,6 @@
     <ClInclude Include="..\..\src\Pt-System\win32\SerialDeviceImpl.h" />
     <ClInclude Include="..\..\src\Pt-System\win32\ThreadImpl.h" />
     <ClInclude Include="..\..\src\Pt-System\win32\win32.h" />
-    <ClInclude Include="..\..\src\Pt\Chunk.h" />
     <ClInclude Include="..\..\src\Pt\regexp.h" />
     <ClInclude Include="..\..\src\Pt\SerializationData.h" />
     <ClInclude Include="..\..\src\Pt\SettingsReader.h" />
@@ -377,7 +376,6 @@
     <ClCompile Include="..\..\src\Pt\Atomicity.sun.cpp" />
     <ClCompile Include="..\..\src\Pt\Atomicity.windows.cpp" />
     <ClCompile Include="..\..\src\Pt\Char.cpp" />
-    <ClCompile Include="..\..\src\Pt\Chunk.cpp" />
     <ClCompile Include="..\..\src\Pt\Connectable.cpp" />
     <ClCompile Include="..\..\src\Pt\Connection.cpp" />
     <ClCompile Include="..\..\src\Pt\ConversionError.cpp" />

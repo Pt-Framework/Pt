@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2009-2010 by Bendri Batti
+ * Copyright (C) 2009-2012 by Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -36,6 +37,10 @@
 
 namespace Pt {
 
+/** @brief Page based allocator.
+
+    @ingroup Allocator
+*/
 class PT_API PageAllocator : public Pt::Allocator
                            , protected NonCopyable
 {

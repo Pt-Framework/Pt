@@ -34,6 +34,10 @@
 
 namespace Pt {
 
+/** @brief Extended API for std::type_info.
+
+    @ingroup CoreTypes
+*/
 class TypeInfo
 {
     public:

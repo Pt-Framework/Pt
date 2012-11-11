@@ -35,6 +35,10 @@ namespace Pt {
 
 class SerializationInfo;
 
+/** @brief Customizes type serialization.
+
+    @ingroup Serialization
+*/
 class SerializationSurrogate
 {
     public:

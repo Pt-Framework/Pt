@@ -33,28 +33,25 @@
 
 namespace Pt {
 
-/**
- * @brief Generic %TextCodec base class for specific codecs.
- *
- * This class contains default implementations for the methods do_unshift(), do_encoding()
- * and do_always_noconv() so sub-classes do not have to implement this default behaviour.
- *
- * Codecs are used to convert one Text-encoding into another Text-encoding. The internal
- * and external data type can be specified using the template parameter 'I' (internal) and
- * 'E' (external).
- *
- * When used on a platform which supports locales and facets the conversion may use
- * locale-specific conversion of the Text.
- *
- * This class derives from facet std::codecvt. Further documentation can be found there.
- *
- * @param I The character type associated with the internal code set.
- * @param E The character type associated with the external code set.
- *
- * @see Utf8Codec
- * @see Utf16Codec
- * @see Utf32Codec
- */
+/** @brief Generic %TextCodec base class for specific codecs.
+ 
+    This class contains default implementations for the methods do_unshift(), do_encoding()
+    and do_always_noconv() so sub-classes do not have to implement this default behaviour.
+ 
+    Codecs are used to convert one Text-encoding into another Text-encoding. The internal
+    and external data type can be specified using the template parameter 'I' (internal) and
+    'E' (external).
+ 
+    When used on a platform which supports locales and facets the conversion may use
+    locale-specific conversion of the Text.
+ 
+    This class derives from facet std::codecvt. Further documentation can be found there.
+ 
+    @param I The character type associated with the internal code set.
+    @param E The character type associated with the external code set.
+ 
+    @ingroup Unicode
+*/
 template <typename I, typename E>
 class TextCodec : public std::codecvt<I, E, Pt::MBState>
 {

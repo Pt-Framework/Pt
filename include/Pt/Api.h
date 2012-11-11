@@ -117,6 +117,28 @@
     #define __NOLOCK_ON_OUTPUT
 #endif
 
+/** @defgroup Allocator Allocators
+
+    The Allocator interface can be used to optimize or customize allocation
+    strategies. Two allocators are provided, which can be approached by the
+    Allocator interface, a pool based allocator and a page based allocator.
+    A pool based allocator is beneficial in all cases where many small objects
+    of small sizes are created. This is for example used to optimize memory
+    usage during serialization. The page based allocator simply places data
+    consecutively in memory and frees the whole block when its no longer in
+    use. This is useful in situation where chunks of memory or objects are
+    created and destroyed at the same time. 
+*/
+
+/** @defgroup CoreTypes Core Types
+
+    The framework provides a number of basic types like fixed-size integers
+    or a type named Any to contain values of different types. There is also
+    functionality for type conversions and to swap or adjust byteorders. The
+    type traits are useful for generic programming to query information about
+    a type at compile time to adapt it or specialize for it. A wrapper for
+    std::type_info makes it easier to store and compare type information.
+*/
 
 /** @defgroup DateTime Dates and Times
 
@@ -125,23 +147,52 @@
     including other dates, times and timespans.
 */
 
-/** @defgroup Unicode
+/** @defgroup Unicode Unicode Text
 
-    Pt extends the string handling of the standard C++ library by
-    a unicode capable character type and a specialization of the
-    std:basic_string<> template for this charcter type. Localization
-    factes are provides that allow the use of i/o streams with the
-    unicode charcter type.
+    This set of classes and functions extends the string and localization
+    support of the C++ standard library to work with unicode characters and
+    strings. A unicode character type and string class (a specialization of
+    std::basic_string) can be used to hold unicode text. A set of functions
+    allows to transform and classify individual characters. Text can be 
+    converted e.g. between different encodings using i/o streams and text
+    codecs. A regular expression class allows to search and match patterns 
+    in unicode strings. Localization facets are available for the systems
+    which support standard C++ locales.
+*/
+
+/** @defgroup Serialization
+
+    Data structures and types can be serialized to text or binary formats using
+    Pt's serialization. This is used within the framework to load and store
+    data or to implement remote procedure calls. It is extensible to work with
+    all kinds of types, including STL containers, PODs (plain old data types),
+    buitlin language types or custom data types. The framework separates the 
+    process of composing and decomposing types from the formatting stage,
+    resulting in a two-phase serialization process. This also allows to resolve
+    and fixup shared pointers or references. 
+    
+    A type is serializable, if two operators are implemented to compose and 
+    decompose it to a SerializationInfo. The SerializationContext provides
+    improved memory management, a mechanism to generate IDs for shared pointers
+    and a way to further customize or override serialization for a type.
+    Alternatively, performance can be increased by implementing a Composers
+    or Decomposer for the type, however it is more complicated to do so.
+    
+    Various formats are supported by implementing Formatters. Other modules
+    of the framework also implement Formatters, for example to support 
+    serialization to XML. The Serializer and Deserializer combine a Formatter
+    and a SerializationContext, manage composition and decomposition and thus
+    form the high-level interface for the serialization of a set of types.
 */
 
 /** @namespace Pt
-    @brief Core module
+    @brief Core module.
 
-    This module is the base module for all other modules and has no dependency
-    to any system specific libraries except the standard c++ library. It
-    provides some basic types, support for byte-order handling, atomic integer
-    operations, type-traits, an unicode string and character class, serialization
-    and a signals/delegates based callback mechanism.
+    This module is the basis for all other modules of the framework It has
+    no dependency to any system specific libraries except the standard c++
+    library. It provides some basic types, support for byte-order handling,
+    atomic integer operations, type-traits, an unicode string and character
+    class, serialization and a signals/delegates based callback mechanism.
 */
 namespace Pt {
 

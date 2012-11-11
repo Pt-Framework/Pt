@@ -36,16 +36,12 @@
 #    define PT_REFLEX_API PT_IMPORT
 #  endif
 
-/** @defgroup Reflection Reflection
-    @brief Object introspection, reflection and meta-objects
-
-    The Pt Reflection API offers support for properties and method invokation.
-*/
-
 namespace Pt {
 
 /** @namespace Pt::Reflex
     @brief Object introspection, reflection and meta-objects
+
+    The Pt Reflection API offers support for properties and method invokation.
 */
 namespace Reflex {
 

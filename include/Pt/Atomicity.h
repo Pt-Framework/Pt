@@ -38,6 +38,8 @@ namespace Pt {
 
     A variable of this type must not be accessed directly, but used the 
     provided atomicity functions atomicSet() and atomicGet().
+
+    @ingroup CoreTypes
 */
 union PT_API atomic_t
 {
@@ -55,30 +57,40 @@ union PT_API atomic_t
 /** @brief Atomically get a value.
 
     Returns the value after employing a memory fence.
+
+    @ingroup CoreTypes
 */
 PT_API int atomicGet(volatile atomic_t& val);
 
 /** @brief Atomically set a value.
 
     Sets the value and employs a memory fence.
+
+    @ingroup CoreTypes
 */
 PT_API void atomicSet(volatile atomic_t& val, int n);
 
 /** @brief Increases a value by one as an atomic operation.
 
     Returns the resulting incremented value.
+
+    @ingroup CoreTypes
 */
 PT_API int atomicIncrement(volatile atomic_t& val);
 
 /** @brief Decreases a value by one as an atomic operation.
 
     Returns the resulting decremented value.
+
+    @ingroup CoreTypes
   */
 PT_API int atomicDecrement(volatile atomic_t& val);
 
 /** @brief Performs an atomic exchange operation.
 
     Sets \a val to \a exch and returns the initial value of \a val.
+
+    @ingroup CoreTypes
 */
 PT_API int atomicExchange(volatile atomic_t& val, int exch);
 
@@ -86,18 +98,24 @@ PT_API int atomicExchange(volatile atomic_t& val, int exch);
 
     If \a val is equal to \a comp, \a val is replaced by \a exch. The initial
     value of of \a val is returned.
+
+    @ingroup CoreTypes
 */
 PT_API int atomicCompareExchange(volatile atomic_t& val, int exch, int comp);
 
 /** @brief Performs atomic addition of two values.
 
      Returns the initial value of the addend.
+
+    @ingroup CoreTypes
 */
 PT_API int atomicExchangeAdd(volatile atomic_t& val, int add);
 
 /** @brief Performs an atomic exchange operation.
 
     Sets \a val to \a exch and returns the initial value of \a val.
+
+    @ingroup CoreTypes
 */
 PT_API void* atomicExchange(void* volatile& val, void* exch);
 
@@ -105,6 +123,8 @@ PT_API void* atomicExchange(void* volatile& val, void* exch);
 
     If \a val is equal to \a comp, \a val is replaced by \a exch. The initial
     value of \a ptr is returned.
+
+    @ingroup CoreTypes
 */
 PT_API void* atomicCompareExchange(void* volatile& val, void* exch, void* comp);
 

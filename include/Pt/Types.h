@@ -46,50 +46,68 @@ namespace Pt {
     /// @brief Same as unsigned long
     typedef unsigned long ulong;
 
-    /// @brief Unsigned integer type large enough to store object sizes
+    /** @brief Unsigned integer type large enough to store object sizes.
+
+        @ingroup CoreTypes
+    */
     typedef std::size_t size_t;
     
-    /// @brief Signed integer varint of Pt::size_t 
+    /** @brief Signed integer varint of Pt::size_t.
+
+        @ingroup CoreTypes
+    */
     typedef std::ptrdiff_t ssize_t;
 
-    /// @brief Signed 8-bit integer type
+    /** @brief Signed 8-bit integer type.
+
+        @ingroup CoreTypes
+    */
     typedef signed char int8_t;
     
-    /// @brief Unsigned -8bit integer type
+    /** @brief Unsigned 8-bit integer type.
+
+        @ingroup CoreTypes
+    */
     typedef unsigned char uint8_t;
 
 #if USHRT_MAX == 0xffff
 
-    /// @brief Signed 16-bit integer type
+    /** @brief Signed 16-bit integer type.
+
+        @ingroup CoreTypes
+    */
     typedef short int16_t;
 
-    /// @brief Unsigned 16-bit integer type
+    /** @brief Unsigned 16-bit integer type.
+
+        @ingroup CoreTypes
+    */
     typedef unsigned short uint16_t;
 
 #elif UINT_MAX == 0xffff
 
-    /// @brief Signed 16-bit integer type
     typedef int int16_t;
-
-    /// @brief Unsigned 16-bit integer type
     typedef unsigned int uint16_t;
 
 #endif
 
 #if UINT_MAX == 0xffffffffUL
 
-    /// @brief Signed 32-bit integer type
+    /** @brief Signed 32-bit integer type.
+
+        @ingroup CoreTypes
+    */
     typedef int int32_t;
 
-    /// @brief Unsigned 32-bit integer type
+    /** @brief Unsigned 32-bit integer type.
+
+        @ingroup CoreTypes
+    */
     typedef unsigned int uint32_t;
 
 #elif ULONG_MAX == 0xffffffffUL
 
-    /// @brief Signed 32-bit integer type
     typedef long int32_t;
-
-    /// @brief Unsigned 32-bit integer type
     typedef unsigned long uint32_t;
 
 #endif
@@ -98,30 +116,30 @@ namespace Pt {
     #define PT_WITH_INT64 1
     #define PT_WITH_LONG_LONG 1
 
-    /// @brief Signed 64-bit integer type
+    /** @brief Signed 64-bit integer type.
+
+        @ingroup CoreTypes
+    */
     typedef long int64_t;
 
-    /// @brief Unsigned 64-bit integer type
+    /** @brief Unsigned 64-bit integer type.
+
+        @ingroup CoreTypes
+    */
     typedef unsigned long uint64_t;
 
 #elif ULLONG_MAX == 18446744073709551615ULL
     #define PT_WITH_INT64 1
     #define PT_WITH_LONG_LONG 1
 
-    /// @brief Signed 64-bit integer type
     typedef long long int64_t;
-
-    /// @brief Unsigned 64-bit integer type
     typedef unsigned long long uint64_t;
 
 #elif defined(__GNUC__) || defined(__MWERKS_SYMBIAN__)
     #define PT_WITH_INT64 1
     #define PT_WITH_LONG_LONG 1
 
-    /// @brief Signed 64-bit integer type
     typedef long long int64_t;
-
-    /// @brief Unsigned 64-bit integer type
     typedef unsigned long long uint64_t;
 
 #endif

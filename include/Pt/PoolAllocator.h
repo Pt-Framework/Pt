@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2009-2010 by Bendri Batti
+ * Copyright (C) 2009-2012 by Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -39,6 +40,10 @@
 
 namespace Pt {
 
+/** @brief Memory pool for objects of the same size.
+
+    @ingroup Allocator
+*/
 class PT_API MemoryPool : public NonCopyable
 {
     typedef std::size_t Record;
@@ -172,7 +177,10 @@ class PT_API MemoryPool : public NonCopyable
         std::size_t _maxUnits;
 };
 
+/** @brief Pool based allocator.
 
+    @ingroup Allocator
+*/
 class PT_API PoolAllocator : public Allocator 
                            , protected NonCopyable
 {

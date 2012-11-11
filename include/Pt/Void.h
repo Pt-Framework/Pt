@@ -38,6 +38,8 @@ namespace Pt {
 
         The Void type is used as marker type for template specialisations,
         where void is not enough to indicate an unused template parameter.
+
+        @ingroup CoreTypes
     */
     struct PT_API Void
     {};

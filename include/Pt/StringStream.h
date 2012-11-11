@@ -35,6 +35,10 @@
 
 namespace Pt {
 
+/** @brief Unicode string stream buffer.
+
+    @ingroup Unicode
+*/
 class PT_API StringBuffer : public std::basic_stringbuf<Pt::Char>
 {
     public:
@@ -45,9 +49,12 @@ class PT_API StringBuffer : public std::basic_stringbuf<Pt::Char>
 
 } // namespace Pt
 
-
 namespace std {
 
+/** @brief Unicode string stream.
+
+    @ingroup Unicode
+*/
 template<>
 class PT_API basic_stringstream<Pt::Char> : public basic_iostream<Pt::Char>
 {
@@ -82,9 +89,23 @@ class PT_API basic_stringstream<Pt::Char> : public basic_iostream<Pt::Char>
 
 namespace Pt {
 
-    typedef std::basic_stringstream<Pt::Char> StringStream;
-    typedef std::basic_istringstream<Pt::Char> IStringStream;
-    typedef std::basic_ostringstream<Pt::Char> OStringStream;
+/** @brief Unicode string stream.
+
+    @ingroup Unicode
+*/
+typedef std::basic_stringstream<Pt::Char> StringStream;
+
+/** @brief Unicode string stream.
+
+    @ingroup Unicode
+*/
+typedef std::basic_istringstream<Pt::Char> IStringStream;
+
+/** @brief Unicode string stream.
+
+    @ingroup Unicode
+*/
+typedef std::basic_ostringstream<Pt::Char> OStringStream;
 
 } // namespace Pt
 

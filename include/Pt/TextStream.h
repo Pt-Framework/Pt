@@ -55,7 +55,7 @@ namespace Pt {
     The Codec object which is passed as pointer to the constructor will afterwards be
     managed by this class and also be deleted by this class when it's destructed!
 
-    @see std::basic_istream
+    @ingroup Unicode
 */
 template <typename CharT, typename ByteT>
 class BasicTextIStream : public std::basic_istream<CharT>
@@ -142,7 +142,7 @@ class BasicTextIStream : public std::basic_istream<CharT>
     The Codec object which is passed as pointer to the constructor will afterwards be
     managed by this class and also be deleted by this class when it's destructed!
 
-    @see std::basic_istream
+    @ingroup Unicode
 */
 template <typename CharT, typename ByteT>
 class BasicTextOStream : public std::basic_ostream<CharT>
@@ -224,7 +224,7 @@ class BasicTextOStream : public std::basic_ostream<CharT>
     The Codec object which is passed as pointer to the constructor will afterwards be
     managed by this class and also be deleted by this class when it's destructed!
 
-    @see std::basic_istream
+    @ingroup Unicode
 */
 template <typename CharT, typename ByteT>
 class BasicTextStream : public std::basic_iostream<CharT>
@@ -289,6 +289,8 @@ class BasicTextStream : public std::basic_iostream<CharT>
 
 
 /** @brief Text Input Stream for Character conversion
+
+    @ingroup Unicode
 */
 class PT_API TextIStream : public BasicTextIStream<Char, char>
 {
@@ -312,6 +314,8 @@ class PT_API TextIStream : public BasicTextIStream<Char, char>
 
 
 /** @brief Text Output Stream for Character conversion
+
+    @ingroup Unicode
 */
 class PT_API TextOStream : public BasicTextOStream<Char, char>
 {
@@ -335,6 +339,8 @@ class PT_API TextOStream : public BasicTextOStream<Char, char>
 
 
 /** @brief Text Stream for Character conversion
+
+    @ingroup Unicode
 */
 class PT_API TextStream : public BasicTextStream<Char, char>
 {

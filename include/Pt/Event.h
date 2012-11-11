@@ -40,6 +40,8 @@ namespace Pt {
     and typeInfo() methods. The first is used to deep copy event objects
     for example in an EventLoop and the latter one is used to dispatch
     events by type.
+
+    @ingroup CoreTypes
  */
 class Event
 {

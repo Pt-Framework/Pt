@@ -41,6 +41,10 @@ namespace Pt {
 
 class SerializationContextImpl;
 
+/** @brief Context for the serialization of types.
+
+    @ingroup Serialization
+*/
 class PT_API SerializationContext : public SerializationInfo
 {
     public:

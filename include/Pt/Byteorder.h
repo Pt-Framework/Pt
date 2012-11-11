@@ -79,11 +79,10 @@
     #error: PT_LE or PT_BE needs to be defined (Pt/Byteorder.h)
 #endif
 
-namespace Pt
-{
-    /** @brief Swaps the byteorder of the given 16-bit value.
-        * @internal
-        */
+namespace Pt {
+
+    /** @internal Swaps the byteorder of the given 16-bit value.
+    */
     template <typename T>
     inline T swab16(T value)
     {
@@ -103,9 +102,8 @@ namespace Pt
                ( (value & 0xFF00) >> 8 );
     }
 
-    /** @brief Swaps the byteorder of the given 32-bit value.
-     *  @internal
-     */
+    /** @internal Swaps the byteorder of the given 32-bit value.
+    */
     template <typename T>
     inline T swab32(T value)
     {
@@ -116,9 +114,8 @@ namespace Pt
     }
 
 #ifdef PT_WITH_INT64
-    /** @brief Swaps the byteorder of the given 64-bit value.
-     *  @internal
-     */
+    /** @internal Swaps the byteorder of the given 64-bit value.
+    */
     template <typename T>
     inline T swab64(T value)
     {
@@ -133,78 +130,60 @@ namespace Pt
     }
 #endif
 
-    /** @brief Dummy function which does nothing.
-     *
-     *  Just for the sake of completeness.
-     */
+    /** @brief Stub function for byteorder conversion.
+
+        @ingroup CoreTypes
+    */
     inline int8_t swab(int8_t value)
     { return value; }
 
-    /** @brief Dummy function which does nothing.
-     *
-     *  Just for the sake of completeness.
-     */
+    /** @brief Stub function for byteorder conversiong.
+
+        @ingroup CoreTypes
+    */
     inline uint8_t swab(uint8_t value)
     { return value; }
 
     /** @brief Swaps the byteorder of an int16_t.
-     *
-     *  @param value The value to be byte-swapped
-     *  @return The byte-swapped value
-     *
-     *  Overloads the generic swap().
+        
+        @ingroup CoreTypes
      */
     inline int16_t swab(int16_t value)
     { return swab16(value); }
 
     /** @brief Swaps the byteorder of a uint16_t.
-     *
-     *  @param value The value to be byte-swapped
-     *  @return The byte-swapped value
-     *
-     *  Overloads the generic swap().
+        
+        @ingroup CoreTypes
      */
     inline uint16_t swab(uint16_t value)
     { return swab16(value); }
 
     /** @brief Swaps the byteorder of an int32_t.
-     *
-     *  @param value The value to be byte-swapped
-     *  @return The byte-swapped value
-     *
-     *  Overloads the generic swap().
+        
+        @ingroup CoreTypes
      */
     inline int32_t swab(int32_t value)
     { return swab32(value); }
 
     /** @brief Swaps the byteorder of a uint32_t.
-     *
-     *  @param value The value to be byte-swapped
-     *  @return The byte-swapped value
-     *
-     *  Overloads the generic swap().
-     */
+        
+        @ingroup CoreTypes
+    */
     inline uint32_t swab(uint32_t value)
     { return swab32(value); }
 
 #ifdef PT_WITH_INT64
     /** @brief Swaps the byteorder of an int64_t.
-     *
-     *  @param value The value to be byte-swapped
-     *  @return The byte-swapped value
-     *
-     *  Overloads the generic swap().
-     */
+        
+        @ingroup CoreTypes
+    */
     inline int64_t swab(int64_t value)
     { return swab64(value); }
 
     /** @brief Swaps the byteorder of a uint64t.
-     *
-     *  @param value The value to be byte-swapped
-     *  @return The byte-swapped value
-     *
-     *  Overloads the generic swap().
-     */
+        
+        @ingroup CoreTypes
+    */
     inline uint64_t swab(uint64_t value)
     { return swab64(value); }
 #endif
@@ -223,15 +202,14 @@ namespace Pt
         return *reinterpret_cast<const int8_t*>(&i) == 1;
     }
 
-    /** @brief Changes the byteorder of a given value from host-byteorder to little-endian.
-     *
-     *  @param value The value in host-byteorder
-     *  @return The value changed to little-endian
-     *
-     *  This function does nothing on a LE system, but calls swap() on a BE system.
-     *  The generic swap() function expects the type passed in to be bitwise-copyable
-     *  and thus does this function. Overloading swab can remove this restriction and
-     *  may improve performance for custon types.
+    /** @brief Returns a given value converted from host-byteorder to little-endian.
+     
+        This function does nothing on a LE system, but calls swap() on a BE system.
+        The generic swap() function expects the type passed in to be bitwise-copyable
+        and thus does this function. Overloading swab can remove this restriction and
+        may improve performance for custon types.
+       
+        @ingroup CoreTypes
      */
     template <typename T>
     inline T hostToLe(const T& value)
@@ -243,15 +221,14 @@ namespace Pt
 #endif
     }
 
-    /** @brief Changes the byteorder of a given value from little-endian to host-byteorder.
-     *
-     *  @param value The value in host-byteorder
-     *  @return The value changed to little-endian
-     *
-     *  This function does nothing on a LE system, but calls swap() on a BE system.
-     *  The generic swap() function expects the type passed in to be bitwise-copyable
-     *  and thus does this function. Overloading swab can remove this restriction and
-     *  may improve performance for custon types.
+    /** @brief Returns a given value converted from little-endian to host-byteorder.
+
+        This function does nothing on a LE system, but calls swap() on a BE system.
+        The generic swap() function expects the type passed in to be bitwise-copyable
+        and thus does this function. Overloading swab can remove this restriction and
+        may improve performance for custon types.
+
+        @ingroup CoreTypes
      */
     template <typename T>
     inline T leToHost(const T& value)
@@ -263,15 +240,14 @@ namespace Pt
 #endif
     }
 
-    /** @brief Changes the given value from the host-byteorder to big-endian.
-     *
-     *  @param value The value in host-byteorder
-     *  @return The value in big-endian
-     *
-     *  This function does nothing on a BE system, but calls swap() on a LE system.
-     *  The generic swap() function expects the type passed in to be bitwise-copyable
-     *  and thus does this function. Overloading swab can remove this restriction and
-     *  may improve performance for custon types.
+    /** @brief Returns a given value converted from the host-byteorder to big-endian.
+
+        This function does nothing on a BE system, but calls swap() on a LE system.
+        The generic swap() function expects the type passed in to be bitwise-copyable
+        and thus does this function. Overloading swab can remove this restriction and
+        may improve performance for custon types.
+       
+        @ingroup CoreTypes
      */
     template <typename T>
     inline T hostToBe(const T& value)
@@ -283,15 +259,14 @@ namespace Pt
 #endif
     }
 
-    /** @brief Changes the byteorder of a given value from big-endian to host-byteorder.
-     *
-     *  @param value The value in host-byteorder
-     *  @return The value in big-endian
-     *
-     *  This function does nothing on a BE system, but calls swap() on a LE system.
-     *  The generic swap() function expects the type passed in to be bitwise-copyable
-     *  and thus does this function. Overloading swab can remove this restriction and
-     *  may improve performance for custon types.
+    /** @brief Returns a given value converted from big-endian to host-byteorder.
+     
+        This function does nothing on a BE system, but calls swap() on a LE system.
+        The generic swap() function expects the type passed in to be bitwise-copyable
+        and thus does this function. Overloading swab can remove this restriction and
+        may improve performance for custon types.
+
+        @ingroup CoreTypes
      */
     template <typename T>
     inline T beToHost(const T& value)

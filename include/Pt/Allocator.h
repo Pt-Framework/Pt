@@ -1,4 +1,6 @@
 /*
+ * Copyright (C) 2008-2012 by Marc Boris Duerner
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -30,25 +32,29 @@
 
 namespace Pt {
 
-    class Allocator
-    {
-        public:
-            Allocator()
-            {}
+/** @brief Allocator interface.
 
-            virtual ~Allocator()
-            {}
+    @ingroup Allocator
+*/
+class Allocator
+{
+    public:
+        Allocator()
+        {}
 
-            virtual void* allocate(std::size_t size)
-            {
-                return operator new(size);
-            }
+        virtual ~Allocator()
+        {}
 
-            virtual void deallocate(void* p, std::size_t size)
-            {
-                operator delete(p);
-            }
-    };
+        virtual void* allocate(std::size_t size)
+        {
+            return operator new(size);
+        }
+
+        virtual void deallocate(void* p, std::size_t size)
+        {
+            operator delete(p);
+        }
+};
 
 }
 

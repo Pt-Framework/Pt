@@ -37,6 +37,10 @@ namespace Pt {
 
 class IComposer;
 
+/** @brief Support for serialization to different formats.
+
+    @ingroup Serialization
+*/
 class Formatter
 {
     public:

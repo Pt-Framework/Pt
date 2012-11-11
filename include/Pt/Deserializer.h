@@ -35,6 +35,10 @@
 
 namespace Pt {
 
+/** @brief Deserializes a set of types.
+
+    @ingroup Serialization
+*/
 class PT_API Deserializer
 {
     public:

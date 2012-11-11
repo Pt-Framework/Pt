@@ -52,7 +52,10 @@ class RegexDestroyPolicy
         }
 };
 
+/** @brief Invalid regular expression.
 
+    @ingroup Unicode
+*/
 class PT_API InvalidRegex : public std::invalid_argument
 {
     public:
@@ -62,7 +65,10 @@ class PT_API InvalidRegex : public std::invalid_argument
         {}
 };
 
+/** @brief Regular Expression for unicode strings.
 
+    @ingroup Unicode
+*/
 class PT_API Regex
 {
       SmartPtr<pt_regexp, ExternalRefCounted, RegexDestroyPolicy > _expr;

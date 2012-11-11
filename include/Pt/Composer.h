@@ -34,6 +34,10 @@
 
 namespace Pt {
 
+/** @brief Manages the composition of types during serialization.
+
+    @ingroup Serialization
+*/
 class IComposer
 {
     public:
@@ -93,7 +97,10 @@ class IComposer
         {}
 };
 
+/** @brief Manages the composition of types during serialization.
 
+    @ingroup Serialization
+*/
 template <typename T>
 class Composer : public IComposer
 {

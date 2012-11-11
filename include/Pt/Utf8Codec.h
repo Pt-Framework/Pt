@@ -38,67 +38,69 @@
 
 namespace Pt {
 
-    /**
-     * @brief This Codec class is able to convert from UTF-8 to UTF-32 and from UTF-32 to UTF-8.
-     *
-     * The method do_in() converts an array of char containing UTF-8-encoded data into an array
-     * of Pt::Char which is UTF-32-encoded, which means that the data is a direct readable
-     * 32-bit representation of the character.
-     *
-     * The method do_out() converts an array of Pt::Char objects (UTF-32/Unicode) into an
-     * array of char which contains the same sequence of characters in UTF-8-encoding.
-     */
-    class PT_API Utf8Codec : public TextCodec<Char, char> {
-        public:
-            /**
-             * @brief Constructs a new Utf8Codec object which converts UTF-8 to UTF-32 and UTF-32 to UTF-8.
-             *
-             * The internal type is Pt::Char and external type is $char$
-             *
-             * @param ref This optional parameter is passed to std::codecvt. When ref == 0 the locale takes
-             * care of deleting the facet. If ref == 1 the locale does not destroy the facet. Default value is 0.
-             */
-            explicit Utf8Codec(size_t ref = 0);
+/** @brief This Codec class is able to convert from UTF-8 to UTF-32 and from UTF-32 to UTF-8.
+    
+    The method do_in() converts an array of char containing UTF-8-encoded data into an array
+    of Pt::Char which is UTF-32-encoded, which means that the data is a direct readable
+    32-bit representation of the character.
+    
+    The method do_out() converts an array of Pt::Char objects (UTF-32/Unicode) into an
+    array of char which contains the same sequence of characters in UTF-8-encoding.
 
-            //! Empty destructor
-            virtual ~Utf8Codec()
-            {}
+    @ingroup Unicode
+*/
+class PT_API Utf8Codec : public TextCodec<Char, char> 
+{
+    public:
+        /**
+            * @brief Constructs a new Utf8Codec object which converts UTF-8 to UTF-32 and UTF-32 to UTF-8.
+            *
+            * The internal type is Pt::Char and external type is $char$
+            *
+            * @param ref This optional parameter is passed to std::codecvt. When ref == 0 the locale takes
+            * care of deleting the facet. If ref == 1 the locale does not destroy the facet. Default value is 0.
+            */
+        explicit Utf8Codec(size_t ref = 0);
 
-            //! @brief Decodes UTF-8 to UTF-32.
-            virtual result do_in(MBState& s, const char* fromBegin,
-                                            const char* fromEnd, const char*& fromNext,
-                                            Char* toBegin, Char* toEnd, Char*& toNext) const;
+        //! Empty destructor
+        virtual ~Utf8Codec()
+        {}
 
-            //! @brief Encodes UTF-32 to UTF-8.
-            virtual result do_out(MBState& s, const Char* fromBegin,
-                                             const Char* fromEnd, const Char*& fromNext,
-                                             char* toBegin, char* toEnd, char*& toNext) const;
+        //! @brief Decodes UTF-8 to UTF-32.
+        virtual result do_in(MBState& s, const char* fromBegin,
+                                        const char* fromEnd, const char*& fromNext,
+                                        Char* toBegin, Char* toEnd, Char*& toNext) const;
 
-            // inheritdoc
-            virtual bool do_always_noconv() const throw();
+        //! @brief Encodes UTF-32 to UTF-8.
+        virtual result do_out(MBState& s, const Char* fromBegin,
+                                            const Char* fromEnd, const Char*& fromNext,
+                                            char* toBegin, char* toEnd, char*& toNext) const;
 
-            // inheritdoc
-            virtual int do_length(MBState& s, const char* fromBegin, const char* fromEnd, size_t max) const;
+        // inheritdoc
+        virtual bool do_always_noconv() const throw();
 
-            // inheritdoc
-            virtual int do_max_length() const throw();
+        // inheritdoc
+        virtual int do_length(MBState& s, const char* fromBegin, const char* fromEnd, size_t max) const;
 
-            // inheritdoc
-            std::codecvt_base::result do_unshift(Pt::MBState&, char*, char*, char*&) const
-            { return std::codecvt_base::noconv; }
+        // inheritdoc
+        virtual int do_max_length() const throw();
 
-            // inheritdoc
-            int do_encoding() const throw()
-            { return 0; }
+        // inheritdoc
+        std::codecvt_base::result do_unshift(Pt::MBState&, char*, char*, char*&) const
+        { return std::codecvt_base::noconv; }
 
-            static String decode(const char* data, unsigned size);
-            static String decode(const std::string& data)
-            { return decode(data.data(), data.size()); }
+        // inheritdoc
+        int do_encoding() const throw()
+        { return 0; }
 
-            static std::string encode(const Char* data, unsigned size);
-            static std::string encode(const String& data)
-            { return encode(data.data(), data.size()); }
-    };
+        static String decode(const char* data, unsigned size);
+        static String decode(const std::string& data)
+        { return decode(data.data(), data.size()); }
+
+        static std::string encode(const Char* data, unsigned size);
+        static std::string encode(const String& data)
+        { return encode(data.data(), data.size()); }
+};
 
 } //namespace Pt
 

@@ -37,7 +37,7 @@
 namespace Pt {
 
 /**
- * @brief A lightweight Character class (32 bits).
+ * @brief Represents a unicode character.
  *
  * Unicode characters are 32-bit entities. This class represents such an entity. It is lightweight, so it
  * can be used everywhere. Most compilers treat it like an unsigned int of 32 bits.
@@ -59,7 +59,7 @@ namespace Pt {
  * Upper- and lower-casing using upper() and lower() will only work if the character has a well-defined
  * upper/lower-case equivalent.
  *
- * @see Category
+ * @ingroup Unicode
  */
 class Char
 {
@@ -332,6 +332,8 @@ class Char
         Pt::uint32_t _value;
 };
 
+/** @internal Multi-byte conversion state.
+*/
 struct MBState
 {
     MBState()
@@ -349,7 +351,8 @@ struct MBState
 
 namespace std {
 
-/// @cond INTERNAL
+/** @internal Character traits for the basic string specialization
+*/
 template<>
 struct char_traits<Pt::Char>
 {
@@ -496,63 +499,115 @@ namespace Pt {
 
 PT_API std::ctype_base::mask ctypeMask(const Char& ch);
 
+/** @brief Checks whether @a ch is a alphabetic character.
+
+    @ingroup Unicode
+*/
 inline int isalpha(const Char& ch)
 {
     return ctypeMask(ch) & std::ctype_base::alpha;
 }
 
+/** @brief Checks whether @a ch is a alphanumeric character.
+
+    @ingroup Unicode
+*/
 inline int isalnum(const Char& ch)
 {
     return ctypeMask(ch) & std::ctype_base::alnum;
 }
 
+/** @brief Checks whether @a ch is a punctuation character.
+
+    @ingroup Unicode
+*/
 inline int ispunct(const Char& ch)
 {
     return ctypeMask(ch) & std::ctype_base::punct;
 }
 
+/** @brief Checks whether @a ch is a control character.
+
+    @ingroup Unicode
+*/
 inline int iscntrl(const Char& ch)
 {
     return ctypeMask(ch) & std::ctype_base::cntrl;
 }
 
+/** @brief Checks whether @a ch is a decimal digit.
+
+    @ingroup Unicode
+*/
 inline int isdigit(const Pt::Char& ch)
 {
     return ctypeMask(ch) & std::ctype_base::digit;
 }
 
+/** @brief Checks whether @a ch is a hexadecimal digit.
+
+    @ingroup Unicode
+*/
 inline int isxdigit(const Char& ch)
 {
     return ctypeMask(ch) & std::ctype_base::xdigit;
 }
 
+/** @brief Checks whether @a ch is a graphical character.
+
+    @ingroup Unicode
+*/
 inline int isgraph(const Char& ch)
 {
     return ctypeMask(ch) & std::ctype_base::graph;
 }
 
+/** @brief Checks whether @a ch is lower case.
+
+    @ingroup Unicode
+*/
 inline int islower(const Pt::Char& ch)
 {
     return ctypeMask(ch) & std::ctype_base::lower;
 }
 
+/** @brief Checks whether @a ch is upper case.
+
+    @ingroup Unicode
+*/
 inline int isupper(const Char& ch)
 {
     return ctypeMask(ch) & std::ctype_base::upper;
 }
 
+/** @brief Checks whether @a ch is a printable character.
+
+    @ingroup Unicode
+*/
 inline int isprint(const Char& ch)
 {
     return ctypeMask(ch) & std::ctype_base::print;
 }
 
+/** @brief Checks whether @a ch is a whitespace character.
+
+    @ingroup Unicode
+*/
 inline int isspace(const Char& ch)
 {
     return ctypeMask(ch) & std::ctype_base::space;
 }
 
+/** @brief Convert a character to lower case.
+
+    @ingroup Unicode
+*/
 PT_API Pt::Char tolower(const Pt::Char& ch);
 
+/** @brief Convert a character to upper case.
+
+    @ingroup Unicode
+*/
 PT_API Pt::Char toupper(const Pt::Char& ch);
 
 } // namespace Pt

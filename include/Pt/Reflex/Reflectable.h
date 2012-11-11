@@ -72,7 +72,6 @@ class PT_REFLEX_API PropertyNotWritable : public std::runtime_error
 
 
 /** @brief Value type registerable as property
-    @ingroup Reflection
 */
 template <typename T>
 class PropertyValue
@@ -108,7 +107,6 @@ class PropertyValue
 
 
 /** @brief Reflection support for properties
-    @ingroup Reflection
 */
 class Property
 {
@@ -366,7 +364,6 @@ class ReadWriteProperty : public Property
 
 
 /** @brief Make objects reflectable
-    @ingroup Reflection
 */
 class PT_REFLEX_API Reflectable
 {

@@ -36,6 +36,10 @@
 
 namespace Pt {
 
+/** @brief Serializes a set of types.
+
+    @ingroup Serialization
+*/
 class PT_API Serializer
 {
     public:

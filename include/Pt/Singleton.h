@@ -32,9 +32,6 @@
 
 #include <Pt/NonCopyable.h>
 
-#include <memory>
-#include <cstdlib>
-
 namespace Pt {
 
     /** @brief %Singleton class template
@@ -57,7 +54,7 @@ namespace Pt {
                };
         @endcode
 
-       @ingroup Pt
+       @ingroup CoreTypes
      */
     template <typename T>
     class Singleton : public NonCopyable

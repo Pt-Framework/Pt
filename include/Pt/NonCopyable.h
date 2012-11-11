@@ -48,6 +48,8 @@ namespace Pt {
     @endcode
   
     Trying to copy a NonCopyable object will cause compile-time error.
+
+    @ingroup CoreTypes
 */
 class NonCopyable {
     public:
