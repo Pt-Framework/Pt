@@ -1,0 +1,27 @@
+# Makefile for jam
+
+# NT (with Microsoft compiler)
+# People with DevStudio settings already in shell environment.
+#
+# Unset conflicting MAKEFLAGS when QNX SDK is installed
+# possibly add /I c:\Programme\PSDK2003Server\Include
+# set LIB environment var
+# nmake /f Makefile.win32
+#
+# use /DPT_MCHECK for memory usage statistics
+
+CC = cl /nologo
+CFLAGS = -DNT /RTC1 /MT /Os -wd4996 kernel32.lib advapi32.lib user32.lib
+TARGET = /Fejam
+
+SOURCES = \
+	builtins.c class.c command.c compile.c constants.c debug.c execcmd.c execnt.c \
+	filent.c filesys.c function.c frames.c glob.c hash.c hcache.c hdrmacro.c \
+	headers.c jam.c jambase.c jamgram.c lists.c make.c make1.c md5.c mem.c modules.c \
+	native.c object.c option.c output.c parse.c pathnt.c pathsys.c cwd.c regexp.c rules.c scan.c \
+	search.c strings.c subst.c timestamp.c variable.c w32_getreg.c \
+	modules/set.c modules/path.c modules/regex.c modules/property-set.c modules/sequence.c \
+	modules/order.c
+
+all:
+	$(CC) $(TARGET) $(CFLAGS) $(SOURCES) $(LINKLIBS)
