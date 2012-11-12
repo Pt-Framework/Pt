@@ -1,6 +1,6 @@
-/** \page textstreams Text Processing
+/** \page textstreams Text Encoding Conversion
 
-@section Text_EncodingConv Conversion of Text Encodings
+@section Text_TextStreams Text Input and Output Streams
 
 Text streams are i/o streams, that can be used to convert text between 
 different encodings. A codec is used to perform the translation, for example
