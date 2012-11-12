@@ -1,9 +1,85 @@
-/** \page textstreams Using TextStreams
-@section textstreams_usage Using TextStreams
+/** \page textstreams Text Processing
 
-This tutorial will show how to use a TextStream object to read data from or write data to a stream while the character
-data is automatically decoded or encoded.
+@section Text_EncodingConv Conversion of Text Encodings
 
+Text streams are i/o streams, that can be used to convert text between 
+different encodings. A codec is used to perform the translation, for example
+a Pt::Utf8Codec. The framework provides six types of text streams, three basic
+class templates and three specializations to work with Pt's unicode character 
+type Pt::Char. The basic class templates look like this: 
+
+@code
+template <typename CharT, typename ByteT>
+class BasicTextIStream : public std::basic_istream<CharT>;
+
+template <typename CharT, typename ByteT>
+class BasicTextOStream : public std::basic_ostream<CharT>;
+
+template <typename CharT, typename ByteT>
+class BasicTextStream : public std::basic_iostream<CharT>;
+@endcode
+
+Text streams can also convert between character types of different size. The
+first template parameter is the character type to convert to and the second
+template parameter is the character type to convert from. They are also called
+internal and external character types and may be the same type.
+
+The concrete text stream classes are specializations of the basic text classes
+to convert from byte streams to unicode. Therefore, the internal character type
+is Pt::Char, while the external character type is char.
+
+@code
+class PT_API TextIStream : public BasicTextIStream<Char, char>;
+
+class PT_API TextOStream : public BasicTextOStream<Char, char>;
+
+class PT_API TextIOStream : public BasicTextIOStream<Char, char>;
+@endcode
+
+Each of the two sets of classes consist of a stream for input, output and both,
+respectively. A text stream always works with another stream, so a text input 
+stream works with a std::basic_istream to read encoded input from and a text 
+output stream needs a std::basic_ostream to write the encoded text. Secondly,
+a codec is required in any case. The following example shows how to read UTF-8
+encoded text:
+
+@code
+std::istringstream iss("UTF-8 encoded text");
+
+Pt::String s;
+Pt::TextIStream tis(iss, new Pt::Utf8Codec());
+std::getline(tis, s);
+@endcode
+
+Of course, all extraction operators can also be used to directly read numbers
+for example. The next example shows how to encode text to an UTF-8 byte
+sequence;
+
+@code
+std::ostringstream oss("UTF-8 encoded text");
+
+Pt::String s = ...some text...;
+Pt::TextOStream tos(oss, new Pt::Utf8Codec());
+tos << s;
+@endcode
+
+Again, all insertion operators can be used to format numbers. Both examples
+create the text codec on the head with the new opertator and the stream
+manages the lifetime of the codec. This can be avoided by passing a value
+different from 0 to the codecs constructor, in which case the codec must
+exist at least as long as the stream that uses it: 
+
+@code
+Pt::Utf8Codec codec(1);
+Pt::TextOStream tos(oss, codec);
+@endcode
+
+Codecs are normally stateless, which means that one codec can be used with
+multiple text streams.
+*/
+
+
+/*
 @subsection text_encode Unicode character encoding
 
 One of the most common standards for character encoding is the ASCII-standard. Each character is encoded using 7 bits of

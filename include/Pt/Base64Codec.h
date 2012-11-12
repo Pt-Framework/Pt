@@ -34,6 +34,10 @@
 
 namespace Pt {
 
+/** @brief A codec for base-64
+
+    @ingroup Unicode
+*/
 class Base64Codec : public TextCodec<char, char>
 {
     public:

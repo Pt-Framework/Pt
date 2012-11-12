@@ -147,7 +147,7 @@
     including other dates, times and timespans.
 */
 
-/** @defgroup Unicode Unicode Text
+/** @defgroup Unicode Text Processing
 
     This set of classes and functions extends the string and localization
     support of the C++ standard library to work with unicode characters and
