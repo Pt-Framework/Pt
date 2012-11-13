@@ -132,31 +132,31 @@ rule SubTree
     local _subdir = [ FDirName $($(<[1])) $(<[2-]) ] ;
     local _subrules = [ FDirName $(_subdir) $(JAMRULES) ] ;    
 
-    ConfigureClean $(_subdir) ;
+    #ConfigureClean $(_subdir) ;
 
-    local config_vars = $(CONFIGURED_VARIABLES) ;
-    CONFIGURED_VARIABLES = ;
+    #local config_vars = $(CONFIGURED_VARIABLES) ;
+    #CONFIGURED_VARIABLES = ;
 
     # set subconfigure root variable
-    $(2) = $(_subdir) ;
+    #$(2) = $(_subdir) ;
 
     include [ FDirName $(_subdir) Jamconfigure ] ;
 
-    for local _var in $(CONFIGURED_VARIABLES)
-    {
-        local _value ;
-        for _v in $($(_var))
-        {
-            local _valtmp ;
-            _valtmp = [ Replace $(_v) "\\\\" "\\\\" ] ;
-            _valtmp = [ Replace $(_valtmp) "\"" "\\\"" ] ;
-            _value += "\"$(_valtmp)\"" ;
-        }
-    
-        WriteFile $(_subrules) : $(_var)" ?= "$(_value:J=" ")" ;" ;
-    }
+    #for local _var in $(CONFIGURED_VARIABLES)
+    #{
+    #    local _value ;
+    #    for _v in $($(_var))
+    #    {
+    #        local _valtmp ;
+    #        _valtmp = [ Replace $(_v) "\\\\" "\\\\" ] ;
+    #        _valtmp = [ Replace $(_valtmp) "\"" "\\\"" ] ;
+    #        _value += "\"$(_valtmp)\"" ;
+    #    }
+   # 
+   #     WriteFile $(_subrules) : $(_var)" ?= "$(_value:J=" ")" ;" ;
+   # }
 
-    CONFIGURED_VARIABLES = $(config_vars) ;
+    #CONFIGURED_VARIABLES = $(config_vars) ;
 }
 
 rule SubDir
