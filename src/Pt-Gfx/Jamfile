@@ -1,15 +1,11 @@
 SubDir PT_TOP src Pt-Gfx ;
 SubDirHdrs $(PT_TOP)/include ;
 SubDirC++Flags [ FDefines PT_GFX_API_EXPORT ] ;
-SubDirObjects $(OUTPUT_OBJECT) Pt-Gfx ;
+SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Gfx ;
 
-if $(FREETYPE_LINKFLAGS)
+if $(FREETYPE_INCLUDES)
 {
     SubDirHdrs $(FREETYPE_INCLUDES) ;
-}
-else
-{
-    SubDirHdrs $(PT_TOP)/src/Pt-Gfx/freetype/include ;
 }
 
 SharedLibrary Pt-Gfx : ARgbColor.cpp
@@ -43,7 +39,7 @@ SharedLibrary Pt-Gfx : ARgbColor.cpp
                        ;
 
 LinkSharedLibraries Pt-Gfx : Pt ;
-MakeLocate Pt-Gfx : $(OUTPUT_TARGET) ;
+MakeLocate Pt-Gfx : $(PT_OUTPUT_TARGET) ;
 
 if $(FREETYPE_LINKFLAGS)
 {
@@ -57,63 +53,63 @@ else
 
 if $(GUI)
 {
-Main ImagePainterDemo : ImagePainterDemo.cpp ;
-LinkSharedLibraries ImagePainterDemo : Pt Pt-System  Pt-Gfx Pt-Gui ;
-MakeLocate ImagePainterDemo : $(OUTPUT_TARGET) ;
+    Main ImagePainterDemo : ImagePainterDemo.cpp ;
+    LinkSharedLibraries ImagePainterDemo : Pt Pt-System  Pt-Gfx Pt-Gui ;
+    MakeLocate ImagePainterDemo : $(PT_OUTPUT_TARGET) ;
 
-Main DrawLineDemo : DrawLineDemo.cpp ;
-LinkSharedLibraries DrawLineDemo : Pt Pt-System  Pt-Gfx Pt-Gui ;
-MakeLocate DrawLineDemo : $(OUTPUT_TARGET) ;
+    Main DrawLineDemo : DrawLineDemo.cpp ;
+    LinkSharedLibraries DrawLineDemo : Pt Pt-System  Pt-Gfx Pt-Gui ;
+    MakeLocate DrawLineDemo : $(PT_OUTPUT_TARGET) ;
 
-Main DrawLineBenchmark : DrawLineBenchmark.cpp ;
-LinkSharedLibraries DrawLineBenchmark : Pt Pt-System  Pt-Gfx Pt-Gui ;
-MakeLocate DrawLineBenchmark : $(OUTPUT_TARGET) ;
+    Main DrawLineBenchmark : DrawLineBenchmark.cpp ;
+    LinkSharedLibraries DrawLineBenchmark : Pt Pt-System  Pt-Gfx Pt-Gui ;
+    MakeLocate DrawLineBenchmark : $(PT_OUTPUT_TARGET) ;
 
-Main DrawRectDemo : DrawRectDemo.cpp ;
-LinkSharedLibraries DrawRectDemo : Pt Pt-System  Pt-Gfx Pt-Gui ;
-MakeLocate DrawRectDemo : $(OUTPUT_TARGET) ;
+    Main DrawRectDemo : DrawRectDemo.cpp ;
+    LinkSharedLibraries DrawRectDemo : Pt Pt-System  Pt-Gfx Pt-Gui ;
+    MakeLocate DrawRectDemo : $(PT_OUTPUT_TARGET) ;
 
-Main FillPolygonDemo : FillPolygonDemo.cpp ;
-LinkSharedLibraries FillPolygonDemo : Pt Pt-System  Pt-Gfx Pt-Gui ;
-MakeLocate FillPolygonDemo : $(OUTPUT_TARGET) ;
+    Main FillPolygonDemo : FillPolygonDemo.cpp ;
+    LinkSharedLibraries FillPolygonDemo : Pt Pt-System  Pt-Gfx Pt-Gui ;
+    MakeLocate FillPolygonDemo : $(PT_OUTPUT_TARGET) ;
 
-Main DrawEllipseDemo : DrawEllipseDemo.cpp ;
-LinkSharedLibraries DrawEllipseDemo : Pt Pt-System  Pt-Gfx Pt-Gui ;
-MakeLocate DrawEllipseDemo : $(OUTPUT_TARGET) ;
+    Main DrawEllipseDemo : DrawEllipseDemo.cpp ;
+    LinkSharedLibraries DrawEllipseDemo : Pt Pt-System  Pt-Gfx Pt-Gui ;
+    MakeLocate DrawEllipseDemo : $(PT_OUTPUT_TARGET) ;
 
-Main GfxPerf : GfxPerf.cpp ;
-LinkSharedLibraries GfxPerf : Pt Pt-System  Pt-Gfx Pt-Gui ;
-MakeLocate GfxPerf : $(OUTPUT_TARGET) ;
+    Main GfxPerf : GfxPerf.cpp ;
+    LinkSharedLibraries GfxPerf : Pt Pt-System  Pt-Gfx Pt-Gui ;
+    MakeLocate GfxPerf : $(PT_OUTPUT_TARGET) ;
 }
 
 Main GreyscaleTest : GreyscaleTest.cpp ;
 LinkSharedLibraries GreyscaleTest : Pt Pt-Gfx ;
-MakeLocate GreyscaleTest : $(OUTPUT_TARGET) ;
+MakeLocate GreyscaleTest : $(PT_OUTPUT_TARGET) ;
 
 Main BlockscaleTest : BlockscaleTest.cpp ;
 LinkSharedLibraries BlockscaleTest : Pt Pt-Gfx ;
-MakeLocate BlockscaleTest : $(OUTPUT_TARGET) ;
+MakeLocate BlockscaleTest : $(PT_OUTPUT_TARGET) ;
 
 Main ImagePainterTest : ImagePainterTest.cpp ;
 LinkSharedLibraries ImagePainterTest : Pt Pt-Gfx Pt-Unit ;
-MakeLocate ImagePainterTest : $(OUTPUT_TARGET) ;
-RunUnitTest ImagePainterTest : $(OUTPUT_TEST) ;
+MakeLocate ImagePainterTest : $(PT_OUTPUT_TARGET) ;
+RunUnitTest ImagePainterTest : $(PT_OUTPUT_TEST) ;
 
 Main PlanarImageTest : PlanarImageTest.cpp ;
 LinkSharedLibraries PlanarImageTest : Pt Pt-Gfx Pt-Unit ;
-MakeLocate PlanarImageTest : $(OUTPUT_TARGET) ;
-RunUnitTest PlanarImageTest : $(OUTPUT_TEST) ;
+MakeLocate PlanarImageTest : $(PT_OUTPUT_TARGET) ;
+RunUnitTest PlanarImageTest : $(PT_OUTPUT_TEST) ;
 
 Main MakeFontHeader : MakeFontHeader.cpp ;
-MakeLocate MakeFontHeader : $(OUTPUT_TARGET) ;
+MakeLocate MakeFontHeader : $(PT_OUTPUT_TARGET) ;
 
 Main ColorTest : ColorTest.cpp ;
 LinkSharedLibraries ColorTest : Pt Pt-Gfx ;
-MakeLocate ColorTest : $(OUTPUT_TARGET) ;
+MakeLocate ColorTest : $(PT_OUTPUT_TARGET) ;
 
 Main ImageTest : ImageTest.cpp ;
 LinkSharedLibraries ImageTest : Pt Pt-Gfx ;
-MakeLocate ImageTest : $(OUTPUT_TARGET) ;
+MakeLocate ImageTest : $(PT_OUTPUT_TARGET) ;
 
 if ! $(FREETYPE_LINKFLAGS)
 {

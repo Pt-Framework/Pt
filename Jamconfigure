@@ -19,7 +19,7 @@ if --nlog in $(ARGV)
     C++FLAGS += [ FDefines NLOG ] ;
 }
 
-Configure CONFIG ;
+#Configure CONFIG ;
 EchoOption CONFIG : "Build configuration" ;
 
 # configure basic C compiler
@@ -28,20 +28,37 @@ ConfigureCc ;
 # configure basic C++ compiler
 ConfigureC++ ;
 
+#############################################################################
+# output directories used by MakeLocate and SubDirObjects
+#############################################################################
+PT_OUTPUT_TARGET ?= [ FDirName $(PT_TOP) build $(CONFIG) ] ;
+EchoOption PT_OUTPUT_TARGET : "Pt Binary Output Dir" ;
+Configure PT_OUTPUT_TARGET ;
+
+PT_OUTPUT_OBJECT ?= [ FDirName $(PT_TOP) tmp $(CONFIG) ] ;
+EchoOption PT_OUTPUT_OBJECT : "Pt Object Output Dir" ;
+Configure PT_OUTPUT_OBJECT ;
+
+PT_OUTPUT_TEST ?= $(PT_OUTPUT_TARGET) ;
+EchoOption PT_OUTPUT_TEST : "Pt Testing Output Dir" ;
+Configure PT_OUTPUT_TEST ;
+
+#############################################################################
 # installation directories
-INSTALL_DIR ?= [ FDirName deploy $(CONFIG) ] ;
+#############################################################################
+PT_INSTALL_DIR ?= [ FDirName $(PT_TOP) deploy $(CONFIG) ] ;
 
-INSTALL_BINDIR ?= [ FDirName $(INSTALL_DIR) bin ] ; 
-EchoOption INSTALL_BINDIR : "Pt Binary Install Dir" ;
-Configure INSTALL_BINDIR ;
+PT_INSTALL_BINDIR ?= [ FDirName $(PT_INSTALL_DIR) bin ] ; 
+EchoOption PT_INSTALL_BINDIR : "Pt Binary Install Dir" ;
+Configure PT_INSTALL_BINDIR ;
 
-INSTALL_INCLUDEDIR ?= [ FDirName $(INSTALL_DIR) include ] ; 
-EchoOption INSTALL_INCLUDEDIR : "Pt Include Install Dir" ;
-Configure INSTALL_INCLUDEDIR ;
+PT_INSTALL_INCLUDEDIR ?= [ FDirName $(PT_INSTALL_DIR) include ] ; 
+EchoOption PT_INSTALL_INCLUDEDIR : "Pt Include Install Dir" ;
+Configure PT_INSTALL_INCLUDEDIR ;
 
-INSTALL_LIBDIR ?= [ FDirName $(INSTALL_DIR) lib ] ;
-EchoOption INSTALL_LIBDIR : "Pt Library Install Dir" ; 
-Configure INSTALL_LIBDIR ;
+PT_INSTALL_LIBDIR ?= [ FDirName $(PT_INSTALL_DIR) lib ] ;
+EchoOption PT_INSTALL_LIBDIR : "Pt Library Install Dir" ; 
+Configure PT_INSTALL_LIBDIR ;
 
 #############################################################################
 # Platform settings
@@ -196,7 +213,7 @@ ConfigureFreetype ;
     
 if ! $(FREETYPE_INCLUDES) || ! $(FREETYPE_LINKFLAGS)
 {
-    FREETYPE_INCLUDES = src/Pt-Gfx/freetype/include ;
+    FREETYPE_INCLUDES = [ FDirName $(PT_TOP) src Pt-Gfx freetype include ] ;
     FREETYPE_LINKFLAGS = "" ;
 
     Configure FREETYPE_INCLUDES ;

@@ -59,13 +59,14 @@ rule ConfigureLoad
 
     if $(_config)
     {
-        # TODO: check timestamp against Jamconfigure
-	    if [ CHECK_IF_FILE $(JAMRULES).$(_config) ] 
-	    {
-		    include Jamrules.$(_config) ;
-		    TryCommand $(CP) $(JAMRULES).$(_config) Jamrules ;
-		    Exit "Using " $(JAMRULES).$(_config) ;
-	    }
+        # TODO: check timestamp of cached Jamrules against Jamconfigure
+
+        if [ CHECK_IF_FILE $(JAMRULES).$(_config) ] 
+        {
+            include Jamrules.$(_config) ;
+            TryCommand $(CP) $(JAMRULES).$(_config) Jamrules ;
+            Exit "Using " $(JAMRULES).$(_config) : 0 ;
+        }
     }
 }
 
@@ -78,13 +79,13 @@ rule ConfigureSave
         TryCommand "rm -f "$(JAMRULES).$(_config) ;
         TryCommand "del /f/q "$(JAMRULES).$(_config) ;
 
-		ConfigureWrite $(JAMRULES).$(_config) ;
+        ConfigureWrite $(JAMRULES).$(_config) ;
     }
 }
 
 rule ConfigureWrite
 {
-	local _file = $(1) ;
+    local _file = $(1) ;
 
     for local _var in $(CONFIGURED_VARIABLES)
     {
@@ -108,7 +109,7 @@ rule ConfigureWrite
 
 rule ConfigureExit
 {
-	ConfigureWrite $(JAMRULES) ;
+    ConfigureWrite $(JAMRULES) ;
     Exit "Configuration successful." : 0 ;
 }
 
@@ -133,12 +134,12 @@ rule SubTree
     local _subrules = [ FDirName $(_subdir) $(JAMRULES) ] ;    
 
     #ConfigureClean $(_subdir) ;
-
+    #
     #local config_vars = $(CONFIGURED_VARIABLES) ;
     #CONFIGURED_VARIABLES = ;
 
     # set subconfigure root variable
-    #$(2) = $(_subdir) ;
+    $(2) = $(_subdir) ;
 
     include [ FDirName $(_subdir) Jamconfigure ] ;
 
@@ -152,9 +153,9 @@ rule SubTree
     #        _valtmp = [ Replace $(_valtmp) "\"" "\\\"" ] ;
     #        _value += "\"$(_valtmp)\"" ;
     #    }
-   # 
-   #     WriteFile $(_subrules) : $(_var)" ?= "$(_value:J=" ")" ;" ;
-   # }
+    # 
+    #     WriteFile $(_subrules) : $(_var)" ?= "$(_value:J=" ")" ;" ;
+    #}
 
     #CONFIGURED_VARIABLES = $(config_vars) ;
 }

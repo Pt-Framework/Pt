@@ -1,6 +1,6 @@
 SubDir PT_TOP src Pt-Net tests ;
 SubDirHdrs $(PT_TOP)/include ;
-SubDirObjects $(OUTPUT_OBJECT) Pt-Net ;
+SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Net ;
 
 Main Pt-Net-test : Pt-Net-test.cpp
 				   TcpSocketExTest.cpp
@@ -8,6 +8,6 @@ Main Pt-Net-test : Pt-Net-test.cpp
                    UdpSocketTest.cpp
                    ;
 LinkSharedLibraries Pt-Net-test : Pt Pt-Net Pt-System Pt-Unit ;
-MakeLocate Pt-Net-test : $(OUTPUT_TARGET) ;
-RunUnitTest Pt-Net-test : $(OUTPUT_TEST) ;
+MakeLocate Pt-Net-test : $(PT_OUTPUT_TARGET) ;
+RunUnitTest Pt-Net-test : $(PT_OUTPUT_TEST) ;
 

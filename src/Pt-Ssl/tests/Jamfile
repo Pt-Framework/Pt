@@ -1,6 +1,6 @@
 SubDir PT_TOP src Pt-Ssl tests ;
 SubDirHdrs $(PT_TOP)/include ;
-SubDirObjects $(OUTPUT_OBJECT) Pt-Ssl ;
+SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Ssl ;
 
 Main Pt-Ssl-test : Pt-Ssl-test.cpp
                    ContextTest.cpp
@@ -8,17 +8,17 @@ Main Pt-Ssl-test : Pt-Ssl-test.cpp
                    StreamBufferTest.cpp
                    ;
 LinkSharedLibraries Pt-Ssl-test : Pt Pt-Net Pt-Ssl Pt-System Pt-Unit ;
-MakeLocate Pt-Ssl-test : $(OUTPUT_TARGET) ;
-RunUnitTest Pt-Ssl-test : $(OUTPUT_TEST) ;
+MakeLocate Pt-Ssl-test : $(PT_OUTPUT_TARGET) ;
+RunUnitTest Pt-Ssl-test : $(PT_OUTPUT_TEST) ;
 
 Main HttpsClientDemo : HttpsClientDemo.cpp ;
 LinkSharedLibraries HttpsClientDemo : Pt-Ssl Pt-Net Pt-System Pt Pt-Http ;
-MakeLocate HttpsClientDemo : $(OUTPUT_TARGET) ;
+MakeLocate HttpsClientDemo : $(PT_OUTPUT_TARGET) ;
 
 Main HttpsServerDemo : HttpsServerDemo.cpp ;
 LinkSharedLibraries HttpsServerDemo : Pt-Ssl Pt-Net Pt-System Pt ;
-MakeLocate HttpsServerDemo : $(OUTPUT_TARGET) ;
+MakeLocate HttpsServerDemo : $(PT_OUTPUT_TARGET) ;
 
 #Main SSLHTTPServerClientTest : SSLHTTPServerClientTest.cpp ;
 #LinkSharedLibraries SSLHTTPServerClientTest : Pt-Ssl Pt-Net Pt-System Pt ;
-#MakeLocate SSLHTTPServerClientTest : $(OUTPUT_TARGET) ;
+#MakeLocate SSLHTTPServerClientTest : $(PT_OUTPUT_TARGET) ;

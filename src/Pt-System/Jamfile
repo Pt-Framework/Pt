@@ -2,7 +2,7 @@ SubDir PT_TOP src Pt-System ;
 SubDirHdrs $(PT_TOP)/include ;
 SubDirHdrs $(PT_TOP)/src/Pt-System/$(SYS:L) ;
 SubDirC++Flags [ FDefines PT_SYSTEM_API_EXPORT ] ;
-SubDirObjects $(OUTPUT_OBJECT) Pt-System ;
+SubDirObjects $(PT_OUTPUT_OBJECT) Pt-System ;
 
 PT_SYSTEM_IMPL_SUBDIR = [ FDirName $(PT_TOP) src Pt-System $(SYS:L) ] ;
 PT_SYSTEM_IMPL += [ GLOB $(PT_SYSTEM_IMPL_SUBDIR) : *.cpp  ] ;
@@ -45,7 +45,7 @@ SharedLibrary Pt-System : $(PT_SYSTEM_IMPL)
 
 LinkSharedLibraries Pt-System : Pt ;
 LinkLibs Pt-System : $(SYSLIBS) ;
-MakeLocate Pt-System : $(OUTPUT_TARGET) ;
-MakeInstall Pt-System : $(INSTALL_LIBDIR) ;
+MakeLocate Pt-System : $(PT_OUTPUT_TARGET) ;
+MakeInstall Pt-System : $(PT_INSTALL_LIBDIR) ;
 
 SubInclude PT_TOP src Pt-System tests ;

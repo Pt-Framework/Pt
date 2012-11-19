@@ -9,7 +9,7 @@ Library Pt-Gui-gf : ApplicationImpl.cpp
                      WidgetImpl.cpp
                      ;
 
-Library_MakeLocate Pt-Gui-gf : $(OUTPUT_TARGET) ;
+Library_MakeLocate Pt-Gui-gf : $(PT_OUTPUT_TARGET) ;
 
 
 Main GfTest : GfTest.cpp  ;

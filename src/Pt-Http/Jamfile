@@ -2,7 +2,7 @@ SubDir PT_TOP src Pt-Http ;
 SubDirHdrs $(PT_TOP)/include ;
 SubDirC++Flags [ FDefines PT_HTTP_API_EXPORT ] ;
 SubDirHdrs $(PT_TOP)/src/Pt-Http/$(SYS:L) ;
-SubDirObjects $(OUTPUT_OBJECT) Pt-Http ;
+SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Http ;
 
 if $(WITH_OPENSSL)
 {
@@ -36,7 +36,7 @@ else
     LinkSharedLibraries Pt-Http : Pt Pt-System Pt-Net ;
 }
 
-MakeLocate Pt-Http : $(OUTPUT_TARGET) ;
-MakeInstall Pt-Http : $(INSTALL_LIBDIR) ;
+MakeLocate Pt-Http : $(PT_OUTPUT_TARGET) ;
+MakeInstall Pt-Http : $(PT_INSTALL_LIBDIR) ;
 
 SubInclude PT_TOP src Pt-Http tests ;

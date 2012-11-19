@@ -1,7 +1,7 @@
 SubDir PT_TOP src Pt-Reflex ;
 SubDirHdrs $(PT_TOP)/include ;
 SubDirC++Flags [ FDefines PT_REFLEX_API_EXPORT ] ;
-SubDirObjects $(OUTPUT_OBJECT) Pt-Reflex ;
+SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Reflex ;
 
 SharedLibrary Pt-Reflex : Reflectable.cpp
                           Type.cpp
@@ -9,7 +9,7 @@ SharedLibrary Pt-Reflex : Reflectable.cpp
                           TypeManager.cpp ;
 
 LinkSharedLibraries Pt-Reflex : Pt ;
-MakeLocate Pt-Reflex : $(OUTPUT_TARGET) ;
-MakeInstall Pt-Reflex : $(INSTALL_LIBDIR) ;
+MakeLocate Pt-Reflex : $(PT_OUTPUT_TARGET) ;
+MakeInstall Pt-Reflex : $(PT_INSTALL_LIBDIR) ;
 
 SubInclude PT_TOP src Pt-Reflex tests ;

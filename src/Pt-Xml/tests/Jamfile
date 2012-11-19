@@ -1,6 +1,6 @@
 SubDir PT_TOP src Pt-Xml tests ;
 SubDirHdrs $(PT_TOP)/include ;
-SubDirObjects $(OUTPUT_OBJECT) Pt-Xml ;
+SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Xml ;
 
 Main Pt-Xml-test : Pt-Xml-test.cpp
                    XmlSerializerTest.cpp
@@ -8,9 +8,9 @@ Main Pt-Xml-test : Pt-Xml-test.cpp
                    XmlWriterTest.cpp ;
 
 LinkSharedLibraries Pt-Xml-test : Pt-Xml Pt-Reflex Pt-System Pt-Unit Pt ;
-MakeLocate Pt-Xml-test : $(OUTPUT_TARGET) ;
-RunUnitTest Pt-Xml-test : $(OUTPUT_TEST) ;
+MakeLocate Pt-Xml-test : $(PT_OUTPUT_TARGET) ;
+RunUnitTest Pt-Xml-test : $(PT_OUTPUT_TEST) ;
 
 Main SerializerBench : SerializerBench.cpp ;
 LinkSharedLibraries SerializerBench : Pt-Xml Pt-Reflex Pt-System Pt-Unit Pt ;
-MakeLocate SerializerBench : $(OUTPUT_TARGET) ;
+MakeLocate SerializerBench : $(PT_OUTPUT_TARGET) ;

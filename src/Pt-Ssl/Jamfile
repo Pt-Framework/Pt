@@ -1,7 +1,7 @@
 SubDir PT_TOP src Pt-Ssl ;
 SubDirHdrs $(PT_TOP)/include ;
 SubDirC++Flags [ FDefines PT_SSL_API_EXPORT ] ;
-SubDirObjects $(OUTPUT_OBJECT) Pt-Ssl ;
+SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Ssl ;
 
 if $(OPENSSL_INCLUDES)
 {
@@ -19,8 +19,8 @@ SharedLibrary Pt-Ssl : CertificateList.cpp
                        StreamBuffer.cpp ;
 
 LinkSharedLibraries Pt-Ssl : Pt Pt-Net Pt-System ;
-MakeLocate Pt-Ssl : $(OUTPUT_TARGET) ;
-MakeInstall Pt-Ssl : $(INSTALL_LIBDIR) ;
+MakeLocate Pt-Ssl : $(PT_OUTPUT_TARGET) ;
+MakeInstall Pt-Ssl : $(PT_INSTALL_LIBDIR) ;
 
 if $(OPENSSL_LINKLIBS)
 {

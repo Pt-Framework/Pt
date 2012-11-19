@@ -1,7 +1,7 @@
 SubDir PT_TOP src Pt-Http tests ;
 SubDirHdrs $(PT_TOP)/include ;
 SubDirHdrs $(PT_TOP)/src/Pt-Http ;
-SubDirObjects $(OUTPUT_OBJECT) Pt-Http ;
+SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Http ;
 
 if $(WITH_OPENSSL)
 {
@@ -22,5 +22,5 @@ else
     LinkSharedLibraries Pt-Http-test : Pt Pt-Http Pt-Net Pt-System Pt-Unit ;
 }
 
-MakeLocate Pt-Http-test : $(OUTPUT_TARGET) ;
-RunUnitTest Pt-Http-test : $(OUTPUT_TEST) ;
+MakeLocate Pt-Http-test : $(PT_OUTPUT_TARGET) ;
+RunUnitTest Pt-Http-test : $(PT_OUTPUT_TEST) ;

@@ -24,35 +24,35 @@ SharedLibrary Pt-Ssl : Exception.cpp
 
 SharedLibrary_LinkSharedLibraries Pt-Ssl : Pt Pt-Net Pt-System ;
 SharedLibrary_LinkLibraries Pt-Ssl : Pt-Ssl-openssl ;
-SharedLibrary_MakeLocate Pt-Ssl : $(OUTPUT_TARGET) ;
+SharedLibrary_MakeLocate Pt-Ssl : $(PT_OUTPUT_TARGET) ;
 
 Main SSLServerClientTest : SSLServerClientTest.cpp ;
 LinkSharedLibraries SSLServerClientTest : Pt-Ssl Pt-Net Pt-System Pt ;
-MakeLocate SSLServerClientTest : $(OUTPUT_TARGET) ;
+MakeLocate SSLServerClientTest : $(PT_OUTPUT_TARGET) ;
 
 Main SSLHTTPClientTest : SSLHTTPClientTest.cpp ;
 LinkSharedLibraries SSLHTTPClientTest : Pt-Ssl Pt-Net Pt-System Pt ;
-MakeLocate SSLHTTPClientTest : $(OUTPUT_TARGET) ;
+MakeLocate SSLHTTPClientTest : $(PT_OUTPUT_TARGET) ;
 
 Main SSLHTTPServerTest : SSLHTTPServerTest.cpp ;
 LinkSharedLibraries SSLHTTPServerTest : Pt-Ssl Pt-Net Pt-System Pt ;
-MakeLocate SSLHTTPServerTest : $(OUTPUT_TARGET) ;
+MakeLocate SSLHTTPServerTest : $(PT_OUTPUT_TARGET) ;
 
 Main SSLHTTPServerClientTest : SSLHTTPServerClientTest.cpp ;
 LinkSharedLibraries SSLHTTPServerClientTest : Pt-Ssl Pt-Net Pt-System Pt ;
-MakeLocate SSLHTTPServerClientTest : $(OUTPUT_TARGET) ;
+MakeLocate SSLHTTPServerClientTest : $(PT_OUTPUT_TARGET) ;
 
 Main SecureDigestTest : SecureDigestTest.cpp ;
 LinkSharedLibraries SecureDigestTest : Pt-Ssl Pt-System Pt ;
-MakeLocate SecureDigestTest : $(OUTPUT_TARGET) ;
+MakeLocate SecureDigestTest : $(PT_OUTPUT_TARGET) ;
 
 Main RSACipherTest : RSACipherTest.cpp ;
 LinkSharedLibraries RSACipherTest : Pt-Ssl Pt-System Pt ;
-MakeLocate RSACipherTest : $(OUTPUT_TARGET) ;
+MakeLocate RSACipherTest : $(PT_OUTPUT_TARGET) ;
 
 Main SymmetricCipherTest : SymmetricCipherTest.cpp ;
 LinkSharedLibraries SymmetricCipherTest : Pt-Ssl Pt-System Pt ;
-MakeLocate SymmetricCipherTest : $(OUTPUT_TARGET) ;
+MakeLocate SymmetricCipherTest : $(PT_OUTPUT_TARGET) ;
 
 if $(TARGET_OS) = "nt"
 {
@@ -72,11 +72,11 @@ if $(TARGET_OS) = "nt"
 
 # openssl pkcs12 -in pkcs-12-certificate-and-key-file -out pem-certificate-and-key-file
 
-File [ FDirName $(OUTPUT_TARGET) ca.pem     ] : cert$(SLASH)ca.pem     ;
-File [ FDirName $(OUTPUT_TARGET) client.pem ] : cert$(SLASH)client.pem ;
-File [ FDirName $(OUTPUT_TARGET) client.key ] : cert$(SLASH)client.key ;
-File [ FDirName $(OUTPUT_TARGET) server.pem ] : cert$(SLASH)server.pem ;
-File [ FDirName $(OUTPUT_TARGET) server.key ] : cert$(SLASH)server.key ;
+File [ FDirName $(PT_OUTPUT_TARGET) ca.pem     ] : cert$(SLASH)ca.pem     ;
+File [ FDirName $(PT_OUTPUT_TARGET) client.pem ] : cert$(SLASH)client.pem ;
+File [ FDirName $(PT_OUTPUT_TARGET) client.key ] : cert$(SLASH)client.key ;
+File [ FDirName $(PT_OUTPUT_TARGET) server.pem ] : cert$(SLASH)server.pem ;
+File [ FDirName $(PT_OUTPUT_TARGET) server.key ] : cert$(SLASH)server.key ;
 
 SubInclude TOP src Pt-Ssl openssl ;
 SubInclude TOP src Pt-Ssl tests ;

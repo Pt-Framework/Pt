@@ -1,6 +1,6 @@
 SubDir PT_TOP src Pt tests ;
 SubDirHdrs $(PT_TOP)/include ;
-SubDirObjects $(OUTPUT_OBJECT) Pt ;
+SubDirObjects $(PT_OUTPUT_OBJECT) Pt ;
 
 Main Pt-test : Pt-test.cpp
                AllocatorTest.cpp
@@ -30,5 +30,5 @@ Main Pt-test : Pt-test.cpp
                  VariantTest.cpp ;
 
 LinkSharedLibraries Pt-test : Pt-System Pt-Unit Pt ;
-MakeLocate Pt-test : $(OUTPUT_TARGET) ;
-RunUnitTest Pt-test : $(OUTPUT_TEST) ;
+MakeLocate Pt-test : $(PT_OUTPUT_TARGET) ;
+RunUnitTest Pt-test : $(PT_OUTPUT_TEST) ;

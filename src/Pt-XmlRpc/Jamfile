@@ -1,7 +1,7 @@
 SubDir PT_TOP src Pt-XmlRpc ;
 SubDirHdrs $(PT_TOP)/include ;
 SubDirC++Flags [ FDefines PT_XMLRPC_API_EXPORT ] ;
-SubDirObjects $(OUTPUT_OBJECT) Pt-XmlRpc ;
+SubDirObjects $(PT_OUTPUT_OBJECT) Pt-XmlRpc ;
 
 PT_XMLRPC_SOURCES = Client.cpp
                     ClientImpl.cpp
@@ -15,7 +15,7 @@ PT_XMLRPC_SOURCES = Client.cpp
 
 SharedLibrary Pt-XmlRpc : $(PT_XMLRPC_SOURCES) ;
 LinkSharedLibraries Pt-XmlRpc :  Pt-Xml Pt-Http Pt-Net Pt-System Pt ;
-MakeLocate Pt-XmlRpc : $(OUTPUT_TARGET) ;
-MakeInstall Pt-XmlRpc : $(INSTALL_LIBDIR) ;
+MakeLocate Pt-XmlRpc : $(PT_OUTPUT_TARGET) ;
+MakeInstall Pt-XmlRpc : $(PT_INSTALL_LIBDIR) ;
 
 SubInclude PT_TOP src Pt-XmlRpc tests ;

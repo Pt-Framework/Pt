@@ -3,7 +3,7 @@ SubDirHdrs $(PT_TOP)/include ;
 SubDirHdrs $(PT_TOP)/src/Pt-Gui/$(GUI:L) ;
 SubDirHdrs $(PT_TOP)/src/Pt-System ;
 SubDirC++Flags [ FDefines PT_GUI_API_EXPORT ] ;
-SubDirObjects $(OUTPUT_OBJECT) Pt-Gui ;
+SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Gui ;
 
 if $(GUI:L) = x11
 {
@@ -42,16 +42,16 @@ SharedLibrary Pt-Gui :  Application.cpp
                         $(PT_GUI_IMPL) ;
 LinkSharedLibraries Pt-Gui : Pt Pt-System Pt-Gfx  ;
 LinkLibs Pt-Gui : $(GUILIBS) ;
-MakeLocate Pt-Gui : $(OUTPUT_TARGET) ;
+MakeLocate Pt-Gui : $(PT_OUTPUT_TARGET) ;
 
 Main WidgetDemo : WidgetDemo.cpp ;
 LinkSharedLibraries WidgetDemo : Pt Pt-System Pt-Gfx Pt-Gui  ;
-MakeLocate WidgetDemo : $(OUTPUT_TARGET) ;
+MakeLocate WidgetDemo : $(PT_OUTPUT_TARGET) ;
 
 Main GuiDemo : GuiDemo.cpp ;
 LinkSharedLibraries GuiDemo : Pt Pt-System Pt-Gfx Pt-Gui  ;
-MakeLocate GuiDemo : $(OUTPUT_TARGET) ;
+MakeLocate GuiDemo : $(PT_OUTPUT_TARGET) ;
 
 Main Scribble : Scribble.cpp ;
 LinkSharedLibraries Scribble : Pt Pt-System Pt-Gfx Pt-Gui  ;
-MakeLocate Scribble : $(OUTPUT_TARGET) ;
+MakeLocate Scribble : $(PT_OUTPUT_TARGET) ;

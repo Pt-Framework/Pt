@@ -1,7 +1,7 @@
 SubDir PT_TOP src Pt-Gui photon ;
 SubDirHdrs $(PT_TOP)/include ;
 SubDirC++Flags [ FDefines PT_GUI_API_EXPORT ] ;
-SubDirObjects $(OUTPUT_OBJECT) Pt-Gui ;
+SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Gui ;
 
 Library Pt-Gui-photon : ApplicationImpl.cpp
                                     PainterImpl.cpp
@@ -11,7 +11,7 @@ Library Pt-Gui-photon : ApplicationImpl.cpp
                                     WidgetImpl.cpp
                                     ;
 
-MakeLocate Pt-Gui-photon : $(OUTPUT_TARGET) ;
+MakeLocate Pt-Gui-photon : $(PT_OUTPUT_TARGET) ;
 
 #Main phtest : phtest.cpp  ;
 #LINKLIBS  += $(GUILIBS) ;

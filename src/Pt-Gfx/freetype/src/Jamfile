@@ -2,7 +2,7 @@ SubDir PT_TOP src Pt-Gfx freetype src ;
 SubDirHdrs $(PT_TOP)/include ;
 SubDirHdrs $(PT_TOP)/src/Pt-Gfx/freetype/include ;
 SubDirCcFlags [ FDefines FT2_BUILD_LIBRARY ] ;
-SubDirObjects $(OUTPUT_OBJECT) Pt-Gfx freetype ;
+SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Gfx freetype ;
 
 Library Pt-Gfx-freetype :
 	[ FDirName autofit autofit.c ]
@@ -42,4 +42,4 @@ Library Pt-Gfx-freetype :
 	[ FDirName winfonts winfnt.c ]
 	;
 
-MakeLocate Pt-Gfx-freetype : $(OUTPUT_TARGET) ;
+MakeLocate Pt-Gfx-freetype : $(PT_OUTPUT_TARGET) ;

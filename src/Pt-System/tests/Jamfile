@@ -1,6 +1,6 @@
 SubDir PT_TOP src Pt-System tests ;
 SubDirHdrs $(PT_TOP)/include ;
-SubDirObjects $(OUTPUT_OBJECT) Pt-System ;
+SubDirObjects $(PT_OUTPUT_OBJECT) Pt-System ;
 
 PT_SYSTEM_TESTS = 
                   ApplicationTest.cpp
@@ -17,10 +17,10 @@ PT_SYSTEM_TESTS =
 
 Main Pt-System-test : Pt-System-test.cpp $(PT_SYSTEM_TESTS) ;
 LinkSharedLibraries Pt-System-test : Pt Pt-System Pt-Unit ;
-MakeLocate Pt-System-test : $(OUTPUT_TARGET) ;
-RunUnitTest Pt-System-test : $(OUTPUT_TEST) ;
+MakeLocate Pt-System-test : $(PT_OUTPUT_TARGET) ;
+RunUnitTest Pt-System-test : $(PT_OUTPUT_TEST) ;
 
 Main ProcessTestChild : ProcessTestChild.cpp ;
-MakeLocate ProcessTestChild : $(OUTPUT_TARGET) ;
+MakeLocate ProcessTestChild : $(PT_OUTPUT_TARGET) ;
 LinkSharedLibraries ProcessTestChild : Pt Pt-System  ;
 Depends Pt-System-test : ProcessTestChild ;

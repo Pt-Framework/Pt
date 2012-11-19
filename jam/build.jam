@@ -959,7 +959,7 @@ rule SubDir
     # 
 
     #
-    # If $(TOP)/Jamrules hasn't been included, do so.
+    # If $(TOP)/Jamrules hasn't been included and not a subtree, do so.
     #
 
     if ! $($(<[1])-included)
@@ -1105,6 +1105,9 @@ rule SubTree
 
     # set subtree root variable
     $(2) = $(_s) ;
+
+    # do not try to include subtree's Jamrules (see SubDir rule)
+    $(<[1])-included = TRUE ;
 
     # include Jamfile of the subtree
     include $(JAMFILE:D=$(_s)) ;

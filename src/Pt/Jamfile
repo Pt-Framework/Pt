@@ -1,7 +1,7 @@
 SubDir PT_TOP src Pt ;
 SubDirHdrs $(PT_TOP)/include ;
 SubDirC++Flags [ FDefines PT_API_EXPORT ] ;
-SubDirObjects $(OUTPUT_OBJECT) Pt ;
+SubDirObjects $(PT_OUTPUT_OBJECT) Pt ;
 
 SharedLibrary Pt : Atomicity.cpp
                    Char.cpp
@@ -32,8 +32,8 @@ SharedLibrary Pt : Atomicity.cpp
                    Utf8Codec.cpp
                    ;
 
-MakeLocate Pt : $(OUTPUT_TARGET) ;
-MakeInstall Pt : $(INSTALL_LIBDIR) ;
+MakeLocate Pt : $(PT_OUTPUT_TARGET) ;
+MakeInstall Pt : $(PT_INSTALL_LIBDIR) ;
 
 #Main itest : itest.mm ;
 #Main_AddLibraries itest : -framework UIKit -framework Foundation -framework CoreGraphics ;

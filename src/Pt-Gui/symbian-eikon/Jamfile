@@ -11,4 +11,4 @@ Library Pt-Gui-symbian-eikon : ApplicationImpl.cpp
                                SymbEventLoop.cpp
                                ;
 
-Library_MakeLocate Pt-Gui-symbian-eikon : $(OUTPUT_TARGET) ;
+Library_MakeLocate Pt-Gui-symbian-eikon : $(PT_OUTPUT_TARGET) ;

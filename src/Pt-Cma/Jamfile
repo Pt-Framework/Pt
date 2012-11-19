@@ -1,7 +1,7 @@
 SubDir PT_TOP src Pt-Cma ;
 SubDirHdrs $(PT_TOP)/include ;
 SubDirC++Flags [ FDefines PT_CMA_API_EXPORT ] ;
-SubDirObjects $(OUTPUT_OBJECT) Pt-Cma ;
+SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Cma ;
 
 PT_CMA_SOURCES = Component.cpp
                  ComponentFactory.cpp
@@ -11,4 +11,4 @@ PT_CMA_SOURCES = Component.cpp
 
 SharedLibrary Pt-Cma : $(PT_CMA_SOURCES) ;
 LinkSharedLibraries Pt-Cma : Pt Pt-System ;
-MakeLocate Pt-Cma : $(OUTPUT_TARGET) ;
+MakeLocate Pt-Cma : $(PT_OUTPUT_TARGET) ;

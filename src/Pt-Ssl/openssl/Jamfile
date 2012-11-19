@@ -15,7 +15,7 @@ SubDirCcFlags [ FDefines OPENSSL_NO_KRB5 ] ;
 SubDirCcFlags [ FDefines OPENSSL_NO_PSK ] ;
 SubDirCcFlags [ FDefines OPENSSL_NO_RC2 ] ;
 SubDirCcFlags [ FDefines OPENSSL_NO_RC4 ] ;
-SubDirObjects $(OUTPUT_OBJECT) Pt-Ssl openssl ;
+SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Ssl openssl ;
 
 Library Pt-Ssl-openssl  :
     ssl/s2_meth.c
@@ -643,4 +643,4 @@ Library Pt-Ssl-openssl  :
   # crypto/dso/dso_beos.c
 ;
 
-MakeLocate Pt-Ssl-openssl : $(OUTPUT_TARGET) ;
+MakeLocate Pt-Ssl-openssl : $(PT_OUTPUT_TARGET) ;
