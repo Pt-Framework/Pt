@@ -3,8 +3,7 @@ SubDirHdrs $(PT_TOP)/include ;
 SubDirC++Flags [ FDefines PT_REFLEX_API_EXPORT ] ;
 SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Reflex ;
 
-SharedLibrary Pt-Reflex : Reflectable.cpp
-                          Type.cpp
+SharedLibrary Pt-Reflex : Type.cpp
                           GenericType.cpp
                           TypeManager.cpp ;
 

@@ -31,7 +31,6 @@
 #include "Pt/Xml/XmlDeserializer.h"
 #include "Pt/Xml/XmlReader.h"
 #include "Pt/Xml/StartElement.h"
-#include "Pt/Reflex/Reflectable.h"
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/RegisterTest.h"
@@ -148,7 +147,6 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             Pt::Unit::TestSuite::registerMethod( "MultiSet", *this, &XmlSerializerTest::MultiSet );
             Pt::Unit::TestSuite::registerMethod( "Object", *this, &XmlSerializerTest::Object );
             Pt::Unit::TestSuite::registerMethod( "AdvanceObject", *this, &XmlSerializerTest::AdvanceObject );
-            Pt::Unit::TestSuite::registerMethod( "DynamicObject", *this, &XmlSerializerTest::DynamicObject );
         }
 
     protected:
@@ -363,157 +361,3 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
 };
 
 Pt::Unit::RegisterTest<XmlSerializerTest> register_XmlSerializerTest;
-
-// class Object
-// {
-//     public:
-//         Object()
-//         {}
-
-//         virtual ~Object()
-//         {}
-
-//         void setProperty(const char* name, const Pt::Any& value)
-//         { _properties[name] = value; }
-
-//     private:
-//         std::map<std::string, Pt::Any> _properties;
-// };
-
-// class Port : public Object
-// {
-//     public:
-//         Port()
-//         {}
-
-//         virtual ~Port()
-//         {}
-// };
-
-// class PortList : public Object
-// {
-//     public:
-//         PortList()
-//         {}
-
-//         virtual ~PortList()
-//         {}
-
-//     private:
-// };
-
-// class Runtime : public Object
-// {
-//     public:
-//         Runtime()
-//         {}
-
-//         ~Runtime()
-//         {}
-
-//         static Object* createObject(const std::string& typeName)
-//         {
-//             if(typeName == "Port")
-//                 return new Port();
-//             if(typeName == "PortList")
-//                 return new PortList();
-
-//             return 0;
-//         }
-// };
-
-
-// void operator >>=(const Pt::SerializationInfo& si, Object& rt)
-// {
-//     Pt::SerializationInfo::ConstIterator it;
-//     for(it = si.begin(); it != si.end(); ++it)
-//     {
-//         Object* obj = Runtime::createObject( it->typeName().c_str() );
-//         Pt::SmartPtr<Object> ptr(obj);
-//         rt.setProperty(it->name().c_str(), Pt::Any(ptr));
-
-//         *it >> Pt::load() >>= ptr; // not ptr, but property !!
-//     }
-// }
-
-namespace Pt {
-
-namespace Reflex {
-
-void operator >>=(const Pt::SerializationInfo& si, Pt::SmartPtr<Pt::Reflex::Reflectable>& sp)
-{
-    std::cerr << "DESERIALIZE SMARTPTR<REFLECTABLE> BEGIN " << si.typeName() << std::endl;
-    sp = new Reflectable("xxx");
-    si >>= *sp;
-    std::cerr << "DESERIALIZE SMARTPTR<REFLECTABLE> END" << std::endl;
-}
-
-}
-
-}
-
-class MyObject : public Pt::Reflex::Reflectable
-{
-    public:
-        MyObject(const std::string& name)
-        : Pt::Reflex::Reflectable(name)
-        {
-            this->registerProperty("child", *this, _child, &MyObject::setChild);
-        }
-
-        void setChild(const Pt::SmartPtr<Pt::Reflex::Reflectable>& child)
-        { _child.set(child); }
-
-        const Pt::SmartPtr<Pt::Reflex::Reflectable>& child() const
-        { return _child.get(); }
-
-    private:
-        Pt::Reflex::PropertyValue<
-            Pt::SmartPtr<
-                Pt::Reflex::Reflectable> > _child;
-};
-
-
-void XmlSerializerTest::DynamicObject()
-{
-    std::string data = "<refl1 type=\"Port\"id=\"0\">\n"
-                       "    <name>myPort2</name>\n"
-                       "</refl1>\n"
-                       "<myObj>\n"
-                       "    <child ref=\"0\"></child>\n"
-                       "</myObj>\n";
-
-    std::string data2 = "<runtime>\n"
-                       "  <portList1 type=\"PortList\">\n"
-                       "    <port1 type=\"Port\"id=\"0\">\n"
-                       "      <name>myPort2</name>\n"
-                       "    </port1>\n"
-                       "    <port2 type=\"Port\"id=\"1\">\n"
-                       "      <name>myPort2</name>\n"
-                       "    </port2>\n"
-                       "  </portList1>\n"
-                       "  <connection1 type=\"Connection\">\n"
-                       "    <from ref=\"0\"></from>\n"
-                       "    <to ref=\"1\"></to>\n"
-                       "  </connection1>\n"
-                       "</runtime>\n";
-
-    std::stringstream input( data );
-    Pt::TextIStream tis(input, new Pt::Utf8Codec);
-
-    Pt::Xml::XmlReader reader(tis);
-    Pt::Xml::XmlDeserializer deser(reader);
-    deser.context()->enableReferencing(true);
-
-    Pt::SmartPtr<Pt::Reflex::Reflectable> refl1;
-    MyObject refl2("myObj");
-
-    deser.deserialize(refl1);
-    deser.deserialize(refl2);
-    deser.finish();
-
-    std::cerr << "refl1: " << refl1.getPointer() << std::endl;
-    std::cerr << "refl1: " << refl1.getPointer()->objectName() << std::endl;
-    std::cerr << "CHILD: " << refl2.child().getPointer() << std::endl;
-    std::cerr << "CHILD: " << refl2.child().getPointer()->objectName() << std::endl;
-}
