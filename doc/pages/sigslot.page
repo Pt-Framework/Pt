@@ -31,7 +31,7 @@ int main()
 @endcode
 
 This program will simply exit, when the timer expires after 1000 ms. The
-Application object is the callee and the member function %Application::exit
+Application object is the callee and the member function Application::exit
 serves as a slot. The Timer is the caller, which has a signal called timeout.
 
 
@@ -39,7 +39,7 @@ serves as a slot. The Timer is the caller, which has a signal called timeout.
 
 Pt::Signal is a class template and can be instantiated like any other object.
 Usually, signals are members of objects and are being sent e.g. when the object
-state changes. The template parameter list of the %Pt::Signal class template
+state changes. The template parameter list of the Pt::Signal class template
 determines the signature of the signal. If a signal does not have any arguments
 the parameter list is left empty:
 
@@ -55,10 +55,10 @@ Pt::Signal<int, int> sig2; // Signal with two arguments
 A signal can be connected to a slot if the signatures are compatible. The
 function named slot is overloaded for various types of callable entities,
 like functions or member functions, and serves to construct the actual slot.
-Slots are lightweight proxy-objects and one example is %Pt::MethodSlot, which
+Slots are lightweight proxy-objects and one example is Pt::MethodSlot, which
 describes a member function slot. This way, signals can be connected to any
 callable entity. The signal's += operator allows to connect a signal to a
-slot. One important feature of %Pt::Signal is that the return value of a slot
+slot. One important feature of Pt::Signal is that the return value of a slot
 is ignored and therefore a slot is compatible to a signal no matter what type
 it returns. The following code example shows how a signal is connected to a
 free function and a member function:
@@ -115,7 +115,7 @@ int main()
 
 A connection is reference counted and can not be duplicated as such, but always
 refers to the same shared connection data. If one peer of a connection is
-destroyed or %Connection::close is called, the connection becomes invalid.
+destroyed or Connection::close is called, the connection becomes invalid.
 
 
 @subsection sigslot_SendingSignals Sending Signals
@@ -146,7 +146,7 @@ the slots will be called one after another.
 
 @section sigslot_Delegates Delegates
 
-A Pt::Delegate is an alternative sender type to the %Pt::Signal and differs
+A Pt::Delegate is an alternative sender type to the Pt::Signal and differs
 from it in two ways. Firstly, delegates forward the return value of the slot
 and secondly, delegates can only be connected to one slot at a time.
 
@@ -185,7 +185,7 @@ is called.
 
 @subsection sigslot_CallingDelegates Calling Delegates
 
-There are two possibilities how a %Pt::Delegate can call its slot. The member
+There are two possibilities how a delegate can call its slot. The member
 function Pt::Delegate::call will return the return value of the slot. If the
 delegate is not connected to a slot, an exception is thrown. The second method
 is through Pt::Delegate::invoke where the return value is ignored, but if the
