@@ -378,7 +378,7 @@ requests, we allow the URI to help route the request to the code that handles
 XML-RPC requests. In the example, the URI is /Calc, telling the server to
 route the request to the "Calc" service.
 
-The payload is in XML, a single <methodCall> structure.
+The payload is in XML, a single \<methodCall\> structure.
 
 The \<methodCall\> must contain a \<methodName\> sub-item, a string, containing
 the name of the method to be called. The string may only contain identifier
@@ -423,7 +423,7 @@ Unless there's a lower-level error, always return 200 OK.
 The Content-Type is text/xml. Content-Length must be present and correct.
 
 The body of the response is a single XML structure, a \<methodResponse\>,
-which can contain a single \<params\> which contains a single <param> which
+which can contain a single \<params\> which contains a single \<param\> which
 contains a single \<value\>.
 
 
@@ -460,9 +460,9 @@ Server: UserLand Frontier/5.1.2-WinNT
 
 The \<methodResponse\> could also contain a \<fault\> which contains a
 \<value\> which is a \<struct\> containing two elements, one named
-\<faultCode\>, an <int> and one named \<faultString\>, a \<string\>.
+\<faultCode\>, an \<int\> and one named \<faultString\>, a \<string\>.
 
-A <methodResponse> can not contain both a <fault> and a <params>.
+A \<methodResponse\> can not contain both a \<fault\> and a \<params\>.
 
 
 @section xmlrpc_Copyright Copyright and Disclaimer

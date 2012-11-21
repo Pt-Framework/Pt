@@ -9,7 +9,7 @@
     rules in the <a href="jam-jambase.html">Jambase Reference</A>. The
     detailed specifications for any Jambase rule can be found by reading the
     rule definition itself in the Jambase.
-<P>
+</P>
 
 <A NAME="jam_building"><H2>Build Configuration</H2></A>
 <P>
@@ -18,7 +18,7 @@
     required for the build are present. When the Jamconfigure script is run
     in the build configuration step, the Jamrules file is generated. This file
     is loaded at the beginning of the build step.
-<P>
+</P>
 
 <H4> CheckBuildC, CheckBuildC++ Rules </H4>
 <P>
@@ -26,6 +26,8 @@
     ConfigureC++ rule, the rules CheckBuildC and CheckBuildC++ can be used 
     to build small test programs to find out if headers and libraries are 
     available.
+</P>
+
 <PRE>
     WITH_DL = [ CheckBuildC++ "#include <dlfcn.h>"
                               "int main() { dlopen(0,0); return 0; }"
@@ -37,6 +39,7 @@
     }
 </PRE>
 
+<P>
     This uses the C++ toolset to compile a small program calling a function
     of the dl library. The program is linked with the linker flag -ldl. The
     third argument passed to CheckBuildC++ is empty, but additional compiler
@@ -44,12 +47,13 @@
     linker paths to the build command. The rule will return nothing if the 
     program can not be built and a boolean-like value on success. The command
     will be logged in the file Jamrules.log.
-<P>
+</P>
 
 <H4> Configure Rule </H4>
 <P>
     The Configure rule can be used to make the result of a test available to
     the following build steps.
+</P>
 <PRE>
     WITH_FOO = ;
     if --with-foo in &#36;(ARGS)
@@ -60,11 +64,12 @@
     Configure WITH_FOO ; 
 </PRE>
 
+<P>
     This tests if the command line option "--with-foo" was set and if so,
     the jam variable named WITH_FOO is stored in the build configuration
     result file. Note, that empty variables are not stored, so later in the
     Jamfiles it can simply be tested if WITH_FOO is set or not.
-<P>
+</P>
 
 <H4> ConfigureCc, ConfigureC++ Rules </H4>
 <P>
@@ -73,38 +78,48 @@
     like Main, Library and SharedLibrary. They do not require any arguments
     and have to be invoked before any other tests are done that require 
     the toolsets to be functional.
+</P>
 <PRE>
     ConfigureCc ;
     ConfigureC++ ;
 </PRE>
+<P>
     Most, if not all Jamconfigure scripts call one or both rules at the
     beginning. All tests will be logged in the file Jamrules.log.
-<P>
+</P>
 
 <H4> EchoOption </H4>
 <P>
     This rule formats and prints the value and description of a configured 
     value. It has the purpose to indicate progress during the configuration
     step.
+</P>
 <PRE>
     EchoOption --with-foo : "Enable foo module" : $(WITH_FOO:E="no") ;
 </PRE>
+
+<P>
     The first argument is the option itself, the second one the description
     and the third one the value configured for the option. The third
     argument is optional and if left away, the first argument will be taken
     as the name of the jam variable that holds the value:
+</P>
+
 <PRE>
     EchoOption MY_INSTALL_BINDIR : "Program installation directory" ;
 </PRE>
+
+<P>
     If this form is used, it will be indicated that the MY_INSTALL_BINDIR
     variable can be overridden with the -s command line switch, in this case
     something like -sMY_INSTALL_BINDIR=/some/dir.
-<P>
+</P>
 
 <H4> TryCommand </H4>
 <P>
     The TryCommand rule takes one argument and that is a shell command to
     execute. It can be used to check if a required tool is in the path:
+</P>
 <PRE>
     if [ TryCommand "ls" ]
     {
@@ -127,10 +142,11 @@
     Jamrules script. All build options that were configured are available
     in the build step. Some rules like Main, Library and SharedLibray
     can only work if the toolset has been configured previously.
-<P>
+</P>
 
 <A NAME="jam_subdirs"><H3>Handling Directory Trees</H3></A>
 
+<P>
     The SubDir* rules are used to define source code directory hierarchies.
     With SubDir and SubInclude, you can use <b>jam</b> to build software 
     from source files and Jamfiles spread across many directories, as is 
@@ -138,7 +154,7 @@
     code tree so that <b>jam</b> can read in all the Jamfiles in one pass 
     and compute dependencies across the entire project.
 
-<P>
+</P>
     To use the SubDir* rules, you must:
 <P>
 <OL>

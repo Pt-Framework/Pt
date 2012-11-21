@@ -35,8 +35,7 @@ namespace Pt {
 
     namespace Xml {
 
-        /**
-         * @brief A Comment element (Node) of an XML document, containing the comment's content.
+        /** @brief A Comment element (Node) of an XML document, containing the comment's content.
          *
          * A Comment element stores the content of a comment. There is no interpretation of the
          * comment's Text before it is stored.
@@ -45,15 +44,13 @@ namespace Pt {
          *
          * When parsing a comment %&lt;!-- This is a comment -->$ the following Text will be
          * returned by Text(): $This is a comment$
-         *
-         * @see Node
          */
         class PT_XML_API Comment : public Node {
             public:
                 /**
                  * @brief Constructs a new Comment object with the given string as content/Text.
                  *
-                 * @param Text The content/Text of the Comment object.
+                 * @param text The content/Text of the Comment object.
                  */
                 explicit Comment(const String& text)
                 : Node(Node::Comment)

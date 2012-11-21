@@ -84,10 +84,10 @@ class PT_SSL_API Context : public NonCopyable
 
         /** @brief Enables session caching on the server side
 
-            The @cacheId is a application specific ID for the session cache,
+            The @a cacheId is a application specific ID for the session cache,
             so that two application domains do not mix up their caches. The
-            @timeout is in maximum lifetime of a session in seconds. The size
-            of the session cache can be limited with @cacheSize.
+            @a timeout is in maximum lifetime of a session in seconds. The size
+            of the session cache can be limited with @a cacheSize.
         */
         void enableSessions(const char* cacheId, 
                             unsigned long timeout = DefaultTimeout, 

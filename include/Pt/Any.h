@@ -352,7 +352,7 @@ class Any
             pointer. It is the resposibility of the caller to make sure
             the type pointed to exists longer than the %Any.
 
-            @param type Value to assign
+            @param rhs Value to assign
         */
         template <typename T>
         Any& operator=(T* rhs)

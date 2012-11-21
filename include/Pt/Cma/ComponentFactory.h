@@ -82,7 +82,7 @@ class PT_CMA_API ComponentFactory
         * If the library was loaded before, nothing happens and the library is not loaded
         * again.
         *
-        * @param libraryFile A File object referencing the library in the file system.
+        * @param file A File object referencing the library in the file system.
         */
         void loadLibrary(const std::string& file);
 
@@ -94,7 +94,7 @@ class PT_CMA_API ComponentFactory
         *
         * If the library was not loaded before, nothing happens.
         *
-        * @param libraryFile A File object referencing the library in the file system.
+        * @param file A File object referencing the library in the file system.
         */
         bool unload(const std::string& file);
 
@@ -141,7 +141,7 @@ class PT_CMA_API ComponentFactory
         *
         * If the library was loaded before, the library is not loaded again.
         *
-        * @param libraryFile A File object referencing the library in the file system.
+        * @param file A File object referencing the library in the file system.
         * @param loadConfig Optional parameter: When true is passed, the configuration of
         * the component is tried to be loaded; otherwise no configuration is loaded.
         * @return An IUnknown pointer to the interfaces of the component.
@@ -154,7 +154,7 @@ class PT_CMA_API ComponentFactory
         * The given File object has to specify the file by its platform-specific name, including
         * any library prefix and suffix.
         *
-        * @param libraryFile A File object referencing the library in the file system.
+        * @param file A File object referencing the library in the file system.
         * @return true if the library was already loaded by this factory; false otherwise.
         */
         bool isLoaded(const std::string& file);

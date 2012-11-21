@@ -48,9 +48,10 @@ class PT_SSL_API Session : public NonCopyable
 
         Session(const Session& sess);
 
-        //! \Session Standard dtor.
+        //! brief Destructor.
         ~Session();
 
+        //! brief Assignment.
         Session& operator=(const Session& sess);
 
         /// \internal Return the raw OpenSSL session handle.

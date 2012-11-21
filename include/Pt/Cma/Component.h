@@ -59,7 +59,7 @@ class PT_EXPORT ComponentBase
           *  Register an interface to this component.
           *
           *  Add an interface to the set of the component's services.
-          *  @param impl the component that implements the interface <IfaceT>
+          *  @param impl the component that implements the interface IfaceT
           */
         template <typename IfaceT>
 	      void registerInterface(IfaceT* impl)

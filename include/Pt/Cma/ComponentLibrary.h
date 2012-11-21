@@ -46,7 +46,7 @@ class PT_EXPORT ComponentLibrary : protected Pt::System::Library
 
         /**
           * Constructor
-          * @param library the name of the dynamic library
+          * @param file the name of the dynamic library
           */
         ComponentLibrary(const std::string& file);
 

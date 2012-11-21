@@ -20,6 +20,7 @@ Your project directory should now contain the following files:
 - Jambase
 - jam.sh
 - jam.exe
+- jam.bat
 @endverbatim
 
 The file Jambase in the project root references the files in the jam support
@@ -35,7 +36,7 @@ rather build them on demand.
 
 All examples in this tutorial will use the script jam.sh, when commands are
 shown. If you want to take this tutorial on a Windows build host, simply
-run jam.exe instead of jam.sh, with the exact same arguments. Unless noted
+run jam.bat instead of jam.sh, with the exact same arguments. Unless noted
 otherwise, the jam tool is run from the project root directory.
 
 @section JamTutorialBuildPrograms Building Programs
@@ -51,6 +52,7 @@ now contain the following files:
     - ... (jam implementation files)
 - Jambase
 - jam.sh
+- jam.bat
 - jam.exe
 - Jamconfigure
 - Jamrules

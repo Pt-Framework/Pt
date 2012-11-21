@@ -51,7 +51,7 @@ namespace Xml {
             /**
              * @brief Constructs a new Namespace object with the given namespace URI and prefix.
              *
-             * @param namespaceURI The unique URI of this namespace.
+             * @param namespaceUri The unique URI of this namespace.
              * @param prefix The namespace prefix which can be added to a tag name to specify that
              * this tag belongs to that namespace.
              */

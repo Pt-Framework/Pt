@@ -33,7 +33,7 @@ source files.
 
 - Use the same build scripts work for all platforms, compilers and toolsets
 
-- Scan source files for #include statements and computes header dependencies automatically, and do so fast
+- Scan source files for \#include statements and computes header dependencies automatically, and do so fast
 
 - A configuration step can test and detect platform capabilities
 

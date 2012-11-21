@@ -12,7 +12,7 @@ Pt::uint32_t swapped = Pt::swab(value);
 @endcode
 
 The swab function is overloaded for all fixed-size integer types such as
-Pt::uint32_t. A second set of functions can be used to convert from a specific
+%Pt::uint32_t. A second set of functions can be used to convert from a specific
 external byteorder to the native host byteorder:
 
 - Pt::beToHost
