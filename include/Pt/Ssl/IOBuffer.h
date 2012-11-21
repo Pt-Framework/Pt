@@ -30,7 +30,7 @@
 #define PT_SSL_IOBUFFER_H
 
 #include <Pt/Ssl/StreamBuffer.h>
-#include <Pt/System/IOStream.h>
+#include <Pt/System/IOBuffer.h>
 
 namespace Pt {
 
@@ -44,17 +44,17 @@ class PT_SSL_API IOBuffer : public StreamBuffer
     public:
         /** @brief Construct a SSL buffer that uses the given I/O buffer. 
         */
-        IOBuffer(Pt::System::StreamBuffer& sb);
+        IOBuffer(Pt::System::IOBuffer& sb);
         
         /** @brief Construct a SSL client that uses the given I/O buffer and SSL context. 
         */
-        IOBuffer(Context& ctx, Pt::System::StreamBuffer& sb);
+        IOBuffer(Context& ctx, Pt::System::IOBuffer& sb);
 
         /** @brief Standard dtor. 
         */
         virtual ~IOBuffer();
 
-        System::StreamBuffer& buffer()
+        System::IOBuffer& buffer()
         { return *_sb; }
 
         void connect();
@@ -104,20 +104,20 @@ class PT_SSL_API IOBuffer : public StreamBuffer
         { return _outputReady; }
 
     private:
-        void onWriteHandshake(Pt::System::StreamBuffer& sb);
-        void onReadHandshake(Pt::System::StreamBuffer& sb);
+        void onWriteHandshake(Pt::System::IOBuffer& sb);
+        void onReadHandshake(Pt::System::IOBuffer& sb);
 
-        void onReadServerHandshake(Pt::System::StreamBuffer& sb);
-        void onWriteServerHandshake(Pt::System::StreamBuffer& sb);
+        void onReadServerHandshake(Pt::System::IOBuffer& sb);
+        void onWriteServerHandshake(Pt::System::IOBuffer& sb);
 
-        void onReadShutdown(Pt::System::StreamBuffer& sb);
-        void onWriteShutdown(Pt::System::StreamBuffer& sb);
+        void onReadShutdown(Pt::System::IOBuffer& sb);
+        void onWriteShutdown(Pt::System::IOBuffer& sb);
 
-        void onInput(Pt::System::StreamBuffer& sb);
-        void onOutput(Pt::System::StreamBuffer& sb);
+        void onInput(Pt::System::IOBuffer& sb);
+        void onOutput(Pt::System::IOBuffer& sb);
 
     private:
-        System::StreamBuffer* _sb;
+        System::IOBuffer* _sb;
         Pt::Signal<IOBuffer&> _handshakeFinished;
         Pt::Signal<IOBuffer&> _shutdownFinished;
         Pt::Signal<IOBuffer&> _inputReady;

@@ -1299,5 +1299,8 @@
     <ClCompile Include="..\..\src\Pt-Http\HttpError.cpp">
       <Filter>Pt-Http</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Pt-System\IOBuffer.cpp">
+      <Filter>Pt-System</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

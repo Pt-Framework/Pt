@@ -36,7 +36,7 @@ namespace Pt {
 
 namespace Ssl {
 
-IOBuffer::IOBuffer(Pt::System::StreamBuffer& sb)
+IOBuffer::IOBuffer(Pt::System::IOBuffer& sb)
 : StreamBuffer(sb)
 , _sb(&sb)
 , _errorPending(0)
@@ -46,7 +46,7 @@ IOBuffer::IOBuffer(Pt::System::StreamBuffer& sb)
 }
 
 
-IOBuffer::IOBuffer(Context& ctx, Pt::System::StreamBuffer& sb)
+IOBuffer::IOBuffer(Context& ctx, Pt::System::IOBuffer& sb)
 : StreamBuffer(ctx, sb)
 , _sb(&sb)
 , _errorPending(0)
@@ -132,7 +132,7 @@ void IOBuffer::endHandshake()
 }
 
 
-void IOBuffer::onWriteHandshake(Pt::System::StreamBuffer& sb)
+void IOBuffer::onWriteHandshake(Pt::System::IOBuffer& sb)
 {
     try
     {
@@ -166,7 +166,7 @@ void IOBuffer::onWriteHandshake(Pt::System::StreamBuffer& sb)
 }
 
 
-void IOBuffer::onWriteServerHandshake(Pt::System::StreamBuffer& sb)
+void IOBuffer::onWriteServerHandshake(Pt::System::IOBuffer& sb)
 {
     try
     {
@@ -211,7 +211,7 @@ void IOBuffer::onWriteServerHandshake(Pt::System::StreamBuffer& sb)
 }
 
 
-void IOBuffer::onReadHandshake(Pt::System::StreamBuffer& sb)
+void IOBuffer::onReadHandshake(Pt::System::IOBuffer& sb)
 {
     try
     {
@@ -260,7 +260,7 @@ void IOBuffer::onReadHandshake(Pt::System::StreamBuffer& sb)
 }
 
 
-void IOBuffer::onReadServerHandshake(Pt::System::StreamBuffer& sb)
+void IOBuffer::onReadServerHandshake(Pt::System::IOBuffer& sb)
 {
     try
     {
@@ -326,12 +326,12 @@ void IOBuffer::endShutdown()
 }
 
 
-void IOBuffer::onReadShutdown(Pt::System::StreamBuffer& sb)
+void IOBuffer::onReadShutdown(Pt::System::IOBuffer& sb)
 {
 }
 
 
-void IOBuffer::onWriteShutdown(Pt::System::StreamBuffer& sb)
+void IOBuffer::onWriteShutdown(Pt::System::IOBuffer& sb)
 {
     try
     {
@@ -391,7 +391,7 @@ void IOBuffer::endRead()
 }
 
 
-void IOBuffer::onInput(Pt::System::StreamBuffer& sb)
+void IOBuffer::onInput(Pt::System::IOBuffer& sb)
 {
     try
     {
@@ -447,7 +447,7 @@ void IOBuffer::endWrite()
 }
 
 
-void IOBuffer::onOutput(Pt::System::StreamBuffer& sb)
+void IOBuffer::onOutput(Pt::System::IOBuffer& sb)
 {
     try
     {

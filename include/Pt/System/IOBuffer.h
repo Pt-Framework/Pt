@@ -29,16 +29,156 @@
 #define Pt_System_IOBuffer_h
 
 #include <Pt/System/Api.h>
-#include <Pt/System/StreamBuffer.h>
+#include <Pt/System/IODevice.h>
+#include <streambuf>
+#include <ios>
+#include <cstring>
 
 namespace Pt {
 
 namespace System {
 
-typedef StreamBuffer IOBuffer;
+class PT_SYSTEM_API IOBufferImpl 
+{
+    public:
+        IOBufferImpl();
+
+        void init(IOBuffer& sb, size_t bufferSize, bool extend);
+
+        IODevice* ioDevice()
+        { return _ioDevice; }
+
+        Signal<IOBuffer&>& inputReady()
+        { return _inputReady; }
+
+        Signal<IOBuffer&>& outputReady()
+        { return _outputReady; }
+
+        void attach(IOBuffer& sb, IODevice& ioDevice);
+        void detach(IOBuffer& sb);
+        void beginRead(IOBuffer& sb);
+        void onRead(IOBuffer& sb);
+        void endRead(IOBuffer& sb);
+        size_t beginWrite(IOBuffer& sb);
+        void onWrite(IOBuffer& sb);
+        size_t endWrite(IOBuffer& sb);
+        void discard(IOBuffer& sb);
+        int sync(IOBuffer& sb);
+        std::streambuf::int_type underflow(IOBuffer& sb);
+        std::streambuf::int_type overflow(IOBuffer& sb, std::streambuf::int_type ch);
+        std::streamsize xspeekn(IOBuffer& sb, char* buffer, std::streamsize size);
+        std::streambuf::pos_type seekoff(IOBuffer& sb, std::streambuf::off_type off, std::ios::seekdir dir, std::ios::openmode);
+        std::streambuf::pos_type seekpos(IOBuffer& sb, std::streambuf::pos_type p, std::ios::openmode mode);
+        std::streamsize showfull(IOBuffer& sb);
+        std::streambuf::int_type pbackfail(IOBuffer& sb, std::streambuf::int_type c);
+
+    private:
+        IODevice*    _ioDevice;
+        size_t       _ibufferSize;
+        char*        _ibuffer;
+        std::size_t  _obufferSize;
+        char*        _obuffer;
+        const size_t _pbmax;
+        bool         _oextend;
+
+        Signal<IOBuffer&> _inputReady;
+        Signal<IOBuffer&> _outputReady;
+};
+
+class IOBuffer : public std::streambuf
+               , public Connectable
+{
+    friend class IOBufferImpl;
+
+    public:
+        explicit IOBuffer(size_t bufferSize = 8192, bool extend = false)
+        : _impl()
+        {
+            _impl.init(*this, bufferSize, extend);
+        }
+
+        explicit IOBuffer(IODevice& ioDevice, size_t bufferSize = 8192, bool extend = false)
+        : _impl()
+        {
+            _impl.init(*this, bufferSize, extend);
+            _impl.attach(*this, ioDevice); 
+        }
+
+        ~IOBuffer()
+        {}
+
+        IODevice* device()
+        { return _impl.ioDevice(); }
+
+        Signal<IOBuffer&>& inputReady()
+        { return _impl.inputReady(); }
+
+        Signal<IOBuffer&>& outputReady()
+        { return _impl.outputReady(); }
+
+        std::streamsize out_avail()
+        {
+            if( this->pptr() )
+                return this->pptr() - this->pbase();
+
+            return _impl.showfull(*this);
+        }
+
+        std::streamsize speekn(char* buffer, std::streamsize size)
+        { return _impl.xspeekn(*this, buffer, size); }
+
+        void attach(IODevice& ioDevice)
+        { _impl.attach(*this, ioDevice); }
+
+        void detach()
+        { _impl.detach(*this); }
+
+        void beginRead()
+        { _impl.beginRead(*this); }
+
+        void onRead(IODevice& dev)
+        { _impl.onRead(*this); }
+
+        void endRead()
+        { _impl.endRead(*this); }
+
+        void beginWrite()
+        { _impl.beginWrite(*this); }
+
+        void onWrite(IODevice& dev)
+        { _impl.onWrite(*this); }
+
+        void endWrite()
+        { _impl.endWrite(*this); }
+
+        void discard()
+        { _impl.discard(*this); }
+
+    protected:
+        virtual int sync()
+        { return _impl.sync(*this); }
+
+        virtual int_type underflow()
+        { return _impl.underflow(*this); }
+
+        virtual int_type overflow(int_type ch)
+        { return _impl.overflow(*this, ch); }
+
+        virtual pos_type seekoff(off_type offset, std::ios::seekdir sd, std::ios::openmode mode)
+        { return _impl.seekoff(*this, offset, sd, mode); }
+
+        virtual pos_type seekpos(pos_type p, std::ios::openmode mode )
+        { return _impl.seekpos(*this, p, mode); }
+
+        virtual int_type pbackfail(int_type c)
+        { return _impl.pbackfail(*this, c); }
+
+    private:
+        IOBufferImpl _impl;
+};
 
 } // namespace System
 
-} // !namespace Pt
+} // namespace Pt
 
 #endif

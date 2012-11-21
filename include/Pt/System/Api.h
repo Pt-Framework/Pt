@@ -87,6 +87,7 @@ namespace System {
     class File;
     class FileDevice;
     class FileInfo;
+    class IOBuffer;
     class IODevice;
     class IOStream;
     class IStream;

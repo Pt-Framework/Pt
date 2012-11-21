@@ -18,6 +18,7 @@ SharedLibrary Pt-System : $(PT_SYSTEM_IMPL)
                           File.cpp
                           FileDevice.cpp
                           FileInfo.cpp
+                          IOBuffer.cpp
                           IODevice.cpp
                           IOError.cpp
                           IOStream.cpp

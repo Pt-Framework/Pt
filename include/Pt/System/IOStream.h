@@ -29,7 +29,7 @@
 #define Pt_System_IOStream_h
 
 #include <Pt/System/Api.h>
-#include <Pt/System/StreamBuffer.h>
+#include <Pt/System/IOBuffer.h>
 #include <iostream>
 #include <algorithm>
 
@@ -46,7 +46,7 @@ class IStream : public std::basic_istream<char>
         
         ~IStream();
 
-        StreamBuffer& buffer();
+        IOBuffer& buffer();
 
         IODevice* attach(IODevice& device);
 
@@ -61,7 +61,7 @@ class IStream : public std::basic_istream<char>
         std::streamsize peeksome(char* buffer, std::streamsize n);
 
     private:
-        StreamBuffer _buffer;
+        IOBuffer _buffer;
 };
 
 
@@ -74,7 +74,7 @@ class OStream : public std::basic_ostream<char>
 
         ~OStream();
 
-        StreamBuffer& buffer();
+        IOBuffer& buffer();
 
         IODevice* attach(IODevice& device);
 
@@ -83,7 +83,7 @@ class OStream : public std::basic_ostream<char>
         std::streamsize writesome(char* buffer, std::streamsize n);
     
     private:
-        StreamBuffer _buffer;
+        IOBuffer _buffer;
 };
 
 
@@ -96,7 +96,7 @@ class IOStream : public std::basic_iostream<char>
 
         ~IOStream();
 
-        StreamBuffer& buffer();
+        IOBuffer& buffer();
 
         IODevice* attach(IODevice& device);
 
@@ -113,7 +113,7 @@ class IOStream : public std::basic_iostream<char>
         std::streamsize writesome(char* buffer, std::streamsize n);
     
     private:
-        StreamBuffer _buffer;
+        IOBuffer _buffer;
 };
 
 
@@ -138,7 +138,7 @@ inline IStream::~IStream()
 }
 
 
-inline StreamBuffer& IStream::buffer()
+inline IOBuffer& IStream::buffer()
 {
     return _buffer;
 }
@@ -194,7 +194,7 @@ inline OStream::~OStream()
 }
 
 
-inline StreamBuffer& OStream::buffer()
+inline IOBuffer& OStream::buffer()
 {
     return _buffer;
 }
@@ -251,7 +251,7 @@ inline IOStream::~IOStream()
 }
 
 
-inline StreamBuffer& IOStream::buffer()
+inline IOBuffer& IOStream::buffer()
 {
     return _buffer;
 }

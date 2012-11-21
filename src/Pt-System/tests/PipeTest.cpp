@@ -180,7 +180,7 @@ class PipeTest : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT( 0 == inbuf.out_avail() );
         }
 
-        void onStreamInput(Pt::System::StreamBuffer& buffer)
+        void onStreamInput(Pt::System::IOBuffer& buffer)
         {
             buffer.endRead();
             PT_UNIT_ASSERT( 0 < buffer.in_avail() );
@@ -195,7 +195,7 @@ class PipeTest : public Pt::Unit::TestSuite
             _loop->exit();
         }
 
-        void onStreamOutput(Pt::System::StreamBuffer& buffer)
+        void onStreamOutput(Pt::System::IOBuffer& buffer)
         {
             buffer.device()->close();
             inbuf.beginRead();
@@ -207,8 +207,8 @@ class PipeTest : public Pt::Unit::TestSuite
         size_t _pos;
         char _buffer[10];
         std::string _result;
-        Pt::System::StreamBuffer inbuf;
-        Pt::System::StreamBuffer outbuf;
+        Pt::System::IOBuffer inbuf;
+        Pt::System::IOBuffer outbuf;
 };
 
 

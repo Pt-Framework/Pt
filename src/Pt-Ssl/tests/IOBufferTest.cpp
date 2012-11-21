@@ -47,8 +47,8 @@ class TcpAcceptor : public Pt::Connectable
         TcpAcceptor(Pt::System::EventLoop& loop, Pt::Ssl::Context& ctx,
                     const std::string& addr, unsigned short port)
         : _loop(loop)
-        , _ios(8192, true)
-        , _ssl(ctx, _ios.buffer())
+        , _iobuf(8192, true)
+        , _ssl(ctx, _iobuf)
         , _socket(0)
         {
             log_debug("listening on " << addr << ':' << port);
@@ -72,7 +72,7 @@ class TcpAcceptor : public Pt::Connectable
             log_debug("accepting TCP connection");
             _socket = new Pt::Net::TcpSocket(server);
             _socket->setActive(_loop);
-            _ios.attach(*_socket);
+            _iobuf.attach(*_socket);
 
             log_debug("starting accept handshake");
             //_ssl.attach(_ios);
@@ -82,7 +82,7 @@ class TcpAcceptor : public Pt::Connectable
     private:
         Pt::System::EventLoop& _loop;
         Pt::Net::TcpServer _server;
-        Pt::System::IOStream _ios;
+        Pt::System::IOBuffer _iobuf;
         Pt::Ssl::IOBuffer _ssl;
         Pt::Net::TcpSocket* _socket;
 };
@@ -93,8 +93,8 @@ class TcpConnector : public Pt::Connectable
         TcpConnector(Pt::System::EventLoop& loop, Pt::Ssl::Context& ctx, 
                      const std::string& addr, unsigned short port)
         : _loop(loop)
-        , _ios(8192, true)
-        , _ssl(ctx, _ios.buffer())
+        , _iobuf(8192, true)
+        , _ssl(ctx, _iobuf)
         {
             log_debug("connecting to " << addr << ':' << port);
 
@@ -113,7 +113,7 @@ class TcpConnector : public Pt::Connectable
         void onConnect(Pt::Net::TcpSocket& socket)
         {
             _socket.endConnect();
-            _ios.attach(socket);
+            _iobuf.attach(socket);
 
             log_debug("starting connect handshake");
             _ssl.beginConnect();
@@ -122,7 +122,7 @@ class TcpConnector : public Pt::Connectable
     private:
         Pt::System::EventLoop& _loop;
         Pt::Net::TcpSocket _socket;
-        Pt::System::IOStream _ios;
+        Pt::System::IOBuffer _iobuf;
         Pt::Ssl::IOBuffer _ssl;
 };
 

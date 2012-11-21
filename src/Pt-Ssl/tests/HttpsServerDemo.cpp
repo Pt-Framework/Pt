@@ -33,6 +33,7 @@
 #include <Pt/Net/TcpServer.h>
 #include <Pt/System/MainLoop.h>
 #include <Pt/System/Logger.h>
+#include <Pt/System/IOStream.h>
 #include <fstream>
 
 log_define("Pt.Ssl.HttpCServerTest")

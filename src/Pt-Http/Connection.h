@@ -238,9 +238,9 @@ class Connection : public Connectable
 
         void onTimeout();
 
-        void onHttpInput(System::StreamBuffer& sb);
+        void onHttpInput(System::IOBuffer& sb);
 
-        void onHttpOutput(System::StreamBuffer& sb);
+        void onHttpOutput(System::IOBuffer& sb);
 
         void beginRead();
 

@@ -76,6 +76,21 @@ class Event
         }
 };
 
+/*
+class MyEvent : public Event
+{
+  MyEvent()
+  : Event()
+  {}
+
+  virtual EventType& type()
+  { return _evType; }
+
+  private:
+    BasicEventType<MyEvent> _evType;
+};
+*/
+
 template <typename T>
 class BasicEvent : public Event
 {

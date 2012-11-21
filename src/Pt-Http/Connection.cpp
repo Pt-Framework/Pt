@@ -973,7 +973,7 @@ void Connection::onTimeout()
 }
 
 
-void Connection::onHttpInput(System::StreamBuffer& sb)
+void Connection::onHttpInput(System::IOBuffer& sb)
 {
     log_trace("Connection::onHttpInput");
 
@@ -988,7 +988,7 @@ void Connection::onHttpInput(System::StreamBuffer& sb)
 }
 
 
-void Connection::onHttpOutput(System::StreamBuffer& sb)
+void Connection::onHttpOutput(System::IOBuffer& sb)
 {
     log_trace("Connection::onHttpOutput");
 
