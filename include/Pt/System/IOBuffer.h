@@ -30,6 +30,7 @@
 
 #include <Pt/System/Api.h>
 #include <Pt/System/IODevice.h>
+#include <Pt/System/StreamBuffer.h>
 #include <streambuf>
 #include <ios>
 #include <cstring>
@@ -66,7 +67,6 @@ class PT_SYSTEM_API IOBufferImpl
         int sync(IOBuffer& sb);
         std::streambuf::int_type underflow(IOBuffer& sb);
         std::streambuf::int_type overflow(IOBuffer& sb, std::streambuf::int_type ch);
-        std::streamsize xspeekn(IOBuffer& sb, char* buffer, std::streamsize size);
         std::streambuf::pos_type seekoff(IOBuffer& sb, std::streambuf::off_type off, std::ios::seekdir dir, std::ios::openmode);
         std::streambuf::pos_type seekpos(IOBuffer& sb, std::streambuf::pos_type p, std::ios::openmode mode);
         std::streamsize showfull(IOBuffer& sb);
@@ -85,7 +85,7 @@ class PT_SYSTEM_API IOBufferImpl
         Signal<IOBuffer&> _outputReady;
 };
 
-class IOBuffer : public std::streambuf
+class IOBuffer : public BasicStreamBuffer<char>
                , public Connectable
 {
     friend class IOBufferImpl;
@@ -116,17 +116,6 @@ class IOBuffer : public std::streambuf
         Signal<IOBuffer&>& outputReady()
         { return _impl.outputReady(); }
 
-        std::streamsize out_avail()
-        {
-            if( this->pptr() )
-                return this->pptr() - this->pbase();
-
-            return _impl.showfull(*this);
-        }
-
-        std::streamsize speekn(char* buffer, std::streamsize size)
-        { return _impl.xspeekn(*this, buffer, size); }
-
         void attach(IODevice& ioDevice)
         { _impl.attach(*this, ioDevice); }
 
@@ -155,6 +144,9 @@ class IOBuffer : public std::streambuf
         { _impl.discard(*this); }
 
     protected:
+        virtual std::streamsize showfull()
+        { return _impl.showfull(*this); }
+
         virtual int sync()
         { return _impl.sync(*this); }
 

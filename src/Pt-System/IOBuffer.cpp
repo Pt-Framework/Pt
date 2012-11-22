@@ -303,22 +303,6 @@ std::streambuf::int_type IOBufferImpl::overflow(IOBuffer& sb, std::streambuf::in
     return traits_type::not_eof(ch);
 }
 
-std::streamsize IOBufferImpl::xspeekn(IOBuffer& sb, char* buffer, std::streamsize size)
-{
-    typedef IOBuffer::traits_type traits_type;
-
-    if(traits_type::eof() == sb.underflow())
-        return 0;
-
-    const std::streamsize avail = sb.egptr() - sb.gptr();
-    size = std::min(avail, size);
-    if(size == 0)
-        return 0;
-
-    std::memcpy(buffer, sb.gptr(), sizeof(char) * size);
-    return size;
-}
-
 std::streambuf::pos_type IOBufferImpl::seekoff(IOBuffer& sb, std::streambuf::off_type off, std::ios::seekdir dir, std::ios::openmode)
 {
     typedef IOBuffer::pos_type pos_type;

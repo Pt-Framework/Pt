@@ -29,5 +29,68 @@
 #ifndef Pt_System_StreamBuffer_h
 #define Pt_System_StreamBuffer_h
 
+#include <streambuf>
+
+namespace Pt {
+
+namespace System {
+
+template <typename CharT>
+class BasicStreamBuffer : public std::basic_streambuf<CharT>
+{
+    public:
+        ~BasicStreamBuffer()
+        { }
+
+        std::streamsize speekn(CharT* buffer, std::streamsize size)
+        {
+            if(size <= 0)
+                return 0;
+
+            int_type next = 0;
+            if( ! gptr() || gptr() == egptr() )
+            {
+                next = underflow();
+                
+                if( traits_type::eof() == next)
+                    return 0;
+            }
+
+            std::size_t avail = gptr() ? egptr() - gptr() : 0;
+
+            // unbuffered streambufs
+            if(avail == 0)
+            {
+                *buffer = traits_type::to_char_type(next);
+                return 1;
+            }
+
+            std::size_t n = static_cast<std::size_t>(size);
+            if(avail < n) 
+                n = avail;
+
+            traits_type::copy(buffer, gptr(), n);
+            return size;
+        }
+
+        std::streamsize out_avail()
+        {
+            if( this->pptr() )
+                return this->pptr() - this->pbase();
+
+            return showfull();
+        }
+
+    protected:
+        BasicStreamBuffer()
+        { }
+
+        virtual std::streamsize showfull()
+        { return 0; }
+};
+
+} // namespace System
+
+} // namespace Pt
 
 #endif
