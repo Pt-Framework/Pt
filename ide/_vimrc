@@ -187,10 +187,10 @@ endfunction
 " Find selected text
 :vnoremap <C-f> "fy/<C-r>f<CR>
 :vnoremap <M-f> "fy/<C-r>f<CR>NN
-:inoremap <C-f> <C-o>/
+:inoremap <C-f> <C-o>/\C
 :inoremap <C-n> <C-o>n
-:inoremap <C-j> <C-o>N
-:nnoremap <C-f> /
+:inoremap <C-p> <C-o>N
+:nnoremap <C-f> /\C
 
 " Replace selected text
 :vnoremap <C-h> "fy<C-o>:%s/<C-r>f/XXX/gc
