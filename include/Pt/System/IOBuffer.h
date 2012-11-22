@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005-2008 Marc Boris Duerner
+ * Copyright (C) 2005-2012 Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -30,7 +30,7 @@
 
 #include <Pt/System/Api.h>
 #include <Pt/System/IODevice.h>
-#include <Pt/System/StreamBuffer.h>
+#include <Pt/StreamBuffer.h>
 #include <streambuf>
 #include <ios>
 #include <cstring>

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005-2008 Marc Boris Duerner
+ * Copyright (C) 2005-2012 Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -30,87 +30,75 @@
 
 #include <Pt/System/Api.h>
 #include <Pt/System/IOBuffer.h>
-#include <iostream>
-#include <algorithm>
+#include <Pt/IOStream.h>
 
 namespace Pt {
 
 namespace System {
 
-class IStream : public std::basic_istream<char>
+class IStream : public BasicIStream<char>
 {
     public:
         explicit IStream(size_t bufferSize = 8192, bool extend = false);
         
         explicit IStream(IODevice& device, size_t bufferSize = 8192, bool extend = false);
         
-        ~IStream();
+        ~IStream()
+        {}
 
-        IOBuffer& buffer();
+        IOBuffer& ioBuffer()
+        { return _buffer; }
 
         IODevice* attach(IODevice& device);
 
-        IODevice* device();
-
-        //! @brief Peeks bytes in the stream buffer.
-        /**
-            The number of bytes that can be peeked depends on the current
-            stream buffer get area and maybe less than requested,
-            similar to istream::readsome().
-        */
-        std::streamsize peeksome(char* buffer, std::streamsize n);
+        IODevice* device()
+        { return _buffer.device(); }
 
     private:
         IOBuffer _buffer;
 };
 
 
-class OStream : public std::basic_ostream<char>
+class OStream : public BasicOStream<char>
 {
     public:
         explicit OStream(size_t bufferSize = 8192, bool extend = false);
 
         explicit OStream(IODevice& device, size_t bufferSize = 8192, bool extend = false);
 
-        ~OStream();
+        ~OStream()
+        {}
 
-        IOBuffer& buffer();
+        IOBuffer& ioBuffer()
+        { return _buffer; }
 
         IODevice* attach(IODevice& device);
 
-        IODevice* device();
-
-        std::streamsize writesome(char* buffer, std::streamsize n);
+        IODevice* device()
+        { return _buffer.device(); }
     
     private:
         IOBuffer _buffer;
 };
 
 
-class IOStream : public std::basic_iostream<char>
+class IOStream : public BasicIOStream<char>
 {
     public:
         explicit IOStream(size_t bufferSize = 8192, bool extend = false);
 
         explicit IOStream(IODevice& device, size_t bufferSize = 8192, bool extend = false);
 
-        ~IOStream();
+        ~IOStream()
+        {}
 
-        IOBuffer& buffer();
+        IOBuffer& ioBuffer()
+        { return _buffer; }
 
         IODevice* attach(IODevice& device);
 
-        IODevice* device();
-
-        //! @brief Peeks bytes in the stream buffer.
-        /**
-            The number of bytes that can be peeked depends on the current
-            stream buffer get area and maybe less than requested,
-            similar to istream::readsome().
-        */
-        std::streamsize peeksome(char* buffer, std::streamsize n);
-    
-        std::streamsize writesome(char* buffer, std::streamsize n);
+        IODevice* device()
+        { return _buffer.device(); }
     
     private:
         IOBuffer _buffer;
@@ -118,29 +106,18 @@ class IOStream : public std::basic_iostream<char>
 
 
 inline IStream::IStream(size_t bufferSize, bool extend)
-: std::basic_istream<char>(0)
+: BasicIStream<char>(0)
 , _buffer(bufferSize, extend)
 {
-    this->init(&_buffer);
+    this->setBuffer(&_buffer);
 }
 
 
 inline IStream::IStream(IODevice& device, size_t bufferSize, bool extend)
-: std::basic_istream<char>(0)
+: BasicIStream<char>(0)
 , _buffer(device, bufferSize, extend)
 {
-    this->init(&_buffer);
-}
-
-
-inline IStream::~IStream()
-{
-}
-
-
-inline IOBuffer& IStream::buffer()
-{
-    return _buffer;
+    this->setBuffer(&_buffer);
 }
 
 
@@ -152,51 +129,19 @@ inline IODevice* IStream::attach(IODevice& dev)
 }
 
 
-inline IODevice* IStream::device()
-{
-    return _buffer.device();
-}
-
-
-inline std::streamsize IStream::peeksome(char* buffer, std::streamsize n)
-{
-    if(this->rdbuf() == &_buffer)
-        return _buffer.speekn(buffer, n);
-
-    if(n > 0)
-    {
-        buffer[0] = this->peek();
-        return 1;
-    }
-
-    return 0;
-}
-
-
 inline OStream::OStream(size_t bufferSize, bool extend)
-: std::basic_ostream<char>(0)
+: BasicOStream<char>(0)
 , _buffer(bufferSize, extend)
 {
-    this->init(&_buffer);
+    this->setBuffer(&_buffer);
 }
 
 
 inline OStream::OStream(IODevice& device, size_t bufferSize, bool extend)
-: std::basic_ostream<char>(0)
+: BasicOStream<char>(0)
 , _buffer(device, bufferSize, extend)
 {
-    this->init(&_buffer);
-}
-
-
-inline OStream::~OStream()
-{
-}
-
-
-inline IOBuffer& OStream::buffer()
-{
-    return _buffer;
+    this->setBuffer(&_buffer);
 }
 
 
@@ -208,52 +153,19 @@ inline IODevice* OStream::attach(IODevice& dev)
 }
 
 
-inline IODevice* OStream::device()
-{
-    return _buffer.device();
-}
-
-
-inline std::streamsize OStream::writesome(char* buffer, std::streamsize n)
-{
-    if(this->rdbuf() != &_buffer)
-        return 0;
-
-    std::streamsize avail = _buffer.out_avail();
-    if(avail == 0)
-    {
-        return 0;
-    }
-
-    n = std::min(avail, n);
-    return _buffer.sputn(buffer, n);
-}
-
-
 inline IOStream::IOStream(size_t bufferSize, bool extend)
-: std::basic_iostream<char>(0)
+: BasicIOStream<char>(0)
 , _buffer(bufferSize, extend)
 {
-    this->init(&_buffer);
+    this->setBuffer(&_buffer);
 }
 
 
 inline IOStream::IOStream(IODevice& device, size_t bufferSize, bool extend)
-: std::basic_iostream<char>(0)
+: BasicIOStream<char>(0)
 , _buffer(device, bufferSize, extend)
 {
-    this->init(&_buffer);
-}
-
-
-inline IOStream::~IOStream()
-{
-}
-
-
-inline IOBuffer& IOStream::buffer()
-{
-    return _buffer;
+    this->setBuffer(&_buffer);
 }
 
 
@@ -262,42 +174,6 @@ inline IODevice* IOStream::attach(IODevice& dev)
     IODevice* ret = this->device();
     _buffer.attach(dev);
     return ret;
-}
-
-
-inline IODevice* IOStream::device()
-{
-    return _buffer.device();
-}
-
-
-inline std::streamsize IOStream::peeksome(char* buffer, std::streamsize n)
-{
-    if(this->rdbuf() == &_buffer)
-        return _buffer.speekn(buffer, n);
-
-    if(n > 0)
-    {
-        buffer[0] = this->peek();
-        return 1;
-    }
-
-    return 0;
-}
-
-inline std::streamsize IOStream::writesome(char* buffer, std::streamsize n)
-{
-    if( this->rdbuf() != &_buffer )
-        return 0;
-
-    std::streamsize avail = _buffer.out_avail();
-    if(avail == 0)
-    {
-        return 0;
-    }
-
-    n = std::min(avail, n);
-    return _buffer.sputn(buffer, n);
 }
 
 } // namespace System

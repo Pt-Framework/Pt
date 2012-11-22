@@ -46,6 +46,7 @@
     <ClInclude Include="..\..\include\Pt\Http\Service.h" />
     <ClInclude Include="..\..\include\Pt\Http\Servlet.h" />
     <ClInclude Include="..\..\include\Pt\Invokable.h" />
+    <ClInclude Include="..\..\include\Pt\IOStream.h" />
     <ClInclude Include="..\..\include\Pt\LiteralPtr.h" />
     <ClInclude Include="..\..\include\Pt\Locale.h" />
     <ClInclude Include="..\..\include\Pt\Main.h" />
@@ -101,6 +102,7 @@
     <ClInclude Include="..\..\include\Pt\Ssl\Session.h" />
     <ClInclude Include="..\..\include\Pt\Ssl\SslError.h" />
     <ClInclude Include="..\..\include\Pt\Ssl\StreamBuffer.h" />
+    <ClInclude Include="..\..\include\Pt\StreamBuffer.h" />
     <ClInclude Include="..\..\include\Pt\String.h" />
     <ClInclude Include="..\..\include\Pt\StringStream.h" />
     <ClInclude Include="..\..\include\Pt\System\Api.h" />
@@ -133,7 +135,6 @@
     <ClInclude Include="..\..\include\Pt\System\Selectable.h" />
     <ClInclude Include="..\..\include\Pt\System\Semaphore.h" />
     <ClInclude Include="..\..\include\Pt\System\SerialDevice.h" />
-    <ClInclude Include="..\..\include\Pt\System\StreamBuffer.h" />
     <ClInclude Include="..\..\include\Pt\System\SystemError.h" />
     <ClInclude Include="..\..\include\Pt\System\Thread.h" />
     <ClInclude Include="..\..\include\Pt\System\Timer.h" />
@@ -304,7 +305,6 @@
     <ClCompile Include="..\..\src\Pt-System\IOBuffer.cpp" />
     <ClCompile Include="..\..\src\Pt-System\IODevice.cpp" />
     <ClCompile Include="..\..\src\Pt-System\IOError.cpp" />
-    <ClCompile Include="..\..\src\Pt-System\IOStream.cpp" />
     <ClCompile Include="..\..\src\Pt-System\Library.cpp" />
     <ClCompile Include="..\..\src\Pt-System\Logger.cpp" />
     <ClCompile Include="..\..\src\Pt-System\LogManager.cpp" />
@@ -318,7 +318,6 @@
     <ClCompile Include="..\..\src\Pt-System\Semaphore.cpp" />
     <ClCompile Include="..\..\src\Pt-System\SerialChannel.cpp" />
     <ClCompile Include="..\..\src\Pt-System\SerialDevice.cpp" />
-    <ClCompile Include="..\..\src\Pt-System\StreamBuffer.cpp" />
     <ClCompile Include="..\..\src\Pt-System\SystemError.cpp" />
     <ClCompile Include="..\..\src\Pt-System\tests\ApplicationTest.cpp" />
     <ClCompile Include="..\..\src\Pt-System\tests\DirectoryTest.cpp" />

@@ -402,9 +402,6 @@
     <ClInclude Include="..\..\include\Pt\System\SerialDevice.h">
       <Filter>Pt-System</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\System\StreamBuffer.h">
-      <Filter>Pt-System</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\System\SystemError.h">
       <Filter>Pt-System</Filter>
     </ClInclude>
@@ -632,6 +629,12 @@
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Http\HttpError.h">
       <Filter>Pt-Http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\StreamBuffer.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\IOStream.h">
+      <Filter>Pt</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -978,9 +981,6 @@
     <ClCompile Include="..\..\src\Pt-System\IOError.cpp">
       <Filter>Pt-System</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-System\IOStream.cpp">
-      <Filter>Pt-System</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Pt-System\Library.cpp">
       <Filter>Pt-System</Filter>
     </ClCompile>
@@ -1015,9 +1015,6 @@
       <Filter>Pt-System</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-System\SerialDevice.cpp">
-      <Filter>Pt-System</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-System\StreamBuffer.cpp">
       <Filter>Pt-System</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-System\SystemError.cpp">

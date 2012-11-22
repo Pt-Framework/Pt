@@ -29,7 +29,6 @@
  */
 #include "Pt/System/Pipe.h"
 #include "Pt/System/MainLoop.h"
-#include "Pt/System/StreamBuffer.h"
 #include "Pt/System/IOStream.h"
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestSuite.h"

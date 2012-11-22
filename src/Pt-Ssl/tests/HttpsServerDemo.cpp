@@ -69,7 +69,7 @@ class Server : public Pt::Connectable {
             _ios->attach(*_client);
 
             log_debug("server Starting handshake");
-            _ssl = new Pt::Ssl::IOBuffer(_sslContext, _ios->buffer());
+            _ssl = new Pt::Ssl::IOBuffer(_sslContext, _ios->ioBuffer());
             _ssl->beginAccept();
 
             _ssl->handshakeFinished() += Pt::slot(*this, &Server::onHandshake);
@@ -103,7 +103,7 @@ class Server : public Pt::Connectable {
         void onInput(Pt::Ssl::IOBuffer& ssl)
         {
             ssl.endRead();
-            log_debug("server Received raw = " << _ios->buffer().in_avail());
+            log_debug("server Received raw = " << _ios->ioBuffer().in_avail());
 
             if( ssl.isShutdown() ) 
             {
@@ -151,14 +151,14 @@ class Server : public Pt::Connectable {
                   << lmsg
                   << std::flush;
 
-            log_debug("server Sending response to the client ... out_avail = " << _ios->buffer().out_avail());
+            log_debug("server Sending response to the client ... out_avail = " << _ios->ioBuffer().out_avail());
             ssl.beginWrite();
         }
 
         void onOutput(Pt::Ssl::IOBuffer& ssl)
         {
             ssl.endWrite();
-            log_debug("server Sent raw; remaining = " << _ios->buffer().out_avail());
+            log_debug("server Sent raw; remaining = " << _ios->ioBuffer().out_avail());
 
 
             log_debug("server Done sending response to the client");

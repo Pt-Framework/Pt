@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2005-2011 Marc Boris Duerner
- * Copyright (C) 2011      Aloysius Indayanto
+ * Copyright (C) 2012 Marc Boris Duerner
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,14 +25,14 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef Pt_System_StreamBuffer_h
-#define Pt_System_StreamBuffer_h
+#ifndef Pt_StreamBuffer_h
+#define Pt_StreamBuffer_h
 
+#include <Pt/Api.h>
 #include <streambuf>
+#include <cstddef>
 
 namespace Pt {
-
-namespace System {
 
 template <typename CharT>
 class BasicStreamBuffer : public std::basic_streambuf<CharT>
@@ -88,8 +87,6 @@ class BasicStreamBuffer : public std::basic_streambuf<CharT>
         virtual std::streamsize showfull()
         { return 0; }
 };
-
-} // namespace System
 
 } // namespace Pt
 

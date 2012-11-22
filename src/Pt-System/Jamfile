@@ -21,7 +21,6 @@ SharedLibrary Pt-System : $(PT_SYSTEM_IMPL)
                           IOBuffer.cpp
                           IODevice.cpp
                           IOError.cpp
-                          IOStream.cpp
                           Library.cpp
                           Logger.cpp
                           LogManager.cpp
@@ -34,7 +33,6 @@ SharedLibrary Pt-System : $(PT_SYSTEM_IMPL)
                           Selectable.cpp
                           SerialDevice.cpp
                           Semaphore.cpp
-                          StreamBuffer.cpp
                           SystemError.cpp
                           Thread.cpp
                           Timer.cpp

@@ -131,12 +131,6 @@ void StreamBuffer::discard()
 }
 
 
-void StreamBuffer::attach(std::iostream& ios)
-{
-    _ios = ios.rdbuf();
-}
-
-
 CipherList StreamBuffer::ciphers() const
 {
     if( ! _ssl )

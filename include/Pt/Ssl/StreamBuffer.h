@@ -138,8 +138,6 @@ class PT_SSL_API StreamBuffer : public std::streambuf
         void import(std::streamsize maxImport = 0);
 
     protected:
-        void attach(std::iostream& ios);
-
         virtual int sync();
         
         virtual int_type underflow();
