@@ -34,9 +34,16 @@
 
 namespace Pt {
 
-template <typename CharT>
-class BasicStreamBuffer : public std::basic_streambuf<CharT>
+template <typename CharT, typename TraitsT = std::char_traits<CharT> >
+class BasicStreamBuffer : public std::basic_streambuf<CharT, TraitsT>
 {
+    public:
+        typedef CharT char_type;
+        typedef TraitsT traits_type;
+        typedef typename TraitsT::int_type int_type;
+        typedef typename TraitsT::pos_type pos_type;
+        typedef typename TraitsT::off_type off_type;
+
     public:
         ~BasicStreamBuffer()
         { }
@@ -47,15 +54,15 @@ class BasicStreamBuffer : public std::basic_streambuf<CharT>
                 return 0;
 
             int_type next = 0;
-            if( ! gptr() || gptr() == egptr() )
+            if( ! this->gptr() || this->gptr() == this->egptr() )
             {
-                next = underflow();
+                next = this->underflow();
                 
                 if( traits_type::eof() == next)
                     return 0;
             }
 
-            std::size_t avail = gptr() ? egptr() - gptr() : 0;
+            std::size_t avail = this->ugptr() ? this->uegptr() - this->gptr() : 0;
 
             // unbuffered streambufs
             if(avail == 0)
@@ -68,7 +75,7 @@ class BasicStreamBuffer : public std::basic_streambuf<CharT>
             if(avail < n) 
                 n = avail;
 
-            traits_type::copy(buffer, gptr(), n);
+            traits_type::copy(buffer, this->gptr(), n);
             return size;
         }
 

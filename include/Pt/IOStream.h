@@ -35,9 +35,16 @@
 
 namespace Pt {
 
-template <typename CharT>
-class BasicIStream : public std::basic_istream<CharT>
+template <typename CharT, typename TraitsT = std::char_traits<CharT> >
+class BasicIStream : public std::basic_istream<CharT, TraitsT>
 {
+    public:
+        typedef CharT char_type;
+        typedef TraitsT traits_type;
+        typedef typename TraitsT::int_type int_type;
+        typedef typename TraitsT::pos_type pos_type;
+        typedef typename TraitsT::off_type off_type;
+
     public:
         explicit BasicIStream(BasicStreamBuffer<CharT>* sb = 0);
         
@@ -66,9 +73,16 @@ class BasicIStream : public std::basic_istream<CharT>
 };
 
 
-template <typename CharT>
-class BasicOStream : public std::basic_ostream<CharT>
+template <typename CharT, typename TraitsT = std::char_traits<CharT> >
+class BasicOStream : public std::basic_ostream<CharT, TraitsT>
 {
+    public:
+        typedef CharT char_type;
+        typedef TraitsT traits_type;
+        typedef typename TraitsT::int_type int_type;
+        typedef typename TraitsT::pos_type pos_type;
+        typedef typename TraitsT::off_type off_type;
+
     public:
         explicit BasicOStream(BasicStreamBuffer<CharT>* sb = 0);
 
@@ -91,9 +105,16 @@ class BasicOStream : public std::basic_ostream<CharT>
 };
 
 
-template <typename CharT>
-class BasicIOStream : public std::basic_iostream<CharT>
+template <typename CharT, typename TraitsT = std::char_traits<CharT> >
+class BasicIOStream : public std::basic_iostream<CharT, TraitsT>
 {
+    public:
+        typedef CharT char_type;
+        typedef TraitsT traits_type;
+        typedef typename TraitsT::int_type int_type;
+        typedef typename TraitsT::pos_type pos_type;
+        typedef typename TraitsT::off_type off_type;
+
     public:
         explicit BasicIOStream(BasicStreamBuffer<CharT>* sb = 0);
 
@@ -124,16 +145,16 @@ class BasicIOStream : public std::basic_iostream<CharT>
 };
 
 
-template <typename CharT>
-inline BasicIStream<CharT>::BasicIStream(BasicStreamBuffer<CharT>* sb)
+template <typename CharT, typename TraitsT>
+inline BasicIStream<CharT, TraitsT>::BasicIStream(BasicStreamBuffer<CharT>* sb)
 : std::basic_istream<CharT>(sb)
 , _buffer(sb)
 {
 }
 
 
-template <typename CharT>
-inline std::streamsize BasicIStream<CharT>::peeksome(CharT* buffer, std::streamsize n)
+template <typename CharT, typename TraitsT>
+inline std::streamsize BasicIStream<CharT, TraitsT>::peeksome(CharT* buffer, std::streamsize n)
 {
     if(_buffer && this->rdbuf() == _buffer)
         return _buffer->speekn(buffer, n);
@@ -148,16 +169,16 @@ inline std::streamsize BasicIStream<CharT>::peeksome(CharT* buffer, std::streams
 }
 
 
-template <typename CharT>
-inline BasicOStream<CharT>::BasicOStream(BasicStreamBuffer<CharT>* sb)
+template <typename CharT, typename TraitsT>
+inline BasicOStream<CharT, TraitsT>::BasicOStream(BasicStreamBuffer<CharT>* sb)
 : std::basic_ostream<CharT>(sb)
 , _buffer(sb)
 {
 }
 
 
-template <typename CharT>
-inline std::streamsize BasicOStream<CharT>::writesome(CharT* buffer, std::streamsize n)
+template <typename CharT, typename TraitsT>
+inline std::streamsize BasicOStream<CharT, TraitsT>::writesome(CharT* buffer, std::streamsize n)
 {
     if( ! _buffer || this->rdbuf() != _buffer )
         return 0;
@@ -173,16 +194,16 @@ inline std::streamsize BasicOStream<CharT>::writesome(CharT* buffer, std::stream
 }
 
 
-template <typename CharT>
-inline BasicIOStream<CharT>::BasicIOStream(BasicStreamBuffer<CharT>* sb)
+template <typename CharT, typename TraitsT>
+inline BasicIOStream<CharT, TraitsT>::BasicIOStream(BasicStreamBuffer<CharT>* sb)
 : std::basic_iostream<CharT>(sb)
 , _buffer(sb)
 {
 }
 
 
-template <typename CharT>
-inline std::streamsize BasicIOStream<CharT>::peeksome(CharT* buffer, std::streamsize n)
+template <typename CharT, typename TraitsT>
+inline std::streamsize BasicIOStream<CharT, TraitsT>::peeksome(CharT* buffer, std::streamsize n)
 {
     if(_buffer && this->rdbuf() == _buffer)
         return _buffer->speekn(buffer, n);
@@ -197,8 +218,8 @@ inline std::streamsize BasicIOStream<CharT>::peeksome(CharT* buffer, std::stream
 }
 
 
-template <typename CharT>
-inline std::streamsize BasicIOStream<CharT>::writesome(CharT* buffer, std::streamsize n)
+template <typename CharT, typename TraitsT>
+inline std::streamsize BasicIOStream<CharT, TraitsT>::writesome(CharT* buffer, std::streamsize n)
 {
     if( ! _buffer || this->rdbuf() != _buffer )
         return 0;
