@@ -43,6 +43,9 @@ namespace Net {
 class PT_NET_API TcpSocket : public System::IODevice
 {
     public:
+        // TCP_NODELAY
+        // SO_KEEPALIVE
+        // SO_SNDBUF 
         class Options
         {
             public:
