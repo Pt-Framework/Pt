@@ -41,9 +41,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-
-using namespace Pt;
-using namespace Pt::Gfx;
+#include <cstddef>
 
 class ImagePainterDemo : public Pt::Gui::Widget
 {
@@ -62,7 +60,7 @@ class ImagePainterDemo : public Pt::Gui::Widget
 
 	virtual void _paintEvent(const Pt::Gui::PaintEvent& event)
 	{
-	    Pen pen( 4, ARgbColor( 0,0,0), Pen::DashStyle, Pen::RoundCap, Pen::BevelJoin );
+	    Pt::Gfx::Pen pen( 4, Pt::Gfx::ARgbColor( 0,0,0), Pt::Gfx::Pen::DashStyle, Pt::Gfx::Pen::RoundCap, Pt::Gfx::Pen::BevelJoin );
 
 		_imagePainter.setPen( pen );
 
@@ -77,9 +75,9 @@ class ImagePainterDemo : public Pt::Gui::Widget
 		poly[1] = Pt::Gfx::Point( 100, 100 );
 
 		_imagePainter.drawPolyline( poly, 2 );
-		painter().drawImage( Point(0,0), _image );
+		painter().drawImage( Pt::Gfx::Point(0,0), _image );
 
-		painter().setPen( Pen(4, ARgbColor( 0, 0, 0xffff ), Pen::DashStyle, Pen::RoundCap, Pen::BevelJoin)  );
+		painter().setPen( Pt::Gfx::Pen(4, Pt::Gfx::ARgbColor( 0, 0, 0xffff ), Pt::Gfx::Pen::DashStyle, Pt::Gfx::Pen::RoundCap, Pt::Gfx::Pen::BevelJoin)  );
 		//painter().drawPolyline( poly, 4 );
 	}
 
@@ -89,7 +87,7 @@ class ImagePainterDemo : public Pt::Gui::Widget
 		Pt::Gfx::Point point( 40 ,50 );
 		Pt::Gfx::Size	size( 70, 50 );
 
-		_imagePainter.setPen(Pt::Gfx::Pen(pens, Pt::Gfx::ARgbColor( 0,0,0), Pen::SolidStyle, Pen::RoundCap));
+		_imagePainter.setPen(Pt::Gfx::Pen(pens, Pt::Gfx::ARgbColor( 0,0,0), Pt::Gfx::Pen::SolidStyle, Pt::Gfx::Pen::RoundCap));
 		_imagePainter.drawEllipse( point, size ) ;
 
 		painter().drawImage( Pt::Gfx::Point( 0, 0 ), _image );

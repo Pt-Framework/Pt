@@ -123,8 +123,6 @@ class RemoteProcedureBase : public IRemoteProcedure
         void onFinished()
         { finished.send(_result); }
 
-        /// TODO
-        //SerializationContext _context;
         Result<R> _result;
         Composer<R> _r;
 };

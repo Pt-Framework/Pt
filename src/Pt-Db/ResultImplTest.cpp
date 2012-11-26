@@ -42,11 +42,6 @@
 
 #include "Pt/Db/Row.h"
 
-using namespace std;
-using namespace Pt;
-using namespace Pt::Db;
-
-
 class ResultImplTest : public Pt::Unit::TestSuite
 {
 public:
@@ -69,17 +64,17 @@ Pt::Unit::RegisterTest<ResultImplTest> register_ResultImplTest;
 
 void ResultImplTest::testSize()
 {
-    ResultImpl resImpl;
+    Pt::Db::ResultImpl resImpl;
 
     for(unsigned int j=0; j<10; j++){
-        RowImpl* rowImpl = new RowImpl();
+        Pt::Db::RowImpl* rowImpl = new Pt::Db::RowImpl();
         for(unsigned int i=0; i<25; i++)
         {
             std::stringstream ss;
             ss << j*i;
 
-            ValueImpl* impl = new ValueImpl( ss.str() );
-            Value v(impl);
+            Pt::Db::ValueImpl* impl = new Pt::Db::ValueImpl( ss.str() );
+            Pt::Db::Value v(impl);
             rowImpl->add( v );
         }
         resImpl.add(rowImpl);
@@ -92,17 +87,17 @@ void ResultImplTest::testSize()
 
 void ResultImplTest::testGetRow()
 {
-    ResultImpl resImpl;
+    Pt::Db::ResultImpl resImpl;
 
     for(unsigned int j=0; j<10; j++){
-        RowImpl* rowImpl = new RowImpl();
+        Pt::Db::RowImpl* rowImpl = new Pt::Db::RowImpl();
         for(unsigned int i=0; i<25; i++)
         {
             std::stringstream ss;
             ss << j*i;
 
-            ValueImpl* impl = new ValueImpl( ss.str() );
-            Value v(impl);
+            Pt::Db::ValueImpl* impl = new Pt::Db::ValueImpl( ss.str() );
+            Pt::Db::Value v(impl);
             rowImpl->add( v );
         }
         resImpl.add(rowImpl);
@@ -110,7 +105,7 @@ void ResultImplTest::testGetRow()
 
     for(int i=0; i<10; i++)
     {
-        Row row = resImpl.getRow(i);
+        Pt::Db::Row row = resImpl.getRow(i);
         PT_UNIT_ASSERT( row.getInt(24) == i * 24 );
     }
 }

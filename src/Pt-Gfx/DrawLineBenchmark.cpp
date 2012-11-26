@@ -47,9 +47,6 @@
 #include <stdexcept>
 #include <string>
 
-
-using namespace Pt;
-
 class DrawLineDemo : public Pt::Gui::Widget
 {
     public:
@@ -64,7 +61,7 @@ class DrawLineDemo : public Pt::Gui::Widget
             this->setTitle(L"DrawLineDemo");
         }
 
-        void drawStar(Gfx::Painter& painter, const Pt::Gfx::Point& center, Pt::size_t lineWidth)
+        void drawStar(Pt::Gfx::Painter& painter, const Pt::Gfx::Point& center, Pt::size_t lineWidth)
         {
             painter.setPen( Pt::Gfx::Pen( lineWidth, Pt::Gfx::ARgbColor(0, 0xcccc, 0) ));
             painter.drawLine( Pt::Gfx::Point( center.x(), center.y()-120 ),
@@ -159,7 +156,7 @@ class DrawLineDemo : public Pt::Gui::Widget
 
             painter().drawImage( Pt::Gfx::Point( 0, 0 ), _image );
 
-            Gui::Painter widgetPainter = painter();
+            Pt::Gui::Painter widgetPainter = painter();
             clock.start();
 
             this->drawStar( widgetPainter, Pt::Gfx::Point(60, 150), 2);

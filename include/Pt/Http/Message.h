@@ -248,8 +248,10 @@ class MessageProgress
         unsigned long _result;
 };
 
-
-class PT_HTTP_API MessageBuffer : public std::streambuf
+/** @internal 
+    @brief Output buffer for HTTP messages.
+*/
+class MessageBuffer : public std::streambuf
 {
     public:
         // @brief Constructs an empty buffer.
@@ -289,6 +291,8 @@ class PT_HTTP_API MessageBuffer : public std::streambuf
 
 class PT_HTTP_API Message
 {
+    friend class Connection;
+
     public:
         explicit Message(Http::Connection& conn);
 
@@ -300,12 +304,6 @@ class PT_HTTP_API Message
 
         const MessageHeader& header() const
         { return _header; }
-
-        MessageBuffer& buffer()
-        { return _buf; }
-
-        void setBuffer(std::streambuf& sb)
-        { _ios.rdbuf(&sb); }
 
         std::iostream& body()
         { return _ios; }
@@ -322,6 +320,12 @@ class PT_HTTP_API Message
         void discard();
 
     protected:
+        MessageBuffer& buffer()
+        { return _buf; }
+
+        void setBuffer(std::streambuf& sb)
+        { _ios.rdbuf(&sb); }
+
         void setSending(bool b)
         { _isSending = b; }
         

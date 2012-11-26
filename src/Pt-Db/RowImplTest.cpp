@@ -41,11 +41,6 @@
 
 #include "Pt/Db/Value.h"
 
-using namespace std;
-using namespace Pt;
-using namespace Pt::Db;
-
-
 class RowImplTest : public Pt::Unit::TestSuite
 {
 public:
@@ -68,15 +63,15 @@ Pt::Unit::RegisterTest<RowImplTest> register_RowImplTest;
 
 void RowImplTest::testSize()
 {
-    RowImpl rowImpl;
+    Pt::Db::RowImpl rowImpl;
 
     for(unsigned int i=0; i<25; i++)
     {
         std::stringstream ss;
         ss << i;
 
-        ValueImpl* impl = new ValueImpl( ss.str() );
-        Value v(impl);
+        Pt::Db::ValueImpl* impl = new Pt::Db::ValueImpl( ss.str() );
+        Pt::Db::Value v(impl);
         rowImpl.add( v );
     }
 
@@ -86,15 +81,15 @@ void RowImplTest::testSize()
 
 void RowImplTest::testGetValue()
 {
-    RowImpl rowImpl;
+    Pt::Db::RowImpl rowImpl;
 
     for(unsigned int i=0; i<25; i++)
     {
         std::stringstream ss;
         ss << i;
 
-        ValueImpl* impl = new ValueImpl( ss.str() );
-        Value v(impl);
+        Pt::Db::ValueImpl* impl = new Pt::Db::ValueImpl( ss.str() );
+        Pt::Db::Value v(impl);
         rowImpl.add( v );
     }
 
