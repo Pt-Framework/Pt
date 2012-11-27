@@ -80,7 +80,7 @@ size_t SerializationContext::limit() const
 
 void SerializationContext::setLimit(size_t n)
 {
-	_cache->_limit = n;
+    _cache->_limit = n;
 }
 
 

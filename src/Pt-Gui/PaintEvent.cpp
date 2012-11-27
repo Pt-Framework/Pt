@@ -56,7 +56,7 @@ PaintEvent::~PaintEvent()
 {}
 
 
-const std::type_info& PaintEvent::typeInfo() const
+const std::type_info& PaintEvent::onTypeInfo() const
 {
     static const std::type_info& ti = typeid(PaintEvent);
     return ti;

@@ -34,11 +34,11 @@
 
 namespace Pt {
 
-/** \brief Base class for all event types.
+/** @brief Base class for all event types.
 
-    Specific Event objects, subclass from Event and implement the clone()
-    and typeInfo() methods. The first is used to deep copy event objects
-    for example in an EventLoop and the latter one is used to dispatch
+    Specific Event objects, subclass from Event and implement the onClone(),
+    onDestroy() and onTypeInfo() methods. The first two are used to copy event
+    objects for example in an EventLoop and the latter one is used to dispatch
     events by type.
 
     @ingroup CoreTypes
@@ -51,15 +51,42 @@ class Event
         virtual ~Event()
         {}
 
-        virtual Event& clone(Allocator& allocator) const = 0;
+        /** @brief Clones this event using an allocator.
+        */
+        Event& clone(Allocator& allocator) const
+        { return onClone(allocator); }
 
-        virtual void destroy(Allocator& allocator) = 0;
+        /** @brief Destroys this event using an allocator.
+        */
+        void destroy(Allocator& allocator)
+        { onDestroy(allocator); }
 
-        /** \brief Returns the type info for this class of events.
-          */
-        virtual const std::type_info& typeInfo() const = 0;
+        /** @brief Returns the type info for this class of events.
+        */
+        const std::type_info& typeInfo() const
+        { return onTypeInfo(); }
+
+    protected:
+        /** \brief Constructor.
+         */
+        Event()
+        {}
+        
+        /** @brief Clones this event using an allocator.
+        */
+        virtual Event& onClone(Allocator& allocator) const = 0;
+
+        /** @brief Destroys this event using an allocator.
+        */
+        virtual void onDestroy(Allocator& allocator) = 0;
+
+        /** @brief Returns the type info for this class of events.
+        */
+        virtual const std::type_info& onTypeInfo() const = 0;
 
     public:
+        /** @brief Copies an event using an allocator.
+        */
         template <typename EventT>
         static Event& copyConstruct(const EventT& ev, Allocator& allocator)
         {
@@ -68,54 +95,104 @@ class Event
             return *(pev);
         }
 
+        /** @brief Destructs an event using an allocator.
+        */
         template <typename EventT>
-        static void destruct(const EventT& ev, Allocator& allocator)
+        static void destruct(EventT& ev, Allocator& allocator)
         {
             ev.~EventT();
             allocator.deallocate(&ev, sizeof(EventT));
         }
 };
 
-/*
-class MyEvent : public Event
-{
-  MyEvent()
-  : Event()
-  {}
-
-  virtual EventType& type()
-  { return _evType; }
-
-  private:
-    BasicEventType<MyEvent> _evType;
-};
-*/
-
 template <typename T>
 class BasicEvent : public Event
 {
-    public:
+    protected:
         BasicEvent()
-        { }
+        {}
 
-        BasicEvent(const BasicEvent& src)
-        { }
-
-        virtual const std::type_info& typeInfo() const
+        virtual const std::type_info& onTypeInfo() const
         { return typeid(T); }
 
-        virtual Event& clone(Allocator& allocator) const
+        virtual Event& onClone(Allocator& allocator) const
         {
             void* pEvent = allocator.allocate(sizeof(T));
             return *(new (pEvent)T(*static_cast<const T*>(this)));
         }
 
-        virtual void destroy(Allocator& allocator)
+        virtual void onDestroy(Allocator& allocator)
         {
             this->~BasicEvent();
             allocator.deallocate(this, sizeof(T));
         }
 };
+
+/*
+class EventType
+{
+    public:
+        virtual ~EventType()
+        {}
+};
+
+class Event2
+{
+    public:
+        virtual ~Event2()
+        {}
+
+        virtual Event2& clone(Allocator& allocator) const
+        { return type().clone(*this, allocator); }
+
+        void destroy(Allocator& allocator)
+        { type().destroy(*this, allocator); }
+
+        const std::type_info& typeInfo() const
+        { type().typeInfo(); }
+
+    protected:
+        virtual const EventType& type() const = 0;
+};
+
+template <typename EventT>
+class BasicEventType : public EventType
+{
+    public:
+        virtual const std::type_info& typeInfo() const
+        { return typeid(EventT); }
+    
+        virtual Event& clone(const Event2& ev, Allocator& allocator) const
+        {
+            const EventT& xev = static_cast<const EventT&>(ev);
+
+            void* mem = allocator.allocate( sizeof(EventT) );
+            EventT* pev = new (mem) EventT(xev);
+            return *(pev);
+        }
+
+        virtual void destroy(Event2& ev, Allocator& allocator) const
+        {
+            ev.~Event2();
+            allocator.deallocate(this, sizeof(T));
+        }
+};
+
+class MyEvent : public Event2
+{
+    public:
+        MyEvent()
+        : Event2()
+        {}
+
+    protected:
+        virtual const EventType& type()
+        { return _evType; }
+
+    private:
+        BasicEventType<MyEvent> _evType;
+};
+*/
 
 /*template <typename D>
 class BasicEvent2 : public Event

@@ -68,7 +68,7 @@ ResizeEvent::Type ResizeEvent::resizeType() const
 }
 
 
-const std::type_info& ResizeEvent::typeInfo() const
+const std::type_info& ResizeEvent::onTypeInfo() const
 {
     static const std::type_info& ti = typeid(ResizeEvent);
     return ti;

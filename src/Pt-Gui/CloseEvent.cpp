@@ -51,7 +51,7 @@ CloseEvent::~CloseEvent()
 {}
 
 
-const std::type_info& CloseEvent::typeInfo() const
+const std::type_info& CloseEvent::onTypeInfo() const
 {
     static const std::type_info& ti = typeid(CloseEvent);
     return ti;

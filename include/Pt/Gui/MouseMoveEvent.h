@@ -150,25 +150,26 @@ namespace Gui {
              */
             unsigned int modifiers() const;
 
+        protected:
             /**
              * @brief Returns the type info for this event.
              *
              * @return The type info for this event.
              */
-            virtual const std::type_info& typeInfo() const;
-		    
-			Pt::Event& clone(Pt::Allocator& allocator) const
-		    {
-		        void* pEvent= allocator.allocate(sizeof(MouseMoveEvent));
-		        return *(new (pEvent)MouseMoveEvent(*this));
-		    }
+            virtual const std::type_info& onTypeInfo() const;
 
-		    void destroy(Pt::Allocator& allocator)
-		    {
-		        allocator.deallocate(this, sizeof(MouseMoveEvent));
-		    }
+            Pt::Event& onClone(Pt::Allocator& allocator) const
+            {
+                void* pEvent= allocator.allocate(sizeof(MouseMoveEvent));
+                return *(new (pEvent)MouseMoveEvent(*this));
+            }
+
+            void onDestroy(Pt::Allocator& allocator)
+            {
+                allocator.deallocate(this, sizeof(MouseMoveEvent));
+            }
         
-		private:
+        private:
             size_t _x;
             size_t _y;
             Action _action;

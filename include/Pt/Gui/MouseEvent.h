@@ -167,18 +167,18 @@ namespace Gui {
              *
              * @return The type info for this event.
              */
-            virtual const std::type_info& typeInfo() const;
+            virtual const std::type_info& onTypeInfo() const;
 
-		    Pt::Event& clone(Pt::Allocator& allocator) const
-		    {
-		        void* pEvent= allocator.allocate(sizeof(MouseEvent));
-		        return *(new (pEvent)MouseEvent(*this));
-		    }
+            Pt::Event& onClone(Pt::Allocator& allocator) const
+            {
+                void* pEvent= allocator.allocate(sizeof(MouseEvent));
+                return *(new (pEvent)MouseEvent(*this));
+            }
 
-		    void destroy(Pt::Allocator& allocator)
-		    {
-		        allocator.deallocate(this, sizeof(MouseEvent));
-		    }
+            void onDestroy(Pt::Allocator& allocator)
+            {
+                allocator.deallocate(this, sizeof(MouseEvent));
+            }
 
         private:
             size_t _x;

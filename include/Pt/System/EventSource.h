@@ -29,11 +29,11 @@
 #ifndef PT_SYSTEM_EVENTSOURCE_H
 #define PT_SYSTEM_EVENTSOURCE_H
 
-#include <Pt/Event.h>
-#include <Pt/Signal.h>
 #include <Pt/System/Api.h>
 #include <Pt/System/Mutex.h>
 #include <Pt/System/EventSink.h>
+#include <Pt/Event.h>
+#include <Pt/Signal.h>
 #include <map>
 #include <typeinfo>
 
@@ -52,7 +52,7 @@ class EventSink;
     slot.
     Construction and destruction must always occur in isolation.
 */
-class PT_SYSTEM_API EventSource : protected NonCopyable
+class PT_SYSTEM_API EventSource : private NonCopyable
 {
     friend class EventSink;
 

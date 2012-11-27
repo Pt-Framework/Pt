@@ -106,22 +106,23 @@ namespace Gui {
              */
             Type resizeType() const;
 
+        protected:
             /**
              * @brief Returns the type info for this event.
              * @return The type info for this event.
              */
-            virtual const std::type_info& typeInfo() const;
+            virtual const std::type_info& onTypeInfo() const;
 
-		    Pt::Event& clone(Pt::Allocator& allocator) const
-		    {
-		        void* pEvent= allocator.allocate(sizeof(ResizeEvent));
-		        return *(new (pEvent)ResizeEvent(*this));
-		    }
+            Pt::Event& onClone(Pt::Allocator& allocator) const
+            {
+                void* pEvent= allocator.allocate(sizeof(ResizeEvent));
+                return *(new (pEvent)ResizeEvent(*this));
+            }
 
-		    void destroy(Pt::Allocator& allocator)
-		    {
-		        allocator.deallocate(this, sizeof(ResizeEvent));
-		    }
+            void onDestroy(Pt::Allocator& allocator)
+            {
+                allocator.deallocate(this, sizeof(ResizeEvent));
+            }
 
         private:
             size_t _width;

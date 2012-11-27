@@ -87,23 +87,24 @@ namespace Gui {
              */
             size_t y() const;
 
+        protected:
             /**
              * @brief Returns the type info for this event.
              *
              * @return The type info for this event.
              */
-            virtual const std::type_info& typeInfo() const;
+            virtual const std::type_info& onTypeInfo() const;
 
-			Pt::Event& clone(Pt::Allocator& allocator) const
-		    {
-		        void* pEvent= allocator.allocate(sizeof(MoveEvent));
-		        return *(new (pEvent)MoveEvent(*this));
-		    }
+            Pt::Event& onClone(Pt::Allocator& allocator) const
+            {
+                void* pEvent= allocator.allocate(sizeof(MoveEvent));
+                return *(new (pEvent)MoveEvent(*this));
+            }
 
-		    void destroy(Pt::Allocator& allocator)
-		    {
-		        allocator.deallocate(this, sizeof(MoveEvent));
-		    }
+            void onDestroy(Pt::Allocator& allocator)
+            {
+                allocator.deallocate(this, sizeof(MoveEvent));
+            }
 
         private:
             size_t _x;

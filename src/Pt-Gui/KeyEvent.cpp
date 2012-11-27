@@ -50,7 +50,7 @@ KeyEvent::~KeyEvent()
 }
 
 
-const std::type_info& KeyEvent::typeInfo() const
+const std::type_info& KeyEvent::onTypeInfo() const
 {
     static const std::type_info& ti = typeid(KeyEvent);
     return ti;

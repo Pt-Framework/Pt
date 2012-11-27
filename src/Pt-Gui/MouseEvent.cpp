@@ -80,7 +80,7 @@ unsigned int MouseEvent::modifiers() const
 }
 
 
-const std::type_info& MouseEvent::typeInfo() const
+const std::type_info& MouseEvent::onTypeInfo() const
 {
     static const std::type_info& ti = typeid(MouseEvent);
     return ti;

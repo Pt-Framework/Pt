@@ -31,45 +31,30 @@
 #include "Pt/Timespan.h"
 #include "Pt/Allocator.h"
 
-class E1: public Pt::Event
+class E1 : public Pt::Event
 {
-    const std::type_info& typeInfo() const
-    {
-        return typeid(E1);
-    }
+    protected:
+        const std::type_info& onTypeInfo() const
+        { return typeid(E1); }
 
-    Pt::Event& clone(Pt::Allocator& allocator) const
-    {
-        void* pEvent= allocator.allocate(sizeof(E1));
-        return *(new (pEvent)E1(*this));
-    }
+        Pt::Event& onClone(Pt::Allocator& allocator) const
+        { return copyConstruct(*this, allocator); }
 
-    void destroy(Pt::Allocator& allocator)
-    {
-        allocator.deallocate(this, sizeof(E1));
-    }
+        void onDestroy(Pt::Allocator& allocator)
+        { destruct(*this, allocator); }
 };
 
-class E2: public Pt::Event
+class E2 : public Pt::Event
 {
-    public:
-    const std::type_info& typeInfo() const
-    {
-        return typeid(E2);
-    }
+    protected:
+        const std::type_info& onTypeInfo() const
+        { return typeid(E2); }
 
-    Pt::Event& clone(Pt::Allocator& allocator) const
-    {
-/*		void* pEvent= allocator.allocate(sizeof(E2));
-        return *(new (pEvent)E2(*this));*/
-        return *(new E2(*this));
-    }
+        Pt::Event& onClone(Pt::Allocator& allocator) const
+        { return *(new E2(*this)); }
 
-    void destroy(Pt::Allocator& allocator)
-    {
-//		allocator.deallocate(this, sizeof(E2));
-        delete this;
-    }
+        void onDestroy(Pt::Allocator& allocator)
+        { delete this; }
 };
 
 class EventLoopTest : public Pt::Unit::TestSuite

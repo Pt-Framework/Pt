@@ -63,7 +63,7 @@ size_t MoveEvent::y() const
 }
 
 
-const std::type_info& MoveEvent::typeInfo() const
+const std::type_info& MoveEvent::onTypeInfo() const
 {
     static const std::type_info& ti = typeid(MoveEvent);
     return ti;

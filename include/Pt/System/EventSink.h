@@ -29,9 +29,9 @@
 #ifndef PT_SYSTEM_EVENTSINK_H
 #define PT_SYSTEM_EVENTSINK_H
 
-#include <Pt/Event.h>
 #include <Pt/System/Api.h>
 #include <Pt/System/Mutex.h>
+#include <Pt/Event.h>
 #include <list>
 
 namespace Pt {
@@ -40,7 +40,7 @@ namespace System {
 
     class EventSource;
 
-    class PT_SYSTEM_API EventSink : protected NonCopyable
+    class PT_SYSTEM_API EventSink : private NonCopyable
     {
         friend class EventSource;
 

@@ -126,20 +126,21 @@ namespace Gui {
                 return _region.topLeft();
             }
 
+        protected:
             /**
              * @brief Returns the type info for this event.
              *
              * @return The type info for this event.
              */
-            virtual const std::type_info& typeInfo() const;
+            virtual const std::type_info& onTypeInfo() const;
 
-            Pt::Event& clone(Pt::Allocator& allocator) const
+            Pt::Event& onClone(Pt::Allocator& allocator) const
             {
                 void* pEvent= allocator.allocate(sizeof(PaintEvent));
                 return *(new (pEvent)PaintEvent(*this));
             }
 
-            void destroy(Pt::Allocator& allocator)
+            void onDestroy(Pt::Allocator& allocator)
             {
                 allocator.deallocate(this, sizeof(PaintEvent));
             }

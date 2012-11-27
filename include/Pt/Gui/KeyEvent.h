@@ -146,23 +146,24 @@ namespace Gui {
             wchar_t text() const
             { return _text; }
 
+        protected:
             /**
              * @brief Returns the type info for this event.
              *
              * @return The type info for this event.
              */
-            virtual const std::type_info& typeInfo() const;
+            virtual const std::type_info& onTypeInfo() const;
 
-		    Pt::Event& clone(Pt::Allocator& allocator) const
-		    {
-		        void* pEvent= allocator.allocate(sizeof(KeyEvent));
-		        return *(new (pEvent)KeyEvent(*this));
-		    }
+            Pt::Event& onClone(Pt::Allocator& allocator) const
+            {
+                void* pEvent= allocator.allocate(sizeof(KeyEvent));
+                return *(new (pEvent)KeyEvent(*this));
+            }
 
-		    void destroy(Pt::Allocator& allocator)
-		    {
-		        allocator.deallocate(this, sizeof(KeyEvent));
-		    }
+            void onDestroy(Pt::Allocator& allocator)
+            {
+                allocator.deallocate(this, sizeof(KeyEvent));
+            }
 
         private:
             Type _type;
