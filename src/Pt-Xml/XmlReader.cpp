@@ -1573,7 +1573,7 @@ class XmlReaderImpl
         const Pt::String& encoding() const
         { return _encoding; }
 
-        bool standalone() const
+        bool isStandalone() const
         { return _standalone; }
 
         EntityResolver& entityResolver()
@@ -1642,7 +1642,8 @@ class XmlReaderImpl
 
         void resolveEntity(String& str)
         {
-            str = _resolver.resolveEntity( str );
+            if( ! _resolver.resolveEntity( str ) )
+                throw XmlError("invalid entity reference", line());
         }
 
         void appendContent(Pt::Char c)
@@ -1673,6 +1674,8 @@ class XmlReaderImpl
         State* _state;
         Node* _current;
         String _token;
+
+        // TODO: some sort of union?
         DocTypeDeclaration _docType;
         ProcessingInstruction _procInstr;
         StartElement _startElem;
@@ -1727,9 +1730,9 @@ const Pt::String& XmlReader::documentEncoding() const
 }
 
 
-bool XmlReader::standaloneDocument() const
+bool XmlReader::isStandalone() const
 {
-    return _impl->standalone();
+    return _impl->isStandalone();
 }
 
 
@@ -1772,59 +1775,6 @@ const Node& XmlReader::next()
 bool XmlReader::advance()
 {
     return _impl->advance();
-}
-
-
-const StartElement& XmlReader::nextElement()
-{
-    bool found = false;
-    while( !found )
-    {
-        const Node& node = this->next();
-        switch( node.type() )
-        {
-            case Node::EndDocument:
-            {
-                throw std::logic_error("End of document" + PT_SOURCEINFO);
-            }
-            case Node::StartElement:
-                found = true;
-                break;
-
-            default:
-                break;
-        }
-
-    }
-
-    return static_cast<const StartElement&>( this->get() );
-}
-
-
-const Node& XmlReader::nextTag()
-{
-    bool found = false;
-    while( !found )
-    {
-        const Node& node = this->next();
-        switch( node.type() )
-        {
-            case Node::EndDocument:
-            {
-                throw std::logic_error("End of document" + PT_SOURCEINFO);
-            }
-            case Node::StartElement:
-            case Node::EndElement:
-                found = true;
-                break;
-
-            default:
-                break;
-        }
-
-    }
-
-    return this->get();
 }
 
 } // namespace Xml

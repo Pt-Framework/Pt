@@ -56,8 +56,6 @@ class XmlTest : public Pt::Unit::TestSuite
             this->registerMethod("InvalidTag3", *this, &XmlTest::InvalidTag3);
             this->registerMethod("InvalidTag4", *this, &XmlTest::InvalidTag4);
             this->registerMethod("InvalidTag5", *this, &XmlTest::InvalidTag5);
-            this->registerMethod("NextElement", *this, &XmlTest::NextElement);
-            this->registerMethod("NextTag", *this, &XmlTest::NextTag);
             this->registerMethod("ElementWithContent", *this, &XmlTest::ElementWithContent);
             this->registerMethod("DefaultEntities", *this, &XmlTest::DefaultEntities);
             this->registerMethod("InvalidAttribute1", *this, &XmlTest::InvalidAttribute1);
@@ -91,8 +89,6 @@ class XmlTest : public Pt::Unit::TestSuite
         void InvalidTag3();
         void InvalidTag4();
         void InvalidTag5();
-        void NextElement();
-        void NextTag();
         void ElementWithContent();
         void AttributeWithSimpleText();
         void AttributeWithUTF8();
@@ -175,7 +171,7 @@ void XmlTest::EmptyDocument()
     PT_UNIT_ASSERT(n.type() == Pt::Xml::Node::EndDocument);
     PT_UNIT_ASSERT(reader.documentVersion() == L"1.0");
     PT_UNIT_ASSERT(reader.documentEncoding() == L"UTF-8");
-    PT_UNIT_ASSERT(reader.standaloneDocument() == true);
+    PT_UNIT_ASSERT(reader.isStandalone() == true);
 }
 
 
@@ -288,48 +284,6 @@ void XmlTest::InvalidTag5()
 
     Pt::Xml::XmlReader reader( input );
     PT_UNIT_ASSERT_THROW(reader.current(), std::exception);
-}
-
-
-void XmlTest::NextElement()
-{
-    std::stringstream input;
-    input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
-    input << "<a><b><c>5</c></b></a>";
-
-    Pt::Xml::XmlReader reader( input );
-    const Pt::Xml::Node& node = reader.get();
-    PT_UNIT_ASSERT(node.type() == Pt::Xml::Node::StartElement);
-
-    reader.nextElement();
-    const Pt::Xml::StartElement& se = reader.nextElement();
-    PT_UNIT_ASSERT(se.name().narrow() == "c");
-
-    PT_UNIT_ASSERT_THROW(reader.nextElement(), std::exception);
-}
-
-
-void XmlTest::NextTag()
-{
-    std::stringstream input;
-    input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
-    input << "<a><b><c>5</c></b></a>";
-
-    Pt::Xml::XmlReader reader( input );
-    const Pt::Xml::Node& node = reader.get();
-    PT_UNIT_ASSERT(node.type() == Pt::Xml::Node::StartElement);
-
-    reader.nextTag();
-    reader.nextTag();
-    reader.nextTag();
-    const Pt::Xml::Node& node2 = reader.nextTag();
-    PT_UNIT_ASSERT(node2.type() == Pt::Xml::Node::EndElement);
-
-    const Pt::Xml::EndElement& ee = static_cast<const Pt::Xml::EndElement&>(node2);
-    PT_UNIT_ASSERT(ee.name().narrow() == "b");
-
-    reader.nextTag();
-    PT_UNIT_ASSERT_THROW(reader.nextTag(), std::exception);
 }
 
 

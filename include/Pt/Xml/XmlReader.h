@@ -141,6 +141,8 @@ class PT_XML_API XmlReader
                      - IgnoreWhitespace
                      - ReportComments
                      - ReportDocumentStart
+
+           TODO: how do we handle document encoding and codec selection?
         */
         explicit XmlReader(std::istream& is, int flags = 0);
 
@@ -148,6 +150,8 @@ class PT_XML_API XmlReader
 
         ~XmlReader();
 
+        // TODO: split into attach() and setFlags()
+        // also add methods for discard() and reset()
         void reset(std::basic_istream<Char>& is, int flags = 0);
 
         void reset(std::istream& is, int flags = 0);
@@ -156,23 +160,22 @@ class PT_XML_API XmlReader
 
         const Pt::String& documentEncoding() const;
 
-        bool standaloneDocument() const;
+        bool isStandalone() const;
 
+        // TODO: should this be settable?
         EntityResolver& entityResolver();
 
         const EntityResolver& entityResolver() const;
 
         size_t depth() const;
 
+        std::size_t line() const;
+
         Iterator current()
-        {
-            return Iterator(*this);
-        }
+        { return Iterator(*this); }
 
         Iterator end() const
-        {
-            return Iterator();
-        }
+        { return Iterator(); }
 
         //! @brief Get current element
         const Node& get();
@@ -180,13 +183,8 @@ class PT_XML_API XmlReader
         //! @brief Get next element from stream
         const Node& next();
 
+        //! @brief Process availabe data from underlying stream
         bool advance();
-
-        const StartElement& nextElement();
-
-        const Node& nextTag();
-
-        std::size_t line() const;
 
     private:
         class XmlReaderImpl* _impl;

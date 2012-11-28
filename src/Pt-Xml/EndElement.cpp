@@ -30,15 +30,6 @@ namespace Pt {
 namespace Xml {
 
 
-bool EndElement::operator==(const Node& node) const
-{
-    const EndElement* e = dynamic_cast<const EndElement*>(&node);
-    if(!e) return false;
-
-    return ( e->name() == this->name() );
-}
-
-
 } // namespace Xml
 
 } // namespace Pt

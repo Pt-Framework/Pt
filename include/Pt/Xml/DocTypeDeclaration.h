@@ -59,13 +59,6 @@ namespace Xml {
             { _content.clear(); }
 
             /**
-             * @brief Clones this DocTypeDeclaration object by creating a duplicate on the heap and returning it.
-             * @return A cloned version of this DocTypeDeclaration object.
-             */
-            DocTypeDeclaration* clone() const
-            { return new DocTypeDeclaration(*this); }
-
-            /**
              * @brief Returns the content of this DocTypeDeclaration object.
              * @return The content of this DocTypeDeclaration object.
              */

@@ -29,16 +29,6 @@ namespace Pt {
 
 namespace Xml {
 
-
-bool Characters::operator==(const Node& node) const
-{
-    const Characters* chars = dynamic_cast<const Characters*>(&node);
-    if (!chars)
-        return false;
-
-    return ( chars->content() == content() );
-}
-
 }
 
 }

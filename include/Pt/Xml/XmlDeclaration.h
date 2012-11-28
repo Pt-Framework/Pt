@@ -46,9 +46,6 @@ class PT_XML_API StartDocument : public Node {
         ~StartDocument()
         {}
 
-        StartDocument* clone() const
-        { return new StartDocument(*this); }
-
         const String& version() const
         {
             return _version;

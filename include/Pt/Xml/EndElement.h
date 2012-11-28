@@ -64,13 +64,6 @@ namespace Pt {
                   _name(name)
                 { }
 
-                /**
-                 * @brief Clones this EndElement object by creating a duplicate on the heap and returning it.
-                 * @return A cloned version of this EndElement object.
-                 */
-                EndElement* clone() const
-                {return new EndElement(*this);}
-
                 void clear()
                 { _name.clear(); }
 
@@ -104,17 +97,6 @@ namespace Pt {
                  */
                 void setName(const String& name)
                 { _name = name; }
-
-                /**
-                 * @brief Compares this EndElement object with the given node.
-                 *
-                 * This method returns $true$ if the given node also is a EndElement object and
-                 * the name of both EndElement objects is the same. Otherwise it returns $false$.
-                 *
-                 * @param node This Node object is compared to the current EndElement node object.
-                 * @return $true if this EndElement object is the same as the given node.
-                 */
-                virtual bool operator==(const Node& node) const;
 
             private:
                 //! The tag name of this end tag.

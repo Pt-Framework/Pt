@@ -46,6 +46,12 @@
     <Filter Include="Pt-Http\tests">
       <UniqueIdentifier>{44bd165a-2ad0-4af4-8d5f-9f0ce39d5acd}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Pt-Xml">
+      <UniqueIdentifier>{079721a1-1f57-4ab2-bab2-f86e46483c6e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-Xml\tests">
+      <UniqueIdentifier>{8bc815a8-812a-45b2-a7fd-ddb98788ac3a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\Pt\Allocator.h">
@@ -636,6 +642,69 @@
     <ClInclude Include="..\..\include\Pt\IOStream.h">
       <Filter>Pt</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Xml\Api.h">
+      <Filter>Pt-Xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Xml\Characters.h">
+      <Filter>Pt-Xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Xml\Comment.h">
+      <Filter>Pt-Xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Xml\DocTypeDeclaration.h">
+      <Filter>Pt-Xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Xml\EndDocument.h">
+      <Filter>Pt-Xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Xml\EndElement.h">
+      <Filter>Pt-Xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Xml\EntityResolver.h">
+      <Filter>Pt-Xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Xml\Namespace.h">
+      <Filter>Pt-Xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Xml\NamespaceContext.h">
+      <Filter>Pt-Xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Xml\Node.h">
+      <Filter>Pt-Xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Xml\ProcessingInstruction.h">
+      <Filter>Pt-Xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Xml\QName.h">
+      <Filter>Pt-Xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Xml\StartElement.h">
+      <Filter>Pt-Xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Xml\XmlDeclaration.h">
+      <Filter>Pt-Xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Xml\XmlDeserializer.h">
+      <Filter>Pt-Xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Xml\XmlError.h">
+      <Filter>Pt-Xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Xml\XmlFormatter.h">
+      <Filter>Pt-Xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Xml\XmlReader.h">
+      <Filter>Pt-Xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Xml\XmlSerializationContext.h">
+      <Filter>Pt-Xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Xml\XmlSerializer.h">
+      <Filter>Pt-Xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Xml\XmlWriter.h">
+      <Filter>Pt-Xml</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -732,6 +801,12 @@
     </None>
     <None Include="..\..\src\Pt-Http\tests\Jamfile">
       <Filter>Pt-Http\tests</Filter>
+    </None>
+    <None Include="..\..\src\Pt-Xml\Jamfile">
+      <Filter>Pt-Xml</Filter>
+    </None>
+    <None Include="..\..\src\Pt-Xml\tests\Jamfile">
+      <Filter>Pt-Xml\tests</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -1298,6 +1373,57 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-System\IOBuffer.cpp">
       <Filter>Pt-System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Xml\Characters.cpp">
+      <Filter>Pt-Xml</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Xml\EndElement.cpp">
+      <Filter>Pt-Xml</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Xml\EntityResolver.cpp">
+      <Filter>Pt-Xml</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Xml\NamespaceContext.cpp">
+      <Filter>Pt-Xml</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Xml\QName.cpp">
+      <Filter>Pt-Xml</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Xml\StartElement.cpp">
+      <Filter>Pt-Xml</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Xml\XmlDeserializer.cpp">
+      <Filter>Pt-Xml</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Xml\XmlError.cpp">
+      <Filter>Pt-Xml</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Xml\XmlFormatter.cpp">
+      <Filter>Pt-Xml</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Xml\XmlReader.cpp">
+      <Filter>Pt-Xml</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Xml\XmlSerializationContext.cpp">
+      <Filter>Pt-Xml</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Xml\XmlSerializer.cpp">
+      <Filter>Pt-Xml</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Xml\XmlWriter.cpp">
+      <Filter>Pt-Xml</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Xml\tests\Pt-Xml-test.cpp">
+      <Filter>Pt-Xml\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Xml\tests\XmlSerializerTest.cpp">
+      <Filter>Pt-Xml\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Xml\tests\XmlTest.cpp">
+      <Filter>Pt-Xml\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Xml\tests\XmlWriterTest.cpp">
+      <Filter>Pt-Xml\tests</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -55,15 +55,6 @@ bool StartElement::hasAttribute(const String& attributeName) const
     return false;
 }
 
-
-bool StartElement::operator==(const Node& node) const
-{
-    const StartElement* se = dynamic_cast<const StartElement*>(&node);
-    if(!se) return false;
-
-    return ( se->name() == this->name() );
-}
-
 } // namespace Xml
 
 } // namespace Pt

@@ -50,13 +50,6 @@ namespace Pt {
                 : Node(Node::EndDocument)
                 { }
 
-                /**
-                 * @brief Clones this EndDocument object by creating a duplicate on the heap and returning it.
-                 * @return A cloned version of this EndDocument object.
-                 */
-                EndDocument* clone() const
-                { return new EndDocument(*this); }
-
         };
 
     }

@@ -58,13 +58,6 @@ namespace Pt {
                 { _target.clear(); _data.clear(); }
 
                 /**
-                 * @brief Clones this CData object by creating a duplicate on the heap and returning it.
-                 * @return A cloned version of this CData object.
-                 */
-                ProcessingInstruction* clone() const
-                {return new ProcessingInstruction(*this);}
-
-                /**
                  * @brief Returns the processor instruction's target.
                  *
                  * The target may be the XML processor for which this PI was added to the XML document.

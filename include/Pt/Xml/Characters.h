@@ -62,13 +62,6 @@ namespace Pt {
                 { }
 
                 /**
-                 * @brief Clones this Character object by creating a duplicate on the heap and returning it.
-                 * @return A cloned version of this Character object.
-                 */
-                Characters* clone() const
-                { return new Characters(*this); }
-
-                /**
                  * @brief Returns $true$ if the content of this Character object is empty; $false$ otherwise.
                  * @return $true$ if the content of this Character object is empty; $false$ otherwise.
                  */
@@ -110,17 +103,6 @@ namespace Pt {
                  */
                 void setContent(const String& content)
                 { _content = content; }
-
-                /**
-                 * @brief Compares this Character object with the given node.
-                 *
-                 * This method returns $true$ if the given node also is a Character object and
-                 * the content of both Character objects is the same. Otherwise it returns $false$.
-                 *
-                 * @param node This Node object is compared to the current Character node object.
-                 * @return $true if this Character object is the same as the given node.
-                 */
-                virtual bool operator==(const Node& node) const;
 
             private:
                 //! The content of this Character object.

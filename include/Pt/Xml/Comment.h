@@ -57,14 +57,6 @@ namespace Pt {
                 , _text(text)
                 { }
 
-
-                /**
-                 * @brief Clones this Comment object by creating a duplicate on the heap and returning it.
-                 * @return A cloned version of this Comment object.
-                 */
-                Comment* clone() const
-                {return new Comment(*this);}
-
                 /**
                  * @brief Returns the content/Text of this Comment object.
                  *
