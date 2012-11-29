@@ -141,8 +141,11 @@ class PT_XML_API XmlReader
                      - IgnoreWhitespace
                      - ReportComments
                      - ReportDocumentStart
+                     - ReportCData (not as Characters)
 
            TODO: how do we handle document encoding and codec selection?
+                 - ctor with byte stream looks at leading bytes to guess codec
+                 - ctor with unicode text stream uses user defined codec
         */
         explicit XmlReader(std::istream& is, int flags = 0);
 

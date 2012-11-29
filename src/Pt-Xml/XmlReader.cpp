@@ -1501,6 +1501,86 @@ class XmlReaderImpl
         }
     };
 
+    private:
+        Char notEof(int c) const
+        {
+            if( c == std::char_traits<Char>::eof() )
+            {
+                throw XmlError("XML syntax error", _line);
+            }
+
+            return Char(c);
+        }
+        
+        void onDocumentBegin(int c)
+        {
+            Char ch = notEof(c);
+
+            if( Pt::isspace(ch) )
+            {
+                _parse = &XmlReaderImpl::onProlog;
+            }
+            else if( ch == '<')
+            {
+                _parse = &XmlReaderImpl::onXmlDecl;
+            }
+            else
+            {
+                throw XmlError("XML syntax error", _line);
+            }
+        }
+
+        void onXmlDecl(int c)
+        {
+            Char ch = notEof(c);
+
+            if(ch == '?')
+            {
+                //_parse = &XmlReaderImpl::onXmlDeclQMark;
+                return;
+            }
+
+            if(ch == '!')
+            {
+                //_parse = &XmlReaderImpl::onTagExclam;
+                return;
+            }
+
+            if( Pt::isalnum(ch) )
+            {
+                _startElem.clear();
+                _startElem.name() += ch;
+                //_parse = &XmlReaderImpl::onStartElement;
+                return;
+            }
+
+            throw XmlError("XML syntax error", _line);
+        }
+
+        void onProlog(int c)
+        {
+            if( c == std::char_traits<Char>::eof() )
+            {
+                _current = &_endDoc;
+                return;
+            }
+
+            Char ch(c);
+
+            if( Pt::isspace(ch) )
+            {
+                return;
+            }
+
+            if( ch == '<')
+            {
+                //_parse = &XmlReaderImpl::onTag;
+                return;
+            }
+
+            throw XmlError("XML syntax error", _line);
+        }
+
     public:
         XmlReaderImpl(std::basic_istream<Char>& is, int flags)
         : _textBuffer( is.rdbuf() )
@@ -1510,9 +1590,11 @@ class XmlReaderImpl
         , _depth(0)
         , _line(1)
         , _state(0)
+        , _parse(0)
         , _current(0)
         {
             _state = XmlReaderImpl::OnDocumentBegin::instance();
+            _parse = &XmlReaderImpl::onDocumentBegin;
         }
 
         XmlReaderImpl(std::istream& is, int flags)
@@ -1523,9 +1605,12 @@ class XmlReaderImpl
         , _depth(0)
         , _line(1)
         , _state(0)
+        , _parse(0)
         , _current(0)
         {
             _state = XmlReaderImpl::OnDocumentBegin::instance();
+            _parse = &XmlReaderImpl::onDocumentBegin;
+
             _buffer = new TextBuffer( &is, new Pt::Utf8Codec() );
             _textBuffer = _buffer;
         }
@@ -1542,6 +1627,8 @@ class XmlReaderImpl
             _textBuffer = is.rdbuf();
 
             _state = XmlReaderImpl::OnDocumentBegin::instance();
+            _parse = &XmlReaderImpl::onDocumentBegin;
+
             _flags = flags;
             _version.clear();
             _encoding.clear();
@@ -1558,6 +1645,8 @@ class XmlReaderImpl
             _textBuffer = _buffer;
 
             _state = XmlReaderImpl::OnDocumentBegin::instance();
+            _parse = &XmlReaderImpl::onDocumentBegin;
+
             _flags = flags;
             _version.clear();
             _encoding.clear();
@@ -1671,7 +1760,9 @@ class XmlReaderImpl
         size_t _depth;
         std::size_t _line;
 
+        typedef void (XmlReaderImpl::*ParseFunc)(int);
         State* _state;
+        ParseFunc _parse;
         Node* _current;
         String _token;
 

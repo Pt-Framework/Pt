@@ -318,11 +318,6 @@ class Char
             return Char(0);
         }
 
-        static Char eof()
-        {
-            return Pt::Char( Pt::uint32_t(-1) );
-        }
-
         static Pt::uint32_t eofval()
         {
             return Pt::uint32_t(-1);
@@ -483,7 +478,7 @@ inline bool char_traits<Pt::Char>::eq_int_type(const int_type& c1, const int_typ
 
 inline char_traits<Pt::Char>::int_type char_traits<Pt::Char>::eof()
 {
-    return Pt::Char::eof().value();
+    return Pt::Char::eofval();
 }
 
 inline char_traits<Pt::Char>::int_type char_traits<Pt::Char>::not_eof(const int_type& c)
