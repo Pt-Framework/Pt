@@ -1074,6 +1074,8 @@ class XmlReaderImpl
         }
     };
 
+        //////////////////////////////////////
+        //////////////////////////////////////
 
     struct OnTag : public State
     {
@@ -1118,7 +1120,6 @@ class XmlReaderImpl
         }
     };
 
-
     struct OnEpilog : public State
     {
         virtual State* onSpace(Pt::Char c, XmlReaderImpl& reader)
@@ -1144,7 +1145,6 @@ class XmlReaderImpl
         }
     };
 
-
     struct OnProlog : public State
     {
         virtual State* onSpace(Pt::Char c, XmlReaderImpl& reader)
@@ -1169,7 +1169,6 @@ class XmlReaderImpl
             return &_state;
         }
     };
-
 
     struct OnProcessingInstructionEnd : public State
     {
@@ -1243,7 +1242,6 @@ class XmlReaderImpl
         }
     };
 
-
     struct OnProcessingInstruction : public State
     {
         virtual State* onSpace(Pt::Char c, XmlReaderImpl& reader)
@@ -1263,9 +1261,6 @@ class XmlReaderImpl
             return &_state;
         }
     };
-
-
-//////////////
 
     struct OnXmlDeclValue : public State
     {
@@ -1597,7 +1592,7 @@ class XmlReaderImpl
                 if( _procInstr.target() == L"xml" )
                     _parse =  &XmlReaderImpl::onXmlDeclBeforeAttr;
                 else
-                    //_parse =  &XmlReaderImpl::onProcessingInstructionData;
+                    _parse =  &XmlReaderImpl::onProcessingInstructionData;
 
                 return;
             }
@@ -1761,12 +1756,134 @@ class XmlReaderImpl
 
             if( ch == '<')
             {
-                //_parse = &XmlReaderImpl::onTag;
+                _parse = &XmlReaderImpl::onTag;
                 return;
             }
 
             throw XmlError("XML syntax error", _line);
         }
+
+        void onProcessingInstruction(int c)
+        {
+            Char ch = notEof(c);
+
+            if( Pt::isspace(ch) )
+            {
+                _parse = &XmlReaderImpl::onProcessingInstructionData;
+                return;
+            }
+
+            if( isAlpha(ch) )
+            {
+                _procInstr.target() += c;
+                return;
+            }
+
+            throw XmlError("XML syntax error", _line);
+        }
+
+        void onProcessingInstructionData(int c)
+        {
+            Char ch = notEof(c);
+
+            if(Pt::isspace(ch) || isAlpha(ch) || isQoute(ch) || 
+               ch == ':' || ch == '/' || ch == '!' || ch == '=')
+            {
+                _procInstr.data() += c;
+                return;
+            }
+
+            if(ch == '?')
+            {
+                _parse = &XmlReaderImpl::onProcessingInstructionEnd;
+                return;
+            }
+
+            throw XmlError("XML syntax error", _line);
+        }
+
+        void onProcessingInstructionEnd(int c)
+        {
+            Char ch = notEof(c);
+
+            if(ch == '>')
+            {
+                _current = &(_procInstr);
+                //_parse = &XmlReaderImpl::afterTag
+                return;
+            }
+
+            throw XmlError("XML syntax error", _line);
+        }
+
+        void onTag(int c)
+        {
+            Char ch = notEof(c);
+            
+            if(ch == '?')
+            {
+                _procInstr.clear();
+                _parse = &XmlReaderImpl::onProcessingInstruction;
+                return;
+            }
+
+            if(ch == '!')
+            {
+                //_parse = &XmlReaderImpl::onTagExclam;
+                return;
+            }
+
+            if(ch == '/')
+            {
+                if( _chars.content().length() )
+                {
+                    _current = &(_chars);
+                }
+
+                _endElem.clear();
+                //_parse = &XmlReaderImpl::onEndElement;
+                return;
+            }
+
+            if( isAlpha(ch) )
+            {
+                if( _chars.content().length() )
+                {
+                    _current = &(_chars);
+                }
+
+                _startElem.clear();
+                _startElem.name() += ch;
+                //_parse = &XmlReaderImpl::OnStartElement;
+                return;
+            }
+
+            throw XmlError("XML syntax error", _line);
+        }
+
+        // not neccessary, allow EOF only when depth == 0 in other states
+        void onEpilog(int c)
+        {
+            if( c == std::char_traits<Char>::eof() )
+            {
+                _current = &_endDoc;
+                return;
+            }
+
+            Char ch(c);
+            if( Pt::isspace(ch) )
+            {
+                return;
+            }
+
+            if (ch == '<' )
+            {
+                _parse = &XmlReaderImpl::onTag;
+                return;
+            }
+
+            throw XmlError("XML syntax error", _line);
+        };
 
     public:
         XmlReaderImpl(std::basic_istream<Char>& is, int flags)
