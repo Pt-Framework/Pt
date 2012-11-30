@@ -1265,6 +1265,8 @@ class XmlReaderImpl
     };
 
 
+//////////////
+
     struct OnXmlDeclValue : public State
     {
         virtual State* onQuote(Pt::Char c, XmlReaderImpl& reader)
@@ -1501,6 +1503,9 @@ class XmlReaderImpl
         }
     };
 
+    //////////////////////////////////////////////////////////////////////
+    // PARSER STATE FUNCTIONS
+    //////////////////////////////////////////////////////////////////////
     private:
         Char notEof(int c) const
         {
@@ -1510,6 +1515,17 @@ class XmlReaderImpl
             }
 
             return Char(c);
+        }
+
+        bool isQoute(Char ch) const
+        {
+            return ch == '\'' || ch =='"';
+        }
+
+        // TODO: rename to isXmlName()
+        bool isAlpha(Char ch)
+        { 
+            return Pt::isalnum(ch) != 0; // also underscore, hyphen, period
         }
         
         void onDocumentBegin(int c)
@@ -1536,7 +1552,7 @@ class XmlReaderImpl
 
             if(ch == '?')
             {
-                //_parse = &XmlReaderImpl::onXmlDeclQMark;
+                _parse = &XmlReaderImpl::onXmlDeclQMark;
                 return;
             }
 
@@ -1546,11 +1562,182 @@ class XmlReaderImpl
                 return;
             }
 
-            if( Pt::isalnum(ch) )
+            if( isAlpha(ch) )
             {
                 _startElem.clear();
                 _startElem.name() += ch;
                 //_parse = &XmlReaderImpl::onStartElement;
+                return;
+            }
+
+            throw XmlError("XML syntax error", _line);
+        }
+
+        void onXmlDeclQMark(int c)
+        {
+            Char ch = notEof(c);
+ 
+            if( isAlpha(ch) )
+            {
+                _procInstr.clear();
+                _procInstr.target() += ch;
+                _parse = &XmlReaderImpl::onXmlDeclName;
+                return;
+            }
+
+            throw XmlError("XML syntax error", _line);
+        }
+
+        void onXmlDeclName(int c)
+        {
+            Char ch = notEof(c);
+
+            if( Pt::isspace(ch) )
+            {
+                if( _procInstr.target() == L"xml" )
+                    _parse =  &XmlReaderImpl::onXmlDeclBeforeAttr;
+                else
+                    //_parse =  &XmlReaderImpl::onProcessingInstructionData;
+
+                return;
+            }
+
+            if( isAlpha(ch) || ch == ':' )
+            {
+                _procInstr.target() += ch;
+                return;
+            }
+
+            throw XmlError("XML syntax error", _line);
+        }
+
+        void onXmlDeclBeforeAttr(int c)
+        {
+            Char ch = notEof(c);
+
+            if( Pt::isspace(ch) )
+            {
+                return;
+            }
+
+            if( isAlpha(ch) )
+            {
+                _attr.clear();
+                _attr.name() += c;
+                _parse =  &XmlReaderImpl::onXmlDeclAttr;
+                return;
+            }
+
+            if(ch == '?')
+            {
+                _parse =  &XmlReaderImpl::onXmlDeclEnd;
+                return;
+            }
+
+            throw XmlError("XML syntax error", _line);
+        }
+
+        void onXmlDeclAttr(int c)
+        {
+            Char ch = notEof(c);
+
+            if( Pt::isspace(ch) )
+            {
+                _parse =  &XmlReaderImpl::onXmlDeclAfterName;
+                return;
+            }
+
+            if(ch == '=')
+            {
+                _parse =  &XmlReaderImpl::onXmlDeclBeforeValue;
+                return;
+            }
+
+            if( isAlpha(ch) )
+            {
+                _attr.name() += c;
+                return;
+            }
+
+            throw XmlError("XML syntax error", _line);
+        }
+
+        void onXmlDeclAfterName(int c)
+        {
+            Char ch = notEof(c);
+
+            if( Pt::isspace(ch) )
+            {
+                return;
+            }
+
+            if(ch == '=')
+            {
+                _parse =  &XmlReaderImpl::onXmlDeclBeforeValue;
+                return;
+            }
+
+            throw XmlError("XML syntax error", _line);
+        }
+
+        void onXmlDeclBeforeValue(int c)
+        {
+            Char ch = notEof(c);
+
+            if( Pt::isspace(ch) )
+            {
+                return;
+            }
+
+            if( isQoute(ch) )
+            {
+                _parse =  &XmlReaderImpl::onXmlDeclValue;
+                return;
+            }
+
+            throw XmlError("XML syntax error", _line);
+        }
+
+        void onXmlDeclValue(int c)
+        {
+            Char ch = notEof(c);
+
+            if( isQoute(ch) )
+            {
+                if(_attr.name() == L"version")
+                {
+                    _version = _attr.value();
+                }
+                else if(_attr.name() == L"encoding")
+                {
+                    _encoding = _attr.value();
+                }
+                else if(_attr.name() == L"standalone")
+                {
+                    if(_attr.value() == L"true")
+                        _standalone = true;
+                }
+
+                _parse =  &XmlReaderImpl::onXmlDeclBeforeAttr;
+                return;
+            }
+
+            if( isAlpha(ch) )
+            {
+                _attr.value() += c;;
+                return;
+            }
+
+            throw XmlError("XML syntax error", _line);
+        }
+
+        void onXmlDeclEnd(int c)
+        {
+            Char ch = notEof(c);
+
+            if(ch == '>')
+            {
+                _parse =  &XmlReaderImpl::onProlog;
                 return;
             }
 
