@@ -428,6 +428,11 @@ class XmlReaderImpl
     };
 
 
+    //////////////////////////////////////
+    // m1
+    //////////////////////////////////////
+
+
     struct AfterEndElementName : public State
     {
         virtual State* onSpace(Pt::Char c, XmlReaderImpl& reader)
@@ -509,7 +514,6 @@ class XmlReaderImpl
         }
     };
 
-
     struct OnEmptyElement : public State
     {
         virtual State* onSpace(Pt::Char c, XmlReaderImpl& reader)
@@ -535,7 +539,6 @@ class XmlReaderImpl
             return &_state;
         }
     };
-
 
     struct OnAttributeValue : public State
     {
@@ -632,7 +635,6 @@ class XmlReaderImpl
         }
     };
 
-
     struct AfterAttributeName : public State
     {
         virtual State* onSpace(Pt::Char c, XmlReaderImpl& reader)
@@ -678,9 +680,6 @@ class XmlReaderImpl
         }
     };
 
-    //////////////////////////////////////
-    // m1
-    //////////////////////////////////////
     struct BeforeAttribute : public State
     {
         virtual State* onSpace(Pt::Char c, XmlReaderImpl& reader)
@@ -1546,7 +1545,7 @@ class XmlReaderImpl
 
             if(ch == '!')
             {
-                //_parse = &XmlReaderImpl::onTagExclam;
+                _parse = &XmlReaderImpl::onTagExclam;
                 return;
             }
 
@@ -1822,7 +1821,7 @@ class XmlReaderImpl
 
             if(ch == '!')
             {
-                //_parse = &XmlReaderImpl::onTagExclam;
+                _parse = &XmlReaderImpl::onTagExclam;
                 return;
             }
 
@@ -1834,7 +1833,7 @@ class XmlReaderImpl
                 }
 
                 _endElem.clear();
-                //_parse = &XmlReaderImpl::onEndElement;
+                _parse = &XmlReaderImpl::onEndElement;
                 return;
             }
 
@@ -1915,7 +1914,7 @@ class XmlReaderImpl
             if(ch == '>')
             {
                 _current = &(_docType);
-                //_parse = &XmlReaderImpl::onProlog;
+                _parse = &XmlReaderImpl::onProlog;
                 return;
             }
 
@@ -2009,7 +2008,7 @@ class XmlReaderImpl
 
             if( Pt::isspace(ch) )
             {
-                //_parse = &XmlReaderImpl::beforeAttribute;
+                _parse = &XmlReaderImpl::beforeAttribute;
                 return;
             }
 
@@ -2019,7 +2018,7 @@ class XmlReaderImpl
                 _current = &(_startElem);
                 _depth++;
 
-                //_parse = &XmlReaderImpl::onEmptyElement;
+                _parse = &XmlReaderImpl::onEmptyElement;
                 return;
             }
 
@@ -2048,11 +2047,11 @@ class XmlReaderImpl
             throw XmlError("XML syntax error", _line);
         }
 
-        void BeforeAttribute(int c)
+        void beforeAttribute(int c)
         {
             Char ch = notEof(c);
 
-            if(Pt::isspace(ch) )
+            if( Pt::isspace(ch) )
             {
                 return;
             }
@@ -2062,7 +2061,7 @@ class XmlReaderImpl
                 _current = &(_startElem);
                 _depth++;
 
-                //_parse = &XmlReaderImpl::onEmptyElement;
+                _parse = &XmlReaderImpl::onEmptyElement;
                 return;
             }
 
@@ -2071,7 +2070,7 @@ class XmlReaderImpl
                 _attr.clear();
                 _attr.name() += c;
 
-                //_parse = &XmlReaderImpl::onAttributeName;
+                _parse = &XmlReaderImpl::onAttributeName;
                 return;
             }
 
@@ -2080,6 +2079,199 @@ class XmlReaderImpl
                 _chars.clear();
                 _current = &(_startElem);
                 _depth++;
+
+                _parse = &XmlReaderImpl::afterTag;
+                return;
+            }
+
+            throw XmlError("XML syntax error", _line);
+        }
+
+        void onAttributeName(int c)
+        {
+            Char ch = notEof(c);
+
+            if( Pt::isspace(ch) )
+            {
+                _parse = &XmlReaderImpl::afterAttributeName;
+                return;
+            }
+
+            if(ch == '=')
+            {
+                _parse = &XmlReaderImpl::beforeAttributeValue;
+                return;
+            }
+
+            if( isAlpha(ch) )
+            {
+                _attr.name() += c;
+                return;
+            }
+
+            throw XmlError("XML syntax error", _line);
+        }
+
+        void afterAttributeName(int c)
+        {
+            Char ch = notEof(c);
+
+            if( Pt::isspace(ch) )
+            {
+                return;
+            }
+
+            if(ch == '=')
+            {
+                _parse = &XmlReaderImpl::beforeAttributeValue;
+                return;
+            }
+
+            throw XmlError("XML syntax error", _line);
+        }
+
+        void beforeAttributeValue(int c)
+        {
+            Char ch = notEof(c);
+
+            if( Pt::isspace(ch) )
+            {
+                return;
+            }
+
+            if( isQoute(ch) )
+            {
+                _parse = &XmlReaderImpl::onAttributeValue;
+                return;
+            }
+
+            throw XmlError("XML syntax error", _line);
+        }
+
+        void onAttributeValue(int c)
+        {
+            Char ch = notEof(c);
+
+            if( isQoute(ch) )
+            {
+                _startElem.addAttribute(_attr);
+                _parse = &XmlReaderImpl::beforeAttribute;
+                return;
+            }
+
+            if (ch == '&')
+            {
+                _token.clear();
+                //_parse = &XmlReaderImpl::onAttributeEntityReference;
+                return;
+            }
+
+            _attr.value() += c;
+        }
+
+        void onEmptyElement(int c)
+        {
+            Char ch = notEof(c);
+
+            if( Pt::isspace(ch) )
+            {
+                return;
+            }
+
+            if(ch == '>')
+            {
+                _endElem.name() = _startElem.name();
+                _current = &(_endElem);
+                _depth--;
+
+                if(depth() == 0)
+                {
+                    _parse = &XmlReaderImpl::onEpilog;
+                    return;
+                }
+
+                _parse = &XmlReaderImpl::afterTag;
+                return;
+            }
+
+            throw XmlError("XML syntax error", _line);
+        }
+
+        void onEndElement(int c)
+        {
+            Char ch = notEof(c);
+            
+            if( isAlpha(ch) )
+            {
+                _endElem.name() += c;
+                _parse = &XmlReaderImpl::onEndElementName;
+                return;
+            }
+
+            throw XmlError("XML syntax error", _line);
+        }
+
+        void onEndElementName(int c)
+        {
+            Char ch = notEof(c);
+            
+            if( Pt::isspace(ch) )
+            {
+                _parse = &XmlReaderImpl::afterEndElementName;
+                return;
+            }
+
+            if( isAlpha(ch) )
+            {
+                _endElem.name() += c;
+                return;
+            }
+
+            if(ch == ':')
+            {
+                _endElem.name() += c;
+                return;
+            }
+
+            if(ch == '>')
+            {
+                _chars.clear();
+                _current = &(_endElem);
+                _depth--;
+
+                if(depth() == 0)
+                {
+                    _parse = &XmlReaderImpl::onEpilog;
+                    return;
+                }
+
+                _parse = &XmlReaderImpl::afterTag;
+                return;
+            }
+
+            throw XmlError("XML syntax error", _line);
+        }
+    
+        void afterEndElementName(int c)
+        {
+            Char ch = notEof(c);
+            
+            if( Pt::isspace(ch) )
+            {
+                return;
+            }
+
+            if(ch == '>')
+            {
+                _chars.clear();
+                _current = &(_endElem);
+                _depth--;
+
+                if(depth() == 0)
+                {
+                    _parse = &XmlReaderImpl::onEpilog;
+                    return;
+                }
 
                 _parse = &XmlReaderImpl::afterTag;
                 return;
