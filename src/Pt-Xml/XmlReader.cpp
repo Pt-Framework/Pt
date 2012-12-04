@@ -193,7 +193,6 @@ class XmlReaderImpl
         }
     };
 
-
     struct OnCData : public State
     {
         virtual State* onSpace(Pt::Char c, XmlReaderImpl& reader)
@@ -274,7 +273,6 @@ class XmlReaderImpl
         }
     };
 
-
     struct BeforeCData : public State
     {
         virtual State* onAlpha(Pt::Char c, XmlReaderImpl& reader)
@@ -301,7 +299,6 @@ class XmlReaderImpl
             return &_state;
         }
     };
-
 
     struct OnEntityReference : public State
     {
@@ -334,7 +331,6 @@ class XmlReaderImpl
         }
     };
 
-
     struct OnAttributeEntityReference : public State
     {
         virtual State* onAlpha(Pt::Char c, XmlReaderImpl& reader)
@@ -357,7 +353,6 @@ class XmlReaderImpl
             return &_state;
         }
     };
-
 
     struct OnCharacters : public State
     {
@@ -426,11 +421,6 @@ class XmlReaderImpl
             return &_state;
         }
     };
-
-
-    //////////////////////////////////////
-    // m1
-    //////////////////////////////////////
 
 
     struct AfterEndElementName : public State
@@ -1511,8 +1501,8 @@ class XmlReaderImpl
 
         // TODO: rename to isXmlName()
         bool isAlpha(Char ch)
-        { 
-            return Pt::isalnum(ch) != 0; // also underscore, hyphen, period
+        {
+            return ch == '.' || ch == '_' || ch == '-' || Pt::isalnum(ch) != 0; // also underscore, hyphen, period
         }
         
         void onDocumentBegin(int c)
@@ -1642,7 +1632,7 @@ class XmlReaderImpl
 
             if( isAlpha(ch) )
             {
-                _attr.name() += c;
+                _attr.name() += ch;
                 return;
             }
 
@@ -1725,30 +1715,6 @@ class XmlReaderImpl
             if(ch == '>')
             {
                 _parse =  &XmlReaderImpl::onProlog;
-                return;
-            }
-
-            throw XmlError("XML syntax error", _line);
-        }
-
-        void onProlog(int c)
-        {
-            if( c == std::char_traits<Char>::eof() )
-            {
-                _current = &_endDoc;
-                return;
-            }
-
-            Char ch(c);
-
-            if( Pt::isspace(ch) )
-            {
-                return;
-            }
-
-            if( ch == '<')
-            {
-                _parse = &XmlReaderImpl::onTag;
                 return;
             }
 
@@ -1867,7 +1833,7 @@ class XmlReaderImpl
             {
                 _token.clear();
                 _token += ch;
-                //_parse = &XmlReaderImpl::beforeCData;
+                _parse = &XmlReaderImpl::beforeCData;
                 return;
             }
 
@@ -1943,11 +1909,29 @@ class XmlReaderImpl
                 }
 
                 _chars.content() += c;
-                //_parse = &XmlReaderImpl::onCharacters;
+                _parse = &XmlReaderImpl::onCharacters;
                 return;
             }
 
-            throw XmlError("XML syntax error", _line);
+            if(ch == '<')
+            {
+                _parse = &XmlReaderImpl::onTag;
+                return;
+            }
+
+            if(ch == '>')
+            {
+                throw XmlError("XML syntax error", _line);
+            }
+
+            if(ch == '&')
+            {
+                _token.clear();
+                _parse = &XmlReaderImpl::onEntityReference;
+                return;
+            }
+
+            appendContent(c);
         }
 
         void beforeComment(int c)
@@ -1981,6 +1965,8 @@ class XmlReaderImpl
                 _parse = &XmlReaderImpl::onCommentEnd;
                 return;
             }
+
+            _parse = &XmlReaderImpl::onComment;
         }
 
         void onCommentEnd(int c)
@@ -2162,12 +2148,35 @@ class XmlReaderImpl
             if (ch == '&')
             {
                 _token.clear();
-                //_parse = &XmlReaderImpl::onAttributeEntityReference;
+                _parse = &XmlReaderImpl::onAttributeEntityReference;
                 return;
             }
 
             _attr.value() += c;
         }
+
+        void onAttributeEntityReference(int c)
+        {
+            Char ch = notEof(c);
+
+            if( isAlpha(ch) || ch == '#')
+            {
+                _token += ch;
+                return;
+            }
+            
+            if(ch == ';')
+            {
+                resolveEntity(_token);
+                _attr.value() += _token;
+                _token.clear();
+
+                _parse = &XmlReaderImpl::onAttributeValue;
+                return;
+            }
+            
+            throw XmlError("XML syntax error", _line);
+        };
 
         void onEmptyElement(int c)
         {
@@ -2280,9 +2289,109 @@ class XmlReaderImpl
             throw XmlError("XML syntax error", _line);
         }
 
-        //
-        // m2
-        //
+        void onCharacters(int c)
+        {
+            Char ch = notEof(c);
+
+            if(ch == '<')
+            {
+                _parse = &XmlReaderImpl::onTag;
+                return;
+            }
+
+            if(ch == '>')
+            {
+                throw XmlError("XML syntax error", _line);
+            }
+
+            if(ch == '&')
+            {
+                _token.clear();
+                _parse = &XmlReaderImpl::onEntityReference;
+                return;
+            }
+
+            appendContent(c);
+        }
+
+        void onEntityReference(int c)
+        {
+            Char ch = notEof(c);
+
+            if( isAlpha(ch) || ch == '#')
+            {
+                _token += ch;
+                return;
+            }
+
+            if(ch == ';')
+            {
+                resolveEntity(_token);
+
+                _chars.content() += _token;
+                _token.clear();
+
+                _parse = &XmlReaderImpl::onCharacters;
+                return;
+            }
+
+            throw XmlError("invalid entity format", _line);
+        };
+
+        void beforeCData(int c)
+        {
+            Char ch = notEof(c);
+
+            switch( ch.value() )
+            {
+                case '[':
+                case 'C':
+                case 'D':
+                case 'A':
+                case 'T':
+                    _token += ch;
+                    break;
+
+                default:
+                    throw XmlError("XML syntax error", _line);
+            }
+            
+            if( _token.length() < 7 )
+                return;
+
+            if( _token == L"[CDATA[" )
+            {
+                _token.clear();
+                _parse = &XmlReaderImpl::onCData;
+                return;
+            }
+
+            throw XmlError("XML syntax error", _line);
+        };
+
+        void onCData(int c)
+        {
+            Char ch = notEof(c);
+
+            if(ch == '>')
+            {
+                const String& content = _chars.content();
+                unsigned len = content.length();
+
+                if( len > 2 && content[len-2] == ']' && content[len-2] == ']')
+                {
+                    _chars.content().resize(len-2);
+
+                    _parse = &XmlReaderImpl::afterTag;
+                    return;
+                }
+
+                appendContent(c);
+                return;
+            }
+
+            appendContent(c);
+        }
 
         // not neccessary, allow EOF only when depth == 0 in other states
         void onEpilog(int c)
@@ -2307,6 +2416,29 @@ class XmlReaderImpl
 
             throw XmlError("XML syntax error", _line);
         };
+
+        void onProlog(int c)
+        {
+            if( c == std::char_traits<Char>::eof() )
+            {
+                _current = &_endDoc;
+                return;
+            }
+
+            Char ch(c);
+            if( Pt::isspace(ch) )
+            {
+                return;
+            }
+
+            if( ch == '<')
+            {
+                _parse = &XmlReaderImpl::onTag;
+                return;
+            }
+
+            throw XmlError("XML syntax error", _line);
+        }
 
     public:
         XmlReaderImpl(std::basic_istream<Char>& is, int flags)
@@ -2419,6 +2551,47 @@ class XmlReaderImpl
 
         const Node& next()
         {
+            std::char_traits<char>::int_type eof = std::char_traits<char>::eof();
+
+            _current = 0;
+            int c = 0;
+            do
+            {
+                c = _textBuffer->sbumpc();
+                (this->*_parse)(c);
+
+                if(c == '\n')
+                {
+                    ++_line;
+                }
+            }
+            while ( !_current && c != eof);
+
+            return *_current;
+        }
+
+        bool advance()
+        {
+            std::char_traits<char>::int_type eof = std::char_traits<char>::eof();
+
+            _current = 0;
+            int c = 0;
+            while( ! _current && _textBuffer->in_avail() > 0 )
+            {
+                c = _textBuffer->sbumpc();
+                (this->*_parse)(c);
+
+                if(c == '\n')
+                {
+                    ++_line;
+                }
+            }
+
+            return _current != 0;
+        }
+
+        const Node& nextOld()
+        {
             const Pt::Char eof = std::char_traits<char>::eof();
 
             _current = 0;
@@ -2438,7 +2611,7 @@ class XmlReaderImpl
             return *_current;
         }
 
-        bool advance()
+        bool advanceOld()
         {
             const Pt::Char eof = std::char_traits<char>::eof();
 
