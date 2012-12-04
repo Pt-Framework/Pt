@@ -169,8 +169,8 @@ void XmlTest::EmptyDocument()
     const Pt::Xml::Node& n = *it;
 
     PT_UNIT_ASSERT(n.type() == Pt::Xml::Node::EndDocument);
-    PT_UNIT_ASSERT(reader.documentVersion() == L"1.0");
-    PT_UNIT_ASSERT(reader.documentEncoding() == L"UTF-8");
+    PT_UNIT_ASSERT(reader.version() == L"1.0");
+    PT_UNIT_ASSERT(reader.encoding() == L"UTF-8");
     PT_UNIT_ASSERT(reader.isStandalone() == true);
 }
 

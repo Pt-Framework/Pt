@@ -155,13 +155,13 @@ class PT_XML_API XmlReader
 
         // TODO: split into attach() and setFlags()
         // also add methods for discard() and reset()
-        void reset(std::basic_istream<Char>& is, int flags = 0);
+        void attach(std::basic_istream<Char>& is, int flags = 0);
 
-        void reset(std::istream& is, int flags = 0);
+        void attach(std::istream& is, int flags = 0);
 
-        const Pt::String& documentVersion() const;
+        const Pt::String& version() const;
 
-        const Pt::String& documentEncoding() const;
+        const Pt::String& encoding() const;
 
         bool isStandalone() const;
 

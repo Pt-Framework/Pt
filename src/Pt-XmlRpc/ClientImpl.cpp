@@ -79,7 +79,7 @@ void ClientImpl::beginCall(IComposer& r, IRemoteProcedure& method, IDecomposer**
 
     beginExecute();
 
-    _reader.reset(_ts);
+    _reader.attach(_ts);
     _scanner.begin(r);
 }
 
@@ -99,7 +99,7 @@ void ClientImpl::call(IComposer& r, IRemoteProcedure& method, IDecomposer** argv
 
     std::istringstream is(execute());
     _ts.attach(is);
-    _reader.reset(_ts);
+    _reader.attach(_ts);
     _scanner.begin(r);
 
     while( _reader.get().type() !=  Pt::Xml::Node::EndDocument )

@@ -1067,7 +1067,7 @@ class XmlReaderImpl
             delete _buffer;
         }
 
-        void reset(std::basic_istream<Char>& is, int flags)
+        void attach(std::basic_istream<Char>& is, int flags)
         {
             delete _buffer;
             _buffer = 0;
@@ -1085,7 +1085,7 @@ class XmlReaderImpl
             _current = 0;
         }
 
-        void reset(std::istream& is, int flags)
+        void attach(std::istream& is, int flags)
         {
             delete _buffer;
             _buffer = new TextBuffer( &is, new Pt::Utf8Codec() );
@@ -1224,25 +1224,25 @@ XmlReader::~XmlReader()
 }
 
 
-void XmlReader::reset(std::basic_istream<Char>& is, int flags)
+void XmlReader::attach(std::basic_istream<Char>& is, int flags)
 {
-    _impl->reset(is, flags);
+    _impl->attach(is, flags);
 }
 
 
-void XmlReader::reset(std::istream& is, int flags)
+void XmlReader::attach(std::istream& is, int flags)
 {
-    _impl->reset(is, flags);
+    _impl->attach(is, flags);
 }
 
 
-const Pt::String& XmlReader::documentVersion() const
+const Pt::String& XmlReader::version() const
 {
     return _impl->version();
 }
 
 
-const Pt::String& XmlReader::documentEncoding() const
+const Pt::String& XmlReader::encoding() const
 {
     return _impl->encoding();
 }
