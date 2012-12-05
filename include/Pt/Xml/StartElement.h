@@ -264,7 +264,7 @@ class PT_XML_API StartElement : public Node
           * for this prefix.
           */
         const String& namespaceUri(const String& prefix) const
-        {return _namespaceContext.namespaceUri(prefix);}
+        {return _namespaceContext.getNamespace(prefix);}
 
     private:
         //! The name of the underlying tag.

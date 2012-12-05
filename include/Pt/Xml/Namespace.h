@@ -1,4 +1,6 @@
 /*
+ * Copyright (C) 2012 Marc Boris Duerner
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -28,94 +30,64 @@
 
 #include <Pt/Xml/Api.h>
 #include <Pt/String.h>
-#include <iosfwd>
 
 namespace Pt {
 
 namespace Xml {
 
-    /**
-     * @brief A Namespace element (Node) of an XML document.
-     *
-     * A namespace element stores a namespace uri which describes the namespace URI and a locally
-     * usable prefix which can be added before a tag name to specify that this particular tag
-     * is part of that namespace.
-     *
-     * Use namespaceUri() to get the namespace URI. Use prefix() to get the prefix.
-     *
-     * @see Node
-     * @see NamespaceContext
-     */
-    class PT_XML_API Namespace {
-        public:
-            /**
-             * @brief Constructs a new Namespace object with the given namespace URI and prefix.
-             *
-             * @param namespaceUri The unique URI of this namespace.
-             * @param prefix The namespace prefix which can be added to a tag name to specify that
-             * this tag belongs to that namespace.
-             */
-            Namespace(const String& namespaceUri, const String& prefix)
-            : _prefix(prefix), _namespaceUri(namespaceUri)
-            { }
+/** @brief A namespace used in an XML document.
+  
+   A namespace consists of a name, normally a namespace URI, a locally used
+   prefix and the element depth which indicates te scope of the namespace.
+  
+   @see NamespaceContext
+  */
+class Namespace 
+{
+    public:
+        /** @brief Constructs a Namespace with scope depth, name and prefix.
+        */
+        Namespace(unsigned depth, const String& prefix, const String& name)
+        : _depth(depth)
+        , _prefix(prefix)
+        , _name(name)
+        { }
 
-            /**
-             * @brief Returns the prefix of this namespace.
-             *
-             * The namespace prefix can be added to a tag name to specify that this tag belongs
-             * to that namespace.
-             *
-             * @return The namespace prefix of this Namespace object.
-             */
-            const String& prefix() const
-            { return _prefix; }
+        /** @brief Returns the scope depth of the namespace.
+        */
+        unsigned depth() const
+        { return _depth; }
+        
+        /** @brief Returns the prefix of this namespace.
+        */
+        const String& prefix() const
+        { return _prefix; }
 
-            /**
-             * @brief Sets the prefix of this namespace.
-             *
-             * The namespace prefix can be added to a tag name to specify that this tag belongs
-             * to that namespace.
-             *
-             * @param prefix The namespace prefix for this Namespace object.
-             */
-            void setPrefix(const String& prefix)
-            { _prefix = prefix; }
+        /** @brief Sets the prefix of this namespace.
+        */
+        void setPrefix(const String& prefix)
+        { _prefix = prefix; }
 
-            /**
-             * @brief Returns the URI of this namespace.
-             *
-             * The URI is unique and identifies the namespace.
-             *
-             * @return The namespace URI of this Namespace object.
-             */
-            const String& namespaceUri() const
-            { return _namespaceUri; }
+        /** @brief Returns the namespace name.
+        */
+        const String& name() const
+        { return _name; }
 
-            /**
-             * @brief Sets the URI of this namespace.
-             *
-             * The URI is unique and identifies the namespace.
-             *
-             * @param namespaceUri The namespace URI for this Namespace object.
-             */
-            void setNamespaceUri(const String& namespaceUri)
-            { _namespaceUri = namespaceUri; }
+        /** @brief Sets the name of the namespace.
+        */
+        void setNamespace(const String& name)
+        { _name = name; }
 
-            /**
-             * @brief Returns $true$ if this is the default namespace in the current XML document. Otherwise
-             * $false$ is returned.
-             *
-             * @return $true$ if this is the default namespace; $false$ otherwise.
-             */
-            bool isDefaultNamespaceDeclaration();
+        /** @brief Returns true if this is the default namespace.
+        */
+        bool isDefaultNamespace() const
+        { return _prefix.empty(); }
 
-        private:
-            //! The prefix of this namespace.
-            String _prefix;
-
-            //! The namespace URI of this namespace.
-            String _namespaceUri;
-    };
+    private:
+        unsigned _depth;
+        String _prefix;
+        String _name;
+};
 
 }
 

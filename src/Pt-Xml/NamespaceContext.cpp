@@ -1,4 +1,6 @@
 /*
+ * Copyright (C) 2012 Marc Boris Duerner
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -24,49 +26,38 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "Pt/Xml/NamespaceContext.h"
-#include "Pt/String.h"
 
 namespace Pt {
 
 namespace Xml {
 
-namespace
+// TODO: return null if not found !!!
+//       reader has to throw an exception then
+const String& NamespaceContext::getNamespace(const String& prefix) const
 {
-    static const String null;
-}
+    std::vector<Namespace>::const_reverse_iterator it;
 
-const String& NamespaceContext::namespaceUri(const String& prefix) const
-{
-    std::multimap<String, Namespace>::const_iterator it;
-    for( it = _namespaceScopes.begin(); it != _namespaceScopes.end(); ++it) {
-        if(it->second.prefix() == prefix) {
-            return it->second.namespaceUri();
-        }
+    for(it = _namespaces.rbegin(); it != _namespaces.rend(); ++it)
+    {
+      if( prefix == it->prefix() )
+          return it->name();
     }
 
-    return null;
+    return _defaultNSName;
 }
 
 
-const String& NamespaceContext::prefix(const String& namespaceUri) const
+void NamespaceContext::setNamespace(unsigned depth, const String& prefix, const String& name)
 {
-    std::multimap<String, Namespace>::const_iterator it;
-    for( it = _namespaceScopes.begin(); it != _namespaceScopes.end(); ++it) {
-        if(it->second.namespaceUri() == namespaceUri) {
-            return it->second.prefix();
-        }
-    }
-
-    return null;
+    _namespaces.push_back( Namespace(depth, prefix, name) );
 }
 
 
-void NamespaceContext::addNamespace(const String& elementName, const Namespace& ns)
+void NamespaceContext::popNamespace(unsigned depth)
 {
-    ScopeMap::value_type elem(elementName, ns);
-    _namespaceScopes.insert(elem);
+    while( ! _namespaces.empty() && _namespaces.back().depth() >= depth)
+        _namespaces.pop_back();
 }
-
 
 } // namespace Xml
 
