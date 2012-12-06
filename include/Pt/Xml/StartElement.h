@@ -29,7 +29,7 @@
 #include <Pt/Xml/Api.h>
 #include <Pt/Xml/Node.h>
 #include <Pt/Xml/Namespace.h>
-#include <Pt/Xml/NamespaceContext.h>
+#include <Pt/NonCopyable.h>
 #include <Pt/String.h>
 #include <list>
 
@@ -65,6 +65,11 @@ class PT_XML_API Attribute
         : _name(name), _value(value)
         { }
 
+        String& prefix() 
+        { return _prefix; }
+
+        const String& prefix() const
+        { return _prefix; }
 
         /**
           * @brief Returns the name of this attribute.
@@ -101,13 +106,15 @@ class PT_XML_API Attribute
         { _value = value; }
 
         void clear()
-        { _name.clear(); _value.clear(); }
+        { 
+            _name.clear(); 
+            _value.clear(); 
+            _prefix.clear(); 
+        }
 
     private:
-        //! The name of this attribute.
+        String _prefix;
         String _name;
-
-        //! The value of this attribute.
         String _value;
 };
 
@@ -131,29 +138,28 @@ class PT_XML_API Attribute
   * @see Attribute
   */
 class PT_XML_API StartElement : public Node
+                              , private NonCopyable
 {
     public:
         //! Constructs a new StartElement object with no name and an empty attribute list.
         StartElement()
         : Node(Node::StartElement)
-        { }
-
-        /**
-          * @brief Constructs a new StartElement object with the given string as tag name.
-          *
-          * @param name The name of the EndElement object. This is an optional parameter.
-          * Default is an empty string.
-          */
-        StartElement(const String& name)
-        : Node(Node::StartElement),
-          _name(name)
+        , _namespace(0)
         { }
 
         void clear()
         {
             _name.clear();
+            _prefix.clear();
             _attributes.clear();
+            _namespace = 0;
         }
+
+        String& prefix() 
+        { return _prefix; }
+
+        const String& prefix() const
+        { return _prefix; }
 
         /**
           * @brief Returns the tag name of the opening tag for which this StartElement object was created.
@@ -164,7 +170,8 @@ class PT_XML_API StartElement : public Node
           *
           * @return The tag name of the opening tag for which this StartElement object was created.
           */
-        String& name() {return _name;}
+        String& name() 
+        { return _name; }
 
         /**
           * @brief Returns the tag name of the opening tag for which this StartElement object was created.
@@ -176,14 +183,14 @@ class PT_XML_API StartElement : public Node
           * @return The tag name of the opening tag for which this StartElement object was created.
           */
         const String& name() const
-        {return _name;}
+        { return _name; }
 
         /**
           * @brief Sets the tag name of the end start for which this StartElement object was created.
           * @param name The new name for this StartElement object.
           */
         void setName(const String& name)
-        {_name = name;}
+        { _name = name; }
 
         /**
           * @brief Add the given attribute to the attribute list of this start tag.
@@ -194,7 +201,7 @@ class PT_XML_API StartElement : public Node
           * @param attribute The attribute which is added to this object's attribute list.
           */
         void addAttribute(const Attribute& attribute)
-        {_attributes.push_back(attribute);}
+        { _attributes.push_back(attribute); }
 
         /**
           * @brief Returns the attribute list of this StartElement which contains all attributes of the tag.
@@ -207,7 +214,7 @@ class PT_XML_API StartElement : public Node
           * @return A list containing all attributes of the tag this StartElement represents.
           */
         const std::list<Attribute>& attributes() const
-        {return _attributes;}
+        { return _attributes; }
 
         /**
           * @brief Returns the value of the attribute with the given name.
@@ -235,38 +242,17 @@ class PT_XML_API StartElement : public Node
           */
         bool hasAttribute(const String& attributeName) const;
 
-        /**
-          * @brief Returns the namespace conText of this StartElement.
-          *
-          * @return NamespaceContext The namespace conText of this StartElment.
-          * @see NamespaceContext
-          */
-        const NamespaceContext& namespaceContext() const
-        {return _namespaceContext;}
+        void setNamespace(const Namespace& ns)
+        { _namespace = &ns; }
 
-        /**
-          * @brief Sets the namespace conText for this StartElement.
-          *
-          * @param conText The new namespace conText for this StartElment.
-          * @see NamespaceContext
-          */
-        void setNamespaceContext(const NamespaceContext& conText)
-        {_namespaceContext = conText;}
-
-        /**
-          * @brief Returns the namespace uri for the given tag prefix in this StartElments namespace conText.
-          *
-          * The namespace uri is determined using the method NamespaceContext::namespaceUri().
-          * If no namespace uri exists for this prefix an empty string is returned.
-          *
-          * @param prefix The prefix for which the namespace uri is returned.
-          * @return The namespace uri for the given prefix; or an empty string if no namespace uri exists
-          * for this prefix.
-          */
-        const String& namespaceUri(const String& prefix) const
-        {return _namespaceContext.getNamespace(prefix);}
+        const String* namespaceUri() const
+        { 
+            return _namespace ? &_namespace->name() : 0; 
+        }
 
     private:
+        String _prefix;
+
         //! The name of the underlying tag.
         String _name;
 
@@ -274,25 +260,25 @@ class PT_XML_API StartElement : public Node
         std::list<Attribute> _attributes;
 
         //! The namespace conText of this StartElement.
-        NamespaceContext _namespaceContext;
+        const Namespace* _namespace;
 };
 
-inline StartElement* toStartElement(Node& node)
+inline StartElement* toStartElement(Node* node)
 {
     StartElement* se = 0;
         
-    if(node.type() == Node::StartElement)
-        se = static_cast<StartElement*>(&node);
+    if(node->type() == Node::StartElement)
+        se = static_cast<StartElement*>(node);
 
     return se;
 }
 
-inline const StartElement* toStartElement(const Node& node)
+inline const StartElement* toStartElement(const Node* node)
 {
     const StartElement* se = 0;
         
-    if(node.type() == Node::StartElement)
-        se = static_cast<const StartElement*>(&node);
+    if(node->type() == Node::StartElement)
+        se = static_cast<const StartElement*>(node);
 
     return se;
 }

@@ -24,6 +24,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "Pt/Xml/XmlReader.h"
+#include <Pt/Xml/NamespaceContext.h>
 #include <Pt/Xml/EndDocument.h>
 #include "Pt/Xml/EntityResolver.h"
 #include <Pt/Xml/DocTypeDeclaration.h>
@@ -553,13 +554,23 @@ class XmlReaderImpl
                 _current = &(_startElem);
                 _depth++;
 
+                const Namespace* ns = _nsctx.getNamespace( _startElem.prefix() );
+                if(ns)
+                {
+                    _startElem.setNamespace(*ns);
+                }
+
                 _parse = &XmlReaderImpl::onEmptyElement;
                 return;
             }
 
             if(ch == ':')
             {
-                _startElem.name() += c;
+                if( ! _startElem.prefix().empty() )
+                    throw XmlError("XML syntax error (invalid namespace prefix)", _line);
+
+                _startElem.prefix() = _startElem.name();
+                _startElem.name().clear();
                 return;
             }
 
@@ -574,6 +585,12 @@ class XmlReaderImpl
                 _chars.clear();
                 _current = &(_startElem);
                 _depth++;
+
+                const Namespace* ns = _nsctx.getNamespace( _startElem.prefix() );
+                if(ns)
+                {
+                    _startElem.setNamespace(*ns);
+                }
 
                 _parse = &XmlReaderImpl::afterTag;
                 return;
@@ -596,6 +613,12 @@ class XmlReaderImpl
                 _current = &(_startElem);
                 _depth++;
 
+                const Namespace* ns = _nsctx.getNamespace( _startElem.prefix() );
+                if(ns)
+                {
+                    _startElem.setNamespace(*ns);
+                }
+
                 _parse = &XmlReaderImpl::onEmptyElement;
                 return;
             }
@@ -614,6 +637,12 @@ class XmlReaderImpl
                 _chars.clear();
                 _current = &(_startElem);
                 _depth++;
+
+                const Namespace* ns = _nsctx.getNamespace( _startElem.prefix() );
+                if(ns)
+                {
+                    _startElem.setNamespace(*ns);
+                }
 
                 _parse = &XmlReaderImpl::afterTag;
                 return;
@@ -635,6 +664,16 @@ class XmlReaderImpl
             if(ch == '=')
             {
                 _parse = &XmlReaderImpl::beforeAttributeValue;
+                return;
+            }
+
+            if(ch == ':')
+            {
+                if( ! _attr.prefix().empty() )
+                    throw XmlError("XML syntax error (invalid namespace prefix)", _line);
+
+                _attr.prefix() = _attr.name();
+                _attr.name().clear();
                 return;
             }
 
@@ -689,6 +728,11 @@ class XmlReaderImpl
 
             if( isQoute(ch) )
             {
+                if(_attr.prefix() == "xmlns")
+                {
+                    _nsctx.setNamespace(_depth+1, _attr.name(), _attr.value());
+                }
+
                 _startElem.addAttribute(_attr);
                 _parse = &XmlReaderImpl::beforeAttribute;
                 return;
@@ -742,13 +786,21 @@ class XmlReaderImpl
                 _current = &(_endElem);
                 _depth--;
 
-                if(depth() == 0)
+                const Namespace* ns = _nsctx.getNamespace( _endElem.prefix() );
+                if(ns)
+                {
+                    _endElem.setNamespace(*ns);
+                }
+
+                /*if(depth() == 0)
                 {
                     _parse = &XmlReaderImpl::onEpilog;
                     return;
                 }
 
-                _parse = &XmlReaderImpl::afterTag;
+                _parse = &XmlReaderImpl::afterTag;*/
+
+                _parse = &XmlReaderImpl::afterEndElement;
                 return;
             }
 
@@ -787,7 +839,11 @@ class XmlReaderImpl
 
             if(ch == ':')
             {
-                _endElem.name() += c;
+                if( ! _endElem.prefix().empty() )
+                    throw XmlError("XML syntax error (invalid namespace prefix)", _line);
+
+                _endElem.prefix() = _endElem.name();
+                _endElem.name().clear();
                 return;
             }
 
@@ -797,13 +853,22 @@ class XmlReaderImpl
                 _current = &(_endElem);
                 _depth--;
 
-                if(depth() == 0)
+                const Namespace* ns = _nsctx.getNamespace( _endElem.prefix() );
+                if(ns)
+                {
+                    _endElem.setNamespace(*ns);
+                }
+
+                /*if(depth() == 0)
                 {
                     _parse = &XmlReaderImpl::onEpilog;
                     return;
                 }
 
-                _parse = &XmlReaderImpl::afterTag;
+                _parse = &XmlReaderImpl::afterTag;*/
+
+                _parse = &XmlReaderImpl::afterEndElement;
+
                 return;
             }
 
@@ -825,17 +890,36 @@ class XmlReaderImpl
                 _current = &(_endElem);
                 _depth--;
 
-                if(depth() == 0)
+                const Namespace* ns = _nsctx.getNamespace( _endElem.prefix() );
+                if(ns)
+                {
+                    _endElem.setNamespace(*ns);
+                }
+
+                /*if(depth() == 0)
                 {
                     _parse = &XmlReaderImpl::onEpilog;
                     return;
                 }
 
-                _parse = &XmlReaderImpl::afterTag;
+                _parse = &XmlReaderImpl::afterTag;*/
+                _parse = &XmlReaderImpl::afterEndElement;
                 return;
             }
 
             throw XmlError("XML syntax error", _line);
+        }
+
+        void afterEndElement(int c)
+        {
+            if(depth() == 0)
+                _parse = &XmlReaderImpl::onEpilog;
+            else
+                _parse = &XmlReaderImpl::afterTag;
+
+            _nsctx.popNamespace( _depth + 1 );
+
+            (this->*_parse)(c);
         }
 
         void onCharacters(int c)
@@ -1075,6 +1159,8 @@ class XmlReaderImpl
 
             _parse = &XmlReaderImpl::onDocumentBegin;
 
+            _nsctx.clear();
+
             _flags = flags;
             _docType.clear();
             _version.clear();
@@ -1092,6 +1178,8 @@ class XmlReaderImpl
             _textBuffer = _buffer;
 
             _parse = &XmlReaderImpl::onDocumentBegin;
+
+            _nsctx.clear();
 
             _flags = flags;
             _docType.clear();
@@ -1192,6 +1280,8 @@ class XmlReaderImpl
         ParseFunc _parse;
         Node* _current;
         String _token;
+
+        NamespaceContext _nsctx;
 
         // TODO: some sort of union?
         DocTypeDeclaration _docType;

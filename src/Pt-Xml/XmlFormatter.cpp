@@ -345,7 +345,7 @@ void XmlFormatter::beginArray(const char* name, const char* type,
         ++countAttrs;
     }
 
-    _writer->writeStartElement( String::widen( *name ? name : type ), attr, countAttrs );
+    _writer->writeStartElement( String::widen( *name ? name : "array" ), attr, countAttrs );
 }
 
 
@@ -398,7 +398,7 @@ void XmlFormatter::onBeginObject(const char* name, const char* type,
         ++countAttrs;
     }
 
-    _writer->writeStartElement( String::widen( *name ? name : type ), attr, countAttrs );
+    _writer->writeStartElement( String::widen( *name ? name : "object" ), attr, countAttrs );
 
 }
 

@@ -1,4 +1,6 @@
 /*
+ * Copyright (C) 2012 Marc Boris Duerner
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -28,83 +30,107 @@
 
 #include <Pt/Xml/Api.h>
 #include <Pt/Xml/Node.h>
+#include <Pt/Xml/Namespace.h>
 #include <Pt/String.h>
 
 namespace Pt {
 
-    namespace Xml {
+namespace Xml {
+
+/**
+  * @brief An end element (Node) which represents a closing tag of an XML document.
+  *
+  * An end element is created when the parser reaches an end tag, for example $&lt;/a>$.
+  * An EndElement object only stores the name of the tag. To access the attributes of the tag the
+  * start tag has to be read. The body of the tag can be accessed by reading the previous
+  * Character node(s).
+  *
+  * Use name() to get the name of the tag which was closed.
+  *
+  * When parsing $<a>test</a>$ a StartElement, a Character and finally an EndElement node is
+  * created. If an empty tag is parsed, like for example $</a>$, a StartElement and an EndElement
+  * is created.
+  *
+  * @see StartElement
+  * @see Node
+  */
+class PT_XML_API EndElement : public Node 
+{
+    public:
+        /**
+          * @brief Constructs a new EndElement object with the given (optional) string as tag name.
+          *
+          * @param name The name of the EndElement object. This is an optional parameter.
+          * Default is an empty string.
+          */
+        EndElement()
+        : Node(Node::EndElement)
+        , _namespace(0)
+        { }
+
+        void clear()
+        { 
+            _name.clear(); 
+            _prefix.clear();
+            _namespace = 0;
+        }
+
+        String& prefix() 
+        { return _prefix; }
+
+        const String& prefix() const
+        { return _prefix; }
 
         /**
-         * @brief An end element (Node) which represents a closing tag of an XML document.
-         *
-         * An end element is created when the parser reaches an end tag, for example $&lt;/a>$.
-         * An EndElement object only stores the name of the tag. To access the attributes of the tag the
-         * start tag has to be read. The body of the tag can be accessed by reading the previous
-         * Character node(s).
-         *
-         * Use name() to get the name of the tag which was closed.
-         *
-         * When parsing $<a>test</a>$ a StartElement, a Character and finally an EndElement node is
-         * created. If an empty tag is parsed, like for example $</a>$, a StartElement and an EndElement
-         * is created.
-         *
-         * @see StartElement
-         * @see Node
-         */
-        class PT_XML_API EndElement : public Node {
-            public:
-                /**
-                 * @brief Constructs a new EndElement object with the given (optional) string as tag name.
-                 *
-                 * @param name The name of the EndElement object. This is an optional parameter.
-                 * Default is an empty string.
-                 */
-                explicit EndElement(const String& name = String())
-                : Node(Node::EndElement),
-                  _name(name)
-                { }
+          * @brief Returns the tag name of the closing tag for which this EndElement object was created.
+          *
+          * When parsing <a>test</a> a StartElement, a Character and finally an EndElement node is
+          * created. The EndElement has the name "a". If an empty tag is parsed, like for example </a>,
+          * a StartElement and an EndElement ("a") is created.
+          *
+          * @return The tag name of the closing tag for which this EndElement object was created.
+          */
+        String& name()
+        { return _name; }
 
-                void clear()
-                { _name.clear(); }
+        /**
+          * @brief Returns the tag name of the closing tag for which this EndElement object was created.
+          *
+          * When parsing <a>test</a> a StartElement, a Character and finally an EndElement node is
+          * created. The EndElement has the name "a". If an empty tag is parsed, like for example </a>,
+          * a StartElement and an EndElement ("a") is created.
+          *
+          * @return The tag name of the closing tag for which this EndElement object was created.
+          */
+        const String& name() const
+        { return _name; }
 
-                /**
-                 * @brief Returns the tag name of the closing tag for which this EndElement object was created.
-                 *
-                 * When parsing <a>test</a> a StartElement, a Character and finally an EndElement node is
-                 * created. The EndElement has the name "a". If an empty tag is parsed, like for example </a>,
-                 * a StartElement and an EndElement ("a") is created.
-                 *
-                 * @return The tag name of the closing tag for which this EndElement object was created.
-                 */
-                String& name()
-                { return _name; }
+        /**
+          * @brief Sets the tag name of the end tag for which this EndElement object was created.
+          * @param name The new name for this EndElement object.
+          */
+        void setName(const String& name)
+        { _name = name; }
 
-                /**
-                 * @brief Returns the tag name of the closing tag for which this EndElement object was created.
-                 *
-                 * When parsing <a>test</a> a StartElement, a Character and finally an EndElement node is
-                 * created. The EndElement has the name "a". If an empty tag is parsed, like for example </a>,
-                 * a StartElement and an EndElement ("a") is created.
-                 *
-                 * @return The tag name of the closing tag for which this EndElement object was created.
-                 */
-                const String& name() const
-                { return _name; }
+        void setNamespace(const Namespace& ns)
+        { _namespace = &ns; }
 
-                /**
-                 * @brief Sets the tag name of the end tag for which this EndElement object was created.
-                 * @param name The new name for this EndElement object.
-                 */
-                void setName(const String& name)
-                { _name = name; }
+        const String* namespaceUri() const
+        { 
+            return _namespace ? &_namespace->name() : 0; 
+        }
 
-            private:
-                //! The tag name of this end tag.
-                String _name;
-        };
+    private:
+        String _prefix;
 
-    }
+        //! The tag name of this end tag.
+        String _name;
 
-}
+        const Namespace* _namespace;
+};
+
+} // namespace Xml
+
+} // namespace Pt
 
 #endif

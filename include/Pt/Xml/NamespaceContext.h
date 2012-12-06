@@ -56,11 +56,15 @@ class PT_XML_API NamespaceContext
 
         /** @brief Returns the namespace for a prefix.
         */
-        const String& getNamespace(const String& prefix) const;
+        const Namespace* getNamespace(const String& prefix) const;
 
         /** @brief Adds a namespace to the stack.
         */
         void setNamespace(unsigned depth, const String& prefix, const String& name);
+
+        /** @brief Unset a namespace.
+        */
+        void unsetNamespace(unsigned depth, const String& prefix);
 
         /** @brief Removes all namespaces at greater or equal depth.
         */

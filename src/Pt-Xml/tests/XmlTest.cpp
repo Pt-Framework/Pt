@@ -56,7 +56,8 @@ class XmlTest : public Pt::Unit::TestSuite
             this->registerMethod("InvalidTag3", *this, &XmlTest::InvalidTag3);
             this->registerMethod("InvalidTag4", *this, &XmlTest::InvalidTag4);
             this->registerMethod("InvalidTag5", *this, &XmlTest::InvalidTag5);
-            this->registerMethod("ElementWithContent", *this, &XmlTest::ElementWithContent);
+            this->registerMethod("ElementWithContent", *this, &XmlTest::ElementWithNamespace);
+            this->registerMethod("ElementWithNamespace", *this, &XmlTest::ElementWithContent);
             this->registerMethod("DefaultEntities", *this, &XmlTest::DefaultEntities);
             this->registerMethod("InvalidAttribute1", *this, &XmlTest::InvalidAttribute1);
             this->registerMethod("InvalidAttribute2", *this, &XmlTest::InvalidAttribute2);
@@ -90,6 +91,7 @@ class XmlTest : public Pt::Unit::TestSuite
         void InvalidTag4();
         void InvalidTag5();
         void ElementWithContent();
+        void ElementWithNamespace();
         void AttributeWithSimpleText();
         void AttributeWithUTF8();
         void MultipleAttributesIteration();
@@ -317,6 +319,67 @@ void XmlTest::ElementWithContent()
 
     PT_UNIT_ASSERT(endNode.type() == Pt::Xml::Node::EndElement);
     PT_UNIT_ASSERT(dynamic_cast<const Pt::Xml::EndElement*>(&endNode)->name().narrow() == "a");
+    PT_UNIT_ASSERT( reader.depth() == 0);
+
+    // End of document
+    ++it;
+    const Pt::Xml::Node& endDocument = *it;
+    PT_UNIT_ASSERT(endDocument.type() == Pt::Xml::Node::EndDocument);
+    PT_UNIT_ASSERT( reader.depth() == 0);
+}
+
+
+void XmlTest::ElementWithNamespace()
+{
+    std::stringstream input;
+    input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
+    input << "<a><my:a xmlns:my=\"http://www.my.net\">b</my:a></a>";
+
+    Pt::Xml::XmlReader reader( input );
+
+    Pt::Xml::XmlReader::Iterator it = reader.current();
+    const Pt::Xml::Node& startNode = *it;
+
+    // <a>
+    PT_UNIT_ASSERT(startNode.type() == Pt::Xml::Node::StartElement);
+    PT_UNIT_ASSERT(Pt::Xml::toStartElement(&startNode)->name() == L"a");
+    PT_UNIT_ASSERT( reader.depth() == 1);
+
+    // <my:a>
+    ++it;
+    const Pt::Xml::Node& nodeA = *it;
+
+    PT_UNIT_ASSERT(nodeA.type() == Pt::Xml::Node::StartElement);
+    PT_UNIT_ASSERT(Pt::Xml::toStartElement(&nodeA)->prefix() == L"my");
+    PT_UNIT_ASSERT(Pt::Xml::toStartElement(&nodeA)->name() == L"a");
+    PT_UNIT_ASSERT(Pt::Xml::toStartElement(&nodeA)->namespaceUri());
+    PT_UNIT_ASSERT(*Pt::Xml::toStartElement(&nodeA)->namespaceUri() == "http://www.my.net");
+    PT_UNIT_ASSERT( reader.depth() == 2);
+
+    // b
+    ++it;
+    const Pt::Xml::Node& charactersNode = *it;
+
+    PT_UNIT_ASSERT(charactersNode.type() == Pt::Xml::Node::Characters);
+    PT_UNIT_ASSERT(dynamic_cast<const Pt::Xml::Characters*>(&charactersNode)->content() == L"b");
+    PT_UNIT_ASSERT( reader.depth() == 2);
+
+    // </my:a>
+    ++it;
+    const Pt::Xml::Node& endNodeMyA = *it;
+
+    PT_UNIT_ASSERT(endNodeMyA.type() == Pt::Xml::Node::EndElement);
+    PT_UNIT_ASSERT(dynamic_cast<const Pt::Xml::EndElement*>(&endNodeMyA)->name() == L"a");
+    PT_UNIT_ASSERT(dynamic_cast<const Pt::Xml::EndElement*>(&endNodeMyA)->namespaceUri());
+    PT_UNIT_ASSERT( reader.depth() == 1);
+
+    // </a>
+    ++it;
+    const Pt::Xml::Node& endNodeA = *it;
+
+    PT_UNIT_ASSERT(endNodeA.type() == Pt::Xml::Node::EndElement);
+    PT_UNIT_ASSERT(dynamic_cast<const Pt::Xml::EndElement*>(&endNodeA)->name() == L"a");
+    PT_UNIT_ASSERT(0 == dynamic_cast<const Pt::Xml::EndElement*>(&endNodeMyA)->namespaceUri());
     PT_UNIT_ASSERT( reader.depth() == 0);
 
     // End of document

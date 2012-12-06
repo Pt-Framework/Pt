@@ -33,23 +33,36 @@ namespace Xml {
 
 // TODO: return null if not found !!!
 //       reader has to throw an exception then
-const String& NamespaceContext::getNamespace(const String& prefix) const
+const Namespace* NamespaceContext::getNamespace(const String& prefix) const
 {
+    const Namespace* ret = 0;
     std::vector<Namespace>::const_reverse_iterator it;
 
     for(it = _namespaces.rbegin(); it != _namespaces.rend(); ++it)
     {
       if( prefix == it->prefix() )
-          return it->name();
+      {
+          const String& name = it->name();
+          if( ! name.empty() )
+              ret = &(*it);
+          
+          break;
+      }
     }
 
-    return _defaultNSName;
+    return ret;
 }
 
 
 void NamespaceContext::setNamespace(unsigned depth, const String& prefix, const String& name)
 {
     _namespaces.push_back( Namespace(depth, prefix, name) );
+}
+
+
+void NamespaceContext::unsetNamespace(unsigned depth, const String& prefix)
+{
+    _namespaces.push_back( Namespace(depth, prefix, String()) );
 }
 
 
