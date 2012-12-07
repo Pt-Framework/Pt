@@ -115,8 +115,8 @@ void AddrInfoImpl::clear()
         _ainfo = 0;
     }
 
-    memset( &_special, 0, sizeof(_special) );
-    memset( &_specialAddr, 0, sizeof(_specialAddr) );
+    std::memset( &_special, 0, sizeof(_special) );
+    std::memset( &_specialAddr, 0, sizeof(_specialAddr) );
     _ai = 0;
 
     _host.clear();
