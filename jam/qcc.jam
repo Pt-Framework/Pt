@@ -1,5 +1,5 @@
 
-JamInclude Jamrules.gcc ;
+Load Jamrules.gcc ;
 
 
 # Compiler flags and tools
