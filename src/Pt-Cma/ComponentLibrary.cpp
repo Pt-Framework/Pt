@@ -26,6 +26,7 @@
 #include "Pt/Cma/ComponentLibrary.h"
 #include "Pt/Cma/IComponentBuilder.h"
 #include <iostream>
+#include <cstddef>
 
 namespace Pt {
 
@@ -86,7 +87,7 @@ IComponentBuilder* ComponentLibrary::getBuilder()
 }
 
 
-size_t ComponentLibrary::size() const
+std::size_t ComponentLibrary::size() const
 {
     return _builders.size();
 }
