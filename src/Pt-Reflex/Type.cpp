@@ -29,6 +29,7 @@
 #include "Pt/Reflex/TypeManager.h"
 #include <stdexcept>
 #include <iostream>
+#include <cstring>
 
 namespace Pt {
 
@@ -392,7 +393,7 @@ void MethodTable::insert(Pt::Reflex::MethodInfo* mi)
     Container::iterator it;
     for(it = _entries.begin(); it != _entries.end(); ++it)
     {
-        if( 0 != strcmp( mi->name(), (*it)->name() ) ||
+        if( 0 != std::strcmp( mi->name(), (*it)->name() ) ||
             nargs != (*it)->psize() )
             continue;
 
