@@ -68,7 +68,7 @@ class TcpSocketExTest : public Pt::Unit::TestSuite
 
 			Pt::Net::TcpSocket socket("127.0.0.1", 5050);
 			std::vector<Pt::uint8_t> data(1024);
-			memset(&data[0],234,data.size());
+			std::memset(&data[0],234,data.size());
 			
 			for( size_t i = 0; i < data.size(); i+= 100)
 			{
