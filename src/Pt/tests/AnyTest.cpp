@@ -33,6 +33,7 @@
 #include "Pt/Unit/RegisterTest.h"
 #include <string>
 #include <algorithm>
+#include <cstdlib>
 
 
 struct LargeObject
@@ -200,9 +201,9 @@ class AnyTest : public Pt::Unit::TestSuite
         void SwapTest()
         {
             LargeObject f;
-            std::generate(f.begin(), f.end(), rand);
+            std::generate(f.begin(), f.end(), std::rand);
             LargeObject f2;
-            std::generate(f2.begin(), f2.end(), rand);
+            std::generate(f2.begin(), f2.end(), std::rand);
             *f2.begin() = *f.begin() + 1;
 
             Pt::Any a = Pt::Any(f);
