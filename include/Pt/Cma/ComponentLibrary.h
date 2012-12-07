@@ -31,6 +31,7 @@
 #include <Pt/System/Library.h>
 #include <map>
 #include <string>
+#include <cstddef>
 
 namespace Pt {
 
@@ -72,7 +73,7 @@ class PT_EXPORT ComponentLibrary : protected Pt::System::Library
           * Get the number of component builders in this library
           * @return the number of IComponentBuilder
           */
-        size_t size() const;
+        std::size_t size() const;
 
         /**
           * Get the library file.
