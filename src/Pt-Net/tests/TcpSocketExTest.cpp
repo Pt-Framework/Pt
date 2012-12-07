@@ -36,6 +36,8 @@
 #include "Pt/System/Thread.h"
 #include <string>
 #include <vector>
+#include <cstddef>
+#include <cstring>
 
 class TcpSocketExTest : public Pt::Unit::TestSuite
 { 
@@ -70,7 +72,7 @@ class TcpSocketExTest : public Pt::Unit::TestSuite
 			std::vector<Pt::uint8_t> data(1024);
 			std::memset(&data[0],234,data.size());
 			
-			for( size_t i = 0; i < data.size(); i+= 100)
+			for( std::size_t i = 0; i < data.size(); i+= 100)
 			{
 				socket.write((char*) &data[i], 100);
 				Pt::System::Thread::sleep(10);
@@ -107,7 +109,7 @@ class TcpSocketExTest : public Pt::Unit::TestSuite
 
         void onInput(Pt::System::IODevice& device)
         {
-			size_t count = device.endRead();
+			std::size_t count = device.endRead();
 			if(!device.eof())
 			{
 				PT_UNIT_ASSERT(count != 0);
