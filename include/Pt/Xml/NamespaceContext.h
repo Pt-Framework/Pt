@@ -63,6 +63,8 @@ class PT_XML_API NamespaceContext
         */
         const Namespace* getNamespace(const String& prefix) const;
 
+        const Namespace* getDefaultNamespace() const;
+
         /** @brief Adds a namespace to the stack.
         */
         void setNamespace(unsigned depth, const String& prefix, const String& name);

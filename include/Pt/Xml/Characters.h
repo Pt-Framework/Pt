@@ -32,85 +32,113 @@
 
 namespace Pt {
 
-    namespace Xml {
+namespace Xml {
+
+/**
+ * @brief A Character element (Node) of an XML document, containing the body's Text of a tag.
+ *
+ * A Character element stores the data of a tag's body. The data is interpreted before it
+ * is set as content of a Character element. This means that entities were translated into
+ * their corresponding character sequence, ...
+ *
+ * Use content() to get the content of the CDATA element.
+ *
+ * When parsing a tag $&lt;a>This is the body's Text&lt;/a>$ the following content will be
+ * returned by content(): $This is the body's Text$
+ *
+ * @see Node
+ */
+class PT_XML_API Characters : public Node
+{
+    public:
+        /**
+         * @brief Constructs a new Character object with the given (optional) string as content.
+         *
+         * @param content The content of the Character object. This is an optional parameter.
+         * Default is an empty string.
+         */
+        explicit Characters( const String& content = String() )
+        : Node(Node::Characters), _content(content)
+        { }
 
         /**
-         * @brief A Character element (Node) of an XML document, containing the body's Text of a tag.
-         *
-         * A Character element stores the data of a tag's body. The data is interpreted before it
-         * is set as content of a Character element. This means that entities were translated into
-         * their corresponding character sequence, ...
-         *
-         * Use content() to get the content of the CDATA element.
-         *
-         * When parsing a tag $&lt;a>This is the body's Text&lt;/a>$ the following content will be
-         * returned by content(): $This is the body's Text$
-         *
-         * @see Node
+         * @brief Returns $true$ if the content of this Character object is empty; $false$ otherwise.
+         * @return $true$ if the content of this Character object is empty; $false$ otherwise.
          */
-        class PT_XML_API Characters : public Node
-        {
-            public:
-                /**
-                 * @brief Constructs a new Character object with the given (optional) string as content.
-                 *
-                 * @param content The content of the Character object. This is an optional parameter.
-                 * Default is an empty string.
-                 */
-                explicit Characters( const String& content = String() )
-                : Node(Node::Characters), _content(content)
-                { }
+        bool empty() const
+        { return _content.empty(); }
 
-                /**
-                 * @brief Returns $true$ if the content of this Character object is empty; $false$ otherwise.
-                 * @return $true$ if the content of this Character object is empty; $false$ otherwise.
-                 */
-                bool empty() const
-                { return _content.empty(); }
+        void clear()
+        { _content.clear(); }
 
-                void clear()
-                { _content.clear(); }
+        /**
+         * @brief Returns the content of this Character object.
+         *
+         * The content includes the Text inside a tag's body. The Text is interpreted before it
+         * is returned, this means that for example entities are translated into their corresponding
+         * character sequence. When parsing a tag $<a>This is the body's Text</a>$ the followin
+         * content will be returned: $This is the body's Text$
+         *
+         * @return The content of this Character object.
+         */
+        String& content()
+        { return _content; }
 
-                /**
-                 * @brief Returns the content of this Character object.
-                 *
-                 * The content includes the Text inside a tag's body. The Text is interpreted before it
-                 * is returned, this means that for example entities are translated into their corresponding
-                 * character sequence. When parsing a tag $<a>This is the body's Text</a>$ the followin
-                 * content will be returned: $This is the body's Text$
-                 *
-                 * @return The content of this Character object.
-                 */
-                String& content()
-                { return _content; }
+        /**
+         * @brief Returns the content of this Character object.
+         *
+         * The content includes the Text inside a tag's body. The Text is interpreted before it
+         * is returned, this means that for example entities are translated into their corresponding
+         * character sequence. When parsing a tag $<a>This is the body's Text</a>$ the followin
+         * content will be returned: $This is the body's Text$
+         *
+         * @return The content of this Character object.
+         */
+        const String& content() const
+        { return _content; }
 
-                /**
-                 * @brief Returns the content of this Character object.
-                 *
-                 * The content includes the Text inside a tag's body. The Text is interpreted before it
-                 * is returned, this means that for example entities are translated into their corresponding
-                 * character sequence. When parsing a tag $<a>This is the body's Text</a>$ the followin
-                 * content will be returned: $This is the body's Text$
-                 *
-                 * @return The content of this Character object.
-                 */
-                const String& content() const
-                { return _content; }
+        /**
+         * @brief Sets the content of this Character object.
+         * @param content The new content for this Character object.
+         */
+        void setContent(const String& content)
+        { _content = content; }
 
-                /**
-                 * @brief Sets the content of this Character object.
-                 * @param content The new content for this Character object.
-                 */
-                void setContent(const String& content)
-                { _content = content; }
+        inline static const Node::Type nodeId()
+        { return Node::Characters; }
 
-            private:
-                //! The content of this Character object.
-                String _content;
-        };
+    private:
+        String _content;
+};
 
-    }
 
+inline Characters* toCharacters(Node* node)
+{
+    return nodeCast<Characters>(node);
 }
 
+
+inline const Characters* toCharacters(const Node* node)
+{
+    return nodeCast<Characters>(node);
+}
+
+
+inline Characters& toCharacters(Node& node)
+{
+    return nodeCast<Characters>(node);
+}
+
+
+inline const Characters& toCharacters(const Node& node)
+{
+    return nodeCast<Characters>(node);
+}
+
+
+} // namespace Xml
+
+} // namespace Pt
+
 #endif
+

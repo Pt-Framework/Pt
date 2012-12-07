@@ -715,8 +715,11 @@ class XmlReaderImpl
                 {
                     _nsctx.setDefaultNamespace(_depth+1, _attr.value());
                 }
-
-                _startElem.attributes().add(_attr);
+                else
+                {
+                    _startElem.attributes().add(_attr);
+                }
+                
                 _parse = &XmlReaderImpl::beforeAttribute;
                 return;
             }
@@ -1089,35 +1092,58 @@ class XmlReaderImpl
 
         void setNamespace(StartElement& se)
         {
-            const Namespace* ns = _nsctx.getNamespace( se.prefix() );
-            if( ! ns )
+            if( se.prefix().empty() )
             {
-                if( ! se.prefix().empty() )
-                    throw SyntaxError("undeclared namespace prefix", _line);
+                const Namespace* ns = _nsctx.getDefaultNamespace();
+                if(ns)
+                    se.setNamespace(*ns);
             }
             else
+            {
+                const Namespace* ns = _nsctx.getNamespace( se.prefix() );
+                if( ! ns )
+                    throw SyntaxError("undeclared namespace prefix", _line);
+
                 se.setNamespace(*ns);
+            }
             
             AttributeList& attributes = se.attributes();
             AttributeList::Iterator it;
             for(it = attributes.begin(); it != attributes.end(); ++it)
             {
-                const Namespace* attrNs = _nsctx.getNamespace( it->prefix() );
-                if( ! attrNs )
+                if( it->prefix().empty() )
                 {
-                    if( ! it->prefix().empty() )
-                        throw SyntaxError( (it->prefix().narrow() + " undeclared namespace prefix").c_str(), _line);
+                     const Namespace* ns = _nsctx.getDefaultNamespace();
+                    if(ns)
+                        it->setNamespace(*ns);
                 }
                 else
-                    it->setNamespace(*attrNs);
+                {
+                    const Namespace* ns = _nsctx.getNamespace( it->prefix() );
+                    if( ! ns )
+                    {
+                        throw SyntaxError("undeclared namespace prefix", _line);
+                    }
+
+                    it->setNamespace(*ns);
+                }    
             }
         }
 
         void setNamespace(EndElement& e)
         {
-            const Namespace* ns = _nsctx.getNamespace( e.prefix() );
-            if(ns)
+            if( e.prefix().empty() )
             {
+                const Namespace* ns = _nsctx.getDefaultNamespace();
+                if(ns)
+                    e.setNamespace(*ns);
+            }
+            else
+            {
+                const Namespace* ns = _nsctx.getNamespace( e.prefix() );
+                if( ! ns )
+                    throw SyntaxError("undeclared namespace prefix", _line);
+
                 e.setNamespace(*ns);
             }
         }

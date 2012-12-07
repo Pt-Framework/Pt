@@ -70,12 +70,12 @@ class Namespace
 
         /** @brief Returns the namespace name.
         */
-        const String& name() const
+        const String& namespaceUri() const
         { return _name; }
 
         /** @brief Sets the name of the namespace.
         */
-        void setNamespace(const String& name)
+        void setNamespaceUri(const String& name)
         { _name = name; }
 
         /** @brief Returns true if this is the default namespace.

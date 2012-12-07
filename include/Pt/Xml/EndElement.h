@@ -113,7 +113,7 @@ class EndElement : public Node
         { _name = name; }
 
         const String& namespaceUri() const
-        { return _namespace ? _namespace->name() : _prefix; }
+        { return _namespace ? _namespace->namespaceUri() : _prefix; }
         
         void setNamespace(const Namespace& ns)
         { _namespace = &ns; }

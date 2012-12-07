@@ -361,10 +361,9 @@ void XmlTest::ElementWithNamespace()
 
     // b
     ++it;
-    const Pt::Xml::Node& charactersNode = *it;
-    PT_UNIT_ASSERT(charactersNode.type() == Pt::Xml::Node::Characters);
-    PT_UNIT_ASSERT(dynamic_cast<const Pt::Xml::Characters*>(&charactersNode)->content() == L"b");
-    PT_UNIT_ASSERT( reader.depth() == 2);
+    const Pt::Xml::Characters& text = Pt::Xml::toCharacters(*it);
+    PT_UNIT_ASSERT(text.content() == L"b");
+    PT_UNIT_ASSERT(reader.depth() == 2);
 
     // </my:a>
     ++it;
@@ -411,11 +410,9 @@ void XmlTest::AttributeWithNamespace()
 
     // b
     ++it;
-    const Pt::Xml::Node& charactersNode = *it;
-
-    PT_UNIT_ASSERT(charactersNode.type() == Pt::Xml::Node::Characters);
-    PT_UNIT_ASSERT(dynamic_cast<const Pt::Xml::Characters*>(&charactersNode)->content() == L"b");
-    PT_UNIT_ASSERT( reader.depth() == 1);
+    const Pt::Xml::Characters& text = Pt::Xml::toCharacters(*it);
+    PT_UNIT_ASSERT(text.content() == L"b");
+    PT_UNIT_ASSERT(reader.depth() == 1);
 
     // </a>
     ++it;

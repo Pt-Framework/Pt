@@ -41,7 +41,7 @@ const Namespace* NamespaceContext::getNamespace(const String& prefix) const
       // empty prefix string is default namespace
       if( prefix == it->prefix() )
       {
-          const String& name = it->name();
+          const String& name = it->namespaceUri();
 
           // empty URI strings mean the namespace prefix was unset
           if( ! name.empty() )
@@ -53,6 +53,31 @@ const Namespace* NamespaceContext::getNamespace(const String& prefix) const
 
     return ret;
 }
+
+
+const Namespace* NamespaceContext::getDefaultNamespace() const
+{
+    const Namespace* ret = 0;
+    std::vector<Namespace>::const_reverse_iterator it;
+
+    for(it = _namespaces.rbegin(); it != _namespaces.rend(); ++it)
+    {
+      // empty prefix string is default namespace
+      if( it->isDefaultNamespace() )
+      {
+          const String& name = it->namespaceUri();
+
+          // empty URI strings mean the namespace prefix was unset
+          if( ! name.empty() )
+              ret = &(*it);
+          
+          break;
+      }
+    }
+
+    return ret;
+}
+
 
 
 void NamespaceContext::setNamespace(unsigned depth, const String& prefix, const String& name)
