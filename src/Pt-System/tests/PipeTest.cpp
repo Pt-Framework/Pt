@@ -35,7 +35,7 @@
 #include "Pt/Unit/RegisterTest.h"
 #include <string>
 #include <iostream>
-
+#include <cstddef>
 
 class PipeTest : public Pt::Unit::TestSuite
 {
@@ -86,7 +86,7 @@ class PipeTest : public Pt::Unit::TestSuite
 
         void onRead(Pt::System::IODevice& dev)
         {
-            size_t sz = dev.endRead();
+            std::size_t sz = dev.endRead();
             _result.append(_buffer, sz);
 
             if( _result.size() < _data.size() )
@@ -112,7 +112,7 @@ class PipeTest : public Pt::Unit::TestSuite
             _loop->run();
 
             char buffer[1024];
-            size_t n = pipe.out().read(buffer, sizeof(buffer));
+            std::size_t n = pipe.out().read(buffer, sizeof(buffer));
             std::string result(buffer, n);
             //this->reportMessage(result);
             PT_UNIT_ASSERT(result == _data);
@@ -122,7 +122,7 @@ class PipeTest : public Pt::Unit::TestSuite
         {
             _pos += dev.endWrite();
 
-            size_t len = std::min(sizeof(_buffer), _data.size() - _pos);
+            std::size_t len = std::min(sizeof(_buffer), _data.size() - _pos);
             if(0 == len)
             {
                 _loop->exit();
@@ -149,7 +149,7 @@ class PipeTest : public Pt::Unit::TestSuite
 
         void onReadRemove(Pt::System::IODevice& dev)
         {
-            size_t sz = dev.endRead();
+            std::size_t sz = dev.endRead();
             _result.append(_buffer, sz);
 
             dev.close();
@@ -185,7 +185,7 @@ class PipeTest : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT( 0 < buffer.in_avail() );
 
             char in[20];
-            size_t n = buffer.sgetn( in, buffer.in_avail() );
+            std::size_t n = buffer.sgetn( in, buffer.in_avail() );
             PT_UNIT_ASSERT( 0 < n );
 
             std::string data(in, n);
@@ -203,7 +203,7 @@ class PipeTest : public Pt::Unit::TestSuite
     private:
         Pt::System::MainLoop* _loop;
         std::string _data;
-        size_t _pos;
+        std::size_t _pos;
         char _buffer[10];
         std::string _result;
         Pt::System::IOBuffer inbuf;
