@@ -116,7 +116,7 @@ Pt::Reflex::FunctionInfo* FunctionTable::find(const std::string& name)
 
 Pt::Reflex::FunctionInfo* FunctionTable::find(const std::string& name, const Pt::Reflex::ArgumentList& args)
 {
-    size_t nargs = args.size();
+    std::size_t nargs = args.size();
 
     Container::iterator it;
     for(it = _entries.begin(); it != _entries.end(); ++it)
@@ -128,7 +128,7 @@ Pt::Reflex::FunctionInfo* FunctionTable::find(const std::string& name, const Pt:
             if(nargs == 0)
                 return fi;
 
-            size_t n = 0;
+            std::size_t n = 0;
             Pt::Reflex::Type** param = fi->params();
             ArgumentIterator iter = args.begin();
             for(; n < nargs; ++n, ++iter, ++param)
@@ -146,7 +146,7 @@ Pt::Reflex::FunctionInfo* FunctionTable::find(const std::string& name, const Pt:
 }
 
 
-Pt::Reflex::FunctionInfo* FunctionTable::find(const std::string& name, Pt::Reflex::Type** args, size_t nargs)
+Pt::Reflex::FunctionInfo* FunctionTable::find(const std::string& name, Pt::Reflex::Type** args, std::size_t nargs)
 {
     Container::iterator it;
     for(it = _entries.begin(); it != _entries.end(); ++it)
@@ -159,7 +159,7 @@ Pt::Reflex::FunctionInfo* FunctionTable::find(const std::string& name, Pt::Refle
                 return fi;
 
             Pt::Reflex::Type** param = fi->params();
-            size_t n = 0;
+            std::size_t n = 0;
             for( ; n < nargs; ++n, ++param)
             {
                 if( ! args[n]->isTypeOf(**param) )
@@ -187,7 +187,7 @@ bool FunctionTable::insert(Pt::Reflex::FunctionInfo* fi)
             if(nargs == 0)
                 return false;
 
-            size_t n = 0;
+            std::size_t n = 0;
             Pt::Reflex::Type** param = fi->params();
             Pt::Reflex::Type** bparam = (*it)->params();
 
@@ -549,7 +549,7 @@ Pt::Reflex::FunctionInfo* TypeManager::function(const std::string& name, const P
 }
 
 
-Pt::Reflex::FunctionInfo* TypeManager::function(const std::string& name, Pt::Reflex::Type** args, size_t nargs)
+Pt::Reflex::FunctionInfo* TypeManager::function(const std::string& name, Pt::Reflex::Type** args, std::size_t nargs)
 {
     return _functions.find(name, args, nargs);
 }

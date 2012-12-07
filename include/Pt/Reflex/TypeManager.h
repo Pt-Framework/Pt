@@ -153,7 +153,7 @@ class PT_REFLEX_API FunctionTable
 
         Pt::Reflex::FunctionInfo* find(const std::string& name, const Pt::Reflex::ArgumentList& args);
 
-        Pt::Reflex::FunctionInfo* find(const std::string& name, Pt::Reflex::Type** args, size_t nargs);
+        Pt::Reflex::FunctionInfo* find(const std::string& name, Pt::Reflex::Type** args, std::size_t nargs);
 
         bool insert(Pt::Reflex::FunctionInfo* fi);
 
@@ -293,9 +293,9 @@ class PT_REFLEX_API TypeManager
 
         virtual ~TypeManager();
 
-        virtual void* alloc(size_t bytes) = 0;
+        virtual void* alloc(std::size_t bytes) = 0;
 
-        virtual void dealloc(void* p, size_t bytes) = 0;
+        virtual void dealloc(void* p, std::size_t bytes) = 0;
 
         Type* getType(const std::type_info& ti);
 
@@ -327,7 +327,7 @@ class PT_REFLEX_API TypeManager
 
         Pt::Reflex::FunctionInfo* function(const std::string& name, const Pt::Reflex::ArgumentList& args);
 
-        Pt::Reflex::FunctionInfo* function(const std::string& name, Pt::Reflex::Type** args, size_t nargs);
+        Pt::Reflex::FunctionInfo* function(const std::string& name, Pt::Reflex::Type** args, std::size_t nargs);
 
         TypeTable& types()
         { return _ttab; }

@@ -57,7 +57,7 @@ class FunctionInfo
         const char* name() const
         { return _name.c_str(); }
 
-        size_t psize() const
+        std::size_t psize() const
         { return _nargs; }
 
         Pt::Reflex::Type** params()
@@ -68,7 +68,7 @@ class FunctionInfo
 
         virtual Any call(const Pt::Reflex::ArgumentList& args) = 0;
 
-        Any call(Pt::Reflex::Argument* args, size_t n)
+        Any call(Pt::Reflex::Argument* args, std::size_t n)
         {
             ArgumentList alist(args, n);
             return call(alist);
@@ -93,7 +93,7 @@ class FunctionInfo
         , _nargs(0)
         { }
 
-        void init(Pt::Reflex::Type& rtype, Pt::Reflex::Type** atypes, size_t nargs)
+        void init(Pt::Reflex::Type& rtype, Pt::Reflex::Type** atypes, std::size_t nargs)
         {
             _rtype = &rtype;
             _ptypes = atypes;
@@ -115,7 +115,7 @@ class FunctionInfo
         std::string _name;
         Pt::Reflex::Type* _rtype;
         Pt::Reflex::Type** _ptypes;
-        size_t _nargs;
+        std::size_t _nargs;
 };
 
 }

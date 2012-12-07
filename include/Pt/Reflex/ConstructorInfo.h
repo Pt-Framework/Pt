@@ -50,7 +50,7 @@ class ConstructorInfo
 
         //virtual void define(TypeManager& tm) = 0;
 
-        size_t psize() const
+        std::size_t psize() const
         { return _nargs; }
 
         Pt::Reflex::Type** params()
@@ -58,7 +58,7 @@ class ConstructorInfo
 
         virtual void call(void* instance, const ArgumentList& args) = 0;
 
-        void call(void* instance, Pt::Reflex::Argument* args, size_t n)
+        void call(void* instance, Pt::Reflex::Argument* args, std::size_t n)
         {
             ArgumentList alist(args, n);
             this->call(instance, alist);
@@ -84,7 +84,7 @@ class ConstructorInfo
         , _nargs(0)
         {}
 
-        void init(Pt::Reflex::Type** atypes, size_t nargs)
+        void init(Pt::Reflex::Type** atypes, std::size_t nargs)
         {
             _ptypes = atypes;
             _nargs = nargs;
@@ -96,7 +96,7 @@ class ConstructorInfo
     private:
         unsigned _refs;
         Pt::Reflex::Type** _ptypes;
-        size_t _nargs;
+        std::size_t _nargs;
 };
 
 }

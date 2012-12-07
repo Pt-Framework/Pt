@@ -151,7 +151,7 @@ class PT_REFLEX_API ConstructorTable
 
         Pt::Reflex::ConstructorInfo* find(const Pt::Reflex::ArgumentList& args);
 
-        Pt::Reflex::ConstructorInfo* find(Pt::Reflex::Type** args, size_t nargs);
+        Pt::Reflex::ConstructorInfo* find(Pt::Reflex::Type** args, std::size_t nargs);
 
         bool insert(Pt::Reflex::ConstructorInfo* ci);
 
@@ -269,11 +269,11 @@ class PT_REFLEX_API MethodTable
 
         Pt::Reflex::MethodInfo* find(const std::string& name, const ArgumentList& args);
 
-        Pt::Reflex::MethodInfo* find(const std::string& name, Type** args, size_t nargs);
+        Pt::Reflex::MethodInfo* find(const std::string& name, Type** args, std::size_t nargs);
 
         Pt::Reflex::MethodInfo* find(unsigned id);
 
-        unsigned findId(const std::string& name, Type** args, size_t nargs);
+        unsigned findId(const std::string& name, Type** args, std::size_t nargs);
 
         void insert(Pt::Reflex::MethodInfo* fi);
 
@@ -477,11 +477,11 @@ class PT_REFLEX_API Type
             return false;
         }
 
-        virtual size_t size() const = 0;
+        virtual std::size_t size() const = 0;
 
         ConstructorInfo* constructor( const Pt::Reflex::ArgumentList& args);
 
-        ConstructorInfo* constructor( Pt::Reflex::Type** args, size_t nargs);
+        ConstructorInfo* constructor( Pt::Reflex::Type** args, std::size_t nargs);
 
         ConstructorTable& constructors()
         { return _ctab; }
@@ -493,7 +493,7 @@ class PT_REFLEX_API Type
 
         MethodInfo* method(unsigned id);
 
-        unsigned methodId(const char* name, Pt::Reflex::Type** args, size_t nargs);
+        unsigned methodId(const char* name, Pt::Reflex::Type** args, std::size_t nargs);
 
         MethodTable& methods()
         { return _mtab; }

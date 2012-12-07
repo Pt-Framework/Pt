@@ -55,7 +55,7 @@ class MethodInfo
         const char* name() const
         { return _name.c_str(); }
 
-        size_t psize() const
+        std::size_t psize() const
         { return _nargs; }
 
         Pt::Reflex::Type** params()
@@ -66,7 +66,7 @@ class MethodInfo
 
         virtual Any call(void* instance, const ArgumentList& args) = 0;
 
-        Any call(void* instance, Pt::Reflex::Argument* args, size_t n)
+        Any call(void* instance, Pt::Reflex::Argument* args, std::size_t n)
         {
             ArgumentList alist(args, n);
             return call(instance, alist);
@@ -96,7 +96,7 @@ class MethodInfo
         , _nargs(0)
         {}
 
-        void init(Pt::Reflex::Type& rtype, Pt::Reflex::Type** atypes, size_t nargs)
+        void init(Pt::Reflex::Type& rtype, Pt::Reflex::Type** atypes, std::size_t nargs)
         {
             _rtype = &rtype;
             _ptypes = atypes;
@@ -111,7 +111,7 @@ class MethodInfo
         std::string _name;
         Pt::Reflex::Type* _rtype;
         Pt::Reflex::Type** _ptypes;
-        size_t _nargs;
+        std::size_t _nargs;
 };
 
 }

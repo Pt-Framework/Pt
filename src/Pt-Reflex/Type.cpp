@@ -100,7 +100,7 @@ unsigned ConstructorTable::size() const
 
 Pt::Reflex::ConstructorInfo* ConstructorTable::find(const Pt::Reflex::ArgumentList& args)
 {
-    size_t nargs = args.size();
+    std::size_t nargs = args.size();
 
     Container::iterator it;
     for(it = _entries.begin(); it != _entries.end(); ++it)
@@ -112,7 +112,7 @@ Pt::Reflex::ConstructorInfo* ConstructorTable::find(const Pt::Reflex::ArgumentLi
             if(nargs == 0)
                 return ci;
 
-            size_t n = 0;
+            std::size_t n = 0;
             Pt::Reflex::Type** param = ci->params();
             ArgumentIterator iter = args.begin();
             for(; n < nargs; ++n, ++iter, ++param)
@@ -130,7 +130,7 @@ Pt::Reflex::ConstructorInfo* ConstructorTable::find(const Pt::Reflex::ArgumentLi
 }
 
 
-Pt::Reflex::ConstructorInfo* ConstructorTable::find(Pt::Reflex::Type** args, size_t nargs)
+Pt::Reflex::ConstructorInfo* ConstructorTable::find(Pt::Reflex::Type** args, std::size_t nargs)
 {
     Container::iterator it;
     for(it = _entries.begin(); it != _entries.end(); ++it)
@@ -143,7 +143,7 @@ Pt::Reflex::ConstructorInfo* ConstructorTable::find(Pt::Reflex::Type** args, siz
                 return ci;
 
             Pt::Reflex::Type** param = ci->params();
-            size_t n = 0;
+            std::size_t n = 0;
             for( ; n < nargs; ++n, ++param)
             {
                 if( ! args[n]->isTypeOf(**param) )
@@ -171,7 +171,7 @@ bool ConstructorTable::insert(Pt::Reflex::ConstructorInfo* ci)
             if(nargs == 0)
                 return false;
 
-            size_t n = 0;
+            std::size_t n = 0;
             Pt::Reflex::Type** param = ci->params();
             Pt::Reflex::Type** bparam = (*it)->params();
 
@@ -294,7 +294,7 @@ Pt::Reflex::MethodInfo* MethodTable::find(const std::string& name, const Argumen
             Pt::Reflex::ArgumentIterator iter = args.begin();
             Pt::Reflex::Type** param = mi->params();
 
-            for(size_t n = 0; n < args.size(); ++param, ++iter, ++n)
+            for(std::size_t n = 0; n < args.size(); ++param, ++iter, ++n)
             {
                 Pt::Reflex::Type& arg = iter->type();
 
@@ -308,7 +308,7 @@ Pt::Reflex::MethodInfo* MethodTable::find(const std::string& name, const Argumen
 }
 
 
-Pt::Reflex::MethodInfo* MethodTable::find(const std::string& name, Pt::Reflex::Type** args, size_t nargs)
+Pt::Reflex::MethodInfo* MethodTable::find(const std::string& name, Pt::Reflex::Type** args, std::size_t nargs)
 {
     Container::iterator it;
     for(it = _entries.begin(); it != _entries.end(); ++it)
@@ -322,7 +322,7 @@ Pt::Reflex::MethodInfo* MethodTable::find(const std::string& name, Pt::Reflex::T
 
             Pt::Reflex::Type** param = mi->params();
 
-            size_t n = 0;
+            std::size_t n = 0;
             for( ; n < nargs; ++n, ++param)
             {
                 Pt::Reflex::Type* arg = args[n];
@@ -349,7 +349,7 @@ Pt::Reflex::MethodInfo* MethodTable::find(unsigned id)
 }
 
 
-unsigned MethodTable::findId(const std::string& name, Pt::Reflex::Type** args, size_t nargs)
+unsigned MethodTable::findId(const std::string& name, Pt::Reflex::Type** args, std::size_t nargs)
 {
     unsigned id = 0;
 
@@ -364,7 +364,7 @@ unsigned MethodTable::findId(const std::string& name, Pt::Reflex::Type** args, s
 
             Pt::Reflex::Type** param = mi->params();
 
-            size_t n = 0;
+            std::size_t n = 0;
             for( ;n < nargs; ++n, ++param)
             {
                 if( ! args[n]->isTypeOf(**param) )
@@ -400,7 +400,7 @@ void MethodTable::insert(Pt::Reflex::MethodInfo* mi)
         Pt::Reflex::Type** param = mi->params();
         Pt::Reflex::Type** bparam = (*it)->params();
 
-        for(size_t n = 0; n < nargs; ++n, ++param, ++bparam)
+        for(std::size_t n = 0; n < nargs; ++n, ++param, ++bparam)
         {
             if( ! (*param)->isTypeOf(**bparam) )
             {
@@ -631,7 +631,7 @@ ConstructorInfo* Type::constructor( const Pt::Reflex::ArgumentList& args)
 }
 
 
-ConstructorInfo* Type::constructor( Pt::Reflex::Type** args, size_t nargs)
+ConstructorInfo* Type::constructor( Pt::Reflex::Type** args, std::size_t nargs)
 {
     return _ctab.find(args, nargs);
 }
@@ -649,7 +649,7 @@ MethodInfo* Type::method(unsigned id)
 }
 
 
-unsigned Type::methodId(const char* name, Pt::Reflex::Type** args, size_t nargs)
+unsigned Type::methodId(const char* name, Pt::Reflex::Type** args, std::size_t nargs)
 {
     return _mtab.findId(name, args, nargs);
 }
