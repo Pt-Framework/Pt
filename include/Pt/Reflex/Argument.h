@@ -30,6 +30,7 @@
 
 #include <Pt/Reflex/Api.h>
 #include <Pt/Any.h>
+#include <cstddef>
 
 namespace Pt {
 
@@ -87,7 +88,7 @@ class Argument
 class ArgumentIterator
 {
     public:
-        ArgumentIterator(Argument* args, size_t stride)
+        ArgumentIterator(Argument* args, std::size_t stride)
         : _arg(args)
         , _stride(stride)
         {}
@@ -100,7 +101,7 @@ class ArgumentIterator
             return *this;
         }
 
-        ArgumentIterator operator+(size_t offset) const
+        ArgumentIterator operator+(std::size_t offset) const
         {
             char* p = (char*)(_arg);
             p += (_stride * offset);
@@ -114,7 +115,7 @@ class ArgumentIterator
         Argument* operator->() const
         { return _arg; }
 
-        size_t stride() const
+        std::size_t stride() const
         { return _stride; }
 
         Argument* get() const
@@ -122,7 +123,7 @@ class ArgumentIterator
 
     private:
         Argument* _arg;
-        const size_t _stride;
+        const std::size_t _stride;
 };
 
 
@@ -135,12 +136,12 @@ class ArgumentList
         {}
 
         template <typename T>
-        ArgumentList(T* args, size_t length)
+        ArgumentList(T* args, std::size_t length)
         : _begin( args, sizeof(T) )
         , _length(length)
         {}
 
-        ArgumentList(Argument* args, size_t length, size_t stride)
+        ArgumentList(Argument* args, std::size_t length, std::size_t stride)
         : _begin(args, stride)
         , _length(length)
         {}
@@ -151,12 +152,12 @@ class ArgumentList
         ArgumentIterator end() const
         { return _begin + _length; }
 
-        size_t size() const
+        std::size_t size() const
         { return _length; }
 
     private:
         ArgumentIterator _begin;
-        size_t _length;
+        std::size_t _length;
 };
 
 }
