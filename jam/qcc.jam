@@ -1,5 +1,5 @@
 
-Load Jamrules.gcc ;
+Load gcc.jam ;
 
 
 # Compiler flags and tools
