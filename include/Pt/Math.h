@@ -111,7 +111,7 @@ inline double hypot(double x, double y)
     #if defined(_MSC_VER) || defined(_WIN32_WCE) || defined(_WIN32)
         return _hypot(x, y);
     #else
-        return ::hypot(x, y);
+        return std::hypot(x, y);
     #endif
 }
 
