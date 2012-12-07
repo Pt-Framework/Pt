@@ -341,7 +341,7 @@ void DrawWideSolidPolyline::drawSegment( ARgbImage& image, const Pen& pen, Point
             maxy = -ya;
         }
 
-        finaly = ceil(maxy) + to.y();
+        finaly = std::ceil(maxy) + to.y();
 
         if (dx < 0)
         {
