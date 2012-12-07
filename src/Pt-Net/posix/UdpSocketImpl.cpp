@@ -235,7 +235,7 @@ void UdpSocketImpl::joinMulticastGroup(const std::string& ipaddr)
             ip_mreq req;
 
             sockaddr_in* sa = (sockaddr_in*)(it->ai_addr);
-            memcpy( &req.imr_multiaddr, &sa->sin_addr, sizeof(struct in_addr) );
+            std::memcpy( &req.imr_multiaddr, &sa->sin_addr, sizeof(struct in_addr) );
 
             req.imr_interface.s_addr = htonl(INADDR_ANY);
 
@@ -248,7 +248,7 @@ void UdpSocketImpl::joinMulticastGroup(const std::string& ipaddr)
         {
             ipv6_mreq req;
             sockaddr_in6* sa = (sockaddr_in6*)(it->ai_addr);
-            memcpy( &req.ipv6mr_multiaddr, &sa->sin6_addr, sizeof(struct in6_addr) );
+            std::memcpy( &req.ipv6mr_multiaddr, &sa->sin6_addr, sizeof(struct in6_addr) );
 
             req.ipv6mr_interface = 0;
 
@@ -277,7 +277,7 @@ void UdpSocketImpl::dropMulticastGroup(const std::string& ipaddr)
             ip_mreq req;
 
             sockaddr_in* sa = (sockaddr_in*)(it->ai_addr);
-            memcpy( &req.imr_multiaddr, &sa->sin_addr, sizeof(struct in_addr) );
+            std::memcpy( &req.imr_multiaddr, &sa->sin_addr, sizeof(struct in_addr) );
 
             req.imr_interface.s_addr = htonl(INADDR_ANY);
 
@@ -290,7 +290,7 @@ void UdpSocketImpl::dropMulticastGroup(const std::string& ipaddr)
         {
             ipv6_mreq req;
             sockaddr_in6* sa = (sockaddr_in6*)(it->ai_addr);
-            memcpy( &req.ipv6mr_multiaddr, &sa->sin6_addr, sizeof(struct in6_addr) );
+            std::memcpy( &req.ipv6mr_multiaddr, &sa->sin6_addr, sizeof(struct in6_addr) );
 
             req.ipv6mr_interface = 0;
 
