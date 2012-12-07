@@ -29,6 +29,7 @@
 #include <Pt/Cma/Api.h>
 #include <Pt/Cma/TypeId.h>
 #include <Pt/Cma/IUnknown.h>
+#include <cstddef>
 
 namespace Pt {
 
@@ -62,7 +63,7 @@ class PT_EXPORT IComponentBuilder
             --_refCount;
         }
 
-        size_t instances()
+        std::size_t instances()
         {
             return _refCount;
         }
@@ -72,7 +73,7 @@ class PT_EXPORT IComponentBuilder
         TypeId _typeId;
 
         /** number of created components of this type */
-        size_t _refCount;
+        std::size_t _refCount;
 };
 
 }
