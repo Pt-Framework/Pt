@@ -112,6 +112,20 @@ rule ConfigureNsl
         }
     }
     
+    if ! $(WITH_NSL)
+    {
+        # check for nsl library
+        WITH_NSL = [ CheckBuildC++ "#include <netdb.h>"
+                                   "int main() { gethostbyname(\"1.2.3.4\"); return 0; }"
+                                   : ""
+                                   : -lsocket ] ;
+
+        if $(WITH_NSL)
+        {
+            NSL_LIBS += -lsocket ;
+        }
+    }
+
     EchoOption WITH_NSL : "Nsl library" ;
     Configure WITH_NSL ;
 
