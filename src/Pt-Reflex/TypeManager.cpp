@@ -32,6 +32,7 @@
 #include "Pt/Reflex/TypeSpecifier.h"
 #include <stdexcept>
 #include <iostream>
+#include <cstring>
 
 namespace Pt {
 
@@ -182,7 +183,7 @@ bool FunctionTable::insert(Pt::Reflex::FunctionInfo* fi)
     Container::iterator it;
     for(it = _entries.begin(); it != _entries.end(); ++it)
     {
-        if( 0 == strcmp( fi->name(), (*it)->name() ) && nargs == (*it)->psize() )
+        if( 0 == std::strcmp( fi->name(), (*it)->name() ) && nargs == (*it)->psize() )
         {
             if(nargs == 0)
                 return false;
