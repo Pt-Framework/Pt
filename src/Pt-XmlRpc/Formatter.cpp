@@ -33,6 +33,7 @@
 #include <limits>
 #include <cassert>
 #include <cmath>
+#include <cstddef>
 
 namespace  {
 
@@ -58,7 +59,7 @@ class array_appender : public std::iterator<std::output_iterator_tag, T>
 		, _end(0)
 		{ }
 
-		array_appender(T* ptr, size_t length)
+		array_appender(T* ptr, std::size_t length)
 		: _ptr(ptr)
 		, _end(ptr + length)
 		{ }
@@ -185,7 +186,7 @@ void Formatter::addInt32(const char* name, Pt::int32_t value, const char* id)
 
 void Formatter::addInt64(const char* name, Pt::int64_t value, const char* id)
 {
-    const size_t bufsize = (sizeof(value) * 4) + 1 ;
+    const std::size_t bufsize = (sizeof(value) * 4) + 1 ;
     Pt::Char buf[bufsize];
     
     array_appender<Pt::Char> it(buf, bufsize);
@@ -222,7 +223,7 @@ void Formatter::addUInt32(const char* name, Pt::uint32_t value, const char* id)
 
 void Formatter::addUInt64(const char* name, Pt::uint64_t value, const char* id)
 {
-    const size_t bufsize = (sizeof(value) * 4) + 1 ;
+    const std::size_t bufsize = (sizeof(value) * 4) + 1 ;
     Pt::Char buf[bufsize];
     
     array_appender<Pt::Char> it(buf, bufsize);
@@ -248,7 +249,7 @@ void Formatter::addFloat(const char* name, float value,const char* id)
 
 void Formatter::addDouble(const char* name, double value, const char* id)
 {
-    const size_t bufsize = 64;
+    const std::size_t bufsize = 64;
     Pt::Char buf[bufsize];
     
     array_appender<Pt::Char> it(buf, bufsize);
@@ -276,7 +277,7 @@ void Formatter::addLongDouble(const char* name, long double value,const char* id
 
 
 void Formatter::addBytes(const char* name, const char* type,
-                         const char* data, size_t length, const char* id)
+                         const char* data, std::size_t length, const char* id)
 {
     // TODO: this should be base64 encoded
 
