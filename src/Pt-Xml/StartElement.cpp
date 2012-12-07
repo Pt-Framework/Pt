@@ -1,4 +1,6 @@
 /*
+ * Copyright (C) 2012 Marc Boris Duerner
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -24,35 +26,59 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "Pt/Xml/StartElement.h"
+#include "Pt/Xml/XmlError.h"
 
 namespace Pt {
 
 namespace Xml {
 
-
-const String& StartElement::attribute(const String& attributeName) const
+AttributeList::ConstIterator AttributeList::find(const String& name) const
 {
-    static const String null;
-    
-    for(std::list<Attribute>::const_iterator it = _attributes.begin(); it != _attributes.end(); ++it) {
-        if(it->name() == attributeName) {
-            return it->value();
+    ConstIterator it;
+    for(it = _container.begin(); it != _container.end(); ++it) 
+    {
+        if(it->name() == name) 
+        {
+            break;
         }
     }
     
-    return null;
+    return it;
 }
 
 
-bool StartElement::hasAttribute(const String& attributeName) const
+AttributeList::ConstIterator AttributeList::find(const String& nsUri, const String& name) const
 {
-    for(std::list<Attribute>::const_iterator it = _attributes.begin(); it != _attributes.end(); ++it) {
-        if(it->name() == attributeName) {
-            return true;
+    ConstIterator it;
+    for(it = _container.begin(); it != _container.end(); ++it) 
+    {
+        if(it->name() == name && it->namespaceUri() == nsUri) 
+        {
+            break;
         }
     }
     
-    return false;
+    return it;
+}
+
+
+const String& StartElement::attribute(const String& name) const
+{
+    AttributeList::ConstIterator it = attributes().find(name);
+    if( it == _attributes.end() )
+        throw NoSuchAttribute(name);
+
+    return it->value();
+}
+
+
+const String& StartElement::attribute(const String& nsUri, const String& name) const
+{
+    AttributeList::ConstIterator it = attributes().find(nsUri, name);
+    if( it == _attributes.end() )
+        throw NoSuchAttribute(name);
+
+    return it->value();
 }
 
 } // namespace Xml

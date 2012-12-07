@@ -31,8 +31,6 @@ namespace Pt {
 
 namespace Xml {
 
-// TODO: return null if not found !!!
-//       reader has to throw an exception then
 const Namespace* NamespaceContext::getNamespace(const String& prefix) const
 {
     const Namespace* ret = 0;
@@ -40,9 +38,12 @@ const Namespace* NamespaceContext::getNamespace(const String& prefix) const
 
     for(it = _namespaces.rbegin(); it != _namespaces.rend(); ++it)
     {
+      // empty prefix string is default namespace
       if( prefix == it->prefix() )
       {
           const String& name = it->name();
+
+          // empty URI strings mean the namespace prefix was unset
           if( ! name.empty() )
               ret = &(*it);
           
@@ -57,6 +58,12 @@ const Namespace* NamespaceContext::getNamespace(const String& prefix) const
 void NamespaceContext::setNamespace(unsigned depth, const String& prefix, const String& name)
 {
     _namespaces.push_back( Namespace(depth, prefix, name) );
+}
+
+
+void NamespaceContext::setDefaultNamespace(unsigned depth, const String& name)
+{
+    _namespaces.push_back( Namespace(depth, String(), name) );
 }
 
 

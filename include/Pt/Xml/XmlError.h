@@ -27,30 +27,60 @@
 #define Pt_Xml_XmlError_h
 
 #include <Pt/Xml/Api.h>
+#include <Pt/String.h>
 #include <stdexcept>
 
 namespace Pt {
 
 namespace Xml {
 
-//! @brief Exception that is thrown when a parse error occured.
+//! @brief Exception during XML processing.
 class PT_XML_API XmlError : public std::runtime_error
 {
     public:
         /** @brief XML format errors.
-
-            Creates a new XmlError object using the given reason and source info.
-
-            @param what The reason of the parse error.
-            @param line Line number where the exception occured.
         */
-        XmlError(const char* what, unsigned line);
+        explicit XmlError(const char* what);
+
+        ~XmlError() throw()
+        {}
+};
+
+//! @brief Indicates XML syntax errors.
+class PT_XML_API SyntaxError : public XmlError
+{
+    public:
+        /** @brief Construct with message and line number.
+        */
+        SyntaxError(const char* what, unsigned line);
+
+        ~SyntaxError() throw()
+        {}
 
         unsigned line() const
         { return _line; }
 
     private:
         unsigned _line;
+};
+
+
+//! @brief Indicates XML syntax errors.
+class PT_XML_API NoSuchAttribute : public XmlError
+{
+    public:
+        /** @brief Construct with message and line number.
+        */
+        NoSuchAttribute(const String& name);
+
+        ~NoSuchAttribute() throw()
+        {}
+
+        const String& name() const
+        { return _name; }
+
+    private:
+        String _name;
 };
 
 }

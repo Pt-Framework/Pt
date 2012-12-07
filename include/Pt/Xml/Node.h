@@ -29,6 +29,7 @@
 #define Pt_Xml_Node_h
 
 #include <Pt/Xml/Api.h>
+#include <Pt/Xml/XmlError.h>
 
 namespace Pt {
 
@@ -107,6 +108,50 @@ class Node
     private:
         Type _type;
 };
+
+
+template <typename T>
+T* nodeCast(Node* node)
+{
+    T* e = 0;
+        
+    if( node->type() == T::nodeId() )
+        e = static_cast<T*>(node);
+
+    return e;
+}
+
+
+template <typename T>
+const T* nodeCast(const Node* node)
+{
+    const T* e = 0;
+        
+    if( node->type() == T::nodeId() )
+        e = static_cast<const T*>(node);
+
+    return e;
+}
+
+
+template <typename T>
+T& nodeCast(Node& node)
+{
+    if( node.type() != T::nodeId() )
+        throw XmlError("unexpected node type");
+
+    return static_cast<T&>(node);
+}
+
+
+template <typename T>
+const T& nodeCast(const Node& node)
+{
+    if( node.type() != T::nodeId() )
+        throw XmlError("unexpected node type");
+
+    return static_cast<const T&>(node);
+}
 
 } // namespace Xml
 

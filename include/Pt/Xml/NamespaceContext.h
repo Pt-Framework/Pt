@@ -49,6 +49,11 @@ class PT_XML_API NamespaceContext
         NamespaceContext()
         { }
 
+        /** Destructor.
+        */
+        ~NamespaceContext()
+        { }
+
         /** @brief Removes all namespaces.
         */
         void clear()
@@ -61,6 +66,8 @@ class PT_XML_API NamespaceContext
         /** @brief Adds a namespace to the stack.
         */
         void setNamespace(unsigned depth, const String& prefix, const String& name);
+
+        void setDefaultNamespace(unsigned depth, const String& name);
 
         /** @brief Unset a namespace.
         */

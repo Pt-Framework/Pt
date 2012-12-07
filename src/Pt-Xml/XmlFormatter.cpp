@@ -493,29 +493,29 @@ void XmlFormatter::OnBegin(const Node& node)
             //std::cerr << "BEGIN MEMBER: " << se.name().narrow() << std::endl;
             _composer->setName( se.name().narrow() );
 
-            String nodeId = se.attribute(L"id");
-            if( ! nodeId.empty() )
+            AttributeList::ConstIterator nodeId = se.attributes().find(L"id");
+            if( nodeId != se.attributes().end() )
             {
                 //std::cerr << "ID: " << nodeId.narrow() << std::endl;
-                _composer->setId( nodeId.narrow() );
+                _composer->setId( nodeId->value().narrow() );
             }
 
-            String type = se.attribute(L"type");
-            if( type.empty() )
+            AttributeList::ConstIterator type = se.attributes().find(L"type");
+            if( type == se.attributes().end() )
             {
                 _composer->setTypeName(se.name().narrow());
             }
             else
             {
                 //std::cerr << "TYPE: " << type.narrow() << std::endl;
-                _composer->setTypeName(type.narrow());
+                _composer->setTypeName(type->value().narrow());
             }
 
-            String refId = se.attribute(L"ref");
-            if( ! refId.empty() )
+            AttributeList::ConstIterator refId = se.attributes().find(L"ref");
+            if( refId!= se.attributes().end() )
             {
                 //std::cerr << "REF: " << refId.narrow() << std::endl;
-                _composer->setReference( refId.narrow() );
+                _composer->setReference( refId->value().narrow() );
                 _processNode = &XmlFormatter::OnReferenceBegin;
                 break;
             }
@@ -700,25 +700,25 @@ void XmlFormatter::beginXmlMember(const Xml::StartElement& se)
     //std::cerr << "BEGIN MEMBER: " << se.name().narrow() << std::endl;
     _composer = _composer->beginMember(se.name().narrow() );
 
-    String nodeId = se.attribute(L"id");
-    if( ! nodeId.empty() )
+    AttributeList::ConstIterator nodeId = se.attributes().find(L"id");
+    if( nodeId != se.attributes().end() )
     {
         //std::cerr << "ID: " << nodeId.narrow() << std::endl;
-        _composer->setId( nodeId.narrow() );
+        _composer->setId( nodeId->value().narrow() );
     }
 
-    String type = se.attribute(L"type");
-    if( ! type.empty() )
+    AttributeList::ConstIterator type = se.attributes().find(L"type");
+    if( type != se.attributes().end() )
     {
         //std::cerr << "BTYPE: " << type.narrow() << std::endl;
-        _composer->setTypeName(type.narrow());
+        _composer->setTypeName(type->value().narrow());
     }
 
-    String refId = se.attribute(L"ref");
-    if( ! refId.empty() )
+    AttributeList::ConstIterator refId = se.attributes().find(L"ref");
+    if( refId != se.attributes().end() )
     {
         //std::cerr << "REF: " << refId.narrow() << std::endl;
-        _composer->setReference( refId.narrow() );
+        _composer->setReference( refId->value().narrow() );
         _processNode = &XmlFormatter::OnReferenceBegin;
         return;
     }

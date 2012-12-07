@@ -29,11 +29,25 @@ namespace Pt {
 
 namespace Xml {
 
-XmlError::XmlError(const char* what, unsigned line)
+XmlError::XmlError(const char* what)
 : std::runtime_error(what)
+{
+}
+
+
+SyntaxError::SyntaxError(const char* what, unsigned line)
+: XmlError(what)
 , _line(line)
 {
 }
+
+
+NoSuchAttribute::NoSuchAttribute(const String& name)
+: XmlError("no such attribute")
+, _name(name)
+{
+}
+
 
 } // namespace Xml
 

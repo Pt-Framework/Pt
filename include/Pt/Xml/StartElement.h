@@ -31,38 +31,20 @@
 #include <Pt/Xml/Namespace.h>
 #include <Pt/NonCopyable.h>
 #include <Pt/String.h>
-#include <list>
+#include <vector>
 
 namespace Pt {
 
 namespace Xml {
 
-/**
-  * @brief A class representing a single attribute of a tag from an XML document.
-  *
-  * An XML attribute consists of the attribute's name and the attribute's value.
-  * The name can be retrieved using the method name(). The value can be retrieved
-  * using the method value().
-  *
-  * The attributes of a tag are retrieved from the document when the opening tag
-  * is parsed. The attributes are stored in a StartElement object from where they
-  * can be retrieved.
-  */
-class PT_XML_API Attribute
+/** @brief A single attribute of a start element.
+*/
+class Attribute
 {
     public:
-        //! Constructs a new Attribute object with an empty name and value.
+        //! Default constructor.
         Attribute()
-        { }
-
-        /**
-          * @brief Constructs a new Attribute using the given name and value.
-          *
-          * @param name The name of the XML attribute.
-          * @param value The value of the XML attribute.
-          */
-        Attribute(const String& name, const String& value)
-        : _name(name), _value(value)
+        : _namespace(0)
         { }
 
         String& prefix() 
@@ -71,37 +53,35 @@ class PT_XML_API Attribute
         const String& prefix() const
         { return _prefix; }
 
-        /**
-          * @brief Returns the name of this attribute.
-          * @return The attribute's name.
-          */
+        /** @brief Returns the name of this attribute.
+        */
         const String& name() const
         { return _name; }
 
         String& name()
         { return _name; }
 
-        /**
-          * @brief Sets the name of this attribute.
-          * @param name The new name of this attribute.
-          */
+        /** @brief Sets the name of this attribute.
+        */
         void setName(const String& name)
         { _name = name; }
 
-        /**
-          * @brief Returns the value of this attribute.
-          * @return The attribute's value.
-          */
+        const String& namespaceUri() const
+        { return _namespace ? _namespace->name() : _prefix; }
+        
+        void setNamespace(const Namespace& ns)
+        { _namespace = &ns; }
+
+        /** @brief Returns the value of this attribute.
+        */
         const String& value() const
         { return _value; }
 
         String& value()
         { return _value; }
 
-        /**
-          * @brief Sets the value of this attribute.
-          * @param value The new value of this attribute.
-          */
+        /** @brief Sets the value of this attribute.
+        */
         void setValue(const String& value)
         { _value = value; }
 
@@ -110,32 +90,64 @@ class PT_XML_API Attribute
             _name.clear(); 
             _value.clear(); 
             _prefix.clear(); 
+            _namespace = 0;
         }
 
     private:
         String _prefix;
         String _name;
         String _value;
+        const Namespace* _namespace;
 };
 
+class PT_XML_API AttributeList : private NonCopyable
+{
+    public:
+        typedef std::vector<Attribute> Container;
+        typedef Container::iterator Iterator;
+        typedef Container::const_iterator ConstIterator;
 
-/**
-  * @brief A start element (Node) which represents an opening tag of an XML document.
-  *
-  * A start element is created when the parser reaches a start tag, for example $&lt;a>$.
-  * A StartElement object not only stores the name of the tag and its namespace information,
-  * but also stores the attributes of the tag. These attributes can be accessed by calling
-  * attributes(), attribute() and hasAttribute().
-  *
-  * Use name() to get the name of the tag which was closed.
-  *
-  * When parsing $<a>test</a>$ a StartElement, a Character and finally an EndElement node is
-  * created. If an empty tag is parsed, like for example $</a>$, a StartElement and an EndElement
-  * is created.
-  *
-  * @see EndElement
-  * @see Node
-  * @see Attribute
+    public:
+        AttributeList()
+        {}
+
+        void clear()
+        { _container.clear(); }
+
+        void add(const Attribute& attr)
+        { _container.push_back(attr); }
+        
+        ConstIterator find(const String& attributeName) const;
+
+        ConstIterator find(const String& nsUri, const String& name) const;
+
+        bool has(const String& name) const
+        { return find(name) != end();}
+
+        bool has(const String& nsUri, const String& name) const
+        { return find(nsUri, name) != end();}
+
+        Iterator begin()
+        { return _container.begin(); }
+
+        Iterator end()
+        { return _container.end(); }
+
+        ConstIterator begin() const
+        { return _container.begin(); }
+
+        ConstIterator end() const
+        { return _container.end(); }
+
+    private:
+        std::vector<Attribute> _container;
+};
+
+/** @brief Represents an opening tag in an XML document.
+  
+    A start element is created when the parser reaches a start tag. It contains
+    the name of the tag, its namespace information, and the attributes of
+    the tag.
   */
 class PT_XML_API StartElement : public Node
                               , private NonCopyable
@@ -155,132 +167,92 @@ class PT_XML_API StartElement : public Node
             _namespace = 0;
         }
 
+        /** @brief Returns the namespace prefix.
+        */
         String& prefix() 
         { return _prefix; }
 
+        /** @brief Returns the namespace prefix.
+        */
         const String& prefix() const
         { return _prefix; }
 
-        /**
-          * @brief Returns the tag name of the opening tag for which this StartElement object was created.
-          *
-          * When parsing <a>test</a> a StartElement, a Character and finally an EndElement node is
-          * created. The StartElement has the name "a". If an empty tag is parsed, like for example </a>,
-          * only a StartElement and an EndElement ("a") is created.
-          *
-          * @return The tag name of the opening tag for which this StartElement object was created.
-          */
+        /** @brief Sets the namespace prefix.
+        */
+        void setPrefix(const String& prefix)
+        { _prefix = prefix; }
+
+        /** @brief Returns the local name.
+        */
         String& name() 
         { return _name; }
 
-        /**
-          * @brief Returns the tag name of the opening tag for which this StartElement object was created.
-          *
-          * When parsing <a>test</a> a StartElement, a Character and finally an EndElement node is
-          * created. The StartElement has the name "a". If an empty tag is parsed, like for example </a>,
-          * only a StartElement and an EndElement ("a") is created.
-          *
-          * @return The tag name of the opening tag for which this StartElement object was created.
-          */
+        /** @brief Returns the local name.
+        */
         const String& name() const
         { return _name; }
 
-        /**
-          * @brief Sets the tag name of the end start for which this StartElement object was created.
-          * @param name The new name for this StartElement object.
-          */
+        /** @brief Sets the local name.
+        */
         void setName(const String& name)
         { _name = name; }
 
-        /**
-          * @brief Add the given attribute to the attribute list of this start tag.
-          *
-          * This StartElement object holds a list of attributes, which consist of the attribute name
-          * and the attribute value. The attributes can be read using attributes() or attribute().
-          *
-          * @param attribute The attribute which is added to this object's attribute list.
-          */
-        void addAttribute(const Attribute& attribute)
-        { _attributes.push_back(attribute); }
-
-        /**
-          * @brief Returns the attribute list of this StartElement which contains all attributes of the tag.
-          *
-          * This StartElement object holds a list of attributes, which consist of the attribute name
-          * and the attribute value. This method returns all attributes of the represented tag. The list
-          * can be iterated using a iterator. To access a specific attribute the method attribute() can be
-          * used.
-          *
-          * @return A list containing all attributes of the tag this StartElement represents.
-          */
-        const std::list<Attribute>& attributes() const
-        { return _attributes; }
-
-        /**
-          * @brief Returns the value of the attribute with the given name.
-          *
-          * This StartElement object holds a list of attributes, which consist of the attribute name
-          * and the attribute value. This methods returns the value of a single attribute. To access
-          * all attributes of this StartElement the method attributes() can be used.
-          *
-          * If no attribute with the given name exists, an empty string is returned.
-          *
-          * @param attributeName The value of the attribute with this name is returned.
-          * @return The value of the request attribute; or an empty string if there is no attribute
-          * with this name.
-          */
-        const String& attribute(const String& attributeName) const;
-
-        /**
-          * @return Checks if the StartElement has an attribute with the given name.
-          *
-          * This method returns $true$ if an attribute with the given name exists in this
-          * StartElement. If no attribute with this name exist $false$ is returned.
-          *
-          * @param attributeName It is checked if an attribute with this attribute name exists.
-          * @return $true$ if an attribute with this name exists; $false$ otherwise.
-          */
-        bool hasAttribute(const String& attributeName) const;
-
+        const String& namespaceUri() const
+        { return _namespace ? _namespace->name() : _prefix; }
+        
         void setNamespace(const Namespace& ns)
         { _namespace = &ns; }
 
-        const String* namespaceUri() const
-        { 
-            return _namespace ? &_namespace->name() : 0; 
-        }
+        /** @brief Returns the attributes of the tag.
+        */
+        const AttributeList& attributes() const
+        { return _attributes; }
+
+        /** @brief Returns the attributes of the tag.
+        */
+        AttributeList& attributes()
+        { return _attributes; }
+
+        /** @brief Returns the value of an attribute.
+        */
+        const String& attribute(const String& name) const;
+
+        /** @brief Returns the value of an attribute.
+        */
+        const String& attribute(const String& nsUri, const String& name) const;
+
+        inline static const Node::Type nodeId()
+        { return Node::StartElement; }
 
     private:
         String _prefix;
-
-        //! The name of the underlying tag.
         String _name;
-
-        //! The list which contains all attributes of the underlying tag.
-        std::list<Attribute> _attributes;
-
-        //! The namespace conText of this StartElement.
+        AttributeList _attributes;
         const Namespace* _namespace;
 };
 
+
 inline StartElement* toStartElement(Node* node)
 {
-    StartElement* se = 0;
-        
-    if(node->type() == Node::StartElement)
-        se = static_cast<StartElement*>(node);
-
-    return se;
+    return nodeCast<StartElement>(node);
 }
+
 
 inline const StartElement* toStartElement(const Node* node)
 {
-    const StartElement* se = 0;
-        
-    if(node->type() == Node::StartElement)
-        se = static_cast<const StartElement*>(node);
+    return nodeCast<StartElement>(node);
+}
 
-    return se;
+
+inline StartElement& toStartElement(Node& node)
+{
+    return nodeCast<StartElement>(node);
+}
+
+
+inline const StartElement& toStartElement(const Node& node)
+{
+    return nodeCast<StartElement>(node);
 }
 
 } // namespace Xml

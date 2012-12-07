@@ -54,7 +54,7 @@ namespace Xml {
   * @see StartElement
   * @see Node
   */
-class PT_XML_API EndElement : public Node 
+class EndElement : public Node 
 {
     public:
         /**
@@ -112,22 +112,44 @@ class PT_XML_API EndElement : public Node
         void setName(const String& name)
         { _name = name; }
 
+        const String& namespaceUri() const
+        { return _namespace ? _namespace->name() : _prefix; }
+        
         void setNamespace(const Namespace& ns)
         { _namespace = &ns; }
 
-        const String* namespaceUri() const
-        { 
-            return _namespace ? &_namespace->name() : 0; 
-        }
+        inline static const Node::Type nodeId()
+        { return Node::EndElement; }
 
     private:
         String _prefix;
-
-        //! The tag name of this end tag.
         String _name;
-
         const Namespace* _namespace;
 };
+
+
+inline EndElement* toEndElement(Node* node)
+{
+    return nodeCast<EndElement>(node);
+}
+
+
+inline const EndElement* toEndElement(const Node* node)
+{
+    return nodeCast<EndElement>(node);
+}
+
+
+inline EndElement& toEndElement(Node& node)
+{
+    return nodeCast<EndElement>(node);
+}
+
+
+inline const EndElement& toEndElement(const Node& node)
+{
+    return nodeCast<EndElement>(node);
+}
 
 } // namespace Xml
 

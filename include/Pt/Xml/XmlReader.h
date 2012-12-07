@@ -28,11 +28,10 @@
 #ifndef Pt_Xml_XmlReader_h
 #define Pt_Xml_XmlReader_h
 
-#include <Pt/String.h>
-#include <Pt/TextStream.h>
 #include <Pt/Xml/Api.h>
 #include <Pt/Xml/Node.h>
 #include <Pt/Xml/EndDocument.h>
+#include <Pt/String.h>
 #include <iosfwd>
 
 namespace Pt {
