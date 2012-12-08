@@ -364,8 +364,10 @@ void Connection::beginSendRequest(Request& request)
         else
         {
             writeRequestHeader(os, request);
+            
             log_debug("writing body: " << mbuf.size() << " bytes");
-            os.write( mbuf.data(), mbuf.size() );
+            if(mbuf.size() > 0)
+                os.write( mbuf.data(), mbuf.size() );
         }
 
         log_debug("pipelining HTTP request");
@@ -487,7 +489,8 @@ void Connection::beginSendReply(Reply& reply)
             writeReplyHeader(os, reply);
 
             log_debug("writing body: " << mbuf.size() << " bytes");
-            os.write( mbuf.data(), mbuf.size() );
+            if(mbuf.size() > 0)
+                os.write( mbuf.data(), mbuf.size() );
         }
 
         log_debug("begin writing reply");
