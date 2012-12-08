@@ -31,7 +31,7 @@
 
 #include <Pt/Types.h>
 #include <Pt/Api.h>
-#include <cmath>
+#include <math.h> // hypot is not in cmath
 #include <cassert>
 
 namespace Pt {
@@ -67,14 +67,14 @@ T fastSin(const T& theta)
     const T B = 4 / Pi;
     const T C = -4 / PiSqr;
 
-    T y = B * localTheta + C * localTheta * std::fabs(localTheta);
+    T y = B * localTheta + C * localTheta * ::fabs(localTheta);
 
     if (accurate)
     {
         //  const float Q = 0.775;
             const T P = 0.225;
 
-            y = P * (y * std::fabs(y) - y) + y;   // Q * y + P * y * abs(y)
+            y = P * (y * ::fabs(y) - y) + y;   // Q * y + P * y * abs(y)
     }
 
     return y;
@@ -111,7 +111,7 @@ inline double hypot(double x, double y)
     #if defined(_MSC_VER) || defined(_WIN32_WCE) || defined(_WIN32)
         return _hypot(x, y);
     #else
-        return std::hypot(x, y);
+        return ::hypot(x, y);
     #endif
 }
 
