@@ -101,6 +101,113 @@ class IntComposer : public Pt::IComposer
         IComposer* _parent;
 };
 
+
+
+
+struct FieldInfo
+{
+    FieldInfo(const char* name)
+    : _name(name)
+    { }
+
+    virtual ~FieldInfo()
+    {}
+
+    virtual const FieldInfo* getMember(unsigned offset) const = 0;
+
+    const char* name() const
+    { return _name; }
+
+    const char* _name;
+};
+
+
+struct ValueInfo : public FieldInfo
+{
+    ValueInfo(const char* name)
+    : FieldInfo(name)
+    {}
+
+    virtual const FieldInfo* getMember(unsigned offset) const
+    { return 0; }
+};
+
+
+template <typename T>
+struct MemberInfo;
+
+
+template <>
+struct MemberInfo<Pt::Date> : public FieldInfo
+{
+    explicit MemberInfo(const char* name)
+    : FieldInfo(name)
+    , _day("day")
+    , _month("month")
+    , _year("year")
+    { }
+ 
+    const FieldInfo* getMember(unsigned id) const
+    { 
+        switch(id)
+        {
+            case 0: return &_day; 
+            case 1: return &_month; 
+            case 2: return &_year; 
+        }
+
+        return 0;
+    }
+
+    ValueInfo _day;
+    ValueInfo _month;
+    ValueInfo _year;
+};
+
+
+
+template <typename T>
+struct MemberInfo< std::vector<T> > : public FieldInfo
+{
+    explicit MemberInfo(const char* name)
+    : FieldInfo(name)
+    , _date("elem")
+    {}
+
+    const FieldInfo* getMember(unsigned offset) const
+    { 
+        return &_date;
+    }
+
+    MemberInfo<T> _date;
+};
+
+
+void printMembers(const FieldInfo* obj)
+{
+    std::cout << "[" << obj->name() << "]" << std::endl;
+    for(unsigned n = 0; ; ++n)
+    {
+        const FieldInfo* member = obj->getMember(n);
+        if( ! member)
+          break;
+
+        printMembers(member);
+    }
+}
+
+
+inline void resolveMembers()
+{
+    MemberInfo< std::vector<Pt::Date> > dtmt("vector");
+    printMembers( dtmt.getMember(0) );
+    printMembers( dtmt.getMember(1) );
+    printMembers( dtmt.getMember(2) );
+}
+
+
+
+
 class VectorComposer : public Pt::IComposer
 {
     public:
@@ -168,6 +275,9 @@ class SerializationTest : public Pt::Unit::TestSuite
         SerializationTest()
         : Pt::Unit::TestSuite("SerializationTest")
         {
+            //resolveMembers();
+            //std::exit(1);
+
             Pt::Unit::TestSuite::registerMethod( "Benchmark1", *this, &SerializationTest::Benchmark1 );
             Pt::Unit::TestSuite::registerMethod( "Benchmark2", *this, &SerializationTest::Benchmark2 );
             Pt::Unit::TestSuite::registerMethod( "Benchmark3", *this, &SerializationTest::Benchmark3 );
