@@ -63,12 +63,6 @@ class IntComposer : public Pt::IComposer
             _type = &type;
         }
 
-        virtual void clear()
-        { }
-
-        virtual void clear(Pt::SerializationContext*)
-        { }
-
         virtual void setName(const std::string& name)
         { }
 
@@ -78,134 +72,20 @@ class IntComposer : public Pt::IComposer
         virtual void setTypeName(const std::string& type)
         { }
 
-        virtual void setValue(const Pt::String& value)
-        {
-            convert(*_type, value);
-        }
-
         virtual void setInt(Pt::int64_t l)
         {
-            //_si.setValue(l);
             *_type = static_cast<int>(l);
         }
 
         virtual Pt::IComposer* finish()
         {
-            //_si >>= *_type;
             return _parent;
         }
 
-        //Pt::SerializationInfo _si;
     private:
         value_type* _type;
         IComposer* _parent;
 };
-
-
-
-
-struct FieldInfo
-{
-    FieldInfo(const char* name)
-    : _name(name)
-    { }
-
-    virtual ~FieldInfo()
-    {}
-
-    virtual const FieldInfo* getMember(unsigned offset) const = 0;
-
-    const char* name() const
-    { return _name; }
-
-    const char* _name;
-};
-
-
-struct ValueInfo : public FieldInfo
-{
-    ValueInfo(const char* name)
-    : FieldInfo(name)
-    {}
-
-    virtual const FieldInfo* getMember(unsigned offset) const
-    { return 0; }
-};
-
-
-template <typename T>
-struct MemberInfo;
-
-
-template <>
-struct MemberInfo<Pt::Date> : public FieldInfo
-{
-    explicit MemberInfo(const char* name)
-    : FieldInfo(name)
-    , _day("day")
-    , _month("month")
-    , _year("year")
-    { }
- 
-    const FieldInfo* getMember(unsigned id) const
-    { 
-        switch(id)
-        {
-            case 0: return &_day; 
-            case 1: return &_month; 
-            case 2: return &_year; 
-        }
-
-        return 0;
-    }
-
-    ValueInfo _day;
-    ValueInfo _month;
-    ValueInfo _year;
-};
-
-
-
-template <typename T>
-struct MemberInfo< std::vector<T> > : public FieldInfo
-{
-    explicit MemberInfo(const char* name)
-    : FieldInfo(name)
-    , _date("elem")
-    {}
-
-    const FieldInfo* getMember(unsigned offset) const
-    { 
-        return &_date;
-    }
-
-    MemberInfo<T> _date;
-};
-
-
-void printMembers(const FieldInfo* obj)
-{
-    std::cout << "[" << obj->name() << "]" << std::endl;
-    for(unsigned n = 0; ; ++n)
-    {
-        const FieldInfo* member = obj->getMember(n);
-        if( ! member)
-          break;
-
-        printMembers(member);
-    }
-}
-
-
-inline void resolveMembers()
-{
-    MemberInfo< std::vector<Pt::Date> > dtmt("vector");
-    printMembers( dtmt.getMember(0) );
-    printMembers( dtmt.getMember(1) );
-    printMembers( dtmt.getMember(2) );
-}
-
-
 
 
 class VectorComposer : public Pt::IComposer
@@ -227,12 +107,6 @@ class VectorComposer : public Pt::IComposer
             type.reserve(5);
             _type = &type;
         }
-
-        virtual void clear()
-        { }
-
-        virtual void clear(Pt::SerializationContext*)
-        { }
 
         virtual void setName(const std::string& name)
         { }
@@ -265,8 +139,141 @@ class VectorComposer : public Pt::IComposer
     private:
         value_type* _type;
         IntComposer _deser;
-        //Pt::Composer<int> _deser;
 };
+
+
+// this is an idea how we could map between type-id or struct
+// offsets and type names. It should be used by the formatter
+// to fill in the typenames if the format is not self-contained
+namespace BinarySerialization {
+
+struct FieldInfo
+{
+    FieldInfo(const char* name = "")
+    : _name(name)
+    { }
+
+    virtual ~FieldInfo()
+    {}
+
+    void setName(const char* name)
+    { _name = name; }
+
+    virtual const FieldInfo* getMember(unsigned offset) const = 0;
+
+    const char* name() const
+    { return _name; }
+
+    const char* _name;
+};
+
+
+struct ValueInfo : public FieldInfo
+{
+    ValueInfo(const char* name = "")
+    : FieldInfo(name)
+    {}
+
+    virtual const FieldInfo* getMember(unsigned offset) const
+    { return 0; }
+};
+
+
+template <typename T>
+struct TypeInfo;
+
+
+template <unsigned N>
+struct ObjectInfo : public FieldInfo
+{
+    ObjectInfo(const char* name)
+    : FieldInfo(name)
+    {}
+
+    ObjectInfo* object();
+
+    void setMember(unsigned offset, const char* name, FieldInfo& fi)
+    {
+        fi.setName(name);
+
+        if(offset < N)
+            members[offset] = &fi;
+    }
+
+    virtual const FieldInfo* getMember(unsigned offset) const
+    { 
+        return offset < N ? members[offset] 
+                          : 0; 
+    }
+    
+    const FieldInfo* members[N];
+};
+
+
+template <typename T>
+struct ArrayInfo : public FieldInfo
+{
+    ArrayInfo(const char* name = "")
+    : FieldInfo(name)
+    , _elem("")
+    {}
+
+    virtual const FieldInfo* getMember(unsigned offset) const
+    { 
+        return &_elem; 
+    }
+
+    TypeInfo<T> _elem;
+};
+
+
+template <>
+struct TypeInfo<Pt::Date> : public ObjectInfo<3>
+{
+    explicit TypeInfo(const char* name)
+    : ObjectInfo<3>(name)
+    { 
+        setMember(0, "day", _day);
+        setMember(1, "month", _month);
+        setMember(2, "year", _year);
+    }
+
+    ValueInfo _day, _month, _year;
+};
+
+
+template <typename T>
+struct TypeInfo< std::vector<T> > : public ArrayInfo<T>
+{
+    explicit TypeInfo(const char* name)
+    : ArrayInfo<T>(name)
+    {}
+};
+
+
+void printMembers(const FieldInfo* obj)
+{
+    std::cout << "[" << obj->name() << "]" << std::endl;
+    for(unsigned n = 0; ; ++n)
+    {
+        const FieldInfo* member = obj->getMember(n);
+        if( ! member)
+          break;
+
+        printMembers(member);
+    }
+}
+
+
+inline void resolveMembers()
+{
+    TypeInfo< std::vector<Pt::Date> > dtmt("vector");
+    printMembers( dtmt.getMember(0) );
+    printMembers( dtmt.getMember(1) );
+    printMembers( dtmt.getMember(2) );
+}
+
+} // namespace BinarySerialization
 
 
 class SerializationTest : public Pt::Unit::TestSuite
@@ -275,7 +282,7 @@ class SerializationTest : public Pt::Unit::TestSuite
         SerializationTest()
         : Pt::Unit::TestSuite("SerializationTest")
         {
-            //resolveMembers();
+            //BinarySerialization::resolveMembers();
             //std::exit(1);
 
             Pt::Unit::TestSuite::registerMethod( "Benchmark1", *this, &SerializationTest::Benchmark1 );
