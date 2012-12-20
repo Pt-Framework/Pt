@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2004-2007 Marc Boris Duerner
+ * Copyright (C) 2004-2012 Marc Boris Duerner
  * Copyright (C) 2011 Tommi Maekitalo
  * 
  * This library is free software; you can redistribute it and/or
@@ -37,8 +37,37 @@
 #define INLINE
 #endif
 
-namespace std
+#include "Unicode.h"
+
+namespace Pt {
+
+std::ctype_base::mask ctypeMask(const Char& ch)
 {
+    const uint32_t c = ch.value();
+    return ctype_data[ ctype_lookup2[ ctype_lookup1[c>>14]+((c>>7)&127) ]+(c&127) ];
+}
+
+
+Char tolower(const Pt::Char& ch)
+{
+    const uint32_t ucs = ch.value();
+    return ucs + lower_data[lower_lookup2[lower_lookup1[ucs>>14]+((ucs>>7)&127)]+(ucs&127)];
+}
+
+
+Char toupper(const Char& ch)
+{
+    const uint32_t ucs = ch.value();
+    return ucs + upper_data[upper_lookup2[upper_lookup1[ucs>>14]+((ucs>>7)&127)]+(ucs&127)];
+}
+
+} //namespace Pt
+
+#ifdef PT_WITH_STD_LOCALE
+#include "Facets.cpp"
+#endif
+
+namespace std {
 
 INLINE
 void basic_string<Pt::Char>::resize(size_t n, Pt::Char ch)
@@ -771,6 +800,4 @@ ostream& operator<< (ostream& out, const basic_string<Pt::Char>& str)
     return out;
 }
 
-
-}
-
+} // namespace std

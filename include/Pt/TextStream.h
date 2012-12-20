@@ -29,7 +29,7 @@
 #define Pt_TextStream_h
 
 #include <Pt/Api.h>
-#include <Pt/Char.h>
+#include <Pt/String.h>
 #include <Pt/TextBuffer.h>
 #include <iostream>
 

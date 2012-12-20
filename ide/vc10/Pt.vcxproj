@@ -467,7 +467,6 @@
     <ClCompile Include="..\..\src\Pt\TextBuffer.cpp" />
     <ClCompile Include="..\..\src\Pt\TextStream.cpp" />
     <ClCompile Include="..\..\src\Pt\Time.cpp" />
-    <ClCompile Include="..\..\src\Pt\Unicode.cpp" />
     <ClCompile Include="..\..\src\Pt\UnicodeTable.cpp" />
     <ClCompile Include="..\..\src\Pt\Utf8Codec.cpp" />
   </ItemGroup>

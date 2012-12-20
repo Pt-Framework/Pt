@@ -976,7 +976,7 @@ SymbolOther          = 29  punct|print
 
 int main(int argc, char* argv[])
 {
-    std::ofstream f("Unicode.h");
+    std::ofstream f("Unicode1.h");
     f << "\n";
     f << "const std::ctype_base::mask digit = std::ctype_base::digit;\n";
     f << "const std::ctype_base::mask xdigit = std::ctype_base::xdigit;\n";

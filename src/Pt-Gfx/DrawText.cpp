@@ -33,7 +33,7 @@
 #include "Pt/Gfx/Font.h"
 #include "Vera.h"
 #include <Pt/System/Clock.h>
-#include "Pt/Char.h"
+#include "Pt/String.h"
 #include <cmath>
 
 namespace Pt {

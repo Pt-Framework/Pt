@@ -56,9 +56,6 @@ class TypeInfo
 
         bool before(const TypeInfo& rhs) const
         { return m_ti->before(*rhs.m_ti) != 0; }
-
-        bool isVoid() const
-        { return *m_ti == typeid(Void); }
         
     private:
         const std::type_info* m_ti;

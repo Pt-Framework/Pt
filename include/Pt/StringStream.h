@@ -29,7 +29,6 @@
 #define PT_STRINGSTREAM_H
 
 #include <Pt/Api.h>
-#include <Pt/Char.h>
 #include <Pt/String.h>
 #include <sstream>
 

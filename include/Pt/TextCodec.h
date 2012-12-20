@@ -30,6 +30,7 @@
 
 #include <Pt/Api.h>
 #include <Pt/Locale.h>
+#include <Pt/String.h>
 
 namespace Pt {
 

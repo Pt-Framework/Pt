@@ -4,7 +4,6 @@ SubDirC++Flags [ FDefines PT_API_EXPORT ] ;
 SubDirObjects $(PT_OUTPUT_OBJECT) Pt ;
 
 SharedLibrary Pt : Atomicity.cpp
-                   Char.cpp
                    Connection.cpp
                    Connectable.cpp
                    Convert.cpp

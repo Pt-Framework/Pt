@@ -29,7 +29,7 @@
 #define Pt_TextBuffer_h
 
 #include <Pt/Api.h>
-#include <Pt/Char.h>
+#include <Pt/String.h>
 #include <Pt/TextCodec.h>
 #include <Pt/ConversionError.h>
 #include <iostream>

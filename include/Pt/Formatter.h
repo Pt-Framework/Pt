@@ -29,7 +29,6 @@
 #define Pt_Formatter_h
 
 #include <Pt/Api.h>
-#include <Pt/Char.h>
 #include <Pt/String.h>
 #include <string>
 

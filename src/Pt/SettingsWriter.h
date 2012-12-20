@@ -20,7 +20,7 @@
 #define Pt_SettingsWriter_h
 
 #include "Pt/Api.h"
-#include "Pt/Char.h"
+#include "Pt/String.h"
 #include "Pt/SerializationInfo.h"
 #include <iostream>
 

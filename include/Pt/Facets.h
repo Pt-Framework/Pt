@@ -30,6 +30,7 @@
 
 #include <Pt/Api.h>
 #include <Pt/String.h>
+#include <Pt/Locale.h>
 #include <iostream>
 #include <iterator>
 

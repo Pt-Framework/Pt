@@ -33,7 +33,6 @@
 #ifdef PT_WITH_STD_LOCALE
 
 #include <locale>
-#include <Pt/Facets.h>
 
 #else // no locales
 

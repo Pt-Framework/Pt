@@ -30,8 +30,6 @@
 #define Pt_Utf8Codec_h
 
 #include <Pt/Api.h>
-#include <Pt/Types.h>
-#include <Pt/Char.h>
 #include <Pt/TextCodec.h>
 #include <Pt/String.h>
 #include <string>

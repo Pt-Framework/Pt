@@ -927,9 +927,6 @@
     <ClCompile Include="..\..\src\Pt\Time.cpp">
       <Filter>Pt</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt\Unicode.cpp">
-      <Filter>Pt</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Pt\UnicodeTable.cpp">
       <Filter>Pt</Filter>
     </ClCompile>

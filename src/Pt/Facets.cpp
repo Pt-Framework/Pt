@@ -205,7 +205,7 @@ inline IterT putFloat(IterT it, T d,
     int i = 0;
     int e = 0;
     Pt::FloatFormat<Pt::Char> fmt;
-    std::streamsize fractSize = Pt::formatFloat(fract, bufsize, i, e, d, fmt, precision, scientific);
+    std::streamsize fractSize = Pt::formatFloat(fract, bufsize, i, e, d, fmt, int(precision), scientific);
 
     std::streamsize len = 0;
     if( 0 == (flags & std::ios_base::floatfield) )

@@ -8,7 +8,6 @@
 #define REGEXP_DWA20011023_H
 
 #include <Pt/Api.h>
-#include <Pt/Char.h>
 #include <Pt/Regex.h>
 #include <iostream>
 #include <stdexcept>
