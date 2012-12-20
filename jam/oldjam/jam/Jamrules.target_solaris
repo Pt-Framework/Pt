@@ -1,9 +1,0 @@
-PRELIB    = lib ;
-SUFLIB    = .so ;
-SUFDLL    = .so ;
-SUFEXE	  = "" ;
-SUFDBG    = "" ;
-
-TOOLSET ?= sunpro ;
-OSPLAT ?= sparc ;
-TARGET_OSPLAT ?= sparc ;

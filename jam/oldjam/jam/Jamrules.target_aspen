@@ -1,7 +1,0 @@
-PRELIB    = lib ;
-SUFLIB    = .a ;
-SUFDLL    = .dylib ;
-SUFEXE	  = "" ;
-SUFDBG    = "" ;
-
-TOOLSET ?= xcode ;

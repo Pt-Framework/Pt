@@ -1,8 +1,0 @@
-SUFOBJ	= .o ;
-PRELIB	= "" ;
-SUFLIB	= .lib ;
-SUFEXE	= .exe ;
-SUFDLL	= .dll ;
-SUFDBG  = "" ;
-
-
