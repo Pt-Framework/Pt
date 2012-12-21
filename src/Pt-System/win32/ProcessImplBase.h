@@ -19,6 +19,8 @@
 #ifndef PT_ProcessImplBase_h
 #define PT_ProcessImplBase_h
 
+#include "Pt/WinVer.h"
+#include "Pt/System/Api.h"
 #include "Pt/System/Process.h"
 #include "Pt/System/SystemError.h"
 #include "Pt/NonCopyable.h"

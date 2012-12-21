@@ -20,7 +20,9 @@
 #define PT_win32_ProcessImpl_h
 
 #include "ProcessImplBase.h"
-#include "../win32/win32.h"
+#include "win32.h"
+#include "Pt/WinVer.h"
+#include "Pt/System/Api.h"
 #include "Pt/System/Process.h"
 #include <cstdlib>
 #include <string>

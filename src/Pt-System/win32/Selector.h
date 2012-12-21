@@ -30,6 +30,8 @@
 #define PT_SYSTEM_SELECTOR_H
 
 #include "../SelectableList.h"
+#include "Pt/WinVer.h"
+#include "Pt/System/Api.h"
 #include "Pt/System/Api.h"
 #include "Pt/System/Mutex.h"
 #include "Pt/System/EventLoop.h"

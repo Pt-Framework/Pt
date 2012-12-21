@@ -35,6 +35,7 @@
 #endif
 
 #include "Selector.h"
+#include "Pt/WinVer.h"
 #include <Pt/Net/TcpServer.h>
 #include <string>
 #include <winsock2.h>

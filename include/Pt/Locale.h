@@ -30,6 +30,12 @@
 
 #include <Pt/Api.h>
 
+#ifdef _WIN32_WCE
+    // WinCE does not provide locale-classes
+#else
+    #define PT_WITH_STD_LOCALE 1
+#endif
+
 #ifdef PT_WITH_STD_LOCALE
 
 #include <locale>

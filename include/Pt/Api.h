@@ -55,29 +55,10 @@
     #pragma warning( disable : 1738 )
 #endif
 
-#ifdef _WIN32_WCE
-    // WinCE does not provide locale-classes
-#else
-    #define PT_WITH_STD_LOCALE 1
-#endif
- 
 #if defined(WIN32) || defined(_WIN32)
     // suppress min/max macros from win32 headers
     #ifndef NOMINMAX
     #define NOMINMAX
-    #endif
-
-    // Use of features specific Windows versions
-    #ifndef WINVER
-    #define WINVER 0x0501
-    #endif
-
-    #ifndef _WIN32_WINNT
-    #define _WIN32_WINNT 0x0501
-    #endif
-
-    #ifndef _WIN32_WINDOWS
-    #define _WIN32_WINDOWS 0x0410
     #endif
 #endif
 
@@ -92,8 +73,6 @@
     #define PT_EXPORT __attribute__((visibility("default")))
     #define PT_IMPORT
 #elif __SYMBIAN32__
-    // leave that empty on symbian for now
-    // dynamic linking is not yet supported
     #define PT_EXPORT
     #define PT_IMPORT
 #else
@@ -107,12 +86,12 @@
     #define PT_API PT_IMPORT
 #endif
 
-#if !defined(__NOLOCK_ON_INPUT)
+#if ! defined(__NOLOCK_ON_INPUT)
     // disable locking of iostreams on xlC
     #define __NOLOCK_ON_INPUT
 #endif
 
-#if !defined(__NOLOCK_ON_OUTPUT)
+#if ! defined(__NOLOCK_ON_OUTPUT)
     // disable locking of iostreams on xlC
     #define __NOLOCK_ON_OUTPUT
 #endif

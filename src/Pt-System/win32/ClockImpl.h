@@ -1,8 +1,10 @@
 #ifndef PT_SYSTEM_CLOCK_IMPL_H
 #define PT_SYSTEM_CLOCK_IMPL_H
 
+#include "Pt/WinVer.h"
 #include "Pt/DateTime.h"
 #include "Pt/Timespan.h"
+#include "Pt/System/Api.h"
 #include <windows.h>
 
 namespace Pt {

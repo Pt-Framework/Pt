@@ -21,6 +21,8 @@
 #define PT_SYSTEM_SERIALDEVICEIMPL_H
 
 #include "IODeviceImpl.h"
+#include "Pt/WinVer.h"
+#include "Pt/System/Api.h"
 #include "Pt/System/IODevice.h"
 #include "Pt/System/IOError.h"
 #include "Pt/System/SerialDevice.h"

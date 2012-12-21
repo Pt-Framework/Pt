@@ -20,7 +20,8 @@
 #ifndef Pt_System_win32_PipeImpl_h
 #define Pt_System_win32_PipeImpl_h
 
-#include <Pt/System/Api.h>
+#include "Pt/WinVer.h"
+#include "Pt/System/Api.h"
 #include <Pt/System/IODevice.h>
 #include "IODeviceImpl.h"
 #include <windows.h>

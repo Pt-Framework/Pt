@@ -164,6 +164,7 @@
     <ClInclude Include="..\..\include\Pt\Utf8Codec.h" />
     <ClInclude Include="..\..\include\Pt\Variant.h" />
     <ClInclude Include="..\..\include\Pt\Void.h" />
+    <ClInclude Include="..\..\include\Pt\WinVer.h" />
     <ClInclude Include="..\..\include\Pt\Xml\Api.h" />
     <ClInclude Include="..\..\include\Pt\Xml\Characters.h" />
     <ClInclude Include="..\..\include\Pt\Xml\Comment.h" />

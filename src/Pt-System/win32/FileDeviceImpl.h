@@ -20,6 +20,7 @@
 #ifndef PT_SYSTEM_FILEDEVICEIMPL_H
 #define PT_SYSTEM_FILEDEVICEIMPL_H
 
+#include "Pt/WinVer.h"
 #include "Pt/System/Api.h"
 #include "Pt/System/IOError.h"
 #include "Pt/System/FileDevice.h"

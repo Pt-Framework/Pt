@@ -18,8 +18,10 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "Pt/Api.h"
+
+#include "Pt/WinVer.h"
 #include "Pt/Types.h"
+#include "Pt/System/Api.h"
 #include <string>
 #include <windows.h>
 

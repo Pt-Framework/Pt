@@ -1,9 +1,5 @@
-/***************************************************************************
- *   Copyright (C) 2006 by PTV AG                                          *
- *                                                                         *
- ***************************************************************************/
-
-#include "Pt/Api.h"
+#include "Pt/WinVer.h"
+#include "Pt/System/Api.h"
 #include "Pt/System/Thread.h"
 
 #include <windows.h>

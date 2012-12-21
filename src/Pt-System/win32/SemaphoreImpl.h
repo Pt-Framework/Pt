@@ -7,7 +7,8 @@
 #ifndef PT_SEMAPHOREIMPL_H
 #define PT_SEMAPHOREIMPL_H
 
-#include <Pt/Api.h>
+#include "Pt/WinVer.h"
+#include "Pt/System/Api.h"
 #include <windows.h>
 
 

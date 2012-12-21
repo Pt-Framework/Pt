@@ -21,6 +21,8 @@
 #define PT_SYSTEM_IODEVICEIMPL_H
 
 #include "Selector.h"
+#include "Pt/WinVer.h"
+#include "Pt/System/Api.h"
 #include "Pt/System/IOError.h"
 #include <windows.h>
 

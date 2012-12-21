@@ -21,7 +21,8 @@
 #ifndef PT_MUTEXIMPL_H
 #define PT_MUTEXIMPL_H
 
-#include "Pt/Api.h"
+#include "Pt/WinVer.h"
+#include "Pt/System/Api.h"
 #include <windows.h>
 
 namespace Pt {

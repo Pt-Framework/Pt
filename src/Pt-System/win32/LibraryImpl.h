@@ -19,6 +19,8 @@
 #ifndef PT_LIBRARYIMPL_H
 #define PT_LIBRARYIMPL_H
 
+#include "Pt/WinVer.h"
+#include "Pt/System/Api.h"
 #include "Pt/System/SystemError.h"
 #include "win32.h"
 #include <windows.h>

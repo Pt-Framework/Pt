@@ -1,8 +1,5 @@
-/***************************************************************************
- *   Copyright (C) 2006 PTV AG                                               *
- ***************************************************************************/
-
-#include "Pt/Api.h"
+#include "Pt/WinVer.h"
+#include "Pt/System/Api.h"
 #include "Pt/System/Mutex.h"
 #include <windows.h>
 

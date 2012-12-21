@@ -32,6 +32,7 @@
 #define WIN32_LEAN_AND_MEAN
 #endif
 
+#include "Pt/WinVer.h"
 #include <Pt/Net/Api.h>
 #include <Pt/RefCounted.h>
 #include <string>

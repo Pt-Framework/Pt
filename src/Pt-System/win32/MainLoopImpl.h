@@ -22,6 +22,7 @@
 #define PT_SYSTEM_MainLoopImpl_H
 
 #include "Selector.h"
+#include "Pt/WinVer.h"
 #include "Pt/System/Api.h"
 
 namespace Pt {

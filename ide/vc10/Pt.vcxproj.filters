@@ -705,6 +705,9 @@
     <ClInclude Include="..\..\include\Pt\Xml\XmlWriter.h">
       <Filter>Pt-Xml</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\WinVer.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
