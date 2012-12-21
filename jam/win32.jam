@@ -8,14 +8,32 @@ rule ConfigurePsapi
                                         "return 0; }"
                                         : ""
                                         : Psapi.lib ] ;
+    if $(WITH_PSAPI)
+    {
+        PSAPI_LIBS += Psapi.lib ;
+    }
 
+    if ! $(WITH_PSAPI)
+    {
+        WITH_PSAPI = [ CheckBuildC++ "#include <windows.h>"
+                                            "#include <Psapi.h>"
+                                            "int main() { PROCESS_MEMORY_COUNTERS pmc;"
+                                            "GetProcessMemoryInfo( NULL, &pmc, sizeof(pmc) );"
+                                            "return 0; }"
+                                            : ""
+                                            : -lPsapi ] ;
+
+        if $(WITH_PSAPI)
+        {
+            PSAPI_LIBS += -lPsapi ;
+        }
+    }
+    
     EchoOption WITH_PSAPI : "PsApi library" ;
     Configure WITH_PSAPI ;
 
     if $(WITH_PSAPI)
     {
-        PSAPI_LIBS += Psapi.lib ;
-
         EchoOption PSAPI_LIBS : "PsAapi lib flags" ;
         Configure PSAPI_LIBS ;
     }
@@ -48,6 +66,21 @@ rule ConfigureWsa
         if $(WITH_WSA)
         {
             WSA_LIBS = winsock.lib Ws2.lib Iphlpapi.lib ;
+        }
+    }
+
+    if ! $(WITH_WSA)
+    {
+        WITH_WSA = [ CheckBuildC++ "#define WIN32_LEAN_AND_MEAN"
+                                    "#include <windows.h>"
+                                    "#include <winsock2.h>"
+                                    "int main() { WSADATA wd; WSAStartup(MAKEWORD(2,2), &wd);"
+                                    "return 0; }"
+                                    : ""
+                                    : -lwsock32 -lws2_32 -lIphlpapi ] ;
+        if $(WITH_WSA)
+        {
+            WSA_LIBS = -lwsock32 -lws2_32 -lIphlpapi ;
         }
     }
 

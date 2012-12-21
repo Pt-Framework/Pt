@@ -3,9 +3,7 @@ SubDirHdrs $(PT_TOP)/include ;
 SubDirC++Flags [ FDefines PT_XML_API_EXPORT ] ;
 SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Xml ;
 
-PT_XML_SOURCES = Characters.cpp
-                 EntityResolver.cpp
-                 EndElement.cpp
+PT_XML_SOURCES = EntityResolver.cpp
                  NamespaceContext.cpp
                  QName.cpp
                  StartElement.cpp

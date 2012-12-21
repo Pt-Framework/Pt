@@ -1,4 +1,6 @@
 /*
+ * Copyright (C) 2012 Marc Boris Duerner
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -221,6 +223,7 @@ class PT_XML_API StartElement : public Node
         */
         const String& attribute(const String& nsUri, const String& name) const;
 
+        //! @internal
         inline static const Node::Type nodeId()
         { return Node::StartElement; }
 

@@ -1,4 +1,6 @@
 /*
+ * Copyright (C) 2012 Marc Boris Duerner
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -23,78 +25,81 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef PTV_Xml_Comment_h
-#define PTV_Xml_Comment_h
+#ifndef Pt_Xml_Comment_h
+#define Pt_Xml_Comment_h
 
 #include <Pt/Xml/Api.h>
 #include <Pt/Xml/Node.h>
 #include <Pt/String.h>
 
-
 namespace Pt {
 
-    namespace Xml {
+namespace Xml {
 
-        /** @brief A Comment element (Node) of an XML document, containing the comment's content.
-         *
-         * A Comment element stores the content of a comment. There is no interpretation of the
-         * comment's Text before it is stored.
-         *
-         * Use Text() to get the content/Text of the comment element without the &lt;!-- and -->.
-         *
-         * When parsing a comment %&lt;!-- This is a comment -->$ the following Text will be
-         * returned by Text(): $This is a comment$
-         */
-        class PT_XML_API Comment : public Node {
-            public:
-                /**
-                 * @brief Constructs a new Comment object with the given string as content/Text.
-                 *
-                 * @param text The content/Text of the Comment object.
-                 */
-                explicit Comment(const String& text)
-                : Node(Node::Comment)
-                , _text(text)
-                { }
+/** @brief A Comment element (Node) of an XML document.
+  
+    A Comment element stores the content of a comment. There is no interpretation of the
+    comment's Text before it is stored.
+*/
+class PT_XML_API Comment : public Node 
+{
+    public:
+        /** @brief Constructs with content string.
+        */
+        explicit Comment(const String& text)
+        : Node(Node::Comment)
+        , _text(text)
+        { }
 
-                /**
-                 * @brief Returns the content/Text of this Comment object.
-                 *
-                 * The content includes everything that is between the start and end "tags" of the comment
-                 * without being parsed. When parsing a comment %&lt;!-- This is a comment -->$ the following
-                 * Text will be returned: $This is a comment$
-                 *
-                 * @return The Text of this Comment object.
-                 */
-                String& text()
-                { return _text; }
+        /** @brief Returns the content of the comment.
+        */
+        String& text()
+        { return _text; }
 
-                /**
-                 * @brief Returns the content/Text of this Comment object.
-                 *
-                 * The content includes everything that is between the start and end "tags" of the comment
-                 * without being parsed. When parsing a comment %&lt;!-- This is a comment -->$ the following
-                 * Text will be returned: $This is a comment$
-                 *
-                 * @return The Text of this Comment object.
-                 */
-                const String& text() const
-                { return _text; }
+        /** @brief Returns the content of the comment.
+        */
+        const String& text() const
+        { return _text; }
 
-                /**
-                 * @brief Sets the Text of this Comment object.
-                 * @param text The new Text for this Comment object.
-                 */
-                void setText(const String& text)
-                { _text = text; }
+        /** @brief RSets the content of the comment.
+        */
+        void setText(const String& text)
+        { _text = text; }
 
-            private:
-                //! The Text of this Comment object.
-                String _text;
-        };
+        //! @internal
+        inline static const Node::Type nodeId()
+        { return Node::Comment; }
 
-    }
+    private:
+        String _text;
+};
 
+
+inline Comment* toComment(Node* node)
+{
+    return nodeCast<Comment>(node);
 }
+
+
+inline const Comment* toComment(const Node* node)
+{
+    return nodeCast<Comment>(node);
+}
+
+
+inline Comment& toComment(Node& node)
+{
+    return nodeCast<Comment>(node);
+}
+
+
+inline const Comment& toComment(const Node& node)
+{
+    return nodeCast<Comment>(node);
+}
+
+} // namespace Xml
+
+} // namespace Pt
 
 #endif
