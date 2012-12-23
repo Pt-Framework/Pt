@@ -459,17 +459,6 @@ const Pt::Char* EntityResolver::findEntity(Char ch) const
 }
 
 
-const Pt::Char* EntityResolver::findEntity(String& str) const
-{
-    const Pt::Char* entity = 0;
-    
-    if( ! str.empty() )
-        entity = findEntity(str[0]);
-    
-    return entity;
-}
-
-
 void EntityResolver::getEntity(std::basic_ostream<Char>& os, const Pt::Char* str) const
 {
     const Pt::Char* it = str;
@@ -485,33 +474,6 @@ void EntityResolver::getEntity(std::basic_ostream<Char>& os, const Pt::Char* str
         {
             os << *it;
         }
-
-        //unsigned u = 0;
-        //unsigned o = sizeof(rent)/sizeof(REnt) - 1;
-        //while (o - u > 1)
-        //{
-        //    unsigned m = (o + u) / 2;
-        //    if (rent[m].charValue == it->value())
-        //    {
-        //        printEntity(os, rent[m].entity);
-        //        goto next;
-        //    }
-
-        //    if (it->value() < rent[m].charValue)
-        //        o = m;
-        //    else
-        //        u = m;
-        //}
-
-        //if (rent[u].charValue == it->value())
-        //    printEntity(os, rent[u].entity);
-        //else if (rent[o].charValue == it->value())
-        //    printEntity(os, rent[o].entity);
-        //else
-        //    os << *it;
-
-        //next:
-        //    continue;
     }
 }
 

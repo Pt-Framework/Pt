@@ -1,4 +1,6 @@
 /*
+ * Copyright (C) 2012 Marc Boris Duerner
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -23,62 +25,83 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef PTV_Xml_DocTypeDeclaration_h
-#define PTV_Xml_DocTypeDeclaration_h
+#ifndef Pt_Xml_DocTypeDeclaration_h
+#define Pt_Xml_DocTypeDeclaration_h
 
 #include <Pt/Xml/Api.h>
 #include <Pt/Xml/Node.h>
 #include <Pt/String.h>
 
-
 namespace Pt {
 
 namespace Xml {
 
-    /**
-     * @brief A DocType element (Node) of an XML document.
-     *
-     * A DocType element stores the document type of the document and contains an URI to a
-     * file which contains the document type definition.
-     *
-     * Use content() to get the content of the DocType element.
-     *
-     * @see Node
-     */
-    class PT_XML_API DocTypeDeclaration : public Node
-    {
-        public:
-            /**
-             * @brief Constructs a new DocTypeDeclaration object with the given string as content.
-             */
-            DocTypeDeclaration()
-            : Node(Node::DocType)
-            { }
+/** @brief A DocType element (Node) of an XML document.
 
-            void clear()
-            { _content.clear(); }
+     A document type declaration element indicates thetype of the document and
+     contains an URI to the document type definition.
+*/
+class PT_XML_API DocTypeDeclaration : public Node
+{
+    public:
+        /** @brief Constructs a new DocTypeDeclaration object with the given string as content.
+        */
+        DocTypeDeclaration()
+        : Node(Node::DocType)
+        { }
 
-            /**
-             * @brief Returns the content of this DocTypeDeclaration object.
-             * @return The content of this DocTypeDeclaration object.
-             */
-            const String& content() const
-            { return _content; }
+        /** @brief Returns true if is empty.
+        */
+        bool empty() const
+        { return _content.empty(); }
 
-            String& content()
-            { return _content; }
+        void clear()
+        { _content.clear(); }
 
-            /**
-             * @brief Sets the content of this DocTypeDeclaration object.
-             * @param content The new content for this DocTypeDeclaration object.
-             */
-            void setContent(const String& content)
-            { _content = content; }
+        /** @brief Returns the content.
+        */
+        const String& content() const
+        { return _content; }
 
-        private:
-            //! The content of this DocTypeDeclaration object.
-            String _content;
-    };
+        String& content()
+        { return _content; }
+
+        /** @brief Sets the content.
+        */
+        void setContent(const String& content)
+        { _content = content; }
+
+        //! @internal
+        inline static const Node::Type nodeId()
+        { return Node::DocType; }
+
+    private:
+        String _content;
+};
+
+
+inline DocTypeDeclaration* toDocTypeDeclaration(Node* node)
+{
+    return nodeCast<DocTypeDeclaration>(node);
+}
+
+
+inline const DocTypeDeclaration* toDocTypeDeclaration(const Node* node)
+{
+    return nodeCast<DocTypeDeclaration>(node);
+}
+
+
+inline DocTypeDeclaration& toDocTypeDeclaration(Node& node)
+{
+    return nodeCast<DocTypeDeclaration>(node);
+}
+
+
+inline const DocTypeDeclaration& toDocTypeDeclaration(const Node& node)
+{
+    return nodeCast<DocTypeDeclaration>(node);
+}
 
 }
 

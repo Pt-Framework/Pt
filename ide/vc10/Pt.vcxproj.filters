@@ -681,9 +681,6 @@
     <ClInclude Include="..\..\include\Pt\Xml\StartElement.h">
       <Filter>Pt-Xml</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Xml\XmlDeclaration.h">
-      <Filter>Pt-Xml</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Xml\XmlDeserializer.h">
       <Filter>Pt-Xml</Filter>
     </ClInclude>
@@ -1374,25 +1371,13 @@
     <ClCompile Include="..\..\src\Pt-System\IOBuffer.cpp">
       <Filter>Pt-System</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Xml\Characters.cpp">
-      <Filter>Pt-Xml</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Xml\EndElement.cpp">
-      <Filter>Pt-Xml</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Pt-Xml\EntityResolver.cpp">
       <Filter>Pt-Xml</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Xml\NamespaceContext.cpp">
       <Filter>Pt-Xml</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Xml\QName.cpp">
-      <Filter>Pt-Xml</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Pt-Xml\StartElement.cpp">
-      <Filter>Pt-Xml</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Xml\XmlDeserializer.cpp">
       <Filter>Pt-Xml</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Xml\XmlError.cpp">

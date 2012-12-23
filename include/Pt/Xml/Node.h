@@ -37,18 +37,15 @@ namespace Xml {
 
 /** @brief XML document node.
 
-   A Node may for example be a opening tag, a closing tag, a comment or a doctype declaration.
-   The supported node types are contained in the enum Type. To determine the type of a Node the
-   method type() can be used.
+    A node may for example be an opening tag, a closing tag, a comment or a
+    doctype declaration. This class provides functionality to cast to a
+    specialized node type. Therefore, the method type() can be used to 
+    determine the type of a node. 
 
-   For every supported node type (except "Unknown") a specialized class exists that is derived
-   from this Node class. Those classes contain more data and access methods to allow the user
-   to determine the information specific to the node, for example the tag name for a StartElement.
-
-   This class mainly provides the method type() to determine the type of the Node. The user
-   may use this information to determine to which specialized class that is associated
-   with the type this object can be cast; for the Node::StartElement type the Node object can be
-   cast to StartElement, for example.
+    Specialized node classes exist for every supported node type (i.e. all
+    except "Unknown"), which are derived from this Node class. Those classes
+    contain more data and access methods to process the information specific
+    to the node, for example the tag name for a StartElement.
 */
 class Node 
 {
@@ -88,20 +85,14 @@ class Node
         {}
 
         /** @brief Returns the type of the Node.
-
-            This information may be used to determine to which specialized Node class that is associated
-            with the type, this Node object can be cast; for the Node::StartElement type the Node object
-            can be cast to StartElement, for example.
-
-            @return The type of this node.
-          */
+        */
         Type type() const
         { return _type; }
 
     protected:
         /** @brief Constructs a new Node object with the specified node type
         */
-        Node(Type type)
+        explicit Node(Type type)
         : _type(type)
         { }
 

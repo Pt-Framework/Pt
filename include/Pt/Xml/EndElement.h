@@ -25,49 +25,34 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef PT_Xml_EndElement_h
-#define PT_Xml_EndElement_h
+#ifndef Pt_Xml_EndElement_h
+#define Pt_Xml_EndElement_h
 
 #include <Pt/Xml/Api.h>
 #include <Pt/Xml/Node.h>
 #include <Pt/Xml/Namespace.h>
 #include <Pt/String.h>
+#include <Pt/NonCopyable.h>
 
 namespace Pt {
 
 namespace Xml {
 
-/**
-  * @brief An end element (Node) which represents a closing tag of an XML document.
-  *
-  * An end element is created when the parser reaches an end tag, for example $&lt;/a>$.
-  * An EndElement object only stores the name of the tag. To access the attributes of the tag the
-  * start tag has to be read. The body of the tag can be accessed by reading the previous
-  * Character node(s).
-  *
-  * Use name() to get the name of the tag which was closed.
-  *
-  * When parsing $<a>test</a>$ a StartElement, a Character and finally an EndElement node is
-  * created. If an empty tag is parsed, like for example $</a>$, a StartElement and an EndElement
-  * is created.
-  *
-  * @see StartElement
-  * @see Node
-  */
+/** @brief An end element represents a closing tag in an XML document.
+*/
 class EndElement : public Node 
+                 , private NonCopyable
 {
     public:
-        /**
-          * @brief Constructs a new EndElement object with the given (optional) string as tag name.
-          *
-          * @param name The name of the EndElement object. This is an optional parameter.
-          * Default is an empty string.
-          */
+        /** @brief Constructs an EndElement object with no name.
+        */
         EndElement()
         : Node(Node::EndElement)
         , _namespace(0)
         { }
 
+        /** @brief Clears the end element.
+        */
         void clear()
         { 
             _name.clear(); 
@@ -75,49 +60,47 @@ class EndElement : public Node
             _namespace = 0;
         }
 
+        /** @brief Returns the namespace prefix.
+        */
         String& prefix() 
         { return _prefix; }
 
+        /** @brief Returns the namespace prefix.
+        */
         const String& prefix() const
         { return _prefix; }
 
-        /**
-          * @brief Returns the tag name of the closing tag for which this EndElement object was created.
-          *
-          * When parsing <a>test</a> a StartElement, a Character and finally an EndElement node is
-          * created. The EndElement has the name "a". If an empty tag is parsed, like for example </a>,
-          * a StartElement and an EndElement ("a") is created.
-          *
-          * @return The tag name of the closing tag for which this EndElement object was created.
-          */
-        String& name()
+        /** @brief Sets the namespace prefix.
+        */
+        void setPrefix(const String& prefix)
+        { _prefix = prefix; }
+
+        /** @brief Returns the local name.
+        */
+        String& name() 
         { return _name; }
 
-        /**
-          * @brief Returns the tag name of the closing tag for which this EndElement object was created.
-          *
-          * When parsing <a>test</a> a StartElement, a Character and finally an EndElement node is
-          * created. The EndElement has the name "a". If an empty tag is parsed, like for example </a>,
-          * a StartElement and an EndElement ("a") is created.
-          *
-          * @return The tag name of the closing tag for which this EndElement object was created.
-          */
+        /** @brief Returns the local name.
+        */
         const String& name() const
         { return _name; }
 
-        /**
-          * @brief Sets the tag name of the end tag for which this EndElement object was created.
-          * @param name The new name for this EndElement object.
-          */
+        /** @brief Sets the local name.
+        */
         void setName(const String& name)
         { _name = name; }
 
+        /** @brief Returns the namespace Uri for this element name
+        */
         const String& namespaceUri() const
         { return _namespace ? _namespace->namespaceUri() : _prefix; }
         
+        /** @brief Sets the namespace context for this element
+        */
         void setNamespace(const Namespace& ns)
         { _namespace = &ns; }
 
+        //! @internal
         inline static const Node::Type nodeId()
         { return Node::EndElement; }
 

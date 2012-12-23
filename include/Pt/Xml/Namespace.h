@@ -25,8 +25,8 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef PT_Xml_Namespace_h
-#define PT_Xml_Namespace_h
+#ifndef Pt_Xml_Namespace_h
+#define Pt_Xml_Namespace_h
 
 #include <Pt/Xml/Api.h>
 #include <Pt/String.h>

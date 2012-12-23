@@ -1,4 +1,6 @@
 /*
+ * Copyright (C) 2012 Marc Boris Duerner
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -23,46 +25,62 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef PTV_Xml_EndDocument_h
-#define PTV_Xml_EndDocument_h
+#ifndef Pt_Xml_EndDocument_h
+#define Pt_Xml_EndDocument_h
 
 #include <Pt/Xml/Api.h>
 #include <Pt/Xml/Node.h>
 
-
 namespace Pt {
 
-    namespace Xml {
+namespace Xml {
 
-        /**
-         * @brief A Node which represents the end of the XML document.
-         *
-         * The last Node/Element which is read from a document is the EndDocument-node. It is read after
-         * the last tag, Text or comment was read from the XML document. This is similar to an eof character
-         * at the end of a file read.
-         *
-         * @see Node
-         */
-        class EndDocument : public Node {
-            public:
-                //! Creates an EndDocument object.
-                EndDocument()
-                : Node(Node::EndDocument)
-                { }
+/** @brief A Node representing the end of the XML document.
+    
+    The last node which is read from a document is the EndDocument node. It is
+    read after the last tag, text or comment was read from the XML document.
+    This is similar to the EOF character being read at the end of a file.
+*/
+class EndDocument : public Node 
+{
+    public:
+        /** @brief Creates an EndDocument object.
+        */
+        EndDocument()
+        : Node(Node::EndDocument)
+        { }
 
-        };
+        //! @internal
+        inline static const Node::Type nodeId()
+        { return Node::EndDocument; }
+};
 
-    }
 
+inline EndDocument* toEndDocument(Node* node)
+{
+    return nodeCast<EndDocument>(node);
 }
 
+
+inline const EndDocument* toEndDocument(const Node* node)
+{
+    return nodeCast<EndDocument>(node);
+}
+
+
+inline EndDocument& toEndDocument(Node& node)
+{
+    return nodeCast<EndDocument>(node);
+}
+
+
+inline const EndDocument& toEndDocument(const Node& node)
+{
+    return nodeCast<EndDocument>(node);
+}
+
+} // namespace Xml
+
+} // namespace Pt
+
 #endif
-
-
-
-
-
-
-
-
-

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 Marc Boris Duerner
+ * Copyright (C) 2009-2012 Marc Boris Duerner
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -36,18 +36,14 @@ namespace Pt {
 
 namespace Xml {
 
-/** @brief Entity resolver class which associates entities to resolved entity values.
- 
-    Entities can be added to this class using the method addEntity(). This method takes
-    the entity and the resolved entity value. To resolve the resolves value for an entity
-    the method resolveEntity() can be used.
- */
+/** @brief Handles character and entity references.
+*/
 class PT_XML_API EntityResolver
 {
     typedef std::map<String, String> EntityMap;
 
     public:
-        /** @brief Initializes to use the XML default entities.
+        /** @brief Constructs with the XML default entities.
         */
         EntityResolver();
 
@@ -58,39 +54,25 @@ class PT_XML_API EntityResolver
         */
         void clear();
 
-        /** @brief Adds an entity to the lookup.
-
-            To determine the resolved entity value of a entity the method resolveEntity() can be used.
-
-            @param entity The entity name.
-            @param token The characters the entity represents.
+        /** @brief Adds an entity reference to the lookup.
         */
         void addEntity(const String& entity, const String& token);
 
-        /** @brief Replaces the entity by the the character it represents.
-
-            @param entity The entity name to be replaced.
-            @return True if the entity could be replaced.
+        /** @brief Replaces the entity with its string value.
         */
         bool resolveEntity(String& entity) const;
 
-        /** @brief Returns the entity name for a character.
+        /** @brief Returns the entity reference for a character.
 
-            If no entity is found, a null pointer is returned.
-        */
-        const Pt::Char* findEntity(String& str) const;
-
-        /** @brief Returns the entity name for a string.
-
-            If no entity is found, a null pointer is returned.
+            If no entity reference is found, a null pointer is returned.
         */
         const Pt::Char* findEntity(Char ch) const;
 
         /** @brief Replaces characters with entities.
             
-            If characters are found in @q str, which are represented by an
-            entity, they will be replaced. The result is written to the output
-            stream @ os.
+            If characters are found in @a str, which are represented by an
+            entity reference, they will be replaced. The result is written
+            to the output stream @a os.
         */
         void getEntity(std::basic_ostream<Char>& os, const Pt::Char* str) const;
 
@@ -98,8 +80,8 @@ class PT_XML_API EntityResolver
         EntityMap _entityMap;
 };
 
-}
+} // namespace Xml
 
-}
+} // namespace Pt
 
 #endif

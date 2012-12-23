@@ -1,4 +1,6 @@
 /*
+ * Copyright (C) 2012 Marc Boris Duerner
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -23,48 +25,86 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef PTV_Xml_QName_h
-#define PTV_Xml_QName_h
+#ifndef Pt_Xml_QName_h
+#define Pt_Xml_QName_h
 
-#include <Pt/String.h>
 #include <Pt/Xml/Api.h>
-
+#include <Pt/Xml/Namespace.h>
+#include <Pt/String.h>
+#include <Pt/NonCopyable.h>
 
 namespace Pt {
 
-    namespace Xml {
+namespace Xml {
 
-        class PT_XML_API QName {
-            public:
-                QName();
+/** @brief A namespace qualified XML name
+*/
+class QName 
+{
+    public:
+        /** @brief Constructs an empty qualified name.
+        */
+        QName()
+        : _namespace(0)
+        {}
 
-                QName(const String& localPart);
+        /** @brief Clears all content.
+        */
+        void clear()
+        {
+            _name.clear();
+            _prefix.clear();
+            _namespace = 0;
+        }
 
-                QName(const String& namespaceURI, const String& localPart);
+        /** @brief Returns the namespace prefix.
+        */
+        String& prefix() 
+        { return _prefix; }
 
-                QName(const String& namespaceURI, const String& localPart, const String& prefix);
+        /** @brief Returns the namespace prefix.
+        */
+        const String& prefix() const
+        { return _prefix; }
 
-                ~QName();
+        /** @brief Sets the namespace prefix.
+        */
+        void setPrefix(const String& prefix)
+        { _prefix = prefix; }
 
-                const String& prefix() const;
+        /** @brief Returns the local name.
+        */
+        String& name() 
+        { return _name; }
 
-                void setPrefix(const String& prefix);
+        /** @brief Returns the local name.
+        */
+        const String& name() const
+        { return _name; }
 
-                const String& localPart() const;
+        /** @brief Sets the local name.
+        */
+        void setName(const String& name)
+        { _name = name; }
 
-                void setLocalPart(const String& localPart);
+        /** @brief Returns the namespace Uri for this element name
+        */
+        const String& namespaceUri() const
+        { return _namespace ? _namespace->namespaceUri() : _prefix; }
+        
+        /** @brief Sets the namespace context for this element
+        */
+        void setNamespace(const Namespace& ns)
+        { _namespace = &ns; }
 
-                const String& namespaceUri() const;
+    private:
+        String _prefix;
+        String _name;
+        const Namespace* _namespace;
+};
 
-                void setNamespaceUri(const String& namespaceUri);
+} // namespace Xml
 
-            private:
-                String _prefix;
-                String _localPart;
-                String _namespaceUri;
-        };
+} // namespace Pt
 
-    }
-
-}
 #endif

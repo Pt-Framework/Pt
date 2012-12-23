@@ -30,7 +30,7 @@
 
 #include <Pt/Xml/Api.h>
 #include <Pt/Xml/Node.h>
-#include <Pt/Xml/Namespace.h>
+#include <Pt/Xml/QName.h>
 #include <Pt/NonCopyable.h>
 #include <Pt/String.h>
 #include <vector>
@@ -155,55 +155,59 @@ class PT_XML_API StartElement : public Node
                               , private NonCopyable
 {
     public:
-        //! Constructs a new StartElement object with no name and an empty attribute list.
+        /** Constructs a StartElement object with no name and an empty attribute list.
+        */
         StartElement()
         : Node(Node::StartElement)
-        , _namespace(0)
         { }
 
+        /** @brief Clears the start element.
+        */
         void clear()
         {
-            _name.clear();
-            _prefix.clear();
+            _qname.clear();
             _attributes.clear();
-            _namespace = 0;
         }
 
         /** @brief Returns the namespace prefix.
         */
         String& prefix() 
-        { return _prefix; }
+        { return _qname.prefix(); }
 
         /** @brief Returns the namespace prefix.
         */
         const String& prefix() const
-        { return _prefix; }
+        { return _qname.prefix(); }
 
         /** @brief Sets the namespace prefix.
         */
         void setPrefix(const String& prefix)
-        { _prefix = prefix; }
+        { _qname.setPrefix(prefix); }
 
         /** @brief Returns the local name.
         */
         String& name() 
-        { return _name; }
+        { return _qname.name(); }
 
         /** @brief Returns the local name.
         */
         const String& name() const
-        { return _name; }
+        { return _qname.name(); }
 
         /** @brief Sets the local name.
         */
         void setName(const String& name)
-        { _name = name; }
+        { _qname.setName(name); }
 
+        /** @brief Returns the namespace Uri for this element name
+        */
         const String& namespaceUri() const
-        { return _namespace ? _namespace->namespaceUri() : _prefix; }
+        { return _qname.namespaceUri(); }
         
+        /** @brief Sets the namespace context for this element
+        */
         void setNamespace(const Namespace& ns)
-        { _namespace = &ns; }
+        { _qname.setNamespace(ns); }
 
         /** @brief Returns the attributes of the tag.
         */
@@ -228,10 +232,8 @@ class PT_XML_API StartElement : public Node
         { return Node::StartElement; }
 
     private:
-        String _prefix;
-        String _name;
+        QName _qname;
         AttributeList _attributes;
-        const Namespace* _namespace;
 };
 
 

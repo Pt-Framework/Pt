@@ -48,30 +48,38 @@ class PT_XML_API Comment : public Node
         */
         explicit Comment(const String& text)
         : Node(Node::Comment)
-        , _text(text)
+        , _content(text)
         { }
 
-        /** @brief Returns the content of the comment.
+        /** @brief Returns true if is empty.
         */
-        String& text()
-        { return _text; }
+        bool empty() const
+        { return _content.empty(); }
+
+        void clear()
+        { _content.clear(); }
 
         /** @brief Returns the content of the comment.
         */
-        const String& text() const
-        { return _text; }
+        String& content()
+        { return _content; }
+
+        /** @brief Returns the content of the comment.
+        */
+        const String& content() const
+        { return _content; }
 
         /** @brief RSets the content of the comment.
         */
-        void setText(const String& text)
-        { _text = text; }
+        void setContent(const String& text)
+        { _content = text; }
 
         //! @internal
         inline static const Node::Type nodeId()
         { return Node::Comment; }
 
     private:
-        String _text;
+        String _content;
 };
 
 

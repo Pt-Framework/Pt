@@ -1,4 +1,6 @@
 /*
+ * Copyright (C) 2008-2012 by Marc Boris Duerner
+ * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -34,7 +36,8 @@ namespace Pt {
 
 namespace Xml {
 
-//! @brief Exception during XML processing.
+/** @brief Exception during XML processing.
+*/
 class PT_XML_API XmlError : public std::runtime_error
 {
     public:
@@ -46,7 +49,8 @@ class PT_XML_API XmlError : public std::runtime_error
         {}
 };
 
-//! @brief Indicates XML syntax errors.
+/** @brief Indicates XML syntax errors.
+*/
 class PT_XML_API SyntaxError : public XmlError
 {
     public:
@@ -65,11 +69,12 @@ class PT_XML_API SyntaxError : public XmlError
 };
 
 
-//! @brief Indicates XML syntax errors.
+/** @brief Indicates XML syntax errors.
+*/
 class PT_XML_API NoSuchAttribute : public XmlError
 {
     public:
-        /** @brief Construct with message and line number.
+        /** @brief Construct with attribute name.
         */
         NoSuchAttribute(const String& name);
 
@@ -83,8 +88,8 @@ class PT_XML_API NoSuchAttribute : public XmlError
         String _name;
 };
 
-}
+} // namespace Xml
 
-}
+} // namespace Pt
 
 #endif

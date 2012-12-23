@@ -5,7 +5,6 @@ SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Xml ;
 
 PT_XML_SOURCES = EntityResolver.cpp
                  NamespaceContext.cpp
-                 QName.cpp
                  StartElement.cpp
                  XmlError.cpp
                  XmlFormatter.cpp

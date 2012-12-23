@@ -178,7 +178,6 @@
     <ClInclude Include="..\..\include\Pt\Xml\ProcessingInstruction.h" />
     <ClInclude Include="..\..\include\Pt\Xml\QName.h" />
     <ClInclude Include="..\..\include\Pt\Xml\StartElement.h" />
-    <ClInclude Include="..\..\include\Pt\Xml\XmlDeclaration.h" />
     <ClInclude Include="..\..\include\Pt\Xml\XmlDeserializer.h" />
     <ClInclude Include="..\..\include\Pt\Xml\XmlError.h" />
     <ClInclude Include="..\..\include\Pt\Xml\XmlFormatter.h" />
@@ -386,17 +385,13 @@
     <ClCompile Include="..\..\src\Pt-Unit\TestSuite.cpp" />
     <ClCompile Include="..\..\src\Pt-Unit\TextProtocol.cpp" />
     <ClCompile Include="..\..\src\Pt-Unit\TextProtocolTest.cpp" />
-    <ClCompile Include="..\..\src\Pt-Xml\Characters.cpp" />
-    <ClCompile Include="..\..\src\Pt-Xml\EndElement.cpp" />
     <ClCompile Include="..\..\src\Pt-Xml\EntityResolver.cpp" />
     <ClCompile Include="..\..\src\Pt-Xml\NamespaceContext.cpp" />
-    <ClCompile Include="..\..\src\Pt-Xml\QName.cpp" />
     <ClCompile Include="..\..\src\Pt-Xml\StartElement.cpp" />
     <ClCompile Include="..\..\src\Pt-Xml\tests\Pt-Xml-test.cpp" />
     <ClCompile Include="..\..\src\Pt-Xml\tests\XmlSerializerTest.cpp" />
     <ClCompile Include="..\..\src\Pt-Xml\tests\XmlTest.cpp" />
     <ClCompile Include="..\..\src\Pt-Xml\tests\XmlWriterTest.cpp" />
-    <ClCompile Include="..\..\src\Pt-Xml\XmlDeserializer.cpp" />
     <ClCompile Include="..\..\src\Pt-Xml\XmlError.cpp" />
     <ClCompile Include="..\..\src\Pt-Xml\XmlFormatter.cpp" />
     <ClCompile Include="..\..\src\Pt-Xml\XmlReader.cpp" />

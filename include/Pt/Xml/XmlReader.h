@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 Marc Boris Duerner
+ * Copyright (C) 2009-2012 Marc Boris Duerner
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -80,59 +80,7 @@ namespace Xml {
 class PT_XML_API XmlReader
 {
     public:
-        class Iterator
-        {
-            public:
-                Iterator()
-                : _stream(0)
-                , _node(0)
-                { }
-
-                Iterator(XmlReader& xis)
-                : _stream(&xis)
-                , _node(0)
-                { _node = &_stream->get(); }
-
-                Iterator(const Iterator& it)
-                : _stream(it._stream), _node(it._node)
-                { }
-
-                ~Iterator()
-                { }
-
-                Iterator& operator=(const Iterator& it)
-                {
-                    _stream = it._stream;
-                    _node = it._node;
-                    return *this;
-                }
-
-                inline const Node& operator*() const
-                { return *_node; }
-
-                inline const Node* operator->() const
-                { return _node; }
-
-                Iterator& operator++()
-                {
-                    if(_node->type() == Node::EndDocument)
-                        _node = 0;
-                    else
-                        _node = &_stream->next();
-
-                    return *this;
-                }
-
-                inline bool operator==(const Iterator& it) const
-                { return _node == it._node; }
-
-                inline bool operator!=(const Iterator& it) const
-                { return _node != it._node; }
-
-            private:
-                XmlReader* _stream;
-                const Node* _node;
-        };
+        class Iterator;
 
     public:
         /* TODO: Consider the following processing flags:
@@ -173,11 +121,9 @@ class PT_XML_API XmlReader
 
         std::size_t line() const;
 
-        Iterator current()
-        { return Iterator(*this); }
+        Iterator current();
 
-        Iterator end() const
-        { return Iterator(); }
+        Iterator end() const;
 
         //! @brief Get current element
         const Node& get();
@@ -191,6 +137,72 @@ class PT_XML_API XmlReader
     private:
         class XmlReaderImpl* _impl;
 };
+
+class XmlReader::Iterator
+{
+    public:
+        Iterator()
+        : _stream(0)
+        , _node(0)
+        { }
+
+        Iterator(XmlReader& xis)
+        : _stream(&xis)
+        , _node(0)
+        { _node = &_stream->get(); }
+
+        Iterator(const Iterator& it)
+        : _stream(it._stream), _node(it._node)
+        { }
+
+        ~Iterator()
+        { }
+
+        Iterator& operator=(const Iterator& it)
+        {
+            _stream = it._stream;
+            _node = it._node;
+            return *this;
+        }
+
+        inline const Node& operator*() const
+        { return *_node; }
+
+        inline const Node* operator->() const
+        { return _node; }
+
+        Iterator& operator++()
+        {
+            if(_node->type() == Node::EndDocument)
+                _node = 0;
+            else
+                _node = &_stream->next();
+
+            return *this;
+        }
+
+        inline bool operator==(const Iterator& it) const
+        { return _node == it._node; }
+
+        inline bool operator!=(const Iterator& it) const
+        { return _node != it._node; }
+
+    private:
+        XmlReader* _stream;
+        const Node* _node;
+};
+
+
+inline XmlReader::Iterator XmlReader::current()
+{
+    return Iterator(*this); 
+}
+
+
+inline XmlReader::Iterator XmlReader::end() const
+{
+    return Iterator(); 
+}
 
 }
 
