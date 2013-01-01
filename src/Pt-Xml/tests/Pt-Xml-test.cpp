@@ -47,19 +47,15 @@ class DtdState
 
         virtual void next(std::vector<DtdState*>& states) = 0;
 
-        virtual void accept(Pt::Xml::Node& node, std::vector<DtdState*>& states) = 0;
+        virtual void setNext(DtdState* state) = 0;
+
+        virtual void eval(Pt::Xml::Node& node, std::vector<DtdState*>& states) = 0;
 
         DtdState* out()
         { return _out; }
 
-        DtdState** outPtr()
-        { return &_out; }
-
         DtdState* out1()
         { return _out1; }
-
-        DtdState** out1Ptr()
-        { return &_out1; }
 
         void setOut(DtdState* next, DtdState* alt)
         {
@@ -91,7 +87,7 @@ class DtdOr : public DtdState
         : DtdState(next, alt)
         { }
 
-        virtual void accept(Pt::Xml::Node& node, std::vector<DtdState*>& states)
+        virtual void eval(Pt::Xml::Node& node, std::vector<DtdState*>& states)
         { }
 
         virtual void next(std::vector<DtdState*>& states) 
@@ -101,6 +97,37 @@ class DtdOr : public DtdState
 
             assert(out1());
             out1()->next(states);
+        }
+
+        virtual void setNext(DtdState* state)
+        { 
+            setOut(state, state);
+        }
+};
+
+
+class DtdPlus : public DtdState
+{
+    public:
+        DtdPlus(DtdState* prev)
+        : DtdState(prev, 0)
+        { }
+
+        virtual void eval(Pt::Xml::Node& node, std::vector<DtdState*>& states)
+        { }
+
+        virtual void next(std::vector<DtdState*>& states) 
+        {
+            assert( out() );
+            out()->next(states);
+
+            assert( out1() );
+            out1()->next(states);
+        }
+
+        virtual void setNext(DtdState* state)
+        { 
+            setOut(out(), state);
         }
 };
 
@@ -113,7 +140,7 @@ class DtdElement : public DtdState
         , _name(name)
         { }
 
-        virtual void accept(Pt::Xml::Node& node, std::vector<DtdState*>& states)
+        virtual void eval(Pt::Xml::Node& node, std::vector<DtdState*>& states)
         {
             Pt::Xml::StartElement* se = Pt::Xml::toStartElement(&node);
             if(se && se->name() == _name)
@@ -124,6 +151,9 @@ class DtdElement : public DtdState
         {
             states.push_back(this);
         }
+
+        virtual void setNext(DtdState* state)
+        { setOut(state, 0); }
 
     private:
         Pt::String _name;
@@ -137,11 +167,14 @@ class DtdMatch : public DtdState
         : DtdState()
         { }
 
-        virtual void accept(Pt::Xml::Node& node, std::vector<DtdState*>& states)
+        virtual void eval(Pt::Xml::Node& node, std::vector<DtdState*>& states)
         { }
         
         virtual void next(std::vector<DtdState*>& states) 
         { states.push_back(this); }
+
+        virtual void setNext(DtdState* state)
+        { }
 };
 
 
@@ -154,7 +187,7 @@ class DtdEnd : public DtdState
             setOut(&_end, 0);
         }
 
-        virtual void accept(Pt::Xml::Node& node, std::vector<DtdState*>& states)
+        virtual void eval(Pt::Xml::Node& node, std::vector<DtdState*>& states)
         {
             Pt::Xml::EndElement* e = Pt::Xml::toEndElement(&node);
             if(e != 0)
@@ -165,6 +198,9 @@ class DtdEnd : public DtdState
         {
             states.push_back(this);
         }
+
+        virtual void setNext(DtdState* state)
+        { }
 
         DtdState* matched()
         { return &_end; }
@@ -177,36 +213,40 @@ class DtdEnd : public DtdState
 class DtdFragment
 {
     public:
-        explicit DtdFragment(DtdState* state)
-        : _state(state)
+        explicit DtdFragment(DtdState* start)
+        : _start(start)
         {}
 
-        DtdState* state()
-        { return _state; }
+        DtdState* start() const
+        { return _start; }
 
-        std::vector<DtdState**>& out()
-        { return _out; }
+        const std::vector<DtdState*>& leafs() const
+        { return _leafs; }
 
-        void appendOut(DtdState** next)
-        { _out.push_back(next); }
+        void setLeaf(DtdState* next)
+        { _leafs.push_back(next); }
 
-        void setOut(std::vector<DtdState**>& states)
+        void setLeafs(const std::vector<DtdState*>& leafs)
+        { _leafs = leafs; }
+
+        void setLeafs(const std::vector<DtdState*>& leafs, const std::vector<DtdState*>& leafs2)
         { 
-            _out = states; 
+            _leafs = leafs; 
+            _leafs.insert( _leafs.end(), leafs2.begin(), leafs2.end() );
         }
 
-        void patchOut(DtdState* to)
+        void patchLeafs(DtdState* to)
         {
-            for(unsigned n = 0; n < _out.size(); ++n)
+            for(unsigned n = 0; n < _leafs.size(); ++n)
             {
-                DtdState** s = _out[n];
-                *s = to;
+                DtdState* leaf = _leafs[n];
+                leaf->setNext(to);
             }
         }
 
     private:
-        DtdState* _state;
-        std::vector<DtdState**> _out;
+        DtdState* _start;
+        std::vector<DtdState*> _leafs;
 };
 
 
@@ -215,7 +255,6 @@ class DtdParser : private Pt::NonCopyable
     public:
         DtdParser()
         : _state(&DtdParser::OnBegin)
-        , _depth(0)
         {}
 
         ~DtdParser()
@@ -238,8 +277,8 @@ class DtdParser : private Pt::NonCopyable
             if(_stack.size() != 1)
                 throw std::logic_error("DTD syntax error: incomplete expression");
 
-            _stack.top().patchOut(&_dtdEnd);
-            DtdState* start = _stack.top().state();
+            _stack.top().patchLeafs(&_dtdEnd);
+            DtdState* start = _stack.top().start();
             _stack.pop();
             return start;
         }
@@ -271,7 +310,6 @@ class DtdParser : private Pt::NonCopyable
             if(ch != '(')
                 throw std::logic_error("DTD syntax error: expected open brace");
 
-            ++_depth;
             _ops.push(ch);
             _state = &DtdParser::OnExprBegin;
         }
@@ -295,6 +333,15 @@ class DtdParser : private Pt::NonCopyable
         {
             if( c == std::char_traits<Pt::Char>::eof() )
             {
+                reduceStack();
+                return;
+            }
+
+            Pt::Char ch(c);
+
+            if(ch == '+')
+            {
+                _ops.push(ch);
                 return;
             }
         }
@@ -312,6 +359,15 @@ class DtdParser : private Pt::NonCopyable
             }
 
             if( ch == ',')
+            {
+                pushOperand();
+
+                _ops.push(ch);
+                _state = &DtdParser::OnExprBegin;
+                return;
+            }
+
+            if( ch == '|')
             {
                 pushOperand();
 
@@ -338,7 +394,7 @@ class DtdParser : private Pt::NonCopyable
             _expr.push_back(elem);
 
             DtdFragment frag(elem);
-            frag.appendOut( elem->outPtr() );
+            frag.setLeaf(elem);
             _stack.push(frag);
         }
 
@@ -347,7 +403,7 @@ class DtdParser : private Pt::NonCopyable
             for(;;)
             {
                 if( _ops.empty() )
-                    throw std::logic_error("internal DTD stack error");
+                    break;
 
                 if(_ops.top() == '(')
                 {
@@ -360,7 +416,7 @@ class DtdParser : private Pt::NonCopyable
                     _ops.pop();
                  
                     if( _stack.size() < 2 )
-                        throw std::logic_error("DTD syntax error: no operands");
+                        throw std::logic_error("DTD syntax error: not enough operands for ,");
                     
                     DtdFragment op2 = _stack.top();
                     _stack.pop();
@@ -368,10 +424,51 @@ class DtdParser : private Pt::NonCopyable
                     DtdFragment op1 = _stack.top();
                     _stack.pop();
 
-                    op1.patchOut( op2.state() );
+                    op1.patchLeafs( op2.start() );
                     
-                    DtdFragment frag( op1.state() );
-                    frag.setOut( op2.out() );
+                    DtdFragment frag( op1.start() );
+                    frag.setLeafs( op2.leafs() );
+                    _stack.push(frag);
+                }
+
+                if(_ops.top() == '|')
+                {
+                    _ops.pop();
+                 
+                    if( _stack.size() < 2 )
+                        throw std::logic_error("DTD syntax error: not enough operands for ,");
+                    
+                    DtdFragment op2 = _stack.top();
+                    _stack.pop();
+
+                    DtdFragment op1 = _stack.top();
+                    _stack.pop();
+
+                    DtdOr* or = new DtdOr( op1.start(), op2.start() );
+                    _expr.push_back(or);
+
+                    DtdFragment frag(or);
+                    frag.setLeafs( op1.leafs(), op2.leafs() );
+                    _stack.push(frag);
+                }
+
+                if(_ops.top() == '+')
+                {
+                    _ops.pop();
+                 
+                    if( _stack.empty() )
+                        throw std::logic_error("DTD syntax error: not enough operands for +");
+                    
+                    DtdFragment op1 = _stack.top();
+                    _stack.pop();
+
+                    DtdPlus* plus = new DtdPlus( op1.start() );
+                    _expr.push_back(plus);
+
+                    op1.patchLeafs(plus);
+                    
+                    DtdFragment frag( op1.start() );
+                    frag.setLeaf( plus );
                     _stack.push(frag);
                 }
             }
@@ -384,26 +481,23 @@ class DtdParser : private Pt::NonCopyable
         DtdEnd _dtdEnd;
         std::vector<DtdState*> _expr;
 
-        unsigned _depth;
         Pt::String _token;
         std::stack<Pt::Char> _ops;
         std::stack<DtdFragment> _stack;
 };
 
-/*
-    - push operators and open brackets on op stack
-    - push literals directly on state stack
-    - on closing bracket process operator stack backwards until open brace remove open brace
-    - each processed operator removes its operands from state stack
 
-    ((a, b) | (c, d))
-
-    a b . c d . |
-
-    OPS:    
-    STATES: (ab) (cd) |
-*/
-
+void advance(std::vector<DtdState*>& current, std::vector<DtdState*>& next, Pt::Xml::Node& node)
+{
+    for(unsigned n = 0; n < current.size(); ++n)
+    {
+        DtdState* state = current[n];
+        state->eval(node, next);
+    }
+            
+    current = next;
+    next.clear();
+}
 
 class PtXmlTest : public Pt::Unit::TestSuite
 {
@@ -412,136 +506,46 @@ class PtXmlTest : public Pt::Unit::TestSuite
         : Pt::Unit::TestSuite("Pt-Xml-Test")
         {
             this->registerMethod("DtdValidate", *this, &PtXmlTest::DtdValidate);
-            this->registerMethod("DtdValidate2", *this, &PtXmlTest::DtdValidate2);
         }
 
     private:
-        void DtdValidate2()
+        void DtdValidate()
         {
-            Pt::Xml::StartElement seA;
-            seA.setName(L"a");
-            
-            Pt::Xml::StartElement seB;
-            seB.setName(L"b");
-
-            Pt::Xml::EndElement endElem;
-
             DtdParser parser;
             parser.parse('(');
             parser.parse('a');
-            parser.parse(',');
+            parser.parse('|');
             parser.parse('b');
             parser.parse(')');
-
-            std::vector<DtdState*> _current;
-            std::vector<DtdState*> _next;
-
+            parser.parse('+');
             DtdState* start = parser.finish();
-            start->next(_current);
+
+            std::vector<DtdState*> current;
+            std::vector<DtdState*> next;
+            start->next(current);
 
             // first token <a>
-
-            for(unsigned n = 0; n < _current.size(); ++n)
-            {
-                DtdState* state = _current[n];
-                state->accept(seA, _next);
-            }
-            
-            _current = _next;
-            _next.clear();
-
-            // first token <b>
-
-            for(unsigned n = 0; n < _current.size(); ++n)
-            {
-                DtdState* state = _current[n];
-                state->accept(seB, _next);
-            }
-            
-            _current = _next;
-            _next.clear();
-
-            // end
-
-            for(unsigned n = 0; n < _current.size(); ++n)
-            {
-                DtdState* state = _current[n];
-                state->accept(endElem, _next);
-            }
-
-            _current = _next;
-            _next.clear();
-
-            bool isMatch = _current.size() > 0 && _current.at(0) == parser.matched();
-            std::cout << isMatch << std::endl;
-        }
-
-        void DtdValidate()
-        {
             Pt::Xml::StartElement seA;
             seA.setName(L"a");
-            
+            advance(current, next, seA);
+
+            // second token <b>
             Pt::Xml::StartElement seB;
             seB.setName(L"b");
+            advance(current, next, seB);
 
+            // third token <a>
+            advance(current, next, seA);
+            
+            // fourth token <b>
+            advance(current, next, seB);
+
+            // 'end of input' token
             Pt::Xml::EndElement endElem;
+            advance(current, next, endElem);
 
-            DtdEnd end;
-            
-            /*
-                (ab) | (cd)
-
-                ab. cd. |
-            */
-
-            DtdElement childB(&end, L"b");
-            DtdElement childA(&childB, L"a");
-
-            DtdElement childD(&end, L"d");
-            DtdElement childC(&childD, L"c");
-
-            DtdOr orState(&childA, &childC);
-
-            std::vector<DtdState*> _current;
-            std::vector<DtdState*> _next;
-
-            orState.next(_current);
-
-            // first token <a>
-
-            for(unsigned n = 0; n < _current.size(); ++n)
-            {
-                DtdState* state = _current[n];
-                state->accept(seA, _next);
-            }
-            
-            _current = _next;
-            _next.clear();
-
-            // first token <b>
-
-            for(unsigned n = 0; n < _current.size(); ++n)
-            {
-                DtdState* state = _current[n];
-                state->accept(seB, _next);
-            }
-            
-            _current = _next;
-            _next.clear();
-
-            // end
-
-            for(unsigned n = 0; n < _current.size(); ++n)
-            {
-                DtdState* state = _current[n];
-                state->accept(endElem, _next);
-            }
-
-            _current = _next;
-            _next.clear();
-
-            bool isMatch = _current.size() > 0 && _current.at(0) == end.matched();
-            std::cout << isMatch << std::endl;
+            bool isMatch = current.size() > 0 && current.at(0) == parser.matched();
+            this->reportMessage(isMatch ? "DTD MATCH" : "NO MATCH");
         }
 };
 
