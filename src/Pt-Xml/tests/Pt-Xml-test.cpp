@@ -106,6 +106,32 @@ class DtdOr : public DtdState
 };
 
 
+class DtdMult : public DtdState
+{
+    public:
+        DtdMult(DtdState* next)
+        : DtdState(next, 0)
+        { }
+
+        virtual void eval(Pt::Xml::Node& node, std::vector<DtdState*>& states)
+        { }
+
+        virtual void next(std::vector<DtdState*>& states) 
+        {
+            assert( out() );
+            out()->next(states);
+
+            assert( out1() );
+            out1()->next(states);
+        }
+
+        virtual void setNext(DtdState* state)
+        { 
+            setOut(out(), state);
+        }
+};
+
+
 class DtdPlus : public DtdState
 {
     public:
@@ -345,6 +371,12 @@ class DtdParser : private Pt::NonCopyable
                 _ops.push(ch);
                 return;
             }
+
+            if(ch == '*')
+            {
+                _ops.push(ch);
+                return;
+            }
         }
 
         void OnIdentifier(int c)
@@ -430,6 +462,7 @@ class DtdParser : private Pt::NonCopyable
                     DtdFragment frag( op1.start() );
                     frag.setLeafs( op2.leafs() );
                     _stack.push(frag);
+                    continue;
                 }
 
                 if(_ops.top() == '|')
@@ -451,6 +484,28 @@ class DtdParser : private Pt::NonCopyable
                     DtdFragment frag(or);
                     frag.setLeafs( op1.leafs(), op2.leafs() );
                     _stack.push(frag);
+                    continue;
+                }
+
+                if(_ops.top() == '*')
+                {
+                    _ops.pop();
+                 
+                    if( _stack.empty() )
+                        throw std::logic_error("DTD syntax error: not enough operands for *");
+                    
+                    DtdFragment op1 = _stack.top();
+                    _stack.pop();
+
+                    DtdMult* mult = new DtdMult( op1.start() );
+                    _expr.push_back(mult);
+
+                    op1.patchLeafs(mult);
+                    
+                    DtdFragment frag( mult );
+                    frag.setLeaf( mult );
+                    _stack.push(frag);
+                    continue;
                 }
 
                 if(_ops.top() == '+')
@@ -471,6 +526,7 @@ class DtdParser : private Pt::NonCopyable
                     DtdFragment frag( op1.start() );
                     frag.setLeaf( plus );
                     _stack.push(frag);
+                    continue;
                 }
             }
         }
@@ -518,7 +574,7 @@ class PtXmlTest : public Pt::Unit::TestSuite
             parser.parse('|');
             parser.parse('b');
             parser.parse(')');
-            parser.parse('+');
+            parser.parse('*');
             DtdState* start = parser.finish();
 
             std::vector<DtdState*> current;
@@ -537,7 +593,7 @@ class PtXmlTest : public Pt::Unit::TestSuite
 
             // third token <a>
             advance(current, next, seA);
-            
+
             // fourth token <b>
             advance(current, next, seB);
 
