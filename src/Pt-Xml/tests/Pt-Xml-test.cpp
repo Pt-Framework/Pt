@@ -274,6 +274,8 @@ class DtdParser : private Pt::NonCopyable
         {
             parse( std::char_traits<Pt::Char>::eof() );
 
+            reduceStack();
+
             if(_stack.size() != 1)
                 throw std::logic_error("DTD syntax error: incomplete expression");
 
@@ -333,7 +335,6 @@ class DtdParser : private Pt::NonCopyable
         {
             if( c == std::char_traits<Pt::Char>::eof() )
             {
-                reduceStack();
                 return;
             }
 
