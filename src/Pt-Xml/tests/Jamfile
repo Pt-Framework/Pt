@@ -2,10 +2,10 @@ SubDir PT_TOP src Pt-Xml tests ;
 SubDirHdrs $(PT_TOP)/include ;
 SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Xml ;
 
-Main Pt-Xml-test : Pt-Xml-test.cpp
+Main Pt-Xml-test : 
                    XmlSerializerTest.cpp
                    XmlTest.cpp
-                   XmlWriterTest.cpp ;
+                   XmlWriterTest.cpp Pt-Xml-test.cpp ;
 
 LinkSharedLibraries Pt-Xml-test : Pt-Xml Pt-Reflex Pt-System Pt-Unit Pt ;
 MakeLocate Pt-Xml-test : $(PT_OUTPUT_TARGET) ;
