@@ -39,6 +39,156 @@
 #include <stack>
 #include <cassert>
 
+class DtdAttrDecl
+{
+    public:
+        enum Mode
+        {
+            Required = 0,
+            Implied = 1,
+            Fixed = 2,
+            Default = 3
+        };
+
+    public:
+        DtdAttrDecl()
+        : _mode(Default)
+        {}
+
+        ~DtdAttrDecl()
+        { }
+
+        void setMode(Mode mode)
+        { _mode = mode; }
+
+        Mode mode() const
+        { return _mode; }
+
+        const Pt::String& name() const
+        { return _name; }
+
+        void setName(const Pt::String& name)
+        { _name = name; }
+
+        void setDefault(const Pt::String& def)
+        { _default = def; }
+
+        virtual bool match(const Pt::String& value) const = 0;
+       
+        bool postMatch(Pt::Xml::AttributeList& list) const
+        {
+            switch(_mode)
+            {
+                case Required:
+                    return false;
+
+                case Implied:
+                    return true;
+
+                case Fixed:
+                case Default:
+                    break;
+            };
+
+            Pt::Xml::Attribute attr;
+            attr.setName(_name);
+            attr.setValue(_default);
+            list.add(attr);
+            return true;
+        }
+
+    private:
+        Mode _mode;
+        Pt::String _name;
+        Pt::String _default;
+};
+
+
+class DtdAttrCDataDecl : public DtdAttrDecl
+{
+    public:
+        DtdAttrCDataDecl()
+        : DtdAttrDecl()
+        {}
+
+        virtual bool match(const Pt::String& value) const
+        { return true; }
+};
+
+
+class DtdAttrListDecl
+{
+    typedef std::vector<DtdAttrDecl*> AttrDecls;
+
+    public:
+        DtdAttrListDecl()
+        {}
+
+        ~DtdAttrListDecl()
+        {
+            AttrDecls::iterator it;
+            for(it = _attrs.begin(); it != _attrs.end(); ++it)
+            {
+                delete *it;
+            }
+        }
+
+        const std::vector<DtdAttrDecl*>& decls() const
+        {
+            return _attrs;
+        }
+
+        void push(DtdAttrDecl* decl)
+        { _attrs.push_back(decl); }
+
+        bool validate(Pt::Xml::AttributeList& attrs) const
+        {
+            std::vector<DtdAttrDecl*>  attrDecls = _attrs;
+            //
+            // match attributes against declarations, remove declartions
+            // that match an attribute
+            //
+            Pt::Xml::AttributeList::ConstIterator attr;
+            for(attr = attrs.begin(); attr != attrs.end(); ++attr)
+            {
+                AttrDecls::iterator it;
+                 
+                for(it = attrDecls.begin(); it != attrDecls.end(); ++it)
+                {
+                    if( (*it)->name() == attr->name() )
+                    {
+                        break;
+                    }
+                }
+
+                if( it == attrDecls.end() )
+                    return false;
+
+                if( ! (*it)->match( attr->value() ) )
+                    return false;
+
+                attrDecls.erase(it);
+            }
+
+            //
+            // post process unmatched declarations e.g. get default values
+            // and check for missing required attributes
+            //
+            AttrDecls::iterator decl;
+            for(decl = attrDecls.begin(); decl != attrDecls.end(); ++decl)
+            {
+                if( ! (*decl)->postMatch(attrs) )
+                    return false;
+            }
+
+            return true;
+        }
+
+    private:
+        AttrDecls _attrs;
+};
+
+
 class DtdState
 {
     public:
@@ -334,12 +484,12 @@ class DtdParser : private Pt::NonCopyable
 
             reduceStack();
 
-            if(_stack.size() != 1)
+            if(_fragments.size() != 1)
                 throw std::logic_error("DTD syntax error: incomplete expression");
 
-            _stack.top().patchLeafs(&_dtdEnd);
-            DtdState* start = _stack.top().start();
-            _stack.pop();
+            _fragments.top().patchLeafs(&_dtdEnd);
+            DtdState* start = _fragments.top().start();
+            _fragments.pop();
             return start;
         }
 
@@ -466,7 +616,7 @@ class DtdParser : private Pt::NonCopyable
 
             DtdFragment frag(elem);
             frag.setLeaf(elem);
-            _stack.push(frag);
+            _fragments.push(frag);
         }
 
         void reduceStack()
@@ -486,20 +636,20 @@ class DtdParser : private Pt::NonCopyable
                 {
                     _ops.pop();
                  
-                    if( _stack.size() < 2 )
+                    if( _fragments.size() < 2 )
                         throw std::logic_error("DTD syntax error: not enough operands for ,");
                     
-                    DtdFragment op2 = _stack.top();
-                    _stack.pop();
+                    DtdFragment op2 = _fragments.top();
+                    _fragments.pop();
 
-                    DtdFragment op1 = _stack.top();
-                    _stack.pop();
+                    DtdFragment op1 = _fragments.top();
+                    _fragments.pop();
 
                     op1.patchLeafs( op2.start() );
                     
                     DtdFragment frag( op1.start() );
                     frag.setLeafs( op2.leafs() );
-                    _stack.push(frag);
+                    _fragments.push(frag);
                     continue;
                 }
 
@@ -507,21 +657,21 @@ class DtdParser : private Pt::NonCopyable
                 {
                     _ops.pop();
                  
-                    if( _stack.size() < 2 )
+                    if( _fragments.size() < 2 )
                         throw std::logic_error("DTD syntax error: not enough operands for ,");
                     
-                    DtdFragment op2 = _stack.top();
-                    _stack.pop();
+                    DtdFragment op2 = _fragments.top();
+                    _fragments.pop();
 
-                    DtdFragment op1 = _stack.top();
-                    _stack.pop();
+                    DtdFragment op1 = _fragments.top();
+                    _fragments.pop();
 
                     DtdOr* or = new DtdOr( op1.start(), op2.start() );
                     _expr.push_back(or);
 
                     DtdFragment frag(or);
                     frag.setLeafs( op1.leafs(), op2.leafs() );
-                    _stack.push(frag);
+                    _fragments.push(frag);
                     continue;
                 }
 
@@ -529,18 +679,18 @@ class DtdParser : private Pt::NonCopyable
                 {
                     _ops.pop();
                  
-                    if( _stack.empty() )
+                    if( _fragments.empty() )
                         throw std::logic_error("DTD syntax error: not enough operands for ?");
                     
-                    DtdFragment op1 = _stack.top();
-                    _stack.pop();
+                    DtdFragment op1 = _fragments.top();
+                    _fragments.pop();
 
                     DtdQuest* quest = new DtdQuest( op1.start() );
                     _expr.push_back(quest);
                     
                     DtdFragment frag( quest );
                     frag.setLeafs(op1.leafs(), quest);
-                    _stack.push(frag);
+                    _fragments.push(frag);
                     continue;
                 }
 
@@ -548,11 +698,11 @@ class DtdParser : private Pt::NonCopyable
                 {
                     _ops.pop();
                  
-                    if( _stack.empty() )
+                    if( _fragments.empty() )
                         throw std::logic_error("DTD syntax error: not enough operands for *");
                     
-                    DtdFragment op1 = _stack.top();
-                    _stack.pop();
+                    DtdFragment op1 = _fragments.top();
+                    _fragments.pop();
 
                     DtdMult* mult = new DtdMult( op1.start() );
                     _expr.push_back(mult);
@@ -561,7 +711,7 @@ class DtdParser : private Pt::NonCopyable
                     
                     DtdFragment frag( mult );
                     frag.setLeaf( mult );
-                    _stack.push(frag);
+                    _fragments.push(frag);
                     continue;
                 }
 
@@ -569,11 +719,11 @@ class DtdParser : private Pt::NonCopyable
                 {
                     _ops.pop();
                  
-                    if( _stack.empty() )
+                    if( _fragments.empty() )
                         throw std::logic_error("DTD syntax error: not enough operands for +");
                     
-                    DtdFragment op1 = _stack.top();
-                    _stack.pop();
+                    DtdFragment op1 = _fragments.top();
+                    _fragments.pop();
 
                     DtdPlus* plus = new DtdPlus( op1.start() );
                     _expr.push_back(plus);
@@ -582,7 +732,7 @@ class DtdParser : private Pt::NonCopyable
                     
                     DtdFragment frag( op1.start() );
                     frag.setLeaf( plus );
-                    _stack.push(frag);
+                    _fragments.push(frag);
                     continue;
                 }
             }
@@ -597,9 +747,19 @@ class DtdParser : private Pt::NonCopyable
 
         Pt::String _token;
         std::stack<Pt::Char> _ops;
-        std::stack<DtdFragment> _stack;
+        std::stack<DtdFragment> _fragments;
 };
 
+// TODO:
+class DtdElementDecl;
+// owns states of state machine including DtdEnd
+// name of element it declares
+
+// TODO: 
+class DtdElementValidator;
+// pointer to DtdAttrListDecl
+// pointer to DtdElementDecl
+// validates attrs first, then uses state machine for child elemenets
 
 void advance(std::vector<DtdState*>& current, std::vector<DtdState*>& next, Pt::Xml::Node& node)
 {
@@ -613,6 +773,7 @@ void advance(std::vector<DtdState*>& current, std::vector<DtdState*>& next, Pt::
     next.clear();
 }
 
+
 class PtXmlTest : public Pt::Unit::TestSuite
 {
     public:
@@ -620,6 +781,7 @@ class PtXmlTest : public Pt::Unit::TestSuite
         : Pt::Unit::TestSuite("Pt-Xml-Test")
         {
             this->registerMethod("DtdValidate", *this, &PtXmlTest::DtdValidate);
+            this->registerMethod("DtdValidateAttributes", *this, &PtXmlTest::DtdValidateAttributes);
         }
 
     private:
@@ -659,7 +821,52 @@ class PtXmlTest : public Pt::Unit::TestSuite
             advance(current, next, endElem);
 
             bool isMatch = current.size() > 0 && current.at(0) == parser.matched();
-            this->reportMessage(isMatch ? "DTD MATCH" : "NO MATCH");
+            this->reportMessage(isMatch ? "DTD ELEMENT MATCH" : "INVALID ELEMENT");
+        }
+
+        void DtdValidateAttributes()
+        {
+            DtdAttrListDecl decl;
+
+            DtdAttrCDataDecl* a1 = new DtdAttrCDataDecl();
+            a1->setName(L"a1");
+            a1->setMode(DtdAttrDecl::Required);
+            decl.push(a1);
+
+            DtdAttrCDataDecl* a2 = new DtdAttrCDataDecl();
+            a2->setName(L"a2");
+            a2->setMode(DtdAttrDecl::Implied);
+            decl.push(a2);
+
+            DtdAttrCDataDecl* a3 = new DtdAttrCDataDecl();
+            a3->setName(L"a3");
+            a3->setMode(DtdAttrDecl::Default);
+            a3->setDefault(L"a3Def");
+            decl.push(a3);
+
+            Pt::Xml::Attribute attr;
+            Pt::Xml::AttributeList attrs;
+
+            attr.setName(L"a1");
+            attr.setValue(L"a1Val");
+            attrs.add(attr);
+
+            //attr.setName(L"a2");
+            //attr.setValue(L"a2Val");
+            //attrs.add(attr);
+
+            //attr.setName(L"a3");
+            //attr.setValue(L"a3Val");
+            //attrs.add(attr);
+
+            bool isMatch = decl.validate(attrs);
+            this->reportMessage(isMatch ? "DTD ATTRIBUTE MATCH" : "INVALID ATTRIBUTE");
+            
+            Pt::Xml::AttributeList::Iterator it;
+            for(it = attrs.begin(); it != attrs.end(); ++it)
+            {
+                this->reportMessage( it->name().narrow() + ": " + it->value().narrow() );
+            }
         }
 };
 
