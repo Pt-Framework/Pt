@@ -55,7 +55,7 @@ class DtdAttrDecl
         : _mode(Default)
         {}
 
-        ~DtdAttrDecl()
+        virtual ~DtdAttrDecl()
         { }
 
         void setMode(Mode mode)
@@ -666,10 +666,10 @@ class DtdParser : private Pt::NonCopyable
                     DtdFragment op1 = _fragments.top();
                     _fragments.pop();
 
-                    DtdOr* or = new DtdOr( op1.start(), op2.start() );
-                    _expr.push_back(or);
+                    DtdOr* dtdor = new DtdOr( op1.start(), op2.start() );
+                    _expr.push_back(dtdor);
 
-                    DtdFragment frag(or);
+                    DtdFragment frag(dtdor);
                     frag.setLeafs( op1.leafs(), op2.leafs() );
                     _fragments.push(frag);
                     continue;
