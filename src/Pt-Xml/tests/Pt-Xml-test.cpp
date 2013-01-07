@@ -197,45 +197,38 @@ class DtdState
 
         virtual void next(std::vector<DtdState*>& states) = 0;
 
-        virtual void setNext(DtdState* state) = 0;
-
         virtual void eval(Pt::Xml::Node& node, std::vector<DtdState*>& states) = 0;
 
         DtdState* out()
         { return _out; }
 
-        DtdState* out1()
-        { return _out1; }
-
-        void setOut(DtdState* next, DtdState* alt)
-        {
-            _out = next;
-            _out1 = alt;
+        void setNext(DtdState* state)
+        { 
+            _out = state;
         }
 
     protected:
         DtdState()
         : _out(0)
-        , _out1(0)
-        {}
-
-        DtdState(DtdState* next, DtdState* alt)
-        : _out(next)
-        , _out1(alt)
         {}
 
     private:
         DtdState* _out;
-        DtdState* _out1;
 };
 
 
-class DtdOr : public DtdState
+class DtdSplit : public DtdState
 {
     public:
-        DtdOr(DtdState* next, DtdState* alt)
-        : DtdState(next, alt)
+        DtdSplit()
+        : DtdState()
+        , _out1(0)
         { }
+
+        void setSplit(DtdState* state)
+        {
+            _out1 = state;
+        }
 
         virtual void eval(Pt::Xml::Node& node, std::vector<DtdState*>& states)
         { }
@@ -245,100 +238,20 @@ class DtdOr : public DtdState
             assert(out());
             out()->next(states);
 
-            assert(out1());
-            out1()->next(states);
+            assert(_out1);
+            _out1->next(states);
         }
 
-        virtual void setNext(DtdState* state)
-        { 
-            setOut(state, state);
-        }
+    private:
+        DtdState* _out1;
 };
 
 
-class DtdQuest : public DtdState
+class DtdLabel : public DtdState
 {
     public:
-        DtdQuest(DtdState* next)
-        : DtdState(next, 0)
-        { }
-
-        virtual void eval(Pt::Xml::Node& node, std::vector<DtdState*>& states)
-        { }
-
-        virtual void next(std::vector<DtdState*>& states) 
-        {
-            assert( out() );
-            out()->next(states);
-
-            assert( out1() );
-            out1()->next(states);
-        }
-
-        virtual void setNext(DtdState* state)
-        { 
-            setOut(out(), state);
-        }
-};
-
-
-class DtdMult : public DtdState
-{
-    public:
-        DtdMult(DtdState* next)
-        : DtdState(next, 0)
-        { }
-
-        virtual void eval(Pt::Xml::Node& node, std::vector<DtdState*>& states)
-        { }
-
-        virtual void next(std::vector<DtdState*>& states) 
-        {
-            assert( out() );
-            out()->next(states);
-
-            assert( out1() );
-            out1()->next(states);
-        }
-
-        virtual void setNext(DtdState* state)
-        { 
-            setOut(out(), state);
-        }
-};
-
-
-class DtdPlus : public DtdState
-{
-    public:
-        DtdPlus(DtdState* prev)
-        : DtdState(prev, 0)
-        { }
-
-        virtual void eval(Pt::Xml::Node& node, std::vector<DtdState*>& states)
-        { }
-
-        virtual void next(std::vector<DtdState*>& states) 
-        {
-            assert( out() );
-            out()->next(states);
-
-            assert( out1() );
-            out1()->next(states);
-        }
-
-        virtual void setNext(DtdState* state)
-        { 
-            setOut(out(), state);
-        }
-};
-
-
-class DtdElement : public DtdState
-{
-    public:
-        DtdElement(DtdState* next, const Pt::String& name)
-        : DtdState(next, 0)
+        DtdLabel(const Pt::String& name)
+        : DtdState()
         , _name(name)
         { }
 
@@ -353,9 +266,6 @@ class DtdElement : public DtdState
         {
             states.push_back(this);
         }
-
-        virtual void setNext(DtdState* state)
-        { setOut(state, 0); }
 
     private:
         Pt::String _name;
@@ -373,9 +283,6 @@ class DtdMatch : public DtdState
         { }
         
         virtual void next(std::vector<DtdState*>& states) 
-        { states.push_back(this); }
-
-        virtual void setNext(DtdState* state)
         { }
 };
 
@@ -385,24 +292,17 @@ class DtdEnd : public DtdState
     public:
         DtdEnd()
         : DtdState()
-        {
-            setOut(&_end, 0);
-        }
+        { }
 
         virtual void eval(Pt::Xml::Node& node, std::vector<DtdState*>& states)
         {
             Pt::Xml::EndElement* e = Pt::Xml::toEndElement(&node);
             if(e != 0)
-                out()->next(states);
+                states.push_back(&_end);
         }
         
         virtual void next(std::vector<DtdState*>& states) 
-        {
-            states.push_back(this);
-        }
-
-        virtual void setNext(DtdState* state)
-        { }
+        { states.push_back(this); }
 
         DtdState* matched()
         { return &_end; }
@@ -611,7 +511,7 @@ class DtdParser : private Pt::NonCopyable
 
         void pushOperand()
         {
-            DtdElement* elem = new DtdElement(0, _token);
+            DtdLabel* elem = new DtdLabel(_token);
             _expr.push_back(elem);
 
             DtdFragment frag(elem);
@@ -666,10 +566,12 @@ class DtdParser : private Pt::NonCopyable
                     DtdFragment op1 = _fragments.top();
                     _fragments.pop();
 
-                    DtdOr* dtdor = new DtdOr( op1.start(), op2.start() );
-                    _expr.push_back(dtdor);
+                    DtdSplit* split = new DtdSplit();
+                    _expr.push_back(split);
+                    split->setNext( op1.start() );
+                    split->setSplit( op2.start() );
 
-                    DtdFragment frag(dtdor);
+                    DtdFragment frag(split);
                     frag.setLeafs( op1.leafs(), op2.leafs() );
                     _fragments.push(frag);
                     continue;
@@ -685,11 +587,12 @@ class DtdParser : private Pt::NonCopyable
                     DtdFragment op1 = _fragments.top();
                     _fragments.pop();
 
-                    DtdQuest* quest = new DtdQuest( op1.start() );
-                    _expr.push_back(quest);
+                    DtdSplit* split = new DtdSplit();
+                    split->setSplit( op1.start() );
+                    _expr.push_back(split);
                     
-                    DtdFragment frag( quest );
-                    frag.setLeafs(op1.leafs(), quest);
+                    DtdFragment frag(split);
+                    frag.setLeafs(op1.leafs(), split);
                     _fragments.push(frag);
                     continue;
                 }
@@ -704,13 +607,14 @@ class DtdParser : private Pt::NonCopyable
                     DtdFragment op1 = _fragments.top();
                     _fragments.pop();
 
-                    DtdMult* mult = new DtdMult( op1.start() );
-                    _expr.push_back(mult);
+                    DtdSplit* split = new DtdSplit();
+                    split->setSplit( op1.start() );
+                    _expr.push_back(split);
 
-                    op1.patchLeafs(mult);
+                    op1.patchLeafs(split);
                     
-                    DtdFragment frag( mult );
-                    frag.setLeaf( mult );
+                    DtdFragment frag( split );
+                    frag.setLeaf(split);
                     _fragments.push(frag);
                     continue;
                 }
@@ -725,13 +629,14 @@ class DtdParser : private Pt::NonCopyable
                     DtdFragment op1 = _fragments.top();
                     _fragments.pop();
 
-                    DtdPlus* plus = new DtdPlus( op1.start() );
-                    _expr.push_back(plus);
+                    DtdSplit* split = new DtdSplit();
+                    split->setSplit( op1.start() );
+                    _expr.push_back(split);
 
-                    op1.patchLeafs(plus);
+                    op1.patchLeafs(split);
                     
                     DtdFragment frag( op1.start() );
-                    frag.setLeaf( plus );
+                    frag.setLeaf(split);
                     _fragments.push(frag);
                     continue;
                 }
