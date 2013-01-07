@@ -15,7 +15,7 @@ let g:pt_project_root = getcwd()
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " C-Tags support
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-let s:ctags_cmd = g:tagbar_ctags_bin
+let s:ctags_cmd = g:Tlist_Ctags_Cmd
 let s:ctags_file   = "pt.tags"
 let s:ctags_create = s:ctags_cmd . " -f " . s:ctags_file . " --c-kinds=+p --fields=+iaS --extra=+q --language-force=C++ "  
 let s:ctags_append = s:ctags_cmd . " --append=on -f " . s:ctags_file . " --c-kinds=+p --fields=+iaS --extra=+q --language-force=C++ "
