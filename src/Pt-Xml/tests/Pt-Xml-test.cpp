@@ -203,9 +203,7 @@ class DtdState
         { return _out; }
 
         void setNext(DtdState* state)
-        { 
-            _out = state;
-        }
+        { _out = state; }
 
     protected:
         DtdState()
@@ -226,9 +224,7 @@ class DtdSplit : public DtdState
         { }
 
         void setSplit(DtdState* state)
-        {
-            _out1 = state;
-        }
+        { _out1 = state; }
 
         virtual void eval(Pt::Xml::Node& node, std::vector<DtdState*>& states)
         { }
@@ -356,6 +352,87 @@ class DtdFragment
         DtdState* _start;
         std::vector<DtdState*> _leafs;
 };
+
+
+// TODO:
+// name of element it declares
+class DtdElementDecl
+{
+    // nested classes: State. Split, Label, Match, End...
+    public:
+        DtdElementDecl()
+        : _start(0)
+        {}
+
+        ~DtdElementDecl()
+        {}
+
+        void set(DtdState& s)
+        { _start = &s; }
+
+    private:
+        DtdState* _start;
+};
+
+
+class DtdElementDeclBuilder
+{
+    // nested classes: Fragment
+    public:
+        DtdElementDeclBuilder()
+        {}
+
+        ~DtdElementDeclBuilder()
+        {}
+
+    private:
+        std::stack<Pt::Char> _ops;
+        std::stack<DtdFragment> _fragments;
+};
+
+
+// TODO: 
+// pointer to DtdAttrListDecl
+// pointer to DtdElementDecl
+// validates attrs first, then uses state machine for child elemenets
+class DtdElementValidator
+{
+    public:
+        DtdElementValidator()
+        {}
+
+        ~DtdElementValidator()
+        {}
+
+    private:
+};
+
+
+class DocTypeDefinition
+{
+    public:
+        DocTypeDefinition()
+        {}
+
+        ~DocTypeDefinition()
+        {}
+
+        void addElementDecl(const Pt::String& name, DtdElementDecl* decl)
+        {}
+
+        void addAttrListDecl(const Pt::String& name, DtdAttrListDecl* decl)
+        {}
+
+        // altenative: clone ElementDecl
+        DtdElementValidator* elementValidator()
+        { return 0; }
+
+    private:
+        DtdEnd _dtdEnd;
+        std::vector<DtdState*> _pool;
+};
+
+
 
 
 class DtdParser : private Pt::NonCopyable
@@ -655,16 +732,6 @@ class DtdParser : private Pt::NonCopyable
         std::stack<DtdFragment> _fragments;
 };
 
-// TODO:
-class DtdElementDecl;
-// owns states of state machine including DtdEnd
-// name of element it declares
-
-// TODO: 
-class DtdElementValidator;
-// pointer to DtdAttrListDecl
-// pointer to DtdElementDecl
-// validates attrs first, then uses state machine for child elemenets
 
 void advance(std::vector<DtdState*>& current, std::vector<DtdState*>& next, Pt::Xml::Node& node)
 {
