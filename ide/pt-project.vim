@@ -28,7 +28,7 @@ function TagsBuild()
     :call system(s:ctags_append . "-IPT_UNIT_API include/Pt/Unit/*.h src/Pt-Unit/*.cpp")
     :call system(s:ctags_append . "-IPT_SSL_API include/Pt/Ssl/*.h src/Pt-Ssl/*.cpp")
     :call system(s:ctags_append . "-IPT_HTTP_API include/Pt/Http/*.h src/Pt-Http/*.cpp")
-    :call system(s:ctags_append . "-IPT_XML_API include/Pt/Xml/*.h src/Pt-Xml/*.cpp")
+    :call system(s:ctags_append . "-IPT_XML_API include/Pt/Xml/*.h src/Pt-Xml/*.cpp src/Pt-Xml/tests/*.cpp")
     :call system(s:ctags_append . "-IPT_XMLRPC_API include/Pt/XmlRpc/*.h src/Pt-XmlRpc/*.cpp")
     let &tags = g:pt_project_root . "/" . s:ctags_file
 endfunction
