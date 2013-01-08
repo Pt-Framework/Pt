@@ -112,7 +112,10 @@ class PT_XML_API AttributeList : private NonCopyable
     public:
         AttributeList()
         {}
-
+        
+        bool empty() const
+        { return _container.empty(); }
+        
         void clear()
         { _container.clear(); }
 
