@@ -17,8 +17,8 @@ let g:pt_project_root = getcwd()
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 let s:ctags_cmd = g:Tlist_Ctags_Cmd
 let s:ctags_file   = "pt.tags"
-let s:ctags_create = s:ctags_cmd . " -f " . s:ctags_file . " --c-kinds=+p --fields=+iaS --extra=+q --language-force=C++ "  
-let s:ctags_append = s:ctags_cmd . " --append=on -f " . s:ctags_file . " --c-kinds=+p --fields=+iaS --extra=+q --language-force=C++ "
+let s:ctags_create = s:ctags_cmd . " -f " . s:ctags_file . " --c-kinds=+pl --fields=+iaS --extra=+q --language-force=C++ "  
+let s:ctags_append = s:ctags_cmd . " --append=on -f " . s:ctags_file . " --c-kinds=+pl --fields=+iaS --extra=+q --language-force=C++ "
 " ctags -R --sort=1 --c++-kinds=+p --fields=+iaS --extra=+q --language-force=C++ -IPT_API -f pt.tags src include
 
 function TagsBuild()
@@ -57,14 +57,13 @@ else
 endif
 
 function Build(args)
-    " See also (very nice!!!) http://blog.vicshih.com/2011/03/fast-make-for-vim.html
-    " close QuickFix window (content is now outdated due to new build run)
+    " http://blog.vicshih.com/2011/03/fast-make-for-vim.html
+
     cclose
     sil wall!
     exe "sil lcd " . g:pt_project_root
-    exe "make " . a:args
-    botright copen
-    "cc 1 "jumps to first error
+    exe "make! " . a:args
+    botright copen 20
     sil lcd -
 endfunction
 
@@ -72,4 +71,3 @@ endfunction
 :noremap! <F5> <C-o>:call Build(g:jam_args)<CR>
 
 command! PtBuild :call Build('')
-

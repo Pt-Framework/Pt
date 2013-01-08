@@ -1,4 +1,3 @@
-
 " General options
 set nocompatible
 set hidden
@@ -7,6 +6,7 @@ set novisualbell
 set showmode
 set nobackup
 set noswapfile
+set nocp
 winpos 0 0
 set lines=999 columns=210
 set guioptions-=L
@@ -14,7 +14,7 @@ set guioptions-=T
 set mouse=a
 set bs=2
 set backspace=indent,eol,start whichwrap+=<,>,[,]
-filetype on
+filetype plugin on
 set number
 set numberwidth=5
 set ruler
@@ -41,6 +41,20 @@ set sessionoptions=buffers
 " %m = modified                       %r = readonly
 " %b = value of byte                  %B = value of byte in HEX
 set statusline=[%n]\ %F%y%m%r\ %=\ %b\ 0x%B\ \ \ %c,%l/%L\ \ %P
+
+" OmniCppComplete
+let OmniCpp_NamespaceSearch = 1
+let OmniCpp_GlobalScopeSearch = 1
+let OmniCpp_ShowAccess = 1
+let OmniCpp_MayCompleteDot = 0
+let OmniCpp_MayCompleteArrow = 0
+let OmniCpp_MayCompleteScope = 0
+let OmniCpp_DefaultNamespaces = ["std", "_GLIBCXX_STD"]
+
+" auto close options when exiting insert mode
+autocmd InsertLeave * if pumvisible() == 0|pclose|endif
+set completeopt=menu,menuone
+
 
 " MiniBufExplorer
 let g:miniBufExplSortBy = "name"
