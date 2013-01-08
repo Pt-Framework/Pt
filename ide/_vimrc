@@ -66,20 +66,31 @@ let g:Tlist_GainFocus_On_ToggleOpen = 1
 let g:Tlist_Sort_Type = 'order'
 let g:Tlist_Display_Tag_Scope = 1
 
-let g:tagbar_width = 40
+let g:tagbar_left = 1
+let g:tagbar_width = 100
 let g:tagbar_show_visibility = 0
+let g:tagbar_autoclose = 1
+let g:tagbar_autofocus = 1
+let g:tagbar_compact = 1
 let g:tagbar_show_visibility = 0
+let g:tagbar_sort = 0
+
+hi TagbarSignature guifg=#c0c0c0 guibg=#000000 gui=none ctermfg=253 ctermbg=234
 
 if filereadable('/Users/marc/ctags/ctags-5.8/ctags')
     let g:Tlist_Ctags_Cmd = '/Users/marc/ctags/ctags-5.8/ctags'
     let g:tagbar_ctags_bin = '/Users/marc/ctags/ctags-5.8/ctags'
 endif
 
-:noremap <C-l> :TlistToggle<CR>
-:noremap! <C-l> <C-o>:TlistToggle<CR>
+function TagsViewOpen()
+    :TagbarOpen
+    ":TlistOpen
+endfunction
 
-":noremap <C-l> :TagbarToggle<CR>
-":noremap! <C-l> <C-o>:TagbarToggle<CR>
+function TagsViewClose()
+    :TagbarClose
+    ":TlistClose
+endfunction
 
 let s:stayNormal = 0
 
@@ -125,13 +136,22 @@ let s:OpenWindow = 0
 
 function ToggleOpenWindow()
     if s:OpenWindow == 0
+        :call TagsViewClose()
         :CMiniBufExplorer
         :NERDTreeFind
         let s:OpenWindow = 1
-    else
-        :NERDTreeClose
-        :MiniBufExplorer
-        let s:OpenWindow = 0
+    else 
+        if s:OpenWindow == 1
+            :call TagsViewClose()
+            :NERDTreeClose
+            :MiniBufExplorer
+            let s:OpenWindow = 2
+        else
+            :NERDTreeClose
+            :CMiniBufExplorer
+            :call TagsViewOpen()
+            let s:OpenWindow = 0
+        endif
     endif
 endfunction
 
