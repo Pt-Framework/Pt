@@ -126,10 +126,10 @@ class PT_XML_API XmlReader
         Iterator end() const;
 
         //! @brief Get current element
-        const Node& get();
+        Node& get();
 
         //! @brief Get next element from stream
-        const Node& next();
+        Node& next();
 
         //! @brief Process availabe data from underlying stream
         bool advance();

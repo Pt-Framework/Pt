@@ -1245,7 +1245,7 @@ class XmlReaderImpl
             return _line;
         }
 
-        const Node& get()
+        Node& get()
         {
             if( ! _current )
             {
@@ -1255,7 +1255,7 @@ class XmlReaderImpl
             return *_current;
         }
 
-        const Node& next()
+        Node& next()
         {
             std::char_traits<char>::int_type eof = std::char_traits<char>::eof();
 
@@ -1400,13 +1400,13 @@ std::size_t XmlReader::line() const
 }
 
 
-const Node& XmlReader::get()
+Node& XmlReader::get()
 {
     return _impl->get();
 }
 
 
-const Node& XmlReader::next()
+Node& XmlReader::next()
 {
     return _impl->next();
 }

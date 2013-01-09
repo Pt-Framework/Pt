@@ -31,6 +31,7 @@
 
 #include <Pt/String.h>
 #include <Pt/NonCopyable.h>
+#include <Pt/Xml/XmlReader.h>
 #include <Pt/Xml/StartElement.h>
 #include <Pt/Xml/Characters.h>
 #include <Pt/Xml/EndElement.h>
@@ -190,180 +191,137 @@ class DtdAttrListDecl
 };
 
 
-class DtdState
-{
-    public:
-        virtual ~DtdState()
-        { }
-
-        virtual void next(std::vector<DtdState*>& states) = 0;
-
-        virtual void eval(Pt::Xml::Node& node, std::vector<DtdState*>& states) = 0;
-
-        virtual bool isValid() const
-        { return false; }
-
-        DtdState* out()
-        { return _out; }
-
-        void setNext(DtdState* state)
-        { _out = state; }
-
-    protected:
-        DtdState()
-        : _out(0)
-        {}
-
-    private:
-        DtdState* _out;
-};
-
-
-class DtdSplit : public DtdState
-{
-    public:
-        DtdSplit()
-        : DtdState()
-        , _out1(0)
-        { }
-
-        void setSplit(DtdState* state)
-        { _out1 = state; }
-
-        virtual void eval(Pt::Xml::Node& node, std::vector<DtdState*>& states)
-        { }
-
-        virtual void next(std::vector<DtdState*>& states) 
-        {
-            assert(out());
-            out()->next(states);
-
-            assert(_out1);
-            _out1->next(states);
-        }
-
-    private:
-        DtdState* _out1;
-};
-
-
-class DtdLabel : public DtdState
-{
-    public:
-        DtdLabel(const Pt::String& name)
-        : DtdState()
-        , _name(name)
-        { }
-
-        virtual void eval(Pt::Xml::Node& node, std::vector<DtdState*>& states)
-        {
-            Pt::Xml::StartElement* se = Pt::Xml::toStartElement(&node);
-            if(se && se->name() == _name)
-                out()->next(states);
-        }
-
-        virtual void next(std::vector<DtdState*>& states) 
-        {
-            states.push_back(this);
-        }
-
-    private:
-        Pt::String _name;
-};
-
-
-class DtdMatch : public DtdState
-{
-    public:
-        DtdMatch()
-        : DtdState()
-        { }
-
-        virtual void eval(Pt::Xml::Node& node, std::vector<DtdState*>& states)
-        { }
-        
-        virtual void next(std::vector<DtdState*>& states) 
-        { }
-
-        virtual bool isValid() const
-        { return true; }
-};
-
-
-class DtdEnd : public DtdState
-{
-    public:
-        DtdEnd()
-        : DtdState()
-        { }
-
-        virtual void eval(Pt::Xml::Node& node, std::vector<DtdState*>& states)
-        {
-            Pt::Xml::EndElement* e = Pt::Xml::toEndElement(&node);
-            if(e != 0)
-                states.push_back(&_end);
-        }
-        
-        virtual void next(std::vector<DtdState*>& states) 
-        { states.push_back(this); }
-
-        DtdState* matched()
-        { return &_end; }
-
-    private:
-        DtdMatch _end;
-};
-
-
-class DtdFragment
-{
-    public:
-        explicit DtdFragment(DtdState* start)
-        : _start(start)
-        {}
-
-        DtdState* start() const
-        { return _start; }
-
-        const std::vector<DtdState*>& leafs() const
-        { return _leafs; }
-
-        void setLeaf(DtdState* next)
-        { _leafs.push_back(next); }
-
-        void setLeafs(const std::vector<DtdState*>& leafs)
-        { _leafs = leafs; }
-
-        void setLeafs(const std::vector<DtdState*>& leafs, const std::vector<DtdState*>& leafs2)
-        { 
-            _leafs = leafs; 
-            _leafs.insert( _leafs.end(), leafs2.begin(), leafs2.end() );
-        }
-
-        void setLeafs(const std::vector<DtdState*>& leafs, DtdState* leaf)
-        { 
-            _leafs = leafs; 
-            _leafs.push_back(leaf);
-        }
-
-        void patchLeafs(DtdState* to)
-        {
-            for(unsigned n = 0; n < _leafs.size(); ++n)
-            {
-                DtdState* leaf = _leafs[n];
-                leaf->setNext(to);
-            }
-        }
-
-    private:
-        DtdState* _start;
-        std::vector<DtdState*> _leafs;
-};
-
-
 class DtdElementDecl
 {
-    // nested classes: State. Split, Label, Match, End...
+    public:
+        class Node
+        {
+            public:
+                virtual ~Node()
+                { }
+
+                //! @brief Gets this node and follows unlabelled transitions.
+                virtual void get(std::vector<Node*>& nodes) = 0;
+
+                virtual void eval(Pt::Xml::Node& node, std::vector<DtdElementDecl::Node*>& states) = 0;
+
+                virtual bool isValid() const
+                { return false; }
+
+                Node* out()
+                { return _out; }
+
+                void setNext(Node* state)
+                { _out = state; }
+
+            protected:
+                Node()
+                : _out(0)
+                {}
+
+            private:
+                Node* _out;
+        };
+
+        class Split : public Node
+        {
+            public:
+                Split(Node* to)
+                : Node()
+                , _out1(to)
+                { }
+
+                virtual void eval(Pt::Xml::Node& node, std::vector<Node*>& nodes)
+                { }
+
+                virtual void get(std::vector<Node*>& nodes) 
+                {
+                    assert( out() );
+                    out()->get(nodes);
+                    _out1->get(nodes);
+                }
+
+            private:
+                Node* _out1;
+        };
+
+        class Label : public Node
+        {
+            public:
+                Label(const Pt::String& name)
+                : Node()
+                , _name(name)
+                { }
+
+                virtual void eval(Pt::Xml::Node& node, std::vector<Node*>& states)
+                {
+                    Pt::Xml::StartElement* se = Pt::Xml::toStartElement(&node);
+                    if(se && se->name() == _name)
+                        out()->get(states);
+                }
+
+                virtual void get(std::vector<Node*>& states) 
+                {
+                    states.push_back(this);
+                }
+
+            private:
+                Pt::String _name;
+        };
+
+        class PcData : public Node
+        {
+            public:
+                PcData()
+                : Node()
+                { }
+
+                virtual void eval(Pt::Xml::Node& node, std::vector<Node*>& states)
+                {
+                    Pt::Xml::Characters* chars = Pt::Xml::toCharacters(&node);
+                    if(chars)
+                        out()->get(states);
+                }
+
+                virtual void get(std::vector<Node*>& states) 
+                {
+                    states.push_back(this);
+                }
+        };
+
+        class Empty : public Node
+        {
+            public:
+                Empty()
+                : Node()
+                { }
+
+                virtual void eval(Pt::Xml::Node& node, std::vector<Node*>& states)
+                { }
+        
+                virtual void get(std::vector<Node*>& states) 
+                { states.push_back(this); }
+
+                virtual bool isValid() const
+                { return true; }
+        };
+
+        class Match : public Node
+        {
+            public:
+                Match()
+                : Node()
+                { }
+
+                virtual void eval(Pt::Xml::Node& node, std::vector<Node*>& states)
+                { }
+        
+                virtual void get(std::vector<Node*>& states) 
+                { states.push_back(this); }
+
+                virtual bool isValid() const
+                { return true; }
+        };
 
     public:
         DtdElementDecl()
@@ -371,7 +329,10 @@ class DtdElementDecl
         , _attr(0)
         {}
 
-        void setContentDecl(DtdState& s)
+        Node* startNode()
+        { return _start; }
+
+        void setContentDecl(Node& s)
         { _start = &s; }
 
         void setAttrListDecl(DtdAttrListDecl& attr)
@@ -382,13 +343,8 @@ class DtdElementDecl
             return _attr ? _attr->validate(attrs) : attrs.empty();
         }
 
-        void begin(std::vector<DtdState*>& states)
-        {
-            _start->next(states);
-        }
-
     private:
-        DtdState* _start;
+        Node* _start;
         DtdAttrListDecl* _attr;
 };
 
@@ -407,52 +363,125 @@ class DocTypeDefinition
             }
         }
 
-        DtdLabel* createLabel(const Pt::String& name)
+        DtdElementDecl::Label* createLabel(const Pt::String& name)
         {
             _pool.reserve(_pool.size() + 1);
-            DtdLabel* label = new DtdLabel(name);
+            DtdElementDecl::Label* label = new DtdElementDecl::Label(name);
             _pool.push_back(label);
             return label;
         }
 
-        DtdSplit* createSplit()
+        DtdElementDecl::Split* createSplit(DtdElementDecl::Node* to)
         {
             _pool.reserve(_pool.size() + 1);
-            DtdSplit* split = new DtdSplit();
+            DtdElementDecl::Split* split = new DtdElementDecl::Split(to);
             _pool.push_back(split);
             return split;
         }
+
+        DtdElementDecl::PcData* createPcData()
+        {
+            _pool.reserve(_pool.size() + 1);
+            DtdElementDecl::PcData* node = new DtdElementDecl::PcData();
+            _pool.push_back(node);
+            return node;
+        }
+
+        DtdElementDecl::Empty* createEmpty()
+        { return &_dtdEmpty; }
+
+        DtdElementDecl::Node* createEnd()
+        { return &_dtdEnd; }
 
         DtdElementDecl& elementDecl(const Pt::String& name)
         { 
             return _elemDecls[name]; 
         }
 
-        DtdState* matched()
+        DtdElementDecl* findElementDecl(const Pt::String& name)
         {
-            return _dtdEnd.matched();
+            DtdElementDecl* decl = 0;
+
+            std::map<Pt::String, DtdElementDecl>::iterator it;
+            it = _elemDecls.find(name);
+
+            if(it != _elemDecls.end())
+                decl = &it->second;
+
+            return decl; 
         }
 
-        DtdState* createEnd()
-        { return &_dtdEnd; }
-
     private:
-        DtdEnd _dtdEnd;
-        std::vector<DtdState*> _pool;
+        DtdElementDecl::Empty _dtdEmpty;
+        DtdElementDecl::Match _dtdEnd;
+        std::vector<DtdElementDecl::Node*> _pool;
         std::map<Pt::String, DtdElementDecl> _elemDecls;
 };
 
 
 class DtdElementDeclBuilder
 {
-    // nested classes: Fragment
+    public:
+        class Fragment
+        {
+            public:
+                explicit Fragment(DtdElementDecl::Node* start)
+                : _start(start)
+                {}
+
+                DtdElementDecl::Node* start() const
+                { return _start; }
+
+                const std::vector<DtdElementDecl::Node*>& leafs() const
+                { return _leafs; }
+
+                void setLeaf(DtdElementDecl::Node* next)
+                { _leafs.push_back(next); }
+
+                void setLeafs(const std::vector<DtdElementDecl::Node*>& leafs)
+                { _leafs = leafs; }
+
+                void setLeafs(const std::vector<DtdElementDecl::Node*>& leafs, const std::vector<DtdElementDecl::Node*>& leafs2)
+                { 
+                    _leafs = leafs; 
+                    _leafs.insert( _leafs.end(), leafs2.begin(), leafs2.end() );
+                }
+
+                void setLeafs(const std::vector<DtdElementDecl::Node*>& leafs, DtdElementDecl::Node* leaf)
+                { 
+                    _leafs = leafs; 
+                    _leafs.push_back(leaf);
+                }
+
+                void patchLeafs(DtdElementDecl::Node* to)
+                {
+                    for(unsigned n = 0; n < _leafs.size(); ++n)
+                    {
+                        DtdElementDecl::Node* leaf = _leafs[n];
+                        leaf->setNext(to);
+                    }
+                }
+
+            private:
+                DtdElementDecl::Node* _start;
+                std::vector<DtdElementDecl::Node*> _leafs;
+        };
 
     public:
         DtdElementDeclBuilder(DocTypeDefinition& dtd)
         : _dtd(&dtd)
         {}
 
-        DtdState* finish()
+        void clear()
+        {
+            while( ! _fragments.empty() )
+                _fragments.pop();
+
+            while( ! _ops.empty() )
+                _ops.pop();
+        }
+
+        DtdElementDecl::Node* finish()
         {
             reduceStack();
 
@@ -460,7 +489,7 @@ class DtdElementDeclBuilder
                 throw std::logic_error("DTD syntax error: incomplete expression");
 
             _fragments.top().patchLeafs( _dtd->createEnd() );
-            DtdState* start = _fragments.top().start();
+            DtdElementDecl::Node* start = _fragments.top().start();
             _fragments.pop();
             return start;
         }
@@ -469,15 +498,39 @@ class DtdElementDeclBuilder
         {
             _ops.push(ch);
         }
-        
-        void pushOperand(const Pt::String name)
+
+        void pushClosingBrace()
         {
-            DtdLabel* label = _dtd->createLabel(name);
-            DtdFragment frag(label);
-            frag.setLeaf(label);
+            reduceStack();
+        }
+        
+        void pushOperand(const Pt::String& name)
+        {
+            DtdElementDecl::Node* node = 0;
+            if(name.at(0) == '#')
+            {
+                if(name != L"#PCDATA")
+                    throw std::logic_error("DTD syntax error: expected PCDATA");
+
+                node = _dtd->createPcData();
+            }
+            else
+                node = _dtd->createLabel(name);
+            
+            Fragment frag(node);
+            frag.setLeaf(node);
             _fragments.push(frag);
         }
 
+        void pushEmpty()
+        {
+            DtdElementDecl::Empty* e = _dtd->createEmpty();
+            Fragment frag(e);
+            frag.setLeaf(e);
+            _fragments.push(frag);
+        }
+
+    private:
         void reduceStack()
         {
             for(;;)
@@ -498,15 +551,15 @@ class DtdElementDeclBuilder
                     if( _fragments.size() < 2 )
                         throw std::logic_error("DTD syntax error: not enough operands for ,");
                     
-                    DtdFragment op2 = _fragments.top();
+                    Fragment op2 = _fragments.top();
                     _fragments.pop();
 
-                    DtdFragment op1 = _fragments.top();
+                    Fragment op1 = _fragments.top();
                     _fragments.pop();
 
                     op1.patchLeafs( op2.start() );
                     
-                    DtdFragment frag( op1.start() );
+                    Fragment frag( op1.start() );
                     frag.setLeafs( op2.leafs() );
                     _fragments.push(frag);
                     continue;
@@ -519,17 +572,16 @@ class DtdElementDeclBuilder
                     if( _fragments.size() < 2 )
                         throw std::logic_error("DTD syntax error: not enough operands for ,");
                     
-                    DtdFragment op2 = _fragments.top();
+                    Fragment op2 = _fragments.top();
                     _fragments.pop();
 
-                    DtdFragment op1 = _fragments.top();
+                    Fragment op1 = _fragments.top();
                     _fragments.pop();
 
-                    DtdSplit* split = _dtd->createSplit();
+                    DtdElementDecl::Split* split = _dtd->createSplit( op2.start() );
                     split->setNext( op1.start() );
-                    split->setSplit( op2.start() );
 
-                    DtdFragment frag(split);
+                    Fragment frag(split);
                     frag.setLeafs( op1.leafs(), op2.leafs() );
                     _fragments.push(frag);
                     continue;
@@ -542,13 +594,12 @@ class DtdElementDeclBuilder
                     if( _fragments.empty() )
                         throw std::logic_error("DTD syntax error: not enough operands for ?");
                     
-                    DtdFragment op1 = _fragments.top();
+                    Fragment op1 = _fragments.top();
                     _fragments.pop();
 
-                    DtdSplit* split = _dtd->createSplit();
-                    split->setSplit( op1.start() );
+                    DtdElementDecl::Split* split = _dtd->createSplit( op1.start() );
                     
-                    DtdFragment frag(split);
+                    Fragment frag(split);
                     frag.setLeafs(op1.leafs(), split);
                     _fragments.push(frag);
                     continue;
@@ -561,15 +612,14 @@ class DtdElementDeclBuilder
                     if( _fragments.empty() )
                         throw std::logic_error("DTD syntax error: not enough operands for *");
                     
-                    DtdFragment op1 = _fragments.top();
+                    Fragment op1 = _fragments.top();
                     _fragments.pop();
 
-                    DtdSplit* split = _dtd->createSplit();
-                    split->setSplit( op1.start() );
+                    DtdElementDecl::Split* split = _dtd->createSplit( op1.start() );
 
                     op1.patchLeafs(split);
                     
-                    DtdFragment frag( split );
+                    Fragment frag( split );
                     frag.setLeaf(split);
                     _fragments.push(frag);
                     continue;
@@ -582,15 +632,14 @@ class DtdElementDeclBuilder
                     if( _fragments.empty() )
                         throw std::logic_error("DTD syntax error: not enough operands for +");
                     
-                    DtdFragment op1 = _fragments.top();
+                    Fragment op1 = _fragments.top();
                     _fragments.pop();
 
-                    DtdSplit* split = _dtd->createSplit();
-                    split->setSplit( op1.start() );
+                    DtdElementDecl::Split* split = _dtd->createSplit( op1.start() );
 
                     op1.patchLeafs(split);
                     
-                    DtdFragment frag( op1.start() );
+                    Fragment frag( op1.start() );
                     frag.setLeaf(split);
                     _fragments.push(frag);
                     continue;
@@ -601,7 +650,7 @@ class DtdElementDeclBuilder
     private:
         DocTypeDefinition* _dtd;
         std::stack<Pt::Char> _ops;
-        std::stack<DtdFragment> _fragments;
+        std::stack<Fragment> _fragments;
 };
 
 
@@ -616,26 +665,25 @@ class DtdParser : private Pt::NonCopyable
         ~DtdParser()
         { }
 
-        void parse(int c)
+        void parse(const Pt::String& elem, const char* elemDecl)
         {
-            (this->*_state)(c);
-        }
+            _dtdBuilder.clear();
+            _state = &DtdParser::OnBegin;
+            
+            while(*elemDecl != '\0')
+            {
+                (this->*_state)(*elemDecl++);
+            }
 
-        DtdElementDecl& finish()
-        {
-            parse( std::char_traits<Pt::Char>::eof() );
-            DtdState* contentDecl = _dtdBuilder.finish();
-
-            DtdElementDecl& decl = _dtd.elementDecl(L"");
+            (this->*_state)( std::char_traits<Pt::Char>::eof() );
+            
+            DtdElementDecl::Node* contentDecl = _dtdBuilder.finish();
+            DtdElementDecl& decl = _dtd.elementDecl(elem);
             decl.setContentDecl(*contentDecl);
-
-            return decl;
         }
 
-        DtdState* matched()
-        {
-            return _dtd.matched();
-        }
+        DocTypeDefinition& dtd()
+        { return _dtd; }
 
     private:
         Pt::Char notEof(int c) const
@@ -656,22 +704,175 @@ class DtdParser : private Pt::NonCopyable
         void OnBegin(int c)
         {
             Pt::Char ch = notEof(c);
+
+            if(ch == 'E' || ch == 'A')
+            {
+                _token.clear();
+                _token += ch;
+                _state = &DtdParser::OnEmptyOrAny;
+                return;
+            }
+
             if(ch != '(')
                 throw std::logic_error("DTD syntax error: expected open brace");
 
             _dtdBuilder.pushOperator(ch);
             _state = &DtdParser::OnExprBegin;
         }
+        
+        void OnEmptyOrAny(int c)
+        {
+            if( c == std::char_traits<Pt::Char>::eof() )
+            {
+                if(_token == L"EMPTY")
+                {
+                    _dtdBuilder.pushEmpty();
+                    return;
+                }
+            }
+            else
+            {
+                Pt::Char ch(c);
+                if( isAlpha(ch) )
+                {
+                    _token += ch;
+                    return;
+                }
+            }
+
+            throw std::logic_error("DTD syntax error: expected EMPTY");
+        }
 
         void OnExprBegin(int c)
         {
             Pt::Char ch = notEof(c);
 
-            if( isAlpha(ch) )
+            if( isAlpha(ch) || ch == '#')
             {
                 _token.clear();
                 _token += ch;
                 _state = &DtdParser::OnIdentifier;
+                return;
+            }
+
+            if(ch == '(')
+            {
+                _dtdBuilder.pushOperator(ch);
+                return;
+            }
+
+            throw std::logic_error("DTD syntax error");
+        }
+
+        void OnIdentifier(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if( isAlpha(ch) )
+            {
+                _token += ch;
+                _state = &DtdParser::OnIdentifier;
+                return;
+            }
+
+            if( ch == ',')
+            {
+                _dtdBuilder.pushOperand(_token);
+                _dtdBuilder.pushOperator(ch);
+                _state = &DtdParser::OnBinaryOp;
+                return;
+            }
+
+            if( ch == '|')
+            {
+                _dtdBuilder.pushOperand(_token);
+                _dtdBuilder.pushOperator(ch);
+                _state = &DtdParser::OnBinaryOp;
+                return;
+            }
+
+            if(ch == '+')
+            {
+                _dtdBuilder.pushOperand(_token);
+                _dtdBuilder.pushOperator(ch);
+                _state = &DtdParser::OnUnrayOp;
+                return;
+            }
+
+            if(ch == '*')
+            {
+                _dtdBuilder.pushOperand(_token);
+                _dtdBuilder.pushOperator(ch);
+                _state = &DtdParser::OnUnrayOp;
+                return;
+            }
+
+            if(ch == '?')
+            {
+                _dtdBuilder.pushOperand(_token);
+                _dtdBuilder.pushOperator(ch);
+                _state = &DtdParser::OnUnrayOp;
+                return;
+            }
+
+            if( ch == ')')
+            {
+                _dtdBuilder.pushOperand(_token);
+                _dtdBuilder.pushClosingBrace();
+                _state = &DtdParser::OnExprEnd;
+                return;
+            }
+
+            throw std::logic_error("DTD syntax error: invalid identifier");
+        }
+        
+        void OnUnrayOp(int c)
+        {
+            if( c == std::char_traits<Pt::Char>::eof() )
+            {
+                return;
+            }
+
+            Pt::Char ch(c);
+
+            if( ch == ',')
+            {
+                _dtdBuilder.pushOperator(ch);
+                _state = &DtdParser::OnBinaryOp;
+                return;
+            }
+
+            if( ch == '|')
+            {
+                _dtdBuilder.pushOperator(ch);
+                _state = &DtdParser::OnBinaryOp;
+                return;
+            }
+
+            if( ch == ')')
+            {
+                _dtdBuilder.pushClosingBrace();
+                _state = &DtdParser::OnExprEnd;
+                return;
+            }
+        }
+        
+        void OnBinaryOp(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if( isAlpha(ch) || ch == '#')
+            {
+                _token.clear();
+                _token += ch;
+                _state = &DtdParser::OnIdentifier;
+                return;
+            }
+
+            if(ch == '(')
+            {
+                _dtdBuilder.pushOperator(ch);
+                _state = &DtdParser::OnExprBegin;
                 return;
             }
 
@@ -687,62 +888,46 @@ class DtdParser : private Pt::NonCopyable
 
             Pt::Char ch(c);
 
+            if( ch == ',')
+            {
+                _dtdBuilder.pushOperator(ch);
+                _state = &DtdParser::OnBinaryOp;
+                return;
+            }
+
+            if( ch == '|')
+            {
+                _dtdBuilder.pushOperator(ch);
+                _state = &DtdParser::OnBinaryOp;
+                return;
+            }
+
             if(ch == '+')
             {
                 _dtdBuilder.pushOperator(ch);
+                _state = &DtdParser::OnUnrayOp;
                 return;
             }
 
             if(ch == '*')
             {
                 _dtdBuilder.pushOperator(ch);
+                _state = &DtdParser::OnUnrayOp;
                 return;
             }
 
             if(ch == '?')
             {
                 _dtdBuilder.pushOperator(ch);
-                return;
-            }
-        }
-
-        void OnIdentifier(int c)
-        {
-            Pt::Char ch = notEof(c);
-
-            if( isAlpha(ch) )
-            {
-                _token.clear();
-                _token += ch;
-                _state = &DtdParser::OnIdentifier;
-                return;
-            }
-
-            if( ch == ',')
-            {
-                _dtdBuilder.pushOperand(_token);
-                _dtdBuilder.pushOperator(ch);
-                _state = &DtdParser::OnExprBegin;
-                return;
-            }
-
-            if( ch == '|')
-            {
-                _dtdBuilder.pushOperand(_token);
-                _dtdBuilder.pushOperator(ch);
-                _state = &DtdParser::OnExprBegin;
+                _state = &DtdParser::OnUnrayOp;
                 return;
             }
 
             if( ch == ')')
             {
-                _dtdBuilder.pushOperand(_token);
-                _dtdBuilder.reduceStack();
-                _state = &DtdParser::OnExprEnd;
+                _dtdBuilder.pushClosingBrace();
                 return;
             }
-
-            throw std::logic_error("DTD syntax error: invalid identifier");
         }
 
     private:
@@ -758,36 +943,50 @@ class DtdParser : private Pt::NonCopyable
 class DtdElementValidator
 {
     public:
+        DtdElementValidator()
+        : _decl(0)
+        {}
+
         DtdElementValidator(DtdElementDecl& decl)
         : _decl(&decl)
         {
-            _decl->begin(_current);
+            _decl->startNode()->get(_current);
         }
 
-        bool begin(Pt::Xml::AttributeList& attrs)
+        bool validateAttributes(Pt::Xml::AttributeList& attrs)
         {
-            _decl->validate(attrs);
+            return _decl ? _decl->validate(attrs) : false;
         }
 
-        void advance(Pt::Xml::Node& node)
+        bool validateContent(Pt::Xml::Node& node)
         {
             for(unsigned n = 0; n < _current.size(); ++n)
             {
-                DtdState* state = _current[n];
+                DtdElementDecl::Node* state = _current[n];
                 state->eval(node, _next);
             }
             
             _current = _next;
             _next.clear();
+
+            return ! _current.empty();
         }
 
         bool isValid() const
-        { return ! _current.empty() && _current[0]->isValid(); }
+        { 
+            for(unsigned n = 0; n < _current.size(); ++n)
+            {
+                if( _current[n]->isValid() )
+                    return true;
+            }
+            
+            return false; 
+        }
 
     private:
         DtdElementDecl* _decl;
-        std::vector<DtdState*> _current;
-        std::vector<DtdState*> _next;
+        std::vector<DtdElementDecl::Node*> _current;
+        std::vector<DtdElementDecl::Node*> _next;
 };
 
 
@@ -801,8 +1000,59 @@ class DtdValidator
         ~DtdValidator()
         {}
 
-        void processNode(Pt::Xml::Node& node)
-        {}
+        bool validate(Pt::Xml::Node& node)
+        {
+            bool valid = true;
+            
+            // TODO: ignorable whitespace
+
+            switch( node.type() )
+            {
+                case Pt::Xml::Node::StartElement:
+                {
+                    Pt::Xml::StartElement& se = static_cast<Pt::Xml::StartElement&>(node);
+
+                    if( ! _decls.empty() )
+                    {
+                        valid = _decls.top().validateContent(se);
+                    }
+                    
+                    DtdElementDecl* decl = _dtd->findElementDecl( se.name() );
+                    if(decl)
+                    {
+                        _decls.push( DtdElementValidator(*decl) );
+                    }
+                    else
+                    {
+                        _decls.push( DtdElementValidator() );
+                    }
+
+                    valid = valid && _decls.top().validateAttributes( se.attributes() );
+                    break;
+                }
+                
+                case Pt::Xml::Node::Characters:
+                {
+                    Pt::Xml::Characters& chars = static_cast<Pt::Xml::Characters&>(node);
+
+                    if( ! _decls.empty() )
+                    {
+                        valid = _decls.top().validateContent(chars);
+                    }
+
+                    break;
+                }
+
+                case Pt::Xml::Node::EndElement:
+                {
+                    valid = _decls.top().isValid();
+                    _decls.pop();
+                    break;
+                }
+            }
+
+            return valid;
+        }
 
     private:
         DocTypeDefinition* _dtd;
@@ -823,37 +1073,28 @@ class PtXmlTest : public Pt::Unit::TestSuite
     private:
         void DtdValidate()
         {
+            std::istringstream text("<test><a>hello</a><b></b><a>world</a><b></b></test>");
+            //std::istringstream text("<test></test>");
+
             DtdParser parser;
-            parser.parse('(');
-            parser.parse('a');
-            parser.parse('|');
-            parser.parse('b');
-            parser.parse(')');
-            parser.parse('*');
-            DtdElementValidator validator( parser.finish() );
+            parser.parse(L"test", "(a|b)+");
+            parser.parse(L"a", "(#PCDATA|(x|y)?|z+)");
+            parser.parse(L"b", "EMPTY");
 
-            // first token <a>
-            Pt::Xml::StartElement seA;
-            seA.setName(L"a");
-            validator.advance(seA);
+            DtdValidator validator( parser.dtd() );
 
-            // second token <b>
-            Pt::Xml::StartElement seB;
-            seB.setName(L"b");
-            validator.advance(seB);
+            Pt::Xml::XmlReader reader(text);
+            for(;;)
+            {
+                Pt::Xml::Node& node = reader.next();
+                bool valid = validator.validate(node);
 
-            // third token <a>
-            validator.advance(seA);
+                if( ! valid)
+                    this->reportMessage("DTD VALIDATION FAILED");
 
-            // fourth token <b>
-            validator.advance(seB);
-
-            // 'end of input' token
-            Pt::Xml::EndElement endElem;
-            validator.advance(endElem);
-
-            bool isMatch = validator.isValid();
-            this->reportMessage(isMatch ? "DTD ELEMENT MATCH" : "INVALID ELEMENT");
+                if( node.type() == Pt::Xml::Node::EndDocument )
+                    break;
+            }
         }
 
         void DtdValidateAttributes()
