@@ -211,8 +211,8 @@ class DtdElementDecl
                 Node* out()
                 { return _out; }
 
-                void setNext(Node* state)
-                { _out = state; }
+                void setNext(Node& state)
+                { _out = &state; }
 
             protected:
                 Node()
@@ -332,7 +332,7 @@ class DtdElementDecl
         Node* startNode()
         { return _start; }
 
-        void setContentDecl(Node& s)
+        void setContentExpr(Node& s)
         { _start = &s; }
 
         void setAttrListDecl(DtdAttrListDecl& attr)
@@ -363,37 +363,37 @@ class DocTypeDefinition
             }
         }
 
-        DtdElementDecl::Label* createLabel(const Pt::String& name)
+        DtdElementDecl::Label& createLabel(const Pt::String& name)
         {
             _pool.reserve(_pool.size() + 1);
             DtdElementDecl::Label* label = new DtdElementDecl::Label(name);
             _pool.push_back(label);
-            return label;
+            return *label;
         }
 
-        DtdElementDecl::Split* createSplit(DtdElementDecl::Node* to)
+        DtdElementDecl::Split& createSplit(DtdElementDecl::Node& to)
         {
             _pool.reserve(_pool.size() + 1);
-            DtdElementDecl::Split* split = new DtdElementDecl::Split(to);
+            DtdElementDecl::Split* split = new DtdElementDecl::Split(&to);
             _pool.push_back(split);
-            return split;
+            return *split;
         }
 
-        DtdElementDecl::PcData* createPcData()
+        DtdElementDecl::PcData& createPcData()
         {
             _pool.reserve(_pool.size() + 1);
             DtdElementDecl::PcData* node = new DtdElementDecl::PcData();
             _pool.push_back(node);
-            return node;
+            return *node;
         }
 
-        DtdElementDecl::Empty* createEmpty()
-        { return &_dtdEmpty; }
+        DtdElementDecl::Empty& createEmpty()
+        { return _dtdEmpty; }
 
-        DtdElementDecl::Node* createEnd()
-        { return &_dtdEnd; }
+        DtdElementDecl::Node& createEnd()
+        { return _dtdEnd; }
 
-        DtdElementDecl& elementDecl(const Pt::String& name)
+        DtdElementDecl& addElementDecl(const Pt::String& name)
         { 
             return _elemDecls[name]; 
         }
@@ -412,9 +412,12 @@ class DocTypeDefinition
         }
 
     private:
+        // TODO: move to DtdContext
         DtdElementDecl::Empty _dtdEmpty;
         DtdElementDecl::Match _dtdEnd;
         std::vector<DtdElementDecl::Node*> _pool;
+        ///////////
+
         std::map<Pt::String, DtdElementDecl> _elemDecls;
 };
 
@@ -425,18 +428,18 @@ class DtdElementDeclBuilder
         class Fragment
         {
             public:
-                explicit Fragment(DtdElementDecl::Node* start)
-                : _start(start)
+                explicit Fragment(DtdElementDecl::Node& start)
+                : _start(&start)
                 {}
 
-                DtdElementDecl::Node* start() const
-                { return _start; }
+                DtdElementDecl::Node& start() const
+                { return *_start; }
 
                 const std::vector<DtdElementDecl::Node*>& leafs() const
                 { return _leafs; }
 
-                void setLeaf(DtdElementDecl::Node* next)
-                { _leafs.push_back(next); }
+                void setLeaf(DtdElementDecl::Node& next)
+                { _leafs.push_back(&next); }
 
                 void setLeafs(const std::vector<DtdElementDecl::Node*>& leafs)
                 { _leafs = leafs; }
@@ -447,13 +450,13 @@ class DtdElementDeclBuilder
                     _leafs.insert( _leafs.end(), leafs2.begin(), leafs2.end() );
                 }
 
-                void setLeafs(const std::vector<DtdElementDecl::Node*>& leafs, DtdElementDecl::Node* leaf)
+                void setLeafs(const std::vector<DtdElementDecl::Node*>& leafs, DtdElementDecl::Node& leaf)
                 { 
                     _leafs = leafs; 
-                    _leafs.push_back(leaf);
+                    _leafs.push_back(&leaf);
                 }
 
-                void patchLeafs(DtdElementDecl::Node* to)
+                void patchLeafs(DtdElementDecl::Node& to)
                 {
                     for(unsigned n = 0; n < _leafs.size(); ++n)
                     {
@@ -481,7 +484,7 @@ class DtdElementDeclBuilder
                 _ops.pop();
         }
 
-        DtdElementDecl::Node* finish()
+        DtdElementDecl::Node& finish()
         {
             reduceStack();
 
@@ -489,7 +492,7 @@ class DtdElementDeclBuilder
                 throw std::logic_error("DTD syntax error: incomplete expression");
 
             _fragments.top().patchLeafs( _dtd->createEnd() );
-            DtdElementDecl::Node* start = _fragments.top().start();
+            DtdElementDecl::Node& start = _fragments.top().start();
             _fragments.pop();
             return start;
         }
@@ -506,25 +509,27 @@ class DtdElementDeclBuilder
         
         void pushOperand(const Pt::String& name)
         {
-            DtdElementDecl::Node* node = 0;
             if(name.at(0) == '#')
             {
                 if(name != L"#PCDATA")
                     throw std::logic_error("DTD syntax error: expected PCDATA");
 
-                node = _dtd->createPcData();
+                DtdElementDecl::PcData& pcdata = _dtd->createPcData();
+                Fragment frag(pcdata);
+                frag.setLeaf(pcdata);
+                _fragments.push(frag);
+                return;
             }
-            else
-                node = _dtd->createLabel(name);
-            
-            Fragment frag(node);
-            frag.setLeaf(node);
+                
+            DtdElementDecl::Label& label =_dtd->createLabel(name);
+            Fragment frag(label);
+            frag.setLeaf(label);
             _fragments.push(frag);
         }
 
         void pushEmpty()
         {
-            DtdElementDecl::Empty* e = _dtd->createEmpty();
+            DtdElementDecl::Empty& e = _dtd->createEmpty();
             Fragment frag(e);
             frag.setLeaf(e);
             _fragments.push(frag);
@@ -578,8 +583,8 @@ class DtdElementDeclBuilder
                     Fragment op1 = _fragments.top();
                     _fragments.pop();
 
-                    DtdElementDecl::Split* split = _dtd->createSplit( op2.start() );
-                    split->setNext( op1.start() );
+                    DtdElementDecl::Split& split = _dtd->createSplit( op2.start() );
+                    split.setNext( op1.start() );
 
                     Fragment frag(split);
                     frag.setLeafs( op1.leafs(), op2.leafs() );
@@ -597,7 +602,7 @@ class DtdElementDeclBuilder
                     Fragment op1 = _fragments.top();
                     _fragments.pop();
 
-                    DtdElementDecl::Split* split = _dtd->createSplit( op1.start() );
+                    DtdElementDecl::Split& split = _dtd->createSplit( op1.start() );
                     
                     Fragment frag(split);
                     frag.setLeafs(op1.leafs(), split);
@@ -615,7 +620,7 @@ class DtdElementDeclBuilder
                     Fragment op1 = _fragments.top();
                     _fragments.pop();
 
-                    DtdElementDecl::Split* split = _dtd->createSplit( op1.start() );
+                    DtdElementDecl::Split& split = _dtd->createSplit( op1.start() );
 
                     op1.patchLeafs(split);
                     
@@ -635,7 +640,7 @@ class DtdElementDeclBuilder
                     Fragment op1 = _fragments.top();
                     _fragments.pop();
 
-                    DtdElementDecl::Split* split = _dtd->createSplit( op1.start() );
+                    DtdElementDecl::Split& split = _dtd->createSplit( op1.start() );
 
                     op1.patchLeafs(split);
                     
@@ -669,6 +674,8 @@ class DtdParser : private Pt::NonCopyable
         {
             _dtdBuilder.clear();
             _state = &DtdParser::OnBegin;
+
+            DtdElementDecl& decl = _dtd.addElementDecl(elem);
             
             while(*elemDecl != '\0')
             {
@@ -677,9 +684,8 @@ class DtdParser : private Pt::NonCopyable
 
             (this->*_state)( std::char_traits<Pt::Char>::eof() );
             
-            DtdElementDecl::Node* contentDecl = _dtdBuilder.finish();
-            DtdElementDecl& decl = _dtd.elementDecl(elem);
-            decl.setContentDecl(*contentDecl);
+            DtdElementDecl::Node& contentDecl = _dtdBuilder.finish();
+            decl.setContentExpr(contentDecl);
         }
 
         DocTypeDefinition& dtd()
