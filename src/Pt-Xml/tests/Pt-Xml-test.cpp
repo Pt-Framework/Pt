@@ -190,8 +190,7 @@ class DtdAttrListDecl
         AttrDecls _attrs;
 };
 
-
-class DtdElementDecl
+class DtdElementContentDecl
 {
     public:
         class Node
@@ -203,7 +202,7 @@ class DtdElementDecl
                 //! @brief Gets this node and follows unlabelled transitions.
                 virtual void get(std::vector<Node*>& nodes) = 0;
 
-                virtual void eval(Pt::Xml::Node& node, std::vector<DtdElementDecl::Node*>& states) = 0;
+                virtual void eval(Pt::Xml::Node& node, std::vector<Node*>& states) = 0;
 
                 virtual bool isValid() const
                 { return false; }
@@ -323,29 +322,324 @@ class DtdElementDecl
                 { return true; }
         };
 
+        class Fragment
+        {
+            public:
+                explicit Fragment(DtdElementContentDecl::Node& start)
+                : _start(&start)
+                {}
+
+                DtdElementContentDecl::Node& start() const
+                { return *_start; }
+
+                const std::vector<DtdElementContentDecl::Node*>& leafs() const
+                { return _leafs; }
+
+                void setLeaf(DtdElementContentDecl::Node& next)
+                { _leafs.push_back(&next); }
+
+                void setLeafs(const std::vector<DtdElementContentDecl::Node*>& leafs)
+                { _leafs = leafs; }
+
+                void setLeafs(const std::vector<DtdElementContentDecl::Node*>& leafs, const std::vector<DtdElementContentDecl::Node*>& leafs2)
+                { 
+                    _leafs = leafs; 
+                    _leafs.insert( _leafs.end(), leafs2.begin(), leafs2.end() );
+                }
+
+                void setLeafs(const std::vector<DtdElementContentDecl::Node*>& leafs, DtdElementContentDecl::Node& leaf)
+                { 
+                    _leafs = leafs; 
+                    _leafs.push_back(&leaf);
+                }
+
+                void patchLeafs(DtdElementContentDecl::Node& to)
+                {
+                    for(unsigned n = 0; n < _leafs.size(); ++n)
+                    {
+                        DtdElementContentDecl::Node* leaf = _leafs[n];
+                        leaf->setNext(to);
+                    }
+                }
+
+            private:
+                Node* _start;
+                std::vector<Node*> _leafs;
+        };
+
+        class FragmentStack
+        {
+            public:
+                FragmentStack()
+                : _decl(0)
+                {}
+                
+                void reset(DtdElementContentDecl& decl)
+                {
+                    while( ! _fragments.empty() )
+                        _fragments.pop();
+                    
+                    while( ! _ops.empty() )
+                        _ops.pop();
+
+                    _decl = &decl;
+                }
+
+                void finish()
+                {
+                    reduceStack();
+
+                    if(_fragments.size() != 1)
+                        throw std::logic_error("DTD syntax error: incomplete expression");
+
+                    _fragments.top().patchLeafs( _decl->createEnd() );
+                    _decl->setStart( _fragments.top().start() );
+                    _fragments.pop();
+                }
+        
+                void pushOperator(Pt::Char ch)
+                {
+                    _ops.push(ch);
+                }
+
+                void pushClosingBrace()
+                {
+                    reduceStack();
+                }
+
+                void pushOperand(const Pt::String& name)
+                {
+                    if(name.at(0) == '#')
+                    {
+                        if(name != L"#PCDATA")
+                            throw std::logic_error("DTD syntax error: expected PCDATA");
+
+                        DtdElementContentDecl::PcData& pcdata = _decl->createPcData();
+                        DtdElementContentDecl::Fragment frag(pcdata);
+                        frag.setLeaf(pcdata);
+                        _fragments.push(frag);
+                        return;
+                    }
+                
+                    DtdElementContentDecl::Label& label =_decl->createLabel(name);
+                    DtdElementContentDecl::Fragment frag(label);
+                    frag.setLeaf(label);
+                    _fragments.push(frag);
+                }
+
+                void pushEmpty()
+                {
+                    DtdElementContentDecl::Empty& e = _decl->createEmpty();
+                    DtdElementContentDecl::Fragment frag(e);
+                    frag.setLeaf(e);
+                    _fragments.push(frag);
+                }
+
+                void reduceStack()
+                {
+                    for(;;)
+                    {
+                        if( _ops.empty() )
+                            break;
+
+                        if(_ops.top() == '(')
+                        {
+                            _ops.pop();
+                            break;
+                        }
+
+                        if(_ops.top() == ',')
+                        {
+                            _ops.pop();
+                 
+                            if( _fragments.size() < 2 )
+                                throw std::logic_error("DTD syntax error: not enough operands for ,");
+                    
+                            DtdElementContentDecl::Fragment op2 = _fragments.top();
+                            _fragments.pop();
+
+                            DtdElementContentDecl::Fragment op1 = _fragments.top();
+                            _fragments.pop();
+
+                            op1.patchLeafs( op2.start() );
+                    
+                            DtdElementContentDecl::Fragment frag( op1.start() );
+                            frag.setLeafs( op2.leafs() );
+                            _fragments.push(frag);
+                            continue;
+                        }
+
+                        if(_ops.top() == '|')
+                        {
+                            _ops.pop();
+                 
+                            if( _fragments.size() < 2 )
+                                throw std::logic_error("DTD syntax error: not enough operands for ,");
+                    
+                            DtdElementContentDecl::Fragment op2 = _fragments.top();
+                            _fragments.pop();
+
+                            DtdElementContentDecl::Fragment op1 = _fragments.top();
+                            _fragments.pop();
+
+                            DtdElementContentDecl::Split& split = _decl->createSplit( op2.start() );
+                            split.setNext( op1.start() );
+
+                            DtdElementContentDecl::Fragment frag(split);
+                            frag.setLeafs( op1.leafs(), op2.leafs() );
+                            _fragments.push(frag);
+                            continue;
+                        }
+
+                        if(_ops.top() == '?')
+                        {
+                            _ops.pop();
+                 
+                            if( _fragments.empty() )
+                                throw std::logic_error("DTD syntax error: not enough operands for ?");
+                    
+                            DtdElementContentDecl::Fragment op1 = _fragments.top();
+                            _fragments.pop();
+
+                            DtdElementContentDecl::Split& split = _decl->createSplit( op1.start() );
+                    
+                            DtdElementContentDecl::Fragment frag(split);
+                            frag.setLeafs(op1.leafs(), split);
+                            _fragments.push(frag);
+                            continue;
+                        }
+
+                        if(_ops.top() == '*')
+                        {
+                            _ops.pop();
+                 
+                            if( _fragments.empty() )
+                                throw std::logic_error("DTD syntax error: not enough operands for *");
+                    
+                            DtdElementContentDecl::Fragment op1 = _fragments.top();
+                            _fragments.pop();
+
+                            DtdElementContentDecl::Split& split = _decl->createSplit( op1.start() );
+
+                            op1.patchLeafs(split);
+                    
+                            DtdElementContentDecl::Fragment frag( split );
+                            frag.setLeaf(split);
+                            _fragments.push(frag);
+                            continue;
+                        }
+
+                        if(_ops.top() == '+')
+                        {
+                            _ops.pop();
+                 
+                            if( _fragments.empty() )
+                                throw std::logic_error("DTD syntax error: not enough operands for +");
+                    
+                            DtdElementContentDecl::Fragment op1 = _fragments.top();
+                            _fragments.pop();
+
+                            DtdElementContentDecl::Split& split = _decl->createSplit( op1.start() );
+
+                            op1.patchLeafs(split);
+                    
+                            DtdElementContentDecl::Fragment frag( op1.start() );
+                            frag.setLeaf(split);
+                            _fragments.push(frag);
+                            continue;
+                        }
+                    }
+                }
+
+            private:
+                DtdElementContentDecl* _decl;
+                std::stack<Pt::Char> _ops;
+                std::stack<Fragment> _fragments;
+        };
+
     public:
-        DtdElementDecl()
+        DtdElementContentDecl()
         : _start(0)
-        , _attr(0)
         {}
 
-        Node* startNode()
+        ~DtdElementContentDecl()
+        {
+            for(unsigned n = 0; n < _pool.size() ; ++n)
+            {
+                delete _pool[n];
+            }
+        }
+
+        Node* start()
         { return _start; }
 
-        void setContentExpr(Node& s)
-        { _start = &s; }
+        void setStart(Node& node)
+        { _start = &node; }
 
-        void setAttrListDecl(DtdAttrListDecl& attr)
-        { _attr = &attr; }
+        Label& createLabel(const Pt::String& name)
+        {
+            _pool.reserve(_pool.size() + 1);
+            Label* label = new Label(name);
+            _pool.push_back(label);
+            return *label;
+        }
+
+        Split& createSplit(Node& to)
+        {
+            _pool.reserve(_pool.size() + 1);
+            Split* split = new Split(&to);
+            _pool.push_back(split);
+            return *split;
+        }
+
+        PcData& createPcData()
+        {
+            _pool.reserve(_pool.size() + 1);
+            PcData* node = new PcData();
+            _pool.push_back(node);
+            return *node;
+        }
+
+        Empty& createEmpty()
+        { return _dtdEmpty; }
+
+        Node& createEnd()
+        { return _dtdEnd; }
+
+    private:
+        std::vector<Node*> _pool;
+        Empty _dtdEmpty;
+        Match _dtdEnd;
+        Node* _start;
+};
+
+
+class DtdElementDecl
+{
+    public:
+        DtdElementDecl()
+        {}
+
+        ~DtdElementDecl()
+        { }
+
+        DtdElementContentDecl& contentDecl()
+        { return _content; }
+
+        void setContentExpr(DtdElementContentDecl::Node& node)
+        {  _content.setStart(node); }
+
+        DtdAttrListDecl& attrListDecl()
+        { return _attr; }
 
         bool validate(Pt::Xml::AttributeList& attrs)
         {
-            return _attr ? _attr->validate(attrs) : attrs.empty();
+            return _attr.validate(attrs);
         }
 
     private:
-        Node* _start;
-        DtdAttrListDecl* _attr;
+        DtdElementContentDecl _content;
+        DtdAttrListDecl _attr;
 };
 
 
@@ -356,42 +650,7 @@ class DocTypeDefinition
         {}
 
         ~DocTypeDefinition()
-        {
-            for(unsigned n = 0; n < _pool.size() ; ++n)
-            {
-                delete _pool[n];
-            }
-        }
-
-        DtdElementDecl::Label& createLabel(const Pt::String& name)
-        {
-            _pool.reserve(_pool.size() + 1);
-            DtdElementDecl::Label* label = new DtdElementDecl::Label(name);
-            _pool.push_back(label);
-            return *label;
-        }
-
-        DtdElementDecl::Split& createSplit(DtdElementDecl::Node& to)
-        {
-            _pool.reserve(_pool.size() + 1);
-            DtdElementDecl::Split* split = new DtdElementDecl::Split(&to);
-            _pool.push_back(split);
-            return *split;
-        }
-
-        DtdElementDecl::PcData& createPcData()
-        {
-            _pool.reserve(_pool.size() + 1);
-            DtdElementDecl::PcData* node = new DtdElementDecl::PcData();
-            _pool.push_back(node);
-            return *node;
-        }
-
-        DtdElementDecl::Empty& createEmpty()
-        { return _dtdEmpty; }
-
-        DtdElementDecl::Node& createEnd()
-        { return _dtdEnd; }
+        {}
 
         DtdElementDecl& addElementDecl(const Pt::String& name)
         { 
@@ -412,259 +671,16 @@ class DocTypeDefinition
         }
 
     private:
-        // TODO: move to DtdContext
-        DtdElementDecl::Empty _dtdEmpty;
-        DtdElementDecl::Match _dtdEnd;
-        std::vector<DtdElementDecl::Node*> _pool;
-        ///////////
-
         std::map<Pt::String, DtdElementDecl> _elemDecls;
-};
-
-
-class DtdElementDeclBuilder
-{
-    public:
-        class Fragment
-        {
-            public:
-                explicit Fragment(DtdElementDecl::Node& start)
-                : _start(&start)
-                {}
-
-                DtdElementDecl::Node& start() const
-                { return *_start; }
-
-                const std::vector<DtdElementDecl::Node*>& leafs() const
-                { return _leafs; }
-
-                void setLeaf(DtdElementDecl::Node& next)
-                { _leafs.push_back(&next); }
-
-                void setLeafs(const std::vector<DtdElementDecl::Node*>& leafs)
-                { _leafs = leafs; }
-
-                void setLeafs(const std::vector<DtdElementDecl::Node*>& leafs, const std::vector<DtdElementDecl::Node*>& leafs2)
-                { 
-                    _leafs = leafs; 
-                    _leafs.insert( _leafs.end(), leafs2.begin(), leafs2.end() );
-                }
-
-                void setLeafs(const std::vector<DtdElementDecl::Node*>& leafs, DtdElementDecl::Node& leaf)
-                { 
-                    _leafs = leafs; 
-                    _leafs.push_back(&leaf);
-                }
-
-                void patchLeafs(DtdElementDecl::Node& to)
-                {
-                    for(unsigned n = 0; n < _leafs.size(); ++n)
-                    {
-                        DtdElementDecl::Node* leaf = _leafs[n];
-                        leaf->setNext(to);
-                    }
-                }
-
-            private:
-                DtdElementDecl::Node* _start;
-                std::vector<DtdElementDecl::Node*> _leafs;
-        };
-
-    public:
-        DtdElementDeclBuilder(DocTypeDefinition& dtd)
-        : _dtd(&dtd)
-        {}
-
-        void clear()
-        {
-            while( ! _fragments.empty() )
-                _fragments.pop();
-
-            while( ! _ops.empty() )
-                _ops.pop();
-        }
-
-        DtdElementDecl::Node& finish()
-        {
-            reduceStack();
-
-            if(_fragments.size() != 1)
-                throw std::logic_error("DTD syntax error: incomplete expression");
-
-            _fragments.top().patchLeafs( _dtd->createEnd() );
-            DtdElementDecl::Node& start = _fragments.top().start();
-            _fragments.pop();
-            return start;
-        }
-
-        void pushOperator(Pt::Char ch)
-        {
-            _ops.push(ch);
-        }
-
-        void pushClosingBrace()
-        {
-            reduceStack();
-        }
-        
-        void pushOperand(const Pt::String& name)
-        {
-            if(name.at(0) == '#')
-            {
-                if(name != L"#PCDATA")
-                    throw std::logic_error("DTD syntax error: expected PCDATA");
-
-                DtdElementDecl::PcData& pcdata = _dtd->createPcData();
-                Fragment frag(pcdata);
-                frag.setLeaf(pcdata);
-                _fragments.push(frag);
-                return;
-            }
-                
-            DtdElementDecl::Label& label =_dtd->createLabel(name);
-            Fragment frag(label);
-            frag.setLeaf(label);
-            _fragments.push(frag);
-        }
-
-        void pushEmpty()
-        {
-            DtdElementDecl::Empty& e = _dtd->createEmpty();
-            Fragment frag(e);
-            frag.setLeaf(e);
-            _fragments.push(frag);
-        }
-
-    private:
-        void reduceStack()
-        {
-            for(;;)
-            {
-                if( _ops.empty() )
-                    break;
-
-                if(_ops.top() == '(')
-                {
-                    _ops.pop();
-                    break;
-                }
-
-                if(_ops.top() == ',')
-                {
-                    _ops.pop();
-                 
-                    if( _fragments.size() < 2 )
-                        throw std::logic_error("DTD syntax error: not enough operands for ,");
-                    
-                    Fragment op2 = _fragments.top();
-                    _fragments.pop();
-
-                    Fragment op1 = _fragments.top();
-                    _fragments.pop();
-
-                    op1.patchLeafs( op2.start() );
-                    
-                    Fragment frag( op1.start() );
-                    frag.setLeafs( op2.leafs() );
-                    _fragments.push(frag);
-                    continue;
-                }
-
-                if(_ops.top() == '|')
-                {
-                    _ops.pop();
-                 
-                    if( _fragments.size() < 2 )
-                        throw std::logic_error("DTD syntax error: not enough operands for ,");
-                    
-                    Fragment op2 = _fragments.top();
-                    _fragments.pop();
-
-                    Fragment op1 = _fragments.top();
-                    _fragments.pop();
-
-                    DtdElementDecl::Split& split = _dtd->createSplit( op2.start() );
-                    split.setNext( op1.start() );
-
-                    Fragment frag(split);
-                    frag.setLeafs( op1.leafs(), op2.leafs() );
-                    _fragments.push(frag);
-                    continue;
-                }
-
-                if(_ops.top() == '?')
-                {
-                    _ops.pop();
-                 
-                    if( _fragments.empty() )
-                        throw std::logic_error("DTD syntax error: not enough operands for ?");
-                    
-                    Fragment op1 = _fragments.top();
-                    _fragments.pop();
-
-                    DtdElementDecl::Split& split = _dtd->createSplit( op1.start() );
-                    
-                    Fragment frag(split);
-                    frag.setLeafs(op1.leafs(), split);
-                    _fragments.push(frag);
-                    continue;
-                }
-
-                if(_ops.top() == '*')
-                {
-                    _ops.pop();
-                 
-                    if( _fragments.empty() )
-                        throw std::logic_error("DTD syntax error: not enough operands for *");
-                    
-                    Fragment op1 = _fragments.top();
-                    _fragments.pop();
-
-                    DtdElementDecl::Split& split = _dtd->createSplit( op1.start() );
-
-                    op1.patchLeafs(split);
-                    
-                    Fragment frag( split );
-                    frag.setLeaf(split);
-                    _fragments.push(frag);
-                    continue;
-                }
-
-                if(_ops.top() == '+')
-                {
-                    _ops.pop();
-                 
-                    if( _fragments.empty() )
-                        throw std::logic_error("DTD syntax error: not enough operands for +");
-                    
-                    Fragment op1 = _fragments.top();
-                    _fragments.pop();
-
-                    DtdElementDecl::Split& split = _dtd->createSplit( op1.start() );
-
-                    op1.patchLeafs(split);
-                    
-                    Fragment frag( op1.start() );
-                    frag.setLeaf(split);
-                    _fragments.push(frag);
-                    continue;
-                }
-            }
-        }
-
-    private:
-        DocTypeDefinition* _dtd;
-        std::stack<Pt::Char> _ops;
-        std::stack<Fragment> _fragments;
 };
 
 
 class DtdParser : private Pt::NonCopyable
 {
     public:
-        DtdParser()
-        : _state(&DtdParser::OnBegin)
-        , _dtdBuilder(_dtd)
+        DtdParser(DocTypeDefinition& dtd)
+        : _dtd(dtd)
+        , _state(&DtdParser::OnBegin)
         {}
 
         ~DtdParser()
@@ -672,24 +688,18 @@ class DtdParser : private Pt::NonCopyable
 
         void parse(const Pt::String& elem, const char* elemDecl)
         {
-            _dtdBuilder.clear();
             _state = &DtdParser::OnBegin;
 
             DtdElementDecl& decl = _dtd.addElementDecl(elem);
-            
+            _fragments.reset( decl.contentDecl() );
+
             while(*elemDecl != '\0')
-            {
                 (this->*_state)(*elemDecl++);
-            }
 
             (this->*_state)( std::char_traits<Pt::Char>::eof() );
-            
-            DtdElementDecl::Node& contentDecl = _dtdBuilder.finish();
-            decl.setContentExpr(contentDecl);
-        }
 
-        DocTypeDefinition& dtd()
-        { return _dtd; }
+            _fragments.finish();
+        }
 
     private:
         Pt::Char notEof(int c) const
@@ -722,7 +732,7 @@ class DtdParser : private Pt::NonCopyable
             if(ch != '(')
                 throw std::logic_error("DTD syntax error: expected open brace");
 
-            _dtdBuilder.pushOperator(ch);
+            _fragments.pushOperator(ch);
             _state = &DtdParser::OnExprBegin;
         }
         
@@ -732,7 +742,7 @@ class DtdParser : private Pt::NonCopyable
             {
                 if(_token == L"EMPTY")
                 {
-                    _dtdBuilder.pushEmpty();
+                    _fragments.pushEmpty();
                     return;
                 }
             }
@@ -763,7 +773,7 @@ class DtdParser : private Pt::NonCopyable
 
             if(ch == '(')
             {
-                _dtdBuilder.pushOperator(ch);
+                _fragments.pushOperator(ch);
                 return;
             }
 
@@ -783,48 +793,48 @@ class DtdParser : private Pt::NonCopyable
 
             if( ch == ',')
             {
-                _dtdBuilder.pushOperand(_token);
-                _dtdBuilder.pushOperator(ch);
+                _fragments.pushOperand(_token);
+                _fragments.pushOperator(ch);
                 _state = &DtdParser::OnBinaryOp;
                 return;
             }
 
             if( ch == '|')
             {
-                _dtdBuilder.pushOperand(_token);
-                _dtdBuilder.pushOperator(ch);
+                _fragments.pushOperand(_token);
+                _fragments.pushOperator(ch);
                 _state = &DtdParser::OnBinaryOp;
                 return;
             }
 
             if(ch == '+')
             {
-                _dtdBuilder.pushOperand(_token);
-                _dtdBuilder.pushOperator(ch);
+                _fragments.pushOperand(_token);
+                _fragments.pushOperator(ch);
                 _state = &DtdParser::OnUnrayOp;
                 return;
             }
 
             if(ch == '*')
             {
-                _dtdBuilder.pushOperand(_token);
-                _dtdBuilder.pushOperator(ch);
+                _fragments.pushOperand(_token);
+                _fragments.pushOperator(ch);
                 _state = &DtdParser::OnUnrayOp;
                 return;
             }
 
             if(ch == '?')
             {
-                _dtdBuilder.pushOperand(_token);
-                _dtdBuilder.pushOperator(ch);
+                _fragments.pushOperand(_token);
+                _fragments.pushOperator(ch);
                 _state = &DtdParser::OnUnrayOp;
                 return;
             }
 
             if( ch == ')')
             {
-                _dtdBuilder.pushOperand(_token);
-                _dtdBuilder.pushClosingBrace();
+                _fragments.pushOperand(_token);
+                _fragments.pushClosingBrace();
                 _state = &DtdParser::OnExprEnd;
                 return;
             }
@@ -843,21 +853,21 @@ class DtdParser : private Pt::NonCopyable
 
             if( ch == ',')
             {
-                _dtdBuilder.pushOperator(ch);
+                _fragments.pushOperator(ch);
                 _state = &DtdParser::OnBinaryOp;
                 return;
             }
 
             if( ch == '|')
             {
-                _dtdBuilder.pushOperator(ch);
+                _fragments.pushOperator(ch);
                 _state = &DtdParser::OnBinaryOp;
                 return;
             }
 
             if( ch == ')')
             {
-                _dtdBuilder.pushClosingBrace();
+                _fragments.pushClosingBrace();
                 _state = &DtdParser::OnExprEnd;
                 return;
             }
@@ -877,7 +887,7 @@ class DtdParser : private Pt::NonCopyable
 
             if(ch == '(')
             {
-                _dtdBuilder.pushOperator(ch);
+                _fragments.pushOperator(ch);
                 _state = &DtdParser::OnExprBegin;
                 return;
             }
@@ -896,53 +906,54 @@ class DtdParser : private Pt::NonCopyable
 
             if( ch == ',')
             {
-                _dtdBuilder.pushOperator(ch);
+                _fragments.pushOperator(ch);
                 _state = &DtdParser::OnBinaryOp;
                 return;
             }
 
             if( ch == '|')
             {
-                _dtdBuilder.pushOperator(ch);
+                _fragments.pushOperator(ch);
                 _state = &DtdParser::OnBinaryOp;
                 return;
             }
 
             if(ch == '+')
             {
-                _dtdBuilder.pushOperator(ch);
+                _fragments.pushOperator(ch);
                 _state = &DtdParser::OnUnrayOp;
                 return;
             }
 
             if(ch == '*')
             {
-                _dtdBuilder.pushOperator(ch);
+                _fragments.pushOperator(ch);
                 _state = &DtdParser::OnUnrayOp;
                 return;
             }
 
             if(ch == '?')
             {
-                _dtdBuilder.pushOperator(ch);
+                _fragments.pushOperator(ch);
                 _state = &DtdParser::OnUnrayOp;
                 return;
             }
 
             if( ch == ')')
             {
-                _dtdBuilder.pushClosingBrace();
+                _fragments.pushClosingBrace();
                 return;
             }
         }
 
     private:
+        DocTypeDefinition& _dtd;
+
         typedef void (DtdParser::*ParseFunc)(int);
         ParseFunc _state;
         Pt::String _token;
 
-        DocTypeDefinition _dtd;
-        DtdElementDeclBuilder _dtdBuilder;
+        DtdElementContentDecl::FragmentStack _fragments;
 };
 
 
@@ -956,7 +967,7 @@ class DtdElementValidator
         DtdElementValidator(DtdElementDecl& decl)
         : _decl(&decl)
         {
-            _decl->startNode()->get(_current);
+            _decl->contentDecl().start()->get(_current);
         }
 
         bool validateAttributes(Pt::Xml::AttributeList& attrs)
@@ -968,7 +979,7 @@ class DtdElementValidator
         {
             for(unsigned n = 0; n < _current.size(); ++n)
             {
-                DtdElementDecl::Node* state = _current[n];
+                DtdElementContentDecl::Node* state = _current[n];
                 state->eval(node, _next);
             }
             
@@ -991,8 +1002,8 @@ class DtdElementValidator
 
     private:
         DtdElementDecl* _decl;
-        std::vector<DtdElementDecl::Node*> _current;
-        std::vector<DtdElementDecl::Node*> _next;
+        std::vector<DtdElementContentDecl::Node*> _current;
+        std::vector<DtdElementContentDecl::Node*> _next;
 };
 
 
@@ -1081,13 +1092,14 @@ class PtXmlTest : public Pt::Unit::TestSuite
         {
             std::istringstream text("<test><a>hello</a><b></b><a>world</a><b></b></test>");
             //std::istringstream text("<test></test>");
+            DocTypeDefinition dtd;
 
-            DtdParser parser;
+            DtdParser parser(dtd);
             parser.parse(L"test", "(a|b)+");
             parser.parse(L"a", "(#PCDATA|(x|y)?|z+)");
             parser.parse(L"b", "EMPTY");
 
-            DtdValidator validator( parser.dtd() );
+            DtdValidator validator(dtd);
 
             Pt::Xml::XmlReader reader(text);
             for(;;)
