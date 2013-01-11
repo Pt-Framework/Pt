@@ -72,11 +72,20 @@ class DtdAttrDecl
         void setName(const Pt::String& name)
         { _name = name; }
 
-        void setDefault(const Pt::String& def)
+        void setDefaultValue(const Pt::String& def)
         { _default = def; }
 
-        virtual bool match(const Pt::String& value) const = 0;
-       
+        const Pt::String& defaultValue() const
+        { return _default; }
+
+        bool validate(const Pt::String& value) const
+        {
+            if(mode() == Fixed)
+                return value == defaultValue();
+
+            return onValidate(value);
+        }
+      
         bool postMatch(Pt::Xml::AttributeList& list) const
         {
             switch(_mode)
@@ -99,6 +108,9 @@ class DtdAttrDecl
             return true;
         }
 
+    protected:
+        virtual bool onValidate(const Pt::String& value) const = 0;
+
     private:
         Mode _mode;
         Pt::String _name;
@@ -113,8 +125,11 @@ class DtdAttrCDataDecl : public DtdAttrDecl
         : DtdAttrDecl()
         {}
 
-        virtual bool match(const Pt::String& value) const
-        { return true; }
+        virtual bool onValidate(const Pt::String& value) const
+        { 
+            // TODO: check for non-CDATA characters in value           
+            return true; 
+        }
 };
 
 
@@ -140,6 +155,11 @@ class DtdAttrListDecl
             return _attrs;
         }
 
+        DtdAttrDecl& last()
+        {
+            return *(_attrs.back());
+        }
+
         void push(DtdAttrDecl* decl)
         { _attrs.push_back(decl); }
 
@@ -147,7 +167,7 @@ class DtdAttrListDecl
         {
             std::vector<DtdAttrDecl*>  attrDecls = _attrs;
             //
-            // match attributes against declarations, remove declartions
+            // match attributes against declarations, remove declarations
             // that match an attribute
             //
             Pt::Xml::AttributeList::ConstIterator attr;
@@ -166,7 +186,7 @@ class DtdAttrListDecl
                 if( it == attrDecls.end() )
                     return false;
 
-                if( ! (*it)->match( attr->value() ) )
+                if( ! (*it)->validate( attr->value() ) )
                     return false;
 
                 attrDecls.erase(it);
@@ -620,22 +640,11 @@ class DtdElementDecl
         DtdElementDecl()
         {}
 
-        ~DtdElementDecl()
-        { }
-
         DtdElementContentDecl& contentDecl()
         { return _content; }
 
-        void setContentExpr(DtdElementContentDecl::Node& node)
-        {  _content.setStart(node); }
-
         DtdAttrListDecl& attrListDecl()
         { return _attr; }
-
-        bool validate(Pt::Xml::AttributeList& attrs)
-        {
-            return _attr.validate(attrs);
-        }
 
     private:
         DtdElementContentDecl _content;
@@ -643,7 +652,7 @@ class DtdElementDecl
 };
 
 
-class DocTypeDefinition
+class DocTypeDefinition : private Pt::NonCopyable
 {
     public:
         DocTypeDefinition()
@@ -652,7 +661,7 @@ class DocTypeDefinition
         ~DocTypeDefinition()
         {}
 
-        DtdElementDecl& addElementDecl(const Pt::String& name)
+        DtdElementDecl& declareElement(const Pt::String& name)
         { 
             return _elemDecls[name]; 
         }
@@ -681,16 +690,20 @@ class DtdParser : private Pt::NonCopyable
         DtdParser(DocTypeDefinition& dtd)
         : _dtd(dtd)
         , _state(&DtdParser::OnBegin)
+        , _elemDecl(0)
         {}
 
         ~DtdParser()
         { }
 
-        void parse(const Pt::String& elem, const char* elemDecl)
+        void parseElementDecl(const Pt::String& elem, const char* elemDecl)
         {
+            _token.clear();
             _state = &DtdParser::OnBegin;
 
-            DtdElementDecl& decl = _dtd.addElementDecl(elem);
+            DtdElementDecl& decl = _dtd.declareElement(elem);
+            _elemDecl = &decl;
+
             _fragments.reset( decl.contentDecl() );
 
             while(*elemDecl != '\0')
@@ -699,6 +712,20 @@ class DtdParser : private Pt::NonCopyable
             (this->*_state)( std::char_traits<Pt::Char>::eof() );
 
             _fragments.finish();
+        }
+
+        void parseAttrDecl(const Pt::String& elem, const char* attrDecl)
+        {
+            _token.clear();
+            _state = &DtdParser::OnAttrName;
+
+            DtdElementDecl& decl = _dtd.declareElement(elem);
+            _elemDecl = &decl;
+
+            while(*attrDecl != '\0')
+                (this->*_state)(*attrDecl++);
+
+            (this->*_state)( std::char_traits<Pt::Char>::eof() );
         }
 
     private:
@@ -715,6 +742,169 @@ class DtdParser : private Pt::NonCopyable
         bool isAlpha(Pt::Char ch)
         {
             return ch == '.' || ch == '_' || ch == '-' || Pt::isalnum(ch) != 0;
+        }
+
+        void OnAttrName(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if( Pt::isspace(ch) )
+            {
+                _state = &DtdParser::AfterAttrName;
+                return;
+            }
+
+            _token += ch;
+        }
+
+        void AfterAttrName(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if( ch == 'C' )
+            {
+                _state = &DtdParser::OnCDATA0;
+                return;
+            }
+        }
+
+        void OnCDATA0(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if( ch != 'D' )
+                throw std::logic_error("DTD syntax error: expected attribute type");
+
+            _state = &DtdParser::OnCDATA1;
+        }
+
+        void OnCDATA1(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if( ch != 'A' )
+                throw std::logic_error("DTD syntax error: expected attribute type");
+
+            _state = &DtdParser::OnCDATA2;
+        }
+
+        void OnCDATA2(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if( ch != 'T' )
+                throw std::logic_error("DTD syntax error: expected attribute type");
+
+            _state = &DtdParser::OnCDATA3;
+        }
+
+        void OnCDATA3(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if( ch != 'A' )
+                throw std::logic_error("DTD syntax error: expected attribute type");
+
+            DtdAttrCDataDecl* attr = new DtdAttrCDataDecl();
+            attr->setName(_token);
+            _elemDecl->attrListDecl().push(attr);
+
+            _token.clear();
+            _state = &DtdParser::AfterAttrType;
+        }
+
+        void AfterAttrType(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if( Pt::isspace(ch) )
+                return;
+
+            if(ch == '"')
+            {
+                _state = &DtdParser::OnAttrDefault;
+                return;
+            }
+
+            if( ch != '#' )
+                throw std::logic_error("DTD syntax error: expected attribute type");
+
+            _state = &DtdParser::OnAttrMode;
+        }
+
+        void OnAttrMode(int c)
+        {
+            Pt::Char ch(c);
+            if( c == std::char_traits<Pt::Char>::eof() || Pt::isspace(ch) )
+            {
+                if(_token == L"REQUIRED")
+                {
+                    _elemDecl->attrListDecl().last().setMode(DtdAttrDecl::Required);
+                    _state = &DtdParser::AfterAttrMode;
+                }
+                else if(_token == L"IMPLIED")
+                {
+                    _elemDecl->attrListDecl().last().setMode(DtdAttrDecl::Implied);
+                    _state = &DtdParser::AfterAttrMode;
+                }
+                else if(_token == L"FIXED")
+                {
+                    _elemDecl->attrListDecl().last().setMode(DtdAttrDecl::Fixed);
+                    _state = &DtdParser::AfterAttrFixed;
+                }
+                else
+                    throw std::logic_error("DTD syntax error: invalid attribute mode");
+                
+                _token.clear();
+                return;
+            }
+
+            if( ! isAlpha(ch) )
+                throw std::logic_error("DTD syntax error: expected attribute mode");
+
+            _token += ch;
+        }
+
+        void AfterAttrMode(int c)
+        {
+            if( c == std::char_traits<Pt::Char>::eof() )
+                return;
+
+            Pt::Char ch(c);
+            
+            if( Pt::isspace(ch) )
+                return;
+        }
+
+        void AfterAttrFixed(int c)
+        {
+            Pt::Char ch = notEof(c);
+            
+            if(ch == '"')
+            {
+                _state = &DtdParser::OnAttrDefault;
+                return;
+            }
+
+            if( Pt::isspace(ch) )
+                return;
+
+            throw std::logic_error("DTD syntax error: expected attribute default");
+        }
+
+        void OnAttrDefault(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if(ch == '"')
+            {
+                _elemDecl->attrListDecl().last().setDefaultValue(_token);
+                _token.clear();
+                _state = &DtdParser::AfterAttrMode;
+                return;
+            }
+
+            _token += ch;
         }
 
         void OnBegin(int c)
@@ -743,6 +933,7 @@ class DtdParser : private Pt::NonCopyable
                 if(_token == L"EMPTY")
                 {
                     _fragments.pushEmpty();
+                    _token.clear();
                     return;
                 }
             }
@@ -953,6 +1144,7 @@ class DtdParser : private Pt::NonCopyable
         ParseFunc _state;
         Pt::String _token;
 
+        DtdElementDecl* _elemDecl;
         DtdElementContentDecl::FragmentStack _fragments;
 };
 
@@ -972,7 +1164,7 @@ class DtdElementValidator
 
         bool validateAttributes(Pt::Xml::AttributeList& attrs)
         {
-            return _decl ? _decl->validate(attrs) : false;
+            return _decl ? _decl->attrListDecl().validate(attrs) : false;
         }
 
         bool validateContent(Pt::Xml::Node& node)
@@ -1083,80 +1275,65 @@ class PtXmlTest : public Pt::Unit::TestSuite
         PtXmlTest()
         : Pt::Unit::TestSuite("Pt-Xml-Test")
         {
-            this->registerMethod("DtdValidate", *this, &PtXmlTest::DtdValidate);
+            this->registerMethod("DtdValidateElementContent", *this, &PtXmlTest::DtdValidateElementContent);
             this->registerMethod("DtdValidateAttributes", *this, &PtXmlTest::DtdValidateAttributes);
         }
 
     private:
-        void DtdValidate()
+        void DtdValidateElementContent()
         {
-            std::istringstream text("<test><a>hello</a><b></b><a>world</a><b></b></test>");
-            //std::istringstream text("<test></test>");
             DocTypeDefinition dtd;
 
             DtdParser parser(dtd);
-            parser.parse(L"test", "(a|b)+");
-            parser.parse(L"a", "(#PCDATA|(x|y)?|z+)");
-            parser.parse(L"b", "EMPTY");
+            parser.parseElementDecl(L"test", "(a|b)+");
+            parser.parseElementDecl(L"a", "(#PCDATA|(x|y)?|z+)");
+            parser.parseElementDecl(L"b", "EMPTY");
 
             DtdValidator validator(dtd);
 
+            std::istringstream text("<test><a>hello</a><b></b><a>world</a><b></b></test>");
             Pt::Xml::XmlReader reader(text);
-            for(;;)
+            
+            Pt::Xml::XmlReader::Iterator it;
+            for(it = reader.current(); it != reader.end(); ++it)
             {
-                Pt::Xml::Node& node = reader.next();
+                Pt::Xml::Node& node = *it;
                 bool valid = validator.validate(node);
-
-                if( ! valid)
-                    this->reportMessage("DTD VALIDATION FAILED");
-
-                if( node.type() == Pt::Xml::Node::EndDocument )
-                    break;
+                PT_UNIT_ASSERT(valid);
             }
         }
 
         void DtdValidateAttributes()
         {
-            DtdAttrListDecl decl;
+            DocTypeDefinition dtd;
 
-            DtdAttrCDataDecl* a1 = new DtdAttrCDataDecl();
-            a1->setName(L"a1");
-            a1->setMode(DtdAttrDecl::Required);
-            decl.push(a1);
+            DtdParser parser(dtd);
+            parser.parseElementDecl(L"test", "EMPTY");
+            parser.parseAttrDecl(L"test", "a1 CDATA #REQUIRED");
+            parser.parseAttrDecl(L"test", "a2 CDATA #IMPLIED");
+            parser.parseAttrDecl(L"test", "a3 CDATA #FIXED \"A3def\"");
+            parser.parseAttrDecl(L"test", "a4 CDATA \"A4def\"");
 
-            DtdAttrCDataDecl* a2 = new DtdAttrCDataDecl();
-            a2->setName(L"a2");
-            a2->setMode(DtdAttrDecl::Implied);
-            decl.push(a2);
+            DtdValidator validator(dtd);
 
-            DtdAttrCDataDecl* a3 = new DtdAttrCDataDecl();
-            a3->setName(L"a3");
-            a3->setMode(DtdAttrDecl::Default);
-            a3->setDefault(L"a3Def");
-            decl.push(a3);
+            std::istringstream text("<test a1=\"A1\" a2=\"A2\" a4=\"A3def\"></test>");
+            Pt::Xml::XmlReader reader(text);
 
-            Pt::Xml::Attribute attr;
-            Pt::Xml::AttributeList attrs;
-
-            attr.setName(L"a1");
-            attr.setValue(L"a1Val");
-            attrs.add(attr);
-
-            //attr.setName(L"a2");
-            //attr.setValue(L"a2Val");
-            //attrs.add(attr);
-
-            //attr.setName(L"a3");
-            //attr.setValue(L"a3Val");
-            //attrs.add(attr);
-
-            bool isMatch = decl.validate(attrs);
-            this->reportMessage(isMatch ? "DTD ATTRIBUTE MATCH" : "INVALID ATTRIBUTE");
-            
-            Pt::Xml::AttributeList::Iterator it;
-            for(it = attrs.begin(); it != attrs.end(); ++it)
+            Pt::Xml::XmlReader::Iterator it;
+            for(it = reader.current(); it != reader.end(); ++it)
             {
-                this->reportMessage( it->name().narrow() + ": " + it->value().narrow() );
+                Pt::Xml::Node& node = *it;
+                bool valid = validator.validate(node);
+                PT_UNIT_ASSERT(valid);
+
+                Pt::Xml::StartElement* se = toStartElement(&node);
+                if(se && se->name() == L"test")
+                {
+                    PT_UNIT_ASSERT( se->attributes().has(L"a3") );
+                    PT_UNIT_ASSERT( se->attributes().find(L"a3")->value() == L"A3def" );
+
+                    PT_UNIT_ASSERT( se->attributes().has(L"a4") );
+                }
             }
         }
 };

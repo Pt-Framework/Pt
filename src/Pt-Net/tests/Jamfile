@@ -11,3 +11,7 @@ LinkSharedLibraries Pt-Net-test : Pt Pt-Net Pt-System Pt-Unit ;
 MakeLocate Pt-Net-test : $(PT_OUTPUT_TARGET) ;
 RunUnitTest Pt-Net-test : $(PT_OUTPUT_TEST) ;
 
+#Main ftp : ftp.cpp ;
+#LinkSharedLibraries ftp : Pt Pt-Net Pt-System Pt-Unit ;
+#MakeLocate ftp : $(PT_OUTPUT_TARGET) ;
+

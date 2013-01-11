@@ -138,6 +138,7 @@ class PT_XML_API XmlReader
         class XmlReaderImpl* _impl;
 };
 
+// TODO: rename InputIterator
 class XmlReader::Iterator
 {
     public:
@@ -146,7 +147,7 @@ class XmlReader::Iterator
         , _node(0)
         { }
 
-        Iterator(XmlReader& xis)
+        explicit Iterator(XmlReader& xis)
         : _stream(&xis)
         , _node(0)
         { _node = &_stream->get(); }
@@ -165,10 +166,10 @@ class XmlReader::Iterator
             return *this;
         }
 
-        inline const Node& operator*() const
+        inline Node& operator*()
         { return *_node; }
 
-        inline const Node* operator->() const
+        inline Node* operator->()
         { return _node; }
 
         Iterator& operator++()
@@ -189,7 +190,7 @@ class XmlReader::Iterator
 
     private:
         XmlReader* _stream;
-        const Node* _node;
+        Node* _node;
 };
 
 
