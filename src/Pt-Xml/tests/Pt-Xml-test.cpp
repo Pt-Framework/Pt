@@ -455,6 +455,7 @@ class DtdElementContentDecl
                     _fragments.push(frag);
                 }
 
+            private:
                 void reduceStack()
                 {
                     for(;;)
