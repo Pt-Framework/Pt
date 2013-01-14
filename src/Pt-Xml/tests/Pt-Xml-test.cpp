@@ -1532,8 +1532,8 @@ class PtXmlTest : public Pt::Unit::TestSuite
 
             DtdParser parser(dtd);
             parser.parse("<!ELEMENT test EMPTY>"
-                         "<!ATTLIST test a1 CDATA #REQUIRED>"
-                         "<!ATTLIST test a2 CDATA #IMPLIED"
+                         "<!ATTLIST test a1 CDATA #REQUIRED"
+                         "          a2 CDATA #IMPLIED"
                          "          a3 CDATA #FIXED \"A3def\""
                          "          a4 CDATA \"A4def\">");
 
