@@ -78,15 +78,15 @@ class AttributeDeclaration
         const Pt::String& defaultValue() const
         { return _default; }
 
-        bool validate(const Pt::String& value) const
+        bool match(const Pt::Xml::Attribute& attr) const
         {
             if(mode() == Fixed)
-                return value == defaultValue();
+                return attr.value() == defaultValue();
 
-            return onValidate(value);
+            return onMatch(attr);
         }
       
-        bool postMatch(Pt::Xml::AttributeList& list) const
+        bool validate(Pt::Xml::AttributeList& list) const
         {
             switch(_mode)
             {
@@ -109,7 +109,7 @@ class AttributeDeclaration
         }
 
     protected:
-        virtual bool onValidate(const Pt::String& value) const = 0;
+        virtual bool onMatch(const Pt::Xml::Attribute& attr) const = 0;
 
     private:
         Mode _mode;
@@ -118,14 +118,14 @@ class AttributeDeclaration
 };
 
 
-class DtdAttrCDataDecl : public AttributeDeclaration
+class CDataAttributeDeclaration : public AttributeDeclaration
 {
     public:
-        DtdAttrCDataDecl()
+        CDataAttributeDeclaration()
         : AttributeDeclaration()
         {}
 
-        virtual bool onValidate(const Pt::String& value) const
+        virtual bool onMatch(const Pt::Xml::Attribute& attr) const
         { 
             // TODO: check for non-CDATA characters in value           
             return true; 
@@ -150,14 +150,9 @@ class AttributeListDeclaration
             }
         }
 
-        const std::vector<AttributeDeclaration*>& decls() const
-        {
-            return _attrs;
-        }
-
         AttributeDeclaration& last()
         {
-            return *(_attrs.back());
+            return *_attrs.back();
         }
 
         void push(AttributeDeclaration* decl)
@@ -166,6 +161,7 @@ class AttributeListDeclaration
         bool validate(Pt::Xml::AttributeList& attrs) const
         {
             std::vector<AttributeDeclaration*>  attrDecls = _attrs;
+
             //
             // match attributes against declarations, remove declarations
             // that match an attribute
@@ -186,7 +182,7 @@ class AttributeListDeclaration
                 if( it == attrDecls.end() )
                     return false;
 
-                if( ! (*it)->validate( attr->value() ) )
+                if( ! (*it)->match( *attr) )
                     return false;
 
                 attrDecls.erase(it);
@@ -199,7 +195,7 @@ class AttributeListDeclaration
             AttrDecls::iterator decl;
             for(decl = attrDecls.begin(); decl != attrDecls.end(); ++decl)
             {
-                if( ! (*decl)->postMatch(attrs) )
+                if( ! (*decl)->validate(attrs) )
                     return false;
             }
 
@@ -213,6 +209,7 @@ class AttributeListDeclaration
 class ContentModel
 {
     public:
+        //TODO: ContentExpression, ContentParticle
         class Node
         {
             public:
@@ -222,8 +219,10 @@ class ContentModel
                 //! @brief Gets this node and follows unlabelled transitions.
                 virtual void get(std::vector<Node*>& nodes) = 0;
 
+                //! @brief Evaluate the XML node and get all following nodes.
                 virtual void eval(Pt::Xml::Node& node, std::vector<Node*>& states) = 0;
 
+                //! @brief Returns true if the node represents a match state.
                 virtual bool isValid() const
                 { return false; }
 
@@ -344,7 +343,7 @@ class ContentModel
 
     public:
         ContentModel()
-        : _start(&_dtdEnd)
+        : _start(&_match)
         {}
 
         ~ContentModel()
@@ -355,13 +354,16 @@ class ContentModel
             }
         }
 
-        Node& start()
-        { return *_start; }
+        void start(std::vector<Node*>& nodes)
+        { 
+            assert(_start);
+            return _start->get(nodes); 
+        }
 
         void setStart(Node& node)
         { _start = &node; }
 
-        Label& createLabel(const Pt::String& name)
+        Label& getLabel(const Pt::String& name)
         {
             _pool.reserve(_pool.size() + 1);
             Label* label = new Label(name);
@@ -369,7 +371,7 @@ class ContentModel
             return *label;
         }
 
-        Split& createSplit(Node& to)
+        Split& getSplit(Node& to)
         {
             _pool.reserve(_pool.size() + 1);
             Split* split = new Split(&to);
@@ -377,7 +379,7 @@ class ContentModel
             return *split;
         }
 
-        PcData& createPcData()
+        PcData& getPcData()
         {
             _pool.reserve(_pool.size() + 1);
             PcData* node = new PcData();
@@ -385,18 +387,19 @@ class ContentModel
             return *node;
         }
 
-        Empty& createEmpty()
-        { return _dtdEmpty; }
+        Empty& getEmpty()
+        { return _empty; }
 
-        Node& createEnd()
-        { return _dtdEnd; }
+        Node& getMatch()
+        { return _match; }
 
     private:
+        Node* _start;
+
         // TODO: move to ContentModelContext, DtdContent etc...
         std::vector<Node*> _pool;
-        Empty _dtdEmpty;
-        Match _dtdEnd;
-        Node* _start;
+        Empty _empty;
+        Match _match;
 };
 
 
@@ -441,7 +444,6 @@ class ContentModelFragment
         }
 
     private:
-        //TODO: ContentExpression, ContentParticle
         ContentModel::Node* _start;
         std::vector<ContentModel::Node*> _leafs;
 };
@@ -469,10 +471,10 @@ class ContentModelBuilder
         {
             reduceStack();
 
-            if(_fragments.size() != 1)
+            if(_fragments.size() != 1 || _decl == 0)
                 throw std::logic_error("DTD syntax error: incomplete expression");
 
-            _fragments.top().patchLeafs( _decl->createEnd() );
+            _fragments.top().patchLeafs( _decl->getMatch() );
             _decl->setStart( _fragments.top().start() );
             _fragments.pop();
         }
@@ -494,14 +496,14 @@ class ContentModelBuilder
                 if(name != L"#PCDATA")
                     throw std::logic_error("DTD syntax error: expected PCDATA");
 
-                ContentModel::PcData& pcdata = _decl->createPcData();
+                ContentModel::PcData& pcdata = _decl->getPcData();
                 ContentModelFragment frag(pcdata);
                 frag.setLeaf(pcdata);
                 _fragments.push(frag);
                 return;
             }
                 
-            ContentModel::Label& label =_decl->createLabel(name);
+            ContentModel::Label& label =_decl->getLabel(name);
             ContentModelFragment frag(label);
             frag.setLeaf(label);
             _fragments.push(frag);
@@ -509,7 +511,7 @@ class ContentModelBuilder
 
         void pushEmpty()
         {
-            ContentModel::Empty& e = _decl->createEmpty();
+            ContentModel::Empty& e = _decl->getEmpty();
             ContentModelFragment frag(e);
             frag.setLeaf(e);
             _fragments.push(frag);
@@ -563,7 +565,7 @@ class ContentModelBuilder
                     ContentModelFragment op1 = _fragments.top();
                     _fragments.pop();
 
-                    ContentModel::Split& split = _decl->createSplit( op2.start() );
+                    ContentModel::Split& split = _decl->getSplit( op2.start() );
                     split.setNext( op1.start() );
 
                     ContentModelFragment frag(split);
@@ -582,7 +584,7 @@ class ContentModelBuilder
                     ContentModelFragment op1 = _fragments.top();
                     _fragments.pop();
 
-                    ContentModel::Split& split = _decl->createSplit( op1.start() );
+                    ContentModel::Split& split = _decl->getSplit( op1.start() );
                     
                     ContentModelFragment frag(split);
                     frag.setLeafs(op1.leafs(), split);
@@ -600,7 +602,7 @@ class ContentModelBuilder
                     ContentModelFragment op1 = _fragments.top();
                     _fragments.pop();
 
-                    ContentModel::Split& split = _decl->createSplit( op1.start() );
+                    ContentModel::Split& split = _decl->getSplit( op1.start() );
 
                     op1.patchLeafs(split);
                     
@@ -620,7 +622,7 @@ class ContentModelBuilder
                     ContentModelFragment op1 = _fragments.top();
                     _fragments.pop();
 
-                    ContentModel::Split& split = _decl->createSplit( op1.start() );
+                    ContentModel::Split& split = _decl->getSplit( op1.start() );
 
                     op1.patchLeafs(split);
                     
@@ -694,41 +696,24 @@ class DtdParser : private Pt::NonCopyable
     public:
         DtdParser(DocTypeDefinition& dtd)
         : _dtd(dtd)
-        , _state(&DtdParser::OnBegin)
+        , _state(&DtdParser::OnDtd)
         , _elemDecl(0)
         {}
 
         ~DtdParser()
         { }
 
-        void parseElementDecl(const Pt::String& elem, const char* elemDecl)
+        void parse(const char* elemDecl)
         {
+            _elemDecl = 0;
             _token.clear();
-            _state = &DtdParser::OnBegin;
-
-            ElementDeclaration& decl = _dtd.declareElement(elem);
-            _elemDecl = &decl;
-
-            _builder.reset( decl.contentModel() );
+            _state = &DtdParser::OnDtd;
 
             while(*elemDecl != '\0')
+            {
+                //std::cout << *elemDecl;
                 (this->*_state)(*elemDecl++);
-
-            (this->*_state)( std::char_traits<Pt::Char>::eof() );
-
-            _builder.finish();
-        }
-
-        void parseAttrDecl(const Pt::String& elem, const char* attrDecl)
-        {
-            _token.clear();
-            _state = &DtdParser::OnAttrName;
-
-            ElementDeclaration& decl = _dtd.declareElement(elem);
-            _elemDecl = &decl;
-
-            while(*attrDecl != '\0')
-                (this->*_state)(*attrDecl++);
+            }
 
             (this->*_state)( std::char_traits<Pt::Char>::eof() );
         }
@@ -749,76 +734,205 @@ class DtdParser : private Pt::NonCopyable
             return ch == '.' || ch == '_' || ch == '-' || Pt::isalnum(ch) != 0;
         }
 
-        void OnAttrName(int c)
+        void OnDtd(int c)
+        {
+            if( c == std::char_traits<Pt::Char>::eof() )
+                return;
+
+            Pt::Char ch(c);
+
+            if(ch == '<')
+            {
+                _state = &DtdParser::OnDtdTag;
+                return;
+            }
+                
+            if( Pt::isspace(ch) )
+                return;
+
+            throw std::logic_error("DTD syntax error: expected DTD entry1");
+        }
+
+        void OnDtdTag(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if(ch != '!')
+                throw std::logic_error("DTD syntax error: expected DTD entry2");
+
+            _state = &DtdParser::OnDtdTagName;
+        }
+
+        void OnDtdTagName(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if( isAlpha(ch) )
+            {
+                _token += ch;
+                return;
+            }
+
+            if( Pt::isspace(ch) )
+            {
+                if(_token == L"ELEMENT")
+                {
+                    _state = &DtdParser::OnDtdElementBegin;
+                    _token.clear();
+                    return;
+                }
+                else if(_token == L"ATTLIST")
+                {
+                    _token.clear();
+                    _state = &DtdParser::OnDtdAttListBegin;
+                    return;
+                }
+            }
+
+            throw std::logic_error("DTD syntax error: expected DTD entry3");
+        }
+
+        void OnDtdAttListBegin(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if( isAlpha(ch) )
+            {
+                _token += ch;
+                _state = &DtdParser::OnDtdAttListName;
+                return;
+            }
+
+            if( Pt::isspace(ch) )
+            {
+                return;
+            }
+
+            throw std::logic_error("DTD syntax error: invalid DTD attlist name");
+        }
+
+        void OnDtdAttListName(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if( isAlpha(ch) )
+            {
+                _token += ch;
+                return;
+            }
+
+            if( Pt::isspace(ch) )
+            {
+                _elemDecl = &_dtd.declareElement(_token);
+                _token.clear();
+                _state = &DtdParser::OnDtdBeforeAttrName;
+                return;
+            }
+
+            throw std::logic_error("DTD syntax error: invalid DTD attlist name");
+        }
+
+        void OnDtdBeforeAttrName(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if( isAlpha(ch) )
+            {
+                _token += ch;
+                _state = &DtdParser::OnDtdAttrName;
+                return;
+            }
+
+            if( Pt::isspace(ch) )
+            {
+                return;
+            }
+
+            throw std::logic_error("DTD syntax error: invalid DTD attribute name");
+        }
+
+        void OnDtdAttrName(int c)
         {
             Pt::Char ch = notEof(c);
 
             if( Pt::isspace(ch) )
             {
-                _state = &DtdParser::AfterAttrName;
+                _state = &DtdParser::AfterDtdAttrName;
+                return;
+            }
+            if( isAlpha(ch) )
+            {
+                _token += ch;
                 return;
             }
 
-            _token += ch;
+            throw std::logic_error("DTD syntax error: invalid DTD attribute name");
         }
 
-        void AfterAttrName(int c)
+        void AfterDtdAttrName(int c)
         {
             Pt::Char ch = notEof(c);
 
             if( ch == 'C' )
             {
-                _state = &DtdParser::OnCDATA0;
+                _state = &DtdParser::OnDtdCDATA0;
                 return;
             }
+
+            if( Pt::isspace(ch) )
+            {
+                return;
+            }
+
+            throw std::logic_error("DTD syntax error: invalid DTD attribute type");
         }
 
-        void OnCDATA0(int c)
+        void OnDtdCDATA0(int c)
         {
             Pt::Char ch = notEof(c);
 
             if( ch != 'D' )
                 throw std::logic_error("DTD syntax error: expected attribute type");
 
-            _state = &DtdParser::OnCDATA1;
+            _state = &DtdParser::OnDtdCDATA1;
         }
 
-        void OnCDATA1(int c)
+        void OnDtdCDATA1(int c)
         {
             Pt::Char ch = notEof(c);
 
             if( ch != 'A' )
                 throw std::logic_error("DTD syntax error: expected attribute type");
 
-            _state = &DtdParser::OnCDATA2;
+            _state = &DtdParser::OnDtdCDATA2;
         }
 
-        void OnCDATA2(int c)
+        void OnDtdCDATA2(int c)
         {
             Pt::Char ch = notEof(c);
 
             if( ch != 'T' )
                 throw std::logic_error("DTD syntax error: expected attribute type");
 
-            _state = &DtdParser::OnCDATA3;
+            _state = &DtdParser::OnDtdCDATA3;
         }
 
-        void OnCDATA3(int c)
+        void OnDtdCDATA3(int c)
         {
             Pt::Char ch = notEof(c);
 
             if( ch != 'A' )
                 throw std::logic_error("DTD syntax error: expected attribute type");
 
-            DtdAttrCDataDecl* attr = new DtdAttrCDataDecl();
+            CDataAttributeDeclaration* attr = new CDataAttributeDeclaration();
             attr->setName(_token);
             _elemDecl->attrListDecl().push(attr);
 
             _token.clear();
-            _state = &DtdParser::AfterAttrType;
+            _state = &DtdParser::AfterDtdAttrType;
         }
 
-        void AfterAttrType(int c)
+        void AfterDtdAttrType(int c)
         {
             Pt::Char ch = notEof(c);
 
@@ -827,67 +941,80 @@ class DtdParser : private Pt::NonCopyable
 
             if(ch == '"')
             {
-                _state = &DtdParser::OnAttrDefault;
+                _state = &DtdParser::OnDtdAttrDefault;
                 return;
             }
 
             if( ch != '#' )
                 throw std::logic_error("DTD syntax error: expected attribute type");
 
-            _state = &DtdParser::OnAttrMode;
+            _state = &DtdParser::OnDtdAttrMode;
         }
 
-        void OnAttrMode(int c)
+        void OnDtdAttrMode(int c)
         {
-            Pt::Char ch(c);
-            if( c == std::char_traits<Pt::Char>::eof() || Pt::isspace(ch) )
+            Pt::Char ch = notEof(c);
+            
+            if( isAlpha(ch) )
             {
-                if(_token == L"REQUIRED")
-                {
-                    _elemDecl->attrListDecl().last().setMode(AttributeDeclaration::Required);
-                    _state = &DtdParser::AfterAttrMode;
-                }
-                else if(_token == L"IMPLIED")
-                {
-                    _elemDecl->attrListDecl().last().setMode(AttributeDeclaration::Implied);
-                    _state = &DtdParser::AfterAttrMode;
-                }
-                else if(_token == L"FIXED")
-                {
-                    _elemDecl->attrListDecl().last().setMode(AttributeDeclaration::Fixed);
-                    _state = &DtdParser::AfterAttrFixed;
-                }
-                else
-                    throw std::logic_error("DTD syntax error: invalid attribute mode");
-                
-                _token.clear();
+                _token += ch;
                 return;
             }
 
-            if( ! isAlpha(ch) )
-                throw std::logic_error("DTD syntax error: expected attribute mode");
+            if(_token == L"REQUIRED")
+            {
+                _elemDecl->attrListDecl().last().setMode(AttributeDeclaration::Required);
+                _state = &DtdParser::AfterDtdAttrMode;
+            }
+            else if(_token == L"IMPLIED")
+            {
+                _elemDecl->attrListDecl().last().setMode(AttributeDeclaration::Implied);
+                _state = &DtdParser::AfterDtdAttrMode;
+            }
+            else if(_token == L"FIXED")
+            {
+                _elemDecl->attrListDecl().last().setMode(AttributeDeclaration::Fixed);
+                _state = &DtdParser::AfterDtdAttrFixed;
+            }
+            else
+                throw std::logic_error("DTD syntax error: invalid attribute mode");
+                
+            _token.clear();
 
-            _token += ch;
+            (this->*_state)(c);
         }
 
-        void AfterAttrMode(int c)
+        void AfterDtdAttrMode(int c)
         {
-            if( c == std::char_traits<Pt::Char>::eof() )
-                return;
+            Pt::Char ch = notEof(c);
 
-            Pt::Char ch(c);
+            if(c == '>')
+            {
+                _elemDecl = 0;
+                _state = &DtdParser::OnDtd;
+                return;
+            }
             
             if( Pt::isspace(ch) )
                 return;
+
+            if( isAlpha(ch) )
+            {
+                _token += ch;
+                _state = &DtdParser::OnDtdAttrName;
+                return;
+            }
+
+            throw std::logic_error("DTD syntax error: invalid attribute mode");
         }
 
-        void AfterAttrFixed(int c)
+        void AfterDtdAttrFixed(int c)
         {
             Pt::Char ch = notEof(c);
             
             if(ch == '"')
             {
-                _state = &DtdParser::OnAttrDefault;
+                _state = &DtdParser::OnDtdAttrDefault;
                 return;
             }
 
@@ -897,7 +1024,7 @@ class DtdParser : private Pt::NonCopyable
             throw std::logic_error("DTD syntax error: expected attribute default");
         }
 
-        void OnAttrDefault(int c)
+        void OnDtdAttrDefault(int c)
         {
             Pt::Char ch = notEof(c);
 
@@ -905,14 +1032,55 @@ class DtdParser : private Pt::NonCopyable
             {
                 _elemDecl->attrListDecl().last().setDefaultValue(_token);
                 _token.clear();
-                _state = &DtdParser::AfterAttrMode;
+                _state = &DtdParser::AfterDtdAttrMode;
                 return;
             }
 
             _token += ch;
         }
 
-        void OnBegin(int c)
+        void OnDtdElementBegin(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if( isAlpha(ch) )
+            {
+                _token += ch;
+                _state = &DtdParser::OnDtdElementName;
+                return;
+            }
+
+            if( Pt::isspace(ch) )
+            {
+                return;
+            }
+
+            throw std::logic_error("DTD syntax error: expected DTD element declaration");
+        }
+
+        void OnDtdElementName(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if( isAlpha(ch) )
+            {
+                _token += ch;
+                return;
+            }
+
+            if( Pt::isspace(ch) )
+            {
+                _elemDecl = &_dtd.declareElement(_token);
+                _token.clear();
+                _builder.reset( _elemDecl->contentModel() );
+                _state = &DtdParser::OnElementContentBegin;
+                return;
+            }
+
+            throw std::logic_error("DTD syntax error: invalid DTD element declaration");
+        }
+
+        void OnElementContentBegin(int c)
         {
             Pt::Char ch = notEof(c);
 
@@ -924,38 +1092,62 @@ class DtdParser : private Pt::NonCopyable
                 return;
             }
 
+            if( Pt::isspace(ch) )
+            {
+                return;
+            }
+
             if(ch != '(')
                 throw std::logic_error("DTD syntax error: expected open brace");
 
             _builder.pushOperator(ch);
-            _state = &DtdParser::OnExprBegin;
+            _state = &DtdParser::OnElementContent;
         }
         
         void OnEmptyOrAny(int c)
         {
-            if( c == std::char_traits<Pt::Char>::eof() )
+            Pt::Char ch = notEof(c);
+
+            if( isAlpha(ch) )
             {
-                if(_token == L"EMPTY")
-                {
-                    _builder.pushEmpty();
-                    _token.clear();
-                    return;
-                }
+                _token += ch;
+                return;
+            }
+
+            if(_token == L"EMPTY")
+            {
+                _builder.pushEmpty();
             }
             else
-            {
-                Pt::Char ch(c);
-                if( isAlpha(ch) )
-                {
-                    _token += ch;
-                    return;
-                }
-            }
+                throw std::logic_error("DTD syntax error: invalid DTD element declaration");
+            
+            _token.clear();
 
-            throw std::logic_error("DTD syntax error: expected EMPTY");
+            _state = &DtdParser::OnDtdBeforeElementEnd;
+            (this->*_state)(c);
         }
 
-        void OnExprBegin(int c)
+        void OnDtdBeforeElementEnd(int c)
+        {
+            Pt::Char ch = notEof(c);
+            
+            if(ch == '>')
+            {
+                _builder.finish();
+                _elemDecl = 0;
+                _state = &DtdParser::OnDtd;
+                return;
+            }
+            
+            if( Pt::isspace(ch) )
+            {
+                return;
+            }
+
+            throw std::logic_error("DTD syntax error: invalid DTD element declaration");
+        }
+
+        void OnElementContent(int c)
         {
             Pt::Char ch = notEof(c);
 
@@ -990,6 +1182,7 @@ class DtdParser : private Pt::NonCopyable
             if( ch == ',')
             {
                 _builder.pushOperand(_token);
+                _token.clear();
                 _builder.pushOperator(ch);
                 _state = &DtdParser::OnBinaryOp;
                 return;
@@ -998,6 +1191,7 @@ class DtdParser : private Pt::NonCopyable
             if( ch == '|')
             {
                 _builder.pushOperand(_token);
+                _token.clear();
                 _builder.pushOperator(ch);
                 _state = &DtdParser::OnBinaryOp;
                 return;
@@ -1006,6 +1200,7 @@ class DtdParser : private Pt::NonCopyable
             if(ch == '+')
             {
                 _builder.pushOperand(_token);
+                _token.clear();
                 _builder.pushOperator(ch);
                 _state = &DtdParser::OnUnrayOp;
                 return;
@@ -1014,6 +1209,7 @@ class DtdParser : private Pt::NonCopyable
             if(ch == '*')
             {
                 _builder.pushOperand(_token);
+                _token.clear();
                 _builder.pushOperator(ch);
                 _state = &DtdParser::OnUnrayOp;
                 return;
@@ -1022,6 +1218,7 @@ class DtdParser : private Pt::NonCopyable
             if(ch == '?')
             {
                 _builder.pushOperand(_token);
+                _token.clear();
                 _builder.pushOperator(ch);
                 _state = &DtdParser::OnUnrayOp;
                 return;
@@ -1030,8 +1227,9 @@ class DtdParser : private Pt::NonCopyable
             if( ch == ')')
             {
                 _builder.pushOperand(_token);
+                _token.clear();
                 _builder.pushClosingBrace();
-                _state = &DtdParser::OnExprEnd;
+                _state = &DtdParser::OnDtdContentExprEnd;
                 return;
             }
 
@@ -1040,12 +1238,15 @@ class DtdParser : private Pt::NonCopyable
         
         void OnUnrayOp(int c)
         {
-            if( c == std::char_traits<Pt::Char>::eof() )
+            Pt::Char ch = notEof(c);
+
+            if( ch == '>' )
             {
+                _builder.finish();
+                _elemDecl = 0;
+                _state = &DtdParser::OnDtd;
                 return;
             }
-
-            Pt::Char ch(c);
 
             if( ch == ',')
             {
@@ -1064,9 +1265,16 @@ class DtdParser : private Pt::NonCopyable
             if( ch == ')')
             {
                 _builder.pushClosingBrace();
-                _state = &DtdParser::OnExprEnd;
+                _state = &DtdParser::OnDtdContentExprEnd;
                 return;
             }
+
+            if( Pt::isspace(ch) )
+            {
+                return;
+            }
+
+            throw std::logic_error("DTD syntax error");
         }
         
         void OnBinaryOp(int c)
@@ -1084,21 +1292,24 @@ class DtdParser : private Pt::NonCopyable
             if(ch == '(')
             {
                 _builder.pushOperator(ch);
-                _state = &DtdParser::OnExprBegin;
+                _state = &DtdParser::OnElementContent;
                 return;
             }
 
             throw std::logic_error("DTD syntax error");
         }
 
-        void OnExprEnd(int c)
+        void OnDtdContentExprEnd(int c)
         {
-            if( c == std::char_traits<Pt::Char>::eof() )
+            Pt::Char ch = notEof(c);
+
+            if( ch == '>' )
             {
+                _builder.finish();
+                _elemDecl = 0;
+                _state = &DtdParser::OnDtd;
                 return;
             }
-
-            Pt::Char ch(c);
 
             if( ch == ',')
             {
@@ -1140,6 +1351,13 @@ class DtdParser : private Pt::NonCopyable
                 _builder.pushClosingBrace();
                 return;
             }
+
+            if( Pt::isspace(ch) )
+            {
+                return;
+            }
+
+            throw std::logic_error("DTD syntax error");
         }
 
     private:
@@ -1164,7 +1382,7 @@ class ElementValidator
         ElementValidator(ElementDeclaration& decl)
         : _decl(&decl)
         {
-            _decl->contentModel().start().get(_current);
+            _decl->contentModel().start(_current);
         }
 
         bool validateAttributes(Pt::Xml::AttributeList& attrs)
@@ -1290,9 +1508,9 @@ class PtXmlTest : public Pt::Unit::TestSuite
             DocTypeDefinition dtd;
 
             DtdParser parser(dtd);
-            parser.parseElementDecl(L"test", "(a|b)+");
-            parser.parseElementDecl(L"a", "(#PCDATA|(x|y)?|z+)");
-            parser.parseElementDecl(L"b", "EMPTY");
+            parser.parse("<!ELEMENT test (a|b)+> "
+                         "<!ELEMENT a (#PCDATA|(x|y)?|z+) >"
+                         "<!ELEMENT b EMPTY>");
 
             DtdValidator validator(dtd);
 
@@ -1313,11 +1531,11 @@ class PtXmlTest : public Pt::Unit::TestSuite
             DocTypeDefinition dtd;
 
             DtdParser parser(dtd);
-            parser.parseElementDecl(L"test", "EMPTY");
-            parser.parseAttrDecl(L"test", "a1 CDATA #REQUIRED");
-            parser.parseAttrDecl(L"test", "a2 CDATA #IMPLIED");
-            parser.parseAttrDecl(L"test", "a3 CDATA #FIXED \"A3def\"");
-            parser.parseAttrDecl(L"test", "a4 CDATA \"A4def\"");
+            parser.parse("<!ELEMENT test EMPTY>"
+                         "<!ATTLIST test a1 CDATA #REQUIRED>"
+                         "<!ATTLIST test a2 CDATA #IMPLIED"
+                         "          a3 CDATA #FIXED \"A3def\""
+                         "          a4 CDATA \"A4def\">");
 
             DtdValidator validator(dtd);
 
