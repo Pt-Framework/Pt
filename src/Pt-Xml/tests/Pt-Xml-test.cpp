@@ -1539,7 +1539,7 @@ class PtXmlTest : public Pt::Unit::TestSuite
 
             DtdValidator validator(dtd);
 
-            std::istringstream text("<test a1=\"A1\" a2=\"A2\" a4=\"A3def\"></test>");
+            std::istringstream text("<test a1='A1' a2='A2' a4='A3def'></test>");
             Pt::Xml::XmlReader reader(text);
 
             Pt::Xml::XmlReader::Iterator it;
