@@ -3,7 +3,8 @@ SubDirHdrs $(PT_TOP)/include ;
 SubDirC++Flags [ FDefines PT_XML_API_EXPORT ] ;
 SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Xml ;
 
-PT_XML_SOURCES = EntityResolver.cpp
+PT_XML_SOURCES = DocType.cpp
+                 EntityResolver.cpp
                  NamespaceContext.cpp
                  StartElement.cpp
                  XmlError.cpp

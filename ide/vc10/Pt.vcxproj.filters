@@ -705,6 +705,12 @@
     <ClInclude Include="..\..\include\Pt\WinVer.h">
       <Filter>Pt</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Xml\DocType.h">
+      <Filter>Pt-Xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Xml\DocTypeBuilder.h">
+      <Filter>Pt-Xml</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -1409,6 +1415,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Xml\tests\XmlWriterTest.cpp">
       <Filter>Pt-Xml\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Xml\DocType.cpp">
+      <Filter>Pt-Xml</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

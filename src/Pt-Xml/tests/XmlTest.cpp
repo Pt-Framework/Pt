@@ -40,50 +40,53 @@
 #include <sstream>
 #include <iostream>
 
-class XmlTest : public Pt::Unit::TestSuite
+class XmlReaderTest : public Pt::Unit::TestSuite
 {
     public:
-        XmlTest()
-        : Pt::Unit::TestSuite("XmlTest")
+        XmlReaderTest()
+        : Pt::Unit::TestSuite("XmlReaderTest")
         {
-            this->registerMethod("MissingXmlDeclaration", *this, &XmlTest::MissingXmlDeclaration);
-            this->registerMethod("EmptyXmlDeclaration", *this, &XmlTest::EmptyXmlDeclaration);
-            this->registerMethod("EmptyDocument", *this, &XmlTest::EmptyDocument);
-            this->registerMethod("DoctypeDeclaration", *this, &XmlTest::DoctypeDeclaration);
-            this->registerMethod("EmptyElementTag", *this, &XmlTest::EmptyElementTag);
-            this->registerMethod("InvalidTag1", *this, &XmlTest::InvalidTag1);
-            this->registerMethod("InvalidTag2", *this, &XmlTest::InvalidTag2);
-            this->registerMethod("InvalidTag3", *this, &XmlTest::InvalidTag3);
-            this->registerMethod("InvalidTag4", *this, &XmlTest::InvalidTag4);
-            this->registerMethod("InvalidTag5", *this, &XmlTest::InvalidTag5);
-            this->registerMethod("ElementWithContent", *this, &XmlTest::ElementWithNamespace);
-            this->registerMethod("ElementWithNamespace", *this, &XmlTest::ElementWithContent);
-            this->registerMethod("AttributeWithNamespace", *this, &XmlTest::AttributeWithNamespace);
-            this->registerMethod("DefaultNamespace", *this, &XmlTest::DefaultNamespace);
-            this->registerMethod("DefaultEntities", *this, &XmlTest::DefaultEntities);
-            this->registerMethod("InvalidAttribute1", *this, &XmlTest::InvalidAttribute1);
-            this->registerMethod("InvalidAttribute2", *this, &XmlTest::InvalidAttribute2);
-            this->registerMethod("InvalidAttribute3", *this, &XmlTest::InvalidAttribute3);
-            this->registerMethod("InvalidAttribute4", *this, &XmlTest::InvalidAttribute4);
-            this->registerMethod("EmptyAttribute", *this, &XmlTest::EmptyAttribute);
-            this->registerMethod("AttributeWithSimpleText", *this, &XmlTest::AttributeWithSimpleText);
-            this->registerMethod("AttributeWithUTF8", *this, &XmlTest::AttributeWithUTF8);
-            this->registerMethod("MultipleAttributesIteration", *this, &XmlTest::MultipleAttributesIteration);
-            this->registerMethod("CDATA", *this, &XmlTest::CDATA );
-            this->registerMethod("CommentInProlog", *this, &XmlTest::CommentInProlog );
-            this->registerMethod("CommentInElement", *this, &XmlTest::CommentInElement );
-            this->registerMethod("CommentInEpilog", *this, &XmlTest::CommentInEpilog );
-            this->registerMethod("EmptyComment", *this, &XmlTest::EmptyComment );
-            this->registerMethod("CommentBeforeRoot", *this, &XmlTest::CommentBeforeRoot );
-            this->registerMethod("MissingCloseTag", *this, &XmlTest::MissingCloseTag );
-            this->registerMethod("ProcessingInstructionInProlog", *this, &XmlTest::ProcessingInstructionInProlog );
-            this->registerMethod("ProcessingInstructionInElement", *this, &XmlTest::ProcessingInstructionInElement );
-            this->registerMethod("ProcessingInstructionInEpilog", *this, &XmlTest::ProcessingInstructionInEpilog );
+            this->registerMethod("MissingXmlDeclaration", *this, &XmlReaderTest::MissingXmlDeclaration);
+            this->registerMethod("EmptyXmlDeclaration", *this, &XmlReaderTest::EmptyXmlDeclaration);
+            this->registerMethod("DtdValidateAttributes", *this, &XmlReaderTest::DtdValidateAttributes);
+            this->registerMethod("DtdValidateElementContent", *this, &XmlReaderTest::DtdValidateElementContent);
+            this->registerMethod("EmptyDocument", *this, &XmlReaderTest::EmptyDocument);
+            this->registerMethod("EmptyElementTag", *this, &XmlReaderTest::EmptyElementTag);
+            this->registerMethod("InvalidTag1", *this, &XmlReaderTest::InvalidTag1);
+            this->registerMethod("InvalidTag2", *this, &XmlReaderTest::InvalidTag2);
+            this->registerMethod("InvalidTag3", *this, &XmlReaderTest::InvalidTag3);
+            this->registerMethod("InvalidTag4", *this, &XmlReaderTest::InvalidTag4);
+            this->registerMethod("InvalidTag5", *this, &XmlReaderTest::InvalidTag5);
+            this->registerMethod("ElementWithContent", *this, &XmlReaderTest::ElementWithNamespace);
+            this->registerMethod("ElementWithNamespace", *this, &XmlReaderTest::ElementWithContent);
+            this->registerMethod("AttributeWithNamespace", *this, &XmlReaderTest::AttributeWithNamespace);
+            this->registerMethod("DefaultNamespace", *this, &XmlReaderTest::DefaultNamespace);
+            this->registerMethod("DefaultEntities", *this, &XmlReaderTest::DefaultEntities);
+            this->registerMethod("InvalidAttribute1", *this, &XmlReaderTest::InvalidAttribute1);
+            this->registerMethod("InvalidAttribute2", *this, &XmlReaderTest::InvalidAttribute2);
+            this->registerMethod("InvalidAttribute3", *this, &XmlReaderTest::InvalidAttribute3);
+            this->registerMethod("InvalidAttribute4", *this, &XmlReaderTest::InvalidAttribute4);
+            this->registerMethod("EmptyAttribute", *this, &XmlReaderTest::EmptyAttribute);
+            this->registerMethod("AttributeWithSimpleText", *this, &XmlReaderTest::AttributeWithSimpleText);
+            this->registerMethod("AttributeWithUTF8", *this, &XmlReaderTest::AttributeWithUTF8);
+            this->registerMethod("MultipleAttributesIteration", *this, &XmlReaderTest::MultipleAttributesIteration);
+            this->registerMethod("CDATA", *this, &XmlReaderTest::CDATA );
+            this->registerMethod("CommentInProlog", *this, &XmlReaderTest::CommentInProlog );
+            this->registerMethod("CommentInElement", *this, &XmlReaderTest::CommentInElement );
+            this->registerMethod("CommentInEpilog", *this, &XmlReaderTest::CommentInEpilog );
+            this->registerMethod("EmptyComment", *this, &XmlReaderTest::EmptyComment );
+            this->registerMethod("CommentBeforeRoot", *this, &XmlReaderTest::CommentBeforeRoot );
+            this->registerMethod("MissingCloseTag", *this, &XmlReaderTest::MissingCloseTag );
+            this->registerMethod("ProcessingInstructionInProlog", *this, &XmlReaderTest::ProcessingInstructionInProlog );
+            this->registerMethod("ProcessingInstructionInElement", *this, &XmlReaderTest::ProcessingInstructionInElement );
+            this->registerMethod("ProcessingInstructionInEpilog", *this, &XmlReaderTest::ProcessingInstructionInEpilog );
         }
 
     protected:
         void MissingXmlDeclaration();
         void EmptyXmlDeclaration();
+        void DtdValidateAttributes();
+        void DtdValidateElementContent();
         void EmptyDocument();
         void DoctypeDeclaration();
         void EmptyElementTag();
@@ -119,10 +122,10 @@ class XmlTest : public Pt::Unit::TestSuite
         void CheckPerformance();
 };
 
-Pt::Unit::RegisterTest<XmlTest> register_XmlTest;
+Pt::Unit::RegisterTest<XmlReaderTest> register_XmlTest;
 
 
-void XmlTest::MissingXmlDeclaration()
+void XmlReaderTest::MissingXmlDeclaration()
 {
     std::stringstream input;
     input << "<a/>";
@@ -150,7 +153,7 @@ void XmlTest::MissingXmlDeclaration()
 }
 
 
-void XmlTest::EmptyXmlDeclaration()
+void XmlReaderTest::EmptyXmlDeclaration()
 {
     std::stringstream input;
     input << "<?xml ?>";
@@ -164,7 +167,71 @@ void XmlTest::EmptyXmlDeclaration()
 }
 
 
-void XmlTest::EmptyDocument()
+void XmlReaderTest::DtdValidateAttributes()
+{
+    try
+    {
+        std::stringstream input;
+        input << "<!DOCTYPE test [\n";
+        input << "<!ELEMENT test EMPTY>\n";
+        input << "<!ATTLIST test a1 CDATA #REQUIRED\n";
+        input << "          a2 CDATA #IMPLIED\n";
+        input << "          a3 CDATA #FIXED \"A3def\"\n";
+        input << "          a4 CDATA \"A4def\"\n>";
+        input << "]>\n";
+        input << "<test a1='A1' a2='A2' a4='A3def'></test>";
+
+        Pt::Xml::XmlReader reader(input);
+        
+        Pt::Xml::XmlReader::Iterator it;
+        for(it = reader.current(); it != reader.end(); ++it)
+        {
+            Pt::Xml::StartElement* se = toStartElement(&*it);
+            if(se && se->name() == L"test")
+            {
+                PT_UNIT_ASSERT( se->attributes().has(L"a3") );
+                PT_UNIT_ASSERT( se->attributes().find(L"a3")->value() == L"A3def" );
+
+                PT_UNIT_ASSERT( se->attributes().has(L"a4") );
+            }
+        }
+    }
+    catch(const Pt::Xml::SyntaxError& error)
+    {
+        std::cerr << error.what() << ": " << error.line() << std::endl;
+        throw;
+    }
+}
+
+
+void XmlReaderTest::DtdValidateElementContent()
+{
+    try
+    {
+        std::stringstream input;
+        input << "<!DOCTYPE test [\n";
+        input << "<!ELEMENT test (a|b)+> \n";
+        input << "<!ELEMENT a (#PCDATA|(x|y)?|z+) >\n";
+        input << "<!ELEMENT b EMPTY>\n";
+        input << "]>\n";
+        input << "<test><a>hello</a><b></b><a>world</a><b></b></test>";
+
+        Pt::Xml::XmlReader reader(input);
+            
+        Pt::Xml::XmlReader::Iterator it;
+        for(it = reader.current(); it != reader.end(); ++it)
+        {
+        }
+    }
+    catch(const Pt::Xml::SyntaxError& error)
+    {
+        std::cerr << error.what() << ": " << error.line() << std::endl;
+        throw;
+    }
+}
+
+
+void XmlReaderTest::EmptyDocument()
 {
     std::stringstream input;
     input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
@@ -180,28 +247,7 @@ void XmlTest::EmptyDocument()
     PT_UNIT_ASSERT(reader.isStandalone() == true);
 }
 
-
-void XmlTest::DoctypeDeclaration()
-{
-    std::stringstream input;
-    input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
-    input << "<!DOCTYPE ressourcen SYSTEM \"ressourcen.dtd\">\n";
-
-    Pt::Xml::XmlReader reader( input );
-
-    Pt::Xml::XmlReader::Iterator it = reader.current();
-    PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::DocType);
-
-    const Pt::Xml::Node& node = *it;
-    const Pt::Xml::DocTypeDeclaration* docType = dynamic_cast<const Pt::Xml::DocTypeDeclaration*>(&node);
-    PT_UNIT_ASSERT(docType->content().narrow() == "DOCTYPE ressourcen SYSTEM \"ressourcen.dtd\"");
-
-    ++it;
-    PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::EndDocument);
-}
-
-
-void XmlTest::EmptyElementTag()
+void XmlReaderTest::EmptyElementTag()
 {
     std::stringstream input;
     input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
@@ -230,7 +276,7 @@ void XmlTest::EmptyElementTag()
 }
 
 
-void XmlTest::InvalidTag1()
+void XmlReaderTest::InvalidTag1()
 {
     std::stringstream input;
     input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
@@ -243,7 +289,7 @@ void XmlTest::InvalidTag1()
 }
 
 
-void XmlTest::InvalidTag2()
+void XmlReaderTest::InvalidTag2()
 {
     std::stringstream input;
     input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
@@ -257,7 +303,7 @@ void XmlTest::InvalidTag2()
 
 
 
-void XmlTest::InvalidTag3()
+void XmlReaderTest::InvalidTag3()
 {
     std::stringstream input;
     input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
@@ -271,7 +317,7 @@ void XmlTest::InvalidTag3()
 }
 
 
-void XmlTest::InvalidTag4()
+void XmlReaderTest::InvalidTag4()
 {
     std::stringstream input;
     input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
@@ -282,7 +328,7 @@ void XmlTest::InvalidTag4()
 }
 
 
-void XmlTest::InvalidTag5()
+void XmlReaderTest::InvalidTag5()
 {
     std::stringstream input;
     input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
@@ -293,7 +339,7 @@ void XmlTest::InvalidTag5()
 }
 
 
-void XmlTest::ElementWithContent()
+void XmlReaderTest::ElementWithContent()
 {
     std::stringstream input;
     input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
@@ -333,7 +379,7 @@ void XmlTest::ElementWithContent()
 }
 
 
-void XmlTest::ElementWithNamespace()
+void XmlReaderTest::ElementWithNamespace()
 {
     std::stringstream input;
     input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
@@ -389,7 +435,7 @@ void XmlTest::ElementWithNamespace()
     PT_UNIT_ASSERT( reader.depth() == 0);
 }
 
-void XmlTest::AttributeWithNamespace()
+void XmlReaderTest::AttributeWithNamespace()
 {
     std::stringstream input;
     input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
@@ -431,7 +477,7 @@ void XmlTest::AttributeWithNamespace()
 }
 
 
-void XmlTest::DefaultNamespace()
+void XmlReaderTest::DefaultNamespace()
 {
     std::stringstream input;
     input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
@@ -489,7 +535,7 @@ void XmlTest::DefaultNamespace()
 }
 
 
-void XmlTest::MissingCloseTag()
+void XmlReaderTest::MissingCloseTag()
 {
     std::stringstream input;
     input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
@@ -506,7 +552,7 @@ void XmlTest::MissingCloseTag()
 }
 
 
-void XmlTest::InvalidAttribute1()
+void XmlReaderTest::InvalidAttribute1()
 {
     std::stringstream input;
     input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
@@ -517,7 +563,7 @@ void XmlTest::InvalidAttribute1()
 }
 
 
-void XmlTest::InvalidAttribute2()
+void XmlReaderTest::InvalidAttribute2()
 {
     std::stringstream input;
     input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
@@ -528,7 +574,7 @@ void XmlTest::InvalidAttribute2()
 }
 
 
-void XmlTest::InvalidAttribute3()
+void XmlReaderTest::InvalidAttribute3()
 {
     std::stringstream input;
     input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
@@ -539,7 +585,7 @@ void XmlTest::InvalidAttribute3()
 }
 
 
-void XmlTest::InvalidAttribute4()
+void XmlReaderTest::InvalidAttribute4()
 {
     std::stringstream input;
     input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
@@ -550,7 +596,7 @@ void XmlTest::InvalidAttribute4()
 }
 
 
-void XmlTest::EmptyAttribute()
+void XmlReaderTest::EmptyAttribute()
 {
     std::stringstream input;
     input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
@@ -569,7 +615,7 @@ void XmlTest::EmptyAttribute()
 }
 
 
-void XmlTest::AttributeWithSimpleText()
+void XmlReaderTest::AttributeWithSimpleText()
 {
     std::stringstream input;
     input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
@@ -588,7 +634,7 @@ void XmlTest::AttributeWithSimpleText()
 }
 
 
-void XmlTest::AttributeWithUTF8()
+void XmlReaderTest::AttributeWithUTF8()
 {
     std::stringstream input;
 
@@ -614,7 +660,7 @@ void XmlTest::AttributeWithUTF8()
 }
 
 
-void XmlTest::MultipleAttributesIteration()
+void XmlReaderTest::MultipleAttributesIteration()
 {
     std::stringstream input;
     input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
@@ -659,7 +705,7 @@ void XmlTest::MultipleAttributesIteration()
 }
 
 
-void XmlTest::ProcessingInstructionInProlog()
+void XmlReaderTest::ProcessingInstructionInProlog()
 {
     std::stringstream input;
     input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
@@ -683,7 +729,7 @@ void XmlTest::ProcessingInstructionInProlog()
 }
 
 
-void XmlTest::ProcessingInstructionInElement()
+void XmlReaderTest::ProcessingInstructionInElement()
 {
     std::stringstream input;
     input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
@@ -713,7 +759,7 @@ void XmlTest::ProcessingInstructionInElement()
 }
 
 
-void XmlTest::ProcessingInstructionInEpilog()
+void XmlReaderTest::ProcessingInstructionInEpilog()
 {
     std::stringstream input;
     input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
@@ -737,7 +783,7 @@ void XmlTest::ProcessingInstructionInEpilog()
 }
 
 
-void XmlTest::CDATA()
+void XmlReaderTest::CDATA()
 {
     std::stringstream input;
     input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
@@ -764,7 +810,7 @@ void XmlTest::CDATA()
 }
 
 
-void XmlTest::DefaultEntities()
+void XmlReaderTest::DefaultEntities()
 {
     std::stringstream input;
     input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
@@ -788,7 +834,7 @@ void XmlTest::DefaultEntities()
 }
 
 
-void XmlTest::CommentInProlog()
+void XmlReaderTest::CommentInProlog()
 {
     std::stringstream input;
     input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
@@ -800,7 +846,7 @@ void XmlTest::CommentInProlog()
 }
 
 
-void XmlTest::CommentBeforeRoot()
+void XmlReaderTest::CommentBeforeRoot()
 {
     std::stringstream input;
     input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
@@ -812,7 +858,7 @@ void XmlTest::CommentBeforeRoot()
 }
 
 
-void XmlTest::CommentInElement()
+void XmlReaderTest::CommentInElement()
 {
     std::stringstream input;
     input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
@@ -829,7 +875,7 @@ void XmlTest::CommentInElement()
 }
 
 
-void XmlTest::CommentInEpilog()
+void XmlReaderTest::CommentInEpilog()
 {
     std::stringstream input;
     input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
@@ -847,7 +893,7 @@ void XmlTest::CommentInEpilog()
 }
 
 
-void XmlTest::EmptyComment()
+void XmlReaderTest::EmptyComment()
 {
     std::stringstream input;
     input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
@@ -859,7 +905,7 @@ void XmlTest::EmptyComment()
 }
 
 
-void XmlTest::CheckPerformance()
+void XmlReaderTest::CheckPerformance()
 {
     std::stringstream input;
     input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";

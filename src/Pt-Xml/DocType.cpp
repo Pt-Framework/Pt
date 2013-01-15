@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005-2006 by Marc Boris Dürner
+ * Copyright (C) 2012 by Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,17 +25,56 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#include "Pt/Unit/TestSuite.h"
-#include "Pt/Unit/TestMain.h"
-#include "Pt/Unit/RegisterTest.h"
+#include "Pt/Xml/DocType.h"
 
-class PtXmlTest : public Pt::Unit::TestSuite
+namespace Pt {
+
+namespace Xml {
+
+DocTypeContext::DocTypeContext()
+{}
+
+DocTypeContext::~DocTypeContext()
 {
-    public:
-        PtXmlTest()
-        : Pt::Unit::TestSuite("Pt-Xml-Test")
-        {
-        }
-};
+    assert(_pool.empty());
+}
 
-Pt::Unit::RegisterTest<PtXmlTest> register_PtXmlTest;
+void DocTypeContext::clear(DocType& dtd)
+{
+    //TODO: remove only particles used by the DocType which clears
+            
+    for(unsigned n = 0; n < _pool.size() ; ++n)
+    {
+        delete _pool[n];
+    }
+
+    _pool.clear();
+}
+
+ContentModel::Label& DocTypeContext::getLabel(const Pt::String& name)
+{
+    _pool.reserve(_pool.size() + 1);
+    ContentModel::Label* label = new ContentModel::Label(name);
+    _pool.push_back(label);
+    return *label;
+}
+
+ContentModel::Split& DocTypeContext::getSplit(ContentModel::Particle& to)
+{
+    _pool.reserve(_pool.size() + 1);
+    ContentModel::Split* split = new ContentModel::Split(&to);
+    _pool.push_back(split);
+    return *split;
+}
+
+ContentModel::PcData& DocTypeContext::getPcData()
+{
+    _pool.reserve(_pool.size() + 1);
+    ContentModel::PcData* node = new ContentModel::PcData();
+    _pool.push_back(node);
+    return *node;
+}
+
+} // namespace Xml
+
+} // namespace Pt

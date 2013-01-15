@@ -168,6 +168,7 @@
     <ClInclude Include="..\..\include\Pt\Xml\Api.h" />
     <ClInclude Include="..\..\include\Pt\Xml\Characters.h" />
     <ClInclude Include="..\..\include\Pt\Xml\Comment.h" />
+    <ClInclude Include="..\..\include\Pt\Xml\DocType.h" />
     <ClInclude Include="..\..\include\Pt\Xml\DocTypeDeclaration.h" />
     <ClInclude Include="..\..\include\Pt\Xml\EndDocument.h" />
     <ClInclude Include="..\..\include\Pt\Xml\EndElement.h" />
@@ -219,6 +220,7 @@
     <ClInclude Include="..\..\src\Pt-System\win32\SerialDeviceImpl.h" />
     <ClInclude Include="..\..\src\Pt-System\win32\ThreadImpl.h" />
     <ClInclude Include="..\..\src\Pt-System\win32\win32.h" />
+    <ClInclude Include="..\..\src\Pt-Xml\DocTypeBuilder.h" />
     <ClInclude Include="..\..\src\Pt\regexp.h" />
     <ClInclude Include="..\..\src\Pt\SerializationData.h" />
     <ClInclude Include="..\..\src\Pt\SettingsReader.h" />
@@ -385,6 +387,7 @@
     <ClCompile Include="..\..\src\Pt-Unit\TestSuite.cpp" />
     <ClCompile Include="..\..\src\Pt-Unit\TextProtocol.cpp" />
     <ClCompile Include="..\..\src\Pt-Unit\TextProtocolTest.cpp" />
+    <ClCompile Include="..\..\src\Pt-Xml\DocType.cpp" />
     <ClCompile Include="..\..\src\Pt-Xml\EntityResolver.cpp" />
     <ClCompile Include="..\..\src\Pt-Xml\NamespaceContext.cpp" />
     <ClCompile Include="..\..\src\Pt-Xml\StartElement.cpp" />

@@ -25,11 +25,12 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+#include "DocTypeBuilder.h"
 #include "Pt/Xml/XmlReader.h"
 #include <Pt/Xml/NamespaceContext.h>
 #include <Pt/Xml/EndDocument.h>
 #include "Pt/Xml/EntityResolver.h"
-#include <Pt/Xml/DocTypeDeclaration.h>
+#include <Pt/Xml/DocType.h>
 #include "Pt/Xml/StartElement.h"
 #include "Pt/Xml/EndElement.h"
 #include "Pt/Xml/Characters.h"
@@ -384,30 +385,29 @@ class XmlReaderImpl
 
             if(ch == 'D' && depth() == 0)
             {
-                _docType.clear();
-                _docType.content() += ch;
-                _parse = &XmlReaderImpl::beforeDocType;
+                _token += ch;
+                _parse = &XmlReaderImpl::OnDocType;
                 return;
             }
 
             throw SyntaxError("XML syntax error", _line);
         };
 
-        void beforeDocType(int c)
+        void OnDocType(int c)
         {
             Char ch = notEof(c);
 
             if( isAlpha(ch) )
             {
-                String& token = _docType.content();
-                token += c;
+                _token += c;
 
-                if(token.length() < 7)
+                if(_token.length() < 7)
                     return;
 
-                if(token == L"DOCTYPE")
+                if(_token == L"DOCTYPE")
                 {
-                    _parse = &XmlReaderImpl::onDocType;
+                    _token.clear();
+                    _parse = &XmlReaderImpl::AfterDocType;
                     return;
                 }
             }
@@ -415,22 +415,705 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", _line);
         }
 
-        void onDocType(int c)
+        void AfterDocType(int c)
         {
             Char ch = notEof(c);
 
+            if( Pt::isspace(ch) )
+            {
+                return;
+            }
+
+            if( isAlpha(ch) )
+            {
+                _docType.rootName() += ch;
+                _parse = &XmlReaderImpl::OnDtdRootName;
+                return;
+            }
+
+            throw SyntaxError("XML syntax error", _line);
+        }
+
+        void OnDtdRootName(int c)
+        {
+            Char ch = notEof(c);
+
+            if( isAlpha(ch) )
+            {
+                _docType.rootName() += ch;
+                return;
+            }
+
+            if( Pt::isspace(ch) )
+            {
+                _parse = &XmlReaderImpl::AfterDtdRootName;
+                return;
+            }
+
+            throw SyntaxError("XML syntax error", _line);
+        }
+
+        void AfterDtdRootName(int c)
+        {
+            Char ch = notEof(c);
+
+            if( Pt::isspace(ch) )
+            {
+                return;
+            }
+
+            if( ch == '[' )
+            {
+                _parse = &XmlReaderImpl::OnDtdInternal;
+                return;
+            }
+
+            throw SyntaxError("XML syntax error", _line);
+        }
+
+        void OnDtdInternal(int c)
+        {
+            Char ch = notEof(c);
+
+            if( Pt::isspace(ch) )
+            {
+                return;
+            }
+
             if(ch == '<')
+            {
+                _parse = &XmlReaderImpl::OnDtdTag;
+                return;
+            }
+
+            if( ch == ']' )
+            {
+                _parse = &XmlReaderImpl::OnDtdInternalEnd;
+                return;
+            }
+
+            throw SyntaxError("XML syntax error", _line);
+        }
+
+        void OnDtdTag(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if(ch != '!')
                 throw SyntaxError("XML syntax error", _line);
 
+            _parse = &XmlReaderImpl::OnDtdTagName;
+        }
+
+        void OnDtdTagName(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if( isAlpha(ch) )
+            {
+                _token += ch;
+                return;
+            }
+
+            if( Pt::isspace(ch) )
+            {
+                if(_token == L"ELEMENT")
+                {
+                    _parse = &XmlReaderImpl::OnDtdElementBegin;
+                    _token.clear();
+                    return;
+                }
+                else if(_token == L"ATTLIST")
+                {
+                    _token.clear();
+                    _parse = &XmlReaderImpl::OnDtdAttListBegin;
+                    return;
+                }
+            }
+
+            throw SyntaxError("XML syntax error", _line);
+        }
+
+        void OnDtdAttListBegin(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if( isAlpha(ch) )
+            {
+                _token += ch;
+                _parse = &XmlReaderImpl::OnDtdAttListName;
+                return;
+            }
+
+            if( Pt::isspace(ch) )
+            {
+                return;
+            }
+
+            throw SyntaxError("XML syntax error", _line);
+        }
+
+        void OnDtdAttListName(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if( isAlpha(ch) )
+            {
+                _token += ch;
+                return;
+            }
+
+            if( Pt::isspace(ch) )
+            {
+                _dtdBuilder.beginAttList(_token);
+                _token.clear();
+                _parse = &XmlReaderImpl::OnDtdBeforeAttrName;
+                return;
+            }
+
+            throw SyntaxError("XML syntax error", _line);
+        }
+
+        void OnDtdBeforeAttrName(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if( isAlpha(ch) )
+            {
+                _token += ch;
+                _parse = &XmlReaderImpl::OnDtdAttrName;
+                return;
+            }
+
+            if( Pt::isspace(ch) )
+            {
+                return;
+            }
+
+            throw SyntaxError("XML syntax error", _line);
+        }
+
+        void OnDtdAttrName(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if( Pt::isspace(ch) )
+            {
+                _parse = &XmlReaderImpl::AfterDtdAttrName;
+                return;
+            }
+            if( isAlpha(ch) )
+            {
+                _token += ch;
+                return;
+            }
+
+            throw SyntaxError("XML syntax error", _line);
+        }
+
+        void AfterDtdAttrName(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if( ch == 'C' )
+            {
+                _parse = &XmlReaderImpl::OnDtdCDATA0;
+                return;
+            }
+
+            if( Pt::isspace(ch) )
+            {
+                return;
+            }
+
+            throw SyntaxError("XML syntax error", _line);
+        }
+
+        void OnDtdCDATA0(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if( ch != 'D' )
+                throw SyntaxError("XML syntax error", _line);
+
+            _parse = &XmlReaderImpl::OnDtdCDATA1;
+        }
+
+        void OnDtdCDATA1(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if( ch != 'A' )
+                throw SyntaxError("XML syntax error", _line);
+
+            _parse = &XmlReaderImpl::OnDtdCDATA2;
+        }
+
+        void OnDtdCDATA2(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if( ch != 'T' )
+                throw SyntaxError("XML syntax error", _line);
+
+            _parse = &XmlReaderImpl::OnDtdCDATA3;
+        }
+
+        void OnDtdCDATA3(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if( ch != 'A' )
+                throw SyntaxError("XML syntax error", _line);
+
+            Pt::Xml::CDataAttributeDeclaration* attr = new Pt::Xml::CDataAttributeDeclaration();
+            attr->setName(_token);
+            _dtdBuilder.beginAttribute(attr);
+
+            _token.clear();
+            _parse = &XmlReaderImpl::AfterDtdAttrType;
+        }
+
+        void AfterDtdAttrType(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if( Pt::isspace(ch) )
+                return;
+
+            if(ch == '"')
+            {
+                _parse = &XmlReaderImpl::OnDtdAttrDefault;
+                return;
+            }
+
+            if( ch != '#' )
+                throw SyntaxError("XML syntax error", _line);
+
+            _parse = &XmlReaderImpl::OnDtdAttrMode;
+        }
+
+        void OnDtdAttrMode(int c)
+        {
+            Pt::Char ch = notEof(c);
+            
+            if( isAlpha(ch) )
+            {
+                _token += ch;
+                return;
+            }
+
+            if(_token == L"REQUIRED")
+            {
+                _dtdBuilder.setAttributeMode(Pt::Xml::AttributeDeclaration::Required);
+                _parse = &XmlReaderImpl::AfterDtdAttrMode;
+            }
+            else if(_token == L"IMPLIED")
+            {
+                _dtdBuilder.setAttributeMode(Pt::Xml::AttributeDeclaration::Implied);
+                _parse = &XmlReaderImpl::AfterDtdAttrMode;
+            }
+            else if(_token == L"FIXED")
+            {
+                _dtdBuilder.setAttributeMode(Pt::Xml::AttributeDeclaration::Fixed);
+                _parse = &XmlReaderImpl::AfterDtdAttrFixed;
+            }
+            else
+                throw SyntaxError("XML syntax error", _line);
+                
+            _token.clear();
+
+            (this->*_parse)(c);
+        }
+
+        void AfterDtdAttrMode(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if(c == '>')
+            {
+                _parse = &XmlReaderImpl::OnDtdInternal;
+                return;
+            }
+            
+            if( Pt::isspace(ch) )
+                return;
+
+            if( isAlpha(ch) )
+            {
+                _token += ch;
+                _parse = &XmlReaderImpl::OnDtdAttrName;
+                return;
+            }
+
+            throw SyntaxError("XML syntax error", _line);
+        }
+
+        void AfterDtdAttrFixed(int c)
+        {
+            Pt::Char ch = notEof(c);
+            
+            if(ch == '"')
+            {
+                _parse = &XmlReaderImpl::OnDtdAttrDefault;
+                return;
+            }
+
+            if( Pt::isspace(ch) )
+                return;
+
+            throw SyntaxError("XML syntax error", _line);
+        }
+
+        void OnDtdAttrDefault(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if(ch == '"')
+            {
+                _dtdBuilder.setAttributeDefault(_token);
+                _token.clear();
+                _parse = &XmlReaderImpl::AfterDtdAttrMode;
+                return;
+            }
+
+            _token += ch;
+        }
+
+        void OnDtdElementBegin(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if( isAlpha(ch) )
+            {
+                _token += ch;
+                _parse = &XmlReaderImpl::OnDtdElementName;
+                return;
+            }
+
+            if( Pt::isspace(ch) )
+            {
+                return;
+            }
+
+            throw SyntaxError("XML syntax error", _line);
+        }
+
+        void OnDtdElementName(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if( isAlpha(ch) )
+            {
+                _token += ch;
+                return;
+            }
+
+            if( Pt::isspace(ch) )
+            {
+                _dtdBuilder.beginElement(_token);
+                _token.clear();
+                _parse = &XmlReaderImpl::OnElementContentBegin;
+                return;
+            }
+
+            throw SyntaxError("XML syntax error", _line);
+        }
+
+        void OnElementContentBegin(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if(ch == 'E' || ch == 'A')
+            {
+                _token.clear();
+                _token += ch;
+                _parse = &XmlReaderImpl::OnEmptyOrAny;
+                return;
+            }
+
+            if( Pt::isspace(ch) )
+            {
+                return;
+            }
+
+            if(ch != '(')
+                throw SyntaxError("XML syntax error", _line);
+
+            _dtdBuilder.pushOperator(ch);
+            _parse = &XmlReaderImpl::OnElementContent;
+        }
+        
+        void OnEmptyOrAny(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if( isAlpha(ch) )
+            {
+                _token += ch;
+                return;
+            }
+
+            if(_token == L"EMPTY")
+            {
+                _dtdBuilder.pushEmpty();
+            }
+            else
+                throw SyntaxError("XML syntax error", _line);
+            
+            _token.clear();
+
+            _parse = &XmlReaderImpl::OnDtdBeforeElementEnd;
+            (this->*_parse)(c);
+        }
+
+        void OnDtdBeforeElementEnd(int c)
+        {
+            Pt::Char ch = notEof(c);
+            
             if(ch == '>')
             {
-                _current = &(_docType);
+                _dtdBuilder.finish();
+                _parse = &XmlReaderImpl::OnDtdInternal;
+                return;
+            }
+            
+            if( Pt::isspace(ch) )
+            {
+                return;
+            }
+
+            throw SyntaxError("XML syntax error", _line);
+        }
+
+        void OnElementContent(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if( isAlpha(ch) || ch == '#')
+            {
+                _token.clear();
+                _token += ch;
+                _parse = &XmlReaderImpl::OnIdentifier;
+                return;
+            }
+
+            if(ch == '(')
+            {
+                _dtdBuilder.pushOperator(ch);
+                return;
+            }
+
+            throw SyntaxError("XML syntax error", _line);
+        }
+
+        void OnIdentifier(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if( isAlpha(ch) )
+            {
+                _token += ch;
+                _parse = &XmlReaderImpl::OnIdentifier;
+                return;
+            }
+
+            if( ch == ',')
+            {
+                _dtdBuilder.pushOperand(_token);
+                _token.clear();
+                _dtdBuilder.pushOperator(ch);
+                _parse = &XmlReaderImpl::OnBinaryOp;
+                return;
+            }
+
+            if( ch == '|')
+            {
+                _dtdBuilder.pushOperand(_token);
+                _token.clear();
+                _dtdBuilder.pushOperator(ch);
+                _parse = &XmlReaderImpl::OnBinaryOp;
+                return;
+            }
+
+            if(ch == '+')
+            {
+                _dtdBuilder.pushOperand(_token);
+                _token.clear();
+                _dtdBuilder.pushOperator(ch);
+                _parse = &XmlReaderImpl::OnUnrayOp;
+                return;
+            }
+
+            if(ch == '*')
+            {
+                _dtdBuilder.pushOperand(_token);
+                _token.clear();
+                _dtdBuilder.pushOperator(ch);
+                _parse = &XmlReaderImpl::OnUnrayOp;
+                return;
+            }
+
+            if(ch == '?')
+            {
+                _dtdBuilder.pushOperand(_token);
+                _token.clear();
+                _dtdBuilder.pushOperator(ch);
+                _parse = &XmlReaderImpl::OnUnrayOp;
+                return;
+            }
+
+            if( ch == ')')
+            {
+                _dtdBuilder.pushOperand(_token);
+                _token.clear();
+                _dtdBuilder.pushClosingBrace();
+                _parse = &XmlReaderImpl::OnDtdContentExprEnd;
+                return;
+            }
+
+            throw SyntaxError("XML syntax error", _line);
+        }
+        
+        void OnUnrayOp(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if( ch == '>' )
+            {
+                _dtdBuilder.finish();
+                _parse = &XmlReaderImpl::OnDtdInternal;
+                return;
+            }
+
+            if( ch == ',')
+            {
+                _dtdBuilder.pushOperator(ch);
+                _parse = &XmlReaderImpl::OnBinaryOp;
+                return;
+            }
+
+            if( ch == '|')
+            {
+                _dtdBuilder.pushOperator(ch);
+                _parse = &XmlReaderImpl::OnBinaryOp;
+                return;
+            }
+
+            if( ch == ')')
+            {
+                _dtdBuilder.pushClosingBrace();
+                _parse = &XmlReaderImpl::OnDtdContentExprEnd;
+                return;
+            }
+
+            if( Pt::isspace(ch) )
+            {
+                return;
+            }
+
+            throw SyntaxError("XML syntax error", _line);
+        }
+        
+        void OnBinaryOp(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if( isAlpha(ch) || ch == '#')
+            {
+                _token.clear();
+                _token += ch;
+                _parse = &XmlReaderImpl::OnIdentifier;
+                return;
+            }
+
+            if(ch == '(')
+            {
+                _dtdBuilder.pushOperator(ch);
+                _parse = &XmlReaderImpl::OnElementContent;
+                return;
+            }
+
+            throw SyntaxError("XML syntax error", _line);
+        }
+
+        void OnDtdContentExprEnd(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if( ch == '>' )
+            {
+                _dtdBuilder.finish();
+                _parse = &XmlReaderImpl::OnDtdInternal;
+                return;
+            }
+
+            if( ch == ',')
+            {
+                _dtdBuilder.pushOperator(ch);
+                _parse = &XmlReaderImpl::OnBinaryOp;
+                return;
+            }
+
+            if( ch == '|')
+            {
+                _dtdBuilder.pushOperator(ch);
+                _parse = &XmlReaderImpl::OnBinaryOp;
+                return;
+            }
+
+            if(ch == '+')
+            {
+                _dtdBuilder.pushOperator(ch);
+                _parse = &XmlReaderImpl::OnUnrayOp;
+                return;
+            }
+
+            if(ch == '*')
+            {
+                _dtdBuilder.pushOperator(ch);
+                _parse = &XmlReaderImpl::OnUnrayOp;
+                return;
+            }
+
+            if(ch == '?')
+            {
+                _dtdBuilder.pushOperator(ch);
+                _parse = &XmlReaderImpl::OnUnrayOp;
+                return;
+            }
+
+            if( ch == ')')
+            {
+                _dtdBuilder.pushClosingBrace();
+                return;
+            }
+
+            if( Pt::isspace(ch) )
+            {
+                return;
+            }
+
+            throw SyntaxError("XML syntax error", _line);
+        }
+
+        void OnDtdInternalEnd(int c)
+        {
+            Char ch = notEof(c);
+
+            if( Pt::isspace(ch) )
+            {
+                return;
+            }
+
+            if( ch == '>' )
+            {
                 _parse = &XmlReaderImpl::onProlog;
                 return;
             }
 
-            _docType.content() += c;
-        };
+            throw SyntaxError("XML syntax error", _line);
+        }
 
         void afterTag(int c)
         {
@@ -1158,6 +1841,10 @@ class XmlReaderImpl
         , _line(1)
         , _parse(0)
         , _current(0)
+        , _dtdContext()
+        , _docType(_dtdContext)
+        , _dtdBuilder(_docType)
+        , _dtdValidator(_docType)
         {
             _parse = &XmlReaderImpl::onDocumentBegin;
         }
@@ -1171,6 +1858,10 @@ class XmlReaderImpl
         , _line(1)
         , _parse(0)
         , _current(0)
+        , _dtdContext()
+        , _docType(_dtdContext)
+        , _dtdBuilder(_docType)
+        , _dtdValidator(_docType)
         {
             _parse = &XmlReaderImpl::onDocumentBegin;
 
@@ -1192,6 +1883,8 @@ class XmlReaderImpl
             _parse = &XmlReaderImpl::onDocumentBegin;
 
             _nsctx.clear();
+            _dtdBuilder.clear();
+            _dtdValidator.clear();
 
             _flags = flags;
             _docType.clear();
@@ -1212,6 +1905,8 @@ class XmlReaderImpl
             _parse = &XmlReaderImpl::onDocumentBegin;
 
             _nsctx.clear();
+            _dtdBuilder.clear();
+            _dtdValidator.clear();
 
             _flags = flags;
             _docType.clear();
@@ -1257,8 +1952,6 @@ class XmlReaderImpl
 
         Node& next()
         {
-            std::char_traits<char>::int_type eof = std::char_traits<char>::eof();
-
             _current = 0;
             int c = 0;
             do
@@ -1271,15 +1964,19 @@ class XmlReaderImpl
                     ++_line;
                 }
             }
-            while ( !_current && c != eof);
+            while ( ! _current );
+
+            if( _docType.isDefined() )
+            {
+                if( ! _dtdValidator.validate(*_current) )
+                    throw SyntaxError("validation failed", _line);
+            }
 
             return *_current;
         }
 
         bool advance()
         {
-            std::char_traits<char>::int_type eof = std::char_traits<char>::eof();
-
             _current = 0;
             int c = 0;
             while( ! _current && _textBuffer->in_avail() > 0 )
@@ -1291,6 +1988,12 @@ class XmlReaderImpl
                 {
                     ++_line;
                 }
+            }
+
+            if( _docType.isDefined() )
+            {
+                if( _current && ! _dtdValidator.validate(*_current) )
+                    throw SyntaxError("validation failed", _line);
             }
 
             return _current != 0;
@@ -1316,8 +2019,12 @@ class XmlReaderImpl
         String _token;
         Attribute _attr;
 
+        DocTypeContext _dtdContext;
+        DocType _docType;
+        DocTypeBuilder _dtdBuilder;
+        DocTypeValidator _dtdValidator;
+
         // TODO: some sort of union?
-        DocTypeDeclaration _docType;
         ProcessingInstruction _procInstr;
         StartElement _startElem;
         EndElement _endElem;

@@ -134,6 +134,10 @@ class PT_XML_API XmlReader
         //! @brief Process availabe data from underlying stream
         bool advance();
 
+        // TODO:
+        // also need a way to finish() after advance(), so eof is processed
+        // and we fail parsing or advance to EndDocument
+
     private:
         class XmlReaderImpl* _impl;
 };
