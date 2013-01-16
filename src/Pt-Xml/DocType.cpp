@@ -25,54 +25,37 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
+#include "DocTypeBuilder.h"
 #include "Pt/Xml/DocType.h"
 
 namespace Pt {
 
 namespace Xml {
 
-DocTypeContext::DocTypeContext()
-{}
-
-DocTypeContext::~DocTypeContext()
-{
-    assert(_pool.empty());
+DocType::~DocType()
+{ 
+    _dtd->clear(); 
 }
 
-void DocTypeContext::clear(DocType& dtd)
-{
-    //TODO: remove only particles used by the DocType which clears
-            
-    for(unsigned n = 0; n < _pool.size() ; ++n)
-    {
-        delete _pool[n];
-    }
-
-    _pool.clear();
+bool DocType::isDefined() const
+{ 
+    return _dtd->isDefined(); 
 }
 
-ContentModel::Label& DocTypeContext::getLabel(const Pt::String& name)
-{
-    _pool.reserve(_pool.size() + 1);
-    ContentModel::Label* label = new ContentModel::Label(name);
-    _pool.push_back(label);
-    return *label;
+void DocType::clear()
+{ 
+    _dtd->clear(); 
 }
 
-ContentModel::Split& DocTypeContext::getSplit(ContentModel::Particle& to)
-{
-    _pool.reserve(_pool.size() + 1);
-    ContentModel::Split* split = new ContentModel::Split(&to);
-    _pool.push_back(split);
-    return *split;
+const Pt::String& DocType::rootName() const
+{ 
+    return _dtd->rootName(); 
 }
 
-ContentModel::PcData& DocTypeContext::getPcData()
-{
-    _pool.reserve(_pool.size() + 1);
-    ContentModel::PcData* node = new ContentModel::PcData();
-    _pool.push_back(node);
-    return *node;
+Pt::String& DocType::rootName()
+{ 
+    return _dtd->rootName(); 
 }
 
 } // namespace Xml

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2012 by Marc Boris Duerner
+ * Copyright (C) 2012 by Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -28,10 +28,13 @@
 #ifndef Pt_Xml_DocTypeBuilder_h
 #define Pt_Xml_DocTypeBuilder_h
 
-#include <Pt/Xml/Api.h>
-#include <Pt/Xml/DocType.h>
-#include <Pt/String.h>
+#include "DocTypeDefinition.h"
 
+#include <Pt/Xml/Api.h>
+#include <Pt/String.h>
+#include <Pt/NonCopyable.h>
+
+#include <vector>
 #include <stack>
 #include <cassert>
 
@@ -39,304 +42,29 @@ namespace Pt {
 
 namespace Xml {
 
-class DocTypeBuilder
-{
-    private:
-        class Fragment
-        {
-            public:
-                explicit Fragment(ContentModel::Particle& start)
-                : _start(&start)
-                {}
-
-                ContentModel::Particle& start() const
-                { return *_start; }
-
-                const std::vector<ContentModel::Particle*>& leafs() const
-                { return _leafs; }
-
-                void setLeaf(ContentModel::Particle& next)
-                { _leafs.push_back(&next); }
-
-                void setLeafs(const std::vector<ContentModel::Particle*>& leafs)
-                { _leafs = leafs; }
-
-                void setLeafs(const std::vector<ContentModel::Particle*>& leafs, const std::vector<ContentModel::Particle*>& leafs2)
-                { 
-                    _leafs = leafs; 
-                    _leafs.insert( _leafs.end(), leafs2.begin(), leafs2.end() );
-                }
-
-                void setLeafs(const std::vector<ContentModel::Particle*>& leafs, ContentModel::Particle& leaf)
-                { 
-                    _leafs = leafs; 
-                    _leafs.push_back(&leaf);
-                }
-
-                void patchLeafs(ContentModel::Particle& to)
-                {
-                    for(unsigned n = 0; n < _leafs.size(); ++n)
-                    {
-                        ContentModel::Particle* leaf = _leafs[n];
-                        leaf->setNext(to);
-                    }
-                }
-
-            private:
-                ContentModel::Particle* _start;
-                std::vector<ContentModel::Particle*> _leafs;
-        };
-
-    public:
-        DocTypeBuilder(DocType& docType)
-        : _docType(&docType)
-        , _elemDecl(0)
-        {}
-
-        void clear()
-        {
-            while( ! _fragments.empty() )
-                _fragments.pop();
-                    
-            while( ! _ops.empty() )
-                _ops.pop();
-
-            _elemDecl = 0;
-        }
-
-        void beginAttList(const Pt::String& name)
-        {
-            _elemDecl = &_docType->declareElement(name);
-        }
-
-        void beginAttribute(AttributeDeclaration* attr)
-        {
-            assert(_elemDecl);
-            _elemDecl->attrListDecl().push(attr);
-        }
-
-        void setAttributeMode(AttributeDeclaration::Mode mode)
-        {
-            assert(_elemDecl);
-            _elemDecl->attrListDecl().last().setMode(mode);
-        }
-
-        void setAttributeDefault(const Pt::String& value)
-        {
-            assert(_elemDecl);
-            _elemDecl->attrListDecl().last().setDefaultValue(value);
-        }
-
-        void beginElement(const Pt::String& name)
-        {
-            _elemDecl = &_docType->declareElement(name);
-
-            while( ! _fragments.empty() )
-                _fragments.pop();
-                    
-            while( ! _ops.empty() )
-                _ops.pop();
-        }
-
-        void finish()
-        {
-            reduceStack();
-
-            if(_fragments.size() != 1 || _elemDecl == 0)
-                throw std::logic_error("DTD syntax error: incomplete expression");
-
-            _fragments.top().patchLeafs( _docType->context().getMatch() );
-            _elemDecl->setContentModel( _fragments.top().start() );
-            _fragments.pop();
-
-            _elemDecl = 0;
-        }
-        
-        void pushOperator(Pt::Char ch)
-        {
-            _ops.push(ch);
-        }
-
-        void pushClosingBrace()
-        {
-            reduceStack();
-        }
-
-        void pushOperand(const Pt::String& name)
-        {
-            assert(_elemDecl);
-
-            if(name.at(0) == '#')
-            {
-                if(name != L"#PCDATA")
-                    throw std::logic_error("DTD syntax error: expected PCDATA");
-
-                ContentModel::PcData& pcdata = _docType->context().getPcData();
-                Fragment frag(pcdata);
-                frag.setLeaf(pcdata);
-                _fragments.push(frag);
-                return;
-            }
-                
-            ContentModel::Label& label = _docType->context().getLabel(name);
-            Fragment frag(label);
-            frag.setLeaf(label);
-            _fragments.push(frag);
-        }
-
-        void pushEmpty()
-        {
-            assert(_elemDecl);
-
-            ContentModel::Empty& e = _docType->context().getEmpty();
-            Fragment frag(e);
-            frag.setLeaf(e);
-            _fragments.push(frag);
-        }
-
-    private:
-        void reduceStack()
-        {
-            assert(_elemDecl);
-
-            for(;;)
-            {
-                if( _ops.empty() )
-                    break;
-
-                if(_ops.top() == '(')
-                {
-                    _ops.pop();
-                    break;
-                }
-
-                if(_ops.top() == ',')
-                {
-                    _ops.pop();
-                 
-                    if( _fragments.size() < 2 )
-                        throw std::logic_error("DTD syntax error: not enough operands for ,");
-                    
-                    Fragment op2 = _fragments.top();
-                    _fragments.pop();
-
-                    Fragment op1 = _fragments.top();
-                    _fragments.pop();
-
-                    op1.patchLeafs( op2.start() );
-                    
-                    Fragment frag( op1.start() );
-                    frag.setLeafs( op2.leafs() );
-                    _fragments.push(frag);
-                    continue;
-                }
-
-                if(_ops.top() == '|')
-                {
-                    _ops.pop();
-                 
-                    if( _fragments.size() < 2 )
-                        throw std::logic_error("DTD syntax error: not enough operands for ,");
-                    
-                    Fragment op2 = _fragments.top();
-                    _fragments.pop();
-
-                    Fragment op1 = _fragments.top();
-                    _fragments.pop();
-
-                    ContentModel::Split& split = _docType->context().getSplit( op2.start() );
-                    split.setNext( op1.start() );
-
-                    Fragment frag(split);
-                    frag.setLeafs( op1.leafs(), op2.leafs() );
-                    _fragments.push(frag);
-                    continue;
-                }
-
-                if(_ops.top() == '?')
-                {
-                    _ops.pop();
-                 
-                    if( _fragments.empty() )
-                        throw std::logic_error("DTD syntax error: not enough operands for ?");
-                    
-                    Fragment op1 = _fragments.top();
-                    _fragments.pop();
-
-                    ContentModel::Split& split = _docType->context().getSplit( op1.start() );
-                    
-                    Fragment frag(split);
-                    frag.setLeafs(op1.leafs(), split);
-                    _fragments.push(frag);
-                    continue;
-                }
-
-                if(_ops.top() == '*')
-                {
-                    _ops.pop();
-                 
-                    if( _fragments.empty() )
-                        throw std::logic_error("DTD syntax error: not enough operands for *");
-                    
-                    Fragment op1 = _fragments.top();
-                    _fragments.pop();
-
-                    ContentModel::Split& split = _docType->context().getSplit( op1.start() );
-
-                    op1.patchLeafs(split);
-                    
-                    Fragment frag( split );
-                    frag.setLeaf(split);
-                    _fragments.push(frag);
-                    continue;
-                }
-
-                if(_ops.top() == '+')
-                {
-                    _ops.pop();
-                 
-                    if( _fragments.empty() )
-                        throw std::logic_error("DTD syntax error: not enough operands for +");
-                    
-                    Fragment op1 = _fragments.top();
-                    _fragments.pop();
-
-                    ContentModel::Split& split = _docType->context().getSplit( op1.start() );
-
-                    op1.patchLeafs(split);
-                    
-                    Fragment frag( op1.start() );
-                    frag.setLeaf(split);
-                    _fragments.push(frag);
-                    continue;
-                }
-            }
-        }
-
-    private:
-        DocType* _docType;
-        ElementDeclaration* _elemDecl;
-        std::stack<Pt::Char> _ops;
-        std::stack<Fragment> _fragments;
-};
-
-
-class DocTypeValidator : private NonCopyable
+class DtdValidator : private NonCopyable
 {
     private:
         class ContentValidator
         {
             public:
                 ContentValidator()
+                : _mixed(false)
                 {}
 
                 void setDeclaration(ElementDeclaration& decl)
                 {
                     decl.start(_current);
+                    _mixed = decl.isMixedContent();
                 }
 
                 bool validate(Node& node)
                 {
+                    if(_mixed && Pt::Xml::toCharacters(&node))
+                    {
+                        return true;
+                    }
+                    
                     for(unsigned n = 0; n < _current.size(); ++n)
                     {
                         ContentModel::Particle* state = _current[n];
@@ -363,10 +91,11 @@ class DocTypeValidator : private NonCopyable
             private:
                 std::vector<ContentModel::Particle*> _current;
                 std::vector<ContentModel::Particle*> _next;
+                bool _mixed;
         };
 
     public:
-        DocTypeValidator(DocType& dtd)
+        DtdValidator(DocTypeDefinition& dtd)
         : _dtd(&dtd)
         {}
 
@@ -433,7 +162,7 @@ class DocTypeValidator : private NonCopyable
         }
 
     private:
-        DocType* _dtd;
+        DocTypeDefinition* _dtd;
         std::stack<ContentValidator> _decls;
 };
 

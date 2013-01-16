@@ -39,6 +39,7 @@ namespace Pt {
 namespace Xml {
 
     class Node;
+    class DocType;
     class StartElement;
     class EntityResolver;
 
@@ -84,7 +85,7 @@ class PT_XML_API XmlReader
 
     public:
         /* TODO: Consider the following processing flags:
-                     - ReportProcessingInstructions
+                     - IgnoreProcessingInstructions
                      - IgnoreWhitespace
                      - ReportComments
                      - ReportDocumentStart
@@ -111,6 +112,8 @@ class PT_XML_API XmlReader
         const Pt::String& encoding() const;
 
         bool isStandalone() const;
+
+        const DocType& docType() const;
 
         // TODO: should this be settable?
         EntityResolver& entityResolver();

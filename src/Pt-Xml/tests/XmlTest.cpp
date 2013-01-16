@@ -57,8 +57,8 @@ class XmlReaderTest : public Pt::Unit::TestSuite
             this->registerMethod("InvalidTag3", *this, &XmlReaderTest::InvalidTag3);
             this->registerMethod("InvalidTag4", *this, &XmlReaderTest::InvalidTag4);
             this->registerMethod("InvalidTag5", *this, &XmlReaderTest::InvalidTag5);
-            this->registerMethod("ElementWithContent", *this, &XmlReaderTest::ElementWithNamespace);
-            this->registerMethod("ElementWithNamespace", *this, &XmlReaderTest::ElementWithContent);
+            this->registerMethod("ElementWithContent", *this, &XmlReaderTest::ElementWithContent);
+            this->registerMethod("ElementWithNamespace", *this, &XmlReaderTest::ElementWithNamespace);
             this->registerMethod("AttributeWithNamespace", *this, &XmlReaderTest::AttributeWithNamespace);
             this->registerMethod("DefaultNamespace", *this, &XmlReaderTest::DefaultNamespace);
             this->registerMethod("DefaultEntities", *this, &XmlReaderTest::DefaultEntities);
@@ -70,6 +70,7 @@ class XmlReaderTest : public Pt::Unit::TestSuite
             this->registerMethod("AttributeWithSimpleText", *this, &XmlReaderTest::AttributeWithSimpleText);
             this->registerMethod("AttributeWithUTF8", *this, &XmlReaderTest::AttributeWithUTF8);
             this->registerMethod("MultipleAttributesIteration", *this, &XmlReaderTest::MultipleAttributesIteration);
+            this->registerMethod("IgnorableWhitespace", *this, &XmlReaderTest::IgnorableWhitespace);
             this->registerMethod("CDATA", *this, &XmlReaderTest::CDATA );
             this->registerMethod("CommentInProlog", *this, &XmlReaderTest::CommentInProlog );
             this->registerMethod("CommentInElement", *this, &XmlReaderTest::CommentInElement );
@@ -102,6 +103,7 @@ class XmlReaderTest : public Pt::Unit::TestSuite
         void AttributeWithSimpleText();
         void AttributeWithUTF8();
         void MultipleAttributesIteration();
+        void IgnorableWhitespace();
         void CDATA();
         void DefaultEntities();
         void CommentInProlog();
@@ -211,17 +213,16 @@ void XmlReaderTest::DtdValidateElementContent()
         std::stringstream input;
         input << "<!DOCTYPE test [\n";
         input << "<!ELEMENT test (a|b)+> \n";
-        input << "<!ELEMENT a (#PCDATA|(x|y)?|z+) >\n";
+        input << "<!ELEMENT a (#PCDATA|x|y|z)* >\n";
         input << "<!ELEMENT b EMPTY>\n";
         input << "]>\n";
-        input << "<test><a>hello</a><b></b><a>world</a><b></b></test>";
+        input << "<test><a>hello<x></x>abc</a><b></b><a>world</a><b></b></test>";
 
         Pt::Xml::XmlReader reader(input);
             
         Pt::Xml::XmlReader::Iterator it;
         for(it = reader.current(); it != reader.end(); ++it)
-        {
-        }
+            ;
     }
     catch(const Pt::Xml::SyntaxError& error)
     {
@@ -346,35 +347,26 @@ void XmlReaderTest::ElementWithContent()
     input << "<a>?!:=b</a>";
 
     Pt::Xml::XmlReader reader( input );
-
     Pt::Xml::XmlReader::Iterator it = reader.current();
-    const Pt::Xml::Node& startNode = *it;
 
     // <a>
-    PT_UNIT_ASSERT(startNode.type() == Pt::Xml::Node::StartElement);
-    PT_UNIT_ASSERT(dynamic_cast<const Pt::Xml::StartElement*>(&startNode)->name().narrow() == "a");
+    PT_UNIT_ASSERT(Pt::Xml::toStartElement(*it).name() == L"a");
     PT_UNIT_ASSERT( reader.depth() == 1);
 
     // b
     ++it;
-    const Pt::Xml::Node& charactersNode = *it;
-
-    PT_UNIT_ASSERT(charactersNode.type() == Pt::Xml::Node::Characters);
-    PT_UNIT_ASSERT(dynamic_cast<const Pt::Xml::Characters*>(&charactersNode)->content().narrow() == "?!:=b");
+    PT_UNIT_ASSERT(Pt::Xml::toCharacters(*it).isIgnorable() == false);
+    PT_UNIT_ASSERT(Pt::Xml::toCharacters(*it).content() == L"?!:=b");
     PT_UNIT_ASSERT( reader.depth() == 1);
 
     // </a>
     ++it;
-    const Pt::Xml::Node& endNode = *it;
-
-    PT_UNIT_ASSERT(endNode.type() == Pt::Xml::Node::EndElement);
-    PT_UNIT_ASSERT(dynamic_cast<const Pt::Xml::EndElement*>(&endNode)->name().narrow() == "a");
+    PT_UNIT_ASSERT(Pt::Xml::toEndElement(*it).name() == L"a");
     PT_UNIT_ASSERT( reader.depth() == 0);
 
     // End of document
     ++it;
-    const Pt::Xml::Node& endDocument = *it;
-    PT_UNIT_ASSERT(endDocument.type() == Pt::Xml::Node::EndDocument);
+    PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::EndDocument);
     PT_UNIT_ASSERT( reader.depth() == 0);
 }
 
@@ -407,8 +399,8 @@ void XmlReaderTest::ElementWithNamespace()
 
     // b
     ++it;
-    const Pt::Xml::Characters& text = Pt::Xml::toCharacters(*it);
-    PT_UNIT_ASSERT(text.content() == L"b");
+    PT_UNIT_ASSERT(Pt::Xml::toCharacters(*it).isIgnorable() == false);
+    PT_UNIT_ASSERT(Pt::Xml::toCharacters(*it).content() == L"b");
     PT_UNIT_ASSERT(reader.depth() == 2);
 
     // </my:a>
@@ -780,6 +772,29 @@ void XmlReaderTest::ProcessingInstructionInEpilog()
 
     ++it;
     PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::EndDocument);
+}
+
+
+void XmlReaderTest::IgnorableWhitespace()
+{
+    std::stringstream input;
+    input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
+    input << "<a>";
+    input << "   <b></b>\n";
+    input << "\t<c></c>\n";
+    input << "</a>\n";
+
+    Pt::Xml::XmlReader reader(input);
+        
+    Pt::Xml::XmlReader::Iterator it;
+    for(it = reader.current(); it != reader.end(); ++it)
+    {
+        Pt::Xml::Characters* chars = toCharacters(&*it);
+        if(chars)
+        {
+            PT_UNIT_ASSERT( chars->isIgnorable() );
+        }
+    }
 }
 
 

@@ -50,6 +50,7 @@ class PT_XML_API Characters : public Node
         explicit Characters( const String& content = String() )
         : Node(Node::Characters)
         , _content(content)
+        , _ignorable(true)
         { }
 
         /** @brief Returns true if is empty.
@@ -58,7 +59,16 @@ class PT_XML_API Characters : public Node
         { return _content.empty(); }
 
         void clear()
-        { _content.clear(); }
+        { 
+            _content.clear(); 
+            _ignorable = true;
+        }
+
+        bool isIgnorable() const
+        { return _ignorable; }
+
+        void setIgnorable(bool isIgn)
+        { _ignorable = isIgn; }
 
         /** @brief Returns the content as a string.
         */
@@ -81,6 +91,7 @@ class PT_XML_API Characters : public Node
 
     private:
         String _content;
+        bool _ignorable;
 };
 
 
