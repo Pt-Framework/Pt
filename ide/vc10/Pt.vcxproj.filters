@@ -708,13 +708,13 @@
     <ClInclude Include="..\..\include\Pt\Xml\DocType.h">
       <Filter>Pt-Xml</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Xml\DocTypeBuilder.h">
-      <Filter>Pt-Xml</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Pt-Xml\ContentModel.h">
       <Filter>Pt-Xml</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Xml\DocTypeDefinition.h">
+      <Filter>Pt-Xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Xml\DtdValidator.h">
       <Filter>Pt-Xml</Filter>
     </ClInclude>
   </ItemGroup>

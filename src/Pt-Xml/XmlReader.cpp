@@ -26,7 +26,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "DocTypeDefinition.h"
-#include "DocTypeBuilder.h"
+#include "DtdValidator.h"
 
 #include "Pt/Xml/XmlReader.h"
 #include <Pt/Xml/NamespaceContext.h>

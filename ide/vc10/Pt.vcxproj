@@ -221,8 +221,8 @@
     <ClInclude Include="..\..\src\Pt-System\win32\ThreadImpl.h" />
     <ClInclude Include="..\..\src\Pt-System\win32\win32.h" />
     <ClInclude Include="..\..\src\Pt-Xml\ContentModel.h" />
-    <ClInclude Include="..\..\src\Pt-Xml\DocTypeBuilder.h" />
     <ClInclude Include="..\..\src\Pt-Xml\DocTypeDefinition.h" />
+    <ClInclude Include="..\..\src\Pt-Xml\DtdValidator.h" />
     <ClInclude Include="..\..\src\Pt\regexp.h" />
     <ClInclude Include="..\..\src\Pt\SerializationData.h" />
     <ClInclude Include="..\..\src\Pt\SettingsReader.h" />
