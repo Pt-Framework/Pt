@@ -1802,10 +1802,14 @@ class XmlReaderImpl
                 if(name != L"#PCDATA")
                     throw std::logic_error("DTD syntax error: expected PCDATA");
 
-                //ContentModel::PcData& pcdata = _dtd.getPcData();
+                ContentModel::PcData& pcdata = _dtd.getPcData();
+                _cmBuilder.pushOperand(pcdata);
+
                 assert(_elemDecl);
                 _elemDecl->setMixedContent(true);
-                //_cmBuilder.pushOperand(pcdata);
+                
+                // TODO: allow #PCDATA only at beginning of first '('
+                // TODO: allow only '|' as next token, but do not push it
                 return;
             }
                 

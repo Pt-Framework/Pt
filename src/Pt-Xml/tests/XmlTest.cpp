@@ -210,16 +210,16 @@ void XmlReaderTest::DtdValidateElementContent()
 {
     try
     {
+        // TODO: *?+ operators do not work
         std::stringstream input;
         input << "<!DOCTYPE test [\n";
-        input << "<!ELEMENT test (a|b)+> \n";
+        input << "<!ELEMENT test (a?)*> \n";
         input << "<!ELEMENT a (#PCDATA|x|y|z)* >\n";
         input << "<!ELEMENT b EMPTY>\n";
         input << "]>\n";
         input << "<test><a>hello<x></x>abc</a><b></b><a>world</a><b></b></test>";
 
         Pt::Xml::XmlReader reader(input);
-            
         Pt::Xml::XmlReader::Iterator it;
         for(it = reader.current(); it != reader.end(); ++it)
             ;

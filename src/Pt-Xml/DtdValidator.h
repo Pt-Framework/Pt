@@ -60,9 +60,12 @@ class DtdValidator : private NonCopyable
 
                 bool validate(Node& node)
                 {
-                    if(_mixed && Pt::Xml::toCharacters(&node))
+                    if( Pt::Xml::Characters* chars = Pt::Xml::toCharacters(&node) )
                     {
-                        return true;
+                        if(_mixed)
+                            return true;
+
+                        return chars->isIgnorable();
                     }
                     
                     for(unsigned n = 0; n < _current.size(); ++n)
