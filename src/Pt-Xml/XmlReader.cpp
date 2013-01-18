@@ -860,7 +860,7 @@ class XmlReaderImpl
 
             if(_token == L"EMPTY")
             {
-                _cmBuilder.push( _dtd.getEmpty() );
+                _cmBuilder.setEmpty();
             }
             else
                 throw SyntaxError("XML syntax error", _line);
@@ -877,8 +877,7 @@ class XmlReaderImpl
             
             if(ch == '>')
             {
-                ContentModel::Particle& particle = _cmBuilder.finish( _dtd.getMatch() );
-                _elemDecl->setContentModel( particle );
+                _cmBuilder.finish( _elemDecl->contentModel(), _dtd.getMatch() );
                 _parse = &XmlReaderImpl::OnDtdInternal;
                 return;
             }
@@ -986,8 +985,7 @@ class XmlReaderImpl
 
             if( ch == '>' )
             {
-                ContentModel::Particle& particle = _cmBuilder.finish( _dtd.getMatch() );
-                _elemDecl->setContentModel( particle );
+                _cmBuilder.finish( _elemDecl->contentModel(), _dtd.getMatch() );
                 _parse = &XmlReaderImpl::OnDtdInternal;
                 return;
             }
@@ -1049,8 +1047,7 @@ class XmlReaderImpl
 
             if( ch == '>' )
             {
-                ContentModel::Particle& particle = _cmBuilder.finish( _dtd.getMatch() );
-                _elemDecl->setContentModel( particle );
+                _cmBuilder.finish( _elemDecl->contentModel(), _dtd.getMatch() );
                 _parse = &XmlReaderImpl::OnDtdInternal;
                 return;
             }
@@ -1659,7 +1656,7 @@ class XmlReaderImpl
             {
                 resolveEntity(_token);
 
-                _chars.content() += _token;
+                _chars.append(_token);
                 _token.clear();
 
                 _parse = &XmlReaderImpl::onCharacters;
@@ -1711,7 +1708,7 @@ class XmlReaderImpl
 
                 if( len > 2 && content[len-2] == ']' && content[len-2] == ']')
                 {
-                    _chars.content().resize(len-2);
+                    _chars.resize(len-2);
 
                     _parse = &XmlReaderImpl::afterTag;
                     return;
@@ -1804,12 +1801,9 @@ class XmlReaderImpl
 
                 ContentModel::PcData& pcdata = _dtd.getPcData();
                 _cmBuilder.pushOperand(pcdata);
-
-                assert(_elemDecl);
-                _elemDecl->setMixedContent(true);
                 
                 // TODO: allow #PCDATA only at beginning of first '('
-                // TODO: allow only '|' as next token, but do not push it
+                // TODO: allow only '|' as next token
                 return;
             }
                 
@@ -1825,15 +1819,16 @@ class XmlReaderImpl
 
         void appendContent(Pt::Char c)
         {
-            String& content = _chars.content();
+            const String& content = _chars.content();
             if (content.capacity() <= content.size() + 20)
             {
                 if (content.capacity() < 16)
-                    content.reserve(16);
+                    _chars.reserve(16);
                 else
-                    content.reserve(content.capacity() + content.capacity() / 2);
+                    _chars.reserve(content.capacity() + content.capacity() / 2);
             }
-            content += c;
+            
+            _chars.append(c);
         }
 
         void setNamespace(StartElement& se)

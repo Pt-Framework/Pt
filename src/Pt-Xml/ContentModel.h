@@ -43,6 +43,7 @@ namespace Pt {
 namespace Xml {
 
 class DocTypeDefinition;
+class ContentValidator;
 
 class ContentModel 
 {
@@ -54,10 +55,10 @@ class ContentModel
                 { }
 
                 //! @brief Gets this Particle and follows unlabelled transitions.
-                virtual void get(std::vector<Particle*>& nodes) = 0;
+                virtual void get(ContentValidator& ctx) = 0;
 
                 //! @brief Evaluate the XML node and get all following nodes.
-                virtual void eval(Node& node, std::vector<Particle*>& states) = 0;
+                virtual void eval(ContentValidator& ctx, Node& node) = 0;
 
                 //! @brief Returns true if the node represents a match state.
                 virtual bool isValid() const
@@ -69,13 +70,21 @@ class ContentModel
                 void setNext(Particle& state)
                 { _out = &state; }
 
+                void setId(unsigned id)
+                { _id = id; }
+
+                unsigned id() const
+                { return _id; }
+
             protected:
                 Particle()
                 : _out(0)
+                , _id(0)
                 {}
 
             private:
                 Particle* _out;
+                unsigned _id;
         };
 
         class Split : public Particle
@@ -86,15 +95,9 @@ class ContentModel
                 , _out1(to)
                 { }
 
-                virtual void eval(Node& node, std::vector<Particle*>& nodes)
-                { }
+                virtual void eval(ContentValidator& ctx, Node& node);
 
-                virtual void get(std::vector<Particle*>& nodes) 
-                {
-                    assert( out() );
-                    out()->get(nodes);
-                    _out1->get(nodes);
-                }
+                virtual void get(ContentValidator& ctx) ;
 
             private:
                 Particle* _out1;
@@ -108,17 +111,9 @@ class ContentModel
                 , _name(name)
                 { }
 
-                virtual void eval(Node& node, std::vector<Particle*>& states)
-                {
-                    StartElement* se = toStartElement(&node);
-                    if(se && se->name() == _name)
-                        out()->get(states);
-                }
+                virtual void eval(ContentValidator& ctx, Node& node);
 
-                virtual void get(std::vector<Particle*>& states) 
-                {
-                    states.push_back(this);
-                }
+                virtual void get(ContentValidator& ctx);
 
             private:
                 Pt::String _name;
@@ -131,34 +126,9 @@ class ContentModel
                 : Particle()
                 { }
 
-                virtual void eval(Node& node, std::vector<Particle*>& states)
-                {
-                    Characters* chars = toCharacters(&node);
-                    if(chars)
-                        out()->get(states);
-                }
+                virtual void eval(ContentValidator& ctx, Node& node);
 
-                virtual void get(std::vector<Particle*>& states) 
-                {
-                    states.push_back(this);
-                }
-        };
-
-        class Empty : public Particle
-        {
-            public:
-                Empty()
-                : Particle()
-                { }
-
-                virtual void eval(Node& node, std::vector<Particle*>& states)
-                { }
-        
-                virtual void get(std::vector<Particle*>& states) 
-                { states.push_back(this); }
-
-                virtual bool isValid() const
-                { return true; }
+                virtual void get(ContentValidator& ctx);
         };
 
         class Match : public Particle
@@ -166,13 +136,11 @@ class ContentModel
             public:
                 Match()
                 : Particle()
-                { }
+                { setId(0); }
 
-                virtual void eval(Node& node, std::vector<Particle*>& states)
-                { }
+                virtual void eval(ContentValidator& ctx, Node& node);
         
-                virtual void get(std::vector<Particle*>& states) 
-                { states.push_back(this); }
+                virtual void get(ContentValidator& ctx);
 
                 virtual bool isValid() const
                 { return true; }
@@ -181,19 +149,27 @@ class ContentModel
     public:
         ContentModel()
         : _start(0)
+        , _nodeCount(0)
         {}
 
-        void setStart(ContentModel::Particle& start)
-        { _start = &start; }
+        unsigned nodeCount() const
+        { return _nodeCount; }
 
-        void start(std::vector<ContentModel::Particle*>& nodes)
+        void setStart(ContentModel::Particle& start, unsigned nodeCount)
+        { 
+            _start = &start; 
+            _nodeCount = nodeCount;
+        }
+
+        void start(ContentValidator& ctx)
         { 
             assert(_start);
-            return _start->get(nodes); 
+            return _start->get(ctx); 
         }
 
     private:
         ContentModel::Particle* _start;
+        unsigned _nodeCount;
 };
 
 
@@ -248,15 +224,16 @@ class ContentModelBuilder
     public:
         ContentModelBuilder(DocTypeDefinition& dtd)
         : _dtd(&dtd)
+        , _nodeCount(0)
         {}
 
         void clear();
 
         void reset();
 
-        void push(ContentModel::Empty& e);
+        void setEmpty();
 
-        ContentModel::Particle& finish(ContentModel::Match& m);
+        void finish(ContentModel& cm, ContentModel::Match& m);
         
         // TODO: push particles, so we do not have to keep a refrence to a dtd here
         void pushOperator(Pt::Char ch);
@@ -274,6 +251,78 @@ class ContentModelBuilder
         DocTypeDefinition* _dtd;
         std::stack<Pt::Char> _ops;
         std::stack<Fragment> _fragments;
+        unsigned _nodeCount;
+};
+
+
+class ContentValidator
+{
+    public:
+        ContentValidator()
+        : _stepId(1)
+        {}
+
+        inline void start(ContentModel& cm)
+        {
+            // all nodes are unvisited
+            _nodes.assign(cm.nodeCount(), 0);
+            _stepId = 1;
+
+            cm.start(*this);
+        }
+
+        bool validate(Node& node)
+        {
+            if( Pt::Xml::Characters* chars = Pt::Xml::toCharacters(&node) )
+            {
+                if( chars->isIgnorable() )
+                    return true;
+            }
+
+            _stepId++;
+
+            _next = _current;
+            _current.clear();
+
+            for(unsigned n = 0; n < _next.size(); ++n)
+            {
+                _next[n]->eval(*this, node);
+            }
+
+            return ! _current.empty();
+        }
+
+        bool isValid() const
+        { 
+            for(unsigned n = 0; n < _current.size(); ++n)
+            {
+                if( _current[n]->isValid() )
+                    return true;
+            }
+            
+            return false; 
+        }
+
+        bool setVisited(unsigned id)
+        { 
+            if(_nodes.at(id) == _stepId)
+                return true;
+
+            // node not yet visited, mark visited
+            _nodes.at(id) = _stepId; 
+            return false;
+        }
+
+        void addNext(ContentModel::Particle* p)
+        {
+            _current.push_back(p);
+        }
+
+    private:
+        std::vector<unsigned> _nodes;
+        unsigned _stepId;
+        std::vector<ContentModel::Particle*> _current;
+        std::vector<ContentModel::Particle*> _next;
 };
 
 } // namespace Xml

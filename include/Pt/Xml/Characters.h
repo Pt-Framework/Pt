@@ -70,10 +70,18 @@ class PT_XML_API Characters : public Node
         void setIgnorable(bool isIgn)
         { _ignorable = isIgn; }
 
-        /** @brief Returns the content as a string.
-        */
-        String& content()
-        { return _content; }
+        // TODO: might want to set ignorableWS flag here...
+        void append(Char ch)
+        { _content += ch; }
+
+        void append(const Pt::String& str)
+        { _content.append(str); }
+
+        void resize(std::size_t n)
+        { _content.resize(n); }
+
+        void reserve(std::size_t n)
+        { _content.reserve(n); }
 
         /** @brief Returns the content as a string.
         */

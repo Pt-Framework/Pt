@@ -44,59 +44,6 @@ namespace Xml {
 
 class DtdValidator : private NonCopyable
 {
-    private:
-        class ContentValidator
-        {
-            public:
-                ContentValidator()
-                : _mixed(false)
-                {}
-
-                void setDeclaration(ElementDeclaration& decl)
-                {
-                    decl.start(_current);
-                    _mixed = decl.isMixedContent();
-                }
-
-                bool validate(Node& node)
-                {
-                    if( Pt::Xml::Characters* chars = Pt::Xml::toCharacters(&node) )
-                    {
-                        if(_mixed)
-                            return true;
-
-                        return chars->isIgnorable();
-                    }
-                    
-                    for(unsigned n = 0; n < _current.size(); ++n)
-                    {
-                        ContentModel::Particle* state = _current[n];
-                        state->eval(node, _next);
-                    }
-            
-                    _current = _next;
-                    _next.clear();
-
-                    return ! _current.empty();
-                }
-
-                bool isValid() const
-                { 
-                    for(unsigned n = 0; n < _current.size(); ++n)
-                    {
-                        if( _current[n]->isValid() )
-                            return true;
-                    }
-            
-                    return false; 
-                }
-
-            private:
-                std::vector<ContentModel::Particle*> _current;
-                std::vector<ContentModel::Particle*> _next;
-                bool _mixed;
-        };
-
     public:
         DtdValidator(DocTypeDefinition& dtd)
         : _dtd(&dtd)
@@ -111,14 +58,13 @@ class DtdValidator : private NonCopyable
         bool validate(Node& node)
         {
             bool valid = true;
-            
-            // TODO: ignorable whitespace
 
             switch( node.type() )
             {
                 case Node::StartElement:
                 {
                     StartElement& se = static_cast<StartElement&>(node);
+                    //std::cerr << "<" << se.name().narrow() << ">" << std::endl;
 
                     if( ! _decls.empty() )
                     {
@@ -129,7 +75,7 @@ class DtdValidator : private NonCopyable
                     ContentValidator validator;
                     if(decl)
                     {
-                        validator.setDeclaration(*decl);
+                        validator.start( decl->contentModel() );
                         
                         if( ! decl->attrListDecl().validate( se.attributes() ) )
                             valid = false; 
@@ -155,6 +101,8 @@ class DtdValidator : private NonCopyable
 
                 case Node::EndElement:
                 {
+                    //std::cerr << "</" << static_cast<EndElement&>(node).name().narrow() << ">" << std::endl;
+
                     valid = _decls.top().isValid();
                     _decls.pop();
                     break;

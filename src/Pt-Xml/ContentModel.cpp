@@ -32,6 +32,84 @@ namespace Pt {
 
 namespace Xml {
 
+void ContentModel::Split::eval(ContentValidator& ctx, Node& node)
+{ 
+}
+
+
+void ContentModel::Split::get(ContentValidator& ctx) 
+{
+    assert(id() != 0);
+
+    if( ctx.setVisited( this->id() ) )
+        return;
+                    
+    assert( out() );
+    out()->get(ctx);
+    
+    assert( _out1 );
+    _out1->get(ctx);
+}
+
+
+void ContentModel::Leaf::eval(ContentValidator& ctx, Node& node)
+{
+    StartElement* se = toStartElement(&node);
+    if(se && se->name() == _name)
+    {
+        out()->get(ctx);
+    }
+}
+
+
+void ContentModel::Leaf::get(ContentValidator& ctx) 
+{
+    assert(id() != 0);
+
+    if( ctx.setVisited( this->id() ) )
+        return;
+
+    ctx.addNext(this);
+}
+
+
+void ContentModel::PcData::eval(ContentValidator& ctx, Node& node)
+{
+    Characters* chars = toCharacters(&node);
+    if(chars)
+        out()->get(ctx);
+    else
+        out()->eval(ctx, node);
+}
+
+
+void ContentModel::PcData::get(ContentValidator& ctx) 
+{
+    assert(id() != 0);
+
+    if( ctx.setVisited( this->id() ) )
+        return;
+
+    ctx.addNext(this);
+}
+
+
+void ContentModel::Match::eval(ContentValidator& ctx, Node& node)
+{
+}
+        
+
+void ContentModel::Match::get(ContentValidator& ctx) 
+{ 
+    assert(id() == 0);
+
+    if( ctx.setVisited( this->id() ) )
+        return;
+    
+    ctx.addNext(this); 
+}
+
+
 void ContentModelBuilder::clear()
 {
     while( ! _fragments.empty() )
@@ -39,6 +117,9 @@ void ContentModelBuilder::clear()
                     
     while( ! _ops.empty() )
         _ops.pop();
+
+    // id of 0 is for Match
+    _nodeCount = 1;
 }
 
 void ContentModelBuilder::reset()
@@ -48,29 +129,37 @@ void ContentModelBuilder::reset()
                     
     while( ! _ops.empty() )
         _ops.pop();
+
+    // id of 0 is for Match
+    _nodeCount = 1;
 }
 
 
-void ContentModelBuilder::push(ContentModel::Empty& e)
+void ContentModelBuilder::setEmpty()
 {
-    Fragment frag(e);
-    frag.setLeaf(e);
-    _fragments.push(frag);
+    reset();
 }
 
 
-ContentModel::Particle& ContentModelBuilder::finish(ContentModel::Match& match)
+void ContentModelBuilder::finish(ContentModel& cm, ContentModel::Match& match)
 {
     reduceStack();
 
-    if(_fragments.size() != 1)
+    if( _fragments.empty() )
+    {
+        assert(_nodeCount == 1);
+        cm.setStart(match, _nodeCount);
+        return;
+    }
+
+    if(_fragments.size() > 1)
         throw std::logic_error("DTD syntax error: incomplete expression");
 
     _fragments.top().patchLeafs(match);
     ContentModel::Particle& particle = _fragments.top().start();
-    _fragments.pop();
+    cm.setStart(particle, _nodeCount);
 
-    return particle;
+    reset();
 }
     
         
@@ -94,6 +183,8 @@ void ContentModelBuilder::pushClosingBrace()
 
 void ContentModelBuilder::pushOperand(ContentModel::Particle& op)
 {
+    op.setId(_nodeCount++);
+
     Fragment frag(op);
     frag.setLeaf(op);
     _fragments.push(frag);
@@ -148,6 +239,7 @@ void ContentModelBuilder::reduceStack()
             _fragments.pop();
 
             ContentModel::Split& split = _dtd->getSplit( op2.start() );
+            split.setId(_nodeCount++);
             split.setNext( op1.start() );
 
             Fragment frag(split);
@@ -167,6 +259,7 @@ void ContentModelBuilder::reduceStack()
             _fragments.pop();
 
             ContentModel::Split& split = _dtd->getSplit( op1.start() );
+            split.setId(_nodeCount++);
                     
             Fragment frag(split);
             frag.setLeafs(op1.leafs(), split);
@@ -185,6 +278,7 @@ void ContentModelBuilder::reduceStack()
             _fragments.pop();
 
             ContentModel::Split& split = _dtd->getSplit( op1.start() );
+            split.setId(_nodeCount++);
 
             op1.patchLeafs(split);
                     
@@ -205,6 +299,7 @@ void ContentModelBuilder::reduceStack()
             _fragments.pop();
 
             ContentModel::Split& split = _dtd->getSplit( op1.start() );
+            split.setId(_nodeCount++);
 
             op1.patchLeafs(split);
                     

@@ -213,20 +213,10 @@ class ElementDeclaration
 {
     public:
         ElementDeclaration()
-        : _mixed(false)
         {}
 
-        void setMixedContent(bool mixed)
-        { _mixed = mixed; }
-
-        bool isMixedContent() const
-        { return _mixed; }
-
-        void setContentModel(ContentModel::Particle& start)
-        { _cm.setStart(start); }
-
-        void start(std::vector<ContentModel::Particle*>& nodes)
-        { return _cm.start(nodes); }
+        ContentModel& contentModel()
+        { return _cm; }
 
         AttributeListDeclaration& attrListDecl()
         { return _attr; }
@@ -234,7 +224,6 @@ class ElementDeclaration
     private:
         ContentModel _cm;
         AttributeListDeclaration _attr;
-        bool _mixed;
 };
 
 
@@ -313,9 +302,6 @@ class DocTypeDefinition : private NonCopyable
             return *node;
         }
 
-        ContentModel::Empty& getEmpty()
-        { return _empty; }
-
         ContentModel::Match& getMatch()
         { return _match; }
 
@@ -324,7 +310,6 @@ class DocTypeDefinition : private NonCopyable
         std::map<Pt::String, ElementDeclaration> _elemDecls;
         
         std::vector<ContentModel::Particle*> _pool;
-        ContentModel::Empty _empty;
         ContentModel::Match _match;
 };
 
