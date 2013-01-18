@@ -233,6 +233,11 @@ class DocTypeDefinition : private NonCopyable
         DocTypeDefinition()
         {}
 
+        DocTypeDefinition::~DocTypeDefinition()
+        {
+            assert(_pool.empty());
+        }
+
         bool isDefined() const
         { return ! _rootName.empty(); }
 
@@ -258,11 +263,6 @@ class DocTypeDefinition : private NonCopyable
                 decl = &it->second;
 
             return decl; 
-        }
-
-        DocTypeDefinition::~DocTypeDefinition()
-        {
-            assert(_pool.empty());
         }
 
         void clear()

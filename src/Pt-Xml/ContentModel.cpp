@@ -122,22 +122,10 @@ void ContentModelBuilder::clear()
     _nodeCount = 1;
 }
 
-void ContentModelBuilder::reset()
-{
-    while( ! _fragments.empty() )
-        _fragments.pop();
-                    
-    while( ! _ops.empty() )
-        _ops.pop();
-
-    // id of 0 is for Match
-    _nodeCount = 1;
-}
-
 
 void ContentModelBuilder::setEmpty()
 {
-    reset();
+    clear();
 }
 
 
@@ -148,7 +136,7 @@ void ContentModelBuilder::finish(ContentModel& cm, ContentModel::Match& match)
     if( _fragments.empty() )
     {
         assert(_nodeCount == 1);
-        cm.setStart(match, _nodeCount);
+        cm.setEmpty();
         return;
     }
 
@@ -159,7 +147,7 @@ void ContentModelBuilder::finish(ContentModel& cm, ContentModel::Match& match)
     ContentModel::Particle& particle = _fragments.top().start();
     cm.setStart(particle, _nodeCount);
 
-    reset();
+    clear();
 }
     
         
@@ -309,6 +297,84 @@ void ContentModelBuilder::reduceStack()
             continue;
         }
     }
+}
+
+
+ContentValidator::ContentValidator(ContentModel& cm)
+: _stepId(1)
+, _cm(&cm)
+{
+    // all nodes are unvisited
+    _nodes.assign(cm.size(), 0);
+    _stepId = 1;
+
+    if( cm.start() )
+        cm.start()->get(*this);
+}
+
+
+bool ContentValidator::validate(Node& node)
+{
+    // handle ignorable WS and EMPTY separately, so indentation in XML
+    // documents does not lead to costly state transitions. 
+    if( Pt::Xml::Characters* chars = Pt::Xml::toCharacters(&node) )
+    {
+        if( chars->isIgnorable() )
+        {
+            // if _cm is null, the element was undeclared and WS should
+            // not lead to a validation error
+            if( ! _cm )
+                return true;
+
+            // special rule for EMPTY, not even WS is allowed
+            if( _cm->isEmpty() )
+                return false;
+
+            return true;
+        }
+    }
+
+    _stepId++;
+    _next = _current;
+    _current.clear();
+
+    for(unsigned n = 0; n < _next.size(); ++n)
+    {
+        _next[n]->eval(*this, node);
+    }
+
+    // no follow up particles means validation error
+    return ! _current.empty();
+}
+
+
+bool ContentValidator::isComplete() const
+{ 
+    // if _cm is null, the element was undeclared
+    if( ! _cm || _cm->isEmpty() )
+        return true;
+            
+    // at the end of the validation, at least one current particle
+    // must be a match particle, otherwise there was more content
+    // expected to come
+    for(unsigned n = 0; n < _current.size(); ++n)
+    {
+        if( _current[n]->isValid() )
+            return true;
+    }
+            
+    return false; 
+}
+
+
+bool ContentValidator::setVisited(unsigned id)
+{ 
+    if(_nodes.at(id) == _stepId)
+        return true;
+
+    // node not yet visited, mark visited
+    _nodes.at(id) = _stepId; 
+    return false;
 }
 
 } // namespace Xml

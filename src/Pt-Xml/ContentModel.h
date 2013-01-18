@@ -149,27 +149,33 @@ class ContentModel
     public:
         ContentModel()
         : _start(0)
-        , _nodeCount(0)
+        , _size(0)
         {}
 
-        unsigned nodeCount() const
-        { return _nodeCount; }
+        unsigned size() const
+        { return _size; }
 
-        void setStart(ContentModel::Particle& start, unsigned nodeCount)
+        bool isEmpty() const
+        { return _start == 0; }
+
+        void setStart(ContentModel::Particle& start, unsigned n)
         { 
             _start = &start; 
-            _nodeCount = nodeCount;
+            _size = n;
         }
 
-        void start(ContentValidator& ctx)
+        void setEmpty()
         { 
-            assert(_start);
-            return _start->get(ctx); 
+            _start = 0;
+            _size = 0;
         }
+
+        ContentModel::Particle* start()
+        { return _start; }
 
     private:
         ContentModel::Particle* _start;
-        unsigned _nodeCount;
+        unsigned _size;
 };
 
 
@@ -229,8 +235,6 @@ class ContentModelBuilder
 
         void clear();
 
-        void reset();
-
         void setEmpty();
 
         void finish(ContentModel& cm, ContentModel::Match& m);
@@ -258,69 +262,27 @@ class ContentModelBuilder
 class ContentValidator
 {
     public:
+        //!@brief A validator for an undeclared element.
         ContentValidator()
         : _stepId(1)
+        , _cm(0)
         {}
 
-        inline void start(ContentModel& cm)
-        {
-            // all nodes are unvisited
-            _nodes.assign(cm.nodeCount(), 0);
-            _stepId = 1;
+        ContentValidator(ContentModel& cm);
 
-            cm.start(*this);
-        }
+        bool validate(Node& node);
 
-        bool validate(Node& node)
-        {
-            if( Pt::Xml::Characters* chars = Pt::Xml::toCharacters(&node) )
-            {
-                if( chars->isIgnorable() )
-                    return true;
-            }
+        bool isComplete() const;
 
-            _stepId++;
-
-            _next = _current;
-            _current.clear();
-
-            for(unsigned n = 0; n < _next.size(); ++n)
-            {
-                _next[n]->eval(*this, node);
-            }
-
-            return ! _current.empty();
-        }
-
-        bool isValid() const
-        { 
-            for(unsigned n = 0; n < _current.size(); ++n)
-            {
-                if( _current[n]->isValid() )
-                    return true;
-            }
-            
-            return false; 
-        }
-
-        bool setVisited(unsigned id)
-        { 
-            if(_nodes.at(id) == _stepId)
-                return true;
-
-            // node not yet visited, mark visited
-            _nodes.at(id) = _stepId; 
-            return false;
-        }
+        bool setVisited(unsigned id);
 
         void addNext(ContentModel::Particle* p)
-        {
-            _current.push_back(p);
-        }
+        { _current.push_back(p); }
 
     private:
-        std::vector<unsigned> _nodes;
+        ContentModel* _cm;
         unsigned _stepId;
+        std::vector<unsigned> _nodes;
         std::vector<ContentModel::Particle*> _current;
         std::vector<ContentModel::Particle*> _next;
 };

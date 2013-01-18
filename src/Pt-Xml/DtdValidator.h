@@ -42,6 +42,7 @@ namespace Pt {
 
 namespace Xml {
 
+// TODO: rename DocTypeValidator
 class DtdValidator : private NonCopyable
 {
     public:
@@ -72,18 +73,21 @@ class DtdValidator : private NonCopyable
                     }
                     
                     ElementDeclaration* decl = _dtd->findElementDecl( se.name() );
-                    ContentValidator validator;
                     if(decl)
                     {
-                        validator.start( decl->contentModel() );
+                        ContentValidator validator( decl->contentModel() );
+                        _decls.push(validator);
                         
                         if( ! decl->attrListDecl().validate( se.attributes() ) )
                             valid = false; 
                     }
                     else
+                    {
+                        ContentValidator validator;
+                        _decls.push(validator);
                         valid = false;
+                    }
 
-                    _decls.push(validator);
                     break;
                 }
                 
@@ -103,7 +107,7 @@ class DtdValidator : private NonCopyable
                 {
                     //std::cerr << "</" << static_cast<EndElement&>(node).name().narrow() << ">" << std::endl;
 
-                    valid = _decls.top().isValid();
+                    valid = _decls.top().isComplete();
                     _decls.pop();
                     break;
                 }

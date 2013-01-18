@@ -815,7 +815,7 @@ class XmlReaderImpl
             if( Pt::isspace(ch) )
             {
                 _elemDecl = &_dtd.declareElement(_token);
-                _cmBuilder.reset();
+                _cmBuilder.clear();
                 _token.clear();
                 _parse = &XmlReaderImpl::OnElementContentBegin;
                 return;
