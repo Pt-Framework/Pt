@@ -44,8 +44,8 @@ IOBufferImpl::IOBufferImpl()
 , _pbmax      (4)
 , _oextend    (false)
 {
-
 }
+
 
 void IOBufferImpl::init(IOBuffer& sb, size_t bufferSize, bool extend)
 {
@@ -62,6 +62,7 @@ void IOBufferImpl::init(IOBuffer& sb, size_t bufferSize, bool extend)
         sb.setp(_obuffer, _obuffer + _obufferSize);
 }
 
+
 void IOBufferImpl::attach(IOBuffer& sb, IODevice& ioDevice)
 {
     if( ioDevice.reading() || ioDevice.writing() )
@@ -73,6 +74,7 @@ void IOBufferImpl::attach(IOBuffer& sb, IODevice& ioDevice)
     ioDevice.inputReady() += slot(sb, &IOBuffer::onRead);
     ioDevice.outputReady() += slot(sb, &IOBuffer::onWrite);
 }
+
 
 void IOBufferImpl::detach(IOBuffer& sb)
 {
@@ -86,6 +88,7 @@ void IOBufferImpl::detach(IOBuffer& sb)
     _ioDevice->outputReady() -= slot(sb, &IOBuffer::onWrite);
     _ioDevice = 0;
 }
+
 
 void IOBufferImpl::beginRead(IOBuffer& sb)
 {
@@ -121,8 +124,12 @@ void IOBufferImpl::beginRead(IOBuffer& sb)
             _ibuffer + used);              // end of get area
 }
 
+
 void IOBufferImpl::onRead(IOBuffer& sb)
-{ _inputReady.send(sb); }
+{ 
+    _inputReady.send(sb); 
+}
+
 
 void IOBufferImpl::endRead(IOBuffer& sb)
 {
@@ -132,6 +139,7 @@ void IOBufferImpl::endRead(IOBuffer& sb)
             sb.gptr(),              // gptr position
             sb.egptr() + readSize); // end of get area
 }
+
 
 size_t IOBufferImpl::beginWrite(IOBuffer& sb)
 {
@@ -148,8 +156,12 @@ size_t IOBufferImpl::beginWrite(IOBuffer& sb)
     return 0;
 }
 
+
 void IOBufferImpl::onWrite(IOBuffer& sb)
-{ _outputReady.send(sb); }
+{ 
+    _outputReady.send(sb); 
+}
+
 
 size_t IOBufferImpl::endWrite(IOBuffer& sb)
 {
@@ -174,6 +186,7 @@ size_t IOBufferImpl::endWrite(IOBuffer& sb)
     return written;
 }
 
+
 void IOBufferImpl::discard(IOBuffer& sb)
 {
     if(_ioDevice && (_ioDevice->reading() || _ioDevice->writing()))
@@ -186,6 +199,7 @@ void IOBufferImpl::discard(IOBuffer& sb)
     else
         sb.setp(0, 0);
 }
+
 
 int IOBufferImpl::sync(IOBuffer& sb)
 {
@@ -208,6 +222,7 @@ int IOBufferImpl::sync(IOBuffer& sb)
 
     return 0;
 }
+
 
 std::streambuf::int_type IOBufferImpl::underflow(IOBuffer& sb)
 {
@@ -249,6 +264,7 @@ std::streambuf::int_type IOBufferImpl::underflow(IOBuffer& sb)
 
     return traits_type::to_int_type(*(sb.gptr()));
 }
+
 
 std::streambuf::int_type IOBufferImpl::overflow(IOBuffer& sb, std::streambuf::int_type ch)
 {
@@ -303,6 +319,7 @@ std::streambuf::int_type IOBufferImpl::overflow(IOBuffer& sb, std::streambuf::in
     return traits_type::not_eof(ch);
 }
 
+
 std::streambuf::pos_type IOBufferImpl::seekoff(IOBuffer& sb, std::streambuf::off_type off, std::ios::seekdir dir, std::ios::openmode)
 {
     typedef IOBuffer::pos_type pos_type;
@@ -327,11 +344,29 @@ std::streambuf::pos_type IOBufferImpl::seekoff(IOBuffer& sb, std::streambuf::off
     return ret;
 }
 
+
 std::streambuf::pos_type IOBufferImpl::seekpos(IOBuffer& sb, std::streambuf::pos_type p, std::ios::openmode mode)
-{ return sb.seekoff(p, std::ios::beg, mode); }
+{ 
+    return sb.seekoff(p, std::ios::beg, mode); 
+}
+
+
+std::streamsize IOBufferImpl::showmanyc(IOBuffer& sb)
+{
+    //if( ! _ioDevice || _ioDevice->eof() )
+    //{
+    //    return 1;
+    //}
+
+    return 0;
+}
+
 
 std::streamsize IOBufferImpl::showfull(IOBuffer& sb)
-{ return 0; }
+{ 
+    return 0; 
+}
+
 
 std::streambuf::int_type IOBufferImpl::pbackfail(IOBuffer& sb, std::streambuf::int_type)
 {
@@ -339,6 +374,6 @@ std::streambuf::int_type IOBufferImpl::pbackfail(IOBuffer& sb, std::streambuf::i
     return traits_type::eof();
 }
 
-}
+} // namespace System
 
-}
+} // namespace Pt

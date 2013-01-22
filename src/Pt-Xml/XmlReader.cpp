@@ -40,6 +40,7 @@
 #include "Pt/Xml/Comment.h"
 #include "Pt/Xml/XmlError.h"
 #include "Pt/System/Logger.h"
+#include "Pt/StringStream.h"
 #include "Pt/TextStream.h"
 #include "Pt/Utf8Codec.h"
 
@@ -2029,6 +2030,126 @@ class XmlReaderImpl
             }
 
             return *_current;
+        }
+
+        class InputSource
+        {
+            public:
+                virtual ~InputSource()
+                {}
+
+                void init(std::basic_streambuf<Char>* buffer)
+                {
+                    _buffer = buffer;
+                }
+
+                //! @brief Returns null if EOF.
+                std::basic_streambuf<Char>* buffer()
+                {               
+                    return _buffer; 
+                }
+
+                //! @brief Returns null if EOF.
+                std::basic_streambuf<Char>* advance()
+                {                               
+                    if( _buffer && _buffer->in_avail() <= 0 )
+                        _buffer = this->onAdvance();
+
+                    return _buffer;
+                }
+
+            protected:
+                InputSource()
+                : _buffer(0)
+                {}
+
+                virtual std::basic_streambuf<Char>* onAdvance() = 0;
+
+            private:
+                std::basic_streambuf<Char>* _buffer;
+        };
+
+        class StringInputSource : public InputSource
+        {
+            public:
+                StringInputSource(const String& str)
+                : _sbuf(str)
+                {
+                    init(&_sbuf);
+                }
+
+                virtual ~StringInputSource()
+                {}
+
+            protected:
+                virtual std::basic_streambuf<Char>* onAdvance()
+                {
+                    if(_sbuf.in_avail() <= 0)
+                        return 0;
+
+                    return &_sbuf;
+                }
+
+            private:
+                StringBuffer _sbuf;
+        };
+
+        bool advanceNew()
+        {
+            std::stack<InputSource*> _external;
+            _current = 0;
+            int c = 0;
+
+            for(;;)
+            {          
+                std::basic_streambuf<Char>* buffer = 0;    
+                
+                if( _external.empty() )
+                {
+                    if( ! _textBuffer )
+                        return false;
+
+                    buffer = _textBuffer;
+                }
+                else
+                {
+                    buffer = _external.top()->advance();
+
+                    if( ! buffer )
+                    {
+                        delete _external.top();
+                        _external.pop();
+                        continue;
+                    }
+                }
+
+                if( buffer->in_avail() <= 0 )
+                    break;
+
+                while( ! _current && buffer->in_avail() > 0 )
+                {
+                    c = buffer->sbumpc();
+                    (this->*_parse)(c);
+
+                    if(c == '\n')
+                    {
+                        ++_line;
+                    }
+                }
+
+                if( _current )
+                {
+                    if( _docType.isDefined() )
+                    {
+                        if( ! _dtdValidator.validate(*_current) )
+                            throw SyntaxError("validation failed", _line);
+                    }
+                    
+                    break;
+                }
+            }
+
+            return _current != 0;
         }
 
         bool advance()

@@ -69,6 +69,7 @@ class PT_SYSTEM_API IOBufferImpl
         std::streambuf::int_type overflow(IOBuffer& sb, std::streambuf::int_type ch);
         std::streambuf::pos_type seekoff(IOBuffer& sb, std::streambuf::off_type off, std::ios::seekdir dir, std::ios::openmode);
         std::streambuf::pos_type seekpos(IOBuffer& sb, std::streambuf::pos_type p, std::ios::openmode mode);
+        std::streamsize showmanyc(IOBuffer& sb);
         std::streamsize showfull(IOBuffer& sb);
         std::streambuf::int_type pbackfail(IOBuffer& sb, std::streambuf::int_type c);
 
@@ -144,6 +145,9 @@ class IOBuffer : public BasicStreamBuffer<char>
         { _impl.discard(*this); }
 
     protected:
+        virtual std::streamsize showmanyc()
+        { return _impl.showmanyc(*this); }
+
         virtual std::streamsize showfull()
         { return _impl.showfull(*this); }
 
