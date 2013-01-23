@@ -40,7 +40,6 @@
 #include "Pt/Xml/Comment.h"
 #include "Pt/Xml/XmlError.h"
 #include "Pt/System/Logger.h"
-#include "Pt/StringStream.h"
 #include "Pt/TextStream.h"
 #include "Pt/Utf8Codec.h"
 
@@ -575,6 +574,8 @@ class XmlReaderImpl
 
             if( Pt::isspace(ch) )
             {
+                assert(_entity == 0);
+                _entity = _entities.addEntity(_token);
                 _token.clear();
                 _parse = &XmlReaderImpl::OnDtdAfterName;
                 return;
@@ -589,7 +590,6 @@ class XmlReaderImpl
 
             if( ch == '"' )
             {
-                _token += ch;
                 _parse = &XmlReaderImpl::OnDtdValue;
                 return;
             }
@@ -608,6 +608,9 @@ class XmlReaderImpl
 
             if( ch == '"' )
             {
+                assert(_entity);
+                _entity->setValue(_token);
+                _entity = 0;
                 _token.clear();
                 _parse = &XmlReaderImpl::OnDtdAfterValue;
                 return;
@@ -1757,7 +1760,9 @@ class XmlReaderImpl
                 _chars.append(_token);
                 _token.clear();
 
-                _parse = &XmlReaderImpl::onCharacters;
+                // TODO: stay ignorable when replacement has only space
+                //_chars.setIgnorable(false);
+                _parse = &XmlReaderImpl::onIgnorableCharacters;
                 return;
             }
 
@@ -1806,6 +1811,7 @@ class XmlReaderImpl
 
                 if( len > 2 && content[len-2] == ']' && content[len-2] == ']')
                 {
+                    _chars.setIgnorable(false);
                     _chars.resize(len-2);
 
                     _parse = &XmlReaderImpl::afterTag;
@@ -1911,8 +1917,19 @@ class XmlReaderImpl
 
         void resolveEntity(String& str)
         {
-            if( ! _entities.resolveEntity( str ) )
+            if( _entities.resolveDefaultEntity( str ) )
+                return;
+
+            const Entity* ent = _entities.find(str);
+            if( ! ent )
                 throw SyntaxError("invalid entity reference", line());
+
+            if( ent->isExternal() )
+                throw SyntaxError("external entity not supported", line());
+            
+            str.clear();
+            _external.push( new StringInputSource( ent->value() ) );
+            _buffer = _external.top()->rdbuf();
         }
 
         void appendContent(Pt::Char c)
@@ -1990,11 +2007,13 @@ class XmlReaderImpl
     public:
         XmlReaderImpl(std::basic_istream<Char>& is, int flags)
         : _textBuffer( is.rdbuf() )
+        , _tbuffer(0)
         , _buffer(0)
         , _flags(flags)
         , _standalone(true)
         , _depth(0)
         , _line(1)
+        , _entity(0)
         , _parse(0)
         , _current(0)
         , _dtd()
@@ -2008,11 +2027,13 @@ class XmlReaderImpl
 
         XmlReaderImpl(std::istream& is, int flags)
         : _textBuffer(0)
+        , _tbuffer(0)
         , _buffer(0)
         , _flags(flags)
         , _standalone(true)
         , _depth(0)
         , _line(1)
+        , _entity(0)
         , _parse(0)
         , _current(0)
         , _dtd()
@@ -2023,23 +2044,39 @@ class XmlReaderImpl
         {
             _parse = &XmlReaderImpl::onDocumentBegin;
 
-            _buffer = new TextBuffer( &is, new Pt::Utf8Codec() );
-            _textBuffer = _buffer;
+            _tbuffer = new TextBuffer( &is, new Pt::Utf8Codec() );
+            _textBuffer = _tbuffer;
         }
 
         ~XmlReaderImpl()
         {
-            delete _buffer;
+            while( ! _external.empty() )
+            {
+                delete _external.top();
+                _external.pop();
+            } 
+
+            delete _tbuffer;
         }
 
         void clear(int flags)
         {
             _parse = &XmlReaderImpl::onDocumentBegin;
 
+            _buffer = 0;
+            while( ! _external.empty() )
+            {
+                delete _external.top();
+                _external.pop();
+            } 
+
             _nsctx.clear();
             _cmBuilder.clear();
             _elemDecl = 0;
             _dtdValidator.clear();
+
+            _entities.clear();
+            _entity = 0;
 
             _flags = flags;
             _docType.clear();
@@ -2055,8 +2092,8 @@ class XmlReaderImpl
         {
             clear(flags);
             
-            delete _buffer;
-            _buffer = 0;
+            delete _tbuffer;
+            _tbuffer = 0;
             _textBuffer = is.rdbuf();
         }
 
@@ -2064,9 +2101,9 @@ class XmlReaderImpl
         {
             clear(flags);
             
-            delete _buffer;
-            _buffer = new TextBuffer( &is, new Pt::Utf8Codec() );
-            _textBuffer = _buffer;
+            delete _tbuffer;
+            _tbuffer = new TextBuffer( &is, new Pt::Utf8Codec() );
+            _textBuffer = _tbuffer;
         }
 
         const Pt::String& version() const
@@ -2108,20 +2145,20 @@ class XmlReaderImpl
 
             for(;;)
             {          
-                std::basic_streambuf<Char>* buffer = _textBuffer;    
+                _buffer = _textBuffer;    
                 
                 if( ! _external.empty() )
                 {
-                    buffer = _external.top()->rdbuf();
+                    _buffer = _external.top()->rdbuf();
                 }
 
-                if( ! buffer )
+                if( ! _buffer )
                     throw std::logic_error("no input for XmlReader");
 
                 while( ! _current )
                 {
-                    c = buffer->sbumpc();
-
+                    c = _buffer->sbumpc();
+       
                     if( c == std::char_traits<Char>::eof() )
                     {
                         if( ! _external.empty() )
@@ -2131,8 +2168,8 @@ class XmlReaderImpl
                             break;
                         }
                     }
-
-                    (this->*_parse)(c);
+                    
+                    (this->*_parse)(c);// might change _buffer
 
                     if(c == '\n')
                     {
@@ -2160,7 +2197,7 @@ class XmlReaderImpl
 
             for(;;)
             {          
-                std::basic_streambuf<Char>* buffer = _textBuffer;    
+                _buffer = _textBuffer;    
                 
                 if( ! _external.empty() )
                 {
@@ -2173,16 +2210,17 @@ class XmlReaderImpl
                         continue;
                     }
 
-                    buffer = input->rdbuf();
+                    _buffer = input->rdbuf();
                 }
 
-                if( ! buffer || buffer->in_avail() <= 0 )
+                if( ! _buffer || _buffer->in_avail() <= 0 )
                     break;
 
-                while( ! _current && buffer->in_avail() > 0 )
+                while( ! _current && _buffer->in_avail() > 0 )
                 {
-                    c = buffer->sbumpc();
-                    (this->*_parse)(c);
+                    c = _buffer->sbumpc();
+
+                    (this->*_parse)(c); // might change _buffer
 
                     if(c == '\n')
                     {
@@ -2207,6 +2245,7 @@ class XmlReaderImpl
 
     private:
         std::basic_streambuf<Char>* _textBuffer;
+        std::basic_streambuf<Char>* _tbuffer;
         std::basic_streambuf<Char>* _buffer;
         std::stack<InputSource*> _external;
         int _flags;
@@ -2223,6 +2262,7 @@ class XmlReaderImpl
 
         NamespaceContext _nsctx;
         EntityMapping _entities;
+        Entity* _entity;
         String _token;
         Attribute _attr;
 

@@ -41,12 +41,15 @@ class Entity
     public:
         Entity()
         {}
-
+        
         bool isExternal() const
         { return ! _publicId.empty() || ! _systemId.empty(); }
 
         const Pt::String& value() const
         { return _value; }
+
+        void setValue(const Pt::String& val)
+        { _value = val; }
 
     private:
         Pt::String _publicId;
@@ -58,7 +61,7 @@ class Entity
 */
 class PT_XML_API EntityMapping
 {
-    typedef std::map<String, Entity> EntityMap;
+    typedef std::map<String, Entity> Entities;
 
     public:
         /** @brief Constructs with the XML default entities.
@@ -68,9 +71,16 @@ class PT_XML_API EntityMapping
         //! @brief Destructor.
         ~EntityMapping();
 
+        void clear()
+        { _entities.clear(); }
+
+        Entity* addEntity(const Pt::String& name);
+
         /** @brief Replaces the entity with its string value.
         */
-        bool resolveEntity(String& entity) const;
+        bool resolveDefaultEntity(String& entity) const;
+
+        const Entity* find(const Pt::String& name) const;
 
         /** @brief Returns the entity reference for a character.
 
@@ -87,7 +97,7 @@ class PT_XML_API EntityMapping
         void encode(std::basic_ostream<Char>& os, const Pt::Char* str) const;
 
     private:
-        EntityMap _entityMap;
+        Entities _entities;
 };
 
 } // namespace Xml

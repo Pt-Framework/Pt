@@ -32,6 +32,7 @@
 #include <Pt/Xml/Node.h>
 #include <Pt/Xml/EndDocument.h>
 #include <Pt/String.h>
+#include "Pt/StringStream.h"
 #include <iosfwd>
 
 namespace Pt {
@@ -68,27 +69,30 @@ class InputSource : public std::basic_istream<Char>
         virtual bool onAdvance() = 0;
 };
 
-//class StringInputSource : public InputSource
-//{
-//    public:
-//        StringInputSource(const String& str)
-//        : _sbuf(str)
-//        {
-//            init(&_sbuf);
-//        }
-//
-//    protected:
-//        virtual bool onAdvance()
-//        {
-//            if(_sbuf.in_avail() <= 0)
-//                return false;
-//
-//            return true;
-//        }
-//
-//    private:
-//        StringBuffer _sbuf;
-//};
+class StringInputSource : public InputSource
+{
+    public:
+        StringInputSource(const String& str)
+        : _sbuf(str)
+        {
+            init(&_sbuf);
+        }
+
+        virtual ~StringInputSource()
+        { }
+
+    protected:
+        virtual bool onAdvance()
+        {
+            if(_sbuf.in_avail() <= 0)
+                return false;
+
+            return true;
+        }
+
+    private:
+        StringBuffer _sbuf;
+};
 
 /** @brief Reads XML as a Stream of XML Nodes.
 

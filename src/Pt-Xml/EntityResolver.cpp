@@ -341,7 +341,14 @@ EntityMapping::~EntityMapping()
 }
 
 
-bool EntityMapping::resolveEntity(String& entity) const
+Entity* EntityMapping::addEntity(const Pt::String& name)
+{
+    Entity& e = _entities[name];
+    return &e;
+}
+
+
+bool EntityMapping::resolveDefaultEntity(String& entity) const
 {
     if( ! entity.empty() && entity[0] == '#')
     {
@@ -407,6 +414,16 @@ bool EntityMapping::resolveEntity(String& entity) const
     }
 
     return false;
+}
+
+
+const Entity* EntityMapping::find(const Pt::String& name) const
+{
+    Entities::const_iterator it = _entities.find(name);
+    if(it == _entities.end() )
+        return 0;
+
+    return &it->second;
 }
 
 

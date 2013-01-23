@@ -869,7 +869,7 @@ void XmlReaderTest::CustomEntities()
     input << "<!ENTITY MyEntity \"Hello World!\">\n";
     input << "]>\n";
 
-    input << "<a>Hello World!</a>";
+    input << "<a>&MyEntity;</a>";
 
     Pt::Xml::XmlReader reader( input );
     Pt::Xml::XmlReader::Iterator it = reader.current();
