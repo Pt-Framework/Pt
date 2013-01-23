@@ -221,13 +221,13 @@ void XmlWriter::writeElement(const Pt::Char* localName, const Pt::Char* content,
 
 void XmlWriter::writeCharacters(const Pt::Char* text)
 {
-    _resolver.getEntity(_tos, text);
+    _entities.encode(_tos, text);
 }
 
 
 void XmlWriter::writeCharacters(const Pt::String& text)
 {
-    _resolver.getEntity(_tos, text.c_str());
+    _entities.encode(_tos, text.c_str());
 }
 
 

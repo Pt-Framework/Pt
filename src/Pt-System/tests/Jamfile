@@ -2,8 +2,7 @@ SubDir PT_TOP src Pt-System tests ;
 SubDirHdrs $(PT_TOP)/include ;
 SubDirObjects $(PT_OUTPUT_OBJECT) Pt-System ;
 
-PT_SYSTEM_TESTS = 
-                  ApplicationTest.cpp
+PT_SYSTEM_TESTS = ApplicationTest.cpp
                   DirectoryTest.cpp
                   EventLoopTest.cpp
                   LoggerTest.cpp
@@ -24,3 +23,7 @@ Main ProcessTestChild : ProcessTestChild.cpp ;
 MakeLocate ProcessTestChild : $(PT_OUTPUT_TARGET) ;
 LinkSharedLibraries ProcessTestChild : Pt Pt-System  ;
 Depends Pt-System-test : ProcessTestChild ;
+
+#Main ThreadDemo : ThreadDemo.cpp ;
+#MakeLocate ThreadDemo : $(PT_OUTPUT_TARGET) ;
+#LinkSharedLibraries ThreadDemo : Pt Pt-System  ;

@@ -33,6 +33,7 @@
 #include "Pt/Xml/EndElement.h"
 #include "Pt/Xml/EndDocument.h"
 #include "Pt/Xml/DocTypeDeclaration.h"
+#include "Pt/Xml/DocType.h"
 #include "Pt/Xml/ProcessingInstruction.h"
 #include "Pt/System/Clock.h"
 #include "Pt/String.h"
@@ -62,6 +63,7 @@ class XmlReaderTest : public Pt::Unit::TestSuite
             this->registerMethod("AttributeWithNamespace", *this, &XmlReaderTest::AttributeWithNamespace);
             this->registerMethod("DefaultNamespace", *this, &XmlReaderTest::DefaultNamespace);
             this->registerMethod("DefaultEntities", *this, &XmlReaderTest::DefaultEntities);
+            this->registerMethod("CustomEntities", *this, &XmlReaderTest::CustomEntities);
             this->registerMethod("InvalidAttribute1", *this, &XmlReaderTest::InvalidAttribute1);
             this->registerMethod("InvalidAttribute2", *this, &XmlReaderTest::InvalidAttribute2);
             this->registerMethod("InvalidAttribute3", *this, &XmlReaderTest::InvalidAttribute3);
@@ -89,7 +91,6 @@ class XmlReaderTest : public Pt::Unit::TestSuite
         void DtdValidateAttributes();
         void DtdValidateElementContent();
         void EmptyDocument();
-        void DoctypeDeclaration();
         void EmptyElementTag();
         void InvalidTag1();
         void InvalidTag2();
@@ -106,6 +107,7 @@ class XmlReaderTest : public Pt::Unit::TestSuite
         void IgnorableWhitespace();
         void CDATA();
         void DefaultEntities();
+        void CustomEntities();
         void CommentInProlog();
         void CommentInElement();
         void CommentInEpilog();
@@ -210,7 +212,6 @@ void XmlReaderTest::DtdValidateElementContent()
 {
     try
     {
-        // TODO: *?+ operators do not work
         std::stringstream input;
         input << "<!DOCTYPE test [\n";
         input << "<!ELEMENT test (b?|a)*> \n";
@@ -855,6 +856,36 @@ void XmlReaderTest::DefaultEntities()
 
     const Pt::Xml::Characters* text = dynamic_cast<const Pt::Xml::Characters*>(&characterNode);
     PT_UNIT_ASSERT(text->content() == compare);
+}
+
+
+void XmlReaderTest::CustomEntities()
+{
+    std::stringstream input;
+    input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
+
+    input << "<!DOCTYPE a [\n";
+    input << "<!ELEMENT a (#PCDATA)>\n";
+    input << "<!ENTITY MyEntity \"Hello World!\">\n";
+    input << "]>\n";
+
+    input << "<a>Hello World!</a>";
+
+    Pt::Xml::XmlReader reader( input );
+    Pt::Xml::XmlReader::Iterator it = reader.current();
+
+    // TODO: parser should report DocType
+    //PT_UNIT_ASSERT(Pt::Xml::toDocType(&*it));
+
+    //++it;
+    PT_UNIT_ASSERT(Pt::Xml::toStartElement(&*it));
+
+    ++it;
+    PT_UNIT_ASSERT(Pt::Xml::toCharacters(&*it));
+    PT_UNIT_ASSERT(Pt::Xml::toCharacters(*it).content() == L"Hello World!");
+
+    ++it;
+    PT_UNIT_ASSERT(Pt::Xml::toEndElement(&*it));
 }
 
 

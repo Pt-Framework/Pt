@@ -533,10 +533,107 @@ class XmlReaderImpl
                     _parse = &XmlReaderImpl::OnDtdAttListBegin;
                     return;
                 }
+                else if(_token == L"ENTITY")
+                {
+                    _token.clear();
+                    _parse = &XmlReaderImpl::OnDtdEntityBegin;
+                    return;
+                }
             }
 
             throw SyntaxError("XML syntax error", _line);
         }
+
+        void OnDtdEntityBegin(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if( isAlpha(ch) )
+            {
+                _token += ch;
+                _parse = &XmlReaderImpl::OnDtdEntityName;
+                return;
+            }
+
+            if( Pt::isspace(ch) )
+            {
+                return;
+            }
+
+            throw SyntaxError("XML syntax error", _line);
+        }
+
+        void OnDtdEntityName(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if( isAlpha(ch) )
+            {
+                _token += ch;
+                return;
+            }
+
+            if( Pt::isspace(ch) )
+            {
+                _token.clear();
+                _parse = &XmlReaderImpl::OnDtdAfterName;
+                return;
+            }
+
+            throw SyntaxError("XML syntax error", _line);
+        }
+        
+        void OnDtdAfterName(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if( ch == '"' )
+            {
+                _token += ch;
+                _parse = &XmlReaderImpl::OnDtdValue;
+                return;
+            }
+
+            if( Pt::isspace(ch) )
+            {
+                return;
+            }
+
+            throw SyntaxError("XML syntax error", _line);
+        }
+
+        void OnDtdValue(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if( ch == '"' )
+            {
+                _token.clear();
+                _parse = &XmlReaderImpl::OnDtdAfterValue;
+                return;
+            }
+
+            _token += ch;
+        }
+        
+        void OnDtdAfterValue(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if( ch == '>' )
+            {
+                _parse = &XmlReaderImpl::OnDtdInternal;
+                return;
+            }
+
+            if( Pt::isspace(ch) )
+            {
+                return;
+            }
+
+            throw SyntaxError("XML syntax error", _line);
+        }
+
 
         void OnDtdAttListBegin(int c)
         {
@@ -1814,7 +1911,7 @@ class XmlReaderImpl
 
         void resolveEntity(String& str)
         {
-            if( ! _resolver.resolveEntity( str ) )
+            if( ! _entities.resolveEntity( str ) )
                 throw SyntaxError("invalid entity reference", line());
         }
 
@@ -1984,9 +2081,6 @@ class XmlReaderImpl
         const DocType& docType() const
         { return _docType; }
 
-        EntityResolver& entityResolver()
-        { return _resolver; }
-
         size_t depth() const
         {
             return _depth;
@@ -2011,17 +2105,44 @@ class XmlReaderImpl
         {
             _current = 0;
             int c = 0;
-            do
-            {
-                c = _textBuffer->sbumpc();
-                (this->*_parse)(c);
 
-                if(c == '\n')
+            for(;;)
+            {          
+                std::basic_streambuf<Char>* buffer = _textBuffer;    
+                
+                if( ! _external.empty() )
                 {
-                    ++_line;
+                    buffer = _external.top()->rdbuf();
                 }
+
+                if( ! buffer )
+                    throw std::logic_error("no input for XmlReader");
+
+                while( ! _current )
+                {
+                    c = buffer->sbumpc();
+
+                    if( c == std::char_traits<Char>::eof() )
+                    {
+                        if( ! _external.empty() )
+                        {
+                            delete _external.top();
+                            _external.pop();
+                            break;
+                        }
+                    }
+
+                    (this->*_parse)(c);
+
+                    if(c == '\n')
+                    {
+                        ++_line;
+                    }
+                }
+
+                if( _current )
+                    break;
             }
-            while ( ! _current );
 
             if( _docType.isDefined() )
             {
@@ -2032,98 +2153,30 @@ class XmlReaderImpl
             return *_current;
         }
 
-        class InputSource
+        bool advance()
         {
-            public:
-                virtual ~InputSource()
-                {}
-
-                void init(std::basic_streambuf<Char>* buffer)
-                {
-                    _buffer = buffer;
-                }
-
-                //! @brief Returns null if EOF.
-                std::basic_streambuf<Char>* buffer()
-                {               
-                    return _buffer; 
-                }
-
-                //! @brief Returns null if EOF.
-                std::basic_streambuf<Char>* advance()
-                {                               
-                    if( _buffer && _buffer->in_avail() <= 0 )
-                        _buffer = this->onAdvance();
-
-                    return _buffer;
-                }
-
-            protected:
-                InputSource()
-                : _buffer(0)
-                {}
-
-                virtual std::basic_streambuf<Char>* onAdvance() = 0;
-
-            private:
-                std::basic_streambuf<Char>* _buffer;
-        };
-
-        class StringInputSource : public InputSource
-        {
-            public:
-                StringInputSource(const String& str)
-                : _sbuf(str)
-                {
-                    init(&_sbuf);
-                }
-
-                virtual ~StringInputSource()
-                {}
-
-            protected:
-                virtual std::basic_streambuf<Char>* onAdvance()
-                {
-                    if(_sbuf.in_avail() <= 0)
-                        return 0;
-
-                    return &_sbuf;
-                }
-
-            private:
-                StringBuffer _sbuf;
-        };
-
-        bool advanceNew()
-        {
-            std::stack<InputSource*> _external;
             _current = 0;
             int c = 0;
 
             for(;;)
             {          
-                std::basic_streambuf<Char>* buffer = 0;    
+                std::basic_streambuf<Char>* buffer = _textBuffer;    
                 
-                if( _external.empty() )
+                if( ! _external.empty() )
                 {
-                    if( ! _textBuffer )
-                        return false;
-
-                    buffer = _textBuffer;
-                }
-                else
-                {
-                    buffer = _external.top()->advance();
-
-                    if( ! buffer )
+                    InputSource* input = _external.top();
+ 
+                    if( ! input->advance() )
                     {
                         delete _external.top();
                         _external.pop();
                         continue;
                     }
+
+                    buffer = input->rdbuf();
                 }
 
-                if( buffer->in_avail() <= 0 )
+                if( ! buffer || buffer->in_avail() <= 0 )
                     break;
 
                 while( ! _current && buffer->in_avail() > 0 )
@@ -2152,33 +2205,10 @@ class XmlReaderImpl
             return _current != 0;
         }
 
-        bool advance()
-        {
-            _current = 0;
-            int c = 0;
-            while( ! _current && _textBuffer->in_avail() > 0 )
-            {
-                c = _textBuffer->sbumpc();
-                (this->*_parse)(c);
-
-                if(c == '\n')
-                {
-                    ++_line;
-                }
-            }
-
-            if( _docType.isDefined() )
-            {
-                if( _current && ! _dtdValidator.validate(*_current) )
-                    throw SyntaxError("validation failed", _line);
-            }
-
-            return _current != 0;
-        }
-
     private:
         std::basic_streambuf<Char>* _textBuffer;
         std::basic_streambuf<Char>* _buffer;
+        std::stack<InputSource*> _external;
         int _flags;
         
         typedef void (XmlReaderImpl::*ParseFunc)(int);
@@ -2192,7 +2222,7 @@ class XmlReaderImpl
         std::size_t _line;
 
         NamespaceContext _nsctx;
-        EntityResolver _resolver;
+        EntityMapping _entities;
         String _token;
         Attribute _attr;
 
@@ -2260,20 +2290,10 @@ bool XmlReader::isStandalone() const
     return _impl->isStandalone();
 }
 
+
 const DocType& XmlReader::docType() const
 {
     return _impl->docType();
-}
-
-EntityResolver& XmlReader::entityResolver()
-{
-    return _impl->entityResolver();
-}
-
-
-const EntityResolver& XmlReader::entityResolver() const
-{
-    return _impl->entityResolver();
 }
 
 

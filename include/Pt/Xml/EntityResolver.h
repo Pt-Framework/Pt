@@ -36,27 +36,37 @@ namespace Pt {
 
 namespace Xml {
 
+class Entity
+{
+    public:
+        Entity()
+        {}
+
+        bool isExternal() const
+        { return ! _publicId.empty() || ! _systemId.empty(); }
+
+        const Pt::String& value() const
+        { return _value; }
+
+    private:
+        Pt::String _publicId;
+        Pt::String _systemId;
+        Pt::String _value;
+};
+
 /** @brief Handles character and entity references.
 */
-class PT_XML_API EntityResolver
+class PT_XML_API EntityMapping
 {
-    typedef std::map<String, String> EntityMap;
+    typedef std::map<String, Entity> EntityMap;
 
     public:
         /** @brief Constructs with the XML default entities.
         */
-        EntityResolver();
+        EntityMapping();
 
         //! @brief Destructor.
-        ~EntityResolver();
-
-        /** @brief Resets to use the XML default entities.
-        */
-        void clear();
-
-        /** @brief Adds an entity reference to the lookup.
-        */
-        void addEntity(const String& entity, const String& token);
+        ~EntityMapping();
 
         /** @brief Replaces the entity with its string value.
         */
@@ -74,7 +84,7 @@ class PT_XML_API EntityResolver
             entity reference, they will be replaced. The result is written
             to the output stream @a os.
         */
-        void getEntity(std::basic_ostream<Char>& os, const Pt::Char* str) const;
+        void encode(std::basic_ostream<Char>& os, const Pt::Char* str) const;
 
     private:
         EntityMap _entityMap;

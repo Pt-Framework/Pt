@@ -38,10 +38,57 @@ namespace Pt {
 
 namespace Xml {
 
-    class Node;
-    class DocType;
-    class StartElement;
-    class EntityResolver;
+class Node;
+class DocType;
+class StartElement;
+class EntityResolver;
+
+class InputSource : public std::basic_istream<Char>
+{
+    public:
+        virtual ~InputSource()
+        {}
+
+        bool advance()
+        {                               
+            if( ! rdbuf() )
+                return false;
+                    
+            if( rdbuf()->in_avail() > 0 )
+                return true;
+                        
+            return this->onAdvance();
+        }
+
+    protected:
+        InputSource(std::basic_streambuf<Char>* sb = 0)
+        : std::basic_istream<Char>(sb)
+        {}
+
+        virtual bool onAdvance() = 0;
+};
+
+//class StringInputSource : public InputSource
+//{
+//    public:
+//        StringInputSource(const String& str)
+//        : _sbuf(str)
+//        {
+//            init(&_sbuf);
+//        }
+//
+//    protected:
+//        virtual bool onAdvance()
+//        {
+//            if(_sbuf.in_avail() <= 0)
+//                return false;
+//
+//            return true;
+//        }
+//
+//    private:
+//        StringBuffer _sbuf;
+//};
 
 /** @brief Reads XML as a Stream of XML Nodes.
 
@@ -115,11 +162,6 @@ class PT_XML_API XmlReader
 
         const DocType& docType() const;
 
-        // TODO: should this be settable?
-        EntityResolver& entityResolver();
-
-        const EntityResolver& entityResolver() const;
-
         size_t depth() const;
 
         std::size_t line() const;
@@ -138,8 +180,8 @@ class PT_XML_API XmlReader
         bool advance();
 
         // TODO:
-        // also need a way to finish() after advance(), so eof is processed
-        // and we fail parsing or advance to EndDocument
+        // also need a way to finish() after advance(), so synthetic eof is 
+        // processed and we fail parsing or advance to EndDocument
 
     private:
         class XmlReaderImpl* _impl;

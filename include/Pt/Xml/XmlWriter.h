@@ -98,7 +98,7 @@ namespace Xml {
             void useEndl(bool sw)            { setFormatFlags(UseEndl, sw); }
 
         private:
-            EntityResolver _resolver;
+            EntityMapping _entities;
             TextOStream _tos;
             std::stack<Pt::String> _elements;
             int _flags;

@@ -331,29 +331,17 @@ namespace Pt {
 
 namespace Xml {
 
-EntityResolver::EntityResolver()
+EntityMapping::EntityMapping()
 {
 }
 
 
-EntityResolver::~EntityResolver()
+EntityMapping::~EntityMapping()
 {
 }
 
 
-void EntityResolver::clear()
-{ 
-    _entityMap.clear();
-}
-
-
-void EntityResolver::addEntity(const String& entity, const String& token)
-{ 
-    _entityMap.insert( std::pair<String, String>(entity, token) ); 
-}
-
-
-bool EntityResolver::resolveEntity(String& entity) const
+bool EntityMapping::resolveEntity(String& entity) const
 {
     if( ! entity.empty() && entity[0] == '#')
     {
@@ -418,20 +406,11 @@ bool EntityResolver::resolveEntity(String& entity) const
         return true;
     }
 
-    EntityMap::const_iterator it = _entityMap.find(entity);
-    if( it == _entityMap.end() )
-    {
-        it = _entityMap.find(entity);
-        if( it == _entityMap.end() )
-            return false;
-    }
-
-    entity = it->second;
-    return true;
+    return false;
 }
 
 
-const Pt::Char* EntityResolver::findEntity(Char ch) const
+const Pt::Char* EntityMapping::findEntity(Char ch) const
 {
     unsigned u = 0;
     unsigned o = sizeof(rent)/sizeof(REnt) - 1;
@@ -459,7 +438,7 @@ const Pt::Char* EntityResolver::findEntity(Char ch) const
 }
 
 
-void EntityResolver::getEntity(std::basic_ostream<Char>& os, const Pt::Char* str) const
+void EntityMapping::encode(std::basic_ostream<Char>& os, const Pt::Char* str) const
 {
     const Pt::Char* it = str;
 
