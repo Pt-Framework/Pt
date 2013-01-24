@@ -53,20 +53,10 @@ class PT_HTTP_API Service
 
     protected:
         /** @brief Creates a responder to handle request received by a server.
-            
-            The implementer of this method must also make sure that no 
-            responders exists anymore when the derived class is destructed.
-            The easiest way to ensure this is to call Service::detach in
-            the derived class's destructor.
         */
         virtual Responder* onGetResponder(const Request&) = 0;
         
         /** @brief Destroys a responder created by a server.
-            
-            The implementer of this method must also make sure that no 
-            responders exists anymore when the derived class is destructed.
-            The easiest way to ensure this is to call Service::detach in
-            the derived class's destructor.
         */
         virtual void onReleaseResponder(Responder*) = 0;
 

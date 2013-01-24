@@ -158,6 +158,17 @@ class PT_XML_API XmlReader
 
         void attach(std::istream& is, int flags = 0);
 
+        // TODO: When user receives a EntityReference node this method
+        // can be used to resolve the external reference.
+        // 
+        // add a refcounter to InputSource so user can place it on the stack
+        // and XmlParser will not delete it
+        //
+        // also use InputSource for primary input, so advance() works also 
+        // for std::istream. Currently it does not work because we do not
+        // import into the internal TextBuffer
+        void addInputSource(InputSource* in);
+
         const Pt::String& version() const;
 
         const Pt::String& encoding() const;

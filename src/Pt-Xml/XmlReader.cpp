@@ -1756,12 +1756,21 @@ class XmlReaderImpl
             if(ch == ';')
             {
                 resolveEntity(_token);
+                if( ! _token.empty() )
+                {
+                    // TODO: this does not cover the case when the replacement
+                    // text resolves only to whitespace
+                    _chars.append(_token);
+                    _chars.setIgnorable(false);
 
-                _chars.append(_token);
-                _token.clear();
+                    _token.clear();
+                    _parse = &XmlReaderImpl::onCharacters;
+                    return;
+                }
 
-                // TODO: stay ignorable when replacement has only space
-                //_chars.setIgnorable(false);
+                // _chars.setIgnorable(false) is potentially called again when
+                // non-space is found in replacement text and non-space text 
+                // has been parsed before
                 _parse = &XmlReaderImpl::onIgnorableCharacters;
                 return;
             }
@@ -2169,8 +2178,9 @@ class XmlReaderImpl
                         }
                     }
                     
-                    (this->*_parse)(c);// might change _buffer
+                    (this->*_parse)(c); // might change _buffer
 
+                    // TODO: this does not work for external input sources
                     if(c == '\n')
                     {
                         ++_line;
@@ -2222,6 +2232,7 @@ class XmlReaderImpl
 
                     (this->*_parse)(c); // might change _buffer
 
+                    // TODO: this does not work for external input sources
                     if(c == '\n')
                     {
                         ++_line;
@@ -2257,7 +2268,7 @@ class XmlReaderImpl
         Pt::String _version;
         Pt::String _encoding;
         bool _standalone;
-        size_t _depth;
+        std::size_t _depth;
         std::size_t _line;
 
         NamespaceContext _nsctx;
@@ -2310,6 +2321,13 @@ void XmlReader::attach(std::basic_istream<Char>& is, int flags)
 void XmlReader::attach(std::istream& is, int flags)
 {
     _impl->attach(is, flags);
+}
+
+
+void XmlReader::addInputSource(InputSource* in)
+{
+    throw std::logic_error("XmlReader::addInputSource not implemented");
+    //_impl->addInputSource(in);
 }
 
 
