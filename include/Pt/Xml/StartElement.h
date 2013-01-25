@@ -266,7 +266,7 @@ inline const StartElement& toStartElement(const Node& node)
 
 class Characters;
 
-class EntityReference : public Node 
+class PT_XML_API EntityReference : public Node 
 {
     public:
         /** @brief Creates an EndDocument object.
@@ -284,10 +284,13 @@ class EntityReference : public Node
         const Pt::String& name() const
         { return _name; }
 
+        void setName(const Pt::String& name)
+        { _name = name; }
+
         // TODO: allow user to resolve entity directly.
         // return a the string which contains the enitity reference
         
-        void resolve(const Pt::String& value) const;
+        void resolve(const Pt::Char* value) const;
 
         void attach(Pt::Xml::Characters* chars)
         {

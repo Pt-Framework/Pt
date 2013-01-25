@@ -83,16 +83,15 @@ const String& StartElement::attribute(const String& nsUri, const String& name) c
 }
 
 
-void EntityReference::resolve(const Pt::String& value) const
+void EntityReference::resolve(const Pt::Char* value) const
 {
     if(_chars)
     {       
         _chars->append(value);
 
-        for(std::size_t n = 0; n < value.size(); ++n)
+        for(const Pt::Char* ch = value; *ch != '\0'; ++ch)
         {
-            Pt::Char c = value[n];
-            if(c != ' ' && c != '\n' && c != '\r' && c != '\t')
+            if(*ch != ' ' && *ch != '\n' && *ch != '\r' && *ch != '\t')
             {
                 _chars->setIgnorable(false);
                 break;

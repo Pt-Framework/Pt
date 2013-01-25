@@ -869,7 +869,7 @@ void XmlReaderTest::CustomEntities()
     input << "<!ENTITY MyEntity \"Hello World!\">\n";
     input << "]>\n";
 
-    input << "<a>&MyEntity;</a>";
+    input << "<a>&MyEntity; &undeclared;</a>";
 
     Pt::Xml::XmlReader reader( input );
     Pt::Xml::XmlReader::Iterator it = reader.current();
@@ -881,8 +881,13 @@ void XmlReaderTest::CustomEntities()
     PT_UNIT_ASSERT(Pt::Xml::toStartElement(&*it));
 
     ++it;
+    PT_UNIT_ASSERT( Pt::Xml::toEntityReference(&*it) );
+    PT_UNIT_ASSERT( Pt::Xml::toEntityReference(*it).name() == L"undeclared" );
+    Pt::Xml::toEntityReference(*it).resolve( Pt::String(L"resolved").c_str() );
+
+    ++it;
     PT_UNIT_ASSERT(Pt::Xml::toCharacters(&*it));
-    PT_UNIT_ASSERT(Pt::Xml::toCharacters(*it).content() == L"Hello World!");
+    PT_UNIT_ASSERT(Pt::Xml::toCharacters(*it).content() == L"Hello World! resolved");
 
     ++it;
     PT_UNIT_ASSERT(Pt::Xml::toEndElement(&*it));

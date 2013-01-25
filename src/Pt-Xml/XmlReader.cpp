@@ -1944,36 +1944,26 @@ class XmlReaderImpl
                 return true;
 
             const Entity* ent = _entities.resolveEntity(token);
-            if( ! ent )
+            if(ent)
             {
-                if(chars)
-                    _entityRef.attach(chars);
-                else if(attr)
-                    _entityRef.attach(attr);
+                if( ! ent->isExternal() )
+                {
+                    _external.push( new StringInputSource( ent->value() ) );
+                    _buffer = _external.top()->rdbuf();
+                    return false;
+                }
+
+                // TODO:
+                // _entityRef->setEntitiy(ent);
+            }
+
+            if(chars)
+                _entityRef.attach(chars);
+            else if(attr)
+                _entityRef.attach(attr);
                 
-                _current = &_entityRef;
-                return false;
-            }
-
-            if( ent->isExternal() )
-            {
-                if(chars)
-                    _entityRef.attach(chars);
-                else if(attr)
-                    _entityRef.attach(attr);
-                
-                _current = &_entityRef;
-                return false;
-            }
-
-            if( ent->isUnparsed() )
-            {
-                token = ent->value();
-                return true;
-            }
-
-            _external.push( new StringInputSource( ent->value() ) );
-            _buffer = _external.top()->rdbuf();
+            _entityRef.setName(token);
+            _current = &_entityRef;
             return false;
         }
 
