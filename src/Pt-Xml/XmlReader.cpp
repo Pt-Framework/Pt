@@ -609,7 +609,7 @@ class XmlReaderImpl
             if( ch == '"' )
             {
                 assert(_entity);
-                _entity->setValue(_token);
+                _entity->setValue(_token, false);
                 _entity = 0;
                 _token.clear();
                 _parse = &XmlReaderImpl::OnDtdAfterValue;
@@ -1536,10 +1536,13 @@ class XmlReaderImpl
             
             if(ch == ';')
             {
-                resolveEntity(_token);
-                _attr.value() += _token;
+                bool resolved = resolveEntity(_token, 0, &_attr);
+                if(resolved)
+                {
+                    _attr.value() += _token;
+                }
+                
                 _token.clear();
-
                 _parse = &XmlReaderImpl::onAttributeValue;
                 return;
             }
@@ -1750,18 +1753,27 @@ class XmlReaderImpl
             if( isAlpha(ch) || ch == '#')
             {
                 _token += ch;
+                
                 return;
             }
 
             if(ch == ';')
             {
-                resolveEntity(_token);
-                if( ! _token.empty() )
+                bool resolved = resolveEntity(_token, &_chars, 0);
+                if(resolved)
                 {
-                    // TODO: this does not cover the case when the replacement
-                    // text resolves only to whitespace
                     _chars.append(_token);
-                    _chars.setIgnorable(false);
+
+                    // TODO: do this in Characters::append
+                    for(std::size_t n = 0; n < _token.size(); ++n)
+                    {
+                        Pt::Char c = _token[n];
+                        if(c != ' ' && c != '\n' && c != '\r' && c != '\t')
+                        {
+                            _chars.setIgnorable(false);
+                            break;
+                        }
+                    }
 
                     _token.clear();
                     _parse = &XmlReaderImpl::onCharacters;
@@ -1771,6 +1783,7 @@ class XmlReaderImpl
                 // _chars.setIgnorable(false) is potentially called again when
                 // non-space is found in replacement text and non-space text 
                 // has been parsed before
+                _token.clear();
                 _parse = &XmlReaderImpl::onIgnorableCharacters;
                 return;
             }
@@ -1924,21 +1937,44 @@ class XmlReaderImpl
             _cmBuilder.pushOperand(leaf);
         }
 
-        void resolveEntity(String& str)
+        bool resolveEntity(String& token, Characters* chars, Attribute* attr)
         {
-            if( _entities.resolveDefaultEntity( str ) )
-                return;
+            // TODO: handle this in concrete parser states
+            if( _entities.resolveDefaultEntity( token ) )
+                return true;
 
-            const Entity* ent = _entities.find(str);
+            const Entity* ent = _entities.resolveEntity(token);
             if( ! ent )
-                throw SyntaxError("invalid entity reference", line());
+            {
+                if(chars)
+                    _entityRef.attach(chars);
+                else if(attr)
+                    _entityRef.attach(attr);
+                
+                _current = &_entityRef;
+                return false;
+            }
 
             if( ent->isExternal() )
-                throw SyntaxError("external entity not supported", line());
-            
-            str.clear();
+            {
+                if(chars)
+                    _entityRef.attach(chars);
+                else if(attr)
+                    _entityRef.attach(attr);
+                
+                _current = &_entityRef;
+                return false;
+            }
+
+            if( ent->isUnparsed() )
+            {
+                token = ent->value();
+                return true;
+            }
+
             _external.push( new StringInputSource( ent->value() ) );
             _buffer = _external.top()->rdbuf();
+            return false;
         }
 
         void appendContent(Pt::Char c)
@@ -2172,7 +2208,9 @@ class XmlReaderImpl
                     {
                         if( ! _external.empty() )
                         {
-                            delete _external.top();
+                            if( _external.top()->refs() == 0 )
+                                delete _external.top();
+                            
                             _external.pop();
                             break;
                         }
@@ -2215,7 +2253,9 @@ class XmlReaderImpl
  
                     if( ! input->advance() )
                     {
-                        delete _external.top();
+                        if( _external.top()->refs() == 0 )
+                            delete _external.top();
+                        
                         _external.pop();
                         continue;
                     }
@@ -2286,6 +2326,7 @@ class XmlReaderImpl
         // TODO: some sort of union?
         ProcessingInstruction _procInstr;
         StartElement _startElem;
+        EntityReference _entityRef;
         EndElement _endElem;
         Characters _chars;
         EndDocument _endDoc;

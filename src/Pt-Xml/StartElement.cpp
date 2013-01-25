@@ -26,6 +26,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "Pt/Xml/StartElement.h"
+#include "Pt/Xml/Characters.h"
 #include "Pt/Xml/XmlError.h"
 
 namespace Pt {
@@ -79,6 +80,29 @@ const String& StartElement::attribute(const String& nsUri, const String& name) c
         throw NoSuchAttribute(name);
 
     return it->value();
+}
+
+
+void EntityReference::resolve(const Pt::String& value) const
+{
+    if(_chars)
+    {       
+        _chars->append(value);
+
+        for(std::size_t n = 0; n < value.size(); ++n)
+        {
+            Pt::Char c = value[n];
+            if(c != ' ' && c != '\n' && c != '\r' && c != '\t')
+            {
+                _chars->setIgnorable(false);
+                break;
+            }
+        }
+    }
+    else if(_attr)
+    {
+        _attr->value().append(value);
+    }
 }
 
 } // namespace Xml

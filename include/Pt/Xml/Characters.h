@@ -72,7 +72,12 @@ class PT_XML_API Characters : public Node
 
         // TODO: might want to set ignorableWS flag here...
         void append(Char ch)
-        { _content += ch; }
+        { 
+            //if(c != ' ' && c != '\n' && c != '\r' && c != '\t')
+            //    _ignorable = false;
+            
+            _content += ch; 
+        }
 
         void append(const Pt::String& str)
         { _content.append(str); }
@@ -86,6 +91,9 @@ class PT_XML_API Characters : public Node
         /** @brief Returns the content as a string.
         */
         const String& content() const
+        { return _content; }
+
+        String& content()
         { return _content; }
 
         /** @brief Sets the content.

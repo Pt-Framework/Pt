@@ -41,21 +41,42 @@ class Entity
     public:
         Entity()
         {}
+     
+        Entity(Pt::Char val, bool ndata)
+        : _value(1, val)
+        , _ndata(ndata)
+        {}
         
+        Entity(const Pt::String& value, bool ndata)
+        : _value(value)
+        , _ndata(ndata)
+        {}
+
         bool isExternal() const
         { return ! _publicId.empty() || ! _systemId.empty(); }
+
+        bool isUnparsed() const
+        { return _ndata; }
+
+        bool setUnparsed(bool ndata = true)
+        { _ndata = ndata; }
 
         const Pt::String& value() const
         { return _value; }
 
-        void setValue(const Pt::String& val)
-        { _value = val; }
+        void setValue(const Pt::String& val, bool ndata)
+        { 
+            _value = val; 
+            _ndata = ndata;
+        }
 
     private:
         Pt::String _publicId;
         Pt::String _systemId;
         Pt::String _value;
+        bool _ndata;
 };
+
 
 /** @brief Handles character and entity references.
 */
@@ -71,8 +92,7 @@ class PT_XML_API EntityMapping
         //! @brief Destructor.
         ~EntityMapping();
 
-        void clear()
-        { _entities.clear(); }
+        void clear();
 
         Entity* addEntity(const Pt::String& name);
 
@@ -80,13 +100,13 @@ class PT_XML_API EntityMapping
         */
         bool resolveDefaultEntity(String& entity) const;
 
-        const Entity* find(const Pt::String& name) const;
+        const Entity* resolveEntity(const Pt::String& name) const;
 
         /** @brief Returns the entity reference for a character.
 
             If no entity reference is found, a null pointer is returned.
         */
-        const Pt::Char* findEntity(Char ch) const;
+        const Pt::Char* encode(Char ch) const;
 
         /** @brief Replaces characters with entities.
             

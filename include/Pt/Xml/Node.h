@@ -77,7 +77,10 @@ class Node
             Comment = 7,
 
             //! Processing instruction
-            ProcessingInstruction = 8
+            ProcessingInstruction = 8,
+
+            //! Unresolved entity reference
+            EntityReference = 9
         };
 
         //! @brief Destructor.

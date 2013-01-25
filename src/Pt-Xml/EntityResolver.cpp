@@ -348,6 +348,12 @@ Entity* EntityMapping::addEntity(const Pt::String& name)
 }
 
 
+void EntityMapping::clear()
+{ 
+    _entities.clear(); 
+}
+
+
 bool EntityMapping::resolveDefaultEntity(String& entity) const
 {
     if( ! entity.empty() && entity[0] == '#')
@@ -380,54 +386,103 @@ bool EntityMapping::resolveDefaultEntity(String& entity) const
             }
         }
 
-        entity = String( 1, Char(code) );
+        entity.assign( 1, Char(code) );
         return true;
     }
 
-    unsigned u = 0;
-    unsigned o = sizeof(ent)/sizeof(Ent) - 1;
-    while (o - u > 1)
+    if( ! entity.empty() )
     {
-        unsigned m = (o + u) / 2;
-        int c = entity.compare(ent[m].entity);
-        if (c == 0)
-        {
-            entity = String(1, Char(ent[m].charValue));
-            return true;
-        }
-        else if (c < 0)
-            o = m;
-        else
-            u = m;
-    }
-
-    if (entity.compare(ent[u].entity) == 0)
-    {
-        entity = String(1, Char(ent[u].charValue));
-        return true;
-    }
-
-    if (entity.compare(ent[o].entity) == 0)
-    {
-        entity = String(1, Char(ent[o].charValue));
-        return true;
+          switch( entity[0] )
+          {
+              case 'a':
+                  if(entity == "apos")
+                  {
+                      entity.assign(1, '\'');
+                      return true;
+                  }
+                  else if(entity == "amp")
+                  {
+                      entity.assign(1, '&');
+                      return true;
+                  }
+                  
+                  break;
+              
+              case 'q':
+                  if(entity == "quot")
+                  {
+                    entity.assign(1, '"');
+                    return true;
+                  }
+                  
+                  break;
+              
+              case 'l':
+                  if(entity == "lt")
+                  {
+                    entity.assign(1, '<');
+                    return true;
+                  }
+                  
+                  break;
+              
+              case 'g':
+                  if(entity == "gt")
+                  {
+                    entity.assign(1, '>');
+                    return true;
+                  }
+                  
+                  break;
+          }
     }
 
     return false;
+
+    //unsigned u = 0;
+    //unsigned o = sizeof(ent)/sizeof(Ent) - 1;
+    //while (o - u > 1)
+    //{
+    //    unsigned m = (o + u) / 2;
+    //    int c = entity.compare(ent[m].entity);
+    //    if (c == 0)
+    //    {
+    //        entity = String(1, Char(ent[m].charValue));
+    //        return true;
+    //    }
+    //    else if (c < 0)
+    //        o = m;
+    //    else
+    //        u = m;
+    //}
+
+    //if (entity.compare(ent[u].entity) == 0)
+    //{
+    //    entity = String(1, Char(ent[u].charValue));
+    //    return true;
+    //}
+
+    //if (entity.compare(ent[o].entity) == 0)
+    //{
+    //    entity = String(1, Char(ent[o].charValue));
+    //    return true;
+    //}
+
+    //return false;
 }
 
 
-const Entity* EntityMapping::find(const Pt::String& name) const
+const Entity* EntityMapping::resolveEntity(const Pt::String& name) const
 {
     Entities::const_iterator it = _entities.find(name);
     if(it == _entities.end() )
         return 0;
 
-    return &it->second;
+    return &(it->second);
 }
 
 
-const Pt::Char* EntityMapping::findEntity(Char ch) const
+const Pt::Char* EntityMapping::encode(Char ch) const
 {
     unsigned u = 0;
     unsigned o = sizeof(rent)/sizeof(REnt) - 1;
@@ -461,7 +516,7 @@ void EntityMapping::encode(std::basic_ostream<Char>& os, const Pt::Char* str) co
 
     for( ; *it != '\0'; ++it)
     {
-        const Char* entity = findEntity(*it);
+        const Char* entity = encode(*it);
         if(entity)
         {
             printEntity(os, entity);

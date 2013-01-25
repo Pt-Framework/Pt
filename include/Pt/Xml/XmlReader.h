@@ -50,6 +50,9 @@ class InputSource : public std::basic_istream<Char>
         virtual ~InputSource()
         {}
 
+        std::size_t refs() const
+        { return _refs; }
+
         bool advance()
         {                               
             if( ! rdbuf() )
@@ -62,11 +65,15 @@ class InputSource : public std::basic_istream<Char>
         }
 
     protected:
-        InputSource(std::basic_streambuf<Char>* sb = 0)
+        InputSource(std::basic_streambuf<Char>* sb = 0, std::size_t refs = 0)
         : std::basic_istream<Char>(sb)
+        , _refs(0)
         {}
 
         virtual bool onAdvance() = 0;
+
+    private:
+        std::size_t _refs;
 };
 
 class StringInputSource : public InputSource

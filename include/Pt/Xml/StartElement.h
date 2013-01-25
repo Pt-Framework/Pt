@@ -263,6 +263,74 @@ inline const StartElement& toStartElement(const Node& node)
     return nodeCast<StartElement>(node);
 }
 
+
+class Characters;
+
+class EntityReference : public Node 
+{
+    public:
+        /** @brief Creates an EndDocument object.
+        */
+        EntityReference()
+        : Node(Node::EntityReference)
+        , _chars(0)
+        , _attr(0)
+        { }
+
+        //! @internal
+        inline static const Node::Type nodeId()
+        { return Node::EntityReference; }
+
+        const Pt::String& name() const
+        { return _name; }
+
+        // TODO: allow user to resolve entity directly.
+        // return a the string which contains the enitity reference
+        
+        void resolve(const Pt::String& value) const;
+
+        void attach(Pt::Xml::Characters* chars)
+        {
+            _chars = chars;
+            _attr = 0;
+        }
+
+        void attach(Attribute* attr)
+        {
+            _chars = 0;
+            _attr = attr;
+        }
+
+    private:
+        Pt::String _name;
+        Pt::Xml::Characters* _chars;
+        Attribute* _attr;
+};
+
+
+inline EntityReference* toEntityReference(Node* node)
+{
+    return nodeCast<EntityReference>(node);
+}
+
+
+inline const EntityReference* toEntityReference(const Node* node)
+{
+    return nodeCast<EntityReference>(node);
+}
+
+
+inline EntityReference& toEntityReference(Node& node)
+{
+    return nodeCast<EntityReference>(node);
+}
+
+
+inline const EntityReference& toEntityReference(const Node& node)
+{
+    return nodeCast<EntityReference>(node);
+}
+
 } // namespace Xml
 
 } // namespace Pt
