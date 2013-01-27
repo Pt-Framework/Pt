@@ -233,7 +233,7 @@ class DocTypeDefinition : private NonCopyable
         DocTypeDefinition()
         {}
 
-        DocTypeDefinition::~DocTypeDefinition()
+        ~DocTypeDefinition()
         {
             assert(_pool.empty());
         }

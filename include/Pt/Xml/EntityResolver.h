@@ -58,7 +58,7 @@ class Entity
         bool isUnparsed() const
         { return _ndata; }
 
-        bool setUnparsed(bool ndata = true)
+        void setUnparsed(bool ndata = true)
         { _ndata = ndata; }
 
         const Pt::String& value() const
