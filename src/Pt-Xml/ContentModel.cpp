@@ -301,8 +301,8 @@ void ContentModelBuilder::reduceStack()
 
 
 ContentValidator::ContentValidator(ContentModel& cm)
-: _stepId(1)
-, _cm(&cm)
+: _cm(&cm)
+, _stepId(1)
 {
     // all nodes are unvisited
     _nodes.assign(cm.size(), 0);

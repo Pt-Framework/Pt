@@ -264,8 +264,8 @@ class ContentValidator
     public:
         //!@brief A validator for an undeclared element.
         ContentValidator()
-        : _stepId(1)
-        , _cm(0)
+        : _cm(0)
+        , _stepId(1)
         {}
 
         ContentValidator(ContentModel& cm);
