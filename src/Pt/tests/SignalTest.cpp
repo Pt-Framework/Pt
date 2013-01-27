@@ -35,6 +35,8 @@
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/RegisterTest.h"
 
+namespace {
+
 void function0()
 {}
 
@@ -67,6 +69,7 @@ class Callee : public Pt::Connectable
         int _count;
 };
 
+}
 
 class SignalTest : public Pt::Unit::TestSuite
 {

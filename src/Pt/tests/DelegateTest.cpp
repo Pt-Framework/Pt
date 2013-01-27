@@ -34,6 +34,7 @@
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/RegisterTest.h"
 
+namespace {
 
 class Callee : public Pt::Connectable
 {
@@ -64,6 +65,7 @@ class Callee : public Pt::Connectable
         int _count;
 };
 
+}
 
 class DelegateTest : public Pt::Unit::TestSuite
 {
