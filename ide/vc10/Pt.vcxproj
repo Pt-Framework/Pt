@@ -172,6 +172,7 @@
     <ClInclude Include="..\..\include\Pt\Xml\DocTypeDeclaration.h" />
     <ClInclude Include="..\..\include\Pt\Xml\EndDocument.h" />
     <ClInclude Include="..\..\include\Pt\Xml\EndElement.h" />
+    <ClInclude Include="..\..\include\Pt\Xml\Entity.h" />
     <ClInclude Include="..\..\include\Pt\Xml\EntityResolver.h" />
     <ClInclude Include="..\..\include\Pt\Xml\Namespace.h" />
     <ClInclude Include="..\..\include\Pt\Xml\NamespaceContext.h" />
@@ -391,6 +392,7 @@
     <ClCompile Include="..\..\src\Pt-Unit\TextProtocolTest.cpp" />
     <ClCompile Include="..\..\src\Pt-Xml\ContentModel.cpp" />
     <ClCompile Include="..\..\src\Pt-Xml\DocType.cpp" />
+    <ClCompile Include="..\..\src\Pt-Xml\Entity.cpp" />
     <ClCompile Include="..\..\src\Pt-Xml\EntityResolver.cpp" />
     <ClCompile Include="..\..\src\Pt-Xml\NamespaceContext.cpp" />
     <ClCompile Include="..\..\src\Pt-Xml\StartElement.cpp" />

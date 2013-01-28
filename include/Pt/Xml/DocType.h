@@ -62,7 +62,7 @@ class PT_XML_API DocType : public Node
         Pt::String& rootName();
 
         //! @internal
-        inline static const Node::Type nodeId()
+        inline static Node::Type nodeId()
         { return Node::DocType; }
 
     private:

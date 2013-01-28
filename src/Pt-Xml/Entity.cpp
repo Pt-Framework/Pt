@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009-2012 Marc Boris Duerner
+ * Copyright (C) 2012 Marc Boris Duerner
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,62 +25,63 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef Pt_Xml_EntityResolver_h
-#define Pt_Xml_EntityResolver_h
-
-#include <Pt/Xml/Api.h>
-#include <Pt/Xml/Entity.h>
-#include <Pt/String.h>
-#include <map>
+ 
+#include "Pt/Xml/Entity.h"
+#include "Pt/Xml/StartElement.h"
+#include "Pt/Xml/Characters.h"
+#include "Pt/Xml/XmlError.h"
 
 namespace Pt {
 
 namespace Xml {
 
-/** @brief Handles character and entity references.
-*/
-class PT_XML_API EntityMapping
+EntityReference::EntityReference()
+: Node(Node::EntityReference)
+, _entity(0)
+, _chars(0)
+, _attr(0)
+{ }
+
+
+void EntityReference::set(const Pt::String& name, const Entity* entity, Pt::Xml::Characters* chars)
+{ 
+    _name = name; 
+    _entity = entity; 
+    _chars = chars;
+    _attr = 0;
+}
+
+
+void EntityReference::set(const Pt::String& name, const Entity* entity, Attribute* attr)
+{ 
+    _name = name; 
+    _entity = entity;
+    _chars = 0;
+    _attr = attr;
+}
+
+
+void EntityReference::resolve(const Pt::Char* value) const
 {
-    typedef std::map<String, Entity> Entities;
+    if(_chars)
+    {       
+        _chars->append(value);
 
-    public:
-        /** @brief Constructs with the XML default entities.
-        */
-        EntityMapping();
-
-        //! @brief Destructor.
-        ~EntityMapping();
-
-        void clear();
-
-        Entity* addEntity(const Pt::String& name);
-
-        /** @brief Replaces the entity with its string value.
-        */
-        bool resolveDefaultEntity(String& entity) const;
-
-        const Entity* resolveEntity(const Pt::String& name) const;
-
-        /** @brief Returns the entity reference for a character.
-
-            If no entity reference is found, a null pointer is returned.
-        */
-        const Pt::Char* encode(Char ch) const;
-
-        /** @brief Replaces characters with entities.
-            
-            If characters are found in @a str, which are represented by an
-            entity reference, they will be replaced. The result is written
-            to the output stream @a os.
-        */
-        void encode(std::basic_ostream<Char>& os, const Pt::Char* str) const;
-
-    private:
-        Entities _entities;
-};
+        for(const Pt::Char* ch = value; *ch != '\0'; ++ch)
+        {
+            if(*ch != ' ' && *ch != '\n' && *ch != '\r' && *ch != '\t')
+            {
+                _chars->setIgnorable(false);
+                break;
+            }
+        }
+    }
+    else if(_attr)
+    {
+        _attr->value().append(value);
+    }
+}
 
 } // namespace Xml
 
 } // namespace Pt
-
-#endif

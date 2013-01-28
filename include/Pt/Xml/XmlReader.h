@@ -32,7 +32,9 @@
 #include <Pt/Xml/Node.h>
 #include <Pt/Xml/EndDocument.h>
 #include <Pt/String.h>
-#include "Pt/StringStream.h"
+#include <Pt/StringStream.h>
+#include <Pt/TextBuffer.h>
+#include <Pt/Utf8Codec.h>
 #include <iosfwd>
 
 namespace Pt {
@@ -65,9 +67,9 @@ class InputSource : public std::basic_istream<Char>
         }
 
     protected:
-        InputSource(std::basic_streambuf<Char>* sb = 0, std::size_t refs = 0)
+        InputSource(std::basic_streambuf<Char>* sb = 0, std::size_t refcnt = 0)
         : std::basic_istream<Char>(sb)
-        , _refs(0)
+        , _refs(refcnt)
         {}
 
         virtual bool onAdvance() = 0;
@@ -79,8 +81,9 @@ class InputSource : public std::basic_istream<Char>
 class StringInputSource : public InputSource
 {
     public:
-        StringInputSource(const String& str)
-        : _sbuf(str)
+        StringInputSource(const String& str, std::size_t refcnt = 0)
+        : InputSource(0, refcnt)
+        , _sbuf(str)
         {
             init(&_sbuf);
         }
@@ -99,6 +102,85 @@ class StringInputSource : public InputSource
 
     private:
         StringBuffer _sbuf;
+};
+
+class ByteInputSource : public InputSource
+{
+    public:
+        ByteInputSource(std::istream& is, std::size_t refcnt = 0)
+        : InputSource(0, refcnt)
+        , _tbuf(&is, new Utf8Codec)
+        , _is(&is)
+        {
+            init(&_tbuf);
+        }
+
+        virtual ~ByteInputSource()
+        { }
+
+    protected:
+        virtual bool onAdvance()
+        {
+            _tbuf.import();
+
+            if( _is->eof() )
+                return false;
+
+            return true;
+        }
+
+    private:
+        TextBuffer _tbuf;
+        std::istream* _is;
+};
+
+class TextInputSource : public InputSource
+{
+    public:
+        TextInputSource(TextBuffer& tb, std::size_t refcnt = 0)
+        : InputSource(&tb, refcnt)
+        , _tbuf(&tb)
+        { }
+
+        virtual ~TextInputSource()
+        { }
+
+    protected:
+        virtual bool onAdvance()
+        {
+            _tbuf->import();
+            
+            if( this->eof() )
+                return false;
+
+            return true;
+        }
+
+        void setEof()
+        { this->setstate(std::ios::eofbit); }
+    
+    private:
+        TextBuffer* _tbuf;
+};
+
+class TextInputSource2 : public InputSource
+{
+    public:
+        TextInputSource2(std::basic_istream<Char>& is, std::size_t refcnt = 0)
+        : InputSource(is.rdbuf(), refcnt)
+        { }
+
+        virtual ~TextInputSource2()
+        { }
+
+    protected:
+        virtual bool onAdvance()
+        {
+            return true;
+        }
+
+        void setEof()
+        { this->setstate(std::ios::eofbit); }
 };
 
 /** @brief Reads XML as a Stream of XML Nodes.
@@ -164,6 +246,8 @@ class PT_XML_API XmlReader
         void attach(std::basic_istream<Char>& is, int flags = 0);
 
         void attach(std::istream& is, int flags = 0);
+
+        void attach(InputSource& is, int flags);
 
         // TODO: When user receives a EntityReference node this method
         // can be used to resolve the external reference.

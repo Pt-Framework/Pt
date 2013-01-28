@@ -29,6 +29,7 @@
 #include "Pt/Xml/XmlReader.h"
 #include "Pt/Xml/StartElement.h"
 #include "Pt/Xml/Comment.h"
+#include "Pt/Xml/Entity.h"
 #include "Pt/Xml/Characters.h"
 #include "Pt/Xml/EndElement.h"
 #include "Pt/Xml/EndDocument.h"
@@ -64,6 +65,7 @@ class XmlReaderTest : public Pt::Unit::TestSuite
             this->registerMethod("DefaultNamespace", *this, &XmlReaderTest::DefaultNamespace);
             this->registerMethod("DefaultEntities", *this, &XmlReaderTest::DefaultEntities);
             this->registerMethod("CustomEntities", *this, &XmlReaderTest::CustomEntities);
+            this->registerMethod("ExternalEntities", *this, &XmlReaderTest::ExternalEntities);
             this->registerMethod("InvalidAttribute1", *this, &XmlReaderTest::InvalidAttribute1);
             this->registerMethod("InvalidAttribute2", *this, &XmlReaderTest::InvalidAttribute2);
             this->registerMethod("InvalidAttribute3", *this, &XmlReaderTest::InvalidAttribute3);
@@ -108,6 +110,7 @@ class XmlReaderTest : public Pt::Unit::TestSuite
         void CDATA();
         void DefaultEntities();
         void CustomEntities();
+        void ExternalEntities();
         void CommentInProlog();
         void CommentInElement();
         void CommentInEpilog();
@@ -881,13 +884,74 @@ void XmlReaderTest::CustomEntities()
     PT_UNIT_ASSERT(Pt::Xml::toStartElement(&*it));
 
     ++it;
-    PT_UNIT_ASSERT( Pt::Xml::toEntityReference(&*it) );
-    PT_UNIT_ASSERT( Pt::Xml::toEntityReference(*it).name() == L"undeclared" );
-    Pt::Xml::toEntityReference(*it).resolve( Pt::String(L"resolved").c_str() );
+    Pt::Xml::EntityReference* ent = Pt::Xml::toEntityReference(&*it);
+    PT_UNIT_ASSERT(ent);
+    PT_UNIT_ASSERT(ent->name() == L"undeclared" );
+    ent->resolve( Pt::String(L"resolved").c_str() );
 
     ++it;
     PT_UNIT_ASSERT(Pt::Xml::toCharacters(&*it));
     PT_UNIT_ASSERT(Pt::Xml::toCharacters(*it).content() == L"Hello World! resolved");
+
+    ++it;
+    PT_UNIT_ASSERT(Pt::Xml::toEndElement(&*it));
+}
+
+
+void XmlReaderTest::ExternalEntities()
+{
+    std::stringstream input;
+    input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
+
+    input << "<!DOCTYPE a [\n";
+    input << "<!ELEMENT a (#PCDATA)>\n";
+    input << "<!ENTITY MyEntity1 SYSTEM \"Platinum\">\n";
+    input << "<!ENTITY MyEntity2 PUBLIC \"http://www.pt-framework.org\" \"Platinum\">\n";
+    input << "<!ENTITY MyEntity3 PUBLIC \"http://www.pt-framework.org\">\n";
+    input << "]>\n";
+
+    input << "<a>&MyEntity1; &MyEntity2;&MyEntity3;</a>";
+
+    Pt::Xml::XmlReader reader( input );
+    Pt::Xml::XmlReader::Iterator it = reader.current();
+
+    // TODO: parser should report DocType
+    //PT_UNIT_ASSERT(Pt::Xml::toDocType(&*it));
+
+    //++it;
+    PT_UNIT_ASSERT(Pt::Xml::toStartElement(&*it));
+
+    ++it;
+    Pt::Xml::EntityReference* ent = Pt::Xml::toEntityReference(&*it);
+    PT_UNIT_ASSERT(ent);
+    PT_UNIT_ASSERT(ent->name() == L"MyEntity1" );
+    PT_UNIT_ASSERT( ent->get() );
+    PT_UNIT_ASSERT(ent->get()->publicId().empty());
+    PT_UNIT_ASSERT(ent->get()->systemId() == L"Platinum" );
+    ent->resolve( Pt::String(L"Hello").c_str() );
+    PT_UNIT_ASSERT(ent);
+
+    ++it;
+    ent = Pt::Xml::toEntityReference(&*it);
+    PT_UNIT_ASSERT(ent);
+    PT_UNIT_ASSERT(ent->name() == L"MyEntity2" );
+    PT_UNIT_ASSERT( ent->get() );
+    PT_UNIT_ASSERT(ent->get()->publicId() == L"http://www.pt-framework.org");
+    PT_UNIT_ASSERT(ent->get()->systemId() == L"Platinum" );
+    ent->resolve( Pt::String(L"World").c_str() );
+
+    ++it;
+    ent = Pt::Xml::toEntityReference(&*it);
+    PT_UNIT_ASSERT(ent);
+    PT_UNIT_ASSERT(ent->name() == L"MyEntity3" );
+    PT_UNIT_ASSERT( ent->get() );
+    PT_UNIT_ASSERT(ent->get()->publicId() == L"http://www.pt-framework.org");
+    PT_UNIT_ASSERT(ent->get()->systemId().empty() );
+    ent->resolve( Pt::String(L"!").c_str() );
+
+    ++it;
+    PT_UNIT_ASSERT(Pt::Xml::toCharacters(&*it));
+    PT_UNIT_ASSERT(Pt::Xml::toCharacters(*it).content() == L"Hello World!");
 
     ++it;
     PT_UNIT_ASSERT(Pt::Xml::toEndElement(&*it));

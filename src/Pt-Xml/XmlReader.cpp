@@ -577,20 +577,76 @@ class XmlReaderImpl
                 assert(_entity == 0);
                 _entity = _entities.addEntity(_token);
                 _token.clear();
-                _parse = &XmlReaderImpl::OnDtdAfterName;
+                _parse = &XmlReaderImpl::OnDtdEntityAfterName;
                 return;
             }
 
             throw SyntaxError("XML syntax error", _line);
         }
         
-        void OnDtdAfterName(int c)
+        void OnDtdEntityAfterName(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if(ch == 'S')
+            {
+                _token += ch;
+                _parse = &XmlReaderImpl::OnDtdEntitySystem;
+                return;
+            }
+
+            if( ch == '"' )
+            {
+                _parse = &XmlReaderImpl::OnDtdEntityValue;
+                return;
+            }
+            
+            if(ch == 'P')
+            {
+                _token += ch;
+                _parse = &XmlReaderImpl::OnDtdEntityPublic;
+                return;
+            }
+            
+            if( Pt::isspace(ch) )
+            {
+                return;
+            }
+
+            throw SyntaxError("XML syntax error", _line);
+        }
+
+        void OnDtdEntityPublic(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if(ch == 'U' || ch == 'B' || ch == 'L' || ch == 'I' || ch == 'C')
+            {
+                _token += ch;
+                return;
+            }
+
+            if( Pt::isspace(ch) )
+            {
+                bool ok = _token == L"PUBLIC";
+                _token.clear();
+                if( ! ok)
+                    throw SyntaxError("XML syntax error", _line);
+                
+                _parse = &XmlReaderImpl::OnDtdEntityBeforePublicId;
+                return;
+            }
+
+            throw SyntaxError("XML syntax error", _line);
+        }
+        
+        void OnDtdEntityBeforePublicId(int c)
         {
             Pt::Char ch = notEof(c);
 
             if( ch == '"' )
             {
-                _parse = &XmlReaderImpl::OnDtdValue;
+                _parse = &XmlReaderImpl::OnDtdEntityPublicId;
                 return;
             }
 
@@ -602,29 +658,114 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", _line);
         }
 
-        void OnDtdValue(int c)
+        void OnDtdEntityPublicId(int c)
         {
             Pt::Char ch = notEof(c);
 
             if( ch == '"' )
             {
                 assert(_entity);
-                _entity->setValue(_token, false);
-                _entity = 0;
+                _entity->setPublicId(_token);
                 _token.clear();
-                _parse = &XmlReaderImpl::OnDtdAfterValue;
+                _parse = &XmlReaderImpl::OnDtdAfterPublicId;
+                return;
+            }
+
+            _token += ch;
+        }
+
+        void OnDtdAfterPublicId(int c)
+        {
+            if( c == '"' )
+            {
+                _parse = &XmlReaderImpl::OnDtdEntitySystemId;
+                return;
+            }
+
+            this->OnDtdAfterEntityValue(c);
+        }
+
+        void OnDtdEntitySystem(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if(ch == 'Y' || ch == 'S' || ch == 'T' || ch == 'E' || ch == 'M')
+            {
+                _token += ch;
+                return;
+            }
+
+            if( Pt::isspace(ch) )
+            {
+                bool ok = _token == L"SYSTEM";
+                _token.clear();
+                if( ! ok)
+                    throw SyntaxError("XML syntax error", _line);
+                
+                _parse = &XmlReaderImpl::OnDtdEntityBeforeSystemId;
+                return;
+            }
+
+            throw SyntaxError("XML syntax error", _line);
+        }
+
+        void OnDtdEntityBeforeSystemId(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if( ch == '"' )
+            {
+                _parse = &XmlReaderImpl::OnDtdEntitySystemId;
+                return;
+            }
+
+            if( Pt::isspace(ch) )
+            {
+                return;
+            }
+
+            throw SyntaxError("XML syntax error", _line);
+        }
+
+        void OnDtdEntitySystemId(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if( ch == '"' )
+            {
+                assert(_entity);
+                _entity->setSystemId(_token);
+                _token.clear();
+                _parse = &XmlReaderImpl::OnDtdAfterEntityValue;
+                return;
+            }
+
+            _token += ch;
+        }
+
+        void OnDtdEntityValue(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if( ch == '"' )
+            {
+                assert(_entity);
+                _entity->setValue(_token);
+                _token.clear();
+                _parse = &XmlReaderImpl::OnDtdAfterEntityValue;
                 return;
             }
 
             _token += ch;
         }
         
-        void OnDtdAfterValue(int c)
+        void OnDtdAfterEntityValue(int c)
         {
             Pt::Char ch = notEof(c);
 
             if( ch == '>' )
             {
+                _entity = 0;
                 _parse = &XmlReaderImpl::OnDtdInternal;
                 return;
             }
@@ -636,7 +777,6 @@ class XmlReaderImpl
 
             throw SyntaxError("XML syntax error", _line);
         }
-
 
         void OnDtdAttListBegin(int c)
         {
@@ -1946,23 +2086,21 @@ class XmlReaderImpl
             const Entity* ent = _entities.resolveEntity(token);
             if(ent)
             {
-                if( ! ent->isExternal() )
+                if( ent->isInternal() )
                 {
                     _external.push( new StringInputSource( ent->value() ) );
                     _buffer = _external.top()->rdbuf();
                     return false;
                 }
-
-                // TODO:
-                // _entityRef->setEntitiy(ent);
             }
 
             if(chars)
-                _entityRef.attach(chars);
+                _entityRef.set(token, ent, chars);
             else if(attr)
-                _entityRef.attach(attr);
-                
-            _entityRef.setName(token);
+                _entityRef.set(token, ent, attr);
+            else
+                throw std::logic_error("internal entity error");
+
             _current = &_entityRef;
             return false;
         }
@@ -2041,8 +2179,7 @@ class XmlReaderImpl
 
     public:
         XmlReaderImpl(std::basic_istream<Char>& is, int flags)
-        : _textBuffer( is.rdbuf() )
-        , _tbuffer(0)
+        : _input( new TextInputSource2(is) )
         , _buffer(0)
         , _flags(flags)
         , _standalone(true)
@@ -2058,11 +2195,11 @@ class XmlReaderImpl
         , _dtdValidator(_dtd)
         {
             _parse = &XmlReaderImpl::onDocumentBegin;
+            _buffer = _input->rdbuf();
         }
 
         XmlReaderImpl(std::istream& is, int flags)
-        : _textBuffer(0)
-        , _tbuffer(0)
+        : _input( new ByteInputSource(is) )
         , _buffer(0)
         , _flags(flags)
         , _standalone(true)
@@ -2078,20 +2215,21 @@ class XmlReaderImpl
         , _dtdValidator(_dtd)
         {
             _parse = &XmlReaderImpl::onDocumentBegin;
-
-            _tbuffer = new TextBuffer( &is, new Pt::Utf8Codec() );
-            _textBuffer = _tbuffer;
+            _buffer = _input->rdbuf();
         }
 
         ~XmlReaderImpl()
         {
             while( ! _external.empty() )
             {
-                delete _external.top();
+                if( _external.top()->refs() == 0 )
+                    delete _external.top();
+                
                 _external.pop();
             } 
 
-            delete _tbuffer;
+            if( _input && _input->refs() == 0 )
+                delete _input;
         }
 
         void clear(int flags)
@@ -2101,7 +2239,9 @@ class XmlReaderImpl
             _buffer = 0;
             while( ! _external.empty() )
             {
-                delete _external.top();
+                if( _external.top()->refs() == 0 )
+                    delete _external.top();
+                
                 _external.pop();
             } 
 
@@ -2126,19 +2266,43 @@ class XmlReaderImpl
         void attach(std::basic_istream<Char>& is, int flags)
         {
             clear(flags);
-            
-            delete _tbuffer;
-            _tbuffer = 0;
-            _textBuffer = is.rdbuf();
+
+            if( _input && _input->refs() == 0 )
+            {
+                delete _input;
+                _input = 0;
+            }
+
+            _input = new TextInputSource2(is);
+            _buffer = _input->rdbuf();
         }
 
         void attach(std::istream& is, int flags)
         {
             clear(flags);
+
+            if( _input && _input->refs() == 0 )
+            {
+                delete _input;
+                _input = 0;
+            }
+
+            _input = new ByteInputSource(is);
+            _buffer = _input->rdbuf();
+        }
+
+        void attach(InputSource& is, int flags)
+        {
+            clear(flags);
             
-            delete _tbuffer;
-            _tbuffer = new TextBuffer( &is, new Pt::Utf8Codec() );
-            _textBuffer = _tbuffer;
+            if( _input && _input->refs() == 0 )
+            {
+                delete _input;
+                _input = 0;
+            }
+
+            _input = &is;
+            _buffer = _input->rdbuf();
         }
 
         const Pt::String& version() const
@@ -2173,50 +2337,59 @@ class XmlReaderImpl
             return *_current;
         }
 
+        void popInput()
+        {
+            if( _external.empty() )
+            {
+                _buffer = 0;
+                return;
+            }
+
+            if( _external.top()->refs() == 0 )
+                delete _external.top();
+                        
+            _external.pop();
+            
+            _buffer = 0;
+            
+            if( ! _external.empty() )
+                _buffer = _external.top()->rdbuf();
+            else
+                _buffer = _input ? _input->rdbuf() : 0;
+        }
+
+        std::basic_streambuf<Char>* inputBuffer()
+        {
+            return _buffer;
+        }
+
         Node& next()
         {
             _current = 0;
             int c = 0;
 
-            for(;;)
-            {          
-                _buffer = _textBuffer;    
-                
-                if( ! _external.empty() )
-                {
-                    _buffer = _external.top()->rdbuf();
-                }
+            if( ! inputBuffer() )
+                throw std::logic_error("no input for XmlReader");
 
-                if( ! _buffer )
-                    throw std::logic_error("no input for XmlReader");
+            while( ! _current )
+            {
+                c = inputBuffer()->sbumpc();
 
-                while( ! _current )
+                if( c == std::char_traits<Char>::eof() )
                 {
-                    c = _buffer->sbumpc();
-       
-                    if( c == std::char_traits<Char>::eof() )
-                    {
-                        if( ! _external.empty() )
-                        {
-                            if( _external.top()->refs() == 0 )
-                                delete _external.top();
-                            
-                            _external.pop();
-                            break;
-                        }
-                    }
+                    popInput();
                     
-                    (this->*_parse)(c); // might change _buffer
-
-                    // TODO: this does not work for external input sources
-                    if(c == '\n')
-                    {
-                        ++_line;
-                    }
+                    if( inputBuffer() )
+                        continue;
                 }
+                    
+                (this->*_parse)(c);
 
-                if( _current )
-                    break;
+                // TODO: this does not work for external input sources
+                if(c == '\n')
+                {
+                    ++_line;
+                }
             }
 
             if( _docType.isDefined() )
@@ -2234,33 +2407,26 @@ class XmlReaderImpl
             int c = 0;
 
             for(;;)
-            {          
-                _buffer = _textBuffer;    
-                
-                if( ! _external.empty() )
-                {
-                    InputSource* input = _external.top();
- 
-                    if( ! input->advance() )
-                    {
-                        if( _external.top()->refs() == 0 )
-                            delete _external.top();
-                        
-                        _external.pop();
-                        continue;
-                    }
+            {                         
+                InputSource* input = _external.empty() ? _input : _external.top(); 
 
-                    _buffer = input->rdbuf();
-                }
-
-                if( ! _buffer || _buffer->in_avail() <= 0 )
+                if( ! input )
                     break;
 
-                while( ! _current && _buffer->in_avail() > 0 )
+                if( ! input->advance() )
                 {
-                    c = _buffer->sbumpc();
+                    popInput();
+                    continue;
+                }
 
-                    (this->*_parse)(c); // might change _buffer
+                if( input->rdbuf()->in_avail() <= 0)
+                    break;
+
+                while( ! _current && inputBuffer()->in_avail() > 0 )
+                {
+                    c = inputBuffer()->sbumpc();
+
+                    (this->*_parse)(c);
 
                     // TODO: this does not work for external input sources
                     if(c == '\n')
@@ -2284,11 +2450,13 @@ class XmlReaderImpl
             return _current != 0;
         }
 
+
     private:
-        std::basic_streambuf<Char>* _textBuffer;
-        std::basic_streambuf<Char>* _tbuffer;
+        InputSource* _input;
+        //std::basic_streambuf<Char>* _tbuffer;
         std::basic_streambuf<Char>* _buffer;
         std::stack<InputSource*> _external;
+        //InputSource* _currentInput;
         int _flags;
         
         typedef void (XmlReaderImpl::*ParseFunc)(int);
@@ -2350,6 +2518,12 @@ void XmlReader::attach(std::basic_istream<Char>& is, int flags)
 
 
 void XmlReader::attach(std::istream& is, int flags)
+{
+    _impl->attach(is, flags);
+}
+
+
+void XmlReader::attach(InputSource& is, int flags)
 {
     _impl->attach(is, flags);
 }

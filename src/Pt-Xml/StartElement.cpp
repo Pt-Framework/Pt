@@ -25,8 +25,8 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #include "Pt/Xml/StartElement.h"
-#include "Pt/Xml/Characters.h"
 #include "Pt/Xml/XmlError.h"
 
 namespace Pt {
@@ -80,28 +80,6 @@ const String& StartElement::attribute(const String& nsUri, const String& name) c
         throw NoSuchAttribute(name);
 
     return it->value();
-}
-
-
-void EntityReference::resolve(const Pt::Char* value) const
-{
-    if(_chars)
-    {       
-        _chars->append(value);
-
-        for(const Pt::Char* ch = value; *ch != '\0'; ++ch)
-        {
-            if(*ch != ' ' && *ch != '\n' && *ch != '\r' && *ch != '\t')
-            {
-                _chars->setIgnorable(false);
-                break;
-            }
-        }
-    }
-    else if(_attr)
-    {
-        _attr->value().append(value);
-    }
 }
 
 } // namespace Xml
