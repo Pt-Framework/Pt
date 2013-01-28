@@ -2415,51 +2415,68 @@ class XmlReaderImpl
             _current = 0;
             int c = 0;
 
-            for(;;)
-            {                         
-                if( advanceInput() <= 0)
-                    break;
+        //for(;;)
+        //{
+            //if( advanceInput() <= 0)
+            //    return false;
 
-                while( ! _current && currentInput()->rdbuf()->in_avail() > 0 )
+            while( ! _current && currentInput() )
+            {
+                if( currentInput()->rdbuf()->in_avail() <= 0 )
                 {
-                    c = currentInput()->rdbuf()->sbumpc();
-
-                    (this->*_parse)(c);
-
-                    // TODO: this does not work for external input sources
-                    if(c == '\n')
+                    if( ! currentInput()->advance() )
                     {
-                        ++_line;
+                        popInput();
+                        continue;
                     }
+
+                    if( currentInput()->rdbuf()->in_avail() <= 0)
+                        break;
+                    //if( advanceInput() <= 0)
+                    //    break;
                 }
 
-                if( _current )
+                c = currentInput()->rdbuf()->sbumpc();
+
+                (this->*_parse)(c);
+
+                // TODO: this does not work for external input sources
+                if(c == '\n')
                 {
-                    if( _docType.isDefined() )
-                    {
-                        if( ! _dtdValidator.validate(*_current) )
-                            throw SyntaxError("validation failed", _line);
-                    }
-                    
-                    return true;
+                    ++_line;
                 }
             }
+
+            if( _current )
+            {
+                if( _docType.isDefined() )
+                {
+                    if( ! _dtdValidator.validate(*_current) )
+                        throw SyntaxError("validation failed", _line);
+                }
+                
+                return true;
+            }
+        //}
 
             return false;
         }
 
         std::streamsize advanceInput()
         {
-            while( _currentInput && ! _currentInput->advance() )
+            while(_currentInput)
             {
+                if( _currentInput->advance() )
+                    return _currentInput->rdbuf()->in_avail();
+
                 popInput();
             }
 
-            return _currentInput ? currentInput()->rdbuf()->in_avail() : 0;
+            return 0;
         }
 
         bool inputAvailable()
-        { return _currentInput && currentInput()->rdbuf()->in_avail() > 0; }
+        { return currentInput()->rdbuf()->in_avail() > 0; }
 
     private:
         InputSource* _input;
