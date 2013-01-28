@@ -2089,7 +2089,7 @@ class XmlReaderImpl
                 if( ent->isInternal() )
                 {
                     _external.push( new StringInputSource( ent->value() ) );
-                    _buffer = _external.top()->rdbuf();
+                    _currentInput = _external.top();
                     return false;
                 }
             }
@@ -2180,7 +2180,7 @@ class XmlReaderImpl
     public:
         XmlReaderImpl(std::basic_istream<Char>& is, int flags)
         : _input( new TextInputSource2(is) )
-        , _buffer(0)
+        , _currentInput(0)
         , _flags(flags)
         , _standalone(true)
         , _depth(0)
@@ -2195,12 +2195,12 @@ class XmlReaderImpl
         , _dtdValidator(_dtd)
         {
             _parse = &XmlReaderImpl::onDocumentBegin;
-            _buffer = _input->rdbuf();
+            _currentInput = _input;
         }
 
         XmlReaderImpl(std::istream& is, int flags)
         : _input( new ByteInputSource(is) )
-        , _buffer(0)
+        , _currentInput(0)
         , _flags(flags)
         , _standalone(true)
         , _depth(0)
@@ -2215,7 +2215,7 @@ class XmlReaderImpl
         , _dtdValidator(_dtd)
         {
             _parse = &XmlReaderImpl::onDocumentBegin;
-            _buffer = _input->rdbuf();
+            _currentInput = _input;
         }
 
         ~XmlReaderImpl()
@@ -2236,7 +2236,7 @@ class XmlReaderImpl
         {
             _parse = &XmlReaderImpl::onDocumentBegin;
 
-            _buffer = 0;
+            _currentInput = 0;
             while( ! _external.empty() )
             {
                 if( _external.top()->refs() == 0 )
@@ -2274,7 +2274,7 @@ class XmlReaderImpl
             }
 
             _input = new TextInputSource2(is);
-            _buffer = _input->rdbuf();
+            _currentInput = _input;
         }
 
         void attach(std::istream& is, int flags)
@@ -2288,7 +2288,7 @@ class XmlReaderImpl
             }
 
             _input = new ByteInputSource(is);
-            _buffer = _input->rdbuf();
+            _currentInput = _input;
         }
 
         void attach(InputSource& is, int flags)
@@ -2302,7 +2302,7 @@ class XmlReaderImpl
             }
 
             _input = &is;
-            _buffer = _input->rdbuf();
+            _currentInput = _input;
         }
 
         const Pt::String& version() const
@@ -2341,7 +2341,7 @@ class XmlReaderImpl
         {
             if( _external.empty() )
             {
-                _buffer = 0;
+                _currentInput = 0;
                 return;
             }
 
@@ -2350,17 +2350,34 @@ class XmlReaderImpl
                         
             _external.pop();
             
-            _buffer = 0;
+            _currentInput = 0;
             
             if( ! _external.empty() )
-                _buffer = _external.top()->rdbuf();
+                _currentInput = _external.top();
             else
-                _buffer = _input ? _input->rdbuf() : 0;
+                _currentInput = _input;
         }
 
-        std::basic_streambuf<Char>* inputBuffer()
+        InputSource* currentInput()
         {
-            return _buffer;
+            return _currentInput;
+        }
+
+        int getInput()
+        {
+            int c = currentInput()->rdbuf()->sbumpc();
+
+            while( c == std::char_traits<Char>::eof() )
+            {
+                popInput();
+                    
+                if( ! currentInput() )
+                    break;
+
+                c = currentInput()->rdbuf()->sbumpc();
+            }
+
+            return c;
         }
 
         Node& next()
@@ -2368,21 +2385,13 @@ class XmlReaderImpl
             _current = 0;
             int c = 0;
 
-            if( ! inputBuffer() )
+            if( ! currentInput() )
                 throw std::logic_error("no input for XmlReader");
 
             while( ! _current )
             {
-                c = inputBuffer()->sbumpc();
+                c = getInput();
 
-                if( c == std::char_traits<Char>::eof() )
-                {
-                    popInput();
-                    
-                    if( inputBuffer() )
-                        continue;
-                }
-                    
                 (this->*_parse)(c);
 
                 // TODO: this does not work for external input sources
@@ -2408,23 +2417,12 @@ class XmlReaderImpl
 
             for(;;)
             {                         
-                InputSource* input = _external.empty() ? _input : _external.top(); 
-
-                if( ! input )
+                if( advanceInput() <= 0)
                     break;
 
-                if( ! input->advance() )
+                while( ! _current && currentInput()->rdbuf()->in_avail() > 0 )
                 {
-                    popInput();
-                    continue;
-                }
-
-                if( input->rdbuf()->in_avail() <= 0)
-                    break;
-
-                while( ! _current && inputBuffer()->in_avail() > 0 )
-                {
-                    c = inputBuffer()->sbumpc();
+                    c = currentInput()->rdbuf()->sbumpc();
 
                     (this->*_parse)(c);
 
@@ -2443,20 +2441,30 @@ class XmlReaderImpl
                             throw SyntaxError("validation failed", _line);
                     }
                     
-                    break;
+                    return true;
                 }
             }
 
-            return _current != 0;
+            return false;
         }
 
+        std::streamsize advanceInput()
+        {
+            while( _currentInput && ! _currentInput->advance() )
+            {
+                popInput();
+            }
+
+            return _currentInput ? currentInput()->rdbuf()->in_avail() : 0;
+        }
+
+        bool inputAvailable()
+        { return _currentInput && currentInput()->rdbuf()->in_avail() > 0; }
 
     private:
         InputSource* _input;
-        //std::basic_streambuf<Char>* _tbuffer;
-        std::basic_streambuf<Char>* _buffer;
         std::stack<InputSource*> _external;
-        //InputSource* _currentInput;
+        InputSource* _currentInput;
         int _flags;
         
         typedef void (XmlReaderImpl::*ParseFunc)(int);
