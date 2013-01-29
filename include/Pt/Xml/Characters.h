@@ -73,9 +73,7 @@ class PT_XML_API Characters : public Node
         // TODO: might want to set ignorableWS flag here...
         void append(Char ch)
         { 
-            //if(c != ' ' && c != '\n' && c != '\r' && c != '\t')
-            //    _ignorable = false;
-            
+            //_ignorable = _ignorable || (ch != ' ' && ch != '\n' && ch != '\r' && ch != '\t');         
             _content += ch; 
         }
 
