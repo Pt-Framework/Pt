@@ -48,6 +48,18 @@ void EntityReference::set(const Pt::String& name, const Entity* entity)
 }
 
 
+const Pt::String& EntityReference::name() const
+{
+    return _name; 
+}
+        
+
+const Entity* EntityReference::get() const
+{ 
+    return _entity; 
+}
+
+
 //void EntityReference::resolve(const Pt::Char* value) const
 //{
 //    if(_chars)

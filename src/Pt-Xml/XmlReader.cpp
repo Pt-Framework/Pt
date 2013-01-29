@@ -395,6 +395,10 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", _line);
         };
 
+        // Note that it is possible to construct a well-formed document
+        // containing a doctypedecl that neither points to an external subset
+        // nor contains an internal subset.
+        
         void OnDocType(int c)
         {
             Char ch = notEof(c);
@@ -496,14 +500,30 @@ class XmlReaderImpl
 
             if( ch == '%' )
             {
-                _parse = &XmlReaderImpl::OnDtdInternalReference;
+                assert(! _beforeEntityReference);
+                _beforeEntityReference = &XmlReaderImpl::OnDtdInternal;
+                _parse = &XmlReaderImpl::OnDtdParameterEntityReference;
                 return;
             }
 
             throw SyntaxError("XML syntax error", _line);
         }
         
-        void OnDtdInternalReference(int c)
+        // The markup declarations may be made up in whole or in part of the
+        // replacement text of parameter entities. The productions later in
+        // this specification for individual nonterminals (elementdecl,
+        // AttlistDecl, and so on) describe the declarations after all the
+        // parameter entities have been included.
+
+        // Parameter entity references are recognized anywhere in the DTD
+        // (internal and external subsets and external parameter entities),
+        // except in literals, processing instructions, comments, and the
+        // contents of ignored conditional sections (see 3.4 Conditional
+        // Sections). They are also recognized in entity value literals.
+        // The use of parameter entities in the internal subset is restricted
+        // furthermore.
+        
+        void OnDtdParameterEntityReference(int c)
         {
             Char ch = notEof(c);
 
@@ -517,7 +537,10 @@ class XmlReaderImpl
             {
                 resolveParamEntity(_token);
                 _token.clear();
-                _parse = &XmlReaderImpl::OnDtdInternal;
+
+                assert(_beforeEntityReference);
+                _parse = _beforeEntityReference;
+                _beforeEntityReference = 0;
                 return;
             }
 
@@ -822,6 +845,10 @@ class XmlReaderImpl
             _token += ch;
         }
 
+        // The entity value literal is preprocessed before it is used in an
+        // entity reference. Character references are replaced immediately
+        // with the specified character. Parameter entity references must be
+        // be resolved recursively.
         void OnDtdEntityValueQuot(int c)
         {
             Pt::Char ch = notEof(c);
@@ -840,29 +867,18 @@ class XmlReaderImpl
                 assert(_entity);
                 _entity->addValue(_token);
                 _token.clear();
-                _parse = &XmlReaderImpl::OnDtdEntityValueQuotEntityRef;
+
+                assert(_beforeEntityReference == 0);
+                _beforeEntityReference = &XmlReaderImpl::OnDtdEntityValueQuot;
+                _parse = &XmlReaderImpl::OnDtdEntityValueEntityReference;
                 return;
             }
 
-            _token += ch;
-        }
-
-        void OnDtdEntityValueQuotEntityRef(int c)
-        {
-            Pt::Char ch = notEof(c);
-
-            if( ch == ';' )
+            if( ch == '%' )
             {
-                if( ! _dtd.resolveCharacterEntity(_token) )
-                {
-                    _token += ';';
-                    _token.insert(0, '&');
-                }
-
-                assert(_entity);
-                _entity->addValue(_token);
-                _token.clear();
-                _parse = &XmlReaderImpl::OnDtdEntityValueQuot;
+                assert(! _beforeEntityReference);
+                _beforeEntityReference = &XmlReaderImpl::OnDtdEntityValueQuot;
+                _parse = &XmlReaderImpl::OnDtdParameterEntityReference;
                 return;
             }
 
@@ -887,14 +903,25 @@ class XmlReaderImpl
                 assert(_entity);
                 _entity->addValue(_token);
                 _token.clear();
-                _parse = &XmlReaderImpl::OnDtdEntityValueAposEntityRef;
+
+                assert(_beforeEntityReference == 0);
+                _beforeEntityReference = &XmlReaderImpl::OnDtdEntityValueApos;
+                _parse = &XmlReaderImpl::OnDtdEntityValueEntityReference;
+                return;
+            }
+
+            if( ch == '%' )
+            {
+                assert(! _beforeEntityReference);
+                _beforeEntityReference = &XmlReaderImpl::OnDtdEntityValueApos;
+                _parse = &XmlReaderImpl::OnDtdParameterEntityReference;
                 return;
             }
 
             _token += ch;
         }
 
-        void OnDtdEntityValueAposEntityRef(int c)
+        void OnDtdEntityValueEntityReference(int c)
         {
             Pt::Char ch = notEof(c);
 
@@ -909,8 +936,10 @@ class XmlReaderImpl
                 assert(_entity);
                 _entity->addValue(_token);
                 _token.clear();
-                
-                _parse = &XmlReaderImpl::OnDtdEntityValueApos;
+
+                assert(_beforeEntityReference != 0);
+                _parse = _beforeEntityReference;
+                _beforeEntityReference = 0;
                 return;
             }
 
@@ -2252,6 +2281,8 @@ class XmlReaderImpl
                 }
             }
 
+            // TODO: add option to parser to fail on undeclared entity references
+
             _entityRef.set(token, ent);
             _current = &_entityRef;
             return false;
@@ -2269,6 +2300,8 @@ class XmlReaderImpl
                     return;
                 }
             }
+            else
+                throw SyntaxError("undeclared parameter entity", _line); 
 
             _entityRef.set(token, ent);
             _current = &_entityRef;
@@ -2430,6 +2463,7 @@ class XmlReaderImpl
         , _line(1)
         , _entity(0)
         , _parse(0)
+        , _beforeEntityReference(0)
         , _current(0)
         , _dtd()
         , _docType(_dtd)
@@ -2450,6 +2484,7 @@ class XmlReaderImpl
         , _line(1)
         , _entity(0)
         , _parse(0)
+        , _beforeEntityReference(0)
         , _current(0)
         , _dtd()
         , _docType(_dtd)
@@ -2470,6 +2505,7 @@ class XmlReaderImpl
         , _line(1)
         , _entity(0)
         , _parse(0)
+        , _beforeEntityReference(0)
         , _current(0)
         , _dtd()
         , _docType(_dtd)
@@ -2489,6 +2525,7 @@ class XmlReaderImpl
         void clear(int flags)
         {
             _parse = &XmlReaderImpl::onDocumentBegin;
+            _beforeEntityReference = 0;
 
             _input.clear();
 
@@ -2667,6 +2704,7 @@ class XmlReaderImpl
         
         typedef void (XmlReaderImpl::*ParseFunc)(int);
         ParseFunc _parse;
+        ParseFunc _beforeEntityReference;
         Node* _current;
 
         Pt::String _version;
