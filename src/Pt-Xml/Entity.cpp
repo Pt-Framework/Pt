@@ -38,49 +38,36 @@ namespace Xml {
 EntityReference::EntityReference()
 : Node(Node::EntityReference)
 , _entity(0)
-, _chars(0)
-, _attr(0)
 { }
 
 
-void EntityReference::set(const Pt::String& name, const Entity* entity, Pt::Xml::Characters* chars)
-{ 
-    _name = name; 
-    _entity = entity; 
-    _chars = chars;
-    _attr = 0;
-}
-
-
-void EntityReference::set(const Pt::String& name, const Entity* entity, Attribute* attr)
-{ 
+void EntityReference::set(const Pt::String& name, const Entity* entity)
+{
     _name = name; 
     _entity = entity;
-    _chars = 0;
-    _attr = attr;
 }
 
 
-void EntityReference::resolve(const Pt::Char* value) const
-{
-    if(_chars)
-    {       
-        _chars->append(value);
-
-        for(const Pt::Char* ch = value; *ch != '\0'; ++ch)
-        {
-            if(*ch != ' ' && *ch != '\n' && *ch != '\r' && *ch != '\t')
-            {
-                _chars->setIgnorable(false);
-                break;
-            }
-        }
-    }
-    else if(_attr)
-    {
-        _attr->value().append(value);
-    }
-}
+//void EntityReference::resolve(const Pt::Char* value) const
+//{
+//    if(_chars)
+//    {       
+//        _chars->append(value);
+//
+//        for(const Pt::Char* ch = value; *ch != '\0'; ++ch)
+//        {
+//            if(*ch != ' ' && *ch != '\n' && *ch != '\r' && *ch != '\t')
+//            {
+//                _chars->setIgnorable(false);
+//                break;
+//            }
+//        }
+//    }
+//    else if(_attr)
+//    {
+//        _attr->value().append(value);
+//    }
+//}
 
 } // namespace Xml
 

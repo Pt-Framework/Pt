@@ -239,6 +239,8 @@ class PT_XML_API XmlReader
 
         explicit XmlReader(std::basic_istream<Char>& is, int flags = 0);
 
+        explicit XmlReader(InputSource& is, int flags = 0);
+
         ~XmlReader();
 
         // TODO: split into attach() and setFlags()
@@ -249,16 +251,20 @@ class PT_XML_API XmlReader
 
         void attach(InputSource& is, int flags);
 
-        // TODO: When user receives a EntityReference node this method
-        // can be used to resolve the external reference.
-        // 
-        // add a refcounter to InputSource so user can place it on the stack
-        // and XmlParser will not delete it
-        //
-        // also use InputSource for primary input, so advance() works also 
-        // for std::istream. Currently it does not work because we do not
-        // import into the internal TextBuffer
+        /** @brief Adds an external input source.
+
+            This method can be used to add additional input streams e.g.
+            to resolve an external entity reference, indicated by an
+            EntityReference node.
+
+            If the reference counter of the input source is 0, it will be
+            deleted when it is no longer needed. So, if an input source is
+            added which was created on the stack, its refernce count must
+            be greater than 0.
+        */
         void addInputSource(InputSource* in);
+
+        void addInput(const Char* str);
 
         const Pt::String& version() const;
 

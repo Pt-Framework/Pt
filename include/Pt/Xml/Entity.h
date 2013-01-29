@@ -66,6 +66,9 @@ class Entity
         void setValue(const Pt::String& val)
         {  _value = val; }
 
+        void addValue(const Pt::String& val)
+        {  _value += val; }
+
         const Pt::String& publicId() const
         { return _publicId; }
 
@@ -97,13 +100,13 @@ class PT_XML_API EntityReference : public Node
 
         void set(const Pt::String& name, const Entity* entity, Attribute* attr);
 
+        void set(const Pt::String& name, const Entity* entity);
+
         const Pt::String& name() const
         { return _name; }
         
         const Entity* get() const
         { return _entity; }
-  
-        void resolve(const Pt::Char* value) const;
 
         //! @internal
         inline static Node::Type nodeId()
@@ -112,10 +115,6 @@ class PT_XML_API EntityReference : public Node
     private:
         Pt::String _name;
         const Entity* _entity;
-
-        // TODO: use common base class
-        Pt::Xml::Characters* _chars;
-        Attribute* _attr;
 };
 
 

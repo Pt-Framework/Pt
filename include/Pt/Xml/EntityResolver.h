@@ -59,6 +59,8 @@ class PT_XML_API EntityMapping
         */
         bool resolveDefaultEntity(String& entity) const;
 
+        bool resolveCharacterEntity(String& entity) const;
+
         const Entity* resolveEntity(const Pt::String& name) const;
 
         /** @brief Returns the entity reference for a character.

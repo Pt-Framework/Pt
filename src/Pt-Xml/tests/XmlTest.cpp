@@ -66,6 +66,7 @@ class XmlReaderTest : public Pt::Unit::TestSuite
             this->registerMethod("DefaultEntities", *this, &XmlReaderTest::DefaultEntities);
             this->registerMethod("CustomEntities", *this, &XmlReaderTest::CustomEntities);
             this->registerMethod("ExternalEntities", *this, &XmlReaderTest::ExternalEntities);
+            this->registerMethod("ParameterEntities", *this, &XmlReaderTest::ParameterEntities);
             this->registerMethod("InvalidAttribute1", *this, &XmlReaderTest::InvalidAttribute1);
             this->registerMethod("InvalidAttribute2", *this, &XmlReaderTest::InvalidAttribute2);
             this->registerMethod("InvalidAttribute3", *this, &XmlReaderTest::InvalidAttribute3);
@@ -110,6 +111,7 @@ class XmlReaderTest : public Pt::Unit::TestSuite
         void CDATA();
         void DefaultEntities();
         void CustomEntities();
+        void ParameterEntities();
         void ExternalEntities();
         void CommentInProlog();
         void CommentInElement();
@@ -887,7 +889,7 @@ void XmlReaderTest::CustomEntities()
     Pt::Xml::EntityReference* ent = Pt::Xml::toEntityReference(&*it);
     PT_UNIT_ASSERT(ent);
     PT_UNIT_ASSERT(ent->name() == L"undeclared" );
-    ent->resolve( Pt::String(L"resolved").c_str() );
+    reader.addInput( Pt::String(L"resolved").c_str() );
 
     ++it;
     PT_UNIT_ASSERT(Pt::Xml::toCharacters(&*it));
@@ -896,7 +898,6 @@ void XmlReaderTest::CustomEntities()
     ++it;
     PT_UNIT_ASSERT(Pt::Xml::toEndElement(&*it));
 }
-
 
 void XmlReaderTest::ExternalEntities()
 {
@@ -925,11 +926,12 @@ void XmlReaderTest::ExternalEntities()
     Pt::Xml::EntityReference* ent = Pt::Xml::toEntityReference(&*it);
     PT_UNIT_ASSERT(ent);
     PT_UNIT_ASSERT(ent->name() == L"MyEntity1" );
-    PT_UNIT_ASSERT( ent->get() );
+    PT_UNIT_ASSERT(ent->get());
     PT_UNIT_ASSERT(ent->get()->publicId().empty());
     PT_UNIT_ASSERT(ent->get()->systemId() == L"Platinum" );
-    ent->resolve( Pt::String(L"Hello").c_str() );
-    PT_UNIT_ASSERT(ent);
+
+    Pt::String entval1("Hello");
+    reader.addInput( entval1.c_str() );
 
     ++it;
     ent = Pt::Xml::toEntityReference(&*it);
@@ -938,16 +940,20 @@ void XmlReaderTest::ExternalEntities()
     PT_UNIT_ASSERT( ent->get() );
     PT_UNIT_ASSERT(ent->get()->publicId() == L"http://www.pt-framework.org");
     PT_UNIT_ASSERT(ent->get()->systemId() == L"Platinum" );
-    ent->resolve( Pt::String(L"World").c_str() );
+
+    Pt::String entval2("World");
+    reader.addInput( entval2.c_str() );
 
     ++it;
     ent = Pt::Xml::toEntityReference(&*it);
     PT_UNIT_ASSERT(ent);
     PT_UNIT_ASSERT(ent->name() == L"MyEntity3" );
-    PT_UNIT_ASSERT( ent->get() );
+    PT_UNIT_ASSERT(ent->get());
     PT_UNIT_ASSERT(ent->get()->publicId() == L"http://www.pt-framework.org");
     PT_UNIT_ASSERT(ent->get()->systemId().empty() );
-    ent->resolve( Pt::String(L"!").c_str() );
+
+    Pt::String entval3("!");
+    reader.addInput( entval3.c_str() );
 
     ++it;
     PT_UNIT_ASSERT(Pt::Xml::toCharacters(&*it));
@@ -955,6 +961,28 @@ void XmlReaderTest::ExternalEntities()
 
     ++it;
     PT_UNIT_ASSERT(Pt::Xml::toEndElement(&*it));
+}
+
+
+void XmlReaderTest::ParameterEntities()
+{
+    std::stringstream input;
+    input << "<?xml version='1.0'?>\n";
+    input << "<!DOCTYPE test [\n";
+    input << "<!ELEMENT test (#PCDATA) >\n";
+    input << "<!ENTITY % xx \"&#37;zz;\">\n";
+    input << "<!ENTITY % yy '&#60;!ENTITY tricky \"complicated\" >' >\n";
+    input << "<!ENTITY % zz '%yy;' >\n";
+    input << "%xx;\n";
+    input << "]>\n";
+    input << "<test>This sample shows a &tricky; method.</test>\n";
+
+    Pt::Xml::XmlReader reader( input );
+    Pt::Xml::XmlReader::Iterator it = reader.current();
+
+    ++it;
+    PT_UNIT_ASSERT(Pt::Xml::toCharacters(&*it));
+    PT_UNIT_ASSERT(Pt::Xml::toCharacters(*it).content() == L"This sample shows a complicated method.");
 }
 
 

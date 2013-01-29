@@ -472,6 +472,46 @@ bool EntityMapping::resolveDefaultEntity(String& entity) const
 }
 
 
+bool EntityMapping::resolveCharacterEntity(String& entity) const
+{
+    if( ! entity.empty() && entity[0] == '#')
+    {
+        int code = 0;
+        if (entity.size() > 2 && entity[1] == 'x')
+        {
+            // hex notation: &#xABCD;
+            for (String::const_iterator it = entity.begin() + 2; it != entity.end(); ++it)
+            {
+                if (*it >= Pt::Char('0') && *it <= Pt::Char('9'))
+                    code = code * 16 + (it->value() - L'0');
+                else if (*it >= Pt::Char('A') && *it <= Pt::Char('F'))
+                    code = code * 16 + (it->value() - L'A' + 10);
+                else if (*it >= Pt::Char('a') && *it <= Pt::Char('f'))
+                    code = code * 16 + (it->value() - L'a' + 10);
+                else
+                    return false;
+            }
+        }
+        else
+        {
+            // dec notation: &#9999;
+            for (String::const_iterator it = entity.begin() + 1; it != entity.end(); ++it)
+            {
+                if (*it >= Pt::Char('0') && *it <= Pt::Char('9'))
+                    code = code * 10 + (it->value() - '0');
+                else
+                    return false;
+            }
+        }
+
+        entity.assign( 1, Char(code) );
+        return true;
+    }
+
+    return false;
+}
+
+
 const Entity* EntityMapping::resolveEntity(const Pt::String& name) const
 {
     Entities::const_iterator it = _entities.find(name);

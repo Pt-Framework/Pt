@@ -32,6 +32,7 @@
 
 #include <Pt/Xml/Api.h>
 #include <Pt/Xml/StartElement.h>
+#include <Pt/Xml/EntityResolver.h>
 #include <Pt/String.h>
 #include <Pt/NonCopyable.h>
 
@@ -269,6 +270,8 @@ class DocTypeDefinition : private NonCopyable
         {            
             _rootName.clear();
             _elemDecls.clear();
+            _entities.clear();
+            _paramEntities.clear();
      
             for(unsigned n = 0; n < _pool.size() ; ++n)
             {
@@ -276,6 +279,36 @@ class DocTypeDefinition : private NonCopyable
             }
 
             _pool.clear();
+        }
+
+        bool resolveCharacterEntity(Pt::String& token) const
+        {
+            return _entities.resolveCharacterEntity(token);
+        }
+
+        bool resolveDefaultEntity(Pt::String& token) const
+        {
+            return _entities.resolveDefaultEntity(token);
+        }
+
+        Entity* addEntity(const Pt::String& name)
+        {
+            return _entities.addEntity(name);
+        }
+
+        const Entity* resolveEntity(const Pt::String& name) const
+        {
+            return _entities.resolveEntity(name);
+        }
+
+        Entity* addParamEntity(const Pt::String& name)
+        {
+            return _paramEntities.addEntity(name);
+        }
+
+        const Entity* resolveParamEntity(const Pt::String& name) const
+        {
+            return _paramEntities.resolveEntity(name);
         }
 
         ContentModel::Leaf& getLabel(const Pt::String& name)
@@ -308,6 +341,8 @@ class DocTypeDefinition : private NonCopyable
     private:
         Pt::String _rootName;
         std::map<Pt::String, ElementDeclaration> _elemDecls;
+        EntityMapping _entities;
+        EntityMapping _paramEntities;
         
         std::vector<ContentModel::Particle*> _pool;
         ContentModel::Match _match;
