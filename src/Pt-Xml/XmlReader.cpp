@@ -1546,6 +1546,10 @@ class XmlReaderImpl
             {
                 _cmBuilder.setEmpty();
             }
+            else if(_token == L"ANY")
+            {
+                _cmBuilder.setAny();
+            }
             else
                 throw SyntaxError("XML syntax error", _line);
             

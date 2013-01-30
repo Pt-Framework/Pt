@@ -147,6 +147,13 @@ class ContentModel
         };
     
     public:
+        enum Type
+        {
+            Expression = 0,
+            Empty = 1,
+            Any = 2
+        };
+
         ContentModel()
         : _start(0)
         , _size(0)
@@ -156,18 +163,33 @@ class ContentModel
         { return _size; }
 
         bool isEmpty() const
-        { return _start == 0; }
+        { return _type == Empty; }
 
-        void setStart(ContentModel::Particle& start, unsigned n)
+        bool isAny() const
+        { return _type == Any; }
+
+        bool isExpression() const
+        { return _type == Expression; }
+
+        void setExpression(ContentModel::Particle& start, unsigned n)
         { 
             _start = &start; 
             _size = n;
+            _type = Expression;
         }
 
         void setEmpty()
         { 
             _start = 0;
             _size = 0;
+            _type = Empty;
+        }
+
+        void setAny()
+        { 
+            _start = 0;
+            _size = 0;
+            _type = Any;
         }
 
         ContentModel::Particle* start()
@@ -176,6 +198,7 @@ class ContentModel
     private:
         ContentModel::Particle* _start;
         unsigned _size;
+        Type _type;
 };
 
 
@@ -230,12 +253,15 @@ class ContentModelBuilder
     public:
         ContentModelBuilder(DocTypeDefinition& dtd)
         : _dtd(&dtd)
+        , _cmtype(ContentModel::Expression)
         , _nodeCount(0)
         {}
 
         void clear();
 
         void setEmpty();
+
+        void setAny();
 
         void finish(ContentModel& cm, ContentModel::Match& m);
         
@@ -254,6 +280,7 @@ class ContentModelBuilder
     private:
         DocTypeDefinition* _dtd;
         std::stack<Pt::Char> _ops;
+        ContentModel::Type _cmtype;
         std::stack<Fragment> _fragments;
         unsigned _nodeCount;
 };

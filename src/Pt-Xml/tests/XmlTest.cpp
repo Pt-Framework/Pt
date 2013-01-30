@@ -50,8 +50,11 @@ class XmlReaderTest : public Pt::Unit::TestSuite
         {
             this->registerMethod("MissingXmlDeclaration", *this, &XmlReaderTest::MissingXmlDeclaration);
             this->registerMethod("EmptyXmlDeclaration", *this, &XmlReaderTest::EmptyXmlDeclaration);
+            
             this->registerMethod("DtdValidateAttributes", *this, &XmlReaderTest::DtdValidateAttributes);
             this->registerMethod("DtdValidateElementContent", *this, &XmlReaderTest::DtdValidateElementContent);
+            this->registerMethod("DtdAnyElementContent", *this, &XmlReaderTest::DtdAnyElementContent);
+            
             this->registerMethod("EmptyDocument", *this, &XmlReaderTest::EmptyDocument);
             this->registerMethod("EmptyElementTag", *this, &XmlReaderTest::EmptyElementTag);
             this->registerMethod("InvalidTag1", *this, &XmlReaderTest::InvalidTag1);
@@ -93,6 +96,7 @@ class XmlReaderTest : public Pt::Unit::TestSuite
         void EmptyXmlDeclaration();
         void DtdValidateAttributes();
         void DtdValidateElementContent();
+        void DtdAnyElementContent();
         void EmptyDocument();
         void EmptyElementTag();
         void InvalidTag1();
@@ -231,6 +235,34 @@ void XmlReaderTest::DtdValidateElementContent()
                  "  <b></b>\n"
                  "  <a></a>\n"
                  "  <a>hello</a>\n"
+                 "  <b></b>\n"
+                 "</test>\n";
+
+        Pt::Xml::XmlReader reader(input);
+        Pt::Xml::XmlReader::Iterator it;
+        for(it = reader.current(); it != reader.end(); ++it)
+            ;
+    }
+    catch(const Pt::Xml::SyntaxError& error)
+    {
+        std::cerr << error.what() << ": " << error.line() << std::endl;
+        throw;
+    }
+}
+
+
+void XmlReaderTest::DtdAnyElementContent()
+{
+    try
+    {
+        std::stringstream input;
+        input << "<!DOCTYPE test [\n";
+        input << "<!ELEMENT test ANY> \n";
+        input << "<!ELEMENT a ANY >\n";
+        input << "<!ELEMENT b ANY>\n";
+        input << "]>\n";
+        input << "<test>\n"
+                 "  <a>hello <b/> world</a>\n"
                  "  <b></b>\n"
                  "</test>\n";
 

@@ -120,12 +120,22 @@ void ContentModelBuilder::clear()
 
     // id of 0 is for Match
     _nodeCount = 1;
+
+    _cmtype = ContentModel::Expression;
 }
 
 
 void ContentModelBuilder::setEmpty()
 {
     clear();
+    _cmtype = ContentModel::Empty;
+}
+
+
+void ContentModelBuilder::setAny()
+{
+    clear();
+    _cmtype = ContentModel::Any;
 }
 
 
@@ -136,7 +146,14 @@ void ContentModelBuilder::finish(ContentModel& cm, ContentModel::Match& match)
     if( _fragments.empty() )
     {
         assert(_nodeCount == 1);
-        cm.setEmpty();
+
+        if(_cmtype == ContentModel::Any)
+            cm.setAny();
+        else if(_cmtype == ContentModel::Empty)
+            cm.setEmpty();
+        else
+            throw std::logic_error("invalid content model");
+        
         return;
     }
 
@@ -145,7 +162,7 @@ void ContentModelBuilder::finish(ContentModel& cm, ContentModel::Match& match)
 
     _fragments.top().patchLeafs(match);
     ContentModel::Particle& particle = _fragments.top().start();
-    cm.setStart(particle, _nodeCount);
+    cm.setExpression(particle, _nodeCount);
 
     clear();
 }
@@ -315,6 +332,9 @@ ContentValidator::ContentValidator(ContentModel& cm)
 
 bool ContentValidator::validate(Node& node)
 {
+    if( _cm->isAny() )
+        return true;
+
     // handle ignorable WS and EMPTY separately, so indentation in XML
     // documents does not lead to costly state transitions. 
     if( Pt::Xml::Characters* chars = Pt::Xml::toCharacters(&node) )
@@ -351,7 +371,7 @@ bool ContentValidator::validate(Node& node)
 bool ContentValidator::isComplete() const
 { 
     // if _cm is null, the element was undeclared
-    if( ! _cm || _cm->isEmpty() )
+    if( ! _cm || _cm->isEmpty() || _cm->isAny() )
         return true;
             
     // at the end of the validation, at least one current particle
