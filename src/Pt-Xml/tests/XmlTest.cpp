@@ -969,7 +969,8 @@ void XmlReaderTest::ParameterEntities()
     std::stringstream input;
     input << "<?xml version='1.0'?>\n";
     input << "<!DOCTYPE test [\n";
-    input << "<!ELEMENT test (#PCDATA) >\n";
+    input << "<!ENTITY % test_content \"(#PCDATA)\">\n";
+    input << "<!ELEMENT test %test_content; >\n";
     input << "<!ENTITY % xx \"&#37;zz;\">\n";
     input << "<!ENTITY % yy '&#60;!ENTITY tricky \"complicated\" >' >\n";
     input << "<!ENTITY % zz '%yy;' >\n";
@@ -983,6 +984,8 @@ void XmlReaderTest::ParameterEntities()
     ++it;
     PT_UNIT_ASSERT(Pt::Xml::toCharacters(&*it));
     PT_UNIT_ASSERT(Pt::Xml::toCharacters(*it).content() == L"This sample shows a complicated method.");
+
+    ++it;
 }
 
 
