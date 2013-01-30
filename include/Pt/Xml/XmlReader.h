@@ -46,8 +46,11 @@ class DocType;
 class StartElement;
 class EntityResolver;
 
-class InputSource : public std::basic_istream<Char>
+class InputSource
 {
+    public:
+        typedef std::basic_streambuf<Char>::int_type int_type;
+
     public:
         virtual ~InputSource()
         {}
@@ -66,16 +69,27 @@ class InputSource : public std::basic_istream<Char>
             return this->onAdvance();
         }
 
+        std::basic_streambuf<Char>* rdbuf()
+        { return _rdbuf; }
+
     protected:
         InputSource(std::basic_streambuf<Char>* sb = 0, std::size_t refcnt = 0)
-        : std::basic_istream<Char>(sb)
+        : _rdbuf(sb)
         , _refs(refcnt)
+        , _line(0)
         {}
+
+        void init(std::basic_streambuf<Char>* sb)
+        { _rdbuf = sb; }
 
         virtual bool onAdvance() = 0;
 
+        //TODO: close() -> user might want to recycle input sources
+
     private:
         std::size_t _refs;
+        std::basic_streambuf<Char>* _rdbuf;
+        std::size_t _line;
 };
 
 class StringInputSource : public InputSource
@@ -140,6 +154,7 @@ class TextInputSource : public InputSource
         TextInputSource(TextBuffer& tb, std::size_t refcnt = 0)
         : InputSource(&tb, refcnt)
         , _tbuf(&tb)
+        , _eof(false)
         { }
 
         virtual ~TextInputSource()
@@ -150,17 +165,18 @@ class TextInputSource : public InputSource
         {
             _tbuf->import();
             
-            if( this->eof() )
+            if( _eof )
                 return false;
 
             return true;
         }
 
         void setEof()
-        { this->setstate(std::ios::eofbit); }
+        { _eof = true; }
     
     private:
         TextBuffer* _tbuf;
+        bool _eof;
 };
 
 class TextInputSource2 : public InputSource
@@ -168,6 +184,7 @@ class TextInputSource2 : public InputSource
     public:
         TextInputSource2(std::basic_istream<Char>& is, std::size_t refcnt = 0)
         : InputSource(is.rdbuf(), refcnt)
+        , _eof(false)
         { }
 
         virtual ~TextInputSource2()
@@ -180,7 +197,10 @@ class TextInputSource2 : public InputSource
         }
 
         void setEof()
-        { this->setstate(std::ios::eofbit); }
+        { _eof = true; }
+    
+    private:
+        bool _eof;
 };
 
 /** @brief Reads XML as a Stream of XML Nodes.
