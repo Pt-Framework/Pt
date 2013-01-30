@@ -111,6 +111,9 @@ class DtdValidator : private NonCopyable
                     _decls.pop();
                     break;
                 }
+
+                default:
+                    break;
             }
 
             return valid;

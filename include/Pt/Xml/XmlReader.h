@@ -58,6 +58,9 @@ class InputSource
         std::size_t refs() const
         { return _refs; }
 
+        int_type get()
+        { return _rdbuf ? _rdbuf->sbumpc() : std::char_traits<Char>::eof(); }
+
         bool advance()
         {                               
             if( ! rdbuf() )
@@ -74,8 +77,8 @@ class InputSource
 
     protected:
         InputSource(std::basic_streambuf<Char>* sb = 0, std::size_t refcnt = 0)
-        : _rdbuf(sb)
-        , _refs(refcnt)
+        : _refs(refcnt)
+        , _rdbuf(sb)
         , _line(0)
         {}
 

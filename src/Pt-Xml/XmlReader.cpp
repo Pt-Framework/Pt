@@ -2760,14 +2760,14 @@ class XmlReaderImpl
         XmlReaderImpl(std::basic_istream<Char>& is, int flags)
         : _is(0)
         , _flags(flags)
-        , _standalone(true)
+        , _entity(0)
         , _depth(0)
         , _line(1)
-        , _entity(0)
-        , _parse(0)
-        , _beforeEntityReference(0)
+        , _parse(0)                 
         , _beforeCharacterReference(0)
+        , _beforeEntityReference(0)
         , _current(0)
+        , _standalone(true)
         , _dtd()
         , _docType(_dtd)
         , _cmBuilder(_dtd)
@@ -2782,14 +2782,14 @@ class XmlReaderImpl
         XmlReaderImpl(std::istream& is, int flags)
         : _is(0)
         , _flags(flags)
-        , _standalone(true)
+        , _entity(0)
         , _depth(0)
         , _line(1)
-        , _entity(0)
-        , _parse(0)
-        , _beforeEntityReference(0)
+        , _parse(0)                 
         , _beforeCharacterReference(0)
+        , _beforeEntityReference(0)
         , _current(0)
+        , _standalone(true)
         , _dtd()
         , _docType(_dtd)
         , _cmBuilder(_dtd)
@@ -2804,14 +2804,14 @@ class XmlReaderImpl
         XmlReaderImpl(InputSource& is, int flags)
         : _is(0)
         , _flags(flags)
-        , _standalone(true)
+        , _entity(0)
         , _depth(0)
         , _line(1)
-        , _entity(0)
-        , _parse(0)
-        , _beforeEntityReference(0)
+        , _parse(0)                 
         , _beforeCharacterReference(0)
+        , _beforeEntityReference(0)
         , _current(0)
+        , _standalone(true)
         , _dtd()
         , _docType(_dtd)
         , _cmBuilder(_dtd)
@@ -2926,7 +2926,7 @@ class XmlReaderImpl
         Node& next()
         {
             _current = 0;
-            int c = 0;
+            std::char_traits<Char>::int_type c = 0;
 
             while( ! _current && _input.current() )
             {
@@ -2980,7 +2980,7 @@ class XmlReaderImpl
                         break;
                 }
 
-                c = _input.current()->rdbuf()->sbumpc();
+                c = _input.current()->get();
 
                 (this->*_parse)(c);
 
