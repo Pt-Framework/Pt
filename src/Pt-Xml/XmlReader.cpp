@@ -68,7 +68,7 @@ class XmlReaderImpl
             }
             else
             {
-                throw SyntaxError("XML syntax error", _line);
+                throw SyntaxError("XML syntax error", line());
             }
         }
 
@@ -96,7 +96,7 @@ class XmlReaderImpl
                 return;
             }
 
-            throw SyntaxError("XML syntax error", _line);
+            throw SyntaxError("XML syntax error", line());
         }
 
         void onXmlDeclQMark(int c)
@@ -111,7 +111,7 @@ class XmlReaderImpl
                 return;
             }
 
-            throw SyntaxError("XML syntax error", _line);
+            throw SyntaxError("XML syntax error", line());
         }
 
         void onXmlDeclName(int c)
@@ -134,7 +134,7 @@ class XmlReaderImpl
                 return;
             }
 
-            throw SyntaxError("XML syntax error", _line);
+            throw SyntaxError("XML syntax error", line());
         }
 
         void onXmlDeclBeforeAttr(int c)
@@ -160,7 +160,7 @@ class XmlReaderImpl
                 return;
             }
 
-            throw SyntaxError("XML syntax error", _line);
+            throw SyntaxError("XML syntax error", line());
         }
 
         void onXmlDeclAttr(int c)
@@ -185,7 +185,7 @@ class XmlReaderImpl
                 return;
             }
 
-            throw SyntaxError("XML syntax error", _line);
+            throw SyntaxError("XML syntax error", line());
         }
 
         void onXmlDeclAfterName(int c)
@@ -203,7 +203,7 @@ class XmlReaderImpl
                 return;
             }
 
-            throw SyntaxError("XML syntax error", _line);
+            throw SyntaxError("XML syntax error", line());
         }
 
         void onXmlDeclBeforeValue(int c)
@@ -221,7 +221,7 @@ class XmlReaderImpl
                 return;
             }
 
-            throw SyntaxError("XML syntax error", _line);
+            throw SyntaxError("XML syntax error", line());
         }
 
         void onXmlDeclValue(int c)
@@ -254,7 +254,7 @@ class XmlReaderImpl
                 return;
             }
 
-            throw SyntaxError("XML syntax error", _line);
+            throw SyntaxError("XML syntax error", line());
         }
 
         void onXmlDeclEnd(int c)
@@ -267,7 +267,7 @@ class XmlReaderImpl
                 return;
             }
 
-            throw SyntaxError("XML syntax error", _line);
+            throw SyntaxError("XML syntax error", line());
         }
 
         void onProcessingInstruction(int c)
@@ -286,7 +286,7 @@ class XmlReaderImpl
                 return;
             }
 
-            throw SyntaxError("XML syntax error", _line);
+            throw SyntaxError("XML syntax error", line());
         }
 
         void onProcessingInstructionData(int c)
@@ -306,7 +306,7 @@ class XmlReaderImpl
                 return;
             }
 
-            throw SyntaxError("XML syntax error", _line);
+            throw SyntaxError("XML syntax error", line());
         }
 
         void onProcessingInstructionEnd(int c)
@@ -320,7 +320,7 @@ class XmlReaderImpl
                 return;
             }
 
-            throw SyntaxError("XML syntax error", _line);
+            throw SyntaxError("XML syntax error", line());
         }
 
         void onTag(int c)
@@ -365,7 +365,7 @@ class XmlReaderImpl
                 return;
             }
 
-            throw SyntaxError("XML syntax error", _line);
+            throw SyntaxError("XML syntax error", line());
         }
 
         void onTagExclam(int c)
@@ -393,7 +393,7 @@ class XmlReaderImpl
                 return;
             }
 
-            throw SyntaxError("XML syntax error", _line);
+            throw SyntaxError("XML syntax error", line());
         };
 
         // Note that it is possible to construct a well-formed document
@@ -419,7 +419,7 @@ class XmlReaderImpl
                 }
             }
 
-            throw SyntaxError("XML syntax error", _line);
+            throw SyntaxError("XML syntax error", line());
         }
 
         void AfterDocType(int c)
@@ -438,7 +438,7 @@ class XmlReaderImpl
                 return;
             }
 
-            throw SyntaxError("XML syntax error", _line);
+            throw SyntaxError("XML syntax error", line());
         }
 
         void OnDtdRootName(int c)
@@ -457,7 +457,7 @@ class XmlReaderImpl
                 return;
             }
 
-            throw SyntaxError("XML syntax error", _line);
+            throw SyntaxError("XML syntax error", line());
         }
 
         void AfterDtdRootName(int c)
@@ -475,7 +475,7 @@ class XmlReaderImpl
                 return;
             }
 
-            throw SyntaxError("XML syntax error", _line);
+            throw SyntaxError("XML syntax error", line());
         }
 
         void OnDtdInternal(int c)
@@ -505,7 +505,7 @@ class XmlReaderImpl
                 return;
             }
 
-            throw SyntaxError("XML syntax error", _line);
+            throw SyntaxError("XML syntax error", line());
         }
         
         // The markup declarations may be made up in whole or in part of the
@@ -542,7 +542,7 @@ class XmlReaderImpl
                 return;
             }
 
-            throw SyntaxError("XML syntax error", _line);
+            throw SyntaxError("XML syntax error", line());
         }
 
         void enterParameterReference(ParseFunc from)
@@ -574,11 +574,11 @@ class XmlReaderImpl
 
             if(ch == '&')
             {
-                throw SyntaxError("character entity reference in parameter entity reference", _line);
+                throw SyntaxError("character entity reference in parameter entity reference", line());
                 return;
             }
 
-            throw SyntaxError("XML syntax error", _line);
+            throw SyntaxError("XML syntax error", line());
         }
         
         void enterEntityValueParameterEntityReference(ParseFunc from)
@@ -604,7 +604,7 @@ class XmlReaderImpl
                 return;
             }
                 
-            throw SyntaxError("XML syntax error", _line);
+            throw SyntaxError("XML syntax error", line());
         }
 
         void OnDtdTagName(int c)
@@ -645,7 +645,7 @@ class XmlReaderImpl
                 return;
             }
 
-            throw SyntaxError("XML syntax error", _line);
+            throw SyntaxError("XML syntax error", line());
         }
 
         void OnDtdEntityBegin(int c)
@@ -670,7 +670,7 @@ class XmlReaderImpl
                 return;
             }
 
-            throw SyntaxError("XML syntax error", _line);
+            throw SyntaxError("XML syntax error", line());
         }
 
         void OnDtdParamEntityBegin(int c)
@@ -690,7 +690,7 @@ class XmlReaderImpl
                 return;
             }
 
-            throw SyntaxError("XML syntax error", _line);
+            throw SyntaxError("XML syntax error", line());
         }
 
         void OnDtdBeforeParamEntityName(int c)
@@ -715,7 +715,7 @@ class XmlReaderImpl
                 return;
             }
 
-            throw SyntaxError("XML syntax error", _line);
+            throw SyntaxError("XML syntax error", line());
         }
 
         void OnDtdParamEntityName(int c)
@@ -743,7 +743,7 @@ class XmlReaderImpl
                 return;
             }
 
-            throw SyntaxError("XML syntax error", _line);
+            throw SyntaxError("XML syntax error", line());
         }
 
         void OnDtdEntityName(int c)
@@ -771,7 +771,7 @@ class XmlReaderImpl
                 return;
             }
 
-            throw SyntaxError("XML syntax error", _line);
+            throw SyntaxError("XML syntax error", line());
         }
         
         void OnDtdEntityAfterName(int c)
@@ -815,7 +815,7 @@ class XmlReaderImpl
                 return;
             }
 
-            throw SyntaxError("XML syntax error", _line);
+            throw SyntaxError("XML syntax error", line());
         }
 
         void OnDtdEntityPublic(int c)
@@ -833,7 +833,7 @@ class XmlReaderImpl
                 bool ok = _token == L"PUBLIC";
                 _token.clear();
                 if( ! ok)
-                    throw SyntaxError("XML syntax error", _line);
+                    throw SyntaxError("XML syntax error", line());
                 
                 _parse = &XmlReaderImpl::OnDtdEntityBeforePublicId;
                 return;
@@ -845,7 +845,7 @@ class XmlReaderImpl
                 return;
             }
 
-            throw SyntaxError("XML syntax error", _line);
+            throw SyntaxError("XML syntax error", line());
         }
 
         void OnDtdEntityBeforePublicId(int c)
@@ -869,7 +869,7 @@ class XmlReaderImpl
                 return;
             }
 
-            throw SyntaxError("XML syntax error", _line);
+            throw SyntaxError("XML syntax error", line());
         }
 
         void OnDtdEntityPublicId(int c)
@@ -916,7 +916,7 @@ class XmlReaderImpl
                 return;
             }
 
-            throw SyntaxError("XML syntax error", _line);
+            throw SyntaxError("XML syntax error", line());
         }
 
         void OnDtdEntitySystem(int c)
@@ -934,7 +934,7 @@ class XmlReaderImpl
                 bool ok = _token == L"SYSTEM";
                 _token.clear();
                 if( ! ok)
-                    throw SyntaxError("XML syntax error", _line);
+                    throw SyntaxError("XML syntax error", line());
                 
                 _parse = &XmlReaderImpl::OnDtdEntityBeforeSystemId;
                 return;
@@ -946,7 +946,7 @@ class XmlReaderImpl
                 return;
             }
 
-            throw SyntaxError("XML syntax error", _line);
+            throw SyntaxError("XML syntax error", line());
         }
 
         void OnDtdEntityBeforeSystemId(int c)
@@ -970,7 +970,7 @@ class XmlReaderImpl
                 return;
             }
 
-            throw SyntaxError("XML syntax error", _line);
+            throw SyntaxError("XML syntax error", line());
         }
 
         void OnDtdEntitySystemId(int c)
@@ -1116,7 +1116,7 @@ class XmlReaderImpl
                 return;
             }
 
-            throw SyntaxError("XML syntax error", _line);
+            throw SyntaxError("XML syntax error", line());
         }
 
         void OnDtdAttListBegin(int c)
@@ -1141,7 +1141,7 @@ class XmlReaderImpl
                 return;
             }
 
-            throw SyntaxError("XML syntax error", _line);
+            throw SyntaxError("XML syntax error", line());
         }
 
         void OnDtdAttListName(int c)
@@ -1168,7 +1168,7 @@ class XmlReaderImpl
                 return;
             }
 
-            throw SyntaxError("XML syntax error", _line);
+            throw SyntaxError("XML syntax error", line());
         }
 
         void OnDtdBeforeAttrName(int c)
@@ -1193,7 +1193,7 @@ class XmlReaderImpl
                 return;
             }
 
-            throw SyntaxError("XML syntax error", _line);
+            throw SyntaxError("XML syntax error", line());
         }
 
         void OnDtdAttrName(int c)
@@ -1217,7 +1217,7 @@ class XmlReaderImpl
                 return;
             }
 
-            throw SyntaxError("XML syntax error", _line);
+            throw SyntaxError("XML syntax error", line());
         }
 
         void OnDtdAfterAttrName(int c)
@@ -1241,7 +1241,7 @@ class XmlReaderImpl
                 return;
             }
 
-            throw SyntaxError("XML syntax error", _line);
+            throw SyntaxError("XML syntax error", line());
         }
 
         void OnDtdCDATA0(int c)
@@ -1255,7 +1255,7 @@ class XmlReaderImpl
             }
 
             if( ch != 'D' )
-                throw SyntaxError("XML syntax error", _line);
+                throw SyntaxError("XML syntax error", line());
 
             _parse = &XmlReaderImpl::OnDtdCDATA1;
         }
@@ -1271,7 +1271,7 @@ class XmlReaderImpl
             }
 
             if( ch != 'A' )
-                throw SyntaxError("XML syntax error", _line);
+                throw SyntaxError("XML syntax error", line());
 
             _parse = &XmlReaderImpl::OnDtdCDATA2;
         }
@@ -1287,7 +1287,7 @@ class XmlReaderImpl
             }
 
             if( ch != 'T' )
-                throw SyntaxError("XML syntax error", _line);
+                throw SyntaxError("XML syntax error", line());
 
             _parse = &XmlReaderImpl::OnDtdCDATA3;
         }
@@ -1303,7 +1303,7 @@ class XmlReaderImpl
             }
 
             if( ch != 'A' )
-                throw SyntaxError("XML syntax error", _line);
+                throw SyntaxError("XML syntax error", line());
 
             Pt::Xml::CDataAttributeDeclaration* attr = new Pt::Xml::CDataAttributeDeclaration();
             attr->setName(_token);
@@ -1333,7 +1333,7 @@ class XmlReaderImpl
             }
 
             if( ch != '#' )
-                throw SyntaxError("XML syntax error", _line);
+                throw SyntaxError("XML syntax error", line());
 
             _parse = &XmlReaderImpl::OnDtdAttrMode;
         }
@@ -1370,7 +1370,7 @@ class XmlReaderImpl
                 _parse = &XmlReaderImpl::OnDtdAfterDtdAttrFixed;
             }
             else
-                throw SyntaxError("XML syntax error", _line);
+                throw SyntaxError("XML syntax error", line());
                 
             _token.clear();
 
@@ -1403,7 +1403,7 @@ class XmlReaderImpl
                 return;
             }
 
-            throw SyntaxError("XML syntax error", _line);
+            throw SyntaxError("XML syntax error", line());
         }
 
         void OnDtdAfterDtdAttrFixed(int c)
@@ -1425,7 +1425,7 @@ class XmlReaderImpl
             if( Pt::isspace(ch) )
                 return;
 
-            throw SyntaxError("XML syntax error", _line);
+            throw SyntaxError("XML syntax error", line());
         }
 
         void OnDtdAttrDefault(int c)
@@ -1465,7 +1465,7 @@ class XmlReaderImpl
                 return;
             }
 
-            throw SyntaxError("XML syntax error", _line);
+            throw SyntaxError("XML syntax error", line());
         }
 
         void OnDtdElementName(int c)
@@ -1493,7 +1493,7 @@ class XmlReaderImpl
                 return;
             }
 
-            throw SyntaxError("XML syntax error", _line);
+            throw SyntaxError("XML syntax error", line());
         }
 
         void OnDtdElementContentBegin(int c)
@@ -1520,7 +1520,7 @@ class XmlReaderImpl
             }
 
             if(ch != '(')
-                throw SyntaxError("XML syntax error", _line);
+                throw SyntaxError("XML syntax error", line());
 
             _cmBuilder.pushOperator(ch);
             _parse = &XmlReaderImpl::OnDtdElementContent;
@@ -1551,7 +1551,7 @@ class XmlReaderImpl
                 _cmBuilder.setAny();
             }
             else
-                throw SyntaxError("XML syntax error", _line);
+                throw SyntaxError("XML syntax error", line());
             
             _token.clear();
 
@@ -1581,7 +1581,7 @@ class XmlReaderImpl
                 return;
             }
 
-            throw SyntaxError("XML syntax error", _line);
+            throw SyntaxError("XML syntax error", line());
         }
 
         void OnDtdElementContent(int c)
@@ -1608,7 +1608,7 @@ class XmlReaderImpl
                 return;
             }
 
-            throw SyntaxError("XML syntax error", _line);
+            throw SyntaxError("XML syntax error", line());
         }
 
         void OnDtdIdentifier(int c)
@@ -1682,7 +1682,7 @@ class XmlReaderImpl
                 return;
             }
 
-            throw SyntaxError("XML syntax error", _line);
+            throw SyntaxError("XML syntax error", line());
         }
         
         void OnDtdUnrayOp(int c)
@@ -1728,7 +1728,7 @@ class XmlReaderImpl
                 return;
             }
 
-            throw SyntaxError("XML syntax error", _line);
+            throw SyntaxError("XML syntax error", line());
         }
         
         void OnDtdBinaryOp(int c)
@@ -1756,7 +1756,7 @@ class XmlReaderImpl
                 return;
             }
 
-            throw SyntaxError("XML syntax error", _line);
+            throw SyntaxError("XML syntax error", line());
         }
 
         void OnDtdContentExprEnd(int c)
@@ -1822,7 +1822,7 @@ class XmlReaderImpl
                 return;
             }
 
-            throw SyntaxError("XML syntax error", _line);
+            throw SyntaxError("XML syntax error", line());
         }
 
         void OnDtdInternalEnd(int c)
@@ -1846,7 +1846,7 @@ class XmlReaderImpl
                 return;
             }
 
-            throw SyntaxError("XML syntax error", _line);
+            throw SyntaxError("XML syntax error", line());
         }
 
         void afterTag(int c)
@@ -1854,7 +1854,7 @@ class XmlReaderImpl
             if( c == std::char_traits<Char>::eof() )
             {
                 if( depth() > 0 )
-                    throw SyntaxError("XML syntax error", _line);
+                    throw SyntaxError("XML syntax error", line());
 
                 _current = &( _endDoc );
                 return;
@@ -1883,7 +1883,7 @@ class XmlReaderImpl
 
             if(ch == '>')
             {
-                throw SyntaxError("XML syntax error", _line);
+                throw SyntaxError("XML syntax error", line());
             }
 
             if(ch == '&')
@@ -1906,7 +1906,7 @@ class XmlReaderImpl
                 return;
             }
 
-            throw SyntaxError("XML syntax error", _line);
+            throw SyntaxError("XML syntax error", line());
         }
 
         void onComment(int c)
@@ -1949,7 +1949,7 @@ class XmlReaderImpl
                 return;
             }
 
-            throw SyntaxError("XML syntax error", _line);
+            throw SyntaxError("XML syntax error", line());
         }
 
         void onStartElement(int c)
@@ -1977,7 +1977,7 @@ class XmlReaderImpl
             if(ch == ':')
             {
                 if( ! _startElem.prefix().empty() )
-                    throw SyntaxError("XML syntax error (invalid namespace prefix)", _line);
+                    throw SyntaxError("XML syntax error (invalid namespace prefix)", line());
 
                 _startElem.prefix() = _startElem.name();
                 _startElem.name().clear();
@@ -2002,7 +2002,7 @@ class XmlReaderImpl
                 return;
             }
 
-            throw SyntaxError("XML syntax error", _line);
+            throw SyntaxError("XML syntax error", line());
         }
 
         void beforeAttribute(int c)
@@ -2046,7 +2046,7 @@ class XmlReaderImpl
                 return;
             }
 
-            throw SyntaxError("XML syntax error", _line);
+            throw SyntaxError("XML syntax error", line());
         }
 
         void onAttributeName(int c)
@@ -2068,7 +2068,7 @@ class XmlReaderImpl
             if(ch == ':')
             {
                 if( ! _attr.prefix().empty() )
-                    throw SyntaxError("invalid namespace prefix", _line);
+                    throw SyntaxError("invalid namespace prefix", line());
 
                 _attr.prefix() = _attr.name();
                 _attr.name().clear();
@@ -2081,7 +2081,7 @@ class XmlReaderImpl
                 return;
             }
 
-            throw SyntaxError("XML syntax error", _line);
+            throw SyntaxError("XML syntax error", line());
         }
 
         void afterAttributeName(int c)
@@ -2099,7 +2099,7 @@ class XmlReaderImpl
                 return;
             }
 
-            throw SyntaxError("XML syntax error", _line);
+            throw SyntaxError("XML syntax error", line());
         }
 
         void beforeAttributeValue(int c)
@@ -2117,7 +2117,7 @@ class XmlReaderImpl
                 return;
             }
 
-            throw SyntaxError("XML syntax error", _line);
+            throw SyntaxError("XML syntax error", line());
         }
 
         void onAttributeValue(int c)
@@ -2176,7 +2176,7 @@ class XmlReaderImpl
                 return;
             }
             
-            throw SyntaxError("XML syntax error", _line);
+            throw SyntaxError("XML syntax error", line());
         };
 
         void onEmptyElement(int c)
@@ -2208,7 +2208,7 @@ class XmlReaderImpl
                 return;
             }
 
-            throw SyntaxError("XML syntax error", _line);
+            throw SyntaxError("XML syntax error", line());
         }
 
         void onEndElement(int c)
@@ -2222,7 +2222,7 @@ class XmlReaderImpl
                 return;
             }
 
-            throw SyntaxError("XML syntax error", _line);
+            throw SyntaxError("XML syntax error", line());
         }
 
         void onEndElementName(int c)
@@ -2244,7 +2244,7 @@ class XmlReaderImpl
             if(ch == ':')
             {
                 if( ! _endElem.prefix().empty() )
-                    throw SyntaxError("invalid namespace prefix", _line);
+                    throw SyntaxError("invalid namespace prefix", line());
 
                 _endElem.prefix() = _endElem.name();
                 _endElem.name().clear();
@@ -2272,7 +2272,7 @@ class XmlReaderImpl
                 return;
             }
 
-            throw SyntaxError("XML syntax error", _line);
+            throw SyntaxError("XML syntax error", line());
         }
     
         void afterEndElementName(int c)
@@ -2303,7 +2303,7 @@ class XmlReaderImpl
                 return;
             }
 
-            throw SyntaxError("XML syntax error", _line);
+            throw SyntaxError("XML syntax error", line());
         }
 
         void afterEndElement(int c)
@@ -2330,7 +2330,7 @@ class XmlReaderImpl
 
             if(ch == '>')
             {
-                throw SyntaxError("XML syntax error", _line);
+                throw SyntaxError("XML syntax error", line());
             }
 
             if(ch == '&')
@@ -2362,7 +2362,7 @@ class XmlReaderImpl
 
             if(ch == '>')
             {
-                throw SyntaxError("XML syntax error", _line);
+                throw SyntaxError("XML syntax error", line());
             }
 
             if(ch == '&')
@@ -2417,7 +2417,7 @@ class XmlReaderImpl
                 return;
             }
 
-            throw SyntaxError("invalid entity format", _line);
+            throw SyntaxError("invalid entity format", line());
         };
 
         void beforeCData(int c)
@@ -2435,7 +2435,7 @@ class XmlReaderImpl
                     break;
 
                 default:
-                    throw SyntaxError("XML syntax error", _line);
+                    throw SyntaxError("XML syntax error", line());
             }
             
             if( _token.length() < 7 )
@@ -2448,7 +2448,7 @@ class XmlReaderImpl
                 return;
             }
 
-            throw SyntaxError("XML syntax error", _line);
+            throw SyntaxError("XML syntax error", line());
         };
 
         void onCData(int c)
@@ -2499,7 +2499,7 @@ class XmlReaderImpl
                 return;
             }
 
-            throw SyntaxError("XML syntax error", _line);
+            throw SyntaxError("XML syntax error", line());
         };
 
         void onProlog(int c)
@@ -2522,7 +2522,7 @@ class XmlReaderImpl
                 return;
             }
 
-            throw SyntaxError("XML syntax error", _line);
+            throw SyntaxError("XML syntax error", line());
         }
 
     private:
@@ -2530,7 +2530,7 @@ class XmlReaderImpl
         {
             if( c == std::char_traits<Char>::eof() )
             {
-                throw SyntaxError("XML syntax error", _line);
+                throw SyntaxError("XML syntax error", line());
             }
 
             return Char(c);
@@ -2603,7 +2603,7 @@ class XmlReaderImpl
                 }
             }
             else
-                throw SyntaxError("undeclared parameter entity", _line); 
+                throw SyntaxError("undeclared parameter entity", line()); 
 
             _entityRef.set(token, ent);
             _current = &_entityRef;
@@ -2636,7 +2636,7 @@ class XmlReaderImpl
             {
                 const Namespace* ns = _nsctx.getNamespace( se.prefix() );
                 if( ! ns )
-                    throw SyntaxError("undeclared namespace prefix", _line);
+                    throw SyntaxError("undeclared namespace prefix", line());
 
                 se.setNamespace(*ns);
             }
@@ -2656,7 +2656,7 @@ class XmlReaderImpl
                     const Namespace* ns = _nsctx.getNamespace( it->prefix() );
                     if( ! ns )
                     {
-                        throw SyntaxError("undeclared namespace prefix", _line);
+                        throw SyntaxError("undeclared namespace prefix", line());
                     }
 
                     it->setNamespace(*ns);
@@ -2676,26 +2676,32 @@ class XmlReaderImpl
             {
                 const Namespace* ns = _nsctx.getNamespace( e.prefix() );
                 if( ! ns )
-                    throw SyntaxError("undeclared namespace prefix", _line);
+                    throw SyntaxError("undeclared namespace prefix", line());
 
                 e.setNamespace(*ns);
             }
         }
 
     public:
-        class Input
+        class InputStack
         {
             public:
-                Input()
+                InputStack()
                 : _input(0)
                 , _currentInput(0)
+                , _rdbuf(0)
                 {}
 
-                ~Input()
+                ~InputStack()
                 {
                     clear();
                 }
-
+                
+                bool empty() const
+                { 
+                    return _currentInput == 0; 
+                }
+                
                 void clear()
                 {
                     while( ! _external.empty() )
@@ -2709,15 +2715,29 @@ class XmlReaderImpl
                     _currentInput = _input;
                 }
 
-                InputSource* current()
+                bool advance()
                 {
-                    return _currentInput;
+                    return _currentInput ? _currentInput->advance() : false;
                 }
+
+                std::basic_streambuf<Char>* rdbuf()
+                {
+                    return _rdbuf;
+                }
+
+                void bumpLine()
+                { _currentInput->bumpLine(); }
+
+                std::size_t line() const
+                { return _currentInput ? _currentInput->line() : 0; }
 
                 void setInput(InputSource& is)
                 {
                     if( _currentInput == 0 || _currentInput == _input)
+                    {
                         _currentInput = &is;
+                        _rdbuf = _currentInput->rdbuf();
+                    }
 
                     _input = &is;
                 }
@@ -2726,6 +2746,7 @@ class XmlReaderImpl
                 {
                     _external.push(is);
                     _currentInput = is;
+                    _rdbuf = _currentInput->rdbuf();
                 }
 
                 void addInput(const Char* str)
@@ -2737,6 +2758,7 @@ class XmlReaderImpl
                 void removeInput()
                 {
                     _currentInput = 0;
+                    _rdbuf = 0;
 
                     if( ! _external.empty() )
                     {
@@ -2748,6 +2770,8 @@ class XmlReaderImpl
 
                         if( ! _external.empty() )
                             _currentInput = _external.top();
+
+                        _rdbuf = _currentInput->rdbuf();
                     }
                 }
 
@@ -2755,6 +2779,7 @@ class XmlReaderImpl
                 InputSource* _input;
                 std::stack<InputSource*> _external;
                 InputSource* _currentInput;
+                std::basic_streambuf<Char>* _rdbuf;
         };
 
         XmlReaderImpl(std::basic_istream<Char>& is, int flags)
@@ -2762,7 +2787,6 @@ class XmlReaderImpl
         , _flags(flags)
         , _entity(0)
         , _depth(0)
-        , _line(1)
         , _parse(0)                 
         , _beforeCharacterReference(0)
         , _beforeEntityReference(0)
@@ -2784,7 +2808,6 @@ class XmlReaderImpl
         , _flags(flags)
         , _entity(0)
         , _depth(0)
-        , _line(1)
         , _parse(0)                 
         , _beforeCharacterReference(0)
         , _beforeEntityReference(0)
@@ -2806,7 +2829,6 @@ class XmlReaderImpl
         , _flags(flags)
         , _entity(0)
         , _depth(0)
-        , _line(1)
         , _parse(0)                 
         , _beforeCharacterReference(0)
         , _beforeEntityReference(0)
@@ -2850,7 +2872,6 @@ class XmlReaderImpl
             _encoding.clear();
             _standalone = true;
             _depth = 0;
-            _line = 1;
             _current = 0;
         }
 
@@ -2911,7 +2932,7 @@ class XmlReaderImpl
         { return _depth; }
 
         std::size_t line() const
-        { return _line; }
+        { return _input.line(); }
 
         Node& get()
         {
@@ -2928,15 +2949,15 @@ class XmlReaderImpl
             _current = 0;
             std::char_traits<Char>::int_type c = 0;
 
-            while( ! _current && _input.current() )
+            while( ! _current && _input.rdbuf() )
             {
-                c = _input.current()->rdbuf()->sbumpc();
+                c = _input.rdbuf()->sbumpc();
 
                 if( c == std::char_traits<Char>::eof() )
                 {
                     _input.removeInput();
 
-                    if( _input.current() )
+                    if( ! _input.empty() )
                         continue;
                 }
 
@@ -2945,7 +2966,7 @@ class XmlReaderImpl
                 // TODO: this does not work for external input sources
                 if(c == '\n')
                 {
-                    ++_line;
+                    _input.bumpLine();
                 }
             }
 
@@ -2955,7 +2976,7 @@ class XmlReaderImpl
             if( _docType.isDefined() )
             {
                 if( ! _dtdValidator.validate(*_current) )
-                    throw SyntaxError("validation failed", _line);
+                    throw SyntaxError("validation failed", line());
             }
 
             return *_current;
@@ -2966,28 +2987,28 @@ class XmlReaderImpl
             _current = 0;
             int c = 0;
 
-            while( ! _current && _input.current() )
+            while( ! _current )
             {
-                if( _input.current()->rdbuf()->in_avail() <= 0 )
-                {
-                    if( ! _input.current()->advance() )
+                if( ! _input.rdbuf() || _input.rdbuf()->in_avail() <= 0 )
+                {                    
+                    if( ! _input.advance() )
                     {
                         _input.removeInput();
                         continue;
                     }
 
-                    if( _input.current()->rdbuf()->in_avail() <= 0)
+                    if( _input.rdbuf()->in_avail() <= 0 )
                         break;
                 }
 
-                c = _input.current()->get();
+                c = _input.rdbuf()->sbumpc();
 
                 (this->*_parse)(c);
 
                 // TODO: this does not work for external input sources
                 if(c == '\n')
                 {
-                    ++_line;
+                    _input.bumpLine();
                 }
             }
 
@@ -2996,7 +3017,7 @@ class XmlReaderImpl
                 if( _docType.isDefined() )
                 {
                     if( ! _dtdValidator.validate(*_current) )
-                        throw SyntaxError("validation failed", _line);
+                        throw SyntaxError("validation failed", line());
                 }
                 
                 return true;
@@ -3006,7 +3027,7 @@ class XmlReaderImpl
         }
 
     private:
-        Input _input;
+        InputStack _input;
         InputSource* _is;
         int _flags;
         
@@ -3015,7 +3036,6 @@ class XmlReaderImpl
         String _token;
         Attribute _attr;
         std::size_t _depth;
-        std::size_t _line;
         ParseFunc _parse;
         
         Pt::String _entityName;

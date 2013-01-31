@@ -58,8 +58,14 @@ class InputSource
         std::size_t refs() const
         { return _refs; }
 
-        int_type get()
-        { return _rdbuf ? _rdbuf->sbumpc() : std::char_traits<Char>::eof(); }
+        std::size_t line() const
+        { return _line; }
+
+        void setLine(std::size_t n)
+        { _line = n; }
+
+        void bumpLine()
+        { ++_line; }
 
         bool advance()
         {                               
@@ -79,7 +85,7 @@ class InputSource
         InputSource(std::basic_streambuf<Char>* sb = 0, std::size_t refcnt = 0)
         : _refs(refcnt)
         , _rdbuf(sb)
-        , _line(0)
+        , _line(1)
         {}
 
         void init(std::basic_streambuf<Char>* sb)
