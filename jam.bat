@@ -7,7 +7,7 @@ if not exist %JAMDIR%\Jambase (
     goto :eof
 )
 
-if not exist .\jam\jam.exe (
+if not exist %JAMDIR%\jam.exe (
     echo "jam.exe not found"
 
     cl.exe
@@ -18,6 +18,6 @@ if not exist .\jam\jam.exe (
     goto :eof
 )
 
-call .\jam\jam.exe %*
+call %JAMDIR%\jam.exe %*
 goto :eof
 
