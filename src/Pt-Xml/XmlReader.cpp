@@ -3001,6 +3001,7 @@ class XmlReaderImpl
                         break;
                 }
 
+                // TODO: performance of get method, which needs to check _rdbuf
                 c = _input.rdbuf()->sbumpc();
 
                 (this->*_parse)(c);

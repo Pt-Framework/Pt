@@ -44,12 +44,15 @@ namespace Xml {
 class Node;
 class DocType;
 class StartElement;
-class EntityResolver;
 
 class InputSource
 {
     public:
-        typedef std::basic_streambuf<Char>::int_type int_type;
+        enum StateFlags
+        {
+            None = 0,
+            End = 1
+        };
 
     public:
         virtual ~InputSource()
@@ -75,30 +78,38 @@ class InputSource
             if( rdbuf()->in_avail() > 0 )
                 return true;
                         
-            return this->onAdvance();
+            this->onAdvance();
+            
+            return ! isEof();
         }
 
         std::basic_streambuf<Char>* rdbuf()
         { return _rdbuf; }
+
+        bool isEof() const
+        { return (_flags & End) == End; }
+
+        void setEof(bool eof)
+        { _flags = eof ? (_flags|End) : (_flags & ~End); }
 
     protected:
         InputSource(std::basic_streambuf<Char>* sb = 0, std::size_t refcnt = 0)
         : _refs(refcnt)
         , _rdbuf(sb)
         , _line(1)
+        , _flags(0)
         {}
 
         void init(std::basic_streambuf<Char>* sb)
         { _rdbuf = sb; }
 
-        virtual bool onAdvance() = 0;
-
-        //TODO: close() -> user might want to recycle input sources
+        virtual void onAdvance() = 0;
 
     private:
         std::size_t _refs;
         std::basic_streambuf<Char>* _rdbuf;
         std::size_t _line;
+        long _flags;
 };
 
 class StringInputSource : public InputSource
@@ -115,12 +126,10 @@ class StringInputSource : public InputSource
         { }
 
     protected:
-        virtual bool onAdvance()
+        virtual void onAdvance()
         {
-            if(_sbuf.in_avail() <= 0)
-                return false;
-
-            return true;
+            if( _sbuf.in_avail() <= 0 )
+                setEof(true);
         }
 
     private:
@@ -142,14 +151,12 @@ class ByteInputSource : public InputSource
         { }
 
     protected:
-        virtual bool onAdvance()
+        virtual void onAdvance()
         {
             _tbuf.import();
 
-            if( _is->eof() )
-                return false;
-
-            return true;
+            if(_tbuf.in_avail() <= 0 && _is->eof() )
+                setEof(true);
         }
 
     private:
@@ -163,29 +170,19 @@ class TextInputSource : public InputSource
         TextInputSource(TextBuffer& tb, std::size_t refcnt = 0)
         : InputSource(&tb, refcnt)
         , _tbuf(&tb)
-        , _eof(false)
         { }
 
         virtual ~TextInputSource()
         { }
 
     protected:
-        virtual bool onAdvance()
+        virtual void onAdvance()
         {
             _tbuf->import();
-            
-            if( _eof )
-                return false;
-
-            return true;
         }
-
-        void setEof()
-        { _eof = true; }
     
     private:
         TextBuffer* _tbuf;
-        bool _eof;
 };
 
 class TextInputSource2 : public InputSource
@@ -200,10 +197,8 @@ class TextInputSource2 : public InputSource
         { }
 
     protected:
-        virtual bool onAdvance()
-        {
-            return true;
-        }
+        virtual void onAdvance()
+        { }
 
         void setEof()
         { _eof = true; }
