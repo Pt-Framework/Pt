@@ -78,6 +78,12 @@ class PT_API Deserializer
             composer->begin(type);
         }
 
+        /** @brief Deserialize as far as data is available
+
+            Returns true if the type could be deserialized, otherwise false.
+            If false is returned, no further progress can be made, unless
+            more data becomes available.
+        */
         bool advance();
 
         void finish();

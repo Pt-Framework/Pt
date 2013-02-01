@@ -1230,6 +1230,12 @@ class XmlReaderImpl
                 return;
             }
 
+            if( ch == 'N' )
+            {
+                _parse = &XmlReaderImpl::OnDtdNMTOKENS0;
+                return;
+            }
+
             if( Pt::isspace(ch) )
             {
                 return;
@@ -1311,6 +1317,138 @@ class XmlReaderImpl
 
             _token.clear();
             _parse = &XmlReaderImpl::OnDtdAfterAttrType;
+        }
+
+        void OnDtdNMTOKENS0(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if( ch == '%' )
+            {
+                enterParameterReference(&XmlReaderImpl::OnDtdNMTOKENS0);
+                return;
+            }
+
+            if( ch != 'M' )
+                throw SyntaxError("XML syntax error", line());
+
+            _parse = &XmlReaderImpl::OnDtdNMTOKENS1;
+        }
+
+        void OnDtdNMTOKENS1(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if( ch == '%' )
+            {
+                enterParameterReference(&XmlReaderImpl::OnDtdNMTOKENS1);
+                return;
+            }
+
+            if( ch != 'T' )
+                throw SyntaxError("XML syntax error", line());
+
+            _parse = &XmlReaderImpl::OnDtdNMTOKENS2;
+        }
+
+
+        void OnDtdNMTOKENS2(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if( ch == '%' )
+            {
+                enterParameterReference(&XmlReaderImpl::OnDtdNMTOKENS2);
+                return;
+            }
+
+            if( ch != 'O' )
+                throw SyntaxError("XML syntax error", line());
+
+            _parse = &XmlReaderImpl::OnDtdNMTOKENS3;
+        }
+
+        void OnDtdNMTOKENS3(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if( ch == '%' )
+            {
+                enterParameterReference(&XmlReaderImpl::OnDtdNMTOKENS3);
+                return;
+            }
+
+            if( ch != 'K' )
+                throw SyntaxError("XML syntax error", line());
+
+            _parse = &XmlReaderImpl::OnDtdNMTOKENS4;
+        }
+
+        void OnDtdNMTOKENS4(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if( ch == '%' )
+            {
+                enterParameterReference(&XmlReaderImpl::OnDtdNMTOKENS4);
+                return;
+            }
+
+            if( ch != 'E' )
+                throw SyntaxError("XML syntax error", line());
+
+            _parse = &XmlReaderImpl::OnDtdNMTOKENS5;
+        }
+
+        void OnDtdNMTOKENS5(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if( ch == '%' )
+            {
+                enterParameterReference(&XmlReaderImpl::OnDtdNMTOKENS5);
+                return;
+            }
+
+            if( ch != 'N' )
+                throw SyntaxError("XML syntax error", line());
+
+            _parse = &XmlReaderImpl::OnDtdNMTOKENS6;
+        }
+
+        void OnDtdNMTOKENS6(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if( ch == '%' )
+            {
+                enterParameterReference(&XmlReaderImpl::OnDtdNMTOKENS6);
+                return;
+            }
+
+            if( ch == 'S' )
+            {
+                Pt::Xml::NMTokensAttributeDeclaration* attr = new Pt::Xml::NMTokensAttributeDeclaration();
+                attr->setName(_token);
+                _elemDecl->attrListDecl().push(attr);
+
+                _token.clear();
+                _parse = &XmlReaderImpl::OnDtdAfterAttrType;
+                return;
+            }
+
+            if( Pt::isspace(ch) )
+            {
+                Pt::Xml::NMTokenAttributeDeclaration* attr = new Pt::Xml::NMTokenAttributeDeclaration();
+                attr->setName(_token);
+                _elemDecl->attrListDecl().push(attr);
+
+                _token.clear();
+                _parse = &XmlReaderImpl::OnDtdAfterAttrType;
+                return;
+            }
+                
+            throw SyntaxError("XML syntax error", line());
         }
 
         void OnDtdAfterAttrType(int c)
@@ -2726,7 +2864,12 @@ class XmlReaderImpl
                 }
 
                 void bumpLine()
-                { _currentInput->bumpLine(); }
+                { 
+                    if(_currentInput)
+                    {
+                        _currentInput->setLine( _currentInput->line() + 1 );
+                    }
+                }
 
                 std::size_t line() const
                 { return _currentInput ? _currentInput->line() : 0; }
@@ -2781,27 +2924,6 @@ class XmlReaderImpl
                 InputSource* _currentInput;
                 std::basic_streambuf<Char>* _rdbuf;
         };
-
-        XmlReaderImpl(std::basic_istream<Char>& is, int flags)
-        : _is(0)
-        , _flags(flags)
-        , _entity(0)
-        , _depth(0)
-        , _parse(0)                 
-        , _beforeCharacterReference(0)
-        , _beforeEntityReference(0)
-        , _current(0)
-        , _standalone(true)
-        , _dtd()
-        , _docType(_dtd)
-        , _cmBuilder(_dtd)
-        , _elemDecl(0)
-        , _dtdValidator(_dtd)
-        {
-            _parse = &XmlReaderImpl::onDocumentBegin;
-            _is = new TextInputSource2(is);
-            _input.setInput(*_is);
-        }
 
         XmlReaderImpl(std::istream& is, int flags)
         : _is(0)
@@ -2873,15 +2995,6 @@ class XmlReaderImpl
             _standalone = true;
             _depth = 0;
             _current = 0;
-        }
-
-        void attach(std::basic_istream<Char>& is, int flags)
-        {
-            clear(flags);
-
-            delete _is;
-            _is = new TextInputSource2(is);
-            _input.setInput(*_is);
         }
 
         void attach(std::istream& is, int flags)
@@ -2963,7 +3076,6 @@ class XmlReaderImpl
 
                 (this->*_parse)(c);
 
-                // TODO: this does not work for external input sources
                 if(c == '\n')
                 {
                     _input.bumpLine();
@@ -2987,9 +3099,9 @@ class XmlReaderImpl
             _current = 0;
             int c = 0;
 
-            while( ! _current )
+            while( ! _current && _input.rdbuf() )
             {
-                if( ! _input.rdbuf() || _input.rdbuf()->in_avail() <= 0 )
+                if( _input.rdbuf()->in_avail() <= 0 )
                 {                    
                     if( ! _input.advance() )
                     {
@@ -2998,7 +3110,9 @@ class XmlReaderImpl
                     }
 
                     if( _input.rdbuf()->in_avail() <= 0 )
+                    {
                         break;
+                    }
                 }
 
                 // TODO: performance of get method, which needs to check _rdbuf
@@ -3006,7 +3120,6 @@ class XmlReaderImpl
 
                 (this->*_parse)(c);
 
-                // TODO: this does not work for external input sources
                 if(c == '\n')
                 {
                     _input.bumpLine();
@@ -3074,13 +3187,6 @@ XmlReader::XmlReader(std::istream& is, int flags)
 }
 
 
-XmlReader::XmlReader(std::basic_istream<Char>& is, int flags)
-: _impl(0)
-{
-    _impl = new XmlReaderImpl(is, flags);
-}
-
-
 XmlReader::XmlReader(InputSource& is, int flags)
 : _impl(0)
 {
@@ -3091,12 +3197,6 @@ XmlReader::XmlReader(InputSource& is, int flags)
 XmlReader::~XmlReader()
 {
     delete _impl;
-}
-
-
-void XmlReader::attach(std::basic_istream<Char>& is, int flags)
-{
-    _impl->attach(is, flags);
 }
 
 

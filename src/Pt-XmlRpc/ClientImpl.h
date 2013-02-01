@@ -89,7 +89,7 @@ class ClientImpl : public Pt::Connectable
     protected:
         void onReadReplyBegin(std::istream& is);
 
-        std::size_t onReadReply();
+        void onReadReply();
 
         void onReplyFinished();
 
@@ -107,7 +107,8 @@ class ClientImpl : public Pt::Connectable
         void advance(const Xml::Node& node);
 
         State _state;
-        TextIStream _ts;
+        TextBuffer _tb;
+        Xml::TextInputSource _tin;
         Xml::XmlReader _reader;
         Xml::XmlWriter _writer;
         Formatter _formatter;

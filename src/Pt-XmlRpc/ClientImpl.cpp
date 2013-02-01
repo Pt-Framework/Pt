@@ -54,8 +54,9 @@ static const Pt::Char XMLRPC_FAULT[]  = { 'f', 'a', 'u', 'l', 't', '\0' };
 
 ClientImpl::ClientImpl()
 : _state(OnBegin)
-, _ts( new Utf8Codec )
-, _reader(_ts)
+, _tb( new Utf8Codec )
+, _tin(_tb)
+, _reader(_tin)
 , _formatter(_writer)
 , _method(0)
 , _timeout(System::EventLoop::WaitInfinite)
@@ -79,7 +80,7 @@ void ClientImpl::beginCall(IComposer& r, IRemoteProcedure& method, IDecomposer**
 
     beginExecute();
 
-    _reader.attach(_ts);
+    _reader.attach(_tin);
     _scanner.begin(r);
 }
 
@@ -98,8 +99,9 @@ void ClientImpl::call(IComposer& r, IRemoteProcedure& method, IDecomposer** argv
     prepareRequest(method.name(), argv, argc);
 
     std::istringstream is(execute());
-    _ts.attach(is);
-    _reader.attach(_ts);
+    
+    _tb.attach(is);
+    _reader.attach(_tin);
     _scanner.begin(r);
 
     while( _reader.get().type() !=  Pt::Xml::Node::EndDocument )
@@ -137,32 +139,19 @@ void ClientImpl::cancel()
 
 void ClientImpl::onReadReplyBegin(std::istream& is)
 {
-    _ts.attach(is);
+    _tb.attach(is);
 }
 
-std::size_t ClientImpl::onReadReply()
+void ClientImpl::onReadReply()
 {
-    std::size_t n = 0;
-
     try
     {
         _errorPending = false;
 
-        while(true)
+        while( _reader.advance() ) // Xml::ParseError
         {
-            _ts.buffer().import();
-            std::streamsize m = _ts.buffer().in_avail();
-            if( ! m )
-                break;
-
-            assert(m > 0);
-            n += static_cast<std::size_t>(m);
-
-            while( _reader.advance() ) // Xml::ParseError
-            {
-                const Pt::Xml::Node& node = _reader.get();
-                advance(node); // SerializationError, ConversionError
-            }
+            const Pt::Xml::Node& node = _reader.get();
+            advance(node); // SerializationError, ConversionError
         }
     }
     catch(const Xml::XmlError& error)
@@ -185,8 +174,6 @@ std::size_t ClientImpl::onReadReply()
         _errorPending = true;
         _method->onFinished();
     }
-
-    return n;
 }
 
 

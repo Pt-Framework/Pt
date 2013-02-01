@@ -74,8 +74,9 @@ class GoogleWeatherClient : public Pt::Connectable
         : _thread(0)
         , _client(_loop, "www.google.com", 80)
         , _sink(0)
-        , _ts(new Pt::Utf8Codec)
-        , _reader(_ts)
+        , _tb(new Pt::Utf8Codec)
+        , _tin(_tb)
+        , _reader(_tin)
         , _parseFunc(&GoogleWeatherClient::onXmlBegin)
         , _weather(city)
         {
@@ -163,37 +164,23 @@ class GoogleWeatherClient : public Pt::Connectable
 
             // we have the expected reply and prepare our text stream to process
             // the incomimg body
-            _ts.attach( client.reply().body() );
+            _tb.attach( client.reply().body() );
         }
 
-        size_t onBodyAvailable(Pt::Http::Client& client)
+        void onBodyAvailable(Pt::Http::Client& client)
         {
             // this callback can be called multiple times. Each time we
             // advance the XML parser.
 
-            // need to return the number of bytes consumed.
-            std::size_t n = 0;
-
             try
-            { 
-                while(true)
+            {     
+                while( _reader.advance() ) // Xml::ParseError
                 {
-                    _ts.buffer().import();
-                    std::streamsize m = _ts.buffer().in_avail();
-                    if( ! m )
-                        break;
-        
-                    assert(m >= 0);
-                    n += static_cast<std::size_t>(m);
-        
-                    while( _reader.advance() ) // Xml::ParseError
-                    {
-                        const Pt::Xml::Node& node = _reader.get();
+                    const Pt::Xml::Node& node = _reader.get();
 
-                        // _parseFunc == 0 means end of document, we ignore the rest...
-                        if(_parseFunc)
-                            (this->*_parseFunc)(node);
-                    }
+                    // _parseFunc == 0 means end of document, we ignore the rest...
+                    if(_parseFunc)
+                        (this->*_parseFunc)(node);
                 }
             }
             catch(const Pt::Xml::XmlError& error)
@@ -206,8 +193,6 @@ class GoogleWeatherClient : public Pt::Connectable
                 if(_sink)
                     _sink->commitEvent(_weather);
             }
-
-            return n;
         }
         
         void onReplyFinished(Pt::Http::Client& client)
@@ -327,7 +312,8 @@ class GoogleWeatherClient : public Pt::Connectable
         Pt::System::Timer _timer;
         Pt::Http::Client _client;
         Pt::System::EventSink* _sink;
-        Pt::TextIStream _ts;
+        Pt::TextBuffer _tb;
+        Pt::Xml::TextInputSource _tin;
         Pt::Xml::XmlReader _reader;
         typedef void (GoogleWeatherClient::*ParseFunc)(const Pt::Xml::Node&);
         ParseFunc _parseFunc;

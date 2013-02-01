@@ -189,8 +189,8 @@ void XmlReaderTest::DtdValidateAttributes()
         input << "<!ELEMENT test EMPTY>\n";
         input << "<!ATTLIST test a1 CDATA #REQUIRED\n";
         input << "          a2 CDATA #IMPLIED\n";
-        input << "          a3 CDATA #FIXED \"A3def\"\n";
-        input << "          a4 CDATA \"A4def\"\n>";
+        input << "          a3 NMTOKEN #FIXED \"A3def\"\n";
+        input << "          a4 NMTOKENS \"A4def\"\n>";
         input << "]>\n";
         input << "<test a1='A1' a2='A2' a4='A3def'></test>";
 

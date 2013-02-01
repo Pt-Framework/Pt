@@ -75,6 +75,11 @@ class PT_API Serializer
 
         void begin();
 
+        /** @brief Returns true if type was completely serialized.
+            
+            If false is returned, only some progress has been made, but the
+            type was not completed yet.
+        */
         bool advance();
 
         void finish();

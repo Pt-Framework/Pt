@@ -106,6 +106,15 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
             this->setp(0, 0);
         }
 
+        explicit BasicTextBuffer(CodecType* codec)
+        : _ebufsize(0)
+        , _codec(codec) 
+        , _target(0)
+        {
+            this->setg(0, 0, 0);
+            this->setp(0, 0);
+        }
+
         ~BasicTextBuffer() throw()
         {
             try
@@ -137,7 +146,7 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
                 if( -1 == this->sync() )
                     return -1;
 
-                if( _codec && ! _codec->always_noconv() )
+                if( _target && _codec && ! _codec->always_noconv() )
                 {
                     typename CodecType::result res = CodecType::error;
                     do
@@ -415,6 +424,8 @@ class PT_API TextBuffer : public BasicTextBuffer<Pt::Char, char>
              @param codec The codec which is used to convert data from and to the external device.
         */
         TextBuffer(std::ios* buffer, Codec* codec);
+
+        explicit TextBuffer(Codec* codec);
 };
 
 } // namespace Pt

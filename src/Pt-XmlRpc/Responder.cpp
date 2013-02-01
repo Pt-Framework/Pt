@@ -60,8 +60,9 @@ static const Pt::Char XMLRPC_STRING[]  = { 's', 't', 'r', 'i', 'n', 'g', '\0' };
 XmlRpcResponder::XmlRpcResponder(Service& service)
 : Http::Responder(service)
 , _state(OnBegin)
-, _ts(new Utf8Codec)
-, _reader(_ts)
+, _tb(new Utf8Codec)
+, _tin(_tb)
+, _reader(_tin)
 , _formatter(_writer)
 , _service(&service)
 , _reply(0)
@@ -83,27 +84,19 @@ XmlRpcResponder::~XmlRpcResponder()
 void XmlRpcResponder::onBeginRequest(Http::Request& request, Http::Reply& reply, System::EventLoop& loop)
 {
     _state = OnBegin;
-    _ts.attach( request.body() );
+    _tb.attach( request.body() );
     _args = 0;
 }
 
 
 void XmlRpcResponder::onReadRequest(Http::Request& request, Http::Reply& reply, System::EventLoop& loop)
 {
-   try
-   {
-        for(;;)
+    try
+    {
+        while( _reader.advance() )
         {
-            _ts.buffer().import();
-            std::streamsize m = _ts.buffer().in_avail();
-            if( ! m)
-                break;
-
-            while( _reader.advance() )
-            {
-                const Xml::Node& node = _reader.get();
-                this->advance(node, loop);
-            }
+            const Xml::Node& node = _reader.get();
+            this->advance(node, loop);
         }
     }
     catch(const Xml::XmlError& error)

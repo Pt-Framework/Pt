@@ -106,11 +106,11 @@ void Serializer::begin()
 bool Serializer::advance()
 {
     if( ! _current )
-        return false;
+        return true;
 
     _current = _current->advanceFormat(*_formatter);
     if( _current )
-        return true;
+        return false;
 
     // at least one on the stack, otherwise _current is 0
     _stack.front()->~IDecomposer();
@@ -118,11 +118,11 @@ bool Serializer::advance()
     _stack.erase( _stack.begin() );
 
     if( _stack.empty() )
-        return false;
+        return true;
 
     _current = _stack.front();
     _current->beginFormat(*_formatter);
-    return true;
+    return false;
 }
 
 

@@ -67,9 +67,6 @@ class InputSource
         void setLine(std::size_t n)
         { _line = n; }
 
-        void bumpLine()
-        { ++_line; }
-
         bool advance()
         {                               
             if( ! rdbuf() )
@@ -112,6 +109,7 @@ class InputSource
         long _flags;
 };
 
+
 class StringInputSource : public InputSource
 {
     public:
@@ -135,6 +133,7 @@ class StringInputSource : public InputSource
     private:
         StringBuffer _sbuf;
 };
+
 
 class ByteInputSource : public InputSource
 {
@@ -164,15 +163,18 @@ class ByteInputSource : public InputSource
         std::istream* _is;
 };
 
+
 class TextInputSource : public InputSource
 {
     public:
-        TextInputSource(TextBuffer& tb, std::size_t refcnt = 0)
+        explicit TextInputSource(TextBuffer& tb, std::size_t refcnt = 0)
         : InputSource(&tb, refcnt)
         , _tbuf(&tb)
         { }
 
-        virtual ~TextInputSource()
+        explicit TextInputSource(BasicTextBuffer<Char, char>& tb, std::size_t refcnt = 0)
+        : InputSource(&tb, refcnt)
+        , _tbuf(&tb)
         { }
 
     protected:
@@ -182,30 +184,9 @@ class TextInputSource : public InputSource
         }
     
     private:
-        TextBuffer* _tbuf;
+        BasicTextBuffer<Char, char>* _tbuf;
 };
 
-class TextInputSource2 : public InputSource
-{
-    public:
-        TextInputSource2(std::basic_istream<Char>& is, std::size_t refcnt = 0)
-        : InputSource(is.rdbuf(), refcnt)
-        , _eof(false)
-        { }
-
-        virtual ~TextInputSource2()
-        { }
-
-    protected:
-        virtual void onAdvance()
-        { }
-
-        void setEof()
-        { _eof = true; }
-    
-    private:
-        bool _eof;
-};
 
 /** @brief Reads XML as a Stream of XML Nodes.
 
@@ -255,13 +236,14 @@ class PT_XML_API XmlReader
                      - ReportDocumentStart
                      - ReportCData (not as Characters)
 
+           TODO: report nodes for StartDocType EndDocType, so we can process
+                 comments and processing instructions embedded in the DTD
+
            TODO: how do we handle document encoding and codec selection?
                  - ctor with byte stream looks at leading bytes to guess codec
                  - ctor with unicode text stream uses user defined codec
         */
         explicit XmlReader(std::istream& is, int flags = 0);
-
-        explicit XmlReader(std::basic_istream<Char>& is, int flags = 0);
 
         explicit XmlReader(InputSource& is, int flags = 0);
 
@@ -269,11 +251,9 @@ class PT_XML_API XmlReader
 
         // TODO: split into attach() and setFlags()
         // also add methods for discard() and reset()
-        void attach(std::basic_istream<Char>& is, int flags = 0);
-
         void attach(std::istream& is, int flags = 0);
 
-        void attach(InputSource& is, int flags);
+        void attach(InputSource& is, int flags = 0);
 
         /** @brief Adds an external input source.
 

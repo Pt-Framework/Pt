@@ -233,9 +233,9 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             dateptr = 0;
 
             std::stringstream input( output.str() );
-            Pt::TextIStream tis(input, new Pt::Utf8Codec);
+            //Pt::TextIStream tis(input, new Pt::Utf8Codec);
 
-            Pt::Xml::XmlReader reader(tis);
+            Pt::Xml::XmlReader reader(input);
             Pt::Xml::XmlDeserializer deser(reader);
 
             deser.deserialize(dates);
@@ -273,9 +273,9 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             Pt::Date date4(1800, 7, 6);
 
             std::stringstream input( output.str() );
-            Pt::TextIStream tis(input, new Pt::Utf8Codec);
+            //Pt::TextIStream tis(input, new Pt::Utf8Codec);
 
-            Pt::Xml::XmlReader reader(tis);
+            Pt::Xml::XmlReader reader(input);
             Pt::Xml::XmlDeserializer deser(reader);
             deser.context()->enableReferencing(false);
 
@@ -311,7 +311,7 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
 
             //std::cerr << "\n--------------------" << std::endl;
             ser.begin();
-            while( ser.advance() )
+            while( ! ser.advance() )
             {
                 //ser.flush();
                 //std::cerr << output.str() << "- ADVANCE -" << std::endl;
@@ -328,25 +328,17 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             Pt::Date date2b;
             Pt::Date* dateptr1b = 0;
             std::stringstream input( output.str() );
-            Pt::TextIStream tis(input, new Pt::Utf8Codec);
-
-            tis.buffer().import();
-            Pt::Xml::XmlReader reader(tis);
+            Pt::Xml::XmlReader reader(input);
             Pt::Xml::XmlDeserializer deser(reader);
 
             deser.begin(date1b);
-            while( tis.buffer().in_avail() && deser.advance() )
-            { }
+            PT_UNIT_ASSERT( deser.advance() );
 
-            tis.buffer().import();
             deser.begin(date2b);
-            while( tis.buffer().in_avail()  && deser.advance() )
-            { }
+            PT_UNIT_ASSERT( deser.advance() );
 
-            tis.buffer().import();
             deser.begin(dateptr1b);
-            while( tis.buffer().in_avail()  && deser.advance() )
-            { }
+            PT_UNIT_ASSERT( deser.advance() );
 
             deser.finish();
 

@@ -136,6 +136,36 @@ class CDataAttributeDeclaration : public AttributeDeclaration
 };
 
 
+class NMTokenAttributeDeclaration : public AttributeDeclaration
+{
+    public:
+        NMTokenAttributeDeclaration()
+        : AttributeDeclaration()
+        {}
+
+        virtual bool onMatch(const Attribute& attr) const
+        { 
+            // TODO: check for non-CDATA characters in value           
+            return true; 
+        }
+};
+
+
+class NMTokensAttributeDeclaration : public AttributeDeclaration
+{
+    public:
+        NMTokensAttributeDeclaration()
+        : AttributeDeclaration()
+        {}
+
+        virtual bool onMatch(const Attribute& attr) const
+        { 
+            // TODO: check for non-CDATA characters in value           
+            return true; 
+        }
+};
+
+
 class AttributeListDeclaration
 {
     typedef std::vector<AttributeDeclaration*> AttrDecls;

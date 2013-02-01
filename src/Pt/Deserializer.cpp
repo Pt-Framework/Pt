@@ -97,7 +97,7 @@ bool Deserializer::advance()
         _current = 0;
     }
 
-    return ! finished;
+    return finished;
 }
 
 
