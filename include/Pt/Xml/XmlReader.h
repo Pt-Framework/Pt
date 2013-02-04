@@ -48,13 +48,6 @@ class StartElement;
 class InputSource
 {
     public:
-        enum StateFlags
-        {
-            None = 0,
-            End = 1
-        };
-
-    public:
         virtual ~InputSource()
         {}
 
@@ -67,46 +60,130 @@ class InputSource
         void setLine(std::size_t n)
         { _line = n; }
 
-        bool advance()
-        {                               
-            if( ! rdbuf() )
-                return false;
-                    
-            if( rdbuf()->in_avail() > 0 )
-                return true;
-                        
-            this->onAdvance();
-            
-            return ! isEof();
+        void advance()
+        {                  
+            if(_eof)
+                return;
+                
+            if( rdbuf() && rdbuf()->in_avail() > 0 )
+                return;        
+
+            _rdbuf = this->onAdvance();
+
+            if( ! _rdbuf)
+                _eof = true;
         }
 
+        void get()
+        {
+            if(_eof)
+                return;
+
+            if( _rdbuf )
+                return;
+                
+            _rdbuf = this->onGet();
+
+            if( ! _rdbuf)
+                _eof = true;
+        }
+        
         std::basic_streambuf<Char>* rdbuf()
         { return _rdbuf; }
 
-        bool isEof() const
-        { return (_flags & End) == End; }
+        bool operator !() const
+        { return eof(); }
 
-        void setEof(bool eof)
-        { _flags = eof ? (_flags|End) : (_flags & ~End); }
+        bool eof() const
+        { return _eof; }
+
+        void setEof(bool f)
+        { _eof = f; }
+
+        void clear()
+        {
+            _line = 1;
+            _eof = false;
+        }
 
     protected:
         InputSource(std::basic_streambuf<Char>* sb = 0, std::size_t refcnt = 0)
         : _refs(refcnt)
         , _rdbuf(sb)
         , _line(1)
-        , _flags(0)
+        , _eof(false)
         {}
 
         void init(std::basic_streambuf<Char>* sb)
         { _rdbuf = sb; }
 
-        virtual void onAdvance() = 0;
+        virtual std::basic_streambuf<Char>* onAdvance() = 0;
+
+        virtual std::basic_streambuf<Char>* onGet() = 0;
 
     private:
         std::size_t _refs;
         std::basic_streambuf<Char>* _rdbuf;
         std::size_t _line;
-        long _flags;
+        bool _eof;
+};
+
+
+/*
+    00 00 FE FF  UTF-32, big-endian
+    FF FE 00 00  UTF-32, little-endian
+    FE FF        UTF-16, big-endian
+    FF FE        UTF-16, little-endian
+    EF BB BF     UTF-8
+*/
+class ByteInputSource : public InputSource
+{
+    public:
+        ByteInputSource(std::istream& is, std::size_t refcnt = 0)
+        : InputSource(0, refcnt)
+        , _codec(new Utf8Codec)
+        , _tbuf(&is, _codec)
+        , _is(&is)
+        {
+            init(&_tbuf);
+        }
+
+        virtual ~ByteInputSource()
+        { }
+
+    protected:
+        virtual std::basic_streambuf<Char>* onAdvance()
+        {
+            if( ! _codec)
+            {
+                if( ! _is->rdbuf() || _is->rdbuf()->in_avail() <= 0)
+                {
+                    if( _is->eof() )
+                    {
+                        return 0;
+                    }
+                }
+
+                // TODO: parse BOM and XML declaration
+            }
+
+            _tbuf.import();
+
+            if(_tbuf.in_avail() <= 0 && _is->eof() )
+                return 0;
+
+            return &_tbuf;
+        }
+
+        std::basic_streambuf<Char>* onGet()
+        {
+            return &_tbuf;
+        }
+
+    private:
+        TextCodec<Char, char>* _codec;
+        TextBuffer _tbuf;
+        std::istream* _is;
 };
 
 
@@ -124,43 +201,21 @@ class StringInputSource : public InputSource
         { }
 
     protected:
-        virtual void onAdvance()
+        virtual std::basic_streambuf<Char>* onAdvance()
         {
             if( _sbuf.in_avail() <= 0 )
-                setEof(true);
+                return 0;
+
+            return &_sbuf;
+        }
+
+        std::basic_streambuf<Char>* onGet()
+        {
+            return &_sbuf;
         }
 
     private:
         StringBuffer _sbuf;
-};
-
-
-class ByteInputSource : public InputSource
-{
-    public:
-        ByteInputSource(std::istream& is, std::size_t refcnt = 0)
-        : InputSource(0, refcnt)
-        , _tbuf(&is, new Utf8Codec)
-        , _is(&is)
-        {
-            init(&_tbuf);
-        }
-
-        virtual ~ByteInputSource()
-        { }
-
-    protected:
-        virtual void onAdvance()
-        {
-            _tbuf.import();
-
-            if(_tbuf.in_avail() <= 0 && _is->eof() )
-                setEof(true);
-        }
-
-    private:
-        TextBuffer _tbuf;
-        std::istream* _is;
 };
 
 
@@ -178,9 +233,15 @@ class TextInputSource : public InputSource
         { }
 
     protected:
-        virtual void onAdvance()
+        virtual std::basic_streambuf<Char>* onAdvance()
+        {    
+            _tbuf->import();    
+            return _tbuf;
+        }
+
+        std::basic_streambuf<Char>* onGet()
         {
-            _tbuf->import();
+            return _tbuf;
         }
     
     private:
@@ -242,6 +303,12 @@ class PT_XML_API XmlReader
            TODO: how do we handle document encoding and codec selection?
                  - ctor with byte stream looks at leading bytes to guess codec
                  - ctor with unicode text stream uses user defined codec
+
+                00 00 FE FF  UTF-32, big-endian
+                FF FE 00 00  UTF-32, little-endian
+                FE FF        UTF-16, big-endian
+                FF FE        UTF-16, little-endian
+                EF BB BF     UTF-8
         */
         explicit XmlReader(std::istream& is, int flags = 0);
 

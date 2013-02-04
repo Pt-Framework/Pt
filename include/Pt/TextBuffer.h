@@ -97,7 +97,7 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
             managed by this class and also be deleted by this class
             on destruction.
         */
-        BasicTextBuffer(std::basic_ios<extern_type>* target, CodecType* codec)
+        explicit BasicTextBuffer(std::basic_ios<extern_type>* target, CodecType* codec = 0)
         : _ebufsize(0)
         , _codec(codec) 
         , _target(target)
@@ -106,7 +106,7 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
             this->setp(0, 0);
         }
 
-        explicit BasicTextBuffer(CodecType* codec)
+        explicit BasicTextBuffer(CodecType* codec = 0)
         : _ebufsize(0)
         , _codec(codec) 
         , _target(0)
@@ -131,6 +131,16 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
         {
             this->terminate();
             _target = &target;
+        }
+
+        void setCodec(CodecType* codec)
+        {
+            this->terminate();
+            
+            if(_codec && _codec->refs() == 0)
+                delete _codec;
+
+            _codec = codec;
         }
 
         void detach()
@@ -423,9 +433,9 @@ class PT_API TextBuffer : public BasicTextBuffer<Pt::Char, char>
              @param buffer The buffer (external device) which is wrapped by this object.
              @param codec The codec which is used to convert data from and to the external device.
         */
-        TextBuffer(std::ios* buffer, Codec* codec);
+        explicit TextBuffer(std::ios* buffer, Codec* codec = 0);
 
-        explicit TextBuffer(Codec* codec);
+        explicit TextBuffer(Codec* codec = 0);
 };
 
 } // namespace Pt

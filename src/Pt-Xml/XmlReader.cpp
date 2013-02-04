@@ -2836,9 +2836,7 @@ class XmlReaderImpl
                 }
                 
                 bool empty() const
-                { 
-                    return _currentInput == 0; 
-                }
+                { return _currentInput == 0; }
                 
                 void clear()
                 {
@@ -2850,12 +2848,45 @@ class XmlReaderImpl
                         _external.pop();
                     } 
 
-                    _currentInput = _input;
+                    _currentInput = 0;
+                    _input = 0;
+                    _rdbuf = 0;
                 }
 
+                bool inputAvailable()
+                { return _rdbuf && _rdbuf->in_avail() > 0; }
+
+                bool operator !() const
+                { return _rdbuf == 0; }
+                
                 bool advance()
                 {
-                    return _currentInput ? _currentInput->advance() : false;
+                    if( ! _currentInput || _currentInput->eof() )
+                        return false;
+
+                    _currentInput->advance();
+
+                    _rdbuf = _currentInput->eof() ? 0 
+                                                  : _currentInput->rdbuf();
+                    return _rdbuf != 0;
+                }
+
+                void getNext(std::char_traits<Char>::int_type& c)
+                { 
+                    c = _rdbuf ? _rdbuf->sbumpc() : getC();
+                }
+
+                std::char_traits<Char>::int_type getC()
+                {
+                    if( ! _currentInput || _currentInput->eof()  )
+                        return std::char_traits<Char>::eof();
+
+                    _currentInput->get();
+                    
+                    _rdbuf = _currentInput->eof() ? 0 
+                                                  : _currentInput->rdbuf();
+                    
+                    return _rdbuf ? _rdbuf->sbumpc() : std::char_traits<Char>::eof();
                 }
 
                 std::basic_streambuf<Char>* rdbuf()
@@ -2914,7 +2945,8 @@ class XmlReaderImpl
                         if( ! _external.empty() )
                             _currentInput = _external.top();
 
-                        _rdbuf = _currentInput->rdbuf();
+                        if(_currentInput)
+                            _rdbuf = _currentInput->rdbuf();
                     }
                 }
 
@@ -3059,19 +3091,29 @@ class XmlReaderImpl
 
         Node& next()
         {
+            bool atEnd = false;
             _current = 0;
             std::char_traits<Char>::int_type c = 0;
 
-            while( ! _current && _input.rdbuf() )
+            while( ! _current )
             {
-                c = _input.rdbuf()->sbumpc();
-
+                _input.getNext(c);
+                
                 if( c == std::char_traits<Char>::eof() )
-                {
+                {            
                     _input.removeInput();
 
                     if( ! _input.empty() )
                         continue;
+
+                    if( ! atEnd)
+                    {
+                        atEnd = true;
+                        (this->*_parse)( std::char_traits<Char>::eof() );
+                        continue;
+                    }
+
+                    throw SyntaxError("unexpected end of input", line());
                 }
 
                 (this->*_parse)(c);
@@ -3081,9 +3123,6 @@ class XmlReaderImpl
                     _input.bumpLine();
                 }
             }
-
-            if( ! _current )
-                throw std::logic_error("not enough input for XmlReader");
 
             if( _docType.isDefined() )
             {
@@ -3099,23 +3138,24 @@ class XmlReaderImpl
             _current = 0;
             int c = 0;
 
-            while( ! _current && _input.rdbuf() )
+            while( ! _current )
             {
-                if( _input.rdbuf()->in_avail() <= 0 )
-                {                    
+                if( ! _input.inputAvailable() )
+                {                 
                     if( ! _input.advance() )
                     {
                         _input.removeInput();
-                        continue;
+
+                        if( ! _input.empty() )
+                            continue;
                     }
 
-                    if( _input.rdbuf()->in_avail() <= 0 )
+                    if( ! _input.inputAvailable() )
                     {
                         break;
                     }
                 }
 
-                // TODO: performance of get method, which needs to check _rdbuf
                 c = _input.rdbuf()->sbumpc();
 
                 (this->*_parse)(c);
