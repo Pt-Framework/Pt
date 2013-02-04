@@ -2873,7 +2873,7 @@ class XmlReaderImpl
 
                 void getNext(std::char_traits<Char>::int_type& c)
                 { 
-                    c = _rdbuf ? _rdbuf->sbumpc() : getC();
+                    c = _rdbuf ? _rdbuf->sbumpc() : std::char_traits<Char>::eof() ;
                 }
 
                 std::char_traits<Char>::int_type getC()
@@ -2907,6 +2907,8 @@ class XmlReaderImpl
 
                 void setInput(InputSource& is)
                 {
+                    assert(is.rdbuf());
+
                     if( _currentInput == 0 || _currentInput == _input)
                     {
                         _currentInput = &is;
@@ -2918,6 +2920,7 @@ class XmlReaderImpl
 
                 void addInput(InputSource* is)
                 {
+                    assert(is->rdbuf());
                     _external.push(is);
                     _currentInput = is;
                     _rdbuf = _currentInput->rdbuf();

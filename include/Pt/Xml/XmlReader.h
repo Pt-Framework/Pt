@@ -65,7 +65,7 @@ class InputSource
             if(_eof)
                 return;
                 
-            if( rdbuf() && rdbuf()->in_avail() > 0 )
+            if( _rdbuf && _rdbuf->in_avail() > 0 )
                 return;        
 
             _rdbuf = this->onAdvance();
@@ -88,6 +88,7 @@ class InputSource
                 _eof = true;
         }
         
+        // TODO: call onGet if _rdbuf is null
         std::basic_streambuf<Char>* rdbuf()
         { return _rdbuf; }
 
