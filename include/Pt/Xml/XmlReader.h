@@ -45,13 +45,13 @@ class Node;
 class DocType;
 class StartElement;
 
-class InputSource : public std::basic_istream<Char>
+class InputSource 
 {
     public:
         InputSource(std::basic_streambuf<Char>* sb = 0, std::size_t refcnt = 0)
-        : std::basic_istream<Char>(sb)
-        , _refs(refcnt)
+        : _refs(refcnt)
         , _line(1)
+        , _buf(0)
         {}
 
         virtual ~InputSource()
@@ -66,43 +66,22 @@ class InputSource : public std::basic_istream<Char>
         void setLine(std::size_t n)
         { _line = n; }
 
-        int_type getNext()
-        { 
-            return rdbuf() ? rdbuf()->sbumpc() : onGet();
-        }
+        std::basic_streambuf<Char>* advance()
+        {
+            if(_buf && _buf->in_avail() > 0)
+                return _buf;
 
-        int_type getAvail()
-        { 
-            return rdbuf() && (rdbuf()->in_avail() > 0) ? rdbuf()->sbumpc() : std::char_traits<Char>::eof();
-        }
-
-        bool inputAvailable()
-        { return rdbuf() && (rdbuf()->in_avail() > 0); }
-
-        void advance()
-        {                  
-            if( ! this->good() )
-                return;
-                
-            if( rdbuf() && rdbuf()->in_avail() > 0 )
-                return;        
-
-            // TODO: catch(...), set state to bad and rethrow
-            if( ! this->onAdvance() )
-                this->setstate(std::ios::eofbit);
+            _buf = onAdvance();
+            return _buf;
         }
 
     protected:
-        virtual bool onAdvance() = 0;
-
-        virtual int_type onGet()
-        { 
-            return std::char_traits<Char>::eof(); 
-        }
+        virtual std::basic_streambuf<Char>* onAdvance() = 0;
 
     private:
         std::size_t _refs;
         std::size_t _line;
+        std::basic_streambuf<Char>* _buf;
 };
 
 
@@ -112,18 +91,12 @@ class NullInputSource : public InputSource
         explicit NullInputSource(std::size_t refcnt = 0)
         : InputSource(0, refcnt)
         {
-            this->setstate(std::ios::eofbit); 
         }
 
     protected:
-        virtual bool onAdvance()
+        virtual std::basic_streambuf<Char>* onAdvance()
         {      
-            return false;
-        }
-
-        virtual int_type onGet()
-        { 
-            return std::char_traits<Char>::eof(); 
+            return 0;
         }
 };
 
@@ -144,22 +117,21 @@ class ByteInputSource : public InputSource
         , _tbuf(&is, _codec)
         , _is(&is)
         {
-            init(&_tbuf);
         }
 
         virtual ~ByteInputSource()
         { }
 
     protected:
-        virtual bool onAdvance()
+        virtual std::basic_streambuf<Char>* onAdvance()
         {
             if( ! _codec)
             {
-                if( ! _is->good() )
-                    return false;
+                //if( ! _is->good() )
+                //    return false;
 
-                if( ! _is->rdbuf() || _is->rdbuf()->in_avail() <= 0)
-                    return true;
+                //if( ! _is->rdbuf() || _is->rdbuf()->in_avail() <= 0)
+                //    return true;
 
                 //if(_is.rdbuf()->sgetc() != '<')
                 //    throw std::logic_error("BOM parsing not implemented");
@@ -173,15 +145,9 @@ class ByteInputSource : public InputSource
             _tbuf.import();
 
             if(_tbuf.in_avail() <= 0 && ! _is->good() )
-                return false;
+                return 0;
 
-            return true;
-        }
-
-        virtual int_type onGet()
-        { 
-            init(&_tbuf);
-            return _tbuf.sbumpc();
+            return &_tbuf;
         }
 
     private:
@@ -198,25 +164,15 @@ class StringInputSource : public InputSource
         : InputSource(0, refcnt)
         , _sbuf(str)
         {
-            init(&_sbuf);
         }
 
         virtual ~StringInputSource()
         { }
 
     protected:
-        virtual bool onAdvance()
-        {
-            if( _sbuf.in_avail() <= 0 )
-                return false;
-
-            return true;
-        }
-
-        virtual int_type onGet()
-        { 
-            init(&_sbuf);
-            return _sbuf.sbumpc();
+        virtual std::basic_streambuf<Char>* onAdvance()
+        {   
+            return &_sbuf;
         }
 
     private:
@@ -238,16 +194,10 @@ class TextInputSource : public InputSource
         { }
 
     protected:
-        virtual bool onAdvance()
-        {    
-            _tbuf->import();    
-            return true;
-        }
-    
-        virtual int_type onGet()
-        { 
-            init(_tbuf);
-            return _tbuf->sbumpc();
+        virtual std::basic_streambuf<Char>* onAdvance()
+        {   
+            _tbuf->import();
+            return _tbuf;
         }
 
     private:

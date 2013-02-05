@@ -2860,37 +2860,28 @@ class XmlReaderImpl
                     _input = &_nullInput;
                     _rdbuf = 0;
                 }
-
-                bool inputAvailable()
-                { return _rdbuf && _rdbuf->in_avail() > 0; }
                 
-                bool advance()
-                {
-                    if( ! _rdbuf || _currentInput == &_nullInput )
-                        return false;
-
-                    _currentInput->advance();
-
-                    return ! _currentInput->eof();
-                }
 
                 int_type getNext()
                 {
                     // return _currentInput->getNext();
                     
-                    return _rdbuf ? _rdbuf->sbumpc() : std::char_traits<Char>::eof();
+                    return std::char_traits<Char>::eof();
                 }
 
                 int_type getAvail()
                 { 
                     // TODO: use NullInput so we save the if-branch
-                    //return _currentInput->getAvail();
+                    return 0;
                     
                     //return inputAvailable() ? _currentInput->getBuf()->sbumpc() : std::char_traits<Char>::eof();
 
-                    return inputAvailable() ? _rdbuf->sbumpc() : std::char_traits<Char>::eof();
+                    //return inputAvailable() ? _rdbuf->sbumpc() : std::char_traits<Char>::eof();
                 }
                 
+                InputSource* currentInput()
+                { return _currentInput; }
+
                 std::basic_streambuf<Char>* rdbuf()
                 {
                     return _rdbuf;
@@ -2916,7 +2907,7 @@ class XmlReaderImpl
                     if( _external.empty() )
                     {
                         _currentInput = &is;
-                        _rdbuf = _currentInput->rdbuf();
+                        //_rdbuf = _currentInput->rdbuf();
                     }
                 }
 
@@ -2931,7 +2922,7 @@ class XmlReaderImpl
 
                     assert( is->rdbuf() );
                     _currentInput = is;
-                    _rdbuf = _currentInput->rdbuf();
+                    //_rdbuf = _currentInput->rdbuf();
                 }
 
                 void removeInput()
@@ -2949,7 +2940,7 @@ class XmlReaderImpl
                                                           : _external.top();
                     }                      
 
-                    _rdbuf = _currentInput != &_nullInput ? _currentInput->rdbuf() : 0;
+                    //_rdbuf = _currentInput != &_nullInput ? _currentInput->rdbuf() : 0;
                 }
 
             private:
@@ -3139,33 +3130,29 @@ class XmlReaderImpl
         bool advance()
         {
             _current = 0;
-            int c = 0;
+            std::char_traits<Char>::int_type c = 0;
+            InputSource* in = _input.currentInput();
+            std::basic_streambuf<Char>* rdbuf = in->advance();
 
             while( ! _current )
             {
-                c = _input.getAvail(); ///
+                if( ! rdbuf || rdbuf->in_avail() <= 0 || in != _input.currentInput() )
+                {                
+                    in = _input.currentInput();
+                    rdbuf = in->advance();
 
-                ///if( ! _input.inputAvailable() )
-                if( c == std::char_traits<Char>::eof() ) ///
-                {                 
-                    if( ! _input.advance() )
+                    if( ! rdbuf || rdbuf->in_avail() <= 0 )
                     {
                         _input.removeInput();
 
                         if( ! _input.empty() )
                             continue;
-                    }
 
-                    c = _input.getAvail(); ///
-                    
-                    ///if( ! _input.inputAvailable() )
-                    if( c == std::char_traits<Char>::eof() ) ///
-                    {
                         break;
                     }
                 }
 
-                ///c = _input.rdbuf()->sbumpc();
+                c = rdbuf->sbumpc();
 
                 (this->*_parse)(c);
 
