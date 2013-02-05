@@ -42,6 +42,7 @@
 #include "Pt/Utf8Codec.h"
 
 #include <iostream>
+#include <memory>
 
 log_define("Pt.Xml.XmlReader")
 
@@ -2819,14 +2820,21 @@ class XmlReaderImpl
                 e.setNamespace(*ns);
             }
         }
-
+        //
+        //
+        //
+        //
+        //
     public:
         class InputStack
         {
             public:
+                typedef std::char_traits<Char>::int_type int_type;
+
+            public:
                 InputStack()
-                : _input(0)
-                , _currentInput(0)
+                : _input(&_nullInput)
+                , _currentInput(&_nullInput)
                 , _rdbuf(0)
                 {}
 
@@ -2834,108 +2842,101 @@ class XmlReaderImpl
                 {
                     clear();
                 }
-                
+
                 bool empty() const
-                { return _currentInput == 0; }
-                
+                { return _currentInput == &_nullInput; }
+
                 void clear()
                 {
                     while( ! _external.empty() )
                     {
                         if( _external.top()->refs() == 0 )
                             delete _external.top();
-                
-                        _external.pop();
-                    } 
 
-                    _currentInput = 0;
-                    _input = 0;
+                        _external.pop();
+                    }
+
+                    _currentInput = &_nullInput;
+                    _input = &_nullInput;
                     _rdbuf = 0;
                 }
 
                 bool inputAvailable()
                 { return _rdbuf && _rdbuf->in_avail() > 0; }
-
-                bool operator !() const
-                { return _rdbuf == 0; }
                 
                 bool advance()
                 {
-                    if( ! _currentInput || _currentInput->eof() )
+                    if( ! _rdbuf || _currentInput == &_nullInput )
                         return false;
 
                     _currentInput->advance();
 
-                    _rdbuf = _currentInput->eof() ? 0 
-                                                  : _currentInput->rdbuf();
-                    return _rdbuf != 0;
+                    return ! _currentInput->eof();
                 }
 
-                void getNext(std::char_traits<Char>::int_type& c)
-                { 
-                    c = _rdbuf ? _rdbuf->sbumpc() : std::char_traits<Char>::eof() ;
-                }
-
-                std::char_traits<Char>::int_type getC()
+                int_type getNext()
                 {
-                    if( ! _currentInput || _currentInput->eof()  )
-                        return std::char_traits<Char>::eof();
-
-                    _currentInput->get();
-                    
-                    _rdbuf = _currentInput->eof() ? 0 
-                                                  : _currentInput->rdbuf();
+                    // return _currentInput->getNext();
                     
                     return _rdbuf ? _rdbuf->sbumpc() : std::char_traits<Char>::eof();
                 }
 
+                int_type getAvail()
+                { 
+                    // TODO: use NullInput so we save the if-branch
+                    //return _currentInput->getAvail();
+                    
+                    //return inputAvailable() ? _currentInput->getBuf()->sbumpc() : std::char_traits<Char>::eof();
+
+                    return inputAvailable() ? _rdbuf->sbumpc() : std::char_traits<Char>::eof();
+                }
+                
                 std::basic_streambuf<Char>* rdbuf()
                 {
                     return _rdbuf;
                 }
 
                 void bumpLine()
-                { 
-                    if(_currentInput)
+                {
+                    if(_currentInput != &_nullInput)
                     {
                         _currentInput->setLine( _currentInput->line() + 1 );
                     }
                 }
 
                 std::size_t line() const
-                { return _currentInput ? _currentInput->line() : 0; }
+                { return _currentInput != &_nullInput ? _currentInput->line() : 0; }
 
                 void setInput(InputSource& is)
                 {
-                    assert(is.rdbuf());
+                    assert( is.rdbuf() );
 
-                    if( _currentInput == 0 || _currentInput == _input)
+                    _input = &is;
+
+                    if( _external.empty() )
                     {
                         _currentInput = &is;
                         _rdbuf = _currentInput->rdbuf();
                     }
-
-                    _input = &is;
                 }
 
                 void addInput(InputSource* is)
                 {
-                    assert(is->rdbuf());
+                    std::auto_ptr<InputSource> isPtr;
+                    if(is->refs() == 0)
+                        isPtr.reset(is);
+
                     _external.push(is);
+                    isPtr.release();
+
+                    assert( is->rdbuf() );
                     _currentInput = is;
                     _rdbuf = _currentInput->rdbuf();
                 }
 
-                void addInput(const Char* str)
-                {
-                    StringInputSource* ss = new StringInputSource(str);
-                    addInput(ss);
-                }
-
                 void removeInput()
                 {
-                    _currentInput = 0;
-                    _rdbuf = 0;
+                    _currentInput = &_nullInput;
 
                     if( ! _external.empty() )
                     {
@@ -2943,17 +2944,16 @@ class XmlReaderImpl
                             delete _external.top();
 
                         _external.pop();
-                        _currentInput = _input;
 
-                        if( ! _external.empty() )
-                            _currentInput = _external.top();
+                        _currentInput = _external.empty() ? _input 
+                                                          : _external.top();
+                    }                      
 
-                        if(_currentInput)
-                            _rdbuf = _currentInput->rdbuf();
-                    }
+                    _rdbuf = _currentInput != &_nullInput ? _currentInput->rdbuf() : 0;
                 }
 
             private:
+                NullInputSource _nullInput;
                 InputSource* _input;
                 std::stack<InputSource*> _external;
                 InputSource* _currentInput;
@@ -3061,7 +3061,7 @@ class XmlReaderImpl
             // user defined entities that do not contain further entity 
             // references
 
-            _input.addInput(str); 
+            _input.addInput( new StringInputSource(str) ); 
         }
 
         const Pt::String& version() const
@@ -3100,7 +3100,7 @@ class XmlReaderImpl
 
             while( ! _current )
             {
-                _input.getNext(c);
+                c = _input.getNext();
                 
                 if( c == std::char_traits<Char>::eof() )
                 {            
@@ -3143,7 +3143,10 @@ class XmlReaderImpl
 
             while( ! _current )
             {
-                if( ! _input.inputAvailable() )
+                c = _input.getAvail(); ///
+
+                ///if( ! _input.inputAvailable() )
+                if( c == std::char_traits<Char>::eof() ) ///
                 {                 
                     if( ! _input.advance() )
                     {
@@ -3153,13 +3156,16 @@ class XmlReaderImpl
                             continue;
                     }
 
-                    if( ! _input.inputAvailable() )
+                    c = _input.getAvail(); ///
+                    
+                    ///if( ! _input.inputAvailable() )
+                    if( c == std::char_traits<Char>::eof() ) ///
                     {
                         break;
                     }
                 }
 
-                c = _input.rdbuf()->sbumpc();
+                ///c = _input.rdbuf()->sbumpc();
 
                 (this->*_parse)(c);
 
