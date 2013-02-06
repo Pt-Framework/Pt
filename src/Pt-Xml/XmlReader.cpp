@@ -2820,11 +2820,7 @@ class XmlReaderImpl
                 e.setNamespace(*ns);
             }
         }
-        //
-        //
-        //
-        //
-        //
+
     public:
         class InputStack
         {
@@ -2842,6 +2838,12 @@ class XmlReaderImpl
                 {
                     clear();
                 }
+
+                void bumpLine()
+                { _currentInput->setLine( _currentInput->line() + 1 ); }
+
+                std::size_t line() const
+                { return _currentInput->line(); }
 
                 bool empty() const
                 { return _currentInput == &_nullInput; }
@@ -2861,53 +2863,20 @@ class XmlReaderImpl
                     _rdbuf = 0;
                 }
                 
-
-                int_type getNext()
-                {
-                    // return _currentInput->getNext();
-                    
-                    return std::char_traits<Char>::eof();
-                }
-
-                int_type getAvail()
-                { 
-                    // TODO: use NullInput so we save the if-branch
-                    return 0;
-                    
-                    //return inputAvailable() ? _currentInput->getBuf()->sbumpc() : std::char_traits<Char>::eof();
-
-                    //return inputAvailable() ? _rdbuf->sbumpc() : std::char_traits<Char>::eof();
-                }
-                
                 InputSource* currentInput()
                 { return _currentInput; }
 
                 std::basic_streambuf<Char>* rdbuf()
-                {
-                    return _rdbuf;
-                }
-
-                void bumpLine()
-                {
-                    if(_currentInput != &_nullInput)
-                    {
-                        _currentInput->setLine( _currentInput->line() + 1 );
-                    }
-                }
-
-                std::size_t line() const
-                { return _currentInput != &_nullInput ? _currentInput->line() : 0; }
+                { return _rdbuf; }
 
                 void setInput(InputSource& is)
                 {
-                    assert( is.rdbuf() );
-
                     _input = &is;
 
                     if( _external.empty() )
                     {
                         _currentInput = &is;
-                        //_rdbuf = _currentInput->rdbuf();
+                        _rdbuf = _currentInput->rdbuf();
                     }
                 }
 
@@ -2920,9 +2889,8 @@ class XmlReaderImpl
                     _external.push(is);
                     isPtr.release();
 
-                    assert( is->rdbuf() );
                     _currentInput = is;
-                    //_rdbuf = _currentInput->rdbuf();
+                    _rdbuf = _currentInput->rdbuf();
                 }
 
                 void removeInput()
@@ -2940,7 +2908,7 @@ class XmlReaderImpl
                                                           : _external.top();
                     }                      
 
-                    //_rdbuf = _currentInput != &_nullInput ? _currentInput->rdbuf() : 0;
+                    _rdbuf = _currentInput->rdbuf();
                 }
 
             private:
@@ -3088,28 +3056,33 @@ class XmlReaderImpl
             bool atEnd = false;
             _current = 0;
             std::char_traits<Char>::int_type c = 0;
+            InputSource* in = _input.currentInput();
+            std::basic_streambuf<Char>* rdbuf = in->get();
 
             while( ! _current )
             {
-                c = _input.getNext();
-                
-                if( c == std::char_traits<Char>::eof() )
+                if( ! rdbuf || in != _input.currentInput() || 
+                   ((c = rdbuf->sbumpc()) == std::char_traits<Char>::eof() ) )
                 {            
-                    _input.removeInput();
+                    in = _input.currentInput();
+                    rdbuf = in->get();
 
-                    if( ! _input.empty() )
-                        continue;
-
-                    if( ! atEnd)
+                    if( ! rdbuf || rdbuf->sgetc() == std::char_traits<Char>::eof() )
                     {
+                        _input.removeInput();
+
+                        if( ! _input.empty() )
+                            continue;
+
+                        if(atEnd)
+                            throw SyntaxError("unexpected end of input", line());
+
                         atEnd = true;
-                        (this->*_parse)( std::char_traits<Char>::eof() );
-                        continue;
                     }
 
-                    throw SyntaxError("unexpected end of input", line());
+                    c = rdbuf ? rdbuf->sbumpc() : std::char_traits<Char>::eof();
                 }
-
+                
                 (this->*_parse)(c);
 
                 if(c == '\n')
@@ -3131,15 +3104,19 @@ class XmlReaderImpl
         {
             _current = 0;
             std::char_traits<Char>::int_type c = 0;
-            InputSource* in = _input.currentInput();
-            std::basic_streambuf<Char>* rdbuf = in->advance();
+            std::basic_streambuf<Char>* rdbuf = 0;
+            //InputSource* in = _input.currentInput();
+            rdbuf = _input.currentInput()->advance();
 
             while( ! _current )
             {
-                if( ! rdbuf || rdbuf->in_avail() <= 0 || in != _input.currentInput() )
+                rdbuf = _input.currentInput()->rdbuf();
+                
+                if( ! rdbuf || rdbuf->in_avail() <= 0 )
+                //if( ! rdbuf || rdbuf->in_avail() <= 0 || in != _input.currentInput() )
                 {                
-                    in = _input.currentInput();
-                    rdbuf = in->advance();
+                    //in = _input.currentInput();
+                    rdbuf = _input.currentInput()->advance();
 
                     if( ! rdbuf || rdbuf->in_avail() <= 0 )
                     {
@@ -3150,10 +3127,11 @@ class XmlReaderImpl
 
                         break;
                     }
+
+                    //TODO: report EOF once if all input has been processed
                 }
 
                 c = rdbuf->sbumpc();
-
                 (this->*_parse)(c);
 
                 if(c == '\n')

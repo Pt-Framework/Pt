@@ -105,9 +105,9 @@ class ClientImpl : public Pt::Connectable
         void prepareRequest(const String& name, IDecomposer** argv, unsigned argc);
 
         void advance(const Xml::Node& node);
-
+        
         State _state;
-        TextBuffer _tb;
+        TextIStream _ts;
         Xml::TextInputSource _tin;
         Xml::XmlReader _reader;
         Xml::XmlWriter _writer;

@@ -34,6 +34,7 @@
 #include <Pt/String.h>
 #include <Pt/StringStream.h>
 #include <Pt/TextBuffer.h>
+#include <Pt/TextStream.h>
 #include <Pt/Utf8Codec.h>
 #include <iosfwd>
 
@@ -48,10 +49,10 @@ class StartElement;
 class InputSource 
 {
     public:
-        InputSource(std::basic_streambuf<Char>* sb = 0, std::size_t refcnt = 0)
+        InputSource(std::size_t refcnt = 0)
         : _refs(refcnt)
         , _line(1)
-        , _buf(0)
+        , _rdbuf(0)
         {}
 
         virtual ~InputSource()
@@ -68,20 +69,37 @@ class InputSource
 
         std::basic_streambuf<Char>* advance()
         {
-            if(_buf && _buf->in_avail() > 0)
-                return _buf;
+            if(_rdbuf && _rdbuf->in_avail() > 0)
+                return _rdbuf;
 
-            _buf = onAdvance();
-            return _buf;
+            _rdbuf = onAdvance();
+            return _rdbuf;
         }
+
+        std::basic_streambuf<Char>* get()
+        {
+            if(_rdbuf)
+                return _rdbuf;
+
+            _rdbuf = onGet();
+            return _rdbuf;
+        }
+
+        std::basic_streambuf<Char>* rdbuf()
+        { return _rdbuf; }
+
+        void init(std::basic_streambuf<Char>* sb = 0)
+        { _rdbuf = sb; }
 
     protected:
         virtual std::basic_streambuf<Char>* onAdvance() = 0;
 
+        virtual std::basic_streambuf<Char>* onGet() = 0;
+
     private:
         std::size_t _refs;
         std::size_t _line;
-        std::basic_streambuf<Char>* _buf;
+        std::basic_streambuf<Char>* _rdbuf;
 };
 
 
@@ -89,7 +107,7 @@ class NullInputSource : public InputSource
 {
     public:
         explicit NullInputSource(std::size_t refcnt = 0)
-        : InputSource(0, refcnt)
+        : InputSource(refcnt)
         {
         }
 
@@ -98,8 +116,12 @@ class NullInputSource : public InputSource
         {      
             return 0;
         }
-};
 
+        virtual std::basic_streambuf<Char>* onGet()
+        {
+            return 0;
+        }
+};
 
 /*
     00 00 FE FF  UTF-32, big-endian
@@ -112,15 +134,12 @@ class ByteInputSource : public InputSource
 {
     public:
         ByteInputSource(std::istream& is, std::size_t refcnt = 0)
-        : InputSource(0, refcnt)
+        : InputSource(refcnt)
         , _codec(new Utf8Codec)
         , _tbuf(&is, _codec)
         , _is(&is)
         {
         }
-
-        virtual ~ByteInputSource()
-        { }
 
     protected:
         virtual std::basic_streambuf<Char>* onAdvance()
@@ -144,9 +163,14 @@ class ByteInputSource : public InputSource
 
             _tbuf.import();
 
-            if(_tbuf.in_avail() <= 0 && ! _is->good() )
-                return 0;
+            if(_tbuf.in_avail() > 0 || _is->good() )
+                return &_tbuf;
 
+            return 0;
+        }
+
+        virtual std::basic_streambuf<Char>* onGet()
+        {
             return &_tbuf;
         }
 
@@ -161,17 +185,19 @@ class StringInputSource : public InputSource
 {
     public:
         StringInputSource(const String& str, std::size_t refcnt = 0)
-        : InputSource(0, refcnt)
+        : InputSource(refcnt)
         , _sbuf(str)
         {
         }
 
-        virtual ~StringInputSource()
-        { }
-
     protected:
         virtual std::basic_streambuf<Char>* onAdvance()
         {   
+            return _sbuf.in_avail() > 0 ? &_sbuf : 0;
+        }
+        
+        virtual std::basic_streambuf<Char>* onGet()
+        {
             return &_sbuf;
         }
 
@@ -183,24 +209,36 @@ class StringInputSource : public InputSource
 class TextInputSource : public InputSource
 {
     public:
-        explicit TextInputSource(TextBuffer& tb, std::size_t refcnt = 0)
-        : InputSource(&tb, refcnt)
-        , _tbuf(&tb)
+        explicit TextInputSource(TextIStream& ts, std::size_t refcnt = 0)
+        : InputSource(refcnt)
+        , _ios(&ts)
+        , _tbuf( &ts.buffer() )
         { }
 
-        explicit TextInputSource(BasicTextBuffer<Char, char>& tb, std::size_t refcnt = 0)
-        : InputSource(&tb, refcnt)
-        , _tbuf(&tb)
+        explicit TextInputSource(TextStream& ts, std::size_t refcnt = 0)
+        : InputSource(refcnt)
+        , _ios(&ts)
+        , _tbuf( &ts.buffer() )
         { }
 
     protected:
         virtual std::basic_streambuf<Char>* onAdvance()
         {   
             _tbuf->import();
+
+            if(_tbuf->in_avail() > 0 || _ios->good() )
+                return _tbuf;
+
+            return 0;
+        }
+
+        virtual std::basic_streambuf<Char>* onGet()
+        {
             return _tbuf;
         }
 
     private:
+        std::basic_ios<Char>* _ios;
         BasicTextBuffer<Char, char>* _tbuf;
 };
 

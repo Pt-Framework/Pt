@@ -60,8 +60,8 @@ static const Pt::Char XMLRPC_STRING[]  = { 's', 't', 'r', 'i', 'n', 'g', '\0' };
 XmlRpcResponder::XmlRpcResponder(Service& service)
 : Http::Responder(service)
 , _state(OnBegin)
-, _tb(new Utf8Codec)
-, _tin(_tb)
+, _ts(new Utf8Codec)
+, _tin(_ts)
 , _reader(_tin)
 , _formatter(_writer)
 , _service(&service)
@@ -84,7 +84,7 @@ XmlRpcResponder::~XmlRpcResponder()
 void XmlRpcResponder::onBeginRequest(Http::Request& request, Http::Reply& reply, System::EventLoop& loop)
 {
     _state = OnBegin;
-    _tb.attach( request.body() );
+    _ts.attach( request.body() );
     _args = 0;
 }
 

@@ -74,8 +74,8 @@ class GoogleWeatherClient : public Pt::Connectable
         : _thread(0)
         , _client(_loop, "www.google.com", 80)
         , _sink(0)
-        , _tb(new Pt::Utf8Codec)
-        , _tin(_tb)
+        , _ts(new Pt::Utf8Codec)
+        , _tin(_ts)
         , _reader(_tin)
         , _parseFunc(&GoogleWeatherClient::onXmlBegin)
         , _weather(city)
@@ -164,7 +164,7 @@ class GoogleWeatherClient : public Pt::Connectable
 
             // we have the expected reply and prepare our text stream to process
             // the incomimg body
-            _tb.attach( client.reply().body() );
+            _ts.attach( client.reply().body() );
         }
 
         void onBodyAvailable(Pt::Http::Client& client)
@@ -312,7 +312,7 @@ class GoogleWeatherClient : public Pt::Connectable
         Pt::System::Timer _timer;
         Pt::Http::Client _client;
         Pt::System::EventSink* _sink;
-        Pt::TextBuffer _tb;
+        Pt::TextStream _ts;
         Pt::Xml::TextInputSource _tin;
         Pt::Xml::XmlReader _reader;
         typedef void (GoogleWeatherClient::*ParseFunc)(const Pt::Xml::Node&);

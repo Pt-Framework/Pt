@@ -54,8 +54,8 @@ static const Pt::Char XMLRPC_FAULT[]  = { 'f', 'a', 'u', 'l', 't', '\0' };
 
 ClientImpl::ClientImpl()
 : _state(OnBegin)
-, _tb( new Utf8Codec )
-, _tin(_tb)
+, _ts( new Utf8Codec )
+, _tin(_ts)
 , _reader(_tin)
 , _formatter(_writer)
 , _method(0)
@@ -100,7 +100,7 @@ void ClientImpl::call(IComposer& r, IRemoteProcedure& method, IDecomposer** argv
 
     std::istringstream is(execute());
     
-    _tb.attach(is);
+    _ts.attach(is);
     _reader.attach(_tin);
     _scanner.begin(r);
 
@@ -139,7 +139,7 @@ void ClientImpl::cancel()
 
 void ClientImpl::onReadReplyBegin(std::istream& is)
 {
-    _tb.attach(is);
+    _ts.attach(is);
 }
 
 void ClientImpl::onReadReply()
