@@ -2831,7 +2831,6 @@ class XmlReaderImpl
                 InputStack()
                 : _input(&_nullInput)
                 , _currentInput(&_nullInput)
-                , _rdbuf(0)
                 {}
 
                 ~InputStack()
@@ -2860,14 +2859,10 @@ class XmlReaderImpl
 
                     _currentInput = &_nullInput;
                     _input = &_nullInput;
-                    _rdbuf = 0;
                 }
                 
                 InputSource* currentInput()
                 { return _currentInput; }
-
-                std::basic_streambuf<Char>* rdbuf()
-                { return _rdbuf; }
 
                 void setInput(InputSource& is)
                 {
@@ -2876,7 +2871,6 @@ class XmlReaderImpl
                     if( _external.empty() )
                     {
                         _currentInput = &is;
-                        _rdbuf = _currentInput->rdbuf();
                     }
                 }
 
@@ -2890,7 +2884,6 @@ class XmlReaderImpl
                     isPtr.release();
 
                     _currentInput = is;
-                    _rdbuf = _currentInput->rdbuf();
                 }
 
                 void removeInput()
@@ -2907,8 +2900,6 @@ class XmlReaderImpl
                         _currentInput = _external.empty() ? _input 
                                                           : _external.top();
                     }                      
-
-                    _rdbuf = _currentInput->rdbuf();
                 }
 
             private:
@@ -2916,7 +2907,6 @@ class XmlReaderImpl
                 InputSource* _input;
                 std::stack<InputSource*> _external;
                 InputSource* _currentInput;
-                std::basic_streambuf<Char>* _rdbuf;
         };
 
         XmlReaderImpl(std::istream& is, int flags)
@@ -3103,32 +3093,30 @@ class XmlReaderImpl
         bool advance()
         {
             _current = 0;
-            std::char_traits<Char>::int_type c = 0;
             std::basic_streambuf<Char>* rdbuf = 0;
-            //InputSource* in = _input.currentInput();
-            rdbuf = _input.currentInput()->advance();
+            std::char_traits<Char>::int_type c = 0;
 
             while( ! _current )
             {
                 rdbuf = _input.currentInput()->rdbuf();
                 
                 if( ! rdbuf || rdbuf->in_avail() <= 0 )
-                //if( ! rdbuf || rdbuf->in_avail() <= 0 || in != _input.currentInput() )
                 {                
-                    //in = _input.currentInput();
                     rdbuf = _input.currentInput()->advance();
 
-                    if( ! rdbuf || rdbuf->in_avail() <= 0 )
+                    if( ! rdbuf )
                     {
                         _input.removeInput();
 
                         if( ! _input.empty() )
                             continue;
 
+                        (this->*_parse)( std::char_traits<Char>::eof() );
                         break;
                     }
 
-                    //TODO: report EOF once if all input has been processed
+                    if( rdbuf->in_avail() <= 0 )
+                        break;
                 }
 
                 c = rdbuf->sbumpc();
