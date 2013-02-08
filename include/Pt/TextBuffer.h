@@ -133,6 +133,9 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
             _target = &target;
         }
 
+        CodecType* codec()
+        { return _codec; }
+
         void setCodec(CodecType* codec)
         {
             this->terminate();
@@ -156,7 +159,7 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
                 if( -1 == this->sync() )
                     return -1;
 
-                if( _target && _codec && ! _codec->always_noconv() )
+                if( _target && _target->rdbuf() && _codec && ! _codec->always_noconv() )
                 {
                     typename CodecType::result res = CodecType::error;
                     do
@@ -192,7 +195,7 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
 
         void import(std::streamsize n = 0)
         {
-            if( _target )
+            if( _target && _target->rdbuf() )
             {
                 if(n == 0)
                     n = _target->rdbuf()->in_avail();
@@ -233,7 +236,7 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
         // inheritdoc
         virtual int_type overflow( int_type ch = traits_type::eof() )
         {
-            if( ! _target || this->gptr() )
+            if( ! _target || ! _target->rdbuf() || this->gptr() )
                 return traits_type::eof();
 
             if( ! this->pptr() )
@@ -300,7 +303,7 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
         // inheritdoc
         virtual int_type underflow()
         {
-            if( ! _target )
+            if( ! _target || ! _target->rdbuf() )
                 return traits_type::eof();
 
             if( this->gptr() < this->egptr() )

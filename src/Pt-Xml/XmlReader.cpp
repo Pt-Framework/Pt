@@ -29,6 +29,7 @@
 #include "DtdValidator.h"
 
 #include "Pt/Xml/XmlReader.h"
+#include "Pt/Xml/InputSource.h"
 #include <Pt/Xml/NamespaceContext.h>
 #include <Pt/Xml/EndDocument.h>
 #include <Pt/Xml/DocType.h>
@@ -66,6 +67,10 @@ class XmlReaderImpl
             else if( ch == '<')
             {
                 _parse = &XmlReaderImpl::onXmlDecl;
+            }
+            else if( ch == 0xfeff)
+            {
+                return;
             }
             else
             {
@@ -3102,7 +3107,7 @@ class XmlReaderImpl
                 
                 if( ! rdbuf || rdbuf->in_avail() <= 0 )
                 {                
-                    rdbuf = _input.currentInput()->advance();
+                    rdbuf = _input.currentInput()->getSome();
 
                     if( ! rdbuf )
                     {

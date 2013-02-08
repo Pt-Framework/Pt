@@ -8,6 +8,7 @@
 #include <Pt/System/Timer.h>
 #include <Pt/System/EventSink.h>
 #include <Pt/System/Logger.h>
+#include <Pt/Xml/InputSource.h>
 #include <Pt/Xml/XmlReader.h>
 #include <Pt/Xml/StartElement.h>
 #include <Pt/Xml/EndElement.h>
