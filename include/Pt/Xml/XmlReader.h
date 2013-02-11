@@ -39,7 +39,6 @@ namespace Xml {
 
 class Node;
 class DocType;
-class StartElement;
 class InputSource;
 
 /** @brief Reads XML as a Stream of XML Nodes.
@@ -84,18 +83,12 @@ class PT_XML_API XmlReader
 
     public:
         /* TODO: Consider the following processing flags:
-                     - IgnoreProcessingInstructions
-                     - IgnoreWhitespace
+                     - ReportDocType
+                     - ReportProcessingInstructions
+                     - ReportWhitespace
                      - ReportComments
                      - ReportDocumentStart
                      - ReportCData (not as Characters)
-
-           TODO: report nodes for StartDocType EndDocType, so we can process
-                 comments and processing instructions embedded in the DTD
-
-           TODO: how do we handle document encoding and codec selection?
-                 - ctor with byte stream looks at leading bytes to guess codec
-                 - ctor with unicode text stream uses user defined codec
         */
         explicit XmlReader(std::istream& is, int flags = 0);
 

@@ -1071,7 +1071,7 @@ class XmlReaderImpl
 
             if(ch == ';')
             {
-                if( ! _dtd.resolveCharacterEntity(_characterReference) )
+                if( ! EntityMapping::resolveCharacterEntity(_characterReference) )
                 {
                     _token += '&';
                     _token += _characterReference;
@@ -1709,7 +1709,7 @@ class XmlReaderImpl
             
             if(ch == '>')
             {
-                _cmBuilder.finish( _elemDecl->contentModel(), _dtd.getMatch() );
+                _cmBuilder.finish( *_elemDecl, _dtd.getMatch() );
                 _parse = &XmlReaderImpl::OnDtdInternal;
                 return;
             }
@@ -1835,7 +1835,7 @@ class XmlReaderImpl
 
             if( ch == '>' )
             {
-                _cmBuilder.finish( _elemDecl->contentModel(), _dtd.getMatch() );
+                _cmBuilder.finish( *_elemDecl, _dtd.getMatch() );
                 _parse = &XmlReaderImpl::OnDtdInternal;
                 return;
             }
@@ -1909,7 +1909,7 @@ class XmlReaderImpl
 
             if( ch == '>' )
             {
-                _cmBuilder.finish( _elemDecl->contentModel(), _dtd.getMatch() );
+                _cmBuilder.finish( *_elemDecl, _dtd.getMatch() );
                 _parse = &XmlReaderImpl::OnDtdInternal;
                 return;
             }
@@ -2698,7 +2698,7 @@ class XmlReaderImpl
                 if(name != L"#PCDATA")
                     throw std::logic_error("DTD syntax error: expected PCDATA");
 
-                ContentModel::PcData& pcdata = _dtd.getPcData();
+                PcDataParticle& pcdata = _dtd.getPcData();
                 _cmBuilder.pushOperand(pcdata);
                 
                 // TODO: allow #PCDATA only at beginning of first '('
@@ -2706,14 +2706,14 @@ class XmlReaderImpl
                 return;
             }
                 
-            ContentModel::Leaf& leaf = _dtd.getLabel(name);
+            LeafParticle& leaf = _dtd.getLabel(name);
             _cmBuilder.pushOperand(leaf);
         }
 
         bool resolveEntity(String& token)
         {
             // TODO: handle this in concrete parser states
-            if( _dtd.resolveDefaultEntity( token ) )
+            if( EntityMapping::resolveDefaultEntity( token ) )
                 return true;
 
             const Entity* ent = _dtd.resolveEntity(token);
@@ -3173,6 +3173,7 @@ class XmlReaderImpl
 
         DocTypeDefinition _dtd;
         DocType _docType;
+
         ContentModelBuilder _cmBuilder;
         ElementDeclaration* _elemDecl;
         DtdValidator _dtdValidator;

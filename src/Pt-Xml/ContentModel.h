@@ -42,163 +42,110 @@ namespace Pt {
 
 namespace Xml {
 
+class ElementDeclaration;
 class DocTypeDefinition;
 class ContentValidator;
 
-class ContentModel 
+class ContentParticle
 {
     public:
-        class Particle
-        {
-            public:
-                virtual ~Particle()
-                { }
+        virtual ~ContentParticle()
+        { }
 
-                //! @brief Gets this Particle and follows unlabelled transitions.
-                virtual void get(ContentValidator& ctx) = 0;
+        //! @brief Gets this Particle and follows unlabelled transitions.
+        virtual void get(ContentValidator& ctx) = 0;
 
-                //! @brief Evaluate the XML node and get all following nodes.
-                virtual void eval(ContentValidator& ctx, Node& node) = 0;
+        //! @brief Evaluate the XML node and get all following nodes.
+        virtual void eval(ContentValidator& ctx, Node& node) = 0;
 
-                //! @brief Returns true if the node represents a match state.
-                virtual bool isValid() const
-                { return false; }
+        //! @brief Returns true if the node represents a match state.
+        virtual bool isValid() const
+        { return false; }
 
-                Particle* out()
-                { return _out; }
+        ContentParticle* out()
+        { return _out; }
 
-                void setNext(Particle& state)
-                { _out = &state; }
+        void setNext(ContentParticle& state)
+        { _out = &state; }
 
-                void setId(unsigned id)
-                { _id = id; }
+        void setId(unsigned id)
+        { _id = id; }
 
-                unsigned id() const
-                { return _id; }
+        unsigned id() const
+        { return _id; }
 
-            protected:
-                Particle()
-                : _out(0)
-                , _id(0)
-                {}
-
-            private:
-                Particle* _out;
-                unsigned _id;
-        };
-
-        class Split : public Particle
-        {
-            public:
-                Split(Particle* to)
-                : Particle()
-                , _out1(to)
-                { }
-
-                virtual void eval(ContentValidator& ctx, Node& node);
-
-                virtual void get(ContentValidator& ctx) ;
-
-            private:
-                Particle* _out1;
-        };
-
-        class Leaf : public Particle
-        {
-            public:
-                Leaf(const Pt::String& name)
-                : Particle()
-                , _name(name)
-                { }
-
-                virtual void eval(ContentValidator& ctx, Node& node);
-
-                virtual void get(ContentValidator& ctx);
-
-            private:
-                Pt::String _name;
-        };
-
-        class PcData : public Particle
-        {
-            public:
-                PcData()
-                : Particle()
-                { }
-
-                virtual void eval(ContentValidator& ctx, Node& node);
-
-                virtual void get(ContentValidator& ctx);
-        };
-
-        class Match : public Particle
-        {
-            public:
-                Match()
-                : Particle()
-                { setId(0); }
-
-                virtual void eval(ContentValidator& ctx, Node& node);
-        
-                virtual void get(ContentValidator& ctx);
-
-                virtual bool isValid() const
-                { return true; }
-        };
-    
-    public:
-        enum Type
-        {
-            Expression = 0,
-            Empty = 1,
-            Any = 2
-        };
-
-        ContentModel()
-        : _start(0)
-        , _size(0)
+    protected:
+        ContentParticle()
+        : _out(0)
+        , _id(0)
         {}
 
-        unsigned size() const
-        { return _size; }
+    private:
+        ContentParticle* _out;
+        unsigned _id;
+};
 
-        bool isEmpty() const
-        { return _type == Empty; }
 
-        bool isAny() const
-        { return _type == Any; }
+class SplitParticle : public ContentParticle
+{
+    public:
+        SplitParticle(ContentParticle* to)
+        : ContentParticle()
+        , _out1(to)
+        { }
 
-        bool isExpression() const
-        { return _type == Expression; }
+        virtual void eval(ContentValidator& ctx, Node& node);
 
-        void setExpression(ContentModel::Particle& start, unsigned n)
-        { 
-            _start = &start; 
-            _size = n;
-            _type = Expression;
-        }
-
-        void setEmpty()
-        { 
-            _start = 0;
-            _size = 0;
-            _type = Empty;
-        }
-
-        void setAny()
-        { 
-            _start = 0;
-            _size = 0;
-            _type = Any;
-        }
-
-        ContentModel::Particle* start()
-        { return _start; }
+        virtual void get(ContentValidator& ctx) ;
 
     private:
-        ContentModel::Particle* _start;
-        unsigned _size;
-        Type _type;
+        ContentParticle* _out1;
+};
+
+
+class LeafParticle : public ContentParticle
+{
+    public:
+        LeafParticle(const Pt::String& name)
+        : ContentParticle()
+        , _name(name)
+        { }
+
+        virtual void eval(ContentValidator& ctx, Node& node);
+
+        virtual void get(ContentValidator& ctx);
+
+    private:
+        Pt::String _name;
+};
+
+
+class PcDataParticle : public ContentParticle
+{
+    public:
+        PcDataParticle()
+        : ContentParticle()
+        { }
+
+        virtual void eval(ContentValidator& ctx, Node& node);
+
+        virtual void get(ContentValidator& ctx);
+};
+
+
+class MatchParticle : public ContentParticle
+{
+    public:
+        MatchParticle()
+        : ContentParticle()
+        { setId(0); }
+
+        virtual void eval(ContentValidator& ctx, Node& node);
+        
+        virtual void get(ContentValidator& ctx);
+
+        virtual bool isValid() const
+        { return true; }
 };
 
 
@@ -208,54 +155,50 @@ class ContentModelBuilder
         class Fragment
         {
             public:
-                explicit Fragment(ContentModel::Particle& start)
+                explicit Fragment(ContentParticle& start)
                 : _start(&start)
                 {}
 
-                ContentModel::Particle& start() const
+                ContentParticle& start() const
                 { return *_start; }
 
-                const std::vector<ContentModel::Particle*>& leafs() const
+                const std::vector<ContentParticle*>& leafs() const
                 { return _leafs; }
 
-                void setLeaf(ContentModel::Particle& next)
+                void setLeaf(ContentParticle& next)
                 { _leafs.push_back(&next); }
 
-                void setLeafs(const std::vector<ContentModel::Particle*>& leafs)
+                void setLeafs(const std::vector<ContentParticle*>& leafs)
                 { _leafs = leafs; }
 
-                void setLeafs(const std::vector<ContentModel::Particle*>& leafs, const std::vector<ContentModel::Particle*>& leafs2)
+                void setLeafs(const std::vector<ContentParticle*>& leafs, const std::vector<ContentParticle*>& leafs2)
                 { 
                     _leafs = leafs; 
                     _leafs.insert( _leafs.end(), leafs2.begin(), leafs2.end() );
                 }
 
-                void setLeafs(const std::vector<ContentModel::Particle*>& leafs, ContentModel::Particle& leaf)
+                void setLeafs(const std::vector<ContentParticle*>& leafs, ContentParticle& leaf)
                 { 
                     _leafs = leafs; 
                     _leafs.push_back(&leaf);
                 }
 
-                void patchLeafs(ContentModel::Particle& to)
+                void patchLeafs(ContentParticle& to)
                 {
                     for(unsigned n = 0; n < _leafs.size(); ++n)
                     {
-                        ContentModel::Particle* leaf = _leafs[n];
+                        ContentParticle* leaf = _leafs[n];
                         leaf->setNext(to);
                     }
                 }
 
             private:
-                ContentModel::Particle* _start;
-                std::vector<ContentModel::Particle*> _leafs;
+                ContentParticle* _start;
+                std::vector<ContentParticle*> _leafs;
         };
 
     public:
-        ContentModelBuilder(DocTypeDefinition& dtd)
-        : _dtd(&dtd)
-        , _cmtype(ContentModel::Expression)
-        , _nodeCount(0)
-        {}
+        ContentModelBuilder(DocTypeDefinition& dtd);
 
         void clear();
 
@@ -263,7 +206,7 @@ class ContentModelBuilder
 
         void setAny();
 
-        void finish(ContentModel& cm, ContentModel::Match& m);
+        void finish(ElementDeclaration& elem, MatchParticle& m);
         
         // TODO: push particles, so we do not have to keep a refrence to a dtd here
         void pushOperator(Pt::Char ch);
@@ -272,7 +215,7 @@ class ContentModelBuilder
 
         void pushClosingBrace();
 
-        void pushOperand(ContentModel::Particle& op);
+        void pushOperand(ContentParticle& op);
 
     private:
         void reduceStack();
@@ -280,7 +223,7 @@ class ContentModelBuilder
     private:
         DocTypeDefinition* _dtd;
         std::stack<Pt::Char> _ops;
-        ContentModel::Type _cmtype;
+        int _cmtype;
         std::stack<Fragment> _fragments;
         unsigned _nodeCount;
 };
@@ -291,11 +234,11 @@ class ContentValidator
     public:
         //!@brief A validator for an undeclared element.
         ContentValidator()
-        : _cm(0)
+        : _elemDecl(0)
         , _stepId(1)
         {}
 
-        ContentValidator(ContentModel& cm);
+        ContentValidator(ElementDeclaration& elemDecl);
 
         bool validate(Node& node);
 
@@ -303,15 +246,15 @@ class ContentValidator
 
         bool setVisited(unsigned id);
 
-        void addNext(ContentModel::Particle* p)
+        void addNext(ContentParticle* p)
         { _current.push_back(p); }
 
     private:
-        ContentModel* _cm;
+        ElementDeclaration* _elemDecl;
         unsigned _stepId;
         std::vector<unsigned> _nodes;
-        std::vector<ContentModel::Particle*> _current;
-        std::vector<ContentModel::Particle*> _next;
+        std::vector<ContentParticle*> _current;
+        std::vector<ContentParticle*> _next;
 };
 
 } // namespace Xml

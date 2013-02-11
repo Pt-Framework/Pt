@@ -354,7 +354,7 @@ void EntityMapping::clear()
 }
 
 
-bool EntityMapping::resolveDefaultEntity(String& entity) const
+bool EntityMapping::resolveDefaultEntity(String& entity)
 {
     if( ! entity.empty() && entity[0] == '#')
     {
@@ -472,7 +472,7 @@ bool EntityMapping::resolveDefaultEntity(String& entity) const
 }
 
 
-bool EntityMapping::resolveCharacterEntity(String& entity) const
+bool EntityMapping::resolveCharacterEntity(String& entity)
 {
     if( ! entity.empty() && entity[0] == '#')
     {

@@ -166,10 +166,12 @@
     <ClInclude Include="..\..\include\Pt\Void.h" />
     <ClInclude Include="..\..\include\Pt\WinVer.h" />
     <ClInclude Include="..\..\include\Pt\Xml\Api.h" />
+    <ClInclude Include="..\..\include\Pt\Xml\AttributeListDeclaration.h" />
     <ClInclude Include="..\..\include\Pt\Xml\Characters.h" />
     <ClInclude Include="..\..\include\Pt\Xml\Comment.h" />
     <ClInclude Include="..\..\include\Pt\Xml\DocType.h" />
     <ClInclude Include="..\..\include\Pt\Xml\DocTypeDeclaration.h" />
+    <ClInclude Include="..\..\include\Pt\Xml\ElementDeclaration.h" />
     <ClInclude Include="..\..\include\Pt\Xml\EndDocument.h" />
     <ClInclude Include="..\..\include\Pt\Xml\EndElement.h" />
     <ClInclude Include="..\..\include\Pt\Xml\Entity.h" />
@@ -393,8 +395,10 @@
     <ClCompile Include="..\..\src\Pt-Unit\TextProtocolTest.cpp" />
     <ClCompile Include="..\..\src\Pt-Xml\ContentModel.cpp" />
     <ClCompile Include="..\..\src\Pt-Xml\DocType.cpp" />
+    <ClCompile Include="..\..\src\Pt-Xml\DocTypeDefinition.cpp" />
     <ClCompile Include="..\..\src\Pt-Xml\Entity.cpp" />
     <ClCompile Include="..\..\src\Pt-Xml\EntityResolver.cpp" />
+    <ClCompile Include="..\..\src\Pt-Xml\InputSource.cpp" />
     <ClCompile Include="..\..\src\Pt-Xml\NamespaceContext.cpp" />
     <ClCompile Include="..\..\src\Pt-Xml\StartElement.cpp" />
     <ClCompile Include="..\..\src\Pt-Xml\tests\Pt-Xml-test.cpp" />

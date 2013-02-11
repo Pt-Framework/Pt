@@ -32,12 +32,12 @@ namespace Pt {
 
 namespace Xml {
 
-void ContentModel::Split::eval(ContentValidator& ctx, Node& node)
+void SplitParticle::eval(ContentValidator& ctx, Node& node)
 { 
 }
 
 
-void ContentModel::Split::get(ContentValidator& ctx) 
+void SplitParticle::get(ContentValidator& ctx) 
 {
     assert(id() != 0);
 
@@ -52,7 +52,7 @@ void ContentModel::Split::get(ContentValidator& ctx)
 }
 
 
-void ContentModel::Leaf::eval(ContentValidator& ctx, Node& node)
+void LeafParticle::eval(ContentValidator& ctx, Node& node)
 {
     StartElement* se = toStartElement(&node);
     if(se && se->name() == _name)
@@ -62,7 +62,7 @@ void ContentModel::Leaf::eval(ContentValidator& ctx, Node& node)
 }
 
 
-void ContentModel::Leaf::get(ContentValidator& ctx) 
+void LeafParticle::get(ContentValidator& ctx) 
 {
     assert(id() != 0);
 
@@ -73,7 +73,7 @@ void ContentModel::Leaf::get(ContentValidator& ctx)
 }
 
 
-void ContentModel::PcData::eval(ContentValidator& ctx, Node& node)
+void PcDataParticle::eval(ContentValidator& ctx, Node& node)
 {
     Characters* chars = toCharacters(&node);
     if(chars)
@@ -83,7 +83,7 @@ void ContentModel::PcData::eval(ContentValidator& ctx, Node& node)
 }
 
 
-void ContentModel::PcData::get(ContentValidator& ctx) 
+void PcDataParticle::get(ContentValidator& ctx) 
 {
     assert(id() != 0);
 
@@ -94,12 +94,12 @@ void ContentModel::PcData::get(ContentValidator& ctx)
 }
 
 
-void ContentModel::Match::eval(ContentValidator& ctx, Node& node)
+void MatchParticle::eval(ContentValidator& ctx, Node& node)
 {
 }
         
 
-void ContentModel::Match::get(ContentValidator& ctx) 
+void MatchParticle::get(ContentValidator& ctx) 
 { 
     assert(id() == 0);
 
@@ -108,6 +108,13 @@ void ContentModel::Match::get(ContentValidator& ctx)
     
     ctx.addNext(this); 
 }
+
+
+ContentModelBuilder::ContentModelBuilder(DocTypeDefinition& dtd)
+: _dtd(&dtd)
+, _cmtype(ElementDeclaration::Expression)
+, _nodeCount(0)
+{}
 
 
 void ContentModelBuilder::clear()
@@ -121,25 +128,25 @@ void ContentModelBuilder::clear()
     // id of 0 is for Match
     _nodeCount = 1;
 
-    _cmtype = ContentModel::Expression;
+    _cmtype = ElementDeclaration::Expression;
 }
 
 
 void ContentModelBuilder::setEmpty()
 {
     clear();
-    _cmtype = ContentModel::Empty;
+    _cmtype = ElementDeclaration::Empty;
 }
 
 
 void ContentModelBuilder::setAny()
 {
     clear();
-    _cmtype = ContentModel::Any;
+    _cmtype = ElementDeclaration::Any;
 }
 
 
-void ContentModelBuilder::finish(ContentModel& cm, ContentModel::Match& match)
+void ContentModelBuilder::finish(ElementDeclaration& elem, MatchParticle& match)
 {
     reduceStack();
 
@@ -147,10 +154,10 @@ void ContentModelBuilder::finish(ContentModel& cm, ContentModel::Match& match)
     {
         assert(_nodeCount == 1);
 
-        if(_cmtype == ContentModel::Any)
-            cm.setAny();
-        else if(_cmtype == ContentModel::Empty)
-            cm.setEmpty();
+        if(_cmtype == ElementDeclaration::Any)
+            elem.setAny();
+        else if(_cmtype == ElementDeclaration::Empty)
+            elem.setEmpty();
         else
             throw std::logic_error("invalid content model");
         
@@ -161,8 +168,8 @@ void ContentModelBuilder::finish(ContentModel& cm, ContentModel::Match& match)
         throw std::logic_error("DTD syntax error: incomplete expression");
 
     _fragments.top().patchLeafs(match);
-    ContentModel::Particle& particle = _fragments.top().start();
-    cm.setExpression(particle, _nodeCount);
+    ContentParticle& particle = _fragments.top().start();
+    elem.setExpression(particle, _nodeCount);
 
     clear();
 }
@@ -186,7 +193,7 @@ void ContentModelBuilder::pushClosingBrace()
 }
 
 
-void ContentModelBuilder::pushOperand(ContentModel::Particle& op)
+void ContentModelBuilder::pushOperand(ContentParticle& op)
 {
     op.setId(_nodeCount++);
 
@@ -243,7 +250,7 @@ void ContentModelBuilder::reduceStack()
             Fragment op1 = _fragments.top();
             _fragments.pop();
 
-            ContentModel::Split& split = _dtd->getSplit( op2.start() );
+            SplitParticle& split = _dtd->getSplit( op2.start() );
             split.setId(_nodeCount++);
             split.setNext( op1.start() );
 
@@ -263,7 +270,7 @@ void ContentModelBuilder::reduceStack()
             Fragment op1 = _fragments.top();
             _fragments.pop();
 
-            ContentModel::Split& split = _dtd->getSplit( op1.start() );
+            SplitParticle& split = _dtd->getSplit( op1.start() );
             split.setId(_nodeCount++);
                     
             Fragment frag(split);
@@ -282,7 +289,7 @@ void ContentModelBuilder::reduceStack()
             Fragment op1 = _fragments.top();
             _fragments.pop();
 
-            ContentModel::Split& split = _dtd->getSplit( op1.start() );
+            SplitParticle& split = _dtd->getSplit( op1.start() );
             split.setId(_nodeCount++);
 
             op1.patchLeafs(split);
@@ -303,7 +310,7 @@ void ContentModelBuilder::reduceStack()
             Fragment op1 = _fragments.top();
             _fragments.pop();
 
-            ContentModel::Split& split = _dtd->getSplit( op1.start() );
+            SplitParticle& split = _dtd->getSplit( op1.start() );
             split.setId(_nodeCount++);
 
             op1.patchLeafs(split);
@@ -317,22 +324,22 @@ void ContentModelBuilder::reduceStack()
 }
 
 
-ContentValidator::ContentValidator(ContentModel& cm)
-: _cm(&cm)
+ContentValidator::ContentValidator(ElementDeclaration& elemDecl)
+: _elemDecl(&elemDecl)
 , _stepId(1)
 {
     // all nodes are unvisited
-    _nodes.assign(cm.size(), 0);
+    _nodes.assign(elemDecl.size(), 0);
     _stepId = 1;
 
-    if( cm.start() )
-        cm.start()->get(*this);
+    if( elemDecl.start() )
+        elemDecl.start()->get(*this);
 }
 
 
 bool ContentValidator::validate(Node& node)
 {
-    if( _cm->isAny() )
+    if( _elemDecl->isAny() )
         return true;
 
     // handle ignorable WS and EMPTY separately, so indentation in XML
@@ -343,11 +350,11 @@ bool ContentValidator::validate(Node& node)
         {
             // if _cm is null, the element was undeclared and WS should
             // not lead to a validation error
-            if( ! _cm )
+            if( ! _elemDecl )
                 return true;
 
             // special rule for EMPTY, not even WS is allowed
-            if( _cm->isEmpty() )
+            if( _elemDecl->isEmpty() )
                 return false;
 
             return true;
@@ -371,7 +378,7 @@ bool ContentValidator::validate(Node& node)
 bool ContentValidator::isComplete() const
 { 
     // if _cm is null, the element was undeclared
-    if( ! _cm || _cm->isEmpty() || _cm->isAny() )
+    if( ! _elemDecl || _elemDecl->isEmpty() || _elemDecl->isAny() )
         return true;
             
     // at the end of the validation, at least one current particle

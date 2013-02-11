@@ -55,32 +55,37 @@ class Node
             //! Unknown Node type (may not currently be supported)
             Unknown = 0,
 
-            //! Xml declaration
-            StartDocument = 1,
+            //! Document Type Declaration
+            DocTypeDeclaration = 1,
 
-            //! Doctype
+            //! Document Type Definition
             DocType = 2,
 
+            //! Xml declaration
+            StartDocument = 3,
+
             //! End of the document
-            EndDocument = 3,
+            EndDocument = 4,
 
             //! Start element aka opening tag
-            StartElement = 4,
+            StartElement = 5,
 
             //! End element aka closing tag
-            EndElement = 5,
+            EndElement = 6,
 
             //! Parsed content of a tag's body
-            Characters = 6,
+            Characters = 7,
 
             //! Comment
-            Comment = 7,
+            Comment = 8,
 
             //! Processing instruction
-            ProcessingInstruction = 8,
+            ProcessingInstruction = 9,
 
             //! Unresolved entity reference
-            EntityReference = 9
+            EntityReference = 10,
+
+            DocTypeDefinition = 11
         };
 
         //! @brief Destructor.

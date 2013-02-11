@@ -29,6 +29,7 @@
 #define Pt_Xml_DtdValidator_h
 
 #include "DocTypeDefinition.h"
+#include "ContentModel.h"
 
 #include <Pt/Xml/Api.h>
 #include <Pt/String.h>
@@ -65,8 +66,6 @@ class DtdValidator : private NonCopyable
                 case Node::StartElement:
                 {
                     StartElement& se = static_cast<StartElement&>(node);
-                    //std::cerr << "<" << se.name().narrow() << ">" << std::endl;
-
                     if( ! _decls.empty() )
                     {
                         valid = _decls.top().validate(se);
@@ -75,7 +74,7 @@ class DtdValidator : private NonCopyable
                     ElementDeclaration* decl = _dtd->findElementDecl( se.name() );
                     if(decl)
                     {
-                        ContentValidator validator( decl->contentModel() );
+                        ContentValidator validator( *decl );
                         _decls.push(validator);
                         
                         if( ! decl->attrListDecl().validate( se.attributes() ) )
@@ -105,8 +104,6 @@ class DtdValidator : private NonCopyable
 
                 case Node::EndElement:
                 {
-                    //std::cerr << "</" << static_cast<EndElement&>(node).name().narrow() << ">" << std::endl;
-
                     valid = _decls.top().isComplete();
                     _decls.pop();
                     break;

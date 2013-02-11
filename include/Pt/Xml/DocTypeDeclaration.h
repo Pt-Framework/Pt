@@ -36,47 +36,20 @@ namespace Pt {
 
 namespace Xml {
 
-/** @brief A DocType element (Node) of an XML document.
-
-     A document type declaration element indicates thetype of the document and
-     contains an URI to the document type definition.
+/** @brief A DocType declaration.
 */
 class PT_XML_API DocTypeDeclaration : public Node
 {
     public:
-        /** @brief Constructs a new DocTypeDeclaration object with the given string as content.
+        /** @brief Default Constructor
         */
         DocTypeDeclaration()
-        : Node(Node::DocType)
+        : Node(Node::DocTypeDeclaration)
         { }
-
-        /** @brief Returns true if is empty.
-        */
-        bool empty() const
-        { return _content.empty(); }
-
-        void clear()
-        { _content.clear(); }
-
-        /** @brief Returns the content.
-        */
-        const String& content() const
-        { return _content; }
-
-        String& content()
-        { return _content; }
-
-        /** @brief Sets the content.
-        */
-        void setContent(const String& content)
-        { _content = content; }
 
         //! @internal
         inline static const Node::Type nodeId()
-        { return Node::DocType; }
-
-    private:
-        String _content;
+        { return Node::DocTypeDeclaration; }
 };
 
 
@@ -103,7 +76,8 @@ inline const DocTypeDeclaration& toDocTypeDeclaration(const Node& node)
     return nodeCast<DocTypeDeclaration>(node);
 }
 
-}
+} // namespace Xml
 
-}
+} //namepspace Pt
+
 #endif

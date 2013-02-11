@@ -5,8 +5,10 @@ SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Xml ;
 
 PT_XML_SOURCES = ContentModel.cpp
                  DocType.cpp
+                 DocTypeDefinition.cpp
                  Entity.cpp
                  EntityResolver.cpp
+                 InputSource.cpp
                  NamespaceContext.cpp
                  StartElement.cpp
                  XmlError.cpp

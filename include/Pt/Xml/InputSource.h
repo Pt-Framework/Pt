@@ -30,6 +30,7 @@
 
 #include <Pt/Xml/Api.h>
 #include <Pt/Xml/XmlError.h>
+#include <Pt/NonCopyable.h>
 #include <Pt/StringStream.h>
 #include <Pt/TextBuffer.h>
 #include <Pt/TextStream.h>
@@ -44,7 +45,7 @@ namespace Xml {
 
 /** @brief Input source for the XML reader
 */
-class InputSource 
+class InputSource : private NonCopyable
 {
     public:
         InputSource(std::size_t refcnt = 0)
@@ -100,13 +101,13 @@ class InputSource
         std::basic_streambuf<Char>* _rdbuf;
 };
 
+
 class NullInputSource : public InputSource
 {
     public:
         explicit NullInputSource(std::size_t refcnt = 0)
         : InputSource(refcnt)
-        {
-        }
+        { }
 
     protected:
         virtual std::basic_streambuf<Char>* onGetSome()
@@ -120,164 +121,24 @@ class NullInputSource : public InputSource
         }
 };
 
-/*
-    00 00 FE FF  UTF-32, big-endian
-    FF FE 00 00  UTF-32, little-endian
-    FE FF        UTF-16, big-endian
-    FF FE        UTF-16, little-endian
-    EF BB BF     UTF-8
-*/
-class ByteInputSource : public InputSource
+
+class PT_XML_API ByteInputSource : public InputSource
 {
     public:
-        enum BomState
-        {
-            OnBomBegin = 0,
-            
-            OnUtf8_0 = 1,
-            OnUtf8_1 = 2,
-            OnUtf8_2 = 3,
+        explicit ByteInputSource(std::istream& is, std::size_t refcnt = 0);
 
-            OnUtf16LE0 = 4,
-            OnUtf16LE1 = 5,
-
-            OnUtf16BE0 = 6,
-            OnUtf16BE1 = 7,
-
-            OnUtf32LE2 = 8,
-            OnUtf16LE3 = 9,
-            
-            OnUtf32BE0 = 10,
-            OnUtf32BE1 = 11,
-            OnUtf32BE2 = 12,
-            OnUtf32BE3 = 13,
-
-            OnBomEnd = 14,
-            OnBomInvalid = 15
-        };
-
-    public:
-        ByteInputSource(std::istream& is, std::size_t refcnt = 0)
-        : InputSource(refcnt)
-        , _tbuf(&is, new Utf8Codec)
-        , _is(&is)
-        , _bomState(OnBomBegin)
-        {
-        }
-
-        void reset(std::istream& is)
-        {
-            _tbuf.attach(is);
-            _tbuf.setCodec(new Utf8Codec);
-            _bomState = OnBomBegin;
-        }
+        void reset(std::istream& is);
         
-        void attach(std::istream& is)
-        { _tbuf.attach(is); }
+        void attach(std::istream& is);
 
-        void detach()
-        { _tbuf.detach(); }
+        void detach();
 
     protected:
-        virtual std::basic_streambuf<Char>* onGetSome()
-        {
-            if( ! _is || ! _is->rdbuf() || ! _is->good() )
-                    return 0;
+        virtual std::basic_streambuf<Char>* onGetSome();
 
-            if(_bomState != OnBomEnd)
-            {
-                std::streambuf* sb = _is->rdbuf();
-                std::char_traits<char>::int_type c = 0;
-                for(;;)
-                {
-                    if(sb->in_avail() <= 0)
-                        return &_tbuf;
+        virtual std::basic_streambuf<Char>* onGet();
 
-                    c = sb->sgetc();
-                    char ch = std::char_traits<char>::to_char_type(c);
-
-                    if( ! parseBom(ch) )
-                        break;
-
-                    c = sb->sbumpc();
-                }                   
-            }
-
-            _tbuf.import();
-                
-            if(_tbuf.in_avail() >= 0)
-                return &_tbuf;
-            
-            if( ! _is->good() )
-                return 0;
-
-            return &_tbuf;
-        }
-
-        virtual std::basic_streambuf<Char>* onGet()
-        {
-            if(_bomState != OnBomEnd)
-            {        
-                std::char_traits<char>::int_type c = 0;
-                std::streambuf* sb = _is->rdbuf();
-                std::char_traits<char>::int_type eofval = std::char_traits<char>::eof();
-                
-                for(c = sb->sgetc(); ! std::char_traits<char>::eq_int_type(c, eofval); c = sb->sbumpc() )
-                {
-                    char ch = std::char_traits<char>::to_char_type(c);
-
-                    if( ! parseBom(ch) )
-                        break;
-                }
-            }
-            
-            return &_tbuf;
-        }
-
-        bool parseBom(unsigned char c)
-        {
-            switch(_bomState)
-            {
-                case OnBomBegin:
-                    if(c == 0xef)
-                        _bomState = OnUtf8_0;
-                    else
-                        _bomState = OnBomEnd;
-
-                    
-                    break;
-
-                case OnUtf8_0:
-                    if(c == 0xbb)
-                        _bomState = OnUtf8_1;
-                    else
-                        throw SyntaxError("invalid byte-order mark", 0);
-                    
-                    break;
-
-                case OnUtf8_1:
-                    if(c == 0xbf)
-                        _bomState = OnUtf8_2;
-                    else
-                        throw SyntaxError("invalid byte-order mark", 0);
-
-                    break;
-
-                case OnUtf8_2:
-                    _bomState = OnBomEnd;
-                    _tbuf.setCodec(new Utf8Codec);
-                    break;
-
-                case OnBomEnd:
-                    throw SyntaxError("invalid byte-order mark", 0);
-                    break;
-
-                default:
-                    break;
-            }
-
-            return _bomState != OnBomEnd;
-        }
+        bool parseBom(unsigned char c);
 
     private:
         TextCodec<Char, char>* _codec;

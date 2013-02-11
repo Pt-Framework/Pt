@@ -25,358 +25,95 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef Pt_Xml_DocTypeDefinition_h
 #define Pt_Xml_DocTypeDefinition_h
 
-#include "ContentModel.h"
-
 #include <Pt/Xml/Api.h>
-#include <Pt/Xml/StartElement.h>
-#include <Pt/Xml/EntityResolver.h>
+#include <Pt/Xml/Node.h>
+#include <Pt/Xml/ElementDeclaration.h>
+#include <Pt/Xml/EntityResolver.h> // TODO: rename EntityMapping
 #include <Pt/String.h>
 #include <Pt/NonCopyable.h>
-
 #include <vector>
 #include <map>
-#include <cassert>
 
 namespace Pt {
 
 namespace Xml {
 
-class AttributeDeclaration
+class ContentParticle;
+class LeafParticle;
+class SplitParticle;
+class PcDataParticle;
+class MatchParticle;
+
+class PT_XML_API DocTypeDefinition : public Node
+                                   , private NonCopyable
 {
     public:
-        enum Mode
-        {
-            Required = 0,
-            Implied = 1,
-            Fixed = 2,
-            Default = 3
-        };
+        DocTypeDefinition();
 
-    public:
-        AttributeDeclaration()
-        : _mode(Default)
-        {}
+        ~DocTypeDefinition();
 
-        virtual ~AttributeDeclaration()
-        { }
+        ElementDeclaration& declareElement(const Pt::String& name);
 
-        void setMode(Mode mode)
-        { _mode = mode; }
+        ElementDeclaration* findElementDecl(const Pt::String& name);
 
-        Mode mode() const
-        { return _mode; }
+        void clear();
 
-        const Pt::String& name() const
-        { return _name; }
+        Entity* addEntity(const Pt::String& name);
 
-        void setName(const Pt::String& name)
-        { _name = name; }
+        const Entity* resolveEntity(const Pt::String& name) const;
 
-        void setDefaultValue(const Pt::String& def)
-        { _default = def; }
+        Entity* addParamEntity(const Pt::String& name);
 
-        const Pt::String& defaultValue() const
-        { return _default; }
+        const Entity* resolveParamEntity(const Pt::String& name) const;
 
-        bool match(const Attribute& attr) const
-        {
-            if(mode() == Fixed)
-                return attr.value() == defaultValue();
+        LeafParticle& getLabel(const Pt::String& name);
 
-            return onMatch(attr);
-        }
-      
-        bool validate(AttributeList& list) const
-        {
-            switch(_mode)
-            {
-                case Required:
-                    return false;
+        SplitParticle& getSplit(ContentParticle& to);
 
-                case Implied:
-                    return true;
+        PcDataParticle& getPcData();
 
-                case Fixed:
-                case Default:
-                    break;
-            };
+        MatchParticle& getMatch();
 
-            Attribute attr;
-            attr.setName(_name);
-            attr.setValue(_default);
-            list.add(attr);
-            return true;
-        }
-
-    protected:
-        virtual bool onMatch(const Attribute& attr) const = 0;
+        //! @internal
+        inline static Node::Type nodeId()
+        { return Node::DocTypeDefinition; }
 
     private:
-        Mode _mode;
-        Pt::String _name;
-        Pt::String _default;
-};
-
-
-class CDataAttributeDeclaration : public AttributeDeclaration
-{
-    public:
-        CDataAttributeDeclaration()
-        : AttributeDeclaration()
-        {}
-
-        virtual bool onMatch(const Attribute& attr) const
-        { 
-            // TODO: check for non-CDATA characters in value           
-            return true; 
-        }
-};
-
-
-class NMTokenAttributeDeclaration : public AttributeDeclaration
-{
-    public:
-        NMTokenAttributeDeclaration()
-        : AttributeDeclaration()
-        {}
-
-        virtual bool onMatch(const Attribute& attr) const
-        { 
-            // TODO: check for non-CDATA characters in value           
-            return true; 
-        }
-};
-
-
-class NMTokensAttributeDeclaration : public AttributeDeclaration
-{
-    public:
-        NMTokensAttributeDeclaration()
-        : AttributeDeclaration()
-        {}
-
-        virtual bool onMatch(const Attribute& attr) const
-        { 
-            // TODO: check for non-CDATA characters in value           
-            return true; 
-        }
-};
-
-
-class AttributeListDeclaration
-{
-    typedef std::vector<AttributeDeclaration*> AttrDecls;
-
-    public:
-        AttributeListDeclaration()
-        {}
-
-        ~AttributeListDeclaration()
-        {
-            AttrDecls::iterator it;
-            for(it = _attrs.begin(); it != _attrs.end(); ++it)
-            {
-                delete *it;
-            }
-        }
-
-        AttributeDeclaration& last()
-        {
-            return *_attrs.back();
-        }
-
-        void push(AttributeDeclaration* decl)
-        { _attrs.push_back(decl); }
-
-        bool validate(AttributeList& attrs) const
-        {
-            std::vector<AttributeDeclaration*> attrDecls = _attrs;
-
-            //
-            // match attributes against declarations, remove declarations
-            // that match an attribute
-            //
-            AttributeList::ConstIterator attr;
-            for(attr = attrs.begin(); attr != attrs.end(); ++attr)
-            {
-                AttrDecls::iterator it;
-                 
-                for(it = attrDecls.begin(); it != attrDecls.end(); ++it)
-                {
-                    if( (*it)->name() == attr->name() )
-                    {
-                        break;
-                    }
-                }
-
-                if( it == attrDecls.end() )
-                    return false;
-
-                if( ! (*it)->match( *attr) )
-                    return false;
-
-                attrDecls.erase(it);
-            }
-
-            //
-            // post process unmatched declarations e.g. get default values
-            // and check for missing required attributes
-            //
-            AttrDecls::iterator decl;
-            for(decl = attrDecls.begin(); decl != attrDecls.end(); ++decl)
-            {
-                if( ! (*decl)->validate(attrs) )
-                    return false;
-            }
-
-            return true;
-        }
-
-    private:
-        AttrDecls _attrs;
-};
-
-
-class ElementDeclaration
-{
-    public:
-        ElementDeclaration()
-        {}
-
-        ContentModel& contentModel()
-        { return _cm; }
-
-        AttributeListDeclaration& attrListDecl()
-        { return _attr; }
-
-    private:
-        ContentModel _cm;
-        AttributeListDeclaration _attr;
-};
-
-
-class DocTypeDefinition : private NonCopyable
-{
-    public:
-        DocTypeDefinition()
-        {}
-
-        ~DocTypeDefinition()
-        {
-            assert(_pool.empty());
-        }
-
-        bool isDefined() const
-        { return ! _rootName.empty(); }
-
-        const Pt::String& rootName() const
-        { return _rootName; }
-
-        Pt::String& rootName()
-        { return _rootName; }
-
-        ElementDeclaration& declareElement(const Pt::String& name)
-        { 
-            return _elemDecls[name]; 
-        }
-
-        ElementDeclaration* findElementDecl(const Pt::String& name)
-        {
-            ElementDeclaration* decl = 0;
-
-            std::map<Pt::String, ElementDeclaration>::iterator it;
-            it = _elemDecls.find(name);
-
-            if(it != _elemDecls.end())
-                decl = &it->second;
-
-            return decl; 
-        }
-
-        void clear()
-        {            
-            _rootName.clear();
-            _elemDecls.clear();
-            _entities.clear();
-            _paramEntities.clear();
-     
-            for(unsigned n = 0; n < _pool.size() ; ++n)
-            {
-                delete _pool[n];
-            }
-
-            _pool.clear();
-        }
-
-        bool resolveCharacterEntity(Pt::String& token) const
-        {
-            return _entities.resolveCharacterEntity(token);
-        }
-
-        bool resolveDefaultEntity(Pt::String& token) const
-        {
-            return _entities.resolveDefaultEntity(token);
-        }
-
-        Entity* addEntity(const Pt::String& name)
-        {
-            return _entities.addEntity(name);
-        }
-
-        const Entity* resolveEntity(const Pt::String& name) const
-        {
-            return _entities.resolveEntity(name);
-        }
-
-        Entity* addParamEntity(const Pt::String& name)
-        {
-            return _paramEntities.addEntity(name);
-        }
-
-        const Entity* resolveParamEntity(const Pt::String& name) const
-        {
-            return _paramEntities.resolveEntity(name);
-        }
-
-        ContentModel::Leaf& getLabel(const Pt::String& name)
-        {
-            _pool.reserve(_pool.size() + 1);
-            ContentModel::Leaf* label = new ContentModel::Leaf(name);
-            _pool.push_back(label);
-            return *label;
-        }
-
-        ContentModel::Split& getSplit(ContentModel::Particle& to)
-        {
-            _pool.reserve(_pool.size() + 1);
-            ContentModel::Split* split = new ContentModel::Split(&to);
-            _pool.push_back(split);
-            return *split;
-        }
-
-        ContentModel::PcData& getPcData()
-        {
-            _pool.reserve(_pool.size() + 1);
-            ContentModel::PcData* node = new ContentModel::PcData();
-            _pool.push_back(node);
-            return *node;
-        }
-
-        ContentModel::Match& getMatch()
-        { return _match; }
-
-    private:
-        Pt::String _rootName;
         std::map<Pt::String, ElementDeclaration> _elemDecls;
         EntityMapping _entities;
         EntityMapping _paramEntities;
         
-        std::vector<ContentModel::Particle*> _pool;
-        ContentModel::Match _match;
+        std::vector<ContentParticle*> _pool;
+        MatchParticle* _match;
 };
+
+
+inline DocTypeDefinition* toDocTypeDefinition(Node* node)
+{
+    return nodeCast<DocTypeDefinition>(node);
+}
+
+
+inline const DocTypeDefinition* toDocTypeDefinition(const Node* node)
+{
+    return nodeCast<DocTypeDefinition>(node);
+}
+
+
+inline DocTypeDefinition& toDocTypeDefinition(Node& node)
+{
+    return nodeCast<DocTypeDefinition>(node);
+}
+
+
+inline const DocTypeDefinition& toDocTypeDefinition(const Node& node)
+{
+    return nodeCast<DocTypeDefinition>(node);
+}
 
 } // namespace Xml
 

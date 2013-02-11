@@ -43,7 +43,7 @@ class PT_XML_API DocType : public Node
                          , private Pt::NonCopyable
 {
     public:
-        DocType(DocTypeDefinition& dtd)
+        explicit DocType(Pt::Xml::DocTypeDefinition& dtd)
         : Node(Node::DocType)
         , _dtd(&dtd)
         {}
@@ -52,21 +52,39 @@ class PT_XML_API DocType : public Node
 
         bool isDefined() const;
 
-        DocTypeDefinition& dtd()
-        { return *_dtd; }
-
         void clear();
 
         const Pt::String& rootName() const;
 
         Pt::String& rootName();
 
+        bool isExternal() const
+        { return ! _publicId.empty() || ! _systemId.empty(); }
+
+        bool isInternal() const
+        { return _publicId.empty() && _systemId.empty(); }
+
+        const Pt::String& publicId() const
+        { return _publicId; }
+
+        void setPublicId(const Pt::String& pubId)
+        { _publicId = pubId; }
+
+        const Pt::String& systemId() const
+        { return _systemId; }
+
+        void setSystemId(const Pt::String& sysId)
+        { _systemId = sysId; }
+
         //! @internal
         inline static Node::Type nodeId()
         { return Node::DocType; }
 
     private:
-        DocTypeDefinition* _dtd;
+        Pt::String _rootName;
+        Pt::String _publicId;
+        Pt::String _systemId;
+        Xml::DocTypeDefinition* _dtd;
 };
 
 

@@ -57,9 +57,9 @@ class PT_XML_API EntityMapping
 
         /** @brief Replaces the entity with its string value.
         */
-        bool resolveDefaultEntity(String& entity) const;
+        static bool resolveDefaultEntity(String& entity);
 
-        bool resolveCharacterEntity(String& entity) const;
+        static bool resolveCharacterEntity(String& entity);
 
         const Entity* resolveEntity(const Pt::String& name) const;
 

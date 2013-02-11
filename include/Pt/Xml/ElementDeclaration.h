@@ -25,40 +25,83 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+#ifndef Pt_Xml_ElementDeclaration_h
+#define Pt_Xml_ElementDeclaration_h
 
-#include "DocTypeDefinition.h"
-#include "Pt/Xml/DocType.h"
+#include <Pt/Xml/Api.h>
+#include <Pt/Xml/AttributeListDeclaration.h>
+#include <Pt/NonCopyable.h>
 
 namespace Pt {
 
 namespace Xml {
 
-DocType::~DocType()
-{ 
-    _dtd->clear();
-}
+class ContentParticle;
 
-bool DocType::isDefined() const
-{ 
-    return ! _rootName.empty(); 
-}
+class ElementDeclaration
+{
+    public:
+        enum Type
+        {
+            Expression = 0,
+            Empty = 1,
+            Any = 2
+        };
 
-void DocType::clear()
-{ 
-    _dtd->clear();
-    _rootName.clear(); 
-}
+    public:
+        ElementDeclaration()
+        : _start(0)
+        , _size(0)
+        {}
 
-const Pt::String& DocType::rootName() const
-{ 
-    return _rootName; 
-}
+        bool isEmpty() const
+        { return _type == Empty; }
 
-Pt::String& DocType::rootName()
-{ 
-    return _rootName; 
-}
+        bool isAny() const
+        { return _type == Any; }
+
+        bool isExpression() const
+        { return _type == Expression; }
+
+        void setExpression(ContentParticle& start, unsigned n)
+        { 
+            _start = &start; 
+            _size = n;
+            _type = Expression;
+        }
+
+        void setEmpty()
+        { 
+            _start = 0;
+            _size = 0;
+            _type = Empty;
+        }
+
+        void setAny()
+        { 
+            _start = 0;
+            _size = 0;
+            _type = Any;
+        }
+
+        ContentParticle* start()
+        { return _start; }
+
+        unsigned size() const
+        { return _size; }
+
+        AttributeListDeclaration& attrListDecl()
+        { return _attr; }
+
+    private:
+        AttributeListDeclaration _attr;
+        ContentParticle* _start;
+        unsigned _size;
+        Type _type;
+};
 
 } // namespace Xml
 
 } // namespace Pt
+
+#endif
