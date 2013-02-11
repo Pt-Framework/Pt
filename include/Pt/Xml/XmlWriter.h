@@ -27,7 +27,7 @@
 #define PT_Xml_XmlWriter_h
 
 #include <Pt/Xml/Api.h>
-#include <Pt/Xml/EntityResolver.h>
+#include <Pt/Xml/EntityMapping.h>
 #include <Pt/String.h>
 #include <Pt/TextStream.h>
 #include <stack>

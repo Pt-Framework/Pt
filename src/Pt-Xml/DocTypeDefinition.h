@@ -32,7 +32,7 @@
 #include <Pt/Xml/Api.h>
 #include <Pt/Xml/Node.h>
 #include <Pt/Xml/ElementDeclaration.h>
-#include <Pt/Xml/EntityResolver.h> // TODO: rename EntityMapping
+#include <Pt/Xml/EntityMapping.h>
 #include <Pt/String.h>
 #include <Pt/NonCopyable.h>
 #include <vector>

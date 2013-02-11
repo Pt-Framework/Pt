@@ -7,7 +7,7 @@ PT_XML_SOURCES = ContentModel.cpp
                  DocType.cpp
                  DocTypeDefinition.cpp
                  Entity.cpp
-                 EntityResolver.cpp
+                 EntityMapping.cpp
                  InputSource.cpp
                  NamespaceContext.cpp
                  StartElement.cpp

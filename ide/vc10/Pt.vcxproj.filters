@@ -660,9 +660,6 @@
     <ClInclude Include="..\..\include\Pt\Xml\EndElement.h">
       <Filter>Pt-Xml</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Xml\EntityResolver.h">
-      <Filter>Pt-Xml</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Xml\Namespace.h">
       <Filter>Pt-Xml</Filter>
     </ClInclude>
@@ -727,6 +724,9 @@
       <Filter>Pt-Xml</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Xml\AttributeListDeclaration.h">
+      <Filter>Pt-Xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Xml\EntityMapping.h">
       <Filter>Pt-Xml</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1395,9 +1395,6 @@
     <ClCompile Include="..\..\src\Pt-System\IOBuffer.cpp">
       <Filter>Pt-System</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Xml\EntityResolver.cpp">
-      <Filter>Pt-Xml</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Pt-Xml\NamespaceContext.cpp">
       <Filter>Pt-Xml</Filter>
     </ClCompile>
@@ -1447,6 +1444,9 @@
       <Filter>Pt-Xml</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Xml\DocTypeDefinition.cpp">
+      <Filter>Pt-Xml</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Xml\EntityMapping.cpp">
       <Filter>Pt-Xml</Filter>
     </ClCompile>
   </ItemGroup>
