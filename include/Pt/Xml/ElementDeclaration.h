@@ -49,10 +49,19 @@ class ElementDeclaration
         };
 
     public:
+        ElementDeclaration(const Pt::String& name)
+        : _name(name)
+        , _start(0)
+        , _size(0)
+        {}
+
         ElementDeclaration()
         : _start(0)
         , _size(0)
         {}
+
+        const Pt::String& name() const
+        { return _name; }
 
         bool isEmpty() const
         { return _type == Empty; }
@@ -90,10 +99,11 @@ class ElementDeclaration
         unsigned size() const
         { return _size; }
 
-        AttributeListDeclaration& attrListDecl()
+        AttributeListDeclaration& attributes()
         { return _attr; }
 
     private:
+        Pt::String _name;
         AttributeListDeclaration _attr;
         ContentParticle* _start;
         unsigned _size;

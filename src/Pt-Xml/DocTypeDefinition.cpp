@@ -28,11 +28,83 @@
 
 #include "DocTypeDefinition.h"
 #include "ContentModel.h"
+#include <algorithm>
 #include <cassert>
 
 namespace Pt {
 
 namespace Xml {
+
+ElementDeclarationTable::ElementDeclarationTable()
+: _decls(0)
+, _size(0)
+, _capacity(0)
+{
+}
+
+
+ElementDeclarationTable::~ElementDeclarationTable()
+{
+    delete [] _decls;
+}
+
+
+void ElementDeclarationTable::clear()
+{
+    delete _decls;
+    _size = 0;
+    _capacity = 0;
+}
+
+void ElementDeclarationTable::reserve(std::size_t capacity)
+{
+    if(_capacity < capacity)
+    {      
+        ElementDeclaration* decls = new ElementDeclaration[capacity];
+
+        try 
+        {
+            std::copy(_decls, _decls + _size, decls);
+        }
+        catch(...)
+        {
+            delete [] decls;
+            throw;
+        }
+        
+        delete _decls;
+        _decls = decls;
+        _capacity = capacity;
+    }
+}
+
+
+void ElementDeclarationTable::declare(const Pt::String& name)
+{
+    if(_size <= _capacity)
+    {
+        reserve(_size + 1);
+    }
+
+    _decls[_size] = ElementDeclaration(name);
+    ++_size;
+}
+
+
+bool lessThanE_S(const ElementDeclaration& e, const Pt::String& name)
+{
+    return e.name() < name;
+}
+
+
+ElementDeclaration* ElementDeclarationTable::find(const Pt::String& name)
+{
+    ElementDeclaration* begin = _decls;
+    ElementDeclaration* end = _decls + _size;
+    ElementDeclaration* found = std::lower_bound(begin, end, name, lessThanE_S);
+    return found != end && found->name() == name ? found : 0;
+}
+
 
 DocTypeDefinition::DocTypeDefinition()
 : Node(Node::DocTypeDefinition)

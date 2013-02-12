@@ -48,6 +48,28 @@ class SplitParticle;
 class PcDataParticle;
 class MatchParticle;
 
+class PT_XML_API ElementDeclarationTable : private NonCopyable
+{
+    public:
+        ElementDeclarationTable();
+
+        ~ElementDeclarationTable();
+
+        void clear();
+
+        void reserve(std::size_t capacity);
+
+        void declare(const Pt::String& name);
+
+        ElementDeclaration* find(const Pt::String& name);
+
+    private:
+        ElementDeclaration* _decls;
+        std::size_t _size;
+        std::size_t _capacity;
+};
+
+
 class PT_XML_API DocTypeDefinition : public Node
                                    , private NonCopyable
 {

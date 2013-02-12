@@ -1319,7 +1319,7 @@ class XmlReaderImpl
 
             Pt::Xml::CDataAttributeDeclaration* attr = new Pt::Xml::CDataAttributeDeclaration();
             attr->setName(_token);
-            _elemDecl->attrListDecl().push(attr);
+            _elemDecl->attributes().push(attr);
 
             _token.clear();
             _parse = &XmlReaderImpl::OnDtdAfterAttrType;
@@ -1436,7 +1436,7 @@ class XmlReaderImpl
             {
                 Pt::Xml::NMTokensAttributeDeclaration* attr = new Pt::Xml::NMTokensAttributeDeclaration();
                 attr->setName(_token);
-                _elemDecl->attrListDecl().push(attr);
+                _elemDecl->attributes().push(attr);
 
                 _token.clear();
                 _parse = &XmlReaderImpl::OnDtdAfterAttrType;
@@ -1447,7 +1447,7 @@ class XmlReaderImpl
             {
                 Pt::Xml::NMTokenAttributeDeclaration* attr = new Pt::Xml::NMTokenAttributeDeclaration();
                 attr->setName(_token);
-                _elemDecl->attrListDecl().push(attr);
+                _elemDecl->attributes().push(attr);
 
                 _token.clear();
                 _parse = &XmlReaderImpl::OnDtdAfterAttrType;
@@ -1500,17 +1500,17 @@ class XmlReaderImpl
 
             if(_token == L"REQUIRED")
             {
-                _elemDecl->attrListDecl().last().setMode(Pt::Xml::AttributeDeclaration::Required);
+                _elemDecl->attributes().last().setMode(Pt::Xml::AttributeDeclaration::Required);
                 _parse = &XmlReaderImpl::OnDtdAfterAttrMode;
             }
             else if(_token == L"IMPLIED")
             {
-                _elemDecl->attrListDecl().last().setMode(Pt::Xml::AttributeDeclaration::Implied);
+                _elemDecl->attributes().last().setMode(Pt::Xml::AttributeDeclaration::Implied);
                 _parse = &XmlReaderImpl::OnDtdAfterAttrMode;
             }
             else if(_token == L"FIXED")
             {
-                _elemDecl->attrListDecl().last().setMode(Pt::Xml::AttributeDeclaration::Fixed);
+                _elemDecl->attributes().last().setMode(Pt::Xml::AttributeDeclaration::Fixed);
                 _parse = &XmlReaderImpl::OnDtdAfterDtdAttrFixed;
             }
             else
@@ -1578,7 +1578,7 @@ class XmlReaderImpl
 
             if(ch == '"')
             {
-                _elemDecl->attrListDecl().last().setDefaultValue(_token);
+                _elemDecl->attributes().last().setDefaultValue(_token);
                 _token.clear();
                 _parse = &XmlReaderImpl::OnDtdAfterAttrMode;
                 return;
