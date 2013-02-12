@@ -56,7 +56,7 @@ union PT_API atomic_t
 
 /** @brief Atomically get a value.
 
-    Returns the value after employing a memory fence.
+    Returns the value after employing a memory fence (before the get).
 
     @ingroup CoreTypes
 */
@@ -64,7 +64,7 @@ PT_API int atomicGet(volatile atomic_t& val);
 
 /** @brief Atomically set a value.
 
-    Sets the value and employs a memory fence.
+    Sets the value and employs a memory fence (after the set).
 
     @ingroup CoreTypes
 */
