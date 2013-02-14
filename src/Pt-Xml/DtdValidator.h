@@ -25,14 +25,15 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef Pt_Xml_DtdValidator_h
 #define Pt_Xml_DtdValidator_h
 
-#include "DocTypeDefinition.h"
 #include "ContentModel.h"
-#include <Pt/Xml/ElementDeclaration.h>
+#include "ElementDeclaration.h"
 
 #include <Pt/Xml/Api.h>
+#include <Pt/Xml/DocTypeDefinition.h>
 #include <Pt/String.h>
 #include <Pt/NonCopyable.h>
 

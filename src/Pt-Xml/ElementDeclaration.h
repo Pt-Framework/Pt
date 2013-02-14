@@ -28,8 +28,9 @@
 #ifndef Pt_Xml_ElementDeclaration_h
 #define Pt_Xml_ElementDeclaration_h
 
+#include "AttributeListDeclaration.h"
+
 #include <Pt/Xml/Api.h>
-#include <Pt/Xml/AttributeListDeclaration.h>
 #include <Pt/NonCopyable.h>
 
 namespace Pt {

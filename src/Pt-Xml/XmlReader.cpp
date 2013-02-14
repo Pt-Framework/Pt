@@ -25,11 +25,12 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#include "DocTypeDefinition.h"
-#include "DtdValidator.h"
-#include <Pt/Xml/ElementDeclaration.h>
 
-#include "Pt/Xml/XmlReader.h"
+#include "DtdValidator.h"
+#include "ElementDeclaration.h"
+
+#include <Pt/Xml/XmlReader.h>
+#include <Pt/Xml/DocTypeDefinition.h>
 #include "Pt/Xml/InputSource.h"
 #include <Pt/Xml/NamespaceContext.h>
 #include <Pt/Xml/EndDocument.h>

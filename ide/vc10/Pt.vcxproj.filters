@@ -708,9 +708,6 @@
     <ClInclude Include="..\..\src\Pt-Xml\ContentModel.h">
       <Filter>Pt-Xml</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Xml\DocTypeDefinition.h">
-      <Filter>Pt-Xml</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Pt-Xml\DtdValidator.h">
       <Filter>Pt-Xml</Filter>
     </ClInclude>
@@ -720,13 +717,16 @@
     <ClInclude Include="..\..\include\Pt\Xml\InputSource.h">
       <Filter>Pt-Xml</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Xml\ElementDeclaration.h">
-      <Filter>Pt-Xml</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Xml\AttributeListDeclaration.h">
-      <Filter>Pt-Xml</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Xml\EntityMapping.h">
+      <Filter>Pt-Xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Xml\AttributeListDeclaration.h">
+      <Filter>Pt-Xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Xml\ElementDeclaration.h">
+      <Filter>Pt-Xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Xml\DocTypeDefinition.h">
       <Filter>Pt-Xml</Filter>
     </ClInclude>
   </ItemGroup>

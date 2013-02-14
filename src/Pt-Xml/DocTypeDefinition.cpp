@@ -26,9 +26,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "DocTypeDefinition.h"
 #include "ContentModel.h"
-#include <Pt/Xml/ElementDeclaration.h>
+#include "ElementDeclaration.h"
+#include <Pt/Xml/DocTypeDefinition.h>
 #include <algorithm>
 #include <memory>
 #include <cassert>

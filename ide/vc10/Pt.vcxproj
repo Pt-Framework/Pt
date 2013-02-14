@@ -166,12 +166,11 @@
     <ClInclude Include="..\..\include\Pt\Void.h" />
     <ClInclude Include="..\..\include\Pt\WinVer.h" />
     <ClInclude Include="..\..\include\Pt\Xml\Api.h" />
-    <ClInclude Include="..\..\include\Pt\Xml\AttributeListDeclaration.h" />
     <ClInclude Include="..\..\include\Pt\Xml\Characters.h" />
     <ClInclude Include="..\..\include\Pt\Xml\Comment.h" />
     <ClInclude Include="..\..\include\Pt\Xml\DocType.h" />
     <ClInclude Include="..\..\include\Pt\Xml\DocTypeDeclaration.h" />
-    <ClInclude Include="..\..\include\Pt\Xml\ElementDeclaration.h" />
+    <ClInclude Include="..\..\include\Pt\Xml\DocTypeDefinition.h" />
     <ClInclude Include="..\..\include\Pt\Xml\EndDocument.h" />
     <ClInclude Include="..\..\include\Pt\Xml\EndElement.h" />
     <ClInclude Include="..\..\include\Pt\Xml\Entity.h" />
@@ -224,9 +223,10 @@
     <ClInclude Include="..\..\src\Pt-System\win32\SerialDeviceImpl.h" />
     <ClInclude Include="..\..\src\Pt-System\win32\ThreadImpl.h" />
     <ClInclude Include="..\..\src\Pt-System\win32\win32.h" />
+    <ClInclude Include="..\..\src\Pt-Xml\AttributeListDeclaration.h" />
     <ClInclude Include="..\..\src\Pt-Xml\ContentModel.h" />
-    <ClInclude Include="..\..\src\Pt-Xml\DocTypeDefinition.h" />
     <ClInclude Include="..\..\src\Pt-Xml\DtdValidator.h" />
+    <ClInclude Include="..\..\src\Pt-Xml\ElementDeclaration.h" />
     <ClInclude Include="..\..\src\Pt\regexp.h" />
     <ClInclude Include="..\..\src\Pt\SerializationData.h" />
     <ClInclude Include="..\..\src\Pt\SettingsReader.h" />
