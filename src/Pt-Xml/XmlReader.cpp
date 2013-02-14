@@ -27,6 +27,7 @@
  */
 #include "DocTypeDefinition.h"
 #include "DtdValidator.h"
+#include <Pt/Xml/ElementDeclaration.h>
 
 #include "Pt/Xml/XmlReader.h"
 #include "Pt/Xml/InputSource.h"

@@ -42,6 +42,8 @@
 #include <sstream>
 #include <iostream>
 
+#include "./../DocTypeDefinition.h"
+
 class XmlReaderTest : public Pt::Unit::TestSuite
 {
     public:

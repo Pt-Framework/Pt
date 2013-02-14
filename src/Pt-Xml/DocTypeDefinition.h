@@ -31,44 +31,21 @@
 
 #include <Pt/Xml/Api.h>
 #include <Pt/Xml/Node.h>
-#include <Pt/Xml/ElementDeclaration.h>
 #include <Pt/Xml/EntityMapping.h>
 #include <Pt/String.h>
 #include <Pt/NonCopyable.h>
 #include <vector>
-#include <map>
 
 namespace Pt {
 
 namespace Xml {
 
+class ElementDeclaration;
 class ContentParticle;
 class LeafParticle;
 class SplitParticle;
 class PcDataParticle;
 class MatchParticle;
-
-class PT_XML_API ElementDeclarationTable : private NonCopyable
-{
-    public:
-        ElementDeclarationTable();
-
-        ~ElementDeclarationTable();
-
-        void clear();
-
-        void reserve(std::size_t capacity);
-
-        void declare(const Pt::String& name);
-
-        ElementDeclaration* find(const Pt::String& name);
-
-    private:
-        ElementDeclaration* _decls;
-        std::size_t _size;
-        std::size_t _capacity;
-};
-
 
 class PT_XML_API DocTypeDefinition : public Node
                                    , private NonCopyable
@@ -80,7 +57,7 @@ class PT_XML_API DocTypeDefinition : public Node
 
         ElementDeclaration& declareElement(const Pt::String& name);
 
-        ElementDeclaration* findElementDecl(const Pt::String& name);
+        ElementDeclaration* findElementDeclaration(const Pt::String& name);
 
         void clear();
 
@@ -105,10 +82,11 @@ class PT_XML_API DocTypeDefinition : public Node
         { return Node::DocTypeDefinition; }
 
     private:
-        std::map<Pt::String, ElementDeclaration> _elemDecls;
+        typedef std::vector< std::pair<Pt::String, ElementDeclaration*> > ElementDeclarationTable;
+        
+        ElementDeclarationTable _elemDecls;
         EntityMapping _entities;
         EntityMapping _paramEntities;
-        
         std::vector<ContentParticle*> _pool;
         MatchParticle* _match;
 };

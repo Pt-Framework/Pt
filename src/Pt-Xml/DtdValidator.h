@@ -30,6 +30,7 @@
 
 #include "DocTypeDefinition.h"
 #include "ContentModel.h"
+#include <Pt/Xml/ElementDeclaration.h>
 
 #include <Pt/Xml/Api.h>
 #include <Pt/String.h>
@@ -71,7 +72,7 @@ class DtdValidator : private NonCopyable
                         valid = _decls.top().validate(se);
                     }
                     
-                    ElementDeclaration* decl = _dtd->findElementDecl( se.name() );
+                    ElementDeclaration* decl = _dtd->findElementDeclaration( se.name() );
                     if(decl)
                     {
                         ContentValidator validator( *decl );

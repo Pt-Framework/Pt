@@ -28,83 +28,23 @@
 
 #include "DocTypeDefinition.h"
 #include "ContentModel.h"
+#include <Pt/Xml/ElementDeclaration.h>
 #include <algorithm>
+#include <memory>
 #include <cassert>
+
+namespace {
+
+bool lessThanName(const std::pair<Pt::String, Pt::Xml::ElementDeclaration*>& e, const Pt::String& name)
+{
+    return e.first < name;
+}
+
+}
 
 namespace Pt {
 
 namespace Xml {
-
-ElementDeclarationTable::ElementDeclarationTable()
-: _decls(0)
-, _size(0)
-, _capacity(0)
-{
-}
-
-
-ElementDeclarationTable::~ElementDeclarationTable()
-{
-    delete [] _decls;
-}
-
-
-void ElementDeclarationTable::clear()
-{
-    delete _decls;
-    _size = 0;
-    _capacity = 0;
-}
-
-void ElementDeclarationTable::reserve(std::size_t capacity)
-{
-    if(_capacity < capacity)
-    {      
-        ElementDeclaration* decls = new ElementDeclaration[capacity];
-
-        try 
-        {
-            std::copy(_decls, _decls + _size, decls);
-        }
-        catch(...)
-        {
-            delete [] decls;
-            throw;
-        }
-        
-        delete _decls;
-        _decls = decls;
-        _capacity = capacity;
-    }
-}
-
-
-void ElementDeclarationTable::declare(const Pt::String& name)
-{
-    if(_size <= _capacity)
-    {
-        reserve(_size + 1);
-    }
-
-    _decls[_size] = ElementDeclaration(name);
-    ++_size;
-}
-
-
-bool lessThanE_S(const ElementDeclaration& e, const Pt::String& name)
-{
-    return e.name() < name;
-}
-
-
-ElementDeclaration* ElementDeclarationTable::find(const Pt::String& name)
-{
-    ElementDeclaration* begin = _decls;
-    ElementDeclaration* end = _decls + _size;
-    ElementDeclaration* found = std::lower_bound(begin, end, name, lessThanE_S);
-    return found != end && found->name() == name ? found : 0;
-}
-
 
 DocTypeDefinition::DocTypeDefinition()
 : Node(Node::DocTypeDefinition)
@@ -117,6 +57,7 @@ DocTypeDefinition::DocTypeDefinition()
 DocTypeDefinition::~DocTypeDefinition()
 {
     assert(_pool.empty());
+    assert(_elemDecls.empty());
 
     delete _match;
 }
@@ -124,27 +65,45 @@ DocTypeDefinition::~DocTypeDefinition()
 
 ElementDeclaration& DocTypeDefinition::declareElement(const Pt::String& name)
 { 
-    return _elemDecls[name]; 
+    ElementDeclarationTable::iterator lbound;
+    lbound = std::lower_bound(_elemDecls.begin(), _elemDecls.end(), name, lessThanName);
+    
+    if( lbound != _elemDecls.end() && lbound->first == name)
+    {
+        return *lbound->second;
+    }
+
+    std::auto_ptr<ElementDeclaration> ep( new ElementDeclaration() );
+    std::pair<Pt::String, ElementDeclaration*> entry( name, ep.get() );
+    _elemDecls.insert(lbound, entry);
+    return *ep.release();
 }
 
 
-ElementDeclaration* DocTypeDefinition::findElementDecl(const Pt::String& name)
+ElementDeclaration* DocTypeDefinition::findElementDeclaration(const Pt::String& name)
 {
-    ElementDeclaration* decl = 0;
+    ElementDeclarationTable::iterator lbound;
+    lbound = std::lower_bound(_elemDecls.begin(), _elemDecls.end(), name, lessThanName);
+    
+    if( lbound != _elemDecls.end() && lbound->first == name)
+    {
+        return lbound->second;
+    }
 
-    std::map<Pt::String, ElementDeclaration>::iterator it;
-    it = _elemDecls.find(name);
-
-    if(it != _elemDecls.end())
-        decl = &it->second;
-
-    return decl; 
+    return 0;
 }
 
 
 void DocTypeDefinition::clear()
 {
+    for(ElementDeclarationTable::iterator it = _elemDecls.begin(); it != _elemDecls.end(); ++it)
+    {
+        delete it->second;
+    }
+
     _elemDecls.clear();
+
+
     _entities.clear();
     _paramEntities.clear();
      

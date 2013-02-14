@@ -27,6 +27,7 @@
  */
 #include "ContentModel.h"
 #include "DocTypeDefinition.h"
+#include <Pt/Xml/ElementDeclaration.h>
 
 namespace Pt {
 
