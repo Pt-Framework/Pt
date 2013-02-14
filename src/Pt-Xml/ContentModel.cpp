@@ -333,24 +333,21 @@ ContentValidator::ContentValidator(ElementDeclaration& elemDecl)
     _nodes.assign(elemDecl.size(), 0);
     _stepId = 1;
 
-    if( elemDecl.start() )
-        elemDecl.start()->get(*this);
+    if( elemDecl.contentModel() )
+        elemDecl.contentModel()->get(*this);
 }
 
 
 bool ContentValidator::validate(Node& node)
 {
-    if( _elemDecl->isAny() )
-        return true;
-
     // handle ignorable WS and EMPTY separately, so indentation in XML
     // documents does not lead to costly state transitions. 
     if( Pt::Xml::Characters* chars = Pt::Xml::toCharacters(&node) )
     {
         if( chars->isIgnorable() )
         {
-            // if _cm is null, the element was undeclared and WS should
-            // not lead to a validation error
+            // if the element was undeclared, WS should not lead to a 
+            // validation error
             if( ! _elemDecl )
                 return true;
 
@@ -361,6 +358,12 @@ bool ContentValidator::validate(Node& node)
             return true;
         }
     }
+
+    if( ! _elemDecl)
+        return false;
+
+    if( _elemDecl->isAny() )
+        return true;
 
     _stepId++;
     _next = _current;
@@ -378,7 +381,7 @@ bool ContentValidator::validate(Node& node)
 
 bool ContentValidator::isComplete() const
 { 
-    // if _cm is null, the element was undeclared
+    // if the element was undeclared, empty or any content is allwed
     if( ! _elemDecl || _elemDecl->isEmpty() || _elemDecl->isAny() )
         return true;
             

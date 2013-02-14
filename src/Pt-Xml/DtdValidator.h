@@ -78,7 +78,7 @@ class DtdValidator : private NonCopyable
                         ContentValidator validator( *decl );
                         _decls.push(validator);
                         
-                        if( ! decl->attributes().validate( se.attributes() ) )
+                        if( ! decl->attlist().validate( se.attributes() ) )
                             valid = false; 
                     }
                     else

@@ -43,25 +43,18 @@ class ElementDeclaration
     public:
         enum Type
         {
-            Expression = 0,
-            Empty = 1,
-            Any = 2
+            Invalid = 0,
+            Expression = 1,
+            Empty = 2,
+            Any = 3
         };
 
     public:
-        ElementDeclaration(const Pt::String& name)
-        : _name(name)
-        , _start(0)
-        , _size(0)
-        {}
-
         ElementDeclaration()
         : _start(0)
         , _size(0)
+        , _type(Invalid)
         {}
-
-        const Pt::String& name() const
-        { return _name; }
 
         bool isEmpty() const
         { return _type == Empty; }
@@ -93,17 +86,16 @@ class ElementDeclaration
             _type = Any;
         }
 
-        ContentParticle* start()
+        ContentParticle* contentModel()
         { return _start; }
 
         unsigned size() const
         { return _size; }
 
-        AttributeListDeclaration& attributes()
+        AttributeListDeclaration& attlist()
         { return _attr; }
 
     private:
-        Pt::String _name;
         AttributeListDeclaration _attr;
         ContentParticle* _start;
         unsigned _size;
