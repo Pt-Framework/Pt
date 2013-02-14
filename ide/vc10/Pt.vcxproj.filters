@@ -651,9 +651,6 @@
     <ClInclude Include="..\..\include\Pt\Xml\Comment.h">
       <Filter>Pt-Xml</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Xml\DocTypeDeclaration.h">
-      <Filter>Pt-Xml</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Xml\EndDocument.h">
       <Filter>Pt-Xml</Filter>
     </ClInclude>

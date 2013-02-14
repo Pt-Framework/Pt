@@ -56,10 +56,10 @@ class Node
             Unknown = 0,
 
             //! Document Type Declaration
-            DocTypeDeclaration = 1,
+            DocType = 1,
 
             //! Document Type Definition
-            DocType = 2,
+            DocTypeDefinition = 2,
 
             //! Xml declaration
             StartDocument = 3,
@@ -83,9 +83,9 @@ class Node
             ProcessingInstruction = 9,
 
             //! Unresolved entity reference
-            EntityReference = 10,
+            EntityReference = 10
 
-            DocTypeDefinition = 11
+            
         };
 
         //! @brief Destructor.

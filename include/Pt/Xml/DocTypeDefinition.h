@@ -55,6 +55,7 @@ class PT_XML_API DocTypeDefinition : public Node
 
         ~DocTypeDefinition();
 
+        // TODO: this should declare and EMPTY element
         ElementDeclaration& declareElement(const Pt::String& name);
 
         ElementDeclaration* findElementDeclaration(const Pt::String& name);

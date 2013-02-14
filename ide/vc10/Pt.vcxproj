@@ -169,7 +169,6 @@
     <ClInclude Include="..\..\include\Pt\Xml\Characters.h" />
     <ClInclude Include="..\..\include\Pt\Xml\Comment.h" />
     <ClInclude Include="..\..\include\Pt\Xml\DocType.h" />
-    <ClInclude Include="..\..\include\Pt\Xml\DocTypeDeclaration.h" />
     <ClInclude Include="..\..\include\Pt\Xml\DocTypeDefinition.h" />
     <ClInclude Include="..\..\include\Pt\Xml\EndDocument.h" />
     <ClInclude Include="..\..\include\Pt\Xml\EndElement.h" />

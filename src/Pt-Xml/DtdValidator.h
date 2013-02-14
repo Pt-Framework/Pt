@@ -80,7 +80,9 @@ class DtdValidator : private NonCopyable
                         _decls.push(validator);
                         
                         if( ! decl->attlist().validate( se.attributes() ) )
-                            valid = false; 
+                            valid = false;
+
+                        //TODO: push empty ContentValidator if only ATTLIST is declared
                     }
                     else
                     {

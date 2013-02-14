@@ -33,7 +33,6 @@
 #include "Pt/Xml/Characters.h"
 #include "Pt/Xml/EndElement.h"
 #include "Pt/Xml/EndDocument.h"
-#include "Pt/Xml/DocTypeDeclaration.h"
 #include "Pt/Xml/DocType.h"
 #include "Pt/Xml/ProcessingInstruction.h"
 #include "Pt/System/Clock.h"
