@@ -79,7 +79,7 @@ class DtdValidator : private NonCopyable
                         ContentValidator validator( *decl );
                         _decls.push(validator);
                         
-                        if( ! decl->attlist().validate( se.attributes() ) )
+                        if( ! decl->validateAttributes( se.attributes() ) )
                             valid = false;
 
                         //TODO: push empty ContentValidator if only ATTLIST is declared

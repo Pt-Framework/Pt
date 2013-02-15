@@ -28,10 +28,11 @@
 #ifndef Pt_Xml_ElementDeclaration_h
 #define Pt_Xml_ElementDeclaration_h
 
-#include "AttributeListDeclaration.h"
-
 #include <Pt/Xml/Api.h>
+#include <Pt/Xml/StartElement.h>
+#include <Pt/String.h>
 #include <Pt/NonCopyable.h>
+#include <vector>
 
 namespace Pt {
 
@@ -39,8 +40,132 @@ namespace Xml {
 
 class ContentParticle;
 
+class AttributeDeclaration
+{
+    public:
+        enum Mode
+        {
+            Required = 0,
+            Implied = 1,
+            Fixed = 2,
+            Default = 3
+        };
+
+    public:
+        AttributeDeclaration()
+        : _mode(Default)
+        {}
+
+        virtual ~AttributeDeclaration()
+        { }
+
+        void setMode(Mode mode)
+        { _mode = mode; }
+
+        Mode mode() const
+        { return _mode; }
+
+        const Pt::String& name() const
+        { return _name; }
+
+        void setName(const Pt::String& name)
+        { _name = name; }
+
+        void setDefaultValue(const Pt::String& def)
+        { _default = def; }
+
+        const Pt::String& defaultValue() const
+        { return _default; }
+
+        bool match(const Attribute& attr) const
+        {
+            if(mode() == Fixed)
+                return attr.value() == defaultValue();
+
+            return onMatch(attr);
+        }
+      
+        bool validate(AttributeList& list) const
+        {
+            switch(_mode)
+            {
+                case Required:
+                    return false;
+
+                case Implied:
+                    return true;
+
+                case Fixed:
+                case Default:
+                    break;
+            };
+
+            Attribute attr;
+            attr.setName(_name);
+            attr.setValue(_default);
+            list.add(attr);
+            return true;
+        }
+
+    protected:
+        virtual bool onMatch(const Attribute& attr) const = 0;
+
+    private:
+        Mode _mode;
+        Pt::String _name;
+        Pt::String _default;
+};
+
+
+class CDataAttributeDeclaration : public AttributeDeclaration
+{
+    public:
+        CDataAttributeDeclaration()
+        : AttributeDeclaration()
+        {}
+
+        virtual bool onMatch(const Attribute& attr) const
+        { 
+            // TODO: check for non-CDATA characters in value           
+            return true; 
+        }
+};
+
+
+class NMTokenAttributeDeclaration : public AttributeDeclaration
+{
+    public:
+        NMTokenAttributeDeclaration()
+        : AttributeDeclaration()
+        {}
+
+        virtual bool onMatch(const Attribute& attr) const
+        { 
+            // TODO: check for non-CDATA characters in value           
+            return true; 
+        }
+};
+
+
+class NMTokensAttributeDeclaration : public AttributeDeclaration
+{
+    public:
+        NMTokensAttributeDeclaration()
+        : AttributeDeclaration()
+        {}
+
+        virtual bool onMatch(const Attribute& attr) const
+        { 
+            // TODO: check for non-CDATA characters in value           
+            return true; 
+        }
+};
+
+
 class ElementDeclaration
 {
+    typedef std::vector<AttributeDeclaration*> Attributes;
+
     public:
         enum Type
         {
@@ -56,6 +181,15 @@ class ElementDeclaration
         , _size(0)
         , _type(Invalid)
         {}
+
+        ~ElementDeclaration()
+        {
+            Attributes::iterator it;
+            for(it = _attrs.begin(); it != _attrs.end(); ++it)
+            {
+                delete *it;
+            }
+        }
 
         bool isEmpty() const
         { return _type == Empty; }
@@ -93,11 +227,55 @@ class ElementDeclaration
         unsigned size() const
         { return _size; }
 
-        AttributeListDeclaration& attlist()
-        { return _attr; }
+        void addAttribute(AttributeDeclaration* decl)
+        { _attrs.push_back(decl); }
+
+        bool validateAttributes(AttributeList& attrs) const
+        {
+            std::vector<AttributeDeclaration*> attrDecls = _attrs;
+
+            //
+            // match attributes against declarations, remove declarations
+            // that match an attribute
+            //
+            AttributeList::ConstIterator attr;
+            for(attr = attrs.begin(); attr != attrs.end(); ++attr)
+            {
+                Attributes::iterator it;
+                 
+                for(it = attrDecls.begin(); it != attrDecls.end(); ++it)
+                {
+                    if( (*it)->name() == attr->name() )
+                    {
+                        break;
+                    }
+                }
+
+                if( it == attrDecls.end() )
+                    return false;
+
+                if( ! (*it)->match( *attr) )
+                    return false;
+
+                attrDecls.erase(it);
+            }
+
+            //
+            // post process unmatched declarations e.g. get default values
+            // and check for missing required attributes
+            //
+            Attributes::iterator decl;
+            for(decl = attrDecls.begin(); decl != attrDecls.end(); ++decl)
+            {
+                if( ! (*decl)->validate(attrs) )
+                    return false;
+            }
+
+            return true;
+        }
 
     private:
-        AttributeListDeclaration _attr;
+        Attributes _attrs;
         ContentParticle* _start;
         unsigned _size;
         Type _type;

@@ -1319,9 +1319,10 @@ class XmlReaderImpl
             if( ch != 'A' )
                 throw SyntaxError("XML syntax error", line());
 
-            Pt::Xml::CDataAttributeDeclaration* attr = new Pt::Xml::CDataAttributeDeclaration();
-            attr->setName(_token);
-            _elemDecl->attlist().push(attr);
+            assert( ! _attrDecl);
+            _attrDecl = new Pt::Xml::CDataAttributeDeclaration();
+            _attrDecl->setName(_token);
+            _elemDecl->addAttribute(_attrDecl);
 
             _token.clear();
             _parse = &XmlReaderImpl::OnDtdAfterAttrType;
@@ -1436,9 +1437,10 @@ class XmlReaderImpl
 
             if( ch == 'S' )
             {
-                Pt::Xml::NMTokensAttributeDeclaration* attr = new Pt::Xml::NMTokensAttributeDeclaration();
-                attr->setName(_token);
-                _elemDecl->attlist().push(attr);
+                assert( ! _attrDecl);
+                _attrDecl = new Pt::Xml::NMTokensAttributeDeclaration();
+                _attrDecl->setName(_token);
+                _elemDecl->addAttribute(_attrDecl);
 
                 _token.clear();
                 _parse = &XmlReaderImpl::OnDtdAfterAttrType;
@@ -1447,9 +1449,10 @@ class XmlReaderImpl
 
             if( Pt::isspace(ch) )
             {
-                Pt::Xml::NMTokenAttributeDeclaration* attr = new Pt::Xml::NMTokenAttributeDeclaration();
-                attr->setName(_token);
-                _elemDecl->attlist().push(attr);
+                assert( ! _attrDecl);
+                _attrDecl = new Pt::Xml::NMTokenAttributeDeclaration();
+                _attrDecl->setName(_token);
+                _elemDecl->addAttribute(_attrDecl);
 
                 _token.clear();
                 _parse = &XmlReaderImpl::OnDtdAfterAttrType;
@@ -1502,17 +1505,20 @@ class XmlReaderImpl
 
             if(_token == L"REQUIRED")
             {
-                _elemDecl->attlist().last().setMode(Pt::Xml::AttributeDeclaration::Required);
+                assert(_attrDecl);
+                _attrDecl->setMode(Pt::Xml::AttributeDeclaration::Required);
                 _parse = &XmlReaderImpl::OnDtdAfterAttrMode;
             }
             else if(_token == L"IMPLIED")
             {
-                _elemDecl->attlist().last().setMode(Pt::Xml::AttributeDeclaration::Implied);
+                assert(_attrDecl);
+                _attrDecl->setMode(Pt::Xml::AttributeDeclaration::Implied);
                 _parse = &XmlReaderImpl::OnDtdAfterAttrMode;
             }
             else if(_token == L"FIXED")
             {
-                _elemDecl->attlist().last().setMode(Pt::Xml::AttributeDeclaration::Fixed);
+                assert(_attrDecl);
+                _attrDecl->setMode(Pt::Xml::AttributeDeclaration::Fixed);
                 _parse = &XmlReaderImpl::OnDtdAfterDtdAttrFixed;
             }
             else
@@ -1529,6 +1535,8 @@ class XmlReaderImpl
 
             if(c == '>')
             {
+                assert(_attrDecl);
+                _attrDecl = 0;
                 _parse = &XmlReaderImpl::OnDtdInternal;
                 return;
             }
@@ -1538,6 +1546,9 @@ class XmlReaderImpl
 
             if( isAlpha(ch) )
             {
+                assert(_attrDecl);
+                _attrDecl = 0;
+                
                 _token += ch;
                 _parse = &XmlReaderImpl::OnDtdAttrName;
                 return;
@@ -1580,7 +1591,9 @@ class XmlReaderImpl
 
             if(ch == '"')
             {
-                _elemDecl->attlist().last().setDefaultValue(_token);
+                assert(_attrDecl);
+                _attrDecl->setDefaultValue(_token);
+                
                 _token.clear();
                 _parse = &XmlReaderImpl::OnDtdAfterAttrMode;
                 return;
@@ -2930,6 +2943,7 @@ class XmlReaderImpl
         , _docType(_dtd)
         , _cmBuilder(_dtd)
         , _elemDecl(0)
+        , _attrDecl(0)
         , _dtdValidator(_dtd)
         {
             _parse = &XmlReaderImpl::onDocumentBegin;
@@ -2951,6 +2965,7 @@ class XmlReaderImpl
         , _docType(_dtd)
         , _cmBuilder(_dtd)
         , _elemDecl(0)
+        , _attrDecl(0)
         , _dtdValidator(_dtd)
         {
             _parse = &XmlReaderImpl::onDocumentBegin;
@@ -2975,6 +2990,7 @@ class XmlReaderImpl
             _nsctx.clear();
             _cmBuilder.clear();
             _elemDecl = 0;
+            _attrDecl = 0;
             _dtdValidator.clear();
 
             _entity = 0;
@@ -3178,6 +3194,7 @@ class XmlReaderImpl
 
         ContentModelBuilder _cmBuilder;
         ElementDeclaration* _elemDecl;
+        AttributeDeclaration* _attrDecl;
         DtdValidator _dtdValidator;
 
         // TODO: some sort of union?

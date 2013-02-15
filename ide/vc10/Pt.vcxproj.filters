@@ -717,9 +717,6 @@
     <ClInclude Include="..\..\include\Pt\Xml\EntityMapping.h">
       <Filter>Pt-Xml</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Xml\AttributeListDeclaration.h">
-      <Filter>Pt-Xml</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Pt-Xml\ElementDeclaration.h">
       <Filter>Pt-Xml</Filter>
     </ClInclude>
