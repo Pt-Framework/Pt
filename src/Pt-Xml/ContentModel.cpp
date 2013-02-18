@@ -33,12 +33,102 @@ namespace Pt {
 
 namespace Xml {
 
-void SplitParticle::eval(ContentValidator& ctx, Node& node)
+ContentValidator::ContentValidator()
+: _cm(0)
+, _stepId(1)
+{}
+
+
+ContentValidator::ContentValidator(const ContentModel& cm)
+: _cm(&cm)
+, _stepId(1)
+{
+    // all nodes are unvisited
+    _nodes.assign(_cm->size(), 0);
+    _stepId = 1;
+
+    if( cm.first() )
+        cm.first()->get(*this);
+}
+
+
+bool ContentValidator::validate(Node& node)
+{
+    // handle ignorable WS and EMPTY separately, so indentation in XML
+    // documents does not lead to costly state transitions. 
+    if( Pt::Xml::Characters* chars = Pt::Xml::toCharacters(&node) )
+    {
+        if( chars->isIgnorable() )
+        {
+            // if the element was undeclared, WS should not lead to a 
+            // validation error
+            if( ! _cm )
+                return true;
+
+            // special rule for EMPTY, not even WS is allowed
+            if( _cm->isEmpty() )
+                return false;
+
+            return true;
+        }
+    }
+
+    if( ! _cm)
+        return false;
+
+    if( _cm->isAny() )
+        return true;
+
+    _stepId++;
+    _next = _current;
+    _current.clear();
+
+    for(unsigned n = 0; n < _next.size(); ++n)
+    {
+        _next[n]->eval(*this, node);
+    }
+
+    // no follow up particles means validation error
+    return ! _current.empty();
+}
+
+
+bool ContentValidator::isComplete() const
+{ 
+    // if the element was undeclared, empty or any content is allwed
+    if( ! _cm || _cm->isEmpty() || _cm->isAny() )
+        return true;
+            
+    // at the end of the validation, at least one current particle
+    // must be a match particle, otherwise there was more content
+    // expected to come
+    for(unsigned n = 0; n < _current.size(); ++n)
+    {
+        if( _current[n]->isValid() )
+            return true;
+    }
+            
+    return false; 
+}
+
+
+bool ContentValidator::setVisited(unsigned id)
+{ 
+    if(_nodes.at(id) == _stepId)
+        return true;
+
+    // node not yet visited, mark visited
+    _nodes.at(id) = _stepId; 
+    return false;
+}
+
+
+void SplitParticle::eval(ContentValidator& ctx, Node& node) const
 { 
 }
 
 
-void SplitParticle::get(ContentValidator& ctx) 
+void SplitParticle::get(ContentValidator& ctx) const
 {
     assert(id() != 0);
 
@@ -53,7 +143,7 @@ void SplitParticle::get(ContentValidator& ctx)
 }
 
 
-void LeafParticle::eval(ContentValidator& ctx, Node& node)
+void LeafParticle::eval(ContentValidator& ctx, Node& node) const
 {
     StartElement* se = toStartElement(&node);
     if(se && se->name() == _name)
@@ -63,7 +153,7 @@ void LeafParticle::eval(ContentValidator& ctx, Node& node)
 }
 
 
-void LeafParticle::get(ContentValidator& ctx) 
+void LeafParticle::get(ContentValidator& ctx) const
 {
     assert(id() != 0);
 
@@ -74,7 +164,7 @@ void LeafParticle::get(ContentValidator& ctx)
 }
 
 
-void PcDataParticle::eval(ContentValidator& ctx, Node& node)
+void PcDataParticle::eval(ContentValidator& ctx, Node& node) const
 {
     Characters* chars = toCharacters(&node);
     if(chars)
@@ -84,7 +174,7 @@ void PcDataParticle::eval(ContentValidator& ctx, Node& node)
 }
 
 
-void PcDataParticle::get(ContentValidator& ctx) 
+void PcDataParticle::get(ContentValidator& ctx) const
 {
     assert(id() != 0);
 
@@ -95,12 +185,12 @@ void PcDataParticle::get(ContentValidator& ctx)
 }
 
 
-void MatchParticle::eval(ContentValidator& ctx, Node& node)
+void MatchParticle::eval(ContentValidator& ctx, Node& node) const
 {
 }
         
 
-void MatchParticle::get(ContentValidator& ctx) 
+void MatchParticle::get(ContentValidator& ctx) const
 { 
     assert(id() == 0);
 
@@ -113,7 +203,7 @@ void MatchParticle::get(ContentValidator& ctx)
 
 ContentModelBuilder::ContentModelBuilder(DocTypeDefinition& dtd)
 : _dtd(&dtd)
-, _cmtype(ElementDeclaration::Expression)
+, _cmtype(ContentModel::Expression)
 , _nodeCount(0)
 {}
 
@@ -129,25 +219,25 @@ void ContentModelBuilder::clear()
     // id of 0 is for Match
     _nodeCount = 1;
 
-    _cmtype = ElementDeclaration::Expression;
+    _cmtype = ContentModel::Expression;
 }
 
 
 void ContentModelBuilder::setEmpty()
 {
     clear();
-    _cmtype = ElementDeclaration::Empty;
+    _cmtype = ContentModel::Empty;
 }
 
 
 void ContentModelBuilder::setAny()
 {
     clear();
-    _cmtype = ElementDeclaration::Any;
+    _cmtype = ContentModel::Any;
 }
 
 
-void ContentModelBuilder::finish(ElementDeclaration& elem, MatchParticle& match)
+void ContentModelBuilder::finish(ContentModel& cm, MatchParticle& match)
 {
     reduceStack();
 
@@ -155,10 +245,10 @@ void ContentModelBuilder::finish(ElementDeclaration& elem, MatchParticle& match)
     {
         assert(_nodeCount == 1);
 
-        if(_cmtype == ElementDeclaration::Any)
-            elem.setAny();
-        else if(_cmtype == ElementDeclaration::Empty)
-            elem.setEmpty();
+        if(_cmtype == ContentModel::Any)
+            cm.setAny();
+        else if(_cmtype == ContentModel::Empty)
+            cm.setEmpty();
         else
             throw std::logic_error("invalid content model");
         
@@ -170,7 +260,7 @@ void ContentModelBuilder::finish(ElementDeclaration& elem, MatchParticle& match)
 
     _fragments.top().patchLeafs(match);
     ContentParticle& particle = _fragments.top().start();
-    elem.setExpression(particle, _nodeCount);
+    cm.setExpression(particle, _nodeCount);
 
     clear();
 }
@@ -322,90 +412,6 @@ void ContentModelBuilder::reduceStack()
             continue;
         }
     }
-}
-
-
-ContentValidator::ContentValidator(ElementDeclaration& elemDecl)
-: _elemDecl(&elemDecl)
-, _stepId(1)
-{
-    // all nodes are unvisited
-    _nodes.assign(elemDecl.size(), 0);
-    _stepId = 1;
-
-    if( elemDecl.contentModel() )
-        elemDecl.contentModel()->get(*this);
-}
-
-
-bool ContentValidator::validate(Node& node)
-{
-    // handle ignorable WS and EMPTY separately, so indentation in XML
-    // documents does not lead to costly state transitions. 
-    if( Pt::Xml::Characters* chars = Pt::Xml::toCharacters(&node) )
-    {
-        if( chars->isIgnorable() )
-        {
-            // if the element was undeclared, WS should not lead to a 
-            // validation error
-            if( ! _elemDecl )
-                return true;
-
-            // special rule for EMPTY, not even WS is allowed
-            if( _elemDecl->isEmpty() )
-                return false;
-
-            return true;
-        }
-    }
-
-    if( ! _elemDecl)
-        return false;
-
-    if( _elemDecl->isAny() )
-        return true;
-
-    _stepId++;
-    _next = _current;
-    _current.clear();
-
-    for(unsigned n = 0; n < _next.size(); ++n)
-    {
-        _next[n]->eval(*this, node);
-    }
-
-    // no follow up particles means validation error
-    return ! _current.empty();
-}
-
-
-bool ContentValidator::isComplete() const
-{ 
-    // if the element was undeclared, empty or any content is allwed
-    if( ! _elemDecl || _elemDecl->isEmpty() || _elemDecl->isAny() )
-        return true;
-            
-    // at the end of the validation, at least one current particle
-    // must be a match particle, otherwise there was more content
-    // expected to come
-    for(unsigned n = 0; n < _current.size(); ++n)
-    {
-        if( _current[n]->isValid() )
-            return true;
-    }
-            
-    return false; 
-}
-
-
-bool ContentValidator::setVisited(unsigned id)
-{ 
-    if(_nodes.at(id) == _stepId)
-        return true;
-
-    // node not yet visited, mark visited
-    _nodes.at(id) = _stepId; 
-    return false;
 }
 
 } // namespace Xml

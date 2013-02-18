@@ -723,6 +723,9 @@
     <ClInclude Include="..\..\include\Pt\Xml\DocTypeDefinition.h">
       <Filter>Pt-Xml</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Xml\AttributeDeclaration.h">
+      <Filter>Pt-Xml</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">

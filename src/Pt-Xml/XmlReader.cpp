@@ -1724,7 +1724,7 @@ class XmlReaderImpl
             
             if(ch == '>')
             {
-                _cmBuilder.finish( *_elemDecl, _dtd.getMatch() );
+                _cmBuilder.finish( _elemDecl->contentModel(), _dtd.getMatch() );
                 _parse = &XmlReaderImpl::OnDtdInternal;
                 return;
             }
@@ -1850,7 +1850,7 @@ class XmlReaderImpl
 
             if( ch == '>' )
             {
-                _cmBuilder.finish( *_elemDecl, _dtd.getMatch() );
+                _cmBuilder.finish( _elemDecl->contentModel(), _dtd.getMatch() );
                 _parse = &XmlReaderImpl::OnDtdInternal;
                 return;
             }
@@ -1924,7 +1924,7 @@ class XmlReaderImpl
 
             if( ch == '>' )
             {
-                _cmBuilder.finish( *_elemDecl, _dtd.getMatch() );
+                _cmBuilder.finish( _elemDecl->contentModel(), _dtd.getMatch() );
                 _parse = &XmlReaderImpl::OnDtdInternal;
                 return;
             }

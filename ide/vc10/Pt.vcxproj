@@ -222,6 +222,7 @@
     <ClInclude Include="..\..\src\Pt-System\win32\SerialDeviceImpl.h" />
     <ClInclude Include="..\..\src\Pt-System\win32\ThreadImpl.h" />
     <ClInclude Include="..\..\src\Pt-System\win32\win32.h" />
+    <ClInclude Include="..\..\src\Pt-Xml\AttributeDeclaration.h" />
     <ClInclude Include="..\..\src\Pt-Xml\ContentModel.h" />
     <ClInclude Include="..\..\src\Pt-Xml\DtdValidator.h" />
     <ClInclude Include="..\..\src\Pt-Xml\ElementDeclaration.h" />

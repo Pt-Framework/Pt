@@ -45,6 +45,58 @@ namespace Pt {
 
 namespace Xml {
 
+class AttributeValidator
+{
+    public:
+        AttributeValidator()
+        {}
+
+        bool validate(AttributeList& attrs, const std::vector<AttributeDeclaration*>& decls) const
+        {
+            std::vector<AttributeDeclaration*> attrDecls = decls;
+
+            //
+            // match attributes against declarations, remove declarations
+            // that match an attribute
+            //
+            AttributeList::ConstIterator attr;
+            for(attr = attrs.begin(); attr != attrs.end(); ++attr)
+            {
+                std::vector<AttributeDeclaration*>::iterator it;
+                 
+                for(it = attrDecls.begin(); it != attrDecls.end(); ++it)
+                {
+                    if( (*it)->name() == attr->name() )
+                    {
+                        break;
+                    }
+                }
+
+                if( it == attrDecls.end() )
+                    return false;
+
+                if( ! (*it)->match( *attr) )
+                    return false;
+
+                attrDecls.erase(it);
+            }
+
+            //
+            // post process unmatched declarations e.g. get default values
+            // and check for missing required attributes
+            //
+            std::vector<AttributeDeclaration*>::iterator decl;
+            for(decl = attrDecls.begin(); decl != attrDecls.end(); ++decl)
+            {
+                if( ! (*decl)->validate(attrs) )
+                    return false;
+            }
+
+            return true;
+        }
+};
+
+
 // TODO: rename DocTypeValidator
 class DtdValidator : private NonCopyable
 {
@@ -76,10 +128,11 @@ class DtdValidator : private NonCopyable
                     ElementDeclaration* decl = _dtd->findElementDeclaration( se.name() );
                     if(decl)
                     {
-                        ContentValidator validator( *decl );
+                        ContentValidator validator( decl->contentModel() );
                         _decls.push(validator);
                         
-                        if( ! decl->validateAttributes( se.attributes() ) )
+                        AttributeValidator attributeValidator;
+                        if( ! attributeValidator.validate( se.attributes(), decl->attributes() ) )
                             valid = false;
 
                         //TODO: push empty ContentValidator if only ATTLIST is declared
