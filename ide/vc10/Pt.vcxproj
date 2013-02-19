@@ -223,6 +223,7 @@
     <ClInclude Include="..\..\src\Pt-System\win32\ThreadImpl.h" />
     <ClInclude Include="..\..\src\Pt-System\win32\win32.h" />
     <ClInclude Include="..\..\src\Pt-Xml\AttributeDeclaration.h" />
+    <ClInclude Include="..\..\src\Pt-Xml\AttributeDeclarationList.h" />
     <ClInclude Include="..\..\src\Pt-Xml\ContentModel.h" />
     <ClInclude Include="..\..\src\Pt-Xml\DtdValidator.h" />
     <ClInclude Include="..\..\src\Pt-Xml\ElementDeclaration.h" />
@@ -395,6 +396,7 @@
     <ClCompile Include="..\..\src\Pt-Xml\ContentModel.cpp" />
     <ClCompile Include="..\..\src\Pt-Xml\DocType.cpp" />
     <ClCompile Include="..\..\src\Pt-Xml\DocTypeDefinition.cpp" />
+    <ClCompile Include="..\..\src\Pt-Xml\ElementDeclaration.cpp" />
     <ClCompile Include="..\..\src\Pt-Xml\Entity.cpp" />
     <ClCompile Include="..\..\src\Pt-Xml\EntityMapping.cpp" />
     <ClCompile Include="..\..\src\Pt-Xml\InputSource.cpp" />

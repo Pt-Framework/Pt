@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 by Marc Boris Duerner
+ * Copyright (C) 2013 by Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,10 +25,9 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef Pt_Xml_ElementDeclaration_h
-#define Pt_Xml_ElementDeclaration_h
+#ifndef Pt_Xml_AttributeDeclarationList_h
+#define Pt_Xml_AttributeDeclarationList_h
 
-#include "AttributeDeclarationList.h"
 #include <Pt/Xml/Api.h>
 #include <Pt/NonCopyable.h>
 #include <vector>
@@ -38,54 +37,9 @@ namespace Pt {
 
 namespace Xml {
 
-class ContentParticle;
+class AttributeDeclaration;
 
-class PT_XML_API ElementDeclaration : private NonCopyable
-{
-    public:
-        enum ContentType
-        {
-            Invalid = 0,
-            Expression = 1,
-            Empty = 2,
-            Any = 3
-        };
-
-    public:
-        ElementDeclaration();
-        
-        ~ElementDeclaration();
-
-        const AttributeDeclarationList& attributeList() const;
-
-        AttributeDeclarationList& attributeList();
-
-        void addAttribute(AttributeDeclaration* decl);
-
-        ContentType contentType() const;
-        
-        bool isEmpty() const;
-
-        void setEmpty();
-
-        bool isAny() const;
-
-        void setAny();
-
-        bool isExpression() const;
-
-        void setExpression(ContentParticle& start, unsigned n);
-
-        const ContentParticle* content() const;
-
-        std::size_t contentSize() const;
-
-    private:
-        ContentParticle* _start;
-        std::size_t _size;
-        ContentType _type;
-        AttributeDeclarationList _attrs;
-};
+typedef std::vector<AttributeDeclaration*> AttributeDeclarationList;
 
 } // namespace Xml
 

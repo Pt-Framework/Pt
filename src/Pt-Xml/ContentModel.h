@@ -43,8 +43,7 @@ namespace Pt {
 namespace Xml {
 
 class DocTypeDefinition;
-class ContentValidator;
-class ContentModel;
+class ValidationContext;
 
 class ContentParticle
 {
@@ -53,10 +52,10 @@ class ContentParticle
         { }
 
         //! @brief Gets this Particle and follows unlabelled transitions.
-        virtual void get(ContentValidator& ctx) const = 0;
+        virtual void get(ValidationContext& ctx) const = 0;
 
         //! @brief Evaluate the XML node and get all following nodes.
-        virtual void eval(ContentValidator& ctx, Node& node) const = 0;
+        virtual void eval(ValidationContext& ctx, Node& node) const = 0;
 
         //! @brief Returns true if the node represents a match state.
         virtual bool isValid() const
@@ -86,29 +85,23 @@ class ContentParticle
 };
 
 
-class ContentValidator
+class ValidationContext
 {
     public:
-        //!@brief A validator for an undeclared element.
-        ContentValidator();
+        ValidationContext(std::size_t nodeCount = 0);
 
-        ContentValidator(const ContentModel& cm);
-
-        bool validate(Node& node);
-
-        bool isComplete() const;
+        void clear();
 
         bool setVisited(unsigned id);
 
-        void addNext(const ContentParticle* p)
-        { _current.push_back(p); }
+        void addNext(const ContentParticle* p);
+        
+        const std::vector<const ContentParticle*>& next() const;
 
     private:
-        const ContentModel* _cm;
         unsigned _stepId;
         std::vector<unsigned> _nodes;
         std::vector<const ContentParticle*> _current;
-        std::vector<const ContentParticle*> _next;
 };
 
 
@@ -120,9 +113,9 @@ class SplitParticle : public ContentParticle
         , _out1(to)
         { }
 
-        virtual void eval(ContentValidator& ctx, Node& node) const;
+        virtual void eval(ValidationContext& ctx, Node& node) const;
 
-        virtual void get(ContentValidator& ctx) const ;
+        virtual void get(ValidationContext& ctx) const ;
 
     private:
         ContentParticle* _out1;
@@ -137,9 +130,9 @@ class LeafParticle : public ContentParticle
         , _name(name)
         { }
 
-        virtual void eval(ContentValidator& ctx, Node& node) const;
+        virtual void eval(ValidationContext& ctx, Node& node) const;
 
-        virtual void get(ContentValidator& ctx) const;
+        virtual void get(ValidationContext& ctx) const;
 
     private:
         Pt::String _name;
@@ -153,9 +146,9 @@ class PcDataParticle : public ContentParticle
         : ContentParticle()
         { }
 
-        virtual void eval(ContentValidator& ctx, Node& node) const;
+        virtual void eval(ValidationContext& ctx, Node& node) const;
 
-        virtual void get(ContentValidator& ctx) const;
+        virtual void get(ValidationContext& ctx) const;
 };
 
 
@@ -166,76 +159,12 @@ class MatchParticle : public ContentParticle
         : ContentParticle()
         { setId(0); }
 
-        virtual void eval(ContentValidator& ctx, Node& node) const;
+        virtual void eval(ValidationContext& ctx, Node& node) const;
         
-        virtual void get(ContentValidator& ctx) const;
+        virtual void get(ValidationContext& ctx) const;
 
         virtual bool isValid() const
         { return true; }
-};
-
-
-class ContentModel
-{
-    public:
-        enum ContentType
-        {
-            Invalid = 0,
-            Expression = 1,
-            Empty = 2,
-            Any = 3
-        };
-
-    public:
-        ContentModel()
-        : _start(0)
-        , _size(0)
-        , _type(Invalid)
-        {}
-
-        ~ContentModel()
-        { }
-
-        bool isEmpty() const
-        { return _type == Empty; }
-
-        bool isAny() const
-        { return _type == Any; }
-
-        bool isExpression() const
-        { return _type == Expression; }
-
-        void setExpression(ContentParticle& start, unsigned n)
-        { 
-            _start = &start; 
-            _size = n;
-            _type = Expression;
-        }
-
-        void setEmpty()
-        { 
-            _start = 0;
-            _size = 0;
-            _type = Empty;
-        }
-
-        void setAny()
-        { 
-            _start = 0;
-            _size = 0;
-            _type = Any;
-        }
-
-        const ContentParticle* first() const
-        { return _start; }
-
-        unsigned size() const
-        { return _size; }
-
-    private:
-        ContentParticle* _start;
-        unsigned _size;
-        ContentType _type;
 };
 
 
@@ -292,11 +221,10 @@ class ContentModelBuilder
 
         void clear();
 
-        void setEmpty();
+        ContentParticle& finish(MatchParticle& m);
 
-        void setAny();
-
-        void finish(ContentModel& cm, MatchParticle& m);
+        std::size_t nodeCount() const
+        { return _nodeCount; }
         
         // TODO: push particles, so we do not have to keep a refrence to a dtd here
         void pushOperator(Pt::Char ch);
@@ -313,7 +241,6 @@ class ContentModelBuilder
     private:
         DocTypeDefinition* _dtd;
         std::stack<Pt::Char> _ops;
-        int _cmtype;
         std::stack<Fragment> _fragments;
         unsigned _nodeCount;
 };

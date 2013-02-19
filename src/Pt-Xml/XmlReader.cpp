@@ -1692,6 +1692,20 @@ class XmlReaderImpl
             if( isAlpha(ch) )
             {
                 _token += ch;
+                
+                if(_token == L"EMPTY")
+                {
+                    _token.clear();
+                    _elemDecl->setEmpty();
+                    _parse = &XmlReaderImpl::OnDtdAfterAnyOrEmpty;
+                }
+                else if(_token == L"ANY")
+                {
+                    _token.clear();
+                    _elemDecl->setAny();
+                    _parse = &XmlReaderImpl::OnDtdAfterAnyOrEmpty;
+                }
+
                 return;
             }
 
@@ -1701,21 +1715,31 @@ class XmlReaderImpl
                 return;
             }
 
-            if(_token == L"EMPTY")
-            {
-                _cmBuilder.setEmpty();
-            }
-            else if(_token == L"ANY")
-            {
-                _cmBuilder.setAny();
-            }
-            else
-                throw SyntaxError("XML syntax error", line());
-            
-            _token.clear();
+            throw SyntaxError("XML syntax error", line());
+        }
 
-            _parse = &XmlReaderImpl::OnDtdBeforeElementEnd;
-            (this->*_parse)(c);
+        void OnDtdAfterAnyOrEmpty(int c)
+        {
+            Pt::Char ch = notEof(c);
+            
+            if(ch == '>')
+            {
+                _parse = &XmlReaderImpl::OnDtdInternal;
+                return;
+            }
+            
+            if( Pt::isspace(ch) )
+            {
+                return;
+            }
+
+            if( ch == '%' )
+            {
+                enterParameterReference(&XmlReaderImpl::OnDtdBeforeElementEnd);
+                return;
+            }
+
+            throw SyntaxError("XML syntax error", line());
         }
 
         void OnDtdBeforeElementEnd(int c)
@@ -1724,7 +1748,10 @@ class XmlReaderImpl
             
             if(ch == '>')
             {
-                _cmBuilder.finish( _elemDecl->contentModel(), _dtd.getMatch() );
+                ContentParticle& content = _cmBuilder.finish( _dtd.getMatch() );
+                _elemDecl->setExpression( content, _cmBuilder.nodeCount() );
+                _cmBuilder.clear();
+                
                 _parse = &XmlReaderImpl::OnDtdInternal;
                 return;
             }
@@ -1850,7 +1877,10 @@ class XmlReaderImpl
 
             if( ch == '>' )
             {
-                _cmBuilder.finish( _elemDecl->contentModel(), _dtd.getMatch() );
+                ContentParticle& content = _cmBuilder.finish( _dtd.getMatch() );
+                _elemDecl->setExpression( content, _cmBuilder.nodeCount() );
+                _cmBuilder.clear();
+                
                 _parse = &XmlReaderImpl::OnDtdInternal;
                 return;
             }
@@ -1924,7 +1954,10 @@ class XmlReaderImpl
 
             if( ch == '>' )
             {
-                _cmBuilder.finish( _elemDecl->contentModel(), _dtd.getMatch() );
+                ContentParticle& content = _cmBuilder.finish( _dtd.getMatch() );
+                _elemDecl->setExpression( content, _cmBuilder.nodeCount() );
+                _cmBuilder.clear();
+
                 _parse = &XmlReaderImpl::OnDtdInternal;
                 return;
             }

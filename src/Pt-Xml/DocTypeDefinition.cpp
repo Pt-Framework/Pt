@@ -65,7 +65,7 @@ DocTypeDefinition::~DocTypeDefinition()
 
 ElementDeclaration& DocTypeDefinition::declareElement(const Pt::String& name)
 { 
-    ElementDeclarationTable::iterator lbound;
+    ElementDeclarationList::iterator lbound;
     lbound = std::lower_bound(_elemDecls.begin(), _elemDecls.end(), name, lessThanName);
     
     if( lbound != _elemDecls.end() && lbound->first == name)
@@ -80,9 +80,9 @@ ElementDeclaration& DocTypeDefinition::declareElement(const Pt::String& name)
 }
 
 
-ElementDeclaration* DocTypeDefinition::findElementDeclaration(const Pt::String& name)
+ElementDeclaration* DocTypeDefinition::element(const Pt::String& name)
 {
-    ElementDeclarationTable::iterator lbound;
+    ElementDeclarationList::iterator lbound;
     lbound = std::lower_bound(_elemDecls.begin(), _elemDecls.end(), name, lessThanName);
     
     if( lbound != _elemDecls.end() && lbound->first == name)
@@ -94,9 +94,41 @@ ElementDeclaration* DocTypeDefinition::findElementDeclaration(const Pt::String& 
 }
 
 
+AttributeDeclarationList& DocTypeDefinition::declareAttributeList(const Pt::String& name)
+{ 
+    ElementDeclarationList::iterator lbound;
+    lbound = std::lower_bound(_elemDecls.begin(), _elemDecls.end(), name, lessThanName);
+    
+    if( lbound != _elemDecls.end() && lbound->first == name)
+    {
+        return lbound->second->attributeList();
+    }
+
+    std::auto_ptr<ElementDeclaration> ep( new ElementDeclaration() );
+    std::pair<Pt::String, ElementDeclaration*> entry( name, ep.get() );
+    _elemDecls.insert(lbound, entry);
+    ElementDeclaration* elemDecl = ep.release();
+    return elemDecl->attributeList();
+}
+
+
+AttributeDeclarationList* DocTypeDefinition::attributeList(const Pt::String& name)
+{
+    ElementDeclarationList::iterator lbound;
+    lbound = std::lower_bound(_elemDecls.begin(), _elemDecls.end(), name, lessThanName);
+    
+    if( lbound != _elemDecls.end() && lbound->first == name)
+    {
+        return &lbound->second->attributeList();
+    }
+
+    return 0;
+}
+
+
 void DocTypeDefinition::clear()
 {
-    for(ElementDeclarationTable::iterator it = _elemDecls.begin(); it != _elemDecls.end(); ++it)
+    for(ElementDeclarationList::iterator it = _elemDecls.begin(); it != _elemDecls.end(); ++it)
     {
         delete it->second;
     }

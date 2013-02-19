@@ -26,93 +26,22 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "ContentModel.h"
-#include "ElementDeclaration.h"
 #include <Pt/Xml/DocTypeDefinition.h>
 
 namespace Pt {
 
 namespace Xml {
 
-ContentValidator::ContentValidator()
-: _cm(0)
-, _stepId(1)
-{}
-
-
-ContentValidator::ContentValidator(const ContentModel& cm)
-: _cm(&cm)
-, _stepId(1)
+ValidationContext::ValidationContext(std::size_t nodeCount)
+: _stepId(1)
 {
     // all nodes are unvisited
-    _nodes.assign(_cm->size(), 0);
+    _nodes.assign(nodeCount, 0);
     _stepId = 1;
-
-    if( cm.first() )
-        cm.first()->get(*this);
 }
 
 
-bool ContentValidator::validate(Node& node)
-{
-    // handle ignorable WS and EMPTY separately, so indentation in XML
-    // documents does not lead to costly state transitions. 
-    if( Pt::Xml::Characters* chars = Pt::Xml::toCharacters(&node) )
-    {
-        if( chars->isIgnorable() )
-        {
-            // if the element was undeclared, WS should not lead to a 
-            // validation error
-            if( ! _cm )
-                return true;
-
-            // special rule for EMPTY, not even WS is allowed
-            if( _cm->isEmpty() )
-                return false;
-
-            return true;
-        }
-    }
-
-    if( ! _cm)
-        return false;
-
-    if( _cm->isAny() )
-        return true;
-
-    _stepId++;
-    _next = _current;
-    _current.clear();
-
-    for(unsigned n = 0; n < _next.size(); ++n)
-    {
-        _next[n]->eval(*this, node);
-    }
-
-    // no follow up particles means validation error
-    return ! _current.empty();
-}
-
-
-bool ContentValidator::isComplete() const
-{ 
-    // if the element was undeclared, empty or any content is allwed
-    if( ! _cm || _cm->isEmpty() || _cm->isAny() )
-        return true;
-            
-    // at the end of the validation, at least one current particle
-    // must be a match particle, otherwise there was more content
-    // expected to come
-    for(unsigned n = 0; n < _current.size(); ++n)
-    {
-        if( _current[n]->isValid() )
-            return true;
-    }
-            
-    return false; 
-}
-
-
-bool ContentValidator::setVisited(unsigned id)
+bool ValidationContext::setVisited(unsigned id)
 { 
     if(_nodes.at(id) == _stepId)
         return true;
@@ -123,12 +52,31 @@ bool ContentValidator::setVisited(unsigned id)
 }
 
 
-void SplitParticle::eval(ContentValidator& ctx, Node& node) const
+void ValidationContext::addNext(const ContentParticle* p)
+{ 
+    _current.push_back(p); 
+}
+
+
+const std::vector<const ContentParticle*>& ValidationContext::next() const
+{ 
+    return _current; 
+}
+
+
+void ValidationContext::clear()
+{ 
+    _current.clear(); 
+    _stepId++;
+}
+
+
+void SplitParticle::eval(ValidationContext& ctx, Node& node) const
 { 
 }
 
 
-void SplitParticle::get(ContentValidator& ctx) const
+void SplitParticle::get(ValidationContext& ctx) const
 {
     assert(id() != 0);
 
@@ -143,7 +91,7 @@ void SplitParticle::get(ContentValidator& ctx) const
 }
 
 
-void LeafParticle::eval(ContentValidator& ctx, Node& node) const
+void LeafParticle::eval(ValidationContext& ctx, Node& node) const
 {
     StartElement* se = toStartElement(&node);
     if(se && se->name() == _name)
@@ -153,7 +101,7 @@ void LeafParticle::eval(ContentValidator& ctx, Node& node) const
 }
 
 
-void LeafParticle::get(ContentValidator& ctx) const
+void LeafParticle::get(ValidationContext& ctx) const
 {
     assert(id() != 0);
 
@@ -164,7 +112,7 @@ void LeafParticle::get(ContentValidator& ctx) const
 }
 
 
-void PcDataParticle::eval(ContentValidator& ctx, Node& node) const
+void PcDataParticle::eval(ValidationContext& ctx, Node& node) const
 {
     Characters* chars = toCharacters(&node);
     if(chars)
@@ -174,7 +122,7 @@ void PcDataParticle::eval(ContentValidator& ctx, Node& node) const
 }
 
 
-void PcDataParticle::get(ContentValidator& ctx) const
+void PcDataParticle::get(ValidationContext& ctx) const
 {
     assert(id() != 0);
 
@@ -185,12 +133,12 @@ void PcDataParticle::get(ContentValidator& ctx) const
 }
 
 
-void MatchParticle::eval(ContentValidator& ctx, Node& node) const
+void MatchParticle::eval(ValidationContext& ctx, Node& node) const
 {
 }
         
 
-void MatchParticle::get(ContentValidator& ctx) const
+void MatchParticle::get(ValidationContext& ctx) const
 { 
     assert(id() == 0);
 
@@ -203,7 +151,6 @@ void MatchParticle::get(ContentValidator& ctx) const
 
 ContentModelBuilder::ContentModelBuilder(DocTypeDefinition& dtd)
 : _dtd(&dtd)
-, _cmtype(ContentModel::Expression)
 , _nodeCount(0)
 {}
 
@@ -218,51 +165,24 @@ void ContentModelBuilder::clear()
 
     // id of 0 is for Match
     _nodeCount = 1;
-
-    _cmtype = ContentModel::Expression;
 }
 
 
-void ContentModelBuilder::setEmpty()
-{
-    clear();
-    _cmtype = ContentModel::Empty;
-}
-
-
-void ContentModelBuilder::setAny()
-{
-    clear();
-    _cmtype = ContentModel::Any;
-}
-
-
-void ContentModelBuilder::finish(ContentModel& cm, MatchParticle& match)
+ContentParticle& ContentModelBuilder::finish(MatchParticle& match)
 {
     reduceStack();
 
     if( _fragments.empty() )
     {
         assert(_nodeCount == 1);
-
-        if(_cmtype == ContentModel::Any)
-            cm.setAny();
-        else if(_cmtype == ContentModel::Empty)
-            cm.setEmpty();
-        else
-            throw std::logic_error("invalid content model");
-        
-        return;
+        throw std::logic_error("invalid content model");
     }
 
     if(_fragments.size() > 1)
         throw std::logic_error("DTD syntax error: incomplete expression");
 
     _fragments.top().patchLeafs(match);
-    ContentParticle& particle = _fragments.top().start();
-    cm.setExpression(particle, _nodeCount);
-
-    clear();
+    return _fragments.top().start();
 }
     
         

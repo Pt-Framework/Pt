@@ -31,6 +31,7 @@
 
 #include "ContentModel.h"
 #include "ElementDeclaration.h"
+#include "AttributeDeclaration.h"
 
 #include <Pt/Xml/Api.h>
 #include <Pt/Xml/DocTypeDefinition.h>
@@ -97,6 +98,77 @@ class AttributeValidator
 };
 
 
+class ContentValidator : public ValidationContext
+{
+    public:
+        //!@brief A validator for an undeclared element.
+        ContentValidator()
+        : _cmType(ElementDeclaration::Invalid)
+        {}
+
+        ContentValidator(const ElementDeclaration& elemDecl)
+        : ValidationContext( elemDecl.contentSize() )
+        , _cmType( elemDecl.contentType() )
+        {
+            if( elemDecl.content() )
+                elemDecl.content()->get(*this);
+        }
+
+        bool validateNode(Node& node)
+        {
+            // handle ignorable WS and EMPTY separately, so indentation in XML
+            // documents does not lead to costly state transitions. 
+            if( Pt::Xml::Characters* chars = Pt::Xml::toCharacters(&node) )
+            {
+                if( chars->isIgnorable() )
+                {
+                    // special rule for EMPTY, not even WS is allowed
+                    if(_cmType == ElementDeclaration::Empty)
+                        return false;
+
+                    return true;
+                }
+            }
+
+            if(_cmType == ElementDeclaration::Any)
+                return true;
+
+            _next = ValidationContext::next();
+            this->clear();
+
+            for(unsigned n = 0; n < _next.size(); ++n)
+            {
+                _next[n]->eval(*this, node);
+            }
+
+            // no follow up particles means validation error
+            return ! this->next().empty();
+        }
+        
+        bool isCompleteNode() const
+        { 
+            // if the element was undeclared, empty or any content is allwed
+            if( _cmType == ElementDeclaration::Invalid || _cmType == ElementDeclaration::Empty || _cmType == ElementDeclaration::Any )
+                return true;
+            
+            // at the end of the validation, at least one current particle
+            // must be a match particle, otherwise there was more content
+            // expected to come
+            for(unsigned n = 0; n < this->next().size(); ++n)
+            {
+                if( this->next()[n]->isValid() )
+                    return true;
+            }
+            
+            return false; 
+        }
+
+    private:
+        unsigned _cmType;
+        std::vector<const ContentParticle*> _next;
+};
+
+
 // TODO: rename DocTypeValidator
 class DtdValidator : private NonCopyable
 {
@@ -122,17 +194,17 @@ class DtdValidator : private NonCopyable
                     StartElement& se = static_cast<StartElement&>(node);
                     if( ! _decls.empty() )
                     {
-                        valid = _decls.top().validate(se);
+                        valid = _decls.top().validateNode(se);
                     }
                     
-                    ElementDeclaration* decl = _dtd->findElementDeclaration( se.name() );
+                    ElementDeclaration* decl = _dtd->element( se.name() );
                     if(decl)
                     {
-                        ContentValidator validator( decl->contentModel() );
+                        ContentValidator validator( *decl );
                         _decls.push(validator);
                         
                         AttributeValidator attributeValidator;
-                        if( ! attributeValidator.validate( se.attributes(), decl->attributes() ) )
+                        if( ! attributeValidator.validate( se.attributes(), decl->attributeList() ) )
                             valid = false;
 
                         //TODO: push empty ContentValidator if only ATTLIST is declared
@@ -153,7 +225,7 @@ class DtdValidator : private NonCopyable
 
                     if( ! _decls.empty() )
                     {
-                        valid = _decls.top().validate(chars);
+                        valid = _decls.top().validateNode(chars);
                     }
 
                     break;
@@ -161,7 +233,7 @@ class DtdValidator : private NonCopyable
 
                 case Node::EndElement:
                 {
-                    valid = _decls.top().isComplete();
+                    valid = _decls.top().isCompleteNode();
                     _decls.pop();
                     break;
                 }

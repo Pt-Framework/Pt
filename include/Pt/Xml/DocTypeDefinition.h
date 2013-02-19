@@ -41,6 +41,9 @@ namespace Pt {
 namespace Xml {
 
 class ElementDeclaration;
+class AttributeDeclaration;
+typedef std::vector<AttributeDeclaration*> AttributeDeclarationList;
+
 class ContentParticle;
 class LeafParticle;
 class SplitParticle;
@@ -58,7 +61,11 @@ class PT_XML_API DocTypeDefinition : public Node
         // TODO: this should declare and EMPTY element
         ElementDeclaration& declareElement(const Pt::String& name);
 
-        ElementDeclaration* findElementDeclaration(const Pt::String& name);
+        ElementDeclaration* element(const Pt::String& name);
+
+        AttributeDeclarationList& declareAttributeList(const Pt::String& name);
+
+        AttributeDeclarationList* attributeList(const Pt::String& name);
 
         void clear();
 
@@ -83,9 +90,9 @@ class PT_XML_API DocTypeDefinition : public Node
         { return Node::DocTypeDefinition; }
 
     private:
-        typedef std::vector< std::pair<Pt::String, ElementDeclaration*> > ElementDeclarationTable;
+        typedef std::vector< std::pair<Pt::String, ElementDeclaration*> > ElementDeclarationList;
         
-        ElementDeclarationTable _elemDecls;
+        ElementDeclarationList _elemDecls;
         EntityMapping _entities;
         EntityMapping _paramEntities;
         std::vector<ContentParticle*> _pool;
