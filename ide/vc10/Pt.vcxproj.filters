@@ -726,10 +726,10 @@
     <ClInclude Include="..\..\src\Pt-Xml\AttributeDeclaration.h">
       <Filter>Pt-Xml</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Xml\AttributeDeclarationList.h">
+    <ClInclude Include="..\..\src\Pt-Xml\DtdContext.h">
       <Filter>Pt-Xml</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Xml\DtdContext.h">
+    <ClInclude Include="..\..\src\Pt-Xml\AttributeListDeclaration.h">
       <Filter>Pt-Xml</Filter>
     </ClInclude>
   </ItemGroup>

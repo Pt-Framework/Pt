@@ -59,10 +59,8 @@ class AttributeValidator
             std::vector<const AttributeDeclaration*> attrDecls;
             std::copy(decls.begin(), decls.end(), std::back_inserter(attrDecls));
 
-            //
-            // match attributes against declarations, remove declarations
+            // match attributes against declarations and remove declarations
             // that match an attribute
-            //
             AttributeList::ConstIterator attr;
             for(attr = attrs.begin(); attr != attrs.end(); ++attr)
             {
@@ -85,10 +83,8 @@ class AttributeValidator
                 attrDecls.erase(it);
             }
 
-            //
             // post process unmatched declarations e.g. get default values
             // and check for missing required attributes
-            //
             std::vector<const AttributeDeclaration*>::iterator decl;
             for(decl = attrDecls.begin(); decl != attrDecls.end(); ++decl)
             {
@@ -113,6 +109,7 @@ class ContentValidator : public ValidationContext
         : ValidationContext( elemDecl.contentSize() )
         , _elemDecl(&elemDecl)
         {
+            // if only an ATTLIST was declared, this can be null
             if( elemDecl.content() )
             {
                 elemDecl.content()->get(*this);
@@ -131,6 +128,7 @@ class ContentValidator : public ValidationContext
                     if( _elemDecl && _elemDecl->isEmpty() )
                         return false;
 
+                    // all other cases ignore WS
                     return true;
                 }
             }
@@ -138,6 +136,8 @@ class ContentValidator : public ValidationContext
             if( _elemDecl && _elemDecl->isAny() )
                 return true;
 
+            // invalid or EMPTY will not have any further states, so we will
+            // return with false eventually
             _next = ValidationContext::next();
             this->clear();
 
@@ -153,6 +153,7 @@ class ContentValidator : public ValidationContext
         bool isCompleteNode() const
         { 
             // if the element was undeclared, empty or any content is allowed
+            // we do not expect more content
             if( ! _elemDecl || ! _elemDecl->isExpression() )
                 return true;
             
@@ -174,7 +175,6 @@ class ContentValidator : public ValidationContext
 };
 
 
-// TODO: rename DocTypeValidator
 class DtdValidator : private NonCopyable
 {
     public:

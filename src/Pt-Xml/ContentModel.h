@@ -110,7 +110,7 @@ class SplitParticle : public ContentParticle
 
         virtual void eval(ValidationContext& ctx, Node& node) const;
 
-        virtual void get(ValidationContext& ctx) const ;
+        virtual void get(ValidationContext& ctx) const;
 
     private:
         ContentParticle* _out1;

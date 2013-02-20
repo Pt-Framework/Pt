@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 by Marc Boris Duerner
+ * Copyright (C) 2013 by Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -29,7 +29,7 @@
 #ifndef Pt_Xml_ElementDeclaration_h
 #define Pt_Xml_ElementDeclaration_h
 
-#include "AttributeDeclarationList.h"
+#include "AttributeListDeclaration.h"
 #include <Pt/Xml/Api.h>
 #include <Pt/NonCopyable.h>
 #include <vector>
@@ -43,14 +43,13 @@ class ContentParticle;
 
 class PT_XML_API ElementDeclaration : private NonCopyable
 {
-    public:
-        enum ContentType
-        {
-            Invalid = 0,
-            Expression = 1,
-            Empty = 2,
-            Any = 3
-        };
+    enum ContentType
+    {
+        Invalid = 0,
+        Expression = 1,
+        Empty = 2,
+        Any = 3
+    };
 
     public:
         ElementDeclaration();
