@@ -404,10 +404,6 @@ class XmlReaderImpl
 
             throw SyntaxError("XML syntax error", line());
         };
-
-        // Note that it is possible to construct a well-formed document
-        // containing a doctypedecl that neither points to an external subset
-        // nor contains an internal subset.
         
         void OnDocType(int c)
         {
@@ -469,12 +465,118 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
 
+        // If both the external and internal subsets are used, the internal
+        // subset MUST be considered to occur before the external subset. This
+        // has the effect that entity and attribute-list declarations in the
+        // internal subset take precedence over those in the external subset.
         void AfterDtdRootName(int c)
         {
             Char ch = notEof(c);
 
             if( Pt::isspace(ch) )
             {
+                return;
+            }
+
+            if( ch == 'S')
+            {
+                _token += ch;
+                _parse = &XmlReaderImpl::OnDtdExternalSystem;
+                return;
+            }
+
+            if( ch == 'P')
+            {
+                throw SyntaxError("TODO: public IDs not yet supported", line());
+            }
+
+            if( ch == '[' )
+            {
+                _parse = &XmlReaderImpl::OnDtdInternal;
+                return;
+            }
+
+            // Note that it is possible to construct a well-formed document
+            // containing a doctypedecl that neither points to an external subset
+            // nor contains an internal subset.
+            if(ch == '<')
+            {
+                _parse = &XmlReaderImpl::OnDtdTag;
+                return;
+            }
+
+            throw SyntaxError("XML syntax error", line());
+        }
+
+        void OnDtdExternalSystem(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if(ch == 'Y' || ch == 'S' || ch == 'T' || ch == 'E' || ch == 'M')
+            {
+                _token += ch;
+                return;
+            }
+
+            if( Pt::isspace(ch) )
+            {
+                bool ok = _token == L"SYSTEM";
+                _token.clear();
+                if( ! ok)
+                    throw SyntaxError("XML syntax error", line());
+                
+                _parse = &XmlReaderImpl::OnDtdExternalBeforeSystemId;
+                return;
+            }
+
+            throw SyntaxError("XML syntax error", line());
+        }
+
+        void OnDtdExternalBeforeSystemId(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if( ch == '"' || ch == '\'' )
+            {
+                _parse = &XmlReaderImpl::OnDtdExternalSystemId;
+                return;
+            }
+
+            if( Pt::isspace(ch) )
+            {
+                return;
+            }
+
+            throw SyntaxError("XML syntax error", line());
+        }
+
+        void OnDtdExternalSystemId(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if( ch == '"' || ch == '\'' )
+            {
+                _docType.setSystemId(_token);
+                _token.clear();
+                _parse = &XmlReaderImpl::OnDtdAfterExternal;
+                return;
+            }
+
+            _token += ch;
+        }
+
+        void OnDtdAfterExternal(int c)
+        {
+            Char ch = notEof(c);
+
+            if( Pt::isspace(ch) )
+            {
+                return;
+            }
+
+            if( ch == '>' )
+            {
+                _parse = &XmlReaderImpl::onProlog;
                 return;
             }
 
