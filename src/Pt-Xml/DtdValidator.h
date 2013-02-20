@@ -35,9 +35,11 @@
 
 #include <Pt/Xml/Api.h>
 #include <Pt/Xml/DocTypeDefinition.h>
+#include <Pt/Xml/Characters.h>
 #include <Pt/String.h>
 #include <Pt/NonCopyable.h>
 
+#include <iterator>
 #include <vector>
 #include <stack>
 #include <cassert>
@@ -52,9 +54,10 @@ class AttributeValidator
         AttributeValidator()
         {}
 
-        bool validate(AttributeList& attrs, const std::vector<AttributeDeclaration*>& decls) const
+        bool validate(AttributeList& attrs, const AttributeListDeclaration& decls) const
         {
-            std::vector<AttributeDeclaration*> attrDecls = decls;
+            std::vector<const AttributeDeclaration*> attrDecls;
+            std::copy(decls.begin(), decls.end(), std::back_inserter(attrDecls));
 
             //
             // match attributes against declarations, remove declarations
@@ -63,7 +66,7 @@ class AttributeValidator
             AttributeList::ConstIterator attr;
             for(attr = attrs.begin(); attr != attrs.end(); ++attr)
             {
-                std::vector<AttributeDeclaration*>::iterator it;
+                std::vector<const AttributeDeclaration*>::iterator it;
                  
                 for(it = attrDecls.begin(); it != attrDecls.end(); ++it)
                 {
@@ -86,7 +89,7 @@ class AttributeValidator
             // post process unmatched declarations e.g. get default values
             // and check for missing required attributes
             //
-            std::vector<AttributeDeclaration*>::iterator decl;
+            std::vector<const AttributeDeclaration*>::iterator decl;
             for(decl = attrDecls.begin(); decl != attrDecls.end(); ++decl)
             {
                 if( ! (*decl)->validate(attrs) )
@@ -103,15 +106,17 @@ class ContentValidator : public ValidationContext
     public:
         //!@brief A validator for an undeclared element.
         ContentValidator()
-        : _cmType(ElementDeclaration::Invalid)
+        : _elemDecl(0)
         {}
 
         ContentValidator(const ElementDeclaration& elemDecl)
         : ValidationContext( elemDecl.contentSize() )
-        , _cmType( elemDecl.contentType() )
+        , _elemDecl(&elemDecl)
         {
             if( elemDecl.content() )
+            {
                 elemDecl.content()->get(*this);
+            }
         }
 
         bool validateNode(Node& node)
@@ -123,14 +128,14 @@ class ContentValidator : public ValidationContext
                 if( chars->isIgnorable() )
                 {
                     // special rule for EMPTY, not even WS is allowed
-                    if(_cmType == ElementDeclaration::Empty)
+                    if( _elemDecl && _elemDecl->isEmpty() )
                         return false;
 
                     return true;
                 }
             }
 
-            if(_cmType == ElementDeclaration::Any)
+            if( _elemDecl && _elemDecl->isAny() )
                 return true;
 
             _next = ValidationContext::next();
@@ -147,8 +152,8 @@ class ContentValidator : public ValidationContext
         
         bool isCompleteNode() const
         { 
-            // if the element was undeclared, empty or any content is allwed
-            if( _cmType == ElementDeclaration::Invalid || _cmType == ElementDeclaration::Empty || _cmType == ElementDeclaration::Any )
+            // if the element was undeclared, empty or any content is allowed
+            if( ! _elemDecl || ! _elemDecl->isExpression() )
                 return true;
             
             // at the end of the validation, at least one current particle
@@ -164,7 +169,7 @@ class ContentValidator : public ValidationContext
         }
 
     private:
-        unsigned _cmType;
+        const ElementDeclaration* _elemDecl;
         std::vector<const ContentParticle*> _next;
 };
 

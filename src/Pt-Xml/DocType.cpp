@@ -35,7 +35,6 @@ namespace Xml {
 
 DocType::~DocType()
 { 
-    _dtd->clear();
 }
 
 bool DocType::isDefined() const
@@ -45,7 +44,6 @@ bool DocType::isDefined() const
 
 void DocType::clear()
 { 
-    _dtd->clear();
     _rootName.clear(); 
 }
 

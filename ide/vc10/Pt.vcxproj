@@ -225,6 +225,7 @@
     <ClInclude Include="..\..\src\Pt-Xml\AttributeDeclaration.h" />
     <ClInclude Include="..\..\src\Pt-Xml\AttributeDeclarationList.h" />
     <ClInclude Include="..\..\src\Pt-Xml\ContentModel.h" />
+    <ClInclude Include="..\..\src\Pt-Xml\DtdContext.h" />
     <ClInclude Include="..\..\src\Pt-Xml\DtdValidator.h" />
     <ClInclude Include="..\..\src\Pt-Xml\ElementDeclaration.h" />
     <ClInclude Include="..\..\src\Pt\regexp.h" />
@@ -393,9 +394,11 @@
     <ClCompile Include="..\..\src\Pt-Unit\TestSuite.cpp" />
     <ClCompile Include="..\..\src\Pt-Unit\TextProtocol.cpp" />
     <ClCompile Include="..\..\src\Pt-Unit\TextProtocolTest.cpp" />
+    <ClCompile Include="..\..\src\Pt-Xml\AttributeListDeclaration.cpp" />
     <ClCompile Include="..\..\src\Pt-Xml\ContentModel.cpp" />
     <ClCompile Include="..\..\src\Pt-Xml\DocType.cpp" />
     <ClCompile Include="..\..\src\Pt-Xml\DocTypeDefinition.cpp" />
+    <ClCompile Include="..\..\src\Pt-Xml\DtdContext.cpp" />
     <ClCompile Include="..\..\src\Pt-Xml\ElementDeclaration.cpp" />
     <ClCompile Include="..\..\src\Pt-Xml\Entity.cpp" />
     <ClCompile Include="..\..\src\Pt-Xml\EntityMapping.cpp" />

@@ -25,24 +25,19 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef Pt_Xml_ContentModel_h
 #define Pt_Xml_ContentModel_h
 
 #include <Pt/Xml/Api.h>
-#include <Pt/Xml/StartElement.h>
-#include <Pt/Xml/Characters.h>
-#include <Pt/Xml/EndElement.h>
+#include <Pt/Xml/Node.h>
 #include <Pt/String.h>
-
 #include <vector>
-#include <stack>
-#include <cassert>
 
 namespace Pt {
 
 namespace Xml {
 
-class DocTypeDefinition;
 class ValidationContext;
 
 class ContentParticle
@@ -165,84 +160,6 @@ class MatchParticle : public ContentParticle
 
         virtual bool isValid() const
         { return true; }
-};
-
-
-class ContentModelBuilder
-{
-    private:
-        class Fragment
-        {
-            public:
-                explicit Fragment(ContentParticle& start)
-                : _start(&start)
-                {}
-
-                ContentParticle& start() const
-                { return *_start; }
-
-                const std::vector<ContentParticle*>& leafs() const
-                { return _leafs; }
-
-                void setLeaf(ContentParticle& next)
-                { _leafs.push_back(&next); }
-
-                void setLeafs(const std::vector<ContentParticle*>& leafs)
-                { _leafs = leafs; }
-
-                void setLeafs(const std::vector<ContentParticle*>& leafs, const std::vector<ContentParticle*>& leafs2)
-                { 
-                    _leafs = leafs; 
-                    _leafs.insert( _leafs.end(), leafs2.begin(), leafs2.end() );
-                }
-
-                void setLeafs(const std::vector<ContentParticle*>& leafs, ContentParticle& leaf)
-                { 
-                    _leafs = leafs; 
-                    _leafs.push_back(&leaf);
-                }
-
-                void patchLeafs(ContentParticle& to)
-                {
-                    for(unsigned n = 0; n < _leafs.size(); ++n)
-                    {
-                        ContentParticle* leaf = _leafs[n];
-                        leaf->setNext(to);
-                    }
-                }
-
-            private:
-                ContentParticle* _start;
-                std::vector<ContentParticle*> _leafs;
-        };
-
-    public:
-        ContentModelBuilder(DocTypeDefinition& dtd);
-
-        void clear();
-
-        ContentParticle& finish(MatchParticle& m);
-
-        std::size_t nodeCount() const
-        { return _nodeCount; }
-        
-        // TODO: push particles, so we do not have to keep a refrence to a dtd here
-        void pushOperator(Pt::Char ch);
-
-        void pushOpenBrace();
-
-        void pushClosingBrace();
-
-        void pushOperand(ContentParticle& op);
-
-    private:
-        void reduceStack();
-
-    private:
-        DocTypeDefinition* _dtd;
-        std::stack<Pt::Char> _ops;
-        std::stack<Fragment> _fragments;
-        unsigned _nodeCount;
 };
 
 } // namespace Xml

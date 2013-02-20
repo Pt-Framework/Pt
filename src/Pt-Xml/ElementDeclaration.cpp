@@ -42,35 +42,18 @@ ElementDeclaration::ElementDeclaration()
 
 ElementDeclaration::~ElementDeclaration()
 {
-    AttributeDeclarationList::iterator it;
-    for(it = _attrs.begin(); it != _attrs.end(); ++it)
-    {
-        delete *it;
-    }
 }
 
 
-const AttributeDeclarationList& ElementDeclaration::attributeList() const
+const AttributeListDeclaration& ElementDeclaration::attributeList() const
 { 
     return _attrs; 
 }
 
 
-AttributeDeclarationList& ElementDeclaration::attributeList()
+AttributeListDeclaration& ElementDeclaration::attributeList()
 { 
     return _attrs; 
-}
-
-
-void ElementDeclaration::addAttribute(AttributeDeclaration* decl)
-{ 
-    _attrs.push_back(decl); 
-}
-
-
-ElementDeclaration::ContentType ElementDeclaration::contentType() const
-{ 
-    return _type; 
 }
         
 

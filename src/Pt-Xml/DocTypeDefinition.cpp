@@ -46,20 +46,29 @@ namespace Pt {
 
 namespace Xml {
 
-DocTypeDefinition::DocTypeDefinition()
+DocTypeDefinition::DocTypeDefinition(DtdContext& ctx)
 : Node(Node::DocTypeDefinition)
-, _match(0)
+, _ctx(&ctx)
 {
-    _match = new MatchParticle();
 }
 
 
 DocTypeDefinition::~DocTypeDefinition()
 {
-    assert(_pool.empty());
-    assert(_elemDecls.empty());
+    clear();
+}
 
-    delete _match;
+
+void DocTypeDefinition::clear()
+{
+    for(ElementDeclarationList::iterator it = _elemDecls.begin(); it != _elemDecls.end(); ++it)
+    {
+        delete it->second;
+    }
+
+    _elemDecls.clear();
+    _entities.clear();
+    _paramEntities.clear();
 }
 
 
@@ -94,7 +103,7 @@ ElementDeclaration* DocTypeDefinition::element(const Pt::String& name)
 }
 
 
-AttributeDeclarationList& DocTypeDefinition::declareAttributeList(const Pt::String& name)
+AttributeListDeclaration& DocTypeDefinition::declareAttributeList(const Pt::String& name)
 { 
     ElementDeclarationList::iterator lbound;
     lbound = std::lower_bound(_elemDecls.begin(), _elemDecls.end(), name, lessThanName);
@@ -112,7 +121,7 @@ AttributeDeclarationList& DocTypeDefinition::declareAttributeList(const Pt::Stri
 }
 
 
-AttributeDeclarationList* DocTypeDefinition::attributeList(const Pt::String& name)
+AttributeListDeclaration* DocTypeDefinition::attributeList(const Pt::String& name)
 {
     ElementDeclarationList::iterator lbound;
     lbound = std::lower_bound(_elemDecls.begin(), _elemDecls.end(), name, lessThanName);
@@ -123,28 +132,6 @@ AttributeDeclarationList* DocTypeDefinition::attributeList(const Pt::String& nam
     }
 
     return 0;
-}
-
-
-void DocTypeDefinition::clear()
-{
-    for(ElementDeclarationList::iterator it = _elemDecls.begin(); it != _elemDecls.end(); ++it)
-    {
-        delete it->second;
-    }
-
-    _elemDecls.clear();
-
-
-    _entities.clear();
-    _paramEntities.clear();
-     
-    for(unsigned n = 0; n < _pool.size() ; ++n)
-    {
-        delete _pool[n];
-    }
-
-    _pool.clear();
 }
 
 
@@ -169,39 +156,6 @@ Entity* DocTypeDefinition::addParamEntity(const Pt::String& name)
 const Entity* DocTypeDefinition::resolveParamEntity(const Pt::String& name) const
 {
     return _paramEntities.resolveEntity(name);
-}
-
-
-LeafParticle& DocTypeDefinition::getLabel(const Pt::String& name)
-{
-    _pool.reserve(_pool.size() + 1);
-    LeafParticle* label = new LeafParticle(name);
-    _pool.push_back(label);
-    return *label;
-}
-
-
-SplitParticle& DocTypeDefinition::getSplit(ContentParticle& to)
-{
-    _pool.reserve(_pool.size() + 1);
-    SplitParticle* split = new SplitParticle(&to);
-    _pool.push_back(split);
-    return *split;
-}
-
-
-PcDataParticle& DocTypeDefinition::getPcData()
-{
-    _pool.reserve(_pool.size() + 1);
-    PcDataParticle* node = new PcDataParticle();
-    _pool.push_back(node);
-    return *node;
-}
-
-
-MatchParticle& DocTypeDefinition::getMatch()
-{ 
-    return *_match; 
 }
 
 } // namespace Xml

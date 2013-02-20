@@ -729,6 +729,9 @@
     <ClInclude Include="..\..\src\Pt-Xml\AttributeDeclarationList.h">
       <Filter>Pt-Xml</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Xml\DtdContext.h">
+      <Filter>Pt-Xml</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -1450,6 +1453,12 @@
       <Filter>Pt-Xml</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Xml\ElementDeclaration.cpp">
+      <Filter>Pt-Xml</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Xml\DtdContext.cpp">
+      <Filter>Pt-Xml</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Xml\AttributeListDeclaration.cpp">
       <Filter>Pt-Xml</Filter>
     </ClCompile>
   </ItemGroup>

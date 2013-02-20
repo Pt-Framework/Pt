@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 by Marc Boris Duerner
+ * Copyright (C) 2013 by Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,66 +26,63 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef Pt_Xml_ElementDeclaration_h
-#define Pt_Xml_ElementDeclaration_h
-
 #include "AttributeDeclarationList.h"
-#include <Pt/Xml/Api.h>
-#include <Pt/NonCopyable.h>
-#include <vector>
-#include <cstddef>
+#include "AttributeDeclaration.h"
 
 namespace Pt {
 
 namespace Xml {
 
-class ContentParticle;
-
-class PT_XML_API ElementDeclaration : private NonCopyable
+AttributeListDeclaration::AttributeListDeclaration()
 {
-    public:
-        enum ContentType
-        {
-            Invalid = 0,
-            Expression = 1,
-            Empty = 2,
-            Any = 3
-        };
+}
 
-    public:
-        ElementDeclaration();
-        
-        ~ElementDeclaration();
 
-        const AttributeListDeclaration& attributeList() const;
+AttributeListDeclaration::~AttributeListDeclaration()
+{
+    clear();
+}
 
-        AttributeListDeclaration& attributeList();
-        
-        bool isEmpty() const;
 
-        void setEmpty();
+void AttributeListDeclaration::clear()
+{
+    std::vector<AttributeDeclaration*>::iterator it;
+    for(it = _decls.begin(); it != _decls.end(); ++it)
+    {
+        delete *it;
+    }
+}
 
-        bool isAny() const;
 
-        void setAny();
+void AttributeListDeclaration::addAttribute(AttributeDeclaration* decl)
+{ 
+    _decls.push_back(decl); 
+}
 
-        bool isExpression() const;
 
-        void setExpression(ContentParticle& start, unsigned n);
+AttributeListDeclaration::Iterator AttributeListDeclaration::begin()
+{
+    return _decls.empty() ? 0 : &_decls[0];
+}
 
-        const ContentParticle* content() const;
 
-        std::size_t contentSize() const;
+AttributeListDeclaration::Iterator AttributeListDeclaration::end()
+{
+    return _decls.empty() ? 0 : &_decls[0] + _decls.size();
+}
 
-    private:
-        ContentParticle* _start;
-        std::size_t _size;
-        ContentType _type;
-        AttributeListDeclaration _attrs;
-};
+
+AttributeListDeclaration::ConstIterator AttributeListDeclaration::begin() const
+{
+    return _decls.empty() ? 0 : &_decls[0];
+}
+
+
+AttributeListDeclaration::ConstIterator AttributeListDeclaration::end() const
+{
+    return _decls.empty() ? 0 : &_decls[0] + _decls.size();
+}
 
 } // namespace Xml
 
 } // namespace Pt
-
-#endif

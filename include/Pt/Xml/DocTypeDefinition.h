@@ -40,34 +40,27 @@ namespace Pt {
 
 namespace Xml {
 
+class DtdContext;
 class ElementDeclaration;
-class AttributeDeclaration;
-typedef std::vector<AttributeDeclaration*> AttributeDeclarationList;
-
-class ContentParticle;
-class LeafParticle;
-class SplitParticle;
-class PcDataParticle;
-class MatchParticle;
+class AttributeListDeclaration;
 
 class PT_XML_API DocTypeDefinition : public Node
                                    , private NonCopyable
 {
     public:
-        DocTypeDefinition();
+        DocTypeDefinition(DtdContext& ctx);
 
         ~DocTypeDefinition();
 
-        // TODO: this should declare and EMPTY element
+        void clear();
+
         ElementDeclaration& declareElement(const Pt::String& name);
 
         ElementDeclaration* element(const Pt::String& name);
 
-        AttributeDeclarationList& declareAttributeList(const Pt::String& name);
+        AttributeListDeclaration& declareAttributeList(const Pt::String& name);
 
-        AttributeDeclarationList* attributeList(const Pt::String& name);
-
-        void clear();
+        AttributeListDeclaration* attributeList(const Pt::String& name);
 
         Entity* addEntity(const Pt::String& name);
 
@@ -77,14 +70,6 @@ class PT_XML_API DocTypeDefinition : public Node
 
         const Entity* resolveParamEntity(const Pt::String& name) const;
 
-        LeafParticle& getLabel(const Pt::String& name);
-
-        SplitParticle& getSplit(ContentParticle& to);
-
-        PcDataParticle& getPcData();
-
-        MatchParticle& getMatch();
-
         //! @internal
         inline static Node::Type nodeId()
         { return Node::DocTypeDefinition; }
@@ -92,11 +77,10 @@ class PT_XML_API DocTypeDefinition : public Node
     private:
         typedef std::vector< std::pair<Pt::String, ElementDeclaration*> > ElementDeclarationList;
         
+        DtdContext* _ctx;
         ElementDeclarationList _elemDecls;
         EntityMapping _entities;
         EntityMapping _paramEntities;
-        std::vector<ContentParticle*> _pool;
-        MatchParticle* _match;
 };
 
 

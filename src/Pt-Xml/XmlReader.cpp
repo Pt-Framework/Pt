@@ -26,6 +26,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#include "DtdContext.h"
 #include "DtdValidator.h"
 #include "ElementDeclaration.h"
 
@@ -1164,7 +1165,8 @@ class XmlReaderImpl
 
             if( Pt::isspace(ch) )
             {
-                _elemDecl = &_dtd.declareElement(_token);
+                assert( ! _attlistDecl );
+                _attlistDecl = &_dtd.declareAttributeList(_token);
                 _token.clear();
                 _parse = &XmlReaderImpl::OnDtdBeforeAttrName;
                 return;
@@ -1322,7 +1324,9 @@ class XmlReaderImpl
             assert( ! _attrDecl);
             _attrDecl = new Pt::Xml::CDataAttributeDeclaration();
             _attrDecl->setName(_token);
-            _elemDecl->addAttribute(_attrDecl);
+
+            assert(_attlistDecl);
+            _attlistDecl->addAttribute(_attrDecl);
 
             _token.clear();
             _parse = &XmlReaderImpl::OnDtdAfterAttrType;
@@ -1440,7 +1444,9 @@ class XmlReaderImpl
                 assert( ! _attrDecl);
                 _attrDecl = new Pt::Xml::NMTokensAttributeDeclaration();
                 _attrDecl->setName(_token);
-                _elemDecl->addAttribute(_attrDecl);
+
+                assert(_attlistDecl);
+                _attlistDecl->addAttribute(_attrDecl);
 
                 _token.clear();
                 _parse = &XmlReaderImpl::OnDtdAfterAttrType;
@@ -1452,7 +1458,9 @@ class XmlReaderImpl
                 assert( ! _attrDecl);
                 _attrDecl = new Pt::Xml::NMTokenAttributeDeclaration();
                 _attrDecl->setName(_token);
-                _elemDecl->addAttribute(_attrDecl);
+
+                assert(_attlistDecl);
+                _attlistDecl->addAttribute(_attrDecl);
 
                 _token.clear();
                 _parse = &XmlReaderImpl::OnDtdAfterAttrType;
@@ -1537,6 +1545,10 @@ class XmlReaderImpl
             {
                 assert(_attrDecl);
                 _attrDecl = 0;
+
+                assert(_attlistDecl);
+                _attlistDecl = 0;
+
                 _parse = &XmlReaderImpl::OnDtdInternal;
                 return;
             }
@@ -1640,7 +1652,7 @@ class XmlReaderImpl
             if( Pt::isspace(ch) )
             {
                 _elemDecl = &_dtd.declareElement(_token);
-                _cmBuilder.clear();
+                _dtdContext.resetExpression();
                 _token.clear();
                 _parse = &XmlReaderImpl::OnDtdElementContentBegin;
                 return;
@@ -1681,7 +1693,7 @@ class XmlReaderImpl
             if(ch != '(')
                 throw SyntaxError("XML syntax error", line());
 
-            _cmBuilder.pushOperator(ch);
+            _dtdContext.pushOperator(ch);
             _parse = &XmlReaderImpl::OnDtdElementContent;
         }
         
@@ -1748,9 +1760,9 @@ class XmlReaderImpl
             
             if(ch == '>')
             {
-                ContentParticle& content = _cmBuilder.finish( _dtd.getMatch() );
-                _elemDecl->setExpression( content, _cmBuilder.nodeCount() );
-                _cmBuilder.clear();
+                ContentParticle& content = _dtdContext.finishExpression();
+                _elemDecl->setExpression( content, _dtdContext.expressionSize() );
+                _dtdContext.resetExpression();
                 
                 _parse = &XmlReaderImpl::OnDtdInternal;
                 return;
@@ -1784,7 +1796,7 @@ class XmlReaderImpl
 
             if(ch == '(')
             {
-                _cmBuilder.pushOperator(ch);
+                _dtdContext.pushOperator(ch);
                 return;
             }
 
@@ -1812,7 +1824,7 @@ class XmlReaderImpl
             {
                 pushDtdOperand(_token);
                 _token.clear();
-                _cmBuilder.pushOperator(ch);
+                _dtdContext.pushOperator(ch);
                 _parse = &XmlReaderImpl::OnDtdBinaryOp;
                 return;
             }
@@ -1821,7 +1833,7 @@ class XmlReaderImpl
             {
                 pushDtdOperand(_token);
                 _token.clear();
-                _cmBuilder.pushOperator(ch);
+                _dtdContext.pushOperator(ch);
                 _parse = &XmlReaderImpl::OnDtdBinaryOp;
                 return;
             }
@@ -1830,7 +1842,7 @@ class XmlReaderImpl
             {
                 pushDtdOperand(_token);
                 _token.clear();
-                _cmBuilder.pushOperator(ch);
+                _dtdContext.pushOperator(ch);
                 _parse = &XmlReaderImpl::OnDtdUnrayOp;
                 return;
             }
@@ -1839,7 +1851,7 @@ class XmlReaderImpl
             {
                 pushDtdOperand(_token);
                 _token.clear();
-                _cmBuilder.pushOperator(ch);
+                _dtdContext.pushOperator(ch);
                 _parse = &XmlReaderImpl::OnDtdUnrayOp;
                 return;
             }
@@ -1848,7 +1860,7 @@ class XmlReaderImpl
             {
                 pushDtdOperand(_token);
                 _token.clear();
-                _cmBuilder.pushOperator(ch);
+                _dtdContext.pushOperator(ch);
                 _parse = &XmlReaderImpl::OnDtdUnrayOp;
                 return;
             }
@@ -1857,7 +1869,7 @@ class XmlReaderImpl
             {
                 pushDtdOperand(_token);
                 _token.clear();
-                _cmBuilder.pushClosingBrace();
+                _dtdContext.pushClosingBrace();
                 _parse = &XmlReaderImpl::OnDtdContentExprEnd;
                 return;
             }
@@ -1877,9 +1889,9 @@ class XmlReaderImpl
 
             if( ch == '>' )
             {
-                ContentParticle& content = _cmBuilder.finish( _dtd.getMatch() );
-                _elemDecl->setExpression( content, _cmBuilder.nodeCount() );
-                _cmBuilder.clear();
+                ContentParticle& content = _dtdContext.finishExpression();
+                _elemDecl->setExpression( content, _dtdContext.expressionSize() );
+                _dtdContext.resetExpression();
                 
                 _parse = &XmlReaderImpl::OnDtdInternal;
                 return;
@@ -1887,21 +1899,21 @@ class XmlReaderImpl
 
             if( ch == ',')
             {
-                _cmBuilder.pushOperator(ch);
+                _dtdContext.pushOperator(ch);
                 _parse = &XmlReaderImpl::OnDtdBinaryOp;
                 return;
             }
 
             if( ch == '|')
             {
-                _cmBuilder.pushOperator(ch);
+                _dtdContext.pushOperator(ch);
                 _parse = &XmlReaderImpl::OnDtdBinaryOp;
                 return;
             }
 
             if( ch == ')')
             {
-                _cmBuilder.pushClosingBrace();
+                _dtdContext.pushClosingBrace();
                 _parse = &XmlReaderImpl::OnDtdContentExprEnd;
                 return;
             }
@@ -1934,7 +1946,7 @@ class XmlReaderImpl
 
             if(ch == '(')
             {
-                _cmBuilder.pushOperator(ch);
+                _dtdContext.pushOperator(ch);
                 _parse = &XmlReaderImpl::OnDtdElementContent;
                 return;
             }
@@ -1954,9 +1966,9 @@ class XmlReaderImpl
 
             if( ch == '>' )
             {
-                ContentParticle& content = _cmBuilder.finish( _dtd.getMatch() );
-                _elemDecl->setExpression( content, _cmBuilder.nodeCount() );
-                _cmBuilder.clear();
+                ContentParticle& content = _dtdContext.finishExpression();
+                _elemDecl->setExpression( content, _dtdContext.expressionSize() );
+                _dtdContext.resetExpression();
 
                 _parse = &XmlReaderImpl::OnDtdInternal;
                 return;
@@ -1964,42 +1976,42 @@ class XmlReaderImpl
 
             if( ch == ',')
             {
-                _cmBuilder.pushOperator(ch);
+                _dtdContext.pushOperator(ch);
                 _parse = &XmlReaderImpl::OnDtdBinaryOp;
                 return;
             }
 
             if( ch == '|')
             {
-                _cmBuilder.pushOperator(ch);
+                _dtdContext.pushOperator(ch);
                 _parse = &XmlReaderImpl::OnDtdBinaryOp;
                 return;
             }
 
             if(ch == '+')
             {
-                _cmBuilder.pushOperator(ch);
+                _dtdContext.pushOperator(ch);
                 _parse = &XmlReaderImpl::OnDtdUnrayOp;
                 return;
             }
 
             if(ch == '*')
             {
-                _cmBuilder.pushOperator(ch);
+                _dtdContext.pushOperator(ch);
                 _parse = &XmlReaderImpl::OnDtdUnrayOp;
                 return;
             }
 
             if(ch == '?')
             {
-                _cmBuilder.pushOperator(ch);
+                _dtdContext.pushOperator(ch);
                 _parse = &XmlReaderImpl::OnDtdUnrayOp;
                 return;
             }
 
             if( ch == ')')
             {
-                _cmBuilder.pushClosingBrace();
+                _dtdContext.pushClosingBrace();
                 return;
             }
 
@@ -2746,16 +2758,16 @@ class XmlReaderImpl
                 if(name != L"#PCDATA")
                     throw std::logic_error("DTD syntax error: expected PCDATA");
 
-                PcDataParticle& pcdata = _dtd.getPcData();
-                _cmBuilder.pushOperand(pcdata);
+                PcDataParticle& pcdata = _dtdContext.getPcData();
+                _dtdContext.pushOperand(pcdata);
                 
                 // TODO: allow #PCDATA only at beginning of first '('
                 // TODO: allow only '|' as next token
                 return;
             }
                 
-            LeafParticle& leaf = _dtd.getLabel(name);
-            _cmBuilder.pushOperand(leaf);
+            LeafParticle& leaf = _dtdContext.getLabel(name);
+            _dtdContext.pushOperand(leaf);
         }
 
         bool resolveEntity(String& token)
@@ -2972,12 +2984,13 @@ class XmlReaderImpl
         , _beforeEntityReference(0)
         , _current(0)
         , _standalone(true)
-        , _dtd()
+        , _dtdContext()
+        , _dtd(_dtdContext)
         , _docType(_dtd)
-        , _cmBuilder(_dtd)
+        , _dtdValidator(_dtd)
         , _elemDecl(0)
         , _attrDecl(0)
-        , _dtdValidator(_dtd)
+        , _attlistDecl(0)
         {
             _parse = &XmlReaderImpl::onDocumentBegin;
             _is =  new ByteInputSource(is);
@@ -2994,12 +3007,13 @@ class XmlReaderImpl
         , _beforeEntityReference(0)
         , _current(0)
         , _standalone(true)
-        , _dtd()
+        , _dtdContext()
+        , _dtd(_dtdContext)
         , _docType(_dtd)
-        , _cmBuilder(_dtd)
+        , _dtdValidator(_dtd)
         , _elemDecl(0)
         , _attrDecl(0)
-        , _dtdValidator(_dtd)
+        , _attlistDecl(0)
         {
             _parse = &XmlReaderImpl::onDocumentBegin;
             _input.setInput(is);
@@ -3021,11 +3035,15 @@ class XmlReaderImpl
             _input.clear();
 
             _nsctx.clear();
-            _cmBuilder.clear();
+            
+            _dtdValidator.clear();
+            _dtd.clear();
+            _dtdContext.clear();
+            
             _elemDecl = 0;
             _attrDecl = 0;
-            _dtdValidator.clear();
-
+            _attlistDecl = 0;
+            
             _entity = 0;
 
             _flags = flags;
@@ -3222,14 +3240,15 @@ class XmlReaderImpl
         Pt::String _encoding;
         bool _standalone;
 
+        DtdContext _dtdContext;
         DocTypeDefinition _dtd;
         DocType _docType;
-
-        ContentModelBuilder _cmBuilder;
-        ElementDeclaration* _elemDecl;
-        AttributeDeclaration* _attrDecl;
         DtdValidator _dtdValidator;
 
+        ElementDeclaration* _elemDecl;
+        AttributeDeclaration* _attrDecl;
+        AttributeListDeclaration* _attlistDecl;
+        
         // TODO: some sort of union?
         ProcessingInstruction _procInstr;
         StartElement _startElem;

@@ -25,8 +25,8 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef Pt_Xml_AttributeDeclarationList_h
-#define Pt_Xml_AttributeDeclarationList_h
+#ifndef Pt_Xml_AttributeListDeclaration_h
+#define Pt_Xml_AttributeListDeclaration_h
 
 #include <Pt/Xml/Api.h>
 #include <Pt/NonCopyable.h>
@@ -39,7 +39,33 @@ namespace Xml {
 
 class AttributeDeclaration;
 
-typedef std::vector<AttributeDeclaration*> AttributeDeclarationList;
+class PT_XML_API AttributeListDeclaration : private NonCopyable
+{
+    public:
+        // TODO: Iterator that is not pointer to pointer
+        typedef AttributeDeclaration** Iterator;
+        typedef const AttributeDeclaration* const* ConstIterator;
+    
+    public:
+        AttributeListDeclaration();
+
+        ~AttributeListDeclaration();
+
+        void clear();
+
+        void addAttribute(AttributeDeclaration* decl);
+
+        Iterator begin();
+
+        Iterator end();
+
+        ConstIterator begin() const;
+
+        ConstIterator end() const;
+
+    private:
+        std::vector<AttributeDeclaration*> _decls;
+};
 
 } // namespace Xml
 
