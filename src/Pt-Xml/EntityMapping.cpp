@@ -343,6 +343,11 @@ EntityMapping::~EntityMapping()
 
 Entity* EntityMapping::addEntity(const Pt::String& name)
 {
+    // TODO: use lower_bound to save one lookup
+    // Entities::iterator it = _entities.find(name);
+    // if( it != _entities.end() )
+    //     return 0;
+
     Entity& e = _entities[name];
     return &e;
 }

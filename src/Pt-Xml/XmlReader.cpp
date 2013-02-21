@@ -259,7 +259,7 @@ class XmlReaderImpl
 
             if( isAlpha(ch) )
             {
-                _attr.value() += c;;
+                _attr.value() += c;
                 return;
             }
 
@@ -971,6 +971,9 @@ class XmlReaderImpl
             {
                 assert(_entity == 0);
                 _entity = _dtd.addEntity(_token);
+                
+                // TODO: do not set entity if already set
+                //       -> OnOverrideEntity state
                 _token.clear();
                 _parse = &XmlReaderImpl::OnDtdEntityAfterName;
                 return;
