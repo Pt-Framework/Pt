@@ -38,7 +38,7 @@ namespace Pt {
 namespace Xml {
 
 class Node;
-class DocType;
+class DocTypeDefinition;
 class InputSource;
 
 /** @brief Reads XML as a Stream of XML Nodes.
@@ -81,9 +81,14 @@ class PT_XML_API XmlReader
     public:
         class Iterator;
 
+        enum Flags
+        {
+            ReportDtd = 1
+        };
+
     public:
         /* TODO: Consider the following processing flags:
-                     - ReportDocType
+                     - ReportDtd
                      - ReportProcessingInstructions
                      - ReportWhitespace
                      - ReportComments
@@ -123,7 +128,7 @@ class PT_XML_API XmlReader
 
         bool isStandalone() const;
 
-        const DocType& docType() const;
+        const DocTypeDefinition& dtd() const;
 
         size_t depth() const;
 

@@ -458,7 +458,18 @@ class XmlReaderImpl
 
             if( Pt::isspace(ch) )
             {
+                setDocType();
                 _parse = &XmlReaderImpl::AfterDtdRootName;
+                return;
+            }
+
+            // Note that it is possible to construct a well-formed document
+            // containing a doctypedecl that neither points to an external subset
+            // nor contains an internal subset.
+            if(ch == '>')
+            {
+                setDocumentTypeDefinition();
+                _parse = &XmlReaderImpl::onProlog;
                 return;
             }
 
@@ -487,7 +498,9 @@ class XmlReaderImpl
 
             if( ch == 'P')
             {
-                throw SyntaxError("TODO: public IDs not yet supported", line());
+                _token += ch;
+                _parse = &XmlReaderImpl::OnDtdExternalPublic;
+                return;
             }
 
             if( ch == '[' )
@@ -496,12 +509,34 @@ class XmlReaderImpl
                 return;
             }
 
-            // Note that it is possible to construct a well-formed document
-            // containing a doctypedecl that neither points to an external subset
-            // nor contains an internal subset.
-            if(ch == '<')
+            if(ch == '>')
             {
-                _parse = &XmlReaderImpl::OnDtdTag;
+                setDocumentTypeDefinition();
+                _parse = &XmlReaderImpl::onProlog;
+                return;
+            }
+
+            throw SyntaxError("XML syntax error", line());
+        }
+
+        void OnDtdExternalPublic(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if(ch == 'U' || ch == 'B' || ch == 'L' || ch == 'I' || ch == 'C')
+            {
+                _token += ch;
+                return;
+            }
+
+            if( Pt::isspace(ch) )
+            {
+                bool ok = _token == L"PUBLIC";
+                _token.clear();
+                if( ! ok)
+                    throw SyntaxError("XML syntax error", line());
+                
+                _parse = &XmlReaderImpl::OnDtdExternalBeforePublicId;
                 return;
             }
 
@@ -532,6 +567,70 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
 
+        void OnDtdExternalBeforePublicId(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if( ch == '"' || ch == '\'' )
+            {
+                _parse = &XmlReaderImpl::OnDtdExternalPublicId;
+                return;
+            }
+
+            if( Pt::isspace(ch) )
+            {
+                return;
+            }
+
+            throw SyntaxError("XML syntax error", line());
+        }
+
+        void OnDtdExternalPublicId(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if( ch == '"' || ch == '\'' )
+            {
+                _dtd.setPublicId(_token);
+                _token.clear();
+                _parse = &XmlReaderImpl::OnDtdAfterExternalPublicId;
+                return;
+            }
+
+            _token += ch;
+        }
+
+        void OnDtdAfterExternalPublicId(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if( ch == '"' || ch == '\'' )
+            {
+                _parse = &XmlReaderImpl::OnDtdExternalSystemId;
+                return;
+            }
+
+            if( ch == '>' )
+            {
+                setDocumentTypeDefinition();
+                _parse = &XmlReaderImpl::onProlog;
+                return;
+            }
+
+            if( ch == '[' )
+            {
+                _parse = &XmlReaderImpl::OnDtdInternal;
+                return;
+            }
+
+            if( Pt::isspace(ch) )
+            {
+                return;
+            }
+
+            throw SyntaxError("XML syntax error", line());
+        }
+
         void OnDtdExternalBeforeSystemId(int c)
         {
             Pt::Char ch = notEof(c);
@@ -556,16 +655,16 @@ class XmlReaderImpl
 
             if( ch == '"' || ch == '\'' )
             {
-                _docType.setSystemId(_token);
+                _dtd.setSystemId(_token);
                 _token.clear();
-                _parse = &XmlReaderImpl::OnDtdAfterExternal;
+                _parse = &XmlReaderImpl::OnDtdAfterExternalSystemId;
                 return;
             }
 
             _token += ch;
         }
 
-        void OnDtdAfterExternal(int c)
+        void OnDtdAfterExternalSystemId(int c)
         {
             Char ch = notEof(c);
 
@@ -576,6 +675,7 @@ class XmlReaderImpl
 
             if( ch == '>' )
             {
+                setDocumentTypeDefinition();
                 _parse = &XmlReaderImpl::onProlog;
                 return;
             }
@@ -2142,6 +2242,7 @@ class XmlReaderImpl
 
             if( ch == '>' )
             {
+                setDocumentTypeDefinition();
                 _parse = &XmlReaderImpl::onProlog;
                 return;
             }
@@ -2988,6 +3089,18 @@ class XmlReaderImpl
             }
         }
 
+        void setDocType()
+        {
+            if(_flags & XmlReader::ReportDtd)
+                  _current = &_docType;
+        }
+
+        void setDocumentTypeDefinition()
+        {
+            if(_flags & XmlReader::ReportDtd)
+                  _current = &_dtd;
+        }
+
     public:
         class InputStack
         {
@@ -3085,7 +3198,7 @@ class XmlReaderImpl
         , _beforeCharacterReference(0)
         , _beforeEntityReference(0)
         , _current(0)
-        , _standalone(true)
+        , _standalone(false)
         , _dtdContext()
         , _dtd(_dtdContext)
         , _docType(_dtd)
@@ -3108,7 +3221,7 @@ class XmlReaderImpl
         , _beforeCharacterReference(0)
         , _beforeEntityReference(0)
         , _current(0)
-        , _standalone(true)
+        , _standalone(false)
         , _dtdContext()
         , _dtd(_dtdContext)
         , _docType(_dtd)
@@ -3152,7 +3265,7 @@ class XmlReaderImpl
             _docType.clear();
             _version.clear();
             _encoding.clear();
-            _standalone = true;
+            _standalone = false;
             _depth = 0;
             _current = 0;
         }
@@ -3198,8 +3311,8 @@ class XmlReaderImpl
         bool isStandalone() const
         { return _standalone; }
 
-        const DocType& docType() const
-        { return _docType; }
+        const DocTypeDefinition& dtd() const
+        { return _dtd; }
 
         size_t depth() const
         { return _depth; }
@@ -3423,9 +3536,9 @@ bool XmlReader::isStandalone() const
 }
 
 
-const DocType& XmlReader::docType() const
+const DocTypeDefinition& XmlReader::dtd() const
 {
-    return _impl->docType();
+    return _impl->dtd();
 }
 
 

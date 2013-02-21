@@ -54,6 +54,24 @@ class PT_XML_API DocTypeDefinition : public Node
 
         void clear();
 
+        bool isExternal() const
+        { return ! _publicId.empty() || ! _systemId.empty(); }
+
+        bool isInternal() const
+        { return _publicId.empty() && _systemId.empty(); }
+
+        const Pt::String& publicId() const
+        { return _publicId; }
+
+        void setPublicId(const Pt::String& pubId)
+        { _publicId = pubId; }
+
+        const Pt::String& systemId() const
+        { return _systemId; }
+
+        void setSystemId(const Pt::String& sysId)
+        { _systemId = sysId; }
+
         ElementDeclaration& declareElement(const Pt::String& name);
 
         ElementDeclaration* element(const Pt::String& name);
@@ -77,6 +95,8 @@ class PT_XML_API DocTypeDefinition : public Node
     private:
         typedef std::vector< std::pair<Pt::String, ElementDeclaration*> > ElementDeclarationList;
         
+        Pt::String _publicId;
+        Pt::String _systemId;
         DtdContext* _ctx;
         ElementDeclarationList _elemDecls;
         EntityMapping _entities;

@@ -34,6 +34,7 @@
 #include "Pt/Xml/EndElement.h"
 #include "Pt/Xml/EndDocument.h"
 #include "Pt/Xml/DocType.h"
+#include "Pt/Xml/DocTypeDefinition.h"
 #include "Pt/Xml/ProcessingInstruction.h"
 #include "Pt/System/Clock.h"
 #include "Pt/String.h"
@@ -50,6 +51,8 @@ class XmlReaderTest : public Pt::Unit::TestSuite
             this->registerMethod("MissingXmlDeclaration", *this, &XmlReaderTest::MissingXmlDeclaration);
             this->registerMethod("EmptyXmlDeclaration", *this, &XmlReaderTest::EmptyXmlDeclaration);
             
+            this->registerMethod("DtdExternalSubsetSystem", *this, &XmlReaderTest::DtdExternalSubsetSystem);
+            this->registerMethod("DtdExternalSubsetPublic", *this, &XmlReaderTest::DtdExternalSubsetPublic);
             this->registerMethod("DtdValidateAttributes", *this, &XmlReaderTest::DtdValidateAttributes);
             this->registerMethod("DtdValidateElementContent", *this, &XmlReaderTest::DtdValidateElementContent);
             this->registerMethod("DtdAnyElementContent", *this, &XmlReaderTest::DtdAnyElementContent);
@@ -65,10 +68,12 @@ class XmlReaderTest : public Pt::Unit::TestSuite
             this->registerMethod("ElementWithNamespace", *this, &XmlReaderTest::ElementWithNamespace);
             this->registerMethod("AttributeWithNamespace", *this, &XmlReaderTest::AttributeWithNamespace);
             this->registerMethod("DefaultNamespace", *this, &XmlReaderTest::DefaultNamespace);
+            
             this->registerMethod("DefaultEntities", *this, &XmlReaderTest::DefaultEntities);
             this->registerMethod("CustomEntities", *this, &XmlReaderTest::CustomEntities);
             this->registerMethod("ExternalEntities", *this, &XmlReaderTest::ExternalEntities);
             this->registerMethod("ParameterEntities", *this, &XmlReaderTest::ParameterEntities);
+            
             this->registerMethod("InvalidAttribute1", *this, &XmlReaderTest::InvalidAttribute1);
             this->registerMethod("InvalidAttribute2", *this, &XmlReaderTest::InvalidAttribute2);
             this->registerMethod("InvalidAttribute3", *this, &XmlReaderTest::InvalidAttribute3);
@@ -93,9 +98,13 @@ class XmlReaderTest : public Pt::Unit::TestSuite
     protected:
         void MissingXmlDeclaration();
         void EmptyXmlDeclaration();
+
+        void DtdExternalSubsetPublic();
+        void DtdExternalSubsetSystem();
         void DtdValidateAttributes();
         void DtdValidateElementContent();
         void DtdAnyElementContent();
+        
         void EmptyDocument();
         void EmptyElementTag();
         void InvalidTag1();
@@ -112,10 +121,12 @@ class XmlReaderTest : public Pt::Unit::TestSuite
         void MultipleAttributesIteration();
         void IgnorableWhitespace();
         void CDATA();
+        
         void DefaultEntities();
         void CustomEntities();
         void ParameterEntities();
         void ExternalEntities();
+        
         void CommentInProlog();
         void CommentInElement();
         void CommentInEpilog();
@@ -176,6 +187,58 @@ void XmlReaderTest::EmptyXmlDeclaration()
     const Pt::Xml::Node& n = *it;
 
     PT_UNIT_ASSERT(n.type() == Pt::Xml::Node::EndDocument);
+}
+
+
+void XmlReaderTest::DtdExternalSubsetPublic()
+{
+    std::stringstream input;
+    input << "<!DOCTYPE test PUBLIC \"pubid\" \"external.dtd\" [\n";
+    input << "<!ELEMENT test EMPTY>\n";
+    input << "]>\n";
+    input << "<test></test>";
+
+    Pt::Xml::XmlReader reader(input, Pt::Xml::XmlReader::ReportDtd);
+    Pt::Xml::XmlReader::Iterator it = reader.current();
+    
+    Pt::Xml::DocType& docType = Pt::Xml::toDocType(*it);
+    PT_UNIT_ASSERT_EQUALS(docType.rootName(), L"test");
+
+    ++it;
+
+    Pt::Xml::DocTypeDefinition& dtd = Pt::Xml::toDocTypeDefinition(*it);
+    PT_UNIT_ASSERT_EQUALS(dtd.publicId(), L"pubid");
+    PT_UNIT_ASSERT_EQUALS(dtd.systemId(), L"external.dtd");
+
+    for(it = reader.current(); it != reader.end(); ++it)
+    {
+    }
+}
+
+
+void XmlReaderTest::DtdExternalSubsetSystem()
+{
+    std::stringstream input;
+    input << "<!DOCTYPE test SYSTEM \"external.dtd\" [\n";
+    input << "<!ELEMENT test EMPTY>\n";
+    input << "]>\n";
+    input << "<test></test>";
+
+    Pt::Xml::XmlReader reader(input, Pt::Xml::XmlReader::ReportDtd);
+    Pt::Xml::XmlReader::Iterator it = reader.current();
+    
+    Pt::Xml::DocType& docType = Pt::Xml::toDocType(*it);
+    PT_UNIT_ASSERT_EQUALS(docType.rootName(), L"test");
+
+    ++it;
+
+    Pt::Xml::DocTypeDefinition& dtd = Pt::Xml::toDocTypeDefinition(*it);
+    PT_UNIT_ASSERT_EQUALS(dtd.publicId(), L"");
+    PT_UNIT_ASSERT_EQUALS(dtd.systemId(), L"external.dtd");
+
+    for(it = reader.current(); it != reader.end(); ++it)
+    {
+    }
 }
 
 
@@ -291,8 +354,9 @@ void XmlReaderTest::EmptyDocument()
     PT_UNIT_ASSERT(n.type() == Pt::Xml::Node::EndDocument);
     PT_UNIT_ASSERT(reader.version() == L"1.0");
     PT_UNIT_ASSERT(reader.encoding() == L"UTF-8");
-    PT_UNIT_ASSERT(reader.isStandalone() == true);
+    PT_UNIT_ASSERT(reader.isStandalone() == false);
 }
+
 
 void XmlReaderTest::EmptyElementTag()
 {
