@@ -1094,14 +1094,14 @@ class XmlReaderImpl
                     _entity->setPublicId(_token);
                 
                 _token.clear();
-                _parse = &XmlReaderImpl::OnDtdAfterPublicId;
+                _parse = &XmlReaderImpl::OnDtdEntityAfterPublicId;
                 return;
             }
 
             _token += ch;
         }
 
-        void OnDtdAfterPublicId(int c)
+        void OnDtdEntityAfterPublicId(int c)
         {
             Pt::Char ch = notEof(c);
 
@@ -1125,7 +1125,7 @@ class XmlReaderImpl
 
             if( ch == '%' )
             {
-                enterParameterReference(&XmlReaderImpl::OnDtdAfterPublicId);
+                enterParameterReference(&XmlReaderImpl::OnDtdEntityAfterPublicId);
                 return;
             }
 
