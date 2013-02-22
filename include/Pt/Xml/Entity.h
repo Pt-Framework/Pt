@@ -45,10 +45,6 @@ class Entity
     public:
         Entity()
         {}
-     
-        Entity(Pt::Char val)
-        : _value(1, val)
-        {}
         
         Entity(const Pt::String& value)
         : _value(value)
@@ -65,9 +61,6 @@ class Entity
 
         void setValue(const Pt::String& val)
         {  _value = val; }
-
-        void addValue(const Pt::String& val)
-        {  _value += val; }
 
         const Pt::String& publicId() const
         { return _publicId; }

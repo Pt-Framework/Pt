@@ -30,6 +30,7 @@
 
 #include <Pt/Xml/Api.h>
 #include <Pt/NonCopyable.h>
+#include <Pt/String.h>
 #include <vector>
 #include <cstddef>
 
@@ -52,6 +53,10 @@ class PT_XML_API AttributeListDeclaration : private NonCopyable
         ~AttributeListDeclaration();
 
         void clear();
+
+        // TODO: lowerBound() / insert() may give better performance 
+        
+        AttributeDeclaration* findAttribute(const Pt::String& name);
 
         void addAttribute(AttributeDeclaration* decl);
 

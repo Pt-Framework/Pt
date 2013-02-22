@@ -942,7 +942,7 @@ class XmlReaderImpl
             if( Pt::isspace(ch) )
             {
                 assert(_entity == 0);
-                _entity = _dtd.addParamEntity(_token);
+                _entity = _dtd.declareParamEntity(_token);
                 _token.clear();
                 _parse = &XmlReaderImpl::OnDtdEntityAfterName;
                 return;
@@ -970,10 +970,7 @@ class XmlReaderImpl
             if( Pt::isspace(ch) )
             {
                 assert(_entity == 0);
-                _entity = _dtd.addEntity(_token);
-                
-                // TODO: do not set entity if already set
-                //       -> OnOverrideEntity state
+                _entity = _dtd.declareEntity(_token);
                 _token.clear();
                 _parse = &XmlReaderImpl::OnDtdEntityAfterName;
                 return;
@@ -1092,8 +1089,10 @@ class XmlReaderImpl
 
             if( ch == '"' || ch == '\'' )
             {
-                assert(_entity);
-                _entity->setPublicId(_token);
+                //assert(_entity);
+                if(_entity)
+                    _entity->setPublicId(_token);
+                
                 _token.clear();
                 _parse = &XmlReaderImpl::OnDtdAfterPublicId;
                 return;
@@ -1193,8 +1192,10 @@ class XmlReaderImpl
 
             if( ch == '"' || ch == '\'' )
             {
-                assert(_entity);
-                _entity->setSystemId(_token);
+                //assert(_entity);
+                if(_entity)
+                    _entity->setSystemId(_token);
+                
                 _token.clear();
                 _parse = &XmlReaderImpl::OnDtdAfterEntityValue;
                 return;
@@ -1213,8 +1214,10 @@ class XmlReaderImpl
 
             if( ch == '"' )
             {
-                assert(_entity);
-                _entity->addValue(_token);
+                //assert(_entity);
+                if(_entity)
+                    _entity->setValue(_token);
+                
                 _token.clear();
                 _parse = &XmlReaderImpl::OnDtdAfterEntityValue;
                 return;
@@ -1222,9 +1225,9 @@ class XmlReaderImpl
 
             if(ch == '&')
             {
-                assert(_entity);
-                _entity->addValue(_token);
-                _token.clear();
+                //assert(_entity);
+                //_entity->addValue(_token);
+                //_token.clear();
 
                 enterEntityValueCharacterReference(&XmlReaderImpl::OnDtdEntityValueQuot);
                 return;
@@ -1245,8 +1248,10 @@ class XmlReaderImpl
 
             if( ch == '\'' )
             {
-                assert(_entity);
-                _entity->addValue(_token);
+                //assert(_entity);
+                if(_entity)
+                    _entity->setValue(_token);
+                
                 _token.clear();
                 _parse = &XmlReaderImpl::OnDtdAfterEntityValue;
                 return;
@@ -1254,9 +1259,9 @@ class XmlReaderImpl
 
             if(ch == '&')
             {
-                assert(_entity);
-                _entity->addValue(_token);
-                _token.clear();
+                //assert(_entity);
+                //_entity->addValue(_token);
+                //_token.clear();
 
                 enterEntityValueCharacterReference(&XmlReaderImpl::OnDtdEntityValueApos);
                 return;
@@ -1370,7 +1375,7 @@ class XmlReaderImpl
 
             if( Pt::isspace(ch) )
             {
-                assert( ! _attlistDecl );
+                assert( _attlistDecl == 0 );
                 _attlistDecl = &_dtd.declareAttributeList(_token);
                 _token.clear();
                 _parse = &XmlReaderImpl::OnDtdBeforeAttrName;
@@ -1526,12 +1531,15 @@ class XmlReaderImpl
             if( ch != 'A' )
                 throw SyntaxError("XML syntax error", line());
 
-            assert( ! _attrDecl);
-            _attrDecl = new Pt::Xml::CDataAttributeDeclaration();
-            _attrDecl->setName(_token);
-
+            assert(_attrDecl == 0);
             assert(_attlistDecl);
-            _attlistDecl->addAttribute(_attrDecl);
+
+            if( 0 == _attlistDecl->findAttribute(_token) )
+            {
+                _attrDecl = new Pt::Xml::CDataAttributeDeclaration();
+                _attrDecl->setName(_token);
+                _attlistDecl->addAttribute(_attrDecl);
+            }
 
             _token.clear();
             _parse = &XmlReaderImpl::OnDtdAfterAttrType;
@@ -1646,12 +1654,15 @@ class XmlReaderImpl
 
             if( ch == 'S' )
             {
-                assert( ! _attrDecl);
-                _attrDecl = new Pt::Xml::NMTokensAttributeDeclaration();
-                _attrDecl->setName(_token);
-
+                assert(_attrDecl == 0);
                 assert(_attlistDecl);
-                _attlistDecl->addAttribute(_attrDecl);
+
+                if( 0 == _attlistDecl->findAttribute(_token) )
+                {
+                    _attrDecl = new Pt::Xml::NMTokensAttributeDeclaration();
+                    _attrDecl->setName(_token);
+                    _attlistDecl->addAttribute(_attrDecl);
+                }
 
                 _token.clear();
                 _parse = &XmlReaderImpl::OnDtdAfterAttrType;
@@ -1660,13 +1671,16 @@ class XmlReaderImpl
 
             if( Pt::isspace(ch) )
             {
-                assert( ! _attrDecl);
-                _attrDecl = new Pt::Xml::NMTokenAttributeDeclaration();
-                _attrDecl->setName(_token);
-
+                assert(_attrDecl == 0);
                 assert(_attlistDecl);
-                _attlistDecl->addAttribute(_attrDecl);
 
+                if( 0 == _attlistDecl->findAttribute(_token) )
+                {
+                    _attrDecl = new Pt::Xml::NMTokenAttributeDeclaration();
+                    _attrDecl->setName(_token);
+                    _attlistDecl->addAttribute(_attrDecl);
+                }
+                
                 _token.clear();
                 _parse = &XmlReaderImpl::OnDtdAfterAttrType;
                 return;
@@ -1718,20 +1732,26 @@ class XmlReaderImpl
 
             if(_token == L"REQUIRED")
             {
-                assert(_attrDecl);
-                _attrDecl->setMode(Pt::Xml::AttributeDeclaration::Required);
+                //assert(_attrDecl);
+                if(_attrDecl) // skip duplicates
+                    _attrDecl->setMode(Pt::Xml::AttributeDeclaration::Required);
+                
                 _parse = &XmlReaderImpl::OnDtdAfterAttrMode;
             }
             else if(_token == L"IMPLIED")
             {
-                assert(_attrDecl);
-                _attrDecl->setMode(Pt::Xml::AttributeDeclaration::Implied);
+                //assert(_attrDecl);
+                if(_attrDecl) // skip duplicates
+                    _attrDecl->setMode(Pt::Xml::AttributeDeclaration::Implied);
+                
                 _parse = &XmlReaderImpl::OnDtdAfterAttrMode;
             }
             else if(_token == L"FIXED")
             {
-                assert(_attrDecl);
-                _attrDecl->setMode(Pt::Xml::AttributeDeclaration::Fixed);
+                //assert(_attrDecl);
+                if(_attrDecl) // skip duplicates
+                    _attrDecl->setMode(Pt::Xml::AttributeDeclaration::Fixed);
+                
                 _parse = &XmlReaderImpl::OnDtdAfterDtdAttrFixed;
             }
             else
@@ -1748,7 +1768,7 @@ class XmlReaderImpl
 
             if(c == '>')
             {
-                assert(_attrDecl);
+                //assert(_attrDecl);
                 _attrDecl = 0;
 
                 assert(_attlistDecl);
@@ -1763,7 +1783,7 @@ class XmlReaderImpl
 
             if( isAlpha(ch) )
             {
-                assert(_attrDecl);
+                //assert(_attrDecl);
                 _attrDecl = 0;
                 
                 _token += ch;
@@ -1808,8 +1828,9 @@ class XmlReaderImpl
 
             if(ch == '"')
             {
-                assert(_attrDecl);
-                _attrDecl->setDefaultValue(_token);
+                //assert(_attrDecl);
+                if(_attrDecl) // skip duplicates
+                    _attrDecl->setDefaultValue(_token);
                 
                 _token.clear();
                 _parse = &XmlReaderImpl::OnDtdAfterAttrMode;
@@ -1856,7 +1877,8 @@ class XmlReaderImpl
 
             if( Pt::isspace(ch) )
             {
-                _elemDecl = &_dtd.declareElement(_token);
+                assert(_elemDecl == 0);
+                _elemDecl = _dtd.declareElement(_token);
                 _dtdContext.resetExpression();
                 _token.clear();
                 _parse = &XmlReaderImpl::OnDtdElementContentBegin;
@@ -1913,13 +1935,21 @@ class XmlReaderImpl
                 if(_token == L"EMPTY")
                 {
                     _token.clear();
-                    _elemDecl->setEmpty();
+                    
+                    if(_elemDecl) // skip duplicates
+                        _elemDecl->setEmpty();
+                    
+                    _elemDecl = 0;
                     _parse = &XmlReaderImpl::OnDtdAfterAnyOrEmpty;
                 }
                 else if(_token == L"ANY")
                 {
                     _token.clear();
-                    _elemDecl->setAny();
+                    
+                    if(_elemDecl) // skip duplicates
+                        _elemDecl->setAny();
+
+                    _elemDecl = 0;
                     _parse = &XmlReaderImpl::OnDtdAfterAnyOrEmpty;
                 }
 
@@ -1966,7 +1996,11 @@ class XmlReaderImpl
             if(ch == '>')
             {
                 ContentParticle& content = _dtdContext.finishExpression();
-                _elemDecl->setExpression( content, _dtdContext.expressionSize() );
+
+                if(_elemDecl) // skip duplicates
+                    _elemDecl->setExpression( content, _dtdContext.expressionSize() );
+                
+                _elemDecl = 0;
                 _dtdContext.resetExpression();
                 
                 _parse = &XmlReaderImpl::OnDtdInternal;
@@ -2095,7 +2129,11 @@ class XmlReaderImpl
             if( ch == '>' )
             {
                 ContentParticle& content = _dtdContext.finishExpression();
-                _elemDecl->setExpression( content, _dtdContext.expressionSize() );
+
+                if(_elemDecl) // skip duplicates
+                    _elemDecl->setExpression( content, _dtdContext.expressionSize() );
+
+                _elemDecl = 0;
                 _dtdContext.resetExpression();
                 
                 _parse = &XmlReaderImpl::OnDtdInternal;
@@ -2172,7 +2210,11 @@ class XmlReaderImpl
             if( ch == '>' )
             {
                 ContentParticle& content = _dtdContext.finishExpression();
-                _elemDecl->setExpression( content, _dtdContext.expressionSize() );
+
+                if(_elemDecl) // skip duplicates
+                    _elemDecl->setExpression( content, _dtdContext.expressionSize() );
+
+                _elemDecl = 0;
                 _dtdContext.resetExpression();
 
                 _parse = &XmlReaderImpl::OnDtdInternal;
@@ -3458,10 +3500,10 @@ class XmlReaderImpl
         Pt::String _encoding;
         bool _standalone;
 
-        DtdContext _dtdContext;
+        DocTypeContext _dtdContext;
         DocTypeDefinition _dtd;
         DocType _docType;
-        DtdValidator _dtdValidator;
+        DocTypeValidator _dtdValidator;
 
         ElementDeclaration* _elemDecl;
         AttributeDeclaration* _attrDecl;

@@ -341,15 +341,18 @@ EntityMapping::~EntityMapping()
 }
 
 
-Entity* EntityMapping::addEntity(const Pt::String& name)
+Entity* EntityMapping::declareEntity(const Pt::String& name)
 {
-    // TODO: use lower_bound to save one lookup
-    // Entities::iterator it = _entities.find(name);
-    // if( it != _entities.end() )
-    //     return 0;
+    Entities::iterator it = _entities.lower_bound(name);
 
-    Entity& e = _entities[name];
-    return &e;
+    // return 0 for duplicates
+    if(it != _entities.end() && it->first == name)
+        return 0;
+
+    // insert new Entity
+    Entities::value_type elem(name, Entity());
+    it = _entities.insert(it, elem);
+    return &it->second;
 }
 
 

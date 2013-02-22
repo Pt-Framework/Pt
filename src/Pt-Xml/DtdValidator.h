@@ -26,8 +26,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef Pt_Xml_DtdValidator_h
-#define Pt_Xml_DtdValidator_h
+#ifndef Pt_Xml_DocTypeValidator_h
+#define Pt_Xml_DocTypeValidator_h
 
 #include "ContentModel.h"
 #include "ElementDeclaration.h"
@@ -175,10 +175,10 @@ class ContentValidator : public ValidationContext
 };
 
 
-class DtdValidator : private NonCopyable
+class DocTypeValidator : private NonCopyable
 {
     public:
-        DtdValidator(DocTypeDefinition& dtd)
+        DocTypeValidator(DocTypeDefinition& dtd)
         : _dtd(&dtd)
         {}
 
@@ -202,7 +202,7 @@ class DtdValidator : private NonCopyable
                         valid = _decls.top().validateNode(se);
                     }
                     
-                    ElementDeclaration* decl = _dtd->element( se.name() );
+                    ElementDeclaration* decl = _dtd->findElement( se.name() );
                     if(decl)
                     {
                         ContentValidator validator( *decl );

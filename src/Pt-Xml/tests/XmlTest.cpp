@@ -218,26 +218,44 @@ void XmlReaderTest::DtdExternalSubsetPublic()
 
 void XmlReaderTest::DtdExternalSubsetSystem()
 {
-    std::stringstream input;
-    input << "<!DOCTYPE test SYSTEM \"external.dtd\" [\n";
-    input << "<!ELEMENT test EMPTY>\n";
-    input << "]>\n";
-    input << "<test></test>";
-
-    Pt::Xml::XmlReader reader(input, Pt::Xml::XmlReader::ReportDtd);
-    Pt::Xml::XmlReader::Iterator it = reader.current();
-    
-    Pt::Xml::DocType& docType = Pt::Xml::toDocType(*it);
-    PT_UNIT_ASSERT_EQUALS(docType.rootName(), L"test");
-
-    ++it;
-
-    Pt::Xml::DocTypeDefinition& dtd = Pt::Xml::toDocTypeDefinition(*it);
-    PT_UNIT_ASSERT_EQUALS(dtd.publicId(), L"");
-    PT_UNIT_ASSERT_EQUALS(dtd.systemId(), L"external.dtd");
-
-    for(it = reader.current(); it != reader.end(); ++it)
+    try
     {
+        std::stringstream input;
+        input << "<!DOCTYPE test SYSTEM \"external.dtd\" [\n";
+        input << "<!ELEMENT test (#PCDATA)>\n";
+        input << "<!ENTITY e1 \"e1Internal\">\n";
+        input << "]>\n";
+        input << "<test>&e1; &e2;</test>";
+
+        Pt::Xml::XmlReader reader(input, Pt::Xml::XmlReader::ReportDtd);
+        Pt::Xml::XmlReader::Iterator it = reader.current();
+    
+        Pt::Xml::DocType& docType = Pt::Xml::toDocType(*it);
+        PT_UNIT_ASSERT_EQUALS(docType.rootName(), L"test");
+
+        ++it;
+
+        Pt::Xml::DocTypeDefinition& dtd = Pt::Xml::toDocTypeDefinition(*it);
+        PT_UNIT_ASSERT_EQUALS(dtd.publicId(), L"");
+        PT_UNIT_ASSERT_EQUALS(dtd.systemId(), L"external.dtd");
+
+        //Pt::String externalDtd("<!ENTITY e1 \"e1External\">\n<!ENTITY e2 \"e2External\">\n");
+        //reader.addInput( externalDtd.c_str() );
+
+        Pt::String content;
+        for(it = reader.current(); it != reader.end(); ++it)
+        {
+            Pt::Xml::Characters* chars = toCharacters(&*it);
+            if(chars)
+                content = chars->content();
+        }
+
+        //PT_UNIT_ASSERT_EQUALS(content, L"e1Internal 2External");
+    }
+    catch(const Pt::Xml::SyntaxError& error)
+    {
+        std::cerr << error.what() << ": " << error.line() << std::endl;
+        throw;
     }
 }
 

@@ -46,7 +46,7 @@ namespace Pt {
 
 namespace Xml {
 
-DocTypeDefinition::DocTypeDefinition(DtdContext& ctx)
+DocTypeDefinition::DocTypeDefinition(DocTypeContext& ctx)
 : Node(Node::DocTypeDefinition)
 , _ctx(&ctx)
 {
@@ -75,24 +75,24 @@ void DocTypeDefinition::clear()
 }
 
 
-ElementDeclaration& DocTypeDefinition::declareElement(const Pt::String& name)
+ElementDeclaration* DocTypeDefinition::declareElement(const Pt::String& name)
 { 
     ElementDeclarationList::iterator lbound;
     lbound = std::lower_bound(_elemDecls.begin(), _elemDecls.end(), name, lessThanName);
     
     if( lbound != _elemDecls.end() && lbound->first == name)
     {
-        return *lbound->second;
+        return 0;
     }
 
     std::auto_ptr<ElementDeclaration> ep( new ElementDeclaration() );
     std::pair<Pt::String, ElementDeclaration*> entry( name, ep.get() );
     _elemDecls.insert(lbound, entry);
-    return *ep.release();
+    return ep.release();
 }
 
 
-ElementDeclaration* DocTypeDefinition::element(const Pt::String& name)
+ElementDeclaration* DocTypeDefinition::findElement(const Pt::String& name)
 {
     ElementDeclarationList::iterator lbound;
     lbound = std::lower_bound(_elemDecls.begin(), _elemDecls.end(), name, lessThanName);
@@ -138,9 +138,9 @@ AttributeListDeclaration* DocTypeDefinition::attributeList(const Pt::String& nam
 }
 
 
-Entity* DocTypeDefinition::addEntity(const Pt::String& name)
+Entity* DocTypeDefinition::declareEntity(const Pt::String& name)
 {
-    return _entities.addEntity(name);
+    return _entities.declareEntity(name);
 }
 
 
@@ -150,9 +150,9 @@ const Entity* DocTypeDefinition::resolveEntity(const Pt::String& name) const
 }
 
 
-Entity* DocTypeDefinition::addParamEntity(const Pt::String& name)
+Entity* DocTypeDefinition::declareParamEntity(const Pt::String& name)
 {
-    return _paramEntities.addEntity(name);
+    return _paramEntities.declareEntity(name);
 }
 
 

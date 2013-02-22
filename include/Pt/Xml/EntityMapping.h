@@ -53,7 +53,8 @@ class PT_XML_API EntityMapping
 
         void clear();
 
-        Entity* addEntity(const Pt::String& name);
+        //! @brief Returns a pointer to the declared Entity or 0 for duplicates
+        Entity* declareEntity(const Pt::String& name);
 
         /** @brief Replaces the entity with its string value.
         */

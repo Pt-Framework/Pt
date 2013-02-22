@@ -54,8 +54,21 @@ void AttributeListDeclaration::clear()
 }
 
 
+AttributeDeclaration* AttributeListDeclaration::findAttribute(const Pt::String& name)
+{
+    std::vector<AttributeDeclaration*>::iterator it;
+    for(it = _decls.begin(); it != _decls.end(); ++it)
+    {
+        if((*it)->name() == name)
+            return *it;
+    }
+
+    return 0;
+}
+
+
 void AttributeListDeclaration::addAttribute(AttributeDeclaration* decl)
-{ 
+{   
     _decls.push_back(decl); 
 }
 

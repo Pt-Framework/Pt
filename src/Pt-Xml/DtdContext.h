@@ -39,7 +39,7 @@ namespace Pt {
 
 namespace Xml {
 
-class DtdContext
+class DocTypeContext
 {
     private:
         class Fragment
@@ -88,9 +88,9 @@ class DtdContext
         };
 
     public:
-        DtdContext();
+        DocTypeContext();
 
-        ~DtdContext();
+        ~DocTypeContext();
 
         void clear();
 

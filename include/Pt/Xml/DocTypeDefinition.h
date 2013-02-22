@@ -40,7 +40,7 @@ namespace Pt {
 
 namespace Xml {
 
-class DtdContext;
+class DocTypeContext;
 class ElementDeclaration;
 class AttributeListDeclaration;
 
@@ -48,7 +48,7 @@ class PT_XML_API DocTypeDefinition : public Node
                                    , private NonCopyable
 {
     public:
-        DocTypeDefinition(DtdContext& ctx);
+        DocTypeDefinition(DocTypeContext& ctx);
 
         ~DocTypeDefinition();
 
@@ -72,19 +72,19 @@ class PT_XML_API DocTypeDefinition : public Node
         void setSystemId(const Pt::String& sysId)
         { _systemId = sysId; }
 
-        ElementDeclaration& declareElement(const Pt::String& name);
+        ElementDeclaration* declareElement(const Pt::String& name);
 
-        ElementDeclaration* element(const Pt::String& name);
+        ElementDeclaration* findElement(const Pt::String& name);
 
         AttributeListDeclaration& declareAttributeList(const Pt::String& name);
 
         AttributeListDeclaration* attributeList(const Pt::String& name);
 
-        Entity* addEntity(const Pt::String& name);
+        Entity* declareEntity(const Pt::String& name);
 
         const Entity* resolveEntity(const Pt::String& name) const;
 
-        Entity* addParamEntity(const Pt::String& name);
+        Entity* declareParamEntity(const Pt::String& name);
 
         const Entity* resolveParamEntity(const Pt::String& name) const;
 
@@ -97,7 +97,7 @@ class PT_XML_API DocTypeDefinition : public Node
         
         Pt::String _publicId;
         Pt::String _systemId;
-        DtdContext* _ctx;
+        DocTypeContext* _ctx;
         ElementDeclarationList _elemDecls;
         EntityMapping _entities;
         EntityMapping _paramEntities;

@@ -32,18 +32,18 @@ namespace Pt {
 
 namespace Xml {
 
-DtdContext::DtdContext()
+DocTypeContext::DocTypeContext()
 : _nodeCount(0)
 {}
 
 
-DtdContext::~DtdContext()
+DocTypeContext::~DocTypeContext()
 {
     clear();
 }
 
 
-void DtdContext::clear()
+void DocTypeContext::clear()
 {
     resetExpression();
 
@@ -56,7 +56,7 @@ void DtdContext::clear()
 }
 
 
-void DtdContext::resetExpression()
+void DocTypeContext::resetExpression()
 {
     //TODO: remove the particles fro pool and delete immediately
 
@@ -71,7 +71,7 @@ void DtdContext::resetExpression()
 }
 
 
-ContentParticle& DtdContext::finishExpression()
+ContentParticle& DocTypeContext::finishExpression()
 {
     reduceStack();
 
@@ -94,25 +94,25 @@ ContentParticle& DtdContext::finishExpression()
 }
     
         
-void DtdContext::pushOperator(Pt::Char ch)
+void DocTypeContext::pushOperator(Pt::Char ch)
 {
     _ops.push(ch);
 }
 
 
-void DtdContext::pushOpenBrace()
+void DocTypeContext::pushOpenBrace()
 {
     _ops.push('(');
 }
 
 
-void DtdContext::pushClosingBrace()
+void DocTypeContext::pushClosingBrace()
 {
     reduceStack();
 }
 
 
-void DtdContext::pushOperand(ContentParticle& op)
+void DocTypeContext::pushOperand(ContentParticle& op)
 {
     op.setId(_nodeCount++);
 
@@ -122,7 +122,7 @@ void DtdContext::pushOperand(ContentParticle& op)
 }
 
 
-void DtdContext::reduceStack()
+void DocTypeContext::reduceStack()
 {
     for(;;)
     {
@@ -243,7 +243,7 @@ void DtdContext::reduceStack()
 }
 
 
-LeafParticle& DtdContext::getLabel(const Pt::String& name)
+LeafParticle& DocTypeContext::getLabel(const Pt::String& name)
 {
     _pool.reserve(_pool.size() + 1);
     LeafParticle* label = new LeafParticle(name);
@@ -252,7 +252,7 @@ LeafParticle& DtdContext::getLabel(const Pt::String& name)
 }
 
 
-SplitParticle& DtdContext::getSplit(ContentParticle& to)
+SplitParticle& DocTypeContext::getSplit(ContentParticle& to)
 {
     _pool.reserve(_pool.size() + 1);
     SplitParticle* split = new SplitParticle(&to);
@@ -261,7 +261,7 @@ SplitParticle& DtdContext::getSplit(ContentParticle& to)
 }
 
 
-PcDataParticle& DtdContext::getPcData()
+PcDataParticle& DocTypeContext::getPcData()
 {
     _pool.reserve(_pool.size() + 1);
     PcDataParticle* node = new PcDataParticle();
@@ -270,7 +270,7 @@ PcDataParticle& DtdContext::getPcData()
 }
 
 
-MatchParticle& DtdContext::getMatch()
+MatchParticle& DocTypeContext::getMatch()
 { 
     return _match; 
 }
