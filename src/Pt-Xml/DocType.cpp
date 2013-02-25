@@ -26,35 +26,76 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "Pt/Xml/DocTypeDefinition.h"
 #include "Pt/Xml/DocType.h"
+#include "Pt/Xml/InputSource.h"
 
 namespace Pt {
 
 namespace Xml {
 
+DocType::DocType()
+: Node(Node::DocType)
+, _externalDtd(0)
+{
+}
+
+
 DocType::~DocType()
 { 
+    clear();
 }
+
 
 bool DocType::isDefined() const
 { 
     return ! _rootName.empty(); 
 }
 
+
 void DocType::clear()
 { 
-    _rootName.clear(); 
+    _rootName.clear();
+    _publicId.clear();
+    _systemId.clear();
+
+    if(_externalDtd && _externalDtd->refs() == 0)
+    {
+        delete _externalDtd;
+        _externalDtd = 0;
+    }
 }
+
 
 const Pt::String& DocType::rootName() const
 { 
     return _rootName; 
 }
 
+
 Pt::String& DocType::rootName()
 { 
     return _rootName; 
+}
+
+
+void DocType::setExternal(InputSource* is)
+{ 
+    if(_externalDtd)
+    {
+        if(_externalDtd->refs() == 0)
+        {
+            delete _externalDtd;
+            _externalDtd = 0;
+        }
+    }
+    
+    _externalDtd = is; 
+}
+
+
+InputSource* DocType::external()
+{
+    return _externalDtd;
 }
 
 } // namespace Xml

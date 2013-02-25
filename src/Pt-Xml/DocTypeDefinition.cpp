@@ -69,9 +69,6 @@ void DocTypeDefinition::clear()
     _elemDecls.clear();
     _entities.clear();
     _paramEntities.clear();
-
-    _publicId.clear();
-    _systemId.clear();
 }
 
 

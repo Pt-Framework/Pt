@@ -37,16 +37,13 @@ namespace Pt {
 
 namespace Xml {
 
-class DocTypeDefinition;
+class InputSource;
 
 class PT_XML_API DocType : public Node
                          , private Pt::NonCopyable
 {
     public:
-        explicit DocType(Pt::Xml::DocTypeDefinition& dtd)
-        : Node(Node::DocType)
-        , _dtd(&dtd)
-        {}
+        DocType();
 
         ~DocType();
 
@@ -58,13 +55,38 @@ class PT_XML_API DocType : public Node
 
         Pt::String& rootName();
 
+        bool isExternal() const
+        { return ! _publicId.empty() || ! _systemId.empty(); }
+
+        bool isInternal() const
+        { return _publicId.empty() && _systemId.empty(); }
+
+        const Pt::String& publicId() const
+        { return _publicId; }
+
+        void setPublicId(const Pt::String& pubId)
+        { _publicId = pubId; }
+
+        const Pt::String& systemId() const
+        { return _systemId; }
+
+        void setSystemId(const Pt::String& sysId)
+        { _systemId = sysId; }
+
+        void setExternal(InputSource* is);
+
+        //! @internal
+        InputSource* external();
+
         //! @internal
         inline static Node::Type nodeId()
         { return Node::DocType; }
 
     private:
         Pt::String _rootName;
-        Xml::DocTypeDefinition* _dtd;
+        Pt::String _publicId;
+        Pt::String _systemId;
+        InputSource* _externalDtd;
 };
 
 

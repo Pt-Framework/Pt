@@ -27,6 +27,7 @@
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/RegisterTest.h"
 #include "Pt/Xml/XmlReader.h"
+#include "Pt/Xml/InputSource.h"
 #include "Pt/Xml/StartElement.h"
 #include "Pt/Xml/Comment.h"
 #include "Pt/Xml/Entity.h"
@@ -203,12 +204,12 @@ void XmlReaderTest::DtdExternalSubsetPublic()
     
     Pt::Xml::DocType& docType = Pt::Xml::toDocType(*it);
     PT_UNIT_ASSERT_EQUALS(docType.rootName(), L"test");
+    PT_UNIT_ASSERT_EQUALS(docType.publicId(), L"pubid");
+    PT_UNIT_ASSERT_EQUALS(docType.systemId(), L"external.dtd");
 
     ++it;
 
     Pt::Xml::DocTypeDefinition& dtd = Pt::Xml::toDocTypeDefinition(*it);
-    PT_UNIT_ASSERT_EQUALS(dtd.publicId(), L"pubid");
-    PT_UNIT_ASSERT_EQUALS(dtd.systemId(), L"external.dtd");
 
     for(it = reader.current(); it != reader.end(); ++it)
     {
@@ -232,15 +233,17 @@ void XmlReaderTest::DtdExternalSubsetSystem()
     
         Pt::Xml::DocType& docType = Pt::Xml::toDocType(*it);
         PT_UNIT_ASSERT_EQUALS(docType.rootName(), L"test");
+        PT_UNIT_ASSERT_EQUALS(docType.publicId(), L"");
+        PT_UNIT_ASSERT_EQUALS(docType.systemId(), L"external.dtd");
 
+        Pt::String externalDtd("<!ENTITY e1 \"e1External\">\n<!ENTITY e2 \"e2External\">\n");
+        docType.setExternal( new Pt::Xml::StringInputSource(externalDtd) );
+        
         ++it;
 
         Pt::Xml::DocTypeDefinition& dtd = Pt::Xml::toDocTypeDefinition(*it);
-        PT_UNIT_ASSERT_EQUALS(dtd.publicId(), L"");
-        PT_UNIT_ASSERT_EQUALS(dtd.systemId(), L"external.dtd");
-
-        //Pt::String externalDtd("<!ENTITY e1 \"e1External\">\n<!ENTITY e2 \"e2External\">\n");
-        //reader.addInput( externalDtd.c_str() );
+        PT_UNIT_ASSERT( dtd.resolveEntity(L"e1") );
+        PT_UNIT_ASSERT( dtd.resolveEntity(L"e2") == 0 );
 
         Pt::String content;
         for(it = reader.current(); it != reader.end(); ++it)
@@ -250,7 +253,7 @@ void XmlReaderTest::DtdExternalSubsetSystem()
                 content = chars->content();
         }
 
-        //PT_UNIT_ASSERT_EQUALS(content, L"e1Internal 2External");
+        PT_UNIT_ASSERT_EQUALS(content, L"e1Internal e2External");
     }
     catch(const Pt::Xml::SyntaxError& error)
     {
