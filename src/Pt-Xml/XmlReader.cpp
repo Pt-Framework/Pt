@@ -32,7 +32,6 @@
 
 #include <Pt/Xml/XmlReader.h>
 #include <Pt/Xml/DocTypeDefinition.h>
-#include "Pt/Xml/InputSource.h"
 #include <Pt/Xml/NamespaceContext.h>
 #include <Pt/Xml/EndDocument.h>
 #include <Pt/Xml/DocType.h>
@@ -504,7 +503,6 @@ class XmlReaderImpl
 
             if( ch == '[' )
             {
-                setDocType();
                 _parse = &XmlReaderImpl::OnDtdInternal;
                 return;
             }
@@ -619,7 +617,6 @@ class XmlReaderImpl
 
             if( ch == '[' )
             {
-                setDocType();
                 _parse = &XmlReaderImpl::OnDtdInternal;
                 return;
             }
@@ -683,7 +680,6 @@ class XmlReaderImpl
 
             if( ch == '[' )
             {
-                setDocType();
                 _parse = &XmlReaderImpl::OnDtdInternal;
                 return;
             }
@@ -724,14 +720,19 @@ class XmlReaderImpl
         
         void OnDtdExternal(int c)
         {
-            if( ! _input.isExternalDtd() )
+            if( c == std::char_traits<Char>::eof() )
             {
-                _parse = &XmlReaderImpl::onProlog;
-                onProlog(c);
-                return;
+                if( ! _input.isExternalDtd() )
+                {
+                    setDocumentTypeDefinition();
+                    _parse = &XmlReaderImpl::onProlog;
+                    return;
+                }
+
+                throw SyntaxError("unexpected EOF in DTD", line());
             }
 
-            Char ch = notEof(c);
+            Char ch(c);
 
             if( Pt::isspace(ch) )
             {
@@ -2351,6 +2352,11 @@ class XmlReaderImpl
 
             if( ch == '>' )
             {
+                setDocType();
+
+                // TODO: if we use an XmlResolver, we do not have to wait for
+                // the next character until we know if we need to change state
+                // and onDtdBeforeExternal becomes obsolete
                 _parse = &XmlReaderImpl::onDtdBeforeExternal;
                 return;
             }
@@ -2366,10 +2372,8 @@ class XmlReaderImpl
 
         void onDtdBeforeExternal(int c)
         {
-            InputSource* extDtd = _docType.external();
-            if(extDtd)
+            if( _input.isExternalDtd() )
             {
-                _input.setExternalDtd(extDtd);
                 _parse = &XmlReaderImpl::OnDtdExternal;
                 OnDtdExternal(c);
                 return;
@@ -3225,114 +3229,6 @@ class XmlReaderImpl
         }
 
     public:
-        class InputStack
-        {
-            public:
-                typedef std::char_traits<Char>::int_type int_type;
-
-            public:
-                InputStack()
-                : _input(&_nullInput)
-                , _externalDtd(0)
-                , _currentInput(&_nullInput)
-                {}
-
-                ~InputStack()
-                {
-                    clear();
-                }
-
-                void bumpLine()
-                { _currentInput->setLine( _currentInput->line() + 1 ); }
-
-                std::size_t line() const
-                { return _currentInput->line(); }
-
-                bool empty() const
-                { return _currentInput == &_nullInput; }
-
-                void clear()
-                {
-                    while( ! _external.empty() )
-                    {
-                        InputSource* is = _external.top();   
-                        
-                        if( is->refs() == 0 && is != _externalDtd )
-                            delete _external.top();
-
-                        _external.pop();
-                    }
-
-                    _externalDtd = 0;
-                    _currentInput = &_nullInput;
-                    _input = &_nullInput;
-                }
-                
-                InputSource* currentInput()
-                { return _currentInput; }
-
-                void setInput(InputSource& is)
-                {
-                    _input = &is;
-
-                    if( _external.empty() )
-                    {
-                        _currentInput = &is;
-                    }
-                }
-
-                void addInput(InputSource* is)
-                {
-                    std::auto_ptr<InputSource> isPtr;
-                    if(is->refs() == 0)
-                        isPtr.reset(is);
-
-                    _external.push(is);
-                    isPtr.release();
-
-                    _currentInput = is;
-                }
-
-                void setExternalDtd(InputSource* is)
-                {
-                    addInput(is);
-                    _externalDtd = is;
-                }
-
-                InputSource* externalDtd()
-                { return _externalDtd; }
-
-                bool isExternalDtd() const
-                { return _externalDtd != 0; }
-
-                void removeInput()
-                {
-                    _currentInput = &_nullInput;
-
-                    if( ! _external.empty() )
-                    {
-                        InputSource* is = _external.top();                        
-
-                        if( is == _externalDtd )
-                            _externalDtd = 0;
-                        else if( is->refs() == 0 )
-                            delete _external.top();
-
-                        _external.pop();
-                        
-                        _currentInput = _external.empty() ? _input 
-                                                          : _external.top();
-                    }
-                }
-
-            private:
-                NullInputSource _nullInput;
-                InputSource* _input;
-                InputSource* _externalDtd;
-                std::stack<InputSource*> _external;
-                InputSource* _currentInput;
-        };
-
         XmlReaderImpl(std::istream& is, int flags)
         : _is(0)
         , _flags(flags)
@@ -3345,7 +3241,7 @@ class XmlReaderImpl
         , _standalone(false)
         , _dtdContext()
         , _dtd(_dtdContext)
-        , _docType()
+        , _docType(_input)
         , _dtdValidator(_dtd)
         , _elemDecl(0)
         , _attrDecl(0)
@@ -3368,7 +3264,7 @@ class XmlReaderImpl
         , _standalone(false)
         , _dtdContext()
         , _dtd(_dtdContext)
-        , _docType()
+        , _docType(_input)
         , _dtdValidator(_dtd)
         , _elemDecl(0)
         , _attrDecl(0)
@@ -3479,33 +3375,34 @@ class XmlReaderImpl
             bool atEnd = false;
             _current = 0;
             std::char_traits<Char>::int_type c = 0;
-            InputSource* in = _input.currentInput();
-            std::basic_streambuf<Char>* rdbuf = in->get();
+            std::basic_streambuf<Char>* rdbuf = 0;
 
             while( ! _current )
             {
-                if( ! rdbuf || in != _input.currentInput() || 
-                   ((c = rdbuf->sbumpc()) == std::char_traits<Char>::eof() ) )
+                rdbuf = _input.currentInput()->rdbuf();
+
+                if( ! rdbuf || rdbuf->sgetc() == std::char_traits<Char>::eof() )
                 {            
-                    in = _input.currentInput();
-                    rdbuf = in->get();
+                    rdbuf = _input.currentInput()->get();
 
                     if( ! rdbuf || rdbuf->sgetc() == std::char_traits<Char>::eof() )
                     {
+                        bool endDtd = _input.externalDtd() != 0;
                         _input.removeInput();
 
-                        if( ! _input.empty() )
-                            continue;
+                        if( endDtd || _input.empty() )
+                        {
+                            (this->*_parse)( std::char_traits<Char>::eof() );
+                            
+                            if( ! _current)
+                                throw SyntaxError("unexpected EOF", line());
+                        }
 
-                        if(atEnd)
-                            throw SyntaxError("unexpected end of input", line());
-
-                        atEnd = true;
+                        continue;
                     }
-
-                    c = rdbuf ? rdbuf->sbumpc() : std::char_traits<Char>::eof();
                 }
 
+                c = rdbuf->sbumpc();
                 (this->*_parse)(c);
 
                 if(c == '\n')
@@ -3539,13 +3436,18 @@ class XmlReaderImpl
 
                     if( ! rdbuf )
                     {
+                        bool endDtd = _input.externalDtd() != 0;
                         _input.removeInput();
 
-                        if( ! _input.empty() )
-                            continue;
+                        if( endDtd || _input.empty() )
+                        {
+                            (this->*_parse)( std::char_traits<Char>::eof() );
+                            
+                            if( ! _current)
+                                throw SyntaxError("unexpected EOF", line());
+                        }
 
-                        (this->*_parse)( std::char_traits<Char>::eof() );
-                        break;
+                        continue;
                     }
 
                     if( rdbuf->in_avail() <= 0 )
@@ -3602,6 +3504,7 @@ class XmlReaderImpl
         DocTypeContext _dtdContext;
         DocTypeDefinition _dtd;
         DocType _docType;
+        EndDocType _endDocType;
         DocTypeValidator _dtdValidator;
 
         ElementDeclaration* _elemDecl;

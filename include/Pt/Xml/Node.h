@@ -55,11 +55,11 @@ class Node
             //! Unknown Node type (may not currently be supported)
             Unknown = 0,
 
-            //! Start of a DocType declaration
-            StartDocType = 1,
+            //! Start of a DocType Declaration
+            DocType = 1,
 
-            //! End of a DocType Declaration
-            DocType = 2,
+            //! End of a DocType declaration
+            EndDocType = 2,
 
             //! Document Type Definition
             DocTypeDefinition = 3,

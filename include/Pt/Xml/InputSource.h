@@ -122,6 +122,8 @@ class NullInputSource : public InputSource
 };
 
 
+// TODO: check if this class works for beginRead/endRead and if BOM
+//       parsing is reusable.
 class PT_XML_API ByteInputSource : public InputSource
 {
     public:
@@ -168,6 +170,8 @@ class TextInputSource : public InputSource
         {   
             _tbuf->import();
 
+            // return buffer pointer if progress could be made
+            // even if no data is immediately available
             if(_tbuf->in_avail() > 0 || _ios->good() )
                 return _tbuf;
 
@@ -197,6 +201,8 @@ class StringInputSource : public InputSource
     protected:
         virtual std::basic_streambuf<Char>* onGetSome()
         {   
+            // NOTE: on many compilers, stringbuf::in_avail never returns -1 
+            //       even if it is empty
             return _sbuf.in_avail() > 0 ? &_sbuf : 0;
         }
         

@@ -28,14 +28,15 @@
 
 #include "Pt/Xml/DocType.h"
 #include "Pt/Xml/InputSource.h"
+#include "Pt/Xml/XmlReader.h"
 
 namespace Pt {
 
 namespace Xml {
 
-DocType::DocType()
+DocType::DocType(InputStack& input)
 : Node(Node::DocType)
-, _externalDtd(0)
+, _input(&input)
 {
 }
 
@@ -57,12 +58,6 @@ void DocType::clear()
     _rootName.clear();
     _publicId.clear();
     _systemId.clear();
-
-    if(_externalDtd && _externalDtd->refs() == 0)
-    {
-        delete _externalDtd;
-        _externalDtd = 0;
-    }
 }
 
 
@@ -80,22 +75,7 @@ Pt::String& DocType::rootName()
 
 void DocType::setExternal(InputSource* is)
 { 
-    if(_externalDtd)
-    {
-        if(_externalDtd->refs() == 0)
-        {
-            delete _externalDtd;
-            _externalDtd = 0;
-        }
-    }
-    
-    _externalDtd = is; 
-}
-
-
-InputSource* DocType::external()
-{
-    return _externalDtd;
+    _input->setExternalDtd(is);
 }
 
 } // namespace Xml

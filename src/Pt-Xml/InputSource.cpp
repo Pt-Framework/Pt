@@ -104,6 +104,12 @@ std::basic_streambuf<Char>* ByteInputSource::onGetSome()
     }
 
     _tbuf.import();
+
+    //TODO: review all streambufs. _tbuf.import() will not set the underlying
+    //      stream _is to EOF. All proxy streambufs should read from basic_ios
+    //      so that they can propagate EOF.
+
+    // NOTE: stringbuf::in_avail never returns -1 even if it is empty !!!
                 
     if(_tbuf.in_avail() >= 0)
         return &_tbuf;

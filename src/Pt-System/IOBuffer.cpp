@@ -353,10 +353,10 @@ std::streambuf::pos_type IOBufferImpl::seekpos(IOBuffer& sb, std::streambuf::pos
 
 std::streamsize IOBufferImpl::showmanyc(IOBuffer& sb)
 {
-    //if( ! _ioDevice || _ioDevice->eof() )
-    //{
-    //    return 1;
-    //}
+    if( ! _ioDevice || _ioDevice->eof() )
+    {
+        return -1;
+    }
 
     return 0;
 }

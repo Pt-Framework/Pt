@@ -38,12 +38,13 @@ namespace Pt {
 namespace Xml {
 
 class InputSource;
+class InputStack;
 
 class PT_XML_API DocType : public Node
                          , private Pt::NonCopyable
 {
     public:
-        DocType();
+        DocType(InputStack& input);
 
         ~DocType();
 
@@ -76,9 +77,6 @@ class PT_XML_API DocType : public Node
         void setExternal(InputSource* is);
 
         //! @internal
-        InputSource* external();
-
-        //! @internal
         inline static Node::Type nodeId()
         { return Node::DocType; }
 
@@ -86,7 +84,7 @@ class PT_XML_API DocType : public Node
         Pt::String _rootName;
         Pt::String _publicId;
         Pt::String _systemId;
-        InputSource* _externalDtd;
+        InputStack* _input;
 };
 
 
@@ -111,6 +109,47 @@ inline DocType& toDocType(Node& node)
 inline const DocType& toDocType(const Node& node)
 {
     return nodeCast<DocType>(node);
+}
+
+
+class EndDocType : public Node
+                 , private Pt::NonCopyable
+{
+    public:
+        EndDocType()
+        : Node(Node::EndDocType)
+        {}
+
+        ~EndDocType()
+        {}
+
+        //! @internal
+        inline static Node::Type nodeId()
+        { return Node::EndDocType; }
+};
+
+
+inline EndDocType* toEndDocType(Node* node)
+{
+    return nodeCast<EndDocType>(node);
+}
+
+
+inline const EndDocType* toEndDocType(const Node* node)
+{
+    return nodeCast<EndDocType>(node);
+}
+
+
+inline EndDocType& toEndDocType(Node& node)
+{
+    return nodeCast<EndDocType>(node);
+}
+
+
+inline const EndDocType& toEndDocType(const Node& node)
+{
+    return nodeCast<EndDocType>(node);
 }
 
 } // namespace Xml

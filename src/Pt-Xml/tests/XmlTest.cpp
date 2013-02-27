@@ -52,8 +52,10 @@ class XmlReaderTest : public Pt::Unit::TestSuite
             this->registerMethod("MissingXmlDeclaration", *this, &XmlReaderTest::MissingXmlDeclaration);
             this->registerMethod("EmptyXmlDeclaration", *this, &XmlReaderTest::EmptyXmlDeclaration);
             
-            this->registerMethod("DtdExternalSubsetSystem", *this, &XmlReaderTest::DtdExternalSubsetSystem);
-            this->registerMethod("DtdExternalSubsetPublic", *this, &XmlReaderTest::DtdExternalSubsetPublic);
+            this->registerMethod("DtdEmptyDocument", *this, &XmlReaderTest::DtdEmptyDocument);
+            this->registerMethod("DtdExternalSubsetPublicId", *this, &XmlReaderTest::DtdExternalSubsetPublicId);
+            this->registerMethod("DtdExternalSubsetSystemId", *this, &XmlReaderTest::DtdExternalSubsetSystemId);
+            this->registerMethod("DtdExternalAndInternalSubset", *this, &XmlReaderTest::DtdExternalAndInternalSubset);
             this->registerMethod("DtdValidateAttributes", *this, &XmlReaderTest::DtdValidateAttributes);
             this->registerMethod("DtdValidateElementContent", *this, &XmlReaderTest::DtdValidateElementContent);
             this->registerMethod("DtdAnyElementContent", *this, &XmlReaderTest::DtdAnyElementContent);
@@ -100,8 +102,10 @@ class XmlReaderTest : public Pt::Unit::TestSuite
         void MissingXmlDeclaration();
         void EmptyXmlDeclaration();
 
-        void DtdExternalSubsetPublic();
-        void DtdExternalSubsetSystem();
+        void DtdEmptyDocument();
+        void DtdExternalSubsetPublicId();
+        void DtdExternalSubsetSystemId();
+        void DtdExternalAndInternalSubset();
         void DtdValidateAttributes();
         void DtdValidateElementContent();
         void DtdAnyElementContent();
@@ -191,12 +195,39 @@ void XmlReaderTest::EmptyXmlDeclaration()
 }
 
 
-void XmlReaderTest::DtdExternalSubsetPublic()
+void XmlReaderTest::DtdEmptyDocument()
 {
     std::stringstream input;
-    input << "<!DOCTYPE test PUBLIC \"pubid\" \"external.dtd\" [\n";
+    input << "<!DOCTYPE test SYSTEM \"external.dtd\" [\n";
     input << "<!ELEMENT test EMPTY>\n";
-    input << "]>\n";
+    input << "]>";
+
+    Pt::Xml::XmlReader reader(input, Pt::Xml::XmlReader::ReportDtd);
+    Pt::Xml::XmlReader::Iterator it = reader.current();
+    
+    Pt::Xml::DocTypeDefinition& dtd = Pt::Xml::toDocTypeDefinition(*it);
+
+    ++it;
+    Pt::Xml::DocType& docType = Pt::Xml::toDocType(*it);
+    PT_UNIT_ASSERT_EQUALS(docType.rootName(), L"test");
+    PT_UNIT_ASSERT_EQUALS(docType.publicId(), L"");
+    PT_UNIT_ASSERT_EQUALS(docType.systemId(), L"external.dtd");
+
+    Pt::String externalDtd("<!ENTITY e1 \"e1External\">");
+    docType.setExternal( new Pt::Xml::StringInputSource(externalDtd) );
+
+    ++it;
+    Pt::Xml::DocTypeDefinition& dtdExt = Pt::Xml::toDocTypeDefinition(*it);
+
+    ++it;
+    Pt::Xml::EndDocument& endDoc = Pt::Xml::toEndDocument(*it);
+}
+
+
+void XmlReaderTest::DtdExternalSubsetPublicId()
+{
+    std::stringstream input;
+    input << "<!DOCTYPE test PUBLIC \"pubid\" \"external.dtd\">";
     input << "<test></test>";
 
     Pt::Xml::XmlReader reader(input, Pt::Xml::XmlReader::ReportDtd);
@@ -207,9 +238,11 @@ void XmlReaderTest::DtdExternalSubsetPublic()
     PT_UNIT_ASSERT_EQUALS(docType.publicId(), L"pubid");
     PT_UNIT_ASSERT_EQUALS(docType.systemId(), L"external.dtd");
 
-    ++it;
+    Pt::String externalDtd("<!ELEMENT test EMPTY>");
+    docType.setExternal( new Pt::Xml::StringInputSource(externalDtd) );
 
-    Pt::Xml::DocTypeDefinition& dtd = Pt::Xml::toDocTypeDefinition(*it);
+    ++it;
+    Pt::Xml::DocTypeDefinition& dtdExt = Pt::Xml::toDocTypeDefinition(*it);
 
     for(it = reader.current(); it != reader.end(); ++it)
     {
@@ -217,7 +250,33 @@ void XmlReaderTest::DtdExternalSubsetPublic()
 }
 
 
-void XmlReaderTest::DtdExternalSubsetSystem()
+void XmlReaderTest::DtdExternalSubsetSystemId()
+{
+    std::stringstream input;
+    input << "<!DOCTYPE test SYSTEM \"external.dtd\">\n";
+    input << "<test></test>";
+
+    Pt::Xml::XmlReader reader(input, Pt::Xml::XmlReader::ReportDtd);
+    Pt::Xml::XmlReader::Iterator it = reader.current();
+
+    Pt::Xml::DocType& docType = Pt::Xml::toDocType(*it);
+    PT_UNIT_ASSERT_EQUALS(docType.rootName(), L"test");
+    PT_UNIT_ASSERT_EQUALS(docType.publicId(), L"");
+    PT_UNIT_ASSERT_EQUALS(docType.systemId(), L"external.dtd");
+
+    Pt::String externalDtd("<!ELEMENT test EMPTY>");
+    docType.setExternal( new Pt::Xml::StringInputSource(externalDtd) );
+
+    ++it;
+    Pt::Xml::DocTypeDefinition& dtdExt = Pt::Xml::toDocTypeDefinition(*it);
+
+    for(it = reader.current(); it != reader.end(); ++it)
+    {
+    }
+}
+
+
+void XmlReaderTest::DtdExternalAndInternalSubset()
 {
     try
     {
@@ -230,7 +289,12 @@ void XmlReaderTest::DtdExternalSubsetSystem()
 
         Pt::Xml::XmlReader reader(input, Pt::Xml::XmlReader::ReportDtd);
         Pt::Xml::XmlReader::Iterator it = reader.current();
+
+        Pt::Xml::DocTypeDefinition& dtd = Pt::Xml::toDocTypeDefinition(*it);
+        PT_UNIT_ASSERT( dtd.resolveEntity(L"e1") );
+        PT_UNIT_ASSERT( dtd.resolveEntity(L"e2") == 0 );
     
+        ++it;
         Pt::Xml::DocType& docType = Pt::Xml::toDocType(*it);
         PT_UNIT_ASSERT_EQUALS(docType.rootName(), L"test");
         PT_UNIT_ASSERT_EQUALS(docType.publicId(), L"");
@@ -238,12 +302,9 @@ void XmlReaderTest::DtdExternalSubsetSystem()
 
         Pt::String externalDtd("<!ENTITY e1 \"e1External\">\n<!ENTITY e2 \"e2External\">\n");
         docType.setExternal( new Pt::Xml::StringInputSource(externalDtd) );
-        
-        ++it;
 
-        Pt::Xml::DocTypeDefinition& dtd = Pt::Xml::toDocTypeDefinition(*it);
-        PT_UNIT_ASSERT( dtd.resolveEntity(L"e1") );
-        PT_UNIT_ASSERT( dtd.resolveEntity(L"e2") == 0 );
+        ++it;
+        Pt::Xml::DocTypeDefinition& dtdExt = Pt::Xml::toDocTypeDefinition(*it);
 
         Pt::String content;
         for(it = reader.current(); it != reader.end(); ++it)

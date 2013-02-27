@@ -357,6 +357,12 @@ HttpBuffer::int_type HttpBuffer::underflow()
     return traits_type::eof();
 }
 
+
+std::streamsize HttpBuffer::showmanyc()
+{
+    return 0;
+}
+
 } // namespace Http
 
 } // namespace Pt

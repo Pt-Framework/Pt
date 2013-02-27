@@ -230,6 +230,11 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
 
         virtual std::streamsize showmanyc()
         {
+            // Alternatively, use eof flags member variable
+            //
+            //if( _ebufsize <= 0 && _target->eof() )
+            //    return -1;
+
             return 0;
         }
 
@@ -347,7 +352,10 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
                 n = _target->rdbuf()->sgetn( _ebuf + _ebufsize,  size );
                 _ebufsize += static_cast<int>(n);
                 if(n == 0)
+                {
                     atEof = true;
+                    // TODO: _target->seteof();
+                }
             }
 
             const extern_type* fromBegin = _ebuf;

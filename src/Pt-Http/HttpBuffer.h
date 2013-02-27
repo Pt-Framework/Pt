@@ -109,6 +109,8 @@ class HttpBuffer : public std::streambuf
     protected:
         virtual int_type underflow();
 
+        virtual std::streamsize showmanyc();
+
     private:
         ChunkParser _chunkParser;
         std::streambuf* _sbuf;
