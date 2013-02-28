@@ -3426,17 +3426,27 @@ class XmlReaderImpl
             std::basic_streambuf<Char>* rdbuf = 0;
             std::char_traits<Char>::int_type c = 0;
 
-            while( ! _current )
+            do
             {
                 rdbuf = _input.currentInput()->rdbuf();
                 
-                if( ! rdbuf || rdbuf->in_avail() <= 0 )
+                if(rdbuf && rdbuf->in_avail() > 0)
+                {
+                    c = rdbuf->sbumpc();
+                    (this->*_parse)(c);
+
+                    if(c == '\n')
+                    {
+                        _input.bumpLine();
+                    }
+                }
+                else
                 {                
                     rdbuf = _input.currentInput()->getSome();
 
-                    if( ! rdbuf )
+                    if( ! rdbuf)
                     {
-                        bool endDtd = _input.externalDtd() != 0;
+                        const bool endDtd = _input.externalDtd() != 0;
                         _input.removeInput();
 
                         if( endDtd || _input.empty() )
@@ -3446,22 +3456,12 @@ class XmlReaderImpl
                             if( ! _current)
                                 throw SyntaxError("unexpected EOF", line());
                         }
-
-                        continue;
                     }
-
-                    if( rdbuf->in_avail() <= 0 )
+                    else if( rdbuf->in_avail() <= 0 )
                         break;
                 }
-
-                c = rdbuf->sbumpc();
-                (this->*_parse)(c);
-
-                if(c == '\n')
-                {
-                    _input.bumpLine();
-                }
-            }
+            } 
+            while( ! _current);
 
             if( _current )
             {
