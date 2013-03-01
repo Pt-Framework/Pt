@@ -26,9 +26,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#include "InputStack.h"
 #include "Pt/Xml/DocType.h"
 #include "Pt/Xml/InputSource.h"
-#include "Pt/Xml/XmlReader.h"
 
 namespace Pt {
 

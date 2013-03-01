@@ -76,6 +76,14 @@ class PT_XML_API DocType : public Node
 
         void setExternal(InputSource* is);
 
+        // TODO: returns true if an internal DTD will be parsed
+        bool isInternalDtd() const
+        { return false; }
+        
+        // TODO: returns true is an external DTD will be parsed
+        bool isExternalDtd() const
+        { return false; }
+
         //! @internal
         inline static Node::Type nodeId()
         { return Node::DocType; }

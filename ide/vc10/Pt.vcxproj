@@ -228,6 +228,7 @@
     <ClInclude Include="..\..\src\Pt-Xml\DtdContext.h" />
     <ClInclude Include="..\..\src\Pt-Xml\DtdValidator.h" />
     <ClInclude Include="..\..\src\Pt-Xml\ElementDeclaration.h" />
+    <ClInclude Include="..\..\src\Pt-Xml\InputStack.h" />
     <ClInclude Include="..\..\src\Pt\regexp.h" />
     <ClInclude Include="..\..\src\Pt\SerializationData.h" />
     <ClInclude Include="..\..\src\Pt\SettingsReader.h" />

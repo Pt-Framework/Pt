@@ -25,14 +25,14 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef Pt_Xml_XmlReader_h
 #define Pt_Xml_XmlReader_h
 
 #include <Pt/Xml/Api.h>
 #include <Pt/Xml/Node.h>
-#include <Pt/Xml/InputSource.h>
 #include <Pt/String.h>
-#include <stack>
+#include <Pt/NonCopyable.h>
 #include <iosfwd>
 
 namespace Pt {
@@ -43,110 +43,29 @@ class Node;
 class DocTypeDefinition;
 class InputSource;
 
-class InputStack
+class XmlResolver
 {
     public:
-        typedef std::char_traits<Char>::int_type int_type;
-
-    public:
-        InputStack()
-        : _input(&_nullInput)
-        , _externalDtd(0)
-        , _currentInput(&_nullInput)
+        virtual ~XmlResolver()
         {}
 
-        ~InputStack()
+        InputSource* resolve(const Pt::String& publicId, const Pt::String& systemId)
         {
-            clear();
+            return onResolve(publicId, systemId);
         }
 
-        void bumpLine()
-        { _currentInput->setLine( _currentInput->line() + 1 ); }
-
-        std::size_t line() const
-        { return _currentInput->line(); }
-
-        bool empty() const
-        { return _currentInput == &_nullInput; }
-
-        bool isPrimary() const
-        { return _currentInput == _input; }
-
-        void clear()
+        void release(InputSource* is)
         {
-            while( ! _external.empty() )
-            {
-                removeInput();
-            }
-
-            _currentInput = &_nullInput;
-            _input = &_nullInput;
-        }
-                
-        InputSource* currentInput()
-        { return _currentInput; }
-
-        void setInput(InputSource& is)
-        {
-            _input = &is;
-
-            if( _external.empty() )
-            {
-                _currentInput = &is;
-            }
+            onRelease(is);
         }
 
-        void addInput(InputSource* is)
-        {
-            std::auto_ptr<InputSource> isPtr;
-            if(is->refs() == 0)
-                isPtr.reset(is);
+    protected:
+        XmlResolver()
+        {}
 
-            _external.push(is);
-            isPtr.release();
+        virtual InputSource* onResolve(const Pt::String& publicId, const Pt::String& systemId) = 0;
 
-            _currentInput = is;
-        }
-
-        void setExternalDtd(InputSource* is)
-        {
-            addInput(is);
-            _externalDtd = is;
-        }
-
-        InputSource* externalDtd()
-        { return _externalDtd; }
-
-        bool isExternalDtd() const
-        { return _externalDtd != 0; }
-
-        void removeInput()
-        {
-            _currentInput = &_nullInput;
-
-            if( ! _external.empty() )
-            {
-                InputSource* is = _external.top();                        
-
-                if( is == _externalDtd ) 
-                    _externalDtd = 0;
-
-                if( is->refs() == 0 )
-                    delete _external.top();
-
-                _external.pop();
-                        
-                _currentInput = _external.empty() ? _input 
-                                                  : _external.top();
-            }
-        }
-
-    private:
-        NullInputSource _nullInput;
-        InputSource* _input;
-        InputSource* _externalDtd;
-        std::stack<InputSource*> _external;
-        InputSource* _currentInput;
+        virtual InputSource* onRelease(InputSource* is) = 0;
 };
 
 /** @brief Reads XML as a Stream of XML Nodes.
@@ -184,7 +103,7 @@ class InputStack
 
      @see Node
 */
-class PT_XML_API XmlReader
+class PT_XML_API XmlReader : private NonCopyable
 {
     public:
         class Iterator;
