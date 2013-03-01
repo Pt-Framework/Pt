@@ -3422,6 +3422,8 @@ class XmlReaderImpl
 
         bool advance()
         {
+            // NOTE: next character could be local const variable
+            
             _current = 0;
             std::basic_streambuf<Char>* rdbuf = 0;
             std::char_traits<Char>::int_type c = 0;
@@ -3433,32 +3435,34 @@ class XmlReaderImpl
                 if(rdbuf && rdbuf->in_avail() > 0)
                 {
                     c = rdbuf->sbumpc();
-                    (this->*_parse)(c);
-
-                    if(c == '\n')
-                    {
-                        _input.bumpLine();
-                    }
                 }
                 else
                 {                
+                    c = 0;
                     rdbuf = _input.currentInput()->getSome();
 
                     if( ! rdbuf)
                     {
-                        const bool endDtd = _input.externalDtd() != 0;
-                        _input.removeInput();
+                        const bool onEof = _input.currentInput() == _input.externalDtd() || _input.isPrimary() || _input.empty();
+                        c = onEof ? std::char_traits<Char>::eof() : 0;
 
-                        if( endDtd || _input.empty() )
-                        {
-                            (this->*_parse)( std::char_traits<Char>::eof() );
-                            
-                            if( ! _current)
-                                throw SyntaxError("unexpected EOF", line());
-                        }
+                        // TODO:
+                        // if(onEof) (this->*_parse)(c);
+                        // if( ! _current) throw SyntaxError("unexpected EOF", line());
+                        _input.removeInput();
                     }
-                    else if( rdbuf->in_avail() <= 0 )
+                    else if(rdbuf->in_avail() <= 0)
                         break;
+
+                    if(c == 0) // :TODO
+                        continue;
+                }
+
+                (this->*_parse)(c);
+
+                if(c == '\n')
+                {
+                    _input.bumpLine();
                 }
             } 
             while( ! _current);

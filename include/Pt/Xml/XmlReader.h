@@ -69,6 +69,9 @@ class InputStack
         bool empty() const
         { return _currentInput == &_nullInput; }
 
+        bool isPrimary() const
+        { return _currentInput == _input; }
+
         void clear()
         {
             while( ! _external.empty() )
