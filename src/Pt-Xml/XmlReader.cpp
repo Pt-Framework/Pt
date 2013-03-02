@@ -3450,8 +3450,6 @@ class XmlReaderImpl
                         if(onEof) 
                             (this->*_parse)( std::char_traits<Char>::eof() );
                         
-                        //if( ! _current) throw SyntaxError("unexpected EOF", line());
-                        
                         _input.removeInput();
                     }
                     else if(rdbuf->in_avail() <= 0)
