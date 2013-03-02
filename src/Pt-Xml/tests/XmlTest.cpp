@@ -216,8 +216,8 @@ void XmlReaderTest::DtdEmptyDocument()
     Pt::String externalDtd("<!ENTITY e1 \"e1External\">");
     docType.setExternal( new Pt::Xml::StringInputSource(externalDtd) );
 
-    ++it;
-    Pt::Xml::DocTypeDefinition& dtdExt = Pt::Xml::toDocTypeDefinition(*it);
+    //++it;
+    //Pt::Xml::DocTypeDefinition& dtdExt = Pt::Xml::toDocTypeDefinition(*it);
 
     ++it;
     Pt::Xml::EndDocument& endDoc = Pt::Xml::toEndDocument(*it);
@@ -241,8 +241,8 @@ void XmlReaderTest::DtdExternalSubsetPublicId()
     Pt::String externalDtd("<!ELEMENT test EMPTY>");
     docType.setExternal( new Pt::Xml::StringInputSource(externalDtd) );
 
-    ++it;
-    Pt::Xml::DocTypeDefinition& dtdExt = Pt::Xml::toDocTypeDefinition(*it);
+    //++it;
+    //Pt::Xml::DocTypeDefinition& dtdExt = Pt::Xml::toDocTypeDefinition(*it);
 
     for(it = reader.current(); it != reader.end(); ++it)
     {
@@ -267,8 +267,8 @@ void XmlReaderTest::DtdExternalSubsetSystemId()
     Pt::String externalDtd("<!ELEMENT test EMPTY>");
     docType.setExternal( new Pt::Xml::StringInputSource(externalDtd) );
 
-    ++it;
-    Pt::Xml::DocTypeDefinition& dtdExt = Pt::Xml::toDocTypeDefinition(*it);
+    //++it;
+    //Pt::Xml::DocTypeDefinition& dtdExt = Pt::Xml::toDocTypeDefinition(*it);
 
     for(it = reader.current(); it != reader.end(); ++it)
     {
@@ -303,8 +303,8 @@ void XmlReaderTest::DtdExternalAndInternalSubset()
         Pt::String externalDtd("<!ENTITY e1 \"e1External\">\n<!ENTITY e2 \"e2External\">\n");
         docType.setExternal( new Pt::Xml::StringInputSource(externalDtd) );
 
-        ++it;
-        Pt::Xml::DocTypeDefinition& dtdExt = Pt::Xml::toDocTypeDefinition(*it);
+        //++it;
+        //Pt::Xml::DocTypeDefinition& dtdExt = Pt::Xml::toDocTypeDefinition(*it);
 
         Pt::String content;
         for(it = reader.current(); it != reader.end(); ++it)

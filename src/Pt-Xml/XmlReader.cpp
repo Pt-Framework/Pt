@@ -721,19 +721,14 @@ class XmlReaderImpl
         
         void OnDtdExternal(int c)
         {
-            if( c == std::char_traits<Char>::eof() )
+            if( ! _input.isExternalDtd() )
             {
-                if( ! _input.isExternalDtd() )
-                {
-                    setDocumentTypeDefinition();
-                    _parse = &XmlReaderImpl::onProlog;
-                    return;
-                }
-
-                throw SyntaxError("unexpected EOF in DTD", line());
+                _parse = &XmlReaderImpl::onProlog;
+                onProlog(c);
+                return;
             }
 
-            Char ch(c);
+            Char ch = notEof(c);
 
             if( Pt::isspace(ch) )
             {
@@ -2373,6 +2368,7 @@ class XmlReaderImpl
 
         void onDtdBeforeExternal(int c)
         {
+            // TODO: revert logic, set a isInternalDtd flag when [ is parsed
             if( _input.isExternalDtd() )
             {
                 _parse = &XmlReaderImpl::OnDtdExternal;
@@ -3388,10 +3384,10 @@ class XmlReaderImpl
 
                     if( ! rdbuf || rdbuf->sgetc() == std::char_traits<Char>::eof() )
                     {
-                        bool endDtd = _input.externalDtd() != 0;
+                        //bool endDtd = _input.externalDtd() != 0;
                         _input.removeInput();
 
-                        if( endDtd || _input.empty() )
+                        if( /*endDtd ||*/ _input.empty() )
                         {
                             (this->*_parse)( std::char_traits<Char>::eof() );
                             
@@ -3446,7 +3442,7 @@ class XmlReaderImpl
 
                     if( ! rdbuf)
                     {
-                        const bool onEof = _input.currentInput() == _input.externalDtd() || _input.isPrimary() || _input.empty();
+                        const bool onEof = /*_input.currentInput() == _input.externalDtd() ||*/ _input.isPrimary() || _input.empty();
                         if(onEof) 
                             (this->*_parse)( std::char_traits<Char>::eof() );
                         
@@ -3499,7 +3495,7 @@ class XmlReaderImpl
         DocTypeContext _dtdContext;
         DocTypeDefinition _dtd;
         DocType _docType;
-        EndDocType _endDocType;
+        //EndDocType _endDocType;
         DocTypeValidator _dtdValidator;
 
         ElementDeclaration* _elemDecl;
