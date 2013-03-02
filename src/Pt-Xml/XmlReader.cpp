@@ -3442,11 +3442,14 @@ class XmlReaderImpl
 
                     if( ! rdbuf)
                     {
-                        const bool onEof = /*_input.currentInput() == _input.externalDtd() ||*/ _input.isPrimary() || _input.empty();
-                        if(onEof) 
-                            (this->*_parse)( std::char_traits<Char>::eof() );
+                        //const bool onEof = _input.currentInput() == _input.externalDtd() || _input.isPrimary() || _input.empty();
+                        //if(onEof) 
+                        //    (this->*_parse)( std::char_traits<Char>::eof() );
                         
                         _input.removeInput();
+                        
+                        if( _input.empty() )
+                            (this->*_parse)( std::char_traits<Char>::eof() );
                     }
                     else if(rdbuf->in_avail() <= 0)
                         break;
