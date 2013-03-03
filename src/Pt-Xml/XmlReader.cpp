@@ -468,7 +468,8 @@ class XmlReaderImpl
             if(ch == '>')
             {
                 setDocType();
-                _parse = &XmlReaderImpl::onDtdBeforeExternal;
+                
+                _parse = &XmlReaderImpl::onProlog;
                 return;
             }
 
@@ -505,6 +506,9 @@ class XmlReaderImpl
             if( ch == '[' )
             {
                 ++_depth;
+                _docType.setInternal(true);
+
+                setDocType();
                 _parse = &XmlReaderImpl::OnDtdInternal;
                 return;
             }
@@ -512,7 +516,7 @@ class XmlReaderImpl
             if(ch == '>')
             {
                 setDocType();
-                _parse = &XmlReaderImpl::onDtdBeforeExternal;
+                _parse = &XmlReaderImpl::onProlog;
                 return;
             }
 
@@ -613,13 +617,23 @@ class XmlReaderImpl
             if( ch == '>' )
             {
                 setDocType();
-                _parse = &XmlReaderImpl::onDtdBeforeExternal;
+
+                bool externalDtd = resolveExternalDtd();
+
+                // TODO: revert logic, set a isInternalDtd flag when [ is parsed
+                if( externalDtd )
+                    _parse = &XmlReaderImpl::OnDtdExternal;
+                else
+                    _parse = &XmlReaderImpl::onProlog;
+                
                 return;
             }
 
             if( ch == '[' )
             {
                 ++_depth;
+                _docType.setInternal(true);
+                setDocType();
                 _parse = &XmlReaderImpl::OnDtdInternal;
                 return;
             }
@@ -677,13 +691,23 @@ class XmlReaderImpl
             if( ch == '>' )
             {
                 setDocType();
-                _parse = &XmlReaderImpl::onDtdBeforeExternal;
+
+                bool externalDtd = resolveExternalDtd();
+
+                // TODO: revert logic, set a isInternalDtd flag when [ is parsed
+                if( externalDtd )
+                    _parse = &XmlReaderImpl::OnDtdExternal;
+                else
+                    _parse = &XmlReaderImpl::onProlog;
+
                 return;
             }
 
             if( ch == '[' )
             {
                 ++_depth;
+                _docType.setInternal(true);
+                setDocType();
                 _parse = &XmlReaderImpl::OnDtdInternal;
                 return;
             }
@@ -2352,12 +2376,14 @@ class XmlReaderImpl
 
             if( ch == '>' )
             {
-                setDocType();
+                bool externalDtd = resolveExternalDtd();
 
-                // TODO: if we use an XmlResolver, we do not have to wait for
-                // the next character until we know if we need to change state
-                // and onDtdBeforeExternal becomes obsolete
-                _parse = &XmlReaderImpl::onDtdBeforeExternal;
+                // TODO: revert logic, set a isInternalDtd flag when [ is parsed
+                if( externalDtd )
+                    _parse = &XmlReaderImpl::OnDtdExternal;
+                else
+                    _parse = &XmlReaderImpl::onProlog;
+                
                 return;
             }
 
@@ -2368,20 +2394,6 @@ class XmlReaderImpl
             }
 
             throw SyntaxError("XML syntax error", line());
-        }
-
-        void onDtdBeforeExternal(int c)
-        {
-            // TODO: revert logic, set a isInternalDtd flag when [ is parsed
-            if( _input.isExternalDtd() )
-            {
-                _parse = &XmlReaderImpl::OnDtdExternal;
-                OnDtdExternal(c);
-                return;
-            }
-            
-            _parse = &XmlReaderImpl::onProlog;
-            onProlog(c);
         }
 
         void afterTag(int c)
@@ -2528,7 +2540,7 @@ class XmlReaderImpl
             if(ch == '>')
             {
                 _chars.clear();
-                _current = &(_startElem);
+                _current = &_startElem;
                 _depth++;
 
                 setNamespace(_startElem);
@@ -3101,6 +3113,22 @@ class XmlReaderImpl
             _dtdContext.pushOperand(leaf);
         }
 
+        bool resolveExternalDtd()
+        {
+            XmlResolver* resolver = _input.resolver();
+            if( resolver && _docType.isExternal() )
+            {
+                InputSource* is = resolver->resolve( _docType.publicId(), _docType.systemId() );
+                if(is)
+                {
+                    _input.setExternalDtd(is);
+                    return true;
+                }
+            }
+
+            return false;
+        }
+        
         bool resolveEntity(String& token)
         {
             // TODO: handle this in concrete parser states
@@ -3242,7 +3270,7 @@ class XmlReaderImpl
         , _standalone(false)
         , _dtdContext()
         , _dtd(_dtdContext)
-        , _docType(_input)
+        , _docType()
         , _dtdValidator(_dtd)
         , _elemDecl(0)
         , _attrDecl(0)
@@ -3265,7 +3293,7 @@ class XmlReaderImpl
         , _standalone(false)
         , _dtdContext()
         , _dtd(_dtdContext)
-        , _docType(_input)
+        , _docType()
         , _dtdValidator(_dtd)
         , _elemDecl(0)
         , _attrDecl(0)
@@ -3309,6 +3337,11 @@ class XmlReaderImpl
             _standalone = false;
             _depth = 0;
             _current = 0;
+        }
+
+        void setResolver(XmlResolver* r)
+        {
+            _input.setResolver(r);
         }
 
         void attach(std::istream& is, int flags)
@@ -3502,7 +3535,6 @@ class XmlReaderImpl
         DocTypeContext _dtdContext;
         DocTypeDefinition _dtd;
         DocType _docType;
-        //EndDocType _endDocType;
         DocTypeValidator _dtdValidator;
 
         ElementDeclaration* _elemDecl;
@@ -3536,6 +3568,12 @@ XmlReader::XmlReader(InputSource& is, int flags)
 XmlReader::~XmlReader()
 {
     delete _impl;
+}
+
+
+void XmlReader::setResolver(XmlResolver* resolver)
+{
+    _impl->setResolver(resolver);
 }
 
 

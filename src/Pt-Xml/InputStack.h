@@ -43,6 +43,7 @@ class InputStack
     public:
         InputStack()
         : _input(&_nullInput)
+        , _resolver(0)
         , _externalDtd(0)
         , _currentInput(&_nullInput)
         {}
@@ -51,6 +52,22 @@ class InputStack
         {
             clear();
         }
+
+        void setResolver(XmlResolver* resolver)
+        { 
+            if(_resolver)
+            {
+                while( ! _external.empty() )
+                {
+                    removeInput();
+                }
+            }
+
+            _resolver = resolver; 
+        }
+
+        XmlResolver* resolver()
+        { return _resolver; }
 
         void bumpLine()
         { _currentInput->setLine( _currentInput->line() + 1 ); }
@@ -120,10 +137,14 @@ class InputStack
             {
                 InputSource* is = _external.top();                        
 
-                if( is == _externalDtd ) 
+                if( is == _externalDtd )
+                {
                     _externalDtd = 0;
-
-                if( is->refs() == 0 )
+                    
+                    if(_resolver)
+                        _resolver->release(is);
+                }
+                else if( is->refs() == 0 )
                     delete _external.top();
 
                 _external.pop();
@@ -136,6 +157,7 @@ class InputStack
     private:
         NullInputSource _nullInput;
         InputSource* _input;
+        XmlResolver* _resolver;
         InputSource* _externalDtd;
         std::stack<InputSource*> _external;
         InputSource* _currentInput;

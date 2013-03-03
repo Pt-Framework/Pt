@@ -34,9 +34,9 @@ namespace Pt {
 
 namespace Xml {
 
-DocType::DocType(InputStack& input)
+DocType::DocType()
 : Node(Node::DocType)
-, _input(&input)
+, _internal(0)
 {
 }
 
@@ -58,6 +58,7 @@ void DocType::clear()
     _rootName.clear();
     _publicId.clear();
     _systemId.clear();
+    _internal = 0;
 }
 
 
@@ -73,9 +74,20 @@ Pt::String& DocType::rootName()
 }
 
 
-void DocType::setExternal(InputSource* is)
+bool DocType::isExternal() const
 { 
-    _input->setExternalDtd(is);
+    return ! _publicId.empty() || ! _systemId.empty(); 
+}
+
+
+bool DocType::isInternal() const
+{ 
+    return _internal == 1; 
+}
+
+void DocType::setInternal(bool hasInternal)
+{
+    _internal = hasInternal ? 1 : 0;
 }
 
 } // namespace Xml

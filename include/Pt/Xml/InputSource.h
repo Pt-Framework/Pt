@@ -215,6 +215,33 @@ class StringInputSource : public InputSource
         StringBuffer _sbuf;
 };
 
+// TODO: add reference to XmlReader, so it gets notified of XmlResolver 
+//       destruction
+class XmlResolver
+{
+    public:
+        virtual ~XmlResolver()
+        {}
+
+        InputSource* resolve(const Pt::String& publicId, const Pt::String& systemId)
+        {
+            return onResolve(publicId, systemId);
+        }
+
+        void release(InputSource* is)
+        {
+            onRelease(is);
+        }
+
+    protected:
+        XmlResolver()
+        {}
+
+        virtual InputSource* onResolve(const Pt::String& publicId, const Pt::String& systemId) = 0;
+
+        virtual void onRelease(InputSource* is) = 0;
+};
+
 } // namespace Xml
 
 } // namespace Pt

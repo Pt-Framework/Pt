@@ -42,31 +42,7 @@ namespace Xml {
 class Node;
 class DocTypeDefinition;
 class InputSource;
-
-class XmlResolver
-{
-    public:
-        virtual ~XmlResolver()
-        {}
-
-        InputSource* resolve(const Pt::String& publicId, const Pt::String& systemId)
-        {
-            return onResolve(publicId, systemId);
-        }
-
-        void release(InputSource* is)
-        {
-            onRelease(is);
-        }
-
-    protected:
-        XmlResolver()
-        {}
-
-        virtual InputSource* onResolve(const Pt::String& publicId, const Pt::String& systemId) = 0;
-
-        virtual InputSource* onRelease(InputSource* is) = 0;
-};
+class XmlResolver;
 
 /** @brief Reads XML as a Stream of XML Nodes.
 
@@ -127,6 +103,8 @@ class PT_XML_API XmlReader : private NonCopyable
         explicit XmlReader(InputSource& is, int flags = 0);
 
         ~XmlReader();
+
+        void setResolver(XmlResolver* r);
 
         // TODO: split into attach() and setFlags()
         // also add methods for discard() and reset()

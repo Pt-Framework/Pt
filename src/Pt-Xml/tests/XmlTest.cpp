@@ -40,8 +40,52 @@
 #include "Pt/System/Clock.h"
 #include "Pt/String.h"
 #include <string>
+#include <map>
 #include <sstream>
 #include <iostream>
+
+class XmlTestResolver : public Pt::Xml::XmlResolver
+{
+    public:
+        XmlTestResolver()
+        {}
+
+        virtual ~XmlTestResolver()
+        {}
+
+        void addInput(const Pt::String& id, const Pt::String& txt)
+        {
+            _input.insert( std::make_pair(id, txt) );
+        }
+
+    protected:
+        virtual Pt::Xml::InputSource* onResolve(const Pt::String& publicId, const Pt::String& systemId)
+        {
+            std::map<Pt::String, Pt::String>::iterator it;
+            
+            it = _input.find(publicId);
+            if( it != _input.end() )
+                return new Pt::Xml::StringInputSource(it->second);
+
+            it = _input.find(systemId);
+            if( it != _input.end() )
+                return new Pt::Xml::StringInputSource(it->second);
+
+            return 0;
+        }
+
+        virtual void onRelease(Pt::Xml::InputSource* is)
+        {
+            if(is)
+            {
+                delete is;
+            }
+        }
+        
+    private:
+        std::map<Pt::String, Pt::String> _input;
+};
+
 
 class XmlReaderTest : public Pt::Unit::TestSuite
 {
@@ -197,28 +241,28 @@ void XmlReaderTest::EmptyXmlDeclaration()
 
 void XmlReaderTest::DtdEmptyDocument()
 {
+    XmlTestResolver resolver;
+    resolver.addInput(L"external.dtd", L"<!ENTITY e1 \"e1External\">");
+
     std::stringstream input;
     input << "<!DOCTYPE test SYSTEM \"external.dtd\" [\n";
     input << "<!ELEMENT test EMPTY>\n";
     input << "]>";
 
     Pt::Xml::XmlReader reader(input, Pt::Xml::XmlReader::ReportDtd);
-    Pt::Xml::XmlReader::Iterator it = reader.current();
-    
-    Pt::Xml::DocTypeDefinition& dtd = Pt::Xml::toDocTypeDefinition(*it);
+    reader.setResolver(&resolver);
 
-    ++it;
+    Pt::Xml::XmlReader::Iterator it = reader.current();
+
     Pt::Xml::DocType& docType = Pt::Xml::toDocType(*it);
     PT_UNIT_ASSERT_EQUALS(docType.rootName(), L"test");
     PT_UNIT_ASSERT_EQUALS(docType.publicId(), L"");
     PT_UNIT_ASSERT_EQUALS(docType.systemId(), L"external.dtd");
-
-    Pt::String externalDtd("<!ENTITY e1 \"e1External\">");
-    docType.setExternal( new Pt::Xml::StringInputSource(externalDtd) );
-
-    //++it;
-    //Pt::Xml::DocTypeDefinition& dtdExt = Pt::Xml::toDocTypeDefinition(*it);
-
+    PT_UNIT_ASSERT_EQUALS(docType.isInternal(), true);
+    
+    ++it;
+    
+    Pt::Xml::DocTypeDefinition& dtd = Pt::Xml::toDocTypeDefinition(*it);
     PT_UNIT_ASSERT_EQUALS(reader.depth(), 0);
 
     ++it;
@@ -228,23 +272,23 @@ void XmlReaderTest::DtdEmptyDocument()
 
 void XmlReaderTest::DtdExternalSubsetPublicId()
 {
+    XmlTestResolver resolver;
+    resolver.addInput(L"external.dtd", L"<!ELEMENT test EMPTY>");
+
     std::stringstream input;
     input << "<!DOCTYPE test PUBLIC \"pubid\" \"external.dtd\">";
     input << "<test></test>";
 
     Pt::Xml::XmlReader reader(input, Pt::Xml::XmlReader::ReportDtd);
-    Pt::Xml::XmlReader::Iterator it = reader.current();
+    reader.setResolver(&resolver);
     
+    Pt::Xml::XmlReader::Iterator it = reader.current();
+
     Pt::Xml::DocType& docType = Pt::Xml::toDocType(*it);
     PT_UNIT_ASSERT_EQUALS(docType.rootName(), L"test");
     PT_UNIT_ASSERT_EQUALS(docType.publicId(), L"pubid");
     PT_UNIT_ASSERT_EQUALS(docType.systemId(), L"external.dtd");
-
-    Pt::String externalDtd("<!ELEMENT test EMPTY>");
-    docType.setExternal( new Pt::Xml::StringInputSource(externalDtd) );
-
-    //++it;
-    //Pt::Xml::DocTypeDefinition& dtdExt = Pt::Xml::toDocTypeDefinition(*it);
+    PT_UNIT_ASSERT_EQUALS(docType.isInternal(), false);
 
     PT_UNIT_ASSERT_EQUALS(reader.depth(), 0);
 
@@ -256,23 +300,23 @@ void XmlReaderTest::DtdExternalSubsetPublicId()
 
 void XmlReaderTest::DtdExternalSubsetSystemId()
 {
+    XmlTestResolver resolver;
+    resolver.addInput(L"external.dtd", L"<!ELEMENT test EMPTY>");
+
     std::stringstream input;
     input << "<!DOCTYPE test SYSTEM \"external.dtd\">\n";
     input << "<test></test>";
 
     Pt::Xml::XmlReader reader(input, Pt::Xml::XmlReader::ReportDtd);
+    reader.setResolver(&resolver);
+
     Pt::Xml::XmlReader::Iterator it = reader.current();
 
     Pt::Xml::DocType& docType = Pt::Xml::toDocType(*it);
     PT_UNIT_ASSERT_EQUALS(docType.rootName(), L"test");
     PT_UNIT_ASSERT_EQUALS(docType.publicId(), L"");
     PT_UNIT_ASSERT_EQUALS(docType.systemId(), L"external.dtd");
-
-    Pt::String externalDtd("<!ELEMENT test EMPTY>");
-    docType.setExternal( new Pt::Xml::StringInputSource(externalDtd) );
-
-    //++it;
-    //Pt::Xml::DocTypeDefinition& dtdExt = Pt::Xml::toDocTypeDefinition(*it);
+    PT_UNIT_ASSERT_EQUALS(docType.isInternal(), false);
 
     PT_UNIT_ASSERT_EQUALS(reader.depth(), 0);
 
@@ -286,6 +330,9 @@ void XmlReaderTest::DtdExternalAndInternalSubset()
 {
     try
     {
+        XmlTestResolver resolver;
+        resolver.addInput(L"external.dtd", L"<!ENTITY e1 \"e1External\">\n<!ENTITY e2 \"e2External\">\n");
+
         std::stringstream input;
         input << "<!DOCTYPE test SYSTEM \"external.dtd\" [\n";
         input << "<!ELEMENT test (#PCDATA)>\n";
@@ -294,24 +341,21 @@ void XmlReaderTest::DtdExternalAndInternalSubset()
         input << "<test>&e1; &e2;</test>";
 
         Pt::Xml::XmlReader reader(input, Pt::Xml::XmlReader::ReportDtd);
-        Pt::Xml::XmlReader::Iterator it = reader.current();
+        reader.setResolver(&resolver);
 
-        Pt::Xml::DocTypeDefinition& dtd = Pt::Xml::toDocTypeDefinition(*it);
-        PT_UNIT_ASSERT( dtd.resolveEntity(L"e1") );
-        PT_UNIT_ASSERT( dtd.resolveEntity(L"e2") == 0 );
-    
-        ++it;
+        Pt::Xml::XmlReader::Iterator it = reader.current();
+        
         Pt::Xml::DocType& docType = Pt::Xml::toDocType(*it);
         PT_UNIT_ASSERT_EQUALS(docType.rootName(), L"test");
         PT_UNIT_ASSERT_EQUALS(docType.publicId(), L"");
         PT_UNIT_ASSERT_EQUALS(docType.systemId(), L"external.dtd");
+        PT_UNIT_ASSERT_EQUALS(docType.isInternal(), true);
 
-        Pt::String externalDtd("<!ENTITY e1 \"e1External\">\n<!ENTITY e2 \"e2External\">\n");
-        docType.setExternal( new Pt::Xml::StringInputSource(externalDtd) );
-
-        //++it;
-        //Pt::Xml::DocTypeDefinition& dtdExt = Pt::Xml::toDocTypeDefinition(*it);
-
+        ++it;
+        
+        Pt::Xml::DocTypeDefinition& dtd = Pt::Xml::toDocTypeDefinition(*it);
+        PT_UNIT_ASSERT( dtd.resolveEntity(L"e1") );
+        PT_UNIT_ASSERT( dtd.resolveEntity(L"e2") == 0 );
         PT_UNIT_ASSERT_EQUALS(reader.depth(), 0);
 
         Pt::String content;

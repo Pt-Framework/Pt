@@ -37,17 +37,16 @@ namespace Pt {
 
 namespace Xml {
 
-class InputSource;
-class InputStack;
-
 class PT_XML_API DocType : public Node
                          , private Pt::NonCopyable
 {
     public:
-        DocType(InputStack& input);
+        DocType();
 
         ~DocType();
 
+        // TODO: remove this method
+        //       keep reference to DocTypeDefinition
         bool isDefined() const;
 
         void clear();
@@ -56,11 +55,11 @@ class PT_XML_API DocType : public Node
 
         Pt::String& rootName();
 
-        bool isExternal() const
-        { return ! _publicId.empty() || ! _systemId.empty(); }
+        bool isExternal() const;
 
-        bool isInternal() const
-        { return _publicId.empty() && _systemId.empty(); }
+        bool isInternal() const;
+
+        void setInternal(bool hasInternal);
 
         const Pt::String& publicId() const
         { return _publicId; }
@@ -74,16 +73,6 @@ class PT_XML_API DocType : public Node
         void setSystemId(const Pt::String& sysId)
         { _systemId = sysId; }
 
-        void setExternal(InputSource* is);
-
-        // TODO: returns true if an internal DTD will be parsed
-        bool isInternalDtd() const
-        { return false; }
-        
-        // TODO: returns true is an external DTD will be parsed
-        bool isExternalDtd() const
-        { return false; }
-
         //! @internal
         inline static Node::Type nodeId()
         { return Node::DocType; }
@@ -92,7 +81,7 @@ class PT_XML_API DocType : public Node
         Pt::String _rootName;
         Pt::String _publicId;
         Pt::String _systemId;
-        InputStack* _input;
+        int _internal;
 };
 
 
