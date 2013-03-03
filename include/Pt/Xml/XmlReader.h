@@ -106,6 +106,8 @@ class PT_XML_API XmlReader : private NonCopyable
 
         void setResolver(XmlResolver* r);
 
+        XmlResolver* resolver();
+
         // TODO: split into attach() and setFlags()
         // also add methods for discard() and reset()
         void attach(std::istream& is, int flags = 0);
@@ -158,6 +160,10 @@ class PT_XML_API XmlReader : private NonCopyable
 
     private:
         class XmlReaderImpl* _impl;
+
+    public:
+        XmlReaderImpl* impl()
+        { return _impl; }
 };
 
 // TODO: rename InputIterator

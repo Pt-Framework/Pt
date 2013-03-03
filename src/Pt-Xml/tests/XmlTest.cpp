@@ -272,16 +272,16 @@ void XmlReaderTest::DtdEmptyDocument()
 
 void XmlReaderTest::DtdExternalSubsetPublicId()
 {
-    XmlTestResolver resolver;
-    resolver.addInput(L"external.dtd", L"<!ELEMENT test EMPTY>");
-
     std::stringstream input;
     input << "<!DOCTYPE test PUBLIC \"pubid\" \"external.dtd\">";
     input << "<test></test>";
 
     Pt::Xml::XmlReader reader(input, Pt::Xml::XmlReader::ReportDtd);
+
+    XmlTestResolver resolver;
+    resolver.addInput(L"external.dtd", L"<!ELEMENT test EMPTY>");
     reader.setResolver(&resolver);
-    
+
     Pt::Xml::XmlReader::Iterator it = reader.current();
 
     Pt::Xml::DocType& docType = Pt::Xml::toDocType(*it);

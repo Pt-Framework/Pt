@@ -39,9 +39,14 @@
 #include <streambuf>
 #include <cstddef>
 
+// XMLResolver
+#include <vector>
+
 namespace Pt {
 
 namespace Xml {
+
+class XmlReader;
 
 /** @brief Input source for the XML reader
 */
@@ -217,11 +222,12 @@ class StringInputSource : public InputSource
 
 // TODO: add reference to XmlReader, so it gets notified of XmlResolver 
 //       destruction
-class XmlResolver
+class PT_XML_API XmlResolver
 {
+    friend class XmlReader;
+
     public:
-        virtual ~XmlResolver()
-        {}
+        virtual ~XmlResolver();
 
         InputSource* resolve(const Pt::String& publicId, const Pt::String& systemId)
         {
@@ -240,6 +246,13 @@ class XmlResolver
         virtual InputSource* onResolve(const Pt::String& publicId, const Pt::String& systemId) = 0;
 
         virtual void onRelease(InputSource* is) = 0;
+
+    private:
+        void registerReader(XmlReader& reader);
+        
+        void unregisterReader(XmlReader& reader);
+        
+        std::vector<XmlReader*> _readers;
 };
 
 } // namespace Xml

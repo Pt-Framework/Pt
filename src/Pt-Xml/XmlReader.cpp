@@ -3344,6 +3344,11 @@ class XmlReaderImpl
             _input.setResolver(r);
         }
 
+        XmlResolver* resolver()
+        {
+            return _input.resolver();
+        }
+
         void attach(std::istream& is, int flags)
         {
             clear(flags);
@@ -3567,15 +3572,32 @@ XmlReader::XmlReader(InputSource& is, int flags)
 
 XmlReader::~XmlReader()
 {
+    setResolver(0);
     delete _impl;
 }
 
 
 void XmlReader::setResolver(XmlResolver* resolver)
 {
+    XmlResolver* current = _impl->resolver();
+
+    if(resolver == current)
+        return;
+
+    if(resolver)
+        resolver->registerReader(*this);
+
     _impl->setResolver(resolver);
+
+    if(current)
+        current->unregisterReader(*this);
 }
 
+
+XmlResolver* XmlReader::resolver()
+{
+    return _impl->resolver();
+}
 
 void XmlReader::attach(std::istream& is, int flags)
 {
