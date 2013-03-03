@@ -219,6 +219,8 @@ void XmlReaderTest::DtdEmptyDocument()
     //++it;
     //Pt::Xml::DocTypeDefinition& dtdExt = Pt::Xml::toDocTypeDefinition(*it);
 
+    PT_UNIT_ASSERT_EQUALS(reader.depth(), 0);
+
     ++it;
     Pt::Xml::EndDocument& endDoc = Pt::Xml::toEndDocument(*it);
 }
@@ -243,6 +245,8 @@ void XmlReaderTest::DtdExternalSubsetPublicId()
 
     //++it;
     //Pt::Xml::DocTypeDefinition& dtdExt = Pt::Xml::toDocTypeDefinition(*it);
+
+    PT_UNIT_ASSERT_EQUALS(reader.depth(), 0);
 
     for(it = reader.current(); it != reader.end(); ++it)
     {
@@ -269,6 +273,8 @@ void XmlReaderTest::DtdExternalSubsetSystemId()
 
     //++it;
     //Pt::Xml::DocTypeDefinition& dtdExt = Pt::Xml::toDocTypeDefinition(*it);
+
+    PT_UNIT_ASSERT_EQUALS(reader.depth(), 0);
 
     for(it = reader.current(); it != reader.end(); ++it)
     {
@@ -305,6 +311,8 @@ void XmlReaderTest::DtdExternalAndInternalSubset()
 
         //++it;
         //Pt::Xml::DocTypeDefinition& dtdExt = Pt::Xml::toDocTypeDefinition(*it);
+
+        PT_UNIT_ASSERT_EQUALS(reader.depth(), 0);
 
         Pt::String content;
         for(it = reader.current(); it != reader.end(); ++it)

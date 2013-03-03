@@ -504,6 +504,7 @@ class XmlReaderImpl
 
             if( ch == '[' )
             {
+                ++_depth;
                 _parse = &XmlReaderImpl::OnDtdInternal;
                 return;
             }
@@ -618,6 +619,7 @@ class XmlReaderImpl
 
             if( ch == '[' )
             {
+                ++_depth;
                 _parse = &XmlReaderImpl::OnDtdInternal;
                 return;
             }
@@ -681,6 +683,7 @@ class XmlReaderImpl
 
             if( ch == '[' )
             {
+                ++_depth;
                 _parse = &XmlReaderImpl::OnDtdInternal;
                 return;
             }
@@ -706,6 +709,7 @@ class XmlReaderImpl
             if( ch == ']' )
             {
                 setDocumentTypeDefinition();
+                --_depth;
                 _parse = &XmlReaderImpl::OnDtdInternalEnd;
                 return;
             }
