@@ -185,6 +185,7 @@
     <ClInclude Include="..\..\include\Pt\Xml\XmlError.h" />
     <ClInclude Include="..\..\include\Pt\Xml\XmlFormatter.h" />
     <ClInclude Include="..\..\include\Pt\Xml\XmlReader.h" />
+    <ClInclude Include="..\..\include\Pt\Xml\XmlResolver.h" />
     <ClInclude Include="..\..\include\Pt\Xml\XmlSerializationContext.h" />
     <ClInclude Include="..\..\include\Pt\Xml\XmlSerializer.h" />
     <ClInclude Include="..\..\include\Pt\Xml\XmlWriter.h" />

@@ -29,7 +29,6 @@
 #define Pt_Xml_InputSource_h
 
 #include <Pt/Xml/Api.h>
-#include <Pt/Xml/XmlError.h>
 #include <Pt/NonCopyable.h>
 #include <Pt/StringStream.h>
 #include <Pt/TextBuffer.h>
@@ -38,9 +37,6 @@
 #include <Pt/String.h>
 #include <streambuf>
 #include <cstddef>
-
-// XMLResolver
-#include <vector>
 
 namespace Pt {
 
@@ -213,34 +209,6 @@ class StringInputSource : public InputSource
 
     private:
         StringBuffer _sbuf;
-};
-
-// TODO: add reference to XmlReader, so it gets notified of XmlResolver 
-//       destruction
-class PT_XML_API XmlResolver
-{
-    friend class XmlReader;
-
-    public:
-        virtual ~XmlResolver();
-
-        InputSource* resolve(const Pt::String& publicId, const Pt::String& systemId)
-        {
-            return onResolve(publicId, systemId);
-        }
-
-        void release(InputSource* is)
-        {
-            onRelease(is);
-        }
-
-    protected:
-        XmlResolver()
-        {}
-
-        virtual InputSource* onResolve(const Pt::String& publicId, const Pt::String& systemId) = 0;
-
-        virtual void onRelease(InputSource* is) = 0;
 };
 
 } // namespace Xml

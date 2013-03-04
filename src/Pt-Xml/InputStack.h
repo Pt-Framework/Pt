@@ -31,6 +31,7 @@
 
 #include <Pt/Xml/Api.h>
 #include <Pt/Xml/InputSource.h>
+#include <Pt/Xml/XmlResolver.h>
 #include <stack>
 #include <cstddef>
 

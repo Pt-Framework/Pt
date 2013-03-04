@@ -735,6 +735,9 @@
     <ClInclude Include="..\..\src\Pt-Xml\InputStack.h">
       <Filter>Pt-Xml</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Xml\XmlResolver.h">
+      <Filter>Pt-Xml</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">

@@ -32,6 +32,7 @@
 #include "InputStack.h"
 
 #include <Pt/Xml/XmlReader.h>
+#include <Pt/Xml/XmlResolver.h>
 #include <Pt/Xml/DocTypeDefinition.h>
 #include <Pt/Xml/NamespaceContext.h>
 #include <Pt/Xml/EndDocument.h>

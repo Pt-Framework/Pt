@@ -27,6 +27,7 @@
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/RegisterTest.h"
 #include "Pt/Xml/XmlReader.h"
+#include "Pt/Xml/XmlResolver.h"
 #include "Pt/Xml/InputSource.h"
 #include "Pt/Xml/StartElement.h"
 #include "Pt/Xml/Comment.h"

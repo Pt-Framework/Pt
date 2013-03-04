@@ -26,20 +26,12 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
  
-#include "Pt/Xml/InputSource.h"
-
-// XMLResolver
-#include "Pt/Xml/XmlReader.h"
+#include <Pt/Xml/InputSource.h>
+#include <Pt/Xml/XmlError.h>
 
 namespace Pt {
 
 namespace Xml {
-
-XmlResolver::~XmlResolver()
-{
-
-}
-
 
 /*
     00 00 FE FF  UTF-32, big-endian
