@@ -29,9 +29,29 @@
 #include "AttributeListDeclaration.h"
 #include "AttributeDeclaration.h"
 
+// AttributeDeclaration
+#include "DtdValidator.h"
+
 namespace Pt {
 
 namespace Xml {
+
+bool IDAttributeDeclaration::onValidate(const Attribute& attr) const
+{          
+    // TODO: attribute value must be an XML name
+
+    return _validator->addId( attr.value() );
+}
+
+
+bool IDRefAttributeDeclaration::onValidate(const Attribute& attr) const
+{          
+    // TODO: attribute value must be an XML name
+
+    _validator->addIdRef( attr.value() );
+    return true; 
+}
+
 
 AttributeListDeclaration::AttributeListDeclaration()
 {

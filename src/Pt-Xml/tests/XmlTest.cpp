@@ -102,6 +102,7 @@ class XmlReaderTest : public Pt::Unit::TestSuite
             this->registerMethod("DtdExternalSubsetSystemId", *this, &XmlReaderTest::DtdExternalSubsetSystemId);
             this->registerMethod("DtdExternalAndInternalSubset", *this, &XmlReaderTest::DtdExternalAndInternalSubset);
             this->registerMethod("DtdValidateAttributes", *this, &XmlReaderTest::DtdValidateAttributes);
+            this->registerMethod("DtdValidateIDAttributes", *this, &XmlReaderTest::DtdValidateIDAttributes);
             this->registerMethod("DtdValidateElementContent", *this, &XmlReaderTest::DtdValidateElementContent);
             this->registerMethod("DtdAnyElementContent", *this, &XmlReaderTest::DtdAnyElementContent);
             
@@ -152,6 +153,7 @@ class XmlReaderTest : public Pt::Unit::TestSuite
         void DtdExternalSubsetSystemId();
         void DtdExternalAndInternalSubset();
         void DtdValidateAttributes();
+        void DtdValidateIDAttributes();
         void DtdValidateElementContent();
         void DtdAnyElementContent();
         
@@ -405,6 +407,32 @@ void XmlReaderTest::DtdValidateAttributes()
 
                 PT_UNIT_ASSERT( se->attributes().has(L"a4") );
             }
+        }
+    }
+    catch(const Pt::Xml::SyntaxError& error)
+    {
+        std::cerr << error.what() << ": " << error.line() << std::endl;
+        throw;
+    }
+}
+
+
+void XmlReaderTest::DtdValidateIDAttributes()
+{
+    try
+    {
+        std::stringstream input;
+        input << "<!DOCTYPE test [\n";
+        input << "<!ELEMENT test EMPTY>\n";
+        input << "<!ATTLIST test id ID #REQUIRED\n>";
+        input << "]>\n";
+        input << "<test id='A1'></test>";
+
+        Pt::Xml::XmlReader reader(input);
+        
+        Pt::Xml::XmlReader::Iterator it;
+        for(it = reader.current(); it != reader.end(); ++it)
+        {
         }
     }
     catch(const Pt::Xml::SyntaxError& error)

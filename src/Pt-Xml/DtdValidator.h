@@ -41,6 +41,7 @@
 
 #include <iterator>
 #include <vector>
+#include <set>
 #include <stack>
 #include <cassert>
 
@@ -77,7 +78,7 @@ class AttributeValidator
                 if( it == attrDecls.end() )
                     return false;
 
-                if( ! (*it)->match( *attr) )
+                if( ! (*it)->validate( *attr) )
                     return false;
 
                 attrDecls.erase(it);
@@ -88,7 +89,7 @@ class AttributeValidator
             std::vector<const AttributeDeclaration*>::iterator decl;
             for(decl = attrDecls.begin(); decl != attrDecls.end(); ++decl)
             {
-                if( ! (*decl)->validate(attrs) )
+                if( ! (*decl)->fixup(attrs) )
                     return false;
             }
 
@@ -96,24 +97,20 @@ class AttributeValidator
         }
 };
 
-
-class ContentValidator : public ValidationContext
+// TODO: rename ElementValidator
+class ElementValidator : public ContentValidator
 {
     public:
         //!@brief A validator for an undeclared element.
-        ContentValidator()
+        ElementValidator()
         : _elemDecl(0)
-        {}
+        {
+        }
 
-        ContentValidator(const ElementDeclaration& elemDecl)
-        : ValidationContext( elemDecl.contentSize() )
+        ElementValidator(const ElementDeclaration& elemDecl)
+        : ContentValidator( elemDecl.content(), elemDecl.contentSize() )
         , _elemDecl(&elemDecl)
         {
-            // if only an ATTLIST was declared, this can be null
-            if( elemDecl.content() )
-            {
-                elemDecl.content()->get(*this);
-            }
         }
 
         bool validateNode(Node& node)
@@ -138,16 +135,7 @@ class ContentValidator : public ValidationContext
 
             // invalid or EMPTY will not have any further states, so we will
             // return with false eventually
-            _next = ValidationContext::next();
-            this->clear();
-
-            for(unsigned n = 0; n < _next.size(); ++n)
-            {
-                _next[n]->eval(*this, node);
-            }
-
-            // no follow up particles means validation error
-            return ! this->next().empty();
+            return ContentValidator::validateNext(node);
         }
         
         bool isCompleteNode() const
@@ -157,16 +145,7 @@ class ContentValidator : public ValidationContext
             if( ! _elemDecl || ! _elemDecl->isExpression() )
                 return true;
             
-            // at the end of the validation, at least one current particle
-            // must be a match particle, otherwise there was more content
-            // expected to come
-            for(unsigned n = 0; n < this->next().size(); ++n)
-            {
-                if( this->next()[n]->isValid() )
-                    return true;
-            }
-            
-            return false; 
+            return ContentValidator::isValid();
         }
 
     private:
@@ -183,7 +162,9 @@ class DocTypeValidator : private NonCopyable
         {}
 
         void clear()
-        {
+        { 
+            _ids.clear();
+
             while( ! _decls.empty() )
                 _decls.pop();
         }
@@ -205,18 +186,16 @@ class DocTypeValidator : private NonCopyable
                     ElementDeclaration* decl = _dtd->findElement( se.name() );
                     if(decl)
                     {
-                        ContentValidator validator( *decl );
+                        ElementValidator validator( *decl );
                         _decls.push(validator);
                         
                         AttributeValidator attributeValidator;
                         if( ! attributeValidator.validate( se.attributes(), decl->attributeList() ) )
                             valid = false;
-
-                        //TODO: push empty ContentValidator if only ATTLIST is declared
                     }
                     else
                     {
-                        ContentValidator validator;
+                        ElementValidator validator;
                         _decls.push(validator);
                         valid = false;
                     }
@@ -240,6 +219,11 @@ class DocTypeValidator : private NonCopyable
                 {
                     valid = _decls.top().isCompleteNode();
                     _decls.pop();
+
+                    if( _decls.empty() )
+                        if( ! vaildateIDRefs() )
+                            valid = false;
+                    
                     break;
                 }
 
@@ -250,9 +234,41 @@ class DocTypeValidator : private NonCopyable
             return valid;
         }
 
+        bool addId(const Pt::String& id)
+        {
+            if( _ids.find(id) != _ids.end() )
+                return false;
+
+            _ids.insert(id);
+            return true;
+        }
+
+        void addIdRef(const Pt::String& id)
+        {
+            _idrefs.push_back(id);
+        }
+
+        bool vaildateIDRefs()
+        {
+            bool valid = true;
+            
+            std::vector<Pt::String>::iterator it;
+            for(it =_idrefs.begin(); it != _idrefs.end(); ++it)
+            {
+                if( _ids.find(*it) == _ids.end() )
+                {
+                    valid = false;
+                }
+            }
+
+            return valid;
+        }
+
     private:
         DocTypeDefinition* _dtd;
-        std::stack<ContentValidator> _decls;
+        std::stack<ElementValidator> _decls;
+        std::set<Pt::String> _ids;
+        std::vector<Pt::String> _idrefs;
 };
 
 } // namespace Xml

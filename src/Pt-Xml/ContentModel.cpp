@@ -35,16 +35,41 @@ namespace Pt {
 
 namespace Xml {
 
-ValidationContext::ValidationContext(std::size_t nodeCount)
+ContentValidator::ContentValidator()
+: _stepId(1)
+{
+}
+
+
+ContentValidator::ContentValidator(const ContentParticle* start, std::size_t nodeCount)
 : _stepId(1)
 {
     // all nodes are unvisited
     _nodes.assign(nodeCount, 0);
-    _stepId = 1;
+
+    // if only an ATTLIST was declared, this can be null
+    if(start)
+        start->get(*this);
 }
 
 
-bool ValidationContext::setVisited(unsigned id)
+bool ContentValidator::validateNext(Node& node)
+{
+    _next = _current;
+    
+    clear();
+
+    for(unsigned n = 0; n < _next.size(); ++n)
+    {
+        _next[n]->eval(*this, node);
+    }
+
+    // no follow up particles means validation error
+    return ! _current.empty();
+}
+
+
+bool ContentValidator::setVisited(unsigned id)
 { 
     if(_nodes.at(id) == _stepId)
         return true;
@@ -55,31 +80,46 @@ bool ValidationContext::setVisited(unsigned id)
 }
 
 
-void ValidationContext::addNext(const ContentParticle* p)
+bool ContentValidator::isValid() const
+{
+    // at the end of the validation, at least one current particle
+    // must be a match particle, otherwise there was more content
+    // expected to come
+
+    for(unsigned n = 0; n < _current.size(); ++n)
+    {
+        if( _current[n]->isValid() )
+            return true;
+    }
+
+    return false;
+}
+
+void ContentValidator::addNext(const ContentParticle* p)
 { 
     _current.push_back(p); 
 }
 
 
-const std::vector<const ContentParticle*>& ValidationContext::next() const
+const std::vector<const ContentParticle*>& ContentValidator::next() const
 { 
     return _current; 
 }
 
 
-void ValidationContext::clear()
+void ContentValidator::clear()
 { 
     _current.clear(); 
     _stepId++;
 }
 
 
-void SplitParticle::eval(ValidationContext& ctx, Node& node) const
+void SplitParticle::eval(ContentValidator& ctx, Node& node) const
 { 
 }
 
 
-void SplitParticle::get(ValidationContext& ctx) const
+void SplitParticle::get(ContentValidator& ctx) const
 {
     assert(id() != 0);
 
@@ -94,7 +134,7 @@ void SplitParticle::get(ValidationContext& ctx) const
 }
 
 
-void LeafParticle::eval(ValidationContext& ctx, Node& node) const
+void LeafParticle::eval(ContentValidator& ctx, Node& node) const
 {
     StartElement* se = toStartElement(&node);
     if(se && se->name() == _name)
@@ -104,7 +144,7 @@ void LeafParticle::eval(ValidationContext& ctx, Node& node) const
 }
 
 
-void LeafParticle::get(ValidationContext& ctx) const
+void LeafParticle::get(ContentValidator& ctx) const
 {
     assert(id() != 0);
 
@@ -115,7 +155,7 @@ void LeafParticle::get(ValidationContext& ctx) const
 }
 
 
-void PcDataParticle::eval(ValidationContext& ctx, Node& node) const
+void PcDataParticle::eval(ContentValidator& ctx, Node& node) const
 {
     Characters* chars = toCharacters(&node);
     if(chars)
@@ -125,7 +165,7 @@ void PcDataParticle::eval(ValidationContext& ctx, Node& node) const
 }
 
 
-void PcDataParticle::get(ValidationContext& ctx) const
+void PcDataParticle::get(ContentValidator& ctx) const
 {
     assert(id() != 0);
 
@@ -136,12 +176,12 @@ void PcDataParticle::get(ValidationContext& ctx) const
 }
 
 
-void MatchParticle::eval(ValidationContext& ctx, Node& node) const
+void MatchParticle::eval(ContentValidator& ctx, Node& node) const
 {
 }
         
 
-void MatchParticle::get(ValidationContext& ctx) const
+void MatchParticle::get(ContentValidator& ctx) const
 { 
     assert(id() == 0);
 

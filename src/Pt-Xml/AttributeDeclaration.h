@@ -37,6 +37,7 @@ namespace Pt {
 
 namespace Xml {
 
+class DocTypeValidator;
 
 class AttributeDeclaration
 {
@@ -75,15 +76,15 @@ class AttributeDeclaration
         const Pt::String& defaultValue() const
         { return _default; }
 
-        bool match(const Attribute& attr) const
+        bool validate(const Attribute& attr) const
         {
             if(mode() == Fixed)
                 return attr.value() == defaultValue();
 
-            return onMatch(attr);
+            return onValidate(attr);
         }
       
-        bool validate(AttributeList& list) const
+        bool fixup(AttributeList& list) const
         {
             switch(_mode)
             {
@@ -106,7 +107,7 @@ class AttributeDeclaration
         }
 
     protected:
-        virtual bool onMatch(const Attribute& attr) const = 0;
+        virtual bool onValidate(const Attribute& attr) const = 0;
 
     private:
         Mode _mode;
@@ -122,7 +123,7 @@ class CDataAttributeDeclaration : public AttributeDeclaration
         : AttributeDeclaration()
         {}
 
-        virtual bool onMatch(const Attribute& attr) const
+        virtual bool onValidate(const Attribute& attr) const
         { 
             // TODO: check for non-CDATA characters in value           
             return true; 
@@ -137,7 +138,7 @@ class NMTokenAttributeDeclaration : public AttributeDeclaration
         : AttributeDeclaration()
         {}
 
-        virtual bool onMatch(const Attribute& attr) const
+        virtual bool onValidate(const Attribute& attr) const
         { 
             // TODO: check for non-CDATA characters in value           
             return true; 
@@ -152,11 +153,44 @@ class NMTokensAttributeDeclaration : public AttributeDeclaration
         : AttributeDeclaration()
         {}
 
-        virtual bool onMatch(const Attribute& attr) const
+        virtual bool onValidate(const Attribute& attr) const
         { 
             // TODO: check for non-CDATA characters in value           
             return true; 
         }
+};
+
+
+class IDAttributeDeclaration : public AttributeDeclaration
+                             , private NonCopyable
+{
+    public:
+        // TODO: pass DocTypeIdContext
+        IDAttributeDeclaration(DocTypeValidator& validator)
+        : AttributeDeclaration()
+        , _validator(&validator)
+        {}
+
+        virtual bool onValidate(const Attribute& attr) const;
+
+    private:
+        DocTypeValidator* _validator;
+};
+
+
+class IDRefAttributeDeclaration : public AttributeDeclaration
+                                , private NonCopyable
+{
+    public:
+        IDRefAttributeDeclaration(DocTypeValidator& validator)
+        : AttributeDeclaration()
+        , _validator(&validator)
+        {}
+
+        virtual bool onValidate(const Attribute& attr) const;
+
+    private:
+        DocTypeValidator* _validator;
 };
 
 } // namespace Xml
