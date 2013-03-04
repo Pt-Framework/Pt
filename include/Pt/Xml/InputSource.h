@@ -53,17 +53,13 @@ class XmlReader;
 class InputSource : private NonCopyable
 {
     public:
-        InputSource(std::size_t refcnt = 0)
-        : _refs(refcnt)
+        InputSource()
+        : _rdbuf(0)
         , _line(1)
-        , _rdbuf(0)
         {}
 
         virtual ~InputSource()
         {}
-
-        std::size_t refs() const
-        { return _refs; }
 
         std::size_t line() const
         { return _line; }
@@ -101,17 +97,16 @@ class InputSource : private NonCopyable
         virtual std::basic_streambuf<Char>* onGet() = 0;
 
     private:
-        std::size_t _refs;
-        std::size_t _line;
         std::basic_streambuf<Char>* _rdbuf;
+        std::size_t _line;
 };
 
 
 class NullInputSource : public InputSource
 {
     public:
-        explicit NullInputSource(std::size_t refcnt = 0)
-        : InputSource(refcnt)
+        explicit NullInputSource()
+        : InputSource()
         { }
 
     protected:
@@ -132,7 +127,7 @@ class NullInputSource : public InputSource
 class PT_XML_API ByteInputSource : public InputSource
 {
     public:
-        explicit ByteInputSource(std::istream& is, std::size_t refcnt = 0);
+        explicit ByteInputSource(std::istream& is);
 
         void reset(std::istream& is);
         
@@ -158,14 +153,14 @@ class PT_XML_API ByteInputSource : public InputSource
 class TextInputSource : public InputSource
 {
     public:
-        explicit TextInputSource(TextIStream& ts, std::size_t refcnt = 0)
-        : InputSource(refcnt)
+        explicit TextInputSource(TextIStream& ts)
+        : InputSource()
         , _ios(&ts)
         , _tbuf( &ts.buffer() )
         { }
 
-        explicit TextInputSource(TextStream& ts, std::size_t refcnt = 0)
-        : InputSource(refcnt)
+        explicit TextInputSource(TextStream& ts)
+        : InputSource()
         , _ios(&ts)
         , _tbuf( &ts.buffer() )
         { }
@@ -197,8 +192,8 @@ class TextInputSource : public InputSource
 class StringInputSource : public InputSource
 {
     public:
-        StringInputSource(const String& str, std::size_t refcnt = 0)
-        : InputSource(refcnt)
+        StringInputSource(const String& str)
+        : InputSource()
         , _sbuf(str)
         {
         }
@@ -246,13 +241,6 @@ class PT_XML_API XmlResolver
         virtual InputSource* onResolve(const Pt::String& publicId, const Pt::String& systemId) = 0;
 
         virtual void onRelease(InputSource* is) = 0;
-
-    private:
-        void registerReader(XmlReader& reader);
-        
-        void unregisterReader(XmlReader& reader);
-        
-        std::vector<XmlReader*> _readers;
 };
 
 } // namespace Xml

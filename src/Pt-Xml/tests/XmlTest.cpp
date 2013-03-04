@@ -249,8 +249,8 @@ void XmlReaderTest::DtdEmptyDocument()
     input << "<!ELEMENT test EMPTY>\n";
     input << "]>";
 
-    Pt::Xml::XmlReader reader(input, Pt::Xml::XmlReader::ReportDtd);
-    reader.setResolver(&resolver);
+    Pt::Xml::XmlReader reader(resolver, input);
+    reader.setFlag(Pt::Xml::XmlReader::ReportDtd);
 
     Pt::Xml::XmlReader::Iterator it = reader.current();
 
@@ -272,15 +272,15 @@ void XmlReaderTest::DtdEmptyDocument()
 
 void XmlReaderTest::DtdExternalSubsetPublicId()
 {
+    XmlTestResolver resolver;
+    resolver.addInput(L"external.dtd", L"<!ELEMENT test EMPTY>");
+
     std::stringstream input;
     input << "<!DOCTYPE test PUBLIC \"pubid\" \"external.dtd\">";
     input << "<test></test>";
 
-    Pt::Xml::XmlReader reader(input, Pt::Xml::XmlReader::ReportDtd);
-
-    XmlTestResolver resolver;
-    resolver.addInput(L"external.dtd", L"<!ELEMENT test EMPTY>");
-    reader.setResolver(&resolver);
+    Pt::Xml::XmlReader reader(resolver, input);
+    reader.setFlag(Pt::Xml::XmlReader::ReportDtd);
 
     Pt::Xml::XmlReader::Iterator it = reader.current();
 
@@ -307,8 +307,8 @@ void XmlReaderTest::DtdExternalSubsetSystemId()
     input << "<!DOCTYPE test SYSTEM \"external.dtd\">\n";
     input << "<test></test>";
 
-    Pt::Xml::XmlReader reader(input, Pt::Xml::XmlReader::ReportDtd);
-    reader.setResolver(&resolver);
+    Pt::Xml::XmlReader reader(resolver, input);
+    reader.setFlag(Pt::Xml::XmlReader::ReportDtd);
 
     Pt::Xml::XmlReader::Iterator it = reader.current();
 
@@ -333,15 +333,16 @@ void XmlReaderTest::DtdExternalAndInternalSubset()
         XmlTestResolver resolver;
         resolver.addInput(L"external.dtd", L"<!ENTITY e1 \"e1External\">\n<!ENTITY e2 \"e2External\">\n");
 
-        std::stringstream input;
-        input << "<!DOCTYPE test SYSTEM \"external.dtd\" [\n";
-        input << "<!ELEMENT test (#PCDATA)>\n";
-        input << "<!ENTITY e1 \"e1Internal\">\n";
-        input << "]>\n";
-        input << "<test>&e1; &e2;</test>";
+        Pt::Xml::StringInputSource input(
+            L"<!DOCTYPE test SYSTEM \"external.dtd\" [\n"
+            L"<!ELEMENT test (#PCDATA)>\n"
+            L"<!ENTITY e1 \"e1Internal\">\n"
+            L"]>\n"
+            L"<test>&e1; &e2;</test>"
+        );
 
-        Pt::Xml::XmlReader reader(input, Pt::Xml::XmlReader::ReportDtd);
-        reader.setResolver(&resolver);
+        Pt::Xml::XmlReader reader(resolver, input);
+        reader.setFlag(Pt::Xml::XmlReader::ReportDtd);
 
         Pt::Xml::XmlReader::Iterator it = reader.current();
         
@@ -1108,17 +1109,15 @@ void XmlReaderTest::CustomEntities()
     Pt::Xml::XmlReader reader( input );
     Pt::Xml::XmlReader::Iterator it = reader.current();
 
-    // TODO: parser should report DocType
-    //PT_UNIT_ASSERT(Pt::Xml::toDocType(&*it));
-
-    //++it;
     PT_UNIT_ASSERT(Pt::Xml::toStartElement(&*it));
 
     ++it;
     Pt::Xml::EntityReference* ent = Pt::Xml::toEntityReference(&*it);
     PT_UNIT_ASSERT(ent);
     PT_UNIT_ASSERT(ent->name() == L"undeclared" );
-    reader.addInput( Pt::String(L"resolved").c_str() );
+
+    Pt::Xml::StringInputSource entval(L"resolved");
+    reader.addInput(entval);
 
     ++it;
     PT_UNIT_ASSERT(Pt::Xml::toCharacters(&*it));
@@ -1130,25 +1129,24 @@ void XmlReaderTest::CustomEntities()
 
 void XmlReaderTest::ExternalEntities()
 {
+    XmlTestResolver resolver;
+    resolver.addInput(L"Pt-Xml-test-e2", L"World");
+
     std::stringstream input;
     input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
 
     input << "<!DOCTYPE a [\n";
     input << "<!ELEMENT a (#PCDATA)>\n";
-    input << "<!ENTITY MyEntity1 SYSTEM \"Platinum\">\n";
-    input << "<!ENTITY MyEntity2 PUBLIC \"http://www.pt-framework.org\" \"Platinum\">\n";
-    input << "<!ENTITY MyEntity3 PUBLIC \"http://www.pt-framework.org\">\n";
+    input << "<!ENTITY MyEntity1 SYSTEM \"Pt-Xml-test-e1\">\n";
+    input << "<!ENTITY MyEntity2 PUBLIC \"http://www.pt-framework.org/e2\" \"Pt-Xml-test-e2\">\n";
+    input << "<!ENTITY MyEntity3 PUBLIC \"http://www.pt-framework.org/e3\">\n";
     input << "]>\n";
 
     input << "<a>&MyEntity1; &MyEntity2;&MyEntity3;</a>";
 
-    Pt::Xml::XmlReader reader( input );
+    Pt::Xml::XmlReader reader( resolver, input );
     Pt::Xml::XmlReader::Iterator it = reader.current();
 
-    // TODO: parser should report DocType
-    //PT_UNIT_ASSERT(Pt::Xml::toDocType(&*it));
-
-    //++it;
     PT_UNIT_ASSERT(Pt::Xml::toStartElement(&*it));
 
     ++it;
@@ -1157,32 +1155,21 @@ void XmlReaderTest::ExternalEntities()
     PT_UNIT_ASSERT(ent->name() == L"MyEntity1" );
     PT_UNIT_ASSERT(ent->get());
     PT_UNIT_ASSERT(ent->get()->publicId().empty());
-    PT_UNIT_ASSERT(ent->get()->systemId() == L"Platinum" );
+    PT_UNIT_ASSERT(ent->get()->systemId() == L"Pt-Xml-test-e1" );
 
-    Pt::String entval1("Hello");
-    reader.addInput( entval1.c_str() );
-
-    ++it;
-    ent = Pt::Xml::toEntityReference(&*it);
-    PT_UNIT_ASSERT(ent);
-    PT_UNIT_ASSERT(ent->name() == L"MyEntity2" );
-    PT_UNIT_ASSERT( ent->get() );
-    PT_UNIT_ASSERT(ent->get()->publicId() == L"http://www.pt-framework.org");
-    PT_UNIT_ASSERT(ent->get()->systemId() == L"Platinum" );
-
-    Pt::String entval2("World");
-    reader.addInput( entval2.c_str() );
+    Pt::Xml::StringInputSource entval1( L"Hello");
+    reader.addInput( entval1);
 
     ++it;
     ent = Pt::Xml::toEntityReference(&*it);
     PT_UNIT_ASSERT(ent);
     PT_UNIT_ASSERT(ent->name() == L"MyEntity3" );
     PT_UNIT_ASSERT(ent->get());
-    PT_UNIT_ASSERT(ent->get()->publicId() == L"http://www.pt-framework.org");
+    PT_UNIT_ASSERT(ent->get()->publicId() == L"http://www.pt-framework.org/e3");
     PT_UNIT_ASSERT(ent->get()->systemId().empty() );
 
-    Pt::String entval3("!");
-    reader.addInput( entval3.c_str() );
+    Pt::Xml::StringInputSource entval3( L"!");
+    reader.addInput(entval3);
 
     ++it;
     PT_UNIT_ASSERT(Pt::Xml::toCharacters(&*it));

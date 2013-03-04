@@ -1148,7 +1148,6 @@ class XmlReaderImpl
 
             if( ch == '"' || ch == '\'' )
             {
-                //assert(_entity);
                 if(_entity)
                     _entity->setPublicId(_token);
                 
@@ -1256,7 +1255,6 @@ class XmlReaderImpl
 
             if( ch == '"' || ch == '\'' )
             {
-                //assert(_entity);
                 if(_entity)
                     _entity->setSystemId(_token);
                 
@@ -1278,7 +1276,6 @@ class XmlReaderImpl
 
             if( ch == '"' )
             {
-                //assert(_entity);
                 if(_entity)
                     _entity->setValue(_token);
                 
@@ -1289,10 +1286,6 @@ class XmlReaderImpl
 
             if(ch == '&')
             {
-                //assert(_entity);
-                //_entity->addValue(_token);
-                //_token.clear();
-
                 enterEntityValueCharacterReference(&XmlReaderImpl::OnDtdEntityValueQuot);
                 return;
             }
@@ -1312,7 +1305,6 @@ class XmlReaderImpl
 
             if( ch == '\'' )
             {
-                //assert(_entity);
                 if(_entity)
                     _entity->setValue(_token);
                 
@@ -1323,10 +1315,6 @@ class XmlReaderImpl
 
             if(ch == '&')
             {
-                //assert(_entity);
-                //_entity->addValue(_token);
-                //_token.clear();
-
                 enterEntityValueCharacterReference(&XmlReaderImpl::OnDtdEntityValueApos);
                 return;
             }
@@ -3113,15 +3101,37 @@ class XmlReaderImpl
             _dtdContext.pushOperand(leaf);
         }
 
+        class EntityResolver : public XmlResolver
+        {
+            public:
+                EntityResolver()
+                {}
+
+                InputSource* resolveEntity(const Entity& ent)
+                {
+                    return new StringInputSource( ent.value() );
+                }
+
+            protected:
+                virtual InputSource* onResolve(const Pt::String& publicId, const Pt::String& systemId)
+                {
+                    return 0;
+                }
+
+                virtual void onRelease(InputSource* is)
+                {
+                    delete is;
+                }
+        };
+
         bool resolveExternalDtd()
         {
-            XmlResolver* resolver = _input.resolver();
-            if( resolver && _docType.isExternal() )
+            if( _resolver && _docType.isExternal() )
             {
-                InputSource* is = resolver->resolve( _docType.publicId(), _docType.systemId() );
+                InputSource* is = _resolver->resolve( _docType.publicId(), _docType.systemId() );
                 if(is)
                 {
-                    _input.setExternalDtd(is);
+                    _input.setExternalDtd(*is, _resolver);
                     return true;
                 }
             }
@@ -3135,41 +3145,62 @@ class XmlReaderImpl
             if( EntityMapping::resolveDefaultEntity( token ) )
                 return true;
 
+            InputSource* is = 0;
+
             const Entity* ent = _dtd.resolveEntity(token);
-            if(ent)
+            if( ent )
             {
                 if( ent->isInternal() )
                 {
-                    StringInputSource* is = new StringInputSource( ent->value() );
-                    _input.addInput(is);
-                    return false;
+                    is = _entityResolver.resolveEntity(*ent);
+                    _input.addInput(*is, &_entityResolver);
+                }
+                else if( ent->isExternal() && _resolver)
+                {
+                    is = _resolver->resolve( ent->publicId(), ent->systemId() );
+                    if(is)
+                    {
+                        _input.addInput(*is, _resolver);
+                    }
                 }
             }
-
-            // TODO: add option to parser to fail on undeclared entity references
-
-            _entityRef.set(token, ent);
-            _current = &_entityRef;
+            
+            if( ! is)
+            {
+                _entityRef.set(token, ent);
+                _current = &_entityRef;
+            }
+            
             return false;
         }
 
         void resolveParamEntity(const String& token)
         {
+            InputSource* is = 0;
+            
             const Entity* ent = _dtd.resolveParamEntity(token);
-            if(ent)
+            if( ent )
             {
                 if( ent->isInternal() )
                 {
-                    StringInputSource* is = new StringInputSource( ent->value() );
-                    _input.addInput(is);
-                    return;
+                    is = _entityResolver.resolveEntity(*ent);
+                    _input.addInput(*is, &_entityResolver);
+                }
+                else if( ent->isExternal() && _resolver)
+                {
+                    is = _resolver->resolve( ent->publicId(), ent->systemId() );
+                    if(is)
+                    {
+                        _input.addInput(*is, _resolver);
+                    }
                 }
             }
-            else
-                throw SyntaxError("undeclared parameter entity", line()); 
 
-            _entityRef.set(token, ent);
-            _current = &_entityRef;
+            if( ! is)
+            {
+                _entityRef.set(token, ent);
+                _current = &_entityRef;
+            }
             return;
         }
 
@@ -3258,9 +3289,9 @@ class XmlReaderImpl
         }
 
     public:
-        XmlReaderImpl(std::istream& is, int flags)
-        : _is(0)
-        , _flags(flags)
+        XmlReaderImpl(XmlResolver* resolver = 0)
+        : _resolver(resolver)
+        , _flags(XmlReader::DefaultParseFlags)
         , _entity(0)
         , _depth(0)
         , _parse(0)                 
@@ -3277,46 +3308,34 @@ class XmlReaderImpl
         , _attlistDecl(0)
         {
             _parse = &XmlReaderImpl::onDocumentBegin;
-            _is =  new ByteInputSource(is);
-            _input.setInput(*_is);
-        }
-
-        XmlReaderImpl(InputSource& is, int flags)
-        : _is(0)
-        , _flags(flags)
-        , _entity(0)
-        , _depth(0)
-        , _parse(0)                 
-        , _beforeCharacterReference(0)
-        , _beforeEntityReference(0)
-        , _current(0)
-        , _standalone(false)
-        , _dtdContext()
-        , _dtd(_dtdContext)
-        , _docType()
-        , _dtdValidator(_dtd)
-        , _elemDecl(0)
-        , _attrDecl(0)
-        , _attlistDecl(0)
-        {
-            _parse = &XmlReaderImpl::onDocumentBegin;
-            _input.setInput(is);
         }
 
         ~XmlReaderImpl()
+        { }
+
+        int flags() const
         {
-            delete _is;
+            return _flags;
+        }
+        
+        void setFlag(XmlReader::ParseFlag f)
+        {
+            _flags |= f;
         }
 
-        void clear(int flags)
+        void unsetFlag(XmlReader::ParseFlag f)
         {
+            _flags &= ~f;
+        }
+
+        void clear()
+        {
+            _input.clear();
             _parse = &XmlReaderImpl::onDocumentBegin;
             _beforeEntityReference = 0;
             _beforeCharacterReference = 0;
             _entityName.clear();
             _characterReference.clear();
-
-            _input.clear();
 
             _nsctx.clear();
             
@@ -3327,59 +3346,45 @@ class XmlReaderImpl
             _elemDecl = 0;
             _attrDecl = 0;
             _attlistDecl = 0;
-            
             _entity = 0;
 
-            _flags = flags;
             _docType.clear();
             _version.clear();
             _encoding.clear();
             _standalone = false;
             _depth = 0;
             _current = 0;
+
+            // clear nodes
+            //
+            //_procInstr.clear();
+            //_startElem.clear();
+            //_entityRef.clear();
+            //_endElem.clear();
+            //_chars.clear();
         }
 
-        void setResolver(XmlResolver* r)
+        XmlResolver* resolver() const
         {
-            _input.setResolver(r);
+            return _resolver;
         }
 
-        XmlResolver* resolver()
+        void setInput(std::istream& is)
         {
-            return _input.resolver();
+            clear();
+
+            InputSource* source = new ByteInputSource(is);
+            _input.addInput(*source, &_entityResolver);
         }
 
-        void attach(std::istream& is, int flags)
+        void setInput(InputSource& is)
         {
-            clear(flags);
-
-            delete _is;
-            _is = new ByteInputSource(is);
-            _input.setInput(*_is);
+            clear();
+            _input.addInput(is);
         }
 
-        void attach(InputSource& is, int flags)
-        {
-            clear(flags);
-
-            delete _is;
-            _is = 0;
-            _input.setInput(is);
-        }
-
-        void addInputSource(InputSource* is)
+        void addInput(InputSource& is)
         { _input.addInput(is); }
-
-        void addInput(const Char* str)
-        { 
-            // a pointer to the 'next' node could be stored in the parser, so
-            // we can directly add resolved text to it. This optimizes the
-            // case when addInput is called to resolve entity references to
-            // user defined entities that do not contain further entity 
-            // references
-
-            _input.addInput( new StringInputSource(str) ); 
-        }
 
         const Pt::String& version() const
         { return _version; }
@@ -3418,11 +3423,11 @@ class XmlReaderImpl
 
             while( ! _current )
             {
-                rdbuf = _input.currentInput()->rdbuf();
+                rdbuf = _input.current()->rdbuf();
 
                 if( ! rdbuf || rdbuf->sgetc() == std::char_traits<Char>::eof() )
                 {            
-                    rdbuf = _input.currentInput()->get();
+                    rdbuf = _input.current()->get();
 
                     if( ! rdbuf || rdbuf->sgetc() == std::char_traits<Char>::eof() )
                     {
@@ -3450,7 +3455,7 @@ class XmlReaderImpl
                 }
             }
 
-            if( _docType.isDefined() )
+            if( (_flags & XmlReader::ValidateDtd) && _docType.isDefined() )
             {
                 if( ! _dtdValidator.validate(*_current) )
                     throw SyntaxError("validation failed", line());
@@ -3465,7 +3470,7 @@ class XmlReaderImpl
 
             do
             {
-                std::basic_streambuf<Char>* rdbuf = _input.currentInput()->rdbuf();
+                std::basic_streambuf<Char>* rdbuf = _input.current()->rdbuf();
                 
                 if(rdbuf && rdbuf->in_avail() > 0)
                 {
@@ -3480,14 +3485,10 @@ class XmlReaderImpl
                 }
                 else
                 {                
-                    rdbuf = _input.currentInput()->getSome();
+                    rdbuf = _input.current()->getSome();
 
                     if( ! rdbuf)
                     {
-                        //const bool onEof = _input.currentInput() == _input.externalDtd() || _input.isPrimary() || _input.empty();
-                        //if(onEof) 
-                        //    (this->*_parse)( std::char_traits<Char>::eof() );
-                        
                         _input.removeInput();
                         
                         if( _input.empty() )
@@ -3501,7 +3502,7 @@ class XmlReaderImpl
 
             if( _current )
             {
-                if( _docType.isDefined() )
+                if( (_flags & XmlReader::ValidateDtd) && _docType.isDefined() )
                 {
                     if( ! _dtdValidator.validate(*_current) )
                         throw SyntaxError("validation failed", line());
@@ -3514,8 +3515,9 @@ class XmlReaderImpl
         }
 
     private:
+        XmlResolver* _resolver;
+        EntityResolver _entityResolver;
         InputStack _input;
-        InputSource* _is;
         int _flags;
         
         NamespaceContext _nsctx;
@@ -3556,70 +3558,96 @@ class XmlReaderImpl
 };
 
 
-XmlReader::XmlReader(std::istream& is, int flags)
+XmlReader::XmlReader()
 : _impl(0)
 {
-    _impl = new XmlReaderImpl(is, flags);
+    _impl = new XmlReaderImpl();
 }
 
 
-XmlReader::XmlReader(InputSource& is, int flags)
+XmlReader::XmlReader(std::istream& is)
 : _impl(0)
 {
-    _impl = new XmlReaderImpl(is, flags);
+    _impl = new XmlReaderImpl();
+    setInput(is);
+}
+
+
+XmlReader::XmlReader(InputSource& is)
+: _impl(0)
+{
+    _impl = new XmlReaderImpl();
+    setInput(is);
+}
+
+
+XmlReader::XmlReader(XmlResolver& r, std::istream& is)
+: _impl(0)
+{
+    _impl = new XmlReaderImpl(&r);
+    setInput(is);
+}
+
+
+XmlReader::XmlReader(XmlResolver& r, InputSource& is)
+: _impl(0)
+{
+    _impl = new XmlReaderImpl(&r);
+    setInput(is);
 }
 
 
 XmlReader::~XmlReader()
 {
-    setResolver(0);
     delete _impl;
 }
 
 
-void XmlReader::setResolver(XmlResolver* resolver)
+int XmlReader::flags() const
 {
-    XmlResolver* current = _impl->resolver();
-
-    if(resolver == current)
-        return;
-
-    if(resolver)
-        resolver->registerReader(*this);
-
-    _impl->setResolver(resolver);
-
-    if(current)
-        current->unregisterReader(*this);
+    return _impl->flags();
 }
 
 
-XmlResolver* XmlReader::resolver()
+void XmlReader::setFlag(ParseFlag f)
+{
+    _impl->setFlag(f);
+}
+
+
+void XmlReader::unsetFlag(ParseFlag f)
+{
+    _impl->unsetFlag(f);
+}
+
+
+void XmlReader::clear()
+{
+    _impl->clear();
+}
+
+
+XmlResolver* XmlReader::resolver() const
 {
     return _impl->resolver();
 }
 
-void XmlReader::attach(std::istream& is, int flags)
+
+void XmlReader::setInput(std::istream& is)
 {
-    _impl->attach(is, flags);
+    _impl->setInput(is);
 }
 
 
-void XmlReader::attach(InputSource& is, int flags)
+void XmlReader::setInput(InputSource& is)
 {
-    _impl->attach(is, flags);
+    _impl->setInput(is);
 }
 
 
-void XmlReader::addInputSource(InputSource* in)
+void XmlReader::addInput(InputSource& in)
 {
-    _impl->addInputSource(in);
-}
-
-
-void XmlReader::addInput(const Char* str)
-{
-    _impl->addInput(str);
+    _impl->addInput(in);
 }
 
 

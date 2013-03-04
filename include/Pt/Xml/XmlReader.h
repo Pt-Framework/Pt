@@ -84,10 +84,13 @@ class PT_XML_API XmlReader : private NonCopyable
     public:
         class Iterator;
 
-        enum Flags
+        enum ParseFlag
         {
-            ReportDtd = 1
+            ReportDtd = 1,
+            ValidateDtd = 2
         };
+
+        static const int DefaultParseFlags = ValidateDtd;
 
     public:
         /* TODO: Consider the following processing flags:
@@ -98,36 +101,50 @@ class PT_XML_API XmlReader : private NonCopyable
                      - ReportDocumentStart
                      - ReportCData (not as Characters)
         */
-        explicit XmlReader(std::istream& is, int flags = 0);
+        XmlReader();
 
-        explicit XmlReader(InputSource& is, int flags = 0);
+        // TODO: deprecated
+        explicit XmlReader(std::istream& is);
+
+        explicit XmlReader(InputSource& is);
+
+        // TODO: deprecated
+        XmlReader(XmlResolver& r, std::istream& is);
+
+        XmlReader(XmlResolver& r, InputSource& is);
 
         ~XmlReader();
 
-        void setResolver(XmlResolver* r);
+        int flags() const;
 
-        XmlResolver* resolver();
+        void setFlag(ParseFlag f);
 
-        // TODO: split into attach() and setFlags()
-        // also add methods for discard() and reset()
-        void attach(std::istream& is, int flags = 0);
+        void unsetFlag(ParseFlag f);
 
-        void attach(InputSource& is, int flags = 0);
+        XmlResolver* resolver() const;
+
+        /** @brief Removes all input sources and resets parser state.
+        */
+        void clear();
+
+        // TODO: add methods for discard(), reset(), clear()
+        void setInput(std::istream& is);
+
+        /** @brief Starts parsing with an input source.
+
+            All previous input is removed and the parser is reset to parse
+            a new document. This is essentially the same as calling clear()
+            followed by addInput().
+        */
+        void setInput(InputSource& is);
 
         /** @brief Adds an external input source.
 
             This method can be used to add additional input streams e.g.
             to resolve an external entity reference, indicated by an
             EntityReference node.
-
-            If the reference counter of the input source is 0, it will be
-            deleted when it is no longer needed. So, if an input source is
-            added which was created on the stack, its refernce count must
-            be greater than 0.
         */
-        void addInputSource(InputSource* in);
-
-        void addInput(const Char* str);
+        void addInput(InputSource& in);
 
         const Pt::String& version() const;
 

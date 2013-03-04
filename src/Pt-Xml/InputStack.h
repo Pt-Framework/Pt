@@ -41,10 +41,19 @@ namespace Xml {
 class InputStack
 {
     public:
+        struct Input
+        {
+            Input(InputSource* is, XmlResolver* res)
+            : source(is)
+            , resolver(res)
+            {}
+
+            InputSource* source;
+            XmlResolver* resolver;
+        };
+    public:
         InputStack()
-        : _input(&_nullInput)
-        , _resolver(0)
-        , _externalDtd(0)
+        : _externalDtd(0)
         , _currentInput(&_nullInput)
         {}
 
@@ -52,22 +61,6 @@ class InputStack
         {
             clear();
         }
-
-        void setResolver(XmlResolver* resolver)
-        { 
-            if(_resolver)
-            {
-                while( ! _external.empty() )
-                {
-                    removeInput();
-                }
-            }
-
-            _resolver = resolver; 
-        }
-
-        XmlResolver* resolver()
-        { return _resolver; }
 
         void bumpLine()
         { _currentInput->setLine( _currentInput->line() + 1 ); }
@@ -78,9 +71,6 @@ class InputStack
         bool empty() const
         { return _currentInput == &_nullInput; }
 
-        bool isPrimary() const
-        { return _currentInput == _input; }
-
         void clear()
         {
             while( ! _external.empty() )
@@ -89,45 +79,25 @@ class InputStack
             }
 
             _currentInput = &_nullInput;
-            _input = &_nullInput;
         }
                 
-        InputSource* currentInput()
+        InputSource* current()
         { return _currentInput; }
 
-        void setInput(InputSource& is)
+        void addInput(InputSource& is, XmlResolver* resolver = 0)
         {
-            _input = &is;
-
-            if( _external.empty() )
-            {
-                _currentInput = &is;
-            }
+            _external.push( Input(&is, resolver) );
+            _currentInput = &is;
         }
-
-        void addInput(InputSource* is)
-        {
-            std::auto_ptr<InputSource> isPtr;
-            if(is->refs() == 0)
-                isPtr.reset(is);
-
-            _external.push(is);
-            isPtr.release();
-
-            _currentInput = is;
-        }
-
-        void setExternalDtd(InputSource* is)
-        {
-            addInput(is);
-            _externalDtd = is;
-        }
-
-        InputSource* externalDtd()
-        { return _externalDtd; }
 
         bool isExternalDtd() const
         { return _externalDtd != 0; }
+
+        void setExternalDtd(InputSource& is, XmlResolver* resolver)
+        {
+            addInput(is, resolver);
+            _externalDtd = &is;
+        }
 
         void removeInput()
         {
@@ -135,31 +105,27 @@ class InputStack
 
             if( ! _external.empty() )
             {
-                InputSource* is = _external.top();                        
+                Input& in = _external.top();
+                InputSource* is = in.source;
+                XmlResolver* resolver = in.resolver;                        
 
                 if( is == _externalDtd )
-                {
                     _externalDtd = 0;
-                    
-                    if(_resolver)
-                        _resolver->release(is);
-                }
-                else if( is->refs() == 0 )
-                    delete _external.top();
+
+                if(resolver)
+                    resolver->release(is);
 
                 _external.pop();
                         
-                _currentInput = _external.empty() ? _input 
-                                                  : _external.top();
+                _currentInput = _external.empty() ? &_nullInput 
+                                                  : _external.top().source;
             }
         }
 
     private:
         NullInputSource _nullInput;
-        InputSource* _input;
-        XmlResolver* _resolver;
         InputSource* _externalDtd;
-        std::stack<InputSource*> _external;
+        std::stack<Input> _external;
         InputSource* _currentInput;
 };
 

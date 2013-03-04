@@ -37,31 +37,9 @@ namespace Xml {
 
 XmlResolver::~XmlResolver()
 {
-    std::vector<XmlReader*>::iterator it;
-    while( ! _readers.empty() )
-    {
-        _readers[0]->setResolver(0);
-    }
+
 }
 
-
-void XmlResolver::registerReader(XmlReader& reader)
-{
-    _readers.push_back(&reader);
-}
-
-
-void XmlResolver::unregisterReader(XmlReader& reader)
-{
-    std::vector<XmlReader*>::iterator it = _readers.begin();
-    while( it != _readers.end() )
-    {
-        if(*it == &reader)
-            it = _readers.erase(it);
-        else
-            ++it;
-    }
-}
 
 /*
     00 00 FE FF  UTF-32, big-endian
@@ -82,8 +60,8 @@ enum BomParseState
 };
 
 
-ByteInputSource::ByteInputSource(std::istream& is, std::size_t refcnt)
-: InputSource(refcnt)
+ByteInputSource::ByteInputSource(std::istream& is)
+: InputSource()
 , _tbuf(&is, new Utf8Codec)
 , _is(&is)
 , _bomState(OnBomBegin)
