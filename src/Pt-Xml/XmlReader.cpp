@@ -3689,7 +3689,7 @@ class XmlReaderImpl
             _entityName.clear();
             _characterReference.clear();
 
-            //TODO: should clear _token
+            _token.clear();
 
             _nsctx.clear();
             
@@ -3811,7 +3811,7 @@ class XmlReaderImpl
             return *_current;
         }
 
-        bool advance()
+        Node* advance()
         {
             _current = 0;
 
@@ -3855,11 +3855,9 @@ class XmlReaderImpl
                     if( ! _dtdValidator.validate(*_current) )
                         throw SyntaxError("validation failed", line());
                 }
-                
-                return true;
             }
 
-            return false;
+            return _current;
         }
 
     private:
@@ -4045,7 +4043,7 @@ Node& XmlReader::next()
 }
 
 
-bool XmlReader::advance()
+Node* XmlReader::advance()
 {
     return _impl->advance();
 }

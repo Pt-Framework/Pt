@@ -457,15 +457,17 @@ bool XmlFormatter::parseSome(IComposer& comp)
 {
     _composer = &comp;
 
-    while( _reader->advance() )
+    for(;;)
     {
-        const Pt::Xml::Node& node = _reader->get();
+        const Pt::Xml::Node* node = _reader->advance();
+        if( ! node)
+            break;
         //std::cerr << "-> GOT NODE: " << node.type() << std::endl;
 
-        if(node.type() == Node::EndDocument)
+        if(node->type() == Node::EndDocument)
             throw SerializationError("incomplete type");
 
-        (this->*_processNode)(node);
+        (this->*_processNode)(*node);
 
         if( _composer == 0 )
         {

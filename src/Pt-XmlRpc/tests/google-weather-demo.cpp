@@ -175,13 +175,15 @@ class GoogleWeatherClient : public Pt::Connectable
 
             try
             {     
-                while( _reader.advance() ) // Xml::ParseError
+                for(;;) // Xml::ParseError
                 {
-                    const Pt::Xml::Node& node = _reader.get();
+                    const Pt::Xml::Node* node = _reader.advance();
+                    if( ! node)
+                        break;
 
                     // _parseFunc == 0 means end of document, we ignore the rest...
                     if(_parseFunc)
-                        (this->*_parseFunc)(node);
+                        (this->*_parseFunc)(*node);
                 }
             }
             catch(const Pt::Xml::XmlError& error)

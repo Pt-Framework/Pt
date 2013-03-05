@@ -173,7 +173,7 @@ class PT_XML_API XmlReader : private NonCopyable
             When the last stream is removed, EOF will be parsed and an
             EndDocument node becomes available.
         */
-        bool advance();
+        Node* advance();
 
     private:
         class XmlReaderImpl* _impl;

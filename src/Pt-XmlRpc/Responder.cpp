@@ -93,10 +93,13 @@ void XmlRpcResponder::onReadRequest(Http::Request& request, Http::Reply& reply, 
 {
     try
     {
-        while( _reader.advance() )
+        for(;;)
         {
-            const Xml::Node& node = _reader.get();
-            this->advance(node, loop);
+            const Xml::Node* node = _reader.advance();
+            if( ! node)
+                break;
+            
+            this->advance(*node, loop);
         }
     }
     catch(const Xml::XmlError& error)

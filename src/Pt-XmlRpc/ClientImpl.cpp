@@ -148,10 +148,13 @@ void ClientImpl::onReadReply()
     {
         _errorPending = false;
 
-        while( _reader.advance() ) // Xml::ParseError
+        for(;;) // Xml::ParseError
         {
-            const Pt::Xml::Node& node = _reader.get();
-            advance(node); // SerializationError, ConversionError
+            const Pt::Xml::Node* node = _reader.advance();
+            if( ! node)
+                break;
+            
+            advance(*node); // SerializationError, ConversionError
         }
     }
     catch(const Xml::XmlError& error)
