@@ -89,6 +89,8 @@ class PT_XML_API EntityReference : public Node
         */
         EntityReference();
 
+        void clear();
+
         void set(const Pt::String& name, const Entity* entity);
 
         const Pt::String& name() const;

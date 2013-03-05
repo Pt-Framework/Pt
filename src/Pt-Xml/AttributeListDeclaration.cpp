@@ -53,6 +53,15 @@ bool IDRefAttributeDeclaration::onValidate(const Attribute& attr) const
 }
 
 
+bool IDRefsAttributeDeclaration::onValidate(const Attribute& attr) const
+{          
+    // TODO: attribute value must be an XML name
+
+    _validator->addIdRef( attr.value() );
+    return true; 
+}
+
+
 AttributeListDeclaration::AttributeListDeclaration()
 {
 }

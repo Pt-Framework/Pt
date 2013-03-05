@@ -41,6 +41,13 @@ EntityReference::EntityReference()
 { }
 
 
+void EntityReference::clear()
+{
+    _name.clear();
+    _entity = 0;
+}
+
+
 void EntityReference::set(const Pt::String& name, const Entity* entity)
 {
     _name = name; 

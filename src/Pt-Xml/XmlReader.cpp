@@ -1559,6 +1559,12 @@ class XmlReaderImpl
                 enterParameterReference(&XmlReaderImpl::OnDtdID1);
                 return;
             }
+            
+            if( ch == 'R' )
+            {
+                _parse = &XmlReaderImpl::OnDtdIDREF2;
+                return;
+            }
 
             if( ! Pt::isspace(ch) )
                 throw SyntaxError("XML syntax error", line());
@@ -1577,6 +1583,97 @@ class XmlReaderImpl
             _parse = &XmlReaderImpl::OnDtdAfterAttrType;
         }
 
+        void OnDtdIDREF2(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if( ch == '%' )
+            {
+                enterParameterReference(&XmlReaderImpl::OnDtdIDREF2);
+                return;
+            }
+
+            if( ch != 'E' )
+                throw SyntaxError("XML syntax error", line());
+
+            _parse = &XmlReaderImpl::OnDtdIDREF3;
+        }
+
+        void OnDtdIDREF3(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if( ch == '%' )
+            {
+                enterParameterReference(&XmlReaderImpl::OnDtdIDREF3);
+                return;
+            }
+
+            if( ch != 'F' )
+                throw SyntaxError("XML syntax error", line());
+
+            _parse = &XmlReaderImpl::OnDtdIDREF4;
+        }
+
+        void OnDtdIDREF4(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if( ch == '%' )
+            {
+                enterParameterReference(&XmlReaderImpl::OnDtdIDREF4);
+                return;
+            }
+
+            if( ch == 'S' )
+            {
+                _parse = &XmlReaderImpl::OnDtdIDREFS;
+                return;
+            }
+
+            if( ! Pt::isspace(ch) )
+                throw SyntaxError("XML syntax error", line());
+
+            assert(_attrDecl == 0);
+            assert(_attlistDecl);
+
+            if( 0 == _attlistDecl->findAttribute(_token) )
+            {
+                _attrDecl = new Pt::Xml::IDRefAttributeDeclaration(_dtdValidator);
+                _attrDecl->setName(_token);
+                _attlistDecl->addAttribute(_attrDecl);
+            }
+
+            _token.clear();
+            _parse = &XmlReaderImpl::OnDtdAfterAttrType;
+        }
+
+        void OnDtdIDREFS(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if( ch == '%' )
+            {
+                enterParameterReference(&XmlReaderImpl::OnDtdIDREFS);
+                return;
+            }
+
+            if( ! Pt::isspace(ch) )
+                throw SyntaxError("XML syntax error", line());
+
+            assert(_attrDecl == 0);
+            assert(_attlistDecl);
+
+            if( 0 == _attlistDecl->findAttribute(_token) )
+            {
+                _attrDecl = new Pt::Xml::IDRefsAttributeDeclaration(_dtdValidator);
+                _attrDecl->setName(_token);
+                _attlistDecl->addAttribute(_attrDecl);
+            }
+
+            _token.clear();
+            _parse = &XmlReaderImpl::OnDtdAfterAttrType;
+        }
 
         void OnDtdCDATA0(int c)
         {
@@ -2302,6 +2399,11 @@ class XmlReaderImpl
         void OnDtdBinaryOp(int c)
         {
             Pt::Char ch = notEof(c);
+
+            if( Pt::isspace(ch) )
+            {
+                return;
+            }
 
             if( isAlpha(ch) || ch == '#')
             {
@@ -3361,6 +3463,29 @@ class XmlReaderImpl
             _parse = &XmlReaderImpl::onDocumentBegin;
         }
 
+        XmlReaderImpl(InputSource& is, XmlResolver* resolver = 0)
+        : _resolver(resolver)
+        , _flags(XmlReader::DefaultParseFlags)
+        , _entity(0)
+        , _depth(0)
+        , _parse(0)                 
+        , _beforeCharacterReference(0)
+        , _beforeEntityReference(0)
+        , _current(0)
+        , _standalone(false)
+        , _dtdContext()
+        , _dtd(_dtdContext)
+        , _docType()
+        , _dtdValidator(_dtd)
+        , _elemDecl(0)
+        , _attrDecl(0)
+        , _attlistDecl(0)
+        {
+            _parse = &XmlReaderImpl::onDocumentBegin;
+
+            _input.addInput(is);
+        }
+
         ~XmlReaderImpl()
         { }
 
@@ -3406,13 +3531,7 @@ class XmlReaderImpl
             _depth = 0;
             _current = 0;
 
-            // clear nodes
-            //
-            //_procInstr.clear();
-            //_startElem.clear();
-            //_entityRef.clear();
-            //_endElem.clear();
-            //_chars.clear();
+            // other members are cleared before they are parsed
         }
 
         XmlResolver* resolver() const
@@ -3482,10 +3601,9 @@ class XmlReaderImpl
 
                     if( ! rdbuf || rdbuf->sgetc() == std::char_traits<Char>::eof() )
                     {
-                        //bool endDtd = _input.externalDtd() != 0;
                         _input.removeInput();
 
-                        if( /*endDtd ||*/ _input.empty() )
+                        if( _input.empty() )
                         {
                             (this->*_parse)( std::char_traits<Char>::eof() );
                             
@@ -3551,6 +3669,7 @@ class XmlReaderImpl
             } 
             while( ! _current);
 
+            // TODO: use Validator outside of XmlReader
             if( _current )
             {
                 if( (_flags & XmlReader::ValidateDtd) && _docType.isDefined() )
@@ -3627,8 +3746,7 @@ XmlReader::XmlReader(std::istream& is)
 XmlReader::XmlReader(InputSource& is)
 : _impl(0)
 {
-    _impl = new XmlReaderImpl();
-    setInput(is);
+    _impl = new XmlReaderImpl(is);
 }
 
 
@@ -3643,8 +3761,7 @@ XmlReader::XmlReader(XmlResolver& r, std::istream& is)
 XmlReader::XmlReader(XmlResolver& r, InputSource& is)
 : _impl(0)
 {
-    _impl = new XmlReaderImpl(&r);
-    setInput(is);
+    _impl = new XmlReaderImpl(is, &r);
 }
 
 

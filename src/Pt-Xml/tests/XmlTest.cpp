@@ -423,10 +423,17 @@ void XmlReaderTest::DtdValidateIDAttributes()
     {
         std::stringstream input;
         input << "<!DOCTYPE test [\n";
-        input << "<!ELEMENT test EMPTY>\n";
-        input << "<!ATTLIST test id ID #REQUIRED\n>";
+        input << "<!ELEMENT test (first, second)>\n";
+        input << "<!ELEMENT first EMPTY>\n";
+        input << "<!ELEMENT second EMPTY>\n";
+        input << "<!ATTLIST test id ID #REQUIRED>\n";
+        input << "<!ATTLIST first ref IDREF #REQUIRED\n>";
+        input << "<!ATTLIST second ref IDREF #REQUIRED\n>";
         input << "]>\n";
-        input << "<test id='A1'></test>";
+        input << "<test id='A1'>\n";
+        input << "    <first ref='A1'/>\n";
+        input << "    <second ref='A1'/>\n";
+        input << "</test>";
 
         Pt::Xml::XmlReader reader(input);
         

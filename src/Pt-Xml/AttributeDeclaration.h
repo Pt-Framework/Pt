@@ -193,6 +193,22 @@ class IDRefAttributeDeclaration : public AttributeDeclaration
         DocTypeValidator* _validator;
 };
 
+
+class IDRefsAttributeDeclaration : public AttributeDeclaration
+                                , private NonCopyable
+{
+    public:
+        IDRefsAttributeDeclaration(DocTypeValidator& validator)
+        : AttributeDeclaration()
+        , _validator(&validator)
+        {}
+
+        virtual bool onValidate(const Attribute& attr) const;
+
+    private:
+        DocTypeValidator* _validator;
+};
+
 } // namespace Xml
 
 } // namespace Pt
