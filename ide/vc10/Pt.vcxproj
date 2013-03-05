@@ -396,10 +396,12 @@
     <ClCompile Include="..\..\src\Pt-Unit\TestSuite.cpp" />
     <ClCompile Include="..\..\src\Pt-Unit\TextProtocol.cpp" />
     <ClCompile Include="..\..\src\Pt-Unit\TextProtocolTest.cpp" />
+    <ClCompile Include="..\..\src\Pt-Xml\AttributeDeclaration.cpp" />
     <ClCompile Include="..\..\src\Pt-Xml\AttributeListDeclaration.cpp" />
     <ClCompile Include="..\..\src\Pt-Xml\ContentModel.cpp" />
     <ClCompile Include="..\..\src\Pt-Xml\DocType.cpp" />
     <ClCompile Include="..\..\src\Pt-Xml\DocTypeDefinition.cpp" />
+    <ClCompile Include="..\..\src\Pt-Xml\DocTypeValidator.cpp" />
     <ClCompile Include="..\..\src\Pt-Xml\DtdContext.cpp" />
     <ClCompile Include="..\..\src\Pt-Xml\ElementDeclaration.cpp" />
     <ClCompile Include="..\..\src\Pt-Xml\Entity.cpp" />

@@ -1,0 +1,341 @@
+/*
+ * Copyright (C) 2013 Marc Boris Duerner
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ * 
+ * As a special exception, you may use this file as part of a free
+ * software library without restriction. Specifically, if other files
+ * instantiate templates or use macros or inline functions from this
+ * file, or you compile this file and link it with other files to
+ * produce an executable, this file does not by itself cause the
+ * resulting executable to be covered by the GNU General Public
+ * License. This exception does not however invalidate any other
+ * reasons why the executable file might be covered by the GNU Library
+ * General Public License.
+ * 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+ 
+#include "DtdValidator.h"
+#include "ContentModel.h"
+#include "ElementDeclaration.h"
+#include "AttributeDeclaration.h"
+#include <Pt/Xml/DocTypeDefinition.h>
+#include <Pt/Xml/Characters.h>
+#include <iterator>
+#include <vector>
+#include <set>
+#include <stack>
+#include <cassert>
+
+namespace {
+
+bool validateAttributes(Pt::Xml::AttributeList& attrs, const Pt::Xml::AttributeListDeclaration& decls)
+{
+    //TODO: use fixed array[N], use vector when decls.size() > N
+
+    std::vector<const Pt::Xml::AttributeDeclaration*> attrDecls;
+    std::copy(decls.begin(), decls.end(), std::back_inserter(attrDecls));
+
+    // TODO: do not allow two ID type attributes
+
+    // match attributes against declarations and remove declarations
+    // that match an attribute
+    Pt::Xml::AttributeList::ConstIterator attr;
+    for(attr = attrs.begin(); attr != attrs.end(); ++attr)
+    {
+        std::vector<const Pt::Xml::AttributeDeclaration*>::iterator it;
+                 
+        for(it = attrDecls.begin(); it != attrDecls.end(); ++it)
+        {
+            if( (*it)->name() == attr->name() )
+            {
+                break;
+            }
+        }
+
+        if( it == attrDecls.end() )
+            return false;
+
+        if( ! (*it)->validate( *attr) )
+            return false;
+
+        attrDecls.erase(it);
+    }
+
+    // post process unmatched declarations e.g. get default values
+    // and check for missing required attributes
+    std::vector<const Pt::Xml::AttributeDeclaration*>::iterator decl;
+    for(decl = attrDecls.begin(); decl != attrDecls.end(); ++decl)
+    {
+        if( ! (*decl)->fixup(attrs) )
+            return false;
+    }
+
+    return true;
+}
+
+}
+
+namespace Pt {
+
+namespace Xml {
+
+class ElementValidator
+{
+    public:
+        //! @brief A validator for an undeclared element.
+        ElementValidator()
+        : _elemDecl(0)
+        { }
+
+        explicit ElementValidator(const ElementDeclaration& elemDecl)
+        : _particles( elemDecl.content(), elemDecl.contentSize() )
+        , _elemDecl(&elemDecl)
+        { }
+
+        bool validateNode(Node& node);
+        
+        bool isValid() const;
+
+    private:
+        ContentParticleList _particles;
+        const ElementDeclaration* _elemDecl;
+};
+
+
+bool ElementValidator::validateNode(Node& node)
+{
+    // handle ignorable WS and EMPTY separately, so indentation in XML
+    // documents does not lead to costly state transitions. 
+    if( Pt::Xml::Characters* chars = Pt::Xml::toCharacters(&node) )
+    {
+        if( chars->isIgnorable() )
+        {
+            // special rule for EMPTY, not even WS is allowed
+            if( _elemDecl && _elemDecl->isEmpty() )
+                return false;
+
+            // all other cases ignore WS
+            return true;
+        }
+    }
+
+    if( _elemDecl && _elemDecl->isAny() )
+        return true;
+
+    // invalid or EMPTY will not have any further states, so we will
+    // return with false eventually
+    return _particles.advance(node);
+}
+        
+
+bool ElementValidator::isValid() const
+{ 
+    // if the element was undeclared, empty or any content is allowed
+    // we do not expect more content
+    if( ! _elemDecl || ! _elemDecl->isExpression() )
+        return true;
+            
+    return _particles.isValid();
+}
+
+
+class IDRefsValidator
+{
+    public:
+        IDRefsValidator()
+        {}
+
+        void clear()
+        {
+            _ids.clear();
+            _idrefs.clear();
+        }
+
+        bool addId(const Pt::String& id)
+        {
+            if( _ids.find(id) != _ids.end() )
+                return false;
+
+            _ids.insert(id);
+            return true;
+        }
+
+        void addRef(const Pt::String& id)
+        {
+            _idrefs.push_back(id);
+        }
+
+
+        bool validate() const
+        {
+            bool valid = true;
+            
+            std::vector<Pt::String>::const_iterator it;
+            for(it =_idrefs.begin(); it != _idrefs.end(); ++it)
+            {
+                if( _ids.find(*it) == _ids.end() )
+                {
+                    valid = false;
+                }
+            }
+
+            return valid;
+        }
+
+    private:
+        std::set<Pt::String> _ids;
+        std::vector<Pt::String> _idrefs;
+};
+
+
+class DocTypeValidatorImpl
+{
+    public:
+        explicit DocTypeValidatorImpl(DocTypeDefinition& dtd);
+
+        void clear();
+
+        bool validate(Node& node);
+
+        bool addId(const Pt::String& id)
+        { return _idrefs.addId(id); }
+
+        void addIdRef(const Pt::String& id)
+        { _idrefs.addRef(id); }
+
+    private:
+        DocTypeDefinition* _dtd;
+        std::stack<ElementValidator> _decls;
+        IDRefsValidator _idrefs;
+};
+
+
+DocTypeValidatorImpl::DocTypeValidatorImpl(DocTypeDefinition& dtd)
+: _dtd(&dtd)
+{
+}
+
+
+void DocTypeValidatorImpl::clear()
+{ 
+    _idrefs.clear();
+
+    while( ! _decls.empty() )
+        _decls.pop();
+}
+
+
+bool DocTypeValidatorImpl::validate(Node& node)
+{
+    bool valid = true;
+
+    switch( node.type() )
+    {
+        case Node::StartElement:
+        {
+            StartElement& se = static_cast<StartElement&>(node);
+            if( ! _decls.empty() )
+            {
+                valid = _decls.top().validateNode(se);
+            }
+                    
+            ElementDeclaration* decl = _dtd->findElement( se.name() );
+            if(decl)
+            {
+                ElementValidator validator( *decl );
+                _decls.push(validator);
+
+                if( ! validateAttributes( se.attributes(), decl->attributeList() ) )
+                    valid = false;
+            }
+            else
+            {
+                ElementValidator validator;
+                _decls.push(validator);
+                valid = false;
+            }
+
+            break;
+        }
+                
+        case Node::Characters:
+        {
+            Characters& chars = static_cast<Characters&>(node);
+
+            if( ! _decls.empty() )
+            {
+                valid = _decls.top().validateNode(chars);
+            }
+
+            break;
+        }
+
+        case Node::EndElement:
+        {
+            valid = _decls.top().isValid();
+            _decls.pop();
+
+            if( _decls.empty() )
+                if( ! _idrefs.validate() )
+                    valid = false;
+                    
+            break;
+        }
+
+        default:
+            break;
+    }
+
+    return valid;
+}
+
+
+DocTypeValidator::DocTypeValidator(DocTypeDefinition& dtd)
+: _impl( new DocTypeValidatorImpl(dtd) )
+{}
+
+
+DocTypeValidator::~DocTypeValidator()
+{
+    delete _impl;
+}
+
+
+void DocTypeValidator::clear()
+{ 
+    _impl->clear();
+}
+
+
+bool DocTypeValidator::validate(Node& node)
+{
+    return _impl->validate(node);
+}
+
+
+bool DocTypeValidator::addId(const Pt::String& id)
+{
+    return _impl->addId(id);
+}
+
+
+void DocTypeValidator::addIdRef(const Pt::String& id)
+{
+    _impl->addIdRef(id);
+}
+
+} // namespace Xml
+
+} // namespace Pt

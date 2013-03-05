@@ -38,7 +38,7 @@ namespace Pt {
 
 namespace Xml {
 
-class ContentValidator;
+class ContentParticleList;
 
 class ContentParticle
 {
@@ -47,10 +47,10 @@ class ContentParticle
         { }
 
         //! @brief Gets this Particle and follows unlabelled transitions.
-        virtual void get(ContentValidator& ctx) const = 0;
+        virtual void get(ContentParticleList& ctx) const = 0;
 
         //! @brief Evaluate the XML node and get all following nodes.
-        virtual void eval(ContentValidator& ctx, Node& node) const = 0;
+        virtual void eval(ContentParticleList& ctx, Node& node) const = 0;
 
         //! @brief Returns true if the node represents a match state.
         virtual bool isValid() const
@@ -80,26 +80,20 @@ class ContentParticle
 };
 
 
-class ContentValidator
+class ContentParticleList
 {
     public:
-        ContentValidator();
+        ContentParticleList();
         
-        ContentValidator(const ContentParticle* start, std::size_t nodeCount);
+        ContentParticleList(const ContentParticle* start, std::size_t nodeCount);
 
-        bool validateNext(Node& node);
+        bool advance(Node& node);
 
         bool isValid() const;
 
         bool setVisited(unsigned id);
 
-        void addNext(const ContentParticle* p);
-        
-    private:
-        // increases step id
-        void clear();
-
-        const std::vector<const ContentParticle*>& next() const;
+        void add(const ContentParticle* p);
 
     private:
         unsigned _stepId;
@@ -117,9 +111,9 @@ class SplitParticle : public ContentParticle
         , _out1(to)
         { }
 
-        virtual void eval(ContentValidator& ctx, Node& node) const;
+        virtual void eval(ContentParticleList& ctx, Node& node) const;
 
-        virtual void get(ContentValidator& ctx) const;
+        virtual void get(ContentParticleList& ctx) const;
 
     private:
         ContentParticle* _out1;
@@ -134,9 +128,9 @@ class LeafParticle : public ContentParticle
         , _name(name)
         { }
 
-        virtual void eval(ContentValidator& ctx, Node& node) const;
+        virtual void eval(ContentParticleList& ctx, Node& node) const;
 
-        virtual void get(ContentValidator& ctx) const;
+        virtual void get(ContentParticleList& ctx) const;
 
     private:
         Pt::String _name;
@@ -150,9 +144,9 @@ class PcDataParticle : public ContentParticle
         : ContentParticle()
         { }
 
-        virtual void eval(ContentValidator& ctx, Node& node) const;
+        virtual void eval(ContentParticleList& ctx, Node& node) const;
 
-        virtual void get(ContentValidator& ctx) const;
+        virtual void get(ContentParticleList& ctx) const;
 };
 
 
@@ -163,9 +157,9 @@ class MatchParticle : public ContentParticle
         : ContentParticle()
         { setId(0); }
 
-        virtual void eval(ContentValidator& ctx, Node& node) const;
+        virtual void eval(ContentParticleList& ctx, Node& node) const;
         
-        virtual void get(ContentValidator& ctx) const;
+        virtual void get(ContentParticleList& ctx) const;
 
         virtual bool isValid() const
         { return true; }

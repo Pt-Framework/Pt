@@ -32,6 +32,7 @@
 #include <Pt/Xml/StartElement.h>
 #include <Pt/String.h>
 #include <Pt/NonCopyable.h>
+#include <set>
 
 namespace Pt {
 
@@ -78,8 +79,8 @@ class AttributeDeclaration
 
         bool validate(const Attribute& attr) const
         {
-            if(mode() == Fixed)
-                return attr.value() == defaultValue();
+            if(mode() == Fixed && attr.value() != defaultValue() )
+                return false;
 
             return onValidate(attr);
         }
@@ -102,8 +103,12 @@ class AttributeDeclaration
             Attribute attr;
             attr.setName(_name);
             attr.setValue(_default);
-            list.add(attr);
-            return true;
+            
+            bool valid = onValidate(attr);
+            if(valid)
+                list.add(attr);
+            
+            return valid;
         }
 
     protected:
@@ -161,6 +166,26 @@ class NMTokensAttributeDeclaration : public AttributeDeclaration
 };
 
 
+class EnumAttributeDeclaration : public AttributeDeclaration
+{
+    public:
+        EnumAttributeDeclaration()
+        : AttributeDeclaration()
+        {}
+
+        void addValue(const Pt::String& value)
+        {
+            _enumValues.insert(value);
+        }
+
+    protected:
+        virtual bool onValidate(const Attribute& attr) const;
+
+    private:
+        std::set<Pt::String> _enumValues;
+};
+
+
 class IDAttributeDeclaration : public AttributeDeclaration
                              , private NonCopyable
 {
@@ -195,7 +220,7 @@ class IDRefAttributeDeclaration : public AttributeDeclaration
 
 
 class IDRefsAttributeDeclaration : public AttributeDeclaration
-                                , private NonCopyable
+                                 , private NonCopyable
 {
     public:
         IDRefsAttributeDeclaration(DocTypeValidator& validator)

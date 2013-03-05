@@ -35,13 +35,13 @@ namespace Pt {
 
 namespace Xml {
 
-ContentValidator::ContentValidator()
+ContentParticleList::ContentParticleList()
 : _stepId(1)
 {
 }
 
 
-ContentValidator::ContentValidator(const ContentParticle* start, std::size_t nodeCount)
+ContentParticleList::ContentParticleList(const ContentParticle* start, std::size_t nodeCount)
 : _stepId(1)
 {
     // all nodes are unvisited
@@ -53,11 +53,12 @@ ContentValidator::ContentValidator(const ContentParticle* start, std::size_t nod
 }
 
 
-bool ContentValidator::validateNext(Node& node)
+bool ContentParticleList::advance(Node& node)
 {
     _next = _current;
     
-    clear();
+    _current.clear(); 
+    _stepId++;
 
     for(unsigned n = 0; n < _next.size(); ++n)
     {
@@ -69,7 +70,7 @@ bool ContentValidator::validateNext(Node& node)
 }
 
 
-bool ContentValidator::setVisited(unsigned id)
+bool ContentParticleList::setVisited(unsigned id)
 { 
     if(_nodes.at(id) == _stepId)
         return true;
@@ -80,7 +81,7 @@ bool ContentValidator::setVisited(unsigned id)
 }
 
 
-bool ContentValidator::isValid() const
+bool ContentParticleList::isValid() const
 {
     // at the end of the validation, at least one current particle
     // must be a match particle, otherwise there was more content
@@ -95,31 +96,18 @@ bool ContentValidator::isValid() const
     return false;
 }
 
-void ContentValidator::addNext(const ContentParticle* p)
+void ContentParticleList::add(const ContentParticle* p)
 { 
     _current.push_back(p); 
 }
 
 
-const std::vector<const ContentParticle*>& ContentValidator::next() const
-{ 
-    return _current; 
-}
-
-
-void ContentValidator::clear()
-{ 
-    _current.clear(); 
-    _stepId++;
-}
-
-
-void SplitParticle::eval(ContentValidator& ctx, Node& node) const
+void SplitParticle::eval(ContentParticleList& ctx, Node& node) const
 { 
 }
 
 
-void SplitParticle::get(ContentValidator& ctx) const
+void SplitParticle::get(ContentParticleList& ctx) const
 {
     assert(id() != 0);
 
@@ -134,7 +122,7 @@ void SplitParticle::get(ContentValidator& ctx) const
 }
 
 
-void LeafParticle::eval(ContentValidator& ctx, Node& node) const
+void LeafParticle::eval(ContentParticleList& ctx, Node& node) const
 {
     StartElement* se = toStartElement(&node);
     if(se && se->name() == _name)
@@ -144,18 +132,18 @@ void LeafParticle::eval(ContentValidator& ctx, Node& node) const
 }
 
 
-void LeafParticle::get(ContentValidator& ctx) const
+void LeafParticle::get(ContentParticleList& ctx) const
 {
     assert(id() != 0);
 
     if( ctx.setVisited( this->id() ) )
         return;
 
-    ctx.addNext(this);
+    ctx.add(this);
 }
 
 
-void PcDataParticle::eval(ContentValidator& ctx, Node& node) const
+void PcDataParticle::eval(ContentParticleList& ctx, Node& node) const
 {
     Characters* chars = toCharacters(&node);
     if(chars)
@@ -165,30 +153,30 @@ void PcDataParticle::eval(ContentValidator& ctx, Node& node) const
 }
 
 
-void PcDataParticle::get(ContentValidator& ctx) const
+void PcDataParticle::get(ContentParticleList& ctx) const
 {
     assert(id() != 0);
 
     if( ctx.setVisited( this->id() ) )
         return;
 
-    ctx.addNext(this);
+    ctx.add(this);
 }
 
 
-void MatchParticle::eval(ContentValidator& ctx, Node& node) const
+void MatchParticle::eval(ContentParticleList& ctx, Node& node) const
 {
 }
         
 
-void MatchParticle::get(ContentValidator& ctx) const
+void MatchParticle::get(ContentParticleList& ctx) const
 { 
     assert(id() == 0);
 
     if( ctx.setVisited( this->id() ) )
         return;
     
-    ctx.addNext(this); 
+    ctx.add(this); 
 }
 
 } // namespace Xml

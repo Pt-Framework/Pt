@@ -3,10 +3,12 @@ SubDirHdrs $(PT_TOP)/include ;
 SubDirC++Flags [ FDefines PT_XML_API_EXPORT ] ;
 SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Xml ;
 
-PT_XML_SOURCES = AttributeListDeclaration.cpp
+PT_XML_SOURCES = AttributeDeclaration.cpp
+                 AttributeListDeclaration.cpp
                  ContentModel.cpp
                  DocType.cpp
                  DocTypeDefinition.cpp
+                 DocTypeValidator.cpp
                  DtdContext.cpp
                  ElementDeclaration.cpp
                  Entity.cpp

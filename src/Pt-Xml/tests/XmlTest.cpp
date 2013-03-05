@@ -102,6 +102,7 @@ class XmlReaderTest : public Pt::Unit::TestSuite
             this->registerMethod("DtdExternalSubsetSystemId", *this, &XmlReaderTest::DtdExternalSubsetSystemId);
             this->registerMethod("DtdExternalAndInternalSubset", *this, &XmlReaderTest::DtdExternalAndInternalSubset);
             this->registerMethod("DtdValidateAttributes", *this, &XmlReaderTest::DtdValidateAttributes);
+            this->registerMethod("DtdValidateEnumAttributes", *this, &XmlReaderTest::DtdValidateEnumAttributes);
             this->registerMethod("DtdValidateIDAttributes", *this, &XmlReaderTest::DtdValidateIDAttributes);
             this->registerMethod("DtdValidateElementContent", *this, &XmlReaderTest::DtdValidateElementContent);
             this->registerMethod("DtdAnyElementContent", *this, &XmlReaderTest::DtdAnyElementContent);
@@ -153,6 +154,7 @@ class XmlReaderTest : public Pt::Unit::TestSuite
         void DtdExternalSubsetSystemId();
         void DtdExternalAndInternalSubset();
         void DtdValidateAttributes();
+        void DtdValidateEnumAttributes();
         void DtdValidateIDAttributes();
         void DtdValidateElementContent();
         void DtdAnyElementContent();
@@ -417,6 +419,32 @@ void XmlReaderTest::DtdValidateAttributes()
 }
 
 
+void XmlReaderTest::DtdValidateEnumAttributes()
+{
+    try
+    {
+        std::stringstream input;
+        input << "<!DOCTYPE test [\n";
+        input << "<!ELEMENT test EMPTY>\n";
+        input << "<!ATTLIST test a1 (aaa|bbb) #REQUIRED>\n";
+        input << "]>\n";
+        input << "<test a1='bbb'></test>";
+
+        Pt::Xml::XmlReader reader(input);
+        
+        Pt::Xml::XmlReader::Iterator it;
+        for(it = reader.current(); it != reader.end(); ++it)
+        {
+        }
+    }
+    catch(const Pt::Xml::SyntaxError& error)
+    {
+        std::cerr << error.what() << ": " << error.line() << std::endl;
+        throw;
+    }
+}
+
+
 void XmlReaderTest::DtdValidateIDAttributes()
 {
     try
@@ -427,12 +455,13 @@ void XmlReaderTest::DtdValidateIDAttributes()
         input << "<!ELEMENT first EMPTY>\n";
         input << "<!ELEMENT second EMPTY>\n";
         input << "<!ATTLIST test id ID #REQUIRED>\n";
-        input << "<!ATTLIST first ref IDREF #REQUIRED\n>";
-        input << "<!ATTLIST second ref IDREF #REQUIRED\n>";
+        input << "<!ATTLIST first refs IDREFS #REQUIRED\n>";
+        input << "<!ATTLIST second id ID #REQUIRED\n";
+        input << "                 ref IDREF #REQUIRED\n>";
         input << "]>\n";
         input << "<test id='A1'>\n";
-        input << "    <first ref='A1'/>\n";
-        input << "    <second ref='A1'/>\n";
+        input << "    <first refs='A1 A2'/>\n";
+        input << "    <second id='A2' ref='A1' />\n";
         input << "</test>";
 
         Pt::Xml::XmlReader reader(input);

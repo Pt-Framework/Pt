@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 by Marc Boris Duerner
+ * Copyright (C) 2013 by Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,41 +26,52 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef Pt_Xml_DocTypeValidator_h
-#define Pt_Xml_DocTypeValidator_h
-
-#include <Pt/Xml/Api.h>
-#include <Pt/String.h>
-#include <Pt/NonCopyable.h>
+#include "AttributeDeclaration.h"
+#include "DtdValidator.h"
+#include <Pt/StringStream.h>
 
 namespace Pt {
 
 namespace Xml {
 
-class Node;
-class DocTypeDefinition;
+bool EnumAttributeDeclaration::onValidate(const Attribute& attr) const
+{           
+    return _enumValues.find( attr.value() ) != _enumValues.end(); 
+}
 
-class DocTypeValidator : private NonCopyable
-{
-    public:
-        explicit DocTypeValidator(DocTypeDefinition& dtd);
 
-        ~DocTypeValidator();
+bool IDAttributeDeclaration::onValidate(const Attribute& attr) const
+{          
+    // TODO: attribute value must be an XML name
 
-        void clear();
+    return _validator->addId( attr.value() );
+}
 
-        bool validate(Node& node);
 
-        bool addId(const Pt::String& id);
+bool IDRefAttributeDeclaration::onValidate(const Attribute& attr) const
+{          
+    // TODO: attribute value must be an XML name
 
-        void addIdRef(const Pt::String& id);
+    _validator->addIdRef( attr.value() );
+    return true; 
+}
 
-    private:
-        class DocTypeValidatorImpl* _impl;
-};
+
+bool IDRefsAttributeDeclaration::onValidate(const Attribute& attr) const
+{          
+    // TODO: attribute value must be an XML name
+
+    Pt::IStringStream iss( attr.value() );
+    Pt::String idref;
+    
+    while(iss >> idref)
+    {
+        _validator->addIdRef(idref);
+    }
+
+    return true; 
+}
 
 } // namespace Xml
 
 } // namespace Pt
-
-#endif

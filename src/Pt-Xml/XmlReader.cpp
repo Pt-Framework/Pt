@@ -29,6 +29,7 @@
 #include "DtdContext.h"
 #include "DtdValidator.h"
 #include "ElementDeclaration.h"
+#include "AttributeDeclaration.h"
 #include "InputStack.h"
 
 #include <Pt/Xml/XmlReader.h>
@@ -48,6 +49,7 @@
 
 #include <iostream>
 #include <memory>
+#include <cassert>
 
 log_define("Pt.Xml.XmlReader")
 
@@ -805,7 +807,7 @@ class XmlReaderImpl
 
             if(ch == ';')
             {
-                 assert(_beforeEntityReference);
+                assert(_beforeEntityReference);
                 resolveParamEntity(_entityName);
                 _parse = _beforeEntityReference;
                 _beforeEntityReference = 0;
@@ -1520,6 +1522,23 @@ class XmlReaderImpl
                 return;
             }
 
+            if( ch == '(' )
+            {
+                assert(_attrDecl == 0);
+                assert(_attlistDecl);
+
+                if( 0 == _attlistDecl->findAttribute(_token) )
+                {
+                    _attrDecl = new Pt::Xml::EnumAttributeDeclaration();
+                    _attrDecl->setName(_token);
+                    _attlistDecl->addAttribute(_attrDecl);
+                }
+
+                _token.clear();
+                _parse = &XmlReaderImpl::OnDtdAttrEnum;
+                return;
+            }
+
             if( Pt::isspace(ch) )
             {
                 return;
@@ -1528,6 +1547,161 @@ class XmlReaderImpl
             if( ch == '%' )
             {
                 enterParameterReference(&XmlReaderImpl::OnDtdAfterAttrName);
+                return;
+            }
+
+            throw SyntaxError("XML syntax error", line());
+        }
+
+        void OnDtdAttrEnum(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if( Pt::isspace(ch) )
+            {
+                return;
+            }
+
+            if( isAlpha(ch) )
+            {
+                _token.clear();
+                _token += ch;
+                _parse = &XmlReaderImpl::OnDtdAttrEnumValue;
+                return;
+            }
+
+            if( ch == '%' )
+            {
+                enterParameterReference(&XmlReaderImpl::OnDtdAttrEnum);
+                return;
+            }
+
+            throw SyntaxError("XML syntax error", line());
+        }
+
+        void OnDtdAttrEnumValue(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if( isAlpha(ch) )
+            {
+                _token += ch;
+                return;
+            }
+
+            if( Pt::isspace(ch) )
+            {
+                assert(_attrDecl);
+                static_cast<EnumAttributeDeclaration*>(_attrDecl)->addValue(_token);
+                _token.clear();
+                _parse = &XmlReaderImpl::OnDtdAttrAfterEnumValue;
+                return;
+            }
+
+            if( ch == '|' )
+            {
+                assert(_attrDecl);
+                static_cast<EnumAttributeDeclaration*>(_attrDecl)->addValue(_token);
+                _token.clear();
+                _parse = &XmlReaderImpl::OnDtdAttrEnumSep;
+                return;
+            }
+
+            if( ch == ')' )
+            {
+                assert(_attrDecl);
+                static_cast<EnumAttributeDeclaration*>(_attrDecl)->addValue(_token);
+                _token.clear();
+                _parse = &XmlReaderImpl::OnDtdAfterAttrType;
+                return;
+            }
+
+            if( ch == '%' )
+            {
+                enterParameterReference(&XmlReaderImpl::OnDtdAttrEnumValue);
+                return;
+            }
+
+            throw SyntaxError("XML syntax error", line());
+        }
+
+        void OnDtdAttrAfterEnumValue(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if( Pt::isspace(ch) )
+            {
+                return;
+            }
+
+            if( ch == '|' )
+            {
+                _parse = &XmlReaderImpl::OnDtdAttrEnumSep;
+                return;
+            }
+
+            if( ch == ')' )
+            {
+                _parse = &XmlReaderImpl::OnDtdAfterAttrType;
+                return;
+            }
+
+            if( ch == '%' )
+            {
+                enterParameterReference(&XmlReaderImpl::OnDtdAttrAfterEnumValue);
+                return;
+            }
+
+            throw SyntaxError("XML syntax error", line());
+        }
+
+        void OnDtdAttrEnumSep(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if( Pt::isspace(ch) )
+            {
+                _parse = &XmlReaderImpl::OnDtdAfterAttrEnumSep;
+                return;
+            }
+
+            if( isAlpha(ch) )
+            {
+                _token.clear();
+                _token += ch;
+                _parse = &XmlReaderImpl::OnDtdAttrEnumValue;
+                return;
+            }
+
+            if( ch == '%' )
+            {
+                enterParameterReference(&XmlReaderImpl::OnDtdAttrEnumSep);
+                return;
+            }
+
+            throw SyntaxError("XML syntax error", line());
+        }
+
+        void OnDtdAfterAttrEnumSep(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if( Pt::isspace(ch) )
+            {
+                return;
+            }
+
+            if( isAlpha(ch) )
+            {
+                _token.clear();
+                _token += ch;
+                _parse = &XmlReaderImpl::OnDtdAttrEnumValue;
+                return;
+            }
+
+            if( ch == '%' )
+            {
+                enterParameterReference(&XmlReaderImpl::OnDtdAttrEnumSep);
                 return;
             }
 
@@ -2519,7 +2693,6 @@ class XmlReaderImpl
             {
                 bool externalDtd = resolveExternalDtd();
 
-                // TODO: revert logic, set a isInternalDtd flag when [ is parsed
                 if( externalDtd )
                     _parse = &XmlReaderImpl::OnDtdExternal;
                 else
@@ -2811,6 +2984,9 @@ class XmlReaderImpl
         void onAttributeValue(int c)
         {
             Char ch = notEof(c);
+
+            // TODO: normalize WS if the attribute type is defined in the DTD
+            //       to be an ID, IDREF, NMTOKEN or an enumerated value.
 
             if( isQoute(ch) )
             {
@@ -3512,6 +3688,8 @@ class XmlReaderImpl
             _beforeCharacterReference = 0;
             _entityName.clear();
             _characterReference.clear();
+
+            //TODO: should clear _token
 
             _nsctx.clear();
             

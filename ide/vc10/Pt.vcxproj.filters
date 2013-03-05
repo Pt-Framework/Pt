@@ -1467,5 +1467,11 @@
     <ClCompile Include="..\..\src\Pt-Xml\AttributeListDeclaration.cpp">
       <Filter>Pt-Xml</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Xml\DocTypeValidator.cpp">
+      <Filter>Pt-Xml</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Xml\AttributeDeclaration.cpp">
+      <Filter>Pt-Xml</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
