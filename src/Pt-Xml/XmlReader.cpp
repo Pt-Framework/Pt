@@ -27,7 +27,7 @@
  */
 
 #include "DtdContext.h"
-#include "DtdValidator.h"
+#include "DocTypeValidator.h"
 #include "ElementDeclaration.h"
 #include "AttributeDeclaration.h"
 #include "InputStack.h"

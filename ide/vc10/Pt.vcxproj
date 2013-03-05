@@ -226,8 +226,8 @@
     <ClInclude Include="..\..\src\Pt-Xml\AttributeDeclaration.h" />
     <ClInclude Include="..\..\src\Pt-Xml\AttributeListDeclaration.h" />
     <ClInclude Include="..\..\src\Pt-Xml\ContentModel.h" />
+    <ClInclude Include="..\..\src\Pt-Xml\DocTypeValidator.h" />
     <ClInclude Include="..\..\src\Pt-Xml\DtdContext.h" />
-    <ClInclude Include="..\..\src\Pt-Xml\DtdValidator.h" />
     <ClInclude Include="..\..\src\Pt-Xml\ElementDeclaration.h" />
     <ClInclude Include="..\..\src\Pt-Xml\InputStack.h" />
     <ClInclude Include="..\..\src\Pt\regexp.h" />

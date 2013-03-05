@@ -27,7 +27,7 @@
  */
 
 #include "AttributeDeclaration.h"
-#include "DtdValidator.h"
+#include "DocTypeValidator.h"
 #include <Pt/StringStream.h>
 
 namespace Pt {
