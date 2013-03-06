@@ -1229,6 +1229,7 @@ class XmlReaderImpl
 
             if(ch == '%')
             {
+                // next state checks if we are on a parameter entity reference
                 _parse = &XmlReaderImpl::OnDtdParamEntityBegin;
                 return;
             }
@@ -1488,6 +1489,7 @@ class XmlReaderImpl
 
             if(ch == 'N')
             {
+                // TODO: fail if parameter entity
                 _token += ch;
                 _parse = &XmlReaderImpl::OnDtdEntityNDATA;
                 return;
@@ -1584,6 +1586,7 @@ class XmlReaderImpl
 
             if( ch == 'N' )
             {
+                // TODO: fail if parameter entity
                 _token += ch;
                 _parse = &XmlReaderImpl::OnDtdEntityNDATA;
                 return;
@@ -1683,7 +1686,7 @@ class XmlReaderImpl
             if( ch == '>' )
             {
                 if(_entity)
-                    _entity->setNData(_token);
+                    _entity->setUnparsed(_token);
 
                 _token.clear();
                 _entity = 0;
@@ -1699,7 +1702,7 @@ class XmlReaderImpl
             if( Pt::isspace(ch) )
             {
                 if(_entity)
-                    _entity->setNData(_token);
+                    _entity->setUnparsed(_token);
 
                 _token.clear();
                 _entity = 0;
@@ -1941,6 +1944,12 @@ class XmlReaderImpl
                 return;
             }
 
+            if( ch == 'E' )
+            {
+                _parse = &XmlReaderImpl::OnDtdAttrENTITY0;
+                return;
+            }
+
             if( ch == '(' )
             {
                 assert(_attrDecl == 0);
@@ -2167,7 +2176,7 @@ class XmlReaderImpl
 
             if( 0 == _attlistDecl->findAttribute(_token) )
             {
-                _attrDecl = new Pt::Xml::IDAttributeDeclaration(_dtdValidator);
+                _attrDecl = new Pt::Xml::IDAttributeDeclaration();
                 _attrDecl->setName(_token);
                 _attlistDecl->addAttribute(_attrDecl);
             }
@@ -2232,7 +2241,7 @@ class XmlReaderImpl
 
             if( 0 == _attlistDecl->findAttribute(_token) )
             {
-                _attrDecl = new Pt::Xml::IDRefAttributeDeclaration(_dtdValidator);
+                _attrDecl = new Pt::Xml::IDRefAttributeDeclaration();
                 _attrDecl->setName(_token);
                 _attlistDecl->addAttribute(_attrDecl);
             }
@@ -2259,7 +2268,7 @@ class XmlReaderImpl
 
             if( 0 == _attlistDecl->findAttribute(_token) )
             {
-                _attrDecl = new Pt::Xml::IDRefsAttributeDeclaration(_dtdValidator);
+                _attrDecl = new Pt::Xml::IDRefsAttributeDeclaration();
                 _attrDecl->setName(_token);
                 _attlistDecl->addAttribute(_attrDecl);
             }
@@ -2495,6 +2504,149 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
 
+        void OnDtdAttrENTITY0(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if( ch == '%' )
+            {
+                enterParameterReference(&XmlReaderImpl::OnDtdAttrENTITY0);
+                return;
+            }
+
+            if( ch != 'N' )
+                throw SyntaxError("XML syntax error", line());
+
+            _parse = &XmlReaderImpl::OnDtdAttrENTITY1;
+        }
+
+        void OnDtdAttrENTITY1(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if( ch == '%' )
+            {
+                enterParameterReference(&XmlReaderImpl::OnDtdAttrENTITY1);
+                return;
+            }
+
+            if( ch != 'T' )
+                throw SyntaxError("XML syntax error", line());
+
+            _parse = &XmlReaderImpl::OnDtdAttrENTITY2;
+        }
+
+        void OnDtdAttrENTITY2(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if( ch == '%' )
+            {
+                enterParameterReference(&XmlReaderImpl::OnDtdAttrENTITY2);
+                return;
+            }
+
+            if( ch != 'I' )
+                throw SyntaxError("XML syntax error", line());
+
+            _parse = &XmlReaderImpl::OnDtdAttrENTITY3;
+        }
+
+        void OnDtdAttrENTITY3(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if( ch == '%' )
+            {
+                enterParameterReference(&XmlReaderImpl::OnDtdAttrENTITY3);
+                return;
+            }
+
+            if( ch != 'T' )
+                throw SyntaxError("XML syntax error", line());
+
+            _parse = &XmlReaderImpl::OnDtdAttrENTITY4;
+        }
+
+        void OnDtdAttrENTITY4(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if( ch == '%' )
+            {
+                enterParameterReference(&XmlReaderImpl::OnDtdAttrENTITY4);
+                return;
+            }
+
+            if( ch == 'Y' )
+            {
+                assert(_attrDecl == 0);
+                assert(_attlistDecl);
+
+                if( 0 == _attlistDecl->findAttribute(_token) )
+                {
+                    _attrDecl = new EntityAttributeDeclaration(_dtd);
+                    _attrDecl->setName(_token);
+                    _attlistDecl->addAttribute(_attrDecl);
+                }
+
+                _token.clear();
+                _parse = &XmlReaderImpl::OnDtdAfterAttrType;
+                return;
+            }
+
+            if( ch != 'I' )
+                throw SyntaxError("XML syntax error", line());
+
+            _parse = &XmlReaderImpl::OnDtdAttrENTITIES5;
+        }
+
+        void OnDtdAttrENTITIES5(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if( ch == '%' )
+            {
+                enterParameterReference(&XmlReaderImpl::OnDtdAttrENTITIES5);
+                return;
+            }
+
+            if( ch != 'E' )
+                throw SyntaxError("XML syntax error", line());
+
+            _parse = &XmlReaderImpl::OnDtdAttrENTITIES6;
+        }
+
+        void OnDtdAttrENTITIES6(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if( ch == '%' )
+            {
+                enterParameterReference(&XmlReaderImpl::OnDtdAttrENTITIES6);
+                return;
+            }
+
+            if( ch == 'S' )
+            {
+                assert(_attrDecl == 0);
+                assert(_attlistDecl);
+
+                if( 0 == _attlistDecl->findAttribute(_token) )
+                {
+                    _attrDecl = new EntitiesAttributeDeclaration(_dtd);
+                    _attrDecl->setName(_token);
+                    _attlistDecl->addAttribute(_attrDecl);
+                }
+
+                _token.clear();
+                _parse = &XmlReaderImpl::OnDtdAfterAttrType;
+                return;
+            }
+
+            throw SyntaxError("XML syntax error", line());
+        }
+
         void OnDtdNOTATION2(int c)
         {
             Pt::Char ch = notEof(c);
@@ -2602,7 +2754,7 @@ class XmlReaderImpl
                 return;
             }
 
-            _parse = &XmlReaderImpl::OnDtdNOTATION7;
+            throw SyntaxError("XML syntax error", line());
         }
 
         void OnDtdAfterAttrNotation(int c)

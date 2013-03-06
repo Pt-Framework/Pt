@@ -32,60 +32,7 @@
 #include "AttributeDeclaration.h"
 #include <Pt/Xml/DocTypeDefinition.h>
 #include <Pt/Xml/Characters.h>
-#include <iterator>
-#include <vector>
-#include <set>
 #include <stack>
-#include <cassert>
-
-namespace {
-
-bool validateAttributes(Pt::Xml::AttributeList& attrs, const Pt::Xml::AttributeListDeclaration& decls)
-{
-    //TODO: use fixed array[N], use vector when decls.size() > N
-
-    std::vector<const Pt::Xml::AttributeDeclaration*> attrDecls;
-    std::copy(decls.begin(), decls.end(), std::back_inserter(attrDecls));
-
-    // TODO: do not allow two ID type attributes
-
-    // match attributes against declarations and remove declarations
-    // that match an attribute
-    Pt::Xml::AttributeList::ConstIterator attr;
-    for(attr = attrs.begin(); attr != attrs.end(); ++attr)
-    {
-        std::vector<const Pt::Xml::AttributeDeclaration*>::iterator it;
-                 
-        for(it = attrDecls.begin(); it != attrDecls.end(); ++it)
-        {
-            if( (*it)->name() == attr->name() )
-            {
-                break;
-            }
-        }
-
-        if( it == attrDecls.end() )
-            return false;
-
-        if( ! (*it)->validate( *attr) )
-            return false;
-
-        attrDecls.erase(it);
-    }
-
-    // post process unmatched declarations e.g. get default values
-    // and check for missing required attributes
-    std::vector<const Pt::Xml::AttributeDeclaration*>::iterator decl;
-    for(decl = attrDecls.begin(); decl != attrDecls.end(); ++decl)
-    {
-        if( ! (*decl)->fixup(attrs) )
-            return false;
-    }
-
-    return true;
-}
-
-}
 
 namespace Pt {
 
@@ -151,55 +98,6 @@ bool ElementValidator::isValid() const
 }
 
 
-class IDRefsValidator
-{
-    public:
-        IDRefsValidator()
-        {}
-
-        void clear()
-        {
-            _ids.clear();
-            _idrefs.clear();
-        }
-
-        bool addId(const Pt::String& id)
-        {
-            if( _ids.find(id) != _ids.end() )
-                return false;
-
-            _ids.insert(id);
-            return true;
-        }
-
-        void addRef(const Pt::String& id)
-        {
-            _idrefs.push_back(id);
-        }
-
-
-        bool validate() const
-        {
-            bool valid = true;
-            
-            std::vector<Pt::String>::const_iterator it;
-            for(it =_idrefs.begin(); it != _idrefs.end(); ++it)
-            {
-                if( _ids.find(*it) == _ids.end() )
-                {
-                    valid = false;
-                }
-            }
-
-            return valid;
-        }
-
-    private:
-        std::set<Pt::String> _ids;
-        std::vector<Pt::String> _idrefs;
-};
-
-
 class DocTypeValidatorImpl
 {
     public:
@@ -209,16 +107,10 @@ class DocTypeValidatorImpl
 
         bool validate(Node& node);
 
-        bool addId(const Pt::String& id)
-        { return _idrefs.addId(id); }
-
-        void addIdRef(const Pt::String& id)
-        { _idrefs.addRef(id); }
-
     private:
         DocTypeDefinition* _dtd;
         std::stack<ElementValidator> _decls;
-        IDRefsValidator _idrefs;
+        AttributeValidator _attrValidator;
 };
 
 
@@ -230,7 +122,7 @@ DocTypeValidatorImpl::DocTypeValidatorImpl(DocTypeDefinition& dtd)
 
 void DocTypeValidatorImpl::clear()
 { 
-    _idrefs.clear();
+    _attrValidator.clear();
 
     while( ! _decls.empty() )
         _decls.pop();
@@ -257,7 +149,7 @@ bool DocTypeValidatorImpl::validate(Node& node)
                 ElementValidator validator( *decl );
                 _decls.push(validator);
 
-                if( ! validateAttributes( se.attributes(), decl->attributeList() ) )
+                if( ! _attrValidator.validate(se.attributes(), decl->attributeList()) )
                     valid = false;
             }
             else
@@ -288,7 +180,7 @@ bool DocTypeValidatorImpl::validate(Node& node)
             _decls.pop();
 
             if( _decls.empty() )
-                if( ! _idrefs.validate() )
+                if( ! _attrValidator.isValid() )
                     valid = false;
                     
             break;
@@ -322,18 +214,6 @@ void DocTypeValidator::clear()
 bool DocTypeValidator::validate(Node& node)
 {
     return _impl->validate(node);
-}
-
-
-bool DocTypeValidator::addId(const Pt::String& id)
-{
-    return _impl->addId(id);
-}
-
-
-void DocTypeValidator::addIdRef(const Pt::String& id)
-{
-    _impl->addIdRef(id);
 }
 
 } // namespace Xml

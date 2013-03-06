@@ -104,6 +104,7 @@ class XmlReaderTest : public Pt::Unit::TestSuite
             this->registerMethod("DtdValidateAttributes", *this, &XmlReaderTest::DtdValidateAttributes);
             this->registerMethod("DtdValidateEnumAttributes", *this, &XmlReaderTest::DtdValidateEnumAttributes);
             this->registerMethod("DtdValidateIDAttributes", *this, &XmlReaderTest::DtdValidateIDAttributes);
+            this->registerMethod("DtdValidateEntityAttributes", *this, &XmlReaderTest::DtdValidateEntityAttributes);
             this->registerMethod("DtdValidateNotationAttributes", *this, &XmlReaderTest::DtdValidateNotationAttributes);
             this->registerMethod("DtdValidateElementContent", *this, &XmlReaderTest::DtdValidateElementContent);
             this->registerMethod("DtdAnyElementContent", *this, &XmlReaderTest::DtdAnyElementContent);
@@ -158,6 +159,7 @@ class XmlReaderTest : public Pt::Unit::TestSuite
         void DtdValidateAttributes();
         void DtdValidateEnumAttributes();
         void DtdValidateIDAttributes();
+        void DtdValidateEntityAttributes();
         void DtdValidateNotationAttributes();
         void DtdValidateElementContent();
         void DtdAnyElementContent();
@@ -474,6 +476,34 @@ void XmlReaderTest::DtdValidateIDAttributes()
         for(it = reader.current(); it != reader.end(); ++it)
         {
         }
+    }
+    catch(const Pt::Xml::SyntaxError& error)
+    {
+        std::cerr << error.what() << ": " << error.line() << std::endl;
+        throw;
+    }
+}
+
+
+void XmlReaderTest::DtdValidateEntityAttributes()
+{
+    try
+    {
+        std::stringstream input;
+        input << "<!DOCTYPE test [\n";
+        input << "<!ELEMENT test EMPTY>\n";
+        input << "<!ATTLIST test a1 ENTITY #REQUIRED\n";
+        input << "               a2 ENTITIES #REQUIRED>\n";
+        input << "<!ENTITY e1 SYSTEM 'e1.txt' NDATA txt>\n";
+        input << "<!ENTITY e2 SYSTEM 'e1.txt' NDATA txt>\n";
+        input << "]>\n";
+        input << "<test a1='e1' a2='e1 e2'></test>";
+
+        Pt::Xml::XmlReader reader(input);
+        
+        Pt::Xml::XmlReader::Iterator it = reader.current();
+        for(; it != reader.end(); ++it)
+            ;
     }
     catch(const Pt::Xml::SyntaxError& error)
     {

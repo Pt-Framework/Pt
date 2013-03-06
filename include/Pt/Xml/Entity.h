@@ -52,18 +52,6 @@ class Entity
         , _ndata(false)
         {}
 
-        bool isUnparsed() const
-        { return _ndata; }
-
-        const Pt::String& ndata() const
-        { return _value; }
-
-        void setNData(const Pt::String& notation)
-        {   
-            _ndata = true;
-            _value = notation; 
-        }
-
         bool isExternal() const
         { return ! _publicId.empty() || ! _systemId.empty(); }
 
@@ -87,6 +75,18 @@ class Entity
 
         void setSystemId(const Pt::String& sysId)
         { _systemId = sysId; }
+
+        bool isUnparsed() const
+        { return _ndata; }
+
+        const Pt::String& notationName() const
+        { return _value; }
+
+        void setUnparsed(const Pt::String& notation)
+        {   
+            _ndata = true;
+            _value = notation; 
+        }
 
     private:
         Pt::String _publicId;

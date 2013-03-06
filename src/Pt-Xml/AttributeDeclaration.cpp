@@ -27,7 +27,7 @@
  */
 
 #include "AttributeDeclaration.h"
-#include "DocTypeValidator.h"
+#include "AttributeListDeclaration.h"
 #include <Pt/Xml/DocTypeDefinition.h>
 #include <Pt/StringStream.h>
 
@@ -35,30 +35,177 @@ namespace Pt {
 
 namespace Xml {
 
-bool EnumAttributeDeclaration::onValidate(const Attribute& attr) const
+AttributeValidator::AttributeValidator()
+{}
+
+void AttributeValidator::clear()
+{
+    _ids.clear();
+    _idrefs.clear();
+}
+
+
+bool AttributeValidator::validate(AttributeList& attrs, const AttributeListDeclaration& decls)
+{
+    //TODO: use fixed array[N], use vector when decls.size() > N
+
+    std::vector<const Pt::Xml::AttributeDeclaration*> attrDecls;
+    std::copy(decls.begin(), decls.end(), std::back_inserter(attrDecls));
+
+    // TODO: do not allow two ID type attributes
+
+    // match attributes against declarations and remove declarations
+    // that match an attribute
+    Pt::Xml::AttributeList::ConstIterator attr;
+    for(attr = attrs.begin(); attr != attrs.end(); ++attr)
+    {
+        std::vector<const Pt::Xml::AttributeDeclaration*>::iterator it;
+                 
+        for(it = attrDecls.begin(); it != attrDecls.end(); ++it)
+        {
+            if( (*it)->name() == attr->name() )
+            {
+                break;
+            }
+        }
+
+        if( it == attrDecls.end() )
+            return false;
+
+        if( ! (*it)->validate( *this, *attr) )
+            return false;
+
+        attrDecls.erase(it);
+    }
+
+    // post process unmatched declarations e.g. get default values
+    // and check for missing required attributes
+    std::vector<const Pt::Xml::AttributeDeclaration*>::iterator decl;
+    for(decl = attrDecls.begin(); decl != attrDecls.end(); ++decl)
+    {
+        if( ! (*decl)->fixup(*this, attrs) )
+            return false;
+    }
+
+    return true;
+}
+
+
+bool AttributeValidator::isValid() const
+{
+    bool valid = true;
+            
+    std::vector<Pt::String>::const_iterator it;
+    for(it =_idrefs.begin(); it != _idrefs.end(); ++it)
+    {
+        if( _ids.find(*it) == _ids.end() )
+        {
+            valid = false;
+        }
+    }
+
+    return valid;
+}
+
+bool AttributeValidator::addId(const Pt::String& id)
+{
+    if( _ids.find(id) != _ids.end() )
+        return false;
+
+    _ids.insert(id);
+    return true;
+}
+
+void AttributeValidator::addRef(const Pt::String& id)
+{
+    _idrefs.push_back(id);
+}
+
+
+
+
+bool AttributeDeclaration::validate(AttributeValidator& validator, const Attribute& attr) const
+{
+    if(mode() == Fixed && attr.value() != defaultValue() )
+        return false;
+
+    return onValidate(validator, attr);
+}
+      
+bool AttributeDeclaration::fixup(AttributeValidator& validator, AttributeList& list) const
+{
+    switch(_mode)
+    {
+        case Required:
+            return false;
+
+        case Implied:
+            return true;
+
+        case Fixed:
+        case Default:
+            break;
+    };
+
+    Attribute attr;
+    attr.setName(_name);
+    attr.setValue(_default);
+            
+    bool valid = onValidate(validator, attr);
+    if(valid)
+        list.add(attr);
+            
+    return valid;
+}
+
+
+
+
+bool CDataAttributeDeclaration::onValidate(AttributeValidator& validator, const Attribute& attr) const
+{ 
+    // TODO: check for non-CDATA characters in value           
+    return true; 
+}
+
+
+bool NMTokenAttributeDeclaration::onValidate(AttributeValidator& validator, const Attribute& attr) const
+{ 
+    // TODO: check for non-CDATA characters in value           
+    return true; 
+}
+
+
+bool NMTokensAttributeDeclaration::onValidate(AttributeValidator& validator, const Attribute& attr) const
+{ 
+    // TODO: check for non-CDATA characters in value           
+    return true; 
+}
+
+
+bool EnumAttributeDeclaration::onValidate(AttributeValidator& validator, const Attribute& attr) const
 {           
     return _enumValues.find( attr.value() ) != _enumValues.end(); 
 }
 
 
-bool IDAttributeDeclaration::onValidate(const Attribute& attr) const
+bool IDAttributeDeclaration::onValidate(AttributeValidator& validator, const Attribute& attr) const
 {          
     // TODO: attribute value must be an XML name
 
-    return _validator->addId( attr.value() );
+    return validator.addId( attr.value() );
 }
 
 
-bool IDRefAttributeDeclaration::onValidate(const Attribute& attr) const
+bool IDRefAttributeDeclaration::onValidate(AttributeValidator& validator, const Attribute& attr) const
 {          
     // TODO: attribute value must be an XML name
 
-    _validator->addIdRef( attr.value() );
+    validator.addRef( attr.value() );
     return true; 
 }
 
 
-bool IDRefsAttributeDeclaration::onValidate(const Attribute& attr) const
+bool IDRefsAttributeDeclaration::onValidate(AttributeValidator& validator, const Attribute& attr) const
 {          
     // TODO: attribute value must be an XML name
 
@@ -67,14 +214,44 @@ bool IDRefsAttributeDeclaration::onValidate(const Attribute& attr) const
     
     while(iss >> idref)
     {
-        _validator->addIdRef(idref);
+        validator.addRef(idref);
     }
 
     return true; 
 }
 
 
-bool NotationAttributeDeclaration::onValidate(const Attribute& attr) const
+bool EntityAttributeDeclaration::onValidate(AttributeValidator& validator, const Attribute& attr) const
+{          
+    const Entity* ent = _dtd->resolveEntity(attr.value());
+    if( ent && ent->isUnparsed() )
+    {
+        return true;
+    }
+
+    return false; 
+}
+
+
+bool EntitiesAttributeDeclaration::onValidate(AttributeValidator& validator, const Attribute& attr) const
+{          
+    Pt::IStringStream iss( attr.value() );
+    Pt::String name;
+    
+    while(iss >> name)
+    {
+        const Entity* ent = _dtd->resolveEntity(name);
+        if( ! ent || ! ent->isUnparsed() )
+        {
+            return false;
+        }
+    }
+
+    return true; 
+}
+
+
+bool NotationAttributeDeclaration::onValidate(AttributeValidator& validator, const Attribute& attr) const
 {          
     if( _notations.find( attr.value() ) == _notations.end() )
     {

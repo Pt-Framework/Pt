@@ -51,10 +51,6 @@ class DocTypeValidator : private NonCopyable
 
         bool validate(Node& node);
 
-        bool addId(const Pt::String& id);
-
-        void addIdRef(const Pt::String& id);
-
     private:
         class DocTypeValidatorImpl* _impl;
 };

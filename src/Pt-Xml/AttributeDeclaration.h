@@ -33,13 +33,34 @@
 #include <Pt/String.h>
 #include <Pt/NonCopyable.h>
 #include <set>
+#include <vector>
 
 namespace Pt {
 
 namespace Xml {
 
-class DocTypeValidator;
 class DocTypeDefinition;
+class AttributeListDeclaration;
+
+class AttributeValidator : private NonCopyable
+{
+    public:
+        AttributeValidator();
+
+        void clear();
+
+        bool validate(AttributeList& attrs, const AttributeListDeclaration& decl);
+
+        bool isValid() const;
+
+        bool addId(const Pt::String& id);
+
+        void addRef(const Pt::String& id);
+
+    private:
+        std::set<Pt::String> _ids;
+        std::vector<Pt::String> _idrefs;
+};
 
 class AttributeDeclaration
 {
@@ -78,42 +99,12 @@ class AttributeDeclaration
         const Pt::String& defaultValue() const
         { return _default; }
 
-        bool validate(const Attribute& attr) const
-        {
-            if(mode() == Fixed && attr.value() != defaultValue() )
-                return false;
-
-            return onValidate(attr);
-        }
+        bool validate(AttributeValidator& validator, const Attribute& attr) const;
       
-        bool fixup(AttributeList& list) const
-        {
-            switch(_mode)
-            {
-                case Required:
-                    return false;
-
-                case Implied:
-                    return true;
-
-                case Fixed:
-                case Default:
-                    break;
-            };
-
-            Attribute attr;
-            attr.setName(_name);
-            attr.setValue(_default);
-            
-            bool valid = onValidate(attr);
-            if(valid)
-                list.add(attr);
-            
-            return valid;
-        }
+        bool fixup(AttributeValidator& validator, AttributeList& list) const;
 
     protected:
-        virtual bool onValidate(const Attribute& attr) const = 0;
+        virtual bool onValidate(AttributeValidator& validator, const Attribute& attr) const = 0;
 
     private:
         Mode _mode;
@@ -129,11 +120,7 @@ class CDataAttributeDeclaration : public AttributeDeclaration
         : AttributeDeclaration()
         {}
 
-        virtual bool onValidate(const Attribute& attr) const
-        { 
-            // TODO: check for non-CDATA characters in value           
-            return true; 
-        }
+        virtual bool onValidate(AttributeValidator& validator, const Attribute& attr) const;
 };
 
 
@@ -144,11 +131,7 @@ class NMTokenAttributeDeclaration : public AttributeDeclaration
         : AttributeDeclaration()
         {}
 
-        virtual bool onValidate(const Attribute& attr) const
-        { 
-            // TODO: check for non-CDATA characters in value           
-            return true; 
-        }
+        virtual bool onValidate(AttributeValidator& validator, const Attribute& attr) const;
 };
 
 
@@ -159,11 +142,7 @@ class NMTokensAttributeDeclaration : public AttributeDeclaration
         : AttributeDeclaration()
         {}
 
-        virtual bool onValidate(const Attribute& attr) const
-        { 
-            // TODO: check for non-CDATA characters in value           
-            return true; 
-        }
+        virtual bool onValidate(AttributeValidator& validator, const Attribute& attr) const;
 };
 
 
@@ -180,7 +159,7 @@ class EnumAttributeDeclaration : public AttributeDeclaration
         }
 
     protected:
-        virtual bool onValidate(const Attribute& attr) const;
+        virtual bool onValidate(AttributeValidator& validator, const Attribute& attr) const;
 
     private:
         std::set<Pt::String> _enumValues;
@@ -191,16 +170,11 @@ class IDAttributeDeclaration : public AttributeDeclaration
                              , private NonCopyable
 {
     public:
-        // TODO: pass DocTypeIdContext?
-        IDAttributeDeclaration(DocTypeValidator& validator)
+        IDAttributeDeclaration()
         : AttributeDeclaration()
-        , _validator(&validator)
         {}
 
-        virtual bool onValidate(const Attribute& attr) const;
-
-    private:
-        DocTypeValidator* _validator;
+        virtual bool onValidate(AttributeValidator& validator, const Attribute& attr) const;
 };
 
 
@@ -208,15 +182,11 @@ class IDRefAttributeDeclaration : public AttributeDeclaration
                                 , private NonCopyable
 {
     public:
-        IDRefAttributeDeclaration(DocTypeValidator& validator)
+        IDRefAttributeDeclaration()
         : AttributeDeclaration()
-        , _validator(&validator)
         {}
 
-        virtual bool onValidate(const Attribute& attr) const;
-
-    private:
-        DocTypeValidator* _validator;
+        virtual bool onValidate(AttributeValidator& validator, const Attribute& attr) const;
 };
 
 
@@ -224,15 +194,43 @@ class IDRefsAttributeDeclaration : public AttributeDeclaration
                                  , private NonCopyable
 {
     public:
-        IDRefsAttributeDeclaration(DocTypeValidator& validator)
+        IDRefsAttributeDeclaration()
         : AttributeDeclaration()
-        , _validator(&validator)
         {}
 
-        virtual bool onValidate(const Attribute& attr) const;
+        virtual bool onValidate(AttributeValidator& validator, const Attribute& attr) const;
+};
+
+
+class EntityAttributeDeclaration : public AttributeDeclaration
+                                 , private NonCopyable
+{
+    public:
+        EntityAttributeDeclaration(const DocTypeDefinition& dtd)
+        : AttributeDeclaration()
+        , _dtd(&dtd)
+        {}
+
+        virtual bool onValidate(AttributeValidator& validator, const Attribute& attr) const;
 
     private:
-        DocTypeValidator* _validator;
+        const DocTypeDefinition* _dtd;
+};
+
+
+class EntitiesAttributeDeclaration : public AttributeDeclaration
+                                   , private NonCopyable
+{
+    public:
+        EntitiesAttributeDeclaration(const DocTypeDefinition& dtd)
+        : AttributeDeclaration()
+        , _dtd(&dtd)
+        {}
+
+        virtual bool onValidate(AttributeValidator& validator, const Attribute& attr) const;
+
+    private:
+        const DocTypeDefinition* _dtd;
 };
 
 
@@ -240,7 +238,7 @@ class NotationAttributeDeclaration : public AttributeDeclaration
                                    , private NonCopyable
 {
     public:
-        NotationAttributeDeclaration(DocTypeDefinition& dtd)
+        NotationAttributeDeclaration(const DocTypeDefinition& dtd)
         : AttributeDeclaration()
         , _dtd(&dtd)
         {}
@@ -250,10 +248,10 @@ class NotationAttributeDeclaration : public AttributeDeclaration
             _notations.insert(notation);
         }
 
-        virtual bool onValidate(const Attribute& attr) const;
+        virtual bool onValidate(AttributeValidator& validator, const Attribute& attr) const;
 
     private:
-        DocTypeDefinition* _dtd;
+        const DocTypeDefinition* _dtd;
         std::set<Pt::String> _notations;
 };
 
