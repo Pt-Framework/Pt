@@ -1,0 +1,115 @@
+/*
+ * Copyright (C) 2013 Marc Boris Duerner
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ * 
+ * As a special exception, you may use this file as part of a free
+ * software library without restriction. Specifically, if other files
+ * instantiate templates or use macros or inline functions from this
+ * file, or you compile this file and link it with other files to
+ * produce an executable, this file does not by itself cause the
+ * resulting executable to be covered by the GNU General Public
+ * License. This exception does not however invalidate any other
+ * reasons why the executable file might be covered by the GNU Library
+ * General Public License.
+ * 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+#ifndef Pt_Xml_Notation_h
+#define Pt_Xml_Notation_h
+
+#include <Pt/Xml/Api.h>
+#include <Pt/String.h>
+#include <map>
+
+namespace Pt {
+
+namespace Xml {
+
+class PT_XML_API Notation 
+{
+    public:
+        Notation()
+        { }
+
+        void clear()
+        {
+            _publicId.clear();
+            _systemId.clear();
+        }
+
+        const Pt::String& publicId() const
+        { return _publicId; }
+
+        void setPublicId(const Pt::String& pubId)
+        { _publicId = pubId; }
+
+        const Pt::String& systemId() const
+        { return _systemId; }
+
+        void setSystemId(const Pt::String& sysId)
+        { _systemId = sysId; }
+
+    private:
+        Pt::String _publicId;
+        Pt::String _systemId;
+};
+
+
+class NotationMapping
+{
+    typedef std::map<String, Notation> Notations;
+
+    public:
+        NotationMapping()
+        {}
+
+        ~NotationMapping()
+        {}
+
+        void clear()
+        { _notations.clear(); }
+
+        Notation* declareNotation(const Pt::String& name)
+        {
+            Notations::iterator it = _notations.lower_bound(name);
+
+            // return 0 for duplicates
+            if(it != _notations.end() && it->first == name)
+                return 0;
+
+            // insert new Notation
+            Notations::value_type elem(name, Notation());
+            it = _notations.insert(it, elem);
+            return &it->second;
+        }
+
+        const Notation* findNotation(const Pt::String& name) const
+        {
+            Notations::const_iterator it = _notations.find(name);
+            if(it == _notations.end() )
+                return 0;
+
+            return &(it->second);
+        }
+
+    private:
+        Notations _notations;
+};
+
+
+} // namespace Xml
+
+} // namespace Pt
+
+#endif

@@ -44,11 +44,25 @@ class Entity
 {
     public:
         Entity()
+        : _ndata(false)
         {}
         
         Entity(const Pt::String& value)
         : _value(value)
+        , _ndata(false)
         {}
+
+        bool isUnparsed() const
+        { return _ndata; }
+
+        const Pt::String& ndata() const
+        { return _value; }
+
+        void setNData(const Pt::String& notation)
+        {   
+            _ndata = true;
+            _value = notation; 
+        }
 
         bool isExternal() const
         { return ! _publicId.empty() || ! _systemId.empty(); }
@@ -78,6 +92,7 @@ class Entity
         Pt::String _publicId;
         Pt::String _systemId;
         Pt::String _value;
+        bool _ndata;
 };
 
 

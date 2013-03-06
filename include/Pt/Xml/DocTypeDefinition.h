@@ -32,6 +32,7 @@
 #include <Pt/Xml/Api.h>
 #include <Pt/Xml/Node.h>
 #include <Pt/Xml/EntityMapping.h>
+#include <Pt/Xml/Notation.h>
 #include <Pt/String.h>
 #include <Pt/NonCopyable.h>
 #include <vector>
@@ -70,6 +71,10 @@ class PT_XML_API DocTypeDefinition : public Node
 
         const Entity* resolveParamEntity(const Pt::String& name) const;
 
+        Notation* declareNotation(const Pt::String& name);
+
+        const Notation* findNotation(const Pt::String& name) const;
+
         //! @internal
         inline static Node::Type nodeId()
         { return Node::DocTypeDefinition; }
@@ -81,6 +86,7 @@ class PT_XML_API DocTypeDefinition : public Node
         ElementDeclarationList _elemDecls;
         EntityMapping _entities;
         EntityMapping _paramEntities;
+        NotationMapping _notations;
 };
 
 

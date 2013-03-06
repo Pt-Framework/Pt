@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2013 by Marc Boris Duerner
- * 
+ * Copyright (C) 2012 Marc Boris Duerner
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -25,70 +25,58 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+#ifndef Pt_Xml_StartDocument_h
+#define Pt_Xml_StartDocument_h
 
-#include "AttributeDeclaration.h"
-#include "DocTypeValidator.h"
-#include <Pt/Xml/DocTypeDefinition.h>
-#include <Pt/StringStream.h>
+#include <Pt/Xml/Api.h>
+#include <Pt/Xml/Node.h>
 
 namespace Pt {
 
 namespace Xml {
 
-bool EnumAttributeDeclaration::onValidate(const Attribute& attr) const
-{           
-    return _enumValues.find( attr.value() ) != _enumValues.end(); 
+/** @brief A Node representing the begin of the XML document.
+*/
+class StartDocument : public Node 
+{
+    public:
+        /** @brief Creates an empty object.
+        */
+        StartDocument()
+        : Node(Node::StartDocument)
+        { }
+
+        //! @internal
+        inline static const Node::Type nodeId()
+        { return Node::StartDocument; }
+};
+
+
+inline StartDocument* toStartDocument(Node* node)
+{
+    return nodeCast<StartDocument>(node);
 }
 
 
-bool IDAttributeDeclaration::onValidate(const Attribute& attr) const
-{          
-    // TODO: attribute value must be an XML name
-
-    return _validator->addId( attr.value() );
+inline const StartDocument* toStartDocument(const Node* node)
+{
+    return nodeCast<StartDocument>(node);
 }
 
 
-bool IDRefAttributeDeclaration::onValidate(const Attribute& attr) const
-{          
-    // TODO: attribute value must be an XML name
-
-    _validator->addIdRef( attr.value() );
-    return true; 
+inline StartDocument& toStartDocument(Node& node)
+{
+    return nodeCast<StartDocument>(node);
 }
 
 
-bool IDRefsAttributeDeclaration::onValidate(const Attribute& attr) const
-{          
-    // TODO: attribute value must be an XML name
-
-    Pt::IStringStream iss( attr.value() );
-    Pt::String idref;
-    
-    while(iss >> idref)
-    {
-        _validator->addIdRef(idref);
-    }
-
-    return true; 
-}
-
-
-bool NotationAttributeDeclaration::onValidate(const Attribute& attr) const
-{          
-    if( _notations.find( attr.value() ) == _notations.end() )
-    {
-        return false;
-    }
-
-    if( ! _dtd->findNotation(attr.value()) )
-    {
-        return false;
-    }
-    
-    return true; 
+inline const StartDocument& toStartDocument(const Node& node)
+{
+    return nodeCast<StartDocument>(node);
 }
 
 } // namespace Xml
 
 } // namespace Pt
+
+#endif

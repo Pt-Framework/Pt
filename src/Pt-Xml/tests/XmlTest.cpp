@@ -104,8 +104,10 @@ class XmlReaderTest : public Pt::Unit::TestSuite
             this->registerMethod("DtdValidateAttributes", *this, &XmlReaderTest::DtdValidateAttributes);
             this->registerMethod("DtdValidateEnumAttributes", *this, &XmlReaderTest::DtdValidateEnumAttributes);
             this->registerMethod("DtdValidateIDAttributes", *this, &XmlReaderTest::DtdValidateIDAttributes);
+            this->registerMethod("DtdValidateNotationAttributes", *this, &XmlReaderTest::DtdValidateNotationAttributes);
             this->registerMethod("DtdValidateElementContent", *this, &XmlReaderTest::DtdValidateElementContent);
             this->registerMethod("DtdAnyElementContent", *this, &XmlReaderTest::DtdAnyElementContent);
+            this->registerMethod("DtdNotations", *this, &XmlReaderTest::DtdNotations);
             
             this->registerMethod("EmptyDocument", *this, &XmlReaderTest::EmptyDocument);
             this->registerMethod("EmptyElementTag", *this, &XmlReaderTest::EmptyElementTag);
@@ -156,8 +158,10 @@ class XmlReaderTest : public Pt::Unit::TestSuite
         void DtdValidateAttributes();
         void DtdValidateEnumAttributes();
         void DtdValidateIDAttributes();
+        void DtdValidateNotationAttributes();
         void DtdValidateElementContent();
         void DtdAnyElementContent();
+        void DtdNotations();
         
         void EmptyDocument();
         void EmptyElementTag();
@@ -479,6 +483,34 @@ void XmlReaderTest::DtdValidateIDAttributes()
 }
 
 
+void XmlReaderTest::DtdValidateNotationAttributes()
+{
+    try
+    {
+        std::stringstream input;
+        input << "<!DOCTYPE test [\n";
+        input << "<!ELEMENT test EMPTY>\n";
+        input << "<!ATTLIST test a1 NOTATION (jpeg) #REQUIRED\n";
+        input << "               a2 NOTATION (jpeg|gif) #REQUIRED>\n";
+        input << "<!NOTATION jpeg SYSTEM 'image/jpeg'>\n";
+        input << "<!NOTATION gif SYSTEM 'image/gif'>\n";
+        input << "]>\n";
+        input << "<test a1='jpeg' a2='gif'></test>";
+
+        Pt::Xml::XmlReader reader(input);
+        
+        Pt::Xml::XmlReader::Iterator it = reader.current();
+        for(; it != reader.end(); ++it)
+            ;
+    }
+    catch(const Pt::Xml::SyntaxError& error)
+    {
+        std::cerr << error.what() << ": " << error.line() << std::endl;
+        throw;
+    }
+}
+
+
 void XmlReaderTest::DtdValidateElementContent()
 {
     try
@@ -538,6 +570,53 @@ void XmlReaderTest::DtdAnyElementContent()
         std::cerr << error.what() << ": " << error.line() << std::endl;
         throw;
     }
+}
+
+
+void XmlReaderTest::DtdNotations()
+{
+    std::stringstream input;
+    input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
+
+    input << "<!DOCTYPE test [\n";
+    input << "<!ELEMENT test EMPTY>\n";
+    input << "<!NOTATION notation1 SYSTEM \"n1\">\n";
+    input << "<!NOTATION notation2 PUBLIC \"http://www.pt-framework.org/n2\">\n";
+    input << "<!NOTATION notation3 PUBLIC \"http://www.pt-framework.org/n3\" \"n3\">\n";
+    input << "]>\n";
+
+    input << "<test></test>";
+
+    Pt::Xml::XmlReader reader( input );
+    reader.setFlag(Pt::Xml::XmlReader::ReportDtd);
+    
+    Pt::Xml::XmlReader::Iterator it = reader.current();
+
+    Pt::Xml::DocType* docType = Pt::Xml::toDocType(&*it);
+    PT_UNIT_ASSERT(docType);
+
+    ++it;
+
+    Pt::Xml::DocTypeDefinition* dtd = Pt::Xml::toDocTypeDefinition(&*it);
+    PT_UNIT_ASSERT(dtd);
+
+    const Pt::Xml::Notation* notation = dtd->findNotation(L"notation1");
+    PT_UNIT_ASSERT(notation);
+    PT_UNIT_ASSERT_EQUALS(notation->publicId(), L"");
+    PT_UNIT_ASSERT_EQUALS(notation->systemId(), L"n1");
+
+    notation = dtd->findNotation(L"notation2");
+    PT_UNIT_ASSERT(notation);
+    PT_UNIT_ASSERT_EQUALS(notation->publicId(), L"http://www.pt-framework.org/n2");
+    PT_UNIT_ASSERT_EQUALS(notation->systemId(), L"");
+
+    notation = dtd->findNotation(L"notation3");
+    PT_UNIT_ASSERT(notation);
+    PT_UNIT_ASSERT_EQUALS(notation->publicId(), L"http://www.pt-framework.org/n3");
+    PT_UNIT_ASSERT_EQUALS(notation->systemId(), L"n3");
+
+    for(; it != reader.end(); ++it)
+            ;
 }
 
 
@@ -1166,10 +1245,11 @@ void XmlReaderTest::CustomEntities()
 
     input << "<!DOCTYPE a [\n";
     input << "<!ELEMENT a (#PCDATA)>\n";
-    input << "<!ENTITY MyEntity \"Hello World!\">\n";
+    input << "<!ENTITY entity1 \"Hello World!\">\n";
+    input << "<!ENTITY entity2 SYSTEM \"e1.ext\" NDATA ext>\n";
     input << "]>\n";
 
-    input << "<a>&MyEntity; &undeclared;</a>";
+    input << "<a>&entity1; &undeclared;&entity2;</a>";
 
     Pt::Xml::XmlReader reader( input );
     Pt::Xml::XmlReader::Iterator it = reader.current();
@@ -1183,6 +1263,11 @@ void XmlReaderTest::CustomEntities()
 
     Pt::Xml::StringInputSource entval(L"resolved");
     reader.addInput(entval);
+
+    ++it;
+    ent = Pt::Xml::toEntityReference(&*it);
+    PT_UNIT_ASSERT(ent);
+    PT_UNIT_ASSERT(ent->name() == L"entity2" );
 
     ++it;
     PT_UNIT_ASSERT(Pt::Xml::toCharacters(&*it));

@@ -158,6 +158,18 @@ const Entity* DocTypeDefinition::resolveParamEntity(const Pt::String& name) cons
     return _paramEntities.resolveEntity(name);
 }
 
+
+Notation* DocTypeDefinition::declareNotation(const Pt::String& name)
+{
+    return _notations.declareNotation(name);
+}
+
+
+const Notation* DocTypeDefinition::findNotation(const Pt::String& name) const
+{
+    return _notations.findNotation(name);
+}
+
 } // namespace Xml
 
 } // namespace Pt

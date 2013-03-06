@@ -39,6 +39,7 @@ namespace Pt {
 namespace Xml {
 
 class DocTypeValidator;
+class DocTypeDefinition;
 
 class AttributeDeclaration
 {
@@ -190,7 +191,7 @@ class IDAttributeDeclaration : public AttributeDeclaration
                              , private NonCopyable
 {
     public:
-        // TODO: pass DocTypeIdContext
+        // TODO: pass DocTypeIdContext?
         IDAttributeDeclaration(DocTypeValidator& validator)
         : AttributeDeclaration()
         , _validator(&validator)
@@ -232,6 +233,28 @@ class IDRefsAttributeDeclaration : public AttributeDeclaration
 
     private:
         DocTypeValidator* _validator;
+};
+
+
+class NotationAttributeDeclaration : public AttributeDeclaration
+                                   , private NonCopyable
+{
+    public:
+        NotationAttributeDeclaration(DocTypeDefinition& dtd)
+        : AttributeDeclaration()
+        , _dtd(&dtd)
+        {}
+
+        void addNotation(const Pt::String& notation)
+        {
+            _notations.insert(notation);
+        }
+
+        virtual bool onValidate(const Attribute& attr) const;
+
+    private:
+        DocTypeDefinition* _dtd;
+        std::set<Pt::String> _notations;
 };
 
 } // namespace Xml
