@@ -45,6 +45,7 @@
 #include <sstream>
 #include <iostream>
 
+
 class XmlTestResolver : public Pt::Xml::XmlResolver
 {
     public:
@@ -86,7 +87,6 @@ class XmlTestResolver : public Pt::Xml::XmlResolver
     private:
         std::map<Pt::String, Pt::String> _input;
 };
-
 
 class XmlReaderTest : public Pt::Unit::TestSuite
 {
@@ -135,6 +135,8 @@ class XmlReaderTest : public Pt::Unit::TestSuite
             this->registerMethod("AttributeWithSimpleText", *this, &XmlReaderTest::AttributeWithSimpleText);
             this->registerMethod("AttributeWithUTF8", *this, &XmlReaderTest::AttributeWithUTF8);
             this->registerMethod("MultipleAttributesIteration", *this, &XmlReaderTest::MultipleAttributesIteration);
+            this->registerMethod("NormalizeAttributes", *this, &XmlReaderTest::NormalizeAttributes);
+
             this->registerMethod("IgnorableWhitespace", *this, &XmlReaderTest::IgnorableWhitespace);
             this->registerMethod("CDATA", *this, &XmlReaderTest::CDATA );
             this->registerMethod("CommentInProlog", *this, &XmlReaderTest::CommentInProlog );
@@ -179,6 +181,7 @@ class XmlReaderTest : public Pt::Unit::TestSuite
         void AttributeWithSimpleText();
         void AttributeWithUTF8();
         void MultipleAttributesIteration();
+        void NormalizeAttributes();
         void IgnorableWhitespace();
         void CDATA();
         
@@ -1113,6 +1116,57 @@ void XmlReaderTest::MultipleAttributesIteration()
 
     attributeIter++;
     PT_UNIT_ASSERT(attributeIter == attributes.end());
+}
+
+
+void XmlReaderTest::NormalizeAttributes()
+{
+    try
+    {
+        std::stringstream input;
+        input << "<!DOCTYPE test [\n";
+        input << "<!ELEMENT test EMPTY>\n";
+        input << "<!ATTLIST test a1 CDATA #REQUIRED\n";
+        input << "               a2 NMTOKEN #REQUIRED\n";
+        input << "               a3 NMTOKEN #REQUIRED\n";
+        input << "               a4 NMTOKEN #REQUIRED\n";
+        input << "               a5 NMTOKEN #REQUIRED\n>";
+        input << "]>\n";
+        input << "<test a1=' a ' a2='' a3='a' a4=' a ' a5=' a b \r\n\t c'></test>";
+
+        Pt::Xml::XmlReader reader(input);
+        
+        Pt::Xml::XmlReader::Iterator it;
+        for(it = reader.current(); it != reader.end(); ++it)
+        {
+            if(it->type() == Pt::Xml::Node::StartElement)
+                break;
+        }
+
+        Pt::Xml::StartElement* se = toStartElement(&*it);
+        PT_UNIT_ASSERT(se);
+        PT_UNIT_ASSERT( se->name() == L"test" );
+        
+        PT_UNIT_ASSERT( se->attributes().has(L"a1") );
+        PT_UNIT_ASSERT( se->attributes().find(L"a1")->value() == L" a " );
+
+        PT_UNIT_ASSERT( se->attributes().has(L"a2") );
+        PT_UNIT_ASSERT( se->attributes().find(L"a2")->value() == L"" );
+
+        PT_UNIT_ASSERT( se->attributes().has(L"a3") );
+        PT_UNIT_ASSERT( se->attributes().find(L"a3")->value() == L"a" );
+
+        PT_UNIT_ASSERT( se->attributes().has(L"a4") );
+        PT_UNIT_ASSERT( se->attributes().find(L"a4")->value() == L"a" );
+
+        PT_UNIT_ASSERT( se->attributes().has(L"a5") );
+        PT_UNIT_ASSERT( se->attributes().find(L"a5")->value() == L"a b c" );
+    }
+    catch(const Pt::Xml::SyntaxError& error)
+    {
+        std::cerr << error.what() << ": " << error.line() << std::endl;
+        throw;
+    }
 }
 
 

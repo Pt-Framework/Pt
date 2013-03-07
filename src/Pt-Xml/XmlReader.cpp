@@ -3765,6 +3765,8 @@ class XmlReaderImpl
 
             if(ch == '=')
             {
+                //if(_attr.prefix() == "xmlns" || _attr.name() == "xmlns")
+                // if( normalizeAttribute() )
                 _parse = &XmlReaderImpl::beforeAttributeValue;
                 return;
             }
@@ -3790,12 +3792,14 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
 
+        void normalizeAttribute(Attribute& attr)
+        {
+            
+        }
+
         void onAttributeValue(int c)
         {
             Char ch = notEof(c);
-
-            // TODO: normalize WS if the attribute type is defined in the DTD
-            //       to be an ID, IDREF, NMTOKEN or an enumerated value.
 
             if( isQoute(ch) )
             {
@@ -3809,6 +3813,21 @@ class XmlReaderImpl
                 }
                 else
                 {
+                    // If the declared value is not CDATA, then discard any leading and
+                    // trailing space (#x20) characters and replace sequences of space
+                    // (#x20) characters by a single space (#x20) character.
+                    // All attributes for which no declaration has been read SHOULD be 
+                    // treated by a non-validating processor as if declared CDATA.
+                    // TODO: QName ?
+                    ElementDeclaration* elemDecl = _dtd.findElement( _startElem.name() );
+                    if(elemDecl)
+                    {
+                        // TODO: QName ?
+                        AttributeDeclaration* attrDecl = elemDecl->attributeList().findAttribute( _attr.name() );
+                        if(attrDecl)
+                            attrDecl->normalize(_attr);
+                    }
+                    
                     _startElem.attributes().add(_attr);
                 }
                 
@@ -3818,11 +3837,25 @@ class XmlReaderImpl
 
             if (ch == '&')
             {
+                // For a character reference, append the referenced character to the
+                // attribute value.
+                // For an entity reference, recursively process the replacement text
+                // of the entity.
                 _token.clear();
                 _parse = &XmlReaderImpl::onAttributeEntityReference;
                 return;
             }
 
+            // For white space characters (#x20, #xD, #xA, #x9), append #x20 to
+            // the normalized value, with the exception that a single #x20 is
+            // appended for a #xD#xA sequence that is part of an external parsed
+            // entity or the literal entity value of an internal parsed entity.
+            if( ch == '\r' | ch == '\n' | ch == '\t' )
+            {
+                _attr.value() += ' ';
+                return;
+            }
+            
             _attr.value() += c;
         }
 
@@ -4149,9 +4182,8 @@ class XmlReaderImpl
             appendContent(c);
         }
 
-        // not neccessary, allow EOF only when depth == 0 in other states
-
-        // join onProlog and onEpilog -> EOF only allowed when root element was found
+        // onEpilog should differ should not allow StartElements
+        // -> onEpilogTag, allow only Comments and ProcInstr
         void onEpilog(int c)
         {
             if( c == std::char_traits<Char>::eof() )

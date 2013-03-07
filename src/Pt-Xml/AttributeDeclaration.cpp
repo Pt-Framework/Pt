@@ -132,6 +132,7 @@ bool AttributeDeclaration::validate(AttributeValidator& validator, const Attribu
     return onValidate(validator, attr);
 }
       
+
 bool AttributeDeclaration::fixup(AttributeValidator& validator, AttributeList& list) const
 {
     switch(_mode)
@@ -159,12 +160,71 @@ bool AttributeDeclaration::fixup(AttributeValidator& validator, AttributeList& l
 }
 
 
+void AttributeDeclaration::normalize(Attribute& attr) const
+{
+    onNormalize(attr);
+}
+
+
+void AttributeDeclaration::onNormalize(Attribute& attr) const
+{
+    Pt::String& str = attr.value();
+
+    Pt::String::iterator p1 = str.begin();
+    Pt::String::iterator p2 = str.begin();
+    int spaces = 1;
+    bool normalized = false;
+    
+    for(; p2 != str.end(); ++p2)
+    {
+        if( Pt::isspace(*p2) )
+        {
+            switch(spaces)
+            {
+                case 0:
+                    *p1 = *p2;
+                    ++p1;
+                    break;
+
+                case 1:
+                    normalized = true;
+            };
+
+              ++spaces;
+        }
+        else
+        {
+            spaces = 0;
+                    
+            if(normalized)
+                *p1 = *p2;
+                    
+            ++p1;
+        }
+    }
+           
+    if(p1 != p2)
+    {               
+        str.erase( p1, str.end() );
+    }
+
+    if( spaces != 0 && ! str.empty() )
+    {
+        str.erase(str.size() - 1);
+    }
+}
+
+
 
 
 bool CDataAttributeDeclaration::onValidate(AttributeValidator& validator, const Attribute& attr) const
 { 
     // TODO: check for non-CDATA characters in value           
     return true; 
+}
+
+void CDataAttributeDeclaration::onNormalize(Attribute&) const
+{
 }
 
 

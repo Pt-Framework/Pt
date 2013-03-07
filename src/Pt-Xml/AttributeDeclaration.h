@@ -103,8 +103,12 @@ class AttributeDeclaration
       
         bool fixup(AttributeValidator& validator, AttributeList& list) const;
 
+        void normalize(Attribute& attr) const;
+
     protected:
         virtual bool onValidate(AttributeValidator& validator, const Attribute& attr) const = 0;
+
+        virtual void onNormalize(Attribute& attr) const;
 
     private:
         Mode _mode;
@@ -120,7 +124,10 @@ class CDataAttributeDeclaration : public AttributeDeclaration
         : AttributeDeclaration()
         {}
 
+    protected:
         virtual bool onValidate(AttributeValidator& validator, const Attribute& attr) const;
+
+        virtual void onNormalize(Attribute& attr) const;
 };
 
 
