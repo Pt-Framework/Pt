@@ -69,6 +69,7 @@ class XmlReaderImpl
 
             if( Pt::isspace(ch) )
             {
+                setStartDoc();
                 _parse = &XmlReaderImpl::onProlog;
             }
             else if( ch == '<')
@@ -97,6 +98,7 @@ class XmlReaderImpl
 
             if(ch == '!')
             {
+                setStartDoc();
                 _parse = &XmlReaderImpl::onTagExclam;
                 return;
             }
@@ -105,6 +107,8 @@ class XmlReaderImpl
             {
                 _startElem.clear();
                 _startElem.name() += ch;
+                
+                setStartDoc();
                 _parse = &XmlReaderImpl::onStartElement;
                 return;
             }
@@ -136,7 +140,10 @@ class XmlReaderImpl
                 if( _procInstr.target() == L"xml" )
                     _parse =  &XmlReaderImpl::onXmlDeclBeforeAttr;
                 else
+                {
+                    setStartDoc();
                     _parse =  &XmlReaderImpl::onProcessingInstructionData;
+                }
 
                 return;
             }
@@ -245,16 +252,16 @@ class XmlReaderImpl
             {
                 if(_attr.name() == L"version")
                 {
-                    _version = _attr.value();
+                    _startDoc.setVersion( _attr.value() );
                 }
                 else if(_attr.name() == L"encoding")
                 {
-                    _encoding = _attr.value();
+                    _startDoc.setEncoding( _attr.value() );
                 }
                 else if(_attr.name() == L"standalone")
                 {
                     if(_attr.value() == L"true")
-                        _standalone = true;
+                        _startDoc.setStandalone(true);
                 }
 
                 _parse =  &XmlReaderImpl::onXmlDeclBeforeAttr;
@@ -276,6 +283,7 @@ class XmlReaderImpl
 
             if(ch == '>')
             {
+                setStartDoc();
                 _parse =  &XmlReaderImpl::onProlog;
                 return;
             }
@@ -4453,6 +4461,12 @@ class XmlReaderImpl
             }
         }
 
+        void setStartDoc()
+        {
+            if(_flags & XmlReader::ReportStartDocument)
+                  _current = &_startDoc;
+        }
+
         void setDocType()
         {
             if(_flags & XmlReader::ReportDtd)
@@ -4476,7 +4490,6 @@ class XmlReaderImpl
         , _beforeCharacterReference(0)
         , _beforeEntityReference(0)
         , _current(0)
-        , _standalone(false)
         , _dtdContext()
         , _dtd(_dtdContext)
         , _docType()
@@ -4498,7 +4511,6 @@ class XmlReaderImpl
         , _beforeCharacterReference(0)
         , _beforeEntityReference(0)
         , _current(0)
-        , _standalone(false)
         , _dtdContext()
         , _dtd(_dtdContext)
         , _docType()
@@ -4554,9 +4566,6 @@ class XmlReaderImpl
             _notation = 0;
 
             _docType.clear();
-            _version.clear();
-            _encoding.clear();
-            _standalone = false;
             _depth = 0;
             _current = 0;
 
@@ -4586,13 +4595,13 @@ class XmlReaderImpl
         { _input.addInput(is); }
 
         const Pt::String& version() const
-        { return _version; }
+        { return _startDoc.version(); }
 
         const Pt::String& encoding() const
-        { return _encoding; }
+        { return _startDoc.encoding(); }
 
         bool isStandalone() const
-        { return _standalone; }
+        { return _startDoc.isStandalone(); }
 
         const DocTypeDefinition& dtd() const
         { return _dtd; }
@@ -4733,10 +4742,6 @@ class XmlReaderImpl
         
         Node* _current;
 
-        Pt::String _version;
-        Pt::String _encoding;
-        bool _standalone;
-
         DocTypeContext _dtdContext;
         DocTypeDefinition _dtd;
         DocType _docType;
@@ -4747,6 +4752,7 @@ class XmlReaderImpl
         AttributeListDeclaration* _attlistDecl;
         
         // TODO: some sort of union?
+        StartDocument _startDoc;
         ProcessingInstruction _procInstr;
         StartElement _startElem;
         EntityReference _entityRef;

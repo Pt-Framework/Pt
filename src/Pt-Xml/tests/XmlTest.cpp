@@ -29,6 +29,7 @@
 #include "Pt/Xml/XmlReader.h"
 #include "Pt/Xml/XmlResolver.h"
 #include "Pt/Xml/InputSource.h"
+#include "Pt/Xml/StartDocument.h"
 #include "Pt/Xml/StartElement.h"
 #include "Pt/Xml/Comment.h"
 #include "Pt/Xml/Entity.h"
@@ -139,6 +140,7 @@ class XmlReaderTest : public Pt::Unit::TestSuite
 
             this->registerMethod("IgnorableWhitespace", *this, &XmlReaderTest::IgnorableWhitespace);
             this->registerMethod("CDATA", *this, &XmlReaderTest::CDATA );
+            this->registerMethod("StartDocument", *this, &XmlReaderTest::StartDocument);
             this->registerMethod("CommentInProlog", *this, &XmlReaderTest::CommentInProlog );
             this->registerMethod("CommentInElement", *this, &XmlReaderTest::CommentInElement );
             this->registerMethod("CommentInEpilog", *this, &XmlReaderTest::CommentInEpilog );
@@ -184,6 +186,7 @@ class XmlReaderTest : public Pt::Unit::TestSuite
         void NormalizeAttributes();
         void IgnorableWhitespace();
         void CDATA();
+        void StartDocument();
         
         void DefaultEntities();
         void CustomEntities();
@@ -1295,6 +1298,42 @@ void XmlReaderTest::CDATA()
 
     ++it;
     PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::EndDocument);
+}
+
+
+void XmlReaderTest::StartDocument()
+{
+    std::stringstream input;
+    input << "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"true\"?>";
+    input << "<test>\n";
+    input << "</test>\n";
+
+    Pt::Xml::XmlReader reader(input);
+    reader.setFlag(Pt::Xml::XmlReader::ReportStartDocument);
+        
+    Pt::Xml::XmlReader::Iterator it = reader.current();
+
+    Pt::Xml::StartDocument* startDoc = Pt::Xml::toStartDocument(&*it);
+    PT_UNIT_ASSERT(startDoc);
+    PT_UNIT_ASSERT_EQUALS(startDoc->version(), L"1.0");
+    PT_UNIT_ASSERT_EQUALS(startDoc->encoding(), L"UTF-8");
+    PT_UNIT_ASSERT_EQUALS(startDoc->isStandalone(), true);
+
+    ++it;
+    Pt::Xml::StartElement* startElem = Pt::Xml::toStartElement(&*it);
+    PT_UNIT_ASSERT(startElem);
+
+    ++it;
+    Pt::Xml::Characters* chars = Pt::Xml::toCharacters(&*it);
+    PT_UNIT_ASSERT(chars);
+
+    ++it;
+    Pt::Xml::EndElement* endElem = Pt::Xml::toEndElement(&*it);
+    PT_UNIT_ASSERT(endElem);
+
+    ++it;
+    Pt::Xml::EndDocument* endDoc = Pt::Xml::toEndDocument(&*it);
+    PT_UNIT_ASSERT(endDoc);
 }
 
 

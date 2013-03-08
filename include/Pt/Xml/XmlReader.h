@@ -87,7 +87,8 @@ class PT_XML_API XmlReader : private NonCopyable
         enum ParseFlag
         {
             ReportDtd = 1,
-            ValidateDtd = 2
+            ReportStartDocument = 2,
+            ValidateDtd = 4
         };
 
         static const int DefaultParseFlags = ValidateDtd;

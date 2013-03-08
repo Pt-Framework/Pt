@@ -44,11 +44,42 @@ class StartDocument : public Node
         */
         StartDocument()
         : Node(Node::StartDocument)
+        , _standalone(false)
         { }
+
+        void clear()
+        {
+            _version.clear();
+            _encoding.clear();
+            _standalone = false;
+        }
+
+        const Pt::String& version() const
+        { return _version; }
+
+        void setVersion(const Pt::String& ver)
+        { _version = ver; }
+
+        const Pt::String& encoding() const
+        { return _encoding; }
+
+        void setEncoding(const Pt::String& enc)
+        { _encoding = enc; }
+
+        bool isStandalone() const
+        { return _standalone; }
+
+        void setStandalone(bool alone)
+        { _standalone = alone; }
 
         //! @internal
         inline static const Node::Type nodeId()
         { return Node::StartDocument; }
+
+    private:
+        Pt::String _version;
+        Pt::String _encoding;
+        bool _standalone;
 };
 
 
