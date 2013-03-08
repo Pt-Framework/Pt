@@ -74,12 +74,16 @@ class AttributeDeclaration
         };
 
     public:
-        AttributeDeclaration()
+        AttributeDeclaration(bool normalize)
         : _mode(Default)
+        , _normalize(normalize)
         {}
 
         virtual ~AttributeDeclaration()
         { }
+
+        bool isNormalize() const
+        { return _normalize; }
 
         void setMode(Mode mode)
         { _mode = mode; }
@@ -103,15 +107,12 @@ class AttributeDeclaration
       
         bool fixup(AttributeValidator& validator, AttributeList& list) const;
 
-        void normalize(Attribute& attr) const;
-
     protected:
         virtual bool onValidate(AttributeValidator& validator, const Attribute& attr) const = 0;
 
-        virtual void onNormalize(Attribute& attr) const;
-
     private:
         Mode _mode;
+        bool _normalize;
         Pt::String _name;
         Pt::String _default;
 };
@@ -121,7 +122,7 @@ class CDataAttributeDeclaration : public AttributeDeclaration
 {
     public:
         CDataAttributeDeclaration()
-        : AttributeDeclaration()
+        : AttributeDeclaration(false)
         {}
 
     protected:
@@ -135,7 +136,7 @@ class NMTokenAttributeDeclaration : public AttributeDeclaration
 {
     public:
         NMTokenAttributeDeclaration()
-        : AttributeDeclaration()
+        : AttributeDeclaration(true)
         {}
 
         virtual bool onValidate(AttributeValidator& validator, const Attribute& attr) const;
@@ -146,7 +147,7 @@ class NMTokensAttributeDeclaration : public AttributeDeclaration
 {
     public:
         NMTokensAttributeDeclaration()
-        : AttributeDeclaration()
+        : AttributeDeclaration(true)
         {}
 
         virtual bool onValidate(AttributeValidator& validator, const Attribute& attr) const;
@@ -157,7 +158,7 @@ class EnumAttributeDeclaration : public AttributeDeclaration
 {
     public:
         EnumAttributeDeclaration()
-        : AttributeDeclaration()
+        : AttributeDeclaration(true)
         {}
 
         void addValue(const Pt::String& value)
@@ -178,7 +179,7 @@ class IDAttributeDeclaration : public AttributeDeclaration
 {
     public:
         IDAttributeDeclaration()
-        : AttributeDeclaration()
+        : AttributeDeclaration(true)
         {}
 
         virtual bool onValidate(AttributeValidator& validator, const Attribute& attr) const;
@@ -190,7 +191,7 @@ class IDRefAttributeDeclaration : public AttributeDeclaration
 {
     public:
         IDRefAttributeDeclaration()
-        : AttributeDeclaration()
+        : AttributeDeclaration(true)
         {}
 
         virtual bool onValidate(AttributeValidator& validator, const Attribute& attr) const;
@@ -202,7 +203,7 @@ class IDRefsAttributeDeclaration : public AttributeDeclaration
 {
     public:
         IDRefsAttributeDeclaration()
-        : AttributeDeclaration()
+        : AttributeDeclaration(true)
         {}
 
         virtual bool onValidate(AttributeValidator& validator, const Attribute& attr) const;
@@ -214,7 +215,7 @@ class EntityAttributeDeclaration : public AttributeDeclaration
 {
     public:
         EntityAttributeDeclaration(const DocTypeDefinition& dtd)
-        : AttributeDeclaration()
+        : AttributeDeclaration(true)
         , _dtd(&dtd)
         {}
 
@@ -230,7 +231,7 @@ class EntitiesAttributeDeclaration : public AttributeDeclaration
 {
     public:
         EntitiesAttributeDeclaration(const DocTypeDefinition& dtd)
-        : AttributeDeclaration()
+        : AttributeDeclaration(true)
         , _dtd(&dtd)
         {}
 
@@ -246,7 +247,7 @@ class NotationAttributeDeclaration : public AttributeDeclaration
 {
     public:
         NotationAttributeDeclaration(const DocTypeDefinition& dtd)
-        : AttributeDeclaration()
+        : AttributeDeclaration(true)
         , _dtd(&dtd)
         {}
 

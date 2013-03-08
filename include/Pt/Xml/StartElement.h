@@ -41,7 +41,7 @@ namespace Xml {
 
 /** @brief A single attribute of a start element.
 */
-class Attribute
+class PT_XML_API Attribute
 {
     public:
         //! Default constructor.
@@ -86,6 +86,8 @@ class Attribute
         */
         void setValue(const String& value)
         { _value = value; }
+
+        void normalize();
 
         void clear()
         { 

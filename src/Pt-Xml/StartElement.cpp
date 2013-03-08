@@ -33,6 +33,54 @@ namespace Pt {
 
 namespace Xml {
 
+void Attribute::normalize()
+{
+    Pt::String& str = value();
+
+    Pt::String::iterator p1 = str.begin();
+    Pt::String::iterator p2 = str.begin();
+    int spaces = 1;
+    bool normalized = false;
+    
+    for(; p2 != str.end(); ++p2)
+    {
+        if( Pt::isspace(*p2) )
+        {
+            switch(spaces)
+            {
+                case 0:
+                    *p1 = *p2;
+                    ++p1;
+                    break;
+
+                case 1:
+                    normalized = true;
+            };
+
+              ++spaces;
+        }
+        else
+        {
+            spaces = 0;
+                    
+            if(normalized)
+                *p1 = *p2;
+                    
+            ++p1;
+        }
+    }
+           
+    if(p1 != p2)
+    {               
+        str.erase( p1, str.end() );
+    }
+
+    if( spaces != 0 && ! str.empty() )
+    {
+        str.erase(str.size() - 1);
+    }
+}
+
 AttributeList::ConstIterator AttributeList::find(const String& name) const
 {
     ConstIterator it;

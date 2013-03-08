@@ -3818,14 +3818,21 @@ class XmlReaderImpl
                     // (#x20) characters by a single space (#x20) character.
                     // All attributes for which no declaration has been read SHOULD be 
                     // treated by a non-validating processor as if declared CDATA.
+                    //
+                    // TODO: do this when StartElement is complete so we only
+                    //       have to look up the ElementDeclaration once.
+
                     // TODO: QName ?
                     ElementDeclaration* elemDecl = _dtd.findElement( _startElem.name() );
                     if(elemDecl)
                     {
                         // TODO: QName ?
                         AttributeDeclaration* attrDecl = elemDecl->attributeList().findAttribute( _attr.name() );
-                        if(attrDecl)
-                            attrDecl->normalize(_attr);
+                        
+                        // TODO: no virtual call, just check if not CDATA or 
+                        //       "normalization flag"
+                        if(attrDecl && attrDecl->isNormalize())
+                            _attr.normalize();
                     }
                     
                     _startElem.attributes().add(_attr);
