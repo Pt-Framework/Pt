@@ -139,6 +139,7 @@ class XmlReaderTest : public Pt::Unit::TestSuite
             this->registerMethod("NormalizeAttributes", *this, &XmlReaderTest::NormalizeAttributes);
 
             this->registerMethod("IgnorableWhitespace", *this, &XmlReaderTest::IgnorableWhitespace);
+            this->registerMethod("CDATAAsCharacters", *this, &XmlReaderTest::CDATAAsCharacters);
             this->registerMethod("CDATA", *this, &XmlReaderTest::CDATA );
             this->registerMethod("StartDocument", *this, &XmlReaderTest::StartDocument);
             this->registerMethod("CommentInProlog", *this, &XmlReaderTest::CommentInProlog );
@@ -185,6 +186,7 @@ class XmlReaderTest : public Pt::Unit::TestSuite
         void MultipleAttributesIteration();
         void NormalizeAttributes();
         void IgnorableWhitespace();
+        void CDATAAsCharacters();
         void CDATA();
         void StartDocument();
         
@@ -1181,6 +1183,8 @@ void XmlReaderTest::ProcessingInstructionInProlog()
     input << "<a/>";
 
     Pt::Xml::XmlReader reader( input );
+    reader.setFlag(Pt::Xml::XmlReader::ReportProcessingInstructions);
+    
     Pt::Xml::XmlReader::Iterator it = reader.current();
     PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::ProcessingInstruction);
     const Pt::Xml::ProcessingInstruction& pi = dynamic_cast<const Pt::Xml::ProcessingInstruction&>(*it);
@@ -1206,6 +1210,8 @@ void XmlReaderTest::ProcessingInstructionInElement()
     input << "456</a>";
 
     Pt::Xml::XmlReader reader( input );
+    reader.setFlag(Pt::Xml::XmlReader::ReportProcessingInstructions);
+
     Pt::Xml::XmlReader::Iterator it = reader.current();
     PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::StartElement);
 
@@ -1235,6 +1241,8 @@ void XmlReaderTest::ProcessingInstructionInEpilog()
     input << "<?xml-stylesheet type=\"text/css\" href=\"styles.css\"?>";
 
     Pt::Xml::XmlReader reader( input );
+    reader.setFlag(Pt::Xml::XmlReader::ReportProcessingInstructions);
+
     Pt::Xml::XmlReader::Iterator it = reader.current();
     PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::StartElement);
 
@@ -1274,13 +1282,20 @@ void XmlReaderTest::IgnorableWhitespace()
 }
 
 
-void XmlReaderTest::CDATA()
+void XmlReaderTest::CDATAAsCharacters()
 {
     std::stringstream input;
     input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
+    input << "<test>";
     input << "<a>";
+    input << "hello";
     input << "<![CDATA[<Element>pure &gt; data</Element>]]>";
-    input << "</a>\n";
+    input << "world!";
+    input << "</a>";
+    input << "<b>";
+    input << "<![CDATA[bbb]]>";
+    input << "</b>";
+    input << "</test>\n";
 
     Pt::Xml::XmlReader reader( input );
 
@@ -1288,10 +1303,87 @@ void XmlReaderTest::CDATA()
     PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::StartElement);
 
     ++it;
-    const Pt::Xml::Node& node = *it;
-    PT_UNIT_ASSERT(node.type() == Pt::Xml::Node::Characters);
-    const Pt::Xml::Characters* chars = dynamic_cast<const Pt::Xml::Characters*>(&node);
-    PT_UNIT_ASSERT(chars->content().narrow() == "<Element>pure &gt; data</Element>");
+    PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::StartElement);
+
+    ++it;
+    Pt::Xml::Characters* chars = Pt::Xml::toCharacters(&*it);
+    PT_UNIT_ASSERT(chars);
+    PT_UNIT_ASSERT_EQUALS(chars->content().narrow(), L"hello<Element>pure &gt; data</Element>world!");
+
+    ++it;
+    PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::EndElement);
+
+    ++it;
+    PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::StartElement);
+
+    ++it;
+    chars = Pt::Xml::toCharacters(&*it);
+    PT_UNIT_ASSERT(chars);
+    PT_UNIT_ASSERT(chars->content().narrow() == "bbb");
+
+    ++it;
+    PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::EndElement);
+
+    ++it;
+    PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::EndElement);
+
+    ++it;
+    PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::EndDocument);
+}
+
+
+void XmlReaderTest::CDATA()
+{
+    std::stringstream input;
+    input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
+    input << "<test>";
+    input << "<a>";
+    input << "hello";
+    input << "<![CDATA[<Element>pure &gt; data</Element>]]>";
+    input << "world!";
+    input << "</a>";
+    input << "<b>";
+    input << "<![CDATA[bbb]]>";
+    input << "</b>";
+    input << "</test>\n";
+
+    Pt::Xml::XmlReader reader( input );
+    reader.setFlag(Pt::Xml::XmlReader::ReportCData);
+
+    Pt::Xml::XmlReader::Iterator it = reader.current();
+    PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::StartElement);
+
+    ++it;
+    PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::StartElement);
+
+    ++it;
+    Pt::Xml::Characters* chars = Pt::Xml::toCharacters(&*it);
+    PT_UNIT_ASSERT(chars);
+    PT_UNIT_ASSERT(chars->content().narrow() == "hello");
+
+    ++it;
+    Pt::Xml::CData* cdata = Pt::Xml::toCData(&*it);
+    PT_UNIT_ASSERT(cdata);
+    PT_UNIT_ASSERT(cdata->content().narrow() == "<Element>pure &gt; data</Element>");
+
+    ++it;
+    chars = Pt::Xml::toCharacters(&*it);
+    PT_UNIT_ASSERT(chars);
+    PT_UNIT_ASSERT(chars->content().narrow() == "world!");
+
+    ++it;
+    PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::EndElement);
+
+    ++it;
+    PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::StartElement);
+
+    ++it;
+    cdata = Pt::Xml::toCData(&*it);
+    PT_UNIT_ASSERT(cdata);
+    PT_UNIT_ASSERT(cdata->content().narrow() == "bbb");
+
+    ++it;
+    PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::EndElement);
 
     ++it;
     PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::EndElement);

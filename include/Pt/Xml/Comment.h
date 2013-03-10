@@ -46,9 +46,9 @@ class PT_XML_API Comment : public Node
     public:
         /** @brief Constructs with content string.
         */
-        explicit Comment(const String& text)
+        explicit Comment()
         : Node(Node::Comment)
-        , _content(text)
+        , _content()
         { }
 
         /** @brief Returns true if is empty.

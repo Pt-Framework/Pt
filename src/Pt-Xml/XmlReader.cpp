@@ -43,6 +43,7 @@
 #include "Pt/Xml/EndElement.h"
 #include "Pt/Xml/Characters.h"
 #include "Pt/Xml/ProcessingInstruction.h"
+#include "Pt/Xml/Comment.h"
 #include "Pt/Xml/XmlError.h"
 #include "Pt/System/Logger.h"
 #include "Pt/TextStream.h"
@@ -336,7 +337,7 @@ class XmlReaderImpl
 
             if(ch == '>')
             {
-                _current = &(_procInstr);
+                setProcessingInstruction();
                 _parse = &XmlReaderImpl::afterTag;
                 return;
             }
@@ -3580,6 +3581,7 @@ class XmlReaderImpl
         {
             if(c == '-')
             {
+                _comment.content().clear();
                 _parse = &XmlReaderImpl::onComment;
                 return;
             }
@@ -3596,6 +3598,8 @@ class XmlReaderImpl
                 _parse = &XmlReaderImpl::afterComment;
                 return;
             }
+
+            _comment.content() += ch;
         }
 
         void afterComment(int c)
@@ -3608,6 +3612,8 @@ class XmlReaderImpl
                 return;
             }
 
+            _comment.content() += '-';
+            _comment.content() += ch;
             _parse = &XmlReaderImpl::onComment;
         }
 
@@ -3617,6 +3623,7 @@ class XmlReaderImpl
             
             if(ch == '>')
             {
+                setComment();
                 if(depth() == 0)
                 {
                     _parse = &XmlReaderImpl::onProlog;
@@ -4165,6 +4172,17 @@ class XmlReaderImpl
             if( _token == L"[CDATA[" )
             {
                 _token.clear();
+
+                if( _flags & XmlReader::ReportCData )
+                {
+                    if(_chars.content().length() > 0)
+                    {
+                        _current = &_chars;
+                    }
+
+                    _cdata.clear();
+                }
+                
                 _parse = &XmlReaderImpl::onCData;
                 return;
             }
@@ -4175,26 +4193,33 @@ class XmlReaderImpl
         void onCData(int c)
         {
             Char ch = notEof(c);
+            Characters& chars = _flags & XmlReader::ReportCData ? _cdata : _chars;
 
             if(ch == '>')
             {
-                const String& content = _chars.content();
+                const String& content = chars.content();
                 unsigned len = content.length();
 
                 if( len > 2 && content[len-2] == ']' && content[len-2] == ']')
                 {
-                    _chars.setIgnorable(false);
-                    _chars.resize(len-2);
+                    chars.setIgnorable(false);
+                    chars.resize(len-2);
 
+                    if( _flags & XmlReader::ReportCData )
+                    {
+                        _current = &_cdata;
+                        _chars.clear();
+                    }
+                    
                     _parse = &XmlReaderImpl::afterTag;
                     return;
                 }
 
-                appendContent(c);
+                chars.append(ch);
                 return;
             }
 
-            appendContent(c);
+            chars.append(ch);
         }
 
         // onEpilog should differ should not allow StartElements
@@ -4479,6 +4504,18 @@ class XmlReaderImpl
                   _current = &_dtd;
         }
 
+        void setComment()
+        {
+            if(_flags & XmlReader::ReportComments)
+                  _current = &_comment;
+        }
+
+        void setProcessingInstruction()
+        {
+            if(_flags & XmlReader::ReportProcessingInstructions)
+                  _current = &_procInstr;
+        }
+
     public:
         XmlReaderImpl(XmlResolver* resolver = 0)
         : _resolver(resolver)
@@ -4754,10 +4791,12 @@ class XmlReaderImpl
         // TODO: some sort of union?
         StartDocument _startDoc;
         ProcessingInstruction _procInstr;
+        Comment _comment;
         StartElement _startElem;
         EntityReference _entityRef;
         EndElement _endElem;
         Characters _chars;
+        CData _cdata;
         EndDocument _endDoc;
 };
 

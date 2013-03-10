@@ -71,6 +71,7 @@ class PT_XML_API Characters : public Node
         { _ignorable = isIgn; }
 
         // TODO: might want to set ignorableWS flag here...
+        // Alternative: appendSpace(ch)
         void append(Char ch)
         { 
             //_ignorable = _ignorable || (ch != ' ' && ch != '\n' && ch != '\r' && ch != '\t');         
@@ -103,6 +104,13 @@ class PT_XML_API Characters : public Node
         inline static const Node::Type nodeId()
         { return Node::Characters; }
 
+    protected:
+        explicit Characters( Node::Type type )
+        : Node(type)
+        , _content()
+        , _ignorable(true)
+        { }
+
     private:
         String _content;
         bool _ignorable;
@@ -130,6 +138,43 @@ inline Characters& toCharacters(Node& node)
 inline const Characters& toCharacters(const Node& node)
 {
     return nodeCast<Characters>(node);
+}
+
+
+class CData : public Characters
+{
+    public:
+        /** @brief Constructs with content string.
+        */
+        CData()
+        : Characters(Node::CData)
+        { }
+
+        inline static const Node::Type nodeId()
+        { return Node::CData; }
+};
+
+inline CData* toCData(Node* node)
+{
+    return nodeCast<CData>(node);
+}
+
+
+inline const CData* toCData(const Node* node)
+{
+    return nodeCast<CData>(node);
+}
+
+
+inline CData& toCData(Node& node)
+{
+    return nodeCast<CData>(node);
+}
+
+
+inline const CData& toCData(const Node& node)
+{
+    return nodeCast<CData>(node);
 }
 
 } // namespace Xml

@@ -79,14 +79,17 @@ class Node
             //! Parsed content of a tag's body
             Characters = 8,
 
+            //! Content of a CDATA entry
+            CData = 9,
+
             //! Comment
-            Comment = 9,
+            Comment = 10,
 
             //! Processing instruction
-            ProcessingInstruction = 10,
+            ProcessingInstruction = 11,
 
             //! Unresolved entity reference
-            EntityReference = 11
+            EntityReference = 12
         };
 
         //! @brief Destructor.

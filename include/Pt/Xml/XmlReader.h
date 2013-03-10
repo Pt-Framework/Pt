@@ -88,7 +88,10 @@ class PT_XML_API XmlReader : private NonCopyable
         {
             ReportDtd = 1,
             ReportStartDocument = 2,
-            ValidateDtd = 4
+            ReportProcessingInstructions = 4,
+            ReportComments = 8,
+            ReportCData = 16,
+            ValidateDtd = 32
         };
 
         static const int DefaultParseFlags = ValidateDtd;
