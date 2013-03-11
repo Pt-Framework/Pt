@@ -55,6 +55,12 @@ void EntityReference::set(const Pt::String& name, const Entity* entity)
 }
 
 
+void EntityReference::set(const Entity* entity)
+{
+    _entity = entity;
+}
+
+
 const Pt::String& EntityReference::name() const
 {
     return _name; 

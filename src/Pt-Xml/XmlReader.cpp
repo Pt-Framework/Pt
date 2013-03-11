@@ -841,17 +841,19 @@ class XmlReaderImpl
 
             if( isAlpha(ch) )
             {
-                _entityName += ch;
+                _entityRef.name() += ch;
+                //_entityName += ch;
                 return;
             }
 
             if(ch == ';')
             {
-                assert(_beforeEntityReference);
-                resolveParamEntity(_entityName);
-                _parse = _beforeEntityReference;
-                _beforeEntityReference = 0;
-                _entityName.clear();
+                //assert(_beforeEntityReference);
+                resolveParamEntity(_entityRef);
+                popParseState();
+                //_parse = _beforeEntityReference;
+                //_beforeEntityReference = 0;
+                //_entityName.clear()
                 return;
             }
 
@@ -860,8 +862,10 @@ class XmlReaderImpl
 
         void enterParameterReference(ParseFunc from)
         {
-            assert( ! _beforeEntityReference);
-            _beforeEntityReference = from;
+            //assert( ! _beforeEntityReference);
+            pushParseState(from);
+            //_beforeEntityReference = from;
+            _entityRef.clear();
             _parse = &XmlReaderImpl::OnDtdParameterEntityReference;
         }
 
@@ -871,17 +875,19 @@ class XmlReaderImpl
             
             if( isAlpha(ch) )
             {
-                _entityName += ch;
+                //_entityName += ch;
+                _entityRef.name() += ch;
                 return;
             }
 
             if(ch == ';')
             {
-                assert(_beforeEntityReference);
-                resolveParamEntity(_entityName);
-                _parse = _beforeEntityReference;
-                _beforeEntityReference = 0;
-                _entityName.clear();
+                //assert(_beforeEntityReference);
+                resolveParamEntity(_entityRef);
+                popParseState();
+                //_parse = _beforeEntityReference;
+                //_beforeEntityReference = 0;
+                //_entityName.clear();
                 return;
             }
 
@@ -892,13 +898,6 @@ class XmlReaderImpl
             }
 
             throw SyntaxError("XML syntax error", line());
-        }
-        
-        void enterEntityValueParameterEntityReference(ParseFunc from)
-        {
-            assert( ! _beforeEntityReference);
-            _beforeEntityReference = from;
-            _parse = &XmlReaderImpl::OnDtdEntityValueParameterEntityReference;
         }
 
         void OnDtdTag(int c)
@@ -2040,10 +2039,10 @@ class XmlReaderImpl
 
             if( ch == '"' )
             {
-                if(_entity)
-                    _entity->setValue(_token);
+                //if(_entity)
+                //    _entity->addValue(_token);
                 
-                _token.clear();
+                //_token.clear();
                 _entity = 0;
                 _parse = &XmlReaderImpl::OnDtdTagEnd;
                 return;
@@ -2051,17 +2050,24 @@ class XmlReaderImpl
 
             if(ch == '&')
             {
-                enterEntityValueCharacterReference(&XmlReaderImpl::OnDtdEntityValueQuot);
+                _token.clear();
+                pushParseState(&XmlReaderImpl::OnDtdEntityValueQuot);
+                _parse = &XmlReaderImpl::OnEntityValueCharacterReference;
                 return;
             }
 
             if( ch == '%' )
             {
-                enterEntityValueParameterEntityReference(&XmlReaderImpl::OnDtdEntityValueQuot);
+                pushParseState(&XmlReaderImpl::OnDtdEntityValueQuot);
+                _entityRef.clear();
+                _parse = &XmlReaderImpl::OnDtdEntityValueParameterEntityReference;
                 return;
             }
 
-            _token += ch;
+            if(_entity)
+                _entity->value() += ch;
+
+            //_token += ch;
         }
 
         void OnDtdEntityValueApos(int c)
@@ -2070,10 +2076,10 @@ class XmlReaderImpl
 
             if( ch == '\'' )
             {
-                if(_entity)
-                    _entity->setValue(_token);
+                //if(_entity)
+                //    _entity->addValue(_token);
                 
-                _token.clear();
+                //_token.clear();
                 _entity = 0;
                 _parse = &XmlReaderImpl::OnDtdTagEnd;
                 return;
@@ -2081,17 +2087,24 @@ class XmlReaderImpl
 
             if(ch == '&')
             {
-                enterEntityValueCharacterReference(&XmlReaderImpl::OnDtdEntityValueApos);
+                _token.clear();
+                pushParseState(&XmlReaderImpl::OnDtdEntityValueApos);
+                _parse = &XmlReaderImpl::OnEntityValueCharacterReference;
                 return;
             }
 
             if( ch == '%' )
             {
-                enterEntityValueParameterEntityReference(&XmlReaderImpl::OnDtdEntityValueApos);
+                pushParseState(&XmlReaderImpl::OnDtdEntityValueApos);
+                _entityRef.clear();
+                _parse = &XmlReaderImpl::OnDtdEntityValueParameterEntityReference;
                 return;
             }
 
-            _token += ch;
+            if(_entity)
+                _entity->value() += ch;
+            
+            //_token += ch;
         }
         
         // Entity references in entity value literals are left as is except
@@ -2102,33 +2115,24 @@ class XmlReaderImpl
 
             if(ch == ';')
             {
-                if( ! EntityMapping::resolveCharacterEntity(_characterReference) )
+                if( ! EntityMapping::resolveCharacterEntity(_token) )
                 {
-                    _token += '&';
-                    _token += _characterReference;
-                    _token += ';';
-                }
-                else
-                {
-                    _token += _characterReference;
+                    _token = '&' + _token + ';';
                 }
 
-                _characterReference.clear();
+                //assert(_beforeCharacterReference != 0);
+                //_parse = _beforeCharacterReference;
+                //_beforeCharacterReference = 0;
 
-                assert(_beforeCharacterReference != 0);
-                _parse = _beforeCharacterReference;
-                _beforeCharacterReference = 0;
+                if(_entity)
+                    _entity->addValue(_token);
+
+                _token.clear();
+                popParseState();
                 return;
             }
 
-            _characterReference += ch;
-        }
-
-        void enterEntityValueCharacterReference(ParseFunc from)
-        {
-            assert( ! _beforeCharacterReference);
-            _beforeCharacterReference = from;
-            _parse = &XmlReaderImpl::OnEntityValueCharacterReference;
+            _token += ch;
         }
 
         void OnDtdAttListBegin(int c)
@@ -4610,6 +4614,19 @@ class XmlReaderImpl
         {
             _parseStack.push(parse);
         }
+
+        void popParseState()
+        {
+            if( _parseStack.empty() )
+            {
+                throw SyntaxError("XML syntax error", line());
+            }
+            else
+            {
+                _parse = _parseStack.top();
+                _parseStack.pop();
+            }
+        }
         
         void popParseState(ParseFunc parse)
         {
@@ -4716,11 +4733,11 @@ class XmlReaderImpl
             return false;
         }
 
-        void resolveParamEntity(const String& token)
+        void resolveParamEntity(const EntityReference& entref)
         {
             InputSource* is = 0;
             
-            const Entity* ent = _dtd.resolveParamEntity(token);
+            const Entity* ent = _dtd.resolveParamEntity( entref.name() );
             if( ent )
             {
                 if( ent->isInternal() )
@@ -4740,10 +4757,9 @@ class XmlReaderImpl
 
             if( ! is)
             {
-                _entityRef.set(token, ent);
+                _entityRef.set(ent);
                 _current = &_entityRef;
             }
-            return;
         }
 
         void appendContent(Pt::Char c)
@@ -4856,8 +4872,8 @@ class XmlReaderImpl
         , _entity(0)
         , _depth(0)
         , _parse(0)                 
-        , _beforeCharacterReference(0)
-        , _beforeEntityReference(0)
+        //, _beforeCharacterReference(0)
+        //, _beforeEntityReference(0)
         , _current(0)
         , _dtdContext()
         , _dtd(_dtdContext)
@@ -4877,8 +4893,8 @@ class XmlReaderImpl
         , _entity(0)
         , _depth(0)
         , _parse(0)                 
-        , _beforeCharacterReference(0)
-        , _beforeEntityReference(0)
+        //, _beforeCharacterReference(0)
+        //, _beforeEntityReference(0)
         , _current(0)
         , _dtdContext()
         , _dtd(_dtdContext)
@@ -4919,10 +4935,10 @@ class XmlReaderImpl
             while( ! _parseStack.empty() )
                 _parseStack.pop();
 
-            _beforeEntityReference = 0;
-            _beforeCharacterReference = 0;
-            _entityName.clear();
-            _characterReference.clear();
+            //_beforeEntityReference = 0;
+            //_beforeCharacterReference = 0;
+            //_entityName.clear();
+            //_characterReference.clear();
 
             _token.clear();
 
@@ -5107,12 +5123,6 @@ class XmlReaderImpl
         std::size_t _depth;
         ParseFunc _parse;
         std::stack<ParseFunc> _parseStack;
-        
-        Pt::String _entityName;
-        ParseFunc _beforeCharacterReference;
-        
-        Pt::String _characterReference;
-        ParseFunc _beforeEntityReference;
         
         Node* _current;
 

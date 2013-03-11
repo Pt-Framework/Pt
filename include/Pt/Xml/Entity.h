@@ -64,6 +64,12 @@ class Entity
         void setValue(const Pt::String& val)
         {  _value = val; }
 
+        Pt::String& value()
+        { return _value; }
+
+        void addValue(const Pt::String& val)
+        {  _value += val; }
+
         const Pt::String& publicId() const
         { return _publicId; }
 
@@ -108,7 +114,12 @@ class PT_XML_API EntityReference : public Node
 
         void set(const Pt::String& name, const Entity* entity);
 
+        void set(const Entity* entity);
+
         const Pt::String& name() const;
+
+        Pt::String& name()
+        { return _name; }
         
         const Entity* get() const;
 
