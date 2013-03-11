@@ -112,6 +112,8 @@ class XmlReaderTest : public Pt::Unit::TestSuite
             this->registerMethod("DtdNotations", *this, &XmlReaderTest::DtdNotations);
             this->registerMethod("DtdInclude", *this, &XmlReaderTest::DtdInclude);
             this->registerMethod("DtdIgnore", *this, &XmlReaderTest::DtdIgnore);
+            this->registerMethod("DtdComment", *this, &XmlReaderTest::DtdComment);
+            this->registerMethod("DtdProcesssingInstruction", *this, &XmlReaderTest::DtdProcesssingInstruction);
             
             this->registerMethod("EmptyDocument", *this, &XmlReaderTest::EmptyDocument);
             this->registerMethod("EmptyElementTag", *this, &XmlReaderTest::EmptyElementTag);
@@ -173,6 +175,8 @@ class XmlReaderTest : public Pt::Unit::TestSuite
         void DtdNotations();
         void DtdInclude();
         void DtdIgnore();
+        void DtdComment();
+        void DtdProcesssingInstruction();
         
         void EmptyDocument();
         void EmptyElementTag();
@@ -736,6 +740,76 @@ void XmlReaderTest::DtdIgnore()
 
         entity = reader.dtd().resolveEntity(L"e2");
         PT_UNIT_ASSERT( ! entity);
+    }
+    catch(const Pt::Xml::SyntaxError& error)
+    {
+        std::cerr << error.what() << ": " << error.line() << std::endl;
+        throw;
+    }
+}
+
+
+void XmlReaderTest::DtdComment()
+{
+    try
+    {
+        XmlTestResolver resolver;
+        resolver.addInput(L"external.dtd", L"<!-- some comment external -->\n");
+
+        std::stringstream input;
+        input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+        input << "<!DOCTYPE test SYSTEM \"external.dtd\" [\n";
+        input << "<!-- some comment internal -->\n";
+        input << "<!ELEMENT test EMPTY>\n";
+        input << "]>\n";
+        input << "<test></test>";
+
+        Pt::Xml::XmlReader reader( resolver, input );
+
+        Pt::Xml::XmlReader::Iterator it = reader.current();
+        for(; it != reader.end(); ++it)
+            ;
+    }
+    catch(const Pt::Xml::SyntaxError& error)
+    {
+        std::cerr << error.what() << ": " << error.line() << std::endl;
+        throw;
+    }
+}
+
+
+void XmlReaderTest::DtdProcesssingInstruction()
+{
+    try
+    {
+        XmlTestResolver resolver;
+        resolver.addInput(L"external.dtd", L"<?pi2 external processing instruction?>\n");
+
+        std::stringstream input;
+        input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+        input << "<!DOCTYPE test SYSTEM \"external.dtd\" [\n";
+        input << "<?pi1 internal processing instruction?>\n";
+        input << "<!ELEMENT test EMPTY>\n";
+        input << "]>\n";
+        input << "<test></test>";
+
+        Pt::Xml::XmlReader reader( resolver, input );
+        reader.setFlag(Pt::Xml::XmlReader::ReportProcessingInstructions);
+
+        Pt::Xml::XmlReader::Iterator it = reader.current();
+        const Pt::Xml::ProcessingInstruction* pi = Pt::Xml::toProcessingInstruction(&*it);
+        PT_UNIT_ASSERT(pi);
+        PT_UNIT_ASSERT_EQUALS(pi->target(), L"pi1");
+        PT_UNIT_ASSERT_EQUALS(pi->data(), L"internal processing instruction");
+
+        ++it;
+        pi = Pt::Xml::toProcessingInstruction(&*it);
+        PT_UNIT_ASSERT(pi);
+        PT_UNIT_ASSERT_EQUALS(pi->target(), L"pi2");
+        PT_UNIT_ASSERT_EQUALS(pi->data(), L"external processing instruction");
+        
+        for(; it != reader.end(); ++it)
+            ;
     }
     catch(const Pt::Xml::SyntaxError& error)
     {
