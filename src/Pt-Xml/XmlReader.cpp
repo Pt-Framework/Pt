@@ -46,10 +46,8 @@
 #include "Pt/Xml/Comment.h"
 #include "Pt/Xml/XmlError.h"
 #include "Pt/System/Logger.h"
-#include "Pt/TextStream.h"
-#include "Pt/Utf8Codec.h"
 
-#include <iostream>
+#include <stack>
 #include <memory>
 #include <cassert>
 
@@ -745,6 +743,14 @@ class XmlReaderImpl
 
             if( ch == ']' )
             {
+                // end of IGNORE/INCLUDE
+                if( ! _parseStack.empty() )
+                {
+                    _parse = _parseStack.top();
+                    _parseStack.pop();
+                    return;
+                }
+
                 setDocumentTypeDefinition();
                 --_depth;
                 _parse = &XmlReaderImpl::OnDtdInternalEnd;
@@ -786,6 +792,17 @@ class XmlReaderImpl
             {
                 enterParameterReference(&XmlReaderImpl::OnDtdExternal);
                 return;
+            }
+
+            if(ch == ']')
+            {          
+                // end of IGNORE/INCLUDE
+                if( ! _parseStack.empty() )
+                {
+                    _parse = _parseStack.top();
+                    _parseStack.pop();
+                    return;
+                }
             }
 
             throw SyntaxError("XML syntax error", line());
@@ -875,15 +892,41 @@ class XmlReaderImpl
         {
             Pt::Char ch = notEof(c);
 
+            if(ch == '!')
+            {
+                _parse = &XmlReaderImpl::OnDtdTagExclam;
+                return;
+            }
+
             if( ch == '%' )
             {
                 enterParameterReference(&XmlReaderImpl::OnDtdTag);
                 return;
             }
 
-            if(ch == '!')
+            throw SyntaxError("XML syntax error", line());
+        }
+
+        void OnDtdTagExclam(int c)
+        {
+            Pt::Char ch = notEof(c);
+            
+            if( isAlpha(ch) )
             {
-                _parse = &XmlReaderImpl::OnDtdTagName;
+                _token += ch;
+                _parse  = &XmlReaderImpl::OnDtdTagName;
+                return;
+            }
+
+            if(ch == '[')
+            {
+                _parse = &XmlReaderImpl::OnDtdBeforeIgnoreOrInclude;
+                return;
+            }
+
+            if( ch == '%' )
+            {
+                enterParameterReference(&XmlReaderImpl::OnDtdTagExclam);
                 return;
             }
                 
@@ -954,12 +997,230 @@ class XmlReaderImpl
                     _parse = &XmlReaderImpl::OnDtdNotationBegin;
                     return;
                 }
-
             }
 
             if( ch == '%' )
             {
                 enterParameterReference(&XmlReaderImpl::OnDtdTagName);
+                return;
+            }
+
+            throw SyntaxError("XML syntax error", line());
+        }
+        
+        void OnDtdBeforeIgnoreOrInclude(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if(ch == 'I')
+            {
+                _token += ch;
+                _parse = &XmlReaderImpl::OnDtdIgnoreOrInclude;
+                return;
+            }
+
+            if( Pt::isspace(ch) )
+            {
+                return;
+            }
+
+            if( ch == '%' )
+            {
+                enterParameterReference(&XmlReaderImpl::OnDtdBeforeIgnoreOrInclude);
+                return;
+            }
+
+            throw SyntaxError("XML syntax error", line());
+        }
+
+        void OnDtdIgnoreOrInclude(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if( isAlpha(ch) )
+            {
+                _token += ch;
+                return;
+            }
+
+            if( Pt::isspace(ch) )
+            {
+                if(_token == L"INCLUDE")
+                {
+                    _token.clear();
+                    _parse = &XmlReaderImpl::OnDtdIncludeBegin;
+                    return;
+                }
+                else if(_token == L"IGNORE")
+                {
+                    _token.clear();
+                    _parse = &XmlReaderImpl::OnDtdIgnoreBegin;
+                    return;
+                }
+            }
+
+            if(ch == '[')
+            {
+                if(_token == L"INCLUDE")
+                {
+                    _token.clear();
+                    
+                    _parseStack.push(&XmlReaderImpl::OnDtdIncludeEnd);
+                
+                    if( _input.isExternalDtd() )
+                        _parse = &XmlReaderImpl::OnDtdExternal;
+                    else
+                        _parse = &XmlReaderImpl::OnDtdInternal;
+                    
+                    return; 
+                }
+                else if(_token == L"IGNORE")
+                {
+                    _token.clear();
+                    _parse = &XmlReaderImpl::OnDtdIgnore; 
+                    return;
+                }
+            }
+
+            if( ch == '%' )
+            {
+                enterParameterReference(&XmlReaderImpl::OnDtdIgnoreOrInclude);
+                return;
+            }
+
+            throw SyntaxError("XML syntax error", line());
+        }
+
+        void OnDtdIgnoreBegin(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if(ch == '[')
+            {             
+                _parse = &XmlReaderImpl::OnDtdIgnore; 
+                return;
+            }
+
+            if( Pt::isspace(ch) )
+            {
+                return;
+            }
+
+            if( ch == '%' )
+            {
+                enterParameterReference(&XmlReaderImpl::OnDtdIgnoreBegin);
+                return;
+            }
+
+            throw SyntaxError("XML syntax error", line());
+        }
+
+        void OnDtdIgnore(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if(ch == ']')
+            {             
+                _parse = &XmlReaderImpl::OnDtdIgnoreEnd; 
+                return;
+            }
+        }
+
+        void OnDtdIgnoreEnd(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if(ch == ']')
+            {             
+                _parse = &XmlReaderImpl::OnDtdIncludeEnd2;
+                return;
+            }
+
+            _parse = &XmlReaderImpl::OnDtdIgnore; 
+        }
+
+        void OnDtdIgnoreEnd2(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if(ch == '>')
+            {             
+                if( _input.isExternalDtd() )
+                    _parse = &XmlReaderImpl::OnDtdExternal;
+                else
+                    _parse = &XmlReaderImpl::OnDtdInternal; 
+                return;
+            }
+
+            _parse = &XmlReaderImpl::OnDtdIgnore; 
+        }
+
+        void OnDtdIncludeBegin(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if(ch == '[')
+            {                                
+                _parseStack.push(&XmlReaderImpl::OnDtdIncludeEnd);
+                
+                if( _input.isExternalDtd() )
+                    _parse = &XmlReaderImpl::OnDtdExternal;
+                else
+                    _parse = &XmlReaderImpl::OnDtdInternal;
+                    
+                return; 
+            }
+
+            if( Pt::isspace(ch) )
+            {
+                return;
+            }
+
+            if( ch == '%' )
+            {
+                enterParameterReference(&XmlReaderImpl::OnDtdIncludeBegin);
+                return;
+            }
+
+            throw SyntaxError("XML syntax error", line());
+        }
+
+        void OnDtdIncludeEnd(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if(ch == ']')
+            {             
+                _parse = &XmlReaderImpl::OnDtdIncludeEnd2; 
+                return;
+            }
+
+            if( ch == '%' )
+            {
+                enterParameterReference(&XmlReaderImpl::OnDtdIncludeEnd);
+                return;
+            }
+
+            throw SyntaxError("XML syntax error", line());
+        }
+
+        void OnDtdIncludeEnd2(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if(ch == '>')
+            {             
+                if( _input.isExternalDtd() )
+                    _parse = &XmlReaderImpl::OnDtdExternal;
+                else
+                    _parse = &XmlReaderImpl::OnDtdInternal; 
+                
+                return;
+            }
+
+            if( ch == '%' )
+            {
+                enterParameterReference(&XmlReaderImpl::OnDtdIncludeEnd2);
                 return;
             }
 
@@ -4583,6 +4844,10 @@ class XmlReaderImpl
         {
             _input.clear();
             _parse = &XmlReaderImpl::onDocumentBegin;
+
+            while( ! _parseStack.empty() )
+                _parseStack.pop();
+
             _beforeEntityReference = 0;
             _beforeCharacterReference = 0;
             _entityName.clear();
@@ -4770,6 +5035,7 @@ class XmlReaderImpl
         Attribute _attr;
         std::size_t _depth;
         ParseFunc _parse;
+        std::stack<ParseFunc> _parseStack;
         
         Pt::String _entityName;
         ParseFunc _beforeCharacterReference;

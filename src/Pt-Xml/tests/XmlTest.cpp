@@ -110,6 +110,8 @@ class XmlReaderTest : public Pt::Unit::TestSuite
             this->registerMethod("DtdValidateElementContent", *this, &XmlReaderTest::DtdValidateElementContent);
             this->registerMethod("DtdAnyElementContent", *this, &XmlReaderTest::DtdAnyElementContent);
             this->registerMethod("DtdNotations", *this, &XmlReaderTest::DtdNotations);
+            this->registerMethod("DtdInclude", *this, &XmlReaderTest::DtdInclude);
+            this->registerMethod("DtdIgnore", *this, &XmlReaderTest::DtdIgnore);
             
             this->registerMethod("EmptyDocument", *this, &XmlReaderTest::EmptyDocument);
             this->registerMethod("EmptyElementTag", *this, &XmlReaderTest::EmptyElementTag);
@@ -169,6 +171,8 @@ class XmlReaderTest : public Pt::Unit::TestSuite
         void DtdValidateElementContent();
         void DtdAnyElementContent();
         void DtdNotations();
+        void DtdInclude();
+        void DtdIgnore();
         
         void EmptyDocument();
         void EmptyElementTag();
@@ -614,8 +618,7 @@ void XmlReaderTest::DtdAnyElementContent()
 void XmlReaderTest::DtdNotations()
 {
     std::stringstream input;
-    input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
-
+    input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
     input << "<!DOCTYPE test [\n";
     input << "<!ELEMENT test EMPTY>\n";
     input << "<!NOTATION notation1 SYSTEM \"n1\">\n";
@@ -655,6 +658,90 @@ void XmlReaderTest::DtdNotations()
 
     for(; it != reader.end(); ++it)
             ;
+}
+
+
+void XmlReaderTest::DtdInclude()
+{
+    try
+    {
+        XmlTestResolver resolver;
+        resolver.addInput(L"external.dtd", L"<![INCLUDE[ <!ENTITY e2 \"entity2\"> ]]>");
+
+        std::stringstream input;
+        input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+        input << "<!DOCTYPE test SYSTEM \"external.dtd\" [\n";
+        input << "<!ENTITY % include \"INCLUDE\">\n";
+        input << "<![INCLUDE[]]>\n";
+        input << "<![ INCLUDE [ ]]>\n";
+        input << "<![%include;[\n";
+        input << "  <!ENTITY e1 \"entity1\">\n";
+        input << "]]>\n";
+        input << "<!ELEMENT test EMPTY>\n";
+        input << "]>\n";
+
+        input << "<test></test>";
+
+        Pt::Xml::XmlReader reader( resolver, input );
+
+        Pt::Xml::XmlReader::Iterator it = reader.current();
+        for(; it != reader.end(); ++it)
+            ;
+
+        const Pt::Xml::Entity* entity = reader.dtd().resolveEntity(L"e1");
+        PT_UNIT_ASSERT(entity);
+        PT_UNIT_ASSERT_EQUALS(entity->value(), L"entity1");
+
+        entity = reader.dtd().resolveEntity(L"e2");
+        PT_UNIT_ASSERT(entity);
+        PT_UNIT_ASSERT_EQUALS(entity->value(), L"entity2");
+    }
+    catch(const Pt::Xml::SyntaxError& error)
+    {
+        std::cerr << error.what() << ": " << error.line() << std::endl;
+        throw;
+    }
+}
+
+
+void XmlReaderTest::DtdIgnore()
+{
+    try
+    {
+        XmlTestResolver resolver;
+        resolver.addInput(L"external.dtd", L"<![IGNORE[ <!ENTITY e2 \"entity2\"> ]]>");
+
+        std::stringstream input;
+        input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+        input << "<!DOCTYPE test SYSTEM \"external.dtd\" [\n";
+        input << "<!ENTITY % ignore \"IGNORE\">\n";
+        input << "<![IGNORE[]]>\n";
+        input << "<![ IGNORE [ ]]>\n";
+        input << "<![%ignore;[\n";
+        input << "  <!ENTITY e1 \"entity1\">\n";
+        input << "]]>\n";
+        input << "<!ELEMENT test EMPTY>\n";
+        input << "]>\n";
+
+        input << "<test></test>";
+
+        Pt::Xml::XmlReader reader( resolver, input );
+
+        Pt::Xml::XmlReader::Iterator it = reader.current();
+        for(; it != reader.end(); ++it)
+            ;
+
+        const Pt::Xml::Entity* entity = reader.dtd().resolveEntity(L"e1");
+        PT_UNIT_ASSERT( ! entity);
+
+        entity = reader.dtd().resolveEntity(L"e2");
+        PT_UNIT_ASSERT( ! entity);
+    }
+    catch(const Pt::Xml::SyntaxError& error)
+    {
+        std::cerr << error.what() << ": " << error.line() << std::endl;
+        throw;
+    }
 }
 
 
