@@ -472,6 +472,190 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
 
+        void OnDtdPublic(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if(ch == 'U' || ch == 'B' || ch == 'L' || ch == 'I' || ch == 'C')
+            {
+                _token += ch;
+                return;
+            }
+
+            if( Pt::isspace(ch) )
+            {
+                bool ok = _token == L"PUBLIC";
+                _token.clear();
+                if( ! ok)
+                    throw SyntaxError("XML syntax error", line());
+                
+                _parse = &XmlReaderImpl::OnDtdBeforePublicId;
+                return;
+            }
+
+            if( ch == '%' )
+            {
+                enterParameterReference(&XmlReaderImpl::OnDtdPublic);
+                return;
+            }
+
+            throw SyntaxError("XML syntax error", line());
+        }
+
+        void OnDtdBeforePublicId(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if( ch == '"' || ch == '\'' )
+            {
+                _parse = &XmlReaderImpl::OnDtdPublicId;
+                return;
+            }
+
+            if( Pt::isspace(ch) )
+            {
+                return;
+            }
+
+            if( ch == '%' )
+            {
+                enterParameterReference(&XmlReaderImpl::OnDtdBeforePublicId);
+                return;
+            }
+
+            throw SyntaxError("XML syntax error", line());
+        }
+
+        void OnDtdPublicId(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if( ch == '"' || ch == '\'' )
+            {
+                popParseState();
+                (this->*_parse)(c);
+                return;
+            }
+
+            _token += ch;
+        }
+
+        void OnDtdSystem(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if(ch == 'Y' || ch == 'S' || ch == 'T' || ch == 'E' || ch == 'M')
+            {
+                _token += ch;
+                return;
+            }
+
+            if( Pt::isspace(ch) )
+            {
+                bool ok = _token == L"SYSTEM";
+                _token.clear();
+                if( ! ok)
+                    throw SyntaxError("XML syntax error", line());
+                
+                _parse = &XmlReaderImpl::OnDtdBeforeSystemId;
+                return;
+            }
+
+            if( ch == '%' )
+            {
+                enterParameterReference(&XmlReaderImpl::OnDtdSystem);
+                return;
+            }
+
+            throw SyntaxError("XML syntax error", line());
+        }
+
+        void OnDtdBeforeSystemId(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if( ch == '"' || ch == '\'' )
+            {
+                _parse = &XmlReaderImpl::OnDtdSystemId;
+                return;
+            }
+
+            if( Pt::isspace(ch) )
+            {
+                return;
+            }
+
+            if( ch == '%' )
+            {
+                enterParameterReference(&XmlReaderImpl::OnDtdBeforeSystemId);
+                return;
+            }
+
+            throw SyntaxError("XML syntax error", line());
+        }
+
+        void OnDtdSystemId(int c)
+        {
+            Pt::Char ch = notEof(c);
+
+            if( ch == '"' || ch == '\'' )
+            {
+                popParseState();
+                (this->*_parse)(c);
+                return;
+            }
+
+            _token += ch;
+        }
+
+        // The markup declarations may be made up in whole or in part of the
+        // replacement text of parameter entities. The productions later in
+        // this specification for individual nonterminals (elementdecl,
+        // AttlistDecl, and so on) describe the declarations after all the
+        // parameter entities have been included.
+
+        // Parameter entity references are recognized anywhere in the DTD
+        // (internal and external subsets and external parameter entities),
+        // except in literals, processing instructions, comments, and the
+        // contents of ignored conditional sections (see 3.4 Conditional
+        // Sections). They are also recognized in entity value literals.
+        // The use of parameter entities in the internal subset is restricted
+        // furthermore.
+        
+        void OnDtdParameterEntityReference(int c)
+        {
+            Char ch = notEof(c);
+
+            if( isAlpha(ch) )
+            {
+                _entityRef.name() += ch;
+                //_entityName += ch;
+                return;
+            }
+
+            if(ch == ';')
+            {
+                //assert(_beforeEntityReference);
+                resolveParamEntity(_entityRef);
+                popParseState();
+                //_parse = _beforeEntityReference;
+                //_beforeEntityReference = 0;
+                //_entityName.clear()
+                return;
+            }
+
+            throw SyntaxError("XML syntax error", line());
+        }
+
+        void enterParameterReference(ParseFunc from)
+        {
+            //assert( ! _beforeEntityReference);
+            pushParseState(from);
+            //_beforeEntityReference = from;
+            _entityRef.clear();
+            _parse = &XmlReaderImpl::OnDtdParameterEntityReference;
+        }
+
         void OnDtdRootName(int c)
         {
             Char ch = notEof(c);
@@ -517,15 +701,19 @@ class XmlReaderImpl
 
             if( ch == 'S')
             {
+                pushParseState(&XmlReaderImpl::OnDtdExternalSystemId);
+
                 _token += ch;
-                _parse = &XmlReaderImpl::OnDtdExternalSystem;
+                _parse = &XmlReaderImpl::OnDtdSystem;
                 return;
             }
 
-            if( ch == 'P')
+            if(ch == 'P')
             {
+                pushParseState(&XmlReaderImpl::OnDtdExternalPublicId);
+
                 _token += ch;
-                _parse = &XmlReaderImpl::OnDtdExternalPublic;
+                _parse = &XmlReaderImpl::OnDtdPublic;
                 return;
             }
 
@@ -549,85 +737,11 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
 
-        void OnDtdExternalPublic(int c)
-        {
-            Pt::Char ch = notEof(c);
-
-            if(ch == 'U' || ch == 'B' || ch == 'L' || ch == 'I' || ch == 'C')
-            {
-                _token += ch;
-                return;
-            }
-
-            if( Pt::isspace(ch) )
-            {
-                bool ok = _token == L"PUBLIC";
-                _token.clear();
-                if( ! ok)
-                    throw SyntaxError("XML syntax error", line());
-                
-                _parse = &XmlReaderImpl::OnDtdExternalBeforePublicId;
-                return;
-            }
-
-            throw SyntaxError("XML syntax error", line());
-        }
-
-        void OnDtdExternalSystem(int c)
-        {
-            Pt::Char ch = notEof(c);
-
-            if(ch == 'Y' || ch == 'S' || ch == 'T' || ch == 'E' || ch == 'M')
-            {
-                _token += ch;
-                return;
-            }
-
-            if( Pt::isspace(ch) )
-            {
-                bool ok = _token == L"SYSTEM";
-                _token.clear();
-                if( ! ok)
-                    throw SyntaxError("XML syntax error", line());
-                
-                _parse = &XmlReaderImpl::OnDtdExternalBeforeSystemId;
-                return;
-            }
-
-            throw SyntaxError("XML syntax error", line());
-        }
-
-        void OnDtdExternalBeforePublicId(int c)
-        {
-            Pt::Char ch = notEof(c);
-
-            if( ch == '"' || ch == '\'' )
-            {
-                _parse = &XmlReaderImpl::OnDtdExternalPublicId;
-                return;
-            }
-
-            if( Pt::isspace(ch) )
-            {
-                return;
-            }
-
-            throw SyntaxError("XML syntax error", line());
-        }
-
         void OnDtdExternalPublicId(int c)
         {
-            Pt::Char ch = notEof(c);
-
-            if( ch == '"' || ch == '\'' )
-            {
-                _docType.setPublicId(_token);
-                _token.clear();
-                _parse = &XmlReaderImpl::OnDtdAfterExternalPublicId;
-                return;
-            }
-
-            _token += ch;
+            _docType.setPublicId(_token);
+            _token.clear();
+            _parse = &XmlReaderImpl::OnDtdAfterExternalPublicId;
         }
 
         void OnDtdAfterExternalPublicId(int c)
@@ -636,7 +750,9 @@ class XmlReaderImpl
 
             if( ch == '"' || ch == '\'' )
             {
-                _parse = &XmlReaderImpl::OnDtdExternalSystemId;
+                pushParseState(&XmlReaderImpl::OnDtdExternalSystemId);
+                
+                _parse = &XmlReaderImpl::OnDtdSystemId;
                 return;
             }
 
@@ -670,37 +786,11 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
 
-        void OnDtdExternalBeforeSystemId(int c)
-        {
-            Pt::Char ch = notEof(c);
-
-            if( ch == '"' || ch == '\'' )
-            {
-                _parse = &XmlReaderImpl::OnDtdExternalSystemId;
-                return;
-            }
-
-            if( Pt::isspace(ch) )
-            {
-                return;
-            }
-
-            throw SyntaxError("XML syntax error", line());
-        }
-
         void OnDtdExternalSystemId(int c)
         {
-            Pt::Char ch = notEof(c);
-
-            if( ch == '"' || ch == '\'' )
-            {
-                _docType.setSystemId(_token);
-                _token.clear();
-                _parse = &XmlReaderImpl::OnDtdAfterExternalSystemId;
-                return;
-            }
-
-            _token += ch;
+            _docType.setSystemId(_token);
+            _token.clear();
+            _parse = &XmlReaderImpl::OnDtdAfterExternalSystemId;
         }
 
         void OnDtdAfterExternalSystemId(int c)
@@ -816,85 +906,6 @@ class XmlReaderImpl
                     _parseStack.pop();
                     return;
                 }
-            }
-
-            throw SyntaxError("XML syntax error", line());
-        }
-
-        // The markup declarations may be made up in whole or in part of the
-        // replacement text of parameter entities. The productions later in
-        // this specification for individual nonterminals (elementdecl,
-        // AttlistDecl, and so on) describe the declarations after all the
-        // parameter entities have been included.
-
-        // Parameter entity references are recognized anywhere in the DTD
-        // (internal and external subsets and external parameter entities),
-        // except in literals, processing instructions, comments, and the
-        // contents of ignored conditional sections (see 3.4 Conditional
-        // Sections). They are also recognized in entity value literals.
-        // The use of parameter entities in the internal subset is restricted
-        // furthermore.
-        
-        void OnDtdParameterEntityReference(int c)
-        {
-            Char ch = notEof(c);
-
-            if( isAlpha(ch) )
-            {
-                _entityRef.name() += ch;
-                //_entityName += ch;
-                return;
-            }
-
-            if(ch == ';')
-            {
-                //assert(_beforeEntityReference);
-                resolveParamEntity(_entityRef);
-                popParseState();
-                //_parse = _beforeEntityReference;
-                //_beforeEntityReference = 0;
-                //_entityName.clear()
-                return;
-            }
-
-            throw SyntaxError("XML syntax error", line());
-        }
-
-        void enterParameterReference(ParseFunc from)
-        {
-            //assert( ! _beforeEntityReference);
-            pushParseState(from);
-            //_beforeEntityReference = from;
-            _entityRef.clear();
-            _parse = &XmlReaderImpl::OnDtdParameterEntityReference;
-        }
-
-        void OnDtdEntityValueParameterEntityReference(int c)
-        {
-            Pt::Char ch = notEof(c);
-            
-            if( isAlpha(ch) )
-            {
-                //_entityName += ch;
-                _entityRef.name() += ch;
-                return;
-            }
-
-            if(ch == ';')
-            {
-                //assert(_beforeEntityReference);
-                resolveParamEntity(_entityRef);
-                popParseState();
-                //_parse = _beforeEntityReference;
-                //_beforeEntityReference = 0;
-                //_entityName.clear();
-                return;
-            }
-
-            if(ch == '&')
-            {
-                throw SyntaxError("character entity reference in parameter entity reference", line());
-                return;
             }
 
             throw SyntaxError("XML syntax error", line());
@@ -1316,21 +1327,24 @@ class XmlReaderImpl
         void OnDtdNotationAfterName(int c)
         {
             Pt::Char ch = notEof(c);
-
-            if(ch == 'S')
+            
+            if( ch == 'S')
             {
+                pushParseState(&XmlReaderImpl::OnDtdNotationSystemId);
                 _token += ch;
-                _parse = &XmlReaderImpl::OnDtdNotationSystem;
+                _parse = &XmlReaderImpl::OnDtdSystem;
                 return;
             }
             
             if(ch == 'P')
             {
+                pushParseState(&XmlReaderImpl::OnDtdNotationPublicId);
+
                 _token += ch;
-                _parse = &XmlReaderImpl::OnDtdNotationPublic;
+                _parse = &XmlReaderImpl::OnDtdPublic;
                 return;
             }
-            
+
             if( Pt::isspace(ch) )
             {
                 return;
@@ -1345,77 +1359,14 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
 
-
-        void OnDtdNotationPublic(int c)
-        {
-            Pt::Char ch = notEof(c);
-
-            if(ch == 'U' || ch == 'B' || ch == 'L' || ch == 'I' || ch == 'C')
-            {
-                _token += ch;
-                return;
-            }
-
-            if( Pt::isspace(ch) )
-            {
-                bool ok = _token == L"PUBLIC";
-                _token.clear();
-                if( ! ok)
-                    throw SyntaxError("XML syntax error", line());
-                
-                _parse = &XmlReaderImpl::OnDtdNotationBeforePublicId;
-                return;
-            }
-
-            if( ch == '%' )
-            {
-                enterParameterReference(&XmlReaderImpl::OnDtdNotationPublic);
-                return;
-            }
-
-            throw SyntaxError("XML syntax error", line());
-        }
-
-        void OnDtdNotationBeforePublicId(int c)
-        {
-            Pt::Char ch = notEof(c);
-
-            if( ch == '"' || ch == '\'' )
-            {
-                _parse = &XmlReaderImpl::OnDtdNotationPublicId;
-                return;
-            }
-
-            if( Pt::isspace(ch) )
-            {
-                return;
-            }
-
-            if( ch == '%' )
-            {
-                enterParameterReference(&XmlReaderImpl::OnDtdNotationBeforePublicId);
-                return;
-            }
-
-            throw SyntaxError("XML syntax error", line());
-        }
-
         void OnDtdNotationPublicId(int c)
         {
-            Pt::Char ch = notEof(c);
-
-            if( ch == '"' || ch == '\'' )
-            {
-                // can be NULL if already declared
-                if(_notation)
-                    _notation->setPublicId(_token);
+            // can be NULL if already declared
+            if(_notation)
+                _notation->setPublicId(_token);
                 
-                _token.clear();
-                _parse = &XmlReaderImpl::OnDtdNotationAfterPublicId;
-                return;
-            }
-
-            _token += ch;
+            _token.clear();
+            _parse = &XmlReaderImpl::OnDtdNotationAfterPublicId;
         }
 
         void OnDtdNotationAfterPublicId(int c)
@@ -1424,7 +1375,9 @@ class XmlReaderImpl
 
             if( ch == '"' || ch == '\'' )
             {
-                _parse = &XmlReaderImpl::OnDtdNotationSystemId;
+                pushParseState(&XmlReaderImpl::OnDtdNotationSystemId);
+                
+                _parse = &XmlReaderImpl::OnDtdSystemId;
                 return;
             }
 
@@ -1456,76 +1409,14 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
 
-        void OnDtdNotationSystem(int c)
-        {
-            Pt::Char ch = notEof(c);
-
-            if(ch == 'Y' || ch == 'S' || ch == 'T' || ch == 'E' || ch == 'M')
-            {
-                _token += ch;
-                return;
-            }
-
-            if( Pt::isspace(ch) )
-            {
-                bool ok = _token == L"SYSTEM";
-                _token.clear();
-                if( ! ok)
-                    throw SyntaxError("XML syntax error", line());
-                
-                _parse = &XmlReaderImpl::OnDtdNotationBeforeSystemId;
-                return;
-            }
-
-            if( ch == '%' )
-            {
-                enterParameterReference(&XmlReaderImpl::OnDtdNotationSystem);
-                return;
-            }
-
-            throw SyntaxError("XML syntax error", line());
-        }
-
-        void OnDtdNotationBeforeSystemId(int c)
-        {
-            Pt::Char ch = notEof(c);
-
-            if( ch == '"' || ch == '\'' )
-            {
-                _parse = &XmlReaderImpl::OnDtdNotationSystemId;
-                return;
-            }
-
-            if( Pt::isspace(ch) )
-            {
-                return;
-            }
-
-            if( ch == '%' )
-            {
-                enterParameterReference(&XmlReaderImpl::OnDtdNotationBeforeSystemId);
-                return;
-            }
-
-            throw SyntaxError("XML syntax error", line());
-        }
-
         void OnDtdNotationSystemId(int c)
         {
-            Pt::Char ch = notEof(c);
-
-            if( ch == '"' || ch == '\'' )
-            {
-                if(_notation)
-                    _notation->setSystemId(_token);
+            if(_notation)
+                _notation->setSystemId(_token);
                 
-                _token.clear();
-                _notation = 0;
-                _parse = &XmlReaderImpl::OnDtdTagEnd;
-                return;
-            }
-
-            _token += ch;
+            _token.clear();
+            _notation = 0;
+            _parse = &XmlReaderImpl::OnDtdTagEnd;
         }
 
         void OnDtdEntityBegin(int c)
@@ -1661,8 +1552,10 @@ class XmlReaderImpl
 
             if(ch == 'S')
             {
+                pushParseState(&XmlReaderImpl::OnDtdEntitySystemId);
+
                 _token += ch;
-                _parse = &XmlReaderImpl::OnDtdEntitySystem;
+                _parse = &XmlReaderImpl::OnDtdSystem;
                 return;
             }
 
@@ -1675,8 +1568,10 @@ class XmlReaderImpl
             
             if(ch == 'P')
             {
+                pushParseState(&XmlReaderImpl::OnDtdEntityPublicId);
+
                 _token += ch;
-                _parse = &XmlReaderImpl::OnDtdEntityPublic;
+                _parse = &XmlReaderImpl::OnDtdPublic;
                 return;
             }
             
@@ -1694,75 +1589,13 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
 
-        void OnDtdEntityPublic(int c)
-        {
-            Pt::Char ch = notEof(c);
-
-            if(ch == 'U' || ch == 'B' || ch == 'L' || ch == 'I' || ch == 'C')
-            {
-                _token += ch;
-                return;
-            }
-
-            if( Pt::isspace(ch) )
-            {
-                bool ok = _token == L"PUBLIC";
-                _token.clear();
-                if( ! ok)
-                    throw SyntaxError("XML syntax error", line());
-                
-                _parse = &XmlReaderImpl::OnDtdEntityBeforePublicId;
-                return;
-            }
-
-            if( ch == '%' )
-            {
-                enterParameterReference(&XmlReaderImpl::OnDtdEntityPublic);
-                return;
-            }
-
-            throw SyntaxError("XML syntax error", line());
-        }
-
-        void OnDtdEntityBeforePublicId(int c)
-        {
-            Pt::Char ch = notEof(c);
-
-            if( ch == '"' || ch == '\'' )
-            {
-                _parse = &XmlReaderImpl::OnDtdEntityPublicId;
-                return;
-            }
-
-            if( Pt::isspace(ch) )
-            {
-                return;
-            }
-
-            if( ch == '%' )
-            {
-                enterParameterReference(&XmlReaderImpl::OnDtdEntityBeforePublicId);
-                return;
-            }
-
-            throw SyntaxError("XML syntax error", line());
-        }
-
         void OnDtdEntityPublicId(int c)
         {
-            Pt::Char ch = notEof(c);
-
-            if( ch == '"' || ch == '\'' )
-            {
-                if(_entity)
-                    _entity->setPublicId(_token);
+            if(_entity)
+                _entity->setPublicId(_token);
                 
-                _token.clear();
-                _parse = &XmlReaderImpl::OnDtdEntityAfterPublicId;
-                return;
-            }
-
-            _token += ch;
+            _token.clear();
+            _parse = &XmlReaderImpl::OnDtdEntityAfterPublicId;
         }
 
         void OnDtdEntityAfterPublicId(int c)
@@ -1771,7 +1604,9 @@ class XmlReaderImpl
 
             if( ch == '"' || ch == '\'' )
             {
-                _parse = &XmlReaderImpl::OnDtdEntitySystemId;
+
+                pushParseState(&XmlReaderImpl::OnDtdEntitySystemId);
+                _parse = &XmlReaderImpl::OnDtdSystemId;
                 return;
             }
 
@@ -1811,75 +1646,13 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
 
-        void OnDtdEntitySystem(int c)
-        {
-            Pt::Char ch = notEof(c);
-
-            if(ch == 'Y' || ch == 'S' || ch == 'T' || ch == 'E' || ch == 'M')
-            {
-                _token += ch;
-                return;
-            }
-
-            if( Pt::isspace(ch) )
-            {
-                bool ok = _token == L"SYSTEM";
-                _token.clear();
-                if( ! ok)
-                    throw SyntaxError("XML syntax error", line());
-                
-                _parse = &XmlReaderImpl::OnDtdEntityBeforeSystemId;
-                return;
-            }
-
-            if( ch == '%' )
-            {
-                enterParameterReference(&XmlReaderImpl::OnDtdEntitySystem);
-                return;
-            }
-
-            throw SyntaxError("XML syntax error", line());
-        }
-
-        void OnDtdEntityBeforeSystemId(int c)
-        {
-            Pt::Char ch = notEof(c);
-
-            if( ch == '"' || ch == '\'' )
-            {
-                _parse = &XmlReaderImpl::OnDtdEntitySystemId;
-                return;
-            }
-
-            if( Pt::isspace(ch) )
-            {
-                return;
-            }
-
-            if( ch == '%' )
-            {
-                enterParameterReference(&XmlReaderImpl::OnDtdEntityBeforeSystemId);
-                return;
-            }
-
-            throw SyntaxError("XML syntax error", line());
-        }
-
         void OnDtdEntitySystemId(int c)
         {
-            Pt::Char ch = notEof(c);
-
-            if( ch == '"' || ch == '\'' )
-            {
-                if(_entity)
-                    _entity->setSystemId(_token);
+            if(_entity)
+                _entity->setSystemId(_token);
                 
-                _token.clear();
-                _parse = &XmlReaderImpl::OnDtdEntityAfterSystemId;
-                return;
-            }
-
-            _token += ch;
+            _token.clear();
+            _parse = &XmlReaderImpl::OnDtdEntityAfterSystemId;
         }
         
         void OnDtdEntityAfterSystemId(int c)
@@ -2092,6 +1865,38 @@ class XmlReaderImpl
             }
 
             _token += ch;
+        }
+
+        void OnDtdEntityValueParameterEntityReference(int c)
+        {
+            Pt::Char ch = notEof(c);
+            
+            if( isAlpha(ch) )
+            {
+                //_entityName += ch;
+                _entityRef.name() += ch;
+                return;
+            }
+
+            if(ch == ';')
+            {
+                //assert(_beforeEntityReference);
+                resolveParamEntity(_entityRef);
+                popParseState();
+                //_parse = _beforeEntityReference;
+                //_beforeEntityReference = 0;
+                //_entityName.clear();
+                return;
+            }
+
+            if(ch == '&')
+            {
+                // TODO: This is most likely allowed.
+                throw SyntaxError("character entity reference in parameter entity reference", line());
+                return;
+            }
+
+            throw SyntaxError("XML syntax error", line());
         }
 
         void OnDtdAttListBegin(int c)
