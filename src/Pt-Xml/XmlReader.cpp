@@ -234,7 +234,7 @@ class XmlReaderImpl
                 return;
             }
 
-            if( isQoute(ch) )
+            if( isQuote(ch) )
             {
                 _parse =  &XmlReaderImpl::onXmlDeclValue;
                 return;
@@ -247,7 +247,7 @@ class XmlReaderImpl
         {
             Char ch = notEof(c);
 
-            if( isQoute(ch) )
+            if( isQuote(ch) )
             {
                 if(_attr.name() == L"version")
                 {
@@ -327,7 +327,7 @@ class XmlReaderImpl
         {
             Char ch = notEof(c);
 
-            if(Pt::isspace(ch) || isAlpha(ch) || isQoute(ch) || 
+            if(Pt::isspace(ch) || isAlpha(ch) || isQuote(ch) || 
                ch == ':' || ch == '/' || ch == '!' || ch == '=')
             {
                 _procInstr.data() += c;
@@ -748,7 +748,7 @@ class XmlReaderImpl
 
             if(ch == '<')
             {
-                pushParseState(&XmlReaderImpl::OnDtdInternal); //TODO
+                pushParseState(&XmlReaderImpl::OnDtdInternal);
                 _parse = &XmlReaderImpl::OnDtdTag;
                 return;
             }
@@ -796,7 +796,7 @@ class XmlReaderImpl
 
             if(ch == '<')
             {
-                pushParseState(&XmlReaderImpl::OnDtdExternal); // TODO
+                pushParseState(&XmlReaderImpl::OnDtdExternal);
                 _parse = &XmlReaderImpl::OnDtdTag;
                 return;
             }
@@ -1172,6 +1172,7 @@ class XmlReaderImpl
 
             if(ch == '>')
             {       
+                assert(_parseStack.empty() == false);
                 popParseState(&XmlReaderImpl::OnDtdInternal);
                       
                 //if( _input.isExternalDtd() )
@@ -1665,15 +1666,10 @@ class XmlReaderImpl
                 return;
             }
 
-            if( ch == '"' )
+            if( ch == '"' || ch == '\'' )
             {
-                _parse = &XmlReaderImpl::OnDtdEntityValueQuot;
-                return;
-            }
-
-            if( ch == '\'' )
-            {
-                _parse = &XmlReaderImpl::OnDtdEntityValueApos;
+                setQuotedBegin(ch);
+                _parse = &XmlReaderImpl::OnDtdEntityValue;
                 return;
             }
             
@@ -2033,11 +2029,11 @@ class XmlReaderImpl
         // entity reference. Character references are replaced immediately
         // with the specified character. Parameter entity references must be
         // be resolved recursively.
-        void OnDtdEntityValueQuot(int c)
+        void OnDtdEntityValue(int c)
         {
             Pt::Char ch = notEof(c);
 
-            if( ch == '"' )
+            if( isQuoteEnd(ch) )
             {
                 //if(_entity)
                 //    _entity->addValue(_token);
@@ -2051,14 +2047,14 @@ class XmlReaderImpl
             if(ch == '&')
             {
                 _token.clear();
-                pushParseState(&XmlReaderImpl::OnDtdEntityValueQuot);
+                pushParseState(&XmlReaderImpl::OnDtdEntityValue);
                 _parse = &XmlReaderImpl::OnEntityValueCharacterReference;
                 return;
             }
 
             if( ch == '%' )
             {
-                pushParseState(&XmlReaderImpl::OnDtdEntityValueQuot);
+                pushParseState(&XmlReaderImpl::OnDtdEntityValue);
                 _entityRef.clear();
                 _parse = &XmlReaderImpl::OnDtdEntityValueParameterEntityReference;
                 return;
@@ -2067,43 +2063,6 @@ class XmlReaderImpl
             if(_entity)
                 _entity->value() += ch;
 
-            //_token += ch;
-        }
-
-        void OnDtdEntityValueApos(int c)
-        {
-            Pt::Char ch = notEof(c);
-
-            if( ch == '\'' )
-            {
-                //if(_entity)
-                //    _entity->addValue(_token);
-                
-                //_token.clear();
-                _entity = 0;
-                _parse = &XmlReaderImpl::OnDtdTagEnd;
-                return;
-            }
-
-            if(ch == '&')
-            {
-                _token.clear();
-                pushParseState(&XmlReaderImpl::OnDtdEntityValueApos);
-                _parse = &XmlReaderImpl::OnEntityValueCharacterReference;
-                return;
-            }
-
-            if( ch == '%' )
-            {
-                pushParseState(&XmlReaderImpl::OnDtdEntityValueApos);
-                _entityRef.clear();
-                _parse = &XmlReaderImpl::OnDtdEntityValueParameterEntityReference;
-                return;
-            }
-
-            if(_entity)
-                _entity->value() += ch;
-            
             //_token += ch;
         }
         
@@ -4116,8 +4075,9 @@ class XmlReaderImpl
                 return;
             }
 
-            if( isQoute(ch) )
+            if( isQuote(ch) )
             {
+                setQuotedBegin(ch);
                 _parse = &XmlReaderImpl::onAttributeValue;
                 return;
             }
@@ -4125,16 +4085,11 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
 
-        void normalizeAttribute(Attribute& attr)
-        {
-            
-        }
-
         void onAttributeValue(int c)
         {
             Char ch = notEof(c);
 
-            if( isQoute(ch) )
+            if( isQuoteEnd(ch) )
             {
                 if(_attr.prefix() == "xmlns")
                 {
@@ -4599,9 +4554,19 @@ class XmlReaderImpl
             return Char(c);
         }
 
-        bool isQoute(Char ch) const
+        bool isQuote(Char ch) const
         {
             return ch == '\'' || ch =='"';
+        }
+
+        void setQuotedBegin(Char ch)
+        {
+            _quotChar = ch;
+        }
+
+        bool isQuoteEnd(Char ch) const
+        {
+            return ch == _quotChar;
         }
 
         // TODO: isXmlName()
@@ -4799,7 +4764,7 @@ class XmlReaderImpl
             {
                 if( it->prefix().empty() )
                 {
-                     const Namespace* ns = _nsctx.getDefaultNamespace();
+                    const Namespace* ns = _nsctx.getDefaultNamespace();
                     if(ns)
                         it->setNamespace(*ns);
                 }
@@ -4807,9 +4772,7 @@ class XmlReaderImpl
                 {
                     const Namespace* ns = _nsctx.getNamespace( it->prefix() );
                     if( ! ns )
-                    {
                         throw SyntaxError("undeclared namespace prefix", line());
-                    }
 
                     it->setNamespace(*ns);
                 }    
@@ -4941,7 +4904,7 @@ class XmlReaderImpl
             //_characterReference.clear();
 
             _token.clear();
-
+            _quotChar = 0;
             _nsctx.clear();
             
             _dtdValidator.clear();
@@ -5119,6 +5082,7 @@ class XmlReaderImpl
         Notation* _notation;
         Entity* _entity;
         String _token;
+        Pt::Char _quotChar;
         Attribute _attr;
         std::size_t _depth;
         ParseFunc _parse;
