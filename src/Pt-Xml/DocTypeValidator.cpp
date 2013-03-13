@@ -143,7 +143,7 @@ bool DocTypeValidatorImpl::validate(Node& node)
                 valid = _decls.top().validateNode(se);
             }
                     
-            ElementDeclaration* decl = _dtd->findElement( se.name() );
+            ElementDeclaration* decl = _dtd->findElement( se.qname() );
             if(decl)
             {
                 ElementValidator validator( *decl );

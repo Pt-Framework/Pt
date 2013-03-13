@@ -31,6 +31,7 @@
 
 #include <Pt/Xml/Api.h>
 #include <Pt/Xml/Node.h>
+#include <Pt/Xml/QName.h>
 #include <Pt/Xml/EntityMapping.h>
 #include <Pt/Xml/Notation.h>
 #include <Pt/String.h>
@@ -55,21 +56,21 @@ class PT_XML_API DocTypeDefinition : public Node
 
         void clear();
 
-        ElementDeclaration* declareElement(const Pt::String& name);
+        ElementDeclaration* declareElement(const QName& name);
 
-        ElementDeclaration* findElement(const Pt::String& name);
+        ElementDeclaration* findElement(const QName& name);
 
-        AttributeListDeclaration& declareAttributeList(const Pt::String& name);
+        AttributeListDeclaration& declareAttributeList(const QName& name);
 
-        AttributeListDeclaration* attributeList(const Pt::String& name);
+        AttributeListDeclaration* findAttributeList(const QName& name);
 
         Entity* declareEntity(const Pt::String& name);
 
-        const Entity* resolveEntity(const Pt::String& name) const;
+        const Entity* findEntity(const Pt::String& name) const;
 
         Entity* declareParamEntity(const Pt::String& name);
 
-        const Entity* resolveParamEntity(const Pt::String& name) const;
+        const Entity* findParamEntity(const Pt::String& name) const;
 
         Notation* declareNotation(const Pt::String& name);
 
@@ -80,7 +81,7 @@ class PT_XML_API DocTypeDefinition : public Node
         { return Node::DocTypeDefinition; }
 
     private:
-        typedef std::vector< std::pair<Pt::String, ElementDeclaration*> > ElementDeclarationList;
+        typedef std::vector< std::pair<QName, ElementDeclaration*> > ElementDeclarationList;
         
         DocTypeContext* _ctx;
         ElementDeclarationList _elemDecls;

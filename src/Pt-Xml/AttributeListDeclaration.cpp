@@ -54,12 +54,12 @@ void AttributeListDeclaration::clear()
 }
 
 
-AttributeDeclaration* AttributeListDeclaration::findAttribute(const Pt::String& name)
+AttributeDeclaration* AttributeListDeclaration::findAttribute(const QName& name)
 {
     std::vector<AttributeDeclaration*>::iterator it;
     for(it = _decls.begin(); it != _decls.end(); ++it)
     {
-        if((*it)->name() == name)
+        if((*it)->qname() == name)
             return *it;
     }
 

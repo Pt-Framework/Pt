@@ -63,7 +63,7 @@ bool AttributeValidator::validate(AttributeList& attrs, const AttributeListDecla
                  
         for(it = attrDecls.begin(); it != attrDecls.end(); ++it)
         {
-            if( (*it)->name() == attr->name() )
+            if( (*it)->qname() == attr->qname() )
             {
                 break;
             }
@@ -149,7 +149,8 @@ bool AttributeDeclaration::fixup(AttributeValidator& validator, AttributeList& l
     };
 
     Attribute attr;
-    attr.setName(_name);
+    attr.setName(_qname.name());
+    attr.setPrefix(_qname.prefix());
     attr.setValue(_default);
             
     bool valid = onValidate(validator, attr);
@@ -228,7 +229,7 @@ bool IDRefsAttributeDeclaration::onValidate(AttributeValidator& validator, const
 
 bool EntityAttributeDeclaration::onValidate(AttributeValidator& validator, const Attribute& attr) const
 {          
-    const Entity* ent = _dtd->resolveEntity(attr.value());
+    const Entity* ent = _dtd->findEntity(attr.value());
     if( ent && ent->isUnparsed() )
     {
         return true;
@@ -245,7 +246,7 @@ bool EntitiesAttributeDeclaration::onValidate(AttributeValidator& validator, con
     
     while(iss >> name)
     {
-        const Entity* ent = _dtd->resolveEntity(name);
+        const Entity* ent = _dtd->findEntity(name);
         if( ! ent || ! ent->isUnparsed() )
         {
             return false;

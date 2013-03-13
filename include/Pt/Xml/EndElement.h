@@ -55,45 +55,49 @@ class EndElement : public Node
         */
         void clear()
         { 
-            _name.clear(); 
-            _prefix.clear();
+            _qname.clear(); 
             _namespace = 0;
         }
+
+        /** @brief Returns the qualified name.
+        */
+        const QName& qname() const
+        { return _qname; }
 
         /** @brief Returns the namespace prefix.
         */
         String& prefix() 
-        { return _prefix; }
+        { return _qname.prefix(); }
 
         /** @brief Returns the namespace prefix.
         */
         const String& prefix() const
-        { return _prefix; }
+        { return _qname.prefix(); }
 
         /** @brief Sets the namespace prefix.
         */
         void setPrefix(const String& prefix)
-        { _prefix = prefix; }
+        { _qname.setPrefix(prefix); }
 
         /** @brief Returns the local name.
         */
         String& name() 
-        { return _name; }
+        { return _qname.name(); }
 
         /** @brief Returns the local name.
         */
         const String& name() const
-        { return _name; }
+        { return _qname.name(); }
 
         /** @brief Sets the local name.
         */
         void setName(const String& name)
-        { _name = name; }
+        { _qname.setName(name); }
 
         /** @brief Returns the namespace Uri for this element name
         */
         const String& namespaceUri() const
-        { return _namespace ? _namespace->namespaceUri() : _prefix; }
+        { return _namespace ? _namespace->namespaceUri() : _qname.prefix(); }
         
         /** @brief Sets the namespace context for this element
         */
@@ -105,8 +109,7 @@ class EndElement : public Node
         { return Node::EndElement; }
 
     private:
-        String _prefix;
-        String _name;
+        QName _qname;
         const Namespace* _namespace;
 };
 

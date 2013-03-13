@@ -49,7 +49,7 @@ DocType::~DocType()
 
 bool DocType::isDefined() const
 { 
-    return ! _rootName.empty(); 
+    return ! ( _rootName.prefix().empty() && _rootName.name().empty() ); 
 }
 
 
@@ -62,13 +62,13 @@ void DocType::clear()
 }
 
 
-const Pt::String& DocType::rootName() const
+const QName& DocType::rootName() const
 { 
     return _rootName; 
 }
 
 
-Pt::String& DocType::rootName()
+QName& DocType::rootName()
 { 
     return _rootName; 
 }

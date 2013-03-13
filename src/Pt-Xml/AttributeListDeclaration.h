@@ -38,6 +38,7 @@ namespace Pt {
 
 namespace Xml {
 
+class QName;
 class AttributeDeclaration;
 
 class PT_XML_API AttributeListDeclaration : private NonCopyable
@@ -56,7 +57,7 @@ class PT_XML_API AttributeListDeclaration : private NonCopyable
 
         // TODO: lowerBound() / insert() may give better performance 
         
-        AttributeDeclaration* findAttribute(const Pt::String& name);
+        AttributeDeclaration* findAttribute(const QName& name);
 
         void addAttribute(AttributeDeclaration* decl);
 

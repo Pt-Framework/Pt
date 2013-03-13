@@ -30,6 +30,7 @@
 
 #include <Pt/Xml/Api.h>
 #include <Pt/Xml/StartElement.h>
+#include <Pt/Xml/QName.h>
 #include <Pt/String.h>
 #include <Pt/NonCopyable.h>
 #include <set>
@@ -91,11 +92,11 @@ class AttributeDeclaration
         Mode mode() const
         { return _mode; }
 
-        const Pt::String& name() const
-        { return _name; }
+        const QName& qname() const
+        { return _qname; }
 
-        void setName(const Pt::String& name)
-        { _name = name; }
+        void setName(const QName& name)
+        { _qname = name; }
 
         void setDefaultValue(const Pt::String& def)
         { _default = def; }
@@ -113,7 +114,7 @@ class AttributeDeclaration
     private:
         Mode _mode;
         bool _normalize;
-        Pt::String _name;
+        QName _qname;
         Pt::String _default;
 };
 

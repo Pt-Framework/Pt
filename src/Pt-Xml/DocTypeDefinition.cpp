@@ -35,7 +35,7 @@
 
 namespace {
 
-bool lessThanName(const std::pair<Pt::String, Pt::Xml::ElementDeclaration*>& e, const Pt::String& name)
+bool lessThanName(const std::pair<Pt::Xml::QName, Pt::Xml::ElementDeclaration*>& e, const Pt::Xml::QName& name)
 {
     return e.first < name;
 }
@@ -72,7 +72,7 @@ void DocTypeDefinition::clear()
 }
 
 
-ElementDeclaration* DocTypeDefinition::declareElement(const Pt::String& name)
+ElementDeclaration* DocTypeDefinition::declareElement(const QName& name)
 { 
     ElementDeclarationList::iterator lbound;
     lbound = std::lower_bound(_elemDecls.begin(), _elemDecls.end(), name, lessThanName);
@@ -83,13 +83,13 @@ ElementDeclaration* DocTypeDefinition::declareElement(const Pt::String& name)
     }
 
     std::auto_ptr<ElementDeclaration> ep( new ElementDeclaration() );
-    std::pair<Pt::String, ElementDeclaration*> entry( name, ep.get() );
+    std::pair<QName, ElementDeclaration*> entry( name, ep.get() );
     _elemDecls.insert(lbound, entry);
     return ep.release();
 }
 
 
-ElementDeclaration* DocTypeDefinition::findElement(const Pt::String& name)
+ElementDeclaration* DocTypeDefinition::findElement(const QName& name)
 {
     ElementDeclarationList::iterator lbound;
     lbound = std::lower_bound(_elemDecls.begin(), _elemDecls.end(), name, lessThanName);
@@ -103,7 +103,7 @@ ElementDeclaration* DocTypeDefinition::findElement(const Pt::String& name)
 }
 
 
-AttributeListDeclaration& DocTypeDefinition::declareAttributeList(const Pt::String& name)
+AttributeListDeclaration& DocTypeDefinition::declareAttributeList(const QName& name)
 { 
     ElementDeclarationList::iterator lbound;
     lbound = std::lower_bound(_elemDecls.begin(), _elemDecls.end(), name, lessThanName);
@@ -114,14 +114,14 @@ AttributeListDeclaration& DocTypeDefinition::declareAttributeList(const Pt::Stri
     }
 
     std::auto_ptr<ElementDeclaration> ep( new ElementDeclaration() );
-    std::pair<Pt::String, ElementDeclaration*> entry( name, ep.get() );
+    std::pair<QName, ElementDeclaration*> entry( name, ep.get() );
     _elemDecls.insert(lbound, entry);
     ElementDeclaration* elemDecl = ep.release();
     return elemDecl->attributeList();
 }
 
 
-AttributeListDeclaration* DocTypeDefinition::attributeList(const Pt::String& name)
+AttributeListDeclaration* DocTypeDefinition::findAttributeList(const QName& name)
 {
     ElementDeclarationList::iterator lbound;
     lbound = std::lower_bound(_elemDecls.begin(), _elemDecls.end(), name, lessThanName);
@@ -141,7 +141,7 @@ Entity* DocTypeDefinition::declareEntity(const Pt::String& name)
 }
 
 
-const Entity* DocTypeDefinition::resolveEntity(const Pt::String& name) const
+const Entity* DocTypeDefinition::findEntity(const Pt::String& name) const
 {
     return _entities.resolveEntity(name);
 }
@@ -153,7 +153,7 @@ Entity* DocTypeDefinition::declareParamEntity(const Pt::String& name)
 }
 
 
-const Entity* DocTypeDefinition::resolveParamEntity(const Pt::String& name) const
+const Entity* DocTypeDefinition::findParamEntity(const Pt::String& name) const
 {
     return _paramEntities.resolveEntity(name);
 }

@@ -30,6 +30,7 @@
 
 #include <Pt/Xml/Api.h>
 #include <Pt/Xml/Node.h>
+#include <Pt/Xml/QName.h>
 #include <Pt/String.h>
 #include <Pt/NonCopyable.h>
 
@@ -51,9 +52,9 @@ class PT_XML_API DocType : public Node
 
         void clear();
 
-        const Pt::String& rootName() const;
+        const QName& rootName() const;
 
-        Pt::String& rootName();
+        QName& rootName();
 
         bool isExternal() const;
 
@@ -78,7 +79,7 @@ class PT_XML_API DocType : public Node
         { return Node::DocType; }
 
     private:
-        Pt::String _rootName;
+        QName _rootName;
         Pt::String _publicId;
         Pt::String _systemId;
         int _internal;

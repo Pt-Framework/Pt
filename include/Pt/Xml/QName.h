@@ -45,7 +45,6 @@ class QName
         /** @brief Constructs an empty qualified name.
         */
         QName()
-        : _namespace(0)
         {}
 
         /** @brief Clears all content.
@@ -54,7 +53,6 @@ class QName
         {
             _name.clear();
             _prefix.clear();
-            _namespace = 0;
         }
 
         /** @brief Returns the namespace prefix.
@@ -87,21 +85,21 @@ class QName
         void setName(const String& name)
         { _name = name; }
 
-        /** @brief Returns the namespace Uri for this element name
-        */
-        const String& namespaceUri() const
-        { return _namespace ? _namespace->namespaceUri() : _prefix; }
-        
-        /** @brief Sets the namespace context for this element
-        */
-        void setNamespace(const Namespace& ns)
-        { _namespace = &ns; }
-
     private:
         String _prefix;
         String _name;
-        const Namespace* _namespace;
 };
+
+inline bool operator ==(const QName& a, const QName& b)
+{
+    return a.prefix() == b.prefix() && a.name() == b.name();
+}
+
+inline bool operator<(const QName& a, const QName& b)
+{
+	  return a.prefix() < b.prefix() ||
+           ! (b.prefix() < a.prefix()) && a.name() < b.name();
+}
 
 } // namespace Xml
 

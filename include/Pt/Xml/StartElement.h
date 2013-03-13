@@ -49,27 +49,33 @@ class PT_XML_API Attribute
         : _namespace(0)
         { }
 
+        const QName& qname() const
+        { return _qname; }
+
         String& prefix() 
-        { return _prefix; }
+        { return _qname.prefix(); }
 
         const String& prefix() const
-        { return _prefix; }
+        { return _qname.prefix(); }
+
+        void setPrefix(const String& pre)
+        { _qname.setPrefix(pre); }
 
         /** @brief Returns the name of this attribute.
         */
         const String& name() const
-        { return _name; }
+        { return _qname.name(); }
 
         String& name()
-        { return _name; }
+        { return _qname.name(); }
 
         /** @brief Sets the name of this attribute.
         */
         void setName(const String& name)
-        { _name = name; }
+        { _qname.setName(name); }
 
         const String& namespaceUri() const
-        { return _namespace ? _namespace->namespaceUri() : _prefix; }
+        { return _namespace ? _namespace->namespaceUri() : _qname.prefix(); }
         
         void setNamespace(const Namespace& ns)
         { _namespace = &ns; }
@@ -91,15 +97,13 @@ class PT_XML_API Attribute
 
         void clear()
         { 
-            _name.clear(); 
+            _qname.clear(); 
             _value.clear(); 
-            _prefix.clear(); 
             _namespace = 0;
         }
 
     private:
-        String _prefix;
-        String _name;
+        QName _qname;
         String _value;
         const Namespace* _namespace;
 };
@@ -123,6 +127,15 @@ class PT_XML_API AttributeList : private NonCopyable
 
         void add(const Attribute& attr)
         { _container.push_back(attr); }
+
+        Attribute& add()
+        { 
+            _container.push_back( Attribute() ); 
+            return _container.back();
+        }
+
+        void pop()
+        { _container.pop_back(); }
         
         ConstIterator find(const String& attributeName) const;
 
@@ -164,6 +177,7 @@ class PT_XML_API StartElement : public Node
         */
         StartElement()
         : Node(Node::StartElement)
+        , _namespace(0)
         { }
 
         /** @brief Clears the start element.
@@ -172,7 +186,13 @@ class PT_XML_API StartElement : public Node
         {
             _qname.clear();
             _attributes.clear();
+            _namespace = 0;
         }
+
+        /** @brief Returns the qualified name.
+        */
+        const QName& qname() const
+        { return _qname; }
 
         /** @brief Returns the namespace prefix.
         */
@@ -207,12 +227,12 @@ class PT_XML_API StartElement : public Node
         /** @brief Returns the namespace Uri for this element name
         */
         const String& namespaceUri() const
-        { return _qname.namespaceUri(); }
+        { return _namespace ? _namespace->namespaceUri() : _qname.prefix(); }
         
         /** @brief Sets the namespace context for this element
-        */
+        */      
         void setNamespace(const Namespace& ns)
-        { _qname.setNamespace(ns); }
+        { _namespace = &ns; }
 
         /** @brief Returns the attributes of the tag.
         */
@@ -238,6 +258,7 @@ class PT_XML_API StartElement : public Node
 
     private:
         QName _qname;
+        const Namespace* _namespace;
         AttributeList _attributes;
 };
 
