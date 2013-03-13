@@ -122,6 +122,26 @@ void DocTypeContext::pushOperand(ContentParticle& op)
 }
 
 
+void DocTypeContext::pushDtdOperand(const String& name)
+{
+    if(name.at(0) == '#')
+    {
+        if(name != L"#PCDATA")
+            throw std::logic_error("DTD syntax error: expected PCDATA");
+
+        PcDataParticle& pcdata = getPcData();
+        pushOperand(pcdata);
+                
+        // TODO: allow #PCDATA only at beginning of first '('
+        // TODO: allow only '|' as next token
+        return;
+    }
+                
+    LeafParticle& leaf = getLabel(name);
+    pushOperand(leaf);
+}
+
+
 void DocTypeContext::reduceStack()
 {
     for(;;)

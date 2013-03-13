@@ -109,6 +109,8 @@ class DocTypeContext
 
         void pushOperand(ContentParticle& op);
 
+        void pushDtdOperand(const String& name);
+
         LeafParticle& getLabel(const Pt::String& name);
 
         SplitParticle& getSplit(ContentParticle& to);

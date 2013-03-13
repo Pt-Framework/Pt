@@ -2816,7 +2816,7 @@ class XmlReaderImpl
 
             if( ch == ',')
             {
-                pushDtdOperand(_token);
+                _dtdContext.pushDtdOperand(_token);
                 _token.clear();
                 _dtdContext.pushOperator(ch);
                 _parse = &XmlReaderImpl::OnDtdBinaryOp;
@@ -2825,7 +2825,7 @@ class XmlReaderImpl
 
             if( ch == '|')
             {
-                pushDtdOperand(_token);
+                _dtdContext.pushDtdOperand(_token);
                 _token.clear();
                 _dtdContext.pushOperator(ch);
                 _parse = &XmlReaderImpl::OnDtdBinaryOp;
@@ -2834,7 +2834,7 @@ class XmlReaderImpl
 
             if(ch == '+')
             {
-                pushDtdOperand(_token);
+                _dtdContext.pushDtdOperand(_token);
                 _token.clear();
                 _dtdContext.pushOperator(ch);
                 _parse = &XmlReaderImpl::OnDtdUnrayOp;
@@ -2843,7 +2843,7 @@ class XmlReaderImpl
 
             if(ch == '*')
             {
-                pushDtdOperand(_token);
+                _dtdContext.pushDtdOperand(_token);
                 _token.clear();
                 _dtdContext.pushOperator(ch);
                 _parse = &XmlReaderImpl::OnDtdUnrayOp;
@@ -2852,7 +2852,7 @@ class XmlReaderImpl
 
             if(ch == '?')
             {
-                pushDtdOperand(_token);
+                _dtdContext.pushDtdOperand(_token);
                 _token.clear();
                 _dtdContext.pushOperator(ch);
                 _parse = &XmlReaderImpl::OnDtdUnrayOp;
@@ -2861,7 +2861,7 @@ class XmlReaderImpl
 
             if( ch == ')')
             {
-                pushDtdOperand(_token);
+                _dtdContext.pushDtdOperand(_token);
                 _token.clear();
                 _dtdContext.pushClosingBrace();
                 _parse = &XmlReaderImpl::OnDtdContentExprEnd;
@@ -3883,25 +3883,6 @@ class XmlReaderImpl
                 _parse = _parseStack.top();
                 _parseStack.pop();
             }
-        }
-
-        void pushDtdOperand(const String& name)
-        {
-            if(name.at(0) == '#')
-            {
-                if(name != L"#PCDATA")
-                    throw std::logic_error("DTD syntax error: expected PCDATA");
-
-                PcDataParticle& pcdata = _dtdContext.getPcData();
-                _dtdContext.pushOperand(pcdata);
-                
-                // TODO: allow #PCDATA only at beginning of first '('
-                // TODO: allow only '|' as next token
-                return;
-            }
-                
-            LeafParticle& leaf = _dtdContext.getLabel(name);
-            _dtdContext.pushOperand(leaf);
         }
 
         class EntityResolver : public XmlResolver
