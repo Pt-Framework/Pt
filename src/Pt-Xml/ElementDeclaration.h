@@ -77,6 +77,10 @@ class PT_XML_API ElementDeclaration : private NonCopyable
         std::size_t contentSize() const;
 
     private:
+        // TODO: use std::vector<ContentParticle*> and let ED own particles
+        //       front() should be start
+        //       DtdBuilder fills it
+        //       reference to DocTypeContext for allocation
         ContentParticle* _start;
         std::size_t _size;
         ContentType _type;
