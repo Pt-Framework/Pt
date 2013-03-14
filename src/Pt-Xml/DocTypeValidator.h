@@ -40,7 +40,7 @@ namespace Xml {
 class Node;
 class DocTypeDefinition;
 
-class DocTypeValidator : private NonCopyable
+class PT_XML_API DocTypeValidator : private NonCopyable
 {
     public:
         explicit DocTypeValidator(DocTypeDefinition& dtd);
