@@ -26,10 +26,11 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
  
-#include "DocTypeValidator.h"
+
 #include "ContentModel.h"
 #include "ElementDeclaration.h"
 #include "AttributeDeclaration.h"
+#include <Pt//Xml/DocTypeValidator.h>
 #include <Pt/Xml/DocTypeDefinition.h>
 #include <Pt/Xml/Characters.h>
 #include <stack>
