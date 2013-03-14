@@ -112,9 +112,9 @@ class PT_XML_API EntityReference : public Node
 
         void clear();
 
-        void set(const Pt::String& name, const Entity* entity);
+        void setName(const Pt::String& name);
 
-        void set(const Entity* entity);
+        void setEntity(const Entity* entity);
 
         const Pt::String& name() const;
 

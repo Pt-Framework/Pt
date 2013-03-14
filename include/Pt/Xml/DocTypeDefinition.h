@@ -56,6 +56,13 @@ class PT_XML_API DocTypeDefinition : public Node
 
         void clear();
 
+        // TODO: remove this method
+        bool isDefined() const;
+
+        const QName& rootName() const;
+
+        QName& rootName();
+
         ElementDeclaration* declareElement(const QName& name);
 
         ElementDeclaration* findElement(const QName& name);
@@ -84,6 +91,7 @@ class PT_XML_API DocTypeDefinition : public Node
         typedef std::vector< std::pair<QName, ElementDeclaration*> > ElementDeclarationList;
         
         DocTypeContext* _ctx;
+        QName _rootName;
         ElementDeclarationList _elemDecls;
         EntityMapping _entities;
         EntityMapping _paramEntities;

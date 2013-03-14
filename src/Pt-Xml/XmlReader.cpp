@@ -465,7 +465,7 @@ class XmlReaderImpl
 
             if( isAlpha(ch) )
             {
-                _docType.rootName().name() += ch;
+                _dtd.rootName().name() += ch;
                 _parse = &XmlReaderImpl::OnDtdRootName;
                 return;
             }
@@ -663,14 +663,14 @@ class XmlReaderImpl
 
             if( isAlpha(ch) )
             {
-                _docType.rootName().name() += ch;
+                _dtd.rootName().name() += ch;
                 return;
             }
 
             if( ch == ':' )
             {
-                _docType.rootName().prefix() = _docType.rootName().name(); // TODO: use swap
-                _docType.rootName().name().clear();
+                _dtd.rootName().prefix() = _dtd.rootName().name(); // TODO: use swap
+                _dtd.rootName().name().clear();
                 return;
             }
 
@@ -3444,12 +3444,16 @@ class XmlReaderImpl
             
             if(ch == ';')
             {
-                bool resolved = resolveEntity(_token);
-                if(resolved)
+                if( EntityMapping::resolveDefaultEntity(_token) )
                 {
                     _attr->value() += _token;
                 }
-                
+                else
+                {
+                    _entityRef.setName(_token);
+                    resolveEntity(_entityRef);
+                }
+
                 _token.clear();
                 _parse = &XmlReaderImpl::onAttributeValue;
                 return;
@@ -3668,8 +3672,7 @@ class XmlReaderImpl
 
             if(ch == ';')
             {
-                bool resolved = resolveEntity(_token);
-                if(resolved)
+                if( EntityMapping::resolveDefaultEntity(_token) )
                 {
                     _chars.append(_token);
 
@@ -3687,6 +3690,11 @@ class XmlReaderImpl
                     _token.clear();
                     _parse = &XmlReaderImpl::onCharacters;
                     return;
+                }
+                else
+                {
+                    _entityRef.setName(_token);
+                    resolveEntity(_entityRef);
                 }
 
                 // _chars.setIgnorable(false) is potentially called again when
@@ -3922,17 +3930,14 @@ class XmlReaderImpl
 
             return false;
         }
-        
-        bool resolveEntity(String& token)
+
+        void resolveEntity(EntityReference& entref)
         {
-            // TODO: handle this in concrete parser states
-            if( EntityMapping::resolveDefaultEntity( token ) )
-                return true;
-
             InputSource* is = 0;
+            int reportEntityRefs = _flags & XmlReader::ReportEntityReferences;
+            const Entity* ent = _dtd.findEntity( entref.name() );
 
-            const Entity* ent = _dtd.findEntity(token);
-            if( ent && ! ent->isUnparsed() )
+            if( ! reportEntityRefs && ent && ! ent->isUnparsed() )
             {
                 if( ent->isInternal() )
                 {
@@ -3943,27 +3948,24 @@ class XmlReaderImpl
                 {
                     is = _resolver->resolve( ent->publicId(), ent->systemId() );
                     if(is)
-                    {
                         _input.addInput(*is, _resolver);
-                    }
                 }
             }
             
             if( ! is)
             {
-                _entityRef.set(token, ent);
-                _current = &_entityRef;
+                entref.setEntity(ent);
+                _current = &entref;
             }
-            
-            return false;
         }
 
-        void resolveParamEntity(const EntityReference& entref)
+        void resolveParamEntity(EntityReference& entref)
         {
             InputSource* is = 0;
-            
+            int reportEntityRefs = _flags & XmlReader::ReportEntityReferences;
             const Entity* ent = _dtd.findParamEntity( entref.name() );
-            if( ent )
+            
+            if( ! reportEntityRefs && ent )
             {
                 if( ent->isInternal() )
                 {
@@ -3974,16 +3976,14 @@ class XmlReaderImpl
                 {
                     is = _resolver->resolve( ent->publicId(), ent->systemId() );
                     if(is)
-                    {
                         _input.addInput(*is, _resolver);
-                    }
                 }
             }
 
             if( ! is)
             {
-                _entityRef.set(ent);
-                _current = &_entityRef;
+                entref.setEntity(ent);
+                _current = &entref;
             }
         }
 
@@ -4280,7 +4280,7 @@ class XmlReaderImpl
                 }
             }
 
-            if( (_flags & XmlReader::ValidateDtd) && _docType.isDefined() )
+            if( (_flags & XmlReader::ValidateDtd) && _dtd.isDefined() )
             {
                 if( ! _dtdValidator.validate(*_current) )
                     throw SyntaxError("validation failed", line());
@@ -4328,7 +4328,7 @@ class XmlReaderImpl
             // TODO: use Validator outside of XmlReader
             if( _current )
             {
-                if( (_flags & XmlReader::ValidateDtd) && _docType.isDefined() )
+                if( (_flags & XmlReader::ValidateDtd) && _dtd.isDefined() )
                 {
                     if( ! _dtdValidator.validate(*_current) )
                         throw SyntaxError("validation failed", line());

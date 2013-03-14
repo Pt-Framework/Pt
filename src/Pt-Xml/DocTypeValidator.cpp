@@ -142,6 +142,10 @@ bool DocTypeValidatorImpl::validate(Node& node)
             {
                 valid = _decls.top().validateNode(se);
             }
+            else // first start element
+            {
+                valid = se.qname() == _dtd->rootName();
+            }
                     
             ElementDeclaration* decl = _dtd->findElement( se.qname() );
             if(decl)

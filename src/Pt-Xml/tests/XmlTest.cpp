@@ -284,7 +284,6 @@ void XmlReaderTest::DtdEmptyDocument()
     Pt::Xml::XmlReader::Iterator it = reader.current();
 
     Pt::Xml::DocType& docType = Pt::Xml::toDocType(*it);
-    PT_UNIT_ASSERT_EQUALS(docType.rootName().name(), L"test");
     PT_UNIT_ASSERT_EQUALS(docType.publicId(), L"");
     PT_UNIT_ASSERT_EQUALS(docType.systemId(), L"external.dtd");
     PT_UNIT_ASSERT_EQUALS(docType.isInternal(), true);
@@ -292,6 +291,7 @@ void XmlReaderTest::DtdEmptyDocument()
     ++it;
     
     Pt::Xml::DocTypeDefinition& dtd = Pt::Xml::toDocTypeDefinition(*it);
+    PT_UNIT_ASSERT_EQUALS(dtd.rootName().name(), L"test");
     PT_UNIT_ASSERT_EQUALS(reader.depth(), 0);
 
     ++it;
@@ -314,7 +314,6 @@ void XmlReaderTest::DtdExternalSubsetPublicId()
     Pt::Xml::XmlReader::Iterator it = reader.current();
 
     Pt::Xml::DocType& docType = Pt::Xml::toDocType(*it);
-    PT_UNIT_ASSERT_EQUALS(docType.rootName().name(), L"test");
     PT_UNIT_ASSERT_EQUALS(docType.publicId(), L"pubid");
     PT_UNIT_ASSERT_EQUALS(docType.systemId(), L"external.dtd");
     PT_UNIT_ASSERT_EQUALS(docType.isInternal(), false);
@@ -342,7 +341,6 @@ void XmlReaderTest::DtdExternalSubsetSystemId()
     Pt::Xml::XmlReader::Iterator it = reader.current();
 
     Pt::Xml::DocType& docType = Pt::Xml::toDocType(*it);
-    PT_UNIT_ASSERT_EQUALS(docType.rootName().name(), L"test");
     PT_UNIT_ASSERT_EQUALS(docType.publicId(), L"");
     PT_UNIT_ASSERT_EQUALS(docType.systemId(), L"external.dtd");
     PT_UNIT_ASSERT_EQUALS(docType.isInternal(), false);
@@ -376,7 +374,6 @@ void XmlReaderTest::DtdExternalAndInternalSubset()
         Pt::Xml::XmlReader::Iterator it = reader.current();
         
         Pt::Xml::DocType& docType = Pt::Xml::toDocType(*it);
-        PT_UNIT_ASSERT_EQUALS(docType.rootName().name(), L"test");
         PT_UNIT_ASSERT_EQUALS(docType.publicId(), L"");
         PT_UNIT_ASSERT_EQUALS(docType.systemId(), L"external.dtd");
         PT_UNIT_ASSERT_EQUALS(docType.isInternal(), true);
@@ -384,6 +381,7 @@ void XmlReaderTest::DtdExternalAndInternalSubset()
         ++it;
         
         Pt::Xml::DocTypeDefinition& dtd = Pt::Xml::toDocTypeDefinition(*it);
+        PT_UNIT_ASSERT_EQUALS(dtd.rootName().name(), L"test");
         PT_UNIT_ASSERT( dtd.findEntity(L"e1") );
         PT_UNIT_ASSERT( dtd.findEntity(L"e2") == 0 );
         PT_UNIT_ASSERT_EQUALS(reader.depth(), 0);

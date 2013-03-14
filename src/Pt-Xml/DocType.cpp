@@ -47,30 +47,11 @@ DocType::~DocType()
 }
 
 
-bool DocType::isDefined() const
-{ 
-    return ! ( _rootName.prefix().empty() && _rootName.name().empty() ); 
-}
-
-
 void DocType::clear()
 { 
-    _rootName.clear();
     _publicId.clear();
     _systemId.clear();
     _internal = 0;
-}
-
-
-const QName& DocType::rootName() const
-{ 
-    return _rootName; 
-}
-
-
-QName& DocType::rootName()
-{ 
-    return _rootName; 
 }
 
 
@@ -84,6 +65,7 @@ bool DocType::isInternal() const
 { 
     return _internal == 1; 
 }
+
 
 void DocType::setInternal(bool hasInternal)
 {

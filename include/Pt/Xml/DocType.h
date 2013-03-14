@@ -46,15 +46,7 @@ class PT_XML_API DocType : public Node
 
         ~DocType();
 
-        // TODO: remove this method
-        //       keep reference to DocTypeDefinition
-        bool isDefined() const;
-
         void clear();
-
-        const QName& rootName() const;
-
-        QName& rootName();
 
         bool isExternal() const;
 
@@ -79,7 +71,7 @@ class PT_XML_API DocType : public Node
         { return Node::DocType; }
 
     private:
-        QName _rootName;
+        
         Pt::String _publicId;
         Pt::String _systemId;
         int _internal;

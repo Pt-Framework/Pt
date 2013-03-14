@@ -66,9 +66,28 @@ void DocTypeDefinition::clear()
         delete it->second;
     }
 
+    _rootName.clear();
     _elemDecls.clear();
     _entities.clear();
     _paramEntities.clear();
+}
+
+
+bool DocTypeDefinition::isDefined() const
+{ 
+    return ! _rootName.name().empty(); 
+}
+
+
+const QName& DocTypeDefinition::rootName() const
+{ 
+    return _rootName; 
+}
+
+
+QName& DocTypeDefinition::rootName()
+{ 
+    return _rootName; 
 }
 
 

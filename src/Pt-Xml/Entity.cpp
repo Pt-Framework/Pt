@@ -48,14 +48,13 @@ void EntityReference::clear()
 }
 
 
-void EntityReference::set(const Pt::String& name, const Entity* entity)
+void EntityReference::setName(const Pt::String& name)
 {
     _name = name; 
-    _entity = entity;
 }
 
 
-void EntityReference::set(const Entity* entity)
+void EntityReference::setEntity(const Entity* entity)
 {
     _entity = entity;
 }

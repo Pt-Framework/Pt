@@ -91,7 +91,8 @@ class PT_XML_API XmlReader : private NonCopyable
             ReportProcessingInstructions = 4,
             ReportComments = 8,
             ReportCData = 16,
-            ValidateDtd = 32
+            ReportEntityReferences = 32,
+            ValidateDtd = 64
         };
 
         static const int DefaultParseFlags = ValidateDtd;
