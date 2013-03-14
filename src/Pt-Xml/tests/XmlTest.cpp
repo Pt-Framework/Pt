@@ -321,8 +321,10 @@ void XmlReaderTest::DtdExternalSubsetPublicId()
 
     PT_UNIT_ASSERT_EQUALS(reader.depth(), 0);
 
+    Pt::Xml::DocTypeValidator validator( reader.dtd() );
     for(it = reader.current(); it != reader.end(); ++it)
     {
+        PT_UNIT_ASSERT( validator.validate(*it) );
     }
 }
 
@@ -348,8 +350,10 @@ void XmlReaderTest::DtdExternalSubsetSystemId()
 
     PT_UNIT_ASSERT_EQUALS(reader.depth(), 0);
 
+    Pt::Xml::DocTypeValidator validator( reader.dtd() );
     for(it = reader.current(); it != reader.end(); ++it)
     {
+        PT_UNIT_ASSERT( validator.validate(*it) );
     }
 }
 
@@ -420,10 +424,13 @@ void XmlReaderTest::DtdValidateAttributes()
         input << "<test a1='A1' a2='A2' a4='A3def'></test>";
 
         Pt::Xml::XmlReader reader(input);
+        Pt::Xml::DocTypeValidator validator( reader.dtd() );
         
         Pt::Xml::XmlReader::Iterator it;
         for(it = reader.current(); it != reader.end(); ++it)
         {
+            PT_UNIT_ASSERT( validator.validate(*it) );
+
             Pt::Xml::StartElement* se = toStartElement(&*it);
             if(se && se->name() == L"test")
             {
@@ -454,10 +461,12 @@ void XmlReaderTest::DtdValidateEnumAttributes()
         input << "<test a1='bbb'></test>";
 
         Pt::Xml::XmlReader reader(input);
+        Pt::Xml::DocTypeValidator validator( reader.dtd() );
         
         Pt::Xml::XmlReader::Iterator it;
         for(it = reader.current(); it != reader.end(); ++it)
         {
+            PT_UNIT_ASSERT( validator.validate(*it) );
         }
     }
     catch(const Pt::Xml::SyntaxError& error)
@@ -488,10 +497,12 @@ void XmlReaderTest::DtdValidateIDAttributes()
         input << "</test>";
 
         Pt::Xml::XmlReader reader(input);
+        Pt::Xml::DocTypeValidator validator( reader.dtd() );
         
         Pt::Xml::XmlReader::Iterator it;
         for(it = reader.current(); it != reader.end(); ++it)
         {
+            PT_UNIT_ASSERT( validator.validate(*it) );
         }
     }
     catch(const Pt::Xml::SyntaxError& error)
@@ -517,10 +528,13 @@ void XmlReaderTest::DtdValidateEntityAttributes()
         input << "<test a1='e1' a2='e1 e2'></test>";
 
         Pt::Xml::XmlReader reader(input);
+        Pt::Xml::DocTypeValidator validator( reader.dtd() );
         
         Pt::Xml::XmlReader::Iterator it = reader.current();
         for(; it != reader.end(); ++it)
-            ;
+        {
+            PT_UNIT_ASSERT( validator.validate(*it) );
+        }
     }
     catch(const Pt::Xml::SyntaxError& error)
     {
@@ -545,10 +559,13 @@ void XmlReaderTest::DtdValidateNotationAttributes()
         input << "<test a1='jpeg' a2='gif'></test>";
 
         Pt::Xml::XmlReader reader(input);
+        Pt::Xml::DocTypeValidator validator( reader.dtd() );
         
         Pt::Xml::XmlReader::Iterator it = reader.current();
         for(; it != reader.end(); ++it)
-            ;
+        {
+            PT_UNIT_ASSERT( validator.validate(*it) );
+        }
     }
     catch(const Pt::Xml::SyntaxError& error)
     {
@@ -580,9 +597,13 @@ void XmlReaderTest::DtdValidateElementContent()
                  "</test>\n";
 
         Pt::Xml::XmlReader reader(input);
+        Pt::Xml::DocTypeValidator validator( reader.dtd() );
+
         Pt::Xml::XmlReader::Iterator it;
         for(it = reader.current(); it != reader.end(); ++it)
-            ;
+        {
+            PT_UNIT_ASSERT( validator.validate(*it) );
+        }
     }
     catch(const Pt::Xml::SyntaxError& error)
     {
@@ -608,12 +629,13 @@ void XmlReaderTest::DtdAnyElementContent()
                  "</test>\n";
 
         Pt::Xml::XmlReader reader(input);
-        //Pt::Xml::DocTypeValidator validator( reader.dtd() );
+        Pt::Xml::DocTypeValidator validator( reader.dtd() );
         
         Pt::Xml::XmlReader::Iterator it;
         for(it = reader.current(); it != reader.end(); ++it)
         {
-            //bool valid = validator.validate(*it);
+            bool valid = validator.validate(*it);
+            PT_UNIT_ASSERT(valid);
         }
     }
     catch(const Pt::Xml::SyntaxError& error)
@@ -636,10 +658,13 @@ void XmlReaderTest::DtdValidateWithNamespace()
         input << "<pt:test xmlns:pt='http://www.pt-framework.org' pt:a1='A1'></pt:test>";
 
         Pt::Xml::XmlReader reader(input);
+        Pt::Xml::DocTypeValidator validator( reader.dtd() );
         
         Pt::Xml::XmlReader::Iterator it;
         for(it = reader.current(); it != reader.end(); ++it)
         {
+            PT_UNIT_ASSERT( validator.validate(*it) );
+
             Pt::Xml::StartElement* se = toStartElement(&*it);
             if(se && se->name() == L"test")
             {
@@ -696,8 +721,11 @@ void XmlReaderTest::DtdNotations()
     PT_UNIT_ASSERT_EQUALS(notation->publicId(), L"http://www.pt-framework.org/n3");
     PT_UNIT_ASSERT_EQUALS(notation->systemId(), L"n3");
 
+    Pt::Xml::DocTypeValidator validator( reader.dtd() );
     for(; it != reader.end(); ++it)
-            ;
+    {
+        PT_UNIT_ASSERT( validator.validate(*it) );
+    }
 }
 
 
@@ -801,10 +829,13 @@ void XmlReaderTest::DtdComment()
         input << "<test></test>";
 
         Pt::Xml::XmlReader reader( resolver, input );
+        Pt::Xml::DocTypeValidator validator( reader.dtd() );
 
         Pt::Xml::XmlReader::Iterator it = reader.current();
         for(; it != reader.end(); ++it)
-            ;
+        {
+            PT_UNIT_ASSERT( validator.validate(*it) );
+        }
     }
     catch(const Pt::Xml::SyntaxError& error)
     {
@@ -844,8 +875,12 @@ void XmlReaderTest::DtdProcesssingInstruction()
         PT_UNIT_ASSERT_EQUALS(pi->target(), L"pi2");
         PT_UNIT_ASSERT_EQUALS(pi->data(), L"external processing instruction");
         
+        Pt::Xml::DocTypeValidator validator( reader.dtd() );
+
         for(; it != reader.end(); ++it)
-            ;
+        {
+            PT_UNIT_ASSERT( validator.validate(*it) );
+        }
     }
     catch(const Pt::Xml::SyntaxError& error)
     {

@@ -27,12 +27,12 @@
  */
 
 #include "DtdContext.h"
-#include "DocTypeValidator.h"
 #include "ElementDeclaration.h"
 #include "AttributeDeclaration.h"
 #include "InputStack.h"
 
 #include <Pt/Xml/XmlReader.h>
+#include <Pt/Xml/DocTypeValidator.h>
 #include <Pt/Xml/XmlResolver.h>
 #include <Pt/Xml/DocTypeDefinition.h>
 #include <Pt/Xml/NamespaceContext.h>
@@ -4102,7 +4102,7 @@ class XmlReaderImpl
         , _dtdContext()
         , _dtd(_dtdContext)
         , _docType()
-        , _dtdValidator(_dtd)
+        //, _dtdValidator(_dtd)
         , _elemDecl(0)
         , _attrDecl(0)
         , _attlistDecl(0)
@@ -4124,7 +4124,7 @@ class XmlReaderImpl
         , _dtdContext()
         , _dtd(_dtdContext)
         , _docType()
-        , _dtdValidator(_dtd)
+        //, _dtdValidator(_dtd)
         , _elemDecl(0)
         , _attrDecl(0)
         , _attlistDecl(0)
@@ -4175,7 +4175,7 @@ class XmlReaderImpl
             _quotChar = 0;
             _nsctx.clear();
             
-            _dtdValidator.clear();
+            //_dtdValidator.clear();
             _dtd.clear();
             _dtdContext.clear();
             _docType.clear();
@@ -4221,7 +4221,7 @@ class XmlReaderImpl
         bool isStandalone() const
         { return _startDoc.isStandalone(); }
 
-        const DocTypeDefinition& dtd() const
+        DocTypeDefinition& dtd()
         { return _dtd; }
 
         size_t depth() const
@@ -4280,11 +4280,11 @@ class XmlReaderImpl
                 }
             }
 
-            if( (_flags & XmlReader::ValidateDtd) && _dtd.isDefined() )
-            {
-                if( ! _dtdValidator.validate(*_current) )
-                    throw SyntaxError("validation failed", line());
-            }
+            //if( (_flags & XmlReader::ValidateDtd) && _dtd.isDefined() )
+            //{
+            //    if( ! _dtdValidator.validate(*_current) )
+            //        throw SyntaxError("validation failed", line());
+            //}
 
             return *_current;
         }
@@ -4326,14 +4326,14 @@ class XmlReaderImpl
             while( ! _current);
 
             // TODO: use Validator outside of XmlReader
-            if( _current )
-            {
-                if( (_flags & XmlReader::ValidateDtd) && _dtd.isDefined() )
-                {
-                    if( ! _dtdValidator.validate(*_current) )
-                        throw SyntaxError("validation failed", line());
-                }
-            }
+            //if( _current )
+            //{
+            //    if( (_flags & XmlReader::ValidateDtd) && _dtd.isDefined() )
+            //    {
+            //        if( ! _dtdValidator.validate(*_current) )
+            //            throw SyntaxError("validation failed", line());
+            //    }
+            //}
 
             return _current;
         }
@@ -4360,7 +4360,7 @@ class XmlReaderImpl
         DocTypeContext _dtdContext;
         DocTypeDefinition _dtd;
         DocType _docType;
-        DocTypeValidator _dtdValidator;
+        //DocTypeValidator _dtdValidator;
 
         ElementDeclaration* _elemDecl;
         AttributeDeclaration* _attrDecl;
@@ -4485,6 +4485,12 @@ const Pt::String& XmlReader::encoding() const
 bool XmlReader::isStandalone() const
 {
     return _impl->isStandalone();
+}
+
+
+DocTypeDefinition& XmlReader::dtd()
+{
+    return _impl->dtd();
 }
 
 

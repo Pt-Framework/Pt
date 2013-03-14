@@ -91,20 +91,14 @@ class PT_XML_API XmlReader : private NonCopyable
             ReportProcessingInstructions = 4,
             ReportComments = 8,
             ReportCData = 16,
-            ReportEntityReferences = 32,
-            ValidateDtd = 64
+            ReportEntityReferences = 32
         };
 
-        static const int DefaultParseFlags = ValidateDtd;
+        static const int DefaultParseFlags = 0;
 
     public:
         /* TODO: Consider the following processing flags:
-                     - ReportDtd
-                     - ReportProcessingInstructions
                      - ReportWhitespace
-                     - ReportComments
-                     - ReportDocumentStart
-                     - ReportCData (not as Characters)
         */
         XmlReader();
 
@@ -120,6 +114,10 @@ class PT_XML_API XmlReader : private NonCopyable
 
         ~XmlReader();
 
+        /** @brief Removes all input sources and resets parser state.
+        */
+        void clear();
+
         int flags() const;
 
         void setFlag(ParseFlag f);
@@ -127,10 +125,6 @@ class PT_XML_API XmlReader : private NonCopyable
         void unsetFlag(ParseFlag f);
 
         XmlResolver* resolver() const;
-
-        /** @brief Removes all input sources and resets parser state.
-        */
-        void clear();
 
         // TODO: add methods for discard(), reset(), clear()
         void setInput(std::istream& is);
@@ -156,6 +150,8 @@ class PT_XML_API XmlReader : private NonCopyable
         const Pt::String& encoding() const;
 
         bool isStandalone() const;
+
+        DocTypeDefinition& dtd();
 
         const DocTypeDefinition& dtd() const;
 
