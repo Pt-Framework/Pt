@@ -170,6 +170,7 @@
     <ClInclude Include="..\..\include\Pt\Xml\Comment.h" />
     <ClInclude Include="..\..\include\Pt\Xml\DocType.h" />
     <ClInclude Include="..\..\include\Pt\Xml\DocTypeDefinition.h" />
+    <ClInclude Include="..\..\include\Pt\Xml\DocTypeValidator.h" />
     <ClInclude Include="..\..\include\Pt\Xml\EndDocument.h" />
     <ClInclude Include="..\..\include\Pt\Xml\EndElement.h" />
     <ClInclude Include="..\..\include\Pt\Xml\Entity.h" />
@@ -228,7 +229,6 @@
     <ClInclude Include="..\..\src\Pt-Xml\AttributeDeclaration.h" />
     <ClInclude Include="..\..\src\Pt-Xml\AttributeListDeclaration.h" />
     <ClInclude Include="..\..\src\Pt-Xml\ContentModel.h" />
-    <ClInclude Include="..\..\src\Pt-Xml\DocTypeValidator.h" />
     <ClInclude Include="..\..\src\Pt-Xml\DtdContext.h" />
     <ClInclude Include="..\..\src\Pt-Xml\ElementDeclaration.h" />
     <ClInclude Include="..\..\src\Pt-Xml\InputStack.h" />

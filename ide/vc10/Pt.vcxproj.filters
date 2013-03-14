@@ -735,13 +735,13 @@
     <ClInclude Include="..\..\include\Pt\Xml\XmlResolver.h">
       <Filter>Pt-Xml</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Xml\DocTypeValidator.h">
-      <Filter>Pt-Xml</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Xml\Notation.h">
       <Filter>Pt-Xml</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Xml\StartDocument.h">
+      <Filter>Pt-Xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Xml\DocTypeValidator.h">
       <Filter>Pt-Xml</Filter>
     </ClInclude>
   </ItemGroup>

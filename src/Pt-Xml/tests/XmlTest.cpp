@@ -28,6 +28,7 @@
 #include "Pt/Unit/RegisterTest.h"
 #include "Pt/Xml/XmlReader.h"
 #include "Pt/Xml/XmlResolver.h"
+#include "Pt/Xml/DocTypeValidator.h"
 #include "Pt/Xml/InputSource.h"
 #include "Pt/Xml/StartDocument.h"
 #include "Pt/Xml/StartElement.h"
@@ -607,9 +608,13 @@ void XmlReaderTest::DtdAnyElementContent()
                  "</test>\n";
 
         Pt::Xml::XmlReader reader(input);
+        //Pt::Xml::DocTypeValidator validator( reader.dtd() );
+        
         Pt::Xml::XmlReader::Iterator it;
         for(it = reader.current(); it != reader.end(); ++it)
-            ;
+        {
+            //bool valid = validator.validate(*it);
+        }
     }
     catch(const Pt::Xml::SyntaxError& error)
     {
