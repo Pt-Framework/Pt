@@ -133,15 +133,46 @@ std::basic_streambuf<Char>* ByteInputSource::onGet()
         std::streambuf* sb = _is->rdbuf();
         std::char_traits<char>::int_type eofval = std::char_traits<char>::eof();
                 
-        for(c = sb->sgetc(); ! std::char_traits<char>::eq_int_type(c, eofval); c = sb->sbumpc() )
+        for(c = sb->sgetc(); ! std::char_traits<char>::eq_int_type(c, eofval); c = sb->snextc() )
         {
             char ch = std::char_traits<char>::to_char_type(c);
 
             if( ! parseBom(ch) )
                 break;
         }
+
+        //if(_bomState == OnBomEnd)
+        //{
+        //    // TODO: parse for xml declaration, but put chars in text buffer
+        //    //       so they can be read again by parser...
+        //    //std::cout << char( _is->rdbuf()->sgetc() )  << std::endl;
+
+        //    std::istringstream iss;
+        //    std::string s;
+        //    
+        //    for(c = sb->sgetc(); ! std::char_traits<char>::eq_int_type(c, eofval); c = sb->snextc() )
+        //    {
+        //        char ch = std::char_traits<char>::to_char_type(c);
+        //        s += ch;
+        //        if(ch == '>')
+        //        {
+        //            sb->sbumpc();
+        //            break;
+        //        }
+        //    }
+
+        //    iss.str(s);
+
+        //    //std::cerr << "in_avail: " << iss.rdbuf()->in_avail() << std::endl;
+        //    _tbuf.set(iss);
+        //    _tbuf.import();
+        //    _tbuf.set(*_is);
+        //    //std::cerr << "in_avail2: " << _tbuf.in_avail() << std::endl;
+
+        //    //TODO: onGetBytes() ???
+        //}
     }
-            
+
     return &_tbuf;
 }
 

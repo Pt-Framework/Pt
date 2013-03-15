@@ -133,6 +133,11 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
             _target = &target;
         }
 
+        void set(std::basic_ios<extern_type>& target)
+        {
+            _target = &target;
+        }
+
         CodecType* codec()
         { return _codec; }
 
@@ -220,6 +225,7 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
                     if( this->overflow( traits_type::eof() ) == traits_type::eof() )
                         return -1;
 
+                    // TODO: should this really fail?
                     if( p == this->pptr() )
                         throw ConversionError("character conversion failed");
                 }
