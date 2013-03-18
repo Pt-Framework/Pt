@@ -62,7 +62,8 @@ XmlRpcResponder::XmlRpcResponder(Service& service)
 , _state(OnBegin)
 , _ts(new Utf8Codec)
 , _tin(_ts)
-, _reader(_tin)
+, _bin()
+, _reader(_bin)
 , _formatter(_writer)
 , _service(&service)
 , _reply(0)
@@ -84,7 +85,7 @@ XmlRpcResponder::~XmlRpcResponder()
 void XmlRpcResponder::onBeginRequest(Http::Request& request, Http::Reply& reply, System::EventLoop& loop)
 {
     _state = OnBegin;
-    _ts.attach( request.body() );
+    _bin.reset( request.body() );
     _args = 0;
 }
 

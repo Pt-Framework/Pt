@@ -66,6 +66,7 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
         typedef typename traits_type::pos_type pos_type;
         typedef typename traits_type::off_type off_type;
         typedef TextCodec<char_type, extern_type> CodecType;
+        typedef typename CodecType::result CodecResult;
         typedef MBState state_type;
 
     private:
@@ -127,6 +128,7 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
                 delete _codec;
         }
 
+        // TODO: do not terminate, just continue from other stream
         void attach(std::basic_ios<extern_type>& target)
         {
             this->terminate();
@@ -196,17 +198,6 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
             _ebufsize = 0;
             _state = state_type();
             return 0;
-        }
-
-        void import(std::streamsize n = 0)
-        {
-            if( _target && _target->rdbuf() )
-            {
-                if(n == 0)
-                    n = _target->rdbuf()->in_avail();
-
-                do_underflow(n);
-            }
         }
 
     protected:
@@ -310,35 +301,54 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
             return traits_type::not_eof(ch);
         }
 
-
         // inheritdoc
         virtual int_type underflow()
         {
-            if( ! _target || ! _target->rdbuf() )
-                return traits_type::eof();
-
             if( this->gptr() < this->egptr() )
                 return traits_type::to_int_type( *this->gptr() );
 
-            return do_underflow(_ebufmax).first;
+            import(_ebufmax);
+
+            return gptr() < egptr() ? traits_type::to_int_type( *gptr() )
+                                    : traits_type::eof();
         }
 
-
-        std::pair<int_type, std::streamsize> do_underflow(std::streamsize size)
+    public:
+        void import(std::streamsize size = 0)
         {
-            typedef std::pair<int_type, std::streamsize> ret_type;
-
-            std::streamsize n = 0;
-
             if( this->pptr() )
             {
                 if( -1 == this->terminate() )
-                    return ret_type(traits_type::eof(), 0);
+                    return;
             }
 
             if( ! this->gptr() )
             {
                 this->setg(_ibuf, _ibuf, _ibuf);
+            }
+
+            std::basic_streambuf<extern_type>* rdbuf = _target ? _target->rdbuf()
+                                                               : 0;
+            
+            // special case: read available input
+            if(size == 0 && rdbuf)
+                size = rdbuf->in_avail();
+
+            // not more than input buffer size
+            const std::streamsize ebufavail = _ebufmax - _ebufsize;
+            size = ebufavail < size ? ebufavail : size;
+
+            if(size > 0 && rdbuf)
+            {
+                std::streamsize n = rdbuf->sgetn( _ebuf + _ebufsize,  size );
+                _ebufsize += static_cast<int>(n);
+                if(n <= 0)
+                {
+                    // rdbuf == 0 means "at end of input"
+                    rdbuf = 0;
+
+                    //TODO: _target->seteof(); ???
+                }  
             }
 
             if( this->gptr() - this->eback() > _pbmax)
@@ -350,20 +360,51 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
                 this->setg(_ibuf, _ibuf + _pbmax, _ibuf + movelen);
             }
 
-            bool atEof = false;
-            const std::streamsize bufavail = _ebufmax - _ebufsize;
-            size = bufavail < size ? bufavail : size;
-            if(size)
+            typename CodecType::result r = decode();
+
+            // fail if partial conversion at the end of input
+            // rdbuf == 0 means "at end of input"
+            if( rdbuf == 0 && _ebufsize == 0 && r == CodecType::partial)
+                throw ConversionError("character conversion failed");
+        }
+
+        std::streamsize import(const extern_type* buf, std::streamsize size)
+        {
+            if( this->pptr() )
             {
-                n = _target->rdbuf()->sgetn( _ebuf + _ebufsize,  size );
-                _ebufsize += static_cast<int>(n);
-                if(n == 0)
-                {
-                    atEof = true;
-                    // TODO: _target->seteof();
-                }
+                if( -1 == this->terminate() )
+                    return 0;
             }
 
+            if( ! this->gptr() )
+            {
+                this->setg(_ibuf, _ibuf, _ibuf);
+            }
+
+            const std::streamsize bufavail = _ebufmax - _ebufsize;
+            size = bufavail < size ? bufavail : size;
+            if(size > 0)
+            {
+                std::char_traits<extern_type>::copy( _ebuf + _ebufsize, buf, static_cast<std::size_t>(size) );
+                _ebufsize += static_cast<int>(size);
+            }
+
+            if( this->gptr() - this->eback() > _pbmax)
+            {
+                std::streamsize movelen = this->egptr() - this->gptr() + _pbmax;
+                std::char_traits<char_type>::move( _ibuf,
+                                                   this->gptr() - _pbmax,
+                                                   static_cast<size_t>(movelen));
+                this->setg(_ibuf, _ibuf + _pbmax, _ibuf + movelen);
+            }
+
+            decode();
+
+            return size;
+        }
+
+        CodecResult decode()
+        {
             const extern_type* fromBegin = _ebuf;
             const extern_type* fromEnd   = _ebuf + _ebufsize;
             const extern_type* fromNext  = fromBegin;
@@ -380,37 +421,29 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
                 // copy characters and advance fromNext and toNext
                 int n =_ebufsize > _ibufmax ? _ibufmax : _ebufsize ;
                 this->copyChars(toBegin, fromBegin, n);
-                _ebufsize -= n;
                 fromNext += n;
                 toNext += n;
             }
 
             std::streamsize consumed = fromNext - fromBegin;
-            if(consumed)
+            if(consumed > 0)
             {
-                std::char_traits<extern_type>::move( _ebuf, _ebuf + consumed, _ebufsize );
                 _ebufsize -= static_cast<int>(consumed);
+                std::char_traits<extern_type>::move( _ebuf, _ebuf + consumed, _ebufsize);
             }
 
             std::streamsize generated = toNext - toBegin;
             if(generated)
             {
-                this->setg(this->eback(),              // start of read buffer
-                           this->gptr(),               // gptr position
+                this->setg(this->eback(),               // start of read buffer
+                           this->gptr(),                // gptr position
                            this->egptr() + generated ); // end of read buffer
             }
 
             if(r == CodecType::error)
                 throw ConversionError("character conversion failed");
 
-            if( this->gptr() < this->egptr() )
-                return ret_type(traits_type::to_int_type( *this->gptr() ), n);
-
-            // fail if partial charactes are at the end of the stream
-            if(r == CodecType::partial && atEof)
-                throw ConversionError("character conversion failed");
-
-            return ret_type(traits_type::eof(), 0);
+            return r;
         }
 
         template <typename T>

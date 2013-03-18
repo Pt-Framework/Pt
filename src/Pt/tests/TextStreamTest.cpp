@@ -50,6 +50,8 @@ class TextStreamTest : public Pt::Unit::TestSuite
                                                  *this, &TextStreamTest::Base64Out );
             Pt::Unit::TestSuite::registerMethod( "InvalidUTF8String",
                                                  *this, &TextStreamTest::InvalidUTF8String );
+            Pt::Unit::TestSuite::registerMethod( "UTF8ToUnicode",
+                                                 *this, &TextStreamTest::UTF8ToUnicode);
             Pt::Unit::TestSuite::registerMethod( "testTextStreamDirectFromUTF8ToUnicode",
                                                  *this, &TextStreamTest::testTextStreamDirectFromUTF8ToUnicode );
             Pt::Unit::TestSuite::registerMethod( "testTextStreamGetLineFromUTF8ToUnicode",
@@ -62,11 +64,12 @@ class TextStreamTest : public Pt::Unit::TestSuite
                                                  *this, &TextStreamTest::testNum_get );
             Pt::Unit::TestSuite::registerMethod( "testNumpunct",
                                                  *this, &TextStreamTest::testNumpunct );
-		}
+        }
 
         void Base64Out();
         void Base64In();
-		void InvalidUTF8String();
+        void InvalidUTF8String();
+        void UTF8ToUnicode();
         void testTextStreamDirectFromUTF8ToUnicode();
         void testTextStreamGetLineFromUTF8ToUnicode();
         void testTextBufferFromUnicodeToUTF8();
@@ -170,6 +173,19 @@ void TextStreamTest::InvalidUTF8String()
 
 	std::getline(ts, str);
     PT_UNIT_ASSERT( !ts.fail() );
+}
+
+
+void TextStreamTest::UTF8ToUnicode()
+{
+    Pt::TextStream ts( new Pt::Utf8Codec() );
+    std::streamsize n = ts.buffer().import(_TextUTF8, std::strlen(_TextUTF8));
+
+    PT_UNIT_ASSERT(ts.get() == _TextUnicode[0].value());
+    PT_UNIT_ASSERT(ts.get() == _TextUnicode[1].value());
+    PT_UNIT_ASSERT(ts.get() == _TextUnicode[2].value());
+    PT_UNIT_ASSERT(ts.get() == _TextUnicode[3].value());
+    PT_UNIT_ASSERT(ts.get() == _TextUnicode[4].value());
 }
 
 

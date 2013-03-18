@@ -43,19 +43,29 @@ namespace Pt {
 namespace Xml {
 
 class XmlReader;
+class XmlDeclaration;
 
 /** @brief Input source for the XML reader
 */
-class InputSource : private NonCopyable
+class PT_XML_API InputSource : private NonCopyable
 {
+    typedef bool (InputSource::*ParseFunc)(int);
+
     public:
         InputSource()
         : _rdbuf(0)
         , _line(1)
+        , _parse(&InputSource::onBegin)
         {}
 
         virtual ~InputSource()
         {}
+
+        void clear()
+        {
+            _line = 0;
+            _parse = &InputSource::onBegin;
+        }
 
         std::size_t line() const
         { return _line; }
@@ -84,17 +94,20 @@ class InputSource : private NonCopyable
         std::basic_streambuf<Char>* rdbuf()
         { return _rdbuf; }
 
-        void init(std::basic_streambuf<Char>* sb = 0)
-        { _rdbuf = sb; }
-
     protected:
         virtual std::basic_streambuf<Char>* onGetSome() = 0;
 
         virtual std::basic_streambuf<Char>* onGet() = 0;
 
+        bool parseBegin(int c);
+
+    private:
+        bool onBegin(int c);
+
     private:
         std::basic_streambuf<Char>* _rdbuf;
         std::size_t _line;
+        ParseFunc _parse;
 };
 
 
@@ -123,10 +136,12 @@ class NullInputSource : public InputSource
 class PT_XML_API ByteInputSource : public InputSource
 {
     public:
-        explicit ByteInputSource(std::istream& is);
-
-        void reset(std::istream& is);
+        ByteInputSource();
         
+        explicit ByteInputSource(std::istream& is);
+        
+        void reset(std::istream& is);
+
         void attach(std::istream& is);
 
         void detach();
@@ -136,7 +151,12 @@ class PT_XML_API ByteInputSource : public InputSource
 
         virtual std::basic_streambuf<Char>* onGet();
 
+        virtual TextCodec<Char, char>* onBegin()
+        { return 0; }
+
         bool parseBom(unsigned char c);
+
+        bool isBegin() const;
 
     private:
         TextCodec<Char, char>* _codec;

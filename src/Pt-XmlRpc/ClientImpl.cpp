@@ -56,6 +56,7 @@ ClientImpl::ClientImpl()
 : _state(OnBegin)
 , _ts( new Utf8Codec )
 , _tin(_ts)
+, _bin()
 , _reader()
 , _formatter(_writer)
 , _method(0)
@@ -80,7 +81,7 @@ void ClientImpl::beginCall(IComposer& r, IRemoteProcedure& method, IDecomposer**
 
     beginExecute();
 
-    _reader.setInput(_tin);
+    _reader.setInput(_bin);
     _scanner.begin(r);
 }
 
@@ -100,8 +101,9 @@ void ClientImpl::call(IComposer& r, IRemoteProcedure& method, IDecomposer** argv
 
     std::istringstream is(execute());
     
-    _ts.attach(is);
-    _reader.setInput(_tin);
+    //_ts.attach(is);
+    _bin.reset(is);
+    _reader.setInput(_bin);
     _scanner.begin(r);
 
     while( _reader.get().type() !=  Pt::Xml::Node::EndDocument )
@@ -139,7 +141,8 @@ void ClientImpl::cancel()
 
 void ClientImpl::onReadReplyBegin(std::istream& is)
 {
-    _ts.attach(is);
+    //_ts.attach(is);
+    _bin.reset(is);
 }
 
 void ClientImpl::onReadReply()
