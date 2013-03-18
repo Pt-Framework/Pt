@@ -141,12 +141,14 @@ std::basic_streambuf<Char>* ByteInputSource::onGetSome()
             char decl[40];
             std::streamsize avail = sb->in_avail();
             avail = avail > 38 ? 38 : avail;
-            for(unsigned n = 0; n < avail; ++n)
-            {
-                decl[n] = sb->sbumpc();
-            }
 
-            //std::cerr.write(decl, 38) << std::endl;
+            sb->sgetn(decl, avail);
+            //for(unsigned n = 0; n < avail; ++n)
+            //{
+            //decl[n] = sb->sbumpc();
+            //}
+
+            //std::cerr.write(decl, avail) << std::endl;
             _tbuf.import( decl, avail );
         }
     }
