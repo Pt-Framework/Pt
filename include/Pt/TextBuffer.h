@@ -309,8 +309,8 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
 
             import(_ebufmax);
 
-            return gptr() < egptr() ? traits_type::to_int_type( *gptr() )
-                                    : traits_type::eof();
+            return this->gptr() < this->egptr() ? traits_type::to_int_type( *this->gptr() )
+                                                : traits_type::eof();
         }
 
     public:
