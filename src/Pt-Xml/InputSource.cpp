@@ -28,30 +28,41 @@
  
 #include <Pt/Xml/InputSource.h>
 #include <Pt/Xml/XmlError.h>
+#include <cassert>
 
 namespace Pt {
 
 namespace Xml {
 
-bool InputSource::parseBegin(int c)
+std::basic_streambuf<Char>* TextInputSource::onGetSome()
+{   
+    _tbuf->import();
+
+    // return buffer pointer if progress could be made
+    // even if no data is immediately available
+    if(_tbuf->in_avail() > 0 || _ios->good() )
+        return _tbuf;
+
+    return 0;
+}
+
+std::basic_streambuf<Char>* TextInputSource::onGet()
 {
-    return (this->*_parse)(c);
+    return _tbuf;
 }
 
 
-bool InputSource::onBegin(int c)
-{
-    if( c == '<')
-    {
-        //_parse = &InputSource::onTag;
-        return true;
-    }
-    else if( c == 0xfeff)
-    {
-        return true;
-    }
+std::basic_streambuf<Char>* StringInputSource::onGetSome()
+{   
+    // NOTE: on many compilers, stringbuf::in_avail never returns -1 
+    //       even if it is empty
+    return _sbuf.in_avail() > 0 ? &_sbuf : 0;
+}
+        
 
-    return false;
+std::basic_streambuf<Char>* StringInputSource::onGet()
+{
+    return &_sbuf;
 }
 
 
@@ -68,7 +79,8 @@ enum BomParseState
             
     OnBomUtf8_0 = 1,
     OnBomUtf8_1 = 2,
-    OnBomUtf8_2 = 3,
+
+    On8Bit = 3,
 
     OnBomEnd = 255,
 };
@@ -76,16 +88,20 @@ enum BomParseState
 
 ByteInputSource::ByteInputSource()
 : InputSource()
-, _tbuf(new Utf8Codec)
 , _is(0)
+, _utf8Codec(1)
+, _tbuf(&_utf8Codec)
+, _bufsize(0)
 , _bomState(OnBomBegin)
 { }
 
 
 ByteInputSource::ByteInputSource(std::istream& is)
 : InputSource()
-, _tbuf(&is, new Utf8Codec)
 , _is(&is)
+, _utf8Codec(1)
+, _tbuf(&is, &_utf8Codec)
+, _bufsize(0)
 , _bomState(OnBomBegin)
 { }
 
@@ -93,8 +109,10 @@ ByteInputSource::ByteInputSource(std::istream& is)
 void ByteInputSource::reset(std::istream& is)
 { 
     _bomState = OnBomBegin;
+    _tbuf.setCodec(&_utf8Codec);
     _tbuf.attach(is); 
     _is = &is;
+    _bufsize = 0;
 }
 
 
@@ -114,111 +132,146 @@ void ByteInputSource::detach()
 
 std::basic_streambuf<Char>* ByteInputSource::onGetSome()
 {
-    if( ! _is || ! _is->rdbuf() || ! _is->good() )
-        return 0;
+    // TODO: check if attach/detach affects peformance
+
+    if( ! _is || ! _is->rdbuf() || _is->rdbuf()->in_avail() <= 0)
+    {
+        std::istream* is = onGetSomeBytes();
+
+        if( ! is || ! is->rdbuf() )
+        {           
+            if(_is)
+            {
+                _is = 0;
+                _tbuf.detach();
+            }
+            
+            return 0;
+        }
+
+        if(_is != is)
+        {
+            _is = is;
+            _tbuf.attach(*_is);
+        }
+    }
 
     if( isBegin() )
     {
         std::streambuf* sb = _is->rdbuf();
         std::char_traits<char>::int_type c = 0;
-        for(;;)
+        std::streamsize avail = sb->in_avail();
+        
+        for( ; ; --avail)
         {
-            if(sb->in_avail() <= 0)
+            if(_bufsize == MaxBufSize)
+            {
+                _tbuf.import( _buf, _bufsize );
+                _bufsize = 0;
                 return &_tbuf;
-
-            c = sb->sgetc();
-            char ch = std::char_traits<char>::to_char_type(c);
-
-            if( ! parseBom(ch) )
-                break;
+            }
+            
+            if(avail <= 0)
+            {
+                return &_tbuf;
+            }
 
             c = sb->sbumpc();
-        }
-        
-        // peek XML declaration
-        if( c == '<')
-        {
-            char decl[40];
-            std::streamsize avail = sb->in_avail();
-            avail = avail > 38 ? 38 : avail;
+            char ch = std::char_traits<char>::to_char_type(c);
 
-            sb->sgetn(decl, avail);
-            //for(unsigned n = 0; n < avail; ++n)
-            //{
-            //decl[n] = sb->sbumpc();
-            //}
-
-            //std::cerr.write(decl, avail) << std::endl;
-            _tbuf.import( decl, avail );
+            _buf[_bufsize] = ch;
+            ++_bufsize;
+            
+            if( ! parseBom(ch) )
+                break;
         }
+
+        _tbuf.import( _buf, _bufsize );
+        _bufsize = 0;
     }
 
     _tbuf.import();
+    return &_tbuf;
+}
 
-    //TODO: review all streambufs. _tbuf.import() will not set the underlying
-    //      stream _is to EOF. All proxy streambufs should read from basic_ios
-    //      so that they can propagate EOF.
 
-    // NOTE: stringbuf::in_avail never returns -1 even if it is empty !!!
-                
-    if(_tbuf.in_avail() >= 0)
-        return &_tbuf;
-            
-    if( ! _is->good() )
+std::istream* ByteInputSource::onGetSomeBytes()
+{
+    if( ! _is || ! _is->rdbuf() || ! _is->good() )
         return 0;
 
-    //TODO: onGetBytes() if in_avail() == 0
-    return &_tbuf;
+    return _is;
 }
 
 
 std::basic_streambuf<Char>* ByteInputSource::onGet()
 {
     if( ! _is || ! _is->rdbuf() )
-        return 0;
+    {
+        std::istream* is = onGetBytes();
+
+        if( ! is || ! is->rdbuf() )
+        {           
+            if(_is)
+            {
+                _is = 0;
+                _tbuf.detach();
+            }
+            
+            return 0;
+        }
+
+        if(_is != is)
+        {
+            _is = is;
+            _tbuf.attach(*_is);
+        }
+    }
 
     if( isBegin() )
     {        
         std::char_traits<char>::int_type c = 0;
         std::streambuf* sb = _is->rdbuf();
         std::char_traits<char>::int_type eofval = std::char_traits<char>::eof();
-                
-        for(c = sb->sgetc(); ! std::char_traits<char>::eq_int_type(c, eofval); c = sb->snextc() )
-        {
-            char ch = std::char_traits<char>::to_char_type(c);
 
+        for( ; ; )
+        {
+            if(_bufsize == MaxBufSize)
+            {
+                _tbuf.import( _buf, _bufsize );
+                _bufsize = 0;
+                return &_tbuf;
+            }
+            
+            c = sb->sbumpc();
+
+            if( std::char_traits<char>::eq_int_type(c, eofval) )
+            {
+                return &_tbuf;
+            }
+
+            char ch = std::char_traits<char>::to_char_type(c);
+            _buf[_bufsize] = ch;
+            ++_bufsize;
+            
             if( ! parseBom(ch) )
                 break;
         }
 
-        // only import xmldecl
-
-        //if(_bomState == OnBomEnd)
-        //{
-        //    // TODO: parse for xml declaration, but put chars in text buffer
-        //    //       so they can be read again by parser...
-
-        //    std::string s;
-        //    
-        //    for(c = sb->sgetc(); ! std::char_traits<char>::eq_int_type(c, eofval); c = sb->snextc() )
-        //    {
-        //        char ch = std::char_traits<char>::to_char_type(c);
-        //        s += ch;
-        //        if(ch == '>')
-        //        {
-        //            sb->sbumpc();
-        //            break;
-        //        }
-        //    }
-
-        //    if( ! s.empty() )
-        //    {
-        //        _tbuf.import(s.c_str(), s.size());
-        //    }  
-        //}
+        _tbuf.import( _buf, _bufsize );
+        _bufsize = 0;
     }
 
     return &_tbuf;
+}
+
+
+std::istream* ByteInputSource::onGetBytes()
+{
+    if( ! _is || ! _is->rdbuf() || ! _is->good() )
+        return 0;
+
+    return _is;
 }
 
 
@@ -228,19 +281,22 @@ bool ByteInputSource::isBegin() const
 }
 
 
+// TODO: parse encoding name and call virtual function so use can 
+//       return pointer to codec: 
+//
+//       Codec* onEncoding(const char* name)
+//
+//       This function could also be part of the XmlResolver or some
+//       context class that would be useful in other situations too...
 bool ByteInputSource::parseBom(unsigned char c)
 {
     switch(_bomState)
     {
         case OnBomBegin:
             if(c == 0xef)
-            {
                 _bomState = OnBomUtf8_0;
-            }
-            //else if(c == '<')
-            //{
-            //    _bomState = On8Bit;
-            //}
+            else if(c == '<')
+                _bomState = On8Bit;
             else
                 _bomState = OnBomEnd;
 
@@ -250,37 +306,26 @@ bool ByteInputSource::parseBom(unsigned char c)
             if(c == 0xbb)
                 _bomState = OnBomUtf8_1;
             else
-                throw SyntaxError("invalid byte-order mark", 0);
+                _bomState = OnBomEnd;
                     
             break;
 
         case OnBomUtf8_1:
             if(c == 0xbf)
-                _bomState = OnBomUtf8_2;
-            else
-                throw SyntaxError("invalid byte-order mark", 0);
+                _tbuf.setCodec(&_utf8Codec);
 
+            _bomState = OnBomEnd;
             break;
 
-        case OnBomUtf8_2:
-            _bomState = OnBomEnd;
-            //_tbuf.setCodec(new Utf8Codec);
+        case On8Bit:
+            if(c == '>')
+                _bomState = OnBomEnd;
+            
             break;
 
         case OnBomEnd:
-            throw SyntaxError("invalid byte-order mark", 0);
+            assert(false);
             break;
-
-        //case On8Bit:
-        //    if(c == 'x')
-        //    {
-        //        _bomState = OnXmlDecl8Bit_x;
-        //        break;
-        //    }
-        //    
-        //    _tbuf.setCodec(new Utf8Codec);
-        //    _tbuf.import("<", 1);
-        //    break;
 
         default:
             break;

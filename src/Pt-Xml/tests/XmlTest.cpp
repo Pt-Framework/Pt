@@ -98,6 +98,8 @@ class XmlReaderTest : public Pt::Unit::TestSuite
         {
             this->registerMethod("MissingXmlDeclaration", *this, &XmlReaderTest::MissingXmlDeclaration);
             this->registerMethod("EmptyXmlDeclaration", *this, &XmlReaderTest::EmptyXmlDeclaration);
+
+            this->registerMethod("ByteorderMarkUtf8", *this, &XmlReaderTest::ByteorderMarkUtf8);
             
             this->registerMethod("DtdEmptyDocument", *this, &XmlReaderTest::DtdEmptyDocument);
             this->registerMethod("DtdExternalSubsetPublicId", *this, &XmlReaderTest::DtdExternalSubsetPublicId);
@@ -162,6 +164,8 @@ class XmlReaderTest : public Pt::Unit::TestSuite
     protected:
         void MissingXmlDeclaration();
         void EmptyXmlDeclaration();
+
+        void ByteorderMarkUtf8();
 
         void DtdEmptyDocument();
         void DtdExternalSubsetPublicId();
@@ -266,6 +270,34 @@ void XmlReaderTest::EmptyXmlDeclaration()
     const Pt::Xml::Node& n = *it;
 
     PT_UNIT_ASSERT(n.type() == Pt::Xml::Node::EndDocument);
+}
+
+
+void XmlReaderTest::ByteorderMarkUtf8()
+{
+    std::stringstream input;
+    input << char(0xef) << char(0xbb) << char(0xbf) << "<a/>";
+
+    Pt::Xml::XmlReader reader( input );
+    PT_UNIT_ASSERT(reader.depth() == 0);
+
+    Pt::Xml::XmlReader::Iterator it = reader.current();
+
+    Pt::Xml::StartElement* se = Pt::Xml::toStartElement(&*it);
+    PT_UNIT_ASSERT(se);
+    PT_UNIT_ASSERT(se->name().narrow() == "a");
+    PT_UNIT_ASSERT(reader.depth() == 1);
+
+    ++it;
+    Pt::Xml::EndElement* ee = Pt::Xml::toEndElement(&*it);
+    PT_UNIT_ASSERT(ee);
+    PT_UNIT_ASSERT(ee->name().narrow() == "a");
+    PT_UNIT_ASSERT(reader.depth() == 0);
+
+    ++it;
+    Pt::Xml::EndDocument* endDoc = Pt::Xml::toEndDocument(&*it);
+    PT_UNIT_ASSERT(endDoc);
+    PT_UNIT_ASSERT(reader.depth() == 0);
 }
 
 

@@ -30,42 +30,31 @@
 
 #include <Pt/Xml/Api.h>
 #include <Pt/NonCopyable.h>
-#include <Pt/StringStream.h>
 #include <Pt/TextBuffer.h>
 #include <Pt/TextStream.h>
 #include <Pt/Utf8Codec.h>
+#include <Pt/StringStream.h>
 #include <Pt/String.h>
 #include <streambuf>
+#include <iostream>
 #include <cstddef>
 
 namespace Pt {
 
 namespace Xml {
 
-class XmlReader;
-class XmlDeclaration;
-
 /** @brief Input source for the XML reader
 */
-class PT_XML_API InputSource : private NonCopyable
+class InputSource : private NonCopyable
 {
-    typedef bool (InputSource::*ParseFunc)(int);
-
     public:
         InputSource()
         : _rdbuf(0)
         , _line(1)
-        , _parse(&InputSource::onBegin)
         {}
 
         virtual ~InputSource()
         {}
-
-        void clear()
-        {
-            _line = 0;
-            _parse = &InputSource::onBegin;
-        }
 
         std::size_t line() const
         { return _line; }
@@ -99,15 +88,9 @@ class PT_XML_API InputSource : private NonCopyable
 
         virtual std::basic_streambuf<Char>* onGet() = 0;
 
-        bool parseBegin(int c);
-
-    private:
-        bool onBegin(int c);
-
     private:
         std::basic_streambuf<Char>* _rdbuf;
         std::size_t _line;
-        ParseFunc _parse;
 };
 
 
@@ -131,8 +114,50 @@ class NullInputSource : public InputSource
 };
 
 
-// TODO: check if this class works for beginRead/endRead and if BOM
-//       parsing is reusable.
+class PT_XML_API TextInputSource : public InputSource
+{
+    public:
+        explicit TextInputSource(TextIStream& ts)
+        : InputSource()
+        , _ios(&ts)
+        , _tbuf( &ts.buffer() )
+        { }
+
+        explicit TextInputSource(TextStream& ts)
+        : InputSource()
+        , _ios(&ts)
+        , _tbuf( &ts.buffer() )
+        { }
+
+    protected:
+        virtual std::basic_streambuf<Char>* onGetSome();
+
+        virtual std::basic_streambuf<Char>* onGet();
+
+    private:
+        std::basic_ios<Char>* _ios;
+        BasicTextBuffer<Char, char>* _tbuf;
+};
+
+
+class PT_XML_API StringInputSource : public InputSource
+{
+    public:
+        StringInputSource(const String& str)
+        : InputSource()
+        , _sbuf(str)
+        { }
+
+    protected:
+        virtual std::basic_streambuf<Char>* onGetSome();
+        
+        virtual std::basic_streambuf<Char>* onGet();
+
+    private:
+        StringBuffer _sbuf;
+};
+
+
 class PT_XML_API ByteInputSource : public InputSource
 {
     public:
@@ -149,86 +174,26 @@ class PT_XML_API ByteInputSource : public InputSource
     protected:
         virtual std::basic_streambuf<Char>* onGetSome();
 
+        virtual std::istream* onGetSomeBytes();
+
         virtual std::basic_streambuf<Char>* onGet();
 
-        virtual TextCodec<Char, char>* onBegin()
-        { return 0; }
+        virtual std::istream* onGetBytes();
 
+    private:
         bool parseBom(unsigned char c);
 
         bool isBegin() const;
 
     private:
-        TextCodec<Char, char>* _codec;
-        TextBuffer _tbuf;
         std::istream* _is;
-        unsigned char _bomState;
-};
-
-
-class TextInputSource : public InputSource
-{
-    public:
-        explicit TextInputSource(TextIStream& ts)
-        : InputSource()
-        , _ios(&ts)
-        , _tbuf( &ts.buffer() )
-        { }
-
-        explicit TextInputSource(TextStream& ts)
-        : InputSource()
-        , _ios(&ts)
-        , _tbuf( &ts.buffer() )
-        { }
-
-    protected:
-        virtual std::basic_streambuf<Char>* onGetSome()
-        {   
-            _tbuf->import();
-
-            // return buffer pointer if progress could be made
-            // even if no data is immediately available
-            if(_tbuf->in_avail() > 0 || _ios->good() )
-                return _tbuf;
-
-            return 0;
-        }
-
-        virtual std::basic_streambuf<Char>* onGet()
-        {
-            return _tbuf;
-        }
-
-    private:
-        std::basic_ios<Char>* _ios;
-        BasicTextBuffer<Char, char>* _tbuf;
-};
-
-
-class StringInputSource : public InputSource
-{
-    public:
-        StringInputSource(const String& str)
-        : InputSource()
-        , _sbuf(str)
-        {
-        }
-
-    protected:
-        virtual std::basic_streambuf<Char>* onGetSome()
-        {   
-            // NOTE: on many compilers, stringbuf::in_avail never returns -1 
-            //       even if it is empty
-            return _sbuf.in_avail() > 0 ? &_sbuf : 0;
-        }
+        Utf8Codec _utf8Codec;
+        TextBuffer _tbuf;
         
-        virtual std::basic_streambuf<Char>* onGet()
-        {
-            return &_sbuf;
-        }
-
-    private:
-        StringBuffer _sbuf;
+        static const unsigned MaxBufSize = 32;
+        char _buf[MaxBufSize];
+        std::size_t _bufsize;
+        unsigned char _bomState;
 };
 
 } // namespace Xml
