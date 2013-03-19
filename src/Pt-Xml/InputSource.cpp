@@ -108,11 +108,14 @@ ByteInputSource::ByteInputSource(std::istream& is)
         
 void ByteInputSource::reset(std::istream& is)
 { 
-    _bomState = OnBomBegin;
-    _tbuf.setCodec(&_utf8Codec);
     _tbuf.attach(is); 
+    _tbuf.setCodec(&_utf8Codec);
+
+    _bomState = OnBomBegin;
     _is = &is;
     _bufsize = 0;
+
+    clear();
 }
 
 

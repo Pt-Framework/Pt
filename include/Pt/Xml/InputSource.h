@@ -56,6 +56,12 @@ class InputSource : private NonCopyable
         virtual ~InputSource()
         {}
 
+        void clear()
+        {
+            _line = 0;
+            _rdbuf = 0;
+        }
+
         std::size_t line() const
         { return _line; }
 
