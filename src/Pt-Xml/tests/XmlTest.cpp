@@ -933,9 +933,9 @@ void XmlReaderTest::EmptyDocument()
     const Pt::Xml::Node& n = *it;
 
     PT_UNIT_ASSERT(n.type() == Pt::Xml::Node::EndDocument);
-    PT_UNIT_ASSERT(reader.version() == L"1.0");
-    PT_UNIT_ASSERT(reader.encoding() == L"UTF-8");
-    PT_UNIT_ASSERT(reader.isStandalone() == false);
+    //PT_UNIT_ASSERT(reader.version() == L"1.0");
+    //PT_UNIT_ASSERT(reader.encoding() == L"UTF-8");
+    //PT_UNIT_ASSERT(reader.isStandalone() == false);
 }
 
 
@@ -1671,9 +1671,9 @@ void XmlReaderTest::StartDocument()
 
     Pt::Xml::StartDocument* startDoc = Pt::Xml::toStartDocument(&*it);
     PT_UNIT_ASSERT(startDoc);
-    PT_UNIT_ASSERT_EQUALS(startDoc->version(), L"1.0");
-    PT_UNIT_ASSERT_EQUALS(startDoc->encoding(), L"UTF-8");
-    PT_UNIT_ASSERT_EQUALS(startDoc->isStandalone(), true);
+    //PT_UNIT_ASSERT_EQUALS(startDoc->version(), L"1.0");
+    //PT_UNIT_ASSERT_EQUALS(startDoc->encoding(), L"UTF-8");
+    //PT_UNIT_ASSERT_EQUALS(startDoc->isStandalone(), true);
 
     ++it;
     Pt::Xml::StartElement* startElem = Pt::Xml::toStartElement(&*it);
@@ -1824,7 +1824,9 @@ void XmlReaderTest::ParameterEntities()
     input << "<test>This sample shows a &tricky; method.</test>\n";
 
     Pt::Xml::XmlReader reader( input );
+    
     Pt::Xml::XmlReader::Iterator it = reader.current();
+    PT_UNIT_ASSERT(Pt::Xml::toStartElement(&*it));
 
     ++it;
     PT_UNIT_ASSERT(Pt::Xml::toCharacters(&*it));

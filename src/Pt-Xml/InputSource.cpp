@@ -34,35 +34,85 @@ namespace Pt {
 
 namespace Xml {
 
+void TextInputSource::reset(std::basic_istream<Char>& ios)
+{
+    // reset bomState
+    _ios = &ios;
+
+    // TODO: init()
+    clear();
+}
+
+
 std::basic_streambuf<Char>* TextInputSource::onGetSome()
 {   
-    _tbuf->import();
+    if( ! _ios || ( _ios->rdbuf() && _ios->rdbuf()->in_avail() <= 0 ) )
+    {
+        _ios = onGetSomeText();
+    }
 
-    // return buffer pointer if progress could be made
-    // even if no data is immediately available
-    if(_tbuf->in_avail() > 0 || _ios->good() )
-        return _tbuf;
+    if( _ios && _ios->rdbuf() && _ios->good() )
+    {
+        return _ios->rdbuf();
+    }
 
     return 0;
 }
 
+
 std::basic_streambuf<Char>* TextInputSource::onGet()
 {
-    return _tbuf;
+    if( ! _ios)
+    {
+        _ios = onGetText();
+    }
+
+    if( ! _ios->rdbuf() )
+    {
+        return 0;
+    }
+
+    if( _ios->good() )
+    {
+        return _ios->rdbuf();
+    }
+
+    return 0;
 }
 
 
-std::basic_streambuf<Char>* StringInputSource::onGetSome()
+std::basic_istream<Char>* TextInputSource::onGetText()
 {   
+    if( _ios && ( ! _ios->rdbuf() || ! _ios->good() ) )
+        return 0;
+
     // NOTE: on many compilers, stringbuf::in_avail never returns -1 
     //       even if it is empty
-    return _sbuf.in_avail() > 0 ? &_sbuf : 0;
+    return _ios;
 }
-        
 
-std::basic_streambuf<Char>* StringInputSource::onGet()
+
+std::basic_istream<Char>* TextInputSource::onGetSomeText()
 {
-    return &_sbuf;
+    if( _ios && ( ! _ios->rdbuf() || ! _ios->good() ) )
+        return 0;
+
+    return _ios;
+}
+
+
+std::basic_istream<Char>* StringInputSource::onGetSomeText()
+{   
+    // NOTE: on some systems stringbuf::in_avail never returns -1, 
+    //       even if no more characters are available
+    
+    return _ss.rdbuf()->in_avail() > 0 ? &_ss : 0;
+}
+
+
+std::basic_istream<Char>* StringInputSource::onGetText()
+{   
+    return &_ss;
 }
 
 
@@ -81,82 +131,64 @@ enum BomParseState
     OnBomUtf8_1 = 2,
 
     On8Bit = 3,
+    On8Bit_1 = 4,
+    On8Bit_2 = 5,
+    On8Bit_3 = 6,
+    On8Bit_4 = 7,
+    On8Bit_5 = 8,
 
     OnBomEnd = 255,
 };
 
 
-ByteInputSource::ByteInputSource()
+BinaryInputSource::BinaryInputSource()
 : InputSource()
 , _is(0)
 , _utf8Codec(1)
 , _tbuf(&_utf8Codec)
-, _bufsize(0)
+//, _bufsize(0)
 , _bomState(OnBomBegin)
 { }
 
 
-ByteInputSource::ByteInputSource(std::istream& is)
+BinaryInputSource::BinaryInputSource(std::istream& is)
 : InputSource()
 , _is(&is)
 , _utf8Codec(1)
 , _tbuf(&is, &_utf8Codec)
-, _bufsize(0)
+//, _bufsize(0)
 , _bomState(OnBomBegin)
 { }
 
-        
-void ByteInputSource::reset(std::istream& is)
+
+void BinaryInputSource::reset(std::istream& is)
 { 
     _tbuf.attach(is); 
     _tbuf.setCodec(&_utf8Codec);
 
     _bomState = OnBomBegin;
     _is = &is;
-    _bufsize = 0;
+    //_bufsize = 0;
 
+    // TODO: init(&_tbuf);
     clear();
 }
 
 
-void ByteInputSource::attach(std::istream& is)
-{ 
-    _tbuf.attach(is); 
-    _is = &is;
-}
-
-
-void ByteInputSource::detach()
-{ 
-    _tbuf.detach(); 
-    _is = 0;
-}
-
-
-std::basic_streambuf<Char>* ByteInputSource::onGetSome()
+std::basic_streambuf<Char>* BinaryInputSource::onGetSome()
 {
     // TODO: check if attach/detach affects peformance
 
-    if( ! _is || ! _is->rdbuf() || _is->rdbuf()->in_avail() <= 0)
+    // TODO: return early when _tbuf has available
+
+    if( ! _is || ! _is->rdbuf() )
     {
-        std::istream* is = onGetSomeBytes();
-
-        if( ! is || ! is->rdbuf() )
-        {           
-            if(_is)
-            {
-                _is = 0;
-                _tbuf.detach();
-            }
-            
-            return 0;
-        }
-
-        if(_is != is)
-        {
-            _is = is;
-            _tbuf.attach(*_is);
-        }
+        return 0;
+    }
+    
+    if( _is->rdbuf()->in_avail() <= 0 )
+    {
+        _is = onGetSomeBytes();
     }
 
     if( isBegin() )
@@ -167,12 +199,12 @@ std::basic_streambuf<Char>* ByteInputSource::onGetSome()
         
         for( ; ; --avail)
         {
-            if(_bufsize == MaxBufSize)
-            {
-                _tbuf.import( _buf, _bufsize );
-                _bufsize = 0;
-                return &_tbuf;
-            }
+            //if(_bufsize == MaxBufSize)
+            //{
+            //    _tbuf.import( _buf, _bufsize );
+            //    _bufsize = 0;
+            //    return &_tbuf;
+            //}
             
             if(avail <= 0)
             {
@@ -180,17 +212,18 @@ std::basic_streambuf<Char>* ByteInputSource::onGetSome()
             }
 
             c = sb->sbumpc();
+            
             char ch = std::char_traits<char>::to_char_type(c);
 
-            _buf[_bufsize] = ch;
-            ++_bufsize;
+            //_buf[_bufsize] = ch;
+            //++_bufsize;
             
             if( ! parseBom(ch) )
                 break;
         }
 
-        _tbuf.import( _buf, _bufsize );
-        _bufsize = 0;
+        //_tbuf.import( _buf, _bufsize );
+        //_bufsize = 0;
     }
 
     _tbuf.import();
@@ -198,7 +231,7 @@ std::basic_streambuf<Char>* ByteInputSource::onGetSome()
 }
 
 
-std::istream* ByteInputSource::onGetSomeBytes()
+std::istream* BinaryInputSource::onGetSomeBytes()
 {
     if( ! _is || ! _is->rdbuf() || ! _is->good() )
         return 0;
@@ -207,11 +240,12 @@ std::istream* ByteInputSource::onGetSomeBytes()
 }
 
 
-std::basic_streambuf<Char>* ByteInputSource::onGet()
+std::basic_streambuf<Char>* BinaryInputSource::onGet()
 {
     if( ! _is || ! _is->rdbuf() )
     {
-        std::istream* is = onGetBytes();
+        return 0;
+        /*std::istream* is = onGetBytes();
 
         if( ! is || ! is->rdbuf() )
         {           
@@ -228,7 +262,7 @@ std::basic_streambuf<Char>* ByteInputSource::onGet()
         {
             _is = is;
             _tbuf.attach(*_is);
-        }
+        }*/
     }
 
     if( isBegin() )
@@ -239,37 +273,38 @@ std::basic_streambuf<Char>* ByteInputSource::onGet()
 
         for( ; ; )
         {
-            if(_bufsize == MaxBufSize)
-            {
-                _tbuf.import( _buf, _bufsize );
-                _bufsize = 0;
-                return &_tbuf;
-            }
+            //if(_bufsize == MaxBufSize)
+            //{
+            //    _tbuf.import( _buf, _bufsize );
+            //    _bufsize = 0;
+            //    return &_tbuf;
+            //}
             
             c = sb->sbumpc();
-
+            
             if( std::char_traits<char>::eq_int_type(c, eofval) )
             {
                 return &_tbuf;
             }
 
             char ch = std::char_traits<char>::to_char_type(c);
-            _buf[_bufsize] = ch;
-            ++_bufsize;
+
+            //_buf[_bufsize] = ch;
+            //++_bufsize;
             
             if( ! parseBom(ch) )
                 break;
         }
 
-        _tbuf.import( _buf, _bufsize );
-        _bufsize = 0;
+        //_tbuf.import( _buf, _bufsize );
+        //_bufsize = 0;
     }
 
     return &_tbuf;
 }
 
 
-std::istream* ByteInputSource::onGetBytes()
+std::istream* BinaryInputSource::onGetBytes()
 {
     if( ! _is || ! _is->rdbuf() || ! _is->good() )
         return 0;
@@ -278,7 +313,7 @@ std::istream* ByteInputSource::onGetBytes()
 }
 
 
-bool ByteInputSource::isBegin() const
+bool BinaryInputSource::isBegin() const
 {
     return _bomState != OnBomEnd;
 }
@@ -291,8 +326,10 @@ bool ByteInputSource::isBegin() const
 //
 //       This function could also be part of the XmlResolver or some
 //       context class that would be useful in other situations too...
-bool ByteInputSource::parseBom(unsigned char c)
+bool BinaryInputSource::parseBom(unsigned char c)
 {
+    char buf[16];
+
     switch(_bomState)
     {
         case OnBomBegin:
@@ -321,9 +358,84 @@ bool ByteInputSource::parseBom(unsigned char c)
             break;
 
         case On8Bit:
+            if(c == '?')
+            {
+                _bomState = On8Bit_1;
+                break;
+            }
+            
+            buf[0] = '<';
+            buf[1] = c;
+            _tbuf.import(buf, 2);
+            _bomState = OnBomEnd;
+            break;
+
+        case On8Bit_1:
+            if(c == 'x')
+            {
+                _bomState = On8Bit_2;
+                break;
+            }
+
+            buf[0] = '<';
+            buf[1] = '?';
+            buf[2] = c;
+            _tbuf.import(buf, 3);
+            _bomState = OnBomEnd;
+            break;
+            
+        case On8Bit_2:
+            if(c == 'm')
+            {
+                _bomState = On8Bit_3;
+                break;
+            }
+
+            buf[0] = '<';
+            buf[1] = '?';
+            buf[2] = 'x';
+            buf[3] = c;
+            _tbuf.import(buf, 3);
+            _bomState = OnBomEnd;
+            break;
+
+        case On8Bit_3:
+            if(c == 'l')
+            {
+                _bomState = On8Bit_4;
+                break;
+            }
+
+            buf[0] = '<';
+            buf[1] = '?';
+            buf[2] = 'x';
+            buf[3] = 'm';
+            buf[4] = c;
+            _tbuf.import(buf, 4);
+            _bomState = OnBomEnd;
+            break;
+
+        case On8Bit_4:
+            if(c == ' ' || c == '\t' || c == '\r' || c == '\n')
+            {
+                _bomState = On8Bit_5;
+                break;
+            }
+
+            buf[0] = '<';
+            buf[1] = '?';
+            buf[2] = 'x';
+            buf[3] = 'm';
+            buf[4] = 'l';
+            buf[5] = c;
+            _tbuf.import(buf, 5);
+            _bomState = OnBomEnd;
+            break;
+
+        case On8Bit_5:
             if(c == '>')
                 _bomState = OnBomEnd;
-            
+
             break;
 
         case OnBomEnd:
@@ -337,6 +449,42 @@ bool ByteInputSource::parseBom(unsigned char c)
     return _bomState != OnBomEnd;
 }
 
+
+ByteInputSource::ByteInputSource()
+: BinaryInputSource()
+{ 
+}
+
+
+ByteInputSource::ByteInputSource(std::istream& is)
+: BinaryInputSource(is)
+{ 
+}
+
+
+void ByteInputSource::reset(std::istream& is)
+{ 
+    BinaryInputSource::reset(is);
+}
+
+/*
+std::istream* ByteInputSource::onGetSomeBytes()
+{
+    if( ! _is || ! _is->rdbuf() || ! _is->good() )
+        return 0;
+
+    return _is;
+}
+
+
+std::istream* ByteInputSource::onGetBytes()
+{
+    if( ! _is || ! _is->rdbuf() || ! _is->good() )
+        return 0;
+
+    return _is;
+}
+*/
 } // namespace Xml
 
 } // namespace Pt

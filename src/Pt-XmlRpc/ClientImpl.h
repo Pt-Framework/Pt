@@ -109,7 +109,7 @@ class ClientImpl : public Pt::Connectable
         
         State _state;
         TextIStream _ts;
-        Xml::TextInputSource _tin;
+        //Xml::TextInputSource _tin;
         Xml::ByteInputSource _bin;
         Xml::XmlReader _reader;
         Xml::XmlWriter _writer;

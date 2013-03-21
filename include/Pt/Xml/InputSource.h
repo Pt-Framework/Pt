@@ -56,31 +56,27 @@ class InputSource : private NonCopyable
         virtual ~InputSource()
         {}
 
-        void clear()
-        {
-            _line = 0;
-            _rdbuf = 0;
-        }
-
         std::size_t line() const
         { return _line; }
 
         void setLine(std::size_t n)
         { _line = n; }
 
+        // TODO: do not return buffer pointer
         std::basic_streambuf<Char>* getSome()
         {
-            if(_rdbuf && _rdbuf->in_avail() > 0)
-                return _rdbuf;
+            //if(_rdbuf && _rdbuf->in_avail() > 0)
+            //    return _rdbuf;
 
             _rdbuf = onGetSome();
             return _rdbuf;
         }
 
+        // TODO: do not return buffer pointer
         std::basic_streambuf<Char>* get()
         {
-            if(_rdbuf)
-                return _rdbuf;
+            //if(_rdbuf)
+            //    return _rdbuf;
 
             _rdbuf = onGet();
             return _rdbuf;
@@ -90,6 +86,13 @@ class InputSource : private NonCopyable
         { return _rdbuf; }
 
     protected:
+        // TODO: void init(std::basic_streambuf<Char>* rdbuf = 0)
+        void clear()
+        {
+            _line = 0;
+            _rdbuf = 0;
+        }
+        
         virtual std::basic_streambuf<Char>* onGetSome() = 0;
 
         virtual std::basic_streambuf<Char>* onGet() = 0;
@@ -123,61 +126,60 @@ class NullInputSource : public InputSource
 class PT_XML_API TextInputSource : public InputSource
 {
     public:
-        explicit TextInputSource(TextIStream& ts)
+        TextInputSource()
         : InputSource()
-        , _ios(&ts)
-        , _tbuf( &ts.buffer() )
-        { }
-
-        explicit TextInputSource(TextStream& ts)
-        : InputSource()
-        , _ios(&ts)
-        , _tbuf( &ts.buffer() )
+        , _ios(0)
         { }
 
     protected:
+        explicit TextInputSource(std::basic_istream<Char>& is)
+        : InputSource()
+        , _ios(&is)
+        { }
+
+        void reset(std::basic_istream<Char>& ios);
+
         virtual std::basic_streambuf<Char>* onGetSome();
 
         virtual std::basic_streambuf<Char>* onGet();
 
+        virtual std::basic_istream<Char>* onGetText();
+
+        virtual std::basic_istream<Char>* onGetSomeText();
+
     private:
-        std::basic_ios<Char>* _ios;
-        BasicTextBuffer<Char, char>* _tbuf;
+        std::basic_istream<Char>* _ios;
 };
 
 
-class PT_XML_API StringInputSource : public InputSource
+class PT_XML_API StringInputSource : public TextInputSource
 {
     public:
         StringInputSource(const String& str)
-        : InputSource()
-        , _sbuf(str)
+        : TextInputSource()
+        , _ss(str)
         { }
 
     protected:
-        virtual std::basic_streambuf<Char>* onGetSome();
-        
-        virtual std::basic_streambuf<Char>* onGet();
+        virtual std::basic_istream<Char>* onGetText();
+
+        virtual std::basic_istream<Char>* onGetSomeText();
 
     private:
-        StringBuffer _sbuf;
+        StringStream _ss;
 };
 
 
-class PT_XML_API ByteInputSource : public InputSource
+class PT_XML_API BinaryInputSource : public InputSource
 {
     public:
-        ByteInputSource();
-        
-        explicit ByteInputSource(std::istream& is);
-        
-        void reset(std::istream& is);
-
-        void attach(std::istream& is);
-
-        void detach();
+        BinaryInputSource();
 
     protected:
+        explicit BinaryInputSource(std::istream& is);
+
+        void reset(std::istream& is);
+
         virtual std::basic_streambuf<Char>* onGetSome();
 
         virtual std::istream* onGetSomeBytes();
@@ -196,10 +198,21 @@ class PT_XML_API ByteInputSource : public InputSource
         Utf8Codec _utf8Codec;
         TextBuffer _tbuf;
         
-        static const unsigned MaxBufSize = 32;
-        char _buf[MaxBufSize];
-        std::size_t _bufsize;
+        //static const unsigned MaxBufSize = 32;
+        //char _buf[MaxBufSize];
+        //std::size_t _bufsize;
         unsigned char _bomState;
+};
+
+
+class PT_XML_API ByteInputSource : public BinaryInputSource
+{
+    public:
+        ByteInputSource();
+        
+        explicit ByteInputSource(std::istream& is);
+        
+        void reset(std::istream& is);
 };
 
 } // namespace Xml

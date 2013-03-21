@@ -176,6 +176,8 @@ class PT_XML_API XmlReader : private NonCopyable
         */
         Node* advance();
 
+        InputSource* input();
+
     private:
         class XmlReaderImpl* _impl;
 

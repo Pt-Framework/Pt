@@ -64,7 +64,18 @@ class XmlReaderImpl
     private:
         void onDocumentBegin(int c)
         {
-            Char ch = notEof(c);
+            if( c == std::char_traits<Char>::eof() )
+            {
+                setStartDoc();
+
+                if( ! _current)
+                    _current = &_endDoc;
+                
+                _parse = &XmlReaderImpl::onProlog;
+                return;
+            }
+
+            Char ch = c;
 
             if( Pt::isspace(ch) )
             {
@@ -4195,6 +4206,11 @@ class XmlReaderImpl
             return _resolver;
         }
 
+        InputSource* input()
+        {
+            return _input.empty() ? 0 : _input.current();
+        }
+
         void setInput(std::istream& is)
         {
             clear();
@@ -4236,6 +4252,8 @@ class XmlReaderImpl
             {
                 this->next();
             }
+
+            assert(_current != 0);
 
             return *_current;
         }
@@ -4527,6 +4545,12 @@ Node& XmlReader::next()
 Node* XmlReader::advance()
 {
     return _impl->advance();
+}
+
+
+InputSource* XmlReader::input()
+{
+    return _impl->input();
 }
 
 } // namespace Xml

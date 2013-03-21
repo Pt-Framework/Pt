@@ -55,7 +55,7 @@ static const Pt::Char XMLRPC_FAULT[]  = { 'f', 'a', 'u', 'l', 't', '\0' };
 ClientImpl::ClientImpl()
 : _state(OnBegin)
 , _ts( new Utf8Codec )
-, _tin(_ts)
+//, _tin(_ts)
 , _bin()
 , _reader()
 , _formatter(_writer)
