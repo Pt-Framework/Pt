@@ -57,24 +57,24 @@ void TextInputSource::reset(std::basic_istream<Char>& ios)
 }
 
 
-bool TextInputSource::onGetSome()
+std::streamsize TextInputSource::onGetSome()
 {   
     if( ! _ios || ! _ios->rdbuf() )
     {
-        return false;
+        return -1;
     }
     
     if( _ios->rdbuf()->in_avail() <= 0 )
     {
         bool r = onGetSomeText();
         if( ! r)
-            return false;
+            return -1;
     }
 
     // parse XML dclaration
 
     init( _ios->rdbuf() );
-    return true;
+    return _ios->rdbuf()->in_avail();
 }
 
 
@@ -139,49 +139,20 @@ enum BomParseState
     On8Bit_4 = 7,
     On8Bit_5 = 8,
 
-    OnBomEnd = 255,
+    OnBomEnd = 64,
+
+    OnXmlDocBegin = 100,
+    OnXmlDeclBegin = 101,
+    OnXmlDeclBeginQuest= 102,
+    OnXmlDeclBegin_X= 103,
+    OnXmlDeclBegin_M= 104,
+    OnXmlDeclBegin_L= 105,
+    OnXmlDecl= 106,
+    OnXmlDeclEnd= 107,
+    OnNoXmlDecl= 108
 };
 
-enum XmlDeclParseState
-{
-    OnXmlDocBegin,
-    OnXmlDeclBegin,
-    OnXmlDeclBeginQMark,
-    OnEnd
-};
 
-unsigned parseXmlDeclaration(unsigned state, std::char_traits<Char>::int_type c)
-{
-    switch(state)
-    {
-        case OnXmlDocBegin:
-            if(c == 0xfeff)
-                state = OnXmlDocBegin;
-            else if(c != '<')
-                state = OnXmlDeclBegin;
-            else
-                state = OnEnd;
-
-            break;
-
-        case OnXmlDeclBegin:
-            if(c == '?')
-                state = OnXmlDeclBeginQMark;
-            else 
-                state = OnEnd;
-            
-            break;
-
-        case OnEnd:
-            assert(false);
-            break;
-            
-        default:
-            break;
-    }
-
-    return state;
-}
 
 
 BinaryInputSource::BinaryInputSource()
@@ -190,6 +161,9 @@ BinaryInputSource::BinaryInputSource()
 , _utf8Codec(1)
 , _tbuf(&_utf8Codec)
 , _state(OnBomBegin)
+, _mbSize(1)
+, _mbPos(0)
+, _bufsize(0)
 { }
 
 
@@ -199,6 +173,9 @@ BinaryInputSource::BinaryInputSource(std::istream& is)
 , _utf8Codec(1)
 , _tbuf(&is, &_utf8Codec)
 , _state(OnBomBegin)
+, _mbSize(1)
+, _mbPos(0)
+, _bufsize(0)
 { 
 }
 
@@ -209,16 +186,19 @@ void BinaryInputSource::reset(std::istream& is)
     _tbuf.attach(is); 
     _tbuf.setCodec(&_utf8Codec);
     _state = OnBomBegin;
+    _mbSize = 1;
+    _mbPos = 0;
+    _bufsize = 0;
     
     init(0);
 }
 
 
-bool BinaryInputSource::onGetSome()
+std::streamsize BinaryInputSource::onGetSome()
 {
     if( ! _is || ! _is->rdbuf() )
     {
-        return false;
+        return -1;
     }
     
     if( _is->rdbuf()->in_avail() <= 0 )
@@ -226,7 +206,7 @@ bool BinaryInputSource::onGetSome()
         bool r = onGetSomeData();
         if( ! r)
         {
-            return false;
+            return -1;
         }
     }
 
@@ -247,14 +227,16 @@ bool BinaryInputSource::onGetSome()
             
             char ch = std::char_traits<char>::to_char_type(c);
             
-            if( ! parseBom(ch) )
+            if( ! parseBom(ch, _buf, _bufsize) )
+            {               
                 break;
+            }
         }
     }
 
     _tbuf.import();
     init(&_tbuf);
-    return true;
+    return _tbuf.in_avail();
 }
 
 
@@ -280,10 +262,38 @@ InputSource::int_type BinaryInputSource::onGet()
                 break;    
             }
 
-            char ch = std::char_traits<char>::to_char_type(c);
-            
-            if( ! parseBom(ch) )
+            char ch = 0;
+            if(_mbSize == 1)
+            {
+                ch = std::char_traits<char>::to_char_type(c);
+            }
+            else if(_mbSize == 2)
+            {
+                if(_mbPos == 0)
+                    continue;
+
+                ch = std::char_traits<char>::to_char_type(c);
+            }
+            else
+            {
                 break;
+            }
+
+            if( ! parseBom(ch, _buf, _bufsize) )
+            {
+                if(_bufsize == 1)
+                {
+                    return _buf[0];
+                }
+
+                if(_bufsize > 1)
+                {
+                    init(_buf+1, _buf + _bufsize);
+                    return _buf[0];
+                }
+                
+                break;
+            }
         }
     }
 
@@ -308,6 +318,83 @@ bool BinaryInputSource::isBegin() const
 
 
 
+bool BinaryInputSource::parseDeclaration(unsigned char c)
+{
+    switch(_state)
+    {
+        case OnXmlDocBegin:
+            if(c == '<')
+            {
+                _state = OnXmlDeclBegin;
+                break;
+            }
+            
+            _state = OnNoXmlDecl;
+            break;
+
+        case OnXmlDeclBegin:
+            if(c == '?')
+            {
+                _state = OnXmlDeclBeginQuest;
+                break;
+            }
+            
+            _state = OnNoXmlDecl;
+            break;
+
+        case OnXmlDeclBeginQuest:
+            if(c == 'x')
+            {
+                _state = OnXmlDeclBegin_X;
+                break;
+            }
+            
+            _state = OnNoXmlDecl;
+            break;
+        
+        case OnXmlDeclBegin_X:
+            if(c == 'm')
+            {
+                _state = OnXmlDeclBegin_M;
+                break;
+            }
+            
+            _state = OnNoXmlDecl;
+            break;
+
+        case OnXmlDeclBegin_M:
+            if(c == 'l')
+            {
+                _state = OnXmlDeclBegin_L;
+                break;
+            }
+            
+            _state = OnNoXmlDecl;
+            break;
+
+        case OnXmlDeclBegin_L:
+            if(c == ' ' || c == '\t' || c == '\r' || c== '\n')
+            {
+                _state = OnXmlDecl;
+                break;
+            }
+            
+            _state = OnNoXmlDecl;
+            break;
+
+        case OnXmlDecl:
+            if(c == '>')
+            {
+                _state = OnXmlDeclEnd;
+                break;
+            }
+            
+            break;
+    }
+
+    return _state != OnXmlDeclEnd && _state != OnNoXmlDecl;
+}
+
 
 // TODO: parse encoding name and call virtual function so use can 
 //       return pointer to codec: 
@@ -316,10 +403,13 @@ bool BinaryInputSource::isBegin() const
 //
 //       This function could also be part of the XmlResolver or some
 //       context class that would be useful in other situations too...
-bool BinaryInputSource::parseBom(unsigned char c)
+bool BinaryInputSource::parseBom(unsigned char c, Pt::Char* buf, std::size_t& bufsize)
 {
-    char buf[16];
-
+    if(bufsize < 8)
+    {
+        buf[bufsize++] = c;
+    }
+    
     switch(_state)
     {
         case OnBomBegin:
@@ -342,7 +432,10 @@ bool BinaryInputSource::parseBom(unsigned char c)
 
         case OnBomUtf8_1:
             if(c == 0xbf)
+            {
+                bufsize = 0;
                 _tbuf.setCodec(&_utf8Codec);
+            }
 
             _state = OnBomEnd;
             break;
@@ -353,10 +446,7 @@ bool BinaryInputSource::parseBom(unsigned char c)
                 _state = On8Bit_1;
                 break;
             }
-            
-            buf[0] = '<';
-            buf[1] = c;
-            _tbuf.import(buf, 2);
+                
             _state = OnBomEnd;
             break;
 
@@ -367,10 +457,6 @@ bool BinaryInputSource::parseBom(unsigned char c)
                 break;
             }
 
-            buf[0] = '<';
-            buf[1] = '?';
-            buf[2] = c;
-            _tbuf.import(buf, 3);
             _state = OnBomEnd;
             break;
             
@@ -381,11 +467,6 @@ bool BinaryInputSource::parseBom(unsigned char c)
                 break;
             }
 
-            buf[0] = '<';
-            buf[1] = '?';
-            buf[2] = 'x';
-            buf[3] = c;
-            _tbuf.import(buf, 3);
             _state = OnBomEnd;
             break;
 
@@ -396,35 +477,26 @@ bool BinaryInputSource::parseBom(unsigned char c)
                 break;
             }
 
-            buf[0] = '<';
-            buf[1] = '?';
-            buf[2] = 'x';
-            buf[3] = 'm';
-            buf[4] = c;
-            _tbuf.import(buf, 4);
             _state = OnBomEnd;
             break;
 
         case On8Bit_4:
             if(c == ' ' || c == '\t' || c == '\r' || c == '\n')
             {
+                _bufsize = 0;
                 _state = On8Bit_5;
                 break;
             }
 
-            buf[0] = '<';
-            buf[1] = '?';
-            buf[2] = 'x';
-            buf[3] = 'm';
-            buf[4] = 'l';
-            buf[5] = c;
-            _tbuf.import(buf, 5);
             _state = OnBomEnd;
             break;
 
         case On8Bit_5:
             if(c == '>')
+            {
+                _bufsize = 0;
                 _state = OnBomEnd;
+            }
 
             break;
 

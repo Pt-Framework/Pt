@@ -83,11 +83,7 @@ class InputSource : private NonCopyable
                 return _bufferEnd - _buffer;
             }
 
-            bool ok = onGetSome();
-            if( ! ok)
-                return -1;
-
-            return _rdbuf ? _rdbuf->in_avail() : 0;
+            return onGetSome();
         }
         
         inline int_type get()
@@ -113,7 +109,7 @@ class InputSource : private NonCopyable
             _bufferEnd = bufEnd;
         }
 
-        virtual bool onGetSome() = 0;
+        virtual std::streamsize onGetSome() = 0;
 
         virtual int_type onGet() = 0;
 
@@ -145,7 +141,7 @@ class PT_XML_API TextInputSource : public InputSource
         void reset(std::basic_istream<Char>& ios);     
 
     protected:
-        virtual bool onGetSome();
+        virtual std::streamsize onGetSome();
 
         virtual int_type onGet();
 
@@ -154,6 +150,7 @@ class PT_XML_API TextInputSource : public InputSource
 
     private:
         std::basic_istream<Char>* _ios;
+        unsigned _state;
 };
 
 
@@ -180,7 +177,7 @@ class PT_XML_API BinaryInputSource : public InputSource
         void reset(std::istream& is);
 
     protected:
-        virtual bool onGetSome();
+        virtual std::streamsize onGetSome();
 
         virtual int_type onGet();
 
@@ -188,7 +185,9 @@ class PT_XML_API BinaryInputSource : public InputSource
         virtual bool onGetSomeData();
 
     private:
-        bool parseBom(unsigned char c);
+        bool parseBom(unsigned char c, Pt::Char* buf, std::size_t& bufsize);
+
+        bool parseDeclaration(unsigned char c);
 
         bool isBegin() const;
 
@@ -197,6 +196,10 @@ class PT_XML_API BinaryInputSource : public InputSource
         Utf8Codec _utf8Codec;
         TextBuffer _tbuf;
         unsigned char _state;
+        unsigned char _mbSize;
+        unsigned char _mbPos;
+        Pt::Char _buf[8];
+        std::size_t _bufsize;
 };
 
 
@@ -208,8 +211,8 @@ class NullInputSource : public InputSource
         { }
 
     protected:
-        virtual bool onGetSome()
-        { return false; }
+        virtual std::streamsize onGetSome()
+        { return -1; }
 
         virtual int_type onGet()
         { return std::char_traits<Char>::eof(); }
