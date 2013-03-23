@@ -53,6 +53,8 @@ class InputSource : private NonCopyable
     public:
         InputSource()
         : _rdbuf(0)
+        , _buffer(0)
+        , _bufferEnd(0)
         , _line(1)
         {}
 
@@ -66,7 +68,7 @@ class InputSource : private NonCopyable
         { _line = n; }
 
         bool inputAvailable()
-        { return _rdbuf && _rdbuf->in_avail() > 0; }
+        { return _buffer || (_rdbuf && _rdbuf->in_avail() > 0); }
         
         std::streamsize getSome()
         {             
@@ -76,6 +78,10 @@ class InputSource : private NonCopyable
                 if(n > 0)
                     return n;
             }
+            else if(_buffer)
+            {
+                return _bufferEnd - _buffer;
+            }
 
             bool ok = onGetSome();
             if( ! ok)
@@ -84,31 +90,47 @@ class InputSource : private NonCopyable
             return _rdbuf ? _rdbuf->in_avail() : 0;
         }
         
-        int_type get()
+        inline int_type get()
         {
-            if( _rdbuf )
-                return _rdbuf->sbumpc();
-
-            onGet();
-            return _rdbuf ? _rdbuf->sbumpc() : std::char_traits<Char>::eof();
+            return _rdbuf ? _rdbuf->sbumpc() 
+                          : _buffer ? getBuffered() : onGet();
         }
-
-        inline std::basic_streambuf<Char>* rdbuf()
-        { return _rdbuf; }
 
     protected:
         void init(std::basic_streambuf<Char>* rdbuf = 0)
         {
             _line = 0;
             _rdbuf = rdbuf;
+            _buffer = 0;
+            _bufferEnd = 0;
+        }
+
+        void init(const Char* buf, const Char* bufEnd)
+        {
+            _line = 0;
+            _rdbuf = 0;
+            _buffer = buf;
+            _bufferEnd = bufEnd;
         }
 
         virtual bool onGetSome() = 0;
 
-        virtual void onGet() = 0;
+        virtual int_type onGet() = 0;
 
     private:
+        inline int_type getBuffered()
+        {
+            const Char* ch = _buffer;
+            if(++_buffer == _bufferEnd)
+            {
+                _buffer = 0;
+            }
+            return static_cast<int_type>(*ch); 
+        }
+
         std::basic_streambuf<Char>* _rdbuf;
+        const Char* _buffer;
+        const Char* _bufferEnd;
         std::size_t _line;
 };
 
@@ -125,7 +147,7 @@ class PT_XML_API TextInputSource : public InputSource
     protected:
         virtual bool onGetSome();
 
-        virtual void onGet();
+        virtual int_type onGet();
 
     protected:
         virtual bool onGetSomeText();
@@ -160,7 +182,7 @@ class PT_XML_API BinaryInputSource : public InputSource
     protected:
         virtual bool onGetSome();
 
-        virtual void onGet();
+        virtual int_type onGet();
 
     protected:
         virtual bool onGetSomeData();
@@ -189,8 +211,8 @@ class NullInputSource : public InputSource
         virtual bool onGetSome()
         { return false; }
 
-        virtual void onGet()
-        { return; }
+        virtual int_type onGet()
+        { return std::char_traits<Char>::eof(); }
 };
 
 } // namespace Xml

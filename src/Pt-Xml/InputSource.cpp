@@ -78,16 +78,17 @@ bool TextInputSource::onGetSome()
 }
 
 
-void TextInputSource::onGet()
+InputSource::int_type TextInputSource::onGet()
 {
     if( ! _ios || ! _ios->rdbuf() )
     {
-        return;
+        return std::char_traits<Char>::eof();
     }
 
     // parse XML dclaration
 
     init( _ios->rdbuf() );
+    return _ios->rdbuf()->sbumpc();
 }
 
 
@@ -257,11 +258,11 @@ bool BinaryInputSource::onGetSome()
 }
 
 
-void BinaryInputSource::onGet()
+InputSource::int_type BinaryInputSource::onGet()
 {
     if( ! _is || ! _is->rdbuf() )
     {
-        return;
+        return std::char_traits<Char>::eof();
     }
 
     if( isBegin() )
@@ -287,6 +288,7 @@ void BinaryInputSource::onGet()
     }
 
     init( &_tbuf );
+    return _tbuf.sbumpc();
 }
 
 

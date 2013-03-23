@@ -4295,10 +4295,9 @@ class XmlReaderImpl
             {
                 InputSource* in = _input.current();
 
-                bool avail = in->inputAvailable();
-                if(avail)
+                if( in->inputAvailable() )
                 {
-                    std::char_traits<Char>::int_type c = in->rdbuf()->sbumpc();
+                    std::char_traits<Char>::int_type c = in->get();
                     (this->*_parse)(c);
 
                     // TODO: move this to state functions
