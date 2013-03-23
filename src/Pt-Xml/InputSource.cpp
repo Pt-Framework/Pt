@@ -143,6 +143,12 @@ enum BomParseState
 };
 
 
+enum XmlParseState
+{
+    OnXmlBegin = 0,
+    OnXmlDeclEnd = 64
+};
+
 
 
 BinaryInputSource::BinaryInputSource()
@@ -151,6 +157,7 @@ BinaryInputSource::BinaryInputSource()
 , _utf8Codec(1)
 , _tbuf(&_utf8Codec)
 , _state(OnBomBegin)
+, _xmlState(OnXmlBegin)
 , _mbSize(1)
 , _mbPos(0)
 , _putback(0)
@@ -163,6 +170,7 @@ BinaryInputSource::BinaryInputSource(std::istream& is)
 , _utf8Codec(1)
 , _tbuf(&is, &_utf8Codec)
 , _state(OnBomBegin)
+, _xmlState(OnXmlBegin)
 , _mbSize(1)
 , _mbPos(0)
 , _putback(0)
@@ -176,6 +184,7 @@ void BinaryInputSource::reset(std::istream& is)
     _tbuf.attach(is); 
     _tbuf.setCodec(&_utf8Codec);
     _state = OnBomBegin;
+    _xmlState = OnXmlBegin;
     _mbSize = 1;
     _mbPos = 0;
     _putback = 0;
@@ -200,7 +209,7 @@ std::streamsize BinaryInputSource::onGetSome()
         }
     }
 
-    if( isBegin() )
+    if( isBomBegin() )
     {
         std::streambuf* sb = _is->rdbuf();
         std::char_traits<char>::int_type c = 0;
@@ -238,6 +247,9 @@ std::streamsize BinaryInputSource::onGetSome()
             
             if( ! parseBom(ch, _putback) )
             {
+                encoding() = L"UTF-8";
+                version() = L"1.0";
+
                 if(_putback > 0 && _putback < 8)
                 {
                     const char* pbtxt = "<?xml     ";
@@ -274,7 +286,7 @@ InputSource::int_type BinaryInputSource::onGet()
         return std::char_traits<Char>::eof();
     }
 
-    if( isBegin() )
+    if( isBomBegin() )
     {        
         std::char_traits<char>::int_type c = 0;
         std::streambuf* sb = _is->rdbuf();
@@ -349,7 +361,7 @@ bool BinaryInputSource::onGetSomeData()
 }
 
 
-bool BinaryInputSource::isBegin() const
+bool BinaryInputSource::isBomBegin() const
 {
     return _state != OnBomEnd;
 }
@@ -375,7 +387,7 @@ bool BinaryInputSource::parseBom(unsigned char c, std::size_t& putback)
             }
             else
             {
-                _putback = 1;
+                putback = 1;
                 _state = OnBomEnd;
             }
 

@@ -56,6 +56,7 @@ class InputSource : private NonCopyable
         //, _buffer(0)
         //, _bufferEnd(0)
         , _line(1)
+        , _standalone(false)
         {}
 
         virtual ~InputSource()
@@ -100,6 +101,7 @@ class InputSource : private NonCopyable
         {
             _line = 0;
             _rdbuf = rdbuf;
+            _standalone = false;
             //_buffer = 0;
             //_bufferEnd = 0;
         }
@@ -116,6 +118,12 @@ class InputSource : private NonCopyable
 
         virtual int_type onGet() = 0;
 
+        String& version()
+        { return _version; }
+
+        String& encoding()
+        { return _encoding;}
+
     private:
         //inline int_type getBuffered()
         //{
@@ -131,6 +139,10 @@ class InputSource : private NonCopyable
         //const Char* _buffer;
         //const Char* _bufferEnd;
         std::size_t _line;
+
+        String _encoding;
+        String _version;
+        bool _standalone;
 };
 
 
@@ -192,13 +204,14 @@ class PT_XML_API BinaryInputSource : public InputSource
 
         bool parseDeclaration(unsigned char c);
 
-        bool isBegin() const;
+        bool isBomBegin() const;
 
     private:
         std::istream* _is;
         Utf8Codec _utf8Codec;
         TextBuffer _tbuf;
         unsigned char _state;
+        unsigned char _xmlState;
         unsigned char _mbSize;
         unsigned char _mbPos;
         std::size_t _putback;
