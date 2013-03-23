@@ -45,7 +45,6 @@ TextInputSource::TextInputSource(std::basic_istream<Char>& is)
 : InputSource()
 , _ios(&is)
 { 
-    init( _ios->rdbuf() );
 }
 
 
@@ -54,29 +53,41 @@ void TextInputSource::reset(std::basic_istream<Char>& ios)
     // reset bomState
     _ios = &ios;
 
-    init( _ios->rdbuf() );
+    init(0);
 }
 
 
-std::basic_streambuf<Char>* TextInputSource::onGetSome()
+bool TextInputSource::onGetSome()
 {   
     if( ! _ios || ! _ios->rdbuf() )
     {
-        return 0;
+        return false;
     }
     
     if( _ios->rdbuf()->in_avail() <= 0 )
     {
         bool r = onGetSomeText();
         if( ! r)
-        {
-            return 0;
-        }
+            return false;
     }
 
     // parse XML dclaration
 
-    return _ios->rdbuf();
+    init( _ios->rdbuf() );
+    return true;
+}
+
+
+void TextInputSource::onGet()
+{
+    if( ! _ios || ! _ios->rdbuf() )
+    {
+        return;
+    }
+
+    // parse XML dclaration
+
+    init( _ios->rdbuf() );
 }
 
 
@@ -86,19 +97,6 @@ bool TextInputSource::onGetSomeText()
         return false;
 
     return true;
-}
-
-
-std::basic_streambuf<Char>* TextInputSource::onGet()
-{
-    if( ! _ios || ! _ios->rdbuf() )
-    {
-        return 0;
-    }
-
-    // parse XML dclaration
-
-    return _ios->rdbuf();
 }
 
 
@@ -160,7 +158,6 @@ BinaryInputSource::BinaryInputSource(std::istream& is)
 , _tbuf(&is, &_utf8Codec)
 , _state(OnBomBegin)
 { 
-    init(&_tbuf);
 }
 
 
@@ -171,15 +168,15 @@ void BinaryInputSource::reset(std::istream& is)
     _tbuf.setCodec(&_utf8Codec);
     _state = OnBomBegin;
     
-    init(&_tbuf);
+    init(0);
 }
 
 
-std::basic_streambuf<Char>* BinaryInputSource::onGetSome()
+bool BinaryInputSource::onGetSome()
 {
     if( ! _is || ! _is->rdbuf() )
     {
-        return 0;
+        return false;
     }
     
     if( _is->rdbuf()->in_avail() <= 0 )
@@ -187,7 +184,7 @@ std::basic_streambuf<Char>* BinaryInputSource::onGetSome()
         bool r = onGetSomeData();
         if( ! r)
         {
-            return 0;
+            return false;
         }
     }
 
@@ -198,53 +195,32 @@ std::basic_streambuf<Char>* BinaryInputSource::onGetSome()
         std::streamsize avail = sb->in_avail();
         
         for( ; ; --avail)
-        {
-            //if(_bufsize == MaxBufSize)
-            //{
-            //    _tbuf.import( _buf, _bufsize );
-            //    _bufsize = 0;
-            //    return &_tbuf;
-            //}
-            
+        {            
             if(avail <= 0)
             {
-                return &_tbuf;
+                return true;
             }
 
             c = sb->sbumpc();
             
             char ch = std::char_traits<char>::to_char_type(c);
-
-            //_buf[_bufsize] = ch;
-            //++_bufsize;
             
             if( ! parseBom(ch) )
                 break;
         }
-
-        //_tbuf.import( _buf, _bufsize );
-        //_bufsize = 0;
     }
 
     _tbuf.import();
-    return &_tbuf;
-}
-
-
-bool BinaryInputSource::onGetSomeData()
-{
-    if( ! _is || ! _is->rdbuf() || ! _is->good() )
-        return false;
-
+    init(&_tbuf);
     return true;
 }
 
 
-std::basic_streambuf<Char>* BinaryInputSource::onGet()
+void BinaryInputSource::onGet()
 {
     if( ! _is || ! _is->rdbuf() )
     {
-        return 0;
+        return;
     }
 
     if( isBegin() )
@@ -254,35 +230,31 @@ std::basic_streambuf<Char>* BinaryInputSource::onGet()
         std::char_traits<char>::int_type eofval = std::char_traits<char>::eof();
 
         for( ; ; )
-        {
-            //if(_bufsize == MaxBufSize)
-            //{
-            //    _tbuf.import( _buf, _bufsize );
-            //    _bufsize = 0;
-            //    return &_tbuf;
-            //}
-            
+        {            
             c = sb->sbumpc();
             
             if( std::char_traits<char>::eq_int_type(c, eofval) )
             {
-                return &_tbuf;
+                break;    
             }
 
             char ch = std::char_traits<char>::to_char_type(c);
-
-            //_buf[_bufsize] = ch;
-            //++_bufsize;
             
             if( ! parseBom(ch) )
                 break;
         }
-
-        //_tbuf.import( _buf, _bufsize );
-        //_bufsize = 0;
     }
 
-    return &_tbuf;
+    init( &_tbuf );
+}
+
+
+bool BinaryInputSource::onGetSomeData()
+{
+    if( ! _is || ! _is->rdbuf() || ! _is->good() )
+        return false;
+
+    return true;
 }
 
 

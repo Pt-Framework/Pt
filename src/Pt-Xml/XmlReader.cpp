@@ -4258,55 +4258,6 @@ class XmlReaderImpl
             return *_current;
         }
 
-        Node& next2()
-        {
-            bool atEnd = false;
-            _current = 0;
-            std::char_traits<Char>::int_type c = 0;
-            std::basic_streambuf<Char>* rdbuf = 0;
-
-            while( ! _current )
-            {
-                rdbuf = _input.current()->rdbuf();
-
-                if( ! rdbuf || rdbuf->sgetc() == std::char_traits<Char>::eof() )
-                {            
-                    rdbuf = _input.current()->get();
-
-                    if( ! rdbuf || rdbuf->sgetc() == std::char_traits<Char>::eof() )
-                    {
-                        _input.removeInput();
-
-                        if( _input.empty() )
-                        {
-                            (this->*_parse)( std::char_traits<Char>::eof() );
-                            
-                            if( ! _current)
-                                throw SyntaxError("unexpected EOF", line());
-                        }
-
-                        continue;
-                    }
-                }
-
-                c = rdbuf->sbumpc();
-                (this->*_parse)(c);
-
-                if(c == '\n')
-                {
-                    _input.bumpLine();
-                }
-            }
-
-            //if( (_flags & XmlReader::ValidateDtd) && _dtd.isDefined() )
-            //{
-            //    if( ! _dtdValidator.validate(*_current) )
-            //        throw SyntaxError("validation failed", line());
-            //}
-
-            return *_current;
-        }
-
         Node& next()
         {
             _current = 0;
@@ -4316,7 +4267,7 @@ class XmlReaderImpl
             {
                 InputSource* in = _input.current();
                 
-                c = in->get2();
+                c = in->get();
                 if( c == std::char_traits<Char>::eof() )
                 {            
                     _input.removeInput();
@@ -4343,9 +4294,9 @@ class XmlReaderImpl
             do
             {
                 InputSource* in = _input.current();
-                std::streamsize n = in->getSome2();
 
-                if(n > 0)
+                bool avail = in->inputAvailable();
+                if(avail)
                 {
                     std::char_traits<Char>::int_type c = in->rdbuf()->sbumpc();
                     (this->*_parse)(c);
@@ -4357,7 +4308,8 @@ class XmlReaderImpl
                     }
                 }
                 else
-                {                
+                {           
+                    std::streamsize n = in->getSome();
                     if(n < 0)
                     {
                         _input.removeInput();
@@ -4365,46 +4317,7 @@ class XmlReaderImpl
                         if( _input.empty() )
                             (this->*_parse)( std::char_traits<Char>::eof() );
                     }
-                    else
-                        break;
-                }
-            } 
-            while( ! _current);
-
-            return _current;
-        }
-
-        Node* advance2()
-        {
-            _current = 0;
-
-            do
-            {
-                std::basic_streambuf<Char>* rdbuf = _input.current()->rdbuf();
-                
-                if(rdbuf && rdbuf->in_avail() > 0)
-                {
-                    std::char_traits<Char>::int_type c = rdbuf->sbumpc();
-                    (this->*_parse)(c);
-
-                    // TODO: move this to state functions
-                    if(c == '\n')
-                    {
-                        _input.bumpLine();
-                    }
-                }
-                else
-                {                
-                    rdbuf = _input.current()->getSome();
-
-                    if( ! rdbuf)
-                    {
-                        _input.removeInput();
-                        
-                        if( _input.empty() )
-                            (this->*_parse)( std::char_traits<Char>::eof() );
-                    }
-                    else if(rdbuf->in_avail() <= 0)
+                    else if (n == 0)
                         break;
                 }
             } 

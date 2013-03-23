@@ -65,49 +65,35 @@ class InputSource : private NonCopyable
         void setLine(std::size_t n)
         { _line = n; }
 
-        // TODO: do not return buffer pointer
+        bool inputAvailable()
+        { return _rdbuf && _rdbuf->in_avail() > 0; }
+        
+        std::streamsize getSome()
+        {             
+            if( _rdbuf )
+            { 
+                std::streamsize n = _rdbuf->in_avail();
+                if(n > 0)
+                    return n;
+            }
 
-        // NULL is EOF
-        std::basic_streambuf<Char>* getSome()
-        {
-            if(_rdbuf && _rdbuf->in_avail() > 0)
-                return _rdbuf;
+            bool ok = onGetSome();
+            if( ! ok)
+                return -1;
 
-            _rdbuf = onGetSome();
-            return _rdbuf;
-        }
-
-        // TODO: do not return buffer pointer
-        std::basic_streambuf<Char>* get()
-        {
-            //if(_rdbuf)
-            //    return _rdbuf;
-
-            _rdbuf = onGet();
-            return _rdbuf;
-        }
-
-        std::streamsize getSome2()
-        { 
-            std::streamsize r = 0;
-            if( _rdbuf && (r =_rdbuf->in_avail()) > 0)
-                return r;
-
-            // TODO: it is enough to return bool here
-            std::basic_streambuf<Char>* ok = onGetSome();
-            return _rdbuf && ok ? _rdbuf->in_avail() : -1;
+            return _rdbuf ? _rdbuf->in_avail() : 0;
         }
         
-        int_type get2()
+        int_type get()
         {
             if( _rdbuf )
                 return _rdbuf->sbumpc();
 
-            _rdbuf = onGet();
+            onGet();
             return _rdbuf ? _rdbuf->sbumpc() : std::char_traits<Char>::eof();
         }
 
-        std::basic_streambuf<Char>* rdbuf()
+        inline std::basic_streambuf<Char>* rdbuf()
         { return _rdbuf; }
 
     protected:
@@ -117,9 +103,10 @@ class InputSource : private NonCopyable
             _rdbuf = rdbuf;
         }
 
-        virtual std::basic_streambuf<Char>* onGetSome() = 0;
+        virtual bool onGetSome() = 0;
 
-        virtual std::basic_streambuf<Char>* onGet() = 0;
+        // TODO: maybe
+        virtual void onGet() = 0;
 
     private:
         std::basic_streambuf<Char>* _rdbuf;
@@ -136,9 +123,10 @@ class PT_XML_API TextInputSource : public InputSource
 
         void reset(std::basic_istream<Char>& ios);     
 
-        virtual std::basic_streambuf<Char>* onGetSome();
+    protected:
+        virtual bool onGetSome();
 
-        virtual std::basic_streambuf<Char>* onGet();
+        virtual void onGet();
 
     protected:
         virtual bool onGetSomeText();
@@ -171,9 +159,9 @@ class PT_XML_API BinaryInputSource : public InputSource
         void reset(std::istream& is);
 
     protected:
-        virtual std::basic_streambuf<Char>* onGetSome();
+        virtual bool onGetSome();
 
-        virtual std::basic_streambuf<Char>* onGet();
+        virtual void onGet();
 
     protected:
         virtual bool onGetSomeData();
@@ -199,14 +187,14 @@ class NullInputSource : public InputSource
         { }
 
     protected:
-        virtual std::basic_streambuf<Char>* onGetSome()
+        virtual bool onGetSome()
         {      
-            return 0;
+            return false;
         }
 
-        virtual std::basic_streambuf<Char>* onGet()
+        virtual void onGet()
         {
-            return 0;
+            return;
         }
 };
 
