@@ -188,7 +188,7 @@ class PT_XML_API BinaryInputSource : public InputSource
         virtual bool onGetSomeData();
 
     private:
-        bool parseBom(unsigned char c);
+        bool parseBom(unsigned char c, std::size_t& putback);
 
         bool parseDeclaration(unsigned char c);
 
@@ -202,6 +202,7 @@ class PT_XML_API BinaryInputSource : public InputSource
         unsigned char _mbSize;
         unsigned char _mbPos;
         std::size_t _putback;
+        Pt::Char _putbackBuffer[8];
 };
 
 

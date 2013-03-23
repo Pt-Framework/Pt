@@ -4295,8 +4295,9 @@ class XmlReaderImpl
             {
                 InputSource* in = _input.current();
 
-                std::char_traits<Char>::int_type c;
                 std::streamsize n = in->inputAvailable();
+
+                //std::char_traits<Char>::int_type c;
                 //if(n > 0)
                 //{
                     //c = in->get();

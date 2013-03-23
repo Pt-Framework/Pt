@@ -140,16 +140,6 @@ enum BomParseState
     On8Bit_5 = 8,
 
     OnBomEnd = 64,
-
-    OnXmlDocBegin = 100,
-    OnXmlDeclBegin = 101,
-    OnXmlDeclBeginQuest= 102,
-    OnXmlDeclBegin_X= 103,
-    OnXmlDeclBegin_M= 104,
-    OnXmlDeclBegin_L= 105,
-    OnXmlDecl= 106,
-    OnXmlDeclEnd= 107,
-    OnNoXmlDecl= 108
 };
 
 
@@ -224,14 +214,51 @@ std::streamsize BinaryInputSource::onGetSome()
             }
 
             c = sb->sbumpc();
+
+            char ch = 0;
+            if(_mbSize == 1)
+            {
+                ch = std::char_traits<char>::to_char_type(c);
+            }
+            else if(_mbSize == 2)
+            {
+                if(_mbPos == 0)
+                {
+                    ++_mbPos;
+                    continue;
+                }
+
+                _mbPos = 0;
+                ch = std::char_traits<char>::to_char_type(c);
+            }
+            else
+            {
+                break;
+            }
             
-            char ch = std::char_traits<char>::to_char_type(c);
-            
-            if( ! parseBom(ch) )
-            {               
+            if( ! parseBom(ch, _putback) )
+            {
+                if(_putback > 0 && _putback < 8)
+                {
+                    const char* pbtxt = "<?xml     ";
+                    pbtxt += _putback - 1;
+
+                    for(unsigned n = 1; n < _putback; ++n)
+                    {
+                        _putbackBuffer[n] = *--pbtxt;
+                    }
+
+                    _putbackBuffer[0] = ch;
+                }
+                
                 break;
             }
         }
+    }
+
+    if(_putback > 0)
+    {
+        return _putbackBuffer[--_putback];
     }
 
     _tbuf.import();
@@ -270,8 +297,12 @@ InputSource::int_type BinaryInputSource::onGet()
             else if(_mbSize == 2)
             {
                 if(_mbPos == 0)
+                {
+                    ++_mbPos;
                     continue;
+                }
 
+                _mbPos = 0;
                 ch = std::char_traits<char>::to_char_type(c);
             }
             else
@@ -279,24 +310,30 @@ InputSource::int_type BinaryInputSource::onGet()
                 break;
             }
 
-            if( ! parseBom(ch) )
+            if( ! parseBom(ch, _putback) )
             {
-                //if(_bufsize == 1)
-                //{
-                    //return _buf[0];
-                //}
+                if(_putback > 0 && _putback < 8)
+                {
+                    const char* pbtxt = "<?xml     ";
+                    pbtxt += _putback - 1;
 
-                //if(_bufsize > 1)
-                //{
-                    //init(_buf+1, _buf + _bufsize);
-                    //return _buf[0];
-                //}
+                    for(unsigned n = 1; n < _putback; ++n)
+                    {
+                        _putbackBuffer[n] = *--pbtxt;
+                    }
+
+                    _putbackBuffer[0] = ch;
+                }
                 
                 break;
             }
         }
     }
     
+    if(_putback > 0)
+    {
+        return _putbackBuffer[--_putback];
+    }
 
     init( &_tbuf );
     return _tbuf.sbumpc();
@@ -318,85 +355,6 @@ bool BinaryInputSource::isBegin() const
 }
 
 
-
-bool BinaryInputSource::parseDeclaration(unsigned char c)
-{
-    switch(_state)
-    {
-        case OnXmlDocBegin:
-            if(c == '<')
-            {
-                _state = OnXmlDeclBegin;
-                break;
-            }
-            
-            _state = OnNoXmlDecl;
-            break;
-
-        case OnXmlDeclBegin:
-            if(c == '?')
-            {
-                _state = OnXmlDeclBeginQuest;
-                break;
-            }
-            
-            _state = OnNoXmlDecl;
-            break;
-
-        case OnXmlDeclBeginQuest:
-            if(c == 'x')
-            {
-                _state = OnXmlDeclBegin_X;
-                break;
-            }
-            
-            _state = OnNoXmlDecl;
-            break;
-        
-        case OnXmlDeclBegin_X:
-            if(c == 'm')
-            {
-                _state = OnXmlDeclBegin_M;
-                break;
-            }
-            
-            _state = OnNoXmlDecl;
-            break;
-
-        case OnXmlDeclBegin_M:
-            if(c == 'l')
-            {
-                _state = OnXmlDeclBegin_L;
-                break;
-            }
-            
-            _state = OnNoXmlDecl;
-            break;
-
-        case OnXmlDeclBegin_L:
-            if(c == ' ' || c == '\t' || c == '\r' || c== '\n')
-            {
-                _state = OnXmlDecl;
-                break;
-            }
-            
-            _state = OnNoXmlDecl;
-            break;
-
-        case OnXmlDecl:
-            if(c == '>')
-            {
-                _state = OnXmlDeclEnd;
-                break;
-            }
-            
-            break;
-    }
-
-    return _state != OnXmlDeclEnd && _state != OnNoXmlDecl;
-}
-
-
 // TODO: parse encoding name and call virtual function so use can 
 //       return pointer to codec: 
 //
@@ -404,7 +362,7 @@ bool BinaryInputSource::parseDeclaration(unsigned char c)
 //
 //       This function could also be part of the XmlResolver or some
 //       context class that would be useful in other situations too...
-bool BinaryInputSource::parseBom(unsigned char c)
+bool BinaryInputSource::parseBom(unsigned char c, std::size_t& putback)
 {    
     switch(_state)
     {
@@ -417,6 +375,7 @@ bool BinaryInputSource::parseBom(unsigned char c)
             }
             else
             {
+                _putback = 1;
                 _state = OnBomEnd;
             }
 
@@ -446,10 +405,7 @@ bool BinaryInputSource::parseBom(unsigned char c)
                 break;
             }
                 
-            char buf2[2];
-            buf2[0] = '<';
-            buf2[1] = c;
-            _tbuf.import(buf2, 2);
+            putback = 2;
             _state = OnBomEnd;
             break;
 
