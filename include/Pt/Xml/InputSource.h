@@ -105,7 +105,6 @@ class InputSource : private NonCopyable
 
         virtual bool onGetSome() = 0;
 
-        // TODO: maybe
         virtual void onGet() = 0;
 
     private:
@@ -188,14 +187,10 @@ class NullInputSource : public InputSource
 
     protected:
         virtual bool onGetSome()
-        {      
-            return false;
-        }
+        { return false; }
 
         virtual void onGet()
-        {
-            return;
-        }
+        { return; }
 };
 
 } // namespace Xml

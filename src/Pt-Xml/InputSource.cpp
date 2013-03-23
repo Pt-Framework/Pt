@@ -141,6 +141,47 @@ enum BomParseState
     OnBomEnd = 255,
 };
 
+enum XmlDeclParseState
+{
+    OnXmlDocBegin,
+    OnXmlDeclBegin,
+    OnXmlDeclBeginQMark,
+    OnEnd
+};
+
+unsigned parseXmlDeclaration(unsigned state, std::char_traits<Char>::int_type c)
+{
+    switch(state)
+    {
+        case OnXmlDocBegin:
+            if(c == 0xfeff)
+                state = OnXmlDocBegin;
+            else if(c != '<')
+                state = OnXmlDeclBegin;
+            else
+                state = OnEnd;
+
+            break;
+
+        case OnXmlDeclBegin:
+            if(c == '?')
+                state = OnXmlDeclBeginQMark;
+            else 
+                state = OnEnd;
+            
+            break;
+
+        case OnEnd:
+            assert(false);
+            break;
+            
+        default:
+            break;
+    }
+
+    return state;
+}
+
 
 BinaryInputSource::BinaryInputSource()
 : InputSource()
@@ -262,6 +303,8 @@ bool BinaryInputSource::isBegin() const
 {
     return _state != OnBomEnd;
 }
+
+
 
 
 // TODO: parse encoding name and call virtual function so use can 
