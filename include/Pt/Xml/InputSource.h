@@ -53,8 +53,8 @@ class InputSource : private NonCopyable
     public:
         InputSource()
         : _rdbuf(0)
-        , _buffer(0)
-        , _bufferEnd(0)
+        //, _buffer(0)
+        //, _bufferEnd(0)
         , _line(1)
         {}
 
@@ -67,29 +67,32 @@ class InputSource : private NonCopyable
         void setLine(std::size_t n)
         { _line = n; }
 
-        bool inputAvailable()
-        { return _buffer || (_rdbuf && _rdbuf->in_avail() > 0); }
-        
-        std::streamsize getSome()
-        {             
-            if( _rdbuf )
-            { 
-                std::streamsize n = _rdbuf->in_avail();
-                if(n > 0)
-                    return n;
-            }
-            else if(_buffer)
-            {
-                return _bufferEnd - _buffer;
-            }
-
-            return onGetSome();
+        inline std::streamsize inputAvailable()
+        { 
+            return  (_rdbuf && _rdbuf->in_avail() > 0) ? 1 
+                                                       : onGetSome(); 
         }
+        
+        //std::streamsize getSome()
+        //{             
+            //if( _rdbuf )
+            //{ 
+                //std::streamsize n = _rdbuf->in_avail();
+                //if(n > 0)
+                    //return n;
+            //}
+            //else if(_buffer)
+            //{
+                //return _bufferEnd - _buffer;
+            //}
+
+            //return onGetSome();
+        //}
         
         inline int_type get()
         {
             return _rdbuf ? _rdbuf->sbumpc() 
-                          : _buffer ? getBuffered() : onGet();
+                          : onGet();
         }
 
     protected:
@@ -97,36 +100,36 @@ class InputSource : private NonCopyable
         {
             _line = 0;
             _rdbuf = rdbuf;
-            _buffer = 0;
-            _bufferEnd = 0;
+            //_buffer = 0;
+            //_bufferEnd = 0;
         }
 
-        void init(const Char* buf, const Char* bufEnd)
-        {
-            _line = 0;
-            _rdbuf = 0;
-            _buffer = buf;
-            _bufferEnd = bufEnd;
-        }
+        //void init(const Char* buf, const Char* bufEnd)
+        //{
+            //_line = 0;
+            //_rdbuf = 0;
+            //_buffer = buf;
+            //_bufferEnd = bufEnd;
+        //}
 
         virtual std::streamsize onGetSome() = 0;
 
         virtual int_type onGet() = 0;
 
     private:
-        inline int_type getBuffered()
-        {
-            const Char* ch = _buffer;
-            if(++_buffer == _bufferEnd)
-            {
-                _buffer = 0;
-            }
-            return static_cast<int_type>(*ch); 
-        }
+        //inline int_type getBuffered()
+        //{
+            //const Char* ch = _buffer;
+            //if(++_buffer == _bufferEnd)
+            //{
+                //_buffer = 0;
+            //}
+            //return static_cast<int_type>(*ch); 
+        //}
 
         std::basic_streambuf<Char>* _rdbuf;
-        const Char* _buffer;
-        const Char* _bufferEnd;
+        //const Char* _buffer;
+        //const Char* _bufferEnd;
         std::size_t _line;
 };
 
@@ -185,7 +188,7 @@ class PT_XML_API BinaryInputSource : public InputSource
         virtual bool onGetSomeData();
 
     private:
-        bool parseBom(unsigned char c, Pt::Char* buf, std::size_t& bufsize);
+        bool parseBom(unsigned char c);
 
         bool parseDeclaration(unsigned char c);
 
@@ -198,8 +201,7 @@ class PT_XML_API BinaryInputSource : public InputSource
         unsigned char _state;
         unsigned char _mbSize;
         unsigned char _mbPos;
-        Pt::Char _buf[8];
-        std::size_t _bufsize;
+        std::size_t _putback;
 };
 
 

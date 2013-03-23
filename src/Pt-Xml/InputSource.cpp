@@ -71,7 +71,7 @@ std::streamsize TextInputSource::onGetSome()
             return -1;
     }
 
-    // parse XML dclaration
+    // parse XML declaration
 
     init( _ios->rdbuf() );
     return _ios->rdbuf()->in_avail();
@@ -163,7 +163,7 @@ BinaryInputSource::BinaryInputSource()
 , _state(OnBomBegin)
 , _mbSize(1)
 , _mbPos(0)
-, _bufsize(0)
+, _putback(0)
 { }
 
 
@@ -175,7 +175,7 @@ BinaryInputSource::BinaryInputSource(std::istream& is)
 , _state(OnBomBegin)
 , _mbSize(1)
 , _mbPos(0)
-, _bufsize(0)
+, _putback(0)
 { 
 }
 
@@ -188,7 +188,7 @@ void BinaryInputSource::reset(std::istream& is)
     _state = OnBomBegin;
     _mbSize = 1;
     _mbPos = 0;
-    _bufsize = 0;
+    _putback = 0;
     
     init(0);
 }
@@ -227,7 +227,7 @@ std::streamsize BinaryInputSource::onGetSome()
             
             char ch = std::char_traits<char>::to_char_type(c);
             
-            if( ! parseBom(ch, _buf, _bufsize) )
+            if( ! parseBom(ch) )
             {               
                 break;
             }
@@ -279,23 +279,24 @@ InputSource::int_type BinaryInputSource::onGet()
                 break;
             }
 
-            if( ! parseBom(ch, _buf, _bufsize) )
+            if( ! parseBom(ch) )
             {
-                if(_bufsize == 1)
-                {
-                    return _buf[0];
-                }
+                //if(_bufsize == 1)
+                //{
+                    //return _buf[0];
+                //}
 
-                if(_bufsize > 1)
-                {
-                    init(_buf+1, _buf + _bufsize);
-                    return _buf[0];
-                }
+                //if(_bufsize > 1)
+                //{
+                    //init(_buf+1, _buf + _bufsize);
+                    //return _buf[0];
+                //}
                 
                 break;
             }
         }
     }
+    
 
     init( &_tbuf );
     return _tbuf.sbumpc();
@@ -403,22 +404,21 @@ bool BinaryInputSource::parseDeclaration(unsigned char c)
 //
 //       This function could also be part of the XmlResolver or some
 //       context class that would be useful in other situations too...
-bool BinaryInputSource::parseBom(unsigned char c, Pt::Char* buf, std::size_t& bufsize)
-{
-    if(bufsize < 8)
-    {
-        buf[bufsize++] = c;
-    }
-    
+bool BinaryInputSource::parseBom(unsigned char c)
+{    
     switch(_state)
     {
         case OnBomBegin:
             if(c == 0xef)
                 _state = OnBomUtf8_0;
             else if(c == '<')
+            {
                 _state = On8Bit;
+            }
             else
+            {
                 _state = OnBomEnd;
+            }
 
             break;
 
@@ -433,7 +433,6 @@ bool BinaryInputSource::parseBom(unsigned char c, Pt::Char* buf, std::size_t& bu
         case OnBomUtf8_1:
             if(c == 0xbf)
             {
-                bufsize = 0;
                 _tbuf.setCodec(&_utf8Codec);
             }
 
@@ -447,6 +446,10 @@ bool BinaryInputSource::parseBom(unsigned char c, Pt::Char* buf, std::size_t& bu
                 break;
             }
                 
+            char buf2[2];
+            buf2[0] = '<';
+            buf2[1] = c;
+            _tbuf.import(buf2, 2);
             _state = OnBomEnd;
             break;
 
@@ -483,7 +486,6 @@ bool BinaryInputSource::parseBom(unsigned char c, Pt::Char* buf, std::size_t& bu
         case On8Bit_4:
             if(c == ' ' || c == '\t' || c == '\r' || c == '\n')
             {
-                _bufsize = 0;
                 _state = On8Bit_5;
                 break;
             }
@@ -492,11 +494,8 @@ bool BinaryInputSource::parseBom(unsigned char c, Pt::Char* buf, std::size_t& bu
             break;
 
         case On8Bit_5:
-            if(c == '>')
-            {
-                _bufsize = 0;
+            if(c== '>')
                 _state = OnBomEnd;
-            }
 
             break;
 

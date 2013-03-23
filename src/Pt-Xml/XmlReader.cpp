@@ -4295,7 +4295,34 @@ class XmlReaderImpl
             {
                 InputSource* in = _input.current();
 
-                if( in->inputAvailable() )
+                std::char_traits<Char>::int_type c;
+                std::streamsize n = in->inputAvailable();
+                //if(n > 0)
+                //{
+                    //c = in->get();
+                //}
+                //else if(n < 0)
+                //{
+                    //_input.removeInput();
+                        
+                    //if( _input.empty() )
+                        //c = std::char_traits<Char>::eof();
+                //}
+                //else
+                //{
+                    //break;
+                //}
+                
+                //(this->*_parse)(c);
+
+                //// TODO: move this to state functions
+                //if(c == '\n')
+                //{
+                    //_input.bumpLine();
+                //}
+
+
+                if( n > 0)
                 {
                     std::char_traits<Char>::int_type c = in->get();
                     (this->*_parse)(c);
@@ -4308,11 +4335,11 @@ class XmlReaderImpl
                 }
                 else
                 {           
-                    std::streamsize n = in->getSome();
+                    //std::streamsize n = in->getSome();
                     if(n < 0)
                     {
                         _input.removeInput();
-                        
+
                         if( _input.empty() )
                             (this->*_parse)( std::char_traits<Char>::eof() );
                     }
