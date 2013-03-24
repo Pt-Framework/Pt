@@ -4268,6 +4268,7 @@ class XmlReaderImpl
                 InputSource* in = _input.current();
                 
                 c = in->get();
+                //std::cerr << char(c);
                 if( c == std::char_traits<Char>::eof() )
                 {            
                     _input.removeInput();
@@ -4326,6 +4327,7 @@ class XmlReaderImpl
                 if( n > 0)
                 {
                     std::char_traits<Char>::int_type c = in->get();
+                    //std::cerr << char(c);
                     (this->*_parse)(c);
 
                     // TODO: move this to state functions

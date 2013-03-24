@@ -34,6 +34,131 @@ namespace Pt {
 
 namespace Xml {
 
+enum XmlParseState
+{
+    OnXmlBegin = 0,
+    OnXmlDeclBegin,
+    OnXmlDeclBeginQuest,
+    OnXmlDeclBegin_x,
+    OnXmlDeclBegin_m,
+    OnXmlDeclBegin_l,
+    OnXmlDecl,
+    OnXmlDeclClose,
+    OnXmlDeclEnd = 64
+};
+
+
+bool isXmlBegin(unsigned xmlState)
+{
+    return xmlState != OnXmlDeclEnd;
+}
+
+
+bool parseXml(unsigned char& state, unsigned char c, std::size_t& putback)
+{
+    switch(state)
+    {
+        case OnXmlBegin:
+            if(c == '<')
+            {
+                state = OnXmlDeclBegin;
+            }
+            else
+            {
+                state = OnXmlDeclEnd;
+            }
+
+            break;
+
+        case OnXmlDeclBegin:
+            if(c == '?')
+            {
+                state = OnXmlDeclBeginQuest;
+            }
+            else
+            {
+                putback = 1;
+                state = OnXmlDeclEnd;
+            }
+
+            break;
+
+        case OnXmlDeclBeginQuest:
+            if(c == 'x')
+            {
+                state = OnXmlDeclBegin_x;
+            }
+            else
+            {
+                putback = 2;
+                state = OnXmlDeclEnd;
+            }
+
+            break;
+
+        case OnXmlDeclBegin_x:
+            if(c == 'm')
+            {
+                state = OnXmlDeclBegin_m;
+            }
+            else
+            {
+                putback = 3;
+                state = OnXmlDeclEnd;
+            }
+
+            break;
+
+        case OnXmlDeclBegin_m:
+            if(c == 'l')
+            {
+                state = OnXmlDeclBegin_l;
+            }
+            else
+            {
+                putback = 4;
+                state = OnXmlDeclEnd;
+            }
+
+            break;
+
+        case OnXmlDeclBegin_l:
+            if(c == ' ' || c == '\t' || c == '\r' || c == '\n')
+            {
+                state = OnXmlDecl;
+            }
+            else
+            {
+                putback = 5;
+                state = OnXmlDeclEnd;
+            }
+
+            break;
+
+        case OnXmlDecl:
+            if(c == '>')
+            {
+                state = OnXmlDeclClose;
+            }
+
+            break;
+
+        case OnXmlDeclClose:
+            state = OnXmlDeclEnd;
+            break;
+
+        case OnXmlDeclEnd:
+            assert(false);
+            break;
+
+        default:
+            break;
+    }
+
+    return state != OnXmlDeclEnd;
+}
+
+
 TextInputSource::TextInputSource()
 : InputSource()
 , _ios(0)
@@ -129,26 +254,12 @@ enum BomParseState
 {
     OnBomBegin = 0,
             
-    OnBomUtf8_0 = 1,
-    OnBomUtf8_1 = 2,
-
-    On8Bit = 3,
-    On8Bit_1 = 4,
-    On8Bit_2 = 5,
-    On8Bit_3 = 6,
-    On8Bit_4 = 7,
-    On8Bit_5 = 8,
+    OnBomUtf8_0,
+    OnBomUtf8_1,
+    OnBomUtf8_2,
 
     OnBomEnd = 64,
 };
-
-
-enum XmlParseState
-{
-    OnXmlBegin = 0,
-    OnXmlDeclEnd = 64
-};
-
 
 
 BinaryInputSource::BinaryInputSource()
@@ -193,6 +304,103 @@ void BinaryInputSource::reset(std::istream& is)
 }
 
 
+bool BinaryInputSource::onParseXml(int c)
+{ 
+    char ch = std::char_traits<char>::to_char_type(c);
+
+    if(_mbSize == 2)
+    {
+        if(_mbPos == 0)
+        {
+            ++_mbPos;
+            return true;
+        }
+
+        _mbPos = 0;
+        ch = std::char_traits<char>::to_char_type(c);
+    }
+            
+    if( ! parseXml(_xmlState, ch, _putback) )
+    {
+        encoding() = L"UTF-8";
+        version() = L"1.0";
+                
+        _putback = _putback < 8 ? _putback : 0;
+        const char* pbtxt = "<?xml     ";
+        const char* pb = pbtxt + _putback;
+
+        for(unsigned n = 0; pb != pbtxt; ++n)
+        {
+            _putbackBuffer[n] = *--pb;
+        }
+   
+        return false;
+    }
+
+    return true;
+}
+
+
+bool BinaryInputSource::isBomBegin() const
+{
+    return _state != OnBomEnd;
+}
+
+
+// TODO: parse encoding name and call virtual function so use can 
+//       return pointer to codec: 
+//
+//       Codec* onEncoding(const char* name)
+//
+//       This function could also be part of the XmlResolver or some
+//       context class that would be useful in other situations too...
+bool BinaryInputSource::onParseBom(unsigned char c)
+{    
+    switch(_state)
+    {
+        case OnBomBegin:
+            if(c == 0xef)
+                _state = OnBomUtf8_0;
+            else
+                _state = OnBomEnd;
+
+            break;
+
+        case OnBomUtf8_0:
+            if(c == 0xbb)
+                _state = OnBomUtf8_1;
+            else
+                _state = OnBomEnd;
+                    
+            break;
+
+        case OnBomUtf8_1:
+            if(c == 0xbf)
+            {
+                _tbuf.setCodec(&_utf8Codec);
+                _state = OnBomUtf8_2;
+                break;
+            }
+
+            _state = OnBomEnd;
+            break;
+
+        case OnBomUtf8_2:
+            _state = OnBomEnd;
+            break;
+
+        case OnBomEnd:
+            assert(false);
+            break;
+
+        default:
+            break;
+    }
+
+    return _state != OnBomEnd;
+}
+
+
 std::streamsize BinaryInputSource::onGetSome()
 {
     if( ! _is || ! _is->rdbuf() )
@@ -222,49 +430,38 @@ std::streamsize BinaryInputSource::onGetSome()
                 return true;
             }
 
-            c = sb->sbumpc();
+            c = sb->sgetc();
+            char ch = std::char_traits<char>::to_char_type(c);
 
-            char ch = 0;
-            if(_mbSize == 1)
-            {
-                ch = std::char_traits<char>::to_char_type(c);
-            }
-            else if(_mbSize == 2)
-            {
-                if(_mbPos == 0)
-                {
-                    ++_mbPos;
-                    continue;
-                }
-
-                _mbPos = 0;
-                ch = std::char_traits<char>::to_char_type(c);
-            }
-            else
+            if( ! onParseBom(ch) )
             {
                 break;
+            }
+
+            sb->sbumpc();
+        }
+    }
+
+    if( isXmlBegin(_xmlState) )
+    {
+        std::streambuf* sb = _is->rdbuf();
+        std::char_traits<char>::int_type c = 0;
+        std::streamsize avail = sb->in_avail();
+        
+        for( ; ; --avail)
+        {            
+            if(avail <= 0)
+            {
+                return true;
             }
             
-            if( ! parseBom(ch, _putback) )
-            {
-                encoding() = L"UTF-8";
-                version() = L"1.0";
-
-                if(_putback > 0 && _putback < 8)
-                {
-                    const char* pbtxt = "<?xml     ";
-                    pbtxt += _putback - 1;
-
-                    for(unsigned n = 1; n < _putback; ++n)
-                    {
-                        _putbackBuffer[n] = *--pbtxt;
-                    }
-
-                    _putbackBuffer[0] = ch;
-                }
-                
+            c = sb->sgetc();
+            
+            bool ok = onParseXml(c);
+            if( ! ok)
                 break;
-            }
+
+            sb->sbumpc();
         }
     }
 
@@ -287,58 +484,53 @@ InputSource::int_type BinaryInputSource::onGet()
     }
 
     if( isBomBegin() )
-    {        
-        std::char_traits<char>::int_type c = 0;
+    {
         std::streambuf* sb = _is->rdbuf();
+        std::char_traits<char>::int_type c = 0;
         std::char_traits<char>::int_type eofval = std::char_traits<char>::eof();
-
+        
         for( ; ; )
-        {            
-            c = sb->sbumpc();
-            
+        {           
+            c = sb->sgetc();
+ 
             if( std::char_traits<char>::eq_int_type(c, eofval) )
             {
                 break;    
             }
 
-            char ch = 0;
-            if(_mbSize == 1)
-            {
-                ch = std::char_traits<char>::to_char_type(c);
-            }
-            else if(_mbSize == 2)
-            {
-                if(_mbPos == 0)
-                {
-                    ++_mbPos;
-                    continue;
-                }
-
-                _mbPos = 0;
-                ch = std::char_traits<char>::to_char_type(c);
-            }
-            else
+            char ch = std::char_traits<char>::to_char_type(c);
+            
+            if( ! onParseBom(ch) )
             {
                 break;
             }
 
-            if( ! parseBom(ch, _putback) )
+            sb->sbumpc();
+        }
+    }
+
+    if( isXmlBegin(_xmlState) )
+    {
+        std::streambuf* sb = _is->rdbuf();
+        std::char_traits<char>::int_type c = 0;
+        std::char_traits<char>::int_type eofval = std::char_traits<char>::eof();
+        
+        for( ; ; )
+        {            
+            c = sb->sgetc();
+ 
+            if( std::char_traits<char>::eq_int_type(c, eofval) )
             {
-                if(_putback > 0 && _putback < 8)
-                {
-                    const char* pbtxt = "<?xml     ";
-                    pbtxt += _putback - 1;
-
-                    for(unsigned n = 1; n < _putback; ++n)
-                    {
-                        _putbackBuffer[n] = *--pbtxt;
-                    }
-
-                    _putbackBuffer[0] = ch;
-                }
-                
+                break;    
+            }
+            
+            bool ok = onParseXml(c);
+            if( ! ok)
+            {
                 break;
             }
+
+            sb->sbumpc();
         }
     }
     
@@ -358,124 +550,6 @@ bool BinaryInputSource::onGetSomeData()
         return false;
 
     return true;
-}
-
-
-bool BinaryInputSource::isBomBegin() const
-{
-    return _state != OnBomEnd;
-}
-
-
-// TODO: parse encoding name and call virtual function so use can 
-//       return pointer to codec: 
-//
-//       Codec* onEncoding(const char* name)
-//
-//       This function could also be part of the XmlResolver or some
-//       context class that would be useful in other situations too...
-bool BinaryInputSource::parseBom(unsigned char c, std::size_t& putback)
-{    
-    switch(_state)
-    {
-        case OnBomBegin:
-            if(c == 0xef)
-                _state = OnBomUtf8_0;
-            else if(c == '<')
-            {
-                _state = On8Bit;
-            }
-            else
-            {
-                putback = 1;
-                _state = OnBomEnd;
-            }
-
-            break;
-
-        case OnBomUtf8_0:
-            if(c == 0xbb)
-                _state = OnBomUtf8_1;
-            else
-                _state = OnBomEnd;
-                    
-            break;
-
-        case OnBomUtf8_1:
-            if(c == 0xbf)
-            {
-                _tbuf.setCodec(&_utf8Codec);
-            }
-
-            _state = OnBomEnd;
-            break;
-
-        case On8Bit:
-            if(c == '?')
-            {
-                _state = On8Bit_1;
-                break;
-            }
-                
-            putback = 2;
-            _state = OnBomEnd;
-            break;
-
-        case On8Bit_1:
-            if(c == 'x')
-            {
-                _state = On8Bit_2;
-                break;
-            }
-
-            _state = OnBomEnd;
-            break;
-            
-        case On8Bit_2:
-            if(c == 'm')
-            {
-                _state = On8Bit_3;
-                break;
-            }
-
-            _state = OnBomEnd;
-            break;
-
-        case On8Bit_3:
-            if(c == 'l')
-            {
-                _state = On8Bit_4;
-                break;
-            }
-
-            _state = OnBomEnd;
-            break;
-
-        case On8Bit_4:
-            if(c == ' ' || c == '\t' || c == '\r' || c == '\n')
-            {
-                _state = On8Bit_5;
-                break;
-            }
-
-            _state = OnBomEnd;
-            break;
-
-        case On8Bit_5:
-            if(c== '>')
-                _state = OnBomEnd;
-
-            break;
-
-        case OnBomEnd:
-            assert(false);
-            break;
-
-        default:
-            break;
-    }
-
-    return _state != OnBomEnd;
 }
 
 } // namespace Xml

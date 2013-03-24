@@ -200,9 +200,9 @@ class PT_XML_API BinaryInputSource : public InputSource
         virtual bool onGetSomeData();
 
     private:
-        bool parseBom(unsigned char c, std::size_t& putback);
-
-        bool parseDeclaration(unsigned char c);
+        bool onParseXml(int c);
+        
+        bool onParseBom(unsigned char c);
 
         bool isBomBegin() const;
 
