@@ -164,8 +164,13 @@ class PT_XML_API TextInputSource : public InputSource
         virtual bool onGetSomeText();
 
     private:
+        bool onParseXml(int_type c);
+
+    private:
         std::basic_istream<Char>* _ios;
-        unsigned _state;
+        unsigned char _xmlState;
+        std::size_t _putback;
+        Pt::Char _putbackBuffer[8];
 };
 
 

@@ -162,6 +162,8 @@ bool parseXml(unsigned char& state, unsigned char c, std::size_t& putback)
 TextInputSource::TextInputSource()
 : InputSource()
 , _ios(0)
+, _xmlState(OnXmlBegin)
+, _putback(0)
 { 
 }
 
@@ -169,16 +171,41 @@ TextInputSource::TextInputSource()
 TextInputSource::TextInputSource(std::basic_istream<Char>& is)
 : InputSource()
 , _ios(&is)
+, _xmlState(OnXmlBegin)
+, _putback(0)
 { 
 }
 
 
 void TextInputSource::reset(std::basic_istream<Char>& ios)
 {
-    // reset bomState
+    _xmlState = OnXmlBegin;
+    _putback = 0;
     _ios = &ios;
-
     init(0);
+}
+
+
+bool TextInputSource::onParseXml(int_type ch)
+{ 
+    if( ! parseXml(_xmlState, static_cast<unsigned char>(ch), _putback) )
+    {
+        encoding() = L"UTF-8";
+        version() = L"1.0";
+                
+        _putback = _putback < 8 ? _putback : 0;
+        const char* pbtxt = "<?xml     ";
+        const char* pb = pbtxt + _putback;
+
+        for(unsigned n = 0; pb != pbtxt; ++n)
+        {
+            _putbackBuffer[n] = *--pb;
+        }
+   
+        return false;
+    }
+
+    return true;
 }
 
 
@@ -196,7 +223,33 @@ std::streamsize TextInputSource::onGetSome()
             return -1;
     }
 
-    // parse XML declaration
+    if( isXmlBegin(_xmlState) )
+    {
+        std::basic_streambuf<Char>* sb = _ios->rdbuf();
+        std::char_traits<Char>::int_type c = 0;
+        std::streamsize avail = sb->in_avail();
+        
+        for( ; ; --avail)
+        {            
+            if(avail <= 0)
+            {
+                return true;
+            }
+            
+            c = sb->sgetc();
+            
+            bool ok = onParseXml(c);
+            if( ! ok)
+                break;
+
+            sb->sbumpc();
+        }
+    }
+
+    if(_putback > 0)
+    {
+        return _putbackBuffer[--_putback];
+    }
 
     init( _ios->rdbuf() );
     return _ios->rdbuf()->in_avail();
@@ -210,7 +263,35 @@ InputSource::int_type TextInputSource::onGet()
         return std::char_traits<Char>::eof();
     }
 
-    // parse XML dclaration
+    if( isXmlBegin(_xmlState) )
+    {
+        std::basic_streambuf<Char>* sb = _ios->rdbuf();
+        std::char_traits<Char>::int_type c = 0;
+        std::char_traits<Char>::int_type eofval = std::char_traits<Char>::eof();
+        
+        for( ; ; )
+        {            
+            c = sb->sgetc();
+ 
+            if( std::char_traits<Char>::eq_int_type(c, eofval) )
+            {
+                break;    
+            }
+            
+            bool ok = onParseXml(c);
+            if( ! ok)
+            {
+                break;
+            }
+
+            sb->sbumpc();
+        }
+    }
+
+    if(_putback > 0)
+    {
+        return _putbackBuffer[--_putback];
+    }
 
     init( _ios->rdbuf() );
     return _ios->rdbuf()->sbumpc();
