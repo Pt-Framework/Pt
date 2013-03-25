@@ -28,6 +28,7 @@
  
 #include <Pt/Xml/InputSource.h>
 #include <Pt/Xml/XmlError.h>
+#include <Pt/Xml/XmlResolver.h>
 #include <cassert>
 
 namespace Pt {
@@ -43,7 +44,46 @@ enum XmlParseState
     OnXmlDeclBegin_m,
     OnXmlDeclBegin_l,
     OnXmlDecl,
+
+    OnXmlDeclVersion_v,
+    OnXmlDeclVersion_e,
+    OnXmlDeclVersion_r,
+    OnXmlDeclVersion_s,
+    OnXmlDeclVersion_i,
+    OnXmlDeclVersion_o,
+    OnXmlDeclVersion_n,
+    OnXmlDeclVersion_Eq,
+    OnXmlDeclVersion_Quot,
+    OnXmlDeclVersion_Apos,
+
+    OnXmlDeclEncoding_e,
+    OnXmlDeclEncoding_n1,
+    OnXmlDeclEncoding_c,
+    OnXmlDeclEncoding_o,
+    OnXmlDeclEncoding_d,
+    OnXmlDeclEncoding_i,
+    OnXmlDeclEncoding_n2,
+    OnXmlDeclEncoding_g,
+    OnXmlDeclEncoding_Eq,
+    OnXmlDeclEncoding_Quot,
+    OnXmlDeclEncoding_Apos,
+
+    OnXmlDeclStandalone_s,
+    OnXmlDeclStandalone_t,
+    OnXmlDeclStandalone_a1,
+    OnXmlDeclStandalone_n1,
+    OnXmlDeclStandalone_d,
+    OnXmlDeclStandalone_a2,
+    OnXmlDeclStandalone_l,
+    OnXmlDeclStandalone_o,
+    OnXmlDeclStandalone_n2,
+    OnXmlDeclStandalone_e,
+    OnXmlDeclStandalone_Eq,
+    OnXmlDeclStandalone_Quot,
+    OnXmlDeclStandalone_Apos,
+
     OnXmlDeclClose,
+    OnXmlDeclCloseQuest,
     OnXmlDeclEnd = 64
 };
 
@@ -53,8 +93,9 @@ bool isXmlBegin(unsigned xmlState)
     return xmlState != OnXmlDeclEnd;
 }
 
+const char PutbackParseXml[8] = {'<', '?', 'x', 'm','l', ' ', ' ', ' '};
 
-bool parseXml(unsigned char& state, unsigned char c, std::size_t& putback)
+bool parseXml(unsigned char& state, unsigned char c, const char*& pbBegin, const char*& pbEnd, XmlDeclaration& decl)
 {
     switch(state)
     {
@@ -77,7 +118,8 @@ bool parseXml(unsigned char& state, unsigned char c, std::size_t& putback)
             }
             else
             {
-                putback = 1;
+                pbBegin = PutbackParseXml;
+                pbEnd = PutbackParseXml + 1;
                 state = OnXmlDeclEnd;
             }
 
@@ -90,7 +132,8 @@ bool parseXml(unsigned char& state, unsigned char c, std::size_t& putback)
             }
             else
             {
-                putback = 2;
+                pbBegin = PutbackParseXml;
+                pbEnd = PutbackParseXml + 2;
                 state = OnXmlDeclEnd;
             }
 
@@ -103,7 +146,8 @@ bool parseXml(unsigned char& state, unsigned char c, std::size_t& putback)
             }
             else
             {
-                putback = 3;
+                pbBegin = PutbackParseXml;
+                pbEnd = PutbackParseXml + 3;
                 state = OnXmlDeclEnd;
             }
 
@@ -116,7 +160,8 @@ bool parseXml(unsigned char& state, unsigned char c, std::size_t& putback)
             }
             else
             {
-                putback = 4;
+                pbBegin = PutbackParseXml;
+                pbEnd = PutbackParseXml + 4;
                 state = OnXmlDeclEnd;
             }
 
@@ -129,18 +174,329 @@ bool parseXml(unsigned char& state, unsigned char c, std::size_t& putback)
             }
             else
             {
-                putback = 5;
+                pbBegin = PutbackParseXml;
+                pbEnd = PutbackParseXml + 5;
                 state = OnXmlDeclEnd;
             }
 
             break;
 
         case OnXmlDecl:
-            if(c == '>')
-            {
-                state = OnXmlDeclClose;
-            }
+            if(c == '?')
+                state = OnXmlDeclCloseQuest;
+            else if(c == 'v')
+                state = OnXmlDeclVersion_v;
+            else if(c == 'e')
+                state = OnXmlDeclEncoding_e;
+            else if(c == 's')
+                state = OnXmlDeclStandalone_s;
+            else if(c == ' ' || c == '\t' || c == '\r' || c == '\n')
+                state = OnXmlDecl;
+            else
+                state = OnXmlDeclEnd;
 
+            break;
+
+        case OnXmlDeclVersion_v:
+            if(c == 'e')
+                state = OnXmlDeclVersion_e;
+            else
+                state = OnXmlDeclEnd;
+
+            break;
+
+        case OnXmlDeclVersion_e:
+            if(c == 'r')
+                state = OnXmlDeclVersion_r;
+            else
+                state = OnXmlDeclEnd;
+
+            break;
+
+        case OnXmlDeclVersion_r:
+            if(c == 's')
+                state = OnXmlDeclVersion_s;
+            else
+                state = OnXmlDeclEnd;
+
+            break;
+
+        case OnXmlDeclVersion_s:
+            if(c == 'i')
+                state = OnXmlDeclVersion_i;
+            else
+                state = OnXmlDeclEnd;
+
+            break;
+
+        case OnXmlDeclVersion_i:
+            if(c == 'o')
+                state = OnXmlDeclVersion_o;
+            else
+                state = OnXmlDeclEnd;
+
+            break;
+
+        case OnXmlDeclVersion_o:
+            if(c == 'n')
+                state = OnXmlDeclVersion_n;
+            else
+                state = OnXmlDeclEnd;
+
+            break;
+
+        case OnXmlDeclVersion_n:
+            if(c == '=')
+                state = OnXmlDeclVersion_Eq;
+            else if(c == ' ' || c == '\t' || c == '\r' || c == '\n' )
+                state = OnXmlDeclVersion_n;
+            else
+                state = OnXmlDeclEnd;
+
+            break;
+
+        case OnXmlDeclVersion_Eq:
+            if(c == '"')
+                state = OnXmlDeclVersion_Quot;
+            else if(c == '\'')
+                state = OnXmlDeclVersion_Apos;
+            else if(c == ' ' || c == '\t' || c == '\r' || c == '\n' )
+                state = OnXmlDeclVersion_Eq;
+            else
+                state = OnXmlDeclEnd;
+
+            break;
+
+        case OnXmlDeclVersion_Quot:
+            if(c == '"')
+                state = OnXmlDecl;
+            else
+                decl.version() += c;
+
+            break;
+
+        case OnXmlDeclVersion_Apos:
+            if(c == '\'')
+                state = OnXmlDecl;
+            else
+                decl.version() += c;
+            
+            break;
+
+        case OnXmlDeclEncoding_e:
+            if(c == 'n')
+                state = OnXmlDeclEncoding_n1;
+            else
+                state = OnXmlDeclEnd;
+
+            break;
+
+        case OnXmlDeclEncoding_n1:
+            if(c == 'c')
+                state = OnXmlDeclEncoding_c;
+            else
+                state = OnXmlDeclEnd;
+
+            break;
+
+        case OnXmlDeclEncoding_c:
+            if(c == 'o')
+                state = OnXmlDeclEncoding_o;
+            else
+                state = OnXmlDeclEnd;
+
+            break;
+
+        case OnXmlDeclEncoding_o:
+            if(c == 'd')
+                state = OnXmlDeclEncoding_d;
+            else
+                state = OnXmlDeclEnd;
+
+            break;
+
+        case OnXmlDeclEncoding_d:
+            if(c == 'i')
+                state = OnXmlDeclEncoding_i;
+            else
+                state = OnXmlDeclEnd;
+
+            break;
+
+        case OnXmlDeclEncoding_i:
+            if(c == 'n')
+                state = OnXmlDeclEncoding_n2;
+            else
+                state = OnXmlDeclEnd;
+
+            break;
+
+        case OnXmlDeclEncoding_n2:
+            if(c == 'g')
+                state = OnXmlDeclEncoding_g;
+            else
+                state = OnXmlDeclEnd;
+
+            break;
+
+        case OnXmlDeclEncoding_g:
+            if(c == '=')
+                state = OnXmlDeclEncoding_Eq;
+            else if(c == ' ' || c == '\t' || c == '\r' || c == '\n' )
+                state = OnXmlDeclEncoding_g;
+            else
+                state = OnXmlDeclEnd;
+
+            break;
+
+        case OnXmlDeclEncoding_Eq:
+            if(c == '"')
+                state = OnXmlDeclEncoding_Quot;
+            else if(c == '\'')
+                state = OnXmlDeclEncoding_Apos;
+            else if(c == ' ' || c == '\t' || c == '\r' || c == '\n' )
+                state = OnXmlDeclEncoding_Eq;
+            else
+                state = OnXmlDeclEnd;
+
+            break;
+
+        case OnXmlDeclEncoding_Quot:
+            if(c == '"')
+                state = OnXmlDecl;
+            else
+                decl.encoding() += c;
+
+            break;
+
+        case OnXmlDeclEncoding_Apos:
+            if(c == '\'')
+                state = OnXmlDecl;
+            else
+                decl.encoding() += c;
+
+            break;
+
+        case OnXmlDeclStandalone_s:
+            if(c == 't')
+                state = OnXmlDeclStandalone_t;
+            else
+                state = OnXmlDeclEnd;
+
+            break;
+
+        case OnXmlDeclStandalone_t:
+            if(c == 'a')
+                state = OnXmlDeclStandalone_a1;
+            else
+                state = OnXmlDeclEnd;
+
+            break;
+
+        case OnXmlDeclStandalone_a1:
+            if(c == 'n')
+                state = OnXmlDeclStandalone_n1;
+            else
+                state = OnXmlDeclEnd;
+
+            break;
+
+        case OnXmlDeclStandalone_n1:
+            if(c == 'd')
+                state = OnXmlDeclStandalone_d;
+            else
+                state = OnXmlDeclEnd;
+
+            break;
+
+        case OnXmlDeclStandalone_d:
+            if(c == 'a')
+                state = OnXmlDeclStandalone_a2;
+            else
+                state = OnXmlDeclEnd;
+
+            break;
+
+        case OnXmlDeclStandalone_a2:
+            if(c == 'l')
+                state = OnXmlDeclStandalone_l;
+            else
+                state = OnXmlDeclEnd;
+
+            break;
+
+        case OnXmlDeclStandalone_l:
+            if(c == 'o')
+                state = OnXmlDeclStandalone_o;
+            else
+                state = OnXmlDeclEnd;
+
+            break;
+
+        case OnXmlDeclStandalone_o:
+            if(c == 'n')
+                state = OnXmlDeclStandalone_n2;
+            else
+                state = OnXmlDeclEnd;
+
+            break;
+
+        case OnXmlDeclStandalone_n2:
+            if(c == 'e')
+                state = OnXmlDeclStandalone_e;
+            else
+                state = OnXmlDeclEnd;
+
+            break;
+
+        case OnXmlDeclStandalone_e:
+            if(c == '=')
+                state = OnXmlDeclStandalone_Eq;
+            else if(c == ' ' || c == '\t' || c == '\r' || c == '\n' )
+                state = OnXmlDeclStandalone_e;
+            else
+                state = OnXmlDeclEnd;
+
+            break;
+
+        case OnXmlDeclStandalone_Eq:
+            if(c == '"')
+                state = OnXmlDeclStandalone_Quot;
+            else if(c == '\'')
+                state = OnXmlDeclStandalone_Apos;
+            else if(c == ' ' || c == '\t' || c == '\r' || c == '\n' )
+                state = OnXmlDeclStandalone_Eq;
+            else
+                state = OnXmlDeclEnd;
+
+            break;
+
+        case OnXmlDeclStandalone_Quot:
+            if(c == '"')
+                state = OnXmlDecl;
+            else if(c == 'y')
+                decl.setStandalone(true);
+            else if(c == 'n')
+                decl.setStandalone(false);
+
+            break;
+
+        case OnXmlDeclStandalone_Apos:
+            if(c == '\'')
+                state = OnXmlDecl;
+            else if(c == 'y')
+                decl.setStandalone(true);
+            else if(c == 'n')
+                decl.setStandalone(false);
+            
+            break;
+
+        case OnXmlDeclCloseQuest:
+            if(c == '>')
+                state = OnXmlDeclClose;
+            else
+                state = OnXmlDeclEnd;
+            
             break;
 
         case OnXmlDeclClose:
@@ -163,7 +519,8 @@ TextInputSource::TextInputSource()
 : InputSource()
 , _ios(0)
 , _xmlState(OnXmlBegin)
-, _putback(0)
+, _pbBegin(0)
+, _pbEnd(0)
 { 
 }
 
@@ -172,36 +529,31 @@ TextInputSource::TextInputSource(std::basic_istream<Char>& is)
 : InputSource()
 , _ios(&is)
 , _xmlState(OnXmlBegin)
-, _putback(0)
+, _pbBegin(0)
+, _pbEnd(0)
 { 
 }
 
 
 void TextInputSource::reset(std::basic_istream<Char>& ios)
 {
-    _xmlState = OnXmlBegin;
-    _putback = 0;
-    _ios = &ios;
     init(0);
+
+    _ios = &ios;
+
+    _xmlDecl.clear();
+
+    _xmlState = OnXmlBegin;
+    _pbBegin = 0;
+    _pbEnd = 0;
 }
 
 
-bool TextInputSource::onParseXml(int_type ch)
+bool TextInputSource::onParseXml(int_type c)
 { 
-    if( ! parseXml(_xmlState, static_cast<unsigned char>(ch), _putback) )
+    char ch = static_cast<unsigned char>(c);
+    if( ! parseXml(_xmlState, ch, _pbBegin, _pbEnd, _xmlDecl) )
     {
-        encoding() = L"UTF-8";
-        version() = L"1.0";
-                
-        _putback = _putback < 8 ? _putback : 0;
-        const char* pbtxt = "<?xml     ";
-        const char* pb = pbtxt + _putback;
-
-        for(unsigned n = 0; pb != pbtxt; ++n)
-        {
-            _putbackBuffer[n] = *--pb;
-        }
-   
         return false;
     }
 
@@ -246,12 +598,12 @@ std::streamsize TextInputSource::onGetSome()
         }
     }
 
-    if(_putback > 0)
+    if(_pbBegin < _pbEnd)
     {
-        return _putbackBuffer[--_putback];
+        return *_pbBegin++;
     }
 
-    init( _ios->rdbuf() );
+    init( _ios->rdbuf(), &_xmlDecl );
     return _ios->rdbuf()->in_avail();
 }
 
@@ -288,12 +640,12 @@ InputSource::int_type TextInputSource::onGet()
         }
     }
 
-    if(_putback > 0)
+    if(_pbBegin < _pbEnd)
     {
-        return _putbackBuffer[--_putback];
+        return *_pbBegin++;
     }
 
-    init( _ios->rdbuf() );
+    init( _ios->rdbuf(), &_xmlDecl );
     return _ios->rdbuf()->sbumpc();
 }
 
@@ -331,6 +683,14 @@ bool StringInputSource::onGetSomeText()
     FF FE        UTF-16, little-endian
     EF BB BF     UTF-8
 */
+enum BomEncoding
+{
+    Bom8 = 1,
+    Bom16LE = 3,
+    Bom16BE = 2,
+};
+
+
 enum BomParseState
 {
     OnBomBegin = 0,
@@ -343,142 +703,90 @@ enum BomParseState
 };
 
 
+bool isBomBegin(unsigned char state)
+{
+    return state != OnBomEnd;
+}
+
+
 BinaryInputSource::BinaryInputSource()
 : InputSource()
+, _resolver(0)
 , _is(0)
 , _utf8Codec(1)
 , _tbuf(&_utf8Codec)
-, _state(OnBomBegin)
+, _bomState(OnBomBegin)
+, _bomEncoding(Bom8)
 , _xmlState(OnXmlBegin)
-, _mbSize(1)
-, _mbPos(0)
-, _putback(0)
-{ }
+, _pbBegin(0)
+, _pbEnd(0)
+{
+}
 
 
 BinaryInputSource::BinaryInputSource(std::istream& is)
 : InputSource()
+, _resolver(0)
 , _is(&is)
 , _utf8Codec(1)
 , _tbuf(&is, &_utf8Codec)
-, _state(OnBomBegin)
+, _bomState(OnBomBegin)
+, _bomEncoding(Bom8)
 , _xmlState(OnXmlBegin)
-, _mbSize(1)
-, _mbPos(0)
-, _putback(0)
+, _pbBegin(0)
+, _pbEnd(0)
+{ 
+}
+
+
+BinaryInputSource::BinaryInputSource(XmlResolver& resolver)
+: InputSource()
+, _resolver(&resolver)
+, _is(0)
+, _utf8Codec(1)
+, _tbuf(&_utf8Codec)
+, _bomState(OnBomBegin)
+, _bomEncoding(Bom8)
+, _xmlState(OnXmlBegin)
+, _pbBegin(0)
+, _pbEnd(0)
+{
+}
+
+
+BinaryInputSource::BinaryInputSource(XmlResolver& resolver, std::istream& is)
+: InputSource()
+, _resolver(&resolver)
+, _is(&is)
+, _utf8Codec(1)
+, _tbuf(&is, &_utf8Codec)
+, _bomState(OnBomBegin)
+, _bomEncoding(Bom8)
+, _xmlState(OnXmlBegin)
+, _pbBegin(0)
+, _pbEnd(0)
 { 
 }
 
 
 void BinaryInputSource::reset(std::istream& is)
 { 
+    init(0);
+
+    _resolver = 0;
     _is = &is;
     _tbuf.attach(is); 
     _tbuf.setCodec(&_utf8Codec);
-    _state = OnBomBegin;
+
+    _xmlDecl.clear();
+
+    _mbState = MBState();
+    _bomState = OnBomBegin;
+    _bomEncoding = Bom8;
+
     _xmlState = OnXmlBegin;
-    _mbSize = 1;
-    _mbPos = 0;
-    _putback = 0;
-    
-    init(0);
-}
-
-
-bool BinaryInputSource::onParseXml(int c)
-{ 
-    char ch = std::char_traits<char>::to_char_type(c);
-
-    if(_mbSize == 2)
-    {
-        if(_mbPos == 0)
-        {
-            ++_mbPos;
-            return true;
-        }
-
-        _mbPos = 0;
-        ch = std::char_traits<char>::to_char_type(c);
-    }
-            
-    if( ! parseXml(_xmlState, ch, _putback) )
-    {
-        encoding() = L"UTF-8";
-        version() = L"1.0";
-                
-        _putback = _putback < 8 ? _putback : 0;
-        const char* pbtxt = "<?xml     ";
-        const char* pb = pbtxt + _putback;
-
-        for(unsigned n = 0; pb != pbtxt; ++n)
-        {
-            _putbackBuffer[n] = *--pb;
-        }
-   
-        return false;
-    }
-
-    return true;
-}
-
-
-bool BinaryInputSource::isBomBegin() const
-{
-    return _state != OnBomEnd;
-}
-
-
-// TODO: parse encoding name and call virtual function so use can 
-//       return pointer to codec: 
-//
-//       Codec* onEncoding(const char* name)
-//
-//       This function could also be part of the XmlResolver or some
-//       context class that would be useful in other situations too...
-bool BinaryInputSource::onParseBom(unsigned char c)
-{    
-    switch(_state)
-    {
-        case OnBomBegin:
-            if(c == 0xef)
-                _state = OnBomUtf8_0;
-            else
-                _state = OnBomEnd;
-
-            break;
-
-        case OnBomUtf8_0:
-            if(c == 0xbb)
-                _state = OnBomUtf8_1;
-            else
-                _state = OnBomEnd;
-                    
-            break;
-
-        case OnBomUtf8_1:
-            if(c == 0xbf)
-            {
-                _tbuf.setCodec(&_utf8Codec);
-                _state = OnBomUtf8_2;
-                break;
-            }
-
-            _state = OnBomEnd;
-            break;
-
-        case OnBomUtf8_2:
-            _state = OnBomEnd;
-            break;
-
-        case OnBomEnd:
-            assert(false);
-            break;
-
-        default:
-            break;
-    }
-
-    return _state != OnBomEnd;
+    _pbBegin = 0;
+    _pbEnd = 0;
 }
 
 
@@ -498,7 +806,7 @@ std::streamsize BinaryInputSource::onGetSome()
         }
     }
 
-    if( isBomBegin() )
+    if( isBomBegin(_bomState) )
     {
         std::streambuf* sb = _is->rdbuf();
         std::char_traits<char>::int_type c = 0;
@@ -540,19 +848,22 @@ std::streamsize BinaryInputSource::onGetSome()
             
             bool ok = onParseXml(c);
             if( ! ok)
+            {
+                onDeclaration();
                 break;
+            }
 
             sb->sbumpc();
         }
     }
 
-    if(_putback > 0)
+    if(_pbBegin < _pbEnd)
     {
-        return _putbackBuffer[--_putback];
+        return *_pbBegin++;
     }
 
     _tbuf.import();
-    init(&_tbuf);
+    init(&_tbuf, &_xmlDecl);
     return _tbuf.in_avail();
 }
 
@@ -564,7 +875,7 @@ InputSource::int_type BinaryInputSource::onGet()
         return std::char_traits<Char>::eof();
     }
 
-    if( isBomBegin() )
+    if( isBomBegin(_bomState) )
     {
         std::streambuf* sb = _is->rdbuf();
         std::char_traits<char>::int_type c = 0;
@@ -608,6 +919,7 @@ InputSource::int_type BinaryInputSource::onGet()
             bool ok = onParseXml(c);
             if( ! ok)
             {
+                onDeclaration();
                 break;
             }
 
@@ -615,12 +927,12 @@ InputSource::int_type BinaryInputSource::onGet()
         }
     }
     
-    if(_putback > 0)
+    if(_pbBegin < _pbEnd)
     {
-        return _putbackBuffer[--_putback];
+        return *_pbBegin++;
     }
 
-    init( &_tbuf );
+    init(&_tbuf, &_xmlDecl);
     return _tbuf.sbumpc();
 }
 
@@ -631,6 +943,112 @@ bool BinaryInputSource::onGetSomeData()
         return false;
 
     return true;
+}
+
+
+bool BinaryInputSource::onParseBom(unsigned char c)
+{    
+    switch(_bomState)
+    {
+        case OnBomBegin:
+            if(c == 0xef)
+                _bomState = OnBomUtf8_0;
+            else
+                _bomState = OnBomEnd;
+
+            break;
+
+        case OnBomUtf8_0:
+            if(c == 0xbb)
+                _bomState = OnBomUtf8_1;
+            else
+                _bomState = OnBomEnd;
+                    
+            break;
+
+        case OnBomUtf8_1:
+            if(c == 0xbf)
+            {
+                _bomState = OnBomUtf8_2;
+                break;
+            }
+
+            _bomState = OnBomEnd;
+            break;
+
+        case OnBomUtf8_2:
+            _bomState = OnBomEnd;
+            break;
+
+        case OnBomEnd:
+            assert(false);
+            break;
+
+        default:
+            break;
+    }
+
+    return _bomState != OnBomEnd;
+}
+
+
+bool BinaryInputSource::onParseXml(int c)
+{ 
+    char ch = 0;
+    
+    if(_bomEncoding == Bom8) // ASCII compatible
+    {
+        ch = std::char_traits<char>::to_char_type(c);
+    }
+    else if(_bomEncoding == Bom16BE) // ASCII subset in UTF-16-BE
+    {
+        if(_mbState.n == 0)
+        {
+            _mbState.n = 1;
+            return true;
+        }
+
+        _mbState.n = 0;
+        ch = std::char_traits<char>::to_char_type(c);
+    }
+    else if(_bomEncoding == Bom16LE)  // ASCII subset in UTF-16-LE
+    {
+        if(_mbState.n == 0)
+        {
+            _mbState.n = 1;
+            ch = std::char_traits<char>::to_char_type(c);
+            return true;
+        }
+
+        _mbState.n = 0;
+        ch = _mbState.value.mbytes[0];
+    }
+            
+    if( ! parseXml(_xmlState, ch, _pbBegin, _pbEnd, _xmlDecl) )
+    {
+        return false;
+    }
+
+    return true;
+}
+
+
+void BinaryInputSource::onDeclaration()
+{
+    // do not resolve encoding string if 
+    //     - BOM is UTF-8
+    //     - encoding string is UTF-8
+
+    if( ! _xmlDecl.encoding().empty() )
+    {
+        const char* encoding = _xmlDecl.encoding().c_str();
+        TextCodec<Char, char>* codec = 0;
+        if(_resolver)
+            codec = _resolver->resolveEncoding(encoding);
+
+        if(codec)
+            _tbuf.setCodec(codec);
+    }
 }
 
 } // namespace Xml

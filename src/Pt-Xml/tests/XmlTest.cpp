@@ -63,7 +63,7 @@ class XmlTestResolver : public Pt::Xml::XmlResolver
         }
 
     protected:
-        virtual Pt::Xml::InputSource* onResolve(const Pt::String& publicId, const Pt::String& systemId)
+        virtual Pt::Xml::InputSource* onResolveInput(const Pt::String& publicId, const Pt::String& systemId)
         {
             std::map<Pt::String, Pt::String>::iterator it;
             
@@ -78,7 +78,7 @@ class XmlTestResolver : public Pt::Xml::XmlResolver
             return 0;
         }
 
-        virtual void onRelease(Pt::Xml::InputSource* is)
+        virtual void onReleaseInput(Pt::Xml::InputSource* is)
         {
             if(is)
             {
@@ -323,8 +323,14 @@ void XmlReaderTest::DtdEmptyDocument()
     
     ++it;
     
-    Pt::Xml::DocTypeDefinition& dtd = Pt::Xml::toDocTypeDefinition(*it);
-    PT_UNIT_ASSERT_EQUALS(dtd.rootName().name(), L"test");
+    Pt::Xml::DocTypeDefinition& dtdInternal = Pt::Xml::toDocTypeDefinition(*it);
+    PT_UNIT_ASSERT_EQUALS(dtdInternal.rootName().name(), L"test");
+    PT_UNIT_ASSERT_EQUALS(reader.depth(), 0);
+
+    ++it;
+    
+    Pt::Xml::DocTypeDefinition& dtdExternal = Pt::Xml::toDocTypeDefinition(*it);
+    PT_UNIT_ASSERT_EQUALS(dtdExternal.rootName().name(), L"test");
     PT_UNIT_ASSERT_EQUALS(reader.depth(), 0);
 
     ++it;
@@ -933,9 +939,13 @@ void XmlReaderTest::EmptyDocument()
     const Pt::Xml::Node& n = *it;
 
     PT_UNIT_ASSERT(n.type() == Pt::Xml::Node::EndDocument);
-    //PT_UNIT_ASSERT(reader.version() == L"1.0");
-    //PT_UNIT_ASSERT(reader.encoding() == L"UTF-8");
-    //PT_UNIT_ASSERT(reader.isStandalone() == false);
+    PT_UNIT_ASSERT( reader.input() );
+    
+    const Pt::Xml::XmlDeclaration* xmlDecl = reader.input()->declaration();
+    PT_UNIT_ASSERT(xmlDecl);
+    PT_UNIT_ASSERT_EQUALS(xmlDecl->version(), L"1.0");
+    PT_UNIT_ASSERT_EQUALS(xmlDecl->encoding(), L"UTF-8");
+    PT_UNIT_ASSERT_EQUALS(xmlDecl->isStandalone(), false);
 }
 
 
@@ -1660,7 +1670,7 @@ void XmlReaderTest::CDATA()
 void XmlReaderTest::StartDocument()
 {
     std::stringstream input;
-    input << "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"true\"?>";
+    input << "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>";
     input << "<test>\n";
     input << "</test>\n";
 
@@ -1671,9 +1681,12 @@ void XmlReaderTest::StartDocument()
 
     Pt::Xml::StartDocument* startDoc = Pt::Xml::toStartDocument(&*it);
     PT_UNIT_ASSERT(startDoc);
-    //PT_UNIT_ASSERT_EQUALS(startDoc->version(), L"1.0");
-    //PT_UNIT_ASSERT_EQUALS(startDoc->encoding(), L"UTF-8");
-    //PT_UNIT_ASSERT_EQUALS(startDoc->isStandalone(), true);
+
+    const Pt::Xml::XmlDeclaration* xmlDecl = reader.input()->declaration();
+    PT_UNIT_ASSERT(xmlDecl);
+    PT_UNIT_ASSERT_EQUALS(xmlDecl->version(), L"1.0");
+    PT_UNIT_ASSERT_EQUALS(xmlDecl->encoding(), L"UTF-8");
+    PT_UNIT_ASSERT_EQUALS(xmlDecl->isStandalone(), true);
 
     ++it;
     Pt::Xml::StartElement* startElem = Pt::Xml::toStartElement(&*it);

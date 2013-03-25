@@ -893,6 +893,8 @@ class XmlReaderImpl
             {
                 _parse = &XmlReaderImpl::onProlog;
                 onProlog(c);
+
+                setDocumentTypeDefinition();
                 return;
             }
 
@@ -3916,12 +3918,12 @@ class XmlReaderImpl
                 }
 
             protected:
-                virtual InputSource* onResolve(const Pt::String& publicId, const Pt::String& systemId)
+                virtual InputSource* onResolveInput(const Pt::String& publicId, const Pt::String& systemId)
                 {
                     return 0;
                 }
 
-                virtual void onRelease(InputSource* is)
+                virtual void onReleaseInput(InputSource* is)
                 {
                     delete is;
                 }
@@ -3931,7 +3933,7 @@ class XmlReaderImpl
         {
             if( _resolver && _docType.isExternal() )
             {
-                InputSource* is = _resolver->resolve( _docType.publicId(), _docType.systemId() );
+                InputSource* is = _resolver->resolveInput( _docType.publicId(), _docType.systemId() );
                 if(is)
                 {
                     _input.setExternalDtd(*is, _resolver);
@@ -3957,7 +3959,7 @@ class XmlReaderImpl
                 }
                 else if( ent->isExternal() && _resolver)
                 {
-                    is = _resolver->resolve( ent->publicId(), ent->systemId() );
+                    is = _resolver->resolveInput( ent->publicId(), ent->systemId() );
                     if(is)
                         _input.addInput(*is, _resolver);
                 }
@@ -3985,7 +3987,7 @@ class XmlReaderImpl
                 }
                 else if( ent->isExternal() && _resolver)
                 {
-                    is = _resolver->resolve( ent->publicId(), ent->systemId() );
+                    is = _resolver->resolveInput( ent->publicId(), ent->systemId() );
                     if(is)
                         _input.addInput(*is, _resolver);
                 }
@@ -4100,7 +4102,9 @@ class XmlReaderImpl
 
     public:
         XmlReaderImpl(XmlResolver* resolver = 0)
-        : _resolver(resolver)
+        : _is(0)
+        , _inDel(0)
+        , _resolver(resolver)
         , _flags(XmlReader::DefaultParseFlags)
         , _notation(0)
         , _entity(0)
@@ -4122,7 +4126,9 @@ class XmlReaderImpl
         }
 
         XmlReaderImpl(InputSource& is, XmlResolver* resolver = 0)
-        : _resolver(resolver)
+        : _is(&is)
+        , _inDel(0)
+        , _resolver(resolver)
         , _flags(XmlReader::DefaultParseFlags)
         , _notation(0)
         , _entity(0)
@@ -4165,6 +4171,8 @@ class XmlReaderImpl
 
         void clear()
         {
+            delete _inDel; // obsolete when we only work with InputSource
+            _is = 0;
             _input.clear();
             
             _depth = 0;
@@ -4208,21 +4216,24 @@ class XmlReaderImpl
 
         InputSource* input()
         {
-            return _input.empty() ? 0 : _input.current();
+            return _input.empty() ? _is : _input.current();
         }
 
         void setInput(std::istream& is)
         {
             clear();
 
-            InputSource* source = new BinaryInputSource(is);
-            _input.addInput(*source, &_entityResolver);
+            _inDel = _resolver ? new BinaryInputSource(*_resolver, is)
+                               : new BinaryInputSource(is);
+            _is = _inDel;
+            _input.addInput(*_is);
         }
 
         void setInput(InputSource& is)
         {
             clear();
-            _input.addInput(is);
+            _is = &is;
+            _input.addInput(*_is);
         }
 
         void addInput(InputSource& is)
@@ -4268,7 +4279,6 @@ class XmlReaderImpl
                 InputSource* in = _input.current();
                 
                 c = in->get();
-                //std::cerr << char(c);
                 if( c == std::char_traits<Char>::eof() )
                 {            
                     _input.removeInput();
@@ -4296,7 +4306,7 @@ class XmlReaderImpl
             {
                 InputSource* in = _input.current();
 
-                std::streamsize n = in->inputAvailable();
+                std::streamsize n = in->import();
 
                 //std::char_traits<Char>::int_type c;
                 //if(n > 0)
@@ -4311,9 +4321,7 @@ class XmlReaderImpl
                         //c = std::char_traits<Char>::eof();
                 //}
                 //else
-                //{
                     //break;
-                //}
                 
                 //(this->*_parse)(c);
 
@@ -4323,11 +4331,9 @@ class XmlReaderImpl
                     //_input.bumpLine();
                 //}
 
-
-                if( n > 0)
+                if(n > 0)
                 {
                     std::char_traits<Char>::int_type c = in->get();
-                    //std::cerr << char(c);
                     (this->*_parse)(c);
 
                     // TODO: move this to state functions
@@ -4338,7 +4344,6 @@ class XmlReaderImpl
                 }
                 else
                 {           
-                    //std::streamsize n = in->getSome();
                     if(n < 0)
                     {
                         _input.removeInput();
@@ -4356,6 +4361,8 @@ class XmlReaderImpl
         }
 
     private:
+        InputSource* _is;
+        InputSource* _inDel;
         XmlResolver* _resolver;
         EntityResolver _entityResolver;
         InputStack _input;

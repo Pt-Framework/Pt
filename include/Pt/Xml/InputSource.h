@@ -37,11 +37,55 @@
 #include <Pt/String.h>
 #include <streambuf>
 #include <iostream>
+#include <string>
 #include <cstddef>
 
 namespace Pt {
 
 namespace Xml {
+
+class XmlResolver;
+
+class XmlDeclaration
+{
+    public:
+        XmlDeclaration()
+        : _standalone(false)
+        {}
+
+        ~XmlDeclaration()
+        {}
+        
+        void clear()
+        {
+            _version.clear();
+            _encoding.clear();
+            _standalone = false;
+        }
+        
+        const std::string& version() const
+        { return _version; }
+
+        std::string& version()
+        { return _version; }
+
+        const std::string& encoding() const
+        { return _encoding; }
+
+        std::string& encoding()
+        { return _encoding;}
+
+        bool isStandalone() const
+        { return _standalone; }
+        
+        void setStandalone(bool value)
+        { _standalone = value; }
+
+    private:
+        std::string _version;
+        std::string _encoding;
+        bool _standalone;
+};
 
 /** @brief Input source for the XML reader
 */
@@ -53,10 +97,8 @@ class InputSource : private NonCopyable
     public:
         InputSource()
         : _rdbuf(0)
-        //, _buffer(0)
-        //, _bufferEnd(0)
         , _line(1)
-        , _standalone(false)
+        , _decl(0)
         {}
 
         virtual ~InputSource()
@@ -68,81 +110,38 @@ class InputSource : private NonCopyable
         void setLine(std::size_t n)
         { _line = n; }
 
-        inline std::streamsize inputAvailable()
+        inline std::streamsize import()
         { 
             return  (_rdbuf && _rdbuf->in_avail() > 0) ? 1 
                                                        : onGetSome(); 
         }
-        
-        //std::streamsize getSome()
-        //{             
-            //if( _rdbuf )
-            //{ 
-                //std::streamsize n = _rdbuf->in_avail();
-                //if(n > 0)
-                    //return n;
-            //}
-            //else if(_buffer)
-            //{
-                //return _bufferEnd - _buffer;
-            //}
 
-            //return onGetSome();
-        //}
-        
         inline int_type get()
         {
             return _rdbuf ? _rdbuf->sbumpc() 
                           : onGet();
         }
 
+        const XmlDeclaration* declaration() const
+        { return _decl; }
+
     protected:
-        void init(std::basic_streambuf<Char>* rdbuf = 0)
+        // InputSource does not take ownership of rdbuf and decl
+        void init(std::basic_streambuf<Char>* rdbuf = 0, XmlDeclaration* decl = 0)
         {
             _line = 0;
             _rdbuf = rdbuf;
-            _standalone = false;
-            //_buffer = 0;
-            //_bufferEnd = 0;
+            _decl = decl;
         }
-
-        //void init(const Char* buf, const Char* bufEnd)
-        //{
-            //_line = 0;
-            //_rdbuf = 0;
-            //_buffer = buf;
-            //_bufferEnd = bufEnd;
-        //}
 
         virtual std::streamsize onGetSome() = 0;
 
         virtual int_type onGet() = 0;
 
-        String& version()
-        { return _version; }
-
-        String& encoding()
-        { return _encoding;}
-
     private:
-        //inline int_type getBuffered()
-        //{
-            //const Char* ch = _buffer;
-            //if(++_buffer == _bufferEnd)
-            //{
-                //_buffer = 0;
-            //}
-            //return static_cast<int_type>(*ch); 
-        //}
-
         std::basic_streambuf<Char>* _rdbuf;
-        //const Char* _buffer;
-        //const Char* _bufferEnd;
         std::size_t _line;
-
-        String _encoding;
-        String _version;
-        bool _standalone;
+        XmlDeclaration* _decl;
 };
 
 
@@ -160,7 +159,6 @@ class PT_XML_API TextInputSource : public InputSource
 
         virtual int_type onGet();
 
-    protected:
         virtual bool onGetSomeText();
 
     private:
@@ -168,9 +166,10 @@ class PT_XML_API TextInputSource : public InputSource
 
     private:
         std::basic_istream<Char>* _ios;
+        XmlDeclaration _xmlDecl;
         unsigned char _xmlState;
-        std::size_t _putback;
-        Pt::Char _putbackBuffer[8];
+        const char* _pbBegin;
+        const char* _pbEnd;
 };
 
 
@@ -188,11 +187,15 @@ class PT_XML_API StringInputSource : public TextInputSource
 
 
 class PT_XML_API BinaryInputSource : public InputSource
-{
+{  
     public:
         BinaryInputSource();
 
         explicit BinaryInputSource(std::istream& is);
+
+        explicit BinaryInputSource(XmlResolver& resolver);
+
+        BinaryInputSource(XmlResolver& resolver, std::istream& is);
 
         void reset(std::istream& is);
 
@@ -201,26 +204,27 @@ class PT_XML_API BinaryInputSource : public InputSource
 
         virtual int_type onGet();
 
-    protected:
         virtual bool onGetSomeData();
 
     private:
-        bool onParseXml(int c);
-        
         bool onParseBom(unsigned char c);
 
-        bool isBomBegin() const;
+        bool onParseXml(int c);
+
+        void onDeclaration();
 
     private:
+        XmlResolver* _resolver;
         std::istream* _is;
         Utf8Codec _utf8Codec;
         TextBuffer _tbuf;
-        unsigned char _state;
+        XmlDeclaration _xmlDecl;
+        MBState _mbState;
+        unsigned char _bomState;
+        unsigned char _bomEncoding;
         unsigned char _xmlState;
-        unsigned char _mbSize;
-        unsigned char _mbPos;
-        std::size_t _putback;
-        Pt::Char _putbackBuffer[8];
+        const char* _pbBegin;
+        const char* _pbEnd;
 };
 
 

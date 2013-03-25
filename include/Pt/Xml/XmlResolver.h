@@ -31,7 +31,7 @@
 #include <Pt/Xml/Api.h>
 #include <Pt/Xml/XmlError.h>
 #include <Pt/String.h>
-#include <vector>
+#include <Pt/TextCodec.h>
 
 namespace Pt {
 
@@ -45,23 +45,31 @@ class PT_XML_API XmlResolver
         virtual ~XmlResolver()
         {}
 
-        InputSource* resolve(const Pt::String& publicId, const Pt::String& systemId)
+        InputSource* resolveInput(const Pt::String& publicId, const Pt::String& systemId)
         {
-            return onResolve(publicId, systemId);
+            return onResolveInput(publicId, systemId);
         }
 
-        void release(InputSource* is)
+        void releaseInput(InputSource* is)
         {
-            onRelease(is);
+            onReleaseInput(is);
+        }
+
+        TextCodec<Char, char>* resolveEncoding(const char* encoding)
+        {
+            return onResolveEncoding(encoding);
         }
 
     protected:
         XmlResolver()
         {}
 
-        virtual InputSource* onResolve(const Pt::String& publicId, const Pt::String& systemId) = 0;
+        virtual InputSource* onResolveInput(const Pt::String& publicId, const Pt::String& systemId) = 0;
 
-        virtual void onRelease(InputSource* is) = 0;
+        virtual void onReleaseInput(InputSource* is) = 0;
+
+        virtual TextCodec<Char, char>* onResolveEncoding(const char* encoding)
+        { return 0; }
 };
 
 } // namespace Xml

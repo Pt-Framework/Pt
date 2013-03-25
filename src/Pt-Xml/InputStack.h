@@ -32,7 +32,7 @@
 #include <Pt/Xml/Api.h>
 #include <Pt/Xml/InputSource.h>
 #include <Pt/Xml/XmlResolver.h>
-#include <stack>
+#include <vector>
 #include <cstddef>
 
 namespace Pt {
@@ -67,7 +67,12 @@ class InputStack
         { _currentInput->setLine( _currentInput->line() + 1 ); }
 
         std::size_t line() const
-        { return _currentInput->line(); }
+        { 
+            if( ! _external.empty() )
+                return _external[0].source->line();
+
+            return _currentInput->line(); 
+        }
 
         bool empty() const
         { return _currentInput == &_nullInput; }
@@ -87,7 +92,7 @@ class InputStack
 
         void addInput(InputSource& is, XmlResolver* resolver = 0)
         {
-            _external.push( Input(&is, resolver) );
+            _external.push_back( Input(&is, resolver) );
             _currentInput = &is;
         }
 
@@ -106,7 +111,7 @@ class InputStack
 
             if( ! _external.empty() )
             {
-                Input& in = _external.top();
+                Input& in = _external.back();
                 InputSource* is = in.source;
                 XmlResolver* resolver = in.resolver;                        
 
@@ -114,19 +119,19 @@ class InputStack
                     _externalDtd = 0;
 
                 if(resolver)
-                    resolver->release(is);
+                    resolver->releaseInput(is);
 
-                _external.pop();
+                _external.pop_back();
                         
                 _currentInput = _external.empty() ? &_nullInput 
-                                                  : _external.top().source;
+                                                  : _external.back().source;
             }
         }
 
     private:
         NullInputSource _nullInput;
         InputSource* _externalDtd;
-        std::stack<Input> _external;
+        std::vector<Input> _external;
         InputSource* _currentInput;
 };
 
