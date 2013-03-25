@@ -112,8 +112,9 @@ class InputSource : private NonCopyable
 
         inline std::streamsize import()
         { 
-            return  (_rdbuf && _rdbuf->in_avail() > 0) ? 1 
-                                                       : onGetSome(); 
+            std::streamsize r = 0;
+            return  (_rdbuf && (r =_rdbuf->in_avail()) > 0) ? r 
+                                                            : onGetSome();
         }
 
         inline int_type get()

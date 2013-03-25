@@ -4307,53 +4307,54 @@ class XmlReaderImpl
                 InputSource* in = _input.current();
 
                 std::streamsize n = in->import();
+                // TODO: cache number of available bytes
 
-                //std::char_traits<Char>::int_type c;
-                //if(n > 0)
-                //{
-                    //c = in->get();
-                //}
-                //else if(n < 0)
-                //{
-                    //_input.removeInput();
-                        
-                    //if( _input.empty() )
-                        //c = std::char_traits<Char>::eof();
-                //}
-                //else
-                    //break;
-                
-                //(this->*_parse)(c);
-
-                //// TODO: move this to state functions
-                //if(c == '\n')
-                //{
-                    //_input.bumpLine();
-                //}
-
+                std::char_traits<Char>::int_type c;
                 if(n > 0)
                 {
-                    std::char_traits<Char>::int_type c = in->get();
-                    (this->*_parse)(c);
+                    c = in->get();
+                }
+                else if(n < 0)
+                {
+                    _input.removeInput();
 
-                    // TODO: move this to state functions
-                    if(c == '\n')
-                    {
-                        _input.bumpLine();
-                    }
+                    if( _input.empty() )
+                        c = std::char_traits<Char>::eof();
                 }
                 else
-                {           
-                    if(n < 0)
-                    {
-                        _input.removeInput();
+                    break;
 
-                        if( _input.empty() )
-                            (this->*_parse)( std::char_traits<Char>::eof() );
-                    }
-                    else if (n == 0)
-                        break;
+                (this->*_parse)(c);
+
+                // TODO: move this to state functions
+                if(c == '\n')
+                {
+                    _input.bumpLine();
                 }
+
+                //if(n > 0)
+                //{
+                    //std::char_traits<Char>::int_type c = in->get();
+                    //(this->*_parse)(c);
+
+                    //// TODO: move this to state functions
+                    //if(c == '\n')
+                    //{
+                        //_input.bumpLine();
+                    //}
+                //}
+                //else
+                //{           
+                    //if(n < 0)
+                    //{
+                        //_input.removeInput();
+
+                        //if( _input.empty() )
+                            //(this->*_parse)( std::char_traits<Char>::eof() );
+                    //}
+                    //else if (n == 0)
+                        //break;
+                //}
             } 
             while( ! _current);
 
