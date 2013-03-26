@@ -38,9 +38,6 @@ namespace Pt {
 
 namespace Xml {
 
-class Characters;
-class Attribute;
-
 class Entity
 {
     public:
