@@ -12,7 +12,6 @@ PT_XML_SOURCES = AttributeDeclaration.cpp
                  DtdContext.cpp
                  ElementDeclaration.cpp
                  Entity.cpp
-                 EntityMapping.cpp
                  InputSource.cpp
                  NamespaceContext.cpp
                  StartElement.cpp

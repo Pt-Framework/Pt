@@ -711,9 +711,6 @@
     <ClInclude Include="..\..\include\Pt\Xml\InputSource.h">
       <Filter>Pt-Xml</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Xml\EntityMapping.h">
-      <Filter>Pt-Xml</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Pt-Xml\ElementDeclaration.h">
       <Filter>Pt-Xml</Filter>
     </ClInclude>
@@ -1459,9 +1456,6 @@
       <Filter>Pt-Xml</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Xml\DocTypeDefinition.cpp">
-      <Filter>Pt-Xml</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Xml\EntityMapping.cpp">
       <Filter>Pt-Xml</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Xml\ElementDeclaration.cpp">

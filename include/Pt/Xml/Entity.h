@@ -32,6 +32,7 @@
 #include <Pt/Xml/Node.h>
 #include <Pt/NonCopyable.h>
 #include <Pt/String.h>
+#include <map>
 
 namespace Pt {
 
@@ -99,6 +100,52 @@ class Entity
         Pt::String _systemId;
         Pt::String _value;
         bool _ndata;
+};
+
+
+/** @brief Handles character and entity references.
+*/
+class PT_XML_API EntityMapping
+{
+    typedef std::map<String, Entity> Entities;
+
+    public:
+        /** @brief Constructs with the XML default entities.
+        */
+        EntityMapping();
+
+        //! @brief Destructor.
+        ~EntityMapping();
+
+        void clear();
+
+        //! @brief Returns a pointer to the declared Entity or 0 for duplicates
+        Entity* declareEntity(const Pt::String& name);
+
+        /** @brief Replaces the entity with its string value.
+        */
+        static bool resolveDefaultEntity(String& entity);
+
+        static bool resolveCharacterEntity(String& entity);
+
+        const Entity* resolveEntity(const Pt::String& name) const;
+
+        /** @brief Returns the entity reference for a character.
+
+            If no entity reference is found, a null pointer is returned.
+        */
+        const Pt::Char* encode(Char ch) const;
+
+        /** @brief Replaces characters with entities.
+            
+            If characters are found in @a str, which are represented by an
+            entity reference, they will be replaced. The result is written
+            to the output stream @a os.
+        */
+        void encode(std::basic_ostream<Char>& os, const Pt::Char* str) const;
+
+    private:
+        Entities _entities;
 };
 
 

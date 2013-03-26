@@ -32,7 +32,7 @@
 #include <Pt/Xml/Api.h>
 #include <Pt/Xml/Node.h>
 #include <Pt/Xml/QName.h>
-#include <Pt/Xml/EntityMapping.h>
+#include <Pt/Xml/Entity.h>
 #include <Pt/Xml/Notation.h>
 #include <Pt/String.h>
 #include <Pt/NonCopyable.h>
