@@ -114,7 +114,7 @@ class InputSource : private NonCopyable
         { 
             std::streamsize r = 0;
             return  (_rdbuf && (r =_rdbuf->in_avail()) > 0) ? r 
-                                                            : onGetSome();
+                                                            : onImport();
         }
 
         inline int_type get()
@@ -135,7 +135,7 @@ class InputSource : private NonCopyable
             _decl = decl;
         }
 
-        virtual std::streamsize onGetSome() = 0;
+        virtual std::streamsize onImport() = 0;
 
         virtual int_type onGet() = 0;
 
@@ -143,6 +143,7 @@ class InputSource : private NonCopyable
         std::basic_streambuf<Char>* _rdbuf;
         std::size_t _line;
         XmlDeclaration* _decl;
+        Pt::String _id; // maybe virtual???
 };
 
 
@@ -156,11 +157,11 @@ class PT_XML_API TextInputSource : public InputSource
         void reset(std::basic_istream<Char>& ios);     
 
     protected:
-        virtual std::streamsize onGetSome();
+        virtual std::streamsize onImport();
 
         virtual int_type onGet();
 
-        virtual bool onGetSomeText();
+        virtual bool onImportText();
 
     private:
         bool onParseXml(int_type c);
@@ -180,7 +181,7 @@ class PT_XML_API StringInputSource : public TextInputSource
         StringInputSource(const String& str);
 
     protected:
-        virtual bool onGetSomeText();
+        virtual bool onImportText();
 
     private:
         StringStream _ss;
@@ -201,11 +202,11 @@ class PT_XML_API BinaryInputSource : public InputSource
         void reset(std::istream& is);
 
     protected:
-        virtual std::streamsize onGetSome();
+        virtual std::streamsize onImport();
 
         virtual int_type onGet();
 
-        virtual bool onGetSomeData();
+        virtual bool onImportData();
 
     private:
         bool onParseBom(unsigned char c);
@@ -237,7 +238,7 @@ class NullInputSource : public InputSource
         { }
 
     protected:
-        virtual std::streamsize onGetSome()
+        virtual std::streamsize onImport()
         { return -1; }
 
         virtual int_type onGet()

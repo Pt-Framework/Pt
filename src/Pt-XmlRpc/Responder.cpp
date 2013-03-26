@@ -156,11 +156,15 @@ void XmlRpcResponder::onWriteReply(Http::Request& request, Http::Reply& reply, S
 
 void XmlRpcResponder::replyError(Http::Reply& reply, int rc, const char* msg)
 {
+    // XML writer might still have bytes in text buffer
+    _writer.flush();
+
     reply.clear();
     reply.header().set("Content-Type", "text/xml");
     reply.header().set("Connection", "close");
 
     _writer.begin( reply.body() );
+    
     _writer.writeStartTag( XMLRPC_METHODRESPONSE );
     _writer.writeStartTag( XMLRPC_FAULT );
     _writer.writeStartTag( XMLRPC_VALUE );

@@ -88,6 +88,7 @@ class XmlReaderImpl
             }
             else if( ch == 0xfeff)
             {
+                assert(false);
                 return;
             }
             else
@@ -170,6 +171,8 @@ class XmlReaderImpl
         void onXmlDeclBeforeAttr(int c)
         {
             Char ch = notEof(c);
+
+            assert(false);
 
             if( Pt::isspace(ch) )
             {
@@ -3135,7 +3138,7 @@ class XmlReaderImpl
                 return;
             }
 
-            _chars.setIgnorable(false);
+            _chars.setSpace(false);
             appendContent(c);
             _parse = &XmlReaderImpl::onCharacters;
         }
@@ -3637,14 +3640,29 @@ class XmlReaderImpl
                 return;
             }
 
+            if(ch == '\r')
+            {
+                _parse = &XmlReaderImpl::onIgnorableCharactersCR;
+                return;
+            }
+
             appendContent(c);
 
             if( ! Pt::isspace(ch) )
             {
-                _chars.setIgnorable(false);
+                _chars.setSpace(false);
                 _parse = &XmlReaderImpl::onCharacters;
                 return;
             }
+        }
+
+        void onIgnorableCharactersCR(int c)
+        {
+            appendContent('\n');
+            _parse = &XmlReaderImpl::onIgnorableCharacters;
+            
+            if(c != '\n')
+                onIgnorableCharacters(c);
         }
 
         void onCharacters(int c)
@@ -3670,7 +3688,22 @@ class XmlReaderImpl
                 return;
             }
 
+            if(ch == '\r')
+            {
+                _parse = &XmlReaderImpl::onCharactersCR;
+                return;
+            }
+
             appendContent(c);
+        }
+
+        void onCharactersCR(int c)
+        {
+            appendContent('\n');
+            _parse = &XmlReaderImpl::onCharacters;
+            
+            if(c != '\n')
+                onCharacters(c);
         }
 
         void onEntityReference(int c)
@@ -3695,7 +3728,7 @@ class XmlReaderImpl
                         Pt::Char c = _token[n];
                         if(c != ' ' && c != '\n' && c != '\r' && c != '\t')
                         {
-                            _chars.setIgnorable(false);
+                            _chars.setSpace(false);
                             break;
                         }
                     }
@@ -3746,7 +3779,7 @@ class XmlReaderImpl
             {
                 _token.clear();
 
-                if( _flags & XmlReader::ReportCData )
+                if( _options & ReportCData )
                 {
                     if(_chars.content().length() > 0)
                     {
@@ -3766,7 +3799,7 @@ class XmlReaderImpl
         void onCData(int c)
         {
             Char ch = notEof(c);
-            Characters& chars = _flags & XmlReader::ReportCData ? _cdata : _chars;
+            Characters& chars = _options & ReportCData ? _cdata : _chars;
 
             if(ch == '>')
             {
@@ -3775,10 +3808,10 @@ class XmlReaderImpl
 
                 if( len > 2 && content[len-2] == ']' && content[len-2] == ']')
                 {
-                    chars.setIgnorable(false);
+                    chars.setSpace(false);
                     chars.resize(len-2);
 
-                    if( _flags & XmlReader::ReportCData )
+                    if( _options & ReportCData )
                     {
                         _current = &_cdata;
                         _chars.clear();
@@ -3947,7 +3980,7 @@ class XmlReaderImpl
         void resolveEntity(EntityReference& entref)
         {
             InputSource* is = 0;
-            int reportEntityRefs = _flags & XmlReader::ReportEntityReferences;
+            int reportEntityRefs = _options & ReportEntityReferences;
             const Entity* ent = _dtd.findEntity( entref.name() );
 
             if( ! reportEntityRefs && ent && ! ent->isUnparsed() )
@@ -3975,7 +4008,7 @@ class XmlReaderImpl
         void resolveParamEntity(EntityReference& entref)
         {
             InputSource* is = 0;
-            int reportEntityRefs = _flags & XmlReader::ReportEntityReferences;
+            int reportEntityRefs = _options & ReportEntityReferences;
             const Entity* ent = _dtd.findParamEntity( entref.name() );
             
             if( ! reportEntityRefs && ent )
@@ -4072,40 +4105,52 @@ class XmlReaderImpl
 
         void setStartDoc()
         {
-            if(_flags & XmlReader::ReportStartDocument)
+            if(_options & ReportStartDocument)
                   _current = &_startDoc;
         }
 
         void setDocType()
         {
-            if(_flags & XmlReader::ReportDtd)
+            if(_options & ReportDtd)
                   _current = &_docType;
         }
 
         void setDocumentTypeDefinition()
         {
-            if(_flags & XmlReader::ReportDtd)
+            if(_options & ReportDtd)
                   _current = &_dtd;
         }
 
         void setComment()
         {
-            if(_flags & XmlReader::ReportComments)
+            if(_options & ReportComments)
                   _current = &_comment;
         }
 
         void setProcessingInstruction()
         {
-            if(_flags & XmlReader::ReportProcessingInstructions)
+            if(_options & ReportProcessingInstructions)
                   _current = &_procInstr;
         }
 
     public:
+        enum Option
+        {
+            ReportDtd = 1,
+            ReportStartDocument = 2,
+            ReportProcessingInstructions = 4,
+            ReportComments = 8,
+            ReportCData = 16,
+            ReportEntityReferences = 32
+        };
+
+        static const int DefaultOptions = 0;
+
         XmlReaderImpl(XmlResolver* resolver = 0)
         : _is(0)
         , _inDel(0)
         , _resolver(resolver)
-        , _flags(XmlReader::DefaultParseFlags)
+        , _options(DefaultOptions)
         , _notation(0)
         , _entity(0)
         , _attr(0)
@@ -4129,7 +4174,7 @@ class XmlReaderImpl
         : _is(&is)
         , _inDel(0)
         , _resolver(resolver)
-        , _flags(XmlReader::DefaultParseFlags)
+        , _options(DefaultOptions)
         , _notation(0)
         , _entity(0)
         , _attr(0)
@@ -4156,17 +4201,17 @@ class XmlReaderImpl
 
         int flags() const
         {
-            return _flags;
+            return _options;
         }
         
-        void setFlag(XmlReader::ParseFlag f)
+        void setOption(Option o)
         {
-            _flags |= f;
+            _options |= o;
         }
 
-        void unsetFlag(XmlReader::ParseFlag f)
+        void unsetOption(Option o)
         {
-            _flags &= ~f;
+            _options &= ~o;
         }
 
         void clear()
@@ -4317,7 +4362,6 @@ class XmlReaderImpl
                 else if(n < 0)
                 {
                     _input.removeInput();
-
                     if( _input.empty() )
                         c = std::char_traits<Char>::eof();
                 }
@@ -4367,7 +4411,7 @@ class XmlReaderImpl
         XmlResolver* _resolver;
         EntityResolver _entityResolver;
         InputStack _input;
-        int _flags;
+        int _options;
         
         NamespaceContext _nsctx;
         Notation* _notation;
@@ -4447,27 +4491,63 @@ XmlReader::~XmlReader()
 }
 
 
-int XmlReader::flags() const
-{
-    return _impl->flags();
-}
-
-
-void XmlReader::setFlag(ParseFlag f)
-{
-    _impl->setFlag(f);
-}
-
-
-void XmlReader::unsetFlag(ParseFlag f)
-{
-    _impl->unsetFlag(f);
-}
-
-
 void XmlReader::clear()
 {
     _impl->clear();
+}
+
+
+void XmlReader::reportStartDocument(bool value)
+{
+    if(value)
+        _impl->setOption(XmlReaderImpl::ReportStartDocument);
+    else
+        _impl->unsetOption(XmlReaderImpl::ReportStartDocument);
+}
+
+
+void XmlReader::reportDtd(bool value)
+{
+    if(value)
+        _impl->setOption(XmlReaderImpl::ReportDtd);
+    else
+        _impl->unsetOption(XmlReaderImpl::ReportDtd);
+}
+
+
+void XmlReader::reportProcessingInstructions(bool value)
+{
+    if(value)
+        _impl->setOption(XmlReaderImpl::ReportProcessingInstructions);
+    else
+        _impl->unsetOption(XmlReaderImpl::ReportProcessingInstructions);
+}
+
+
+void XmlReader::reportCData(bool value)
+{
+    if(value)
+        _impl->setOption(XmlReaderImpl::ReportCData);
+    else
+        _impl->unsetOption(XmlReaderImpl::ReportCData);
+}
+
+
+void XmlReader::reportComments(bool value)
+{
+    if(value)
+        _impl->setOption(XmlReaderImpl::ReportComments);
+    else
+        _impl->unsetOption(XmlReaderImpl::ReportComments);
+}
+
+
+void XmlReader::reportEntityReferences(bool value)
+{
+    if(value)
+        _impl->setOption(XmlReaderImpl::ReportEntityReferences);
+    else
+        _impl->unsetOption(XmlReaderImpl::ReportCData);
 }
 
 
@@ -4492,24 +4572,6 @@ void XmlReader::setInput(InputSource& is)
 void XmlReader::addInput(InputSource& in)
 {
     _impl->addInput(in);
-}
-
-
-const Pt::String& XmlReader::version() const
-{
-    return _impl->version();
-}
-
-
-const Pt::String& XmlReader::encoding() const
-{
-    return _impl->encoding();
-}
-
-
-bool XmlReader::isStandalone() const
-{
-    return _impl->isStandalone();
 }
 
 

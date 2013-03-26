@@ -561,7 +561,7 @@ bool TextInputSource::onParseXml(int_type c)
 }
 
 
-std::streamsize TextInputSource::onGetSome()
+std::streamsize TextInputSource::onImport()
 {   
     if( ! _ios || ! _ios->rdbuf() )
     {
@@ -570,7 +570,7 @@ std::streamsize TextInputSource::onGetSome()
     
     if( _ios->rdbuf()->in_avail() <= 0 )
     {
-        bool r = onGetSomeText();
+        bool r = onImportText();
         if( ! r)
             return -1;
     }
@@ -650,7 +650,7 @@ InputSource::int_type TextInputSource::onGet()
 }
 
 
-bool TextInputSource::onGetSomeText()
+bool TextInputSource::onImportText()
 {
     if( ! _ios || ! _ios->rdbuf() || ! _ios->good() )
         return false;
@@ -667,7 +667,7 @@ StringInputSource::StringInputSource(const String& str)
 }
 
 
-bool StringInputSource::onGetSomeText()
+bool StringInputSource::onImportText()
 {   
     // NOTE: on some systems stringbuf::in_avail never returns -1, 
     //       even if no more characters are available
@@ -677,17 +677,29 @@ bool StringInputSource::onGetSomeText()
 
 
 /*
+    BOM must match the actual encoding:
+
     00 00 FE FF  UTF-32, big-endian
     FF FE 00 00  UTF-32, little-endian
     FE FF        UTF-16, big-endian
     FF FE        UTF-16, little-endian
     EF BB BF     UTF-8
+
+    encoding attribute must be processed when:
+
+    00 00 00 3C 32-bit characters encoded as ASCII values, big-endian
+    3C 00 00 00 32-bit characters encoded as ASCII values, little-endian
+    00 3C 00 3F 16-bit characters encoded as ASCII values, big-endian
+    3C 00 3F 00 16-bit characters encoded as ASCII values, big-endian
+    3C 3F 78 6D 8-bit characters encoded as ASCII values
+    4C 6F A7 94 EBCDIC based encodings
 */
 enum BomEncoding
 {
     Bom8 = 1,
-    Bom16LE = 3,
-    Bom16BE = 2,
+    BomUtf8 = 2,
+    BomUtf16LE = 3,
+    BomUtf16BE = 4,
 };
 
 
@@ -790,7 +802,7 @@ void BinaryInputSource::reset(std::istream& is)
 }
 
 
-std::streamsize BinaryInputSource::onGetSome()
+std::streamsize BinaryInputSource::onImport()
 {
     if( ! _is || ! _is->rdbuf() )
     {
@@ -799,7 +811,7 @@ std::streamsize BinaryInputSource::onGetSome()
     
     if( _is->rdbuf()->in_avail() <= 0 )
     {
-        bool r = onGetSomeData();
+        bool r = onImportData();
         if( ! r)
         {
             return -1;
@@ -937,7 +949,7 @@ InputSource::int_type BinaryInputSource::onGet()
 }
 
 
-bool BinaryInputSource::onGetSomeData()
+bool BinaryInputSource::onImportData()
 {
     if( ! _is || ! _is->rdbuf() || ! _is->good() )
         return false;
@@ -970,6 +982,7 @@ bool BinaryInputSource::onParseBom(unsigned char c)
             if(c == 0xbf)
             {
                 _bomState = OnBomUtf8_2;
+                _bomEncoding = BomUtf8;
                 break;
             }
 
@@ -1000,7 +1013,7 @@ bool BinaryInputSource::onParseXml(int c)
     {
         ch = std::char_traits<char>::to_char_type(c);
     }
-    else if(_bomEncoding == Bom16BE) // ASCII subset in UTF-16-BE
+    else if(_bomEncoding == BomUtf16BE) // ASCII subset in UTF-16-BE
     {
         if(_mbState.n == 0)
         {
@@ -1011,7 +1024,7 @@ bool BinaryInputSource::onParseXml(int c)
         _mbState.n = 0;
         ch = std::char_traits<char>::to_char_type(c);
     }
-    else if(_bomEncoding == Bom16LE)  // ASCII subset in UTF-16-LE
+    else if(_bomEncoding == BomUtf16LE)  // ASCII subset in UTF-16-LE
     {
         if(_mbState.n == 0)
         {
@@ -1035,20 +1048,28 @@ bool BinaryInputSource::onParseXml(int c)
 
 void BinaryInputSource::onDeclaration()
 {
-    // do not resolve encoding string if 
-    //     - BOM is UTF-8
-    //     - encoding string is UTF-8
-
-    if( ! _xmlDecl.encoding().empty() )
+    if(_bomEncoding == BomUtf8)
     {
-        const char* encoding = _xmlDecl.encoding().c_str();
-        TextCodec<Char, char>* codec = 0;
-        if(_resolver)
-            codec = _resolver->resolveEncoding(encoding);
+        if( _xmlDecl.encoding().empty() || _xmlDecl.encoding() == "UTF-8" )
+            return;
 
-        if(codec)
-            _tbuf.setCodec(codec);
+        throw SyntaxError("invalid encoding", 0);
     }
+    else if(_bomEncoding == Bom8)
+    {
+        if( _xmlDecl.encoding().empty() || _xmlDecl.encoding() == "UTF-8" )
+            return;
+    }
+
+    const char* encoding = _xmlDecl.encoding().c_str();
+    TextCodec<Char, char>* codec = 0;
+    if(_resolver)
+        codec = _resolver->resolveEncoding(encoding);
+
+    if( ! codec)
+        throw SyntaxError("invalid encoding", 0);
+    
+    _tbuf.setCodec(codec);
 }
 
 } // namespace Xml

@@ -84,45 +84,54 @@ class PT_XML_API XmlReader : private NonCopyable
     public:
         class Iterator;
 
-        enum ParseFlag
-        {
-            ReportDtd = 1,
-            ReportStartDocument = 2,
-            ReportProcessingInstructions = 4,
-            ReportComments = 8,
-            ReportCData = 16,
-            ReportEntityReferences = 32
-        };
-
-        static const int DefaultParseFlags = 0;
-
     public:
-        /* TODO: Consider the following processing flags:
-                     - ReportWhitespace
+        /** @brief Default Constructor.
         */
         XmlReader();
 
         // TODO: deprecated
         explicit XmlReader(std::istream& is);
 
+        /** @brief Construct with input source.
+        */
         explicit XmlReader(InputSource& is);
 
         // TODO: deprecated
         XmlReader(XmlResolver& r, std::istream& is);
 
+        /** @brief Construct with resolver and input source.
+        */
         XmlReader(XmlResolver& r, InputSource& is);
 
+        /** @brief Destructor.
+        */
         ~XmlReader();
 
-        /** @brief Removes all input sources and resets parser state.
+        /** @brief Clears the reader state and input.
+
+            All input sources are removed and the parser state is reset to
+            parse a new document. The XmlResolver not removed and the reporting
+            options are not changed.
         */
         void clear();
 
-        int flags() const;
+        void reportStartDocument(bool value);
 
-        void setFlag(ParseFlag f);
+        void reportDtd(bool value);
 
-        void unsetFlag(ParseFlag f);
+        void reportProcessingInstructions(bool value);
+
+        void reportCData(bool value);
+
+        void reportComments(bool value);
+
+        void reportEntityReferences(bool value);
+
+        // TODO: whitespace between start tags or end tags
+        // void reportBoundaryWhitespace(bool value);
+
+        // TODO: ENTITIY, ATTLIST, NOTATION and ELEMENT in DTDs
+        // void reportDtdContent(bool value);
 
         XmlResolver* resolver() const;
 
@@ -145,37 +154,42 @@ class PT_XML_API XmlReader : private NonCopyable
         */
         void addInput(InputSource& in);
 
-        const Pt::String& version() const;
-
-        const Pt::String& encoding() const;
-
-        bool isStandalone() const;
-
+        /** @brief Returns current DTD of the document.
+        */
         DocTypeDefinition& dtd();
 
+        /** @brief Returns current DTD of the document.
+        */
         const DocTypeDefinition& dtd() const;
 
+        /** @brief Returns the XML tree depth.
+        */
         size_t depth() const;
 
+        /** @brief Returns the current line of the primary input source.
+        */
         std::size_t line() const;
 
+        /** @brief Returns an iterator to the current node.
+        */
         Iterator current();
 
+        /** @brief Returns an iterator to the end of the document.
+        */
         Iterator end() const;
 
-        //! @brief Get current element
+        //! @brief Get current element.
         Node& get();
 
-        //! @brief Get next element from stream
+        //! @brief Get next element from stream.
         Node& next();
 
-        /** @brief Process availabe data from underlying stream
-            
-            When the last stream is removed, EOF will be parsed and an
-            EndDocument node becomes available.
+        /** @brief Process availabe data from underlying input source.
         */
         Node* advance();
 
+        /** @brief Returns the current input source or nullptr if none is set.
+        */
         InputSource* input();
 
     private:

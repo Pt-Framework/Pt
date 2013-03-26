@@ -101,47 +101,6 @@ inline const DocType& toDocType(const Node& node)
     return nodeCast<DocType>(node);
 }
 
-
-class EndDocType : public Node
-                 , private Pt::NonCopyable
-{
-    public:
-        EndDocType()
-        : Node(Node::EndDocType)
-        {}
-
-        ~EndDocType()
-        {}
-
-        //! @internal
-        inline static Node::Type nodeId()
-        { return Node::EndDocType; }
-};
-
-
-inline EndDocType* toEndDocType(Node* node)
-{
-    return nodeCast<EndDocType>(node);
-}
-
-
-inline const EndDocType* toEndDocType(const Node* node)
-{
-    return nodeCast<EndDocType>(node);
-}
-
-
-inline EndDocType& toEndDocType(Node& node)
-{
-    return nodeCast<EndDocType>(node);
-}
-
-
-inline const EndDocType& toEndDocType(const Node& node)
-{
-    return nodeCast<EndDocType>(node);
-}
-
 } // namespace Xml
 
 } // namespace Pt

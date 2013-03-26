@@ -56,7 +56,6 @@ class PT_XML_API DocTypeDefinition : public Node
 
         void clear();
 
-        // TODO: remove this method
         bool isDefined() const;
 
         const QName& rootName() const;

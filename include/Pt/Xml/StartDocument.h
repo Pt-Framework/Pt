@@ -47,6 +47,7 @@ class StartDocument : public Node
         , _standalone(false)
         { }
 
+        // TODO: remove this
         void clear()
         {
             _version.clear();
@@ -54,21 +55,27 @@ class StartDocument : public Node
             _standalone = false;
         }
 
+        // TODO: remove this
         const Pt::String& version() const
         { return _version; }
 
+        // TODO: remove this
         void setVersion(const Pt::String& ver)
         { _version = ver; }
 
+        // TODO: remove this
         const Pt::String& encoding() const
         { return _encoding; }
 
+        // TODO: remove this
         void setEncoding(const Pt::String& enc)
         { _encoding = enc; }
 
+        // TODO: remove this
         bool isStandalone() const
         { return _standalone; }
 
+        // TODO: remove this
         void setStandalone(bool alone)
         { _standalone = alone; }
 

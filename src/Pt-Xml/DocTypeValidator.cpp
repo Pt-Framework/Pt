@@ -68,7 +68,7 @@ bool ElementValidator::validateNode(Node& node)
     // documents does not lead to costly state transitions. 
     if( Pt::Xml::Characters* chars = Pt::Xml::toCharacters(&node) )
     {
-        if( chars->isIgnorable() )
+        if( chars->isSpace() )
         {
             // special rule for EMPTY, not even WS is allowed
             if( _elemDecl && _elemDecl->isEmpty() )

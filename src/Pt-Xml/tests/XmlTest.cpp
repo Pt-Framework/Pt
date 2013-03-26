@@ -312,7 +312,7 @@ void XmlReaderTest::DtdEmptyDocument()
     input << "]>";
 
     Pt::Xml::XmlReader reader(resolver, input);
-    reader.setFlag(Pt::Xml::XmlReader::ReportDtd);
+    reader.reportDtd(true);
 
     Pt::Xml::XmlReader::Iterator it = reader.current();
 
@@ -348,7 +348,7 @@ void XmlReaderTest::DtdExternalSubsetPublicId()
     input << "<test></test>";
 
     Pt::Xml::XmlReader reader(resolver, input);
-    reader.setFlag(Pt::Xml::XmlReader::ReportDtd);
+    reader.reportDtd(true);
 
     Pt::Xml::XmlReader::Iterator it = reader.current();
 
@@ -377,7 +377,7 @@ void XmlReaderTest::DtdExternalSubsetSystemId()
     input << "<test></test>";
 
     Pt::Xml::XmlReader reader(resolver, input);
-    reader.setFlag(Pt::Xml::XmlReader::ReportDtd);
+    reader.reportDtd(true);
 
     Pt::Xml::XmlReader::Iterator it = reader.current();
 
@@ -412,7 +412,7 @@ void XmlReaderTest::DtdExternalAndInternalSubset()
         );
 
         Pt::Xml::XmlReader reader(resolver, input);
-        reader.setFlag(Pt::Xml::XmlReader::ReportDtd);
+        reader.reportDtd(true);
 
         Pt::Xml::XmlReader::Iterator it = reader.current();
         
@@ -732,7 +732,7 @@ void XmlReaderTest::DtdNotations()
     input << "<test></test>";
 
     Pt::Xml::XmlReader reader( input );
-    reader.setFlag(Pt::Xml::XmlReader::ReportDtd);
+    reader.reportDtd(true);
     
     Pt::Xml::XmlReader::Iterator it = reader.current();
 
@@ -899,7 +899,7 @@ void XmlReaderTest::DtdProcesssingInstruction()
         input << "<test></test>";
 
         Pt::Xml::XmlReader reader( resolver, input );
-        reader.setFlag(Pt::Xml::XmlReader::ReportProcessingInstructions);
+        reader.reportProcessingInstructions(true);
 
         Pt::Xml::XmlReader::Iterator it = reader.current();
         const Pt::Xml::ProcessingInstruction* pi = Pt::Xml::toProcessingInstruction(&*it);
@@ -1056,7 +1056,7 @@ void XmlReaderTest::ElementWithContent()
 
     // b
     ++it;
-    PT_UNIT_ASSERT(Pt::Xml::toCharacters(*it).isIgnorable() == false);
+    PT_UNIT_ASSERT(Pt::Xml::toCharacters(*it).isSpace() == false);
     PT_UNIT_ASSERT(Pt::Xml::toCharacters(*it).content() == L"?!:=b");
     PT_UNIT_ASSERT( reader.depth() == 1);
 
@@ -1100,7 +1100,7 @@ void XmlReaderTest::ElementWithNamespace()
 
     // b
     ++it;
-    PT_UNIT_ASSERT(Pt::Xml::toCharacters(*it).isIgnorable() == false);
+    PT_UNIT_ASSERT(Pt::Xml::toCharacters(*it).isSpace() == false);
     PT_UNIT_ASSERT(Pt::Xml::toCharacters(*it).content() == L"b");
     PT_UNIT_ASSERT(reader.depth() == 2);
 
@@ -1457,7 +1457,7 @@ void XmlReaderTest::ProcessingInstructionInProlog()
     input << "<a/>";
 
     Pt::Xml::XmlReader reader( input );
-    reader.setFlag(Pt::Xml::XmlReader::ReportProcessingInstructions);
+    reader.reportProcessingInstructions(true);
     
     Pt::Xml::XmlReader::Iterator it = reader.current();
     PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::ProcessingInstruction);
@@ -1484,7 +1484,7 @@ void XmlReaderTest::ProcessingInstructionInElement()
     input << "456</a>";
 
     Pt::Xml::XmlReader reader( input );
-    reader.setFlag(Pt::Xml::XmlReader::ReportProcessingInstructions);
+    reader.reportProcessingInstructions(true);
 
     Pt::Xml::XmlReader::Iterator it = reader.current();
     PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::StartElement);
@@ -1515,7 +1515,7 @@ void XmlReaderTest::ProcessingInstructionInEpilog()
     input << "<?xml-stylesheet type=\"text/css\" href=\"styles.css\"?>";
 
     Pt::Xml::XmlReader reader( input );
-    reader.setFlag(Pt::Xml::XmlReader::ReportProcessingInstructions);
+    reader.reportProcessingInstructions(true);
 
     Pt::Xml::XmlReader::Iterator it = reader.current();
     PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::StartElement);
@@ -1550,7 +1550,7 @@ void XmlReaderTest::IgnorableWhitespace()
         Pt::Xml::Characters* chars = toCharacters(&*it);
         if(chars)
         {
-            PT_UNIT_ASSERT( chars->isIgnorable() );
+            PT_UNIT_ASSERT( chars->isSpace() );
         }
     }
 }
@@ -1622,7 +1622,7 @@ void XmlReaderTest::CDATA()
     input << "</test>\n";
 
     Pt::Xml::XmlReader reader( input );
-    reader.setFlag(Pt::Xml::XmlReader::ReportCData);
+    reader.reportCData(true);
 
     Pt::Xml::XmlReader::Iterator it = reader.current();
     PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::StartElement);
@@ -1675,7 +1675,7 @@ void XmlReaderTest::StartDocument()
     input << "</test>\n";
 
     Pt::Xml::XmlReader reader(input);
-    reader.setFlag(Pt::Xml::XmlReader::ReportStartDocument);
+    reader.reportStartDocument(true);
         
     Pt::Xml::XmlReader::Iterator it = reader.current();
 

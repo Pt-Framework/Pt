@@ -52,44 +52,41 @@ class Node
     public:
         enum Type 
         {
-            //! Unknown Node type (may not currently be supported)
+            //! Unknown Node type
             Unknown = 0,
 
             //! Start of a DocType Declaration
             DocType = 1,
 
-            //! End of a DocType declaration
-            EndDocType = 2,
-
             //! Document Type Definition
-            DocTypeDefinition = 3,
+            DocTypeDefinition = 2,
 
             //! Xml declaration
-            StartDocument = 4,
+            StartDocument = 3,
 
             //! End of the document
-            EndDocument = 5,
+            EndDocument = 4,
 
             //! Start element aka opening tag
-            StartElement = 6,
+            StartElement = 5,
 
             //! End element aka closing tag
-            EndElement = 7,
+            EndElement = 6,
 
             //! Parsed content of a tag's body
-            Characters = 8,
+            Characters = 7,
 
             //! Content of a CDATA entry
-            CData = 9,
+            CData = 8,
 
             //! Comment
-            Comment = 10,
+            Comment = 9,
 
             //! Processing instruction
-            ProcessingInstruction = 11,
+            ProcessingInstruction = 10,
 
             //! Unresolved entity reference
-            EntityReference = 12
+            EntityReference = 11
         };
 
         //! @brief Destructor.

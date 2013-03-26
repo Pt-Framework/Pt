@@ -64,11 +64,11 @@ class PT_XML_API Characters : public Node
             _ignorable = true;
         }
 
-        bool isIgnorable() const
+        bool isSpace() const
         { return _ignorable; }
 
-        void setIgnorable(bool isIgn)
-        { _ignorable = isIgn; }
+        void setSpace(bool isWS)
+        { _ignorable = isWS; }
 
         // TODO: might want to set ignorableWS flag here...
         // Alternative: appendSpace(ch)

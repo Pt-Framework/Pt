@@ -318,7 +318,7 @@ Message::Message(Http::Connection& conn)
 
 void Message::discard()
 { 
-    _buf.discard(); 
+    _buf.discard();
 
     std::streambuf* sb = _ios.rdbuf();
     if(sb != &_buf)

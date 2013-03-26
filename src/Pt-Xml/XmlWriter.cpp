@@ -73,7 +73,7 @@ void XmlWriter::begin(std::ostream& os)
 
     _tos.attach(os);
 
-    if( useXmlDeclaration() )
+    if( useXmlDeclaration())
         _tos.write(declstr, sizeof(declstr)/sizeof(Pt::Char));
 
     if( useEndl() )
