@@ -76,7 +76,7 @@ class XmlReaderImpl
 
             Char ch = c;
 
-            if( Pt::isspace(ch) )
+            if( isSpace(ch) )
             {
                 setStartDoc();
                 _parse = &XmlReaderImpl::onProlog;
@@ -145,7 +145,7 @@ class XmlReaderImpl
         {
             Char ch = notEof(c);
 
-            if( Pt::isspace(ch) )
+            if( isSpace(ch) )
             {
                 if( _procInstr.target() == L"xml" )
                     _parse =  &XmlReaderImpl::onXmlDeclBeforeAttr;
@@ -173,7 +173,7 @@ class XmlReaderImpl
 
             assert(false);
 
-            if( Pt::isspace(ch) )
+            if( isSpace(ch) )
             {
                 return;
             }
@@ -198,7 +198,7 @@ class XmlReaderImpl
         {
             Char ch = notEof(c);
 
-            if( Pt::isspace(ch) )
+            if( isSpace(ch) )
             {
                 _parse =  &XmlReaderImpl::onXmlDeclAfterName;
                 return;
@@ -223,7 +223,7 @@ class XmlReaderImpl
         {
             Char ch = notEof(c);
 
-            if( Pt::isspace(ch) )
+            if( isSpace(ch) )
             {
                 return;
             }
@@ -241,7 +241,7 @@ class XmlReaderImpl
         {
             Char ch = notEof(c);
 
-            if( Pt::isspace(ch) )
+            if( isSpace(ch) )
             {
                 return;
             }
@@ -322,7 +322,7 @@ class XmlReaderImpl
         {
             Char ch = notEof(c);
 
-            if( Pt::isspace(ch) )
+            if( isSpace(ch) )
             {
                 _parse = &XmlReaderImpl::onProcessingInstructionData;
                 return;
@@ -341,7 +341,7 @@ class XmlReaderImpl
         {
             Char ch = notEof(c);
 
-            if(Pt::isspace(ch) || isAlpha(ch) || isQuote(ch) || 
+            if(isSpace(ch) || isAlpha(ch) || isQuote(ch) || 
                ch == ':' || ch == '/' || ch == '!' || ch == '=')
             {
                 _procInstr.data() += c;
@@ -471,7 +471,7 @@ class XmlReaderImpl
         {
             Char ch = notEof(c);
 
-            if( Pt::isspace(ch) )
+            if( isSpace(ch) )
             {
                 return;
             }
@@ -496,7 +496,7 @@ class XmlReaderImpl
                 return;
             }
 
-            if( Pt::isspace(ch) )
+            if( isSpace(ch) )
             {
                 bool ok = _token == L"PUBLIC";
                 _token.clear();
@@ -526,7 +526,7 @@ class XmlReaderImpl
                 return;
             }
 
-            if( Pt::isspace(ch) )
+            if( isSpace(ch) )
             {
                 return;
             }
@@ -564,7 +564,7 @@ class XmlReaderImpl
                 return;
             }
 
-            if( Pt::isspace(ch) )
+            if( isSpace(ch) )
             {
                 bool ok = _token == L"SYSTEM";
                 _token.clear();
@@ -594,7 +594,7 @@ class XmlReaderImpl
                 return;
             }
 
-            if( Pt::isspace(ch) )
+            if( isSpace(ch) )
             {
                 return;
             }
@@ -687,7 +687,7 @@ class XmlReaderImpl
                 return;
             }
 
-            if( Pt::isspace(ch) )
+            if( isSpace(ch) )
             {
                 _parse = &XmlReaderImpl::AfterDtdRootName;
                 return;
@@ -715,7 +715,7 @@ class XmlReaderImpl
         {
             Char ch = notEof(c);
 
-            if( Pt::isspace(ch) )
+            if( isSpace(ch) )
             {
                 return;
             }
@@ -799,7 +799,7 @@ class XmlReaderImpl
                 return;
             }
 
-            if( Pt::isspace(ch) )
+            if( isSpace(ch) )
             {
                 return;
             }
@@ -818,7 +818,7 @@ class XmlReaderImpl
         {
             Char ch = notEof(c);
 
-            if( Pt::isspace(ch) )
+            if( isSpace(ch) )
             {
                 return;
             }
@@ -852,7 +852,7 @@ class XmlReaderImpl
         {
             Char ch = notEof(c);
 
-            if( Pt::isspace(ch) )
+            if( isSpace(ch) )
             {
                 return;
             }
@@ -893,7 +893,7 @@ class XmlReaderImpl
 
             Char ch = notEof(c);
 
-            if( Pt::isspace(ch) )
+            if( isSpace(ch) )
             {
                 return;
             }
@@ -990,7 +990,7 @@ class XmlReaderImpl
                 return;
             }
 
-            if( Pt::isspace(ch) )
+            if( isSpace(ch) )
             {
                 return;
             }
@@ -1014,7 +1014,7 @@ class XmlReaderImpl
                 return;
             }
 
-            if( Pt::isspace(ch) )
+            if( isSpace(ch) )
             {
                 if(_token == L"ELEMENT")
                 {
@@ -1062,7 +1062,7 @@ class XmlReaderImpl
                 return;
             }
 
-            if( Pt::isspace(ch) )
+            if( isSpace(ch) )
             {
                 return;
             }
@@ -1086,7 +1086,7 @@ class XmlReaderImpl
                 return;
             }
 
-            if( Pt::isspace(ch) )
+            if( isSpace(ch) )
             {
                 if(_token == L"INCLUDE")
                 {
@@ -1144,7 +1144,7 @@ class XmlReaderImpl
                 return;
             }
 
-            if( Pt::isspace(ch) )
+            if( isSpace(ch) )
             {
                 return;
             }
@@ -1198,7 +1198,7 @@ class XmlReaderImpl
                 return; 
             }
 
-            if( Pt::isspace(ch) )
+            if( isSpace(ch) )
             {
                 return;
             }
@@ -1268,7 +1268,7 @@ class XmlReaderImpl
                 return;
             }
 
-            if( Pt::isspace(ch) )
+            if( isSpace(ch) )
             {
                 return;
             }
@@ -1286,7 +1286,7 @@ class XmlReaderImpl
                 return;
             }
 
-            if( Pt::isspace(ch) )
+            if( isSpace(ch) )
             {
                 assert(_notation == 0);
                 _notation = _dtd.declareNotation(_token);
@@ -1325,7 +1325,7 @@ class XmlReaderImpl
                 return;
             }
 
-            if( Pt::isspace(ch) )
+            if( isSpace(ch) )
             {
                 return;
             }
@@ -1375,7 +1375,7 @@ class XmlReaderImpl
                 return;
             }
 
-            if( Pt::isspace(ch) )
+            if( isSpace(ch) )
             {
                 return;
             }
@@ -1417,7 +1417,7 @@ class XmlReaderImpl
                 return;
             }
 
-            if( Pt::isspace(ch) )
+            if( isSpace(ch) )
             {
                 return;
             }
@@ -1436,7 +1436,7 @@ class XmlReaderImpl
                 return;
             }
 
-            if( Pt::isspace(ch) )
+            if( isSpace(ch) )
             {
                 _parse = &XmlReaderImpl::OnDtdBeforeParamEntityName;
                 return;
@@ -1456,7 +1456,7 @@ class XmlReaderImpl
                 return;
             }
 
-            if( Pt::isspace(ch) )
+            if( isSpace(ch) )
             {
                 return;
             }
@@ -1480,7 +1480,7 @@ class XmlReaderImpl
                 return;
             }
 
-            if( Pt::isspace(ch) )
+            if( isSpace(ch) )
             {
                 assert(_entity == 0);
                 _entity = _dtd.declareParamEntity(_token);
@@ -1508,7 +1508,7 @@ class XmlReaderImpl
                 return;
             }
 
-            if( Pt::isspace(ch) )
+            if( isSpace(ch) )
             {
                 assert(_entity == 0);
                 _entity = _dtd.declareEntity(_token);
@@ -1555,7 +1555,7 @@ class XmlReaderImpl
                 return;
             }
             
-            if( Pt::isspace(ch) )
+            if( isSpace(ch) )
             {
                 return;
             }
@@ -1612,7 +1612,7 @@ class XmlReaderImpl
                 return;
             }
 
-            if( Pt::isspace(ch) )
+            if( isSpace(ch) )
             {
                 return;
             }
@@ -1661,7 +1661,7 @@ class XmlReaderImpl
                 return;
             }
 
-            if( Pt::isspace(ch) )
+            if( isSpace(ch) )
             {
                 return;
             }
@@ -1685,7 +1685,7 @@ class XmlReaderImpl
                 return;
             }
 
-            if( Pt::isspace(ch) )
+            if( isSpace(ch) )
             {
                 bool ok = _token == L"NDATA";
                 _token.clear();
@@ -1709,7 +1709,7 @@ class XmlReaderImpl
         {
             Pt::Char ch = notEof(c);
 
-            if( Pt::isspace(ch) )
+            if( isSpace(ch) )
             {
                 return;
             }
@@ -1758,7 +1758,7 @@ class XmlReaderImpl
                 return;
             }
 
-            if( Pt::isspace(ch) )
+            if( isSpace(ch) )
             {
                 if(_entity)
                     _entity->setUnparsed(_token);
@@ -1891,7 +1891,7 @@ class XmlReaderImpl
                 return;
             }
 
-            if( Pt::isspace(ch) )
+            if( isSpace(ch) )
             {
                 return;
             }
@@ -1923,7 +1923,7 @@ class XmlReaderImpl
                 return;
             }
 
-            if( Pt::isspace(ch) )
+            if( isSpace(ch) )
             {
                 assert( _attlistDecl == 0 );
                 _attlistDecl = &_dtd.declareAttributeList(_qname);
@@ -1953,7 +1953,7 @@ class XmlReaderImpl
                 return;
             }
 
-            if( Pt::isspace(ch) )
+            if( isSpace(ch) )
             {
                 return;
             }
@@ -1971,7 +1971,7 @@ class XmlReaderImpl
         {
             Pt::Char ch = notEof(c);
 
-            if( Pt::isspace(ch) )
+            if( isSpace(ch) )
             {
                 _parse = &XmlReaderImpl::OnDtdAfterAttrName;
                 return;
@@ -2029,7 +2029,7 @@ class XmlReaderImpl
                 return;
             }
 
-            if( Pt::isspace(ch) )
+            if( isSpace(ch) )
             {
                 return;
             }
@@ -2047,7 +2047,7 @@ class XmlReaderImpl
         {
             Pt::Char ch = notEof(c);
 
-            if( Pt::isspace(ch) )
+            if( isSpace(ch) )
             {
                 return;
             }
@@ -2079,7 +2079,7 @@ class XmlReaderImpl
                 return;
             }
 
-            if( Pt::isspace(ch) )
+            if( isSpace(ch) )
             {
                 assert(_attrDecl);
                 static_cast<EnumAttributeDeclaration*>(_attrDecl)->addValue(_token);
@@ -2119,7 +2119,7 @@ class XmlReaderImpl
         {
             Pt::Char ch = notEof(c);
 
-            if( Pt::isspace(ch) )
+            if( isSpace(ch) )
             {
                 return;
             }
@@ -2149,7 +2149,7 @@ class XmlReaderImpl
         {
             Pt::Char ch = notEof(c);
 
-            if( Pt::isspace(ch) )
+            if( isSpace(ch) )
             {
                 _parse = &XmlReaderImpl::OnDtdAfterAttrEnumSep;
                 return;
@@ -2176,7 +2176,7 @@ class XmlReaderImpl
         {
             Pt::Char ch = notEof(c);
 
-            if( Pt::isspace(ch) )
+            if( isSpace(ch) )
             {
                 return;
             }
@@ -2208,7 +2208,7 @@ class XmlReaderImpl
                 return;
             }
 
-            if( Pt::isspace(ch) )
+            if( isSpace(ch) )
             {
                 assert(_attrDecl == 0);
                 assert(_attlistDecl);
@@ -2276,7 +2276,7 @@ class XmlReaderImpl
         {
             Pt::Char ch = notEof(c);
 
-            if( Pt::isspace(ch) )
+            if( isSpace(ch) )
             {
                 return;
             }
@@ -2300,7 +2300,7 @@ class XmlReaderImpl
         {
             Pt::Char ch = notEof(c);
 
-            if( Pt::isspace(ch) )
+            if( isSpace(ch) )
             {
                 return;
             }
@@ -2331,7 +2331,7 @@ class XmlReaderImpl
                 return;
             }
 
-            if( Pt::isspace(ch) )
+            if( isSpace(ch) )
             {
                 if(_attrDecl) // skip duplicates
                     static_cast<NotationAttributeDeclaration*>(_attrDecl)->addNotation(_token);
@@ -2374,7 +2374,7 @@ class XmlReaderImpl
         {
             Pt::Char ch = notEof(c);
 
-            if( Pt::isspace(ch) )
+            if( isSpace(ch) )
                 return;
 
             if( ch == '|' )
@@ -2402,7 +2402,7 @@ class XmlReaderImpl
         {
             Pt::Char ch = notEof(c);
 
-            if( Pt::isspace(ch) )
+            if( isSpace(ch) )
             {
                 return;
             }
@@ -2427,7 +2427,7 @@ class XmlReaderImpl
         {
             Pt::Char ch = notEof(c);
 
-            if( Pt::isspace(ch) )
+            if( isSpace(ch) )
                 return;
 
             if(ch == '"')
@@ -2515,7 +2515,7 @@ class XmlReaderImpl
                 return;
             }
             
-            if( Pt::isspace(ch) )
+            if( isSpace(ch) )
                 return;
 
             if( isAlpha(ch) )
@@ -2553,7 +2553,7 @@ class XmlReaderImpl
                 return;
             }
 
-            if( Pt::isspace(ch) )
+            if( isSpace(ch) )
                 return;
 
             throw SyntaxError("XML syntax error", line());
@@ -2588,7 +2588,7 @@ class XmlReaderImpl
                 return;
             }
 
-            if( Pt::isspace(ch) )
+            if( isSpace(ch) )
             {
                 return;
             }
@@ -2619,7 +2619,7 @@ class XmlReaderImpl
                 return;
             }
 
-            if( Pt::isspace(ch) )
+            if( isSpace(ch) )
             {
                 assert(_elemDecl == 0);
                 _elemDecl = _dtd.declareElement(_qname);
@@ -2651,7 +2651,7 @@ class XmlReaderImpl
                 return;
             }
 
-            if( Pt::isspace(ch) )
+            if( isSpace(ch) )
             {
                 return;
             }
@@ -2734,7 +2734,7 @@ class XmlReaderImpl
                 return;
             }
             
-            if( Pt::isspace(ch) )
+            if( isSpace(ch) )
             {
                 return;
             }
@@ -2894,7 +2894,7 @@ class XmlReaderImpl
                 return;
             }
 
-            if( Pt::isspace(ch) )
+            if( isSpace(ch) )
             {
                 return;
             }
@@ -2912,7 +2912,7 @@ class XmlReaderImpl
         {
             Pt::Char ch = notEof(c);
 
-            if( Pt::isspace(ch) )
+            if( isSpace(ch) )
             {
                 return;
             }
@@ -3006,7 +3006,7 @@ class XmlReaderImpl
                 return;
             }
 
-            if( Pt::isspace(ch) )
+            if( isSpace(ch) )
             {
                 return;
             }
@@ -3024,7 +3024,7 @@ class XmlReaderImpl
         {
             Char ch = notEof(c);
 
-            if( Pt::isspace(ch) )
+            if( isSpace(ch) )
             {
                 return;
             }
@@ -3065,7 +3065,7 @@ class XmlReaderImpl
 
             Char ch(c);
 
-            if( Pt::isspace(ch) )
+            if( isSpace(ch) )
             {
                 if( depth() == 0 )
                 {
@@ -3073,8 +3073,8 @@ class XmlReaderImpl
                     return;
                 }
 
-                appendContent(c);
-                _parse = &XmlReaderImpl::onIgnorableCharacters;
+                appendSpace(ch);
+                _parse = &XmlReaderImpl::onCharacters;
                 return;
             }
 
@@ -3097,7 +3097,7 @@ class XmlReaderImpl
                 return;
             }
 
-            _chars.setSpace(false);
+            //_chars.setSpace(false);
             appendContent(c);
             _parse = &XmlReaderImpl::onCharacters;
         }
@@ -3111,7 +3111,7 @@ class XmlReaderImpl
                 return;
             }
 
-            throw SyntaxError("XML syntax error 111", line());
+            throw SyntaxError("XML syntax error", line());
         }
 
         void onComment(int c)
@@ -3171,7 +3171,7 @@ class XmlReaderImpl
         {
             Char ch = notEof(c);
 
-            if( Pt::isspace(ch) )
+            if( isSpace(ch) )
             {
                 _parse = &XmlReaderImpl::beforeAttribute;
                 return;
@@ -3224,7 +3224,7 @@ class XmlReaderImpl
         {
             Char ch = notEof(c);
 
-            if( Pt::isspace(ch) )
+            if( isSpace(ch) )
             {
                 return;
             }
@@ -3269,7 +3269,7 @@ class XmlReaderImpl
         {
             Char ch = notEof(c);
 
-            if( Pt::isspace(ch) )
+            if( isSpace(ch) )
             {
                 _parse = &XmlReaderImpl::afterAttributeName;
                 return;
@@ -3306,7 +3306,7 @@ class XmlReaderImpl
         {
             Char ch = notEof(c);
 
-            if( Pt::isspace(ch) )
+            if( isSpace(ch) )
             {
                 return;
             }
@@ -3324,7 +3324,7 @@ class XmlReaderImpl
         {
             Char ch = notEof(c);
 
-            if( Pt::isspace(ch) )
+            if( isSpace(ch) )
             {
                 return;
             }
@@ -3441,7 +3441,7 @@ class XmlReaderImpl
         {
             Char ch = notEof(c);
 
-            if( Pt::isspace(ch) )
+            if( isSpace(ch) )
             {
                 return;
             }
@@ -3487,7 +3487,7 @@ class XmlReaderImpl
         {
             Char ch = notEof(c);
             
-            if( Pt::isspace(ch) )
+            if( isSpace(ch) )
             {
                 _parse = &XmlReaderImpl::afterEndElementName;
                 return;
@@ -3537,7 +3537,7 @@ class XmlReaderImpl
         {
             Char ch = notEof(c);
             
-            if( Pt::isspace(ch) )
+            if( isSpace(ch) )
             {
                 return;
             }
@@ -3576,89 +3576,45 @@ class XmlReaderImpl
             (this->*_parse)(c);
         }
 
-        void onIgnorableCharacters(int c)
-        {
-            Char ch = notEof(c);
-
-            if(ch == '<')
-            {
-                _parse = &XmlReaderImpl::onTag;
-                return;
-            }
-
-            if(ch == '>')
-            {
-                throw SyntaxError("XML syntax error", line());
-            }
-
-            if(ch == '&')
-            {
-                assert(_token.empty());
-                _token.clear(); // TODO
-                _parse = &XmlReaderImpl::onEntityReference;
-                return;
-            }
-
-            if(ch == '\r')
-            {
-                _parse = &XmlReaderImpl::onIgnorableCharactersCR;
-                return;
-            }
-
-            appendContent(c);
-
-            if( ! Pt::isspace(ch) )
-            {
-                _chars.setSpace(false);
-                _parse = &XmlReaderImpl::onCharacters;
-                return;
-            }
-        }
-
-        void onIgnorableCharactersCR(int c)
-        {
-            appendContent('\n');
-            _parse = &XmlReaderImpl::onIgnorableCharacters;
-            
-            if(c != '\n')
-                onIgnorableCharacters(c);
-        }
-
         void onCharacters(int c)
         {
-            Char ch = notEof(c);
+            Char ch = c;
 
-            if(ch == '<')
-            {
-                _parse = &XmlReaderImpl::onTag;
-                return;
+            switch(c)
+            {                    
+                case '<':
+                    _parse = &XmlReaderImpl::onTag;
+                    break;
+
+                // EOF handling does make a difference
+                case Pt::uint32_t(-1):
+                case '>':
+                    throw SyntaxError("XML syntax error", line());
+
+                case '&':
+                    assert(_token.empty());
+                    _token.clear(); // TODO
+                    _parse = &XmlReaderImpl::onEntityReference;
+                    break;
+
+                case '\r':
+                    _parse = &XmlReaderImpl::onCharactersCR;
+                    break;
+            
+                case ' ':
+                case '\t':
+                case '\n':
+                    appendSpace(ch);
+                    break;
+            
+                default:
+                    appendContent(ch);
             }
-
-            if(ch == '>')
-            {
-                throw SyntaxError("XML syntax error", line());
-            }
-
-            if(ch == '&')
-            {
-                assert(_token.empty());
-                _token.clear(); // TODO
-                _parse = &XmlReaderImpl::onEntityReference;
-                return;
-            }
-
-            if(ch == '\r')
-            {
-                _parse = &XmlReaderImpl::onCharactersCR;
-                return;
-            }
-
-            appendContent(c);
         }
 
         void onCharactersCR(int c)
         {
-            appendContent('\n');
+            appendSpace('\n');
             _parse = &XmlReaderImpl::onCharacters;
             
             if(c != '\n')
@@ -3679,17 +3635,13 @@ class XmlReaderImpl
             {
                 if( EntityMapping::resolveDefaultEntity(_token) )
                 {
-                    _chars.append(_token);
-
-                    // TODO: do this in Characters::append
                     for(std::size_t n = 0; n < _token.size(); ++n)
                     {
                         Pt::Char c = _token[n];
-                        if(c != ' ' && c != '\n' && c != '\r' && c != '\t')
-                        {
-                            _chars.setSpace(false);
-                            break;
-                        }
+                        if(c == ' ' || c == '\n' || c == '\r' || c == '\t')
+                            _chars.appendSpace(c);
+                        else
+                            _chars.append(c);
                     }
 
                     _token.clear();
@@ -3702,11 +3654,8 @@ class XmlReaderImpl
                     resolveEntity(_entityRef);
                 }
 
-                // _chars.setIgnorable(false) is potentially called again when
-                // non-space is found in replacement text and non-space text 
-                // has been parsed before
                 _token.clear();
-                _parse = &XmlReaderImpl::onIgnorableCharacters;
+                _parse = &XmlReaderImpl::onCharacters;
                 return;
             }
 
@@ -3765,9 +3714,9 @@ class XmlReaderImpl
                 const String& content = chars.content();
                 unsigned len = content.length();
 
+                // TODO: add states for this, so Characters::isSpace works
                 if( len > 2 && content[len-2] == ']' && content[len-2] == ']')
                 {
-                    chars.setSpace(false);
                     chars.resize(len-2);
 
                     if( _options & ReportCData )
@@ -3784,6 +3733,8 @@ class XmlReaderImpl
                 return;
             }
 
+            //TODO: check for space -> appendSpace
+
             chars.append(ch);
         }
 
@@ -3798,7 +3749,7 @@ class XmlReaderImpl
             }
 
             Char ch(c);
-            if( Pt::isspace(ch) )
+            if( isSpace(ch) )
             {
                 return;
             }
@@ -3821,7 +3772,7 @@ class XmlReaderImpl
             }
 
             Char ch(c);
-            if( Pt::isspace(ch) )
+            if( isSpace(ch) )
             {
                 return;
             }
@@ -3862,11 +3813,16 @@ class XmlReaderImpl
         }
 
         // TODO: isXmlName()
-        bool isAlpha(Char ch)
+        inline bool isAlpha(Char ch) const
         {
             return ch == '.' || ch == '_' || ch == '-' || Pt::isalnum(ch) != 0;
         }
         
+        inline bool isSpace(Char ch) const
+        {
+            return ch == ' ' || ch == '\t' || ch == '\r' || ch == '\n';
+        }
+
         void pushParseState(ParseFunc parse)
         {
             _parseStack.push(parse);
@@ -3988,18 +3944,32 @@ class XmlReaderImpl
             }
         }
 
-        void appendContent(Pt::Char c)
+        inline void appendContent(Pt::Char c)
         {
             const String& content = _chars.content();
-            if (content.capacity() <= content.size() + 20)
-            {
-                if (content.capacity() < 16)
-                    _chars.reserve(16);
-                else
-                    _chars.reserve(content.capacity() + content.capacity() / 2);
-            }
+            //if (content.capacity() <= content.size() + 20)
+            //{
+                //if (content.capacity() < 16)
+                    //_chars.reserve(16);
+                //else
+                    //_chars.reserve(content.capacity() + content.capacity() / 2);
+            //}
             
             _chars.append(c);
+        }
+
+        inline void appendSpace(Pt::Char c)
+        {
+            const String& content = _chars.content();
+            //if (content.capacity() <= content.size() + 20)
+            //{
+                //if (content.capacity() < 16)
+                    //_chars.reserve(16);
+                //else
+                    //_chars.reserve(content.capacity() + content.capacity() / 2);
+            //}
+            
+            _chars.appendSpace(c);
         }
 
         void setNamespace(StartElement& se)

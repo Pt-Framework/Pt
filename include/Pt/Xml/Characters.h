@@ -67,15 +67,18 @@ class PT_XML_API Characters : public Node
         bool isSpace() const
         { return _ignorable; }
 
-        void setSpace(bool isWS)
-        { _ignorable = isWS; }
-
         // TODO: might want to set ignorableWS flag here...
         // Alternative: appendSpace(ch)
-        void append(Char ch)
-        { 
-            //_ignorable = _ignorable || (ch != ' ' && ch != '\n' && ch != '\r' && ch != '\t');         
-            _content += ch; 
+        
+        inline void appendSpace(Char ch)
+        {
+            _content += ch;
+        }
+
+        inline void append(Char ch)
+        {
+            _ignorable = false;
+            _content += ch;
         }
 
         void append(const Pt::String& str)
