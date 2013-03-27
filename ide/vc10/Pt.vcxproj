@@ -176,7 +176,6 @@
     <ClInclude Include="..\..\include\Pt\Xml\Entity.h" />
     <ClInclude Include="..\..\include\Pt\Xml\InputSource.h" />
     <ClInclude Include="..\..\include\Pt\Xml\Namespace.h" />
-    <ClInclude Include="..\..\include\Pt\Xml\NamespaceContext.h" />
     <ClInclude Include="..\..\include\Pt\Xml\Node.h" />
     <ClInclude Include="..\..\include\Pt\Xml\Notation.h" />
     <ClInclude Include="..\..\include\Pt\Xml\ProcessingInstruction.h" />
@@ -231,6 +230,7 @@
     <ClInclude Include="..\..\src\Pt-Xml\DtdContext.h" />
     <ClInclude Include="..\..\src\Pt-Xml\ElementDeclaration.h" />
     <ClInclude Include="..\..\src\Pt-Xml\InputStack.h" />
+    <ClInclude Include="..\..\src\Pt-Xml\NamespaceContext.h" />
     <ClInclude Include="..\..\src\Pt\regexp.h" />
     <ClInclude Include="..\..\src\Pt\SerializationData.h" />
     <ClInclude Include="..\..\src\Pt\SettingsReader.h" />

@@ -660,9 +660,6 @@
     <ClInclude Include="..\..\include\Pt\Xml\Namespace.h">
       <Filter>Pt-Xml</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Xml\NamespaceContext.h">
-      <Filter>Pt-Xml</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Xml\Node.h">
       <Filter>Pt-Xml</Filter>
     </ClInclude>
@@ -739,6 +736,9 @@
       <Filter>Pt-Xml</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Xml\DocTypeValidator.h">
+      <Filter>Pt-Xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Xml\NamespaceContext.h">
       <Filter>Pt-Xml</Filter>
     </ClInclude>
   </ItemGroup>

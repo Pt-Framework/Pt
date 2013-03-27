@@ -30,12 +30,12 @@
 #include "ElementDeclaration.h"
 #include "AttributeDeclaration.h"
 #include "InputStack.h"
+#include "NamespaceContext.h"
 
 #include <Pt/Xml/XmlReader.h>
 #include <Pt/Xml/DocTypeValidator.h>
 #include <Pt/Xml/XmlResolver.h>
 #include <Pt/Xml/DocTypeDefinition.h>
-#include <Pt/Xml/NamespaceContext.h>
 #include <Pt/Xml/StartDocument.h>
 #include <Pt/Xml/EndDocument.h>
 #include <Pt/Xml/DocType.h>
@@ -48,7 +48,6 @@
 #include "Pt/System/Logger.h"
 
 #include <stack>
-#include <memory>
 #include <cassert>
 
 log_define("Pt.Xml.XmlReader")
