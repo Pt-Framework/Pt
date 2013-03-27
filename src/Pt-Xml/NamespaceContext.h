@@ -37,10 +37,6 @@ namespace Pt {
 
 namespace Xml {
 
-//
-// TODO: this is not a public header file
-//
-
 /** @brief Manages all namespaces used in an XML document.
         
     @see Namespace
