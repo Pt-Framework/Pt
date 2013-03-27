@@ -60,18 +60,6 @@ class XmlDeserializer : public Deserializer
             this->setFormatter(_formatter);
         }
 
-        explicit XmlDeserializer(std::istream& is)
-        : _formatter(is)
-        {
-            this->reset( &_xmlcontext );
-            this->setFormatter(_formatter);
-        }
-
-        void attach(std::istream& is)
-        {
-            _formatter.attach(is);
-        }
-
         void attach(XmlReader& reader)
         {
             _formatter.attach(reader);

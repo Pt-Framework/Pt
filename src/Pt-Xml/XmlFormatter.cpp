@@ -78,19 +78,6 @@ XmlFormatter::XmlFormatter(XmlWriter& writer)
 }
 
 
-XmlFormatter::XmlFormatter(std::istream& is)
-: _writer(0)
-, _wrPtr(0)
-, _reader(0)
-, _rdPtr(0)
-, _composer(0)
-{
-    this->attach(is);
-    _processNode = &XmlFormatter::OnBegin;
-    _writer = _wrPtr.get();
-}
-
-
 XmlFormatter::XmlFormatter(XmlReader& reader)
 : _writer(0)
 , _wrPtr(0)
@@ -126,13 +113,6 @@ void XmlFormatter::attach(XmlWriter& writer)
 
     _wrPtr.reset(0);
     _writer = &writer;
-}
-
-
-void XmlFormatter::attach(std::istream& is)
-{
-    _rdPtr.reset( new XmlReader(is) );
-    _reader = _rdPtr.get();
 }
 
 

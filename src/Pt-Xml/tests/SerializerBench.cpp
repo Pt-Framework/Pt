@@ -29,6 +29,7 @@
 #include <iostream>
 #include <fstream>
 #include <math.h>
+#include <Pt/Xml/InputSource.h>
 #include <Pt/Xml/XmlSerializer.h>
 #include <Pt/Xml/XmlDeserializer.h>
 #include <Pt/Arg.h>
@@ -71,7 +72,9 @@ void benchSerialization(const T& d, const char* fname = 0)
     Serializer serializer(data);
     serializer.context()->enableReferencing(false);
 
-    Deserializer deserializer(data);
+    Pt::Xml::BinaryInputSource is(data);
+    Pt::Xml::XmlReader reader(is);
+    Deserializer deserializer(reader);
     deserializer.context()->enableReferencing(false);
 
     Pt::System::Clock clock;

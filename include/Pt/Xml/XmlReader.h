@@ -89,15 +89,9 @@ class PT_XML_API XmlReader : private NonCopyable
         */
         XmlReader();
 
-        // TODO: deprecated
-        explicit XmlReader(std::istream& is);
-
         /** @brief Construct with input source.
         */
         explicit XmlReader(InputSource& is);
-
-        // TODO: deprecated
-        XmlReader(XmlResolver& r, std::istream& is);
 
         /** @brief Construct with resolver and input source.
         */
@@ -136,7 +130,6 @@ class PT_XML_API XmlReader : private NonCopyable
         XmlResolver* resolver() const;
 
         // TODO: add methods for discard(), reset(), clear()
-        void setInput(std::istream& is);
 
         /** @brief Starts parsing with an input source.
 

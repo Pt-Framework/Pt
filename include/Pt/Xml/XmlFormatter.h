@@ -76,8 +76,6 @@ class PT_XML_API XmlFormatter : public Formatter
         */
         explicit XmlFormatter(XmlWriter& writer);
 
-        explicit XmlFormatter(std::istream& is);
-
         explicit XmlFormatter(XmlReader& reader);
 
         //! @brief Destructor
@@ -111,8 +109,6 @@ class PT_XML_API XmlFormatter : public Formatter
 
         XmlWriter* writer()
         { return _writer;}
-
-        void attach(std::istream& is);
 
         void attach(XmlReader& reader);
 

@@ -236,7 +236,8 @@ void XmlReaderTest::MissingXmlDeclaration()
     std::stringstream input;
     input << "<a/>";
 
-    Pt::Xml::XmlReader reader( input );
+    Pt::Xml::BinaryInputSource is(input);
+    Pt::Xml::XmlReader reader(is);
     PT_UNIT_ASSERT( reader.depth() == 0);
 
     Pt::Xml::XmlReader::Iterator it = reader.current();
@@ -264,7 +265,8 @@ void XmlReaderTest::EmptyXmlDeclaration()
     std::stringstream input;
     input << "<?xml ?>";
 
-    Pt::Xml::XmlReader reader( input );
+    Pt::Xml::BinaryInputSource is(input);
+    Pt::Xml::XmlReader reader(is);
 
     Pt::Xml::XmlReader::Iterator it = reader.current();
     const Pt::Xml::Node& n = *it;
@@ -278,7 +280,8 @@ void XmlReaderTest::ByteorderMarkUtf8()
     std::stringstream input;
     input << char(0xef) << char(0xbb) << char(0xbf) << "<a/>";
 
-    Pt::Xml::XmlReader reader( input );
+    Pt::Xml::BinaryInputSource is(input);
+    Pt::Xml::XmlReader reader(is);
     PT_UNIT_ASSERT(reader.depth() == 0);
 
     Pt::Xml::XmlReader::Iterator it = reader.current();
@@ -311,7 +314,9 @@ void XmlReaderTest::DtdEmptyDocument()
     input << "<!ELEMENT test EMPTY>\n";
     input << "]>";
 
-    Pt::Xml::XmlReader reader(resolver, input);
+    Pt::Xml::BinaryInputSource is(input);
+
+    Pt::Xml::XmlReader reader(resolver, is);
     reader.reportDtd(true);
 
     Pt::Xml::XmlReader::Iterator it = reader.current();
@@ -347,7 +352,9 @@ void XmlReaderTest::DtdExternalSubsetPublicId()
     input << "<!DOCTYPE test PUBLIC \"pubid\" \"external.dtd\">";
     input << "<test></test>";
 
-    Pt::Xml::XmlReader reader(resolver, input);
+    Pt::Xml::BinaryInputSource is(input);
+
+    Pt::Xml::XmlReader reader(resolver, is);
     reader.reportDtd(true);
 
     Pt::Xml::XmlReader::Iterator it = reader.current();
@@ -376,7 +383,9 @@ void XmlReaderTest::DtdExternalSubsetSystemId()
     input << "<!DOCTYPE test SYSTEM \"external.dtd\">\n";
     input << "<test></test>";
 
-    Pt::Xml::XmlReader reader(resolver, input);
+    Pt::Xml::BinaryInputSource is(input);
+
+    Pt::Xml::XmlReader reader(resolver, is);
     reader.reportDtd(true);
 
     Pt::Xml::XmlReader::Iterator it = reader.current();
@@ -403,7 +412,7 @@ void XmlReaderTest::DtdExternalAndInternalSubset()
         XmlTestResolver resolver;
         resolver.addInput(L"external.dtd", L"<!ENTITY e1 \"e1External\">\n<!ENTITY e2 \"e2External\">\n");
 
-        Pt::Xml::StringInputSource input(
+        Pt::Xml::StringInputSource is(
             L"<!DOCTYPE test SYSTEM \"external.dtd\" [\n"
             L"<!ELEMENT test (#PCDATA)>\n"
             L"<!ENTITY e1 \"e1Internal\">\n"
@@ -411,7 +420,7 @@ void XmlReaderTest::DtdExternalAndInternalSubset()
             L"<test>&e1; &e2;</test>"
         );
 
-        Pt::Xml::XmlReader reader(resolver, input);
+        Pt::Xml::XmlReader reader(resolver, is);
         reader.reportDtd(true);
 
         Pt::Xml::XmlReader::Iterator it = reader.current();
@@ -461,7 +470,9 @@ void XmlReaderTest::DtdValidateAttributes()
         input << "]>\n";
         input << "<test a1='A1' a2='A2' a4='A3def'></test>";
 
-        Pt::Xml::XmlReader reader(input);
+        Pt::Xml::BinaryInputSource is(input);
+
+        Pt::Xml::XmlReader reader(is);
         Pt::Xml::DocTypeValidator validator( reader.dtd() );
         
         Pt::Xml::XmlReader::Iterator it;
@@ -498,7 +509,9 @@ void XmlReaderTest::DtdValidateEnumAttributes()
         input << "]>\n";
         input << "<test a1='bbb'></test>";
 
-        Pt::Xml::XmlReader reader(input);
+        Pt::Xml::BinaryInputSource is(input);
+
+        Pt::Xml::XmlReader reader(is);
         Pt::Xml::DocTypeValidator validator( reader.dtd() );
         
         Pt::Xml::XmlReader::Iterator it;
@@ -534,7 +547,9 @@ void XmlReaderTest::DtdValidateIDAttributes()
         input << "    <second id='A2' ref='A1' />\n";
         input << "</test>";
 
-        Pt::Xml::XmlReader reader(input);
+        Pt::Xml::BinaryInputSource is(input);
+
+        Pt::Xml::XmlReader reader(is);
         Pt::Xml::DocTypeValidator validator( reader.dtd() );
         
         Pt::Xml::XmlReader::Iterator it;
@@ -565,7 +580,9 @@ void XmlReaderTest::DtdValidateEntityAttributes()
         input << "]>\n";
         input << "<test a1='e1' a2='e1 e2'></test>";
 
-        Pt::Xml::XmlReader reader(input);
+        Pt::Xml::BinaryInputSource is(input);
+
+        Pt::Xml::XmlReader reader(is);
         Pt::Xml::DocTypeValidator validator( reader.dtd() );
         
         Pt::Xml::XmlReader::Iterator it = reader.current();
@@ -596,7 +613,9 @@ void XmlReaderTest::DtdValidateNotationAttributes()
         input << "]>\n";
         input << "<test a1='jpeg' a2='gif'></test>";
 
-        Pt::Xml::XmlReader reader(input);
+        Pt::Xml::BinaryInputSource is(input);
+
+        Pt::Xml::XmlReader reader(is);
         Pt::Xml::DocTypeValidator validator( reader.dtd() );
         
         Pt::Xml::XmlReader::Iterator it = reader.current();
@@ -634,7 +653,9 @@ void XmlReaderTest::DtdValidateElementContent()
                  "  <b></b>\n"
                  "</test>\n";
 
-        Pt::Xml::XmlReader reader(input);
+        Pt::Xml::BinaryInputSource is(input);
+
+        Pt::Xml::XmlReader reader(is);
         Pt::Xml::DocTypeValidator validator( reader.dtd() );
 
         Pt::Xml::XmlReader::Iterator it;
@@ -666,7 +687,9 @@ void XmlReaderTest::DtdAnyElementContent()
                  "  <b></b>\n"
                  "</test>\n";
 
-        Pt::Xml::XmlReader reader(input);
+        Pt::Xml::BinaryInputSource is(input);
+
+        Pt::Xml::XmlReader reader(is);
         Pt::Xml::DocTypeValidator validator( reader.dtd() );
         
         Pt::Xml::XmlReader::Iterator it;
@@ -695,7 +718,9 @@ void XmlReaderTest::DtdValidateWithNamespace()
         input << "]>\n";
         input << "<pt:test xmlns:pt='http://www.pt-framework.org' pt:a1='A1'></pt:test>";
 
-        Pt::Xml::XmlReader reader(input);
+        Pt::Xml::BinaryInputSource is(input);
+
+        Pt::Xml::XmlReader reader(is);
         Pt::Xml::DocTypeValidator validator( reader.dtd() );
         
         Pt::Xml::XmlReader::Iterator it;
@@ -731,7 +756,8 @@ void XmlReaderTest::DtdNotations()
 
     input << "<test></test>";
 
-    Pt::Xml::XmlReader reader( input );
+    Pt::Xml::BinaryInputSource is(input);
+    Pt::Xml::XmlReader reader(is);
     reader.reportDtd(true);
     
     Pt::Xml::XmlReader::Iterator it = reader.current();
@@ -785,10 +811,11 @@ void XmlReaderTest::DtdInclude()
         input << "]]>\n";
         input << "<!ELEMENT test EMPTY>\n";
         input << "]>\n";
-
         input << "<test></test>";
 
-        Pt::Xml::XmlReader reader( resolver, input );
+        Pt::Xml::BinaryInputSource is(input);
+
+        Pt::Xml::XmlReader reader( resolver, is );
 
         Pt::Xml::XmlReader::Iterator it = reader.current();
         for(; it != reader.end(); ++it)
@@ -828,10 +855,10 @@ void XmlReaderTest::DtdIgnore()
         input << "]]>\n";
         input << "<!ELEMENT test EMPTY>\n";
         input << "]>\n";
-
         input << "<test></test>";
 
-        Pt::Xml::XmlReader reader( resolver, input );
+        Pt::Xml::BinaryInputSource is(input);
+        Pt::Xml::XmlReader reader( resolver, is );
 
         Pt::Xml::XmlReader::Iterator it = reader.current();
         for(; it != reader.end(); ++it)
@@ -866,7 +893,8 @@ void XmlReaderTest::DtdComment()
         input << "]>\n";
         input << "<test></test>";
 
-        Pt::Xml::XmlReader reader( resolver, input );
+        Pt::Xml::BinaryInputSource is(input);
+        Pt::Xml::XmlReader reader( resolver, is );
         Pt::Xml::DocTypeValidator validator( reader.dtd() );
 
         Pt::Xml::XmlReader::Iterator it = reader.current();
@@ -898,7 +926,8 @@ void XmlReaderTest::DtdProcesssingInstruction()
         input << "]>\n";
         input << "<test></test>";
 
-        Pt::Xml::XmlReader reader( resolver, input );
+        Pt::Xml::BinaryInputSource is(input);
+        Pt::Xml::XmlReader reader( resolver, is );
         reader.reportProcessingInstructions(true);
 
         Pt::Xml::XmlReader::Iterator it = reader.current();
@@ -933,7 +962,8 @@ void XmlReaderTest::EmptyDocument()
     std::stringstream input;
     input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
 
-    Pt::Xml::XmlReader reader( input );
+    Pt::Xml::BinaryInputSource is(input);
+    Pt::Xml::XmlReader reader(is);
 
     Pt::Xml::XmlReader::Iterator it = reader.current();
     const Pt::Xml::Node& n = *it;
@@ -955,7 +985,8 @@ void XmlReaderTest::EmptyElementTag()
     input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
     input << "<a/>";
 
-    Pt::Xml::XmlReader reader( input );
+    Pt::Xml::BinaryInputSource is(input);
+    Pt::Xml::XmlReader reader(is);
     PT_UNIT_ASSERT( reader.depth() == 0);
 
     Pt::Xml::XmlReader::Iterator it = reader.current();
@@ -984,7 +1015,8 @@ void XmlReaderTest::InvalidTag1()
     input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
     input << "<>";
 
-    Pt::Xml::XmlReader reader( input );
+    Pt::Xml::BinaryInputSource is(input);
+    Pt::Xml::XmlReader reader(is);
 
     // Expecting exception because empty tags are not allowed.
     PT_UNIT_ASSERT_THROW(reader.current(), std::exception);
@@ -997,7 +1029,8 @@ void XmlReaderTest::InvalidTag2()
     input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
     input << "</>";
 
-    Pt::Xml::XmlReader reader( input );
+    Pt::Xml::BinaryInputSource is(input);
+    Pt::Xml::XmlReader reader(is);
 
     // Expecting exception because empty tags are not allowed.
     PT_UNIT_ASSERT_THROW(reader.current(), std::exception);
@@ -1011,7 +1044,8 @@ void XmlReaderTest::InvalidTag3()
     input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
     input << "<a>>b</a>";
 
-    Pt::Xml::XmlReader reader( input );
+    Pt::Xml::BinaryInputSource is(input);
+    Pt::Xml::XmlReader reader(is);
     Pt::Xml::XmlReader::Iterator it = reader.current();
 
     PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::StartElement);
@@ -1025,7 +1059,8 @@ void XmlReaderTest::InvalidTag4()
     input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
     input << "<<a>b</a>";
 
-    Pt::Xml::XmlReader reader( input );
+    Pt::Xml::BinaryInputSource is(input);
+    Pt::Xml::XmlReader reader(is);
     PT_UNIT_ASSERT_THROW(reader.current(), std::exception);
 }
 
@@ -1036,7 +1071,8 @@ void XmlReaderTest::InvalidTag5()
     input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
     input << "<ab<cd>>";
 
-    Pt::Xml::XmlReader reader( input );
+    Pt::Xml::BinaryInputSource is(input);
+    Pt::Xml::XmlReader reader(is);
     PT_UNIT_ASSERT_THROW(reader.current(), std::exception);
 }
 
@@ -1047,7 +1083,8 @@ void XmlReaderTest::ElementWithContent()
     input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
     input << "<a>?!:=b</a>";
 
-    Pt::Xml::XmlReader reader( input );
+    Pt::Xml::BinaryInputSource is(input);
+    Pt::Xml::XmlReader reader(is);
     Pt::Xml::XmlReader::Iterator it = reader.current();
 
     // <a>
@@ -1080,7 +1117,8 @@ void XmlReaderTest::ElementWithNamespace()
     input << "<my:a xmlns:my=\"http://www.my2.net\">b</my:a>";
     input << "</my:a>";
 
-    Pt::Xml::XmlReader reader( input );
+    Pt::Xml::BinaryInputSource is(input);
+    Pt::Xml::XmlReader reader(is);
     Pt::Xml::XmlReader::Iterator it = reader.current();
 
     // <my:a>
@@ -1134,7 +1172,8 @@ void XmlReaderTest::AttributeWithNamespace()
     input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
     input << "<a my:attr=\"Hallo\" xmlns:my=\"http://www.my.net\">b</a>";
 
-    Pt::Xml::XmlReader reader( input );
+    Pt::Xml::BinaryInputSource is(input);
+    Pt::Xml::XmlReader reader(is);
 
     Pt::Xml::XmlReader::Iterator it = reader.current();
     const Pt::Xml::Node& startNode = *it;
@@ -1178,7 +1217,8 @@ void XmlReaderTest::DefaultNamespace()
     input << "<a xmlns=\"http://www.my2.net\">b</a>";
     input << "</a>";
 
-    Pt::Xml::XmlReader reader( input );
+    Pt::Xml::BinaryInputSource is(input);
+    Pt::Xml::XmlReader reader(is);
     Pt::Xml::XmlReader::Iterator it = reader.current();
 
     // <my:a>
@@ -1234,7 +1274,8 @@ void XmlReaderTest::MissingCloseTag()
     input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
     input << "<a><b></a>";
 
-    Pt::Xml::XmlReader reader( input );
+    Pt::Xml::BinaryInputSource is(input);
+    Pt::Xml::XmlReader reader(is);
     Pt::Xml::XmlReader::Iterator it = reader.current();
 
     // <a>
@@ -1251,7 +1292,8 @@ void XmlReaderTest::InvalidAttribute1()
     input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
     input << "<a blub/>";
 
-    Pt::Xml::XmlReader reader( input );
+    Pt::Xml::BinaryInputSource is(input);
+    Pt::Xml::XmlReader reader(is);
     PT_UNIT_ASSERT_THROW(reader.current(), std::exception);
 }
 
@@ -1262,7 +1304,8 @@ void XmlReaderTest::InvalidAttribute2()
     input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
     input << "<a blub=/>";
 
-    Pt::Xml::XmlReader reader( input );
+    Pt::Xml::BinaryInputSource is(input);
+    Pt::Xml::XmlReader reader(is);
     PT_UNIT_ASSERT_THROW(reader.current(), std::exception);
 }
 
@@ -1273,7 +1316,8 @@ void XmlReaderTest::InvalidAttribute3()
     input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
     input << "<a blub=\"/>";
 
-    Pt::Xml::XmlReader reader( input );
+    Pt::Xml::BinaryInputSource is(input);
+    Pt::Xml::XmlReader reader(is);
     PT_UNIT_ASSERT_THROW(reader.current(), std::exception);
 }
 
@@ -1284,7 +1328,8 @@ void XmlReaderTest::InvalidAttribute4()
     input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
     input << "<a blub=bla=\"b\"/>";
 
-    Pt::Xml::XmlReader reader( input );
+    Pt::Xml::BinaryInputSource is(input);
+    Pt::Xml::XmlReader reader(is);
     PT_UNIT_ASSERT_THROW(reader.current(), std::exception);
 }
 
@@ -1295,7 +1340,8 @@ void XmlReaderTest::EmptyAttribute()
     input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
     input << "<a b=\"\"/>";
 
-    Pt::Xml::XmlReader reader( input );
+    Pt::Xml::BinaryInputSource is(input);
+    Pt::Xml::XmlReader reader(is);
 
     Pt::Xml::XmlReader::Iterator it = reader.current();
     const Pt::Xml::Node& node = *it;
@@ -1314,7 +1360,8 @@ void XmlReaderTest::AttributeWithSimpleText()
     input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
     input << "<a b=\"a bcdefghijklmnopqrstuvwxyz\"/>";
 
-    Pt::Xml::XmlReader reader( input );
+    Pt::Xml::BinaryInputSource is(input);
+    Pt::Xml::XmlReader reader(is);
 
     Pt::Xml::XmlReader::Iterator it = reader.current();
     const Pt::Xml::Node& startNode = *it;
@@ -1336,7 +1383,8 @@ void XmlReaderTest::AttributeWithUTF8()
     input << "<a b=\"" << (char)0xce << (char)0xba << (char)0xe1 << (char)0xbd << (char)0xb9 << (char)0xcf <<
                           (char)0x83 << (char)0xce << (char)0xbc << (char)0xce << (char)0xb5 << "\"/>";
 
-    Pt::Xml::XmlReader reader( input );
+    Pt::Xml::BinaryInputSource is(input);
+    Pt::Xml::XmlReader reader(is);
 
     Pt::Xml::XmlReader::Iterator it = reader.current();
     const Pt::Xml::Node& startNode = *it;
@@ -1359,7 +1407,8 @@ void XmlReaderTest::MultipleAttributesIteration()
     input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
     input << "<a b=\"123\" c=\"456\" d=\"789\"/>";
 
-    Pt::Xml::XmlReader reader( input );
+    Pt::Xml::BinaryInputSource is(input);
+    Pt::Xml::XmlReader reader(is);
 
     Pt::Xml::XmlReader::Iterator it = reader.current();
     const Pt::Xml::Node& startNode = *it;
@@ -1413,7 +1462,8 @@ void XmlReaderTest::NormalizeAttributes()
         input << "]>\n";
         input << "<test a1=' a ' a2='' a3='a' a4=' a ' a5=' a b \r\n\t c'></test>";
 
-        Pt::Xml::XmlReader reader(input);
+        Pt::Xml::BinaryInputSource is(input);
+        Pt::Xml::XmlReader reader(is);
         
         Pt::Xml::XmlReader::Iterator it;
         for(it = reader.current(); it != reader.end(); ++it)
@@ -1456,7 +1506,8 @@ void XmlReaderTest::ProcessingInstructionInProlog()
     input << "<?xml-stylesheet type=\"text/css\" href=\"styles.css\"?>";
     input << "<a/>";
 
-    Pt::Xml::XmlReader reader( input );
+    Pt::Xml::BinaryInputSource is(input);
+    Pt::Xml::XmlReader reader(is);
     reader.reportProcessingInstructions(true);
     
     Pt::Xml::XmlReader::Iterator it = reader.current();
@@ -1483,7 +1534,8 @@ void XmlReaderTest::ProcessingInstructionInElement()
     input << "<?xml-stylesheet type=\"text/css\" href=\"styles.css\"?>";
     input << "456</a>";
 
-    Pt::Xml::XmlReader reader( input );
+    Pt::Xml::BinaryInputSource is(input);
+    Pt::Xml::XmlReader reader(is);
     reader.reportProcessingInstructions(true);
 
     Pt::Xml::XmlReader::Iterator it = reader.current();
@@ -1514,7 +1566,8 @@ void XmlReaderTest::ProcessingInstructionInEpilog()
     input << "<a/>\n";
     input << "<?xml-stylesheet type=\"text/css\" href=\"styles.css\"?>";
 
-    Pt::Xml::XmlReader reader( input );
+    Pt::Xml::BinaryInputSource is(input);
+    Pt::Xml::XmlReader reader(is);
     reader.reportProcessingInstructions(true);
 
     Pt::Xml::XmlReader::Iterator it = reader.current();
@@ -1542,7 +1595,8 @@ void XmlReaderTest::IgnorableWhitespace()
     input << "\t<c></c>\n";
     input << "</a>\n";
 
-    Pt::Xml::XmlReader reader(input);
+    Pt::Xml::BinaryInputSource is(input);
+    Pt::Xml::XmlReader reader(is);
         
     Pt::Xml::XmlReader::Iterator it;
     for(it = reader.current(); it != reader.end(); ++it)
@@ -1571,7 +1625,8 @@ void XmlReaderTest::CDATAAsCharacters()
     input << "</b>";
     input << "</test>\n";
 
-    Pt::Xml::XmlReader reader( input );
+    Pt::Xml::BinaryInputSource is(input);
+    Pt::Xml::XmlReader reader(is);
 
     Pt::Xml::XmlReader::Iterator it = reader.current();
     PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::StartElement);
@@ -1621,7 +1676,8 @@ void XmlReaderTest::CDATA()
     input << "</b>";
     input << "</test>\n";
 
-    Pt::Xml::XmlReader reader( input );
+    Pt::Xml::BinaryInputSource is(input);
+    Pt::Xml::XmlReader reader(is);
     reader.reportCData(true);
 
     Pt::Xml::XmlReader::Iterator it = reader.current();
@@ -1674,7 +1730,8 @@ void XmlReaderTest::StartDocument()
     input << "<test>\n";
     input << "</test>\n";
 
-    Pt::Xml::XmlReader reader(input);
+    Pt::Xml::BinaryInputSource is(input);
+    Pt::Xml::XmlReader reader(is);
     reader.reportStartDocument(true);
         
     Pt::Xml::XmlReader::Iterator it = reader.current();
@@ -1712,7 +1769,8 @@ void XmlReaderTest::DefaultEntities()
     input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
     input << "<a>&lt;&gt;&amp;&quot;&apos;&#1234;</a>";
 
-    Pt::Xml::XmlReader reader( input );
+    Pt::Xml::BinaryInputSource is(input);
+    Pt::Xml::XmlReader reader(is);
 
     Pt::Xml::XmlReader::Iterator it = reader.current();
     const Pt::Xml::Node& startNodeA = *it;
@@ -1743,7 +1801,8 @@ void XmlReaderTest::CustomEntities()
 
     input << "<a>&entity1; &undeclared;&entity2;</a>";
 
-    Pt::Xml::XmlReader reader( input );
+    Pt::Xml::BinaryInputSource is(input);
+    Pt::Xml::XmlReader reader(is);
     Pt::Xml::XmlReader::Iterator it = reader.current();
 
     PT_UNIT_ASSERT(Pt::Xml::toStartElement(&*it));
@@ -1786,7 +1845,8 @@ void XmlReaderTest::ExternalEntities()
 
     input << "<a>&MyEntity1; &MyEntity2;&MyEntity3;</a>";
 
-    Pt::Xml::XmlReader reader( resolver, input );
+    Pt::Xml::BinaryInputSource is(input);
+    Pt::Xml::XmlReader reader( resolver, is );
     Pt::Xml::XmlReader::Iterator it = reader.current();
 
     PT_UNIT_ASSERT(Pt::Xml::toStartElement(&*it));
@@ -1836,7 +1896,8 @@ void XmlReaderTest::ParameterEntities()
     input << "]>\n";
     input << "<test>This sample shows a &tricky; method.</test>\n";
 
-    Pt::Xml::XmlReader reader( input );
+    Pt::Xml::BinaryInputSource is(input);
+    Pt::Xml::XmlReader reader(is);
     
     Pt::Xml::XmlReader::Iterator it = reader.current();
     PT_UNIT_ASSERT(Pt::Xml::toStartElement(&*it));
@@ -1855,7 +1916,8 @@ void XmlReaderTest::CommentInProlog()
     input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
     input << "<!--</a>-->";
 
-    Pt::Xml::XmlReader reader( input );
+    Pt::Xml::BinaryInputSource is(input);
+    Pt::Xml::XmlReader reader(is);
     Pt::Xml::XmlReader::Iterator it = reader.current();
     PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::EndDocument);
 }
@@ -1867,7 +1929,8 @@ void XmlReaderTest::CommentBeforeRoot()
     input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
     input << "<!-- - ab --><a/>";
 
-    Pt::Xml::XmlReader reader( input );
+    Pt::Xml::BinaryInputSource is(input);
+    Pt::Xml::XmlReader reader(is);
     Pt::Xml::XmlReader::Iterator it = reader.current();
     PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::StartElement);
 }
@@ -1879,7 +1942,8 @@ void XmlReaderTest::CommentInElement()
     input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
     input << "<a>123<!--a-->456</a>";
 
-    Pt::Xml::XmlReader reader( input );
+    Pt::Xml::BinaryInputSource is(input);
+    Pt::Xml::XmlReader reader(is);
     Pt::Xml::XmlReader::Iterator it = reader.current();
     PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::StartElement);
 
@@ -1896,7 +1960,8 @@ void XmlReaderTest::CommentInEpilog()
     input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
     input << "<a/><!--a-->";
 
-    Pt::Xml::XmlReader reader( input );
+    Pt::Xml::BinaryInputSource is(input);
+    Pt::Xml::XmlReader reader(is);
     Pt::Xml::XmlReader::Iterator it = reader.current();
     PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::StartElement);
 
@@ -1914,7 +1979,8 @@ void XmlReaderTest::EmptyComment()
     input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
     input << "<!---->";
 
-    Pt::Xml::XmlReader reader( input );
+    Pt::Xml::BinaryInputSource is(input);
+    Pt::Xml::XmlReader reader(is);
     Pt::Xml::XmlReader::Iterator it = reader.current();
     PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::EndDocument);
 }
@@ -1933,7 +1999,9 @@ void XmlReaderTest::CheckPerformance()
     }
 
     std::cerr << "PrefTest: ";
-    Pt::Xml::XmlReader reader( input );
+
+    Pt::Xml::BinaryInputSource is(input);
+    Pt::Xml::XmlReader reader(is);
 
     //clock_t begin = clock();
     Pt::System::Clock c;

@@ -30,6 +30,7 @@
 #include "Pt/Xml/XmlSerializer.h"
 #include "Pt/Xml/XmlDeserializer.h"
 #include "Pt/Xml/XmlReader.h"
+#include "Pt/Xml/InputSource.h"
 #include "Pt/Xml/StartElement.h"
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestSuite.h"
@@ -185,7 +186,10 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             std::cerr << "---------------------\n" << std::endl;
 
             std::stringstream input( output.str() );
-            Pt::Xml::XmlDeserializer deser(input);
+
+            Pt::Xml::BinaryInputSource is(input);
+            Pt::Xml::XmlReader reader(is);
+            Pt::Xml::XmlDeserializer deser(reader);
             deser.context()->registerSurrogate("date", &fromXmlString, &toXmlString);
 
             deser.deserialize(date2);
@@ -235,7 +239,8 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             std::stringstream input( output.str() );
             //Pt::TextIStream tis(input, new Pt::Utf8Codec);
 
-            Pt::Xml::XmlReader reader(input);
+            Pt::Xml::BinaryInputSource is(input);
+            Pt::Xml::XmlReader reader(is);
             Pt::Xml::XmlDeserializer deser(reader);
 
             deser.deserialize(dates);
@@ -275,7 +280,8 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             std::stringstream input( output.str() );
             //Pt::TextIStream tis(input, new Pt::Utf8Codec);
 
-            Pt::Xml::XmlReader reader(input);
+            Pt::Xml::BinaryInputSource is(input);
+            Pt::Xml::XmlReader reader(is);
             Pt::Xml::XmlDeserializer deser(reader);
             deser.context()->enableReferencing(false);
 
@@ -328,7 +334,9 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             Pt::Date date2b;
             Pt::Date* dateptr1b = 0;
             std::stringstream input( output.str() );
-            Pt::Xml::XmlReader reader(input);
+            
+            Pt::Xml::BinaryInputSource is(input);
+            Pt::Xml::XmlReader reader(is);
             Pt::Xml::XmlDeserializer deser(reader);
 
             deser.begin(date1b);

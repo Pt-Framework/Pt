@@ -4103,7 +4103,6 @@ class XmlReaderImpl
 
         XmlReaderImpl(XmlResolver* resolver = 0)
         : _is(0)
-        , _inDel(0)
         , _resolver(resolver)
         , _options(DefaultOptions)
         , _notation(0)
@@ -4127,7 +4126,6 @@ class XmlReaderImpl
 
         XmlReaderImpl(InputSource& is, XmlResolver* resolver = 0)
         : _is(&is)
-        , _inDel(0)
         , _resolver(resolver)
         , _options(DefaultOptions)
         , _notation(0)
@@ -4171,7 +4169,6 @@ class XmlReaderImpl
 
         void clear()
         {
-            delete _inDel; // obsolete when we only work with InputSource
             _is = 0;
             _input.clear();
             
@@ -4217,16 +4214,6 @@ class XmlReaderImpl
         InputSource* input()
         {
             return _input.empty() ? _is : _input.current();
-        }
-
-        void setInput(std::istream& is)
-        {
-            clear();
-
-            _inDel = _resolver ? new BinaryInputSource(*_resolver, is)
-                               : new BinaryInputSource(is);
-            _is = _inDel;
-            _input.addInput(*_is);
         }
 
         void setInput(InputSource& is)
@@ -4362,7 +4349,6 @@ class XmlReaderImpl
 
     private:
         InputSource* _is;
-        InputSource* _inDel;
         XmlResolver* _resolver;
         EntityResolver _entityResolver;
         InputStack _input;
@@ -4410,26 +4396,12 @@ XmlReader::XmlReader()
 }
 
 
-XmlReader::XmlReader(std::istream& is)
-: _impl(0)
-{
-    _impl = new XmlReaderImpl();
-    setInput(is);
-}
 
 
 XmlReader::XmlReader(InputSource& is)
 : _impl(0)
 {
     _impl = new XmlReaderImpl(is);
-}
-
-
-XmlReader::XmlReader(XmlResolver& r, std::istream& is)
-: _impl(0)
-{
-    _impl = new XmlReaderImpl(&r);
-    setInput(is);
 }
 
 
@@ -4509,12 +4481,6 @@ void XmlReader::reportEntityReferences(bool value)
 XmlResolver* XmlReader::resolver() const
 {
     return _impl->resolver();
-}
-
-
-void XmlReader::setInput(std::istream& is)
-{
-    _impl->setInput(is);
 }
 
 
