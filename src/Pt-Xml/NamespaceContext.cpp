@@ -31,6 +31,23 @@ namespace Pt {
 
 namespace Xml {
 
+NamespaceContext::NamespaceContext()
+: _xmlNamespace(0, L"xml", L"http://www.w3.org/XML/1998/namespace")
+{
+}
+
+
+NamespaceContext::~NamespaceContext()
+{
+}
+
+
+void NamespaceContext::clear()
+{ 
+    _namespaces.clear(); 
+}
+
+
 const Namespace* NamespaceContext::getNamespace(const String& prefix) const
 {
     const Namespace* ret = 0;
@@ -50,6 +67,9 @@ const Namespace* NamespaceContext::getNamespace(const String& prefix) const
           break;
       }
     }
+
+    if( ! ret && prefix == _xmlNamespace.prefix() )
+        return &_xmlNamespace;
 
     return ret;
 }
@@ -77,7 +97,6 @@ const Namespace* NamespaceContext::getDefaultNamespace() const
 
     return ret;
 }
-
 
 
 void NamespaceContext::setNamespace(unsigned depth, const String& prefix, const String& name)

@@ -30,7 +30,6 @@
 #define Pt_Xml_DocTypeValidator_h
 
 #include <Pt/Xml/Api.h>
-#include <Pt/String.h>
 #include <Pt/NonCopyable.h>
 
 namespace Pt {

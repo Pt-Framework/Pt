@@ -126,6 +126,12 @@ class InputSource : private NonCopyable
         const XmlDeclaration* declaration() const
         { return _decl; }
 
+        void setId(const Pt::String& id)
+        { _id = id; }
+
+        const Pt::String& id() const
+        { return _id; }
+
     protected:
         // InputSource does not take ownership of rdbuf and decl
         void init(std::basic_streambuf<Char>* rdbuf = 0, XmlDeclaration* decl = 0)

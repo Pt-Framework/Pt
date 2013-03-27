@@ -37,27 +37,28 @@ namespace Pt {
 
 namespace Xml {
 
+//
+// TODO: this is not a public header file
+//
+
 /** @brief Manages all namespaces used in an XML document.
         
     @see Namespace
 */
-class PT_XML_API NamespaceContext 
+class NamespaceContext 
 {
     public:
         /** Default constructor.
         */
-        NamespaceContext()
-        { }
+        NamespaceContext();
 
         /** Destructor.
         */
-        ~NamespaceContext()
-        { }
+        ~NamespaceContext();
 
         /** @brief Removes all namespaces.
         */
-        void clear()
-        { _namespaces.clear(); }
+        void clear();
 
         /** @brief Returns the namespace for a prefix.
         */
@@ -81,7 +82,7 @@ class PT_XML_API NamespaceContext
 
     private:
         std::vector<Namespace> _namespaces;
-        String _defaultNSName;
+        Namespace _xmlNamespace;
 };
 
 } // namespace Xml

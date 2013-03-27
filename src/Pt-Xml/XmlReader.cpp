@@ -867,17 +867,8 @@ class XmlReaderImpl
 
             if( ch == ']' )
             {
-                // end of IGNORE/INCLUDE
-                if( ! _parseStack.empty() )
-                {
-                    _parse = _parseStack.top();
-                    _parseStack.pop();
-                    return;
-                }
-
-                setDocumentTypeDefinition();
-                --_depth;
-                _parse = &XmlReaderImpl::OnDtdInternalEnd;
+                // end of INCLUDE or end of internal DTD
+                popParseState(&XmlReaderImpl::OnDtdInternalEnd);
                 return;
             }
 
@@ -923,13 +914,9 @@ class XmlReaderImpl
 
             if(ch == ']')
             {          
-                // end of IGNORE/INCLUDE
-                if( ! _parseStack.empty() )
-                {
-                    _parse = _parseStack.top();
-                    _parseStack.pop();
-                    return;
-                }
+                // end of INCLUDE
+                popParseState();
+                return;
             }
 
             throw SyntaxError("XML syntax error", line());
@@ -980,6 +967,7 @@ class XmlReaderImpl
 
             if(ch == '[')
             {
+                // TODO: INCLUDE/IGNORE only in external subset
                 _parse = &XmlReaderImpl::OnDtdBeforeIgnoreOrInclude;
                 return;
             }
@@ -999,13 +987,7 @@ class XmlReaderImpl
 
             if( ch == '>' )
             {
-                popParseState(&XmlReaderImpl::OnDtdInternal);
-
-                //if( _input.isExternalDtd() )
-                //    _parse = &XmlReaderImpl::OnDtdExternal;
-                //else
-                //    _parse = &XmlReaderImpl::OnDtdInternal;
-
+                popParseState();
                 return;
             }
 
@@ -1201,26 +1183,6 @@ class XmlReaderImpl
             _parse = &XmlReaderImpl::OnDtdIgnore; 
         }
 
-        void OnDtdIgnoreEnd2(int c)
-        {
-            Pt::Char ch = notEof(c);
-
-            if(ch == '>')
-            {       
-                assert(_parseStack.empty() == false);
-                popParseState(&XmlReaderImpl::OnDtdInternal);
-                      
-                //if( _input.isExternalDtd() )
-                //    _parse = &XmlReaderImpl::OnDtdExternal;
-                //else
-                //    _parse = &XmlReaderImpl::OnDtdInternal; 
-                
-                return;
-            }
-
-            _parse = &XmlReaderImpl::OnDtdIgnore; 
-        }
-
         void OnDtdIncludeBegin(int c)
         {
             Pt::Char ch = notEof(c);
@@ -1276,13 +1238,8 @@ class XmlReaderImpl
 
             if(ch == '>')
             {      
-                popParseState(&XmlReaderImpl::OnDtdInternal);
-                   
-                //if( _input.isExternalDtd() )
-                //    _parse = &XmlReaderImpl::OnDtdExternal;
-                //else
-                //    _parse = &XmlReaderImpl::OnDtdInternal; 
-                
+                std::cerr << "X";
+                popParseState();  
                 return;
             }
 
@@ -1409,7 +1366,7 @@ class XmlReaderImpl
             {
                 _notation = 0;
                 
-                popParseState(&XmlReaderImpl::OnDtdInternal);
+                popParseState();
 
                 //if( _input.isExternalDtd() )
                 //    _parse = &XmlReaderImpl::OnDtdExternal;
@@ -1638,7 +1595,7 @@ class XmlReaderImpl
             {
                 _entity = 0;
                 
-                popParseState(&XmlReaderImpl::OnDtdInternal);
+                popParseState();
 
                 //if( _input.isExternalDtd() )
                 //    _parse = &XmlReaderImpl::OnDtdExternal;
@@ -1695,7 +1652,7 @@ class XmlReaderImpl
             {
                 _entity = 0;
 
-                popParseState(&XmlReaderImpl::OnDtdInternal);
+                popParseState();
                 
                 //if( _input.isExternalDtd() )
                 //    _parse = &XmlReaderImpl::OnDtdExternal;
@@ -1792,7 +1749,7 @@ class XmlReaderImpl
                 _token.clear();
                 _entity = 0;
 
-                popParseState(&XmlReaderImpl::OnDtdInternal);
+                popParseState();
                 
                 //if( _input.isExternalDtd() )
                 //    _parse = &XmlReaderImpl::OnDtdExternal;
@@ -2549,7 +2506,7 @@ class XmlReaderImpl
                 assert(_attlistDecl);
                 _attlistDecl = 0;
 
-                popParseState(&XmlReaderImpl::OnDtdInternal);
+                popParseState();
 
                 //if( _input.isExternalDtd() )
                 //    _parse = &XmlReaderImpl::OnDtdExternal;
@@ -2768,7 +2725,7 @@ class XmlReaderImpl
                 _elemDecl = 0;
                 _dtdContext.resetExpression();
                 
-                popParseState(&XmlReaderImpl::OnDtdInternal);
+                popParseState();
 
                 //if( _input.isExternalDtd() )
                 //    _parse = &XmlReaderImpl::OnDtdExternal;
@@ -2907,7 +2864,7 @@ class XmlReaderImpl
                 _elemDecl = 0;
                 _dtdContext.resetExpression();
                 
-                popParseState(&XmlReaderImpl::OnDtdInternal);
+                popParseState();
 
                 //if( _input.isExternalDtd() )
                 //    _parse = &XmlReaderImpl::OnDtdExternal;
@@ -2999,7 +2956,7 @@ class XmlReaderImpl
                 _elemDecl = 0;
                 _dtdContext.resetExpression();
 
-                popParseState(&XmlReaderImpl::OnDtdInternal);
+                popParseState();
 
                 //if( _input.isExternalDtd() )
                 //    _parse = &XmlReaderImpl::OnDtdExternal;
@@ -3075,6 +3032,9 @@ class XmlReaderImpl
 
             if( ch == '>' )
             {
+                setDocumentTypeDefinition();
+                --_depth;
+
                 bool externalDtd = resolveExternalDtd();
                 if( externalDtd )
                     _parse = &XmlReaderImpl::OnDtdExternal;
@@ -3916,14 +3876,10 @@ class XmlReaderImpl
         void popParseState()
         {
             if( _parseStack.empty() )
-            {
                 throw SyntaxError("XML syntax error", line());
-            }
-            else
-            {
-                _parse = _parseStack.top();
-                _parseStack.pop();
-            }
+
+            _parse = _parseStack.top();
+            _parseStack.pop();
         }
         
         void popParseState(ParseFunc parse)
