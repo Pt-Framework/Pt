@@ -32,6 +32,7 @@
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/RegisterTest.h"
 #include "Pt/Base64Codec.h"
+#include "Pt/Utf16Codec.h"
 #include "Pt/Utf8Codec.h"
 #include "Pt/TextStream.h"
 #include <string>
@@ -48,6 +49,8 @@ class TextStreamTest : public Pt::Unit::TestSuite
                                                  *this, &TextStreamTest::Base64In );
             Pt::Unit::TestSuite::registerMethod( "Base64Out",
                                                  *this, &TextStreamTest::Base64Out );
+            Pt::Unit::TestSuite::registerMethod( "UTF16String",
+                                                 *this, &TextStreamTest::UTF16String);
             Pt::Unit::TestSuite::registerMethod( "InvalidUTF8String",
                                                  *this, &TextStreamTest::InvalidUTF8String );
             Pt::Unit::TestSuite::registerMethod( "UTF8ToUnicode",
@@ -68,6 +71,7 @@ class TextStreamTest : public Pt::Unit::TestSuite
 
         void Base64Out();
         void Base64In();
+        void UTF16String();
         void InvalidUTF8String();
         void UTF8ToUnicode();
         void testTextStreamDirectFromUTF8ToUnicode();
@@ -150,6 +154,22 @@ void TextStreamTest::Base64In()
     std::string token;
     ts3 >> token;
     PT_UNIT_ASSERT( token == "abcd" );
+}
+
+void TextStreamTest::UTF16String()
+{
+    std::stringstream ss;
+    const char u16txt[] = { 0x00, 0x61, 0x00, 0x62, 0x00, 0x63, 0x00};
+    ss.str(u16txt);
+
+    Pt::TextStream ts( ss, new Pt::Utf16Codec() );
+
+    Pt::String str;
+    //std::getline(ts, str);
+    //PT_UNIT_ASSERT( ts.good() );
+
+    //std::cout << str.narrow() << std::endl;
+    //PT_UNIT_ASSERT_EQUALS(str, L"abc" );
 }
 
 void TextStreamTest::InvalidUTF8String()
