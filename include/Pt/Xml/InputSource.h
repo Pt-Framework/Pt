@@ -126,11 +126,8 @@ class InputSource : private NonCopyable
         const XmlDeclaration* declaration() const
         { return _decl; }
 
-        void setId(const Pt::String& id)
-        { _id = id; }
-
         const Pt::String& id() const
-        { return _id; }
+        { return onId(); }
 
     protected:
         // InputSource does not take ownership of rdbuf and decl
@@ -144,12 +141,13 @@ class InputSource : private NonCopyable
         virtual std::streamsize onImport() = 0;
 
         virtual int_type onGet() = 0;
+        
+        virtual const Pt::String& onId() const = 0;
 
     private:
         std::basic_streambuf<Char>* _rdbuf;
         std::size_t _line;
         XmlDeclaration* _decl;
-        Pt::String _id; // maybe virtual???
 };
 
 
@@ -162,10 +160,14 @@ class PT_XML_API TextInputSource : public InputSource
 
         void reset(std::basic_istream<Char>& ios);     
 
+        void setId(const Pt::String& id);
+        
     protected:
         virtual std::streamsize onImport();
 
         virtual int_type onGet();
+
+        const Pt::String& onId() const;
 
         virtual bool onImportText();
 
@@ -175,6 +177,7 @@ class PT_XML_API TextInputSource : public InputSource
     private:
         std::basic_istream<Char>* _ios;
         XmlDeclaration _xmlDecl;
+        Pt::String _id;
         unsigned char _xmlState;
         const char* _pbBegin;
         const char* _pbEnd;
@@ -207,10 +210,14 @@ class PT_XML_API BinaryInputSource : public InputSource
 
         void reset(std::istream& is);
 
+        void setId(const Pt::String& id);
+
     protected:
         virtual std::streamsize onImport();
 
         virtual int_type onGet();
+
+        const Pt::String& onId() const;
 
         virtual bool onImportData();
 
@@ -227,6 +234,7 @@ class PT_XML_API BinaryInputSource : public InputSource
         Utf8Codec _utf8Codec;
         TextBuffer _tbuf;
         XmlDeclaration _xmlDecl;
+        Pt::String _id;
         MBState _mbState;
         unsigned char _bomState;
         unsigned char _bomEncoding;
@@ -249,6 +257,12 @@ class NullInputSource : public InputSource
 
         virtual int_type onGet()
         { return std::char_traits<Char>::eof(); }
+
+        const Pt::String& onId() const
+        { return _id; }
+
+    private:
+        Pt::String _id;
 };
 
 } // namespace Xml

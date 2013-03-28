@@ -47,10 +47,11 @@ class PT_XML_API Characters : public Node
     public:
         /** @brief Constructs with content string.
         */
-        explicit Characters( const String& content = String() )
+        Characters()
         : Node(Node::Characters)
-        , _content(content)
-        , _ignorable(true)
+        , _content()
+        , _isSpace(true)
+        , _cdata(false)
         { }
 
         /** @brief Returns true if is empty.
@@ -58,18 +59,22 @@ class PT_XML_API Characters : public Node
         bool empty() const
         { return _content.empty(); }
 
+        void setCData(bool cdata)
+        { _cdata = cdata; }
+
+        bool isCData() const
+        { return _cdata; }
+
         void clear()
         { 
             _content.clear(); 
-            _ignorable = true;
+            _isSpace = true;
+            _cdata = false;
         }
 
         bool isSpace() const
-        { return _ignorable; }
-
-        // TODO: might want to set ignorableWS flag here...
-        // Alternative: appendSpace(ch)
-        
+        { return _isSpace; }
+       
         inline void appendSpace(Char ch)
         {
             _content += ch;
@@ -77,7 +82,7 @@ class PT_XML_API Characters : public Node
 
         inline void append(Char ch)
         {
-            _ignorable = false;
+            _isSpace = false;
             _content += ch;
         }
 
@@ -107,16 +112,10 @@ class PT_XML_API Characters : public Node
         inline static const Node::Type nodeId()
         { return Node::Characters; }
 
-    protected:
-        explicit Characters( Node::Type type )
-        : Node(type)
-        , _content()
-        , _ignorable(true)
-        { }
-
     private:
         String _content;
-        bool _ignorable;
+        bool _isSpace;
+        bool _cdata;
 };
 
 
@@ -141,43 +140,6 @@ inline Characters& toCharacters(Node& node)
 inline const Characters& toCharacters(const Node& node)
 {
     return nodeCast<Characters>(node);
-}
-
-
-class CData : public Characters
-{
-    public:
-        /** @brief Constructs with content string.
-        */
-        CData()
-        : Characters(Node::CData)
-        { }
-
-        inline static const Node::Type nodeId()
-        { return Node::CData; }
-};
-
-inline CData* toCData(Node* node)
-{
-    return nodeCast<CData>(node);
-}
-
-
-inline const CData* toCData(const Node* node)
-{
-    return nodeCast<CData>(node);
-}
-
-
-inline CData& toCData(Node& node)
-{
-    return nodeCast<CData>(node);
-}
-
-
-inline const CData& toCData(const Node& node)
-{
-    return nodeCast<CData>(node);
 }
 
 } // namespace Xml

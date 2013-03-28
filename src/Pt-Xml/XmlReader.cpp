@@ -263,11 +263,11 @@ class XmlReaderImpl
             {
                 if(_qname.name() == L"version")
                 {
-                    _startDoc.setVersion( _token );
+                    //_startDoc.setVersion( _token );
                 }
                 else if(_qname.name() == L"encoding")
                 {
-                    _startDoc.setEncoding( _token );
+                    //_startDoc.setEncoding( _token );
                 }
                 else if(_qname.name() == L"standalone")
                 {
@@ -1237,7 +1237,6 @@ class XmlReaderImpl
 
             if(ch == '>')
             {      
-                std::cerr << "X";
                 popParseState();  
                 return;
             }
@@ -3092,7 +3091,6 @@ class XmlReaderImpl
             if(ch == '&')
             {
                 assert(_token.empty());
-                _token.clear(); // TODO
                 _parse = &XmlReaderImpl::onEntityReference;
                 return;
             }
@@ -3389,7 +3387,6 @@ class XmlReaderImpl
                 // For an entity reference, recursively process the replacement text
                 // of the entity.
                 assert(_token.empty());
-                _token.clear(); // TODO
                 _parse = &XmlReaderImpl::onAttributeEntityReference;
                 return;
             }
@@ -3593,7 +3590,6 @@ class XmlReaderImpl
 
                 case '&':
                     assert(_token.empty());
-                    _token.clear(); // TODO
                     _parse = &XmlReaderImpl::onEntityReference;
                     break;
 
@@ -3687,55 +3683,89 @@ class XmlReaderImpl
             {
                 _token.clear();
 
-                if( _options & ReportCData )
-                {
-                    if(_chars.content().length() > 0)
-                    {
-                        _current = &_chars;
-                    }
-
-                    _cdata.clear();
-                }
+                if( (_options & ReportCData) && ! _chars.empty() )
+                    _current = &_chars;
                 
-                _parse = &XmlReaderImpl::onCData;
+                _parse = &XmlReaderImpl::onCDataBegin;
                 return;
             }
 
             throw SyntaxError("XML syntax error", line());
         };
 
+        void onCDataBegin(int c)
+        {
+            if(_options & ReportCData)
+            {
+                _chars.clear();
+                _chars.setCData(true);
+            }
+
+            _parse = &XmlReaderImpl::onCData;
+            onCData(c);
+        }
+
         void onCData(int c)
         {
             Char ch = notEof(c);
-            Characters& chars = _options & ReportCData ? _cdata : _chars;
 
-            if(ch == '>')
+            if(ch == ']')
             {
-                const String& content = chars.content();
-                unsigned len = content.length();
-
-                // TODO: add states for this, so Characters::isSpace works
-                if( len > 2 && content[len-2] == ']' && content[len-2] == ']')
-                {
-                    chars.resize(len-2);
-
-                    if( _options & ReportCData )
-                    {
-                        _current = &_cdata;
-                        _chars.clear();
-                    }
-                    
-                    _parse = &XmlReaderImpl::afterTag;
-                    return;
-                }
-
-                chars.append(ch);
+                _parse = &XmlReaderImpl::onCDataClose0;
                 return;
             }
 
-            //TODO: check for space -> appendSpace
+            if( isSpace(ch) )
+                _chars.appendSpace(ch);
+            else
+                _chars.append(ch);
+        }
 
-            chars.append(ch);
+        void onCDataClose0(int c)
+        {
+            Char ch = notEof(c);
+            
+            if(ch == ']')
+            {
+                _parse = &XmlReaderImpl::onCDataClose1;
+                return;
+            }
+
+            _chars.append(']');
+            _chars.append(ch);
+
+            _parse = &XmlReaderImpl::onCData;
+        }
+
+        void onCDataClose1(int c)
+        {
+            Char ch = notEof(c);
+            
+            if(ch == '>')
+            {
+                if( _options & ReportCData )
+                {
+                    _current = &_chars;
+                }
+                    
+                _parse = &XmlReaderImpl::afterCData;
+                return;
+            }
+
+            _chars.append(']');
+            _chars.append(']');
+            _chars.append(ch);
+            
+            _parse = &XmlReaderImpl::onCData;
+        }
+
+        void afterCData(int c)
+        {
+            if( _options & ReportCData )
+                _chars.clear();
+            
+            _parse = &XmlReaderImpl::afterTag;
+            afterTag(c);
         }
 
         // onEpilog should differ should not allow StartElements
@@ -4031,31 +4061,35 @@ class XmlReaderImpl
         void setStartDoc()
         {
             if(_options & ReportStartDocument)
-                  _current = &_startDoc;
+            {
+                bool standalone = _is && _is->declaration() && _is->declaration()->isStandalone();
+                _startDoc.setStandalone(standalone);
+                _current = &_startDoc;
+            }
         }
 
         void setDocType()
         {
             if(_options & ReportDtd)
-                  _current = &_docType;
+                _current = &_docType;
         }
 
         void setDocumentTypeDefinition()
         {
             if(_options & ReportDtd)
-                  _current = &_dtd;
+                _current = &_dtd;
         }
 
         void setComment()
         {
             if(_options & ReportComments)
-                  _current = &_comment;
+                _current = &_comment;
         }
 
         void setProcessingInstruction()
         {
             if(_options & ReportProcessingInstructions)
-                  _current = &_procInstr;
+                _current = &_procInstr;
         }
 
     public:
@@ -4080,13 +4114,10 @@ class XmlReaderImpl
         , _attr(0)
         , _depth(0)
         , _parse(0)                 
-        //, _beforeCharacterReference(0)
-        //, _beforeEntityReference(0)
         , _current(0)
         , _dtdContext()
         , _dtd(_dtdContext)
         , _docType()
-        //, _dtdValidator(_dtd)
         , _elemDecl(0)
         , _attrDecl(0)
         , _attlistDecl(0)
@@ -4103,13 +4134,10 @@ class XmlReaderImpl
         , _attr(0)
         , _depth(0)
         , _parse(0)                 
-        //, _beforeCharacterReference(0)
-        //, _beforeEntityReference(0)
         , _current(0)
         , _dtdContext()
         , _dtd(_dtdContext)
         , _docType()
-        //, _dtdValidator(_dtd)
         , _elemDecl(0)
         , _attrDecl(0)
         , _attlistDecl(0)
@@ -4149,19 +4177,11 @@ class XmlReaderImpl
             while( ! _parseStack.empty() )
                 _parseStack.pop();
 
-            //_beforeEntityReference = 0;
-            //_beforeCharacterReference = 0;
-            //_entityName.clear();
-            //_characterReference.clear();
-
             _qname.clear();
-            // TODO: remove _token.clear() in states, 
-            //       where we assert(_token.empty())
             _token.clear(); 
             _quotChar = 0;
             _nsctx.clear();
             
-            //_dtdValidator.clear();
             _dtd.clear();
             _dtdContext.clear();
             _docType.clear();
@@ -4195,15 +4215,6 @@ class XmlReaderImpl
 
         void addInput(InputSource& is)
         { _input.addInput(is); }
-
-        const Pt::String& version() const
-        { return _startDoc.version(); }
-
-        const Pt::String& encoding() const
-        { return _startDoc.encoding(); }
-
-        bool isStandalone() const
-        { return _startDoc.isStandalone(); }
 
         DocTypeDefinition& dtd()
         { return _dtd; }
@@ -4340,7 +4351,6 @@ class XmlReaderImpl
         DocTypeContext _dtdContext;
         DocTypeDefinition _dtd;
         DocType _docType;
-        //DocTypeValidator _dtdValidator;
 
         ElementDeclaration* _elemDecl;
         AttributeDeclaration* _attrDecl;
@@ -4354,7 +4364,6 @@ class XmlReaderImpl
         EntityReference _entityRef;
         EndElement _endElem;
         Characters _chars;
-        CData _cdata;
         EndDocument _endDoc;
 };
 

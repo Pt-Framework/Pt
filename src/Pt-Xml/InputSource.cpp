@@ -542,10 +542,17 @@ void TextInputSource::reset(std::basic_istream<Char>& ios)
     _ios = &ios;
 
     _xmlDecl.clear();
+    _id.clear();
 
     _xmlState = OnXmlBegin;
     _pbBegin = 0;
     _pbEnd = 0;
+}
+
+
+void TextInputSource::setId(const Pt::String& id)
+{ 
+    _id = id; 
 }
 
 
@@ -647,6 +654,12 @@ InputSource::int_type TextInputSource::onGet()
 
     init( _ios->rdbuf(), &_xmlDecl );
     return _ios->rdbuf()->sbumpc();
+}
+
+
+const Pt::String& TextInputSource::onId() const
+{ 
+    return _id; 
 }
 
 
@@ -791,6 +804,7 @@ void BinaryInputSource::reset(std::istream& is)
     _tbuf.setCodec(&_utf8Codec);
 
     _xmlDecl.clear();
+    _id.clear();
 
     _mbState = MBState();
     _bomState = OnBomBegin;
@@ -799,6 +813,12 @@ void BinaryInputSource::reset(std::istream& is)
     _xmlState = OnXmlBegin;
     _pbBegin = 0;
     _pbEnd = 0;
+}
+
+
+void BinaryInputSource::setId(const Pt::String& id)
+{ 
+    _id = id; 
 }
 
 
@@ -946,6 +966,12 @@ InputSource::int_type BinaryInputSource::onGet()
 
     init(&_tbuf, &_xmlDecl);
     return _tbuf.sbumpc();
+}
+
+
+const Pt::String& BinaryInputSource::onId() const
+{ 
+    return _id; 
 }
 
 

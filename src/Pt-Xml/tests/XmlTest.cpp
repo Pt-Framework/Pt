@@ -1692,14 +1692,15 @@ void XmlReaderTest::CDATA()
     PT_UNIT_ASSERT(chars->content().narrow() == "hello");
 
     ++it;
-    Pt::Xml::CData* cdata = Pt::Xml::toCData(&*it);
-    PT_UNIT_ASSERT(cdata);
-    PT_UNIT_ASSERT(cdata->content().narrow() == "<Element>pure &gt; data</Element>");
+    chars = Pt::Xml::toCharacters(&*it);
+    PT_UNIT_ASSERT(chars);
+    PT_UNIT_ASSERT(chars->isCData());
+    PT_UNIT_ASSERT(chars->content().narrow() == "<Element>pure &gt; data</Element>");
 
     ++it;
     chars = Pt::Xml::toCharacters(&*it);
     PT_UNIT_ASSERT(chars);
-    PT_UNIT_ASSERT(chars->content().narrow() == "world!");
+    PT_UNIT_ASSERT_EQUALS(chars->content().narrow(), "world!");
 
     ++it;
     PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::EndElement);
@@ -1708,9 +1709,10 @@ void XmlReaderTest::CDATA()
     PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::StartElement);
 
     ++it;
-    cdata = Pt::Xml::toCData(&*it);
-    PT_UNIT_ASSERT(cdata);
-    PT_UNIT_ASSERT(cdata->content().narrow() == "bbb");
+    chars = Pt::Xml::toCharacters(&*it);
+    PT_UNIT_ASSERT(chars);
+    PT_UNIT_ASSERT(chars->isCData());
+    PT_UNIT_ASSERT(chars->content().narrow() == "bbb");
 
     ++it;
     PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::EndElement);
