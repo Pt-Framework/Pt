@@ -81,7 +81,7 @@ void ClientImpl::beginCall(IComposer& r, IRemoteProcedure& method, IDecomposer**
 
     beginExecute();
 
-    _reader.setInput(_bin);
+    _reader.reset(_bin);
     _scanner.begin(r);
 }
 
@@ -103,7 +103,7 @@ void ClientImpl::call(IComposer& r, IRemoteProcedure& method, IDecomposer** argv
     
     //_ts.attach(is);
     _bin.reset(is);
-    _reader.setInput(_bin);
+    _reader.reset(_bin);
     _scanner.begin(r);
 
     while( _reader.get().type() !=  Pt::Xml::Node::EndDocument )

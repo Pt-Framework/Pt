@@ -42,61 +42,88 @@ namespace Xml {
 class InputStack
 {
     public:
+        typedef std::char_traits<Char>::int_type int_type;
+
         struct Input
         {
             Input(InputSource* is, XmlResolver* res)
             : source(is)
+            , _avail(0)
             , resolver(res)
             {}
 
+            inline std::streamsize avail()
+            { return _avail; }
+
+            inline std::streamsize import()
+            {
+                _avail = source->import();
+                return _avail;
+            }
+
+            inline int_type get()
+            {
+                if(_avail > 0)
+                    --_avail;
+                return source->get();
+            }
+
             InputSource* source;
+            std::streamsize _avail;
             XmlResolver* resolver;
         };
+
     public:
         InputStack()
         : _externalDtd(0)
-        , _currentInput(&_nullInput)
-        {}
+        , _currentInput(0)
+        {
+            _sources.push_back( Input(&_nullInput, 0) );
+            _currentInput = &_sources.back();
+        }
 
         ~InputStack()
         {
             clear();
         }
+        
+        inline Input& input() 
+        { return *_currentInput; }
 
-        void bumpLine()
-        { _currentInput->setLine( _currentInput->line() + 1 ); }
+        inline void bumpLine()
+        { _currentInput->source->setLine( line() + 1 ); }
 
-        std::size_t line() const
-        { 
-            if( ! _external.empty() )
-                return _external[0].source->line();
+        inline std::size_t line() const
+        { return _currentInput->source->line(); }
 
-            return _currentInput->line(); 
-        }
+        inline bool empty() const
+        { return _sources.size() <= 1; }
 
-        bool empty() const
-        { return _currentInput == &_nullInput; }
-
-        void clear()
+        inline void clear()
         {
-            while( ! _external.empty() )
-            {
+            while( ! empty() )
                 removeInput();
-            }
-
-            _currentInput = &_nullInput;
         }
-                
-        InputSource* current()
-        { return _currentInput; }
+
+        inline int_type get()
+        { return _currentInput->get(); }
+               
+        inline std::streamsize import()
+        { return _currentInput->import(); }
+
+        inline std::streamsize avail()
+        { return _currentInput->avail(); }
+
+        inline InputSource* source()
+        { return _currentInput->source; }
 
         void addInput(InputSource& is, XmlResolver* resolver = 0)
         {
-            _external.push_back( Input(&is, resolver) );
-            _currentInput = &is;
+            _sources.push_back( Input(&is, resolver) );
+            _currentInput = &_sources.back();
         }
 
-        bool isExternalDtd() const
+        inline bool isExternalDtd() const
         { return _externalDtd != 0; }
 
         void setExternalDtd(InputSource& is, XmlResolver* resolver)
@@ -107,11 +134,9 @@ class InputStack
 
         void removeInput()
         {
-            _currentInput = &_nullInput;
-
-            if( ! _external.empty() )
+            if( ! empty() )
             {
-                Input& in = _external.back();
+                Input& in = _sources.back();
                 InputSource* is = in.source;
                 XmlResolver* resolver = in.resolver;                        
 
@@ -121,18 +146,16 @@ class InputStack
                 if(resolver)
                     resolver->releaseInput(is);
 
-                _external.pop_back();
-                        
-                _currentInput = _external.empty() ? &_nullInput 
-                                                  : _external.back().source;
+                _sources.pop_back();
+                _currentInput = & _sources.back();
             }
         }
 
     private:
         NullInputSource _nullInput;
         InputSource* _externalDtd;
-        std::vector<Input> _external;
-        InputSource* _currentInput;
+        std::vector<Input> _sources;
+        Input* _currentInput;
 };
 
 } // namespace Xml

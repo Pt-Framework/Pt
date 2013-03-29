@@ -3072,7 +3072,7 @@ class XmlReaderImpl
                     return;
                 }
 
-                appendSpace(ch);
+                _chars.appendSpace(ch);
                 _parse = &XmlReaderImpl::onCharacters;
                 return;
             }
@@ -3095,8 +3095,7 @@ class XmlReaderImpl
                 return;
             }
 
-            //_chars.setSpace(false);
-            appendContent(c);
+            _chars.append(ch);
             _parse = &XmlReaderImpl::onCharacters;
         }
 
@@ -3197,12 +3196,6 @@ class XmlReaderImpl
                 return;
             }
 
-            if( isAlpha(ch) )
-            {
-                _startElem.name() += c;
-                return;
-            }
-
             if(ch == '>')
             {
                 _chars.clear();
@@ -3210,8 +3203,13 @@ class XmlReaderImpl
                 _depth++;
 
                 setNamespace(_startElem);
-
                 _parse = &XmlReaderImpl::afterTag;
+                return;
+            }
+
+            if( isAlpha(ch) )
+            {
+                _startElem.name() += c;
                 return;
             }
 
@@ -3450,15 +3448,6 @@ class XmlReaderImpl
                 _depth--;
 
                 setNamespace(_endElem);
-
-                /*if(depth() == 0)
-                {
-                    _parse = &XmlReaderImpl::onEpilog;
-                    return;
-                }
-
-                _parse = &XmlReaderImpl::afterTag;*/
-
                 _parse = &XmlReaderImpl::afterEndElement;
                 return;
             }
@@ -3484,6 +3473,17 @@ class XmlReaderImpl
         {
             Char ch = notEof(c);
             
+            if(ch == '>')
+            {
+                _chars.clear();
+                _current = &(_endElem);
+                _depth--;
+
+                setNamespace(_endElem);
+                _parse = &XmlReaderImpl::afterEndElement;
+                return;
+            }
+
             if( isSpace(ch) )
             {
                 _parse = &XmlReaderImpl::afterEndElementName;
@@ -3506,27 +3506,6 @@ class XmlReaderImpl
                 return;
             }
 
-            if(ch == '>')
-            {
-                _chars.clear();
-                _current = &(_endElem);
-                _depth--;
-
-                setNamespace(_endElem);
-
-                /*if(depth() == 0)
-                {
-                    _parse = &XmlReaderImpl::onEpilog;
-                    return;
-                }
-
-                _parse = &XmlReaderImpl::afterTag;*/
-
-                _parse = &XmlReaderImpl::afterEndElement;
-
-                return;
-            }
-
             throw SyntaxError("XML syntax error", line());
         }
     
@@ -3546,14 +3525,6 @@ class XmlReaderImpl
                 _depth--;
 
                 setNamespace(_endElem);
-
-                /*if(depth() == 0)
-                {
-                    _parse = &XmlReaderImpl::onEpilog;
-                    return;
-                }
-
-                _parse = &XmlReaderImpl::afterTag;*/
                 _parse = &XmlReaderImpl::afterEndElement;
                 return;
             }
@@ -3575,16 +3546,14 @@ class XmlReaderImpl
 
         void onCharacters(int c)
         {
-            Char ch = c;
+            Char ch = notEof(c);
 
             switch(c)
             {                    
                 case '<':
                     _parse = &XmlReaderImpl::onTag;
                     break;
-
-                // EOF handling does make a difference
-                case Pt::uint32_t(-1):
+                
                 case '>':
                     throw SyntaxError("XML syntax error", line());
 
@@ -3600,17 +3569,17 @@ class XmlReaderImpl
                 case ' ':
                 case '\t':
                 case '\n':
-                    appendSpace(ch);
+                    _chars.appendSpace(ch);
                     break;
             
                 default:
-                    appendContent(ch);
+                    _chars.append(ch);
             }
         }
 
         void onCharactersCR(int c)
         {
-            appendSpace('\n');
+            _chars.appendSpace('\n');
             _parse = &XmlReaderImpl::onCharacters;
             
             if(c != '\n')
@@ -3817,7 +3786,7 @@ class XmlReaderImpl
         }
 
     private:
-        Char notEof(int c) const
+        inline Char notEof(int c) const
         {
             if( c == std::char_traits<Char>::eof() )
             {
@@ -3827,17 +3796,17 @@ class XmlReaderImpl
             return Char(c);
         }
 
-        bool isQuote(Char ch) const
+        inline bool isQuote(Char ch) const
         {
             return ch == '\'' || ch =='"';
         }
 
-        void setQuotedBegin(Char ch)
+        inline void setQuotedBegin(Char ch)
         {
             _quotChar = ch;
         }
 
-        bool isQuoteEnd(Char ch) const
+        inline bool isQuoteEnd(Char ch) const
         {
             return ch == _quotChar;
         }
@@ -3853,12 +3822,12 @@ class XmlReaderImpl
             return ch == ' ' || ch == '\t' || ch == '\r' || ch == '\n';
         }
 
-        void pushParseState(ParseFunc parse)
+        inline void pushParseState(ParseFunc parse)
         {
             _parseStack.push(parse);
         }
 
-        void popParseState()
+        inline void popParseState()
         {
             if( _parseStack.empty() )
                 throw SyntaxError("XML syntax error", line());
@@ -3867,7 +3836,7 @@ class XmlReaderImpl
             _parseStack.pop();
         }
         
-        void popParseState(ParseFunc parse)
+        inline void popParseState(ParseFunc parse)
         {
             if( _parseStack.empty() )
             {
@@ -3972,34 +3941,6 @@ class XmlReaderImpl
                 entref.setEntity(ent);
                 _current = &entref;
             }
-        }
-
-        inline void appendContent(Pt::Char c)
-        {
-            const String& content = _chars.content();
-            //if (content.capacity() <= content.size() + 20)
-            //{
-                //if (content.capacity() < 16)
-                    //_chars.reserve(16);
-                //else
-                    //_chars.reserve(content.capacity() + content.capacity() / 2);
-            //}
-            
-            _chars.append(c);
-        }
-
-        inline void appendSpace(Pt::Char c)
-        {
-            const String& content = _chars.content();
-            //if (content.capacity() <= content.size() + 20)
-            //{
-                //if (content.capacity() < 16)
-                    //_chars.reserve(16);
-                //else
-                    //_chars.reserve(content.capacity() + content.capacity() / 2);
-            //}
-            
-            _chars.appendSpace(c);
         }
 
         void setNamespace(StartElement& se)
@@ -4165,7 +4106,7 @@ class XmlReaderImpl
             _options &= ~o;
         }
 
-        void clear()
+        void reset()
         {
             _is = 0;
             _input.clear();
@@ -4203,12 +4144,12 @@ class XmlReaderImpl
 
         InputSource* input()
         {
-            return _input.empty() ? _is : _input.current();
+            return _input.empty() ? _is : _input.source();
         }
 
-        void setInput(InputSource& is)
+        void reset(InputSource& is)
         {
-            clear();
+            reset();
             _is = &is;
             _input.addInput(*_is);
         }
@@ -4240,13 +4181,10 @@ class XmlReaderImpl
         Node& next()
         {
             _current = 0;
-            std::char_traits<Char>::int_type c = 0;
 
             while( ! _current )
             {
-                InputSource* in = _input.current();
-                
-                c = in->get();
+                std::char_traits<Char>::int_type c = _input.get();
                 if( c == std::char_traits<Char>::eof() )
                 {            
                     _input.removeInput();
@@ -4272,15 +4210,12 @@ class XmlReaderImpl
 
             do
             {
-                InputSource* in = _input.current();
-
-                std::streamsize n = in->import();
-                // TODO: cache number of available bytes
-
                 std::char_traits<Char>::int_type c;
+                std::streamsize n = _input.avail();                
+                
                 if(n > 0)
                 {
-                    c = in->get();
+                    c = _input.get();
                 }
                 else if(n < 0)
                 {
@@ -4289,7 +4224,13 @@ class XmlReaderImpl
                         c = std::char_traits<Char>::eof();
                 }
                 else
-                    break;
+                {
+                    n = _input.import();
+                    if(n == 0)
+                        break;
+
+                    continue;
+                }
 
                 (this->*_parse)(c);
 
@@ -4301,7 +4242,7 @@ class XmlReaderImpl
 
                 //if(n > 0)
                 //{
-                    //std::char_traits<Char>::int_type c = in->get();
+                    //std::char_traits<Char>::int_type c = _input.get();
                     //(this->*_parse)(c);
 
                     //// TODO: move this to state functions
@@ -4320,7 +4261,11 @@ class XmlReaderImpl
                             //(this->*_parse)( std::char_traits<Char>::eof() );
                     //}
                     //else if (n == 0)
-                        //break;
+                    //{
+                        //n = _input.import();
+                        //if(n == 0)
+                            //break;
+                    //}
                 //}
             } 
             while( ! _current);
@@ -4375,8 +4320,6 @@ XmlReader::XmlReader()
 }
 
 
-
-
 XmlReader::XmlReader(InputSource& is)
 : _impl(0)
 {
@@ -4397,9 +4340,27 @@ XmlReader::~XmlReader()
 }
 
 
-void XmlReader::clear()
+void XmlReader::reset()
 {
-    _impl->clear();
+    _impl->reset();
+}
+
+
+void XmlReader::reset(InputSource& is)
+{
+    _impl->reset(is);
+}
+
+
+void XmlReader::addInput(InputSource& in)
+{
+    _impl->addInput(in);
+}
+
+
+XmlResolver* XmlReader::resolver() const
+{
+    return _impl->resolver();
 }
 
 
@@ -4454,24 +4415,6 @@ void XmlReader::reportEntityReferences(bool value)
         _impl->setOption(XmlReaderImpl::ReportEntityReferences);
     else
         _impl->unsetOption(XmlReaderImpl::ReportCData);
-}
-
-
-XmlResolver* XmlReader::resolver() const
-{
-    return _impl->resolver();
-}
-
-
-void XmlReader::setInput(InputSource& is)
-{
-    _impl->setInput(is);
-}
-
-
-void XmlReader::addInput(InputSource& in)
-{
-    _impl->addInput(in);
 }
 
 

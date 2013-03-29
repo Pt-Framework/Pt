@@ -107,7 +107,27 @@ class PT_XML_API XmlReader : private NonCopyable
             parse a new document. The XmlResolver not removed and the reporting
             options are not changed.
         */
-        void clear();
+        void reset();
+
+        // TODO: add methods for discard(), reset(), clear()
+
+        /** @brief Starts parsing with an input source.
+
+            All previous input is removed and the parser is reset to parse
+            a new document. This is essentially the same as calling clear()
+            followed by addInput().
+        */
+        void reset(InputSource& is);
+
+        /** @brief Adds an external input source.
+
+            This method can be used to add additional input streams e.g.
+            to resolve an external entity reference, indicated by an
+            EntityReference node.
+        */
+        void addInput(InputSource& in);
+
+        XmlResolver* resolver() const;
 
         void reportStartDocument(bool value);
 
@@ -126,26 +146,6 @@ class PT_XML_API XmlReader : private NonCopyable
 
         // TODO: ENTITIY, ATTLIST, NOTATION and ELEMENT in DTDs
         // void reportDtdContent(bool value);
-
-        XmlResolver* resolver() const;
-
-        // TODO: add methods for discard(), reset(), clear()
-
-        /** @brief Starts parsing with an input source.
-
-            All previous input is removed and the parser is reset to parse
-            a new document. This is essentially the same as calling clear()
-            followed by addInput().
-        */
-        void setInput(InputSource& is);
-
-        /** @brief Adds an external input source.
-
-            This method can be used to add additional input streams e.g.
-            to resolve an external entity reference, indicated by an
-            EntityReference node.
-        */
-        void addInput(InputSource& in);
 
         /** @brief Returns current DTD of the document.
         */
