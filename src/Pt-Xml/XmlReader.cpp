@@ -4046,6 +4046,10 @@ class XmlReaderImpl
 
         static const int DefaultOptions = 0;
 
+        // TODO:
+        //     - XmlName object which has non-owning Char* to parse character
+        //       buffer. Also for QName, Characters, with a String like API.
+
         XmlReaderImpl(XmlResolver* resolver = 0)
         : _is(0)
         , _resolver(resolver)

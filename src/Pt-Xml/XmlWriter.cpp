@@ -1,4 +1,6 @@
 /*
+ * Copyright (C) 2005-2013 Marc Boris Duerner
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -23,10 +25,54 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#include "Pt/Xml/XmlWriter.h"
-#include "Pt/Xml/StartElement.h"
-#include "Pt/Utf8Codec.h"
+#include <Pt/Xml/XmlWriter.h>
+#include <Pt/Xml/StartElement.h>
+#include <Pt/Utf8Codec.h>
 #include <iostream>
+
+namespace {
+
+static const Pt::Char XML_QUOT[] = { '&', 'q', 'u', 'o', 't', ';','\0' };
+static const Pt::Char XML_AMP[]  = { '&', 'a', 'm', 'p', ';','\0' };
+static const Pt::Char XML_APOS[] = { '&', 'a', 'p', 'o', 's', ';','\0' };
+static const Pt::Char XML_LT[]   = { '&', 'l', 't', ';','\0' };
+static const Pt::Char XML_GT[]   = { '&', 'g', 't', ';','\0' };
+
+void xmlEncode(std::basic_ostream<Pt::Char>& os, const Pt::Char* str)
+{
+    const Pt::Char* it = str;
+
+    for( ; *it != '\0'; ++it)
+    {
+        switch( it->value() )
+        {
+            case 0x0022:
+                os.write(XML_QUOT, sizeof(XML_QUOT)/sizeof(Pt::Char));
+                break;
+
+            case 0x0026:
+                os.write(XML_QUOT, sizeof(XML_AMP)/sizeof(Pt::Char));
+                break;
+
+            case 0x0027:
+                os.write(XML_QUOT, sizeof(XML_APOS)/sizeof(Pt::Char));
+                break;
+
+            case 0x003C:
+                os.write(XML_QUOT, sizeof(XML_LT)/sizeof(Pt::Char));
+                break;
+
+            case 0x003E:
+                os.write(XML_QUOT, sizeof(XML_GT)/sizeof(Pt::Char));
+                break;
+
+            default:
+                os << *it;
+        }
+    }
+}
+
+}
 
 
 namespace Pt {
@@ -221,13 +267,13 @@ void XmlWriter::writeElement(const Pt::Char* localName, const Pt::Char* content,
 
 void XmlWriter::writeCharacters(const Pt::Char* text)
 {
-    _entities.encode(_tos, text);
+    xmlEncode(_tos, text);
 }
 
 
 void XmlWriter::writeCharacters(const Pt::String& text)
 {
-    _entities.encode(_tos, text.c_str());
+    xmlEncode(_tos, text.c_str());
 }
 
 

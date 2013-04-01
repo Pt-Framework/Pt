@@ -1,4 +1,6 @@
 /*
+ * Copyright (C) 2005-2013 Marc Boris Duerner
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -23,11 +25,11 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef PT_Xml_XmlWriter_h
-#define PT_Xml_XmlWriter_h
+
+#ifndef Pt_Xml_XmlWriter_h
+#define Pt_Xml_XmlWriter_h
 
 #include <Pt/Xml/Api.h>
-#include <Pt/Xml/Entity.h>
 #include <Pt/String.h>
 #include <Pt/TextStream.h>
 #include <stack>
@@ -98,7 +100,6 @@ namespace Xml {
             void useEndl(bool sw)            { setFormatFlags(UseEndl, sw); }
 
         private:
-            EntityMapping _entities;
             TextOStream _tos;
             std::stack<Pt::String> _elements;
             int _flags;
