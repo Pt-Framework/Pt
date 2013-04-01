@@ -127,20 +127,6 @@ class PT_XML_API EntityMapping
 
         const Entity* resolveEntity(const Pt::String& name) const;
 
-        /** @brief Returns the entity reference for a character.
-
-            If no entity reference is found, a null pointer is returned.
-        */
-        const Pt::Char* encode(Char ch) const;
-
-        /** @brief Replaces characters with entities.
-            
-            If characters are found in @a str, which are represented by an
-            entity reference, they will be replaced. The result is written
-            to the output stream @a os.
-        */
-        void encode(std::basic_ostream<Char>& os, const Pt::Char* str) const;
-
     private:
         Entities _entities;
 };

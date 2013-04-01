@@ -205,63 +205,6 @@ const Entity* EntityMapping::resolveEntity(const Pt::String& name) const
 }
 
 
-static const Pt::Char XML_QUOT[] = { 'q', 'u', 'o', 't', '\0' };
-static const Pt::Char XML_AMP[]  = { 'a', 'm', 'p', '\0' };
-static const Pt::Char XML_APOS[] = { 'a', 'p', 'o', 's', '\0' };
-static const Pt::Char XML_LT[]   = { 'l', 't', '\0' };
-static const Pt::Char XML_GT[]   = { 'g', 't', '\0' };
-
-
-const Pt::Char* EntityMapping::encode(Char ch) const
-{
-    const Pt::Char* ret = 0;
-    switch(ch.value())
-    {
-        case 0x0022:
-            ret = XML_QUOT;
-            break;
-
-        case 0x0026:
-            ret = XML_AMP;
-            break;
-
-        case 0x0027:
-            ret = XML_APOS;
-            break;
-
-        case 0x003C:
-            ret = XML_LT;
-            break;
-
-        case 0x003E:
-            ret = XML_GT;
-            break;
-    }
-
-    return ret;
-}
-
-
-void EntityMapping::encode(std::basic_ostream<Char>& os, const Pt::Char* str) const
-{
-    const Pt::Char* it = str;
-
-    for( ; *it != '\0'; ++it)
-    {
-        const Char* entity = encode(*it);
-        if(entity)
-        {
-            os << Pt::Char('&');
-            while (*entity)
-                os << Pt::Char(*entity++);
-            os << Pt::Char(';');
-        }
-        else
-        {
-            os << *it;
-        }
-    }
-}
 
 
 EntityReference::EntityReference()
