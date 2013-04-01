@@ -32,44 +32,68 @@
 
 namespace {
 
-static const Pt::Char XML_QUOT[] = { '&', 'q', 'u', 'o', 't', ';','\0' };
-static const Pt::Char XML_AMP[]  = { '&', 'a', 'm', 'p', ';','\0' };
-static const Pt::Char XML_APOS[] = { '&', 'a', 'p', 'o', 's', ';','\0' };
-static const Pt::Char XML_LT[]   = { '&', 'l', 't', ';','\0' };
-static const Pt::Char XML_GT[]   = { '&', 'g', 't', ';','\0' };
+static const Pt::Char XML_QUOT[] = { '&', 'q', 'u', 'o', 't', ';' };
+static const Pt::Char XML_AMP[]  = { '&', 'a', 'm', 'p', ';'};
+static const Pt::Char XML_APOS[] = { '&', 'a', 'p', 'o', 's', ';' };
+static const Pt::Char XML_LT[]   = { '&', 'l', 't', ';' };
+static const Pt::Char XML_GT[]   = { '&', 'g', 't', ';' };
 
 void xmlEncode(std::basic_ostream<Pt::Char>& os, const Pt::Char* str)
 {
     const Pt::Char* it = str;
+    const Pt::Char* begin = str;
 
     for( ; *it != '\0'; ++it)
     {
         switch( it->value() )
         {
             case 0x0022:
+                if(it != begin)
+                    os.write(begin, it - begin);
+                
+                begin = it + 1;
                 os.write(XML_QUOT, sizeof(XML_QUOT)/sizeof(Pt::Char));
                 break;
 
             case 0x0026:
-                os.write(XML_QUOT, sizeof(XML_AMP)/sizeof(Pt::Char));
+                if(it != begin)
+                    os.write(begin, it - begin);
+                
+                begin = it + 1;
+                os.write(XML_AMP, sizeof(XML_AMP)/sizeof(Pt::Char));
                 break;
 
             case 0x0027:
-                os.write(XML_QUOT, sizeof(XML_APOS)/sizeof(Pt::Char));
+                if(it != begin)
+                    os.write(begin, it - begin);
+                
+                begin = it + 1;
+                os.write(XML_APOS, sizeof(XML_APOS)/sizeof(Pt::Char));
                 break;
 
             case 0x003C:
-                os.write(XML_QUOT, sizeof(XML_LT)/sizeof(Pt::Char));
+                if(it != begin)
+                    os.write(begin, it - begin);
+                
+                begin = it + 1;
+                os.write(XML_LT, sizeof(XML_LT)/sizeof(Pt::Char));
                 break;
 
             case 0x003E:
-                os.write(XML_QUOT, sizeof(XML_GT)/sizeof(Pt::Char));
+                if(it != begin)
+                    os.write(begin, it - begin);
+
+                begin = it + 1;
+                os.write(XML_GT, sizeof(XML_GT)/sizeof(Pt::Char));
                 break;
 
             default:
-                os << *it;
+                break;
         }
     }
+
+    if(it != begin)
+        os.write(begin, it - begin);
 }
 
 }
