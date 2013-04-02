@@ -32,78 +32,57 @@
 #include <Pt/Xml/Api.h>
 #include <Pt/String.h>
 #include <Pt/TextStream.h>
-#include <stack>
 
 namespace Pt {
 
 namespace Xml {
 
-    class Attribute;
+class Attribute;
 
-    class PT_XML_API XmlWriter
-    {
-        public:
-            XmlWriter();
+class PT_XML_API XmlWriter
+{
+    public:
+        XmlWriter();
 
-            XmlWriter(std::ostream& os, int format =  UseXmlDeclaration | UseIndent | UseEndl);
+        XmlWriter(std::basic_ostream<Char>& os);
 
-            ~XmlWriter();
+        ~XmlWriter();
 
-            void begin(std::ostream& os);
+        void begin(std::basic_ostream<Char>& os);
 
-            void writeStartElement(const Pt::String& prefix, const Pt::String& localName, const Pt::String& ns);
+        void writeStartDocument(const Pt::Char* version, const Pt::Char* encoding);
 
-            void writeStartTag(const Pt::Char* name);
+        void writeStartElement(const Pt::String& prefix, const Pt::String& localName, const Pt::String& ns);
 
-            void writeEndTag(const Pt::Char* name);
+        void writeStartTag(const Pt::Char* name);
 
-            void writeStartElement(const Pt::Char* localName, const Attribute* attr = 0, size_t attrCount = 0);
+        void writeEndTag(const Pt::Char* name);
 
-            void writeStartElement(const Pt::String& localName, const Attribute* attr = 0, size_t attrCount = 0);
+        void writeStartElement(const Pt::Char* localName, const Attribute* attr = 0, size_t attrCount = 0);
 
-            void writeEndElement();
+        void writeStartElement(const Pt::String& localName, const Attribute* attr = 0, size_t attrCount = 0);
 
-            void writeElement(const Pt::String& localName, const Pt::String& content, const Attribute* attr = 0, size_t attrCount = 0);
+        void writeEndElement();
 
-            void writeElement(const Pt::Char* localName, const Char* content, const Attribute* attr = 0, size_t attrCount = 0);
+        void writeElement(const Pt::String& localName, const Pt::String& content, const Attribute* attr = 0, size_t attrCount = 0);
 
-            void writeCharacters(const Pt::Char* text);
+        void writeElement(const Pt::Char* localName, const Char* content, const Attribute* attr = 0, size_t attrCount = 0);
 
-            void writeCharacters(const Pt::String& text);
+        void writeCharacters(const Pt::Char* text);
 
-            void flush();
+        void writeCharacters(const Pt::String& text);
 
-            void endl();
+        void flush();
 
-            enum FormatFlags {
-              UseXmlDeclaration = 1,
-              UseIndent = 2,
-              UseEndl = 4
-            };
+        void endl();
 
-            void setFormat(int f)  { _flags = f; }
+        void useIndent(bool sw);
 
-            void setFormatFlags(int f, bool sw = true)  { if (sw) _flags |= f; else _flags &= ~f; }
+        void useEndl(bool sw);
 
-            int format() const               { return _flags; }
-
-            bool useXmlDeclaration() const   { return UseXmlDeclaration == (_flags & UseXmlDeclaration); }
-
-            void useXmlDeclaration(bool sw)  { setFormatFlags(UseXmlDeclaration, sw); }
-
-            bool useIndent() const           { return UseIndent == (_flags & UseIndent); }
-
-            void useIndent(bool sw)          { setFormatFlags(UseIndent, sw); }
-
-            bool useEndl() const             { return UseEndl == (_flags & UseEndl); }
-
-            void useEndl(bool sw)            { setFormatFlags(UseEndl, sw); }
-
-        private:
-            TextOStream _tos;
-            std::stack<Pt::String> _elements;
-            int _flags;
-    };
+    private:
+        class XmlWriterImpl* _impl;
+};
 
 }
 

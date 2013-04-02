@@ -36,7 +36,7 @@
 #include "Pt/Xml/EndElement.h"
 #include "Pt/System/Selectable.h"
 #include "Pt/System/Logger.h"
-#include "Pt/Utf8Codec.h"
+
 #include <cassert>
 
 log_define("Pt.XmlRpc.Client")
@@ -45,6 +45,8 @@ namespace Pt {
 
 namespace XmlRpc {
 
+static const Pt::Char XMLRPC_XMLVERSION[]  = { '1', '.', '0', '\0' };
+static const Pt::Char XMLRPC_XMLENCODING[]  = { 'U', 'T', 'F', '-', '8',  '\0' };
 static const Pt::Char XMLRPC_METHODRESPONSE[]  = { 'm', 'e', 't', 'h', 'o', 'd', 'R', 'e', 's', 'p', 'o', 'n', 's', 'e', '\0' };
 static const Pt::Char XMLRPC_METHODCALL[]  = { 'm', 'e', 't', 'h', 'o', 'd', 'C', 'a', 'l', 'l', '\0' };
 static const Pt::Char XMLRPC_METHODNAME[]  = { 'm', 'e', 't', 'h', 'o', 'd', 'N', 'a', 'm', 'e', '\0' };
@@ -54,8 +56,8 @@ static const Pt::Char XMLRPC_FAULT[]  = { 'f', 'a', 'u', 'l', 't', '\0' };
 
 ClientImpl::ClientImpl()
 : _state(OnBegin)
-, _ts( new Utf8Codec )
-//, _tin(_ts)
+, _utf8(1)
+, _ts( &_utf8 )
 , _bin()
 , _reader()
 , _formatter(_writer)
@@ -100,8 +102,6 @@ void ClientImpl::call(IComposer& r, IRemoteProcedure& method, IDecomposer** argv
     prepareRequest(method.name(), argv, argc);
 
     std::istringstream is(execute());
-    
-    //_ts.attach(is);
     _bin.reset(is);
     _reader.reset(_bin);
     _scanner.begin(r);
@@ -141,7 +141,6 @@ void ClientImpl::cancel()
 
 void ClientImpl::onReadReplyBegin(std::istream& is)
 {
-    //_ts.attach(is);
     _bin.reset(is);
 }
 
@@ -214,7 +213,11 @@ void ClientImpl::onReplyFinished()
 
 void ClientImpl::prepareRequest(const String& name, IDecomposer** argv, unsigned argc)
 {
-    _writer.begin( prepareRequest() );
+    _ts.attach( prepareRequest() );
+    _writer.begin(_ts);
+    
+    _writer.writeStartDocument(XMLRPC_XMLVERSION, XMLRPC_XMLENCODING);
+    
     _writer.writeStartTag( XMLRPC_METHODCALL );
     _writer.writeElement( XMLRPC_METHODNAME, name.c_str() );
     _writer.writeStartTag( XMLRPC_PARAMS );

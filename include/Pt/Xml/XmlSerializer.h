@@ -64,12 +64,12 @@ class XmlSerializer : public Serializer
             The serializer will write the objects as XML with
             UTF-8 encoding to the output stream.
         */
-        explicit XmlSerializer(std::ostream& os)
-        : _formatter(os)
-        {
-            this->reset( &_xmlcontext );
-            this->setFormatter(_formatter);
-        }
+        //explicit XmlSerializer(std::ostream& os)
+        //: _formatter(os)
+        //{
+        //    this->reset( &_xmlcontext );
+        //    this->setFormatter(_formatter);
+        //}
 
         /** @brief Construct a serializer writing to the given XmlWriter object
 
@@ -95,10 +95,10 @@ class XmlSerializer : public Serializer
             std::logic_error is thrown.
         */
 
-        void attach(std::ostream& os)
-        {
-            _formatter.attach(os);
-        }
+        //void attach(std::ostream& os)
+        //{
+        //    _formatter.attach(os);
+        //}
 
         /** @brief Opens this serializer for writing into the given XmlWriter object.
 

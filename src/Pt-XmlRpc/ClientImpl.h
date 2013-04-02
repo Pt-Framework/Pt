@@ -38,6 +38,7 @@
 #include <Pt/Composer.h>
 #include <Pt/Decomposer.h>
 #include <Pt/Connectable.h>
+#include <Pt/Utf8Codec.h>
 #include <Pt/TextStream.h>
 #include <string>
 #include <sstream>
@@ -48,7 +49,6 @@ namespace Pt {
 namespace XmlRpc {
 
 class IRemoteProcedure;
-
 
 class ClientImpl : public Pt::Connectable
 {
@@ -108,8 +108,8 @@ class ClientImpl : public Pt::Connectable
         void advance(const Xml::Node& node);
         
         State _state;
-        TextIStream _ts;
-        //Xml::TextInputSource _tin;
+        Pt::Utf8Codec _utf8;
+        TextOStream _ts;
         Xml::BinaryInputSource _bin;
         Xml::XmlReader _reader;
         Xml::XmlWriter _writer;

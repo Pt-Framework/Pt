@@ -66,7 +66,7 @@ class PT_XML_API XmlFormatter : public Formatter
             The serializer will write the objects as XML with
             UTF-8 encoding to the output stream.
         */
-        explicit XmlFormatter(std::ostream& os);
+        //explicit XmlFormatter(std::ostream& os);
 
         /** @brief Construct a serializer writing to the given XmlWriter object
 
@@ -91,7 +91,7 @@ class PT_XML_API XmlFormatter : public Formatter
             XmlWriter object. If this method is called anyway or called twice an
             std::logic_error is thrown.
         */
-        void attach(std::ostream& os);
+        //void attach(std::ostream& os);
 
         /** @brief Opens this serializer for writing into the given XmlWriter object.
 

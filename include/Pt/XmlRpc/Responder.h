@@ -85,8 +85,8 @@ class PT_XMLRPC_API XmlRpcResponder : public Http::Responder
 
     private:
        State _state;
+       Utf8Codec _utf8;
        TextStream _ts;
-       //Xml::TextInputSource _tin;
        Xml::BinaryInputSource _bin;
        Xml::XmlReader _reader;
        Xml::XmlWriter _writer;

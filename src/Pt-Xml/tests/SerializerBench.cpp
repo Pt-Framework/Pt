@@ -66,10 +66,12 @@ template <typename T, typename Serializer, typename Deserializer>
 void benchSerialization(const T& d, const char* fname = 0)
 {
     std::stringstream data;
-
     Pt::SerializationContext ctx;
 
-    Serializer serializer(data);
+    Pt::TextOStream tos(data, new Pt::Utf8Codec);
+    Pt::Xml::XmlWriter writer;
+    writer.begin(tos);
+    Serializer serializer(writer);
     serializer.context()->enableReferencing(false);
 
     Pt::Xml::BinaryInputSource is(data);

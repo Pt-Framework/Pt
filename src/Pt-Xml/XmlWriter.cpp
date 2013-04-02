@@ -28,7 +28,7 @@
 #include <Pt/Xml/XmlWriter.h>
 #include <Pt/Xml/StartElement.h>
 #include <Pt/Utf8Codec.h>
-#include <iostream>
+#include <vector>
 
 namespace {
 
@@ -103,213 +103,378 @@ namespace Pt {
 
 namespace Xml {
 
-XmlWriter::XmlWriter()
-: _tos(new Utf8Codec)
-, _flags(UseXmlDeclaration | UseIndent | UseEndl)
+class XmlWriterImpl
 {
+    public:
+        enum FormatFlags {
+          UseXmlDeclaration = 1,
+          UseIndent = 2,
+          UseEndl = 4
+        };
+
+    public:
+        XmlWriterImpl()
+        : _tos(0)
+        , _flags(UseXmlDeclaration | UseIndent | UseEndl)
+        {
+        }
+
+        XmlWriterImpl(std::basic_ostream<Char>& tos)
+        : _tos(0)
+        , _flags(UseXmlDeclaration | UseIndent | UseEndl)
+        {
+            begin(tos);
+        }
+
+        void begin(std::basic_ostream<Char>& tos)
+        {
+            _elements.clear();
+            _tos = &tos;
+        }
+
+        void writeStartDocument(const Pt::Char* version, const Pt::Char* encoding)
+        {
+            if( ! _tos)
+                return;
+
+            static const Pt::Char declbegin[] = { '<', '?', 'x', 'm', 'l', ' ', 'v', 
+                'e', 'r', 's', 'i', 'o', 'n', '=', '"' };
+
+            static const Pt::Char declmid[] = { '"', ' ', 
+            'e', 'n', 'c', 'o', 'd', 'i', 'n', 'g', '=', '"' };
+
+            static const Pt::Char declend[] = { '"', '?', '>' };
+
+            _tos->write(declbegin, sizeof(declbegin)/sizeof(Pt::Char));
+            *_tos << version;
+
+            _tos->write(declmid, sizeof(declmid)/sizeof(Pt::Char));
+            *_tos << encoding;
+
+            _tos->write(declend, sizeof(declend)/sizeof(Pt::Char));
+
+            if( useEndl() )
+                this->endl();
+        }
+
+        void writeStartTag(const Pt::Char* name)
+        {
+            if( ! _tos)
+                return;
+
+            *_tos << Pt::Char('<') << name;
+            *_tos << Pt::Char('>');
+
+            if( useEndl() )
+                this->endl();
+        }
+
+        void writeEndTag(const Pt::Char* name)
+        {
+            if( ! _tos)
+                return;
+
+            *_tos << Pt::Char('<') << Pt::Char('/') << name << Pt::Char('>');
+
+            if( useEndl() )
+                this->endl();
+        }
+
+        void writeStartElement(const Pt::String& prefix, const Pt::String& localName, const Pt::String& ns)
+        {
+        }
+
+        void writeStartElement(const Pt::Char* localName, const Attribute* attr, size_t attrCount)
+        {
+            this->writeStartElement(Pt::String(localName), attr, attrCount);
+        }
+
+        void writeStartElement(const Pt::String& localName, const Attribute* attr, size_t attrCount)
+        {
+            if( ! _tos)
+                return;
+
+            if (useIndent())
+            {
+                for(size_t n = 0; n < _elements.size(); ++n)
+                {
+                    *_tos << Pt::Char(' ') << Pt::Char(' ');
+                }
+            }
+
+            *_tos << Pt::Char('<') << localName;
+
+            for(size_t n = 0; n < attrCount; ++n)
+            {
+                *_tos << Pt::Char(' ') << attr[n].name() << Pt::Char('=') << Pt::Char('"');
+                writeCharacters( attr[n].value() );
+                *_tos << Pt::Char('"');
+            }
+
+            *_tos << Pt::Char('>');
+
+            if (useEndl())
+                this->endl();
+
+            _elements.push_back(localName);
+        }
+
+        void writeEndElement()
+        {
+            if( ! _tos)
+                return;
+
+            if( _elements.empty() )
+                return;
+
+            if (useIndent())
+            {
+                for(size_t n = 1; n < _elements.size(); ++n)
+                {
+                    *_tos << Pt::Char(' ') << Pt::Char(' ');
+                }
+            }
+
+            *_tos << Pt::Char('<') << Pt::Char('/') << _elements.back() << Pt::Char('>');
+
+            if (useEndl())
+                this->endl();
+
+            _elements.pop_back();
+        }
+
+        void writeElement(const Pt::String& localName, const Pt::String& content, const Attribute* attr, size_t attrCount)
+        {
+            if( ! _tos)
+                return;
+            
+            if( useIndent() )
+            {
+                for(size_t n = 0; n < _elements.size(); ++n)
+                {
+                    *_tos << Pt::Char(' ') << Pt::Char(' ');
+                }
+            }
+
+            *_tos << Pt::Char('<') << localName;
+
+            for(size_t n = 0; n < attrCount; ++n)
+            {
+                *_tos << Pt::Char(' ') << attr[n].name() << Pt::Char('=') << Pt::Char('"');
+                writeCharacters( attr[n].value() );
+                *_tos << Pt::Char('"');
+            }
+
+            *_tos << Pt::Char('>');
+
+            this->writeCharacters(content);
+            *_tos << Pt::Char('<') << Pt::Char('/') << localName << Pt::Char('>');
+
+            if( useEndl() )
+                this->endl();
+        }
+
+        void writeElement(const Pt::Char* localName, const Pt::Char* content, const Attribute* attr, size_t attrCount)
+        {
+            if( ! _tos)
+                return;
+
+            if( useIndent() )
+            {
+                for(size_t n = 0; n < _elements.size(); ++n)
+                {
+                    *_tos << Pt::Char(' ') << Pt::Char(' ');
+                }
+            }
+
+            *_tos << Pt::Char('<') << localName;
+
+            for(size_t n = 0; n < attrCount; ++n)
+            {
+                *_tos << Pt::Char(' ') << attr[n].name() << Pt::Char('=') << Pt::Char('"');
+                writeCharacters( attr[n].value() );
+                *_tos << Pt::Char('"');
+            }
+
+            *_tos << Pt::Char('>');
+
+            this->writeCharacters(content);
+            *_tos << Pt::Char('<') << Pt::Char('/') << localName << Pt::Char('>');
+
+            if( useEndl() )
+                this->endl();
+        }
+
+        void writeCharacters(const Pt::Char* text)
+        {
+            if( ! _tos)
+                return;
+
+            xmlEncode(*_tos, text);
+        }
+
+        void writeCharacters(const Pt::String& text)
+        {
+            if( ! _tos)
+                return;
+
+            xmlEncode(*_tos, text.c_str());
+        }
+
+        void flush()
+        {
+            if(_tos)
+                _tos->flush();
+        }
+
+        void endl()
+        {
+            if(_tos)
+                *_tos << Pt::Char('\n');
+        }
+
+        void setFormatFlags(int f, bool sw = true)  
+        { if (sw) _flags |= f; else _flags &= ~f; }
+
+        bool useXmlDeclaration() const   
+        { return UseXmlDeclaration == (_flags & UseXmlDeclaration); }
+
+        void useXmlDeclaration(bool sw)  
+        { setFormatFlags(UseXmlDeclaration, sw); }
+
+        bool useIndent() const           
+        { return UseIndent == (_flags & UseIndent); }
+
+        void useIndent(bool sw)          
+        { setFormatFlags(UseIndent, sw); }
+
+        bool useEndl() const             
+        { return UseEndl == (_flags & UseEndl); }
+
+        void useEndl(bool sw)            
+        { setFormatFlags(UseEndl, sw); }
+
+    private:
+        std::basic_ostream<Char>* _tos;
+        std::vector<Pt::String> _elements;
+        int _flags;
+};
+
+
+
+XmlWriter::XmlWriter()
+: _impl(0)
+{
+    _impl = new XmlWriterImpl();
 }
 
 
-XmlWriter::XmlWriter(std::ostream& os, int flags)
-: _tos(os, new Utf8Codec)
-, _flags(flags)
+XmlWriter::XmlWriter(std::basic_ostream<Char>& os)
+: _impl(0)
 {
-    static const Pt::Char declstr[] = { '<', '?', 'x', 'm', 'l', ' ', 'v', 
-        'e', 'r', 's', 'i', 'o', 'n', '=', '"', '1', '.', '0', '"', ' ', 
-        'e', 'n', 'c', 'o', 'd', 'i', 'n', 'g', '=', '"', 'U', 'T', 'F', 
-        '-', '8', '"', '?', '>' };
-
-    if( useXmlDeclaration() )
-    {
-        _tos.write(declstr, sizeof(declstr)/sizeof(Pt::Char));
-
-        if( useEndl() )
-            this->endl();
-    }
+    _impl = new XmlWriterImpl(os);
 }
 
 
 XmlWriter::~XmlWriter()
 {
+    delete _impl;
 }
 
 
-void XmlWriter::begin(std::ostream& os)
+void XmlWriter::begin(std::basic_ostream<Char>& os)
 {
-    static const Pt::Char declstr[] = { '<', '?', 'x', 'm', 'l', ' ', 'v', 
-        'e', 'r', 's', 'i', 'o', 'n', '=', '"', '1', '.', '0', '"', ' ', 
-        'e', 'n', 'c', 'o', 'd', 'i', 'n', 'g', '=', '"', 'U', 'T', 'F', 
-        '-', '8', '"', '?', '>' };
+    _impl->begin(os);
+}
 
-    _tos.attach(os);
 
-    if( useXmlDeclaration())
-        _tos.write(declstr, sizeof(declstr)/sizeof(Pt::Char));
-
-    if( useEndl() )
-        this->endl();
+void XmlWriter::writeStartDocument(const Pt::Char* version, const Pt::Char* encoding)
+{
+    _impl->writeStartDocument(version, encoding);
 }
 
 
 void XmlWriter::writeStartTag(const Pt::Char* name)
 {
-    _tos << Pt::Char('<') << name;
-    _tos << Pt::Char('>');
-
-    if( useEndl() )
-        this->endl();
+    _impl->writeStartTag(name);
 }
 
 
 void XmlWriter::writeEndTag(const Pt::Char* name)
 {
-    _tos << Pt::Char('<') << Pt::Char('/') << name << Pt::Char('>');
-
-    if( useEndl() )
-        this->endl();
+    _impl->writeEndTag(name);
 }
 
 
 void XmlWriter::writeStartElement(const Pt::String& prefix, const Pt::String& localName, const Pt::String& ns)
 {
+    _impl->writeStartElement(prefix, localName, ns);
 }
 
 
 void XmlWriter::writeStartElement(const Pt::Char* localName, const Attribute* attr, size_t attrCount)
 {
-    this->writeStartElement(Pt::String(localName), attr, attrCount);
+    _impl->writeStartElement(localName, attr,attrCount);
 }
 
 
 void XmlWriter::writeStartElement(const Pt::String& localName, const Attribute* attr, size_t attrCount)
 {
-    if (useIndent())
-    {
-        for(size_t n = 0; n < _elements.size(); ++n)
-        {
-            _tos << Pt::Char(' ') << Pt::Char(' ');
-        }
-    }
-
-    _tos << Pt::Char('<') << localName;
-
-    for(size_t n = 0; n < attrCount; ++n)
-    {
-        _tos << Pt::Char(' ') << attr[n].name() << Pt::Char('=') << Pt::Char('"');
-        writeCharacters( attr[n].value() );
-        _tos << Pt::Char('"');
-    }
-
-    _tos << Pt::Char('>');
-
-    if (useEndl())
-        this->endl();
-
-    _elements.push(localName);
+    _impl->writeStartElement(localName, attr, attrCount);
 }
 
 
 void XmlWriter::writeEndElement()
 {
-    if( _elements.empty() )
-        return;
-
-    if (useIndent())
-    {
-        for(size_t n = 1; n < _elements.size(); ++n)
-        {
-            _tos << Pt::Char(' ') << Pt::Char(' ');
-        }
-    }
-
-    _tos << Pt::Char('<') << Pt::Char('/') << _elements.top() << Pt::Char('>');
-
-    if (useEndl())
-        this->endl();
-
-    _elements.pop();
+    _impl->writeEndElement();
 }
 
 
 void XmlWriter::writeElement(const Pt::String& localName, const Pt::String& content, const Attribute* attr, size_t attrCount)
 {
-    if( useIndent() )
-    {
-        for(size_t n = 0; n < _elements.size(); ++n)
-        {
-            _tos << Pt::Char(' ') << Pt::Char(' ');
-        }
-    }
-
-    _tos << Pt::Char('<') << localName;
-
-    for(size_t n = 0; n < attrCount; ++n)
-    {
-        _tos << Pt::Char(' ') << attr[n].name() << Pt::Char('=') << Pt::Char('"');
-        writeCharacters( attr[n].value() );
-        _tos << Pt::Char('"');
-    }
-
-    _tos << Pt::Char('>');
-
-    this->writeCharacters(content);
-    _tos << Pt::Char('<') << Pt::Char('/') << localName << Pt::Char('>');
-
-    if( useEndl() )
-        this->endl();
+    _impl->writeElement(localName, content, attr, attrCount);
 }
 
 
 void XmlWriter::writeElement(const Pt::Char* localName, const Pt::Char* content, const Attribute* attr, size_t attrCount)
 {
-    if( useIndent() )
-    {
-        for(size_t n = 0; n < _elements.size(); ++n)
-        {
-            _tos << Pt::Char(' ') << Pt::Char(' ');
-        }
-    }
-
-    _tos << Pt::Char('<') << localName;
-
-    for(size_t n = 0; n < attrCount; ++n)
-    {
-        _tos << Pt::Char(' ') << attr[n].name() << Pt::Char('=') << Pt::Char('"');
-        writeCharacters( attr[n].value() );
-        _tos << Pt::Char('"');
-    }
-
-    _tos << Pt::Char('>');
-
-    this->writeCharacters(content);
-    _tos << Pt::Char('<') << Pt::Char('/') << localName << Pt::Char('>');
-
-    if( useEndl() )
-        this->endl();
+    _impl->writeElement(localName, content, attr, attrCount);
 }
 
 
 void XmlWriter::writeCharacters(const Pt::Char* text)
 {
-    xmlEncode(_tos, text);
+    _impl->writeCharacters(text);
 }
 
 
 void XmlWriter::writeCharacters(const Pt::String& text)
 {
-    xmlEncode(_tos, text.c_str());
+    _impl->writeCharacters(text);
 }
 
 
 void XmlWriter::flush()
 {
-    _tos.flush();
+    _impl->flush();
 }
 
 
 void XmlWriter::endl()
 {
-    _tos << Pt::Char('\n');
+    _impl->endl();
+}
+
+
+void XmlWriter::useIndent(bool sw)          
+{ 
+    _impl->useIndent(sw);
+}
+
+
+void XmlWriter::useEndl(bool sw)            
+{ 
+    _impl->useEndl(sw);
 }
 
 } // namespace Xml

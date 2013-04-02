@@ -161,7 +161,10 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             DateSmartPtr dateNull;
 
             std::stringstream output;
-            Pt::Xml::XmlSerializer ser(output);
+            Pt::TextOStream tos(output, new Pt::Utf8Codec);
+            Pt::Xml::XmlWriter writer;
+            writer.begin(tos);
+            Pt::Xml::XmlSerializer ser(writer);
             ser.context()->registerSurrogate("date", &fromXmlString, &toXmlString);
 
             ser.serialize(date1, "date1");
@@ -221,7 +224,10 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             const Pt::Date* dateptr = &(*dates.begin() );
 
             std::stringstream output;
-            Pt::Xml::XmlSerializer ser(output);
+            Pt::TextOStream tos(output, new Pt::Utf8Codec);
+            Pt::Xml::XmlWriter writer;
+            writer.begin(tos);
+            Pt::Xml::XmlSerializer ser(writer);
 
             ser.serialize(dates, "dates");
             ser.serialize(dateptr, "dateptr");
@@ -259,7 +265,10 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             Pt::Date date2(2000, 4,18);
 
             std::stringstream output;
-            Pt::Xml::XmlSerializer ser(output);
+            Pt::TextOStream tos(output, new Pt::Utf8Codec);
+            Pt::Xml::XmlWriter writer;
+            writer.begin(tos);
+            Pt::Xml::XmlSerializer ser(writer);
             ser.context()->enableReferencing(false);
 
             ser.serialize(date1, "date1a");
@@ -304,12 +313,18 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
 
         void AdvanceObject()
         {
+            try {
+
             Pt::Date date1a(1889, 4,20);
             Pt::Date date2a(1945, 4,29);
             Pt::Date* dateptr1a = &date1a;
 
             std::stringstream output;
-            Pt::Xml::XmlSerializer ser(output);
+            Pt::TextOStream tos(output, new Pt::Utf8Codec);
+            Pt::Xml::XmlWriter writer;
+            writer.begin(tos);
+
+            Pt::Xml::XmlSerializer ser(writer);
 
             ser.serialize(date1a, "date1");
             ser.serialize(date2a, "date2");
@@ -355,6 +370,13 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             PT_UNIT_ASSERT(date1a == date1b);
             PT_UNIT_ASSERT(date2a == date2b);
             PT_UNIT_ASSERT(dateptr1b == &date1b);
+            }
+            catch(const Pt::Xml::SyntaxError& ex)
+            {
+                std::cerr << ex.what() << " " << ex.line() << std::endl;
+                std::exit(1);
+                throw;
+            }
         }
 
         void DynamicObject();

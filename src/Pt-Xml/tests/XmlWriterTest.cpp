@@ -36,6 +36,8 @@
 #include "Pt/Xml/EndElement.h"
 #include "Pt/Xml/EndDocument.h"
 
+#include "Pt/Utf8Codec.h"
+
 #include <sstream>
 
 class XmlWriterTest : public Pt::Unit::TestSuite
@@ -53,13 +55,16 @@ class XmlWriterTest : public Pt::Unit::TestSuite
         void Element()
         {
             std::stringstream ss;
-            Pt::Xml::XmlWriter writer(ss);
+
+            Pt::TextOStream tos(ss, new Pt::Utf8Codec);
+            Pt::Xml::XmlWriter writer;
+            writer.begin(tos);
+
             writer.writeStartElement(L"first");
             writer.writeEndElement();
             writer.flush();
 
             std::stringstream result;
-            result << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << std::endl;
             result << "<first>" << std::endl;
             result << "</first>" << std::endl;
 
@@ -69,12 +74,13 @@ class XmlWriterTest : public Pt::Unit::TestSuite
         void TextElement()
         {
             std::stringstream ss;
-            Pt::Xml::XmlWriter writer(ss);
+            Pt::TextOStream tos(ss, new Pt::Utf8Codec);
+            Pt::Xml::XmlWriter writer;
+            writer.begin(tos);
             writer.writeElement(L"fourth", L"Hello world!");
             writer.flush();
 
             std::stringstream result;
-            result << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << std::endl;
             result << "<fourth>Hello world!</fourth>" << std::endl;
 
             PT_UNIT_ASSERT( result.str() == ss.str());

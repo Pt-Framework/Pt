@@ -607,7 +607,7 @@ std::streamsize TextInputSource::onImport()
 
     if(_pbBegin < _pbEnd)
     {
-        return *_pbBegin++;
+        return _pbEnd - _pbBegin;
     }
 
     init( _ios->rdbuf(), &_xmlDecl );
@@ -891,7 +891,7 @@ std::streamsize BinaryInputSource::onImport()
 
     if(_pbBegin < _pbEnd)
     {
-        return *_pbBegin++;
+        return _pbEnd - _pbBegin;
     }
 
     _tbuf.import();

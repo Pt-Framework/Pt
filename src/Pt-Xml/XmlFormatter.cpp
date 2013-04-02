@@ -53,17 +53,17 @@ XmlFormatter::XmlFormatter()
 }
 
 
-XmlFormatter::XmlFormatter(std::ostream& os)
-: _writer(0)
-, _wrPtr(0)
-, _reader(0)
-, _rdPtr(0)
-, _composer(0)
-{
-    this->attach(os);
-    _processNode = &XmlFormatter::OnBegin;
-    _writer = _wrPtr.get();
-}
+//XmlFormatter::XmlFormatter(std::ostream& os)
+//: _writer(0)
+//, _wrPtr(0)
+//, _reader(0)
+//, _rdPtr(0)
+//, _composer(0)
+//{
+//    this->attach(os);
+//    _processNode = &XmlFormatter::OnBegin;
+//    _writer = _wrPtr.get();
+//}
 
 
 XmlFormatter::XmlFormatter(XmlWriter& writer)
@@ -96,14 +96,14 @@ XmlFormatter::~XmlFormatter()
 }
 
 
-void XmlFormatter::attach(std::ostream& os)
-{
-    if (_writer)
-        throw std::logic_error("XmlSerizalizer is already open." + PT_SOURCEINFO);
-
-    _wrPtr.reset(new XmlWriter(os));
-    _writer = _wrPtr.get();
-}
+//void XmlFormatter::attach(std::ostream& os)
+//{
+//    if (_writer)
+//        throw std::logic_error("XmlSerizalizer is already open." + PT_SOURCEINFO);
+//
+//    _wrPtr.reset(new XmlWriter(os));
+//    _writer = _wrPtr.get();
+//}
 
 
 void XmlFormatter::attach(XmlWriter& writer)
