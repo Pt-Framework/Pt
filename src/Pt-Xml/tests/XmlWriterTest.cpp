@@ -48,6 +48,7 @@ class XmlWriterTest : public Pt::Unit::TestSuite
         {
             this->registerMethod("Element" , *this, &XmlWriterTest::Element);
             this->registerMethod("TextElement" , *this, &XmlWriterTest::TextElement);
+            this->registerMethod("Namespaces" , *this, &XmlWriterTest::Namespaces);
         }
 
     protected:
@@ -84,6 +85,43 @@ class XmlWriterTest : public Pt::Unit::TestSuite
             result << "<fourth>Hello world!</fourth>" << std::endl;
 
             PT_UNIT_ASSERT( result.str() == ss.str());
+        }
+
+        void Namespaces()
+        {
+            std::stringstream ss;
+            Pt::TextOStream tos(ss, new Pt::Utf8Codec);
+
+            Pt::Xml::XmlWriter writer;
+            writer.useEndl(false);
+            writer.useIndent(false);
+            
+            writer.begin(tos);
+            writer.setDefaultNamespace(L"http://pt-framework.org/default");
+            writer.setNamespacePrefix(L"pt", L"http://pt-framework.org/pt");
+            
+            writer.writeStartElement(L"root");
+            writer.writeStartElement(L"http://pt-framework.org/pt", L"first");
+            writer.writeStartElement(L"http://pt-framework.org/pt", L"second");
+            writer.writeStartElement(L"http://pt-framework.org/default", L"default");
+            writer.writeEndElement();
+            writer.writeEndElement();
+            writer.writeEndElement();
+
+            writer.writeEndElement();
+            writer.flush();
+
+            //std::cerr << '\n' << ss.str() << std::endl;
+            std::string result = "<root xmlns:pt=\"http://pt-framework.org/pt\""
+                                      " xmlns=\"http://pt-framework.org/default\">"
+                                   "<pt:first>"
+                                     "<pt:second>"
+                                       "<default>"
+                                       "</default>"
+                                     "</pt:second>"
+                                   "</pt:first>"
+                                 "</root>";
+            PT_UNIT_ASSERT( result == ss.str());
         }
 };
 

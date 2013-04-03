@@ -48,30 +48,41 @@ void NamespaceContext::clear()
 }
 
 
-const Namespace* NamespaceContext::getNamespace(const String& prefix) const
+const Namespace* NamespaceContext::findPrefix(const String& prefix) const
 {
-    const Namespace* ret = 0;
     std::vector<Namespace>::const_reverse_iterator it;
 
     for(it = _namespaces.rbegin(); it != _namespaces.rend(); ++it)
     {
-      // empty prefix string is default namespace
-      if( prefix == it->prefix() )
+      if( prefix == it->prefix() && ! it->isUnset() && ! it->isDefaultNamespace() )
       {
-          const String& name = it->namespaceUri();
-
-          // empty URI strings mean the namespace prefix was unset
-          if( ! name.empty() )
-              ret = &(*it);
-          
-          break;
+          return &(*it);
       }
     }
 
-    if( ! ret && prefix == _xmlNamespace.prefix() )
+    if( prefix == _xmlNamespace.prefix() )
         return &_xmlNamespace;
 
-    return ret;
+    return 0;
+}
+
+
+const Namespace* NamespaceContext::findUri(const String& ns) const
+{
+    std::vector<Namespace>::const_reverse_iterator it;
+
+    for(it = _namespaces.rbegin(); it != _namespaces.rend(); ++it)
+    {
+      if( ns == it->namespaceUri() )
+      {
+          return &(*it);
+      }
+    }
+
+    if( ns == _xmlNamespace.namespaceUri() )
+        return &_xmlNamespace;
+
+    return 0;
 }
 
 
@@ -88,7 +99,7 @@ const Namespace* NamespaceContext::getDefaultNamespace() const
           const String& name = it->namespaceUri();
 
           // empty URI strings mean the namespace prefix was unset
-          if( ! name.empty() )
+          if( ! it->isUnset() )
               ret = &(*it);
           
           break;
@@ -107,12 +118,14 @@ void NamespaceContext::setNamespace(unsigned depth, const String& prefix, const 
 
 void NamespaceContext::setDefaultNamespace(unsigned depth, const String& name)
 {
+    // Namespace without prefix is default namespace
     _namespaces.push_back( Namespace(depth, String(), name) );
 }
 
 
 void NamespaceContext::unsetNamespace(unsigned depth, const String& prefix)
 {
+    // Namespace without name is an explicitly unset namespace
     _namespaces.push_back( Namespace(depth, prefix, String()) );
 }
 

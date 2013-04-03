@@ -58,17 +58,25 @@ class NamespaceContext
 
         /** @brief Returns the namespace for a prefix.
         */
-        const Namespace* getNamespace(const String& prefix) const;
+        const Namespace* findPrefix(const String& prefix) const;
 
+        /** @brief Returns the prefix for a namespace URI.
+        */
+        const Namespace* findUri(const String& ns) const;
+
+        /** @brief Returns the current default namespace.
+        */
         const Namespace* getDefaultNamespace() const;
 
         /** @brief Adds a namespace to the stack.
         */
         void setNamespace(unsigned depth, const String& prefix, const String& name);
 
+        /** @brief Adds a default namespace to the stack.
+        */
         void setDefaultNamespace(unsigned depth, const String& name);
 
-        /** @brief Unset a namespace.
+        /** @brief Unsets a namespace.
         */
         void unsetNamespace(unsigned depth, const String& prefix);
 

@@ -83,6 +83,9 @@ class Namespace
         bool isDefaultNamespace() const
         { return _prefix.empty(); }
 
+        bool isUnset() const
+        { return _name.empty(); }
+
     private:
         unsigned _depth;
         String _prefix;

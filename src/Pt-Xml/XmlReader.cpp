@@ -3953,7 +3953,7 @@ class XmlReaderImpl
             }
             else
             {
-                const Namespace* ns = _nsctx.getNamespace( se.prefix() );
+                const Namespace* ns = _nsctx.findPrefix( se.prefix() );
                 if( ! ns )
                     throw SyntaxError("undeclared namespace prefix", line());
 
@@ -3972,7 +3972,7 @@ class XmlReaderImpl
                 }
                 else
                 {
-                    const Namespace* ns = _nsctx.getNamespace( it->prefix() );
+                    const Namespace* ns = _nsctx.findPrefix( it->prefix() );
                     if( ! ns )
                         throw SyntaxError("undeclared namespace prefix", line());
 
@@ -3991,7 +3991,7 @@ class XmlReaderImpl
             }
             else
             {
-                const Namespace* ns = _nsctx.getNamespace( e.prefix() );
+                const Namespace* ns = _nsctx.findPrefix( e.prefix() );
                 if( ! ns )
                     throw SyntaxError("undeclared namespace prefix", line());
 

@@ -52,12 +52,20 @@ class PT_XML_API XmlWriter
 
         void writeStartDocument(const Pt::Char* version, const Pt::Char* encoding);
 
-        void writeStartElement(const Pt::String& prefix, const Pt::String& localName, const Pt::String& ns);
-
         void writeStartTag(const Pt::Char* name);
 
         void writeEndTag(const Pt::Char* name);
 
+        
+        void setDefaultNamespace(const Pt::String& ns);
+
+        void setNamespacePrefix(const Pt::String& prefix, const Pt::String& ns);
+
+        void writeStartElement(const Pt::String& ns, const Pt::String& localName);
+
+        void writeStartElement(const Pt::Char* ns, const Pt::Char* localName);
+
+        
         void writeStartElement(const Pt::Char* localName, const Attribute* attr = 0, size_t attrCount = 0);
 
         void writeStartElement(const Pt::String& localName, const Attribute* attr = 0, size_t attrCount = 0);
@@ -65,8 +73,6 @@ class PT_XML_API XmlWriter
         void writeEndElement();
 
         void writeElement(const Pt::String& localName, const Pt::String& content, const Attribute* attr = 0, size_t attrCount = 0);
-
-        void writeElement(const Pt::Char* localName, const Char* content, const Attribute* attr = 0, size_t attrCount = 0);
 
         void writeCharacters(const Pt::Char* text);
 
