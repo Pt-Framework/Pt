@@ -112,12 +112,8 @@ const Namespace* NamespaceContext::getDefaultNamespace() const
 
     for(it = _namespaces.rbegin(); it != _namespaces.rend(); ++it)
     {
-      // empty prefix string is default namespace
       if( it->isDefaultNamespace() )
       {
-          const String& name = it->namespaceUri();
-
-          // empty URI strings mean the namespace prefix was unset
           if( ! it->isUnset() )
               ret = &(*it);
           
