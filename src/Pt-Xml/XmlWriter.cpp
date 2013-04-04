@@ -41,12 +41,13 @@ static const Pt::Char XML_APOS[] = { '&', 'a', 'p', 'o', 's', ';' };
 static const Pt::Char XML_LT[]   = { '&', 'l', 't', ';' };
 static const Pt::Char XML_GT[]   = { '&', 'g', 't', ';' };
 
-void xmlEncode(std::basic_ostream<Pt::Char>& os, const Pt::Char* str)
+void xmlEncode(std::basic_ostream<Pt::Char>& os, const Pt::Char* str, std::size_t n)
 {
     const Pt::Char* it = str;
     const Pt::Char* begin = str;
+    const Pt::Char* end = begin + n;
 
-    for( ; *it != '\0'; ++it)
+    for( ; it != end; ++it)
     {
         switch( it->value() )
         {
@@ -109,36 +110,54 @@ namespace Xml {
 class XmlWriterImpl
 {
     public:
-        enum FormatFlags {
-          UseXmlDeclaration = 1,
-          UseIndent = 2,
-          UseEndl = 4
+        enum State
+        {
+            OnBegin = 0,
+            OnStartElement = 1,
+            OnCharacters = 2,
+            OnTag = 3
         };
 
     public:
         XmlWriterImpl()
         : _tos(0)
-        , _flags(UseXmlDeclaration | UseIndent | UseEndl)
+        , _formatting(true)
+        , _state(OnBegin)
         , _defaultNamespace(false)
-        {
-        }
+        { }
 
         XmlWriterImpl(std::basic_ostream<Char>& tos)
-        : _tos(0)
-        , _flags(UseXmlDeclaration | UseIndent | UseEndl)
+        : _tos(&tos)
+        , _formatting(true)
+        , _state(OnBegin)
         , _defaultNamespace(false)
-        {
-            begin(tos);
-        }
+        { }
 
-        void begin(std::basic_ostream<Char>& tos)
+        bool isFormatting() const
+        { return _formatting; }
+
+        void setFormatting(bool value)
+        { _formatting = value; }
+
+        void reset()
         {
+            _tos = 0;
+            _state = OnBegin;
             _defaultNamespace = false;
+            
             _nsctx.clear();
             _namespaces.clear();
             _elements.clear();
+        }
+
+        void reset(std::basic_ostream<Char>& tos)
+        {
+            reset();
             _tos = &tos;
         }
+
+        std::basic_ostream<Char>* output()
+        { return _tos; }
 
         void writeStartDocument(const Pt::Char* version, const Pt::Char* encoding)
         {
@@ -161,283 +180,9 @@ class XmlWriterImpl
 
             _tos->write(declend, sizeof(declend)/sizeof(Pt::Char));
 
-            if( useEndl() )
-                this->endl();
-        }
-
-        void writeStartTag(const Pt::Char* name)
-        {
-            if( ! _tos)
-                return;
-
-            *_tos << Pt::Char('<') << name;
-            *_tos << Pt::Char('>');
-
-            if( useEndl() )
-                this->endl();
-        }
-
-        void writeEndTag(const Pt::Char* name)
-        {
-            if( ! _tos)
-                return;
-
-            *_tos << Pt::Char('<') << Pt::Char('/') << name << Pt::Char('>');
-
-            if( useEndl() )
-                this->endl();
-        }
-
-        void writeStartElement(const Char* ns, const Char* localName)
-        {
-            if( ! _tos)
-                return;
-
-            if( useIndent() )
-            {
-                for(size_t n = 0; n < _elements.size(); ++n)
-                {
-                    *_tos << Pt::Char(' ') << Pt::Char(' ');
-                }
-            }
-
-            const Namespace* nsdecl = _nsctx.findUri(ns);
-            if(! nsdecl)
-                throw XmlError("undeclared namespace");
-
-            *_tos << Pt::Char('<');
-
-            if( ! nsdecl->isDefaultNamespace() )
-            {
-                *_tos << nsdecl->prefix() << Pt::Char(':');
-            }
-
-            *_tos << localName;
-
-            std::vector<Pt::String>::iterator it;
-            for(it = _namespaces.begin(); it != _namespaces.end(); ++it)
-            {
-                const Namespace* n = _nsctx.findPrefix(*it);
-                assert(n);
-
-                *_tos << Pt::String(L" xmlns:") << n->prefix() << Pt::Char('=') 
-                      << Pt::Char('"') << n->namespaceUri() << Pt::Char('"');
-              }
-
-            _namespaces.clear();
-
-            if( _defaultNamespace )
-            {
-                const Namespace* n = _nsctx.getDefaultNamespace();
-                *_tos << Pt::String(L" xmlns") << Pt::Char('=') << Pt::Char('"') << n->namespaceUri() << Pt::Char('"');
-                _defaultNamespace = false;
-            }
-
-            *_tos << Pt::Char('>');
-
-            if( useEndl() )
-                this->endl();
-
-            if( ! nsdecl->isDefaultNamespace() )
-            {
-                _elements.push_back( nsdecl->prefix() );
-                _elements.back() += Char(':');
-                _elements.back() += localName;
-            }
-            else
-            {
-                _elements.push_back(localName);
-            }
-        }
-
-        void writeEndElement()
-        {
-            if( ! _tos || _elements.empty() )
-                return;
-
-            if( useIndent() )
-            {
-                for(size_t n = 1; n < _elements.size(); ++n)
-                {
-                    *_tos << Pt::Char(' ') << Pt::Char(' ');
-                }
-            }
-
-            *_tos << Pt::Char('<') << Pt::Char('/') << _elements.back() << Pt::Char('>');
-
-            if( useEndl() )
-                this->endl();
-
-            std::size_t depth = _elements.size();
-            _nsctx.popNamespace(depth);
-
-            _elements.pop_back();
-        }
-
-        void writeStartElement(const Pt::Char* localName, const Attribute* attr, size_t attrCount)
-        {
-            this->writeStartElement(Pt::String(localName), attr, attrCount);
-        }
-
-        void writeStartElement(const Pt::String& localName, const Attribute* attr, size_t attrCount)
-        {
-            if( ! _tos)
-                return;
-
-            if (useIndent())
-            {
-                for(size_t n = 0; n < _elements.size(); ++n)
-                {
-                    *_tos << Pt::Char(' ') << Pt::Char(' ');
-                }
-            }
-
-            *_tos << Pt::Char('<') << localName;
-
-            std::vector<Pt::String>::iterator it;
-            for(it = _namespaces.begin(); it != _namespaces.end(); ++it)
-            {
-                const Namespace* n = _nsctx.findPrefix(*it);
-                assert(n);
-
-                *_tos << Pt::String(L" xmlns:") << n->prefix() << Pt::Char('=') 
-                      << Pt::Char('"') << n->namespaceUri() << Pt::Char('"');
-              }
-
-            _namespaces.clear();
-
-            if( _defaultNamespace )
-            {
-                const Namespace* n = _nsctx.getDefaultNamespace();
-                *_tos << Pt::String(L" xmlns") << Pt::Char('=') << Pt::Char('"') << n->namespaceUri() << Pt::Char('"');
-                _defaultNamespace = false;
-            }
-
-            for(size_t n = 0; n < attrCount; ++n)
-            {
-                *_tos << Pt::Char(' ') << attr[n].name() << Pt::Char('=') << Pt::Char('"');
-                writeCharacters( attr[n].value() );
-                *_tos << Pt::Char('"');
-            }
-
-            *_tos << Pt::Char('>');
-
-            if (useEndl())
-                this->endl();
-
-            _elements.push_back(localName);
-        }
-
-        void writeElement(const Pt::String& localName, const Pt::String& content, const Attribute* attr, size_t attrCount)
-        {
-            if( ! _tos)
-                return;
-            
-            if( useIndent() )
-            {
-                for(size_t n = 0; n < _elements.size(); ++n)
-                {
-                    *_tos << Pt::Char(' ') << Pt::Char(' ');
-                }
-            }
-
-            *_tos << Pt::Char('<') << localName;
-
-            for(size_t n = 0; n < attrCount; ++n)
-            {
-                *_tos << Pt::Char(' ') << attr[n].name() << Pt::Char('=') << Pt::Char('"');
-                writeCharacters( attr[n].value() );
-                *_tos << Pt::Char('"');
-            }
-
-            *_tos << Pt::Char('>');
-
-            this->writeCharacters(content);
-            *_tos << Pt::Char('<') << Pt::Char('/') << localName << Pt::Char('>');
-
-            if( useEndl() )
-                this->endl();
-        }
-
-        void writeElement(const Pt::Char* localName, const Pt::Char* content, const Attribute* attr, size_t attrCount)
-        {
-            if( ! _tos)
-                return;
-
-            if( useIndent() )
-            {
-                for(size_t n = 0; n < _elements.size(); ++n)
-                {
-                    *_tos << Pt::Char(' ') << Pt::Char(' ');
-                }
-            }
-
-            *_tos << Pt::Char('<') << localName;
-
-            for(size_t n = 0; n < attrCount; ++n)
-            {
-                *_tos << Pt::Char(' ') << attr[n].name() << Pt::Char('=') << Pt::Char('"');
-                writeCharacters( attr[n].value() );
-                *_tos << Pt::Char('"');
-            }
-
-            *_tos << Pt::Char('>');
-
-            this->writeCharacters(content);
-            *_tos << Pt::Char('<') << Pt::Char('/') << localName << Pt::Char('>');
-
-            if( useEndl() )
-                this->endl();
-        }
-
-        void writeCharacters(const Pt::Char* text)
-        {
-            if( ! _tos)
-                return;
-
-            xmlEncode(*_tos, text);
-        }
-
-        void writeCharacters(const Pt::String& text)
-        {
-            if( ! _tos)
-                return;
-
-            xmlEncode(*_tos, text.c_str());
-        }
-
-        void flush()
-        {
-            if(_tos)
-                _tos->flush();
-        }
-
-        void endl()
-        {
-            if(_tos)
+            if( _formatting )
                 *_tos << Pt::Char('\n');
         }
-
-        void setFormatFlags(int f, bool sw = true)  
-        { if (sw) _flags |= f; else _flags &= ~f; }
-
-        bool useXmlDeclaration() const   
-        { return UseXmlDeclaration == (_flags & UseXmlDeclaration); }
-
-        void useXmlDeclaration(bool sw)  
-        { setFormatFlags(UseXmlDeclaration, sw); }
-
-        bool useIndent() const           
-        { return UseIndent == (_flags & UseIndent); }
-
-        void useIndent(bool sw)          
-        { setFormatFlags(UseIndent, sw); }
-
-        bool useEndl() const             
-        { return UseEndl == (_flags & UseEndl); }
-
-        void useEndl(bool sw)            
-        { setFormatFlags(UseEndl, sw); }
 
         void setDefaultNamespace(const Pt::String& ns)
         {
@@ -451,13 +196,245 @@ class XmlWriterImpl
             _namespaces.push_back(prefix);
         }
 
+        void writeStartElement(const Pt::Char* localName, std::size_t localNameSize)
+        {
+            if( ! _tos)
+                return;
+
+            if(_state == OnStartElement)
+            {
+                if(_tos)
+                    *_tos << Pt::Char('>');
+            }
+
+            if((_state == OnStartElement) || (_state == OnTag))
+            {
+                writeLineBreak(*_tos, _elements.size());
+            }
+
+            _state = OnStartElement;
+
+            *_tos << Pt::Char('<');
+
+            _tos->write(localName, localNameSize);
+
+            std::vector<Pt::String>::iterator it;
+            for(it = _namespaces.begin(); it != _namespaces.end(); ++it)
+            {
+                const Namespace* n = _nsctx.findPrefix(*it);
+                assert(n);
+
+                *_tos << Pt::String(L" xmlns:") << n->prefix() << Pt::Char('=') 
+                      << Pt::Char('"') << n->namespaceUri() << Pt::Char('"');
+            }
+
+            _namespaces.clear();
+
+            if( _defaultNamespace )
+            {
+                const Namespace* n = _nsctx.getDefaultNamespace();
+                *_tos << Pt::String(L" xmlns") << Pt::Char('=') << Pt::Char('"') << n->namespaceUri() << Pt::Char('"');
+                _defaultNamespace = false;
+            }
+
+            _elements.push_back( Pt::String(localName, localNameSize) );
+        }
+
+        void writeStartElement(const Char* ns, std::size_t nsSize,
+                               const Char* localName, std::size_t localNameSize)
+        {
+            if( ! _tos)
+                return;
+
+            if(_state == OnStartElement)
+            {
+                if(_tos)
+                    *_tos << Pt::Char('>');
+            }
+
+            if((_state == OnStartElement) || (_state == OnTag))
+            {
+                writeLineBreak(*_tos, _elements.size());
+            }
+
+            _state = OnStartElement;
+
+            const Namespace* nsdecl = _nsctx.findUri(ns, nsSize);
+            if( ! nsdecl)
+                throw XmlError("undeclared namespace");
+
+            *_tos << Pt::Char('<');
+
+            if( ! nsdecl->isDefaultNamespace() )
+            {
+                *_tos << nsdecl->prefix() << Pt::Char(':');
+            }
+
+            _tos->write(localName, localNameSize);
+
+            std::vector<Pt::String>::iterator it;
+            for(it = _namespaces.begin(); it != _namespaces.end(); ++it)
+            {
+                const Namespace* n = _nsctx.findPrefix(*it);
+                assert(n);
+
+                *_tos << Pt::String(L" xmlns:") << n->prefix() << Pt::Char('=') 
+                      << Pt::Char('"') << n->namespaceUri() << Pt::Char('"');
+              }
+
+            _namespaces.clear();
+
+            if( _defaultNamespace )
+            {
+                const Namespace* n = _nsctx.getDefaultNamespace();
+                *_tos << Pt::String(L" xmlns") << Pt::Char('=') << Pt::Char('"') << n->namespaceUri() << Pt::Char('"');
+                _defaultNamespace = false;
+            }
+
+            if( ! nsdecl->isDefaultNamespace() )
+            {
+                _elements.push_back( nsdecl->prefix() );
+                _elements.back() += Char(':');
+                _elements.back().append(localName, localNameSize);
+            }
+            else
+            {
+                _elements.push_back( Pt::String(localName, localNameSize) );
+            }
+        }
+
+        void writeAttribute(const Char* localName, std::size_t localNameSize,
+                            const Char* value, std::size_t valueSize)
+        {
+            if( ! _tos || ! _state == OnStartElement)
+                return;
+
+            *_tos << Pt::Char(' ');
+
+            _tos->write(localName, localNameSize) << Pt::Char('=') << Pt::Char('"');
+            xmlEncode(*_tos, value, valueSize);
+            *_tos << Pt::Char('"');
+        }
+
+        void writeAttribute(const Char* ns, std::size_t nsSize,
+                            const Char* localName, std::size_t localNameSize,
+                            const Char* value, std::size_t valueSize)
+        {
+            if( ! _tos || ! _state == OnStartElement)
+                return;
+
+            const Namespace* nsdecl = _nsctx.findUri(ns, nsSize);
+            if( ! nsdecl)
+                throw XmlError("undeclared namespace");
+
+            *_tos << Pt::Char(' ');
+
+            if( ! nsdecl->isDefaultNamespace() )
+                *_tos << nsdecl->prefix() << Pt::Char(':');
+
+            _tos->write(localName, localNameSize) << Pt::Char('=') << Pt::Char('"');
+            xmlEncode(*_tos, value, valueSize);
+            *_tos << Pt::Char('"');
+        }
+
+        void writeEndElement()
+        {
+            if( ! _tos || _elements.empty() )
+                return;
+
+            if(_state == OnStartElement)
+            {
+                if(_tos)
+                    *_tos << Pt::Char('>');
+            }
+            
+            if(_state == OnTag)
+            {
+                writeLineBreak(*_tos, _elements.size() - 1);
+            }
+
+            _state = OnTag;
+
+            *_tos << Pt::Char('<') << Pt::Char('/') << _elements.back() << Pt::Char('>');
+
+            std::size_t depth = _elements.size();
+            _nsctx.popNamespace(depth);
+
+            _elements.pop_back();
+        }
+
+        void writeCharacters(const Pt::Char* text, std::size_t n)
+        {
+            if( ! _tos)
+                return;
+
+            if(_state == OnStartElement)
+            {
+                if(_tos)
+                    *_tos << Pt::Char('>');
+            }
+
+            _state = OnCharacters;
+
+            xmlEncode(*_tos, text, n);
+        }
+
+        void writeStartTag(const Pt::Char* name)
+        {
+            if( ! _tos)
+                return;
+
+            *_tos << Pt::Char('<') << name;
+            *_tos << Pt::Char('>');
+        }
+
+        void writeEndTag(const Pt::Char* name)
+        {
+            if( ! _tos)
+                return;
+
+            *_tos << Pt::Char('<') << Pt::Char('/') << name << Pt::Char('>');
+        }
+
+        void writeIndent()
+        {
+            if(_tos)
+            {
+                for(size_t n = 0; n < _elements.size(); ++n)
+                {
+                    *_tos << Pt::Char(' ') << Pt::Char(' ');
+                }
+            }
+        }
+
+        void writeEndl()
+        {
+            if(_tos)
+                *_tos << Pt::Char('\n');
+        }
+
+    private:
+        void writeLineBreak(std::basic_ostream<Char>& tos, std::size_t width)
+        {
+            if( _formatting )
+            {
+                tos << Pt::Char('\n');
+
+                for(size_t n = 0; n < width; ++n)
+                {
+                    tos << Pt::Char(' ') << Pt::Char(' ');
+                }
+            }
+        }
+
     private:
         std::basic_ostream<Char>* _tos;
+        bool _formatting;
+        State _state;
         std::vector<Pt::String> _elements;
         NamespaceContext _nsctx;
         std::vector<Pt::String> _namespaces;
         bool _defaultNamespace;
-        int _flags;
 };
 
 
@@ -482,27 +459,39 @@ XmlWriter::~XmlWriter()
 }
 
 
-void XmlWriter::begin(std::basic_ostream<Char>& os)
+bool XmlWriter::isFormatting() const
 {
-    _impl->begin(os);
+    return _impl->isFormatting();
+}
+
+
+void XmlWriter::setFormatting(bool value)
+{
+    _impl->setFormatting(value);
+}
+
+
+void XmlWriter::reset()
+{
+    _impl->reset();
+}
+
+
+void XmlWriter::reset(std::basic_ostream<Char>& os)
+{
+    _impl->reset(os);
+}
+
+
+std::basic_ostream<Char>* XmlWriter::output()
+{
+    return _impl->output();
 }
 
 
 void XmlWriter::writeStartDocument(const Pt::Char* version, const Pt::Char* encoding)
 {
     _impl->writeStartDocument(version, encoding);
-}
-
-
-void XmlWriter::writeStartTag(const Pt::Char* name)
-{
-    _impl->writeStartTag(name);
-}
-
-
-void XmlWriter::writeEndTag(const Pt::Char* name)
-{
-    _impl->writeEndTag(name);
 }
 
 
@@ -518,27 +507,31 @@ void XmlWriter::setNamespacePrefix(const Pt::String& prefix, const Pt::String& n
 }
 
 
-void XmlWriter::writeStartElement(const Pt::Char* ns, const Pt::Char* localName)
+void XmlWriter::writeStartElement(const Pt::Char* localName, std::size_t localNameSize)
 {
-    _impl->writeStartElement(ns, localName);
+    _impl->writeStartElement(localName, localNameSize);
 }
 
 
-void XmlWriter::writeStartElement(const Pt::String& ns, const Pt::String& localName)
+void XmlWriter::writeStartElement(const Char* ns, std::size_t nsSize,
+                                  const Char* localName, std::size_t localNameSize)
 {
-    _impl->writeStartElement(ns.c_str(), localName.c_str());
+    _impl->writeStartElement(ns, nsSize, localName, localNameSize);
 }
 
 
-void XmlWriter::writeStartElement(const Pt::Char* localName, const Attribute* attr, size_t attrCount)
+void XmlWriter::writeAttribute(const Char* localName, std::size_t localNameSize,
+                               const Char* value, std::size_t valueSize)
 {
-    _impl->writeStartElement(localName, attr,attrCount);
+    _impl->writeAttribute(localName, localNameSize, value, valueSize);
 }
 
 
-void XmlWriter::writeStartElement(const Pt::String& localName, const Attribute* attr, size_t attrCount)
+void XmlWriter::writeAttribute(const Char* ns, std::size_t nsSize,
+                               const Char* localName, std::size_t localNameSize,
+                               const Char* value, std::size_t valueSize)
 {
-    _impl->writeStartElement(localName, attr, attrCount);
+    _impl->writeAttribute(ns, nsSize, localName, localNameSize, value, valueSize);
 }
 
 
@@ -548,45 +541,33 @@ void XmlWriter::writeEndElement()
 }
 
 
-void XmlWriter::writeElement(const Pt::String& localName, const Pt::String& content, const Attribute* attr, size_t attrCount)
+void XmlWriter::writeCharacters(const Pt::Char* text, std::size_t n)
 {
-    _impl->writeElement(localName, content, attr, attrCount);
+    _impl->writeCharacters(text, n);
 }
 
 
-void XmlWriter::writeCharacters(const Pt::Char* text)
+void XmlWriter::writeStartTag(const Pt::Char* name)
 {
-    _impl->writeCharacters(text);
+    _impl->writeStartTag(name);
 }
 
 
-void XmlWriter::writeCharacters(const Pt::String& text)
+void XmlWriter::writeEndTag(const Pt::Char* name)
 {
-    _impl->writeCharacters(text);
+    _impl->writeEndTag(name);
 }
 
 
-void XmlWriter::flush()
+void XmlWriter::writeIndent()
 {
-    _impl->flush();
+    _impl->writeIndent();
 }
 
 
-void XmlWriter::endl()
+void XmlWriter::writeEndl()
 {
-    _impl->endl();
-}
-
-
-void XmlWriter::useIndent(bool sw)          
-{ 
-    _impl->useIndent(sw);
-}
-
-
-void XmlWriter::useEndl(bool sw)            
-{ 
-    _impl->useEndl(sw);
+    _impl->writeEndl();
 }
 
 } // namespace Xml

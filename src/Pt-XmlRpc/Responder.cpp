@@ -73,8 +73,7 @@ XmlRpcResponder::XmlRpcResponder(Service& service)
 , _proc(0)
 , _args(0)
 {
-    _writer.useIndent(false);
-    _writer.useEndl(false);
+    _writer.setFormatting(false);
 }
 
 
@@ -127,7 +126,7 @@ void XmlRpcResponder::onBeginReply(Http::Request& request, Http::Reply& reply, S
     {
         _reply = &reply;
         _ts.attach( _reply->body() );
-        _writer.begin(_ts);
+        _writer.reset(_ts);
         
         _writer.writeStartDocument(XMLRPC_XMLVERSION, XMLRPC_XMLENCODING);
         
@@ -164,14 +163,14 @@ void XmlRpcResponder::onWriteReply(Http::Request& request, Http::Reply& reply, S
 void XmlRpcResponder::replyError(Http::Reply& reply, int rc, const char* msg)
 {
     // XML writer might still have bytes in text buffer
-    _writer.flush();
+    _ts.flush();
 
     reply.clear();
     reply.header().set("Content-Type", "text/xml");
     reply.header().set("Connection", "close");
 
     _ts.attach( reply.body() );
-    _writer.begin(_ts);
+    _writer.reset(_ts);
     
     _writer.writeStartDocument(XMLRPC_XMLVERSION, XMLRPC_XMLENCODING);
 
@@ -181,17 +180,29 @@ void XmlRpcResponder::replyError(Http::Reply& reply, int rc, const char* msg)
     _writer.writeStartTag( XMLRPC_STRUCT );
 
     _writer.writeStartTag( XMLRPC_MEMBER );
-    _writer.writeElement( XMLRPC_NAME, XMLRPC_FAULTCODE );
+
+    _writer.writeStartTag(XMLRPC_NAME);
+    _writer.writeCharacters(XMLRPC_FAULTCODE );
+    _writer.writeEndTag(XMLRPC_NAME);
+
     _writer.writeStartTag( XMLRPC_VALUE );
-    _writer.writeElement( XMLRPC_INT, Pt::convert<Pt::String>(rc) );
+    _writer.writeStartTag( XMLRPC_INT );
+    _writer.writeCharacters( Pt::convert<Pt::String>(rc) );
+    _writer.writeEndTag(XMLRPC_INT);
     _writer.writeEndTag(XMLRPC_VALUE); // value
     _writer.writeEndTag(XMLRPC_MEMBER); // member
 
     _writer.writeStartTag( XMLRPC_MEMBER );
-    _writer.writeElement( XMLRPC_NAME, XMLRPC_FAULTSTRING );
+
+    _writer.writeStartTag(XMLRPC_NAME);
+    _writer.writeCharacters(XMLRPC_FAULTSTRING );
+    _writer.writeEndTag(XMLRPC_NAME);
+
     _writer.writeStartTag( XMLRPC_VALUE );
 
-    _writer.writeElement( XMLRPC_STRING, Pt::String::widen(msg));
+    _writer.writeStartTag( XMLRPC_STRING );
+    _writer.writeCharacters( Pt::String::widen(msg) );
+    _writer.writeEndTag(XMLRPC_STRING);
 
     _writer.writeEndTag(XMLRPC_VALUE); // value
     _writer.writeEndTag(XMLRPC_MEMBER); // member
@@ -200,7 +211,7 @@ void XmlRpcResponder::replyError(Http::Reply& reply, int rc, const char* msg)
     _writer.writeEndTag(XMLRPC_VALUE); // value
     _writer.writeEndTag(XMLRPC_FAULT); // fault
     _writer.writeEndTag(XMLRPC_METHODRESPONSE); // methodResponse
-    _writer.flush();
+    _ts.flush();
 
     reply.beginSend(true);
 }
@@ -218,7 +229,7 @@ void XmlRpcResponder::endReply()
         _writer.writeEndTag(XMLRPC_PARAM); // param
         _writer.writeEndTag(XMLRPC_PARAMS); // params
         _writer.writeEndTag(XMLRPC_METHODRESPONSE); // methodResponse
-        _writer.flush();
+        _ts.flush();
 
         assert(_reply);
         if( ! _reply)

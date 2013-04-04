@@ -86,6 +86,25 @@ const Namespace* NamespaceContext::findUri(const String& ns) const
 }
 
 
+const Namespace* NamespaceContext::findUri(const Char* ns, std::size_t n) const
+{
+    std::vector<Namespace>::const_reverse_iterator it;
+
+    for(it = _namespaces.rbegin(); it != _namespaces.rend(); ++it)
+    {
+      if( 0 == it->namespaceUri().compare(0, n, ns) )
+      {
+          return &(*it);
+      }
+    }
+
+    if( ns == _xmlNamespace.namespaceUri() )
+        return &_xmlNamespace;
+
+    return 0;
+}
+
+
 const Namespace* NamespaceContext::getDefaultNamespace() const
 {
     const Namespace* ret = 0;

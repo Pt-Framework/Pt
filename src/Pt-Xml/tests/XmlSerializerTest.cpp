@@ -163,7 +163,7 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             std::stringstream output;
             Pt::TextOStream tos(output, new Pt::Utf8Codec);
             Pt::Xml::XmlWriter writer;
-            writer.begin(tos);
+            writer.reset(tos);
             Pt::Xml::XmlSerializer ser(writer);
             ser.context()->registerSurrogate("date", &fromXmlString, &toXmlString);
 
@@ -184,9 +184,7 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             DateSmartPtr datesp4;
             DateSmartPtr nullDate( new Pt::Date(1 ,1, 1) );
 
-            std::cerr << "\n--------------------" << std::endl;
-            std::cerr << output.str();
-            std::cerr << "---------------------\n" << std::endl;
+            std::cerr << std::endl << output.str() << std::endl << std::endl;
 
             std::stringstream input( output.str() );
 
@@ -226,7 +224,7 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             std::stringstream output;
             Pt::TextOStream tos(output, new Pt::Utf8Codec);
             Pt::Xml::XmlWriter writer;
-            writer.begin(tos);
+            writer.reset(tos);
             Pt::Xml::XmlSerializer ser(writer);
 
             ser.serialize(dates, "dates");
@@ -235,9 +233,7 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             ser.finish();
             ser.flush();
 
-            std::cerr << "\n--------------------" << std::endl;
-            std::cerr << output.str();
-            std::cerr << "---------------------\n" << std::endl;
+            std::cerr << std::endl << output.str() << std::endl << std::endl;
 
             dates.clear();
             dateptr = 0;
@@ -267,7 +263,7 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             std::stringstream output;
             Pt::TextOStream tos(output, new Pt::Utf8Codec);
             Pt::Xml::XmlWriter writer;
-            writer.begin(tos);
+            writer.reset(tos);
             Pt::Xml::XmlSerializer ser(writer);
             ser.context()->enableReferencing(false);
 
@@ -279,9 +275,7 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             ser.finish();
             ser.flush();
 
-            std::cerr << "\n--------------------" << std::endl;
-            std::cerr << output.str();
-            std::cerr << "---------------------\n" << std::endl;
+            std::cerr << std::endl << output.str() << std::endl << std::endl;
 
             Pt::DateTime date3(1, 1, 1, 1, 1, 1, 1);
             Pt::Date date4(1800, 7, 6);
@@ -321,8 +315,7 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
 
             std::stringstream output;
             Pt::TextOStream tos(output, new Pt::Utf8Codec);
-            Pt::Xml::XmlWriter writer;
-            writer.begin(tos);
+            Pt::Xml::XmlWriter writer(tos);
 
             Pt::Xml::XmlSerializer ser(writer);
 
@@ -342,7 +335,7 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             ser.finish();
             ser.flush();
 
-            //std::cerr << output.str();
+            std::cerr << std::endl << output.str() << std::endl;
             //std::cerr << "---------------------\n" << std::endl;
 
             Pt::Date date1b;

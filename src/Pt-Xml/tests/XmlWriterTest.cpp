@@ -47,42 +47,71 @@ class XmlWriterTest : public Pt::Unit::TestSuite
         : Pt::Unit::TestSuite("XmlWriterTest")
         {
             this->registerMethod("Element" , *this, &XmlWriterTest::Element);
+            this->registerMethod("MixedContent" , *this, &XmlWriterTest::MixedContent);
             this->registerMethod("TextElement" , *this, &XmlWriterTest::TextElement);
             this->registerMethod("Namespaces" , *this, &XmlWriterTest::Namespaces);
         }
 
     protected:
-
         void Element()
         {
             std::stringstream ss;
 
             Pt::TextOStream tos(ss, new Pt::Utf8Codec);
+            
             Pt::Xml::XmlWriter writer;
-            writer.begin(tos);
-
+            writer.reset(tos);
             writer.writeStartElement(L"first");
             writer.writeEndElement();
-            writer.flush();
+            tos.flush();
 
             std::stringstream result;
-            result << "<first>" << std::endl;
-            result << "</first>" << std::endl;
+            result << "<first></first>";
 
+            //std::cerr << '\n' << ss.str() << std::endl;
+            PT_UNIT_ASSERT( result.str() == ss.str());
+        }
+
+        void MixedContent()
+        {
+            std::stringstream ss;
+
+            Pt::TextOStream tos(ss, new Pt::Utf8Codec);
+            
+            Pt::Xml::XmlWriter writer;
+            writer.reset(tos);
+            writer.writeStartElement(L"root");
+            writer.writeCharacters(L"aaa");
+            writer.writeStartElement(L"first");
+            writer.writeCharacters(L"bbb");
+            writer.writeEndElement();
+            writer.writeCharacters(L"ccc");
+            writer.writeEndElement();
+            tos.flush();
+
+            std::stringstream result;
+            result << "<root>aaa<first>bbb</first>ccc</root>";
+
+            //std::cerr << '\n' << ss.str() << std::endl;
             PT_UNIT_ASSERT( result.str() == ss.str());
         }
 
         void TextElement()
         {
             std::stringstream ss;
+            
             Pt::TextOStream tos(ss, new Pt::Utf8Codec);
+            
             Pt::Xml::XmlWriter writer;
-            writer.begin(tos);
-            writer.writeElement(L"fourth", L"Hello world!");
-            writer.flush();
+            writer.reset(tos);
+            writer.writeStartElement(L"elem");
+            writer.writeCharacters(L"Hello world!");
+            writer.writeEndElement();
+
+            tos.flush();
 
             std::stringstream result;
-            result << "<fourth>Hello world!</fourth>" << std::endl;
+            result << "<elem>Hello world!</elem>";
 
             PT_UNIT_ASSERT( result.str() == ss.str());
         }
@@ -90,33 +119,34 @@ class XmlWriterTest : public Pt::Unit::TestSuite
         void Namespaces()
         {
             std::stringstream ss;
+            
             Pt::TextOStream tos(ss, new Pt::Utf8Codec);
 
-            Pt::Xml::XmlWriter writer;
-            writer.useEndl(false);
-            writer.useIndent(false);
+            Pt::Xml::XmlWriter writer(tos);
+            writer.setFormatting(false);
             
-            writer.begin(tos);
             writer.setDefaultNamespace(L"http://pt-framework.org/default");
             writer.setNamespacePrefix(L"pt", L"http://pt-framework.org/pt");
             
             writer.writeStartElement(L"root");
             writer.writeStartElement(L"http://pt-framework.org/pt", L"first");
+            writer.writeAttribute(L"http://pt-framework.org/pt", L"a", L"aaa");
             writer.writeStartElement(L"http://pt-framework.org/pt", L"second");
             writer.writeStartElement(L"http://pt-framework.org/default", L"default");
+            writer.writeAttribute(L"http://pt-framework.org/default", L"b", L"bbb");
             writer.writeEndElement();
             writer.writeEndElement();
             writer.writeEndElement();
 
             writer.writeEndElement();
-            writer.flush();
+            tos.flush();
 
             //std::cerr << '\n' << ss.str() << std::endl;
             std::string result = "<root xmlns:pt=\"http://pt-framework.org/pt\""
                                       " xmlns=\"http://pt-framework.org/default\">"
-                                   "<pt:first>"
+                                   "<pt:first pt:a=\"aaa\">"
                                      "<pt:second>"
-                                       "<default>"
+                                       "<default b=\"bbb\">"
                                        "</default>"
                                      "</pt:second>"
                                    "</pt:first>"

@@ -48,50 +48,103 @@ class PT_XML_API XmlWriter
 
         ~XmlWriter();
 
-        void begin(std::basic_ostream<Char>& os);
+        bool isFormatting() const;
+        
+        void setFormatting(bool value);
+
+        //TODO: void setIndentation(const Pt::String& indent)
+
+        /** @brief Clears the writer state and output.
+
+            Ther output stream is removed and the writer state is reset to
+            write a new document. The formatting options are not changed.
+        */
+        void reset();
+
+        void reset(std::basic_ostream<Char>& os);
+
+        std::basic_ostream<Char>* output();
 
         void writeStartDocument(const Pt::Char* version, const Pt::Char* encoding);
+
+        void setDefaultNamespace(const Pt::String& ns);
+
+        void setNamespacePrefix(const Pt::String& prefix, const Pt::String& ns);
+
+        void writeStartElement(const Pt::Char* localName, std::size_t localNameSize);
+
+        void writeStartElement(const Pt::String& localName);
+
+        void writeStartElement(const Char* ns, std::size_t nsSize,
+                               const Char* localName, std::size_t localNameSize);
+
+        void writeStartElement(const Pt::String& ns, const Pt::String& localName);
+
+        void writeAttribute(const Char* localName, std::size_t localNameSize,
+                            const Char* value, std::size_t valueSize);
+
+        void writeAttribute(const Pt::String& localName, const Pt::String& value);
+
+        void writeAttribute(const Char* ns, std::size_t nsSize,
+                            const Char* localName, std::size_t localNameSize,
+                            const Char* value, std::size_t valueSize);
+
+        void writeAttribute(const Pt::String& ns, const Pt::String& localName, const Pt::String& value);
+
+        void writeEndElement();
+
+        void writeCharacters(const Pt::Char* text, std::size_t n);
+
+        void writeCharacters(const Pt::String& text);
 
         void writeStartTag(const Pt::Char* name);
 
         void writeEndTag(const Pt::Char* name);
 
-        
-        void setDefaultNamespace(const Pt::String& ns);
+        void writeIndent();
 
-        void setNamespacePrefix(const Pt::String& prefix, const Pt::String& ns);
-
-        void writeStartElement(const Pt::String& ns, const Pt::String& localName);
-
-        void writeStartElement(const Pt::Char* ns, const Pt::Char* localName);
-
-        
-        void writeStartElement(const Pt::Char* localName, const Attribute* attr = 0, size_t attrCount = 0);
-
-        void writeStartElement(const Pt::String& localName, const Attribute* attr = 0, size_t attrCount = 0);
-
-        void writeEndElement();
-
-        void writeElement(const Pt::String& localName, const Pt::String& content, const Attribute* attr = 0, size_t attrCount = 0);
-
-        void writeCharacters(const Pt::Char* text);
-
-        void writeCharacters(const Pt::String& text);
-
-        void flush();
-
-        void endl();
-
-        void useIndent(bool sw);
-
-        void useEndl(bool sw);
+        void writeEndl();
 
     private:
         class XmlWriterImpl* _impl;
 };
 
+
+inline void XmlWriter::writeStartElement(const Pt::String& localName)
+{
+    this->writeStartElement(localName.c_str(), localName.size());
 }
 
+
+inline void XmlWriter::writeStartElement(const Pt::String& ns, const Pt::String& localName)
+{
+    this->writeStartElement(ns.c_str(), ns.size(), 
+                            localName.c_str(), localName.size());
 }
+
+
+inline void XmlWriter::writeAttribute(const Pt::String& localName, const Pt::String& value)
+{
+  this->writeAttribute( localName.c_str(), localName.size(), 
+                        value.c_str(), value.size() );
+}
+
+
+inline void XmlWriter::writeAttribute(const Pt::String& ns, const Pt::String& localName, const Pt::String& value)
+{
+  this->writeAttribute( ns.c_str(), ns.size(), 
+                        localName.c_str(), localName.size(), 
+                        value.c_str(), value.size() );
+}
+
+
+inline void XmlWriter::writeCharacters(const Pt::String& text)
+{
+    this->writeCharacters(text.c_str(), text.size());
+}
+
+} // namespace Xml
+
+} // namespace Pt
 
 #endif

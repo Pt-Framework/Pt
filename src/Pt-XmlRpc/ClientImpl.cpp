@@ -65,8 +65,7 @@ ClientImpl::ClientImpl()
 , _timeout(System::EventLoop::WaitInfinite)
 , _errorPending(false)
 {
-    _writer.useIndent(false);
-    _writer.useEndl(false);
+    _writer.setFormatting(false);
 }
 
 ClientImpl::~ClientImpl()
@@ -214,12 +213,16 @@ void ClientImpl::onReplyFinished()
 void ClientImpl::prepareRequest(const String& name, IDecomposer** argv, unsigned argc)
 {
     _ts.attach( prepareRequest() );
-    _writer.begin(_ts);
+    _writer.reset(_ts);
     
     _writer.writeStartDocument(XMLRPC_XMLVERSION, XMLRPC_XMLENCODING);
     
     _writer.writeStartTag( XMLRPC_METHODCALL );
-    _writer.writeElement( XMLRPC_METHODNAME, name.c_str() );
+
+    _writer.writeStartTag(XMLRPC_METHODNAME);
+    _writer.writeCharacters(name);
+    _writer.writeEndTag(XMLRPC_METHODNAME);
+
     _writer.writeStartTag( XMLRPC_PARAMS );
 
     for(unsigned n = 0; n < argc; ++n)
@@ -231,7 +234,7 @@ void ClientImpl::prepareRequest(const String& name, IDecomposer** argv, unsigned
 
     _writer.writeEndTag(XMLRPC_PARAMS);
     _writer.writeEndTag(XMLRPC_METHODCALL);
-    _writer.flush();
+    _ts.flush();
 }
 
 

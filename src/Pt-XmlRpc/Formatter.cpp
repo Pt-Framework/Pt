@@ -82,6 +82,9 @@ class array_appender : public std::iterator<std::output_iterator_tag, T>
 			return *this;
 		}
 
+    T* getPointer()
+    { return _ptr; }
+
 		array_appender<T>& operator++()
 		{
 			if(_ptr != _end)
@@ -115,17 +118,21 @@ void Formatter::addString(const char* name, const char* type,
                           const Pt::Char* value, const char* id)
 {
     _writer->writeStartTag(XMLRPC_VALUE);
-    _writer->writeElement(XMLRPC_STRING, value);
+    _writer->writeStartTag(XMLRPC_STRING);
+    _writer->writeCharacters(value);
+    _writer->writeEndTag(XMLRPC_STRING);
     _writer->writeEndTag(XMLRPC_VALUE);
 }
 
 
 void Formatter::addString8(const char* name, const char* value, const char* id)
 {
-	Pt::String str = Pt::String::widen(value);
+    Pt::String str = Pt::String::widen(value);
     
     _writer->writeStartTag(XMLRPC_VALUE);
-    _writer->writeElement(XMLRPC_STRING, str.c_str());
+    _writer->writeStartTag(XMLRPC_STRING);
+    _writer->writeCharacters(str);
+    _writer->writeEndTag(XMLRPC_STRING);
     _writer->writeEndTag(XMLRPC_VALUE);
 }
 
@@ -135,10 +142,9 @@ void Formatter::addBool(const char* name, bool value,
 {
     _writer->writeStartTag(XMLRPC_VALUE);
 
-    if(value)
-        _writer->writeElement(XMLRPC_BOOLEAN, XMLRPC_TRUE);
-    else
-        _writer->writeElement(XMLRPC_BOOLEAN, XMLRPC_FALSE);
+    _writer->writeStartTag(XMLRPC_BOOLEAN);
+    _writer->writeCharacters(value ? XMLRPC_TRUE : XMLRPC_FALSE);
+    _writer->writeEndTag(XMLRPC_BOOLEAN);
 
     _writer->writeEndTag(XMLRPC_VALUE);
 }
@@ -150,7 +156,9 @@ void Formatter::addChar(const char* name, const Pt::Char& value,
     Pt::Char str[2] = { value, '\0' };
 
     _writer->writeStartTag(XMLRPC_VALUE);
-    _writer->writeElement(XMLRPC_STRING , str);
+    _writer->writeStartTag(XMLRPC_STRING);
+    _writer->writeCharacters(str);
+    _writer->writeEndTag(XMLRPC_STRING);
     _writer->writeEndTag(XMLRPC_VALUE);
 }
 
@@ -161,7 +169,9 @@ void Formatter::addChar8(const char* name, char value,
     Pt::Char str[2] = { value, '\0' };
 
     _writer->writeStartTag(XMLRPC_VALUE);
-    _writer->writeElement(XMLRPC_STRING , str);
+    _writer->writeStartTag(XMLRPC_STRING);
+    _writer->writeCharacters(str);
+    _writer->writeEndTag(XMLRPC_STRING);
     _writer->writeEndTag(XMLRPC_VALUE);
 }
 
@@ -193,12 +203,14 @@ void Formatter::addInt64(const char* name, Pt::int64_t value, const char* id)
     array_appender<Pt::Char> end;
     it = putInt(it, value);
     if(it == end)
-		throw std::logic_error("invalid buffer size");
+		    throw std::logic_error("invalid buffer size");
 
     *it = '\0';
 
     _writer->writeStartTag(XMLRPC_VALUE);
-    _writer->writeElement(XMLRPC_INT, buf);
+    _writer->writeStartTag(XMLRPC_INT);
+    _writer->writeCharacters(buf, it.getPointer() - buf);
+    _writer->writeEndTag(XMLRPC_INT);
     _writer->writeEndTag(XMLRPC_VALUE);
 }
 
@@ -235,7 +247,11 @@ void Formatter::addUInt64(const char* name, Pt::uint64_t value, const char* id)
     *it = '\0';
 
     _writer->writeStartTag(XMLRPC_VALUE);
-    _writer->writeElement(XMLRPC_INT, buf);
+
+    _writer->writeStartTag(XMLRPC_INT);
+    _writer->writeCharacters(buf, it.getPointer() - buf);
+    _writer->writeEndTag(XMLRPC_INT);
+
     _writer->writeEndTag(XMLRPC_VALUE);
 }
 
@@ -264,7 +280,11 @@ void Formatter::addDouble(const char* name, double value, const char* id)
     *it = '\0';
 
     _writer->writeStartTag(XMLRPC_VALUE);
-    _writer->writeElement(XMLRPC_DOUBLE, buf);
+
+    _writer->writeStartTag(XMLRPC_DOUBLE);
+    _writer->writeCharacters(buf, it.getPointer() - buf);
+    _writer->writeEndTag(XMLRPC_DOUBLE);
+
     _writer->writeEndTag(XMLRPC_VALUE);
 }
 
@@ -283,7 +303,11 @@ void Formatter::addBytes(const char* name, const char* type,
 
     _writer->writeStartTag(XMLRPC_VALUE);
     std::string value(data, length);
-    _writer->writeElement( Pt::String::widen(type), Pt::String::widen(value) );
+
+    _writer->writeStartTag(Pt::String::widen(type).c_str());
+    _writer->writeCharacters(Pt::String::widen(value));
+    _writer->writeEndTag(Pt::String::widen(type).c_str());
+
     _writer->writeStartTag(XMLRPC_VALUE);
 }
 
@@ -332,7 +356,10 @@ void Formatter::beginObject(const char* name, const char* type,
 void Formatter::beginMember(const char* name, const char*, const char*)
 {
     _writer->writeStartTag(XMLRPC_MEMBER);
-    _writer->writeElement(XMLRPC_NAME, Pt::String::widen(name) );
+    
+    _writer->writeStartTag(XMLRPC_NAME);
+    _writer->writeCharacters( Pt::String::widen(name) );
+    _writer->writeEndTag(XMLRPC_NAME);
 }
 
 

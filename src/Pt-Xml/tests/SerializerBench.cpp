@@ -70,7 +70,7 @@ void benchSerialization(const T& d, const char* fname = 0)
 
     Pt::TextOStream tos(data, new Pt::Utf8Codec);
     Pt::Xml::XmlWriter writer;
-    writer.begin(tos);
+    writer.reset(tos);
     Serializer serializer(writer);
     serializer.context()->enableReferencing(false);
 
