@@ -43,8 +43,8 @@ namespace Pt {
 
 namespace XmlRpc {
 
-static const Pt::Char XMLRPC_XMLVERSION[]  = { '1', '.', '0', '\0' };
-static const Pt::Char XMLRPC_XMLENCODING[]  = { 'U', 'T', 'F', '-', '8',  '\0' };
+static const Pt::Char XMLRPC_XMLVERSION[]  = { '1', '.', '0' };
+static const Pt::Char XMLRPC_XMLENCODING[]  = { 'U', 'T', 'F', '-', '8' };
 static const Pt::Char XMLRPC_METHODRESPONSE[]  = { 'm', 'e', 't', 'h', 'o', 'd', 'R', 'e', 's', 'p', 'o', 'n', 's', 'e', '\0' };
 static const Pt::Char XMLRPC_METHODCALL[]  = { 'm', 'e', 't', 'h', 'o', 'd', 'C', 'a', 'l', 'l', '\0' };
 static const Pt::Char XMLRPC_PARAMS[]  = { 'p', 'a', 'r', 'a', 'm', 's', '\0' };
@@ -128,7 +128,8 @@ void XmlRpcResponder::onBeginReply(Http::Request& request, Http::Reply& reply, S
         _ts.attach( _reply->body() );
         _writer.reset(_ts);
         
-        _writer.writeStartDocument(XMLRPC_XMLVERSION, XMLRPC_XMLENCODING);
+        _writer.writeStartDocument(XMLRPC_XMLVERSION, sizeof(XMLRPC_XMLVERSION)/sizeof(Char),
+                                   XMLRPC_XMLENCODING, sizeof(XMLRPC_XMLENCODING)/sizeof(Char));
         
         reply.header().set("Content-Type", "text/xml");
 
@@ -172,7 +173,8 @@ void XmlRpcResponder::replyError(Http::Reply& reply, int rc, const char* msg)
     _ts.attach( reply.body() );
     _writer.reset(_ts);
     
-    _writer.writeStartDocument(XMLRPC_XMLVERSION, XMLRPC_XMLENCODING);
+    _writer.writeStartDocument(XMLRPC_XMLVERSION, sizeof(XMLRPC_XMLVERSION)/sizeof(Char),
+                               XMLRPC_XMLENCODING, sizeof(XMLRPC_XMLENCODING)/sizeof(Char));
 
     _writer.writeStartTag( XMLRPC_METHODRESPONSE );
     _writer.writeStartTag( XMLRPC_FAULT );

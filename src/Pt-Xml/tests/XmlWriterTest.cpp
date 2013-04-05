@@ -46,39 +46,140 @@ class XmlWriterTest : public Pt::Unit::TestSuite
         XmlWriterTest()
         : Pt::Unit::TestSuite("XmlWriterTest")
         {
-            this->registerMethod("Element" , *this, &XmlWriterTest::Element);
+            this->registerMethod("XmlDeclaration" , *this, &XmlWriterTest::XmlDeclaration);
+            this->registerMethod("DocType" , *this, &XmlWriterTest::DocType);
+            this->registerMethod("EmptyElement" , *this, &XmlWriterTest::EmptyElement);
+            this->registerMethod("EndDocument" , *this, &XmlWriterTest::EndDocument);
+            this->registerMethod("Attributes" , *this, &XmlWriterTest::Attributes);
             this->registerMethod("MixedContent" , *this, &XmlWriterTest::MixedContent);
-            this->registerMethod("TextElement" , *this, &XmlWriterTest::TextElement);
+            this->registerMethod("Characters" , *this, &XmlWriterTest::Characters);
+            this->registerMethod("CData" , *this, &XmlWriterTest::CData);
+            this->registerMethod("EntityReference" , *this, &XmlWriterTest::EntityReference);
+            this->registerMethod("Comment" , *this, &XmlWriterTest::Comment);
+            this->registerMethod("ProcessingInstruction" , *this, &XmlWriterTest::ProcessingInstruction);
             this->registerMethod("Namespaces" , *this, &XmlWriterTest::Namespaces);
+            this->registerMethod("Indent" , *this, &XmlWriterTest::Indent);
         }
 
     protected:
-        void Element()
+        void XmlDeclaration()
         {
             std::stringstream ss;
-
             Pt::TextOStream tos(ss, new Pt::Utf8Codec);
             
             Pt::Xml::XmlWriter writer;
+            writer.setFormatting(false);
+
             writer.reset(tos);
+            writer.writeStartDocument(L"1.0", L"UTF-8", true);
             writer.writeStartElement(L"first");
             writer.writeEndElement();
             tos.flush();
 
-            std::stringstream result;
-            result << "<first></first>";
+            std::string result;
+            result = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><first/>";
 
             //std::cerr << '\n' << ss.str() << std::endl;
-            PT_UNIT_ASSERT( result.str() == ss.str());
+            PT_UNIT_ASSERT( result == ss.str());
+        }
+
+        void DocType()
+        {
+            std::stringstream ss;
+            Pt::TextOStream tos(ss, new Pt::Utf8Codec);
+            
+            Pt::Xml::XmlWriter writer;
+            writer.setFormatting(false);
+
+            writer.reset(tos);
+            writer.writeDocType(L"first SYSTEM \"test.dtd\"");
+            writer.writeStartElement(L"first");
+            writer.writeEndElement();
+            tos.flush();
+
+            std::string result;
+            result = "<!DOCTYPE first SYSTEM \"test.dtd\"><first/>";
+
+            //std::cerr << '\n' << ss.str() << std::endl;
+            PT_UNIT_ASSERT( result == ss.str());
+        }
+
+        void EmptyElement()
+        {
+            std::stringstream ss;
+            Pt::TextOStream tos(ss, new Pt::Utf8Codec);
+            
+            Pt::Xml::XmlWriter writer;
+            writer.setFormatting(false);
+
+            writer.reset(tos);
+            writer.writeStartElement(L"first");
+            writer.writeEmptyElement(L"second");
+            writer.writeEmptyElement(L"third");
+            writer.writeEndElement();
+            tos.flush();
+
+            std::string result;
+            result = "<first><second/><third/></first>";
+
+            //std::cerr << '\n' << ss.str() << std::endl;
+            PT_UNIT_ASSERT( result == ss.str());
+        }
+
+        void EndDocument()
+        {
+            std::stringstream ss;
+            Pt::TextOStream tos(ss, new Pt::Utf8Codec);
+            
+            Pt::Xml::XmlWriter writer;
+            writer.setFormatting(false);
+
+            writer.reset(tos);
+            writer.writeStartElement(L"first");
+            writer.writeStartElement(L"second");
+            writer.writeEmptyElement(L"third");
+            writer.writeEndDocument();
+            tos.flush();
+
+            std::string result;
+            result = "<first><second><third/></second></first>";
+
+            //std::cerr << '\n' << ss.str() << std::endl;
+            PT_UNIT_ASSERT( result == ss.str());
+        }
+
+        void Attributes()
+        {
+            std::stringstream ss;
+            Pt::TextOStream tos(ss, new Pt::Utf8Codec);
+            
+            Pt::Xml::XmlWriter writer;
+            writer.setFormatting(false);
+
+            writer.reset(tos);
+            writer.writeStartElement(L"first");
+            writer.writeAttribute(L"a1", L"aaa");
+
+            writer.setQuote('\'');
+            writer.writeAttribute(L"a2", L"bbb");
+            writer.writeEndElement();
+            tos.flush();
+
+            std::string result;
+            result = "<first a1=\"aaa\" a2='bbb'/>";
+
+            //std::cerr << '\n' << ss.str() << std::endl;
+            PT_UNIT_ASSERT( result == ss.str());
         }
 
         void MixedContent()
         {
             std::stringstream ss;
-
             Pt::TextOStream tos(ss, new Pt::Utf8Codec);
             
             Pt::Xml::XmlWriter writer;
+            writer.setFormatting(false);
+
             writer.reset(tos);
             writer.writeStartElement(L"root");
             writer.writeCharacters(L"aaa");
@@ -89,37 +190,148 @@ class XmlWriterTest : public Pt::Unit::TestSuite
             writer.writeEndElement();
             tos.flush();
 
-            std::stringstream result;
-            result << "<root>aaa<first>bbb</first>ccc</root>";
+            std::string result;
+            result = "<root>aaa<first>bbb</first>ccc</root>";
 
             //std::cerr << '\n' << ss.str() << std::endl;
-            PT_UNIT_ASSERT( result.str() == ss.str());
+            PT_UNIT_ASSERT( result == ss.str());
         }
 
-        void TextElement()
+        void Characters()
         {
             std::stringstream ss;
-            
             Pt::TextOStream tos(ss, new Pt::Utf8Codec);
             
             Pt::Xml::XmlWriter writer;
+            writer.setFormatting(false);
+
             writer.reset(tos);
-            writer.writeStartElement(L"elem");
+            writer.writeStartElement(L"first");
             writer.writeCharacters(L"Hello world!");
+            writer.writeCharacters(L"<>&'\"");
             writer.writeEndElement();
 
             tos.flush();
 
-            std::stringstream result;
-            result << "<elem>Hello world!</elem>";
+            std::string result;
+            result = "<first>Hello world!&lt;&gt;&amp;&apos;&quot;</first>";
 
-            PT_UNIT_ASSERT( result.str() == ss.str());
+            //std::cerr << '\n' << ss.str() << std::endl;
+            PT_UNIT_ASSERT( result == ss.str());
         }
 
+        void EntityReference()
+        {
+            std::stringstream ss;
+            Pt::TextOStream tos(ss, new Pt::Utf8Codec);
+            
+            Pt::Xml::XmlWriter writer;
+            writer.setFormatting(false);
+
+            writer.reset(tos);
+            writer.writeStartElement(L"first");
+            writer.writeEntityReference(L"eref");
+            writer.writeEndElement();
+
+            tos.flush();
+
+            std::string result;
+            result = "<first>&eref;</first>";
+
+            //std::cerr << '\n' << ss.str() << std::endl;
+            PT_UNIT_ASSERT( result == ss.str());
+        }
+
+        void CData()
+        {
+            std::stringstream ss;
+            Pt::TextOStream tos(ss, new Pt::Utf8Codec);
+            
+            Pt::Xml::XmlWriter writer;
+            writer.setFormatting(false);
+
+            writer.reset(tos);
+            writer.writeStartElement(L"first");
+            writer.writeCData(L"Hello world!");
+            writer.writeEndElement();
+
+            tos.flush();
+
+            std::string result;
+            result = "<first><![CDATA[Hello world!]]></first>";
+
+            //std::cerr << '\n' << ss.str() << std::endl;
+            PT_UNIT_ASSERT( result == ss.str());
+        }
+
+        void Comment()
+        {
+            std::stringstream ss;
+            Pt::TextOStream tos(ss, new Pt::Utf8Codec);
+            
+            Pt::Xml::XmlWriter writer;
+            writer.setFormatting(false);
+
+            writer.reset(tos);
+            writer.writeStartElement(L"first");
+            writer.writeComment(L"comment 1");
+            
+            writer.writeStartElement(L"second");
+            writer.writeComment(L"comment 2");
+            writer.writeEndElement();
+            
+            writer.writeStartElement(L"third");
+            writer.writeCharacters(L"Hello");
+            writer.writeComment(L"comment 3");
+            writer.writeCharacters(L"world!");
+            writer.writeEndElement();
+            
+            writer.writeComment(L"comment 4");
+            writer.writeEndElement();
+
+            tos.flush();
+
+            std::string result;
+            result = "<first>"
+                       "<!--comment 1-->"
+                         "<second>"
+                           "<!--comment 2-->"
+                         "</second>"
+                         "<third>Hello<!--comment 3-->world!</third>"
+                       "<!--comment 4-->"
+                     "</first>";
+
+            //std::cerr << '\n' << ss.str() << std::endl;
+            PT_UNIT_ASSERT( result == ss.str());
+        }
+        
+        void ProcessingInstruction()
+        {
+            std::stringstream ss;
+            Pt::TextOStream tos(ss, new Pt::Utf8Codec);
+            
+            Pt::Xml::XmlWriter writer;
+            writer.setFormatting(false);
+
+            writer.reset(tos);
+            writer.writeStartElement(L"first");
+            writer.writeProcessingInstruction(L"proc", L"some data");
+            writer.writeEndElement();
+
+            tos.flush();
+
+            std::string result;
+            result = "<first>"
+                       "<?proc some data?>"
+                     "</first>";
+
+            //std::cerr << '\n' << ss.str() << std::endl;
+            PT_UNIT_ASSERT( result == ss.str());
+        }
+        
         void Namespaces()
         {
             std::stringstream ss;
-            
             Pt::TextOStream tos(ss, new Pt::Utf8Codec);
 
             Pt::Xml::XmlWriter writer(tos);
@@ -143,15 +355,63 @@ class XmlWriterTest : public Pt::Unit::TestSuite
 
             //std::cerr << '\n' << ss.str() << std::endl;
             std::string result = "<root xmlns:pt=\"http://pt-framework.org/pt\""
-                                      " xmlns=\"http://pt-framework.org/default\">"
-                                   "<pt:first pt:a=\"aaa\">"
-                                     "<pt:second>"
-                                       "<default b=\"bbb\">"
-                                       "</default>"
-                                     "</pt:second>"
-                                   "</pt:first>"
+                                 " xmlns=\"http://pt-framework.org/default\">"
+                                 "<pt:first pt:a=\"aaa\">"
+                                 "<pt:second>"
+                                 "<default b=\"bbb\"/>"
+                                 "</pt:second>"
+                                 "</pt:first>"
                                  "</root>";
+            
             PT_UNIT_ASSERT( result == ss.str());
+        }
+
+        void Indent()
+        {
+            std::stringstream ss;
+            Pt::TextOStream tos(ss, new Pt::Utf8Codec);
+
+            Pt::Xml::XmlWriter writer(tos);
+
+            writer.writeStartDocument(L"1.0", L"UTF-8", true);
+                       
+            writer.writeStartElement(L"root");
+            writer.writeStartElement(L"first");
+            writer.writeComment(L"comment 1");
+            writer.writeProcessingInstruction(L"proc", L"some data");
+            writer.writeStartElement(L"second");
+
+            writer.writeStartElement(L"third");
+            writer.writeEndElement();
+
+            writer.writeEmptyElement(L"empty");
+            
+            writer.writeStartElement(L"fourth");
+            writer.writeCharacters(L"Hello ");
+            writer.writeEntityReference(L"world");
+            writer.writeEndElement();
+           
+            writer.writeEndElement();
+            writer.writeEndElement();
+            writer.writeEndElement();
+            tos.flush();
+
+            //std::cerr << '\n' << ss.str() << std::endl;
+            std::stringstream result;
+            result << "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>" << std::endl;
+            result << "<root>" << std::endl;
+            result << "  <first>" << std::endl;
+            result << "    <!--comment 1-->" << std::endl;
+            result << "    <?proc some data?>" << std::endl;
+            result << "    <second>" << std::endl;
+            result << "      <third/>" << std::endl;
+            result << "      <empty/>" << std::endl;
+            result << "      <fourth>Hello &world;</fourth>" << std::endl;
+            result << "    </second>" << std::endl;
+            result << "  </first>" << std::endl;
+            result << "</root>";
+            
+            PT_UNIT_ASSERT( result.str() == ss.str());
         }
 };
 

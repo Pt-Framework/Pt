@@ -52,7 +52,13 @@ class PT_XML_API XmlWriter
         
         void setFormatting(bool value);
 
-        //TODO: void setIndentation(const Pt::String& indent)
+        const Pt::String& indent() const;
+
+        void setIndent(const Pt::String& indent);
+
+        Pt::Char quote() const;
+
+        void setQuote(Pt::Char ch);
 
         /** @brief Clears the writer state and output.
 
@@ -65,11 +71,22 @@ class PT_XML_API XmlWriter
 
         std::basic_ostream<Char>* output();
 
-        void writeStartDocument(const Pt::Char* version, const Pt::Char* encoding);
+        std::size_t depth() const;
 
         void setDefaultNamespace(const Pt::String& ns);
 
         void setNamespacePrefix(const Pt::String& prefix, const Pt::String& ns);
+
+        void writeStartDocument(const Pt::Char* version, std::size_t versionSize, 
+                                const Pt::Char* encoding, std::size_t encodingSize, bool standalone = false);
+
+        void writeStartDocument(const Pt::String& version, const Pt::String& encoding, bool standalone = false);
+
+        void writeEndDocument();
+
+        void writeDocType(const Pt::Char* dtd, std::size_t n);
+
+        void writeDocType(const Pt::String& dtd);
 
         void writeStartElement(const Pt::Char* localName, std::size_t localNameSize);
 
@@ -91,11 +108,37 @@ class PT_XML_API XmlWriter
 
         void writeAttribute(const Pt::String& ns, const Pt::String& localName, const Pt::String& value);
 
+        void writeEmptyElement(const Pt::Char* localName, std::size_t localNameSize);
+
+        void writeEmptyElement(const Pt::String& localName);
+
+        void writeEmptyElement(const Char* ns, std::size_t nsSize,
+                               const Char* localName, std::size_t localNameSize);
+
+        void writeEmptyElement(const Pt::String& ns, const Pt::String& localName);
+
         void writeEndElement();
 
         void writeCharacters(const Pt::Char* text, std::size_t n);
 
         void writeCharacters(const Pt::String& text);
+
+        void writeEntityReference(const Pt::Char* name, std::size_t n);
+
+        void writeEntityReference(const Pt::String& name);
+
+        void writeCData(const Pt::Char* text, std::size_t n);
+
+        void writeCData(const Pt::String& text);
+
+        void writeComment(const Pt::Char* text, std::size_t n);
+        
+        void writeComment(const Pt::String& text);
+
+        void writeProcessingInstruction(const Pt::Char* target, std::size_t targetSize,
+                                        const Pt::Char* data, std::size_t dataSize);
+        
+        void writeProcessingInstruction(const Pt::String& text, const Pt::String& data);
 
         void writeStartTag(const Pt::Char* name);
 
@@ -103,11 +146,22 @@ class PT_XML_API XmlWriter
 
         void writeIndent();
 
-        void writeEndl();
-
     private:
         class XmlWriterImpl* _impl;
 };
+
+
+inline void XmlWriter::writeStartDocument(const Pt::String& version, const Pt::String& encoding, bool standalone)
+{
+    this->writeStartDocument(version.c_str(), version.size(),
+                             encoding.c_str(), encoding.size(), standalone);
+}
+
+
+inline void XmlWriter::writeDocType(const Pt::String& dtd)
+{
+    this->writeDocType(dtd.c_str(), dtd.size());
+}
 
 
 inline void XmlWriter::writeStartElement(const Pt::String& localName)
@@ -125,22 +179,60 @@ inline void XmlWriter::writeStartElement(const Pt::String& ns, const Pt::String&
 
 inline void XmlWriter::writeAttribute(const Pt::String& localName, const Pt::String& value)
 {
-  this->writeAttribute( localName.c_str(), localName.size(), 
-                        value.c_str(), value.size() );
+    this->writeAttribute( localName.c_str(), localName.size(), 
+                          value.c_str(), value.size() );
 }
 
 
 inline void XmlWriter::writeAttribute(const Pt::String& ns, const Pt::String& localName, const Pt::String& value)
 {
-  this->writeAttribute( ns.c_str(), ns.size(), 
-                        localName.c_str(), localName.size(), 
-                        value.c_str(), value.size() );
+    this->writeAttribute( ns.c_str(), ns.size(), 
+                          localName.c_str(), localName.size(), 
+                          value.c_str(), value.size() );
+}
+
+
+inline void XmlWriter::writeEmptyElement(const Pt::String& localName)
+{
+    this->writeEmptyElement(localName.c_str(), localName.size());
+}
+
+
+inline void XmlWriter::writeEmptyElement(const Pt::String& ns, const Pt::String& localName)
+{
+    this->writeEmptyElement(ns.c_str(), ns.size(), 
+                            localName.c_str(), localName.size());
 }
 
 
 inline void XmlWriter::writeCharacters(const Pt::String& text)
 {
     this->writeCharacters(text.c_str(), text.size());
+}
+
+
+inline void XmlWriter::writeEntityReference(const Pt::String& name)
+{
+    this->writeEntityReference(name.c_str(), name.size());
+}
+
+
+inline void XmlWriter::writeCData(const Pt::String& text)
+{
+    this->writeCData(text.c_str(), text.size());
+}
+
+
+inline void XmlWriter::writeComment(const Pt::String& text)
+{
+    this->writeComment(text.c_str(), text.size());
+}
+
+
+inline void XmlWriter::writeProcessingInstruction(const Pt::String& target, const Pt::String& data)
+{
+    this->writeProcessingInstruction( target.c_str(), target.size(), 
+                                      data.c_str(), data.size() );
 }
 
 } // namespace Xml

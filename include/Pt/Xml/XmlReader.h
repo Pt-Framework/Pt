@@ -109,7 +109,7 @@ class PT_XML_API XmlReader : private NonCopyable
         */
         void reset();
 
-        // TODO: add methods for discard(), reset(), clear()
+        // TODO: add methods for attach(), detach(), discard(), reset(), clear()
 
         /** @brief Starts parsing with an input source.
 
@@ -157,7 +157,7 @@ class PT_XML_API XmlReader : private NonCopyable
 
         /** @brief Returns the XML tree depth.
         */
-        size_t depth() const;
+        std::size_t depth() const;
 
         /** @brief Returns the current line of the primary input source.
         */
