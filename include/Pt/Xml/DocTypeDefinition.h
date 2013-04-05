@@ -46,8 +46,7 @@ class DocTypeContext;
 class ElementDeclaration;
 class AttributeListDeclaration;
 
-class PT_XML_API DocTypeDefinition : public Node
-                                   , private NonCopyable
+class PT_XML_API DocTypeDefinition : private NonCopyable
 {
     public:
         DocTypeDefinition(DocTypeContext& ctx);
@@ -82,10 +81,6 @@ class PT_XML_API DocTypeDefinition : public Node
 
         const Notation* findNotation(const Pt::String& name) const;
 
-        //! @internal
-        inline static Node::Type nodeId()
-        { return Node::DocTypeDefinition; }
-
     private:
         typedef std::vector< std::pair<QName, ElementDeclaration*> > ElementDeclarationList;
         
@@ -96,30 +91,6 @@ class PT_XML_API DocTypeDefinition : public Node
         EntityMapping _paramEntities;
         NotationMapping _notations;
 };
-
-
-inline DocTypeDefinition* toDocTypeDefinition(Node* node)
-{
-    return nodeCast<DocTypeDefinition>(node);
-}
-
-
-inline const DocTypeDefinition* toDocTypeDefinition(const Node* node)
-{
-    return nodeCast<DocTypeDefinition>(node);
-}
-
-
-inline DocTypeDefinition& toDocTypeDefinition(Node& node)
-{
-    return nodeCast<DocTypeDefinition>(node);
-}
-
-
-inline const DocTypeDefinition& toDocTypeDefinition(const Node& node)
-{
-    return nodeCast<DocTypeDefinition>(node);
-}
 
 } // namespace Xml
 

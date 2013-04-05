@@ -867,6 +867,8 @@ class XmlReaderImpl
             if( ch == ']' )
             {
                 // end of INCLUDE or end of internal DTD
+
+                // TODO: do not allow INCLUDE/IGNORE in internal subset
                 popParseState(&XmlReaderImpl::OnDtdInternalEnd);
                 return;
             }
@@ -887,7 +889,7 @@ class XmlReaderImpl
                 _parse = &XmlReaderImpl::onProlog;
                 onProlog(c);
 
-                setDocumentTypeDefinition();
+                setDocumentTypeDefinition(false);
                 return;
             }
 
@@ -3030,7 +3032,7 @@ class XmlReaderImpl
 
             if( ch == '>' )
             {
-                setDocumentTypeDefinition();
+                setDocumentTypeDefinition(true);
                 --_depth;
 
                 bool externalDtd = resolveExternalDtd();
@@ -4015,10 +4017,14 @@ class XmlReaderImpl
                 _current = &_docType;
         }
 
-        void setDocumentTypeDefinition()
+        void setDocumentTypeDefinition(bool internSubset)
         {
             if(_options & ReportDtd)
-                _current = &_dtd;
+            {
+                _endDocType.clear();
+                _endDocType.setInternal(internSubset);
+                _current = &_endDocType;
+            }
         }
 
         void setComment()
@@ -4300,6 +4306,7 @@ class XmlReaderImpl
         DocTypeContext _dtdContext;
         DocTypeDefinition _dtd;
         DocType _docType;
+        EndDocType _endDocType;
 
         ElementDeclaration* _elemDecl;
         AttributeDeclaration* _attrDecl;

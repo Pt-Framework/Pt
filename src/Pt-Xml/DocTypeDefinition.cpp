@@ -47,8 +47,7 @@ namespace Pt {
 namespace Xml {
 
 DocTypeDefinition::DocTypeDefinition(DocTypeContext& ctx)
-: Node(Node::DocTypeDefinition)
-, _ctx(&ctx)
+: _ctx(&ctx)
 {
 }
 

@@ -328,14 +328,18 @@ void XmlReaderTest::DtdEmptyDocument()
     
     ++it;
     
-    Pt::Xml::DocTypeDefinition& dtdInternal = Pt::Xml::toDocTypeDefinition(*it);
-    PT_UNIT_ASSERT_EQUALS(dtdInternal.rootName().name(), L"test");
+    Pt::Xml::EndDocType& endDocInternal = Pt::Xml::toEndDocType(*it);
+    PT_UNIT_ASSERT_EQUALS(endDocInternal.isInternal(), true);
+    PT_UNIT_ASSERT_EQUALS(endDocInternal.isExternal(), false);
+    PT_UNIT_ASSERT_EQUALS(reader.dtd().rootName().name(), L"test");
     PT_UNIT_ASSERT_EQUALS(reader.depth(), 0);
 
     ++it;
     
-    Pt::Xml::DocTypeDefinition& dtdExternal = Pt::Xml::toDocTypeDefinition(*it);
-    PT_UNIT_ASSERT_EQUALS(dtdExternal.rootName().name(), L"test");
+    Pt::Xml::EndDocType& endDocExternal = Pt::Xml::toEndDocType(*it);
+    PT_UNIT_ASSERT_EQUALS(endDocExternal.isInternal(), false);
+    PT_UNIT_ASSERT_EQUALS(endDocExternal.isExternal(), true);
+    PT_UNIT_ASSERT_EQUALS(reader.dtd().rootName().name(), L"test");
     PT_UNIT_ASSERT_EQUALS(reader.depth(), 0);
 
     ++it;
@@ -432,10 +436,11 @@ void XmlReaderTest::DtdExternalAndInternalSubset()
 
         ++it;
         
-        Pt::Xml::DocTypeDefinition& dtd = Pt::Xml::toDocTypeDefinition(*it);
-        PT_UNIT_ASSERT_EQUALS(dtd.rootName().name(), L"test");
-        PT_UNIT_ASSERT( dtd.findEntity(L"e1") );
-        PT_UNIT_ASSERT( dtd.findEntity(L"e2") == 0 );
+        Pt::Xml::EndDocType* endDoc = Pt::Xml::toEndDocType(&(*it));
+        PT_UNIT_ASSERT(endDoc);
+        PT_UNIT_ASSERT_EQUALS(reader.dtd().rootName().name(), L"test");
+        PT_UNIT_ASSERT( reader.dtd().findEntity(L"e1") );
+        PT_UNIT_ASSERT( reader.dtd().findEntity(L"e2") == 0 );
         PT_UNIT_ASSERT_EQUALS(reader.depth(), 0);
 
         Pt::String content;
@@ -767,20 +772,20 @@ void XmlReaderTest::DtdNotations()
 
     ++it;
 
-    Pt::Xml::DocTypeDefinition* dtd = Pt::Xml::toDocTypeDefinition(&*it);
-    PT_UNIT_ASSERT(dtd);
+    Pt::Xml::EndDocType* endDocType = Pt::Xml::toEndDocType(&*it);
+    PT_UNIT_ASSERT(endDocType);
 
-    const Pt::Xml::Notation* notation = dtd->findNotation(L"notation1");
+    const Pt::Xml::Notation* notation = reader.dtd().findNotation(L"notation1");
     PT_UNIT_ASSERT(notation);
     PT_UNIT_ASSERT_EQUALS(notation->publicId(), L"");
     PT_UNIT_ASSERT_EQUALS(notation->systemId(), L"n1");
 
-    notation = dtd->findNotation(L"notation2");
+    notation = reader.dtd().findNotation(L"notation2");
     PT_UNIT_ASSERT(notation);
     PT_UNIT_ASSERT_EQUALS(notation->publicId(), L"http://www.pt-framework.org/n2");
     PT_UNIT_ASSERT_EQUALS(notation->systemId(), L"");
 
-    notation = dtd->findNotation(L"notation3");
+    notation = reader.dtd().findNotation(L"notation3");
     PT_UNIT_ASSERT(notation);
     PT_UNIT_ASSERT_EQUALS(notation->publicId(), L"http://www.pt-framework.org/n3");
     PT_UNIT_ASSERT_EQUALS(notation->systemId(), L"n3");

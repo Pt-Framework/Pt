@@ -72,6 +72,42 @@ void DocType::setInternal(bool hasInternal)
     _internal = hasInternal ? 1 : 0;
 }
 
+
+EndDocType::EndDocType()
+: Node(Node::EndDocType)
+, _internal(0)
+{
+}
+
+
+EndDocType::~EndDocType()
+{ 
+}
+
+
+void EndDocType::clear()
+{ 
+    _internal = 0;
+}
+
+
+bool EndDocType::isExternal() const
+{ 
+    return _internal != 1;
+}
+
+
+bool EndDocType::isInternal() const
+{ 
+    return _internal == 1; 
+}
+
+
+void EndDocType::setInternal(bool value)
+{
+    _internal = value ? 1 : 0;
+}
+
 } // namespace Xml
 
 } // namespace Pt

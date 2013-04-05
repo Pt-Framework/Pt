@@ -59,7 +59,7 @@ class Node
             DocType = 1,
 
             //! Document Type Definition
-            DocTypeDefinition = 2,
+            EndDocType = 2,
 
             //! Xml declaration
             StartDocument = 3,
@@ -83,7 +83,7 @@ class Node
             ProcessingInstruction = 9,
 
             //! Unresolved entity reference
-            EntityReference = 10
+            EntityReference = 10,
         };
 
         //! @brief Destructor.

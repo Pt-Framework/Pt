@@ -101,6 +101,53 @@ inline const DocType& toDocType(const Node& node)
     return nodeCast<DocType>(node);
 }
 
+class PT_XML_API EndDocType : public Node
+                            , private Pt::NonCopyable
+{
+    public:
+        EndDocType();
+
+        ~EndDocType();
+
+        void clear();
+
+        bool isExternal() const;
+
+        bool isInternal() const;
+
+        void setInternal(bool value);
+
+        //! @internal
+        inline static Node::Type nodeId()
+        { return Node::EndDocType; }
+
+    private:
+        int _internal;
+};
+
+inline EndDocType* toEndDocType(Node* node)
+{
+    return nodeCast<EndDocType>(node);
+}
+
+
+inline const EndDocType* toEndDocType(const Node* node)
+{
+    return nodeCast<EndDocType>(node);
+}
+
+
+inline EndDocType& toEndDocType(Node& node)
+{
+    return nodeCast<EndDocType>(node);
+}
+
+
+inline const EndDocType& toEndDocType(const Node& node)
+{
+    return nodeCast<EndDocType>(node);
+}
+
 } // namespace Xml
 
 } // namespace Pt
