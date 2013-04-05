@@ -260,7 +260,7 @@ class XmlWriterImpl
 
             if((_state == OnStartElementOpen) || (_state == OnStartElement) || (_state == OnTag))
             {
-                formatLineBreak(*_tos, _elements.size());
+                formatIndent(*_tos, _elements.size());
             }
 
             _state = OnStartElementOpen;
@@ -305,7 +305,7 @@ class XmlWriterImpl
 
             if((_state == OnStartElementOpen) || (_state == OnStartElement) || (_state == OnTag))
             {
-                formatLineBreak(*_tos, _elements.size());
+                formatIndent(*_tos, _elements.size());
             }
 
             _state = OnStartElementOpen;
@@ -413,7 +413,7 @@ class XmlWriterImpl
             
             if(_state == OnTag)
             {
-                formatLineBreak(*_tos, _elements.size() - 1);
+                formatIndent(*_tos, _elements.size() - 1);
             }
 
             if(_state != OnStartElementOpen)
@@ -492,7 +492,7 @@ class XmlWriterImpl
 
             if((_state == OnStartElement) || (_state == OnTag))
             {
-                formatLineBreak(*_tos, depth());
+                formatIndent(*_tos, depth());
             }
 
             *_tos << Pt::Char('<') << Pt::Char('!') << Pt::Char('-') << Pt::Char('-');
@@ -514,7 +514,7 @@ class XmlWriterImpl
 
             if((_state == OnStartElement) || (_state == OnTag))
             {
-                formatLineBreak(*_tos, depth());
+                formatIndent(*_tos, depth());
             }
 
             *_tos << Pt::Char('<') << Pt::Char('?');
@@ -541,28 +541,8 @@ class XmlWriterImpl
             *_tos << Pt::Char('<') << Pt::Char('/') << name << Pt::Char('>');
         }
 
-        void writeIndent()
-        {
-            if( ! _tos)
-                return;
-            
-            if(_state == OnStartElementOpen)
-            {
-                *_tos << Pt::Char('>');
-            }
-
-            _state = OnTag;
-
-            *_tos << std::endl;
-            
-            for(size_t n = 0; n < _elements.size(); ++n)
-            {
-                *_tos << _indent;
-            }
-        }
-
     private:
-        void formatLineBreak(std::basic_ostream<Char>& tos, std::size_t width)
+        void formatIndent(std::basic_ostream<Char>& tos, std::size_t width)
         {
             if( _formatting )
             {
@@ -787,12 +767,6 @@ void XmlWriter::writeStartTag(const Pt::Char* name)
 void XmlWriter::writeEndTag(const Pt::Char* name)
 {
     _impl->writeEndTag(name);
-}
-
-
-void XmlWriter::writeIndent()
-{
-    _impl->writeIndent();
 }
 
 } // namespace Xml

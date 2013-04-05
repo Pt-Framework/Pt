@@ -144,8 +144,6 @@ class PT_XML_API XmlWriter
 
         void writeEndTag(const Pt::Char* name);
 
-        void writeIndent();
-
     private:
         class XmlWriterImpl* _impl;
 };
