@@ -39,6 +39,10 @@ namespace Xml {
 
 class Attribute;
 
+PT_XML_API void xmlEncode(std::basic_ostream<Pt::Char>& os, const Pt::Char* str, std::size_t n);
+
+PT_XML_API void xmlEncode(std::basic_ostream<Pt::Char>& os, const Pt::Char* str);
+
 class PT_XML_API XmlWriter
 {
     public:

@@ -34,7 +34,6 @@
 #include <Pt/XmlRpc/Scanner.h>
 #include <Pt/Xml/InputSource.h>
 #include <Pt/Xml/XmlReader.h>
-#include <Pt/Xml/XmlWriter.h>
 #include <Pt/Composer.h>
 #include <Pt/Decomposer.h>
 #include <Pt/Connectable.h>
@@ -112,7 +111,6 @@ class ClientImpl : public Pt::Connectable
         TextOStream _ts;
         Xml::BinaryInputSource _bin;
         Xml::XmlReader _reader;
-        Xml::XmlWriter _writer;
         Formatter _formatter;
         Scanner _scanner;
         IRemoteProcedure* _method;

@@ -28,6 +28,7 @@
  */
 #include <Pt/XmlRpc/Api.h>
 #include <Pt/XmlRpc/Formatter.h>
+#include <Pt/Xml/XmlWriter.h>
 #include <Pt/Convert.h>
 #include <Pt/SerializationError.h>
 #include <limits>
@@ -37,18 +38,30 @@
 
 namespace  {
 
-static const Pt::Char XMLRPC_VALUE[]   = { 'v', 'a', 'l', 'u', 'e', '\0' };
-static const Pt::Char XMLRPC_INT[]     = { 'i', 'n', 't', '\0' };
-static const Pt::Char XMLRPC_DOUBLE[]  = { 'd', 'o', 'u', 'b', 'l', 'e', '\0' };
-static const Pt::Char XMLRPC_STRING[]  = { 's', 't', 'r', 'i', 'n', 'g', '\0' };
-static const Pt::Char XMLRPC_BOOLEAN[] = { 'b', 'o', 'o', 'l', 'e', 'a', 'n', '\0' };
-static const Pt::Char XMLRPC_STRUCT[]  = { 's', 't', 'r', 'u', 'c', 't', '\0' };
-static const Pt::Char XMLRPC_MEMBER[]  = { 'm', 'e', 'm', 'b', 'e', 'r', '\0' };
-static const Pt::Char XMLRPC_NAME[]    = { 'n', 'a', 'm', 'e', '\0' };
-static const Pt::Char XMLRPC_ARRAY[]   = { 'a', 'r', 'r', 'a', 'y', '\0' };
-static const Pt::Char XMLRPC_DATA[]    = { 'd', 'a', 't', 'a', '\0' };
+static const Pt::Char XMLRPC_VALUE[]   = { '<', 'v', 'a', 'l', 'u', 'e', '>' };
+static const Pt::Char XMLRPC_INT[]     = { '<', 'i', 'n', 't', '>' };
+static const Pt::Char XMLRPC_DOUBLE[]  = { '<', 'd', 'o', 'u', 'b', 'l', 'e', '>' };
+static const Pt::Char XMLRPC_STRING[]  = { '<', 's', 't', 'r', 'i', 'n', 'g', '>' };
+static const Pt::Char XMLRPC_BOOLEAN[] = { '<', 'b', 'o', 'o', 'l', 'e', 'a', 'n', '>' };
+static const Pt::Char XMLRPC_STRUCT[]  = { '<', 's', 't', 'r', 'u', 'c', 't', '>' };
+static const Pt::Char XMLRPC_MEMBER[]  = { '<', 'm', 'e', 'm', 'b', 'e', 'r', '>' };
+static const Pt::Char XMLRPC_NAME[]    = { '<', 'n', 'a', 'm', 'e', '>' };
+static const Pt::Char XMLRPC_ARRAY[]   = { '<', 'a', 'r', 'r', 'a', 'y', '>' };
+static const Pt::Char XMLRPC_DATA[]    = { '<', 'd', 'a', 't', 'a', '>' };
 static const Pt::Char XMLRPC_FALSE[]   = { '0', '\0' };
 static const Pt::Char XMLRPC_TRUE[]    = { '1', '\0' };
+
+static const Pt::Char XMLRPC_VALUE_END[]   = { '<', '/', 'v', 'a', 'l', 'u', 'e', '>' };
+static const Pt::Char XMLRPC_INT_END[]     = { '<', '/', 'i', 'n', 't', '>' };
+static const Pt::Char XMLRPC_DOUBLE_END[]  = { '<', '/', 'd', 'o', 'u', 'b', 'l', 'e', '>' };
+static const Pt::Char XMLRPC_STRING_END[]  = { '<', '/', 's', 't', 'r', 'i', 'n', 'g', '>' };
+static const Pt::Char XMLRPC_BOOLEAN_END[] = { '<', '/', 'b', 'o', 'o', 'l', 'e', 'a', 'n', '>' };
+static const Pt::Char XMLRPC_STRUCT_END[]  = { '<', '/', 's', 't', 'r', 'u', 'c', 't', '>' };
+static const Pt::Char XMLRPC_MEMBER_END[]  = { '<', '/', 'm', 'e', 'm', 'b', 'e', 'r', '>' };
+static const Pt::Char XMLRPC_NAME_END[]    = { '<', '/', 'n', 'a', 'm', 'e', '>' };
+static const Pt::Char XMLRPC_ARRAY_END[]   = { '<', '/', 'a', 'r', 'r', 'a', 'y', '>' };
+static const Pt::Char XMLRPC_DATA_END[]    = { '<', '/', 'd', 'a', 't', 'a', '>' };
+
 
 template<typename T>
 class array_appender : public std::iterator<std::output_iterator_tag, T>
@@ -117,62 +130,62 @@ namespace XmlRpc {
 void Formatter::addString(const char* name, const char* type,
                           const Pt::Char* value, const char* id)
 {
-    _writer->writeStartTag(XMLRPC_VALUE);
-    _writer->writeStartTag(XMLRPC_STRING);
-    _writer->writeCharacters(value);
-    _writer->writeEndTag(XMLRPC_STRING);
-    _writer->writeEndTag(XMLRPC_VALUE);
+    _os->write(XMLRPC_VALUE, sizeof(XMLRPC_VALUE)/sizeof(Char));
+    _os->write(XMLRPC_STRING, sizeof(XMLRPC_STRING)/sizeof(Char));
+    Xml::xmlEncode(*_os, value);
+    _os->write(XMLRPC_STRING_END, sizeof(XMLRPC_STRING_END)/sizeof(Char));
+    _os->write(XMLRPC_VALUE_END, sizeof(XMLRPC_VALUE_END)/sizeof(Char));
 }
 
 
 void Formatter::addString8(const char* name, const char* value, const char* id)
 {
-    Pt::String str = Pt::String::widen(value);
+    _str = Pt::String::widen(value);
     
-    _writer->writeStartTag(XMLRPC_VALUE);
-    _writer->writeStartTag(XMLRPC_STRING);
-    _writer->writeCharacters(str);
-    _writer->writeEndTag(XMLRPC_STRING);
-    _writer->writeEndTag(XMLRPC_VALUE);
+    _os->write(XMLRPC_VALUE, sizeof(XMLRPC_VALUE)/sizeof(Char));
+    _os->write(XMLRPC_STRING, sizeof(XMLRPC_STRING)/sizeof(Char));
+    Xml::xmlEncode(*_os, _str.c_str(), _str.size());
+    _os->write(XMLRPC_STRING_END, sizeof(XMLRPC_STRING_END)/sizeof(Char));
+    _os->write(XMLRPC_VALUE_END, sizeof(XMLRPC_VALUE_END)/sizeof(Char));
 }
 
 
 void Formatter::addBool(const char* name, bool value, 
                         const char* id)
 {
-    _writer->writeStartTag(XMLRPC_VALUE);
+    _os->write(XMLRPC_VALUE, sizeof(XMLRPC_VALUE)/sizeof(Char));
 
-    _writer->writeStartTag(XMLRPC_BOOLEAN);
-    _writer->writeCharacters(value ? XMLRPC_TRUE : XMLRPC_FALSE);
-    _writer->writeEndTag(XMLRPC_BOOLEAN);
+    _os->write(XMLRPC_BOOLEAN, sizeof(XMLRPC_BOOLEAN)/sizeof(Char));
+    Xml::xmlEncode(*_os, value ? XMLRPC_TRUE : XMLRPC_FALSE);
+    _os->write(XMLRPC_BOOLEAN_END, sizeof(XMLRPC_BOOLEAN_END)/sizeof(Char));
 
-    _writer->writeEndTag(XMLRPC_VALUE);
+    _os->write(XMLRPC_VALUE_END, sizeof(XMLRPC_VALUE_END)/sizeof(Char));
 }
 
 
 void Formatter::addChar(const char* name, const Pt::Char& value,
                         const char* id)
 {
-    Pt::Char str[2] = { value, '\0' };
+    Pt::Char str[] = { value };
 
-    _writer->writeStartTag(XMLRPC_VALUE);
-    _writer->writeStartTag(XMLRPC_STRING);
-    _writer->writeCharacters(str);
-    _writer->writeEndTag(XMLRPC_STRING);
-    _writer->writeEndTag(XMLRPC_VALUE);
+    _os->write(XMLRPC_VALUE, sizeof(XMLRPC_VALUE)/sizeof(Char));
+    _os->write(XMLRPC_STRING, sizeof(XMLRPC_STRING)/sizeof(Char));
+    Xml::xmlEncode(*_os, str, 1);
+    _os->write(XMLRPC_STRING_END, sizeof(XMLRPC_STRING_END)/sizeof(Char));
+    _os->write(XMLRPC_VALUE_END, sizeof(XMLRPC_VALUE_END)/sizeof(Char));
 }
 
 
 void Formatter::addChar8(const char* name, char value,
                          const char* id)
 {
-    Pt::Char str[2] = { value, '\0' };
+    Pt::Char str[] = { value,};
 
-    _writer->writeStartTag(XMLRPC_VALUE);
-    _writer->writeStartTag(XMLRPC_STRING);
-    _writer->writeCharacters(str);
-    _writer->writeEndTag(XMLRPC_STRING);
-    _writer->writeEndTag(XMLRPC_VALUE);
+    _os->write(XMLRPC_VALUE, sizeof(XMLRPC_VALUE)/sizeof(Char));
+    _os->write(XMLRPC_STRING, sizeof(XMLRPC_STRING)/sizeof(Char));
+    Xml::xmlEncode(*_os, str, 1);
+    _os->write(XMLRPC_STRING_END, sizeof(XMLRPC_STRING_END)/sizeof(Char));
+    _os->write(XMLRPC_VALUE_END, sizeof(XMLRPC_VALUE_END)/sizeof(Char));
 }
 
 
@@ -195,23 +208,15 @@ void Formatter::addInt32(const char* name, Pt::int32_t value, const char* id)
 
 
 void Formatter::addInt64(const char* name, Pt::int64_t value, const char* id)
-{
-    const std::size_t bufsize = (sizeof(value) * 4) + 1 ;
-    Pt::Char buf[bufsize];
-    
-    array_appender<Pt::Char> it(buf, bufsize);
-    array_appender<Pt::Char> end;
+{    
+    array_appender<Pt::Char> it(_buf, _bufsize);
     it = putInt(it, value);
-    if(it == end)
-		    throw std::logic_error("invalid buffer size");
 
-    *it = '\0';
-
-    _writer->writeStartTag(XMLRPC_VALUE);
-    _writer->writeStartTag(XMLRPC_INT);
-    _writer->writeCharacters(buf, it.getPointer() - buf);
-    _writer->writeEndTag(XMLRPC_INT);
-    _writer->writeEndTag(XMLRPC_VALUE);
+    _os->write(XMLRPC_VALUE, sizeof(XMLRPC_VALUE)/sizeof(Char));
+    _os->write(XMLRPC_INT, sizeof(XMLRPC_INT)/sizeof(Char));
+    Xml::xmlEncode(*_os, _buf, it.getPointer() - _buf);
+    _os->write(XMLRPC_INT_END, sizeof(XMLRPC_INT_END)/sizeof(Char));
+    _os->write(XMLRPC_VALUE_END, sizeof(XMLRPC_VALUE_END)/sizeof(Char));
 }
 
 
@@ -234,25 +239,15 @@ void Formatter::addUInt32(const char* name, Pt::uint32_t value, const char* id)
 
 
 void Formatter::addUInt64(const char* name, Pt::uint64_t value, const char* id)
-{
-    const std::size_t bufsize = (sizeof(value) * 4) + 1 ;
-    Pt::Char buf[bufsize];
-    
-    array_appender<Pt::Char> it(buf, bufsize);
-    array_appender<Pt::Char> end;
+{    
+    array_appender<Pt::Char> it(_buf, _bufsize);
     it = putInt(it, value);
-    if(it == end)
-		throw std::logic_error("invalid buffer size");
 
-    *it = '\0';
-
-    _writer->writeStartTag(XMLRPC_VALUE);
-
-    _writer->writeStartTag(XMLRPC_INT);
-    _writer->writeCharacters(buf, it.getPointer() - buf);
-    _writer->writeEndTag(XMLRPC_INT);
-
-    _writer->writeEndTag(XMLRPC_VALUE);
+    _os->write(XMLRPC_VALUE, sizeof(XMLRPC_VALUE)/sizeof(Char));
+    _os->write(XMLRPC_INT, sizeof(XMLRPC_INT)/sizeof(Char));
+    Xml::xmlEncode(*_os, _buf, it.getPointer() - _buf);
+    _os->write(XMLRPC_INT_END, sizeof(XMLRPC_INT_END)/sizeof(Char));
+    _os->write(XMLRPC_VALUE_END, sizeof(XMLRPC_VALUE_END)/sizeof(Char));
 }
 
 
@@ -265,27 +260,16 @@ void Formatter::addFloat(const char* name, float value,const char* id)
 
 void Formatter::addDouble(const char* name, double value, const char* id)
 {
-    const std::size_t bufsize = 64;
-    Pt::Char buf[bufsize];
-    
-    array_appender<Pt::Char> it(buf, bufsize);
-    array_appender<Pt::Char> end;
+    array_appender<Pt::Char> it(_buf, _bufsize);
     it = putFloat(it, value);
-    if(it == end)
-    {
-		// TODO: use dynamic buffer now or allow to write to writer directly
-		throw std::logic_error("float too large");
-	}
 
-    *it = '\0';
+    _os->write(XMLRPC_VALUE, sizeof(XMLRPC_VALUE)/sizeof(Char));
 
-    _writer->writeStartTag(XMLRPC_VALUE);
+    _os->write(XMLRPC_DOUBLE, sizeof(XMLRPC_DOUBLE)/sizeof(Char));
+    Xml::xmlEncode(*_os, _buf, it.getPointer() - _buf);
+    _os->write(XMLRPC_DOUBLE_END, sizeof(XMLRPC_DOUBLE_END)/sizeof(Char));
 
-    _writer->writeStartTag(XMLRPC_DOUBLE);
-    _writer->writeCharacters(buf, it.getPointer() - buf);
-    _writer->writeEndTag(XMLRPC_DOUBLE);
-
-    _writer->writeEndTag(XMLRPC_VALUE);
+    _os->write(XMLRPC_VALUE_END, sizeof(XMLRPC_VALUE_END)/sizeof(Char));
 }
 
 
@@ -301,14 +285,15 @@ void Formatter::addBytes(const char* name, const char* type,
 {
     // TODO: this should be base64 encoded
 
-    _writer->writeStartTag(XMLRPC_VALUE);
+    _os->write(XMLRPC_VALUE, sizeof(XMLRPC_VALUE)/sizeof(Char));
     std::string value(data, length);
 
-    _writer->writeStartTag(Pt::String::widen(type).c_str());
-    _writer->writeCharacters(Pt::String::widen(value));
-    _writer->writeEndTag(Pt::String::widen(type).c_str());
+    throw std::logic_error("base64 data not supported");
+    //_writer->writeStartTag(Pt::String::widen(type).c_str());
+    //Xml::xmlEncode(Pt::String::widen(value).c_str());
+    //_writer->writeEndTag(Pt::String::widen(type).c_str());
 
-    _writer->writeStartTag(XMLRPC_VALUE);
+    _os->write(XMLRPC_VALUE_END, sizeof(XMLRPC_VALUE_END)/sizeof(Char));
 }
 
 
@@ -321,9 +306,9 @@ void Formatter::addReference(const char* name, const char*value)
 void Formatter::beginArray(const char*, const char*,
                            const char*)
 {
-    _writer->writeStartTag(XMLRPC_VALUE);
-    _writer->writeStartTag(XMLRPC_ARRAY);
-    _writer->writeStartTag(XMLRPC_DATA);
+    _os->write(XMLRPC_VALUE, sizeof(XMLRPC_VALUE)/sizeof(Char));
+    _os->write(XMLRPC_ARRAY, sizeof(XMLRPC_ARRAY)/sizeof(Char));
+    _os->write(XMLRPC_DATA, sizeof(XMLRPC_DATA)/sizeof(Char));
 }
 
 
@@ -339,40 +324,41 @@ void Formatter::finishElement()
 
 void Formatter::finishArray()
 {
-    _writer->writeEndTag(XMLRPC_DATA);
-    _writer->writeEndTag(XMLRPC_ARRAY);
-    _writer->writeEndTag(XMLRPC_VALUE);
+    _os->write(XMLRPC_DATA_END, sizeof(XMLRPC_DATA_END)/sizeof(Char));
+    _os->write(XMLRPC_ARRAY_END, sizeof(XMLRPC_ARRAY_END)/sizeof(Char));
+    _os->write(XMLRPC_VALUE_END, sizeof(XMLRPC_VALUE_END)/sizeof(Char));
 }
 
 
 void Formatter::beginObject(const char* name, const char* type,
                             const char* id)
 {
-    _writer->writeStartTag(XMLRPC_VALUE);
-    _writer->writeStartTag(XMLRPC_STRUCT);
+    _os->write(XMLRPC_VALUE, sizeof(XMLRPC_VALUE)/sizeof(Char));
+    _os->write(XMLRPC_STRUCT, sizeof(XMLRPC_STRUCT)/sizeof(Char));
 }
 
 
 void Formatter::beginMember(const char* name, const char*, const char*)
 {
-    _writer->writeStartTag(XMLRPC_MEMBER);
-    
-    _writer->writeStartTag(XMLRPC_NAME);
-    _writer->writeCharacters( Pt::String::widen(name) );
-    _writer->writeEndTag(XMLRPC_NAME);
+    _str = Pt::String::widen(name);
+
+    _os->write(XMLRPC_MEMBER, sizeof(XMLRPC_MEMBER)/sizeof(Char));
+    _os->write(XMLRPC_NAME, sizeof(XMLRPC_NAME)/sizeof(Char));
+    Xml::xmlEncode(*_os, _str.c_str(), _str.size() );
+    _os->write(XMLRPC_NAME_END, sizeof(XMLRPC_NAME_END)/sizeof(Char));
 }
 
 
 void Formatter::finishMember()
 {
-    _writer->writeEndTag(XMLRPC_MEMBER);
+    _os->write(XMLRPC_MEMBER_END, sizeof(XMLRPC_MEMBER_END)/sizeof(Char));
 }
 
 
 void Formatter::finishObject()
 {
-    _writer->writeEndTag(XMLRPC_STRUCT);
-    _writer->writeEndTag(XMLRPC_VALUE);
+    _os->write(XMLRPC_STRUCT_END, sizeof(XMLRPC_STRUCT_END)/sizeof(Char));
+    _os->write(XMLRPC_VALUE_END, sizeof(XMLRPC_VALUE_END)/sizeof(Char));
 }
 
 }

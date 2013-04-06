@@ -30,6 +30,7 @@
 #include "Pt/XmlRpc/Client.h"
 #include "ClientImpl.h"
 #include "Pt/XmlRpc/RemoteProcedure.h"
+#include <Pt/Xml/XmlWriter.h>
 #include "Pt/Xml/XmlError.h"
 #include "Pt/Xml/StartElement.h"
 #include "Pt/Xml/Characters.h"
@@ -45,14 +46,28 @@ namespace Pt {
 
 namespace XmlRpc {
 
-static const Pt::Char XMLRPC_XMLVERSION[]  = { '1', '.', '0', '\0' };
-static const Pt::Char XMLRPC_XMLENCODING[]  = { 'U', 'T', 'F', '-', '8',  '\0' };
-static const Pt::Char XMLRPC_METHODRESPONSE[]  = { 'm', 'e', 't', 'h', 'o', 'd', 'R', 'e', 's', 'p', 'o', 'n', 's', 'e', '\0' };
-static const Pt::Char XMLRPC_METHODCALL[]  = { 'm', 'e', 't', 'h', 'o', 'd', 'C', 'a', 'l', 'l', '\0' };
-static const Pt::Char XMLRPC_METHODNAME[]  = { 'm', 'e', 't', 'h', 'o', 'd', 'N', 'a', 'm', 'e', '\0' };
-static const Pt::Char XMLRPC_PARAMS[]  = { 'p', 'a', 'r', 'a', 'm', 's', '\0' };
-static const Pt::Char XMLRPC_PARAM[]  = { 'p', 'a', 'r', 'a', 'm', '\0' };
-static const Pt::Char XMLRPC_FAULT[]  = { 'f', 'a', 'u', 'l', 't', '\0' };
+static const Pt::Char XMLRPC_XMLDECL[] = { '<', '?', 'x', 'm', 'l', ' ', 
+    'v', 'e', 'r', 's', 'i', 'o', 'n', '=', '"', '1', '.', '0' , '"', ' ', 
+    'e', 'n', 'c', 'o', 'd', 'i', 'n', 'g', '=', '"', 'U', 'T', 'F', '-', '8', '"', 
+    '?', '>' };
+
+
+//static const Pt::Char XMLRPC_XMLVERSION[]  = { '1', '.', '0', '\0' };
+//static const Pt::Char XMLRPC_XMLENCODING[]  = { 'U', 'T', 'F', '-', '8',  '\0' };
+static const Pt::Char XMLRPC_METHODRESPONSE[]  = { '<', 'm', 'e', 't', 'h', 'o', 'd', 'R', 'e', 's', 'p', 'o', 'n', 's', 'e', '>' };
+static const Pt::Char XMLRPC_METHODCALL[]  = { '<', 'm', 'e', 't', 'h', 'o', 'd', 'C', 'a', 'l', 'l', '>' };
+static const Pt::Char XMLRPC_METHODNAME[]  = { '<', 'm', 'e', 't', 'h', 'o', 'd', 'N', 'a', 'm', 'e', '>' };
+static const Pt::Char XMLRPC_PARAMS[]  = { '<', 'p', 'a', 'r', 'a', 'm', 's', '>' };
+static const Pt::Char XMLRPC_PARAM[]  = { '<', 'p', 'a', 'r', 'a', 'm', '>' };
+static const Pt::Char XMLRPC_FAULT[]  = { '<', 'f', 'a', 'u', 'l', 't', '>' };
+
+static const Pt::Char XMLRPC_METHODRESPONSE_END[]  = { '<', '/', 'm', 'e', 't', 'h', 'o', 'd', 'R', 'e', 's', 'p', 'o', 'n', 's', 'e', '>' };
+static const Pt::Char XMLRPC_METHODCALL_END[]  = { '<', '/', 'm', 'e', 't', 'h', 'o', 'd', 'C', 'a', 'l', 'l', '>' };
+static const Pt::Char XMLRPC_METHODNAME_END[]  = { '<', '/', 'm', 'e', 't', 'h', 'o', 'd', 'N', 'a', 'm', 'e', '>' };
+static const Pt::Char XMLRPC_PARAMS_END[]  = { '<', '/', 'p', 'a', 'r', 'a', 'm', 's', '>' };
+static const Pt::Char XMLRPC_PARAM_END[]  = { '<', '/', 'p', 'a', 'r', 'a', 'm', '>' };
+static const Pt::Char XMLRPC_FAULT_END[]  = { '<', '/', 'f', 'a', 'u', 'l', 't', '>' };
+
 
 ClientImpl::ClientImpl()
 : _state(OnBegin)
@@ -60,12 +75,11 @@ ClientImpl::ClientImpl()
 , _ts( &_utf8 )
 , _bin()
 , _reader()
-, _formatter(_writer)
+, _formatter(_ts)
 , _method(0)
 , _timeout(System::EventLoop::WaitInfinite)
 , _errorPending(false)
 {
-    _writer.setFormatting(false);
 }
 
 ClientImpl::~ClientImpl()
@@ -213,27 +227,27 @@ void ClientImpl::onReplyFinished()
 void ClientImpl::prepareRequest(const String& name, IDecomposer** argv, unsigned argc)
 {
     _ts.attach( prepareRequest() );
-    _writer.reset(_ts);
     
-    _writer.writeStartDocument(XMLRPC_XMLVERSION, XMLRPC_XMLENCODING);
+    _ts.write( XMLRPC_XMLDECL, sizeof(XMLRPC_XMLDECL)/sizeof(Char) );
     
-    _writer.writeStartTag( XMLRPC_METHODCALL );
-
-    _writer.writeStartTag(XMLRPC_METHODNAME);
-    _writer.writeCharacters(name);
-    _writer.writeEndTag(XMLRPC_METHODNAME);
-
-    _writer.writeStartTag( XMLRPC_PARAMS );
+    _ts.write( XMLRPC_METHODCALL, sizeof(XMLRPC_METHODCALL)/sizeof(Char) );
+    
+    _ts.write( XMLRPC_METHODNAME, sizeof(XMLRPC_METHODNAME)/sizeof(Char) );
+    Xml::xmlEncode(_ts, name.c_str(), name.size() );
+    _ts.write(XMLRPC_METHODNAME_END, sizeof(XMLRPC_METHODNAME_END)/sizeof(Char) );
+    
+    _ts.write( XMLRPC_PARAMS, sizeof(XMLRPC_PARAMS)/sizeof(Char) );
 
     for(unsigned n = 0; n < argc; ++n)
     {
-        _writer.writeStartTag( XMLRPC_PARAM );
+        _ts.write( XMLRPC_PARAM, sizeof(XMLRPC_PARAM)/sizeof(Char) );
         argv[n]->format(_formatter);
-        _writer.writeEndTag(XMLRPC_PARAM);
+        _ts.write(XMLRPC_PARAM_END, sizeof(XMLRPC_PARAM_END)/sizeof(Char) );
     }
 
-    _writer.writeEndTag(XMLRPC_PARAMS);
-    _writer.writeEndTag(XMLRPC_METHODCALL);
+    _ts.write(XMLRPC_PARAMS_END, sizeof(XMLRPC_PARAMS_END)/sizeof(Char) );
+    _ts.write(XMLRPC_METHODCALL_END, sizeof(XMLRPC_METHODCALL_END)/sizeof(Char) );
+    
     _ts.flush();
 }
 

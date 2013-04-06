@@ -29,7 +29,6 @@
 #define Pt_XmlRpc_Formatter_h
 
 #include <Pt/XmlRpc/Api.h>
-#include <Pt/Xml/XmlWriter.h>
 #include <Pt/Formatter.h>
 #include <Pt/String.h>
 #include <string>
@@ -42,12 +41,12 @@ namespace XmlRpc {
 class PT_XMLRPC_API Formatter : public Pt::Formatter
 {
     public:
-        Formatter(Xml::XmlWriter& writer)
-        : _writer(&writer)
+        Formatter(std::basic_ostream<Char>& os)
+        : _os(&os)
         { }
 
-        void attach(Xml::XmlWriter& writer)
-        { _writer = &writer; }
+        void attach(std::basic_ostream<Char>& os)
+        { _os = &os; }
 
         void addString(const char* name, const char* type,
                        const Pt::Char* value, const char* id);
@@ -122,7 +121,11 @@ class PT_XMLRPC_API Formatter : public Pt::Formatter
         {}
 
     private:
-        Xml::XmlWriter* _writer;
+        std::basic_ostream<Char>* _os;
+        Pt::String _str;
+        static const unsigned _bufsize = 64;
+         Pt::Char _buf[_bufsize];
+
 };
 
 }

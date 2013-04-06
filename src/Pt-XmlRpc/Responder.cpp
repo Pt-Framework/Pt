@@ -43,8 +43,11 @@ namespace Pt {
 
 namespace XmlRpc {
 
-static const Pt::Char XMLRPC_XMLVERSION[]  = { '1', '.', '0' };
-static const Pt::Char XMLRPC_XMLENCODING[]  = { 'U', 'T', 'F', '-', '8' };
+static const Pt::Char XMLRPC_XMLDECL[] = { '<', '?', 'x', 'm', 'l', ' ', 
+    'v', 'e', 'r', 's', 'i', 'o', 'n', '=', '"', '1', '.', '0' , '"', ' ', 
+    'e', 'n', 'c', 'o', 'd', 'i', 'n', 'g', '=', '"', 'U', 'T', 'F', '-', '8', '"', 
+    '?', '>' };
+
 static const Pt::Char XMLRPC_METHODRESPONSE[]  = { 'm', 'e', 't', 'h', 'o', 'd', 'R', 'e', 's', 'p', 'o', 'n', 's', 'e', '\0' };
 static const Pt::Char XMLRPC_METHODCALL[]  = { 'm', 'e', 't', 'h', 'o', 'd', 'C', 'a', 'l', 'l', '\0' };
 static const Pt::Char XMLRPC_PARAMS[]  = { 'p', 'a', 'r', 'a', 'm', 's', '\0' };
@@ -67,7 +70,7 @@ XmlRpcResponder::XmlRpcResponder(Service& service)
 , _bin()
 , _reader(_bin)
 , _writer()
-, _formatter(_writer)
+, _formatter(_ts)
 , _service(&service)
 , _reply(0)
 , _proc(0)
@@ -128,8 +131,7 @@ void XmlRpcResponder::onBeginReply(Http::Request& request, Http::Reply& reply, S
         _ts.attach( _reply->body() );
         _writer.reset(_ts);
         
-        _writer.writeStartDocument(XMLRPC_XMLVERSION, sizeof(XMLRPC_XMLVERSION)/sizeof(Char),
-                                   XMLRPC_XMLENCODING, sizeof(XMLRPC_XMLENCODING)/sizeof(Char));
+        _writer.output()->write( XMLRPC_XMLDECL, sizeof(XMLRPC_XMLDECL)/sizeof(Char) );
         
         reply.header().set("Content-Type", "text/xml");
 
@@ -173,8 +175,7 @@ void XmlRpcResponder::replyError(Http::Reply& reply, int rc, const char* msg)
     _ts.attach( reply.body() );
     _writer.reset(_ts);
     
-    _writer.writeStartDocument(XMLRPC_XMLVERSION, sizeof(XMLRPC_XMLVERSION)/sizeof(Char),
-                               XMLRPC_XMLENCODING, sizeof(XMLRPC_XMLENCODING)/sizeof(Char));
+    _writer.output()->write( XMLRPC_XMLDECL, sizeof(XMLRPC_XMLDECL)/sizeof(Char) );
 
     _writer.writeStartTag( XMLRPC_METHODRESPONSE );
     _writer.writeStartTag( XMLRPC_FAULT );
@@ -184,7 +185,7 @@ void XmlRpcResponder::replyError(Http::Reply& reply, int rc, const char* msg)
     _writer.writeStartTag( XMLRPC_MEMBER );
 
     _writer.writeStartTag(XMLRPC_NAME);
-    _writer.writeCharacters(XMLRPC_FAULTCODE );
+    _writer.writeCharacters(XMLRPC_FAULTCODE);
     _writer.writeEndTag(XMLRPC_NAME);
 
     _writer.writeStartTag( XMLRPC_VALUE );
@@ -219,18 +220,23 @@ void XmlRpcResponder::replyError(Http::Reply& reply, int rc, const char* msg)
 }
 
 
+static const Pt::Char XMLRPC_METHODRESPONSE_BEGIN[]  = { '<', 'm', 'e', 't', 'h', 'o', 'd', 'R', 'e', 's', 'p', 'o', 'n', 's', 'e', '>',
+                                                         '<', 'p', 'a', 'r', 'a', 'm', 's', '>',
+                                                         '<', 'p', 'a', 'r', 'a', 'm', '>' };
+
+static const Pt::Char XMLRPC_METHODRESPONSE_END[]  = { '<', '/', 'p', 'a', 'r', 'a', 'm', '>',
+                                                       '<', '/', 'p', 'a', 'r', 'a', 'm', 's', '>',
+                                                       '<', '/', 'm', 'e', 't', 'h', 'o', 'd', 'R', 'e', 's', 'p', 'o', 'n', 's', 'e', '>', };
+
+
 void XmlRpcResponder::endReply()
 {
     try
     {
         IDecomposer* rh = _proc->endCall();
-        _writer.writeStartTag( XMLRPC_METHODRESPONSE );
-        _writer.writeStartTag( XMLRPC_PARAMS );
-        _writer.writeStartTag( XMLRPC_PARAM );
+        _writer.output()->write(XMLRPC_METHODRESPONSE_BEGIN, sizeof(XMLRPC_METHODRESPONSE_BEGIN)/sizeof(Char));
         rh->format(_formatter);
-        _writer.writeEndTag(XMLRPC_PARAM); // param
-        _writer.writeEndTag(XMLRPC_PARAMS); // params
-        _writer.writeEndTag(XMLRPC_METHODRESPONSE); // methodResponse
+        _writer.output()->write(XMLRPC_METHODRESPONSE_END, sizeof(XMLRPC_METHODRESPONSE_END)/sizeof(Char));
         _ts.flush();
 
         assert(_reply);

@@ -33,13 +33,16 @@
 #include <vector>
 #include <cassert>
 
-namespace {
+namespace Pt {
+
+namespace Xml {
 
 static const Pt::Char XML_QUOT[] = { '&', 'q', 'u', 'o', 't', ';' };
 static const Pt::Char XML_AMP[]  = { '&', 'a', 'm', 'p', ';'};
 static const Pt::Char XML_APOS[] = { '&', 'a', 'p', 'o', 's', ';' };
 static const Pt::Char XML_LT[]   = { '&', 'l', 't', ';' };
 static const Pt::Char XML_GT[]   = { '&', 'g', 't', ';' };
+
 
 void xmlEncode(std::basic_ostream<Pt::Char>& os, const Pt::Char* str, std::size_t n)
 {
@@ -100,12 +103,65 @@ void xmlEncode(std::basic_ostream<Pt::Char>& os, const Pt::Char* str, std::size_
         os.write(begin, it - begin);
 }
 
+
+void xmlEncode(std::basic_ostream<Pt::Char>& os, const Pt::Char* str)
+{
+    const Pt::Char* it = str;
+    const Pt::Char* begin = str;
+
+    for( ; *it != '\0'; ++it)
+    {
+        switch( it->value() )
+        {
+            case 0x0022:
+                if(it != begin)
+                    os.write(begin, it - begin);
+                
+                begin = it + 1;
+                os.write(XML_QUOT, sizeof(XML_QUOT)/sizeof(Pt::Char));
+                break;
+
+            case 0x0026:
+                if(it != begin)
+                    os.write(begin, it - begin);
+                
+                begin = it + 1;
+                os.write(XML_AMP, sizeof(XML_AMP)/sizeof(Pt::Char));
+                break;
+
+            case 0x0027:
+                if(it != begin)
+                    os.write(begin, it - begin);
+                
+                begin = it + 1;
+                os.write(XML_APOS, sizeof(XML_APOS)/sizeof(Pt::Char));
+                break;
+
+            case 0x003C:
+                if(it != begin)
+                    os.write(begin, it - begin);
+                
+                begin = it + 1;
+                os.write(XML_LT, sizeof(XML_LT)/sizeof(Pt::Char));
+                break;
+
+            case 0x003E:
+                if(it != begin)
+                    os.write(begin, it - begin);
+
+                begin = it + 1;
+                os.write(XML_GT, sizeof(XML_GT)/sizeof(Pt::Char));
+                break;
+
+            default:
+                break;
+        }
+    }
+
+    if(it != begin)
+        os.write(begin, it - begin);
 }
 
-
-namespace Pt {
-
-namespace Xml {
 
 class XmlWriterImpl
 {
