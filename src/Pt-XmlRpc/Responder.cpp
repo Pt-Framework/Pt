@@ -48,35 +48,52 @@ static const Pt::Char XMLRPC_XMLDECL[] = { '<', '?', 'x', 'm', 'l', ' ',
     'e', 'n', 'c', 'o', 'd', 'i', 'n', 'g', '=', '"', 'U', 'T', 'F', '-', '8', '"', 
     '?', '>' };
 
-static const Pt::Char XMLRPC_METHODRESPONSE[]  = { 'm', 'e', 't', 'h', 'o', 'd', 'R', 'e', 's', 'p', 'o', 'n', 's', 'e', '\0' };
-static const Pt::Char XMLRPC_METHODCALL[]  = { 'm', 'e', 't', 'h', 'o', 'd', 'C', 'a', 'l', 'l', '\0' };
-static const Pt::Char XMLRPC_PARAMS[]  = { 'p', 'a', 'r', 'a', 'm', 's', '\0' };
-static const Pt::Char XMLRPC_PARAM[]  = { 'p', 'a', 'r', 'a', 'm', '\0' };
-static const Pt::Char XMLRPC_FAULT[]  = { 'f', 'a', 'u', 'l', 't', '\0' };
-static const Pt::Char XMLRPC_FAULTCODE[]  = { 'f', 'a', 'u', 'l', 't', 'C', 'o', 'd', 'e', '\0' };
-static const Pt::Char XMLRPC_FAULTSTRING[]  = { 'f', 'a', 'u', 'l', 't', 'S', 't', 'r', 'i', 'n', 'g', '\0' };
-static const Pt::Char XMLRPC_STRUCT[]  = { 's', 't', 'r', 'u', 'c', 't', '\0' };
-static const Pt::Char XMLRPC_MEMBER[]  = { 'm', 'e', 'm', 'b', 'e', 'r', '\0' };
-static const Pt::Char XMLRPC_NAME[]    = { 'n', 'a', 'm', 'e', '\0' };
-static const Pt::Char XMLRPC_VALUE[]   = { 'v', 'a', 'l', 'u', 'e', '\0' };
-static const Pt::Char XMLRPC_INT[]     = { 'i', 'n', 't', '\0' };
-static const Pt::Char XMLRPC_STRING[]  = { 's', 't', 'r', 'i', 'n', 'g', '\0' };
+static const Pt::Char XMLRPC_REPLY_BEGIN[]  = { '<', 'm', 'e', 't', 'h', 'o', 'd', 'R', 'e', 's', 'p', 'o', 'n', 's', 'e', '>',
+                                                '<', 'p', 'a', 'r', 'a', 'm', 's', '>',
+                                                '<', 'p', 'a', 'r', 'a', 'm', '>' };
+
+static const Pt::Char XMLRPC_REPLY_END[]  = { '<', '/', 'p', 'a', 'r', 'a', 'm', '>',
+                                              '<', '/', 'p', 'a', 'r', 'a', 'm', 's', '>',
+                                              '<', '/', 'm', 'e', 't', 'h', 'o', 'd', 'R', 'e', 's', 'p', 'o', 'n', 's', 'e', '>', };
+
+static const Pt::Char XMLRPC_METHODRESPONSE[]  = { '<', 'm', 'e', 't', 'h', 'o', 'd', 'R', 'e', 's', 'p', 'o', 'n', 's', 'e', '>' };
+static const Pt::Char XMLRPC_METHODCALL[]  = { '<', 'm', 'e', 't', 'h', 'o', 'd', 'C', 'a', 'l', 'l', '>' };
+static const Pt::Char XMLRPC_PARAMS[]  = { '<', 'p', 'a', 'r', 'a', 'm', 's', '>' };
+static const Pt::Char XMLRPC_PARAM[]  = { '<', 'p', 'a', 'r', 'a', 'm', '>' };
+static const Pt::Char XMLRPC_FAULT[]  = { '<', 'f', 'a', 'u', 'l', 't', '>' };
+static const Pt::Char XMLRPC_FAULTCODE[]  = { 'f', 'a', 'u', 'l', 't', 'C', 'o', 'd', 'e' };
+static const Pt::Char XMLRPC_FAULTSTRING[]  = { 'f', 'a', 'u', 'l', 't', 'S', 't', 'r', 'i', 'n', 'g' };
+static const Pt::Char XMLRPC_STRUCT[]  = { '<', 's', 't', 'r', 'u', 'c', 't', '>' };
+static const Pt::Char XMLRPC_MEMBER[]  = { '<', 'm', 'e', 'm', 'b', 'e', 'r', '>' };
+static const Pt::Char XMLRPC_NAME[]    = { '<', 'n', 'a', 'm', 'e', '>' };
+static const Pt::Char XMLRPC_VALUE[]   = { '<', 'v', 'a', 'l', 'u', 'e', '>' };
+static const Pt::Char XMLRPC_INT[]     = { '<', 'i', 'n', 't', '>' };
+static const Pt::Char XMLRPC_STRING[]  = { '<', 's', 't', 'r', 'i', 'n', 'g', '>' };
+
+static const Pt::Char XMLRPC_METHODRESPONSE_END[]  = { '<', '/', 'm', 'e', 't', 'h', 'o', 'd', 'R', 'e', 's', 'p', 'o', 'n', 's', 'e', '>' };
+static const Pt::Char XMLRPC_METHODCALL_END[]  = { '<', '/', 'm', 'e', 't', 'h', 'o', 'd', 'C', 'a', 'l', 'l', '>' };
+static const Pt::Char XMLRPC_PARAMS_END[]  = { '<', '/', 'p', 'a', 'r', 'a', 'm', 's', '>' };
+static const Pt::Char XMLRPC_PARAM_END[]  = { '<', '/', 'p', 'a', 'r', 'a', 'm', '>' };
+static const Pt::Char XMLRPC_FAULT_END[]  = { '<', '/', 'f', 'a', 'u', 'l', 't', '>' };
+static const Pt::Char XMLRPC_STRUCT_END[]  = { '<', '/', 's', 't', 'r', 'u', 'c', 't', '>' };
+static const Pt::Char XMLRPC_MEMBER_END[]  = { '<', '/', 'm', 'e', 'm', 'b', 'e', 'r', '>' };
+static const Pt::Char XMLRPC_NAME_END[]    = { '<', '/', 'n', 'a', 'm', 'e', '>' };
+static const Pt::Char XMLRPC_VALUE_END[]   = { '<', '/', 'v', 'a', 'l', 'u', 'e', '>' };
+static const Pt::Char XMLRPC_INT_END[]     = { '<', '/', 'i', 'n', 't', '>' };
+static const Pt::Char XMLRPC_STRING_END[]  = { '<', '/', 's', 't', 'r', 'i', 'n', 'g', '>' };
 
 XmlRpcResponder::XmlRpcResponder(Service& service)
 : Http::Responder(service)
 , _state(OnBegin)
 , _utf8(1)
 , _ts(&_utf8)
-, _bin()
 , _reader(_bin)
-, _writer()
 , _formatter(_ts)
 , _service(&service)
 , _reply(0)
 , _proc(0)
 , _args(0)
 {
-    _writer.setFormatting(false);
 }
 
 
@@ -129,9 +146,9 @@ void XmlRpcResponder::onBeginReply(Http::Request& request, Http::Reply& reply, S
     {
         _reply = &reply;
         _ts.attach( _reply->body() );
-        _writer.reset(_ts);
+
         
-        _writer.output()->write( XMLRPC_XMLDECL, sizeof(XMLRPC_XMLDECL)/sizeof(Char) );
+        _ts.write( XMLRPC_XMLDECL, sizeof(XMLRPC_XMLDECL)/sizeof(Char) );
         
         reply.header().set("Content-Type", "text/xml");
 
@@ -165,7 +182,7 @@ void XmlRpcResponder::onWriteReply(Http::Request& request, Http::Reply& reply, S
 
 void XmlRpcResponder::replyError(Http::Reply& reply, int rc, const char* msg)
 {
-    // XML writer might still have bytes in text buffer
+    // text stream might still have bytes in text buffer
     _ts.flush();
 
     reply.clear();
@@ -173,60 +190,44 @@ void XmlRpcResponder::replyError(Http::Reply& reply, int rc, const char* msg)
     reply.header().set("Connection", "close");
 
     _ts.attach( reply.body() );
-    _writer.reset(_ts);
     
-    _writer.output()->write( XMLRPC_XMLDECL, sizeof(XMLRPC_XMLDECL)/sizeof(Char) );
+    _ts.write( XMLRPC_XMLDECL, sizeof(XMLRPC_XMLDECL)/sizeof(Char) );
 
-    _writer.writeStartTag( XMLRPC_METHODRESPONSE );
-    _writer.writeStartTag( XMLRPC_FAULT );
-    _writer.writeStartTag( XMLRPC_VALUE );
-    _writer.writeStartTag( XMLRPC_STRUCT );
+    _ts.write( XMLRPC_METHODRESPONSE, sizeof(XMLRPC_METHODRESPONSE)/sizeof(Char) );
+    _ts.write( XMLRPC_FAULT, sizeof(XMLRPC_FAULT)/sizeof(Char) );
+    _ts.write( XMLRPC_VALUE, sizeof(XMLRPC_VALUE)/sizeof(Char) );
+    _ts.write( XMLRPC_STRUCT, sizeof(XMLRPC_STRUCT)/sizeof(Char) );
+    
+    _ts.write( XMLRPC_MEMBER, sizeof(XMLRPC_MEMBER)/sizeof(Char) );
+    _ts.write(XMLRPC_NAME, sizeof(XMLRPC_NAME)/sizeof(Char));
+    _ts.write(XMLRPC_FAULTCODE, sizeof(XMLRPC_FAULTCODE)/sizeof(Char));
+    _ts.write(XMLRPC_NAME_END, sizeof(XMLRPC_NAME_END)/sizeof(Char));
+    _ts.write( XMLRPC_VALUE, sizeof(XMLRPC_VALUE)/sizeof(Char) );
+    _ts.write( XMLRPC_INT, sizeof(XMLRPC_INT)/sizeof(Char) );
+    _ts << Pt::convert<Pt::String>(rc);
+    _ts.write(XMLRPC_INT_END, sizeof(XMLRPC_INT_END)/sizeof(Char));
+    _ts.write(XMLRPC_VALUE_END, sizeof(XMLRPC_VALUE_END)/sizeof(Char));
+    _ts.write(XMLRPC_MEMBER_END, sizeof(XMLRPC_MEMBER_END)/sizeof(Char));
 
-    _writer.writeStartTag( XMLRPC_MEMBER );
+    _ts.write( XMLRPC_MEMBER, sizeof(XMLRPC_MEMBER)/sizeof(Char) );
+    _ts.write(XMLRPC_NAME, sizeof(XMLRPC_NAME)/sizeof(Char));
+    _ts.write(XMLRPC_FAULTSTRING, sizeof(XMLRPC_FAULTSTRING)/sizeof(Char) );
+    _ts.write(XMLRPC_NAME_END, sizeof(XMLRPC_NAME_END)/sizeof(Char) );
+    _ts.write( XMLRPC_VALUE, sizeof(XMLRPC_VALUE)/sizeof(Char) );
+    _ts.write( XMLRPC_STRING, sizeof(XMLRPC_STRING)/sizeof(Char) );
+    _ts << Pt::String::widen(msg);
+    _ts.write(XMLRPC_STRING_END, sizeof(XMLRPC_STRING_END)/sizeof(Char));
+    _ts.write(XMLRPC_VALUE_END, sizeof(XMLRPC_VALUE_END)/sizeof(Char));
+    _ts.write(XMLRPC_MEMBER_END, sizeof(XMLRPC_MEMBER_END)/sizeof(Char));
 
-    _writer.writeStartTag(XMLRPC_NAME);
-    _writer.writeCharacters(XMLRPC_FAULTCODE);
-    _writer.writeEndTag(XMLRPC_NAME);
-
-    _writer.writeStartTag( XMLRPC_VALUE );
-    _writer.writeStartTag( XMLRPC_INT );
-    _writer.writeCharacters( Pt::convert<Pt::String>(rc) );
-    _writer.writeEndTag(XMLRPC_INT);
-    _writer.writeEndTag(XMLRPC_VALUE); // value
-    _writer.writeEndTag(XMLRPC_MEMBER); // member
-
-    _writer.writeStartTag( XMLRPC_MEMBER );
-
-    _writer.writeStartTag(XMLRPC_NAME);
-    _writer.writeCharacters(XMLRPC_FAULTSTRING );
-    _writer.writeEndTag(XMLRPC_NAME);
-
-    _writer.writeStartTag( XMLRPC_VALUE );
-
-    _writer.writeStartTag( XMLRPC_STRING );
-    _writer.writeCharacters( Pt::String::widen(msg) );
-    _writer.writeEndTag(XMLRPC_STRING);
-
-    _writer.writeEndTag(XMLRPC_VALUE); // value
-    _writer.writeEndTag(XMLRPC_MEMBER); // member
-
-    _writer.writeEndTag(XMLRPC_STRUCT); // struct
-    _writer.writeEndTag(XMLRPC_VALUE); // value
-    _writer.writeEndTag(XMLRPC_FAULT); // fault
-    _writer.writeEndTag(XMLRPC_METHODRESPONSE); // methodResponse
+    _ts.write(XMLRPC_STRUCT_END, sizeof(XMLRPC_STRUCT_END)/sizeof(Char));
+    _ts.write(XMLRPC_VALUE_END, sizeof(XMLRPC_VALUE_END)/sizeof(Char));
+    _ts.write(XMLRPC_FAULT_END, sizeof(XMLRPC_FAULT_END)/sizeof(Char));
+    _ts.write(XMLRPC_METHODRESPONSE_END, sizeof(XMLRPC_METHODRESPONSE_END)/sizeof(Char));
     _ts.flush();
 
     reply.beginSend(true);
 }
-
-
-static const Pt::Char XMLRPC_METHODRESPONSE_BEGIN[]  = { '<', 'm', 'e', 't', 'h', 'o', 'd', 'R', 'e', 's', 'p', 'o', 'n', 's', 'e', '>',
-                                                         '<', 'p', 'a', 'r', 'a', 'm', 's', '>',
-                                                         '<', 'p', 'a', 'r', 'a', 'm', '>' };
-
-static const Pt::Char XMLRPC_METHODRESPONSE_END[]  = { '<', '/', 'p', 'a', 'r', 'a', 'm', '>',
-                                                       '<', '/', 'p', 'a', 'r', 'a', 'm', 's', '>',
-                                                       '<', '/', 'm', 'e', 't', 'h', 'o', 'd', 'R', 'e', 's', 'p', 'o', 'n', 's', 'e', '>', };
 
 
 void XmlRpcResponder::endReply()
@@ -234,9 +235,10 @@ void XmlRpcResponder::endReply()
     try
     {
         IDecomposer* rh = _proc->endCall();
-        _writer.output()->write(XMLRPC_METHODRESPONSE_BEGIN, sizeof(XMLRPC_METHODRESPONSE_BEGIN)/sizeof(Char));
+        
+        _ts.write(XMLRPC_REPLY_BEGIN, sizeof(XMLRPC_REPLY_BEGIN)/sizeof(Char));
         rh->format(_formatter);
-        _writer.output()->write(XMLRPC_METHODRESPONSE_END, sizeof(XMLRPC_METHODRESPONSE_END)/sizeof(Char));
+        _ts.write(XMLRPC_REPLY_END, sizeof(XMLRPC_REPLY_END)/sizeof(Char));
         _ts.flush();
 
         assert(_reply);
