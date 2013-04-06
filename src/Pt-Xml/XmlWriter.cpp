@@ -739,7 +739,7 @@ void XmlWriter::writeCData(const Pt::Char* text, std::size_t n)
 }
 
 
-inline void XmlWriter::writeEntityReference(const Pt::Char* name, std::size_t n)
+void XmlWriter::writeEntityReference(const Pt::Char* name, std::size_t n)
 {
     _impl->writeEntityReference(name, n);
 }
