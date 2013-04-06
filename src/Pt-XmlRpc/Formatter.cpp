@@ -48,8 +48,6 @@ static const Pt::Char XMLRPC_MEMBER[]  = { '<', 'm', 'e', 'm', 'b', 'e', 'r', '>
 static const Pt::Char XMLRPC_NAME[]    = { '<', 'n', 'a', 'm', 'e', '>' };
 static const Pt::Char XMLRPC_ARRAY[]   = { '<', 'a', 'r', 'r', 'a', 'y', '>' };
 static const Pt::Char XMLRPC_DATA[]    = { '<', 'd', 'a', 't', 'a', '>' };
-static const Pt::Char XMLRPC_FALSE[]   = { '0', '\0' };
-static const Pt::Char XMLRPC_TRUE[]    = { '1', '\0' };
 
 static const Pt::Char XMLRPC_VALUE_END[]   = { '<', '/', 'v', 'a', 'l', 'u', 'e', '>' };
 static const Pt::Char XMLRPC_INT_END[]     = { '<', '/', 'i', 'n', 't', '>' };
@@ -156,7 +154,7 @@ void Formatter::addBool(const char* name, bool value,
     _os->write(XMLRPC_VALUE, sizeof(XMLRPC_VALUE)/sizeof(Char));
 
     _os->write(XMLRPC_BOOLEAN, sizeof(XMLRPC_BOOLEAN)/sizeof(Char));
-    Xml::xmlEncode(*_os, value ? XMLRPC_TRUE : XMLRPC_FALSE);
+    *_os << (value ? Char('1') : Char('0'));
     _os->write(XMLRPC_BOOLEAN_END, sizeof(XMLRPC_BOOLEAN_END)/sizeof(Char));
 
     _os->write(XMLRPC_VALUE_END, sizeof(XMLRPC_VALUE_END)/sizeof(Char));
@@ -166,24 +164,22 @@ void Formatter::addBool(const char* name, bool value,
 void Formatter::addChar(const char* name, const Pt::Char& value,
                         const char* id)
 {
-    Pt::Char str[] = { value };
-
     _os->write(XMLRPC_VALUE, sizeof(XMLRPC_VALUE)/sizeof(Char));
     _os->write(XMLRPC_STRING, sizeof(XMLRPC_STRING)/sizeof(Char));
-    Xml::xmlEncode(*_os, str, 1);
+    Xml::xmlEncode(*_os, &value, 1);
     _os->write(XMLRPC_STRING_END, sizeof(XMLRPC_STRING_END)/sizeof(Char));
     _os->write(XMLRPC_VALUE_END, sizeof(XMLRPC_VALUE_END)/sizeof(Char));
 }
 
 
-void Formatter::addChar8(const char* name, char value,
+void Formatter::addChar8(const char* name, char ch,
                          const char* id)
 {
-    Pt::Char str[] = { value,};
+    Pt::Char value(ch);
 
     _os->write(XMLRPC_VALUE, sizeof(XMLRPC_VALUE)/sizeof(Char));
     _os->write(XMLRPC_STRING, sizeof(XMLRPC_STRING)/sizeof(Char));
-    Xml::xmlEncode(*_os, str, 1);
+    Xml::xmlEncode(*_os, &value, 1);
     _os->write(XMLRPC_STRING_END, sizeof(XMLRPC_STRING_END)/sizeof(Char));
     _os->write(XMLRPC_VALUE_END, sizeof(XMLRPC_VALUE_END)/sizeof(Char));
 }
@@ -214,7 +210,7 @@ void Formatter::addInt64(const char* name, Pt::int64_t value, const char* id)
 
     _os->write(XMLRPC_VALUE, sizeof(XMLRPC_VALUE)/sizeof(Char));
     _os->write(XMLRPC_INT, sizeof(XMLRPC_INT)/sizeof(Char));
-    Xml::xmlEncode(*_os, _buf, it.getPointer() - _buf);
+    _os->write(_buf, it.getPointer() - _buf);
     _os->write(XMLRPC_INT_END, sizeof(XMLRPC_INT_END)/sizeof(Char));
     _os->write(XMLRPC_VALUE_END, sizeof(XMLRPC_VALUE_END)/sizeof(Char));
 }
@@ -245,7 +241,7 @@ void Formatter::addUInt64(const char* name, Pt::uint64_t value, const char* id)
 
     _os->write(XMLRPC_VALUE, sizeof(XMLRPC_VALUE)/sizeof(Char));
     _os->write(XMLRPC_INT, sizeof(XMLRPC_INT)/sizeof(Char));
-    Xml::xmlEncode(*_os, _buf, it.getPointer() - _buf);
+    _os->write( _buf, it.getPointer() - _buf );
     _os->write(XMLRPC_INT_END, sizeof(XMLRPC_INT_END)/sizeof(Char));
     _os->write(XMLRPC_VALUE_END, sizeof(XMLRPC_VALUE_END)/sizeof(Char));
 }
@@ -266,7 +262,7 @@ void Formatter::addDouble(const char* name, double value, const char* id)
     _os->write(XMLRPC_VALUE, sizeof(XMLRPC_VALUE)/sizeof(Char));
 
     _os->write(XMLRPC_DOUBLE, sizeof(XMLRPC_DOUBLE)/sizeof(Char));
-    Xml::xmlEncode(*_os, _buf, it.getPointer() - _buf);
+    _os->write(_buf, it.getPointer() - _buf);
     _os->write(XMLRPC_DOUBLE_END, sizeof(XMLRPC_DOUBLE_END)/sizeof(Char));
 
     _os->write(XMLRPC_VALUE_END, sizeof(XMLRPC_VALUE_END)/sizeof(Char));
