@@ -50,46 +50,6 @@ class SplitParticle;
 class PcDataParticle;
 class MatchParticle;
 
-class PT_XML_API EntityMapping
-{
-    typedef std::map<String, Entity> Entities;
-
-    public:
-        EntityMapping();
-
-        ~EntityMapping();
-
-        void clear();
-
-        //! @internal Returns a pointer to the declared Entity or 0 for duplicates
-        Entity* declareEntity(const Pt::String& name);
-
-        const Entity* findEntity(const Pt::String& name) const;
-
-    private:
-        Entities _entities;
-};
-
-class PT_XML_API NotationMapping
-{
-    typedef std::map<String, Notation> Notations;
-
-    public:
-        NotationMapping();
-
-        ~NotationMapping();
-
-        void clear();
-
-        //! @internal Returns a pointer to the declared Entity or 0 for duplicates
-        Notation* declareNotation(const Pt::String& name);
-
-        const Notation* findNotation(const Pt::String& name) const;
-
-    private:
-        Notations _notations;
-};
-
 class PT_XML_API DocTypeDefinition : private NonCopyable
 {
     public:
@@ -139,14 +99,15 @@ class PT_XML_API DocTypeDefinition : private NonCopyable
         MatchParticle& getMatch();
 
     private:
-        // TODO: separate class with _rootName
         typedef std::vector< std::pair<QName, ContentModel*> > DocumentModel;
-        
+        typedef std::map<String, Notation> Notations;
+        typedef std::map<String, Entity> Entities;
+
         QName _rootName;
         DocumentModel _docModel;
-        EntityMapping _entities;
-        EntityMapping _paramEntities;
-        NotationMapping _notations;
+        Entities _entities;
+        Entities _paramEntities;
+        Notations _notations;
 
         // TODO: ContentModelPool
         std::vector<ContentParticle*> _pool;

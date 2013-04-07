@@ -46,88 +46,6 @@ namespace Pt {
 
 namespace Xml {
 
-EntityMapping::EntityMapping()
-{
-}
-
-
-EntityMapping::~EntityMapping()
-{
-}
-
-
-void EntityMapping::clear()
-{ 
-    _entities.clear(); 
-}
-
-
-Entity* EntityMapping::declareEntity(const Pt::String& name)
-{
-    Entities::iterator it = _entities.lower_bound(name);
-
-    // return 0 for duplicates
-    if(it != _entities.end() && it->first == name)
-        return 0;
-
-    // insert new Entity
-    Entities::value_type elem(name, Entity());
-    it = _entities.insert(it, elem);
-    return &it->second;
-}
-
-
-const Entity* EntityMapping::findEntity(const Pt::String& name) const
-{
-    Entities::const_iterator it = _entities.find(name);
-    if(it == _entities.end() )
-        return 0;
-
-    return &(it->second);
-}
-
-
-NotationMapping::NotationMapping()
-{
-}
-
-
-NotationMapping::~NotationMapping()
-{
-}
-
-
-void NotationMapping::clear()
-{ 
-    _notations.clear(); 
-}
-
-
-Notation* NotationMapping::declareNotation(const Pt::String& name)
-{
-    Notations::iterator it = _notations.lower_bound(name);
-
-    // return 0 for duplicates
-    if(it != _notations.end() && it->first == name)
-        return 0;
-
-    // insert new Notation
-    Notations::value_type elem(name, Notation());
-    it = _notations.insert(it, elem);
-    return &it->second;
-}
-
-
-const Notation* NotationMapping::findNotation(const Pt::String& name) const
-{
-    Notations::const_iterator it = _notations.find(name);
-    if(it == _notations.end() )
-        return 0;
-
-    return &(it->second);
-}
-
-
 // TODO
 static MatchParticle match;
 
@@ -246,38 +164,82 @@ AttributeListModel* DocTypeDefinition::findAttributeList(const QName& name)
 
 Entity* DocTypeDefinition::declareEntity(const Pt::String& name)
 {
-    return _entities.declareEntity(name);
+    Entities::iterator it = _entities.lower_bound(name);
+
+    // return 0 for duplicates
+    if(it != _entities.end() && it->first == name)
+        return 0;
+
+    // insert new Entity
+    Entities::value_type elem(name, Entity());
+    it = _entities.insert(it, elem);
+    return &it->second;
 }
 
 
 const Entity* DocTypeDefinition::findEntity(const Pt::String& name) const
 {
-    return _entities.findEntity(name);
+    Entities::const_iterator it = _entities.find(name);
+    if(it == _entities.end() )
+        return 0;
+
+    return &(it->second);
 }
 
 
 Entity* DocTypeDefinition::declareParamEntity(const Pt::String& name)
 {
-    return _paramEntities.declareEntity(name);
+
+    Entities::iterator it = _paramEntities.lower_bound(name);
+
+    // return 0 for duplicates
+    if(it != _paramEntities.end() && it->first == name)
+        return 0;
+
+    // insert new Entity
+    Entities::value_type elem(name, Entity());
+    it = _paramEntities.insert(it, elem);
+    return &it->second;
 }
 
 
 const Entity* DocTypeDefinition::findParamEntity(const Pt::String& name) const
 {
-    return _paramEntities.findEntity(name);
+    Entities::const_iterator it = _paramEntities.find(name);
+    if(it == _paramEntities.end() )
+        return 0;
+
+    return &(it->second);
 }
 
 
 Notation* DocTypeDefinition::declareNotation(const Pt::String& name)
 {
-    return _notations.declareNotation(name);
+    Notations::iterator it = _notations.lower_bound(name);
+
+    // return 0 for duplicates
+    if(it != _notations.end() && it->first == name)
+        return 0;
+
+    // insert new Notation
+    Notations::value_type elem(name, Notation());
+    it = _notations.insert(it, elem);
+    return &it->second;
 }
 
 
 const Notation* DocTypeDefinition::findNotation(const Pt::String& name) const
 {
-    return _notations.findNotation(name);
+    Notations::const_iterator it = _notations.find(name);
+    if(it == _notations.end() )
+        return 0;
+
+    return &(it->second);
 }
+
+
+
+
 
 
 LeafParticle& DocTypeDefinition::getLabel(const Pt::String& name)
