@@ -25,8 +25,8 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef Pt_Xml_AttributeDeclaration_h
-#define Pt_Xml_AttributeDeclaration_h
+#ifndef Pt_Xml_AttributeModel_h
+#define Pt_Xml_AttributeModel_h
 
 #include <Pt/Xml/Api.h>
 #include <Pt/Xml/StartElement.h>
@@ -41,7 +41,7 @@ namespace Pt {
 namespace Xml {
 
 class DocTypeDefinition;
-class AttributeListDeclaration;
+class AttributeListModel;
 
 class AttributeValidator : private NonCopyable
 {
@@ -50,7 +50,7 @@ class AttributeValidator : private NonCopyable
 
         void clear();
 
-        bool validate(AttributeList& attrs, const AttributeListDeclaration& decl);
+        bool validate(AttributeList& attrs, const AttributeListModel& decl);
 
         bool isValid() const;
 
@@ -63,7 +63,7 @@ class AttributeValidator : private NonCopyable
         std::vector<Pt::String> _idrefs;
 };
 
-class AttributeDeclaration
+class AttributeModel
 {
     public:
         enum Mode
@@ -75,12 +75,12 @@ class AttributeDeclaration
         };
 
     public:
-        AttributeDeclaration(bool normalize)
+        AttributeModel(bool normalize)
         : _mode(Default)
         , _normalize(normalize)
         {}
 
-        virtual ~AttributeDeclaration()
+        virtual ~AttributeModel()
         { }
 
         bool isNormalize() const
@@ -119,11 +119,11 @@ class AttributeDeclaration
 };
 
 
-class CDataAttributeDeclaration : public AttributeDeclaration
+class CDataAttributeModel : public AttributeModel
 {
     public:
-        CDataAttributeDeclaration()
-        : AttributeDeclaration(false)
+        CDataAttributeModel()
+        : AttributeModel(false)
         {}
 
     protected:
@@ -133,33 +133,33 @@ class CDataAttributeDeclaration : public AttributeDeclaration
 };
 
 
-class NMTokenAttributeDeclaration : public AttributeDeclaration
+class NMTokenAttributeModel : public AttributeModel
 {
     public:
-        NMTokenAttributeDeclaration()
-        : AttributeDeclaration(true)
+        NMTokenAttributeModel()
+        : AttributeModel(true)
         {}
 
         virtual bool onValidate(AttributeValidator& validator, const Attribute& attr) const;
 };
 
 
-class NMTokensAttributeDeclaration : public AttributeDeclaration
+class NMTokensAttributeModel : public AttributeModel
 {
     public:
-        NMTokensAttributeDeclaration()
-        : AttributeDeclaration(true)
+        NMTokensAttributeModel()
+        : AttributeModel(true)
         {}
 
         virtual bool onValidate(AttributeValidator& validator, const Attribute& attr) const;
 };
 
 
-class EnumAttributeDeclaration : public AttributeDeclaration
+class EnumAttributeModel : public AttributeModel
 {
     public:
-        EnumAttributeDeclaration()
-        : AttributeDeclaration(true)
+        EnumAttributeModel()
+        : AttributeModel(true)
         {}
 
         void addValue(const Pt::String& value)
@@ -175,48 +175,48 @@ class EnumAttributeDeclaration : public AttributeDeclaration
 };
 
 
-class IDAttributeDeclaration : public AttributeDeclaration
+class IDAttributeModel : public AttributeModel
                              , private NonCopyable
 {
     public:
-        IDAttributeDeclaration()
-        : AttributeDeclaration(true)
+        IDAttributeModel()
+        : AttributeModel(true)
         {}
 
         virtual bool onValidate(AttributeValidator& validator, const Attribute& attr) const;
 };
 
 
-class IDRefAttributeDeclaration : public AttributeDeclaration
+class IDRefAttributeModel : public AttributeModel
                                 , private NonCopyable
 {
     public:
-        IDRefAttributeDeclaration()
-        : AttributeDeclaration(true)
+        IDRefAttributeModel()
+        : AttributeModel(true)
         {}
 
         virtual bool onValidate(AttributeValidator& validator, const Attribute& attr) const;
 };
 
 
-class IDRefsAttributeDeclaration : public AttributeDeclaration
+class IDRefsAttributeModel : public AttributeModel
                                  , private NonCopyable
 {
     public:
-        IDRefsAttributeDeclaration()
-        : AttributeDeclaration(true)
+        IDRefsAttributeModel()
+        : AttributeModel(true)
         {}
 
         virtual bool onValidate(AttributeValidator& validator, const Attribute& attr) const;
 };
 
 
-class EntityAttributeDeclaration : public AttributeDeclaration
+class EntityAttributeModel : public AttributeModel
                                  , private NonCopyable
 {
     public:
-        EntityAttributeDeclaration(const DocTypeDefinition& dtd)
-        : AttributeDeclaration(true)
+        EntityAttributeModel(const DocTypeDefinition& dtd)
+        : AttributeModel(true)
         , _dtd(&dtd)
         {}
 
@@ -227,12 +227,12 @@ class EntityAttributeDeclaration : public AttributeDeclaration
 };
 
 
-class EntitiesAttributeDeclaration : public AttributeDeclaration
+class EntitiesAttributeModel : public AttributeModel
                                    , private NonCopyable
 {
     public:
-        EntitiesAttributeDeclaration(const DocTypeDefinition& dtd)
-        : AttributeDeclaration(true)
+        EntitiesAttributeModel(const DocTypeDefinition& dtd)
+        : AttributeModel(true)
         , _dtd(&dtd)
         {}
 
@@ -243,12 +243,12 @@ class EntitiesAttributeDeclaration : public AttributeDeclaration
 };
 
 
-class NotationAttributeDeclaration : public AttributeDeclaration
+class NotationAttributeModel : public AttributeModel
                                    , private NonCopyable
 {
     public:
-        NotationAttributeDeclaration(const DocTypeDefinition& dtd)
-        : AttributeDeclaration(true)
+        NotationAttributeModel(const DocTypeDefinition& dtd)
+        : AttributeModel(true)
         , _dtd(&dtd)
         {}
 

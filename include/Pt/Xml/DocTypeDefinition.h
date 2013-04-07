@@ -42,14 +42,58 @@ namespace Pt {
 
 namespace Xml {
 
-class DocTypeContext;
-class ElementDeclaration;
-class AttributeListDeclaration;
+class ContentModel;
+class AttributeListModel;
+class ContentParticle;
+class LeafParticle;
+class SplitParticle;
+class PcDataParticle;
+class MatchParticle;
+
+class PT_XML_API EntityMapping
+{
+    typedef std::map<String, Entity> Entities;
+
+    public:
+        EntityMapping();
+
+        ~EntityMapping();
+
+        void clear();
+
+        //! @internal Returns a pointer to the declared Entity or 0 for duplicates
+        Entity* declareEntity(const Pt::String& name);
+
+        const Entity* findEntity(const Pt::String& name) const;
+
+    private:
+        Entities _entities;
+};
+
+class PT_XML_API NotationMapping
+{
+    typedef std::map<String, Notation> Notations;
+
+    public:
+        NotationMapping();
+
+        ~NotationMapping();
+
+        void clear();
+
+        //! @internal Returns a pointer to the declared Entity or 0 for duplicates
+        Notation* declareNotation(const Pt::String& name);
+
+        const Notation* findNotation(const Pt::String& name) const;
+
+    private:
+        Notations _notations;
+};
 
 class PT_XML_API DocTypeDefinition : private NonCopyable
 {
     public:
-        DocTypeDefinition(DocTypeContext& ctx);
+        DocTypeDefinition();
 
         ~DocTypeDefinition();
 
@@ -61,13 +105,13 @@ class PT_XML_API DocTypeDefinition : private NonCopyable
 
         QName& rootName();
 
-        ElementDeclaration* declareElement(const QName& name);
+        ContentModel* declareElement(const QName& name);
 
-        ElementDeclaration* findElement(const QName& name);
+        ContentModel* findElement(const QName& name);
 
-        AttributeListDeclaration& declareAttributeList(const QName& name);
+        AttributeListModel& declareAttributeList(const QName& name);
 
-        AttributeListDeclaration* findAttributeList(const QName& name);
+        AttributeListModel* findAttributeList(const QName& name);
 
         Entity* declareEntity(const Pt::String& name);
 
@@ -81,15 +125,31 @@ class PT_XML_API DocTypeDefinition : private NonCopyable
 
         const Notation* findNotation(const Pt::String& name) const;
 
+    public:
+        //! @internal use allocator
+        LeafParticle& getLabel(const Pt::String& name);
+
+        //! @internal use allocator
+        SplitParticle& getSplit(ContentParticle& to);
+
+        //! @internal use allocator
+        PcDataParticle& getPcData();
+
+        //! @internal use allocator
+        MatchParticle& getMatch();
+
     private:
-        typedef std::vector< std::pair<QName, ElementDeclaration*> > ElementDeclarationList;
+        // TODO: separate class with _rootName
+        typedef std::vector< std::pair<QName, ContentModel*> > DocumentModel;
         
-        DocTypeContext* _ctx;
         QName _rootName;
-        ElementDeclarationList _elemDecls;
+        DocumentModel _docModel;
         EntityMapping _entities;
         EntityMapping _paramEntities;
         NotationMapping _notations;
+
+        // TODO: ContentModelPool
+        std::vector<ContentParticle*> _pool;
 };
 
 } // namespace Xml

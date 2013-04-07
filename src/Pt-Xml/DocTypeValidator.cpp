@@ -47,7 +47,7 @@ class ElementValidator
         : _elemDecl(0)
         { }
 
-        explicit ElementValidator(const ElementDeclaration& elemDecl)
+        explicit ElementValidator(const ContentModel& elemDecl)
         : _particles( elemDecl.content(), elemDecl.contentSize() )
         , _elemDecl(&elemDecl)
         { }
@@ -58,7 +58,7 @@ class ElementValidator
 
     private:
         ContentParticleList _particles;
-        const ElementDeclaration* _elemDecl;
+        const ContentModel* _elemDecl;
 };
 
 
@@ -148,7 +148,7 @@ bool DocTypeValidatorImpl::validate(Node& node)
                 valid = se.qname() == _dtd->rootName();
             }
                     
-            ElementDeclaration* decl = _dtd->findElement( se.qname() );
+            ContentModel* decl = _dtd->findElement( se.qname() );
             if(decl)
             {
                 ElementValidator validator( *decl );

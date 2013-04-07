@@ -65,49 +65,6 @@ class PT_XML_API Notation
         Pt::String _systemId;
 };
 
-
-class NotationMapping
-{
-    typedef std::map<String, Notation> Notations;
-
-    public:
-        NotationMapping()
-        {}
-
-        ~NotationMapping()
-        {}
-
-        void clear()
-        { _notations.clear(); }
-
-        Notation* declareNotation(const Pt::String& name)
-        {
-            Notations::iterator it = _notations.lower_bound(name);
-
-            // return 0 for duplicates
-            if(it != _notations.end() && it->first == name)
-                return 0;
-
-            // insert new Notation
-            Notations::value_type elem(name, Notation());
-            it = _notations.insert(it, elem);
-            return &it->second;
-        }
-
-        const Notation* findNotation(const Pt::String& name) const
-        {
-            Notations::const_iterator it = _notations.find(name);
-            if(it == _notations.end() )
-                return 0;
-
-            return &(it->second);
-        }
-
-    private:
-        Notations _notations;
-};
-
-
 } // namespace Xml
 
 } // namespace Pt

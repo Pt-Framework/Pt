@@ -39,38 +39,34 @@ namespace Pt {
 namespace Xml {
 
 class QName;
-class AttributeDeclaration;
+class AttributeModel;
 
-class PT_XML_API AttributeListDeclaration : private NonCopyable
+class PT_XML_API AttributeListModel : private NonCopyable
 {
     public:
         // TODO: Iterator that is not pointer to pointer
-        typedef AttributeDeclaration** Iterator;
-        typedef const AttributeDeclaration* const* ConstIterator;
+        typedef AttributeModel** Iterator;
+        typedef const AttributeModel* const* ConstIterator;
     
     public:
-        AttributeListDeclaration();
+        AttributeListModel();
 
-        ~AttributeListDeclaration();
+        ~AttributeListModel();
 
         void clear();
 
         // TODO: lowerBound() / insert() may give better performance 
         
-        AttributeDeclaration* findAttribute(const QName& name);
+        AttributeModel* findAttribute(const QName& name);
 
-        void addAttribute(AttributeDeclaration* decl);
-
-        Iterator begin();
-
-        Iterator end();
+        void addAttribute(AttributeModel* decl);
 
         ConstIterator begin() const;
 
         ConstIterator end() const;
 
     private:
-        std::vector<AttributeDeclaration*> _decls;
+        std::vector<AttributeModel*> _decls;
 };
 
 } // namespace Xml

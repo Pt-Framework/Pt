@@ -26,37 +26,32 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "DtdContext.h"
+#include "Pt/Xml/DocTypeDefinition.h"
 #include <cassert>
 
 namespace Pt {
 
 namespace Xml {
 
-DocTypeContext::DocTypeContext()
-: _nodeCount(0)
+ContentModelBuilder::ContentModelBuilder(DocTypeDefinition& dtd)
+: _dtd(&dtd)
+, _nodeCount(0)
 {}
 
 
-DocTypeContext::~DocTypeContext()
+ContentModelBuilder::~ContentModelBuilder()
 {
     clear();
 }
 
 
-void DocTypeContext::clear()
+void ContentModelBuilder::clear()
 {
     resetExpression();
-
-    for(unsigned n = 0; n < _pool.size() ; ++n)
-    {
-        delete _pool[n];
-    }
-
-    _pool.clear();
 }
 
 
-void DocTypeContext::resetExpression()
+void ContentModelBuilder::resetExpression()
 {
     //TODO: remove the particles fro pool and delete immediately
 
@@ -71,7 +66,7 @@ void DocTypeContext::resetExpression()
 }
 
 
-ContentParticle& DocTypeContext::finishExpression()
+ContentParticle& ContentModelBuilder::finishExpression()
 {
     reduceStack();
 
@@ -84,7 +79,7 @@ ContentParticle& DocTypeContext::finishExpression()
     if(_fragments.size() > 1)
         throw std::logic_error("DTD syntax error: incomplete expression");
 
-    _fragments.top().patchLeafs( this->getMatch() );
+    _fragments.top().patchLeafs( _dtd->getMatch() );
 
     ContentParticle& particle = _fragments.top().start();
 
@@ -94,25 +89,25 @@ ContentParticle& DocTypeContext::finishExpression()
 }
     
         
-void DocTypeContext::pushOperator(Pt::Char ch)
+void ContentModelBuilder::pushOperator(Pt::Char ch)
 {
     _ops.push(ch);
 }
 
 
-void DocTypeContext::pushOpenBrace()
+void ContentModelBuilder::pushOpenBrace()
 {
     _ops.push('(');
 }
 
 
-void DocTypeContext::pushClosingBrace()
+void ContentModelBuilder::pushClosingBrace()
 {
     reduceStack();
 }
 
 
-void DocTypeContext::pushOperand(ContentParticle& op)
+void ContentModelBuilder::pushOperand(ContentParticle& op)
 {
     op.setId(_nodeCount++);
 
@@ -122,14 +117,14 @@ void DocTypeContext::pushOperand(ContentParticle& op)
 }
 
 
-void DocTypeContext::pushDtdOperand(const String& name)
+void ContentModelBuilder::pushDtdOperand(const String& name)
 {
     if(name.at(0) == '#')
     {
         if(name != L"#PCDATA")
             throw std::logic_error("DTD syntax error: expected PCDATA");
 
-        PcDataParticle& pcdata = getPcData();
+        PcDataParticle& pcdata = _dtd->getPcData();
         pushOperand(pcdata);
                 
         // TODO: allow #PCDATA only at beginning of first '('
@@ -137,12 +132,12 @@ void DocTypeContext::pushDtdOperand(const String& name)
         return;
     }
                 
-    LeafParticle& leaf = getLabel(name);
+    LeafParticle& leaf = _dtd->getLabel(name);
     pushOperand(leaf);
 }
 
 
-void DocTypeContext::reduceStack()
+void ContentModelBuilder::reduceStack()
 {
     for(;;)
     {
@@ -189,7 +184,7 @@ void DocTypeContext::reduceStack()
             Fragment op1 = _fragments.top();
             _fragments.pop();
 
-            SplitParticle& split = this->getSplit( op2.start() );
+            SplitParticle& split = _dtd->getSplit( op2.start() );
             split.setId(_nodeCount++);
             split.setNext( op1.start() );
 
@@ -209,7 +204,7 @@ void DocTypeContext::reduceStack()
             Fragment op1 = _fragments.top();
             _fragments.pop();
 
-            SplitParticle& split = this->getSplit( op1.start() );
+            SplitParticle& split = _dtd->getSplit( op1.start() );
             split.setId(_nodeCount++);
                     
             Fragment frag(split);
@@ -228,7 +223,7 @@ void DocTypeContext::reduceStack()
             Fragment op1 = _fragments.top();
             _fragments.pop();
 
-            SplitParticle& split = this->getSplit( op1.start() );
+            SplitParticle& split = _dtd->getSplit( op1.start() );
             split.setId(_nodeCount++);
 
             op1.patchLeafs(split);
@@ -249,7 +244,7 @@ void DocTypeContext::reduceStack()
             Fragment op1 = _fragments.top();
             _fragments.pop();
 
-            SplitParticle& split = this->getSplit( op1.start() );
+            SplitParticle& split = _dtd->getSplit( op1.start() );
             split.setId(_nodeCount++);
 
             op1.patchLeafs(split);
@@ -260,39 +255,6 @@ void DocTypeContext::reduceStack()
             continue;
         }
     }
-}
-
-
-LeafParticle& DocTypeContext::getLabel(const Pt::String& name)
-{
-    _pool.reserve(_pool.size() + 1);
-    LeafParticle* label = new LeafParticle(name);
-    _pool.push_back(label);
-    return *label;
-}
-
-
-SplitParticle& DocTypeContext::getSplit(ContentParticle& to)
-{
-    _pool.reserve(_pool.size() + 1);
-    SplitParticle* split = new SplitParticle(&to);
-    _pool.push_back(split);
-    return *split;
-}
-
-
-PcDataParticle& DocTypeContext::getPcData()
-{
-    _pool.reserve(_pool.size() + 1);
-    PcDataParticle* node = new PcDataParticle();
-    _pool.push_back(node);
-    return *node;
-}
-
-
-MatchParticle& DocTypeContext::getMatch()
-{ 
-    return _match; 
 }
 
 } // namespace Xml

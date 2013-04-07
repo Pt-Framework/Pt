@@ -33,37 +33,37 @@ namespace Pt {
 
 namespace Xml {
 
-ElementDeclaration::ElementDeclaration()
+ContentModel::ContentModel()
 : _start(0)
 , _size(0)
 , _type(Invalid)
 {}
         
 
-ElementDeclaration::~ElementDeclaration()
+ContentModel::~ContentModel()
 {
 }
 
 
-const AttributeListDeclaration& ElementDeclaration::attributeList() const
+const AttributeListModel& ContentModel::attributeList() const
 { 
     return _attrs; 
 }
 
 
-AttributeListDeclaration& ElementDeclaration::attributeList()
+AttributeListModel& ContentModel::attributeList()
 { 
     return _attrs; 
 }
         
 
-bool ElementDeclaration::isEmpty() const
+bool ContentModel::isEmpty() const
 { 
     return _type == Empty; 
 }
 
 
-void ElementDeclaration::setEmpty()
+void ContentModel::setEmpty()
 { 
     _start = 0;
     _size = 0;
@@ -71,13 +71,13 @@ void ElementDeclaration::setEmpty()
 }
 
 
-bool ElementDeclaration::isAny() const
+bool ContentModel::isAny() const
 { 
     return _type == Any; 
 }
 
 
-void ElementDeclaration::setAny()
+void ContentModel::setAny()
 { 
     _start = 0;
     _size = 0;
@@ -85,13 +85,13 @@ void ElementDeclaration::setAny()
 }
 
 
-bool ElementDeclaration::isExpression() const
+bool ContentModel::isExpression() const
 { 
     return _type == Expression; 
 }
 
 
-void ElementDeclaration::setExpression(ContentParticle& start, unsigned n)
+void ContentModel::setExpression(ContentParticle& start, unsigned n)
 { 
     _start = &start; 
     _size = n;
@@ -99,13 +99,13 @@ void ElementDeclaration::setExpression(ContentParticle& start, unsigned n)
 }
 
 
-const ContentParticle* ElementDeclaration::content() const
+const ContentParticle* ContentModel::content() const
 { 
     return _start; 
 }
 
 
-std::size_t ElementDeclaration::contentSize() const
+std::size_t ContentModel::contentSize() const
 { 
     return _size; 
 }

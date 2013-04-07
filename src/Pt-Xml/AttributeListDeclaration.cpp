@@ -33,20 +33,14 @@ namespace Pt {
 
 namespace Xml {
 
-AttributeListDeclaration::AttributeListDeclaration()
+AttributeListModel::AttributeListModel()
 {
 }
 
 
-AttributeListDeclaration::~AttributeListDeclaration()
+AttributeListModel::~AttributeListModel()
 {
-    clear();
-}
-
-
-void AttributeListDeclaration::clear()
-{
-    std::vector<AttributeDeclaration*>::iterator it;
+    std::vector<AttributeModel*>::iterator it;
     for(it = _decls.begin(); it != _decls.end(); ++it)
     {
         delete *it;
@@ -54,9 +48,9 @@ void AttributeListDeclaration::clear()
 }
 
 
-AttributeDeclaration* AttributeListDeclaration::findAttribute(const QName& name)
+AttributeModel* AttributeListModel::findAttribute(const QName& name)
 {
-    std::vector<AttributeDeclaration*>::iterator it;
+    std::vector<AttributeModel*>::iterator it;
     for(it = _decls.begin(); it != _decls.end(); ++it)
     {
         if((*it)->qname() == name)
@@ -67,31 +61,19 @@ AttributeDeclaration* AttributeListDeclaration::findAttribute(const QName& name)
 }
 
 
-void AttributeListDeclaration::addAttribute(AttributeDeclaration* decl)
+void AttributeListModel::addAttribute(AttributeModel* decl)
 {   
     _decls.push_back(decl); 
 }
 
 
-AttributeListDeclaration::Iterator AttributeListDeclaration::begin()
+AttributeListModel::ConstIterator AttributeListModel::begin() const
 {
     return _decls.empty() ? 0 : &_decls[0];
 }
 
 
-AttributeListDeclaration::Iterator AttributeListDeclaration::end()
-{
-    return _decls.empty() ? 0 : &_decls[0] + _decls.size();
-}
-
-
-AttributeListDeclaration::ConstIterator AttributeListDeclaration::begin() const
-{
-    return _decls.empty() ? 0 : &_decls[0];
-}
-
-
-AttributeListDeclaration::ConstIterator AttributeListDeclaration::end() const
+AttributeListModel::ConstIterator AttributeListModel::end() const
 {
     return _decls.empty() ? 0 : &_decls[0] + _decls.size();
 }

@@ -35,7 +35,7 @@
 
 namespace {
 
-bool lessThanName(const std::pair<Pt::Xml::QName, Pt::Xml::ElementDeclaration*>& e, const Pt::Xml::QName& name)
+bool lessThanName(const std::pair<Pt::Xml::QName, Pt::Xml::ContentModel*>& e, const Pt::Xml::QName& name)
 {
     return e.first < name;
 }
@@ -46,8 +46,92 @@ namespace Pt {
 
 namespace Xml {
 
-DocTypeDefinition::DocTypeDefinition(DocTypeContext& ctx)
-: _ctx(&ctx)
+EntityMapping::EntityMapping()
+{
+}
+
+
+EntityMapping::~EntityMapping()
+{
+}
+
+
+void EntityMapping::clear()
+{ 
+    _entities.clear(); 
+}
+
+
+Entity* EntityMapping::declareEntity(const Pt::String& name)
+{
+    Entities::iterator it = _entities.lower_bound(name);
+
+    // return 0 for duplicates
+    if(it != _entities.end() && it->first == name)
+        return 0;
+
+    // insert new Entity
+    Entities::value_type elem(name, Entity());
+    it = _entities.insert(it, elem);
+    return &it->second;
+}
+
+
+const Entity* EntityMapping::findEntity(const Pt::String& name) const
+{
+    Entities::const_iterator it = _entities.find(name);
+    if(it == _entities.end() )
+        return 0;
+
+    return &(it->second);
+}
+
+
+NotationMapping::NotationMapping()
+{
+}
+
+
+NotationMapping::~NotationMapping()
+{
+}
+
+
+void NotationMapping::clear()
+{ 
+    _notations.clear(); 
+}
+
+
+Notation* NotationMapping::declareNotation(const Pt::String& name)
+{
+    Notations::iterator it = _notations.lower_bound(name);
+
+    // return 0 for duplicates
+    if(it != _notations.end() && it->first == name)
+        return 0;
+
+    // insert new Notation
+    Notations::value_type elem(name, Notation());
+    it = _notations.insert(it, elem);
+    return &it->second;
+}
+
+
+const Notation* NotationMapping::findNotation(const Pt::String& name) const
+{
+    Notations::const_iterator it = _notations.find(name);
+    if(it == _notations.end() )
+        return 0;
+
+    return &(it->second);
+}
+
+
+// TODO
+static MatchParticle match;
+
+DocTypeDefinition::DocTypeDefinition()
 {
 }
 
@@ -60,15 +144,22 @@ DocTypeDefinition::~DocTypeDefinition()
 
 void DocTypeDefinition::clear()
 {
-    for(ElementDeclarationList::iterator it = _elemDecls.begin(); it != _elemDecls.end(); ++it)
+    for(DocumentModel::iterator it = _docModel.begin(); it != _docModel.end(); ++it)
     {
         delete it->second;
     }
 
     _rootName.clear();
-    _elemDecls.clear();
+    _docModel.clear();
     _entities.clear();
     _paramEntities.clear();
+
+    for(unsigned n = 0; n < _pool.size() ; ++n)
+    {
+        delete _pool[n];
+    }
+
+    _pool.clear();
 }
 
 
@@ -90,29 +181,29 @@ QName& DocTypeDefinition::rootName()
 }
 
 
-ElementDeclaration* DocTypeDefinition::declareElement(const QName& name)
+ContentModel* DocTypeDefinition::declareElement(const QName& name)
 { 
-    ElementDeclarationList::iterator lbound;
-    lbound = std::lower_bound(_elemDecls.begin(), _elemDecls.end(), name, lessThanName);
+    DocumentModel::iterator lbound;
+    lbound = std::lower_bound(_docModel.begin(), _docModel.end(), name, lessThanName);
     
-    if( lbound != _elemDecls.end() && lbound->first == name)
+    if( lbound != _docModel.end() && lbound->first == name)
     {
         return 0;
     }
 
-    std::auto_ptr<ElementDeclaration> ep( new ElementDeclaration() );
-    std::pair<QName, ElementDeclaration*> entry( name, ep.get() );
-    _elemDecls.insert(lbound, entry);
+    std::auto_ptr<ContentModel> ep( new ContentModel() );
+    std::pair<QName, ContentModel*> entry( name, ep.get() );
+    _docModel.insert(lbound, entry);
     return ep.release();
 }
 
 
-ElementDeclaration* DocTypeDefinition::findElement(const QName& name)
+ContentModel* DocTypeDefinition::findElement(const QName& name)
 {
-    ElementDeclarationList::iterator lbound;
-    lbound = std::lower_bound(_elemDecls.begin(), _elemDecls.end(), name, lessThanName);
+    DocumentModel::iterator lbound;
+    lbound = std::lower_bound(_docModel.begin(), _docModel.end(), name, lessThanName);
     
-    if( lbound != _elemDecls.end() && lbound->first == name)
+    if( lbound != _docModel.end() && lbound->first == name)
     {
         return lbound->second;
     }
@@ -121,30 +212,30 @@ ElementDeclaration* DocTypeDefinition::findElement(const QName& name)
 }
 
 
-AttributeListDeclaration& DocTypeDefinition::declareAttributeList(const QName& name)
+AttributeListModel& DocTypeDefinition::declareAttributeList(const QName& name)
 { 
-    ElementDeclarationList::iterator lbound;
-    lbound = std::lower_bound(_elemDecls.begin(), _elemDecls.end(), name, lessThanName);
+    DocumentModel::iterator lbound;
+    lbound = std::lower_bound(_docModel.begin(), _docModel.end(), name, lessThanName);
     
-    if( lbound != _elemDecls.end() && lbound->first == name)
+    if( lbound != _docModel.end() && lbound->first == name)
     {
         return lbound->second->attributeList();
     }
 
-    std::auto_ptr<ElementDeclaration> ep( new ElementDeclaration() );
-    std::pair<QName, ElementDeclaration*> entry( name, ep.get() );
-    _elemDecls.insert(lbound, entry);
-    ElementDeclaration* elemDecl = ep.release();
+    std::auto_ptr<ContentModel> ep( new ContentModel() );
+    std::pair<QName, ContentModel*> entry( name, ep.get() );
+    _docModel.insert(lbound, entry);
+    ContentModel* elemDecl = ep.release();
     return elemDecl->attributeList();
 }
 
 
-AttributeListDeclaration* DocTypeDefinition::findAttributeList(const QName& name)
+AttributeListModel* DocTypeDefinition::findAttributeList(const QName& name)
 {
-    ElementDeclarationList::iterator lbound;
-    lbound = std::lower_bound(_elemDecls.begin(), _elemDecls.end(), name, lessThanName);
+    DocumentModel::iterator lbound;
+    lbound = std::lower_bound(_docModel.begin(), _docModel.end(), name, lessThanName);
     
-    if( lbound != _elemDecls.end() && lbound->first == name)
+    if( lbound != _docModel.end() && lbound->first == name)
     {
         return &lbound->second->attributeList();
     }
@@ -161,7 +252,7 @@ Entity* DocTypeDefinition::declareEntity(const Pt::String& name)
 
 const Entity* DocTypeDefinition::findEntity(const Pt::String& name) const
 {
-    return _entities.resolveEntity(name);
+    return _entities.findEntity(name);
 }
 
 
@@ -173,7 +264,7 @@ Entity* DocTypeDefinition::declareParamEntity(const Pt::String& name)
 
 const Entity* DocTypeDefinition::findParamEntity(const Pt::String& name) const
 {
-    return _paramEntities.resolveEntity(name);
+    return _paramEntities.findEntity(name);
 }
 
 
@@ -186,6 +277,39 @@ Notation* DocTypeDefinition::declareNotation(const Pt::String& name)
 const Notation* DocTypeDefinition::findNotation(const Pt::String& name) const
 {
     return _notations.findNotation(name);
+}
+
+
+LeafParticle& DocTypeDefinition::getLabel(const Pt::String& name)
+{
+    _pool.reserve(_pool.size() + 1);
+    LeafParticle* label = new LeafParticle(name);
+    _pool.push_back(label);
+    return *label;
+}
+
+
+SplitParticle& DocTypeDefinition::getSplit(ContentParticle& to)
+{
+    _pool.reserve(_pool.size() + 1);
+    SplitParticle* split = new SplitParticle(&to);
+    _pool.push_back(split);
+    return *split;
+}
+
+
+PcDataParticle& DocTypeDefinition::getPcData()
+{
+    _pool.reserve(_pool.size() + 1);
+    PcDataParticle* node = new PcDataParticle();
+    _pool.push_back(node);
+    return *node;
+}
+
+
+MatchParticle& DocTypeDefinition::getMatch()
+{ 
+    return match; 
 }
 
 } // namespace Xml

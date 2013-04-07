@@ -37,38 +37,7 @@ namespace Pt {
 
 namespace Xml {
 
-EntityMapping::EntityMapping()
-{
-}
-
-
-EntityMapping::~EntityMapping()
-{
-}
-
-
-Entity* EntityMapping::declareEntity(const Pt::String& name)
-{
-    Entities::iterator it = _entities.lower_bound(name);
-
-    // return 0 for duplicates
-    if(it != _entities.end() && it->first == name)
-        return 0;
-
-    // insert new Entity
-    Entities::value_type elem(name, Entity());
-    it = _entities.insert(it, elem);
-    return &it->second;
-}
-
-
-void EntityMapping::clear()
-{ 
-    _entities.clear(); 
-}
-
-
-bool EntityMapping::resolveDefaultEntity(String& entity)
+bool Entity::resolveDefaultEntity(String& entity)
 {
     if( ! entity.empty() && entity[0] == '#')
     {
@@ -155,7 +124,7 @@ bool EntityMapping::resolveDefaultEntity(String& entity)
 }
 
 
-bool EntityMapping::resolveCharacterEntity(String& entity)
+bool Entity::resolveCharacterEntity(String& entity)
 {
     if( ! entity.empty() && entity[0] == '#')
     {
@@ -193,18 +162,6 @@ bool EntityMapping::resolveCharacterEntity(String& entity)
 
     return false;
 }
-
-
-const Entity* EntityMapping::resolveEntity(const Pt::String& name) const
-{
-    Entities::const_iterator it = _entities.find(name);
-    if(it == _entities.end() )
-        return 0;
-
-    return &(it->second);
-}
-
-
 
 
 EntityReference::EntityReference()

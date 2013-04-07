@@ -38,7 +38,7 @@ namespace Pt {
 
 namespace Xml {
 
-class Entity
+class PT_XML_API Entity
 {
     public:
         Entity()
@@ -92,43 +92,19 @@ class Entity
             _value = notation; 
         }
 
+        /** @brief Replaces the entity with its string value.
+        */
+        static bool resolveDefaultEntity(String& entity);
+        
+        /** @brief Replaces the entity with its string value.
+        */
+        static bool resolveCharacterEntity(String& entity);
+
     private:
         Pt::String _publicId;
         Pt::String _systemId;
         Pt::String _value;
         bool _ndata;
-};
-
-
-/** @brief Handles character and entity references.
-*/
-class PT_XML_API EntityMapping
-{
-    typedef std::map<String, Entity> Entities;
-
-    public:
-        /** @brief Constructs with the XML default entities.
-        */
-        EntityMapping();
-
-        //! @brief Destructor.
-        ~EntityMapping();
-
-        void clear();
-
-        //! @brief Returns a pointer to the declared Entity or 0 for duplicates
-        Entity* declareEntity(const Pt::String& name);
-
-        /** @brief Replaces the entity with its string value.
-        */
-        static bool resolveDefaultEntity(String& entity);
-
-        static bool resolveCharacterEntity(String& entity);
-
-        const Entity* resolveEntity(const Pt::String& name) const;
-
-    private:
-        Entities _entities;
 };
 
 

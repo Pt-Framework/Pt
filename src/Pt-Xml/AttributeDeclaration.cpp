@@ -45,11 +45,11 @@ void AttributeValidator::clear()
 }
 
 
-bool AttributeValidator::validate(AttributeList& attrs, const AttributeListDeclaration& decls)
+bool AttributeValidator::validate(AttributeList& attrs, const AttributeListModel& decls)
 {
     //TODO: use fixed array[N], use vector when decls.size() > N
 
-    std::vector<const Pt::Xml::AttributeDeclaration*> attrDecls;
+    std::vector<const Pt::Xml::AttributeModel*> attrDecls;
     std::copy(decls.begin(), decls.end(), std::back_inserter(attrDecls));
 
     // TODO: do not allow two ID type attributes
@@ -59,7 +59,7 @@ bool AttributeValidator::validate(AttributeList& attrs, const AttributeListDecla
     Pt::Xml::AttributeList::ConstIterator attr;
     for(attr = attrs.begin(); attr != attrs.end(); ++attr)
     {
-        std::vector<const Pt::Xml::AttributeDeclaration*>::iterator it;
+        std::vector<const Pt::Xml::AttributeModel*>::iterator it;
                  
         for(it = attrDecls.begin(); it != attrDecls.end(); ++it)
         {
@@ -80,7 +80,7 @@ bool AttributeValidator::validate(AttributeList& attrs, const AttributeListDecla
 
     // post process unmatched declarations e.g. get default values
     // and check for missing required attributes
-    std::vector<const Pt::Xml::AttributeDeclaration*>::iterator decl;
+    std::vector<const Pt::Xml::AttributeModel*>::iterator decl;
     for(decl = attrDecls.begin(); decl != attrDecls.end(); ++decl)
     {
         if( ! (*decl)->fixup(*this, attrs) )
@@ -124,7 +124,7 @@ void AttributeValidator::addRef(const Pt::String& id)
 
 
 
-bool AttributeDeclaration::validate(AttributeValidator& validator, const Attribute& attr) const
+bool AttributeModel::validate(AttributeValidator& validator, const Attribute& attr) const
 {
     if(mode() == Fixed && attr.value() != defaultValue() )
         return false;
@@ -133,7 +133,7 @@ bool AttributeDeclaration::validate(AttributeValidator& validator, const Attribu
 }
       
 
-bool AttributeDeclaration::fixup(AttributeValidator& validator, AttributeList& list) const
+bool AttributeModel::fixup(AttributeValidator& validator, AttributeList& list) const
 {
     switch(_mode)
     {
@@ -163,38 +163,38 @@ bool AttributeDeclaration::fixup(AttributeValidator& validator, AttributeList& l
 
 
 
-bool CDataAttributeDeclaration::onValidate(AttributeValidator& validator, const Attribute& attr) const
+bool CDataAttributeModel::onValidate(AttributeValidator& validator, const Attribute& attr) const
 { 
     // TODO: check for non-CDATA characters in value           
     return true; 
 }
 
-void CDataAttributeDeclaration::onNormalize(Attribute&) const
+void CDataAttributeModel::onNormalize(Attribute&) const
 {
 }
 
 
-bool NMTokenAttributeDeclaration::onValidate(AttributeValidator& validator, const Attribute& attr) const
+bool NMTokenAttributeModel::onValidate(AttributeValidator& validator, const Attribute& attr) const
 { 
     // TODO: check for non-CDATA characters in value           
     return true; 
 }
 
 
-bool NMTokensAttributeDeclaration::onValidate(AttributeValidator& validator, const Attribute& attr) const
+bool NMTokensAttributeModel::onValidate(AttributeValidator& validator, const Attribute& attr) const
 { 
     // TODO: check for non-CDATA characters in value           
     return true; 
 }
 
 
-bool EnumAttributeDeclaration::onValidate(AttributeValidator& validator, const Attribute& attr) const
+bool EnumAttributeModel::onValidate(AttributeValidator& validator, const Attribute& attr) const
 {           
     return _enumValues.find( attr.value() ) != _enumValues.end(); 
 }
 
 
-bool IDAttributeDeclaration::onValidate(AttributeValidator& validator, const Attribute& attr) const
+bool IDAttributeModel::onValidate(AttributeValidator& validator, const Attribute& attr) const
 {          
     // TODO: attribute value must be an XML name
 
@@ -202,7 +202,7 @@ bool IDAttributeDeclaration::onValidate(AttributeValidator& validator, const Att
 }
 
 
-bool IDRefAttributeDeclaration::onValidate(AttributeValidator& validator, const Attribute& attr) const
+bool IDRefAttributeModel::onValidate(AttributeValidator& validator, const Attribute& attr) const
 {          
     // TODO: attribute value must be an XML name
 
@@ -211,7 +211,7 @@ bool IDRefAttributeDeclaration::onValidate(AttributeValidator& validator, const 
 }
 
 
-bool IDRefsAttributeDeclaration::onValidate(AttributeValidator& validator, const Attribute& attr) const
+bool IDRefsAttributeModel::onValidate(AttributeValidator& validator, const Attribute& attr) const
 {          
     // TODO: attribute value must be an XML name
 
@@ -227,7 +227,7 @@ bool IDRefsAttributeDeclaration::onValidate(AttributeValidator& validator, const
 }
 
 
-bool EntityAttributeDeclaration::onValidate(AttributeValidator& validator, const Attribute& attr) const
+bool EntityAttributeModel::onValidate(AttributeValidator& validator, const Attribute& attr) const
 {          
     const Entity* ent = _dtd->findEntity(attr.value());
     if( ent && ent->isUnparsed() )
@@ -239,7 +239,7 @@ bool EntityAttributeDeclaration::onValidate(AttributeValidator& validator, const
 }
 
 
-bool EntitiesAttributeDeclaration::onValidate(AttributeValidator& validator, const Attribute& attr) const
+bool EntitiesAttributeModel::onValidate(AttributeValidator& validator, const Attribute& attr) const
 {          
     Pt::IStringStream iss( attr.value() );
     Pt::String name;
@@ -257,7 +257,7 @@ bool EntitiesAttributeDeclaration::onValidate(AttributeValidator& validator, con
 }
 
 
-bool NotationAttributeDeclaration::onValidate(AttributeValidator& validator, const Attribute& attr) const
+bool NotationAttributeModel::onValidate(AttributeValidator& validator, const Attribute& attr) const
 {          
     if( _notations.find( attr.value() ) == _notations.end() )
     {

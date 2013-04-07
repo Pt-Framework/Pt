@@ -1828,7 +1828,7 @@ class XmlReaderImpl
 
             if(ch == ';')
             {
-                if( ! EntityMapping::resolveCharacterEntity(_token) )
+                if( ! Entity::resolveCharacterEntity(_token) )
                 {
                     _token = '&' + _token + ';';
                 }
@@ -2020,7 +2020,7 @@ class XmlReaderImpl
 
                 if( 0 == _attlistDecl->findAttribute( _qname ) )
                 {
-                    _attrDecl = new EnumAttributeDeclaration();
+                    _attrDecl = new EnumAttributeModel();
                     _attrDecl->setName(_qname);
                     _attlistDecl->addAttribute(_attrDecl);
                 }
@@ -2083,7 +2083,7 @@ class XmlReaderImpl
             if( isSpace(ch) )
             {
                 assert(_attrDecl);
-                static_cast<EnumAttributeDeclaration*>(_attrDecl)->addValue(_token);
+                static_cast<EnumAttributeModel*>(_attrDecl)->addValue(_token);
                 _token.clear();
                 _parse = &XmlReaderImpl::OnDtdAttrAfterEnumValue;
                 return;
@@ -2092,7 +2092,7 @@ class XmlReaderImpl
             if( ch == '|' )
             {
                 assert(_attrDecl);
-                static_cast<EnumAttributeDeclaration*>(_attrDecl)->addValue(_token);
+                static_cast<EnumAttributeModel*>(_attrDecl)->addValue(_token);
                 _token.clear();
                 _parse = &XmlReaderImpl::OnDtdAttrEnumSep;
                 return;
@@ -2101,7 +2101,7 @@ class XmlReaderImpl
             if( ch == ')' )
             {
                 assert(_attrDecl);
-                static_cast<EnumAttributeDeclaration*>(_attrDecl)->addValue(_token);
+                static_cast<EnumAttributeModel*>(_attrDecl)->addValue(_token);
                 _token.clear();
                 _parse = &XmlReaderImpl::OnDtdAfterAttrType;
                 return;
@@ -2220,39 +2220,39 @@ class XmlReaderImpl
                 {
                     if(_token == L"CDATA")
                     {
-                        _attrDecl = new CDataAttributeDeclaration();
+                        _attrDecl = new CDataAttributeModel();
                     }
                     else if(_token == L"NMTOKEN")
                     {
-                        _attrDecl = new NMTokenAttributeDeclaration();
+                        _attrDecl = new NMTokenAttributeModel();
                     }
                     else if(_token == L"NMTOKENS")
                     {
-                        _attrDecl = new NMTokensAttributeDeclaration();
+                        _attrDecl = new NMTokensAttributeModel();
                     }
                     else if(_token == L"ID")
                     {
-                        _attrDecl = new IDAttributeDeclaration();
+                        _attrDecl = new IDAttributeModel();
                     }
                     else if(_token == L"IDREF")
                     {
-                        _attrDecl = new IDRefAttributeDeclaration();
+                        _attrDecl = new IDRefAttributeModel();
                     }
                     else if(_token == L"IDREFS")
                     {
-                        _attrDecl = new IDRefsAttributeDeclaration();
+                        _attrDecl = new IDRefsAttributeModel();
                     }
                     else if(_token == L"ENTITY")
                     {
-                        _attrDecl = new EntityAttributeDeclaration(_dtd);
+                        _attrDecl = new EntityAttributeModel(_dtd);
                     }
                     else if(_token == L"ENTITIES")
                     {
-                        _attrDecl = new EntitiesAttributeDeclaration(_dtd);
+                        _attrDecl = new EntitiesAttributeModel(_dtd);
                     }
                     else if(_token == L"NOTATION")
                     {
-                        _attrDecl = new NotationAttributeDeclaration(_dtd);
+                        _attrDecl = new NotationAttributeModel(_dtd);
                         _parse = &XmlReaderImpl::OnDtdAfterAttrNotation;
                     }
                     else
@@ -2335,7 +2335,7 @@ class XmlReaderImpl
             if( isSpace(ch) )
             {
                 if(_attrDecl) // skip duplicates
-                    static_cast<NotationAttributeDeclaration*>(_attrDecl)->addNotation(_token);
+                    static_cast<NotationAttributeModel*>(_attrDecl)->addNotation(_token);
 
                 _token.clear();
                 _parse = &XmlReaderImpl::OnDtdAttrAfterNotationId;
@@ -2345,7 +2345,7 @@ class XmlReaderImpl
             if( ch == '|' )
             {
                 if(_attrDecl) // skip duplicates
-                    static_cast<NotationAttributeDeclaration*>(_attrDecl)->addNotation(_token);
+                    static_cast<NotationAttributeModel*>(_attrDecl)->addNotation(_token);
 
                 _token.clear();
                 _parse = &XmlReaderImpl::OnDtdAttrNotationSep;
@@ -2355,7 +2355,7 @@ class XmlReaderImpl
             if( ch == ')' )
             {
                 if(_attrDecl) // skip duplicates
-                    static_cast<NotationAttributeDeclaration*>(_attrDecl)->addNotation(_token);
+                    static_cast<NotationAttributeModel*>(_attrDecl)->addNotation(_token);
 
                 _token.clear();
                 _parse = &XmlReaderImpl::OnDtdAfterAttrType;
@@ -2468,21 +2468,21 @@ class XmlReaderImpl
             if(_token == L"REQUIRED")
             {
                 if(_attrDecl) // skip duplicates
-                    _attrDecl->setMode(Pt::Xml::AttributeDeclaration::Required);
+                    _attrDecl->setMode(Pt::Xml::AttributeModel::Required);
                 
                 _parse = &XmlReaderImpl::OnDtdAfterAttrMode;
             }
             else if(_token == L"IMPLIED")
             {
                 if(_attrDecl) // skip duplicates
-                    _attrDecl->setMode(Pt::Xml::AttributeDeclaration::Implied);
+                    _attrDecl->setMode(Pt::Xml::AttributeModel::Implied);
                 
                 _parse = &XmlReaderImpl::OnDtdAfterAttrMode;
             }
             else if(_token == L"FIXED")
             {
                 if(_attrDecl) // skip duplicates
-                    _attrDecl->setMode(Pt::Xml::AttributeDeclaration::Fixed);
+                    _attrDecl->setMode(Pt::Xml::AttributeModel::Fixed);
                 
                 _parse = &XmlReaderImpl::OnDtdAfterDtdAttrFixed;
             }
@@ -3366,10 +3366,10 @@ class XmlReaderImpl
                     //       have to look up the ElementDeclaration once.
 
                     // TODO: QName ?
-                    ElementDeclaration* elemDecl = _dtd.findElement( _startElem.qname() );
+                    ContentModel* elemDecl = _dtd.findElement( _startElem.qname() );
                     if(elemDecl)
                     {
-                        AttributeDeclaration* attrDecl = elemDecl->attributeList().findAttribute( _attr->qname() );
+                        AttributeModel* attrDecl = elemDecl->attributeList().findAttribute( _attr->qname() );
 
                         if(attrDecl && attrDecl->isNormalize())
                             _attr->normalize();
@@ -3416,7 +3416,7 @@ class XmlReaderImpl
             
             if(ch == ';')
             {
-                if( EntityMapping::resolveDefaultEntity(_token) )
+                if( Entity::resolveDefaultEntity(_token) )
                 {
                     _attr->value() += _token;
                 }
@@ -3600,7 +3600,7 @@ class XmlReaderImpl
 
             if(ch == ';')
             {
-                if( EntityMapping::resolveDefaultEntity(_token) )
+                if( Entity::resolveDefaultEntity(_token) )
                 {
                     for(std::size_t n = 0; n < _token.size(); ++n)
                     {
@@ -4066,9 +4066,7 @@ class XmlReaderImpl
         , _depth(0)
         , _parse(0)                 
         , _current(0)
-        , _dtdContext()
-        , _dtd(_dtdContext)
-        , _docType()
+        , _dtdContext(_dtd)
         , _elemDecl(0)
         , _attrDecl(0)
         , _attlistDecl(0)
@@ -4086,9 +4084,7 @@ class XmlReaderImpl
         , _depth(0)
         , _parse(0)                 
         , _current(0)
-        , _dtdContext()
-        , _dtd(_dtdContext)
-        , _docType()
+        , _dtdContext(_dtd)
         , _elemDecl(0)
         , _attrDecl(0)
         , _attlistDecl(0)
@@ -4303,16 +4299,16 @@ class XmlReaderImpl
         
         Node* _current;
 
-        DocTypeContext _dtdContext;
         DocTypeDefinition _dtd;
-        DocType _docType;
-        EndDocType _endDocType;
-
-        ElementDeclaration* _elemDecl;
-        AttributeDeclaration* _attrDecl;
-        AttributeListDeclaration* _attlistDecl;
+        ContentModelBuilder _dtdContext;
+        
+        ContentModel* _elemDecl;
+        AttributeModel* _attrDecl;
+        AttributeListModel* _attlistDecl;
         
         // TODO: some sort of union?
+        DocType _docType;
+        EndDocType _endDocType;
         StartDocument _startDoc;
         ProcessingInstruction _procInstr;
         Comment _comment;

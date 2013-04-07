@@ -39,7 +39,9 @@ namespace Pt {
 
 namespace Xml {
 
-class DocTypeContext
+class DocTypeDefinition;
+
+class ContentModelBuilder
 {
     private:
         class Fragment
@@ -88,9 +90,9 @@ class DocTypeContext
         };
 
     public:
-        DocTypeContext();
+        ContentModelBuilder(DocTypeDefinition& dtd);
 
-        ~DocTypeContext();
+        ~ContentModelBuilder();
 
         void clear();
 
@@ -111,21 +113,12 @@ class DocTypeContext
 
         void pushDtdOperand(const String& name);
 
-        LeafParticle& getLabel(const Pt::String& name);
-
-        SplitParticle& getSplit(ContentParticle& to);
-
-        PcDataParticle& getPcData();
-
-        MatchParticle& getMatch();
-
     private:
         void reduceStack();
 
     private:
-        std::vector<ContentParticle*> _pool;
+        DocTypeDefinition* _dtd;
         unsigned _nodeCount;
-        MatchParticle _match;
         std::stack<Pt::Char> _ops;
         std::stack<Fragment> _fragments;
 };
