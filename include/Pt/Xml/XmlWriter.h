@@ -37,19 +37,27 @@ namespace Pt {
 
 namespace Xml {
 
-class Attribute;
-
 PT_XML_API void xmlEncode(std::basic_ostream<Pt::Char>& os, const Pt::Char* str, std::size_t n);
 
 PT_XML_API void xmlEncode(std::basic_ostream<Pt::Char>& os, const Pt::Char* str);
 
+inline void xmlEncode(std::basic_ostream<Pt::Char>& os, const Pt::String& str);
+
+/** @brief Writes XML to a text stream.
+*/
 class PT_XML_API XmlWriter
 {
     public:
+        /** @brief Constructor.
+        */
         XmlWriter();
 
+        /** @brief Constructs with output stream.
+        */
         XmlWriter(std::basic_ostream<Char>& os);
 
+        /** @brief Destructor.
+        */
         ~XmlWriter();
 
         bool isFormatting() const;
@@ -151,6 +159,12 @@ class PT_XML_API XmlWriter
     private:
         class XmlWriterImpl* _impl;
 };
+
+
+inline void xmlEncode(std::basic_ostream<Pt::Char>& os, const Pt::String& str)
+{
+    xmlEncode(os, str.c_str(), str.size());
+}
 
 
 inline void XmlWriter::writeStartDocument(const Pt::String& version, const Pt::String& encoding, bool standalone)

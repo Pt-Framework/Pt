@@ -49,53 +49,50 @@ void xmlEncode(std::basic_ostream<Pt::Char>& os, const Pt::Char* str, std::size_
     const Pt::Char* it = str;
     const Pt::Char* begin = str;
     const Pt::Char* end = begin + n;
+    const Pt::Char* replace = 0;
+    std::size_t replSize = 0;
 
     for( ; it != end; ++it)
     {
         switch( it->value() )
         {
             case 0x0022:
-                if(it != begin)
-                    os.write(begin, it - begin);
-                
-                begin = it + 1;
-                os.write(XML_QUOT, sizeof(XML_QUOT)/sizeof(Pt::Char));
+                replace = XML_QUOT;
+                replSize = sizeof(XML_QUOT)/sizeof(Pt::Char);
                 break;
 
             case 0x0026:
-                if(it != begin)
-                    os.write(begin, it - begin);
-                
-                begin = it + 1;
-                os.write(XML_AMP, sizeof(XML_AMP)/sizeof(Pt::Char));
+                replace = XML_AMP;
+                replSize = sizeof(XML_AMP)/sizeof(Pt::Char);
                 break;
 
             case 0x0027:
-                if(it != begin)
-                    os.write(begin, it - begin);
-                
-                begin = it + 1;
-                os.write(XML_APOS, sizeof(XML_APOS)/sizeof(Pt::Char));
+                replace = XML_APOS;
+                replSize = sizeof(XML_APOS)/sizeof(Pt::Char);
                 break;
 
             case 0x003C:
-                if(it != begin)
-                    os.write(begin, it - begin);
-                
-                begin = it + 1;
-                os.write(XML_LT, sizeof(XML_LT)/sizeof(Pt::Char));
+                replace = XML_LT;
+                replSize = sizeof(XML_LT)/sizeof(Pt::Char);
                 break;
 
             case 0x003E:
-                if(it != begin)
-                    os.write(begin, it - begin);
-
-                begin = it + 1;
-                os.write(XML_GT, sizeof(XML_GT)/sizeof(Pt::Char));
+                replace = XML_GT;
+                replSize = sizeof(XML_GT)/sizeof(Pt::Char);
                 break;
 
             default:
                 break;
+        }
+
+        if(replace)
+        {
+            if(it != begin)
+                os.write(begin, it - begin);
+            
+            begin = it + 1;
+            os.write(replace, replSize);
+            replace = 0;
         }
     }
 
@@ -108,53 +105,50 @@ void xmlEncode(std::basic_ostream<Pt::Char>& os, const Pt::Char* str)
 {
     const Pt::Char* it = str;
     const Pt::Char* begin = str;
+    const Pt::Char* replace = 0;
+    std::size_t replSize = 0;
 
     for( ; *it != '\0'; ++it)
     {
         switch( it->value() )
         {
             case 0x0022:
-                if(it != begin)
-                    os.write(begin, it - begin);
-                
-                begin = it + 1;
-                os.write(XML_QUOT, sizeof(XML_QUOT)/sizeof(Pt::Char));
+                replace = XML_QUOT;
+                replSize = sizeof(XML_QUOT)/sizeof(Pt::Char);
                 break;
 
             case 0x0026:
-                if(it != begin)
-                    os.write(begin, it - begin);
-                
-                begin = it + 1;
-                os.write(XML_AMP, sizeof(XML_AMP)/sizeof(Pt::Char));
+                replace = XML_AMP;
+                replSize = sizeof(XML_AMP)/sizeof(Pt::Char);
                 break;
 
             case 0x0027:
-                if(it != begin)
-                    os.write(begin, it - begin);
-                
-                begin = it + 1;
-                os.write(XML_APOS, sizeof(XML_APOS)/sizeof(Pt::Char));
+                replace = XML_APOS;
+                replSize = sizeof(XML_APOS)/sizeof(Pt::Char);
                 break;
 
             case 0x003C:
-                if(it != begin)
-                    os.write(begin, it - begin);
-                
-                begin = it + 1;
-                os.write(XML_LT, sizeof(XML_LT)/sizeof(Pt::Char));
+                replace = XML_LT;
+                replSize = sizeof(XML_LT)/sizeof(Pt::Char);
                 break;
 
             case 0x003E:
-                if(it != begin)
-                    os.write(begin, it - begin);
-
-                begin = it + 1;
-                os.write(XML_GT, sizeof(XML_GT)/sizeof(Pt::Char));
+                replace = XML_GT;
+                replSize = sizeof(XML_GT)/sizeof(Pt::Char);
                 break;
 
             default:
                 break;
+        }
+
+        if(replace)
+        {
+            if(it != begin)
+                os.write(begin, it - begin);
+            
+            begin = it + 1;
+            os.write(replace, replSize);
+            replace = 0;
         }
     }
 

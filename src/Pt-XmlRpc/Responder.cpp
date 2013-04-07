@@ -215,7 +215,10 @@ void XmlRpcResponder::replyError(Http::Reply& reply, int rc, const char* msg)
     _ts.write(XMLRPC_NAME_END, sizeof(XMLRPC_NAME_END)/sizeof(Char) );
     _ts.write( XMLRPC_VALUE, sizeof(XMLRPC_VALUE)/sizeof(Char) );
     _ts.write( XMLRPC_STRING, sizeof(XMLRPC_STRING)/sizeof(Char) );
-    _ts << Pt::String::widen(msg);
+
+    for(const char* str = msg; *str != '\0'; ++str)
+        _ts << Char(*str);
+
     _ts.write(XMLRPC_STRING_END, sizeof(XMLRPC_STRING_END)/sizeof(Char));
     _ts.write(XMLRPC_VALUE_END, sizeof(XMLRPC_VALUE_END)/sizeof(Char));
     _ts.write(XMLRPC_MEMBER_END, sizeof(XMLRPC_MEMBER_END)/sizeof(Char));

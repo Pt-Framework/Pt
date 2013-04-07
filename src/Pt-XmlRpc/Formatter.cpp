@@ -138,11 +138,11 @@ void Formatter::addString(const char* name, const char* type,
 
 void Formatter::addString8(const char* name, const char* value, const char* id)
 {
-    _str = Pt::String::widen(value);
+    _str.assign(value);
     
     _os->write(XMLRPC_VALUE, sizeof(XMLRPC_VALUE)/sizeof(Char));
     _os->write(XMLRPC_STRING, sizeof(XMLRPC_STRING)/sizeof(Char));
-    Xml::xmlEncode(*_os, _str.c_str(), _str.size());
+    Xml::xmlEncode(*_os, _str);
     _os->write(XMLRPC_STRING_END, sizeof(XMLRPC_STRING_END)/sizeof(Char));
     _os->write(XMLRPC_VALUE_END, sizeof(XMLRPC_VALUE_END)/sizeof(Char));
 }
@@ -336,11 +336,11 @@ void Formatter::beginObject(const char* name, const char* type,
 
 void Formatter::beginMember(const char* name, const char*, const char*)
 {
-    _str = Pt::String::widen(name);
+    _str.assign(name);
 
     _os->write(XMLRPC_MEMBER, sizeof(XMLRPC_MEMBER)/sizeof(Char));
     _os->write(XMLRPC_NAME, sizeof(XMLRPC_NAME)/sizeof(Char));
-    Xml::xmlEncode(*_os, _str.c_str(), _str.size() );
+    Xml::xmlEncode(*_os, _str );
     _os->write(XMLRPC_NAME_END, sizeof(XMLRPC_NAME_END)/sizeof(Char));
 }
 
