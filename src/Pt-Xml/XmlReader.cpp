@@ -3827,14 +3827,15 @@ class XmlReaderImpl
 
         inline void setStartElement()
         {
-            _elements += _startElem.name();
+            _elements.resize(_elements.size() + _startElem.name().size());
+            //std::cerr << _elements.capacity() << " ";
             _current = &(_startElem);
         }
 
         inline void setEndElement()
         {
-            if(_endElem.name().size() > _elements.size())
-                throw SyntaxError("unmatched XML element", line());
+            //if(_endElem.name().size() > _elements.size())
+            //    throw SyntaxError("unmatched XML element", line());
             
             std::size_t n =  _endElem.name().size();
             _elements.resize(_elements.size() - n);
@@ -3880,7 +3881,7 @@ class XmlReaderImpl
         , _attlistDecl(0)
         {
             _parse = &XmlReaderImpl::onDocumentBegin;
-            _elements.reserve(32);
+            _elements.reserve(64);
         }
 
         XmlReaderImpl(InputSource& is, XmlResolver* resolver = 0)
@@ -3899,7 +3900,7 @@ class XmlReaderImpl
         , _attlistDecl(0)
         {
             _parse = &XmlReaderImpl::onDocumentBegin;
-            _elements.reserve(32);
+            _elements.reserve(64);
 
             _input.addInput(is);
         }
@@ -3922,6 +3923,7 @@ class XmlReaderImpl
             _options &= ~o;
         }
 
+        // TODO: use Char buffer[64] before allocating
         Pt::String _elements;
 
         void reset()
