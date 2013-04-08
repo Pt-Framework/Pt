@@ -131,6 +131,9 @@ class PT_XML_API XmlReader : private NonCopyable
 
         void reportStartDocument(bool value);
 
+        //void reportInternalDtd(bool value);
+
+        // TODO: void reportDocType(bool value);
         void reportDtd(bool value);
 
         void reportProcessingInstructions(bool value);

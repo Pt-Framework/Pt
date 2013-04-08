@@ -65,14 +65,6 @@ class PT_XML_API DocTypeDefinition : private NonCopyable
 
         QName& rootName();
 
-        ContentModel* declareElement(const QName& name);
-
-        ContentModel* findElement(const QName& name);
-
-        AttributeListModel& declareAttributeList(const QName& name);
-
-        AttributeListModel* findAttributeList(const QName& name);
-
         Entity* declareEntity(const Pt::String& name);
 
         const Entity* findEntity(const Pt::String& name) const;
@@ -86,6 +78,18 @@ class PT_XML_API DocTypeDefinition : private NonCopyable
         const Notation* findNotation(const Pt::String& name) const;
 
     public:
+        //! @internal
+        ContentModel* declareElement(const QName& name);
+
+        //! @internal
+        ContentModel* findElement(const QName& name);
+
+        //! @internal
+        AttributeListModel& declareAttributeList(const QName& name);
+
+        //! @internal
+        AttributeListModel* findAttributeList(const QName& name);
+
         //! @internal use allocator
         LeafParticle& getLabel(const Pt::String& name);
 
@@ -99,6 +103,9 @@ class PT_XML_API DocTypeDefinition : private NonCopyable
         MatchParticle& getMatch();
 
     private:
+        // TODO: vector<ContentModel*>, move QName to ContentModel
+        // make separate class DocumentModel, where _pool and Builder
+        // functionality is placed.
         typedef std::vector< std::pair<QName, ContentModel*> > DocumentModel;
         typedef std::map<String, Notation> Notations;
         typedef std::map<String, Entity> Entities;
