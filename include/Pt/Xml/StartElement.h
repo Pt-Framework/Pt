@@ -49,30 +49,25 @@ class PT_XML_API Attribute
         : _namespace(0)
         { }
 
+        /** @brief Returns the qualified name.
+        */
         const QName& qname() const
         { return _qname; }
 
-        String& prefix() 
-        { return _qname.prefix(); }
+        /** @brief Returns the qualified name.
+        */
+        QName& qname()
+        { return _qname; }
 
+        /** @brief Returns the namespace prefix.
+        */
         const String& prefix() const
         { return _qname.prefix(); }
-
-        void setPrefix(const String& pre)
-        { _qname.setPrefix(pre); }
 
         /** @brief Returns the name of this attribute.
         */
         const String& name() const
         { return _qname.name(); }
-
-        String& name()
-        { return _qname.name(); }
-
-        /** @brief Sets the name of this attribute.
-        */
-        void setName(const String& name)
-        { _qname.setName(name); }
 
         const String& namespaceUri() const
         { return _namespace ? _namespace->namespaceUri() : _qname.prefix(); }
@@ -85,13 +80,10 @@ class PT_XML_API Attribute
         const String& value() const
         { return _value; }
 
+        /** @brief Returns the value of this attribute.
+        */
         String& value()
         { return _value; }
-
-        /** @brief Sets the value of this attribute.
-        */
-        void setValue(const String& value)
-        { _value = value; }
 
         void normalize();
 
@@ -108,59 +100,51 @@ class PT_XML_API Attribute
         const Namespace* _namespace;
 };
 
+
 class PT_XML_API AttributeList : private NonCopyable
 {
     public:
-        typedef std::vector<Attribute> Container;
-        typedef Container::iterator Iterator;
-        typedef Container::const_iterator ConstIterator;
+        typedef Attribute* Iterator;
+        typedef const Attribute* ConstIterator;
 
     public:
-        AttributeList()
-        {}
+        AttributeList();
         
-        bool empty() const
-        { return _container.empty(); }
+        bool empty() const;
         
-        void clear()
-        { _container.clear(); }
-
-        void add(const Attribute& attr)
-        { _container.push_back(attr); }
-
-        Attribute& add()
-        { 
-            _container.push_back( Attribute() ); 
-            return _container.back();
-        }
-
-        void pop()
-        { _container.pop_back(); }
+        void clear();
         
-        ConstIterator find(const String& attributeName) const;
+        void reset();
 
-        ConstIterator find(const String& nsUri, const String& name) const;
+        Attribute& push();
 
-        bool has(const String& name) const
-        { return find(name) != end();}
+        void pop();
+        
+        ConstIterator find(const String& localName) const;
 
-        bool has(const String& nsUri, const String& name) const
-        { return find(nsUri, name) != end();}
+        ConstIterator find(const String& nsUri, const String& localName) const;
+
+        bool has(const String& name) const;
+
+        bool has(const String& nsUri, const String& name) const;
 
         Iterator begin()
-        { return _container.begin(); }
+        { return _begin; }
 
         Iterator end()
-        { return _container.end(); }
+        { return _end; }
 
         ConstIterator begin() const
-        { return _container.begin(); }
+        { return _begin; }
 
         ConstIterator end() const
-        { return _container.end(); }
+        { return _end; }
 
     private:
         std::vector<Attribute> _container;
+        Attribute* _begin;
+        Attribute* _end;
+        std::size_t _size;
 };
 
 /** @brief Represents an opening tag in an XML document.
@@ -175,8 +159,11 @@ class PT_XML_API StartElement : public Node
     public:
         /** Constructs a StartElement object with no name and an empty attribute list.
         */
+
+        //TODO use shared QName
         StartElement()
         : Node(Node::StartElement)
+        , _depth(0)
         , _namespace(0)
         { }
 
@@ -184,8 +171,19 @@ class PT_XML_API StartElement : public Node
         */
         void clear()
         {
+            _depth = 0;
             _qname.clear();
             _attributes.clear();
+            _namespace = 0;
+        }
+
+        /** @brief Resets the start element.
+        */
+        void reset()
+        {
+            _depth = 0;
+            _qname.clear();
+            _attributes.reset();
             _namespace = 0;
         }
 
@@ -194,35 +192,20 @@ class PT_XML_API StartElement : public Node
         const QName& qname() const
         { return _qname; }
 
-        /** @brief Returns the namespace prefix.
+        /** @brief Returns the qualified name.
         */
-        String& prefix() 
-        { return _qname.prefix(); }
+        QName& qname()
+        { return _qname; }
 
         /** @brief Returns the namespace prefix.
         */
         const String& prefix() const
         { return _qname.prefix(); }
 
-        /** @brief Sets the namespace prefix.
-        */
-        void setPrefix(const String& prefix)
-        { _qname.setPrefix(prefix); }
-
-        /** @brief Returns the local name.
-        */
-        String& name() 
-        { return _qname.name(); }
-
         /** @brief Returns the local name.
         */
         const String& name() const
         { return _qname.name(); }
-
-        /** @brief Sets the local name.
-        */
-        void setName(const String& name)
-        { _qname.setName(name); }
 
         /** @brief Returns the namespace Uri for this element name
         */
@@ -257,6 +240,7 @@ class PT_XML_API StartElement : public Node
         { return Node::StartElement; }
 
     private:
+        std::size_t _depth; // use _depth to find QName in NameTable
         QName _qname;
         const Namespace* _namespace;
         AttributeList _attributes;

@@ -27,7 +27,7 @@
  */
  
 
-#include "ContentModel.h"
+#include "ContentParticle.h"
 #include "ElementDeclaration.h"
 #include "AttributeDeclaration.h"
 #include <Pt//Xml/DocTypeValidator.h>

@@ -202,7 +202,7 @@ class XmlReaderImpl
                 }
 
                 _startElem.clear();
-                _startElem.name() += ch;
+                _startElem.qname().name() += ch;
                 _parse = &XmlReaderImpl::onStartElement;
                 return;
             }
@@ -2972,7 +2972,7 @@ class XmlReaderImpl
             if(ch == '/')
             {
                 _chars.clear();
-                _current = &(_startElem);
+                setStartElement();
                 _depth++;
 
                 setNamespace(_startElem);
@@ -2986,15 +2986,15 @@ class XmlReaderImpl
                 if( ! _startElem.prefix().empty() )
                     throw SyntaxError("XML syntax error (invalid namespace prefix)", line());
 
-                _startElem.prefix() = _startElem.name();
-                _startElem.name().clear();
+                _startElem.qname().prefix() = _startElem.name();
+                _startElem.qname().name().clear();
                 return;
             }
 
             if(ch == '>')
             {
                 _chars.clear();
-                _current = &_startElem;
+                setStartElement();
                 _depth++;
 
                 setNamespace(_startElem);
@@ -3004,7 +3004,7 @@ class XmlReaderImpl
 
             if( isAlpha(ch) )
             {
-                _startElem.name() += c;
+                _startElem.qname().name() += c;
                 return;
             }
 
@@ -3022,7 +3022,7 @@ class XmlReaderImpl
 
             if(ch == '/')
             {
-                _current = &(_startElem);
+                setStartElement();
                 _depth++;
 
                 setNamespace(_startElem);
@@ -3033,9 +3033,8 @@ class XmlReaderImpl
 
             if( isAlpha(ch) )
             {
-                _attr = &_startElem.attributes().add();
-                //_attr.clear();
-                _attr->name() += c;
+                _attr = &_startElem.attributes().push();
+                _attr->qname().name() += c;
 
                 _parse = &XmlReaderImpl::onAttributeName;
                 return;
@@ -3044,7 +3043,7 @@ class XmlReaderImpl
             if(ch == '>')
             {
                 _chars.clear();
-                _current = &(_startElem);
+                setStartElement();
                 _depth++;
 
                 setNamespace(_startElem);
@@ -3079,14 +3078,14 @@ class XmlReaderImpl
                 if( ! _attr->prefix().empty() )
                     throw SyntaxError("invalid namespace prefix", line());
 
-                _attr->prefix() = _attr->name();
-                _attr->name().clear();
+                _attr->qname().prefix() = _attr->name();
+                _attr->qname().name().clear();
                 return;
             }
 
             if( isAlpha(ch) )
             {
-                _attr->name() += c;
+                _attr->qname().name() += c;
                 return;
             }
 
@@ -3239,7 +3238,7 @@ class XmlReaderImpl
             if(ch == '>')
             {
                 _endElem.name() = _startElem.name();
-                _current = &(_endElem);
+                setEndElement();
                 _depth--;
 
                 setNamespace(_endElem);
@@ -3271,7 +3270,7 @@ class XmlReaderImpl
             if(ch == '>')
             {
                 _chars.clear();
-                _current = &(_endElem);
+                setEndElement();
                 _depth--;
 
                 setNamespace(_endElem);
@@ -3316,7 +3315,7 @@ class XmlReaderImpl
             if(ch == '>')
             {
                 _chars.clear();
-                _current = &(_endElem);
+                setEndElement();
                 _depth--;
 
                 setNamespace(_endElem);
@@ -3826,6 +3825,22 @@ class XmlReaderImpl
                 _current = &_comment;
         }
 
+        inline void setStartElement()
+        {
+            _elements += _startElem.name();
+            _current = &(_startElem);
+        }
+
+        inline void setEndElement()
+        {
+            if(_endElem.name().size() > _elements.size())
+                throw SyntaxError("unmatched XML element", line());
+            
+            std::size_t n =  _endElem.name().size();
+            _elements.resize(_elements.size() - n);
+            _current = &(_endElem);
+        }
+
         void setProcessingInstruction()
         {
             if(_options & ReportProcessingInstructions)
@@ -3865,6 +3880,7 @@ class XmlReaderImpl
         , _attlistDecl(0)
         {
             _parse = &XmlReaderImpl::onDocumentBegin;
+            _elements.reserve(32);
         }
 
         XmlReaderImpl(InputSource& is, XmlResolver* resolver = 0)
@@ -3883,6 +3899,7 @@ class XmlReaderImpl
         , _attlistDecl(0)
         {
             _parse = &XmlReaderImpl::onDocumentBegin;
+            _elements.reserve(32);
 
             _input.addInput(is);
         }
@@ -3905,6 +3922,8 @@ class XmlReaderImpl
             _options &= ~o;
         }
 
+        Pt::String _elements;
+
         void reset()
         {
             _is = 0;
@@ -3916,6 +3935,8 @@ class XmlReaderImpl
 
             while( ! _parseStack.empty() )
                 _parseStack.pop();
+
+            _elements.clear();
 
             _qname.clear();
             _token.clear(); 

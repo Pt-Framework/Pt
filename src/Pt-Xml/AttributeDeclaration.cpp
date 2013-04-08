@@ -148,16 +148,11 @@ bool AttributeModel::fixup(AttributeValidator& validator, AttributeList& list) c
             break;
     };
 
-    Attribute attr;
-    attr.setName(_qname.name());
-    attr.setPrefix(_qname.prefix());
-    attr.setValue(_default);
+    Attribute& attr = list.push();
+    attr.qname() = _qname;
+    attr.value() = _default;
             
-    bool valid = onValidate(validator, attr);
-    if(valid)
-        list.add(attr);
-            
-    return valid;
+    return onValidate(validator, attr);
 }
 
 

@@ -46,6 +46,8 @@ class EndElement : public Node
     public:
         /** @brief Constructs an EndElement object with no name.
         */
+
+        //TODO point to shared QName (e.g. from StartElement)
         EndElement()
         : Node(Node::EndElement)
         , _namespace(0)
@@ -74,11 +76,6 @@ class EndElement : public Node
         const String& prefix() const
         { return _qname.prefix(); }
 
-        /** @brief Sets the namespace prefix.
-        */
-        void setPrefix(const String& prefix)
-        { _qname.setPrefix(prefix); }
-
         /** @brief Returns the local name.
         */
         String& name() 
@@ -88,11 +85,6 @@ class EndElement : public Node
         */
         const String& name() const
         { return _qname.name(); }
-
-        /** @brief Sets the local name.
-        */
-        void setName(const String& name)
-        { _qname.setName(name); }
 
         /** @brief Returns the namespace Uri for this element name
         */

@@ -1425,7 +1425,7 @@ void XmlReaderTest::MultipleAttributesIteration()
     PT_UNIT_ASSERT(tag->attributes().has(L"d"));
 
     const Pt::Xml::AttributeList& attributes = tag->attributes();
-    std::vector<Pt::Xml::Attribute>::const_iterator attributeIter = attributes.begin();
+    Pt::Xml::AttributeList::ConstIterator attributeIter = attributes.begin();
 
     PT_UNIT_ASSERT(attributeIter != attributes.end());
 

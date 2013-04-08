@@ -5,7 +5,7 @@ SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Xml ;
 
 PT_XML_SOURCES = AttributeDeclaration.cpp
                  AttributeListDeclaration.cpp
-                 ContentModel.cpp
+                 ContentParticle.cpp
                  DocType.cpp
                  DocTypeDefinition.cpp
                  DocTypeValidator.cpp

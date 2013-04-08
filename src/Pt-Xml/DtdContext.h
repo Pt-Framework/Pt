@@ -28,7 +28,7 @@
 #ifndef Pt_Xml_DtdContext_h
 #define Pt_Xml_DtdContext_h
 
-#include "ContentModel.h"
+#include "ContentParticle.h"
 #include <Pt/Xml/Api.h>
 #include <Pt/String.h>
 #include <Pt/NonCopyable.h>

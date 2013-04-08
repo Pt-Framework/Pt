@@ -81,10 +81,71 @@ void Attribute::normalize()
     }
 }
 
+
+AttributeList::AttributeList()
+: _begin(0)
+, _end(0)
+, _size(0)
+{
+}
+
+        
+bool AttributeList::empty() const
+{ 
+    return _size == 0; 
+}
+
+    
+void AttributeList::clear()
+{ 
+    _container.clear();
+    _begin = 0;
+    _end = 0;
+    _size = 0;
+}
+      
+        
+void AttributeList::reset()
+{ 
+    _begin = 0;
+    _end = 0;
+    _size = 0;
+}
+
+
+Attribute& AttributeList::push()
+{ 
+    if( _size >= _container.size() )
+    {
+        _container.push_back( Attribute() ); 
+    }
+    
+    std::size_t backPos = _size;
+    ++_size;
+
+    _begin = &_container[0];
+    _end = _begin + (_size);
+
+    return _container[backPos];
+}
+
+
+void AttributeList::pop()
+{ 
+    if( ! empty() )
+    {
+        _container[--_size].clear();
+
+        _begin = _size == 0 ? 0 : &_container[0];
+        _end = _begin + _size;
+    }
+}
+
+
 AttributeList::ConstIterator AttributeList::find(const String& name) const
 {
     ConstIterator it;
-    for(it = _container.begin(); it != _container.end(); ++it) 
+    for(it = begin(); it != end(); ++it) 
     {
         if(it->name() == name) 
         {
@@ -99,7 +160,7 @@ AttributeList::ConstIterator AttributeList::find(const String& name) const
 AttributeList::ConstIterator AttributeList::find(const String& nsUri, const String& name) const
 {
     ConstIterator it;
-    for(it = _container.begin(); it != _container.end(); ++it) 
+    for(it = begin(); it != end(); ++it) 
     {
         if(it->name() == name && it->namespaceUri() == nsUri) 
         {
@@ -108,6 +169,18 @@ AttributeList::ConstIterator AttributeList::find(const String& nsUri, const Stri
     }
     
     return it;
+}
+
+
+bool AttributeList::has(const String& name) const
+{ 
+    return find(name) != end();
+}
+
+
+bool AttributeList::has(const String& nsUri, const String& name) const
+{ 
+    return find(nsUri, name) != end();
 }
 
 

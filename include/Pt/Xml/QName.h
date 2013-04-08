@@ -37,6 +37,62 @@ namespace Pt {
 
 namespace Xml {
 
+class StringRef
+{
+    public:
+        StringRef()
+        : _str(0)
+        , _beg(0)
+        , _len(0)
+        {}
+
+        void clear()
+        {
+            _str = 0;
+            _beg = 0;
+            _len = 0;
+        }
+
+        bool empty() const
+        { return _len == 0; }
+
+        std::size_t size() const
+        { return _len; }
+
+        const Char* data() const
+        { return _str ? _str->data() + _beg : 0; }
+
+        void set(String& str, std::size_t pos, std::size_t n)
+        {
+            _str = &str;
+            _beg = pos;
+            _len = n;
+        }
+
+    private:
+        String* _str;
+        size_t _beg;
+        size_t _len;
+};
+
+
+inline bool operator==(const StringRef& a, const String& b)
+{
+    return a.size() == b.size() &&
+           0 == std::char_traits<Char>::compare(a.data(), b.data(), b.size());
+}
+
+
+inline bool operator<(const StringRef& a, const String& b)
+{
+    std::size_t sizeA = a.size();
+    std::size_t sizeB = b.size();
+    return sizeA != sizeB ? sizeA < sizeB
+                          : std::char_traits<Char>::compare(a.data(), b.data(), b.size()) < 0;
+
+}
+
+
 /** @brief A namespace qualified XML name
 */
 class QName 
