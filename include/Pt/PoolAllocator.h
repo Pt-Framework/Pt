@@ -220,6 +220,12 @@ class PT_API PoolAllocator : public Allocator
         }
 
     private:
+        // TODO: use vector<PoolStorage>
+        // struct PoolStorage 
+        // {
+        //     char buffer[sizeof(MemoryPool)];
+        // };
+        //
         std::vector<MemoryPool*> _pools;
 
         //! @internal @brief Largest object size supported by allocators.
