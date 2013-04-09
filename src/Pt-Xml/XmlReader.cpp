@@ -1083,6 +1083,8 @@ class XmlReaderImpl
             if( isSpace(ch) )
             {
                 assert(_notation == 0);
+
+                // must only be declared once
                 _notation = _dtd.declareNotation(_token);
                 _token.clear();
                 _parse = &XmlReaderImpl::OnDtdNotationAfterName;
@@ -1305,6 +1307,8 @@ class XmlReaderImpl
             if( isSpace(ch) )
             {
                 assert(_entity == 0);
+
+                // bind to first declaration
                 _entity = _dtd.declareEntity(_token);
                 _token.clear();
                 _parse = &XmlReaderImpl::OnDtdEntityAfterName;
@@ -1808,14 +1812,14 @@ class XmlReaderImpl
 
             if( ch == '(' )
             {
-                assert(_attrDecl == 0);
+                assert(_attrModel == 0);
                 assert(_attlistDecl);
 
                 if( 0 == _attlistDecl->findAttribute( _qname ) )
                 {
-                    _attrDecl = new EnumAttributeModel();
-                    _attrDecl->setName(_qname);
-                    _attlistDecl->addAttribute(_attrDecl);
+                    _attrModel = new EnumAttributeModel();
+                    _attrModel->setName(_qname);
+                    _attlistDecl->addAttribute(_attrModel);
                 }
 
                 _qname.clear();
@@ -1875,8 +1879,8 @@ class XmlReaderImpl
 
             if( isSpace(ch) )
             {
-                assert(_attrDecl);
-                static_cast<EnumAttributeModel*>(_attrDecl)->addValue(_token);
+                assert(_attrModel);
+                static_cast<EnumAttributeModel*>(_attrModel)->addValue(_token);
                 _token.clear();
                 _parse = &XmlReaderImpl::OnDtdAttrAfterEnumValue;
                 return;
@@ -1884,8 +1888,8 @@ class XmlReaderImpl
 
             if( ch == '|' )
             {
-                assert(_attrDecl);
-                static_cast<EnumAttributeModel*>(_attrDecl)->addValue(_token);
+                assert(_attrModel);
+                static_cast<EnumAttributeModel*>(_attrModel)->addValue(_token);
                 _token.clear();
                 _parse = &XmlReaderImpl::OnDtdAttrEnumSep;
                 return;
@@ -1893,8 +1897,8 @@ class XmlReaderImpl
 
             if( ch == ')' )
             {
-                assert(_attrDecl);
-                static_cast<EnumAttributeModel*>(_attrDecl)->addValue(_token);
+                assert(_attrModel);
+                static_cast<EnumAttributeModel*>(_attrModel)->addValue(_token);
                 _token.clear();
                 _parse = &XmlReaderImpl::OnDtdAfterAttrType;
                 return;
@@ -2004,7 +2008,7 @@ class XmlReaderImpl
 
             if( isSpace(ch) )
             {
-                assert(_attrDecl == 0);
+                assert(_attrModel == 0);
                 assert(_attlistDecl);
 
                 _parse = &XmlReaderImpl::OnDtdAfterAttrType;
@@ -2013,49 +2017,49 @@ class XmlReaderImpl
                 {
                     if(_token == L"CDATA")
                     {
-                        _attrDecl = new CDataAttributeModel();
+                        _attrModel = new CDataAttributeModel();
                     }
                     else if(_token == L"NMTOKEN")
                     {
-                        _attrDecl = new NMTokenAttributeModel();
+                        _attrModel = new NMTokenAttributeModel();
                     }
                     else if(_token == L"NMTOKENS")
                     {
-                        _attrDecl = new NMTokensAttributeModel();
+                        _attrModel = new NMTokensAttributeModel();
                     }
                     else if(_token == L"ID")
                     {
-                        _attrDecl = new IDAttributeModel();
+                        _attrModel = new IDAttributeModel();
                     }
                     else if(_token == L"IDREF")
                     {
-                        _attrDecl = new IDRefAttributeModel();
+                        _attrModel = new IDRefAttributeModel();
                     }
                     else if(_token == L"IDREFS")
                     {
-                        _attrDecl = new IDRefsAttributeModel();
+                        _attrModel = new IDRefsAttributeModel();
                     }
                     else if(_token == L"ENTITY")
                     {
-                        _attrDecl = new EntityAttributeModel(_dtd);
+                        _attrModel = new EntityAttributeModel(_dtd);
                     }
                     else if(_token == L"ENTITIES")
                     {
-                        _attrDecl = new EntitiesAttributeModel(_dtd);
+                        _attrModel = new EntitiesAttributeModel(_dtd);
                     }
                     else if(_token == L"NOTATION")
                     {
-                        _attrDecl = new NotationAttributeModel(_dtd);
+                        _attrModel = new NotationAttributeModel(_dtd);
                         _parse = &XmlReaderImpl::OnDtdAfterAttrNotation;
                     }
                     else
                         throw SyntaxError("invalid attribute declaration type", line());
                 }
 
-                if(_attrDecl)
+                if(_attrModel)
                 {
-                    _attrDecl->setName(_qname);
-                    _attlistDecl->addAttribute(_attrDecl);
+                    _attrModel->setName(_qname);
+                    _attlistDecl->addAttribute(_attrModel);
                 }
 
                 _qname.clear();
@@ -2127,8 +2131,8 @@ class XmlReaderImpl
 
             if( isSpace(ch) )
             {
-                if(_attrDecl) // skip duplicates
-                    static_cast<NotationAttributeModel*>(_attrDecl)->addNotation(_token);
+                if(_attrModel) // skip duplicates
+                    static_cast<NotationAttributeModel*>(_attrModel)->addNotation(_token);
 
                 _token.clear();
                 _parse = &XmlReaderImpl::OnDtdAttrAfterNotationId;
@@ -2137,8 +2141,8 @@ class XmlReaderImpl
 
             if( ch == '|' )
             {
-                if(_attrDecl) // skip duplicates
-                    static_cast<NotationAttributeModel*>(_attrDecl)->addNotation(_token);
+                if(_attrModel) // skip duplicates
+                    static_cast<NotationAttributeModel*>(_attrModel)->addNotation(_token);
 
                 _token.clear();
                 _parse = &XmlReaderImpl::OnDtdAttrNotationSep;
@@ -2147,8 +2151,8 @@ class XmlReaderImpl
 
             if( ch == ')' )
             {
-                if(_attrDecl) // skip duplicates
-                    static_cast<NotationAttributeModel*>(_attrDecl)->addNotation(_token);
+                if(_attrModel) // skip duplicates
+                    static_cast<NotationAttributeModel*>(_attrModel)->addNotation(_token);
 
                 _token.clear();
                 _parse = &XmlReaderImpl::OnDtdAfterAttrType;
@@ -2260,22 +2264,22 @@ class XmlReaderImpl
 
             if(_token == L"REQUIRED")
             {
-                if(_attrDecl) // skip duplicates
-                    _attrDecl->setMode(Pt::Xml::AttributeModel::Required);
+                if(_attrModel) // skip duplicates
+                    _attrModel->setMode(Pt::Xml::AttributeModel::Required);
                 
                 _parse = &XmlReaderImpl::OnDtdAfterAttrMode;
             }
             else if(_token == L"IMPLIED")
             {
-                if(_attrDecl) // skip duplicates
-                    _attrDecl->setMode(Pt::Xml::AttributeModel::Implied);
+                if(_attrModel) // skip duplicates
+                    _attrModel->setMode(Pt::Xml::AttributeModel::Implied);
                 
                 _parse = &XmlReaderImpl::OnDtdAfterAttrMode;
             }
             else if(_token == L"FIXED")
             {
-                if(_attrDecl) // skip duplicates
-                    _attrDecl->setMode(Pt::Xml::AttributeModel::Fixed);
+                if(_attrModel) // skip duplicates
+                    _attrModel->setMode(Pt::Xml::AttributeModel::Fixed);
                 
                 _parse = &XmlReaderImpl::OnDtdAfterDtdAttrFixed;
             }
@@ -2293,8 +2297,8 @@ class XmlReaderImpl
 
             if(c == '>')
             {
-                //assert(_attrDecl);
-                _attrDecl = 0;
+                //assert(_attrModel);
+                _attrModel = 0;
 
                 assert(_attlistDecl);
                 _attlistDecl = 0;
@@ -2314,8 +2318,8 @@ class XmlReaderImpl
 
             if( isAlpha(ch) )
             {
-                //assert(_attrDecl);
-                _attrDecl = 0;
+                //assert(_attrModel);
+                _attrModel = 0;
                 
                 _qname.name() += ch;
                 _parse = &XmlReaderImpl::OnDtdAttrName;
@@ -2359,9 +2363,9 @@ class XmlReaderImpl
 
             if(ch == '"')
             {
-                //assert(_attrDecl);
-                if(_attrDecl) // skip duplicates
-                    _attrDecl->setDefaultValue(_token);
+                //assert(_attrModel);
+                if(_attrModel) // skip duplicates
+                    _attrModel->setDefaultValue(_token);
                 
                 _token.clear();
                 _parse = &XmlReaderImpl::OnDtdAfterAttrMode;
@@ -2415,10 +2419,14 @@ class XmlReaderImpl
 
             if( isSpace(ch) )
             {
-                assert(_elemDecl == 0);
-                _elemDecl = _dtd.declareElement(_qname);
-                _dtdContext.resetExpression();
+                assert(_elemModel == 0);
                 
+                // must only be declared once
+                _elemModel = _dtd.declareElement(_qname);
+                if( ! _elemModel)
+                    throw SyntaxError("duplicate element declaration", line());
+
+                _elemModelBuilder.reset(*_elemModel);
                 _qname.clear();
                 _parse = &XmlReaderImpl::OnDtdElementContentBegin;
                 return;
@@ -2459,7 +2467,7 @@ class XmlReaderImpl
             if(ch != '(')
                 throw SyntaxError("XML syntax error", line());
 
-            _dtdContext.pushOperator(ch);
+            _elemModelBuilder.pushOperator(ch);
             _parse = &XmlReaderImpl::OnDtdElementContent;
         }
         
@@ -2475,20 +2483,20 @@ class XmlReaderImpl
                 {
                     _token.clear();
                     
-                    if(_elemDecl) // skip duplicates
-                        _elemDecl->setEmpty();
+                    assert(_elemModel);
+                    _elemModel->setEmpty();
+                    _elemModel = 0;
                     
-                    _elemDecl = 0;
                     _parse = &XmlReaderImpl::OnDtdTagEnd;
                 }
                 else if(_token == L"ANY")
                 {
                     _token.clear();
-                    
-                    if(_elemDecl) // skip duplicates
-                        _elemDecl->setAny();
 
-                    _elemDecl = 0;
+                    assert(_elemModel);
+                    _elemModel->setAny();
+                    _elemModel = 0;
+                    
                     _parse = &XmlReaderImpl::OnDtdTagEnd;
                 }
 
@@ -2510,13 +2518,9 @@ class XmlReaderImpl
             
             if(ch == '>')
             {
-                ContentParticle& content = _dtdContext.finishExpression();
-
-                if(_elemDecl) // skip duplicates
-                    _elemDecl->setExpression( content, _dtdContext.expressionSize() );
-                
-                _elemDecl = 0;
-                _dtdContext.resetExpression();
+                assert(_elemModel);
+                _elemModelBuilder.finish();
+                _elemModel = 0;
                 
                 popParseState();
 
@@ -2556,7 +2560,7 @@ class XmlReaderImpl
 
             if(ch == '(')
             {
-                _dtdContext.pushOperator(ch);
+                _elemModelBuilder.pushOperator(ch);
                 return;
             }
 
@@ -2582,54 +2586,54 @@ class XmlReaderImpl
 
             if( ch == ',')
             {
-                _dtdContext.pushDtdOperand(_token);
+                _elemModelBuilder.pushDtdOperand(_token);
                 _token.clear();
-                _dtdContext.pushOperator(ch);
+                _elemModelBuilder.pushOperator(ch);
                 _parse = &XmlReaderImpl::OnDtdBinaryOp;
                 return;
             }
 
             if( ch == '|')
             {
-                _dtdContext.pushDtdOperand(_token);
+                _elemModelBuilder.pushDtdOperand(_token);
                 _token.clear();
-                _dtdContext.pushOperator(ch);
+                _elemModelBuilder.pushOperator(ch);
                 _parse = &XmlReaderImpl::OnDtdBinaryOp;
                 return;
             }
 
             if(ch == '+')
             {
-                _dtdContext.pushDtdOperand(_token);
+                _elemModelBuilder.pushDtdOperand(_token);
                 _token.clear();
-                _dtdContext.pushOperator(ch);
+                _elemModelBuilder.pushOperator(ch);
                 _parse = &XmlReaderImpl::OnDtdUnrayOp;
                 return;
             }
 
             if(ch == '*')
             {
-                _dtdContext.pushDtdOperand(_token);
+                _elemModelBuilder.pushDtdOperand(_token);
                 _token.clear();
-                _dtdContext.pushOperator(ch);
+                _elemModelBuilder.pushOperator(ch);
                 _parse = &XmlReaderImpl::OnDtdUnrayOp;
                 return;
             }
 
             if(ch == '?')
             {
-                _dtdContext.pushDtdOperand(_token);
+                _elemModelBuilder.pushDtdOperand(_token);
                 _token.clear();
-                _dtdContext.pushOperator(ch);
+                _elemModelBuilder.pushOperator(ch);
                 _parse = &XmlReaderImpl::OnDtdUnrayOp;
                 return;
             }
 
             if( ch == ')')
             {
-                _dtdContext.pushDtdOperand(_token);
+                _elemModelBuilder.pushDtdOperand(_token);
                 _token.clear();
-                _dtdContext.pushClosingBrace();
+                _elemModelBuilder.pushClosingBrace();
                 _parse = &XmlReaderImpl::OnDtdContentExprEnd;
                 return;
             }
@@ -2649,13 +2653,9 @@ class XmlReaderImpl
 
             if( ch == '>' )
             {
-                ContentParticle& content = _dtdContext.finishExpression();
-
-                if(_elemDecl) // skip duplicates
-                    _elemDecl->setExpression( content, _dtdContext.expressionSize() );
-
-                _elemDecl = 0;
-                _dtdContext.resetExpression();
+                assert(_elemModel);
+                _elemModelBuilder.finish();
+                _elemModel = 0;
                 
                 popParseState();
 
@@ -2669,21 +2669,21 @@ class XmlReaderImpl
 
             if( ch == ',')
             {
-                _dtdContext.pushOperator(ch);
+                _elemModelBuilder.pushOperator(ch);
                 _parse = &XmlReaderImpl::OnDtdBinaryOp;
                 return;
             }
 
             if( ch == '|')
             {
-                _dtdContext.pushOperator(ch);
+                _elemModelBuilder.pushOperator(ch);
                 _parse = &XmlReaderImpl::OnDtdBinaryOp;
                 return;
             }
 
             if( ch == ')')
             {
-                _dtdContext.pushClosingBrace();
+                _elemModelBuilder.pushClosingBrace();
                 _parse = &XmlReaderImpl::OnDtdContentExprEnd;
                 return;
             }
@@ -2721,7 +2721,7 @@ class XmlReaderImpl
 
             if(ch == '(')
             {
-                _dtdContext.pushOperator(ch);
+                _elemModelBuilder.pushOperator(ch);
                 _parse = &XmlReaderImpl::OnDtdElementContent;
                 return;
             }
@@ -2741,13 +2741,9 @@ class XmlReaderImpl
 
             if( ch == '>' )
             {
-                ContentParticle& content = _dtdContext.finishExpression();
-
-                if(_elemDecl) // skip duplicates
-                    _elemDecl->setExpression( content, _dtdContext.expressionSize() );
-
-                _elemDecl = 0;
-                _dtdContext.resetExpression();
+                assert(_elemModel);
+                _elemModelBuilder.finish();
+                _elemModel = 0;
 
                 popParseState();
 
@@ -2761,42 +2757,42 @@ class XmlReaderImpl
 
             if( ch == ',')
             {
-                _dtdContext.pushOperator(ch);
+                _elemModelBuilder.pushOperator(ch);
                 _parse = &XmlReaderImpl::OnDtdBinaryOp;
                 return;
             }
 
             if( ch == '|')
             {
-                _dtdContext.pushOperator(ch);
+                _elemModelBuilder.pushOperator(ch);
                 _parse = &XmlReaderImpl::OnDtdBinaryOp;
                 return;
             }
 
             if(ch == '+')
             {
-                _dtdContext.pushOperator(ch);
+                _elemModelBuilder.pushOperator(ch);
                 _parse = &XmlReaderImpl::OnDtdUnrayOp;
                 return;
             }
 
             if(ch == '*')
             {
-                _dtdContext.pushOperator(ch);
+                _elemModelBuilder.pushOperator(ch);
                 _parse = &XmlReaderImpl::OnDtdUnrayOp;
                 return;
             }
 
             if(ch == '?')
             {
-                _dtdContext.pushOperator(ch);
+                _elemModelBuilder.pushOperator(ch);
                 _parse = &XmlReaderImpl::OnDtdUnrayOp;
                 return;
             }
 
             if( ch == ')')
             {
-                _dtdContext.pushClosingBrace();
+                _elemModelBuilder.pushClosingBrace();
                 return;
             }
 
@@ -3158,10 +3154,10 @@ class XmlReaderImpl
                     //       have to look up the ElementDeclaration once.
 
                     // TODO: QName ?
-                    ContentModel* elemDecl = _dtd.findElement( _startElem.qname() );
+                    ElementModel* elemDecl = _dtd.findElement( _startElem.qname() );
                     if(elemDecl)
                     {
-                        AttributeModel* attrDecl = elemDecl->attributeList().findAttribute( _attr->qname() );
+                        AttributeModel* attrDecl = elemDecl->attributes().findAttribute( _attr->qname() );
 
                         if(attrDecl && attrDecl->isNormalize())
                             _attr->normalize();
@@ -3875,9 +3871,9 @@ class XmlReaderImpl
         , _depth(0)
         , _parse(0)                 
         , _current(0)
-        , _dtdContext(_dtd)
-        , _elemDecl(0)
-        , _attrDecl(0)
+        , _elemModelBuilder()
+        , _elemModel(0)
+        , _attrModel(0)
         , _attlistDecl(0)
         {
             _parse = &XmlReaderImpl::onDocumentBegin;
@@ -3894,9 +3890,9 @@ class XmlReaderImpl
         , _depth(0)
         , _parse(0)                 
         , _current(0)
-        , _dtdContext(_dtd)
-        , _elemDecl(0)
-        , _attrDecl(0)
+        , _elemModelBuilder()
+        , _elemModel(0)
+        , _attrModel(0)
         , _attlistDecl(0)
         {
             _parse = &XmlReaderImpl::onDocumentBegin;
@@ -3946,12 +3942,12 @@ class XmlReaderImpl
             _nsctx.clear();
             
             _dtd.clear();
-            _dtdContext.clear();
+            _elemModelBuilder.reset();
             _docType.clear();
             
             _attr = 0;
-            _elemDecl = 0;
-            _attrDecl = 0;
+            _elemModel = 0;
+            _attrModel = 0;
             _attlistDecl = 0;
             _entity = 0;
             _notation = 0;
@@ -4116,10 +4112,10 @@ class XmlReaderImpl
         Node* _current;
 
         DocTypeDefinition _dtd;
-        ContentModelBuilder _dtdContext;
+        ContentModelBuilder _elemModelBuilder;
         
-        ContentModel* _elemDecl;
-        AttributeModel* _attrDecl;
+        ElementModel* _elemModel;
+        AttributeModel* _attrModel;
         AttributeListModel* _attlistDecl;
         
         // TODO: some sort of union?

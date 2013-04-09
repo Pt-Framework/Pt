@@ -42,13 +42,8 @@ namespace Pt {
 
 namespace Xml {
 
-class ContentModel;
+class ElementModel;
 class AttributeListModel;
-class ContentParticle;
-class LeafParticle;
-class SplitParticle;
-class PcDataParticle;
-class MatchParticle;
 
 class PT_XML_API DocTypeDefinition : private NonCopyable
 {
@@ -65,48 +60,39 @@ class PT_XML_API DocTypeDefinition : private NonCopyable
 
         QName& rootName();
 
+        //! @brief Returns the entity or null if already declared.
         Entity* declareEntity(const Pt::String& name);
 
+        //! @brief Returns the entity or null if not declared.
         const Entity* findEntity(const Pt::String& name) const;
 
+        //! @brief Returns the entity or null if already declared.
         Entity* declareParamEntity(const Pt::String& name);
 
+        //! @brief Returns the entity or null if not declared.
         const Entity* findParamEntity(const Pt::String& name) const;
 
+        //! @brief Returns the notation or null if already declared.
         Notation* declareNotation(const Pt::String& name);
 
+        //! @brief Returns the notation or null if not declared.
         const Notation* findNotation(const Pt::String& name) const;
 
     public:
-        //! @internal
-        ContentModel* declareElement(const QName& name);
+        //! @internal Returns null if already declared.
+        ElementModel* declareElement(const QName& name);
 
         //! @internal
-        ContentModel* findElement(const QName& name);
+        ElementModel* findElement(const QName& name);
 
-        //! @internal
+        //! @internal Returns 
         AttributeListModel& declareAttributeList(const QName& name);
 
         //! @internal
         AttributeListModel* findAttributeList(const QName& name);
 
-        //! @internal use allocator
-        LeafParticle& getLabel(const Pt::String& name);
-
-        //! @internal use allocator
-        SplitParticle& getSplit(ContentParticle& to);
-
-        //! @internal use allocator
-        PcDataParticle& getPcData();
-
-        //! @internal use allocator
-        MatchParticle& getMatch();
-
     private:
-        // TODO: vector<ContentModel*>, move QName to ContentModel
-        // make separate class DocumentModel, where _pool and Builder
-        // functionality is placed.
-        typedef std::vector< std::pair<QName, ContentModel*> > DocumentModel;
+        typedef std::vector<ElementModel*> DocumentModel;
         typedef std::map<String, Notation> Notations;
         typedef std::map<String, Entity> Entities;
 
@@ -115,9 +101,6 @@ class PT_XML_API DocTypeDefinition : private NonCopyable
         Entities _entities;
         Entities _paramEntities;
         Notations _notations;
-
-        // TODO: ContentModelPool
-        std::vector<ContentParticle*> _pool;
 };
 
 } // namespace Xml

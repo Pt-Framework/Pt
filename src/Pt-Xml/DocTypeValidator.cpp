@@ -47,7 +47,7 @@ class ElementValidator
         : _elemDecl(0)
         { }
 
-        explicit ElementValidator(const ContentModel& elemDecl)
+        explicit ElementValidator(const ElementModel& elemDecl)
         : _particles( elemDecl.content(), elemDecl.contentSize() )
         , _elemDecl(&elemDecl)
         { }
@@ -58,7 +58,7 @@ class ElementValidator
 
     private:
         ContentParticleList _particles;
-        const ContentModel* _elemDecl;
+        const ElementModel* _elemDecl;
 };
 
 
@@ -148,13 +148,13 @@ bool DocTypeValidatorImpl::validate(Node& node)
                 valid = se.qname() == _dtd->rootName();
             }
                     
-            ContentModel* decl = _dtd->findElement( se.qname() );
+            ElementModel* decl = _dtd->findElement( se.qname() );
             if(decl)
             {
                 ElementValidator validator( *decl );
                 _decls.push(validator);
 
-                if( ! _attrValidator.validate(se.attributes(), decl->attributeList()) )
+                if( ! _attrValidator.validate(se.attributes(), decl->attributes()) )
                     valid = false;
             }
             else

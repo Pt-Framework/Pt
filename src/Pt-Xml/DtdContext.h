@@ -40,6 +40,7 @@ namespace Pt {
 namespace Xml {
 
 class DocTypeDefinition;
+class ElementModel;
 
 class ContentModelBuilder
 {
@@ -90,18 +91,15 @@ class ContentModelBuilder
         };
 
     public:
-        ContentModelBuilder(DocTypeDefinition& dtd);
+        ContentModelBuilder();
 
         ~ContentModelBuilder();
 
-        void clear();
+        void reset(ElementModel& elem);
 
-        void resetExpression();
+        void reset();
 
-        ContentParticle& finishExpression();
-
-        std::size_t expressionSize() const
-        { return _nodeCount; }
+        void finish();
         
         void pushOperator(Pt::Char ch);
 
@@ -109,16 +107,15 @@ class ContentModelBuilder
 
         void pushClosingBrace();
 
-        void pushOperand(ContentParticle& op);
-
         void pushDtdOperand(const String& name);
 
     private:
+        void pushOperand(ContentParticle& op);
+
         void reduceStack();
 
     private:
-        DocTypeDefinition* _dtd;
-        unsigned _nodeCount;
+        ElementModel* _elem;
         std::stack<Pt::Char> _ops;
         std::stack<Fragment> _fragments;
 };

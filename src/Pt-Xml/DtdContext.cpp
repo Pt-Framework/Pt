@@ -26,6 +26,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "DtdContext.h"
+#include "ElementDeclaration.h"
 #include "Pt/Xml/DocTypeDefinition.h"
 #include <cassert>
 
@@ -33,25 +34,25 @@ namespace Pt {
 
 namespace Xml {
 
-ContentModelBuilder::ContentModelBuilder(DocTypeDefinition& dtd)
-: _dtd(&dtd)
-, _nodeCount(0)
+ContentModelBuilder::ContentModelBuilder()
+: _elem(0)
 {}
 
 
 ContentModelBuilder::~ContentModelBuilder()
 {
-    clear();
+    reset();
 }
 
 
-void ContentModelBuilder::clear()
+void ContentModelBuilder::reset(ElementModel& elem)
 {
-    resetExpression();
+    reset();
+    _elem = &elem;
 }
 
 
-void ContentModelBuilder::resetExpression()
+void ContentModelBuilder::reset()
 {
     //TODO: remove the particles fro pool and delete immediately
 
@@ -61,70 +62,74 @@ void ContentModelBuilder::resetExpression()
     while( ! _ops.empty() )
         _ops.pop();
 
-    // id of 0 is for Match
-    _nodeCount = 1;
+    _elem = 0;
 }
 
 
-ContentParticle& ContentModelBuilder::finishExpression()
+void ContentModelBuilder::finish()
 {
+    if( ! _elem)
+        return;
+
     reduceStack();
 
     if( _fragments.empty() )
     {
-        assert(_nodeCount == 1);
         throw std::logic_error("invalid content model");
     }
 
     if(_fragments.size() > 1)
         throw std::logic_error("DTD syntax error: incomplete expression");
 
-    _fragments.top().patchLeafs( _dtd->getMatch() );
+    _fragments.top().patchLeafs( _elem->getMatch() );
 
     ContentParticle& particle = _fragments.top().start();
 
-    // TODO reset here, but what about _nodeCount?
-    //reset();
-    return particle;
+    if(_elem) // skip duplicates
+        _elem->setExpression(particle);
+
+    reset();
 }
     
         
 void ContentModelBuilder::pushOperator(Pt::Char ch)
 {
+    if( ! _elem)
+        return;
+
     _ops.push(ch);
 }
 
 
 void ContentModelBuilder::pushOpenBrace()
 {
+    if( ! _elem)
+        return;
+
     _ops.push('(');
 }
 
 
 void ContentModelBuilder::pushClosingBrace()
 {
+    if( ! _elem)
+        return;
+
     reduceStack();
-}
-
-
-void ContentModelBuilder::pushOperand(ContentParticle& op)
-{
-    op.setId(_nodeCount++);
-
-    Fragment frag(op);
-    frag.setLeaf(op);
-    _fragments.push(frag);
 }
 
 
 void ContentModelBuilder::pushDtdOperand(const String& name)
 {
+    if( ! _elem)
+        return;
+
     if(name.at(0) == '#')
     {
         if(name != L"#PCDATA")
             throw std::logic_error("DTD syntax error: expected PCDATA");
 
-        PcDataParticle& pcdata = _dtd->getPcData();
+        PcDataParticle& pcdata = _elem->getPcData();
         pushOperand(pcdata);
                 
         // TODO: allow #PCDATA only at beginning of first '('
@@ -132,8 +137,16 @@ void ContentModelBuilder::pushDtdOperand(const String& name)
         return;
     }
                 
-    LeafParticle& leaf = _dtd->getLabel(name);
+    LeafParticle& leaf = _elem->getLabel(name);
     pushOperand(leaf);
+}
+
+
+void ContentModelBuilder::pushOperand(ContentParticle& op)
+{
+    Fragment frag(op);
+    frag.setLeaf(op);
+    _fragments.push(frag);
 }
 
 
@@ -184,8 +197,7 @@ void ContentModelBuilder::reduceStack()
             Fragment op1 = _fragments.top();
             _fragments.pop();
 
-            SplitParticle& split = _dtd->getSplit( op2.start() );
-            split.setId(_nodeCount++);
+            SplitParticle& split = _elem->getSplit( op2.start() );
             split.setNext( op1.start() );
 
             Fragment frag(split);
@@ -204,8 +216,7 @@ void ContentModelBuilder::reduceStack()
             Fragment op1 = _fragments.top();
             _fragments.pop();
 
-            SplitParticle& split = _dtd->getSplit( op1.start() );
-            split.setId(_nodeCount++);
+            SplitParticle& split = _elem->getSplit( op1.start() );
                     
             Fragment frag(split);
             frag.setLeafs(op1.leafs(), split);
@@ -223,8 +234,7 @@ void ContentModelBuilder::reduceStack()
             Fragment op1 = _fragments.top();
             _fragments.pop();
 
-            SplitParticle& split = _dtd->getSplit( op1.start() );
-            split.setId(_nodeCount++);
+            SplitParticle& split = _elem->getSplit( op1.start() );
 
             op1.patchLeafs(split);
                     
@@ -244,8 +254,7 @@ void ContentModelBuilder::reduceStack()
             Fragment op1 = _fragments.top();
             _fragments.pop();
 
-            SplitParticle& split = _dtd->getSplit( op1.start() );
-            split.setId(_nodeCount++);
+            SplitParticle& split = _elem->getSplit( op1.start() );
 
             op1.patchLeafs(split);
                     

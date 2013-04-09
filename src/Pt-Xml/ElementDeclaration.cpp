@@ -28,86 +28,151 @@
 
 #include "ElementDeclaration.h"
 #include "AttributeDeclaration.h"
+#include "ContentParticle.h"
+#include <cassert>
 
 namespace Pt {
 
 namespace Xml {
 
-ContentModel::ContentModel()
-: _start(0)
-, _size(0)
-, _type(Invalid)
+ElementModel::ElementModel(const QName& name)
+: _name(name)
+, _start(0)
+, _type(Undeclared)
 {}
         
 
-ContentModel::~ContentModel()
+ElementModel::~ElementModel()
 {
+    clear();
 }
 
 
-const AttributeListModel& ContentModel::attributeList() const
-{ 
-    return _attrs; 
+void ElementModel::clear()
+{
+    for(unsigned n = 0; n < _particles.size() ; ++n)
+    {
+        delete _particles[n];
+    }
+
+    _particles.clear();
+
+    _type = Undeclared;
 }
 
 
-AttributeListModel& ContentModel::attributeList()
-{ 
-    return _attrs; 
+const QName& ElementModel::qname() const
+{
+    return _name;
 }
         
 
-bool ContentModel::isEmpty() const
+bool ElementModel::isUndeclared() const
+{
+    return _type == Undeclared;
+}
+
+
+bool ElementModel::isEmpty() const
 { 
     return _type == Empty; 
 }
 
 
-void ContentModel::setEmpty()
+void ElementModel::setEmpty()
 { 
+    clear();
     _start = 0;
-    _size = 0;
     _type = Empty;
 }
 
 
-bool ContentModel::isAny() const
+bool ElementModel::isAny() const
 { 
     return _type == Any; 
 }
 
 
-void ContentModel::setAny()
+void ElementModel::setAny()
 { 
+    clear();
     _start = 0;
-    _size = 0;
     _type = Any;
 }
 
 
-bool ContentModel::isExpression() const
+bool ElementModel::isExpression() const
 { 
     return _type == Expression; 
 }
 
 
-void ContentModel::setExpression(ContentParticle& start, unsigned n)
+void ElementModel::setExpression(ContentParticle& start)
 { 
     _start = &start; 
-    _size = n;
     _type = Expression;
 }
 
 
-const ContentParticle* ContentModel::content() const
+const ContentParticle* ElementModel::content() const
 { 
     return _start; 
 }
 
 
-std::size_t ContentModel::contentSize() const
+std::size_t ElementModel::contentSize() const
 { 
-    return _size; 
+    return _particles.empty() ? 0 : _particles.size() + 1;
+}
+
+
+const AttributeListModel& ElementModel::attributes() const
+{ 
+    return _attrs; 
+}
+
+
+AttributeListModel& ElementModel::attributes()
+{ 
+    return _attrs; 
+}
+
+
+LeafParticle& ElementModel::getLabel(const Pt::String& name)
+{
+    _particles.reserve(_particles.size() + 1);
+    LeafParticle* label = new LeafParticle(name);
+    _particles.push_back(label);
+    label->setId( _particles.size() );
+    return *label;
+}
+
+
+SplitParticle& ElementModel::getSplit(ContentParticle& to)
+{
+    _particles.reserve(_particles.size() + 1);
+    SplitParticle* split = new SplitParticle(&to);
+    _particles.push_back(split);
+    split->setId( _particles.size() );
+    return *split;
+}
+
+
+PcDataParticle& ElementModel::getPcData()
+{
+    _particles.reserve(_particles.size() + 1);
+    PcDataParticle* node = new PcDataParticle();
+    _particles.push_back(node);
+    node->setId( _particles.size() );
+    return *node;
+}
+
+// TODO
+static MatchParticle match;
+
+MatchParticle& ElementModel::getMatch()
+{ 
+    return match; 
 }
 
 } // namespace Xml

@@ -26,7 +26,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "ContentParticle.h"
 #include "ElementDeclaration.h"
 #include <Pt/Xml/DocTypeDefinition.h>
 #include <algorithm>
@@ -35,9 +34,14 @@
 
 namespace {
 
-bool lessThanName(const std::pair<Pt::Xml::QName, Pt::Xml::ContentModel*>& e, const Pt::Xml::QName& name)
+bool lessThanNameooo(const std::pair<Pt::Xml::QName, Pt::Xml::ElementModel*>& e, const Pt::Xml::QName& name)
 {
     return e.first < name;
+}
+
+bool lessThanName(Pt::Xml::ElementModel* e, const Pt::Xml::QName& name)
+{
+    return e->qname() < name;
 }
 
 }
@@ -45,9 +49,6 @@ bool lessThanName(const std::pair<Pt::Xml::QName, Pt::Xml::ContentModel*>& e, co
 namespace Pt {
 
 namespace Xml {
-
-// TODO
-static MatchParticle match;
 
 DocTypeDefinition::DocTypeDefinition()
 {
@@ -64,20 +65,13 @@ void DocTypeDefinition::clear()
 {
     for(DocumentModel::iterator it = _docModel.begin(); it != _docModel.end(); ++it)
     {
-        delete it->second;
+        delete *it;
     }
 
     _rootName.clear();
     _docModel.clear();
     _entities.clear();
     _paramEntities.clear();
-
-    for(unsigned n = 0; n < _pool.size() ; ++n)
-    {
-        delete _pool[n];
-    }
-
-    _pool.clear();
 }
 
 
@@ -96,69 +90,6 @@ const QName& DocTypeDefinition::rootName() const
 QName& DocTypeDefinition::rootName()
 { 
     return _rootName; 
-}
-
-
-ContentModel* DocTypeDefinition::declareElement(const QName& name)
-{ 
-    DocumentModel::iterator lbound;
-    lbound = std::lower_bound(_docModel.begin(), _docModel.end(), name, lessThanName);
-    
-    if( lbound != _docModel.end() && lbound->first == name)
-    {
-        return 0;
-    }
-
-    std::auto_ptr<ContentModel> ep( new ContentModel() );
-    std::pair<QName, ContentModel*> entry( name, ep.get() );
-    _docModel.insert(lbound, entry);
-    return ep.release();
-}
-
-
-ContentModel* DocTypeDefinition::findElement(const QName& name)
-{
-    DocumentModel::iterator lbound;
-    lbound = std::lower_bound(_docModel.begin(), _docModel.end(), name, lessThanName);
-    
-    if( lbound != _docModel.end() && lbound->first == name)
-    {
-        return lbound->second;
-    }
-
-    return 0;
-}
-
-
-AttributeListModel& DocTypeDefinition::declareAttributeList(const QName& name)
-{ 
-    DocumentModel::iterator lbound;
-    lbound = std::lower_bound(_docModel.begin(), _docModel.end(), name, lessThanName);
-    
-    if( lbound != _docModel.end() && lbound->first == name)
-    {
-        return lbound->second->attributeList();
-    }
-
-    std::auto_ptr<ContentModel> ep( new ContentModel() );
-    std::pair<QName, ContentModel*> entry( name, ep.get() );
-    _docModel.insert(lbound, entry);
-    ContentModel* elemDecl = ep.release();
-    return elemDecl->attributeList();
-}
-
-
-AttributeListModel* DocTypeDefinition::findAttributeList(const QName& name)
-{
-    DocumentModel::iterator lbound;
-    lbound = std::lower_bound(_docModel.begin(), _docModel.end(), name, lessThanName);
-    
-    if( lbound != _docModel.end() && lbound->first == name)
-    {
-        return &lbound->second->attributeList();
-    }
-
-    return 0;
 }
 
 
@@ -238,40 +169,67 @@ const Notation* DocTypeDefinition::findNotation(const Pt::String& name) const
 }
 
 
-
-
-
-
-LeafParticle& DocTypeDefinition::getLabel(const Pt::String& name)
-{
-    _pool.reserve(_pool.size() + 1);
-    LeafParticle* label = new LeafParticle(name);
-    _pool.push_back(label);
-    return *label;
-}
-
-
-SplitParticle& DocTypeDefinition::getSplit(ContentParticle& to)
-{
-    _pool.reserve(_pool.size() + 1);
-    SplitParticle* split = new SplitParticle(&to);
-    _pool.push_back(split);
-    return *split;
-}
-
-
-PcDataParticle& DocTypeDefinition::getPcData()
-{
-    _pool.reserve(_pool.size() + 1);
-    PcDataParticle* node = new PcDataParticle();
-    _pool.push_back(node);
-    return *node;
-}
-
-
-MatchParticle& DocTypeDefinition::getMatch()
+ElementModel* DocTypeDefinition::declareElement(const QName& name)
 { 
-    return match; 
+    DocumentModel::iterator lbound;
+    lbound = std::lower_bound(_docModel.begin(), _docModel.end(), name, lessThanName);
+    
+    if( lbound != _docModel.end() && (*lbound)->qname() == name)
+    {
+        ElementModel* e = *lbound;
+        return e->isUndeclared() ? e : 0;
+    }
+
+    std::auto_ptr<ElementModel> ep( new ElementModel(name) );
+    _docModel.insert(lbound, ep.get());
+    return ep.release();
+}
+
+
+ElementModel* DocTypeDefinition::findElement(const QName& name)
+{
+    DocumentModel::iterator lbound;
+    lbound = std::lower_bound(_docModel.begin(), _docModel.end(), name, lessThanName);
+    
+    if( lbound != _docModel.end() && (*lbound)->qname() == name)
+    {
+        return *lbound;
+    }
+
+    return 0;
+}
+
+
+AttributeListModel& DocTypeDefinition::declareAttributeList(const QName& name)
+{ 
+    DocumentModel::iterator lbound;
+    lbound = std::lower_bound(_docModel.begin(), _docModel.end(), name, lessThanName);
+    
+    if( lbound != _docModel.end() && (*lbound)->qname() == name)
+    {
+        return (*lbound)->attributes();
+    }
+
+    std::auto_ptr<ElementModel> ep( new ElementModel(name) );
+    _docModel.insert(lbound, ep.get());
+    
+    ElementModel* elemDecl = ep.release();
+    return elemDecl->attributes();
+}
+
+
+AttributeListModel* DocTypeDefinition::findAttributeList(const QName& name)
+{
+    DocumentModel::iterator lbound;
+    lbound = std::lower_bound(_docModel.begin(), _docModel.end(), name, lessThanName);
+    
+    if( lbound != _docModel.end() && (*lbound)->qname() == name)
+    {
+        ElementModel* e = *lbound;
+        return &e->attributes();
+    }
+
+    return 0;
 }
 
 } // namespace Xml

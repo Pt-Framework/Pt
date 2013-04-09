@@ -31,6 +31,7 @@
 
 #include "AttributeListDeclaration.h"
 #include <Pt/Xml/Api.h>
+#include <Pt/Xml/QName.h>
 #include <Pt/NonCopyable.h>
 #include <vector>
 #include <cstddef>
@@ -40,26 +41,31 @@ namespace Pt {
 namespace Xml {
 
 class ContentParticle;
+class LeafParticle;
+class SplitParticle;
+class PcDataParticle;
+class MatchParticle;
 
-class PT_XML_API ContentModel : private NonCopyable
+class PT_XML_API ElementModel : private NonCopyable
 {
     enum ContentType
     {
-        //TODO: Undeclared (only ATTLIST, missing ELEMENT)
-        Invalid = 0,
+        Undeclared = 0,
         Expression = 1,
         Empty = 2,
         Any = 3
     };
 
     public:
-        ContentModel();
+        ElementModel(const QName& name);
         
-        ~ContentModel();
+        ~ElementModel();
 
-        const AttributeListModel& attributeList() const;
+        void clear();
 
-        AttributeListModel& attributeList();
+        const QName& qname() const;
+
+        bool isUndeclared() const;
         
         bool isEmpty() const;
 
@@ -71,19 +77,33 @@ class PT_XML_API ContentModel : private NonCopyable
 
         bool isExpression() const;
 
-        void setExpression(ContentParticle& start, unsigned n);
+        void setExpression(ContentParticle& start);
 
         const ContentParticle* content() const;
 
         std::size_t contentSize() const;
 
+        const AttributeListModel& attributes() const;
+
+        AttributeListModel& attributes();
+
+    public:
+        //! @internal use allocator
+        LeafParticle& getLabel(const Pt::String& name);
+
+        //! @internal use allocator
+        SplitParticle& getSplit(ContentParticle& to);
+
+        //! @internal use allocator
+        PcDataParticle& getPcData();
+
+        //! @internal use allocator
+        MatchParticle& getMatch();
+
     private:
-        // TODO: use std::vector<ContentParticle*> and own particles
-        //       front() should be start
-        //       DtdBuilder fills it
-        //       reference to DocTypeContext for allocation
+        QName _name;
         ContentParticle* _start;
-        std::size_t _size;
+        std::vector<ContentParticle*> _particles;
         ContentType _type;
         AttributeListModel _attrs;
 };
