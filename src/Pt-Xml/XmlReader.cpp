@@ -3017,7 +3017,7 @@ class XmlReaderImpl
 
             if( isAlpha(ch) )
             {
-                _startElem.qname().name() += c;
+                _startElem.qname().name() += ch;
                 return;
             }
 
