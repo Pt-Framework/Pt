@@ -26,8 +26,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "ElementDeclaration.h"
-#include "AttributeDeclaration.h"
+#include "ElementModel.h"
+#include "AttributeModel.h"
 #include "ContentParticle.h"
 #include <cassert>
 

@@ -27,8 +27,8 @@
  */
 
 #include "DtdContext.h"
-#include "ElementDeclaration.h"
-#include "AttributeDeclaration.h"
+#include "ElementModel.h"
+#include "AttributeModel.h"
 #include "InputStack.h"
 #include "NamespaceContext.h"
 

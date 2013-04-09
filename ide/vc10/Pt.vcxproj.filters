@@ -705,19 +705,7 @@
     <ClInclude Include="..\..\include\Pt\Xml\InputSource.h">
       <Filter>Pt-Xml</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Xml\ElementDeclaration.h">
-      <Filter>Pt-Xml</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Xml\DocTypeDefinition.h">
-      <Filter>Pt-Xml</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Xml\AttributeDeclaration.h">
-      <Filter>Pt-Xml</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Xml\DtdContext.h">
-      <Filter>Pt-Xml</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Xml\AttributeListDeclaration.h">
       <Filter>Pt-Xml</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Xml\InputStack.h">
@@ -739,6 +727,15 @@
       <Filter>Pt-Xml</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Xml\ContentParticle.h">
+      <Filter>Pt-Xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Xml\ElementModel.h">
+      <Filter>Pt-Xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Xml\AttributeListModel.h">
+      <Filter>Pt-Xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Xml\AttributeModel.h">
       <Filter>Pt-Xml</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1455,22 +1452,19 @@
     <ClCompile Include="..\..\src\Pt-Xml\DocTypeDefinition.cpp">
       <Filter>Pt-Xml</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Xml\ElementDeclaration.cpp">
-      <Filter>Pt-Xml</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Xml\DtdContext.cpp">
-      <Filter>Pt-Xml</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Xml\AttributeListDeclaration.cpp">
-      <Filter>Pt-Xml</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Pt-Xml\DocTypeValidator.cpp">
       <Filter>Pt-Xml</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Xml\AttributeDeclaration.cpp">
+    <ClCompile Include="..\..\src\Pt-Xml\ContentParticle.cpp">
       <Filter>Pt-Xml</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Xml\ContentParticle.cpp">
+    <ClCompile Include="..\..\src\Pt-Xml\ElementModel.cpp">
+      <Filter>Pt-Xml</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Xml\AttributeListModel.cpp">
+      <Filter>Pt-Xml</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Xml\AttributeModel.cpp">
       <Filter>Pt-Xml</Filter>
     </ClCompile>
   </ItemGroup>

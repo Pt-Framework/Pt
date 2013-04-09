@@ -26,8 +26,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "AttributeListDeclaration.h"
-#include "AttributeDeclaration.h"
+#include "AttributeListModel.h"
+#include "AttributeModel.h"
 
 namespace Pt {
 

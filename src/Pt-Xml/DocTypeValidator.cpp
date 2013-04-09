@@ -28,8 +28,8 @@
  
 
 #include "ContentParticle.h"
-#include "ElementDeclaration.h"
-#include "AttributeDeclaration.h"
+#include "ElementModel.h"
+#include "AttributeModel.h"
 #include <Pt//Xml/DocTypeValidator.h>
 #include <Pt/Xml/DocTypeDefinition.h>
 #include <Pt/Xml/Characters.h>

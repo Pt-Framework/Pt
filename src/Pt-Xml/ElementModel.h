@@ -29,7 +29,7 @@
 #ifndef Pt_Xml_ElementDeclaration_h
 #define Pt_Xml_ElementDeclaration_h
 
-#include "AttributeListDeclaration.h"
+#include "AttributeListModel.h"
 #include <Pt/Xml/Api.h>
 #include <Pt/Xml/QName.h>
 #include <Pt/NonCopyable.h>

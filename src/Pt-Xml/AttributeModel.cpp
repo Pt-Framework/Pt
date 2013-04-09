@@ -26,8 +26,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "AttributeDeclaration.h"
-#include "AttributeListDeclaration.h"
+#include "AttributeModel.h"
+#include "AttributeListModel.h"
 #include <Pt/Xml/DocTypeDefinition.h>
 #include <Pt/StringStream.h>
 
