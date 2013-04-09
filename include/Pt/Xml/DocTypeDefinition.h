@@ -43,6 +43,7 @@ namespace Pt {
 namespace Xml {
 
 class ElementModel;
+class ContentModel;
 class AttributeListModel;
 
 class PT_XML_API DocTypeDefinition : private NonCopyable
@@ -80,24 +81,21 @@ class PT_XML_API DocTypeDefinition : private NonCopyable
 
     public:
         //! @internal Returns null if already declared.
-        ElementModel* declareElement(const QName& name);
+        ContentModel* declareContent(const QName& name);
 
-        //! @internal
-        ElementModel* findElement(const QName& name);
-
-        //! @internal Returns 
+        //! @internal Returns the attribute list for an element.
         AttributeListModel& declareAttributeList(const QName& name);
 
-        //! @internal
-        AttributeListModel* findAttributeList(const QName& name);
+        //! @internal Returns null if not declared.
+        ElementModel* findElement(const QName& name);
 
     private:
-        typedef std::vector<ElementModel*> DocumentModel;
-        typedef std::map<String, Notation> Notations;
-        typedef std::map<String, Entity> Entities;
+        typedef std::vector<ElementModel*> Elements;
+        typedef std::map<String, Notation> Notations; // TODO: vector<Notation*>
+        typedef std::map<String, Entity> Entities; // TODO: vector<Entity*>
 
         QName _rootName;
-        DocumentModel _docModel;
+        Elements _elements;
         Entities _entities;
         Entities _paramEntities;
         Notations _notations;

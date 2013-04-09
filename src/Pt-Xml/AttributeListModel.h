@@ -41,7 +41,7 @@ namespace Xml {
 class QName;
 class AttributeModel;
 
-class PT_XML_API AttributeListModel : private NonCopyable
+class AttributeListModel : private NonCopyable
 {
     public:
         // TODO: Iterator that is not pointer to pointer

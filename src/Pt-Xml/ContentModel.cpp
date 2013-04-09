@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2013 by Marc Boris Duerner
- * 
+ * Copyright (C) 2013 Marc Boris Duerner
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -25,17 +25,167 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#include "DtdContext.h"
-#include "ElementModel.h"
-#include "Pt/Xml/DocTypeDefinition.h"
+
+#include "ContentModel.h"
+#include "ContentParticle.h"
 #include <cassert>
 
 namespace Pt {
 
 namespace Xml {
 
+ContentModel::ContentModel()
+: _start(0)
+, _type(Undeclared)
+{}
+        
+
+ContentModel::~ContentModel()
+{
+    clear();
+}
+
+
+void ContentModel::clear()
+{
+    for(unsigned n = 0; n < _particles.size() ; ++n)
+    {
+        delete _particles[n];
+    }
+
+    _particles.clear();
+
+    _type = Undeclared;
+}
+
+
+bool ContentModel::isUndeclared() const
+{
+    return _type == Undeclared;
+}
+
+
+bool ContentModel::isEmpty() const
+{ 
+    return _type == Empty; 
+}
+
+
+void ContentModel::setEmpty()
+{ 
+    clear();
+    _start = 0;
+    _type = Empty;
+}
+
+
+bool ContentModel::isAny() const
+{ 
+    return _type == Any; 
+}
+
+
+void ContentModel::setAny()
+{ 
+    clear();
+    _start = 0;
+    _type = Any;
+}
+
+
+bool ContentModel::isExpression() const
+{ 
+    return _type == Expression; 
+}
+
+
+void ContentModel::setExpression(ContentParticle& start)
+{ 
+    _start = &start; 
+    _type = Expression;
+}
+
+
+const ContentParticle* ContentModel::expression() const
+{ 
+    return _start; 
+}
+
+
+std::size_t ContentModel::size() const
+{ 
+    return _particles.empty() ? 0 : _particles.size() + 1;
+}
+
+
+LeafParticle& ContentModel::getLabel(const Pt::String& name)
+{
+    _particles.reserve(_particles.size() + 1);
+    LeafParticle* label = new LeafParticle(name);
+    _particles.push_back(label);
+    label->setId( _particles.size() );
+    return *label;
+}
+
+
+SplitParticle& ContentModel::getSplit(ContentParticle& to)
+{
+    _particles.reserve(_particles.size() + 1);
+    SplitParticle* split = new SplitParticle(&to);
+    _particles.push_back(split);
+    split->setId( _particles.size() );
+    return *split;
+}
+
+
+PcDataParticle& ContentModel::getPcData()
+{
+    _particles.reserve(_particles.size() + 1);
+    PcDataParticle* node = new PcDataParticle();
+    _particles.push_back(node);
+    node->setId( _particles.size() );
+    return *node;
+}
+
+// TODO
+static MatchParticle match;
+
+MatchParticle& ContentModel::getMatch()
+{ 
+    return match; 
+}
+
+
+
+
+void ContentModelBuilder::Fragment::setLeafs(const std::vector<ContentParticle*>& leafs, 
+                                             const std::vector<ContentParticle*>& leafs2)
+{ 
+    _leafs = leafs; 
+    _leafs.insert( _leafs.end(), leafs2.begin(), leafs2.end() );
+}
+
+
+void ContentModelBuilder::Fragment::setLeafs(const std::vector<ContentParticle*>& leafs, 
+                                             ContentParticle& leaf)
+{ 
+    _leafs = leafs; 
+    _leafs.push_back(&leaf);
+}
+
+
+void ContentModelBuilder::Fragment::patchLeafs(ContentParticle& to)
+{
+    for(unsigned n = 0; n < _leafs.size(); ++n)
+    {
+        ContentParticle* leaf = _leafs[n];
+        leaf->setNext(to);
+    }
+}
+
+
 ContentModelBuilder::ContentModelBuilder()
-: _elem(0)
+: _cm(0)
 {}
 
 
@@ -45,91 +195,81 @@ ContentModelBuilder::~ContentModelBuilder()
 }
 
 
-void ContentModelBuilder::reset(ElementModel& elem)
+void ContentModelBuilder::reset(ContentModel& cm)
 {
     reset();
-    _elem = &elem;
+    _cm = &cm;
 }
 
 
 void ContentModelBuilder::reset()
 {
-    //TODO: remove the particles fro pool and delete immediately
-
     while( ! _fragments.empty() )
         _fragments.pop();
                     
     while( ! _ops.empty() )
         _ops.pop();
 
-    _elem = 0;
+    _cm = 0;
 }
 
 
-void ContentModelBuilder::finish()
+bool ContentModelBuilder::finish()
 {
-    if( ! _elem)
-        return;
+    if( ! _cm)
+        return false;
 
-    reduceStack();
+    if( ! reduceStack() )
+        return false;
 
-    if( _fragments.empty() )
-    {
-        throw std::logic_error("invalid content model");
-    }
+    if(_fragments.size() != 1)
+        return false;
 
-    if(_fragments.size() > 1)
-        throw std::logic_error("DTD syntax error: incomplete expression");
-
-    _fragments.top().patchLeafs( _elem->getMatch() );
+    _fragments.top().patchLeafs( _cm->getMatch() );
 
     ContentParticle& particle = _fragments.top().start();
-
-    if(_elem) // skip duplicates
-        _elem->setExpression(particle);
+    _cm->setExpression(particle);
 
     reset();
+    return true;
 }
     
         
 void ContentModelBuilder::pushOperator(Pt::Char ch)
 {
-    if( ! _elem)
+    if( ! _cm)
         return;
 
     _ops.push(ch);
 }
 
 
-void ContentModelBuilder::pushOpenBrace()
+void ContentModelBuilder::pushScope()
 {
-    if( ! _elem)
+    if( ! _cm)
         return;
 
     _ops.push('(');
 }
 
 
-void ContentModelBuilder::pushClosingBrace()
+bool ContentModelBuilder::reduceScope()
 {
-    if( ! _elem)
-        return;
+    if( ! _cm)
+        return false;
 
-    reduceStack();
+    return reduceStack();
 }
 
 
-void ContentModelBuilder::pushDtdOperand(const String& name)
+void ContentModelBuilder::pushOperand(const String& name)
 {
-    if( ! _elem)
+    if( ! _cm)
         return;
 
-    if(name.at(0) == '#')
+    if(name== L"#PCDATA")
     {
-        if(name != L"#PCDATA")
-            throw std::logic_error("DTD syntax error: expected PCDATA");
-
-        PcDataParticle& pcdata = _elem->getPcData();
+        PcDataParticle& pcdata = _cm->getPcData();
         pushOperand(pcdata);
                 
         // TODO: allow #PCDATA only at beginning of first '('
@@ -137,7 +277,7 @@ void ContentModelBuilder::pushDtdOperand(const String& name)
         return;
     }
                 
-    LeafParticle& leaf = _elem->getLabel(name);
+    LeafParticle& leaf = _cm->getLabel(name);
     pushOperand(leaf);
 }
 
@@ -150,7 +290,7 @@ void ContentModelBuilder::pushOperand(ContentParticle& op)
 }
 
 
-void ContentModelBuilder::reduceStack()
+bool ContentModelBuilder::reduceStack()
 {
     for(;;)
     {
@@ -168,7 +308,7 @@ void ContentModelBuilder::reduceStack()
             _ops.pop();
                  
             if( _fragments.size() < 2 )
-                throw std::logic_error("DTD syntax error: not enough operands for ,");
+                return false;
                     
             Fragment op2 = _fragments.top();
             _fragments.pop();
@@ -189,7 +329,7 @@ void ContentModelBuilder::reduceStack()
             _ops.pop();
                  
             if( _fragments.size() < 2 )
-                throw std::logic_error("DTD syntax error: not enough operands for |");
+                return false;
                     
             Fragment op2 = _fragments.top();
             _fragments.pop();
@@ -197,7 +337,7 @@ void ContentModelBuilder::reduceStack()
             Fragment op1 = _fragments.top();
             _fragments.pop();
 
-            SplitParticle& split = _elem->getSplit( op2.start() );
+            SplitParticle& split = _cm->getSplit( op2.start() );
             split.setNext( op1.start() );
 
             Fragment frag(split);
@@ -211,12 +351,12 @@ void ContentModelBuilder::reduceStack()
             _ops.pop();
                  
             if( _fragments.empty() )
-                throw std::logic_error("DTD syntax error: not enough operands for ?");
+                return false;
                     
             Fragment op1 = _fragments.top();
             _fragments.pop();
 
-            SplitParticle& split = _elem->getSplit( op1.start() );
+            SplitParticle& split = _cm->getSplit( op1.start() );
                     
             Fragment frag(split);
             frag.setLeafs(op1.leafs(), split);
@@ -229,12 +369,12 @@ void ContentModelBuilder::reduceStack()
             _ops.pop();
                  
             if( _fragments.empty() )
-                throw std::logic_error("DTD syntax error: not enough operands for *");
+                return false;
                     
             Fragment op1 = _fragments.top();
             _fragments.pop();
 
-            SplitParticle& split = _elem->getSplit( op1.start() );
+            SplitParticle& split = _cm->getSplit( op1.start() );
 
             op1.patchLeafs(split);
                     
@@ -249,12 +389,12 @@ void ContentModelBuilder::reduceStack()
             _ops.pop();
                  
             if( _fragments.empty() )
-                throw std::logic_error("DTD syntax error: not enough operands for +");
+                return false;
                     
             Fragment op1 = _fragments.top();
             _fragments.pop();
 
-            SplitParticle& split = _elem->getSplit( op1.start() );
+            SplitParticle& split = _cm->getSplit( op1.start() );
 
             op1.patchLeafs(split);
                     
@@ -264,6 +404,8 @@ void ContentModelBuilder::reduceStack()
             continue;
         }
     }
+
+    return true;
 }
 
 } // namespace Xml

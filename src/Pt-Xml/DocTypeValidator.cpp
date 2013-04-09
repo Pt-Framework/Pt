@@ -48,7 +48,7 @@ class ElementValidator
         { }
 
         explicit ElementValidator(const ElementModel& elemDecl)
-        : _particles( elemDecl.content(), elemDecl.contentSize() )
+        : _particles( elemDecl.content().expression(), elemDecl.content().size() )
         , _elemDecl(&elemDecl)
         { }
 
@@ -71,7 +71,7 @@ bool ElementValidator::validateNode(Node& node)
         if( chars->isSpace() )
         {
             // special rule for EMPTY, not even WS is allowed
-            if( _elemDecl && _elemDecl->isEmpty() )
+            if( _elemDecl && _elemDecl->content().isEmpty() )
                 return false;
 
             // all other cases ignore WS
@@ -79,7 +79,7 @@ bool ElementValidator::validateNode(Node& node)
         }
     }
 
-    if( _elemDecl && _elemDecl->isAny() )
+    if( _elemDecl && _elemDecl->content().isAny() )
         return true;
 
     // invalid or EMPTY will not have any further states, so we will
@@ -92,7 +92,7 @@ bool ElementValidator::isValid() const
 { 
     // if the element was undeclared, empty or any content is allowed
     // we do not expect more content
-    if( ! _elemDecl || ! _elemDecl->isExpression() )
+    if( ! _elemDecl || ! _elemDecl->content().isExpression() )
         return true;
             
     return _particles.isValid();

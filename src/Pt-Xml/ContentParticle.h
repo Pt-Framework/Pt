@@ -26,8 +26,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef Pt_Xml_ContentModel_h
-#define Pt_Xml_ContentModel_h
+#ifndef Pt_Xml_ContentParticle_h
+#define Pt_Xml_ContentParticle_h
 
 #include <Pt/Xml/Api.h>
 #include <Pt/Xml/Node.h>
@@ -85,7 +85,7 @@ class ContentParticleList
     public:
         ContentParticleList();
         
-        ContentParticleList(const ContentParticle* start, std::size_t nodeCount);
+        ContentParticleList(const ContentParticle* start, std::size_t size);
 
         bool advance(Node& node);
 

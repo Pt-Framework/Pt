@@ -226,6 +226,7 @@
     <ClInclude Include="..\..\src\Pt-System\win32\win32.h" />
     <ClInclude Include="..\..\src\Pt-Xml\AttributeListModel.h" />
     <ClInclude Include="..\..\src\Pt-Xml\AttributeModel.h" />
+    <ClInclude Include="..\..\src\Pt-Xml\ContentModel.h" />
     <ClInclude Include="..\..\src\Pt-Xml\ContentParticle.h" />
     <ClInclude Include="..\..\src\Pt-Xml\ElementModel.h" />
     <ClInclude Include="..\..\src\Pt-Xml\InputStack.h" />
@@ -398,6 +399,7 @@
     <ClCompile Include="..\..\src\Pt-Unit\TextProtocolTest.cpp" />
     <ClCompile Include="..\..\src\Pt-Xml\AttributeListModel.cpp" />
     <ClCompile Include="..\..\src\Pt-Xml\AttributeModel.cpp" />
+    <ClCompile Include="..\..\src\Pt-Xml\ContentModel.cpp" />
     <ClCompile Include="..\..\src\Pt-Xml\ContentParticle.cpp" />
     <ClCompile Include="..\..\src\Pt-Xml\DocType.cpp" />
     <ClCompile Include="..\..\src\Pt-Xml\DocTypeDefinition.cpp" />

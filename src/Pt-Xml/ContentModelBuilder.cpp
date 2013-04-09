@@ -25,55 +25,17 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-
-#ifndef Pt_Xml_ElementModel_h
-#define Pt_Xml_ElementModel_h
-
-#include "ContentModel.h"
-#include "AttributeListModel.h"
-#include <Pt/Xml/Api.h>
-#include <Pt/Xml/QName.h>
-#include <Pt/NonCopyable.h>
-#include <cstddef>
+#include "ContentModelBuilder.h"
+#include "ContentParticle.h"
+#include "ElementModel.h"
+#include <cassert>
 
 namespace Pt {
 
 namespace Xml {
 
-class ContentParticle;
 
-class ElementModel : private NonCopyable
-{
-    public:
-        ElementModel(const QName& name);
-        
-        ~ElementModel();
-
-        void clear();
-
-        const QName& qname() const
-        { return _name; }
-
-        ContentModel& content()
-        { return _content; }
-
-        const ContentModel& content() const
-        { return _content; }
-
-        const AttributeListModel& attributes() const
-        { return _attrs; }
-
-        AttributeListModel& attributes()
-        { return _attrs; }
-
-    private:
-        QName _name;
-        ContentModel _content;
-        AttributeListModel _attrs;
-};
 
 } // namespace Xml
 
 } // namespace Pt
-
-#endif

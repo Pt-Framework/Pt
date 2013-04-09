@@ -25,22 +25,81 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef Pt_Xml_DtdContext_h
-#define Pt_Xml_DtdContext_h
 
-#include "ContentParticle.h"
+#ifndef Pt_Xml_ContentModel_h
+#define Pt_Xml_ContentModel_h
+
 #include <Pt/Xml/Api.h>
-#include <Pt/String.h>
+#include <Pt/Xml/QName.h>
 #include <Pt/NonCopyable.h>
 #include <vector>
 #include <stack>
+#include <cstddef>
 
 namespace Pt {
 
 namespace Xml {
 
-class DocTypeDefinition;
-class ElementModel;
+class ContentParticle;
+class LeafParticle;
+class SplitParticle;
+class PcDataParticle;
+class MatchParticle;
+
+class ContentModel : private NonCopyable
+{
+    enum ContentType
+    {
+        Undeclared = 0,
+        Expression = 1,
+        Empty = 2,
+        Any = 3
+    };
+
+    public:
+        ContentModel();
+        
+        ~ContentModel();
+
+        void clear();
+
+        bool isUndeclared() const;
+        
+        bool isEmpty() const;
+
+        void setEmpty();
+
+        bool isAny() const;
+
+        void setAny();
+
+        bool isExpression() const;
+
+        void setExpression(ContentParticle& start);
+
+        const ContentParticle* expression() const;
+
+        std::size_t size() const;
+
+    public:
+        //! @internal use allocator
+        LeafParticle& getLabel(const Pt::String& name);
+
+        //! @internal use allocator
+        SplitParticle& getSplit(ContentParticle& to);
+
+        //! @internal use allocator
+        PcDataParticle& getPcData();
+
+        //! @internal use allocator
+        MatchParticle& getMatch();
+
+    private:
+        ContentParticle* _start;
+        std::vector<ContentParticle*> _particles;
+        ContentType _type;
+};
+
 
 class ContentModelBuilder
 {
@@ -64,26 +123,11 @@ class ContentModelBuilder
                 void setLeafs(const std::vector<ContentParticle*>& leafs)
                 { _leafs = leafs; }
 
-                void setLeafs(const std::vector<ContentParticle*>& leafs, const std::vector<ContentParticle*>& leafs2)
-                { 
-                    _leafs = leafs; 
-                    _leafs.insert( _leafs.end(), leafs2.begin(), leafs2.end() );
-                }
+                void setLeafs(const std::vector<ContentParticle*>& leafs, const std::vector<ContentParticle*>& leafs2);
 
-                void setLeafs(const std::vector<ContentParticle*>& leafs, ContentParticle& leaf)
-                { 
-                    _leafs = leafs; 
-                    _leafs.push_back(&leaf);
-                }
+                void setLeafs(const std::vector<ContentParticle*>& leafs, ContentParticle& leaf);
 
-                void patchLeafs(ContentParticle& to)
-                {
-                    for(unsigned n = 0; n < _leafs.size(); ++n)
-                    {
-                        ContentParticle* leaf = _leafs[n];
-                        leaf->setNext(to);
-                    }
-                }
+                void patchLeafs(ContentParticle& to);
 
             private:
                 ContentParticle* _start;
@@ -95,27 +139,27 @@ class ContentModelBuilder
 
         ~ContentModelBuilder();
 
-        void reset(ElementModel& elem);
+        void reset(ContentModel& cm);
 
         void reset();
 
-        void finish();
+        bool finish();
         
         void pushOperator(Pt::Char ch);
 
-        void pushOpenBrace();
+        void pushScope();
 
-        void pushClosingBrace();
+        bool reduceScope();
 
-        void pushDtdOperand(const String& name);
+        void pushOperand(const String& name);
 
     private:
         void pushOperand(ContentParticle& op);
 
-        void reduceStack();
+        bool reduceStack();
 
     private:
-        ElementModel* _elem;
+        ContentModel* _cm;
         std::stack<Pt::Char> _ops;
         std::stack<Fragment> _fragments;
 };

@@ -26,7 +26,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "DtdContext.h"
 #include "ElementModel.h"
 #include "AttributeModel.h"
 #include "InputStack.h"
@@ -2419,14 +2418,14 @@ class XmlReaderImpl
 
             if( isSpace(ch) )
             {
-                assert(_elemModel == 0);
+                assert(_contentModel == 0);
                 
                 // must only be declared once
-                _elemModel = _dtd.declareElement(_qname);
-                if( ! _elemModel)
+                _contentModel = _dtd.declareContent(_qname);
+                if( ! _contentModel)
                     throw SyntaxError("duplicate element declaration", line());
 
-                _elemModelBuilder.reset(*_elemModel);
+                _cmBuilder.reset(*_contentModel);
                 _qname.clear();
                 _parse = &XmlReaderImpl::OnDtdElementContentBegin;
                 return;
@@ -2467,7 +2466,7 @@ class XmlReaderImpl
             if(ch != '(')
                 throw SyntaxError("XML syntax error", line());
 
-            _elemModelBuilder.pushOperator(ch);
+            _cmBuilder.pushScope();
             _parse = &XmlReaderImpl::OnDtdElementContent;
         }
         
@@ -2483,9 +2482,9 @@ class XmlReaderImpl
                 {
                     _token.clear();
                     
-                    assert(_elemModel);
-                    _elemModel->setEmpty();
-                    _elemModel = 0;
+                    assert(_contentModel);
+                    _contentModel->setEmpty();
+                    _contentModel = 0;
                     
                     _parse = &XmlReaderImpl::OnDtdTagEnd;
                 }
@@ -2493,9 +2492,9 @@ class XmlReaderImpl
                 {
                     _token.clear();
 
-                    assert(_elemModel);
-                    _elemModel->setAny();
-                    _elemModel = 0;
+                    assert(_contentModel);
+                    _contentModel->setAny();
+                    _contentModel = 0;
                     
                     _parse = &XmlReaderImpl::OnDtdTagEnd;
                 }
@@ -2518,10 +2517,12 @@ class XmlReaderImpl
             
             if(ch == '>')
             {
-                assert(_elemModel);
-                _elemModelBuilder.finish();
-                _elemModel = 0;
+                assert(_contentModel);
+                bool ok = _cmBuilder.finish();
+                if( ! ok )
+                    throw SyntaxError("invalid element declaration", line());
                 
+                _contentModel = 0;
                 popParseState();
 
                 //if( _input.isExternalDtd() )
@@ -2560,7 +2561,7 @@ class XmlReaderImpl
 
             if(ch == '(')
             {
-                _elemModelBuilder.pushOperator(ch);
+                _cmBuilder.pushScope();
                 return;
             }
 
@@ -2586,54 +2587,58 @@ class XmlReaderImpl
 
             if( ch == ',')
             {
-                _elemModelBuilder.pushDtdOperand(_token);
+                _cmBuilder.pushOperand(_token);
                 _token.clear();
-                _elemModelBuilder.pushOperator(ch);
+                _cmBuilder.pushOperator(ch);
                 _parse = &XmlReaderImpl::OnDtdBinaryOp;
                 return;
             }
 
             if( ch == '|')
             {
-                _elemModelBuilder.pushDtdOperand(_token);
+                _cmBuilder.pushOperand(_token);
                 _token.clear();
-                _elemModelBuilder.pushOperator(ch);
+                _cmBuilder.pushOperator(ch);
                 _parse = &XmlReaderImpl::OnDtdBinaryOp;
                 return;
             }
 
             if(ch == '+')
             {
-                _elemModelBuilder.pushDtdOperand(_token);
+                _cmBuilder.pushOperand(_token);
                 _token.clear();
-                _elemModelBuilder.pushOperator(ch);
+                _cmBuilder.pushOperator(ch);
                 _parse = &XmlReaderImpl::OnDtdUnrayOp;
                 return;
             }
 
             if(ch == '*')
             {
-                _elemModelBuilder.pushDtdOperand(_token);
+                _cmBuilder.pushOperand(_token);
                 _token.clear();
-                _elemModelBuilder.pushOperator(ch);
+                _cmBuilder.pushOperator(ch);
                 _parse = &XmlReaderImpl::OnDtdUnrayOp;
                 return;
             }
 
             if(ch == '?')
             {
-                _elemModelBuilder.pushDtdOperand(_token);
+                _cmBuilder.pushOperand(_token);
                 _token.clear();
-                _elemModelBuilder.pushOperator(ch);
+                _cmBuilder.pushOperator(ch);
                 _parse = &XmlReaderImpl::OnDtdUnrayOp;
                 return;
             }
 
             if( ch == ')')
             {
-                _elemModelBuilder.pushDtdOperand(_token);
+                _cmBuilder.pushOperand(_token);
                 _token.clear();
-                _elemModelBuilder.pushClosingBrace();
+                
+                bool ok = _cmBuilder.reduceScope();
+                if( ! ok )
+                    throw SyntaxError("invalid element declaration", line());
+                
                 _parse = &XmlReaderImpl::OnDtdContentExprEnd;
                 return;
             }
@@ -2653,10 +2658,12 @@ class XmlReaderImpl
 
             if( ch == '>' )
             {
-                assert(_elemModel);
-                _elemModelBuilder.finish();
-                _elemModel = 0;
+                assert(_contentModel);
+                bool ok = _cmBuilder.finish();
+                if( ! ok )
+                    throw SyntaxError("invalid element declaration", line());
                 
+                _contentModel = 0;
                 popParseState();
 
                 //if( _input.isExternalDtd() )
@@ -2669,21 +2676,24 @@ class XmlReaderImpl
 
             if( ch == ',')
             {
-                _elemModelBuilder.pushOperator(ch);
+                _cmBuilder.pushOperator(ch);
                 _parse = &XmlReaderImpl::OnDtdBinaryOp;
                 return;
             }
 
             if( ch == '|')
             {
-                _elemModelBuilder.pushOperator(ch);
+                _cmBuilder.pushOperator(ch);
                 _parse = &XmlReaderImpl::OnDtdBinaryOp;
                 return;
             }
 
             if( ch == ')')
             {
-                _elemModelBuilder.pushClosingBrace();
+                bool ok = _cmBuilder.reduceScope();
+                if( ! ok )
+                    throw SyntaxError("invalid element declaration", line());
+                
                 _parse = &XmlReaderImpl::OnDtdContentExprEnd;
                 return;
             }
@@ -2721,7 +2731,7 @@ class XmlReaderImpl
 
             if(ch == '(')
             {
-                _elemModelBuilder.pushOperator(ch);
+                _cmBuilder.pushScope();
                 _parse = &XmlReaderImpl::OnDtdElementContent;
                 return;
             }
@@ -2741,10 +2751,12 @@ class XmlReaderImpl
 
             if( ch == '>' )
             {
-                assert(_elemModel);
-                _elemModelBuilder.finish();
-                _elemModel = 0;
-
+                assert(_contentModel);
+                bool ok = _cmBuilder.finish();
+                if( ! ok )
+                    throw SyntaxError("invalid element declaration", line());
+                
+                _contentModel = 0;
                 popParseState();
 
                 //if( _input.isExternalDtd() )
@@ -2757,42 +2769,45 @@ class XmlReaderImpl
 
             if( ch == ',')
             {
-                _elemModelBuilder.pushOperator(ch);
+                _cmBuilder.pushOperator(ch);
                 _parse = &XmlReaderImpl::OnDtdBinaryOp;
                 return;
             }
 
             if( ch == '|')
             {
-                _elemModelBuilder.pushOperator(ch);
+                _cmBuilder.pushOperator(ch);
                 _parse = &XmlReaderImpl::OnDtdBinaryOp;
                 return;
             }
 
             if(ch == '+')
             {
-                _elemModelBuilder.pushOperator(ch);
+                _cmBuilder.pushOperator(ch);
                 _parse = &XmlReaderImpl::OnDtdUnrayOp;
                 return;
             }
 
             if(ch == '*')
             {
-                _elemModelBuilder.pushOperator(ch);
+                _cmBuilder.pushOperator(ch);
                 _parse = &XmlReaderImpl::OnDtdUnrayOp;
                 return;
             }
 
             if(ch == '?')
             {
-                _elemModelBuilder.pushOperator(ch);
+                _cmBuilder.pushOperator(ch);
                 _parse = &XmlReaderImpl::OnDtdUnrayOp;
                 return;
             }
 
             if( ch == ')')
             {
-                _elemModelBuilder.pushClosingBrace();
+                bool ok = _cmBuilder.reduceScope();
+                if( ! ok )
+                    throw SyntaxError("invalid element declaration", line());
+                
                 return;
             }
 
@@ -3871,8 +3886,8 @@ class XmlReaderImpl
         , _depth(0)
         , _parse(0)                 
         , _current(0)
-        , _elemModelBuilder()
-        , _elemModel(0)
+        , _cmBuilder()
+        , _contentModel(0)
         , _attrModel(0)
         , _attlistDecl(0)
         {
@@ -3890,8 +3905,8 @@ class XmlReaderImpl
         , _depth(0)
         , _parse(0)                 
         , _current(0)
-        , _elemModelBuilder()
-        , _elemModel(0)
+        , _cmBuilder()
+        , _contentModel(0)
         , _attrModel(0)
         , _attlistDecl(0)
         {
@@ -3942,11 +3957,11 @@ class XmlReaderImpl
             _nsctx.clear();
             
             _dtd.clear();
-            _elemModelBuilder.reset();
+            _cmBuilder.reset();
             _docType.clear();
             
             _attr = 0;
-            _elemModel = 0;
+            _contentModel = 0;
             _attrModel = 0;
             _attlistDecl = 0;
             _entity = 0;
@@ -4112,9 +4127,9 @@ class XmlReaderImpl
         Node* _current;
 
         DocTypeDefinition _dtd;
-        ContentModelBuilder _elemModelBuilder;
+        ContentModelBuilder _cmBuilder;
         
-        ElementModel* _elemModel;
+        ContentModel* _contentModel;
         AttributeModel* _attrModel;
         AttributeListModel* _attlistDecl;
         

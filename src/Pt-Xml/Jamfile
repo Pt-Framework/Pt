@@ -5,11 +5,11 @@ SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Xml ;
 
 PT_XML_SOURCES = AttributeModel.cpp
                  AttributeListModel.cpp
+                 ContentModel.cpp
                  ContentParticle.cpp
                  DocType.cpp
                  DocTypeDefinition.cpp
                  DocTypeValidator.cpp
-                 DtdContext.cpp
                  ElementModel.cpp
                  Entity.cpp
                  InputSource.cpp

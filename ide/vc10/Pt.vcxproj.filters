@@ -738,6 +738,9 @@
     <ClInclude Include="..\..\src\Pt-Xml\AttributeModel.h">
       <Filter>Pt-Xml</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Xml\ContentModel.h">
+      <Filter>Pt-Xml</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -1465,6 +1468,9 @@
       <Filter>Pt-Xml</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Xml\AttributeModel.cpp">
+      <Filter>Pt-Xml</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Xml\ContentModel.cpp">
       <Filter>Pt-Xml</Filter>
     </ClCompile>
   </ItemGroup>
