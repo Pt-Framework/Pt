@@ -29,6 +29,8 @@
 #include "AttributeModel.h"
 #include "AttributeListModel.h"
 #include <Pt/Xml/DocTypeDefinition.h>
+#include <Pt/Xml/Entity.h>
+#include <Pt/Xml/Notation.h>
 #include <Pt/StringStream.h>
 
 namespace Pt {

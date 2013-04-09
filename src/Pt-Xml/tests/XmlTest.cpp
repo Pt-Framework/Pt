@@ -30,6 +30,8 @@
 #include "Pt/Xml/XmlResolver.h"
 #include "Pt/Xml/DocTypeValidator.h"
 #include "Pt/Xml/InputSource.h"
+#include <Pt/Xml/Entity.h>
+#include <Pt/Xml/Notation.h>
 #include "Pt/Xml/StartDocument.h"
 #include "Pt/Xml/StartElement.h"
 #include "Pt/Xml/Comment.h"

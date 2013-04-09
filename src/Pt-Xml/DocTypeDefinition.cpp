@@ -28,15 +28,27 @@
 
 #include "ElementModel.h"
 #include <Pt/Xml/DocTypeDefinition.h>
+#include <Pt/Xml/Entity.h>
+#include <Pt/Xml/Notation.h>
 #include <algorithm>
 #include <memory>
 #include <cassert>
 
 namespace {
 
-bool lessThanName(Pt::Xml::ElementModel* e, const Pt::Xml::QName& name)
+bool lessElementName(Pt::Xml::ElementModel* e, const Pt::Xml::QName& name)
 {
     return e->qname() < name;
+}
+
+bool lessNotationName(Pt::Xml::Notation* n, const Pt::String& name)
+{
+    return n->name() < name;
+}
+
+bool lessEntityName(Pt::Xml::Entity* e, const Pt::String& name)
+{
+    return e->name() < name;
 }
 
 }
@@ -66,8 +78,23 @@ void DocTypeDefinition::clear()
     }
     _elements.clear();
 
+    for(Entities::iterator it = _entities.begin(); it != _entities.end(); ++it)
+    {
+        delete *it;
+    }
     _entities.clear();
+
+    for(Entities::iterator it = _paramEntities.begin(); it != _paramEntities.end(); ++it)
+    {
+        delete *it;
+    }
     _paramEntities.clear();
+
+    for(Notations::iterator it = _notations.begin(); it != _notations.end(); ++it)
+    {
+        delete *it;
+    }
+    _notations.clear();
 }
 
 
@@ -91,84 +118,140 @@ QName& DocTypeDefinition::rootName()
 
 Entity* DocTypeDefinition::declareEntity(const Pt::String& name)
 {
-    Entities::iterator it = _entities.lower_bound(name);
-
-    // return 0 for duplicates
-    if(it != _entities.end() && it->first == name)
+    Entities::iterator lbound;
+    lbound = std::lower_bound(_entities.begin(), _entities.end(), name, lessEntityName);
+    
+    if( lbound != _entities.end() && (*lbound)->name() == name)
+    {
+        // return 0 for duplicates
         return 0;
+    }
 
-    // insert new Entity
-    Entities::value_type elem(name, Entity());
-    it = _entities.insert(it, elem);
-    return &it->second;
+    std::auto_ptr<Entity> ep( new Entity(name) );
+    _entities.insert(lbound, ep.get());
+    return ep.release();
 }
 
 
 const Entity* DocTypeDefinition::findEntity(const Pt::String& name) const
 {
-    Entities::const_iterator it = _entities.find(name);
-    if(it == _entities.end() )
-        return 0;
+    Entities::const_iterator lbound;
+    lbound = std::lower_bound(_entities.begin(), _entities.end(), name, lessEntityName);
 
-    return &(it->second);
+    if( lbound != _entities.end() && (*lbound)->name() == name)
+    {
+        return *lbound;
+    }
+
+    return 0;
+}
+
+
+void DocTypeDefinition::removeEntity(const Pt::String& name)
+{
+    Entities::const_iterator lbound;
+    lbound = std::lower_bound(_entities.begin(), _entities.end(), name, lessEntityName);
+
+    if( lbound != _entities.end() && (*lbound)->name() == name )
+    {
+        delete *lbound;
+        _entities.erase(lbound);
+    }
 }
 
 
 Entity* DocTypeDefinition::declareParamEntity(const Pt::String& name)
 {
-
-    Entities::iterator it = _paramEntities.lower_bound(name);
-
-    // return 0 for duplicates
-    if(it != _paramEntities.end() && it->first == name)
+    Entities::iterator lbound;
+    lbound = std::lower_bound(_paramEntities.begin(), _paramEntities.end(), name, lessEntityName);
+    
+    if( lbound != _paramEntities.end() && (*lbound)->name() == name)
+    {
+        // return 0 for duplicates
         return 0;
+    }
 
-    // insert new Entity
-    Entities::value_type elem(name, Entity());
-    it = _paramEntities.insert(it, elem);
-    return &it->second;
+    std::auto_ptr<Entity> ep( new Entity(name) );
+    _paramEntities.insert(lbound, ep.get());
+    return ep.release();
 }
 
 
 const Entity* DocTypeDefinition::findParamEntity(const Pt::String& name) const
 {
-    Entities::const_iterator it = _paramEntities.find(name);
-    if(it == _paramEntities.end() )
-        return 0;
+    Entities::const_iterator lbound;
+    lbound = std::lower_bound(_paramEntities.begin(), _paramEntities.end(), name, lessEntityName);
 
-    return &(it->second);
+    if( lbound != _paramEntities.end() && (*lbound)->name() == name)
+    {
+        return *lbound;
+    }
+
+    return 0;
+}
+
+
+void DocTypeDefinition::removeParamEntity(const Pt::String& name)
+{
+    Entities::const_iterator lbound;
+    lbound = std::lower_bound(_paramEntities.begin(), _paramEntities.end(), name, lessEntityName);
+
+    if( lbound != _paramEntities.end() && (*lbound)->name() == name )
+    {
+        delete *lbound;
+        _paramEntities.erase(lbound);
+    }
 }
 
 
 Notation* DocTypeDefinition::declareNotation(const Pt::String& name)
 {
-    Notations::iterator it = _notations.lower_bound(name);
-
-    // return 0 for duplicates
-    if(it != _notations.end() && it->first == name)
+    Notations::iterator lbound;
+    lbound = std::lower_bound(_notations.begin(), _notations.end(), name, lessNotationName);
+    
+    if( lbound != _notations.end() && (*lbound)->name() == name)
+    {
+        // return 0 for duplicates
         return 0;
+    }
 
-    // insert new Notation
-    Notations::value_type elem(name, Notation());
-    it = _notations.insert(it, elem);
-    return &it->second;
+    std::auto_ptr<Notation> ep( new Notation(name) );
+    _notations.insert(lbound, ep.get());
+    return ep.release();
 }
 
 
 const Notation* DocTypeDefinition::findNotation(const Pt::String& name) const
 {
-    Notations::const_iterator it = _notations.find(name);
-    if(it == _notations.end() )
-        return 0;
+    Notations::const_iterator lbound;
+    lbound = std::lower_bound(_notations.begin(), _notations.end(), name, lessNotationName);
 
-    return &(it->second);
+    if( lbound != _notations.end() && (*lbound)->name() == name)
+    {
+        return *lbound;
+    }
+
+    return 0;
+}
+
+
+void DocTypeDefinition::removeNotation(const Pt::String& name)
+{
+    Notations::const_iterator lbound;
+    lbound = std::lower_bound(_notations.begin(), _notations.end(), name, lessNotationName);
+
+    if( lbound != _notations.end() && (*lbound)->name() == name )
+    {
+        delete *lbound;
+        _notations.erase(lbound);
+    }
 }
 
 
 ContentModel* DocTypeDefinition::declareContent(const QName& name)
 { 
     Elements::iterator lbound;
-    lbound = std::lower_bound(_elements.begin(), _elements.end(), name, lessThanName);
+    lbound = std::lower_bound(_elements.begin(), _elements.end(), name, lessElementName);
     
     if( lbound != _elements.end() && (*lbound)->qname() == name)
     {
@@ -187,7 +270,7 @@ ContentModel* DocTypeDefinition::declareContent(const QName& name)
 AttributeListModel& DocTypeDefinition::declareAttributeList(const QName& name)
 { 
     Elements::iterator lbound;
-    lbound = std::lower_bound(_elements.begin(), _elements.end(), name, lessThanName);
+    lbound = std::lower_bound(_elements.begin(), _elements.end(), name, lessElementName);
     
     if( lbound != _elements.end() && (*lbound)->qname() == name)
     {
@@ -205,7 +288,7 @@ AttributeListModel& DocTypeDefinition::declareAttributeList(const QName& name)
 ElementModel* DocTypeDefinition::findElement(const QName& name)
 {
     Elements::iterator lbound;
-    lbound = std::lower_bound(_elements.begin(), _elements.end(), name, lessThanName);
+    lbound = std::lower_bound(_elements.begin(), _elements.end(), name, lessElementName);
     
     if( lbound != _elements.end() && (*lbound)->qname() == name)
     {

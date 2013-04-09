@@ -39,8 +39,12 @@ namespace Xml {
 class PT_XML_API Notation 
 {
     public:
-        Notation()
+        explicit Notation(const Pt::String& name)
+        : _name(name)
         { }
+
+        const Pt::String& name() const
+        { return _name; }
 
         void clear()
         {
@@ -61,6 +65,7 @@ class PT_XML_API Notation
         { _systemId = sysId; }
 
     private:
+        Pt::String _name;
         Pt::String _publicId;
         Pt::String _systemId;
 };

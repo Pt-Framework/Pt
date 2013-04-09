@@ -41,14 +41,13 @@ namespace Xml {
 class PT_XML_API Entity
 {
     public:
-        Entity()
-        : _ndata(false)
-        {}
-        
-        Entity(const Pt::String& value)
-        : _value(value)
+        explicit Entity(const Pt::String& name)
+        : _name(name)
         , _ndata(false)
         {}
+
+        const Pt::String& name() const
+        { return _name; }
 
         bool isExternal() const
         { return ! _publicId.empty() || ! _systemId.empty(); }
@@ -101,6 +100,7 @@ class PT_XML_API Entity
         static bool resolveCharacterEntity(String& entity);
 
     private:
+        Pt::String _name;
         Pt::String _publicId;
         Pt::String _systemId;
         Pt::String _value;

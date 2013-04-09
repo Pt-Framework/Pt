@@ -32,8 +32,6 @@
 #include <Pt/Xml/Api.h>
 #include <Pt/Xml/Node.h>
 #include <Pt/Xml/QName.h>
-#include <Pt/Xml/Entity.h>
-#include <Pt/Xml/Notation.h>
 #include <Pt/String.h>
 #include <Pt/NonCopyable.h>
 #include <vector>
@@ -45,6 +43,8 @@ namespace Xml {
 class ElementModel;
 class ContentModel;
 class AttributeListModel;
+class Entity;
+class Notation;
 
 class PT_XML_API DocTypeDefinition : private NonCopyable
 {
@@ -67,17 +67,26 @@ class PT_XML_API DocTypeDefinition : private NonCopyable
         //! @brief Returns the entity or null if not declared.
         const Entity* findEntity(const Pt::String& name) const;
 
+        //! @brief Removes the entity with the given name.
+        void removeEntity(const Pt::String& name);
+
         //! @brief Returns the entity or null if already declared.
         Entity* declareParamEntity(const Pt::String& name);
 
         //! @brief Returns the entity or null if not declared.
         const Entity* findParamEntity(const Pt::String& name) const;
 
+        //! @brief Removes the entity with the given name.
+        void removeParamEntity(const Pt::String& name);
+
         //! @brief Returns the notation or null if already declared.
         Notation* declareNotation(const Pt::String& name);
 
         //! @brief Returns the notation or null if not declared.
         const Notation* findNotation(const Pt::String& name) const;
+
+        //! @brief Removes the notation with the given name.
+        void removeNotation(const Pt::String& name);
 
     public:
         //! @internal Returns null if already declared.
@@ -91,8 +100,8 @@ class PT_XML_API DocTypeDefinition : private NonCopyable
 
     private:
         typedef std::vector<ElementModel*> Elements;
-        typedef std::map<String, Notation> Notations; // TODO: vector<Notation*>
-        typedef std::map<String, Entity> Entities; // TODO: vector<Entity*>
+        typedef std::vector<Notation*> Notations;
+        typedef std::vector<Entity*> Entities;
 
         QName _rootName;
         Elements _elements;

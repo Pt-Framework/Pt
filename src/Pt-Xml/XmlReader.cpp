@@ -33,6 +33,8 @@
 
 #include <Pt/Xml/XmlReader.h>
 #include <Pt/Xml/DocTypeValidator.h>
+#include <Pt/Xml/Entity.h>
+#include <Pt/Xml/Notation.h>
 #include <Pt/Xml/XmlResolver.h>
 #include <Pt/Xml/DocTypeDefinition.h>
 #include <Pt/Xml/StartDocument.h>
@@ -3838,8 +3840,11 @@ class XmlReaderImpl
 
         inline void setStartElement()
         {
-            _elements.resize(_elements.size() + _startElem.name().size());
+            //_elements.resize(_elements.size() + _startElem.name().size());
             //std::cerr << _elements.capacity() << " ";
+
+            _elements.push(_startElem.name());
+            
             _current = &(_startElem);
         }
 
@@ -3848,8 +3853,13 @@ class XmlReaderImpl
             //if(_endElem.name().size() > _elements.size())
             //    throw SyntaxError("unmatched XML element", line());
             
-            std::size_t n =  _endElem.name().size();
-            _elements.resize(_elements.size() - n);
+            //std::size_t n =  _endElem.name().size();
+            //_elements.resize(_elements.size() - n);
+            
+            bool ok = _elements.pop(_endElem.name());
+            if( ! ok )
+                throw SyntaxError("unmatched XML element", line());
+            
             _current = &(_endElem);
         }
 
@@ -3858,6 +3868,85 @@ class XmlReaderImpl
             if(_options & ReportProcessingInstructions)
                 _current = &_procInstr;
         }
+
+        class NameStack
+        {
+            typedef std::char_traits<Char> Traits;
+            static const unsigned BufSize = 64;
+
+            public:
+                NameStack()
+                : _beg(_first)
+                , _end(_first + BufSize)
+                {
+                    //_extra.reserve(64);
+                }
+
+                void clear()
+                {
+                    _beg = _first;
+                    _end = _first + BufSize;
+                }
+
+                void push(const Pt::String& name)
+                {
+                    if( _extra.empty() && std::size_t(_end - _beg) > name.size() )
+                    {
+                        Traits::copy(_beg, name.data(), name.size());
+
+                        // use null terminator as separator
+                        _beg += name.size();
+                        *_beg++ = 0;
+                    }
+                    else
+                    {
+                        _extra.append(name);
+                        
+                        // use null terminator as separator
+                        _extra.push_back(0);
+                    }
+                }
+
+                bool pop(const Pt::String& name)
+                {
+                    if( _extra.empty() )
+                    {
+                        Char* pos = _beg - (name.size() + 1); // with null-term
+                    
+                        if(pos >= _first)
+                        {
+                            //if( 0 == Traits::compare(n, name.data(), name.size()) )
+                            {
+                                _beg = pos;
+                                return true;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        Char* extraBegin = &_extra[0];
+                        Char* extraEnd = extraBegin + _extra.size();
+                        Char* pos = extraEnd - (name.size() + 1); // with null term
+                    
+                        if(pos >= extraBegin)
+                        {
+                            //if( 0 == Traits::compare(pos, name.data(), name.size()) )
+                            {
+                                _extra.resize(pos - extraBegin); 
+                                return true;
+                            }
+                        }
+                    }
+                    
+                    return false;
+                }
+
+            private:
+                Char _first[BufSize];
+                Char* _beg;
+                Char* _end;
+                Pt::String _extra;
+        };
 
     public:
         enum Option
@@ -3872,9 +3961,8 @@ class XmlReaderImpl
 
         static const int DefaultOptions = 0;
 
-        // TODO:
-        //     - XmlName object which has non-owning Char* to parse character
-        //       buffer. Also for QName, Characters, with a String like API.
+        // TODO: use Char buffer[64] before allocating
+        NameStack _elements;
 
         XmlReaderImpl(XmlResolver* resolver = 0)
         : _is(0)
@@ -3892,7 +3980,7 @@ class XmlReaderImpl
         , _attlistDecl(0)
         {
             _parse = &XmlReaderImpl::onDocumentBegin;
-            _elements.reserve(64);
+            //_elements.reserve(64);
         }
 
         XmlReaderImpl(InputSource& is, XmlResolver* resolver = 0)
@@ -3911,7 +3999,7 @@ class XmlReaderImpl
         , _attlistDecl(0)
         {
             _parse = &XmlReaderImpl::onDocumentBegin;
-            _elements.reserve(64);
+            //_elements.reserve(64);
 
             _input.addInput(is);
         }
@@ -3934,8 +4022,7 @@ class XmlReaderImpl
             _options &= ~o;
         }
 
-        // TODO: use Char buffer[64] before allocating
-        Pt::String _elements;
+
 
         void reset()
         {
