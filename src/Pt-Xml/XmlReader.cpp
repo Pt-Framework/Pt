@@ -3872,50 +3872,49 @@ class XmlReaderImpl
         class NameStack
         {
             typedef std::char_traits<Char> Traits;
-            static const unsigned BufSize = 64;
+            static const unsigned BufSize = 96;
 
             public:
                 NameStack()
                 : _beg(_first)
                 , _end(_first + BufSize)
-                {
-                    //_extra.reserve(64);
-                }
+                { }
 
                 void clear()
                 {
                     _beg = _first;
                     _end = _first + BufSize;
+                    _extra.clear();
                 }
 
                 void push(const Pt::String& name)
                 {
                     if( _extra.empty() && std::size_t(_end - _beg) > name.size() )
                     {
-                        Traits::copy(_beg, name.data(), name.size());
-
                         // use null terminator as separator
-                        _beg += name.size();
-                        *_beg++ = 0;
+                        const std::size_t len = name.size() + 1;
+                        Traits::copy(_beg, name.c_str(), len);
+                        _beg += len;
                     }
                     else
                     {
-                        _extra.append(name);
-                        
                         // use null terminator as separator
+                        _extra.append(name);
                         _extra.push_back(0);
                     }
                 }
 
                 bool pop(const Pt::String& name)
                 {
+                    // use null terminator as separator
+                    const std::size_t len = name.size() + 1;
+
                     if( _extra.empty() )
                     {
-                        Char* pos = _beg - (name.size() + 1); // with null-term
-                    
+                        Char* pos = _beg - len;
                         if(pos >= _first)
                         {
-                            //if( 0 == Traits::compare(n, name.data(), name.size()) )
+                            if( 0 == Traits::compare(pos, name.data(), name.size()) )
                             {
                                 _beg = pos;
                                 return true;
@@ -3926,11 +3925,11 @@ class XmlReaderImpl
                     {
                         Char* extraBegin = &_extra[0];
                         Char* extraEnd = extraBegin + _extra.size();
-                        Char* pos = extraEnd - (name.size() + 1); // with null term
-                    
+                        
+                        Char* pos = extraEnd - len;
                         if(pos >= extraBegin)
                         {
-                            //if( 0 == Traits::compare(pos, name.data(), name.size()) )
+                            if( 0 == Traits::compare(pos, name.data(), name.size()) )
                             {
                                 _extra.resize(pos - extraBegin); 
                                 return true;

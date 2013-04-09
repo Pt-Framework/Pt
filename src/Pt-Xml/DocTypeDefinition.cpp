@@ -149,7 +149,7 @@ const Entity* DocTypeDefinition::findEntity(const Pt::String& name) const
 
 void DocTypeDefinition::removeEntity(const Pt::String& name)
 {
-    Entities::const_iterator lbound;
+    Entities::iterator lbound;
     lbound = std::lower_bound(_entities.begin(), _entities.end(), name, lessEntityName);
 
     if( lbound != _entities.end() && (*lbound)->name() == name )
@@ -193,7 +193,7 @@ const Entity* DocTypeDefinition::findParamEntity(const Pt::String& name) const
 
 void DocTypeDefinition::removeParamEntity(const Pt::String& name)
 {
-    Entities::const_iterator lbound;
+    Entities::iterator lbound;
     lbound = std::lower_bound(_paramEntities.begin(), _paramEntities.end(), name, lessEntityName);
 
     if( lbound != _paramEntities.end() && (*lbound)->name() == name )
@@ -237,7 +237,7 @@ const Notation* DocTypeDefinition::findNotation(const Pt::String& name) const
 
 void DocTypeDefinition::removeNotation(const Pt::String& name)
 {
-    Notations::const_iterator lbound;
+    Notations::iterator lbound;
     lbound = std::lower_bound(_notations.begin(), _notations.end(), name, lessNotationName);
 
     if( lbound != _notations.end() && (*lbound)->name() == name )
