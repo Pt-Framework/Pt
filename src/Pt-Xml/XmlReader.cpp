@@ -3840,22 +3840,12 @@ class XmlReaderImpl
 
         inline void setStartElement()
         {
-            //_elements.resize(_elements.size() + _startElem.name().size());
-            //std::cerr << _elements.capacity() << " ";
-
             _elements.push(_startElem.name());
-            
             _current = &(_startElem);
         }
 
         inline void setEndElement()
-        {
-            //if(_endElem.name().size() > _elements.size())
-            //    throw SyntaxError("unmatched XML element", line());
-            
-            //std::size_t n =  _endElem.name().size();
-            //_elements.resize(_elements.size() - n);
-            
+        {            
             bool ok = _elements.pop(_endElem.name());
             if( ! ok )
                 throw SyntaxError("unmatched XML element", line());
@@ -3887,7 +3877,7 @@ class XmlReaderImpl
                     _extra.clear();
                 }
 
-                void push(const Pt::String& name)
+                inline void push(const Pt::String& name)
                 {
                     if( _extra.empty() && std::size_t(_end - _beg) > name.size() )
                     {
@@ -3904,7 +3894,7 @@ class XmlReaderImpl
                     }
                 }
 
-                bool pop(const Pt::String& name)
+                inline bool pop(const Pt::String& name)
                 {
                     // use null terminator as separator
                     const std::size_t len = name.size() + 1;
