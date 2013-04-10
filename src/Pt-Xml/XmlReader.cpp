@@ -168,47 +168,37 @@ class XmlReaderImpl
 
         void onTag(int c)
         {
-            Char ch = notEof(c);
-            
-            if(ch == '?')
+            switch(c)
             {
-                _procInstr.clear();
-                _parse = &XmlReaderImpl::onProcessingInstructionBegin;
-                return;
+                case '?':
+                    _procInstr.clear();
+                    _parse = &XmlReaderImpl::onProcessingInstructionBegin;
+                    return;
+
+                case '!':
+                    _parse = &XmlReaderImpl::onTagExclam;
+                    return;
+
+                case '/':
+                    if( _chars.content().length() )
+                        _current = &(_chars);
+
+                    _endElem.clear();
+                    _parse = &XmlReaderImpl::onEndElement;
+                    return;
             }
 
-            if(ch == '!')
+            if( c == std::char_traits<Char>::eof() || ! isAlpha(c) )
+                throw SyntaxError("XML syntax error", line());
+
+            if( _chars.content().length() )
             {
-                _parse = &XmlReaderImpl::onTagExclam;
-                return;
+                _current = &(_chars);
             }
 
-            if(ch == '/')
-            {
-                if( _chars.content().length() )
-                {
-                    _current = &(_chars);
-                }
-
-                _endElem.clear();
-                _parse = &XmlReaderImpl::onEndElement;
-                return;
-            }
-
-            if( isAlpha(ch) )
-            {
-                if( _chars.content().length() )
-                {
-                    _current = &(_chars);
-                }
-
-                _startElem.clear();
-                _startElem.qname().name() += ch;
-                _parse = &XmlReaderImpl::onStartElement;
-                return;
-            }
-
-            throw SyntaxError("XML syntax error", line());
+            _startElem.clear();
+            _startElem.qname().name() += c;
+            _parse = &XmlReaderImpl::onStartElement;
         }
 
         void onTagExclam(int c)
@@ -2870,41 +2860,40 @@ class XmlReaderImpl
                 return;
             }
 
-            Char ch(c);
-
-            if( isSpace(ch) )
+            switch(c)
             {
-                if( depth() == 0 )
-                {
-                    _parse = &XmlReaderImpl::onProlog;
-                    return;
-                }
+                case ' ':
+                case '\n':
+                case '\r':
+                case '\t':
+                    if( depth() != 0 )
+                    {
+                        _chars.appendSpace(c);
+                        _parse = &XmlReaderImpl::onCharacters;
+                    }
+                    else
+                        _parse = &XmlReaderImpl::onProlog;
+                    
+                    break;
 
-                _chars.appendSpace(ch);
-                _parse = &XmlReaderImpl::onCharacters;
-                return;
+                case '<':
+                    _parse = &XmlReaderImpl::onTag;
+                    break;
+
+                case '>':
+                    throw SyntaxError("XML syntax error", line());
+                    break;
+
+                case '&':
+                    assert(_token.empty());
+                    _parse = &XmlReaderImpl::onEntityReference;
+                    break;
+
+                default:
+                    _chars.append(c);
+                    _parse = &XmlReaderImpl::onCharacters;
+                    break;
             }
-
-            if(ch == '<')
-            {
-                _parse = &XmlReaderImpl::onTag;
-                return;
-            }
-
-            if(ch == '>')
-            {
-                throw SyntaxError("XML syntax error", line());
-            }
-
-            if(ch == '&')
-            {
-                assert(_token.empty());
-                _parse = &XmlReaderImpl::onEntityReference;
-                return;
-            }
-
-            _chars.append(ch);
-            _parse = &XmlReaderImpl::onCharacters;
         }
 
         void beforeComment(int c)
@@ -2974,54 +2963,45 @@ class XmlReaderImpl
 
         void onStartElement(int c)
         {
-            Char ch = notEof(c);
-
-            if( isSpace(ch) )
+            switch(c)
             {
-                _parse = &XmlReaderImpl::beforeAttribute;
-                return;
+                case ' ':
+                case '\n':
+                case '\r':
+                case '\t':
+                    _parse = &XmlReaderImpl::beforeAttribute;
+                    return;
+
+                case '/':
+                    _chars.clear();
+                    setStartElement();
+                    _depth++;
+
+                    _parse = &XmlReaderImpl::onEmptyElement;
+                    return;
+
+                case ':':
+                    if( ! _startElem.prefix().empty() )
+                        throw SyntaxError("invalid namespace prefix", line());
+
+                    _startElem.qname().prefix() = _startElem.name();
+                    _startElem.qname().name().clear();
+                    return;
+
+
+                case '>':
+                    _chars.clear();
+                    setStartElement();
+                    _depth++;
+
+                    _parse = &XmlReaderImpl::afterTag;
+                    return;
             }
 
-            if(ch == '/')
-            {
-                _chars.clear();
-                setStartElement();
-                _depth++;
+            if( c == std::char_traits<Char>::eof() || ! isAlpha(c) )
+                throw SyntaxError("XML syntax error", line());
 
-                setNamespace(_startElem);
-
-                _parse = &XmlReaderImpl::onEmptyElement;
-                return;
-            }
-
-            if(ch == ':')
-            {
-                if( ! _startElem.prefix().empty() )
-                    throw SyntaxError("XML syntax error (invalid namespace prefix)", line());
-
-                _startElem.qname().prefix() = _startElem.name();
-                _startElem.qname().name().clear();
-                return;
-            }
-
-            if(ch == '>')
-            {
-                _chars.clear();
-                setStartElement();
-                _depth++;
-
-                setNamespace(_startElem);
-                _parse = &XmlReaderImpl::afterTag;
-                return;
-            }
-
-            if( isAlpha(ch) )
-            {
-                _startElem.qname().name() += ch;
-                return;
-            }
-
-            throw SyntaxError("XML syntax error", line());
+            _startElem.qname().name() += c;
         }
 
         void beforeAttribute(int c)
@@ -3038,7 +3018,7 @@ class XmlReaderImpl
                 setStartElement();
                 _depth++;
 
-                setNamespace(_startElem);
+                //setNamespace(_startElem);
 
                 _parse = &XmlReaderImpl::onEmptyElement;
                 return;
@@ -3059,7 +3039,7 @@ class XmlReaderImpl
                 setStartElement();
                 _depth++;
 
-                setNamespace(_startElem);
+                //setNamespace(_startElem);
 
                 _parse = &XmlReaderImpl::afterTag;
                 return;
@@ -3254,7 +3234,6 @@ class XmlReaderImpl
                 setEndElement();
                 _depth--;
 
-                setNamespace(_endElem);
                 _parse = &XmlReaderImpl::afterEndElement;
                 return;
             }
@@ -3263,53 +3242,47 @@ class XmlReaderImpl
         }
 
         void onEndElement(int c)
-        {
-            Char ch = notEof(c);
-            
-            if( isAlpha(ch) )
-            {
-                _endElem.name() += c;
-                _parse = &XmlReaderImpl::onEndElementName;
-                return;
-            }
+        {           
+            if( c == std::char_traits<Char>::eof() || ! isAlpha(c) )
+                throw SyntaxError("XML syntax error", line());
 
-            throw SyntaxError("XML syntax error", line());
+            _endElem.name() += c;
+            _parse = &XmlReaderImpl::onEndElementName;
         }
 
         void onEndElementName(int c)
         {
             Char ch = notEof(c);
             
-            if(ch == '>')
+            switch(c)
             {
-                _chars.clear();
-                setEndElement();
-                _depth--;
+                case '>':
+                    _chars.clear();
+                    setEndElement();
+                    _depth--;
 
-                setNamespace(_endElem);
-                _parse = &XmlReaderImpl::afterEndElement;
-                return;
-            }
+                    _parse = &XmlReaderImpl::afterEndElement;
+                    return;
 
-            if( isSpace(ch) )
-            {
-                _parse = &XmlReaderImpl::afterEndElementName;
-                return;
+                case ' ':
+                case '\n':
+                case '\r':
+                case '\t':
+                    _parse = &XmlReaderImpl::afterEndElementName;
+                    return;
+
+                case ':':
+                    if( ! _endElem.prefix().empty() )
+                        throw SyntaxError("invalid namespace prefix", line());
+
+                    _endElem.prefix() = _endElem.name();
+                    _endElem.name().clear();
+                    return;
             }
 
             if( isAlpha(ch) )
             {
                 _endElem.name() += c;
-                return;
-            }
-
-            if(ch == ':')
-            {
-                if( ! _endElem.prefix().empty() )
-                    throw SyntaxError("invalid namespace prefix", line());
-
-                _endElem.prefix() = _endElem.name();
-                _endElem.name().clear();
                 return;
             }
 
@@ -3317,37 +3290,34 @@ class XmlReaderImpl
         }
     
         void afterEndElementName(int c)
-        {
-            Char ch = notEof(c);
-            
-            if( isSpace(ch) )
+        {          
+            switch(c)
             {
-                return;
+                case ' ':
+                case '\n':
+                case '\r':
+                case '\t':
+                    break;
+
+                case '>':
+                    _chars.clear();
+                    setEndElement();
+                    _depth--;
+
+                    _parse = &XmlReaderImpl::afterEndElement;
+                    break;
+
+                default:
+                    throw SyntaxError("XML syntax error", line());
             }
-
-            if(ch == '>')
-            {
-                _chars.clear();
-                setEndElement();
-                _depth--;
-
-                setNamespace(_endElem);
-                _parse = &XmlReaderImpl::afterEndElement;
-                return;
-            }
-
-            throw SyntaxError("XML syntax error", line());
         }
 
         void afterEndElement(int c)
         {
-            if(depth() == 0)
-                _parse = &XmlReaderImpl::onEpilog;
-            else
-                _parse = &XmlReaderImpl::afterTag;
+            _parse = depth() == 0 ? &XmlReaderImpl::onEpilog
+                                  : &XmlReaderImpl::afterTag;
 
             _nsctx.popNamespace( _depth + 1 );
-
             (this->*_parse)(c);
         }
 
@@ -3750,62 +3720,6 @@ class XmlReaderImpl
             }
         }
 
-        void setNamespace(StartElement& se)
-        {
-            if( se.prefix().empty() )
-            {
-                const Namespace* ns = _nsctx.getDefaultNamespace();
-                if(ns)
-                    se.setNamespace(*ns);
-            }
-            else
-            {
-                const Namespace* ns = _nsctx.findPrefix( se.prefix() );
-                if( ! ns )
-                    throw SyntaxError("undeclared namespace prefix", line());
-
-                se.setNamespace(*ns);
-            }
-            
-            AttributeList& attributes = se.attributes();
-            AttributeList::Iterator it;
-            for(it = attributes.begin(); it != attributes.end(); ++it)
-            {
-                if( it->prefix().empty() )
-                {
-                    const Namespace* ns = _nsctx.getDefaultNamespace();
-                    if(ns)
-                        it->setNamespace(*ns);
-                }
-                else
-                {
-                    const Namespace* ns = _nsctx.findPrefix( it->prefix() );
-                    if( ! ns )
-                        throw SyntaxError("undeclared namespace prefix", line());
-
-                    it->setNamespace(*ns);
-                }    
-            }
-        }
-
-        void setNamespace(EndElement& e)
-        {
-            if( e.prefix().empty() )
-            {
-                const Namespace* ns = _nsctx.getDefaultNamespace();
-                if(ns)
-                    e.setNamespace(*ns);
-            }
-            else
-            {
-                const Namespace* ns = _nsctx.findPrefix( e.prefix() );
-                if( ! ns )
-                    throw SyntaxError("undeclared namespace prefix", line());
-
-                e.setNamespace(*ns);
-            }
-        }
-
         void setStartDoc()
         {
             if(_options & ReportStartDocument)
@@ -3838,18 +3752,69 @@ class XmlReaderImpl
                 _current = &_comment;
         }
 
-        inline void setStartElement()
+        void setStartElement()
         {
-            _elements.push(_startElem.name());
+            _elements.push( _startElem.name() );
+
+            if( _startElem.prefix().empty() )
+            {
+                const Namespace* ns = _nsctx.getDefaultNamespace();
+                if(ns)
+                    _startElem.setNamespace(*ns);
+            }
+            else
+            {
+                const Namespace* ns = _nsctx.findPrefix( _startElem.prefix() );
+                if( ! ns )
+                    throw SyntaxError("undeclared namespace prefix", line());
+
+                _startElem.setNamespace(*ns);
+            }
+            
+            AttributeList& attributes = _startElem.attributes();
+            AttributeList::Iterator it;
+            for(it = attributes.begin(); it != attributes.end(); ++it)
+            {
+                if( it->prefix().empty() )
+                {
+                    const Namespace* ns = _nsctx.getDefaultNamespace();
+                    if(ns)
+                        it->setNamespace(*ns);
+                }
+                else
+                {
+                    const Namespace* ns = _nsctx.findPrefix( it->prefix() );
+                    if( ! ns )
+                        throw SyntaxError("undeclared namespace prefix", line());
+
+                    it->setNamespace(*ns);
+                }    
+            }
+
             _current = &(_startElem);
         }
 
-        inline void setEndElement()
+        void setEndElement()
         {            
-            bool ok = _elements.pop(_endElem.name());
+            bool ok = _elements.pop( _endElem.name() );
             if( ! ok )
                 throw SyntaxError("unmatched XML element", line());
             
+            if( _endElem.prefix().empty() )
+            {
+                const Namespace* ns = _nsctx.getDefaultNamespace();
+                if(ns)
+                    _endElem.setNamespace(*ns);
+            }
+            else
+            {
+                const Namespace* ns = _nsctx.findPrefix( _endElem.prefix() );
+                if( ! ns )
+                    throw SyntaxError("undeclared namespace prefix", line());
+
+                _endElem.setNamespace(*ns);
+            }
+
             _current = &(_endElem);
         }
 
@@ -3882,9 +3847,14 @@ class XmlReaderImpl
                     if( _extra.empty() && std::size_t(_end - _beg) > name.size() )
                     {
                         // use null terminator as separator
-                        const std::size_t len = name.size() + 1;
-                        Traits::copy(_beg, name.c_str(), len);
-                        _beg += len;
+                        std::size_t len = name.size() + 1;
+                        
+                        //Traits::copy(_beg, name.c_str(), len);
+                        //_beg += len;
+
+                        const Char* c = name.c_str();
+                        while(len--)
+                            *_beg++ = *c++;
                     }
                     else
                     {
@@ -3937,6 +3907,8 @@ class XmlReaderImpl
                 Pt::String _extra;
         };
 
+        NameStack _elements;
+
     public:
         enum Option
         {
@@ -3949,9 +3921,6 @@ class XmlReaderImpl
         };
 
         static const int DefaultOptions = 0;
-
-        // TODO: use Char buffer[64] before allocating
-        NameStack _elements;
 
         XmlReaderImpl(XmlResolver* resolver = 0)
         : _is(0)
@@ -3969,7 +3938,6 @@ class XmlReaderImpl
         , _attlistDecl(0)
         {
             _parse = &XmlReaderImpl::onDocumentBegin;
-            //_elements.reserve(64);
         }
 
         XmlReaderImpl(InputSource& is, XmlResolver* resolver = 0)
@@ -3988,7 +3956,6 @@ class XmlReaderImpl
         , _attlistDecl(0)
         {
             _parse = &XmlReaderImpl::onDocumentBegin;
-            //_elements.reserve(64);
 
             _input.addInput(is);
         }
@@ -4010,8 +3977,6 @@ class XmlReaderImpl
         {
             _options &= ~o;
         }
-
-
 
         void reset()
         {
@@ -4090,11 +4055,12 @@ class XmlReaderImpl
         Node& next()
         {
             _current = 0;
+            const std::char_traits<Char>::int_type eof = std::char_traits<Char>::eof();
 
             while( ! _current )
             {
                 std::char_traits<Char>::int_type c = _input.get();
-                if( c == std::char_traits<Char>::eof() )
+                if( c == eof )
                 {            
                     _input.removeInput();
 
@@ -4105,9 +4071,7 @@ class XmlReaderImpl
                 (this->*_parse)(c);
 
                 if(c == '\n')
-                {
                     _input.bumpLine();
-                }
             }
 
             return *_current;
@@ -4119,63 +4083,32 @@ class XmlReaderImpl
 
             do
             {
-                std::char_traits<Char>::int_type c;
                 std::streamsize n = _input.avail();                
-                
+
                 if(n > 0)
                 {
-                    c = _input.get();
-                }
-                else if(n < 0)
-                {
-                    _input.removeInput();
-                    if( _input.empty() )
-                        c = std::char_traits<Char>::eof();
+                    std::char_traits<Char>::int_type c = _input.get();
+                    (this->*_parse)(c);
+
+                    if(c == '\n')
+                        _input.bumpLine();
                 }
                 else
-                {
-                    n = _input.import();
-                    if(n == 0)
-                        break;
+                {           
+                    if(n < 0)
+                    {
+                        _input.removeInput();
 
-                    continue;
+                        if( _input.empty() )
+                            (this->*_parse)( std::char_traits<Char>::eof() );
+                    }
+                    else if (n == 0)
+                    {
+                        n = _input.import();
+                        if(n == 0)
+                            break;
+                    }
                 }
-
-                (this->*_parse)(c);
-
-                // TODO: move this to state functions
-                if(c == '\n')
-                {
-                    _input.bumpLine();
-                }
-
-                //if(n > 0)
-                //{
-                    //std::char_traits<Char>::int_type c = _input.get();
-                    //(this->*_parse)(c);
-
-                    //// TODO: move this to state functions
-                    //if(c == '\n')
-                    //{
-                        //_input.bumpLine();
-                    //}
-                //}
-                //else
-                //{           
-                    //if(n < 0)
-                    //{
-                        //_input.removeInput();
-
-                        //if( _input.empty() )
-                            //(this->*_parse)( std::char_traits<Char>::eof() );
-                    //}
-                    //else if (n == 0)
-                    //{
-                        //n = _input.import();
-                        //if(n == 0)
-                            //break;
-                    //}
-                //}
             } 
             while( ! _current);
 

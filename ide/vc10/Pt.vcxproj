@@ -15,7 +15,6 @@
     <ClInclude Include="..\..\include\Pt\Base64Codec.h" />
     <ClInclude Include="..\..\include\Pt\Byteorder.h" />
     <ClInclude Include="..\..\include\Pt\Callable.h" />
-    <ClInclude Include="..\..\include\Pt\Char.h" />
     <ClInclude Include="..\..\include\Pt\Composer.h" />
     <ClInclude Include="..\..\include\Pt\Connectable.h" />
     <ClInclude Include="..\..\include\Pt\Connection.h" />
@@ -432,7 +431,6 @@
     <ClCompile Include="..\..\src\Pt\Atomicity.pthread.cpp" />
     <ClCompile Include="..\..\src\Pt\Atomicity.sun.cpp" />
     <ClCompile Include="..\..\src\Pt\Atomicity.windows.cpp" />
-    <ClCompile Include="..\..\src\Pt\Char.cpp" />
     <ClCompile Include="..\..\src\Pt\Connectable.cpp" />
     <ClCompile Include="..\..\src\Pt\Connection.cpp" />
     <ClCompile Include="..\..\src\Pt\ConversionError.cpp" />

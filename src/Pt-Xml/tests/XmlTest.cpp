@@ -161,6 +161,8 @@ class XmlReaderTest : public Pt::Unit::TestSuite
             this->registerMethod("ProcessingInstructionInProlog", *this, &XmlReaderTest::ProcessingInstructionInProlog );
             this->registerMethod("ProcessingInstructionInElement", *this, &XmlReaderTest::ProcessingInstructionInElement );
             this->registerMethod("ProcessingInstructionInEpilog", *this, &XmlReaderTest::ProcessingInstructionInEpilog );
+
+            this->registerMethod("ZZZ_Benchmark", *this, &XmlReaderTest::Benchmark);
         }
 
     protected:
@@ -227,7 +229,7 @@ class XmlReaderTest : public Pt::Unit::TestSuite
         void ProcessingInstructionInProlog();
         void ProcessingInstructionInElement();
         void ProcessingInstructionInEpilog();
-        void CheckPerformance();
+        void Benchmark();
 };
 
 Pt::Unit::RegisterTest<XmlReaderTest> register_XmlTest;
@@ -1995,30 +1997,52 @@ void XmlReaderTest::EmptyComment()
 }
 
 
-void XmlReaderTest::CheckPerformance()
+void XmlReaderTest::Benchmark()
 {
-    std::stringstream input;
-    input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
-
-    for(int i = 0; i < 1000000; ++i)
+    std::string txt;
+    txt += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
+    txt += "<benchmark>";
+    for(int i = 0; i < 50000; ++i)
     {
-        input << "<testelem x=\"abc\">";
-        input << "0123456789abcdefghijklmnopqrstuvwxyz";
-        input << "</testelem>";
+        txt += "<test>";
+        txt += "<number>";
+        txt += "3.1415";
+        txt += "</number>";
+        txt += "<text>";
+        txt += "hello world!";
+        txt += "</text>";
+        txt += "</test>";
     }
+    txt += "</benchmark>";
 
-    std::cerr << "PrefTest: ";
+    std::istringstream iss(txt);
+    Pt::Xml::BinaryInputSource is(iss);
 
-    Pt::Xml::BinaryInputSource is(input);
-    Pt::Xml::XmlReader reader(is);
-
-    //clock_t begin = clock();
     Pt::System::Clock c;
     c.start();
 
+    Pt::Xml::XmlReader reader(is);
 
-    for(Pt::Xml::XmlReader::Iterator it = reader.current(); it != reader.end(); ++it)
-    {}
+    int n = 0;
+    for(;;)
+    {      
+        Pt::Xml::Node& node = reader.next();
+
+        ++n;
+        if(node.type() == Pt::Xml::Node::EndDocument)
+            break;
+
+        //Pt::Xml::Node* node = reader.advance();
+        //if( ! node && iss.rdbuf()->in_avail() <= 0)
+        //{
+        //    break;
+        //}
+        //else if(node->type() == Pt::Xml::Node::EndDocument)
+        //    break;
+
+        //++n;
+    }
+
     Pt::Timespan ts = c.stop();
-    std::cerr << "msecs: " << ts.toMSecs() << std::endl;
+    std::cerr << "parsed " << n << " nodes in " << ts.toMSecs()  << " msecs." << std::endl;
 }

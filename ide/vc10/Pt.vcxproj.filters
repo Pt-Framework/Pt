@@ -78,9 +78,6 @@
     <ClInclude Include="..\..\include\Pt\Callable.h">
       <Filter>Pt</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Char.h">
-      <Filter>Pt</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Composer.h">
       <Filter>Pt</Filter>
     </ClInclude>
@@ -883,9 +880,6 @@
       <Filter>Pt</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt\Atomicity.windows.cpp">
-      <Filter>Pt</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt\Char.cpp">
       <Filter>Pt</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt\Connectable.cpp">

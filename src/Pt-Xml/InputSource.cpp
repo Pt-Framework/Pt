@@ -684,7 +684,10 @@ bool StringInputSource::onImportText()
 {   
     // NOTE: on some systems stringbuf::in_avail never returns -1, 
     //       even if no more characters are available
-    
+  
+    // some implementations need peek(), otherwise in_avail returns
+    // 0 event though data is available
+    _ss.peek();
     return _ss.rdbuf()->in_avail() > 0;
 }
 
