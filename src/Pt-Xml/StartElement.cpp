@@ -94,18 +94,9 @@ bool AttributeList::empty() const
 { 
     return _size == 0; 
 }
-
-    
-void AttributeList::clear()
-{ 
-    _container.clear();
-    _begin = 0;
-    _end = 0;
-    _size = 0;
-}
-      
+ 
         
-void AttributeList::reset()
+void AttributeList::clear()
 { 
     _begin = 0;
     _end = 0;
@@ -118,6 +109,10 @@ Attribute& AttributeList::push()
     if( _size >= _container.size() )
     {
         _container.push_back( Attribute() ); 
+    }
+    else
+    {
+        _container[_size].clear();
     }
     
     std::size_t backPos = _size;
@@ -134,7 +129,7 @@ void AttributeList::pop()
 { 
     if( ! empty() )
     {
-        _container[--_size].clear();
+        --_size;
 
         _begin = _size == 0 ? 0 : &_container[0];
         _end = _begin + _size;
@@ -181,26 +176,6 @@ bool AttributeList::has(const String& name) const
 bool AttributeList::has(const String& nsUri, const String& name) const
 { 
     return find(nsUri, name) != end();
-}
-
-
-const String& StartElement::attribute(const String& name) const
-{
-    AttributeList::ConstIterator it = attributes().find(name);
-    if( it == _attributes.end() )
-        throw NoSuchAttribute(name);
-
-    return it->value();
-}
-
-
-const String& StartElement::attribute(const String& nsUri, const String& name) const
-{
-    AttributeList::ConstIterator it = attributes().find(nsUri, name);
-    if( it == _attributes.end() )
-        throw NoSuchAttribute(name);
-
-    return it->value();
 }
 
 } // namespace Xml

@@ -722,10 +722,13 @@ void XmlReaderTest::DtdValidateWithNamespace()
     {
         std::stringstream input;
         input << "<!DOCTYPE pt:test [\n";
-        input << "<!ELEMENT pt:test EMPTY>\n";
+        input << "<!ELEMENT pt:test (pt:first)>\n";
+        input << "<!ELEMENT pt:first EMPTY>\n";
         input << "<!ATTLIST pt:test pt:a1 CDATA #REQUIRED>\n";
         input << "]>\n";
-        input << "<pt:test xmlns:pt='http://www.pt-framework.org' pt:a1='A1'></pt:test>";
+        input << "<pt:test xmlns:pt='http://www.pt-framework.org' pt:a1='A1'>\n";
+        input << "<pt:first/>\n";
+        input << "</pt:test>\n";
 
         Pt::Xml::BinaryInputSource is(input);
 
@@ -1359,7 +1362,7 @@ void XmlReaderTest::EmptyAttribute()
     const Pt::Xml::StartElement* tag = dynamic_cast<const Pt::Xml::StartElement*>(&node);
 
     PT_UNIT_ASSERT(tag->attributes().has(L"b"));
-    PT_UNIT_ASSERT(tag->attribute(L"b").narrow() == "");
+    PT_UNIT_ASSERT(tag->attributes().find(L"b")->value().narrow() == "");
 }
 
 
@@ -1379,7 +1382,7 @@ void XmlReaderTest::AttributeWithSimpleText()
     const Pt::Xml::StartElement* tag = dynamic_cast<const Pt::Xml::StartElement*>(&startNode);
 
     PT_UNIT_ASSERT(tag->attributes().has(L"b"));
-    PT_UNIT_ASSERT(tag->attribute(L"b").narrow() == "a bcdefghijklmnopqrstuvwxyz");
+    PT_UNIT_ASSERT(tag->attributes().find(L"b")->value().narrow() == "a bcdefghijklmnopqrstuvwxyz");
 }
 
 
@@ -1406,7 +1409,7 @@ void XmlReaderTest::AttributeWithUTF8()
     // This is the same 5-character word with greek characters as above, but this time not encoded but
     // directly in Unicode. If the UTF-8 decoding works this must be stored in the Attribute's String now.
     Pt::Char c[] = { 954, 8057, 963, 956, 949, 0 };
-    PT_UNIT_ASSERT(tag->attribute(L"b") == c);
+    PT_UNIT_ASSERT(tag->attributes().find(L"b")->value() == c);
 }
 
 

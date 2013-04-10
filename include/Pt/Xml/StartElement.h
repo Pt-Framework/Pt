@@ -113,8 +113,6 @@ class PT_XML_API AttributeList : private NonCopyable
         bool empty() const;
         
         void clear();
-        
-        void reset();
 
         Attribute& push();
 
@@ -153,37 +151,23 @@ class PT_XML_API AttributeList : private NonCopyable
     the name of the tag, its namespace information, and the attributes of
     the tag.
   */
-class PT_XML_API StartElement : public Node
-                              , private NonCopyable
+class StartElement : public Node
+                   , private NonCopyable
 {
     public:
         /** Constructs a StartElement object with no name and an empty attribute list.
         */
-
-        //TODO use shared QName
         StartElement()
         : Node(Node::StartElement)
-        , _depth(0)
         , _namespace(0)
         { }
 
-        /** @brief Clears the start element.
+        /** @brief Resets the start element.
         */
         void clear()
         {
-            _depth = 0;
             _qname.clear();
             _attributes.clear();
-            _namespace = 0;
-        }
-
-        /** @brief Resets the start element.
-        */
-        void reset()
-        {
-            _depth = 0;
-            _qname.clear();
-            _attributes.reset();
             _namespace = 0;
         }
 
@@ -227,20 +211,11 @@ class PT_XML_API StartElement : public Node
         AttributeList& attributes()
         { return _attributes; }
 
-        /** @brief Returns the value of an attribute.
-        */
-        const String& attribute(const String& name) const;
-
-        /** @brief Returns the value of an attribute.
-        */
-        const String& attribute(const String& nsUri, const String& name) const;
-
         //! @internal
         inline static const Node::Type nodeId()
         { return Node::StartElement; }
 
     private:
-        std::size_t _depth; // use _depth to find QName in NameTable
         QName _qname;
         const Namespace* _namespace;
         AttributeList _attributes;

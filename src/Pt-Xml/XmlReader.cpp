@@ -2570,7 +2570,7 @@ class XmlReaderImpl
         {
             Pt::Char ch = notEof(c);
 
-            if( isAlpha(ch) )
+            if( isAlpha(ch) || ch == ':')
             {
                 _token += ch;
                 _parse = &XmlReaderImpl::OnDtdIdentifier;
@@ -3161,6 +3161,7 @@ class XmlReaderImpl
                     }
                 }
                 
+                _attr = 0;
                 _parse = &XmlReaderImpl::beforeAttribute;
                 return;
             }

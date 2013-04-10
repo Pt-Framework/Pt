@@ -43,14 +43,6 @@ SyntaxError::SyntaxError(const char* what, unsigned line)
 {
 }
 
-
-NoSuchAttribute::NoSuchAttribute(const String& name)
-: XmlError("no such attribute")
-, _name(name)
-{
-}
-
-
 } // namespace Xml
 
 } // namespace Pt

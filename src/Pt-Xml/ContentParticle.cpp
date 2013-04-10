@@ -125,9 +125,36 @@ void SplitParticle::get(ContentParticleList& ctx) const
 void LeafParticle::eval(ContentParticleList& ctx, Node& node) const
 {
     StartElement* se = toStartElement(&node);
-    if(se && se->name() == _name)
+    if( ! se )
+        return;
+
+    if( se->prefix().empty() )
     {
-        out()->get(ctx);
+        if( se->name() == _name)
+        {
+            out()->get(ctx);
+        }
+    }
+    else
+    {
+        std::size_t prefixSize = se->prefix().size();
+        std::size_t nameSize = se->name().size();
+        std::size_t totalSize = prefixSize + nameSize + 1;
+        
+        if(_name.size() == totalSize)
+        {
+            const Char* c = _name.c_str();
+            int r = se->prefix().compare(c, prefixSize);
+            if(r != 0)
+                return;
+
+            c += (prefixSize+1);
+            r = se->name().compare(c, nameSize);
+            if(r != 0)
+                return;
+
+            out()->get(ctx);
+        }
     }
 }
 

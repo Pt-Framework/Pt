@@ -41,7 +41,7 @@ namespace Xml {
     A Comment element stores the content of a comment. There is no interpretation of the
     comment's Text before it is stored.
 */
-class PT_XML_API Comment : public Node 
+class Comment : public Node 
 {
     public:
         /** @brief Constructs with content string.

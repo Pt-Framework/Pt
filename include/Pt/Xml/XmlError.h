@@ -68,26 +68,6 @@ class PT_XML_API SyntaxError : public XmlError
         unsigned _line;
 };
 
-
-/** @brief Indicates XML syntax errors.
-*/
-class PT_XML_API NoSuchAttribute : public XmlError
-{
-    public:
-        /** @brief Construct with attribute name.
-        */
-        NoSuchAttribute(const String& name);
-
-        ~NoSuchAttribute() throw()
-        {}
-
-        const String& name() const
-        { return _name; }
-
-    private:
-        String _name;
-};
-
 } // namespace Xml
 
 } // namespace Pt
