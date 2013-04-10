@@ -120,9 +120,9 @@ bool Scanner::advance(const Pt::Xml::Node& node)
             }
             else if(node.type() == Xml::Node::EndElement)
             {
-                const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
-                if(ee.name() != L"value")
-                    throwSerializationError();
+                //const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
+                //if(ee.name() != L"value")
+                //    throwSerializationError();
 
                 // is always type string
                 _current->setString( _value );
@@ -234,10 +234,10 @@ bool Scanner::advance(const Pt::Xml::Node& node)
             log_debug("OnStructEnd");
             if(node.type() == Xml::Node::EndElement) // </value>
             {
-                const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
+                //const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
 
-                if(ee.name() != L"value")
-                    throwSerializationError();
+                //if(ee.name() != L"value")
+                //    throwSerializationError();
 
                 _state = OnValueEnd;
             }
@@ -294,10 +294,10 @@ bool Scanner::advance(const Pt::Xml::Node& node)
             log_debug("OnName");
             if(node.type() == Xml::Node::EndElement) // </name>
             {
-                const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
+                //const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
 
-                if(ee.name() != L"name")
-                    throwSerializationError();
+                //if(ee.name() != L"name")
+                //    throwSerializationError();
 
                 _state = OnNameEnd;
             }
@@ -492,10 +492,10 @@ bool Scanner::advance(const Pt::Xml::Node& node)
             log_debug("OnScalarEnd");
             if(node.type() == Xml::Node::EndElement) // </value>
             {
-                const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
+                //const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
 
-                if(ee.name() != L"value")
-                    throwSerializationError();
+                //if(ee.name() != L"value")
+                //    throwSerializationError();
 
                 _state = OnValueEnd;
             }
@@ -538,9 +538,9 @@ bool Scanner::advance(const Pt::Xml::Node& node)
             }
             else if(node.type() == Xml::Node::EndElement) // empty array
             {
-                const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
-                if(ee.name() != L"data")
-                    throwSerializationError();
+                //const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
+                //if(ee.name() != L"data")
+                //    throwSerializationError();
 
                 _state = OnDataEnd;
             }
@@ -553,10 +553,10 @@ bool Scanner::advance(const Pt::Xml::Node& node)
             log_debug("OnDataEnd");
             if(node.type() == Xml::Node::EndElement) // </array>
             {
-                const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
+                //const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
 
-                if(ee.name() != L"array")
-                    throwSerializationError();
+                //if(ee.name() != L"array")
+                //    throwSerializationError();
 
                 _state = OnArrayEnd;
             }
@@ -573,10 +573,10 @@ bool Scanner::advance(const Pt::Xml::Node& node)
             log_debug("OnArrayEnd");
             if(node.type() == Xml::Node::EndElement) // </value>
             {
-                const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
+                //const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
 
-                if(ee.name() != L"value")
-                    throwSerializationError();
+                //if(ee.name() != L"value")
+                //    throwSerializationError();
 
                 _state = OnValueEnd;
             }
