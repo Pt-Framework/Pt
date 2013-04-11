@@ -99,6 +99,9 @@ class InputStack
         inline bool empty() const
         { return _sources.size() <= 1; }
 
+        std::size_t size() const
+        { return _sources.size() -1; }
+
         inline void clear()
         {
             while( ! empty() )

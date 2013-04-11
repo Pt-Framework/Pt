@@ -139,6 +139,7 @@ class XmlReaderTest : public Pt::Unit::TestSuite
             this->registerMethod("CustomEntities", *this, &XmlReaderTest::CustomEntities);
             this->registerMethod("ExternalEntities", *this, &XmlReaderTest::ExternalEntities);
             this->registerMethod("ParameterEntities", *this, &XmlReaderTest::ParameterEntities);
+            this->registerMethod("MaxEntityRecursion", *this, &XmlReaderTest::MaxEntityRecursion);
             
             this->registerMethod("InvalidAttribute1", *this, &XmlReaderTest::InvalidAttribute1);
             this->registerMethod("InvalidAttribute2", *this, &XmlReaderTest::InvalidAttribute2);
@@ -219,6 +220,7 @@ class XmlReaderTest : public Pt::Unit::TestSuite
         void CustomEntities();
         void ParameterEntities();
         void ExternalEntities();
+        void MaxEntityRecursion();
         
         void CommentInProlog();
         void CommentInElement();
@@ -327,7 +329,7 @@ void XmlReaderTest::DtdEmptyDocument()
     Pt::Xml::BinaryInputSource is(input);
 
     Pt::Xml::XmlReader reader(resolver, is);
-    reader.reportDtd(true);
+    reader.reportDocType(true);
 
     Pt::Xml::XmlReader::Iterator it = reader.current();
 
@@ -369,7 +371,7 @@ void XmlReaderTest::DtdExternalSubsetPublicId()
     Pt::Xml::BinaryInputSource is(input);
 
     Pt::Xml::XmlReader reader(resolver, is);
-    reader.reportDtd(true);
+    reader.reportDocType(true);
 
     Pt::Xml::XmlReader::Iterator it = reader.current();
 
@@ -400,7 +402,7 @@ void XmlReaderTest::DtdExternalSubsetSystemId()
     Pt::Xml::BinaryInputSource is(input);
 
     Pt::Xml::XmlReader reader(resolver, is);
-    reader.reportDtd(true);
+    reader.reportDocType(true);
 
     Pt::Xml::XmlReader::Iterator it = reader.current();
 
@@ -435,7 +437,7 @@ void XmlReaderTest::DtdExternalAndInternalSubset()
         );
 
         Pt::Xml::XmlReader reader(resolver, is);
-        reader.reportDtd(true);
+        reader.reportDocType(true);
 
         Pt::Xml::XmlReader::Iterator it = reader.current();
         
@@ -776,7 +778,7 @@ void XmlReaderTest::DtdNotations()
 
     Pt::Xml::BinaryInputSource is(input);
     Pt::Xml::XmlReader reader(is);
-    reader.reportDtd(true);
+    reader.reportDocType(true);
     
     Pt::Xml::XmlReader::Iterator it = reader.current();
 
@@ -1995,6 +1997,33 @@ void XmlReaderTest::ParameterEntities()
     ++it;
 }
 
+
+void XmlReaderTest::MaxEntityRecursion()
+{
+    std::stringstream input;
+    input << "<?xml version='1.0'?>\n";
+    input << "<!DOCTYPE test [\n";
+    input << "<!ENTITY ha1 \"XXX\">\n";
+    input << "<!ENTITY ha2 \"&ha1; &ha1; &ha1; &ha1;\">\n";
+    input << "<!ENTITY ha3 \"&ha2; &ha2; &ha2; &ha2;\">\n";
+    input << "<!ENTITY ha4 \"&ha3; &ha3; &ha3; &ha3;\">\n";
+    input << "<!ENTITY ha5 \"&ha4; &ha4; &ha4; &ha4;\">\n";
+    input << "<!ENTITY ha6 \"&ha5; &ha5; &ha5; &ha5;\">\n";
+    input << "<!ENTITY ha7 \"&ha6; &ha6; &ha6; &ha6;\">\n";
+    input << "<!ENTITY ha8 \"&ha7; &ha7; &ha7; &ha7;\">\n";
+    input << "<!ELEMENT test ANY>\n";
+
+    input << "]>\n";
+    input << "<test>&ha8;</test>\n";
+
+    Pt::Xml::BinaryInputSource is(input);
+    Pt::Xml::XmlReader reader(is);
+    reader.setMaxInputDepth(4);
+    
+    Pt::Xml::XmlReader::Iterator it = reader.current();
+    
+    PT_UNIT_ASSERT_THROW(++it, Pt::Xml::SyntaxError);
+}
 
 void XmlReaderTest::CommentInProlog()
 {
