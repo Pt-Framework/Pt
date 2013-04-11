@@ -135,6 +135,8 @@ class PT_XML_API XmlReader : private NonCopyable
 
         void setMaxNameSize(std::size_t n);
 
+        //void setMaxRecursion(std::size_t n);
+
         void reportStartDocument(bool value);
 
         //void reportInternalDtd(bool value);

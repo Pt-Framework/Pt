@@ -1130,11 +1130,11 @@ void XmlReaderTest::ElementWithContent()
 void XmlReaderTest::MaxCharacters()
 {
     std::stringstream input;
-    input << "<a>01234567899876543210</a>";
+    input << "<a>0123456789</a>";
 
     Pt::Xml::BinaryInputSource is(input);
     Pt::Xml::XmlReader reader(is);
-    reader.setMaxNodeSize(10);
+    reader.setMaxNodeSize(5);
     
     Pt::Xml::XmlReader::Iterator it = reader.current();
     PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::StartElement);
@@ -1142,12 +1142,12 @@ void XmlReaderTest::MaxCharacters()
     ++it;
     Pt::Xml::Characters* chars = Pt::Xml::toCharacters(&*it);
     PT_UNIT_ASSERT(chars);
-    PT_UNIT_ASSERT_EQUALS(chars->content(), L"0123456789");
+    PT_UNIT_ASSERT_EQUALS(chars->content(), L"01234");
 
     ++it;
     chars = Pt::Xml::toCharacters(&*it);
     PT_UNIT_ASSERT(chars);
-    PT_UNIT_ASSERT_EQUALS(chars->content(), L"9876543210");
+    PT_UNIT_ASSERT_EQUALS(chars->content(), L"56789");
 
     ++it;
     PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::EndElement);
@@ -1799,7 +1799,6 @@ void XmlReaderTest::MaxCDATA()
     chars = Pt::Xml::toCharacters(&*it);
     PT_UNIT_ASSERT(chars);
     PT_UNIT_ASSERT(chars->isCData());
-    std::cerr << "VAL: " << chars->content().narrow() << std::endl;
     PT_UNIT_ASSERT_EQUALS(chars->content(), L"56789");
 
     ++it;

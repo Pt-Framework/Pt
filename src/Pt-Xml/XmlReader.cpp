@@ -105,6 +105,7 @@ class XmlReaderImpl
             if( isAlpha(ch) ) // TODO: XML Name character
             {
                 _procInstr.target() += c;
+                ++_nodeSize;
                 _parse = &XmlReaderImpl::onProcessingInstruction;
                 return;
             }
@@ -126,6 +127,7 @@ class XmlReaderImpl
                 throw SyntaxError("XML syntax error", line());
 
             _procInstr.target() += c;
+            ++_nodeSize;
         }
 
         void onProcessingInstructionData(int c)
@@ -136,6 +138,7 @@ class XmlReaderImpl
                ch == ':' || ch == '/' || ch == '!' || ch == '=')
             {
                 _procInstr.data() += c;
+                ++_nodeSize;
                 return;
             }
 
@@ -178,7 +181,10 @@ class XmlReaderImpl
 
                 case '/':
                     if( ! _chars.content().empty() )
-                        _current = &(_chars);
+                    {
+                        _current = &_chars;
+                        _nodeSize = 0;
+                    }
 
                     _endElem.clear();
                     _parse = &XmlReaderImpl::onEndElement;
@@ -189,10 +195,14 @@ class XmlReaderImpl
                 throw SyntaxError("XML syntax error", line());
 
             if( ! _chars.content().empty() )
-                _current = &(_chars);
+            {
+                _current = &_chars;
+                _nodeSize = 0;
+            }
 
             _startElem.clear();
             _startElem.qname().name() += c;
+            ++_nodeSize;
             _parse = &XmlReaderImpl::onStartElement;
         }
 
@@ -230,7 +240,6 @@ class XmlReaderImpl
 
             if( isAlpha(ch) )
             {
-                _nodeSize = 0;
                 _token += c;
 
                 if(_token.length() < 7)
@@ -259,6 +268,7 @@ class XmlReaderImpl
             if( isAlpha(ch) )
             {
                 _dtd.rootName().name() += ch;
+                ++_nodeSize;
                 _parse = &XmlReaderImpl::OnDtdRootName;
                 return;
             }
@@ -332,6 +342,7 @@ class XmlReaderImpl
             }
 
             _token += ch;
+            ++_nodeSize;
         }
 
         void OnDtdSystem(int c)
@@ -400,6 +411,7 @@ class XmlReaderImpl
             }
 
             _token += ch;
+            ++_nodeSize;
         }
 
         // The markup declarations may be made up in whole or in part of the
@@ -457,6 +469,7 @@ class XmlReaderImpl
             if( isAlpha(ch) )
             {
                 _dtd.rootName().name() += ch;
+                ++_nodeSize;
                 return;
             }
 
@@ -641,7 +654,6 @@ class XmlReaderImpl
             {
                 pushParseState(&XmlReaderImpl::OnDtdInternal);
 
-                _nodeSize = 0;
                 _parse = &XmlReaderImpl::OnDtdTag;
                 return;
             }
@@ -671,7 +683,7 @@ class XmlReaderImpl
                 _parse = &XmlReaderImpl::onProlog;
                 onProlog(c);
 
-                setDocumentTypeDefinition(false);
+                setEndDocType(false);
                 return;
             }
 
@@ -685,7 +697,7 @@ class XmlReaderImpl
             if(ch == '<')
             {
                 pushParseState(&XmlReaderImpl::OnDtdExternal);
-                _nodeSize = 0;
+
                 _parse = &XmlReaderImpl::OnDtdTag;
                 return;
             }
@@ -771,7 +783,6 @@ class XmlReaderImpl
 
             if( ch == '>' )
             {
-                _nodeSize = 0;
                 popParseState();
                 return;
             }
@@ -1049,6 +1060,7 @@ class XmlReaderImpl
             if( isAlpha(ch) )
             {
                 _token += ch;
+                ++_nodeSize;
                 _parse = &XmlReaderImpl::OnDtdNotationName;
                 return;
             }
@@ -1068,6 +1080,7 @@ class XmlReaderImpl
             if( isAlpha(ch) )
             {
                 _token += ch;
+                ++_nodeSize;
                 return;
             }
 
@@ -1200,6 +1213,7 @@ class XmlReaderImpl
             if( isAlpha(ch) )
             {
                 _token += ch;
+                ++_nodeSize;
                 _parse = &XmlReaderImpl::OnDtdEntityName;
                 return;
             }
@@ -1239,6 +1253,7 @@ class XmlReaderImpl
             if( isAlpha(ch) )
             {
                 _token += ch;
+                ++_nodeSize;
                 _parse = &XmlReaderImpl::OnDtdParamEntityName;
                 return;
             }
@@ -1264,6 +1279,7 @@ class XmlReaderImpl
             if( isAlpha(ch) )
             {
                 _token += ch;
+                ++_nodeSize;
                 return;
             }
 
@@ -1292,6 +1308,7 @@ class XmlReaderImpl
             if( isAlpha(ch) )
             {
                 _token += ch;
+                ++_nodeSize;
                 return;
             }
 
@@ -1506,6 +1523,7 @@ class XmlReaderImpl
             if( isAlpha(ch) )
             {
                 _token += ch;
+                ++_nodeSize;
                 _parse = &XmlReaderImpl::OnDtdEntityNotation;
                 return;
             }
@@ -1526,6 +1544,7 @@ class XmlReaderImpl
             if( isAlpha(ch) )
             {
                 _token += ch;
+                ++_nodeSize;
                 return;
             }
             
@@ -1577,10 +1596,6 @@ class XmlReaderImpl
 
             if( isQuoteEnd(ch) )
             {
-                //if(_entity)
-                //    _entity->addValue(_token);
-                
-                //_token.clear();
                 _entity = 0;
                 _parse = &XmlReaderImpl::OnDtdTagEnd;
                 return;
@@ -1603,9 +1618,10 @@ class XmlReaderImpl
             }
 
             if(_entity)
+            {
                 _entity->value() += ch;
-
-            //_token += ch;
+                ++_nodeSize;
+            }
         }
         
         // Entity references in entity value literals are left as is except
@@ -1675,7 +1691,7 @@ class XmlReaderImpl
             if( isAlpha(ch) )
             {
                 _qname.name() += ch;
-                //_token += ch;
+                ++_nodeSize;
                 _parse = &XmlReaderImpl::OnDtdAttListName;
                 return;
             }
@@ -1701,7 +1717,7 @@ class XmlReaderImpl
             if( isAlpha(ch) )
             {
                 _qname.name() += ch;
-                //_token += ch;
+                ++_nodeSize;
                 return;
             }
 
@@ -1737,7 +1753,7 @@ class XmlReaderImpl
             if( isAlpha(ch) )
             {
                 _qname.name() += ch;
-                //_token += ch;
+                ++_nodeSize;
                 _parse = &XmlReaderImpl::OnDtdAttrName;
                 return;
             }
@@ -1769,7 +1785,7 @@ class XmlReaderImpl
             if( isAlpha(ch) )
             {
                 _qname.name() += ch;
-                //_token += ch;
+                ++_nodeSize;
                 return;
             }
 
@@ -1845,6 +1861,7 @@ class XmlReaderImpl
             {
                 assert( _token.empty() );
                 _token += ch;
+                ++_nodeSize;
                 _parse = &XmlReaderImpl::OnDtdAttrEnumValue;
                 return;
             }
@@ -1865,6 +1882,7 @@ class XmlReaderImpl
             if( isAlpha(ch) )
             {
                 _token += ch;
+                ++_nodeSize;
                 return;
             }
 
@@ -1948,6 +1966,7 @@ class XmlReaderImpl
             {
                 assert(_token.empty());
                 _token += ch;
+                ++_nodeSize;
                 _parse = &XmlReaderImpl::OnDtdAttrEnumValue;
                 return;
             }
@@ -1974,6 +1993,7 @@ class XmlReaderImpl
             {
                 assert(_token.empty());
                 _token += ch;
+                ++_nodeSize;
                 _parse = &XmlReaderImpl::OnDtdAttrEnumValue;
                 return;
             }
@@ -2097,6 +2117,7 @@ class XmlReaderImpl
             if( isAlpha(ch) )
             {
                 _token += ch;
+                ++_nodeSize;
                 _parse = &XmlReaderImpl::OnDtdAttrNotationId;
                 return;
             }
@@ -2117,6 +2138,7 @@ class XmlReaderImpl
             if( isAlpha(ch) )
             {
                 _token += ch;
+                ++_nodeSize;
                 return;
             }
 
@@ -2199,6 +2221,7 @@ class XmlReaderImpl
             if( isAlpha(ch) )
             {
                 _token += ch;
+                ++_nodeSize;
                 _parse = &XmlReaderImpl::OnDtdAttrNotationId;
                 return;
             }
@@ -2313,6 +2336,7 @@ class XmlReaderImpl
                 _attrModel = 0;
                 
                 _qname.name() += ch;
+                ++_nodeSize;
                 _parse = &XmlReaderImpl::OnDtdAttrName;
                 return;
             }
@@ -2364,6 +2388,7 @@ class XmlReaderImpl
             }
 
             _token += ch;
+            ++_nodeSize;
         }
 
         void OnDtdElementBegin(int c)
@@ -2373,6 +2398,7 @@ class XmlReaderImpl
             if( isAlpha(ch) )
             {
                 _qname.name() += ch;
+                ++_nodeSize;
                 _parse = &XmlReaderImpl::OnDtdElementName;
                 return;
             }
@@ -2398,6 +2424,7 @@ class XmlReaderImpl
             if( isAlpha(ch) )
             {
                 _qname.name() += ch;
+                ++_nodeSize;
                 return;
             }
 
@@ -2510,7 +2537,6 @@ class XmlReaderImpl
             if( ! ok )
                 throw SyntaxError("invalid element declaration", line());
                 
-            _nodeSize = 0;
             _contentModel = 0;
         }
 
@@ -2547,6 +2573,7 @@ class XmlReaderImpl
             {
                 assert(_token.empty());
                 _token += ch;
+                ++_nodeSize;
                 _parse = &XmlReaderImpl::OnDtdIdentifier;
                 return;
             }
@@ -2573,6 +2600,7 @@ class XmlReaderImpl
             if( isAlpha(ch) || ch == ':')
             {
                 _token += ch;
+                ++_nodeSize;
                 _parse = &XmlReaderImpl::OnDtdIdentifier;
                 return;
             }
@@ -2706,6 +2734,7 @@ class XmlReaderImpl
             {
                 assert(_token.empty());
                 _token += ch;
+                ++_nodeSize;
                 _parse = &XmlReaderImpl::OnDtdIdentifier;
                 return;
             }
@@ -2806,7 +2835,7 @@ class XmlReaderImpl
 
             if( ch == '>' )
             {
-                setDocumentTypeDefinition(true);
+                setEndDocType(true);
                 decDepth();
 
                 bool externalDtd = resolveExternalDtd();
@@ -2847,6 +2876,7 @@ class XmlReaderImpl
                     if( depth() != 0 )
                     {
                         _chars.appendSpace(c);
+                        ++_nodeSize;
                         _parse = &XmlReaderImpl::onCharacters;
                     }
                     else
@@ -2869,6 +2899,7 @@ class XmlReaderImpl
 
                 default:
                     _chars.append(c);
+                    ++_nodeSize;
                     _parse = &XmlReaderImpl::onCharacters;
                     break;
             }
@@ -2897,6 +2928,7 @@ class XmlReaderImpl
             }
 
             _comment.content() += ch;
+            ++_nodeSize;
         }
 
         void afterComment(int c)
@@ -2911,6 +2943,8 @@ class XmlReaderImpl
 
             _comment.content() += '-';
             _comment.content() += ch;
+            _nodeSize += 2;
+            
             _parse = &XmlReaderImpl::onComment;
         }
 
@@ -2947,6 +2981,9 @@ class XmlReaderImpl
                 case '\n':
                 case '\r':
                 case '\t':
+                    if(_nodeSize > _maxName)
+                        throw SyntaxError("oversized name", line());
+
                     _parse = &XmlReaderImpl::beforeAttribute;
                     return;
 
@@ -2985,6 +3022,7 @@ class XmlReaderImpl
                 throw SyntaxError("XML syntax error", line());
             
             _startElem.qname().name() += c;
+            ++_nodeSize;
         }
 
         void beforeAttribute(int c)
@@ -2998,9 +3036,6 @@ class XmlReaderImpl
 
             if(ch == '/')
             {
-                if(_nodeSize > _maxName)
-                    throw SyntaxError("oversized name", line());
-
                 setStartElement();
                 _parse = &XmlReaderImpl::onEmptyElement;
                 return;
@@ -3010,6 +3045,7 @@ class XmlReaderImpl
             {
                 _attr = &_startElem.attributes().push();
                 _attr->qname().name() += c;
+                ++_nodeSize;
 
                 _parse = &XmlReaderImpl::onAttributeName;
                 return;
@@ -3062,6 +3098,7 @@ class XmlReaderImpl
             if( isAlpha(ch) )
             {
                 _attr->qname().name() += c;
+                ++_nodeSize;
                 return;
             }
 
@@ -3132,8 +3169,6 @@ class XmlReaderImpl
                     //
                     // TODO: do this when StartElement is complete so we only
                     //       have to look up the ElementDeclaration once.
-
-                    // TODO: QName ?
                     ElementModel* elemDecl = _dtd.findElement( _startElem.qname() );
                     if(elemDecl)
                     {
@@ -3166,11 +3201,11 @@ class XmlReaderImpl
             // entity or the literal entity value of an internal parsed entity.
             if( ch == '\r' | ch == '\n' | ch == '\t' )
             {
-                _attr->value() += ' ';
-                return;
+                ch = ' ';
             }
             
             _attr->value() += ch;
+            ++_nodeSize;
         }
 
         void onAttributeEntityReference(int c)
@@ -3184,10 +3219,11 @@ class XmlReaderImpl
             }
             
             if(ch == ';')
-            {
+            {               
                 if( Entity::resolveDefaultEntity(_token) )
                 {
                     _attr->value() += _token;
+                    _nodeSize += _token.size();
                 }
                 else
                 {
@@ -3230,6 +3266,7 @@ class XmlReaderImpl
                 throw SyntaxError("XML syntax error", line());
 
             _endElem.name() += c;
+            ++_nodeSize;
             _parse = &XmlReaderImpl::onEndElementName;
         }
 
@@ -3264,6 +3301,7 @@ class XmlReaderImpl
                 throw SyntaxError("XML syntax error", line());
             
             _endElem.name() += c;
+            ++_nodeSize;
         }
     
         void afterEndElementName(int c)
@@ -3323,6 +3361,7 @@ class XmlReaderImpl
                 case '\t':
                 case '\n':
                     _chars.appendSpace(ch);
+                    ++_nodeSize;
 
                     if(_nodeSize == _maxNodeSize)
                     {
@@ -3334,11 +3373,13 @@ class XmlReaderImpl
             
                 default:                   
                     _chars.append(ch);
+                    ++_nodeSize;
 
                     if(_nodeSize == _maxNodeSize)
                     {
                         _parse = &XmlReaderImpl::onCharactersMax;
                         _current = &_chars;
+                        _nodeSize = 0;
                     }
             }
         }
@@ -3382,9 +3423,7 @@ class XmlReaderImpl
                             _chars.append(c);
                     }
 
-                    _token.clear();
-                    _parse = &XmlReaderImpl::onCharacters;
-                    return;
+                    _nodeSize += _token.size();
                 }
                 else
                 {
@@ -3411,7 +3450,6 @@ class XmlReaderImpl
                 case 'D':
                 case 'A':
                 case 'T':
-                    _nodeSize = 0;
                     _token += ch;
                     break;
 
@@ -3424,7 +3462,6 @@ class XmlReaderImpl
 
             if( _token == L"[CDATA[" )
             {
-                _nodeSize = 0;
                 _token.clear();
 
                 if( (_options & ReportCData) && ! _chars.empty() )
@@ -3463,9 +3500,12 @@ class XmlReaderImpl
             else
                 _chars.append(ch);
 
+            ++_nodeSize;
+
             if(_nodeSize >= _maxNodeSize)
             {
                 _current = &_chars;
+                _nodeSize = 0;
                 _parse = &XmlReaderImpl::onCDataMax;
             }
         }
@@ -3493,6 +3533,7 @@ class XmlReaderImpl
 
             _chars.append(']');
             _chars.append(ch);
+            _nodeSize += 2;
 
             _parse = &XmlReaderImpl::onCData;
         }
@@ -3506,10 +3547,9 @@ class XmlReaderImpl
                 if( _options & ReportCData && ! _chars.content().empty() )
                 {
                     _current = &_chars;
+                    _nodeSize = 0;
                 }
 
-                // do not count ]]> of empty CDATA sections
-                _nodeSize = 0;
                 _parse = &XmlReaderImpl::afterCData;
                 return;
             }
@@ -3517,6 +3557,7 @@ class XmlReaderImpl
             _chars.append(']');
             _chars.append(']');
             _chars.append(ch);
+            _nodeSize += 3;
             
             _parse = &XmlReaderImpl::onCData;
         }
@@ -3744,17 +3785,19 @@ class XmlReaderImpl
                 _startDoc.setStandalone(standalone);
                 _current = &_startDoc;
             }
+
+            _nodeSize = 0;
         }
 
         void setDocType()
         {
             if(_options & ReportDtd)
                 _current = &_docType;
-            else
-                _nodeSize = 0;
+
+            _nodeSize = 0;
         }
 
-        void setDocumentTypeDefinition(bool internSubset)
+        void setEndDocType(bool internSubset)
         {
             if(_options & ReportDtd)
             {
@@ -3762,21 +3805,23 @@ class XmlReaderImpl
                 _endDocType.setInternal(internSubset);
                 _current = &_endDocType;
             }
-            else
-                _nodeSize = 0;
+
+            _nodeSize = 0;
         }
 
         void setComment()
         {
             if(_options & ReportComments)
                 _current = &_comment;
-            else
-                _nodeSize = 0;
+
+            _nodeSize = 0;
         }
 
         void setStartElement()
         {
             _elements.push( _startElem.name() );
+
+            _nodeSize = 0;
 
             if( _startElem.prefix().empty() )
             {
@@ -3824,6 +3869,8 @@ class XmlReaderImpl
             if( ! ok )
                 throw SyntaxError("unmatched XML element", line());
             
+            _nodeSize = 0;
+
             if( _endElem.prefix().empty() )
             {
                 const Namespace* ns = _nsctx.getDefaultNamespace();
@@ -3847,8 +3894,8 @@ class XmlReaderImpl
         {
             if(_options & ReportProcessingInstructions)
                 _current = &_procInstr;
-            else
-                _nodeSize = 0;
+
+            _nodeSize = 0;
         }
 
         class NameStack
@@ -4120,8 +4167,7 @@ class XmlReaderImpl
             {
                 std::char_traits<Char>::int_type c = _input.get();
 
-                // TODO: better count nodeSize in states !!!
-                if( c == eof || ++_nodeSize > _maxNodeSize)
+                if( c == eof || _nodeSize > _maxNodeSize)
                 {          
                     if(_nodeSize > _maxNodeSize)
                         throw SyntaxError("oversized node", line());  
@@ -4138,7 +4184,6 @@ class XmlReaderImpl
                     _input.bumpLine();
             }
 
-            _nodeSize = 0;
             return *_current;
         }
 
@@ -4153,7 +4198,6 @@ class XmlReaderImpl
                 if(n > 0 && _nodeSize < _maxNodeSize)
                 {
                     std::char_traits<Char>::int_type c = _input.get();
-                    _nodeSize++;
                     
                     (this->*_parse)(c);
 
@@ -4181,9 +4225,6 @@ class XmlReaderImpl
                 }
             } 
             while( ! _current);
-
-            if(_current)
-                _nodeSize = 0;
 
             return _current;
         }
