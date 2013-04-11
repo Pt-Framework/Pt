@@ -129,6 +129,12 @@ class PT_XML_API XmlReader : private NonCopyable
 
         XmlResolver* resolver() const;
 
+        void setMaxNodeSize(std::size_t n);
+
+        void setMaxDepth(std::size_t n);
+
+        void setMaxNameSize(std::size_t n);
+
         void reportStartDocument(bool value);
 
         //void reportInternalDtd(bool value);
@@ -144,11 +150,8 @@ class PT_XML_API XmlReader : private NonCopyable
 
         void reportEntityReferences(bool value);
 
-        // TODO: whitespace between start tags or end tags
+        // whitespace between start tags or end tags
         // void reportBoundaryWhitespace(bool value);
-
-        // TODO: ENTITIY, ATTLIST, NOTATION and ELEMENT in DTDs
-        // void reportDtdContent(bool value);
 
         /** @brief Returns current DTD of the document.
         */

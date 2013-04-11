@@ -42,7 +42,7 @@ namespace Xml {
     is set as content of a Character element. This means that entities were translated into
     their corresponding character sequence.
 */
-class PT_XML_API Characters : public Node
+class Characters : public Node
 {
     public:
         /** @brief Constructs with content string.

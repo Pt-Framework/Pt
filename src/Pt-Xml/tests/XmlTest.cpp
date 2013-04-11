@@ -129,6 +129,8 @@ class XmlReaderTest : public Pt::Unit::TestSuite
             this->registerMethod("InvalidTag4", *this, &XmlReaderTest::InvalidTag4);
             this->registerMethod("InvalidTag5", *this, &XmlReaderTest::InvalidTag5);
             this->registerMethod("ElementWithContent", *this, &XmlReaderTest::ElementWithContent);
+            this->registerMethod("MaxCharacters", *this, &XmlReaderTest::MaxCharacters);
+
             this->registerMethod("ElementWithNamespace", *this, &XmlReaderTest::ElementWithNamespace);
             this->registerMethod("AttributeWithNamespace", *this, &XmlReaderTest::AttributeWithNamespace);
             this->registerMethod("DefaultNamespace", *this, &XmlReaderTest::DefaultNamespace);
@@ -151,6 +153,7 @@ class XmlReaderTest : public Pt::Unit::TestSuite
             this->registerMethod("IgnorableWhitespace", *this, &XmlReaderTest::IgnorableWhitespace);
             this->registerMethod("CDATAAsCharacters", *this, &XmlReaderTest::CDATAAsCharacters);
             this->registerMethod("CDATA", *this, &XmlReaderTest::CDATA );
+            this->registerMethod("MaxCDATA", *this, &XmlReaderTest::MaxCDATA);
             this->registerMethod("StartDocument", *this, &XmlReaderTest::StartDocument);
             this->registerMethod("CommentInProlog", *this, &XmlReaderTest::CommentInProlog );
             this->registerMethod("CommentInElement", *this, &XmlReaderTest::CommentInElement );
@@ -197,6 +200,8 @@ class XmlReaderTest : public Pt::Unit::TestSuite
         void InvalidTag4();
         void InvalidTag5();
         void ElementWithContent();
+        void MaxCharacters();
+
         void ElementWithNamespace();
         void AttributeWithNamespace();
         void DefaultNamespace();
@@ -207,6 +212,7 @@ class XmlReaderTest : public Pt::Unit::TestSuite
         void IgnorableWhitespace();
         void CDATAAsCharacters();
         void CDATA();
+        void MaxCDATA();
         void StartDocument();
         
         void DefaultEntities();
@@ -1121,6 +1127,36 @@ void XmlReaderTest::ElementWithContent()
 }
 
 
+void XmlReaderTest::MaxCharacters()
+{
+    std::stringstream input;
+    input << "<a>01234567899876543210</a>";
+
+    Pt::Xml::BinaryInputSource is(input);
+    Pt::Xml::XmlReader reader(is);
+    reader.setMaxNodeSize(10);
+    
+    Pt::Xml::XmlReader::Iterator it = reader.current();
+    PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::StartElement);
+
+    ++it;
+    Pt::Xml::Characters* chars = Pt::Xml::toCharacters(&*it);
+    PT_UNIT_ASSERT(chars);
+    PT_UNIT_ASSERT_EQUALS(chars->content(), L"0123456789");
+
+    ++it;
+    chars = Pt::Xml::toCharacters(&*it);
+    PT_UNIT_ASSERT(chars);
+    PT_UNIT_ASSERT_EQUALS(chars->content(), L"9876543210");
+
+    ++it;
+    PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::EndElement);
+
+    ++it;
+    PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::EndDocument);
+}
+
+
 void XmlReaderTest::ElementWithNamespace()
 {
     std::stringstream input;
@@ -1728,6 +1764,43 @@ void XmlReaderTest::CDATA()
 
     ++it;
     PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::EndElement);
+
+    ++it;
+    PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::EndElement);
+
+    ++it;
+    PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::EndDocument);
+}
+
+
+void XmlReaderTest::MaxCDATA()
+{
+    std::stringstream input;
+    input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
+    input << "<a>";
+    input << "<![CDATA[0123456789]]>";
+    input << "</a>\n";
+
+    Pt::Xml::BinaryInputSource is(input);
+    Pt::Xml::XmlReader reader(is);
+    reader.setMaxNodeSize(5);
+    reader.reportCData(true);
+
+    Pt::Xml::XmlReader::Iterator it = reader.current();
+    PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::StartElement);
+
+    ++it;
+    Pt::Xml::Characters* chars = Pt::Xml::toCharacters(&*it);
+    PT_UNIT_ASSERT(chars);
+    PT_UNIT_ASSERT(chars->isCData());
+    PT_UNIT_ASSERT_EQUALS(chars->content(), L"01234");
+
+    ++it;
+    chars = Pt::Xml::toCharacters(&*it);
+    PT_UNIT_ASSERT(chars);
+    PT_UNIT_ASSERT(chars->isCData());
+    std::cerr << "VAL: " << chars->content().narrow() << std::endl;
+    PT_UNIT_ASSERT_EQUALS(chars->content(), L"56789");
 
     ++it;
     PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::EndElement);
