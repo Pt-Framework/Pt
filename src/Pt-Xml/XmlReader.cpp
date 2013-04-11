@@ -3367,6 +3367,7 @@ class XmlReaderImpl
                     {
                         _parse = &XmlReaderImpl::onCharactersMax;
                         _current = &_chars;
+                        _nodeSize = 0;
                     }
                     
                     break;
@@ -4130,7 +4131,7 @@ class XmlReaderImpl
         size_t depth() const
         { return _depth; }
 
-        void incDepth()
+        inline void incDepth()
         {
             if(_depth == _maxDepth)
                 throw SyntaxError("maximum depth reached", line());
@@ -4138,7 +4139,7 @@ class XmlReaderImpl
             _depth++;
         }
 
-        void decDepth()
+        inline void decDepth()
         {
             _depth--;
         }
