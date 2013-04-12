@@ -656,10 +656,8 @@ class XmlReaderImpl
 
             if( ch == ']' )
             {
-                // end of INCLUDE or end of internal DTD
-
-                // TODO: do not allow INCLUDE/IGNORE in internal subset
-                popParseState(&XmlReaderImpl::OnDtdInternalEnd);
+                assert( _parseStack.empty() );
+                _parse = &XmlReaderImpl::OnDtdInternalEnd;
                 return;
             }
 
@@ -757,9 +755,9 @@ class XmlReaderImpl
                 return;
             }
 
-            if(ch == '[')
+            // INCLUDE/IGNORE only in external subset allowed
+            if(ch == '[' && _input.isExternalDtd())
             {
-                // TODO: INCLUDE/IGNORE only in external subset
                 _parse = &XmlReaderImpl::OnDtdBeforeIgnoreOrInclude;
                 return;
             }
@@ -900,14 +898,8 @@ class XmlReaderImpl
                 if(_token == L"INCLUDE")
                 {
                     _token.clear();
-                    
                     pushParseState(&XmlReaderImpl::OnDtdIncludeEnd);
-                
-                    if( _input.isExternalDtd() )
-                        _parse = &XmlReaderImpl::OnDtdExternal;
-                    else
-                        _parse = &XmlReaderImpl::OnDtdInternal;
-                    
+                    _parse = &XmlReaderImpl::OnDtdExternal;
                     return; 
                 }
                 else if(_token == L"IGNORE")
@@ -982,12 +974,7 @@ class XmlReaderImpl
             if(ch == '[')
             {                                
                 pushParseState(&XmlReaderImpl::OnDtdIncludeEnd);
-                
-                if( _input.isExternalDtd() )
-                    _parse = &XmlReaderImpl::OnDtdExternal;
-                else
-                    _parse = &XmlReaderImpl::OnDtdInternal;
-                    
+                _parse = &XmlReaderImpl::OnDtdExternal;
                 return; 
             }
 
@@ -1159,13 +1146,7 @@ class XmlReaderImpl
             {
                 _notation = 0;
                 
-                popParseState();
-
-                //if( _input.isExternalDtd() )
-                //    _parse = &XmlReaderImpl::OnDtdExternal;
-                //else
-                //    _parse = &XmlReaderImpl::OnDtdInternal;
-                
+                popParseState(); // internal / external subset
                 return;
             }
 
@@ -1207,6 +1188,7 @@ class XmlReaderImpl
             if( isAlpha(ch) )
             {
                 _token += ch;
+                assert( ! _paramEntity);
                 _parse = &XmlReaderImpl::OnDtdEntityName;
                 return;
             }
@@ -1232,6 +1214,8 @@ class XmlReaderImpl
 
             if( isSpace(ch) )
             {
+                assert( ! _paramEntity);
+                _paramEntity = true;
                 _parse = &XmlReaderImpl::OnDtdBeforeParamEntityName;
                 return;
             }
@@ -1246,7 +1230,7 @@ class XmlReaderImpl
             if( isAlpha(ch) )
             {
                 _token += ch;
-                _parse = &XmlReaderImpl::OnDtdParamEntityName;
+                _parse = &XmlReaderImpl::OnDtdEntityName;
                 return;
             }
 
@@ -1258,34 +1242,6 @@ class XmlReaderImpl
             if( ch == '%' )
             {
                 enterParameterReference(&XmlReaderImpl::OnDtdBeforeParamEntityName);
-                return;
-            }
-
-            throw SyntaxError("XML syntax error", line());
-        }
-
-        void OnDtdParamEntityName(int c)
-        {
-            Pt::Char ch = notEof(c);
-
-            if( isAlpha(ch) )
-            {
-                _token += ch;
-                return;
-            }
-
-            if( isSpace(ch) )
-            {
-                assert(_entity == 0);
-                _entity = _dtd.declareParamEntity(_token);
-                _token.clear();
-                _parse = &XmlReaderImpl::OnDtdEntityAfterName;
-                return;
-            }
-
-            if( ch == '%' )
-            {
-                enterParameterReference(&XmlReaderImpl::OnDtdParamEntityName);
                 return;
             }
 
@@ -1307,7 +1263,11 @@ class XmlReaderImpl
                 assert(_entity == 0);
 
                 // bind to first declaration
-                _entity = _dtd.declareEntity(_token);
+                if(_paramEntity)
+                    _entity = _dtd.declareParamEntity(_token);
+                else
+                    _entity = _dtd.declareEntity(_token);
+                
                 _token.clear();
                 _parse = &XmlReaderImpl::OnDtdEntityAfterName;
                 return;
@@ -1380,7 +1340,6 @@ class XmlReaderImpl
 
             if( ch == '"' || ch == '\'' )
             {
-
                 pushParseState(&XmlReaderImpl::OnDtdEntitySystemId);
                 _parse = &XmlReaderImpl::OnDtdSystemId;
                 return;
@@ -1389,20 +1348,17 @@ class XmlReaderImpl
             if( ch == '>' )
             {
                 _entity = 0;
+                _paramEntity = false;
                 
-                popParseState();
-
-                //if( _input.isExternalDtd() )
-                //    _parse = &XmlReaderImpl::OnDtdExternal;
-                //else
-                //    _parse = &XmlReaderImpl::OnDtdInternal;
-                
+                popParseState(); // internal / external subset
                 return;
             }
 
             if(ch == 'N')
             {
-                // TODO: fail if parameter entity
+                if(_paramEntity)
+                    throw SyntaxError("invalid parameter entity", line());
+
                 _token += ch;
                 _parse = &XmlReaderImpl::OnDtdEntityNDATA;
                 return;
@@ -1437,7 +1393,9 @@ class XmlReaderImpl
 
             if( ch == 'N' )
             {
-                // TODO: fail if parameter entity
+                if(_paramEntity)
+                    throw SyntaxError("invalid parameter entity", line());
+                
                 _token += ch;
                 _parse = &XmlReaderImpl::OnDtdEntityNDATA;
                 return;
@@ -1446,14 +1404,9 @@ class XmlReaderImpl
             if( ch == '>' )
             {
                 _entity = 0;
+                _paramEntity = false;
 
-                popParseState();
-                
-                //if( _input.isExternalDtd() )
-                //    _parse = &XmlReaderImpl::OnDtdExternal;
-                //else
-                //    _parse = &XmlReaderImpl::OnDtdInternal;
-                
+                popParseState(); // internal / external subset
                 return;
             }
 
@@ -1543,14 +1496,9 @@ class XmlReaderImpl
 
                 _token.clear();
                 _entity = 0;
+                _paramEntity = false;
 
-                popParseState();
-                
-                //if( _input.isExternalDtd() )
-                //    _parse = &XmlReaderImpl::OnDtdExternal;
-                //else
-                //    _parse = &XmlReaderImpl::OnDtdInternal;
-                
+                popParseState(); // internal / external subset
                 return;
             }
 
@@ -1561,6 +1509,7 @@ class XmlReaderImpl
 
                 _token.clear();
                 _entity = 0;
+                _paramEntity = false;
                 _parse = &XmlReaderImpl::OnDtdTagEnd;
                 return;
             }
@@ -1585,6 +1534,7 @@ class XmlReaderImpl
             if( isQuoteEnd(ch) )
             {
                 _entity = 0;
+                _paramEntity = false;
                 _parse = &XmlReaderImpl::OnDtdTagEnd;
                 return;
             }
@@ -1592,14 +1542,12 @@ class XmlReaderImpl
             if(ch == '&')
             {
                 assert(_token.empty());
-                pushParseState(&XmlReaderImpl::OnDtdEntityValue);
                 _parse = &XmlReaderImpl::OnEntityValueCharacterReference;
                 return;
             }
 
             if( ch == '%' )
             {
-                pushParseState(&XmlReaderImpl::OnDtdEntityValue);
                 _entityRef.clear();
                 _parse = &XmlReaderImpl::OnDtdEntityValueParameterEntityReference;
                 return;
@@ -1619,20 +1567,24 @@ class XmlReaderImpl
 
             if(ch == ';')
             {
+                if( ! _paramEntity)
+                {
+                    assert(_entity);
+
+                    if(_entity && _entity->name() == _token)
+                        throw SyntaxError("self reference", line());
+                }
+
                 if( ! Entity::resolveCharacterEntity(_token) )
                 {
                     _token = '&' + _token + ';';
                 }
 
-                //assert(_beforeCharacterReference != 0);
-                //_parse = _beforeCharacterReference;
-                //_beforeCharacterReference = 0;
-
                 if(_entity)
                     _entity->addValue(_token);
 
                 _token.clear();
-                popParseState();
+                _parse = &XmlReaderImpl::OnDtdEntityValue;
                 return;
             }
 
@@ -1645,26 +1597,27 @@ class XmlReaderImpl
             
             if( isAlpha(ch) )
             {
-                //_entityName += ch;
                 _entityRef.name() += ch;
                 return;
             }
 
             if(ch == ';')
             {
-                //assert(_beforeEntityReference);
+                if(_paramEntity)
+                {
+                    if(_entity && _entity->name() == _entityRef.name())
+                        throw SyntaxError("self reference", line());
+                }
+
                 resolveParamEntity(_entityRef);
-                popParseState();
-                //_parse = _beforeEntityReference;
-                //_beforeEntityReference = 0;
-                //_entityName.clear();
+                _parse = &XmlReaderImpl::OnDtdEntityValue;
                 return;
             }
 
             if(ch == '&')
             {
                 // TODO: This is most likely allowed.
-                throw SyntaxError("character entity reference in parameter entity reference", line());
+                throw SyntaxError("character entity reference in entity reference name", line());
                 return;
             }
 
@@ -2287,19 +2240,12 @@ class XmlReaderImpl
 
             if(c == '>')
             {
-                //assert(_attrModel);
                 _attrModel = 0;
 
                 assert(_attlistDecl);
                 _attlistDecl = 0;
 
-                popParseState();
-
-                //if( _input.isExternalDtd() )
-                //    _parse = &XmlReaderImpl::OnDtdExternal;
-                //else
-                //    _parse = &XmlReaderImpl::OnDtdInternal;
-                
+                popParseState(); // internal / external subset
                 return;
             }
             
@@ -2308,7 +2254,6 @@ class XmlReaderImpl
 
             if( isAlpha(ch) )
             {
-                //assert(_attrModel);
                 _attrModel = 0;
                 
                 _qname.name() += ch;
@@ -3962,6 +3907,7 @@ class XmlReaderImpl
         , _maxInputDepth(8)
         , _notation(0)
         , _entity(0)
+        , _paramEntity(false)
         , _attr(0)
         , _depth(0)
         , _nodeSize(0)
@@ -3983,6 +3929,7 @@ class XmlReaderImpl
         , _maxInputDepth(8)
         , _notation(0)
         , _entity(0)
+        , _paramEntity(false)
         , _attr(0)
         , _depth(0)
         , _nodeSize(0)
@@ -4050,6 +3997,7 @@ class XmlReaderImpl
             _attrModel = 0;
             _attlistDecl = 0;
             _entity = 0;
+            _paramEntity = false;
             _notation = 0;
 
             // nodes are cleared before they are parsed
@@ -4194,6 +4142,7 @@ class XmlReaderImpl
         NamespaceContext _nsctx;
         Notation* _notation;
         Entity* _entity;
+        bool _paramEntity;
         QName _qname;
         String _token;
         Pt::Char _quotChar;

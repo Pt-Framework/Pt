@@ -117,18 +117,11 @@ class PT_XML_API EndDocType : public Node
 
         void setInternal(bool value);
 
-        const Pt::String& internalSubset() const
-        { return _internalSubset; }
-
-        Pt::String& internalSubset()
-        { return _internalSubset; }
-
         //! @internal
         inline static Node::Type nodeId()
         { return Node::EndDocType; }
 
     private:
-        Pt::String _internalSubset;
         int _internal;
 };
 

@@ -38,6 +38,10 @@ namespace Pt {
 
 namespace Xml {
 
+//
+// TODO: use same QName object for StartElement and EndElement
+//
+
 /** @brief An end element represents a closing tag in an XML document.
 */
 class EndElement : public Node 

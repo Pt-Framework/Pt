@@ -137,8 +137,10 @@ class XmlReaderTest : public Pt::Unit::TestSuite
             
             this->registerMethod("DefaultEntities", *this, &XmlReaderTest::DefaultEntities);
             this->registerMethod("CustomEntities", *this, &XmlReaderTest::CustomEntities);
+            this->registerMethod("EntitySelfReference", *this, &XmlReaderTest::EntitySelfReference);
             this->registerMethod("ExternalEntities", *this, &XmlReaderTest::ExternalEntities);
             this->registerMethod("ParameterEntities", *this, &XmlReaderTest::ParameterEntities);
+            this->registerMethod("ParameterEntitySelfReference", *this, &XmlReaderTest::ParameterEntitySelfReference);
             this->registerMethod("MaxEntityRecursion", *this, &XmlReaderTest::MaxEntityRecursion);
             
             this->registerMethod("InvalidAttribute1", *this, &XmlReaderTest::InvalidAttribute1);
@@ -218,8 +220,10 @@ class XmlReaderTest : public Pt::Unit::TestSuite
         
         void DefaultEntities();
         void CustomEntities();
+        void EntitySelfReference();
         void ParameterEntities();
         void ExternalEntities();
+        void ParameterEntitySelfReference();
         void MaxEntityRecursion();
         
         void CommentInProlog();
@@ -817,18 +821,21 @@ void XmlReaderTest::DtdInclude()
 {
     try
     {
+        Pt::String externalDtd;
+        externalDtd += L"<![INCLUDE[]]>\n";
+        externalDtd += L"<![ INCLUDE [ ]]>\n";
+        externalDtd += L"<![%include;[\n";
+        externalDtd += L"<![INCLUDE[ <!ENTITY e2 \"entity2\"> ]]>";
+        externalDtd += L"  <!ENTITY e1 \"entity1\">\n";
+        externalDtd += L"]]>\n";
+
         XmlTestResolver resolver;
-        resolver.addInput(L"external.dtd", L"<![INCLUDE[ <!ENTITY e2 \"entity2\"> ]]>");
+        resolver.addInput(L"external.dtd", externalDtd);
 
         std::stringstream input;
         input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
         input << "<!DOCTYPE test SYSTEM \"external.dtd\" [\n";
         input << "<!ENTITY % include \"INCLUDE\">\n";
-        input << "<![INCLUDE[]]>\n";
-        input << "<![ INCLUDE [ ]]>\n";
-        input << "<![%include;[\n";
-        input << "  <!ENTITY e1 \"entity1\">\n";
-        input << "]]>\n";
         input << "<!ELEMENT test EMPTY>\n";
         input << "]>\n";
         input << "<test></test>";
@@ -861,21 +868,24 @@ void XmlReaderTest::DtdIgnore()
 {
     try
     {
-        XmlTestResolver resolver;
-        resolver.addInput(L"external.dtd", L"<![IGNORE[ <!ENTITY e2 \"entity2\"> ]]>");
+        Pt::String externalDtd;
+        externalDtd += L"<![IGNORE[]]>\n";
+        externalDtd += L"<![ IGNORE [ ]]>\n";
+        externalDtd += L"<![%ignore;[\n";
+        externalDtd += L"  <!ENTITY e1 \"entity1\">\n";
+        externalDtd += L"]]>\n";
+        externalDtd += L"<![IGNORE[ <!ENTITY e2 \"entity2\"> ]]>";
 
         std::stringstream input;
         input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
         input << "<!DOCTYPE test SYSTEM \"external.dtd\" [\n";
         input << "<!ENTITY % ignore \"IGNORE\">\n";
-        input << "<![IGNORE[]]>\n";
-        input << "<![ IGNORE [ ]]>\n";
-        input << "<![%ignore;[\n";
-        input << "  <!ENTITY e1 \"entity1\">\n";
-        input << "]]>\n";
         input << "<!ELEMENT test EMPTY>\n";
         input << "]>\n";
         input << "<test></test>";
+
+        XmlTestResolver resolver;
+        resolver.addInput(L"external.dtd", externalDtd);
 
         Pt::Xml::BinaryInputSource is(input);
         Pt::Xml::XmlReader reader( resolver, is );
@@ -1916,6 +1926,24 @@ void XmlReaderTest::CustomEntities()
     PT_UNIT_ASSERT(Pt::Xml::toEndElement(&*it));
 }
 
+
+void XmlReaderTest::EntitySelfReference()
+{
+    std::stringstream input;
+    input << "<!DOCTYPE test [\n";
+    input << "<!ENTITY ha \"&ha;\">\n";
+    input << "<!ELEMENT test ANY>\n";
+
+    input << "]>\n";
+    input << "<test></test>\n";
+
+    Pt::Xml::BinaryInputSource is(input);
+    Pt::Xml::XmlReader reader(is);
+
+    PT_UNIT_ASSERT_THROW(reader.next(), Pt::Xml::SyntaxError);
+}
+
+
 void XmlReaderTest::ExternalEntities()
 {
     XmlTestResolver resolver;
@@ -1998,6 +2026,23 @@ void XmlReaderTest::ParameterEntities()
 }
 
 
+void XmlReaderTest::ParameterEntitySelfReference()
+{
+    std::stringstream input;
+    input << "<!DOCTYPE test [\n";
+    input << "<!ENTITY % pe \"%pe;\">\n";
+    input << "<!ELEMENT test ANY>\n";
+
+    input << "]>\n";
+    input << "<test></test>\n";
+
+    Pt::Xml::BinaryInputSource is(input);
+    Pt::Xml::XmlReader reader(is);
+
+    PT_UNIT_ASSERT_THROW(reader.next(), Pt::Xml::SyntaxError);
+}
+
+
 void XmlReaderTest::MaxEntityRecursion()
 {
     std::stringstream input;
@@ -2019,10 +2064,9 @@ void XmlReaderTest::MaxEntityRecursion()
     Pt::Xml::BinaryInputSource is(input);
     Pt::Xml::XmlReader reader(is);
     reader.setMaxInputDepth(4);
-    
-    Pt::Xml::XmlReader::Iterator it = reader.current();
-    
-    PT_UNIT_ASSERT_THROW(++it, Pt::Xml::SyntaxError);
+
+    reader.next();
+    PT_UNIT_ASSERT_THROW(reader.next(), Pt::Xml::SyntaxError);
 }
 
 void XmlReaderTest::CommentInProlog()
