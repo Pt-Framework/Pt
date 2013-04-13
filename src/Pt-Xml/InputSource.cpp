@@ -29,6 +29,7 @@
 #include <Pt/Xml/InputSource.h>
 #include <Pt/Xml/XmlError.h>
 #include <Pt/Xml/XmlResolver.h>
+#include <cctype>
 #include <cassert>
 
 namespace Pt {
@@ -365,7 +366,7 @@ bool parseXml(unsigned char& state, unsigned char c, const char*& pbBegin, const
             if(c == '"')
                 state = OnXmlDecl;
             else
-                decl.encoding() += c;
+                decl.encoding() += std::toupper(c);
 
             break;
 
