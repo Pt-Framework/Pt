@@ -359,7 +359,8 @@ void XmlReaderTest::DtdEmptyDocument()
     PT_UNIT_ASSERT_EQUALS(reader.depth(), 0);
 
     ++it;
-    Pt::Xml::EndDocument& endDoc = Pt::Xml::toEndDocument(*it);
+    Pt::Xml::EndDocument* endDoc = Pt::Xml::toEndDocument(&*it);
+    PT_UNIT_ASSERT(endDoc);
 }
 
 
@@ -1146,7 +1147,7 @@ void XmlReaderTest::MaxCharacters()
 
     Pt::Xml::BinaryInputSource is(input);
     Pt::Xml::XmlReader reader(is);
-    reader.setMaxNodeSize(5);
+    reader.setMaxInputSize(5);
     
     Pt::Xml::XmlReader::Iterator it = reader.current();
     PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::StartElement);
@@ -1795,7 +1796,7 @@ void XmlReaderTest::MaxCDATA()
 
     Pt::Xml::BinaryInputSource is(input);
     Pt::Xml::XmlReader reader(is);
-    reader.setMaxNodeSize(5);
+    reader.setMaxInputSize(5);
     reader.reportCData(true);
 
     Pt::Xml::XmlReader::Iterator it = reader.current();
@@ -2174,21 +2175,19 @@ void XmlReaderTest::Benchmark()
     int n = 0;
     for(;;)
     {      
-        Pt::Xml::Node& node = reader.next();
-
-        ++n;
-        if(node.type() == Pt::Xml::Node::EndDocument)
-            break;
-
-        //Pt::Xml::Node* node = reader.advance();
-        //if( ! node && iss.rdbuf()->in_avail() <= 0)
-        //{
-        //    break;
-        //}
-        //else if(node->type() == Pt::Xml::Node::EndDocument)
-        //    break;
+        //Pt::Xml::Node& node = reader.next();
 
         //++n;
+        //if(node.type() == Pt::Xml::Node::EndDocument)
+            //break;
+
+        Pt::Xml::Node* node = reader.advance();
+        if( ! node && iss.rdbuf()->in_avail() <= 0)
+        {
+            break;
+        }
+
+        ++n;
     }
 
     Pt::Timespan ts = c.stop();

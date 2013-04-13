@@ -87,11 +87,6 @@ class XmlReaderImpl
                 setStartDoc();
                 _parse = &XmlReaderImpl::onTag;
             }
-            else if( ch == 0xfeff)
-            {
-                assert(false);
-                return;
-            }
             else
             {
                 throw SyntaxError("XML syntax error", line());
@@ -2932,6 +2927,7 @@ class XmlReaderImpl
 
             if( isSpace(ch) )
             {
+                ++_nodeSize;
                 return;
             }
 
@@ -3007,6 +3003,7 @@ class XmlReaderImpl
 
             if( isSpace(ch) )
             {
+                ++_nodeSize;
                 return;
             }
 
@@ -3025,6 +3022,7 @@ class XmlReaderImpl
 
             if( isSpace(ch) )
             {
+                ++_nodeSize;
                 return;
             }
 
@@ -3111,6 +3109,7 @@ class XmlReaderImpl
             if( isAlpha(ch) || ch == '#')
             {
                 _token += ch;
+                ++_nodeSize;
                 return;
             }
             
@@ -3141,6 +3140,7 @@ class XmlReaderImpl
 
             if( isSpace(ch) )
             {
+                ++_nodeSize;
                 return;
             }
 
@@ -3208,6 +3208,7 @@ class XmlReaderImpl
                 case '\n':
                 case '\r':
                 case '\t':
+                    ++_nodeSize;
                     break;
 
                 case '>':
@@ -3287,7 +3288,15 @@ class XmlReaderImpl
             _parse = &XmlReaderImpl::onCharacters;
             
             if(c != '\n')
+            {
                 onCharacters(c);
+            }
+            else if(_nodeSize == _maxNodeSize)
+            {
+                _parse = &XmlReaderImpl::onCharactersMax;
+                _current = &_chars;
+                _nodeSize = 0;
+            }
         }
 
         void onCharactersMax(int c)
@@ -3304,6 +3313,9 @@ class XmlReaderImpl
             if( isAlpha(ch) || ch == '#')
             {
                 _token += ch;
+                if(_token.size() == _maxNodeSize)
+                    throw SyntaxError("entity reference too long", line());
+
                 return;
             }
 
@@ -3319,8 +3331,6 @@ class XmlReaderImpl
                         else
                             _chars.append(c);
                     }
-
-                    _nodeSize += _token.size();
                 }
                 else
                 {
@@ -3481,6 +3491,7 @@ class XmlReaderImpl
             Char ch(c);
             if( isSpace(ch) )
             {
+                ++_nodeSize;
                 return;
             }
 
@@ -3504,6 +3515,7 @@ class XmlReaderImpl
             Char ch(c);
             if( isSpace(ch) )
             {
+                ++_nodeSize;
                 return;
             }
 
@@ -3958,7 +3970,7 @@ class XmlReaderImpl
             _options &= ~o;
         }
 
-        void setMaxNodeSize(std::size_t n)
+        void setMaxInputSize(std::size_t n)
         {
             _maxNodeSize = n;
         }
@@ -4226,9 +4238,9 @@ XmlResolver* XmlReader::resolver() const
 }
 
 
-void XmlReader::setMaxNodeSize(std::size_t n)
+void XmlReader::setMaxInputSize(std::size_t n)
 {
-    return _impl->setMaxNodeSize(n);
+    return _impl->setMaxInputSize(n);
 }
 
 

@@ -129,8 +129,11 @@ class PT_XML_API XmlReader : private NonCopyable
 
         XmlResolver* resolver() const;
 
-        void setMaxNodeSize(std::size_t n);
+        // prevents "long space attack", "long name attack" and 
+        // "long content attack"
+        void setMaxInputSize(std::size_t n);
 
+        // prevents the "billion laughs attack"
         void setMaxInputDepth(std::size_t n);
 
         void reportStartDocument(bool value);
