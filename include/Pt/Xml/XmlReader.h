@@ -129,9 +129,16 @@ class PT_XML_API XmlReader : private NonCopyable
 
         XmlResolver* resolver() const;
 
+        // max size of characters between nodes, combined attribute values
+        // of an element, comment size, processing instruction size.
+        //
         // prevents "long space attack", "long name attack" and 
-        // "long content attack"
+        // "long content attack", "long attribute-list attack"
         void setMaxInputSize(std::size_t n);
+
+        // void setChunkSize(std::size_t n);
+        // add isChunk method to Characters
+        void setMaxCharSize(std::size_t n);
 
         // prevents the "billion laughs attack"
         void setMaxInputDepth(std::size_t n);
