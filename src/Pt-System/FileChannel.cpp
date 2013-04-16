@@ -116,11 +116,12 @@ void FileChannel::onOpen(const std::string& urlstring)
     _file = url.path();
 
     _fs.open(_file.c_str(), std::ios_base::out | std::ios_base::app);
+    std::streamoff pos = _fs.tellp();
 
-    if( !_fs)
+    if( !_fs || pos < 0)
         throw std::invalid_argument("invalid file name: " + _file);
 
-    _curSize = _fs.tellp();
+    _curSize = static_cast<std::size_t>(pos);
 
     if(_curSize > _maxSize)
     {
@@ -162,7 +163,7 @@ void FileChannel::rotate()
             Pt::System::File(to).remove();
         //remove( to.c_str() );
 
-        for(unsigned n = _numBackup; n > 0 ; --n)
+        for(std::size_t n = _numBackup; n > 0 ; --n)
         {
             std::string from = makePath(n-1);
             //std::rename( from.c_str(), to.c_str() );
@@ -177,7 +178,7 @@ void FileChannel::rotate()
 }
 
 
-std::string FileChannel::makePath(int n)
+std::string FileChannel::makePath(std::size_t n)
 {
     if(n == 0)
         return _file;

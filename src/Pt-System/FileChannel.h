@@ -55,14 +55,14 @@ class FileChannel : public LogChannel
 
         void rotate();
 
-        std::string makePath(int n);
+        std::string makePath(std::size_t n);
 
 	private:
 		std::ofstream _fs;
 		std::string _file;
         std::size_t _maxSize;
         std::size_t _numBackup;
-        std::streamoff _curSize;
+        std::size_t _curSize;
 };
 
 } // namespace System
