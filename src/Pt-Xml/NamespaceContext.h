@@ -72,19 +72,19 @@ class NamespaceContext
 
         /** @brief Adds a namespace to the stack.
         */
-        void setNamespace(unsigned depth, const String& prefix, const String& name);
+        std::size_t setNamespace(unsigned depth, const String& prefix, const String& name);
 
         /** @brief Adds a default namespace to the stack.
         */
-        void setDefaultNamespace(unsigned depth, const String& name);
+        std::size_t setDefaultNamespace(unsigned depth, const String& name);
 
         /** @brief Unsets a namespace.
         */
-        void unsetNamespace(unsigned depth, const String& prefix);
+        std::size_t unsetNamespace(unsigned depth, const String& prefix);
 
         /** @brief Removes all namespaces at greater or equal depth.
         */
-        void popNamespace(unsigned depth);
+        std::size_t popNamespace(unsigned depth);
 
     private:
         std::vector<Namespace> _namespaces;

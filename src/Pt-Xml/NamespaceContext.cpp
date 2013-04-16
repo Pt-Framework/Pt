@@ -125,30 +125,40 @@ const Namespace* NamespaceContext::getDefaultNamespace() const
 }
 
 
-void NamespaceContext::setNamespace(unsigned depth, const String& prefix, const String& name)
+std::size_t NamespaceContext::setNamespace(unsigned depth, const String& prefix, const String& name)
 {
     _namespaces.push_back( Namespace(depth, prefix, name) );
+    return prefix.size() + name.size();
 }
 
 
-void NamespaceContext::setDefaultNamespace(unsigned depth, const String& name)
+std::size_t NamespaceContext::setDefaultNamespace(unsigned depth, const String& name)
 {
     // Namespace without prefix is default namespace
     _namespaces.push_back( Namespace(depth, String(), name) );
+    return name.size();
 }
 
 
-void NamespaceContext::unsetNamespace(unsigned depth, const String& prefix)
+std::size_t NamespaceContext::unsetNamespace(unsigned depth, const String& prefix)
 {
     // Namespace without name is an explicitly unset namespace
     _namespaces.push_back( Namespace(depth, prefix, String()) );
+    return prefix.size();
 }
 
 
-void NamespaceContext::popNamespace(unsigned depth)
+std::size_t NamespaceContext::popNamespace(unsigned depth)
 {
+    std::size_t size = 0;
     while( ! _namespaces.empty() && _namespaces.back().depth() >= depth)
+    {
+        Namespace & ns = _namespaces.back();
+        size += ns.namespaceUri().size() + ns.prefix().size();
         _namespaces.pop_back();
+    }
+
+    return size;
 }
 
 } // namespace Xml

@@ -1147,7 +1147,7 @@ void XmlReaderTest::MaxCharacters()
 
     Pt::Xml::BinaryInputSource is(input);
     Pt::Xml::XmlReader reader(is);
-    reader.setMaxCharSize(5);
+    reader.setChunkSize(5);
     
     Pt::Xml::XmlReader::Iterator it = reader.current();
     PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::StartElement);
@@ -1796,7 +1796,7 @@ void XmlReaderTest::MaxCDATA()
 
     Pt::Xml::BinaryInputSource is(input);
     Pt::Xml::XmlReader reader(is);
-    reader.setMaxCharSize(5);
+    reader.setChunkSize(5);
     reader.reportCData(true);
 
     Pt::Xml::XmlReader::Iterator it = reader.current();

@@ -52,6 +52,7 @@ class Characters : public Node
         , _content()
         , _isSpace(true)
         , _cdata(false)
+        , _isChunk(false)
         { }
 
         /** @brief Returns true if is empty.
@@ -70,6 +71,7 @@ class Characters : public Node
             _content.clear(); 
             _isSpace = true;
             _cdata = false;
+            _isChunk = false;
         }
 
         bool isSpace() const
@@ -116,6 +118,7 @@ class Characters : public Node
         String _content;
         bool _isSpace;
         bool _cdata;
+        bool _isChunk;
 };
 
 
