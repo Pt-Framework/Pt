@@ -103,6 +103,8 @@ class PT_XML_API DocTypeDefinition : private NonCopyable
         typedef std::vector<Notation*> Notations;
         typedef std::vector<Entity*> Entities;
 
+        void* _v1;
+        void* _v2;
         QName _rootName;
         Elements _elements;
         Entities _entities;

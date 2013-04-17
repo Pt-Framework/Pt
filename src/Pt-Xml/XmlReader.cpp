@@ -57,6 +57,32 @@ namespace Pt {
 
 namespace Xml {
 
+inline void QName::clear()
+{
+    _name.clear();
+    _prefix.clear();
+}
+
+inline void QName::addName(Char ch)
+{
+    _name += ch;
+}
+
+inline void QName::setPrefix(const Pt::String& s)
+{
+    _prefix = s;
+}
+
+inline void QName::setName(const Pt::String& s)
+{
+    _name = s;
+}
+
+inline void QName::clearName()
+{
+    _name.clear();
+}
+
 class XmlReaderImpl
 {
     typedef void (XmlReaderImpl::*ParseFunc)(int);
@@ -198,7 +224,7 @@ class XmlReaderImpl
             setCharactersEnd();
 
             _startElem.clear();
-            _startElem.qname().name() += c;
+            _startElem.qname().addName(c);
             ++_nodeSize;
             _parse = &XmlReaderImpl::onStartElement;
         }
@@ -264,7 +290,7 @@ class XmlReaderImpl
 
             if( isAlpha(ch) )
             {
-                _dtd.rootName().name() += ch;
+                _dtd.rootName().addName(ch);
                 ++_nodeSize;
                 _parse = &XmlReaderImpl::OnDtdRootName;
                 return;
@@ -277,30 +303,23 @@ class XmlReaderImpl
         {
             Pt::Char ch = notEof(c);
 
-            if(ch == 'U' || ch == 'B' || ch == 'L' || ch == 'I' || ch == 'C')
-            {
-                _token += ch;
-                return;
-            }
-
-            if( isSpace(ch) )
-            {
-                bool ok = _token == L"PUBLIC";
-                _token.clear();
-                if( ! ok)
-                    throw SyntaxError("XML syntax error", line());
-                
-                _parse = &XmlReaderImpl::OnDtdBeforePublicId;
-                return;
-            }
-
             if( ch == '%' )
             {
                 enterParameterReference(&XmlReaderImpl::OnDtdPublic);
                 return;
             }
 
-            throw SyntaxError("XML syntax error", line());
+            _token += ch;
+
+            if(_token.length() < 6)
+                return;
+
+            bool ok = _token == L"PUBLIC";
+            _token.clear();
+            if( ! ok)
+                throw SyntaxError("XML syntax error", line());
+                
+            _parse = &XmlReaderImpl::OnDtdBeforePublicId;
         }
 
         void OnDtdBeforePublicId(int c)
@@ -345,30 +364,23 @@ class XmlReaderImpl
         {
             Pt::Char ch = notEof(c);
 
-            if(ch == 'Y' || ch == 'S' || ch == 'T' || ch == 'E' || ch == 'M')
-            {
-                _token += ch;
-                return;
-            }
-
-            if( isSpace(ch) )
-            {
-                bool ok = _token == L"SYSTEM";
-                _token.clear();
-                if( ! ok)
-                    throw SyntaxError("XML syntax error", line());
-                
-                _parse = &XmlReaderImpl::OnDtdBeforeSystemId;
-                return;
-            }
-
             if( ch == '%' )
             {
                 enterParameterReference(&XmlReaderImpl::OnDtdSystem);
                 return;
             }
 
-            throw SyntaxError("XML syntax error", line());
+            _token += ch;
+
+            if(_token.length() < 6)
+                return;
+
+            bool ok = _token == L"SYSTEM";
+            _token.clear();
+            if( ! ok)
+                throw SyntaxError("XML syntax error", line());
+                
+            _parse = &XmlReaderImpl::OnDtdBeforeSystemId;
         }
 
         void OnDtdBeforeSystemId(int c)
@@ -466,15 +478,16 @@ class XmlReaderImpl
                 if(_nodeSize == _maxSize)
                     throw SyntaxError("node too large", line());
 
-                _dtd.rootName().name() += ch;
+                _dtd.rootName().addName(ch);
                 ++_nodeSize;
                 return;
             }
 
             if( ch == ':' )
             {
-                _dtd.rootName().prefix() = _dtd.rootName().name(); // TODO: use swap
-                _dtd.rootName().name().clear();
+                QName& qn = _dtd.rootName();
+                qn.setPrefix( qn.name() ); // TODO: use swap
+                qn.clearName();
                 return;
             }
 
@@ -1632,7 +1645,7 @@ class XmlReaderImpl
 
             if( isAlpha(ch) )
             {
-                _qname.name() += ch;
+                _qname.addName(ch);
                 _parse = &XmlReaderImpl::OnDtdAttListName;
                 return;
             }
@@ -1657,14 +1670,14 @@ class XmlReaderImpl
 
             if( isAlpha(ch) )
             {
-                _qname.name() += ch;
+                _qname.addName(ch);
                 return;
             }
 
             if(ch == ':')
             {
-                _qname.prefix() = _qname.name(); // TODO: use swap
-                _qname.name().clear();
+                _qname.setPrefix(_qname.name() ); // TODO: use swap
+                _qname.clearName();
                 return;
             }
 
@@ -1692,7 +1705,7 @@ class XmlReaderImpl
 
             if( isAlpha(ch) )
             {
-                _qname.name() += ch;
+                _qname.addName(ch);
                 _parse = &XmlReaderImpl::OnDtdAttrName;
                 return;
             }
@@ -1723,14 +1736,14 @@ class XmlReaderImpl
             
             if( isAlpha(ch) )
             {
-                _qname.name() += ch;
+                _qname.addName(ch);
                 return;
             }
 
             if(ch == ':')
             {
-                _qname.prefix() = _qname.name(); // TODO: use swap
-                _qname.name().clear();
+                _qname.setPrefix(_qname.name() ); // TODO: use swap
+                _qname.clearName();
                 return;
             }
 
@@ -2258,7 +2271,7 @@ class XmlReaderImpl
             {
                 _attrModel = 0;
                 
-                _qname.name() += ch;
+                _qname.addName(ch);
                 _parse = &XmlReaderImpl::OnDtdAttrName;
                 return;
             }
@@ -2318,7 +2331,7 @@ class XmlReaderImpl
 
             if( isAlpha(ch) )
             {
-                _qname.name() += ch;
+                _qname.addName(ch);
                 _parse = &XmlReaderImpl::OnDtdElementName;
                 return;
             }
@@ -2343,14 +2356,14 @@ class XmlReaderImpl
 
             if( isAlpha(ch) )
             {
-                _qname.name() += ch;
+                _qname.addName(ch);
                 return;
             }
 
             if(ch == ':')
             {
-                _qname.prefix() = _qname.name(); // TODO: use swap
-                _qname.name().clear();
+                _qname.setPrefix(_qname.name() ); // TODO: use swap
+                _qname.clearName();
                 return;
             }
 
@@ -2900,12 +2913,15 @@ class XmlReaderImpl
                     return;
 
                 case ':':
+                {
                     if( ! _startElem.prefix().empty() )
                         throw SyntaxError("invalid namespace prefix", line());
 
-                    _startElem.qname().prefix() = _startElem.name();
-                    _startElem.qname().name().clear();
+                    QName& qn = _startElem.qname();
+                    qn.setPrefix(qn.name() ); // TODO: use swap
+                    qn.clearName();
                     return;
+                }
 
                 case '>':
                     _chars.clear();
@@ -2920,7 +2936,7 @@ class XmlReaderImpl
             if(_nodeSize == _maxSize)
                 throw SyntaxError("element name too long", line());
 
-            _startElem.qname().name() += c;
+            _startElem.qname().addName(c);
             ++_nodeSize;
         }
 
@@ -2943,7 +2959,7 @@ class XmlReaderImpl
             if( isAlpha(ch) )
             {
                 _attr = &_startElem.attributes().push();
-                _attr->qname().name() += c;
+                _attr->qname().addName(c);
                 ++_nodeSize;
 
                 _parse = &XmlReaderImpl::onAttributeName;
@@ -2984,8 +3000,9 @@ class XmlReaderImpl
                 if( ! _attr->prefix().empty() )
                     throw SyntaxError("invalid namespace prefix", line());
 
-                _attr->qname().prefix() = _attr->name();
-                _attr->qname().name().clear();
+                QName& qn = _attr->qname();
+                qn.setPrefix(qn.name() ); // TODO: use swap
+                qn.clearName();
                 return;
             }
 
@@ -2994,7 +3011,7 @@ class XmlReaderImpl
                 if(_nodeSize == _maxSize)
                     throw SyntaxError("node too long", line());
 
-                _attr->qname().name() += c;
+                _attr->qname().addName(c);
                 ++_nodeSize;
                 return;
             }
@@ -3153,7 +3170,7 @@ class XmlReaderImpl
 
             if(ch == '>')
             {
-                _endElem.name() = _startElem.name();
+                _endElem.qname().setName( _startElem.name() );
                 setEndElement();
 
                 _parse = &XmlReaderImpl::afterEndElement;
@@ -3168,7 +3185,7 @@ class XmlReaderImpl
             if( c == std::char_traits<Char>::eof() || ! isAlpha(c) )
                 throw SyntaxError("XML syntax error", line());
 
-            _endElem.name() += c;
+            _endElem.qname().addName(c);
             ++_nodeSize;
             _parse = &XmlReaderImpl::onEndElementName;
         }
@@ -3195,8 +3212,9 @@ class XmlReaderImpl
                     if( ! _endElem.prefix().empty() )
                         throw SyntaxError("invalid namespace prefix", line());
 
-                    _endElem.prefix() = _endElem.name();
-                    _endElem.name().clear();
+                    QName& qn = _endElem.qname();
+                    qn.setPrefix( qn.name() ); // TODO: use swap
+                    qn.clearName();
                     return;
             }
             
@@ -3206,7 +3224,7 @@ class XmlReaderImpl
             if(_nodeSize == _maxSize)
                 throw SyntaxError("node too long", line());
 
-            _endElem.name() += c;
+            _endElem.qname().addName(c);
             ++_nodeSize;
         }
     

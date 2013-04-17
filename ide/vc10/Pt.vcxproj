@@ -229,6 +229,7 @@
     <ClInclude Include="..\..\src\Pt-Xml\ContentParticle.h" />
     <ClInclude Include="..\..\src\Pt-Xml\ElementModel.h" />
     <ClInclude Include="..\..\src\Pt-Xml\InputStack.h" />
+    <ClInclude Include="..\..\src\Pt-Xml\Memory.h" />
     <ClInclude Include="..\..\src\Pt-Xml\NamespaceContext.h" />
     <ClInclude Include="..\..\src\Pt\regexp.h" />
     <ClInclude Include="..\..\src\Pt\SerializationData.h" />

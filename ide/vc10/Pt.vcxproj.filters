@@ -738,6 +738,9 @@
     <ClInclude Include="..\..\src\Pt-Xml\ContentModel.h">
       <Filter>Pt-Xml</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Xml\Memory.h">
+      <Filter>Pt-Xml</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">

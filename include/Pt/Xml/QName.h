@@ -95,7 +95,7 @@ inline bool operator<(const StringRef& a, const String& b)
 
 /** @brief A namespace qualified XML name
 */
-class QName 
+class PT_XML_API QName 
 {
     public:
         /** @brief Constructs an empty qualified name.
@@ -105,11 +105,7 @@ class QName
 
         /** @brief Clears all content.
         */
-        void clear()
-        {
-            _name.clear();
-            _prefix.clear();
-        }
+        void clear();
 
         /** @brief Returns the namespace prefix.
         */
@@ -123,13 +119,16 @@ class QName
 
         /** @brief Sets the namespace prefix.
         */
-        void setPrefix(const String& prefix)
-        { _prefix = prefix; }
+        void setPrefix(const String& prefix);
 
         /** @brief Returns the local name.
         */
-        String& name() 
-        { return _name; }
+        //String& name() 
+        //{ return _name; }
+
+        void addName(Char ch);
+
+        void clearName();
 
         /** @brief Returns the local name.
         */
@@ -138,8 +137,7 @@ class QName
 
         /** @brief Sets the local name.
         */
-        void setName(const String& name)
-        { _name = name; }
+        void setName(const String& name);
 
     private:
         String _prefix;

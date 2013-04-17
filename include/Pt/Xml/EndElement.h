@@ -70,6 +70,11 @@ class EndElement : public Node
         const QName& qname() const
         { return _qname; }
 
+        /** @brief Returns the qualified name.
+        */
+        QName& qname()
+        { return _qname; }
+
         /** @brief Returns the namespace prefix.
         */
         String& prefix() 
@@ -82,8 +87,8 @@ class EndElement : public Node
 
         /** @brief Returns the local name.
         */
-        String& name() 
-        { return _qname.name(); }
+        //String& name() 
+        //{ return _qname.name(); }
 
         /** @brief Returns the local name.
         */
