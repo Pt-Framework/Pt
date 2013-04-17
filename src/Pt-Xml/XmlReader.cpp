@@ -57,28 +57,28 @@ namespace Pt {
 
 namespace Xml {
 
-inline void QName::clear()
+void QName::clear()
 {
     _name.clear();
     _prefix.clear();
 }
 
-inline void QName::addName(Char ch)
+void QName::addName(Char ch)
 {
     _name += ch;
 }
 
-inline void QName::setPrefix(const Pt::String& s)
+void QName::setPrefix(const Pt::String& s)
 {
     _prefix = s;
 }
 
-inline void QName::setName(const Pt::String& s)
+void QName::setName(const Pt::String& s)
 {
     _name = s;
 }
 
-inline void QName::clearName()
+void QName::clearName()
 {
     _name.clear();
 }
