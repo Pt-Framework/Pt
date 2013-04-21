@@ -3185,6 +3185,11 @@ class XmlReaderImpl
             if( c == std::char_traits<Char>::eof() || ! isAlpha(c) )
                 throw SyntaxError("XML syntax error", line());
 
+            //_back = _elements.back();
+
+            //if(_back == _elements.end() || c != _back->value())
+            //    throw SyntaxError("unmatched element", line());
+            
             _endElem.qname().addName(c);
             ++_nodeSize;
             _parse = &XmlReaderImpl::onEndElementName;
@@ -3224,6 +3229,10 @@ class XmlReaderImpl
             if(_nodeSize == _maxSize)
                 throw SyntaxError("node too long", line());
 
+            //++_back;
+            //if(_back == _elements.end() || c != _back->value())
+            //    throw SyntaxError("unmatched element", line());
+            
             _endElem.qname().addName(c);
             ++_nodeSize;
         }
@@ -3252,6 +3261,9 @@ class XmlReaderImpl
 
         void afterEndElement(int c)
         {
+            // _usedSize -= _elements.popBack();
+            // _nodeSize = _usedSize;
+
             _parse = depth() == 0 ? &XmlReaderImpl::onEpilog
                                   : &XmlReaderImpl::afterTag;
 
@@ -3885,7 +3897,7 @@ class XmlReaderImpl
                     if( _extra.empty() && std::size_t(_end - _beg) > size )
                     {
                         // use null terminator as separator
-                        std::size_t len = size + 1;
+                        std::size_t len = size;// + 1;
                         
                         //Traits::copy(_beg, name.c_str(), len);
                         //_beg += len;
@@ -3893,6 +3905,8 @@ class XmlReaderImpl
                         const Char* c = name.c_str();
                         while(len--)
                             *_beg++ = *c++;
+
+                        *_beg++ = size;
                     }
                     else
                     {
@@ -3938,6 +3952,33 @@ class XmlReaderImpl
                     return false;
                 }
 
+                inline std::size_t popBack()
+                {
+                    if(_beg == _first)
+                        return 0;
+
+                    --_beg;
+                    std::size_t n = _beg->value();
+                    _beg -= n;
+                    return n;
+                }
+
+                const Char* back() const
+                {
+                    if(_beg == _first)
+                        return _first;
+
+                    const Char* c = _beg - 1;
+                    std::size_t n = c->value();
+                    c -= n;
+                    return c;
+                }
+
+                const Char* end() const
+                {
+                    return _beg;
+                }
+
             private:
                 Char _first[BufSize];
                 Char* _beg;
@@ -3945,6 +3986,7 @@ class XmlReaderImpl
                 Pt::String _extra;
         };
 
+        const Pt::Char* _back;
         NameStack _elements;
 
     public:
