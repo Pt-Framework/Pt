@@ -63,25 +63,30 @@ void QName::clear()
     _prefix.clear();
 }
 
-void QName::addName(Char ch)
+
+inline void QName::addName(Char ch)
 {
     _name += ch;
 }
 
-void QName::setPrefix(const Pt::String& s)
+
+inline void QName::setPrefix(const Pt::String& s)
 {
     _prefix = s;
 }
 
-void QName::setName(const Pt::String& s)
+
+inline void QName::setName(const Pt::String& s)
 {
     _name = s;
 }
 
-void QName::clearName()
+
+inline void QName::clearName()
 {
     _name.clear();
 }
+
 
 class XmlReaderImpl
 {

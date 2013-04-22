@@ -137,6 +137,10 @@ void XmlRpcResponder::onReadRequest(Http::Request& request, Http::Reply& reply, 
     {
         replyError(reply, 3, error.what());
     }
+    catch(const Fault& fault)
+    {
+        replyError(reply, fault.rc(), fault.what());
+    }
 }
 
 
@@ -311,7 +315,7 @@ void XmlRpcResponder::advance(const Pt::Xml::Node& node, System::EventLoop& loop
 
                 _proc = _service->getProcedure( chars.content().narrow(), _context, *this, loop );
                 if( ! _proc )
-                    throw std::runtime_error("no such procedure");
+                    throw Fault("no such procedure", Pt::XmlRpc::Fault::methodNotFound);
 
                 //std::cerr << "-> Found Procedure: " << chars.content().narrow() << std::endl;
 
