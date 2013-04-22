@@ -3886,14 +3886,18 @@ class XmlReaderImpl
 
             public:
                 NameStack()
-                : _beg(_first)
+                : _nameSize(0)
+                , _beg(_first)
                 , _end(_first + BufSize)
+                , _back(0)
                 { }
 
                 void clear()
                 {
+                    _nameSize = 0;
                     _beg = _first;
                     _end = _first + BufSize;
+                    _back = 0;
                     _extra.clear();
                 }
 
@@ -3957,37 +3961,94 @@ class XmlReaderImpl
                     return false;
                 }
 
+                void pushChar(Char ch)
+                {
+                    // "ns\0elem\08ns\0elem2\09"
+
+                    if( _extra.empty() )
+                    {
+                        *_beg++ == ch;
+                        ++_nameSize;
+
+                        if(_beg == _end)
+                        {
+                            Char* from = _beg - _nameSize;
+                            _extra.append(from, _beg);
+                            _beg = from;
+                        }
+                    }
+                    else
+                    {
+                        _extra += ch;
+                        ++_nameSize;
+                    }
+                }
+
+                std::size_t _nameSize;
+
+                std::size_t closeString()
+                {
+                    std::size_t n = _nameSize;
+                    pushChar(_nameSize);
+                    _nameSize = 0;
+
+                    if( _extra.empty() )
+                        _back = _beg - (n+1);
+                    else
+                        _back = &_extra[_extra.size()-1] - (n+1);
+                    
+                    return n;
+                }
+
                 inline std::size_t popBack()
                 {
-                    if(_beg == _first)
-                        return 0;
+                    std::size_t n = 0;
 
-                    --_beg;
-                    std::size_t n = _beg->value();
-                    _beg -= n;
+                    // check _nameSize == 0;
+
+                    if( ! _extra.empty() )
+                    {
+                        Char* c = &_extra[_extra.size()-1];
+                        n = _beg->value();
+                        _extra.resize(_extra.size() - n);
+                    }
+                    else if(_beg != _first)
+                    {
+                        --_beg;
+                        n = _beg->value();
+                        _beg -= n;
+                    }
+
+                    _back = 0;
+                    
+                    if( ! empty() )
+                    {
+                        if( _extra.empty() )
+                            _back = _beg - 1;
+                        else
+                            _back = &_extra[_extra.size()-1];
+                    
+                        std::size_t n = _back->value();
+                        _back -= n;
+                    }
                     return n;
                 }
 
                 const Char* back() const
                 {
-                    if(_beg == _first)
-                        return _first;
-
-                    const Char* c = _beg - 1;
-                    std::size_t n = c->value();
-                    c -= n;
-                    return c;
+                    return _back;
                 }
-
-                const Char* end() const
+                
+                bool empty() const
                 {
-                    return _beg;
+                    return _beg == _first && _extra.empty();
                 }
 
             private:
                 Char _first[BufSize];
                 Char* _beg;
                 Char* _end;
+                Char* _back;
                 Pt::String _extra;
         };
 
