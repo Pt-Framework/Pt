@@ -230,6 +230,10 @@ class XmlReaderImpl
 
             _startElem.clear();
             _startElem.qname().addName(c);
+
+            // XXX
+            _elements.pushChar(c);
+            
             ++_nodeSize;
             _parse = &XmlReaderImpl::onStartElement;
         }
@@ -2925,6 +2929,8 @@ class XmlReaderImpl
                     QName& qn = _startElem.qname();
                     qn.setPrefix(qn.name() ); // TODO: use swap
                     qn.clearName();
+
+                    _elements.pushChar(0);
                     return;
                 }
 
@@ -2940,6 +2946,9 @@ class XmlReaderImpl
             
             if(_nodeSize == _maxSize)
                 throw SyntaxError("element name too long", line());
+
+            // XXX
+            _elements.pushChar(c);
 
             _startElem.qname().addName(c);
             ++_nodeSize;
@@ -3175,7 +3184,13 @@ class XmlReaderImpl
 
             if(ch == '>')
             {
-                _endElem.qname().setName( _startElem.name() );
+                //_endElem.qname().setName( _startElem.name() );
+                _endElem.clear();
+                if( ! _startElem.prefix().empty())
+                    _endElem.setPrefixPtr( _startElem.prefix().c_str() );
+                
+                _endElem.setNamePtr( _startElem.name().c_str() );
+
                 setEndElement();
 
                 _parse = &XmlReaderImpl::afterEndElement;
@@ -3187,15 +3202,23 @@ class XmlReaderImpl
 
         void onEndElement(int c)
         {           
-            if( c == std::char_traits<Char>::eof() || ! isAlpha(c) )
+            //if( c == std::char_traits<Char>::eof() || ! isAlpha(c) )
+            //    throw SyntaxError("XML syntax error", line());
+
+            // XXX
+            if( _elements.empty() )
                 throw SyntaxError("XML syntax error", line());
 
-            //_back = _elements.back();
+            _back = _elements.back();
 
-            //if(_back == _elements.end() || c != _back->value())
-            //    throw SyntaxError("unmatched element", line());
+            _endElem.setNamePtr(_back);
+
+            if( c != _back->value() || *_back == '\0' )
+                throw SyntaxError("unmatched element 1", line());
+
+            ++_back;
             
-            _endElem.qname().addName(c);
+            //_endElem.qname().addName(c);
             ++_nodeSize;
             _parse = &XmlReaderImpl::onEndElementName;
         }
@@ -3219,26 +3242,37 @@ class XmlReaderImpl
                     return;
 
                 case ':':
-                    if( ! _endElem.prefix().empty() )
-                        throw SyntaxError("invalid namespace prefix", line());
+                    //if( ! _endElem.prefix().empty() )
+                    //    throw SyntaxError("invalid namespace prefix", line());
 
-                    QName& qn = _endElem.qname();
-                    qn.setPrefix( qn.name() ); // TODO: use swap
-                    qn.clearName();
+                    //QName& qn = _endElem.qname();
+                    //qn.setPrefix( qn.name() ); // TODO: use swap
+                    //qn.clearName();
+
+                    if( *_back != '\0' || _back == _elements.end() )
+                        throw SyntaxError("unmatched element", line());
+
+                    _endElem.setPrefixPtr( _endElem.namePtr() );
+
+                    ++_back;
+                    _endElem.setNamePtr(_back);
                     return;
             }
             
-            if( c == std::char_traits<Char>::eof() || ! isAlpha(c) )
-                throw SyntaxError("XML syntax error", line());
+            //if( c == std::char_traits<Char>::eof() || ! isAlpha(c) )
+            //    throw SyntaxError("XML syntax error", line());
             
-            if(_nodeSize == _maxSize)
-                throw SyntaxError("node too long", line());
+            //if(_nodeSize == _maxSize)
+            //    throw SyntaxError("node too long", line());
 
-            //++_back;
-            //if(_back == _elements.end() || c != _back->value())
-            //    throw SyntaxError("unmatched element", line());
+            // XXX
+            //std::cerr << "EE: " << char(c) << "-"<<  _back->narrow() << std::endl;
+            if( c != _back->value() || *_back == '\0' )
+                throw SyntaxError("unmatched element 2", line());
             
-            _endElem.qname().addName(c);
+            ++_back;
+            
+            //_endElem.qname().addName(c);
             ++_nodeSize;
         }
     
@@ -3266,8 +3300,8 @@ class XmlReaderImpl
 
         void afterEndElement(int c)
         {
-            // _usedSize -= _elements.popBack();
-            // _nodeSize = _usedSize;
+            // XXX
+            _usedSize -= _elements.popBack();
 
             _parse = depth() == 0 ? &XmlReaderImpl::onEpilog
                                   : &XmlReaderImpl::afterTag;
@@ -3789,10 +3823,13 @@ class XmlReaderImpl
 
         void setStartElement()
         {
-            std::size_t nameSize = _startElem.name().size();
-            _elements.push( _startElem.name(), nameSize );
+            //std::size_t nameSize = _startElem.name().size();
+            //_elements.push( _startElem.name(), nameSize );
             
-            _usedSize += nameSize;
+            //_usedSize += nameSize;
+
+            // XXX
+            _usedSize += _elements.pushString();
             _nodeSize = _usedSize;
 
             if( _startElem.prefix().empty() )
@@ -3837,15 +3874,15 @@ class XmlReaderImpl
 
         void setEndElement()
         {            
-            std::size_t nameSize = _endElem.name().size();
-            bool ok = _elements.pop( _endElem.name(), nameSize );
-            if( ! ok )
-                throw SyntaxError("unmatched XML element", line());
+            //std::size_t nameSize = _endElem.name().size();
+            //bool ok = _elements.pop( _endElem.name(), nameSize );
+            //if( ! ok )
+            //    throw SyntaxError("unmatched XML element", line());
             
-            _usedSize -= nameSize;
+            //_usedSize -= nameSize;
             _nodeSize = _usedSize;
 
-            if( _endElem.prefix().empty() )
+            if( ! _endElem.prefixPtr() )
             {
                 const Namespace* ns = _nsctx.getDefaultNamespace();
                 if(ns)
@@ -3853,7 +3890,7 @@ class XmlReaderImpl
             }
             else
             {
-                const Namespace* ns = _nsctx.findPrefix( _endElem.prefix() );
+                const Namespace* ns = _nsctx.findPrefix( _endElem.prefixPtr() );
                 if( ! ns )
                     throw SyntaxError("undeclared namespace prefix", line());
 
@@ -3882,22 +3919,20 @@ class XmlReaderImpl
         class NameStack
         {
             typedef std::char_traits<Char> Traits;
-            static const unsigned BufSize = 96;
+            static const unsigned BufSize = 128;
 
             public:
                 NameStack()
-                : _nameSize(0)
-                , _beg(_first)
+                : _beg(_first)
                 , _end(_first + BufSize)
-                , _back(0)
+                , _nameSize(0)
                 { }
 
                 void clear()
                 {
-                    _nameSize = 0;
                     _beg = _first;
                     _end = _first + BufSize;
-                    _back = 0;
+                    _nameSize = 0;
                     _extra.clear();
                 }
 
@@ -3920,7 +3955,7 @@ class XmlReaderImpl
                     else
                     {
                         // use null terminator as separator
-                        _extra.append(name);
+                        _extra.insert(_extra.end(), name.begin(), name.end());
                         _extra.push_back(0);
                     }
                 }
@@ -3965,78 +4000,90 @@ class XmlReaderImpl
                 {
                     // "ns\0elem\08ns\0elem2\09"
 
+                    //std::cerr << "push: " << ch.value() << " "<< char(ch) << std::endl;
+
                     if( _extra.empty() )
                     {
-                        *_beg++ == ch;
+                        *_beg++ = ch;
                         ++_nameSize;
 
                         if(_beg == _end)
                         {
                             Char* from = _beg - _nameSize;
-                            _extra.append(from, _beg);
+                            _extra.insert(_extra.end(), from, _beg);
                             _beg = from;
                         }
                     }
                     else
                     {
-                        _extra += ch;
+                        _extra.push_back(ch);
                         ++_nameSize;
                     }
                 }
 
-                std::size_t _nameSize;
-
-                std::size_t closeString()
+                std::size_t pushString()
                 {
+                    pushChar(0);
+                    
                     std::size_t n = _nameSize;
                     pushChar(_nameSize);
                     _nameSize = 0;
-
-                    if( _extra.empty() )
-                        _back = _beg - (n+1);
-                    else
-                        _back = &_extra[_extra.size()-1] - (n+1);
                     
                     return n;
                 }
 
-                inline std::size_t popBack()
+                std::size_t popBack()
                 {
                     std::size_t n = 0;
+                    std::size_t m = _nameSize + 1;
 
                     // check _nameSize == 0;
 
                     if( ! _extra.empty() )
                     {
-                        Char* c = &_extra[_extra.size()-1];
-                        n = _beg->value();
-                        _extra.resize(_extra.size() - n);
+                        Char* c = &_extra[0] + _extra.size();
+                        c -= m;
+                        n = c->value();
+                        //std::cerr << "pop:" << n << std::endl;
+                        _extra.resize(_extra.size() - (n+1));
                     }
-                    else if(_beg != _first)
+                    else
                     {
-                        --_beg;
+                        _beg -= m;
                         n = _beg->value();
                         _beg -= n;
                     }
 
-                    _back = 0;
-                    
-                    if( ! empty() )
-                    {
-                        if( _extra.empty() )
-                            _back = _beg - 1;
-                        else
-                            _back = &_extra[_extra.size()-1];
-                    
-                        std::size_t n = _back->value();
-                        _back -= n;
-                    }
                     return n;
                 }
 
                 const Char* back() const
                 {
-                    return _back;
+                    const Char* back = 0;
+                    
+                    if( _extra.empty() )
+                        back = _beg;
+                    else
+                        back = &_extra[0] + _extra.size();
+
+                    back -= (_nameSize + 1);
+                    std::size_t n = back->value();
+                    back -= n;
+
+                    //std::cerr << "back: " << n << " " << String(back, n).narrow() << "." << std::endl;
+                    return back;
+                }
+
+                const Char* end() const
+                {
+                    const Char* back = 0; 
+                    
+                    if( _extra.empty() )
+                        back = _beg;
+                    else
+                        back = &_extra[0] + _extra.size();
+
+                    return --back;
                 }
                 
                 bool empty() const
@@ -4048,8 +4095,8 @@ class XmlReaderImpl
                 Char _first[BufSize];
                 Char* _beg;
                 Char* _end;
-                Char* _back;
-                Pt::String _extra;
+                std::vector<Char> _extra;
+                std::size_t _nameSize;
         };
 
         const Pt::Char* _back;

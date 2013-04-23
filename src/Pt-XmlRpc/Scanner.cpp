@@ -145,8 +145,8 @@ bool Scanner::advance(const Pt::Xml::Node& node)
             if(node.type() == Xml::Node::EndElement)
             {
                 const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
-
-                if(ee.name() == L"member")
+                ;
+                if( ee.compareName("member") )
                 {
                     log_debug("OnValueEnd member");
                     _current = _current->finish();
@@ -155,7 +155,7 @@ bool Scanner::advance(const Pt::Xml::Node& node)
 
                     _state = OnStructBegin;
                 }
-                else if(ee.name() == L"data")
+                else if( ee.compareName("data") )
                 {
                     log_debug("OnValueEnd data");
                     _current = _current->finish();
@@ -164,7 +164,7 @@ bool Scanner::advance(const Pt::Xml::Node& node)
 
                     _state = OnDataEnd;
                 }
-                else if(ee.name() == L"param")
+                else if( ee.compareName("param") )
                 {
                     log_debug("OnValueEnd data other " << ee.name().narrow());
                     if( 0 != _current->finish() )
@@ -173,7 +173,7 @@ bool Scanner::advance(const Pt::Xml::Node& node)
                     _state = OnValueEnd;
                     return true;
                 }
-                else if(ee.name() == L"fault")
+                else if( ee.compareName("fault") )
                 {
                     log_debug("OnValueEnd data other " << ee.name().narrow());
                     if( 0 != _current->finish() )

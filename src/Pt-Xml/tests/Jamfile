@@ -5,9 +5,10 @@ SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Xml ;
 #SubDirHdrs $(PT_TOP)/../Qt/4.8.4/include ;
 
 Main Pt-Xml-test : 
-                   XmlSerializerTest.cpp
+                   #XmlSerializerTest.cpp
                    XmlTest.cpp
-                   XmlWriterTest.cpp Pt-Xml-test.cpp ;
+                   #XmlWriterTest.cpp 
+                   Pt-Xml-test.cpp ;
 
 LinkSharedLibraries Pt-Xml-test : Pt-Xml Pt-Reflex Pt-System Pt-Unit Pt ;
 MakeLocate Pt-Xml-test : $(PT_OUTPUT_TARGET) ;

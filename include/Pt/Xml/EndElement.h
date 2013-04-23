@@ -54,6 +54,8 @@ class EndElement : public Node
         //TODO point to shared QName (e.g. from StartElement)
         EndElement()
         : Node(Node::EndElement)
+        , _prefix(0)
+        , _name(0)
         , _namespace(0)
         { }
 
@@ -61,29 +63,81 @@ class EndElement : public Node
         */
         void clear()
         { 
-            _qname.clear(); 
+            //_qname.clear(); 
+            _prefix = 0;
+            _name = 0;
             _namespace = 0;
+        }
+
+        void setNamePtr(const Char* name)
+        { _name = name; }
+
+        const Char* namePtr() const
+        { return _name; }
+
+        const Char* prefixPtr() const
+        { return _prefix; }
+
+        void setPrefixPtr(const Char* prefix)
+        { _prefix = prefix; }
+
+        template <typename T>
+        bool compareName(const T* name) const
+        {
+            if( ! _name)
+                return false;
+
+            const Char* self = _name;
+            while(*self == *name++ && *self != 0)
+                self++;
+
+            return *self == 0;
+        }
+
+        template <typename T>
+        bool compareName(const T* prefix, const T* name) const
+        {
+            if( ! _name)
+                return false;
+
+            const Char* self = _name;
+            while(*self == *name++ && *self != 0)
+                self++;
+
+            if(*self != 0 || *name != 0)
+                return false;
+            
+            if( _prefix )
+            {
+                self = _prefix;
+                while(*self == *prefix++ && *self != 0)
+                    self++;
+
+                return *self == 0 && *prefix != 0;
+            }
+
+            return *prefix == 0;
         }
 
         /** @brief Returns the qualified name.
         */
-        const QName& qname() const
-        { return _qname; }
+        //const QName& qname() const
+        //{ return _qname; }
 
         /** @brief Returns the qualified name.
         */
-        QName& qname()
-        { return _qname; }
+        //QName& qname()
+        //{ return _qname; }
 
         /** @brief Returns the namespace prefix.
         */
-        String& prefix() 
-        { return _qname.prefix(); }
+        //String& prefix() 
+        //{ return _qname.prefix(); }
 
         /** @brief Returns the namespace prefix.
         */
-        const String& prefix() const
-        { return _qname.prefix(); }
+        //const String& prefix() const
+        //{ return _qname.prefix(); }
 
         /** @brief Returns the local name.
         */
@@ -92,13 +146,13 @@ class EndElement : public Node
 
         /** @brief Returns the local name.
         */
-        const String& name() const
-        { return _qname.name(); }
+        //const String& name() const
+        //{ return _qname.name(); }
 
         /** @brief Returns the namespace Uri for this element name
         */
         const String& namespaceUri() const
-        { return _namespace ? _namespace->namespaceUri() : _qname.prefix(); }
+        { return _namespace->namespaceUri(); }
         
         /** @brief Sets the namespace context for this element
         */
@@ -110,7 +164,9 @@ class EndElement : public Node
         { return Node::EndElement; }
 
     private:
-        QName _qname;
+        //QName _qname;
+        const Char* _prefix;
+        const Char* _name;
         const Namespace* _namespace;
 };
 

@@ -67,6 +67,25 @@ const Namespace* NamespaceContext::findPrefix(const String& prefix) const
 }
 
 
+const Namespace* NamespaceContext::findPrefix(const Char* prefix) const
+{
+    std::vector<Namespace>::const_reverse_iterator it;
+
+    for(it = _namespaces.rbegin(); it != _namespaces.rend(); ++it)
+    {
+      if( prefix == it->prefix() && ! it->isUnset() && ! it->isDefaultNamespace() )
+      {
+          return &(*it);
+      }
+    }
+
+    if( prefix == _xmlNamespace.prefix() )
+        return &_xmlNamespace;
+
+    return 0;
+}
+
+
 const Namespace* NamespaceContext::findUri(const String& ns) const
 {
     std::vector<Namespace>::const_reverse_iterator it;
@@ -107,7 +126,9 @@ const Namespace* NamespaceContext::findUri(const Char* ns, std::size_t n) const
 
 const Namespace* NamespaceContext::getDefaultNamespace() const
 {
-    const Namespace* ret = 0;
+    static const Namespace defNs(0, Pt::String(),Pt::String() );
+
+    const Namespace* ret = &defNs;
     std::vector<Namespace>::const_reverse_iterator it;
 
     for(it = _namespaces.rbegin(); it != _namespaces.rend(); ++it)

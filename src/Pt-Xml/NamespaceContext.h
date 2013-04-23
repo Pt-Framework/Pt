@@ -60,6 +60,8 @@ class NamespaceContext
         */
         const Namespace* findPrefix(const String& prefix) const;
 
+        const Namespace* findPrefix(const Char* prefix) const;
+
         /** @brief Returns the prefix for a namespace URI.
         */
         const Namespace* findUri(const String& ns) const;
