@@ -95,6 +95,48 @@ inline bool operator<(const StringRef& a, const String& b)
 
 /** @brief A namespace qualified XML name
 */
+class QNameRef
+{
+    public:
+        /** @brief Constructs an empty qualified name.
+        */
+        QNameRef()
+        : _prefix(0)
+        , _name(0)
+        {}
+
+        void set(const Char* prefix, const Char* name)
+        {
+            _prefix = prefix;
+            _name = name;
+        }
+
+        /** @brief Clears all content.
+        */
+        void clear()
+        {            
+            _prefix = 0;
+            _name = 0;
+        }
+
+        /** @brief Returns the namespace prefix.
+        */
+        const Char* prefix() const
+        { return _prefix; }
+
+        /** @brief Returns the local name.
+        */
+        const Char* name() const
+        { return _name; }
+
+    private:
+        const Char* _prefix;
+        const Char* _name;
+};
+
+
+/** @brief A namespace qualified XML name
+*/
 class PT_XML_API QName 
 {
     public:
@@ -109,8 +151,8 @@ class PT_XML_API QName
 
         /** @brief Returns the namespace prefix.
         */
-        String& prefix() 
-        { return _prefix; }
+        //String& prefix() 
+        //{ return _prefix; }
 
         /** @brief Returns the namespace prefix.
         */
@@ -135,9 +177,17 @@ class PT_XML_API QName
         const String& name() const
         { return _name; }
 
+        String& name()
+        { return _name; }
+
         /** @brief Sets the local name.
         */
         void setName(const String& name);
+
+        bool equals(const Char* prefix, const Char* name) const
+        {
+            return _prefix == prefix && _name == name;
+        }
 
     private:
         String _prefix;
@@ -149,7 +199,20 @@ inline bool operator ==(const QName& a, const QName& b)
     return a.prefix() == b.prefix() && a.name() == b.name();
 }
 
+
+inline bool operator ==(const QName& a, const QNameRef& b)
+{
+    return a.prefix() == b.prefix() && a.name() == b.name();
+}
+
+
 inline bool operator<(const QName& a, const QName& b)
+{
+	  return a.prefix() < b.prefix() ||
+           ! (b.prefix() < a.prefix()) && a.name() < b.name();
+}
+
+inline bool operator<(const QName& a, const QNameRef& b)
 {
 	  return a.prefix() < b.prefix() ||
            ! (b.prefix() < a.prefix()) && a.name() < b.name();
