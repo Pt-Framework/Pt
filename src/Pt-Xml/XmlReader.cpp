@@ -3186,6 +3186,7 @@ class XmlReaderImpl
             {
                 //_endElem.qname().setName( _startElem.name() );
                 _endElem.clear();
+                
                 if( ! _startElem.prefix().empty())
                     _endElem.setPrefixPtr( _startElem.prefix().c_str() );
                 
@@ -3200,6 +3201,8 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
 
+        Pt::Char _null[1];
+
         void onEndElement(int c)
         {           
             //if( c == std::char_traits<Char>::eof() || ! isAlpha(c) )
@@ -3211,6 +3214,7 @@ class XmlReaderImpl
 
             _back = _elements.back();
 
+            _endElem.setPrefixPtr(_null);
             _endElem.setNamePtr(_back);
 
             if( c != _back->value() || *_back == '\0' )
@@ -3882,7 +3886,8 @@ class XmlReaderImpl
             //_usedSize -= nameSize;
             _nodeSize = _usedSize;
 
-            if( ! _endElem.prefixPtr() )
+            const Char* prefix = _endElem.prefixPtr();
+            if( prefix == 0 || *prefix == '\0')
             {
                 const Namespace* ns = _nsctx.getDefaultNamespace();
                 if(ns)
@@ -3890,7 +3895,7 @@ class XmlReaderImpl
             }
             else
             {
-                const Namespace* ns = _nsctx.findPrefix( _endElem.prefixPtr() );
+                const Namespace* ns = _nsctx.findPrefix( prefix );
                 if( ! ns )
                     throw SyntaxError("undeclared namespace prefix", line());
 

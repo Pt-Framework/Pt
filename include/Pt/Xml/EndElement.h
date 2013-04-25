@@ -84,12 +84,12 @@ class EndElement : public Node
         template <typename T>
         bool compareName(const T* name) const
         {
-            if( ! _name)
-                return false;
-
             const Char* self = _name;
-            while(*self == *name++ && *self != 0)
+            while(*self == *name && *self != 0)
+            {
                 self++;
+                name++;
+            }
 
             return *self == 0;
         }
@@ -97,26 +97,25 @@ class EndElement : public Node
         template <typename T>
         bool compareName(const T* prefix, const T* name) const
         {
-            if( ! _name)
-                return false;
-
             const Char* self = _name;
-            while(*self == *name++ && *self != 0)
+            while(*self == *name && *self != 0)
+            {
                 self++;
+                name++;
+            }
 
             if(*self != 0 || *name != 0)
                 return false;
             
-            if( _prefix )
+            self = _prefix;
+            while(*self == *prefix && *self != 0)
             {
-                self = _prefix;
-                while(*self == *prefix++ && *self != 0)
-                    self++;
-
-                return *self == 0 && *prefix != 0;
+                    
+                self++;
+                prefix++;
             }
 
-            return *prefix == 0;
+            return *self == 0 && *prefix == 0;
         }
 
         /** @brief Returns the qualified name.

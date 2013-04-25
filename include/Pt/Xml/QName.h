@@ -151,8 +151,8 @@ class PT_XML_API QName
 
         /** @brief Returns the namespace prefix.
         */
-        //String& prefix() 
-        //{ return _prefix; }
+        String& prefix() 
+        { return _prefix; }
 
         /** @brief Returns the namespace prefix.
         */
