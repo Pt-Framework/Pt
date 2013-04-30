@@ -261,7 +261,7 @@ void ClientImpl::advance(const Pt::Xml::Node& node)
             if(node.type() == Xml::Node::StartElement)
             {
                 const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
-                if( se.name() != L"methodResponse" )
+                if( ! se.qnameRef().equals("methodResponse") )
                     throw SerializationError("invalid XML-RPC methodCall");
 
                 _state = OnMethodResponseBegin;
@@ -275,13 +275,13 @@ void ClientImpl::advance(const Pt::Xml::Node& node)
             if(node.type() == Xml::Node::StartElement) // <params> or <fault>
             {
                 const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
-                if( se.name() == L"params")
+                if( se.qnameRef().equals("params") )
                 {
                     _state = OnParamsBegin;
                     break;
                 }
 
-                else if( se.name() == L"fault")
+                else if( se.qnameRef().equals("fault") )
                 {
                     _fh.begin(_fault);
                     _scanner.begin(_fh);
@@ -332,7 +332,7 @@ void ClientImpl::advance(const Pt::Xml::Node& node)
             if(node.type() == Xml::Node::StartElement) // <param>
             {
                 const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
-                if( se.name() != L"param" )
+                if( ! se.qnameRef().equals("param") )
                     throw SerializationError("invalid XML-RPC methodCall");
 
                 _state = OnParam;

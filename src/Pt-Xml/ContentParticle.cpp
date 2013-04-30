@@ -128,31 +128,21 @@ void LeafParticle::eval(ContentParticleList& ctx, Node& node) const
     if( ! se )
         return;
 
-    if( se->prefix().empty() )
+    if( *se->qnameRef().prefix() == '\0' )
     {
-        if( se->name() == _name)
+        if( se->qnameRef().name() == _name)
         {
             out()->get(ctx);
         }
     }
     else
     {
-        std::size_t prefixSize = se->prefix().size();
-        std::size_t nameSize = se->name().size();
-        std::size_t totalSize = prefixSize + nameSize + 1;
+        Pt::String name; // = se->qnameRef().prefix();
+        //name += ':';
+        //name += se->qnameRef().name();
         
-        if(_name.size() == totalSize)
+        if(_name == name)
         {
-            const Char* c = _name.c_str();
-            int r = se->prefix().compare(c, prefixSize);
-            if(r != 0)
-                return;
-
-            c += (prefixSize+1);
-            r = se->name().compare(c, nameSize);
-            if(r != 0)
-                return;
-
             out()->get(ctx);
         }
     }

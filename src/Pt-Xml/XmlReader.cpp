@@ -229,7 +229,10 @@ class XmlReaderImpl
             setCharactersEnd();
 
             _startElem.clear();
-            _startElem.qname().addName(c);
+            _startElem.qnameRef().clear();
+
+            // YYY
+            //_startElem.qname().addName(c);
 
             // XXX
             _elements.pushChar(c);
@@ -2923,12 +2926,14 @@ class XmlReaderImpl
 
                 case ':':
                 {
-                    if( ! _startElem.prefix().empty() )
+                    if( _startElem.qnameRef().prefix() == _null )
                         throw SyntaxError("invalid namespace prefix", line());
 
-                    QName& qn = _startElem.qname();
-                    qn.setPrefix(qn.name() ); // TODO: use swap
-                    qn.clearName();
+                    // YYY
+                    _startElem.qnameRef().set(_null, 0);
+                    //QName& qn = _startElem.qname();
+                    //qn.setPrefix(qn.name() ); // TODO: use swap
+                    //qn.clearName();
 
                     _elements.pushChar(0);
                     return;
@@ -2950,7 +2955,8 @@ class XmlReaderImpl
             // XXX
             _elements.pushChar(c);
 
-            _startElem.qname().addName(c);
+            // YYY
+            //_startElem.qname().addName(c);
             ++_nodeSize;
         }
 
@@ -3097,14 +3103,14 @@ class XmlReaderImpl
                     //
                     // TODO: do this when StartElement is complete so we only
                     //       have to look up the ElementDeclaration once.
-                    ElementModel* elemDecl = _dtd.findElement( _startElem.qname() );
+                    /*ElementModel* elemDecl = _dtd.findElement( _startElem.qnameRef() );
                     if(elemDecl)
                     {
                         AttributeModel* attrDecl = elemDecl->attributes().findAttribute( _attr->qname() );
 
                         if(attrDecl && attrDecl->isNormalize())
                             _attr->normalize();
-                    }
+                    }*/
                 }
                 
                 _attr = 0;
@@ -3186,11 +3192,8 @@ class XmlReaderImpl
             {
                 //_endElem.qname().setName( _startElem.name() );
                 _endElem.clear();
-                
-                if( ! _startElem.prefix().empty())
-                    _endElem.setPrefixPtr( _startElem.prefix().c_str() );
-                
-                _endElem.setNamePtr( _startElem.name().c_str() );
+                _endElem.setPrefixPtr( _startElem.qnameRef().prefix() );
+                _endElem.setNamePtr( _startElem.qnameRef().name() );
 
                 setEndElement();
 
@@ -3835,21 +3838,30 @@ class XmlReaderImpl
             // XXX
             _usedSize += _elements.pushString();
             _nodeSize = _usedSize;
-
-            if( _startElem.prefix().empty() )
+            
+            // YYY
+            const Namespace* ns = 0;
+            const Char* back = _elements.back();
+            
+            if(_startElem.qnameRef().prefix() == _null)
             {
-                const Namespace* ns = _nsctx.getDefaultNamespace();
-                if(ns)
-                    _startElem.setNamespace(*ns);
+                const Char* prf = back;
+                while(*back++)
+                    ;
+                
+                _startElem.qnameRef().set(prf, back);
+
+                ns = _nsctx.findPrefix( prf );
+                if( ! ns )
+                    throw SyntaxError("undeclared namespace prefix", line());
             }
             else
             {
-                const Namespace* ns = _nsctx.findPrefix( _startElem.prefix() );
-                if( ! ns )
-                    throw SyntaxError("undeclared namespace prefix", line());
-
-                _startElem.setNamespace(*ns);
+                _startElem.qnameRef().set(_null, back);
+                ns = _nsctx.getDefaultNamespace();
             }
+
+            _startElem.setNamespace(*ns);
             
             AttributeList& attributes = _startElem.attributes();
             AttributeList::Iterator it;
@@ -3863,7 +3875,7 @@ class XmlReaderImpl
                 }
                 else
                 {
-                    const Namespace* ns = _nsctx.findPrefix( it->prefix() );
+                    const Namespace* ns = _nsctx.findPrefix2( it->prefix() );
                     if( ! ns )
                         throw SyntaxError("undeclared namespace prefix", line());
 

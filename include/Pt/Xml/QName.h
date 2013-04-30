@@ -129,6 +129,43 @@ class QNameRef
         const Char* name() const
         { return _name; }
 
+        template <typename T>
+        bool equals(const T* name) const
+        {
+            const Char* self = _name;
+            while(*self == *name && *self != 0)
+            {
+                self++;
+                name++;
+            }
+
+            return *self == 0;
+        }
+
+        template <typename T>
+        bool equals(const T* prefix, const T* name) const
+        {
+            const Char* self = _name;
+            while(*self == *name && *self != 0)
+            {
+                self++;
+                name++;
+            }
+
+            if(*self != 0 || *name != 0)
+                return false;
+            
+            self = _prefix;
+            while(*self == *prefix && *self != 0)
+            {
+                    
+                self++;
+                prefix++;
+            }
+
+            return *self == 0 && *prefix == 0;
+        }
+
     private:
         const Char* _prefix;
         const Char* _name;

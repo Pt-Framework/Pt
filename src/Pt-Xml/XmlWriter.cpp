@@ -322,7 +322,7 @@ class XmlWriterImpl
             std::vector<Pt::String>::iterator it;
             for(it = _namespaces.begin(); it != _namespaces.end(); ++it)
             {
-                const Namespace* n = _nsctx.findPrefix(*it);
+                const Namespace* n = _nsctx.findPrefix2(*it);
                 assert(n);
 
                 *_tos << Pt::String(L" xmlns:") << n->prefix() << Pt::Char('=') 
@@ -376,7 +376,7 @@ class XmlWriterImpl
             std::vector<Pt::String>::iterator it;
             for(it = _namespaces.begin(); it != _namespaces.end(); ++it)
             {
-                const Namespace* n = _nsctx.findPrefix(*it);
+                const Namespace* n = _nsctx.findPrefix2(*it);
                 assert(n);
 
                 *_tos << Pt::String(L" xmlns:") << n->prefix() << Pt::Char('=') 

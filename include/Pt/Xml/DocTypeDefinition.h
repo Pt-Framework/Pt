@@ -98,6 +98,8 @@ class PT_XML_API DocTypeDefinition : private NonCopyable
         //! @internal Returns null if not declared.
         ElementModel* findElement(const QName& name);
 
+        ElementModel* findElement(const QNameRef& name);
+
     private:
         typedef std::vector<ElementModel*> Elements;
         typedef std::vector<Notation*> Notations;

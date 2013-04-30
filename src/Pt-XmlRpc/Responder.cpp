@@ -286,7 +286,7 @@ void XmlRpcResponder::advance(const Pt::Xml::Node& node, System::EventLoop& loop
             if(node.type() == Xml::Node::StartElement)
             {
                 const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
-                if( se.name() != L"methodCall" )
+                if( ! se.qnameRef().equals("methodCall") )
                     throw Xml::SyntaxError( "invalid XML-RPC methodCall", _reader.line() );
 
                 _state = OnMethodCallBegin;
@@ -342,7 +342,7 @@ void XmlRpcResponder::advance(const Pt::Xml::Node& node, System::EventLoop& loop
             if(node.type() == Xml::Node::StartElement)
             {
                 const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
-                if( se.name() != L"params" )
+                if( ! se.qnameRef().equals("params") )
                     throw std::runtime_error("invalid XML-RPC methodCall");
 
                 _state = OnParams;
@@ -365,7 +365,7 @@ void XmlRpcResponder::advance(const Pt::Xml::Node& node, System::EventLoop& loop
             if(node.type() == Xml::Node::StartElement)
             {
                 const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
-                if( se.name() != L"param" )
+                if( ! se.qnameRef().equals("param") )
                     throw std::runtime_error("invalid XML-RPC methodCall");
 
                 //std::cerr << "-> Found param" << std::endl;

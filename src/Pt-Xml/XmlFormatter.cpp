@@ -457,7 +457,8 @@ void XmlFormatter::OnBegin(const Node& node)
             const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
 
             //std::cerr << "BEGIN MEMBER: " << se.name().narrow() << std::endl;
-            _composer->setName( se.name().narrow() );
+            Pt::String name = se.qnameRef().name();
+            _composer->setName( name.narrow() );
 
             AttributeList::ConstIterator nodeId = se.attributes().find(L"id");
             if( nodeId != se.attributes().end() )
@@ -469,7 +470,7 @@ void XmlFormatter::OnBegin(const Node& node)
             AttributeList::ConstIterator type = se.attributes().find(L"type");
             if( type == se.attributes().end() )
             {
-                _composer->setTypeName(se.name().narrow());
+                _composer->setTypeName(name.narrow());
             }
             else
             {
@@ -664,7 +665,8 @@ void XmlFormatter::OnMemberEnd(const Node& node)
 void XmlFormatter::beginXmlMember(const Xml::StartElement& se)
 {
     //std::cerr << "BEGIN MEMBER: " << se.name().narrow() << std::endl;
-    _composer = _composer->beginMember(se.name().narrow() );
+    Pt::String name = se.qnameRef().name();
+    _composer = _composer->beginMember(name.narrow() );
 
     AttributeList::ConstIterator nodeId = se.attributes().find(L"id");
     if( nodeId != se.attributes().end() )

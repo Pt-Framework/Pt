@@ -269,7 +269,7 @@ void XmlReaderTest::MissingXmlDeclaration()
     const Pt::Xml::Node& startNode = *it;
 
     PT_UNIT_ASSERT(startNode.type() == Pt::Xml::Node::StartElement);
-    PT_UNIT_ASSERT(dynamic_cast<const Pt::Xml::StartElement*>(&startNode)->name().narrow() == "a");
+    PT_UNIT_ASSERT(dynamic_cast<const Pt::Xml::StartElement*>(&startNode)->qnameRef().equals("a"));
     PT_UNIT_ASSERT( reader.depth() == 1);
 
     ++it;
@@ -313,7 +313,7 @@ void XmlReaderTest::ByteorderMarkUtf8()
 
     Pt::Xml::StartElement* se = Pt::Xml::toStartElement(&*it);
     PT_UNIT_ASSERT(se);
-    PT_UNIT_ASSERT(se->name().narrow() == "a");
+    PT_UNIT_ASSERT(se->qnameRef().equals("a"));
     PT_UNIT_ASSERT(reader.depth() == 1);
 
     ++it;
@@ -512,7 +512,7 @@ void XmlReaderTest::DtdValidateAttributes()
             PT_UNIT_ASSERT( validator.validate(*it) );
 
             Pt::Xml::StartElement* se = toStartElement(&*it);
-            if(se && se->name() == L"test")
+            if(se && se->qnameRef().equals("test"))
             {
                 PT_UNIT_ASSERT( se->attributes().has(L"a3") );
                 PT_UNIT_ASSERT( se->attributes().find(L"a3")->value() == L"A3def" );
@@ -763,7 +763,7 @@ void XmlReaderTest::DtdValidateWithNamespace()
             PT_UNIT_ASSERT( validator.validate(*it) );
 
             Pt::Xml::StartElement* se = toStartElement(&*it);
-            if(se && se->name() == L"test")
+            if(se && se->qnameRef().equals("test") )
             {
                 PT_UNIT_ASSERT( se->attributes().has(L"a1") );
             }
@@ -1033,7 +1033,7 @@ void XmlReaderTest::EmptyElementTag()
     const Pt::Xml::Node& startNode = *it;
 
     PT_UNIT_ASSERT(startNode.type() == Pt::Xml::Node::StartElement);
-    PT_UNIT_ASSERT(dynamic_cast<const Pt::Xml::StartElement*>(&startNode)->name().narrow() == "a");
+    PT_UNIT_ASSERT(dynamic_cast<const Pt::Xml::StartElement*>(&startNode)->qnameRef().equals("a"));
     PT_UNIT_ASSERT( reader.depth() == 1);
 
     ++it;
@@ -1128,7 +1128,7 @@ void XmlReaderTest::ElementWithContent()
     Pt::Xml::XmlReader::Iterator it = reader.current();
 
     // <a>
-    PT_UNIT_ASSERT(Pt::Xml::toStartElement(*it).name() == L"a");
+    PT_UNIT_ASSERT(Pt::Xml::toStartElement(*it).qnameRef().equals("a"));
     PT_UNIT_ASSERT( reader.depth() == 1);
 
     // b
@@ -1193,16 +1193,14 @@ void XmlReaderTest::ElementWithNamespace()
 
     // <my:a>
     const Pt::Xml::StartElement& startA = Pt::Xml::toStartElement(*it);
-    PT_UNIT_ASSERT(startA.name() == L"a");
-    PT_UNIT_ASSERT(startA.prefix() == L"my");
+    PT_UNIT_ASSERT(startA.qnameRef().equals("my", "a") );
     PT_UNIT_ASSERT(startA.namespaceUri() == L"http://www.my1.net");
     PT_UNIT_ASSERT(reader.depth() == 1);
 
     // <my:a>
     ++it;
     const Pt::Xml::StartElement& startA2 = Pt::Xml::toStartElement(*it);
-    PT_UNIT_ASSERT(startA2.name() == L"a");
-    PT_UNIT_ASSERT(startA2.prefix() == L"my");
+    PT_UNIT_ASSERT(startA2.qnameRef().equals("my", "a") );
     PT_UNIT_ASSERT(startA2.namespaceUri() == "http://www.my2.net");
     PT_UNIT_ASSERT(reader.depth() == 2);
 
@@ -1250,7 +1248,7 @@ void XmlReaderTest::AttributeWithNamespace()
 
     // <a>
     PT_UNIT_ASSERT(startNode.type() == Pt::Xml::Node::StartElement);
-    PT_UNIT_ASSERT(Pt::Xml::toStartElement(&startNode)->name() == L"a");
+    PT_UNIT_ASSERT(Pt::Xml::toStartElement(&startNode)->qnameRef().equals("a") );
     PT_UNIT_ASSERT( Pt::Xml::toStartElement(&startNode)->attributes().has(L"attr") );
     PT_UNIT_ASSERT( Pt::Xml::toStartElement(&startNode)->attributes().begin()->prefix() == L"my" );
     PT_UNIT_ASSERT( Pt::Xml::toStartElement(&startNode)->attributes().begin()->namespaceUri() == L"http://www.my.net");
@@ -1293,16 +1291,14 @@ void XmlReaderTest::DefaultNamespace()
 
     // <my:a>
     const Pt::Xml::StartElement& startA = Pt::Xml::toStartElement(*it);
-    PT_UNIT_ASSERT(startA.name() == L"a");
-    PT_UNIT_ASSERT(startA.prefix() == L"");
+    PT_UNIT_ASSERT(startA.qnameRef().equals("", "a"));
     PT_UNIT_ASSERT(startA.namespaceUri() == L"http://www.my1.net");
     PT_UNIT_ASSERT(reader.depth() == 1);
 
     // <my:a>
     ++it;
     const Pt::Xml::StartElement& startA2 = Pt::Xml::toStartElement(*it);
-    PT_UNIT_ASSERT(startA2.name() == L"a");
-    PT_UNIT_ASSERT(startA2.prefix() == L"");
+    PT_UNIT_ASSERT(startA2.qnameRef().equals("", "a") );
     PT_UNIT_ASSERT(startA2.namespaceUri() == "http://www.my2.net");
     PT_UNIT_ASSERT(reader.depth() == 2);
 
@@ -1542,7 +1538,7 @@ void XmlReaderTest::NormalizeAttributes()
 
         Pt::Xml::StartElement* se = toStartElement(&*it);
         PT_UNIT_ASSERT(se);
-        PT_UNIT_ASSERT( se->name() == L"test" );
+        PT_UNIT_ASSERT( se->qnameRef().equals("test") );
         
         PT_UNIT_ASSERT( se->attributes().has(L"a1") );
         PT_UNIT_ASSERT( se->attributes().find(L"a1")->value() == L" a " );
