@@ -173,10 +173,10 @@ class StartElement : public Node
 
         /** @brief Returns the qualified name.
         */
-        const QNameRef& qnameRef() const
+        const QNameRef& qname() const
         { return _nameRef; }
 
-        QNameRef& qnameRef()
+        QNameRef& qname()
         { return _nameRef; }
 
         /** @brief Returns the namespace prefix.

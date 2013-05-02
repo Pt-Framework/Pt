@@ -57,37 +57,6 @@ namespace Pt {
 
 namespace Xml {
 
-void QName::clear()
-{
-    _name.clear();
-    _prefix.clear();
-}
-
-
-inline void QName::addName(Char ch)
-{
-    _name += ch;
-}
-
-
-inline void QName::setPrefix(const Pt::String& s)
-{
-    _prefix = s;
-}
-
-
-inline void QName::setName(const Pt::String& s)
-{
-    _name = s;
-}
-
-
-inline void QName::clearName()
-{
-    _name.clear();
-}
-
-
 class XmlReaderImpl
 {
     typedef void (XmlReaderImpl::*ParseFunc)(int);
@@ -3078,8 +3047,8 @@ class XmlReaderImpl
                     _usedSize += _nsctx.setDefaultNamespace(_depth+1, _attr->value());
                     _startElem.attributes().pop();
                 }
-                else
-                {
+                //else
+                //{
                     // If the declared value is not CDATA, then discard any leading and
                     // trailing space (#x20) characters and replace sequences of space
                     // (#x20) characters by a single space (#x20) character.
@@ -3088,7 +3057,7 @@ class XmlReaderImpl
                     //
                     // TODO: do this when StartElement is complete so we only
                     //       have to look up the ElementDeclaration once.
-                    /*ElementModel* elemDecl = _dtd.findElement( _startElem.qnameRef() );
+                    /*ElementModel* elemDecl = _dtd.findElement( _startElem.qname() );
                     if(elemDecl)
                     {
                         AttributeModel* attrDecl = elemDecl->attributes().findAttribute( _attr->qname() );
@@ -3096,7 +3065,7 @@ class XmlReaderImpl
                         if(attrDecl && attrDecl->isNormalize())
                             _attr->normalize();
                     }*/
-                }
+                //}
                 
                 _attr = 0;
                 _parse = &XmlReaderImpl::beforeAttribute;
@@ -3176,7 +3145,7 @@ class XmlReaderImpl
             if(ch == '>')
             {
                 _endElem.clear();
-                _endElem.qnameRef().set( _startElem.qnameRef().prefix(), _startElem.qnameRef().name() );
+                _endElem.qname().set( _startElem.qname().prefix(), _startElem.qname().name() );
 
                 setEndElement();
 
@@ -3195,7 +3164,7 @@ class XmlReaderImpl
             _back = _elements.back();
 
             _endElem.clear();
-            _endElem.qnameRef().set(_null, _back);
+            _endElem.qname().set(_null, _back);
 
             if( c != _back->value() || *_back == '\0' )
                 throw SyntaxError("unmatched element", line());
@@ -3211,6 +3180,10 @@ class XmlReaderImpl
             {
                 case '>':
                     _chars.clear();
+
+                    if( *_back != '\0' )
+                        throw SyntaxError("unmatched element", line());
+                    
                     setEndElement();
 
                     _parse = &XmlReaderImpl::afterEndElement;
@@ -3220,6 +3193,9 @@ class XmlReaderImpl
                 case '\n':
                 case '\r':
                 case '\t':
+                    if( *_back != '\0' )
+                        throw SyntaxError("unmatched element", line());
+                    
                     _parse = &XmlReaderImpl::afterEndElementName;
                     return;
 
@@ -3228,7 +3204,7 @@ class XmlReaderImpl
                         throw SyntaxError("unmatched element", line());
 
                     ++_back;
-                    _endElem.qnameRef().set(_endElem.qnameRef().name(), _back);
+                    _endElem.qname().set(_endElem.qname().name(), _back);
                     return;
             }
 
@@ -3796,14 +3772,14 @@ class XmlReaderImpl
                 if( ! ns )
                     throw SyntaxError("undeclared namespace prefix", line());
 
-                _startElem.qnameRef().set(back, back + _prefixSize);
+                _startElem.qname().set(back, back + _prefixSize);
                 _startElem.setNamespace(*ns);
             }
             else
             {
                 const Namespace& ns = _nsctx.getDefaultNamespace();
 
-                _startElem.qnameRef().set(_null, back);
+                _startElem.qname().set(_null, back);
                 _startElem.setNamespace(ns);
             }
 
@@ -3813,7 +3789,7 @@ class XmlReaderImpl
             
             ElementModel* elemDecl = 0;
             if( it != attributes.end() )
-                elemDecl = _dtd.findElement( _startElem.qnameRef() );
+                elemDecl = _dtd.findElement( _startElem.qname() );
             
             for( ; it != attributes.end(); ++it)
             {
@@ -3854,7 +3830,7 @@ class XmlReaderImpl
         {            
             _nodeSize = _usedSize;
 
-            const Char* prefix = _endElem.qnameRef().prefix();
+            const Char* prefix = _endElem.qname().prefix();
             if( *prefix == '\0')
             {
                 const Namespace& ns = _nsctx.getDefaultNamespace();
@@ -3954,6 +3930,9 @@ class XmlReaderImpl
 
                 std::size_t pop()
                 {
+                    assert( ! empty() );
+                    assert( _nameSize == 0 );
+
                     std::size_t n = 0;
                     std::size_t m = _nameSize + 1;
 
@@ -3965,12 +3944,16 @@ class XmlReaderImpl
                         Char* c = &_extra[0] + _extra.size();
                         c -= m;
                         n = c->value();
+                        
+                        assert(n >= _extra.size());
                         _extra.resize(_extra.size() - (n+1));
                     }
                     else
                     {
                         _beg -= m;
                         n = _beg->value();
+
+                        assert(n >= _beg - _first);
                         _beg -= n;
                     }
 
@@ -3980,6 +3963,9 @@ class XmlReaderImpl
 
                 const Char* back() const
                 {
+                    assert( ! empty() );
+                    assert( _nameSize == 0 );
+                    
                     const Char* back = 0;
                     
                     if( _extra.empty() )
@@ -3987,15 +3973,17 @@ class XmlReaderImpl
                     else
                         back = &_extra[0] + _extra.size();
 
+                    // ignore unfinished name token
                     back -= (_nameSize + 1);
                     std::size_t n = back->value();
-                    back -= n;
-
-                    return back;
+                    return back - n;
                 }
 
                 const Char* end() const
                 {
+                    assert( ! empty() );
+                    assert( _nameSize == 0 );
+
                     const Char* back = 0; 
                     
                     if( _extra.empty() )
@@ -4004,7 +3992,9 @@ class XmlReaderImpl
                         back = &_extra[0] + _extra.size();
 
                     // point to null-term before last length field
-                    return --back; 
+                    back -= (_nameSize + 2);
+                    assert(back->value() == 0);
+                    return back; 
                 }
                 
                 bool empty() const

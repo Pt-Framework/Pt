@@ -98,6 +98,7 @@ class PT_XML_API DocTypeDefinition : private NonCopyable
         //! @internal Returns null if not declared.
         ElementModel* findElement(const QName& name);
 
+        //! @internal Returns null if not declared.
         ElementModel* findElement(const QNameRef& name);
 
     private:

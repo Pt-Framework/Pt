@@ -139,7 +139,7 @@ class QNameRef
                 name++;
             }
 
-            return *self == 0;
+            return *self == *name;
         }
 
         template <typename T>
@@ -152,7 +152,7 @@ class QNameRef
                 name++;
             }
 
-            if(*self != 0 || *name != 0)
+            if(*self != *name)
                 return false;
             
             self = _prefix;
@@ -163,7 +163,7 @@ class QNameRef
                 prefix++;
             }
 
-            return *self == 0 && *prefix == 0;
+            return *self ==  *prefix;
         }
 
     private:
@@ -174,7 +174,7 @@ class QNameRef
 
 /** @brief A namespace qualified XML name
 */
-class PT_XML_API QName 
+class QName 
 {
     public:
         /** @brief Constructs an empty qualified name.
@@ -184,7 +184,11 @@ class PT_XML_API QName
 
         /** @brief Clears all content.
         */
-        void clear();
+        void clear()
+        {
+            _name.clear();
+            _prefix.clear();
+        }
 
         /** @brief Returns the namespace prefix.
         */
@@ -198,28 +202,37 @@ class PT_XML_API QName
 
         /** @brief Sets the namespace prefix.
         */
-        void setPrefix(const String& prefix);
+        void setPrefix(const String& prefix)
+        {
+            _prefix = prefix;
+        }
 
         /** @brief Returns the local name.
         */
-        //String& name() 
-        //{ return _name; }
-
-        void addName(Char ch);
-
-        void clearName();
+        String& name() 
+        { return _name; }
 
         /** @brief Returns the local name.
         */
         const String& name() const
         { return _name; }
 
-        String& name()
-        { return _name; }
+        void addName(Char ch)
+        {
+            _name += ch;
+        }
+
+        void clearName()
+        {
+            _name.clear();
+        }
 
         /** @brief Sets the local name.
         */
-        void setName(const String& name);
+        void setName(const String& name)
+        {
+            _name = name;
+        }
 
         bool equals(const Char* prefix, const Char* name) const
         {

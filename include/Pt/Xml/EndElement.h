@@ -67,12 +67,12 @@ class EndElement : public Node
 
         /** @brief Returns the qualified name.
         */
-        const QNameRef& qnameRef() const
+        const QNameRef& qname() const
         { return _nameRef; }
 
         /** @brief Returns the qualified name.
         */
-        QNameRef& qnameRef()
+        QNameRef& qname()
         { return _nameRef; }
 
         /** @brief Returns the namespace Uri for this element name
@@ -90,7 +90,6 @@ class EndElement : public Node
         { return Node::EndElement; }
 
     private:
-        //QName _qname;
         QNameRef _nameRef;
         const Namespace* _namespace;
 };

@@ -128,7 +128,7 @@ void LeafParticle::eval(ContentParticleList& ctx, Node& node) const
     if( ! se )
         return;
 
-    if(_name == se->qnameRef().name() && _prefix == se->qnameRef().prefix())
+    if(_name == se->qname().name() && _prefix == se->qname().prefix())
     {
         out()->get(ctx);
     }
