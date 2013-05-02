@@ -32,7 +32,8 @@ namespace Pt {
 namespace Xml {
 
 NamespaceContext::NamespaceContext()
-: _xmlNamespace(0, L"xml", L"http://www.w3.org/XML/1998/namespace")
+: _empty(0, String(), String() )
+, _xmlNamespace(0, L"xml", L"http://www.w3.org/XML/1998/namespace")
 {
 }
 
@@ -124,11 +125,9 @@ const Namespace* NamespaceContext::findUri(const Char* ns, std::size_t n) const
 }
 
 
-const Namespace* NamespaceContext::getDefaultNamespace() const
+const Namespace& NamespaceContext::getDefaultNamespace() const
 {
-    static const Namespace defNs(0, Pt::String(),Pt::String() );
-
-    const Namespace* ret = &defNs;
+    const Namespace* ret = &_empty;
     std::vector<Namespace>::const_reverse_iterator it;
 
     for(it = _namespaces.rbegin(); it != _namespaces.rend(); ++it)
@@ -142,7 +141,7 @@ const Namespace* NamespaceContext::getDefaultNamespace() const
       }
     }
 
-    return ret;
+    return *ret;
 }
 
 

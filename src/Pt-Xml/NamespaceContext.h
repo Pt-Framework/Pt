@@ -70,7 +70,7 @@ class NamespaceContext
 
         /** @brief Returns the current default namespace.
         */
-        const Namespace* getDefaultNamespace() const;
+        const Namespace& getDefaultNamespace() const;
 
         /** @brief Adds a namespace to the stack.
         */
@@ -90,6 +90,7 @@ class NamespaceContext
 
     private:
         std::vector<Namespace> _namespaces;
+        Namespace _empty;
         Namespace _xmlNamespace;
 };
 

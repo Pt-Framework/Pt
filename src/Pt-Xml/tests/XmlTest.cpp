@@ -319,7 +319,7 @@ void XmlReaderTest::ByteorderMarkUtf8()
     ++it;
     Pt::Xml::EndElement* ee = Pt::Xml::toEndElement(&*it);
     PT_UNIT_ASSERT(ee);
-    PT_UNIT_ASSERT(ee->compareName("a"));
+    PT_UNIT_ASSERT(ee->qnameRef().equals("a"));
     PT_UNIT_ASSERT(reader.depth() == 0);
 
     ++it;
@@ -1039,7 +1039,7 @@ void XmlReaderTest::EmptyElementTag()
     ++it;
     const Pt::Xml::Node& endNode = *it;
     PT_UNIT_ASSERT(endNode.type() == Pt::Xml::Node::EndElement);
-    PT_UNIT_ASSERT(dynamic_cast<const Pt::Xml::EndElement*>(&endNode)->compareName("a"));
+    PT_UNIT_ASSERT(dynamic_cast<const Pt::Xml::EndElement*>(&endNode)->qnameRef().equals("a"));
     PT_UNIT_ASSERT( reader.depth() == 0);
 
     ++it;
@@ -1139,7 +1139,7 @@ void XmlReaderTest::ElementWithContent()
 
     // </a>
     ++it;
-    PT_UNIT_ASSERT(Pt::Xml::toEndElement(*it).compareName("a"));
+    PT_UNIT_ASSERT(Pt::Xml::toEndElement(*it).qnameRef().equals("a"));
     PT_UNIT_ASSERT( reader.depth() == 0);
 
     // End of document
@@ -1312,7 +1312,7 @@ void XmlReaderTest::DefaultNamespace()
     // </my:a>
     ++it;
     const Pt::Xml::EndElement& endA2 = Pt::Xml::toEndElement(*it);
-    PT_UNIT_ASSERT(endA2.compareName("", "a") );
+    PT_UNIT_ASSERT(endA2.qnameRef().equals("", "a") );
     PT_UNIT_ASSERT(endA2.namespaceUri() == L"http://www.my2.net");
     PT_UNIT_ASSERT(reader.depth() == 1);
 
@@ -1320,7 +1320,7 @@ void XmlReaderTest::DefaultNamespace()
     ++it;
     const Pt::Xml::EndElement& endA = Pt::Xml::toEndElement(*it);
 
-    PT_UNIT_ASSERT(endA.compareName("", "a"));
+    PT_UNIT_ASSERT(endA.qnameRef().equals("", "a"));
     PT_UNIT_ASSERT(endA.namespaceUri() == L"http://www.my1.net");
     PT_UNIT_ASSERT( reader.depth() == 0);
 

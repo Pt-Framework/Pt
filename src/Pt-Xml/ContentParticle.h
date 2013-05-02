@@ -126,13 +126,21 @@ class LeafParticle : public ContentParticle
         LeafParticle(const Pt::String& name)
         : ContentParticle()
         , _name(name)
-        { }
+        { 
+            std::size_t pos = name.find(':');
+            if(pos != String::npos)
+            {
+                _prefix.assign(name.c_str(), pos);
+                _name.erase(0, pos+1);
+            }
+        }
 
         virtual void eval(ContentParticleList& ctx, Node& node) const;
 
         virtual void get(ContentParticleList& ctx) const;
 
     private:
+        Pt::String _prefix;
         Pt::String _name;
 };
 

@@ -333,8 +333,8 @@ class XmlWriterImpl
 
             if( _defaultNamespace )
             {
-                const Namespace* n = _nsctx.getDefaultNamespace();
-                *_tos << Pt::String(L" xmlns") << Pt::Char('=') << _quote << n->namespaceUri() << _quote;
+                const Namespace& n = _nsctx.getDefaultNamespace();
+                *_tos << Pt::String(L" xmlns") << Pt::Char('=') << _quote << n.namespaceUri() << _quote;
                 _defaultNamespace = false;
             }
 
@@ -387,8 +387,8 @@ class XmlWriterImpl
 
             if( _defaultNamespace )
             {
-                const Namespace* n = _nsctx.getDefaultNamespace();
-                *_tos << Pt::String(L" xmlns") << Pt::Char('=') << _quote << n->namespaceUri() << _quote;
+                const Namespace& n = _nsctx.getDefaultNamespace();
+                *_tos << Pt::String(L" xmlns") << Pt::Char('=') << _quote << n.namespaceUri() << _quote;
                 _defaultNamespace = false;
             }
 

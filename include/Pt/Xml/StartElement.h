@@ -166,8 +166,6 @@ class StartElement : public Node
         */
         void clear()
         {
-            //_qname.clear();
-
             _nameRef.clear();
             _attributes.clear();
             _namespace = 0;
@@ -175,35 +173,21 @@ class StartElement : public Node
 
         /** @brief Returns the qualified name.
         */
-        //const QName& qname() const
-        //{ return _qname; }
-
         const QNameRef& qnameRef() const
         { return _nameRef; }
 
         QNameRef& qnameRef()
         { return _nameRef; }
 
+        /** @brief Returns the namespace prefix.
+        */
         const Char* prefixPtr() const
         { return _nameRef.prefix(); }
         
-        const Char* namePtr() const
-        { return _nameRef.name(); }
-
-        /** @brief Returns the qualified name.
-        */
-        //QName& qname()
-        //{ return _qname; }
-
-        /** @brief Returns the namespace prefix.
-        */
-        //const String& prefix() const
-        //{ return _qname.prefix(); }
-
         /** @brief Returns the local name.
         */
-        //const String& name() const
-        //{ return _qname.name(); }
+        const Char* namePtr() const
+        { return _nameRef.name(); }
 
         /** @brief Returns the namespace Uri for this element name
         */
@@ -231,7 +215,6 @@ class StartElement : public Node
 
     private:
         QNameRef _nameRef;
-        //QName _qname;
         const Namespace* _namespace;
         AttributeList _attributes;
 };

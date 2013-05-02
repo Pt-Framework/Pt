@@ -218,7 +218,6 @@ class XmlReaderImpl
                 case '/':
                     setCharactersEnd();
 
-                    _endElem.clear();
                     _parse = &XmlReaderImpl::onEndElement;
                     return;
             }
@@ -229,15 +228,11 @@ class XmlReaderImpl
             setCharactersEnd();
 
             _startElem.clear();
-            _startElem.qnameRef().clear();
+            _prefixSize = 0;
 
-            // YYY
-            //_startElem.qname().addName(c);
-
-            // XXX
             _elements.pushChar(c);
-            
             ++_nodeSize;
+
             _parse = &XmlReaderImpl::onStartElement;
         }
 
@@ -2926,16 +2921,10 @@ class XmlReaderImpl
 
                 case ':':
                 {
-                    if( _startElem.qnameRef().prefix() == _null )
+                    if( _prefixSize != 0 )
                         throw SyntaxError("invalid namespace prefix", line());
 
-                    // YYY
-                    _startElem.qnameRef().set(_null, 0);
-                    //QName& qn = _startElem.qname();
-                    //qn.setPrefix(qn.name() ); // TODO: use swap
-                    //qn.clearName();
-
-                    _elements.pushChar(0);
+                    _prefixSize = _elements.pushPrefix();
                     return;
                 }
 
@@ -2952,11 +2941,7 @@ class XmlReaderImpl
             if(_nodeSize == _maxSize)
                 throw SyntaxError("element name too long", line());
 
-            // XXX
             _elements.pushChar(c);
-
-            // YYY
-            //_startElem.qname().addName(c);
             ++_nodeSize;
         }
 
@@ -3190,10 +3175,8 @@ class XmlReaderImpl
 
             if(ch == '>')
             {
-                //_endElem.qname().setName( _startElem.name() );
                 _endElem.clear();
-                _endElem.setPrefixPtr( _startElem.qnameRef().prefix() );
-                _endElem.setNamePtr( _startElem.qnameRef().name() );
+                _endElem.qnameRef().set( _startElem.qnameRef().prefix(), _startElem.qnameRef().name() );
 
                 setEndElement();
 
@@ -3204,28 +3187,20 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
 
-        Pt::Char _null[1];
-
         void onEndElement(int c)
         {           
-            //if( c == std::char_traits<Char>::eof() || ! isAlpha(c) )
-            //    throw SyntaxError("XML syntax error", line());
-
-            // XXX
             if( _elements.empty() )
-                throw SyntaxError("XML syntax error", line());
+                throw SyntaxError("unmatched element", line());
 
             _back = _elements.back();
 
-            _endElem.setPrefixPtr(_null);
-            _endElem.setNamePtr(_back);
+            _endElem.clear();
+            _endElem.qnameRef().set(_null, _back);
 
             if( c != _back->value() || *_back == '\0' )
-                throw SyntaxError("unmatched element 1", line());
+                throw SyntaxError("unmatched element", line());
 
             ++_back;
-            
-            //_endElem.qname().addName(c);
             ++_nodeSize;
             _parse = &XmlReaderImpl::onEndElementName;
         }
@@ -3249,37 +3224,18 @@ class XmlReaderImpl
                     return;
 
                 case ':':
-                    //if( ! _endElem.prefix().empty() )
-                    //    throw SyntaxError("invalid namespace prefix", line());
-
-                    //QName& qn = _endElem.qname();
-                    //qn.setPrefix( qn.name() ); // TODO: use swap
-                    //qn.clearName();
-
                     if( *_back != '\0' || _back == _elements.end() )
                         throw SyntaxError("unmatched element", line());
 
-                    _endElem.setPrefixPtr( _endElem.namePtr() );
-
                     ++_back;
-                    _endElem.setNamePtr(_back);
+                    _endElem.qnameRef().set(_endElem.qnameRef().name(), _back);
                     return;
             }
-            
-            //if( c == std::char_traits<Char>::eof() || ! isAlpha(c) )
-            //    throw SyntaxError("XML syntax error", line());
-            
-            //if(_nodeSize == _maxSize)
-            //    throw SyntaxError("node too long", line());
 
-            // XXX
-            //std::cerr << "EE: " << char(c) << "-"<<  _back->narrow() << std::endl;
             if( c != _back->value() || *_back == '\0' )
-                throw SyntaxError("unmatched element 2", line());
+                throw SyntaxError("unmatched element", line());
             
             ++_back;
-            
-            //_endElem.qname().addName(c);
             ++_nodeSize;
         }
     
@@ -3307,8 +3263,7 @@ class XmlReaderImpl
 
         void afterEndElement(int c)
         {
-            // XXX
-            _usedSize -= _elements.popBack();
+            _usedSize -= _elements.pop();
 
             _parse = depth() == 0 ? &XmlReaderImpl::onEpilog
                                   : &XmlReaderImpl::afterTag;
@@ -3830,48 +3785,42 @@ class XmlReaderImpl
 
         void setStartElement()
         {
-            //std::size_t nameSize = _startElem.name().size();
-            //_elements.push( _startElem.name(), nameSize );
-            
-            //_usedSize += nameSize;
-
-            // XXX
-            _usedSize += _elements.pushString();
+            _usedSize += _elements.pushName();
             _nodeSize = _usedSize;
             
-            // YYY
-            const Namespace* ns = 0;
             const Char* back = _elements.back();
             
-            if(_startElem.qnameRef().prefix() == _null)
-            {
-                const Char* prf = back;
-                while(*back++)
-                    ;
-                
-                _startElem.qnameRef().set(prf, back);
-
-                ns = _nsctx.findPrefix( prf );
+            if(_prefixSize != 0)
+            {               
+                const Namespace* ns = _nsctx.findPrefix( back );
                 if( ! ns )
                     throw SyntaxError("undeclared namespace prefix", line());
+
+                _startElem.qnameRef().set(back, back + _prefixSize);
+                _startElem.setNamespace(*ns);
             }
             else
             {
+                const Namespace& ns = _nsctx.getDefaultNamespace();
+
                 _startElem.qnameRef().set(_null, back);
-                ns = _nsctx.getDefaultNamespace();
+                _startElem.setNamespace(ns);
             }
 
-            _startElem.setNamespace(*ns);
             
             AttributeList& attributes = _startElem.attributes();
-            AttributeList::Iterator it;
-            for(it = attributes.begin(); it != attributes.end(); ++it)
+            AttributeList::Iterator it = attributes.begin();
+            
+            ElementModel* elemDecl = 0;
+            if( it != attributes.end() )
+                elemDecl = _dtd.findElement( _startElem.qnameRef() );
+            
+            for( ; it != attributes.end(); ++it)
             {
                 if( it->prefix().empty() )
                 {
-                    const Namespace* ns = _nsctx.getDefaultNamespace();
-                    if(ns)
-                        it->setNamespace(*ns);
+                    const Namespace& ns = _nsctx.getDefaultNamespace();
+                    it->setNamespace(ns);
                 }
                 else
                 {
@@ -3880,7 +3829,20 @@ class XmlReaderImpl
                         throw SyntaxError("undeclared namespace prefix", line());
 
                     it->setNamespace(*ns);
-                }    
+                }
+
+                // If the declared value is not CDATA, then discard any leading and
+                // trailing space (#x20) characters and replace sequences of space
+                // (#x20) characters by a single space (#x20) character.
+                // All attributes for which no declaration has been read SHOULD be 
+                // treated by a non-validating processor as if declared CDATA.
+                if(elemDecl)
+                {
+                    AttributeModel* attrDecl = elemDecl->attributes().findAttribute( it->qname() );
+
+                    if(attrDecl && attrDecl->isNormalize())
+                        it->normalize();
+                }
             }
 
             incDepth();
@@ -3890,20 +3852,13 @@ class XmlReaderImpl
 
         void setEndElement()
         {            
-            //std::size_t nameSize = _endElem.name().size();
-            //bool ok = _elements.pop( _endElem.name(), nameSize );
-            //if( ! ok )
-            //    throw SyntaxError("unmatched XML element", line());
-            
-            //_usedSize -= nameSize;
             _nodeSize = _usedSize;
 
-            const Char* prefix = _endElem.prefixPtr();
-            if( prefix == 0 || *prefix == '\0')
+            const Char* prefix = _endElem.qnameRef().prefix();
+            if( *prefix == '\0')
             {
-                const Namespace* ns = _nsctx.getDefaultNamespace();
-                if(ns)
-                    _endElem.setNamespace(*ns);
+                const Namespace& ns = _nsctx.getDefaultNamespace();
+                _endElem.setNamespace(ns);
             }
             else
             {
@@ -3940,84 +3895,24 @@ class XmlReaderImpl
 
             public:
                 NameStack()
-                : _beg(_first)
+                : _size(0)
+                , _beg(_first)
                 , _end(_first + BufSize)
                 , _nameSize(0)
                 { }
 
                 void clear()
                 {
+                    _size = 0;
                     _beg = _first;
                     _end = _first + BufSize;
                     _nameSize = 0;
                     _extra.clear();
                 }
 
-                inline void push(const Pt::String& name, std::size_t size)
-                {
-                    if( _extra.empty() && std::size_t(_end - _beg) > size )
-                    {
-                        // use null terminator as separator
-                        std::size_t len = size;// + 1;
-                        
-                        //Traits::copy(_beg, name.c_str(), len);
-                        //_beg += len;
-
-                        const Char* c = name.c_str();
-                        while(len--)
-                            *_beg++ = *c++;
-
-                        *_beg++ = size;
-                    }
-                    else
-                    {
-                        // use null terminator as separator
-                        _extra.insert(_extra.end(), name.begin(), name.end());
-                        _extra.push_back(0);
-                    }
-                }
-
-                inline bool pop(const Pt::String& name, std::size_t size)
-                {
-                    // use null terminator as separator
-                    const std::size_t len = size + 1;
-
-                    if( _extra.empty() )
-                    {
-                        Char* pos = _beg - len;
-                        if(pos >= _first)
-                        {
-                            if( 0 == Traits::compare(pos, name.data(), size) )
-                            {
-                                _beg = pos;
-                                return true;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        Char* extraBegin = &_extra[0];
-                        Char* extraEnd = extraBegin + _extra.size();
-                        
-                        Char* pos = extraEnd - len;
-                        if(pos >= extraBegin)
-                        {
-                            if( 0 == Traits::compare(pos, name.data(), size) )
-                            {
-                                _extra.resize(pos - extraBegin); 
-                                return true;
-                            }
-                        }
-                    }
-                    
-                    return false;
-                }
-
                 void pushChar(Char ch)
                 {
                     // "ns\0elem\08ns\0elem2\09"
-
-                    //std::cerr << "push: " << ch.value() << " "<< char(ch) << std::endl;
 
                     if( _extra.empty() )
                     {
@@ -4038,30 +3933,38 @@ class XmlReaderImpl
                     }
                 }
 
-                std::size_t pushString()
+                std::size_t pushPrefix()
+                {
+                    pushChar(0);
+                    return _nameSize;
+                }
+                
+                std::size_t pushName()
                 {
                     pushChar(0);
                     
                     std::size_t n = _nameSize;
                     pushChar(_nameSize);
+                    
                     _nameSize = 0;
+                    ++_size;
                     
                     return n;
                 }
 
-                std::size_t popBack()
+                std::size_t pop()
                 {
                     std::size_t n = 0;
                     std::size_t m = _nameSize + 1;
 
-                    // check _nameSize == 0;
+                    if(_nameSize != 0)
+                        return n;
 
                     if( ! _extra.empty() )
                     {
                         Char* c = &_extra[0] + _extra.size();
                         c -= m;
                         n = c->value();
-                        //std::cerr << "pop:" << n << std::endl;
                         _extra.resize(_extra.size() - (n+1));
                     }
                     else
@@ -4071,6 +3974,7 @@ class XmlReaderImpl
                         _beg -= n;
                     }
 
+                    --_size;
                     return n;
                 }
 
@@ -4087,7 +3991,6 @@ class XmlReaderImpl
                     std::size_t n = back->value();
                     back -= n;
 
-                    //std::cerr << "back: " << n << " " << String(back, n).narrow() << "." << std::endl;
                     return back;
                 }
 
@@ -4100,15 +4003,17 @@ class XmlReaderImpl
                     else
                         back = &_extra[0] + _extra.size();
 
-                    return --back;
+                    // point to null-term before last length field
+                    return --back; 
                 }
                 
                 bool empty() const
                 {
-                    return _beg == _first && _extra.empty();
+                    return _size == 0;
                 }
 
             private:
+                std::size_t _size;
                 Char _first[BufSize];
                 Char* _beg;
                 Char* _end;
@@ -4116,7 +4021,9 @@ class XmlReaderImpl
                 std::size_t _nameSize;
         };
 
+        Pt::Char _null[1];
         const Pt::Char* _back;
+        std::size_t _prefixSize;
         NameStack _elements;
 
     public:
