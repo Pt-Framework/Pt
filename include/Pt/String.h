@@ -919,8 +919,27 @@ class PT_API basic_string< Pt::Char > {
         basic_string& operator+=(const Pt::Char* str)
         { return this->append(str); }
 
-        basic_string& operator+=(Pt::Char c)
+        inline basic_string& operator+=(Pt::Char c)
         { return this->append(1, c); }
+        //{
+            //size_type l = isShortString() ? shortStringLength() : longStringLength();;
+            //privreserve(l + 1);
+            //Pt::Char* p = privdata_rw();
+            //p[l] = c;
+            
+            ////setLength(l + 1);
+            //++l;
+            //if (isShortString())
+                //setShortStringLength(l);
+            //else
+            //{
+                //_d._u._p._end = _d._u._p._begin + l;
+                //_d._u._p._begin[l] = Pt::Char::null();
+            //}
+
+
+            //return *this;
+        //}
 
     private:
         struct Ptr
