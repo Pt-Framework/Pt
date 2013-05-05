@@ -4002,6 +4002,9 @@ class XmlReaderImpl
                     return _size == 0;
                 }
 
+                //QName& namesBack(std::size_t n)
+                //{ return _names[n]; }
+
             private:
                 std::size_t _size;
                 Char _first[BufSize];
@@ -4009,6 +4012,7 @@ class XmlReaderImpl
                 Char* _end;
                 std::vector<Char> _extra;
                 std::size_t _nameSize;
+                //QName _names[6];
         };
 
         Pt::Char _null[1];
