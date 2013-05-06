@@ -3867,152 +3867,199 @@ class XmlReaderImpl
         class NameStack
         {
             typedef std::char_traits<Char> Traits;
-            static const unsigned BufSize = 128;
+            
+            static const unsigned BufSize = 1;
 
             public:
                 NameStack()
-                : _size(0)
-                , _beg(_first)
-                , _end(_first + BufSize)
-                , _nameSize(0)
-                { }
+                : 
+                //_size(0)
+                //, _beg(_first)
+                //, _end(_first + BufSize)
+                //, _nameSize(0)
+                _cur(0)
+                {
+                    _cur = &_names[0]; 
+                }
 
                 void clear()
                 {
-                    _size = 0;
-                    _beg = _first;
-                    _end = _first + BufSize;
-                    _nameSize = 0;
-                    _extra.clear();
-                }
+                    //_size = 0;
+                    //_beg = _first;
+                    //_end = _first + BufSize;
+                    //_nameSize = 0;
+                    //_extra.clear();
 
+                    _cur = &_names[0];
+                    _cur->clear();
+                }
+                
                 void pushChar(Char ch)
                 {
-                    // "ns\0elem\08ns\0elem2\09"
-
-                    if( _extra.empty() )
-                    {
-                        *_beg++ = ch;
-                        ++_nameSize;
-
-                        if(_beg == _end)
-                        {
-                            Char* from = _beg - _nameSize;
-                            _extra.insert(_extra.end(), from, _beg);
-                            _beg = from;
-                        }
-                    }
-                    else
-                    {
-                        _extra.push_back(ch);
-                        ++_nameSize;
-                    }
+                    _cur->name() += ch;
                 }
+
+                //void pushChar(Char ch)
+                //{
+                //    // "ns\0elem\08ns\0elem2\09"
+
+                //    if( _extra.empty() )
+                //    {
+                //        *_beg++ = ch;
+                //        ++_nameSize;
+
+                //        if(_beg == _end)
+                //        {
+                //            Char* from = _beg - _nameSize;
+                //            _extra.insert(_extra.end(), from, _beg);
+                //            _beg = from;
+                //        }
+                //    }
+                //    else
+                //    {
+                //        _extra.push_back(ch);
+                //        ++_nameSize;
+                //    }
+                //}
 
                 std::size_t pushPrefix()
                 {
-                    pushChar(0);
-                    return _nameSize;
+                    _cur->prefix() = _cur->name();
+                    return 0;
                 }
-                
+
+                //std::size_t pushPrefix()
+                //{
+                //    pushChar(0);
+                //    return _nameSize;
+                //}
+            
                 std::size_t pushName()
                 {
-                    pushChar(0);
-                    
-                    std::size_t n = _nameSize;
-                    pushChar(_nameSize);
-                    
-                    _nameSize = 0;
-                    ++_size;
-                    
-                    return n;
+                    ++_cur;
+                    return 0;
                 }
+                
+                //std::size_t pushName()
+                //{
+                //    pushChar(0);
+                //    
+                //    std::size_t n = _nameSize;
+                //    pushChar(_nameSize);
+                //    
+                //    _nameSize = 0;
+                //    ++_size;
+                //    
+                //    return n;
+                //}
 
                 std::size_t pop()
                 {
-                    assert( ! empty() );
-                    assert( _nameSize == 0 );
-
-                    std::size_t n = 0;
-                    std::size_t m = _nameSize + 1;
-
-                    if(_nameSize != 0)
-                        return n;
-
-                    if( ! _extra.empty() )
-                    {
-                        Char* c = &_extra[0] + _extra.size();
-                        c -= m;
-                        n = c->value();
-                        
-                        assert(n >= _extra.size());
-                        _extra.resize(_extra.size() - (n+1));
-                    }
-                    else
-                    {
-                        _beg -= m;
-                        n = _beg->value();
-
-                        assert(n >= _beg - _first);
-                        _beg -= n;
-                    }
-
-                    --_size;
-                    return n;
+                    (--_cur)->clear();
+                    return 0;
                 }
+
+                //std::size_t pop()
+                //{
+                //    assert( ! empty() );
+                //    assert( _nameSize == 0 );
+
+                //    std::size_t n = 0;
+                //    std::size_t m = _nameSize + 1;
+
+                //    if(_nameSize != 0)
+                //        return n;
+
+                //    if( ! _extra.empty() )
+                //    {
+                //        Char* c = &_extra[0] + _extra.size();
+                //        c -= m;
+                //        n = c->value();
+                //        
+                //        assert(n >= _extra.size());
+                //        _extra.resize(_extra.size() - (n+1));
+                //    }
+                //    else
+                //    {
+                //        _beg -= m;
+                //        n = _beg->value();
+
+                //        assert(n >= _beg - _first);
+                //        _beg -= n;
+                //    }
+
+                //    --_size;
+                //    return n;
+                //}
 
                 const Char* back() const
                 {
-                    assert( ! empty() );
-                    assert( _nameSize == 0 );
-                    
-                    const Char* back = 0;
-                    
-                    if( _extra.empty() )
-                        back = _beg;
-                    else
-                        back = &_extra[0] + _extra.size();
-
-                    // ignore unfinished name token
-                    back -= (_nameSize + 1);
-                    std::size_t n = back->value();
-                    return back - n;
+                    QName* n = _cur - 1;
+                    return n->name().c_str();
                 }
+
+                //const Char* back() const
+                //{
+                //    assert( ! empty() );
+                //    assert( _nameSize == 0 );
+                //    
+                //    const Char* back = 0;
+                //    
+                //    if( _extra.empty() )
+                //        back = _beg;
+                //    else
+                //        back = &_extra[0] + _extra.size();
+
+                //    // ignore unfinished name token
+                //    back -= (_nameSize + 1);
+                //    std::size_t n = back->value();
+                //    return back - n;
+                //}
 
                 const Char* end() const
                 {
-                    assert( ! empty() );
-                    assert( _nameSize == 0 );
-
-                    const Char* back = 0; 
-                    
-                    if( _extra.empty() )
-                        back = _beg;
-                    else
-                        back = &_extra[0] + _extra.size();
-
                     // point to null-term before last length field
-                    back -= (_nameSize + 2);
-                    assert(back->value() == 0);
-                    return back; 
+                    QName* n = _cur - 1;
+                    return n->name().c_str() + n->name().size(); 
                 }
+
+                //const Char* end() const
+                //{
+                //    assert( ! empty() );
+                //    assert( _nameSize == 0 );
+
+                //    const Char* back = 0; 
+                //    
+                //    if( _extra.empty() )
+                //        back = _beg;
+                //    else
+                //        back = &_extra[0] + _extra.size();
+
+                //    // point to null-term before last length field
+                //    back -= (_nameSize + 2);
+                //    assert(back->value() == 0);
+                //    return back; 
+                //}
                 
                 bool empty() const
                 {
-                    return _size == 0;
+                    return _cur == _names;
                 }
 
-                //QName& namesBack(std::size_t n)
-                //{ return _names[n]; }
+                //bool empty() const
+                //{
+                //    return _size == 0;
+                //}
 
             private:
-                std::size_t _size;
-                Char _first[BufSize];
-                Char* _beg;
-                Char* _end;
-                std::vector<Char> _extra;
-                std::size_t _nameSize;
-                //QName _names[6];
+                //std::size_t _size;
+                //Char _first[BufSize];
+                //Char* _beg;
+                //Char* _end;
+                //std::vector<Char> _extra;
+                //std::size_t _nameSize;
+                QName _names[16];
+                QName* _cur;
         };
 
         Pt::Char _null[1];
