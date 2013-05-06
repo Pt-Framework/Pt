@@ -920,26 +920,45 @@ class PT_API basic_string< Pt::Char > {
         { return this->append(str); }
 
         inline basic_string& operator+=(Pt::Char c)
-        { return this->append(1, c); }
-        //{
-            //size_type l = isShortString() ? shortStringLength() : longStringLength();;
-            //privreserve(l + 1);
-            //Pt::Char* p = privdata_rw();
-            //p[l] = c;
+        {
+            //return this->append(1, c);
+
+            size_type len = 0;
+            size_type cap = 0;
+
+            if( isShortString() )
+            {
+                len = shortStringLength();
+                cap = shortStringCapacity();
+            }
+            else
+            {
+                len = longStringLength();
+                cap = longStringCapacity();
+            }
             
-            ////setLength(l + 1);
-            //++l;
-            //if (isShortString())
-                //setShortStringLength(l);
-            //else
-            //{
-                //_d._u._p._end = _d._u._p._begin + l;
-                //_d._u._p._begin[l] = Pt::Char::null();
-            //}
+            size_type newLen = len + 1;
+            if( newLen > cap )
+                privreserve(newLen);
 
+            if( isShortString() )
+            {
+                Pt::Char* p = shortStringData();
+                p[len] = c;
 
-            //return *this;
-        //}
+                setShortStringLength(newLen);
+            }
+            else
+            {
+                Pt::Char* p = longStringData();
+                p[len] = c;
+            
+                _d._u._p._end = _d._u._p._begin + newLen;
+                _d._u._p._begin[newLen] = Pt::Char::null();
+            }
+
+            return *this;
+        }
 
     private:
         struct Ptr
