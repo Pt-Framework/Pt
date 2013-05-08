@@ -37,141 +37,6 @@ namespace Pt {
 
 namespace Xml {
 
-class StringRef
-{
-    public:
-        StringRef()
-        : _str(0)
-        , _beg(0)
-        , _len(0)
-        {}
-
-        void clear()
-        {
-            _str = 0;
-            _beg = 0;
-            _len = 0;
-        }
-
-        bool empty() const
-        { return _len == 0; }
-
-        std::size_t size() const
-        { return _len; }
-
-        const Char* data() const
-        { return _str ? _str->data() + _beg : 0; }
-
-        void set(String& str, std::size_t pos, std::size_t n)
-        {
-            _str = &str;
-            _beg = pos;
-            _len = n;
-        }
-
-    private:
-        String* _str;
-        size_t _beg;
-        size_t _len;
-};
-
-
-inline bool operator==(const StringRef& a, const String& b)
-{
-    return a.size() == b.size() &&
-           0 == std::char_traits<Char>::compare(a.data(), b.data(), b.size());
-}
-
-
-inline bool operator<(const StringRef& a, const String& b)
-{
-    std::size_t sizeA = a.size();
-    std::size_t sizeB = b.size();
-    return sizeA != sizeB ? sizeA < sizeB
-                          : std::char_traits<Char>::compare(a.data(), b.data(), b.size()) < 0;
-
-}
-
-
-/** @brief A namespace qualified XML name
-*/
-class QNameRef
-{
-    public:
-        /** @brief Constructs an empty qualified name.
-        */
-        QNameRef()
-        : _prefix(0)
-        , _name(0)
-        {}
-
-        void set(const Char* prefix, const Char* name)
-        {
-            _prefix = prefix;
-            _name = name;
-        }
-
-        /** @brief Clears all content.
-        */
-        void clear()
-        {            
-            _prefix = 0;
-            _name = 0;
-        }
-
-        /** @brief Returns the namespace prefix.
-        */
-        const Char* prefix() const
-        { return _prefix; }
-
-        /** @brief Returns the local name.
-        */
-        const Char* name() const
-        { return _name; }
-
-        template <typename T>
-        bool equals(const T* name) const
-        {
-            const Char* self = _name;
-            while(*self == *name && *self != 0)
-            {
-                self++;
-                name++;
-            }
-
-            return *self == *name;
-        }
-
-        template <typename T>
-        bool equals(const T* prefix, const T* name) const
-        {
-            const Char* self = _name;
-            while(*self == *name && *self != 0)
-            {
-                self++;
-                name++;
-            }
-
-            if(*self != *name)
-                return false;
-            
-            self = _prefix;
-            while(*self == *prefix && *self != 0)
-            {
-                    
-                self++;
-                prefix++;
-            }
-
-            return *self ==  *prefix;
-        }
-
-    private:
-        const Char* _prefix;
-        const Char* _name;
-};
-
-
 /** @brief A namespace qualified XML name
 */
 class QName 
@@ -190,6 +55,18 @@ class QName
             _prefix.clear();
         }
 
+        template <typename T>
+        bool equals(const T* name) const
+        {
+            return _name == name;
+        }
+
+        template <typename T>
+        bool equals(const T* prefix, const T* name) const
+        {
+            return _name == name && _prefix == prefix;
+        }
+
         /** @brief Returns the namespace prefix.
         */
         String& prefix() 
@@ -203,9 +80,7 @@ class QName
         /** @brief Sets the namespace prefix.
         */
         void setPrefix(const String& prefix)
-        {
-            _prefix = prefix;
-        }
+        { _prefix = prefix; }
 
         /** @brief Returns the local name.
         */
@@ -217,27 +92,18 @@ class QName
         const String& name() const
         { return _name; }
 
-        void addName(Char ch)
-        {
-            _name += ch;
-        }
-
-        void clearName()
-        {
-            _name.clear();
-        }
-
         /** @brief Sets the local name.
         */
         void setName(const String& name)
-        {
-            _name = name;
-        }
+        { _name = name; }
 
-        bool equals(const Char* prefix, const Char* name) const
-        {
-            return _prefix == prefix && _name == name;
-        }
+        //! @internal
+        void addName(Char ch)
+        { _name += ch; }
+
+        //! @internal
+        void clearName()
+        { _name.clear(); }
 
     private:
         String _prefix;
@@ -250,19 +116,7 @@ inline bool operator ==(const QName& a, const QName& b)
 }
 
 
-inline bool operator ==(const QName& a, const QNameRef& b)
-{
-    return a.prefix() == b.prefix() && a.name() == b.name();
-}
-
-
 inline bool operator<(const QName& a, const QName& b)
-{
-	  return a.prefix() < b.prefix() ||
-           ! (b.prefix() < a.prefix()) && a.name() < b.name();
-}
-
-inline bool operator<(const QName& a, const QNameRef& b)
 {
 	  return a.prefix() < b.prefix() ||
            ! (b.prefix() < a.prefix()) && a.name() < b.name();

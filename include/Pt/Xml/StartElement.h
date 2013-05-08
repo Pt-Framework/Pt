@@ -159,40 +159,32 @@ class StartElement : public Node
         */
         StartElement()
         : Node(Node::StartElement)
+        , _name(0)
         , _namespace(0)
         { }
 
-        /** @brief Resets the start element.
+        /** @brief Sets the qualified name.
         */
-        void clear()
+        void setName(const QName& n, const Namespace& ns)
         {
-            _nameRef.clear();
-            _attributes.clear();
-            _namespace = 0;
+            _name = &n;
+            _namespace = &ns;
         }
-
+        
         /** @brief Returns the qualified name.
         */
-        const QNameRef& qname() const
-        { return _nameRef; }
-
-        QNameRef& qname()
-        { return _nameRef; }
-
-        /** @brief Returns the namespace prefix.
-        */
-        const Char* prefixPtr() const
-        { return _nameRef.prefix(); }
-        
-        /** @brief Returns the local name.
-        */
-        const Char* namePtr() const
-        { return _nameRef.name(); }
+        const QName& name() const
+        {
+            return *_name;
+        }
 
         /** @brief Returns the namespace Uri for this element name
         */
         const String& namespaceUri() const
         { return _namespace->namespaceUri(); }
+
+        const Namespace& ns() const
+        { return *_namespace; }
         
         /** @brief Sets the namespace context for this element
         */      
@@ -214,7 +206,7 @@ class StartElement : public Node
         { return Node::StartElement; }
 
     private:
-        QNameRef _nameRef;
+        const QName* _name;
         const Namespace* _namespace;
         AttributeList _attributes;
 };

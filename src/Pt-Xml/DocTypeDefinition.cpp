@@ -41,11 +41,6 @@ bool lessElementName(Pt::Xml::ElementModel* e, const Pt::Xml::QName& name)
     return e->qname() < name;
 }
 
-bool lessElementNameR(Pt::Xml::ElementModel* e, const Pt::Xml::QNameRef& name)
-{
-    return e->qname() < name;
-}
-
 bool lessNotationName(Pt::Xml::Notation* n, const Pt::String& name)
 {
     return n->name() < name;
@@ -296,19 +291,6 @@ ElementModel* DocTypeDefinition::findElement(const QName& name)
 {
     Elements::iterator lbound;
     lbound = std::lower_bound(_elements.begin(), _elements.end(), name, lessElementName);
-    
-    if( lbound != _elements.end() && (*lbound)->qname() == name)
-    {
-        return *lbound;
-    }
-
-    return 0;
-}
-
-ElementModel* DocTypeDefinition::findElement(const QNameRef& name)
-{
-    Elements::iterator lbound;
-    lbound = std::lower_bound(_elements.begin(), _elements.end(), name, lessElementNameR);
     
     if( lbound != _elements.end() && (*lbound)->qname() == name)
     {

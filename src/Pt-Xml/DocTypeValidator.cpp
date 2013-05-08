@@ -145,10 +145,10 @@ bool DocTypeValidatorImpl::validate(Node& node)
             }
             else // first start element
             {
-                valid = _dtd->rootName() == se.qname();
+                valid = _dtd->rootName() == se.name();
             }
                     
-            ElementModel* decl = _dtd->findElement( se.qname() );
+            ElementModel* decl = _dtd->findElement( se.name() );
             if(decl)
             {
                 ElementValidator validator( *decl );

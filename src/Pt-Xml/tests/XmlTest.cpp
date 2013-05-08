@@ -98,76 +98,76 @@ class XmlReaderTest : public Pt::Unit::TestSuite
         XmlReaderTest()
         : Pt::Unit::TestSuite("XmlReaderTest")
         {
-            //this->registerMethod("MissingXmlDeclaration", *this, &XmlReaderTest::MissingXmlDeclaration);
-            //this->registerMethod("EmptyXmlDeclaration", *this, &XmlReaderTest::EmptyXmlDeclaration);
+            this->registerMethod("MissingXmlDeclaration", *this, &XmlReaderTest::MissingXmlDeclaration);
+            this->registerMethod("EmptyXmlDeclaration", *this, &XmlReaderTest::EmptyXmlDeclaration);
 
             this->registerMethod("ByteorderMarkUtf8", *this, &XmlReaderTest::ByteorderMarkUtf8);
             
-            //this->registerMethod("DtdEmptyDocument", *this, &XmlReaderTest::DtdEmptyDocument);
-            //this->registerMethod("DtdExternalSubsetPublicId", *this, &XmlReaderTest::DtdExternalSubsetPublicId);
-            //this->registerMethod("DtdExternalSubsetSystemId", *this, &XmlReaderTest::DtdExternalSubsetSystemId);
-            //this->registerMethod("DtdExternalAndInternalSubset", *this, &XmlReaderTest::DtdExternalAndInternalSubset);
-            //this->registerMethod("DtdValidateAttributes", *this, &XmlReaderTest::DtdValidateAttributes);
-            //this->registerMethod("DtdValidateEnumAttributes", *this, &XmlReaderTest::DtdValidateEnumAttributes);
-            //this->registerMethod("DtdValidateIDAttributes", *this, &XmlReaderTest::DtdValidateIDAttributes);
-            //this->registerMethod("DtdValidateEntityAttributes", *this, &XmlReaderTest::DtdValidateEntityAttributes);
-            //this->registerMethod("DtdValidateNotationAttributes", *this, &XmlReaderTest::DtdValidateNotationAttributes);
-            //this->registerMethod("DtdValidateElementContent", *this, &XmlReaderTest::DtdValidateElementContent);
-            //this->registerMethod("DtdAnyElementContent", *this, &XmlReaderTest::DtdAnyElementContent);
-            //this->registerMethod("DtdValidateWithNamespace", *this, &XmlReaderTest::DtdValidateWithNamespace);
-            //this->registerMethod("DtdNotations", *this, &XmlReaderTest::DtdNotations);
-            //this->registerMethod("DtdInclude", *this, &XmlReaderTest::DtdInclude);
-            //this->registerMethod("DtdIgnore", *this, &XmlReaderTest::DtdIgnore);
-            //this->registerMethod("DtdComment", *this, &XmlReaderTest::DtdComment);
-            //this->registerMethod("DtdProcesssingInstruction", *this, &XmlReaderTest::DtdProcesssingInstruction);
-            //
-            //this->registerMethod("EmptyDocument", *this, &XmlReaderTest::EmptyDocument);
-            //this->registerMethod("EmptyElementTag", *this, &XmlReaderTest::EmptyElementTag);
-            //this->registerMethod("InvalidTag1", *this, &XmlReaderTest::InvalidTag1);
-            //this->registerMethod("InvalidTag2", *this, &XmlReaderTest::InvalidTag2);
-            //this->registerMethod("InvalidTag3", *this, &XmlReaderTest::InvalidTag3);
-            //this->registerMethod("InvalidTag4", *this, &XmlReaderTest::InvalidTag4);
-            //this->registerMethod("InvalidTag5", *this, &XmlReaderTest::InvalidTag5);
-            //this->registerMethod("UnmatchedElement", *this, &XmlReaderTest::UnmatchedElement);
+            this->registerMethod("DtdEmptyDocument", *this, &XmlReaderTest::DtdEmptyDocument);
+            this->registerMethod("DtdExternalSubsetPublicId", *this, &XmlReaderTest::DtdExternalSubsetPublicId);
+            this->registerMethod("DtdExternalSubsetSystemId", *this, &XmlReaderTest::DtdExternalSubsetSystemId);
+            this->registerMethod("DtdExternalAndInternalSubset", *this, &XmlReaderTest::DtdExternalAndInternalSubset);
+            this->registerMethod("DtdValidateAttributes", *this, &XmlReaderTest::DtdValidateAttributes);
+            this->registerMethod("DtdValidateEnumAttributes", *this, &XmlReaderTest::DtdValidateEnumAttributes);
+            this->registerMethod("DtdValidateIDAttributes", *this, &XmlReaderTest::DtdValidateIDAttributes);
+            this->registerMethod("DtdValidateEntityAttributes", *this, &XmlReaderTest::DtdValidateEntityAttributes);
+            this->registerMethod("DtdValidateNotationAttributes", *this, &XmlReaderTest::DtdValidateNotationAttributes);
+            this->registerMethod("DtdValidateElementContent", *this, &XmlReaderTest::DtdValidateElementContent);
+            this->registerMethod("DtdAnyElementContent", *this, &XmlReaderTest::DtdAnyElementContent);
+            this->registerMethod("DtdValidateWithNamespace", *this, &XmlReaderTest::DtdValidateWithNamespace);
+            this->registerMethod("DtdNotations", *this, &XmlReaderTest::DtdNotations);
+            this->registerMethod("DtdInclude", *this, &XmlReaderTest::DtdInclude);
+            this->registerMethod("DtdIgnore", *this, &XmlReaderTest::DtdIgnore);
+            this->registerMethod("DtdComment", *this, &XmlReaderTest::DtdComment);
+            this->registerMethod("DtdProcesssingInstruction", *this, &XmlReaderTest::DtdProcesssingInstruction);
+            
+            this->registerMethod("EmptyDocument", *this, &XmlReaderTest::EmptyDocument);
+            this->registerMethod("EmptyElementTag", *this, &XmlReaderTest::EmptyElementTag);
+            this->registerMethod("InvalidTag1", *this, &XmlReaderTest::InvalidTag1);
+            this->registerMethod("InvalidTag2", *this, &XmlReaderTest::InvalidTag2);
+            this->registerMethod("InvalidTag3", *this, &XmlReaderTest::InvalidTag3);
+            this->registerMethod("InvalidTag4", *this, &XmlReaderTest::InvalidTag4);
+            this->registerMethod("InvalidTag5", *this, &XmlReaderTest::InvalidTag5);
+            this->registerMethod("UnmatchedElement", *this, &XmlReaderTest::UnmatchedElement);
             this->registerMethod("ElementWithContent", *this, &XmlReaderTest::ElementWithContent);
-            //this->registerMethod("MaxCharacters", *this, &XmlReaderTest::MaxCharacters);
+            this->registerMethod("MaxCharacters", *this, &XmlReaderTest::MaxCharacters);
 
-            //this->registerMethod("ElementWithNamespace", *this, &XmlReaderTest::ElementWithNamespace);
-            //this->registerMethod("AttributeWithNamespace", *this, &XmlReaderTest::AttributeWithNamespace);
-            //this->registerMethod("DefaultNamespace", *this, &XmlReaderTest::DefaultNamespace);
-            //
-            //this->registerMethod("DefaultEntities", *this, &XmlReaderTest::DefaultEntities);
-            //this->registerMethod("CustomEntities", *this, &XmlReaderTest::CustomEntities);
-            //this->registerMethod("EntitySelfReference", *this, &XmlReaderTest::EntitySelfReference);
-            //this->registerMethod("ExternalEntities", *this, &XmlReaderTest::ExternalEntities);
-            //this->registerMethod("ParameterEntities", *this, &XmlReaderTest::ParameterEntities);
-            //this->registerMethod("ParameterEntitySelfReference", *this, &XmlReaderTest::ParameterEntitySelfReference);
-            //this->registerMethod("MaxEntityRecursion", *this, &XmlReaderTest::MaxEntityRecursion);
-            //
-            //this->registerMethod("InvalidAttribute1", *this, &XmlReaderTest::InvalidAttribute1);
-            //this->registerMethod("InvalidAttribute2", *this, &XmlReaderTest::InvalidAttribute2);
-            //this->registerMethod("InvalidAttribute3", *this, &XmlReaderTest::InvalidAttribute3);
-            //this->registerMethod("InvalidAttribute4", *this, &XmlReaderTest::InvalidAttribute4);
-            //this->registerMethod("EmptyAttribute", *this, &XmlReaderTest::EmptyAttribute);
-            //this->registerMethod("AttributeWithSimpleText", *this, &XmlReaderTest::AttributeWithSimpleText);
-            //this->registerMethod("AttributeWithUTF8", *this, &XmlReaderTest::AttributeWithUTF8);
-            //this->registerMethod("MultipleAttributesIteration", *this, &XmlReaderTest::MultipleAttributesIteration);
-            //this->registerMethod("NormalizeAttributes", *this, &XmlReaderTest::NormalizeAttributes);
+            this->registerMethod("ElementWithNamespace", *this, &XmlReaderTest::ElementWithNamespace);
+            this->registerMethod("AttributeWithNamespace", *this, &XmlReaderTest::AttributeWithNamespace);
+            this->registerMethod("DefaultNamespace", *this, &XmlReaderTest::DefaultNamespace);
+            
+            this->registerMethod("DefaultEntities", *this, &XmlReaderTest::DefaultEntities);
+            this->registerMethod("CustomEntities", *this, &XmlReaderTest::CustomEntities);
+            this->registerMethod("EntitySelfReference", *this, &XmlReaderTest::EntitySelfReference);
+            this->registerMethod("ExternalEntities", *this, &XmlReaderTest::ExternalEntities);
+            this->registerMethod("ParameterEntities", *this, &XmlReaderTest::ParameterEntities);
+            this->registerMethod("ParameterEntitySelfReference", *this, &XmlReaderTest::ParameterEntitySelfReference);
+            this->registerMethod("MaxEntityRecursion", *this, &XmlReaderTest::MaxEntityRecursion);
+            
+            this->registerMethod("InvalidAttribute1", *this, &XmlReaderTest::InvalidAttribute1);
+            this->registerMethod("InvalidAttribute2", *this, &XmlReaderTest::InvalidAttribute2);
+            this->registerMethod("InvalidAttribute3", *this, &XmlReaderTest::InvalidAttribute3);
+            this->registerMethod("InvalidAttribute4", *this, &XmlReaderTest::InvalidAttribute4);
+            this->registerMethod("EmptyAttribute", *this, &XmlReaderTest::EmptyAttribute);
+            this->registerMethod("AttributeWithSimpleText", *this, &XmlReaderTest::AttributeWithSimpleText);
+            this->registerMethod("AttributeWithUTF8", *this, &XmlReaderTest::AttributeWithUTF8);
+            this->registerMethod("MultipleAttributesIteration", *this, &XmlReaderTest::MultipleAttributesIteration);
+            this->registerMethod("NormalizeAttributes", *this, &XmlReaderTest::NormalizeAttributes);
 
-            //this->registerMethod("IgnorableWhitespace", *this, &XmlReaderTest::IgnorableWhitespace);
-            //this->registerMethod("CDATAAsCharacters", *this, &XmlReaderTest::CDATAAsCharacters);
+            this->registerMethod("IgnorableWhitespace", *this, &XmlReaderTest::IgnorableWhitespace);
+            this->registerMethod("CDATAAsCharacters", *this, &XmlReaderTest::CDATAAsCharacters);
             this->registerMethod("CDATA", *this, &XmlReaderTest::CDATA );
-            //this->registerMethod("MaxCDATA", *this, &XmlReaderTest::MaxCDATA);
-            //this->registerMethod("StartDocument", *this, &XmlReaderTest::StartDocument);
-            //this->registerMethod("CommentInProlog", *this, &XmlReaderTest::CommentInProlog );
-            //this->registerMethod("CommentInElement", *this, &XmlReaderTest::CommentInElement );
-            //this->registerMethod("CommentInEpilog", *this, &XmlReaderTest::CommentInEpilog );
-            //this->registerMethod("EmptyComment", *this, &XmlReaderTest::EmptyComment );
-            //this->registerMethod("CommentBeforeRoot", *this, &XmlReaderTest::CommentBeforeRoot );
-            //this->registerMethod("MissingCloseTag", *this, &XmlReaderTest::MissingCloseTag );
-            //this->registerMethod("ProcessingInstructionInProlog", *this, &XmlReaderTest::ProcessingInstructionInProlog );
-            //this->registerMethod("ProcessingInstructionInElement", *this, &XmlReaderTest::ProcessingInstructionInElement );
-            //this->registerMethod("ProcessingInstructionInEpilog", *this, &XmlReaderTest::ProcessingInstructionInEpilog );
+            this->registerMethod("MaxCDATA", *this, &XmlReaderTest::MaxCDATA);
+            this->registerMethod("StartDocument", *this, &XmlReaderTest::StartDocument);
+            this->registerMethod("CommentInProlog", *this, &XmlReaderTest::CommentInProlog );
+            this->registerMethod("CommentInElement", *this, &XmlReaderTest::CommentInElement );
+            this->registerMethod("CommentInEpilog", *this, &XmlReaderTest::CommentInEpilog );
+            this->registerMethod("EmptyComment", *this, &XmlReaderTest::EmptyComment );
+            this->registerMethod("CommentBeforeRoot", *this, &XmlReaderTest::CommentBeforeRoot );
+            this->registerMethod("MissingCloseTag", *this, &XmlReaderTest::MissingCloseTag );
+            this->registerMethod("ProcessingInstructionInProlog", *this, &XmlReaderTest::ProcessingInstructionInProlog );
+            this->registerMethod("ProcessingInstructionInElement", *this, &XmlReaderTest::ProcessingInstructionInElement );
+            this->registerMethod("ProcessingInstructionInEpilog", *this, &XmlReaderTest::ProcessingInstructionInEpilog );
 
             this->registerMethod("ZZZ1_Benchmark", *this, &XmlReaderTest::Benchmark);
             this->registerMethod("ZZZ2_Benchmark", *this, &XmlReaderTest::Benchmark);
@@ -271,7 +271,7 @@ void XmlReaderTest::MissingXmlDeclaration()
     const Pt::Xml::Node& startNode = *it;
 
     PT_UNIT_ASSERT(startNode.type() == Pt::Xml::Node::StartElement);
-    PT_UNIT_ASSERT(dynamic_cast<const Pt::Xml::StartElement*>(&startNode)->qname().equals("a"));
+    PT_UNIT_ASSERT(dynamic_cast<const Pt::Xml::StartElement*>(&startNode)->name().equals("a"));
     PT_UNIT_ASSERT( reader.depth() == 1);
 
     ++it;
@@ -315,13 +315,13 @@ void XmlReaderTest::ByteorderMarkUtf8()
 
     Pt::Xml::StartElement* se = Pt::Xml::toStartElement(&*it);
     PT_UNIT_ASSERT(se);
-    PT_UNIT_ASSERT(se->qname().equals("a"));
+    PT_UNIT_ASSERT(se->name().equals("a"));
     PT_UNIT_ASSERT(reader.depth() == 1);
 
     ++it;
     Pt::Xml::EndElement* ee = Pt::Xml::toEndElement(&*it);
     PT_UNIT_ASSERT(ee);
-    PT_UNIT_ASSERT(ee->qname().equals("a"));
+    PT_UNIT_ASSERT(ee->name().equals("a"));
     PT_UNIT_ASSERT(reader.depth() == 0);
 
     ++it;
@@ -514,7 +514,7 @@ void XmlReaderTest::DtdValidateAttributes()
             PT_UNIT_ASSERT( validator.validate(*it) );
 
             Pt::Xml::StartElement* se = toStartElement(&*it);
-            if(se && se->qname().equals("test"))
+            if(se && se->name().equals("test"))
             {
                 PT_UNIT_ASSERT( se->attributes().has(L"a3") );
                 PT_UNIT_ASSERT( se->attributes().find(L"a3")->value() == L"A3def" );
@@ -765,7 +765,7 @@ void XmlReaderTest::DtdValidateWithNamespace()
             PT_UNIT_ASSERT( validator.validate(*it) );
 
             Pt::Xml::StartElement* se = toStartElement(&*it);
-            if(se && se->qname().equals("test") )
+            if(se && se->name().equals("test") )
             {
                 PT_UNIT_ASSERT( se->attributes().has(L"a1") );
             }
@@ -1035,13 +1035,13 @@ void XmlReaderTest::EmptyElementTag()
     const Pt::Xml::Node& startNode = *it;
 
     PT_UNIT_ASSERT(startNode.type() == Pt::Xml::Node::StartElement);
-    PT_UNIT_ASSERT(dynamic_cast<const Pt::Xml::StartElement*>(&startNode)->qname().equals("a"));
+    PT_UNIT_ASSERT(dynamic_cast<const Pt::Xml::StartElement*>(&startNode)->name().equals("a"));
     PT_UNIT_ASSERT( reader.depth() == 1);
 
     ++it;
     const Pt::Xml::Node& endNode = *it;
     PT_UNIT_ASSERT(endNode.type() == Pt::Xml::Node::EndElement);
-    PT_UNIT_ASSERT(dynamic_cast<const Pt::Xml::EndElement*>(&endNode)->qname().equals("a"));
+    PT_UNIT_ASSERT(dynamic_cast<const Pt::Xml::EndElement*>(&endNode)->name().equals("a"));
     PT_UNIT_ASSERT( reader.depth() == 0);
 
     ++it;
@@ -1148,7 +1148,7 @@ void XmlReaderTest::ElementWithContent()
     Pt::Xml::XmlReader::Iterator it = reader.current();
 
     // <a>
-    PT_UNIT_ASSERT(Pt::Xml::toStartElement(*it).qname().equals("a"));
+    PT_UNIT_ASSERT(Pt::Xml::toStartElement(*it).name().equals("a"));
     PT_UNIT_ASSERT( reader.depth() == 1);
 
     // b
@@ -1159,7 +1159,7 @@ void XmlReaderTest::ElementWithContent()
 
     // </a>
     ++it;
-    PT_UNIT_ASSERT(Pt::Xml::toEndElement(*it).qname().equals("a"));
+    PT_UNIT_ASSERT(Pt::Xml::toEndElement(*it).name().equals("a"));
     PT_UNIT_ASSERT( reader.depth() == 0);
 
     // End of document
@@ -1213,14 +1213,14 @@ void XmlReaderTest::ElementWithNamespace()
 
     // <my:a>
     const Pt::Xml::StartElement& startA = Pt::Xml::toStartElement(*it);
-    PT_UNIT_ASSERT(startA.qname().equals("my", "a") );
+    PT_UNIT_ASSERT(startA.name().equals("my", "a") );
     PT_UNIT_ASSERT(startA.namespaceUri() == L"http://www.my1.net");
     PT_UNIT_ASSERT(reader.depth() == 1);
 
     // <my:a>
     ++it;
     const Pt::Xml::StartElement& startA2 = Pt::Xml::toStartElement(*it);
-    PT_UNIT_ASSERT(startA2.qname().equals("my", "a") );
+    PT_UNIT_ASSERT(startA2.name().equals("my", "a") );
     PT_UNIT_ASSERT(startA2.namespaceUri() == "http://www.my2.net");
     PT_UNIT_ASSERT(reader.depth() == 2);
 
@@ -1268,7 +1268,7 @@ void XmlReaderTest::AttributeWithNamespace()
 
     // <a>
     PT_UNIT_ASSERT(startNode.type() == Pt::Xml::Node::StartElement);
-    PT_UNIT_ASSERT(Pt::Xml::toStartElement(&startNode)->qname().equals("a") );
+    PT_UNIT_ASSERT(Pt::Xml::toStartElement(&startNode)->name().equals("a") );
     PT_UNIT_ASSERT( Pt::Xml::toStartElement(&startNode)->attributes().has(L"attr") );
     PT_UNIT_ASSERT( Pt::Xml::toStartElement(&startNode)->attributes().begin()->prefix() == L"my" );
     PT_UNIT_ASSERT( Pt::Xml::toStartElement(&startNode)->attributes().begin()->namespaceUri() == L"http://www.my.net");
@@ -1311,14 +1311,14 @@ void XmlReaderTest::DefaultNamespace()
 
     // <my:a>
     const Pt::Xml::StartElement& startA = Pt::Xml::toStartElement(*it);
-    PT_UNIT_ASSERT(startA.qname().equals("", "a"));
+    PT_UNIT_ASSERT(startA.name().equals("", "a"));
     PT_UNIT_ASSERT(startA.namespaceUri() == L"http://www.my1.net");
     PT_UNIT_ASSERT(reader.depth() == 1);
 
     // <my:a>
     ++it;
     const Pt::Xml::StartElement& startA2 = Pt::Xml::toStartElement(*it);
-    PT_UNIT_ASSERT(startA2.qname().equals("", "a") );
+    PT_UNIT_ASSERT(startA2.name().equals("", "a") );
     PT_UNIT_ASSERT(startA2.namespaceUri() == "http://www.my2.net");
     PT_UNIT_ASSERT(reader.depth() == 2);
 
@@ -1332,7 +1332,7 @@ void XmlReaderTest::DefaultNamespace()
     // </my:a>
     ++it;
     const Pt::Xml::EndElement& endA2 = Pt::Xml::toEndElement(*it);
-    PT_UNIT_ASSERT(endA2.qname().equals("", "a") );
+    PT_UNIT_ASSERT(endA2.name().equals("", "a") );
     PT_UNIT_ASSERT(endA2.namespaceUri() == L"http://www.my2.net");
     PT_UNIT_ASSERT(reader.depth() == 1);
 
@@ -1340,7 +1340,7 @@ void XmlReaderTest::DefaultNamespace()
     ++it;
     const Pt::Xml::EndElement& endA = Pt::Xml::toEndElement(*it);
 
-    PT_UNIT_ASSERT(endA.qname().equals("", "a"));
+    PT_UNIT_ASSERT(endA.name().equals("", "a"));
     PT_UNIT_ASSERT(endA.namespaceUri() == L"http://www.my1.net");
     PT_UNIT_ASSERT( reader.depth() == 0);
 
@@ -1558,7 +1558,7 @@ void XmlReaderTest::NormalizeAttributes()
 
         Pt::Xml::StartElement* se = toStartElement(&*it);
         PT_UNIT_ASSERT(se);
-        PT_UNIT_ASSERT( se->qname().equals("test") );
+        PT_UNIT_ASSERT( se->name().equals("test") );
         
         PT_UNIT_ASSERT( se->attributes().has(L"a1") );
         PT_UNIT_ASSERT( se->attributes().find(L"a1")->value() == L" a " );
@@ -2171,6 +2171,8 @@ void XmlReaderTest::EmptyComment()
 
 void XmlReaderTest::Benchmark()
 {
+    // compare to rev. 6012
+
     std::string txt;
     txt += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
     txt += "<benchmark>";

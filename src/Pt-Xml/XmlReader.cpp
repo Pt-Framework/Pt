@@ -196,8 +196,7 @@ class XmlReaderImpl
 
             setCharactersEnd();
 
-            _startElem.clear();
-            _prefixSize = 0;
+            _startElem.attributes().clear();
 
             _elements.pushChar(c);
             ++_nodeSize;
@@ -2890,10 +2889,8 @@ class XmlReaderImpl
 
                 case ':':
                 {
-                    if( _prefixSize != 0 )
-                        throw SyntaxError("invalid namespace prefix", line());
-
-                    _prefixSize = _elements.pushPrefix();
+                    if( ! _elements.pushPrefix() )
+                        throw SyntaxError("invalid prefix", line());
                     return;
                 }
 
@@ -2901,7 +2898,7 @@ class XmlReaderImpl
                     _chars.clear();
                     setStartElement();
                     _parse = &XmlReaderImpl::afterTag;
-                    return;
+                    return;  
             }
 
             if( c == std::char_traits<Char>::eof() || ! isAlpha(c) )
@@ -3144,11 +3141,7 @@ class XmlReaderImpl
 
             if(ch == '>')
             {
-                _endElem.clear();
-                _endElem.qname().set( _startElem.qname().prefix(), _startElem.qname().name() );
-
                 setEndElement();
-
                 _parse = &XmlReaderImpl::afterEndElement;
                 return;
             }
@@ -3161,10 +3154,9 @@ class XmlReaderImpl
             if( _elements.empty() )
                 throw SyntaxError("unmatched element", line());
 
-            _back = _elements.back();
-
-            _endElem.clear();
-            _endElem.qname().set(_null, _back);
+            QName& name = _elements.top();
+            _back = name.prefix().empty() ? name.name().c_str() 
+                                          : name.prefix().c_str();
 
             if( c != _back->value() || *_back == '\0' )
                 throw SyntaxError("unmatched element", line());
@@ -3175,42 +3167,39 @@ class XmlReaderImpl
         }
 
         void onEndElementName(int c)
-        {           
+        {  
             switch(c)
             {
                 case '>':
-                    _chars.clear();
-
-                    if( *_back != '\0' )
+                    if(*_back != '\0')
                         throw SyntaxError("unmatched element", line());
                     
+                    _chars.clear();
                     setEndElement();
-
                     _parse = &XmlReaderImpl::afterEndElement;
                     return;
 
                 case ' ':
                 case '\n':
                 case '\r':
-                case '\t':
-                    if( *_back != '\0' )
+                case '\t':       
+                    if(*_back != '\0')
                         throw SyntaxError("unmatched element", line());
-                    
+                                   
                     _parse = &XmlReaderImpl::afterEndElementName;
                     return;
 
                 case ':':
-                    if( *_back != '\0' || _back == _elements.end() )
+                    if(*_back != '\0')
                         throw SyntaxError("unmatched element", line());
-
-                    ++_back;
-                    _endElem.qname().set(_endElem.qname().name(), _back);
+                    
+                    _back = _elements.top().name().c_str();
                     return;
             }
 
             if( c != _back->value() || *_back == '\0' )
                 throw SyntaxError("unmatched element", line());
-            
+
             ++_back;
             ++_nodeSize;
         }
@@ -3228,7 +3217,6 @@ class XmlReaderImpl
                 case '>':
                     _chars.clear();
                     setEndElement();
-
                     _parse = &XmlReaderImpl::afterEndElement;
                     break;
 
@@ -3763,33 +3751,30 @@ class XmlReaderImpl
         {
             _usedSize += _elements.pushName();
             _nodeSize = _usedSize;
-            
-            const Char* back = _elements.back();
-            
-            if(_prefixSize != 0)
+
+            QName& name = _elements.top();
+                       
+            const String& prefix = name.prefix();
+            if( ! prefix.empty() )
             {               
-                const Namespace* ns = _nsctx.findPrefix( back );
+                const Namespace* ns = _nsctx.findPrefix( prefix );
                 if( ! ns )
                     throw SyntaxError("undeclared namespace prefix", line());
 
-                _startElem.qname().set(back, back + _prefixSize);
-                _startElem.setNamespace(*ns);
+                _startElem.setName(name, *ns);
             }
             else
             {
                 const Namespace& ns = _nsctx.getDefaultNamespace();
-
-                _startElem.qname().set(_null, back);
-                _startElem.setNamespace(ns);
+                _startElem.setName(name, ns);
             }
 
-            
             AttributeList& attributes = _startElem.attributes();
             AttributeList::Iterator it = attributes.begin();
             
             ElementModel* elemDecl = 0;
             if( it != attributes.end() )
-                elemDecl = _dtd.findElement( _startElem.qname() );
+                elemDecl = _dtd.findElement( _startElem.name() );
             
             for( ; it != attributes.end(); ++it)
             {
@@ -3800,7 +3785,7 @@ class XmlReaderImpl
                 }
                 else
                 {
-                    const Namespace* ns = _nsctx.findPrefix2( it->prefix() );
+                    const Namespace* ns = _nsctx.findPrefix( it->prefix() );
                     if( ! ns )
                         throw SyntaxError("undeclared namespace prefix", line());
 
@@ -3830,22 +3815,25 @@ class XmlReaderImpl
         {            
             _nodeSize = _usedSize;
 
-            const Char* prefix = _endElem.qname().prefix();
-            if( *prefix == '\0')
+            QName& name = _elements.top();
+            const String& prefix = name.prefix();
+
+            if( prefix.empty() )
             {
                 const Namespace& ns = _nsctx.getDefaultNamespace();
-                _endElem.setNamespace(ns);
+                _endElem.setName(name, ns);
             }
             else
             {
                 const Namespace* ns = _nsctx.findPrefix( prefix );
                 if( ! ns )
                     throw SyntaxError("undeclared namespace prefix", line());
-
-                _endElem.setNamespace(*ns);
+                
+                _endElem.setName(name, *ns);
             }
 
             decDepth();
+            
             _current = &(_endElem);
         }
 
@@ -3866,30 +3854,15 @@ class XmlReaderImpl
 
         class NameStack
         {
-            typedef std::char_traits<Char> Traits;
-            
-            static const unsigned BufSize = 1;
-
             public:
                 NameStack()
-                : 
-                //_size(0)
-                //, _beg(_first)
-                //, _end(_first + BufSize)
-                //, _nameSize(0)
-                _cur(0)
+                : _cur(0)
                 {
                     _cur = &_names[0]; 
                 }
 
                 void clear()
                 {
-                    //_size = 0;
-                    //_beg = _first;
-                    //_end = _first + BufSize;
-                    //_nameSize = 0;
-                    //_extra.clear();
-
                     _cur = &_names[0];
                     _cur->clear();
                 }
@@ -3899,170 +3872,47 @@ class XmlReaderImpl
                     _cur->name() += ch;
                 }
 
-                //void pushChar(Char ch)
-                //{
-                //    // "ns\0elem\08ns\0elem2\09"
-
-                //    if( _extra.empty() )
-                //    {
-                //        *_beg++ = ch;
-                //        ++_nameSize;
-
-                //        if(_beg == _end)
-                //        {
-                //            Char* from = _beg - _nameSize;
-                //            _extra.insert(_extra.end(), from, _beg);
-                //            _beg = from;
-                //        }
-                //    }
-                //    else
-                //    {
-                //        _extra.push_back(ch);
-                //        ++_nameSize;
-                //    }
-                //}
-
-                std::size_t pushPrefix()
+                bool pushPrefix()
                 {
-                    _cur->prefix() = _cur->name();
-                    return 0;
-                }
+                    if( _cur->prefix().empty() )
+                    {
+                        _cur->setPrefix( _cur->name() );
+                        _cur->name().clear();
+                        return true;
+                    }
 
-                //std::size_t pushPrefix()
-                //{
-                //    pushChar(0);
-                //    return _nameSize;
-                //}
+                    return false;
+                }
             
                 std::size_t pushName()
                 {
                     ++_cur;
                     return 0;
                 }
-                
-                //std::size_t pushName()
-                //{
-                //    pushChar(0);
-                //    
-                //    std::size_t n = _nameSize;
-                //    pushChar(_nameSize);
-                //    
-                //    _nameSize = 0;
-                //    ++_size;
-                //    
-                //    return n;
-                //}
 
                 std::size_t pop()
                 {
-                    (--_cur)->clear();
+                    --_cur;
+                    _cur->clear();
                     return 0;
                 }
 
-                //std::size_t pop()
-                //{
-                //    assert( ! empty() );
-                //    assert( _nameSize == 0 );
-
-                //    std::size_t n = 0;
-                //    std::size_t m = _nameSize + 1;
-
-                //    if(_nameSize != 0)
-                //        return n;
-
-                //    if( ! _extra.empty() )
-                //    {
-                //        Char* c = &_extra[0] + _extra.size();
-                //        c -= m;
-                //        n = c->value();
-                //        
-                //        assert(n >= _extra.size());
-                //        _extra.resize(_extra.size() - (n+1));
-                //    }
-                //    else
-                //    {
-                //        _beg -= m;
-                //        n = _beg->value();
-
-                //        assert(n >= _beg - _first);
-                //        _beg -= n;
-                //    }
-
-                //    --_size;
-                //    return n;
-                //}
-
-                const Char* back() const
+                QName& top()
                 {
-                    QName* n = _cur - 1;
-                    return n->name().c_str();
+                    return *(_cur - 1);
                 }
-
-                //const Char* back() const
-                //{
-                //    assert( ! empty() );
-                //    assert( _nameSize == 0 );
-                //    
-                //    const Char* back = 0;
-                //    
-                //    if( _extra.empty() )
-                //        back = _beg;
-                //    else
-                //        back = &_extra[0] + _extra.size();
-
-                //    // ignore unfinished name token
-                //    back -= (_nameSize + 1);
-                //    std::size_t n = back->value();
-                //    return back - n;
-                //}
-
-                const Char* end() const
-                {
-                    // point to null-term before last length field
-                    QName* n = _cur - 1;
-                    return n->name().c_str() + n->name().size(); 
-                }
-
-                //const Char* end() const
-                //{
-                //    assert( ! empty() );
-                //    assert( _nameSize == 0 );
-
-                //    const Char* back = 0; 
-                //    
-                //    if( _extra.empty() )
-                //        back = _beg;
-                //    else
-                //        back = &_extra[0] + _extra.size();
-
-                //    // point to null-term before last length field
-                //    back -= (_nameSize + 2);
-                //    assert(back->value() == 0);
-                //    return back; 
-                //}
                 
                 bool empty() const
                 {
                     return _cur == _names;
                 }
 
-                //bool empty() const
-                //{
-                //    return _size == 0;
-                //}
-
             private:
-                //std::size_t _size;
-                //Char _first[BufSize];
-                //Char* _beg;
-                //Char* _end;
-                //std::vector<Char> _extra;
-                //std::size_t _nameSize;
                 QName _names[16];
                 QName* _cur;
         };
 
-        Pt::Char _null[1];
+        Char _null;
         const Pt::Char* _back;
         std::size_t _prefixSize;
         NameStack _elements;
@@ -4100,6 +3950,7 @@ class XmlReaderImpl
         , _contentModel(0)
         , _attrModel(0)
         , _attlistDecl(0)
+        , _back(0)
         {
             _parse = &XmlReaderImpl::onDocumentBegin;
         }
@@ -4124,6 +3975,7 @@ class XmlReaderImpl
         , _contentModel(0)
         , _attrModel(0)
         , _attlistDecl(0)
+        , _back(0)
         {
             _parse = &XmlReaderImpl::onDocumentBegin;
 
@@ -4174,6 +4026,7 @@ class XmlReaderImpl
                 _parseStack.pop();
 
             _elements.clear();
+            _back = 0;
 
             _qname.clear();
             _token.clear(); 

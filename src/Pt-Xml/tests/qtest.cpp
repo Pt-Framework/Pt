@@ -7,7 +7,7 @@
 #include <QtCore/QXmlStreamReader>
 #include <Pt/System/Clock.h>
 
-int main(int argc, char* argv[])
+void runTest()
 {
     std::string input;
     input += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
@@ -49,5 +49,12 @@ int main(int argc, char* argv[])
 
     Pt::Timespan ts = c.stop();
     std::cerr << "parsed " << n << " nodes in " << ts.toMSecs()  << " msecs." << std::endl;
+}
+
+int main(int argc, char* argv[])
+{
+    for(unsigned n = 0; n < 10; ++n)
+        runTest();
+
     return 0;
 }

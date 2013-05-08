@@ -49,7 +49,7 @@ void NamespaceContext::clear()
 }
 
 
-const Namespace* NamespaceContext::findPrefix2(const String& prefix) const
+const Namespace* NamespaceContext::findPrefix(const String& prefix) const
 {
     std::vector<Namespace>::const_reverse_iterator it;
 
@@ -68,7 +68,7 @@ const Namespace* NamespaceContext::findPrefix2(const String& prefix) const
 }
 
 
-const Namespace* NamespaceContext::findPrefix(const Char* prefix) const
+const Namespace* NamespaceContext::findPrefix2(const Char* prefix) const
 {
     std::vector<Namespace>::const_reverse_iterator it;
 

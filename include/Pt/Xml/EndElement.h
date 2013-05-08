@@ -50,30 +50,24 @@ class EndElement : public Node
     public:
         /** @brief Constructs an EndElement object with no name.
         */
-
-        //TODO point to shared QName (e.g. from StartElement)
         EndElement()
         : Node(Node::EndElement)
+        , _name(0)
         , _namespace(0)
         { }
 
-        /** @brief Clears the end element.
+        /** @brief Returns the qualified name.
         */
-        void clear()
+        const QName& name() const
+        { return *_name; }
+
+        /** @brief Returns the qualified name.
+        */
+        void setName(const QName& name, const Namespace& ns)
         { 
-            _nameRef.clear();
-            _namespace = 0;
+            _name = &name; 
+            _namespace = &ns; 
         }
-
-        /** @brief Returns the qualified name.
-        */
-        const QNameRef& qname() const
-        { return _nameRef; }
-
-        /** @brief Returns the qualified name.
-        */
-        QNameRef& qname()
-        { return _nameRef; }
 
         /** @brief Returns the namespace Uri for this element name
         */
@@ -90,7 +84,7 @@ class EndElement : public Node
         { return Node::EndElement; }
 
     private:
-        QNameRef _nameRef;
+        const QName* _name;
         const Namespace* _namespace;
 };
 
