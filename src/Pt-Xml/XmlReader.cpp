@@ -3912,11 +3912,6 @@ class XmlReaderImpl
                 QName* _cur;
         };
 
-        Char _null;
-        const Pt::Char* _back;
-        std::size_t _prefixSize;
-        NameStack _elements;
-
     public:
         enum Option
         {
@@ -4170,6 +4165,9 @@ class XmlReaderImpl
         }
 
     private:
+        const Pt::Char* _back;
+        NameStack _elements;
+
         InputSource* _is;
         XmlResolver* _resolver;
         EntityResolver _entityResolver;
