@@ -145,9 +145,6 @@ Utf8Codec::Utf8Codec(size_t ref)
 : Pt::TextCodec<Char, char>(ref)
 {}
 
-
-#ifndef PT_USE_SIMPLE_UTF8
-
 namespace
 {
   inline bool invalid_leading_octet(unsigned char octet_1)
@@ -169,19 +166,72 @@ namespace
     // Otherwise the count number of consecutive 1 bits starting at MSB
     //    assert(0xc0 <= lead_octet && lead_octet <= 0xfd);
 
-    if (0xc0 <= lead_octet && lead_octet <= 0xdf) return 2;
+    if      (0xc0 <= lead_octet && lead_octet <= 0xdf) return 2;
     else if (0xe0 <= lead_octet && lead_octet <= 0xef) return 3;
     else if (0xf0 <= lead_octet && lead_octet <= 0xf7) return 4;
     else if (0xf8 <= lead_octet && lead_octet <= 0xfb) return 5;
     else return 6;
   }
 
-
   inline unsigned int get_cont_octet_count(unsigned char lead_octet) 
   {
     return get_octet_count(lead_octet) - 1;
   }
 
+  template<std::size_t s>
+  int get_cont_octet_out_count_impl(wchar_t word)
+  {
+    if (word < 0x80) 
+      return 0;
+    
+    if (word < 0x800) 
+      return 1;
+    
+    return 2;
+  }
+
+  template<>
+  int get_cont_octet_out_count_impl<4>(wchar_t word)
+  {
+    if (word < 0x80) 
+      return 0;
+    
+    if (word < 0x800) 
+      return 1;
+   
+    // Note that the following code will generate warnings on some platforms
+    // where wchar_t is defined as UCS2.  The warnings are superfluous as the
+    // specialization is never instantitiated with such compilers, but this
+    // can cause problems if warnings are being treated as errors, so we guard
+    // against that.  Including <boost/detail/utf8_codecvt_facet.hpp> as we do
+    // should be enough to get WCHAR_MAX defined.
+#if !defined(WCHAR_MAX)
+#   error WCHAR_MAX not defined!
+#endif
+    // cope with VC++ 7.1 or earlier having invalid WCHAR_MAX
+#if defined(_MSC_VER) && _MSC_VER <= 1310 // 7.1 or earlier
+    return 2;
+#elif WCHAR_MAX > 0x10000
+
+    if (word < 0x10000) 
+      return 2;
+    
+    if (word < 0x200000) 
+      return 3;
+    
+    if (word < 0x4000000) 
+      return 4;
+    
+    return 5;
+#else
+    return 2;
+#endif
+  }
+
+  int get_cont_octet_out_count( wchar_t word) 
+  {
+    return get_cont_octet_out_count_impl<sizeof(wchar_t)>(word);
+  }
 } // namespace
 
 Utf8Codec::result Utf8Codec::do_in(MBState& s, const char* fromBegin, const char* fromEnd, const char*& fromNext,
@@ -200,14 +250,15 @@ Utf8Codec::result Utf8Codec::do_in(MBState& s, const char* fromBegin, const char
     // The first octet is   adjusted by a value dependent upon 
     // the number   of "continuing octets" encoding the character
     const int cont_octet_count = get_cont_octet_count(*fromBegin);
-    const wchar_t octet1_modifier_table[] =   
+    const unsigned char octet1_modifier_table[] =   
     {
       0x00, 0xc0, 0xe0, 0xf0, 0xf8, 0xfc
     };
 
     // The unsigned char conversion is necessary in case char is
     // signed   (I learned this the hard way)
-    wchar_t ucs_result = 
+    
+    unsigned ucs_result = 
       (unsigned char)(*fromBegin++) - octet1_modifier_table[cont_octet_count];
 
     // Invariants   : 
@@ -255,62 +306,66 @@ Utf8Codec::result Utf8Codec::do_in(MBState& s, const char* fromBegin, const char
         return std::codecvt_base::partial;
 }
 
-#else
-Utf8Codec::result Utf8Codec::do_in(MBState& s, const char* fromBegin, const char* fromEnd, const char*& fromNext,
-                                   Pt::Char* toBegin, Pt::Char* toEnd, Pt::Char*& toNext) const
+#ifdef USE_PT_WHAT_ESLE
+Utf8Codec::result Utf8Codec::do_out(MBState& /*s*/, const Pt::Char* fromBegin, const Pt::Char* fromEnd, const Pt::Char * & fromNext, 
+  char* toBegin, char* toEnd, char * & toNext) const
 {
-    Utf8Codec::result retstat = ok;
-    fromNext = fromBegin;
-    toNext = toBegin;
+  // RG - consider merging this table with the other one
+  const unsigned char octet1_modifier_table[] = 
+  {
+    0x00, 0xc0, 0xe0, 0xf0, 0xf8, 0xfc
+  };
 
-    while(fromNext < fromEnd) {
-        uint8_t* fnext = (uint8_t *)(fromNext);
+  //Pt::uint32_t max_wchar = (std::numeric_limits<uint32_t>::max)();
+  while (fromBegin != fromEnd && toBegin != toEnd) 
+  {
+    // Check for invalid UCS-4 character
+    //if (*fromBegin > max_wchar) 
+    //{
+    //  fromNext = fromBegin;
+    //  toNext = toBegin;
+    //  return std::codecvt_base::error;
+    //}
 
-        if(toNext >= toEnd) {
-            retstat = partial;
-            break;
-        }
+    int cont_octet_count = get_cont_octet_out_count(*fromBegin);
 
-        const size_t extraBytesToRead = trailingBytesForUTF8[*fnext];
-        if(fromNext + extraBytesToRead >= fromEnd) {
-            retstat = partial;
-            break;
-        }
+    // RG  - comment this formula better
+    int shift_exponent = (cont_octet_count) * 6;
 
-        if( !isLegalUTF8( (const uint8_t*)fnext, extraBytesToRead + 1 ) ) {
-            retstat = error;
-            break;
-        }
+    // Process the first character
+    *toBegin++ = static_cast<char>(octet1_modifier_table[cont_octet_count] +
+      (unsigned char)(*fromBegin / (1 << shift_exponent)));
 
-        *toNext = 0;
-        switch (extraBytesToRead) {
-            case 5: *toNext += *fnext++; *toNext <<= 6; // We should never get this for legal UTF-8
-            case 4: *toNext += *fnext++; *toNext <<= 6; // We should never get this for legal UTF-8
-            case 3: *toNext += *fnext++; *toNext <<= 6;
-            case 2: *toNext += *fnext++; *toNext <<= 6;
-            case 1: *toNext += *fnext++; *toNext <<= 6;
-            case 0: *toNext += *fnext++;
-        }
-        *toNext -= offsetsFromUTF8[extraBytesToRead];
-
-        // UTF-16 surrogate values are illegal in UTF-32, and anything
-        // over Plane 17 (> 0x10FFFF) is illegal.
-        if(*toNext > MaxLegalUtf32) {
-            *toNext = ReplacementChar;
-        }
-        else if(*toNext >= SurHighStart && *toNext <= SurLowEnd) {
-            *toNext = ReplacementChar;
-        }
-
-        ++toNext;
-        fromNext += (extraBytesToRead + 1);
+    // Process the continuation characters 
+    // Invariants: At   the start of the loop:
+    //   1) 'i' continuing octets   have been generated
+    //   2) '*toBegin'   points to the next location to place an octet
+    //   3) shift_exponent is   6 more than needed for the next octet
+    int i = 0;
+    while(i != cont_octet_count && toBegin != toEnd) 
+    {
+      shift_exponent -= 6;
+      *toBegin++ = static_cast<char>(0x80 + ((*fromBegin / (1 << shift_exponent)) % (1 << 6)));
+      ++i;
     }
-
-    return retstat;
+    // If   we filled up the out buffer before encoding the character
+    if(toBegin   == toEnd && i != cont_octet_count) 
+    {
+      fromNext = fromBegin;
+      toNext = toBegin - (i+1);
+      return std::codecvt_base::partial;
+    }
+    ++fromBegin;
+  }
+  fromNext = fromBegin;
+  toNext = toBegin;
+  // Were we done or did we run out of destination space
+  if(fromBegin == fromEnd) return std::codecvt_base::ok;
+  else return std::codecvt_base::partial;
 }
 
-#endif
 
+#else
 Utf8Codec::result Utf8Codec::do_out(MBState& s, const Pt::Char* fromBegin, const Pt::Char* fromEnd, const Pt::Char*& fromNext,
                                                   char* toBegin, char* toEnd, char*& toNext) const
 {
@@ -367,6 +422,7 @@ Utf8Codec::result Utf8Codec::do_out(MBState& s, const Pt::Char* fromBegin, const
     return retstat;
 }
 
+#endif
 
 int Utf8Codec::do_length(MBState& s, const char* fromBegin, const char* fromEnd, size_t max) const
 {
