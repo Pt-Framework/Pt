@@ -3154,7 +3154,7 @@ class XmlReaderImpl
             if( _elements.empty() )
                 throw SyntaxError("unmatched element", line());
 
-            QName& name = _elements.top();
+            const QName& name = _elements.top();
             _back = name.prefix().empty() ? name.name().c_str() 
                                           : name.prefix().c_str();
 
@@ -3752,7 +3752,7 @@ class XmlReaderImpl
             _usedSize += _elements.pushName();
             _nodeSize = _usedSize;
 
-            QName& name = _elements.top();
+            const QName& name = _elements.top();
                        
             const String& prefix = name.prefix();
             if( ! prefix.empty() )
@@ -3815,7 +3815,7 @@ class XmlReaderImpl
         {            
             _nodeSize = _usedSize;
 
-            QName& name = _elements.top();
+            const QName& name = _elements.top();
             const String& prefix = name.prefix();
 
             if( prefix.empty() )
@@ -3854,6 +3854,8 @@ class XmlReaderImpl
 
         class NameStack
         {
+            static const unsigned int BufSize = 16;
+
             public:
                 NameStack()
                 : _cur(0)
@@ -3863,8 +3865,8 @@ class XmlReaderImpl
 
                 void clear()
                 {
-                    _cur = &_names[0];
-                    _cur->clear();
+                    while( ! empty() )
+                        pop();
                 }
                 
                 void pushChar(Char ch)
@@ -3886,20 +3888,41 @@ class XmlReaderImpl
             
                 std::size_t pushName()
                 {
-                    ++_cur;
+                    if( _extra.empty() && _cur < &_names[BufSize-1] )
+                    {
+                        ++_cur;
+                        return 0;
+                    }
+                    
+                    std::size_t n = _extra.size() + 1;
+                    _extra.resize(n);
+                    _cur = &_extra.back();
+
                     return 0;
                 }
 
                 std::size_t pop()
                 {
-                    --_cur;
+                    if( _extra.empty() )
+                    {
+                        --_cur;
+                    }
+                    else
+                    {
+                        _extra.pop_back();
+                        _cur = _extra.empty() ? &_names[BufSize-1]
+                                                : &_extra.back();
+                    }
+
                     _cur->clear();
+                    
                     return 0;
                 }
 
-                QName& top()
+                const QName& top() const
                 {
-                    return *(_cur - 1);
+                    return _extra.size() == 1 ? _names[BufSize-1]
+                                              : *(_cur - 1);
                 }
                 
                 bool empty() const
@@ -3908,7 +3931,8 @@ class XmlReaderImpl
                 }
 
             private:
-                QName _names[16];
+                QName _names[BufSize];
+                std::vector<QName> _extra;
                 QName* _cur;
         };
 
