@@ -3869,7 +3869,7 @@ class XmlReaderImpl
                         pop();
                 }
                 
-                void pushChar(Char ch)
+                inline void pushChar(Char ch)
                 {
                     _cur->name() += ch;
                 }
@@ -3886,22 +3886,23 @@ class XmlReaderImpl
                     return false;
                 }
             
-                std::size_t pushName()
+                inline std::size_t pushName()
                 {
                     if( _extra.empty() && _cur < &_names[BufSize-1] )
                     {
                         ++_cur;
-                        return 0;
+                    }
+                    else
+                    {
+                        std::size_t n = _extra.size() + 1;
+                        _extra.resize(n);
+                        _cur = &_extra.back();
                     }
                     
-                    std::size_t n = _extra.size() + 1;
-                    _extra.resize(n);
-                    _cur = &_extra.back();
-
                     return 0;
                 }
 
-                std::size_t pop()
+                inline std::size_t pop()
                 {
                     if( _extra.empty() )
                     {
@@ -3919,13 +3920,13 @@ class XmlReaderImpl
                     return 0;
                 }
 
-                const QName& top() const
+                inline const QName& top() const
                 {
                     return _extra.size() == 1 ? _names[BufSize-1]
                                               : *(_cur - 1);
                 }
                 
-                bool empty() const
+                inline bool empty() const
                 {
                     return _cur == _names;
                 }
