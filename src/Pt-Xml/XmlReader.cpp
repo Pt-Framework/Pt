@@ -3854,7 +3854,7 @@ class XmlReaderImpl
 
         class NameStack
         {
-            static const unsigned int BufSize = 14;
+            static const unsigned int BufSize = 16;
 
             public:
                 NameStack()
@@ -3870,7 +3870,7 @@ class XmlReaderImpl
                 }
                 
                 inline void pushChar(Char ch)
-                {
+                {                        
                     _cur->name() += ch;
                 }
 
@@ -3886,7 +3886,7 @@ class XmlReaderImpl
                     return false;
                 }
             
-                inline std::size_t pushName()
+                std::size_t pushName()
                 {
                     if( _extra.empty() && _cur < &_names[BufSize-1] )
                     {
@@ -3902,7 +3902,7 @@ class XmlReaderImpl
                     return 0;
                 }
 
-                inline std::size_t pop()
+                std::size_t pop()
                 {
                     if( _extra.empty() )
                     {
@@ -3966,11 +3966,11 @@ class XmlReaderImpl
         , _nodeSize(_usedSize)
         , _parse(0)                 
         , _current(0)
+        , _back(0)
         , _cmBuilder()
         , _contentModel(0)
         , _attrModel(0)
         , _attlistDecl(0)
-        , _back(0)
         {
             _parse = &XmlReaderImpl::onDocumentBegin;
         }
@@ -3991,11 +3991,11 @@ class XmlReaderImpl
         , _nodeSize(_usedSize)
         , _parse(0)                 
         , _current(0)
+        , _back(0)
         , _cmBuilder()
         , _contentModel(0)
         , _attrModel(0)
         , _attlistDecl(0)
-        , _back(0)
         {
             _parse = &XmlReaderImpl::onDocumentBegin;
 
@@ -4040,13 +4040,13 @@ class XmlReaderImpl
             _nodeSize = _usedSize;
 
             _parse = &XmlReaderImpl::onDocumentBegin;
-            _current = 0;
 
             while( ! _parseStack.empty() )
                 _parseStack.pop();
 
-            _elements.clear();
+            _current = 0;
             _back = 0;
+            _elements.clear();
 
             _qname.clear();
             _token.clear(); 
@@ -4190,9 +4190,6 @@ class XmlReaderImpl
         }
 
     private:
-        const Pt::Char* _back;
-        NameStack _elements;
-
         InputSource* _is;
         XmlResolver* _resolver;
         EntityResolver _entityResolver;
@@ -4217,6 +4214,8 @@ class XmlReaderImpl
         std::stack<ParseFunc> _parseStack;
         
         Node* _current;
+        const Pt::Char* _back;
+        NameStack _elements;
 
         DocTypeDefinition _dtd;
         ContentModelBuilder _cmBuilder;
