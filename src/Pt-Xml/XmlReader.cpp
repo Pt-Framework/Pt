@@ -3854,7 +3854,7 @@ class XmlReaderImpl
 
         class NameStack
         {
-            static const unsigned int BufSize = 16;
+            static const unsigned int BufSize = 14;
 
             public:
                 NameStack()
