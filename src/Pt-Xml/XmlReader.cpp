@@ -3859,10 +3859,8 @@ class XmlReaderImpl
             public:
                 NameStack()
                 : _cur(0)
-                , _namesBack(0)
                 {
                     _cur = &_names[0]; 
-                    _namesBack = &_names[BufSize-1];
                 }
 
                 void clear()
@@ -3890,7 +3888,7 @@ class XmlReaderImpl
             
                 inline std::size_t pushName()
                 {
-                    if( _extra.empty() && _cur < _namesBack )
+                    if( _extra.empty() && _cur < &_names[BufSize-1] )
                     {
                         ++_cur;
                     }
@@ -3913,7 +3911,7 @@ class XmlReaderImpl
                     else
                     {
                         _extra.pop_back();
-                        _cur = _extra.empty() ? _namesBack
+                        _cur = _extra.empty() ? &_names[BufSize-1]
                                                 : &_extra.back();
                     }
 
@@ -3924,7 +3922,7 @@ class XmlReaderImpl
 
                 inline const QName& top() const
                 {
-                    return _extra.size() == 1 ? *_namesBack
+                    return _extra.size() == 1 ? _names[BufSize-1]
                                               : *(_cur - 1);
                 }
                 
@@ -3935,7 +3933,6 @@ class XmlReaderImpl
 
             private:
                 QName _names[BufSize];
-                QName* _namesBack;
                 std::vector<QName> _extra;
                 QName* _cur;
         };
