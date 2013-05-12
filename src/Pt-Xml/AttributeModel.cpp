@@ -153,6 +153,8 @@ bool AttributeModel::fixup(AttributeValidator& validator, AttributeList& list) c
     Attribute& attr = list.push();
     attr.qname() = _qname;
     attr.value() = _default;
+
+    // TODO: also add namespace!!!
             
     return onValidate(validator, attr);
 }
