@@ -38,10 +38,6 @@ namespace Pt {
 
 namespace Xml {
 
-//
-// TODO: use same QName object for StartElement and EndElement
-//
-
 /** @brief An end element represents a closing tag in an XML document.
 */
 class EndElement : public Node 
@@ -74,11 +70,6 @@ class EndElement : public Node
         const String& namespaceUri() const
         { return _namespace->namespaceUri(); }
         
-        /** @brief Sets the namespace context for this element
-        */
-        void setNamespace(const Namespace& ns)
-        { _namespace = &ns; }
-
         //! @internal
         inline static const Node::Type nodeId()
         { return Node::EndElement; }

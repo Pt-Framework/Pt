@@ -59,16 +59,6 @@ class PT_XML_API Attribute
         QName& qname()
         { return _qname; }
 
-        /** @brief Returns the namespace prefix.
-        */
-        const String& prefix() const
-        { return _qname.prefix(); }
-
-        /** @brief Returns the name of this attribute.
-        */
-        const String& name() const
-        { return _qname.name(); }
-
         const String& namespaceUri() const
         { return _namespace ? _namespace->namespaceUri() : _qname.prefix(); }
         
@@ -96,8 +86,8 @@ class PT_XML_API Attribute
 
     private:
         QName _qname;
-        String _value;
         const Namespace* _namespace;
+        String _value;
 };
 
 
@@ -163,6 +153,11 @@ class StartElement : public Node
         , _namespace(0)
         { }
 
+        /** @brief Returns the qualified name.
+        */
+        const QName& name() const
+        { return *_name; }
+
         /** @brief Sets the qualified name.
         */
         void setName(const QName& n, const Namespace& ns)
@@ -170,27 +165,12 @@ class StartElement : public Node
             _name = &n;
             _namespace = &ns;
         }
-        
-        /** @brief Returns the qualified name.
-        */
-        const QName& name() const
-        {
-            return *_name;
-        }
 
         /** @brief Returns the namespace Uri for this element name
         */
         const String& namespaceUri() const
         { return _namespace->namespaceUri(); }
-
-        const Namespace& ns() const
-        { return *_namespace; }
         
-        /** @brief Sets the namespace context for this element
-        */      
-        void setNamespace(const Namespace& ns)
-        { _namespace = &ns; }
-
         /** @brief Returns the attributes of the tag.
         */
         const AttributeList& attributes() const

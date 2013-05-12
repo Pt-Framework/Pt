@@ -2968,10 +2968,10 @@ class XmlReaderImpl
             {
                 assert(_attr);
                 
-                if( ! _attr->prefix().empty() )
+                QName& qn = _attr->qname();
+                if( ! qn.prefix().empty() )
                     throw SyntaxError("invalid namespace prefix", line());
 
-                QName& qn = _attr->qname();
                 qn.setPrefix(qn.name() ); // TODO: use swap
                 qn.clearName();
                 return;
@@ -3034,12 +3034,12 @@ class XmlReaderImpl
 
             if( isQuoteEnd(ch) )
             {
-                if(_attr->prefix() == "xmlns")
+                if(_attr->qname().prefix() == "xmlns")
                 {
-                    _usedSize += _nsctx.setNamespace(_depth+1, _attr->name(), _attr->value());
+                    _usedSize += _nsctx.setNamespace(_depth+1, _attr->qname().name(), _attr->value());
                     _startElem.attributes().pop();
                 }
-                else if(_attr->name() == "xmlns")
+                else if(_attr->qname().name() == "xmlns")
                 {
                     _usedSize += _nsctx.setDefaultNamespace(_depth+1, _attr->value());
                     _startElem.attributes().pop();
@@ -3778,14 +3778,14 @@ class XmlReaderImpl
             
             for( ; it != attributes.end(); ++it)
             {
-                if( it->prefix().empty() )
+                if( it->qname().prefix().empty() )
                 {
                     const Namespace& ns = _nsctx.getDefaultNamespace();
                     it->setNamespace(ns);
                 }
                 else
                 {
-                    const Namespace* ns = _nsctx.findPrefix( it->prefix() );
+                    const Namespace* ns = _nsctx.findPrefix( it->qname().prefix() );
                     if( ! ns )
                         throw SyntaxError("undeclared namespace prefix", line());
 
@@ -3878,6 +3878,7 @@ class XmlReaderImpl
                 {
                     if( _cur->prefix().empty() )
                     {
+                        // TODO: use swap
                         _cur->setPrefix( _cur->name() );
                         _cur->name().clear();
                         return true;

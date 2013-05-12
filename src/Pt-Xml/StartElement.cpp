@@ -142,7 +142,7 @@ AttributeList::ConstIterator AttributeList::find(const String& name) const
     ConstIterator it;
     for(it = begin(); it != end(); ++it) 
     {
-        if(it->name() == name) 
+        if(it->qname().name() == name) 
         {
             break;
         }
@@ -157,7 +157,7 @@ AttributeList::ConstIterator AttributeList::find(const String& nsUri, const Stri
     ConstIterator it;
     for(it = begin(); it != end(); ++it) 
     {
-        if(it->name() == name && it->namespaceUri() == nsUri) 
+        if(it->qname().name() == name && it->namespaceUri() == nsUri) 
         {
             break;
         }
