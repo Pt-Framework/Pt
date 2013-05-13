@@ -3933,9 +3933,9 @@ class XmlReaderImpl
                 }
 
             private:
+                QName* _cur;
                 QName _names[BufSize];
                 std::vector<QName> _extra;
-                QName* _cur;
         };
 
     public:
