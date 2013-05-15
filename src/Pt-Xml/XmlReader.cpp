@@ -187,6 +187,12 @@ class XmlReaderImpl
                 case '/':
                     setCharactersEnd();
 
+                    std::size_t n = _startElem.attributes().size();
+                    while(n--)
+                        _elements.pop();
+
+                    _startElem.attributes().clear();
+
                     _parse = &XmlReaderImpl::onEndElement;
                     return;
             }
@@ -196,8 +202,13 @@ class XmlReaderImpl
 
             setCharactersEnd();
 
+            std::size_t n = _startElem.attributes().size();
+            while(n--)
+                _elements.pop();
+
             _startElem.attributes().clear();
 
+            
             _elements.pushChar(c);
             ++_nodeSize;
 
@@ -2878,10 +2889,15 @@ class XmlReaderImpl
                 case '\n':
                 case '\r':
                 case '\t':
+                    _usedSize += _elements.pushName();
+                    _startElem.setName(_elements.top(), _nsctx.emptyNamespace());
                     _parse = &XmlReaderImpl::beforeAttribute;
                     return;
 
                 case '/':
+                    _usedSize += _elements.pushName();
+                    _startElem.setName(_elements.top(), _nsctx.emptyNamespace());
+                    
                     _chars.clear();               
                     setStartElement();
                     _parse = &XmlReaderImpl::onEmptyElement;
@@ -2891,10 +2907,14 @@ class XmlReaderImpl
                 {
                     if( ! _elements.pushPrefix() )
                         throw SyntaxError("invalid prefix", line());
+                    
                     return;
                 }
 
                 case '>':
+                    _usedSize += _elements.pushName();
+                    _startElem.setName(_elements.top(), _nsctx.emptyNamespace());
+                    
                     _chars.clear();
                     setStartElement();
                     _parse = &XmlReaderImpl::afterTag;
@@ -2922,6 +2942,7 @@ class XmlReaderImpl
 
             if(ch == '/')
             {
+                _chars.clear(); 
                 setStartElement();
                 _parse = &XmlReaderImpl::onEmptyElement;
                 return;
@@ -2929,8 +2950,9 @@ class XmlReaderImpl
 
             if( isAlpha(ch) )
             {
-                _attr = &_startElem.attributes().push();
-                _attr->qname().addName(c);
+                _elements.pushChar(ch);
+                //_attr = &_startElem.attributes().push();
+                //_attr->qname().addName(c);
                 ++_nodeSize;
 
                 _parse = &XmlReaderImpl::onAttributeName;
@@ -2966,14 +2988,17 @@ class XmlReaderImpl
 
             if(ch == ':')
             {
-                assert(_attr);
-                
-                QName& qn = _attr->qname();
-                if( ! qn.prefix().empty() )
-                    throw SyntaxError("invalid namespace prefix", line());
+                //assert(_attr);
 
-                qn.setPrefix(qn.name() ); // TODO: use swap
-                qn.clearName();
+                if( ! _elements.pushPrefix() )
+                    throw SyntaxError("invalid attribute prefix", line());
+                
+                //QName& qn = _attr->qname();
+                //if( ! qn.prefix().empty() )
+                //    throw SyntaxError("invalid namespace prefix", line());
+
+                //qn.setPrefix(qn.name() ); // TODO: use swap
+                //qn.clearName();
                 return;
             }
 
@@ -2982,7 +3007,8 @@ class XmlReaderImpl
                 if(_nodeSize == _maxSize)
                     throw SyntaxError("node too long", line());
 
-                _attr->qname().addName(c);
+                //_attr->qname().addName(c);
+                _elements.pushChar(ch);
                 ++_nodeSize;
                 return;
             }
@@ -3000,7 +3026,7 @@ class XmlReaderImpl
             }
 
             if(ch == '=')
-            {
+            {               
                 _parse = &XmlReaderImpl::beforeAttributeValue;
                 return;
             }
@@ -3019,6 +3045,12 @@ class XmlReaderImpl
 
             if( isQuote(ch) )
             {
+                _usedSize += _elements.pushName();
+                
+                const QName& name = _elements.top();
+                const Namespace& ns = _nsctx.emptyNamespace();
+                _attr = &_startElem.attributes().append(name, ns);
+
                 setQuotedBegin(ch);
                 _parse = &XmlReaderImpl::onAttributeValue;
                 return;
@@ -3038,31 +3070,14 @@ class XmlReaderImpl
                 {
                     _usedSize += _nsctx.setNamespace(_depth+1, _attr->qname().name(), _attr->value());
                     _startElem.attributes().pop();
+                    _elements.pop();
                 }
                 else if(_attr->qname().name() == "xmlns")
                 {
                     _usedSize += _nsctx.setDefaultNamespace(_depth+1, _attr->value());
                     _startElem.attributes().pop();
+                    _elements.pop();
                 }
-                //else
-                //{
-                    // If the declared value is not CDATA, then discard any leading and
-                    // trailing space (#x20) characters and replace sequences of space
-                    // (#x20) characters by a single space (#x20) character.
-                    // All attributes for which no declaration has been read SHOULD be 
-                    // treated by a non-validating processor as if declared CDATA.
-                    //
-                    // TODO: do this when StartElement is complete so we only
-                    //       have to look up the ElementDeclaration once.
-                    /*ElementModel* elemDecl = _dtd.findElement( _startElem.qname() );
-                    if(elemDecl)
-                    {
-                        AttributeModel* attrDecl = elemDecl->attributes().findAttribute( _attr->qname() );
-
-                        if(attrDecl && attrDecl->isNormalize())
-                            _attr->normalize();
-                    }*/
-                //}
                 
                 _attr = 0;
                 _parse = &XmlReaderImpl::beforeAttribute;
@@ -3141,6 +3156,12 @@ class XmlReaderImpl
 
             if(ch == '>')
             {
+                std::size_t n = _startElem.attributes().size();
+                while(n--)
+                    _elements.pop();
+
+                _startElem.attributes().clear();
+                
                 setEndElement();
                 _parse = &XmlReaderImpl::afterEndElement;
                 return;
@@ -3749,12 +3770,11 @@ class XmlReaderImpl
 
         void setStartElement()
         {
-            _usedSize += _elements.pushName();
             _nodeSize = _usedSize;
 
-            const QName& name = _elements.top();
-                       
+            const QName& name = _startElem.name();
             const String& prefix = name.prefix();
+            
             if( ! prefix.empty() )
             {               
                 const Namespace* ns = _nsctx.findPrefix( prefix );
@@ -3851,92 +3871,6 @@ class XmlReaderImpl
                 _nodeSize = _usedSize;
             }
         }
-
-        class NameStack
-        {
-            static const unsigned int BufSize = 16;
-
-            public:
-                NameStack()
-                : _cur(0)
-                {
-                    _cur = &_names[0]; 
-                }
-
-                void clear()
-                {
-                    while( ! empty() )
-                        pop();
-                }
-                
-                inline void pushChar(Char ch)
-                {                        
-                    _cur->name() += ch;
-                }
-
-                bool pushPrefix()
-                {
-                    if( _cur->prefix().empty() )
-                    {
-                        // TODO: use swap
-                        _cur->setPrefix( _cur->name() );
-                        _cur->name().clear();
-                        return true;
-                    }
-
-                    return false;
-                }
-            
-                std::size_t pushName()
-                {
-                    if( _extra.empty() && _cur < &_names[BufSize-1] )
-                    {
-                        ++_cur;
-                    }
-                    else
-                    {
-                        std::size_t n = _extra.size() + 1;
-                        _extra.resize(n);
-                        _cur = &_extra.back();
-                    }
-                    
-                    return 0;
-                }
-
-                std::size_t pop()
-                {
-                    if( _extra.empty() )
-                    {
-                        --_cur;
-                    }
-                    else
-                    {
-                        _extra.pop_back();
-                        _cur = _extra.empty() ? &_names[BufSize-1]
-                                                : &_extra.back();
-                    }
-
-                    _cur->clear();
-                    
-                    return 0;
-                }
-
-                inline const QName& top() const
-                {
-                    return _extra.size() == 1 ? _names[BufSize-1]
-                                              : *(_cur - 1);
-                }
-                
-                inline bool empty() const
-                {
-                    return _cur == _names;
-                }
-
-            private:
-                QName* _cur;
-                QName _names[BufSize];
-                std::vector<QName> _extra;
-        };
 
     public:
         enum Option
@@ -4142,6 +4076,7 @@ class XmlReaderImpl
                         continue;
                 }
 
+                //std::cerr << char(c);
                 (this->*_parse)(c);
 
                 if(c == '\n')
@@ -4216,7 +4151,7 @@ class XmlReaderImpl
         
         Node* _current;
         const Pt::Char* _back;
-        NameStack _elements;
+        QNameStack _elements;
 
         DocTypeDefinition _dtd;
         ContentModelBuilder _cmBuilder;

@@ -89,23 +89,30 @@ AttributeList::AttributeList()
 {
 }
 
-        
-bool AttributeList::empty() const
-{ 
-    return _size == 0; 
-}
- 
-        
-void AttributeList::clear()
-{ 
-    _begin = 0;
-    _end = 0;
-    _size = 0;
-}
+
+//Attribute& AttributeList::push()
+//{ 
+//    if( _size >= _container.size() )
+//    {
+//        _container.push_back( Attribute() ); 
+//    }
+//    else
+//    {
+//        _container[_size].clear();
+//    }
+//    
+//    std::size_t backPos = _size;
+//    ++_size;
+//
+//    _begin = &_container[0];
+//    _end = _begin + (_size);
+//
+//    return _container[backPos];
+//}
 
 
-Attribute& AttributeList::push()
-{ 
+Attribute& AttributeList::append(const QName& name, const Namespace& ns)
+{
     if( _size >= _container.size() )
     {
         _container.push_back( Attribute() ); 
@@ -121,7 +128,9 @@ Attribute& AttributeList::push()
     _begin = &_container[0];
     _end = _begin + (_size);
 
-    return _container[backPos];
+    Attribute& attr = _container[backPos];
+    attr.set(name, ns);
+    return attr;
 }
 
 

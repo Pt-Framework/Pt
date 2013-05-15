@@ -150,13 +150,13 @@ bool AttributeModel::fixup(AttributeValidator& validator, AttributeList& list) c
             break;
     };
 
-    Attribute& attr = list.push();
-    attr.qname() = _qname;
-    attr.value() = _default;
+    //Attribute& attr = list.push();
+    //attr.qname() = _qname;
+    //attr.value() = _default;
+    //return onValidate(validator, attr);
 
-    // TODO: also add namespace!!!
-            
-    return onValidate(validator, attr);
+    throw std::logic_error("TODO: AttributeModel::fixup");
+    return false;
 }
 
 

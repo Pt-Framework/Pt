@@ -52,16 +52,17 @@ class PT_XML_API Attribute
         /** @brief Returns the qualified name.
         */
         const QName& qname() const
-        { return _qname; }
+        { return *_qname; }
 
-        /** @brief Returns the qualified name.
-        */
-        QName& qname()
-        { return _qname; }
+        void set(const QName& name, const Namespace& ns)
+        {
+            _qname = &name;
+            _namespace = &ns;
+        }
 
         const String& namespaceUri() const
-        { return _namespace ? _namespace->namespaceUri() : _qname.prefix(); }
-        
+        { return _namespace->namespaceUri(); }
+
         void setNamespace(const Namespace& ns)
         { _namespace = &ns; }
 
@@ -79,13 +80,11 @@ class PT_XML_API Attribute
 
         void clear()
         { 
-            _qname.clear(); 
             _value.clear(); 
-            _namespace = 0;
         }
 
     private:
-        QName _qname;
+        const QName* _qname;
         const Namespace* _namespace;
         String _value;
 };
@@ -100,11 +99,19 @@ class PT_XML_API AttributeList : private NonCopyable
     public:
         AttributeList();
         
-        bool empty() const;
-        
-        void clear();
+        bool empty() const
+        { 
+            return _size == 0; 
+        }
 
-        Attribute& push();
+        void clear()
+        { 
+            _begin = 0;
+            _end = 0;
+            _size = 0;
+        }
+
+        Attribute& append(const QName& name, const Namespace& ns);
 
         void pop();
         
@@ -127,6 +134,9 @@ class PT_XML_API AttributeList : private NonCopyable
 
         ConstIterator end() const
         { return _end; }
+
+        std::size_t size() const
+        { return _size; }
 
     private:
         std::vector<Attribute> _container;
@@ -170,6 +180,9 @@ class StartElement : public Node
         */
         const String& namespaceUri() const
         { return _namespace->namespaceUri(); }
+
+        void setNamespace(const Namespace& ns)
+        { _namespace = &ns; }
         
         /** @brief Returns the attributes of the tag.
         */

@@ -68,6 +68,9 @@ class NamespaceContext
 
         const Namespace* findUri(const Char* ns, std::size_t n) const;
 
+        const Namespace& emptyNamespace() const
+        { return _empty; }
+
         /** @brief Returns the current default namespace.
         */
         const Namespace& getDefaultNamespace() const;
