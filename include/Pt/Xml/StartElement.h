@@ -39,6 +39,8 @@ namespace Pt {
 
 namespace Xml {
 
+class NamespaceContext;
+
 /** @brief A single attribute of a start element.
 */
 class PT_XML_API Attribute
@@ -97,7 +99,7 @@ class PT_XML_API AttributeList : private NonCopyable
         typedef const Attribute* ConstIterator;
 
     public:
-        AttributeList();
+        AttributeList(NamespaceContext& nsctx);
         
         bool empty() const
         { 
@@ -138,11 +140,15 @@ class PT_XML_API AttributeList : private NonCopyable
         std::size_t size() const
         { return _size; }
 
+        NamespaceContext& namespaceContext()
+        { return *_nsctx; }
+
     private:
         std::vector<Attribute> _container;
         Attribute* _begin;
         Attribute* _end;
         std::size_t _size;
+        NamespaceContext* _nsctx;
 };
 
 /** @brief Represents an opening tag in an XML document.
@@ -155,12 +161,13 @@ class StartElement : public Node
                    , private NonCopyable
 {
     public:
-        /** Constructs a StartElement object with no name and an empty attribute list.
+        /** Constructs an empty StartElement.
         */
-        StartElement()
+        StartElement(NamespaceContext& nsctx)
         : Node(Node::StartElement)
         , _name(0)
         , _namespace(0)
+        , _attributes(nsctx)
         { }
 
         /** @brief Returns the qualified name.

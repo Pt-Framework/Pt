@@ -28,6 +28,7 @@
 
 #include "AttributeModel.h"
 #include "AttributeListModel.h"
+#include "NamespaceContext.h"
 #include <Pt/Xml/DocTypeDefinition.h>
 #include <Pt/Xml/Entity.h>
 #include <Pt/Xml/Notation.h>
@@ -150,13 +151,25 @@ bool AttributeModel::fixup(AttributeValidator& validator, AttributeList& list) c
             break;
     };
 
-    //Attribute& attr = list.push();
-    //attr.qname() = _qname;
-    //attr.value() = _default;
-    //return onValidate(validator, attr);
+    NamespaceContext& nsctx = list.namespaceContext();
+    const String& prefix = _qname.prefix();
+    const Namespace* ns = 0;
 
-    throw std::logic_error("TODO: AttributeModel::fixup");
-    return false;
+    if( prefix.empty() )
+    {
+        ns = &nsctx.getDefaultNamespace();
+    }
+    else
+    {
+        ns = nsctx.findPrefix( prefix );
+        if( ! ns )
+            return false;
+    }
+
+    Attribute& attr = list.append(_qname, *ns);
+    attr.value() = _default;
+
+    return onValidate(validator, attr);
 }
 
 

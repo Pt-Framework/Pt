@@ -186,13 +186,6 @@ class XmlReaderImpl
 
                 case '/':
                     setCharactersEnd();
-
-                    std::size_t n = _startElem.attributes().size();
-                    while(n--)
-                        _elements.pop();
-
-                    _startElem.attributes().clear();
-
                     _parse = &XmlReaderImpl::onEndElement;
                     return;
             }
@@ -202,13 +195,6 @@ class XmlReaderImpl
 
             setCharactersEnd();
 
-            std::size_t n = _startElem.attributes().size();
-            while(n--)
-                _elements.pop();
-
-            _startElem.attributes().clear();
-
-            
             _elements.pushChar(c);
             ++_nodeSize;
 
@@ -2917,7 +2903,8 @@ class XmlReaderImpl
                     
                     _chars.clear();
                     setStartElement();
-                    _parse = &XmlReaderImpl::afterTag;
+                    
+                    _parse = &XmlReaderImpl::afterStartElement;
                     return;  
             }
 
@@ -2929,6 +2916,17 @@ class XmlReaderImpl
 
             _elements.pushChar(c);
             ++_nodeSize;
+        }
+
+        void afterStartElement(int c)
+        {
+            std::size_t n = _elements.size();
+            while(n-- > _depth)
+                _elements.pop();
+
+            _startElem.attributes().clear();
+
+            afterTag(c);
         }
 
         void beforeAttribute(int c)
@@ -2951,8 +2949,6 @@ class XmlReaderImpl
             if( isAlpha(ch) )
             {
                 _elements.pushChar(ch);
-                //_attr = &_startElem.attributes().push();
-                //_attr->qname().addName(c);
                 ++_nodeSize;
 
                 _parse = &XmlReaderImpl::onAttributeName;
@@ -2963,7 +2959,8 @@ class XmlReaderImpl
             {
                 _chars.clear();
                 setStartElement();
-                _parse = &XmlReaderImpl::afterTag;
+                
+                _parse = &XmlReaderImpl::afterStartElement;
                 return;
             }
 
@@ -2988,17 +2985,9 @@ class XmlReaderImpl
 
             if(ch == ':')
             {
-                //assert(_attr);
-
                 if( ! _elements.pushPrefix() )
                     throw SyntaxError("invalid attribute prefix", line());
-                
-                //QName& qn = _attr->qname();
-                //if( ! qn.prefix().empty() )
-                //    throw SyntaxError("invalid namespace prefix", line());
 
-                //qn.setPrefix(qn.name() ); // TODO: use swap
-                //qn.clearName();
                 return;
             }
 
@@ -3007,7 +2996,6 @@ class XmlReaderImpl
                 if(_nodeSize == _maxSize)
                     throw SyntaxError("node too long", line());
 
-                //_attr->qname().addName(c);
                 _elements.pushChar(ch);
                 ++_nodeSize;
                 return;
@@ -3156,8 +3144,8 @@ class XmlReaderImpl
 
             if(ch == '>')
             {
-                std::size_t n = _startElem.attributes().size();
-                while(n--)
+                std::size_t n = _elements.size();
+                while(n-- > _depth)
                     _elements.pop();
 
                 _startElem.attributes().clear();
@@ -3906,6 +3894,7 @@ class XmlReaderImpl
         , _contentModel(0)
         , _attrModel(0)
         , _attlistDecl(0)
+        , _startElem(_nsctx)
         {
             _parse = &XmlReaderImpl::onDocumentBegin;
         }
@@ -3931,6 +3920,7 @@ class XmlReaderImpl
         , _contentModel(0)
         , _attrModel(0)
         , _attlistDecl(0)
+        , _startElem(_nsctx)
         {
             _parse = &XmlReaderImpl::onDocumentBegin;
 

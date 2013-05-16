@@ -111,9 +111,16 @@ class QName
         String _name;
 };
 
+
 inline bool operator ==(const QName& a, const QName& b)
 {
     return a.prefix() == b.prefix() && a.name() == b.name();
+}
+
+
+inline bool operator !=(const QName& a, const QName& b)
+{
+    return a.prefix() != b.prefix() || a.name() != b.name();
 }
 
 
@@ -137,10 +144,12 @@ class QNameStack
 
         inline void clear()
         {
-            while( ! empty() )
+            _cur->clear();
+
+            while(! empty() )
                 pop();
         }
-                
+
         inline void pushChar(Char ch)
         {                        
             _cur->name() += ch;
@@ -167,8 +176,7 @@ class QNameStack
             }
             else
             {
-                std::size_t n = _extra.size() + 1;
-                _extra.resize(n);
+                _extra.push_back( QName() );
                 _cur = &_extra.back();
             }
                     
@@ -202,6 +210,11 @@ class QNameStack
         inline bool empty() const
         {
             return _cur == _names;
+        }
+
+        inline std::size_t size() const
+        {
+            return _extra.empty() ? _cur - _names : BufSize + _extra.size();
         }
 
     private:

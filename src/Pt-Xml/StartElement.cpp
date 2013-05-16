@@ -82,10 +82,11 @@ void Attribute::normalize()
 }
 
 
-AttributeList::AttributeList()
+AttributeList::AttributeList(NamespaceContext& nsctx)
 : _begin(0)
 , _end(0)
 , _size(0)
+, _nsctx(&nsctx)
 {
 }
 
