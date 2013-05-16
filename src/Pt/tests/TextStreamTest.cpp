@@ -35,6 +35,7 @@
 #include "Pt/Utf16Codec.h"
 #include "Pt/Utf8Codec.h"
 #include "Pt/TextStream.h"
+#include <Pt/System/Clock.h>
 #include <string>
 #include <sstream>
 #include <cstring>
@@ -67,6 +68,9 @@ class TextStreamTest : public Pt::Unit::TestSuite
                                                  *this, &TextStreamTest::testNum_get );
             Pt::Unit::TestSuite::registerMethod( "testNumpunct",
                                                  *this, &TextStreamTest::testNumpunct );
+            Pt::Unit::TestSuite::registerMethod( "UTF8Benchmark",
+                                                 *this, &TextStreamTest::UTF8Benchmark );
+
         }
 
         void Base64Out();
@@ -82,6 +86,7 @@ class TextStreamTest : public Pt::Unit::TestSuite
         void testNum_get();
         void testNum_put();
         void testNumpunct();
+        void UTF8Benchmark();
 
     public:
         static char _TextUTF8[];
@@ -320,4 +325,41 @@ void TextStreamTest::testNumpunct()
     TextStream.flush();
 
     PT_UNIT_ASSERT(ss.str() == "123456789");
+}
+
+void TextStreamTest::UTF8Benchmark()
+{
+  Pt::System::Clock c;
+  c.start();
+
+  unsigned size = 1024;
+  std::vector<char> output(size+10, 'a');
+  std::vector<Pt::Char> input(size, Pt::Char('a'));
+
+  for(unsigned n = 0; n < 5000*3; ++n)
+  {
+    Pt::MBState mb ;
+    Pt::Utf8Codec codec;
+
+    const Pt::Char* fromNext = &input[0];
+    char* toNext = &output[0];
+
+    /*Pt::Utf8Codec::result r = codec.out(mb, &input[0], &input[0] + size, fromNext, 
+      &output[0], &output[0] + size+10, toNext); */
+
+    int ss = codec.length(mb, &output[0], &output[0] + size, size ); 
+
+    if(ss !=size)
+      throw std::runtime_error("length failed");
+
+
+    /*if(r != Pt::Utf8Codec::ok)
+      throw std::runtime_error("conversion failed");*/
+
+
+  }
+
+  Pt::Timespan ts = c.stop();
+  std::cerr << "time:  " << ts.toMSecs()  << " msecs." << std::endl;
+
 }

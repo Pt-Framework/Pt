@@ -177,61 +177,6 @@ namespace
   {
     return get_octet_count(lead_octet) - 1;
   }
-
-  template<std::size_t s>
-  int get_cont_octet_out_count_impl(wchar_t word)
-  {
-    if (word < 0x80) 
-      return 0;
-    
-    if (word < 0x800) 
-      return 1;
-    
-    return 2;
-  }
-
-  template<>
-  int get_cont_octet_out_count_impl<4>(wchar_t word)
-  {
-    if (word < 0x80) 
-      return 0;
-    
-    if (word < 0x800) 
-      return 1;
-   
-    // Note that the following code will generate warnings on some platforms
-    // where wchar_t is defined as UCS2.  The warnings are superfluous as the
-    // specialization is never instantitiated with such compilers, but this
-    // can cause problems if warnings are being treated as errors, so we guard
-    // against that.  Including <boost/detail/utf8_codecvt_facet.hpp> as we do
-    // should be enough to get WCHAR_MAX defined.
-#if !defined(WCHAR_MAX)
-#   error WCHAR_MAX not defined!
-#endif
-    // cope with VC++ 7.1 or earlier having invalid WCHAR_MAX
-#if defined(_MSC_VER) && _MSC_VER <= 1310 // 7.1 or earlier
-    return 2;
-#elif WCHAR_MAX > 0x10000
-
-    if (word < 0x10000) 
-      return 2;
-    
-    if (word < 0x200000) 
-      return 3;
-    
-    if (word < 0x4000000) 
-      return 4;
-    
-    return 5;
-#else
-    return 2;
-#endif
-  }
-
-  int get_cont_octet_out_count( wchar_t word) 
-  {
-    return get_cont_octet_out_count_impl<sizeof(wchar_t)>(word);
-  }
 } // namespace
 
 Utf8Codec::result Utf8Codec::do_in(MBState& s, const char* fromBegin, const char* fromEnd, const char*& fromNext,
@@ -306,66 +251,7 @@ Utf8Codec::result Utf8Codec::do_in(MBState& s, const char* fromBegin, const char
         return std::codecvt_base::partial;
 }
 
-#ifdef USE_PT_WHAT_ESLE
-Utf8Codec::result Utf8Codec::do_out(MBState& /*s*/, const Pt::Char* fromBegin, const Pt::Char* fromEnd, const Pt::Char * & fromNext, 
-  char* toBegin, char* toEnd, char * & toNext) const
-{
-  // RG - consider merging this table with the other one
-  const unsigned char octet1_modifier_table[] = 
-  {
-    0x00, 0xc0, 0xe0, 0xf0, 0xf8, 0xfc
-  };
 
-  //Pt::uint32_t max_wchar = (std::numeric_limits<uint32_t>::max)();
-  while (fromBegin != fromEnd && toBegin != toEnd) 
-  {
-    // Check for invalid UCS-4 character
-    //if (*fromBegin > max_wchar) 
-    //{
-    //  fromNext = fromBegin;
-    //  toNext = toBegin;
-    //  return std::codecvt_base::error;
-    //}
-
-    int cont_octet_count = get_cont_octet_out_count(*fromBegin);
-
-    // RG  - comment this formula better
-    int shift_exponent = (cont_octet_count) * 6;
-
-    // Process the first character
-    *toBegin++ = static_cast<char>(octet1_modifier_table[cont_octet_count] +
-      (unsigned char)(*fromBegin / (1 << shift_exponent)));
-
-    // Process the continuation characters 
-    // Invariants: At   the start of the loop:
-    //   1) 'i' continuing octets   have been generated
-    //   2) '*toBegin'   points to the next location to place an octet
-    //   3) shift_exponent is   6 more than needed for the next octet
-    int i = 0;
-    while(i != cont_octet_count && toBegin != toEnd) 
-    {
-      shift_exponent -= 6;
-      *toBegin++ = static_cast<char>(0x80 + ((*fromBegin / (1 << shift_exponent)) % (1 << 6)));
-      ++i;
-    }
-    // If   we filled up the out buffer before encoding the character
-    if(toBegin   == toEnd && i != cont_octet_count) 
-    {
-      fromNext = fromBegin;
-      toNext = toBegin - (i+1);
-      return std::codecvt_base::partial;
-    }
-    ++fromBegin;
-  }
-  fromNext = fromBegin;
-  toNext = toBegin;
-  // Were we done or did we run out of destination space
-  if(fromBegin == fromEnd) return std::codecvt_base::ok;
-  else return std::codecvt_base::partial;
-}
-
-
-#else
 Utf8Codec::result Utf8Codec::do_out(MBState& s, const Pt::Char* fromBegin, const Pt::Char* fromEnd, const Pt::Char*& fromNext,
                                                   char* toBegin, char* toEnd, char*& toNext) const
 {
@@ -421,8 +307,6 @@ Utf8Codec::result Utf8Codec::do_out(MBState& s, const Pt::Char* fromBegin, const
 
     return retstat;
 }
-
-#endif
 
 int Utf8Codec::do_length(MBState& s, const char* fromBegin, const char* fromEnd, size_t max) const
 {
