@@ -148,7 +148,6 @@ class XmlReaderImpl
             if( isAlpha(ch) ) // TODO: XML Name character
             {
                 _procInstr.target() += c;
-                ++_nodeSize;
                 _parse = &XmlReaderImpl::onProcessingInstruction;
                 return;
             }
@@ -169,11 +168,7 @@ class XmlReaderImpl
             if( ! isAlpha(ch) )
                 throw SyntaxError("XML syntax error", line());
 
-            if(_nodeSize == _maxSize)
-                throw SyntaxError("node too large", line());
-
             _procInstr.target() += c;
-            ++_nodeSize;
         }
 
         void onProcessingInstructionData(int c)
@@ -183,11 +178,7 @@ class XmlReaderImpl
             if(isSpace(ch) || isAlpha(ch) || isQuote(ch) || 
                ch == ':' || ch == '/' || ch == '!' || ch == '=')
             {
-                if(_nodeSize == _maxSize)
-                    throw SyntaxError("node too long", line());
-
                 _procInstr.data() += c;
-                ++_nodeSize;
                 return;
             }
 
@@ -243,8 +234,8 @@ class XmlReaderImpl
 
             setCharactersEnd();
 
-            _elements.pushChar(c);
-            ++_nodeSize;
+            _nameStack.pushChar(c);
+            ++_usedSize;
 
             _parse = &XmlReaderImpl::onStartElement;
         }
@@ -311,7 +302,6 @@ class XmlReaderImpl
             if( isAlpha(ch) )
             {
                 _dtd.rootName().addName(ch);
-                ++_nodeSize;
                 _parse = &XmlReaderImpl::OnDtdRootName;
                 return;
             }
@@ -495,11 +485,7 @@ class XmlReaderImpl
 
             if( isAlpha(ch) )
             {
-                if(_nodeSize == _maxSize)
-                    throw SyntaxError("node too large", line());
-
                 _dtd.rootName().addName(ch);
-                ++_nodeSize;
                 return;
             }
 
@@ -2817,12 +2803,12 @@ class XmlReaderImpl
                 case '\n':
                 case '\t':
                     _chars.appendSpace(ch);
-                    _nodeSize = _chars.content().size();
+                    _chunkSize = _chars.content().size();
                     _parse = &XmlReaderImpl::onCharacters;
                     break;
 
                 case '\r':
-                    _nodeSize = _chars.content().size();
+                    _chunkSize = _chars.content().size();
                     _parse = &XmlReaderImpl::onCharactersCR;
                     break;
 
@@ -2841,7 +2827,7 @@ class XmlReaderImpl
 
                 default:
                     _chars.append(ch);
-                    _nodeSize = _chars.content().size();
+                    _chunkSize = _chars.content().size();
                     _parse = &XmlReaderImpl::onCharacters;
                     break;
             }
@@ -2869,11 +2855,7 @@ class XmlReaderImpl
                 return;
             }
 
-            if(_nodeSize == _maxSize)
-                throw SyntaxError("element name too long", line());
-
             _comment.content() += ch;
-            ++_nodeSize;
         }
 
         void afterComment(int c)
@@ -2886,12 +2868,8 @@ class XmlReaderImpl
                 return;
             }
 
-            if(_nodeSize == _maxSize)
-                throw SyntaxError("element name too long", line());
-
             _comment.content() += '-';
             _comment.content() += ch;
-            _nodeSize += 2;
             
             _parse = &XmlReaderImpl::onComment;
         }
@@ -2923,14 +2901,14 @@ class XmlReaderImpl
                 case '\n':
                 case '\r':
                 case '\t':
-                    _usedSize += _elements.pushName();
-                    _startElem.setName(_elements.top(), _nsctx.emptyNamespace());
+                    _nameStack.pushName();
+                    _startElem.setName(_nameStack.top(), _nsctx.emptyNamespace());
                     _parse = &XmlReaderImpl::beforeAttribute;
                     return;
 
                 case '/':
-                    _usedSize += _elements.pushName();
-                    _startElem.setName(_elements.top(), _nsctx.emptyNamespace());
+                    _nameStack.pushName();
+                    _startElem.setName(_nameStack.top(), _nsctx.emptyNamespace());
                     
                     _chars.clear();               
                     setStartElement();
@@ -2939,15 +2917,15 @@ class XmlReaderImpl
 
                 case ':':
                 {
-                    if( ! _elements.pushPrefix() )
+                    if( ! _nameStack.pushPrefix() )
                         throw SyntaxError("invalid prefix", line());
                     
                     return;
                 }
 
                 case '>':
-                    _usedSize += _elements.pushName();
-                    _startElem.setName(_elements.top(), _nsctx.emptyNamespace());
+                    _nameStack.pushName();
+                    _startElem.setName(_nameStack.top(), _nsctx.emptyNamespace());
                     
                     _chars.clear();
                     setStartElement();
@@ -2959,18 +2937,18 @@ class XmlReaderImpl
             if( c == std::char_traits<Char>::eof() || ! isAlpha(c) )
                 throw SyntaxError("XML syntax error", line());
             
-            if(_nodeSize == _maxSize)
+            if(_usedSize >= _maxSize)
                 throw SyntaxError("element name too long", line());
 
-            _elements.pushChar(c);
-            ++_nodeSize;
+            _nameStack.pushChar(c);
+            ++_usedSize;
         }
 
         void afterStartElement(int c)
         {
-            std::size_t n = _elements.size();
+            std::size_t n = _nameStack.size();
             while(n-- > _depth)
-                _elements.pop();
+                _nameStack.pop();
 
             _startElem.attributes().clear();
 
@@ -2996,8 +2974,8 @@ class XmlReaderImpl
 
             if( isAlpha(ch) )
             {
-                _elements.pushChar(ch);
-                ++_nodeSize;
+                _nameStack.pushChar(ch);
+                ++_usedSize;
 
                 _parse = &XmlReaderImpl::onAttributeName;
                 return;
@@ -3033,7 +3011,7 @@ class XmlReaderImpl
 
             if(ch == ':')
             {
-                if( ! _elements.pushPrefix() )
+                if( ! _nameStack.pushPrefix() )
                     throw SyntaxError("invalid attribute prefix", line());
 
                 return;
@@ -3041,11 +3019,11 @@ class XmlReaderImpl
 
             if( isAlpha(ch) )
             {
-                if(_nodeSize == _maxSize)
+                if(_usedSize >= _maxSize)
                     throw SyntaxError("node too long", line());
 
-                _elements.pushChar(ch);
-                ++_nodeSize;
+                _nameStack.pushChar(ch);
+                ++_usedSize;
                 return;
             }
 
@@ -3083,8 +3061,8 @@ class XmlReaderImpl
             {
                 setQuotedBegin(ch);
                 
-                _usedSize += _elements.pushName();
-                const QName& name = _elements.top();
+                _nameStack.pushName();
+                const QName& name = _nameStack.top();
 
                 if(name.prefix() == "xmlns")
                 {
@@ -3092,7 +3070,7 @@ class XmlReaderImpl
                     _parse = &XmlReaderImpl::onNamespace;
                     return;
                 }
-                else if(name.name() == "xmlns")
+                else if(name.prefix().empty() && name.name() == "xmlns")
                 {
                     assert(_token.empty() );
                     _parse = &XmlReaderImpl::onDefaultNamespace;
@@ -3115,17 +3093,22 @@ class XmlReaderImpl
 
             if( isQuoteEnd(ch) )
             {
-                const QName& name = _elements.top();
-                _usedSize += _nsctx.pushNamespace(_depth+1, name.name(), _token);
+                const String& name = _nameStack.top().name();
+                _nsctx.pushNamespace(_depth + 1, name, _token);
+                _usedSize += name.size();
 
-                _elements.pop();
+                _usedSize -= _nameStack.pop();
                 _token.clear();
                 
                 _parse = &XmlReaderImpl::beforeAttribute;
                 return;
             }
 
+            if(_usedSize >= _maxSize)
+                throw SyntaxError("element name too long", line());
+
             _token += ch;
+            ++_usedSize;
         }
 
         void onDefaultNamespace(int c)
@@ -3134,17 +3117,21 @@ class XmlReaderImpl
 
             if( isQuoteEnd(ch) )
             {
-                const QName& name = _elements.top();
-                _usedSize += _nsctx.pushDefaultNamespace(_depth+1, _token);
+                const QName& name = _nameStack.top();
+                _nsctx.pushDefaultNamespace(_depth + 1, _token);
 
-                _elements.pop();
+                _usedSize -= _nameStack.pop();
                 _token.clear();
                 
                 _parse = &XmlReaderImpl::beforeAttribute;
                 return;
             }
 
+            if(_usedSize >= _maxSize)
+                throw SyntaxError("element name too long", line());
+
             _token += ch;
+            ++_usedSize;
         }
         
         void onAttributeValue(int c)
@@ -3179,11 +3166,11 @@ class XmlReaderImpl
                 ch = ' ';
             }
 
-            if(_nodeSize == _maxSize)
+            if(_usedSize >= _maxSize)
                 throw SyntaxError("node too long", line());
             
             _attr->value() += ch;
-            ++_nodeSize;
+            ++_usedSize;
         }
 
         void onAttributeEntityReference(int c)
@@ -3192,19 +3179,22 @@ class XmlReaderImpl
 
             if( isAlpha(ch) || ch == '#')
             {
+                if(_usedSize >= _maxSize)
+                    throw SyntaxError("element name too long", line());
+
                 _token += ch;
-                ++_nodeSize;
+                ++_usedSize;
                 return;
             }
             
             if(ch == ';')
             {       
-                _nodeSize -= _token.size();        
+                _usedSize -= _token.size();        
                 
                 if( Entity::resolveDefaultEntity(_token) )
                 {
                     _attr->value() += _token;
-                    _nodeSize += _token.size();
+                    _usedSize += _token.size();
                 }
                 else
                 {
@@ -3231,9 +3221,9 @@ class XmlReaderImpl
 
             if(ch == '>')
             {
-                std::size_t n = _elements.size();
+                std::size_t n = _nameStack.size();
                 while(n-- > _depth)
-                    _elements.pop();
+                    _nameStack.pop();
 
                 _startElem.attributes().clear();
                 
@@ -3247,10 +3237,10 @@ class XmlReaderImpl
 
         void onEndElement(int c)
         {           
-            if( _elements.empty() )
+            if( _nameStack.empty() )
                 throw SyntaxError("unmatched element", line());
 
-            const QName& name = _elements.top();
+            const QName& name = _nameStack.top();
             _back = name.prefix().empty() ? name.name().c_str() 
                                           : name.prefix().c_str();
 
@@ -3258,7 +3248,6 @@ class XmlReaderImpl
                 throw SyntaxError("unmatched element", line());
 
             ++_back;
-            ++_nodeSize;
             _parse = &XmlReaderImpl::onEndElementName;
         }
 
@@ -3289,7 +3278,7 @@ class XmlReaderImpl
                     if(*_back != '\0')
                         throw SyntaxError("unmatched element", line());
                     
-                    _back = _elements.top().name().c_str();
+                    _back = _nameStack.top().name().c_str();
                     return;
             }
 
@@ -3297,7 +3286,6 @@ class XmlReaderImpl
                 throw SyntaxError("unmatched element", line());
 
             ++_back;
-            ++_nodeSize;
         }
     
         void afterEndElementName(int c)
@@ -3323,7 +3311,7 @@ class XmlReaderImpl
 
         void afterEndElement(int c)
         {
-            _usedSize -= _elements.pop();
+            _usedSize -= _nameStack.pop();
 
             _parse = depth() == 0 ? &XmlReaderImpl::onEpilog
                                   : &XmlReaderImpl::afterTag;
@@ -3347,7 +3335,6 @@ class XmlReaderImpl
 
                 case '&':
                     assert(_token.empty());
-                    _nodeSize = _usedSize;
                     _parse = &XmlReaderImpl::onEntityReference;
                     break;
 
@@ -3359,9 +3346,9 @@ class XmlReaderImpl
                 case '\t':
                 case '\n':
                     _chars.appendSpace(ch);
-                    ++_nodeSize;
+                    ++_chunkSize;
 
-                    if(_nodeSize >= _chunkSize)
+                    if(_chunkSize >= _maxChunkSize)
                     {
                         _parse = &XmlReaderImpl::onCharactersMax;
                         setCharactersChunk();
@@ -3371,9 +3358,9 @@ class XmlReaderImpl
             
                 default:                   
                     _chars.append(ch);
-                    ++_nodeSize;
+                    ++_chunkSize;
 
-                    if(_nodeSize >= _chunkSize)
+                    if(_chunkSize >= _maxChunkSize)
                     {
                         _parse = &XmlReaderImpl::onCharactersMax;
                         setCharactersChunk();
@@ -3390,7 +3377,7 @@ class XmlReaderImpl
             {
                 onCharacters(c);
             }
-            else if(_nodeSize >= _chunkSize)
+            else if(_chunkSize >= _maxChunkSize)
             {
                 _parse = &XmlReaderImpl::onCharactersMax;
                 setCharactersChunk();
@@ -3412,8 +3399,8 @@ class XmlReaderImpl
             {
                 _token += ch;
                 
-                ++_nodeSize;
-                if(_nodeSize >= _maxSize)
+                ++_chunkSize;
+                if(_chunkSize >= _maxSize)
                     throw SyntaxError("node too large", line());
 
                 return;
@@ -3421,12 +3408,12 @@ class XmlReaderImpl
 
             if(ch == ';')
             {
-                _nodeSize = _chars.content().size();
+                _chunkSize = _chars.content().size();
 
                 if( Entity::resolveDefaultEntity(_token) )
                 {
                     std::size_t tokenSize = _token.size();
-                    _nodeSize += tokenSize;
+                    _chunkSize += tokenSize;
                     for(std::size_t n = 0; n < tokenSize; ++n)
                     {
                         Pt::Char c = _token[n];
@@ -3475,7 +3462,7 @@ class XmlReaderImpl
             {
                 _token.clear();
 
-                _nodeSize = _chars.content().size();
+                _chunkSize = _chars.content().size();
 
                 if( (_options & ReportCData) && ! _chars.empty() )
                 {
@@ -3515,9 +3502,9 @@ class XmlReaderImpl
             else
                 _chars.append(ch);
 
-            ++_nodeSize;
+            ++_chunkSize;
 
-            if(_nodeSize >= _chunkSize)
+            if(_chunkSize >= _maxChunkSize)
             {
                 setCharactersChunk();
                 _parse = &XmlReaderImpl::onCDataMax;
@@ -3547,7 +3534,7 @@ class XmlReaderImpl
 
             _chars.append(']');
             _chars.append(ch);
-            _nodeSize += 2;
+            _chunkSize += 2;
 
             _parse = &XmlReaderImpl::onCData;
         }
@@ -3570,7 +3557,7 @@ class XmlReaderImpl
             _chars.append(']');
             _chars.append(']');
             _chars.append(ch);
-            _nodeSize += 3;
+            _chunkSize += 3;
             
             _parse = &XmlReaderImpl::onCData;
         }
@@ -3803,16 +3790,12 @@ class XmlReaderImpl
                 _startDoc.setStandalone(standalone);
                 _current = &_startDoc;
             }
-
-            _nodeSize = _usedSize;
         }
 
         void setDocType()
         {
             if(_options & ReportDtd)
                 _current = &_docType;
-
-            _nodeSize = _usedSize;
         }
 
         void setEndDocType(bool internSubset)
@@ -3823,30 +3806,22 @@ class XmlReaderImpl
                 _endDocType.setInternal(internSubset);
                 _current = &_endDocType;
             }
-
-            _nodeSize = _usedSize;
         }
 
         void setComment()
         {
             if(_options & ReportComments)
                 _current = &_comment;
-
-            _nodeSize = _usedSize;
         }
 
         void setProcessingInstruction()
         {
             if(_options & ReportProcessingInstructions)
                 _current = &_procInstr;
-
-            _nodeSize = _usedSize;
         }
 
         void setStartElement()
         {
-            _nodeSize = _usedSize;
-
             const QName& name = _startElem.name();
             const String& prefix = name.prefix();
             
@@ -3856,12 +3831,12 @@ class XmlReaderImpl
                 if( ! ns )
                     throw SyntaxError("undeclared namespace prefix", line());
 
-                _startElem.setName(name, *ns);
+                _startElem.setNamespace(*ns);
             }
             else
             {
                 const Namespace& ns = _nsctx.getDefaultNamespace();
-                _startElem.setName(name, ns);
+                _startElem.setNamespace(ns);
             }
 
             AttributeList& attributes = _startElem.attributes();
@@ -3873,6 +3848,9 @@ class XmlReaderImpl
             
             for( ; it != attributes.end(); ++it)
             {
+                const QName& attrName = it->name();
+                _usedSize -= attrName.prefix().size() + attrName.name().size() + it->value().size();
+                
                 if( it->name().prefix().empty() )
                 {
                     const Namespace& ns = _nsctx.getDefaultNamespace();
@@ -3908,9 +3886,7 @@ class XmlReaderImpl
 
         void setEndElement()
         {            
-            _nodeSize = _usedSize;
-
-            const QName& name = _elements.top();
+            const QName& name = _nameStack.top();
             const String& prefix = name.prefix();
 
             if( prefix.empty() )
@@ -3935,7 +3911,7 @@ class XmlReaderImpl
         inline void setCharactersChunk()
         {
             _current = &_chars;
-            _nodeSize = 0;
+            _chunkSize = 0;
         }
 
         inline void setCharactersEnd()
@@ -3943,7 +3919,7 @@ class XmlReaderImpl
             if( ! _chars.content().empty() )
             {
                 _current = &_chars;
-                _nodeSize = _usedSize;
+                _chunkSize = 0;
             }
         }
 
@@ -3965,15 +3941,15 @@ class XmlReaderImpl
         , _resolver(resolver)
         , _options(DefaultOptions)
         , _maxSize(2048)
-        , _chunkSize(1024)
+        , _maxChunkSize(1024)
         , _maxInputDepth(8)
         , _notation(0)
         , _entity(0)
         , _paramEntity(false)
         , _attr(0)
         , _depth(0)
-        , _usedSize(_chunkSize)
-        , _nodeSize(_usedSize)
+        , _usedSize(0)
+        , _chunkSize(0)
         , _parse(0)                 
         , _current(0)
         , _back(0)
@@ -3991,15 +3967,15 @@ class XmlReaderImpl
         , _resolver(resolver)
         , _options(DefaultOptions)
         , _maxSize(2048)
-        , _chunkSize(1024)
+        , _maxChunkSize(1024)
         , _maxInputDepth(8)
         , _notation(0)
         , _entity(0)
         , _paramEntity(false)
         , _attr(0)
         , _depth(0)
-        , _usedSize(_chunkSize)
-        , _nodeSize(_usedSize)
+        , _usedSize(0)
+        , _chunkSize(0)
         , _parse(0)                 
         , _current(0)
         , _back(0)
@@ -4034,7 +4010,7 @@ class XmlReaderImpl
 
         void setChunkSize(std::size_t n)
         {
-            _chunkSize = n;
+            _maxChunkSize = n;
         }
 
         void setMaxInputDepth(std::size_t n)
@@ -4048,8 +4024,8 @@ class XmlReaderImpl
             _input.clear();
             
             _depth = 0;
-            _usedSize = _chunkSize;
-            _nodeSize = _usedSize;
+            _usedSize = 0;
+            _chunkSize = 0;
 
             _parse = &XmlReaderImpl::onDocumentBegin;
 
@@ -4058,7 +4034,7 @@ class XmlReaderImpl
 
             _current = 0;
             _back = 0;
-            _elements.clear();
+            _nameStack.clear();
 
             _qname.clear();
             _token.clear(); 
@@ -4088,6 +4064,11 @@ class XmlReaderImpl
         InputSource* input()
         {
             return _input.empty() ? _is : _input.source();
+        }
+
+        std::size_t usedSize() const
+        {
+            return _usedSize;
         }
 
         void reset(InputSource& is)
@@ -4209,7 +4190,7 @@ class XmlReaderImpl
         InputStack _input;
         int _options;
         std::size_t _maxSize;
-        std::size_t _chunkSize;
+        std::size_t _maxChunkSize;
         std::size_t _maxInputDepth;
 
         NamespaceContext _nsctx;
@@ -4222,13 +4203,13 @@ class XmlReaderImpl
         Attribute* _attr;
         std::size_t _depth;
         std::size_t _usedSize;
-        std::size_t _nodeSize;
+        std::size_t _chunkSize;
         ParseFunc _parse;
         std::stack<ParseFunc> _parseStack;
         
         Node* _current;
         const Pt::Char* _back;
-        QNameStack _elements;
+        QNameStack _nameStack;
 
         DocTypeDefinition _dtd;
         ContentModelBuilder _cmBuilder;
@@ -4419,6 +4400,12 @@ Node* XmlReader::advance()
 InputSource* XmlReader::input()
 {
     return _impl->input();
+}
+
+
+std::size_t XmlReader::usedSize() const
+{
+    return _impl->usedSize();
 }
 
 } // namespace Xml

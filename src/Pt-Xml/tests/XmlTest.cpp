@@ -1166,6 +1166,8 @@ void XmlReaderTest::ElementWithContent()
     ++it;
     PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::EndDocument);
     PT_UNIT_ASSERT( reader.depth() == 0);
+
+    PT_UNIT_ASSERT_EQUALS(reader.usedSize(), 0);
 }
 
 
@@ -1196,6 +1198,7 @@ void XmlReaderTest::MaxCharacters()
 
     ++it;
     PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::EndDocument);
+    PT_UNIT_ASSERT_EQUALS(reader.usedSize(), 0);
 }
 
 
@@ -1252,6 +1255,8 @@ void XmlReaderTest::ElementWithNamespace()
     const Pt::Xml::Node& endDocument = *it;
     PT_UNIT_ASSERT(endDocument.type() == Pt::Xml::Node::EndDocument);
     PT_UNIT_ASSERT( reader.depth() == 0);
+
+    PT_UNIT_ASSERT_EQUALS(reader.usedSize(), 0);
 }
 
 void XmlReaderTest::AttributeWithNamespace()
@@ -1349,6 +1354,8 @@ void XmlReaderTest::DefaultNamespace()
     const Pt::Xml::Node& endDocument = *it;
     PT_UNIT_ASSERT(endDocument.type() == Pt::Xml::Node::EndDocument);
     PT_UNIT_ASSERT( reader.depth() == 0);
+
+    PT_UNIT_ASSERT_EQUALS(reader.usedSize(), 0);
 }
 
 
@@ -1442,7 +1449,7 @@ void XmlReaderTest::AttributeWithSimpleText()
 {
     std::stringstream input;
     input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
-    input << "<a b=\"a bcdefghijklmnopqrstuvwxyz\"/>";
+    input << "<a value=\"a bcdefghijklmnopqrstuvwxyz\"/>";
 
     Pt::Xml::BinaryInputSource is(input);
     Pt::Xml::XmlReader reader(is);
@@ -1450,11 +1457,18 @@ void XmlReaderTest::AttributeWithSimpleText()
     Pt::Xml::XmlReader::Iterator it = reader.current();
     const Pt::Xml::Node& startNode = *it;
 
-    PT_UNIT_ASSERT(startNode.type() == Pt::Xml::Node::StartElement);
+    PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::StartElement);
     const Pt::Xml::StartElement* tag = dynamic_cast<const Pt::Xml::StartElement*>(&startNode);
 
-    PT_UNIT_ASSERT(tag->attributes().has(L"b"));
-    PT_UNIT_ASSERT(tag->attributes().find(L"b")->value().narrow() == "a bcdefghijklmnopqrstuvwxyz");
+    PT_UNIT_ASSERT(tag->attributes().has(L"value"));
+    PT_UNIT_ASSERT(tag->attributes().find(L"value")->value().narrow() == "a bcdefghijklmnopqrstuvwxyz");
+
+    ++it;
+    PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::EndElement);
+
+    ++it;
+    PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::EndDocument);
+    PT_UNIT_ASSERT_EQUALS(reader.usedSize(), 0);
 }
 
 
@@ -1806,6 +1820,7 @@ void XmlReaderTest::CDATA()
 
     ++it;
     PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::EndDocument);
+    PT_UNIT_ASSERT_EQUALS(reader.usedSize(), 0);
 }
 
 
@@ -1842,6 +1857,7 @@ void XmlReaderTest::MaxCDATA()
 
     ++it;
     PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::EndDocument);
+    PT_UNIT_ASSERT_EQUALS(reader.usedSize(), 0);
 }
 
 

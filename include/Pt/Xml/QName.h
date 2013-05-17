@@ -56,6 +56,16 @@ class QName
             _prefix.clear();
         }
 
+        bool empty() const
+        {
+            return _prefix.empty() && _name.empty(); 
+        }
+
+        inline std::size_t size() const
+        {
+            return _prefix.size() + _name.size(); 
+        }
+
         template <typename T>
         bool equals(const T* name) const
         {
@@ -131,6 +141,7 @@ inline bool operator<(const QName& a, const QName& b)
 }
 
 
+//! @internal Stack of QNames.
 class QNameStack
 {
     static const unsigned int BufSize = 16;
@@ -168,7 +179,7 @@ class QNameStack
             return false;
         }
             
-        inline std::size_t pushName()
+        void pushName()
         {
             if( _cur >= _names && _cur < &_names[BufSize-1] )
             {
@@ -179,11 +190,9 @@ class QNameStack
                 _extra.push_back( QName() );
                 _cur = &_extra.back();
             }
-                    
-            return 0;
         }
 
-        inline std::size_t pop()
+        std::size_t pop()
         {
             if( _extra.empty() )
             {
@@ -196,9 +205,9 @@ class QNameStack
                                         : &_extra.back();
             }
 
-            _cur->clear();
-                    
-            return 0;
+            std::size_t n = _cur->name().size() + _cur->prefix().size();
+            _cur->clear(); 
+            return n;
         }
 
         inline const QName& top() const

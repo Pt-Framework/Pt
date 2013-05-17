@@ -194,6 +194,8 @@ class PT_XML_API XmlReader : private NonCopyable
         */
         InputSource* input();
 
+        std::size_t usedSize() const;
+
     private:
         class XmlReaderImpl* _impl;
 
