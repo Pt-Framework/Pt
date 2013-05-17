@@ -148,6 +148,7 @@ class XmlReaderImpl
             if( isAlpha(ch) ) // TODO: XML Name character
             {
                 _procInstr.target() += c;
+                ++_usedSize;
                 _parse = &XmlReaderImpl::onProcessingInstruction;
                 return;
             }
@@ -168,7 +169,11 @@ class XmlReaderImpl
             if( ! isAlpha(ch) )
                 throw SyntaxError("XML syntax error", line());
 
+            if(_usedSize >= _maxSize)
+                throw SyntaxError("node too long", line());
+            
             _procInstr.target() += c;
+            ++_usedSize;
         }
 
         void onProcessingInstructionData(int c)
@@ -178,7 +183,11 @@ class XmlReaderImpl
             if(isSpace(ch) || isAlpha(ch) || isQuote(ch) || 
                ch == ':' || ch == '/' || ch == '!' || ch == '=')
             {
+                if(_usedSize >= _maxSize)
+                    throw SyntaxError("node too long", line());
+                
                 _procInstr.data() += c;
+                ++_usedSize;
                 return;
             }
 
@@ -197,6 +206,8 @@ class XmlReaderImpl
 
             if(ch == '>')
             {
+                _usedSize -= _procInstr.target().size() + _procInstr.data().size();
+
                 setProcessingInstruction();
                 
                 if(depth() == 0)
@@ -3399,8 +3410,9 @@ class XmlReaderImpl
             {
                 _token += ch;
                 
-                ++_chunkSize;
-                if(_chunkSize >= _maxSize)
+                ++_usedSize;
+                
+                if(_usedSize >= _maxSize)
                     throw SyntaxError("node too large", line());
 
                 return;
@@ -3410,10 +3422,13 @@ class XmlReaderImpl
             {
                 _chunkSize = _chars.content().size();
 
+                _usedSize -= _token.size();
+
                 if( Entity::resolveDefaultEntity(_token) )
                 {
                     std::size_t tokenSize = _token.size();
                     _chunkSize += tokenSize;
+                    
                     for(std::size_t n = 0; n < tokenSize; ++n)
                     {
                         Pt::Char c = _token[n];

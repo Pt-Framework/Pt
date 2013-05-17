@@ -152,26 +152,23 @@ const Namespace* NamespaceContext::findUri(const Char* ns, std::size_t n) const
 }
 
 
-std::size_t NamespaceContext::pushNamespace(unsigned depth, const String& prefix, const String& name)
+void NamespaceContext::pushNamespace(unsigned depth, const String& prefix, const String& name)
 {
     _namespaces.push_back( Namespace(depth, prefix, name) );
-    return prefix.size() + name.size();
 }
 
 
-std::size_t NamespaceContext::pushDefaultNamespace(unsigned depth, const String& name)
+void NamespaceContext::pushDefaultNamespace(unsigned depth, const String& name)
 {
     // Namespace without prefix is default namespace
     _namespaces.push_back( Namespace(depth, String(), name) );
-    return name.size();
 }
 
 
-std::size_t NamespaceContext::unsetNamespace(unsigned depth, const String& prefix)
+void NamespaceContext::unsetNamespace(unsigned depth, const String& prefix)
 {
     // Namespace without name is an explicitly unset namespace
     _namespaces.push_back( Namespace(depth, prefix, String()) );
-    return prefix.size();
 }
 
 

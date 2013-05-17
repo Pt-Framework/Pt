@@ -76,15 +76,15 @@ class NamespaceContext
 
         /** @brief Adds a namespace to the stack.
         */
-        std::size_t pushNamespace(unsigned depth, const String& prefix, const String& name);
+        void pushNamespace(unsigned depth, const String& prefix, const String& name);
 
         /** @brief Adds a default namespace to the stack.
         */
-        std::size_t pushDefaultNamespace(unsigned depth, const String& name);
+        void pushDefaultNamespace(unsigned depth, const String& name);
 
         /** @brief Unsets a namespace.
         */
-        std::size_t unsetNamespace(unsigned depth, const String& prefix);
+        void unsetNamespace(unsigned depth, const String& prefix);
 
         /** @brief Removes all namespaces at greater or equal depth.
         */

@@ -1621,6 +1621,7 @@ void XmlReaderTest::ProcessingInstructionInProlog()
 
     ++it;
     PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::EndDocument);
+    PT_UNIT_ASSERT_EQUALS(reader.usedSize(), 0);
 }
 
 
@@ -1654,6 +1655,7 @@ void XmlReaderTest::ProcessingInstructionInElement()
 
     ++it;
     PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::EndDocument);
+    PT_UNIT_ASSERT_EQUALS(reader.usedSize(), 0);
 }
 
 
@@ -1681,6 +1683,7 @@ void XmlReaderTest::ProcessingInstructionInEpilog()
 
     ++it;
     PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::EndDocument);
+    PT_UNIT_ASSERT_EQUALS(reader.usedSize(), 0);
 }
 
 
