@@ -66,7 +66,7 @@ bool AttributeValidator::validate(AttributeList& attrs, const AttributeListModel
                  
         for(it = attrDecls.begin(); it != attrDecls.end(); ++it)
         {
-            if( (*it)->qname() == attr->qname() )
+            if( (*it)->qname() == attr->name() )
             {
                 break;
             }

@@ -231,13 +231,13 @@ class XmlWriterImpl
 
         void setDefaultNamespace(const Pt::String& ns)
         {
-            _nsctx.setDefaultNamespace(_elements.size() + 1, ns);
+            _nsctx.pushDefaultNamespace(_elements.size() + 1, ns);
             _defaultNamespace = true;
         }
 
         void setNamespacePrefix(const String& prefix, const String& ns)
         {
-            _nsctx.setNamespace(_elements.size() + 1, prefix, ns);
+            _nsctx.pushNamespace(_elements.size() + 1, prefix, ns);
             _namespaces.push_back(prefix);
         }
 

@@ -33,85 +33,6 @@ namespace Pt {
 
 namespace Xml {
 
-void Attribute::normalize()
-{
-    Pt::String& str = value();
-
-    Pt::String::iterator p1 = str.begin();
-    Pt::String::iterator p2 = str.begin();
-    int spaces = 1;
-    bool normalized = false;
-    
-    for(; p2 != str.end(); ++p2)
-    {
-        if( Pt::isspace(*p2) )
-        {
-            switch(spaces)
-            {
-                case 0:
-                    *p1 = *p2;
-                    ++p1;
-                    break;
-
-                case 1:
-                    normalized = true;
-            };
-
-              ++spaces;
-        }
-        else
-        {
-            spaces = 0;
-                    
-            if(normalized)
-                *p1 = *p2;
-                    
-            ++p1;
-        }
-    }
-           
-    if(p1 != p2)
-    {               
-        str.erase( p1, str.end() );
-    }
-
-    if( spaces != 0 && ! str.empty() )
-    {
-        str.erase(str.size() - 1);
-    }
-}
-
-
-AttributeList::AttributeList(NamespaceContext& nsctx)
-: _begin(0)
-, _end(0)
-, _size(0)
-, _nsctx(&nsctx)
-{
-}
-
-
-//Attribute& AttributeList::push()
-//{ 
-//    if( _size >= _container.size() )
-//    {
-//        _container.push_back( Attribute() ); 
-//    }
-//    else
-//    {
-//        _container[_size].clear();
-//    }
-//    
-//    std::size_t backPos = _size;
-//    ++_size;
-//
-//    _begin = &_container[0];
-//    _end = _begin + (_size);
-//
-//    return _container[backPos];
-//}
-
-
 Attribute& AttributeList::append(const QName& name, const Namespace& ns)
 {
     if( _size >= _container.size() )
@@ -135,24 +56,12 @@ Attribute& AttributeList::append(const QName& name, const Namespace& ns)
 }
 
 
-void AttributeList::pop()
-{ 
-    if( ! empty() )
-    {
-        --_size;
-
-        _begin = _size == 0 ? 0 : &_container[0];
-        _end = _begin + _size;
-    }
-}
-
-
 AttributeList::ConstIterator AttributeList::find(const String& name) const
 {
     ConstIterator it;
     for(it = begin(); it != end(); ++it) 
     {
-        if(it->qname().name() == name) 
+        if(it->name().name() == name) 
         {
             break;
         }
@@ -167,7 +76,7 @@ AttributeList::ConstIterator AttributeList::find(const String& nsUri, const Stri
     ConstIterator it;
     for(it = begin(); it != end(); ++it) 
     {
-        if(it->qname().name() == name && it->namespaceUri() == nsUri) 
+        if(it->name().name() == name && it->namespaceUri() == nsUri) 
         {
             break;
         }

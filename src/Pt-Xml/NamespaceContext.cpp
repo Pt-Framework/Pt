@@ -49,39 +49,64 @@ void NamespaceContext::clear()
 }
 
 
+const Namespace& NamespaceContext::getDefaultNamespace() const
+{
+    std::vector<Namespace>::const_reverse_iterator it;
+
+    for(it = _namespaces.rbegin(); it != _namespaces.rend(); ++it)
+    {
+      if( it->isDefaultNamespace() )
+      {
+          if( ! it->isUnset() )
+              return *it;
+      }
+    }
+
+    return _empty;
+}
+
+
 const Namespace* NamespaceContext::findPrefix(const String& prefix) const
 {
     std::vector<Namespace>::const_reverse_iterator it;
 
     for(it = _namespaces.rbegin(); it != _namespaces.rend(); ++it)
     {
-      if( prefix == it->prefix() && ! it->isUnset() && ! it->isDefaultNamespace() )
+      if( prefix == it->prefix() && 
+          ! it->isUnset() && 
+          ! it->isDefaultNamespace() )
       {
           return &(*it);
       }
     }
 
     if( prefix == _xmlNamespace.prefix() )
+    {
         return &_xmlNamespace;
+    }
 
     return 0;
 }
 
 
-const Namespace* NamespaceContext::findPrefix2(const Char* prefix) const
+const Namespace* NamespaceContext::findPrefix(const Char* prefix, std::size_t n) const
 {
     std::vector<Namespace>::const_reverse_iterator it;
 
     for(it = _namespaces.rbegin(); it != _namespaces.rend(); ++it)
     {
-      if( prefix == it->prefix() && ! it->isUnset() && ! it->isDefaultNamespace() )
+      if( 0 == it->prefix().compare(0, n, prefix) && 
+          ! it->isUnset() && 
+          ! it->isDefaultNamespace() )
       {
           return &(*it);
       }
     }
 
-    if( prefix == _xmlNamespace.prefix() )
+    if( 0 == _xmlNamespace.prefix().compare(0, n, prefix) )
+    {
         return &_xmlNamespace;
+    }
 
     return 0;
 }
@@ -118,41 +143,23 @@ const Namespace* NamespaceContext::findUri(const Char* ns, std::size_t n) const
       }
     }
 
-    if( ns == _xmlNamespace.namespaceUri() )
+    if( 0 == _xmlNamespace.namespaceUri().compare(0, n, ns) )
+    {
         return &_xmlNamespace;
+    }
 
     return 0;
 }
 
 
-const Namespace& NamespaceContext::getDefaultNamespace() const
-{
-    const Namespace* ret = &_empty;
-    std::vector<Namespace>::const_reverse_iterator it;
-
-    for(it = _namespaces.rbegin(); it != _namespaces.rend(); ++it)
-    {
-      if( it->isDefaultNamespace() )
-      {
-          if( ! it->isUnset() )
-              ret = &(*it);
-          
-          break;
-      }
-    }
-
-    return *ret;
-}
-
-
-std::size_t NamespaceContext::setNamespace(unsigned depth, const String& prefix, const String& name)
+std::size_t NamespaceContext::pushNamespace(unsigned depth, const String& prefix, const String& name)
 {
     _namespaces.push_back( Namespace(depth, prefix, name) );
     return prefix.size() + name.size();
 }
 
 
-std::size_t NamespaceContext::setDefaultNamespace(unsigned depth, const String& name)
+std::size_t NamespaceContext::pushDefaultNamespace(unsigned depth, const String& name)
 {
     // Namespace without prefix is default namespace
     _namespaces.push_back( Namespace(depth, String(), name) );

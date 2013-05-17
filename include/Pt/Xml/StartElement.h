@@ -43,7 +43,7 @@ class NamespaceContext;
 
 /** @brief A single attribute of a start element.
 */
-class PT_XML_API Attribute
+class Attribute
 {
     public:
         //! Default constructor.
@@ -53,18 +53,24 @@ class PT_XML_API Attribute
 
         /** @brief Returns the qualified name.
         */
-        const QName& qname() const
-        { return *_qname; }
+        const QName& name() const
+        { return *_name; }
 
+        /** @brief Sets the qualified name and namespace.
+        */
         void set(const QName& name, const Namespace& ns)
         {
-            _qname = &name;
+            _name = &name;
             _namespace = &ns;
         }
 
+        /** @brief Returns the namespaceUri.
+        */
         const String& namespaceUri() const
         { return _namespace->namespaceUri(); }
 
+        /** @brief Sets the namespace.
+        */
         void setNamespace(const Namespace& ns)
         { _namespace = &ns; }
 
@@ -78,20 +84,19 @@ class PT_XML_API Attribute
         String& value()
         { return _value; }
 
-        void normalize();
-
+        /** @brief Clears the value of this attribute.
+        */
         void clear()
-        { 
-            _value.clear(); 
-        }
+        { _value.clear(); }
 
     private:
-        const QName* _qname;
+        const QName* _name;
         const Namespace* _namespace;
         String _value;
 };
 
-
+/** @brief An attribute list of a start element.
+*/
 class PT_XML_API AttributeList : private NonCopyable
 {
     public:
@@ -99,12 +104,12 @@ class PT_XML_API AttributeList : private NonCopyable
         typedef const Attribute* ConstIterator;
 
     public:
-        AttributeList(NamespaceContext& nsctx);
-        
-        bool empty() const
-        { 
-            return _size == 0; 
-        }
+        explicit AttributeList(NamespaceContext& nsctx)
+        : _begin(0)
+        , _end(0)
+        , _size(0)
+        , _nsctx(&nsctx)
+        { }
 
         void clear()
         { 
@@ -114,8 +119,6 @@ class PT_XML_API AttributeList : private NonCopyable
         }
 
         Attribute& append(const QName& name, const Namespace& ns);
-
-        void pop();
         
         ConstIterator find(const String& localName) const;
 
@@ -137,6 +140,9 @@ class PT_XML_API AttributeList : private NonCopyable
         ConstIterator end() const
         { return _end; }
 
+        bool empty() const
+        { return _size == 0; }
+
         std::size_t size() const
         { return _size; }
 
@@ -156,7 +162,7 @@ class PT_XML_API AttributeList : private NonCopyable
     A start element is created when the parser reaches a start tag. It contains
     the name of the tag, its namespace information, and the attributes of
     the tag.
-  */
+*/
 class StartElement : public Node
                    , private NonCopyable
 {

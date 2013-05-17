@@ -57,6 +57,54 @@ namespace Pt {
 
 namespace Xml {
 
+void normalizeAttributeValue(String& value)
+{
+    Pt::String& str = value;
+
+    Pt::String::iterator p1 = str.begin();
+    Pt::String::iterator p2 = str.begin();
+    int spaces = 1;
+    bool normalized = false;
+    
+    for(; p2 != str.end(); ++p2)
+    {
+        if( Pt::isspace(*p2) )
+        {
+            switch(spaces)
+            {
+                case 0:
+                    *p1 = *p2;
+                    ++p1;
+                    break;
+
+                case 1:
+                    normalized = true;
+            };
+
+              ++spaces;
+        }
+        else
+        {
+            spaces = 0;
+                    
+            if(normalized)
+                *p1 = *p2;
+                    
+            ++p1;
+        }
+    }
+           
+    if(p1 != p2)
+    {               
+        str.erase( p1, str.end() );
+    }
+
+    if( spaces != 0 && ! str.empty() )
+    {
+        str.erase(str.size() - 1);
+    }
+}
+
 class XmlReaderImpl
 {
     typedef void (XmlReaderImpl::*ParseFunc)(int);
@@ -3033,13 +3081,27 @@ class XmlReaderImpl
 
             if( isQuote(ch) )
             {
-                _usedSize += _elements.pushName();
+                setQuotedBegin(ch);
                 
+                _usedSize += _elements.pushName();
                 const QName& name = _elements.top();
+
+                if(name.prefix() == "xmlns")
+                {
+                    assert(_token.empty() );
+                    _parse = &XmlReaderImpl::onNamespace;
+                    return;
+                }
+                else if(name.name() == "xmlns")
+                {
+                    assert(_token.empty() );
+                    _parse = &XmlReaderImpl::onDefaultNamespace;
+                    return;
+                }
+
                 const Namespace& ns = _nsctx.emptyNamespace();
                 _attr = &_startElem.attributes().append(name, ns);
 
-                setQuotedBegin(ch);
                 _parse = &XmlReaderImpl::onAttributeValue;
                 return;
             }
@@ -3047,26 +3109,51 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
 
+        void onNamespace(int c)
+        {
+            Char ch = notEof(c);
+
+            if( isQuoteEnd(ch) )
+            {
+                const QName& name = _elements.top();
+                _usedSize += _nsctx.pushNamespace(_depth+1, name.name(), _token);
+
+                _elements.pop();
+                _token.clear();
+                
+                _parse = &XmlReaderImpl::beforeAttribute;
+                return;
+            }
+
+            _token += ch;
+        }
+
+        void onDefaultNamespace(int c)
+        {
+            Char ch = notEof(c);
+
+            if( isQuoteEnd(ch) )
+            {
+                const QName& name = _elements.top();
+                _usedSize += _nsctx.pushDefaultNamespace(_depth+1, _token);
+
+                _elements.pop();
+                _token.clear();
+                
+                _parse = &XmlReaderImpl::beforeAttribute;
+                return;
+            }
+
+            _token += ch;
+        }
+        
         void onAttributeValue(int c)
         {
             Char ch = notEof(c);
             assert(_attr);
 
             if( isQuoteEnd(ch) )
-            {
-                if(_attr->qname().prefix() == "xmlns")
-                {
-                    _usedSize += _nsctx.setNamespace(_depth+1, _attr->qname().name(), _attr->value());
-                    _startElem.attributes().pop();
-                    _elements.pop();
-                }
-                else if(_attr->qname().name() == "xmlns")
-                {
-                    _usedSize += _nsctx.setDefaultNamespace(_depth+1, _attr->value());
-                    _startElem.attributes().pop();
-                    _elements.pop();
-                }
-                
+            {               
                 _attr = 0;
                 _parse = &XmlReaderImpl::beforeAttribute;
                 return;
@@ -3078,7 +3165,7 @@ class XmlReaderImpl
                 // attribute value.
                 // For an entity reference, recursively process the replacement text
                 // of the entity.
-                assert(_token.empty());
+                assert( _token.empty() );
                 _parse = &XmlReaderImpl::onAttributeEntityReference;
                 return;
             }
@@ -3786,14 +3873,14 @@ class XmlReaderImpl
             
             for( ; it != attributes.end(); ++it)
             {
-                if( it->qname().prefix().empty() )
+                if( it->name().prefix().empty() )
                 {
                     const Namespace& ns = _nsctx.getDefaultNamespace();
                     it->setNamespace(ns);
                 }
                 else
                 {
-                    const Namespace* ns = _nsctx.findPrefix( it->qname().prefix() );
+                    const Namespace* ns = _nsctx.findPrefix( it->name().prefix() );
                     if( ! ns )
                         throw SyntaxError("undeclared namespace prefix", line());
 
@@ -3807,10 +3894,10 @@ class XmlReaderImpl
                 // treated by a non-validating processor as if declared CDATA.
                 if(elemDecl)
                 {
-                    AttributeModel* attrDecl = elemDecl->attributes().findAttribute( it->qname() );
+                    AttributeModel* attrDecl = elemDecl->attributes().findAttribute( it->name() );
 
                     if(attrDecl && attrDecl->isNormalize())
-                        it->normalize();
+                        normalizeAttributeValue( it->value() );
                 }
             }
 

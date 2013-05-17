@@ -56,11 +56,17 @@ class NamespaceContext
         */
         void clear();
 
+        /** @brief Returns the current default namespace.
+        */
+        const Namespace& getDefaultNamespace() const;
+
         /** @brief Returns the namespace for a prefix.
         */
         const Namespace* findPrefix(const String& prefix) const;
 
-        const Namespace* findPrefix2(const Char* prefix) const;
+        /** @brief Returns the namespace for a prefix.
+        */
+        const Namespace* findPrefix(const Char* prefix, std::size_t n) const;
 
         /** @brief Returns the prefix for a namespace URI.
         */
@@ -68,20 +74,13 @@ class NamespaceContext
 
         const Namespace* findUri(const Char* ns, std::size_t n) const;
 
-        const Namespace& emptyNamespace() const
-        { return _empty; }
-
-        /** @brief Returns the current default namespace.
-        */
-        const Namespace& getDefaultNamespace() const;
-
         /** @brief Adds a namespace to the stack.
         */
-        std::size_t setNamespace(unsigned depth, const String& prefix, const String& name);
+        std::size_t pushNamespace(unsigned depth, const String& prefix, const String& name);
 
         /** @brief Adds a default namespace to the stack.
         */
-        std::size_t setDefaultNamespace(unsigned depth, const String& name);
+        std::size_t pushDefaultNamespace(unsigned depth, const String& name);
 
         /** @brief Unsets a namespace.
         */
@@ -91,9 +90,12 @@ class NamespaceContext
         */
         std::size_t popNamespace(unsigned depth);
 
+        const Namespace& emptyNamespace() const
+        { return _empty; }
+
     private:
-        std::vector<Namespace> _namespaces;
         Namespace _empty;
+        std::vector<Namespace> _namespaces;
         Namespace _xmlNamespace;
 };
 

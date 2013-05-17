@@ -1270,7 +1270,7 @@ void XmlReaderTest::AttributeWithNamespace()
     PT_UNIT_ASSERT(startNode.type() == Pt::Xml::Node::StartElement);
     PT_UNIT_ASSERT(Pt::Xml::toStartElement(&startNode)->name().equals("a") );
     PT_UNIT_ASSERT( Pt::Xml::toStartElement(&startNode)->attributes().has(L"attr") );
-    PT_UNIT_ASSERT( Pt::Xml::toStartElement(&startNode)->attributes().begin()->qname().prefix() == L"my" );
+    PT_UNIT_ASSERT( Pt::Xml::toStartElement(&startNode)->attributes().begin()->name().prefix() == L"my" );
     PT_UNIT_ASSERT( Pt::Xml::toStartElement(&startNode)->attributes().begin()->namespaceUri() == L"http://www.my.net");
     PT_UNIT_ASSERT( reader.depth() == 1);
 
@@ -1509,21 +1509,21 @@ void XmlReaderTest::MultipleAttributesIteration()
     PT_UNIT_ASSERT(attributeIter != attributes.end());
 
     Pt::Xml::Attribute attributeB = *attributeIter;
-    PT_UNIT_ASSERT(attributeB.qname().name() == L"b");
+    PT_UNIT_ASSERT(attributeB.name().name() == L"b");
     PT_UNIT_ASSERT(attributeB.value().narrow() == "123");
 
     attributeIter++;
     PT_UNIT_ASSERT(attributeIter != attributes.end());
 
     Pt::Xml::Attribute attributeC = *attributeIter;
-    PT_UNIT_ASSERT(attributeC.qname().name() == L"c");
+    PT_UNIT_ASSERT(attributeC.name().name() == L"c");
     PT_UNIT_ASSERT(attributeC.value().narrow() == "456");
 
     attributeIter++;
     PT_UNIT_ASSERT(attributeIter != attributes.end());
 
     Pt::Xml::Attribute attributeD = *attributeIter;
-    PT_UNIT_ASSERT(attributeD.qname().name() == L"d");
+    PT_UNIT_ASSERT(attributeD.name().name() == L"d");
     PT_UNIT_ASSERT(attributeD.value().narrow() == "789");
 
     attributeIter++;
