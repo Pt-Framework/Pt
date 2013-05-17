@@ -49,40 +49,6 @@ const Pt::Char ByteOrderMark = 0xFEFF;
 const Pt::Char ByteOrderSwapped = 0xFFFE;
 
 /*
- * Index into the table below with the first byte of a UTF-8 sequence to
- * get the number of trailing bytes that are supposed to follow it.
- * Note that *legal* UTF-8 values can't have 4 or 5-bytes. The table is
- * left as-is for anyone who may want to do such conversion, which was
- * allowed in earlier algorithms.
- */
-const char trailingBytesForUTF8[256] = {
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-    2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2, 3,3,3,3,3,3,3,3,4,4,4,4,5,5,5,5
-};
-
-
-/*
- * Magic values subtracted from a buffer value during UTF8 conversion.
- * This table contains as many values as there might be trailing bytes
- * in a UTF-8 sequence.
- */
-const Char offsetsFromUTF8[6] = {
-    0x00000000UL,
-    0x00003080UL,
-    0x000E2080UL,
-    0x03C82080UL,
-    0xFA082080UL,
-    0x82082080UL
-};
-
-
-/*
  * Once the bits are split out into bytes of UTF-8, this is a mask OR-ed
  * into the first byte, depending on how many bytes follow.  There are
  * as many entries in this table as there are UTF-8 sequence types.
@@ -92,54 +58,6 @@ const Char offsetsFromUTF8[6] = {
 const uint8_t firstByteMark[7] = {
     0x00, 0x00, 0xC0, 0xE0, 0xF0, 0xF8, 0xFC
 };
-
-
-/**
- * @brief Checks if the given character sequence is a valid UTF-8 character.
- *
- * The given array 8-bit-values is "parsed" and tried to be converted into a
- * Unicode-character using UTF-decoding. If this is not possible $false$ is returned
- * as the 8-bit-sequence is not a valid UTF-8 character. Otherwise $true$ is
- * returned. Only the first number of characters as specified in 'length' is
- * tried to converted.
- *
- * @param source An array of 8-bit values containing raw UTF-8 character data.
- * @param length Number of characters of source which are checked if they are
- * a valid UTF-8 character.
- * @return $true$ if the given sequence is a UTF-8-encoded character, $false$
- * otherwise.
- */
-inline bool isLegalUTF8(const uint8_t *source, int length)
-{
-    uint8_t a;
-    const uint8_t *srcptr = source + length;
-
-    switch (length)
-    {
-        default:
-            return false;
-
-        // Everything else falls through when "true"...
-        case 4: if ((a = (*--srcptr)) < 0x80 || a > 0xBF) return false;
-        case 3: if ((a = (*--srcptr)) < 0x80 || a > 0xBF) return false;
-        case 2: if ((a = (*--srcptr)) > 0xBF) return false;
-            switch (*source) {
-                // no fall-through in this inner switch
-                case 0xE0: if (a < 0xA0) return false; break;
-                case 0xED: if (a > 0x9F) return false; break;
-                case 0xF0: if (a < 0x90) return false; break;
-                case 0xF4: if (a > 0x8F) return false; break;
-                default:   if (a < 0x80) return false;
-            }
-        case 1: if (*source >= 0x80 && *source < 0xC2) return false;
-    }
-
-    if (*source > 0xF4)
-        return false;
-
-    return true;
-}
-
 
 Utf8Codec::Utf8Codec(size_t ref)
 : Pt::TextCodec<Char, char>(ref)
@@ -184,7 +102,6 @@ Utf8Codec::result Utf8Codec::do_in(MBState& s, const char* fromBegin, const char
 {
   while (fromBegin != fromEnd && toBegin != toEnd)
   {
-    // Error checking   on the first octet
     if (invalid_leading_octet(*fromBegin))
     {
       fromNext = fromBegin;
@@ -262,28 +179,35 @@ Utf8Codec::result Utf8Codec::do_out(MBState& s, const Pt::Char* fromBegin, const
 
     size_t bytesToWrite;
 
-    while(fromNext < fromEnd) {
+    while(fromNext < fromEnd) 
+    {
         ch = *fromNext;
-        if (ch >= SurHighStart && ch <= SurLowEnd) {
+        if (ch >= SurHighStart && ch <= SurLowEnd) 
+        {
             retstat = error;
             break;
         }
 
         // Figure out how many bytes the result will require. Turn any
         // illegally large UTF32 things (> Plane 17) into replacement chars.
-        if (ch < Pt::Char(0x80)) {
+        if (ch < Pt::Char(0x80)) 
+        {
             bytesToWrite = 1;
         }
-        else if (ch < Pt::Char(0x800)) {
+        else if (ch < Pt::Char(0x800)) 
+        {
             bytesToWrite = 2;
         }
-        else if (ch < Pt::Char(0x10000)) {
+        else if (ch < Pt::Char(0x10000)) 
+        {
             bytesToWrite = 3;
         }
-        else if (ch <= MaxLegalUtf32) {
+        else if (ch <= MaxLegalUtf32) 
+        {
             bytesToWrite = 4;
         }
-        else {
+        else 
+        {
             bytesToWrite = 3;
             ch = ReplacementChar;
         }
@@ -294,7 +218,8 @@ Utf8Codec::result Utf8Codec::do_out(MBState& s, const Pt::Char* fromBegin, const
             break;
         }
 
-        switch(bytesToWrite) { // note: everything falls through...
+        switch(bytesToWrite) 
+        { // note: everything falls through...
             case 4: *--current = (uint8_t)((ch | byteMark) & byteMask).value(); ch >>= 6;
             case 3: *--current = (uint8_t)((ch | byteMark) & byteMask).value(); ch >>= 6;
             case 2: *--current = (uint8_t)((ch | byteMark) & byteMask).value(); ch >>= 6;
@@ -310,31 +235,22 @@ Utf8Codec::result Utf8Codec::do_out(MBState& s, const Pt::Char* fromBegin, const
 
 int Utf8Codec::do_length(MBState& s, const char* fromBegin, const char* fromEnd, size_t max) const
 {
-    const char* fromNext = fromBegin;
-    size_t counter = 0;
-
-    while(fromNext < fromEnd && counter <= max) {
-        int extraBytesToRead = trailingBytesForUTF8[ (unsigned char)*fromNext ]; // NOTE: check again...
-
-        if(fromNext + extraBytesToRead >= fromEnd) {
-            break;
-        }
-
-        if(!isLegalUTF8( (const uint8_t*) fromNext, extraBytesToRead + 1 ) ) {
-            break;
-        }
-
-        fromNext += extraBytesToRead + 1;
-        counter += extraBytesToRead + 1;
-    }
-
-    return fromNext - fromBegin;
+  int last_octet_count = 0;
+  std::size_t char_count = 0;
+  const char* from_next = fromBegin;
+  while(from_next + last_octet_count <= fromEnd && char_count <= max) 
+  {
+    from_next += last_octet_count;
+    last_octet_count = (get_octet_count(*from_next));
+    ++char_count;
+  }
+  return static_cast<int>(from_next-fromBegin);
 }
 
 
 int Utf8Codec::do_max_length() const throw()
 {
-    return 4;
+    return 6;
 }
 
 
