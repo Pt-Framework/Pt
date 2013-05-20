@@ -2866,7 +2866,11 @@ class XmlReaderImpl
                 return;
             }
 
+            if(_usedSize >= _maxSize)
+                throw SyntaxError("node too long", line());
+            
             _comment.content() += ch;
+            ++_usedSize;
         }
 
         void afterComment(int c)
@@ -2879,8 +2883,12 @@ class XmlReaderImpl
                 return;
             }
 
+            if(_usedSize >= _maxSize)
+                throw SyntaxError("node too long", line());
+
             _comment.content() += '-';
             _comment.content() += ch;
+            _usedSize += 2;
             
             _parse = &XmlReaderImpl::onComment;
         }
@@ -2957,6 +2965,7 @@ class XmlReaderImpl
 
         void afterStartElement(int c)
         {
+            // remove attribute names from name stack
             std::size_t n = _nameStack.size();
             while(n-- > _depth)
                 _nameStack.pop();
@@ -3232,6 +3241,7 @@ class XmlReaderImpl
 
             if(ch == '>')
             {
+                // remove attribute names from name stack
                 std::size_t n = _nameStack.size();
                 while(n-- > _depth)
                     _nameStack.pop();
@@ -3381,6 +3391,7 @@ class XmlReaderImpl
 
         void onCharactersCR(int c)
         {
+            // TODO: \r\r\r\r\r... and \r\n\r\n\r\n... must increase _usedSize
             _chars.appendSpace('\n');
             _parse = &XmlReaderImpl::onCharacters;
             
@@ -3827,6 +3838,8 @@ class XmlReaderImpl
         {
             if(_options & ReportComments)
                 _current = &_comment;
+
+            _usedSize -= _comment.content().size();
         }
 
         void setProcessingInstruction()
@@ -4023,6 +4036,16 @@ class XmlReaderImpl
             _maxSize = n;
         }
 
+        std::size_t maxSize() const
+        {
+            return _maxSize;
+        }
+
+        std::size_t usedSize() const
+        {
+            return _usedSize;
+        }
+
         void setChunkSize(std::size_t n)
         {
             _maxChunkSize = n;
@@ -4079,11 +4102,6 @@ class XmlReaderImpl
         InputSource* input()
         {
             return _input.empty() ? _is : _input.source();
-        }
-
-        std::size_t usedSize() const
-        {
-            return _usedSize;
         }
 
         void reset(InputSource& is)
@@ -4304,6 +4322,18 @@ void XmlReader::setMaxInputSize(std::size_t n)
 }
 
 
+std::size_t XmlReader::maxSize() const
+{
+    return _impl->maxSize();
+}
+
+
+std::size_t XmlReader::usedSize() const
+{
+    return _impl->usedSize();
+}
+
+
 void XmlReader::setChunkSize(std::size_t n)
 {
     return _impl->setChunkSize(n);
@@ -4415,12 +4445,6 @@ Node* XmlReader::advance()
 InputSource* XmlReader::input()
 {
     return _impl->input();
-}
-
-
-std::size_t XmlReader::usedSize() const
-{
-    return _impl->usedSize();
 }
 
 } // namespace Xml

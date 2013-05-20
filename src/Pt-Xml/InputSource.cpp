@@ -32,6 +32,13 @@
 #include <cctype>
 #include <cassert>
 
+namespace {
+
+    const unsigned int MaxTokenSize = 128;
+
+}
+
+
 namespace Pt {
 
 namespace Xml {
@@ -272,7 +279,12 @@ bool parseXml(unsigned char& state, unsigned char c, const char*& pbBegin, const
             if(c == '"')
                 state = OnXmlDecl;
             else
+            {
+                if(decl.version().size() == MaxTokenSize)
+                    state = OnXmlDeclEnd;
+
                 decl.version() += c;
+            }
 
             break;
 
@@ -280,7 +292,12 @@ bool parseXml(unsigned char& state, unsigned char c, const char*& pbBegin, const
             if(c == '\'')
                 state = OnXmlDecl;
             else
+            {
+                if(decl.version().size() == MaxTokenSize)
+                    state = OnXmlDeclEnd;
+
                 decl.version() += c;
+            }
             
             break;
 
@@ -366,7 +383,12 @@ bool parseXml(unsigned char& state, unsigned char c, const char*& pbBegin, const
             if(c == '"')
                 state = OnXmlDecl;
             else
+            {
+                if(decl.encoding().size() == MaxTokenSize)
+                    state = OnXmlDeclEnd;
+
                 decl.encoding() += std::toupper(c);
+            }
 
             break;
 
@@ -374,7 +396,12 @@ bool parseXml(unsigned char& state, unsigned char c, const char*& pbBegin, const
             if(c == '\'')
                 state = OnXmlDecl;
             else
-                decl.encoding() += c;
+            {
+                if(decl.encoding().size() == MaxTokenSize)
+                    state = OnXmlDeclEnd;
+
+                decl.encoding() += std::toupper(c);
+            }
 
             break;
 

@@ -2120,8 +2120,10 @@ void XmlReaderTest::CommentInProlog()
 
     Pt::Xml::BinaryInputSource is(input);
     Pt::Xml::XmlReader reader(is);
+    
     Pt::Xml::XmlReader::Iterator it = reader.current();
     PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::EndDocument);
+    PT_UNIT_ASSERT_EQUALS(reader.usedSize(), 0);
 }
 
 
@@ -2133,8 +2135,16 @@ void XmlReaderTest::CommentBeforeRoot()
 
     Pt::Xml::BinaryInputSource is(input);
     Pt::Xml::XmlReader reader(is);
+    
     Pt::Xml::XmlReader::Iterator it = reader.current();
     PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::StartElement);
+
+    ++it;
+    PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::EndElement);
+
+    ++it;
+    PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::EndDocument);
+    PT_UNIT_ASSERT_EQUALS(reader.usedSize(), 0);
 }
 
 
@@ -2146,13 +2156,21 @@ void XmlReaderTest::CommentInElement()
 
     Pt::Xml::BinaryInputSource is(input);
     Pt::Xml::XmlReader reader(is);
+    
     Pt::Xml::XmlReader::Iterator it = reader.current();
     PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::StartElement);
 
     ++it;
-    PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::Characters);
-    const Pt::Xml::Characters& text = dynamic_cast<const Pt::Xml::Characters&>(*it);
-    PT_UNIT_ASSERT(text.content() == L"123456");
+    const Pt::Xml::Characters* text = Pt::Xml::toCharacters(&*it);
+    PT_UNIT_ASSERT(text);
+    PT_UNIT_ASSERT(text->content() == L"123456");
+
+    ++it;
+    PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::EndElement);
+
+    ++it;
+    PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::EndDocument);
+    PT_UNIT_ASSERT_EQUALS(reader.usedSize(), 0);
 }
 
 
@@ -2164,6 +2182,7 @@ void XmlReaderTest::CommentInEpilog()
 
     Pt::Xml::BinaryInputSource is(input);
     Pt::Xml::XmlReader reader(is);
+    
     Pt::Xml::XmlReader::Iterator it = reader.current();
     PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::StartElement);
 
@@ -2172,6 +2191,7 @@ void XmlReaderTest::CommentInEpilog()
 
     ++it;
     PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::EndDocument);
+    PT_UNIT_ASSERT_EQUALS(reader.usedSize(), 0);
 }
 
 

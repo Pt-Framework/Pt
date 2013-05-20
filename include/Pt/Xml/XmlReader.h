@@ -135,6 +135,10 @@ class PT_XML_API XmlReader : private NonCopyable
         // "long content attack", "long attribute-list attack"
         void setMaxInputSize(std::size_t n);
 
+        std::size_t maxSize() const;
+
+        std::size_t usedSize() const;
+
         // add isChunk method to Characters
         void setChunkSize(std::size_t n);
 
@@ -193,8 +197,6 @@ class PT_XML_API XmlReader : private NonCopyable
         /** @brief Returns the current input source or nullptr if none is set.
         */
         InputSource* input();
-
-        std::size_t usedSize() const;
 
     private:
         class XmlReaderImpl* _impl;
