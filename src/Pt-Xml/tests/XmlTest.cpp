@@ -373,8 +373,8 @@ void XmlReaderTest::DtdEmptyDocument()
     Pt::Xml::EndDocument* endDoc = Pt::Xml::toEndDocument(&*it);
     PT_UNIT_ASSERT(endDoc);
 
-    // used size is "test" + "external.dtd"
-    PT_UNIT_ASSERT_EQUALS(reader.usedSize(), 16);
+    // used size is "test" + "external.dtd" + entity name and value
+    PT_UNIT_ASSERT_EQUALS(reader.usedSize(), 28);
 }
 
 
@@ -835,6 +835,9 @@ void XmlReaderTest::DtdNotations()
     {
         PT_UNIT_ASSERT( validator.validate(*it) );
     }
+
+    // used size is "test" + notation names and values
+    PT_UNIT_ASSERT_EQUALS(reader.usedSize(), 95);
 }
 
 
@@ -1976,6 +1979,12 @@ void XmlReaderTest::CustomEntities()
 
     ++it;
     PT_UNIT_ASSERT(Pt::Xml::toEndElement(&*it));
+
+    ++it;
+    PT_UNIT_ASSERT(Pt::Xml::toEndDocument(&*it));
+
+    // used size is names and values from DTD
+    PT_UNIT_ASSERT_EQUALS(reader.usedSize(), 36);
 }
 
 

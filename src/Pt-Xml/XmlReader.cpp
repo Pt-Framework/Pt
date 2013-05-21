@@ -927,6 +927,7 @@ class XmlReaderImpl
             if( isAlpha(ch) )
             {
                 _token += ch;
+                ++_usedSize;
                 _parse = &XmlReaderImpl::OnDtdNotationName;
                 return;
             }
@@ -945,7 +946,11 @@ class XmlReaderImpl
 
             if( isAlpha(ch) )
             {
+                if(_usedSize >= _maxSize)
+                    throw SyntaxError("node too long", line());
+
                 _token += ch;
+                ++_usedSize;
                 return;
             }
 
@@ -953,7 +958,7 @@ class XmlReaderImpl
             {
                 assert(_notation == 0);
 
-                // must only be declared once
+                // TODO: must only be declared once
                 _notation = _dtd.declareNotation(_token);
                 _token.clear();
                 _parse = &XmlReaderImpl::OnDtdNotationAfterName;
@@ -1072,6 +1077,8 @@ class XmlReaderImpl
             if( isAlpha(ch) )
             {
                 _token += ch;
+                ++_usedSize;
+
                 assert( ! _paramEntity);
                 _parse = &XmlReaderImpl::OnDtdEntityName;
                 return;
@@ -1114,6 +1121,8 @@ class XmlReaderImpl
             if( isAlpha(ch) )
             {
                 _token += ch;
+                ++_usedSize;
+
                 _parse = &XmlReaderImpl::OnDtdEntityName;
                 return;
             }
@@ -1138,7 +1147,11 @@ class XmlReaderImpl
 
             if( isAlpha(ch) )
             {
+                if(_usedSize >= _maxSize)
+                    throw SyntaxError("node too long", line());
+
                 _token += ch;
+                ++_usedSize;
                 return;
             }
 
@@ -1152,6 +1165,10 @@ class XmlReaderImpl
                 else
                     _entity = _dtd.declareEntity(_token);
                 
+                // ignored overwritten entity
+                if( ! _entity )
+                    _usedSize -= _token.size();
+
                 _token.clear();
                 _parse = &XmlReaderImpl::OnDtdEntityAfterName;
                 return;
@@ -1213,6 +1230,8 @@ class XmlReaderImpl
         {
             if(_entity)
                 _entity->setPublicId(_token);
+            else
+                _usedSize -= _token.size();
                 
             _token.clear();
             _parse = &XmlReaderImpl::OnDtdEntityAfterPublicId;
@@ -1266,6 +1285,8 @@ class XmlReaderImpl
         {
             if(_entity)
                 _entity->setSystemId(_token);
+            else
+                _usedSize -= _token.size();
                 
             _token.clear();
             _parse = &XmlReaderImpl::OnDtdEntityAfterSystemId;
@@ -1312,16 +1333,11 @@ class XmlReaderImpl
         {
             Pt::Char ch = notEof(c);
 
-            if(ch == 'D' || ch == 'A' || ch == 'T')
-            {
-                _token += ch;
-                return;
-            }
-
             if( isSpace(ch) )
             {
                 bool ok = _token == L"NDATA";
                 _token.clear();
+                
                 if( ! ok)
                     throw SyntaxError("XML syntax error", line());
                 
@@ -1335,7 +1351,10 @@ class XmlReaderImpl
                 return;
             }
 
-            throw SyntaxError("XML syntax error", line());
+            if(_token.size() >= 5)
+                throw SyntaxError("XML syntax error", line());
+
+            _token += ch;
         }
 
         void OnDtdEntityAfterNDATA(int c)
@@ -1350,6 +1369,7 @@ class XmlReaderImpl
             if( isAlpha(ch) )
             {
                 _token += ch;
+                ++_usedSize;
                 _parse = &XmlReaderImpl::OnDtdEntityNotation;
                 return;
             }
@@ -1369,7 +1389,11 @@ class XmlReaderImpl
 
             if( isAlpha(ch) )
             {
+                if(_usedSize >= _maxSize)
+                    throw SyntaxError("node too long", line());
+                
                 _token += ch;
+                ++_usedSize;
                 return;
             }
             
@@ -1377,6 +1401,8 @@ class XmlReaderImpl
             {
                 if(_entity)
                     _entity->setUnparsed(_token);
+                else
+                    _usedSize -= _token.size();
 
                 _token.clear();
                 _entity = 0;
@@ -1390,6 +1416,8 @@ class XmlReaderImpl
             {
                 if(_entity)
                     _entity->setUnparsed(_token);
+                else
+                    _usedSize -= _token.size();
 
                 _token.clear();
                 _entity = 0;
@@ -1437,9 +1465,14 @@ class XmlReaderImpl
                 return;
             }
 
+            // _entity is 0 if already declared
             if(_entity)
             {
+                if(_usedSize >= _maxSize)
+                    throw SyntaxError("node too long", line());
+
                 _entity->value() += ch;
+                ++_usedSize;
             }
         }
         
@@ -1451,6 +1484,8 @@ class XmlReaderImpl
 
             if(ch == ';')
             {
+                _usedSize -= _token.size();
+
                 if( ! _paramEntity)
                 {
                     assert(_entity);
@@ -1465,14 +1500,24 @@ class XmlReaderImpl
                 }
 
                 if(_entity)
+                {
                     _entity->addValue(_token);
+                    ++_usedSize;
+
+                    if(_usedSize >= _maxSize)
+                        throw SyntaxError("node too long", line());
+                }
 
                 _token.clear();
                 _parse = &XmlReaderImpl::OnDtdEntityValue;
                 return;
             }
 
+            if(_usedSize >= _maxSize)
+                throw SyntaxError("node too long", line());
+
             _token += ch;
+            ++_usedSize;
         }
 
         void OnDtdEntityValueParameterEntityReference(int c)
@@ -1481,12 +1526,18 @@ class XmlReaderImpl
             
             if( isAlpha(ch) )
             {
+                if(_usedSize >= _maxSize)
+                    throw SyntaxError("node too long", line());
+                
                 _entityRef.name() += ch;
+                ++_usedSize;
                 return;
             }
 
             if(ch == ';')
             {
+                _usedSize -= _entity->name().size();
+
                 if(_paramEntity)
                 {
                     if(_entity && _entity->name() == _entityRef.name())
@@ -3236,6 +3287,9 @@ class XmlReaderImpl
                 {
                     _attr->value() += _token;
                     _usedSize += _token.size();
+
+                    if(_usedSize >= _maxSize)
+                        throw SyntaxError("element name too long", line());
                 }
                 else
                 {
@@ -3440,19 +3494,18 @@ class XmlReaderImpl
 
             if( isAlpha(ch) || ch == '#')
             {
-                _token += ch;
-                
-                ++_usedSize;
-                
                 if(_usedSize >= _maxSize)
                     throw SyntaxError("node too large", line());
 
+                _token += ch;
+                ++_usedSize;
                 return;
             }
 
             if(ch == ';')
             {
-                _chunkSize = _chars.content().size();
+                assert( _chunkSize == _chars.content().size() );
+                //_chunkSize = _chars.content().size();
 
                 _usedSize -= _token.size();
 
@@ -3469,6 +3522,8 @@ class XmlReaderImpl
                         else
                             _chars.append(c);
                     }
+
+                    // TODO: check chunk size
                 }
                 else
                 {
@@ -4244,11 +4299,11 @@ class XmlReaderImpl
         XmlResolver* _resolver;
         EntityResolver _entityResolver;
         
+        QNameStack _nameStack;
         InputStack _input;
         ParseFunc _parse;
         Node* _current;
         
-        QNameStack _nameStack;
         std::size_t _depth;
         const Pt::Char* _back;
         Attribute* _attr;
