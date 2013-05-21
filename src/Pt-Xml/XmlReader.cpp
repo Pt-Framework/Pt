@@ -4218,49 +4218,54 @@ class XmlReaderImpl
 
     private:
         InputSource* _is;
+        std::size_t _maxInputDepth;
         XmlResolver* _resolver;
         EntityResolver _entityResolver;
-        InputStack _input;
-        int _options;
-        std::size_t _maxSize;
-        std::size_t _maxChunkSize;
-        std::size_t _maxInputDepth;
-
-        NamespaceContext _nsctx;
-        Notation* _notation; // move back
-        Entity* _entity;
-        bool _paramEntity;
-        char _quotChar;
-        QName _qname;
-        String _token;
-        Attribute* _attr;
-        std::size_t _depth;
-        std::size_t _usedSize;
-        std::size_t _chunkSize;
-        ParseFunc _parse;
-        std::stack<ParseFunc> _parseStack; // move back
         
+        InputStack _input;
+        ParseFunc _parse;
         Node* _current;
-        const Pt::Char* _back;
+        
         QNameStack _nameStack;
+        std::size_t _depth;
+        const Pt::Char* _back;
+        Attribute* _attr;
+        String _token;
+        int _options;
 
-        // TODO: some sort of union?
-        EndDocType _endDocType;
-        StartDocument _startDoc;
+        std::size_t _usedSize;
+        std::size_t _maxSize;
+        NamespaceContext _nsctx;
+        StartElement _startElem;
+        EndElement _endElem;
+
+        Characters _chars;
+        std::size_t _maxChunkSize;
+        std::size_t _chunkSize;
+
+        EntityReference _entityRef;
         ProcessingInstruction _procInstr;
         Comment _comment;
-        StartElement _startElem;
-        EntityReference _entityRef;
-        EndElement _endElem;
-        Characters _chars;
+
+        // TODO: some sort of union?
+        StartDocument _startDoc;
         EndDocument _endDoc;
 
         DocTypeDefinition _dtd;
         DocType _docType;
+        EndDocType _endDocType;
         ContentModelBuilder _cmBuilder;
+
+        bool _paramEntity;
+        char _quotChar;
+        QName _qname;
+        std::stack<ParseFunc> _parseStack;
+
         ContentModel* _contentModel;
         AttributeModel* _attrModel;
         AttributeListModel* _attlistDecl;
+        Notation* _notation;
+        Entity* _entity;
 };
 
 
