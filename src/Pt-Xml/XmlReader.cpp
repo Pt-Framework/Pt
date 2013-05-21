@@ -143,7 +143,8 @@ class XmlReaderImpl
 
             if( isAlpha(ch) )
             {
-                _dtd.rootName().addName(ch);
+                _dtd.rootName().name() += ch;
+                ++_usedSize;
                 _parse = &XmlReaderImpl::OnDtdRootName;
                 return;
             }
@@ -209,7 +210,11 @@ class XmlReaderImpl
                 return;
             }
 
+            if(_usedSize >= _maxSize)
+                throw SyntaxError("node too long", line());
+
             _token += ch;
+            ++_usedSize;
         }
 
         void OnDtdSystem(int c)
@@ -270,7 +275,11 @@ class XmlReaderImpl
                 return;
             }
 
+            if(_usedSize >= _maxSize)
+                throw SyntaxError("node too long", line());
+
             _token += ch;
+            ++_usedSize;
         }
 
         // The markup declarations may be made up in whole or in part of the
@@ -293,19 +302,20 @@ class XmlReaderImpl
 
             if( isAlpha(ch) )
             {
+                if(_usedSize >= _maxSize)
+                    throw SyntaxError("node too long", line());
+
                 _entityRef.name() += ch;
-                //_entityName += ch;
+                ++_usedSize;
                 return;
             }
 
             if(ch == ';')
             {
-                //assert(_beforeEntityReference);
+                _usedSize -= _entityRef.name().size();
+
                 resolveParamEntity(_entityRef);
                 popParseState();
-                //_parse = _beforeEntityReference;
-                //_beforeEntityReference = 0;
-                //_entityName.clear()
                 return;
             }
 
@@ -314,9 +324,7 @@ class XmlReaderImpl
 
         void enterParameterReference(ParseFunc from)
         {
-            //assert( ! _beforeEntityReference);
             pushParseState(from);
-            //_beforeEntityReference = from;
             _entityRef.clear();
             _parse = &XmlReaderImpl::OnDtdParameterEntityReference;
         }
@@ -327,7 +335,11 @@ class XmlReaderImpl
 
             if( isAlpha(ch) )
             {
-                _dtd.rootName().addName(ch);
+                if(_usedSize >= _maxSize)
+                    throw SyntaxError("node too long", line());
+
+                _dtd.rootName().name() += ch;
+                ++_usedSize;
                 return;
             }
 
@@ -335,7 +347,7 @@ class XmlReaderImpl
             {
                 QName& qn = _dtd.rootName();
                 qn.setPrefix( qn.name() ); // TODO: use swap
-                qn.clearName();
+                qn.name().clear();
                 return;
             }
 
@@ -665,6 +677,10 @@ class XmlReaderImpl
             if( isAlpha(ch) )
             {
                 _token += ch;
+
+                if(_token.size() > 10)
+                    throw SyntaxError("XML syntax error", line());
+                
                 return;
             }
 
@@ -737,6 +753,10 @@ class XmlReaderImpl
             if( isAlpha(ch) )
             {
                 _token += ch;
+
+                if(_token.size() > 7)
+                    throw SyntaxError("XML syntax error", line());
+                
                 return;
             }
 
@@ -761,6 +781,7 @@ class XmlReaderImpl
                 if(_token == L"INCLUDE")
                 {
                     _token.clear();
+
                     pushParseState(&XmlReaderImpl::OnDtdIncludeEnd);
                     _parse = &XmlReaderImpl::OnDtdExternal;
                     return; 
@@ -3657,7 +3678,7 @@ class XmlReaderImpl
 
         inline bool isQuote(Char ch) const
         {
-            return ch == '\'' || ch =='"';
+            return ch == '\'' || ch == '"';
         }
 
         inline void setQuotedBegin(Char ch)
@@ -3683,11 +3704,13 @@ class XmlReaderImpl
 
         inline void pushParseState(ParseFunc parse)
         {
+            // TODO: push state should add to _usedSize...
             _parseStack.push(parse);
         }
 
         inline void popParseState()
         {
+            // TODO: push state should shrink _usedSize...
             if( _parseStack.empty() )
                 throw SyntaxError("XML syntax error", line());
 
@@ -3697,6 +3720,7 @@ class XmlReaderImpl
         
         inline void popParseState(ParseFunc parse)
         {
+            // TODO: push state should shrink _usedSize...
             if( _parseStack.empty() )
             {
                 _parse = parse;
@@ -3820,6 +3844,7 @@ class XmlReaderImpl
 
         void setDocType()
         {
+            // NOTE: might want to do _usedSize -= _docType.size();
             if(_options & ReportDtd)
                 _current = &_docType;
         }

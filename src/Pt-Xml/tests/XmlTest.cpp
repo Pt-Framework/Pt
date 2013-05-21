@@ -372,6 +372,9 @@ void XmlReaderTest::DtdEmptyDocument()
     ++it;
     Pt::Xml::EndDocument* endDoc = Pt::Xml::toEndDocument(&*it);
     PT_UNIT_ASSERT(endDoc);
+
+    // used size is "test" + "external.dtd"
+    PT_UNIT_ASSERT_EQUALS(reader.usedSize(), 16);
 }
 
 
@@ -403,6 +406,9 @@ void XmlReaderTest::DtdExternalSubsetPublicId()
     {
         PT_UNIT_ASSERT( validator.validate(*it) );
     }
+
+    // used size is "test" + "pubid" + "external.dtd"
+    PT_UNIT_ASSERT_EQUALS(reader.usedSize(), 21);
 }
 
 
@@ -434,6 +440,9 @@ void XmlReaderTest::DtdExternalSubsetSystemId()
     {
         PT_UNIT_ASSERT( validator.validate(*it) );
     }
+
+    // used size is "test" + "external.dtd"
+    PT_UNIT_ASSERT_EQUALS(reader.usedSize(), 16);
 }
 
 

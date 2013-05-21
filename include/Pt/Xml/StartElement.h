@@ -146,12 +146,6 @@ class PT_XML_API AttributeList : private NonCopyable
         std::size_t size() const
         { return _size; }
 
-        Attribute& back()
-        { return *(_end - 1); }
-
-        const Attribute& back() const
-        { return *(_end - 1); }
-
         NamespaceContext& namespaceContext()
         { return *_nsctx; }
 

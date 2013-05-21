@@ -38,6 +38,8 @@ namespace Pt {
 
 namespace Xml {
 
+class DocTypeDefinition;
+
 class PT_XML_API DocType : public Node
                          , private Pt::NonCopyable
 {
@@ -71,6 +73,7 @@ class PT_XML_API DocType : public Node
         { return Node::DocType; }
 
     private:
+        DocTypeDefinition* _dtd;
         Pt::String _publicId;
         Pt::String _systemId;
         int _internal;
