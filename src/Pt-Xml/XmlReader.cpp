@@ -110,175 +110,6 @@ class XmlReaderImpl
     typedef void (XmlReaderImpl::*ParseFunc)(int);
 
     private:
-        void onDocumentBegin(int c)
-        {
-            if( c == std::char_traits<Char>::eof() )
-            {
-                setStartDoc();
-
-                if( ! _current)
-                    _current = &_endDoc;
-                
-                _parse = &XmlReaderImpl::onProlog;
-                return;
-            }
-
-            Char ch = c;
-
-            if( isSpace(ch) )
-            {
-                setStartDoc();
-                _parse = &XmlReaderImpl::onProlog;
-            }
-            else if( ch == '<')
-            {
-                setStartDoc();
-                _parse = &XmlReaderImpl::onTag;
-            }
-            else
-            {
-                throw SyntaxError("XML syntax error", line());
-            }
-        }
-
-        void onProcessingInstructionBegin(int c)
-        {
-            Char ch = notEof(c);
-
-            if( isAlpha(ch) ) // TODO: XML Name character
-            {
-                _procInstr.target() += c;
-                ++_usedSize;
-                _parse = &XmlReaderImpl::onProcessingInstruction;
-                return;
-            }
-
-            throw SyntaxError("XML syntax error", line());
-        }
-
-        void onProcessingInstruction(int c)
-        {
-            Char ch = notEof(c);
-
-            if( isSpace(ch) )
-            {
-                _parse = &XmlReaderImpl::onProcessingInstructionData;
-                return;
-            }
-
-            if( ! isAlpha(ch) )
-                throw SyntaxError("XML syntax error", line());
-
-            if(_usedSize >= _maxSize)
-                throw SyntaxError("node too long", line());
-            
-            _procInstr.target() += c;
-            ++_usedSize;
-        }
-
-        void onProcessingInstructionData(int c)
-        {
-            Char ch = notEof(c);
-
-            if(isSpace(ch) || isAlpha(ch) || isQuote(ch) || 
-               ch == ':' || ch == '/' || ch == '!' || ch == '=')
-            {
-                if(_usedSize >= _maxSize)
-                    throw SyntaxError("node too long", line());
-                
-                _procInstr.data() += c;
-                ++_usedSize;
-                return;
-            }
-
-            if(ch == '?')
-            {
-                _parse = &XmlReaderImpl::onProcessingInstructionEnd;
-                return;
-            }
-
-            throw SyntaxError("XML syntax error", line());
-        }
-
-        void onProcessingInstructionEnd(int c)
-        {
-            Char ch = notEof(c);
-
-            if(ch == '>')
-            {
-                _usedSize -= _procInstr.target().size() + _procInstr.data().size();
-
-                setProcessingInstruction();
-                
-                if(depth() == 0)
-                    popParseState(&XmlReaderImpl::onProlog);
-                else
-                    popParseState(&XmlReaderImpl::afterTag);
-                
-                return;
-            }
-
-            throw SyntaxError("XML syntax error", line());
-        }
-
-        void onTag(int c)
-        {
-            switch(c)
-            {
-                case '?':
-                    _procInstr.clear();
-                    _parse = &XmlReaderImpl::onProcessingInstructionBegin;
-                    return;
-
-                case '!':
-                    _parse = &XmlReaderImpl::onTagExclam;
-                    return;
-
-                case '/':
-                    setCharactersEnd();
-                    _parse = &XmlReaderImpl::onEndElement;
-                    return;
-            }
-
-            if( c == std::char_traits<Char>::eof() || ! isAlpha(c) )
-                throw SyntaxError("XML syntax error", line());
-
-            setCharactersEnd();
-
-            _nameStack.pushChar(c);
-            ++_usedSize;
-
-            _parse = &XmlReaderImpl::onStartElement;
-        }
-
-        void onTagExclam(int c)
-        {
-            Char ch = notEof(c);
-
-            if(ch == '-')
-            {
-                _parse = &XmlReaderImpl::beforeComment;
-                return;
-            }
-
-            if(ch == '[' && depth() > 0)
-            {
-                _token.clear();
-                _token += ch;
-                _parse = &XmlReaderImpl::beforeCData;
-                return;
-            }
-
-            if(ch == 'D' && depth() == 0)
-            {
-                _token += ch;
-                _parse = &XmlReaderImpl::OnDocType;
-                return;
-            }
-
-            throw SyntaxError("XML syntax error", line());
-        };
-        
         void OnDocType(int c)
         {
             Char ch = notEof(c);
@@ -2802,46 +2633,115 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
 
-        void afterTag(int c)
+        void onDocumentBegin(int c)
         {
-            assert(depth() != 0);
-            
+            if( c == std::char_traits<Char>::eof() )
+            {
+                setStartDoc();
+
+                if( ! _current)
+                    _current = &_endDoc;
+                
+                _parse = &XmlReaderImpl::onProlog;
+                return;
+            }
+
+            Char ch = c;
+
+            if( isSpace(ch) )
+            {
+                setStartDoc();
+                _parse = &XmlReaderImpl::onProlog;
+            }
+            else if( ch == '<')
+            {
+                setStartDoc();
+                _parse = &XmlReaderImpl::onTag;
+            }
+            else
+            {
+                throw SyntaxError("XML syntax error", line());
+            }
+        }
+
+        void onProcessingInstructionBegin(int c)
+        {
             Char ch = notEof(c);
 
-            switch(c)
+            if( isAlpha(ch) ) // TODO: XML Name character
             {
-                case ' ':
-                case '\n':
-                case '\t':
-                    _chars.appendSpace(ch);
-                    _chunkSize = _chars.content().size();
-                    _parse = &XmlReaderImpl::onCharacters;
-                    break;
-
-                case '\r':
-                    _chunkSize = _chars.content().size();
-                    _parse = &XmlReaderImpl::onCharactersCR;
-                    break;
-
-                case '<':
-                    _parse = &XmlReaderImpl::onTag;
-                    break;
-
-                case '>':
-                    throw SyntaxError("XML syntax error", line());
-                    break;
-
-                case '&':
-                    assert(_token.empty());
-                    _parse = &XmlReaderImpl::onEntityReference;
-                    break;
-
-                default:
-                    _chars.append(ch);
-                    _chunkSize = _chars.content().size();
-                    _parse = &XmlReaderImpl::onCharacters;
-                    break;
+                _procInstr.target() += c;
+                ++_usedSize;
+                _parse = &XmlReaderImpl::onProcessingInstruction;
+                return;
             }
+
+            throw SyntaxError("XML syntax error", line());
+        }
+
+        void onProcessingInstruction(int c)
+        {
+            Char ch = notEof(c);
+
+            if( isSpace(ch) )
+            {
+                _parse = &XmlReaderImpl::onProcessingInstructionData;
+                return;
+            }
+
+            if( ! isAlpha(ch) )
+                throw SyntaxError("XML syntax error", line());
+
+            if(_usedSize >= _maxSize)
+                throw SyntaxError("node too long", line());
+            
+            _procInstr.target() += c;
+            ++_usedSize;
+        }
+
+        void onProcessingInstructionData(int c)
+        {
+            Char ch = notEof(c);
+
+            if(isSpace(ch) || isAlpha(ch) || isQuote(ch) || 
+               ch == ':' || ch == '/' || ch == '!' || ch == '=')
+            {
+                if(_usedSize >= _maxSize)
+                    throw SyntaxError("node too long", line());
+                
+                _procInstr.data() += c;
+                ++_usedSize;
+                return;
+            }
+
+            if(ch == '?')
+            {
+                _parse = &XmlReaderImpl::onProcessingInstructionEnd;
+                return;
+            }
+
+            throw SyntaxError("XML syntax error", line());
+        }
+
+        void onProcessingInstructionEnd(int c)
+        {
+            Char ch = notEof(c);
+
+            if(ch == '>')
+            {
+                _usedSize -= _procInstr.target().size() + _procInstr.data().size();
+
+                setProcessingInstruction();
+                
+                if(depth() == 0)
+                    popParseState(&XmlReaderImpl::onProlog);
+                else
+                    popParseState(&XmlReaderImpl::afterTag);
+                
+                return;
+            }
+
+            throw SyntaxError("XML syntax error", line());
         }
 
         void beforeComment(int c)
@@ -2910,6 +2810,106 @@ class XmlReaderImpl
             }
 
             throw SyntaxError("XML syntax error", line());
+        }
+
+        void onTagExclam(int c)
+        {
+            Char ch = notEof(c);
+
+            if(ch == '-')
+            {
+                _parse = &XmlReaderImpl::beforeComment;
+                return;
+            }
+
+            if(ch == '[' && depth() > 0)
+            {
+                _token.clear();
+                _token += ch;
+                _parse = &XmlReaderImpl::beforeCData;
+                return;
+            }
+
+            if(ch == 'D' && depth() == 0)
+            {
+                _token += ch;
+                _parse = &XmlReaderImpl::OnDocType;
+                return;
+            }
+
+            throw SyntaxError("XML syntax error", line());
+        };
+
+        void onTag(int c)
+        {
+            switch(c)
+            {
+                case '?':
+                    _procInstr.clear();
+                    _parse = &XmlReaderImpl::onProcessingInstructionBegin;
+                    return;
+
+                case '!':
+                    _parse = &XmlReaderImpl::onTagExclam;
+                    return;
+
+                case '/':
+                    setCharactersEnd();
+                    _parse = &XmlReaderImpl::onEndElement;
+                    return;
+            }
+
+            if( c == std::char_traits<Char>::eof() || ! isAlpha(c) )
+                throw SyntaxError("XML syntax error", line());
+
+            setCharactersEnd();
+
+            _nameStack.pushChar(c);
+            ++_usedSize;
+
+            _parse = &XmlReaderImpl::onStartElement;
+        }
+
+        void afterTag(int c)
+        {
+            assert(depth() != 0);
+            
+            Char ch = notEof(c);
+
+            switch(c)
+            {
+                case ' ':
+                case '\n':
+                case '\t':
+                    _chars.appendSpace(ch);
+                    _chunkSize = _chars.content().size();
+                    _parse = &XmlReaderImpl::onCharacters;
+                    break;
+
+                case '\r':
+                    _chunkSize = _chars.content().size();
+                    _parse = &XmlReaderImpl::onCharactersCR;
+                    break;
+
+                case '<':
+                    _parse = &XmlReaderImpl::onTag;
+                    break;
+
+                case '>':
+                    throw SyntaxError("XML syntax error", line());
+                    break;
+
+                case '&':
+                    assert(_token.empty());
+                    _parse = &XmlReaderImpl::onEntityReference;
+                    break;
+
+                default:
+                    _chars.append(ch);
+                    _chunkSize = _chars.content().size();
+                    _parse = &XmlReaderImpl::onCharacters;
+                    break;
+            }
         }
 
         void onStartElement(int c)
@@ -3662,7 +3662,7 @@ class XmlReaderImpl
 
         inline void setQuotedBegin(Char ch)
         {
-            _quotChar = ch;
+            _quotChar = static_cast<char>( ch.value() );
         }
 
         inline bool isQuoteEnd(Char ch) const
@@ -4076,7 +4076,7 @@ class XmlReaderImpl
 
             _qname.clear();
             _token.clear(); 
-            _quotChar = 0;
+            _quotChar = '"';
             _nsctx.clear();
             
             _dtd.clear();
@@ -4227,32 +4227,24 @@ class XmlReaderImpl
         std::size_t _maxInputDepth;
 
         NamespaceContext _nsctx;
-        Notation* _notation;
+        Notation* _notation; // move back
         Entity* _entity;
         bool _paramEntity;
+        char _quotChar;
         QName _qname;
         String _token;
-        Pt::Char _quotChar;
         Attribute* _attr;
         std::size_t _depth;
         std::size_t _usedSize;
         std::size_t _chunkSize;
         ParseFunc _parse;
-        std::stack<ParseFunc> _parseStack;
+        std::stack<ParseFunc> _parseStack; // move back
         
         Node* _current;
         const Pt::Char* _back;
         QNameStack _nameStack;
 
-        DocTypeDefinition _dtd;
-        ContentModelBuilder _cmBuilder;
-        
-        ContentModel* _contentModel;
-        AttributeModel* _attrModel;
-        AttributeListModel* _attlistDecl;
-        
         // TODO: some sort of union?
-        DocType _docType;
         EndDocType _endDocType;
         StartDocument _startDoc;
         ProcessingInstruction _procInstr;
@@ -4262,6 +4254,13 @@ class XmlReaderImpl
         EndElement _endElem;
         Characters _chars;
         EndDocument _endDoc;
+
+        DocTypeDefinition _dtd;
+        DocType _docType;
+        ContentModelBuilder _cmBuilder;
+        ContentModel* _contentModel;
+        AttributeModel* _attrModel;
+        AttributeListModel* _attlistDecl;
 };
 
 
