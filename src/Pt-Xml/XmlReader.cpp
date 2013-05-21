@@ -4194,21 +4194,18 @@ class XmlReaderImpl
                     if(c == '\n')
                         _input.bumpLine();
                 }
-                else
-                {                              
-                    if(n < 0)
-                    {
-                        _input.removeInput();
+                else if(n < 0)
+                {
+                    _input.removeInput();
 
-                        if( _input.empty() )
-                            (this->*_parse)( std::char_traits<Char>::eof() );
-                    }
-                    else if (n == 0)
-                    {
-                        n = _input.import();
-                        if(n == 0)
-                            break;
-                    }
+                    if( _input.empty() )
+                        (this->*_parse)( std::char_traits<Char>::eof() );
+                }
+                else if (n == 0)
+                {
+                    n = _input.import();
+                    if(n == 0)
+                        break;
                 }
             } 
             while( ! _current);
