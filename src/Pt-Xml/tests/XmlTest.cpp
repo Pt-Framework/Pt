@@ -373,8 +373,8 @@ void XmlReaderTest::DtdEmptyDocument()
     Pt::Xml::EndDocument* endDoc = Pt::Xml::toEndDocument(&*it);
     PT_UNIT_ASSERT(endDoc);
 
-    // used size is "test" + "external.dtd" + entity name and value
-    PT_UNIT_ASSERT_EQUALS(reader.usedSize(), 28);
+    // used size is names and values from DTD
+    PT_UNIT_ASSERT_EQUALS(reader.usedSize(), 32);
 }
 
 
@@ -407,8 +407,8 @@ void XmlReaderTest::DtdExternalSubsetPublicId()
         PT_UNIT_ASSERT( validator.validate(*it) );
     }
 
-    // used size is "test" + "pubid" + "external.dtd"
-    PT_UNIT_ASSERT_EQUALS(reader.usedSize(), 21);
+    // used size is names and values from DTD
+    PT_UNIT_ASSERT_EQUALS(reader.usedSize(), 25);
 }
 
 
@@ -441,8 +441,8 @@ void XmlReaderTest::DtdExternalSubsetSystemId()
         PT_UNIT_ASSERT( validator.validate(*it) );
     }
 
-    // used size is "test" + "external.dtd"
-    PT_UNIT_ASSERT_EQUALS(reader.usedSize(), 16);
+    // used size is names and values from DTD
+    PT_UNIT_ASSERT_EQUALS(reader.usedSize(), 20);
 }
 
 
@@ -531,6 +531,9 @@ void XmlReaderTest::DtdValidateAttributes()
                 PT_UNIT_ASSERT( se->attributes().has(L"a4") );
             }
         }
+
+        // used size is names and values from DTD
+        PT_UNIT_ASSERT_EQUALS(reader.usedSize(), 26);
     }
     catch(const Pt::Xml::SyntaxError& error)
     {
@@ -599,6 +602,9 @@ void XmlReaderTest::DtdValidateIDAttributes()
         {
             PT_UNIT_ASSERT( validator.validate(*it) );
         }
+
+        // used size is names and values from DTD
+        PT_UNIT_ASSERT_EQUALS(reader.usedSize(), 41);
     }
     catch(const Pt::Xml::SyntaxError& error)
     {
@@ -665,6 +671,9 @@ void XmlReaderTest::DtdValidateNotationAttributes()
         {
             PT_UNIT_ASSERT( validator.validate(*it) );
         }
+
+        // used size is names and values from DTD
+        PT_UNIT_ASSERT_EQUALS(reader.usedSize(), 49);
     }
     catch(const Pt::Xml::SyntaxError& error)
     {
@@ -705,6 +714,9 @@ void XmlReaderTest::DtdValidateElementContent()
         {
             PT_UNIT_ASSERT( validator.validate(*it) );
         }
+
+        // used size is names and values from DTD
+        PT_UNIT_ASSERT_EQUALS(reader.usedSize(), 25);
     }
     catch(const Pt::Xml::SyntaxError& error)
     {
@@ -740,6 +752,9 @@ void XmlReaderTest::DtdAnyElementContent()
             bool valid = validator.validate(*it);
             PT_UNIT_ASSERT(valid);
         }
+
+        // used size is names and values from DTD
+        PT_UNIT_ASSERT_EQUALS(reader.usedSize(), 10);
     }
     catch(const Pt::Xml::SyntaxError& error)
     {
@@ -779,6 +794,9 @@ void XmlReaderTest::DtdValidateWithNamespace()
                 PT_UNIT_ASSERT( se->attributes().has(L"a1") );
             }
         }
+
+        // used size is names and values from DTD
+        PT_UNIT_ASSERT_EQUALS(reader.usedSize(), 31);
     }
     catch(const Pt::Xml::SyntaxError& error)
     {
@@ -836,8 +854,8 @@ void XmlReaderTest::DtdNotations()
         PT_UNIT_ASSERT( validator.validate(*it) );
     }
 
-    // used size is "test" + notation names and values
-    PT_UNIT_ASSERT_EQUALS(reader.usedSize(), 95);
+    // used size is names and values from DTD
+    PT_UNIT_ASSERT_EQUALS(reader.usedSize(), 99);
 }
 
 
@@ -1984,7 +2002,7 @@ void XmlReaderTest::CustomEntities()
     PT_UNIT_ASSERT(Pt::Xml::toEndDocument(&*it));
 
     // used size is names and values from DTD
-    PT_UNIT_ASSERT_EQUALS(reader.usedSize(), 36);
+    PT_UNIT_ASSERT_EQUALS(reader.usedSize(), 44);
 }
 
 
@@ -2056,6 +2074,12 @@ void XmlReaderTest::ExternalEntities()
 
     ++it;
     PT_UNIT_ASSERT(Pt::Xml::toEndElement(&*it));
+
+    ++it;
+    PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::EndDocument);
+
+    // used size is names and values from DTD
+    PT_UNIT_ASSERT_EQUALS(reader.usedSize(), 124);
 }
 
 
@@ -2084,6 +2108,10 @@ void XmlReaderTest::ParameterEntities()
     PT_UNIT_ASSERT(Pt::Xml::toCharacters(*it).content() == L"This sample shows a complicated method.");
 
     ++it;
+    PT_UNIT_ASSERT(Pt::Xml::toEndElement(&*it));
+
+    ++it;
+    PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::EndDocument);
 }
 
 

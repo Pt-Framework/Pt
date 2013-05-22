@@ -90,13 +90,16 @@ class PT_XML_API DocTypeDefinition : private NonCopyable
 
     public:
         //! @internal Returns null if already declared.
-        ContentModel* declareContent(const QName& name);
+        ContentModel& declareContent(const QName& name);
 
         //! @internal Returns the attribute list for an element.
         AttributeListModel& declareAttributeList(const QName& name);
 
         //! @internal Returns null if not declared.
         ElementModel* findElement(const QName& name);
+
+        //! @internal Returns null if not declared.
+        AttributeListModel* findAttributes(const QName& name);
 
     private:
         typedef std::vector<ElementModel*> Elements;

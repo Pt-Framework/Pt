@@ -101,23 +101,13 @@ class PT_XML_API XmlReader : private NonCopyable
         */
         ~XmlReader();
 
-        /** @brief Clears the reader state and input.
-
-            All input sources are removed and the parser state is reset to
-            parse a new document. The XmlResolver not removed and the reporting
-            options are not changed.
+        /** @brief Returns the resolver or nullptr is none was set.
         */
-        void reset();
+        XmlResolver* resolver() const;
 
-        // TODO: add methods for attach(), detach(), discard(), reset(), clear()
-
-        /** @brief Starts parsing with an input source.
-
-            All previous input is removed and the parser is reset to parse
-            a new document. This is essentially the same as calling clear()
-            followed by addInput().
+        /** @brief Returns the current input source or nullptr if none is set.
         */
-        void reset(InputSource& is);
+        InputSource* input();
 
         /** @brief Adds an external input source.
 
@@ -127,23 +117,40 @@ class PT_XML_API XmlReader : private NonCopyable
         */
         void addInput(InputSource& in);
 
-        XmlResolver* resolver() const;
+        /** @brief Clears the reader state and input.
 
-        // Max number of characters the parser may allocate.
-        //
-        // prevents "long name attack" and 
-        // "long content attack", "long attribute-list attack"
-        void setMaxInputSize(std::size_t n);
+            All input sources are removed and the parser state is reset to
+            parse a new document. The XmlResolver not removed and the reporting
+            options are not changed.
+        */
+        void reset();
+
+        /** @brief Starts parsing with an input source.
+
+            All previous input is removed and the parser is reset to parse
+            a new document. This is essentially the same as calling reset()
+            followed by addInput().
+        */
+        void reset(InputSource& is);
+
+        /** @brief Sets the max size of a characters block.
+
+            If an XML element contains more character data than this limit,
+            the content is reported as multiple Characters or CData nodes.
+        */
+        void setChunkSize(std::size_t n);
+
+        /** @brief Sets the max expansion depth of input sources.
+        */
+        void setMaxInputDepth(std::size_t n);
+
+        /** @brief Sets the max number of characters the parser may allocate.
+        */
+        void setMaxSize(std::size_t n);
 
         std::size_t maxSize() const;
 
         std::size_t usedSize() const;
-
-        // add isChunk method to Characters
-        void setChunkSize(std::size_t n);
-
-        // prevents the "billion laughs attack"
-        void setMaxInputDepth(std::size_t n);
 
         void reportStartDocument(bool value);
 
@@ -156,9 +163,6 @@ class PT_XML_API XmlReader : private NonCopyable
         void reportComments(bool value);
 
         void reportEntityReferences(bool value);
-
-        // whitespace between start tags or end tags
-        // void reportBoundaryWhitespace(bool value);
 
         /** @brief Returns current DTD of the document.
         */
@@ -184,19 +188,15 @@ class PT_XML_API XmlReader : private NonCopyable
         */
         Iterator end() const;
 
-        //! @brief Get current element.
+        //! @brief Get current node.
         Node& get();
 
-        //! @brief Get next element from stream.
+        //! @brief Get next node.
         Node& next();
 
         /** @brief Process availabe data from underlying input source.
         */
         Node* advance();
-
-        /** @brief Returns the current input source or nullptr if none is set.
-        */
-        InputSource* input();
 
     private:
         class XmlReaderImpl* _impl;

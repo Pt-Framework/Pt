@@ -211,7 +211,7 @@ class XmlReaderImpl
             }
 
             if(_usedSize >= _maxSize)
-                throw SyntaxError("node too long", line());
+                throw SyntaxError("XML syntax error", line());
 
             _token += ch;
             ++_usedSize;
@@ -276,7 +276,7 @@ class XmlReaderImpl
             }
 
             if(_usedSize >= _maxSize)
-                throw SyntaxError("node too long", line());
+                throw SyntaxError("XML syntax error", line());
 
             _token += ch;
             ++_usedSize;
@@ -303,7 +303,7 @@ class XmlReaderImpl
             if( isAlpha(ch) )
             {
                 if(_usedSize >= _maxSize)
-                    throw SyntaxError("node too long", line());
+                    throw SyntaxError("XML syntax error", line());
 
                 _entityRef.name() += ch;
                 ++_usedSize;
@@ -336,7 +336,7 @@ class XmlReaderImpl
             if( isAlpha(ch) )
             {
                 if(_usedSize >= _maxSize)
-                    throw SyntaxError("node too long", line());
+                    throw SyntaxError("XML syntax error", line());
 
                 _dtd.rootName().name() += ch;
                 ++_usedSize;
@@ -926,6 +926,9 @@ class XmlReaderImpl
 
             if( isAlpha(ch) )
             {
+                if(_usedSize >= _maxSize)
+                    throw SyntaxError("XML syntax error", line());
+
                 _token += ch;
                 ++_usedSize;
                 _parse = &XmlReaderImpl::OnDtdNotationName;
@@ -947,7 +950,7 @@ class XmlReaderImpl
             if( isAlpha(ch) )
             {
                 if(_usedSize >= _maxSize)
-                    throw SyntaxError("node too long", line());
+                    throw SyntaxError("XML syntax error", line());
 
                 _token += ch;
                 ++_usedSize;
@@ -1076,6 +1079,9 @@ class XmlReaderImpl
 
             if( isAlpha(ch) )
             {
+                if(_usedSize >= _maxSize)
+                    throw SyntaxError("XML syntax error", line());
+
                 _token += ch;
                 ++_usedSize;
 
@@ -1120,6 +1126,9 @@ class XmlReaderImpl
 
             if( isAlpha(ch) )
             {
+                if(_usedSize >= _maxSize)
+                    throw SyntaxError("XML syntax error", line());
+
                 _token += ch;
                 ++_usedSize;
 
@@ -1148,7 +1157,7 @@ class XmlReaderImpl
             if( isAlpha(ch) )
             {
                 if(_usedSize >= _maxSize)
-                    throw SyntaxError("node too long", line());
+                    throw SyntaxError("XML syntax error", line());
 
                 _token += ch;
                 ++_usedSize;
@@ -1390,7 +1399,7 @@ class XmlReaderImpl
             if( isAlpha(ch) )
             {
                 if(_usedSize >= _maxSize)
-                    throw SyntaxError("node too long", line());
+                    throw SyntaxError("XML syntax error", line());
                 
                 _token += ch;
                 ++_usedSize;
@@ -1469,7 +1478,7 @@ class XmlReaderImpl
             if(_entity)
             {
                 if(_usedSize >= _maxSize)
-                    throw SyntaxError("node too long", line());
+                    throw SyntaxError("XML syntax error", line());
 
                 _entity->value() += ch;
                 ++_usedSize;
@@ -1505,7 +1514,7 @@ class XmlReaderImpl
                     ++_usedSize;
 
                     if(_usedSize >= _maxSize)
-                        throw SyntaxError("node too long", line());
+                        throw SyntaxError("XML syntax error", line());
                 }
 
                 _token.clear();
@@ -1514,7 +1523,7 @@ class XmlReaderImpl
             }
 
             if(_usedSize >= _maxSize)
-                throw SyntaxError("node too long", line());
+                throw SyntaxError("XML syntax error", line());
 
             _token += ch;
             ++_usedSize;
@@ -1527,7 +1536,7 @@ class XmlReaderImpl
             if( isAlpha(ch) )
             {
                 if(_usedSize >= _maxSize)
-                    throw SyntaxError("node too long", line());
+                    throw SyntaxError("XML syntax error", line());
                 
                 _entityRef.name() += ch;
                 ++_usedSize;
@@ -1565,7 +1574,12 @@ class XmlReaderImpl
 
             if( isAlpha(ch) )
             {
-                _qname.addName(ch);
+                if(_usedSize >= _maxSize)
+                    throw SyntaxError("XML syntax error", line());
+
+                _qname.name() += ch;
+                ++_usedSize;
+
                 _parse = &XmlReaderImpl::OnDtdAttListName;
                 return;
             }
@@ -1590,21 +1604,35 @@ class XmlReaderImpl
 
             if( isAlpha(ch) )
             {
-                _qname.addName(ch);
+                if(_usedSize >= _maxSize)
+                    throw SyntaxError("XML syntax error", line());
+
+                _qname.name() += ch;
+                ++_usedSize;
                 return;
             }
 
             if(ch == ':')
             {
-                _qname.setPrefix(_qname.name() ); // TODO: use swap
-                _qname.clearName();
+                if( ! _qname.prefix().empty() )
+                    throw SyntaxError("invalid name", line());
+                
+                // TODO: use swap
+                _qname.setPrefix( _qname.name() ); 
+                _qname.name().clear();
                 return;
             }
 
             if( isSpace(ch) )
             {
                 assert( _attlistDecl == 0 );
-                _attlistDecl = &_dtd.declareAttributeList(_qname);
+
+                _attlistDecl = _dtd.findAttributes(_qname);
+                if( ! _attlistDecl )
+                    _attlistDecl = &_dtd.declareAttributeList(_qname);
+                else
+                    _usedSize -= _qname.size();
+                
                 _qname.clear();
                 _parse = &XmlReaderImpl::OnDtdBeforeAttrName;
                 return;
@@ -1625,7 +1653,11 @@ class XmlReaderImpl
 
             if( isAlpha(ch) )
             {
-                _qname.addName(ch);
+                if(_usedSize >= _maxSize)
+                    throw SyntaxError("XML syntax error", line());
+
+                _qname.name() += ch;
+                ++_usedSize;
                 _parse = &XmlReaderImpl::OnDtdAttrName;
                 return;
             }
@@ -1656,12 +1688,19 @@ class XmlReaderImpl
             
             if( isAlpha(ch) )
             {
-                _qname.addName(ch);
+                if(_usedSize >= _maxSize)
+                    throw SyntaxError("XML syntax error", line());
+                
+                _qname.name() += ch;
+                ++_usedSize;
                 return;
             }
 
             if(ch == ':')
             {
+                if( ! _qname.prefix().empty() )
+                    throw SyntaxError("invalid name", line());
+
                 _qname.setPrefix(_qname.name() ); // TODO: use swap
                 _qname.clearName();
                 return;
@@ -1699,6 +1738,8 @@ class XmlReaderImpl
                     _attrModel->setName(_qname);
                     _attlistDecl->addAttribute(_attrModel);
                 }
+                else
+                    _usedSize -= _qname.size();
 
                 _qname.clear();
                 _parse = &XmlReaderImpl::OnDtdAttrEnum;
@@ -1731,7 +1772,13 @@ class XmlReaderImpl
             if( isAlpha(ch) )
             {
                 assert( _token.empty() );
+
+                if(_usedSize >= _maxSize)
+                    throw SyntaxError("XML syntax error", line());
+
                 _token += ch;
+                ++_usedSize;
+                
                 _parse = &XmlReaderImpl::OnDtdAttrEnumValue;
                 return;
             }
@@ -1751,14 +1798,21 @@ class XmlReaderImpl
 
             if( isAlpha(ch) )
             {
+                if(_usedSize >= _maxSize)
+                    throw SyntaxError("XML syntax error", line());
+                
                 _token += ch;
+                ++_usedSize;
                 return;
             }
 
             if( isSpace(ch) )
             {
-                assert(_attrModel);
-                static_cast<EnumAttributeModel*>(_attrModel)->addValue(_token);
+                if(_attrModel)
+                    static_cast<EnumAttributeModel*>(_attrModel)->addValue(_token);
+                else
+                    _usedSize -= _qname.size();
+
                 _token.clear();
                 _parse = &XmlReaderImpl::OnDtdAttrAfterEnumValue;
                 return;
@@ -1766,8 +1820,11 @@ class XmlReaderImpl
 
             if( ch == '|' )
             {
-                assert(_attrModel);
-                static_cast<EnumAttributeModel*>(_attrModel)->addValue(_token);
+                if(_attrModel)
+                    static_cast<EnumAttributeModel*>(_attrModel)->addValue(_token);
+                else
+                    _usedSize -= _qname.size();
+
                 _token.clear();
                 _parse = &XmlReaderImpl::OnDtdAttrEnumSep;
                 return;
@@ -1775,8 +1832,11 @@ class XmlReaderImpl
 
             if( ch == ')' )
             {
-                assert(_attrModel);
-                static_cast<EnumAttributeModel*>(_attrModel)->addValue(_token);
+                if(_attrModel)
+                    static_cast<EnumAttributeModel*>(_attrModel)->addValue(_token);
+                else
+                    _usedSize -= _qname.size();
+
                 _token.clear();
                 _parse = &XmlReaderImpl::OnDtdAfterAttrType;
                 return;
@@ -1834,7 +1894,13 @@ class XmlReaderImpl
             if( isAlpha(ch) )
             {
                 assert(_token.empty());
+
+                if(_usedSize >= _maxSize)
+                    throw SyntaxError("XML syntax error", line());
+                
                 _token += ch;
+                ++_usedSize;
+                
                 _parse = &XmlReaderImpl::OnDtdAttrEnumValue;
                 return;
             }
@@ -1860,7 +1926,13 @@ class XmlReaderImpl
             if( isAlpha(ch) )
             {
                 assert(_token.empty());
+
+                if(_usedSize >= _maxSize)
+                    throw SyntaxError("XML syntax error", line());
+                
                 _token += ch;
+                ++_usedSize;
+                
                 _parse = &XmlReaderImpl::OnDtdAttrEnumValue;
                 return;
             }
@@ -1945,6 +2017,9 @@ class XmlReaderImpl
                 return;
             }
 
+            if(_token.size() > 12)
+                throw SyntaxError("XML syntax error", line());
+
             _token += ch;
         }
 
@@ -1983,7 +2058,12 @@ class XmlReaderImpl
 
             if( isAlpha(ch) )
             {
+                if(_usedSize >= _maxSize)
+                    throw SyntaxError("XML syntax error", line());
+
                 _token += ch;
+                ++_usedSize;
+                
                 _parse = &XmlReaderImpl::OnDtdAttrNotationId;
                 return;
             }
@@ -2003,7 +2083,11 @@ class XmlReaderImpl
 
             if( isAlpha(ch) )
             {
+                if(_usedSize >= _maxSize)
+                    throw SyntaxError("XML syntax error", line());
+                
                 _token += ch;
+                ++_usedSize;
                 return;
             }
 
@@ -2011,6 +2095,8 @@ class XmlReaderImpl
             {
                 if(_attrModel) // skip duplicates
                     static_cast<NotationAttributeModel*>(_attrModel)->addNotation(_token);
+                else
+                    _usedSize -= _token.size();
 
                 _token.clear();
                 _parse = &XmlReaderImpl::OnDtdAttrAfterNotationId;
@@ -2021,6 +2107,8 @@ class XmlReaderImpl
             {
                 if(_attrModel) // skip duplicates
                     static_cast<NotationAttributeModel*>(_attrModel)->addNotation(_token);
+                else
+                    _usedSize -= _token.size();
 
                 _token.clear();
                 _parse = &XmlReaderImpl::OnDtdAttrNotationSep;
@@ -2031,6 +2119,8 @@ class XmlReaderImpl
             {
                 if(_attrModel) // skip duplicates
                     static_cast<NotationAttributeModel*>(_attrModel)->addNotation(_token);
+                else
+                    _usedSize -= _token.size();
 
                 _token.clear();
                 _parse = &XmlReaderImpl::OnDtdAfterAttrType;
@@ -2085,7 +2175,12 @@ class XmlReaderImpl
 
             if( isAlpha(ch) )
             {
+                if(_usedSize >= _maxSize)
+                    throw SyntaxError("XML syntax error", line());
+
                 _token += ch;
+                ++_usedSize;
+
                 _parse = &XmlReaderImpl::OnDtdAttrNotationId;
                 return;
             }
@@ -2130,6 +2225,9 @@ class XmlReaderImpl
             
             if( isAlpha(ch) )
             {
+                if(_token.size() > 12)
+                    throw SyntaxError("XML syntax error", line());
+                
                 _token += ch;
                 return;
             }
@@ -2191,7 +2289,9 @@ class XmlReaderImpl
             {
                 _attrModel = 0;
                 
-                _qname.addName(ch);
+                _qname.name() += ch;
+                ++_usedSize;
+                
                 _parse = &XmlReaderImpl::OnDtdAttrName;
                 return;
             }
@@ -2233,16 +2333,21 @@ class XmlReaderImpl
 
             if(ch == '"')
             {
-                //assert(_attrModel);
                 if(_attrModel) // skip duplicates
                     _attrModel->setDefaultValue(_token);
+                else
+                    _usedSize -= _token.size();
                 
                 _token.clear();
                 _parse = &XmlReaderImpl::OnDtdAfterAttrMode;
                 return;
             }
 
+            if(_usedSize >= _maxSize)
+                throw SyntaxError("XML syntax error", line());
+
             _token += ch;
+            ++_usedSize;
         }
 
         void OnDtdElementBegin(int c)
@@ -2251,7 +2356,12 @@ class XmlReaderImpl
 
             if( isAlpha(ch) )
             {
-                _qname.addName(ch);
+                if(_usedSize >= _maxSize)
+                    throw SyntaxError("XML syntax error", line());
+
+                _qname.name() +=ch;
+                ++_usedSize;
+                
                 _parse = &XmlReaderImpl::OnDtdElementName;
                 return;
             }
@@ -2276,25 +2386,40 @@ class XmlReaderImpl
 
             if( isAlpha(ch) )
             {
-                _qname.addName(ch);
+                if(_usedSize >= _maxSize)
+                    throw SyntaxError("XML syntax error", line());
+                
+                _qname.name() += ch;
+                ++_usedSize;
                 return;
             }
 
             if(ch == ':')
             {
+                if( ! _qname.prefix().empty() )
+                    throw SyntaxError("invalid name", line());
+
                 _qname.setPrefix(_qname.name() ); // TODO: use swap
-                _qname.clearName();
+                _qname.name().clear();
                 return;
             }
 
             if( isSpace(ch) )
             {
                 assert(_contentModel == 0);
-                
-                // must only be declared once
-                _contentModel = _dtd.declareContent(_qname);
-                if( ! _contentModel)
-                    throw SyntaxError("duplicate element declaration", line());
+
+                ElementModel* elemModel =  _dtd.findElement(_qname);
+                if(elemModel)
+                {
+                    _usedSize -= _qname.size();
+                    _contentModel = &elemModel->content();
+
+                    // must only be declared once
+                    if( ! _contentModel->isUndeclared() )
+                        throw SyntaxError("duplicate element declaration", line());
+                }
+                else
+                    _contentModel = &_dtd.declareContent(_qname);
 
                 _cmBuilder.reset(*_contentModel);
                 _qname.clear();
@@ -2317,7 +2442,7 @@ class XmlReaderImpl
 
             if(ch == 'E' || ch == 'A')
             {
-                assert(_token.empty());
+                assert( _token.empty() );
                 _token += ch;
                 _parse = &XmlReaderImpl::OnDtdEmptyOrAny;
                 return;
@@ -2334,10 +2459,12 @@ class XmlReaderImpl
                 return;
             }
 
-            if(ch != '(')
+            if(ch != '(' || _usedSize >= _maxSize)
                 throw SyntaxError("XML syntax error", line());
 
             _cmBuilder.pushScope();
+            ++_usedSize;
+
             _parse = &XmlReaderImpl::OnDtdElementContent;
         }
         
@@ -2348,8 +2475,12 @@ class XmlReaderImpl
             if( isAlpha(ch) )
             {
                 _token += ch;
+                std::size_t tsize = _token.size();
+
+                if(tsize > 5)
+                    throw SyntaxError("invalid token", line());
                 
-                if(_token == L"EMPTY")
+                if(tsize == 5 && _token == L"EMPTY")
                 {
                     _token.clear();
                     
@@ -2359,7 +2490,7 @@ class XmlReaderImpl
                     
                     _parse = &XmlReaderImpl::OnDtdTagEnd;
                 }
-                else if(_token == L"ANY")
+                else if(tsize == 3 && _token == L"ANY")
                 {
                     _token.clear();
 
@@ -2392,46 +2523,33 @@ class XmlReaderImpl
             _contentModel = 0;
         }
 
-        void OnDtdBeforeElementEnd(int c)
-        {
-            Pt::Char ch = notEof(c);
-            
-            if(ch == '>')
-            {
-                setElementDeclaration();
-                popParseState(); // internal / external subset
-                return;
-            }
-            
-            if( isSpace(ch) )
-            {
-                return;
-            }
-
-            if( ch == '%' )
-            {
-                enterParameterReference(&XmlReaderImpl::OnDtdBeforeElementEnd);
-                return;
-            }
-
-            throw SyntaxError("XML syntax error", line());
-        }
-
         void OnDtdElementContent(int c)
         {
             Pt::Char ch = notEof(c);
 
+            // TODO: handle #PCDATA differently
             if( isAlpha(ch) || ch == '#')
             {
-                assert(_token.empty());
+                assert( _token.empty() );
+                
+                if(_usedSize >= _maxSize)
+                    throw SyntaxError("XML syntax error", line());
+                
                 _token += ch;
+                ++_usedSize;
+                
                 _parse = &XmlReaderImpl::OnDtdIdentifier;
                 return;
             }
 
             if(ch == '(')
             {
+                if(_usedSize >= _maxSize)
+                    throw SyntaxError("XML syntax error", line());
+
                 _cmBuilder.pushScope();
+                ++_usedSize;
+                
                 return;
             }
 
@@ -2450,7 +2568,12 @@ class XmlReaderImpl
 
             if( isAlpha(ch) || ch == ':')
             {
+                if(_usedSize >= _maxSize)
+                    throw SyntaxError("XML syntax error", line());
+                
                 _token += ch;
+                ++_usedSize;
+
                 _parse = &XmlReaderImpl::OnDtdIdentifier;
                 return;
             }
@@ -2509,6 +2632,8 @@ class XmlReaderImpl
                 if( ! ok )
                     throw SyntaxError("invalid element declaration", line());
                 
+                --_usedSize;
+
                 _parse = &XmlReaderImpl::OnDtdContentExprEnd;
                 return;
             }
@@ -2553,6 +2678,8 @@ class XmlReaderImpl
                 if( ! ok )
                     throw SyntaxError("invalid element declaration", line());
                 
+                --_usedSize;
+
                 _parse = &XmlReaderImpl::OnDtdContentExprEnd;
                 return;
             }
@@ -2582,15 +2709,26 @@ class XmlReaderImpl
 
             if( isAlpha(ch) || ch == '#')
             {
-                assert(_token.empty());
+                assert( _token.empty() );
+                
+                if(_usedSize >= _maxSize)
+                    throw SyntaxError("XML syntax error", line());
+                
                 _token += ch;
+                ++_usedSize;
+                
                 _parse = &XmlReaderImpl::OnDtdIdentifier;
                 return;
             }
 
             if(ch == '(')
             {
+                if(_usedSize >= _maxSize)
+                    throw SyntaxError("XML syntax error", line());
+
                 _cmBuilder.pushScope();
+                ++_usedSize;
+
                 _parse = &XmlReaderImpl::OnDtdElementContent;
                 return;
             }
@@ -2656,6 +2794,7 @@ class XmlReaderImpl
                 if( ! ok )
                     throw SyntaxError("invalid element declaration", line());
                 
+                --_usedSize;
                 return;
             }
 
@@ -2761,11 +2900,8 @@ class XmlReaderImpl
                 return;
             }
 
-            if( ! isAlpha(ch) )
+            if( ! isAlpha(ch) || _usedSize >= _maxSize)
                 throw SyntaxError("XML syntax error", line());
-
-            if(_usedSize >= _maxSize)
-                throw SyntaxError("node too long", line());
             
             _procInstr.target() += c;
             ++_usedSize;
@@ -2779,7 +2915,7 @@ class XmlReaderImpl
                ch == ':' || ch == '/' || ch == '!' || ch == '=')
             {
                 if(_usedSize >= _maxSize)
-                    throw SyntaxError("node too long", line());
+                    throw SyntaxError("XML syntax error", line());
                 
                 _procInstr.data() += c;
                 ++_usedSize;
@@ -2839,7 +2975,7 @@ class XmlReaderImpl
             }
 
             if(_usedSize >= _maxSize)
-                throw SyntaxError("node too long", line());
+                throw SyntaxError("XML syntax error", line());
             
             _comment.content() += ch;
             ++_usedSize;
@@ -2856,7 +2992,7 @@ class XmlReaderImpl
             }
 
             if(_usedSize >= _maxSize)
-                throw SyntaxError("node too long", line());
+                throw SyntaxError("XML syntax error", line());
 
             _comment.content() += '-';
             _comment.content() += ch;
@@ -2931,7 +3067,7 @@ class XmlReaderImpl
                     return;
             }
 
-            if( c == std::char_traits<Char>::eof() || ! isAlpha(c) )
+            if( c == std::char_traits<Char>::eof() || ! isAlpha(c) || _usedSize >= _maxSize)
                 throw SyntaxError("XML syntax error", line());
 
             setCharactersEnd();
@@ -3025,11 +3161,8 @@ class XmlReaderImpl
                     return;  
             }
 
-            if( c == std::char_traits<Char>::eof() || ! isAlpha(c) )
+            if( c == std::char_traits<Char>::eof() || ! isAlpha(c) || _usedSize >= _maxSize)
                 throw SyntaxError("XML syntax error", line());
-            
-            if(_usedSize >= _maxSize)
-                throw SyntaxError("element name too long", line());
 
             _nameStack.pushChar(c);
             ++_usedSize;
@@ -3066,6 +3199,9 @@ class XmlReaderImpl
 
             if( isAlpha(ch) )
             {
+                if(_usedSize >= _maxSize)
+                    throw SyntaxError("XML syntax error", line());
+                
                 _nameStack.pushChar(ch);
                 ++_usedSize;
 
@@ -3112,7 +3248,7 @@ class XmlReaderImpl
             if( isAlpha(ch) )
             {
                 if(_usedSize >= _maxSize)
-                    throw SyntaxError("node too long", line());
+                    throw SyntaxError("XML syntax error", line());
 
                 _nameStack.pushChar(ch);
                 ++_usedSize;
@@ -3197,7 +3333,7 @@ class XmlReaderImpl
             }
 
             if(_usedSize >= _maxSize)
-                throw SyntaxError("element name too long", line());
+                throw SyntaxError("XML syntax error", line());
 
             _token += ch;
             ++_usedSize;
@@ -3220,7 +3356,7 @@ class XmlReaderImpl
             }
 
             if(_usedSize >= _maxSize)
-                throw SyntaxError("element name too long", line());
+                throw SyntaxError("XML syntax error", line());
 
             _token += ch;
             ++_usedSize;
@@ -3259,7 +3395,7 @@ class XmlReaderImpl
             }
 
             if(_usedSize >= _maxSize)
-                throw SyntaxError("node too long", line());
+                throw SyntaxError("XML syntax error", line());
             
             _attr->value() += ch;
             ++_usedSize;
@@ -3272,7 +3408,7 @@ class XmlReaderImpl
             if( isAlpha(ch) || ch == '#')
             {
                 if(_usedSize >= _maxSize)
-                    throw SyntaxError("element name too long", line());
+                    throw SyntaxError("XML syntax error", line());
 
                 _token += ch;
                 ++_usedSize;
@@ -3289,7 +3425,7 @@ class XmlReaderImpl
                     _usedSize += _token.size();
 
                     if(_usedSize >= _maxSize)
-                        throw SyntaxError("element name too long", line());
+                        throw SyntaxError("XML syntax error", line());
                 }
                 else
                 {
@@ -3466,19 +3602,14 @@ class XmlReaderImpl
 
         void onCharactersCR(int c)
         {
-            // TODO: \r\r\r\r\r... and \r\n\r\n\r\n... must increase _usedSize
-            _chars.appendSpace('\n');
-            _parse = &XmlReaderImpl::onCharacters;
-            
             if(c != '\n')
             {
-                onCharacters(c);
+                _chars.appendSpace('\n');
+                ++_chunkSize;
             }
-            else if(_chunkSize >= _maxChunkSize)
-            {
-                _parse = &XmlReaderImpl::onCharactersMax;
-                setCharactersChunk();
-            }
+            
+            _parse = &XmlReaderImpl::onCharacters;
+            onCharacters(c);
         }
 
         void onCharactersMax(int c)
@@ -3495,7 +3626,7 @@ class XmlReaderImpl
             if( isAlpha(ch) || ch == '#')
             {
                 if(_usedSize >= _maxSize)
-                    throw SyntaxError("node too large", line());
+                    throw SyntaxError("XML syntax error", line());
 
                 _token += ch;
                 ++_usedSize;
@@ -3508,10 +3639,11 @@ class XmlReaderImpl
                 //_chunkSize = _chars.content().size();
 
                 _usedSize -= _token.size();
+                _parse = &XmlReaderImpl::onCharacters;
 
                 if( Entity::resolveDefaultEntity(_token) )
                 {
-                    std::size_t tokenSize = _token.size();
+                    const std::size_t tokenSize = _token.size();
                     _chunkSize += tokenSize;
                     
                     for(std::size_t n = 0; n < tokenSize; ++n)
@@ -3523,7 +3655,11 @@ class XmlReaderImpl
                             _chars.append(c);
                     }
 
-                    // TODO: check chunk size
+                    if(_chunkSize >= _maxChunkSize)
+                    {
+                        _parse = &XmlReaderImpl::onCharactersMax;
+                        setCharactersChunk();
+                    }
                 }
                 else
                 {
@@ -3532,11 +3668,10 @@ class XmlReaderImpl
                 }
 
                 _token.clear();
-                _parse = &XmlReaderImpl::onCharacters;
                 return;
             }
 
-            throw SyntaxError("invalid entity format", line());
+            throw SyntaxError("XML syntax error", line());
         };
 
         void beforeCData(int c)
@@ -4111,7 +4246,7 @@ class XmlReaderImpl
             _options &= ~o;
         }
 
-        void setMaxInputSize(std::size_t n)
+        void setMaxSize(std::size_t n)
         {
             _maxSize = n;
         }
@@ -4373,6 +4508,12 @@ XmlReader::~XmlReader()
 }
 
 
+InputSource* XmlReader::input()
+{
+    return _impl->input();
+}
+
+
 void XmlReader::reset()
 {
     _impl->reset();
@@ -4397,9 +4538,9 @@ XmlResolver* XmlReader::resolver() const
 }
 
 
-void XmlReader::setMaxInputSize(std::size_t n)
+void XmlReader::setMaxSize(std::size_t n)
 {
-    return _impl->setMaxInputSize(n);
+    return _impl->setMaxSize(n);
 }
 
 
@@ -4520,12 +4661,6 @@ Node& XmlReader::next()
 Node* XmlReader::advance()
 {
     return _impl->advance();
-}
-
-
-InputSource* XmlReader::input()
-{
-    return _impl->input();
 }
 
 } // namespace Xml

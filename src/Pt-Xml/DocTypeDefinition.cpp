@@ -250,22 +250,21 @@ void DocTypeDefinition::removeNotation(const Pt::String& name)
 }
 
 
-ContentModel* DocTypeDefinition::declareContent(const QName& name)
+ContentModel& DocTypeDefinition::declareContent(const QName& name)
 { 
     Elements::iterator lbound;
     lbound = std::lower_bound(_elements.begin(), _elements.end(), name, lessElementName);
     
     if( lbound != _elements.end() && (*lbound)->qname() == name)
     {
-        ContentModel& cm = (*lbound)->content();
-        return cm.isUndeclared() ? &cm : 0;
+        return (*lbound)->content();
     }
 
     std::auto_ptr<ElementModel> ep( new ElementModel(name) );
     _elements.insert(lbound, ep.get());
 
-    ContentModel& cm = ep.release()->content();
-    return &cm;
+    ElementModel* elemDecl = ep.release();
+    return elemDecl->content();
 }
 
 
@@ -295,6 +294,21 @@ ElementModel* DocTypeDefinition::findElement(const QName& name)
     if( lbound != _elements.end() && (*lbound)->qname() == name)
     {
         return *lbound;
+    }
+
+    return 0;
+}
+
+
+AttributeListModel* DocTypeDefinition::findAttributes(const QName& name)
+{
+    Elements::iterator lbound;
+    lbound = std::lower_bound(_elements.begin(), _elements.end(), name, lessElementName);
+    
+    if( lbound != _elements.end() && (*lbound)->qname() == name)
+    {
+        AttributeListModel& attList = (*lbound)->attributes();
+        return &attList;
     }
 
     return 0;
