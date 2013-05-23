@@ -44,7 +44,7 @@ class PT_XML_API DocType : public Node
                          , private Pt::NonCopyable
 {
     public:
-        DocType();
+        explicit DocType(DocTypeDefinition& dtd);
 
         ~DocType();
 
@@ -55,6 +55,8 @@ class PT_XML_API DocType : public Node
         bool isInternal() const;
 
         void setInternal(bool hasInternal);
+
+        const QName& rootName() const;
 
         const Pt::String& publicId() const
         { return _publicId; }

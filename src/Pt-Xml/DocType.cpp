@@ -27,23 +27,24 @@
  */
 
 #include "InputStack.h"
-#include "Pt/Xml/DocType.h"
-#include "Pt/Xml/InputSource.h"
+#include <Pt/Xml/DocType.h>
+#include <Pt/Xml/InputSource.h>
+#include <Pt/Xml/DocTypeDefinition.h>
 
 namespace Pt {
 
 namespace Xml {
 
-DocType::DocType()
+DocType::DocType(DocTypeDefinition& dtd)
 : Node(Node::DocType)
+, _dtd(&dtd)
 , _internal(0)
 {
 }
 
 
 DocType::~DocType()
-{ 
-    clear();
+{
 }
 
 
@@ -70,6 +71,12 @@ bool DocType::isInternal() const
 void DocType::setInternal(bool hasInternal)
 {
     _internal = hasInternal ? 1 : 0;
+}
+
+
+const QName& DocType::rootName() const
+{ 
+    return _dtd->rootName(); 
 }
 
 

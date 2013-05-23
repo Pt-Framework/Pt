@@ -38,6 +38,7 @@ namespace Pt {
 
 namespace Xml {
 
+// TODO: inline?
 class PT_XML_API Entity
 {
     public:
@@ -108,6 +109,7 @@ class PT_XML_API Entity
 };
 
 
+// TODO: inline ?
 class PT_XML_API EntityReference : public Node
                                  , private NonCopyable 
 {

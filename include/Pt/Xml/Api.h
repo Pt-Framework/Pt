@@ -47,6 +47,23 @@ namespace Pt {
 */
 namespace Xml {
 
+    class Characters;
+    class Comment;
+    class DocType;
+    class EndDocType;
+    class DocTypeDefinition;
+    class DocTypeValidator;
+    class EndDocument;
+    class EndElement;
+
+    class Entity;
+    class EntityReference;
+    class Namespace;
+    class QName;
+    class StartElement;
+    class XmlReader;
+    class XmlWriter;
+
 } // namespace Xml
 
 } // namespace Pt

@@ -55,6 +55,14 @@ class Characters : public Node
         , _isChunk(false)
         { }
 
+        void clear()
+        { 
+            _content.clear(); 
+            _isSpace = true;
+            _cdata = false;
+            _isChunk = false;
+        }
+
         /** @brief Returns true if is empty.
         */
         bool empty() const
@@ -71,14 +79,6 @@ class Characters : public Node
 
         bool isChunk() const
         { return _isChunk; }
-
-        void clear()
-        { 
-            _content.clear(); 
-            _isSpace = true;
-            _cdata = false;
-            _isChunk = false;
-        }
 
         bool isSpace() const
         { return _isSpace; }

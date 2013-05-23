@@ -4213,6 +4213,7 @@ class XmlReaderImpl
         , _attrModel(0)
         , _attlistDecl(0)
         , _startElem(_nsctx)
+        , _docType(_dtd)
         {
             _parse = &XmlReaderImpl::onDocumentBegin;
         }
@@ -4239,6 +4240,7 @@ class XmlReaderImpl
         , _attrModel(0)
         , _attlistDecl(0)
         , _startElem(_nsctx)
+        , _docType(_dtd)
         {
             _parse = &XmlReaderImpl::onDocumentBegin;
 
