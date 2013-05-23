@@ -84,7 +84,7 @@ class Characters : public Node
 
         inline void append(Char ch)
         {
-            if(_isSpace && ch != ' ' && ch != '\t' && ch != '\n')
+            if(_isSpace && ch != ' ' && ch != '\t' && ch != '\n' && ch != '\r')
                 _isSpace = false;
 
             _content += ch;
