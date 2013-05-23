@@ -29,10 +29,9 @@
 #define Pt_Xml_QName_h
 
 #include <Pt/Xml/Api.h>
-#include <Pt/Xml/Namespace.h>
 #include <Pt/String.h>
-#include <Pt/NonCopyable.h>
 #include <vector>
+#include <cstddef>
 
 namespace Pt {
 
@@ -139,98 +138,6 @@ inline bool operator<(const QName& a, const QName& b)
 	  return a.prefix() < b.prefix() ||
            ! (b.prefix() < a.prefix()) && a.name() < b.name();
 }
-
-
-//! @internal Stack of QNames.
-class QNameStack
-{
-    static const unsigned int BufSize = 16;
-
-    public:
-        inline QNameStack()
-        : _cur(0)
-        {
-            _cur = &_names[0]; 
-        }
-
-        inline void clear()
-        {
-            _cur->clear();
-
-            while(! empty() )
-                pop();
-        }
-
-        inline void pushChar(Char ch)
-        {                        
-            _cur->name() += ch;
-        }
-
-        inline bool pushPrefix()
-        {
-            if( _cur->prefix().empty() )
-            {
-                // TODO: use swap
-                _cur->setPrefix( _cur->name() );
-                _cur->name().clear();
-                return true;
-            }
-
-            return false;
-        }
-            
-        void pushName()
-        {
-            if( _cur >= _names && _cur < &_names[BufSize-1] )
-            {
-                ++_cur;
-            }
-            else
-            {
-                _extra.push_back( QName() );
-                _cur = &_extra.back();
-            }
-        }
-
-        std::size_t pop()
-        {
-            if( _extra.empty() )
-            {
-                --_cur;
-            }
-            else
-            {
-                _extra.pop_back();
-                _cur = _extra.empty() ? &_names[BufSize-1]
-                                        : &_extra.back();
-            }
-
-            std::size_t n = _cur->name().size() + _cur->prefix().size();
-            _cur->clear(); 
-            return n;
-        }
-
-        inline const QName& top() const
-        {
-            return _extra.size() == 1 ? _names[BufSize-1]
-                                      : *(_cur - 1);
-        }
-                
-        inline bool empty() const
-        {
-            return _cur == _names;
-        }
-
-        inline std::size_t size() const
-        {
-            return _extra.empty() ? _cur - _names : BufSize + _extra.size();
-        }
-
-    private:
-        QName* _cur;
-        QName _names[BufSize];
-        std::vector<QName> _extra;
-};
 
 } // namespace Xml
 

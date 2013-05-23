@@ -31,6 +31,7 @@
 #include <Pt/Xml/Api.h>
 #include <Pt/Xml/Node.h>
 #include <Pt/Xml/QName.h>
+#include <Pt/Xml/Namespace.h>
 #include <Pt/NonCopyable.h>
 #include <Pt/String.h>
 #include <vector>

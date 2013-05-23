@@ -29,6 +29,7 @@
 #include "ElementModel.h"
 #include "AttributeModel.h"
 #include "InputStack.h"
+#include "QNameStack.h"
 #include "NamespaceContext.h"
 
 #include <Pt/Xml/XmlReader.h>
