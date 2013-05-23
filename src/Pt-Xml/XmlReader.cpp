@@ -961,7 +961,8 @@ class XmlReaderImpl
             {
                 assert(_notation == 0);
 
-                // TODO: must only be declared once
+                // TODO: ignored when declared twice or error? nullptr is
+                //       returned when already declared.
                 _notation = _dtd.declareNotation(_token);
                 _token.clear();
                 _parse = &XmlReaderImpl::OnDtdNotationAfterName;
