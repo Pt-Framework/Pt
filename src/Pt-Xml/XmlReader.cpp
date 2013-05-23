@@ -3070,10 +3070,10 @@ class XmlReaderImpl
             if( c == std::char_traits<Char>::eof() || ! isAlpha(c) || _usedSize >= _maxSize)
                 throw SyntaxError("XML syntax error", line());
 
-            setCharactersEnd();
-
             _nameStack.pushChar(c);
             ++_usedSize;
+
+            setCharactersEnd();
 
             _parse = &XmlReaderImpl::onStartElement;
         }
@@ -3086,14 +3086,6 @@ class XmlReaderImpl
 
             switch(c)
             {
-                case ' ':
-                case '\n':
-                case '\t':
-                    _chars.appendSpace(ch);
-                    _chunkSize = _chars.content().size();
-                    _parse = &XmlReaderImpl::onCharacters;
-                    break;
-
                 case '\r':
                     _chunkSize = _chars.content().size();
                     _parse = &XmlReaderImpl::onCharactersCR;
@@ -3111,6 +3103,14 @@ class XmlReaderImpl
                     assert(_token.empty());
                     _parse = &XmlReaderImpl::onEntityReference;
                     break;
+
+                //case ' ':
+                //case '\n':
+                //case '\t':
+                //    _chars.appendSpace(ch);
+                //    _chunkSize = _chars.content().size();
+                //    _parse = &XmlReaderImpl::onCharacters;
+                //    break;
 
                 default:
                     _chars.append(ch);
@@ -3389,7 +3389,7 @@ class XmlReaderImpl
             // the normalized value, with the exception that a single #x20 is
             // appended for a #xD#xA sequence that is part of an external parsed
             // entity or the literal entity value of an internal parsed entity.
-            if( ch == '\r' | ch == '\n' | ch == '\t' )
+            if( ch == '\r' || ch == '\n' || ch == '\t' )
             {
                 ch = ' ';
             }
@@ -3543,13 +3543,18 @@ class XmlReaderImpl
 
         void afterEndElement(int c)
         {
-            _usedSize -= _nameStack.pop();
+            _usedSize -= _nameStack.pop() + _nsctx.popNamespace( _depth + 1 );
 
-            _parse = depth() == 0 ? &XmlReaderImpl::onEpilog
-                                  : &XmlReaderImpl::afterTag;
-
-            _usedSize -= _nsctx.popNamespace( _depth + 1 );
-            (this->*_parse)(c);
+            if( depth() == 0 )
+            {
+                _parse = &XmlReaderImpl::onEpilog;
+                onEpilog(c);
+            }
+            else
+            {
+                _parse = &XmlReaderImpl::afterTag;
+                afterTag(c);
+            }
         }
 
         void onCharacters(int c)
@@ -3574,19 +3579,19 @@ class XmlReaderImpl
                     _parse = &XmlReaderImpl::onCharactersCR;
                     break;
             
-                case ' ':
-                case '\t':
-                case '\n':
-                    _chars.appendSpace(ch);
-                    ++_chunkSize;
+                //case ' ':
+                //case '\t':
+                //case '\n':
+                //    _chars.appendSpace(ch);
+                //    ++_chunkSize;
 
-                    if(_chunkSize >= _maxChunkSize)
-                    {
-                        _parse = &XmlReaderImpl::onCharactersMax;
-                        setCharactersChunk();
-                    }
-                    
-                    break;
+                //    if(_chunkSize >= _maxChunkSize)
+                //    {
+                //        _parse = &XmlReaderImpl::onCharactersMax;
+                //        setCharactersChunk();
+                //    }
+                //    
+                //    break;
             
                 default:                   
                     _chars.append(ch);
@@ -3604,7 +3609,8 @@ class XmlReaderImpl
         {
             if(c != '\n')
             {
-                _chars.appendSpace('\n');
+                ///_chars.appendSpace('\n');
+                _chars.append('\n');
                 ++_chunkSize;
             }
             
@@ -3649,9 +3655,9 @@ class XmlReaderImpl
                     for(std::size_t n = 0; n < tokenSize; ++n)
                     {
                         Pt::Char c = _token[n];
-                        if(c == ' ' || c == '\n' || c == '\r' || c == '\t')
-                            _chars.appendSpace(c);
-                        else
+                        //if(c == ' ' || c == '\n' || c == '\r' || c == '\t')
+                        //    _chars.appendSpace(c);
+                        //else
                             _chars.append(c);
                     }
 
@@ -3663,7 +3669,7 @@ class XmlReaderImpl
                 }
                 else
                 {
-                    _entityRef.setName(_token); // use swap
+                    _entityRef.setName(_token);
                     resolveEntity(_entityRef);
                 }
 
@@ -3734,9 +3740,9 @@ class XmlReaderImpl
                 return;
             }
 
-            if( isSpace(ch) )
-                _chars.appendSpace(ch);
-            else
+            //if( isSpace(ch) )
+            //    _chars.appendSpace(ch);
+            //else
                 _chars.append(ch);
 
             ++_chunkSize;

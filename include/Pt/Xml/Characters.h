@@ -77,25 +77,18 @@ class Characters : public Node
         bool isSpace() const
         { return _isSpace; }
        
-        inline void appendSpace(Char ch)
-        {
-            _content += ch;
-        }
+        //inline void appendSpace(Char ch)
+        //{
+        //    _content += ch;
+        //}
 
         inline void append(Char ch)
         {
-            _isSpace = false;
+            if(_isSpace && ch != ' ' && ch != '\t' && ch != '\n')
+                _isSpace = false;
+
             _content += ch;
         }
-
-        void append(const Pt::String& str)
-        { _content.append(str); }
-
-        void resize(std::size_t n)
-        { _content.resize(n); }
-
-        void reserve(std::size_t n)
-        { _content.reserve(n); }
 
         /** @brief Returns the content as a string.
         */
