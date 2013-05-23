@@ -2937,8 +2937,6 @@ class XmlReaderImpl
 
             if(ch == '>')
             {
-                _usedSize -= _procInstr.target().size() + _procInstr.data().size();
-
                 setProcessingInstruction();
                 
                 if(depth() == 0)
@@ -3087,7 +3085,7 @@ class XmlReaderImpl
             switch(c)
             {
                 case '\r':
-                    _chunkSize = _chars.content().size();
+                    //_chunkSize = _chars.content().size();
                     _parse = &XmlReaderImpl::onCharactersCR;
                     break;
 
@@ -3114,7 +3112,8 @@ class XmlReaderImpl
 
                 default:
                     _chars.append(ch);
-                    _chunkSize = _chars.content().size();
+                    //_chunkSize = _chars.content().size();
+                    ++_chunkSize;
                     _parse = &XmlReaderImpl::onCharacters;
                     break;
             }
@@ -3705,7 +3704,8 @@ class XmlReaderImpl
             {
                 _token.clear();
 
-                _chunkSize = _chars.content().size();
+                assert( _chunkSize == _chars.content().size() );
+                //_chunkSize = _chars.content().size();
 
                 if( (_options & ReportCData) && ! _chars.empty() )
                 {
@@ -4067,6 +4067,8 @@ class XmlReaderImpl
         {
             if(_options & ReportProcessingInstructions)
                 _current = &_procInstr;
+
+            _usedSize -= _procInstr.target().size() + _procInstr.data().size();
         }
 
         void setStartElement()
@@ -4159,14 +4161,16 @@ class XmlReaderImpl
 
         inline void setCharactersChunk()
         {
+            _chars.setChunk(true);
             _current = &_chars;
             _chunkSize = 0;
         }
 
         inline void setCharactersEnd()
         {
-            if( ! _chars.content().empty() )
+            if( _chunkSize != 0 )
             {
+                _chars.setChunk(false);
                 _current = &_chars;
                 _chunkSize = 0;
             }

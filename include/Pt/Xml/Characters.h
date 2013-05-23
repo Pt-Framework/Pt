@@ -66,6 +66,12 @@ class Characters : public Node
         bool isCData() const
         { return _cdata; }
 
+        void setChunk(bool val)
+        { _isChunk = val; }
+
+        bool isChunk() const
+        { return _isChunk; }
+
         void clear()
         { 
             _content.clear(); 
