@@ -744,6 +744,9 @@
     <ClInclude Include="..\..\src\Pt-Xml\QNameStack.h">
       <Filter>Pt-Xml</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Xml\XmlDeclaration.h">
+      <Filter>Pt-Xml</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">

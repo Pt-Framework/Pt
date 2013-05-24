@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005-2007 by Dr. Marc Boris Duerner
+ * Copyright (C) 2005-2013 by Dr. Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,6 +25,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef PT_XML_API_H
 #define PT_XML_API_H
 
@@ -55,13 +56,24 @@ namespace Xml {
     class DocTypeValidator;
     class EndDocument;
     class EndElement;
-
     class Entity;
     class EntityReference;
+    class InputSource;
     class Namespace;
+    class Node;
+    class Notation;
+    class ProcessingInstruction;
     class QName;
+    class StartDocument;
     class StartElement;
+    class XmlDeclaration;
+    class XmlDeserializer;
+    class XmlError;
+    class XmlFormatter;
     class XmlReader;
+    class XmlResolver;
+    class XmlSerializationContext;
+    class XmlSerializer;
     class XmlWriter;
 
 } // namespace Xml

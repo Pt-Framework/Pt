@@ -25,6 +25,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef Pt_Xml_StartElement_h
 #define Pt_Xml_StartElement_h
 
@@ -96,7 +97,7 @@ class Attribute
         String _value;
 };
 
-/** @brief An attribute list of a start element.
+/** @brief An attribute list of an XML element.
 */
 class PT_XML_API AttributeList : private NonCopyable
 {

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Marc Boris Duerner
+ * Copyright (C) 2012 Marc Boris Duerner
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,43 +25,55 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-
-#ifndef Pt_Xml_Notation_h
-#define Pt_Xml_Notation_h
+#ifndef Pt_Xml_XmlDeclaration_h
+#define Pt_Xml_XmlDeclaration_h
 
 #include <Pt/Xml/Api.h>
 #include <Pt/String.h>
+#include <string>
 
 namespace Pt {
 
 namespace Xml {
 
-class Notation 
+/** @brief XML declaration.
+*/
+class XmlDeclaration
 {
     public:
-        explicit Notation(const Pt::String& name)
-        : _name(name)
-        { }
+        XmlDeclaration()
+        : _standalone(false)
+        {}
+       
+        void clear()
+        {
+            _version.clear();
+            _encoding.clear();
+            _standalone = false;
+        }
+        
+        const std::string& version() const
+        { return _version; }
 
-        const Pt::String& name() const
-        { return _name; }
+        std::string& version()
+        { return _version; }
 
-        const Pt::String& publicId() const
-        { return _publicId; }
+        const std::string& encoding() const
+        { return _encoding; }
 
-        void setPublicId(const Pt::String& pubId)
-        { _publicId = pubId; }
+        std::string& encoding()
+        { return _encoding;}
 
-        const Pt::String& systemId() const
-        { return _systemId; }
-
-        void setSystemId(const Pt::String& sysId)
-        { _systemId = sysId; }
+        bool isStandalone() const
+        { return _standalone; }
+        
+        void setStandalone(bool value)
+        { _standalone = value; }
 
     private:
-        Pt::String _name;
-        Pt::String _publicId;
-        Pt::String _systemId;
+        std::string _version;
+        std::string _encoding;
+        bool _standalone;
 };
 
 } // namespace Xml

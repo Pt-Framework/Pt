@@ -1118,6 +1118,8 @@ void BinaryInputSource::onDeclaration()
             return;
     }
 
+    // TODO: BOM for 16 and 32 bit unicode
+
     const char* encoding = _xmlDecl.encoding().c_str();
     TextCodec<Char, char>* codec = 0;
     if(_resolver)

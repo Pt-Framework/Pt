@@ -43,6 +43,7 @@ class Node;
 class DocTypeDefinition;
 class InputSource;
 class XmlResolver;
+class InputIterator;
 
 /** @brief Reads XML as a Stream of XML Nodes.
 
@@ -81,9 +82,6 @@ class XmlResolver;
 */
 class PT_XML_API XmlReader : private NonCopyable
 {
-    public:
-        class Iterator;
-
     public:
         /** @brief Default Constructor.
         */
@@ -182,11 +180,11 @@ class PT_XML_API XmlReader : private NonCopyable
 
         /** @brief Returns an iterator to the current node.
         */
-        Iterator current();
+        InputIterator current();
 
         /** @brief Returns an iterator to the end of the document.
         */
-        Iterator end() const;
+        InputIterator end() const;
 
         //! @brief Get current node.
         Node& get();
@@ -206,28 +204,29 @@ class PT_XML_API XmlReader : private NonCopyable
         { return _impl; }
 };
 
-// TODO: rename InputIterator
-class XmlReader::Iterator
+/** @brief Input iterator to read XML nodes with an XmlReader.
+*/
+class InputIterator
 {
     public:
-        Iterator()
+        InputIterator()
         : _stream(0)
         , _node(0)
         { }
 
-        explicit Iterator(XmlReader& xis)
+        explicit InputIterator(XmlReader& xis)
         : _stream(&xis)
         , _node(0)
         { _node = &_stream->get(); }
 
-        Iterator(const Iterator& it)
+        InputIterator(const InputIterator& it)
         : _stream(it._stream), _node(it._node)
         { }
 
-        ~Iterator()
+        ~InputIterator()
         { }
 
-        Iterator& operator=(const Iterator& it)
+        InputIterator& operator=(const InputIterator& it)
         {
             _stream = it._stream;
             _node = it._node;
@@ -240,7 +239,7 @@ class XmlReader::Iterator
         inline Node* operator->()
         { return _node; }
 
-        Iterator& operator++()
+        InputIterator& operator++()
         {
             if(_node->type() == Node::EndDocument)
                 _node = 0;
@@ -250,10 +249,10 @@ class XmlReader::Iterator
             return *this;
         }
 
-        inline bool operator==(const Iterator& it) const
+        inline bool operator==(const InputIterator& it) const
         { return _node == it._node; }
 
-        inline bool operator!=(const Iterator& it) const
+        inline bool operator!=(const InputIterator& it) const
         { return _node != it._node; }
 
     private:
@@ -262,15 +261,15 @@ class XmlReader::Iterator
 };
 
 
-inline XmlReader::Iterator XmlReader::current()
+inline InputIterator XmlReader::current()
 {
-    return Iterator(*this); 
+    return InputIterator(*this); 
 }
 
 
-inline XmlReader::Iterator XmlReader::end() const
+inline InputIterator XmlReader::end() const
 {
-    return Iterator(); 
+    return InputIterator(); 
 }
 
 }

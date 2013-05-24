@@ -25,19 +25,19 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef Pt_Xml_QName_h
 #define Pt_Xml_QName_h
 
 #include <Pt/Xml/Api.h>
 #include <Pt/String.h>
-#include <vector>
 #include <cstddef>
 
 namespace Pt {
 
 namespace Xml {
 
-/** @brief A namespace qualified XML name
+/** @brief A qualified XML name
 */
 class QName 
 {
@@ -55,26 +55,18 @@ class QName
             _prefix.clear();
         }
 
+        /** @brief Returns true if empty.
+        */
         bool empty() const
         {
             return _prefix.empty() && _name.empty(); 
         }
 
+        /** @brief Returns the size of the prefix and local part.
+        */
         inline std::size_t size() const
         {
             return _prefix.size() + _name.size(); 
-        }
-
-        template <typename T>
-        bool equals(const T* name) const
-        {
-            return _name == name;
-        }
-
-        template <typename T>
-        bool equals(const T* prefix, const T* name) const
-        {
-            return _name == name && _prefix == prefix;
         }
 
         /** @brief Returns the namespace prefix.
@@ -102,37 +94,42 @@ class QName
         const String& name() const
         { return _name; }
 
+        /** @brief Returns the local name.
+        */
+        String& local() 
+        { return _name; }
+
+        /** @brief Returns the local name.
+        */
+        const String& local() const
+        { return _name; }
+
         /** @brief Sets the local name.
         */
-        void setName(const String& name)
+        void setLocal(const String& name)
         { _name = name; }
-
-        //! @internal
-        void addName(Char ch)
-        { _name += ch; }
-
-        //! @internal
-        void clearName()
-        { _name.clear(); }
 
     private:
         String _prefix;
         String _name;
 };
 
-
+/** @brief Returns true if equal.
+*/
 inline bool operator ==(const QName& a, const QName& b)
 {
     return a.prefix() == b.prefix() && a.name() == b.name();
 }
 
-
+/** @brief Returns true if not equal.
+*/
 inline bool operator !=(const QName& a, const QName& b)
 {
     return a.prefix() != b.prefix() || a.name() != b.name();
 }
 
-
+/** @brief Returns true if less.
+*/
 inline bool operator<(const QName& a, const QName& b)
 {
 	  return a.prefix() < b.prefix() ||

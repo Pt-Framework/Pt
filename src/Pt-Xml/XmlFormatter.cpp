@@ -35,8 +35,6 @@
 #include <Pt/Composer.h>
 #include "Pt/Convert.h"
 #include "Pt/String.h"
-#include "Pt/SourceInfo.h"
-#include <stdexcept>
 
 namespace Pt {
 
@@ -44,33 +42,16 @@ namespace Xml {
 
 XmlFormatter::XmlFormatter()
 : _writer(0)
-, _wrPtr(0)
 , _reader(0)
-, _rdPtr(0)
 , _composer(0)
 {
     _processNode = &XmlFormatter::OnBegin;
 }
 
 
-//XmlFormatter::XmlFormatter(std::ostream& os)
-//: _writer(0)
-//, _wrPtr(0)
-//, _reader(0)
-//, _rdPtr(0)
-//, _composer(0)
-//{
-//    this->attach(os);
-//    _processNode = &XmlFormatter::OnBegin;
-//    _writer = _wrPtr.get();
-//}
-
-
 XmlFormatter::XmlFormatter(XmlWriter& writer)
 : _writer(0)
-, _wrPtr(0)
 , _reader(0)
-, _rdPtr(0)
 , _composer(0)
 {
     this->attach(writer);
@@ -80,9 +61,7 @@ XmlFormatter::XmlFormatter(XmlWriter& writer)
 
 XmlFormatter::XmlFormatter(XmlReader& reader)
 : _writer(0)
-, _wrPtr(0)
 , _reader(0)
-, _rdPtr(0)
 , _composer(0)
 {
     this->attach(reader);
@@ -96,46 +75,22 @@ XmlFormatter::~XmlFormatter()
 }
 
 
-//void XmlFormatter::attach(std::ostream& os)
-//{
-//    if (_writer)
-//        throw std::logic_error("XmlSerizalizer is already open." + PT_SOURCEINFO);
-//
-//    _wrPtr.reset(new XmlWriter(os));
-//    _writer = _wrPtr.get();
-//}
-
-
 void XmlFormatter::attach(XmlWriter& writer)
 {
-    if (_writer)
-        throw std::logic_error("XmlSerizalizer is already open." + PT_SOURCEINFO);
-
-    _wrPtr.reset(0);
     _writer = &writer;
 }
 
 
 void XmlFormatter::attach(XmlReader& reader)
 {
-    _rdPtr.reset(0);
     _reader = &reader;
 }
 
 
 void XmlFormatter::detach()
 {
-    if (_writer)
-    {
-        _wrPtr.reset(0);
-        _writer = 0;
-    }
-
-    if (_reader)
-    {
-        _rdPtr.reset(0);
-        _reader = 0;
-    }
+    _writer = 0;
+    _reader = 0;
 }
 
 
@@ -395,25 +350,21 @@ void XmlFormatter::onFinishObject()
 
 void XmlFormatter::parse(IComposer& comp)
 {
-    //std::cerr << "-> GET"<< std::endl;
     _composer = &comp;
 
     _processNode = &XmlFormatter::OnBegin;
 
-    XmlReader::Iterator it = _reader->current();
+    InputIterator it = _reader->current();
     if(it->type() == Node::EndElement)
         ++it;
 
     for( ; it != _reader->end(); ++it)
     {
-        //std::cerr << "-> GOT NODE: " << it->type() << std::endl;
         (this->*_processNode)(*it);
 
         if(_composer == 0)
             break;
     }
-
-    //std::cerr << "-> DONE"<< std::endl;
 }
 
 
@@ -426,7 +377,6 @@ bool XmlFormatter::parseSome(IComposer& comp)
         const Pt::Xml::Node* node = _reader->advance();
         if( ! node)
             break;
-        //std::cerr << "-> GOT NODE: " << node.type() << std::endl;
 
         if(node->type() == Node::EndDocument)
             throw SerializationError("incomplete type");
@@ -435,35 +385,29 @@ bool XmlFormatter::parseSome(IComposer& comp)
 
         if( _composer == 0 )
         {
-            //std::cerr << "-> COMPOSER END" << std::endl;
             _processNode = &XmlFormatter::OnBegin;
             return true;
         }
     }
 
-    //std::cerr << "-> COMPOSER MORE" << std::endl;
     return false;
 }
 
 
 void XmlFormatter::OnBegin(const Node& node)
 {
-    //std::cerr << "-> OnBegin" << std::endl;
-
     switch( node.type() )
     {
         case Node::StartElement:
         {
             const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
 
-            //std::cerr << "BEGIN MEMBER: " << se.name().narrow() << std::endl;
             Pt::String name = se.name().name();
             _composer->setName( name.narrow() );
 
             AttributeList::ConstIterator nodeId = se.attributes().find(L"id");
             if( nodeId != se.attributes().end() )
             {
-                //std::cerr << "ID: " << nodeId.narrow() << std::endl;
                 _composer->setId( nodeId->value().narrow() );
             }
 
@@ -474,14 +418,12 @@ void XmlFormatter::OnBegin(const Node& node)
             }
             else
             {
-                //std::cerr << "TYPE: " << type.narrow() << std::endl;
                 _composer->setTypeName(type->value().narrow());
             }
 
             AttributeList::ConstIterator refId = se.attributes().find(L"ref");
             if( refId!= se.attributes().end() )
             {
-                //std::cerr << "REF: " << refId.narrow() << std::endl;
                 _composer->setReference( refId->value().narrow() );
                 _processNode = &XmlFormatter::OnReferenceBegin;
                 break;
@@ -504,8 +446,6 @@ void XmlFormatter::OnBegin(const Node& node)
 
 void XmlFormatter::OnReferenceBegin(const Node& node)
 {
-    //std::cerr << "-> OnReferenceBegin" << std::endl;
-
     switch( node.type() )
     {
         case Node::StartElement:
@@ -528,8 +468,6 @@ void XmlFormatter::OnReferenceBegin(const Node& node)
 
 void XmlFormatter::OnMemberBegin(const Node& node)
 {
-    //std::cerr << "-> OnMemberBegin" << std::endl;
-
     switch( node.type() )
     {
         case Node::StartElement:
@@ -549,7 +487,6 @@ void XmlFormatter::OnMemberBegin(const Node& node)
 
         case Node::EndElement:
         {
-            //std::cerr << "VALUE: <empty>" << std::endl;
             _composer->setString(Pt::String() );
 
             const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
@@ -608,8 +545,6 @@ void setValue(Pt::IComposer& composer, const Pt::String& value)
 
 void XmlFormatter::OnValue(const Node& node)
 {
-    //std::cerr << "-> OnValue" << std::endl;
-
     switch( node.type() )
     {
         case Node::StartElement:
@@ -621,9 +556,7 @@ void XmlFormatter::OnValue(const Node& node)
 
         case Node::EndElement:
         {
-            //std::cerr << "VALUE: " << _value.narrow() << std::endl;
             setValue(*_composer, _value);
-            //_composer->setString(_value);
 
             const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
             this->finishXmlMember(ee);
@@ -638,8 +571,6 @@ void XmlFormatter::OnValue(const Node& node)
 
 void XmlFormatter::OnMemberEnd(const Node& node)
 {
-    //std::cerr << "-> OnMemberEnd" << std::endl;
-
     switch( node.type() )
     {
         case Node::StartElement:
@@ -664,28 +595,24 @@ void XmlFormatter::OnMemberEnd(const Node& node)
 
 void XmlFormatter::beginXmlMember(const Xml::StartElement& se)
 {
-    //std::cerr << "BEGIN MEMBER: " << se.name().narrow() << std::endl;
     const Pt::String& name = se.name().name();
     _composer = _composer->beginMember(name.narrow() );
 
     AttributeList::ConstIterator nodeId = se.attributes().find(L"id");
     if( nodeId != se.attributes().end() )
     {
-        //std::cerr << "ID: " << nodeId.narrow() << std::endl;
         _composer->setId( nodeId->value().narrow() );
     }
 
     AttributeList::ConstIterator type = se.attributes().find(L"type");
     if( type != se.attributes().end() )
     {
-        //std::cerr << "BTYPE: " << type.narrow() << std::endl;
         _composer->setTypeName(type->value().narrow());
     }
 
     AttributeList::ConstIterator refId = se.attributes().find(L"ref");
     if( refId != se.attributes().end() )
     {
-        //std::cerr << "REF: " << refId.narrow() << std::endl;
         _composer->setReference( refId->value().narrow() );
         _processNode = &XmlFormatter::OnReferenceBegin;
         return;
@@ -697,8 +624,6 @@ void XmlFormatter::beginXmlMember(const Xml::StartElement& se)
 
 void XmlFormatter::finishXmlMember(const Xml::EndElement& )
 {
-    //const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
-    //std::cerr << "END MEMBER: " << ee.name().narrow() << std::endl;
     _composer = _composer->finish();
     _processNode = &XmlFormatter::OnMemberEnd;
 }

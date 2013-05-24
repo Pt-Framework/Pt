@@ -38,8 +38,9 @@ namespace Pt {
 
 namespace Xml {
 
-// TODO: inline?
-class PT_XML_API Entity
+/** @brief An entity declaration.
+*/
+class Entity
 {
     public:
         explicit Entity(const Pt::String& name)
@@ -92,14 +93,6 @@ class PT_XML_API Entity
             _value = notation; 
         }
 
-        /** @brief Replaces the entity with its string value.
-        */
-        static bool resolveDefaultEntity(String& entity);
-        
-        /** @brief Replaces the entity with its string value.
-        */
-        static bool resolveCharacterEntity(String& entity);
-
     private:
         Pt::String _name;
         Pt::String _publicId;
@@ -108,28 +101,39 @@ class PT_XML_API Entity
         bool _ndata;
 };
 
-
-// TODO: inline ?
-class PT_XML_API EntityReference : public Node
-                                 , private NonCopyable 
+/** @brief An entity reference XML node.
+*/
+class EntityReference : public Node
+                      , private NonCopyable 
 {
     public:
         /** @brief Creates an EntityReference object.
         */
-        EntityReference();
+        EntityReference()
+        : Node(Node::EntityReference)
+        , _entity(0)
+        { }
 
-        void clear();
+        void clear()
+        {
+            _name.clear();
+            _entity = 0;
+        }
 
-        void setName(const Pt::String& name);
+        void setName(const Pt::String& name)
+        { _name = name; }
 
-        void setEntity(const Entity* entity);
+        void setEntity(const Entity* entity)
+        { _entity = entity; }
 
-        const Pt::String& name() const;
+        const Pt::String& name() const
+        { return _name; }
 
         Pt::String& name()
         { return _name; }
         
-        const Entity* get() const;
+        const Entity* get() const
+        { return _entity; }
 
         //! @internal
         inline static Node::Type nodeId()
@@ -163,6 +167,14 @@ inline const EntityReference& toEntityReference(const Node& node)
 {
     return nodeCast<EntityReference>(node);
 }
+
+/** @internal @brief Replaces the entity with its string value.
+*/
+bool resolveDefaultEntity(String& entity);
+        
+/** @internal @brief Replaces the entity with its string value.
+*/
+bool resolveCharacterEntity(String& entity);
 
 } // namespace Xml
 

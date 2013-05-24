@@ -1505,7 +1505,7 @@ class XmlReaderImpl
                         throw SyntaxError("self reference", line());
                 }
 
-                if( ! Entity::resolveCharacterEntity(_token) )
+                if( ! resolveCharacterEntity(_token) )
                 {
                     _token = '&' + _token + ';';
                 }
@@ -1704,7 +1704,7 @@ class XmlReaderImpl
                     throw SyntaxError("invalid name", line());
 
                 _qname.setPrefix(_qname.name() ); // TODO: use swap
-                _qname.clearName();
+                _qname.name().clear();
                 return;
             }
 
@@ -3420,7 +3420,7 @@ class XmlReaderImpl
             {       
                 _usedSize -= _token.size();        
                 
-                if( Entity::resolveDefaultEntity(_token) )
+                if( resolveDefaultEntity(_token) )
                 {
                     _attr->value() += _token;
                     _usedSize += _token.size();
@@ -3648,7 +3648,7 @@ class XmlReaderImpl
                 _usedSize -= _token.size();
                 _parse = &XmlReaderImpl::onCharacters;
 
-                if( Entity::resolveDefaultEntity(_token) )
+                if( resolveDefaultEntity(_token) )
                 {
                     const std::size_t tokenSize = _token.size();
                     _chunkSize += tokenSize;

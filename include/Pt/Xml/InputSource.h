@@ -29,6 +29,7 @@
 #define Pt_Xml_InputSource_h
 
 #include <Pt/Xml/Api.h>
+#include <Pt/Xml/XmlDeclaration.h>
 #include <Pt/NonCopyable.h>
 #include <Pt/TextBuffer.h>
 #include <Pt/TextStream.h>
@@ -45,47 +46,6 @@ namespace Pt {
 namespace Xml {
 
 class XmlResolver;
-
-class XmlDeclaration
-{
-    public:
-        XmlDeclaration()
-        : _standalone(false)
-        {}
-
-        ~XmlDeclaration()
-        {}
-        
-        void clear()
-        {
-            _version.clear();
-            _encoding.clear();
-            _standalone = false;
-        }
-        
-        const std::string& version() const
-        { return _version; }
-
-        std::string& version()
-        { return _version; }
-
-        const std::string& encoding() const
-        { return _encoding; }
-
-        std::string& encoding()
-        { return _encoding;}
-
-        bool isStandalone() const
-        { return _standalone; }
-        
-        void setStandalone(bool value)
-        { _standalone = value; }
-
-    private:
-        std::string _version;
-        std::string _encoding;
-        bool _standalone;
-};
 
 /** @brief Input source for the XML reader
 */
@@ -123,6 +83,7 @@ class InputSource : private NonCopyable
                           : onGet();
         }
 
+        // @brief Returns nullptr if input source has no XML declaration.
         const XmlDeclaration* declaration() const
         { return _decl; }
 
@@ -150,7 +111,8 @@ class InputSource : private NonCopyable
         XmlDeclaration* _decl;
 };
 
-
+/** @brief Text input source for the XML reader
+*/
 class PT_XML_API TextInputSource : public InputSource
 {
     public:
@@ -183,7 +145,8 @@ class PT_XML_API TextInputSource : public InputSource
         const char* _pbEnd;
 };
 
-
+/** @brief String input source for the XML reader
+*/
 class PT_XML_API StringInputSource : public TextInputSource
 {
     public:
@@ -196,7 +159,8 @@ class PT_XML_API StringInputSource : public TextInputSource
         StringStream _ss;
 };
 
-
+/** @brief Binary input source for the XML reader
+*/
 class PT_XML_API BinaryInputSource : public InputSource
 {  
     public:
@@ -243,7 +207,8 @@ class PT_XML_API BinaryInputSource : public InputSource
         const char* _pbEnd;
 };
 
-
+/** @brief Null input source for the XML reader
+*/
 class NullInputSource : public InputSource
 {
     public:

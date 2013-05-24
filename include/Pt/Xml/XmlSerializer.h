@@ -59,18 +59,6 @@ class XmlSerializer : public Serializer
             this->setFormatter(_formatter);
         }
 
-        /** @brief Construct a serializer writing to a byte stream
-
-            The serializer will write the objects as XML with
-            UTF-8 encoding to the output stream.
-        */
-        //explicit XmlSerializer(std::ostream& os)
-        //: _formatter(os)
-        //{
-        //    this->reset( &_xmlcontext );
-        //    this->setFormatter(_formatter);
-        //}
-
         /** @brief Construct a serializer writing to the given XmlWriter object
 
             The serializer will write the objects to the given XmlWriter object.
@@ -83,22 +71,6 @@ class XmlSerializer : public Serializer
             this->reset( &_xmlcontext );
             this->setFormatter(_formatter);
         }
-
-        /** @brief Opens this serializer for writing into the given stream.
-
-            The serializer will write the objects as XML with
-            UTF-8 encoding to the output stream.
-
-            This method does not have to be called if this XmlSerializer object
-            was constructed using the constructor that takes an ostream or
-            XmlWriter object. If this method is called anyway or called twice an
-            std::logic_error is thrown.
-        */
-
-        //void attach(std::ostream& os)
-        //{
-        //    _formatter.attach(os);
-        //}
 
         /** @brief Opens this serializer for writing into the given XmlWriter object.
 

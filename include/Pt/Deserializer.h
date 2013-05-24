@@ -54,6 +54,7 @@ class PT_API Deserializer
 
         void setFormatter(Formatter& formatter);
 
+        // TODO: rethink clear/reset i.e. for derived XmlDesrializer
         void clear();
 
         /** @brief Deserialize an object

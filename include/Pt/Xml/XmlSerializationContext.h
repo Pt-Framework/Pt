@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008 by Marc Boris Duerner
+ * Copyright (C) 2008-2013 by Marc Boris Duerner
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,6 +25,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef Pt_Xml_XmlSerializationContext_h
 #define Pt_Xml_XmlSerializationContext_h
 
@@ -37,16 +38,18 @@ namespace Pt {
 
 namespace Xml {
 
-class XmlFormatter;
-
+/** @brief Serialization context for XML serialization.
+*/
 class PT_XML_API XmlSerializationContext : public SerializationContext
 {
     public:
+        //! @brief Default Constructor.
         XmlSerializationContext();
 
-        //! @brief Destructor
+        //! @brief Destructor.
         ~XmlSerializationContext();
 
+        //TODO: should this really be virtual?
         virtual void reset();
 
     public:
@@ -93,9 +96,6 @@ class PT_XML_API XmlSerializationContext : public SerializationContext
                 , _fixup(handler)
                 , _type(type)
                 , _m(m)
-                {}
-
-                ~Fixup()
                 {}
 
                 void* instance() const

@@ -59,7 +59,7 @@ bool Scanner::advance(const Pt::Xml::Node& node)
             {
                 const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
 
-                if( ! se.name().equals("value") )
+                if( se.name().name() != L"value" )
                     throwSerializationError();
 
                 _state = OnValueBegin;
@@ -80,23 +80,23 @@ bool Scanner::advance(const Pt::Xml::Node& node)
                 const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
 
                 log_debug("-> found type " << se.name().narrow());
-                if( se.name().equals("struct") )
+                if( se.name().name() == "struct" )
                 {
                     _state = OnStructBegin;
                 }
-                else if(se.name().equals("array"))
+                else if(se.name().name() == "array")
                 {
                     _state = OnArrayBegin;
                 }
-                else if(se.name().equals("int") || se.name().equals("i4"))
+                else if(se.name().name() == "int" || se.name().name() == "i4")
                 {
                     _state = OnIntBegin;
                 }
-                else if(se.name().equals("boolean"))
+                else if(se.name().name() == "boolean")
                 {
                     _state = OnBoolBegin;
                 }
-                else if(se.name().equals("double"))
+                else if(se.name().name() == "double")
                 {
                     _state = OnDoubleBegin;
                 }
@@ -145,8 +145,8 @@ bool Scanner::advance(const Pt::Xml::Node& node)
             if(node.type() == Xml::Node::EndElement)
             {
                 const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
-                ;
-                if( ee.name().equals("member") )
+
+                if( ee.name().name() == "member" )
                 {
                     log_debug("OnValueEnd member");
                     _current = _current->finish();
@@ -155,7 +155,7 @@ bool Scanner::advance(const Pt::Xml::Node& node)
 
                     _state = OnStructBegin;
                 }
-                else if( ee.name().equals("data") )
+                else if( ee.name().name() == "data" )
                 {
                     log_debug("OnValueEnd data");
                     _current = _current->finish();
@@ -164,7 +164,7 @@ bool Scanner::advance(const Pt::Xml::Node& node)
 
                     _state = OnDataEnd;
                 }
-                else if( ee.name().equals("param") )
+                else if( ee.name().name() == "param" )
                 {
                     log_debug("OnValueEnd data other " << ee.name().narrow());
                     if( 0 != _current->finish() )
@@ -173,7 +173,7 @@ bool Scanner::advance(const Pt::Xml::Node& node)
                     _state = OnValueEnd;
                     return true;
                 }
-                else if( ee.name().equals("fault") )
+                else if( ee.name().name() == "fault" )
                 {
                     log_debug("OnValueEnd data other " << ee.name().narrow());
                     if( 0 != _current->finish() )
@@ -190,7 +190,7 @@ bool Scanner::advance(const Pt::Xml::Node& node)
             else if(node.type() == Xml::Node::StartElement)
             {
                 const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
-                if(se.name().equals("value"))
+                if(se.name().name() == "value")
                 {
                     log_debug("OnValueEnd data value");
                     _current = _current->finish();
@@ -217,7 +217,7 @@ bool Scanner::advance(const Pt::Xml::Node& node)
             {
                 const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
 
-                if( ! se.name().equals("member"))
+                if(se.name().name() != L"member")
                     throwSerializationError();
 
                 _state = OnMemberBegin;
@@ -256,7 +256,7 @@ bool Scanner::advance(const Pt::Xml::Node& node)
             {
                 const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
 
-                if( ! se.name().equals("name"))
+                if( se.name().name() != L"name")
                     throwSerializationError();
 
                 _state = OnNameBegin;
@@ -316,7 +316,7 @@ bool Scanner::advance(const Pt::Xml::Node& node)
             {
                 const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
 
-                if( ! se.name().equals("value") )
+                if( se.name().name() != L"value" )
                     throwSerializationError();
 
                 _state = OnValueBegin;
@@ -514,7 +514,7 @@ bool Scanner::advance(const Pt::Xml::Node& node)
             {
                 const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
 
-                if( ! se.name().equals("data") )
+                if( se.name().name() != L"data" )
                     throwSerializationError();
 
                 _state = OnDataBegin;

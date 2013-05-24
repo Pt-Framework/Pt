@@ -41,7 +41,7 @@ namespace Xml {
 class PT_XML_API XmlError : public std::runtime_error
 {
     public:
-        /** @brief XML format errors.
+        /** @brief Construct with message.
         */
         explicit XmlError(const char* what);
 

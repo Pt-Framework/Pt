@@ -181,6 +181,7 @@
     <ClInclude Include="..\..\include\Pt\Xml\QName.h" />
     <ClInclude Include="..\..\include\Pt\Xml\StartDocument.h" />
     <ClInclude Include="..\..\include\Pt\Xml\StartElement.h" />
+    <ClInclude Include="..\..\include\Pt\Xml\XmlDeclaration.h" />
     <ClInclude Include="..\..\include\Pt\Xml\XmlDeserializer.h" />
     <ClInclude Include="..\..\include\Pt\Xml\XmlError.h" />
     <ClInclude Include="..\..\include\Pt\Xml\XmlFormatter.h" />

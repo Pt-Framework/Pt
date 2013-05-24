@@ -38,19 +38,17 @@ namespace Xml {
 /** @brief A namespace used in an XML document.
   
    A namespace consists of a name, normally a namespace URI, a locally used
-   prefix and the element depth which indicates te scope of the namespace.
-  
-   @see NamespaceContext
-  */
+   prefix and the element depth which indicates the scope of the namespace.
+*/
 class Namespace 
 {
     public:
         /** @brief Constructs a Namespace with scope depth, name and prefix.
         */
-        Namespace(unsigned depth, const String& prefix, const String& name)
+        Namespace(unsigned depth, const String& prefix, const String& uri)
         : _depth(depth)
         , _prefix(prefix)
-        , _name(name)
+        , _uri(uri)
         { }
 
         /** @brief Returns the scope depth of the namespace.
@@ -68,28 +66,30 @@ class Namespace
         void setPrefix(const String& prefix)
         { _prefix = prefix; }
 
-        /** @brief Returns the namespace name.
+        /** @brief Returns the namespace URI.
         */
         const String& namespaceUri() const
-        { return _name; }
+        { return _uri; }
 
-        /** @brief Sets the name of the namespace.
+        /** @brief Sets the URI of the namespace.
         */
-        void setNamespaceUri(const String& name)
-        { _name = name; }
+        void setNamespaceUri(const String& uri)
+        { _uri = uri; }
 
         /** @brief Returns true if this is the default namespace.
         */
         bool isDefaultNamespace() const
         { return _prefix.empty(); }
 
+        /** @brief Returns true if explicitly unset.
+        */
         bool isUnset() const
-        { return _name.empty(); }
+        { return _uri.empty(); }
 
     private:
         unsigned _depth;
         String _prefix;
-        String _name;
+        String _uri;
 };
 
 }

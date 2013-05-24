@@ -25,6 +25,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef Pt_Xml_ProcessingInstruction_h
 #define Pt_Xml_ProcessingInstruction_h
 
@@ -43,7 +44,7 @@ namespace Xml {
      processing instruction has no particular format and can contain plain
      text or XML-like attribute/value-associations.
 */
-class PT_XML_API ProcessingInstruction : public Node 
+class ProcessingInstruction : public Node 
 {
     public:
         /** @brief Constructs a ProcessingInstruction.

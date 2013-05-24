@@ -33,7 +33,6 @@
 #include <Pt/Xml/XmlReader.h>
 #include <Pt/String.h>
 #include <Pt/Formatter.h>
-#include <memory>
 
 namespace Pt {
 
@@ -61,14 +60,7 @@ class PT_XML_API XmlFormatter : public Formatter
         */
         XmlFormatter();
 
-        /** @brief Construct a serializer writing to a byte stream
-
-            The serializer will write the objects as XML with
-            UTF-8 encoding to the output stream.
-        */
-        //explicit XmlFormatter(std::ostream& os);
-
-        /** @brief Construct a serializer writing to the given XmlWriter object
+        /** @brief Construct a formatter writing to a XmlWriter.
 
             The serializer will write the objects to the given XmlWriter object.
             This class will not free the given XmlWriter object. The caller is
@@ -80,18 +72,6 @@ class PT_XML_API XmlFormatter : public Formatter
 
         //! @brief Destructor
         ~XmlFormatter();
-
-        /** @brief Opens this serializer for writing into the given stream.
-
-            The serializer will write the objects as XML with
-            UTF-8 encoding to the output stream.
-
-            This method does not have to be called if this XmlSerializer object
-            was constructed using the constructor that takes an ostream or
-            XmlWriter object. If this method is called anyway or called twice an
-            std::logic_error is thrown.
-        */
-        //void attach(std::ostream& os);
 
         /** @brief Opens this serializer for writing into the given XmlWriter object.
 
@@ -218,13 +198,7 @@ class PT_XML_API XmlFormatter : public Formatter
         XmlWriter* _writer;
 
         //! @internal
-        std::auto_ptr<XmlWriter> _wrPtr;
-
-        //! @internal
         XmlReader* _reader;
-
-        //! @internal
-        std::auto_ptr<XmlReader> _rdPtr;
 
         //! @internal
         Pt::String _value;

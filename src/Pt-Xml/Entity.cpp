@@ -27,17 +27,14 @@
  */
  
 #include "Pt/Xml/Entity.h"
-#include "Pt/Xml/StartElement.h"
-#include "Pt/Xml/Characters.h"
-#include "Pt/Xml/XmlError.h"
-#include <Pt/StringStream.h>
-#include <stdexcept>
+#include <Pt/Types.h>
+#include <Pt/String.h>
 
 namespace Pt {
 
 namespace Xml {
 
-bool Entity::resolveDefaultEntity(String& entity)
+bool resolveDefaultEntity(String& entity)
 {
     if( ! entity.empty() && entity[0] == '#')
     {
@@ -124,7 +121,7 @@ bool Entity::resolveDefaultEntity(String& entity)
 }
 
 
-bool Entity::resolveCharacterEntity(String& entity)
+bool resolveCharacterEntity(String& entity)
 {
     if( ! entity.empty() && entity[0] == '#')
     {
@@ -161,43 +158,6 @@ bool Entity::resolveCharacterEntity(String& entity)
     }
 
     return false;
-}
-
-
-EntityReference::EntityReference()
-: Node(Node::EntityReference)
-, _entity(0)
-{ }
-
-
-void EntityReference::clear()
-{
-    _name.clear();
-    _entity = 0;
-}
-
-
-void EntityReference::setName(const Pt::String& name)
-{
-    _name = name; 
-}
-
-
-void EntityReference::setEntity(const Entity* entity)
-{
-    _entity = entity;
-}
-
-
-const Pt::String& EntityReference::name() const
-{
-    return _name; 
-}
-        
-
-const Entity* EntityReference::get() const
-{ 
-    return _entity; 
 }
 
 } // namespace Xml
