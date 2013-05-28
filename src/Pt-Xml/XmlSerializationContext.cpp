@@ -29,6 +29,7 @@
 #include "Pt/Xml/XmlFormatter.h"
 #include "Pt/Convert.h"
 #include <algorithm>
+#include <memory>
 
 namespace Pt {
 
