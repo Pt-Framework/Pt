@@ -28,12 +28,64 @@
 #include "Pt/Xml/XmlSerializationContext.h"
 #include "Pt/Xml/XmlFormatter.h"
 #include "Pt/Convert.h"
+#include <algorithm>
 
 namespace Pt {
 
 namespace Xml {
 
+class XmlSerializationContext::Fixup
+{
+    public:
+        Fixup(const std::string& id, void* fixme, FixupInfo::FixupHandler handler, const std::type_info* type, unsigned m = 0)
+        : _instance(fixme)
+        , _fixup(handler)
+        , _type(type)
+        , _id(id)
+        , _m(m)
+        {}
+
+        void* instance() const
+        { return _instance; }
+
+        const std::string& id() const
+        { return _id; }
+
+        void setId(const std::string& id)
+        { _id = id; }
+
+        void setInstance(void* obj)
+        {
+            _instance = obj;
+        }
+
+        FixupInfo::FixupHandler fixup() const
+        { return _fixup; }
+
+        const std::type_info* type() const
+        { return _type; }
+
+        unsigned memberId() const
+        { return _m; }
+
+    private:
+        void* _instance;
+        FixupInfo::FixupHandler _fixup;
+        const std::type_info* _type;
+        std::string _id;
+        unsigned _m;
+};
+
+
+bool lessFixupId(XmlSerializationContext::Fixup* f, const std::string& id)
+{
+    return f->id() < id;
+}
+
+
 XmlSerializationContext::XmlSerializationContext()
+: _v1(0)
+, _v2(0)
 {
     this->enableReferencing(true);
 }
@@ -41,6 +93,17 @@ XmlSerializationContext::XmlSerializationContext()
 
 XmlSerializationContext::~XmlSerializationContext()
 {
+    std::vector<Fixup*>::iterator it;
+
+    for(it = _targets.begin(); it != _targets.end(); ++it)
+    {
+        delete *it;
+    }
+
+    for(it = _pointers.begin(); it != _pointers.end(); ++it)
+    {
+        delete *it;
+    }
 }
 
 
@@ -121,7 +184,19 @@ void XmlSerializationContext::reset()
     _refmap.clear();
     _idmap.clear();
 
+    std::vector<Fixup*>::iterator it;
+    for(it = _targets.begin(); it != _targets.end(); ++it)
+    {
+        delete *it;
+    }
+
     _targets.clear();
+
+    for(it = _pointers.begin(); it != _pointers.end(); ++it)
+    {
+        delete *it;
+    }
+    
     _pointers.clear();
 }
 
@@ -132,9 +207,17 @@ void XmlSerializationContext::beginLoad(void* obj, const std::type_info& fixupIn
     if( id.empty() )
         return;
 
-    //std::cerr << "beginLinkTarget: "  << obj << " " << fixupInfo.name() << " id: " << id << std::endl;
-    Fixup fi(obj, 0, &fixupInfo);
-    _targets[id] = fi;
+    std::vector<Fixup*>::iterator it;
+    it = std::lower_bound(_targets.begin(), _targets.end(), id, lessFixupId);
+
+    //std::cerr << "beginLoad: "  << obj << " " << fixupInfo.name() << " id: " << id << std::endl;
+    
+    //if( it != _targets.end() && (*it)->id() == id)
+    //    throw SerializationError("object loaded twice");
+
+    std::auto_ptr<Fixup> ap( new Fixup(id, obj, 0, &fixupInfo) );
+    _targets.insert(it, ap.get());
+    ap.release();
 }
 
 
@@ -145,27 +228,37 @@ void XmlSerializationContext::finishLoad()
 
 void XmlSerializationContext::rebindTarget(const char* id, void* obj)
 {
-    //std::cerr << "rebind " << id << " to " << obj << std::endl;
-    if(obj)
-        _targets[id].setInstance(obj);
-    else
-        _targets.erase(id);
+    //std::cerr << "rebindTarget: " << id << " to " << obj << std::endl;
+    
+    std::vector<Fixup*>::iterator it;
+    it = std::lower_bound(_targets.begin(), _targets.end(), id, lessFixupId);
+
+    if( it != _targets.end() && (*it)->id() == id )
+    {
+        if(obj)
+            (*it)->setInstance(obj);
+        else
+            _targets.erase(it);
+    }
 }
 
 
 void XmlSerializationContext::rebindFixup(const std::string& id, void* obj, void* from)
 {
     //std::cerr << "rebindFixup " << id << " from " << from << " to " << obj << std::endl;
-    std::multimap<std::string, Fixup>::iterator it;
-    it = _pointers.lower_bound(id);
-    for( ; id == it->first; ++it)
+    
+    std::vector<Fixup*>::iterator it;
+    it = std::lower_bound(_pointers.begin(), _pointers.end(), id, lessFixupId);
+
+    for( ; id == (*it)->id(); ++it)
     {
-        if( it->second.instance() == from )
+        if( (*it)->instance() == from )
         {
             if(obj)
-                it->second.setInstance(obj);
+                (*it)->setInstance(obj);
             else
                 _pointers.erase(it);
+            
             break;
         }
     }
@@ -174,41 +267,64 @@ void XmlSerializationContext::rebindFixup(const std::string& id, void* obj, void
 
 void XmlSerializationContext::prepareFixup(void* obj, const std::string& id, FixupInfo::FixupHandler fh, unsigned m)
 {
-    //std::cerr << "prepareLink: " << obj << " id " << id << std::endl;
-    Fixup fi(obj, fh, 0, m);
-    _pointers.insert( std::pair<std::string, Fixup>(id, fi) );
+    //std::cerr << "prepareFixup: " << obj << " id " << id << std::endl;
+    
+    std::vector<Fixup*>::iterator it;
+    it = std::lower_bound(_pointers.begin(), _pointers.end(), id, lessFixupId);
+
+    std::auto_ptr<Fixup> ap( new Fixup(id, obj, fh, 0, m) );
+    _pointers.insert(it, ap.get());
+    ap.release();
 }
 
 
 void XmlSerializationContext::fixup()
 {
-    std::multimap<std::string, Fixup>::iterator it;
+    std::vector<Fixup*>::iterator it;
+    
     for(it = _pointers.begin(); it != _pointers.end(); ++it)
     {
-        void* fixme = it->second.instance();
-        std::string id = it->first;
-        unsigned m = it->second.memberId();
+        Fixup* fixup = *it;
+        
+        void* fixme = fixup->instance();
+        const std::string& id = fixup->id();
+        unsigned m = fixup->memberId();
 
         if( id == "null" )
         {
             const std::type_info* targetType = &( typeid(void*) );
-            it->second.fixup()(fixme, 0, *targetType, m);
-        }
-        else if( _targets.find(id) != _targets.end() )
-        {
-            void* target = _targets[id].instance();
-            const std::type_info* targetType = _targets[id].type() ;
-
-            //std::cerr << "FIXING: " << fixme << " to " << target  << " by id " << id << std::endl;
-            it->second.fixup()(fixme, target, *targetType, m);
+            fixup->fixup()(fixme, 0, *targetType, m);
         }
         else
         {
-            throw SerializationError("reference target not found");
+            std::vector<Fixup*>::iterator target;
+            target = std::lower_bound(_targets.begin(), _targets.end(), id, lessFixupId);
+
+            if( target == _targets.end() || (*target)->id() != id)
+            {
+                throw SerializationError("reference target not found");
+            }
+            
+            void* targetInstance = (*target)->instance();
+            const std::type_info* targetType = (*target)->type();
+
+            //std::cerr << "FIXING: " << fixme << " to " << target  << " by id " << id << std::endl;
+            fixup->fixup()(fixme, targetInstance, *targetType, m);
         }
     }
 
+    for(it = _targets.begin(); it != _targets.end(); ++it)
+    {
+        delete *it;
+    }
+
     _targets.clear();
+
+    for(it = _pointers.begin(); it != _pointers.end(); ++it)
+    {
+        delete *it;
+    }
+    
     _pointers.clear();
 }
 

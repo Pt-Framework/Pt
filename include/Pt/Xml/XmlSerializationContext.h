@@ -32,6 +32,7 @@
 #include <Pt/Xml/Api.h>
 #include <Pt/SerializationContext.h>
 #include <map>
+#include <vector>
 #include <string>
 
 namespace Pt {
@@ -63,10 +64,6 @@ class PT_XML_API XmlSerializationContext : public SerializationContext
 
         virtual const char* makeId(const void* p);
 
-    private:
-        std::map<const void*, unsigned> _idmap;
-        std::map<const void*, std::string> _refmap;
-
     public:
         virtual void beginLoad(void* obj, const std::type_info& fixupInfo,
                                const std::string& name, const std::string& id);
@@ -81,49 +78,15 @@ class PT_XML_API XmlSerializationContext : public SerializationContext
 
         virtual void fixup();
 
-    private:
-        class Fixup
-        {
-            public:
-                Fixup()
-                : _instance(0)
-                , _fixup(0)
-                , _type(0)
-                {}
+    public:
+        class Fixup;
 
-                Fixup(void* fixme, FixupInfo::FixupHandler handler, const std::type_info* type, unsigned m = 0)
-                : _instance(fixme)
-                , _fixup(handler)
-                , _type(type)
-                , _m(m)
-                {}
-
-                void* instance() const
-                { return _instance; }
-
-                void setInstance(void* obj)
-                {
-                    _instance = obj;
-                }
-
-                FixupInfo::FixupHandler fixup() const
-                { return _fixup; }
-
-                const std::type_info* type() const
-                { return _type; }
-
-                unsigned memberId() const
-                { return _m; }
-
-            private:
-                void* _instance;
-                FixupInfo::FixupHandler _fixup;
-                const std::type_info* _type;
-                unsigned _m;
-        };
-
-        std::map<std::string, Fixup> _targets;
-        std::multimap<std::string, Fixup> _pointers;
+        std::map<const void*, unsigned> _idmap;
+        std::map<const void*, std::string> _refmap;
+        std::vector<Fixup*> _targets;
+        std::vector<Fixup*> _pointers; 
+        void* _v1; // allocator
+        void* _v2;
 };
 
 } // namespace Xml

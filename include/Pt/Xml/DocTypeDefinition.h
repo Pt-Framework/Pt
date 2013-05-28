@@ -111,7 +111,7 @@ class PT_XML_API DocTypeDefinition : private NonCopyable
         Entities _entities;
         Entities _paramEntities;
         Notations _notations;
-        void* _v1;
+        void* _v1; // allocator
         void* _v2;
 };
 
