@@ -133,7 +133,7 @@ inline bool operator !=(const QName& a, const QName& b)
 inline bool operator<(const QName& a, const QName& b)
 {
 	  return a.prefix() < b.prefix() ||
-           ! (b.prefix() < a.prefix()) && a.name() < b.name();
+           ( ! (b.prefix() < a.prefix()) && a.name() < b.name() );
 }
 
 } // namespace Xml
