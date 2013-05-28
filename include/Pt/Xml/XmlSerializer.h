@@ -100,11 +100,6 @@ class XmlSerializer : public Serializer
             _formatter.detach();
         }
 
-        void flush()
-        {
-            _formatter.flush();
-        }
-
         XmlWriter* writer()
         {
             return _formatter.writer();

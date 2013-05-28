@@ -102,9 +102,6 @@ class PT_XML_API XmlFormatter : public Formatter
         */
         void detach();
 
-        //! @internal
-        void flush();
-
         void addString(const char*, const char* type,
                        const Pt::Char* value, const char* id);
         
@@ -172,25 +169,30 @@ class PT_XML_API XmlFormatter : public Formatter
         void onBeginObject(const char* name, const char* type,
                            const char* id);
 
-        void onFinishObject();
-
         bool parseSome(IComposer& composer);
 
         void parse(IComposer& composer);
 
     protected:
+        //! @internal
         void OnBegin(const Node& node);
 
+        //! @internal
         void OnReferenceBegin(const Node& node);
 
+        //! @internal
         void OnMemberBegin(const Node& node);
 
+        //! @internal
         void OnValue(const Node& node);
 
+        //! @internal
         void OnMemberEnd(const Node& node);
 
+        //! @internal
         void beginXmlMember(const StartElement& se);
 
+        //! @internal
         void finishXmlMember(const EndElement& ee);
 
     private:

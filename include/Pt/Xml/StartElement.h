@@ -60,7 +60,7 @@ class Attribute
 
         /** @brief Sets the qualified name and namespace.
         */
-        void set(const QName& name, const Namespace& ns)
+        void setName(const QName& name, const Namespace& ns)
         {
             _name = &name;
             _namespace = &ns;
@@ -121,7 +121,23 @@ class PT_XML_API AttributeList : private NonCopyable
         }
 
         Attribute& append(const QName& name, const Namespace& ns);
-        
+
+        const Pt::String& get(const Pt::String& localName, const Pt::String& defaultValue) const
+        {
+            ConstIterator it = find(localName);
+            return it == end() ? defaultValue : it->value();
+        }
+
+        const Pt::String& get(const String& nsUri, const String& localName, const Pt::String& defaultValue) const
+        {
+            ConstIterator it = find(nsUri, localName);
+            return it == end() ? defaultValue : it->value();
+        }
+
+        Iterator find(const String& localName);
+
+        Iterator find(const String& nsUri, const String& localName);
+
         ConstIterator find(const String& localName) const;
 
         ConstIterator find(const String& nsUri, const String& localName) const;

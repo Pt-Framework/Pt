@@ -38,6 +38,8 @@ namespace Pt {
 
 namespace Xml {
 
+/** @brief Resolves external entities and DTDs.
+*/
 class InputSource;
 
 class XmlResolver

@@ -175,7 +175,7 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             ser.serialize(dateNull, "dateNull");
 
             ser.finish();
-            ser.flush();
+            tos.flush();
 
             Pt::Date date2(1, 1, 1);
             dr.setDate(0);
@@ -231,7 +231,7 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             ser.serialize(dateptr, "dateptr");
 
             ser.finish();
-            ser.flush();
+            tos.flush();
 
             std::cerr << std::endl << output.str() << std::endl << std::endl;
 
@@ -273,7 +273,7 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             ser.serialize(date2, "date2b");
 
             ser.finish();
-            ser.flush();
+            tos.flush();
 
             std::cerr << std::endl << output.str() << std::endl << std::endl;
 
@@ -333,7 +333,7 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             }
 
             ser.finish();
-            ser.flush();
+            tos.flush();
 
             std::cerr << std::endl << output.str() << std::endl;
             //std::cerr << "---------------------\n" << std::endl;

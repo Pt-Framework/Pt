@@ -51,8 +51,38 @@ Attribute& AttributeList::append(const QName& name, const Namespace& ns)
     _end = _begin + (_size);
 
     Attribute& attr = _container[backPos];
-    attr.set(name, ns);
+    attr.setName(name, ns);
     return attr;
+}
+
+
+AttributeList::Iterator AttributeList::find(const String& name)
+{
+    Iterator it;
+    for(it = begin(); it != end(); ++it) 
+    {
+        if(it->name().name() == name) 
+        {
+            break;
+        }
+    }
+    
+    return it;
+}
+
+
+AttributeList::Iterator AttributeList::find(const String& nsUri, const String& name)
+{
+    Iterator it;
+    for(it = begin(); it != end(); ++it) 
+    {
+        if(it->name().name() == name && it->namespaceUri() == nsUri) 
+        {
+            break;
+        }
+    }
+    
+    return it;
 }
 
 

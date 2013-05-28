@@ -83,7 +83,7 @@ void benchSerialization(const T& d, const char* fname = 0)
     clock.start();
     serializer.serialize(d, "d");
     serializer.finish();
-    serializer.flush();
+    tos.flush();
     Pt::Timespan ts = clock.stop();
 
     if (fname)

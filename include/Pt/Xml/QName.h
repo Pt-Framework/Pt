@@ -84,12 +84,12 @@ class QName
         void setPrefix(const String& prefix)
         { _prefix = prefix; }
 
-        /** @brief Returns the local name.
+        /** @internal @brief Returns the local name.
         */
         String& name() 
         { return _name; }
 
-        /** @brief Returns the local name.
+        /** @internal @brief Returns the local name.
         */
         const String& name() const
         { return _name; }

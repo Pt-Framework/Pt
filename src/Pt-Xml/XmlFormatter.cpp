@@ -94,17 +94,6 @@ void XmlFormatter::detach()
 }
 
 
-void XmlFormatter::flush()
-{
-    if (_writer)
-    {
-        std::basic_ostream<Char>* os = _writer->output();
-        if(os)
-            os->flush();
-    }
-}
-
-
 void XmlFormatter::addString(const char* name, const char* type,
                              const Pt::Char* value, const char* id)
 {
@@ -334,12 +323,6 @@ void XmlFormatter::finishMember()
 
 
 void XmlFormatter::finishObject()
-{
-    this->onFinishObject();
-}
-
-
-void XmlFormatter::onFinishObject()
 {
     if( ! _writer )
         return;

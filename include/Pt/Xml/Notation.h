@@ -36,6 +36,8 @@ namespace Pt {
 
 namespace Xml {
 
+/** @brief A notation declaration.
+*/
 class Notation 
 {
     public:
