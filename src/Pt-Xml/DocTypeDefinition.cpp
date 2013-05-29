@@ -46,7 +46,7 @@ inline Iter lowerBound(Iter first, Iter last, const T& value, Pred pred)
 	
     for( ; count > 0; )
 	{	
-		TraitsType::difference_type count2 = count / 2;
+		typename TraitsType::difference_type count2 = count / 2;
 		
         Iter mid = first;
 		std::advance(mid, count2);
