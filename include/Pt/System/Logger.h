@@ -365,9 +365,9 @@ struct LoggerStaticInit
 
 //! @internal @brief Log to a logger if the log level permits it.
 #define logger_begin_impl(logger, level)            \
-    if( ! logger.enabled( Pt::System::level ) )   \
+    if( ! logger.enabled( Pt::System::level ) )     \
         ;                                           \
-    else Pt::System::LogMessage(logger, Pt::System::level, true)
+    else Pt::System::LogMessage(static_cast<Pt::System::Logger&>(logger), Pt::System::level, true)
 
 #define logger_begin_fatal(logger) logger_begin_impl(logger, Fatal)
 #define logger_begin_error(logger) logger_begin_impl(logger, Error)
