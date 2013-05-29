@@ -31,6 +31,38 @@
 #include <algorithm>
 #include <memory>
 
+namespace {
+
+template<class Iter, class T, class Pred> 
+inline Iter lowerBound(Iter first, Iter last, const T& value, Pred pred)
+{	
+    typedef std::iterator_traits<Iter> TraitsType;
+
+    TraitsType::difference_type count = std::distance(first, last);
+	
+    for( ; count > 0; )
+	{	
+		TraitsType::difference_type count2 = count / 2;
+		
+        Iter mid = first;
+		std::advance(mid, count2);
+
+		if( pred(*mid, value) ) // upper half
+		{	
+		    first = ++mid;
+		    count -= count2 + 1;
+		}
+		else // lower half
+        {
+			count = count2;
+        }
+	}
+	
+    return first;
+}
+
+}
+
 namespace Pt {
 
 namespace Xml {
@@ -209,7 +241,7 @@ void XmlSerializationContext::beginLoad(void* obj, const std::type_info& fixupIn
         return;
 
     std::vector<Fixup*>::iterator it;
-    it = std::lower_bound(_targets.begin(), _targets.end(), id, lessFixupId);
+    it = lowerBound(_targets.begin(), _targets.end(), id, lessFixupId);
 
     //std::cerr << "beginLoad: "  << obj << " " << fixupInfo.name() << " id: " << id << std::endl;
     
@@ -232,7 +264,7 @@ void XmlSerializationContext::rebindTarget(const char* id, void* obj)
     //std::cerr << "rebindTarget: " << id << " to " << obj << std::endl;
     
     std::vector<Fixup*>::iterator it;
-    it = std::lower_bound(_targets.begin(), _targets.end(), id, lessFixupId);
+    it = lowerBound(_targets.begin(), _targets.end(), id, lessFixupId);
 
     if( it != _targets.end() && (*it)->id() == id )
     {
@@ -249,7 +281,7 @@ void XmlSerializationContext::rebindFixup(const std::string& id, void* obj, void
     //std::cerr << "rebindFixup " << id << " from " << from << " to " << obj << std::endl;
     
     std::vector<Fixup*>::iterator it;
-    it = std::lower_bound(_pointers.begin(), _pointers.end(), id, lessFixupId);
+    it = lowerBound(_pointers.begin(), _pointers.end(), id, lessFixupId);
 
     for( ; id == (*it)->id(); ++it)
     {
@@ -271,7 +303,7 @@ void XmlSerializationContext::prepareFixup(void* obj, const std::string& id, Fix
     //std::cerr << "prepareFixup: " << obj << " id " << id << std::endl;
     
     std::vector<Fixup*>::iterator it;
-    it = std::lower_bound(_pointers.begin(), _pointers.end(), id, lessFixupId);
+    it = lowerBound(_pointers.begin(), _pointers.end(), id, lessFixupId);
 
     std::auto_ptr<Fixup> ap( new Fixup(id, obj, fh, 0, m) );
     _pointers.insert(it, ap.get());
@@ -299,7 +331,7 @@ void XmlSerializationContext::fixup()
         else
         {
             std::vector<Fixup*>::iterator target;
-            target = std::lower_bound(_targets.begin(), _targets.end(), id, lessFixupId);
+            target = lowerBound(_targets.begin(), _targets.end(), id, lessFixupId);
 
             if( target == _targets.end() || (*target)->id() != id)
             {
