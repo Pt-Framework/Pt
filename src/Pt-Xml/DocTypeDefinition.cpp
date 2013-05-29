@@ -31,10 +31,39 @@
 #include <Pt/Xml/Entity.h>
 #include <Pt/Xml/Notation.h>
 #include <algorithm>
+#include <iterator>
 #include <memory>
 #include <cassert>
 
 namespace {
+
+template<class Iter, class T, class Pred> 
+inline Iter lowerBound(Iter first, Iter last, const T& value, Pred pred)
+{	
+    typedef std::iterator_traits<Iter> TraitsType;
+
+    TraitsType::difference_type count = std::distance(first, last);
+	
+    for( ; count > 0; )
+	{	
+		TraitsType::difference_type count2 = count / 2;
+		
+        Iter mid = first;
+		std::advance(mid, count2);
+
+		if( pred(*mid, value) ) // upper half
+		{	
+		    first = ++mid;
+		    count -= count2 + 1;
+		}
+		else // lower half
+        {
+			count = count2;
+        }
+	}
+	
+    return first;
+}
 
 bool lessElementName(Pt::Xml::ElementModel* e, const Pt::Xml::QName& name)
 {
@@ -121,7 +150,7 @@ QName& DocTypeDefinition::rootName()
 Entity* DocTypeDefinition::declareEntity(const Pt::String& name)
 {
     Entities::iterator lbound;
-    lbound = std::lower_bound(_entities.begin(), _entities.end(), name, lessEntityName);
+    lbound = lowerBound(_entities.begin(), _entities.end(), name, lessEntityName);
     
     if( lbound != _entities.end() && (*lbound)->name() == name)
     {
@@ -138,7 +167,7 @@ Entity* DocTypeDefinition::declareEntity(const Pt::String& name)
 const Entity* DocTypeDefinition::findEntity(const Pt::String& name) const
 {
     Entities::const_iterator lbound;
-    lbound = std::lower_bound(_entities.begin(), _entities.end(), name, lessEntityName);
+    lbound = lowerBound(_entities.begin(), _entities.end(), name, lessEntityName);
 
     if( lbound != _entities.end() && (*lbound)->name() == name)
     {
@@ -152,7 +181,7 @@ const Entity* DocTypeDefinition::findEntity(const Pt::String& name) const
 void DocTypeDefinition::removeEntity(const Pt::String& name)
 {
     Entities::iterator lbound;
-    lbound = std::lower_bound(_entities.begin(), _entities.end(), name, lessEntityName);
+    lbound = lowerBound(_entities.begin(), _entities.end(), name, lessEntityName);
 
     if( lbound != _entities.end() && (*lbound)->name() == name )
     {
@@ -165,7 +194,7 @@ void DocTypeDefinition::removeEntity(const Pt::String& name)
 Entity* DocTypeDefinition::declareParamEntity(const Pt::String& name)
 {
     Entities::iterator lbound;
-    lbound = std::lower_bound(_paramEntities.begin(), _paramEntities.end(), name, lessEntityName);
+    lbound = lowerBound(_paramEntities.begin(), _paramEntities.end(), name, lessEntityName);
     
     if( lbound != _paramEntities.end() && (*lbound)->name() == name)
     {
@@ -182,7 +211,7 @@ Entity* DocTypeDefinition::declareParamEntity(const Pt::String& name)
 const Entity* DocTypeDefinition::findParamEntity(const Pt::String& name) const
 {
     Entities::const_iterator lbound;
-    lbound = std::lower_bound(_paramEntities.begin(), _paramEntities.end(), name, lessEntityName);
+    lbound = lowerBound(_paramEntities.begin(), _paramEntities.end(), name, lessEntityName);
 
     if( lbound != _paramEntities.end() && (*lbound)->name() == name)
     {
@@ -196,7 +225,7 @@ const Entity* DocTypeDefinition::findParamEntity(const Pt::String& name) const
 void DocTypeDefinition::removeParamEntity(const Pt::String& name)
 {
     Entities::iterator lbound;
-    lbound = std::lower_bound(_paramEntities.begin(), _paramEntities.end(), name, lessEntityName);
+    lbound = lowerBound(_paramEntities.begin(), _paramEntities.end(), name, lessEntityName);
 
     if( lbound != _paramEntities.end() && (*lbound)->name() == name )
     {
@@ -209,7 +238,7 @@ void DocTypeDefinition::removeParamEntity(const Pt::String& name)
 Notation* DocTypeDefinition::declareNotation(const Pt::String& name)
 {
     Notations::iterator lbound;
-    lbound = std::lower_bound(_notations.begin(), _notations.end(), name, lessNotationName);
+    lbound = lowerBound(_notations.begin(), _notations.end(), name, lessNotationName);
     
     if( lbound != _notations.end() && (*lbound)->name() == name)
     {
@@ -226,7 +255,7 @@ Notation* DocTypeDefinition::declareNotation(const Pt::String& name)
 const Notation* DocTypeDefinition::findNotation(const Pt::String& name) const
 {
     Notations::const_iterator lbound;
-    lbound = std::lower_bound(_notations.begin(), _notations.end(), name, lessNotationName);
+    lbound = lowerBound(_notations.begin(), _notations.end(), name, lessNotationName);
 
     if( lbound != _notations.end() && (*lbound)->name() == name)
     {
@@ -240,7 +269,7 @@ const Notation* DocTypeDefinition::findNotation(const Pt::String& name) const
 void DocTypeDefinition::removeNotation(const Pt::String& name)
 {
     Notations::iterator lbound;
-    lbound = std::lower_bound(_notations.begin(), _notations.end(), name, lessNotationName);
+    lbound = lowerBound(_notations.begin(), _notations.end(), name, lessNotationName);
 
     if( lbound != _notations.end() && (*lbound)->name() == name )
     {
@@ -253,7 +282,7 @@ void DocTypeDefinition::removeNotation(const Pt::String& name)
 ContentModel& DocTypeDefinition::declareContent(const QName& name)
 { 
     Elements::iterator lbound;
-    lbound = std::lower_bound(_elements.begin(), _elements.end(), name, lessElementName);
+    lbound = lowerBound(_elements.begin(), _elements.end(), name, lessElementName);
     
     if( lbound != _elements.end() && (*lbound)->qname() == name)
     {
@@ -271,7 +300,7 @@ ContentModel& DocTypeDefinition::declareContent(const QName& name)
 AttributeListModel& DocTypeDefinition::declareAttributeList(const QName& name)
 { 
     Elements::iterator lbound;
-    lbound = std::lower_bound(_elements.begin(), _elements.end(), name, lessElementName);
+    lbound = lowerBound(_elements.begin(), _elements.end(), name, lessElementName);
     
     if( lbound != _elements.end() && (*lbound)->qname() == name)
     {
@@ -289,7 +318,7 @@ AttributeListModel& DocTypeDefinition::declareAttributeList(const QName& name)
 ElementModel* DocTypeDefinition::findElement(const QName& name)
 {
     Elements::iterator lbound;
-    lbound = std::lower_bound(_elements.begin(), _elements.end(), name, lessElementName);
+    lbound = lowerBound(_elements.begin(), _elements.end(), name, lessElementName);
     
     if( lbound != _elements.end() && (*lbound)->qname() == name)
     {
@@ -303,7 +332,7 @@ ElementModel* DocTypeDefinition::findElement(const QName& name)
 AttributeListModel* DocTypeDefinition::findAttributes(const QName& name)
 {
     Elements::iterator lbound;
-    lbound = std::lower_bound(_elements.begin(), _elements.end(), name, lessElementName);
+    lbound = lowerBound(_elements.begin(), _elements.end(), name, lessElementName);
     
     if( lbound != _elements.end() && (*lbound)->qname() == name)
     {
