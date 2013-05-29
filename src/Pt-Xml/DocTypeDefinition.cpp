@@ -42,7 +42,7 @@ inline Iter lowerBound(Iter first, Iter last, const T& value, Pred pred)
 {	
     typedef std::iterator_traits<Iter> TraitsType;
 
-    TraitsType::difference_type count = std::distance(first, last);
+    typename TraitsType::difference_type count = std::distance(first, last);
 	
     for( ; count > 0; )
 	{	
