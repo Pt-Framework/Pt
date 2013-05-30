@@ -109,6 +109,12 @@ class BasicTextIStream : public std::basic_istream<CharT>
             this->clear();
         }
 
+        void reset()
+        {
+            _buffer.reset();
+            this->clear();
+        }
+
         void terminate()
         {
             _buffer.terminate();
@@ -192,6 +198,12 @@ class BasicTextOStream : public std::basic_ostream<CharT>
             this->clear();
         }
 
+        void reset()
+        {
+            _buffer.reset();
+            this->clear();
+        }
+
         void terminate()
         {
             _buffer.terminate();
@@ -272,6 +284,12 @@ class BasicTextStream : public std::basic_iostream<CharT>
         void detach()
         {
             _buffer.detach();
+            this->clear();
+        }
+
+        void reset()
+        {
+            _buffer.reset();
             this->clear();
         }
 

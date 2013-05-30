@@ -135,6 +135,15 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
             _target = &target;
         }
 
+        void reset()
+        {
+            _ebufsize = 0;
+            this->setp(0, 0);
+            this->setg(0, 0, 0);
+            
+            _state = state_type();
+        }
+
         void set(std::basic_ios<extern_type>& target)
         {
             _target = &target;
@@ -193,10 +202,7 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
                 }
             }
 
-            this->setp(0, 0);
-            this->setg(0, 0, 0);
-            _ebufsize = 0;
-            _state = state_type();
+            this->reset();
             return 0;
         }
 

@@ -84,6 +84,7 @@ ClientImpl::ClientImpl()
 
 ClientImpl::~ClientImpl()
 {
+    _ts.reset();
 }
 
 
