@@ -40,33 +40,62 @@ namespace Xml {
 
 class DocTypeDefinition;
 
+/** @brief A %DocType node represents the begin of a DTD.
+
+    %DocType nodes are only reported when the XmlReader is configured to
+    do so. %DocType nodes might appear twice, before the internal DTD subset
+    is parsed and before the external DTD subset is parsed. An EndDocType
+    node indicates that a DTD subset is complete.
+*/
 class PT_XML_API DocType : public Node
                          , private Pt::NonCopyable
 {
     public:
+        /** @brief Construct an empty DocType node.
+        */
         explicit DocType(DocTypeDefinition& dtd);
 
+        /** @brief Destructor.
+        */
         ~DocType();
 
+        /** @brief Clears all content.
+        */
         void clear();
 
+        /** @brief Returns true if the external DTD subset begins.
+        */
         bool isExternal() const;
 
+        /** @brief Returns true if the internal DTD subset begins.
+        */
         bool isInternal() const;
 
+        /** @brief Indicates the begin of internal or external DTD subsets.
+        */
         void setInternal(bool hasInternal);
 
+        /** @brief Returns the documents root element name.
+        */
         const QName& rootName() const;
 
+        /** @brief Returns the public ID of the external subset.
+        */
         const Pt::String& publicId() const
         { return _publicId; }
 
+        /** @brief Sets the public ID of the external subset.
+        */
         void setPublicId(const Pt::String& pubId)
         { _publicId = pubId; }
 
+        /** @brief Returns the system ID of the external subset.
+        */
         const Pt::String& systemId() const
         { return _systemId; }
 
+        /** @brief Sets the system ID of the external subset.
+        */
         void setSystemId(const Pt::String& sysId)
         { _systemId = sysId; }
 
@@ -81,45 +110,67 @@ class PT_XML_API DocType : public Node
         int _internal;
 };
 
-
+/** @brief Casts a generic node to a DocType node.
+*/
 inline DocType* toDocType(Node* node)
 {
     return nodeCast<DocType>(node);
 }
 
-
+/** @brief Casts a generic node to a DocType node.
+*/
 inline const DocType* toDocType(const Node* node)
 {
     return nodeCast<DocType>(node);
 }
 
-
+/** @brief Casts a generic node to a DocType node.
+*/
 inline DocType& toDocType(Node& node)
 {
     return nodeCast<DocType>(node);
 }
 
-
+/** @brief Casts a generic node to a DocType node.
+*/
 inline const DocType& toDocType(const Node& node)
 {
     return nodeCast<DocType>(node);
 }
 
+/** @brief An %EndDocType node represents the end of a DTD.
 
+    %EndDocType nodes are only reported when the XmlReader is configured to
+    do so. An %EndDocType node indicates that a DTD subset is complete. 
+    %EndDocType nodes might appear twice, after the internal DTD subset
+    was parsed and after the external DTD subset was parsed. 
+*/
 class PT_XML_API EndDocType : public Node
                             , private Pt::NonCopyable
 {
     public:
+        /** @brief Construct an empty DocType node.
+        */
         EndDocType();
 
+        /** @brief Destructor.
+        */
         ~EndDocType();
 
+        /** @brief Clears all content.
+        */
         void clear();
 
+        /** @brief Returns true if the external DTD subset begins.
+        */
         bool isExternal() const;
 
+        /** @brief Returns true if the internal DTD subset begins.
+        */
         bool isInternal() const;
 
+        /** @brief Indicates the end of internal or external DTD subsets.
+        */
         void setInternal(bool value);
 
         //! @internal
@@ -130,25 +181,29 @@ class PT_XML_API EndDocType : public Node
         int _internal;
 };
 
-
+/** @brief Casts a generic node to a EndDocType node.
+*/
 inline EndDocType* toEndDocType(Node* node)
 {
     return nodeCast<EndDocType>(node);
 }
 
-
+/** @brief Casts a generic node to a EndDocType node.
+*/
 inline const EndDocType* toEndDocType(const Node* node)
 {
     return nodeCast<EndDocType>(node);
 }
 
-
+/** @brief Casts a generic node to a EndDocType node.
+*/
 inline EndDocType& toEndDocType(Node& node)
 {
     return nodeCast<EndDocType>(node);
 }
 
-
+/** @brief Casts a generic node to a EndDocType node.
+*/
 inline const EndDocType& toEndDocType(const Node& node)
 {
     return nodeCast<EndDocType>(node);

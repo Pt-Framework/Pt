@@ -46,59 +46,78 @@ class AttributeListModel;
 class Entity;
 class Notation;
 
+class DocTypeDefinition;
+
+/** @brief The DocTypeDefinition of an XML document.
+
+    A %DocTypeDefinition contains all entity, notation, element and attribute
+    list declarations from the external and internal DTD subsets.
+*/
 class PT_XML_API DocTypeDefinition : private NonCopyable
 {
     public:
+        /** @brief Construct an empty DocType node.
+        */
         DocTypeDefinition();
 
+        /** @brief Destructor.
+        */
         ~DocTypeDefinition();
 
+        /** @brief Clears all content.
+        */
         void clear();
 
+        /** @brief Returns true if a DTD was defined in the document.
+        */
         bool isDefined() const;
 
+        /** @brief Returns the documents root element name.
+        */
         const QName& rootName() const;
 
+        /** @brief Returns the documents root element name.
+        */
         QName& rootName();
 
-        //! @brief Returns the entity or null if already declared.
+        //! @brief Returns the entity or a nullptr if already declared.
         Entity* declareEntity(const Pt::String& name);
 
-        //! @brief Returns the entity or null if not declared.
+        //! @brief Returns the entity or a nullptr if not declared.
         const Entity* findEntity(const Pt::String& name) const;
 
         //! @brief Removes the entity with the given name.
         void removeEntity(const Pt::String& name);
 
-        //! @brief Returns the entity or null if already declared.
+        //! @brief Returns the entity or a nullptr if already declared.
         Entity* declareParamEntity(const Pt::String& name);
 
-        //! @brief Returns the entity or null if not declared.
+        //! @brief Returns the entity or a nullptr if not declared.
         const Entity* findParamEntity(const Pt::String& name) const;
 
         //! @brief Removes the entity with the given name.
         void removeParamEntity(const Pt::String& name);
 
-        //! @brief Returns the notation or null if already declared.
+        //! @brief Returns the notation or a nullptr if already declared.
         Notation* declareNotation(const Pt::String& name);
 
-        //! @brief Returns the notation or null if not declared.
+        //! @brief Returns the notation or a nullptr if not declared.
         const Notation* findNotation(const Pt::String& name) const;
 
         //! @brief Removes the notation with the given name.
         void removeNotation(const Pt::String& name);
 
     public:
-        //! @internal Returns null if already declared.
+        //! @internal @brief Returns null if already declared.
         ContentModel& declareContent(const QName& name);
 
-        //! @internal Returns the attribute list for an element.
+        //! @internal @brief Returns the attribute list for an element.
         AttributeListModel& declareAttributeList(const QName& name);
 
-        //! @internal Returns null if not declared.
+        //! @internal @brief Returns null if not declared.
         ElementModel* findElement(const QName& name);
 
-        //! @internal Returns null if not declared.
+        //! @internal @brief Returns null if not declared.
         AttributeListModel* findAttributes(const QName& name);
 
     private:

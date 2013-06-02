@@ -2848,7 +2848,7 @@ class XmlReaderImpl
 
         void onDocumentBegin(int c)
         {
-            if( c == std::char_traits<Char>::eof() )
+            if( c == std::char_traits<Char>::eof() ) //signed unsigned
             {
                 setStartDoc();
 

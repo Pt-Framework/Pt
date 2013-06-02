@@ -35,11 +35,11 @@ namespace Pt {
 
 namespace Xml {
 
-/** @brief A Node representing the end of the XML document.
+/** @brief Represents the end of an XML document.
     
-    The last node which is read from a document is the EndDocument node. It is
-    read after the last tag, text or comment was read from the XML document.
-    This is similar to the EOF character being read at the end of a file.
+    The last node which is read from a document is the EndDocument node.
+    It is reported after all XML tags in the epilogue were parsed, similar 
+    to an end-of-file marker (EOF).
 */
 class EndDocument : public Node 
 {
@@ -55,25 +55,29 @@ class EndDocument : public Node
         { return Node::EndDocument; }
 };
 
-
+/** @brief Casts a generic node to a EndDocument node.
+*/
 inline EndDocument* toEndDocument(Node* node)
 {
     return nodeCast<EndDocument>(node);
 }
 
-
+/** @brief Casts a generic node to a EndDocument node.
+*/
 inline const EndDocument* toEndDocument(const Node* node)
 {
     return nodeCast<EndDocument>(node);
 }
 
-
+/** @brief Casts a generic node to a EndDocument node.
+*/
 inline EndDocument& toEndDocument(Node& node)
 {
     return nodeCast<EndDocument>(node);
 }
 
-
+/** @brief Casts a generic node to a EndDocument node.
+*/
 inline const EndDocument& toEndDocument(const Node& node)
 {
     return nodeCast<EndDocument>(node);

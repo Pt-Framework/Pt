@@ -36,16 +36,17 @@ namespace Pt {
 
 namespace Xml {
 
-/** @brief A Character element (Node) of an XML document, containing the body's Text of a tag.
+/** @brief A Character node represents text in an XML document.
  
-    A Character element stores the data of a tag's body. The data is interpreted before it
-    is set as content of a Character element. This means that entities were translated into
-    their corresponding character sequence.
+    Character nodes are reported for text between a start element and an
+    end element, between two start elements or between two end elements.
+    Not only normal text, but also CDATA sections are reported as %Characters,
+    unless the XmlReader is configured to report CDATA sections separately.
 */
 class Characters : public Node
 {
     public:
-        /** @brief Constructs with content string.
+        /** @brief Constructs an empty node.
         */
         Characters()
         : Node(Node::Characters)
@@ -55,6 +56,8 @@ class Characters : public Node
         , _isChunk(false)
         { }
 
+        /** @brief Clears all content.
+        */
         void clear()
         { 
             _content.clear(); 
@@ -63,31 +66,38 @@ class Characters : public Node
             _isChunk = false;
         }
 
-        /** @brief Returns true if is empty.
+        /** @brief Returns true if empty.
         */
         bool empty() const
         { return _content.empty(); }
 
+        /** @brief Indicates that text was in a CDATA section.
+        */
         void setCData(bool cdata)
         { _cdata = cdata; }
 
+        /** @brief Indicates that text was in a CDATA section.
+        */
         bool isCData() const
         { return _cdata; }
 
+        /** @brief Indicates that text might be split up.
+        */
         void setChunk(bool val)
         { _isChunk = val; }
 
+        /** @brief Indicates that text might be split up.
+        */
         bool isChunk() const
         { return _isChunk; }
 
+        /** @brief Returns true if the text consists only of whitespace.
+        */
         bool isSpace() const
         { return _isSpace; }
        
-        //inline void appendSpace(Char ch)
-        //{
-        //    _content += ch;
-        //}
-
+        /** @brief Appends a character to the text.
+        */
         inline void append(Char ch)
         {
             if(_isSpace && ch != ' ' && ch != '\t' && ch != '\n' && ch != '\r')
@@ -96,11 +106,13 @@ class Characters : public Node
             _content += ch;
         }
 
-        /** @brief Returns the content as a string.
+        /** @brief Returns the text.
         */
         const String& content() const
         { return _content; }
 
+        /** @brief Returns the text.
+        */
         String& content()
         { return _content; }
 
@@ -120,25 +132,29 @@ class Characters : public Node
         bool _isChunk;
 };
 
-
+/** @brief Casts a generic node to a Characters node.
+*/
 inline Characters* toCharacters(Node* node)
 {
     return nodeCast<Characters>(node);
 }
 
-
+/** @brief Casts a generic node to a Characters node.
+*/
 inline const Characters* toCharacters(const Node* node)
 {
     return nodeCast<Characters>(node);
 }
 
-
+/** @brief Casts a generic node to a Characters node.
+*/
 inline Characters& toCharacters(Node& node)
 {
     return nodeCast<Characters>(node);
 }
 
-
+/** @brief Casts a generic node to a Characters node.
+*/
 inline const Characters& toCharacters(const Node& node)
 {
     return nodeCast<Characters>(node);

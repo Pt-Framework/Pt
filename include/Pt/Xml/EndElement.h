@@ -38,13 +38,13 @@ namespace Pt {
 
 namespace Xml {
 
-/** @brief An end element represents a closing tag in an XML document.
+/** @brief Represents a closing element tag in an XML document.
 */
 class EndElement : public Node 
                  , private NonCopyable
 {
     public:
-        /** @brief Constructs an EndElement object with no name.
+        /** @brief Constructs an empty EndElement.
         */
         EndElement()
         : Node(Node::EndElement)
@@ -52,12 +52,12 @@ class EndElement : public Node
         , _namespace(0)
         { }
 
-        /** @brief Returns the qualified name.
+        /** @brief Returns the qualified element name.
         */
         const QName& name() const
         { return *_name; }
 
-        /** @brief Returns the qualified name.
+        /** @brief Returns the qualified element name.
         */
         void setName(const QName& name, const Namespace& ns)
         { 
@@ -79,25 +79,29 @@ class EndElement : public Node
         const Namespace* _namespace;
 };
 
-
+/** @brief Casts a generic node to an EndElement node.
+*/
 inline EndElement* toEndElement(Node* node)
 {
     return nodeCast<EndElement>(node);
 }
 
-
+/** @brief Casts a generic node to an EndElement node.
+*/
 inline const EndElement* toEndElement(const Node* node)
 {
     return nodeCast<EndElement>(node);
 }
 
-
+/** @brief Casts a generic node to an EndElement node.
+*/
 inline EndElement& toEndElement(Node& node)
 {
     return nodeCast<EndElement>(node);
 }
 
-
+/** @brief Casts a generic node to an EndElement node.
+*/
 inline const EndElement& toEndElement(const Node& node)
 {
     return nodeCast<EndElement>(node);

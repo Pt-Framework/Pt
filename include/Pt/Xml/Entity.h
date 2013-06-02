@@ -38,60 +38,85 @@ namespace Pt {
 
 namespace Xml {
 
-/** @brief An entity declaration.
+/** @brief An entity declaration in a DTD.
 */
 class Entity
 {
     public:
+        /** @brief Constructs with entity name.
+        */
         explicit Entity(const Pt::String& name)
         : _name(name)
         , _ndata(false)
         {}
 
+        /** @brief Returns the name of the entity.
+        */
         const Pt::String& name() const
         { return _name; }
 
+        /** @brief Returns true if the entity in external.
+        */
         bool isExternal() const
         { return ! _publicId.empty() || ! _systemId.empty(); }
 
+        /** @brief Returns true if the entity in internal.
+        */
         bool isInternal() const
         { return _publicId.empty() && _systemId.empty(); }
 
+        /** @brief Returns the value of the entity.
+        */
         const Pt::String& value() const
         { return _value; }
 
-        void setValue(const Pt::String& val)
-        {  _value = val; }
-
+        /** @brief Returns the value of the entity.
+        */
         Pt::String& value()
         { return _value; }
 
-        void addValue(const Pt::String& val)
-        {  _value += val; }
+        /** @brief Sets the value of the entity.
+        */
+        void setValue(const Pt::String& val)
+        {  _value = val; }
 
+        /** @brief Returns the public ID of the entity.
+        */
         const Pt::String& publicId() const
         { return _publicId; }
 
+        /** @brief Sets the public ID of the entity.
+        */
         void setPublicId(const Pt::String& pubId)
         { _publicId = pubId; }
 
+        /** @brief Returns the system ID of the entity.
+        */
         const Pt::String& systemId() const
         { return _systemId; }
 
+        /** @brief Sets the system ID of the entity.
+        */
         void setSystemId(const Pt::String& sysId)
         { _systemId = sysId; }
 
+        /** @brief Indicates if the entity is unparsed (NDATA).
+        */
         bool isUnparsed() const
         { return _ndata; }
 
-        const Pt::String& notationName() const
-        { return _value; }
-
+        /** @brief Sets the notation of an unparsed entity (NDATA).
+        */
         void setUnparsed(const Pt::String& notation)
         {   
             _ndata = true;
             _value = notation; 
         }
+
+        /** @brief Returns the name of the notation.
+        */
+        const Pt::String& notationName() const
+        { return _value; }
 
     private:
         Pt::String _name;
@@ -102,6 +127,10 @@ class Entity
 };
 
 /** @brief An entity reference XML node.
+
+    The XmlReader normally reports only unresolved entity references, but
+    can be configured to report all entity references. They can be ignored
+    or treated as an error depending on the application.
 */
 class EntityReference : public Node
                       , private NonCopyable 
@@ -114,26 +143,38 @@ class EntityReference : public Node
         , _entity(0)
         { }
 
+        /** @brief Clears all content.
+        */
         void clear()
         {
             _name.clear();
             _entity = 0;
         }
 
-        void setName(const Pt::String& name)
-        { _name = name; }
-
-        void setEntity(const Entity* entity)
-        { _entity = entity; }
-
+        /** @brief Returns the name of the entity this reference refers to.
+        */
         const Pt::String& name() const
         { return _name; }
 
+        /** @brief Returns the name of the entity this reference refers to.
+        */
         Pt::String& name()
         { return _name; }
-        
+
+        /** @brief Sets the name of the entity this reference refers to.
+        */
+        void setName(const Pt::String& name)
+        { _name = name; }
+
+        /** @brief Returns the entity this reference refers to or a nullptr.
+        */
         const Entity* get() const
         { return _entity; }
+
+        /** @brief Sets the entity this reference refers to.
+        */
+        void setEntity(const Entity* entity)
+        { _entity = entity; }
 
         //! @internal
         inline static Node::Type nodeId()
@@ -144,25 +185,29 @@ class EntityReference : public Node
         const Entity* _entity;
 };
 
-
+/** @brief Casts a generic node to an EntityReference node.
+*/
 inline EntityReference* toEntityReference(Node* node)
 {
     return nodeCast<EntityReference>(node);
 }
 
-
+/** @brief Casts a generic node to an EntityReference node.
+*/
 inline const EntityReference* toEntityReference(const Node* node)
 {
     return nodeCast<EntityReference>(node);
 }
 
-
+/** @brief Casts a generic node to an EntityReference node.
+*/
 inline EntityReference& toEntityReference(Node& node)
 {
     return nodeCast<EntityReference>(node);
 }
 
-
+/** @brief Casts a generic node to an EntityReference node.
+*/
 inline const EntityReference& toEntityReference(const Node& node)
 {
     return nodeCast<EntityReference>(node);

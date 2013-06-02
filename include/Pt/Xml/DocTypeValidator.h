@@ -39,15 +39,31 @@ namespace Xml {
 class Node;
 class DocTypeDefinition;
 
+/** @brief Validates an XML document against a DTD.
+
+    An XML document can be validated against its DTD by passing all XML
+    nodes on to a %DocTypeValidator. Note, that it is also possible to 
+    validate XML against a DTD from a different source.
+*/
 class PT_XML_API DocTypeValidator : private NonCopyable
 {
     public:
+        /** @brief Construct an empty DocType node.
+        */
         explicit DocTypeValidator(DocTypeDefinition& dtd);
 
+        /** @brief Destructor.
+        */
         ~DocTypeValidator();
 
+        // TODO: rename reset
+
+        /** @brief Clears the validator to start a new document.
+        */
         void clear();
 
+        /** @brief Returns true if the node is valid.
+        */
         bool validate(Node& node);
 
     private:

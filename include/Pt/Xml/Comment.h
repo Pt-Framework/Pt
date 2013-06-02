@@ -36,15 +36,14 @@ namespace Pt {
 
 namespace Xml {
 
-/** @brief A Comment element (Node) of an XML document.
+/** @brief A %Comment node represents a comment in an XML document.
   
-    A Comment element stores the content of a comment. There is no interpretation of the
-    comment's Text before it is stored.
+    Comments are only reported if the XmlReader is configured to do so.
 */
 class Comment : public Node 
 {
     public:
-        /** @brief Constructs with content string.
+        /** @brief Constructs an empty %Comment node.
         */
         explicit Comment()
         : Node(Node::Comment)
@@ -56,20 +55,22 @@ class Comment : public Node
         bool empty() const
         { return _content.empty(); }
 
+        /** @brief Clears all content.
+        */
         void clear()
         { _content.clear(); }
 
-        /** @brief Returns the content of the comment.
+        /** @brief Returns the text of the comment.
         */
         String& content()
         { return _content; }
 
-        /** @brief Returns the content of the comment.
+        /** @brief Returns the text of the comment.
         */
         const String& content() const
         { return _content; }
 
-        /** @brief RSets the content of the comment.
+        /** @brief Sets the text of the comment.
         */
         void setContent(const String& text)
         { _content = text; }
@@ -82,25 +83,29 @@ class Comment : public Node
         String _content;
 };
 
-
+/** @brief Casts a generic node to a Comment node.
+*/
 inline Comment* toComment(Node* node)
 {
     return nodeCast<Comment>(node);
 }
 
-
+/** @brief Casts a generic node to a Comment node.
+*/
 inline const Comment* toComment(const Node* node)
 {
     return nodeCast<Comment>(node);
 }
 
-
+/** @brief Casts a generic node to a Comment node.
+*/
 inline Comment& toComment(Node& node)
 {
     return nodeCast<Comment>(node);
 }
 
-
+/** @brief Casts a generic node to a Comment node.
+*/
 inline const Comment& toComment(const Node& node)
 {
     return nodeCast<Comment>(node);

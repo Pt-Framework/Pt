@@ -44,7 +44,7 @@
 namespace Pt {
 
 /** @namespace Pt::Xml
-    @brief XML Parsing and Generation
+    @brief Read and write XML ducuments.
 */
 namespace Xml {
 
