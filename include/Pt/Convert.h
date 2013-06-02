@@ -608,11 +608,18 @@ inline int formatFloat(CharT* fraction, int fractSize, int& intpart, int& exp, T
     if(exp != 0)
         n /= std::pow(T(10.0), exp);
 
-    // rounding errors e.g. log10(1000.0) is less than 3
+    // adjust rounding errors due to floating point representation
     if(n >= 10)
     {
+        // in case e.g. log10(1000.0) is less than 3
         n /= 10;
         ++exp;
+    }
+    else if(n < 1)
+    {
+        // in case log10(0.00001) is less than -5
+        n *= 10;
+        --exp;
     }
 
     if( precision >= 0 && precision < fractSize )
