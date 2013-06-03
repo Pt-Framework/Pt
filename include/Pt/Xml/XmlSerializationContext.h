@@ -50,32 +50,42 @@ class PT_XML_API XmlSerializationContext : public SerializationContext
         //! @brief Destructor.
         ~XmlSerializationContext();
 
-        //TODO: should this really be virtual?
-        virtual void reset();
+        // inherit docs
+        virtual void clear();
 
     public:
+        // inherit docs
         virtual bool beginSave(const void* p, const std::string& name);
-
+        
+        // inherit docs
         virtual void finishSave();
-
+        
+        // inherit docs
         virtual void prepareId(const void* p);
-
+        
+        // inherit docs
         virtual const char* getId(const void* p);
-
+        
+        // inherit docs
         virtual const char* makeId(const void* p);
 
     public:
+        // inherit docs
         virtual void beginLoad(void* obj, const std::type_info& fixupInfo,
                                const std::string& name, const std::string& id);
-
+        // inherit docs
         virtual void finishLoad();
-
+        
+        // inherit docs
         virtual void rebindTarget(const char* id, void* obj);
-
+        
+        // inherit docs
         virtual void rebindFixup(const std::string& id, void* obj, void* prev);
-
+        
+        // inherit docs
         virtual void prepareFixup(void* obj, const std::string& id, FixupInfo::FixupHandler, unsigned m);
-
+        
+        // inherit docs
         virtual void fixup();
 
     public:

@@ -38,39 +38,67 @@ namespace Pt {
 
 namespace Xml {
 
-/** @brief Resolves external entities and DTDs.
-*/
 class InputSource;
 
+/** @brief Resolves external entities and DTDs.
+
+    The %XmlResolver is used, for example by the XmlReader, to resolve
+    external entites by their public or system ID to an input source. All
+    input sources must be released with the same resolver by which they were
+    created. Encoding strings can also be resolved to to text codecs by the 
+    standardised encoding names.
+*/
 class XmlResolver
 {
     public:
+        /** @brief Destructor.
+        */
         virtual ~XmlResolver()
         {}
 
+        /** @brief Returns an input source for the given IDs.
+        */
         InputSource* resolveInput(const Pt::String& publicId, const Pt::String& systemId)
         {
             return onResolveInput(publicId, systemId);
         }
 
+        /** @brief Releases an input source resolved by this resolver.
+        */
         void releaseInput(InputSource* is)
         {
             onReleaseInput(is);
         }
 
+        /** @brief Returns a text codec for an encoding string.
+
+            The returned codec will be treated like a stream facet by the
+            caller, i.e. it will be deleted if its refcount is 0.
+        */
         TextCodec<Char, char>* resolveEncoding(const char* encoding)
         {
             return onResolveEncoding(encoding);
         }
 
     protected:
+        /** @brief Default constructor.
+        */
         XmlResolver()
         {}
 
+        /** @brief Returns an input source for the given IDs.
+        */
         virtual InputSource* onResolveInput(const Pt::String& publicId, const Pt::String& systemId) = 0;
 
+        /** @brief Releases an input source resolved by this resolver.
+        */
         virtual void onReleaseInput(InputSource* is) = 0;
 
+        /** @brief Returns a text codec for an encoding string.
+
+            The returned codec will be treated like a stream facet by the
+            caller, i.e. it will be deleted if its refcount is 0.
+        */
         virtual TextCodec<Char, char>* onResolveEncoding(const char* encoding)
         { return 0; }
 };

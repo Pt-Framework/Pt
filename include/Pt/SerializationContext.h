@@ -62,30 +62,44 @@ class PT_API SerializationContext : public SerializationInfo
             return _refsEnabled;
         }
 
-        virtual void reset();
+        // TOOD: public non-virtual / protected virtual
+        /** @brief Clears all content.
+        */
+        virtual void clear();
 
+        // TOOD: public non-virtual / protected virtual
         virtual bool beginSave(const void* p, const std::string& name);
 
+        // TOOD: public non-virtual / protected virtual
         virtual void finishSave();
 
+        // TOOD: public non-virtual / protected virtual
         virtual void prepareId(const void* p);
 
+        // TOOD: public non-virtual / protected virtual
         virtual const char* getId(const void* p);
 
+        // TOOD: public non-virtual / protected virtual
         virtual const char* makeId(const void* p);
 
     public:
+        // TOOD: public non-virtual / protected virtual
         virtual void beginLoad(void* obj, const std::type_info& fixupInfo,
                                const std::string& name, const std::string& id);
 
+        // TOOD: public non-virtual / protected virtual
         virtual void finishLoad();
 
+        // TOOD: public non-virtual / protected virtual
         virtual void rebindTarget(const char* id, void* obj);
 
+        // TOOD: public non-virtual / protected virtual
         virtual void rebindFixup(const std::string& id, void* obj, void* prev);
 
+        // TOOD: public non-virtual / protected virtual
         virtual void prepareFixup(void* obj, const std::string& id, FixupInfo::FixupHandler, unsigned mid);
 
+        // TOOD: public non-virtual / protected virtual
         virtual void fixup();
 
     public:

@@ -37,10 +37,13 @@ namespace Pt {
 
 namespace Xml {
 
+//! @internal
 PT_XML_API void xmlEncode(std::basic_ostream<Pt::Char>& os, const Pt::Char* str, std::size_t n);
 
+//! @internal
 PT_XML_API void xmlEncode(std::basic_ostream<Pt::Char>& os, const Pt::Char* str);
 
+//! @internal
 inline void xmlEncode(std::basic_ostream<Pt::Char>& os, const Pt::String& str);
 
 /** @brief Writes XML to a text stream.
@@ -60,16 +63,28 @@ class PT_XML_API XmlWriter
         */
         ~XmlWriter();
 
+        /** @brief Returns true if indentation should be written.
+        */
         bool isFormatting() const;
         
+        /** @brief Indicates wether indentation should be written.
+        */
         void setFormatting(bool value);
 
+        /** @brief Returns the indentation string.
+        */
         const Pt::String& indent() const;
 
+        /** @brief Sets the indentation string.
+        */
         void setIndent(const Pt::String& indent);
 
+        /** @brief Returns the quotation character.
+        */
         Pt::Char quote() const;
 
+        /** @brief Sets the quotation character.
+        */
         void setQuote(Pt::Char ch);
 
         /** @brief Clears the writer state and output.
@@ -79,81 +94,154 @@ class PT_XML_API XmlWriter
         */
         void reset();
 
+        /** @brief Clears the writer state and output.
+
+            Ther output stream is set and the writer state is reset to
+            write a new document. The formatting options are not changed.
+        */
         void reset(std::basic_ostream<Char>& os);
 
+        /** @brief Returns the output stream or a nullptr if none was set.
+        */
         std::basic_ostream<Char>* output();
 
+        /** @brief Returns the current element depth.
+        */
         std::size_t depth() const;
 
+        /** @brief Sets the default namespace for the child elemnts.
+        */
         void setDefaultNamespace(const Pt::String& ns);
 
+        /** @brief Sets the namespace for the child elemnts.
+        */
         void setNamespacePrefix(const Pt::String& prefix, const Pt::String& ns);
 
+        /** @brief Writes an XML declaration.
+        */
         void writeStartDocument(const Pt::Char* version, std::size_t versionSize, 
                                 const Pt::Char* encoding, std::size_t encodingSize, bool standalone = false);
 
+        /** @brief Writes an XML declaration.
+        */
         void writeStartDocument(const Pt::String& version, const Pt::String& encoding, bool standalone = false);
 
+        /** @brief Finishes the document and closes all open elements.
+        */
         void writeEndDocument();
 
+        /** @brief Writes a DOCTYPE declaration.
+        */
         void writeDocType(const Pt::Char* dtd, std::size_t n);
 
+        /** @brief Writes a DOCTYPE declaration.
+        */
         void writeDocType(const Pt::String& dtd);
 
+        /** @brief Writes a start element.
+        */
         void writeStartElement(const Pt::Char* localName, std::size_t localNameSize);
 
+        /** @brief Writes a start element.
+        */
         void writeStartElement(const Pt::String& localName);
 
+        /** @brief Writes a start element.
+        */
         void writeStartElement(const Char* ns, std::size_t nsSize,
                                const Char* localName, std::size_t localNameSize);
 
+        /** @brief Writes a start element.
+        */
         void writeStartElement(const Pt::String& ns, const Pt::String& localName);
 
+        /** @brief Writes an XML attribute.
+        */
         void writeAttribute(const Char* localName, std::size_t localNameSize,
                             const Char* value, std::size_t valueSize);
 
+        /** @brief Writes an XML attribute.
+        */
         void writeAttribute(const Pt::String& localName, const Pt::String& value);
 
+        /** @brief Writes an XML attribute.
+        */
         void writeAttribute(const Char* ns, std::size_t nsSize,
                             const Char* localName, std::size_t localNameSize,
                             const Char* value, std::size_t valueSize);
 
+        /** @brief Writes an XML attribute.
+        */
         void writeAttribute(const Pt::String& ns, const Pt::String& localName, const Pt::String& value);
 
+        /** @brief Writes an empty XML element.
+        */
         void writeEmptyElement(const Pt::Char* localName, std::size_t localNameSize);
 
+        /** @brief Writes an empty XML element.
+        */
         void writeEmptyElement(const Pt::String& localName);
 
+        /** @brief Writes an empty XML element.
+        */
         void writeEmptyElement(const Char* ns, std::size_t nsSize,
                                const Char* localName, std::size_t localNameSize);
 
+        /** @brief Writes an empty XML element.
+        */
         void writeEmptyElement(const Pt::String& ns, const Pt::String& localName);
 
+        /** @brief Closes the last XML element.
+        */
         void writeEndElement();
 
+        /** @brief Writes text as element content.
+        */
         void writeCharacters(const Pt::Char* text, std::size_t n);
 
+        /** @brief Writes text as element content.
+        */
         void writeCharacters(const Pt::String& text);
 
+        /** @brief Writes an entitiy reference.
+        */
         void writeEntityReference(const Pt::Char* name, std::size_t n);
 
+        /** @brief Writes an entitiy reference.
+        */
         void writeEntityReference(const Pt::String& name);
 
+        /** @brief Writes text as a CDATA section.
+        */
         void writeCData(const Pt::Char* text, std::size_t n);
 
+        /** @brief Writes text as a CDATA section.
+        */
         void writeCData(const Pt::String& text);
 
+        /** @brief Writes a comment.
+        */
         void writeComment(const Pt::Char* text, std::size_t n);
         
+        /** @brief Writes a comment.
+        */
         void writeComment(const Pt::String& text);
 
+        /** @brief Writes a processing instruction.
+        */
         void writeProcessingInstruction(const Pt::Char* target, std::size_t targetSize,
                                         const Pt::Char* data, std::size_t dataSize);
         
+        /** @brief Writes a processing instruction.
+        */
         void writeProcessingInstruction(const Pt::String& text, const Pt::String& data);
 
+        /** @brief Writes a start tag.
+        */
         void writeStartTag(const Pt::Char* name);
 
+        /** @brief Writes an end tag.
+        */
         void writeEndTag(const Pt::Char* name);
 
     private:

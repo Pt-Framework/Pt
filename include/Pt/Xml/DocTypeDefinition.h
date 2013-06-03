@@ -48,7 +48,7 @@ class Notation;
 
 class DocTypeDefinition;
 
-/** @brief The DocTypeDefinition of an XML document.
+/** @brief The %DocTypeDefinition of an XML document.
 
     A %DocTypeDefinition contains all entity, notation, element and attribute
     list declarations from the external and internal DTD subsets.

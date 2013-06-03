@@ -39,19 +39,12 @@ namespace Xml {
 
 class XmlWriter;
 
-/** @brief Serialize objects or object data to XML
-
-    Thic class performs XML serialization of a single object or
-    object data.
+/** @brief Serialize objects or data to XML
 */
 class XmlSerializer : public Serializer
 {
     public:
-        /** @brief Construct a serializer without initializing the
-                    serializer for writing.
-
-            The serializer can be "opened" for writing by calling
-            method attach().
+        /** @brief Default Constructor.
         */
         XmlSerializer()
         {
@@ -59,11 +52,7 @@ class XmlSerializer : public Serializer
             this->setFormatter(_formatter);
         }
 
-        /** @brief Construct a serializer writing to the given XmlWriter object
-
-            The serializer will write the objects to the given XmlWriter object.
-            This class will not free the given XmlWriter object. The caller is
-            responsible to free it if needed.
+        /** @brief Construct to use an %XmlWriter.
         */
         explicit XmlSerializer(XmlWriter& writer)
         : _formatter(writer)
@@ -72,34 +61,22 @@ class XmlSerializer : public Serializer
             this->setFormatter(_formatter);
         }
 
-        /** @brief Opens this serializer for writing into the given XmlWriter object.
-
-            The serializer will write the objects to the given XmlWriter object.
-
-            This method does not have to be called if this XmlSerializer object
-            was constructed using the constructor that takes an ostream or
-            XmlWriter object. If this method is called anyway or called twice an
-            std::logic_error is thrown.
-
-            This class will not free the given XmlWriter object. The caller is
-            responsible to free it if needed.
+        /** @brief Attach to an %XmlWriter.
         */
-
         void attach(XmlWriter& writer)
         {
             _formatter.attach(writer);
         }
-        /** @brief Detaches the currently set writer from this object.
-
-            Before detaching the writer, the underlaying stream is flushed.
-            If there is no currently set writer, nothing happens.
+        
+        /** @brief Detach from its %XmlWriter.
         */
-
         void detach()
         {
             _formatter.detach();
         }
 
+        /** @brief Returns the attached %XmlWriter or a nullptr.
+        */
         XmlWriter* writer()
         {
             return _formatter.writer();

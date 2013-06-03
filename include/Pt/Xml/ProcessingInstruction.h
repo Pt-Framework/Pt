@@ -39,15 +39,15 @@ namespace Xml {
 
 /** @brief A processing instruction of an XML document.
     
-     A processing instruction can be used to add instructions to an XML
-     document to support specific XML processing software. The data of a
-     processing instruction has no particular format and can contain plain
-     text or XML-like attribute/value-associations.
+     Processing instruction are used to add instructions to an XML document
+     to support specific XML processing software. The data of a processing
+     instruction has no particular format and can contain plain text or 
+     XML-like attribute/value-associations.
 */
 class ProcessingInstruction : public Node 
 {
     public:
-        /** @brief Constructs a ProcessingInstruction.
+        /** @brief Constructs an empty %ProcessingInstruction.
         */
         ProcessingInstruction()
         : Node(Node::ProcessingInstruction)
@@ -100,25 +100,29 @@ class ProcessingInstruction : public Node
         String _data;
 };
 
-
+/** @brief Casts a generic node to a %ProcessingInstruction node.
+*/
 inline ProcessingInstruction* toProcessingInstruction(Node* node)
 {
     return nodeCast<ProcessingInstruction>(node);
 }
 
-
+/** @brief Casts a generic node to a %ProcessingInstruction node.
+*/
 inline const ProcessingInstruction* toProcessingInstruction(const Node* node)
 {
     return nodeCast<ProcessingInstruction>(node);
 }
 
-
+/** @brief Casts a generic node to a %ProcessingInstruction node.
+*/
 inline ProcessingInstruction& toProcessingInstruction(Node& node)
 {
     return nodeCast<ProcessingInstruction>(node);
 }
 
-
+/** @brief Casts a generic node to a %ProcessingInstruction node.
+*/
 inline const ProcessingInstruction& toProcessingInstruction(const Node& node)
 {
     return nodeCast<ProcessingInstruction>(node);

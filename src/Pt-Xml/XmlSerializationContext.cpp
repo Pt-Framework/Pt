@@ -126,17 +126,29 @@ XmlSerializationContext::XmlSerializationContext()
 
 XmlSerializationContext::~XmlSerializationContext()
 {
-    std::vector<Fixup*>::iterator it;
+    clear();
+}
 
+
+void XmlSerializationContext::clear()
+{
+    _refmap.clear();
+    _idmap.clear();
+
+    std::vector<Fixup*>::iterator it;
     for(it = _targets.begin(); it != _targets.end(); ++it)
     {
         delete *it;
     }
 
+    _targets.clear();
+
     for(it = _pointers.begin(); it != _pointers.end(); ++it)
     {
         delete *it;
     }
+    
+    _pointers.clear();
 }
 
 
@@ -209,28 +221,6 @@ const char* XmlSerializationContext::makeId(const void* p)
     _refmap[p] = convert<std::string>( _idmap[p] );
     _idmap.erase(p);
     return _refmap[p].c_str();
-}
-
-
-void XmlSerializationContext::reset()
-{
-    _refmap.clear();
-    _idmap.clear();
-
-    std::vector<Fixup*>::iterator it;
-    for(it = _targets.begin(); it != _targets.end(); ++it)
-    {
-        delete *it;
-    }
-
-    _targets.clear();
-
-    for(it = _pointers.begin(); it != _pointers.end(); ++it)
-    {
-        delete *it;
-    }
-    
-    _pointers.clear();
 }
 
 

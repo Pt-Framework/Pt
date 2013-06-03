@@ -37,6 +37,9 @@ namespace Pt {
 namespace Xml {
 
 /** @brief A Node representing the begin of the XML document.
+
+    %StartDocument nodes are only reported when the XmlReader is configured to
+    do so. They indicate that the XML declaration has been parsed.
 */
 class StartDocument : public Node 
 {
@@ -48,14 +51,20 @@ class StartDocument : public Node
         , _standalone(false)
         { }
 
+        /** @brief Clears all content.
+        */
         void clear()
         {
             _standalone = false;
         }
 
+        /** @brief Returns true if the document is standalone.
+        */
         bool isStandalone() const
         { return _standalone; }
 
+        /** @brief Indicates that the document is standalone.
+        */
         void setStandalone(bool alone)
         { _standalone = alone; }
 
@@ -67,25 +76,29 @@ class StartDocument : public Node
         bool _standalone;
 };
 
-
+/** @brief Casts a generic node to a %StartDocument node.
+*/
 inline StartDocument* toStartDocument(Node* node)
 {
     return nodeCast<StartDocument>(node);
 }
 
-
+/** @brief Casts a generic node to a %StartDocument node.
+*/
 inline const StartDocument* toStartDocument(const Node* node)
 {
     return nodeCast<StartDocument>(node);
 }
 
-
+/** @brief Casts a generic node to a %StartDocument node.
+*/
 inline StartDocument& toStartDocument(Node& node)
 {
     return nodeCast<StartDocument>(node);
 }
 
-
+/** @brief Casts a generic node to a %StartDocument node.
+*/
 inline const StartDocument& toStartDocument(const Node& node)
 {
     return nodeCast<StartDocument>(node);

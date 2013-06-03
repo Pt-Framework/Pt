@@ -37,6 +37,7 @@ Deserializer::Deserializer()
 , _memsize(0)
 {}
 
+
 Deserializer::~Deserializer()
 {
     if(_current)
@@ -46,6 +47,7 @@ Deserializer::~Deserializer()
 
     this->deallocate(_mem);
 }
+
 
 SerializationContext* Deserializer::context()
 {
@@ -75,7 +77,7 @@ void Deserializer::setFormatter(Formatter& formatter)
 void Deserializer::clear()
 {
     if(_context)
-        _context->reset();
+        _context->clear();
 
     if(_current)
     {

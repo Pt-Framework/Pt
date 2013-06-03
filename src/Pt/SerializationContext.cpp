@@ -183,7 +183,7 @@ void SerializationContext::fixup()
 }
 
 
-void SerializationContext::reset()
+void SerializationContext::clear()
 {
 }
 

@@ -48,7 +48,8 @@ class NamespaceContext;
 class Attribute
 {
     public:
-        //! Default constructor.
+        /** @brief Default constructor.
+        */
         Attribute()
         : _namespace(0)
         { }
@@ -106,13 +107,17 @@ class PT_XML_API AttributeList : private NonCopyable
         typedef const Attribute* ConstIterator;
 
     public:
+        /** @brief Construct with namespace context.
+        */
         explicit AttributeList(NamespaceContext& nsctx)
         : _begin(0)
         , _end(0)
         , _size(0)
         , _nsctx(&nsctx)
         { }
-
+        
+        /** @brief Clears all content.
+        */
         void clear()
         { 
             _begin = 0;
@@ -120,50 +125,111 @@ class PT_XML_API AttributeList : private NonCopyable
             _size = 0;
         }
 
+        /** @brief Appends a new element to the end of the list.
+
+            A new attribute is added to the end of the list with the name
+            @a name in the namespace @a ns
+        */
         Attribute& append(const QName& name, const Namespace& ns);
 
+        /** @brief Gets the value of an attribute.
+
+            The value of the attribute with the local name @a localName is
+            returned. If no attribute by that name is present, the @a
+            defaultValue is returned.
+        */
         const Pt::String& get(const Pt::String& localName, const Pt::String& defaultValue) const
         {
             ConstIterator it = find(localName);
             return it == end() ? defaultValue : it->value();
         }
 
+        /** @brief Gets the value of an attribute.
+
+            The value of the attribute with the namespace @a nsUri and the
+            local name @a localName is returned. If no attribute by that
+            name is present, the @a defaultValue is returned.
+        */
         const Pt::String& get(const String& nsUri, const String& localName, const Pt::String& defaultValue) const
         {
             ConstIterator it = find(nsUri, localName);
             return it == end() ? defaultValue : it->value();
         }
 
+        /** @brief Finds an attribute by name.
+
+            An iterator to the the attribute with the local name @a localName is
+            returned. If no attribute by that name is present, an iterator to
+            the end of the sequence is returned.
+        */
         Iterator find(const String& localName);
 
+        /** @brief Finds an attribute by name.
+
+            An iterator to the the attribute with the the namespace @a nsUri 
+            and the local name @a localName is returned. If no attribute by
+            that name is present, an iterator to the end of the sequence is
+            returned.
+        */
         Iterator find(const String& nsUri, const String& localName);
 
+        /** @brief Finds an attribute by name.
+
+            An iterator to the the attribute with the local name @a localName is
+            returned. If no attribute by that name is present, an iterator to
+            the end of the sequence is returned.
+        */
         ConstIterator find(const String& localName) const;
 
+        /** @brief Finds an attribute by name.
+
+            An iterator to the the attribute with the the namespace @a nsUri 
+            and the local name @a localName is returned. If no attribute by
+            that name is present, an iterator to the end of the sequence is
+            returned.
+        */
         ConstIterator find(const String& nsUri, const String& localName) const;
 
-        bool has(const String& name) const;
+        /** @brief Checks if an attribute is present.
+        */
+        bool has(const String& localName) const;
 
-        bool has(const String& nsUri, const String& name) const;
+        /** @brief Checks if an attribute is present.
+        */
+        bool has(const String& nsUri, const String& localName) const;
 
+        /** @brief An iterator to the begin of the sequence.
+        */
         Iterator begin()
         { return _begin; }
 
+        /** @brief An iterator to the end of the sequence.
+        */
         Iterator end()
         { return _end; }
 
+        /** @brief An iterator to the begin of the sequence.
+        */
         ConstIterator begin() const
         { return _begin; }
 
+        /** @brief An iterator to the end of the sequence.
+        */
         ConstIterator end() const
         { return _end; }
 
+        /** @brief Returns true if the list is empty.
+        */
         bool empty() const
         { return _size == 0; }
 
+        /** @brief Returns the size of the list.
+        */
         std::size_t size() const
         { return _size; }
 
+        /** @brief Returns the namespace context for the attributes.
+        */
         NamespaceContext& namespaceContext()
         { return *_nsctx; }
 
@@ -175,17 +241,17 @@ class PT_XML_API AttributeList : private NonCopyable
         NamespaceContext* _nsctx;
 };
 
-/** @brief Represents an opening tag in an XML document.
+/** @brief Represents the start of an element in an XML document.
   
-    A start element is created when the parser reaches a start tag. It contains
-    the name of the tag, its namespace information, and the attributes of
-    the tag.
+    A start element node is reported when the XML reader parsed the opening
+    tag of an XML element. It contains the name of the XML element, its
+    namespace information, and the attributes of the XML element.
 */
 class StartElement : public Node
                    , private NonCopyable
 {
     public:
-        /** Constructs an empty StartElement.
+        /** @brief Constructs an empty %StartElement.
         */
         StartElement(NamespaceContext& nsctx)
         : Node(Node::StartElement)
@@ -207,20 +273,22 @@ class StartElement : public Node
             _namespace = &ns;
         }
 
-        /** @brief Returns the namespace Uri for this element name
+        /** @brief Returns the namespace Uri for this element name.
         */
         const String& namespaceUri() const
         { return _namespace->namespaceUri(); }
 
+        /** @brief Sets the namespace.
+        */
         void setNamespace(const Namespace& ns)
         { _namespace = &ns; }
         
-        /** @brief Returns the attributes of the tag.
+        /** @brief Returns the attributes of the element.
         */
         const AttributeList& attributes() const
         { return _attributes; }
 
-        /** @brief Returns the attributes of the tag.
+        /** @brief Returns the attributes of the element.
         */
         AttributeList& attributes()
         { return _attributes; }
@@ -235,25 +303,29 @@ class StartElement : public Node
         AttributeList _attributes;
 };
 
-
+/** @brief Casts a generic node to a %StartElement node.
+*/
 inline StartElement* toStartElement(Node* node)
 {
     return nodeCast<StartElement>(node);
 }
 
-
+/** @brief Casts a generic node to a %StartElement node.
+*/
 inline const StartElement* toStartElement(const Node* node)
 {
     return nodeCast<StartElement>(node);
 }
 
-
+/** @brief Casts a generic node to a %StartElement node.
+*/
 inline StartElement& toStartElement(Node& node)
 {
     return nodeCast<StartElement>(node);
 }
 
-
+/** @brief Casts a generic node to a %StartElement node.
+*/
 inline const StartElement& toStartElement(const Node& node)
 {
     return nodeCast<StartElement>(node);

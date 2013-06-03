@@ -44,133 +44,146 @@ class Node;
 class StartElement;
 class EndElement;
 
-/** @brief Serialize objects or object data to XML
-
-    Thic class performs XML serialization of a single object or
-    object data.
+/** @brief Format objects or data to XML
 */
 class PT_XML_API XmlFormatter : public Formatter
 {
     public:
-        /** @brief Construct a serializer without initializing the
-                    serializer for writing.
-
-            The serializer can be "opened" for writing by calling
-            method attach().
+        /** @brief Default Constructor.
         */
         XmlFormatter();
 
-        /** @brief Construct a formatter writing to a XmlWriter.
-
-            The serializer will write the objects to the given XmlWriter object.
-            This class will not free the given XmlWriter object. The caller is
-            responsible to free it if needed.
+        /** @brief Construct a formatter writing to a %XmlWriter.
         */
         explicit XmlFormatter(XmlWriter& writer);
 
+        /** @brief Construct a formatter reading from a %XmlReader.
+        */
         explicit XmlFormatter(XmlReader& reader);
 
         //! @brief Destructor
         ~XmlFormatter();
 
-        /** @brief Opens this serializer for writing into the given XmlWriter object.
-
-            The serializer will write the objects to the given XmlWriter object.
-
-            This method does not have to be called if this XmlSerializer object
-            was constructed using the constructor that takes an ostream or
-            XmlWriter object. If this method is called anyway or called twice an
-            std::logic_error is thrown.
-
-            This class will not free the given XmlWriter object. The caller is
-            responsible to free it if needed.
+        /** @brief Attach to an %XmlWriter.
         */
         void attach(XmlWriter& writer);
 
+        /** @brief Returns the attached %XmlWriter or a nullptr.
+        */
         XmlWriter* writer()
         { return _writer;}
 
+        /** @brief Attach to an %XmlReader.
+        */
         void attach(XmlReader& reader);
 
+        /** @brief Returns the attached %XmlReader or a nullptr.
+        */
         XmlReader* reader()
         { return _reader;}
 
-        /** @brief Detaches the currently set writer from this object.
-
-            Before detaching the writer, the underlaying stream is flushed.
-            If there is no currently set writer, nothing happens.
+        /** @brief Detach from its %XmlReader and %XmlWriter.
         */
         void detach();
 
+        // inherit docs
         void addString(const char*, const char* type,
                        const Pt::Char* value, const char* id);
         
+        // inherit docs
         void addString8(const char* name, const char* value, 
                         const char* id);
         
+        // inherit docs
         void addBool(const char* name, bool value,
                      const char* id);
 
         void addChar(const char* name, const Pt::Char& value,
                      const char* id);
 
+        // inherit docs
         void addChar8(const char* name, char value,
                       const char* id);
 
+        // inherit docs
         void addInt8(const char* name, Pt::int8_t value, const char* id);
         
+        // inherit docs
         void addInt16(const char* name, Pt::int16_t value,  const char* id);
         
+        // inherit docs
         void addInt32(const char* name, Pt::int32_t value, const char* id);
         
+        // inherit docs
         void addInt64(const char* name, Pt::int64_t value, const char* id);
 
+        // inherit docs
         void addUInt8(const char* name, Pt::uint8_t value, const char* id);
         
+        // inherit docs
         void addUInt16(const char* name, Pt::uint16_t value,  const char* id);
         
+        // inherit docs
         void addUInt32(const char* name, Pt::uint32_t value, const char* id);
         
+        // inherit docs
         void addUInt64(const char* name, Pt::uint64_t value, const char* id);
 
+        // inherit docs
         void addFloat(const char* name, float value,
                       const char* id);
 
+        // inherit docs
         void addDouble(const char* name, double value,
                        const char* id);
-
+        
+        // inherit docs
         void addLongDouble(const char* name, long double value,
                            const char* id);
-
+        
+        // inherit docs
         void addBytes(const char* name, const char* type,
                       const char* value, size_t length, const char* id);
-
+        
+        // inherit docs
         void addReference(const char* name, const char* value);
-
+        
+        // inherit docs
         void beginArray(const char* name, const char* type,
                         const char* id);
-
+        
+        
+        // inherit docs
         void beginElement(const char* type, const char* id);
-
+        
+        // inherit docs
         void finishElement();
-
+        
+        // inherit docs
         void finishArray();
-
+        
+        // inherit docs
         void beginObject(const char* name, const char* type,
                          const char* id);
-
+        
+        // inherit docs
         void beginMember(const char* name, const char* type,
                          const char* id);
-
+        
+        // inherit docs
         void finishMember();
-
+        
+        // inherit docs
         void finishObject();
-
+        
+        // inherit docs
         void onBeginObject(const char* name, const char* type,
                            const char* id);
 
+        // inherit docs
         bool parseSome(IComposer& composer);
 
+        // inherit docs
         void parse(IComposer& composer);
 
     protected:

@@ -36,15 +36,19 @@ namespace Pt {
 
 namespace Xml {
 
-/** @brief XML declaration.
+/** @brief XML declaration of an XML document.
 */
 class XmlDeclaration
 {
     public:
+        /** @brief Constructs an empty %XmlDeclaration.
+        */
         XmlDeclaration()
         : _standalone(false)
         {}
        
+        /** @brief Clears all content.
+        */
         void clear()
         {
             _version.clear();
@@ -52,21 +56,33 @@ class XmlDeclaration
             _standalone = false;
         }
         
+        /** @brief Returns the version string.
+        */
         const std::string& version() const
         { return _version; }
 
+        /** @brief Returns the version string.
+        */
         std::string& version()
         { return _version; }
 
+        /** @brief Returns the encoding string.
+        */
         const std::string& encoding() const
         { return _encoding; }
 
+        /** @brief Returns the encoding string.
+        */
         std::string& encoding()
         { return _encoding;}
 
+        /** @brief Returns true if the document is standalone.
+        */
         bool isStandalone() const
         { return _standalone; }
         
+        /** @brief Indicates that the document is standalone.
+        */
         void setStandalone(bool value)
         { _standalone = value; }
 

@@ -40,20 +40,21 @@ namespace Xml {
 
 class XmlReader;
 
-/** @brief Deserialize objects or object data to XML
-
-    Thic class performs XML deserialization of a single object or
-    object data.
+/** @brief Deserialize objects and data from XML.
 */
 class XmlDeserializer : public Deserializer
 {
     public:
+        /** @brief Default Constructor.
+        */
         XmlDeserializer()
         {
             this->reset( &_xmlcontext );
             this->setFormatter(_formatter);
         }
 
+        /** @brief Construct to use an %XmlReader.
+        */
         explicit XmlDeserializer(XmlReader& reader)
         : _formatter(reader)
         {
@@ -61,16 +62,22 @@ class XmlDeserializer : public Deserializer
             this->setFormatter(_formatter);
         }
 
+        /** @brief Attach to an %XmlReader.
+        */
         void attach(XmlReader& reader)
         {
             _formatter.attach(reader);
         }
 
+        /** @brief Detach from its %XmlReader.
+        */
         void detach()
         {
             _formatter.detach();
         }
 
+        /** @brief Returns the attached %XmlReader or a nullptr.
+        */
         XmlReader* reader()
         {
             return _formatter.reader();

@@ -79,7 +79,7 @@ void Serializer::setFormatter(Formatter& formatter)
 void Serializer::clear()
 {
     if(_context)
-        _context->reset();
+        _context->clear();
 
     std::vector<IDecomposer*>::iterator it;
     for(it = _stack.begin(); it != _stack.end(); ++it)

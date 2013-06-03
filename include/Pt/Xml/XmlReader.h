@@ -47,38 +47,34 @@ class InputIterator;
 
 /** @brief Reads XML as a Stream of XML Nodes.
 
-     This class operates on an input stream from which XML character data
-     is read and parsed.
+     This class operates on an input source from which XML character data
+     is read and parsed. The content of the XML document is reported as XML
+     nodes.
 
      The parser will only parse the XML document as far as the user read
-     data from it. To read the current element (Node) the method get() can
-     be used. To parse and read the next element the method next() can be
+     data from it. To acces the current node the method get() can
+     be used. To parse and read the next node the method next() can be
      used. Only when next() or any corresponding method or operator is
      called, the next chunk of XML input data is parsed.
 
-     To parse a XML-document, a XmlReader constructed with an input stream
-     from which the XML document is to be read.
+     The current XML node can be read using get(). Every call to
+     next() will parse the next node, position the cursor to the next
+     node and return the parsed node. The returned value is of type
+     Node, which is the super-class for all XML node classes.
 
-     The current XML element (Node) can be read using get(). Every call to
-     next() will parse the next element, position the cursor to the next
-     element and return the parsed element. The returned element is of type
-     Node, which is the super-class for all XML element classes. The class
-     Node has a method type() which returns the type of the read element.
-     Depending on the type the generic Node object may be cast to the more
-     concrete element object. For example a Node object with a node type of
+     Depending on the type, the generic node object may be cast to the more
+     concrete node object. For example a Node object with a node type of
      Node::StartElement can be cast to StartElement.
 
      Parsing using next() will continue until the end of the document is
-     reached which will resultin a EndDocument element to be returned by
+     reached which will result in a EndDocument node to be returned by
      next() and get().
 
      This class also provides the method current() to obtain an iterator
      which basically works the same way like using using get() and next()
-     directly. The iterator can be set to the next element by using the
-     ++ operator. The current element can be accessed by dereferencing
+     directly. The iterator can be set to the next node by using the
+     ++ operator. The current node can be accessed by dereferencing
      the iterator.
-
-     @see Node
 */
 class PT_XML_API XmlReader : private NonCopyable
 {
@@ -146,20 +142,36 @@ class PT_XML_API XmlReader : private NonCopyable
         */
         void setMaxSize(std::size_t n);
 
+        /** @brief Returns the number of characters the parser may allocate.
+        */
         std::size_t maxSize() const;
 
+        /** @brief Returns the number of characters the parser has allocated.
+        */
         std::size_t usedSize() const;
 
+        /** @brief Configures the parser to report the start of the document.
+        */
         void reportStartDocument(bool value);
 
+        /** @brief Configures the parser to report DOCTYPEs.
+        */
         void reportDocType(bool value);
 
+        /** @brief Configures the parser to report processing instructions.
+        */
         void reportProcessingInstructions(bool value);
 
+        /** @brief Configures the parser to report CDATA sections.
+        */
         void reportCData(bool value);
-
+        
+        /** @brief Configures the parser to report comments.
+        */
         void reportComments(bool value);
 
+        /** @brief Configures the parser to report entity references.
+        */
         void reportEntityReferences(bool value);
 
         /** @brief Returns current DTD of the document.
@@ -186,10 +198,12 @@ class PT_XML_API XmlReader : private NonCopyable
         */
         InputIterator end() const;
 
-        //! @brief Get current node.
+        /** @brief Get current node.
+        */
         Node& get();
 
-        //! @brief Get next node.
+        /** @brief Get next node.
+        */
         Node& next();
 
         /** @brief Process availabe data from underlying input source.
@@ -209,23 +223,33 @@ class PT_XML_API XmlReader : private NonCopyable
 class InputIterator
 {
     public:
+        /** @brief Default Constructor.
+        */
         InputIterator()
         : _stream(0)
         , _node(0)
         { }
 
+        /** @brief Construct iterator to point to current document position.
+        */
         explicit InputIterator(XmlReader& xis)
         : _stream(&xis)
         , _node(0)
         { _node = &_stream->get(); }
 
+        /** @brief Copy constructor.
+        */
         InputIterator(const InputIterator& it)
         : _stream(it._stream), _node(it._node)
         { }
 
+        /** @brief Destructor.
+        */
         ~InputIterator()
         { }
 
+        /** @brief Assignment operator.
+        */
         InputIterator& operator=(const InputIterator& it)
         {
             _stream = it._stream;
@@ -233,12 +257,18 @@ class InputIterator
             return *this;
         }
 
+        /** @brief Derefences the iterator.
+        */
         inline Node& operator*()
         { return *_node; }
 
+        /** @brief Derefences the iterator.
+        */
         inline Node* operator->()
         { return _node; }
 
+        /** @brief Increments the iterator position.
+        */
         InputIterator& operator++()
         {
             if(_node->type() == Node::EndDocument)
@@ -249,9 +279,13 @@ class InputIterator
             return *this;
         }
 
+        /** @brief Returns true if both iterators point at the same node.
+        */
         inline bool operator==(const InputIterator& it) const
         { return _node == it._node; }
 
+        /** @brief Returns true if iterators point to different nodes.
+        */
         inline bool operator!=(const InputIterator& it) const
         { return _node != it._node; }
 

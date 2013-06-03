@@ -45,6 +45,8 @@ class PT_XML_API XmlError : public std::runtime_error
         */
         explicit XmlError(const char* what);
 
+        /** @brief Destructor.
+        */
         ~XmlError() throw()
         {}
 };
@@ -58,9 +60,13 @@ class PT_XML_API SyntaxError : public XmlError
         */
         SyntaxError(const char* what, unsigned line);
 
+        /** @brief Destructor.
+        */
         ~SyntaxError() throw()
         {}
 
+        /** @brief Line count where the error in the document occured.
+        */
         unsigned line() const
         { return _line; }
 

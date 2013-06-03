@@ -563,11 +563,11 @@ TextInputSource::TextInputSource(std::basic_istream<Char>& is)
 }
 
 
-void TextInputSource::reset(std::basic_istream<Char>& ios)
+void TextInputSource::reset()
 {
     init(0);
 
-    _ios = &ios;
+    _ios = 0;
 
     _xmlDecl.clear();
     _id.clear();
@@ -575,6 +575,14 @@ void TextInputSource::reset(std::basic_istream<Char>& ios)
     _xmlState = OnXmlBegin;
     _pbBegin = 0;
     _pbEnd = 0;
+}
+
+
+void TextInputSource::reset(std::basic_istream<Char>& ios)
+{
+    reset();
+
+    _ios = &ios;
 }
 
 
@@ -714,7 +722,7 @@ bool StringInputSource::onImportText()
     //       even if no more characters are available
   
     // some implementations need peek(), otherwise in_avail returns
-    // 0 event though data is available
+    // 0 even though data is available
     _ss.peek();
     return _ss.rdbuf()->in_avail() > 0;
 }
@@ -825,13 +833,11 @@ BinaryInputSource::BinaryInputSource(XmlResolver& resolver, std::istream& is)
 }
 
 
-void BinaryInputSource::reset(std::istream& is)
+void BinaryInputSource::reset()
 { 
     init(0);
 
-    _resolver = 0;
-    _is = &is;
-    _tbuf.attach(is); 
+    _tbuf.reset(); 
     _tbuf.setCodec(&_utf8Codec);
 
     _xmlDecl.clear();
@@ -844,6 +850,15 @@ void BinaryInputSource::reset(std::istream& is)
     _xmlState = OnXmlBegin;
     _pbBegin = 0;
     _pbEnd = 0;
+}
+
+
+void BinaryInputSource::reset(std::istream& is)
+{ 
+    reset();
+
+    _is = &is;
+    _tbuf.attach(is); 
 }
 
 

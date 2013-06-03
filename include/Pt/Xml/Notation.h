@@ -36,27 +36,39 @@ namespace Pt {
 
 namespace Xml {
 
-/** @brief A notation declaration.
+/** @brief A notation declaration in a DTD.
 */
 class Notation 
 {
     public:
+        /** @brief Constructs with notation name.
+        */
         explicit Notation(const Pt::String& name)
         : _name(name)
         { }
 
+        /** @brief Returns the name of the notation.
+        */
         const Pt::String& name() const
         { return _name; }
 
+        /** @brief Returns the public ID of the notation.
+        */
         const Pt::String& publicId() const
         { return _publicId; }
 
+        /** @brief Sets the public ID of the notation.
+        */
         void setPublicId(const Pt::String& pubId)
         { _publicId = pubId; }
 
+        /** @brief Returns the system ID of the notation.
+        */
         const Pt::String& systemId() const
         { return _systemId; }
 
+        /** @brief Sets the system ID of the notation.
+        */
         void setSystemId(const Pt::String& sysId)
         { _systemId = sysId; }
 

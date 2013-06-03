@@ -37,7 +37,11 @@ namespace Pt {
 
 namespace Xml {
 
-/** @brief A qualified XML name
+/** @brief A qualified XML name.
+
+    A qualified XML name consists of a prefix separated by a colon from its
+    local name. The prefix is used to refer to a namespace. This allows to
+    distinguish between to attributes or elements with the same local name.
 */
 class QName 
 {

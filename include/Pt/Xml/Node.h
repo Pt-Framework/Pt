@@ -37,15 +37,14 @@ namespace Xml {
 
 /** @brief XML document node.
 
-    A node may for example be an opening tag, a closing tag, a comment or a
-    doctype declaration. This class provides functionality to cast to a
-    specialized node type. Therefore, the method type() can be used to 
-    determine the type of a node. 
-
-    Specialized node classes exist for every supported node type (i.e. all
-    except "Unknown"), which are derived from this Node class. Those classes
-    contain more data and access methods to process the information specific
-    to the node, for example the tag name for a StartElement.
+    The XmlReader reports the content of a XML document as XML nodes. A node
+    might be a start element, an end element, characters, a comment or a
+    doctype declaration. The specialized node classes have methods and data
+    members to process the information specific to the node. So, this class
+    serves more or less as an anchor for casting and as a common token type. 
+    
+    To cast to a derived node, a static_cast can be done after checking the
+    node type, or the helper functions such as toStartElement() can be used.
 */
 class Node 
 {
@@ -106,7 +105,7 @@ class Node
         Type _type;
 };
 
-
+//! @internal
 template <typename T>
 T* nodeCast(Node* node)
 {
@@ -118,7 +117,7 @@ T* nodeCast(Node* node)
     return e;
 }
 
-
+//! @internal
 template <typename T>
 const T* nodeCast(const Node* node)
 {
@@ -130,7 +129,7 @@ const T* nodeCast(const Node* node)
     return e;
 }
 
-
+//! @internal
 template <typename T>
 T& nodeCast(Node& node)
 {
@@ -140,7 +139,7 @@ T& nodeCast(Node& node)
     return static_cast<T&>(node);
 }
 
-
+//! @internal
 template <typename T>
 const T& nodeCast(const Node& node)
 {
