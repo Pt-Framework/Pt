@@ -243,9 +243,6 @@
     <ClInclude Include="..\..\src\Pt\regexp.h">
       <Filter>Pt</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt\SerializationData.h">
-      <Filter>Pt</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Pt\SettingsReader.h">
       <Filter>Pt</Filter>
     </ClInclude>
