@@ -52,6 +52,9 @@
     <Filter Include="Pt-Xml\tests">
       <UniqueIdentifier>{8bc815a8-812a-45b2-a7fd-ddb98788ac3a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Pt-XmlRpc">
+      <UniqueIdentifier>{7e2aa4fc-ec38-41cb-bdeb-a9d84c96394a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\Pt\Allocator.h">
@@ -564,9 +567,6 @@
     <ClInclude Include="..\..\include\Pt\Reflex\PropertyProxy.h">
       <Filter>Pt-Reflex</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Reflex\Reflectable.h">
-      <Filter>Pt-Reflex</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Reflex\Type.h">
       <Filter>Pt-Reflex</Filter>
     </ClInclude>
@@ -744,6 +744,42 @@
     <ClInclude Include="..\..\include\Pt\Xml\XmlDeclaration.h">
       <Filter>Pt-Xml</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\XmlRpc\Api.h">
+      <Filter>Pt-XmlRpc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\XmlRpc\Client.h">
+      <Filter>Pt-XmlRpc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\XmlRpc\Fault.h">
+      <Filter>Pt-XmlRpc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\XmlRpc\Formatter.h">
+      <Filter>Pt-XmlRpc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\XmlRpc\HttpClient.h">
+      <Filter>Pt-XmlRpc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\XmlRpc\RemoteProcedure.h">
+      <Filter>Pt-XmlRpc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\XmlRpc\Responder.h">
+      <Filter>Pt-XmlRpc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\XmlRpc\Result.h">
+      <Filter>Pt-XmlRpc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\XmlRpc\Scanner.h">
+      <Filter>Pt-XmlRpc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\XmlRpc\Service.h">
+      <Filter>Pt-XmlRpc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-XmlRpc\ClientImpl.h">
+      <Filter>Pt-XmlRpc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-XmlRpc\HttpClientImpl.h">
+      <Filter>Pt-XmlRpc</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -846,6 +882,15 @@
     </None>
     <None Include="..\..\src\Pt-Xml\tests\Jamfile">
       <Filter>Pt-Xml\tests</Filter>
+    </None>
+    <None Include="..\..\include\Pt\XmlRpc\RemoteProcedure.tpp">
+      <Filter>Pt-XmlRpc</Filter>
+    </None>
+    <None Include="..\..\include\Pt\XmlRpc\Service.tpp">
+      <Filter>Pt-XmlRpc</Filter>
+    </None>
+    <None Include="..\..\src\Pt-XmlRpc\Jamfile">
+      <Filter>Pt-XmlRpc</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -1335,9 +1380,6 @@
     <ClCompile Include="..\..\src\Pt-Reflex\GenericType.cpp">
       <Filter>Pt-Reflex</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Reflex\Reflectable.cpp">
-      <Filter>Pt-Reflex</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Pt-Reflex\Type.cpp">
       <Filter>Pt-Reflex</Filter>
     </ClCompile>
@@ -1472,6 +1514,33 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Xml\ContentModel.cpp">
       <Filter>Pt-Xml</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-XmlRpc\Client.cpp">
+      <Filter>Pt-XmlRpc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-XmlRpc\ClientImpl.cpp">
+      <Filter>Pt-XmlRpc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-XmlRpc\Fault.cpp">
+      <Filter>Pt-XmlRpc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-XmlRpc\Formatter.cpp">
+      <Filter>Pt-XmlRpc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-XmlRpc\HttpClient.cpp">
+      <Filter>Pt-XmlRpc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-XmlRpc\HttpClientImpl.cpp">
+      <Filter>Pt-XmlRpc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-XmlRpc\Responder.cpp">
+      <Filter>Pt-XmlRpc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-XmlRpc\Scanner.cpp">
+      <Filter>Pt-XmlRpc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-XmlRpc\Service.cpp">
+      <Filter>Pt-XmlRpc</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

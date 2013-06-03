@@ -75,7 +75,6 @@
     <ClInclude Include="..\..\include\Pt\Reflex\MethodProxy.h" />
     <ClInclude Include="..\..\include\Pt\Reflex\PropertyInfo.h" />
     <ClInclude Include="..\..\include\Pt\Reflex\PropertyProxy.h" />
-    <ClInclude Include="..\..\include\Pt\Reflex\Reflectable.h" />
     <ClInclude Include="..\..\include\Pt\Reflex\Type.h" />
     <ClInclude Include="..\..\include\Pt\Reflex\TypeManager.h" />
     <ClInclude Include="..\..\include\Pt\Reflex\TypeSpecifier.h" />
@@ -164,6 +163,16 @@
     <ClInclude Include="..\..\include\Pt\Variant.h" />
     <ClInclude Include="..\..\include\Pt\Void.h" />
     <ClInclude Include="..\..\include\Pt\WinVer.h" />
+    <ClInclude Include="..\..\include\Pt\XmlRpc\Api.h" />
+    <ClInclude Include="..\..\include\Pt\XmlRpc\Client.h" />
+    <ClInclude Include="..\..\include\Pt\XmlRpc\Fault.h" />
+    <ClInclude Include="..\..\include\Pt\XmlRpc\Formatter.h" />
+    <ClInclude Include="..\..\include\Pt\XmlRpc\HttpClient.h" />
+    <ClInclude Include="..\..\include\Pt\XmlRpc\RemoteProcedure.h" />
+    <ClInclude Include="..\..\include\Pt\XmlRpc\Responder.h" />
+    <ClInclude Include="..\..\include\Pt\XmlRpc\Result.h" />
+    <ClInclude Include="..\..\include\Pt\XmlRpc\Scanner.h" />
+    <ClInclude Include="..\..\include\Pt\XmlRpc\Service.h" />
     <ClInclude Include="..\..\include\Pt\Xml\Api.h" />
     <ClInclude Include="..\..\include\Pt\Xml\Characters.h" />
     <ClInclude Include="..\..\include\Pt\Xml\Comment.h" />
@@ -224,6 +233,8 @@
     <ClInclude Include="..\..\src\Pt-System\win32\SerialDeviceImpl.h" />
     <ClInclude Include="..\..\src\Pt-System\win32\ThreadImpl.h" />
     <ClInclude Include="..\..\src\Pt-System\win32\win32.h" />
+    <ClInclude Include="..\..\src\Pt-XmlRpc\ClientImpl.h" />
+    <ClInclude Include="..\..\src\Pt-XmlRpc\HttpClientImpl.h" />
     <ClInclude Include="..\..\src\Pt-Xml\AttributeListModel.h" />
     <ClInclude Include="..\..\src\Pt-Xml\AttributeModel.h" />
     <ClInclude Include="..\..\src\Pt-Xml\ContentModel.h" />
@@ -248,6 +259,8 @@
     <None Include="..\..\include\Pt\Signal.tpp" />
     <None Include="..\..\include\Pt\Slot.tpp" />
     <None Include="..\..\include\Pt\String.tpp" />
+    <None Include="..\..\include\Pt\XmlRpc\RemoteProcedure.tpp" />
+    <None Include="..\..\include\Pt\XmlRpc\Service.tpp" />
     <None Include="..\..\jam.bat" />
     <None Include="..\..\Jambase" />
     <None Include="..\..\Jamconfigure" />
@@ -269,6 +282,7 @@
     <None Include="..\..\src\Pt-System\tests\Makefile.am" />
     <None Include="..\..\src\Pt-Unit\Jamfile" />
     <None Include="..\..\src\Pt-Unit\Makefile.am" />
+    <None Include="..\..\src\Pt-XmlRpc\Jamfile" />
     <None Include="..\..\src\Pt-Xml\Jamfile" />
     <None Include="..\..\src\Pt-Xml\tests\Jamfile" />
     <None Include="..\..\src\Pt\itest.mm" />
@@ -310,7 +324,6 @@
     <ClCompile Include="..\..\src\Pt-Net\win32\TcpSocketImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Net\win32\UdpSocketImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Reflex\GenericType.cpp" />
-    <ClCompile Include="..\..\src\Pt-Reflex\Reflectable.cpp" />
     <ClCompile Include="..\..\src\Pt-Reflex\tests\ReflectableTest.cpp" />
     <ClCompile Include="..\..\src\Pt-Reflex\Type.cpp" />
     <ClCompile Include="..\..\src\Pt-Reflex\TypeManager.cpp" />
@@ -398,6 +411,15 @@
     <ClCompile Include="..\..\src\Pt-Unit\TestSuite.cpp" />
     <ClCompile Include="..\..\src\Pt-Unit\TextProtocol.cpp" />
     <ClCompile Include="..\..\src\Pt-Unit\TextProtocolTest.cpp" />
+    <ClCompile Include="..\..\src\Pt-XmlRpc\Client.cpp" />
+    <ClCompile Include="..\..\src\Pt-XmlRpc\ClientImpl.cpp" />
+    <ClCompile Include="..\..\src\Pt-XmlRpc\Fault.cpp" />
+    <ClCompile Include="..\..\src\Pt-XmlRpc\Formatter.cpp" />
+    <ClCompile Include="..\..\src\Pt-XmlRpc\HttpClient.cpp" />
+    <ClCompile Include="..\..\src\Pt-XmlRpc\HttpClientImpl.cpp" />
+    <ClCompile Include="..\..\src\Pt-XmlRpc\Responder.cpp" />
+    <ClCompile Include="..\..\src\Pt-XmlRpc\Scanner.cpp" />
+    <ClCompile Include="..\..\src\Pt-XmlRpc\Service.cpp" />
     <ClCompile Include="..\..\src\Pt-Xml\AttributeListModel.cpp" />
     <ClCompile Include="..\..\src\Pt-Xml\AttributeModel.cpp" />
     <ClCompile Include="..\..\src\Pt-Xml\ContentModel.cpp" />
