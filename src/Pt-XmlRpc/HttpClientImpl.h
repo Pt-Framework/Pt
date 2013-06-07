@@ -74,7 +74,6 @@ class HttpClientImpl : public ClientImpl
 
         std::string url() const;
 
-    protected:
         void onReply(Http::Client& client);
 
         virtual void beginExecute();

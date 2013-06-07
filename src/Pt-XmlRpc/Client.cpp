@@ -28,6 +28,7 @@
  */
 
 #include "Pt/XmlRpc/Client.h"
+#include "Pt/XmlRpc/RemoteProcedure.h"
 #include "ClientImpl.h"
 
 namespace Pt {
@@ -40,7 +41,12 @@ Client::~Client()
 
 void Client::beginCall(IComposer& r, IRemoteProcedure& method, IDecomposer** argv, unsigned argc)
 {
-    _impl->beginCall(r, method, argv, argc);
+    std::ostream& os = this->prepareRequest();
+
+    // format XML for request
+    _impl->beginCall(os, r, method, argv, argc);
+
+    _impl->beginExecute();
 }
 
 void Client::endCall()

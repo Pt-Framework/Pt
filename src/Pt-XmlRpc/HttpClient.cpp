@@ -79,6 +79,17 @@ void HttpClient::url(const std::string& url)
     _impl->url(url);
 }
 
+std::ostream& HttpClient::prepareRequest()
+{
+    return _impl->prepareRequest();
+}
+
+
+void HttpClient::beginExecute()
+{
+    _impl->beginExecute();
+}
+
 }
 
 }

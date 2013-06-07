@@ -88,14 +88,14 @@ ClientImpl::~ClientImpl()
 }
 
 
-void ClientImpl::beginCall(IComposer& r, IRemoteProcedure& method, IDecomposer** argv, unsigned argc)
+void ClientImpl::beginCall(std::ostream& os, IComposer& r, IRemoteProcedure& method, IDecomposer** argv, unsigned argc)
 {
     _method = &method;
     _state = OnBegin;
 
-    prepareRequest(method.name(), argv, argc);
+    prepareRequest(os, method, argv, argc);
 
-    beginExecute();
+    //beginExecute();
 
     _reader.reset(_bin);
     _scanner.begin(r);
@@ -228,6 +228,36 @@ void ClientImpl::onReplyFinished()
 void ClientImpl::prepareRequest(const String& name, IDecomposer** argv, unsigned argc)
 {
     _ts.attach( prepareRequest() );
+    
+    _ts.write( XMLRPC_XMLDECL, sizeof(XMLRPC_XMLDECL)/sizeof(Char) );
+    
+    _ts.write( XMLRPC_METHODCALL, sizeof(XMLRPC_METHODCALL)/sizeof(Char) );
+    
+    _ts.write( XMLRPC_METHODNAME, sizeof(XMLRPC_METHODNAME)/sizeof(Char) );
+    Xml::xmlEncode(_ts, name.c_str(), name.size() );
+    _ts.write(XMLRPC_METHODNAME_END, sizeof(XMLRPC_METHODNAME_END)/sizeof(Char) );
+    
+    _ts.write( XMLRPC_PARAMS, sizeof(XMLRPC_PARAMS)/sizeof(Char) );
+
+    for(unsigned n = 0; n < argc; ++n)
+    {
+        _ts.write( XMLRPC_PARAM, sizeof(XMLRPC_PARAM)/sizeof(Char) );
+        argv[n]->format(_formatter);
+        _ts.write(XMLRPC_PARAM_END, sizeof(XMLRPC_PARAM_END)/sizeof(Char) );
+    }
+
+    _ts.write(XMLRPC_PARAMS_END, sizeof(XMLRPC_PARAMS_END)/sizeof(Char) );
+    _ts.write(XMLRPC_METHODCALL_END, sizeof(XMLRPC_METHODCALL_END)/sizeof(Char) );
+    
+    _ts.flush();
+}
+
+
+void ClientImpl::prepareRequest(std::ostream& os, IRemoteProcedure& method, IDecomposer** argv, unsigned argc)
+{
+    const String& name = method.name();
+
+    _ts.attach(os);
     
     _ts.write( XMLRPC_XMLDECL, sizeof(XMLRPC_XMLDECL)/sizeof(Char) );
     

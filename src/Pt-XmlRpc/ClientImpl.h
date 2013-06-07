@@ -70,7 +70,7 @@ class ClientImpl : public Pt::Connectable
 
         virtual ~ClientImpl();
 
-        void beginCall(IComposer& r, IRemoteProcedure& method, IDecomposer** argv, unsigned argc);
+        void beginCall(std::ostream& os, IComposer& r, IRemoteProcedure& method, IDecomposer** argv, unsigned argc);
 
         void endCall();
 
@@ -86,7 +86,6 @@ class ClientImpl : public Pt::Connectable
 
         virtual void cancel();
 
-    protected:
         void onReadReplyBegin(std::istream& is);
 
         void onReadReply();
@@ -103,6 +102,8 @@ class ClientImpl : public Pt::Connectable
 
     protected:
         void prepareRequest(const String& name, IDecomposer** argv, unsigned argc);
+
+        void prepareRequest(std::ostream& os, IRemoteProcedure& method, IDecomposer** argv, unsigned argc);
 
         void advance(const Xml::Node& node);
         

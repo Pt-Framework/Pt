@@ -52,6 +52,10 @@ class PT_XMLRPC_API Client : public NonCopyable
 
     protected:
         void impl(ClientImpl* i) { _impl = i; }
+        
+        virtual std::ostream& prepareRequest() = 0;
+        
+        virtual void beginExecute() = 0;
 
     public:
         Client()

@@ -70,6 +70,10 @@ class PT_XMLRPC_API HttpClient : public Client
 
         void clearAuth();
 
+        virtual std::ostream& prepareRequest();
+
+        virtual void beginExecute();
+
     private:
         HttpClientImpl* _impl;
 };
