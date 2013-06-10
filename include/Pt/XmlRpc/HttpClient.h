@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 by Dr. Marc Boris Duerner, Tommi Maekitalo
+ * Copyright (C) 2012-2013 by Marc Dürner
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,61 +25,79 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef Pt_XmlRpc_HttpClient_h
 #define Pt_XmlRpc_HttpClient_h
 
 #include <Pt/XmlRpc/Api.h>
 #include <Pt/XmlRpc/Client.h>
+#include <Pt/Connectable.h>
 
 namespace Pt {
 
 namespace System {
-
-class EventLoop;
-
+    class EventLoop;
 }
 
-namespace Net
-{
+namespace Net {
     class AddrInfo;
+}
+
+namespace Http {
+    class Client;
 }
 
 namespace XmlRpc {
 
-class HttpClientImpl;
-
 class PT_XMLRPC_API HttpClient : public Client
+                               , public Connectable
 {
     public:
         HttpClient();
 
-        HttpClient(System::EventLoop& loop, const std::string& addr,
-                   unsigned short port, const std::string& url);
+        HttpClient(const Net::AddrInfo& addrinfo, const std::string& serviceUrl);
 
-        HttpClient(const std::string& addr, unsigned short port, const std::string& url);
+        HttpClient(const std::string& addr, unsigned short port, 
+                   const std::string& serviceUrl);
+
+        HttpClient(System::EventLoop& loop);
+
+        HttpClient(System::EventLoop& loop, const Net::AddrInfo& addrinfo, 
+                   const std::string& serviceUrl);
+
+        HttpClient(System::EventLoop& loop, 
+                   const std::string& addr, unsigned short port, 
+                   const std::string& serviceUrl);
 
         virtual ~HttpClient();
 
-        void connect(const Net::AddrInfo& addrinfo, const std::string& url);
+        void setActive(System::EventLoop& loop);
+
+        void connect(const Net::AddrInfo& addrinfo, const std::string& serviceUrl);
 
         void connect(const std::string& addr, unsigned short port,
-                     const std::string& url);
+                     const std::string& serviceUrl);
 
-        void url(const std::string& url);
-        void auth(const std::string& username, const std::string& password);
+        Http::Client& client();
 
-        void clearAuth();
+    protected:       
+        virtual void onBeginCall();
 
-        virtual std::ostream& prepareRequest();
+        virtual void onEndCall();
 
-        virtual void beginExecute();
+        virtual void onCall();
+
+        virtual void onCancel();
 
     private:
-        HttpClientImpl* _impl;
+        void onReply(Http::Client& client);
+
+    private:
+        class HttpClientImpl* _impl;
 };
 
-}
+} // namespace XmlRpc
 
-}
+} // namespace Pt
 
 #endif

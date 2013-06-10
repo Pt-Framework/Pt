@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 by Marc Boris Duerner, Tommi Maekitalo
+ * Copyright (C) 2009-2013 by Marc Boris Duerner
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -36,7 +36,6 @@
 #include <Pt/Xml/XmlReader.h>
 #include <Pt/Composer.h>
 #include <Pt/Decomposer.h>
-#include <Pt/Connectable.h>
 #include <Pt/Utf8Codec.h>
 #include <Pt/TextStream.h>
 #include <string>
@@ -49,7 +48,7 @@ namespace XmlRpc {
 
 class IRemoteProcedure;
 
-class ClientImpl : public Pt::Connectable
+class ClientImpl
 {
     enum State
     {
@@ -68,45 +67,30 @@ class ClientImpl : public Pt::Connectable
     public:
         ClientImpl();
 
-        virtual ~ClientImpl();
+        ~ClientImpl();
 
-        void beginCall(std::ostream& os, IComposer& r, IRemoteProcedure& method, IDecomposer** argv, unsigned argc);
+        void beginCall(IComposer& r, IRemoteProcedure& method, IDecomposer** argv, unsigned argc);
 
         void endCall();
 
-        void call(IComposer& r, IRemoteProcedure& method, IDecomposer** argv, unsigned argc);
+        void beginRequest(std::ostream& os);
 
-        std::size_t timeout() const  { return _timeout; }
+        bool beginReply(std::istream& is);
 
-        void timeout(std::size_t t)  { _timeout = t; }
+        bool advanceReply();
 
-        virtual std::string url() const = 0;
+        void finishReply();
+
+        void readReply(std::istream& is);
+
+        void cancel();
 
         const IRemoteProcedure* activeProcedure() const;
 
-        virtual void cancel();
-
-        void onReadReplyBegin(std::istream& is);
-
-        void onReadReply();
-
-        void onReplyFinished();
-
-        virtual void beginExecute() = 0;
-
-        virtual void endExecute() = 0;
-
-        virtual std::string execute() = 0;
-
-        virtual std::ostream& prepareRequest() = 0;
-
-    protected:
-        void prepareRequest(const String& name, IDecomposer** argv, unsigned argc);
-
-        void prepareRequest(std::ostream& os, IRemoteProcedure& method, IDecomposer** argv, unsigned argc);
-
+    private:
         void advance(const Xml::Node& node);
         
+    private:
         State _state;
         Pt::Utf8Codec _utf8;
         TextOStream _ts;
@@ -114,11 +98,11 @@ class ClientImpl : public Pt::Connectable
         Xml::XmlReader _reader;
         Formatter _formatter;
         Scanner _scanner;
+        IDecomposer** _argv;
+        unsigned _argc;
         IRemoteProcedure* _method;
         Fault _fault;
         Composer<Fault> _fh;
-        std::size_t _timeout;
-        bool _errorPending;
 };
 
 }

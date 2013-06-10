@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 by Tommi Maekitalo
+ * Copyright (C) 2012-2013 by Marc Dürner
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -31,65 +31,46 @@
 #include <Pt/Http/Client.h>
 #include <Pt/Http/Request.h>
 #include <Pt/Http/Reply.h>
-#include "ClientImpl.h"
 
-namespace Pt
-{
+namespace Pt {
 
-namespace Net
-{
+namespace Net {
     class AddrInfo;
 }
 
-namespace XmlRpc
-{
+namespace XmlRpc {
 
-class HttpClientImpl : public ClientImpl
+class HttpClientImpl
 {
     public:
         HttpClientImpl();
 
-        HttpClientImpl(System::EventLoop& selector, const std::string& addr,
-               unsigned short port, const std::string& url);
+        HttpClientImpl(System::EventLoop& selector);
 
-        //HttpClientImpl(const std::string& addr, unsigned short port, const std::string& url);
+        Http::Client& client()
+        { return _client; }
 
-        void connect(const Net::AddrInfo& addrinfo, const std::string& url)
-        {
-            _client.setHost(addrinfo);
-            _client.request().setUrl(url);
-        }
+        void setError(bool err = true)
+        { _error = err; }
 
-        void connect(const std::string& addr, unsigned short port,
-                     const std::string& url)
-        {
-            _client.setHost(addr, port);
-            _client.request().setUrl(url);
-        }
+        bool isError() const
+        { return _error; }
 
-        void url(const std::string& url)
-        {
-            _client.request().setUrl(url);
-        }
+        std::ostream& prepareRequest();
 
-        std::string url() const;
+        void onBeginCall();
 
-        void onReply(Http::Client& client);
+        void onEndCall();
 
-        virtual void beginExecute();
+        std::istream& onCall();
 
-        virtual void endExecute();
+        void cancel();
 
-        virtual std::string execute();
-
-        virtual std::ostream& prepareRequest();
-
-        virtual void cancel();
-
-    private:
         static void verifyHeader(const Http::Reply& header);
 
+    private:
         Http::Client _client;
+        std::size_t _timeout;
         bool _error;
 };
 

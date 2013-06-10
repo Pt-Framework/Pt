@@ -42,8 +42,6 @@ namespace Pt {
 
 namespace XmlRpc {
 
-class Fault;
-
 class PT_XMLRPC_API IRemoteProcedure
 {
     friend class ClientImpl;
@@ -126,7 +124,6 @@ class RemoteProcedureBase : public IRemoteProcedure
         Result<R> _result;
         Composer<R> _r;
 };
-
 
 }
 

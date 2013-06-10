@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2009 by Dr. Marc Boris Duerner
- * Copyright (C) 2009 by Tommi Meakitalo
+ * Copyright (C) 2009-2013 by Dr. Marc Boris Duerner
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -27,8 +26,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "Pt/XmlRpc/Client.h"
 #include "ClientImpl.h"
+#include "Pt/XmlRpc/Client.h"
 #include "Pt/XmlRpc/RemoteProcedure.h"
 #include <Pt/Xml/XmlWriter.h>
 #include "Pt/Xml/XmlError.h"
@@ -37,7 +36,6 @@
 #include "Pt/Xml/EndElement.h"
 #include "Pt/System/Selectable.h"
 #include "Pt/System/Logger.h"
-
 #include <cassert>
 
 log_define("Pt.XmlRpc.Client")
@@ -76,11 +74,12 @@ ClientImpl::ClientImpl()
 , _bin()
 , _reader()
 , _formatter(_ts)
+, _argv(0)
+, _argc(0)
 , _method(0)
-, _timeout(System::EventLoop::WaitInfinite)
-, _errorPending(false)
 {
 }
+
 
 ClientImpl::~ClientImpl()
 {
@@ -88,37 +87,127 @@ ClientImpl::~ClientImpl()
 }
 
 
-void ClientImpl::beginCall(std::ostream& os, IComposer& r, IRemoteProcedure& method, IDecomposer** argv, unsigned argc)
+void ClientImpl::beginCall(IComposer& r, IRemoteProcedure& method, IDecomposer** argv, unsigned argc)
 {
     _method = &method;
     _state = OnBegin;
 
-    prepareRequest(os, method, argv, argc);
-
-    //beginExecute();
-
     _reader.reset(_bin);
     _scanner.begin(r);
+
+    _argv = argv;
+    _argc = argc;
 }
 
 
 void ClientImpl::endCall()
 {
-    endExecute();
 }
 
 
-void ClientImpl::call(IComposer& r, IRemoteProcedure& method, IDecomposer** argv, unsigned argc)
+void ClientImpl::cancel()
 {
-    _method = &method;
-    _state = OnBegin;
+    _method = 0;
+    _argc = 0;
+    _argv = 0;
+}
 
-    prepareRequest(method.name(), argv, argc);
 
-    std::istringstream is(execute());
+const IRemoteProcedure* ClientImpl::activeProcedure() const
+{
+    return _method;
+}
+
+
+void ClientImpl::beginRequest(std::ostream& os)
+{
+    const String& name = _method->name();
+
+    _ts.attach(os);
+    
+    _ts.write( XMLRPC_XMLDECL, sizeof(XMLRPC_XMLDECL)/sizeof(Char) );
+    
+    _ts.write( XMLRPC_METHODCALL, sizeof(XMLRPC_METHODCALL)/sizeof(Char) );
+    
+    _ts.write( XMLRPC_METHODNAME, sizeof(XMLRPC_METHODNAME)/sizeof(Char) );
+    Xml::xmlEncode(_ts, name.c_str(), name.size() );
+    _ts.write(XMLRPC_METHODNAME_END, sizeof(XMLRPC_METHODNAME_END)/sizeof(Char) );
+    
+    _ts.write( XMLRPC_PARAMS, sizeof(XMLRPC_PARAMS)/sizeof(Char) );
+
+    for(unsigned n = 0; n < _argc; ++n)
+    {
+        _ts.write( XMLRPC_PARAM, sizeof(XMLRPC_PARAM)/sizeof(Char) );
+        _argv[n]->format(_formatter);
+        _ts.write(XMLRPC_PARAM_END, sizeof(XMLRPC_PARAM_END)/sizeof(Char) );
+    }
+
+    _ts.write(XMLRPC_PARAMS_END, sizeof(XMLRPC_PARAMS_END)/sizeof(Char) );
+    _ts.write(XMLRPC_METHODCALL_END, sizeof(XMLRPC_METHODCALL_END)/sizeof(Char) );
+    
+    _ts.flush();
+}
+
+
+bool ClientImpl::beginReply(std::istream& is)
+{
     _bin.reset(is);
-    _reader.reset(_bin);
-    _scanner.begin(r);
+    return true;
+}
+
+
+bool ClientImpl::advanceReply()
+{
+    try
+    {
+        for(;;) 
+        {
+            const Pt::Xml::Node* node = _reader.advance(); // XmlError
+            if( ! node)
+                break;
+            
+            advance(*node); // SerializationError, ConversionError
+        }
+
+        return true;
+    }
+    catch(const Xml::XmlError& error)
+    {
+        _method->setFault(Fault::invalidXmlRpc, error.what());
+        finishReply();
+    }
+    catch(const SerializationError& error)
+    {
+        _method->setFault(Fault::invalidMethodParameters, error.what());
+        finishReply();
+    }
+    catch(const ConversionError& error)
+    {
+        _method->setFault(Fault::invalidMethodParameters, error.what());
+        finishReply();
+    }
+
+    // signal caller to not continue reading on error
+    return false;
+}
+
+
+void ClientImpl::finishReply()
+{
+    log_debug("onReplyFinished; method=" << static_cast<void*>(_method));
+
+    if(_method)
+    {
+        IRemoteProcedure* method = _method;
+        _method = 0;
+        method->onFinished();
+    }
+}
+
+
+void ClientImpl::readReply(std::istream& is)
+{   
+    _bin.reset(is);
 
     while( _reader.get().type() !=  Pt::Xml::Node::EndDocument )
     {
@@ -140,146 +229,6 @@ void ClientImpl::call(IComposer& r, IRemoteProcedure& method, IDecomposer** argv
     _state = OnBegin;
 
     // _method contains a valid return value now
-}
-
-
-const IRemoteProcedure* ClientImpl::activeProcedure() const
-{
-    return _method;
-}
-
-void ClientImpl::cancel()
-{
-    _method = 0;
-}
-
-void ClientImpl::onReadReplyBegin(std::istream& is)
-{
-    _bin.reset(is);
-}
-
-void ClientImpl::onReadReply()
-{
-    try
-    {
-        _errorPending = false;
-
-        for(;;) // Xml::ParseError
-        {
-            const Pt::Xml::Node* node = _reader.advance();
-            if( ! node)
-                break;
-            
-            advance(*node); // SerializationError, ConversionError
-        }
-    }
-    catch(const Xml::XmlError& error)
-    {
-        _method->setFault(Fault::invalidXmlRpc, error.what());
-        _method->onFinished();
-    }
-    catch(const SerializationError& error)
-    {
-        _method->setFault(Fault::invalidMethodParameters, error.what());
-        _method->onFinished();
-    }
-    catch(const ConversionError& error)
-    {
-        _method->setFault(Fault::invalidMethodParameters, error.what());
-        _method->onFinished();
-    }
-    catch(const std::exception&)
-    {
-        _errorPending = true;
-        _method->onFinished();
-    }
-}
-
-
-void ClientImpl::onReplyFinished()
-{
-    log_debug("onReplyFinished; method=" << static_cast<void*>(_method));
-
-    try
-    {
-        _errorPending = false;
-        endExecute();
-    }
-    catch (const std::exception&)
-    {
-        if (!_method)
-            throw;
-
-        _errorPending = true;
-
-        IRemoteProcedure* method = _method;
-        _method = 0;
-        method->onFinished();
-        _errorPending = false;
-        return;
-    }
-
-    IRemoteProcedure* method = _method;
-    _method = 0;
-    method->onFinished();
-}
-
-
-void ClientImpl::prepareRequest(const String& name, IDecomposer** argv, unsigned argc)
-{
-    _ts.attach( prepareRequest() );
-    
-    _ts.write( XMLRPC_XMLDECL, sizeof(XMLRPC_XMLDECL)/sizeof(Char) );
-    
-    _ts.write( XMLRPC_METHODCALL, sizeof(XMLRPC_METHODCALL)/sizeof(Char) );
-    
-    _ts.write( XMLRPC_METHODNAME, sizeof(XMLRPC_METHODNAME)/sizeof(Char) );
-    Xml::xmlEncode(_ts, name.c_str(), name.size() );
-    _ts.write(XMLRPC_METHODNAME_END, sizeof(XMLRPC_METHODNAME_END)/sizeof(Char) );
-    
-    _ts.write( XMLRPC_PARAMS, sizeof(XMLRPC_PARAMS)/sizeof(Char) );
-
-    for(unsigned n = 0; n < argc; ++n)
-    {
-        _ts.write( XMLRPC_PARAM, sizeof(XMLRPC_PARAM)/sizeof(Char) );
-        argv[n]->format(_formatter);
-        _ts.write(XMLRPC_PARAM_END, sizeof(XMLRPC_PARAM_END)/sizeof(Char) );
-    }
-
-    _ts.write(XMLRPC_PARAMS_END, sizeof(XMLRPC_PARAMS_END)/sizeof(Char) );
-    _ts.write(XMLRPC_METHODCALL_END, sizeof(XMLRPC_METHODCALL_END)/sizeof(Char) );
-    
-    _ts.flush();
-}
-
-
-void ClientImpl::prepareRequest(std::ostream& os, IRemoteProcedure& method, IDecomposer** argv, unsigned argc)
-{
-    const String& name = method.name();
-
-    _ts.attach(os);
-    
-    _ts.write( XMLRPC_XMLDECL, sizeof(XMLRPC_XMLDECL)/sizeof(Char) );
-    
-    _ts.write( XMLRPC_METHODCALL, sizeof(XMLRPC_METHODCALL)/sizeof(Char) );
-    
-    _ts.write( XMLRPC_METHODNAME, sizeof(XMLRPC_METHODNAME)/sizeof(Char) );
-    Xml::xmlEncode(_ts, name.c_str(), name.size() );
-    _ts.write(XMLRPC_METHODNAME_END, sizeof(XMLRPC_METHODNAME_END)/sizeof(Char) );
-    
-    _ts.write( XMLRPC_PARAMS, sizeof(XMLRPC_PARAMS)/sizeof(Char) );
-
-    for(unsigned n = 0; n < argc; ++n)
-    {
-        _ts.write( XMLRPC_PARAM, sizeof(XMLRPC_PARAM)/sizeof(Char) );
-        argv[n]->format(_formatter);
-        _ts.write(XMLRPC_PARAM_END, sizeof(XMLRPC_PARAM_END)/sizeof(Char) );
-    }
-
-    _ts.write(XMLRPC_PARAMS_END, sizeof(XMLRPC_PARAMS_END)/sizeof(Char) );
-    _ts.write(XMLRPC_METHODCALL_END, sizeof(XMLRPC_METHODCALL_END)/sizeof(Char) );
-    
-    _ts.flush();
 }
 
 
@@ -418,6 +367,6 @@ void ClientImpl::advance(const Pt::Xml::Node& node)
     }
 }
 
-}
+} // namespace XmlRpc
 
-}
+} // namespace Pt

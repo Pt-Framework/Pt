@@ -110,8 +110,8 @@ inline void operator <<=(Pt::SerializationInfo& si, const Fault& fault)
     si.addMember("faultString") <<= fault.text();
 }
 
-}
+} // namespace XmlRpc
 
-}
+} // namespace Pt
 
 #endif

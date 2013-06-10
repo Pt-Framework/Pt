@@ -35,55 +35,91 @@ namespace Pt {
 
 namespace XmlRpc {
 
+Client::Client()
+: _impl(0)
+{
+    _impl = new ClientImpl();
+}
+
 Client::~Client()
 {
+    delete _impl;
 }
+
+
+SerializationContext& Client::context()
+{
+    return _ctx;
+}
+
 
 void Client::beginCall(IComposer& r, IRemoteProcedure& method, IDecomposer** argv, unsigned argc)
 {
-    std::ostream& os = this->prepareRequest();
+    _impl->beginCall(r, method, argv, argc);
 
-    // format XML for request
-    _impl->beginCall(os, r, method, argv, argc);
-
-    _impl->beginExecute();
+    this->onBeginCall();
 }
+
 
 void Client::endCall()
 {
     _impl->endCall();
+
+    onEndCall();
 }
+
 
 void Client::call(IComposer& r, IRemoteProcedure& method, IDecomposer** argv, unsigned argc)
 {
-    _impl->call(r, method, argv, argc);
+    _impl->beginCall(r, method, argv, argc);
+
+    this->onCall();
 }
 
-std::size_t Client::timeout() const
+
+void Client::cancel()
 {
-    return _impl->timeout();
+    _impl->cancel();
+
+    this->onCancel();
 }
 
-void Client::timeout(std::size_t t)
-{
-    _impl->timeout(t);
-}
-
-std::string Client::url() const
-{
-    return _impl->url();
-}
 
 const IRemoteProcedure* Client::activeProcedure() const
 {
     return _impl->activeProcedure();
 }
 
-void Client::cancel()
+
+void Client::beginRequest(std::ostream& os)
 {
-    _impl->cancel();
+    _impl->beginRequest(os);
 }
 
+
+bool Client::beginReply(std::istream& is)
+{
+    return _impl->beginReply(is);
 }
 
+
+bool Client::advanceReply()
+{
+    return _impl->advanceReply();
 }
+
+
+void Client::finishReply()
+{
+    _impl->finishReply();
+}
+
+
+void Client::readReply(std::istream& is)
+{
+    _impl->readReply(is);
+}
+
+} // namespace XmlRpc
+
+} // namespace Pt

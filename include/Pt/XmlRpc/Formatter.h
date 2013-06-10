@@ -125,11 +125,10 @@ class PT_XMLRPC_API Formatter : public Pt::Formatter
         Pt::String _str;
         static const unsigned _bufsize = 64;
          Pt::Char _buf[_bufsize];
-
 };
 
-}
+} // namespace XmlRpc
 
-}
+} // namespace Pt
 
 #endif

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 by Tommi Meakitalo
+ * Copyright (C) 2012-2013 by Marc Dürner
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -29,6 +29,7 @@
 #include "HttpClientImpl.h"
 #include "Pt/Net/AddrInfo.h"
 #include <Pt/System/Logger.h>
+#include "Pt/System/EventLoop.h"
 
 log_define("Pt.XmlRpc.HttpClient")
 
@@ -38,118 +39,19 @@ namespace XmlRpc {
 
 HttpClientImpl::HttpClientImpl()
 : _client()
+, _timeout(System::EventLoop::WaitInfinite)
 , _error(false)
 {
     _client.request().setMethod("POST");
-    _client.replyReceived() += Pt::slot( *this, &HttpClientImpl::onReply);
 }
 
 
-HttpClientImpl::HttpClientImpl(System::EventLoop& selector, const std::string& addr,
-       unsigned short port, const std::string& url)
-: _client(selector, addr, port)
+HttpClientImpl::HttpClientImpl(System::EventLoop& loop)
+: _client(loop)
+, _timeout(System::EventLoop::WaitInfinite)
 , _error(false)
 {
     _client.request().setMethod("POST");
-    _client.request().setUrl(url);
-    _client.replyReceived() += Pt::slot( *this, &HttpClientImpl::onReply);
-}
-
-
-/*HttpClientImpl::HttpClientImpl(const std::string& addr, unsigned short port, const std::string& url)
-: _client(addr, port)
-, _error(false)
-{
-    _client.request().header().method("POST");
-    _client.request().header().url(url);
-    _client.replyReceived() += Pt::slot( *this, &HttpClientImpl::onReply);
-}*/
-
-
-std::string HttpClientImpl::url() const
-{
-    std::ostringstream s;
-    s << "http://"
-      << _client.host().host()
-      << ':'
-      << _client.host().port()
-      << _client.request().url();
-
-    return s.str();
-}
-
-
-void HttpClientImpl::onReply(Http::Client& client)
-{
-    try
-    {
-        Http::MessageProgress progress = client.endReceive();
-        if( progress.header() )
-        {
-            verifyHeader(client.reply());
-            ClientImpl::onReadReplyBegin(client.reply().body());
-        }
-
-        if( progress.body() )
-        {
-            ClientImpl::onReadReply();
-        }
-
-        if( progress.finished() )
-        {
-            ClientImpl::onReplyFinished();
-            return;
-        }
-
-        client.beginReceive();
-    }
-    catch(const std::exception&)
-    {
-        _error = true;
-        ClientImpl::onReplyFinished();
-    }
-}
-
-
-void HttpClientImpl::beginExecute()
-{
-    _client.beginReceive();
-}
-
-
-void HttpClientImpl::endExecute()
-{
-    if( _errorPending || _error) 
-    {
-        _error = false;
-        throw;
-    }
-}
-
-
-std::string HttpClientImpl::execute()
-{
-    _client.setTimeout( timeout() );
-    _client.send();
-    std::istream& is = _client.receive();
-
-    std::string body;
-
-    try
-    {
-        verifyHeader( _client.reply() );
-
-        char ch = ' ';
-        while( is.get(ch) )
-            body += ch;
-    }
-    catch (...)
-    {
-        _client.cancel();
-        throw;
-    }
-
-    return body;
 }
 
 
@@ -162,11 +64,38 @@ std::ostream& HttpClientImpl::prepareRequest()
 }
 
 
+void HttpClientImpl::onBeginCall()
+{
+    _client.beginReceive();
+}
+
+
+void HttpClientImpl::onEndCall()
+{
+    if( _error) 
+    {
+        _error = false;
+        throw;
+    }
+}
+
+
+std::istream& HttpClientImpl::onCall()
+{
+    _client.send();
+    
+    std::istream& is = _client.receive();
+
+    //verifyHeader( _client.reply() );
+
+    return is;
+}
+
+
 void HttpClientImpl::cancel()
 {
     _error = false;
     _client.cancel();
-    ClientImpl::cancel();
 }
 
 
@@ -192,6 +121,6 @@ void HttpClientImpl::verifyHeader(const Http::Reply& reply)
 
 }
 
-}
+} // namespace XmlRpc
 
-}
+} // namespace Pt

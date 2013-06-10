@@ -29,7 +29,6 @@
 #define Pt_XmlRpc_Client_h
 
 #include <Pt/XmlRpc/Api.h>
-#include <Pt/XmlRpc/Fault.h>
 #include <Pt/NonCopyable.h>
 #include <Pt/SerializationContext.h>
 #include <string>
@@ -42,32 +41,15 @@ class IDecomposer;
 namespace XmlRpc {
 
 class IRemoteProcedure;
-class ClientImpl;
-
 
 class PT_XMLRPC_API Client : public NonCopyable
 {
-        ClientImpl* _impl;
-        SerializationContext _ctx;
-
-    protected:
-        void impl(ClientImpl* i) { _impl = i; }
-        
-        virtual std::ostream& prepareRequest() = 0;
-        
-        virtual void beginExecute() = 0;
-
     public:
-        Client()
-        : _impl(0)
-        { }
+        Client();
 
         virtual ~Client();
 
-        SerializationContext& context()
-        {
-            return _ctx;
-        }
+        SerializationContext& context();
 
         void beginCall(IComposer& r, IRemoteProcedure& method, IDecomposer** argv, unsigned argc);
 
@@ -75,19 +57,37 @@ class PT_XMLRPC_API Client : public NonCopyable
 
         void call(IComposer& r, IRemoteProcedure& method, IDecomposer** argv, unsigned argc);
 
-        std::size_t timeout() const;
-
-        void timeout(std::size_t t);
-
-        std::string url() const;
+        void cancel();
 
         const IRemoteProcedure* activeProcedure() const;
 
-        void cancel();
+    protected:       
+        virtual void onBeginCall() = 0;
+
+        virtual void onEndCall() = 0;
+
+        virtual void onCall() = 0;
+
+        virtual void onCancel() = 0;
+
+    protected:
+        void beginRequest(std::ostream& os);
+        
+        bool beginReply(std::istream& is);
+
+        bool advanceReply();
+
+        void finishReply();
+
+        void readReply(std::istream& is);
+
+    private:
+        class ClientImpl* _impl;
+        SerializationContext _ctx;
 };
 
-}
+} // namespace XmlRpc
 
-}
+} // namespace Pt
 
 #endif

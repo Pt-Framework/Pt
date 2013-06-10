@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 by Tommi Meakitalo
+ * Copyright (C) 2012-2013 by Marc Dürner
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -29,32 +29,56 @@
 #include "Pt/XmlRpc/HttpClient.h"
 #include "HttpClientImpl.h"
 
-namespace Pt
-{
+namespace Pt {
 
-namespace XmlRpc
-{
+namespace XmlRpc {
 
 HttpClient::HttpClient()
 : _impl(new HttpClientImpl())
 {
-  impl(_impl);
+    _impl->client().replyReceived() += Pt::slot( *this, &HttpClient::onReply);
 }
 
 
-HttpClient::HttpClient(System::EventLoop& selector, const std::string& server,
-                       unsigned short port, const std::string& url)
-: _impl(new HttpClientImpl(selector, server, port, url))
+HttpClient::HttpClient(const Net::AddrInfo& addrinfo, 
+                       const std::string& url)
+: _impl(new HttpClientImpl())
 {
-    impl(_impl);
+    _impl->client().replyReceived() += Pt::slot( *this, &HttpClient::onReply);
+    connect(addrinfo, url);
 }
 
 
 HttpClient::HttpClient(const std::string& addr, unsigned short port, const std::string& url)
 : _impl( new HttpClientImpl() )
 {
-    impl(_impl);
+    _impl->client().replyReceived() += Pt::slot( *this, &HttpClient::onReply);
+    connect(addr, port, url);
+}
 
+
+HttpClient::HttpClient(System::EventLoop& loop)
+: _impl( new HttpClientImpl(loop) )
+{
+    _impl->client().replyReceived() += Pt::slot( *this, &HttpClient::onReply);
+}
+
+
+HttpClient::HttpClient(System::EventLoop& loop, const Net::AddrInfo& addrinfo,
+                       const std::string& url)
+: _impl( new HttpClientImpl(loop) )
+{
+    _impl->client().replyReceived() += Pt::slot( *this, &HttpClient::onReply);
+    connect(addrinfo, url);
+}
+
+
+HttpClient::HttpClient(System::EventLoop& loop, 
+                       const std::string& addr, unsigned short port, 
+                       const std::string& url)
+: _impl( new HttpClientImpl(loop) )
+{
+    _impl->client().replyReceived() += Pt::slot( *this, &HttpClient::onReply);
     connect(addr, port, url);
 }
 
@@ -64,32 +88,148 @@ HttpClient::~HttpClient()
     delete _impl;
 }
 
+
+void HttpClient::setActive(System::EventLoop& loop)
+{
+    _impl->client().setActive(loop);
+}
+
+
 void HttpClient::connect(const Net::AddrInfo& addrinfo, const std::string& url)
 {
-    _impl->connect(addrinfo, url);
+    _impl->client().setHost(addrinfo);
+    _impl->client().request().setUrl(url);
 }
+
 
 void HttpClient::connect(const std::string& addr, unsigned short port, const std::string& url)
 {
-    _impl->connect(addr, port, url);
+    _impl->client().setHost(addr, port);
+    _impl->client().request().setUrl(url);
 }
 
-void HttpClient::url(const std::string& url)
+
+//std::string HttpClient::url() const
+//{
+//    std::ostringstream s;
+//    s << "http://"
+//      << _client.host().host()
+//      << ':'
+//      << _client.host().port()
+//      << _client.request().url();
+//
+//    return s.str();
+//}
+//
+//
+//const std::string& HttpClient::url() const
+//{
+//    return _impl->client().request().url();
+//}
+//
+//
+//void HttpClient::setUrl(const std::string& url)
+//{
+//    _impl->client().request().setUrl(url);
+//}
+
+
+Http::Client& HttpClient::client()
 {
-    _impl->url(url);
+    return _impl->client();
 }
 
-std::ostream& HttpClient::prepareRequest()
+
+void HttpClient::onBeginCall()
 {
-    return _impl->prepareRequest();
+    // prepare HTTP request
+    std::ostream& os = _impl->prepareRequest();
+
+    // format XML-RPC request
+    Client::beginRequest(os);
+
+    _impl->onBeginCall();
 }
 
 
-void HttpClient::beginExecute()
+void HttpClient::onEndCall()
 {
-    _impl->beginExecute();
+    _impl->onEndCall();
 }
 
+
+void HttpClient::onCall()
+{
+    // prepare HTTP request
+    std::ostream& os = _impl->prepareRequest();
+
+    // format XML-RPC request
+    Client::beginRequest(os);
+
+    // send HTTP request and start receiving HTTP reply
+    std::istream& is = _impl->onCall();
+
+    // parse XML-RPC reply
+    Client::readReply(is);
 }
 
+
+void HttpClient::onCancel()
+{
+    _impl->cancel();
 }
+
+
+void HttpClient::onReply(Http::Client& client)
+{
+    try
+    {
+        Http::MessageProgress progress = client.endReceive();
+
+        if( progress.header() )
+        {
+            //_impl->verifyHeader( client.reply() );
+            
+            // might send finished signal
+            bool ok = Client::beginReply( client.reply().body() );
+            if( ! ok )
+                return;
+        }
+
+        if( progress.body() )
+        {
+            // might send finished signal
+            bool ok = Client::advanceReply();
+            if( ! ok )
+                return;
+        }
+
+        if( progress.finished() )
+        { 
+            // send finished signal
+            Client::finishReply();
+        }
+        else
+        {
+            client.beginReceive();
+        }
+    }
+    catch(...)
+    {
+        _impl->setError();
+        
+        // send finished signal, if finishReply was not yet called
+        Client::finishReply();
+
+        // throw if error not handled in slot
+        if( _impl->isError() )
+        {
+            _impl->setError(false);
+            throw;
+        }
+    }   
+}
+
+} // namespace XmlRpc
+
+} // namespace Pt
