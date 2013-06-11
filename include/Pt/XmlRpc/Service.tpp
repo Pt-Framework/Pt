@@ -48,7 +48,7 @@ template < typename R,
 class BasicServiceProcedure : public ServiceProcedure
 {
     public:
-        BasicServiceProcedure( const Callable<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>& cb, Context& ctx)
+        BasicServiceProcedure( const Callable<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>& cb, Responder& ctx)
         : ServiceProcedure(ctx)
         , _cb(0)
         , _a1(&ctx.sctx())
@@ -99,7 +99,7 @@ class BasicServiceProcedure : public ServiceProcedure
             return _args;
         }
 
-        virtual void beginCall()
+        virtual void beginCall(System::EventLoop&)
         {
             this->setReady();
         }
@@ -168,7 +168,7 @@ class BasicServiceProcedure<R, A1, A2, A3, A4, A5, A6, A7, A8, A9,
                             Pt::Void> : public ServiceProcedure
 {
     public:
-        BasicServiceProcedure( const Callable<R, A1, A2, A3, A4, A5, A6, A7, A8, A9>& cb, Context& ctx)
+        BasicServiceProcedure( const Callable<R, A1, A2, A3, A4, A5, A6, A7, A8, A9>& cb, Responder& ctx)
         : ServiceProcedure(ctx)
         , _cb(0)
         , _a1(&ctx.sctx())
@@ -216,7 +216,7 @@ class BasicServiceProcedure<R, A1, A2, A3, A4, A5, A6, A7, A8, A9,
             return _args;
         }
 
-        virtual void beginCall()
+        virtual void beginCall(System::EventLoop&)
         {
             this->setReady();
         }
@@ -282,7 +282,7 @@ class BasicServiceProcedure<R, A1, A2, A3, A4, A5, A6, A7, A8,
                             Pt::Void> : public ServiceProcedure
 {
     public:
-        BasicServiceProcedure( const Callable<R, A1, A2, A3, A4, A5, A6, A7, A8>& cb, Context& ctx)
+        BasicServiceProcedure( const Callable<R, A1, A2, A3, A4, A5, A6, A7, A8>& cb, Responder& ctx)
         : ServiceProcedure(ctx)
         , _cb(0)
         , _a1(&ctx.sctx())
@@ -327,7 +327,7 @@ class BasicServiceProcedure<R, A1, A2, A3, A4, A5, A6, A7, A8,
             return _args;
         }
 
-        virtual void beginCall()
+        virtual void beginCall(System::EventLoop&)
         {
             this->setReady();
         }
@@ -390,7 +390,7 @@ class BasicServiceProcedure<R, A1, A2, A3, A4, A5, A6, A7,
                             Pt::Void> : public ServiceProcedure
 {
     public:
-        BasicServiceProcedure( const Callable<R, A1, A2, A3, A4, A5, A6, A7>& cb, Context& ctx)
+        BasicServiceProcedure( const Callable<R, A1, A2, A3, A4, A5, A6, A7>& cb, Responder& ctx)
         : ServiceProcedure(ctx)
         , _cb(0)
         , _a1(&ctx.sctx())
@@ -432,7 +432,7 @@ class BasicServiceProcedure<R, A1, A2, A3, A4, A5, A6, A7,
             return _args;
         }
 
-        virtual void beginCall()
+        virtual void beginCall(System::EventLoop&)
         {
             this->setReady();
         }
@@ -492,7 +492,7 @@ class BasicServiceProcedure<R, A1, A2, A3, A4, A5, A6,
                             Pt::Void> : public ServiceProcedure
 {
     public:
-        BasicServiceProcedure( const Callable<R, A1, A2, A3, A4, A5, A6>& cb, Context& ctx)
+        BasicServiceProcedure( const Callable<R, A1, A2, A3, A4, A5, A6>& cb, Responder& ctx)
         : ServiceProcedure(ctx)
         , _cb(0)
         , _a1(&ctx.sctx())
@@ -531,7 +531,7 @@ class BasicServiceProcedure<R, A1, A2, A3, A4, A5, A6,
             return _args;
         }
 
-        virtual void beginCall()
+        virtual void beginCall(System::EventLoop&)
         {
             this->setReady();
         }
@@ -588,7 +588,7 @@ class BasicServiceProcedure<R, A1, A2, A3, A4, A5,
                             Pt::Void> : public ServiceProcedure
 {
     public:
-        BasicServiceProcedure( const Callable<R, A1, A2, A3, A4, A5>& cb, Context& ctx)
+        BasicServiceProcedure( const Callable<R, A1, A2, A3, A4, A5>& cb, Responder& ctx)
         : ServiceProcedure(ctx)
         , _cb(0)
         , _a1(&ctx.sctx())
@@ -624,7 +624,7 @@ class BasicServiceProcedure<R, A1, A2, A3, A4, A5,
             return _args;
         }
 
-        virtual void beginCall()
+        virtual void beginCall(System::EventLoop&)
         {
             this->setReady();
         }
@@ -678,7 +678,7 @@ class BasicServiceProcedure<R, A1, A2, A3, A4,
                             Pt::Void> : public ServiceProcedure
 {
     public:
-        BasicServiceProcedure( const Callable<R, A1, A2, A3, A4>& cb, Context& ctx)
+        BasicServiceProcedure( const Callable<R, A1, A2, A3, A4>& cb, Responder& ctx)
         : ServiceProcedure(ctx)
         , _cb(0)
         , _a1(&ctx.sctx())
@@ -711,7 +711,7 @@ class BasicServiceProcedure<R, A1, A2, A3, A4,
             return _args;
         }
 
-        virtual void beginCall()
+        virtual void beginCall(System::EventLoop&)
         {
             this->setReady();
         }
@@ -762,7 +762,7 @@ class BasicServiceProcedure<R, A1, A2, A3,
                             Pt::Void> : public ServiceProcedure
 {
     public:
-        BasicServiceProcedure( const Callable<R, A1, A2, A3>& cb, Context& ctx )
+        BasicServiceProcedure( const Callable<R, A1, A2, A3>& cb, Responder& ctx )
         : ServiceProcedure(ctx)
         , _cb(0)
         , _a1(&ctx.sctx())
@@ -792,7 +792,7 @@ class BasicServiceProcedure<R, A1, A2, A3,
             return _args;
         }
 
-        virtual void beginCall()
+        virtual void beginCall(System::EventLoop&)
         {
             this->setReady();
         }
@@ -840,7 +840,7 @@ class BasicServiceProcedure<R, A1, A2,
                             Pt::Void> : public ServiceProcedure
 {
     public:
-        BasicServiceProcedure( const Callable<R, A1, A2>& cb, Context& ctx )
+        BasicServiceProcedure( const Callable<R, A1, A2>& cb, Responder& ctx )
         : ServiceProcedure(ctx)
         , _cb(0)
         , _a1(&ctx.sctx())
@@ -867,7 +867,7 @@ class BasicServiceProcedure<R, A1, A2,
             return _args;
         }
 
-        virtual void beginCall()
+        virtual void beginCall(System::EventLoop&)
         {
             this->setReady();
         }
@@ -912,7 +912,7 @@ class BasicServiceProcedure<R, A1,
                             Pt::Void> : public ServiceProcedure
 {
     public:
-        BasicServiceProcedure( const Callable<R, A1>& cb, Context& ctx)
+        BasicServiceProcedure( const Callable<R, A1>& cb, Responder& ctx)
         : ServiceProcedure(ctx)
         , _cb(0)
         , _a1(&ctx.sctx())
@@ -936,7 +936,7 @@ class BasicServiceProcedure<R, A1,
             return _args;
         }
 
-        virtual void beginCall()
+        virtual void beginCall(System::EventLoop&)
         {
             this->setReady();
         }
@@ -980,7 +980,7 @@ class BasicServiceProcedure<R,
                             Pt::Void> : public ServiceProcedure
 {
     public:
-        BasicServiceProcedure(const Callable<R>& cb, Context& ctx)
+        BasicServiceProcedure(const Callable<R>& cb, Responder& ctx)
         : ServiceProcedure(ctx)
         , _cb(0)
         , _r(&ctx.sctx())
@@ -1000,7 +1000,7 @@ class BasicServiceProcedure<R,
             return _args;
         }
 
-        virtual void beginCall()
+        virtual void beginCall(System::EventLoop&)
         {
             this->setReady();
         }
@@ -1036,7 +1036,7 @@ class AsyncProcedure : public ServiceProcedure
         typedef A1 Arg1T;
 
     public:
-        AsyncProcedure(Context& ctx)
+        AsyncProcedure(Responder& ctx)
         : ServiceProcedure(ctx)
         , _a1(&ctx.sctx())
         , _r(&ctx.sctx())
@@ -1051,9 +1051,9 @@ class AsyncProcedure : public ServiceProcedure
             return _args;
         }
 
-        virtual void beginCall()
+        virtual void beginCall(System::EventLoop& loop)
         {
-            onBeginCall(_v1);
+            onBeginCall(loop, _v1);
         }
 
         IDecomposer* endCall()
@@ -1064,7 +1064,7 @@ class AsyncProcedure : public ServiceProcedure
         }
 
     protected:
-        virtual void onBeginCall(const A1& a1) = 0;
+        virtual void onBeginCall(System::EventLoop& loop, const A1& a1) = 0;
 
         virtual const R& onEndCall() = 0;
 
@@ -1089,7 +1089,7 @@ class AsyncProcedure<R,
         typedef Pt::Void Arg1T;
 
     public:
-        AsyncProcedure(Context& ctx)
+        AsyncProcedure(Responder& ctx)
         : ServiceProcedure(ctx)
         , _r( &ctx.sctx() )
         {
@@ -1101,9 +1101,9 @@ class AsyncProcedure<R,
             return _args;
         }
 
-        virtual void beginCall()
+        virtual void beginCall(System::EventLoop& loop)
         {
-            onBeginCall();
+            onBeginCall(loop);
         }
 
         IDecomposer* endCall()
@@ -1114,7 +1114,7 @@ class AsyncProcedure<R,
         }
 
     protected:
-        virtual void onBeginCall() = 0;
+        virtual void onBeginCall(System::EventLoop& loop) = 0;
 
         virtual const R& onEndCall() = 0;
 
@@ -1150,7 +1150,7 @@ class BasicProcedureDef : public ServiceProcedureDef
         }
 
     protected:
-        virtual ServiceProcedure* onCreateProcedure(Context& ctx) const
+        virtual ServiceProcedure* onCreateProcedure(Responder& ctx) const
         { 
             return new BasicServiceProcedure<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>( *_cb, ctx ); 
         }
@@ -1164,7 +1164,7 @@ template <typename CallT>
 class AsyncProcedureDef : public ServiceProcedureDef
 {
     public:
-        AsyncProcedureDef(const Callable<CallT*, Context&>& cb)
+        AsyncProcedureDef(const Callable<CallT*, Responder&>& cb)
         : _cb(0)
         {
             _cb = cb.clone();
@@ -1176,7 +1176,7 @@ class AsyncProcedureDef : public ServiceProcedureDef
         }
 
     protected:
-        virtual ServiceProcedure* onCreateProcedure(Context& ctx) const
+        virtual ServiceProcedure* onCreateProcedure(Responder& ctx) const
         {
             typedef typename CallT::ReturnT R;
             typedef typename CallT::Arg1T A1;
@@ -1186,7 +1186,7 @@ class AsyncProcedureDef : public ServiceProcedureDef
         }
 
     private:
-        const Callable<CallT*, Context&>* _cb;
+        const Callable<CallT*, Responder&>* _cb;
 };
 
 }

@@ -30,9 +30,7 @@
 #define Pt_XmlRpc_Service_h
 
 #include <Pt/XmlRpc/Api.h>
-#include <Pt/XmlRpc/Responder.h>
 #include <Pt/Http/Service.h>
-#include <Pt/Http/Responder.h>
 #include <Pt/System/EventLoop.h>
 #include <Pt/System/Mutex.h>
 #include <Pt/Decomposer.h>
@@ -46,27 +44,22 @@ namespace Pt {
 
 namespace XmlRpc {
 
-// TODO: pass responder to constructor, loop to an init() method
-class Context
+class Responder
 {
     public:
-        Context(XmlRpcResponder& r, System::EventLoop& loop)
-        : _resp(&r)
-        , _loop(&loop)
+        Responder()
+        {}
+
+        virtual ~Responder()
         {}
 
         SerializationContext& sctx()
-        { return _resp->context(); }
+        { return _context; }
 
-        System::EventLoop& loop()
-        { return *_loop; }
-
-        XmlRpcResponder& responder()
-        { return *_resp; }
+        virtual void endReply() = 0;
 
     private:
-        XmlRpcResponder* _resp;
-        System::EventLoop* _loop;
+        SerializationContext _context;
 };
 
 
@@ -76,27 +69,22 @@ class ServiceProcedure
         virtual ~ServiceProcedure()
         {}
 
-        System::EventLoop& loop()
-        { return *_loop; }
-
         void setReady()
-        { _resp->endReply(); }
+        { _responder->endReply(); }
 
         virtual IComposer** beginArgs() = 0;
 
-        virtual void beginCall() = 0;
+        virtual void beginCall(System::EventLoop& loop) = 0;
 
         virtual IDecomposer* endCall() = 0;      
 
     protected:
-        ServiceProcedure(Context& ctx)
-        : _resp( &ctx.responder() )
-        , _loop( &ctx.loop() )
+        ServiceProcedure(Responder& r)
+        : _responder( &r )
         {}
 
     private:
-        XmlRpcResponder* _resp;
-        System::EventLoop* _loop;
+        Responder* _responder;
 };
 
 
@@ -106,14 +94,14 @@ class ServiceProcedureDef
         virtual ~ServiceProcedureDef()
         {}
 
-        ServiceProcedure* createProcedure(Context& ctx) const
+        ServiceProcedure* createProcedure(Responder& ctx) const
         { return this->onCreateProcedure(ctx); }
 
     protected:
         ServiceProcedureDef()
         {}
 
-        virtual ServiceProcedure* onCreateProcedure(Context& ctx) const = 0;
+        virtual ServiceProcedure* onCreateProcedure(Responder& ctx) const = 0;
 };
 
 } // namespace XmlRpc
@@ -128,8 +116,6 @@ namespace XmlRpc {
 
 class PT_XMLRPC_API Service : public Http::Service
 {
-        friend class XmlRpcResponder;
-
     public:
         Service()
         { }
@@ -368,7 +354,7 @@ class PT_XMLRPC_API Service : public Http::Service
         }
 
         template <typename CallT, class C>
-        void registerAsyncMethod(const std::string& name, C& obj, CallT* (C::*method)(Context&) )
+        void registerAsyncMethod(const std::string& name, C& obj, CallT* (C::*method)(Responder&) )
         {
             ServiceProcedureDef* proc = new AsyncProcedureDef<CallT>( callable(obj, method) );
             this->registerProcedure(name, proc);
@@ -379,7 +365,8 @@ class PT_XMLRPC_API Service : public Http::Service
 
         virtual void onReleaseResponder(Http::Responder* resp);
 
-        ServiceProcedure* getProcedure(const std::string& name, XmlRpcResponder& resp, System::EventLoop& loop);
+    public:
+        ServiceProcedure* getProcedure(const std::string& name, Responder& resp);
 
         void releaseProcedure(ServiceProcedure* proc);
 

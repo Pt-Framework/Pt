@@ -40,24 +40,24 @@ class AsyncEcho : public Pt::XmlRpc::AsyncProcedure<std::string, std::string>
                 , public Pt::Connectable
 {
     public:   
-        AsyncEcho(Pt::XmlRpc::Context& si, EchoService& srv)
-        : Pt::XmlRpc::AsyncProcedure<std::string, std::string>(si)
+        AsyncEcho(Pt::XmlRpc::Responder& resp, EchoService& srv)
+        : Pt::XmlRpc::AsyncProcedure<std::string, std::string>(resp)
         , _srv(&srv)
         {
             _timer.timeout() += Pt::slot(*this, &AsyncEcho::onTimeout);
         }
 
     protected:
-        virtual void onBeginCall(const std::string& msg)
+        virtual void onBeginCall(Pt::System::EventLoop& loop, const std::string& msg)
         {
             _r = msg;
-            _timer.setActive( this->loop() );
+            _timer.setActive(loop);
             _timer.start(1000);         
         }
 
         virtual const std::string& onEndCall()
         {
-            std::cerr << " X ";
+            std::cerr << " " << _r << " ";
             return _r;
         }
 
@@ -79,17 +79,17 @@ class AsyncHello : public Pt::XmlRpc::AsyncProcedure<std::string>
                  , public Pt::Connectable
 {
     public:   
-        AsyncHello(Pt::XmlRpc::Context& ctx, const char* helloTxt)
-        : Pt::XmlRpc::AsyncProcedure<std::string>(ctx)
+        AsyncHello(Pt::XmlRpc::Responder& resp, const char* helloTxt)
+        : Pt::XmlRpc::AsyncProcedure<std::string>(resp)
         , _hello(helloTxt)
         {
             _timer.timeout() += Pt::slot(*this, &AsyncHello::setReady);
         }
 
     protected:
-        virtual void onBeginCall()
+        virtual void onBeginCall(Pt::System::EventLoop& loop)
         {
-            _timer.setActive( this->loop() );
+            _timer.setActive(loop);
             _timer.start(1000);         
         }
 
@@ -120,14 +120,14 @@ class EchoService : public Pt::XmlRpc::Service
             return msg;
         }
 
-        AsyncEcho* asyncEcho(Pt::XmlRpc::Context& ctx)
+        AsyncEcho* asyncEcho(Pt::XmlRpc::Responder& r)
         {
-            return new AsyncEcho(ctx, *this);
+            return new AsyncEcho(r, *this);
         }
 
-        AsyncHello* asyncHello(Pt::XmlRpc::Context& ctx)
+        AsyncHello* asyncHello(Pt::XmlRpc::Responder& r)
         {
-            return new AsyncHello(ctx, "Hello world!");
+            return new AsyncHello(r, "Hello world!");
         }
 };
 

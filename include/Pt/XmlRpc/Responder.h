@@ -33,6 +33,7 @@
 #include <Pt/XmlRpc/Fault.h>
 #include <Pt/XmlRpc/Scanner.h>
 #include <Pt/XmlRpc/Formatter.h>
+#include <Pt/XmlRpc/Service.h>
 #include <Pt/Xml/InputSource.h>
 #include <Pt/Xml/XmlReader.h>
 #include <Pt/Http/Responder.h>
@@ -48,6 +49,7 @@ class Service;
 class ServiceProcedure;
 
 class PT_XMLRPC_API XmlRpcResponder : public Http::Responder
+                                    , public Responder
 {
     enum State
     {
@@ -68,9 +70,6 @@ class PT_XMLRPC_API XmlRpcResponder : public Http::Responder
         ~XmlRpcResponder();
 
         void endReply();
-
-        SerializationContext& context()
-        { return _context; }
 
     protected:
         void onBeginRequest(Http::Request& request, Http::Reply& reply, System::EventLoop& loop);
@@ -95,7 +94,6 @@ class PT_XMLRPC_API XmlRpcResponder : public Http::Responder
        Formatter _formatter;
        Service* _service;
        Http::Reply* _reply;
-       SerializationContext _context;
        ServiceProcedure* _proc;
        IComposer** _args;
        IDecomposer* _result;

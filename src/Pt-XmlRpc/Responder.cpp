@@ -27,7 +27,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "Pt/XmlRpc/Responder.h"
-#include "Pt/XmlRpc/Service.h"
 #include "Pt/XmlRpc/Fault.h"
 #include "Pt/Xml/XmlError.h"
 #include "Pt/Xml/StartElement.h"
@@ -183,7 +182,7 @@ void XmlRpcResponder::onBeginReply(Http::Request& request, Http::Reply& reply, S
             }
         }
 
-        _proc->beginCall();
+        _proc->beginCall(loop);
     }
     catch (const Fault& fault)
     {
@@ -260,6 +259,9 @@ void XmlRpcResponder::endReply()
 {
     try
     {
+        if( ! _proc )
+            throw Fault("invalid procedure", Fault::invalidXmlRpc);
+
         IDecomposer* rh = _proc->endCall();
         
         _ts.write(XMLRPC_REPLY_BEGIN, sizeof(XMLRPC_REPLY_BEGIN)/sizeof(Char));
@@ -341,7 +343,7 @@ void XmlRpcResponder::advance(const Pt::Xml::Node& node, System::EventLoop& loop
                 if(_proc)
                     _service->releaseProcedure(_proc);
 
-                _proc = _service->getProcedure( chars.content().narrow(), *this, loop );
+                _proc = _service->getProcedure( chars.content().narrow(), *this );
                 if( ! _proc )
                     throw Fault("no such procedure", Pt::XmlRpc::Fault::methodNotFound);
 
