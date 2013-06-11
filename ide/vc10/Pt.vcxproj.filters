@@ -55,6 +55,9 @@
     <Filter Include="Pt-XmlRpc">
       <UniqueIdentifier>{7e2aa4fc-ec38-41cb-bdeb-a9d84c96394a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Pt-XmlRpc\tests">
+      <UniqueIdentifier>{f6833083-cbf2-4eca-9fae-4aeb9ad165e5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\Pt\Allocator.h">
@@ -889,6 +892,9 @@
     <None Include="..\..\src\Pt-XmlRpc\Jamfile">
       <Filter>Pt-XmlRpc</Filter>
     </None>
+    <None Include="..\..\src\Pt-XmlRpc\tests\Jamfile">
+      <Filter>Pt-XmlRpc\tests</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Pt\Atomicity.cpp">
@@ -1538,6 +1544,15 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-XmlRpc\Service.cpp">
       <Filter>Pt-XmlRpc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-XmlRpc\tests\Pt-XmlRpc-test.cpp">
+      <Filter>Pt-XmlRpc\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-XmlRpc\tests\RpcBenchClient.cpp">
+      <Filter>Pt-XmlRpc\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-XmlRpc\tests\RpcBenchServer.cpp">
+      <Filter>Pt-XmlRpc\tests</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

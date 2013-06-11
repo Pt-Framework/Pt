@@ -1080,7 +1080,48 @@ class AsyncProcedure : public ServiceProcedure
 // AsyncServiceProcedure with 0 arguments
 //
 
+template <typename R>
+class AsyncProcedure<R, 
+                     Pt::Void> : public ServiceProcedure
+{
+    public:
+        typedef R ReturnT;
+        typedef Pt::Void Arg1T;
 
+    public:
+        AsyncProcedure(Context& ctx)
+        : ServiceProcedure(ctx)
+        , _r( &ctx.sctx() )
+        {
+            _args[0] = 0;
+        }
+
+        IComposer** beginArgs()
+        {
+            return _args;
+        }
+
+        virtual void beginCall()
+        {
+            onBeginCall();
+        }
+
+        IDecomposer* endCall()
+        {
+            const R& r = onEndCall();
+            _r.begin(r, "");
+            return &_r;
+        }
+
+    protected:
+        virtual void onBeginCall() = 0;
+
+        virtual const R& onEndCall() = 0;
+
+    private:
+        IComposer* _args[1];
+        Decomposer<R> _r;
+};
 
 
 template < typename R,

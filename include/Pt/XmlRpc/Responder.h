@@ -69,6 +69,9 @@ class PT_XMLRPC_API XmlRpcResponder : public Http::Responder
 
         void endReply();
 
+        SerializationContext& context()
+        { return _context; }
+
     protected:
         void onBeginRequest(Http::Request& request, Http::Reply& reply, System::EventLoop& loop);
 
@@ -85,7 +88,7 @@ class PT_XMLRPC_API XmlRpcResponder : public Http::Responder
     private:
        State _state;
        Utf8Codec _utf8;
-       TextStream _ts;
+       TextOStream _ts;
        Xml::BinaryInputSource _bin;
        Xml::XmlReader _reader;
        Scanner _scanner;

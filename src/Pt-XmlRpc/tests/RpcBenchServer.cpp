@@ -63,8 +63,8 @@ class AsyncEcho : public Pt::XmlRpc::AsyncProcedure<std::string, std::string>
 
         void onTimeout()
         {
-            _timer.stop();
-            _timer.detach();
+            //_timer.stop();
+            //_timer.detach();
             this->setReady();
         }
 
@@ -74,6 +74,36 @@ class AsyncEcho : public Pt::XmlRpc::AsyncProcedure<std::string, std::string>
         EchoService* _srv;
 };
 
+
+class AsyncHello : public Pt::XmlRpc::AsyncProcedure<std::string>
+                 , public Pt::Connectable
+{
+    public:   
+        AsyncHello(Pt::XmlRpc::Context& ctx, const char* helloTxt)
+        : Pt::XmlRpc::AsyncProcedure<std::string>(ctx)
+        , _hello(helloTxt)
+        {
+            _timer.timeout() += Pt::slot(*this, &AsyncHello::setReady);
+        }
+
+    protected:
+        virtual void onBeginCall()
+        {
+            _timer.setActive( this->loop() );
+            _timer.start(1000);         
+        }
+
+        virtual const std::string& onEndCall()
+        {
+            return _hello;
+        }
+
+    private:
+        std::string _hello;
+        Pt::System::Timer _timer;
+};
+
+
 class EchoService : public Pt::XmlRpc::Service
 {
     public:
@@ -81,6 +111,8 @@ class EchoService : public Pt::XmlRpc::Service
         {
             registerAsyncMethod("echo", *this, &EchoService::asyncEcho);
             registerMethod("echo2", *this, &EchoService::echo);
+
+            registerAsyncMethod("hello", *this, &EchoService::asyncHello);
         }
 
         std::string echo(const std::string& msg)
@@ -88,9 +120,14 @@ class EchoService : public Pt::XmlRpc::Service
             return msg;
         }
 
-        AsyncEcho* asyncEcho(Pt::XmlRpc::Context& si)
+        AsyncEcho* asyncEcho(Pt::XmlRpc::Context& ctx)
         {
-            return new AsyncEcho(si, *this);
+            return new AsyncEcho(ctx, *this);
+        }
+
+        AsyncHello* asyncHello(Pt::XmlRpc::Context& ctx)
+        {
+            return new AsyncHello(ctx, "Hello world!");
         }
 };
 

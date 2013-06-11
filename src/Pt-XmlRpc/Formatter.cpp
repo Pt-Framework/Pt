@@ -284,7 +284,7 @@ void Formatter::addBytes(const char* name, const char* type,
     _os->write(XMLRPC_VALUE, sizeof(XMLRPC_VALUE)/sizeof(Char));
     std::string value(data, length);
 
-    throw std::logic_error("base64 data not supported");
+    throw SerializationError("base64 data not supported");
     //_writer->writeStartTag(Pt::String::widen(type).c_str());
     //Xml::xmlEncode(Pt::String::widen(value).c_str());
     //_writer->writeEndTag(Pt::String::widen(type).c_str());

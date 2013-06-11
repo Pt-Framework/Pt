@@ -41,7 +41,7 @@ namespace Xml {
 AttributeValidator::AttributeValidator()
 {}
 
-void AttributeValidator::clear()
+void AttributeValidator::reset()
 {
     _ids.clear();
     _idrefs.clear();

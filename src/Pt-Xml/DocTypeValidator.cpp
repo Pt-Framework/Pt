@@ -104,7 +104,7 @@ class DocTypeValidatorImpl
     public:
         explicit DocTypeValidatorImpl(DocTypeDefinition& dtd);
 
-        void clear();
+        void reset();
 
         bool validate(Node& node);
 
@@ -121,9 +121,9 @@ DocTypeValidatorImpl::DocTypeValidatorImpl(DocTypeDefinition& dtd)
 }
 
 
-void DocTypeValidatorImpl::clear()
+void DocTypeValidatorImpl::reset()
 { 
-    _attrValidator.clear();
+    _attrValidator.reset();
 
     while( ! _decls.empty() )
         _decls.pop();
@@ -210,9 +210,9 @@ DocTypeValidator::~DocTypeValidator()
 }
 
 
-void DocTypeValidator::clear()
+void DocTypeValidator::reset()
 { 
-    _impl->clear();
+    _impl->reset();
 }
 
 

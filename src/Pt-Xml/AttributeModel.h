@@ -48,7 +48,7 @@ class AttributeValidator : private NonCopyable
     public:
         AttributeValidator();
 
-        void clear();
+        void reset();
 
         bool validate(AttributeList& attrs, const AttributeListModel& decl);
 

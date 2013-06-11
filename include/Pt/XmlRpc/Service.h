@@ -46,19 +46,17 @@ namespace Pt {
 
 namespace XmlRpc {
 
-// TODO: derive Responder from this class or find other way to make ownership
-//       more explicit and clearer.
+// TODO: pass responder to constructor, loop to an init() method
 class Context
 {
     public:
-        Context(SerializationContext& ctx, XmlRpcResponder& r, System::EventLoop& loop)
-        : _ctx()
-        , _resp(&r)
+        Context(XmlRpcResponder& r, System::EventLoop& loop)
+        : _resp(&r)
         , _loop(&loop)
         {}
 
         SerializationContext& sctx()
-        { return *_ctx; }
+        { return _resp->context(); }
 
         System::EventLoop& loop()
         { return *_loop; }
@@ -67,10 +65,10 @@ class Context
         { return *_resp; }
 
     private:
-        SerializationContext* _ctx;
         XmlRpcResponder* _resp;
         System::EventLoop* _loop;
 };
+
 
 class ServiceProcedure
 {
@@ -82,7 +80,7 @@ class ServiceProcedure
         { return *_loop; }
 
         void setReady()
-        { if(_resp) _resp->endReply(); }
+        { _resp->endReply(); }
 
         virtual IComposer** beginArgs() = 0;
 
@@ -381,7 +379,7 @@ class PT_XMLRPC_API Service : public Http::Service
 
         virtual void onReleaseResponder(Http::Responder* resp);
 
-        ServiceProcedure* getProcedure(const std::string& name, SerializationContext& ctx, XmlRpcResponder& resp, System::EventLoop& loop);
+        ServiceProcedure* getProcedure(const std::string& name, XmlRpcResponder& resp, System::EventLoop& loop);
 
         void releaseProcedure(ServiceProcedure* proc);
 

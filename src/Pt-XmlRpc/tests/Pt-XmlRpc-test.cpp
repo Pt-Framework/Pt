@@ -150,7 +150,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             catch (const Pt::XmlRpc::Fault& e)
             {
                 PT_UNIT_ASSERT_EQUALS(e.rc(), 7);
-                PT_UNIT_ASSERT_EQUALS(e.text(), "Fault");
+                PT_UNIT_ASSERT_EQUALS(e.text(), "test fault message");
             }
 
             _loop->exit();
@@ -158,7 +158,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
 
         bool throwFault()
         {
-            throw Pt::XmlRpc::Fault("Fault", 7);
+            throw Pt::XmlRpc::Fault("test fault message", 7);
             return false;
         }
 

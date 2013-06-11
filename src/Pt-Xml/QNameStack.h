@@ -66,9 +66,7 @@ class QNameStack
         {
             if( _cur->prefix().empty() )
             {
-                // TODO: use swap
-                _cur->setPrefix( _cur->name() );
-                _cur->name().clear();
+                _cur->prefix().swap( _cur->name() );
                 return true;
             }
 

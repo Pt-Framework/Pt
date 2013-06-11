@@ -56,11 +56,9 @@ class PT_XML_API DocTypeValidator : private NonCopyable
         */
         ~DocTypeValidator();
 
-        // TODO: rename reset
-
         /** @brief Clears the validator to start a new document.
         */
-        void clear();
+        void reset();
 
         /** @brief Returns true if the node is valid.
         */

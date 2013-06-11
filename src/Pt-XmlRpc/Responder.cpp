@@ -35,9 +35,12 @@
 #include "Pt/Xml/EndElement.h"
 #include "Pt/Http/Reply.h"
 #include <Pt/Http/Request.h>
+#include <Pt/System/Logger.h>
 #include "Pt/Utf8Codec.h"
 #include "Pt/Convert.h"
 #include <cassert>
+
+log_define("Pt.XmlRpc.Responder")
 
 namespace Pt {
 
@@ -99,6 +102,8 @@ XmlRpcResponder::XmlRpcResponder(Service& service)
 
 XmlRpcResponder::~XmlRpcResponder()
 {
+    _ts.reset();
+
     if(_proc)
         _service->releaseProcedure(_proc);
 }
@@ -127,19 +132,28 @@ void XmlRpcResponder::onReadRequest(Http::Request& request, Http::Reply& reply, 
     }
     catch(const Xml::XmlError& error)
     {
+        log_error( error.what() );
         replyError(reply, 1, error.what());
     }
     catch(const SerializationError& error)
     {
+        log_error( error.what() );
         replyError(reply, 2, error.what());
     }
     catch(const ConversionError& error)
     {
+        log_error( error.what() );
         replyError(reply, 3, error.what());
     }
     catch(const Fault& fault)
     {
+        log_error( fault.what() );
         replyError(reply, fault.rc(), fault.what());
+    }
+    catch(const std::exception& error)
+    {
+        log_error( error.what() );
+        throw;
     }
 }
 
@@ -151,7 +165,6 @@ void XmlRpcResponder::onBeginReply(Http::Request& request, Http::Reply& reply, S
         _reply = &reply;
         _ts.attach( _reply->body() );
 
-        
         _ts.write( XMLRPC_XMLDECL, sizeof(XMLRPC_XMLDECL)/sizeof(Char) );
         
         reply.header().set("Content-Type", "text/xml");
@@ -174,7 +187,13 @@ void XmlRpcResponder::onBeginReply(Http::Request& request, Http::Reply& reply, S
     }
     catch (const Fault& fault)
     {
+        log_error( fault.what() );
         replyError(reply, fault.rc(), fault.what());
+    }
+    catch(const std::exception& error)
+    {
+        log_error( error.what() );
+        throw;
     }
 }
 
@@ -256,23 +275,32 @@ void XmlRpcResponder::endReply()
     }
     catch (const Fault& fault)
     {
+        log_error( fault.what() );
         assert(_reply);
         replyError(*_reply, fault.rc(), fault.what());
     }
     catch(const Xml::XmlError& error)
     {
+        log_error( error.what() );
         assert(_reply);
         replyError( *_reply, 1, error.what());
     }
     catch(const SerializationError& error)
     {
+        log_error( error.what() );
         assert(_reply);
         replyError(*_reply, 2, error.what());
     }
     catch(const ConversionError& error)
     {
+        log_error( error.what() );
         assert(_reply);
         replyError(*_reply, 3, error.what());
+    }
+    catch(const std::exception& error)
+    {
+        log_error( error.what() );
+        throw;
     }
 }
 
@@ -287,7 +315,7 @@ void XmlRpcResponder::advance(const Pt::Xml::Node& node, System::EventLoop& loop
             {
                 const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
                 if( se.name().name() != L"methodCall" )
-                    throw Xml::SyntaxError( "invalid XML-RPC methodCall", _reader.line() );
+                    throw SerializationError("invalid XML-RPC methodCall");
 
                 _state = OnMethodCallBegin;
             }
@@ -313,7 +341,7 @@ void XmlRpcResponder::advance(const Pt::Xml::Node& node, System::EventLoop& loop
                 if(_proc)
                     _service->releaseProcedure(_proc);
 
-                _proc = _service->getProcedure( chars.content().narrow(), _context, *this, loop );
+                _proc = _service->getProcedure( chars.content().narrow(), *this, loop );
                 if( ! _proc )
                     throw Fault("no such procedure", Pt::XmlRpc::Fault::methodNotFound);
 
@@ -343,7 +371,7 @@ void XmlRpcResponder::advance(const Pt::Xml::Node& node, System::EventLoop& loop
             {
                 const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
                 if( se.name().name() != L"params" )
-                    throw std::runtime_error("invalid XML-RPC methodCall");
+                    throw SerializationError("invalid XML-RPC methodCall");
 
                 _state = OnParams;
             }
@@ -366,7 +394,7 @@ void XmlRpcResponder::advance(const Pt::Xml::Node& node, System::EventLoop& loop
             {
                 const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
                 if( se.name().name() != L"param" )
-                    throw std::runtime_error("invalid XML-RPC methodCall");
+                    throw SerializationError("invalid XML-RPC methodCall");
 
                 //std::cerr << "-> Found param" << std::endl;
                 if( ! _args )
@@ -374,14 +402,14 @@ void XmlRpcResponder::advance(const Pt::Xml::Node& node, System::EventLoop& loop
                     //std::cerr << "-> begin call" << std::endl;
                     _args = _proc->beginArgs();
                     if( ! *_args)
-                        throw std::runtime_error("too many arguments");
+                        throw SerializationError("too many arguments");
                 }
                 else
                 {
                     //std::cerr << "-> next argument" << std::endl;
                     ++_args;
                     if( ! *_args)
-                        throw std::runtime_error("too many arguments");
+                        throw SerializationError("too many arguments");
                 }
 
                 _scanner.begin(**_args);

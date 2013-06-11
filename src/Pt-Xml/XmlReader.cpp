@@ -347,8 +347,7 @@ class XmlReaderImpl
             if( ch == ':' )
             {
                 QName& qn = _dtd.rootName();
-                qn.setPrefix( qn.name() ); // TODO: use swap
-                qn.name().clear();
+                qn.prefix().swap( qn.name() );
                 return;
             }
 
@@ -962,8 +961,8 @@ class XmlReaderImpl
             {
                 assert(_notation == 0);
 
-                // TODO: ignored when declared twice or error? nullptr is
-                //       returned when already declared.
+                // TODO: Is it an error if a notation is declared twice? 
+                // nullptr is returned when already declared.
                 _notation = _dtd.declareNotation(_token);
                 _token.clear();
                 _parse = &XmlReaderImpl::OnDtdNotationAfterName;
@@ -1619,9 +1618,7 @@ class XmlReaderImpl
                 if( ! _qname.prefix().empty() )
                     throw SyntaxError("invalid name", line());
                 
-                // TODO: use swap
-                _qname.setPrefix( _qname.name() ); 
-                _qname.name().clear();
+                _qname.prefix().swap( _qname.name() );
                 return;
             }
 
@@ -1703,8 +1700,7 @@ class XmlReaderImpl
                 if( ! _qname.prefix().empty() )
                     throw SyntaxError("invalid name", line());
 
-                _qname.setPrefix(_qname.name() ); // TODO: use swap
-                _qname.name().clear();
+                _qname.prefix().swap( _qname.name() );
                 return;
             }
 
@@ -2401,8 +2397,7 @@ class XmlReaderImpl
                 if( ! _qname.prefix().empty() )
                     throw SyntaxError("invalid name", line());
 
-                _qname.setPrefix(_qname.name() ); // TODO: use swap
-                _qname.name().clear();
+                _qname.prefix().swap( _qname.name() );
                 return;
             }
 
