@@ -13,6 +13,11 @@ SUFDBG ?= "" ;
 # Default toolkit
 ##############################################################################
 
+if $(VS110COMNTOOLS)
+{
+    TOOLSET ?= vc11 ;
+}
+
 if $(VS100COMNTOOLS)
 {
     TOOLSET ?= vc10 ;
