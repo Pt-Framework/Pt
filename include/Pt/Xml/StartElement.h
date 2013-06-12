@@ -132,28 +132,36 @@ class PT_XML_API AttributeList : private NonCopyable
         */
         Attribute& append(const QName& name, const Namespace& ns);
 
-        /** @brief Gets the value of an attribute.
+		/** @brief Gets the value of an attribute.
 
             The value of the attribute with the local name @a localName is
-            returned. If no attribute by that name is present, the @a
-            defaultValue is returned.
+            returned. If no attribute by that name is present, an
+            exception of type XmlError is thrown.
         */
-        const Pt::String& get(const Pt::String& localName, const Pt::String& defaultValue) const
+		const Pt::String& get(const Pt::String& localName) const
         {
             ConstIterator it = find(localName);
-            return it == end() ? defaultValue : it->value();
+            
+			if(it == end())
+				throw XmlError("Attribute not found");
+
+			 return it->value();
         }
 
         /** @brief Gets the value of an attribute.
 
             The value of the attribute with the namespace @a nsUri and the
-            local name @a localName is returned. If no attribute by that
-            name is present, the @a defaultValue is returned.
+            local name @a localName is returned. If no attribute by that name is present, an
+            exception of type XmlError is thrown.
         */
-        const Pt::String& get(const String& nsUri, const String& localName, const Pt::String& defaultValue) const
+        const Pt::String& get(const String& nsUri, const String& localName) const
         {
             ConstIterator it = find(nsUri, localName);
-            return it == end() ? defaultValue : it->value();
+          	
+			if(it == end())
+				throw XmlError("Attribute not found");
+
+			return it->value();
         }
 
         /** @brief Finds an attribute by name.
