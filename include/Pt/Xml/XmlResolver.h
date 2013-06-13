@@ -75,9 +75,9 @@ class XmlResolver
             The returned codec will be treated like a stream facet by the
             caller, i.e. it will be deleted if its refcount is 0.
         */
-        TextCodec<Char, char>* resolveEncoding(const char* encoding)
+        TextCodec<Char, char>* resolveEncoding(const XmlDeclaration& decl)
         {
-            return onResolveEncoding(encoding);
+            return onResolveEncoding(decl);
         }
 
     protected:
@@ -99,7 +99,7 @@ class XmlResolver
             The returned codec will be treated like a stream facet by the
             caller, i.e. it will be deleted if its refcount is 0.
         */
-        virtual TextCodec<Char, char>* onResolveEncoding(const char* encoding)
+        virtual TextCodec<Char, char>* onResolveEncoding(const XmlDeclaration& decl)
         { return 0; }
 };
 

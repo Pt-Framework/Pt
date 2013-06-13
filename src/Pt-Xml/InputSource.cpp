@@ -29,6 +29,7 @@
 #include <Pt/Xml/InputSource.h>
 #include <Pt/Xml/XmlError.h>
 #include <Pt/Xml/XmlResolver.h>
+#include <Pt/Utf16Codec.h>
 #include <cctype>
 #include <cassert>
 
@@ -763,6 +764,12 @@ enum BomParseState
     OnBomUtf8_1,
     OnBomUtf8_2,
 
+    OnBomUtf16BE_0,
+    OnBomUtf16BE_1,
+
+    OnBomUtf16LE_0,
+    OnBomUtf16LE_1,
+
     OnBomEnd = 64,
 };
 
@@ -1037,6 +1044,10 @@ bool BinaryInputSource::onParseBom(unsigned char c)
         case OnBomBegin:
             if(c == 0xef)
                 _bomState = OnBomUtf8_0;
+            else if(c == 0xfe)
+                _bomState = OnBomUtf16BE_0;
+            else if(c == 0xff)
+                _bomState = OnBomUtf16LE_0;
             else
                 _bomState = OnBomEnd;
 
@@ -1062,6 +1073,38 @@ bool BinaryInputSource::onParseBom(unsigned char c)
             break;
 
         case OnBomUtf8_2:
+            _bomState = OnBomEnd;
+            break;
+
+        case OnBomUtf16BE_0:
+            if(c == 0xff)
+            {
+                _bomState = OnBomUtf16BE_1;
+                _xmlDecl.setEndianess(XmlDeclaration::BigEndian);
+                _bomEncoding = BomUtf16BE;
+            }
+            else
+                _bomState = OnBomEnd;
+                    
+            break;
+
+        case OnBomUtf16BE_1:
+            _bomState = OnBomEnd;
+            break;
+
+        case OnBomUtf16LE_0:
+            if(c == 0xfe)
+            {
+                _bomEncoding = BomUtf16LE;
+                _xmlDecl.setEndianess(XmlDeclaration::LittleEndian);
+                _bomState = OnBomUtf16LE_1;
+            }
+            else
+                _bomState = OnBomEnd;
+                    
+            break;
+
+        case OnBomUtf16LE_1:
             _bomState = OnBomEnd;
             break;
 
@@ -1122,23 +1165,39 @@ void BinaryInputSource::onDeclaration()
 {
     if(_bomEncoding == BomUtf8)
     {
+        // keep using utf-8 codec
         if( _xmlDecl.encoding().empty() || _xmlDecl.encoding() == "UTF-8" )
             return;
 
+        // no other encoding string allowed 
         throw SyntaxError("invalid encoding", 0);
     }
     else if(_bomEncoding == Bom8)
     {
+        // keep using utf-8 codec
         if( _xmlDecl.encoding().empty() || _xmlDecl.encoding() == "UTF-8" )
             return;
     }
+    else if(_bomEncoding == BomUtf16BE)
+    {
+        if( _xmlDecl.encoding().empty() || _xmlDecl.encoding() == "UTF-16" )
+        {
+            _tbuf.setCodec( new Utf16Codec );
+            return;
+        }
+    }
+    else if(_bomEncoding == BomUtf16LE)
+    {      
+        if( _xmlDecl.encoding().empty() || _xmlDecl.encoding() == "UTF-16" )
+        {
+            _tbuf.setCodec( new Utf16Codec );
+            return;
+        }
+    }
 
-    // TODO: BOM for 16 and 32 bit unicode
-
-    const char* encoding = _xmlDecl.encoding().c_str();
     TextCodec<Char, char>* codec = 0;
     if(_resolver)
-        codec = _resolver->resolveEncoding(encoding);
+        codec = _resolver->resolveEncoding(_xmlDecl);
 
     if( ! codec)
         throw SyntaxError("invalid encoding", 0);

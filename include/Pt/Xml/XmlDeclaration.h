@@ -41,10 +41,19 @@ namespace Xml {
 class XmlDeclaration
 {
     public:
+        enum Endianess
+        {
+            None = 0,
+            BigEndian = 1,
+            LittleEndian = 2
+        };
+
+    public:
         /** @brief Constructs an empty %XmlDeclaration.
         */
         XmlDeclaration()
         : _standalone(false)
+        , _endianess(None)
         {}
        
         /** @brief Clears all content.
@@ -54,6 +63,7 @@ class XmlDeclaration
             _version.clear();
             _encoding.clear();
             _standalone = false;
+            _endianess = None;
         }
         
         /** @brief Returns the version string.
@@ -86,10 +96,21 @@ class XmlDeclaration
         void setStandalone(bool value)
         { _standalone = value; }
 
+        /** @brief The endianess of the document encoding.
+        */
+        Endianess endianess() const
+        { return static_cast<Endianess>(_endianess); }
+
+        /** @brief Sets the endianess of the document encoding.
+        */
+        void setEndianess(Endianess e)
+        { _endianess = e; }
+
     private:
         std::string _version;
         std::string _encoding;
         bool _standalone;
+        unsigned char _endianess;
 };
 
 } // namespace Xml
