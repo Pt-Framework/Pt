@@ -58,10 +58,10 @@ class TextStreamTest : public Pt::Unit::TestSuite
             Pt::Unit::TestSuite::registerMethod( "UnicodeToUTF8",
                                                  *this, &TextStreamTest::UnicodeToUTF8);
             
-            //Pt::Unit::TestSuite::registerMethod( "UTF16ToUnicode",
-            //                                     *this, &TextStreamTest::UTF16ToUnicode);
-            //Pt::Unit::TestSuite::registerMethod( "UnicodeToUTF16",
-            //                                     *this, &TextStreamTest::UnicodeToUTF16);
+            Pt::Unit::TestSuite::registerMethod( "UTF16ToUnicode",
+                                                 *this, &TextStreamTest::UTF16ToUnicode);
+            Pt::Unit::TestSuite::registerMethod( "UnicodeToUTF16",
+                                                 *this, &TextStreamTest::UnicodeToUTF16);
             
             Pt::Unit::TestSuite::registerMethod( "GetChar",
                                                  *this, &TextStreamTest::GetChar );

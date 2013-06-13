@@ -29,6 +29,7 @@ SharedLibrary Pt : Atomicity.cpp
                    TextStream.cpp
                    Time.cpp
                    Utf8Codec.cpp
+				   Utf16Codec.cpp
                    ;
 
 MakeLocate Pt : $(PT_OUTPUT_TARGET) ;

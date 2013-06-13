@@ -38,7 +38,6 @@ namespace Pt {
 
 const Pt::Char ReplacementChar = 0x0000FFFD;
 const Pt::Char MaxBmp = 0x0000FFFF;
-const Pt::Char MaxUtf16 = 0x0010FFFF;
 const Pt::Char MaxUtf32 = 0x7FFFFFFF;
 const Pt::Char MaxLegalUtf32 = 0x0010FFFF;
 const Pt::Char SurHighStart = 0xD800;

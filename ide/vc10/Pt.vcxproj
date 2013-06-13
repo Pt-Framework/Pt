@@ -159,6 +159,7 @@
     <ClInclude Include="..\..\include\Pt\Unit\TestProtocol.h" />
     <ClInclude Include="..\..\include\Pt\Unit\TestSuite.h" />
     <ClInclude Include="..\..\include\Pt\Unit\TextProtocol.h" />
+    <ClInclude Include="..\..\include\Pt\Utf16Codec.h" />
     <ClInclude Include="..\..\include\Pt\Utf8Codec.h" />
     <ClInclude Include="..\..\include\Pt\Variant.h" />
     <ClInclude Include="..\..\include\Pt\Void.h" />
@@ -510,6 +511,7 @@
     <ClCompile Include="..\..\src\Pt\TextStream.cpp" />
     <ClCompile Include="..\..\src\Pt\Time.cpp" />
     <ClCompile Include="..\..\src\Pt\UnicodeTable.cpp" />
+    <ClCompile Include="..\..\src\Pt\Utf16Codec.cpp" />
     <ClCompile Include="..\..\src\Pt\Utf8Codec.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
