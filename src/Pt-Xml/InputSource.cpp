@@ -1182,7 +1182,7 @@ void BinaryInputSource::onDeclaration()
     {
         if( _xmlDecl.encoding().empty() || _xmlDecl.encoding() == "UTF-16" )
         {
-            _tbuf.setCodec( new Utf16Codec );
+            _tbuf.setCodec( new Utf16BeCodec );
             return;
         }
     }
@@ -1190,7 +1190,7 @@ void BinaryInputSource::onDeclaration()
     {      
         if( _xmlDecl.encoding().empty() || _xmlDecl.encoding() == "UTF-16" )
         {
-            _tbuf.setCodec( new Utf16Codec );
+            _tbuf.setCodec( new Utf16LeCodec );
             return;
         }
     }

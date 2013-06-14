@@ -62,6 +62,11 @@ class TextStreamTest : public Pt::Unit::TestSuite
                                                  *this, &TextStreamTest::UTF16ToUnicode);
             Pt::Unit::TestSuite::registerMethod( "UnicodeToUTF16",
                                                  *this, &TextStreamTest::UnicodeToUTF16);
+
+            Pt::Unit::TestSuite::registerMethod( "UTF16LeToUnicode",
+                                                 *this, &TextStreamTest::UTF16LeToUnicode);
+            Pt::Unit::TestSuite::registerMethod( "UnicodeToUTF16Le",
+                                                 *this, &TextStreamTest::UnicodeToUTF16Le);
             
             Pt::Unit::TestSuite::registerMethod( "GetChar",
                                                  *this, &TextStreamTest::GetChar );
@@ -92,6 +97,9 @@ class TextStreamTest : public Pt::Unit::TestSuite
         
         void UTF16ToUnicode();
         void UnicodeToUTF16();
+
+        void UTF16LeToUnicode();
+        void UnicodeToUTF16Le();
         
         void GetChar();
         void GetLineBuffer();
@@ -112,6 +120,9 @@ char TextUTF8[]        = { (char)0xce, (char)0xba, (char)0xe1, (char)0xbd, (char
 
 char TextUTF16BE[]     = { (char)0x03, (char)0xba, (char)0x1F, (char)0x79, (char)0x03, (char)0xC3, (char)0x03, 
                            (char)0xBC, (char)0x03, (char)0xB5, (char)0x0 };
+
+char TextUTF16LE[]     = { (char)0xba, (char)0x03, (char)0x79, (char)0x1F,  (char)0xC3, (char)0x03, (char)0xBC,   
+                           (char)0x03, (char)0xB5, (char)0x03, (char)0x0 };
 
 Pt::Char TextUnicode[] = { 954, 8057, 963, 956, 949, 0 };
 
@@ -228,7 +239,7 @@ void TextStreamTest::UnicodeToUTF8()
 
 void TextStreamTest::UTF16ToUnicode()
 {
-    Pt::TextStream ts( new Pt::Utf16Codec() );
+    Pt::TextStream ts( new Pt::Utf16BeCodec() );
     std::streamsize n = ts.buffer().import(TextUTF16BE, std::strlen(TextUTF16BE));
 
     PT_UNIT_ASSERT(ts.get() == TextUnicode[0].value());
@@ -243,13 +254,39 @@ void TextStreamTest::UnicodeToUTF16()
 {
     std::stringstream ss;
 
-    Pt::TextBuffer tbuf(&ss, new Pt::Utf16Codec());
+    Pt::TextBuffer tbuf(&ss, new Pt::Utf16BeCodec());
     tbuf.sputn(TextUnicode, 5);
     tbuf.pubsync();
 
     std::string str = ss.str();
     PT_UNIT_ASSERT( str.size() == std::strlen(TextUTF16BE) );
     PT_UNIT_ASSERT( str == TextUTF16BE );
+}
+
+void TextStreamTest::UTF16LeToUnicode()
+{
+    Pt::TextStream ts( new Pt::Utf16LeCodec() );
+    std::streamsize n = ts.buffer().import(TextUTF16LE, std::strlen(TextUTF16LE));
+
+    PT_UNIT_ASSERT(ts.get() == TextUnicode[0].value());
+    PT_UNIT_ASSERT(ts.get() == TextUnicode[1].value());
+    PT_UNIT_ASSERT(ts.get() == TextUnicode[2].value());
+    PT_UNIT_ASSERT(ts.get() == TextUnicode[3].value());
+    PT_UNIT_ASSERT(ts.get() == TextUnicode[4].value());
+}
+
+
+void TextStreamTest::UnicodeToUTF16Le()
+{
+    std::stringstream ss;
+
+    Pt::TextBuffer tbuf(&ss, new Pt::Utf16LeCodec());
+    tbuf.sputn(TextUnicode, 5);
+    tbuf.pubsync();
+
+    std::string str = ss.str();
+    PT_UNIT_ASSERT( str.size() == std::strlen(TextUTF16LE) );
+    PT_UNIT_ASSERT( str == TextUTF16LE );
 }
 
 

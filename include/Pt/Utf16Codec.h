@@ -35,13 +35,53 @@
 
 namespace Pt {
 
-class PT_API Utf16Codec : public TextCodec<Char, char> 
+// UTF16 BigEndian
+class PT_API Utf16BeCodec : public TextCodec<Char, char> 
 {
     public:
-        explicit Utf16Codec(size_t ref = 0);
+        explicit Utf16BeCodec(size_t ref = 0);
 
         //! @brief Destructor.
-        virtual ~Utf16Codec()
+        virtual ~Utf16BeCodec()
+        {}
+
+        //! @brief Decodes UTF-16 to UTF-32.
+        virtual result do_in(MBState& s, 
+                             const char* from, const char* fromEnd, const char*& fromNext,
+                             Char* to, Char* toEnd, Char*& toNext) const ;
+        
+        //! @brief Encodes UTF-32 to UTF-16.
+        virtual result do_out(MBState& s, const Char* fromBegin,
+                              const Char* fromEnd, const Char*& fromNext,
+                              char* toBegin, char* toEnd, char*& toNext) const;
+
+        // inheritdoc
+        virtual bool do_always_noconv() const throw() 
+        { return false; }
+
+        // inheritdoc
+        virtual int do_length(MBState& s, const char* fromBegin, 
+                              const char* fromEnd, size_t max) const;
+        // inheritdoc
+        virtual int do_max_length() const throw()  { return 12; }
+
+        // inheritdoc
+        std::codecvt_base::result do_unshift(Pt::MBState&, char*, char*, char*&) const
+        { return std::codecvt_base::noconv; }
+
+        // inheritdoc
+        int do_encoding() const throw()
+        { return 0; }
+};
+
+// UTF16 LittleEndian
+class PT_API Utf16LeCodec : public TextCodec<Char, char> 
+{
+    public:
+        explicit Utf16LeCodec(size_t ref = 0);
+
+        //! @brief Destructor.
+        virtual ~Utf16LeCodec()
         {}
 
         //! @brief Decodes UTF-16 to UTF-32.
