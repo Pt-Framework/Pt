@@ -102,6 +102,7 @@ class XmlReaderTest : public Pt::Unit::TestSuite
             this->registerMethod("EmptyXmlDeclaration", *this, &XmlReaderTest::EmptyXmlDeclaration);
 
             this->registerMethod("ByteorderMarkUtf8", *this, &XmlReaderTest::ByteorderMarkUtf8);
+            //this->registerMethod("ByteorderMarkUtf16", *this, &XmlReaderTest::ByteorderMarkUtf16);
             
             this->registerMethod("DtdEmptyDocument", *this, &XmlReaderTest::DtdEmptyDocument);
             this->registerMethod("DtdExternalSubsetPublicId", *this, &XmlReaderTest::DtdExternalSubsetPublicId);
@@ -186,6 +187,7 @@ class XmlReaderTest : public Pt::Unit::TestSuite
         void EmptyXmlDeclaration();
 
         void ByteorderMarkUtf8();
+        void ByteorderMarkUtf16();
 
         void DtdEmptyDocument();
         void DtdExternalSubsetPublicId();
@@ -305,7 +307,40 @@ void XmlReaderTest::EmptyXmlDeclaration()
 void XmlReaderTest::ByteorderMarkUtf8()
 {
     std::stringstream input;
-    input << char(0xef) << char(0xbb) << char(0xbf) << "<a/>";
+    input << char(0xef) << char(0xbb) << char(0xbf) << "<?xml version=\"1.0\" encoding=\"UTF-8\"?><a/>";
+
+    Pt::Xml::BinaryInputSource is(input);
+    Pt::Xml::XmlReader reader(is);
+    PT_UNIT_ASSERT(reader.depth() == 0);
+
+    Pt::Xml::InputIterator it = reader.current();
+
+    Pt::Xml::StartElement* se = Pt::Xml::toStartElement(&*it);
+    PT_UNIT_ASSERT(se);
+    PT_UNIT_ASSERT(se->name().name() == "a");
+    PT_UNIT_ASSERT(reader.depth() == 1);
+
+    ++it;
+    Pt::Xml::EndElement* ee = Pt::Xml::toEndElement(&*it);
+    PT_UNIT_ASSERT(ee);
+    PT_UNIT_ASSERT(ee->name().name() == "a");
+    PT_UNIT_ASSERT(reader.depth() == 0);
+
+    ++it;
+    Pt::Xml::EndDocument* endDoc = Pt::Xml::toEndDocument(&*it);
+    PT_UNIT_ASSERT(endDoc);
+    PT_UNIT_ASSERT(reader.depth() == 0);
+}
+
+
+void XmlReaderTest::ByteorderMarkUtf16()
+{
+    std::stringstream input;
+    input << char(0xfe) << char(0xff) 
+          << char(0) << char(0x3c)  
+          << char(0) << char(0x61) 
+          << char(0) << char(0x2f) 
+          << char(0) << char(0x3e);
 
     Pt::Xml::BinaryInputSource is(input);
     Pt::Xml::XmlReader reader(is);

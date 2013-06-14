@@ -729,46 +729,53 @@ bool StringInputSource::onImportText()
 }
 
 
-/*
-    BOM must match the actual encoding:
-
-    00 00 FE FF  UTF-32, big-endian
-    FF FE 00 00  UTF-32, little-endian
-    FE FF        UTF-16, big-endian
-    FF FE        UTF-16, little-endian
-    EF BB BF     UTF-8
-
-    encoding attribute must be processed when:
-
-    00 00 00 3C 32-bit characters encoded as ASCII values, big-endian
-    3C 00 00 00 32-bit characters encoded as ASCII values, little-endian
-    00 3C 00 3F 16-bit characters encoded as ASCII values, big-endian
-    3C 00 3F 00 16-bit characters encoded as ASCII values, big-endian
-    3C 3F 78 6D 8-bit characters encoded as ASCII values
-    4C 6F A7 94 EBCDIC based encodings
-*/
+// TODO: it might not be neccessary to make a difference between utf16 and 
+//       generic 16 bit
 enum BomEncoding
 {
     Bom8 = 1,
-    BomUtf8 = 2,
-    BomUtf16LE = 3,
-    BomUtf16BE = 4,
+    Bom16LE = 2,
+    Bom16BE = 3,
+    Bom32LE = 4,
+    Bom32BE = 5,
+    
+    BomUtf8 = 6,
+    BomUtf16LE = 7,
+    BomUtf16BE = 8,
+    BomUtf32LE = 9,
+    BomUtf32BE = 10,
 };
 
 
 enum BomParseState
 {
     OnBomBegin = 0,
+
+    OnBom16BE_0,
             
     OnBomUtf8_0,
     OnBomUtf8_1,
     OnBomUtf8_2,
 
+    OnBomUtf16LE_0,
+    OnBomUtf16LE_1,
+
     OnBomUtf16BE_0,
     OnBomUtf16BE_1,
 
-    OnBomUtf16LE_0,
-    OnBomUtf16LE_1,
+    OnBomUtf32LE_2,
+    OnBomUtf32LE_3,
+
+    OnBomUtf32BE_0,
+    OnBomUtf32BE_1,
+    OnBomUtf32BE_2,
+    OnBomUtf32BE_3,
+
+    OnBom32LE_0,
+    OnBom32LE_1,
+    OnBom32LE_2,
+    
+    OnBom32BE_2,
 
     OnBomEnd = 64,
 };
@@ -1000,7 +1007,10 @@ InputSource::int_type BinaryInputSource::onGet()
             {
                 break;    
             }
-            
+
+            // TODO: if we see 0<0a in 16 bit we can not leave only a in 
+            //       streambuffer sb, otherwise it will be treated as the 
+            //       begin of a word. Also consume 'a' and buffer it somewhere 
             bool ok = onParseXml(c);
             if( ! ok)
             {
@@ -1036,7 +1046,24 @@ bool BinaryInputSource::onImportData()
     return true;
 }
 
+/*
+    BOM must match the actual encoding:
 
+    00 00 FE FF  UTF-32, big-endian
+    FF FE 00 00  UTF-32, little-endian
+    FE FF        UTF-16, big-endian
+    FF FE        UTF-16, little-endian
+    EF BB BF     UTF-8
+
+    encoding attribute must be processed when:
+
+    00 00 00 3C 32-bit characters encoded as ASCII values, big-endian
+    3C 00 00 00 32-bit characters encoded as ASCII values, little-endian
+    00 3C 00 3F 16-bit characters encoded as ASCII values, big-endian
+    3C 00 3F 00 16-bit characters encoded as ASCII values, little-endian
+    3C 3F 78 6D 8-bit characters encoded as ASCII values
+    4C 6F A7 94 EBCDIC based encodings
+*/
 bool BinaryInputSource::onParseBom(unsigned char c)
 {    
     switch(_bomState)
@@ -1048,9 +1075,56 @@ bool BinaryInputSource::onParseBom(unsigned char c)
                 _bomState = OnBomUtf16BE_0;
             else if(c == 0xff)
                 _bomState = OnBomUtf16LE_0;
+            else if(c == 0x00)
+                _bomState = OnBomUtf32BE_0;
+            else if(c == 0x3c)
+                _bomState = OnBom32LE_0;
             else
                 _bomState = OnBomEnd;
 
+            break;
+
+        // 3C 00 00 00   32-bit generic, little-endian
+        case OnBom32LE_0:
+            if(c == 0x00)
+                _bomState = OnBom32LE_1;
+            else
+            {
+                onParseXml(0x3c);
+                _bomState = OnBomEnd;
+            }
+                    
+            break;
+
+        // 3C 00 3F 00   16-bit generic, little-endian
+        case OnBom32LE_1:
+            if(c == 0x00)
+            {
+                _bomState = OnBom32LE_2;
+            }
+            else // 0x3F
+            {
+                onParseXml(0x3c);
+
+                _bomEncoding = Bom16LE;
+                _xmlDecl.setEndianess(XmlDeclaration::LittleEndian);
+                _bomState = OnBomEnd;
+            }
+                    
+            break;
+
+        case OnBom32LE_2:
+            if(c == 0x00)
+            {
+                onParseXml(0x3c);
+
+                _bomEncoding = Bom32LE;
+                _xmlDecl.setEndianess(XmlDeclaration::LittleEndian);
+                _bomState = OnBomEnd;
+            }
+            else
+                _bomState = OnBomEnd;
+                    
             break;
 
         case OnBomUtf8_0:
@@ -1105,7 +1179,89 @@ bool BinaryInputSource::onParseBom(unsigned char c)
             break;
 
         case OnBomUtf16LE_1:
+            if(c == 0x00)
+                _bomState = OnBomUtf32LE_2;
+            else
+                _bomState = OnBomEnd;
+            
+            break;
+
+        // FF FE 00 00  UTF-32, little-endian
+        case OnBomUtf32LE_2:
+            if(c == 0x00)
+            {
+                _bomEncoding = BomUtf32LE;
+                _xmlDecl.setEndianess(XmlDeclaration::LittleEndian);
+                _bomState = OnBomUtf32LE_3;
+            }
+            else
+                _bomState = OnBomEnd;
+            
+            break;
+
+        case OnBomUtf32LE_3:
             _bomState = OnBomEnd;
+            break;
+
+        // 00 3C 00 3F   16-bit generic, big-endian
+        // 00 00 FE FF   UTF-32, big-endian
+        case OnBomUtf32BE_0:
+            if(c == 0x00)
+            {
+                _bomState = OnBomUtf32BE_1;
+            }
+            else if(c == 0x3c)
+            {
+                onParseXml(0x3c);
+
+                _bomEncoding = Bom16BE;
+                _xmlDecl.setEndianess(XmlDeclaration::BigEndian);
+                _bomState = OnBomEnd;
+            }
+            else
+                _bomState = OnBomEnd;
+            
+            break;
+
+        // 00 00 00 3c   32 bit generic, big-endian
+        case OnBomUtf32BE_1:
+            if(c == 0xfe)
+                _bomState = OnBomUtf32BE_2;
+            else if(c == 0x00)
+                _bomState = OnBom32BE_2;
+            else
+                _bomState = OnBomEnd;
+            
+            break;
+
+        case OnBomUtf32BE_2:
+            if(c == 0xff)
+            {
+                _bomEncoding = BomUtf32BE;
+                _xmlDecl.setEndianess(XmlDeclaration::BigEndian);
+                _bomState = OnBomUtf32BE_3;
+            }
+            else
+                _bomState = OnBomEnd;
+            
+            break;
+
+        case OnBomUtf32BE_3:
+            _bomState = OnBomEnd;
+            break;
+
+        case OnBom32BE_2:
+            if(c == 0x3c)
+            {
+                onParseXml(0x3c);
+                
+                _bomEncoding = Bom32BE;
+                _xmlDecl.setEndianess(XmlDeclaration::BigEndian);
+                _bomState = OnBomEnd;
+            }
+            else
+                _bomState = OnBomEnd;
+            
             break;
 
         case OnBomEnd:
@@ -1124,11 +1280,11 @@ bool BinaryInputSource::onParseXml(int c)
 { 
     char ch = 0;
     
-    if(_bomEncoding == Bom8) // ASCII compatible
+    if(_bomEncoding == Bom8 || _bomEncoding == BomUtf8 ) // ASCII compatible
     {
         ch = std::char_traits<char>::to_char_type(c);
     }
-    else if(_bomEncoding == BomUtf16BE) // ASCII subset in UTF-16-BE
+    else if(_bomEncoding == BomUtf16BE || _bomEncoding == Bom16BE) // ASCII subset in UTF-16-BE
     {
         if(_mbState.n == 0)
         {
@@ -1139,17 +1295,46 @@ bool BinaryInputSource::onParseXml(int c)
         _mbState.n = 0;
         ch = std::char_traits<char>::to_char_type(c);
     }
-    else if(_bomEncoding == BomUtf16LE)  // ASCII subset in UTF-16-LE
+    else if(_bomEncoding == BomUtf16LE || _bomEncoding == Bom16LE)  // ASCII subset in UTF-16-LE
     {
         if(_mbState.n == 0)
         {
             _mbState.n = 1;
             ch = std::char_traits<char>::to_char_type(c);
+            _mbState.value.mbytes[0] = ch;
             return true;
         }
 
         _mbState.n = 0;
         ch = _mbState.value.mbytes[0];
+    }
+    else if(_bomEncoding == BomUtf32BE || _bomEncoding == Bom32BE) // ASCII subset in UTF-32-BE
+    {
+        if(_mbState.n < 3)
+        {
+            _mbState.n += 1;
+            return true;
+        }
+
+        _mbState.n = 0;
+        ch = std::char_traits<char>::to_char_type(c);
+    }
+    else if(_bomEncoding == BomUtf32LE || _bomEncoding == Bom32LE)  // ASCII subset in UTF-32-LE
+    {
+        _mbState.n += 1;
+
+        if(_mbState.n == 1)
+        {
+            ch = std::char_traits<char>::to_char_type(c);
+            _mbState.value.mbytes[0] = ch;
+            return true;
+        }
+        
+        if(_mbState.n == 4)
+        {
+            _mbState.n = 0;
+            ch = _mbState.value.mbytes[0];
+        }
     }
             
     if( ! parseXml(_xmlState, ch, _pbBegin, _pbEnd, _xmlDecl) )
@@ -1163,30 +1348,24 @@ bool BinaryInputSource::onParseXml(int c)
 
 void BinaryInputSource::onDeclaration()
 {
-    if(_bomEncoding == BomUtf8)
+    if(_bomEncoding == BomUtf8 || _bomEncoding == Bom8)
     {
-        // keep using utf-8 codec
         if( _xmlDecl.encoding().empty() || _xmlDecl.encoding() == "UTF-8" )
+        {
+            // keep using utf-8 codec
             return;
-
-        // no other encoding string allowed 
-        throw SyntaxError("invalid encoding", 0);
+        }
     }
-    else if(_bomEncoding == Bom8)
+    else if(_bomEncoding == BomUtf16BE || _bomEncoding == Bom16BE)
     {
-        // keep using utf-8 codec
-        if( _xmlDecl.encoding().empty() || _xmlDecl.encoding() == "UTF-8" )
-            return;
-    }
-    else if(_bomEncoding == BomUtf16BE)
-    {
+        
         if( _xmlDecl.encoding().empty() || _xmlDecl.encoding() == "UTF-16" )
         {
             _tbuf.setCodec( new Utf16BeCodec );
             return;
         }
     }
-    else if(_bomEncoding == BomUtf16LE)
+    else if(_bomEncoding == BomUtf16LE || _bomEncoding == Bom16LE)
     {      
         if( _xmlDecl.encoding().empty() || _xmlDecl.encoding() == "UTF-16" )
         {
