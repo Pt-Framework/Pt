@@ -75,7 +75,8 @@ namespace Pt {
 
       *toNext++ = Ch;
     }
-    return (from == fromNext ? std::codecvt_base::partial : std::codecvt_base::ok);
+
+    return (fromNext != fromEnd ? std::codecvt_base::partial : std::codecvt_base::ok);
   }
 
 Utf16BeCodec::result Utf16BeCodec::do_out(MBState& s, const Char* fromBegin,
@@ -201,7 +202,7 @@ Utf16LeCodec::result Utf16LeCodec::do_in(MBState& s,
 
      *toNext++ = Ch;
    }
-   return (from == fromNext ? std::codecvt_base::partial : std::codecvt_base::ok);
+   return (fromNext != fromEnd ? std::codecvt_base::partial : std::codecvt_base::ok);
  }
 
 Utf16LeCodec::result Utf16LeCodec::do_out(MBState& s, const Char* fromBegin,

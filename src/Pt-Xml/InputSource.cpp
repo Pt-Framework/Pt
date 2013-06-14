@@ -908,7 +908,7 @@ std::streamsize BinaryInputSource::onImport()
         {            
             if(avail <= 0)
             {
-                return true;
+                return 0;
             }
 
             c = sb->sgetc();
@@ -916,6 +916,7 @@ std::streamsize BinaryInputSource::onImport()
 
             if( ! onParseBom(ch) )
             {
+                // do not consume character from underlying streambuf
                 break;
             }
 
@@ -933,25 +934,30 @@ std::streamsize BinaryInputSource::onImport()
         {            
             if(avail <= 0)
             {
-                return true;
+                return 0;
             }
             
-            c = sb->sgetc();
+            c = sb->sbumpc();
             
+            // returns true if c is part of the xml-decl
             bool ok = onParseXml(c);
             if( ! ok)
             {
                 onDeclaration();
+                init(0, &_xmlDecl);
                 break;
             }
-
-            sb->sbumpc();
         }
     }
 
     if(_pbBegin < _pbEnd)
     {
         return _pbEnd - _pbBegin;
+    }
+
+    if(_mbState.n == 1)
+    {
+        return 1;
     }
 
     _tbuf.import();
@@ -1001,30 +1007,32 @@ InputSource::int_type BinaryInputSource::onGet()
         
         for( ; ; )
         {            
-            c = sb->sgetc();
+            c = sb->sbumpc();
  
             if( std::char_traits<char>::eq_int_type(c, eofval) )
             {
                 break;    
             }
-
-            // TODO: if we see 0<0a in 16 bit we can not leave only a in 
-            //       streambuffer sb, otherwise it will be treated as the 
-            //       begin of a word. Also consume 'a' and buffer it somewhere 
+ 
             bool ok = onParseXml(c);
             if( ! ok)
             {
                 onDeclaration();
+                init(0, &_xmlDecl);
                 break;
             }
-
-            sb->sbumpc();
         }
     }
     
     if(_pbBegin < _pbEnd)
     {
         return *_pbBegin++;
+    }
+
+    if(_mbState.n == 1)
+    {
+        _mbState.n = 0;
+        return _mbState.value.mbytes[0];
     }
 
     init(&_tbuf, &_xmlDecl);
@@ -1336,9 +1344,11 @@ bool BinaryInputSource::onParseXml(int c)
             ch = _mbState.value.mbytes[0];
         }
     }
-            
+
     if( ! parseXml(_xmlState, ch, _pbBegin, _pbEnd, _xmlDecl) )
     {
+        _mbState.value.mbytes[0] = ch;
+        _mbState.n = 1;
         return false;
     }
 

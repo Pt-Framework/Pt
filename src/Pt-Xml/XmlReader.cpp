@@ -4389,7 +4389,7 @@ class XmlReaderImpl
                         continue;
                 }
 
-                //std::cerr << char(c) << "(" << c << ")";
+                //std::cerr << char(c) << " (" << c << ")\n";
                 (this->*_parse)(c);
 
                 if(c == '\n')

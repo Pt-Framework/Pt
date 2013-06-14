@@ -102,7 +102,7 @@ class XmlReaderTest : public Pt::Unit::TestSuite
             this->registerMethod("EmptyXmlDeclaration", *this, &XmlReaderTest::EmptyXmlDeclaration);
 
             this->registerMethod("ByteorderMarkUtf8", *this, &XmlReaderTest::ByteorderMarkUtf8);
-            //this->registerMethod("ByteorderMarkUtf16", *this, &XmlReaderTest::ByteorderMarkUtf16);
+            this->registerMethod("ByteorderMarkUtf16", *this, &XmlReaderTest::ByteorderMarkUtf16);
             
             this->registerMethod("DtdEmptyDocument", *this, &XmlReaderTest::DtdEmptyDocument);
             this->registerMethod("DtdExternalSubsetPublicId", *this, &XmlReaderTest::DtdExternalSubsetPublicId);
