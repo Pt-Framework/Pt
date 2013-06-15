@@ -102,7 +102,10 @@ class XmlReaderTest : public Pt::Unit::TestSuite
             this->registerMethod("EmptyXmlDeclaration", *this, &XmlReaderTest::EmptyXmlDeclaration);
 
             this->registerMethod("ByteorderMarkUtf8", *this, &XmlReaderTest::ByteorderMarkUtf8);
-            this->registerMethod("ByteorderMarkUtf16", *this, &XmlReaderTest::ByteorderMarkUtf16);
+            this->registerMethod("ByteorderMarkUtf16LE", *this, &XmlReaderTest::ByteorderMarkUtf16LE);
+            this->registerMethod("ByteorderMarkUtf16BE", *this, &XmlReaderTest::ByteorderMarkUtf16BE);
+            this->registerMethod("ByteorderMarkGeneric16LE", *this, &XmlReaderTest::ByteorderMarkGeneric16LE);
+            this->registerMethod("ByteorderMarkGeneric16BE", *this, &XmlReaderTest::ByteorderMarkGeneric16BE);
             
             this->registerMethod("DtdEmptyDocument", *this, &XmlReaderTest::DtdEmptyDocument);
             this->registerMethod("DtdExternalSubsetPublicId", *this, &XmlReaderTest::DtdExternalSubsetPublicId);
@@ -187,7 +190,10 @@ class XmlReaderTest : public Pt::Unit::TestSuite
         void EmptyXmlDeclaration();
 
         void ByteorderMarkUtf8();
-        void ByteorderMarkUtf16();
+        void ByteorderMarkUtf16LE();
+        void ByteorderMarkUtf16BE();
+        void ByteorderMarkGeneric16LE();
+        void ByteorderMarkGeneric16BE();
 
         void DtdEmptyDocument();
         void DtdExternalSubsetPublicId();
@@ -333,11 +339,108 @@ void XmlReaderTest::ByteorderMarkUtf8()
 }
 
 
-void XmlReaderTest::ByteorderMarkUtf16()
+void XmlReaderTest::ByteorderMarkUtf16LE()
+{
+    std::stringstream input;
+    input << char(0xff) << char(0xfe) 
+          << char(0x3c) << char(0)
+          << char(0x61) << char(0)
+          << char(0x2f) << char(0)
+          << char(0x3e) << char(0);
+
+    Pt::Xml::BinaryInputSource is(input);
+    Pt::Xml::XmlReader reader(is);
+    PT_UNIT_ASSERT(reader.depth() == 0);
+
+    Pt::Xml::InputIterator it = reader.current();
+
+    Pt::Xml::StartElement* se = Pt::Xml::toStartElement(&*it);
+    PT_UNIT_ASSERT(se);
+    PT_UNIT_ASSERT(se->name().name() == "a");
+    PT_UNIT_ASSERT(reader.depth() == 1);
+
+    ++it;
+    Pt::Xml::EndElement* ee = Pt::Xml::toEndElement(&*it);
+    PT_UNIT_ASSERT(ee);
+    PT_UNIT_ASSERT(ee->name().name() == "a");
+    PT_UNIT_ASSERT(reader.depth() == 0);
+
+    ++it;
+    Pt::Xml::EndDocument* endDoc = Pt::Xml::toEndDocument(&*it);
+    PT_UNIT_ASSERT(endDoc);
+    PT_UNIT_ASSERT(reader.depth() == 0);
+}
+
+
+void XmlReaderTest::ByteorderMarkUtf16BE()
 {
     std::stringstream input;
     input << char(0xfe) << char(0xff) 
           << char(0) << char(0x3c)  
+          << char(0) << char(0x61) 
+          << char(0) << char(0x2f) 
+          << char(0) << char(0x3e);
+
+    Pt::Xml::BinaryInputSource is(input);
+    Pt::Xml::XmlReader reader(is);
+    PT_UNIT_ASSERT(reader.depth() == 0);
+
+    Pt::Xml::InputIterator it = reader.current();
+
+    Pt::Xml::StartElement* se = Pt::Xml::toStartElement(&*it);
+    PT_UNIT_ASSERT(se);
+    PT_UNIT_ASSERT(se->name().name() == "a");
+    PT_UNIT_ASSERT(reader.depth() == 1);
+
+    ++it;
+    Pt::Xml::EndElement* ee = Pt::Xml::toEndElement(&*it);
+    PT_UNIT_ASSERT(ee);
+    PT_UNIT_ASSERT(ee->name().name() == "a");
+    PT_UNIT_ASSERT(reader.depth() == 0);
+
+    ++it;
+    Pt::Xml::EndDocument* endDoc = Pt::Xml::toEndDocument(&*it);
+    PT_UNIT_ASSERT(endDoc);
+    PT_UNIT_ASSERT(reader.depth() == 0);
+}
+
+
+void XmlReaderTest::ByteorderMarkGeneric16LE()
+{
+    std::stringstream input;
+    input << char(0x3c) << char(0)
+          << char(0x61) << char(0)
+          << char(0x2f) << char(0)
+          << char(0x3e) << char(0);
+
+    Pt::Xml::BinaryInputSource is(input);
+    Pt::Xml::XmlReader reader(is);
+    PT_UNIT_ASSERT(reader.depth() == 0);
+
+    Pt::Xml::InputIterator it = reader.current();
+
+    Pt::Xml::StartElement* se = Pt::Xml::toStartElement(&*it);
+    PT_UNIT_ASSERT(se);
+    PT_UNIT_ASSERT(se->name().name() == "a");
+    PT_UNIT_ASSERT(reader.depth() == 1);
+
+    ++it;
+    Pt::Xml::EndElement* ee = Pt::Xml::toEndElement(&*it);
+    PT_UNIT_ASSERT(ee);
+    PT_UNIT_ASSERT(ee->name().name() == "a");
+    PT_UNIT_ASSERT(reader.depth() == 0);
+
+    ++it;
+    Pt::Xml::EndDocument* endDoc = Pt::Xml::toEndDocument(&*it);
+    PT_UNIT_ASSERT(endDoc);
+    PT_UNIT_ASSERT(reader.depth() == 0);
+}
+
+
+void XmlReaderTest::ByteorderMarkGeneric16BE()
+{
+    std::stringstream input;
+    input << char(0) << char(0x3c)  
           << char(0) << char(0x61) 
           << char(0) << char(0x2f) 
           << char(0) << char(0x3e);

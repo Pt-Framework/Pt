@@ -141,6 +141,7 @@ class InputSource : private NonCopyable
         */
         virtual int_type onGet() = 0;
         
+        // NOTE: EntityStream returns a reference to the entity name
         /** @brief Returns the ID of the input stream.
         */
         virtual const Pt::String& onId() const = 0;
@@ -298,7 +299,7 @@ class PT_XML_API BinaryInputSource : public InputSource
         Pt::String _id;
         MBState _mbState;
         unsigned char _bomState;
-        unsigned char _bomEncoding;
+        unsigned char _bomEncoding; // move to ByteorderMark class
         unsigned char _xmlState;
         const char* _pbBegin;
         const char* _pbEnd;

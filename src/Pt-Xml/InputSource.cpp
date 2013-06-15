@@ -750,8 +750,6 @@ enum BomEncoding
 enum BomParseState
 {
     OnBomBegin = 0,
-
-    OnBom16BE_0,
             
     OnBomUtf8_0,
     OnBomUtf8_1,
@@ -777,6 +775,7 @@ enum BomParseState
     
     OnBom32BE_2,
 
+    OnBomLast,
     OnBomEnd = 64,
 };
 
@@ -1113,9 +1112,10 @@ bool BinaryInputSource::onParseBom(unsigned char c)
             else // 0x3F
             {
                 onParseXml(0x3c);
-
                 _bomEncoding = Bom16LE;
                 _xmlDecl.setEndianess(XmlDeclaration::LittleEndian);
+                
+                // do not consume this byte
                 _bomState = OnBomEnd;
             }
                     
@@ -1128,7 +1128,7 @@ bool BinaryInputSource::onParseBom(unsigned char c)
 
                 _bomEncoding = Bom32LE;
                 _xmlDecl.setEndianess(XmlDeclaration::LittleEndian);
-                _bomState = OnBomEnd;
+                _bomState = OnBomLast;
             }
             else
                 _bomState = OnBomEnd;
@@ -1224,7 +1224,7 @@ bool BinaryInputSource::onParseBom(unsigned char c)
 
                 _bomEncoding = Bom16BE;
                 _xmlDecl.setEndianess(XmlDeclaration::BigEndian);
-                _bomState = OnBomEnd;
+                _bomState = OnBomLast;
             }
             else
                 _bomState = OnBomEnd;
@@ -1265,11 +1265,15 @@ bool BinaryInputSource::onParseBom(unsigned char c)
                 
                 _bomEncoding = Bom32BE;
                 _xmlDecl.setEndianess(XmlDeclaration::BigEndian);
-                _bomState = OnBomEnd;
+                _bomState = OnBomLast;
             }
             else
                 _bomState = OnBomEnd;
             
+            break;
+
+        case OnBomLast:
+            _bomState = OnBomEnd;
             break;
 
         case OnBomEnd:
@@ -1368,7 +1372,6 @@ void BinaryInputSource::onDeclaration()
     }
     else if(_bomEncoding == BomUtf16BE || _bomEncoding == Bom16BE)
     {
-        
         if( _xmlDecl.encoding().empty() || _xmlDecl.encoding() == "UTF-16" )
         {
             _tbuf.setCodec( new Utf16BeCodec );
@@ -1376,7 +1379,7 @@ void BinaryInputSource::onDeclaration()
         }
     }
     else if(_bomEncoding == BomUtf16LE || _bomEncoding == Bom16LE)
-    {      
+    {
         if( _xmlDecl.encoding().empty() || _xmlDecl.encoding() == "UTF-16" )
         {
             _tbuf.setCodec( new Utf16LeCodec );

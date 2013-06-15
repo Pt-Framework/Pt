@@ -96,6 +96,7 @@ class XmlDeclaration
         void setStandalone(bool value)
         { _standalone = value; }
 
+        // TODO: move to ByteorderMark class
         /** @brief The endianess of the document encoding.
         */
         Endianess endianess() const
