@@ -87,6 +87,11 @@ class XmlTestResolver : public Pt::Xml::XmlResolver
                 delete is;
             }
         }
+
+        virtual Pt::TextCodec<Pt::Char, char>* onResolveEncoding(const Pt::Xml::XmlDeclaration& decl)
+        { 
+            return new Pt::Utf8Codec(); 
+        }
         
     private:
         std::map<Pt::String, Pt::String> _input;
@@ -106,6 +111,11 @@ class XmlReaderTest : public Pt::Unit::TestSuite
             this->registerMethod("ByteorderMarkUtf16BE", *this, &XmlReaderTest::ByteorderMarkUtf16BE);
             this->registerMethod("ByteorderMarkGeneric16LE", *this, &XmlReaderTest::ByteorderMarkGeneric16LE);
             this->registerMethod("ByteorderMarkGeneric16BE", *this, &XmlReaderTest::ByteorderMarkGeneric16BE);
+
+            this->registerMethod("ByteorderMarkUtf32LE", *this, &XmlReaderTest::ByteorderMarkUtf32LE);
+            this->registerMethod("ByteorderMarkUtf32BE", *this, &XmlReaderTest::ByteorderMarkUtf32BE);
+            this->registerMethod("ByteorderMarkGeneric32LE", *this, &XmlReaderTest::ByteorderMarkGeneric32LE);
+            this->registerMethod("ByteorderMarkGeneric32BE", *this, &XmlReaderTest::ByteorderMarkGeneric32BE);
             
             this->registerMethod("DtdEmptyDocument", *this, &XmlReaderTest::DtdEmptyDocument);
             this->registerMethod("DtdExternalSubsetPublicId", *this, &XmlReaderTest::DtdExternalSubsetPublicId);
@@ -194,6 +204,10 @@ class XmlReaderTest : public Pt::Unit::TestSuite
         void ByteorderMarkUtf16BE();
         void ByteorderMarkGeneric16LE();
         void ByteorderMarkGeneric16BE();
+        void ByteorderMarkUtf32LE();
+        void ByteorderMarkUtf32BE();
+        void ByteorderMarkGeneric32LE();
+        void ByteorderMarkGeneric32BE();
 
         void DtdEmptyDocument();
         void DtdExternalSubsetPublicId();
@@ -452,6 +466,158 @@ void XmlReaderTest::ByteorderMarkGeneric16BE()
     Pt::Xml::InputIterator it = reader.current();
 
     Pt::Xml::StartElement* se = Pt::Xml::toStartElement(&*it);
+    PT_UNIT_ASSERT(se);
+    PT_UNIT_ASSERT(se->name().name() == "a");
+    PT_UNIT_ASSERT(reader.depth() == 1);
+
+    ++it;
+    Pt::Xml::EndElement* ee = Pt::Xml::toEndElement(&*it);
+    PT_UNIT_ASSERT(ee);
+    PT_UNIT_ASSERT(ee->name().name() == "a");
+    PT_UNIT_ASSERT(reader.depth() == 0);
+
+    ++it;
+    Pt::Xml::EndDocument* endDoc = Pt::Xml::toEndDocument(&*it);
+    PT_UNIT_ASSERT(endDoc);
+    PT_UNIT_ASSERT(reader.depth() == 0);
+}
+
+
+void XmlReaderTest::ByteorderMarkUtf32LE()
+{
+    std::stringstream input;
+    input << char(0xff) << char(0xfe) << char(0) << char(0)
+          << char(0x3c) << char(0) << char(0) << char(0)
+          << char(0x61) << char(0) << char(0) << char(0)
+          << char(0x2f) 
+          << char(0x3e);
+
+    XmlTestResolver resolver;
+    Pt::Xml::BinaryInputSource is(resolver, input);
+    Pt::Xml::XmlReader reader(is);
+    PT_UNIT_ASSERT(reader.depth() == 0);
+
+    Pt::Xml::InputIterator it = reader.current();
+
+    Pt::Xml::StartElement* se = Pt::Xml::toStartElement(&*it);
+
+    PT_UNIT_ASSERT(se);
+    PT_UNIT_ASSERT(se->name().name() == "a");
+    PT_UNIT_ASSERT(reader.depth() == 1);
+
+    ++it;
+    Pt::Xml::EndElement* ee = Pt::Xml::toEndElement(&*it);
+    PT_UNIT_ASSERT(ee);
+    PT_UNIT_ASSERT(ee->name().name() == "a");
+    PT_UNIT_ASSERT(reader.depth() == 0);
+
+    ++it;
+    Pt::Xml::EndDocument* endDoc = Pt::Xml::toEndDocument(&*it);
+    PT_UNIT_ASSERT(endDoc);
+    PT_UNIT_ASSERT(reader.depth() == 0);
+}
+
+
+void XmlReaderTest::ByteorderMarkUtf32BE()
+{
+    std::stringstream input;
+    input << char(0) << char(0) << char(0xfe) << char(0xff) 
+          << char(0) << char(0) << char(0) << char(0x3c)  
+          << char(0) << char(0) << char(0) << char(0x61) 
+          << char(0x2f) 
+          << char(0x3e);
+
+
+    XmlTestResolver resolver;
+    Pt::Xml::BinaryInputSource is(resolver, input);
+    Pt::Xml::XmlReader reader(is);
+    PT_UNIT_ASSERT(reader.depth() == 0);
+
+    Pt::Xml::InputIterator it = reader.current();
+
+    Pt::Xml::StartElement* se = Pt::Xml::toStartElement(&*it);
+
+    PT_UNIT_ASSERT(se);
+    PT_UNIT_ASSERT(se->name().name() == "a");
+    PT_UNIT_ASSERT(reader.depth() == 1);
+
+    ++it;
+    Pt::Xml::EndElement* ee = Pt::Xml::toEndElement(&*it);
+    PT_UNIT_ASSERT(ee);
+    PT_UNIT_ASSERT(ee->name().name() == "a");
+    PT_UNIT_ASSERT(reader.depth() == 0);
+
+    ++it;
+    Pt::Xml::EndDocument* endDoc = Pt::Xml::toEndDocument(&*it);
+    PT_UNIT_ASSERT(endDoc);
+    PT_UNIT_ASSERT(reader.depth() == 0);
+}
+
+
+void XmlReaderTest::ByteorderMarkGeneric32LE()
+{
+    std::stringstream input;
+    input << char(0x3c) << char(0) << char(0) << char(0)
+          << char(0x61) << char(0) << char(0) << char(0)
+          << char(0x2f) 
+          << char(0x3e);
+
+    XmlTestResolver resolver;
+    Pt::Xml::BinaryInputSource is(resolver, input);
+    Pt::Xml::XmlReader reader(is);
+    PT_UNIT_ASSERT(reader.depth() == 0);
+
+    Pt::Xml::InputIterator it = reader.current();
+
+    Pt::Xml::StartElement* se = Pt::Xml::toStartElement(&*it);
+
+    PT_UNIT_ASSERT(se);
+    PT_UNIT_ASSERT(se->name().name() == "a");
+    PT_UNIT_ASSERT(reader.depth() == 1);
+
+    ++it;
+    Pt::Xml::EndElement* ee = Pt::Xml::toEndElement(&*it);
+    PT_UNIT_ASSERT(ee);
+    PT_UNIT_ASSERT(ee->name().name() == "a");
+    PT_UNIT_ASSERT(reader.depth() == 0);
+
+    ++it;
+    Pt::Xml::EndDocument* endDoc = Pt::Xml::toEndDocument(&*it);
+    PT_UNIT_ASSERT(endDoc);
+    PT_UNIT_ASSERT(reader.depth() == 0);
+}
+
+
+void XmlReaderTest::ByteorderMarkGeneric32BE()
+{
+    std::stringstream input;
+    //input << char(0) << char(0) << char(0) << '<' 
+    //      << char(0) << char(0) << char(0) << '?'
+    //      << char(0) << char(0) << char(0) << 'x' 
+    //      << char(0) << char(0) << char(0) << 'm' 
+    //      << char(0) << char(0) << char(0) << 'l' 
+    //      << char(0) << char(0) << char(0) << ' ' 
+    //      << char(0) << char(0) << char(0) << '?' 
+    //      << char(0) << char(0) << char(0) << '>' 
+    //      << char(0) << char(0) << char(0) << char(0x3c)  
+    //      << char(0x61) 
+    //      << char(0x2f) 
+    //      << char(0x3e);
+
+    input << char(0) << char(0) << char(0) << char(0x3c)  
+          << char(0) << char(0) << char(0) << char(0x61) 
+          << char(0x2f) 
+          << char(0x3e);
+
+    XmlTestResolver resolver;
+    Pt::Xml::BinaryInputSource is(resolver, input);
+    Pt::Xml::XmlReader reader(is);
+    PT_UNIT_ASSERT(reader.depth() == 0);
+
+    Pt::Xml::InputIterator it = reader.current();
+
+    Pt::Xml::StartElement* se = Pt::Xml::toStartElement(&*it);
+
     PT_UNIT_ASSERT(se);
     PT_UNIT_ASSERT(se->name().name() == "a");
     PT_UNIT_ASSERT(reader.depth() == 1);

@@ -1339,14 +1339,13 @@ bool BinaryInputSource::onParseXml(int c)
         {
             ch = std::char_traits<char>::to_char_type(c);
             _mbState.value.mbytes[0] = ch;
-            return true;
         }
         
-        if(_mbState.n == 4)
-        {
-            _mbState.n = 0;
-            ch = _mbState.value.mbytes[0];
-        }
+        if(_mbState.n < 4)
+            return true;
+
+        _mbState.n = 0;
+        ch = _mbState.value.mbytes[0];
     }
 
     if( ! parseXml(_xmlState, ch, _pbBegin, _pbEnd, _xmlDecl) )
