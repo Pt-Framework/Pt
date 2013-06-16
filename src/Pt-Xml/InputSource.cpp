@@ -1113,7 +1113,7 @@ bool BinaryInputSource::onParseBom(unsigned char c)
             {
                 onParseXml(0x3c);
                 _bomEncoding = Bom16LE;
-                _xmlDecl.setEndianess(XmlDeclaration::LittleEndian);
+                //_xmlDecl.setEndianess(XmlDeclaration::LittleEndian);
                 
                 // do not consume this byte
                 _bomState = OnBomEnd;
@@ -1127,7 +1127,7 @@ bool BinaryInputSource::onParseBom(unsigned char c)
                 onParseXml(0x3c);
 
                 _bomEncoding = Bom32LE;
-                _xmlDecl.setEndianess(XmlDeclaration::LittleEndian);
+                //_xmlDecl.setEndianess(XmlDeclaration::LittleEndian);
                 _bomState = OnBomLast;
             }
             else
@@ -1162,7 +1162,7 @@ bool BinaryInputSource::onParseBom(unsigned char c)
             if(c == 0xff)
             {
                 _bomState = OnBomUtf16BE_1;
-                _xmlDecl.setEndianess(XmlDeclaration::BigEndian);
+                //_xmlDecl.setEndianess(XmlDeclaration::BigEndian);
                 _bomEncoding = BomUtf16BE;
             }
             else
@@ -1178,7 +1178,7 @@ bool BinaryInputSource::onParseBom(unsigned char c)
             if(c == 0xfe)
             {
                 _bomEncoding = BomUtf16LE;
-                _xmlDecl.setEndianess(XmlDeclaration::LittleEndian);
+                //_xmlDecl.setEndianess(XmlDeclaration::LittleEndian);
                 _bomState = OnBomUtf16LE_1;
             }
             else
@@ -1199,7 +1199,7 @@ bool BinaryInputSource::onParseBom(unsigned char c)
             if(c == 0x00)
             {
                 _bomEncoding = BomUtf32LE;
-                _xmlDecl.setEndianess(XmlDeclaration::LittleEndian);
+                //_xmlDecl.setEndianess(XmlDeclaration::LittleEndian);
                 _bomState = OnBomUtf32LE_3;
             }
             else
@@ -1223,7 +1223,7 @@ bool BinaryInputSource::onParseBom(unsigned char c)
                 onParseXml(0x3c);
 
                 _bomEncoding = Bom16BE;
-                _xmlDecl.setEndianess(XmlDeclaration::BigEndian);
+                //_xmlDecl.setEndianess(XmlDeclaration::BigEndian);
                 _bomState = OnBomLast;
             }
             else
@@ -1246,7 +1246,7 @@ bool BinaryInputSource::onParseBom(unsigned char c)
             if(c == 0xff)
             {
                 _bomEncoding = BomUtf32BE;
-                _xmlDecl.setEndianess(XmlDeclaration::BigEndian);
+                //_xmlDecl.setEndianess(XmlDeclaration::BigEndian);
                 _bomState = OnBomUtf32BE_3;
             }
             else
@@ -1264,7 +1264,7 @@ bool BinaryInputSource::onParseBom(unsigned char c)
                 onParseXml(0x3c);
                 
                 _bomEncoding = Bom32BE;
-                _xmlDecl.setEndianess(XmlDeclaration::BigEndian);
+                //_xmlDecl.setEndianess(XmlDeclaration::BigEndian);
                 _bomState = OnBomLast;
             }
             else
@@ -1361,6 +1361,8 @@ bool BinaryInputSource::onParseXml(int c)
 
 void BinaryInputSource::onDeclaration()
 {
+    ByteorderMark bom;
+
     if(_bomEncoding == BomUtf8 || _bomEncoding == Bom8)
     {
         if( _xmlDecl.encoding().empty() || _xmlDecl.encoding() == "UTF-8" )
@@ -1368,6 +1370,10 @@ void BinaryInputSource::onDeclaration()
             // keep using utf-8 codec
             return;
         }
+
+        bom.setEndianess(ByteorderMark::None);
+        bom.setWidth(1);
+        bom.setEncoding(_bomEncoding == BomUtf8 ? ByteorderMark::Unicode : ByteorderMark::Generic);
     }
     else if(_bomEncoding == BomUtf16BE || _bomEncoding == Bom16BE)
     {
@@ -1376,6 +1382,10 @@ void BinaryInputSource::onDeclaration()
             _tbuf.setCodec( new Utf16BeCodec );
             return;
         }
+
+        bom.setEndianess(ByteorderMark::BigEndian);
+        bom.setWidth(2);
+        bom.setEncoding(_bomEncoding == BomUtf16BE ? ByteorderMark::Unicode : ByteorderMark::Generic);
     }
     else if(_bomEncoding == BomUtf16LE || _bomEncoding == Bom16LE)
     {
@@ -1384,11 +1394,27 @@ void BinaryInputSource::onDeclaration()
             _tbuf.setCodec( new Utf16LeCodec );
             return;
         }
+
+        bom.setEndianess(ByteorderMark::LittleEndian);
+        bom.setWidth(2);
+        bom.setEncoding(_bomEncoding == BomUtf16LE ? ByteorderMark::Unicode : ByteorderMark::Generic);
+    }
+    else if(_bomEncoding == BomUtf32BE || _bomEncoding == Bom32BE)
+    {
+        bom.setEndianess(ByteorderMark::BigEndian);
+        bom.setWidth(4);
+        bom.setEncoding(_bomEncoding == BomUtf32BE ? ByteorderMark::Unicode : ByteorderMark::Generic);
+    }
+    else if(_bomEncoding == BomUtf32LE || _bomEncoding == Bom32LE)
+    {
+        bom.setEndianess(ByteorderMark::LittleEndian);
+        bom.setWidth(4);
+        bom.setEncoding(_bomEncoding == BomUtf32LE ? ByteorderMark::Unicode : ByteorderMark::Generic);
     }
 
     TextCodec<Char, char>* codec = 0;
     if(_resolver)
-        codec = _resolver->resolveEncoding(_xmlDecl);
+        codec = _resolver->resolveEncoding(bom, _xmlDecl);
 
     if( ! codec)
         throw SyntaxError("invalid encoding", 0);

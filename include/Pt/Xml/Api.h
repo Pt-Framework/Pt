@@ -48,6 +48,7 @@ namespace Pt {
 */
 namespace Xml {
 
+    class ByteorderMark;
     class Characters;
     class Comment;
     class DocType;

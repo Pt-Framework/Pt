@@ -65,7 +65,8 @@ class XmlTestResolver : public Pt::Xml::XmlResolver
         }
 
     protected:
-        virtual Pt::Xml::InputSource* onResolveInput(const Pt::String& publicId, const Pt::String& systemId)
+        virtual Pt::Xml::InputSource* onResolveInput(const Pt::String& publicId, 
+                                                     const Pt::String& systemId)
         {
             std::map<Pt::String, Pt::String>::iterator it;
             
@@ -88,7 +89,8 @@ class XmlTestResolver : public Pt::Xml::XmlResolver
             }
         }
 
-        virtual Pt::TextCodec<Pt::Char, char>* onResolveEncoding(const Pt::Xml::XmlDeclaration& decl)
+        Pt::TextCodec<Pt::Char, char>* onResolveEncoding(const Pt::Xml::ByteorderMark& bom,
+                                                         const Pt::Xml::XmlDeclaration& decl)
         { 
             return new Pt::Utf8Codec(); 
         }

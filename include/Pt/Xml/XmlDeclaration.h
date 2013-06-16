@@ -36,6 +36,64 @@ namespace Pt {
 
 namespace Xml {
 
+class ByteorderMark
+{
+    public:
+        enum Endianess
+        {
+            None = 0,
+            BigEndian = 1,
+            LittleEndian = 2
+        };
+
+        enum Encoding
+        {
+            Generic = 0,
+            Unicode = 1
+        };
+
+        ByteorderMark()
+        : _endianess(None)
+        , _width(1)
+        , _encoding(Generic)
+        {}
+
+        /** @brief The endianess of the document encoding.
+        */
+        Endianess endianess() const
+        { return static_cast<Endianess>(_endianess); }
+
+        /** @brief Sets the endianess of the document encoding.
+        */
+        void setEndianess(Endianess e)
+        { _endianess = e; }
+
+        /** @brief Returns the word width of the encoding.
+        */
+        int width() const
+        { return _width; }
+
+        /** @brief Sets word width of the encoding.
+        */
+        void setWidth(unsigned char w)
+        { _width = w; }
+
+        /** @brief Returns the type of encoding.
+        */
+        Encoding encoding() const
+        { return static_cast<Encoding>(_encoding); }
+
+        /** @brief Sets the type of encoding.
+        */
+        void setEncoding(Encoding e)
+        { _encoding = static_cast<Encoding>(e); }
+
+    private:
+        unsigned char _endianess;
+        unsigned char _width;
+        unsigned char _encoding;
+};
+
 /** @brief XML declaration of an XML document.
 */
 class XmlDeclaration
@@ -53,7 +111,6 @@ class XmlDeclaration
         */
         XmlDeclaration()
         : _standalone(false)
-        , _endianess(None)
         {}
        
         /** @brief Clears all content.
@@ -63,7 +120,6 @@ class XmlDeclaration
             _version.clear();
             _encoding.clear();
             _standalone = false;
-            _endianess = None;
         }
         
         /** @brief Returns the version string.
@@ -96,22 +152,11 @@ class XmlDeclaration
         void setStandalone(bool value)
         { _standalone = value; }
 
-        // TODO: move to ByteorderMark class
-        /** @brief The endianess of the document encoding.
-        */
-        Endianess endianess() const
-        { return static_cast<Endianess>(_endianess); }
-
-        /** @brief Sets the endianess of the document encoding.
-        */
-        void setEndianess(Endianess e)
-        { _endianess = e; }
 
     private:
         std::string _version;
         std::string _encoding;
         bool _standalone;
-        unsigned char _endianess;
 };
 
 } // namespace Xml

@@ -38,7 +38,9 @@ namespace Pt {
 
 namespace Xml {
 
+class ByteorderMark;
 class InputSource;
+class XmlDeclaration;
 
 /** @brief Resolves external entities and DTDs.
 
@@ -58,7 +60,8 @@ class XmlResolver
 
         /** @brief Returns an input source for the given IDs.
         */
-        InputSource* resolveInput(const Pt::String& publicId, const Pt::String& systemId)
+        InputSource* resolveInput(const Pt::String& publicId, 
+                                  const Pt::String& systemId)
         {
             return onResolveInput(publicId, systemId);
         }
@@ -75,9 +78,10 @@ class XmlResolver
             The returned codec will be treated like a stream facet by the
             caller, i.e. it will be deleted if its refcount is 0.
         */
-        TextCodec<Char, char>* resolveEncoding(const XmlDeclaration& decl)
+        TextCodec<Char, char>* resolveEncoding(const ByteorderMark& bom, 
+                                               const XmlDeclaration& decl)
         {
-            return onResolveEncoding(decl);
+            return onResolveEncoding(bom, decl);
         }
 
     protected:
@@ -88,7 +92,8 @@ class XmlResolver
 
         /** @brief Returns an input source for the given IDs.
         */
-        virtual InputSource* onResolveInput(const Pt::String& publicId, const Pt::String& systemId) = 0;
+        virtual InputSource* onResolveInput(const Pt::String& publicId, 
+                                            const Pt::String& systemId) = 0;
 
         /** @brief Releases an input source resolved by this resolver.
         */
@@ -99,7 +104,8 @@ class XmlResolver
             The returned codec will be treated like a stream facet by the
             caller, i.e. it will be deleted if its refcount is 0.
         */
-        virtual TextCodec<Char, char>* onResolveEncoding(const XmlDeclaration& decl)
+        virtual TextCodec<Char, char>* onResolveEncoding(const ByteorderMark& bom, 
+                                                         const XmlDeclaration& decl)
         { return 0; }
 };
 

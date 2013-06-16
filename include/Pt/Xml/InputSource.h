@@ -294,12 +294,12 @@ class PT_XML_API BinaryInputSource : public InputSource
         XmlResolver* _resolver;
         std::istream* _is;
         Utf8Codec _utf8Codec;
-        TextBuffer _tbuf;
-        XmlDeclaration _xmlDecl;
-        Pt::String _id;
         MBState _mbState;
+        TextBuffer _tbuf;
+        Pt::String _id;
+        XmlDeclaration _xmlDecl;
         unsigned char _bomState;
-        unsigned char _bomEncoding; // move to ByteorderMark class
+        unsigned char _bomEncoding; // TODO: move to ByteorderMark class
         unsigned char _xmlState;
         const char* _pbBegin;
         const char* _pbEnd;
