@@ -138,15 +138,15 @@ class PT_XML_API AttributeList : private NonCopyable
             returned. If no attribute by that name is present, an
             exception of type XmlError is thrown.
         */
-		const Pt::String& get(const Pt::String& localName) const
-        {
-            ConstIterator it = find(localName);
-            
-			if(it == end())
-				throw XmlError("Attribute not found");
+		const Pt::String& get(const String& localName) const;
 
-			 return it->value();
-        }
+		/** @brief Gets the value of an attribute.
+
+            The value of the attribute with the local name @a localName is
+            returned. If no attribute by that name is present, an
+            exception of type XmlError is thrown.
+        */
+		const Pt::String& get(const Char* localName) const;
 
         /** @brief Gets the value of an attribute.
 
@@ -154,15 +154,15 @@ class PT_XML_API AttributeList : private NonCopyable
             local name @a localName is returned. If no attribute by that name is present, an
             exception of type XmlError is thrown.
         */
-        const Pt::String& get(const String& nsUri, const String& localName) const
-        {
-            ConstIterator it = find(nsUri, localName);
-          	
-			if(it == end())
-				throw XmlError("Attribute not found");
+        const Pt::String& get(const String& nsUri, const String& localName) const;
 
-			return it->value();
-        }
+        /** @brief Gets the value of an attribute.
+
+            The value of the attribute with the namespace @a nsUri and the
+            local name @a localName is returned. If no attribute by that name is present, an
+            exception of type XmlError is thrown.
+        */
+        const Pt::String& get(const Char* nsUri, const Char* localName) const;
 
         /** @brief Finds an attribute by name.
 
@@ -171,6 +171,14 @@ class PT_XML_API AttributeList : private NonCopyable
             the end of the sequence is returned.
         */
         Iterator find(const String& localName);
+
+        /** @brief Finds an attribute by name.
+
+            An iterator to the the attribute with the local name @a localName is
+            returned. If no attribute by that name is present, an iterator to
+            the end of the sequence is returned.
+        */
+        Iterator find(const Char* localName);
 
         /** @brief Finds an attribute by name.
 
@@ -183,11 +191,28 @@ class PT_XML_API AttributeList : private NonCopyable
 
         /** @brief Finds an attribute by name.
 
+            An iterator to the the attribute with the the namespace @a nsUri 
+            and the local name @a localName is returned. If no attribute by
+            that name is present, an iterator to the end of the sequence is
+            returned.
+        */
+        Iterator find(const Char* nsUri, const Char* localName);
+
+        /** @brief Finds an attribute by name.
+
             An iterator to the the attribute with the local name @a localName is
             returned. If no attribute by that name is present, an iterator to
             the end of the sequence is returned.
         */
         ConstIterator find(const String& localName) const;
+
+        /** @brief Finds an attribute by name.
+
+            An iterator to the the attribute with the local name @a localName is
+            returned. If no attribute by that name is present, an iterator to
+            the end of the sequence is returned.
+        */
+        ConstIterator find(const Char* localName) const;
 
         /** @brief Finds an attribute by name.
 
@@ -198,13 +223,42 @@ class PT_XML_API AttributeList : private NonCopyable
         */
         ConstIterator find(const String& nsUri, const String& localName) const;
 
-        /** @brief Checks if an attribute is present.
+        /** @brief Finds an attribute by name.
+
+            An iterator to the the attribute with the the namespace @a nsUri 
+            and the local name @a localName is returned. If no attribute by
+            that name is present, an iterator to the end of the sequence is
+            returned.
         */
-        bool has(const String& localName) const;
+        ConstIterator find(const Char* nsUri, const Char* localName) const;
 
         /** @brief Checks if an attribute is present.
         */
-        bool has(const String& nsUri, const String& localName) const;
+        bool has(const String& localName) const
+        { 
+            return find(localName) != end();
+        }
+
+        /** @brief Checks if an attribute is present.
+        */
+        bool has(const Char* localName) const
+        { 
+            return find(localName) != end();
+        }
+
+        /** @brief Checks if an attribute is present.
+        */
+        bool has(const String& nsUri, const String& localName) const
+        { 
+            return find(nsUri, localName) != end();
+        }
+
+        /** @brief Checks if an attribute is present.
+        */
+        bool has(const Char* nsUri, const Char* localName) const
+        { 
+            return find(nsUri, localName) != end();
+        }
 
         /** @brief An iterator to the begin of the sequence.
         */

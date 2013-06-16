@@ -56,7 +56,66 @@ Attribute& AttributeList::append(const QName& name, const Namespace& ns)
 }
 
 
+const Pt::String& AttributeList::get(const String& localName) const
+{
+    ConstIterator it = find(localName);
+            
+	if(it == end())
+		throw XmlError("Attribute not found");
+
+		return it->value();
+}
+
+
+const Pt::String& AttributeList::get(const Char* localName) const
+{
+    ConstIterator it = find(localName);
+            
+	if(it == end())
+		throw XmlError("Attribute not found");
+
+		return it->value();
+}
+
+
+const Pt::String& AttributeList::get(const String& nsUri, const String& localName) const
+{
+    ConstIterator it = find(nsUri, localName);
+          	
+	if(it == end())
+		throw XmlError("Attribute not found");
+
+	return it->value();
+}
+
+
+const Pt::String& AttributeList::get(const Char* nsUri, const Char* localName) const
+{
+    ConstIterator it = find(nsUri, localName);
+          	
+	if(it == end())
+		throw XmlError("Attribute not found");
+
+	return it->value();
+}
+
+
 AttributeList::Iterator AttributeList::find(const String& name)
+{
+    Iterator it;
+    for(it = begin(); it != end(); ++it) 
+    {
+        if(it->name().name() == name) 
+        {
+            break;
+        }
+    }
+    
+    return it;
+}
+
+
+AttributeList::Iterator AttributeList::find(const Char* name)
 {
     Iterator it;
     for(it = begin(); it != end(); ++it) 
@@ -86,7 +145,37 @@ AttributeList::Iterator AttributeList::find(const String& nsUri, const String& n
 }
 
 
+AttributeList::Iterator AttributeList::find(const Char* nsUri, const Char* name)
+{
+    Iterator it;
+    for(it = begin(); it != end(); ++it) 
+    {
+        if(it->name().name() == name && it->namespaceUri() == nsUri) 
+        {
+            break;
+        }
+    }
+    
+    return it;
+}
+
+
 AttributeList::ConstIterator AttributeList::find(const String& name) const
+{
+    ConstIterator it;
+    for(it = begin(); it != end(); ++it) 
+    {
+        if(it->name().name() == name) 
+        {
+            break;
+        }
+    }
+    
+    return it;
+}
+
+
+AttributeList::ConstIterator AttributeList::find(const Char* name) const
 {
     ConstIterator it;
     for(it = begin(); it != end(); ++it) 
@@ -116,15 +205,18 @@ AttributeList::ConstIterator AttributeList::find(const String& nsUri, const Stri
 }
 
 
-bool AttributeList::has(const String& name) const
-{ 
-    return find(name) != end();
-}
-
-
-bool AttributeList::has(const String& nsUri, const String& name) const
-{ 
-    return find(nsUri, name) != end();
+AttributeList::ConstIterator AttributeList::find(const Char* nsUri, const Char* name) const
+{
+    ConstIterator it;
+    for(it = begin(); it != end(); ++it) 
+    {
+        if(it->name().name() == name && it->namespaceUri() == nsUri) 
+        {
+            break;
+        }
+    }
+    
+    return it;
 }
 
 } // namespace Xml

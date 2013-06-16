@@ -783,6 +783,9 @@
     <ClInclude Include="..\..\include\Pt\Utf16Codec.h">
       <Filter>Pt</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Xml\ByteorderMark.h">
+      <Filter>Pt-Xml</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">

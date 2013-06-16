@@ -29,6 +29,7 @@
 #define Pt_Xml_InputSource_h
 
 #include <Pt/Xml/Api.h>
+#include <Pt/Xml/ByteorderMark.h>
 #include <Pt/Xml/XmlDeclaration.h>
 #include <Pt/NonCopyable.h>
 #include <Pt/TextBuffer.h>
@@ -297,9 +298,9 @@ class PT_XML_API BinaryInputSource : public InputSource
         MBState _mbState;
         TextBuffer _tbuf;
         Pt::String _id;
+        ByteorderMark _bom;
         XmlDeclaration _xmlDecl;
         unsigned char _bomState;
-        unsigned char _bomEncoding; // TODO: move to ByteorderMark class
         unsigned char _xmlState;
         const char* _pbBegin;
         const char* _pbEnd;

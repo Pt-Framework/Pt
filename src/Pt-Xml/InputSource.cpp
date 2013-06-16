@@ -793,7 +793,6 @@ BinaryInputSource::BinaryInputSource()
 , _utf8Codec(1)
 , _tbuf(&_utf8Codec)
 , _bomState(OnBomBegin)
-, _bomEncoding(Bom8)
 , _xmlState(OnXmlBegin)
 , _pbBegin(0)
 , _pbEnd(0)
@@ -808,7 +807,6 @@ BinaryInputSource::BinaryInputSource(std::istream& is)
 , _utf8Codec(1)
 , _tbuf(&is, &_utf8Codec)
 , _bomState(OnBomBegin)
-, _bomEncoding(Bom8)
 , _xmlState(OnXmlBegin)
 , _pbBegin(0)
 , _pbEnd(0)
@@ -823,7 +821,6 @@ BinaryInputSource::BinaryInputSource(XmlResolver& resolver)
 , _utf8Codec(1)
 , _tbuf(&_utf8Codec)
 , _bomState(OnBomBegin)
-, _bomEncoding(Bom8)
 , _xmlState(OnXmlBegin)
 , _pbBegin(0)
 , _pbEnd(0)
@@ -838,7 +835,6 @@ BinaryInputSource::BinaryInputSource(XmlResolver& resolver, std::istream& is)
 , _utf8Codec(1)
 , _tbuf(&is, &_utf8Codec)
 , _bomState(OnBomBegin)
-, _bomEncoding(Bom8)
 , _xmlState(OnXmlBegin)
 , _pbBegin(0)
 , _pbEnd(0)
@@ -858,7 +854,7 @@ void BinaryInputSource::reset()
 
     _mbState = MBState();
     _bomState = OnBomBegin;
-    _bomEncoding = Bom8;
+    _bom.clear();
 
     _xmlState = OnXmlBegin;
     _pbBegin = 0;
@@ -1112,9 +1108,11 @@ bool BinaryInputSource::onParseBom(unsigned char c)
             else // 0x3F
             {
                 onParseXml(0x3c);
-                _bomEncoding = Bom16LE;
-                //_xmlDecl.setEndianess(XmlDeclaration::LittleEndian);
-                
+                //_bomEncoding = Bom16LE;
+                _bom.setEndianess(ByteorderMark::LittleEndian);
+                _bom.setEncoding(ByteorderMark::Generic);
+                _bom.setWidth(2);
+
                 // do not consume this byte
                 _bomState = OnBomEnd;
             }
@@ -1126,8 +1124,11 @@ bool BinaryInputSource::onParseBom(unsigned char c)
             {
                 onParseXml(0x3c);
 
-                _bomEncoding = Bom32LE;
-                //_xmlDecl.setEndianess(XmlDeclaration::LittleEndian);
+                //_bomEncoding = Bom32LE;
+                _bom.setEndianess(ByteorderMark::LittleEndian);
+                _bom.setEncoding(ByteorderMark::Generic);
+                _bom.setWidth(4);
+
                 _bomState = OnBomLast;
             }
             else
@@ -1146,8 +1147,12 @@ bool BinaryInputSource::onParseBom(unsigned char c)
         case OnBomUtf8_1:
             if(c == 0xbf)
             {
+                //_bomEncoding = BomUtf8;
+                _bom.setEndianess(ByteorderMark::None);
+                _bom.setEncoding(ByteorderMark::Unicode);
+                _bom.setWidth(1);
+
                 _bomState = OnBomUtf8_2;
-                _bomEncoding = BomUtf8;
                 break;
             }
 
@@ -1161,9 +1166,12 @@ bool BinaryInputSource::onParseBom(unsigned char c)
         case OnBomUtf16BE_0:
             if(c == 0xff)
             {
+                //_bomEncoding = BomUtf16BE;
+                _bom.setEndianess(ByteorderMark::BigEndian);
+                _bom.setEncoding(ByteorderMark::Unicode);
+                _bom.setWidth(2);
+
                 _bomState = OnBomUtf16BE_1;
-                //_xmlDecl.setEndianess(XmlDeclaration::BigEndian);
-                _bomEncoding = BomUtf16BE;
             }
             else
                 _bomState = OnBomEnd;
@@ -1177,8 +1185,11 @@ bool BinaryInputSource::onParseBom(unsigned char c)
         case OnBomUtf16LE_0:
             if(c == 0xfe)
             {
-                _bomEncoding = BomUtf16LE;
-                //_xmlDecl.setEndianess(XmlDeclaration::LittleEndian);
+                //_bomEncoding = BomUtf16LE;
+                _bom.setEndianess(ByteorderMark::LittleEndian);
+                _bom.setEncoding(ByteorderMark::Unicode);
+                _bom.setWidth(2);
+
                 _bomState = OnBomUtf16LE_1;
             }
             else
@@ -1198,8 +1209,11 @@ bool BinaryInputSource::onParseBom(unsigned char c)
         case OnBomUtf32LE_2:
             if(c == 0x00)
             {
-                _bomEncoding = BomUtf32LE;
-                //_xmlDecl.setEndianess(XmlDeclaration::LittleEndian);
+                //_bomEncoding = BomUtf32LE;
+                _bom.setEndianess(ByteorderMark::LittleEndian);
+                _bom.setEncoding(ByteorderMark::Unicode);
+                _bom.setWidth(4);
+
                 _bomState = OnBomUtf32LE_3;
             }
             else
@@ -1222,8 +1236,11 @@ bool BinaryInputSource::onParseBom(unsigned char c)
             {
                 onParseXml(0x3c);
 
-                _bomEncoding = Bom16BE;
-                //_xmlDecl.setEndianess(XmlDeclaration::BigEndian);
+                //_bomEncoding = Bom16BE;
+                _bom.setEndianess(ByteorderMark::BigEndian);
+                _bom.setEncoding(ByteorderMark::Generic);
+                _bom.setWidth(2);
+
                 _bomState = OnBomLast;
             }
             else
@@ -1245,8 +1262,11 @@ bool BinaryInputSource::onParseBom(unsigned char c)
         case OnBomUtf32BE_2:
             if(c == 0xff)
             {
-                _bomEncoding = BomUtf32BE;
-                //_xmlDecl.setEndianess(XmlDeclaration::BigEndian);
+                //_bomEncoding = BomUtf32BE;
+                _bom.setEndianess(ByteorderMark::BigEndian);
+                _bom.setEncoding(ByteorderMark::Unicode);
+                _bom.setWidth(4);
+
                 _bomState = OnBomUtf32BE_3;
             }
             else
@@ -1263,8 +1283,11 @@ bool BinaryInputSource::onParseBom(unsigned char c)
             {
                 onParseXml(0x3c);
                 
-                _bomEncoding = Bom32BE;
-                //_xmlDecl.setEndianess(XmlDeclaration::BigEndian);
+                //_bomEncoding = Bom32BE;
+                _bom.setEndianess(ByteorderMark::BigEndian);
+                _bom.setEncoding(ByteorderMark::Generic);
+                _bom.setWidth(4);
+
                 _bomState = OnBomLast;
             }
             else
@@ -1292,60 +1315,66 @@ bool BinaryInputSource::onParseXml(int c)
 { 
     char ch = 0;
     
-    if(_bomEncoding == Bom8 || _bomEncoding == BomUtf8 ) // ASCII compatible
+    if(_bom.width() == 1 ) // ASCII compatible
     {
         ch = std::char_traits<char>::to_char_type(c);
     }
-    else if(_bomEncoding == BomUtf16BE || _bomEncoding == Bom16BE) // ASCII subset in UTF-16-BE
+    else if(_bom.width() == 2) // ASCII subset in UTF-16
     {
-        if(_mbState.n == 0)
+        if(_bom.endianess() == ByteorderMark::BigEndian)
         {
-            _mbState.n = 1;
-            return true;
-        }
+            if(_mbState.n == 0)
+            {
+                _mbState.n = 1;
+                return true;
+            }
 
-        _mbState.n = 0;
-        ch = std::char_traits<char>::to_char_type(c);
-    }
-    else if(_bomEncoding == BomUtf16LE || _bomEncoding == Bom16LE)  // ASCII subset in UTF-16-LE
-    {
-        if(_mbState.n == 0)
-        {
-            _mbState.n = 1;
+            _mbState.n = 0;
             ch = std::char_traits<char>::to_char_type(c);
-            _mbState.value.mbytes[0] = ch;
-            return true;
         }
+        else
+        {
+            if(_mbState.n == 0)
+            {
+                _mbState.n = 1;
+                ch = std::char_traits<char>::to_char_type(c);
+                _mbState.value.mbytes[0] = ch;
+                return true;
+            }
 
-        _mbState.n = 0;
-        ch = _mbState.value.mbytes[0];
+            _mbState.n = 0;
+            ch = _mbState.value.mbytes[0];
+        }
     }
-    else if(_bomEncoding == BomUtf32BE || _bomEncoding == Bom32BE) // ASCII subset in UTF-32-BE
+    else if(_bom.width() == 4) // ASCII subset in UTF-32
     {
-        if(_mbState.n < 3)
+        if(_bom.endianess() == ByteorderMark::BigEndian)
+        {
+            if(_mbState.n < 3)
+            {
+                _mbState.n += 1;
+                return true;
+            }
+
+            _mbState.n = 0;
+            ch = std::char_traits<char>::to_char_type(c);
+        }
+        else
         {
             _mbState.n += 1;
-            return true;
-        }
 
-        _mbState.n = 0;
-        ch = std::char_traits<char>::to_char_type(c);
-    }
-    else if(_bomEncoding == BomUtf32LE || _bomEncoding == Bom32LE)  // ASCII subset in UTF-32-LE
-    {
-        _mbState.n += 1;
-
-        if(_mbState.n == 1)
-        {
-            ch = std::char_traits<char>::to_char_type(c);
-            _mbState.value.mbytes[0] = ch;
-        }
+            if(_mbState.n == 1)
+            {
+                ch = std::char_traits<char>::to_char_type(c);
+                _mbState.value.mbytes[0] = ch;
+            }
         
-        if(_mbState.n < 4)
-            return true;
+            if(_mbState.n < 4)
+                return true;
 
-        _mbState.n = 0;
-        ch = _mbState.value.mbytes[0];
+            _mbState.n = 0;
+            ch = _mbState.value.mbytes[0];
+        }
     }
 
     if( ! parseXml(_xmlState, ch, _pbBegin, _pbEnd, _xmlDecl) )
@@ -1361,60 +1390,31 @@ bool BinaryInputSource::onParseXml(int c)
 
 void BinaryInputSource::onDeclaration()
 {
-    ByteorderMark bom;
-
-    if(_bomEncoding == BomUtf8 || _bomEncoding == Bom8)
+    if(_bom.width() == 1)
     {
         if( _xmlDecl.encoding().empty() || _xmlDecl.encoding() == "UTF-8" )
         {
             // keep using utf-8 codec
             return;
         }
-
-        bom.setEndianess(ByteorderMark::None);
-        bom.setWidth(1);
-        bom.setEncoding(_bomEncoding == BomUtf8 ? ByteorderMark::Unicode : ByteorderMark::Generic);
     }
-    else if(_bomEncoding == BomUtf16BE || _bomEncoding == Bom16BE)
+    else if(_bom.width() == 2)
     {
         if( _xmlDecl.encoding().empty() || _xmlDecl.encoding() == "UTF-16" )
         {
-            _tbuf.setCodec( new Utf16BeCodec );
+            const bool isLittleEndian = _bom.endianess() == ByteorderMark::LittleEndian;
+            if(isLittleEndian)
+                _tbuf.setCodec( new Utf16LeCodec );
+            else
+                _tbuf.setCodec( new Utf16BeCodec );
+            
             return;
         }
-
-        bom.setEndianess(ByteorderMark::BigEndian);
-        bom.setWidth(2);
-        bom.setEncoding(_bomEncoding == BomUtf16BE ? ByteorderMark::Unicode : ByteorderMark::Generic);
-    }
-    else if(_bomEncoding == BomUtf16LE || _bomEncoding == Bom16LE)
-    {
-        if( _xmlDecl.encoding().empty() || _xmlDecl.encoding() == "UTF-16" )
-        {
-            _tbuf.setCodec( new Utf16LeCodec );
-            return;
-        }
-
-        bom.setEndianess(ByteorderMark::LittleEndian);
-        bom.setWidth(2);
-        bom.setEncoding(_bomEncoding == BomUtf16LE ? ByteorderMark::Unicode : ByteorderMark::Generic);
-    }
-    else if(_bomEncoding == BomUtf32BE || _bomEncoding == Bom32BE)
-    {
-        bom.setEndianess(ByteorderMark::BigEndian);
-        bom.setWidth(4);
-        bom.setEncoding(_bomEncoding == BomUtf32BE ? ByteorderMark::Unicode : ByteorderMark::Generic);
-    }
-    else if(_bomEncoding == BomUtf32LE || _bomEncoding == Bom32LE)
-    {
-        bom.setEndianess(ByteorderMark::LittleEndian);
-        bom.setWidth(4);
-        bom.setEncoding(_bomEncoding == BomUtf32LE ? ByteorderMark::Unicode : ByteorderMark::Generic);
     }
 
     TextCodec<Char, char>* codec = 0;
     if(_resolver)
-        codec = _resolver->resolveEncoding(bom, _xmlDecl);
+        codec = _resolver->resolveEncoding(_bom, _xmlDecl);
 
     if( ! codec)
         throw SyntaxError("invalid encoding", 0);

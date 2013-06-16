@@ -25,72 +25,89 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef Pt_Xml_XmlDeclaration_h
-#define Pt_Xml_XmlDeclaration_h
+#ifndef Pt_Xml_ByteoderMark_h
+#define Pt_Xml_ByteoderMark_h
 
 #include <Pt/Xml/Api.h>
-#include <Pt/String.h>
-#include <string>
 
 namespace Pt {
 
 namespace Xml {
 
-/** @brief XML declaration of an XML document.
+/** @brief XML byte order mark.
 */
-class XmlDeclaration
+class ByteorderMark
 {
     public:
-        /** @brief Constructs an empty %XmlDeclaration.
+        /** @brief Text encoding endianess.
         */
-        XmlDeclaration()
-        : _standalone(false)
+        enum Endianess
+        {
+            None = 0,
+            BigEndian = 1,
+            LittleEndian = 2
+        };
+
+        /** @brief Text encoding type.
+        */
+        enum Encoding
+        {
+            Generic = 0,
+            Unicode = 1
+        };
+
+    public:
+        /** @brief Default constructor.
+        */
+        ByteorderMark()
+        : _endianess(None)
+        , _width(1)
+        , _encoding(Generic)
         {}
-       
+
         /** @brief Clears all content.
         */
         void clear()
         {
-            _version.clear();
-            _encoding.clear();
-            _standalone = false;
+            _endianess = None;
+            _width = 1;
+            _encoding = Generic;
         }
-        
-        /** @brief Returns the version string.
-        */
-        const std::string& version() const
-        { return _version; }
 
-        /** @brief Returns the version string.
+        /** @brief The endianess of the document encoding.
         */
-        std::string& version()
-        { return _version; }
+        Endianess endianess() const
+        { return static_cast<Endianess>(_endianess); }
 
-        /** @brief Returns the encoding string.
+        /** @brief Sets the endianess of the document encoding.
         */
-        const std::string& encoding() const
-        { return _encoding; }
+        void setEndianess(Endianess e)
+        { _endianess = e; }
 
-        /** @brief Returns the encoding string.
+        /** @brief Returns the word width of the encoding.
         */
-        std::string& encoding()
-        { return _encoding;}
+        int width() const
+        { return _width; }
 
-        /** @brief Returns true if the document is standalone.
+        /** @brief Sets word width of the encoding.
         */
-        bool isStandalone() const
-        { return _standalone; }
-        
-        /** @brief Indicates that the document is standalone.
-        */
-        void setStandalone(bool value)
-        { _standalone = value; }
+        void setWidth(unsigned char w)
+        { _width = w; }
 
+        /** @brief Returns the type of encoding.
+        */
+        Encoding encoding() const
+        { return static_cast<Encoding>(_encoding); }
+
+        /** @brief Sets the type of encoding.
+        */
+        void setEncoding(Encoding e)
+        { _encoding = static_cast<Encoding>(e); }
 
     private:
-        std::string _version;
-        std::string _encoding;
-        bool _standalone;
+        unsigned char _endianess;
+        unsigned char _width;
+        unsigned char _encoding;
 };
 
 } // namespace Xml
