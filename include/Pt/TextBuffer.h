@@ -352,8 +352,6 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
                 {
                     // rdbuf == 0 means "at end of input"
                     rdbuf = 0;
-
-                    //TODO: _target->seteof(); ???
                 }  
             }
 
