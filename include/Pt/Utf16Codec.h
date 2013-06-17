@@ -119,49 +119,6 @@ class PT_API Utf16LECodec : public TextCodec<Char, char>
         { return 0; }
 };
 
-/** @brief UTF-32 big endian codec.
-    
-    @ingroup Unicode
-*/
-class PT_API Utf32BECodec : public TextCodec<Char, char> 
-{
-    public:
-        explicit Utf32BECodec(size_t ref = 0);
-
-        //! @brief Destructor.
-        virtual ~Utf32BECodec()
-        {}
-
-        //! @brief Decodes UTF-16 to UTF-32.
-        virtual result do_in(MBState& s, 
-                             const char* from, const char* fromEnd, const char*& fromNext,
-                             Char* to, Char* toEnd, Char*& toNext) const ;
-        
-        //! @brief Encodes UTF-32 to UTF-16.
-        virtual result do_out(MBState& s, const Char* fromBegin,
-                              const Char* fromEnd, const Char*& fromNext,
-                              char* toBegin, char* toEnd, char*& toNext) const;
-
-        // inheritdoc
-        virtual bool do_always_noconv() const throw() 
-        { return false; }
-
-        // inheritdoc
-        virtual int do_length(MBState& s, const char* fromBegin, 
-                              const char* fromEnd, std::size_t max) const;
-        // inheritdoc
-        virtual int do_max_length() const throw()  
-        { return 4; }
-
-        // inheritdoc
-        std::codecvt_base::result do_unshift(Pt::MBState&, char*, char*, char*&) const
-        { return std::codecvt_base::noconv; }
-
-        // inheritdoc
-        int do_encoding() const throw()
-        { return 4; }
-};
-
 } //namespace Pt
 
 #endif

@@ -34,6 +34,7 @@
 #include "Pt/Base64Codec.h"
 #include "Pt/Utf16Codec.h"
 #include "Pt/Utf8Codec.h"
+#include "Pt/Utf32Codec.h"
 #include "Pt/TextStream.h"
 #include <Pt/System/Clock.h>
 #include <string>
@@ -67,6 +68,16 @@ class TextStreamTest : public Pt::Unit::TestSuite
                                                  *this, &TextStreamTest::UTF16LeToUnicode);
             Pt::Unit::TestSuite::registerMethod( "UnicodeToUTF16Le",
                                                  *this, &TextStreamTest::UnicodeToUTF16Le);
+
+            Pt::Unit::TestSuite::registerMethod( "UTF32BeToUnicode",
+                                                 *this, &TextStreamTest::UTF32BeToUnicode);
+            Pt::Unit::TestSuite::registerMethod( "UnicodeToUTF32Be",
+                                                 *this, &TextStreamTest::UnicodeToUTF32Be);
+
+            Pt::Unit::TestSuite::registerMethod( "UTF32LeToUnicode",
+                                                 *this, &TextStreamTest::UTF32LeToUnicode);
+            Pt::Unit::TestSuite::registerMethod( "UnicodeToUTF32Le",
+                                                 *this, &TextStreamTest::UnicodeToUTF32Le);
             
             Pt::Unit::TestSuite::registerMethod( "GetChar",
                                                  *this, &TextStreamTest::GetChar );
@@ -100,6 +111,12 @@ class TextStreamTest : public Pt::Unit::TestSuite
 
         void UTF16LeToUnicode();
         void UnicodeToUTF16Le();
+
+        void UTF32BeToUnicode();
+        void UnicodeToUTF32Be();
+
+        void UTF32LeToUnicode();
+        void UnicodeToUTF32Le();
         
         void GetChar();
         void GetLineBuffer();
@@ -123,6 +140,20 @@ char TextUTF16BE[]     = { (char)0x03, (char)0xba, (char)0x1F, (char)0x79, (char
 
 char TextUTF16LE[]     = { (char)0xba, (char)0x03, (char)0x79, (char)0x1F,  (char)0xC3, (char)0x03, (char)0xBC,   
                            (char)0x03, (char)0xB5, (char)0x03, (char)0x0 };
+
+char TextUTF32BE[]     = { (char)0x0, (char)0x0, (char)0x03, (char)0xba, 
+                           (char)0x0, (char)0x0, (char)0x1F, (char)0x79,
+                           (char)0x0, (char)0x0, (char)0x03, (char)0xC3,
+                           (char)0x0, (char)0x0, (char)0x03, (char)0xBC,
+                           (char)0x0, (char)0x0,  (char)0x03, (char)0xB5,
+                           (char)0x0 };
+
+char TextUTF32LE[]     = { (char)0xba,(char)0x03, (char)0x0, (char)0x0, 
+                           (char)0x79,(char)0x1F, (char)0x0, (char)0x0,  
+                           (char)0xC3,(char)0x03, (char)0x0, (char)0x0, 
+                           (char)0xBC,(char)0x03, (char)0x0, (char)0x0,  
+                           (char)0xB5,(char)0x03, (char)0x0, (char)0x0,  
+                           (char)0x0 };
 
 Pt::Char TextUnicode[] = { 954, 8057, 963, 956, 949, 0 };
 
@@ -287,6 +318,65 @@ void TextStreamTest::UnicodeToUTF16Le()
     std::string str = ss.str();
     PT_UNIT_ASSERT( str.size() == std::strlen(TextUTF16LE) );
     PT_UNIT_ASSERT( str == TextUTF16LE );
+}
+
+
+void TextStreamTest::UTF32BeToUnicode()
+{
+    Pt::TextStream ts( new Pt::Utf32BECodec() );
+    std::streamsize n = ts.buffer().import(TextUTF32BE, sizeof(TextUTF32BE) - 1);
+
+    PT_UNIT_ASSERT(ts.get() == TextUnicode[0].value());
+    PT_UNIT_ASSERT(ts.get() == TextUnicode[1].value());
+    PT_UNIT_ASSERT(ts.get() == TextUnicode[2].value());
+    PT_UNIT_ASSERT(ts.get() == TextUnicode[3].value());
+    PT_UNIT_ASSERT(ts.get() == TextUnicode[4].value());
+}
+
+
+void TextStreamTest::UnicodeToUTF32Be()
+{
+    std::stringstream ss;
+
+    Pt::TextBuffer tbuf(&ss, new Pt::Utf32BECodec());
+    tbuf.sputn(TextUnicode, 5);
+    tbuf.pubsync();
+
+    std::string str = ss.str();
+    PT_UNIT_ASSERT( str.size() == sizeof(TextUTF32BE) - 1 );
+    PT_UNIT_ASSERT( 0 == std::memcmp(str.c_str(), TextUTF32BE, sizeof(TextUTF32BE) - 1) );
+}
+
+
+
+
+
+
+
+void TextStreamTest::UTF32LeToUnicode()
+{
+    Pt::TextStream ts( new Pt::Utf32LECodec() );
+    std::streamsize n = ts.buffer().import(TextUTF32LE, sizeof(TextUTF32LE) - 1);
+
+    PT_UNIT_ASSERT(ts.get() == TextUnicode[0].value());
+    PT_UNIT_ASSERT(ts.get() == TextUnicode[1].value());
+    PT_UNIT_ASSERT(ts.get() == TextUnicode[2].value());
+    PT_UNIT_ASSERT(ts.get() == TextUnicode[3].value());
+    PT_UNIT_ASSERT(ts.get() == TextUnicode[4].value());
+}
+
+
+void TextStreamTest::UnicodeToUTF32Le()
+{
+    std::stringstream ss;
+
+    Pt::TextBuffer tbuf(&ss, new Pt::Utf32LECodec());
+    tbuf.sputn(TextUnicode, 5);
+    tbuf.pubsync();
+
+    std::string str = ss.str();
+    PT_UNIT_ASSERT( str.size() == sizeof(TextUTF32LE) - 1 );
+    PT_UNIT_ASSERT( 0 == std::memcmp(str.c_str(), TextUTF32LE, sizeof(TextUTF32LE) - 1) );
 }
 
 

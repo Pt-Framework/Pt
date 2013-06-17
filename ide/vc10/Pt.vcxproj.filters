@@ -786,6 +786,9 @@
     <ClInclude Include="..\..\include\Pt\Xml\ByteorderMark.h">
       <Filter>Pt-Xml</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Utf32Codec.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -1561,6 +1564,9 @@
       <Filter>Pt-XmlRpc\tests</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt\Utf16Codec.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt\Utf32Codec.cpp">
       <Filter>Pt</Filter>
     </ClCompile>
   </ItemGroup>
