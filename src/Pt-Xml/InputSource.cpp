@@ -30,6 +30,7 @@
 #include <Pt/Xml/XmlError.h>
 #include <Pt/Xml/XmlResolver.h>
 #include <Pt/Utf16Codec.h>
+#include <Pt/Utf32Codec.h>
 #include <cctype>
 #include <cassert>
 
@@ -1407,6 +1408,19 @@ void BinaryInputSource::onDeclaration()
                 _tbuf.setCodec( new Utf16LECodec );
             else
                 _tbuf.setCodec( new Utf16BECodec );
+            
+            return;
+        }
+    }
+    else if(_bom.width() == 4)
+    {
+        if( _xmlDecl.encoding().empty() || _xmlDecl.encoding() == "UTF-32" )
+        {
+            const bool isLittleEndian = _bom.endianess() == ByteorderMark::LittleEndian;
+            if(isLittleEndian)
+                _tbuf.setCodec( new Utf32LECodec );
+            else
+                _tbuf.setCodec( new Utf32BECodec );
             
             return;
         }

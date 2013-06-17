@@ -491,8 +491,8 @@ void XmlReaderTest::ByteorderMarkUtf32LE()
     input << char(0xff) << char(0xfe) << char(0) << char(0)
           << char(0x3c) << char(0) << char(0) << char(0)
           << char(0x61) << char(0) << char(0) << char(0)
-          << char(0x2f) 
-          << char(0x3e);
+          << char(0x2f) << char(0) << char(0) << char(0)
+          << char(0x3e) << char(0) << char(0) << char(0);
 
     XmlTestResolver resolver;
     Pt::Xml::BinaryInputSource is(resolver, input);
@@ -526,8 +526,8 @@ void XmlReaderTest::ByteorderMarkUtf32BE()
     input << char(0) << char(0) << char(0xfe) << char(0xff) 
           << char(0) << char(0) << char(0) << char(0x3c)  
           << char(0) << char(0) << char(0) << char(0x61) 
-          << char(0x2f) 
-          << char(0x3e);
+          << char(0) << char(0) << char(0) << char(0x2f) 
+          << char(0) << char(0) << char(0) << char(0x3e);
 
 
     XmlTestResolver resolver;
@@ -561,8 +561,8 @@ void XmlReaderTest::ByteorderMarkGeneric32LE()
     std::stringstream input;
     input << char(0x3c) << char(0) << char(0) << char(0)
           << char(0x61) << char(0) << char(0) << char(0)
-          << char(0x2f) 
-          << char(0x3e);
+          << char(0x2f) << char(0) << char(0) << char(0)
+          << char(0x3e) << char(0) << char(0) << char(0);
 
     XmlTestResolver resolver;
     Pt::Xml::BinaryInputSource is(resolver, input);
@@ -608,8 +608,8 @@ void XmlReaderTest::ByteorderMarkGeneric32BE()
 
     input << char(0) << char(0) << char(0) << char(0x3c)  
           << char(0) << char(0) << char(0) << char(0x61) 
-          << char(0x2f) 
-          << char(0x3e);
+          << char(0) << char(0) << char(0) << char(0x2f) 
+          << char(0) << char(0) << char(0) << char(0x3e);
 
     XmlTestResolver resolver;
     Pt::Xml::BinaryInputSource is(resolver, input);

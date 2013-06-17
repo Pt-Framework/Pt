@@ -94,6 +94,23 @@ int Utf32BECodec::do_length(MBState& s, const char* fromBegin, const char* fromE
 }
 
 
+bool Utf32BECodec::do_always_noconv() const throw() 
+{ return false; }
+
+
+int Utf32BECodec::do_max_length() const throw()  
+{ return 4; }
+
+
+std::codecvt_base::result Utf32BECodec::do_unshift(Pt::MBState&, char*, char*, char*&) const
+{ return std::codecvt_base::noconv; }
+
+
+int Utf32BECodec::do_encoding() const throw()
+{ return 4; }
+
+
+
 
 Utf32LECodec::Utf32LECodec(size_t ref)
 : Pt::TextCodec<Char, char>(ref)
@@ -157,5 +174,21 @@ int Utf32LECodec::do_length(MBState& s, const char* fromBegin, const char* fromE
 
     return static_cast<int>(count);
 }
+
+
+bool Utf32LECodec::do_always_noconv() const throw() 
+{ return false; }
+
+
+int Utf32LECodec::do_max_length() const throw()  
+{ return 4; }
+
+
+std::codecvt_base::result Utf32LECodec::do_unshift(Pt::MBState&, char*, char*, char*&) const
+{ return std::codecvt_base::noconv; }
+
+
+int Utf32LECodec::do_encoding() const throw()
+{ return 4; }
 
 }// namespace Pt

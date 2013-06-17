@@ -77,7 +77,7 @@ class PT_API Utf16BECodec : public TextCodec<Char, char>
         { return 0; }
 };
 
-/** @brief UTF-16 big little codec.
+/** @brief UTF-16 little endian codec.
     
     @ingroup Unicode
 */

@@ -59,25 +59,26 @@ class PT_API Utf32BECodec : public TextCodec<Char, char>
                               char* toBegin, char* toEnd, char*& toNext) const;
 
         // inheritdoc
-        virtual bool do_always_noconv() const throw() 
-        { return false; }
+        virtual bool do_always_noconv() const throw();
 
         // inheritdoc
         virtual int do_length(MBState& s, const char* fromBegin, 
                               const char* fromEnd, std::size_t max) const;
         // inheritdoc
-        virtual int do_max_length() const throw()  
-        { return 4; }
+        virtual int do_max_length() const throw();
 
         // inheritdoc
-        std::codecvt_base::result do_unshift(Pt::MBState&, char*, char*, char*&) const
-        { return std::codecvt_base::noconv; }
+        std::codecvt_base::result do_unshift(Pt::MBState&, char*, char*, char*&) const;
 
         // inheritdoc
-        int do_encoding() const throw()
-        { return 4; }
+        int do_encoding() const throw();
 };
 
+
+/** @brief UTF-32 little endian codec.
+    
+    @ingroup Unicode
+*/
 class PT_API Utf32LECodec : public TextCodec<Char, char> 
 {
     public:
@@ -98,23 +99,20 @@ class PT_API Utf32LECodec : public TextCodec<Char, char>
                               char* toBegin, char* toEnd, char*& toNext) const;
 
         // inheritdoc
-        virtual bool do_always_noconv() const throw() 
-        { return false; }
-
-        // inheritdoc
         virtual int do_length(MBState& s, const char* fromBegin, 
                               const char* fromEnd, std::size_t max) const;
-        // inheritdoc
-        virtual int do_max_length() const throw()  
-        { return 4; }
 
         // inheritdoc
-        std::codecvt_base::result do_unshift(Pt::MBState&, char*, char*, char*&) const
-        { return std::codecvt_base::noconv; }
+        virtual bool do_always_noconv() const throw();
 
         // inheritdoc
-        int do_encoding() const throw()
-        { return 4; }
+        virtual int do_max_length() const throw()  ;
+
+        // inheritdoc
+        std::codecvt_base::result do_unshift(Pt::MBState&, char*, char*, char*&) const;
+
+        // inheritdoc
+        int do_encoding() const throw();
 };
 }// namespace Pt
 
