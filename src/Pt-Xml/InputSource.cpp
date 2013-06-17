@@ -1404,9 +1404,9 @@ void BinaryInputSource::onDeclaration()
         {
             const bool isLittleEndian = _bom.endianess() == ByteorderMark::LittleEndian;
             if(isLittleEndian)
-                _tbuf.setCodec( new Utf16LeCodec );
+                _tbuf.setCodec( new Utf16LECodec );
             else
-                _tbuf.setCodec( new Utf16BeCodec );
+                _tbuf.setCodec( new Utf16BECodec );
             
             return;
         }

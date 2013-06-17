@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 by Marc Boris Duerner
+ * Copyright (C) 2013 by Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -35,14 +35,17 @@
 
 namespace Pt {
 
-// UTF16 BigEndian
-class PT_API Utf16BeCodec : public TextCodec<Char, char> 
+/** @brief UTF-16 big endian codec.
+    
+    @ingroup Unicode
+*/
+class PT_API Utf16BECodec : public TextCodec<Char, char> 
 {
     public:
-        explicit Utf16BeCodec(size_t ref = 0);
+        explicit Utf16BECodec(size_t ref = 0);
 
         //! @brief Destructor.
-        virtual ~Utf16BeCodec()
+        virtual ~Utf16BECodec()
         {}
 
         //! @brief Decodes UTF-16 to UTF-32.
@@ -74,14 +77,17 @@ class PT_API Utf16BeCodec : public TextCodec<Char, char>
         { return 0; }
 };
 
-// UTF16 LittleEndian
-class PT_API Utf16LeCodec : public TextCodec<Char, char> 
+/** @brief UTF-16 big little codec.
+    
+    @ingroup Unicode
+*/
+class PT_API Utf16LECodec : public TextCodec<Char, char> 
 {
     public:
-        explicit Utf16LeCodec(size_t ref = 0);
+        explicit Utf16LECodec(size_t ref = 0);
 
         //! @brief Destructor.
-        virtual ~Utf16LeCodec()
+        virtual ~Utf16LECodec()
         {}
 
         //! @brief Decodes UTF-16 to UTF-32.
