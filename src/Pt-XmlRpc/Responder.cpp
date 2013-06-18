@@ -108,11 +108,62 @@ XmlRpcResponder::~XmlRpcResponder()
 }
 
 
-void XmlRpcResponder::onBeginRequest(Http::Request& request, Http::Reply& reply, System::EventLoop& loop)
+void XmlRpcResponder::beginRequest(std::istream& is)
 {
     _state = OnBegin;
-    _bin.reset( request.body() );
+    _bin.reset(is);
     _args = 0;
+}
+
+
+//void XmlRpcResponder::advanceRequest()
+//{
+//    try
+//    {
+//        for(;;)
+//        {
+//            const Xml::Node* node = _reader.advance();
+//            if( ! node)
+//                break;
+//            
+//            this->advance(*node);
+//        }
+//    }
+//    catch(const Xml::XmlError& error)
+//    {
+//        log_error( error.what() );
+//        //replyError(reply, 1, error.what());
+//    }
+//    catch(const SerializationError& error)
+//    {
+//        log_error( error.what() );
+//        //replyError(reply, 2, error.what());
+//    }
+//    catch(const ConversionError& error)
+//    {
+//        log_error( error.what() );
+//        //replyError(reply, 3, error.what());
+//    }
+//    catch(const Fault& fault)
+//    {
+//        log_error( fault.what() );
+//        //replyError(reply, fault.rc(), fault.what());
+//    }
+//    catch(const std::exception& error)
+//    {
+//        log_error( error.what() );
+//        throw;
+//    }
+//}
+
+
+void XmlRpcResponder::onBeginRequest(Http::Request& request, Http::Reply& reply, System::EventLoop& loop)
+{
+    //_state = OnBegin;
+    //_bin.reset( request.body() );
+    //_args = 0;
+
+    beginRequest( request.body() );
 }
 
 
@@ -126,7 +177,7 @@ void XmlRpcResponder::onReadRequest(Http::Request& request, Http::Reply& reply, 
             if( ! node)
                 break;
             
-            this->advance(*node, loop);
+            this->advance(*node);
         }
     }
     catch(const Xml::XmlError& error)
@@ -307,7 +358,7 @@ void XmlRpcResponder::endReply()
 }
 
 
-void XmlRpcResponder::advance(const Pt::Xml::Node& node, System::EventLoop& loop)
+void XmlRpcResponder::advance(const Pt::Xml::Node& node)
 {
     switch(_state)
     {

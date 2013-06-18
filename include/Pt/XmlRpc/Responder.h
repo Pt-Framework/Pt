@@ -80,9 +80,15 @@ class PT_XMLRPC_API XmlRpcResponder : public Http::Responder
 
         void onWriteReply(Http::Request& request, Http::Reply& reply, System::EventLoop& loop);
 
-        void advance(const Pt::Xml::Node& node, System::EventLoop& loop);
+        void advance(const Pt::Xml::Node& node);
 
         void replyError(Http::Reply& reply, int rc, const char* msg);
+
+    // Responder base API:
+    protected:
+        void beginRequest(std::istream& is);
+
+        //void advanceRequest();
 
     private:
        State _state;
