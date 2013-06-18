@@ -45,8 +45,7 @@ class PT_API Utf16BECodec : public TextCodec<Char, char>
         explicit Utf16BECodec(size_t ref = 0);
 
         //! @brief Destructor.
-        virtual ~Utf16BECodec()
-        {}
+        virtual ~Utf16BECodec();
 
         //! @brief Decodes UTF-16 to UTF-32.
         virtual result do_in(MBState& s, 
@@ -59,22 +58,19 @@ class PT_API Utf16BECodec : public TextCodec<Char, char>
                               char* toBegin, char* toEnd, char*& toNext) const;
 
         // inheritdoc
-        virtual bool do_always_noconv() const throw() 
-        { return false; }
+        virtual bool do_always_noconv() const throw();
 
         // inheritdoc
         virtual int do_length(MBState& s, const char* fromBegin, 
                               const char* fromEnd, std::size_t max) const;
         // inheritdoc
-        virtual int do_max_length() const throw()  { return 12; }
+        virtual int do_max_length() const throw();
 
         // inheritdoc
-        std::codecvt_base::result do_unshift(Pt::MBState&, char*, char*, char*&) const
-        { return std::codecvt_base::noconv; }
+        std::codecvt_base::result do_unshift(Pt::MBState&, char*, char*, char*&) const;
 
         // inheritdoc
-        int do_encoding() const throw()
-        { return 0; }
+        int do_encoding() const throw();
 };
 
 /** @brief UTF-16 little endian codec.
@@ -87,8 +83,7 @@ class PT_API Utf16LECodec : public TextCodec<Char, char>
         explicit Utf16LECodec(size_t ref = 0);
 
         //! @brief Destructor.
-        virtual ~Utf16LECodec()
-        {}
+        virtual ~Utf16LECodec();
 
         //! @brief Decodes UTF-16 to UTF-32.
         virtual result do_in(MBState& s, 
@@ -101,22 +96,19 @@ class PT_API Utf16LECodec : public TextCodec<Char, char>
                               char* toBegin, char* toEnd, char*& toNext) const;
 
         // inheritdoc
-        virtual bool do_always_noconv() const throw() 
-        { return false; }
+        virtual bool do_always_noconv() const throw();
 
         // inheritdoc
         virtual int do_length(MBState& s, const char* fromBegin, 
                               const char* fromEnd, std::size_t max) const;
         // inheritdoc
-        virtual int do_max_length() const throw()  { return 12; }
+        virtual int do_max_length() const throw();
 
         // inheritdoc
-        std::codecvt_base::result do_unshift(Pt::MBState&, char*, char*, char*&) const
-        { return std::codecvt_base::noconv; }
+        std::codecvt_base::result do_unshift(Pt::MBState&, char*, char*, char*&) const;
 
         // inheritdoc
-        int do_encoding() const throw()
-        { return 0; }
+        int do_encoding() const throw();
 };
 
 } //namespace Pt

@@ -84,18 +84,18 @@ class PT_API Utf8Codec : public TextCodec<Char, char>
         virtual int do_max_length() const throw();
 
         // inheritdoc
-        std::codecvt_base::result do_unshift(Pt::MBState&, char*, char*, char*&) const
-        { return std::codecvt_base::noconv; }
+        std::codecvt_base::result do_unshift(Pt::MBState&, char*, char*, char*&) const;
 
         // inheritdoc
-        int do_encoding() const throw()
-        { return 0; }
+        int do_encoding() const throw();
 
         static String decode(const char* data, unsigned size);
+        
         static String decode(const std::string& data)
         { return decode(data.data(), data.size()); }
 
         static std::string encode(const Char* data, unsigned size);
+        
         static std::string encode(const String& data)
         { return encode(data.data(), data.size()); }
 };

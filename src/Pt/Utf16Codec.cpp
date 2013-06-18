@@ -37,6 +37,10 @@ Utf16BECodec::Utf16BECodec(size_t ref)
 {}
 
 
+Utf16BECodec::~Utf16BECodec()
+{}
+
+
 Utf16BECodec::result Utf16BECodec::do_in(MBState& s, 
                                          const char* from, const char* fromEnd, const char*& fromNext,
                                          Char* to, Char* toEnd, Char*& toNext) const
@@ -171,8 +175,38 @@ int Utf16BECodec::do_length(MBState& s, const char* fromBegin, const char* fromE
 }
 
 
+bool Utf16BECodec::do_always_noconv() const throw() 
+{ 
+    return false; 
+}
+
+
+int Utf16BECodec::do_max_length() const throw()  
+{ 
+    return 12; 
+}
+
+
+std::codecvt_base::result Utf16BECodec::do_unshift(Pt::MBState&, char*, char*, char*&) const
+{ 
+    return std::codecvt_base::noconv; 
+}
+
+
+int Utf16BECodec::do_encoding() const throw()
+{ 
+    return 0; 
+}
+
+
+
+
 Utf16LECodec::Utf16LECodec(size_t ref)
 : Pt::TextCodec<Char, char>(ref)
+{}
+
+
+Utf16LECodec::~Utf16LECodec()
 {}
 
 
@@ -302,6 +336,30 @@ int Utf16LECodec::do_length(MBState& s, const char* fromBegin, const char* fromE
     }
 
     return static_cast<int>(count);
+}
+
+
+bool Utf16LECodec::do_always_noconv() const throw() 
+{ 
+    return false; 
+}
+
+
+int Utf16LECodec::do_max_length() const throw()  
+{ 
+    return 12; 
+}
+
+
+std::codecvt_base::result Utf16LECodec::do_unshift(Pt::MBState&, char*, char*, char*&) const
+{ 
+    return std::codecvt_base::noconv; 
+}
+
+
+int Utf16LECodec::do_encoding() const throw()
+{ 
+    return 0; 
 }
 
 } // namespace Pt

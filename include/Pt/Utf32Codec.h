@@ -45,8 +45,7 @@ class PT_API Utf32BECodec : public TextCodec<Char, char>
         explicit Utf32BECodec(size_t ref = 0);
 
         //! @brief Destructor.
-        virtual ~Utf32BECodec()
-        {}
+        virtual ~Utf32BECodec();
 
         //! @brief Decodes UTF-16 to UTF-32.
         virtual result do_in(MBState& s, 
@@ -85,8 +84,7 @@ class PT_API Utf32LECodec : public TextCodec<Char, char>
         explicit Utf32LECodec(size_t ref = 0);
 
         //! @brief Destructor.
-        virtual ~Utf32LECodec()
-        {}
+        virtual ~Utf32LECodec();
 
         //! @brief Decodes UTF-16 to UTF-32.
         virtual result do_in(MBState& s, 

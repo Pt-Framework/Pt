@@ -258,6 +258,18 @@ bool Utf8Codec::do_always_noconv() const throw()
     return false;
 }
 
+
+std::codecvt_base::result Utf8Codec::do_unshift(Pt::MBState&, char*, char*, char*&) const
+{ 
+    return std::codecvt_base::noconv; 
+}
+
+
+int Utf8Codec::do_encoding() const throw()
+{ 
+    return 0; 
+}
+
 String Utf8Codec::decode(const char* data, unsigned size)
 {
     Utf8Codec codec;

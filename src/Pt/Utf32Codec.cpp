@@ -37,6 +37,10 @@ Utf32BECodec::Utf32BECodec(size_t ref)
 {}
 
 
+Utf32BECodec::~Utf32BECodec()
+{}
+
+
 Utf32BECodec::result Utf32BECodec::do_in(MBState& s, 
                                          const char* from, const char* fromEnd, const char*& fromNext,
                                          Char* to, Char* toEnd, Char*& toNext) const
@@ -114,6 +118,10 @@ int Utf32BECodec::do_encoding() const throw()
 
 Utf32LECodec::Utf32LECodec(size_t ref)
 : Pt::TextCodec<Char, char>(ref)
+{}
+
+
+Utf32LECodec::~Utf32LECodec()
 {}
 
 
