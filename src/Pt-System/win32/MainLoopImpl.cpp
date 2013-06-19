@@ -37,7 +37,8 @@ MainLoopImpl::MainLoopImpl(Signal<const Pt::Event&>& eventSignal)
 }
 
 MainLoopImpl::MainLoopImpl(Signal<const Pt::Event&>& eventSignal, Allocator& a)
-: _event(&eventSignal)
+: _eventQueue(a)
+, _event(&eventSignal)
 {
 }
 

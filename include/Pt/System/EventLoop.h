@@ -156,7 +156,7 @@ class PT_SYSTEM_API EventQueue
     public:
         EventQueue();
 
-        EventQueue( Allocator& a);
+        EventQueue(Allocator& a);
 
         virtual ~EventQueue();
 

@@ -30,6 +30,39 @@
 #include "Pt/System/Clock.h"
 #include "Pt/Timespan.h"
 #include "Pt/Allocator.h"
+#include <new>
+
+class TestAllocator : public Pt::Allocator
+{
+    public:
+        TestAllocator(std::size_t maxAlloc)
+        : _maxAlloc(maxAlloc)
+        , _allocCount(0)
+        {}
+
+        virtual ~TestAllocator()
+        {}
+
+        virtual void* allocate(std::size_t size)
+        {
+            if(_allocCount == _maxAlloc)
+                throw std::bad_alloc();
+
+            void* m = operator new(size);
+            ++_allocCount;
+            return m;
+        }
+
+        virtual void deallocate(void* p, std::size_t size)
+        {
+            --_allocCount;
+            operator delete(p);
+        }
+
+    private:
+        std::size_t _maxAlloc;
+        std::size_t _allocCount;
+};
 
 class E1 : public Pt::Event
 {
@@ -64,6 +97,7 @@ class EventLoopTest : public Pt::Unit::TestSuite
         : Pt::Unit::TestSuite("EventLoopTest")
         {
             Pt::Unit::TestSuite::registerMethod( "DispatchTest", *this, &EventLoopTest::DispatchTest);
+            Pt::Unit::TestSuite::registerMethod( "MaxAlloc", *this, &EventLoopTest::MaxAlloc);
             //Pt::Unit::TestSuite::registerMethod( "LoopBenchmark", *this, &EventLoopTest::LoopBenchmark);
             Pt::Unit::TestSuite::registerMethod( "IdleTimeout", *this, &EventLoopTest::IdleTimeout);
         }
@@ -115,6 +149,18 @@ class EventLoopTest : public Pt::Unit::TestSuite
 
             PT_UNIT_ASSERT(elapsed.toMSecs() > 280);
             PT_UNIT_ASSERT(elapsed.toMSecs() < 320);
+        }
+
+        void MaxAlloc()
+        {
+            TestAllocator alloc(3);
+            Pt::System::MainLoop el(alloc);
+
+            el.commitEvent( E1() );
+            el.commitEvent( E1() );
+            el.commitEvent( E1() );
+
+            PT_UNIT_ASSERT_THROW( el.commitEvent( E1() ), std::bad_alloc );
         }
 
         // Pt::System::MainLoop* _loop;
