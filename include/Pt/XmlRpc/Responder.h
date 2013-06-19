@@ -48,8 +48,7 @@ namespace XmlRpc {
 class Service;
 class ServiceProcedure;
 
-class PT_XMLRPC_API XmlRpcResponder : public Http::Responder
-                                    , public Responder
+class PT_XMLRPC_API XmlRpcResponderBase : public Responder
 {
     enum State
     {
@@ -65,30 +64,23 @@ class PT_XMLRPC_API XmlRpcResponder : public Http::Responder
     };
 
     public:
-        XmlRpcResponder(Service& service);
+        XmlRpcResponderBase(Service& service);
 
-        ~XmlRpcResponder();
+        ~XmlRpcResponderBase();
 
-        void endReply();
-
-    protected:
-        void onBeginRequest(Http::Request& request, Http::Reply& reply, System::EventLoop& loop);
-
-        void onReadRequest(Http::Request& request, Http::Reply& reply, System::EventLoop& loop);
-
-        void onBeginReply(Http::Request& request, Http::Reply& reply, System::EventLoop& loop);
-
-        void onWriteReply(Http::Request& request, Http::Reply& reply, System::EventLoop& loop);
-
-        void advance(const Pt::Xml::Node& node);
-
-        void replyError(Http::Reply& reply, int rc, const char* msg);
-
-    // Responder base API:
     protected:
         void beginRequest(std::istream& is);
 
-        //void advanceRequest();
+        void advanceRequest();
+
+        void finishRequest(System::EventLoop& loop);
+
+        void formatReply(std::ostream& os);
+
+        void formatError(std::ostream& os, int rc, const char* msg);
+
+    private:
+        void advance(const Pt::Xml::Node& node);
 
     private:
        State _state;
@@ -99,14 +91,41 @@ class PT_XMLRPC_API XmlRpcResponder : public Http::Responder
        Scanner _scanner;
        Formatter _formatter;
        Service* _service;
-       Http::Reply* _reply;
        ServiceProcedure* _proc;
        IComposer** _args;
        IDecomposer* _result;
 };
 
-}
 
-}
+class PT_XMLRPC_API XmlRpcResponder : public Http::Responder
+                                    , public XmlRpcResponderBase
+{
+    public:
+        XmlRpcResponder(Service& service);
+
+        ~XmlRpcResponder();
+
+    protected:
+        void onBeginRequest(Http::Request& request, Http::Reply& reply, System::EventLoop& loop);
+
+        void onReadRequest(Http::Request& request, Http::Reply& reply, System::EventLoop& loop);
+
+        void onBeginReply(Http::Request& request, Http::Reply& reply, System::EventLoop& loop);
+
+        void onWriteReply(Http::Request& request, Http::Reply& reply, System::EventLoop& loop);
+
+        void replyError(Http::Reply& reply, int rc, const char* msg);
+
+    protected:
+        // inheritdoc
+        virtual void onEndReply();
+
+    private:
+         Http::Reply* _reply;
+};
+
+} // namespace XmlRpc
+
+} // namespace Pt
 
 #endif

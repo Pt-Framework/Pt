@@ -57,7 +57,7 @@ void Client::beginCall(IComposer& r, IRemoteProcedure& method, IDecomposer** arg
 {
     _impl->beginCall(r, method, argv, argc);
 
-    this->onBeginCall();
+    this->onBeginRequest();
 }
 
 
@@ -91,9 +91,9 @@ const IRemoteProcedure* Client::activeProcedure() const
 }
 
 
-void Client::beginRequest(std::ostream& os)
+void Client::formatRequest(std::ostream& os)
 {
-    _impl->beginRequest(os);
+    _impl->formatRequest(os);
 }
 
 

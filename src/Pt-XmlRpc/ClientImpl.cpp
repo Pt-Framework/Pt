@@ -119,7 +119,7 @@ const IRemoteProcedure* ClientImpl::activeProcedure() const
 }
 
 
-void ClientImpl::beginRequest(std::ostream& os)
+void ClientImpl::formatRequest(std::ostream& os)
 {
     const String& name = _method->name();
 

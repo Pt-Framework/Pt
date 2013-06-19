@@ -56,7 +56,11 @@ class Responder
         SerializationContext& sctx()
         { return _context; }
 
-        virtual void endReply() = 0;
+        void endReply()
+        { this->onEndReply(); }
+
+    protected:
+        virtual void onEndReply() = 0;
 
     private:
         SerializationContext _context;

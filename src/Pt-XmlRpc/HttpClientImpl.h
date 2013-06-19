@@ -58,10 +58,6 @@ class HttpClientImpl
 
         std::ostream& prepareRequest();
 
-        void onBeginCall();
-
-        void onEndCall();
-
         std::istream& onCall();
 
         void cancel();

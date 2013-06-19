@@ -84,22 +84,22 @@ static const Pt::Char XMLRPC_VALUE_END[]   = { '<', '/', 'v', 'a', 'l', 'u', 'e'
 static const Pt::Char XMLRPC_INT_END[]     = { '<', '/', 'i', 'n', 't', '>' };
 static const Pt::Char XMLRPC_STRING_END[]  = { '<', '/', 's', 't', 'r', 'i', 'n', 'g', '>' };
 
-XmlRpcResponder::XmlRpcResponder(Service& service)
-: Http::Responder(service)
-, _state(OnBegin)
+
+XmlRpcResponderBase::XmlRpcResponderBase(Service& service)
+: _state(OnBegin)
 , _utf8(1)
 , _ts(&_utf8)
 , _reader(_bin)
 , _formatter(_ts)
 , _service(&service)
-, _reply(0)
 , _proc(0)
 , _args(0)
+, _result(0)
 {
 }
 
 
-XmlRpcResponder::~XmlRpcResponder()
+XmlRpcResponderBase::~XmlRpcResponderBase()
 {
     _ts.reset();
 
@@ -108,7 +108,7 @@ XmlRpcResponder::~XmlRpcResponder()
 }
 
 
-void XmlRpcResponder::beginRequest(std::istream& is)
+void XmlRpcResponderBase::beginRequest(std::istream& is)
 {
     _state = OnBegin;
     _bin.reset(is);
@@ -116,58 +116,7 @@ void XmlRpcResponder::beginRequest(std::istream& is)
 }
 
 
-//void XmlRpcResponder::advanceRequest()
-//{
-//    try
-//    {
-//        for(;;)
-//        {
-//            const Xml::Node* node = _reader.advance();
-//            if( ! node)
-//                break;
-//            
-//            this->advance(*node);
-//        }
-//    }
-//    catch(const Xml::XmlError& error)
-//    {
-//        log_error( error.what() );
-//        //replyError(reply, 1, error.what());
-//    }
-//    catch(const SerializationError& error)
-//    {
-//        log_error( error.what() );
-//        //replyError(reply, 2, error.what());
-//    }
-//    catch(const ConversionError& error)
-//    {
-//        log_error( error.what() );
-//        //replyError(reply, 3, error.what());
-//    }
-//    catch(const Fault& fault)
-//    {
-//        log_error( fault.what() );
-//        //replyError(reply, fault.rc(), fault.what());
-//    }
-//    catch(const std::exception& error)
-//    {
-//        log_error( error.what() );
-//        throw;
-//    }
-//}
-
-
-void XmlRpcResponder::onBeginRequest(Http::Request& request, Http::Reply& reply, System::EventLoop& loop)
-{
-    //_state = OnBegin;
-    //_bin.reset( request.body() );
-    //_args = 0;
-
-    beginRequest( request.body() );
-}
-
-
-void XmlRpcResponder::onReadRequest(Http::Request& request, Http::Reply& reply, System::EventLoop& loop)
+void XmlRpcResponderBase::advanceRequest()
 {
     try
     {
@@ -182,87 +131,78 @@ void XmlRpcResponder::onReadRequest(Http::Request& request, Http::Reply& reply, 
     }
     catch(const Xml::XmlError& error)
     {
-        log_error( error.what() );
-        replyError(reply, 1, error.what());
+        throw Fault(error.what(), 1);
     }
     catch(const SerializationError& error)
     {
-        log_error( error.what() );
-        replyError(reply, 2, error.what());
+        throw Fault(error.what(), 2);
     }
     catch(const ConversionError& error)
     {
-        log_error( error.what() );
-        replyError(reply, 3, error.what());
-    }
-    catch(const Fault& fault)
-    {
-        log_error( fault.what() );
-        replyError(reply, fault.rc(), fault.what());
-    }
-    catch(const std::exception& error)
-    {
-        log_error( error.what() );
-        throw;
+        throw Fault(error.what(), 3);
     }
 }
 
 
-void XmlRpcResponder::onBeginReply(Http::Request& request, Http::Reply& reply, System::EventLoop& loop)
+void XmlRpcResponderBase::finishRequest(System::EventLoop& loop)
+{
+    if( ! _proc )
+    {
+        throw Fault("invalid XML-RPC", 4);
+    }
+
+    if( _args )
+    {
+        ++_args;
+        if( * _args )
+        {
+            throw Fault("invalid XML-RPC, missing arguments", 5);
+        }
+    }
+
+    _proc->beginCall(loop);
+}
+
+
+void XmlRpcResponderBase::formatReply(std::ostream& os)
 {
     try
     {
-        _reply = &reply;
-        _ts.attach( _reply->body() );
-
-        _ts.write( XMLRPC_XMLDECL, sizeof(XMLRPC_XMLDECL)/sizeof(Char) );
-        
-        reply.header().set("Content-Type", "text/xml");
-
         if( ! _proc )
-        {
-            throw Fault("invalid XML-RPC", 4);
-        }
+            throw Fault("invalid procedure", Fault::invalidXmlRpc);
 
-        if( _args )
-        {
-            ++_args;
-            if( * _args )
-            {
-                throw Fault("invalid XML-RPC, missing arguments", 5);
-            }
-        }
+        IDecomposer* rh = _proc->endCall();
+        
+        _ts.attach(os);
+        _ts.write( XMLRPC_XMLDECL, sizeof(XMLRPC_XMLDECL)/sizeof(Char) );
 
-        _proc->beginCall(loop);
+        _ts.write(XMLRPC_REPLY_BEGIN, sizeof(XMLRPC_REPLY_BEGIN)/sizeof(Char));
+        rh->format(_formatter);
+        _ts.write(XMLRPC_REPLY_END, sizeof(XMLRPC_REPLY_END)/sizeof(Char));
+        _ts.flush();
+
     }
-    catch (const Fault& fault)
+    catch(const Xml::XmlError& error)
     {
-        log_error( fault.what() );
-        replyError(reply, fault.rc(), fault.what());
+        throw Fault(error.what(), 1);
     }
-    catch(const std::exception& error)
+    catch(const SerializationError& error)
     {
-        log_error( error.what() );
-        throw;
+        throw Fault(error.what(), 2);
+    }
+    catch(const ConversionError& error)
+    {
+        throw Fault(error.what(), 3);
     }
 }
 
 
-void XmlRpcResponder::onWriteReply(Http::Request& request, Http::Reply& reply, System::EventLoop& loop)
-{
-}
-
-
-void XmlRpcResponder::replyError(Http::Reply& reply, int rc, const char* msg)
+void XmlRpcResponderBase::formatError(std::ostream& os, int rc, const char* msg)
 {
     // text stream might still have bytes in text buffer
     _ts.flush();
 
-    reply.clear();
-    reply.header().set("Content-Type", "text/xml");
-    reply.header().set("Connection", "close");
-
-    _ts.attach( reply.body() );
+    _ts.attach(os);
     
     _ts.write( XMLRPC_XMLDECL, sizeof(XMLRPC_XMLDECL)/sizeof(Char) );
 
@@ -301,64 +241,10 @@ void XmlRpcResponder::replyError(Http::Reply& reply, int rc, const char* msg)
     _ts.write(XMLRPC_FAULT_END, sizeof(XMLRPC_FAULT_END)/sizeof(Char));
     _ts.write(XMLRPC_METHODRESPONSE_END, sizeof(XMLRPC_METHODRESPONSE_END)/sizeof(Char));
     _ts.flush();
-
-    reply.beginSend(true);
 }
 
 
-void XmlRpcResponder::endReply()
-{
-    try
-    {
-        if( ! _proc )
-            throw Fault("invalid procedure", Fault::invalidXmlRpc);
-
-        IDecomposer* rh = _proc->endCall();
-        
-        _ts.write(XMLRPC_REPLY_BEGIN, sizeof(XMLRPC_REPLY_BEGIN)/sizeof(Char));
-        rh->format(_formatter);
-        _ts.write(XMLRPC_REPLY_END, sizeof(XMLRPC_REPLY_END)/sizeof(Char));
-        _ts.flush();
-
-        assert(_reply);
-        if( ! _reply)
-            throw std::logic_error("XML-RPC responder without reply");
-
-        _reply->beginSend(true);
-    }
-    catch (const Fault& fault)
-    {
-        log_error( fault.what() );
-        assert(_reply);
-        replyError(*_reply, fault.rc(), fault.what());
-    }
-    catch(const Xml::XmlError& error)
-    {
-        log_error( error.what() );
-        assert(_reply);
-        replyError( *_reply, 1, error.what());
-    }
-    catch(const SerializationError& error)
-    {
-        log_error( error.what() );
-        assert(_reply);
-        replyError(*_reply, 2, error.what());
-    }
-    catch(const ConversionError& error)
-    {
-        log_error( error.what() );
-        assert(_reply);
-        replyError(*_reply, 3, error.what());
-    }
-    catch(const std::exception& error)
-    {
-        log_error( error.what() );
-        throw;
-    }
-}
-
-
-void XmlRpcResponder::advance(const Pt::Xml::Node& node)
+void XmlRpcResponderBase::advance(const Pt::Xml::Node& node)
 {
     switch(_state)
     {
@@ -508,6 +394,108 @@ void XmlRpcResponder::advance(const Pt::Xml::Node& node)
         }
     }
 }
+
+
+XmlRpcResponder::XmlRpcResponder(Service& service)
+: Http::Responder(service)
+, XmlRpcResponderBase(service)
+, _reply(0)
+{
 }
 
+
+XmlRpcResponder::~XmlRpcResponder()
+{
 }
+
+
+void XmlRpcResponder::onBeginRequest(Http::Request& request, Http::Reply& reply, System::EventLoop& loop)
+{
+    XmlRpcResponderBase::beginRequest( request.body() );
+}
+
+
+void XmlRpcResponder::onReadRequest(Http::Request& request, Http::Reply& reply, System::EventLoop& loop)
+{
+    try
+    {
+        advanceRequest();
+    }
+    catch(const Fault& fault)
+    {
+        log_error( fault.what() );
+        replyError(reply, fault.rc(), fault.what());
+    }
+    catch(const std::exception& error)
+    {
+        log_error( error.what() );
+        throw;
+    }
+}
+
+
+void XmlRpcResponder::onBeginReply(Http::Request& request, Http::Reply& reply, System::EventLoop& loop)
+{
+    try
+    {
+        _reply = &reply;      
+        reply.header().set("Content-Type", "text/xml");
+
+        finishRequest(loop);
+    }
+    catch (const Fault& fault)
+    {
+        log_error( fault.what() );
+        replyError(reply, fault.rc(), fault.what());
+    }
+    catch(const std::exception& error)
+    {
+        log_error( error.what() );
+        throw;
+    }
+}
+
+
+void XmlRpcResponder::onWriteReply(Http::Request& request, Http::Reply& reply, System::EventLoop& loop)
+{
+}
+
+
+void XmlRpcResponder::onEndReply()
+{
+    try
+    {
+        assert(_reply);
+        if( ! _reply)
+            throw std::logic_error("XML-RPC responder without reply");
+
+        formatReply( _reply->body() );
+
+        _reply->beginSend(true);
+    }
+    catch (const Fault& fault)
+    {
+        replyError(*_reply, fault.rc(), fault.what());
+    }
+    catch(const std::exception& error)
+    {
+        log_error( error.what() );
+        throw;
+    }
+}
+
+
+void XmlRpcResponder::replyError(Http::Reply& reply, int rc, const char* msg)
+{
+    reply.clear();
+    reply.header().set("Content-Type", "text/xml");
+    reply.header().set("Connection", "close");
+
+    formatError( reply.body(), rc, msg );
+
+    reply.beginSend(true);
+}
+
+} // namespace XmlRpc
+
+} // namespace Pt

@@ -64,22 +64,6 @@ std::ostream& HttpClientImpl::prepareRequest()
 }
 
 
-void HttpClientImpl::onBeginCall()
-{
-    _client.beginReceive();
-}
-
-
-void HttpClientImpl::onEndCall()
-{
-    if( _error) 
-    {
-        _error = false;
-        throw;
-    }
-}
-
-
 std::istream& HttpClientImpl::onCall()
 {
     _client.send();

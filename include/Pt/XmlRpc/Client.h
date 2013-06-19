@@ -62,7 +62,7 @@ class PT_XMLRPC_API Client : public NonCopyable
         const IRemoteProcedure* activeProcedure() const;
 
     protected:       
-        virtual void onBeginCall() = 0;
+        virtual void onBeginRequest() = 0;
 
         virtual void onEndCall() = 0;
 
@@ -71,7 +71,7 @@ class PT_XMLRPC_API Client : public NonCopyable
         virtual void onCancel() = 0;
 
     protected:
-        void beginRequest(std::ostream& os);
+        void formatRequest(std::ostream& os);
         
         bool beginReply(std::istream& is);
 

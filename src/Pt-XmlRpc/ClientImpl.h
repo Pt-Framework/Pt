@@ -73,7 +73,7 @@ class ClientImpl
 
         void endCall();
 
-        void beginRequest(std::ostream& os);
+        void formatRequest(std::ostream& os);
 
         bool beginReply(std::istream& is);
 

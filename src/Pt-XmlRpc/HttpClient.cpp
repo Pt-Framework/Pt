@@ -140,21 +140,25 @@ Http::Client& HttpClient::client()
 }
 
 
-void HttpClient::onBeginCall()
+void HttpClient::onBeginRequest()
 {
     // prepare HTTP request
     std::ostream& os = _impl->prepareRequest();
 
     // format XML-RPC request
-    Client::beginRequest(os);
+    Client::formatRequest(os);
 
-    _impl->onBeginCall();
+    _impl->client().beginReceive();
 }
 
 
 void HttpClient::onEndCall()
 {
-    _impl->onEndCall();
+    if( _impl->isError() ) 
+    {
+        _impl->setError(false);
+        throw;
+    }
 }
 
 
@@ -164,7 +168,7 @@ void HttpClient::onCall()
     std::ostream& os = _impl->prepareRequest();
 
     // format XML-RPC request
-    Client::beginRequest(os);
+    Client::formatRequest(os);
 
     // send HTTP request and start receiving HTTP reply
     std::istream& is = _impl->onCall();
