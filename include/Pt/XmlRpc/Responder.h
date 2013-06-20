@@ -74,6 +74,9 @@ class PT_XMLRPC_API Responder
     protected:
         virtual void onEndCall() = 0;
 
+        // TODO:
+        // virtual void onCancel() = 0;
+
     protected:
         void beginRequest(std::istream& is);
 
