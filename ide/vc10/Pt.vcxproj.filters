@@ -789,6 +789,9 @@
     <ClInclude Include="..\..\include\Pt\Utf32Codec.h">
       <Filter>Pt</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\XmlRpc\HttpResponder.h">
+      <Filter>Pt-XmlRpc</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -1568,6 +1571,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt\Utf32Codec.cpp">
       <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-XmlRpc\HttpResponder.cpp">
+      <Filter>Pt-XmlRpc</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

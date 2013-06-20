@@ -156,11 +156,11 @@ int main(int argc, char* argv[])
     server.listen(ip, port, options);
     
     EchoService service;
-    Pt::Http::MapUrl servlet("/myservice", service);
+
+    Pt::XmlRpc::HttpService httpService(service);
+    Pt::Http::MapUrl servlet("/myservice", httpService);
     server.addServlet(servlet);
 
-    //loop.setIdleTimeout(5000);
-    //loop.timeout() += Pt::slot(loop, &Pt::System::EventLoop::exit);
     loop.run();
   }
   catch (const std::exception& e)

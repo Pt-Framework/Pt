@@ -30,42 +30,21 @@
 #define Pt_XmlRpc_Service_h
 
 #include <Pt/XmlRpc/Api.h>
+#include <Pt/XmlRpc/Responder.h>
 #include <Pt/Http/Service.h>
 #include <Pt/System/EventLoop.h>
 #include <Pt/System/Mutex.h>
 #include <Pt/Decomposer.h>
 #include <Pt/Composer.h>
-#include <Pt/Void.h>
+#include <Pt/NonCopyable.h>
 #include <Pt/TypeTraits.h>
+#include <Pt/Void.h>
 #include <string>
 #include <map>
 
 namespace Pt {
 
 namespace XmlRpc {
-
-class Responder
-{
-    public:
-        Responder()
-        {}
-
-        virtual ~Responder()
-        {}
-
-        SerializationContext& sctx()
-        { return _context; }
-
-        void endReply()
-        { this->onEndReply(); }
-
-    protected:
-        virtual void onEndReply() = 0;
-
-    private:
-        SerializationContext _context;
-};
-
 
 class ServiceProcedure
 {
@@ -74,7 +53,7 @@ class ServiceProcedure
         {}
 
         void setReady()
-        { _responder->endReply(); }
+        { _responder->endCall(); }
 
         virtual IComposer** beginArgs() = 0;
 
@@ -118,13 +97,16 @@ namespace Pt {
 
 namespace XmlRpc {
 
-class PT_XMLRPC_API Service : public Http::Service
+class PT_XMLRPC_API Service : private NonCopyable
 {
     public:
-        Service()
-        { }
+        Service();
 
         virtual ~Service();
+
+        ServiceProcedure* getProcedure(const std::string& name, Responder& resp);
+
+        void releaseProcedure(ServiceProcedure* proc);
 
         template <typename R>
         void registerFunction(const std::string& name, R (*fn)())
@@ -365,21 +347,30 @@ class PT_XMLRPC_API Service : public Http::Service
         }
 
     protected:
-        virtual Http::Responder* onGetResponder(const Http::Request&);
-
-        virtual void onReleaseResponder(Http::Responder* resp);
-
-    public:
-        ServiceProcedure* getProcedure(const std::string& name, Responder& resp);
-
-        void releaseProcedure(ServiceProcedure* proc);
-
         void registerProcedure(const std::string& name, ServiceProcedureDef* proc);
 
     private:
         typedef std::map<std::string, ServiceProcedureDef*> ProcedureMap;
         ProcedureMap _procedures;
         System::Mutex _mtx;
+};
+
+
+class PT_XMLRPC_API HttpService : public Http::Service
+                                , private NonCopyable
+{
+    public:
+        HttpService(XmlRpc::Service& rpcService);
+
+        virtual ~HttpService();
+
+    protected:
+        virtual Http::Responder* onGetResponder(const Http::Request&);
+
+        virtual void onReleaseResponder(Http::Responder* resp);
+
+    private:
+        XmlRpc::Service* _rpcService;
 };
 
 } // namespace XmlRpc

@@ -140,7 +140,7 @@ Http::Client& HttpClient::client()
 }
 
 
-void HttpClient::onBeginRequest()
+void HttpClient::onBeginCall()
 {
     // prepare HTTP request
     std::ostream& os = _impl->prepareRequest();

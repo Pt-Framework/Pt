@@ -57,7 +57,7 @@ void Client::beginCall(IComposer& r, IRemoteProcedure& method, IDecomposer** arg
 {
     _impl->beginCall(r, method, argv, argc);
 
-    this->onBeginRequest();
+    this->onBeginCall();
 }
 
 

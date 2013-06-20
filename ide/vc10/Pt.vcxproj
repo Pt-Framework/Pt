@@ -170,6 +170,7 @@
     <ClInclude Include="..\..\include\Pt\XmlRpc\Fault.h" />
     <ClInclude Include="..\..\include\Pt\XmlRpc\Formatter.h" />
     <ClInclude Include="..\..\include\Pt\XmlRpc\HttpClient.h" />
+    <ClInclude Include="..\..\include\Pt\XmlRpc\HttpResponder.h" />
     <ClInclude Include="..\..\include\Pt\XmlRpc\RemoteProcedure.h" />
     <ClInclude Include="..\..\include\Pt\XmlRpc\Responder.h" />
     <ClInclude Include="..\..\include\Pt\XmlRpc\Result.h" />
@@ -420,6 +421,7 @@
     <ClCompile Include="..\..\src\Pt-XmlRpc\Formatter.cpp" />
     <ClCompile Include="..\..\src\Pt-XmlRpc\HttpClient.cpp" />
     <ClCompile Include="..\..\src\Pt-XmlRpc\HttpClientImpl.cpp" />
+    <ClCompile Include="..\..\src\Pt-XmlRpc\HttpResponder.cpp" />
     <ClCompile Include="..\..\src\Pt-XmlRpc\Responder.cpp" />
     <ClCompile Include="..\..\src\Pt-XmlRpc\Scanner.cpp" />
     <ClCompile Include="..\..\src\Pt-XmlRpc\Service.cpp" />

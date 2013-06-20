@@ -68,7 +68,7 @@ class ClientImpl
         ClientImpl();
 
         ~ClientImpl();
-
+        
         void beginCall(IComposer& r, IRemoteProcedure& method, IDecomposer** argv, unsigned argc);
 
         void endCall();

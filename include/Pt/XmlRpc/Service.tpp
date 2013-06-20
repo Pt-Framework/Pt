@@ -48,20 +48,20 @@ template < typename R,
 class BasicServiceProcedure : public ServiceProcedure
 {
     public:
-        BasicServiceProcedure( const Callable<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>& cb, Responder& ctx)
-        : ServiceProcedure(ctx)
+        BasicServiceProcedure( const Callable<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>& cb, Responder& resp)
+        : ServiceProcedure(resp)
         , _cb(0)
-        , _a1(&ctx.sctx())
-        , _a2(&ctx.sctx())
-        , _a3(&ctx.sctx())
-        , _a4(&ctx.sctx())
-        , _a5(&ctx.sctx())
-        , _a6(&ctx.sctx())
-        , _a7(&ctx.sctx())
-        , _a8(&ctx.sctx())
-        , _a9(&ctx.sctx())
-        , _a10(&ctx.sctx())
-        , _r(&ctx.sctx())
+        , _a1(&resp.context())
+        , _a2(&resp.context())
+        , _a3(&resp.context())
+        , _a4(&resp.context())
+        , _a5(&resp.context())
+        , _a6(&resp.context())
+        , _a7(&resp.context())
+        , _a8(&resp.context())
+        , _a9(&resp.context())
+        , _a10(&resp.context())
+        , _r(&resp.context())
         {
             _cb = cb.clone();
 
@@ -168,19 +168,19 @@ class BasicServiceProcedure<R, A1, A2, A3, A4, A5, A6, A7, A8, A9,
                             Pt::Void> : public ServiceProcedure
 {
     public:
-        BasicServiceProcedure( const Callable<R, A1, A2, A3, A4, A5, A6, A7, A8, A9>& cb, Responder& ctx)
-        : ServiceProcedure(ctx)
+        BasicServiceProcedure( const Callable<R, A1, A2, A3, A4, A5, A6, A7, A8, A9>& cb, Responder& resp)
+        : ServiceProcedure(resp)
         , _cb(0)
-        , _a1(&ctx.sctx())
-        , _a2(&ctx.sctx())
-        , _a3(&ctx.sctx())
-        , _a4(&ctx.sctx())
-        , _a5(&ctx.sctx())
-        , _a6(&ctx.sctx())
-        , _a7(&ctx.sctx())
-        , _a8(&ctx.sctx())
-        , _a9(&ctx.sctx())
-        , _r(&ctx.sctx())
+        , _a1(&resp.context())
+        , _a2(&resp.context())
+        , _a3(&resp.context())
+        , _a4(&resp.context())
+        , _a5(&resp.context())
+        , _a6(&resp.context())
+        , _a7(&resp.context())
+        , _a8(&resp.context())
+        , _a9(&resp.context())
+        , _r(&resp.context())
         {
             _cb = cb.clone();
 
@@ -282,18 +282,18 @@ class BasicServiceProcedure<R, A1, A2, A3, A4, A5, A6, A7, A8,
                             Pt::Void> : public ServiceProcedure
 {
     public:
-        BasicServiceProcedure( const Callable<R, A1, A2, A3, A4, A5, A6, A7, A8>& cb, Responder& ctx)
-        : ServiceProcedure(ctx)
+        BasicServiceProcedure( const Callable<R, A1, A2, A3, A4, A5, A6, A7, A8>& cb, Responder& resp)
+        : ServiceProcedure(resp)
         , _cb(0)
-        , _a1(&ctx.sctx())
-        , _a2(&ctx.sctx())
-        , _a3(&ctx.sctx())
-        , _a4(&ctx.sctx())
-        , _a5(&ctx.sctx())
-        , _a6(&ctx.sctx())
-        , _a7(&ctx.sctx())
-        , _a8(&ctx.sctx())
-        , _r(&ctx.sctx())
+        , _a1(&resp.context())
+        , _a2(&resp.context())
+        , _a3(&resp.context())
+        , _a4(&resp.context())
+        , _a5(&resp.context())
+        , _a6(&resp.context())
+        , _a7(&resp.context())
+        , _a8(&resp.context())
+        , _r(&resp.context())
         {
             _cb = cb.clone();
 
@@ -390,17 +390,17 @@ class BasicServiceProcedure<R, A1, A2, A3, A4, A5, A6, A7,
                             Pt::Void> : public ServiceProcedure
 {
     public:
-        BasicServiceProcedure( const Callable<R, A1, A2, A3, A4, A5, A6, A7>& cb, Responder& ctx)
-        : ServiceProcedure(ctx)
+        BasicServiceProcedure( const Callable<R, A1, A2, A3, A4, A5, A6, A7>& cb, Responder& resp)
+        : ServiceProcedure(resp)
         , _cb(0)
-        , _a1(&ctx.sctx())
-        , _a2(&ctx.sctx())
-        , _a3(&ctx.sctx())
-        , _a4(&ctx.sctx())
-        , _a5(&ctx.sctx())
-        , _a6(&ctx.sctx())
-        , _a7(&ctx.sctx())
-        , _r(&ctx.sctx())
+        , _a1(&resp.context())
+        , _a2(&resp.context())
+        , _a3(&resp.context())
+        , _a4(&resp.context())
+        , _a5(&resp.context())
+        , _a6(&resp.context())
+        , _a7(&resp.context())
+        , _r(&resp.context())
         {
             _cb = cb.clone();
 
@@ -492,16 +492,16 @@ class BasicServiceProcedure<R, A1, A2, A3, A4, A5, A6,
                             Pt::Void> : public ServiceProcedure
 {
     public:
-        BasicServiceProcedure( const Callable<R, A1, A2, A3, A4, A5, A6>& cb, Responder& ctx)
-        : ServiceProcedure(ctx)
+        BasicServiceProcedure( const Callable<R, A1, A2, A3, A4, A5, A6>& cb, Responder& resp)
+        : ServiceProcedure(resp)
         , _cb(0)
-        , _a1(&ctx.sctx())
-        , _a2(&ctx.sctx())
-        , _a3(&ctx.sctx())
-        , _a4(&ctx.sctx())
-        , _a5(&ctx.sctx())
-        , _a6(&ctx.sctx())
-        , _r(&ctx.sctx())
+        , _a1(&resp.context())
+        , _a2(&resp.context())
+        , _a3(&resp.context())
+        , _a4(&resp.context())
+        , _a5(&resp.context())
+        , _a6(&resp.context())
+        , _r(&resp.context())
         {
             _cb = cb.clone();
 
@@ -588,15 +588,15 @@ class BasicServiceProcedure<R, A1, A2, A3, A4, A5,
                             Pt::Void> : public ServiceProcedure
 {
     public:
-        BasicServiceProcedure( const Callable<R, A1, A2, A3, A4, A5>& cb, Responder& ctx)
-        : ServiceProcedure(ctx)
+        BasicServiceProcedure( const Callable<R, A1, A2, A3, A4, A5>& cb, Responder& resp)
+        : ServiceProcedure(resp)
         , _cb(0)
-        , _a1(&ctx.sctx())
-        , _a2(&ctx.sctx())
-        , _a3(&ctx.sctx())
-        , _a4(&ctx.sctx())
-        , _a5(&ctx.sctx())
-        , _r(&ctx.sctx())
+        , _a1(&resp.context())
+        , _a2(&resp.context())
+        , _a3(&resp.context())
+        , _a4(&resp.context())
+        , _a5(&resp.context())
+        , _r(&resp.context())
         {
             _cb = cb.clone();
 
@@ -678,14 +678,14 @@ class BasicServiceProcedure<R, A1, A2, A3, A4,
                             Pt::Void> : public ServiceProcedure
 {
     public:
-        BasicServiceProcedure( const Callable<R, A1, A2, A3, A4>& cb, Responder& ctx)
-        : ServiceProcedure(ctx)
+        BasicServiceProcedure( const Callable<R, A1, A2, A3, A4>& cb, Responder& resp)
+        : ServiceProcedure(resp)
         , _cb(0)
-        , _a1(&ctx.sctx())
-        , _a2(&ctx.sctx())
-        , _a3(&ctx.sctx())
-        , _a4(&ctx.sctx())
-        , _r(&ctx.sctx())
+        , _a1(&resp.context())
+        , _a2(&resp.context())
+        , _a3(&resp.context())
+        , _a4(&resp.context())
+        , _r(&resp.context())
         {
             _cb = cb.clone();
 
@@ -762,13 +762,13 @@ class BasicServiceProcedure<R, A1, A2, A3,
                             Pt::Void> : public ServiceProcedure
 {
     public:
-        BasicServiceProcedure( const Callable<R, A1, A2, A3>& cb, Responder& ctx )
-        : ServiceProcedure(ctx)
+        BasicServiceProcedure( const Callable<R, A1, A2, A3>& cb, Responder& resp )
+        : ServiceProcedure(resp)
         , _cb(0)
-        , _a1(&ctx.sctx())
-        , _a2(&ctx.sctx())
-        , _a3(&ctx.sctx())
-        , _r(&ctx.sctx())
+        , _a1(&resp.context())
+        , _a2(&resp.context())
+        , _a3(&resp.context())
+        , _r(&resp.context())
         {
             _cb = cb.clone();
 
@@ -840,12 +840,12 @@ class BasicServiceProcedure<R, A1, A2,
                             Pt::Void> : public ServiceProcedure
 {
     public:
-        BasicServiceProcedure( const Callable<R, A1, A2>& cb, Responder& ctx )
-        : ServiceProcedure(ctx)
+        BasicServiceProcedure( const Callable<R, A1, A2>& cb, Responder& resp )
+        : ServiceProcedure(resp)
         , _cb(0)
-        , _a1(&ctx.sctx())
-        , _a2(&ctx.sctx())
-        , _r(&ctx.sctx())
+        , _a1(&resp.context())
+        , _a2(&resp.context())
+        , _r(&resp.context())
         {
             _cb = cb.clone();
 
@@ -912,11 +912,11 @@ class BasicServiceProcedure<R, A1,
                             Pt::Void> : public ServiceProcedure
 {
     public:
-        BasicServiceProcedure( const Callable<R, A1>& cb, Responder& ctx)
-        : ServiceProcedure(ctx)
+        BasicServiceProcedure( const Callable<R, A1>& cb, Responder& resp)
+        : ServiceProcedure(resp)
         , _cb(0)
-        , _a1(&ctx.sctx())
-        , _r(&ctx.sctx())
+        , _a1(&resp.context())
+        , _r(&resp.context())
         {
             _cb = cb.clone();
 
@@ -980,10 +980,10 @@ class BasicServiceProcedure<R,
                             Pt::Void> : public ServiceProcedure
 {
     public:
-        BasicServiceProcedure(const Callable<R>& cb, Responder& ctx)
-        : ServiceProcedure(ctx)
+        BasicServiceProcedure(const Callable<R>& cb, Responder& resp)
+        : ServiceProcedure(resp)
         , _cb(0)
-        , _r(&ctx.sctx())
+        , _r(&resp.context())
         {
             _cb = cb.clone();
 
@@ -1036,10 +1036,10 @@ class AsyncProcedure : public ServiceProcedure
         typedef A1 Arg1T;
 
     public:
-        AsyncProcedure(Responder& ctx)
-        : ServiceProcedure(ctx)
-        , _a1(&ctx.sctx())
-        , _r(&ctx.sctx())
+        AsyncProcedure(Responder& resp)
+        : ServiceProcedure(resp)
+        , _a1(&resp.context())
+        , _r(&resp.context())
         {
             _args[0] = &_a1;
             _args[1] = 0;
@@ -1089,9 +1089,9 @@ class AsyncProcedure<R,
         typedef Pt::Void Arg1T;
 
     public:
-        AsyncProcedure(Responder& ctx)
-        : ServiceProcedure(ctx)
-        , _r( &ctx.sctx() )
+        AsyncProcedure(Responder& resp)
+        : ServiceProcedure(resp)
+        , _r( &resp.context() )
         {
             _args[0] = 0;
         }
@@ -1150,9 +1150,9 @@ class BasicProcedureDef : public ServiceProcedureDef
         }
 
     protected:
-        virtual ServiceProcedure* onCreateProcedure(Responder& ctx) const
+        virtual ServiceProcedure* onCreateProcedure(Responder& resp) const
         { 
-            return new BasicServiceProcedure<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>( *_cb, ctx ); 
+            return new BasicServiceProcedure<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>( *_cb, resp ); 
         }
 
     private:
@@ -1176,12 +1176,12 @@ class AsyncProcedureDef : public ServiceProcedureDef
         }
 
     protected:
-        virtual ServiceProcedure* onCreateProcedure(Responder& ctx) const
+        virtual ServiceProcedure* onCreateProcedure(Responder& resp) const
         {
             typedef typename CallT::ReturnT R;
             typedef typename CallT::Arg1T A1;
 
-            AsyncProcedure<R, A1>* proc = _cb->call(ctx);
+            AsyncProcedure<R, A1>* proc = _cb->call(resp);
             return proc;
         }
 

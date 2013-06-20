@@ -27,7 +27,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "Pt/XmlRpc/Service.h"
-#include "Pt/XmlRpc/Responder.h"
+#include "Pt/XmlRpc/HttpResponder.h"
 #include "Pt/Xml/StartElement.h"
 #include "Pt/Xml/Characters.h"
 #include "Pt/Xml/EndElement.h"
@@ -38,8 +38,15 @@ namespace Pt {
 
 namespace XmlRpc {
 
+Service::Service()
+{ 
+}
+
+
 Service::~Service()
 {
+    System::MutexLock lock(_mtx);
+
     ProcedureMap::iterator it;
     for(it = _procedures.begin(); it != _procedures.end(); ++it)
     {
@@ -88,7 +95,19 @@ void Service::registerProcedure(const std::string& name, ServiceProcedureDef* pr
 }
 
 
-Http::Responder* Service::onGetResponder(const Http::Request& req)
+
+HttpService::HttpService(XmlRpc::Service& rpcService)
+: _rpcService(&rpcService)
+{ 
+}
+
+
+HttpService::~HttpService()
+{
+}
+
+
+Http::Responder* HttpService::onGetResponder(const Http::Request& req)
 {
     //if (req.isHeaderValue("Content-Type", "text/xml"))
     //    return new XmlRpcResponder(*this);
@@ -96,11 +115,11 @@ Http::Responder* Service::onGetResponder(const Http::Request& req)
     //if (req.isHeaderValue("Content-Type", "text/xml; charset=UTF-8")) //! ### Temporary fix ###
     //    return new XmlRpcResponder(*this);
 
-    return new XmlRpcResponder(*this);
+    return new HttpResponder(*this, *_rpcService);
 }
 
 
-void Service::onReleaseResponder(Http::Responder* resp)
+void HttpService::onReleaseResponder(Http::Responder* resp)
 {
     delete resp;
 }

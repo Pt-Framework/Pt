@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2009-2013 by Dr. Marc Boris Duerner
-  * 
+ * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -25,82 +25,44 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef Pt_XmlRpc_Responder_h
-#define Pt_XmlRpc_Responder_h
+#ifndef Pt_XmlRpc_HttpResponder_h
+#define Pt_XmlRpc_HttpResponder_h
 
 #include <Pt/XmlRpc/Api.h>
-#include <Pt/XmlRpc/Scanner.h>
-#include <Pt/XmlRpc/Formatter.h>
-#include <Pt/Xml/InputSource.h>
-#include <Pt/Xml/XmlReader.h>
-#include <Pt/System/EventLoop.h>
-#include <Pt/SerializationContext.h>
-#include <Pt/Serializer.h>
-#include <Pt/TextStream.h>
+#include <Pt/XmlRpc/Responder.h>
+#include <Pt/Http/Responder.h>
 
 namespace Pt {
 
 namespace XmlRpc {
 
-class Service;
-class ServiceProcedure;
+class HttpService;
 
-class PT_XMLRPC_API Responder
+class PT_XMLRPC_API HttpResponder : public Http::Responder
+                                  , public Responder
 {
-    enum State
-    {
-        OnBegin,
-        OnMethodCallBegin,
-        OnMethodNameBegin,
-        OnMethodName,
-        OnMethodNameEnd,
-        OnParams,
-        OnParam,
-        OnParamsEnd,
-        OnMethodCallEnd
-    };
-
     public:
-        Responder(Service& service);
+        HttpResponder(HttpService& httpService, Service& rpcService);
 
-        virtual ~Responder();
-
-        SerializationContext& context()
-        { return _context; }
-
-        void endCall()
-        { this->onEndCall(); }
+        ~HttpResponder();
 
     protected:
-        virtual void onEndCall() = 0;
+        void onBeginRequest(Http::Request& request, Http::Reply& reply, System::EventLoop& loop);
+
+        void onReadRequest(Http::Request& request, Http::Reply& reply, System::EventLoop& loop);
+
+        void onBeginReply(Http::Request& request, Http::Reply& reply, System::EventLoop& loop);
+
+        void onWriteReply(Http::Request& request, Http::Reply& reply, System::EventLoop& loop);
+
+        void replyError(Http::Reply& reply, int rc, const char* msg);
 
     protected:
-        void beginRequest(std::istream& is);
-
-        void advanceRequest();
-
-        void finishRequest(System::EventLoop& loop);
-
-        void formatReply(std::ostream& os);
-
-        void formatError(std::ostream& os, int rc, const char* msg);
+        // inheritdoc
+        virtual void onEndCall();
 
     private:
-        void advance(const Pt::Xml::Node& node);
-
-    private:
-       SerializationContext _context;
-       State _state;
-       Utf8Codec _utf8;
-       TextOStream _ts;
-       Xml::BinaryInputSource _bin;
-       Xml::XmlReader _reader;
-       Scanner _scanner;
-       Formatter _formatter;
-       Service* _service;
-       ServiceProcedure* _proc;
-       IComposer** _args;
-       IDecomposer* _result;
+         Http::Reply* _reply;
 };
 
 } // namespace XmlRpc

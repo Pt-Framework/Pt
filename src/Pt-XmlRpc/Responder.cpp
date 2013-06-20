@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2009 by Dr. Marc Boris Duerner
- * Copyright (C) 2009 by Tommi Meakitalo
+ * Copyright (C) 2009-2013 by Dr. Marc Boris Duerner
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -28,12 +27,11 @@
  */
 #include "Pt/XmlRpc/Responder.h"
 #include "Pt/XmlRpc/Fault.h"
+#include "Pt/XmlRpc/Service.h"
 #include "Pt/Xml/XmlError.h"
 #include "Pt/Xml/StartElement.h"
 #include "Pt/Xml/Characters.h"
 #include "Pt/Xml/EndElement.h"
-#include "Pt/Http/Reply.h"
-#include <Pt/Http/Request.h>
 #include <Pt/System/Logger.h>
 #include "Pt/Utf8Codec.h"
 #include "Pt/Convert.h"
@@ -85,7 +83,7 @@ static const Pt::Char XMLRPC_INT_END[]     = { '<', '/', 'i', 'n', 't', '>' };
 static const Pt::Char XMLRPC_STRING_END[]  = { '<', '/', 's', 't', 'r', 'i', 'n', 'g', '>' };
 
 
-XmlRpcResponderBase::XmlRpcResponderBase(Service& service)
+Responder::Responder(Service& service)
 : _state(OnBegin)
 , _utf8(1)
 , _ts(&_utf8)
@@ -99,7 +97,7 @@ XmlRpcResponderBase::XmlRpcResponderBase(Service& service)
 }
 
 
-XmlRpcResponderBase::~XmlRpcResponderBase()
+Responder::~Responder()
 {
     _ts.reset();
 
@@ -108,7 +106,7 @@ XmlRpcResponderBase::~XmlRpcResponderBase()
 }
 
 
-void XmlRpcResponderBase::beginRequest(std::istream& is)
+void Responder::beginRequest(std::istream& is)
 {
     _state = OnBegin;
     _bin.reset(is);
@@ -116,7 +114,7 @@ void XmlRpcResponderBase::beginRequest(std::istream& is)
 }
 
 
-void XmlRpcResponderBase::advanceRequest()
+void Responder::advanceRequest()
 {
     try
     {
@@ -144,7 +142,7 @@ void XmlRpcResponderBase::advanceRequest()
 }
 
 
-void XmlRpcResponderBase::finishRequest(System::EventLoop& loop)
+void Responder::finishRequest(System::EventLoop& loop)
 {
     if( ! _proc )
     {
@@ -164,7 +162,7 @@ void XmlRpcResponderBase::finishRequest(System::EventLoop& loop)
 }
 
 
-void XmlRpcResponderBase::formatReply(std::ostream& os)
+void Responder::formatReply(std::ostream& os)
 {
     try
     {
@@ -197,7 +195,7 @@ void XmlRpcResponderBase::formatReply(std::ostream& os)
 }
 
 
-void XmlRpcResponderBase::formatError(std::ostream& os, int rc, const char* msg)
+void Responder::formatError(std::ostream& os, int rc, const char* msg)
 {
     // text stream might still have bytes in text buffer
     _ts.flush();
@@ -244,7 +242,7 @@ void XmlRpcResponderBase::formatError(std::ostream& os, int rc, const char* msg)
 }
 
 
-void XmlRpcResponderBase::advance(const Pt::Xml::Node& node)
+void Responder::advance(const Pt::Xml::Node& node)
 {
     switch(_state)
     {
@@ -393,107 +391,6 @@ void XmlRpcResponderBase::advance(const Pt::Xml::Node& node)
             break;
         }
     }
-}
-
-
-XmlRpcResponder::XmlRpcResponder(Service& service)
-: Http::Responder(service)
-, XmlRpcResponderBase(service)
-, _reply(0)
-{
-}
-
-
-XmlRpcResponder::~XmlRpcResponder()
-{
-}
-
-
-void XmlRpcResponder::onBeginRequest(Http::Request& request, Http::Reply& reply, System::EventLoop& loop)
-{
-    XmlRpcResponderBase::beginRequest( request.body() );
-}
-
-
-void XmlRpcResponder::onReadRequest(Http::Request& request, Http::Reply& reply, System::EventLoop& loop)
-{
-    try
-    {
-        advanceRequest();
-    }
-    catch(const Fault& fault)
-    {
-        log_error( fault.what() );
-        replyError(reply, fault.rc(), fault.what());
-    }
-    catch(const std::exception& error)
-    {
-        log_error( error.what() );
-        throw;
-    }
-}
-
-
-void XmlRpcResponder::onBeginReply(Http::Request& request, Http::Reply& reply, System::EventLoop& loop)
-{
-    try
-    {
-        _reply = &reply;      
-        reply.header().set("Content-Type", "text/xml");
-
-        finishRequest(loop);
-    }
-    catch (const Fault& fault)
-    {
-        log_error( fault.what() );
-        replyError(reply, fault.rc(), fault.what());
-    }
-    catch(const std::exception& error)
-    {
-        log_error( error.what() );
-        throw;
-    }
-}
-
-
-void XmlRpcResponder::onWriteReply(Http::Request& request, Http::Reply& reply, System::EventLoop& loop)
-{
-}
-
-
-void XmlRpcResponder::onEndReply()
-{
-    try
-    {
-        assert(_reply);
-        if( ! _reply)
-            throw std::logic_error("XML-RPC responder without reply");
-
-        formatReply( _reply->body() );
-
-        _reply->beginSend(true);
-    }
-    catch (const Fault& fault)
-    {
-        replyError(*_reply, fault.rc(), fault.what());
-    }
-    catch(const std::exception& error)
-    {
-        log_error( error.what() );
-        throw;
-    }
-}
-
-
-void XmlRpcResponder::replyError(Http::Reply& reply, int rc, const char* msg)
-{
-    reply.clear();
-    reply.header().set("Content-Type", "text/xml");
-    reply.header().set("Connection", "close");
-
-    formatError( reply.body(), rc, msg );
-
-    reply.beginSend(true);
 }
 
 } // namespace XmlRpc

@@ -35,12 +35,12 @@ namespace Pt {
 
 namespace XmlRpc {
 
-class IResult
+class ResultBase
 {
     public:
-        IResult()
-            : _failed(false)
-            { }
+        ResultBase()
+        : _failed(false)
+        { }
 
         void setFault(int rc, const std::string& msg)
         {
@@ -55,7 +55,8 @@ class IResult
             _fault.clear();
         }
 
-        Fault& fault()  { return _fault; }
+        Fault& fault()  
+        { return _fault; }
 
         void checkFault() const
         {
@@ -72,18 +73,15 @@ class IResult
 };
 
 template <typename R>
-class Result : public IResult
+class Result : public ResultBase
 {
     public:
         explicit Result(Client& client)
-            : _client(client)
-        {
-        }
+        : _client(client)
+        { }
 
         R& value()
-        {
-            return _result;
-        }
+        { return _result; }
 
         const R& get() const
         {

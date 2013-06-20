@@ -62,7 +62,7 @@ class PT_XMLRPC_API Client : public NonCopyable
         const IRemoteProcedure* activeProcedure() const;
 
     protected:       
-        virtual void onBeginRequest() = 0;
+        virtual void onBeginCall() = 0;
 
         virtual void onEndCall() = 0;
 
