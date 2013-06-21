@@ -169,6 +169,10 @@ bool ClientImpl::advanceReply()
             advance(*node); // SerializationError, ConversionError
         }
 
+        // TODO: return true if more is available, false if finished or
+        //       an error occured. Do not call finishReply() here but 
+        //       let caller do it.
+         
         return true;
     }
     catch(const Xml::XmlError& error)

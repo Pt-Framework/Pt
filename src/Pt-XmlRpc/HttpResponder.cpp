@@ -63,6 +63,12 @@ void HttpResponder::onReadRequest(Http::Request& request, Http::Reply& reply, Sy
     try
     {
         advanceRequest();
+
+        // advanceRquest() should return false if end was reached, either
+        // because parsing is complete, or an error occured
+
+        // if an error occured, we save it in Responder and call onEndCall
+        // to get a stream where we can format the error response to.
     }
     catch(const Fault& fault)
     {
