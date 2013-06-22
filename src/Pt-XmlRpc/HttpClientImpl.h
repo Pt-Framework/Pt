@@ -31,6 +31,7 @@
 #include <Pt/Http/Client.h>
 #include <Pt/Http/Request.h>
 #include <Pt/Http/Reply.h>
+#include <sstream>
 
 namespace Pt {
 
@@ -40,35 +41,7 @@ namespace Net {
 
 namespace XmlRpc {
 
-class HttpClientImpl
-{
-    public:
-        HttpClientImpl();
 
-        HttpClientImpl(System::EventLoop& selector);
-
-        Http::Client& client()
-        { return _client; }
-
-        void setError(bool err = true)
-        { _error = err; }
-
-        bool isError() const
-        { return _error; }
-
-        std::ostream& prepareRequest();
-
-        std::istream& onCall();
-
-        void cancel();
-
-        static void verifyHeader(const Http::Reply& header);
-
-    private:
-        Http::Client _client;
-        std::size_t _timeout;
-        bool _error;
-};
 
 }
 

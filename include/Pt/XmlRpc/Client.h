@@ -73,7 +73,7 @@ class PT_XMLRPC_API Client : public NonCopyable
     protected:
         void formatRequest(std::ostream& os);
         
-        bool beginReply(std::istream& is);
+        void beginReply(std::istream& is);
 
         bool advanceReply();
 

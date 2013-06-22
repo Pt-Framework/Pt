@@ -777,9 +777,6 @@
     <ClInclude Include="..\..\src\Pt-XmlRpc\ClientImpl.h">
       <Filter>Pt-XmlRpc</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt-XmlRpc\HttpClientImpl.h">
-      <Filter>Pt-XmlRpc</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Utf16Codec.h">
       <Filter>Pt</Filter>
     </ClInclude>
@@ -1543,9 +1540,6 @@
       <Filter>Pt-XmlRpc</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-XmlRpc\HttpClient.cpp">
-      <Filter>Pt-XmlRpc</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-XmlRpc\HttpClientImpl.cpp">
       <Filter>Pt-XmlRpc</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-XmlRpc\Responder.cpp">

@@ -149,10 +149,9 @@ void ClientImpl::formatRequest(std::ostream& os)
 }
 
 
-bool ClientImpl::beginReply(std::istream& is)
+void ClientImpl::beginReply(std::istream& is)
 {
     _bin.reset(is);
-    return true;
 }
 
 
@@ -169,29 +168,27 @@ bool ClientImpl::advanceReply()
             advance(*node); // SerializationError, ConversionError
         }
 
-        // TODO: return true if more is available, false if finished or
-        //       an error occured. Do not call finishReply() here but 
-        //       let caller do it.
+        // TODO: return true if more is available, false if finished
          
         return true;
     }
     catch(const Xml::XmlError& error)
     {
+        // set method to failed, so exception is thrown when the
+        // method is finished later.
         _method->setFault(Fault::invalidXmlRpc, error.what());
-        finishReply();
     }
     catch(const SerializationError& error)
     {
         _method->setFault(Fault::invalidMethodParameters, error.what());
-        finishReply();
     }
     catch(const ConversionError& error)
     {
         _method->setFault(Fault::invalidMethodParameters, error.what());
-        finishReply();
     }
 
-    // signal caller to not continue reading on error
+    // return false if reply is finished because of an error
+    // caller will call finishReply() then to trigger the exception
     return false;
 }
 

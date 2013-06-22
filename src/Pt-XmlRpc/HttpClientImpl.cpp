@@ -37,73 +37,7 @@ namespace Pt {
 
 namespace XmlRpc {
 
-HttpClientImpl::HttpClientImpl()
-: _client()
-, _timeout(System::EventLoop::WaitInfinite)
-, _error(false)
-{
-    _client.request().setMethod("POST");
-}
 
-
-HttpClientImpl::HttpClientImpl(System::EventLoop& loop)
-: _client(loop)
-, _timeout(System::EventLoop::WaitInfinite)
-, _error(false)
-{
-    _client.request().setMethod("POST");
-}
-
-
-std::ostream& HttpClientImpl::prepareRequest()
-{
-    _client.request().clear();
-    _client.request().header().set("Content-Type", "text/xml");
-    _client.request().setMethod("POST");
-    return _client.request().body();
-}
-
-
-std::istream& HttpClientImpl::onCall()
-{
-    _client.send();
-    
-    std::istream& is = _client.receive();
-
-    //verifyHeader( _client.reply() );
-
-    return is;
-}
-
-
-void HttpClientImpl::cancel()
-{
-    _error = false;
-    _client.cancel();
-}
-
-
-void HttpClientImpl::verifyHeader(const Http::Reply& reply)
-{
-    if (reply.statusCode() != 200)
-    {
-        std::ostringstream msg;
-        msg << "invalid http return code "
-            << reply.statusCode()
-            << ": "
-            << reply.statusText();
-        throw std::runtime_error(msg.str());
-    }
-
-    if (! reply.header().isSet("Content-Type", "text/xml"))
-    {
-        std::ostringstream msg;
-        const char* ct = reply.header().get("Content-Type");
-        msg << "invalid content type " << (ct ? ct : "");
-        throw std::runtime_error(msg.str());
-    }
-
-}
 
 } // namespace XmlRpc
 

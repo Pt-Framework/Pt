@@ -8,7 +8,6 @@ PT_XMLRPC_SOURCES = Client.cpp
                     Fault.cpp
                     Formatter.cpp
                     HttpClient.cpp
-                    HttpClientImpl.cpp
                     HttpResponder.cpp
                     Responder.cpp
                     Scanner.cpp

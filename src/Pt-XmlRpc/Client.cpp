@@ -97,9 +97,9 @@ void Client::formatRequest(std::ostream& os)
 }
 
 
-bool Client::beginReply(std::istream& is)
+void Client::beginReply(std::istream& is)
 {
-    return _impl->beginReply(is);
+    _impl->beginReply(is);
 }
 
 

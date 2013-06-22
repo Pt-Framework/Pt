@@ -26,16 +26,70 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "Pt/XmlRpc/HttpClient.h"
-#include "HttpClientImpl.h"
+#include <Pt/XmlRpc/HttpClient.h>
+#include <Pt/Http/Client.h>
+#include <Pt/Http/Request.h>
+#include <Pt/Http/Reply.h>
+#include <sstream>
 
 namespace Pt {
 
 namespace XmlRpc {
 
+class HttpClientImpl
+{
+    public:
+        HttpClientImpl()
+        : _client()
+        , _error(false)
+        { }
+
+        HttpClientImpl(System::EventLoop& loop)
+        : _client(loop)
+        , _error(false)
+        { }
+
+        Http::Client& client()
+        { return _client; }
+
+        void setError(bool err = true)
+        { _error = err; }
+
+        bool isError() const
+        { return _error; }
+
+        static void verifyHeader(const Http::Reply& reply)
+        {
+            if (reply.statusCode() != 200)
+            {
+                std::ostringstream msg;
+                msg << "invalid http return code "
+                    << reply.statusCode()
+                    << ": "
+                    << reply.statusText();
+                throw std::runtime_error(msg.str());
+            }
+
+            if (! reply.header().isSet("Content-Type", "text/xml"))
+            {
+                std::ostringstream msg;
+                const char* ct = reply.header().get("Content-Type");
+                msg << "invalid content type " << (ct ? ct : "");
+                throw std::runtime_error(msg.str());
+            }
+
+        }
+
+    private:
+        Http::Client _client;
+        bool _error;
+};
+
+
 HttpClient::HttpClient()
 : _impl(new HttpClientImpl())
 {
+    _impl->client().request().setMethod("POST");
     _impl->client().replyReceived() += Pt::slot( *this, &HttpClient::onReply);
 }
 
@@ -44,6 +98,7 @@ HttpClient::HttpClient(const Net::AddrInfo& addrinfo,
                        const std::string& url)
 : _impl(new HttpClientImpl())
 {
+    _impl->client().request().setMethod("POST");
     _impl->client().replyReceived() += Pt::slot( *this, &HttpClient::onReply);
     connect(addrinfo, url);
 }
@@ -52,6 +107,7 @@ HttpClient::HttpClient(const Net::AddrInfo& addrinfo,
 HttpClient::HttpClient(const std::string& addr, unsigned short port, const std::string& url)
 : _impl( new HttpClientImpl() )
 {
+    _impl->client().request().setMethod("POST");
     _impl->client().replyReceived() += Pt::slot( *this, &HttpClient::onReply);
     connect(addr, port, url);
 }
@@ -60,6 +116,7 @@ HttpClient::HttpClient(const std::string& addr, unsigned short port, const std::
 HttpClient::HttpClient(System::EventLoop& loop)
 : _impl( new HttpClientImpl(loop) )
 {
+    _impl->client().request().setMethod("POST");
     _impl->client().replyReceived() += Pt::slot( *this, &HttpClient::onReply);
 }
 
@@ -68,6 +125,7 @@ HttpClient::HttpClient(System::EventLoop& loop, const Net::AddrInfo& addrinfo,
                        const std::string& url)
 : _impl( new HttpClientImpl(loop) )
 {
+    _impl->client().request().setMethod("POST");
     _impl->client().replyReceived() += Pt::slot( *this, &HttpClient::onReply);
     connect(addrinfo, url);
 }
@@ -78,6 +136,7 @@ HttpClient::HttpClient(System::EventLoop& loop,
                        const std::string& url)
 : _impl( new HttpClientImpl(loop) )
 {
+    _impl->client().request().setMethod("POST");
     _impl->client().replyReceived() += Pt::slot( *this, &HttpClient::onReply);
     connect(addr, port, url);
 }
@@ -143,7 +202,10 @@ Http::Client& HttpClient::client()
 void HttpClient::onBeginCall()
 {
     // prepare HTTP request
-    std::ostream& os = _impl->prepareRequest();
+    _impl->client().request().clear();
+    _impl->client().request().header().set("Content-Type", "text/xml");
+    _impl->client().request().setMethod("POST");
+    std::ostream& os = _impl->client().request().body();
 
     // format XML-RPC request
     Client::formatRequest(os);
@@ -165,13 +227,17 @@ void HttpClient::onEndCall()
 void HttpClient::onCall()
 {
     // prepare HTTP request
-    std::ostream& os = _impl->prepareRequest();
+    _impl->client().request().clear();
+    _impl->client().request().header().set("Content-Type", "text/xml");
+    _impl->client().request().setMethod("POST");
+    std::ostream& os = _impl->client().request().body();
 
     // format XML-RPC request
     Client::formatRequest(os);
 
     // send HTTP request and start receiving HTTP reply
-    std::istream& is = _impl->onCall();
+    _impl->client().send();
+    std::istream& is = _impl->client().receive();
 
     // parse XML-RPC reply
     Client::readReply(is);
@@ -180,7 +246,8 @@ void HttpClient::onCall()
 
 void HttpClient::onCancel()
 {
-    _impl->cancel();
+    _impl->setError(false);
+    _impl->client().cancel();
 }
 
 
@@ -194,18 +261,18 @@ void HttpClient::onReply(Http::Client& client)
         {
             //_impl->verifyHeader( client.reply() );
             
-            // might send finished signal
-            bool ok = Client::beginReply( client.reply().body() );
-            if( ! ok )
-                return;
+            Client::beginReply( client.reply().body() );
         }
 
         if( progress.body() )
         {
-            // might send finished signal
             bool ok = Client::advanceReply();
             if( ! ok )
+            {
+                // send finished signal
+                Client::finishReply();
                 return;
+            }
         }
 
         if( progress.finished() )
@@ -222,7 +289,7 @@ void HttpClient::onReply(Http::Client& client)
     {
         _impl->setError();
         
-        // send finished signal, if finishReply was not yet called
+        // send finished signal
         Client::finishReply();
 
         // throw if error not handled in slot

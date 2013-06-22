@@ -238,7 +238,6 @@
     <ClInclude Include="..\..\src\Pt-System\win32\ThreadImpl.h" />
     <ClInclude Include="..\..\src\Pt-System\win32\win32.h" />
     <ClInclude Include="..\..\src\Pt-XmlRpc\ClientImpl.h" />
-    <ClInclude Include="..\..\src\Pt-XmlRpc\HttpClientImpl.h" />
     <ClInclude Include="..\..\src\Pt-Xml\AttributeListModel.h" />
     <ClInclude Include="..\..\src\Pt-Xml\AttributeModel.h" />
     <ClInclude Include="..\..\src\Pt-Xml\ContentModel.h" />
@@ -420,7 +419,6 @@
     <ClCompile Include="..\..\src\Pt-XmlRpc\Fault.cpp" />
     <ClCompile Include="..\..\src\Pt-XmlRpc\Formatter.cpp" />
     <ClCompile Include="..\..\src\Pt-XmlRpc\HttpClient.cpp" />
-    <ClCompile Include="..\..\src\Pt-XmlRpc\HttpClientImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-XmlRpc\HttpResponder.cpp" />
     <ClCompile Include="..\..\src\Pt-XmlRpc\Responder.cpp" />
     <ClCompile Include="..\..\src\Pt-XmlRpc\Scanner.cpp" />
