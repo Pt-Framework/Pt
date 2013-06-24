@@ -62,18 +62,15 @@ void HttpResponder::onReadRequest(Http::Request& request, Http::Reply& reply, Sy
 {
     try
     {
-        advanceRequest();
+        bool ok = advanceRequest();
+        if( ! ok )
+        {
+            _reply = &reply;      
+            reply.header().set("Content-Type", "text/xml");
 
-        // advanceRquest() should return false if end was reached, either
-        // because parsing is complete, or an error occured
-
-        // if an error occured, we save it in Responder and call onEndCall
-        // to get a stream where we can format the error response to.
-    }
-    catch(const Fault& fault)
-    {
-        log_error( fault.what() );
-        replyError(reply, fault.rc(), fault.what());
+            execute(loop);
+            return;
+        }
     }
     catch(const std::exception& error)
     {
@@ -90,12 +87,7 @@ void HttpResponder::onBeginReply(Http::Request& request, Http::Reply& reply, Sys
         _reply = &reply;      
         reply.header().set("Content-Type", "text/xml");
 
-        finishRequest(loop);
-    }
-    catch (const Fault& fault)
-    {
-        log_error( fault.what() );
-        replyError(reply, fault.rc(), fault.what());
+        execute(loop);
     }
     catch(const std::exception& error)
     {
@@ -122,10 +114,6 @@ void HttpResponder::onEndCall()
 
         _reply->beginSend(true);
     }
-    catch (const Fault& fault)
-    {
-        replyError(*_reply, fault.rc(), fault.what());
-    }
     catch(const std::exception& error)
     {
         log_error( error.what() );
@@ -134,16 +122,16 @@ void HttpResponder::onEndCall()
 }
 
 
-void HttpResponder::replyError(Http::Reply& reply, int rc, const char* msg)
-{
-    reply.clear();
-    reply.header().set("Content-Type", "text/xml");
-    reply.header().set("Connection", "close");
-
-    formatError( reply.body(), rc, msg );
-
-    reply.beginSend(true);
-}
+//void HttpResponder::replyError(Http::Reply& reply, int rc, const char* msg)
+//{
+//    reply.clear();
+//    reply.header().set("Content-Type", "text/xml");
+//    reply.header().set("Connection", "close");
+//
+//    formatError( reply.body(), rc, msg );
+//
+//    reply.beginSend(true);
+//}
 
 } // namespace XmlRpc
 

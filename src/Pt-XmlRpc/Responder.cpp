@@ -93,6 +93,7 @@ Responder::Responder(Service& service)
 , _proc(0)
 , _args(0)
 , _result(0)
+, _isFault(false)
 {
 }
 
@@ -111,10 +112,11 @@ void Responder::beginRequest(std::istream& is)
     _state = OnBegin;
     _bin.reset(is);
     _args = 0;
+    _isFault = false;
 }
 
 
-void Responder::advanceRequest()
+bool Responder::advanceRequest()
 {
     try
     {
@@ -126,39 +128,72 @@ void Responder::advanceRequest()
             
             this->advance(*node);
         }
+
+        return true;
     }
     catch(const Xml::XmlError& error)
     {
-        throw Fault(error.what(), 1);
+        _fault = Fault(error.what(), 1);
+        _isFault = true;
     }
     catch(const SerializationError& error)
     {
-        throw Fault(error.what(), 2);
+        _fault = Fault(error.what(), 2);
+        _isFault = true;
     }
     catch(const ConversionError& error)
     {
-        throw Fault(error.what(), 3);
+        _fault = Fault(error.what(), 3);
+        _isFault = true;
     }
+
+    return false;
 }
 
 
-void Responder::finishRequest(System::EventLoop& loop)
+void Responder::execute(System::EventLoop& loop)
 {
-    if( ! _proc )
+    if( _isFault )
     {
-        throw Fault("invalid XML-RPC", 4);
+        onEndCall();
+        return;
     }
 
-    if( _args )
+    try
     {
-        ++_args;
-        if( * _args )
+
+        if( ! _proc )
         {
-            throw Fault("invalid XML-RPC, missing arguments", 5);
+            throw Fault("invalid XML-RPC", 4);
+        }
+
+        if( _args )
+        {
+            ++_args;
+
+            if( * _args )
+            {
+                throw Fault("invalid XML-RPC, missing arguments", 5);
+            }
         }
     }
+    catch(const Fault& fault)
+    {
+        _fault = fault;
+        _isFault = true;
+        onEndCall();
+        return;
+    }
 
-    _proc->beginCall(loop);
+    try
+    {
+        _proc->beginCall(loop); // throws Fault
+    }
+    catch(const Fault& fault)
+    {
+        _fault = fault;
+        _isFault = true;
+    }
 }
 
 
@@ -166,10 +201,15 @@ void Responder::formatReply(std::ostream& os)
 {
     try
     {
-        if( ! _proc )
-            throw Fault("invalid procedure", Fault::invalidXmlRpc);
+        if( _isFault )
+        {
+            formatError(os, _fault.rc(), _fault.what());
+            return;
+        }
 
-        IDecomposer* rh = _proc->endCall();
+        assert(_proc);
+
+        IDecomposer* rh = _proc->endCall(); // throws Fault
         
         _ts.attach(os);
         _ts.write( XMLRPC_XMLDECL, sizeof(XMLRPC_XMLDECL)/sizeof(Char) );
@@ -180,17 +220,21 @@ void Responder::formatReply(std::ostream& os)
         _ts.flush();
 
     }
+    catch(const Fault& fault)
+    {
+        formatError(os, fault.rc(), fault.what());
+    }
     catch(const Xml::XmlError& error)
     {
-        throw Fault(error.what(), 1);
+        formatError(os, 1, error.what());
     }
     catch(const SerializationError& error)
     {
-        throw Fault(error.what(), 2);
+        formatError(os, 2, error.what());
     }
     catch(const ConversionError& error)
     {
-        throw Fault(error.what(), 3);
+        formatError(os, 3, error.what());
     }
 }
 

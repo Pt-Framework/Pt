@@ -77,7 +77,7 @@ class PT_XMLRPC_API Client : public NonCopyable
 
         bool advanceReply();
 
-        void finishReply();
+        void execute();
 
         void readReply(std::istream& is);
 

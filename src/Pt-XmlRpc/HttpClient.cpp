@@ -270,7 +270,7 @@ void HttpClient::onReply(Http::Client& client)
             if( ! ok )
             {
                 // send finished signal
-                Client::finishReply();
+                Client::execute();
                 return;
             }
         }
@@ -278,7 +278,7 @@ void HttpClient::onReply(Http::Client& client)
         if( progress.finished() )
         { 
             // send finished signal
-            Client::finishReply();
+            Client::execute();
         }
         else
         {
@@ -290,7 +290,7 @@ void HttpClient::onReply(Http::Client& client)
         _impl->setError();
         
         // send finished signal
-        Client::finishReply();
+        Client::execute();
 
         // throw if error not handled in slot
         if( _impl->isError() )

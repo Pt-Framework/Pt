@@ -193,7 +193,7 @@ bool ClientImpl::advanceReply()
 }
 
 
-void ClientImpl::finishReply()
+void ClientImpl::execute()
 {
     log_debug("onReplyFinished; method=" << static_cast<void*>(_method));
 

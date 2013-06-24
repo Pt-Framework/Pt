@@ -79,7 +79,7 @@ class ClientImpl
 
         bool advanceReply();
 
-        void finishReply();
+        void execute();
 
         void readReply(std::istream& is);
 

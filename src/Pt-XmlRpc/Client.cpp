@@ -109,9 +109,9 @@ bool Client::advanceReply()
 }
 
 
-void Client::finishReply()
+void Client::execute()
 {
-    _impl->finishReply();
+    _impl->execute();
 }
 
 

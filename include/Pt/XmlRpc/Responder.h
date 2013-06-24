@@ -29,6 +29,7 @@
 #define Pt_XmlRpc_Responder_h
 
 #include <Pt/XmlRpc/Api.h>
+#include <Pt/XmlRpc/Fault.h>
 #include <Pt/XmlRpc/Scanner.h>
 #include <Pt/XmlRpc/Formatter.h>
 #include <Pt/Xml/InputSource.h>
@@ -80,15 +81,15 @@ class PT_XMLRPC_API Responder
     protected:
         void beginRequest(std::istream& is);
 
-        void advanceRequest();
+        bool advanceRequest();
 
-        void finishRequest(System::EventLoop& loop);
+        void execute(System::EventLoop& loop);
 
         void formatReply(std::ostream& os);
 
+    private:
         void formatError(std::ostream& os, int rc, const char* msg);
 
-    private:
         void advance(const Pt::Xml::Node& node);
 
     private:
@@ -104,6 +105,8 @@ class PT_XMLRPC_API Responder
        ServiceProcedure* _proc;
        IComposer** _args;
        IDecomposer* _result;
+       Fault _fault;
+       bool _isFault;
 };
 
 } // namespace XmlRpc

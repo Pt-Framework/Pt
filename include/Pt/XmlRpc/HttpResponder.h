@@ -55,7 +55,7 @@ class PT_XMLRPC_API HttpResponder : public Http::Responder
 
         void onWriteReply(Http::Request& request, Http::Reply& reply, System::EventLoop& loop);
 
-        void replyError(Http::Reply& reply, int rc, const char* msg);
+        //void replyError(Http::Reply& reply, int rc, const char* msg);
 
     protected:
         // inheritdoc
