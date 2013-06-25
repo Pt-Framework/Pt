@@ -83,11 +83,11 @@ class PT_XMLRPC_API HttpClient : public Client
     protected:       
         virtual void onBeginCall();
 
-        virtual void onEndCall();
-
         virtual void onCall();
 
         virtual void onCancel();
+
+        virtual void onError();
 
     private:
         void onReply(Http::Client& client);

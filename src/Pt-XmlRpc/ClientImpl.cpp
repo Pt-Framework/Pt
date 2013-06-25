@@ -77,6 +77,7 @@ ClientImpl::ClientImpl()
 , _argv(0)
 , _argc(0)
 , _method(0)
+, _error(false)
 {
 }
 
@@ -97,25 +98,20 @@ void ClientImpl::beginCall(IComposer& r, IRemoteProcedure& method, IDecomposer**
 
     _argv = argv;
     _argc = argc;
-}
 
-
-void ClientImpl::endCall()
-{
+    _error = false;
 }
 
 
 void ClientImpl::cancel()
 {
+    _ts.reset();
+
     _method = 0;
     _argc = 0;
     _argv = 0;
-}
 
-
-const IRemoteProcedure* ClientImpl::activeProcedure() const
-{
-    return _method;
+    _error = false;
 }
 
 
@@ -168,9 +164,9 @@ bool ClientImpl::advanceReply()
             advance(*node); // SerializationError, ConversionError
         }
 
-        // TODO: return true if more is available, false if finished
+        // TODO: return true if parsing is complete
          
-        return true;
+        return false;
     }
     catch(const Xml::XmlError& error)
     {
@@ -187,16 +183,21 @@ bool ClientImpl::advanceReply()
         _method->setFault(Fault::invalidMethodParameters, error.what());
     }
 
-    // return false if reply is finished because of an error
-    // caller will call finishReply() then to trigger the exception
-    return false;
+    return true;
+}
+
+
+void ClientImpl::setFault(int rc, const char* msg)
+{
+    if(_method)
+        _method->setFault(rc, msg);
 }
 
 
 void ClientImpl::execute()
 {
-    log_debug("onReplyFinished; method=" << static_cast<void*>(_method));
-
+    // do not call method twice, i.e. if we get here from within
+    // method->onFinish() we have an infinite loop
     if(_method)
     {
         IRemoteProcedure* method = _method;

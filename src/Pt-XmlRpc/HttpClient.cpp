@@ -27,9 +27,11 @@
  */
 
 #include <Pt/XmlRpc/HttpClient.h>
+#include <Pt/XmlRpc/Fault.h>
 #include <Pt/Http/Client.h>
 #include <Pt/Http/Request.h>
 #include <Pt/Http/Reply.h>
+#include <Pt/Http/HttpError.h>
 #include <sstream>
 
 namespace Pt {
@@ -41,22 +43,14 @@ class HttpClientImpl
     public:
         HttpClientImpl()
         : _client()
-        , _error(false)
         { }
 
         HttpClientImpl(System::EventLoop& loop)
         : _client(loop)
-        , _error(false)
         { }
 
         Http::Client& client()
         { return _client; }
-
-        void setError(bool err = true)
-        { _error = err; }
-
-        bool isError() const
-        { return _error; }
 
         static void verifyHeader(const Http::Reply& reply)
         {
@@ -82,7 +76,6 @@ class HttpClientImpl
 
     private:
         Http::Client _client;
-        bool _error;
 };
 
 
@@ -214,16 +207,6 @@ void HttpClient::onBeginCall()
 }
 
 
-void HttpClient::onEndCall()
-{
-    if( _impl->isError() ) 
-    {
-        _impl->setError(false);
-        throw;
-    }
-}
-
-
 void HttpClient::onCall()
 {
     // prepare HTTP request
@@ -246,8 +229,13 @@ void HttpClient::onCall()
 
 void HttpClient::onCancel()
 {
-    _impl->setError(false);
     _impl->client().cancel();
+}
+
+
+void HttpClient::onError()
+{
+    throw;
 }
 
 
@@ -266,39 +254,28 @@ void HttpClient::onReply(Http::Client& client)
 
         if( progress.body() )
         {
-            bool ok = Client::advanceReply();
-            if( ! ok )
-            {
-                // send finished signal
-                Client::execute();
-                return;
-            }
-        }
+            // reads until error or XML was consumed
+            Client::advanceReply();
 
-        if( progress.finished() )
+            // discard remaining data
+            client.reply().discard();
+        }
+        
+        if( ! progress.finished() )
         { 
-            // send finished signal
-            Client::execute();
+            client.beginReceive();
         }
         else
         {
-            client.beginReceive();
+            // send finished signal
+            Client::execute();
         }
     }
-    catch(...)
+    catch(const System::IOError& e) // HttpError is also an IOError
     {
-        _impl->setError();
-        
-        // send finished signal
+        Client::setFault( 0, e.what() );
         Client::execute();
-
-        // throw if error not handled in slot
-        if( _impl->isError() )
-        {
-            _impl->setError(false);
-            throw;
-        }
-    }   
+    }
 }
 
 } // namespace XmlRpc

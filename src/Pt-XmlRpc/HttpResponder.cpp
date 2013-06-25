@@ -52,6 +52,12 @@ HttpResponder::~HttpResponder()
 }
 
 
+void HttpResponder::onCancel()
+{
+    _reply = 0;
+}
+
+
 void HttpResponder::onBeginRequest(Http::Request& request, Http::Reply& reply, System::EventLoop& loop)
 {
     XmlRpc::Responder::beginRequest( request.body() );
@@ -62,12 +68,10 @@ void HttpResponder::onReadRequest(Http::Request& request, Http::Reply& reply, Sy
 {
     try
     {
-        bool ok = advanceRequest();
-        if( ! ok )
+        bool done = advanceRequest();
+        if( done )
         {
-            _reply = &reply;      
-            reply.header().set("Content-Type", "text/xml");
-
+            _reply = &reply;
             execute(loop);
             return;
         }
@@ -84,9 +88,7 @@ void HttpResponder::onBeginReply(Http::Request& request, Http::Reply& reply, Sys
 {
     try
     {
-        _reply = &reply;      
-        reply.header().set("Content-Type", "text/xml");
-
+        _reply = &reply;
         execute(loop);
     }
     catch(const std::exception& error)
@@ -102,13 +104,26 @@ void HttpResponder::onWriteReply(Http::Request& request, Http::Reply& reply, Sys
 }
 
 
-void HttpResponder::onEndCall()
+void HttpResponder::onError()
+{
+    assert(_reply);
+    if(_reply)
+    {
+        _reply->header().set("Content-Type", "text/xml");
+        _reply->header().set("Connection", "close");
+    }
+}
+
+
+void HttpResponder::onBeginReturn()
 {
     try
     {
         assert(_reply);
         if( ! _reply)
             throw std::logic_error("XML-RPC responder without reply");
+
+        _reply->header().set("Content-Type", "text/xml");
 
         formatReply( _reply->body() );
 
@@ -120,18 +135,6 @@ void HttpResponder::onEndCall()
         throw;
     }
 }
-
-
-//void HttpResponder::replyError(Http::Reply& reply, int rc, const char* msg)
-//{
-//    reply.clear();
-//    reply.header().set("Content-Type", "text/xml");
-//    reply.header().set("Connection", "close");
-//
-//    formatError( reply.body(), rc, msg );
-//
-//    reply.beginSend(true);
-//}
 
 } // namespace XmlRpc
 

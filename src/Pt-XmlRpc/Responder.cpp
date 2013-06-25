@@ -107,11 +107,35 @@ Responder::~Responder()
 }
 
 
+void Responder::cancel()
+{
+    this->onCancel();
+
+    _ts.reset();
+
+    if(_proc)
+        _service->releaseProcedure(_proc);
+
+    _state = OnBegin;
+
+    _proc = 0;
+    _args = 0;
+    _result = 0;
+    _isFault = false;
+}
+
+
 void Responder::beginRequest(std::istream& is)
 {
     _state = OnBegin;
     _bin.reset(is);
+
+    if(_proc)
+        _service->releaseProcedure(_proc);
+    
+    _proc = 0;
     _args = 0;
+    _result = 0;
     _isFault = false;
 }
 
@@ -129,7 +153,7 @@ bool Responder::advanceRequest()
             this->advance(*node);
         }
 
-        return true;
+        return false;
     }
     catch(const Xml::XmlError& error)
     {
@@ -147,7 +171,7 @@ bool Responder::advanceRequest()
         _isFault = true;
     }
 
-    return false;
+    return true;
 }
 
 
@@ -155,13 +179,13 @@ void Responder::execute(System::EventLoop& loop)
 {
     if( _isFault )
     {
-        onEndCall();
+        onError();
+        onBeginReturn();
         return;
     }
 
     try
     {
-
         if( ! _proc )
         {
             throw Fault("invalid XML-RPC", 4);
@@ -176,24 +200,44 @@ void Responder::execute(System::EventLoop& loop)
                 throw Fault("invalid XML-RPC, missing arguments", 5);
             }
         }
-    }
-    catch(const Fault& fault)
-    {
-        _fault = fault;
-        _isFault = true;
-        onEndCall();
-        return;
-    }
 
-    try
-    {
         _proc->beginCall(loop); // throws Fault
     }
     catch(const Fault& fault)
     {
         _fault = fault;
         _isFault = true;
+
+        onError();
+        onBeginReturn();
     }
+}
+
+
+//void Responder::executeFault(int rc, const char* msg)
+//{
+//
+//}
+
+
+void Responder::endCall()
+{ 
+    try
+    {
+        if( ! _isFault )
+        {
+            assert(_proc);
+            _result = _proc->endCall(); // throws Fault
+        }
+    }
+    catch(const Fault& fault)
+    {
+        _fault = fault;
+        onError();
+        _isFault = true;
+    }
+
+    this->onBeginReturn(); 
 }
 
 
@@ -207,22 +251,15 @@ void Responder::formatReply(std::ostream& os)
             return;
         }
 
-        assert(_proc);
-
-        IDecomposer* rh = _proc->endCall(); // throws Fault
-        
         _ts.attach(os);
         _ts.write( XMLRPC_XMLDECL, sizeof(XMLRPC_XMLDECL)/sizeof(Char) );
 
+        assert(_result);
         _ts.write(XMLRPC_REPLY_BEGIN, sizeof(XMLRPC_REPLY_BEGIN)/sizeof(Char));
-        rh->format(_formatter);
+        _result->format(_formatter);
         _ts.write(XMLRPC_REPLY_END, sizeof(XMLRPC_REPLY_END)/sizeof(Char));
         _ts.flush();
 
-    }
-    catch(const Fault& fault)
-    {
-        formatError(os, fault.rc(), fault.what());
     }
     catch(const Xml::XmlError& error)
     {
@@ -319,6 +356,7 @@ void Responder::advance(const Pt::Xml::Node& node)
             {
                 const Xml::Characters& chars = static_cast<const Xml::Characters&>(node);
 
+                // TODO: probably not neccessary to release here...
                 if(_proc)
                     _service->releaseProcedure(_proc);
 

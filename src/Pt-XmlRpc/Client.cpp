@@ -63,9 +63,11 @@ void Client::beginCall(IComposer& r, IRemoteProcedure& method, IDecomposer** arg
 
 void Client::endCall()
 {
-    _impl->endCall();
-
-    onEndCall();
+    if( _impl->isError() )
+    {
+        _impl->setError(false);
+        onError();
+    }
 }
 
 
@@ -109,10 +111,44 @@ bool Client::advanceReply()
 }
 
 
+void Client::setFault(int rc, const char* msg)
+{
+    _impl->setFault(rc, msg);
+}
+
+
+void Client::setError()
+{
+    _impl->setError();
+}
+
+
 void Client::execute()
 {
-    _impl->execute();
+    if( _impl->activeProcedure() )
+    {
+        _impl->execute();
+    }
+    else if( _impl->isError() )
+    {
+        _impl->setError(false);
+        onError();
+    }
 }
+
+
+//void Client::executeError()
+//{
+//    _impl->setError();
+//
+//    _impl->execute();
+//
+//    if( _impl->isError() )
+//    {
+//        _impl->setError(false);
+//        onError();
+//    }
+//}
 
 
 void Client::readReply(std::istream& is)

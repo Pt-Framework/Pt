@@ -64,11 +64,11 @@ class PT_XMLRPC_API Client : public NonCopyable
     protected:       
         virtual void onBeginCall() = 0;
 
-        virtual void onEndCall() = 0;
-
         virtual void onCall() = 0;
 
         virtual void onCancel() = 0;
+
+        virtual void onError() = 0;
 
     protected:
         void formatRequest(std::ostream& os);
@@ -77,9 +77,15 @@ class PT_XMLRPC_API Client : public NonCopyable
 
         bool advanceReply();
 
+        void readReply(std::istream& is);
+
+        void setFault(int rc, const char* msg);
+
+        void setError();
+
         void execute();
 
-        void readReply(std::istream& is);
+        //void executeError();
 
     private:
         class ClientImpl* _impl;

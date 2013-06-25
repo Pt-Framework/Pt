@@ -69,14 +69,16 @@ class PT_XMLRPC_API Responder
         SerializationContext& context()
         { return _context; }
 
-        void endCall()
-        { this->onEndCall(); }
+        void cancel();
+
+        void endCall();
 
     protected:
-        virtual void onEndCall() = 0;
+        virtual void onBeginReturn() = 0;
 
-        // TODO:
-        // virtual void onCancel() = 0;
+        virtual void onCancel() = 0;
+
+        virtual void onError() = 0;
 
     protected:
         void beginRequest(std::istream& is);
