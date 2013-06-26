@@ -74,20 +74,22 @@ class PT_XMLRPC_API Responder
         void endCall();
 
     protected:
-        virtual void onBeginReturn() = 0;
+        virtual void onResult() = 0;
 
         virtual void onCancel() = 0;
 
         virtual void onError() = 0;
 
     protected:
-        void beginRequest(std::istream& is);
+        void beginMessage(std::istream& is);
 
-        bool advanceRequest();
+        bool parseMessage();
 
-        void execute(System::EventLoop& loop);
+        void finishMessage(System::EventLoop& loop);
 
-        void formatReply(std::ostream& os);
+        void formatResult(std::ostream& os);
+
+        void setFault(int rc, const char* msg);
 
     private:
         void formatError(std::ostream& os, int rc, const char* msg);

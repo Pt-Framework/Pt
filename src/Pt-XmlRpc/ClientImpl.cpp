@@ -115,7 +115,7 @@ void ClientImpl::cancel()
 }
 
 
-void ClientImpl::formatRequest(std::ostream& os)
+void ClientImpl::formatMessage(std::ostream& os)
 {
     const String& name = _method->name();
 
@@ -145,13 +145,13 @@ void ClientImpl::formatRequest(std::ostream& os)
 }
 
 
-void ClientImpl::beginReply(std::istream& is)
+void ClientImpl::beginResult(std::istream& is)
 {
     _bin.reset(is);
 }
 
 
-bool ClientImpl::advanceReply()
+bool ClientImpl::parseResult()
 {
     try
     {
@@ -170,8 +170,6 @@ bool ClientImpl::advanceReply()
     }
     catch(const Xml::XmlError& error)
     {
-        // set method to failed, so exception is thrown when the
-        // method is finished later.
         _method->setFault(Fault::invalidXmlRpc, error.what());
     }
     catch(const SerializationError& error)
@@ -194,7 +192,7 @@ void ClientImpl::setFault(int rc, const char* msg)
 }
 
 
-void ClientImpl::execute()
+void ClientImpl::finishResult()
 {
     // do not call method twice, i.e. if we get here from within
     // method->onFinish() we have an infinite loop
@@ -207,30 +205,35 @@ void ClientImpl::execute()
 }
 
 
-void ClientImpl::readReply(std::istream& is)
+void ClientImpl::processResult(std::istream& is)
 {   
     _bin.reset(is);
 
-    while( _reader.get().type() !=  Pt::Xml::Node::EndDocument )
+    try
     {
-        const Pt::Xml::Node& node = _reader.get();
-        advance(node);
-        _reader.next();
+        while( _reader.get().type() !=  Pt::Xml::Node::EndDocument )
+        {
+            const Pt::Xml::Node& node = _reader.get();
+            advance(node);
+            _reader.next();
+        }
+    }
+    catch(const Xml::XmlError& error)
+    {
+        _method->setFault(Fault::invalidXmlRpc, error.what());
+    }
+    catch(const SerializationError& error)
+    {
+        _method->setFault(Fault::invalidMethodParameters, error.what());
+    }
+    catch(const ConversionError& error)
+    {
+        _method->setFault(Fault::invalidMethodParameters, error.what());
     }
 
-    // let Xml::ParseError SerializationError, ConversionError propagate
-
-    if (_method->failed() )
-    {
-        _method = 0;
-        _state = OnBegin;
-        throw _fault;
-    }
-
+    // _method contains a return value or fault now
     _method = 0;
     _state = OnBegin;
-
-    // _method contains a valid return value now
 }
 
 

@@ -52,15 +52,9 @@ HttpResponder::~HttpResponder()
 }
 
 
-void HttpResponder::onCancel()
-{
-    _reply = 0;
-}
-
-
 void HttpResponder::onBeginRequest(Http::Request& request, Http::Reply& reply, System::EventLoop& loop)
 {
-    XmlRpc::Responder::beginRequest( request.body() );
+    beginMessage( request.body() );
 }
 
 
@@ -68,11 +62,11 @@ void HttpResponder::onReadRequest(Http::Request& request, Http::Reply& reply, Sy
 {
     try
     {
-        bool done = advanceRequest();
+        bool done = parseMessage();
         if( done )
         {
             _reply = &reply;
-            execute(loop);
+            finishMessage(loop);
             return;
         }
     }
@@ -89,7 +83,7 @@ void HttpResponder::onBeginReply(Http::Request& request, Http::Reply& reply, Sys
     try
     {
         _reply = &reply;
-        execute(loop);
+        finishMessage(loop);
     }
     catch(const std::exception& error)
     {
@@ -104,28 +98,20 @@ void HttpResponder::onWriteReply(Http::Request& request, Http::Reply& reply, Sys
 }
 
 
-void HttpResponder::onError()
-{
-    assert(_reply);
-    if(_reply)
-    {
-        _reply->header().set("Content-Type", "text/xml");
-        _reply->header().set("Connection", "close");
-    }
-}
-
-
-void HttpResponder::onBeginReturn()
+void HttpResponder::onResult()
 {
     try
     {
         assert(_reply);
-        if( ! _reply)
+        
+        if( ! _reply )
+        {
             throw std::logic_error("XML-RPC responder without reply");
+        }
 
         _reply->header().set("Content-Type", "text/xml");
 
-        formatReply( _reply->body() );
+        formatResult( _reply->body() );
 
         _reply->beginSend(true);
     }
@@ -134,6 +120,23 @@ void HttpResponder::onBeginReturn()
         log_error( error.what() );
         throw;
     }
+}
+
+
+void HttpResponder::onCancel()
+{
+    _reply = 0;
+}
+
+
+void HttpResponder::onError()
+{
+    if(_reply)
+    {
+        _reply->header().set("Connection", "close");
+    }
+
+    onResult();
 }
 
 } // namespace XmlRpc

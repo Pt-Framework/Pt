@@ -57,7 +57,7 @@ void Client::beginCall(IComposer& r, IRemoteProcedure& method, IDecomposer** arg
 {
     _impl->beginCall(r, method, argv, argc);
 
-    this->onBeginCall();
+    this->onInvoke();
 }
 
 
@@ -68,6 +68,8 @@ void Client::endCall()
         _impl->setError(false);
         onError();
     }
+
+    // TODO: handle also faults here...
 }
 
 
@@ -93,21 +95,21 @@ const IRemoteProcedure* Client::activeProcedure() const
 }
 
 
-void Client::formatRequest(std::ostream& os)
+void Client::formatMessage(std::ostream& os)
 {
-    _impl->formatRequest(os);
+    _impl->formatMessage(os);
 }
 
 
-void Client::beginReply(std::istream& is)
+void Client::beginResult(std::istream& is)
 {
-    _impl->beginReply(is);
+    _impl->beginResult(is);
 }
 
 
-bool Client::advanceReply()
+bool Client::parseResult()
 {
-    return _impl->advanceReply();
+    return _impl->parseResult();
 }
 
 
@@ -123,11 +125,11 @@ void Client::setError()
 }
 
 
-void Client::execute()
+void Client::finishResult()
 {
     if( _impl->activeProcedure() )
     {
-        _impl->execute();
+        _impl->finishResult();
     }
     else if( _impl->isError() )
     {
@@ -137,23 +139,9 @@ void Client::execute()
 }
 
 
-//void Client::executeError()
-//{
-//    _impl->setError();
-//
-//    _impl->execute();
-//
-//    if( _impl->isError() )
-//    {
-//        _impl->setError(false);
-//        onError();
-//    }
-//}
-
-
-void Client::readReply(std::istream& is)
+void Client::processResult(std::istream& is)
 {
-    _impl->readReply(is);
+    _impl->processResult(is);
 }
 
 } // namespace XmlRpc

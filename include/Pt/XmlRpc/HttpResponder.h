@@ -61,7 +61,7 @@ class PT_XMLRPC_API HttpResponder : public Http::Responder
 
     protected:
         // inheritdoc
-        virtual void onBeginReturn();
+        virtual void onResult();
 
         // inheritdoc
         virtual void onCancel();

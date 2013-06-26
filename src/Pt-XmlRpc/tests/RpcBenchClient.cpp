@@ -108,7 +108,7 @@ void BenchClient::exec()
     {
         try
         {
-            echo("hi");
+            std::cout << echo("hi") << " ";
             Pt::atomicIncrement(_requestsFinished);
         }
         catch(const std::exception& e)

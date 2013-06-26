@@ -77,17 +77,17 @@ class ClientImpl
         void setError(bool f = true)
         { _error = f; }
 
-        void formatRequest(std::ostream& os);
+        void formatMessage(std::ostream& os);
 
-        void beginReply(std::istream& is);
+        void beginResult(std::istream& is);
 
-        bool advanceReply();
+        bool parseResult();
 
         void setFault(int rc, const char* msg);
 
-        void execute();
+        void finishResult();
 
-        void readReply(std::istream& is);
+        void processResult(std::istream& is);
 
         void cancel();
 

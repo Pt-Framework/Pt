@@ -81,7 +81,7 @@ class PT_XMLRPC_API HttpClient : public Client
         Http::Client& client();
 
     protected:       
-        virtual void onBeginCall();
+        virtual void onInvoke();
 
         virtual void onCall();
 

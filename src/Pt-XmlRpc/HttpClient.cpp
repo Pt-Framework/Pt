@@ -82,7 +82,6 @@ class HttpClientImpl
 HttpClient::HttpClient()
 : _impl(new HttpClientImpl())
 {
-    _impl->client().request().setMethod("POST");
     _impl->client().replyReceived() += Pt::slot( *this, &HttpClient::onReply);
 }
 
@@ -91,7 +90,6 @@ HttpClient::HttpClient(const Net::AddrInfo& addrinfo,
                        const std::string& url)
 : _impl(new HttpClientImpl())
 {
-    _impl->client().request().setMethod("POST");
     _impl->client().replyReceived() += Pt::slot( *this, &HttpClient::onReply);
     connect(addrinfo, url);
 }
@@ -100,7 +98,6 @@ HttpClient::HttpClient(const Net::AddrInfo& addrinfo,
 HttpClient::HttpClient(const std::string& addr, unsigned short port, const std::string& url)
 : _impl( new HttpClientImpl() )
 {
-    _impl->client().request().setMethod("POST");
     _impl->client().replyReceived() += Pt::slot( *this, &HttpClient::onReply);
     connect(addr, port, url);
 }
@@ -109,7 +106,6 @@ HttpClient::HttpClient(const std::string& addr, unsigned short port, const std::
 HttpClient::HttpClient(System::EventLoop& loop)
 : _impl( new HttpClientImpl(loop) )
 {
-    _impl->client().request().setMethod("POST");
     _impl->client().replyReceived() += Pt::slot( *this, &HttpClient::onReply);
 }
 
@@ -118,7 +114,6 @@ HttpClient::HttpClient(System::EventLoop& loop, const Net::AddrInfo& addrinfo,
                        const std::string& url)
 : _impl( new HttpClientImpl(loop) )
 {
-    _impl->client().request().setMethod("POST");
     _impl->client().replyReceived() += Pt::slot( *this, &HttpClient::onReply);
     connect(addrinfo, url);
 }
@@ -129,7 +124,6 @@ HttpClient::HttpClient(System::EventLoop& loop,
                        const std::string& url)
 : _impl( new HttpClientImpl(loop) )
 {
-    _impl->client().request().setMethod("POST");
     _impl->client().replyReceived() += Pt::slot( *this, &HttpClient::onReply);
     connect(addr, port, url);
 }
@@ -161,38 +155,13 @@ void HttpClient::connect(const std::string& addr, unsigned short port, const std
 }
 
 
-//std::string HttpClient::url() const
-//{
-//    std::ostringstream s;
-//    s << "http://"
-//      << _client.host().host()
-//      << ':'
-//      << _client.host().port()
-//      << _client.request().url();
-//
-//    return s.str();
-//}
-//
-//
-//const std::string& HttpClient::url() const
-//{
-//    return _impl->client().request().url();
-//}
-//
-//
-//void HttpClient::setUrl(const std::string& url)
-//{
-//    _impl->client().request().setUrl(url);
-//}
-
-
 Http::Client& HttpClient::client()
 {
     return _impl->client();
 }
 
 
-void HttpClient::onBeginCall()
+void HttpClient::onInvoke()
 {
     // prepare HTTP request
     _impl->client().request().clear();
@@ -201,7 +170,7 @@ void HttpClient::onBeginCall()
     std::ostream& os = _impl->client().request().body();
 
     // format XML-RPC request
-    Client::formatRequest(os);
+    Client::formatMessage(os);
 
     _impl->client().beginReceive();
 }
@@ -216,14 +185,14 @@ void HttpClient::onCall()
     std::ostream& os = _impl->client().request().body();
 
     // format XML-RPC request
-    Client::formatRequest(os);
+    Client::formatMessage(os);
 
     // send HTTP request and start receiving HTTP reply
     _impl->client().send();
     std::istream& is = _impl->client().receive();
 
     // parse XML-RPC reply
-    Client::readReply(is);
+    Client::processResult(is);
 }
 
 
@@ -249,13 +218,13 @@ void HttpClient::onReply(Http::Client& client)
         {
             //_impl->verifyHeader( client.reply() );
             
-            Client::beginReply( client.reply().body() );
+            beginResult( client.reply().body() );
         }
 
         if( progress.body() )
         {
             // reads until error or XML was consumed
-            Client::advanceReply();
+            parseResult();
 
             // discard remaining data
             client.reply().discard();
@@ -268,13 +237,13 @@ void HttpClient::onReply(Http::Client& client)
         else
         {
             // send finished signal
-            Client::execute();
+            finishResult();
         }
     }
-    catch(const System::IOError& e) // HttpError is also an IOError
+    catch(const System::IOError&) // HttpError is also an IOError
     {
-        Client::setFault( 0, e.what() );
-        Client::execute();
+        setError();
+        finishResult();
     }
 }
 

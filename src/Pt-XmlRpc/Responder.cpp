@@ -125,7 +125,7 @@ void Responder::cancel()
 }
 
 
-void Responder::beginRequest(std::istream& is)
+void Responder::beginMessage(std::istream& is)
 {
     _state = OnBegin;
     _bin.reset(is);
@@ -140,7 +140,7 @@ void Responder::beginRequest(std::istream& is)
 }
 
 
-bool Responder::advanceRequest()
+bool Responder::parseMessage()
 {
     try
     {
@@ -175,12 +175,12 @@ bool Responder::advanceRequest()
 }
 
 
-void Responder::execute(System::EventLoop& loop)
+void Responder::finishMessage(System::EventLoop& loop)
 {
     if( _isFault )
     {
         onError();
-        onBeginReturn();
+        // onResult();
         return;
     }
 
@@ -209,15 +209,9 @@ void Responder::execute(System::EventLoop& loop)
         _isFault = true;
 
         onError();
-        onBeginReturn();
+        // onResult();
     }
 }
-
-
-//void Responder::executeFault(int rc, const char* msg)
-//{
-//
-//}
 
 
 void Responder::endCall()
@@ -233,15 +227,17 @@ void Responder::endCall()
     catch(const Fault& fault)
     {
         _fault = fault;
-        onError();
         _isFault = true;
+        onError();
+        // onResult();
+        return;
     }
 
-    this->onBeginReturn(); 
+    this->onResult(); 
 }
 
 
-void Responder::formatReply(std::ostream& os)
+void Responder::formatResult(std::ostream& os)
 {
     try
     {
@@ -259,11 +255,6 @@ void Responder::formatReply(std::ostream& os)
         _result->format(_formatter);
         _ts.write(XMLRPC_REPLY_END, sizeof(XMLRPC_REPLY_END)/sizeof(Char));
         _ts.flush();
-
-    }
-    catch(const Xml::XmlError& error)
-    {
-        formatError(os, 1, error.what());
     }
     catch(const SerializationError& error)
     {
@@ -273,6 +264,14 @@ void Responder::formatReply(std::ostream& os)
     {
         formatError(os, 3, error.what());
     }
+}
+
+
+void Responder::setFault(int rc, const char* msg)
+{
+    _fault.setRc(rc);
+    _fault.setText(msg);
+    _isFault = true;
 }
 
 
