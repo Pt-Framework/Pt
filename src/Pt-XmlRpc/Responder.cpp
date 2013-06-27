@@ -261,7 +261,23 @@ void Responder::formatResult(std::ostream& os)
 
         assert(_result);
         _ts.write(XMLRPC_REPLY_BEGIN, sizeof(XMLRPC_REPLY_BEGIN)/sizeof(Char));
+
         _result->format(_formatter);
+
+        //_result->beginFormat(_formatter);
+
+        //IDecomposer* d = _result;
+        //for(;;)
+        //{
+        //    std::cerr << "advanceFormat" << std::endl;
+        //    d = d->advanceFormat(_formatter);
+        //    if(d == 0)
+        //    {
+        //        std::cerr << "END" << std::endl;
+        //        break;
+        //    }
+        //}
+
         _ts.write(XMLRPC_REPLY_END, sizeof(XMLRPC_REPLY_END)/sizeof(Char));
         _ts.flush();
     }

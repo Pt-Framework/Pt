@@ -113,6 +113,15 @@ namespace Pt {
 
 SerializationInfo::Iterator SerializationInfo::beginFormat(Formatter& formatter)
 {
+    if( this->parent() && this->parent()->type() == Struct )
+    {
+        formatter.beginMember(_Name, this->typeName(), this->id() );
+    }
+    else if( this->parent() && this->parent()->type() == Sequence )
+    {
+        formatter.beginElement(this->typeName(), this->id() );
+    }
+
     switch(_type)
     {
         case Boolean:
@@ -241,6 +250,15 @@ void SerializationInfo::endFormat(Formatter& formatter)
     else if(_type == Pt::SerializationInfo::Sequence)
     {
         formatter.finishArray();
+    }
+
+    if( this->parent() && this->parent()->type() == Struct )
+    {
+        formatter.finishMember();
+    }
+    else if( this->parent() && this->parent()->type() == Sequence )
+    {
+        formatter.finishElement();
     }
 }
 
