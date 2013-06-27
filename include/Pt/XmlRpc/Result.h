@@ -28,57 +28,27 @@
 #ifndef Pt_XmlRpc_Result_h
 #define Pt_XmlRpc_Result_h
 
+#include <Pt/XmlRpc/Api.h>
 #include <string>
-#include <Pt/XmlRpc/Fault.h>
 
 namespace Pt {
 
 namespace XmlRpc {
 
-class ResultBase
-{
-    public:
-        ResultBase()
-        : _failed(false)
-        { }
-
-        void setFault(int rc, const std::string& msg)
-        {
-            _fault.setRc(rc);
-            _fault.setText(msg);
-            _failed = true;
-        }
-
-        void clearFault()
-        {
-            _failed = false;
-            _fault.clear();
-        }
-
-        Fault& fault()  
-        { return _fault; }
-
-        void checkFault() const
-        {
-            if (_failed)
-                throw _fault;
-        }
-
-        bool failed() const
-        { return _failed; }
-
-    private:
-        Fault _fault;
-        bool _failed;
-};
+class Client;
 
 template <typename R>
-class Result : public ResultBase
+class Result
 {
     public:
         explicit Result(Client& client)
         : _client(client)
         { }
+
+        bool isFailed() const
+        {
+            return _client.isFailed();
+        }
 
         R& value()
         { return _result; }
@@ -86,7 +56,6 @@ class Result : public ResultBase
         const R& get() const
         {
             _client.endCall();
-            checkFault();
             return _result;
         }
 

@@ -69,7 +69,10 @@ void Client::endCall()
         onError();
     }
 
-    // TODO: handle also faults here...
+    if( _impl->isFault() )
+    {
+        _impl->throwFault();
+    }
 }
 
 
@@ -92,6 +95,12 @@ void Client::cancel()
 const IRemoteProcedure* Client::activeProcedure() const
 {
     return _impl->activeProcedure();
+}
+
+
+bool Client::isFailed() const
+{
+    return _impl->isError() || _impl->isFault();
 }
 
 

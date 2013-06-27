@@ -54,41 +54,31 @@ HttpResponder::~HttpResponder()
 
 void HttpResponder::onBeginRequest(Http::Request& request, Http::Reply& reply, System::EventLoop& loop)
 {
+    // _reply != 0 means that request was completely parsed
+    _reply = 0;
+    
     beginMessage( request.body() );
 }
 
 
 void HttpResponder::onReadRequest(Http::Request& request, Http::Reply& reply, System::EventLoop& loop)
 {
-    try
+    bool done = parseMessage();
+    if( done )
     {
-        bool done = parseMessage();
-        if( done )
-        {
-            _reply = &reply;
-            finishMessage(loop);
-            return;
-        }
-    }
-    catch(const std::exception& error)
-    {
-        log_error( error.what() );
-        throw;
+        _reply = &reply;
+        finishMessage(loop);
     }
 }
 
 
 void HttpResponder::onBeginReply(Http::Request& request, Http::Reply& reply, System::EventLoop& loop)
 {
-    try
+    // _reply != 0 means that finishMessage() was already called
+    if( ! _reply )
     {
         _reply = &reply;
         finishMessage(loop);
-    }
-    catch(const std::exception& error)
-    {
-        log_error( error.what() );
-        throw;
     }
 }
 
@@ -100,32 +90,20 @@ void HttpResponder::onWriteReply(Http::Request& request, Http::Reply& reply, Sys
 
 void HttpResponder::onResult()
 {
-    try
-    {
-        assert(_reply);
-        
-        if( ! _reply )
-        {
-            throw std::logic_error("XML-RPC responder without reply");
-        }
+    assert(_reply);
 
+    if( _reply )
+    {
         _reply->header().set("Content-Type", "text/xml");
-
         formatResult( _reply->body() );
-
         _reply->beginSend(true);
-    }
-    catch(const std::exception& error)
-    {
-        log_error( error.what() );
-        throw;
     }
 }
 
 
 void HttpResponder::onCancel()
 {
-    _reply = 0;
+    // not really possible, since only the HTTP server uses this class
 }
 
 

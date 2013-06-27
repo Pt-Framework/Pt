@@ -68,8 +68,6 @@ class ClientImpl
         ClientImpl();
 
         ~ClientImpl();
-        
-        void beginCall(IComposer& r, IRemoteProcedure& method, IDecomposer** argv, unsigned argc);
 
         bool isError() const
         { return _error; }
@@ -77,25 +75,41 @@ class ClientImpl
         void setError(bool f = true)
         { _error = f; }
 
+        bool isFault() const
+        { return _isFault; }
+
+        void setFault(int rc, const char* msg);
+
+        void setFault(bool f = true)
+        { _isFault = f; }
+
+        void throwFault()  
+        { 
+            _isFault = false;
+            throw _fault; 
+        }
+
+        const IRemoteProcedure* activeProcedure() const
+        { 
+            return _method;
+        }
+
+        void beginCall(IComposer& r, IRemoteProcedure& method, IDecomposer** argv, unsigned argc);
+
+        void cancel();
+
         void formatMessage(std::ostream& os);
 
         void beginResult(std::istream& is);
 
         bool parseResult();
 
-        void setFault(int rc, const char* msg);
-
         void finishResult();
 
-        void processResult(std::istream& is);
-
-        void cancel();
-
-        const IRemoteProcedure* activeProcedure() const
-        { return _method; }
+        void processResult(std::istream& is);        
 
     private:
-        void advance(const Xml::Node& node);
+        bool advance(const Xml::Node& node);
         
     private:
         State _state;
@@ -111,6 +125,7 @@ class ClientImpl
         Fault _fault;
         Composer<Fault> _fh;
         bool _error;
+        bool _isFault;
 };
 
 }

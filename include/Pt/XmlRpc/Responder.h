@@ -94,7 +94,7 @@ class PT_XMLRPC_API Responder
     private:
         void formatError(std::ostream& os, int rc, const char* msg);
 
-        void advance(const Pt::Xml::Node& node);
+        bool advance(const Pt::Xml::Node& node);
 
     private:
        SerializationContext _context;

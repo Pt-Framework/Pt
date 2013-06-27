@@ -31,24 +31,15 @@
 
 #include <Pt/XmlRpc/Api.h>
 #include <Pt/XmlRpc/Client.h>
+#include <Pt/Http/Client.h>
 #include <Pt/Connectable.h>
+#include <string>
 
 namespace Pt {
 
-namespace System {
-    class EventLoop;
-}
-
-namespace Net {
-    class AddrInfo;
-}
-
-namespace Http {
-    class Client;
-}
-
 namespace XmlRpc {
 
+// TODO: derive from Http::Client
 class PT_XMLRPC_API HttpClient : public Client
                                , public Connectable
 {
@@ -93,7 +84,9 @@ class PT_XMLRPC_API HttpClient : public Client
         void onReply(Http::Client& client);
 
     private:
-        class HttpClientImpl* _impl;
+        Http::Client _client;
+        void* _v1;
+        void* _v2;
 };
 
 } // namespace XmlRpc

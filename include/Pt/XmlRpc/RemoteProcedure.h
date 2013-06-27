@@ -44,8 +44,6 @@ namespace XmlRpc {
 
 class PT_XMLRPC_API IRemoteProcedure
 {
-    friend class ClientImpl;
-
     public:
         IRemoteProcedure(Client& client, const String& name)
         : _client(&client)
@@ -71,14 +69,20 @@ class PT_XMLRPC_API IRemoteProcedure
         const String& name() const
         { return _name; }
 
-        virtual void setFault(int rc, const std::string& msg) = 0;
-
-        virtual bool failed() const = 0;
+        bool isFailed() const
+        {
+            return _client->isFailed();
+        }
 
         void cancel()
         {
-            if (_client && _client->activeProcedure() == this)
+            if( _client->activeProcedure() == this )
                 _client->cancel();
+        }
+
+        void finish()
+        {
+            this->onFinished();
         }
 
     protected:
@@ -100,27 +104,24 @@ class RemoteProcedureBase : public IRemoteProcedure
           _r( & client.context() )
         { }
 
-        void setFault(int rc, const std::string& msg)
-        {
-            _result.setFault(rc, msg);
+        R& result()
+        { 
+            return _result.value(); 
         }
 
-        const R& result()
+        const R& getResult()
         {
             return _result.get();
         }
 
-        virtual bool failed() const
-        {
-            return _result.failed();
-        }
-
-        Signal< const Result<R> & > finished;
+        Signal< const Result<R>& >& finished()
+        { return _finished; }
 
     protected:
         void onFinished()
-        { finished.send(_result); }
+        { _finished.send(_result); }
 
+        Signal< const Result<R> & > _finished;
         Result<R> _result;
         Composer<R> _r;
 };

@@ -61,7 +61,7 @@ class RemoteProcedure : public RemoteProcedureBase<R>
 
         void begin(const A1& a1, const A2& a2, const A3& a3, const A4& a4, const A5& a5, const A6& a6, const A7& a7, const A8& a8, const A9& a9, const A10& a10)
         {
-            this->_result.clearFault();
+            //this->_result.clearFault();
 
             _a1.begin(a1, "");
             _a2.begin(a2, "");
@@ -82,7 +82,7 @@ class RemoteProcedure : public RemoteProcedureBase<R>
 
         const R& call(const A1& a1, const A2& a2, const A3& a3, const A4& a4, const A5& a5, const A6& a6, const A7& a7, const A8& a8, const A9& a9, const A10& a10)
         {
-            this->_result.clearFault();
+            //this->_result.clearFault();
 
             _a1.begin(a1, "");
             _a2.begin(a2, "");
@@ -149,7 +149,7 @@ class RemoteProcedure<R, A1, A2, A3, A4, A5, A6, A7, A8, A9,
 
         void begin(const A1& a1, const A2& a2, const A3& a3, const A4& a4, const A5& a5, const A6& a6, const A7& a7, const A8& a8, const A9& a9)
         {
-            this->_result.clearFault();
+            //this->_result.clearFault();
 
             _a1.begin(a1, "");
             _a2.begin(a2, "");
@@ -169,7 +169,7 @@ class RemoteProcedure<R, A1, A2, A3, A4, A5, A6, A7, A8, A9,
 
         const R& call(const A1& a1, const A2& a2, const A3& a3, const A4& a4, const A5& a5, const A6& a6, const A7& a7, const A8& a8, const A9& a9)
         {
-            this->_result.clearFault();
+            //this->_result.clearFault();
 
             _a1.begin(a1, "");
             _a2.begin(a2, "");
@@ -233,7 +233,7 @@ class RemoteProcedure<R, A1, A2, A3, A4, A5, A6, A7, A8,
 
         void begin(const A1& a1, const A2& a2, const A3& a3, const A4& a4, const A5& a5, const A6& a6, const A7& a7, const A8& a8)
         {
-            this->_result.clearFault();
+            //this->_result.clearFault();
 
             _a1.begin(a1, "");
             _a2.begin(a2, "");
@@ -252,7 +252,7 @@ class RemoteProcedure<R, A1, A2, A3, A4, A5, A6, A7, A8,
 
         const R& call(const A1& a1, const A2& a2, const A3& a3, const A4& a4, const A5& a5, const A6& a6, const A7& a7, const A8& a8)
         {
-            this->_result.clearFault();
+            //this->_result.clearFault();
 
             _a1.begin(a1, "");
             _a2.begin(a2, "");
@@ -313,7 +313,7 @@ class RemoteProcedure<R, A1, A2, A3, A4, A5, A6, A7,
 
         void begin(const A1& a1, const A2& a2, const A3& a3, const A4& a4, const A5& a5, const A6& a6, const A7& a7)
         {
-            this->_result.clearFault();
+            //this->_result.clearFault();
 
             _a1.begin(a1, "");
             _a2.begin(a2, "");
@@ -331,7 +331,7 @@ class RemoteProcedure<R, A1, A2, A3, A4, A5, A6, A7,
 
         const R& call(const A1& a1, const A2& a2, const A3& a3, const A4& a4, const A5& a5, const A6& a6, const A7& a7)
         {
-            this->_result.clearFault();
+            //this->_result.clearFault();
 
             _a1.begin(a1, "");
             _a2.begin(a2, "");
@@ -389,7 +389,7 @@ class RemoteProcedure<R, A1, A2, A3, A4, A5, A6,
 
         void begin(const A1& a1, const A2& a2, const A3& a3, const A4& a4, const A5& a5, const A6& a6)
         {
-            this->_result.clearFault();
+            //this->_result.clearFault();
 
             _a1.begin(a1, "");
             _a2.begin(a2, "");
@@ -406,7 +406,7 @@ class RemoteProcedure<R, A1, A2, A3, A4, A5, A6,
 
         const R& call(const A1& a1, const A2& a2, const A3& a3, const A4& a4, const A5& a5, const A6& a6)
         {
-            this->_result.clearFault();
+            //this->_result.clearFault();
 
             _a1.begin(a1, "");
             _a2.begin(a2, "");
@@ -461,7 +461,7 @@ class RemoteProcedure<R, A1, A2, A3, A4, A5,
 
         void begin(const A1& a1, const A2& a2, const A3& a3, const A4& a4, const A5& a5)
         {
-            this->_result.clearFault();
+            //this->_result.clearFault();
 
             _a1.begin(a1, "");
             _a2.begin(a2, "");
@@ -477,7 +477,7 @@ class RemoteProcedure<R, A1, A2, A3, A4, A5,
 
         const R& call(const A1& a1, const A2& a2, const A3& a3, const A4& a4, const A5& a5)
         {
-            this->_result.clearFault();
+            //this->_result.clearFault();
 
             _a1.begin(a1, "");
             _a2.begin(a2, "");
@@ -529,7 +529,7 @@ class RemoteProcedure<R, A1, A2, A3, A4,
 
         void begin(const A1& a1, const A2& a2, const A3& a3, const A4& a4)
         {
-            this->_result.clearFault();
+            //this->_result.clearFault();
 
             _a1.begin(a1, "");
             _a2.begin(a2, "");
@@ -544,7 +544,7 @@ class RemoteProcedure<R, A1, A2, A3, A4,
 
         const R& call(const A1& a1, const A2& a2, const A3& a3, const A4& a4)
         {
-            this->_result.clearFault();
+            //this->_result.clearFault();
 
             _a1.begin(a1, "");
             _a2.begin(a2, "");
@@ -593,7 +593,7 @@ class RemoteProcedure<R, A1, A2, A3,
 
         void begin(const A1& a1, const A2& a2, const A3& a3)
         {
-            this->_result.clearFault();
+            //this->_result.clearFault();
 
             _a1.begin(a1, "");
             _a2.begin(a2, "");
@@ -607,7 +607,7 @@ class RemoteProcedure<R, A1, A2, A3,
 
         const R& call(const A1& a1, const A2& a2, const A3& a3)
         {
-            this->_result.clearFault();
+            //this->_result.clearFault();
 
             _a1.begin(a1, "");
             _a2.begin(a2, "");
@@ -653,7 +653,7 @@ class RemoteProcedure<R, A1, A2,
 
         void begin(const A1& a1, const A2& a2)
         {
-            this->_result.clearFault();
+            //this->_result.clearFault();
 
             _a1.begin(a1, "");
             _a2.begin(a2, "");
@@ -666,7 +666,7 @@ class RemoteProcedure<R, A1, A2,
 
         const R& call(const A1& a1, const A2& a2)
         {
-            this->_result.clearFault();
+            //this->_result.clearFault();
 
             _a1.begin(a1, "");
             _a2.begin(a2, "");
@@ -709,7 +709,7 @@ class RemoteProcedure<R, A1,
 
         void begin(const A1& a1)
         {
-            this->_result.clearFault();
+            //this->_result.clearFault();
 
             _a1.begin(a1, "");
 
@@ -721,7 +721,7 @@ class RemoteProcedure<R, A1,
 
         const R& call(const A1& a1)
         {
-            this->_result.clearFault();
+            //this->_result.clearFault();
 
             _a1.begin(a1, "");
             this->_r.begin(this->_result.value());
@@ -761,7 +761,7 @@ class RemoteProcedure<R,
 
         void begin()
         {
-            this->_result.clearFault();
+            //this->_result.clearFault();
 
             this->_r.begin(this->_result.value());
 
@@ -771,7 +771,7 @@ class RemoteProcedure<R,
 
         const R& call()
         {
-            this->_result.clearFault();
+            //this->_result.clearFault();
 
             this->_r.begin(this->_result.value());
 

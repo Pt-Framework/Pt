@@ -142,18 +142,27 @@ void Responder::beginMessage(std::istream& is)
 
 bool Responder::parseMessage()
 {
+    bool done = true;
+    
     try
     {
         for(;;)
         {
             const Xml::Node* node = _reader.advance();
-            if( ! node)
+            if( ! node )
+            {
+                done = false;
                 break;
+            }
             
-            this->advance(*node);
+            done = this->advance(*node);
+            if(done)
+            {
+                break;
+            }
         }
 
-        return false;
+        return done;
     }
     catch(const Xml::XmlError& error)
     {
@@ -171,7 +180,7 @@ bool Responder::parseMessage()
         _isFault = true;
     }
 
-    return true;
+    return done;
 }
 
 
@@ -322,7 +331,7 @@ void Responder::formatError(std::ostream& os, int rc, const char* msg)
 }
 
 
-void Responder::advance(const Pt::Xml::Node& node)
+bool Responder::advance(const Pt::Xml::Node& node)
 {
     switch(_state)
     {
@@ -460,18 +469,22 @@ void Responder::advance(const Pt::Xml::Node& node)
 
                 _state = OnMethodCallEnd;
             }
+            
             break;
         }
 
         case OnMethodCallEnd:
-        { //std::cerr << "OnMethodCallEnd" << std::endl;
+        {
             if(node.type() == Xml::Node::EndDocument)
             {
                 _state = OnMethodCallEnd;
             }
+            
             break;
         }
     }
+
+    return _state == OnMethodCallEnd;
 }
 
 } // namespace XmlRpc

@@ -169,7 +169,7 @@ void Acceptor::onRequestReceived(Request& req)
     }
     catch(const System::IOError& e) // TODO: HttpError is also an IOError
     {
-        log_error("EXCEPTION: " << e.what());
+        log_warn("EXCEPTION: " << e.what());
         _finished.send(*this);
     }
 }
@@ -216,7 +216,7 @@ void Acceptor::onAuthorization(Authorization& auth)
     }
     catch(const System::IOError& e) // TODO: HttpError is also an IOError
     {
-        log_error("EXCEPTION: " << e.what());
+        log_warn("EXCEPTION: " << e.what());
 
         // TODO: error reply on HTTP related exceptions
         // replyError();
@@ -330,7 +330,7 @@ void Acceptor::onReplySent(Reply& r)
     }
     catch(const System::IOError& e) // TODO: HttpError is also an IOError
     {
-        log_error("EXCEPTION: " << e.what());
+        log_warn("EXCEPTION: " << e.what());
         _finished.send(*this);
     }
 }

@@ -78,6 +78,7 @@ ClientImpl::ClientImpl()
 , _argc(0)
 , _method(0)
 , _error(false)
+, _isFault(false)
 {
 }
 
@@ -85,6 +86,14 @@ ClientImpl::ClientImpl()
 ClientImpl::~ClientImpl()
 {
     _ts.reset();
+}
+
+
+void ClientImpl::setFault(int rc, const char* msg)
+{
+    _fault.setRc(rc);
+    _fault.setText(msg);
+    _isFault = true;
 }
 
 
@@ -100,6 +109,7 @@ void ClientImpl::beginCall(IComposer& r, IRemoteProcedure& method, IDecomposer**
     _argc = argc;
 
     _error = false;
+    _isFault = false;
 }
 
 
@@ -112,11 +122,15 @@ void ClientImpl::cancel()
     _argv = 0;
 
     _error = false;
+    _isFault = false;
 }
 
 
 void ClientImpl::formatMessage(std::ostream& os)
 {
+    if( ! _method )
+        return;
+
     const String& name = _method->name();
 
     _ts.attach(os);
@@ -158,49 +172,46 @@ bool ClientImpl::parseResult()
         for(;;) 
         {
             const Pt::Xml::Node* node = _reader.advance(); // XmlError
-            if( ! node)
+            if( ! node )
+            {
                 break;
+            }
             
-            advance(*node); // SerializationError, ConversionError
+            bool done = advance(*node); // SerializationError, ConversionError
+            if(done)
+            {
+                return true;
+            }
         }
-
-        // TODO: return true if parsing is complete
          
         return false;
     }
     catch(const Xml::XmlError& error)
     {
-        _method->setFault(Fault::invalidXmlRpc, error.what());
+        setFault(Fault::invalidXmlRpc, error.what());
     }
     catch(const SerializationError& error)
     {
-        _method->setFault(Fault::invalidMethodParameters, error.what());
+        setFault(Fault::invalidMethodParameters, error.what());
     }
     catch(const ConversionError& error)
     {
-        _method->setFault(Fault::invalidMethodParameters, error.what());
+        setFault(Fault::invalidMethodParameters, error.what());
     }
 
     return true;
 }
 
 
-void ClientImpl::setFault(int rc, const char* msg)
-{
-    if(_method)
-        _method->setFault(rc, msg);
-}
-
-
 void ClientImpl::finishResult()
 {
     // do not call method twice, i.e. if we get here from within
-    // method->onFinish() we have an infinite loop
+    // method->finish() we have an infinite loop
     if(_method)
     {
         IRemoteProcedure* method = _method;
         _method = 0;
-        method->onFinished();
+        method->finish();
     }
 }
 
@@ -214,21 +225,27 @@ void ClientImpl::processResult(std::istream& is)
         while( _reader.get().type() !=  Pt::Xml::Node::EndDocument )
         {
             const Pt::Xml::Node& node = _reader.get();
-            advance(node);
+            
+            bool done = advance(node);
+            if(done)
+            {
+                break;
+            }
+            
             _reader.next();
         }
     }
     catch(const Xml::XmlError& error)
     {
-        _method->setFault(Fault::invalidXmlRpc, error.what());
+        setFault(Fault::invalidXmlRpc, error.what());
     }
     catch(const SerializationError& error)
     {
-        _method->setFault(Fault::invalidMethodParameters, error.what());
+        setFault(Fault::invalidMethodParameters, error.what());
     }
     catch(const ConversionError& error)
     {
-        _method->setFault(Fault::invalidMethodParameters, error.what());
+        setFault(Fault::invalidMethodParameters, error.what());
     }
 
     // _method contains a return value or fault now
@@ -237,7 +254,7 @@ void ClientImpl::processResult(std::istream& is)
 }
 
 
-void ClientImpl::advance(const Pt::Xml::Node& node)
+bool ClientImpl::advance(const Pt::Xml::Node& node)
 {
     switch(_state)
     {
@@ -299,7 +316,7 @@ void ClientImpl::advance(const Pt::Xml::Node& node)
                 //if( ee.name() != L"methodResponse" )
                 //    throw SerializationError("invalid XML-RPC methodCall");
 
-                _method->setFault(_fault.rc(), _fault.text());
+                setFault(true);
 
                 _state = OnFaultResponseEnd;
             }
@@ -370,6 +387,8 @@ void ClientImpl::advance(const Pt::Xml::Node& node)
             break;
         }
     }
+
+    return _state == OnMethodResponseEnd;
 }
 
 } // namespace XmlRpc
