@@ -24,12 +24,63 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#ifndef PT_XMLRPC_SERVICE_TPP
-#define PT_XMLRPC_SERVICE_TPP
+#ifndef PT_XMLRPC_SERVICEPROCEDURE_H
+#define PT_XMLRPC_SERVICEPROCEDURE_H
+
+#include <Pt/XmlRpc/Api.h>
+#include <Pt/System/EventLoop.h>
+#include <Pt/Decomposer.h>
+#include <Pt/Composer.h>
+#include <Pt/TypeTraits.h>
+#include <Pt/Void.h>
 
 namespace Pt {
 
 namespace XmlRpc {
+
+class Responder;
+
+class ServiceProcedure
+{
+    public:
+        virtual ~ServiceProcedure()
+        {}
+
+        void setReady()
+        { _responder->endCall(); }
+
+        virtual IComposer** beginArgs() = 0;
+
+        virtual void beginCall(System::EventLoop& loop) = 0;
+
+        virtual IDecomposer* endCall() = 0;      
+
+    protected:
+        ServiceProcedure(Responder& r)
+        : _responder( &r )
+        {}
+
+    private:
+        Responder* _responder;
+};
+
+
+class ServiceProcedureDef
+{
+    public:
+        virtual ~ServiceProcedureDef()
+        {}
+
+        ServiceProcedure* createProcedure(Responder& ctx) const
+        { return this->onCreateProcedure(ctx); }
+
+    protected:
+        ServiceProcedureDef()
+        {}
+
+        virtual ServiceProcedure* onCreateProcedure(Responder& ctx) const = 0;
+};
+
 
 //
 // BasicServiceProcedure with 10 arguments
@@ -1193,4 +1244,4 @@ class AsyncProcedureDef : public ServiceProcedureDef
 
 }
 
-#endif // PT_XMLRPC_SERVICE_TPP
+#endif // PT_XMLRPC_SERVICEPROCEDURE_H

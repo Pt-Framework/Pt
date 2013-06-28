@@ -95,7 +95,17 @@ void HttpResponder::onResult()
     if( _reply )
     {
         _reply->header().set("Content-Type", "text/xml");
-        formatResult( _reply->body() );
+
+        beginResult(_reply->body() );
+
+        // TODO: begin send when reply buffers more than 8192 bytes
+        while( ! advanceResult() )
+            ;
+
+        finishResult();
+        //std::cerr << "sending: " << _reply->buffer().size() << " bytes." << std::endl;
+
+        //formatResult( _reply->body() );
         _reply->beginSend(true);
     }
 }

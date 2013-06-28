@@ -318,11 +318,11 @@ class PT_HTTP_API Message
         { return _finished; }
 
         void discard();
-
-    protected:
+   
         MessageBuffer& buffer()
         { return _buf; }
 
+    protected:
         void setBuffer(std::streambuf& sb)
         { _ios.rdbuf(&sb); }
 

@@ -31,67 +31,12 @@
 
 #include <Pt/XmlRpc/Api.h>
 #include <Pt/XmlRpc/Responder.h>
+#include <Pt/XmlRpc/ServiceProcedure.h>
 #include <Pt/Http/Service.h>
-#include <Pt/System/EventLoop.h>
 #include <Pt/System/Mutex.h>
-#include <Pt/Decomposer.h>
-#include <Pt/Composer.h>
 #include <Pt/NonCopyable.h>
-#include <Pt/TypeTraits.h>
-#include <Pt/Void.h>
 #include <string>
 #include <map>
-
-namespace Pt {
-
-namespace XmlRpc {
-
-class ServiceProcedure
-{
-    public:
-        virtual ~ServiceProcedure()
-        {}
-
-        void setReady()
-        { _responder->endCall(); }
-
-        virtual IComposer** beginArgs() = 0;
-
-        virtual void beginCall(System::EventLoop& loop) = 0;
-
-        virtual IDecomposer* endCall() = 0;      
-
-    protected:
-        ServiceProcedure(Responder& r)
-        : _responder( &r )
-        {}
-
-    private:
-        Responder* _responder;
-};
-
-
-class ServiceProcedureDef
-{
-    public:
-        virtual ~ServiceProcedureDef()
-        {}
-
-        ServiceProcedure* createProcedure(Responder& ctx) const
-        { return this->onCreateProcedure(ctx); }
-
-    protected:
-        ServiceProcedureDef()
-        {}
-
-        virtual ServiceProcedure* onCreateProcedure(Responder& ctx) const = 0;
-};
-
-} // namespace XmlRpc
-
-} // namespace Pt
-
-#include <Pt/XmlRpc/Service.tpp>
 
 namespace Pt {
 

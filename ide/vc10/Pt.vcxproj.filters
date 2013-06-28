@@ -789,6 +789,9 @@
     <ClInclude Include="..\..\include\Pt\XmlRpc\HttpResponder.h">
       <Filter>Pt-XmlRpc</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\XmlRpc\ServiceProcedure.h">
+      <Filter>Pt-XmlRpc</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -893,9 +896,6 @@
       <Filter>Pt-Xml\tests</Filter>
     </None>
     <None Include="..\..\include\Pt\XmlRpc\RemoteProcedure.tpp">
-      <Filter>Pt-XmlRpc</Filter>
-    </None>
-    <None Include="..\..\include\Pt\XmlRpc\Service.tpp">
       <Filter>Pt-XmlRpc</Filter>
     </None>
     <None Include="..\..\src\Pt-XmlRpc\Jamfile">

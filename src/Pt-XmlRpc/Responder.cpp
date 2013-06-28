@@ -246,49 +246,71 @@ void Responder::endCall()
 }
 
 
-void Responder::formatResult(std::ostream& os)
+void Responder::beginResult(std::ostream& os)
 {
-    try
+    if( _isFault )
     {
-        if( _isFault )
-        {
-            formatError(os, _fault.rc(), _fault.what());
-            return;
-        }
+        _result = 0;
+        formatError(os, _fault.rc(), _fault.what());
+        return;
+    }
 
-        _ts.attach(os);
-        _ts.write( XMLRPC_XMLDECL, sizeof(XMLRPC_XMLDECL)/sizeof(Char) );
+    _ts.attach(os);
+    _ts.write( XMLRPC_XMLDECL, sizeof(XMLRPC_XMLDECL)/sizeof(Char) );
 
-        assert(_result);
-        _ts.write(XMLRPC_REPLY_BEGIN, sizeof(XMLRPC_REPLY_BEGIN)/sizeof(Char));
+    assert(_result);
+    _ts.write(XMLRPC_REPLY_BEGIN, sizeof(XMLRPC_REPLY_BEGIN)/sizeof(Char));
 
-        _result->format(_formatter);
+    _result->beginFormat(_formatter);
+}
 
-        //_result->beginFormat(_formatter);
 
-        //IDecomposer* d = _result;
-        //for(;;)
-        //{
-        //    std::cerr << "advanceFormat" << std::endl;
-        //    d = d->advanceFormat(_formatter);
-        //    if(d == 0)
-        //    {
-        //        std::cerr << "END" << std::endl;
-        //        break;
-        //    }
-        //}
+bool Responder::advanceResult()
+{
+    //while(_result)
+    //{
+    //    _result = _result->advanceFormat(_formatter);
+    //}
+    //
+    //return true;
 
+    for(unsigned n = 0; _result && n < 10; ++n)
+    {
+        _result = _result->advanceFormat(_formatter);
+    }
+
+    return _result == 0;
+}
+
+
+void Responder::finishResult()
+{
+    if( ! _isFault )
+    {
         _ts.write(XMLRPC_REPLY_END, sizeof(XMLRPC_REPLY_END)/sizeof(Char));
         _ts.flush();
     }
-    catch(const SerializationError& error)
+}
+
+
+void Responder::formatResult(std::ostream& os)
+{
+    if( _isFault )
     {
-        formatError(os, 2, error.what());
+        formatError(os, _fault.rc(), _fault.what());
+        return;
     }
-    catch(const ConversionError& error)
-    {
-        formatError(os, 3, error.what());
-    }
+
+    _ts.attach(os);
+    _ts.write( XMLRPC_XMLDECL, sizeof(XMLRPC_XMLDECL)/sizeof(Char) );
+
+    assert(_result);
+    _ts.write(XMLRPC_REPLY_BEGIN, sizeof(XMLRPC_REPLY_BEGIN)/sizeof(Char));
+
+    _result->format(_formatter);
+
+    _ts.write(XMLRPC_REPLY_END, sizeof(XMLRPC_REPLY_END)/sizeof(Char));
+    _ts.flush();
 }
 
 

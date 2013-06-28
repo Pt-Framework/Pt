@@ -176,6 +176,7 @@
     <ClInclude Include="..\..\include\Pt\XmlRpc\Result.h" />
     <ClInclude Include="..\..\include\Pt\XmlRpc\Scanner.h" />
     <ClInclude Include="..\..\include\Pt\XmlRpc\Service.h" />
+    <ClInclude Include="..\..\include\Pt\XmlRpc\ServiceProcedure.h" />
     <ClInclude Include="..\..\include\Pt\Xml\Api.h" />
     <ClInclude Include="..\..\include\Pt\Xml\ByteorderMark.h" />
     <ClInclude Include="..\..\include\Pt\Xml\Characters.h" />
@@ -262,7 +263,6 @@
     <None Include="..\..\include\Pt\Slot.tpp" />
     <None Include="..\..\include\Pt\String.tpp" />
     <None Include="..\..\include\Pt\XmlRpc\RemoteProcedure.tpp" />
-    <None Include="..\..\include\Pt\XmlRpc\Service.tpp" />
     <None Include="..\..\jam.bat" />
     <None Include="..\..\Jambase" />
     <None Include="..\..\Jamconfigure" />

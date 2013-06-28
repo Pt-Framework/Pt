@@ -48,19 +48,6 @@ class ServiceProcedure;
 
 class PT_XMLRPC_API Responder
 {
-    enum State
-    {
-        OnBegin,
-        OnMethodCallBegin,
-        OnMethodNameBegin,
-        OnMethodName,
-        OnMethodNameEnd,
-        OnParams,
-        OnParam,
-        OnParamsEnd,
-        OnMethodCallEnd
-    };
-
     public:
         Responder(Service& service);
 
@@ -87,6 +74,12 @@ class PT_XMLRPC_API Responder
 
         void finishMessage(System::EventLoop& loop);
 
+        void beginResult(std::ostream& os);
+
+        bool advanceResult();
+
+        void finishResult();
+
         void formatResult(std::ostream& os);
 
         void setFault(int rc, const char* msg);
@@ -97,6 +90,19 @@ class PT_XMLRPC_API Responder
         bool advance(const Pt::Xml::Node& node);
 
     private:
+        enum State
+        {
+            OnBegin,
+            OnMethodCallBegin,
+            OnMethodNameBegin,
+            OnMethodName,
+            OnMethodNameEnd,
+            OnParams,
+            OnParam,
+            OnParamsEnd,
+            OnMethodCallEnd
+        };
+
        SerializationContext _context;
        State _state;
        Utf8Codec _utf8;

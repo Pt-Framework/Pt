@@ -103,7 +103,8 @@ class Decomposer : public IDecomposer
         {
             _si << Pt::save() <<= *_type;
             _current = &_si;
-            _it = _current->beginFormat(formatter);
+            
+            _it = _si.beginFormat(formatter);
         }
 
         virtual IDecomposer* advanceFormat(Formatter& formatter)
@@ -111,23 +112,34 @@ class Decomposer : public IDecomposer
             if( _it == _current->end() )
             {
                 _current->endFormat(formatter);
-                _current = _current->parent();
-                if(_current)
-                    _it = _current->end();
+                
+                if( _current->sibling() )
+                {
+                    _current = _current->sibling();
+                    _it = _current->beginFormat(formatter);
+                }
+                else
+                {
+                    _current = _current->parent();
+                    if(_current)
+                        _it = _current->end();
+                }
 
                 return _current != 0 ? this : _parent;
             }
 
             SerializationInfo::Iterator it = _it->beginFormat(formatter);
-            if( it != _current->end() )
+            if( it != _it->end() )
             {
-                 _it = it;
                  _current = &(*_it);
-                 return this;
+                 _it = it;
             }
-
-            _it->endFormat(formatter);
-            ++_it;
+            else
+            {
+                _it->endFormat(formatter);
+                ++_it;
+            }
+            
             return this;
         }
 
