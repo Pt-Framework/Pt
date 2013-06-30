@@ -57,12 +57,21 @@ class RemoteProcedure : public RemoteProcedureBase<R>
         , _a8( & client.context() )
         , _a9( & client.context() )
         , _a10( & client.context() )
-        { }
+        { 
+            _args[0] = &_a1;
+            _args[1] = &_a2; 
+            _args[2] = &_a3;
+            _args[3] = &_a4;
+            _args[4] = &_a5;
+            _args[5] = &_a6;
+            _args[6] = &_a7;
+            _args[7] = &_a8;
+            _args[8] = &_a9;
+            _args[9] = &_a10;
+        }
 
         void begin(const A1& a1, const A2& a2, const A3& a3, const A4& a4, const A5& a5, const A6& a6, const A7& a7, const A8& a8, const A9& a9, const A10& a10)
         {
-            //this->_result.clearFault();
-
             _a1.begin(a1, "");
             _a2.begin(a2, "");
             _a3.begin(a3, "");
@@ -76,14 +85,11 @@ class RemoteProcedure : public RemoteProcedureBase<R>
 
             this->_r.begin(this->_result.value());
 
-            IDecomposer* argv[10] = { &_a1, &_a2, &_a3, &_a4, &_a5, &_a6, &_a7, &_a8, &_a9, &_a10 };
-            this->client().beginCall(this->_r, *this, argv, 10);
+            this->client().beginCall(this->_r, *this, _args, 10);
         }
 
         const R& call(const A1& a1, const A2& a2, const A3& a3, const A4& a4, const A5& a5, const A6& a6, const A7& a7, const A8& a8, const A9& a9, const A10& a10)
         {
-            //this->_result.clearFault();
-
             _a1.begin(a1, "");
             _a2.begin(a2, "");
             _a3.begin(a3, "");
@@ -96,8 +102,7 @@ class RemoteProcedure : public RemoteProcedureBase<R>
             _a10.begin(a10, "");
             this->_r.begin(this->_result.value());
 
-            IDecomposer* argv[10] = { &_a1, &_a2, &_a3, &_a4, &_a5, &_a6, &_a7, &_a8, &_a9, &_a10 };
-            this->client().call(this->_r, *this, argv, 10);
+            this->client().call(this->_r, *this, _args, 10);
             return this->_result.get();
         }
 
@@ -117,6 +122,7 @@ class RemoteProcedure : public RemoteProcedureBase<R>
         Decomposer<A8> _a8;
         Decomposer<A9> _a9;
         Decomposer<A10> _a10;
+        IDecomposer* _args[10]; 
 };
 
 
@@ -145,12 +151,20 @@ class RemoteProcedure<R, A1, A2, A3, A4, A5, A6, A7, A8, A9,
         , _a7( & client.context() )
         , _a8( & client.context() )
         , _a9( & client.context() )
-        { }
+        { 
+            _args[0] = &_a1;
+            _args[1] = &_a2; 
+            _args[2] = &_a3;
+            _args[3] = &_a4;
+            _args[4] = &_a5;
+            _args[5] = &_a6;
+            _args[6] = &_a7;
+            _args[7] = &_a8;
+            _args[8] = &_a9;
+        }
 
         void begin(const A1& a1, const A2& a2, const A3& a3, const A4& a4, const A5& a5, const A6& a6, const A7& a7, const A8& a8, const A9& a9)
         {
-            //this->_result.clearFault();
-
             _a1.begin(a1, "");
             _a2.begin(a2, "");
             _a3.begin(a3, "");
@@ -163,14 +177,11 @@ class RemoteProcedure<R, A1, A2, A3, A4, A5, A6, A7, A8, A9,
 
             this->_r.begin(this->_result.value());
 
-            IDecomposer* argv[9] = { &_a1, &_a2, &_a3, &_a4, &_a5, &_a6, &_a7, &_a8, &_a9 };
-            this->client().beginCall(this->_r, *this, argv, 9);
+            this->client().beginCall(this->_r, *this, _args, 9);
         }
 
         const R& call(const A1& a1, const A2& a2, const A3& a3, const A4& a4, const A5& a5, const A6& a6, const A7& a7, const A8& a8, const A9& a9)
         {
-            //this->_result.clearFault();
-
             _a1.begin(a1, "");
             _a2.begin(a2, "");
             _a3.begin(a3, "");
@@ -182,8 +193,7 @@ class RemoteProcedure<R, A1, A2, A3, A4, A5, A6, A7, A8, A9,
             _a9.begin(a9, "");
             this->_r.begin(this->_result.value());
 
-            IDecomposer* argv[9] = { &_a1, &_a2, &_a3, &_a4, &_a5, &_a6, &_a7, &_a8, &_a9 };
-            this->client().call(this->_r, *this, argv, 9);
+            this->client().call(this->_r, *this, _args, 9);
             return this->_result.get();
         }
 
@@ -202,6 +212,7 @@ class RemoteProcedure<R, A1, A2, A3, A4, A5, A6, A7, A8, A9,
         Decomposer<A7> _a7;
         Decomposer<A8> _a8;
         Decomposer<A9> _a9;
+        IDecomposer* _args[9]; 
 };
 
 
@@ -229,12 +240,19 @@ class RemoteProcedure<R, A1, A2, A3, A4, A5, A6, A7, A8,
         , _a6( & client.context() )
         , _a7( & client.context() )
         , _a8( & client.context() )
-        { }
+        { 
+            _args[0] = &_a1;
+            _args[1] = &_a2; 
+            _args[2] = &_a3;
+            _args[3] = &_a4;
+            _args[4] = &_a5;
+            _args[5] = &_a6;
+            _args[6] = &_a7;
+            _args[7] = &_a8;
+        }
 
         void begin(const A1& a1, const A2& a2, const A3& a3, const A4& a4, const A5& a5, const A6& a6, const A7& a7, const A8& a8)
         {
-            //this->_result.clearFault();
-
             _a1.begin(a1, "");
             _a2.begin(a2, "");
             _a3.begin(a3, "");
@@ -246,14 +264,11 @@ class RemoteProcedure<R, A1, A2, A3, A4, A5, A6, A7, A8,
 
             this->_r.begin(this->_result.value());
 
-            IDecomposer* argv[8] = { &_a1, &_a2, &_a3, &_a4, &_a5, &_a6, &_a7, &_a8 };
-            this->client().beginCall(this->_r, *this, argv, 8);
+            this->client().beginCall(this->_r, *this, _args, 8);
         }
 
         const R& call(const A1& a1, const A2& a2, const A3& a3, const A4& a4, const A5& a5, const A6& a6, const A7& a7, const A8& a8)
         {
-            //this->_result.clearFault();
-
             _a1.begin(a1, "");
             _a2.begin(a2, "");
             _a3.begin(a3, "");
@@ -264,8 +279,7 @@ class RemoteProcedure<R, A1, A2, A3, A4, A5, A6, A7, A8,
             _a8.begin(a8, "");
             this->_r.begin(this->_result.value());
 
-            IDecomposer* argv[8] = { &_a1, &_a2, &_a3, &_a4, &_a5, &_a6, &_a7, &_a8 };
-            this->client().call(this->_r, *this, argv, 8);
+            this->client().call(this->_r, *this, _args, 8);
             return this->_result.get();
         }
 
@@ -283,6 +297,7 @@ class RemoteProcedure<R, A1, A2, A3, A4, A5, A6, A7, A8,
         Decomposer<A6> _a6;
         Decomposer<A7> _a7;
         Decomposer<A8> _a8;
+        IDecomposer* _args[8]; 
 };
 
 
@@ -309,12 +324,18 @@ class RemoteProcedure<R, A1, A2, A3, A4, A5, A6, A7,
         , _a5( & client.context() )
         , _a6( & client.context() )
         , _a7( & client.context() )
-        { }
+        { 
+            _args[0] = &_a1;
+            _args[1] = &_a2; 
+            _args[2] = &_a3;
+            _args[3] = &_a4;
+            _args[4] = &_a5;
+            _args[5] = &_a6;
+            _args[6] = &_a7;
+        }
 
         void begin(const A1& a1, const A2& a2, const A3& a3, const A4& a4, const A5& a5, const A6& a6, const A7& a7)
         {
-            //this->_result.clearFault();
-
             _a1.begin(a1, "");
             _a2.begin(a2, "");
             _a3.begin(a3, "");
@@ -325,14 +346,11 @@ class RemoteProcedure<R, A1, A2, A3, A4, A5, A6, A7,
 
             this->_r.begin(this->_result.value());
 
-            IDecomposer* argv[7] = { &_a1, &_a2, &_a3, &_a4, &_a5, &_a6, &_a7 };
-            this->client().beginCall(this->_r, *this, argv, 7);
+            this->client().beginCall(this->_r, *this, _args, 7);
         }
 
         const R& call(const A1& a1, const A2& a2, const A3& a3, const A4& a4, const A5& a5, const A6& a6, const A7& a7)
         {
-            //this->_result.clearFault();
-
             _a1.begin(a1, "");
             _a2.begin(a2, "");
             _a3.begin(a3, "");
@@ -342,8 +360,7 @@ class RemoteProcedure<R, A1, A2, A3, A4, A5, A6, A7,
             _a7.begin(a7, "");
             this->_r.begin(this->_result.value());
 
-            IDecomposer* argv[7] = { &_a1, &_a2, &_a3, &_a4, &_a5, &_a6, &_a7 };
-            this->client().call(this->_r, *this, argv, 7);
+            this->client().call(this->_r, *this, _args, 7);
             return this->_result.get();
         }
 
@@ -360,6 +377,7 @@ class RemoteProcedure<R, A1, A2, A3, A4, A5, A6, A7,
         Decomposer<A5> _a5;
         Decomposer<A6> _a6;
         Decomposer<A7> _a7;
+        IDecomposer* _args[7]; 
 };
 
 
@@ -385,12 +403,17 @@ class RemoteProcedure<R, A1, A2, A3, A4, A5, A6,
         , _a4( & client.context() )
         , _a5( & client.context() )
         , _a6( & client.context() )
-        { }
+        { 
+            _args[0] = &_a1;
+            _args[1] = &_a2; 
+            _args[2] = &_a3;
+            _args[3] = &_a4;
+            _args[4] = &_a5;
+            _args[5] = &_a6;
+        }
 
         void begin(const A1& a1, const A2& a2, const A3& a3, const A4& a4, const A5& a5, const A6& a6)
         {
-            //this->_result.clearFault();
-
             _a1.begin(a1, "");
             _a2.begin(a2, "");
             _a3.begin(a3, "");
@@ -400,14 +423,11 @@ class RemoteProcedure<R, A1, A2, A3, A4, A5, A6,
 
             this->_r.begin(this->_result.value());
 
-            IDecomposer* argv[6] = { &_a1, &_a2, &_a3, &_a4, &_a5, &_a6 };
-            this->client().beginCall(this->_r, *this, argv, 6);
+            this->client().beginCall(this->_r, *this, _args, 6);
         }
 
         const R& call(const A1& a1, const A2& a2, const A3& a3, const A4& a4, const A5& a5, const A6& a6)
         {
-            //this->_result.clearFault();
-
             _a1.begin(a1, "");
             _a2.begin(a2, "");
             _a3.begin(a3, "");
@@ -416,8 +436,7 @@ class RemoteProcedure<R, A1, A2, A3, A4, A5, A6,
             _a6.begin(a6, "");
             this->_r.begin(this->_result.value());
 
-            IDecomposer* argv[6] = { &_a1, &_a2, &_a3, &_a4, &_a5, &_a6 };
-            this->client().call(this->_r, *this, argv, 6);
+            this->client().call(this->_r, *this, _args, 6);
             return this->_result.get();
         }
 
@@ -433,6 +452,7 @@ class RemoteProcedure<R, A1, A2, A3, A4, A5, A6,
         Decomposer<A4> _a4;
         Decomposer<A5> _a5;
         Decomposer<A6> _a6;
+        IDecomposer* _args[6]; 
 };
 
 
@@ -457,12 +477,16 @@ class RemoteProcedure<R, A1, A2, A3, A4, A5,
         , _a3( & client.context() )
         , _a4( & client.context() )
         , _a5( & client.context() )
-        { }
+        { 
+            _args[0] = &_a1;
+            _args[1] = &_a2; 
+            _args[2] = &_a3;
+            _args[3] = &_a4;
+            _args[4] = &_a5;
+        }
 
         void begin(const A1& a1, const A2& a2, const A3& a3, const A4& a4, const A5& a5)
         {
-            //this->_result.clearFault();
-
             _a1.begin(a1, "");
             _a2.begin(a2, "");
             _a3.begin(a3, "");
@@ -471,14 +495,11 @@ class RemoteProcedure<R, A1, A2, A3, A4, A5,
 
             this->_r.begin(this->_result.value());
 
-            IDecomposer* argv[5] = { &_a1, &_a2, &_a3, &_a4, &_a5 };
-            this->client().beginCall(this->_r, *this, argv, 5);
+            this->client().beginCall(this->_r, *this, _args, 5);
         }
 
         const R& call(const A1& a1, const A2& a2, const A3& a3, const A4& a4, const A5& a5)
         {
-            //this->_result.clearFault();
-
             _a1.begin(a1, "");
             _a2.begin(a2, "");
             _a3.begin(a3, "");
@@ -486,8 +507,7 @@ class RemoteProcedure<R, A1, A2, A3, A4, A5,
             _a5.begin(a5, "");
             this->_r.begin(this->_result.value());
 
-            IDecomposer* argv[5] = { &_a1, &_a2, &_a3, &_a4, &_a5 };
-            this->client().call(this->_r, *this, argv, 5);
+            this->client().call(this->_r, *this, _args, 5);
             return this->_result.get();
         }
 
@@ -502,6 +522,7 @@ class RemoteProcedure<R, A1, A2, A3, A4, A5,
         Decomposer<A3> _a3;
         Decomposer<A4> _a4;
         Decomposer<A5> _a5;
+        IDecomposer* _args[5]; 
 };
 
 
@@ -525,12 +546,15 @@ class RemoteProcedure<R, A1, A2, A3, A4,
         , _a2( & client.context() )
         , _a3( & client.context() )
         , _a4( & client.context() )
-        { }
+        { 
+            _args[0] = &_a1;
+            _args[1] = &_a2; 
+            _args[2] = &_a3;
+            _args[3] = &_a4;
+        }
 
         void begin(const A1& a1, const A2& a2, const A3& a3, const A4& a4)
         {
-            //this->_result.clearFault();
-
             _a1.begin(a1, "");
             _a2.begin(a2, "");
             _a3.begin(a3, "");
@@ -538,22 +562,18 @@ class RemoteProcedure<R, A1, A2, A3, A4,
 
             this->_r.begin(this->_result.value());
 
-            IDecomposer* argv[4] = { &_a1, &_a2, &_a3, &_a4 };
-            this->client().beginCall(this->_r, *this, argv, 4);
+            this->client().beginCall(this->_r, *this, _args, 4);
         }
 
         const R& call(const A1& a1, const A2& a2, const A3& a3, const A4& a4)
         {
-            //this->_result.clearFault();
-
             _a1.begin(a1, "");
             _a2.begin(a2, "");
             _a3.begin(a3, "");
             _a4.begin(a4, "");
             this->_r.begin(this->_result.value());
 
-            IDecomposer* argv[4] = { &_a1, &_a2, &_a3, &_a4 };
-            this->client().call(this->_r, *this, argv, 4);
+            this->client().call(this->_r, *this, _args, 4);
             return this->_result.get();
         }
 
@@ -567,6 +587,7 @@ class RemoteProcedure<R, A1, A2, A3, A4,
         Decomposer<A2> _a2;
         Decomposer<A3> _a3;
         Decomposer<A4> _a4;
+        IDecomposer* _args[4]; 
 };
 
 
@@ -589,33 +610,31 @@ class RemoteProcedure<R, A1, A2, A3,
         , _a1( & client.context() )
         , _a2( & client.context() )
         , _a3( & client.context() )
-        { }
+        {
+            _args[0] = &_a1;
+            _args[1] = &_a2; 
+            _args[2] = &_a3;
+        }
 
         void begin(const A1& a1, const A2& a2, const A3& a3)
         {
-            //this->_result.clearFault();
-
             _a1.begin(a1, "");
             _a2.begin(a2, "");
             _a3.begin(a3, "");
 
             this->_r.begin(this->_result.value());
 
-            IDecomposer* argv[3] = { &_a1, &_a2, &_a3 };
-            this->client().beginCall(this->_r, *this, argv, 3);
+            this->client().beginCall(this->_r, *this, _args, 3);
         }
 
         const R& call(const A1& a1, const A2& a2, const A3& a3)
         {
-            //this->_result.clearFault();
-
             _a1.begin(a1, "");
             _a2.begin(a2, "");
             _a3.begin(a3, "");
             this->_r.begin(this->_result.value());
 
-            IDecomposer* argv[3] = { &_a1, &_a2, &_a3 };
-            this->client().call(this->_r, *this, argv, 3);
+            this->client().call(this->_r, *this, _args, 3);
             return this->_result.get();
         }
 
@@ -628,6 +647,7 @@ class RemoteProcedure<R, A1, A2, A3,
         Decomposer<A1> _a1;
         Decomposer<A2> _a2;
         Decomposer<A3> _a3;
+        IDecomposer* _args[3]; 
 };
 
 
@@ -656,8 +676,6 @@ class RemoteProcedure<R, A1, A2,
 
         void begin(const A1& a1, const A2& a2)
         {
-            //this->_result.clearFault();
-
             _a1.begin(a1, "");
             _a2.begin(a2, "");
 
@@ -668,8 +686,6 @@ class RemoteProcedure<R, A1, A2,
 
         const R& call(const A1& a1, const A2& a2)
         {
-            //this->_result.clearFault();
-
             _a1.begin(a1, "");
             _a2.begin(a2, "");
             this->_r.begin(this->_result.value());
@@ -707,29 +723,25 @@ class RemoteProcedure<R, A1,
         RemoteProcedure(Client& client, const std::string& name)
         : RemoteProcedureBase<R>(client, name)
         , _a1( & client.context() )
-        { }
+        {
+            _args[0] = &_a1; 
+        }
 
         void begin(const A1& a1)
         {
-            //this->_result.clearFault();
-
             _a1.begin(a1, "");
 
             this->_r.begin(this->_result.value());
 
-            IDecomposer* argv[1] = { &_a1 };
-            this->client().beginCall(this->_r, *this, argv, 1);
+            this->client().beginCall(this->_r, *this, _args, 1);
         }
 
         const R& call(const A1& a1)
         {
-            //this->_result.clearFault();
-
             _a1.begin(a1, "");
             this->_r.begin(this->_result.value());
 
-            IDecomposer* argv[1] = { &_a1 };
-            this->client().call(this->_r, *this, argv, 1);
+            this->client().call(this->_r, *this, _args, 1);
             return this->_result.get();
         }
 
@@ -740,6 +752,7 @@ class RemoteProcedure<R, A1,
 
     private:
         Decomposer<A1> _a1;
+        IDecomposer* _args[1]; 
 };
 
 
@@ -763,12 +776,9 @@ class RemoteProcedure<R,
 
         void begin()
         {
-            //this->_result.clearFault();
-
             this->_r.begin(this->_result.value());
 
-            IDecomposer* argv[1] = { 0 };
-            this->client().beginCall(this->_r, *this, argv, 0);
+            this->client().beginCall(this->_r, *this, 0, 0);
         }
 
         const R& call()
@@ -777,8 +787,7 @@ class RemoteProcedure<R,
 
             this->_r.begin(this->_result.value());
 
-            IDecomposer* argv[1] = { 0 };
-            this->client().call(this->_r, *this, argv, 0);
+            this->client().call(this->_r, *this, 0, 0);
             return this->_result.get();
         }
 
