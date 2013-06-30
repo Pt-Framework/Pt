@@ -104,9 +104,21 @@ bool Client::isFailed() const
 }
 
 
-void Client::formatMessage(std::ostream& os)
+void Client::beginMessage(std::ostream& os)
 {
-    _impl->formatMessage(os);
+    _impl->beginMessage(os);
+}
+
+
+bool Client::advanceMessage()
+{
+    return _impl->advanceMessage();
+}
+
+
+void Client::finishMessage()
+{
+    _impl->finishMessage();
 }
 
 

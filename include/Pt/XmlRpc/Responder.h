@@ -80,7 +80,7 @@ class PT_XMLRPC_API Responder
 
         void finishResult();
 
-        void formatResult(std::ostream& os);
+        //void formatResult(std::ostream& os);
 
         void setFault(int rc, const char* msg);
 

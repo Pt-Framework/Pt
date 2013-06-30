@@ -98,7 +98,13 @@ class ClientImpl
 
         void cancel();
 
-        void formatMessage(std::ostream& os);
+        void beginMessage(std::ostream& os);
+        
+        bool advanceMessage();
+        
+        void finishMessage();
+        
+        //void formatMessage(std::ostream& os);
 
         void beginResult(std::istream& is);
 
@@ -121,6 +127,8 @@ class ClientImpl
         Scanner _scanner;
         IDecomposer** _argv;
         unsigned _argc;
+        IDecomposer* _arg;
+        unsigned _argn;
         IRemoteProcedure* _method;
         Fault _fault;
         Composer<Fault> _fh;

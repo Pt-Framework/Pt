@@ -293,7 +293,7 @@ void Responder::finishResult()
 }
 
 
-void Responder::formatResult(std::ostream& os)
+/*void Responder::formatResult(std::ostream& os)
 {
     if( _isFault )
     {
@@ -311,7 +311,7 @@ void Responder::formatResult(std::ostream& os)
 
     _ts.write(XMLRPC_REPLY_END, sizeof(XMLRPC_REPLY_END)/sizeof(Char));
     _ts.flush();
-}
+}*/
 
 
 void Responder::setFault(int rc, const char* msg)

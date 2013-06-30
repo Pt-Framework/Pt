@@ -73,7 +73,11 @@ class PT_XMLRPC_API Client : public NonCopyable
         virtual void onError() = 0;
 
     protected:
-        void formatMessage(std::ostream& os);
+        void beginMessage(std::ostream& os);
+        
+        bool advanceMessage();
+        
+        void finishMessage();
         
         void beginResult(std::istream& is);
 

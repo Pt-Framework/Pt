@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012-2013 by Marc Dürner
+ * Copyright (C) 2012-2013 by Marc DÃ¼rner
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -165,7 +165,14 @@ void HttpClient::onInvoke()
     std::ostream& os = _client.request().body();
 
     // format XML-RPC request
-    Client::formatMessage(os);
+    beginMessage(os);
+    
+    while( ! advanceMessage() )
+        ;
+        
+    finishMessage();
+    
+    //std::cerr << _client.request().buffer().size() << std::endl;
 
     _client.beginReceive();
 }
@@ -180,7 +187,12 @@ void HttpClient::onCall()
     std::ostream& os = _client.request().body();
 
     // format XML-RPC request
-    Client::formatMessage(os);
+    beginMessage(os);
+    
+    while( ! advanceMessage() )
+        ;
+        
+    finishMessage();
 
     // send HTTP request and start receiving HTTP reply
     _client.send();

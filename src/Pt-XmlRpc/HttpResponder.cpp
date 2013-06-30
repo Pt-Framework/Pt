@@ -85,6 +85,17 @@ void HttpResponder::onBeginReply(Http::Request& request, Http::Reply& reply, Sys
 
 void HttpResponder::onWriteReply(Http::Request& request, Http::Reply& reply, System::EventLoop& loop)
 {
+    while( ! advanceResult() )
+    {
+        if(reply.buffer().size() > 100)
+        {
+            reply.beginSend(false);
+            return;
+        }
+    }
+
+    finishResult();
+    reply.beginSend(true);
 }
 
 
@@ -98,14 +109,16 @@ void HttpResponder::onResult()
 
         beginResult(_reply->body() );
 
-        // TODO: begin send when reply buffers more than 8192 bytes
         while( ! advanceResult() )
-            ;
+        {
+            if(_reply->buffer().size() > 8192)
+            {
+                _reply->beginSend(false);
+                return;
+            }
+        }
 
         finishResult();
-        //std::cerr << "sending: " << _reply->buffer().size() << " bytes." << std::endl;
-
-        //formatResult( _reply->body() );
         _reply->beginSend(true);
     }
 }

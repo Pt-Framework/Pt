@@ -76,6 +76,8 @@ ClientImpl::ClientImpl()
 , _formatter(_ts)
 , _argv(0)
 , _argc(0)
+, _arg(0)
+, _argn(0)
 , _method(0)
 , _error(false)
 , _isFault(false)
@@ -107,6 +109,8 @@ void ClientImpl::beginCall(IComposer& r, IRemoteProcedure& method, IDecomposer**
 
     _argv = argv;
     _argc = argc;
+    _arg = 0;
+    _argn = 0;
 
     _error = false;
     _isFault = false;
@@ -120,13 +124,15 @@ void ClientImpl::cancel()
     _method = 0;
     _argc = 0;
     _argv = 0;
+    _arg = 0;
+    _argn = 0;
 
     _error = false;
     _isFault = false;
 }
 
 
-void ClientImpl::formatMessage(std::ostream& os)
+void ClientImpl::beginMessage(std::ostream& os)
 {
     if( ! _method )
         return;
@@ -144,19 +150,80 @@ void ClientImpl::formatMessage(std::ostream& os)
     _ts.write(XMLRPC_METHODNAME_END, sizeof(XMLRPC_METHODNAME_END)/sizeof(Char) );
     
     _ts.write( XMLRPC_PARAMS, sizeof(XMLRPC_PARAMS)/sizeof(Char) );
+}
 
-    for(unsigned n = 0; n < _argc; ++n)
+
+bool ClientImpl::advanceMessage()
+{
+    unsigned n = 10;
+
+    while(_argn < _argc && n > 0)
     {
-        _ts.write( XMLRPC_PARAM, sizeof(XMLRPC_PARAM)/sizeof(Char) );
-        _argv[n]->format(_formatter);
-        _ts.write(XMLRPC_PARAM_END, sizeof(XMLRPC_PARAM_END)/sizeof(Char) );
-    }
+        if( ! _arg)
+        {
+            _arg = _argv[_argn];
+            _ts.write( XMLRPC_PARAM, sizeof(XMLRPC_PARAM)/sizeof(Char) );
+            _arg->beginFormat(_formatter);
+        }
+        
+        while( _arg && n > 0)
+        {
+            _arg = _arg->advanceFormat(_formatter);
+            --n;
+        }
+        
+        if( ! _arg )
+        {
+            _ts.write(XMLRPC_PARAM_END, sizeof(XMLRPC_PARAM_END)/sizeof(Char) );
+            ++_argn;
+        }
 
+    }
+    
+    return _argn >= _argc;
+}
+
+
+void ClientImpl::finishMessage()
+{
     _ts.write(XMLRPC_PARAMS_END, sizeof(XMLRPC_PARAMS_END)/sizeof(Char) );
     _ts.write(XMLRPC_METHODCALL_END, sizeof(XMLRPC_METHODCALL_END)/sizeof(Char) );
     
     _ts.flush();
 }
+
+
+//void ClientImpl::formatMessage(std::ostream& os)
+//{
+//    if( ! _method )
+//        return;
+//
+//    const String& name = _method->name();
+//
+//    _ts.attach(os);
+//    
+//    _ts.write( XMLRPC_XMLDECL, sizeof(XMLRPC_XMLDECL)/sizeof(Char) );
+//    
+//    _ts.write( XMLRPC_METHODCALL, sizeof(XMLRPC_METHODCALL)/sizeof(Char) );
+//    
+//    _ts.write( XMLRPC_METHODNAME, sizeof(XMLRPC_METHODNAME)/sizeof(Char) );
+//    Xml::xmlEncode(_ts, name.c_str(), name.size() );
+//    _ts.write(XMLRPC_METHODNAME_END, sizeof(XMLRPC_METHODNAME_END)/sizeof(Char) );
+//    
+//    _ts.write( XMLRPC_PARAMS, sizeof(XMLRPC_PARAMS)/sizeof(Char) );
+//
+//    for(unsigned n = 0; n < _argc; ++n)
+//    {
+//        _ts.write( XMLRPC_PARAM, sizeof(XMLRPC_PARAM)/sizeof(Char) );
+//        _argv[n]->format(_formatter);
+//        _ts.write(XMLRPC_PARAM_END, sizeof(XMLRPC_PARAM_END)/sizeof(Char) );
+//    }
+//
+//    _ts.write(XMLRPC_PARAMS_END, sizeof(XMLRPC_PARAMS_END)/sizeof(Char) );
+//    _ts.write(XMLRPC_METHODCALL_END, sizeof(XMLRPC_METHODCALL_END)/sizeof(Char) );
+//    
+//    _ts.flush();
+//}
 
 
 void ClientImpl::beginResult(std::istream& is)
