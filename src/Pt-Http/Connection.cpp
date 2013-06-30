@@ -607,6 +607,9 @@ void Connection::beginReceiveRequest(Request& request)
     log_debug("begin reading request");
     _parseEvent.init( request );
 
+    // NOTE: the http header parser is also not at begin if data from the
+    // last request has not been read. 
+
     if( _parser.begin() )
     {
         _readBytes = 0;
@@ -693,6 +696,8 @@ MessageProgress Connection::endReceiveRequest()
         _httpbuf.beginBody( _request->header() );
     }
 
+    _request = 0;
+
     if( _parser.end() )
     {
         std::streamsize avail = _httpbuf.in_avail();
@@ -717,7 +722,6 @@ MessageProgress Connection::endReceiveRequest()
 
             _timer.stop();
             _readBytes = 0;
-            _request = 0;
             _parser.reset(false);
         }
     }

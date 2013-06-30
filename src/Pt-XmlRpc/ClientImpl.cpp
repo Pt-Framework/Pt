@@ -107,6 +107,7 @@ void ClientImpl::beginCall(IComposer& r, IRemoteProcedure& method, IDecomposer**
     _reader.reset(_bin);
     _scanner.begin(r);
 
+
     _argv = argv;
     _argc = argc;
     _arg = 0;
@@ -161,8 +162,9 @@ bool ClientImpl::advanceMessage()
     {
         if( ! _arg)
         {
-            _arg = _argv[_argn];
             _ts.write( XMLRPC_PARAM, sizeof(XMLRPC_PARAM)/sizeof(Char) );
+
+            _arg = _argv[_argn];
             _arg->beginFormat(_formatter);
         }
         

@@ -81,6 +81,8 @@ class PT_XMLRPC_API HttpClient : public Client
         virtual void onError();
 
     private:
+        void init();
+        void onRequest(Http::Client& client);
         void onReply(Http::Client& client);
 
     private:

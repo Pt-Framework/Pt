@@ -69,7 +69,7 @@ HttpClient::HttpClient()
 : _v1(0)
 , _v2(0)
 {
-    _client.replyReceived() += Pt::slot( *this, &HttpClient::onReply);
+    init();
 }
 
 
@@ -78,7 +78,7 @@ HttpClient::HttpClient(const Net::AddrInfo& addrinfo,
 : _v1(0)
 , _v2(0)
 {
-    _client.replyReceived() += Pt::slot( *this, &HttpClient::onReply);
+    init();
     connect(addrinfo, url);
 }
 
@@ -88,7 +88,7 @@ HttpClient::HttpClient(const std::string& addr, unsigned short port,
 : _v1(0)
 , _v2(0)
 {
-    _client.replyReceived() += Pt::slot( *this, &HttpClient::onReply);
+    init();
     connect(addr, port, url);
 }
 
@@ -98,7 +98,7 @@ HttpClient::HttpClient(System::EventLoop& loop)
 , _v1(0)
 , _v2(0)
 {
-    _client.replyReceived() += Pt::slot( *this, &HttpClient::onReply);
+    init();
 }
 
 
@@ -108,7 +108,7 @@ HttpClient::HttpClient(System::EventLoop& loop, const Net::AddrInfo& addrinfo,
 , _v1(0)
 , _v2(0)
 {
-    _client.replyReceived() += Pt::slot( *this, &HttpClient::onReply);
+    init();
     connect(addrinfo, url);
 }
 
@@ -120,13 +120,20 @@ HttpClient::HttpClient(System::EventLoop& loop,
 , _v1(0)
 , _v2(0)
 {
-    _client.replyReceived() += Pt::slot( *this, &HttpClient::onReply);
+    init();
     connect(addr, port, url);
 }
 
 
 HttpClient::~HttpClient()
 {
+}
+
+
+void HttpClient::init()
+{
+    _client.requestSent() += Pt::slot(*this, &HttpClient::onRequest);
+    _client.replyReceived() += Pt::slot( *this, &HttpClient::onReply);
 }
 
 
@@ -166,13 +173,17 @@ void HttpClient::onInvoke()
 
     // format XML-RPC request
     beginMessage(os);
-    
+
     while( ! advanceMessage() )
-        ;
+    {
+        if(_client.request().buffer().size() > 8192)
+        {
+            _client.beginSend(false);
+            return;
+        }
+    }
         
     finishMessage();
-    
-    //std::cerr << _client.request().buffer().size() << std::endl;
 
     _client.beginReceive();
 }
@@ -190,12 +201,17 @@ void HttpClient::onCall()
     beginMessage(os);
     
     while( ! advanceMessage() )
-        ;
-        
+    {
+        if(_client.request().buffer().size() > 8192)
+        {
+            _client.send(false);
+        }
+    }
+
     finishMessage();
 
     // send HTTP request and start receiving HTTP reply
-    _client.send();
+    _client.send(true);
     std::istream& is = _client.receive();
 
     // parse XML-RPC reply
@@ -216,6 +232,39 @@ void HttpClient::onCancel()
 void HttpClient::onError()
 {
     throw;
+}
+
+
+void HttpClient::onRequest(Http::Client& client)
+{
+    try
+    {
+        Pt::Http::MessageProgress progress = client.endSend();
+        if( ! progress.finished() )
+        {
+            client.beginSend(false);
+            return;
+        }
+
+        while( ! advanceMessage() )
+        {
+            if(client.request().buffer().size() > 8192)
+            {
+                client.beginSend(false);
+                return;
+            }
+        }
+        
+        finishMessage();
+
+        client.beginReceive();
+    }
+    catch(const System::IOError&) // HttpError is also an IOError
+    {
+        // setError() makes finishResult() call onError() where we throw
+        setError();
+        finishResult();
+    }
 }
 
 

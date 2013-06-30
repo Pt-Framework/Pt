@@ -87,7 +87,7 @@ void HttpResponder::onWriteReply(Http::Request& request, Http::Reply& reply, Sys
 {
     while( ! advanceResult() )
     {
-        if(reply.buffer().size() > 100)
+        if(reply.buffer().size() > 8192)
         {
             reply.beginSend(false);
             return;
