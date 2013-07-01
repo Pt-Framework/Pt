@@ -26,66 +26,39 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "Pt/XmlRpc/Service.h"
+#include "HttpResponder.h"
+#include "Pt/XmlRpc/HttpService.h"
 
 namespace Pt {
 
 namespace XmlRpc {
 
-Service::Service()
+HttpService::HttpService(XmlRpc::Service& rpcService)
+: _rpcService(&rpcService)
 { 
 }
 
 
-Service::~Service()
+HttpService::~HttpService()
 {
-    System::MutexLock lock(_mtx);
-
-    ProcedureMap::iterator it;
-    for(it = _procedures.begin(); it != _procedures.end(); ++it)
-    {
-        delete it->second;
-    }
 }
 
 
-ServiceProcedure* Service::getProcedure(const std::string& name, Responder& resp)
+Http::Responder* HttpService::onGetResponder(const Http::Request& req)
 {
-    System::MutexLock lock(_mtx);
+    //if (req.isHeaderValue("Content-Type", "text/xml"))
+    //    return new XmlRpcResponder(*this);
 
-    ServiceProcedure* proc = 0;
+    //if (req.isHeaderValue("Content-Type", "text/xml; charset=UTF-8")) //! ### Temporary fix ###
+    //    return new XmlRpcResponder(*this);
 
-    ProcedureMap::iterator it = _procedures.find( name );
-    if( it != _procedures.end() )
-    {
-        proc = it->second->createProcedure(resp);
-    }
-
-    return proc;
+    return new HttpResponder(*this, *_rpcService);
 }
 
 
-void Service::releaseProcedure(ServiceProcedure* proc)
+void HttpService::onReleaseResponder(Http::Responder* resp)
 {
-    delete proc;
-}
-
-
-void Service::registerProcedure(const std::string& name, ServiceProcedureDef* procDef)
-{
-    System::MutexLock lock(_mtx);
-
-    ProcedureMap::iterator it = _procedures.find( name );
-    if (it == _procedures.end())
-    {
-        std::pair<const std::string, ServiceProcedureDef*> p( name, procDef );
-        _procedures.insert( p );
-    }
-    else
-    {
-        delete it->second;
-        it->second = procDef;
-    }
+    delete resp;
 }
 
 }

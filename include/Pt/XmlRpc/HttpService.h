@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2009-2013 by Dr. Marc Boris Duerner
- *
+ * Copyright (C) 2009 by Dr. Marc Boris Duerner
+ * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -26,68 +26,37 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "Pt/XmlRpc/Service.h"
+#ifndef Pt_XmlRpc_HttpService_h
+#define Pt_XmlRpc_HttpService_h
+
+#include <Pt/XmlRpc/Api.h>
+#include <Pt/XmlRpc/Service.h>
+#include <Pt/Http/Service.h>
+#include <Pt/NonCopyable.h>
 
 namespace Pt {
 
 namespace XmlRpc {
 
-Service::Service()
-{ 
-}
-
-
-Service::~Service()
+class PT_XMLRPC_API HttpService : public Http::Service
+                                , private NonCopyable
 {
-    System::MutexLock lock(_mtx);
+    public:
+        HttpService(XmlRpc::Service& rpcService);
 
-    ProcedureMap::iterator it;
-    for(it = _procedures.begin(); it != _procedures.end(); ++it)
-    {
-        delete it->second;
-    }
-}
+        virtual ~HttpService();
 
+    protected:
+        virtual Http::Responder* onGetResponder(const Http::Request&);
 
-ServiceProcedure* Service::getProcedure(const std::string& name, Responder& resp)
-{
-    System::MutexLock lock(_mtx);
+        virtual void onReleaseResponder(Http::Responder* resp);
 
-    ServiceProcedure* proc = 0;
+    private:
+        XmlRpc::Service* _rpcService;
+};
 
-    ProcedureMap::iterator it = _procedures.find( name );
-    if( it != _procedures.end() )
-    {
-        proc = it->second->createProcedure(resp);
-    }
+} // namespace XmlRpc
 
-    return proc;
-}
+} // namespace Pt
 
-
-void Service::releaseProcedure(ServiceProcedure* proc)
-{
-    delete proc;
-}
-
-
-void Service::registerProcedure(const std::string& name, ServiceProcedureDef* procDef)
-{
-    System::MutexLock lock(_mtx);
-
-    ProcedureMap::iterator it = _procedures.find( name );
-    if (it == _procedures.end())
-    {
-        std::pair<const std::string, ServiceProcedureDef*> p( name, procDef );
-        _procedures.insert( p );
-    }
-    else
-    {
-        delete it->second;
-        it->second = procDef;
-    }
-}
-
-}
-
-}
+#endif

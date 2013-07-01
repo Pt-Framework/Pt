@@ -121,7 +121,7 @@ class RemoteProcedureBase : public IRemoteProcedure
         void onFinished()
         { _finished.send(_result); }
 
-        Signal< const Result<R> & > _finished;
+        Signal< const Result<R>& > _finished;
         Result<R> _result;
         Composer<R> _r;
 };

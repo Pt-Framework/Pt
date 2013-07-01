@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2009 by Dr. Marc Boris Duerner
- * Copyright (C) 2009 by Tommi Meakitalo
+ * Copyright (C) 2009-2013 by Dr. Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,6 +25,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef Pt_XmlRpc_Fault_h
 #define Pt_XmlRpc_Fault_h
 
@@ -43,17 +43,18 @@ class PT_XMLRPC_API Fault : public std::exception
     friend void operator >>=(const Pt::SerializationInfo&, Fault&);
 
     public:
-        enum ErrorCodes {
-            parseError                  = -32700,
-            unsupportedEncoding         = -32701,
-            invalidCharacterForEncoding = -32702,
-            invalidXmlRpc               = -32600,
-            methodNotFound              = -32601,
-            invalidMethodParameters     = -32602,
-            internalXmlRpcError         = -32603,
-            applicationError            = -32500,
-            systemError                 = -32400,
-            transportError              = -32300
+        enum ErrorCodes 
+        {
+            ParseError                  = -32700,
+            UnsupportedEncoding         = -32701,
+            InvalidCharacterForEncoding = -32702,
+            InvalidXmlRpc               = -32600,
+            MethodNotFound              = -32601,
+            InvalidMethodParameters     = -32602,
+            InternalXmlRpcError         = -32603,
+            ApplicationError            = -32500,
+            SystemError                 = -32400,
+            TransportError              = -32300
         };
 
         Fault(const std::string& msg, int rc)

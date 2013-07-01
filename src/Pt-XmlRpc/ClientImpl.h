@@ -50,20 +50,6 @@ class IRemoteProcedure;
 
 class ClientImpl
 {
-    enum State
-    {
-        OnBegin,
-        OnMethodResponseBegin,
-        OnFaultBegin,
-        OnFaultEnd,
-        OnFaultResponseEnd,
-        OnParamsBegin,
-        OnParam,
-        OnParamEnd,
-        OnParamsEnd,
-        OnMethodResponseEnd
-    };
-
     public:
         ClientImpl();
 
@@ -103,8 +89,6 @@ class ClientImpl
         bool advanceMessage();
         
         void finishMessage();
-        
-        //void formatMessage(std::ostream& os);
 
         void beginResult(std::istream& is);
 
@@ -118,6 +102,20 @@ class ClientImpl
         bool advance(const Xml::Node& node);
         
     private:
+        enum State
+        {
+            OnBegin,
+            OnMethodResponseBegin,
+            OnFaultBegin,
+            OnFaultEnd,
+            OnFaultResponseEnd,
+            OnParamsBegin,
+            OnParam,
+            OnParamEnd,
+            OnParamsEnd,
+            OnMethodResponseEnd
+        };
+
         State _state;
         Pt::Utf8Codec _utf8;
         TextOStream _ts;

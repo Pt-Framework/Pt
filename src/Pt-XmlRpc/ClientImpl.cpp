@@ -195,39 +195,6 @@ void ClientImpl::finishMessage()
 }
 
 
-//void ClientImpl::formatMessage(std::ostream& os)
-//{
-//    if( ! _method )
-//        return;
-//
-//    const String& name = _method->name();
-//
-//    _ts.attach(os);
-//    
-//    _ts.write( XMLRPC_XMLDECL, sizeof(XMLRPC_XMLDECL)/sizeof(Char) );
-//    
-//    _ts.write( XMLRPC_METHODCALL, sizeof(XMLRPC_METHODCALL)/sizeof(Char) );
-//    
-//    _ts.write( XMLRPC_METHODNAME, sizeof(XMLRPC_METHODNAME)/sizeof(Char) );
-//    Xml::xmlEncode(_ts, name.c_str(), name.size() );
-//    _ts.write(XMLRPC_METHODNAME_END, sizeof(XMLRPC_METHODNAME_END)/sizeof(Char) );
-//    
-//    _ts.write( XMLRPC_PARAMS, sizeof(XMLRPC_PARAMS)/sizeof(Char) );
-//
-//    for(unsigned n = 0; n < _argc; ++n)
-//    {
-//        _ts.write( XMLRPC_PARAM, sizeof(XMLRPC_PARAM)/sizeof(Char) );
-//        _argv[n]->format(_formatter);
-//        _ts.write(XMLRPC_PARAM_END, sizeof(XMLRPC_PARAM_END)/sizeof(Char) );
-//    }
-//
-//    _ts.write(XMLRPC_PARAMS_END, sizeof(XMLRPC_PARAMS_END)/sizeof(Char) );
-//    _ts.write(XMLRPC_METHODCALL_END, sizeof(XMLRPC_METHODCALL_END)/sizeof(Char) );
-//    
-//    _ts.flush();
-//}
-
-
 void ClientImpl::beginResult(std::istream& is)
 {
     _bin.reset(is);
@@ -257,15 +224,15 @@ bool ClientImpl::parseResult()
     }
     catch(const Xml::XmlError& error)
     {
-        setFault(Fault::invalidXmlRpc, error.what());
+        setFault(Fault::InvalidXmlRpc, error.what());
     }
     catch(const SerializationError& error)
     {
-        setFault(Fault::invalidMethodParameters, error.what());
+        setFault(Fault::InvalidMethodParameters, error.what());
     }
     catch(const ConversionError& error)
     {
-        setFault(Fault::invalidMethodParameters, error.what());
+        setFault(Fault::InvalidMethodParameters, error.what());
     }
 
     return true;
@@ -306,15 +273,15 @@ void ClientImpl::processResult(std::istream& is)
     }
     catch(const Xml::XmlError& error)
     {
-        setFault(Fault::invalidXmlRpc, error.what());
+        setFault(Fault::InvalidXmlRpc, error.what());
     }
     catch(const SerializationError& error)
     {
-        setFault(Fault::invalidMethodParameters, error.what());
+        setFault(Fault::InvalidMethodParameters, error.what());
     }
     catch(const ConversionError& error)
     {
-        setFault(Fault::invalidMethodParameters, error.what());
+        setFault(Fault::InvalidMethodParameters, error.what());
     }
 
     // _method contains a return value or fault now

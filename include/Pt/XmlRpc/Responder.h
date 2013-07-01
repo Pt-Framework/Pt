@@ -38,6 +38,7 @@
 #include <Pt/SerializationContext.h>
 #include <Pt/Serializer.h>
 #include <Pt/TextStream.h>
+#include <Pt/NonCopyable.h>
 
 namespace Pt {
 
@@ -46,15 +47,14 @@ namespace XmlRpc {
 class Service;
 class ServiceProcedure;
 
-class PT_XMLRPC_API Responder
+class PT_XMLRPC_API Responder : private NonCopyable
 {
     public:
         Responder(Service& service);
 
         virtual ~Responder();
 
-        SerializationContext& context()
-        { return _context; }
+        SerializationContext& context();
 
         void cancel();
 
@@ -80,8 +80,6 @@ class PT_XMLRPC_API Responder
 
         void finishResult();
 
-        //void formatResult(std::ostream& os);
-
         void setFault(int rc, const char* msg);
 
     private:
@@ -103,20 +101,22 @@ class PT_XMLRPC_API Responder
             OnMethodCallEnd
         };
 
-       SerializationContext _context;
-       State _state;
-       Utf8Codec _utf8;
-       TextOStream _ts;
-       Xml::BinaryInputSource _bin;
-       Xml::XmlReader _reader;
-       Scanner _scanner;
-       Formatter _formatter;
-       Service* _service;
-       ServiceProcedure* _proc;
-       IComposer** _args;
-       IDecomposer* _result;
-       Fault _fault;
-       bool _isFault;
+        Service* _service;
+        ServiceProcedure* _proc;
+        State _state;
+        Xml::BinaryInputSource _bin;
+        Xml::XmlReader _reader;
+        Scanner _scanner;
+        Utf8Codec _utf8;
+        TextOStream _ts;
+        Formatter _formatter;
+        SerializationContext _context;
+        IComposer** _args;
+        IDecomposer* _result;
+        Fault _fault;
+        bool _isFault;
+        void* _r1;
+        void* _r2;
 };
 
 } // namespace XmlRpc

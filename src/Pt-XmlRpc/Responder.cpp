@@ -84,16 +84,18 @@ static const Pt::Char XMLRPC_STRING_END[]  = { '<', '/', 's', 't', 'r', 'i', 'n'
 
 
 Responder::Responder(Service& service)
-: _state(OnBegin)
+: _service(&service)
+, _proc(0)
+, _state(OnBegin)
+, _reader(_bin)
 , _utf8(1)
 , _ts(&_utf8)
-, _reader(_bin)
 , _formatter(_ts)
-, _service(&service)
-, _proc(0)
 , _args(0)
 , _result(0)
 , _isFault(false)
+, _r1(0)
+, _r2(0)
 {
 }
 
@@ -104,6 +106,12 @@ Responder::~Responder()
 
     if(_proc)
         _service->releaseProcedure(_proc);
+}
+
+
+SerializationContext& Responder::context()
+{ 
+    return _context; 
 }
 
 
@@ -293,27 +301,6 @@ void Responder::finishResult()
 }
 
 
-/*void Responder::formatResult(std::ostream& os)
-{
-    if( _isFault )
-    {
-        formatError(os, _fault.rc(), _fault.what());
-        return;
-    }
-
-    _ts.attach(os);
-    _ts.write( XMLRPC_XMLDECL, sizeof(XMLRPC_XMLDECL)/sizeof(Char) );
-
-    assert(_result);
-    _ts.write(XMLRPC_REPLY_BEGIN, sizeof(XMLRPC_REPLY_BEGIN)/sizeof(Char));
-
-    _result->format(_formatter);
-
-    _ts.write(XMLRPC_REPLY_END, sizeof(XMLRPC_REPLY_END)/sizeof(Char));
-    _ts.flush();
-}*/
-
-
 void Responder::setFault(int rc, const char* msg)
 {
     _fault.setRc(rc);
@@ -408,7 +395,7 @@ bool Responder::advance(const Pt::Xml::Node& node)
 
                 _proc = _service->getProcedure( chars.content().narrow(), *this );
                 if( ! _proc )
-                    throw Fault("no such procedure", Pt::XmlRpc::Fault::methodNotFound);
+                    throw Fault("no such procedure", Pt::XmlRpc::Fault::MethodNotFound);
 
                 //std::cerr << "-> Found Procedure: " << chars.content().narrow() << std::endl;
 

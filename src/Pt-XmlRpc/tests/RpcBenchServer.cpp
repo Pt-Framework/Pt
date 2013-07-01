@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2011 Tommi Maekitalo
+ * Copyright (C) 2013 by Marc Duerner
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,22 +27,22 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <iostream>
-#include <Pt/Arg.h>
-#include <Pt/System/MainLoop.h>
+#include <Pt/XmlRpc/HttpService.h>
 #include <Pt/Http/Server.h>
 #include <Pt/Http/Servlet.h>
-#include <Pt/XmlRpc/Service.h>
+#include <Pt/System/MainLoop.h>
+#include <Pt/Arg.h>
 #include <Pt/Main.h>
+#include <iostream>
 
 class EchoService;
 
-class AsyncEcho : public Pt::XmlRpc::AsyncProcedure<std::string, std::string>
+class AsyncEcho : public Pt::XmlRpc::ActiveProcedure<std::string, std::string>
                 , public Pt::Connectable
 {
     public:   
         AsyncEcho(Pt::XmlRpc::Responder& resp, EchoService& srv)
-        : Pt::XmlRpc::AsyncProcedure<std::string, std::string>(resp)
+        : Pt::XmlRpc::ActiveProcedure<std::string, std::string>(resp)
         , _srv(&srv)
         {
             _timer.timeout() += Pt::slot(*this, &AsyncEcho::onTimeout);
@@ -75,12 +76,12 @@ class AsyncEcho : public Pt::XmlRpc::AsyncProcedure<std::string, std::string>
 };
 
 
-class AsyncHello : public Pt::XmlRpc::AsyncProcedure<std::string>
+class AsyncHello : public Pt::XmlRpc::ActiveProcedure<std::string>
                  , public Pt::Connectable
 {
     public:   
         AsyncHello(Pt::XmlRpc::Responder& resp, const char* helloTxt)
-        : Pt::XmlRpc::AsyncProcedure<std::string>(resp)
+        : Pt::XmlRpc::ActiveProcedure<std::string>(resp)
         , _hello(helloTxt)
         {
             _timer.timeout() += Pt::slot(*this, &AsyncHello::setReady);
@@ -109,10 +110,10 @@ class EchoService : public Pt::XmlRpc::Service
     public:
         EchoService()
         {
-            registerAsyncMethod("echo", *this, &EchoService::asyncEcho);
-            registerMethod("echo2", *this, &EchoService::echo);
-
-            registerAsyncMethod("hello", *this, &EchoService::asyncHello);
+            registerProcedure("echo2", *this, &EchoService::echo);
+            
+            registerActiveProcedure("echo", *this, &EchoService::asyncEcho);
+            registerActiveProcedure("hello", *this, &EchoService::asyncHello);
         }
 
         std::string echo(const std::string& msg)
