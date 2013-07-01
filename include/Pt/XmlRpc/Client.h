@@ -40,7 +40,7 @@ class IDecomposer;
 
 namespace XmlRpc {
 
-class IRemoteProcedure;
+class RemoteCall;
 
 class PT_XMLRPC_API Client : public NonCopyable
 {
@@ -51,15 +51,15 @@ class PT_XMLRPC_API Client : public NonCopyable
 
         SerializationContext& context();
 
-        void beginCall(IComposer& r, IRemoteProcedure& method, IDecomposer** argv, unsigned argc);
+        void beginCall(IComposer& r, RemoteCall& method, IDecomposer** argv, unsigned argc);
 
         void endCall();
 
-        void call(IComposer& r, IRemoteProcedure& method, IDecomposer** argv, unsigned argc);
+        void call(IComposer& r, RemoteCall& method, IDecomposer** argv, unsigned argc);
 
         void cancel();
 
-        const IRemoteProcedure* activeProcedure() const;
+        const RemoteCall* activeProcedure() const;
 
         bool isFailed() const;
 

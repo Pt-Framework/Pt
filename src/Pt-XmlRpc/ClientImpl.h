@@ -46,7 +46,7 @@ namespace Pt {
 
 namespace XmlRpc {
 
-class IRemoteProcedure;
+class RemoteCall;
 
 class ClientImpl
 {
@@ -75,12 +75,12 @@ class ClientImpl
             throw _fault; 
         }
 
-        const IRemoteProcedure* activeProcedure() const
+        const RemoteCall* activeProcedure() const
         { 
             return _method;
         }
 
-        void beginCall(IComposer& r, IRemoteProcedure& method, IDecomposer** argv, unsigned argc);
+        void beginCall(IComposer& r, RemoteCall& method, IDecomposer** argv, unsigned argc);
 
         void cancel();
 
@@ -127,7 +127,7 @@ class ClientImpl
         unsigned _argc;
         IDecomposer* _arg;
         unsigned _argn;
-        IRemoteProcedure* _method;
+        RemoteCall* _method;
         Fault _fault;
         Composer<Fault> _fh;
         bool _error;

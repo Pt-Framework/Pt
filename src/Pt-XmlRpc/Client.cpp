@@ -53,7 +53,7 @@ SerializationContext& Client::context()
 }
 
 
-void Client::beginCall(IComposer& r, IRemoteProcedure& method, IDecomposer** argv, unsigned argc)
+void Client::beginCall(IComposer& r, RemoteCall& method, IDecomposer** argv, unsigned argc)
 {
     _impl->beginCall(r, method, argv, argc);
 
@@ -76,7 +76,7 @@ void Client::endCall()
 }
 
 
-void Client::call(IComposer& r, IRemoteProcedure& method, IDecomposer** argv, unsigned argc)
+void Client::call(IComposer& r, RemoteCall& method, IDecomposer** argv, unsigned argc)
 {
     _impl->beginCall(r, method, argv, argc);
 
@@ -92,7 +92,7 @@ void Client::cancel()
 }
 
 
-const IRemoteProcedure* Client::activeProcedure() const
+const RemoteCall* Client::activeProcedure() const
 {
     return _impl->activeProcedure();
 }

@@ -42,25 +42,25 @@ namespace Pt {
 
 namespace XmlRpc {
 
-class PT_XMLRPC_API IRemoteProcedure
+class PT_XMLRPC_API RemoteCall
 {
     public:
-        IRemoteProcedure(Client& client, const String& name)
+        RemoteCall(Client& client, const String& name)
         : _client(&client)
         , _name(name)
         { }
 
-        IRemoteProcedure(Client& client, const std::string& name)
+        RemoteCall(Client& client, const std::string& name)
         : _client(&client)
         , _name(String::widen(name))
         { }
 
-        IRemoteProcedure(Client& client, const char* name)
+        RemoteCall(Client& client, const char* name)
         : _client(&client)
         , _name(String::widen(name))
         { }
 
-        virtual ~IRemoteProcedure()
+        virtual ~RemoteCall()
         { cancel(); }
 
         Client& client()
@@ -95,11 +95,11 @@ class PT_XMLRPC_API IRemoteProcedure
 
 
 template <typename R>
-class RemoteProcedureBase : public IRemoteProcedure
+class RemoteProcedureBase : public RemoteCall
 {
     public:
         RemoteProcedureBase(Client& client, const std::string& name)
-        : IRemoteProcedure(client, name),
+        : RemoteCall(client, name),
           _result(client),
           _r( & client.context() )
         { }

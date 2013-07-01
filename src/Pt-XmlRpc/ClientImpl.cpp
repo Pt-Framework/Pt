@@ -99,7 +99,7 @@ void ClientImpl::setFault(int rc, const char* msg)
 }
 
 
-void ClientImpl::beginCall(IComposer& r, IRemoteProcedure& method, IDecomposer** argv, unsigned argc)
+void ClientImpl::beginCall(IComposer& r, RemoteCall& method, IDecomposer** argv, unsigned argc)
 {
     _method = &method;
     _state = OnBegin;
@@ -245,7 +245,7 @@ void ClientImpl::finishResult()
     // method->finish() we have an infinite loop
     if(_method)
     {
-        IRemoteProcedure* method = _method;
+        RemoteCall* method = _method;
         _method = 0;
         method->finish();
     }
