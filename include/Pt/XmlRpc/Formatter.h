@@ -134,23 +134,18 @@ class PT_XMLRPC_API Formatter : public Pt::Formatter
             OnParam,
             OnValueBegin,
             OnValueEnd,
-
             OnBoolBegin,
             OnIntBegin,
             OnDoubleBegin,
             OnStringBegin,
-
             OnScalar,
             OnScalarEnd,
-
             OnStructBegin,
             OnMemberBegin,
             OnNameBegin,
             OnName,
             OnNameEnd,
-            //OnMemberEnd,
             OnStructEnd,
-
             OnArrayBegin,
             OnDataBegin,
             OnDataEnd,

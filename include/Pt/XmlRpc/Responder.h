@@ -30,7 +30,6 @@
 
 #include <Pt/XmlRpc/Api.h>
 #include <Pt/XmlRpc/Fault.h>
-#include <Pt/XmlRpc/Scanner.h>
 #include <Pt/XmlRpc/Formatter.h>
 #include <Pt/Xml/InputSource.h>
 #include <Pt/Xml/XmlReader.h>
