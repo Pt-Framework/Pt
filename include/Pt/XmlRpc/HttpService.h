@@ -53,6 +53,8 @@ class PT_XMLRPC_API HttpService : public Http::Service
 
     private:
         XmlRpc::Service* _rpcService;
+        void* _r1;
+        void* _r2;
 };
 
 } // namespace XmlRpc

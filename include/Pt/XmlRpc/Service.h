@@ -311,6 +311,8 @@ class PT_XMLRPC_API Service : private NonCopyable
         typedef std::map<std::string, ServiceProcedureDef*> ProcedureMap;
         ProcedureMap _procedures;
         System::Mutex _mtx;
+        void* _r1;
+        void* _r2;
 };
 
 } // namespace XmlRpc

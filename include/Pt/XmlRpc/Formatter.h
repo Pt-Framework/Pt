@@ -41,6 +41,8 @@ namespace Pt {
 
 namespace XmlRpc {
 
+/** @internal @brief Formatter to read and write XML-RPC messages.
+*/
 class PT_XMLRPC_API Formatter : public Pt::Formatter
                               , private NonCopyable
 {

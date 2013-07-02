@@ -33,6 +33,8 @@ namespace Pt {
 namespace XmlRpc {
 
 Service::Service()
+: _r1(0)
+, _r2(0)
 { 
 }
 

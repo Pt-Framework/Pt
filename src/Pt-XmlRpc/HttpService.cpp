@@ -35,6 +35,8 @@ namespace XmlRpc {
 
 HttpService::HttpService(XmlRpc::Service& rpcService)
 : _rpcService(&rpcService)
+, _r1(0)
+, _r2(0)
 { 
 }
 

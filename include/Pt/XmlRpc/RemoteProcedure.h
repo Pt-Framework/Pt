@@ -42,6 +42,7 @@ namespace Pt {
 
 namespace XmlRpc {
 
+// TODO: not inline
 class PT_XMLRPC_API RemoteCall
 {
     public:
