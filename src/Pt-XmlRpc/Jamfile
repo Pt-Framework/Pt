@@ -4,7 +4,6 @@ SubDirC++Flags [ FDefines PT_XMLRPC_API_EXPORT ] ;
 SubDirObjects $(PT_OUTPUT_OBJECT) Pt-XmlRpc ;
 
 PT_XMLRPC_SOURCES = Client.cpp
-                    ClientImpl.cpp
                     Fault.cpp
                     Formatter.cpp
                     HttpClient.cpp

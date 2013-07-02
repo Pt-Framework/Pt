@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 by Dr. Marc Boris Duerner
+ * Copyright (C) 2009-2013 by Dr. Marc Boris Duerner
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -29,20 +29,25 @@
 #define Pt_XmlRpc_Client_h
 
 #include <Pt/XmlRpc/Api.h>
+#include <Pt/XmlRpc/Fault.h>
+#include <Pt/XmlRpc/Formatter.h>
+#include <Pt/Xml/InputSource.h>
+#include <Pt/Xml/XmlReader.h>
+#include <Pt/Composer.h>
+#include <Pt/Decomposer.h>
+#include <Pt/Utf8Codec.h>
+#include <Pt/TextStream.h>
 #include <Pt/NonCopyable.h>
 #include <Pt/SerializationContext.h>
 #include <string>
 
 namespace Pt {
 
-class IComposer;
-class IDecomposer;
-
 namespace XmlRpc {
 
 class RemoteCall;
 
-class PT_XMLRPC_API Client : public NonCopyable
+class PT_XMLRPC_API Client : private NonCopyable
 {
     public:
         Client();
@@ -51,11 +56,11 @@ class PT_XMLRPC_API Client : public NonCopyable
 
         SerializationContext& context();
 
-        void beginCall(IComposer& r, RemoteCall& method, IDecomposer** argv, unsigned argc);
+        void beginCall(IComposer& r, RemoteCall& call, IDecomposer** argv, unsigned argc);
 
         void endCall();
 
-        void call(IComposer& r, RemoteCall& method, IDecomposer** argv, unsigned argc);
+        void call(IComposer& r, RemoteCall& call, IDecomposer** argv, unsigned argc);
 
         void cancel();
 
@@ -89,11 +94,47 @@ class PT_XMLRPC_API Client : public NonCopyable
 
         void setFault(int rc, const char* msg);
 
-        void setError();
+        void setError(bool f = true);
 
     private:
-        class ClientImpl* _impl;
+        bool advance(const Xml::Node& node);
+
+    private:
+        enum State
+        {
+            OnBegin,
+            OnMethodResponseBegin,
+            OnFaultBegin,
+            OnFaultEnd,
+            OnFaultResponseEnd,
+            OnParamsBegin,
+            OnParam,
+            OnParamEnd,
+            OnParamsEnd,
+            OnMethodResponseEnd
+        };
+
         SerializationContext _ctx;
+        RemoteCall* _method;
+        
+        Pt::Utf8Codec _utf8;
+        TextOStream _ts;
+        IDecomposer** _argv;
+        unsigned _argc;
+        IDecomposer* _arg;
+        unsigned _argn;
+
+        Xml::BinaryInputSource _bin;
+        Xml::XmlReader _reader;
+        State _state;
+        
+        Formatter _formatter;
+        Fault _fault;
+        Composer<Fault> _fh;
+        bool _error;
+        bool _isFault;
+        void* _r1;
+        void* _r2;
 };
 
 } // namespace XmlRpc

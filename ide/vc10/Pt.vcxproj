@@ -239,7 +239,6 @@
     <ClInclude Include="..\..\src\Pt-System\win32\SerialDeviceImpl.h" />
     <ClInclude Include="..\..\src\Pt-System\win32\ThreadImpl.h" />
     <ClInclude Include="..\..\src\Pt-System\win32\win32.h" />
-    <ClInclude Include="..\..\src\Pt-XmlRpc\ClientImpl.h" />
     <ClInclude Include="..\..\src\Pt-XmlRpc\HttpResponder.h" />
     <ClInclude Include="..\..\src\Pt-Xml\AttributeListModel.h" />
     <ClInclude Include="..\..\src\Pt-Xml\AttributeModel.h" />
@@ -417,7 +416,6 @@
     <ClCompile Include="..\..\src\Pt-Unit\TextProtocol.cpp" />
     <ClCompile Include="..\..\src\Pt-Unit\TextProtocolTest.cpp" />
     <ClCompile Include="..\..\src\Pt-XmlRpc\Client.cpp" />
-    <ClCompile Include="..\..\src\Pt-XmlRpc\ClientImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-XmlRpc\Fault.cpp" />
     <ClCompile Include="..\..\src\Pt-XmlRpc\Formatter.cpp" />
     <ClCompile Include="..\..\src\Pt-XmlRpc\HttpClient.cpp" />
