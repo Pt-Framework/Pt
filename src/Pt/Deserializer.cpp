@@ -92,7 +92,7 @@ bool Deserializer::advance()
     if( ! _current )
         return false;
 
-    bool finished = _fmt->parseSome(*_current);
+    bool finished = _fmt->parseSome();
     if(finished)
     {
         _current->~IComposer();

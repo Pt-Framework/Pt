@@ -175,16 +175,14 @@ class PT_XML_API XmlFormatter : public Formatter
         
         // inherit docs
         void finishObject();
-        
-        // inherit docs
-        void onBeginObject(const char* name, const char* type,
-                           const char* id);
+
+        virtual void beginParse(IComposer& composer);
 
         // inherit docs
-        bool parseSome(IComposer& composer);
+        virtual bool parseSome();
 
         // inherit docs
-        void parse(IComposer& composer);
+        virtual void parse(IComposer& composer);
 
     protected:
         //! @internal

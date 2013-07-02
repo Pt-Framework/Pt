@@ -287,13 +287,6 @@ void XmlFormatter::finishArray()
 void XmlFormatter::beginObject(const char* name, const char* type,
                                const char* id)
 {
-    this->onBeginObject(name, type, id);
-}
-
-
-void XmlFormatter::onBeginObject(const char* name, const char* type,
-                                 const char* id)
-{
     if( ! _writer )
         return;
 
@@ -351,11 +344,18 @@ void XmlFormatter::parse(IComposer& comp)
 }
 
 
-bool XmlFormatter::parseSome(IComposer& comp)
+void XmlFormatter::beginParse(IComposer& comp)
 {
     _composer = &comp;
+    _processNode = &XmlFormatter::OnBegin;
+}
 
-    for(;;)
+
+bool XmlFormatter::parseSome()
+{
+    //_composer = &comp;
+
+    while(_composer != 0)
     {
         const Pt::Xml::Node* node = _reader->advance();
         if( ! node)
@@ -365,15 +365,9 @@ bool XmlFormatter::parseSome(IComposer& comp)
             throw SerializationError("incomplete type");
 
         (this->*_processNode)(*node);
-
-        if( _composer == 0 )
-        {
-            _processNode = &XmlFormatter::OnBegin;
-            return true;
-        }
     }
 
-    return false;
+    return _composer == 0 ;
 }
 
 

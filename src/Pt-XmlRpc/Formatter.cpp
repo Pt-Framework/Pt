@@ -143,6 +143,8 @@ Formatter::Formatter(std::basic_ostream<Char>& os)
 , _state(OnParam)
 , _composer(0)
 , _os(&os)
+, _r1(0)
+, _r2(0)
 { 
 }
 
@@ -404,7 +406,7 @@ void Formatter::beginParse(IComposer& composer)
 }
 
 
-bool Formatter::parseSome(IComposer& composer)
+bool Formatter::parseSome()
 { 
     return false; 
 }

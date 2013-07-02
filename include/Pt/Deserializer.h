@@ -54,7 +54,7 @@ class PT_API Deserializer
 
         void setFormatter(Formatter& formatter);
 
-        // TODO: rethink clear/reset i.e. for derived XmlDesrializer
+        // TODO: rethink clear/reset i.e. for derived XmlDeserializer
         void clear();
 
         /** @brief Deserialize an object
@@ -77,6 +77,8 @@ class PT_API Deserializer
             Composer<T>* composer = new (m) Composer<T>(_context);
             _current = composer;
             composer->begin(type);
+
+            _fmt->beginParse(*composer);
         }
 
         /** @brief Deserialize as far as data is available

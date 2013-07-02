@@ -118,8 +118,11 @@ class Formatter
 
         virtual void finishObject() = 0;
 
+    public:
+        virtual void beginParse(IComposer& composer) = 0;
+
         //! @brief Returns true if composer completes, false if no more data available
-        virtual bool parseSome(IComposer& composer) = 0;
+        virtual bool parseSome() = 0;
 
         //! @brief Parse until composer completes.
         virtual void parse(IComposer& composer) = 0;
