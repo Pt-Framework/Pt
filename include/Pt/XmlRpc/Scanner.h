@@ -80,10 +80,10 @@ class PT_XMLRPC_API Scanner
         ~Scanner()
         {}
 
-        void begin(IComposer& handler)
+        void begin(IComposer& composer)
         {
             _state = OnParam;
-            _current = &handler;
+            _current = &composer;
         }
 
         bool advance(const Xml::Node& node);
@@ -94,8 +94,8 @@ class PT_XMLRPC_API Scanner
         String _value;
 };
 
-}
+} // namespace Xml
 
-}
+} // namespace Pt
 
 #endif

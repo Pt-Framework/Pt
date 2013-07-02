@@ -29,24 +29,29 @@
 #define Pt_XmlRpc_Formatter_h
 
 #include <Pt/XmlRpc/Api.h>
+#include <Pt/Xml/XmlReader.h>
+#include <Pt/Composer.h>
 #include <Pt/Formatter.h>
 #include <Pt/String.h>
+#include <Pt/NonCopyable.h>
 #include <string>
-#include <map>
+#include <iostream>
 
 namespace Pt {
 
 namespace XmlRpc {
 
 class PT_XMLRPC_API Formatter : public Pt::Formatter
+                              , private NonCopyable
 {
     public:
-        Formatter(std::basic_ostream<Char>& os)
-        : _os(&os)
-        { }
+        Formatter(std::basic_ostream<Char>& os);
 
-        void attach(std::basic_ostream<Char>& os)
-        { _os = &os; }
+        ~Formatter();
+
+        void attach(Xml::XmlReader& reader);
+
+        void attach(std::basic_ostream<Char>& os);
 
         void addString(const char* name, const char* type,
                        const Pt::Char* value, const char* id);
@@ -114,13 +119,48 @@ class PT_XMLRPC_API Formatter : public Pt::Formatter
 
         void finishObject();
 
-        virtual bool parseSome(IComposer& composer)
-        { return false; }
+        void beginParse(IComposer& composer);
 
-        virtual void parse(IComposer& composer)
-        {}
+        virtual bool parseSome(IComposer& composer);
+
+        virtual void parse(IComposer& composer);
+
+        // @internal
+        bool advance(const Pt::Xml::Node& node);
 
     private:
+        enum State
+        {
+            OnParam,
+            OnValueBegin,
+            OnValueEnd,
+
+            OnBoolBegin,
+            OnIntBegin,
+            OnDoubleBegin,
+            OnStringBegin,
+
+            OnScalar,
+            OnScalarEnd,
+
+            OnStructBegin,
+            OnMemberBegin,
+            OnNameBegin,
+            OnName,
+            OnNameEnd,
+            //OnMemberEnd,
+            OnStructEnd,
+
+            OnArrayBegin,
+            OnDataBegin,
+            OnDataEnd,
+            OnArrayEnd
+        };
+
+        Xml::XmlReader* _reader;
+        State _state;
+        IComposer* _composer;
+
         std::basic_ostream<Char>* _os;
         Pt::String _str;
         static const unsigned _bufsize = 64;

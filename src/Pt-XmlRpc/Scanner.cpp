@@ -592,6 +592,6 @@ bool Scanner::advance(const Pt::Xml::Node& node)
     return false;
 }
 
-}
+} // namespace Xml
 
-}
+} // namespace Pt

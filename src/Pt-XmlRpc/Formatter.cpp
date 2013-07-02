@@ -29,12 +29,19 @@
 #include <Pt/XmlRpc/Api.h>
 #include <Pt/XmlRpc/Formatter.h>
 #include <Pt/Xml/XmlWriter.h>
+#include <Pt/Xml/StartElement.h>
+#include <Pt/Xml/EndElement.h>
+#include <Pt/Xml/Characters.h>
 #include <Pt/Convert.h>
 #include <Pt/SerializationError.h>
 #include <limits>
 #include <cassert>
 #include <cmath>
 #include <cstddef>
+
+#define log_define(e)
+#define log_debug(e)
+log_define("Pt.XmlRpc.Formatter")
 
 namespace  {
 
@@ -119,11 +126,43 @@ class array_appender : public std::iterator<std::output_iterator_tag, T>
 		T* _end;
 };
 
+
+void throwSerializationError(const char* msg = "invalid XML-RPC parameter")
+{
+    throw Pt::SerializationError(msg);
+}
+
 }
 
 namespace Pt {
 
 namespace XmlRpc {
+
+Formatter::Formatter(std::basic_ostream<Char>& os)
+: _reader(0)
+, _state(OnParam)
+, _composer(0)
+, _os(&os)
+{ 
+}
+
+
+Formatter::~Formatter()
+{
+}
+
+
+void Formatter::attach(Xml::XmlReader& reader)
+{ 
+    _reader = &reader; 
+}
+
+
+void Formatter::attach(std::basic_ostream<Char>& os)
+{ 
+    _os = &os; 
+}
+
 
 void Formatter::addString(const char* name, const char* type,
                           const Pt::Char* value, const char* id)
@@ -357,6 +396,568 @@ void Formatter::finishObject()
     _os->write(XMLRPC_VALUE_END, sizeof(XMLRPC_VALUE_END)/sizeof(Char));
 }
 
+
+void Formatter::beginParse(IComposer& composer)
+{
+    _state = OnParam;
+    _composer = &composer;
 }
 
+
+bool Formatter::parseSome(IComposer& composer)
+{ 
+    return false; 
 }
+
+
+void Formatter::parse(IComposer& composer)
+{
+}
+
+
+bool Formatter::advance(const Pt::Xml::Node& node)
+{
+    switch(_state)
+    {
+        case OnParam:
+        {
+            log_debug("OnParam");
+            if(node.type() == Xml::Node::StartElement) // i4, struct, array...
+            {
+                const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
+
+                if( se.name().name() != L"value" )
+                    throwSerializationError();
+
+                _state = OnValueBegin;
+            }
+            else if(node.type() == Xml::Node::EndElement)
+            {
+                throwSerializationError();
+            }
+
+            break;
+        }
+
+        case OnValueBegin:
+        {
+            log_debug("OnValueBegin, node type " << node.type());
+            if(node.type() == Xml::Node::StartElement) // i4, struct, array...
+            {
+                const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
+
+                log_debug("-> found type " << se.name().narrow());
+                if( se.name().name() == "struct" )
+                {
+                    _state = OnStructBegin;
+                }
+                else if(se.name().name() == "array")
+                {
+                    _state = OnArrayBegin;
+                }
+                else if(se.name().name() == "int" || se.name().name() == "i4")
+                {
+                    _state = OnIntBegin;
+                }
+                else if(se.name().name() == "boolean")
+                {
+                    _state = OnBoolBegin;
+                }
+                else if(se.name().name() == "double")
+                {
+                    _state = OnDoubleBegin;
+                }
+                else
+                {
+                    _state = OnStringBegin;
+                }
+
+                _str.clear();
+            }
+            else if(node.type() == Xml::Node::Characters)
+            {
+                // maybe <value>...<type>...</type>...</value>  (case 1)
+                //    or <value>...</value>                     (case 2)
+                const Xml::Characters& chars = static_cast<const Xml::Characters&>(node);
+                _str = chars.content();
+                
+                //NOTE we could get rid of this is the XmlReader could be set up
+                //     to ignore characters between two start tags and only report
+                //     "leaf characters".
+            }
+            else if(node.type() == Xml::Node::EndElement)
+            {
+                //const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
+                //if(ee.name() != L"value")
+                //    throwSerializationError();
+
+                // is always type string
+                _composer->setString( _str );
+                _str.clear();
+
+                _state = OnValueEnd;
+            }
+            else
+            {
+                throwSerializationError();
+            }
+
+            break;
+        }
+
+        case OnValueEnd:
+        {
+            log_debug("OnValueEnd, node type " << node.type());
+
+            if(node.type() == Xml::Node::EndElement)
+            {
+                const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
+
+                if( ee.name().name() == "member" )
+                {
+                    log_debug("OnValueEnd member");
+                    _composer = _composer->finish();
+                    if( ! _composer )
+                        throwSerializationError("invalid XML-RPC struct");
+
+                    _state = OnStructBegin;
+                }
+                else if( ee.name().name() == "data" )
+                {
+                    log_debug("OnValueEnd data");
+                    _composer = _composer->finish();
+                    if( ! _composer )
+                        throwSerializationError("invalid XML-RPC array");
+
+                    _state = OnDataEnd;
+                }
+                else if( ee.name().name() == "param" )
+                {
+                    log_debug("OnValueEnd data other " << ee.name().narrow());
+                    if( 0 != _composer->finish() )
+                        throwSerializationError();
+
+                    _state = OnValueEnd;
+                    return true;
+                }
+                else if( ee.name().name() == "fault" )
+                {
+                    log_debug("OnValueEnd data other " << ee.name().narrow());
+                    if( 0 != _composer->finish() )
+                        throwSerializationError("invalid XML-RPC fault");
+
+                    _state = OnValueEnd;
+                    return true;
+                }
+                else
+                {
+                    throwSerializationError();
+                }
+            }
+            else if(node.type() == Xml::Node::StartElement)
+            {
+                const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
+                if(se.name().name() == "value")
+                {
+                    log_debug("OnValueEnd data value");
+                    _composer = _composer->finish();
+
+                    if( ! _composer )
+                        throwSerializationError("invalid XML-RPC element");
+
+                    _composer = _composer->beginElement();
+                    _state = OnValueBegin;
+                }
+                else
+                {
+                    throwSerializationError();
+                }
+            }
+
+            break;
+        }
+
+        case OnStructBegin:
+        {
+            log_debug("OnStructBegin");
+            if(node.type() == Xml::Node::StartElement) // <member>
+            {
+                const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
+
+                if(se.name().name() != L"member")
+                    throwSerializationError();
+
+                _state = OnMemberBegin;
+            }
+            else if(node.type() == Xml::Node::EndElement) // </struct>
+            {
+                _state = OnStructEnd;
+            }
+            break;
+        }
+
+        case OnStructEnd:
+        {
+            log_debug("OnStructEnd");
+            if(node.type() == Xml::Node::EndElement) // </value>
+            {
+                //const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
+
+                //if(ee.name() != L"value")
+                //    throwSerializationError();
+
+                _state = OnValueEnd;
+            }
+            else if(node.type() == Xml::Node::StartElement)
+            {
+                throwSerializationError();
+            }
+
+            break;
+        }
+
+        case OnMemberBegin:
+        {
+            log_debug("OnMemberBegin");
+            if(node.type() == Xml::Node::StartElement) // name
+            {
+                const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
+
+                if( se.name().name() != L"name")
+                    throwSerializationError();
+
+                _state = OnNameBegin;
+            }
+            else if(node.type() == Xml::Node::EndElement)
+            {
+                throwSerializationError();
+            }
+
+            break;
+        }
+
+        case OnNameBegin:
+        {
+            log_debug("OnNameBegin");
+            if(node.type() == Xml::Node::Characters) // member-name
+            {
+                const Xml::Characters& chars = static_cast<const Xml::Characters&>(node);
+                const std::string& name = chars.content().narrow();
+
+                _composer = _composer->beginMember(name);
+
+                _state = OnName;
+            }
+            else
+            {
+                throwSerializationError();
+            }
+
+            break;
+        }
+
+        case OnName:
+        {
+            log_debug("OnName");
+            if(node.type() == Xml::Node::EndElement) // </name>
+            {
+                //const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
+
+                //if(ee.name() != L"name")
+                //    throwSerializationError();
+
+                _state = OnNameEnd;
+            }
+            else if(node.type() == Xml::Node::StartElement)
+            {
+                throwSerializationError();
+            }
+
+            break;
+        }
+
+        case OnNameEnd:
+        {
+            log_debug("OnNameEnd");
+            if(node.type() == Xml::Node::StartElement) // <value>
+            {
+                const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
+
+                if( se.name().name() != L"value" )
+                    throwSerializationError();
+
+                _state = OnValueBegin;
+            }
+            else if(node.type() == Xml::Node::EndElement)
+            {
+                throwSerializationError();
+            }
+
+            break;
+        }
+
+        case OnBoolBegin:
+        {
+            log_debug("OnBoolBegin ");
+            if(node.type() == Xml::Node::Characters)
+            {
+                const Xml::Characters& chars = static_cast<const Xml::Characters&>(node);
+                log_debug("-> found bool " << chars.content().narrow());
+
+                bool value = false;
+                const Pt::String& strval = chars.content();
+                Pt::String::const_iterator it = strval.begin();
+
+                // skip leading whitespace
+                for( ; it != strval.end(); it++)
+                    if( ! Pt::isspace(*it) )
+                        break;
+
+                if( it == strval.end() )
+                    throwSerializationError();
+
+                if(*it == '0')
+                    value = false;
+                else if(*it == '1')
+                    value = true;
+                else if(*it == 'f')
+                {
+                    if( ++it == strval.end() || *it != 'a')
+                        throwSerializationError();
+                    if( ++it == strval.end() || *it != 'l')
+                        throwSerializationError();
+                    if( ++it == strval.end() || *it != 's')
+                        throwSerializationError();
+                    if( ++it == strval.end() || *it != 'e')
+                        throwSerializationError();
+
+                    value = false;
+                }
+                else if(*it == 't')
+                {
+                    if( ++it == strval.end() || *it != 'r')
+                        throwSerializationError();
+                    if( ++it == strval.end() || *it != 'u')
+                        throwSerializationError();
+                    if( ++it == strval.end() || *it != 'e')
+                        throwSerializationError();
+
+                    value = true;
+                }
+
+                // allow only trailing whitespace
+                for( ++it; it != strval.end(); it++)
+                    if( ! Pt::isspace(*it) )
+                        throwSerializationError();
+
+                _composer->setBool(value);
+                _state = OnScalar;
+            }
+            else
+            {
+                throwSerializationError();
+            }
+
+            break;
+        }
+
+        case OnIntBegin:
+        {
+            log_debug("OnIntBegin ");
+            if(node.type() == Xml::Node::Characters)
+            {
+                const Xml::Characters& chars = static_cast<const Xml::Characters&>(node);
+                log_debug("-> found int " << chars.content().narrow());
+
+                Pt::int32_t number = 0;
+                bool ok = false;
+                getInt( chars.content().begin(), chars.content().end(), ok, number );
+
+                if( ! ok )
+                    throwSerializationError();
+
+                _composer->setInt(number);
+                _state = OnScalar;
+            }
+            else
+            {
+                throwSerializationError();
+            }
+
+            break;
+        }
+
+        case OnDoubleBegin:
+        {
+            log_debug("OnDoubleBegin ");
+            if(node.type() == Xml::Node::Characters)
+            {
+                const Xml::Characters& chars = static_cast<const Xml::Characters&>(node);
+                log_debug("-> found double " << chars.content().narrow());
+
+                double number = 0.0;
+                bool ok = false;
+                getFloat( chars.content().begin(), chars.content().end(), ok, number );
+
+                if( ! ok )
+                    throwSerializationError();
+
+                _composer->setDouble(number);
+                log_debug("-> parsed double " << number);
+                _state = OnScalar;
+            }
+            else
+            {
+                throwSerializationError();
+            }
+
+            break;
+        }
+
+        case OnStringBegin:
+        {
+            log_debug("OnStringBegin ");
+            if(node.type() == Xml::Node::Characters)
+            {
+                const Xml::Characters& chars = static_cast<const Xml::Characters&>(node);
+                _state = OnScalar;
+
+                log_debug("-> found string " << chars.content().narrow());
+                _composer->setString( chars.content() );
+            }
+            else if(node.type() == Xml::Node::EndElement) // no content, for example empty strings
+            {
+                log_debug("-> found empty value ");
+                _composer->setString( Pt::String() );
+                _state = OnScalarEnd;
+            }
+            else
+            {
+                throwSerializationError();
+            }
+
+            break;
+        }
+
+        case OnScalar:
+        {
+            log_debug("OnScalar");
+            if(node.type() == Xml::Node::EndElement) // </int>, boolean ...
+            {
+                _state = OnScalarEnd;
+            }
+            else if(node.type() == Xml::Node::StartElement)
+            {
+                throwSerializationError();
+            }
+
+            break;
+        }
+
+        case OnScalarEnd:
+        {
+            log_debug("OnScalarEnd");
+            if(node.type() == Xml::Node::EndElement) // </value>
+            {
+                //const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
+
+                //if(ee.name() != L"value")
+                //    throwSerializationError();
+
+                _state = OnValueEnd;
+            }
+            else if(node.type() == Xml::Node::StartElement)
+            {
+                throwSerializationError();
+            }
+
+            break;
+        }
+
+        case OnArrayBegin:
+        {
+            log_debug("OnArrayBegin");
+            if(node.type() == Xml::Node::StartElement) // <data>
+            {
+                const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
+
+                if( se.name().name() != L"data" )
+                    throwSerializationError();
+
+                _state = OnDataBegin;
+            }
+            else if(node.type() == Xml::Node::EndElement)
+            {
+                throwSerializationError();
+            }
+
+            break;
+        }
+
+        case OnDataBegin:
+        {
+            log_debug("OnDataBegin");
+            if(node.type() == Xml::Node::StartElement) // value
+            {
+                _composer = _composer->beginElement();
+                _state = OnValueBegin;
+            }
+            else if(node.type() == Xml::Node::EndElement) // empty array
+            {
+                //const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
+                //if(ee.name() != L"data")
+                //    throwSerializationError();
+
+                _state = OnDataEnd;
+            }
+
+            break;
+        }
+
+        case OnDataEnd:
+        {
+            log_debug("OnDataEnd");
+            if(node.type() == Xml::Node::EndElement) // </array>
+            {
+                //const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
+
+                //if(ee.name() != L"array")
+                //    throwSerializationError();
+
+                _state = OnArrayEnd;
+            }
+            else if(node.type() == Xml::Node::StartElement)
+            {
+                throwSerializationError();
+            }
+
+            break;
+        }
+
+        case OnArrayEnd:
+        {
+            log_debug("OnArrayEnd");
+            if(node.type() == Xml::Node::EndElement) // </value>
+            {
+                //const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
+
+                //if(ee.name() != L"value")
+                //    throwSerializationError();
+
+                _state = OnValueEnd;
+            }
+            else if(node.type() == Xml::Node::StartElement)
+            {
+                throwSerializationError();
+            }
+
+            break;
+        }
+    }
+
+    return false;
+}
+
+} // namespace Xml
+
+} // namespace Pt

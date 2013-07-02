@@ -86,12 +86,12 @@ static const Pt::Char XMLRPC_STRING_END[]  = { '<', '/', 's', 't', 'r', 'i', 'n'
 Responder::Responder(Service& service)
 : _service(&service)
 , _proc(0)
-, _state(OnBegin)
 , _reader(_bin)
+, _args(0)
+, _state(OnBegin)
 , _utf8(1)
 , _ts(&_utf8)
 , _formatter(_ts)
-, _args(0)
 , _result(0)
 , _isFault(false)
 , _r1(0)
@@ -464,7 +464,7 @@ bool Responder::advance(const Pt::Xml::Node& node)
                         throw SerializationError("too many arguments");
                 }
 
-                _scanner.begin(**_args);
+                _formatter.beginParse(**_args);
                 _state = OnParam;
                 break;
             }
@@ -474,7 +474,7 @@ bool Responder::advance(const Pt::Xml::Node& node)
 
         case OnParam:
         { //std::cerr << "S: OnParam" << std::endl;
-            bool finished = _scanner.advance(node);
+            bool finished = _formatter.advance(node);
             if(finished)
             {
                 //std::cerr << "-> param finished" << std::endl; // node is </param>

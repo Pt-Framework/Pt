@@ -122,7 +122,6 @@ class ClientImpl
         Xml::BinaryInputSource _bin;
         Xml::XmlReader _reader;
         Formatter _formatter;
-        Scanner _scanner;
         IDecomposer** _argv;
         unsigned _argc;
         IDecomposer* _arg;

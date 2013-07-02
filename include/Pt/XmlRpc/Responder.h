@@ -101,17 +101,16 @@ class PT_XMLRPC_API Responder : private NonCopyable
             OnMethodCallEnd
         };
 
+        SerializationContext _context;
         Service* _service;
         ServiceProcedure* _proc;
-        State _state;
         Xml::BinaryInputSource _bin;
         Xml::XmlReader _reader;
-        Scanner _scanner;
+        IComposer** _args;
+        State _state;
         Utf8Codec _utf8;
         TextOStream _ts;
         Formatter _formatter;
-        SerializationContext _context;
-        IComposer** _args;
         IDecomposer* _result;
         Fault _fault;
         bool _isFault;

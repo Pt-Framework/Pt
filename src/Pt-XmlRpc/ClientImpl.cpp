@@ -105,7 +105,7 @@ void ClientImpl::beginCall(IComposer& r, RemoteCall& method, IDecomposer** argv,
     _state = OnBegin;
 
     _reader.reset(_bin);
-    _scanner.begin(r);
+    _formatter.beginParse(r);
 
 
     _argv = argv;
@@ -322,7 +322,7 @@ bool ClientImpl::advance(const Pt::Xml::Node& node)
                 else if( se.name().name() == "fault" )
                 {
                     _fh.begin(_fault);
-                    _scanner.begin(_fh);
+                    _formatter.beginParse(_fh);
                     _state = OnFaultBegin;
                     break;
                 }
@@ -334,7 +334,7 @@ bool ClientImpl::advance(const Pt::Xml::Node& node)
 
         case OnFaultBegin:
         {
-            bool finished = _scanner.advance(node); // start with <value>
+            bool finished = _formatter.advance(node); // start with <value>
             if(finished)
             {
                 // </fault>
@@ -381,7 +381,7 @@ bool ClientImpl::advance(const Pt::Xml::Node& node)
 
         case OnParam:
         {
-            bool finished = _scanner.advance(node); // start with <value>
+            bool finished = _formatter.advance(node); // start with <value>
             if(finished)
             {
                 // </param>
