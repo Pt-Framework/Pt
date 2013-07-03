@@ -39,16 +39,16 @@ namespace Pt {
 
 namespace XmlRpc {
 
-// TODO: derive from Http::Client
 class PT_XMLRPC_API HttpClient : public Client
                                , public Connectable
 {
     public:
         HttpClient();
 
-        HttpClient(const Net::AddrInfo& addrinfo, const std::string& serviceUrl);
+        HttpClient(const Net::AddrInfo& addrinfo, 
+                   const std::string& serviceUrl);
 
-        HttpClient(const std::string& addr, unsigned short port, 
+        HttpClient(const std::string& addr, unsigned short port,
                    const std::string& serviceUrl);
 
         HttpClient(System::EventLoop& loop);
@@ -64,12 +64,29 @@ class PT_XMLRPC_API HttpClient : public Client
 
         void setActive(System::EventLoop& loop);
 
-        void connect(const Net::AddrInfo& addrinfo, const std::string& serviceUrl);
+        System::EventLoop* loop() const;
 
-        void connect(const std::string& addr, unsigned short port,
-                     const std::string& serviceUrl);
+        void setSecure(Ssl::Context& ctx);
 
-        Http::Client& client();
+        /** @brief Set timeout for I/O operations.
+        */
+        void setTimeout(std::size_t timeout);
+
+        void setTarget(const Net::AddrInfo& addrinfo, 
+                       const std::string& serviceUrl);
+
+        void setTarget(const std::string& addr, unsigned short port,
+                       const std::string& serviceUrl);
+
+        void setServiceUrl(const std::string& serviceUrl);
+
+        void setHost(const Net::AddrInfo& addrinfo);
+        
+        void setHost(const std::string& host, unsigned short int port);
+
+        const Net::AddrInfo& host() const;
+
+        Http::Client& httpClient();
 
     protected:       
         virtual void onInvoke();

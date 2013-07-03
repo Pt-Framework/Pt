@@ -79,7 +79,7 @@ HttpClient::HttpClient(const Net::AddrInfo& addrinfo,
 , _v2(0)
 {
     init();
-    connect(addrinfo, url);
+    setTarget(addrinfo, url);
 }
 
 
@@ -89,7 +89,7 @@ HttpClient::HttpClient(const std::string& addr, unsigned short port,
 , _v2(0)
 {
     init();
-    connect(addr, port, url);
+    setTarget(addr, port, url);
 }
 
 
@@ -109,7 +109,7 @@ HttpClient::HttpClient(System::EventLoop& loop, const Net::AddrInfo& addrinfo,
 , _v2(0)
 {
     init();
-    connect(addrinfo, url);
+    setTarget(addrinfo, url);
 }
 
 
@@ -121,7 +121,7 @@ HttpClient::HttpClient(System::EventLoop& loop,
 , _v2(0)
 {
     init();
-    connect(addr, port, url);
+    setTarget(addr, port, url);
 }
 
 
@@ -143,21 +143,63 @@ void HttpClient::setActive(System::EventLoop& loop)
 }
 
 
-void HttpClient::connect(const Net::AddrInfo& addrinfo, const std::string& url)
+System::EventLoop* HttpClient::loop() const
+{
+    return _client.loop();
+}
+
+
+void HttpClient::setSecure(Ssl::Context& ctx)
+{
+    _client.setSecure(ctx);
+}
+
+
+void HttpClient::setTimeout(std::size_t timeout)
+{
+    _client.setTimeout(timeout);
+}
+
+
+void HttpClient::setTarget(const Net::AddrInfo& addrinfo, const std::string& url)
 {
     _client.setHost(addrinfo);
     _client.request().setUrl(url);
 }
 
 
-void HttpClient::connect(const std::string& addr, unsigned short port, const std::string& url)
+void HttpClient::setTarget(const std::string& addr, unsigned short port, const std::string& url)
 {
     _client.setHost(addr, port);
     _client.request().setUrl(url);
 }
 
 
-Http::Client& HttpClient::client()
+void HttpClient::setServiceUrl(const std::string& serviceUrl)
+{
+    _client.request().setUrl(serviceUrl);
+}
+
+
+void HttpClient::setHost(const Net::AddrInfo& addrinfo)
+{
+    _client.setHost(addrinfo);
+}
+
+   
+void HttpClient::setHost(const std::string& host, unsigned short int port)
+{
+    _client.setHost(host, port);
+}
+
+
+const Net::AddrInfo& HttpClient::host() const
+{
+    return _client.host();
+}
+
+
+Http::Client& HttpClient::httpClient()
 {
     return _client;
 }

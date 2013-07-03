@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2009 by Dr. Marc Boris Duerner, Tommi Maekitalo
- *
+ * Copyright (C) 2013 by Dr. Marc Boris Duerner
+ * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -25,47 +25,45 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef Pt_XmlRpc_Result_h
-#define Pt_XmlRpc_Result_h
-
-#include <Pt/XmlRpc/Api.h>
-#include <string>
+#include <Pt/XmlRpc/RemoteProcedure.h>
 
 namespace Pt {
 
 namespace XmlRpc {
 
-class Client;
+RemoteCall::RemoteCall(Client& client, const String& name)
+: _client(&client)
+, _name(name)
+{ 
+}
 
-template <typename R>
-class Result
+
+RemoteCall::RemoteCall(Client& client, const std::string& name)
+: _client(&client)
+, _name( String::widen(name) )
+{ 
+}
+
+
+RemoteCall::RemoteCall(Client& client, const char* name)
+: _client(&client)
+, _name( String::widen(name) )
+{ 
+}
+
+
+RemoteCall::~RemoteCall()
+{ 
+    cancel(); 
+}
+
+
+void RemoteCall::cancel()
 {
-    public:
-        explicit Result(Client& client)
-        : _client(client)
-        { }
-
-        bool isFailed() const
-        {
-            return _client.isFailed();
-        }
-
-        R& value()
-        { return _result; }
-
-        const R& get() const
-        {
-            _client.endCall();
-            return _result;
-        }
-
-    private:
-        Client& _client;
-        R _result;
-};
-
+    if( _client->activeProcedure() == this )
+        _client->cancel();
 }
 
-}
+} // namespace XmlRpc
 
-#endif
+} // namespace Pt

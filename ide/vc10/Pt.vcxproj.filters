@@ -765,9 +765,6 @@
     <ClInclude Include="..\..\include\Pt\XmlRpc\Responder.h">
       <Filter>Pt-XmlRpc</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\XmlRpc\Result.h">
-      <Filter>Pt-XmlRpc</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\XmlRpc\Service.h">
       <Filter>Pt-XmlRpc</Filter>
     </ClInclude>
@@ -1567,6 +1564,9 @@
       <Filter>Pt-XmlRpc</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-XmlRpc\HttpService.cpp">
+      <Filter>Pt-XmlRpc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-XmlRpc\RemoteProcedure.cpp">
       <Filter>Pt-XmlRpc</Filter>
     </ClCompile>
   </ItemGroup>

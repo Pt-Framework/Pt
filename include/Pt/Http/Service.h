@@ -31,7 +31,6 @@
 
 #include <Pt/Http/Api.h>
 #include <Pt/Http/Responder.h>
-#include <Pt/Atomicity.h>
 #include <Pt/Allocator.h>
 
 namespace Pt {
@@ -39,6 +38,8 @@ namespace Pt {
 namespace Http {
 
 class Request;
+
+//TODO: max request size
 
 class PT_HTTP_API Service
 {
@@ -61,9 +62,9 @@ class PT_HTTP_API Service
         virtual void onReleaseResponder(Responder*) = 0;
 
     private:
-        Pt::atomic_t _responderCount;
-        void* _reserved0;
-        std::size_t _reserved1;
+        std::size_t _r0;
+        void* _r1;
+        std::size_t _r2;
 };
 
 

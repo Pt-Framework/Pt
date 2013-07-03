@@ -26,7 +26,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-
 #include <Pt/XmlRpc/RemoteProcedure.h>
 #include <Pt/XmlRpc/HttpClient.h>
 #include <Pt/System/Application.h>
@@ -38,7 +37,6 @@
 #include <Pt/Atomicity.h>
 #include <Pt/Main.h>
 #include <Pt/Arg.h>
-
 #include <iostream>
 
 #ifndef WINCE
@@ -51,25 +49,13 @@
 
 class BenchClient
 {
-    void exec();
-
-    Pt::XmlRpc::HttpClient client;
-    Pt::XmlRpc::RemoteProcedure<std::string, std::string> echo;
-    Pt::System::AttachedThread thread;
-
-    static unsigned _numRequests;
-    static Pt::atomic_t _requestsStarted;
-    static Pt::atomic_t _requestsFinished;
-    static Pt::atomic_t _requestsFailed;
-
   public:
-
     explicit BenchClient(unsigned short port)
       : client(),
         echo(client, "echo"),
         thread(Pt::callable(*this, &BenchClient::exec))
     { 
-        client.connect("", port, "/myservice");
+        client.setTarget("", port, "/myservice");
     }
 
     static unsigned numRequests()
@@ -92,40 +78,56 @@ class BenchClient
 
     void join()
     { thread.join(); }
+
+  private:
+    void exec()
+    {
+        while (static_cast<unsigned>(Pt::atomicIncrement(_requestsStarted)) <= _numRequests)
+        {
+            try
+            {
+                std::cout << echo("hi") << " ";
+                Pt::atomicIncrement(_requestsFinished);
+            }
+            catch(const std::exception& e)
+            {
+                {
+                    Pt::System::MutexLock lock(mutex);
+                    std::cerr << "request failed: " << e.what() << std::endl;
+                    client.cancel();
+                }
+
+                Pt::atomicIncrement(_requestsFailed);
+            }
+        }
+    }
+
+    Pt::XmlRpc::HttpClient client;
+    Pt::XmlRpc::RemoteProcedure<std::string, std::string> echo;
+    Pt::System::AttachedThread thread;
+
+    static unsigned _numRequests;
+    static Pt::atomic_t _requestsStarted;
+    static Pt::atomic_t _requestsFinished;
+    static Pt::atomic_t _requestsFailed;
+    static Pt::System::Mutex mutex;
 };
 
 Pt::atomic_t BenchClient::_requestsStarted(0);
+
 Pt::atomic_t BenchClient::_requestsFinished(0);
+
 Pt::atomic_t BenchClient::_requestsFailed(0);
+
 unsigned BenchClient::_numRequests = 0;
-typedef std::vector<BenchClient*> BenchClients;
 
-static Pt::System::Mutex mutex;
+Pt::System::Mutex BenchClient::mutex;
 
-void BenchClient::exec()
-{
-    while (static_cast<unsigned>(Pt::atomicIncrement(_requestsStarted)) <= _numRequests)
-    {
-        try
-        {
-            std::cout << echo("hi") << " ";
-            Pt::atomicIncrement(_requestsFinished);
-        }
-        catch(const std::exception& e)
-        {
-            {
-                Pt::System::MutexLock lock(mutex);
-                std::cerr << "request failed: " << e.what() << std::endl;
-                client.cancel();
-            }
-
-            Pt::atomicIncrement(_requestsFailed);
-        }
-    }
-}
 
 int main(int argc, char* argv[])
 {
+  typedef std::vector<BenchClient*> BenchClients;
+
   BenchClients clients;
 
   try
@@ -140,7 +142,8 @@ int main(int argc, char* argv[])
     Pt::Arg<unsigned> threads(argc, argv, 't', 4);
     BenchClient::numRequests(Pt::Arg<unsigned>(argc, argv, 'n', 10000));
 
-    std::cout << "call " << BenchClient::numRequests() << " requests with " << threads.getValue() << " threads\n\n"
+    std::cout << "call " << BenchClient::numRequests() << " requests with " 
+              << threads.getValue() << " threads\n\n"
                  "options:\n"
                  "   -l ip      set ip address of server (default: localhost)\n"
                  "   -p number  set port number of server (default: 7002)\n"
@@ -162,19 +165,19 @@ int main(int argc, char* argv[])
 
     Pt::Timespan t = cl.stop();
 
-    std::cerr << "--- DONE ---" << std::endl;
-    std::cout << BenchClient::numRequests() << " requests in " << t.toMSecs()/1e3 << " s => " << (BenchClient::requestsStarted() / (t.toMSecs()/1e3)) << "#/s\n"
-              << BenchClient::requestsFinished() << " finished " << BenchClient::requestsFailed() << " failed" << std::endl;
-
-    for (BenchClients::iterator it = clients.begin(); it != clients.end(); ++it)
-      delete *it;
+    std::cout << "--- DONE ---" << std::endl;
+    std::cout << BenchClient::numRequests() << " requests in "
+              << t.toMSecs()/1e3 << " s => " 
+              << BenchClient::requestsStarted() / t.toSeconds() << "#/s\n"
+              << BenchClient::requestsFinished() << " finished " 
+              << BenchClient::requestsFailed() << " failed" << std::endl;
   }
   catch (const std::exception& e)
   {
     std::cerr << "ERROR: " << e.what() << std::endl;
-
-    for (BenchClients::iterator it = clients.begin(); it != clients.end(); ++it)
-      delete *it;
   }
+
+  for (BenchClients::iterator it = clients.begin(); it != clients.end(); ++it)
+    delete *it;
 }
 

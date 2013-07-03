@@ -36,9 +36,9 @@ namespace Pt {
 namespace Http {
 
 Service::Service()
-: _responderCount(0)
-, _reserved0(0)
-, _reserved1(0)
+: _r0(0)
+, _r1(0)
+, _r2(0)
 { 
 }
 
@@ -51,7 +51,6 @@ Service::~Service()
 Responder* Service::getResponder(const Request& request)
 {
     Responder* responder = onGetResponder(request);
-    atomicIncrement(_responderCount);    
     
     return responder;
 }
@@ -63,7 +62,6 @@ void Service::releaseResponder(Responder* responder)
         return;
     
     onReleaseResponder(responder);
-    atomicDecrement(_responderCount);
 }
 
 }

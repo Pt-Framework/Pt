@@ -83,9 +83,9 @@ class RemoteProcedure : public RemoteProcedureBase<R>
             _a9.begin(a9, "");
             _a10.begin(a10, "");
 
-            this->_r.begin(this->_result.value());
+            Composer<R>& r = this->beginResult();
 
-            this->client().beginCall(this->_r, *this, _args, 10);
+            this->client().beginCall(r, *this, _args, 10);
         }
 
         const R& call(const A1& a1, const A2& a2, const A3& a3, const A4& a4, const A5& a5, const A6& a6, const A7& a7, const A8& a8, const A9& a9, const A10& a10)
@@ -100,10 +100,10 @@ class RemoteProcedure : public RemoteProcedureBase<R>
             _a8.begin(a8, "");
             _a9.begin(a9, "");
             _a10.begin(a10, "");
-            this->_r.begin(this->_result.value());
+            Composer<R>& r = this->beginResult();
 
-            this->client().call(this->_r, *this, _args, 10);
-            return this->_result.get();
+            this->client().call(r, *this, _args, 10);
+            return this->result().get();
         }
 
         const R& operator()(const A1& a1, const A2& a2, const A3& a3, const A4& a4, const A5& a5, const A6& a6, const A7& a7, const A8& a8, const A9& a9, const A10& a10)
@@ -175,9 +175,9 @@ class RemoteProcedure<R, A1, A2, A3, A4, A5, A6, A7, A8, A9,
             _a8.begin(a8, "");
             _a9.begin(a9, "");
 
-            this->_r.begin(this->_result.value());
+            Composer<R>& r = this->beginResult();
 
-            this->client().beginCall(this->_r, *this, _args, 9);
+            this->client().beginCall(r, *this, _args, 9);
         }
 
         const R& call(const A1& a1, const A2& a2, const A3& a3, const A4& a4, const A5& a5, const A6& a6, const A7& a7, const A8& a8, const A9& a9)
@@ -191,10 +191,10 @@ class RemoteProcedure<R, A1, A2, A3, A4, A5, A6, A7, A8, A9,
             _a7.begin(a7, "");
             _a8.begin(a8, "");
             _a9.begin(a9, "");
-            this->_r.begin(this->_result.value());
+            Composer<R>& r = this->beginResult();
 
-            this->client().call(this->_r, *this, _args, 9);
-            return this->_result.get();
+            this->client().call(r, *this, _args, 9);
+            return this->result().get();
         }
 
         const R& operator()(const A1& a1, const A2& a2, const A3& a3, const A4& a4, const A5& a5, const A6& a6, const A7& a7, const A8& a8, const A9& a9)
@@ -262,9 +262,9 @@ class RemoteProcedure<R, A1, A2, A3, A4, A5, A6, A7, A8,
             _a7.begin(a7, "");
             _a8.begin(a8, "");
 
-            this->_r.begin(this->_result.value());
+            Composer<R>& r = this->beginResult();
 
-            this->client().beginCall(this->_r, *this, _args, 8);
+            this->client().beginCall(r, *this, _args, 8);
         }
 
         const R& call(const A1& a1, const A2& a2, const A3& a3, const A4& a4, const A5& a5, const A6& a6, const A7& a7, const A8& a8)
@@ -277,10 +277,10 @@ class RemoteProcedure<R, A1, A2, A3, A4, A5, A6, A7, A8,
             _a6.begin(a6, "");
             _a7.begin(a7, "");
             _a8.begin(a8, "");
-            this->_r.begin(this->_result.value());
+            Composer<R>& r = this->beginResult();
 
-            this->client().call(this->_r, *this, _args, 8);
-            return this->_result.get();
+            this->client().call(r, *this, _args, 8);
+            return this->result().get();
         }
 
         const R& operator()(const A1& a1, const A2& a2, const A3& a3, const A4& a4, const A5& a5, const A6& a6, const A7& a7, const A8& a8)
@@ -344,9 +344,9 @@ class RemoteProcedure<R, A1, A2, A3, A4, A5, A6, A7,
             _a6.begin(a6, "");
             _a7.begin(a7, "");
 
-            this->_r.begin(this->_result.value());
+            Composer<R>& r = this->beginResult();
 
-            this->client().beginCall(this->_r, *this, _args, 7);
+            this->client().beginCall(r, *this, _args, 7);
         }
 
         const R& call(const A1& a1, const A2& a2, const A3& a3, const A4& a4, const A5& a5, const A6& a6, const A7& a7)
@@ -358,10 +358,10 @@ class RemoteProcedure<R, A1, A2, A3, A4, A5, A6, A7,
             _a5.begin(a5, "");
             _a6.begin(a6, "");
             _a7.begin(a7, "");
-            this->_r.begin(this->_result.value());
+            Composer<R>& r = this->beginResult();
 
-            this->client().call(this->_r, *this, _args, 7);
-            return this->_result.get();
+            this->client().call(r, *this, _args, 7);
+            return this->result().get();
         }
 
         const R& operator()(const A1& a1, const A2& a2, const A3& a3, const A4& a4, const A5& a5, const A6& a6, const A7& a7)
@@ -421,9 +421,9 @@ class RemoteProcedure<R, A1, A2, A3, A4, A5, A6,
             _a5.begin(a5, "");
             _a6.begin(a6, "");
 
-            this->_r.begin(this->_result.value());
+            Composer<R>& r = this->beginResult();
 
-            this->client().beginCall(this->_r, *this, _args, 6);
+            this->client().beginCall(r, *this, _args, 6);
         }
 
         const R& call(const A1& a1, const A2& a2, const A3& a3, const A4& a4, const A5& a5, const A6& a6)
@@ -434,10 +434,10 @@ class RemoteProcedure<R, A1, A2, A3, A4, A5, A6,
             _a4.begin(a4, "");
             _a5.begin(a5, "");
             _a6.begin(a6, "");
-            this->_r.begin(this->_result.value());
+            Composer<R>& r = this->beginResult();
 
-            this->client().call(this->_r, *this, _args, 6);
-            return this->_result.get();
+            this->client().call(r, *this, _args, 6);
+            return this->result().get();
         }
 
         const R& operator()(const A1& a1, const A2& a2, const A3& a3, const A4& a4, const A5& a5, const A6& a6)
@@ -493,9 +493,9 @@ class RemoteProcedure<R, A1, A2, A3, A4, A5,
             _a4.begin(a4, "");
             _a5.begin(a5, "");
 
-            this->_r.begin(this->_result.value());
+            Composer<R>& r = this->beginResult();
 
-            this->client().beginCall(this->_r, *this, _args, 5);
+            this->client().beginCall(r, *this, _args, 5);
         }
 
         const R& call(const A1& a1, const A2& a2, const A3& a3, const A4& a4, const A5& a5)
@@ -505,10 +505,10 @@ class RemoteProcedure<R, A1, A2, A3, A4, A5,
             _a3.begin(a3, "");
             _a4.begin(a4, "");
             _a5.begin(a5, "");
-            this->_r.begin(this->_result.value());
+            Composer<R>& r = this->beginResult();
 
-            this->client().call(this->_r, *this, _args, 5);
-            return this->_result.get();
+            this->client().call(r, *this, _args, 5);
+            return this->result().get();
         }
 
         const R& operator()(const A1& a1, const A2& a2, const A3& a3, const A4& a4, const A5& a5)
@@ -560,9 +560,9 @@ class RemoteProcedure<R, A1, A2, A3, A4,
             _a3.begin(a3, "");
             _a4.begin(a4, "");
 
-            this->_r.begin(this->_result.value());
+            Composer<R>& r = this->beginResult();
 
-            this->client().beginCall(this->_r, *this, _args, 4);
+            this->client().beginCall(r, *this, _args, 4);
         }
 
         const R& call(const A1& a1, const A2& a2, const A3& a3, const A4& a4)
@@ -571,10 +571,10 @@ class RemoteProcedure<R, A1, A2, A3, A4,
             _a2.begin(a2, "");
             _a3.begin(a3, "");
             _a4.begin(a4, "");
-            this->_r.begin(this->_result.value());
+            Composer<R>& r = this->beginResult();
 
-            this->client().call(this->_r, *this, _args, 4);
-            return this->_result.get();
+            this->client().call(r, *this, _args, 4);
+            return this->result().get();
         }
 
         const R& operator()(const A1& a1, const A2& a2, const A3& a3, const A4& a4)
@@ -622,9 +622,9 @@ class RemoteProcedure<R, A1, A2, A3,
             _a2.begin(a2, "");
             _a3.begin(a3, "");
 
-            this->_r.begin(this->_result.value());
+            Composer<R>& r = this->beginResult();
 
-            this->client().beginCall(this->_r, *this, _args, 3);
+            this->client().beginCall(r, *this, _args, 3);
         }
 
         const R& call(const A1& a1, const A2& a2, const A3& a3)
@@ -632,10 +632,10 @@ class RemoteProcedure<R, A1, A2, A3,
             _a1.begin(a1, "");
             _a2.begin(a2, "");
             _a3.begin(a3, "");
-            this->_r.begin(this->_result.value());
+            Composer<R>& r = this->beginResult();
 
-            this->client().call(this->_r, *this, _args, 3);
-            return this->_result.get();
+            this->client().call(r, *this, _args, 3);
+            return this->result().get();
         }
 
         const R& operator()(const A1& a1, const A2& a2, const A3& a3)
@@ -679,19 +679,19 @@ class RemoteProcedure<R, A1, A2,
             _a1.begin(a1, "");
             _a2.begin(a2, "");
 
-            this->_r.begin(this->_result.value());
+            Composer<R>& r = this->beginResult();
 
-            this->client().beginCall(this->_r, *this, _args, 2);
+            this->client().beginCall(r, *this, _args, 2);
         }
 
         const R& call(const A1& a1, const A2& a2)
         {
             _a1.begin(a1, "");
             _a2.begin(a2, "");
-            this->_r.begin(this->_result.value());
+            Composer<R>& r = this->beginResult();
 
-            this->client().call(this->_r, *this, _args, 2);
-            return this->_result.get();
+            this->client().call(r, *this, _args, 2);
+            return this->result().get();
         }
 
         const R& operator()(const A1& a1, const A2& a2)
@@ -731,18 +731,18 @@ class RemoteProcedure<R, A1,
         {
             _a1.begin(a1, "");
 
-            this->_r.begin(this->_result.value());
+            Composer<R>& r = this->beginResult();
 
-            this->client().beginCall(this->_r, *this, _args, 1);
+            this->client().beginCall(r, *this, _args, 1);
         }
 
         const R& call(const A1& a1)
         {
             _a1.begin(a1, "");
-            this->_r.begin(this->_result.value());
+            Composer<R>& r = this->beginResult();
 
-            this->client().call(this->_r, *this, _args, 1);
-            return this->_result.get();
+            this->client().call(r, *this, _args, 1);
+            return this->result().get();
         }
 
         const R& operator()(const A1& a1)
@@ -776,19 +776,17 @@ class RemoteProcedure<R,
 
         void begin()
         {
-            this->_r.begin(this->_result.value());
+            Composer<R>& r = this->beginResult();
 
-            this->client().beginCall(this->_r, *this, 0, 0);
+            this->client().beginCall(r, *this, 0, 0);
         }
 
         const R& call()
         {
-            //this->_result.clearFault();
+            Composer<R>& r = this->beginResult();
 
-            this->_r.begin(this->_result.value());
-
-            this->client().call(this->_r, *this, 0, 0);
-            return this->_result.get();
+            this->client().call(r, *this, 0, 0);
+            return this->result().get();
         }
 
         const R& operator()()

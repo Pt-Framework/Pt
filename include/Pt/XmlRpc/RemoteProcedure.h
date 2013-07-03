@@ -30,39 +30,27 @@
 
 #include <Pt/XmlRpc/Api.h>
 #include <Pt/XmlRpc/Client.h>
-#include <Pt/XmlRpc/Fault.h>
-#include <Pt/XmlRpc/Result.h>
 #include <Pt/SerializationContext.h>
 #include <Pt/Deserializer.h>
 #include <Pt/Serializer.h>
 #include <Pt/Signal.h>
+#include <Pt/String.h>
 #include <string>
 
 namespace Pt {
 
 namespace XmlRpc {
 
-// TODO: not inline
 class PT_XMLRPC_API RemoteCall
 {
     public:
-        RemoteCall(Client& client, const String& name)
-        : _client(&client)
-        , _name(name)
-        { }
+        RemoteCall(Client& client, const String& name);
 
-        RemoteCall(Client& client, const std::string& name)
-        : _client(&client)
-        , _name(String::widen(name))
-        { }
+        RemoteCall(Client& client, const std::string& name);
 
-        RemoteCall(Client& client, const char* name)
-        : _client(&client)
-        , _name(String::widen(name))
-        { }
+        RemoteCall(Client& client, const char* name);
 
-        virtual ~RemoteCall()
-        { cancel(); }
+        virtual ~RemoteCall();
 
         Client& client()
         { return *_client; }
@@ -71,20 +59,12 @@ class PT_XMLRPC_API RemoteCall
         { return _name; }
 
         bool isFailed() const
-        {
-            return _client->isFailed();
-        }
+        { return _client->isFailed(); }
 
-        void cancel()
-        {
-            if( _client->activeProcedure() == this )
-                _client->cancel();
-        }
+        void cancel();
 
         void finish()
-        {
-            this->onFinished();
-        }
+        { this->onFinished(); }
 
     protected:
         virtual void onFinished() = 0;
@@ -96,23 +76,51 @@ class PT_XMLRPC_API RemoteCall
 
 
 template <typename R>
+class Result
+{
+    public:
+        explicit Result(Client& client)
+        : _client(client)
+        { }
+
+        bool isFailed() const
+        {
+            return _client.isFailed();
+        }
+
+        R& value()
+        { return _result; }
+
+        const R& get() const
+        {
+            _client.endCall();
+            return _result;
+        }
+
+    private:
+        Client& _client;
+        R _result;
+};
+
+
+template <typename R>
 class RemoteProcedureBase : public RemoteCall
 {
     public:
         RemoteProcedureBase(Client& client, const std::string& name)
-        : RemoteCall(client, name),
-          _result(client),
-          _r( & client.context() )
+        : RemoteCall(client, name)
+        , _result(client)
+        , _r( & client.context() )
         { }
 
-        R& result()
+        Result<R>& result()
         { 
-            return _result.value(); 
+            return _result; 
         }
 
-        const R& getResult()
+        const Result<R>& result() const
         {
-            return _result.get();
+            return _result;
         }
 
         Signal< const Result<R>& >& finished()
@@ -122,14 +130,21 @@ class RemoteProcedureBase : public RemoteCall
         void onFinished()
         { _finished.send(_result); }
 
+        Composer<R>& beginResult()
+        {
+            _r.begin( result().value() );
+            return _r;
+        }
+
+    private:
         Signal< const Result<R>& > _finished;
         Result<R> _result;
         Composer<R> _r;
 };
 
-}
+} // namespace XmlRpc
 
-}
+} // namespace Pt
 
 #include <Pt/XmlRpc/RemoteProcedure.tpp>
 
