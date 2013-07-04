@@ -96,6 +96,7 @@ class ActiveProcedure : public ServiceProcedure
             _args[10] = 0;
         }
 
+    protected:
         IComposer** onBeginArgs()
         {
             _a1.begin(_v1);
@@ -213,6 +214,7 @@ class ActiveProcedure<R, A1, A2, A3, A4, A5, A6, A7, A8, A9,
             _args[9] = 0;
         }
 
+    protected:
         IComposer** onBeginArgs()
         {
             _a1.begin(_v1);
@@ -325,6 +327,7 @@ class ActiveProcedure<R, A1, A2, A3, A4, A5, A6, A7, A8,
             _args[8] = 0;
         }
 
+    protected:
         IComposer** onBeginArgs()
         {
             _a1.begin(_v1);
@@ -431,6 +434,7 @@ class ActiveProcedure<R, A1, A2, A3, A4, A5, A6, A7,
             _args[7] = 0;
         }
 
+    protected:
         IComposer** onBeginArgs()
         {
             _a1.begin(_v1);
@@ -532,6 +536,7 @@ class ActiveProcedure<R, A1, A2, A3, A4, A5, A6,
             _args[6] = 0;
         }
 
+    protected:
         IComposer** onBeginArgs()
         {
             _a1.begin(_v1);
@@ -627,6 +632,7 @@ class ActiveProcedure<R, A1, A2, A3, A4, A5,
             _args[5] = 0;
         }
 
+    protected:
         IComposer** onBeginArgs()
         {
             _a1.begin(_v1);
@@ -717,6 +723,7 @@ class ActiveProcedure<R, A1, A2, A3, A4,
             _args[4] = 0;
         }
 
+    protected:
         IComposer** onBeginArgs()
         {
             _a1.begin(_v1);
@@ -802,6 +809,7 @@ class ActiveProcedure<R, A1, A2, A3,
 
         }
 
+    protected:
         IComposer** onBeginArgs()
         {
             _a1.begin(_v1);
@@ -881,6 +889,7 @@ class ActiveProcedure<R, A1, A2,
             _args[2] = 0;
         }
 
+    protected:
         IComposer** onBeginArgs()
         {
             _a1.begin(_v1);
@@ -954,6 +963,7 @@ class ActiveProcedure<R, A1,
             _args[1] = 0;
         }
 
+    protected:
         IComposer** onBeginArgs()
         {
             _a1.begin(_v1);
@@ -1019,6 +1029,7 @@ class ActiveProcedure<R,
             _args[0] = 0;
         }
 
+    protected:
         IComposer** onBeginArgs()
         {
             return _args;

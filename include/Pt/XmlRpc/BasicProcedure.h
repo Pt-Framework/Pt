@@ -95,6 +95,7 @@ class BasicProcedure : public ServiceProcedure
             delete _cb;
         }
 
+    protected:
         IComposer** onBeginArgs()
         {
             _a1.begin(_v1);
@@ -213,6 +214,7 @@ class BasicProcedure<R, A1, A2, A3, A4, A5, A6, A7, A8, A9,
             delete _cb;
         }
 
+    protected:
         IComposer** onBeginArgs()
         {
             _a1.begin(_v1);
@@ -325,6 +327,7 @@ class BasicProcedure<R, A1, A2, A3, A4, A5, A6, A7, A8,
             delete _cb;
         }
 
+    protected:
         IComposer** onBeginArgs()
         {
             _a1.begin(_v1);
@@ -431,6 +434,7 @@ class BasicProcedure<R, A1, A2, A3, A4, A5, A6, A7,
             delete _cb;
         }
 
+    protected:
         IComposer** onBeginArgs()
         {
             _a1.begin(_v1);
@@ -531,6 +535,7 @@ class BasicProcedure<R, A1, A2, A3, A4, A5, A6,
             delete _cb;
         }
 
+    protected:
         IComposer** onBeginArgs()
         {
             _a1.begin(_v1);
@@ -625,6 +630,7 @@ class BasicProcedure<R, A1, A2, A3, A4, A5,
             delete _cb;
         }
 
+    protected:
         IComposer** onBeginArgs()
         {
             _a1.begin(_v1);
@@ -713,6 +719,7 @@ class BasicProcedure<R, A1, A2, A3, A4,
             delete _cb;
         }
 
+    protected:
         IComposer** onBeginArgs()
         {
             _a1.begin(_v1);
@@ -795,6 +802,7 @@ class BasicProcedure<R, A1, A2, A3,
             delete _cb;
         }
 
+    protected:
         IComposer** onBeginArgs()
         {
             _a1.begin(_v1);
@@ -871,6 +879,7 @@ class BasicProcedure<R, A1, A2,
             delete _cb;
         }
 
+    protected:
         IComposer** onBeginArgs()
         {
             _a1.begin(_v1);
@@ -941,6 +950,7 @@ class BasicProcedure<R, A1,
             delete _cb;
         }
 
+    protected:
         IComposer** onBeginArgs()
         {
             _a1.begin(_v1);
@@ -1007,6 +1017,7 @@ class BasicProcedure<R,
             delete _cb;
         }
 
+    protected:
         IComposer** onBeginArgs()
         {
             return _args;
