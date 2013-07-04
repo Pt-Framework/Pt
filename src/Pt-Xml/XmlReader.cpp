@@ -4114,6 +4114,8 @@ class XmlReaderImpl
             incDepth();
 
             _startElem.namespaceMapping().clear();
+            
+            // TODO: join this into findPrefix
             _nsctx.getMapped(_depth, _startElem.namespaceMapping());
 
             _current = &_startElem;
@@ -4131,6 +4133,8 @@ class XmlReaderImpl
             _endElem.setName(name, *ns);
 
             _endElem.namespaceMapping().clear();
+            
+            // TODO: join this into findPrefix
             _nsctx.getUnmapped(_depth, _endElem.namespaceMapping());
 
             decDepth();
