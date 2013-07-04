@@ -49,14 +49,14 @@ class AsyncEcho : public Pt::XmlRpc::ActiveProcedure<std::string, std::string>
         }
 
     protected:
-        virtual void onBeginCall(Pt::System::EventLoop& loop, const std::string& msg)
+        virtual void onInvoke(Pt::System::EventLoop& loop, const std::string& msg)
         {
             _r = msg;
             _timer.setActive(loop);
             _timer.start(1000);         
         }
 
-        virtual const std::string& onEndCall()
+        virtual const std::string& onResult()
         {
             std::cerr << " " << _r << " ";
             return _r;
@@ -88,13 +88,13 @@ class AsyncHello : public Pt::XmlRpc::ActiveProcedure<std::string>
         }
 
     protected:
-        virtual void onBeginCall(Pt::System::EventLoop& loop)
+        virtual void onInvoke(Pt::System::EventLoop& loop)
         {
             _timer.setActive(loop);
             _timer.start(1000);         
         }
 
-        virtual const std::string& onEndCall()
+        virtual const std::string& onResult()
         {
             return _hello;
         }

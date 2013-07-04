@@ -160,8 +160,6 @@ class PT_XMLRPC_API Formatter : public Pt::Formatter
 
         std::basic_ostream<Char>* _os;
         Pt::String _str;
-        static const unsigned _bufsize = 64;
-        Pt::Char _buf[_bufsize];
 
         void* _r1;
         void* _r2;

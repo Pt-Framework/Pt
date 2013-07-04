@@ -246,6 +246,9 @@ void Formatter::addInt32(const char* name, Pt::int32_t value, const char* id)
 
 void Formatter::addInt64(const char* name, Pt::int64_t value, const char* id)
 {    
+    const unsigned _bufsize = 64;
+    Pt::Char _buf[_bufsize];
+        
     array_appender<Pt::Char> it(_buf, _bufsize);
     it = putInt(it, value);
 
@@ -277,6 +280,9 @@ void Formatter::addUInt32(const char* name, Pt::uint32_t value, const char* id)
 
 void Formatter::addUInt64(const char* name, Pt::uint64_t value, const char* id)
 {    
+    const unsigned _bufsize = 64;
+    Pt::Char _buf[_bufsize];
+
     array_appender<Pt::Char> it(_buf, _bufsize);
     it = putInt(it, value);
 
@@ -297,6 +303,9 @@ void Formatter::addFloat(const char* name, float value,const char* id)
 
 void Formatter::addDouble(const char* name, double value, const char* id)
 {
+    const unsigned _bufsize = 64;
+    Pt::Char _buf[_bufsize];
+
     array_appender<Pt::Char> it(_buf, _bufsize);
     it = putFloat(it, value);
 

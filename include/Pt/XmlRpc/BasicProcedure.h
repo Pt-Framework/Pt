@@ -95,7 +95,7 @@ class BasicProcedure : public ServiceProcedure
             delete _cb;
         }
 
-        IComposer** beginArgs()
+        IComposer** onBeginArgs()
         {
             _a1.begin(_v1);
             _a2.begin(_v2);
@@ -111,12 +111,12 @@ class BasicProcedure : public ServiceProcedure
             return _args;
         }
 
-        virtual void beginCall(System::EventLoop&)
+        virtual void onBeginCall(System::EventLoop&)
         {
             this->setReady();
         }
 
-        IDecomposer* endCall()
+        IDecomposer* onEndCall()
         {
             _rv = _cb->call(_v1, _v2, _v3, _v4, _v5, _v6, _v7, _v8, _v9, _v10);
             _r.begin(_rv, "");
@@ -213,7 +213,7 @@ class BasicProcedure<R, A1, A2, A3, A4, A5, A6, A7, A8, A9,
             delete _cb;
         }
 
-        IComposer** beginArgs()
+        IComposer** onBeginArgs()
         {
             _a1.begin(_v1);
             _a2.begin(_v2);
@@ -228,12 +228,12 @@ class BasicProcedure<R, A1, A2, A3, A4, A5, A6, A7, A8, A9,
             return _args;
         }
 
-        virtual void beginCall(System::EventLoop&)
+        virtual void onBeginCall(System::EventLoop&)
         {
             this->setReady();
         }
 
-        IDecomposer* endCall()
+        IDecomposer* onEndCall()
         {
             _rv = _cb->call(_v1, _v2, _v3, _v4, _v5, _v6, _v7, _v8, _v9);
             _r.begin(_rv, "");
@@ -325,7 +325,7 @@ class BasicProcedure<R, A1, A2, A3, A4, A5, A6, A7, A8,
             delete _cb;
         }
 
-        IComposer** beginArgs()
+        IComposer** onBeginArgs()
         {
             _a1.begin(_v1);
             _a2.begin(_v2);
@@ -339,12 +339,12 @@ class BasicProcedure<R, A1, A2, A3, A4, A5, A6, A7, A8,
             return _args;
         }
 
-        virtual void beginCall(System::EventLoop&)
+        virtual void onBeginCall(System::EventLoop&)
         {
             this->setReady();
         }
 
-        IDecomposer* endCall()
+        IDecomposer* onEndCall()
         {
             _rv = _cb->call(_v1, _v2, _v3, _v4, _v5, _v6, _v7, _v8);
             _r.begin(_rv, "");
@@ -431,7 +431,7 @@ class BasicProcedure<R, A1, A2, A3, A4, A5, A6, A7,
             delete _cb;
         }
 
-        IComposer** beginArgs()
+        IComposer** onBeginArgs()
         {
             _a1.begin(_v1);
             _a2.begin(_v2);
@@ -444,12 +444,12 @@ class BasicProcedure<R, A1, A2, A3, A4, A5, A6, A7,
             return _args;
         }
 
-        virtual void beginCall(System::EventLoop&)
+        virtual void onBeginCall(System::EventLoop&)
         {
             this->setReady();
         }
 
-        IDecomposer* endCall()
+        IDecomposer* onEndCall()
         {
             _rv = _cb->call(_v1, _v2, _v3, _v4, _v5, _v6, _v7);
             _r.begin(_rv, "");
@@ -531,7 +531,7 @@ class BasicProcedure<R, A1, A2, A3, A4, A5, A6,
             delete _cb;
         }
 
-        IComposer** beginArgs()
+        IComposer** onBeginArgs()
         {
             _a1.begin(_v1);
             _a2.begin(_v2);
@@ -543,12 +543,12 @@ class BasicProcedure<R, A1, A2, A3, A4, A5, A6,
             return _args;
         }
 
-        virtual void beginCall(System::EventLoop&)
+        virtual void onBeginCall(System::EventLoop&)
         {
             this->setReady();
         }
 
-        IDecomposer* endCall()
+        IDecomposer* onEndCall()
         {
             _rv = _cb->call(_v1, _v2, _v3, _v4, _v5, _v6);
             _r.begin(_rv, "");
@@ -625,7 +625,7 @@ class BasicProcedure<R, A1, A2, A3, A4, A5,
             delete _cb;
         }
 
-        IComposer** beginArgs()
+        IComposer** onBeginArgs()
         {
             _a1.begin(_v1);
             _a2.begin(_v2);
@@ -636,12 +636,12 @@ class BasicProcedure<R, A1, A2, A3, A4, A5,
             return _args;
         }
 
-        virtual void beginCall(System::EventLoop&)
+        virtual void onBeginCall(System::EventLoop&)
         {
             this->setReady();
         }
 
-        IDecomposer* endCall()
+        IDecomposer* onEndCall()
         {
             _rv = _cb->call(_v1, _v2, _v3, _v4, _v5);
             _r.begin(_rv, "");
@@ -713,7 +713,7 @@ class BasicProcedure<R, A1, A2, A3, A4,
             delete _cb;
         }
 
-        IComposer** beginArgs()
+        IComposer** onBeginArgs()
         {
             _a1.begin(_v1);
             _a2.begin(_v2);
@@ -723,12 +723,12 @@ class BasicProcedure<R, A1, A2, A3, A4,
             return _args;
         }
 
-        virtual void beginCall(System::EventLoop&)
+        virtual void onBeginCall(System::EventLoop&)
         {
             this->setReady();
         }
 
-        IDecomposer* endCall()
+        IDecomposer* onEndCall()
         {
             _rv = _cb->call(_v1, _v2, _v3, _v4);
             _r.begin(_rv, "");
@@ -795,7 +795,7 @@ class BasicProcedure<R, A1, A2, A3,
             delete _cb;
         }
 
-        IComposer** beginArgs()
+        IComposer** onBeginArgs()
         {
             _a1.begin(_v1);
             _a2.begin(_v2);
@@ -804,12 +804,12 @@ class BasicProcedure<R, A1, A2, A3,
             return _args;
         }
 
-        virtual void beginCall(System::EventLoop&)
+        virtual void onBeginCall(System::EventLoop&)
         {
             this->setReady();
         }
 
-        IDecomposer* endCall()
+        IDecomposer* onEndCall()
         {
             _rv = _cb->call(_v1, _v2, _v3);
             _r.begin(_rv, "");
@@ -871,7 +871,7 @@ class BasicProcedure<R, A1, A2,
             delete _cb;
         }
 
-        IComposer** beginArgs()
+        IComposer** onBeginArgs()
         {
             _a1.begin(_v1);
             _a2.begin(_v2);
@@ -879,12 +879,12 @@ class BasicProcedure<R, A1, A2,
             return _args;
         }
 
-        virtual void beginCall(System::EventLoop&)
+        virtual void onBeginCall(System::EventLoop&)
         {
             this->setReady();
         }
 
-        IDecomposer* endCall()
+        IDecomposer* onEndCall()
         {
             _rv = _cb->call(_v1, _v2);
             _r.begin(_rv, "");
@@ -941,19 +941,19 @@ class BasicProcedure<R, A1,
             delete _cb;
         }
 
-        IComposer** beginArgs()
+        IComposer** onBeginArgs()
         {
             _a1.begin(_v1);
 
             return _args;
         }
 
-        virtual void beginCall(System::EventLoop&)
+        virtual void onBeginCall(System::EventLoop&)
         {
             this->setReady();
         }
 
-        IDecomposer* endCall()
+        IDecomposer* onEndCall()
         {
             _rv = _cb->call(_v1);
             _r.begin(_rv, "");
@@ -1007,17 +1007,17 @@ class BasicProcedure<R,
             delete _cb;
         }
 
-        IComposer** beginArgs()
+        IComposer** onBeginArgs()
         {
             return _args;
         }
 
-        virtual void beginCall(System::EventLoop&)
+        virtual void onBeginCall(System::EventLoop&)
         {
             this->setReady();
         }
 
-        IDecomposer* endCall()
+        IDecomposer* onEndCall()
         {
             _rv = _cb->call();
             _r.begin(_rv, "");

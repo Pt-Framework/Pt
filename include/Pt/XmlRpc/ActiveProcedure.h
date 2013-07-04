@@ -96,7 +96,7 @@ class ActiveProcedure : public ServiceProcedure
             _args[10] = 0;
         }
 
-        IComposer** beginArgs()
+        IComposer** onBeginArgs()
         {
             _a1.begin(_v1);
             _a2.begin(_v2);
@@ -112,27 +112,27 @@ class ActiveProcedure : public ServiceProcedure
             return _args;
         }
 
-        virtual void beginCall(System::EventLoop& loop)
+        virtual void onBeginCall(System::EventLoop& loop)
         {
-            onBeginCall(loop, _v1, _v2, _v3, _v4, _v5, _v6, _v7, _v8, _v9, _v10);
+            onInvoke(loop, _v1, _v2, _v3, _v4, _v5, _v6, _v7, _v8, _v9, _v10);
         }
 
-        IDecomposer* endCall()
+        IDecomposer* onEndCall()
         {
-            const R& r = onEndCall();
+            const R& r = onResult();
             _r.begin(r, "");
             return &_r;
         }
 
     protected:
-        virtual void onBeginCall(System::EventLoop& loop,
+        virtual void onInvoke(System::EventLoop& loop,
                                  const A1& a1, const A2& a2,
                                  const A3& a3, const A4& a4,
                                  const A5& a5, const A6& a6,
                                  const A7& a7, const A8& a8,
                                  const A9& a9, const A10& a10) = 0;
 
-        virtual const R& onEndCall() = 0;
+        virtual const R& onResult() = 0;
 
     private:
         A1 _v1;
@@ -213,7 +213,7 @@ class ActiveProcedure<R, A1, A2, A3, A4, A5, A6, A7, A8, A9,
             _args[9] = 0;
         }
 
-        IComposer** beginArgs()
+        IComposer** onBeginArgs()
         {
             _a1.begin(_v1);
             _a2.begin(_v2);
@@ -228,27 +228,27 @@ class ActiveProcedure<R, A1, A2, A3, A4, A5, A6, A7, A8, A9,
             return _args;
         }
 
-        virtual void beginCall(System::EventLoop& loop)
+        virtual void onBeginCall(System::EventLoop& loop)
         {
-            onBeginCall(loop, _v1, _v2, _v3, _v4, _v5, _v6, _v7, _v8, _v9);
+            onInvoke(loop, _v1, _v2, _v3, _v4, _v5, _v6, _v7, _v8, _v9);
         }
 
-        IDecomposer* endCall()
+        IDecomposer* onEndCall()
         {
-            const R& r = onEndCall();
+            const R& r = onResult();
             _r.begin(r, "");
             return &_r;
         }
 
     protected:
-        virtual void onBeginCall(System::EventLoop& loop,
+        virtual void onInvoke(System::EventLoop& loop,
                                  const A1& a1, const A2& a2,
                                  const A3& a3, const A4& a4,
                                  const A5& a5, const A6& a6,
                                  const A7& a7, const A8& a8,
                                  const A9& a9) = 0;
 
-        virtual const R& onEndCall() = 0;
+        virtual const R& onResult() = 0;
 
     private:
         A1 _v1;
@@ -325,7 +325,7 @@ class ActiveProcedure<R, A1, A2, A3, A4, A5, A6, A7, A8,
             _args[8] = 0;
         }
 
-        IComposer** beginArgs()
+        IComposer** onBeginArgs()
         {
             _a1.begin(_v1);
             _a2.begin(_v2);
@@ -339,26 +339,26 @@ class ActiveProcedure<R, A1, A2, A3, A4, A5, A6, A7, A8,
             return _args;
         }
 
-        virtual void beginCall(System::EventLoop& loop)
+        virtual void onBeginCall(System::EventLoop& loop)
         {
-            onBeginCall(loop, _v1, _v2, _v3, _v4, _v5, _v6, _v7, _v8);
+            onInvoke(loop, _v1, _v2, _v3, _v4, _v5, _v6, _v7, _v8);
         }
 
-        IDecomposer* endCall()
+        IDecomposer* onEndCall()
         {
-            const R& r = onEndCall();
+            const R& r = onResult();
             _r.begin(r, "");
             return &_r;
         }
 
     protected:
-        virtual void onBeginCall(System::EventLoop& loop,
+        virtual void onInvoke(System::EventLoop& loop,
                                  const A1& a1, const A2& a2,
                                  const A3& a3, const A4& a4,
                                  const A5& a5, const A6& a6,
                                  const A7& a7, const A8& a8) = 0;
 
-        virtual const R& onEndCall() = 0;
+        virtual const R& onResult() = 0;
 
     private:
         A1 _v1;
@@ -431,7 +431,7 @@ class ActiveProcedure<R, A1, A2, A3, A4, A5, A6, A7,
             _args[7] = 0;
         }
 
-        IComposer** beginArgs()
+        IComposer** onBeginArgs()
         {
             _a1.begin(_v1);
             _a2.begin(_v2);
@@ -444,26 +444,26 @@ class ActiveProcedure<R, A1, A2, A3, A4, A5, A6, A7,
             return _args;
         }
 
-        virtual void beginCall(System::EventLoop& loop)
+        virtual void onBeginCall(System::EventLoop& loop)
         {
-            onBeginCall(loop, _v1, _v2, _v3, _v4, _v5, _v6, _v7);
+            onInvoke(loop, _v1, _v2, _v3, _v4, _v5, _v6, _v7);
         }
 
-        IDecomposer* endCall()
+        IDecomposer* onEndCall()
         {
-            const R& r = onEndCall();
+            const R& r = onResult();
             _r.begin(r, "");
             return &_r;
         }
 
     protected:
-        virtual void onBeginCall(System::EventLoop& loop,
+        virtual void onInvoke(System::EventLoop& loop,
                                  const A1& a1, const A2& a2,
                                  const A3& a3, const A4& a4,
                                  const A5& a5, const A6& a6,
                                  const A7& a7) = 0;
 
-        virtual const R& onEndCall() = 0;
+        virtual const R& onResult() = 0;
 
     private:
         A1 _v1;
@@ -532,7 +532,7 @@ class ActiveProcedure<R, A1, A2, A3, A4, A5, A6,
             _args[6] = 0;
         }
 
-        IComposer** beginArgs()
+        IComposer** onBeginArgs()
         {
             _a1.begin(_v1);
             _a2.begin(_v2);
@@ -544,25 +544,25 @@ class ActiveProcedure<R, A1, A2, A3, A4, A5, A6,
             return _args;
         }
 
-        virtual void beginCall(System::EventLoop& loop)
+        virtual void onBeginCall(System::EventLoop& loop)
         {
-            onBeginCall(loop, _v1, _v2, _v3, _v4, _v5, _v6);
+            onInvoke(loop, _v1, _v2, _v3, _v4, _v5, _v6);
         }
 
-        IDecomposer* endCall()
+        IDecomposer* onEndCall()
         {
-            const R& r = onEndCall();
+            const R& r = onResult();
             _r.begin(r, "");
             return &_r;
         }
 
     protected:
-        virtual void onBeginCall(System::EventLoop& loop,
+        virtual void onInvoke(System::EventLoop& loop,
                                  const A1& a1, const A2& a2,
                                  const A3& a3, const A4& a4,
                                  const A5& a5, const A6& a6) = 0;
 
-        virtual const R& onEndCall() = 0;
+        virtual const R& onResult() = 0;
 
     private:
         A1 _v1;
@@ -627,7 +627,7 @@ class ActiveProcedure<R, A1, A2, A3, A4, A5,
             _args[5] = 0;
         }
 
-        IComposer** beginArgs()
+        IComposer** onBeginArgs()
         {
             _a1.begin(_v1);
             _a2.begin(_v2);
@@ -638,25 +638,25 @@ class ActiveProcedure<R, A1, A2, A3, A4, A5,
             return _args;
         }
 
-        virtual void beginCall(System::EventLoop& loop)
+        virtual void onBeginCall(System::EventLoop& loop)
         {
-            onBeginCall(loop, _v1, _v2, _v3, _v4, _v5);
+            onInvoke(loop, _v1, _v2, _v3, _v4, _v5);
         }
 
-        IDecomposer* endCall()
+        IDecomposer* onEndCall()
         {
-            const R& r = onEndCall();
+            const R& r = onResult();
             _r.begin(r, "");
             return &_r;
         }
 
     protected:
-        virtual void onBeginCall(System::EventLoop& loop,
+        virtual void onInvoke(System::EventLoop& loop,
                                  const A1& a1, const A2& a2,
                                  const A3& a3, const A4& a4,
                                  const A5& a5) = 0;
 
-        virtual const R& onEndCall() = 0;
+        virtual const R& onResult() = 0;
 
     private:
         A1 _v1;
@@ -717,7 +717,7 @@ class ActiveProcedure<R, A1, A2, A3, A4,
             _args[4] = 0;
         }
 
-        IComposer** beginArgs()
+        IComposer** onBeginArgs()
         {
             _a1.begin(_v1);
             _a2.begin(_v2);
@@ -727,24 +727,24 @@ class ActiveProcedure<R, A1, A2, A3, A4,
             return _args;
         }
 
-        virtual void beginCall(System::EventLoop& loop)
+        virtual void onBeginCall(System::EventLoop& loop)
         {
-            onBeginCall(loop, _v1, _v2, _v3, _v4);
+            onInvoke(loop, _v1, _v2, _v3, _v4);
         }
 
-        IDecomposer* endCall()
+        IDecomposer* onEndCall()
         {
-            const R& r = onEndCall();
+            const R& r = onResult();
             _r.begin(r, "");
             return &_r;
         }
 
     protected:
-        virtual void onBeginCall(System::EventLoop& loop,
+        virtual void onInvoke(System::EventLoop& loop,
                                  const A1& a1, const A2& a2,
                                  const A3& a3, const A4& a4) = 0;
 
-        virtual const R& onEndCall() = 0;
+        virtual const R& onResult() = 0;
 
     private:
         A1 _v1;
@@ -802,7 +802,7 @@ class ActiveProcedure<R, A1, A2, A3,
 
         }
 
-        IComposer** beginArgs()
+        IComposer** onBeginArgs()
         {
             _a1.begin(_v1);
             _a2.begin(_v2);
@@ -811,24 +811,24 @@ class ActiveProcedure<R, A1, A2, A3,
             return _args;
         }
 
-        virtual void beginCall(System::EventLoop& loop)
+        virtual void onBeginCall(System::EventLoop& loop)
         {
-            onBeginCall(loop, _v1, _v2, _v3);
+            onInvoke(loop, _v1, _v2, _v3);
         }
 
-        IDecomposer* endCall()
+        IDecomposer* onEndCall()
         {
-            const R& r = onEndCall();
+            const R& r = onResult();
             _r.begin(r, "");
             return &_r;
         }
 
     protected:
-        virtual void onBeginCall(System::EventLoop& loop,
+        virtual void onInvoke(System::EventLoop& loop,
                                  const A1& a1, const A2& a2,
                                  const A3& a3) = 0;
 
-        virtual const R& onEndCall() = 0;
+        virtual const R& onResult() = 0;
 
     private:
         A1 _v1;
@@ -881,7 +881,7 @@ class ActiveProcedure<R, A1, A2,
             _args[2] = 0;
         }
 
-        IComposer** beginArgs()
+        IComposer** onBeginArgs()
         {
             _a1.begin(_v1);
             _a2.begin(_v2);
@@ -889,23 +889,23 @@ class ActiveProcedure<R, A1, A2,
             return _args;
         }
 
-        virtual void beginCall(System::EventLoop& loop)
+        virtual void onBeginCall(System::EventLoop& loop)
         {
-            onBeginCall(loop, _v1, _v2);
+            onInvoke(loop, _v1, _v2);
         }
 
-        IDecomposer* endCall()
+        IDecomposer* onEndCall()
         {
-            const R& r = onEndCall();
+            const R& r = onResult();
             _r.begin(r, "");
             return &_r;
         }
 
     protected:
-        virtual void onBeginCall(System::EventLoop& loop,
+        virtual void onInvoke(System::EventLoop& loop,
                                  const A1& a1, const A2& a2) = 0;
 
-        virtual const R& onEndCall() = 0;
+        virtual const R& onResult() = 0;
 
     private:
         A1 _v1;
@@ -954,28 +954,28 @@ class ActiveProcedure<R, A1,
             _args[1] = 0;
         }
 
-        IComposer** beginArgs()
+        IComposer** onBeginArgs()
         {
             _a1.begin(_v1);
             return _args;
         }
 
-        virtual void beginCall(System::EventLoop& loop)
+        virtual void onBeginCall(System::EventLoop& loop)
         {
-            onBeginCall(loop, _v1);
+            onInvoke(loop, _v1);
         }
 
-        IDecomposer* endCall()
+        IDecomposer* onEndCall()
         {
-            const R& r = onEndCall();
+            const R& r = onResult();
             _r.begin(r, "");
             return &_r;
         }
 
     protected:
-        virtual void onBeginCall(System::EventLoop& loop, const A1& a1) = 0;
+        virtual void onInvoke(System::EventLoop& loop, const A1& a1) = 0;
 
-        virtual const R& onEndCall() = 0;
+        virtual const R& onResult() = 0;
 
     private:
         A1 _v1;
@@ -1019,27 +1019,27 @@ class ActiveProcedure<R,
             _args[0] = 0;
         }
 
-        IComposer** beginArgs()
+        IComposer** onBeginArgs()
         {
             return _args;
         }
 
-        virtual void beginCall(System::EventLoop& loop)
+        virtual void onBeginCall(System::EventLoop& loop)
         {
-            onBeginCall(loop);
+            onInvoke(loop);
         }
 
-        IDecomposer* endCall()
+        IDecomposer* onEndCall()
         {
-            const R& r = onEndCall();
+            const R& r = onResult();
             _r.begin(r, "");
             return &_r;
         }
 
     protected:
-        virtual void onBeginCall(System::EventLoop& loop) = 0;
+        virtual void onInvoke(System::EventLoop& loop) = 0;
 
-        virtual const R& onEndCall() = 0;
+        virtual const R& onResult() = 0;
 
     private:
         IComposer* _args[1];

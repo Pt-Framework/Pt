@@ -49,16 +49,25 @@ class ServiceProcedure
         void setReady()
         { _responder->endCall(); }
 
-        virtual IComposer** beginArgs() = 0;
+        IComposer** beginArgs()
+        { return onBeginArgs(); }
 
-        virtual void beginCall(System::EventLoop& loop) = 0;
+        void beginCall(System::EventLoop& loop)
+        { onBeginCall(loop); }
 
-        virtual IDecomposer* endCall() = 0;      
+        IDecomposer* endCall()
+        { return onEndCall(); }
 
     protected:
         ServiceProcedure(Responder& r)
         : _responder( &r )
         {}
+
+        virtual IComposer** onBeginArgs() = 0;
+
+        virtual void onBeginCall(System::EventLoop& loop) = 0;
+
+        virtual IDecomposer* onEndCall() = 0;  
 
     private:
         Responder* _responder;
