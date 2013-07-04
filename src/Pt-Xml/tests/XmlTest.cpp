@@ -1543,7 +1543,7 @@ void XmlReaderTest::ElementWithNamespace()
     std::stringstream input;
     input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
     input << "<my:a xmlns:my=\"http://www.my1.net\">";
-    input << "<my:a xmlns:my=\"http://www.my2.net\">b</my:a>";
+    input <<   "<my:a xmlns:my=\"http://www.my2.net\">b</my:a>";
     input << "</my:a>";
 
     Pt::Xml::BinaryInputSource is(input);
@@ -1555,6 +1555,10 @@ void XmlReaderTest::ElementWithNamespace()
     PT_UNIT_ASSERT(startA.name().prefix() == "my");
     PT_UNIT_ASSERT(startA.name().name() == "a");
     PT_UNIT_ASSERT(startA.namespaceUri() == L"http://www.my1.net");
+    PT_UNIT_ASSERT(startA.namespaceMapping().size() == 1);
+    PT_UNIT_ASSERT(startA.namespaceMapping().begin()->isMapped() == true);
+    PT_UNIT_ASSERT(startA.namespaceMapping().begin()->prefix() == L"my");
+    PT_UNIT_ASSERT(startA.namespaceMapping().begin()->namespaceUri() == L"http://www.my1.net");
     PT_UNIT_ASSERT(reader.depth() == 1);
 
     // <my:a>
@@ -1563,6 +1567,10 @@ void XmlReaderTest::ElementWithNamespace()
     PT_UNIT_ASSERT(startA2.name().prefix() == "my");
     PT_UNIT_ASSERT(startA2.name().name() == "a");
     PT_UNIT_ASSERT(startA2.namespaceUri() == "http://www.my2.net");
+    PT_UNIT_ASSERT(startA2.namespaceMapping().size() == 1);
+    PT_UNIT_ASSERT(startA2.namespaceMapping().begin()->isMapped() == true);
+    PT_UNIT_ASSERT(startA2.namespaceMapping().begin()->prefix() == L"my");
+    PT_UNIT_ASSERT(startA2.namespaceMapping().begin()->namespaceUri() == L"http://www.my2.net");
     PT_UNIT_ASSERT(reader.depth() == 2);
 
     // b
@@ -1577,6 +1585,10 @@ void XmlReaderTest::ElementWithNamespace()
     PT_UNIT_ASSERT(endA2.name().name() == L"a");
     PT_UNIT_ASSERT(endA2.name().prefix() == L"my");
     PT_UNIT_ASSERT(endA2.namespaceUri() == L"http://www.my2.net");
+    PT_UNIT_ASSERT(endA2.namespaceMapping().size() == 1);
+    PT_UNIT_ASSERT(endA2.namespaceMapping().begin()->isMapped() == true);
+    PT_UNIT_ASSERT(endA2.namespaceMapping().begin()->prefix() == L"my");
+    PT_UNIT_ASSERT(endA2.namespaceMapping().begin()->namespaceUri() == L"http://www.my1.net");
     PT_UNIT_ASSERT(reader.depth() == 1);
 
     // </my:a>
@@ -1586,6 +1598,10 @@ void XmlReaderTest::ElementWithNamespace()
     PT_UNIT_ASSERT(endA.name().name() == L"a");
     PT_UNIT_ASSERT(endA.name().prefix() == L"my");
     PT_UNIT_ASSERT(endA.namespaceUri() == L"http://www.my1.net");
+    PT_UNIT_ASSERT(endA.namespaceMapping().size() == 1);
+    PT_UNIT_ASSERT(endA.namespaceMapping().begin()->isMapped() == false);
+    PT_UNIT_ASSERT(endA.namespaceMapping().begin()->prefix() == L"my");
+    PT_UNIT_ASSERT(endA.namespaceMapping().begin()->namespaceUri() == L"http://www.my1.net");
     PT_UNIT_ASSERT( reader.depth() == 0);
 
     // End of document

@@ -4073,19 +4073,11 @@ class XmlReaderImpl
             const QName& name = _startElem.name();
             const String& prefix = name.prefix();
             
-            if( ! prefix.empty() )
-            {               
-                const Namespace* ns = _nsctx.findPrefix( prefix );
-                if( ! ns )
-                    throw SyntaxError("undeclared namespace prefix", line());
+            const Namespace* ns = _nsctx.findPrefix( prefix );
+            if( ! ns )
+                throw SyntaxError("undeclared namespace prefix", line());
 
-                _startElem.setNamespace(*ns);
-            }
-            else
-            {
-                const Namespace& ns = _nsctx.getDefaultNamespace();
-                _startElem.setNamespace(ns);
-            }
+            _startElem.setNamespace(*ns);
 
             AttributeList& attributes = _startElem.attributes();
             AttributeList::Iterator it = attributes.begin();
@@ -4099,19 +4091,11 @@ class XmlReaderImpl
                 const QName& attrName = it->name();
                 _usedSize -= attrName.prefix().size() + attrName.name().size() + it->value().size();
                 
-                if( it->name().prefix().empty() )
-                {
-                    const Namespace& ns = _nsctx.getDefaultNamespace();
-                    it->setNamespace(ns);
-                }
-                else
-                {
-                    const Namespace* ns = _nsctx.findPrefix( it->name().prefix() );
-                    if( ! ns )
-                        throw SyntaxError("undeclared namespace prefix", line());
+                const Namespace* ns = _nsctx.findPrefix( it->name().prefix() );
+                if( ! ns )
+                    throw SyntaxError("undeclared namespace prefix", line());
 
-                    it->setNamespace(*ns);
-                }
+                it->setNamespace(*ns);
 
                 // If the declared value is not CDATA, then discard any leading and
                 // trailing space (#x20) characters and replace sequences of space
@@ -4129,6 +4113,9 @@ class XmlReaderImpl
 
             incDepth();
 
+            _startElem.namespaceMapping().clear();
+            _nsctx.getMapped(_depth, _startElem.namespaceMapping());
+
             _current = &_startElem;
         }
 
@@ -4137,22 +4124,17 @@ class XmlReaderImpl
             const QName& name = _nameStack.top();
             const String& prefix = name.prefix();
 
-            if( prefix.empty() )
-            {
-                const Namespace& ns = _nsctx.getDefaultNamespace();
-                _endElem.setName(name, ns);
-            }
-            else
-            {
-                const Namespace* ns = _nsctx.findPrefix( prefix );
-                if( ! ns )
-                    throw SyntaxError("undeclared namespace prefix", line());
+            const Namespace* ns = _nsctx.findPrefix( prefix );
+            if( ! ns )
+                throw SyntaxError("undeclared namespace prefix", line());
                 
-                _endElem.setName(name, *ns);
-            }
+            _endElem.setName(name, *ns);
+
+            _endElem.namespaceMapping().clear();
+            _nsctx.getUnmapped(_depth, _endElem.namespaceMapping());
 
             decDepth();
-            
+
             _current = &(_endElem);
         }
 

@@ -52,6 +52,15 @@ class EndElement : public Node
         , _namespace(0)
         { }
 
+        /** @brief Clears all content.
+        */
+        void clear()
+        { 
+            _name = 0; 
+            _namespace = 0; 
+            _nsmap.clear(); 
+        }
+
         /** @brief Returns the qualified element name.
         */
         const QName& name() const
@@ -69,6 +78,12 @@ class EndElement : public Node
         */
         const String& namespaceUri() const
         { return _namespace->namespaceUri(); }
+
+        NamespaceMapping& namespaceMapping()
+        { return _nsmap; }
+
+        const NamespaceMapping& namespaceMapping() const
+        { return _nsmap; }
         
         //! @internal
         inline static const Node::Type nodeId()
@@ -77,6 +92,7 @@ class EndElement : public Node
     private:
         const QName* _name;
         const Namespace* _namespace;
+        NamespaceMapping _nsmap;
 };
 
 /** @brief Casts a generic node to an EndElement node.

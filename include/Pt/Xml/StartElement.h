@@ -322,6 +322,15 @@ class StartElement : public Node
         , _attributes(nsctx)
         { }
 
+        /** @brief Clears all content.
+        */
+        void clear()
+        { 
+            _name = 0; 
+            _namespace = 0; 
+            _nsmap.clear(); 
+        }
+
         /** @brief Returns the qualified name.
         */
         const QName& name() const
@@ -355,6 +364,12 @@ class StartElement : public Node
         AttributeList& attributes()
         { return _attributes; }
 
+        NamespaceMapping& namespaceMapping()
+        { return _nsmap; }
+
+        const NamespaceMapping& namespaceMapping() const
+        { return _nsmap; }
+
         //! @internal
         inline static const Node::Type nodeId()
         { return Node::StartElement; }
@@ -363,6 +378,7 @@ class StartElement : public Node
         const QName* _name;
         const Namespace* _namespace;
         AttributeList _attributes;
+        NamespaceMapping _nsmap;
 };
 
 /** @brief Casts a generic node to a %StartElement node.

@@ -31,6 +31,7 @@
 #include <Pt/Xml/Api.h>
 #include <Pt/Xml/Namespace.h>
 #include <Pt/String.h>
+#include <Pt/NonCopyable.h>
 #include <vector>
 
 namespace Pt {
@@ -41,7 +42,7 @@ namespace Xml {
         
     @see Namespace
 */
-class NamespaceContext 
+class NamespaceContext : private NonCopyable
 {
     public:
         /** Default constructor.
@@ -85,6 +86,14 @@ class NamespaceContext
         /** @brief Unsets a namespace.
         */
         void unsetNamespace(unsigned depth, const String& prefix);
+
+        /** @brief Unsets the default namespace.
+        */
+        void unsetDefaultNamespace(unsigned depth);
+
+        void getMapped(unsigned depth, NamespaceMapping& nsmap) const;
+
+        void getUnmapped(unsigned depth, NamespaceMapping& nsmap) const;
 
         /** @brief Removes all namespaces at greater or equal depth.
         */

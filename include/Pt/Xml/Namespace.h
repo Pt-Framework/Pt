@@ -30,6 +30,7 @@
 
 #include <Pt/Xml/Api.h>
 #include <Pt/String.h>
+#include <vector>
 
 namespace Pt {
 
@@ -90,6 +91,75 @@ class Namespace
         unsigned _depth;
         String _prefix;
         String _uri;
+};
+
+
+/** @brief A list of namespaces, mapped or umapped to a prefix.
+*/
+class NamespaceMapping
+{
+    public:
+        class Entry
+        {
+            public:
+                Entry(const Namespace& ns, bool mapped)
+                : _ns(&ns)
+                , _mapped(mapped)
+                {}
+
+                bool isMapped() const
+                { return _mapped; }
+
+                bool isUnmapped() const
+                { return ! _mapped; }
+
+                const String& namespaceUri() const
+                { return _ns->namespaceUri(); }
+
+                const String& prefix() const
+                { return _ns->prefix(); }
+            
+            private:
+                const Namespace* _ns;
+                bool _mapped;
+        };
+
+        typedef const Entry* ConstIterator;
+        typedef Entry* Iterator;
+
+    public:
+        NamespaceMapping()
+        {}
+
+        void clear()
+        { _entries.clear(); }
+
+        std::size_t size() const
+        { return _entries.size(); }
+
+        std::size_t empty() const
+        { return _entries.empty(); }
+
+        ConstIterator begin() const
+        { return _entries.empty() ? 0 : &_entries[0]; }
+
+        ConstIterator end() const
+        { return _entries.empty() ? 0 : &_entries[ _entries.size() ]; }
+               
+        Iterator begin()
+        { return _entries.empty() ? 0 : &_entries[0]; }
+
+        Iterator end()
+        { return _entries.empty() ? 0 : &_entries[ _entries.size() ]; }
+
+        void addMapped(const Namespace& ns)
+        { _entries.push_back( Entry(ns, true) ); }
+
+        void addUnmapped(const Namespace& ns)
+        { _entries.push_back( Entry(ns, false) ); }
+
+    private:
+        std::vector<Entry> _entries;
 };
 
 }

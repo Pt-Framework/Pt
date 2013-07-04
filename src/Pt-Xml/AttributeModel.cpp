@@ -152,19 +152,10 @@ bool AttributeModel::fixup(AttributeValidator& validator, AttributeList& list) c
     };
 
     NamespaceContext& nsctx = list.namespaceContext();
-    const String& prefix = _qname.prefix();
-    const Namespace* ns = 0;
 
-    if( prefix.empty() )
-    {
-        ns = &nsctx.getDefaultNamespace();
-    }
-    else
-    {
-        ns = nsctx.findPrefix( prefix );
-        if( ! ns )
-            return false;
-    }
+    const Namespace* ns = nsctx.findPrefix( _qname.prefix() );
+    if( ! ns )
+        return false;
 
     Attribute& attr = list.append(_qname, *ns);
     attr.value() = _default;
