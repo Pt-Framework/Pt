@@ -91,9 +91,9 @@ class NamespaceContext : private NonCopyable
         */
         void unsetDefaultNamespace(unsigned depth);
 
-        void getMapped(unsigned depth, NamespaceMapping& nsmap) const;
+        const Namespace* startElement(unsigned depth, NamespaceMapping& nsmap, const String& prefix) const;
 
-        void getUnmapped(unsigned depth, NamespaceMapping& nsmap) const;
+        const Namespace* endElement(unsigned depth, NamespaceMapping& nsmap, const String& prefix) const;
 
         /** @brief Removes all namespaces at greater or equal depth.
         */

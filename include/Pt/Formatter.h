@@ -119,6 +119,7 @@ class Formatter
         virtual void finishObject() = 0;
 
     public:
+        //! @brief Begin to parse to a composer
         virtual void beginParse(IComposer& composer) = 0;
 
         //! @brief Returns true if composer completes, false if no more data available

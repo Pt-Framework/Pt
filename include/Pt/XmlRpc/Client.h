@@ -47,53 +47,142 @@ namespace XmlRpc {
 
 class RemoteCall;
 
+/** @brief A client for remote procedure calls.
+*/
 class PT_XMLRPC_API Client : private NonCopyable
 {
     public:
+        /** @brief Constructor.
+        */
         Client();
 
+        /** @brief Destructor.
+        */
         virtual ~Client();
 
+        //! @internal
         SerializationContext& context();
 
+        //! @internal
         void beginCall(IComposer& r, RemoteCall& call, IDecomposer** argv, unsigned argc);
 
+        //! @internal
         void endCall();
 
+        //! @internal
         void call(IComposer& r, RemoteCall& call, IDecomposer** argv, unsigned argc);
 
+        /** @brief Cancels the currently executing procedure.
+        */
         void cancel();
 
+        /** @brief The currently executing procedure.
+        */
         const RemoteCall* activeProcedure() const;
 
+        /** @brief Indicates if the procedure has failed.
+        */
         bool isFailed() const;
 
     protected:       
+        /** @brief An asynchronous remote procedure is invoked.
+
+            Derived Clients implement this method to format and send a
+            XML-RPC message to the service.
+        */
         virtual void onInvoke() = 0;
 
+        /** @brief A synchronous remote procedure is called.
+
+            Derived Clients implement this method to format and send a
+            XML-RPC message to the service and receive and parse the
+            XML-RPC result.
+        */
         virtual void onCall() = 0;
 
+        /** @brief A remote procedure is cancelled.
+
+            Derived Clients implement this method to cancel the remote
+            procedure call.
+        */
         virtual void onCancel() = 0;
 
+        /** @brief A remote procedure has failed.
+
+            Derived Clients implement this method to format to throw exceptions
+            which can not be represented by Fault. This method is called when
+            the result of the RemoteProcedure is processed.
+        */
         virtual void onError() = 0;
 
     protected:
+        /** @brief Formats the XML-RPC message.
+
+            This method is used by derived Clients in onInvoke() and onCall()
+            to begin formatting a XML-RPC message to a std::ostream.
+        */
         void beginMessage(std::ostream& os);
         
+        /** @brief Formats the XML-RPC message.
+
+            This method is used by derived Clients in onInvoke() and onCall()
+            to format a XML-RPC message. Each call generates a chunk of the
+            message and returns true if the message is complete.
+        */
         bool advanceMessage();
         
+        /** @brief Formats the XML-RPC message.
+
+            This method is used by derived Clients in onInvoke() and onCall()
+            to format the end of a XML-RPC message. It is called after 
+            advanceMessage() returns true.
+        */
         void finishMessage();
         
+        /** @brief Parses the XML-RPC result.
+
+            This method is used by derived Clients to begin parsing a XML-RPC
+            result from a std::istream.
+        */
         void beginResult(std::istream& is);
 
+        /** @brief Parses the XML-RPC result.
+
+            This method is used by derived Clients to parse a XML-RPC result
+            Each call consumes the available data from the std::istream set
+            with beginResult() and returns true if the result is complete.
+        */
         bool parseResult();
 
+        /** @brief Parses the XML-RPC result.
+
+            This method is used by derived Clients after the XML-RPC result 
+            has been parsed by parseResult(). The current RemoteProcedure will
+            receive completion notification to process the result.
+        */
         void finishResult();
 
+        /** @brief Parses the XML-RPC result.
+
+            This method is used by derived Clients in in onCall() to parse a
+            XML-RPC result from a std::istream.
+        */
         void processResult(std::istream& is);
 
+        /** @brief Fails the current procedure.
+
+            This method is used by derived Clients before calling finishResult()
+            so that the RemoteProcedure throws a Fault when the result is 
+            processed.
+        */
         void setFault(int rc, const char* msg);
 
+        /** @brief Fails the current procedure.
+
+            This method is used by derived Clients before calling finishResult()
+            so that the RemoteProcedure throws a Fault when the result is 
+            processed.
+        */
         void setError(bool f = true);
 
     private:

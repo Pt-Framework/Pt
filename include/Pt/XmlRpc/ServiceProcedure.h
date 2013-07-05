@@ -40,33 +40,47 @@ namespace XmlRpc {
 
 class Responder;
 
+/** @brief XML-RPC service procedure.
+*/
 class ServiceProcedure
 {
     public:
+        /** @brief Destructor.
+        */
         virtual ~ServiceProcedure()
         {}
 
+        /** @brief Indicates that the procedure has finished.
+        */
         void setReady()
         { _responder->endCall(); }
 
+        //! @internal
         IComposer** beginArgs()
         { return onBeginArgs(); }
 
+        //! @internal
         void beginCall(System::EventLoop& loop)
         { onBeginCall(loop); }
 
+        //! @internal
         IDecomposer* endCall()
         { return onEndCall(); }
 
     protected:
+        /** @brief Constructor.
+        */
         ServiceProcedure(Responder& r)
         : _responder( &r )
         {}
 
+        //! @internal
         virtual IComposer** onBeginArgs() = 0;
 
+        //! @internal
         virtual void onBeginCall(System::EventLoop& loop) = 0;
 
+        //! @internal
         virtual IDecomposer* onEndCall() = 0;  
 
     private:

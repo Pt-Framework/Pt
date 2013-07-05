@@ -39,62 +39,101 @@ namespace Pt {
 
 namespace XmlRpc {
 
+/** @brief A client for remote procedure calls via HTTP.
+*/
 class PT_XMLRPC_API HttpClient : public Client
                                , public Connectable
 {
     public:
+        /** @brief Constructor.
+        */
         HttpClient();
 
+        /** @brief Construct with host and service URL.
+        */
         HttpClient(const Net::AddrInfo& addrinfo, 
                    const std::string& serviceUrl);
 
+        /** @brief Construct with host and service URL.
+        */
         HttpClient(const std::string& addr, unsigned short port,
                    const std::string& serviceUrl);
 
+        /** @brief Construct with EventLoop used for I/O.
+        */
         HttpClient(System::EventLoop& loop);
 
+        /** @brief Construct with host and service URL.
+        */
         HttpClient(System::EventLoop& loop, const Net::AddrInfo& addrinfo, 
                    const std::string& serviceUrl);
 
+        /** @brief Construct with host and service URL.
+        */
         HttpClient(System::EventLoop& loop, 
                    const std::string& addr, unsigned short port, 
                    const std::string& serviceUrl);
 
+        /** @brief Destructor.
+        */
         virtual ~HttpClient();
 
+        /** @brief Sets the EventLoop to use for I/O.
+        */
         void setActive(System::EventLoop& loop);
 
+        /** @brief Gets the used EventLoop.
+        */
         System::EventLoop* loop() const;
 
+        /** @brief Sets SSL context.
+        */
         void setSecure(Ssl::Context& ctx);
 
-        /** @brief Set timeout for I/O operations.
+        /** @brief Sets timeout for I/O operations.
         */
         void setTimeout(std::size_t timeout);
 
+        /** @brief Sets target host and service URL.
+        */
         void setTarget(const Net::AddrInfo& addrinfo, 
                        const std::string& serviceUrl);
 
+        /** @brief Sets target host and service URL.
+        */
         void setTarget(const std::string& addr, unsigned short port,
                        const std::string& serviceUrl);
 
+        /** @brief Sets the service URL.
+        */
         void setServiceUrl(const std::string& serviceUrl);
 
+        /** @brief Sets host to connect.
+        */
         void setHost(const Net::AddrInfo& addrinfo);
         
+        /** @brief Sets host to connect.
+        */
         void setHost(const std::string& host, unsigned short int port);
 
+        /** @brief Returns target host.
+        */
         const Net::AddrInfo& host() const;
 
+        //! @internal
         Http::Client& httpClient();
 
     protected:       
+        // inheritdoc
         virtual void onInvoke();
 
+        // inheritdoc
         virtual void onCall();
 
+        // inheritdoc
         virtual void onCancel();
 
+        // inheritdoc
         virtual void onError();
 
     private:

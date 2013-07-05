@@ -63,6 +63,38 @@ const Namespace& NamespaceContext::getDefaultNamespace() const
 }
 
 
+const Namespace* NamespaceContext::startElement(unsigned depth, NamespaceMapping& nsmap, const String& prefix) const
+{
+    std::vector<Namespace>::const_reverse_iterator iter;
+
+    for(iter = _namespaces.rbegin(); iter != _namespaces.rend(); ++iter)
+    {
+        if( iter->depth() != depth )
+            break;
+
+        if( iter->isUnset() )
+            nsmap.addUnmapped(*iter);
+        else
+            nsmap.addMapped(*iter);
+    }
+
+    for(iter = _namespaces.rbegin(); iter != _namespaces.rend(); ++iter)
+    {
+      if( prefix == iter->prefix() && ! iter->isUnset() )
+      {
+          return &(*iter);
+      }
+    }
+
+    if( prefix == _xmlNamespace.prefix() )
+    {
+        return &_xmlNamespace;
+    }
+
+    return prefix.empty() ? &_empty : 0;
+}
+
+
 const Namespace* NamespaceContext::findPrefix(const String& prefix) const
 {
     std::vector<Namespace>::const_reverse_iterator it;
@@ -103,6 +135,47 @@ const Namespace* NamespaceContext::findPrefix(const Char* prefix, std::size_t n)
     }
 
     return n == 0 ? &_empty : 0;
+}
+
+
+const Namespace* NamespaceContext::endElement(unsigned depth, NamespaceMapping& nsmap, const String& prefix) const
+{
+    std::vector<Namespace>::const_reverse_iterator iter;
+
+    for(iter = _namespaces.rbegin(); iter != _namespaces.rend(); ++iter)
+    {
+        if( iter->depth() < depth )
+            break;
+
+        std::vector<Namespace>::const_reverse_iterator it = iter;
+
+        for(++it; it != _namespaces.rend(); ++it)
+        {
+          if( it->prefix() == iter->prefix() && ! it->isUnset() )
+          {
+              nsmap.addMapped(*it);
+              break;
+          }
+        }
+
+        if(it == _namespaces.rend())
+            nsmap.addUnmapped(*iter);
+    }
+
+    for(iter = _namespaces.rbegin(); iter != _namespaces.rend(); ++iter)
+    {
+      if( prefix == iter->prefix() && ! iter->isUnset() )
+      {
+          return &(*iter);
+      }
+    }
+
+    if( prefix == _xmlNamespace.prefix() )
+    {
+        return &_xmlNamespace;
+    }
+
+    return prefix.empty() ? &_empty : 0;
 }
 
 
@@ -172,48 +245,6 @@ void NamespaceContext::unsetDefaultNamespace(unsigned depth)
     _namespaces.push_back( Namespace(depth, String(), String()) );
 }
 
-void NamespaceContext::getMapped(unsigned depth, NamespaceMapping& nsmap) const
-{
-    std::vector<Namespace>::const_reverse_iterator iter;
-
-    for(iter = _namespaces.rbegin(); iter != _namespaces.rend(); ++iter)
-    {
-        if( iter->depth() != depth )
-            break;
-
-        if( iter->isUnset() )
-            nsmap.addUnmapped(*iter);
-        else
-            nsmap.addMapped(*iter);
-    }
-}
-
-
-void NamespaceContext::getUnmapped(unsigned depth, NamespaceMapping& nsmap) const
-{
-    std::vector<Namespace>::const_reverse_iterator iter;
-
-    for(iter = _namespaces.rbegin(); iter != _namespaces.rend(); ++iter)
-    {
-        if( iter->depth() < depth )
-            break;
-
-        std::vector<Namespace>::const_reverse_iterator it = iter;
-
-        for(++it; it != _namespaces.rend(); ++it)
-        {
-          if( it->prefix() == iter->prefix() && ! it->isUnset() )
-          {
-              nsmap.addMapped(*it);
-              break;
-          }
-        }
-
-        if(it == _namespaces.rend())
-            nsmap.addUnmapped(*iter);
-    }
-}
-
 
 std::size_t NamespaceContext::popNamespace(unsigned depth)
 {
@@ -227,6 +258,49 @@ std::size_t NamespaceContext::popNamespace(unsigned depth)
 
     return size;
 }
+
+
+//void NamespaceContext::getMapped(unsigned depth, NamespaceMapping& nsmap) const
+//{
+//    std::vector<Namespace>::const_reverse_iterator iter;
+//
+//    for(iter = _namespaces.rbegin(); iter != _namespaces.rend(); ++iter)
+//    {
+//        if( iter->depth() != depth )
+//            break;
+//
+//        if( iter->isUnset() )
+//            nsmap.addUnmapped(*iter);
+//        else
+//            nsmap.addMapped(*iter);
+//    }
+//}
+
+
+//void NamespaceContext::getUnmapped(unsigned depth, NamespaceMapping& nsmap) const
+//{
+//    std::vector<Namespace>::const_reverse_iterator iter;
+//
+//    for(iter = _namespaces.rbegin(); iter != _namespaces.rend(); ++iter)
+//    {
+//        if( iter->depth() < depth )
+//            break;
+//
+//        std::vector<Namespace>::const_reverse_iterator it = iter;
+//
+//        for(++it; it != _namespaces.rend(); ++it)
+//        {
+//          if( it->prefix() == iter->prefix() && ! it->isUnset() )
+//          {
+//              nsmap.addMapped(*it);
+//              break;
+//          }
+//        }
+//
+//        if(it == _namespaces.rend())
+//            nsmap.addUnmapped(*iter);
+//    }
+//}
 
 } // namespace Xml
 

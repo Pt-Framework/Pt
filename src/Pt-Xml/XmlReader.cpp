@@ -4070,10 +4070,17 @@ class XmlReaderImpl
 
         void setStartElement()
         {
+            incDepth();
+
             const QName& name = _startElem.name();
             const String& prefix = name.prefix();
             
-            const Namespace* ns = _nsctx.findPrefix( prefix );
+            _startElem.namespaceMapping().clear();
+
+            // TODO: pass StartElement to fill
+            const Namespace* ns = _nsctx.startElement(_depth, _startElem.namespaceMapping(), prefix);
+            
+            //const Namespace* ns = _nsctx.findPrefix( prefix );
             if( ! ns )
                 throw SyntaxError("undeclared namespace prefix", line());
 
@@ -4111,12 +4118,9 @@ class XmlReaderImpl
                 }
             }
 
-            incDepth();
-
-            _startElem.namespaceMapping().clear();
-            
             // TODO: join this into findPrefix
-            _nsctx.getMapped(_depth, _startElem.namespaceMapping());
+            //_startElem.namespaceMapping().clear();
+            //_nsctx.getMapped(_depth, _startElem.namespaceMapping());
 
             _current = &_startElem;
         }
@@ -4126,16 +4130,18 @@ class XmlReaderImpl
             const QName& name = _nameStack.top();
             const String& prefix = name.prefix();
 
-            const Namespace* ns = _nsctx.findPrefix( prefix );
+            _endElem.namespaceMapping().clear();
+            const Namespace* ns =_nsctx.endElement(_depth, _endElem.namespaceMapping(), prefix);
+            
+            //const Namespace* ns = _nsctx.findPrefix( prefix );
             if( ! ns )
                 throw SyntaxError("undeclared namespace prefix", line());
                 
             _endElem.setName(name, *ns);
 
-            _endElem.namespaceMapping().clear();
-            
             // TODO: join this into findPrefix
-            _nsctx.getUnmapped(_depth, _endElem.namespaceMapping());
+            //_endElem.namespaceMapping().clear();
+            //_nsctx.getUnmapped(_depth, _endElem.namespaceMapping());
 
             decDepth();
 

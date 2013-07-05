@@ -38,11 +38,15 @@ namespace Pt {
 
 namespace XmlRpc {
 
+/** @brief XML-RPC fault exception.
+*/
 class PT_XMLRPC_API Fault : public std::exception
 {
     friend void operator >>=(const Pt::SerializationInfo&, Fault&);
 
     public:
+        /** @brief XML-RPC fault error codes.
+        */
         enum ErrorCodes 
         {
             ParseError                  = -32700,
@@ -57,38 +61,57 @@ class PT_XMLRPC_API Fault : public std::exception
             TransportError              = -32300
         };
 
+        /** @brief Construct with message and error code.
+        */
         Fault(const std::string& msg, int rc)
         : _msg(msg)
         , _rc(rc)
         { }
 
+        /** @brief Construct with message and error code.
+        */
         Fault(const char* msg, int rc);
 
+        /** @brief Constructor.
+        */
         Fault()
         : _rc(0)
         { }
 
+        /** @brief Destructor.
+        */
         ~Fault() throw()
         { }
 
+        /** @brief Clears all content.
+        */
         void clear()
         {
             _rc = 0;
             _msg.clear();
         }
 
+        /** @brief Returns the error code.
+        */
         int rc() const
         { return _rc; }
 
+        /** @brief Sets the error code.
+        */
         void setRc(int rc)
         { _rc = rc; }
 
+        /** @brief Sets the error message.
+        */
         void setText(const std::string& msg)
         { _msg = msg; }
 
+        /** @brief Resturns the error message.
+        */
         const std::string& text() const
         { return _msg; }
 
+        // inheritdoc
         const char* what() const throw()
         { return _msg.c_str(); }
 

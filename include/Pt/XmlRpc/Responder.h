@@ -46,39 +46,108 @@ namespace XmlRpc {
 class Service;
 class ServiceProcedure;
 
+/** @brief Dispatches requests to a service procedure.
+*/
 class PT_XMLRPC_API Responder : private NonCopyable
 {
     public:
+        /** @brief Construct with Service.
+        */
         Responder(Service& service);
 
+        /** @brief Destructor.
+        */
         virtual ~Responder();
 
+        //! @internal
         SerializationContext& context();
 
+        /** @brief Cancels the responder.
+        */
         void cancel();
 
+        //! @internal
         void endCall();
 
     protected:
+        /** @brief The service procedure has finished.
+
+            Derived responders implement this method to format and send the
+            XML-RPC result. It is called when the service procedure has
+            finished. Use beginResult(), advanceResult() and finishResult()
+            to format the XML-RPC result.
+        */
         virtual void onResult() = 0;
 
+        /** @brief The responder is canceled.
+
+            Derived responders implement this method to cancel all operations.
+        */
         virtual void onCancel() = 0;
 
+        /** @brief The service procedure has failed.
+
+            Derived responders implement this method to format and send the
+            XML-RPC fault result. It is called when the service procedure has
+            failed. Use beginResult(), advanceResult() and finishResult()
+            to format the XML-RPC result.
+        */
         virtual void onError() = 0;
 
     protected:
+        /** @brief Parses the XML-RPC message.
+
+            This method is used by derived responders to begin parsing a
+            XML-RPC message from a std::istream.
+        */
         void beginMessage(std::istream& is);
 
+        /** @brief Parses the XML-RPC message.
+
+            This method is used by derived responders to parse a XML-RPC
+            message. Each call consumes the available data from the 
+            std::istream set with beginMessage() and returns true if the
+            result is complete.
+        */
         bool parseMessage();
 
+        /** @brief Parses the XML-RPC message.
+
+            This method is used by derived responders after the XML-RPC message 
+            has been parsed by parseMessage(). This will execute the service
+            procedure.
+        */
         void finishMessage(System::EventLoop& loop);
 
+        /** @brief Formats the XML-RPC result.
+
+            This method is used by derived responders in onResult() and onError()
+            to begin formatting a XML-RPC result to a std::ostream.
+        */
         void beginResult(std::ostream& os);
 
+        /** @brief Formats the XML-RPC message.
+
+            This method is used by derived responders in onResult() and onError()
+            to format a XML-RPC result. Each call generates a chunk of the
+            result and returns true if the message is complete.
+        */
         bool advanceResult();
 
+        /** @brief Formats the XML-RPC message.
+
+            This method is used by derived responders in onResult() and onError()
+            to format the end of a XML-RPC result. It is called after 
+            advanceResult() returns true.
+        */
         void finishResult();
 
+        /** @brief Fails the service procedure.
+
+            This method is used by derived responders to indicate that the
+            service procedure should not be executed, but a fault result 
+            be generated instead.
+        */
         void setFault(int rc, const char* msg);
 
     private:

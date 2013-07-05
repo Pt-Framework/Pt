@@ -38,17 +38,29 @@ namespace Pt {
 
 namespace XmlRpc {
 
+/** @brief HTTP service for XML-RPC.
+
+    The %HttpService makes procedures registered in a XML-RPC Service
+    available for HTTP. Use the HttpClient to run a RemoteProcedure accessing
+    this service.
+*/
 class PT_XMLRPC_API HttpService : public Http::Service
                                 , private NonCopyable
 {
     public:
+        /** @brief Constructs with RPC service.
+        */
         HttpService(XmlRpc::Service& rpcService);
 
+        /** @brief Destructor.
+        */
         virtual ~HttpService();
 
     protected:
+        // inheritdoc
         virtual Http::Responder* onGetResponder(const Http::Request&);
 
+        // inheritdoc
         virtual void onReleaseResponder(Http::Responder* resp);
 
     private:

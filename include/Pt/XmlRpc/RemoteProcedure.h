@@ -41,6 +41,8 @@ namespace Pt {
 
 namespace XmlRpc {
 
+/** @internal Documented externally.
+*/
 class PT_XMLRPC_API RemoteCall
 {
     public:
@@ -74,23 +76,39 @@ class PT_XMLRPC_API RemoteCall
         String _name;
 };
 
-
+/** @brief %Result of a remote procedure call.
+*/
 template <typename R>
 class Result
 {
     public:
+        /** @brief Constructor.
+        */
         explicit Result(Client& client)
         : _client(client)
         { }
 
+        /** @brief Indicates if the procedure has failed.
+
+            If this method returns false, get() will not throw an excption.
+        */
         bool isFailed() const
         {
             return _client.isFailed();
         }
 
+        /** @brief The return value.
+        */
         R& value()
         { return _result; }
 
+        /** @brief Ends a remote procedure call.
+
+            This method ends a remote procedure call when the RemoteProcedure
+            sends thie finished signal. If the procedure has failed, an exception
+            of type Fault is thrown. Other exceptions might be raised depending
+            on the used Client.
+        */
         const R& get() const
         {
             _client.endCall();
@@ -102,7 +120,8 @@ class Result
         R _result;
 };
 
-
+/** @internal Documented externally.
+*/
 template <typename R>
 class RemoteProcedureBase : public RemoteCall
 {
