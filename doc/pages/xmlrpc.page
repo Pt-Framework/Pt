@@ -19,7 +19,7 @@ the respective procedure by the service. Note that the registered function or
 method will potentially be called from one of the HTTP server threads.
 
 
-@subsection xmlrpc_Service_1 Adding service class methods to a XML-RPC service
+@subsection xmlrpc_Service_1 Adding service procedures to a XML-RPC service
 
 The following example shows a typical XML-RPC service, where member functions
 are registered as XML-RPC procedures:
@@ -102,21 +102,22 @@ class AsyncEcho : public Pt::XmlRpc::ActiveProcedure<std::string, std::string>
 };
 @endcode 
 
-The class AsyncEcho is an example of such an
-asynchronous call and it needs to derive from Pt::XmlRpc::ActiveProcedure, where the 
-template parameters describe the signature of the XML-RPC procedure. The first
+The class AsyncEcho is an example of such an asynchronous call and it needs to
+derive from the Pt::XmlRpc::ActiveProcedure class template. The template
+parameters describe the signature of the XML-RPC procedure. The first
 parameter is the return type and the following parameters are the argument
 types. In this case, the XML-RPC procedure returns a std::string and takes one
-argument, also a std::string, when invoked. Two virtual functions have to be
-implemented as part of the Pt::XmlRpc::ActiveProcedure interface. When the procedure
-is invoked, onInvoke() will be called and the arguments, as defined by the 
-template parameters of AsyncProcedure, are passed. In the example, we use the event 
-loop to start a timer. This is also the 
-event loop of the server thread from which the procedure was invoked. When the 
-timer runs out, ActiveProcedure::setReady() is called in the timer callback, to
-notify the XML-RPC service that the asynchronous call has finished and finally
-onResult() will be called to obtain the return value. The next example shows
-how the service procedure is registered:
+argument, also a std::string, when invoked. 
+
+Two virtual functions have to be implemented. When the procedure is executed,
+onInvoke() will be called with arguments, as defined by the template parameters
+of ActiveProcedure. In the example, we use the event loop to start a timer.
+This is also the event loop of the server thread from which the procedure was
+invoked. When the timer runs out, ActiveProcedure::setReady() is called in
+the timer callback, to notify the XML-RPC service that the asynchronous call
+has finished. Finally, onResult() will be called to obtain the return value. 
+
+The next example shows how the service procedure is registered:
 
 @code
 class MyService : public Pt::XmlRpc::Service
@@ -135,7 +136,7 @@ class MyService : public Pt::XmlRpc::Service
 @endcode
 
 A member function is registered as an asynchronous XML-RPC procedure in the
-constructor of the service, but the registered member function is only a
+constructor of the service, but here the registered member function is only a
 factory method for an asynchronous XML-RPC call. 
 
 
@@ -202,7 +203,7 @@ client side.
 Once the XML-RPC service is implemented, it can be run within an instance
 of Pt's HTTP server. The incoming requests are mapped by the service name
 to the XML-RPC service and then processed and dispatched in the service to
-the registered procedure.
+the registered procedures.
 
 
 @code
@@ -245,7 +246,7 @@ int main(int argc, char** argv)
 {
   try
   {
-    Pt::XmlRpc::HttpClient client("127.0.0.1", 7002, "/Calc");
+    Pt::XmlRpc::HttpClient client("127.0.0.1", 7002, "/calculator");
 
     Pt::XmlRpc::RemoteProcedure<int, int, int> multiply(client, "multiply");
     int r = multiply(6, 7);
@@ -301,7 +302,7 @@ int main(int argc, char** argv)
   try
   {
     Pt::System::MainLoop loop;
-    Pt::XmlRpc::HttpClient client(loop, "127.0.0.1", 7002, "/Calc");
+    Pt::XmlRpc::HttpClient client(loop, "127.0.0.1", 7002, "/calculator");
 
     Pt::XmlRpc::RemoteProcedure<int, int, int> multiply(client, "multiply");
     multiply.finished += Pt::slot(&onResult);
@@ -361,7 +362,7 @@ on other operating systems.
 Here's an example of an XML-RPC request:
 
 @verbatim
-POST /Calc HTTP/1.0
+POST /calculator HTTP/1.0
 User-Agent: Frontier/5.1.2 (WinNT)
 Host: betty.userland.com
 Content-Type: text/xml
@@ -381,8 +382,8 @@ The format of the URI in the first line of the header is not specified. For
 example, it could be empty, a single slash, if the server is only handling
 XML-RPC calls. However, if the server is handling a mix of incoming HTTP
 requests, we allow the URI to help route the request to the code that handles
-XML-RPC requests. In the example, the URI is /Calc, telling the server to
-route the request to the "Calc" service.
+XML-RPC requests. In the example, the URI is /calculator, telling the server to
+route the request to the "calculator" service.
 
 The payload is in XML, a single \<methodCall\> structure.
 
