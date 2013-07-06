@@ -15,7 +15,7 @@ if they are serializable using Pt's serialization API.
 The XML-RPC server side API is implemented as a service for Pt's HTTP server.
 Regular C++ functions or methods can be registered as XML-RPC remote procedures
 with a Pt::XmlRpc::Service. XML-RPC requests are processed and dispatched to
-the respective procedure by the service. Mind that the registered function or
+the respective procedure by the service. Note that the registered function or
 method will potentially be called from one of the HTTP server threads.
 
 
@@ -30,10 +30,10 @@ class CalculatorService : public Pt::XmlRpc::Service
   public:
     CalculatorService()
     {
-      registerMethod("add", *this, &CalculatorService::add);
-      registerMethod("sub", *this, &CalculatorService::sub);
-      registerMethod("multiply", *this, &CalculatorService::multiply);
-      registerMethod("div", *this, &CalculatorService::div);
+      registerProcedure("add", *this, &CalculatorService::add);
+      registerProcedure("sub", *this, &CalculatorService::sub);
+      registerProcedure("multiply", *this, &CalculatorService::multiply);
+      registerProcedure("div", *this, &CalculatorService::div);
     }
 
     int add(int a, int b)
@@ -51,7 +51,7 @@ class CalculatorService : public Pt::XmlRpc::Service
 @endcode
 
 The service needs to inherit Pt::XmlRpc::Service and register the XML-RPC
-procedures in the constructor. The string passed to registerMethod() is
+procedures in the constructor. The string passed to registerProcedure() is
 the name of the procedure and all XML-RPC requests with this 'methodName' 
 XML tag will be dispatched to that method.
 
@@ -65,26 +65,26 @@ Instead, the asynchronous API allows using a Pt::System::EventLoop from
 within a XML-RPC procedure, as shown in the next example:
 
 @code
-class AsyncEcho : public Pt::XmlRpc::AsyncProcedure<std::string, std::string>
+class AsyncEcho : public Pt::XmlRpc::ActiveProcedure<std::string, std::string>
                 , public Pt::Connectable
 {
   public:   
-    AsyncEcho(Pt::XmlRpc::ServiceProcedure& proc)
-    : Pt::XmlRpc::AsyncProcedure<std::string, std::string>(proc)
+    AsyncEcho(Pt::XmlRpc::Responder& responder)
+    : Pt::XmlRpc::ActiveProcedure<std::string, std::string>(responder)
     {
       _timer.timeout() += Pt::slot(*this, &AsyncEcho::onTimeout);
     }
 
   protected:
-    virtual void onBeginCall(const std::string& msg)
+    virtual void onInvoke(System::EventLoop& loop, const std::string& msg)
     {
       _r = msg;
 
-      _timer.setActive( this->loop() );
+      _timer.setActive( loop );
       _timer.start(1000);         
     }
 
-    virtual const std::string& onEndCall()
+    virtual const std::string& onResult()
     {
       return _r;
     }
@@ -100,38 +100,43 @@ class AsyncEcho : public Pt::XmlRpc::AsyncProcedure<std::string, std::string>
       std::string _r;
       Pt::System::Timer _timer;
 };
+@endcode 
 
+The class AsyncEcho is an example of such an
+asynchronous call and it needs to derive from Pt::XmlRpc::ActiveProcedure, where the 
+template parameters describe the signature of the XML-RPC procedure. The first
+parameter is the return type and the following parameters are the argument
+types. In this case, the XML-RPC procedure returns a std::string and takes one
+argument, also a std::string, when invoked. Two virtual functions have to be
+implemented as part of the Pt::XmlRpc::ActiveProcedure interface. When the procedure
+is invoked, onInvoke() will be called and the arguments, as defined by the 
+template parameters of AsyncProcedure, are passed. In the example, we use the event 
+loop to start a timer. This is also the 
+event loop of the server thread from which the procedure was invoked. When the 
+timer runs out, ActiveProcedure::setReady() is called in the timer callback, to
+notify the XML-RPC service that the asynchronous call has finished and finally
+onResult() will be called to obtain the return value. The next example shows
+how the service procedure is registered:
+
+@code
 class MyService : public Pt::XmlRpc::Service
 {
   public:
     MyService()
     {
-      registerAsyncMethod("async", *this, &CalculatorService::async);
+      registerActiveProcedure("async", *this, &CalculatorService::async);
     }
 
-    AsyncEcho* asyncEcho(Pt::XmlRpc::Context& proc)
+    AsyncEcho* asyncEcho(Pt::XmlRpc::Responder& responder)
     {
       return new AsyncEcho(proc);
     }
 };
 @endcode
 
-A member function is registered as a XML-RPC procedure in the constructor of
-the service, but the registered member function is only a factory method for
-an asynchronous XML-RPC call. The class AsyncEcho is an example of such an
-asynchronous call and it needs to derive from Pt::XmlRpc::AsyncProcedure, where the 
-template parameters describe the signature of the XML-RPC procedure. The first
-parameter is the return type and the following parameters are the argument
-types. In this case, the XML-RPC procedure returns a std::string and takes one
-argument, also a std::string, when invoked. Two virtual functions have to be
-implemented as part of the Pt::XmlRpc::AsyncProcedure interface. When the procedure
-is invoked, onBeginCall() will be called and the arguments, as defined by the 
-template parameters of AsyncProcedure, are passed. In the example, we use the event 
-loop inherited from Pt::XmlRpc::AsyncProcedure, to start a timer. This is also the 
-event loop of the server thread from which the procedure was invoked. When the 
-timer runs out, AsyncProcedure::setReady() is called in the timer callback, to
-notify the XML-RPC service that the asynchronous call has finished and finally
-onEndCall() will be called to obtain the return value.
+A member function is registered as an asynchronous XML-RPC procedure in the
+constructor of the service, but the registered member function is only a
+factory method for an asynchronous XML-RPC call. 
 
 
 @subsection xmlrpc_Service_2 Using User-Defined Types in XML-RPC procedures
@@ -158,7 +163,7 @@ class MyService : public Pt::xmlrpc::Service
   public:
     MyService()
     {
-      registerMethod("getPosition", *this, &MyService::getPosition);
+      registerProcedure("getPosition", *this, &MyService::getPosition);
     }
 
     Address getPosition();
@@ -203,23 +208,24 @@ the registered procedure.
 @code
 int main(int argc, char** argv)
 {
-  Pt::System::MainLoop loop;
+    Pt::System::MainLoop loop;
 
-  Pt::Http::HttpServer server(loop, "127.0.0.1", 7002);
+    Pt::Http::Server server(loop, "127.0.0.1", 7002);
+    
+    CalculatorService service;
 
-  CalculatorService calc;
-  Pt::Http::MapUrl mapurl("/Calc", calc);
-  server.addServlet(mapurl);
+    Pt::XmlRpc::HttpService httpService(service);
+    Pt::Http::MapUrl servlet("/calculator", httpService);
+    server.addServlet(servlet);
 
-  loop.run();
-  return 0;
+    loop.run();
 };
 @endcode
 
 The code above constructs a HTTP server instance and adds an XML-RPC service
-with the name '/Calc'. HTTP services are not directly added to a HTTP server,
+with the name '/calculator'. HTTP services are not directly added to a HTTP server,
 but as part of a servlet. The servlet of type Pt::Http::MapUrl instructs the
-server to route all requests for the URL '/Calc' to the CalculatorService.
+server to route all requests for the URL '/calculator' to the CalculatorService.
 The server requires an event loop to run, in this case a program main loop.
 
 
