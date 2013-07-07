@@ -50,7 +50,7 @@ rule CheckCc
 {
     ConfigureVisualC ;
 
-    if $(TARGET_OS:L) = "nt"
+    if $(TARGET_OS:L) = "nt" || $(TARGET_OS:L) = "winrt"
     {
         ConfigureMt ;
 
@@ -97,6 +97,7 @@ rule CheckCc
         }
     }
 
+
     Configure AS : $(AS) ;  
     Configure AR : $(AR) ;
     Configure CC : $(CC) ;
@@ -106,7 +107,7 @@ rule CheckCc
     Configure LINKFLAGS ;
     Configure LINKLIBS ;
         
-    if $(TARGET_OS:L) = "nt"
+    if $(TARGET_OS:L) = "nt" || $(TARGET_OS:L) = "winrt"
     {
         STDHDRS += \""$(VISUALC)\\vc\\include\"" ;
 
@@ -128,6 +129,14 @@ rule CheckCc
             LINKFLAGS += /LIBPATH:\""$(VISUALC)\\VC\\ce\\lib\\armv4\"" ;
         }
     }
+	
+	if $(TARGET_OS:L) = "winrt"
+	{
+		CCFLAGS += "/ZW" ;
+		LINKFLAGS += "/WINMD" "/APPCONTAINER" "/INCREMENTAL" ;
+		WINMD = yes ;
+		Configure WINMD ;
+	}
 
     Configure STDHDRS ;
     Configure LINKFLAGS ;
@@ -173,6 +182,11 @@ rule CheckC++
 
     LINK++ = $(LINK) ;
     Configure LINK++ ;
+
+	if $(TARGET_OS:L) = "winrt"
+	{
+		C++FLAGS += "/ZW" ;
+	}
 
     C++FLAGS += /EHsc /fp:fast /GR /TP /FD ;
 
@@ -333,6 +347,7 @@ rule SharedLibrary-Build
     Clean clean : $(_target:S=.pdb) ;
     Clean clean : $(_target:S=.ilk) ;
     Clean clean : $(_target:S=.idb) ;
+	Clean clean : $(_target:S=.winmd) ;
     Clean clean : $(_target).manifest ;
     
     INSTALL_LIB on $(<) += $(_target:S=.lib) $(_target:S=.pdb) ;
@@ -347,7 +362,7 @@ rule SharedLibrary-Build
     {
         EmbedManifest $(_target) : $(_target).manifest ;
     }
-    
+
     # The *.lib is created before its *.dll and therefore has an older timestamp.
     # However, the lib depends on the dll and will be recreated everytime a 
     # target is called using this dll because it seems to be 'old'.
@@ -434,6 +449,18 @@ actions updated together piecemeal Archive
 # if exist $(<) set _$(<:B)_=$(<)
 # "$(AR)" /out:$(<) %_$(<:B)_% $(>)
 
+if $(TARGET_OS) = winrt
+{
+
+actions together Link bind NEEDLIBS
+{
+  set PATH=$(VISUALC_PATH);%PATH%
+  "$(LINK)" $(LINKFLAGS) /PDB:$(<:S=.pdb) /WINMDFILE:$(<:S=.winmd) /out:$(<) $(UNDEFS) $(>) $(NEEDLIBS) $(LINKLIBS)
+}
+
+}
+else
+{
 
 actions together Link bind NEEDLIBS
 {
@@ -441,3 +468,4 @@ actions together Link bind NEEDLIBS
   "$(LINK)" $(LINKFLAGS) /PDB:$(<:S=.pdb) /out:$(<) $(UNDEFS) $(>) $(NEEDLIBS) $(LINKLIBS)
 }
 
+}
