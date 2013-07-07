@@ -25,8 +25,8 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef Pt_XmlRpc_Service_h
-#define Pt_XmlRpc_Service_h
+#ifndef Pt_XmlRpc_ServiceDefinition_h
+#define Pt_XmlRpc_ServiceDefinition_h
 
 #include <Pt/XmlRpc/Api.h>
 #include <Pt/XmlRpc/Responder.h>
@@ -40,12 +40,12 @@ namespace Pt {
 
 namespace XmlRpc {
 
-class PT_XMLRPC_API Service : private NonCopyable
+class PT_XMLRPC_API ServiceDefinition : private NonCopyable
 {
     public:
-        Service();
+        ServiceDefinition();
 
-        virtual ~Service();
+        virtual ~ServiceDefinition();
 
         ServiceProcedure* getProcedure(const std::string& name, Responder& resp);
 

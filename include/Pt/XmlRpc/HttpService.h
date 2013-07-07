@@ -30,7 +30,7 @@
 #define Pt_XmlRpc_HttpService_h
 
 #include <Pt/XmlRpc/Api.h>
-#include <Pt/XmlRpc/Service.h>
+#include <Pt/XmlRpc/ServiceDefinition.h>
 #include <Pt/Http/Service.h>
 #include <Pt/NonCopyable.h>
 
@@ -50,7 +50,7 @@ class PT_XMLRPC_API HttpService : public Http::Service
     public:
         /** @brief Constructs with RPC service.
         */
-        HttpService(XmlRpc::Service& rpcService);
+        HttpService(XmlRpc::ServiceDefinition& rpcService);
 
         /** @brief Destructor.
         */
@@ -64,7 +64,7 @@ class PT_XMLRPC_API HttpService : public Http::Service
         virtual void onReleaseResponder(Http::Responder* resp);
 
     private:
-        XmlRpc::Service* _rpcService;
+        XmlRpc::ServiceDefinition* _rpcService;
         void* _r1;
         void* _r2;
 };

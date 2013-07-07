@@ -39,7 +39,7 @@ namespace Pt {
 
 namespace XmlRpc {
 
-HttpResponder::HttpResponder(HttpService& httpService, Service& rpcService)
+HttpResponder::HttpResponder(HttpService& httpService, ServiceDefinition& rpcService)
 : Http::Responder(httpService)
 , XmlRpc::Responder(rpcService)
 , _reply(0)

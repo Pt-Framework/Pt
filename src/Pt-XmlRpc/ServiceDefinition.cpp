@@ -26,20 +26,20 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "Pt/XmlRpc/Service.h"
+#include "Pt/XmlRpc/ServiceDefinition.h"
 
 namespace Pt {
 
 namespace XmlRpc {
 
-Service::Service()
+ServiceDefinition::ServiceDefinition()
 : _r1(0)
 , _r2(0)
 { 
 }
 
 
-Service::~Service()
+ServiceDefinition::~ServiceDefinition()
 {
     System::MutexLock lock(_mtx);
 
@@ -51,7 +51,7 @@ Service::~Service()
 }
 
 
-ServiceProcedure* Service::getProcedure(const std::string& name, Responder& resp)
+ServiceProcedure* ServiceDefinition::getProcedure(const std::string& name, Responder& resp)
 {
     System::MutexLock lock(_mtx);
 
@@ -67,13 +67,13 @@ ServiceProcedure* Service::getProcedure(const std::string& name, Responder& resp
 }
 
 
-void Service::releaseProcedure(ServiceProcedure* proc)
+void ServiceDefinition::releaseProcedure(ServiceProcedure* proc)
 {
     delete proc;
 }
 
 
-void Service::registerProcedure(const std::string& name, ServiceProcedureDef* procDef)
+void ServiceDefinition::registerProcedure(const std::string& name, ServiceProcedureDef* procDef)
 {
     System::MutexLock lock(_mtx);
 

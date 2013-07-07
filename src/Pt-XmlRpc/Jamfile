@@ -11,7 +11,7 @@ PT_XMLRPC_SOURCES = Client.cpp
                     HttpService.cpp
                     RemoteProcedure.cpp
                     Responder.cpp
-                    Service.cpp ;
+                    ServiceDefinition.cpp ;
 
 SharedLibrary Pt-XmlRpc : $(PT_XMLRPC_SOURCES) ;
 LinkSharedLibraries Pt-XmlRpc :  Pt-Xml Pt-Http Pt-Net Pt-System Pt ;

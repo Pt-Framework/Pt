@@ -105,7 +105,7 @@ class AsyncHello : public Pt::XmlRpc::ActiveProcedure<std::string>
 };
 
 
-class EchoService : public Pt::XmlRpc::Service
+class EchoService : public Pt::XmlRpc::ServiceDefinition
 {
     public:
         EchoService()

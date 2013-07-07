@@ -126,7 +126,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
         //
         void Fault()
         {
-            Pt::XmlRpc::Service service;
+            Pt::XmlRpc::ServiceDefinition service;
             service.registerProcedure("multiply", *this, &PtXmlRpcTest::throwFault);
 
             Pt::XmlRpc::HttpService httpService(service);
@@ -169,7 +169,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
         //
         void Nothing()
         {
-            Pt::XmlRpc::Service service;
+            Pt::XmlRpc::ServiceDefinition service;
             service.registerProcedure("multiply", *this, &PtXmlRpcTest::multiplyNothing);
 
             Pt::XmlRpc::HttpService httpService(service);
@@ -203,7 +203,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
         //
         void CallbackException()
         {
-            Pt::XmlRpc::Service service;
+            Pt::XmlRpc::ServiceDefinition service;
             service.registerProcedure("multiply", *this, &PtXmlRpcTest::multiplyNothing);
 
             Pt::XmlRpc::HttpService httpService(service);
@@ -274,7 +274,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
         //
         void Boolean()
         {
-            Pt::XmlRpc::Service service;
+            Pt::XmlRpc::ServiceDefinition service;
             service.registerProcedure("multiply", *this, &PtXmlRpcTest::multiplyBoolean);
 
             Pt::XmlRpc::HttpService httpService(service);
@@ -313,7 +313,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
 
         void Integer()
         {
-            Pt::XmlRpc::Service service;
+            Pt::XmlRpc::ServiceDefinition service;
             service.registerProcedure("multiply", *this, &PtXmlRpcTest::multiplyInt);
 
             Pt::XmlRpc::HttpService httpService(service);
@@ -355,7 +355,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
         //
         void Double()
         {
-            Pt::XmlRpc::Service service;
+            Pt::XmlRpc::ServiceDefinition service;
             service.registerProcedure("multiply", *this, &PtXmlRpcTest::multiplyDouble);
 
             Pt::XmlRpc::HttpService httpService(service);
@@ -389,7 +389,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
         //
         void String()
         {
-            Pt::XmlRpc::Service service;
+            Pt::XmlRpc::ServiceDefinition service;
             service.registerProcedure("echoString", *this, &PtXmlRpcTest::echoString);
 
             Pt::XmlRpc::HttpService httpService(service);
@@ -423,7 +423,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
         //
         void EmptyValues()
         {
-            Pt::XmlRpc::Service service;
+            Pt::XmlRpc::ServiceDefinition service;
             service.registerProcedure("multiply", *this, &PtXmlRpcTest::multiplyEmpty);
 
             Pt::XmlRpc::HttpService httpService(service);
@@ -458,7 +458,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
         //
         void Array()
         {
-            Pt::XmlRpc::Service service;
+            Pt::XmlRpc::ServiceDefinition service;
             service.registerProcedure("multiply", *this, &PtXmlRpcTest::multiplyVector);
 
             Pt::XmlRpc::HttpService httpService(service);
@@ -509,7 +509,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
 
         void ArrayBenchmark()
         {
-            Pt::XmlRpc::Service service;
+            Pt::XmlRpc::ServiceDefinition service;
             service.registerProcedure("mergeVector", *this, &PtXmlRpcTest::mergeVector);
 
             Pt::XmlRpc::HttpService httpService(service);
@@ -571,7 +571,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
         //
         void EmptyArray()
         {
-            Pt::XmlRpc::Service service;
+            Pt::XmlRpc::ServiceDefinition service;
             service.registerProcedure("multiply", *this, &PtXmlRpcTest::multiplyVector);
 
             Pt::XmlRpc::HttpService httpService(service);
@@ -601,7 +601,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
         //
         void Struct()
         {
-            Pt::XmlRpc::Service service;
+            Pt::XmlRpc::ServiceDefinition service;
             service.registerProcedure("multiply", *this, &PtXmlRpcTest::multiplyColor);
 
             Pt::XmlRpc::HttpService httpService(service);
@@ -651,7 +651,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
         //
         void Set()
         {
-            Pt::XmlRpc::Service service;
+            Pt::XmlRpc::ServiceDefinition service;
             service.registerProcedure("multiplyset", *this, &PtXmlRpcTest::multiplySet);
 
             Pt::XmlRpc::HttpService httpService(service);
@@ -698,7 +698,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
         //
         void Multiset()
         {
-            Pt::XmlRpc::Service service;
+            Pt::XmlRpc::ServiceDefinition service;
             service.registerProcedure("multiplyset", *this, &PtXmlRpcTest::multiplyMultiset);
 
             Pt::XmlRpc::HttpService httpService(service);
@@ -745,7 +745,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
         //
         void Map()
         {
-            Pt::XmlRpc::Service service;
+            Pt::XmlRpc::ServiceDefinition service;
             service.registerProcedure("multiplymap", *this, &PtXmlRpcTest::multiplyMap);
             
             Pt::XmlRpc::HttpService httpService(service);
@@ -797,7 +797,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
         //
         void Multimap()
         {
-            Pt::XmlRpc::Service service;
+            Pt::XmlRpc::ServiceDefinition service;
             service.registerProcedure("multiplymultimap", *this, &PtXmlRpcTest::multiplyMultimap);
 
             Pt::XmlRpc::HttpService httpService(service);

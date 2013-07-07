@@ -42,7 +42,7 @@ class PT_XMLRPC_API HttpResponder : public Http::Responder
                                   , public Responder
 {
     public:
-        HttpResponder(HttpService& httpService, Service& rpcService);
+        HttpResponder(HttpService& httpService, ServiceDefinition& rpcService);
 
         ~HttpResponder();
 

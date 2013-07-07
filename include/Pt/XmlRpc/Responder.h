@@ -43,7 +43,7 @@ namespace Pt {
 
 namespace XmlRpc {
 
-class Service;
+class ServiceDefinition;
 class ServiceProcedure;
 
 /** @brief Dispatches requests to a service procedure.
@@ -53,7 +53,7 @@ class PT_XMLRPC_API Responder : private NonCopyable
     public:
         /** @brief Construct with Service.
         */
-        Responder(Service& service);
+        Responder(ServiceDefinition& service);
 
         /** @brief Destructor.
         */
@@ -170,7 +170,7 @@ class PT_XMLRPC_API Responder : private NonCopyable
         };
 
         SerializationContext _context;
-        Service* _service;
+        ServiceDefinition* _serviceDef;
         ServiceProcedure* _proc;
         
         Xml::BinaryInputSource _bin;

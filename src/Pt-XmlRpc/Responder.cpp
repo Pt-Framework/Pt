@@ -27,7 +27,7 @@
  */
 #include "Pt/XmlRpc/Responder.h"
 #include "Pt/XmlRpc/Fault.h"
-#include "Pt/XmlRpc/Service.h"
+#include "Pt/XmlRpc/ServiceDefinition.h"
 #include "Pt/Xml/XmlError.h"
 #include "Pt/Xml/StartElement.h"
 #include "Pt/Xml/Characters.h"
@@ -83,8 +83,8 @@ static const Pt::Char XMLRPC_INT_END[]     = { '<', '/', 'i', 'n', 't', '>' };
 static const Pt::Char XMLRPC_STRING_END[]  = { '<', '/', 's', 't', 'r', 'i', 'n', 'g', '>' };
 
 
-Responder::Responder(Service& service)
-: _service(&service)
+Responder::Responder(ServiceDefinition& service)
+: _serviceDef(&service)
 , _proc(0)
 , _reader(_bin)
 , _args(0)
@@ -105,7 +105,7 @@ Responder::~Responder()
     _ts.reset();
 
     if(_proc)
-        _service->releaseProcedure(_proc);
+        _serviceDef->releaseProcedure(_proc);
 }
 
 
@@ -122,7 +122,7 @@ void Responder::cancel()
     _ts.reset();
 
     if(_proc)
-        _service->releaseProcedure(_proc);
+        _serviceDef->releaseProcedure(_proc);
 
     _state = OnBegin;
 
@@ -139,7 +139,7 @@ void Responder::beginMessage(std::istream& is)
     _bin.reset(is);
 
     if(_proc)
-        _service->releaseProcedure(_proc);
+        _serviceDef->releaseProcedure(_proc);
     
     _proc = 0;
     _args = 0;
@@ -391,9 +391,9 @@ bool Responder::advance(const Pt::Xml::Node& node)
 
                 // TODO: probably not neccessary to release here...
                 if(_proc)
-                    _service->releaseProcedure(_proc);
+                    _serviceDef->releaseProcedure(_proc);
 
-                _proc = _service->getProcedure( chars.content().narrow(), *this );
+                _proc = _serviceDef->getProcedure( chars.content().narrow(), *this );
                 if( ! _proc )
                     throw Fault("no such procedure", Pt::XmlRpc::Fault::MethodNotFound);
 

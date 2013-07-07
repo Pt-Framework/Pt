@@ -83,7 +83,7 @@ SubInclude PT_TOP src Pt ;
 SubInclude PT_TOP src Pt-Reflex ;
 SubInclude PT_TOP src Pt-Unit ;
 SubInclude PT_TOP src Pt-Xml ;
-SubInclude PT_TOP src Pt-Gfx ;
+#SubInclude PT_TOP src Pt-Gfx ;
 
 if $(SYS)
 {

@@ -765,9 +765,6 @@
     <ClInclude Include="..\..\include\Pt\XmlRpc\Responder.h">
       <Filter>Pt-XmlRpc</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\XmlRpc\Service.h">
-      <Filter>Pt-XmlRpc</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Utf16Codec.h">
       <Filter>Pt</Filter>
     </ClInclude>
@@ -790,6 +787,9 @@
       <Filter>Pt-XmlRpc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-XmlRpc\HttpResponder.h">
+      <Filter>Pt-XmlRpc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\XmlRpc\ServiceDefinition.h">
       <Filter>Pt-XmlRpc</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1542,9 +1542,6 @@
     <ClCompile Include="..\..\src\Pt-XmlRpc\Responder.cpp">
       <Filter>Pt-XmlRpc</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-XmlRpc\Service.cpp">
-      <Filter>Pt-XmlRpc</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Pt-XmlRpc\tests\Pt-XmlRpc-test.cpp">
       <Filter>Pt-XmlRpc\tests</Filter>
     </ClCompile>
@@ -1567,6 +1564,9 @@
       <Filter>Pt-XmlRpc</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-XmlRpc\RemoteProcedure.cpp">
+      <Filter>Pt-XmlRpc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-XmlRpc\ServiceDefinition.cpp">
       <Filter>Pt-XmlRpc</Filter>
     </ClCompile>
   </ItemGroup>
