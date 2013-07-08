@@ -97,7 +97,6 @@ rule CheckCc
         }
     }
 
-
     Configure AS : $(AS) ;  
     Configure AR : $(AR) ;
     Configure CC : $(CC) ;
@@ -133,9 +132,9 @@ rule CheckCc
 	if $(TARGET_OS:L) = "winrt"
 	{
 		CCFLAGS += "/ZW" ;
-		LINKFLAGS += "/WINMD" "/APPCONTAINER" "/INCREMENTAL" ;
-		WINMD = yes ;
-		Configure WINMD ;
+		LINKFLAGS += "/WINMD" "/APPCONTAINER" ;
+		WINMDFILE = "/WINMDFILE:" ;
+		Configure WINMDFILE ;
 	}
 
     Configure STDHDRS ;
@@ -280,6 +279,7 @@ rule Main-Build
     Clean clean : $(_target:S=.pdb) ;
     Clean clean : $(_target:S=.ilk) ;
     Clean clean : $(_target:S=.idb) ;
+    Clean clean : $(_target:S=.winmd) ;
     Clean clean : $(_target:S=.exe.manifest) ;
     
     local _objects = [ FGristFiles $(>:S=$(SUFOBJ)) ] ;
@@ -322,6 +322,7 @@ rule Main-MakeLocate
     MakeLocate $(_target:S=.pdb) : $(>) ;
     MakeLocate $(_target:S=.idb) : $(>) ;
     MakeLocate $(_target:S=.ilk) : $(>) ;
+    MakeLocate $(_target:S=.winmd) : $(>) ;
     MakeLocate $(_target:S=.exe.manifest) : $(>) ;
     
     # create dir before C++ rule creates .pdb files
@@ -401,6 +402,7 @@ rule SharedLibrary-MakeLocate
     MakeLocate $(_target:S=.pdb) : $(>) ;   
     MakeLocate $(_target:S=.ilk) : $(>) ;
     MakeLocate $(_target:S=.idb) : $(>) ;
+    MakeLocate $(_target:S=.winmd) : $(>) ;
     MakeLocate $(_target:S=.dll.manifest) : $(>) ;
     
     # create dir before C++ rule creates .pdb files
@@ -449,23 +451,11 @@ actions updated together piecemeal Archive
 # if exist $(<) set _$(<:B)_=$(<)
 # "$(AR)" /out:$(<) %_$(<:B)_% $(>)
 
-if $(TARGET_OS) = winrt
-{
+
+#WINMDFILE = /WINMDFILE: ;
 
 actions together Link bind NEEDLIBS
 {
   set PATH=$(VISUALC_PATH);%PATH%
-  "$(LINK)" $(LINKFLAGS) /PDB:$(<:S=.pdb) /WINMDFILE:$(<:S=.winmd) /out:$(<) $(UNDEFS) $(>) $(NEEDLIBS) $(LINKLIBS)
-}
-
-}
-else
-{
-
-actions together Link bind NEEDLIBS
-{
-  set PATH=$(VISUALC_PATH);%PATH%
-  "$(LINK)" $(LINKFLAGS) /PDB:$(<:S=.pdb) /out:$(<) $(UNDEFS) $(>) $(NEEDLIBS) $(LINKLIBS)
-}
-
+  "$(LINK)" $(LINKFLAGS) /PDB:$(<:S=.pdb) $(WINMDFILE)$(<:S=.winmd) /out:$(<) $(UNDEFS) $(>) $(NEEDLIBS) $(LINKLIBS)
 }

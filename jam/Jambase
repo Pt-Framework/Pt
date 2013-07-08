@@ -52,7 +52,7 @@ if configure in $(ARGV)
         WITH_OPTIM = yes ;
     }
 
-    EchoOption --optimize OPTIM : "Optimized Build" : $(WITH_OPTIM:E="no") ;
+    EchoOption --optimize : "Optimized Build" : $(WITH_OPTIM:E="no") ;
 
     # configure build
     ConfigureLog "[ Configure ]" ;
@@ -72,6 +72,7 @@ if configure in $(ARGV)
 
     # save configuration, so it can be reused
     ConfigureSave $(CONFIG) ;
+    EchoOption CONFIG : "Build configuration" ;
 
     ConfigureExit ;
 }

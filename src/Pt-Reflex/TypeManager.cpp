@@ -462,14 +462,14 @@ Type* TypeManager::getType(const TypeSpecifier& typeSpec)
     if( typeSpec.params().empty() )
         return this->getType(typeSpec.name());
 
-    GenericType* generic = this->getGeneric(typeSpec.name());
+    GenericType* gt = this->getGeneric(typeSpec.name());
 
     if( typeSpec.params().size() > 1 )
         throw std::logic_error( "multiple type params not yet supported" );
 
     Type* t1 = this->getType( typeSpec.params()[0] );
 
-    Type* type =  generic->getType( *t1);
+    Type* type =  gt->getType( *t1);
 
     registerType(*type);
     type->define(*this);
@@ -493,9 +493,9 @@ GenericType* TypeManager::getGeneric(const std::string& baseName)
 }
 
 
-void TypeManager::registerType(Type& type, GenericType& generic, Type& t1)
+void TypeManager::registerType(Type& type, GenericType& gt, Type& t1)
 {
-    generic.setType(t1, type);
+    gt.setType(t1, type);
     registerType(type);
 }
 

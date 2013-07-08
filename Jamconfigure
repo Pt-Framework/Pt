@@ -19,9 +19,6 @@ if --nlog in $(ARGV)
     C++FLAGS += [ FDefines NLOG ] ;
 }
 
-#Configure CONFIG ;
-EchoOption CONFIG : "Build configuration" ;
-
 # configure basic C compiler
 ConfigureCc ;
 
@@ -63,6 +60,11 @@ Configure PT_INSTALL_LIBDIR ;
 #############################################################################
 # Platform settings
 #############################################################################
+if $(TARGET_OS:L) = winrt
+{
+    SYS = winrt ;
+}
+
 if ! $(SYS)
 {
     WITH_WIN32 = [ CheckBuildC++ "#include <windows.h>"
