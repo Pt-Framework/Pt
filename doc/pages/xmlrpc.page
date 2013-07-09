@@ -25,7 +25,7 @@ The following example shows a typical XML-RPC service, where member functions
 are registered as XML-RPC procedures:
 
 @code
-class CalculatorService : public Pt::XmlRpc::Service
+class CalculatorService : public Pt::XmlRpc::ServiceDefinition
 {
   public:
     CalculatorService()
@@ -50,7 +50,7 @@ class CalculatorService : public Pt::XmlRpc::Service
 };
 @endcode
 
-The service needs to inherit Pt::XmlRpc::Service and register the XML-RPC
+The service needs to inherit Pt::XmlRpc::ServiceDefinition and register the XML-RPC
 procedures in the constructor. The string passed to registerProcedure() is
 the name of the procedure and all XML-RPC requests with this 'methodName' 
 XML tag will be dispatched to that method.
@@ -120,7 +120,7 @@ has finished. Finally, onResult() will be called to obtain the return value.
 The next example shows how the service procedure is registered:
 
 @code
-class MyService : public Pt::XmlRpc::Service
+class MyService : public Pt::XmlRpc::ServiceDefinition
 {
   public:
     MyService()
@@ -159,7 +159,7 @@ struct Address
 void operator>>=(const Pt::SerializationInfo& si, Address& address);
 void operator<<=(Pt::SerializationInfo& si, const Address& address);
 
-class MyService : public Pt::xmlrpc::Service
+class MyService : public Pt::xmlrpc::ServiceDefinition
 {
   public:
     MyService()

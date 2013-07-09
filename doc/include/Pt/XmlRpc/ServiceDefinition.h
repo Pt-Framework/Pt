@@ -1,11 +1,11 @@
-#ifndef Pt_XmlRpc_Service_h
-#define Pt_XmlRpc_Service_h
+#ifndef Pt_XmlRpc_ServiceDefinition_h
+#define Pt_XmlRpc_ServiceDefinition_h
 
 namespace Pt {
 
 namespace XmlRpc {
 
-/** @brief XML-RPC service.
+/** @brief XML-RPC service definition.
 
     The XML-RPC service provides a number of service procedures to its clients.
     Regular C++ functions or methods can be registered as service procedures,
@@ -16,16 +16,16 @@ namespace XmlRpc {
     supports synchronous and asynchronous procedures, where the latter ones
     are factories for %ActiveProcedure objects.
 */
-class PT_XMLRPC_API Service : private NonCopyable
+class PT_XMLRPC_API ServiceDefinition : private NonCopyable
 {
     public:
         /** @brief Constructor.
         */
-        Service();
+        ServiceDefinition();
 
         /** @brief Destructor.
         */
-        virtual ~Service();
+        virtual ~ServiceDefinition();
 
         //! @internal
         ServiceProcedure* getProcedure(const std::string& name, Responder& resp);
