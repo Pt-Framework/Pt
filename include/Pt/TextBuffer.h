@@ -79,11 +79,11 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
         static const int _ibufmax = 256;
         intern_type _ibuf[_ibufmax];
 
-        //! Contains the state of conversion.
         state_type _state;
 
-        //! The codec which is used to convert character data from or to the external device.
         CodecType* _codec;
+
+        std::size_t _codecRefs;
 
         std::basic_ios<extern_type>* _target;
 
@@ -98,18 +98,20 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
             managed by this class and also be deleted by this class
             on destruction.
         */
-        explicit BasicTextBuffer(std::basic_ios<extern_type>* target, CodecType* codec = 0)
+        explicit BasicTextBuffer(std::basic_ios<extern_type>& target, CodecType* codec = 0)
         : _ebufsize(0)
-        , _codec(codec) 
-        , _target(target)
-        {
+        , _codec(codec)
+        , _codecRefs( codec ? codec->refs() : 0 )
+        , _target(&target)
+        { 
             this->setg(0, 0, 0);
             this->setp(0, 0);
         }
 
         explicit BasicTextBuffer(CodecType* codec = 0)
         : _ebufsize(0)
-        , _codec(codec) 
+        , _codec(codec)
+        , _codecRefs( codec ? codec->refs() : 0 )
         , _target(0)
         {
             this->setg(0, 0, 0);
@@ -118,54 +120,50 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
 
         ~BasicTextBuffer() throw()
         {
-            try
-            {
-                this->terminate();
-            }
-            catch(...) {}
-
-            if(_codec && _codec->refs() == 0)
+            // if _codecRefs is greater than 0, the codec might have been
+            // destroyed before the text buffer, therefore we work with a
+            // separate refcount to mark owned codecs
+            
+            if(_codecRefs == 0)
                 delete _codec;
         }
 
-        // TODO: do not terminate, just continue from other stream
+        CodecType* codec()
+        { return _codec; }
+
+        /** @brief Sets the text codec.
+        
+            The caller must ensure that the codec does not run out of scope
+            before the text buffer is destructed. 
+        */
+        void setCodec(CodecType* codec)
+        {           
+            _state = state_type();
+
+            if(_codecRefs == 0)
+                delete _codec;
+
+            _codec = codec;
+            _codecRefs = codec ? codec->refs() : 0;
+        }
+
         void attach(std::basic_ios<extern_type>& target)
         {
-            this->terminate();
             _target = &target;
         }
 
-        void reset()
+        void detach()
+        {
+            _target = 0;
+        }
+
+        void discard()
         {
             _ebufsize = 0;
             this->setp(0, 0);
             this->setg(0, 0, 0);
             
             _state = state_type();
-        }
-
-        void set(std::basic_ios<extern_type>& target)
-        {
-            _target = &target;
-        }
-
-        CodecType* codec()
-        { return _codec; }
-
-        void setCodec(CodecType* codec)
-        {
-            this->terminate();
-            
-            if(_codec && _codec->refs() == 0)
-                delete _codec;
-
-            _codec = codec;
-        }
-
-        void detach()
-        {
-            this->terminate();
-            _target = 0;
         }
 
         int terminate()
@@ -202,7 +200,8 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
                 }
             }
 
-            this->reset();
+            discard();
+            
             return 0;
         }
 
@@ -221,23 +220,15 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
 
                     if( this->overflow( traits_type::eof() ) == traits_type::eof() )
                         return -1;
-
-                    // TODO: should this really fail?
-                    if( p == this->pptr() )
-                        throw ConversionError("character conversion failed");
                 }
             }
 
             return 0;
         }
 
+        // inheritdoc
         virtual std::streamsize showmanyc()
         {
-            // Alternatively, use eof flags member variable
-            //
-            //if( _ebufsize <= 0 && _target->eof() )
-            //    return -1;
-
             return 0;
         }
 
@@ -407,6 +398,7 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
             return size;
         }
 
+    private:
         CodecResult decode()
         {
             const extern_type* fromBegin = _ebuf;
@@ -456,7 +448,6 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
             std::char_traits<T>::copy(s1, s2, n);
         }
 
-        //TODO: signature like codecvt with ptr refs
         template <typename A, typename B>
         void copyChars(A* s1, const B* s2, size_t n)
         {
@@ -487,7 +478,7 @@ class PT_API TextBuffer : public BasicTextBuffer<Pt::Char, char>
              @param buffer The buffer (external device) which is wrapped by this object.
              @param codec The codec which is used to convert data from and to the external device.
         */
-        explicit TextBuffer(std::ios* buffer, Codec* codec = 0);
+        explicit TextBuffer(std::ios& buffer, Codec* codec = 0);
 
         explicit TextBuffer(Codec* codec = 0);
 };

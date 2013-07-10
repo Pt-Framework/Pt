@@ -565,6 +565,11 @@ TextInputSource::TextInputSource(std::basic_istream<Char>& is)
 }
 
 
+TextInputSource::~TextInputSource()
+{
+}
+
+
 void TextInputSource::reset()
 {
     init(0);
@@ -718,6 +723,11 @@ StringInputSource::StringInputSource(const String& str)
 }
 
 
+StringInputSource::~StringInputSource()
+{
+}
+
+
 bool StringInputSource::onImportText()
 {   
     // NOTE: on some systems stringbuf::in_avail never returns -1, 
@@ -806,7 +816,7 @@ BinaryInputSource::BinaryInputSource(std::istream& is)
 , _resolver(0)
 , _is(&is)
 , _utf8Codec(1)
-, _tbuf(&is, &_utf8Codec)
+, _tbuf(is, &_utf8Codec)
 , _bomState(OnBomBegin)
 , _xmlState(OnXmlBegin)
 , _pbBegin(0)
@@ -834,7 +844,7 @@ BinaryInputSource::BinaryInputSource(XmlResolver& resolver, std::istream& is)
 , _resolver(&resolver)
 , _is(&is)
 , _utf8Codec(1)
-, _tbuf(&is, &_utf8Codec)
+, _tbuf(is, &_utf8Codec)
 , _bomState(OnBomBegin)
 , _xmlState(OnXmlBegin)
 , _pbBegin(0)
@@ -843,11 +853,21 @@ BinaryInputSource::BinaryInputSource(XmlResolver& resolver, std::istream& is)
 }
 
 
+BinaryInputSource::~BinaryInputSource()
+{
+    _tbuf.detach();
+}
+
+
 void BinaryInputSource::reset()
 { 
     init(0);
 
-    _tbuf.reset(); 
+    _is = 0;
+    
+    //_tbuf.reset(); 
+    _tbuf.detach();
+    _tbuf.discard();
     _tbuf.setCodec(&_utf8Codec);
 
     _xmlDecl.clear();

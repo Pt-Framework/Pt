@@ -29,7 +29,7 @@
 
 namespace Pt {
 
-TextBuffer::TextBuffer(std::ios* s, Codec* codec)
+TextBuffer::TextBuffer(std::ios& s, Codec* codec)
 : BasicTextBuffer<Pt::Char, char>(s, codec)
 { }
 

@@ -169,6 +169,10 @@ class PT_XML_API TextInputSource : public InputSource
         */
         explicit TextInputSource(std::basic_istream<Char>& is);
 
+        /** @brief Destructor.
+        */
+        ~TextInputSource();
+
         /** @brief Resets the input source and removes the input stream.
         */
         void reset();
@@ -220,6 +224,10 @@ class PT_XML_API StringInputSource : public TextInputSource
         */
         StringInputSource(const String& str);
 
+        /** @brief Destructor.
+        */
+        ~StringInputSource();
+
     protected:
         // inherit docs
         virtual bool onImportText();
@@ -254,6 +262,10 @@ class PT_XML_API BinaryInputSource : public InputSource
         /** @brief Construct with resolver and input stream.
         */
         BinaryInputSource(XmlResolver& resolver, std::istream& is);
+
+        /** @brief Destructor.
+        */
+        ~BinaryInputSource();
 
         /** @brief Resets the input source and removes the input stream.
         */

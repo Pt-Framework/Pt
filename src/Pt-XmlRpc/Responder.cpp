@@ -102,7 +102,7 @@ Responder::Responder(ServiceDefinition& service)
 
 Responder::~Responder()
 {
-    _ts.reset();
+    _ts.detach();
 
     if(_proc)
         _serviceDef->releaseProcedure(_proc);
@@ -119,7 +119,8 @@ void Responder::cancel()
 {
     this->onCancel();
 
-    _ts.reset();
+    _ts.detach();
+    _ts.discard();
 
     if(_proc)
         _serviceDef->releaseProcedure(_proc);
@@ -263,7 +264,12 @@ void Responder::beginResult(std::ostream& os)
         return;
     }
 
+    _ts.clear();
+    _ts.discard();
     _ts.attach(os);
+    //_ts.set(os);
+    // _ts.attach(os);
+
     _ts.write( XMLRPC_XMLDECL, sizeof(XMLRPC_XMLDECL)/sizeof(Char) );
 
     assert(_result);
@@ -314,7 +320,11 @@ void Responder::formatError(std::ostream& os, int rc, const char* msg)
     // text stream might still have bytes in text buffer
     _ts.flush();
 
+    _ts.clear();
+    _ts.discard();
     _ts.attach(os);
+    //_ts.set(os);
+    // _ts.attach(os);
     
     _ts.write( XMLRPC_XMLDECL, sizeof(XMLRPC_XMLDECL)/sizeof(Char) );
 

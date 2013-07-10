@@ -81,38 +81,44 @@ class BasicTextIStream : public std::basic_istream<CharT>
         */
         BasicTextIStream(StreamType& is, CodecType* codec)
         : std::basic_istream<intern_type>(0)
-        , _buffer( &is, codec )
+        , _buffer( is, codec )
         {
             this->init(&_buffer);
         }
 
         explicit BasicTextIStream(CodecType* codec)
         : std::basic_istream<intern_type>(0)
-        , _buffer( 0, codec )
+        , _buffer(codec )
         {
             this->init(&_buffer);
         }
 
-        //! @brief Deletes to codec.
         ~BasicTextIStream()
         {  }
 
-        void attach(StreamType& is)
+        CodecType* codec()
+        { 
+            return _buffer.codec(); 
+        }
+
+        void setCodec(CodecType* codec)
+        {           
+            _buffer.setCodec(codec);
+        }
+
+        void attach(StreamType& os)
         {
-            _buffer.attach( is );
-            this->clear();
+            _buffer.attach( os );
         }
 
         void detach()
         {
             _buffer.detach();
-            this->clear();
         }
 
-        void reset()
+        void discard()
         {
-            _buffer.reset();
-            this->clear();
+            _buffer.discard();
         }
 
         void terminate()
@@ -174,34 +180,40 @@ class BasicTextOStream : public std::basic_ostream<CharT>
         */
         BasicTextOStream(StreamType& os, CodecType* codec)
         : std::basic_ostream<intern_type>(0)
-        , _buffer( &os , codec )
+        , _buffer( os , codec )
         { this->init(&_buffer); }
 
         explicit BasicTextOStream(CodecType* codec)
         : std::basic_ostream<intern_type>(0)
-        , _buffer( 0 , codec )
+        , _buffer( codec )
         { this->init(&_buffer); }
 
-        //! @brief Deletes to codec.
         ~BasicTextOStream()
         {  }
+
+        CodecType* codec()
+        { 
+            return _buffer.codec(); 
+        }
+
+        void setCodec(CodecType* codec)
+        {           
+            _buffer.setCodec(codec);
+        }
 
         void attach(StreamType& os)
         {
             _buffer.attach( os );
-            this->clear();
         }
 
         void detach()
         {
             _buffer.detach();
-            this->clear();
         }
 
-        void reset()
+        void discard()
         {
-            _buffer.reset();
-            this->clear();
+            _buffer.discard();
         }
 
         void terminate()
@@ -263,34 +275,40 @@ class BasicTextStream : public std::basic_iostream<CharT>
         */
         BasicTextStream(StreamType& ios, CodecType* codec)
         : std::basic_iostream<intern_type>(0)
-        , _buffer( &ios, codec)
+        , _buffer( ios, codec)
         { this->init(&_buffer); }
 
         explicit BasicTextStream(CodecType* codec)
         : std::basic_iostream<intern_type>(0)
-        , _buffer(0, codec)
+        , _buffer(codec)
         { this->init(&_buffer); }
 
-        //! @brief Deletes the codec.
         ~BasicTextStream()
         { }
 
-        void attach(StreamType& ios)
+        CodecType* codec()
+        { 
+            return _buffer.codec(); 
+        }
+
+        void setCodec(CodecType* codec)
+        {           
+            _buffer.setCodec(codec);
+        }
+
+        void attach(StreamType& os)
         {
-            _buffer.attach( ios );
-            this->clear();
+            _buffer.attach( os );
         }
 
         void detach()
         {
             _buffer.detach();
-            this->clear();
         }
 
-        void reset()
+        void discard()
         {
-            _buffer.reset();
-            this->clear();
+            _buffer.discard();
         }
 
         void terminate()

@@ -83,7 +83,7 @@ Client::Client()
 
 Client::~Client()
 {
-    _ts.reset();
+    _ts.detach();
 }
 
 
@@ -95,7 +95,6 @@ SerializationContext& Client::context()
 
 void Client::beginCall(IComposer& r, RemoteCall& method, IDecomposer** argv, unsigned argc)
 {
-    //_impl->beginCall(r, method, argv, argc);
     _method = &method;
     _state = OnBegin;
 
@@ -133,7 +132,6 @@ void Client::endCall()
 
 void Client::call(IComposer& r, RemoteCall& method, IDecomposer** argv, unsigned argc)
 {
-    //_impl->beginCall(r, method, argv, argc);
     _method = &method;
     _state = OnBegin;
 
@@ -148,15 +146,14 @@ void Client::call(IComposer& r, RemoteCall& method, IDecomposer** argv, unsigned
     _error = false;
     _isFault = false;
 
-
     this->onCall();
 }
 
 
 void Client::cancel()
 {
-    //_impl->cancel();
-    _ts.reset();
+    _ts.detach();
+    _ts.discard();
 
     _method = 0;
     _argc = 0;
@@ -191,6 +188,8 @@ void Client::beginMessage(std::ostream& os)
 
     const String& name = _method->name();
 
+    _ts.clear();
+    _ts.discard();
     _ts.attach(os);
     
     _ts.write( XMLRPC_XMLDECL, sizeof(XMLRPC_XMLDECL)/sizeof(Char) );

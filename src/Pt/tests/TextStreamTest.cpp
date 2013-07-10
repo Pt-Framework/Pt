@@ -222,8 +222,8 @@ void TextStreamTest::InvalidUTF8()
     std::stringstream ss;
     Pt::TextStream ts( ss, new Pt::Utf8Codec() );
  
-	std::string invalid = "Xevil";
-	invalid[0] = std::char_traits<char>::to_char_type(159); //"�evil"
+    std::string invalid = "Xevil";
+    invalid[0] = std::char_traits<char>::to_char_type(159); //"�evil"
     ss.str(invalid);
     PT_UNIT_ASSERT( !ss.fail() );
     
@@ -231,13 +231,15 @@ void TextStreamTest::InvalidUTF8()
     std::getline(ts, str);
     PT_UNIT_ASSERT( ts.fail() );
 
-	// attaching the TextStream also clears state
-	std::stringstream ss2( TextUTF8 );
-	ts.attach(ss2);
-    PT_UNIT_ASSERT( !ts.fail() );
+    ts.clear();
+    ts.discard();
 
-	std::getline(ts, str);
-    PT_UNIT_ASSERT( !ts.fail() );
+    std::stringstream ss2( TextUTF8 );
+    ts.attach(ss2);
+    PT_UNIT_ASSERT( ! ts.fail() );
+
+    std::getline(ts, str);
+    PT_UNIT_ASSERT( ! ts.fail() );
 }
 
 
@@ -258,7 +260,7 @@ void TextStreamTest::UnicodeToUTF8()
 {
     std::stringstream ss;
 
-    Pt::TextBuffer TextBuffer(&ss, new Pt::Utf8Codec());
+    Pt::TextBuffer TextBuffer(ss, new Pt::Utf8Codec());
     TextBuffer.sputn(TextUnicode, 5);
     TextBuffer.pubsync();
 
@@ -285,7 +287,7 @@ void TextStreamTest::UnicodeToUTF16()
 {
     std::stringstream ss;
 
-    Pt::TextBuffer tbuf(&ss, new Pt::Utf16BECodec());
+    Pt::TextBuffer tbuf(ss, new Pt::Utf16BECodec());
     tbuf.sputn(TextUnicode, 5);
     tbuf.pubsync();
 
@@ -311,7 +313,7 @@ void TextStreamTest::UnicodeToUTF16Le()
 {
     std::stringstream ss;
 
-    Pt::TextBuffer tbuf(&ss, new Pt::Utf16LECodec());
+    Pt::TextBuffer tbuf(ss, new Pt::Utf16LECodec());
     tbuf.sputn(TextUnicode, 5);
     tbuf.pubsync();
 
@@ -338,7 +340,7 @@ void TextStreamTest::UnicodeToUTF32Be()
 {
     std::stringstream ss;
 
-    Pt::TextBuffer tbuf(&ss, new Pt::Utf32BECodec());
+    Pt::TextBuffer tbuf(ss, new Pt::Utf32BECodec());
     tbuf.sputn(TextUnicode, 5);
     tbuf.pubsync();
 
@@ -370,7 +372,7 @@ void TextStreamTest::UnicodeToUTF32Le()
 {
     std::stringstream ss;
 
-    Pt::TextBuffer tbuf(&ss, new Pt::Utf32LECodec());
+    Pt::TextBuffer tbuf(ss, new Pt::Utf32LECodec());
     tbuf.sputn(TextUnicode, 5);
     tbuf.pubsync();
 
