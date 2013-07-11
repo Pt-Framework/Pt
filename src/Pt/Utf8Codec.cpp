@@ -225,6 +225,16 @@ Utf8Codec::result Utf8Codec::do_out(MBState& s, const Pt::Char* fromBegin, const
             case 1: *--current = (uint8_t) (ch.value() | firstByteMark[bytesToWrite]);
         }
 
+#if 0
+        switch(bytesToWrite) 
+        { // note: everything falls through...
+            case 4: *--current = (uint8_t)((ch | byteMark) & byteMask); ch >>= 6;
+            case 3: *--current = (uint8_t)((ch | byteMark) & byteMask); ch >>= 6;
+            case 2: *--current = (uint8_t)((ch | byteMark) & byteMask); ch >>= 6;
+            case 1: *--current = (uint8_t) (ch.value() | firstByteMark[bytesToWrite]);
+        }
+#endif
+
         toNext += bytesToWrite;
         ++fromNext;
     }

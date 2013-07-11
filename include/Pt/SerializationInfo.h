@@ -883,7 +883,7 @@ inline void operator >>=(const SerializationInfo& si, char& ch)
 {
     Pt::Char tmp;
     si.getChar(tmp);
-    ch = static_cast<int>(tmp);
+    ch = tmp.value();
 }
 
 

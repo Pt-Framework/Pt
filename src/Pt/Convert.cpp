@@ -226,14 +226,14 @@ void convert(char& c, const String& str)
     if ( str.empty() )
         throwConversionError("char", "Pt::String");
 
-    int n = str[0];
-    c = n;
+    Pt::Char ch = str[0];
+    c = ch.value();
 }
 
 void convert(unsigned char& n, const String& str)
 {
     bool ok = false;
-    Pt::String::const_iterator r = getInt( str.begin(), str.end(), ok, n );
+    Pt::String::const_iterator r = getInt( str.begin(), str.end(), ok, n);
 
     if (ok)
         _skipws(r, str.end());
@@ -246,7 +246,7 @@ void convert(unsigned char& n, const String& str)
 void convert(signed char& n, const String& str)
 {
     bool ok = false;
-    Pt::String::const_iterator r = getInt( str.begin(), str.end(), ok, n );
+    Pt::String::const_iterator r = getInt( str.begin(), str.end(), ok, n);
 
     if (ok)
         _skipws(r, str.end());

@@ -36,7 +36,6 @@
 #include <string>
 #include <sstream>
 
-
 class CharTest : public Pt::Unit::TestSuite
 {
     public:

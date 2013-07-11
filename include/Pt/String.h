@@ -162,6 +162,7 @@ class Char
         operator int() const
         { return _value; }
 
+
         /**
          * @brief Substracts the numeric value of this character and the numeric value of the given character and
          * stores the result in this chracater class.
@@ -200,6 +201,7 @@ class Char
             return *this;
         }
 
+#if 1
         //! @brief Returns $true$ if the a and b are the same character; $false$ otherwise.
         //! @return $true$ if the a and b are the same character; $false$ otherwise.
         friend bool operator==(const Char& a, const Char& b)
@@ -304,7 +306,7 @@ class Char
 
         friend Char operator<<(const Char& a, int b)
         { return a.value() << b; }
-
+#endif
         static Char null()
         {
             return Char(0);

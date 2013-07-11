@@ -484,16 +484,16 @@ void TextStreamTest::UTF8Benchmark()
     const Pt::Char* fromNext = &input[0];
     char* toNext = &output[0];
 
-    /*Pt::Utf8Codec::result r = codec.out(mb, &input[0], &input[0] + size, fromNext, 
-      &output[0], &output[0] + size+10, toNext); */
+    Pt::Utf8Codec::result r = codec.out(mb, &input[0], &input[0] + size, fromNext, 
+      &output[0], &output[0] + size+10, toNext); 
 
-    int ss = codec.length(mb, &output[0], &output[0] + size, size ); 
+    if(r != Pt::Utf8Codec::ok)
+      throw std::runtime_error("conversion failed");
 
-    if(ss != size)
-      throw std::runtime_error("length failed");
+    //int ss = codec.length(mb, &output[0], &output[0] + size, size ); 
 
-    /*if(r != Pt::Utf8Codec::ok)
-      throw std::runtime_error("conversion failed");*/
+    //if(ss != size)
+    //  throw std::runtime_error("length failed");
   }
 
   Pt::Timespan ts = c.stop();
