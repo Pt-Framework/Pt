@@ -174,7 +174,7 @@ Utf8Codec::result Utf8Codec::do_out(MBState& s, const Pt::Char* fromBegin, const
     result retstat = ok;
     fromNext  = fromBegin;
     toNext = toBegin;
-    Pt::Char ch;
+    Pt::uint32_t ch;
 
     size_t bytesToWrite;
 
@@ -189,15 +189,15 @@ Utf8Codec::result Utf8Codec::do_out(MBState& s, const Pt::Char* fromBegin, const
 
         // Figure out how many bytes the result will require. Turn any
         // illegally large UTF32 things (> Plane 17) into replacement chars.
-        if (ch < Pt::Char(0x80)) 
+        if (ch < 0x80) 
         {
             bytesToWrite = 1;
         }
-        else if (ch < Pt::Char(0x800)) 
+        else if (ch < 0x800) 
         {
             bytesToWrite = 2;
         }
-        else if (ch < Pt::Char(0x10000)) 
+        else if (ch < 0x10000) 
         {
             bytesToWrite = 3;
         }
@@ -217,6 +217,7 @@ Utf8Codec::result Utf8Codec::do_out(MBState& s, const Pt::Char* fromBegin, const
             break;
         }
 
+#if 0
         switch(bytesToWrite) 
         { // note: everything falls through...
             case 4: *--current = (uint8_t)((ch | byteMark) & byteMask).value(); ch >>= 6;
@@ -225,13 +226,13 @@ Utf8Codec::result Utf8Codec::do_out(MBState& s, const Pt::Char* fromBegin, const
             case 1: *--current = (uint8_t) (ch.value() | firstByteMark[bytesToWrite]);
         }
 
-#if 0
+#else
         switch(bytesToWrite) 
         { // note: everything falls through...
             case 4: *--current = (uint8_t)((ch | byteMark) & byteMask); ch >>= 6;
             case 3: *--current = (uint8_t)((ch | byteMark) & byteMask); ch >>= 6;
             case 2: *--current = (uint8_t)((ch | byteMark) & byteMask); ch >>= 6;
-            case 1: *--current = (uint8_t) (ch.value() | firstByteMark[bytesToWrite]);
+            case 1: *--current = (uint8_t) (ch | firstByteMark[bytesToWrite]);
         }
 #endif
 

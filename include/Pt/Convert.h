@@ -846,93 +846,83 @@ InIterT getFloat(InIterT it, InIterT end, bool& ok, T& n, const FormatT& fmt)
     it = getSign(it, end, pos, fmt);
     
     // NaN, -inf, +inf
-    bool done = false;
     while(it != end)
     {
-        switch(*it)
+        if(*it == 'n' || *it == 'N')
         {
-            case 'n':
-            case 'N':
-                if(++it == end)
-                    return it;
-
-                if(*it != 'a' && *it != 'A')
-                    return it;
-
-                if(++it == end)
-                    return it;
-
-                if(*it != 'n' && *it != 'N')
-                    return it;
-
-                n = std::numeric_limits<T>::quiet_NaN();
-                ok = true;
-                return ++it;
-                break;
-
-            case 'i':
-            case 'I':
-                if(++it == end)
-                    return it;
-
-                if(*it != 'n' && *it != 'N')
-                    return it;
-
-                if(++it == end)
-                    return it;
-
-                if(*it != 'f' && *it != 'F')
-                    return it;
-
-                if( ++it != end )
-                {
-                    if(*it != 'i' && *it != 'I')
-                        return it;
-
-                    if(++it == end)
-                        return it;
-
-                    if(*it != 'n' && *it != 'N')
-                        return it;
-
-                    if(++it == end)
-                        return it;
-
-                    if(*it != 'i' && *it != 'I')
-                        return it;
-
-                    if(++it == end)
-                        return it;
-
-                    if(*it != 't' && *it != 'T')
-                        return it;
-
-                    if(++it == end)
-                        return it;
-
-                    if(*it != 'y' && *it != 'Y')
-                        return it;
-
-                    ++it;
-                }
-
-                n = std::numeric_limits<T>::infinity();
-                if(!pos)
-                    n *= -1;
-
-                ok = true;
+            if(++it == end)
                 return it;
-                break;
 
-            default:
-                done = true;
-                break;
+            if(*it != 'a' && *it != 'A')
+                return it;
+
+            if(++it == end)
+                return it;
+
+            if(*it != 'n' && *it != 'N')
+                return it;
+
+            n = std::numeric_limits<T>::quiet_NaN();
+            ok = true;
+            return ++it;
         }
+        else if(*it == 'i' || *it == 'I')
+        {
+            if(++it == end)
+                return it;
 
-        if(done)
+            if(*it != 'n' && *it != 'N')
+                return it;
+
+            if(++it == end)
+                return it;
+
+            if(*it != 'f' && *it != 'F')
+                return it;
+
+            if( ++it != end )
+            {
+                if(*it != 'i' && *it != 'I')
+                    return it;
+
+                if(++it == end)
+                    return it;
+
+                if(*it != 'n' && *it != 'N')
+                    return it;
+
+                if(++it == end)
+                    return it;
+
+                if(*it != 'i' && *it != 'I')
+                    return it;
+
+                if(++it == end)
+                    return it;
+
+                if(*it != 't' && *it != 'T')
+                    return it;
+
+                if(++it == end)
+                    return it;
+
+                if(*it != 'y' && *it != 'Y')
+                    return it;
+
+                ++it;
+            }
+
+            n = std::numeric_limits<T>::infinity();
+            if(!pos)
+                n *= -1;
+
+            ok = true;
+            return it;
+        }
+        else
+        {
             break;
-
-        ++it;
+        }
     }
 
     // integral part
@@ -1023,7 +1013,8 @@ InIterT getFloat(InIterT it, InIterT end, bool& ok, T& n, const FormatT& fmt)
 template <typename InIterT, typename T>
 InIterT getFloat(InIterT it, InIterT end, bool& ok, T& n)
 {
-    return getFloat( it, end, ok, n, FloatFormat<char>() );
+    typedef typename std::iterator_traits<InIterT>::value_type CharType;
+    return getFloat( it, end, ok, n, FloatFormat<CharType>() );
 }
 
 } // namespace Pt

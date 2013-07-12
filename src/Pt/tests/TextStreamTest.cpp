@@ -36,6 +36,7 @@
 #include "Pt/Utf8Codec.h"
 #include "Pt/Utf32Codec.h"
 #include "Pt/TextStream.h"
+#include "Pt/StringStream.h"
 #include <Pt/System/Clock.h>
 #include <string>
 #include <sstream>

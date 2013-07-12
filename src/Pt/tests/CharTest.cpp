@@ -101,8 +101,8 @@ void CharTest::testConstructor()
     Pt::Char p9((long)'a');
     PT_UNIT_ASSERT(p9.value() == 97);
 
-    Pt::Char p10((unsigned long)'a');
-    PT_UNIT_ASSERT(p10.value() == 97);
+    //Pt::Char p10((unsigned long)'a');
+    //PT_UNIT_ASSERT(p10.value() == 97);
 }
 
 void CharTest::testAssign()
@@ -134,8 +134,8 @@ void CharTest::testAssign()
     p = (long)'h';
     PT_UNIT_ASSERT(p.value() == 104);
 
-    p = (unsigned long)'i';
-    PT_UNIT_ASSERT(p.value() == 105);
+    //p = (unsigned long)'i';
+    //PT_UNIT_ASSERT(p.value() == 105);
 }
 
 void CharTest::testCategory()
@@ -303,15 +303,6 @@ void CharTest::testOperators()
 
     r = z + 'a';
     PT_UNIT_ASSERT(r == 219);
-
-    r = z;
-    r -= a;
-    PT_UNIT_ASSERT(r == 25);
-
-    r = a;
-    r += z;
-    PT_UNIT_ASSERT(r == 219);
-
 
     Pt::Char v1(0x1E0); // 111100000
     Pt::Char v2(0x10F); // 100001111

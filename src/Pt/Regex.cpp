@@ -141,7 +141,7 @@ Pt::String RegexSMatch::get(unsigned n) const
 
     for (Pt::String::const_iterator it = str.begin(); it != str.end(); ++it)
     {
-      char ch = *it;
+      Char ch = *it;
 
       switch (state)
       {

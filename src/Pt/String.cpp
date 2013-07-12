@@ -102,7 +102,7 @@ void basic_string<Pt::Char>::reserve(size_t n)
         _d._u._p._begin = p;
         _d._u._p._end = p + l;
         _d._u._p._capacity = p + n;
-        *_d._u._p._end = Pt::Char::null();
+        *_d._u._p._end = 0;
     }
 }
 
