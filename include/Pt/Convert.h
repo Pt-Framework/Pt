@@ -292,7 +292,7 @@ struct DecimalFormat : public NumberFormat<CharType>
     */
     static unsigned char toDigit(CharT ch)
     {
-        std::char_traits<CharT>::int_type cc = std::char_traits<CharT>::to_int_type(ch);
+        typename std::char_traits<CharT>::int_type cc = std::char_traits<CharT>::to_int_type(ch);
         
         // let negatives overrun
         return static_cast<unsigned>(cc - 48);
@@ -320,7 +320,7 @@ struct OctalFormat : public NumberFormat<CharType>
     */
     static unsigned char toDigit(CharT ch)
     {
-        std::char_traits<CharT>::int_type cc = std::char_traits<CharT>::to_int_type(ch);
+        typename std::char_traits<CharT>::int_type cc = std::char_traits<CharT>::to_int_type(ch);
         
         // let negatives overrun
         return static_cast<unsigned>(cc - 48);
@@ -357,7 +357,7 @@ struct HexFormat : public NumberFormat<CharType>
             0xFF,10,11,12,13,14,15,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
         };
 
-        std::char_traits<CharT>::int_type cc = std::char_traits<CharT>::to_int_type(ch);
+        typename std::char_traits<CharT>::int_type cc = std::char_traits<CharT>::to_int_type(ch);
         
         // let negatives overrun
         unsigned uc = static_cast<unsigned>(cc - 48);
@@ -391,7 +391,7 @@ struct BinaryFormat : public NumberFormat<CharType>
     */
     static unsigned char toDigit(CharT ch)
     {
-        std::char_traits<CharT>::int_type cc = std::char_traits<CharT>::to_int_type(ch);
+        typename std::char_traits<CharT>::int_type cc = std::char_traits<CharT>::to_int_type(ch);
         
         // let negatives overrun
         return static_cast<unsigned>(cc - 48);
@@ -829,7 +829,7 @@ InIterT getInt(InIterT it, InIterT end, bool& ok, T& n, const FormatT& fmt)
 template <typename InIterT, typename T>
 InIterT getInt(InIterT it, InIterT end, bool& ok, T& n)
 {
-    typedef std::iterator_traits<InIterT>::value_type CharType;
+    typedef typename std::iterator_traits<InIterT>::value_type CharType;
     return getInt(it, end, ok, n, DecimalFormat<CharType>() );
 }
 

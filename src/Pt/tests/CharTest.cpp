@@ -98,8 +98,8 @@ void CharTest::testConstructor()
     Pt::Char p8((Pt::uint32_t)'a');
     PT_UNIT_ASSERT(p8.value() == 97);
 
-    Pt::Char p9((long)'a');
-    PT_UNIT_ASSERT(p9.value() == 97);
+    //Pt::Char p9((long)'a');
+    //PT_UNIT_ASSERT(p9.value() == 97);
 
     //Pt::Char p10((unsigned long)'a');
     //PT_UNIT_ASSERT(p10.value() == 97);
@@ -131,8 +131,8 @@ void CharTest::testAssign()
     p = (Pt::uint32_t)'g';
     PT_UNIT_ASSERT(p.value() == 103);
 
-    p = (long)'h';
-    PT_UNIT_ASSERT(p.value() == 104);
+    //p = (long)'h';
+    //PT_UNIT_ASSERT(p.value() == 104);
 
     //p = (unsigned long)'i';
     //PT_UNIT_ASSERT(p.value() == 105);
