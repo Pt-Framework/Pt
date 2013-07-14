@@ -28,6 +28,7 @@
  */
 
 #include "OpenSsl.h"
+#include "CertificateListImpl.h"
 #include <Pt/Ssl/Context.h>
 #include <Pt/Ssl/SslError.h>
 #include <Pt/System/Mutex.h>
@@ -402,7 +403,7 @@ void Context::setCACertificates(const CertificateList& caCerts)
 
     for(CertificateList::Iterator it = _caCerts.begin(); it != _caCerts.end(); ++it) 
     {
-        if( ! X509_STORE_add_cert(cert_store.get(), it->getX509()) )
+        if( ! X509_STORE_add_cert(cert_store.get(), it->impl()->getX509()) )
             throw InvalidCertificate("Could not store the CA certificate as a trusted certificate");
     }
 
@@ -417,7 +418,7 @@ void Context::setCertificate(const Certificate& cert)
     // certificate to present to peer
     _cert = cert;
 
-    X509* x509 = _cert.getX509();
+    X509* x509 = _cert.impl()->getX509();
 
     if( ! SSL_CTX_use_certificate(_ctx, x509) )
     {
@@ -440,7 +441,7 @@ void Context::setCertificateChain(const CertificateList& certs)
 
     for(; it != certs.end(); ++it)
     {
-        X509* x509 = addExtraCert(_ctx, it->getX509());
+        X509* x509 = addExtraCert(_ctx, it->impl()->getX509());
         _extraCerts.push_back(x509);
     }
 }

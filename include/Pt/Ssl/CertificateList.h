@@ -34,18 +34,18 @@
 #include <Pt/NonCopyable.h>
 #include <vector>
 
-struct x509_st;
-
 namespace Pt {
 
 namespace Ssl {
 
+class CertificateImpl;
+    
 class PT_SSL_API Certificate
 {
     public:     
         Certificate();
 
-        explicit Certificate(x509_st* x509);
+        explicit Certificate(CertificateImpl* impl);
 
         Certificate(const Certificate& cert);
 
@@ -65,10 +65,10 @@ class PT_SSL_API Certificate
         
         PublicKey publicKey() const;
 
-        x509_st* getX509() const;
+        CertificateImpl* impl() const;
 
     private:
-        class CertificateImpl* _impl;
+        CertificateImpl* _impl;
 };
 
 //! \brief Certificate list.

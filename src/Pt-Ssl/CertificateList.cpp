@@ -26,16 +26,11 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#include "OpenSsl.h"
+#include "CertificateListImpl.h"
 #include <Pt/Ssl/CertificateList.h>
-#include <Pt/Ssl/SslError.h>
 #include <Pt/System/Logger.h>
-#include <Pt/Atomicity.h>
 #include <fstream>
 #include <cassert>
-#include <openssl/ssl.h>
-#include <openssl/pem.h>
-#include <openssl/err.h>
 
 log_define("Pt.Ssl.CertificateList")
 
@@ -43,97 +38,14 @@ namespace Pt {
 
 namespace Ssl {
 
-std::string toString(const X509_NAME* val)
-{
-    int len = 0;
-    char buf[1024];
-    
-    BioAutoPtr out( BIO_new(BIO_s_mem()) );
-    if( X509_NAME_print( out.get(), (X509_NAME*) val, 0) ) 
-    {
-        len = BIO_read( out.get(), buf, sizeof(buf) );
-    }
-    
-    return std::string(buf, len);
-}
-
-std::string toString(ASN1_TIME* val)
-{
-    int len = 0;
-    char buf[1024];
-
-    BioAutoPtr out( BIO_new(BIO_s_mem()) );
-    if( ASN1_TIME_print( out.get(), val) )
-    {
-        len = BIO_read( out.get(), buf, sizeof(buf) );
-    }
-
-    return std::string(buf, len);
-}
-
-class CertificateImpl
-{
-    public:
-        explicit CertificateImpl(x509_st* x509)
-        : _x509(x509)
-        , _refs(1)
-        {
-            assert(_x509);
-        }
-
-        ~CertificateImpl()
-        {
-            X509_free(_x509);
-        }
-
-        void ref()
-        { atomicIncrement(_refs); }
-
-        int unref()
-        { return atomicDecrement(_refs); }
-
-        int serialNumber() const
-        {
-            return ASN1_INTEGER_get( X509_get_serialNumber(_x509) );
-        }
-
-        std::string issuer() const
-        {
-            return toString( X509_get_issuer_name(_x509) );
-        }
-
-        std::string subject() const
-        {
-            return toString( X509_get_subject_name(_x509) );
-        }
-        
-        std::string notBefore() const
-        {
-            return toString( X509_get_notBefore(_x509) );
-        }
-
-        std::string notAfter() const
-        {
-            return toString( X509_get_notAfter(_x509) );
-        }
-
-        x509_st* getX509() const
-        { return _x509; }
-
-    private:
-        x509_st* _x509;
-        Pt::atomic_t _refs;
-};
-
-
 Certificate::Certificate()
 : _impl(0)
 {
 }
 
 
-Certificate::Certificate(x509_st* x509)
-: _impl( new CertificateImpl(x509) )
+Certificate::Certificate(CertificateImpl* impl)
+: _impl(impl)
 {
 }
 
@@ -220,70 +132,18 @@ PublicKey Certificate::publicKey() const
 {
     if( ! _impl)
         return PublicKey();
-    
-    EVP_PKEY* pkey = X509_get_pubkey( _impl->getX509() );
-    return PublicKey(pkey);
+
+    return _impl->publicKey();
 }
 
 
-x509_st* Certificate::getX509() const
+CertificateImpl* Certificate::impl() const
 {
     if( ! _impl)
-        return 0;
+        throw std::logic_error("invalid certificate implementation");
 
-    return _impl->getX509();
+    return _impl;
 }
-
-
-
-
-class CertificateListImpl
-{
-    public:
-        CertificateListImpl()
-        { }
-
-        CertificateListImpl(const CertificateListImpl& list)
-        { _certificates = list._certificates; }
-
-        ~CertificateListImpl()
-        { clear(); }
-
-        void push_back(const Certificate& cert)
-        { _certificates.push_back(cert); }
-
-        void clear()
-        { _certificates.clear(); }
-
-        size_t size() const
-        { return _certificates.size(); }
-
-        bool empty() const
-        { return _certificates.empty(); }
-
-        Certificate* begin()
-        { 
-            return _certificates.empty() ? 0 : &_certificates[0]; 
-        }
-
-        Certificate* end()
-        { 
-            return _certificates.empty() ? 0 : &_certificates[0] + _certificates.size(); 
-        }
-
-        const Certificate* begin() const
-        { 
-            return _certificates.empty() ? 0 : &_certificates[0]; 
-        }
-
-        const Certificate* end() const
-        { 
-            return _certificates.empty() ? 0 : &_certificates[0] + _certificates.size(); 
-        }
-
-    private:
-        std::vector<Certificate> _certificates;
-};
 
 
 CertificateList::CertificateList()
@@ -311,39 +171,9 @@ CertificateList& CertificateList::operator=(const CertificateList& list)
 }
 
 
-//For PEM we use:
-//   PEM_read_PUBKEY
-//   PEM_read_bio_PrivateKey
-//
-//For reading  ASN1 (DER) we use:
-//  d2i_PUBKEY_bio
-//  d2i_PrivateKey_bio
-//
-//For writing, I believe the functions are:
-//   PEM_write_bio_PUBKEY
-//   PEM_write_bio_PrivateKey
-//   i2d_PUBKEY_bio
-//   i2d_PrivateKey_bio
-
 void CertificateList::fromPem(const char* data, size_t len)
 {
-    _impl->clear();
-
-    BioAutoPtr in( BIO_new_mem_buf( (void*) data, len ) );
-
-    // Try to read/parse the CA X509 certificates
-    while(true) 
-    {
-        // Read the certificate
-        X509AutoPtr x509 ( PEM_read_bio_X509_AUX(in.get(), 0, 0, 0) );
-        if( ! x509) 
-          break;
-
-        Certificate cert( x509.get() );
-        _impl->push_back(cert);
-        
-        x509.release();
-    }
+    _impl->fromPem(data, len);
 }
 
 
@@ -359,7 +189,7 @@ void CertificateList::fromPem(std::istream& is)
         data.append(rbuf, count);
     }
 
-    fromPem( data.c_str(), data.size() );
+    _impl->fromPem( data.c_str(), data.size() );
 }
 
 
