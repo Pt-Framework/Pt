@@ -792,12 +792,6 @@
     <ClInclude Include="..\..\include\Pt\XmlRpc\ServiceDefinition.h">
       <Filter>Pt-XmlRpc</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\System\MouseDevice.h">
-      <Filter>Pt-System</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-System\win32\MouseDeviceImpl.h">
-      <Filter>Pt-System\win32</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\System\Input2DEvent.h">
       <Filter>Pt-System</Filter>
     </ClInclude>
@@ -1577,15 +1571,6 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-XmlRpc\ServiceDefinition.cpp">
       <Filter>Pt-XmlRpc</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-System\MouseDevice.cpp">
-      <Filter>Pt-System</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-System\win32\MouseDeviceImpl.cpp">
-      <Filter>Pt-System\win32</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-System\tests\MouseDeviceTest.cpp">
-      <Filter>Pt-System\tests</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-System\Input2DEvent.cpp">
       <Filter>Pt-System</Filter>
