@@ -32,6 +32,9 @@
 #include "Pt/Allocator.h"
 #include <new>
 
+#include "Pt/System/Selectable.h"
+#include "Pt/System/Thread.h"
+
 class TestAllocator : public Pt::Allocator
 {
     public:
@@ -90,12 +93,61 @@ class E2 : public Pt::Event
         { delete this; }
 };
 
+
+class TestSelectable : public Pt::System::Selectable
+{
+    public:
+        TestSelectable()
+        : Pt::System::Selectable()
+        , _loop(0)
+        , _thread( Pt::callable(*this, &TestSelectable::executeThread) )
+        { }
+
+        void start(Pt::System::EventLoop& loop)
+        {
+            setActive(loop);
+            _loop = &loop;
+            _thread.start();
+        }
+
+    protected:
+        void executeThread()
+        {
+            for(unsigned n = 0; n < 5; ++n)
+            {
+                Pt::System::Thread::sleep(500);
+                _loop->setReady(*this);
+                _loop->wake();
+            }
+
+            _loop->exit();
+        }
+
+        bool onRun()
+        {
+            std::cout << "TestSelectable::onRun called" << std::endl;
+            return true;
+        }
+
+        void onCancel()
+        {
+            std::cout << "TestSelectable::onCancel called" << std::endl;
+            _thread.join();
+        }
+
+    private:
+        Pt::System::EventLoop* _loop;
+        Pt::System::AttachedThread _thread;
+};
+
+
 class EventLoopTest : public Pt::Unit::TestSuite
 {
     public:
         EventLoopTest()
         : Pt::Unit::TestSuite("EventLoopTest")
         {
+            Pt::Unit::TestSuite::registerMethod( "SelectableTest", *this, &EventLoopTest::SelectableTest);
             Pt::Unit::TestSuite::registerMethod( "DispatchTest", *this, &EventLoopTest::DispatchTest);
             Pt::Unit::TestSuite::registerMethod( "MaxAlloc", *this, &EventLoopTest::MaxAlloc);
             //Pt::Unit::TestSuite::registerMethod( "LoopBenchmark", *this, &EventLoopTest::LoopBenchmark);
@@ -108,6 +160,16 @@ class EventLoopTest : public Pt::Unit::TestSuite
         }
 
     private:
+        void SelectableTest()
+        {
+            TestSelectable ts;
+            
+            Pt::System::MainLoop el;
+            ts.start(el);
+
+            el.run();
+        }
+
         void DispatchTest()
         {
             Pt::System::MainLoop el;
