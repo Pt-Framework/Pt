@@ -12,7 +12,7 @@ PT_SYSTEM_TESTS = ApplicationTest.cpp
                   ThreadTest.cpp
                   TimerTest.cpp
                   UriTest.cpp
-				  MouseDeviceTest.cpp
+#				  MouseDeviceTest.cpp
                   ;
 
 Main Pt-System-test : Pt-System-test.cpp $(PT_SYSTEM_TESTS) ;

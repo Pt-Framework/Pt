@@ -40,8 +40,8 @@ SharedLibrary Pt-System : $(PT_SYSTEM_IMPL)
                           ConsoleChannel.cpp
                           FileChannel.cpp
                           SerialChannel.cpp
-						  MouseDevice.cpp
-						  Input2DEvent.cpp
+#						  MouseDevice.cpp
+#						  Input2DEvent.cpp
                           ;
 
 LinkSharedLibraries Pt-System : Pt ;
