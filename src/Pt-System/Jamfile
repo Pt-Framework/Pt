@@ -40,10 +40,19 @@ SharedLibrary Pt-System : $(PT_SYSTEM_IMPL)
                           ConsoleChannel.cpp
                           FileChannel.cpp
                           SerialChannel.cpp
+						  MouseDevice.cpp
+						  Input2DEvent.cpp
                           ;
 
 LinkSharedLibraries Pt-System : Pt ;
+
 LinkLibs Pt-System : $(SYSLIBS) ;
+
+if $(SYS:L) = "win32"
+{
+	LinkLibs Pt-System : $(GUILIBS) ;
+}
+
 MakeLocate Pt-System : $(PT_OUTPUT_TARGET) ;
 MakeInstall Pt-System : $(PT_INSTALL_LIBDIR) ;
 
