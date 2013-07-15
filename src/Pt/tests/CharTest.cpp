@@ -54,6 +54,7 @@ class CharTest : public Pt::Unit::TestSuite
             std::cerr << "print  " << std::ctype_base::print << std::endl;
             std::cerr << "cntrl  " << std::ctype_base::cntrl << std::endl;*/
 
+            Pt::Unit::TestSuite::registerMethod( "OutOfRange", *this, &CharTest::OutOfRange  );
             Pt::Unit::TestSuite::registerMethod( "testConstructor", *this, &CharTest::testConstructor  );
             Pt::Unit::TestSuite::registerMethod( "testAssign", *this, &CharTest::testAssign  );
             Pt::Unit::TestSuite::registerMethod( "testCategory", *this, &CharTest::testCategory  );
@@ -62,6 +63,7 @@ class CharTest : public Pt::Unit::TestSuite
         }
 
     protected:
+        void OutOfRange();
         void testConstructor();
         void testAssign();
         void testCategory();
@@ -70,6 +72,12 @@ class CharTest : public Pt::Unit::TestSuite
 };
 
 Pt::Unit::RegisterTest<CharTest> _registerCharTest;
+
+
+void CharTest::OutOfRange()
+{
+    Pt::Char ch(std::numeric_limits<Pt::uint32_t>::max());
+}
 
 
 void CharTest::testConstructor()

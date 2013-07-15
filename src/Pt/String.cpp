@@ -43,22 +43,22 @@ namespace Pt {
 
 std::ctype_base::mask ctypeMask(const Char& ch)
 {
-    const uint32_t c = ch.value();
-    return ctype_data[ ctype_lookup2[ ctype_lookup1[c>>14]+((c>>7)&127) ]+(c&127) ];
+    const uint32_t ucs = ch.value();
+    return ctype_data[ ctype_lookup2[ ctype_lookup1[(ucs>>14)&127]+((ucs>>7)&127) ]+(ucs&127) ];
 }
 
 
 Char tolower(const Pt::Char& ch)
 {
     const uint32_t ucs = ch.value();
-    return ucs + lower_data[lower_lookup2[lower_lookup1[ucs>>14]+((ucs>>7)&127)]+(ucs&127)];
+    return ucs + lower_data[lower_lookup2[lower_lookup1[(ucs>>14)&127]+((ucs>>7)&127)]+(ucs&127)];
 }
 
 
 Char toupper(const Char& ch)
 {
     const uint32_t ucs = ch.value();
-    return ucs + upper_data[upper_lookup2[upper_lookup1[ucs>>14]+((ucs>>7)&127)]+(ucs&127)];
+    return ucs + upper_data[upper_lookup2[upper_lookup1[(ucs>>14)&127]+((ucs>>7)&127)]+(ucs&127)];
 }
 
 } //namespace Pt
