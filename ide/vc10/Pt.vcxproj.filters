@@ -795,6 +795,9 @@
     <ClInclude Include="..\..\include\Pt\System\Input2DEvent.h">
       <Filter>Pt-System</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Ssl\CertificateListImpl.h">
+      <Filter>Pt-Ssl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">

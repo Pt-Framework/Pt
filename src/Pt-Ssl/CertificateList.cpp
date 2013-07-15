@@ -44,6 +44,13 @@ Certificate::Certificate()
 }
 
 
+Certificate::Certificate(const char* data, size_t len)
+: _impl(0)
+{
+    _impl = new CertificateImpl(data, len);
+}
+
+
 Certificate::Certificate(CertificateImpl* impl)
 : _impl(impl)
 {

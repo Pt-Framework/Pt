@@ -214,6 +214,7 @@
     <ClInclude Include="..\..\src\Pt-Net\win32\TcpServerImpl.h" />
     <ClInclude Include="..\..\src\Pt-Net\win32\TcpSocketImpl.h" />
     <ClInclude Include="..\..\src\Pt-Net\win32\UdpSocketImpl.h" />
+    <ClInclude Include="..\..\src\Pt-Ssl\CertificateListImpl.h" />
     <ClInclude Include="..\..\src\Pt-Ssl\OpenSsl.h" />
     <ClInclude Include="..\..\src\Pt-System\ConsoleChannel.h" />
     <ClInclude Include="..\..\src\Pt-System\FileChannel.h" />
