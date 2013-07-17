@@ -312,3 +312,10 @@ if $(GUI)
     EchoOption GUILIBS : "Graphics UI lib flags" ;
 }
 
+
+if --with-hmi in $(ARGV)
+{
+	WITH_HMI = yes ;
+    Configure WITH_HMI ;
+    EchoOption WITH_HMI : "HMI module" ;
+}
