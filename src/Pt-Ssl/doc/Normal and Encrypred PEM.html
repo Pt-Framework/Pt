@@ -1,0 +1,242 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<!--Converted with jLaTeX2HTML 2002-2-1 (1.70) JA patch-1.4
+patched version by:  Kenshi Muto, Debian Project.
+LaTeX2HTML 2002-2-1 (1.70),
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=windows-1252">
+<title>Certificates: File Format &amp; Conversion</title>
+<meta name="description" content="Certificates: File Format &amp; Conversion">
+<meta name="keywords" content="certmgr">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+
+<meta name="Generator" content="jLaTeX2HTML v2002-2-1 JA patch-1.4">
+<meta http-equiv="Content-Style-Type" content="text/css">
+
+<link rel="STYLESHEET" href="Normal%20and%20Encrypred%20PEM_files/certmgr.css">
+
+<link rel="next" href="http://www.bo.infn.it/alice/introgrd/certmgr/node3.html">
+<link rel="previous" href="http://www.bo.infn.it/alice/introgrd/certmgr/node1.html">
+<link rel="up" href="http://www.bo.infn.it/alice/introgrd/certmgr/certmgr.html">
+<link rel="next" href="http://www.bo.infn.it/alice/introgrd/certmgr/node3.html">
+</head>
+
+<body bgcolor="#ffffff">
+<!--Navigation Panel-->
+<a name="tex2html70" href="http://www.bo.infn.it/alice/introgrd/certmgr/node3.html">
+<img alt="next" src="Normal%20and%20Encrypred%20PEM_files/next.png" align="BOTTOM" border="0" height="24" width="37"></a> 
+<a name="tex2html66" href="http://www.bo.infn.it/alice/introgrd/certmgr/certmgr.html">
+<img alt="up" src="Normal%20and%20Encrypred%20PEM_files/up.png" align="BOTTOM" border="0" height="24" width="26"></a> 
+<a name="tex2html60" href="http://www.bo.infn.it/alice/introgrd/certmgr/node1.html">
+<img alt="previous" src="Normal%20and%20Encrypred%20PEM_files/prev.png" align="BOTTOM" border="0" height="24" width="63"></a> 
+<a name="tex2html68" href="http://www.bo.infn.it/alice/introgrd/certmgr/node22.html">
+<img alt="contents" src="Normal%20and%20Encrypred%20PEM_files/contents.png" align="BOTTOM" border="0" height="24" width="65"></a>  
+<br>
+<b> Next:</b> <a name="tex2html71" href="http://www.bo.infn.it/alice/introgrd/certmgr/node3.html">Personal Certificates released by</a>
+<b> Up:</b> <a name="tex2html67" href="http://www.bo.infn.it/alice/introgrd/certmgr/certmgr.html">A Brief Guide to</a>
+<b> Previous:</b> <a name="tex2html61" href="http://www.bo.infn.it/alice/introgrd/certmgr/node1.html">Introduction: Concepts, Passphrase</a>
+ &nbsp; <b>  <a name="tex2html69" href="http://www.bo.infn.it/alice/introgrd/certmgr/node22.html">Contents</a></b> 
+<br>
+<br>
+<!--End of Navigation Panel-->
+
+<h1><a name="SECTION00020000000000000000"></a> <a name="cert:pem"></a>
+<br>
+Certificates: File Format &amp; Conversion
+</h1>
+
+<p>
+The user must also be aware that <i>OpenSSL</i> supports several
+certificate formats. Certificates are based on the <i>DSA</i> signature
+algorithm and the <i>RSA</i> algorithm for public-key cryptography
+according to <i>PKCS</i> algorithms, as described in [<a href="http://www.bo.infn.it/alice/introgrd/certmgr/node21.html#bibrsa">7</a>].
+
+</p><p>
+The certificate format depends on the application, as there is no agreement
+on file format standards.
+
+</p><p>
+<b>Private keys</b> are usually available in the <i>PEM</i> and
+<i>DER</i> format. The related files have names of the following type:
+<br>
+<br><code>*key-rsa.pem       </code> for <tt>pem</tt> files
+<br><code>*key-rsa.der       </code> for <tt>der</tt> files
+<br>
+<br>
+For <code>OpenSSL</code> applications, the <code>PEM</code> format should suffice.
+For <code>Java</code> applications, the <code>DER</code> format might be more suitable
+for importing the private key and certificates.
+
+</p><p></p><p>
+<br>
+
+</p><p>
+For <b>certificates</b>, the available formats are <i>PEM</i>, <i>DER</i>
+and <i>PKCS12</i> with file names of the following type:
+<br>
+<br><code>*cert.pem      </code> for <tt>pem</tt> files
+<br><code>*cert.der      </code> for <tt>der</tt> files
+<br><code>*cert.p12      </code> for <tt>pkcs12</tt> files
+<br>
+<br>
+In general, the <code>PEM</code> formats are mostly used in the Unix world,
+<code>PCKS12</code> in the Microsoft world and <code>DER</code> in the Java world.
+
+</p><p></p><p>
+<br>
+
+</p><p>
+Certificate files are <code>ASN.1-</code>encoded objects that may be encrypted according
+to <i>DES</i> (Data Encryption Standard).  The files can optionally be
+encrypted using a symmetric cipher algorithm, such as <i>3DES</i>.
+
+</p><p></p><p>
+<br>
+
+</p><p>
+An <b>unencrypted</b> <tt>PEM</tt> file might look something like this:
+</p><pre>    -----BEGIN CERTIFICATE-----
+    MB4CGQDUoLoCULb9LsYm5+/WN992xxbiLQlEuIsCAQM=
+    -----END CERTIFICATE-----
+</pre>
+The string beginning with <tt>MB4C...</tt> is the Base64-encoded,
+<code>ASN.1-</code>encoded object.
+
+<p></p><p>
+<br>
+
+</p><p>
+An <b>encrypted</b> file would have headers describing the type
+of encryption used, and the initialization vector:
+</p><pre>    -----BEGIN RSA PRIVATE KEY-----
+    Proc-Type: 4,ENCRYPTED
+    DEK-Info: DES-EDE3-CBC,C814158661DC1449
+    AFAZFbnQNrGjZJ/ZemdVSoZa3HWujxZuvBHzHNoesxeyqqidFvnydA==
+    -----END RSA PRIVATE KEY-----
+</pre>
+The two headers <code>Proc-Type</code> and <code>DEK-Info</code> declare
+the type of encryption, and the string starting with <code>AFAZ...</code> is
+the Base64-encoded, encrypted, <code>ASN.1-</code>encoded object.
+
+<p></p><p>
+<br>
+
+</p><p>
+As web browsers make use of Java applications, they import/export certificates
+in <i>pkcs12</i> file format, i.e. public and private keys
+are packed in one single file using the <code>PKCS#12</code> algorithm.
+Other applications require the <i>pem</i> format with unpacked public and
+private keys, thus the user must remember the appropriate file format for
+each application and must perform format conversions as appropriate.
+
+</p><p>
+The following tables report a summary of formats used for INFN-Grid
+applications and two simple scripts with format conversion commands.
+
+</p><p>
+
+</p><p></p><p>
+<br>
+<table border="1" cellpadding="3">
+<tbody><tr><td colspan="2" align="CENTER"><b> INFN-Grid Certificates Format Summary </b></td>
+</tr>
+<tr><th align="LEFT"><b>Certificate Type</b></th>
+<td align="CENTER"><b>Certificate Format </b></td>
+</tr>
+<tr><td align="LEFT">CA Authority Certificate</td>
+<td align="CENTER">DER</td>
+</tr>
+<tr><td align="LEFT">Personal Certificate from CA</td>
+<td align="CENTER">PKCS12</td>
+</tr>
+<tr><td align="LEFT">Grid Access Certificate</td>
+<td align="CENTER">PEM</td>
+</tr>
+</tbody></table>
+
+</p><p>
+
+</p><p></p><p>
+<br>
+
+</p><p></p><p>
+<br>
+
+<table border="1" cellpadding="3">
+<tbody><tr><td colspan="1" align="CENTER"><font size="-1">
+ <b> CONVERT pkcs12 to pem </b></font></td>
+</tr>
+<tr><td align="LEFT"><font size="-1"> 
+
+<code>#!/bin/sh</code> </font></td>
+</tr>
+<tr><td align="LEFT"><font size="-1"> 
+<code>#</code> </font></td>
+</tr>
+<tr><td align="LEFT"><font size="-1"> 
+<code>echo "copy your cert to cert.p12 - then run this script"</code> </font></td>
+</tr>
+<tr><td align="LEFT"><font size="-1"> 
+<code>#</code> </font></td>
+</tr>
+<tr><td align="LEFT"><font size="-1"> 
+<code>openssl pkcs12 -clcerts -nokeys -in cert.p12 -out usercert.pem</code> </font></td>
+</tr>
+<tr><td align="LEFT"><font size="-1"> 
+<code>openssl pkcs12 -nocerts -in cert.p12 -out userkey.pem</code> </font></td>
+</tr>
+<tr><td colspan="1" align="CENTER"><font size="-1"> 
+
+ <b> CONVERT pem to pkcs12 </b></font></td>
+</tr>
+<tr><td align="LEFT"><font size="-1"> 
+
+<code>#!/bin/sh</code> </font></td>
+</tr>
+<tr><td align="LEFT"><font size="-1"> 
+<code>#</code> </font></td>
+</tr>
+<tr><td align="LEFT"><font size="-1"> 
+<code>echo "Verify that you are using the correct certificate pair (key/cert)"</code> </font></td>
+</tr>
+<tr><td align="LEFT"><font size="-1"> 
+<code>#</code> </font></td>
+</tr>
+<tr><td align="LEFT"><font size="-1"> 
+<code>openssl pkcs12 -export -out cert.p12 -inkey ./userkey.pem -in ./usercert.pem</code> </font></td>
+</tr>
+</tbody></table>
+
+</p><p></p><p>
+<br>
+
+</p><p>
+
+</p><p>
+</p><hr>
+<!--Navigation Panel-->
+<a name="tex2html70" href="http://www.bo.infn.it/alice/introgrd/certmgr/node3.html">
+<img alt="next" src="Normal%20and%20Encrypred%20PEM_files/next.png" align="BOTTOM" border="0" height="24" width="37"></a> 
+<a name="tex2html66" href="http://www.bo.infn.it/alice/introgrd/certmgr/certmgr.html">
+<img alt="up" src="Normal%20and%20Encrypred%20PEM_files/up.png" align="BOTTOM" border="0" height="24" width="26"></a> 
+<a name="tex2html60" href="http://www.bo.infn.it/alice/introgrd/certmgr/node1.html">
+<img alt="previous" src="Normal%20and%20Encrypred%20PEM_files/prev.png" align="BOTTOM" border="0" height="24" width="63"></a> 
+<a name="tex2html68" href="http://www.bo.infn.it/alice/introgrd/certmgr/node22.html">
+<img alt="contents" src="Normal%20and%20Encrypred%20PEM_files/contents.png" align="BOTTOM" border="0" height="24" width="65"></a>  
+<br>
+<b> Next:</b> <a name="tex2html71" href="http://www.bo.infn.it/alice/introgrd/certmgr/node3.html">Personal Certificates released by</a>
+<b> Up:</b> <a name="tex2html67" href="http://www.bo.infn.it/alice/introgrd/certmgr/certmgr.html">A Brief Guide to</a>
+<b> Previous:</b> <a name="tex2html61" href="http://www.bo.infn.it/alice/introgrd/certmgr/node1.html">Introduction: Concepts, Passphrase</a>
+ &nbsp; <b>  <a name="tex2html69" href="http://www.bo.infn.it/alice/introgrd/certmgr/node22.html">Contents</a></b> 
+<!--End of Navigation Panel-->
+<address>
+luvisetto
+2008-11-18
+</address>
+
+
+</body></html>
