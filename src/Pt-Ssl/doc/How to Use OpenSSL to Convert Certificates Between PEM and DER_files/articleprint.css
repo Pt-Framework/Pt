@@ -1,0 +1,214 @@
+a:link {
+	font-size: 12px;
+}
+a:visited {
+	font-size: 12px;
+}
+a:hover {
+	font-size: 12px;
+	text-decoration: underline;
+}
+body {
+	color:black;
+	font-family:Arial,Helvetica,sans-serif;
+	font-size: 12px;
+}
+dd {
+	position: relative;
+	left: -40px;
+}
+dl {
+	font-size: 12px;
+}
+h2 {
+	border-color:#CFCDCD;
+	border-style:solid;
+	border-width:1px 0px 1px 1px;
+	color:#70A426;
+	font-size:1.2em;
+	font-weight:bold;
+	margin-bottom:0.3em;
+	padding:0.3em;
+}
+h4 {
+	border-color:#CFCDCD;
+	border-style:solid;
+	border-width:1px 0px 1px 1px;
+	color:#000000 !important;
+	font-size:1.2em;
+	font-weight:bold;
+	margin-bottom:0.3em;
+	padding:0.3em;
+}
+li {
+	font-size: 12px;
+}
+p {
+	font-size: 12px;
+}
+ul {
+	font-size: 12px;
+}
+.allelements {
+	display: none;
+	visibility: hidden;
+}
+.altlang {
+	font-size: 12px;
+	font-weight: bold;
+}
+.altlang i {
+	font-size: 12px;
+	font-weight: normal;
+}
+.artportlet span {
+	display:block;
+	font-size: 12px;
+	font-weight: bold;
+}
+.artportlet span i {
+	font-weight: normal;
+}
+.artportlet span i strong {
+	font-weight: normal;
+}
+.artportletopt {
+	display: none;
+}
+.artportletrated {
+	display: none;
+	visibility: hidden;
+}
+.artprodrelated h3 a {
+	color:#0047B6;
+	margin-top:10px;
+	font-size: 12px;
+	font-weight: bold;
+	text-decoration: none;
+}
+.copyright {
+	font-size: 10px;
+	float: right;
+}
+#ctxkcfooter {
+	font-size:60%;
+}
+#ctxkcfooter ul {
+	display: none;
+	visibility: hidden;
+}
+#ctxkcheader {
+	border-bottom: solid 1px #000000;
+}
+.ctxkcmsgs {
+	display: none;
+	visibility: hidden;
+}
+.ctxkcmsgsinv {
+	display: none;
+	visibility: hidden;
+}
+.ctxtstabscontent {
+	border: solid 1px #000000;
+	margin-bottom: 10px;
+}
+.ctxtstabscontent ul {
+	list-style-type:none;
+}
+.ctxtstabscontent ul li {
+	background:transparent url(/i/dotted.gif) repeat-x scroll center bottom;
+	margin:0pt;
+	padding:0.5em 0pt;
+}
+.ctxtsarticle h1 {
+	font-size: 1.3em;
+}
+.ctxtsarticle h2 {
+	background-color:#FFFFFF;
+	color:#457EAD;
+	margin:1em 0pt 0pt;
+	font-size: 1em;
+}
+.ctxtsbreadcrumb {
+	display: none;
+	visibility: hidden;
+}
+.ctxtsonecol ul, .ctxtstwocol ul {
+	list-style-type:square;
+}
+.divider {
+	display: none;
+	visibility: hidden;
+}
+.dyntitle {
+	font-size:26px;
+	font-weight:normal;
+}
+.exitPrintView {
+	position: relative;
+	top: -33px;
+	width: 100%;
+	z-index: 25; 
+}
+.exitPrintView a {
+	float: right;	
+}
+.helptips {
+	font-size: 12px;
+}
+.helptips h6 {
+	border-color:#CFCDCD;
+	border-style:solid;
+	border-width:1px 0px 1px 1px;
+	color:#70A426;
+	font-size:1.2em;
+	font-weight:bold;
+	margin-bottom:0.3em;
+	padding:0.3em;
+}
+.kcltnav {
+	display: none;
+	visibility: hidden;
+}
+.kcmasthead {
+	display: none;
+	visibility: hidden;
+}
+.mastlogo {
+	float: left;
+	position: absolute;
+	top: 16px;
+	left: 120px;
+}
+.mastlogo a {
+	color: #000000;
+	font-size: 1.3em;
+	font-weight: bold;
+	text-decoration: none;
+}
+.nojstabtitles {
+	background-image:none !important;
+	clear:both;
+	color:#70A426;
+	font-size:1.2em;
+	font-weight:bold;
+	margin-left:0.5em;
+}
+.noweb {
+	display: none;
+	visibility: hidden;
+}
+.utilportlet img {
+	display: none;
+	visibility: hidden;
+}
+.feedbackFromOuter {
+    display: none !important;
+}
+
+.containerArticleFeedbackInner {
+    display: none;
+}
+#openCaseLayerBlocker, #openCaseLayer {
+	    display: none;
+}

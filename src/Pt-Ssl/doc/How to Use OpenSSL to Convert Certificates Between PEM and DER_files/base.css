@@ -1,0 +1,2862 @@
+
+/* @override http://www.citrix.com/site/resources/v4_includes/css/5.0/base.css */
+
+/*
+Layout Features
+
+Grid : 12 x 67px columns with 16px gutters
+Type : 12px/18px
+Colors :    Black      #000000
+			Blue       #004477
+			------------------
+			Med Blue   #4791d9
+			Yellow     #ffb400
+			Green      #70a426
+			------------------
+
+Text color: #333333
+Link color: #004477
+
+Structure :
+	* Container
+		- Header
+			` supnav
+			` nav
+		- Main
+			` grid[2-12]
+		- Footer
+			` footernav
+			` copyright
+			
+
+Standard Sizes
+Fonts:  12/18 - Body
+		11/14 - Small
+
+*/
+
+/* @group Typography */
+
+body {
+	font: 12px Arial, Verdana, sans-serif;
+	background-color: #fff;
+	color: #35383d;
+	line-height: 18px;
+}
+
+a {
+	/*color: #004477; */
+	text-decoration: none;
+	 color: #0075b0;  
+}
+
+a:link {
+	
+}
+
+a:visited {
+	
+}
+
+a:hover {
+		 color: #005986;  
+
+}
+
+a:active {
+	
+}
+
+strong, b {
+	font-weight: bold;
+}
+
+em, i {
+	font-style: italic;
+}
+
+sup {
+	padding-left: 1px;
+	font-size: 10px !important;
+	font-weight: normal !important;
+	vertical-align: baseline;
+	position: relative;
+	bottom: 0.33em;
+	color: #76797c;
+	_position: static !important;
+}
+
+ul{
+	list-style-position: outside;
+	margin-bottom: 18px;
+}
+
+ul li {
+	background: url(list_bullet.gif) no-repeat left 5px;
+	padding-left: 8px;
+/* Uncommented by Purni on 05/05/2010. This style is required for display of bullet point in myCitrix applications */
+	margin-left: 16px;
+}
+
+
+ol{
+	list-style-position: outside;
+	margin-bottom: 18px;
+}
+
+li {
+	padding-left: 8px;
+	margin-left: 16px;
+}
+
+ol {
+	padding-left: 8px;
+	margin-left: 16px;
+}
+
+
+
+p {
+
+	margin-bottom: 18px;
+}
+
+p.intro {
+	/*font-size: 14px;
+	line-height: 20px;*/
+	font-size: 12px;
+	line-height: 18px;
+}
+
+h1 {
+	font-size: 20px;
+	margin-bottom: 8px;
+	margin-top: 2px;
+	line-height: 26px;
+	font-weight: normal;
+	color: #545454;
+
+	
+}
+
+h2 {
+	font-size: 20px;
+	margin-bottom: 8px;
+	margin-top: 2px;
+	line-height: 26px;
+	font-weight: normal;
+	color: #545454;
+}
+
+h3 {
+	font-weight: bold;
+	font-size: 15px;
+	line-height: 18px;
+		color: #545454;
+
+}
+
+h4 {
+	font-weight: bold;
+	font-size: 12px;
+	line-height: 16px;
+	margin-bottom: 2px;
+		color: #545454;
+
+}
+
+h5 {
+	font-weight: bold;
+		color: #545454;
+
+	margin-bottom: 2px;
+}
+
+h3.arrow {
+	background: url(h3arrow_gray.gif) no-repeat left 3px;
+	padding-left: 10px;
+}
+h3.number{
+		padding-left: 22px;
+}
+h3.number + p {
+		padding-left: 22px;
+}
+
+h3.number.one {
+	background: url(h3_one.gif) no-repeat;
+}
+h3.number.two {
+	background: url(h3_two.gif) no-repeat;
+}
+h3.number.three {
+	background: url(h3_three.gif) no-repeat;
+}
+h3.number.four {
+	background: url(h3_four.gif) no-repeat;
+}
+h3.number.five {
+	background: url(h3_five.gif) no-repeat;
+}
+h3.number.six {
+	background: url(h3_six.gif) no-repeat;
+}
+
+.fineprint {
+	font-size: 10px;
+	color: #76797c;
+	line-height: 13px;
+}
+
+.small {
+	font-size: 11px;
+	line-height: 14px;
+}
+.tiny {
+	font-size: 10px;
+	line-height: 12px;
+}
+
+.caption {
+	font-size: 10px;
+	line-height: 13px;
+	padding-top: 10px;
+	padding-bottom: 15px;
+	
+}
+
+/* @end */
+
+
+/* @group Backwards Compatibility */
+
+.subhead {
+	/* should be equal to h3 */
+	font-weight: bold;
+	font-size: 15px;
+	line-height: 18px;
+}
+
+h2 strong {
+	font-weight: normal;
+	font-style: normal;
+}
+.blurbheadline{
+	font-size: 11px;
+	line-height: 14px;
+	font-weight: bold;
+}
+
+.headline {
+	font-weight: normal;
+	font-size: 20px;
+	line-height: 18px;
+}
+
+.subheadlight {
+	color: #999;
+	font-size: 15px;
+	line-height: 18px;
+	font-weight: bold;
+}
+
+.bodycopybold {
+	font-weight: bold;
+}
+
+table.exam_table {
+	width: 563px;
+	border: 1px solid #ccc;
+}
+table.exam_table table.exam_table {
+	width: auto;
+	border: none;
+}
+
+table.exam_table .exam_title{
+font-color:#000000;
+font-size:18px;
+line-height:20px;
+font-weight:bold;
+padding: 7px 0px 7px 7px;
+	border-bottom: 1px solid #ccc;
+	border-left: 1px solid #ccc;
+}
+
+table.exam_table .number_title{
+text-transform:uppercase;
+font-size:11px;
+font-weight:bold;
+letter-spacing:3px;
+}
+
+table.exam_table .number{
+font-size:16px;
+	border-bottom: 1px solid #ccc;
+
+}
+
+table.exam_table .title{
+text-transform:uppercase;
+font-size:11px;
+font-weight:bold;
+padding-left:7px;
+letter-spacing:2px;
+}
+
+table.exam_table .exam_table{
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 12px;
+	line-height: 16px;
+	color: #333333;
+	}
+
+table.exam_table .exam_table p{
+padding:7px 7px 7px 0px;
+margin:0px;
+}
+
+table.exam_table .exam_desc{
+padding:7px 0px 7px 7px;
+	font-size: 12px;
+	line-height: 16px;
+}
+
+table.exam_table .exam_bold{
+font-weight:bold;
+/*padding-left:7px;*/
+}
+
+table.exam_table .courses_table{
+	font-size: 12px;
+	line-height: 16px;
+	}
+	
+
+table.exam_table .courses_table td{
+padding: 5px;
+border-bottom:1px solid #ffffff;
+}
+
+table.exam_table .courses_subtable{
+	font-size: 12px;
+
+	
+	}
+	
+table.exam_table .courses_subtable td{
+padding: 5px;
+border-bottom:none;
+}
+
+
+tr.psuedolist td {
+		border-top: 1px dotted #ccc;
+	padding-bottom: 9px;
+	padding-top: 9px;
+}
+
+/* QA pages */
+
+tr.qaQ td {
+	border-top: 1px dotted #ccc;
+	padding-top: 18px;
+}
+tr.qaA td {
+	padding-bottom: 18px;
+	padding-top: 9px;
+}
+
+table.courses_table {
+	margin-bottom: 36px;
+}
+
+table.courses_table tr.psuedolist td {
+	border-top:  none;
+			border-bottom: 1px dotted #ccc;
+	padding-bottom: 9px;
+	padding-top: 9px;
+}
+div.courses_header{
+	background: #4791d5 url(listheader_background.jpg) repeat-x;
+	color: #fff;
+	overflow: hidden;
+	padding: 6px;
+}
+/*
+td.bodycopy p {
+	margin-top: 18px;
+}
+*/
+/* @end */
+
+
+/* @group Boxes & Groups */
+
+
+
+/* @group Content Header Groups */
+
+/*
+Intro Quotes
+Used to showcase a Quotation at the top of a page
+*/
+
+div.introquote, div.csquote {
+	border-top: 1px solid #ccc;
+	border-bottom: 1px solid #ccc;
+	margin-bottom: 18px;
+	padding-top: 6px;
+}
+div.introquote p, div.csquote p {
+	margin-bottom: 6px;
+	color: #666;
+	font-size: 12px;
+}
+div.introquote .attribution, div.csquote .attribution csquoteattribution {
+	font-size: 11px;
+	font-weight: bold;
+}
+
+/*
+Title Groups
+ titlegroups are used to group the main headlines and subhead into a unit. All main headers should be enclosed in title groups
+*/
+
+.titlegroup {
+	margin-bottom: 24px;
+}
+
+.titlegroup h1, .titlegroup h2 {
+		font-size: 25px;
+	font-weight: bold;
+	font-style: normal;
+	color: #545454;
+	line-height: 24px;
+	letter-spacing: -1px;
+/*        float:left;
+width:980px;*/
+
+}
+.titlegroup h3 {
+	font-size: 20px;
+	font-weight: normal;
+	font-style: normal;
+	color: #0075b0;
+	line-height: 18px;
+}
+
+
+
+
+/*
+Case Study Groups
+csgroup is for Case Studies
+Where the corporation and the categories are displayed at top of page
+use <h3> and <p>
+*/
+.csgroup {
+	color: #999;
+}
+.csgroup p {
+	font-size: 11px;
+}
+
+/* @end */
+
+/* @group Content Callout Area */
+
+/* Product Promos - right sidebar stuff */
+div.contentcallout {
+	width: 215px;
+	margin-left: 16px;
+	float: right;
+	overflow: hidden;
+	padding-top: 9px;
+	padding-right: 9px;
+	padding-left: 9px;
+	background-image: none;
+	background-color: #e4e4e4;
+	position: relative;
+	z-index: 1;
+	
+}
+
+
+div.contentcallout h3 {
+	font-size: 12px;
+	line-height: 15px;
+}
+
+div.contentcallout img {
+	margin-bottom: 6px;
+	
+}
+
+div.contentcallout p {
+	font-size: 11px;
+	line-height: 14px;
+}
+div.contentcallout a {
+	font-weight: bold;
+}
+
+
+
+
+div.contentcallout ul {
+	padding-left: 0;
+	margin-left: 0;
+}
+
+div.contentcallout ul ul {
+	margin-bottom: 14px;
+}
+
+
+div.contentcallout ul li {
+	background: none;
+	font-size: 11px;
+	line-height: 14px;
+	padding-left: 0;
+	margin-left: 0;
+}
+
+div.contentcallout ul li li {
+	padding-top: 4px;
+	margin-top: 4px;
+}
+
+
+div.contentcallout ul a {
+	font-weight: bold;
+}
+div.contentcallout ul li li {
+	border-top: 1px dotted #999;
+	width:215px;
+	
+}
+div.contentcallout ul li.nodivider {
+	padding-top: 0px;
+	border-top: none;
+}
+div.contentcallout ul li h3 {
+	font-size: 13px;
+	line-height: 18px;
+}
+
+
+/* @end */
+
+/* @group Homepage Promo box */
+
+.hppromobox {
+	background: #f7f7f7 url(hp_promobox_background.gif) repeat-x;
+	color: #d1e3f5;
+	font-size: 11px;
+	line-height: 14px;
+	padding: 9px;
+	height:290px;
+}html>body .hppromobox{height:272px;}
+
+.hppromobox a{
+	font-weight: bold;
+	color: #fff;
+}
+.hppromobox p{
+	margin: 0;
+}
+.hppromobox .promoitem {
+	
+	margin-top: 9px;
+	padding-top:9px;
+	border-top: 1px solid #ebebeb;
+}
+
+.hppromobox .first {
+	margin-top: 0;
+	padding-top: 0;
+	border-top-style: none;
+}
+.hppromobox div.image {
+	width: 75px;
+	height: 75px;
+	float: left;
+}
+
+.hppromobox .promoitem:after {
+	content: ".";
+	display: block;
+	height: 0;
+	clear: both;
+	visibility: hidden;
+}
+
+.hppromobox .promoitem {*zoom: 1;}
+
+/* @end */
+
+/* @group Notes Box */
+
+/*
+Notesbox
+This is a box that recedes into the background by being white, stroked and small. Ideal for System Requirements etc.
+*/
+
+.notesbox {
+	font-size: 11px;
+	line-height: 14px;
+	background: #fff;
+	color: #333;
+	position: relative;
+	padding: 9px;
+	border: 1px solid #ddd;
+	margin-bottom: 18px;
+	position: relative;
+	z-index: 1;
+}
+
+
+
+
+
+
+.notesbox ul {
+	margin-bottom: 0;
+}
+.notesbox h3 {
+	font-size: 12px;
+}
+
+/* @end */
+
+/* @group Feature Boxes (square) */
+
+
+.featurebox {
+	font-size: 12px;
+	line-height: 16px;
+	background: #ececec url(sidebarbox_secondarybg.gif) repeat-x;
+	color: #333;
+	position: relative;
+}
+.featurebox:after {
+	content: ".";
+	display: block;
+	height: 0;
+	clear: both;
+	visibility: hidden;
+}
+
+.featurebox {*zoom: 1;}
+
+.featurebox h3 {
+	
+margin-bottom: 6px;
+	background-image: url(featurebox_header.gif);
+	padding: 6px;
+	color: #fff;
+}
+
+.featurebox div.primary {
+	padding: 12px;
+}
+.featurebox a {font-weight: bold;
+}
+
+.featurebox p {margin-bottom: 9px;}
+
+.featurebox .imagebox {
+	background-color: #fff;
+}
+
+.featurebox li {
+	margin-bottom: 9px;
+	margin-right: 18px;
+	background-image: url(arrow_blue.gif);
+}
+
+
+
+
+/* @end */
+
+/* @group Sidebar Box */
+
+.sidebarbox {
+	font-size: 11px;
+	margin-bottom: 18px;
+	line-height: 14px;
+}
+.sidebarbox h3 {
+	font-size: 12px;
+	color: #fff;
+	padding-left: 9px;
+	overflow: hidden;
+	background: #545454 url(sidebarbox_header.gif) repeat-x;
+	line-height: 14px;
+	padding-bottom: 5px;
+	padding-top: 6px;
+}
+
+
+.sidebarbox div.primary {
+	border-bottom: 1px solid #999;
+	border-top: 1px solid #999;
+	padding: 6px;
+	background: #bababa url(sidebarbox_mainbg.gif) repeat-x;
+
+}
+
+.sidebarbox div.secondary {
+	border-bottom: 1px solid #ccc;
+	border-top: 1px solid #ccc;
+	padding: 6px;
+	background: #ececec url(sidebarbox_secondarybg.gif) repeat-x;
+
+}
+
+.sidebarbox .formlabel {
+	font-size: 11px;
+	font-weight: bold;
+	line-height: 11px;
+	margin-top: 6px;
+	color: #333;
+}
+.sidebarbox .formelement {
+	width: 130px;
+}
+
+.sidebarbox select {
+	font-size: 9px;
+}
+
+.sidebarbox .formbutton {
+	text-align: right;
+	margin-top: 6px;
+	margin-right: 6px;
+}
+
+.sidebarbox a {
+	color: #35383d;
+	display: block;
+}
+
+.sidebarbox a:hover {
+	color: #000;
+
+}
+
+.sidebarbox ul {
+	padding: 6px 0 0;
+	margin: 0;}
+
+.sidebarbox li {
+	margin-left: 0;
+	padding-left: 0;
+	padding-top: 6px;
+	padding-bottom: 6px;
+	background: url(sidebar_divider.png) repeat-x 0 top;
+
+}
+.sidebarbox  li.first {
+	background: none repeat-x 0 top;
+	padding-top: 0;
+	border-top: none;
+	}
+
+
+
+/* Alt Sidebar
+Note: must add class="alt" to the h3's to work
+ */
+
+.sidebarbox h3.alt {
+	font-size: 12px;
+	color: #fff;
+	padding-left: 9px;
+	overflow: hidden;
+	background: #545454 url(sidebarbox_header.gif) repeat-x;
+	line-height: 14px;
+	padding-bottom: 5px;
+	padding-top: 6px;
+}
+
+.sidebarbox div.alt {
+	border-bottom: 1px solid #ccc;
+	border-top: 1px solid #ccc;
+	padding: 6px;
+	background: #ececec url(sidebarbox_secondarybg.gif) repeat-x;
+}
+
+
+
+
+
+/* Alt2 Sidebar
+Note: must add class="alt2" to the h3's to work
+ */
+
+.sidebarbox h3.alt2 {
+	border-top: 1px solid #fff;
+	border-bottom: 1px solid #c2c2c4;
+	color: #535355;
+	background-image: url(sidebarbox_grayheader.gif);
+	background-color: #c2c2c4;
+}
+
+.sidebarbox div.alt2 {
+	border-top: 1px solid #fff;
+	border-bottom: 1px solid #c2c2c4;
+	padding: 6px;
+	background: #e3e3e4 url(sidebarbox_graybg.gif) repeat-x;
+	color: #535355;
+}
+
+
+#main .sidebarbox div.alt2 a{
+	color: #35383d;
+} 
+
+
+
+
+/* misc sidebarbox parts */
+.sidebarbox div.review {
+	font-weight: bold;
+}
+.sidebarbox div.review span.attribution {
+	font-size: 9px;
+	font-weight: normal;
+}
+
+
+.sidebarbox div.tightlist {
+	font-weight: bold;
+}
+.sidebarbox div.tightlist li {
+	padding-top: 1px;
+	padding-bottom: 1px;
+}
+.sidebarbox div.textlist li {
+	padding-top: 9px;
+	padding-bottom: 9px;
+}
+
+.sidebarbox .button a {
+	/* fix button rollover color */
+	color: #fff;
+}
+
+/* CR product Reviews */
+.alt li#rev_read {
+	background: url(resources_icons/alt_magnify.gif) no-repeat left center;
+	padding-left: 24px;
+}
+.alt li#rev_write {
+	background: url(resources_icons/alt_pencil.gif) no-repeat 2px;
+	padding-left: 24px;
+}
+
+/* Resources sidebar */
+
+.sidebarbox div.resources {
+	border-bottom: 1px solid #ccc;
+	border-top: 1px solid #ccc;
+	padding: 6px;
+	background: #ececec url(sidebarbox_secondarybg.gif) repeat-x;}
+	
+.sidebarbox .resources img {
+	vertical-align: middle;
+	margin-right: 5px;
+}
+
+#main .sidebarbox div.resources li a {
+	color: #35383d;
+}
+
+.sidebarbox div.primary li.first,
+.sidebarbox div.secondary li.first,
+.sidebarbox div.alt li.first,
+.sidebarbox div.alt2 li.first,
+.sidebarbox div.resources li.first {
+	padding-top: 0;
+	border-top: none;
+}
+
+.sidebarbox div.primary li.last,
+.sidebarbox div.secondary li.last,
+.sidebarbox div.alt li.last,
+.sidebarbox div.alt2 li.last,
+.sidebarbox div.resources li.last {
+	border-bottom: none;
+	padding-bottom: 0;
+}
+
+
+.resources li.text {
+	padding-left: 0;
+}
+
+
+div.crlogo_bg {
+	background: url(citrixready_logobg.gif) no-repeat;
+	width: 138px;
+	height: 85px;
+	text-align: center;
+	margin-bottom: 6px;
+}
+
+
+/* @end */
+
+
+
+/* @end */
+
+/* @group Lists */
+
+/* @group P-based Lists */
+
+/* plist
+	This is a simple list in the following format:
+	<div class="plist">
+		<p><a href="#">Title Link</a><br />Text Here</p>
+	</div>
+*/
+div.plist {
+	margin-bottom: 18px;
+}
+
+div.plist p {
+	margin-top: 9px;
+	padding-top: 9px;
+	border-top: 1px dotted #ccc;
+	margin-bottom: 9px;
+	font-size: 11px;
+	line-height: 14px;
+	*zoom:1; /* border is not applied without this ie6-7 */
+}
+
+div.plist p.first {
+	margin-top: 0px;
+	padding-top: 0px;
+	border-top: none;
+	
+}
+
+
+
+div.plist p a {
+	font-weight: bold;
+	font-size: 12px;
+	line-height: 18px;
+}
+
+div.plist h3 a {
+	background: url(arrow_divlist.gif) no-repeat left center;
+	padding-left: 8px;
+	color: #333;
+}
+
+div.plist p.intro {
+	font-size: 11px;
+	line-height: 14px;
+	margin-top: 0px;
+	padding-top: 0px;
+	border-top: none;
+}
+
+/* @end */
+
+/* @group Div-based Lists */
+
+
+
+/*
+<div class="list">
+used to encapsulate a group of <div class="listitem">'s
+*/
+.list {
+	margin-bottom: 36px;
+}
+/*
+<div class="listitem">
+used to create a divided list of items
+*/
+
+
+.listitem, .listitemhot {
+	
+	margin-top: 9px;
+	border-top: 1px dotted #bbb;
+	padding-top: 9px;
+	color: #333;
+	font-size: 11px;
+	line-height: 14px;
+}
+
+.listitemhot {
+	background: #bababa url(sidebarbox_mainbg.gif) repeat-x 0 top;
+	padding: 9px;
+		border-top: none;
+
+}
+
+.listitem h3, .listitemhot h3 {
+	
+	font-size: 12px;
+	line-height: 15px;
+	/*background: url(arrow_divlist.gif) no-repeat left 1px;
+	padding-left: 9px;*/
+}
+
+.listitem p, .listitemhot p {
+	margin-bottom: 0;
+}
+
+
+.listitem a, .listitemhot a {
+	font-weight: bold;
+	
+}
+
+.list .first {
+	border-style: none;
+	margin-top: 6px;
+
+}
+
+.listheader {
+	margin-bottom: 6px;
+	background: #545454 url(listheader_background.gif) repeat-x;
+	color: #fff;
+	overflow: hidden;
+	padding: 6px;
+}
+
+.listheader .description {
+	border-bottom: 1px solid #999;
+	border-top: 1px solid #eee;
+	padding: 9px;
+	background: #bababa url(sidebarbox_mainbg.gif) repeat-x;
+	margin: 6px -6px -6px;
+	color:  #333;
+}
+
+.listheaderplain {
+	color: #333;
+	font-size: 12px;
+	line-height: 18px;
+	background: #fff;
+}
+
+.listheader h3 {
+	color: #fff;
+}
+
+.listheader p {
+	margin-bottom: 0;
+}
+
+.listheader a {
+	
+}
+
+
+/* @end */
+
+/* @group Homepage Lists */
+
+/* homepagelist */
+
+.homepagelist a{
+	font-weight: normal;
+	font-style: normal;
+	color: #333;
+}
+
+.homepagelist h3 a{
+	font-weight: bold;
+	background: url(arrow_divlist.gif) no-repeat left center;
+	padding-left: 8px;
+}
+
+.homepagelist .ctalink{
+	font-weight: bold;
+		 color: #0075b0;  
+
+}
+
+/* @end */
+
+/* @group UL-based Lists */
+
+
+/* Related List
+   This is a right-sidebar list that has links/info pertinent to the particular page. Make sure all links are nested.
+*/
+ul.relatedlist {
+	padding-left: 0;
+	margin-left: 0;
+}
+
+ul.relatedlist ul {
+	margin-bottom: 14px;
+}
+
+ul.relatedlist li {
+	background: none;
+	padding-top: 4px;
+	margin-top: 4px;
+	font-size: 11px;
+	line-height: 14px;
+	padding-left: 0;
+	margin-left: 0;
+}
+
+ul.relatedlist li.standalone {
+	
+	margin-bottom: 18px;
+	margin-top: 18px;
+	padding: 0;
+}
+
+ul.relatedlist a {
+	font-weight: bold;
+}
+ul.relatedlist li li {
+	border-top: 1px dotted #ccc;
+	/*width:215px;*/
+}
+ul.relatedlist li.nodivider {
+	padding-top: 0px;
+	border-top: none;
+}
+ul.relatedlist li h3 {
+	font-size: 13px;
+	line-height: 18px;
+}
+
+/* Faked but Prettier/Compatible Ordered Lists
+   These make pretty lists but the code is messy
+   <ul class="ordered">
+   	<li><div class="ol_marker">1.</div><div class="ol_content">Content</div></li>
+*/
+ul.relatedlist ul.ordered div.ol_marker {
+	display: block;
+	float: left;
+	font-weight: bold;
+}
+ul.relatedlist ul.ordered div.ol_content {
+	display: block;
+	margin-left: 1.5em;
+}
+
+/* @end */
+
+
+
+/* @end */
+
+/* @group Links and Buttons */
+
+.more {	margin-top: 14px;}
+.more a {
+	font-size: 11px;
+	font-weight: bold;
+	background: url(arrow_more.gif) no-repeat right center;
+	padding: 4px 18px 3px 0;
+}
+
+a.download {
+	
+	font-weight: bold;
+	background: url(arrow_download.gif) no-repeat left top;
+	padding-left: 12px;
+}
+
+a.learnmore {
+	font-weight: bold;
+}
+
+
+
+/* Buttons
+Call with <a href="#" class="button bluebtn"><span>Link</span></a>
+*/
+
+/*
+a.button {
+	
+	font-size:0;
+    line-height:0;
+	display: -moz-inline-box;
+	display: inline-block;
+	height: 16px;
+	margin: 3px 3px 3px 0;
+	vertical-align: middle;
+}
+
+
+a.button span {
+	
+	font-size: 11px;
+	line-height: 14px; 
+	*line-height: 11px;
+	color: #fff;
+	font-weight: bold;
+	display: -moz-inline-box;
+	display:inline-block;
+	height: 16px;
+	padding: 1px 6px 0;
+	cursor: pointer;
+	margin: 0 20px 0 0;
+}
+
+*/
+
+
+#main a.button {
+	font-size: 11px;
+    line-height:16px;
+    height: 16px;
+    font-weight: bold;
+	color: #fff;
+	display: -moz-inline-box;
+	display: inline-block;
+	xvertical-align: 2px;
+	margin-top: 6px;
+}
+#main a.button:hover {
+	color: #fff;
+}
+
+#main a.button span {
+	display: block;
+	padding: 0 6px;
+	margin: 0 20px 0 0;
+	/* ie6 fixes */
+	_display: inline-block;
+	_cursor: pointer;
+}
+
+#main a.bluebtn {
+	background: url(button_right.png) no-repeat right top;
+	_background: url(button_right.gif) no-repeat right top;
+	
+
+}
+#main a.bluebtn span {
+	background: url(button_left.png) no-repeat left top;
+	_background: url(button_left.gif) no-repeat left top;
+}
+
+#main a.backbtn {
+	background: url(button_right_back.gif) no-repeat right top;
+
+}
+#main a.backbtn span {
+	background: url(button_left.gif) no-repeat left top;
+}
+
+
+#main .featurebox a.bluebtn {
+	background: url(button_right_featurebox.gif) no-repeat right top;
+
+}
+#main .featurebox a.bluebtn span {
+	background: url(button_left_featurebox.gif) no-repeat left top;
+}
+
+
+
+/* DIV Button
+<div class="button bluebtn"><div></div><a href="#link">Button Text</a></div>
+Note: the empty div is important, as that is the hook for the right side of the "sliding door."
+Use a <div> to provide a full width button, the size of the enclosed space
+*/
+
+div.button {
+	height: 17px;
+	padding-left: 6px;
+	padding-top: 3px;
+}
+
+div.button a {
+	color: #fff;
+	font-weight: bold;
+	display: block;
+}
+div.button a:hover {
+	color: #fff;
+}
+
+
+div.toolboxbtn {
+	background: url(flyout_btn.gif) no-repeat right top;
+	height: 20px;
+	padding-top:2px;
+	*padding-top:1px;
+}
+
+
+
+
+
+.rssbug {
+	font-size: 11px;
+	line-height: 14px;
+	font-weight: bold;
+	float:  right;
+}
+
+.boldlinks a {
+	font-weight: bold;
+}
+
+.product_bottomlinks{
+	font-weight: bold;
+	margin-top: 18px;
+}
+
+#main .product_bottomlinks a {
+	/* funky selector to override custom section colors */
+	margin-right: 9px;
+	margin-left: 9px;
+	color: #fff;
+	background-color: #555;
+	/*background:url(buttonBg.jpg) repeat-x;*/
+	font-size: 12px;
+	line-height: 12px;
+	zoom:1;
+	padding-right: 7px;
+	padding-left: 7px;
+		padding-top: 3px;
+	padding-bottom: 3px;
+}
+
+#main .product_bottomlinks a:hover {
+	background-color: #000;
+		color: #fff;
+
+}
+.cr_bottomlinks {
+	margin-left: -9px;
+	margin-right: -9px;
+	
+	clear:both;
+}
+.cr_bottomlinks a{
+	margin-left: 9px;
+	margin-right: 9px;
+}
+
+
+
+
+
+/* @end */
+
+/* @group Accordion */
+
+ul.accordion {
+	margin-bottom: 18px;
+}
+ul.accordion li {
+	background: none;
+	margin-left: 0;
+	padding-left: 12px;
+	margin-bottom: 0;
+}
+ul.accordion li.accordionnav {	background: #004477 url(accordionhead_right.gif) 0 top;
+	font-size: 11px;
+	line-height: 14px;
+	margin-bottom: 1px;
+}
+ul.accordion li.accordionnav a.accordionhead {
+	
+	padding-top: 3px;
+	display: block;
+	height: 17px;
+}
+
+ul.accordion li.accordionnav a.selected {
+	background: url(accordionhead_down.gif) no-repeat right;
+}
+
+ul.accordion ul {
+	background-color: #4791d9;
+	padding-left: 12px;
+	margin: 0 0 0 -12px;
+}
+ul.accordion li a {
+	color: #fff;
+	font-weight: bold;
+}
+
+ul.accordion ul li {
+	font-size: 11px;
+	line-height: 14px;
+	border: none;
+	border-top: 1px dotted #a3c8ec;
+	background: none;
+	margin: 0 12px 0 0;
+	padding: 2px;
+}
+ul.accordion ul li:hover{background-color: #75ade3;}
+ul.accordion ul li.first {border: none;}
+
+/* @end */
+
+/* @group Accordion Box */
+
+/*
+	Vertical Accordions
+*/
+.accordion_box {
+    font-size: 11px;
+    margin-bottom: 18px;
+    line-height: 14px;
+}		
+ 
+ 
+ 
+ 
+.accordion_toggle {
+    color: #333;
+    background-image: url(accordion_off.gif);
+    background-color: #c2c2c4;
+    font-size: 12px;
+	line-height: 14px;
+    padding-bottom: 6px;
+    padding-top: 6px;
+    cursor: pointer;
+    cursor: hand;
+	padding-left: 23px;
+}
+ 
+.accordion_hover {
+	background-image: url(accordion_over.gif);
+ 
+}
+h3.accordion_toggle {
+	cursor: pointer;
+    cursor: hand;
+}
+ 
+.accordion_toggle_active {
+    color: #fff;
+    background: #333 url(accordion_in.gif) repeat-x;
+    font-size: 12px;
+    padding-left: 23px;
+	line-height: 14px;
+    padding-bottom: 6px;
+    padding-top: 6px;
+	cursor: default;
+}
+ 
+h3.accordion_toggle_active{
+		cursor: default;
+}
+ 
+ 
+.accordion_content {
+    background: #eee url(lightgray_background.gif) repeat-x;
+    display: none;
+	padding-left: 6px;
+	padding-right: 6px;
+	padding-bottom: 0;
+	margin-bottom: 0;
+}
+ 
+.accordion_image {
+	margin-left: -6px;
+	margin-right: -6px;
+}
+ 
+ 
+ 
+.accordion_image_first{
+ 
+	margin-top:  -1px;
+	margin-left: -6px;
+	margin-right: -6px;
+}
+ 
+ 
+ul.iconlist {
+	padding: 6px 0 0;
+	margin: 0;
+}
+ 
+.iconlist li {
+	margin-left: 0;
+	padding-left: 0;
+	padding-top: 6px;
+	padding-bottom: 6px;
+	background: url(sidebar_divider.png) repeat-x 0 top;
+
+}
+.iconlist  li.first {
+	background: none repeat-x 0 top;
+	padding-top: 0;
+	border-top: none;
+ 
+}
+	
+.iconlist li img {
+	vertical-align: bottom;
+	margin-right: 5px;
+}
+ 
+.iconlist li.last {
+	border-bottom: none;
+	padding-bottom: 0;
+}
+ 
+ 
+.iconlist li.text {
+	padding-left: 0;
+}
+ 
+#container .iconlist li a
+{
+	color: #35383d;
+	display: block;
+}
+
+ul.bubblelist {
+	padding-left: 0;
+	margin-left: 0;
+	margin-bottom: 0;
+	padding-bottom: 6px;
+}
+ul.bubblelist ul {
+	margin-bottom: 7px;
+}
+ul.bubblelist li {
+	padding-top: 8px;
+	margin-top: 0;
+	font-size: 11px;
+	line-height: 14px;
+	padding-left: 0;
+	margin-left: 0;
+	
+	background: url(sidebar_divider.png) repeat-x 0 top;
+	color: #35383d;
+}
+ul.bubblelist li.first {
+	background: none;
+}
+ul.bubblelist li li {
+		background: none;
+		margin-top: 0px;
+	padding-top: 0;
+}
+ul.bubblelist li.nodivider {
+	padding-top: 0px;
+	border-top: none;
+}
+ul.bubblelist li h3 {
+	font-size: 13px;
+	line-height: 18px;
+	color: #35383d;
+}
+
+/* @end */
+
+/* @group Structure */
+
+#container {
+	width: 980px;
+	margin: 0 auto;
+	position: relative;
+}
+
+#header {
+	position: relative;
+	height: 69px;
+	z-index:999999;
+	/*z-index:999999999;*/
+        
+}
+
+#logo {
+	height: 36px;
+	background: url(citrix_logo.gif) no-repeat;
+	width: 208px;
+	position: absolute;
+	top: 36px;
+	left: 0;
+}
+
+#logo a {
+	display: block;
+	height: 36px;
+	width: 208px;
+	text-indent: -9999px;
+}
+
+#main {
+	clear:both;
+	margin:0 auto;
+	width:980px;
+}
+
+#footer {
+	border-top:1px dotted #999999;
+	height:1px;
+	margin:22px 0 17px;
+	padding-top:0;
+}
+#pg_citrix_home #footer {
+		margin-top: 18px;
+}
+
+#copyright {
+	font-size: 9px;
+	color: #666;
+	float: right;
+}
+
+#globalsearch {
+	position: absolute;
+	right: 0px;
+	z-index: 999998;
+	top: 49px;
+	width: 118px;
+	height: 20px;
+	background-image: url(search_background.gif);
+}
+
+#globalsearch #qt {
+	width: 90px;
+	font-size: 11px;
+	line-height: 13px;
+	padding: 2px;
+	height: 11px;
+	position: absolute;
+	right: 5px;
+	border-style: none;
+	background-color: transparent;
+	top: 3px;
+	outline-style:none;
+	color:  #545454;
+}
+#globalsearch #GoSearch {
+	float: left;
+	margin-top: 2px;
+	margin-left: 3px;
+	display: none;
+}
+
+
+
+/* @end */
+
+/* @group Navigation */
+
+/* @group Section Sidebar Nav */
+
+#sectionnav {
+
+	font-weight: bold;
+/*	padding-top: 9px;*/
+	color: #959595;
+	border-bottom:  1px #ccc dotted;
+}
+
+#main #sectionnav a {
+	/* odd selector to have higher precedence over other link coloring selectors */
+ color: #545454;
+ 
+}
+#main #sectionnav a:hover {
+	text-decoration: none;
+	 color: #000;
+
+}
+#sectionnav li.nav_top_level {
+	font-size: 20px;
+	letter-spacing: -1px;
+}
+#sectionnav ul ul {
+	margin-bottom: 0;
+	font-weight: bold;
+
+}
+
+#sectionnav ul ul a {
+	font-weight: normal;
+	font-style: normal;
+}
+
+
+#sectionnav .collapse {
+	background: url(sn_collapse_arrow.gif) no-repeat 0 8px;
+}
+#sectionnav .expand {
+	background: url(sn_expand_arrow.gif) no-repeat 0 9px;
+}
+#sectionnav .highlight {
+	background-color: #ddd;
+}
+#sectionnav li {
+	background:none;
+	padding-left: 0px;
+	margin-left: 0;
+}
+
+#sectionnav li li {
+		padding-top: 6px;
+
+	font-size: 11px;
+	line-height: 10px;
+	padding-left: 10px;
+	letter-spacing: 0;
+}
+#sectionnav a:hover {
+	text-decoration: underline;
+}
+
+#sectionnav li.product_selector {
+	background-position: 0 11px;
+}
+
+#sectionnav li.product_selector select{
+	font-size: 11px;
+	padding: 1px;
+}
+
+#sectionnav .gray_nav{
+color:#666666;
+}
+
+
+/* @end */
+
+/* @group Super Nav */
+
+
+
+#supnavglobal {height: 35px;
+	position:relative;
+	
+}
+
+#supnavmenu {
+	
+	position: absolute;
+	right: 2px;
+	top: 15px;
+	margin: 0;
+	
+}
+
+#supnavmenu li {
+	display: inline;
+	background: none;
+	margin:0;
+	padding: 0;
+}
+
+#supnavmenu a {
+	text-decoration: none;
+	color: #a8a8a8;
+	padding-left: 16px;
+	font-size: 11px;
+}
+
+#supnavmenu a:link {}
+#supnavmenu a:visited {}
+#supnavmenu a:hover {color: #000;}
+#supnavmenu a:active {}
+
+
+#supnavmenu .hover_color a:hover {color: #fff;}
+
+/*
+#supnav #unav_login a {
+	color: #70a426;
+	margin-left: 12px;
+	background: url(icon_lock.gif) no-repeat left center;
+	padding-left: 12px;
+	
+	padding-top: 2px;
+}
+
+#supnav #unav_logout a {
+	color: #70a426;
+	margin-left: 12px;
+	background: url(icon_lock.gif) no-repeat left center;
+	padding-left: 12px;
+	padding-top: 2px;
+}
+*/
+
+
+/* @end */
+
+/* @group Nav */
+
+#nav {
+	height: 18px;
+	
+	padding-top: 4px;
+	padding-bottom: 4px;
+	width: 450px;
+	position: absolute;
+	left: 379px;
+	top: 45px;
+}
+
+#nav ul {margin: 0;}
+
+#nav li {
+	display: inline;
+	background:none;
+	padding:0;
+	margin:0;
+
+}
+
+#nav a {
+	text-decoration: none;
+	padding-right: 22px;
+	font-size: 14px;
+}
+
+#nav a:link {}
+#nav a:visited {}
+#nav a:hover {}
+#nav a:active {}
+
+/*mini site nav*/
+
+#nav_ms {
+	height: 22px;
+	background: url(ms_altheader_navbar.gif) no-repeat;
+	padding-top:4px;
+	
+	
+}
+
+#nav_ms img{
+
+float:left;
+
+
+}
+
+#nav_ms ul {margin: 0;}
+
+#nav_ms li {
+	display: inline;
+	background:none;
+	padding:0;
+	margin:0;
+
+}
+
+#nav_ms a {
+	text-decoration: none;
+	font-weight: bold;
+	color: #fff;
+	
+	font-size: 12px;
+	
+}
+
+#nav_ms a:link {}
+#nav_ms a:visited {}
+#nav_ms a:hover {color: #d7e6ff;}
+#nav_ms a:active {}
+
+
+
+
+
+
+
+
+
+/* @end */
+
+
+
+/* @group Footer Nav */
+
+#footernav {float: left;}
+#footernav ul {margin: 0;}
+
+#footernav li {
+	background: none;
+	margin:0;
+	padding: 0;
+	display: inline;
+}
+
+#footer #footernav a {
+	text-decoration: none;
+	font-weight: normal;
+	padding-right: 12px;
+	font-size: 10px;
+}
+
+#footer #footernav a:link {color: #434343;}
+#footer #footernav a:visited {color: #434343;}
+#footer #footernav a:hover {color: #000;}
+#footer #footernav a:active {color: #000;}
+
+#rightfooternav 
+{
+	float: right;
+	padding-top: 0;
+	margin: 0 0 50px;
+	vertical-align:top;
+}
+#rightfooternav ul {margin: 0;}
+
+#rightfooternav li {
+	background: none;
+	margin:0;
+	padding: 0;
+	display: inline;
+	vertical-align:top;
+}
+
+#rightfooternav a {
+	text-decoration: none;
+	font-weight: normal;
+	padding-right: 5px;
+	font-size: 9px;
+}
+
+#rightfooternav a:link {color: #434343;}
+#rightfooternav a:visited {color: #434343;}
+#rightfooternav a:hover {color: #000;}
+#rightfooternav a:active {color: #000;}
+
+#middlefooternav 
+{
+	float: left;
+	padding-top: 0;
+	padding-left: 50px;
+	margin: 0;
+}
+#middlefooternav ul {margin: 0;}
+
+#middlefooternav li {
+	background: none;
+	margin:0;
+	padding: 0;
+	display: inline;
+}
+
+#middlefooternav a {
+	text-decoration: none;
+	font-weight: normal;
+	padding-right: 16px;
+	font-size: 10px;
+}
+
+#middlefooternav a:link {color: #434343;}
+#middlefooternav a:visited {color: #434343;}
+#middlefooternav a:hover {color: #000;}
+#middlefooternav a:active {color: #000;}
+
+/* @end */
+
+/* @group Breadcrumbs */
+
+#main #breadcrumbs {
+	font-size: 10px;
+	margin-left: 0;
+	color: #959595;
+	padding-bottom: 9px;
+	padding-top: 0px;
+	font-weight: bold;
+}
+
+#main #breadcrumbs a:link { 	
+	color: #545454;
+	font-weight: normal;
+	font-style: normal;
+}
+#main #breadcrumbs a:visited { 	
+	color: #545454;
+	font-weight: normal;
+	font-style: normal;
+}
+#main #breadcrumbs a:hover { 	
+	color: #000;
+	font-weight: normal;
+	font-style: normal;
+}
+#main #breadcrumbs a:active { 	
+	color: #000;
+	font-weight: normal;
+	font-style: normal;
+}
+#breadcrumbs span {
+	color: #959595;
+	margin-left: 8px;
+	margin-right: 8px;
+	font-weight: normal;
+	font-style: normal;
+}
+
+
+/* @end */
+
+
+
+/* @end */
+
+/* @group Grid */
+
+/* Grid Instructions
+
+   <div class="grid2 firstcolumn">
+   
+   12 column grid
+   
+   grid2 {}
+       ^ number of columns wide the unit is
+   string the columns together to form a whole
+   
+   firstcolumn {}
+     ^ removes the margin so that it is flush left
+
+   A horizontal "group" of twelve columns should be enclosed in a
+   <div class=".section"> so that we avoid float issues.
+
+*/
+
+
+/* column widths useful for form elements etc... */
+.width1  {width:  67px;}
+.width2  {width: 150px;}
+.width3  {width: 233px;}
+.width4  {width: 316px;}
+.width5  {width: 399px;}
+.width6  {width: 482px;}
+.width7  {width: 565px;}
+.width8  {width: 648px;}
+.width9  {width: 731px;}
+.width10 {width: 814px;}
+.width11 {width: 897px;}
+.width12 {width: 980px;}
+.widthFull {width: 100%;}
+
+.section {margin-top: 16px;clear:both;}
+
+/* Grid columns */
+.grid2 {
+	/* grid2 = 6 columns */
+	/*width: 149px;  OLD, WRONG VALUE did I do this on purpose? */
+	width: 150px;
+	margin-left: 16px;
+	float: left;
+	display: inline;
+	overflow: hidden;
+}
+
+.grid3 {
+	/* grid3 = 4 columns */
+	width: 233px;
+	margin-left: 16px;
+	float: left;
+	display: inline;
+	overflow: hidden;
+}
+
+.grid4 {
+	/* grid4 = 3 columns */
+	width: 316px;
+	margin-left: 16px;
+	float: left;
+	display: inline;
+	overflow: hidden;
+
+
+}
+
+.grid5 {
+	width: 399px;
+	margin-left: 16px;
+	float: left;
+	display: inline;
+	overflow: hidden;
+
+}
+
+.grid6 {
+	/* grid6 = 2 columns */
+	width: 482px;
+	margin-left: 16px;
+	float: left;
+	display: inline;
+	overflow: hidden;
+
+}
+
+.grid7 {
+	width: 565px;
+	margin-left: 16px;
+	float: left;
+	display: inline;
+	overflow: hidden;
+
+}
+
+.grid7 a {
+	font-weight: bold;
+}
+
+
+.grid7-2cols {
+	/* subdivides the 7 column space into 2 columns */
+	width: 274px;
+	margin-left: 16px;
+	float:  left;
+	display: inline;
+	overflow: hidden;
+
+}
+.grid7-3cols {
+	/* subdivides the 7 column space into 3 columns */
+	width: 175px;
+	margin-left: 16px;
+	float:  left;
+	display: inline;
+	overflow: hidden;
+
+}
+
+
+.grid7-3colsb {
+	/* subdivides the 7 column space into 3 columns */
+	width: 177px;
+	margin-left: 17px;
+	float:  left;
+	display: inline;
+	overflow: hidden;
+
+}
+
+
+
+.featurebox .grid7-3cols {
+	/* subdivides the 7 column space into 3 columns inside a 12px padded box */
+	width: 169px;
+}
+
+.grid8 {
+	width: 648px;
+	margin-left: 16px;
+	float: left;
+	display: inline;
+	overflow: hidden;
+
+}
+
+.grid8-3cols {
+	/* subdivides the 8 column space into 3 columns */
+	width: 205px;
+	margin-left: 16px;
+	float:  left;
+	display: inline;
+	overflow: hidden;
+
+}
+
+.grid9 {
+	width: 731px;
+	margin-left: 16px;
+	float: left;
+	display: inline;
+	overflow: hidden;
+
+}
+.grid9-3cols {
+	/* subdivides the 9 column space into 3 columns */
+	width: 233px;
+	margin-left: 16px;
+	float: left;
+	display: inline;
+	overflow: hidden;
+
+}
+
+
+.grid10 {
+	width: 814px;
+	margin-left: 16px;
+	float: left;
+	display: inline;
+	overflow: hidden;
+
+}
+
+.grid12 {
+/* Full width */
+	width: 980px;
+	overflow: hidden;
+
+}
+
+.gridhalf {
+	/* subdivides a section into two *almost* equal parts */
+	width: 49%;
+	float: left;
+	display: inline;
+	overflow: hidden;
+
+}
+
+.firstcolumn {margin-left: 0;}
+
+.sidebar {
+	font-size: 11px;
+	line-height: 14px;
+}
+
+
+.section:after {
+	content: ".";
+	display: block;
+	height: 0;
+	clear: both;
+	visibility: hidden;
+}
+
+/* Commented by Purni on 04/13/2010/ Width 960 messes up alignment of iFrame in myCitrix pages. It should either be 980 or it should not be specified at all. Reverting to style to what it was before.*/
+/*.section {*zoom: 1;width:960px;margin:0 auto;}*/
+.section {*zoom: 1;}
+
+
+
+
+
+
+/* @end */
+
+/* @group Misc */
+
+.hero {padding-bottom: 18px;}
+
+.divider {
+	border-bottom: 1px dotted #ccc;
+	margin-bottom: 12px;
+	padding-bottom: 6px;
+}
+
+.billboard {
+	margin-top: 1px;
+	margin-bottom: 18px;
+}
+
+.billboard:after {
+	content: ".";
+	display: block;
+	height: 0;
+	clear: both;
+	visibility: hidden;
+}
+.billboard {*zoom: 1;}
+
+.hp_promo_image_large, .hp_promo_image_medium, .hp_promo_image_small {
+	float: left;
+}
+
+.hp_promo_image_medium{
+	margin-left: 1px;
+
+}
+.hp_promo_image_small {
+	margin-left: 1px;
+	margin-top: 1px;
+}
+
+/* @end */
+
+/* @group Form Elements */
+
+.findmenu {
+	width: 300px;
+	margin-bottom: 6px;
+}
+
+select {
+	color: #000;
+}
+
+select, input, textarea, input.formlabel,textarea.formlabel {
+	font-size: 11px;
+
+}
+
+
+.formlabel{
+	font-size: 12px;
+}
+
+
+
+.valuelabel {
+	font-size: 11px;
+}
+
+.formerror {
+	background-color: #cc0000;
+	padding: 10px;
+	margin-bottom: 18px;
+	color: #fff;
+}
+
+.fielderror{
+	background-color: #ccc;
+}
+
+/* @end */
+
+/* @group Online Standards Elements */
+
+#siteheader_os{
+	line-height: 18px;
+	font-size: 16px;
+	text-transform: uppercase;
+	padding: 10px;
+	background-color: #eee;
+	text-align: right;
+	letter-spacing: 3px;
+	background-image: url(siteheader_background.png);
+}
+
+
+#supnav {height: 35px;
+
+}
+
+#supnav ul {
+	position: absolute;
+	right: 2px;
+	bottom: 90px;
+	margin: 0;
+}
+
+#supnav li {
+	display: inline;
+	background: none;
+	margin:0;
+	padding: 0;
+}
+
+#supnav a {
+	text-decoration: none;
+	/*color: #adadad;*/
+	padding-left: 16px;
+	font-size: 11px;
+}
+
+#supnav a:link {}
+#supnav a:visited {}
+#supnav a:hover {color: #919ca9;}
+#supnav a:active {}
+
+#unav_login,
+#unav_logout {
+	float:  right;
+	display: block;
+}
+
+#supnav #unav_login a {
+	color: #000;
+	margin-left: 12px;
+	background: url(icon_lock.gif) no-repeat left center;
+	padding-left: 12px;
+	float:  none;
+	padding-top: 2px;
+}
+
+#supnav #unav_logout a {
+	color: #000;
+	margin-left: 12px;
+	background: url(icon_lock.gif) no-repeat left center;
+	padding-left: 12px;
+	padding-top: 2px;
+	float:  none;
+}
+
+
+
+
+
+
+
+#nav_alt_header_os{
+
+
+}
+
+
+#nav_alt_header_os {
+	height: 18px;
+	background: url(altheader_navbar.gif) no-repeat;
+	padding-top: 4px;
+	padding-bottom: 4px;
+}
+
+#nav_alt_header_os ul {margin: 0;}
+
+#nav_alt_header_os li {
+	display: inline;
+	background:none;
+	padding:0;
+	margin:0;
+
+}
+
+#nav_alt_header_os a {
+	text-decoration: none;
+	font-weight: bold;
+	color: #fff;
+	padding-left: 16px;
+	font-size: 12px;
+	padding-right: 8px;
+}
+
+#nav_alt_header_os a:link {}
+#nav_alt_header_os a:visited {}
+#nav_alt_header_os a:hover {color: #d7e6ff;}
+#nav_alt_header_os a:active {}
+
+
+/*table styles*/
+
+.citrix_table table{
+	color:#545454;
+	font-size:11px;
+	font-family:Arial, Helvetica, sans-serif;
+}
+
+.citrix_table td{
+	padding:5px 7px 5px 7px;
+	
+}
+
+.header_row{
+	color:#fff;
+	font-size:12px;
+	background: #545454 url(table_header_background.gif) repeat-x;
+	font-weight:bold;
+	
+}
+
+.subhead_row{
+	color:#fff;
+	font-size:12px;
+	background: #999 url(table_subhead_background.gif) repeat-x;
+	font-weight:bold;
+	
+}
+
+.subhead_row a:link, .subhead_row a:active, .subhead_row a:visited, .header_row a:link, .header_row a:active, .header_row a:visited{
+	color:#fff;
+	text-decoration:underline;
+}
+
+.subhead_row a:hover, .header_row a:hover{
+	color:#fff;
+	text-decoration:underline;
+}
+
+.light_row{
+	background: #e8e8e8;
+	font-size:9px;
+	text-align:center;
+}
+
+.darker_row{
+	background:#ddd;
+	font-size:9px;
+	text-align:center;
+}
+
+.light_gray{
+	background:#f2f2f2;
+	font-size:11px;
+	text-align:left;
+}
+
+.dark_gray{
+	background:#e8e8e8;
+	font-size:11px;
+	text-align:left;
+}
+
+.table_indent{
+	margin-left:20px;
+}
+
+
+
+
+/* @end */
+
+@media print {
+
+	body, #main, #content {
+		background: #fff !important;
+		color: #000 !important;
+	}
+	
+	a, a:link, a:visited {
+		color: #000 !important;
+		text-decoration: none;
+	}
+}
+
+/* @group Rebrand Section Colors */
+
+/*
+Custom colors for subheads based on section
+*/
+
+/* Product Related - Burgandy */
+#product_topic .titlegroup h3,
+#product_topic a
+{color: #772432;}
+#product_topic a:hover
+{color: #641e2a;}
+
+
+
+/* Partner Related - Green */
+#partner_topic .titlegroup h3,
+#partner_topic a
+{color: #007934;}
+#partner_topic a:hover
+{color: #005e28;}
+
+
+/* Corporate Related - Blue */
+#corporate_topic .titlegroup h3,
+#corporate_topic a
+{color: #0075b0;}
+#corporate_topic a:hover
+{color: #005986;}
+
+
+/* Customer Related - Gold */
+#customer_topic .titlegroup h3,
+#customer_topic a
+{color: #ce8e00;}
+#customer_topic a:hover
+{color: #b57d00;}
+
+
+
+/* @end */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* Start new css - GAURAV LAL @ Outworx (08-April-2010 12:30 PM [IST]) */
+
+
+
+#upperNav{margin-top:60px;padding-top:60px;width:980px;margin-bottom:-11px;}
+#upperNav tr{height:30px;display:block;}
+#upperNav td{display:inline;color:#306580;float:left;padding-right:8px;}
+
+#upperNav td a{color:#772432;font-size:14px;font-family:Arial;}
+ #upperNav td span{color:#666666;font-family:'Helvetica Neue';font-size:21px;position:absolute;padding:0 10px 0 0 !important;float:left;}
+
+/*#upperNav td .buttonRound{background:url(tryButton.jpg) no-repeat;color:#306580;width:68px;height:30px;border:1px solid #fff;cursor:pointer;}
+#upperNav td .buttonRound2{background:url(howtoBuy.jpg) no-repeat;color:#306580;width:93px;height:30px;border:1px solid #fff;cursor:pointer;}*/
+
+#btnBox {float:right;height:0px;position:relative;top:-33px;}
+#btnBox .buttonRound{background:url(tryButton.jpg) no-repeat;color:#306580;width:68px;height:30px;border:1px solid #fff;cursor:pointer;}
+#btnBox .buttonRound2{background:url(howtoBuy.jpg) no-repeat;color:#306580;width:93px;height:30px;border:1px solid #fff;cursor:pointer;}
+.upperButton h4{display:inline;}
+.gradient{height:10px;background:url(navBg.jpg);width:980px;padding:30px;}
+
+.mainContainer{height:400px;width:960px;background:#f4f4f4;margin:0;padding:10px}
+
+.bottomContent{height:60px;margin:0px;}
+.bottomContent h2{text-align:right;font-size:16px;font-weight:bold;}
+
+
+.bottomContent span .buttonRound{background:url(product_try.gif) no-repeat;color:#306580;width:80px;height:27px;cursor:pointer;border:1px solid #FFFFFF;font-size:12px;font-family:Arial;*height:30px;}
+.bottomContent span .buttonRound:hover{background:url(product_tryactive.gif) no-repeat;color:#ffffff;width:80px;height:27px;cursor:pointer;border:1px solid #FFFFFF;font-size:12px;font-family:Arial;*height:30px;}
+
+.bottomContent span .buttonRound2{background:url(product_request.gif) no-repeat;color:#306580;width:130px;height:27px;cursor:pointer;border:1px solid #FFFFFF;font-size:12px;font-family:Arial;*height:30px;}
+.bottomContent span .buttonRound2:hover{background:url(product_requestactive.gif) no-repeat;color:#ffffff;width:130px;height:27px;cursor:pointer;border:1px solid #FFFFFF;font-size:12px;font-family:Arial;*height:30px;}
+
+
+.bottomContent span{float:left;margin:0 2px;}
+.bottomContent img{float:right;margin:0 3px;} 
+.followon{width:82px;float:right}
+.followon li{width:20px;float:left;margin:0 !important;padding:0 !important}
+
+
+
+
+
+#upperNav2{height:5px;width:980px;margin-bottom:10px;}
+#upperNav2 tr{height:15px;display:inline; width:100%;}
+#upperNav2 td{display:inline;color:#306580;float:left;padding:0 8px;font-size:13px;}
+#upperNav2 td a{color:#772432;}
+
+
+
+#upperNav3{height:20px;width:100px;display:inline;margin:0;padding:0 10px 0 0;position:relative;}
+#upperNav3 tr{height:30px;}
+#upperNav3 td{color:#306580;float:left;}
+
+#upperNav3 td a{color:#666666;font-size:21px;}
+
+
+
+
+
+
+
+
+/* -----    Begin Product Nav (12-April-2010)   ----- */
+
+#productNav {
+    background: url(product_bg.png) repeat-x;
+    float: left;
+    height: 90px;
+    margin: 56px 0 2px 0;
+    width: 980px;
+}
+
+    #productNav ul {
+        margin: 0;
+        list-style: none;
+        padding: 0;
+    }
+
+    #productNav li {
+        display: inline;
+	background:none;
+    }
+
+    .mainProductNav {
+        float: left;
+        font-size: 14px;
+        padding: 5px 0 0 0;
+	width:760px;
+	margin-left:10px;
+	*margin-left:5px;
+    }
+
+        .mainProductNav ul li {
+            padding:1px 10px 0;
+            float: left;
+            height: 37px;
+        }
+
+        .mainProductNav ul li a {
+            color: #306580;
+            position:relative;
+        }
+
+        .mainProductNav ul li a:hover {
+            color: #4E4F53 !important;
+            text-decoration: none;
+        }
+
+        .mainProductNav ul li.xen {
+            float:left;
+			font-family:helvetica;
+			font-size:21px;
+			height:37px;
+			padding:0;
+			margin-right:24px;
+        }
+        .mainProductNav ul li.xen  a
+        {
+			color:#4E4F53 !important;
+        }
+
+        .mainProductNav ul li.spacer {
+            padding: 0 24px 0 0;            
+        }
+
+        .mainProductNav ul li.active {
+            background: url(product_nav_active.png) no-repeat top center !important;
+        }
+        .mainProductNav ul li.active a {
+            color:#4E4F53 !important;
+        }
+
+    .subProductNav {
+        font-size: 13px;            
+    }
+
+        .subProductNav ul li {
+            float: left;
+            margin: 4px 0 0 0;
+	    padding-left:0px;
+        }
+		
+		 .subProductNav ul li a {
+			color: #30657f;
+			height: 24px;
+			text-decoration: none;
+        }
+		
+		.subProductNav ul li a span {
+			color: #772432;
+			padding: 5px 9px 4px 8px;
+			line-height: 24px;
+			text-decoration: none;
+        }
+        .subProductNav ul li a span:hover {
+			color: #4E4F53 !important;
+        }
+		
+        .subProductNav ul li.active a {
+			background: url(left_tab.gif) no-repeat left top;
+			color: #4d4f52;
+			float: left;
+			font-size: 13px; 
+			height: 24px;
+			padding: 0 0 0 4px;
+			text-decoration: none;
+			background-color:#E4E6E9;
+        }
+        .subProductNav ul li.active a span {
+			background: url(right_tab.gif) no-repeat right top;
+			color:#4E4F53;
+			float: left;
+			padding: 0 9px 4px 8px;
+			text-decoration: none;
+        }
+
+#productNavLeft {
+	background: url(leftfade.gif) no-repeat;
+	display: block;    
+	float: left;    
+	height: 75px;
+	margin: 25px 0 10px 0;
+	width: 15px;
+}
+#productNavRight {
+	background: url(rightfade.gif) no-repeat;
+	display: block;    
+	float: left;    
+	height: 75px;
+	margin: 25px 0 10px 0;    
+	width: 15px;
+}
+
+.productButtons {
+	margin-right:5px;
+}
+
+    .productButtons ul, li {
+        margin: 0;
+        padding: 0;
+    }
+
+    .productButtons li a {
+            background: url(product_try.gif) no-repeat;
+            color: #306580 !important;
+			float:  right;
+            font-size: 12px;
+            height: 22ssssspx;
+			margin: 0 5px 0 0;
+            padding: 3px 0 0 0;
+			text-align:center;
+            width: 76px;
+            height:22px;
+        }
+
+    .productButtons li a:hover {
+        background: url(product_tryactive.gif) no-repeat;
+        color: #ffffff !important;
+        float: right;
+        text-decoration: none;
+    }
+
+    .productButtons li.last a {
+        margin: 0;margin:0 5px 0 0;
+    }
+
+/* -----    End Product Nav    ----- */
+
+
+
+
+
+
+
+/*
+
+.smallBtn a{
+    background:transparent url(product_howtobuy.gif) no-repeat scroll 0 0;
+    color:#306580 !important;
+    font-size:12px;
+    height:20px;
+    margin:0 5px 0 0;
+    padding:5px 0 0;
+    text-align:center;
+    width:76px;
+}
+
+.smallBtn a:hover {
+                background: url(product_howtobuyactive.gif) no-repeat;
+    color: #ffffff !important;
+    float: right;
+    text-decoration: none;
+}
+
+.bigBtn a{
+    background:transparent url(product_request.gif) no-repeat scroll 0 0;
+    color:#306580 !important;
+    float:right;
+    font-size:12px;
+    height:20px;
+    margin:0 5px 0 0;
+    padding:5px 0 0;
+    text-align:center;
+    width:76px;
+}
+
+.bigBtn a:hover {
+                background: url(product_requestactive.gif) no-repeat;
+    color: #ffffff !important;
+    float: right;
+    text-decoration: none;
+}
+
+*/
+
+
+
+
+
+/* By Gaurav Lal on 04/14/2010/ Product, Feature and Sub-Feature pages' Section area to be indented with Product Navigation Menu line.*/
+.section_PRO_PRF_PSF {*zoom: 1;width:960px;margin:0 auto;clear:both;}
+
+.productButtons li 
+{
+	padding-left:0px !important;
+}
