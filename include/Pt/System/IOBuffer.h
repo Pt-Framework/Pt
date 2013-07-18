@@ -86,7 +86,7 @@ class PT_SYSTEM_API IOBufferImpl
         Signal<IOBuffer&> _outputReady;
 };
 
-class IOBuffer : public BasicStreamBuffer<char>
+class PT_SYSTEM_API IOBuffer : public BasicStreamBuffer<char>
                , public Connectable
 {
     friend class IOBufferImpl;
@@ -105,8 +105,7 @@ class IOBuffer : public BasicStreamBuffer<char>
             _impl.attach(*this, ioDevice); 
         }
 
-        ~IOBuffer()
-        {}
+        ~IOBuffer();
 
         IODevice* device()
         { return _impl.ioDevice(); }

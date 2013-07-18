@@ -32,6 +32,7 @@
 #include <Pt/Http/HttpError.h>
 #include <Pt/TextStream.h>
 #include <Pt/Base64Codec.h>
+#include <Pt/StreamBuffer.h>
 #include <sstream>
 
 namespace Pt {

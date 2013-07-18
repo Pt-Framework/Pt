@@ -32,6 +32,13 @@
 #include <streambuf>
 #include <cstddef>
 
+#if defined(_MSC_VER) && defined(_WIN32_WCE) 
+    #include <streambuf> 
+    template class PT_EXPORT std::basic_streambuf<char>; 
+
+    // alternatively compile with /FORCE:multiple
+#endif
+
 namespace Pt {
 
 template <typename CharT, typename TraitsT = std::char_traits<CharT> >
@@ -62,7 +69,7 @@ class BasicStreamBuffer : public std::basic_streambuf<CharT, TraitsT>
                     return 0;
             }
 
-            std::size_t avail = this->ugptr() ? this->uegptr() - this->gptr() : 0;
+            std::size_t avail = this->gptr() ? this->egptr() - this->gptr() : 0;
 
             // unbuffered streambufs
             if(avail == 0)

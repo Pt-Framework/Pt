@@ -35,6 +35,9 @@ namespace Pt {
 
 namespace System {
 
+IOBuffer::~IOBuffer()
+{}
+
 IOBufferImpl::IOBufferImpl()
 : _ioDevice   (0)
 , _ibufferSize(0)
