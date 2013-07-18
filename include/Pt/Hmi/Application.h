@@ -7,12 +7,10 @@
 #include <Pt/Gfx/Size.h>
 #include <Pt/Singleton.h>
 
-
 namespace Pt {
 namespace Hmi {
 
 class ApplicationImpl;
-
 
 class PT_HMI_API Application : public Pt::System::Application
 {
