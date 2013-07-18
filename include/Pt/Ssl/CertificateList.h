@@ -31,6 +31,7 @@
 
 #include <Pt/Ssl/Api.h>
 #include <Pt/Ssl/PublicKey.h>
+#include <Pt/Ssl/PrivateKey.h>
 #include <Pt/NonCopyable.h>
 #include <vector>
 
@@ -72,6 +73,18 @@ class PT_SSL_API Certificate
     private:
         CertificateImpl* _impl;
 };
+
+
+class CertificateStore : private NonCopyable
+{
+    public:
+        CertificateStore();
+
+        ~CertificateStore();
+
+        void add(const PrivateKey& key, const Certificate& cert);
+};
+
 
 //! \brief Certificate list.
 class PT_SSL_API CertificateList

@@ -153,6 +153,29 @@ CertificateImpl* Certificate::impl() const
 }
 
 
+//
+// CertificateStore
+//
+
+CertificateStore::CertificateStore()
+{
+}
+
+
+CertificateStore::~CertificateStore()
+{
+}
+
+
+void CertificateStore::add(const PrivateKey& key, const Certificate& cert)
+{
+}
+
+
+//
+// CertificateList
+//
+
 CertificateList::CertificateList()
 : _impl( new CertificateListImpl() )
 {
