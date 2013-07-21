@@ -154,8 +154,83 @@ CertificateImpl* Certificate::impl() const
 
 
 //
+// Identity
+//
+
+Identity::Identity(const Certificate& cert, const PrivateKey& key)
+: _cert(cert)
+, _key(key)
+{
+}
+
+
+Identity::~Identity()
+{
+}
+
+
+//
 // CertificateStore
 //
+
+#ifdef __APPLE__
+
+CertificateStore::CertificateStore()
+{
+    CFArrayRef items = NULL; 
+
+    // NOTE: kSecMatchSearchList -> (id)keychain
+    const void *keys[] =   { kSecClass, kSecReturnRef, kSecMatchLimit };
+    const void *values[] = { kSecClassIdentity, kCFBooleanTrue, kSecMatchLimitAll };
+
+    CFDictionaryRef dict = CFDictionaryCreate(NULL, keys, values, 3, NULL, NULL);
+    if(! dict)
+        throw std::runtime_error("invalid keychain");
+
+    OSStatus status = SecItemCopyMatching(dict, (CFTypeRef*)&items);
+
+    CFRelease(dict);
+
+    if (status != errSecSuccess) 
+        throw std::runtime_error("invalid keychain");
+
+    // Do something with certificateRef here
+
+    CFRelease(items);
+}
+
+
+CertificateStore::~CertificateStore()
+{
+}
+
+void CertificateStore::addPem(const char* data, size_t len, const std::string& passwd)
+{
+    //NSMutableDictionary * options = [[[NSMutableDictionary alloc] init] autorelease];
+ 
+    //// Set the public key query dictionary
+    //
+    ////change to your .pfx  password here
+    //[options setObject:@"MyPassword" forKey:(id)kSecImportExportPassphrase];
+ 
+    //CFArrayRef items = CFArrayCreate(NULL, 0, 0, NULL);
+ 
+    //OSStatus securityError = SecPKCS12Import((CFDataRef) pfxkeydata,
+    //                                         (CFDictionaryRef)options, &items);
+ 
+    //CFDictionaryRef identityDict = CFArrayGetValueAtIndex(items, 0);
+    //SecIdentityRef identityApp =
+    //(SecIdentityRef)CFDictionaryGetValue(identityDict,
+    //                                     kSecImportItemIdentity);
+    ////NSLog(@"%@", securityError);
+ 
+    //assert(securityError == noErr);
+    //SecKeyRef privateKeyRef;
+    //SecIdentityCopyPrivateKey(identityApp, &privateKeyRef);
+
+}
+
+#else
 
 CertificateStore::CertificateStore()
 {
@@ -167,9 +242,52 @@ CertificateStore::~CertificateStore()
 }
 
 
-void CertificateStore::add(const PrivateKey& key, const Certificate& cert)
+int passwordCallback(char* buff, int num, int /*rwflag*/, void* userdata)
 {
+    // Get the password
+    const std::string& password = *((std::string*) userdata);
+
+    // If the wanted length is not the same with the given password length, just return 0
+    if((size_t) num < password.length() + 1) 
+        return 0;
+
+    // Copy the password to the buffer and return the length
+    strcpy(buff, &password[0]);
+    return password.length();
 }
+
+
+// Add the contents of a PEM file to the Certificate store
+void CertificateStore::addPem(const char* data, size_t len, const std::string& passwd)
+{
+    BioAutoPtr in( BIO_new_mem_buf( (void*) data, len ) );
+
+    while(true) 
+    {
+        // Is it a certificate
+        X509AutoPtr x509 ( PEM_read_bio_X509_AUX(in.get(), 0, 0, 0) );
+        if(x509)
+        {
+            Certificate cert( new CertificateImpl(x509.get()) );
+            _certificates.push_back(cert);
+            x509.release();
+            continue;
+        }
+
+        // ..or is it a private key?
+        evp_pkey_st* pkey = PEM_read_bio_PrivateKey(in.get(), 0, &passwordCallback, (void*) &passwd);
+        if(pkey)
+        {
+            continue;
+        }
+
+        break;
+    }
+
+    // TODO: find out if we have private-key/certificate pairs that form an Identitiy
+}
+
+#endif
 
 
 //

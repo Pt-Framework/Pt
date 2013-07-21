@@ -75,14 +75,17 @@ class PT_SSL_API Certificate
 };
 
 
-class CertificateStore : private NonCopyable
+class Identity
 {
     public:
-        CertificateStore();
+        Identity(const Certificate& cert, const PrivateKey& key);
 
-        ~CertificateStore();
+        ~Identity();
 
-        void add(const PrivateKey& key, const Certificate& cert);
+    private:
+        Certificate _cert;
+        PrivateKey _key;
+        
 };
 
 
@@ -136,6 +139,31 @@ class PT_SSL_API CertificateList
     private:
         class CertificateListImpl* _impl;
 };
+
+
+typedef std::vector<Identity> IdentityList;
+
+
+class CertificateStore : private NonCopyable
+{
+    public:
+        CertificateStore();
+
+        ~CertificateStore();
+
+        const IdentityList& identities()
+        { return _identities; }
+
+        const CertificateList certificates()
+        { return _certificates; }
+
+        void addPem(const char* data, size_t len, const std::string& passwd);
+
+    private:
+        IdentityList _identities;
+        CertificateList _certificates;
+};
+
 
 //! @brief Forward iterator for certificate lists
 class CertificateList::Iterator
