@@ -177,11 +177,11 @@ Identity::~Identity()
 
 CertificateStore::CertificateStore()
 {
-    CFArrayRef items = NULL; 
+    CFArrayRef items = NULL;
 
     // NOTE: kSecMatchSearchList -> (id)keychain
-    const void *keys[] =   { kSecClass, kSecReturnRef, kSecMatchLimit };
-    const void *values[] = { kSecClassIdentity, kCFBooleanTrue, kSecMatchLimitAll };
+    const void* keys[]   = { kSecClass,         kSecReturnRef,  kSecMatchLimit };
+    const void* values[] = { kSecClassIdentity, kCFBooleanTrue, kSecMatchLimitAll };
 
     CFDictionaryRef dict = CFDictionaryCreate(NULL, keys, values, 3, NULL, NULL);
     if(! dict)

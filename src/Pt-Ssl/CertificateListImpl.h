@@ -42,8 +42,9 @@
 #ifdef __APPLE__
 #include <Pt/Base64Codec.h>
 #include <Pt/TextStream.h>
-#include <Security/Security.h>
-#include <CoreFoundation/CoreFoundation.h>
+#import <Security/Security.h>
+#import <CoreFoundation/CoreFoundation.h>
+#import <CoreFoundation/CFDictionary.h>
 #include <string>
 #include <sstream>
 #endif
@@ -179,9 +180,9 @@ class CertificateListImpl2
             return _certificates.empty() ? 0 : &_certificates[0] + _certificates.size(); 
         }
 
-        void fromPem(const char* data, size_t len)
+        void fromPem(const char* pemData, size_t len)
         {
-            std::istringstream iss( std::string(data, len) );
+            std::istringstream iss( std::string(pemData, len) );
             // alternatively:
             // iss.write(data, len);
             // is.seekg(0, iss.beg);

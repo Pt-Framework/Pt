@@ -199,6 +199,11 @@ if $(WITH_OPENSSL)
     Configure OPENSSL_INCLUDES ;
     EchoOption OPENSSL_INCLUDES : "OpenSSL includes" ;
 
+    if $(TARGET_OS:L) = "macosx"
+    {
+        OPENSSL_LINKLIBS += "-framework Foundation" "-framework Security" ;
+    }
+
     Configure OPENSSL_LINKLIBS ;
     EchoOption OPENSSL_LINKLIBS : "OpenSSL library" ;
 }
