@@ -212,12 +212,8 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
             if( this->pptr() )
             {
                 // Try to write out the whole buffer to the underlying stream.
-                // Fail if we can not make progress, because more characters
-                // are needed to continue a multi-byte sequence.
                 while( this->pptr() > this->pbase() )
                 {
-                    const char_type* p = this->pptr();
-
                     if( this->overflow( traits_type::eof() ) == traits_type::eof() )
                         return -1;
                 }
