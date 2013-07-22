@@ -999,6 +999,9 @@
     <ClInclude Include="..\..\include\Pt\Hmi\Renderer.h">
       <Filter>Pt-Hmi\Headers</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Ssl\PrivateKeyImpl.h">
+      <Filter>Pt-Ssl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">

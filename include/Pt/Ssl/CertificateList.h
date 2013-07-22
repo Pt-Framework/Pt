@@ -144,7 +144,7 @@ class PT_SSL_API CertificateList
 typedef std::vector<Identity> IdentityList;
 
 
-class CertificateStore : private NonCopyable
+class PT_SSL_API CertificateStore : private NonCopyable
 {
     public:
         CertificateStore();
@@ -158,6 +158,8 @@ class CertificateStore : private NonCopyable
         { return _certificates; }
 
         void addPem(const char* data, size_t len, const std::string& passwd);
+
+        void loadPkcs12(const char* data, size_t len, const char* passwd);
 
     private:
         IdentityList _identities;

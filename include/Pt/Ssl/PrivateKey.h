@@ -47,6 +47,8 @@ class PT_SSL_API PrivateKey
         //! \brief Contructs an empty private key.
         PrivateKey();
 
+        explicit PrivateKey(PrivateKeyImpl* impl);
+
         //! \brief Contructs an empty key with a password.
         explicit PrivateKey(const std::string& password);
 

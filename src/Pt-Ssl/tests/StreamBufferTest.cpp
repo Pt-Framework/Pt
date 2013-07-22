@@ -35,6 +35,7 @@
 #include "Pt/Ssl/StreamBuffer.h"
 #include "Pt/System/Logger.h"
 #include <sstream>
+#include <fstream>
 
 class StreamBufferTest : public Pt::Unit::TestSuite
 {
@@ -45,6 +46,7 @@ class StreamBufferTest : public Pt::Unit::TestSuite
             Pt::System::Logger::setLogLevel("", Pt::System::Error);
 
             this->registerMethod("Handshake", *this, &StreamBufferTest::Handshake);
+            this->registerMethod("CertificateStore", *this, &StreamBufferTest::CertificateStore);
         }
 
         void setUp()
@@ -53,11 +55,32 @@ class StreamBufferTest : public Pt::Unit::TestSuite
         void tearDown()
         { }
 
+        void CertificateStore();
         void Handshake();
 };
 
 
 Pt::Unit::RegisterTest<StreamBufferTest> register_StreamBufferTest;
+
+void StreamBufferTest::CertificateStore()
+{
+    // adjust the path
+    #ifdef _WIN32
+        std::ifstream ifs("..\\..\\src\\Pt-Ssl\\tests\\cert\\ca.p12", std::ios::binary);
+    #else
+        std::ifstream ifs("src/Pt-Ssl/tests/cert/ca.p12", std::ios::binary);
+    #endif
+
+    char buffer[4096];
+    ifs.read( buffer, sizeof(buffer) );
+
+    std::clog << "ca.p12 is " << ifs.gcount() << " bytes long." << std::endl;
+
+    Pt::Ssl::CertificateStore certStore;
+
+    // load without password, as in the other test
+    certStore.loadPkcs12(buffer, (size_t)ifs.gcount(), "");
+}
 
 
 void StreamBufferTest::Handshake()

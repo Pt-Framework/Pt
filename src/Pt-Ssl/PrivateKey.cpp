@@ -28,123 +28,17 @@
  */
 
 #include "OpenSsl.h"
+#include "PrivateKeyImpl.h"
 #include <Pt/Ssl/PrivateKey.h>
-#include <Pt/Ssl/SslError.h>
-#include <Pt/NonCopyable.h>
-#include <Pt/Atomicity.h>
-#include <iostream>
-#include <fstream>
 
 namespace Pt {
 
 namespace Ssl {
 
-class PrivateKeyImpl : private Pt::NonCopyable
+PrivateKey::PrivateKey(PrivateKeyImpl* impl)
+: _pswd()
+, _impl(impl)
 {
-    public:
-        PrivateKeyImpl(const std::string& password)
-        : _pswd(password)
-        , _pkey(0)
-        , _refs(1)
-        { }
-        
-        ~PrivateKeyImpl()
-        {
-            if(_pkey)
-                EVP_PKEY_free(_pkey);
-        }
-
-        void ref()
-        { atomicIncrement(_refs); }
-
-        int unref()
-        { return atomicDecrement(_refs); }
-
-        void fromPem(const char* data, size_t len);
-
-        void fromPem(std::istream& is);
-
-        void fromPemFile(const char* path);
-
-        void toPem(std::ostream& os) const;
-
-        static int passwordCallback(char* buff, int num, int /*rwflag*/, void* userdata);
-
-        evp_pkey_st* evp()
-        { return _pkey; }
-
-    private:
-        const std::string&  _pswd;
-        evp_pkey_st* _pkey;
-        Pt::atomic_t _refs;
-};
-
-
-void PrivateKeyImpl::fromPem(const char* data, size_t len)
-{
-    // Create a read-only memory BIO from the given string
-    BioAutoPtr in( BIO_new_mem_buf( (void*) data, len ) );
-
-    // Try to read/parse the private key
-    _pkey = PEM_read_bio_PrivateKey(in.get(), 0, &PrivateKeyImpl::passwordCallback, (void*) &_pswd);
-    if(!_pkey)
-        throw InvalidKey("Could not read/parse/decode private-key data!");
-}
-
-
-void PrivateKeyImpl::fromPem(std::istream& is)
-{
-    char rbuf[4096];
-    const std::streamsize rbufSize = sizeof(rbuf);
-    std::string data;
-    while( is ) 
-    {
-        is.read(rbuf, rbufSize);
-        size_t count = size_t( is.gcount() );
-        data.append(rbuf, count);
-    }
-
-    fromPem( data.c_str(), data.size() );
-}
-
-
-void PrivateKeyImpl::fromPemFile(const char* path)
-{
-    std::ifstream ifs(path, std::ios::binary);
-    fromPem(ifs);
-}
-
-
-void PrivateKeyImpl::toPem(std::ostream& os) const
-{
-    if( ! _pkey)
-        return;
-    
-    BioAutoPtr out( BIO_new(BIO_s_mem()) );
-
-    int ret = PEM_write_bio_PrivateKey(out.get(), _pkey, EVP_des_ede3_cbc(), NULL, 0, 
-                                       &PrivateKeyImpl::passwordCallback, (void*) &_pswd);
-    if( ! ret)
-        throw InvalidKey("Could not write key in pem format");
-
-    char* data = 0;
-    long len = BIO_get_mem_data(out.get(), &data);
-    os.write(data, len);
-}
-
-
-int PrivateKeyImpl::passwordCallback(char* buff, int num, int /*rwflag*/, void* userdata)
-{
-    // Get the password
-    const std::string& password = *((std::string*) userdata);
-
-    // If the wanted length is not the same with the given password length, just return 0
-    if((unsigned) num < password.length() + 1) 
-        return 0;
-
-    // Copy the password to the buffer and return the length
-    strcpy(buff, &password[0]);
-    return password.length();
 }
 
 

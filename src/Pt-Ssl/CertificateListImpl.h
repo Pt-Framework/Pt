@@ -38,6 +38,7 @@
 #include <openssl/ssl.h>
 #include <openssl/pem.h>
 #include <openssl/err.h>
+#include <openssl/pkcs12.h>
 
 #ifdef __APPLE__
 #include <Pt/Base64Codec.h>

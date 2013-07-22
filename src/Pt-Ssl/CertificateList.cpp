@@ -27,9 +27,11 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "CertificateListImpl.h"
+#include "PrivateKeyImpl.h"
 #include <Pt/Ssl/CertificateList.h>
+#include <Pt/Ssl/PrivateKey.h>
 #include <Pt/System/Logger.h>
-#include <fstream>
+#include <iostream>
 #include <cassert>
 
 log_define("Pt.Ssl.CertificateList")
@@ -206,28 +208,45 @@ CertificateStore::~CertificateStore()
 
 void CertificateStore::addPem(const char* data, size_t len, const std::string& passwd)
 {
-    //NSMutableDictionary * options = [[[NSMutableDictionary alloc] init] autorelease];
- 
-    //// Set the public key query dictionary
-    //
-    ////change to your .pfx  password here
-    //[options setObject:@"MyPassword" forKey:(id)kSecImportExportPassphrase];
- 
-    //CFArrayRef items = CFArrayCreate(NULL, 0, 0, NULL);
- 
-    //OSStatus securityError = SecPKCS12Import((CFDataRef) pfxkeydata,
-    //                                         (CFDictionaryRef)options, &items);
- 
-    //CFDictionaryRef identityDict = CFArrayGetValueAtIndex(items, 0);
-    //SecIdentityRef identityApp =
-    //(SecIdentityRef)CFDictionaryGetValue(identityDict,
-    //                                     kSecImportItemIdentity);
-    ////NSLog(@"%@", securityError);
- 
-    //assert(securityError == noErr);
-    //SecKeyRef privateKeyRef;
-    //SecIdentityCopyPrivateKey(identityApp, &privateKeyRef);
+}
 
+void CertificateStore::loadPkcs12(const char* pkcs12, size_t len, const char* passwd)
+{
+    CFDataRef data = CFDataCreate(NULL, reinterpret_cast<const UInt8*>(pkcs12), len);
+
+    const void* keys[]   = { kSecImportExportPassphrase };
+    const void* values[] = { passwd };
+
+    CFDictionaryRef options = CFDictionaryCreate(NULL, keys, values, 1, NULL, NULL);
+
+    CFArrayRef items = CFArrayCreate(NULL, 0, 0, NULL);
+    
+    OSStatus securityError = SecPKCS12Import(data, options, &items);
+    assert(securityError == noErr);
+    CFRelease(options);
+    CFRelease(data);
+
+    CFIndex count = CFArrayGetCount(items);
+    for(CFIndex n = 0; n < count; ++n)
+    {
+        CFDictionaryRef item = CFArrayGetValueAtIndex(items, n);
+    
+        SecIdentityRef identity =
+          (SecIdentityRef) CFDictionaryGetValue(item, kSecImportItemIdentity);
+
+        if(identity)
+        {
+            SecKeyRef pkey;
+            SecIdentityCopyPrivateKey(identity, &pkey);
+
+            SecCertificateRef certificateRef;
+            SecIdentityCopyCertificate(identity, &certificateRef);
+
+            // Certificate c( new CertificateImpl(certificateRef) );
+            // PrivateKey pk( new PrivateKeyImpl(pkey) );
+            //_identities.push_back( Identity(c, pk) );
+        }
+    }
 }
 
 #else
@@ -285,6 +304,76 @@ void CertificateStore::addPem(const char* data, size_t len, const std::string& p
     }
 
     // TODO: find out if we have private-key/certificate pairs that form an Identitiy
+}
+
+
+void CertificateStore::loadPkcs12(const char* data, size_t len, const char* passwd)
+{
+    EVP_PKEY* pkey = NULL;
+    X509* cert = NULL;
+    STACK_OF(X509)* ca = NULL;
+
+    BioAutoPtr in( BIO_new_mem_buf( (void*) data, len ) );
+
+    PKCS12* p12 = d2i_PKCS12_bio(in.get(), NULL);
+    if( ! p12)
+        throw InvalidCertificate("invalid PKCS12 data");
+
+    int status = PKCS12_parse(p12, passwd, &pkey, &cert, &ca);
+    PKCS12_free(p12);
+
+    if( ! status )
+        throw InvalidCertificate("invalid PKCS12 content");
+
+    try
+    {
+        if(cert) 
+        {
+            X509AutoPtr x509(cert);
+            Certificate c( new CertificateImpl(x509.get()) );
+            _certificates.push_back(c);
+            x509.release();
+
+            if(pkey)
+            {
+                PrivateKey pk( new PrivateKeyImpl(pkey) );
+                _identities.push_back( Identity(c, pk) );
+                pkey = 0;
+            }
+        }
+
+        if(pkey) 
+        {
+            EVP_PKEY_free(pkey);
+            pkey = NULL;
+        }
+    
+        if( ca )
+        {
+            for(int i = 0; i < sk_X509_num(ca); i++)
+            {
+                X509AutoPtr x509( sk_X509_pop(ca) );
+                Certificate cert( new CertificateImpl(x509.get()) );
+                _certificates.push_back(cert);
+                x509.release();
+            }
+
+            sk_X509_pop_free(ca, X509_free);
+            ca = NULL;
+        }  
+    } 
+    catch(...)
+    {
+        // TODO: use smart pointers later...
+
+        if(pkey) 
+            EVP_PKEY_free(pkey);
+
+        if( ca )
+            sk_X509_pop_free(ca, X509_free);
+        
+        throw;
+    }
 }
 
 #endif

@@ -563,7 +563,7 @@ Library Pt-Ssl-openssl  :
     crypto/pkcs12/p12_decr.c
     crypto/pkcs12/p12_init.c
     crypto/pkcs12/p12_key.c
-  # crypto/pkcs12/p12_kiss.c
+    crypto/pkcs12/p12_kiss.c
     crypto/pkcs12/p12_mutl.c
     crypto/pkcs12/p12_utl.c
   # crypto/pkcs12/p12_npas.c
