@@ -179,26 +179,26 @@ Identity::~Identity()
 
 CertificateStore::CertificateStore()
 {
-    CFArrayRef items = NULL;
-
-    // NOTE: kSecMatchSearchList -> (id)keychain
-    const void* keys[]   = { kSecClass,         kSecReturnRef,  kSecMatchLimit };
-    const void* values[] = { kSecClassIdentity, kCFBooleanTrue, kSecMatchLimitAll };
-
-    CFDictionaryRef dict = CFDictionaryCreate(NULL, keys, values, 3, NULL, NULL);
-    if(! dict)
-        throw std::runtime_error("invalid keychain");
-
-    OSStatus status = SecItemCopyMatching(dict, (CFTypeRef*)&items);
-
-    CFRelease(dict);
-
-    if (status != errSecSuccess) 
-        throw std::runtime_error("invalid keychain");
-
-    // Do something with certificateRef here
-
-    CFRelease(items);
+//    CFArrayRef items = NULL;
+//
+//    // NOTE: kSecMatchSearchList -> (id)keychain
+//    const void* keys[]   = { kSecClass,         kSecReturnRef,  kSecMatchLimit };
+//    const void* values[] = { kSecClassIdentity, kCFBooleanTrue, kSecMatchLimitAll };
+//
+//    CFDictionaryRef dict = CFDictionaryCreate(NULL, keys, values, 3, NULL, NULL);
+//    if(! dict)
+//        throw std::runtime_error("invalid keychain");
+//
+//    OSStatus status = SecItemCopyMatching(dict, (CFTypeRef*)&items);
+//
+//    CFRelease(dict);
+//
+//    if (status != errSecSuccess) 
+//        throw std::runtime_error("invalid keychain");
+//
+//    // Do something with certificateRef here
+//
+//    CFRelease(items);
 }
 
 
@@ -210,27 +210,37 @@ void CertificateStore::addPem(const char* data, size_t len, const std::string& p
 {
 }
 
+
 void CertificateStore::loadPkcs12(const char* pkcs12, size_t len, const char* passwd)
 {
     CFDataRef data = CFDataCreate(NULL, reinterpret_cast<const UInt8*>(pkcs12), len);
+    if( ! data)
+        throw std::runtime_error("CFDataCreate");
 
-    const void* keys[]   = { kSecImportExportPassphrase };
-    const void* values[] = { passwd };
+    CFStringRef password = CFStringCreateWithCString(NULL, passwd, kCFStringEncodingUTF8);
+    
+    const void* keys[]   = { kSecImportExportPassphrase, 0 };
+    const void* values[] = { password, 0 };
 
     CFDictionaryRef options = CFDictionaryCreate(NULL, keys, values, 1, NULL, NULL);
+    if( ! options)
+        throw std::runtime_error("CFDictionaryCreate");
 
-    CFArrayRef items = CFArrayCreate(NULL, 0, 0, NULL);
+    CFArrayRef items = NULL; //CFArrayCreate(NULL, 0, 0, NULL);
     
     OSStatus securityError = SecPKCS12Import(data, options, &items);
     assert(securityError == noErr);
+    
+    CFRelease(password);
     CFRelease(options);
     CFRelease(data);
 
     CFIndex count = CFArrayGetCount(items);
+
     for(CFIndex n = 0; n < count; ++n)
     {
-        CFDictionaryRef item = CFArrayGetValueAtIndex(items, n);
-    
+        CFDictionaryRef item = (CFDictionaryRef)CFArrayGetValueAtIndex(items, n);
+
         SecIdentityRef identity =
           (SecIdentityRef) CFDictionaryGetValue(item, kSecImportItemIdentity);
 
