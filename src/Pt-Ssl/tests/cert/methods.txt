@@ -16,3 +16,11 @@ openssl x509 -req -in client.req -CA ca.cer -CAkey ca.key -set_serial 101 -extfi
 openssl pkcs12 -export -inkey client.key -in client.cer -out client.p12
 openssl pkcs12 -in client.p12 -out client.pem -clcerts -nokeys
 openssl x509 -in client.pem -inform PEM -out client.der -outform DER
+
+-------------------------------------------------------------------------------
+
+openssl pkcs12 -export -inkey ca.key -in ca.cer -out ca-with-password.p12
+openssl pkcs12 -export -inkey server.key -in server.cer -out server-with-password.p12
+openssl pkcs12 -export -inkey client.key -in client.cer -out client-with-password.p12
+
+123
