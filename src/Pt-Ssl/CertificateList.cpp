@@ -182,29 +182,31 @@ CertificateStore::CertificateStore()
 //    CFArrayRef items = NULL;
 //
 //    // NOTE: kSecMatchSearchList -> (id)keychain
-//    const void* keys[]   = { kSecClass,         kSecReturnRef,  kSecMatchLimit };
-//    const void* values[] = { kSecClassIdentity, kCFBooleanTrue, kSecMatchLimitAll };
+//    const void* keys[]   = { kSecClass,         kSecReturnRef,  kSecMatchLimit, 0 };
+//    const void* values[] = { kSecClassIdentity, kCFBooleanTrue, kSecMatchLimitAll, 0 };
 //
 //    CFDictionaryRef dict = CFDictionaryCreate(NULL, keys, values, 3, NULL, NULL);
-//    if(! dict)
-//        throw std::runtime_error("invalid keychain");
+//    if( ! dict)
+//        throw std::runtime_error("invalid keychain values");
 //
 //    OSStatus status = SecItemCopyMatching(dict, (CFTypeRef*)&items);
 //
 //    CFRelease(dict);
 //
-//    if (status != errSecSuccess) 
+//    if( status != errSecSuccess && status != errSecItemNotFound ) 
 //        throw std::runtime_error("invalid keychain");
 //
 //    // Do something with certificateRef here
 //
-//    CFRelease(items);
+//    if(items)
+//        CFRelease(items);
 }
 
 
 CertificateStore::~CertificateStore()
 {
 }
+
 
 void CertificateStore::addPem(const char* data, size_t len, const std::string& passwd)
 {
@@ -229,6 +231,7 @@ void CertificateStore::loadPkcs12(const char* pkcs12, size_t len, const char* pa
     CFArrayRef items = NULL; //CFArrayCreate(NULL, 0, 0, NULL);
     
     OSStatus securityError = SecPKCS12Import(data, options, &items);
+
     assert(securityError == noErr);
     
     CFRelease(password);
