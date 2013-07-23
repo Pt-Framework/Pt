@@ -66,25 +66,40 @@ void StreamBufferTest::CertificateStore()
 {
     // adjust the path
     #ifdef _WIN32
-        std::ifstream ifs("..\\..\\src\\Pt-Ssl\\tests\\cert\\ca.p12", std::ios::binary);
+        std::ifstream ifs("src\\Pt-Ssl\\tests\\cert\\ca.p12", std::ios::binary);
     #else
         std::ifstream ifs("src/Pt-Ssl/tests/cert/ca.p12", std::ios::binary);
     #endif
 
-    char buffer[4096];
-    ifs.read( buffer, sizeof(buffer) );
-
-    std::clog << "ca.p12 is " << ifs.gcount() << " bytes long." << std::endl;
-
     Pt::Ssl::CertificateStore certStore;
 
     // load without password, as in the other test
-    certStore.loadPkcs12(buffer, (size_t)ifs.gcount(), "");
+    certStore.loadPkcs12(ifs, "");
 }
 
 
 void StreamBufferTest::Handshake()
 {
+    // adjust the path
+    #ifdef _WIN32
+        std::ifstream ifs("src\\Pt-Ssl\\tests\\cert\\client.p12", std::ios::binary);
+    #else
+        std::ifstream ifs("src/Pt-Ssl/tests/cert/client.p12", std::ios::binary);
+    #endif
+
+    #ifdef _WIN32
+        std::ifstream ifs_ca("src\\Pt-Ssl\\tests\\cert\\ca.p12", std::ios::binary);
+    #else
+        std::ifstream ifs_ca("src/Pt-Ssl/tests/cert/ca.p12", std::ios::binary);
+    #endif
+
+    Pt::Ssl::CertificateStore certStore;
+    certStore.loadPkcs12(ifs, "");
+    certStore.loadPkcs12(ifs_ca, "");
+
+    PT_UNIT_ASSERT( ! certStore.identities().empty() );
+    PT_UNIT_ASSERT( ! certStore.certificates().empty() );
+
     std::stringstream data;
 
     Pt::Ssl::CertificateList caCert;
@@ -111,9 +126,14 @@ void StreamBufferTest::Handshake()
     clientPrivKey.fromPem(clientKeyData, sizeof(clientKeyData));
 
     Pt::Ssl::Context clientContext;
-    clientContext.setCACertificates(caCert);
-    clientContext.setCertificateChain(clientCert);
-    clientContext.setPrivateKey(clientPrivKey);
+    //clientContext.setCACertificates(caCert);
+    //clientContext.setCertificateChain(clientCert);
+    //clientContext.setPrivateKey(clientPrivKey);
+
+    const Pt::Ssl::Identity& clientIdentity = certStore.identities().front();
+    clientContext.setCertificate( clientIdentity.certificate() );
+    clientContext.setPrivateKey( clientIdentity.privateKey());
+    clientContext.setCACertificates( certStore.certificates() );
     clientContext.setVerifyMode(Pt::Ssl::Context::VerifyPeer);
 
     // client begins the handshake

@@ -13,7 +13,7 @@ SubDirCcFlags [ FDefines OPENSSL_NO_COMP ] ;
 SubDirCcFlags [ FDefines OPENSSL_NO_IDEA ] ;
 SubDirCcFlags [ FDefines OPENSSL_NO_KRB5 ] ;
 SubDirCcFlags [ FDefines OPENSSL_NO_PSK ] ;
-SubDirCcFlags [ FDefines OPENSSL_NO_RC2 ] ;
+#SubDirCcFlags [ FDefines OPENSSL_NO_RC2 ] ;
 SubDirCcFlags [ FDefines OPENSSL_NO_RC4 ] ;
 SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Ssl openssl ;
 
@@ -133,11 +133,11 @@ Library Pt-Ssl-openssl  :
   # crypto/aes/aes_ctr.c
   # crypto/aes/aes_ige.c
     crypto/aes/aes_wrap.c
-  # crypto/rc2/rc2_ecb.c
-  # crypto/rc2/rc2_skey.c
-  # crypto/rc2/rc2_cbc.c
-  # crypto/rc2/rc2cfb64.c
-  # crypto/rc2/rc2ofb64.c
+  crypto/rc2/rc2_ecb.c
+  crypto/rc2/rc2_skey.c
+  crypto/rc2/rc2_cbc.c
+  crypto/rc2/rc2cfb64.c
+  crypto/rc2/rc2ofb64.c
   # crypto/rc4/rc4_skey.c
   # crypto/rc4/rc4_enc.c
   # crypto/des/cbc_cksm.c
@@ -349,7 +349,7 @@ Library Pt-Ssl-openssl  :
     crypto/evp/names.c
     crypto/evp/e_seed.c
   # crypto/evp/e_xcbc_d.c
-  # crypto/evp/e_rc2.c
+  crypto/evp/e_rc2.c
   # crypto/evp/e_cast.c
   # crypto/evp/e_rc5.c
   # crypto/evp/m_null.c

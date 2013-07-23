@@ -82,6 +82,12 @@ class Identity
 
         ~Identity();
 
+        const Certificate& certificate() const
+        { return _cert; }
+
+        const PrivateKey& privateKey() const
+        { return _key; }
+
     private:
         Certificate _cert;
         PrivateKey _key;
@@ -160,6 +166,8 @@ class PT_SSL_API CertificateStore : private NonCopyable
         void addPem(const char* data, size_t len, const std::string& passwd);
 
         void loadPkcs12(const char* data, size_t len, const char* passwd);
+
+        void loadPkcs12(std::istream& is, const char* passwd);
 
     private:
         IdentityList _identities;

@@ -388,6 +388,23 @@ void CertificateStore::loadPkcs12(const char* data, size_t len, const char* pass
 
 #endif
 
+void CertificateStore::loadPkcs12(std::istream& is, const char* passwd)
+{
+    std::vector<char> data;
+    char rbuf[4096];
+    const std::streamsize rbufSize = sizeof(rbuf);
+
+    while( is )
+    {
+        is.read( rbuf, rbufSize );
+        data.insert( data.end(), rbuf, rbuf + is.gcount() );
+    }
+
+    if( data.empty() )
+        return;
+
+    loadPkcs12(&data[0], data.size(), passwd);
+}
 
 //
 // CertificateList
