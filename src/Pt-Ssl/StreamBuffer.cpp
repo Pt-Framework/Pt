@@ -489,28 +489,38 @@ std::streamsize StreamBuffer::do_underflow(std::streamsize isize)
                     _ibuffer + _pbmax + leftover ); // end of get area
     }
 
-    BUF_MEM* bm = 0;
+    // We do not need to read all bytes from _ssl, but only make some progress
+    size_t used = _pbmax + leftover;
+    size_t unused = _ibufferSize - used;
+
+    log_debug("available to fill: " << unused);
+    assert(unused);
+
+    std::streamsize readSize = sslRead(_ibuffer + used, unused, isize);
+
+    if(readSize > 0)
+    {
+        log_debug("place decoded data in buffer");
+        this->setg( _ibuffer + (_pbmax - putback), // start of get area
+                    _ibuffer + _pbmax,             // gptr position
+                    _ibuffer + used + readSize );  // end of get area
+    }
+
+    return readSize;
+}
+
+
+std::streamsize StreamBuffer::sslRead(char* buf, size_t n, std::streamsize isize)
+{
     while(true) 
     {
-        // We do not need to read all bytes from _ssl, but only make some progress
-        size_t used = _pbmax + leftover;
-        size_t unused = _ibufferSize - used;
-
-        log_debug("available to fill: " << unused);
-        assert(unused);
-
         // even if we could not refill the BIO, we might still get data from the SSL
-        const int readSize = SSL_read(_ssl, _ibuffer + used, unused);
+        const int readSize = SSL_read(_ssl, buf, n);
         log_debug("Read " << readSize << " bytes from _ssl");
         log_debug("SSL_get_shutdown() = " << SSL_get_shutdown(_ssl));
 
         if(readSize > 0)
-        {
-            log_debug("place decoded data in buffer");
-            this->setg( _ibuffer + (_pbmax - putback), // start of get area
-                        _ibuffer + _pbmax,             // gptr position
-                        _ibuffer + used + readSize );  // end of get area
-            
+        {           
             return readSize;
         }
 
@@ -525,7 +535,8 @@ std::streamsize StreamBuffer::do_underflow(std::streamsize isize)
             }
 
             log_debug("ssl error occured");
-            while( ( sslerr = ERR_get_error() ) ) {
+            while( ( sslerr = ERR_get_error() ) ) 
+            {
                 log_debug("ERR_error_string = " << ERR_error_string(sslerr, 0));
             }
             
@@ -536,27 +547,24 @@ std::streamsize StreamBuffer::do_underflow(std::streamsize isize)
             return 0;
 
         // Refill the BIO with encoded bytes for decoding
+        BUF_MEM* bm = 0;
         BIO_get_mem_ptr(_in, &bm);
+
         if(bm->max == bm->length)
             continue;
 
-        // Block until data can be read from the stream
-        if( traits_type::eof() == _ios->sgetc() )
-            return 0;
-
-        const std::streamsize avail  = std::min(_ios->in_avail(), isize);
-        const std::streamsize refill = std::min(static_cast<std::streamsize>(bm->max - bm->length), avail);
-        isize -= refill;
+        const std::streamsize refill = std::min(static_cast<std::streamsize>(bm->max - bm->length), isize);
         log_debug("get " << refill << " bytes from _ios");
         
         std::streamsize gcount = _ios->sgetn(bm->data + bm->length, refill);
         bm->length += static_cast<int>( gcount );
         log_debug("Wrote " << gcount << " bytes from _ios to _in BUF_MEM");
+
+        isize -= gcount;
     }
 
     return 0;
 }
-
 
 StreamBuffer::int_type StreamBuffer::overflow(int_type ch)
 {

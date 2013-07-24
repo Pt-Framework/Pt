@@ -147,6 +147,8 @@ class PT_SSL_API StreamBuffer : public std::streambuf
         std::streamsize do_underflow(std::streamsize size);
 
     private:
+        std::streamsize sslRead(char* buf, size_t n, std::streamsize isize);
+
         /** @brief Get the current status string of this SSL stream buffer. 
         */
         const char* getStatus() const;
