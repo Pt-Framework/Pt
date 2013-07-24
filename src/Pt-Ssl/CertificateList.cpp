@@ -249,11 +249,16 @@ void CertificateStore::loadPkcs12(const char* pkcs12, size_t len, const char* pa
 
         if(identity)
         {
-            SecKeyRef pkey;
-            SecIdentityCopyPrivateKey(identity, &pkey);
+            SecKeyRef pkey = NULL;
+            OSStatus stat1 = SecIdentityCopyPrivateKey(identity, &pkey);
 
-            SecCertificateRef certificateRef;
-            SecIdentityCopyCertificate(identity, &certificateRef);
+            SecCertificateRef certificateRef = NULL;
+            OSStatus stat2 = SecIdentityCopyCertificate(identity, &certificateRef);
+            
+            assert(stat1 == noErr);
+            assert(stat2 == noErr);
+            assert(pkey);
+            assert(certificateRef);
 
             // Certificate c( new CertificateImpl(certificateRef) );
             // PrivateKey pk( new PrivateKeyImpl(pkey) );

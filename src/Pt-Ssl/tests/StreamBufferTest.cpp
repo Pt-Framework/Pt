@@ -66,15 +66,15 @@ void StreamBufferTest::CertificateStore()
 {
     // adjust the path
     #ifdef _WIN32
-        std::ifstream ifs("src\\Pt-Ssl\\tests\\cert\\ca.p12", std::ios::binary);
+        std::ifstream ifs("src\\Pt-Ssl\\tests\\cert\\ca-with-password.p12", std::ios::binary);
     #else
-        std::ifstream ifs("src/Pt-Ssl/tests/cert/ca.p12", std::ios::binary);
+        std::ifstream ifs("src/Pt-Ssl/tests/cert/ca-with-password.p12", std::ios::binary);
     #endif
 
     Pt::Ssl::CertificateStore certStore;
 
     // load without password, as in the other test
-    certStore.loadPkcs12(ifs, "");
+    certStore.loadPkcs12(ifs, "123");
 }
 
 
