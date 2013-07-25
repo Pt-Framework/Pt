@@ -650,10 +650,71 @@ void Connection::beginReceiveRequest(Request& request)
     if(_state == SslNotAccepted)
     {
         log_debug("beginning SSL handshake");
+        _sslbuf.outputReady() -= slot(*this, &Connection::onHttpsOutput);
+        _sslbuf.inputReady() -= slot(*this, &Connection::onHttpsInput);
+        
+        _sockbuf.outputReady() += slot(*this, &Connection::onHttpOutput);
+        _sockbuf.inputReady() += slot(*this, &Connection::onHttpInput);
+
         _timer.start( _timeout );
-        _sslbuf.beginAccept();
+        
+        _sslbuf.setAccepting();
+        _sockbuf.beginRead();
+        _state = SslAcceptRead;
         return;
     }
+
+    if(_state == SslAcceptRead)
+    {
+        if( _sslbuf.readHandshake() )
+        {
+            log_debug("reading SSL handshake");
+            _sockbuf.beginRead();
+            return;
+        }
+
+        if( _sslbuf.writeHandshake() ) 
+        {
+            log_debug("writing SSL handshake");
+            _sockbuf.beginWrite();
+            _state = SslAcceptWrite;
+            return;
+        }
+
+        assert(false);
+        return;
+    }
+
+    if(_state == SslAcceptWrite)
+    {
+        if(_sslbuf.writeHandshake() || _sockbuf.out_avail() > 0)
+        {
+            log_debug("writing SSL handshake");
+            _sockbuf.beginWrite();
+            return;
+        }
+
+        if( ! _sslbuf.connected() )
+        {
+            log_debug("reading SSL handshake");
+            _sockbuf.beginRead();
+            _state = SslAcceptRead;
+            return;
+        }
+
+        log_debug("SERVER Handshake finished");
+
+        _sockbuf.outputReady() -= slot(*this, &Connection::onHttpOutput);
+        _sockbuf.inputReady() -= slot(*this, &Connection::onHttpInput);
+
+        _sslbuf.outputReady() += slot(*this, &Connection::onHttpsOutput);
+        _sslbuf.inputReady() += slot(*this, &Connection::onHttpsInput);
+        
+        _sslbuf.fakeAfterAccept();
+        _timer.stop();
+        _state = Accepted;
+    }
+
 #endif
 
     // keep pipeling replies, until no more requests
@@ -699,14 +760,29 @@ MessageProgress Connection::endReceiveRequest()
         throw System::IOError("timeout");
 
 #ifdef PT_HTTP_WITH_SSL
-    if(_state == SslNotAccepted)
+    //if(_state == SslNotAccepted)
+    //{
+    //    _timer.stop();
+    //    _sslbuf.endHandshake();
+    //    _state = Accepted;
+    //    log_debug("SSL handshake finished");
+    //    return progress;
+    //}
+    
+    if(_state == SslAcceptWrite)
     {
-        _timer.stop();
-        _sslbuf.endHandshake();
-        _state = Accepted;
-        log_debug("SSL handshake finished");
+        log_debug("wrote SSL handshake");
+        _sockbuf.endWrite();
         return progress;
     }
+
+    if(_state == SslAcceptRead)
+    {
+        log_debug("read SSL handshake");
+        _sockbuf.endRead();
+        return progress;
+    }
+
 #endif
 
     if(_state == ReplyOutputPending)

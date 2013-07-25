@@ -61,6 +61,8 @@ class PT_SSL_API IOBuffer : public StreamBuffer
 
         void fakeAfterConnect();
 
+        void fakeAfterAccept();
+
         /** @brief Starts the client connect handshake
         */
         void beginConnect();

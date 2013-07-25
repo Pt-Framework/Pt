@@ -222,6 +222,13 @@ void IOBuffer::fakeAfterConnect()
 }
 
 
+void IOBuffer::fakeAfterAccept()
+{
+    _sb->outputReady() += Pt::slot(*this, &IOBuffer::onOutput);
+    _sb->inputReady()  += Pt::slot(*this, &IOBuffer::onInput);
+}
+
+
 void IOBuffer::onWriteServerHandshake(Pt::System::IOBuffer& sb)
 {
     try

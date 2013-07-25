@@ -295,7 +295,10 @@ class Connection : public Connectable
             ReplyOutputPending = 6,
 
             SslHandshakeWrite,
-            SslHandshakeRead
+            SslHandshakeRead,
+
+            SslAcceptRead,
+            SslAcceptWrite
 
         } _state;
 
