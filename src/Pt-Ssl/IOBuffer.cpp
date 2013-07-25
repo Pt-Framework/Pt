@@ -166,51 +166,6 @@ void IOBuffer::onWriteHandshake(Pt::System::IOBuffer& sb)
 }
 
 
-void IOBuffer::onWriteServerHandshake(Pt::System::IOBuffer& sb)
-{
-    try
-    {
-        log_debug("_sb->endWrite()");
-        _sb->endWrite();
-
-        log_debug("_sslbuf.writeHandshake()");
-        if(StreamBuffer::writeHandshake() || _sb->out_avail() > 0)
-        {
-            log_debug("_sb->beginWrite()");
-            _sb->beginWrite();
-            return;
-        }
-
-        if( StreamBuffer::connected() )
-        {
-            log_debug("SERVER Handshake finished");
-            _sb->outputReady() -= Pt::slot(*this, &IOBuffer::onWriteServerHandshake);
-            _sb->inputReady()  -= Pt::slot(*this, &IOBuffer::onReadServerHandshake);
-            _sb->outputReady() += Pt::slot(*this, &IOBuffer::onOutput);
-            _sb->inputReady()  += Pt::slot(*this, &IOBuffer::onInput);
-            _handshakeFinished.send(*this);
-            return;
-        }
-
-        log_debug("_sb->beginRead()");
-        _sb->beginRead();
-    } 
-    catch(...)
-    {
-        log_debug("Handshake failed");
-        _errorPending = 1;
-        _sb->outputReady() -= Pt::slot(*this, &IOBuffer::onWriteServerHandshake);
-        _sb->inputReady()  -= Pt::slot(*this, &IOBuffer::onReadServerHandshake);
-        _handshakeFinished.send(*this);
-
-        if(_errorPending)
-        {
-            throw;
-        }
-    }
-}
-
-
 void IOBuffer::onReadHandshake(Pt::System::IOBuffer& sb)
 {
     try
@@ -250,6 +205,58 @@ void IOBuffer::onReadHandshake(Pt::System::IOBuffer& sb)
         _errorPending = 1;
         _sb->outputReady() -= Pt::slot(*this, &IOBuffer::onWriteHandshake);
         _sb->inputReady()  -= Pt::slot(*this, &IOBuffer::onReadHandshake);
+        _handshakeFinished.send(*this);
+
+        if(_errorPending)
+        {
+            throw;
+        }
+    }
+}
+
+
+void IOBuffer::fakeAfterConnect()
+{
+    _sb->outputReady() += Pt::slot(*this, &IOBuffer::onOutput);
+    _sb->inputReady()  += Pt::slot(*this, &IOBuffer::onInput);
+}
+
+
+void IOBuffer::onWriteServerHandshake(Pt::System::IOBuffer& sb)
+{
+    try
+    {
+        log_debug("_sb->endWrite()");
+        _sb->endWrite();
+
+        log_debug("_sslbuf.writeHandshake()");
+        if(StreamBuffer::writeHandshake() || _sb->out_avail() > 0)
+        {
+            log_debug("_sb->beginWrite()");
+            _sb->beginWrite();
+            return;
+        }
+
+        if( StreamBuffer::connected() )
+        {
+            log_debug("SERVER Handshake finished");
+            _sb->outputReady() -= Pt::slot(*this, &IOBuffer::onWriteServerHandshake);
+            _sb->inputReady()  -= Pt::slot(*this, &IOBuffer::onReadServerHandshake);
+            _sb->outputReady() += Pt::slot(*this, &IOBuffer::onOutput);
+            _sb->inputReady()  += Pt::slot(*this, &IOBuffer::onInput);
+            _handshakeFinished.send(*this);
+            return;
+        }
+
+        log_debug("_sb->beginRead()");
+        _sb->beginRead();
+    } 
+    catch(...)
+    {
+        log_debug("Handshake failed");
+        _errorPending = 1;
+        _sb->outputReady() -= Pt::slot(*this, &IOBuffer::onWriteServerHandshake);
+        _sb->inputReady()  -= Pt::slot(*this, &IOBuffer::onReadServerHandshake);
         _handshakeFinished.send(*this);
 
         if(_errorPending)

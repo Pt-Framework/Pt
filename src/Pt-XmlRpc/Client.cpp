@@ -307,9 +307,6 @@ void Client::finishResult()
 {
     if( _method )
     {
-        // do not call method twice, i.e. if we get here from within
-        // method->finish() we have an infinite loop
-
         RemoteCall* method = _method;
         _method = 0;
         method->finish();

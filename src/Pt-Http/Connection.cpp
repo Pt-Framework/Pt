@@ -334,10 +334,66 @@ void Connection::beginSendRequest(Request& request)
 #ifdef PT_HTTP_WITH_SSL
     if(_state == SslHandshake)
     {
+        _sslbuf.outputReady() -= slot(*this, &Connection::onHttpsOutput);
+        _sslbuf.inputReady() -= slot(*this, &Connection::onHttpsInput);
+        
+        _sockbuf.outputReady() += slot(*this, &Connection::onHttpOutput);
+        _sockbuf.inputReady() += slot(*this, &Connection::onHttpInput);
+
         log_debug("begining SSL handshake");
         _timer.start( _timeout );
-        _sslbuf.beginConnect();
+        _sslbuf.setConnecting();
+        _sslbuf.writeHandshake();
+        _sockbuf.beginWrite();
+        _state = SslHandshakeWrite;
         return;
+    }
+
+    if(_state == SslHandshakeWrite)
+    {
+        if(_sslbuf.writeHandshake() || _sockbuf.out_avail() > 0)
+        {
+            log_debug("writing SSL handshake");
+            _sockbuf.beginWrite();
+            return;
+        }
+
+        log_debug("reading SSL handshake");
+        _sockbuf.beginRead();
+        _state = SslHandshakeRead;
+        return;
+    }
+
+    if(_state == SslHandshakeRead)
+    {
+        if( _sslbuf.readHandshake() )
+        {
+            log_debug("reading SSL handshake");
+            _sockbuf.beginRead();
+            return;
+        }
+
+        if( ! _sslbuf.connected() )
+        {
+            if( _sslbuf.writeHandshake() || _sockbuf.out_avail() > 0 ) 
+            {
+                _sockbuf.beginWrite();
+                _state = SslHandshakeWrite;
+            }
+            
+            return;
+        }
+
+        _sockbuf.outputReady() -= slot(*this, &Connection::onHttpOutput);
+        _sockbuf.inputReady() -= slot(*this, &Connection::onHttpInput);
+
+        _sslbuf.outputReady() += slot(*this, &Connection::onHttpsOutput);
+        _sslbuf.inputReady() += slot(*this, &Connection::onHttpsInput);
+        
+        _sslbuf.fakeAfterConnect();
+        _timer.stop();
+        _state = Connected;
+        log_debug("Handshake finished");
     }
 #endif
 
@@ -421,12 +477,17 @@ MessageProgress Connection::endSendRequest()
     }
 
 #ifdef PT_HTTP_WITH_SSL
-    if(_state == SslHandshake)
+    if(_state == SslHandshakeWrite)
     {
-        _timer.stop();
-        _sslbuf.endHandshake();
-        _state = Connected;
-        log_debug("SSL handshake finished");
+        log_debug("wrote SSL handshake");
+        _sockbuf.endWrite();
+        return progress;
+    }
+
+    if(_state == SslHandshakeRead)
+    {
+        log_debug("read SSL handshake");
+        _sockbuf.endRead();
         return progress;
     }
 #endif
@@ -986,12 +1047,21 @@ void Connection::onHttpInput(System::IOBuffer& sb)
 
     if(_request)
     {
-        _request->onInput();
+        if( _request->isReceiving() )
+            _request->onInput();
+        else
+            _request->onOutput();
+        
         return;
     }
 
     if(_reply)
-        _reply->onInput();
+    {
+        if( _reply->isReceiving() )
+            _reply->onInput();
+        else
+            _reply->onOutput();
+    }
 }
 
 
@@ -1001,7 +1071,7 @@ void Connection::onHttpOutput(System::IOBuffer& sb)
 
     if(_reply)
     {
-        if(_reply->isReceiving())
+        if( _reply->isReceiving() )
             _reply->onInput();
         else
             _reply->onOutput();
@@ -1011,7 +1081,7 @@ void Connection::onHttpOutput(System::IOBuffer& sb)
 
     if(_request)
     {
-        if( _request->isReceiving())
+        if( _request->isReceiving() )
             _request->onInput();
         else
             _request->onOutput();
@@ -1058,7 +1128,7 @@ void Connection::beginWrite()
 #ifdef PT_HTTP_WITH_SSL
     if(_ssl)
     {
-        log_debug("begin writing ssl buffer" << _sslbuf.buffer().out_avail());
+        log_debug("begin writing ssl buffer " << _sslbuf.buffer().out_avail());
         _timer.start(_timeout);
         _sslbuf.beginWrite();
         return;

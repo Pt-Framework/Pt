@@ -292,7 +292,10 @@ class Connection : public Connectable
             SslHandshake = 3,
             SslNotAccepted = 4,
             RequestOutputPending = 5,
-            ReplyOutputPending = 6
+            ReplyOutputPending = 6,
+
+            SslHandshakeWrite,
+            SslHandshakeRead
 
         } _state;
 

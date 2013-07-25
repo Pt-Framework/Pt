@@ -239,12 +239,12 @@ class ServerTest : public Pt::Unit::TestSuite
         {
             Pt::Http::MessageProgress progress = client.endReceive();
 
-            if(progress.header())
+            if( progress.header() )
             {
                 PT_UNIT_ASSERT_EQUALS(client.reply().statusCode(), 404);
             }
 
-            if(progress.body())
+            if( progress.body() )
                 while ( client.reply().body().rdbuf()->in_avail() )
                     _reply += client.reply().body().get();
 
@@ -283,6 +283,8 @@ class ServerTest : public Pt::Unit::TestSuite
             client.beginReceive();
 
             loop->run();
+
+            PT_UNIT_ASSERT_EQUALS(client.reply().statusCode(), 404);
         }
 
         static void setupSslClientContext(Pt::Ssl::Context& ctx)

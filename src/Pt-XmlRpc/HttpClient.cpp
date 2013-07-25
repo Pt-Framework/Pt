@@ -335,19 +335,17 @@ void HttpClient::onReply(Http::Client& client)
         if( ! progress.finished() )
         { 
             client.beginReceive();
-        }
-        else
-        {
-            // send finished signal
-            finishResult();
+            return;
         }
     }
     catch(const System::IOError&) // HttpError is also an IOError
     {
-        // setError() makes finishResult() call onError() where we throw
+        // finished signal will call onError()
         setError();
-        finishResult();
     }
+
+    // send finished signal
+    finishResult();
 }
 
 } // namespace XmlRpc
