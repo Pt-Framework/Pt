@@ -221,17 +221,18 @@ void CertificateStore::loadPkcs12(const char* pkcs12, size_t len, const char* pa
 
     CFStringRef password = CFStringCreateWithCString(NULL, passwd, kCFStringEncodingUTF8);
     
-    const void* keys[]   = { kSecImportExportPassphrase, 0 };
-    const void* values[] = { password, 0 };
+    const void* keys[]   = { kSecImportExportPassphrase };
+    const void* values[] = { NULL };
 
-    CFDictionaryRef options = CFDictionaryCreate(NULL, keys, values, 1, NULL, NULL);
+    CFIndex hasPassword = CFStringGetLength(password) > 0 ? 1 : 0;
+
+    CFDictionaryRef options = CFDictionaryCreate(NULL, keys, values, hasPassword, NULL, NULL);
     if( ! options)
         throw std::runtime_error("CFDictionaryCreate");
 
-    CFArrayRef items = NULL; //CFArrayCreate(NULL, 0, 0, NULL);
+    CFArrayRef items = NULL;
     
     OSStatus securityError = SecPKCS12Import(data, options, &items);
-
     assert(securityError == noErr);
     
     CFRelease(password);
