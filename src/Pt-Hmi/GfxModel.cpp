@@ -5,7 +5,8 @@ namespace Pt{
 namespace Hmi{
 
 GfxModel::GfxModel()
-: BackColor(Pt::Gfx::ARgbColor(197,197,197))
+: Visible(false)
+, BackColor(Pt::Gfx::ARgbColor(197,197,197))
 , ForeColor(Pt::Gfx::ARgbColor(70,70,70))
 {
 	Position = toUnit(Pt::Gfx::Point(20,20));

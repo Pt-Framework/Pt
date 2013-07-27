@@ -61,6 +61,9 @@ public:
 		return _controlDial;
 	}
 
+
+	void operator =(const Event2D& copy);
+
 protected:
     virtual Pt::Event& onClone(Pt::Allocator& allocator) const;
     virtual void onDestroy(Pt::Allocator& allocator);

@@ -5,7 +5,6 @@ namespace Pt{
 namespace Hmi{
 
 WindowModel::WindowModel()
-: Pinned(false)
 {
 }
 

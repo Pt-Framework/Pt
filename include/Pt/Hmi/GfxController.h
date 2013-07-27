@@ -25,39 +25,34 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef Pt_Hmi_Model_Base_h
-#define Pt_Hmi_Model_Base_h
+#ifndef Pt_Hmi_GfxController_H
+#define Pt_Hmi_GfxController_H
 
-#include <Pt/Connectable.h>
-#include <Pt/Signal.h>
-#include <Pt/Hmi/Api.h>
-#include <Pt/Hmi/Property.h>
+#include <Pt/Hmi/Controller.h>
+#include <Pt/Gfx/Painter.h>
 
 namespace Pt{
 namespace Hmi{
 
-class PT_HMI_API Model : public Pt::Connectable
+class GfxModel;
+
+class PT_HMI_API GfxController  : public Controller
 {
 public:
-	virtual ~Model()
-	{ }
+	GfxController();
+	virtual ~GfxController();
 
-public:
-	Property<bool>  Enable;
-	Property<bool>  Active;
-	Property<void*> Tag;  
+	Pt::Gfx::PointF toClient(const Pt::Gfx::PointF& globalPoint);
+	Pt::Gfx::PointF fromClient(const Pt::Gfx::PointF& localPoint);
 
-public:
-	Pt::Signal<> Changed;
+	void render(Pt::Gfx::Painter* painter);
 
-protected:
-	Model()
-	: Enable(true)
-	, Active(true)
-	, Tag(0)
-	{ }
+	GfxModel* gfxModel();
+	const GfxModel* gfxModel() const;
+
+private:
+
 };
 
 }}
-
 #endif

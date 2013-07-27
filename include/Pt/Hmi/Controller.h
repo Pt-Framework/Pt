@@ -1,3 +1,30 @@
+/* Copyright (C) 2013 Marc Boris Duerner 
+ * Copyright (C) 2013 Laurentiu-Gheorghe Crisan
+ * 
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ * 
+ * As a special exception, you may use this file as part of a free
+ * software library without restriction. Specifically, if other files
+ * instantiate templates or use macros or inline functions from this
+ * file, or you compile this file and link it with other files to
+ * produce an executable, this file does not by itself cause the
+ * resulting executable to be covered by the GNU General Public
+ * License. This exception does not however invalidate any other
+ * reasons why the executable file might be covered by the GNU Library
+ * General Public License.
+ * 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
 #ifndef Pt_Hmi_Controller_H
 #define Pt_Hmi_Controller_H
 
@@ -7,6 +34,7 @@
 #include <Pt/Hmi/Model.h>
 #include <Pt/Hmi/Renderer.h>
 #include <Pt/Hmi/Api.h>
+#include <Pt/Hmi/Event2D.h>
 
 namespace Pt{
 namespace Hmi{
@@ -14,27 +42,22 @@ namespace Hmi{
 class PT_HMI_API Controller  : public Pt::Connectable
 {
 protected:
-	Controller(Controller* parent = 0)
-	: _model(0)
-	, _renderer(0)
-	, _parent(0)
-	{ }
+	Controller(Controller* parent = 0);
 
 public:
-	virtual ~Controller()
-	{ }
+	virtual ~Controller();
+	
+	void setModel(Model* model);
 
-	inline void setModel(Model* model)
-	{
-		_model = model;
-		_model->Changed += Pt::slot(*this, &Controller::modelChanged);
-	}
-
-	inline Model* model()
+	inline Model* model() 
 	{
 		return _model;
 	}
 
+	inline const Model* model() const 
+	{
+		return _model;
+	}
 	
 	inline void setRenderer(Renderer* r)
 	{
@@ -46,45 +69,23 @@ public:
 		return _renderer;
 	}
 
-	inline void addInputDevice(InputDevice* device)
+	inline const Renderer* renderer() const 
 	{
-		_inputDevices.push_back(device);
+		return _renderer;
 	}
 
-	inline void removeInputDevice(InputDevice* device)
-	{
-		for(size_t i = 0; i < _inputDevices.size(); ++i)
-		{
-			if(_inputDevices[i] == device)
-			{
-				_inputDevices.erase(_inputDevices.begin() + i);
-				return;
-			}
-		}
-	}
+	void addInputDevice(InputDevice* device);
 
-	inline void addOutputDevice(OutputDevice* device)
-	{
-		_outputDevices.push_back(device);
-	}
+	void removeInputDevice(InputDevice* device);
 
-	inline void removeOutputDevice(OutputDevice* device)
-	{
-		for(size_t i = 0; i < _outputDevices.size(); ++i)
-		{
-			if(_outputDevices[i] == device)
-			{
-				_outputDevices.erase(_outputDevices.begin() + i);
-				return;
-			}
-		}
-	}
+	void addOutputDevice(OutputDevice* device);
+
+	void removeOutputDevice(OutputDevice* device);
 
 	inline const std::vector<InputDevice*>& inputDevices() const
 	{
 		return _inputDevices;
 	}
-
 
 	inline const std::vector<OutputDevice*>& outputDevices() const
 	{
@@ -96,33 +97,54 @@ public:
 		return _children;
 	}
 
-	inline void addChildren(Controller* base)
-	{
-		_children.push_back(base);
-	}
+	void addChild(Controller* cotroller);
 
-	inline void removeChildren(Controller* base)
-	{
-		
-	}	
-	const Controller* parent() const
+	inline void removeChild(Controller* controller);
+
+	inline const Controller* parent() const
 	{
 		return _parent;
 	}
 
-	Controller* parent() 
+	inline Controller* parent() 
 	{
 		return _parent;
 	}
 
-protected:
+	inline void setParent(Controller* p)
+	{
+		_parent = p;
+	}
+
+
+	inline void notifyModelChanged(bool created)
+	{
+		onModelChanged(created);
+	}
+
+	inline void notifyInput2D(const Event2D& ev)
+	{
+		onInput2D(ev);
+	}
+	
+	void output();		
+
+protected:	
+
+	virtual void onModelChanged(bool created = false)
+	{
+	}
+	
+	virtual void onInput2D(const Event2D& ev)
+	{
+
+	}
+	 
+private:
 	void modelChanged()
 	{
-		onModelChanged();
+		onModelChanged(false);
 	}
-
-	virtual void onModelChanged() = 0;
-
 private:
 	std::vector<InputDevice*>	_inputDevices;
 	std::vector<OutputDevice*>	_outputDevices;

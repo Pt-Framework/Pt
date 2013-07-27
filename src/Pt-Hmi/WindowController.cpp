@@ -1,119 +1,136 @@
+/* Copyright (C) 2013 Marc Boris Duerner 
+ * Copyright (C) 2013 Laurentiu-Gheorghe Crisan
+ * 
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ * 
+ * As a special exception, you may use this file as part of a free
+ * software library without restriction. Specifically, if other files
+ * instantiate templates or use macros or inline functions from this
+ * file, or you compile this file and link it with other files to
+ * produce an executable, this file does not by itself cause the
+ * resulting executable to be covered by the GNU General Public
+ * License. This exception does not however invalidate any other
+ * reasons why the executable file might be covered by the GNU Library
+ * General Public License.
+ * 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
 #include <Pt/Hmi/WindowController.h>
-#include <Pt/Hmi/PanelController.h>
 #include <Pt/Hmi/Input2DDevice.h>
-#include <Pt/Hmi/WindowModel.h>
-#include <assert.h>
+#include <Pt/Hmi/WidgetController.h>
+#include <Pt/Hmi/GfxOutput.h>
 
 namespace Pt{
 namespace Hmi{
 
-WindowController::WindowController()
-{
+WindowController::WindowController(GfxModel* m, Renderer* r,  GfxOutput* out, Input2DDevice* in1, InputDevice* in2)
+: _painter(0)
+{	
+	if( m != 0)
+		Controller::setModel(m);
+
+	if( r != 0)
+		Controller::setRenderer(r);
+
+	if( out != 0)
+		Controller::addOutputDevice(out);
+
+	if( in1 != 0)
+		Controller::addInputDevice(in1);
+
+	if( in2 != 0)
+		Controller::addInputDevice(in2);
 }
 
 WindowController::~WindowController()
 {
+	delete _painter;
 }
 
 WidgetController* WindowController::mainWidget()
 {
-	if(Controller::children().size() != 0)
-		return dynamic_cast<WidgetController*>(Controller::children()[0]);
+	if( Controller::children().size() != 0)
+		return dynamic_cast<WidgetController*>( Controller::children()[0]);
 
 	return 0;
-}	
+}
+
+const WidgetController* WindowController::mainWidget() const
+{
+	if( Controller::children().size() != 0)
+		return dynamic_cast<WidgetController*>( Controller::children()[0]);
+
+	return 0;
+}
+
+void WindowController::render()
+{
+	GfxController::render(_painter);
+}
+
+void WindowController::invalidate()
+{
+	render();
+	output();
+}
 
 void WindowController::onInput2D(const Event2D& ev)
 {
-	WindowModel* model = (WindowModel*) Controller::model();
+	GfxModel* m = gfxModel();
 	
-	Pt::Gfx::PointF pos(ev.x(),ev.y());
+	m->Pointer2DStatus = ev;
 
-	if( model->contains(pos))
-	{
-		const DeviceButton& leftButton = ev.buttons().at(0);
-
-		switch( leftButton.state())
-		{
-			case DeviceButton::Pressed:
-				model->Pinned = true;
-				model->PinPosition = pos;
-			break;
-
-			case DeviceButton::Released:
-				if(model->Pinned.get())
-					model->Pinned = false;		
-			break;
-		}
-		
-		if(model->Pinned.get())
-		{
-			Pt::Gfx::PointF delta = pos - model->PinPosition.get();
-
-			model->move(Pt::Gfx::SizeF(delta.x(),delta.y()));
-			model->Pinned = true;
-			model->PinPosition  =  pos;
-		}
-		
-		model->Changed.send();		
-	}	
+	for( size_t i = 0; i < children().size(); ++i)
+		children()[i]->notifyInput2D(ev);
 }
 
-void WindowController::start()
+
+void WindowController::onSizeChanged(Pt::Gfx::SizeF& sizeUnits)
 {
-	assert(model() != 0);
+	GfxModel* m = gfxModel();
 
-	const std::vector<InputDevice*>& devices = inputDevices();
+	Pt::Gfx::Size size = m->fromUnit(sizeUnits);
 
-	for( size_t i = 0; i < devices.size(); ++i)
+	m->PaintBuffer.resize(size.width(), size.height());	
+}
+
+GfxModel* WindowController::gfxModel()
+{
+	GfxModel* m = dynamic_cast<GfxModel*>(model());
+
+	if( m == 0)
+		throw std::logic_error("ERROR: WindowController expect a GFXModel!");
+
+	return m;
+}
+
+void WindowController::onModelChanged(bool created)
+{
+	if( created)
 	{
-		if( Input2DDevice* inputSource = dynamic_cast<Input2DDevice*>( devices[i]))		
-			inputSource->Event += Pt::slot(*this, &WindowController::onInput2D);		
+		GfxModel* m = gfxModel();
+
+		if( _painter != 0)
+			delete _painter;
+
+		_painter = new Pt::Gfx::ImagePainter(m->PaintBuffer);
+
+		m->Size.PropertyChanged += Pt::slot(*this, &WindowController::onSizeChanged);
+		m->Size.PropertyChanged.send(m->Size.get());		
 	}
 
-	model()->Changed.send();		
-}
-
-void WindowController::onModelChanged()
-{
-	Pt::Hmi::GfxModel* myModel = dynamic_cast<Pt::Hmi::GfxModel*>(model());
-/*
-	Pt::Gfx::ARgbImage& image = *(myModel->ImagePtr.get());
-	
-	Pt::Gfx::Size size = myModel->fromUnit(myModel->Size.get());
-
-	image.resize(size.width(), size.height());
-
-	for(size_t i = 0; i < children().size(); ++i)
-	{
-		Controller* child = children()[i];
-		Pt::Hmi::GfxModel* gfx = dynamic_cast<Pt::Hmi::GfxModel*>(child->model());
-
-		if(gfx != 0)
-		{
-			Pt::Hmi::GfxModel* myGfx = (Pt::Hmi::GfxModel*)model();
-			gfx->ImagePtr= myGfx->ImagePtr.get();
-		}
-
-		if(child->renderer() != 0)
-			child->renderer()->render(child->model());
-		
-		for(size_t j = 0; j < child->outputDevices().size(); ++i)
-		{
-			OutputDevice* dev = child->outputDevices()[j];
-			dev->output(child->model());
-		}
-	}
-
-	const std::vector<OutputDevice*>& devices = outputDevices();
-
-	for( size_t i = 0; i < devices.size(); ++i)
-		devices[i]->output(model());
-*/
-}
-
-void WindowController::stop()
-{
+	for( size_t i = 0; i < children().size(); ++i)
+		children()[i]->notifyModelChanged(created);										
 }
 
 }}

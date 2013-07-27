@@ -12,9 +12,4 @@ WidgetRenderer::~WidgetRenderer()
 {
 }
 
-void WidgetRenderer::render(Pt::Hmi::Model* model)
-{
-}
-
-
 }}

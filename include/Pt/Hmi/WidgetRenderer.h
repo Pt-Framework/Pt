@@ -12,9 +12,6 @@ class PT_HMI_API WidgetRenderer : public Renderer
 public:
 	WidgetRenderer();
 	virtual ~WidgetRenderer();
-
-	virtual void render(Pt::Hmi::Model* model);
-
 private:	
 
 };

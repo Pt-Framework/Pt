@@ -17,7 +17,7 @@ GfxOutputImpl::GfxOutputImpl()
     _hwnd = CreateWindow( "Pt-Hmi", "", WS_OVERLAPPEDWINDOW | WS_CLIPSIBLINGS | WS_CLIPCHILDREN, 20, 20, 200, 200, NULL, NULL, hInstance, NULL );
 	SetWindowLong(_hwnd, GWL_STYLE, 0); 
     BringWindowToTop(_hwnd);
-	ShowWindow(_hwnd, SW_SHOW);    
+	ShowWindow(_hwnd, SW_HIDE);    
 	UpdateWindow(_hwnd);	
 	Pt::Hmi::Application* app = (Pt::Hmi::Application*) &Pt::Hmi::Application::instance();
 	
@@ -42,13 +42,13 @@ void GfxOutputImpl::OnPaint(HWND hwnd)
     
 	Pt::Gfx::Size size = gfxModel->fromUnit(gfxModel->Size.get());
 
-/*	Pt::Gfx::Rgb888Image rgb88Image(image.width(), image.height());
+	Pt::Gfx::Rgb888Image rgb88Image(gfxModel->PaintBuffer.width(), gfxModel->PaintBuffer.height());
 
-	for( size_t x = 0; x < image.width(); ++x)
+	for( size_t x = 0; x < gfxModel->PaintBuffer.width(); ++x)
 	{
-		for(size_t y = 0; y < image.height(); ++y)
+		for(size_t y = 0; y < gfxModel->PaintBuffer.height(); ++y)
 		{
-			const Pt::Gfx::ARgbColor& pixel = image.pixel(x,y);
+			const Pt::Gfx::ARgbColor& pixel = gfxModel->PaintBuffer.pixel(x,y);
 
 			Pt::Gfx::Rgb888Color color(pixel.red(), pixel.green(), pixel.blue());
 			rgb88Image.setColor(x,y,color);
@@ -56,7 +56,7 @@ void GfxOutputImpl::OnPaint(HWND hwnd)
 	}
 		
 
-    drawIndependentImage(0, 0, (char*)rgb88Image.data(), size.width(), size.height());*/
+    drawIndependentImage(0, 0, (char*)rgb88Image.data(), size.width(), size.height());
 }
 
 void GfxOutputImpl::drawIndependentImage(size_t x, size_t y, const char* data, size_t width, size_t height)
@@ -100,6 +100,11 @@ void GfxOutputImpl::output(Pt::Hmi::Model* model)
 
 	if( gfxModel == 0)
 		throw std::logic_error("GFX Model expected");
+
+	if(!gfxModel->Visible.get())
+		ShowWindow(_hwnd, SW_HIDE);
+	else
+		ShowWindow(_hwnd, SW_SHOW);
 
 	Application& app = *((Application*) &Application::instance());
 

@@ -40,4 +40,12 @@ const std::type_info& Event2D::onTypeInfo() const
     return ti;
 }
 
+void Event2D::operator=(const Event2D& copy)
+{
+	 _x = copy._x;
+	 _y = copy._y;
+	 _buttons = copy._buttons;
+	 _controlDial = copy._controlDial;
+}
+
 }}

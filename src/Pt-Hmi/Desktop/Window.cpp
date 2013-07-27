@@ -1,38 +1,52 @@
 #include <Pt/Hmi/Desktop/Window.h>
-#include <Pt/Hmi/Model/Window.h>
-#include <Pt/Hmi/Output/Gfx.h>
-#include <Pt/Hmi/Input/Mouse.h>
-#include <Pt/Hmi/Renderer/Window.h>
-
+#include <Pt/Hmi/WindowController.h>
+#include <Pt/Hmi/WindowModel.h>
+#include <Pt/Hmi/WindowRenderer.h>
+#include <Pt/Hmi/Application.h>
 
 namespace Pt{
 namespace Hmi{
 namespace Desktop{
 
 Window::Window()
-:_controller(0)
+: _defController(new WindowController())
+, _defModel( new WindowModel())
+, _defRenderer(new WindowRenderer())
 {		
-	Pt::Hmi::Controller::Windows* ctrl = new Pt::Hmi::Controller::Windows();
-	ctrl.setModel(new Pt::Hmi::Model::Window());
-	ctrl.addInputDevice(new Pt::Hmi::Input::Mouse());
-	ctrl.addOutputDevice(new Pt::Hmi::Output::Gfx());
-	ctrl.setRenderer(new  Pt::Hmi::Renderer::Window());
+	
+	Pt::Hmi::Application& app = Pt::Hmi::Application::instance();
 
-	setController(ctrl)
+	_defController->setModel(_defModel);
+	_defController->setRenderer(_defRenderer);
+	_defController->addInputDevice(&_mouseDevice);
+	_defController->addOutputDevice(&_gfxOutputDevice);
+	
+	_mouseDevice.start(app.loop());
+	_gfxOutputDevice.start(app.loop());
+
+	setController(*_defController);
 }
 
-void setController(Pt::Hmi::Controller::Windows* controller)
+void Window::show()
 {
-	if(_controller != 0)
-		delete _controller;
-
-	_controller = controller;	
-	_controller->start();
+	GfxModel* m = dynamic_cast<GfxModel*>(controller().model());
+	m->Visible = true;
+	controller().invalidate();
 }
+
+void Window::hide()
+{
+	GfxModel* m = dynamic_cast<GfxModel*>(controller().model());
+	m->Visible = false;
+	controller().invalidate();	
+}
+
 
 Window::~Window()
 {
-	delete _controller;
+	delete _defController;
+	delete _defModel;
+	delete _defRenderer;
 }
 		
 }}}

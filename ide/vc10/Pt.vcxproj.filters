@@ -73,6 +73,12 @@
     <Filter Include="Pt-Hmi\Headers\Desktop">
       <UniqueIdentifier>{2e90b4ef-c978-4c42-b9ce-616fefa610a5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Pt-Hmi\Sources\Desktop">
+      <UniqueIdentifier>{5ff8bfb5-2d51-4efa-908a-342da391ef75}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-Hmi\Sources\Desktop\tests">
+      <UniqueIdentifier>{c5aaf993-ddc9-4694-a792-2c183ef2e94c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\Pt\Allocator.h">
@@ -1002,6 +1008,9 @@
     <ClInclude Include="..\..\src\Pt-Ssl\PrivateKeyImpl.h">
       <Filter>Pt-Ssl</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\GfxController.h">
+      <Filter>Pt-Hmi\Headers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -1116,6 +1125,12 @@
     </None>
     <None Include="..\..\src\Pt-Hmi\Jamfile">
       <Filter>Pt-Hmi\Sources</Filter>
+    </None>
+    <None Include="..\..\src\Pt-Hmi\Desktop\Jamfile">
+      <Filter>Pt-Hmi\Sources\Desktop</Filter>
+    </None>
+    <None Include="..\..\src\Pt-Hmi\Desktop\tests\Jamfile">
+      <Filter>Pt-Hmi\Sources\Desktop\tests</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -1843,6 +1858,96 @@
       <Filter>Pt-Hmi\Sources</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\Device.cpp">
+      <Filter>Pt-Hmi\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\Desktop\Button.cpp">
+      <Filter>Pt-Hmi\Sources\Desktop</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\Desktop\CheckBox.cpp">
+      <Filter>Pt-Hmi\Sources\Desktop</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\Desktop\ComboBox.cpp">
+      <Filter>Pt-Hmi\Sources\Desktop</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\Desktop\ContextMenu.cpp">
+      <Filter>Pt-Hmi\Sources\Desktop</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\Desktop\DockAreaWidget.cpp">
+      <Filter>Pt-Hmi\Sources\Desktop</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\Desktop\DockWidget.cpp">
+      <Filter>Pt-Hmi\Sources\Desktop</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\Desktop\FlowLayout.cpp">
+      <Filter>Pt-Hmi\Sources\Desktop</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\Desktop\GroupBox.cpp">
+      <Filter>Pt-Hmi\Sources\Desktop</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\Desktop\Label.cpp">
+      <Filter>Pt-Hmi\Sources\Desktop</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\Desktop\ListBox.cpp">
+      <Filter>Pt-Hmi\Sources\Desktop</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\Desktop\ListView.cpp">
+      <Filter>Pt-Hmi\Sources\Desktop</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\Desktop\MenuItem.cpp">
+      <Filter>Pt-Hmi\Sources\Desktop</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\Desktop\MenuStrip.cpp">
+      <Filter>Pt-Hmi\Sources\Desktop</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\Desktop\Panel.cpp">
+      <Filter>Pt-Hmi\Sources\Desktop</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\Desktop\ProgressBar.cpp">
+      <Filter>Pt-Hmi\Sources\Desktop</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\Desktop\PropertyView.cpp">
+      <Filter>Pt-Hmi\Sources\Desktop</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\Desktop\RadioButton.cpp">
+      <Filter>Pt-Hmi\Sources\Desktop</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\Desktop\ScrollBar.cpp">
+      <Filter>Pt-Hmi\Sources\Desktop</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\Desktop\SplitContainer.cpp">
+      <Filter>Pt-Hmi\Sources\Desktop</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\Desktop\StatusBar.cpp">
+      <Filter>Pt-Hmi\Sources\Desktop</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\Desktop\TabControl.cpp">
+      <Filter>Pt-Hmi\Sources\Desktop</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\Desktop\Table.cpp">
+      <Filter>Pt-Hmi\Sources\Desktop</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\Desktop\TextBox.cpp">
+      <Filter>Pt-Hmi\Sources\Desktop</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\Desktop\ToolBar.cpp">
+      <Filter>Pt-Hmi\Sources\Desktop</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\Desktop\Tree.cpp">
+      <Filter>Pt-Hmi\Sources\Desktop</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\Desktop\Widget.cpp">
+      <Filter>Pt-Hmi\Sources\Desktop</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\Desktop\Window.cpp">
+      <Filter>Pt-Hmi\Sources\Desktop</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\Controller.cpp">
+      <Filter>Pt-Hmi\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\Desktop\tests\Pt-Hmi-demo.cpp">
+      <Filter>Pt-Hmi\Sources\Desktop\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\GfxController.cpp">
       <Filter>Pt-Hmi\Sources</Filter>
     </ClCompile>
   </ItemGroup>
