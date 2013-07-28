@@ -42,7 +42,7 @@
 #include <Pt/Connectable.h>
 
 #ifdef PT_HTTP_WITH_SSL
-#include <Pt/Ssl/IOBuffer.h>
+#include <Pt/Ssl/StreamBuffer.h>
 #endif
 
 #include <iostream>
@@ -223,13 +223,6 @@ class Connection : public Connectable
         std::streambuf& buffer()
         { return _httpbuf; }
 
-#ifdef PT_HTTP_WITH_SSL
-        void onHttpsHandshake(Ssl::IOBuffer& ssl);
-
-        void onHttpsInput(Ssl::IOBuffer& ssl);
-
-        void onHttpsOutput(Ssl::IOBuffer& ssl);
-#endif
         void onConnect(Net::TcpSocket& socket);
 
         void onOutputPipelined();
@@ -275,7 +268,7 @@ class Connection : public Connectable
 
         bool _ssl;
 #ifdef PT_HTTP_WITH_SSL
-        Ssl::IOBuffer _sslbuf;
+        Ssl::StreamBuffer _sslbuf;
 #endif
         HttpBuffer _httpbuf;
         std::iostream _os;

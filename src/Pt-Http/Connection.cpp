@@ -97,10 +97,6 @@ Connection::Connection()
     _sockbuf.outputReady() += slot(*this, &Connection::onHttpOutput);
     _sockbuf.inputReady() += slot(*this, &Connection::onHttpInput);
 
-#ifdef PT_HTTP_WITH_SSL
-    _sslbuf.handshakeFinished() += slot(*this, &Connection::onHttpsHandshake);
-#endif
-
     _httpbuf.attach(_sockbuf);
 
     _timer.timeout() += slot(*this, &Connection::onTimeout);
@@ -154,11 +150,6 @@ void Connection::setSecure(Ssl::Context& ctx)
             cancel();
         }
 
-        _sockbuf.outputReady() -= slot(*this, &Connection::onHttpOutput);
-        _sockbuf.inputReady() -= slot(*this, &Connection::onHttpInput);
-
-        _sslbuf.outputReady() += slot(*this, &Connection::onHttpsOutput);
-        _sslbuf.inputReady() += slot(*this, &Connection::onHttpsInput);
         _ssl = true;
     }
 
@@ -212,7 +203,26 @@ void Connection::sendRequest(Request& request)
         if(_ssl)
         {
             log_debug("SSL connect");
-            _sslbuf.connect();
+            _sslbuf.setConnecting();
+
+            for( ; ; )
+            {
+                log_debug("writing handshake");
+                while( _sslbuf.writeHandshake() )
+                    ;
+
+                log_debug("syncing buffer");
+                _sockbuf.pubsync();
+
+                log_debug("reading handshake");
+                while( _sslbuf.readHandshake() )
+                    ;
+
+                if( _sslbuf.connected() )
+                    break;
+
+                log_debug("continuing handshake");
+            }
         }
 #endif
     }
@@ -266,12 +276,12 @@ void Connection::sendRequest(Request& request)
 #ifdef PT_HTTP_WITH_SSL
     if(_ssl)
     {
-        log_debug("writing ssl buffer" << _sslbuf.buffer().out_avail());
+        log_debug("flushing ssl buffer");
         _sslbuf.pubsync();
     }
 #endif
 
-    log_debug("writing socket buffer: " << _sockbuf.out_avail());
+    log_debug("flushing socket buffer: " << _sockbuf.out_avail());
     _sockbuf.pubsync();
 }
 
@@ -334,12 +344,6 @@ void Connection::beginSendRequest(Request& request)
 #ifdef PT_HTTP_WITH_SSL
     if(_state == SslHandshake)
     {
-        _sslbuf.outputReady() -= slot(*this, &Connection::onHttpsOutput);
-        _sslbuf.inputReady() -= slot(*this, &Connection::onHttpsInput);
-        
-        _sockbuf.outputReady() += slot(*this, &Connection::onHttpOutput);
-        _sockbuf.inputReady() += slot(*this, &Connection::onHttpInput);
-
         log_debug("begining SSL handshake");
         _timer.start( _timeout );
         _sslbuf.setConnecting();
@@ -384,13 +388,6 @@ void Connection::beginSendRequest(Request& request)
             return;
         }
 
-        _sockbuf.outputReady() -= slot(*this, &Connection::onHttpOutput);
-        _sockbuf.inputReady() -= slot(*this, &Connection::onHttpInput);
-
-        _sslbuf.outputReady() += slot(*this, &Connection::onHttpsOutput);
-        _sslbuf.inputReady() += slot(*this, &Connection::onHttpsInput);
-        
-        _sslbuf.fakeAfterConnect();
         _timer.stop();
         _state = Connected;
         log_debug("Handshake finished");
@@ -427,6 +424,7 @@ void Connection::beginSendRequest(Request& request)
         }
 
         log_debug("pipelining HTTP request");
+
         // signal that output was sent, so the request data can be pipelined
         // until we begin receiving the next reply from the server
         _socket.setOutputPipelined(); //_request->onOutput();
@@ -650,12 +648,6 @@ void Connection::beginReceiveRequest(Request& request)
     if(_state == SslNotAccepted)
     {
         log_debug("beginning SSL handshake");
-        _sslbuf.outputReady() -= slot(*this, &Connection::onHttpsOutput);
-        _sslbuf.inputReady() -= slot(*this, &Connection::onHttpsInput);
-        
-        _sockbuf.outputReady() += slot(*this, &Connection::onHttpOutput);
-        _sockbuf.inputReady() += slot(*this, &Connection::onHttpInput);
-
         _timer.start( _timeout );
         
         _sslbuf.setAccepting();
@@ -703,21 +695,13 @@ void Connection::beginReceiveRequest(Request& request)
         }
 
         log_debug("SERVER Handshake finished");
-
-        _sockbuf.outputReady() -= slot(*this, &Connection::onHttpOutput);
-        _sockbuf.inputReady() -= slot(*this, &Connection::onHttpInput);
-
-        _sslbuf.outputReady() += slot(*this, &Connection::onHttpsOutput);
-        _sslbuf.inputReady() += slot(*this, &Connection::onHttpsInput);
-        
-        _sslbuf.fakeAfterAccept();
         _timer.stop();
         _state = Accepted;
     }
 
 #endif
 
-    // keep pipeling replies, until no more requests
+    // send remaining piplined replies
     if( outputAvailable() && ! inputAvailable() )
     {
         log_debug("sending remaining reply data");
@@ -760,15 +744,7 @@ MessageProgress Connection::endReceiveRequest()
         throw System::IOError("timeout");
 
 #ifdef PT_HTTP_WITH_SSL
-    //if(_state == SslNotAccepted)
-    //{
-    //    _timer.stop();
-    //    _sslbuf.endHandshake();
-    //    _state = Accepted;
-    //    log_debug("SSL handshake finished");
-    //    return progress;
-    //}
-    
+   
     if(_state == SslAcceptWrite)
     {
         log_debug("wrote SSL handshake");
@@ -988,69 +964,6 @@ MessageProgress Connection::endReceiveReply()
 }
 
 
-#ifdef PT_HTTP_WITH_SSL
-void Connection::onHttpsHandshake(Ssl::IOBuffer& ssl)
-{
-    log_trace("Connection::onHttpsHandshake");
-    if(_request && _state == SslHandshake)
-    {
-        _request->onOutput();
-        return;
-    }
-
-    if(_request && _state == SslNotAccepted)
-    {
-        _request->onInput();
-        return;
-    }
-}
-
-
-void Connection::onHttpsInput(Ssl::IOBuffer& ssl)
-{
-    log_trace("Connection::onHttpsInput");
-
-    if(_request)
-    {
-        _request->onInput();
-        return;
-    }
-
-    if(_reply)
-        _reply->onInput();
-}
-
-void Connection::onHttpsOutput(Ssl::IOBuffer& ssl)
-{
-    log_trace("Connection::onHttpsOutput");
-
-    if( _reply && _reply->isReceiving() )
-    {
-        _reply->onInput();
-        return;
-    }
-
-    if( _request && _request->isReceiving() )
-    {
-        _request->onInput();
-        return;
-    }
-
-    if(_reply)
-    {
-        _reply->onOutput();
-        return;
-    }
-
-    if(_request)
-    {
-        _request->onOutput();
-        return;
-    }
-}
-#endif
-
-
 void Connection::onConnect(Net::TcpSocket& socket)
 {
     log_trace("Connection::onConnect");
@@ -1171,29 +1084,34 @@ void Connection::beginRead()
 {
 #ifdef PT_HTTP_WITH_SSL
     if(_ssl)
-        if( _sslbuf.in_avail() )
+    {
+        _sslbuf.import();
+
+        if(_sslbuf.in_avail() > 0)
+        {
             _socket.setInputPipelined();
-        else
-            _sslbuf.beginRead();
-     else
+            return;
+        }
+    }
 #endif
-        if( _sockbuf.in_avail() )
-            _socket.setInputPipelined();
-        else
-            _sockbuf.beginRead();
+    if( _sockbuf.in_avail() )
+        _socket.setInputPipelined();
+    else
+        _sockbuf.beginRead();
 }
 
 
 void Connection::endRead()
 {
     // TODO: do not call endRead if data was available
+    _sockbuf.endRead();
 
 #ifdef PT_HTTP_WITH_SSL
     if(_ssl)
-        _sslbuf.endRead();
-    else
+    {
+        _sslbuf.import();
+    }
 #endif
-        _sockbuf.endRead();
 }
 
 
@@ -1204,10 +1122,8 @@ void Connection::beginWrite()
 #ifdef PT_HTTP_WITH_SSL
     if(_ssl)
     {
-        log_debug("begin writing ssl buffer " << _sslbuf.buffer().out_avail());
-        _timer.start(_timeout);
-        _sslbuf.beginWrite();
-        return;
+        log_debug("flushing ssl buffer");
+        _sslbuf.pubsync();
     }
 #endif
 
@@ -1220,13 +1136,7 @@ void Connection::beginWrite()
 void Connection::endWrite()
 {
     _timer.stop();
-
-#ifdef PT_HTTP_WITH_SSL
-    if(_ssl)
-        _sslbuf.endWrite();
-    else
-#endif
-        _sockbuf.endWrite();
+    _sockbuf.endWrite();
 }
 
 
@@ -1234,7 +1144,8 @@ bool Connection::inputAvailable()
 {
 #ifdef PT_HTTP_WITH_SSL
     if(_ssl)
-    {  
+    {
+        _sslbuf.import();
         return _sslbuf.in_avail() > 0;
     }
 #endif
@@ -1249,7 +1160,6 @@ bool Connection::outputAvailable()
     if(_ssl)
     {
         _sslbuf.pubsync();
-        return _sslbuf.buffer().out_avail() > 0;
     }
 #endif
     return _sockbuf.out_avail() > 0;
