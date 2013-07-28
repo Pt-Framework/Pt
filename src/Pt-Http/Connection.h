@@ -225,9 +225,9 @@ class Connection : public Connectable
 
         void onConnect(Net::TcpSocket& socket);
 
-        void onOutputPipelined();
+        void onOutput();
 
-        void onInputPipelined();
+        void onInput();
 
         void onTimeout();
 

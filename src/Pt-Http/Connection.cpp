@@ -90,8 +90,8 @@ Connection::Connection()
 , _onTimeout(false)
 {
     _socket.connected() += slot(*this, &Connection::onConnect);
-    _socket.outputPipelined() += slot(*this, &Connection::onOutputPipelined);
-    _socket.inputPipelined() += slot(*this, &Connection::onInputPipelined);
+    _socket.outputPipelined() += slot(*this, &Connection::onOutput);
+    _socket.inputPipelined() += slot(*this, &Connection::onInput);
 
     _sockbuf.attach(_socket);
     _sockbuf.outputReady() += slot(*this, &Connection::onHttpOutput);
@@ -972,37 +972,50 @@ void Connection::onConnect(Net::TcpSocket& socket)
 }
 
 
-void Connection::onOutputPipelined()
+void Connection::onOutput()
 {
-    log_trace("Connection::onOutputPipelined");
+    log_trace("Connection::onOutput");
+
     if(_request)
     {
-        _request->onOutput();
+        if( _request->isReceiving() )
+            _request->onInput();
+        else
+            _request->onOutput();
+        
         return;
     }
 
     if(_reply)
     {
-        _reply->onOutput();
-        return;
+        if( _reply->isReceiving() )
+            _reply->onInput();
+        else
+            _reply->onOutput();
     }
 }
 
 
-void Connection::onInputPipelined()
+void Connection::onInput()
 {
-    log_trace("Connection::onInputPipelined");
+    log_trace("Connection::onInput");
 
     if(_request)
     {
-        _request->onInput();
+        if( _request->isReceiving() )
+            _request->onInput();
+        else
+            _request->onOutput();
+        
         return;
     }
 
     if(_reply)
     {
-        _reply->onInput();
-        return;
+        if( _reply->isReceiving() )
+            _reply->onInput();
+        else
+            _reply->onOutput();
     }
 }
 
@@ -1012,71 +1025,23 @@ void Connection::onTimeout()
     log_trace("Connection::onTimeout");
     _onTimeout = true;
 
-    if(_request)
-    {
-        if( _request->isSending() )
-            _request->onOutput();
-        else
-            _request->onInput();
-    }
-
-    if(_reply)
-    {
-        if( _reply->isSending() )
-            _reply->onOutput();
-        else
-            _reply->onInput();
-    }
+    onInput();
 }
 
 
-void Connection::onHttpInput(System::IOBuffer& sb)
+void Connection::onHttpInput(System::IOBuffer&)
 {
     log_trace("Connection::onHttpInput");
 
-    if(_request)
-    {
-        if( _request->isReceiving() )
-            _request->onInput();
-        else
-            _request->onOutput();
-        
-        return;
-    }
-
-    if(_reply)
-    {
-        if( _reply->isReceiving() )
-            _reply->onInput();
-        else
-            _reply->onOutput();
-    }
+    onInput();
 }
 
 
-void Connection::onHttpOutput(System::IOBuffer& sb)
+void Connection::onHttpOutput(System::IOBuffer&)
 {
     log_trace("Connection::onHttpOutput");
 
-    if(_reply)
-    {
-        if( _reply->isReceiving() )
-            _reply->onInput();
-        else
-            _reply->onOutput();
-        
-        return;
-    }
-
-    if(_request)
-    {
-        if( _request->isReceiving() )
-            _request->onInput();
-        else
-            _request->onOutput();
-
-        return;
-    }
+    onOutput();
 }
 
 
