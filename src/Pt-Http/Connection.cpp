@@ -558,7 +558,7 @@ void Connection::beginSendReply(Reply& reply)
         {
             // signal that output was sent, so the reply data can be pipelined
             // until we begin receiving the next request from the client
-            _socket.setOutputPipelined(); //_reply->onOutput(); 
+            _socket.setOutputPipelined(); 
         }
         else
             beginWrite();
@@ -701,7 +701,8 @@ void Connection::beginReceiveRequest(Request& request)
 
 #endif
 
-    // send remaining piplined replies
+    // send remaining pipelined replies, if no further requests
+    // are in the pipeline.
     if( outputAvailable() && ! inputAvailable() )
     {
         log_debug("sending remaining reply data");
@@ -1080,6 +1081,21 @@ void Connection::endRead()
 }
 
 
+bool Connection::inputAvailable()
+{
+#ifdef PT_HTTP_WITH_SSL
+    if(_ssl)
+    {
+        //_sslbuf.import();
+        if( _sslbuf.in_avail() > 0 ) 
+            return true;
+    }
+#endif
+
+    return _sockbuf.in_avail() > 0;
+}
+
+
 void Connection::beginWrite()
 {
     log_debug("Connection::beginWrite");
@@ -1102,20 +1118,6 @@ void Connection::endWrite()
 {
     _timer.stop();
     _sockbuf.endWrite();
-}
-
-
-bool Connection::inputAvailable()
-{
-#ifdef PT_HTTP_WITH_SSL
-    if(_ssl)
-    {
-        _sslbuf.import();
-        return _sslbuf.in_avail() > 0;
-    }
-#endif
-
-    return _sockbuf.in_avail() > 0;
 }
 
 
