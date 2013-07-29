@@ -46,6 +46,14 @@ namespace Ssl {
 class PT_SSL_API StreamBuffer : public std::streambuf
 {
     public:
+        enum HandshakeProgress
+        {
+          None = 0,
+          Input = 1,
+          Output = 2
+        };
+
+    public:
         /** @brief Construct an SSL stream buffer that uses the given IO stream. 
         */
         StreamBuffer(std::streambuf& sb, size_t bufferSize = 1024);
@@ -124,6 +132,10 @@ class PT_SSL_API StreamBuffer : public std::streambuf
             if the handshake message is complete.
         */
         bool readHandshake();
+
+        /** @brief Returns false if more input is needed.
+        */
+        HandshakeProgress handshake();
 
         /** @brief Shutdown this SSL stream buffer. 
         */

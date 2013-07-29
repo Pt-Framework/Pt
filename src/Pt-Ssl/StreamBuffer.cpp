@@ -341,6 +341,84 @@ bool StreamBuffer::readHandshake()
 }
 
 
+StreamBuffer::HandshakeProgress StreamBuffer::handshake()
+{
+    if( ! _ios || ! _ssl )
+        throw System::IOError("SSL Buffer not initialized");
+      
+    int ret = SSL_do_handshake(_ssl);
+    //Sleep(1000);
+    std::clog << "HANDSHAKE " << ret << std::endl;
+
+    if(ret <= 0)
+    {
+        const int sslerr = SSL_get_error(_ssl, ret);
+
+        if(sslerr != SSL_ERROR_WANT_READ && sslerr != SSL_ERROR_WANT_WRITE) 
+        {
+            throw HandshakeFailed("SSL handshake failed");
+        }
+    }
+
+    while( BIO_pending(_out) )
+    {
+        char buf[1000];
+        int n = BIO_read( _out, buf, sizeof(buf) );
+        log_debug("Wrote " << n << " bytes from _out BIO to _ios");
+        std::clog << "WRITE HANDSHAKE: " << n << std::endl;
+
+        if(n <= 0)
+            throw System::IOError("BIO_read");
+
+        _ios->sputn(buf, n);
+
+        if( ! BIO_pending(_out) )
+            return Output;
+    }
+        
+    if( SSL_want_read(_ssl)  )
+    {
+        std::clog << "WANT READ" << std::endl;
+
+        std::streamsize avail = _ios->in_avail();
+        if(avail == 0)
+        {
+            std::clog << "READ HANDSHAKE: break" << std::endl;
+            return Input;
+        }
+
+        const std::streamsize bufsize = 2000;
+        char buf[bufsize];
+        std::streamsize refill = std::min( bufsize, _ios->in_avail() );
+        std::clog << "IN AVAIL: " << _ios->in_avail() << std::endl;
+
+        std::streamsize gcount = _ios->sgetn(buf, refill);
+        log_debug("read " << gcount << " bytes from input stream");
+        std::clog << "READ HANDSHAKE: " << gcount << std::endl;
+
+        int n = BIO_write(_in, buf, static_cast<int>(gcount));
+        if(n <= 0)
+            throw System::IOError("BIO_write");
+
+        ret = SSL_do_handshake(_ssl);
+        std::clog << "HANDSHAKE " << ret << std::endl;
+
+        if(ret <= 0)
+        {
+            const int sslerr = SSL_get_error(_ssl, ret);
+            if(sslerr != SSL_ERROR_WANT_READ && sslerr != SSL_ERROR_WANT_WRITE) 
+            {
+                throw HandshakeFailed("SSL handshake failed");
+            }
+        }
+
+        return Input;
+    }
+    
+    return None;
+}
+
+
 void StreamBuffer::writeShutdown()
 {
     if( ! _ios || ! _ssl)

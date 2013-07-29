@@ -100,8 +100,6 @@ void StreamBufferTest::Handshake()
     PT_UNIT_ASSERT( ! certStore.identities().empty() );
     PT_UNIT_ASSERT( ! certStore.certificates().empty() );
 
-    std::stringstream data;
-
     Pt::Ssl::CertificateList caCert;
     caCert.fromPem(caPemData, sizeof(caPemData));
 
@@ -137,6 +135,7 @@ void StreamBufferTest::Handshake()
     clientContext.setVerifyMode(Pt::Ssl::Context::VerifyPeer);
 
     // client begins the handshake
+    std::stringstream data;
     Pt::Ssl::StreamBuffer client(clientContext, *data.rdbuf());
     client.setConnecting();
 
@@ -147,34 +146,32 @@ void StreamBufferTest::Handshake()
     for( ; ; )
     {
         // client handshake progress
-        while( client.writeHandshake() )
-            ;
-    
-        PT_UNIT_ASSERT(data.str().size() > 0);
-        data.clear();
+        std::clog << "\nCLIENT: " << std::endl;
+        int clientState = client.handshake();
+        if(clientState == Pt::Ssl::StreamBuffer::Output)
+        {
+            data.str( data.str() );
+        }
+        if(clientState == Pt::Ssl::StreamBuffer::Input)
+        {
+            data.str("");
+        }
+        if( client.connected() )
+        {
+            break;
+        }
 
         // server handshake progress
-        while( server.readHandshake() )
-            ;
-    
-        data.clear();
-        data.str( std::string() );
-    
-        while( server.writeHandshake() )
-            ;
-    
-        PT_UNIT_ASSERT(data.str().size() > 0);
-        data.clear();
-
-        // client handshake progress
-        while( client.readHandshake() )
-            ;
-
-        data.clear();
-        data.str( std::string() );
-
-        if( client.connected() )
-            break;
+        std::clog << "\nSERVER: " << std::endl;
+        int serverState = server.handshake();
+        if(serverState == Pt::Ssl::StreamBuffer::Output)
+        {
+            data.str( data.str() );
+        }
+        if(serverState == Pt::Ssl::StreamBuffer::Input)
+        {
+            data.str("");
+        }
     }
 
     PT_UNIT_ASSERT( client.connected() );

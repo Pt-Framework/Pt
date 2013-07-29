@@ -1126,6 +1126,7 @@ bool Connection::outputAvailable()
 #ifdef PT_HTTP_WITH_SSL
     if(_ssl)
     {
+        // TODO: implement Ssl::StreamBuffer::out_avail...
         _sslbuf.pubsync();
     }
 #endif
