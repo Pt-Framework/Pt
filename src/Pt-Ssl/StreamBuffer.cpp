@@ -349,7 +349,7 @@ StreamBuffer::HandshakeProgress StreamBuffer::handshake()
     if( ! _ios || ! _ssl )
         throw System::IOError("SSL Buffer not initialized");
       
-    Sleep(800);
+    //Sleep(800);
 
     int ret = SSL_do_handshake(_ssl);
    
