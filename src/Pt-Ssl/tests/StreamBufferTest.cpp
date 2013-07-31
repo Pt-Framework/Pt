@@ -146,33 +146,65 @@ void StreamBufferTest::Handshake()
     for( ; ; )
     {
         // client handshake progress
-        std::clog << "\nCLIENT: " << std::endl;
-        int clientState = client.handshake();
-        if(clientState == Pt::Ssl::StreamBuffer::Output)
-        {
-            data.str( data.str() );
-        }
-        if(clientState == Pt::Ssl::StreamBuffer::Input)
-        {
-            data.str("");
-        }
-        if( client.connected() )
-        {
-            break;
-        }
+        while( client.writeHandshake() )
+            ;
+    
+        PT_UNIT_ASSERT(data.str().size() > 0);
+        data.str( data.str() );
+        data.clear();
 
         // server handshake progress
-        std::clog << "\nSERVER: " << std::endl;
-        int serverState = server.handshake();
-        if(serverState == Pt::Ssl::StreamBuffer::Output)
-        {
-            data.str( data.str() );
-        }
-        if(serverState == Pt::Ssl::StreamBuffer::Input)
-        {
-            data.str("");
-        }
+        while( server.readHandshake() )
+            ;
+    
+        data.clear();
+        data.str( std::string() );
+    
+        while( server.writeHandshake() )
+            ;
+    
+        PT_UNIT_ASSERT(data.str().size() > 0);
+        data.str( data.str() );
+        data.clear();
+
+        // client handshake progress
+        while( client.readHandshake() )
+            ;
+
+        data.clear();
+        data.str( std::string() );
+
+        if( client.connected() )
+            break;
     }
+
+    //while( ! client.connected() || ! server.connected() )
+    //{
+    //    // client handshake progress
+    //    std::clog << "\nCLIENT: " << std::endl;
+    //    int clientState = client.handshake();
+    //    
+    //    if(clientState == Pt::Ssl::StreamBuffer::Output)
+    //    {
+    //        data.str( data.str() );
+    //    }
+    //    else
+    //    {
+    //        data.str("");
+    //    }
+
+    //    // server handshake progress
+    //    std::clog << "\nSERVER: " << std::endl;
+    //    int serverState = server.handshake();
+    //    if(serverState == Pt::Ssl::StreamBuffer::Output)
+    //    {
+    //        data.str( data.str() );
+    //    }
+    //    else
+    //    {
+    //        data.str("");
+    //    }
+    //}
 
     PT_UNIT_ASSERT( client.connected() );
     PT_UNIT_ASSERT( server.connected() );

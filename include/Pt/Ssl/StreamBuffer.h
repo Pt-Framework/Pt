@@ -161,6 +161,8 @@ class PT_SSL_API StreamBuffer : public std::streambuf
     private:
         std::streamsize sslRead(char* buf, size_t n, std::streamsize isize);
 
+        std::streamsize sslWrite(char* buf, size_t n);
+
         /** @brief Get the current status string of this SSL stream buffer. 
         */
         const char* getStatus() const;
@@ -175,6 +177,7 @@ class PT_SSL_API StreamBuffer : public std::streambuf
         std::size_t    _obufferSize;
         char*          _obuffer;
         const size_t   _pbmax;
+        bool           _connected;
 };
 
 } // namespace Ssl

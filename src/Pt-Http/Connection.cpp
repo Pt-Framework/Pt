@@ -347,46 +347,32 @@ void Connection::beginSendRequest(Request& request)
         log_debug("begining SSL handshake");
         _timer.start( _timeout );
         _sslbuf.setConnecting();
-        _sslbuf.writeHandshake();
-        _sockbuf.beginWrite();
         _state = SslHandshakeWrite;
-        return;
     }
 
-    if(_state == SslHandshakeWrite)
+    if(_state == SslHandshakeWrite || _state == SslHandshakeRead)
     {
-        if(_sslbuf.writeHandshake() || _sockbuf.out_avail() > 0)
+        do
         {
-            log_debug("writing SSL handshake");
-            _sockbuf.beginWrite();
-            return;
-        }
-
-        log_debug("reading SSL handshake");
-        _sockbuf.beginRead();
-        _state = SslHandshakeRead;
-        return;
-    }
-
-    if(_state == SslHandshakeRead)
-    {
-        if( _sslbuf.readHandshake() )
-        {
-            log_debug("reading SSL handshake");
-            _sockbuf.beginRead();
-            return;
-        }
-
-        if( ! _sslbuf.connected() )
-        {
-            if( _sslbuf.writeHandshake() || _sockbuf.out_avail() > 0 ) 
+            if(_sslbuf.writeHandshake() || _sockbuf.out_avail() > 0)
             {
+                log_debug("writing SSL handshake");
                 _sockbuf.beginWrite();
-                _state = SslHandshakeWrite;
+                 _state = SslHandshakeWrite;
+                return;
             }
-            
-            return;
+
+            while( _sslbuf.readHandshake() )
+            {
+                if(_sockbuf.in_avail() <= 0)
+                {
+                    _sockbuf.beginRead();
+                    _state = SslHandshakeRead;
+                    return;
+                }
+            }
         }
+        while( ! _sslbuf.connected() );
 
         _timer.stop();
         _state = Connected;
@@ -649,54 +635,37 @@ void Connection::beginReceiveRequest(Request& request)
     {
         log_debug("beginning SSL handshake");
         _timer.start( _timeout );
-        
         _sslbuf.setAccepting();
-        _sockbuf.beginRead();
         _state = SslAcceptRead;
-        return;
     }
 
-    if(_state == SslAcceptRead)
+    if(_state == SslAcceptWrite || _state == SslAcceptRead)
     {
-        if( _sslbuf.readHandshake() )
+        do
         {
-            log_debug("reading SSL handshake");
-            _sockbuf.beginRead();
-            return;
+            while( _sslbuf.readHandshake() )
+            {
+                if(_sockbuf.in_avail() <= 0)
+                {
+                    _sockbuf.beginRead();
+                    _state = SslAcceptRead;
+                    return;
+                }
+            }
+
+            if(_sslbuf.writeHandshake() || _sockbuf.out_avail() > 0)
+            {
+                log_debug("writing SSL handshake");
+                _sockbuf.beginWrite();
+                 _state = SslAcceptWrite;
+                return;
+            }
         }
+        while( ! _sslbuf.connected() );
 
-        if( _sslbuf.writeHandshake() ) 
-        {
-            log_debug("writing SSL handshake");
-            _sockbuf.beginWrite();
-            _state = SslAcceptWrite;
-            return;
-        }
-
-        assert(false);
-        return;
-    }
-
-    if(_state == SslAcceptWrite)
-    {
-        if(_sslbuf.writeHandshake() || _sockbuf.out_avail() > 0)
-        {
-            log_debug("writing SSL handshake");
-            _sockbuf.beginWrite();
-            return;
-        }
-
-        if( ! _sslbuf.connected() )
-        {
-            log_debug("reading SSL handshake");
-            _sockbuf.beginRead();
-            _state = SslAcceptRead;
-            return;
-        }
-
-        log_debug("SERVER Handshake finished");
         _timer.stop();
         _state = Accepted;
+        log_debug("Handshake finished");
     }
 
 #endif

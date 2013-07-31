@@ -66,6 +66,7 @@ StreamBuffer::StreamBuffer(Context& ctx, std::streambuf& sb, size_t bufferSize)
 , _obufferSize(bufferSize)
 , _obuffer(0)
 , _pbmax(4)
+, _connected(false)
 {
     this->init(ctx);
 }
@@ -81,6 +82,7 @@ StreamBuffer::StreamBuffer(Context& ctx, size_t bufferSize)
 , _obufferSize(bufferSize)
 , _obuffer(0)
 , _pbmax(4)
+, _connected(false)
 {
     this->init(ctx);
 }
@@ -113,6 +115,8 @@ void StreamBuffer::init(Context& ctx)
     BIO_set_nbio(_in, 1);
     BIO_set_nbio(_out, 1);
     SSL_set_bio(_ssl, _in, _out);
+
+    _connected = false;
 }
 
 
@@ -128,6 +132,8 @@ void StreamBuffer::discard()
 
     delete [] _ibuffer; _ibuffer = 0;
     delete [] _obuffer; _obuffer = 0;
+
+    _connected = false;
 }
 
 
@@ -159,7 +165,7 @@ bool StreamBuffer::connected() const
     if( ! _ssl )
         return false;
 
-    return SSL_get_state(_ssl) == SSL_ST_OK; 
+    return _connected; 
 }
 
 
@@ -242,20 +248,22 @@ bool StreamBuffer::writeHandshake()
     if( ! _ios || ! _ssl)
         throw System::IOError("SSL Buffer not initialized");
 
-    log_debug("getStatus() = " << getStatus());
+    int ret = SSL_do_handshake(_ssl);
+    log_debug("SSL_do_handshake returns " << ret);
 
-    if( ! SSL_want_read(_ssl) )
+    if(ret <= 0)
     {
-        const int ret = SSL_do_handshake(_ssl);
-        log_debug("SSL_do_handshake() = " << ret);
-
-        if(ret <= 0)
+        const int sslerr = SSL_get_error(_ssl, ret);
+        if(sslerr != SSL_ERROR_WANT_READ && sslerr != SSL_ERROR_WANT_WRITE) 
         {
-            const int sslerr = SSL_get_error(_ssl, ret);
-            if(sslerr != SSL_ERROR_WANT_READ && sslerr != SSL_ERROR_WANT_WRITE) 
+            if(sslerr == SSL_ERROR_SSL)
             {
-                throw HandshakeFailed("SSL handshake failed");
+                char buf[255];
+                ERR_error_string_n(ERR_get_error(), buf, sizeof(buf));
+                log_warn("handshake failed: " << buf);
             }
+            
+            throw HandshakeFailed("SSL handshake failed");
         }
     }
 
@@ -263,16 +271,21 @@ bool StreamBuffer::writeHandshake()
     {
         char buff[1000];
         const int n = BIO_read(_out, buff, sizeof(buff));
-        log_debug("Wrote " << n << " bytes from _out BIO to _ios");
+        log_debug("wrote " << n << " bytes to output");
 
         if(n <= 0)
-            throw System::IOError("Failed reading from OpenSSL output BIO!");
+            throw System::IOError("BIO_read");
 
         _ios->sputn(buff, n);
         return true;
     }
 
-    return false;
+    if(ret == 1)
+    {
+        _connected = true;
+    }
+
+    return SSL_want_write(_ssl);
 }
 
 
@@ -283,61 +296,51 @@ bool StreamBuffer::readHandshake()
     if( ! _ios || ! _ssl)
         throw System::IOError("SSL Buffer not initialized");
 
-    log_debug("getStatus() = " << getStatus());
-
-    const std::streamsize bufsize = 1000;
-    char buf[bufsize];
-
-    // Block until data can be read from the stream
-    _ios->sgetc();
-
-    while(true)
+    while(_ios->in_avail() > 0)
     {
-        std::streamsize gsize = std::min(_ios->in_avail(), bufsize);
-        std::streamsize n = gsize > 0 ? _ios->sgetn(buf, gsize) : 0;
-        if(n == 0) 
-          break;
+        const std::streamsize bufsize = 1000;
+        char buf[bufsize];
 
-        while(n)
+        std::streamsize gsize = std::min( _ios->in_avail(), bufsize );
+        std::streamsize n = _ios->sgetn(buf, gsize);
+
+        const int written = BIO_write(_in, buf, static_cast<int>(n));
+        assert(written == n);
+
+        if(written <= 0 || written != n)
+            throw System::IOError("BIO_write");
+
+        log_debug("read " << n << " bytes from input");
+    }
+
+    int ret = SSL_do_handshake(_ssl);
+    log_debug("SSL_do_handshake returns " << ret);
+
+    if( ret <= 0 )
+    {
+        int sslerr = SSL_get_error(_ssl, ret);
+        if( sslerr != SSL_ERROR_WANT_READ && sslerr != SSL_ERROR_WANT_WRITE) 
         {
-            const int written = BIO_write(_in, buf, static_cast<int>(n));
-            if(written <= 0)
-              throw System::IOError("Failed writing to OpenSSL input BIO!");
-
-            n -= written;
-            log_debug("Wrote " << written << " bytes from _ios to _in BIO; leftover = " << n << " bytes");
-
-            if(n > 0)
-                std::memcpy(buf, buf + written, static_cast<size_t>(n));
-
-            int ret = SSL_do_handshake(_ssl);
-            if( ret <= 0 )
+            if(sslerr == SSL_ERROR_SSL)
             {
-                
-                int sslerr = SSL_get_error(_ssl, ret);
-                if( sslerr != SSL_ERROR_WANT_READ && sslerr != SSL_ERROR_WANT_WRITE) 
-                {
-                    char buf[255];
-                    std::string msg = "SSL handshake failed";
-                    if(sslerr == SSL_ERROR_SSL)
-                    {
-                        msg += ' ';
-                        msg += ERR_error_string(ERR_get_error(), buf);
-                    }
-
-                    log_warn("handshake failed: " << msg);
-                    throw HandshakeFailed("SSL handshake failed");
-                }
+                char buf[255];
+                ERR_error_string_n(ERR_get_error(), buf, sizeof(buf));
+                log_warn("handshake failed: " << buf);
             }
+
+            throw HandshakeFailed("SSL handshake failed");
         }
     }
 
-    if( BIO_pending(_out) > 0 || SSL_get_state(_ssl) == SSL_ST_OK ) 
+    if(ret == 1)
     {
-        return false;
+        if(BIO_pending(_out) <= 0)
+        {
+            _connected = true;
+        }
     }
 
-    return true;
+    return BIO_pending(_out) <= 0 && SSL_want_read(_ssl);
 }
 
 
@@ -346,10 +349,10 @@ StreamBuffer::HandshakeProgress StreamBuffer::handshake()
     if( ! _ios || ! _ssl )
         throw System::IOError("SSL Buffer not initialized");
       
-    int ret = SSL_do_handshake(_ssl);
-    //Sleep(1000);
-    std::clog << "HANDSHAKE " << ret << std::endl;
+    Sleep(800);
 
+    int ret = SSL_do_handshake(_ssl);
+   
     if(ret <= 0)
     {
         const int sslerr = SSL_get_error(_ssl, ret);
@@ -360,26 +363,26 @@ StreamBuffer::HandshakeProgress StreamBuffer::handshake()
         }
     }
 
-    while( BIO_pending(_out) )
+    if( BIO_pending(_out) )
     {
-        char buf[1000];
-        int n = BIO_read( _out, buf, sizeof(buf) );
-        log_debug("Wrote " << n << " bytes from _out BIO to _ios");
-        std::clog << "WRITE HANDSHAKE: " << n << std::endl;
+        while( BIO_pending(_out) )
+        {
+            char buf[1000];
+            int n = BIO_read( _out, buf, sizeof(buf) );
+            std::clog << "WRITE HANDSHAKE: " << n << std::endl;
 
-        if(n <= 0)
-            throw System::IOError("BIO_read");
+            if(n <= 0)
+                throw System::IOError("BIO_read");
 
-        _ios->sputn(buf, n);
+            _ios->sputn(buf, n);
+            log_debug("wrote " << n << " bytes to output stream");  
+        }
 
-        if( ! BIO_pending(_out) )
-            return Output;
+        return Output;
     }
         
     if( SSL_want_read(_ssl)  )
     {
-        std::clog << "WANT READ" << std::endl;
-
         std::streamsize avail = _ios->in_avail();
         if(avail == 0)
         {
@@ -401,7 +404,6 @@ StreamBuffer::HandshakeProgress StreamBuffer::handshake()
             throw System::IOError("BIO_write");
 
         ret = SSL_do_handshake(_ssl);
-        std::clog << "HANDSHAKE " << ret << std::endl;
 
         if(ret <= 0)
         {
@@ -411,11 +413,9 @@ StreamBuffer::HandshakeProgress StreamBuffer::handshake()
                 throw HandshakeFailed("SSL handshake failed");
             }
         }
-
-        return Input;
     }
-    
-    return None;
+
+    return SSL_want_read(_ssl) ? Input : None;
 }
 
 
@@ -444,6 +444,8 @@ void StreamBuffer::writeShutdown()
 
     delete [] _ibuffer; _ibuffer = 0;
     delete [] _obuffer; _obuffer = 0;
+
+    _connected = false;
 }
 
 
@@ -535,16 +537,13 @@ std::streamsize StreamBuffer::do_underflow(std::streamsize isize)
 {
     log_trace("StreamBuffer::do_underflow");
 
-    if(! _ios || ! _ssl ) 
-        return 0;
-
-    if(!_ibuffer) {
+    if( ! _ibuffer ) {
         log_debug("Allocating _ibuffer of size " << _ibufferSize);
         _ibuffer = new char[_ibufferSize];
     }
 
     // Return 0 if full
-    if(_ibufferSize == (size_t)(this->egptr() - this->gptr() + _pbmax))
+    if(_ibufferSize == (this->egptr() - this->gptr() + _pbmax))
     {
         log_debug("_ibuffer is full");
         return 0;
@@ -567,7 +566,7 @@ std::streamsize StreamBuffer::do_underflow(std::streamsize isize)
                     _ibuffer + _pbmax + leftover ); // end of get area
     }
 
-    // We do not need to read all bytes from _ssl, but only make some progress
+    // We only have to make some progress
     size_t used = _pbmax + leftover;
     size_t unused = _ibufferSize - used;
 
@@ -590,6 +589,9 @@ std::streamsize StreamBuffer::do_underflow(std::streamsize isize)
 
 std::streamsize StreamBuffer::sslRead(char* buf, size_t n, std::streamsize isize)
 {
+    if( ! _ios || ! _ssl) 
+        return 0;
+
     while(true) 
     {
         // even if we could not refill the BIO, we might still get data from the SSL
@@ -651,47 +653,34 @@ StreamBuffer::int_type StreamBuffer::overflow(int_type ch)
     // the eof character is passed to overflow(). When StreamBuffer is
     // constructed no output buffer area exists, therefore when overflow
     // is called for the first time, we need to set it up.
-    if( ! _ios || ! _ssl )
-        return traits_type::eof();
 
     // No buffer area etablished yet
-    if( ! _obuffer ) {
+    if( ! _obuffer ) 
+    {
         log_debug("Allocating _obuffer of size " << _obufferSize);
 
         _obuffer = new char[_obufferSize];
         this->setp(_obuffer, _obuffer + _obufferSize);
-
     }
-
-    // Write buffer to underlying stream
     else
     {
         // Normal blocking overflow case
-        const size_t avail = this->pptr() - _obuffer;
+        std::size_t avail = this->pptr() - _obuffer;
 
-        // Feed _obuffer to openssl
-        int written = SSL_write(_ssl, _obuffer, avail);
-        log_debug("Wrote " << written << " bytes to _ssl");
+        std::streamsize written = sslWrite(_obuffer, avail);
+        if(written == 0)
+            return traits_type::eof();
 
         // Move leftover in _obuffer to the front
-        const size_t leftover = avail - written;
-        if(leftover > 0)  traits_type::move(_obuffer, _obuffer + written, leftover);
+        std::size_t leftover = avail - static_cast<std::size_t>(written);
+        if(leftover > 0)  
+            traits_type::move(_obuffer, _obuffer + written, leftover);
+        
         this->setp(_obuffer, _obuffer + _obufferSize);
         this->pbump( leftover );
-
-        // Write encoded bytes to _ios
-
-        BUF_MEM* bm = 0;
-        BIO_get_mem_ptr(_out, &bm);
-        if(bm->length > 0)
-        {
-            _ios->sputn(bm->data, bm->length);
-            log_debug("Wrote " << bm->length << " bytes from _ios to _out BUF_MEM");
-            bm->length = 0;
-        }
     }
 
-    // If the overflow char is not EOF, put it in the buffer area
+    // put the overflow char in the buffer area, if not EOF
     if( ! traits_type::eq_int_type( ch, traits_type::eof() ) )
     {
         *(this->pptr()) = traits_type::to_char_type(ch);
@@ -700,6 +689,28 @@ StreamBuffer::int_type StreamBuffer::overflow(int_type ch)
 
     return traits_type::not_eof(ch);
 }
+
+
+std::streamsize StreamBuffer::sslWrite(char* buf, size_t n)
+{
+    if( ! _ios || ! _ssl )
+        return 0;
+
+    std::streamsize written = SSL_write(_ssl, buf, n);
+    log_debug("encrypted " << written << " bytes");
+
+    BUF_MEM* bm = 0;
+    BIO_get_mem_ptr(_out, &bm);
+    if(bm->length > 0)
+    {
+        _ios->sputn(bm->data, bm->length);
+        log_debug("wrote " << bm->length << " bytes to output");
+        bm->length = 0;
+    }
+
+    return written;
+}
+
 
 /*
 std::vector<CipherInfo> StreamBuffer::availableCiphers() const
