@@ -34,10 +34,7 @@
     <ClInclude Include="..\..\include\Pt\Hmi\Api.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Application.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Controller.h" />
-    <ClInclude Include="..\..\include\Pt\Hmi\CursorController.h" />
-    <ClInclude Include="..\..\include\Pt\Hmi\CursorModel.h" />
-    <ClInclude Include="..\..\include\Pt\Hmi\CursorOutput.h" />
-    <ClInclude Include="..\..\include\Pt\Hmi\CursorRendere.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\Cursor.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Desktop\Api.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Desktop\Button.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Desktop\CheckBox.h" />
@@ -266,6 +263,7 @@
     <ClInclude Include="..\..\include\Pt\Xml\XmlSerializer.h" />
     <ClInclude Include="..\..\include\Pt\Xml\XmlWriter.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\gdi\ApplicationImpl.h" />
+    <ClInclude Include="..\..\src\Pt-Hmi\gdi\CursorImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\gdi\GfxOutputImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\gdi\MouseDeviceImpl.h" />
     <ClInclude Include="..\..\src\Pt-Http\ClientImpl.h" />
@@ -366,6 +364,7 @@
   <ItemGroup>
     <ClCompile Include="..\..\src\Pt-Hmi\Application.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Controller.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\Cursor.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Desktop\Button.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Desktop\CheckBox.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Desktop\ComboBox.cpp" />
@@ -397,6 +396,7 @@
     <ClCompile Include="..\..\src\Pt-Hmi\Device.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Event2D.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\gdi\ApplicationImpl.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\gdi\CursorImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\gdi\GfxOutputImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\gdi\MouseDeviceImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\GfxController.cpp" />

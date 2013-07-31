@@ -31,6 +31,7 @@
 #include <Pt/Hmi/Model.h>
 #include <Pt/Hmi/Property.h>
 #include <Pt/Hmi/Event2D.h>
+#include <Pt/Hmi/Cursor.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Rect.h>
@@ -71,7 +72,8 @@ public:
 	Property<int>					Opacity;
 	Property<Pt::Gfx::ARgbColor>	TransparancyKey;
 	Pt::Gfx::ARgbImage				PaintBuffer;
-	Property<Event2D>				Pointer2DStatus;		
+	Property<Event2D>				Pointer2DStatus;	
+	Property<Cursor>	            CursorStatus; 
 
 public:
 	virtual ~GfxModel();

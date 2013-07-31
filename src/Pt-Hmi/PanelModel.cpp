@@ -5,7 +5,7 @@ namespace Hmi{
 
 PanelModel::PanelModel()
 : BorderStyle(BorderStyle::Sizebale)
-, BorderWidth(0.12)
+, BorderWidth(3)
 {
 }
 

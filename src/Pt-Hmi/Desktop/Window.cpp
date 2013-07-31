@@ -25,22 +25,8 @@ Window::Window()
 	_gfxOutputDevice.start(app.loop());
 
 	setController(*_defController);
+	addChild(&_panel);
 }
-
-void Window::show()
-{
-	GfxModel* m = dynamic_cast<GfxModel*>(controller().model());
-	m->Visible = true;
-	controller().invalidate();
-}
-
-void Window::hide()
-{
-	GfxModel* m = dynamic_cast<GfxModel*>(controller().model());
-	m->Visible = false;
-	controller().invalidate();	
-}
-
 
 Window::~Window()
 {

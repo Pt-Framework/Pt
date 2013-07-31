@@ -58,8 +58,9 @@ HHOOK ApplicationImpl::_hDesktopHook;
 
 ApplicationImpl::ApplicationImpl()
 : Pt::System::EventLoop()
+, _dpi(72.0)
 {
-	_dpi = unitSizeInch();
+	
     _instanceHandle = (HINSTANCE)GetModuleHandle(NULL);
 	_hDesktopHook = SetWindowsHookEx( WH_MOUSE, ApplicationImpl::mouseProc, _instanceHandle, GetCurrentThreadId());	
 
@@ -67,8 +68,8 @@ ApplicationImpl::ApplicationImpl()
 
 	getScreeResolution(_screenWidth, _screenHeight);
 
-	_width  = _screenWidth * _dpi;
-	_height = _screenHeight * _dpi;
+	_width  = _screenWidth * unitSizeInch()*_dpi;
+	_height = _screenHeight * unitSizeInch()*_dpi;
 	
 	_factorX = _width / _screenWidth;
 	_factorY = _height / _screenHeight;
@@ -110,13 +111,13 @@ double ApplicationImpl::resolutionDPI() const
 
 int ApplicationImpl::fromUnit(double unit)
 {
-	return (int)( unit /unitSizeInch());
+	return (int) (unit *unitSizeInch()* _dpi);
 }
 
 
 double ApplicationImpl::toUnit(int unit)
 {
-	return unitSizeInch() * unit;
+	return unitSizeInch()/_dpi * unit;
 }
 
 

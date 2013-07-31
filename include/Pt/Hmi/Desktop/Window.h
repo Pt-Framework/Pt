@@ -3,6 +3,7 @@
 
 #include <Pt/Hmi/Desktop/Api.h>
 #include <Pt/Hmi/MouseDevice.h>
+#include <Pt/Hmi/Desktop/Widget.h>
 #include <Pt/Hmi/GfxOutput.h>
 
 namespace Pt{
@@ -11,43 +12,22 @@ namespace Hmi{
 class WindowController;
 class WindowModel;
 class WindowRenderer;
-class WindowRenderer;
 
 namespace Desktop{
 
-class PT_HMI_DESKTOP_API Window 
+class PT_HMI_DESKTOP_API Window : public Widget
 {
 public:
 	Window();
 	virtual ~Window();
-
-
-	void show();
-	void hide();
-
-	inline Pt::Hmi::WindowController& controller()
-	{
-		return  *_controller;
-	}
 	
-	inline const Pt::Hmi::WindowController& controller() const
-	{
-		return  *_controller;
-	}
-	
-	
-	inline void setController(Pt::Hmi::WindowController& controller)
-	{		
-		_controller = &controller;
-	}
-
 private:
+	pt::Hmi::Panel				_panel;
 	Pt::Hmi::WindowController*	_defController;
 	Pt::Hmi::WindowModel*		_defModel;
 	Pt::Hmi::WindowRenderer*	_defRenderer;
 	Pt::Hmi::MouseDevice        _mouseDevice;
 	Pt::Hmi::GfxOutput          _gfxOutputDevice;
-	Pt::Hmi::WindowController*  _controller;
 };
  
 }}}

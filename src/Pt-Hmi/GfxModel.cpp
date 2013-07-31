@@ -9,7 +9,7 @@ GfxModel::GfxModel()
 , BackColor(Pt::Gfx::ARgbColor(197,197,197))
 , ForeColor(Pt::Gfx::ARgbColor(70,70,70))
 {
-	Position = toUnit(Pt::Gfx::Point(20,20));
+	Position = toUnit(Pt::Gfx::Point(0,0));
 	Size = toUnit(Pt::Gfx::Size(200,200));
 }
 

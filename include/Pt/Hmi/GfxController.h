@@ -46,7 +46,10 @@ public:
 	Pt::Gfx::PointF fromClient(const Pt::Gfx::PointF& localPoint);
 
 	void render(Pt::Gfx::Painter* painter);
-
+	
+	virtual void invalidate()
+	{ }
+		
 	GfxModel* gfxModel();
 	const GfxModel* gfxModel() const;
 

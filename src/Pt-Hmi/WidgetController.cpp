@@ -15,4 +15,14 @@ WidgetController::~WidgetController()
 
 }
 
+void WidgetController::onInput2D(const Event2D& ev)
+{
+	GfxModel* m = gfxModel();
+	
+	m->Pointer2DStatus = ev;
+
+	for( size_t i = 0; i < children().size(); ++i)
+		children()[i]->notifyInput2D(ev);
+}
+
 }}

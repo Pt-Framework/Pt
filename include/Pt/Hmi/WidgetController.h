@@ -14,6 +14,9 @@ class PT_HMI_API WidgetController  : public GfxController
 public:
 	WidgetController();
 	virtual ~WidgetController();		
+
+public:
+	virtual void onInput2D(const Event2D& ev);
 };
 
 }}

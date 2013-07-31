@@ -13,6 +13,14 @@ class PT_HMI_API PanelController  : public WidgetController
 public:
 	PanelController();
 	virtual ~PanelController();	
+	
+protected:
+	virtual void onInput2D(const Event2D& ev);
+
+private:
+	void recalcPosSize(const Pt::Gfx::PointF& p);
+
+
 };
 
 }}

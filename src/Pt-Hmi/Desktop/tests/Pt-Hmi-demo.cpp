@@ -8,17 +8,15 @@
 #include "Pt/Allocator.h"
 
 #include <Pt/Hmi/Application.h>
-//Devices
+//Desktop
 #include <Pt/Hmi/Desktop/Window.h>
+#include <Pt/Hmi/Desktop/Panel.h>
 
 
 int main(int argc, char* args[])
 {
 
 	Pt::Hmi::Application	  app;
-	
-	app.setResolution(1/96.0);
-
 	
 	Pt::Hmi::Desktop::Window	window;	
 

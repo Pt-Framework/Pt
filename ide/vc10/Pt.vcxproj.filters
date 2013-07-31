@@ -831,9 +831,6 @@
     <ClInclude Include="..\..\include\Pt\Hmi\Controller.h">
       <Filter>Pt-Hmi\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\CursorController.h">
-      <Filter>Pt-Hmi\Headers</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\PanelController.h">
       <Filter>Pt-Hmi\Headers</Filter>
     </ClInclude>
@@ -870,16 +867,10 @@
     <ClInclude Include="..\..\include\Pt\Hmi\DeviceControlDial.h">
       <Filter>Pt-Hmi\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\CursorOutput.h">
-      <Filter>Pt-Hmi\Headers</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\GfxOutput.h">
       <Filter>Pt-Hmi\Headers</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\OutputDevice.h">
-      <Filter>Pt-Hmi\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\CursorModel.h">
       <Filter>Pt-Hmi\Headers</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\GfxModel.h">
@@ -895,9 +886,6 @@
       <Filter>Pt-Hmi\Headers</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\WindowModel.h">
-      <Filter>Pt-Hmi\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\CursorRendere.h">
       <Filter>Pt-Hmi\Headers</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\PanelRenderer.h">
@@ -1010,6 +998,12 @@
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\GfxController.h">
       <Filter>Pt-Hmi\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\Cursor.h">
+      <Filter>Pt-Hmi\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\gdi\CursorImpl.h">
+      <Filter>Pt-Hmi\Sources\gdi</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1949,6 +1943,12 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\GfxController.cpp">
       <Filter>Pt-Hmi\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\Cursor.cpp">
+      <Filter>Pt-Hmi\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\gdi\CursorImpl.cpp">
+      <Filter>Pt-Hmi\Sources\gdi</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
