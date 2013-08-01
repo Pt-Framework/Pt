@@ -225,14 +225,11 @@ void ImagePainter::drawRect(const  Gfx::Rect& rect)
     //
     this->drawLine(rect.topLeft(), rect.topRight() );
 
-    this->drawLine(Pt::Gfx::Point( rect.topRight().x() - 1, rect.topRight().y()),
-                   Pt::Gfx::Point( rect.bottomRight().x() - 1, rect.bottomRight().y() -1 ) );
+    this->drawLine(rect.topRight(), rect.bottomRight());
 
-    this->drawLine(Pt::Gfx::Point( rect.bottomRight().x(), rect.bottomRight().y() -1 ),
-                   Pt::Gfx::Point( rect.bottomLeft().x(), rect.bottomLeft().y() -1 ) );
+    this->drawLine(rect.bottomRight(),rect.bottomLeft());
 
-    this->drawLine(Pt::Gfx::Point( rect.bottomLeft().x(), rect.bottomLeft().y() -1 ),
-                   rect.topLeft() );
+    this->drawLine(rect.bottomLeft(), rect.topLeft() );
 }
 
 void ImagePainter::fillRect(const  Gfx::Rect& rect)
