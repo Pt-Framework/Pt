@@ -72,6 +72,7 @@ class Connection
         SSLContextRef   _context;
         std::streambuf* _ios;
         std::streamsize _iocount;
+        bool _connected;
         bool _wantRead;
         bool _isReadingHandshake;
         bool _isWritingHandshake;

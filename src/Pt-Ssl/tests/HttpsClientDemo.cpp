@@ -29,6 +29,7 @@
 
 #include "PemData.h"
 #include <Pt/Ssl/Context.h>
+#include <Pt/Ssl/StreamBuffer.h>
 #include <Pt/Http/Client.h>
 #include <Pt/Http/Request.h>
 #include <Pt/Http/Reply.h>
@@ -66,6 +67,16 @@ int main(int argc, char** argv)
     {
         Pt::System::Logger::setLogLevel("", Pt::System::Trace);
         log_debug("OpenSSL HTTP test progam started");
+        
+#ifdef __APPLE__
+        std::stringstream ss;
+        Pt::Ssl::Connection conn( *ss.rdbuf() );
+        conn.writeHandshake();
+        
+        ss.rdbuf()->sgetc();
+        std::clog << ss.str().size() << std::endl;
+        std::exit(0);
+#endif        
 
         Pt::System::MainLoop loop;
 
