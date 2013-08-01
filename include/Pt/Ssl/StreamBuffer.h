@@ -37,9 +37,46 @@
 #include <streambuf>
 #include <string>
 
+#ifdef __APPLE__
+#import <Security/Security.h>
+#import <CoreFoundation/CoreFoundation.h>
+#import <CoreFoundation/CFDictionary.h>
+#endif
+
 namespace Pt {
 
 namespace Ssl {
+
+#ifdef __APPLE__
+
+class Connection
+{
+    public:
+        Connection(std::streambuf& ios);
+
+        ~Connection();
+
+        bool writeHandshake();
+
+        bool readHandshake();
+
+        OSStatus sslRead(void* data, size_t* n);
+
+        OSStatus sslWrite(const void* data, size_t* n);
+
+        static OSStatus sslWriteCallback(SSLConnectionRef connection, const void* data, size_t* n);
+
+        static OSStatus sslReadCallback(SSLConnectionRef connection, void* data, size_t* n);
+
+    private:
+        SSLContextRef   _context;
+        std::streambuf* _ios;
+        std::streamsize _iocount;
+        bool _wantRead;
+        bool _isReadingHandshake;
+        bool _isWritingHandshake;
+};
+#endif
 
 /** @brief SSL stream buffer.
 */

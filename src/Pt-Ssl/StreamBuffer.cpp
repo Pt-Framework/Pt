@@ -50,131 +50,126 @@ namespace Ssl {
 
 #ifdef __APPLE__
 
-class Connection
+Connection::Connection(std::streambuf& ios)
+: _context(0)
+, _ios(&ios)
+, _iocount(0)
+, _wantRead(false)
+, _isReadingHandshake(false)
+, _isWritingHandshake(false)
 {
-    public:
-        Connection(std::streambuf& ios)
-        : _context(0)
-        , _ios(&ios)
-        , _iocount(0)
-        , _wantRead(false)
-        , _isReadingHandshake(false)
-        , _isWritingHandshake(false)
-        {
-            _context = SSLCreateContext(NULL, kSSLClientSide, kSSLStreamType);
+    _context = SSLCreateContext(NULL, kSSLClientSide, kSSLStreamType);
 
-            OSStatus status = SSLSetIOFuncs(_context, 
-                                            &Connection::sslReadCallback, 
-                                            &Connection::sslWriteCallback);
-        }
+    OSStatus status = SSLSetIOFuncs(_context, 
+                                    &Connection::sslReadCallback, 
+                                    &Connection::sslWriteCallback);
+}
 
-        bool writeHandshake()
-        {
-            log_trace("Connection::writeHandshake");
+
+Connection::~Connection()
+{
+    CFRelease(_context);
+}
+
+
+bool Connection::writeHandshake()
+{
+    log_trace("Connection::writeHandshake");
     
-            if( ! _ios )
-                throw System::IOError("SSL Buffer not initialized");
+    if( ! _ios )
+        throw System::IOError("SSL Buffer not initialized");
 
-            _iocount = 0;
-            _isWritingHandshake = true;
-            OSStatus status = SSLHandshake(_context);
-            _isWritingHandshake = false;
+    _iocount = 0;
+    _isWritingHandshake = true;
+    OSStatus status = SSLHandshake(_context);
+    _isWritingHandshake = false;
 
-            log_debug("SSLHandshake returns " << status);
+    log_debug("SSLHandshake returns " << status);
 
-            if(status != noErr && status != errSSLWouldBlock)
-            {
-                throw HandshakeFailed("SSL handshake failed");
-            }
+    if(status != noErr && status != errSSLWouldBlock)
+    {
+        throw HandshakeFailed("SSL handshake failed");
+    }
 
-            if(status == noErr)
-            {
-                _connected = true;
-            }
+    if(status == noErr)
+    {
+        _connected = true;
+    }
 
-            return written > 0;
-        }
+    return written > 0;
+}
 
-        bool readHandshake()
-        {
-            log_trace("Connection::readHandshake");
+bool Connection::readHandshake()
+{
+    log_trace("Connection::readHandshake");
     
-            if( ! _ios )
-                throw System::IOError("SSL Buffer not initialized");
+    if( ! _ios )
+        throw System::IOError("SSL Buffer not initialized");
 
-            _wantRead = false;
-            _isReadingHandshake = true;
-            OSStatus status = SSLHandshake(_context);
-            _isReadingHandshake = false;
+    _wantRead = false;
+    _isReadingHandshake = true;
+    OSStatus status = SSLHandshake(_context);
+    _isReadingHandshake = false;
 
-            log_debug("SSLHandshake returns " << ret);
+    log_debug("SSLHandshake returns " << ret);
 
-            if(status != noErr && status != errSSLWouldBlock)
-            {
-                throw HandshakeFailed("SSL handshake failed");
-            }
+    if(status != noErr && status != errSSLWouldBlock)
+    {
+        throw HandshakeFailed("SSL handshake failed");
+    }
 
-            if( status == noErr )
-            {
-                _connected = true;
-            }
+    if( status == noErr )
+    {
+        _connected = true;
+    }
 
-            return _wantRead;
-        }
+    return _wantRead;
+}
 
-        OSStatus sslRead(void* data, size_t* n)
-        {    
-            if(_isWritingHandshake)
-            {
-                *n = 0;
-                return errSSLWouldBlock;
-            }       
+OSStatus Connection::sslRead(void* data, size_t* n)
+{    
+    if(_isWritingHandshake)
+    {
+        *n = 0;
+        return errSSLWouldBlock;
+    }       
 
-            if(_ios->in_avail() <= 0)
-            {
-                _wantRead = true;
-                *n = 0;
-                return errSSLWouldBlock;
-            }  
+    if(_ios->in_avail() <= 0)
+    {
+        _wantRead = true;
+        *n = 0;
+        return errSSLWouldBlock;
+    }  
 
-            std::streamsize gsize = std::min( _ios->in_avail(), static_cast<std::streamsize>(*n) );
-            std::streamsize r = _ios->sgetn(data, gsize);
-            log_debug("read " << r << " bytes from input");
+    std::streamsize gsize = std::min( _ios->in_avail(), static_cast<std::streamsize>(*n) );
+    std::streamsize r = _ios->sgetn(data, gsize);
+    log_debug("read " << r << " bytes from input");
 
-            *n = static_cast<size_t>(r);
-            return noErr;
-        }
+    *n = static_cast<size_t>(r);
+    return noErr;
+}
 
-        OSStatus sslWrite(const void* data, size_t* n)
-        {           
-            if(_isReadingHandshake)
-            {
-                *n = 0;
-                return errSSLWouldBlock;
-            }
+OSStatus Connection::sslWrite(const void* data, size_t* n)
+{           
+    if(_isReadingHandshake)
+    {
+        *n = 0;
+        return errSSLWouldBlock;
+    }
 
-            _iocount = _ios->sputn(data, *n);
-            assert(static_cast<size_t>(_iocount) == *n);
-            return noErr;
-        }
+    _iocount = _ios->sputn(data, *n);
+    assert(static_cast<size_t>(_iocount) == *n);
+    return noErr;
+}
 
-        static OSStatus sslWriteCallback(SSLConnectionRef connection, const void* data, size_t* n)
-        {
-              return reinterpret_cast<Connection>(connection)->sslWrite(data, n);
-        }
+OSStatus Connection::sslWriteCallback(SSLConnectionRef connection, const void* data, size_t* n)
+{
+      return reinterpret_cast<Connection>(connection)->sslWrite(data, n);
+}
 
-        static OSStatus sslReadCallback(SSLConnectionRef connection, void* data, size_t* n)
-        {
-              return reinterpret_cast<Connection>(connection)->sslRead(data, n);
-        }
-
-    private:
-        SSLContextRef   _context;
-        std::streambuf* _ios;
-        std::streamsize _iocount;
-        bool _wantRead;
-        bool _isReadingHandshake;
-        bool _isWritingHandshake;
+OSStatus Connection::sslReadCallback(SSLConnectionRef connection, void* data, size_t* n)
+{
+      return reinterpret_cast<Connection>(connection)->sslRead(data, n);
 }
 #endif
 
