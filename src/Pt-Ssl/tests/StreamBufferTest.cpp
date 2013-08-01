@@ -143,7 +143,7 @@ void StreamBufferTest::Handshake()
     Pt::Ssl::StreamBuffer server(serverContext, *data.rdbuf());
     server.setAccepting();
 
-    for( ; ; )
+    for( int n = 0; n < 20; ++n)
     {
         // client handshake progress
         while( client.writeHandshake() )
@@ -182,27 +182,28 @@ void StreamBufferTest::Handshake()
     //{
     //    // client handshake progress
     //    std::clog << "\nCLIENT: " << std::endl;
-    //    int clientState = client.handshake();
-    //    
-    //    if(clientState == Pt::Ssl::StreamBuffer::Output)
+
+    //    while( ! client.connected() )
     //    {
-    //        data.str( data.str() );
-    //    }
-    //    else
-    //    {
-    //        data.str("");
+    //        data.rdbuf()->sgetc();
+    //        int clientState = client.handshake();
+    //        
+    //        if( clientState == Pt::Ssl::StreamBuffer::Output )
+    //        {
+    //            break;
+    //        }
     //    }
 
-    //    // server handshake progress
     //    std::clog << "\nSERVER: " << std::endl;
-    //    int serverState = server.handshake();
-    //    if(serverState == Pt::Ssl::StreamBuffer::Output)
+    //    while( ! server.connected() )
     //    {
-    //        data.str( data.str() );
-    //    }
-    //    else
-    //    {
-    //        data.str("");
+    //        data.rdbuf()->sgetc();
+    //        int serverState = server.handshake();
+
+    //        if( serverState == Pt::Ssl::StreamBuffer::Output )
+    //        {
+    //            break;
+    //        }
     //    }
     //}
 

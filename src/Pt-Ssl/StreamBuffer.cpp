@@ -36,11 +36,147 @@
 #include <cassert>
 #include <cstring>
 
+#ifdef __APPLE__
+#import <Security/Security.h>
+#import <CoreFoundation/CoreFoundation.h>
+#import <CoreFoundation/CFDictionary.h>
+#endif
+
 log_define("Pt.Ssl.StreamBuffer")
 
 namespace Pt {
 
 namespace Ssl {
+
+#ifdef __APPLE__
+
+class Connection
+{
+    public:
+        Connection(std::streambuf& ios)
+        : _context(0)
+        , _ios(&ios)
+        , _iocount(0)
+        , _wantRead(false)
+        , _isReadingHandshake(false)
+        , _isWritingHandshake(false)
+        {
+            _context = SSLCreateContext(NULL, kSSLClientSide, kSSLStreamType);
+
+            OSStatus status = SSLSetIOFuncs(_context, 
+                                            &Connection::sslReadCallback, 
+                                            &Connection::sslWriteCallback);
+        }
+
+        bool writeHandshake()
+        {
+            log_trace("Connection::writeHandshake");
+    
+            if( ! _ios )
+                throw System::IOError("SSL Buffer not initialized");
+
+            _iocount = 0;
+            _isWritingHandshake = true;
+            OSStatus status = SSLHandshake(_context);
+            _isWritingHandshake = false;
+
+            log_debug("SSLHandshake returns " << status);
+
+            if(status != noErr && status != errSSLWouldBlock)
+            {
+                throw HandshakeFailed("SSL handshake failed");
+            }
+
+            if(status == noErr)
+            {
+                _connected = true;
+            }
+
+            return written > 0;
+        }
+
+        bool readHandshake()
+        {
+            log_trace("Connection::readHandshake");
+    
+            if( ! _ios )
+                throw System::IOError("SSL Buffer not initialized");
+
+            _wantRead = false;
+            _isReadingHandshake = true;
+            OSStatus status = SSLHandshake(_context);
+            _isReadingHandshake = false;
+
+            log_debug("SSLHandshake returns " << ret);
+
+            if(status != noErr && status != errSSLWouldBlock)
+            {
+                throw HandshakeFailed("SSL handshake failed");
+            }
+
+            if( status == noErr )
+            {
+                _connected = true;
+            }
+
+            return _wantRead;
+        }
+
+        OSStatus sslRead(void* data, size_t* n)
+        {    
+            if(_isWritingHandshake)
+            {
+                *n = 0;
+                return errSSLWouldBlock;
+            }       
+
+            if(_ios->in_avail() <= 0)
+            {
+                _wantRead = true;
+                *n = 0;
+                return errSSLWouldBlock;
+            }  
+
+            std::streamsize gsize = std::min( _ios->in_avail(), static_cast<std::streamsize>(*n) );
+            std::streamsize r = _ios->sgetn(data, gsize);
+            log_debug("read " << r << " bytes from input");
+
+            *n = static_cast<size_t>(r);
+            return noErr;
+        }
+
+        OSStatus sslWrite(const void* data, size_t* n)
+        {           
+            if(_isReadingHandshake)
+            {
+                *n = 0;
+                return errSSLWouldBlock;
+            }
+
+            _iocount = _ios->sputn(data, *n);
+            assert(static_cast<size_t>(_iocount) == *n);
+            return noErr;
+        }
+
+        static OSStatus sslWriteCallback(SSLConnectionRef connection, const void* data, size_t* n)
+        {
+              return reinterpret_cast<Connection>(connection)->sslWrite(data, n);
+        }
+
+        static OSStatus sslReadCallback(SSLConnectionRef connection, void* data, size_t* n)
+        {
+              return reinterpret_cast<Connection>(connection)->sslRead(data, n);
+        }
+
+    private:
+        SSLContextRef   _context;
+        std::streambuf* _ios;
+        std::streamsize _iocount;
+        bool _wantRead;
+        bool _isReadingHandshake;
+        bool _isWritingHandshake;
+}
+#endif
 
 StreamBuffer::StreamBuffer(std::streambuf& sb, size_t bufferSize)
 : _in(0)
@@ -267,6 +403,11 @@ bool StreamBuffer::writeHandshake()
         }
     }
 
+    if(ret == 1)
+    {
+        _connected = true;
+    }
+
     if( BIO_pending(_out) )
     {
         char buff[1000];
@@ -278,11 +419,6 @@ bool StreamBuffer::writeHandshake()
 
         _ios->sputn(buff, n);
         return true;
-    }
-
-    if(ret == 1)
-    {
-        _connected = true;
     }
 
     return SSL_want_write(_ssl);
@@ -332,12 +468,9 @@ bool StreamBuffer::readHandshake()
         }
     }
 
-    if(ret == 1)
+    if( ret == 1 && BIO_pending(_out) <= 0 )
     {
-        if(BIO_pending(_out) <= 0)
-        {
-            _connected = true;
-        }
+        _connected = true;
     }
 
     return BIO_pending(_out) <= 0 && SSL_want_read(_ssl);
@@ -349,8 +482,6 @@ StreamBuffer::HandshakeProgress StreamBuffer::handshake()
     if( ! _ios || ! _ssl )
         throw System::IOError("SSL Buffer not initialized");
       
-    //Sleep(800);
-
     int ret = SSL_do_handshake(_ssl);
    
     if(ret <= 0)
@@ -381,12 +512,17 @@ StreamBuffer::HandshakeProgress StreamBuffer::handshake()
         return Output;
     }
         
+    if(ret == 1)
+    {
+        _connected = true;
+    }
+
     if( SSL_want_read(_ssl)  )
     {
         std::streamsize avail = _ios->in_avail();
         if(avail == 0)
         {
-            std::clog << "READ HANDSHAKE: break" << std::endl;
+            std::clog << "READ HANDSHAKE: need input" << std::endl;
             return Input;
         }
 
@@ -402,20 +538,9 @@ StreamBuffer::HandshakeProgress StreamBuffer::handshake()
         int n = BIO_write(_in, buf, static_cast<int>(gcount));
         if(n <= 0)
             throw System::IOError("BIO_write");
-
-        ret = SSL_do_handshake(_ssl);
-
-        if(ret <= 0)
-        {
-            const int sslerr = SSL_get_error(_ssl, ret);
-            if(sslerr != SSL_ERROR_WANT_READ && sslerr != SSL_ERROR_WANT_WRITE) 
-            {
-                throw HandshakeFailed("SSL handshake failed");
-            }
-        }
     }
 
-    return SSL_want_read(_ssl) ? Input : None;
+    return None;
 }
 
 

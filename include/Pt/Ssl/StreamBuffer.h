@@ -50,7 +50,20 @@ class PT_SSL_API StreamBuffer : public std::streambuf
         {
           None = 0,
           Input = 1,
-          Output = 2
+          InputPending = 2,
+          Output = 3,
+          OutputPending = 4
+        };
+
+        struct HandshakeProgress2
+        {
+            HandshakeProgress2()
+            {}
+
+            bool inputPending;
+            bool outputPending;
+            bool input;
+            bool output;
         };
 
     public:

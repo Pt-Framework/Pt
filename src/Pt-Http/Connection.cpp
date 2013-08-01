@@ -350,34 +350,58 @@ void Connection::beginSendRequest(Request& request)
         _state = SslHandshakeWrite;
     }
 
-    if(_state == SslHandshakeWrite || _state == SslHandshakeRead)
+    if(_state == SslHandshakeWrite)
     {
-        do
+        if(_sslbuf.writeHandshake() || _sockbuf.out_avail() > 0)
         {
-            if(_sslbuf.writeHandshake() || _sockbuf.out_avail() > 0)
-            {
-                log_debug("writing SSL handshake");
-                _sockbuf.beginWrite();
-                 _state = SslHandshakeWrite;
-                return;
-            }
-
-            while( _sslbuf.readHandshake() )
-            {
-                if(_sockbuf.in_avail() <= 0)
-                {
-                    _sockbuf.beginRead();
-                    _state = SslHandshakeRead;
-                    return;
-                }
-            }
+            log_debug("writing SSL handshake");
+            _sockbuf.beginWrite();
+              _state = SslHandshakeWrite;
+            return;
         }
-        while( ! _sslbuf.connected() );
 
+        if( _sslbuf.readHandshake() && _sockbuf.in_avail() <= 0)
+        {
+            log_debug("reading SSL handshake");
+            _sockbuf.beginRead();
+            _state = SslHandshakeRead;
+            return;
+        }
+        
+        if( ! _sslbuf.connected() )
+            throw HttpError("invalid HTTP message");
+
+        log_debug("Handshake finished");
         _timer.stop();
         _state = Connected;
-        log_debug("Handshake finished");
     }
+    
+    if( _state == SslHandshakeRead)
+    {
+        if( _sslbuf.readHandshake() && _sockbuf.in_avail() <= 0)
+        {
+            log_debug("reading SSL handshake");
+            _sockbuf.beginRead();
+            _state = SslHandshakeRead;
+            return;
+        }
+
+        if( _sslbuf.writeHandshake() )
+        {
+            log_debug("writing SSL handshake");
+            _sockbuf.beginWrite();
+              _state = SslHandshakeWrite;
+            return;
+        }
+        
+        if( ! _sslbuf.connected() )
+            throw HttpError("invalid HTTP message");
+            
+        log_debug("Handshake finished");
+        _timer.stop();
+        _state = Connected;
+    }
+
 #endif
 
     std::ostream& os = _os; //( _httpbuf.buffer() );
@@ -412,8 +436,10 @@ void Connection::beginSendRequest(Request& request)
         log_debug("pipelining HTTP request");
 
         // signal that output was sent, so the request data can be pipelined
-        // until we begin receiving the next reply from the server
-        _socket.setOutputPipelined(); //_request->onOutput();
+        // until we begin receiving the next reply from the server.
+        //
+        // TODO: beginWrite() if over 8K data to send
+        _socket.setOutputPipelined();
         return;
     }
 
@@ -433,7 +459,6 @@ void Connection::beginSendRequest(Request& request)
         os.write("\r\n", 2);
     }
 
-    // TODO: only if over 8K data to send
     beginWrite();
 }
 
@@ -639,33 +664,56 @@ void Connection::beginReceiveRequest(Request& request)
         _state = SslAcceptRead;
     }
 
-    if(_state == SslAcceptWrite || _state == SslAcceptRead)
+    if(_state == SslAcceptWrite)
     {
-        do
+        if(_sslbuf.writeHandshake() || _sockbuf.out_avail() > 0)
         {
-            while( _sslbuf.readHandshake() )
-            {
-                if(_sockbuf.in_avail() <= 0)
-                {
-                    _sockbuf.beginRead();
-                    _state = SslAcceptRead;
-                    return;
-                }
-            }
-
-            if(_sslbuf.writeHandshake() || _sockbuf.out_avail() > 0)
-            {
-                log_debug("writing SSL handshake");
-                _sockbuf.beginWrite();
-                 _state = SslAcceptWrite;
-                return;
-            }
+            log_debug("writing SSL handshake");
+            _sockbuf.beginWrite();
+              _state = SslAcceptWrite;
+            return;
         }
-        while( ! _sslbuf.connected() );
 
+        if( _sslbuf.readHandshake() && _sockbuf.in_avail() <= 0)
+        {
+            log_debug("reading SSL handshake");
+            _sockbuf.beginRead();
+            _state = SslAcceptRead;
+            return;
+        }
+
+        if( ! _sslbuf.connected() )
+            throw HttpError("invalid HTTP message");
+
+        log_debug("Handshake finished");
         _timer.stop();
         _state = Accepted;
+    }
+    
+    if( _state == SslAcceptRead)
+    {
+        if( _sslbuf.readHandshake() && _sockbuf.in_avail() <= 0)
+        {
+            log_debug("reading SSL handshake");
+            _sockbuf.beginRead();
+            _state = SslAcceptRead;
+            return;
+        }
+
+        if( _sslbuf.writeHandshake() )
+        {
+            log_debug("writing SSL handshake");
+            _sockbuf.beginWrite();
+              _state = SslAcceptWrite;
+            return;
+        }
+        
+        if( ! _sslbuf.connected() )
+            throw HttpError("invalid HTTP message");
+        
         log_debug("Handshake finished");
+        _timer.stop();
+        _state = Accepted;
     }
 
 #endif
