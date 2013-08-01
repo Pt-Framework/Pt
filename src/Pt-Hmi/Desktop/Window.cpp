@@ -16,16 +16,20 @@ Window::Window()
 	
 	Pt::Hmi::Application& app = Pt::Hmi::Application::instance();
 
-	_defController->setModel(_defModel);
-	_defController->setRenderer(_defRenderer);
-	_defController->addInputDevice(&_mouseDevice);
-	_defController->addOutputDevice(&_gfxOutputDevice);
-	
 	_mouseDevice.start(app.loop());
 	_gfxOutputDevice.start(app.loop());
 
+	_defModel->Caption.set("New Window");
+	_defModel->ShowInTaskbar.set(true);
+	_defModel->Border.set(BorderStyle::Sizebale);
+	_defModel->WinSize.set( Pt::Gfx::SizeF(800,800));
+
+	_defController->addInputDevice(&_mouseDevice);
+	_defController->addOutputDevice(&_gfxOutputDevice);
+	_defController->setRenderer(_defRenderer);
+	_defController->setModel(_defModel);
+
 	setController(*_defController);
-	addChild(&_panel);
 }
 
 Window::~Window()

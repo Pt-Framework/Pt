@@ -2,7 +2,7 @@
 #define Pt_Hmi_Controller_Widget_H
 
 #include <Pt/Hmi/GfxController.h>
-#include <Pt/Hmi/Event2D.h>
+#include <Pt/Hmi/PointingEvent.h>
 
 namespace Pt{
 namespace Hmi{
@@ -16,7 +16,7 @@ public:
 	virtual ~WidgetController();		
 
 public:
-	virtual void onInput2D(const Event2D& ev);
+	virtual void onInput2D(const PointingEvent& ev);
 };
 
 }}

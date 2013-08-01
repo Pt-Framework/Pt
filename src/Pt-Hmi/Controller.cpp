@@ -27,7 +27,7 @@
  */
 
 #include <Pt/Hmi/Controller.h>
-#include <Pt/Hmi/Input2DDevice.h>
+#include <Pt/Hmi/PointingDevice.h>
 
 namespace Pt{
 namespace Hmi{
@@ -46,14 +46,18 @@ Controller::~Controller()
 
 void Controller::setModel(Model* model)
 {
+	if( _model != 0)
+		_model->Controller.set(0);
+
 	_model = model;
+	_model->Controller.set(this);
 	_model->Changed += Pt::slot(*this, &Controller::modelChanged);
 	notifyModelChanged(true);
 }
 
 void Controller::addInputDevice(InputDevice* device)
 {
-	Input2DDevice* pointerDev = dynamic_cast<Input2DDevice*>(device);
+	PointingDevice* pointerDev = dynamic_cast<PointingDevice*>(device);
 	
 	if( pointerDev != 0)
 		pointerDev->Event += Pt::slot(*this, &Controller::notifyInput2D);

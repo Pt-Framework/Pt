@@ -36,6 +36,8 @@
 namespace Pt{
 namespace Hmi{
 
+class Controller;
+
 class PT_HMI_API Model : public Pt::Connectable
 {
 public:
@@ -46,6 +48,7 @@ public:
 	Property<bool>  Enable;
 	Property<bool>  Active;
 	Property<void*> Tag;  
+	Property<Controller*>	Controller;
 
 public:
 	Pt::Signal<> Changed;
@@ -55,6 +58,7 @@ protected:
 	: Enable(true)
 	, Active(true)
 	, Tag(0)
+	, Controller(0)
 	{ }
 };
 

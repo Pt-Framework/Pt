@@ -76,7 +76,7 @@ ApplicationImpl::ApplicationImpl()
 	_offsetX = 0;
 	_offsetY = 0;
 
-	FreeConsole();
+	//FreeConsole();
 }
 
 
@@ -163,7 +163,16 @@ LRESULT ApplicationImpl::dispatchGDIEvent(HWND hwnd, unsigned int message, unsig
 		case WM_PAINT:
 			PaintEvent.send(hwnd);
 		break;
+		
+		case WM_SIZE:
+			SizeEvent.send(hwnd, wParam, lParam);
+		break;
+
+		case WM_MOVE:
+			MoveEvent.send(hwnd, wParam, lParam);
+		break;
 	}
+
 	return DefWindowProc(hwnd, message, wParam, lParam);
 }
 
@@ -286,7 +295,7 @@ Pt::Gfx::PointF ApplicationImpl::toUnit(const Pt::Gfx::Point& value)
 	const double x = value.x() * _factorX  + _offsetX;
 	const double y = value.y() * _factorY  + _offsetY;
 
-	return Pt::Gfx::PointF(x,y);
+	return Pt::Gfx::PointF(std::ceil(x),std::ceil(y));
 }
 
 Pt::Gfx::SizeF ApplicationImpl::toUnit(const Pt::Gfx::Size& value)
@@ -294,7 +303,7 @@ Pt::Gfx::SizeF ApplicationImpl::toUnit(const Pt::Gfx::Size& value)
 	const double width = value.width() * _factorX  + _offsetX;
 	const double height = value.height() * _factorY  + _offsetY;
 
-	return Pt::Gfx::SizeF(width,height);
+	return Pt::Gfx::SizeF(std::ceil(width),std::ceil(height));
 }
 
 Pt::Gfx::Point ApplicationImpl::fromUnit(const Pt::Gfx::PointF& value)

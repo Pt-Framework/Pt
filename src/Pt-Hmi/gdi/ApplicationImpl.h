@@ -13,6 +13,7 @@ namespace Pt {
 
 namespace Hmi {
 
+
 class Selector : public System::Selector
 {
     public:
@@ -59,8 +60,11 @@ class ApplicationImpl : public Pt::System::EventLoop
 
 		double resolutionDPI() const;
 
-		Pt::Signal<int, WPARAM, LPARAM> MouseEvent;
-		Pt::Signal<HWND> PaintEvent;
+		Pt::Signal<int, WPARAM, LPARAM>		MouseEvent;
+		Pt::Signal<HWND>					PaintEvent;
+		Pt::Signal<HWND, WPARAM, LPARAM>	SizeEvent;
+		Pt::Signal<HWND, WPARAM, LPARAM>	MoveEvent;
+		Pt::Signal<HWND, WPARAM, LPARAM>	KeyBoardEvent;
 
     protected:
         static long CALLBACK wndProc(HWND hwnd, unsigned int message, unsigned int wParam, long lParam);

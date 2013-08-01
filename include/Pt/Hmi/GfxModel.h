@@ -30,7 +30,7 @@
 
 #include <Pt/Hmi/Model.h>
 #include <Pt/Hmi/Property.h>
-#include <Pt/Hmi/Event2D.h>
+#include <Pt/Hmi/PointingEvent.h>
 #include <Pt/Hmi/Cursor.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Size.h>
@@ -45,13 +45,29 @@ namespace Hmi{
 
 namespace ImageLayout
 {
-	enum Layout
+	enum Type
 	{
 		None,
 		Tile,
 		Center,
 		Strech,
 		Zoom
+	};
+}
+
+namespace TextAlign
+{
+	enum Type
+	{
+		TopLeft,
+		TopCenter,
+		TopRight,
+		MidleLeft,
+		MidleCenter,
+		MidleRight,
+		BottomLeft,
+		BottomCenter,
+		BottomRight,
 	};
 }
 
@@ -68,18 +84,24 @@ public:
 	Property<Pt::Gfx::ARgbColor>	BackColor;
 	Property<Pt::Gfx::ARgbColor>	ForeColor;
 	Property<Pt::Gfx::ARgbImage>	BackgroundImage;
-	Property<ImageLayout::Layout>	BackgroundImageLayout;
+	Property<ImageLayout::Type>		BackgroundImageLayout;
 	Property<int>					Opacity;
 	Property<Pt::Gfx::ARgbColor>	TransparancyKey;
 	Pt::Gfx::ARgbImage				PaintBuffer;
-	Property<Event2D>				Pointer2DStatus;	
+	Property<PointingEvent>			Pointer2DStatus;	
 	Property<Cursor>	            CursorStatus; 
-
+	Property<TextAlign::Type>	    TextAlign; 
+	Property<bool>					Focused; 
 public:
 	virtual ~GfxModel();
 
 	void move(const Pt::Gfx::SizeF& size);	
     bool contains(const Pt::Gfx::PointF& p);
+
+	//Client Handling
+	Pt::Gfx::PointF toClient(const Pt::Gfx::PointF& globalPoint);
+	Pt::Gfx::PointF fromClient(const Pt::Gfx::PointF& localPoint);
+
 
 	//Unit handling
 	double toUnit(int v);

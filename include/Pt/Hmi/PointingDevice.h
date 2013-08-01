@@ -2,22 +2,22 @@
 #define Pt_Hmi_Input_Input2DDevice_H
 
 #include <Pt/Hmi/InputDevice.h>
-#include <Pt/Hmi/Event2D.h>
+#include <Pt/Hmi/PointingEvent.h>
 
 namespace Pt{
 namespace Hmi{
 
-class PT_HMI_API Input2DDevice : public InputDevice
+class PT_HMI_API PointingDevice : public InputDevice
 {
 public:
-	virtual ~Input2DDevice()
+	virtual ~PointingDevice()
 	{ }
 
 public:
-	Pt::Signal<const Event2D&> Event;
+	Pt::Signal<const PointingEvent&> Event;
 
 protected:	
-	Input2DDevice()
+	PointingDevice()
 	{ }
 
 };

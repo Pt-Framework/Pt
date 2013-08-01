@@ -19,7 +19,8 @@ namespace BorderStyle
 		Border3D,
 		Sizebale,
 		Tool,
-		ToolSizeable
+		ToolSizeable,
+		Widget
 	};
 }
 
@@ -32,6 +33,7 @@ public:
 
 	Property<BorderStyle::Type> BorderStyle;	
 	Property<double>			BorderWidth;	
+	Property<bool>				Invert3DEffect;
 	
 public:
 	Pt::Gfx::SizeF clientSize() const;	

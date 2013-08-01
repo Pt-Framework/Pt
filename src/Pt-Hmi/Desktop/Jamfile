@@ -8,6 +8,8 @@ SharedLibrary Pt-Hmi-Desktop :
 					   Window.cpp
 					   Widget.cpp
 					   Panel.cpp
+					   Label.cpp
+					   Button.cpp
 						;
 
 LinkSharedLibraries Pt-Hmi-Desktop : Pt Pt-System Pt-Gfx  Pt-Hmi ;

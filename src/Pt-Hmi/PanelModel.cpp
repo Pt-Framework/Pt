@@ -6,6 +6,7 @@ namespace Hmi{
 PanelModel::PanelModel()
 : BorderStyle(BorderStyle::Sizebale)
 , BorderWidth(3)
+, Invert3DEffect(false)
 {
 }
 

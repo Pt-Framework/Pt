@@ -33,6 +33,9 @@
     <ClInclude Include="..\..\include\Pt\Function.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Api.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Application.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\ButtonController.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\ButtonModel.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\ButtonRenderer.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Controller.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Cursor.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Desktop\Api.h" />
@@ -66,22 +69,23 @@
     <ClInclude Include="..\..\include\Pt\Hmi\Device.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\DeviceButton.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\DeviceControlDial.h" />
-    <ClInclude Include="..\..\include\Pt\Hmi\Event2D.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\GfxController.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\GfxModel.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\GfxOutput.h" />
-    <ClInclude Include="..\..\include\Pt\Hmi\Input2DDevice.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\InputDevice.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\LabelController.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\LabelModel.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\LabelRenderer.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Model.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\MouseDevice.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\OutputDevice.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\PanelController.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\PanelModel.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\PanelRenderer.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\PointingDevice.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\PointingEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Property.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Renderer.h" />
-    <ClInclude Include="..\..\include\Pt\Hmi\TitleBarController.h" />
-    <ClInclude Include="..\..\include\Pt\Hmi\TitleBarRenderer.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\WidgetController.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\WidgetModel.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\WidgetRenderer.h" />
@@ -363,6 +367,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Pt-Hmi\Application.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\ButtonController.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\ButtonModel.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\ButtonRenderer.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Controller.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Cursor.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Desktop\Button.cpp" />
@@ -394,7 +401,6 @@
     <ClCompile Include="..\..\src\Pt-Hmi\Desktop\Widget.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Desktop\Window.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Device.cpp" />
-    <ClCompile Include="..\..\src\Pt-Hmi\Event2D.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\gdi\ApplicationImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\gdi\CursorImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\gdi\GfxOutputImpl.cpp" />
@@ -402,12 +408,14 @@
     <ClCompile Include="..\..\src\Pt-Hmi\GfxController.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\GfxModel.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\GfxOutput.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\LabelController.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\LabelModel.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\LabelRenderer.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\MouseDevice.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\PanelController.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\PanelModel.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\PanelRenderer.cpp" />
-    <ClCompile Include="..\..\src\Pt-Hmi\TitleBarController.cpp" />
-    <ClCompile Include="..\..\src\Pt-Hmi\TitleBarRenderer.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\PointingEvent.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\WidgetController.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\WidgetModel.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\WidgetRenderer.cpp" />

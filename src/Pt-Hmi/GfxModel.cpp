@@ -5,9 +5,11 @@ namespace Pt{
 namespace Hmi{
 
 GfxModel::GfxModel()
-: Visible(false)
-, BackColor(Pt::Gfx::ARgbColor(197,197,197))
+: Visible(true)
+, BackColor(Pt::Gfx::ARgbColor(200,200,200))
 , ForeColor(Pt::Gfx::ARgbColor(70,70,70))
+, Focused(false)
+, Font(Pt::Gfx::Font("",12))
 {
 	Position = toUnit(Pt::Gfx::Point(0,0));
 	Size = toUnit(Pt::Gfx::Size(200,200));
@@ -17,6 +19,7 @@ GfxModel::~GfxModel()
 {
 
 }
+
 void GfxModel::move(const Pt::Gfx::SizeF& size)		
 {
 	Position.get().addX(size.width());
@@ -27,10 +30,10 @@ bool GfxModel::contains(const Pt::Gfx::PointF& p)
 {
 	double x1, x2, y1, y2;
 
-	x1 = Position.get().x();
+	x1 = 0;
 	x2 = x1  + Size.get().width();
 
-	y1 = Position.get().y();
+	y1 = 0;
 	y2 = y1  + Size.get().height();
 
 	return ((p.x() > x1) && (p.x() < x2) && (p.y() > y1) && (p.y() < y2));

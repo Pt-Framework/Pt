@@ -5,23 +5,26 @@
 #include <Pt/Gfx/Rgb888Color.h>
 #include <Pt/Gfx/Rgb888Image.h>
 #include <Windows.h>
+#include <Pt/Hmi/WindowModel.h>
 
 namespace Pt{
 namespace Hmi{
 
 GfxOutputImpl::GfxOutputImpl()
 : _model(0)
+, _ignoreSizeEvent(false)
 {
 	HINSTANCE hInstance = GetModuleHandle(NULL);
 
     _hwnd = CreateWindow( "Pt-Hmi", "", WS_OVERLAPPEDWINDOW | WS_CLIPSIBLINGS | WS_CLIPCHILDREN, 20, 20, 200, 200, NULL, NULL, hInstance, NULL );
-	SetWindowLong(_hwnd, GWL_STYLE, 0); 
     BringWindowToTop(_hwnd);
 	ShowWindow(_hwnd, SW_HIDE);    
 	UpdateWindow(_hwnd);	
 	Pt::Hmi::Application* app = (Pt::Hmi::Application*) &Pt::Hmi::Application::instance();
 	
-	app->impl()->PaintEvent += Pt::slot(*this,&GfxOutputImpl::OnPaint);
+	app->impl()->PaintEvent += Pt::slot(*this,&GfxOutputImpl::onPaint);
+	app->impl()->SizeEvent += Pt::slot(*this,&GfxOutputImpl::onSize);
+	app->impl()->MoveEvent += Pt::slot(*this,&GfxOutputImpl::onMove);
 }
 
 GfxOutputImpl::~GfxOutputImpl()
@@ -29,8 +32,65 @@ GfxOutputImpl::~GfxOutputImpl()
     DestroyWindow(_hwnd);
 }
 
+void GfxOutputImpl::onSize(HWND hwnd, WPARAM wParam, LPARAM lParam)
+{
+	if( _hwnd != hwnd)
+		return;
 
-void GfxOutputImpl::OnPaint(HWND hwnd)
+	if(_model == 0)
+		return;
+
+	if( _ignoreSizeEvent)
+		return;
+
+	WindowModel* winMod = (WindowModel*) _model;
+			
+	switch(wParam)
+	{
+		case SIZE_MAXHIDE:
+		case SIZE_MAXSHOW:
+			return;
+		break;
+
+		case SIZE_MAXIMIZED:
+			winMod->WindowState = WindowStateType::Maximazed;
+		break;
+
+		case SIZE_MINIMIZED:
+			winMod->WindowState = WindowStateType::Minimized;
+		break;
+ 
+		case SIZE_RESTORED:
+			winMod->WindowState = WindowStateType::Normal;
+		break;
+	}
+
+	RECT rect;
+	GetWindowRect(_hwnd, &rect);
+	Pt::Gfx::Size size(LOWORD(lParam), HIWORD(lParam));
+	winMod->Size = winMod->toUnit(size);
+	winMod->WinSize = winMod->toUnit(Pt::Gfx::Size(rect.right - rect.left, rect.bottom - rect.top));
+}
+
+void GfxOutputImpl::onMove(HWND hwnd, WPARAM wParam, LPARAM lParam)
+{
+	if( _hwnd != hwnd)
+		return;
+
+	if(_model == 0)
+		return;
+
+	if( _ignoreSizeEvent)
+		return;
+
+	WindowModel* winMod = (WindowModel*) _model;
+
+	Pt::Gfx::Point pos((int)LOWORD(lParam), (int)HIWORD(lParam));
+
+	winMod->Position = winMod->toUnit(pos);
+}
+
+void GfxOutputImpl::onPaint(HWND hwnd)
 {
 	if( _hwnd != hwnd)
 		return;
@@ -94,24 +154,47 @@ void GfxOutputImpl::drawIndependentImage(size_t x, size_t y, const char* data, s
 
 void GfxOutputImpl::output(Pt::Hmi::Model* model)
 {
-	GfxModel* gfxModel = dynamic_cast<GfxModel*>(model);
+	WindowModel* wmodel = dynamic_cast<WindowModel*>(model);
 
 	_model = model;
 
-	if( gfxModel == 0)
+	if( wmodel == 0)
 		throw std::logic_error("GFX Model expected");
 
-	if(!gfxModel->Visible.get())
+	_ignoreSizeEvent = true;
+	Application& app = *((Application*) &Application::instance());
+
+	Pt::Gfx::Point pos = app.fromUnit(wmodel->Position.get());
+	Pt::Gfx::Size size = app.fromUnit(wmodel->WinSize.get());
+	RECT rect;
+	
+	SetWindowPos(_hwnd, 0, pos.x(), pos.y(), size.width(),size.height(), 0);
+
+	GetClientRect(_hwnd,&rect);
+	Pt::Gfx::SizeF clientSize = app.toUnit(Pt::Gfx::Size( rect.right - rect.left, rect.bottom- rect.top));
+	wmodel->Size = clientSize;
+	SetWindowText(_hwnd, wmodel->Caption.get().c_str());
+
+	long style= GetWindowLong(_hwnd, GWL_STYLE);
+
+	if( wmodel->ShowInTaskbar.get())
+	{
+		style |= WS_EX_APPWINDOW;   // flags don't work - windows remains in taskbar
+	}
+	else
+	{
+		style &= ~(WS_EX_APPWINDOW); 
+	}
+
+	SetWindowLong(_hwnd, GWL_STYLE, style);  
+
+	if(!wmodel->Visible.get())
 		ShowWindow(_hwnd, SW_HIDE);
 	else
 		ShowWindow(_hwnd, SW_SHOW);
+	
+	_ignoreSizeEvent = false;
 
-	Application& app = *((Application*) &Application::instance());
-
-	Pt::Gfx::Point pos = app.fromUnit(gfxModel->Position.get());
-	Pt::Gfx::Size size = app.fromUnit(gfxModel->Size.get());
-
-	SetWindowPos(_hwnd, 0, pos.x(), pos.y(), size.width(),size.height(), 0);
 	InvalidateRect(_hwnd, 0, FALSE);
 }
 

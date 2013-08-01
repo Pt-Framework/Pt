@@ -834,9 +834,6 @@
     <ClInclude Include="..\..\include\Pt\Hmi\PanelController.h">
       <Filter>Pt-Hmi\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\TitleBarController.h">
-      <Filter>Pt-Hmi\Headers</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\WidgetController.h">
       <Filter>Pt-Hmi\Headers</Filter>
     </ClInclude>
@@ -847,12 +844,6 @@
       <Filter>Pt-Hmi\Headers</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\Property.h">
-      <Filter>Pt-Hmi\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\Event2D.h">
-      <Filter>Pt-Hmi\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\Input2DDevice.h">
       <Filter>Pt-Hmi\Headers</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\InputDevice.h">
@@ -889,9 +880,6 @@
       <Filter>Pt-Hmi\Headers</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\PanelRenderer.h">
-      <Filter>Pt-Hmi\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\TitleBarRenderer.h">
       <Filter>Pt-Hmi\Headers</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\WidgetRenderer.h">
@@ -1004,6 +992,30 @@
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\gdi\CursorImpl.h">
       <Filter>Pt-Hmi\Sources\gdi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\PointingDevice.h">
+      <Filter>Pt-Hmi\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\PointingEvent.h">
+      <Filter>Pt-Hmi\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\LabelController.h">
+      <Filter>Pt-Hmi\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\LabelRenderer.h">
+      <Filter>Pt-Hmi\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\LabelModel.h">
+      <Filter>Pt-Hmi\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\ButtonController.h">
+      <Filter>Pt-Hmi\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\ButtonModel.h">
+      <Filter>Pt-Hmi\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\ButtonRenderer.h">
+      <Filter>Pt-Hmi\Headers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1806,16 +1818,10 @@
     <ClCompile Include="..\..\src\Pt-Hmi\gdi\MouseDeviceImpl.cpp">
       <Filter>Pt-Hmi\Sources\gdi</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\Event2D.cpp">
-      <Filter>Pt-Hmi\Sources</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\GfxModel.cpp">
       <Filter>Pt-Hmi\Sources</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\GfxOutput.cpp">
-      <Filter>Pt-Hmi\Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\MouseDevice.cpp">
       <Filter>Pt-Hmi\Sources</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\PanelController.cpp">
@@ -1825,12 +1831,6 @@
       <Filter>Pt-Hmi\Sources</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\PanelRenderer.cpp">
-      <Filter>Pt-Hmi\Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\TitleBarController.cpp">
-      <Filter>Pt-Hmi\Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\TitleBarRenderer.cpp">
       <Filter>Pt-Hmi\Sources</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\WidgetController.cpp">
@@ -1949,6 +1949,30 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\gdi\CursorImpl.cpp">
       <Filter>Pt-Hmi\Sources\gdi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\MouseDevice.cpp">
+      <Filter>Pt-Hmi\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\LabelController.cpp">
+      <Filter>Pt-Hmi\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\LabelRenderer.cpp">
+      <Filter>Pt-Hmi\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\PointingEvent.cpp">
+      <Filter>Pt-Hmi\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\LabelModel.cpp">
+      <Filter>Pt-Hmi\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\ButtonController.cpp">
+      <Filter>Pt-Hmi\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\ButtonModel.cpp">
+      <Filter>Pt-Hmi\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\ButtonRenderer.cpp">
+      <Filter>Pt-Hmi\Sources</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

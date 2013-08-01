@@ -27,6 +27,7 @@
  */
 #include <Pt/Hmi/GfxController.h>
 #include <Pt/Hmi/GfxModel.h>
+#include <Pt/Hmi/WindowModel.h>
 
 namespace Pt{
 namespace Hmi{
@@ -47,15 +48,27 @@ Pt::Gfx::PointF GfxController::toClient(const Pt::Gfx::PointF& globalPoint)
 
 	if( par == 0)
 	{
-		Pt::Gfx::PointF parPoint = globalPoint;
-		return Pt::Gfx::PointF(parPoint.x() - m->Position.get().x(), parPoint.y() - m->Position.get().y());	
+		WindowModel* winMod = dynamic_cast<WindowModel*>(m);
+
+		if( winMod != 0)
+		{
+			Pt::Gfx::PointF parPoint = globalPoint;
+			double clientWBorder =  (winMod->WinSize.get().width() - winMod->Size.get().width());
+			double clientHBorder =  (winMod->WinSize.get().height() - winMod->Size.get().height());
+			return Pt::Gfx::PointF(parPoint.x() - (clientWBorder + m->Position.get().x())  , parPoint.y() - (clientHBorder + m->Position.get().y()));	
+		}
+		else
+		{
+			Pt::Gfx::PointF parPoint = globalPoint;
+			return Pt::Gfx::PointF(parPoint.x() - m->Position.get().x(), parPoint.y() - m->Position.get().y());	
+		}
 	}
 
 	Pt::Gfx::PointF parPoint = par->toClient(globalPoint);
 	return Pt::Gfx::PointF(parPoint.x() - m->Position.get().x(), parPoint.y() - m->Position.get().y());
 }
 
-Pt::Gfx::PointF GfxController::fromClient(const Pt::Gfx::PointF& localPoint)
+Pt::Gfx::PointF GfxController::fromClient(const Pt::Gfx::PointF& localPoint, bool toRoot)
 {
 	const GfxController* par = dynamic_cast<const GfxController*>(Controller::parent());
 	const GfxModel* m = gfxModel();
@@ -66,9 +79,13 @@ Pt::Gfx::PointF GfxController::fromClient(const Pt::Gfx::PointF& localPoint)
 	while(par != 0)
 	{
 		m = par->gfxModel();
-		x += m->Position.get().x();
-		y += m->Position.get().y();
 		par = dynamic_cast<const GfxController*>(par->parent());
+		
+		if(!(toRoot && par == 0))
+		{
+			x += m->Position.get().x();
+			y += m->Position.get().y();
+		}
 	}
 	
 	return Pt::Gfx::PointF(x,y);
@@ -82,6 +99,14 @@ const GfxModel* GfxController::gfxModel() const
 		throw std::logic_error("GfXmOdel"); 
 
 	return m;
+}
+
+void GfxController::invalidate()
+{
+	GfxController* par = dynamic_cast<GfxController*>(parent());
+	
+	if( par != 0)
+		par->invalidate();
 }
 
 

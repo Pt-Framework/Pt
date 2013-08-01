@@ -12,14 +12,23 @@
 namespace Pt{
 namespace Hmi{
 
-class PT_HMI_API Event2D : public Pt::Event
+class PT_HMI_API PointingEvent : public Pt::Event
 {
 
 public:	
-	Event2D();
-	Event2D(const Event2D& copy);
-	virtual ~Event2D();
+	PointingEvent();
+	PointingEvent(const PointingEvent& copy);
+	virtual ~PointingEvent();
 
+	bool operator==(const PointingEvent& cmp)
+	{
+		return false;
+	}
+	
+	bool operator!=(const PointingEvent& cmp)
+	{
+		return true;
+	}
 
 	inline void setX(double x)
 	{
@@ -62,7 +71,7 @@ public:
 	}
 
 
-	void operator =(const Event2D& copy);
+	void operator =(const PointingEvent& copy);
 
 protected:
     virtual Pt::Event& onClone(Pt::Allocator& allocator) const;

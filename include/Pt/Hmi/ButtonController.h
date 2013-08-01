@@ -25,62 +25,28 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef Pt_Hmi_Model_Window_h
-#define Pt_Hmi_Model_Window_h
+#ifndef Pt_Hmi_ButtonController_H
+#define Pt_Hmi_ButtonController_H
 
-#include <Pt/Hmi/GfxModel.h>
-#include <Pt/Gfx/Point.h>
-#include <Pt/Gfx/Size.h>
-#include <Pt/Gfx/ARgbImage.h>
-#include <Pt/Gfx/Font.h>
-#include <Pt/Gfx/Gfx.h>
-#include <Pt/Hmi/PanelModel.h>
+#include <Pt/Hmi/LabelController.h>
+#include <Pt/Hmi/ButtonModel.h>
+#include <Pt/Gfx/ImagePainter.h>
 
 namespace Pt{
 namespace Hmi{
 
-namespace WindowStartPositionType
-{
-	enum Type
-	{
-		Manual,
-		CenterScreen,
-		WindowsDefaultLocation,
-		WindowsDefaultBounds,
-		CenterParent,
-	};
-}
+class PointingEvent;
 
-namespace WindowStateType
-{
-	enum Type
-	{
-		Normal,
-		Minimized,
-		Maximazed,
-	};
-}
-
-class PT_HMI_API WindowModel : public GfxModel
+class PT_HMI_API ButtonController  : public LabelController
 {
 public:
-	WindowModel();
-	virtual ~WindowModel();
+	ButtonController();
+	virtual ~ButtonController();
 
-	Property<int>								Cursor;	
-	Property<bool>								AllowDrop;
-	Property<double>							MinimumSize;
-	Property<double>							MaximumSize;
-	Property<WindowStartPositionType::Type>		WindowStartPostion;
-	Property<WindowStateType::Type>				WindowState;	
-	Property<bool>								ShowInTaskbar;
-	Property<std::string>						Caption;
-	Property<std::string>						Name;
-	Property<BorderStyle::Type>					Border;
-	Property<Pt::Gfx::SizeF>					WinSize;
-	Property<Pt::Gfx::ARgbImage>				Icon;
+private:
+	virtual void onInput2D(const PointingEvent& ev);
+
 };
 
 }}
-
 #endif

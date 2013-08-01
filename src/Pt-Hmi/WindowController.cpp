@@ -26,14 +26,16 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include <Pt/Hmi/WindowController.h>
-#include <Pt/Hmi/Input2DDevice.h>
+#include <Pt/Hmi/PointingDevice.h>
 #include <Pt/Hmi/WidgetController.h>
 #include <Pt/Hmi/GfxOutput.h>
+
+#include <iostream>
 
 namespace Pt{
 namespace Hmi{
 
-WindowController::WindowController(GfxModel* m, Renderer* r,  GfxOutput* out, Input2DDevice* in1, InputDevice* in2)
+WindowController::WindowController(GfxModel* m, Renderer* r,  GfxOutput* out, PointingDevice* in1, InputDevice* in2)
 : _painter(0)
 {	
 	if( m != 0)
@@ -84,7 +86,7 @@ void WindowController::invalidate()
 	output();
 }
 
-void WindowController::onInput2D(const Event2D& ev)
+void WindowController::onInput2D(const PointingEvent& ev)
 {
 	GfxModel* m = gfxModel();
 	
@@ -92,8 +94,11 @@ void WindowController::onInput2D(const Event2D& ev)
 
 	for( size_t i = 0; i < children().size(); ++i)
 		children()[i]->notifyInput2D(ev);
-}
+	
+	Pt::Gfx::PointF p = toClient(Pt::Gfx::PointF(ev.x(), ev.y()));
 
+	invalidate();
+}
 
 void WindowController::onSizeChanged(Pt::Gfx::SizeF& sizeUnits)
 {
@@ -102,6 +107,7 @@ void WindowController::onSizeChanged(Pt::Gfx::SizeF& sizeUnits)
 	Pt::Gfx::Size size = m->fromUnit(sizeUnits);
 
 	m->PaintBuffer.resize(size.width(), size.height());	
+	render();	
 }
 
 GfxModel* WindowController::gfxModel()
@@ -124,8 +130,9 @@ void WindowController::onModelChanged(bool created)
 			delete _painter;
 
 		_painter = new Pt::Gfx::ImagePainter(m->PaintBuffer);
+		_painter->setFont(m->Font.get());
 
-		m->Size.PropertyChanged += Pt::slot(*this, &WindowController::onSizeChanged);
+		m->Size.PropertyChanged += Pt::slot(*this, &WindowController::onSizeChanged);					
 		m->Size.PropertyChanged.send(m->Size.get());		
 	}
 

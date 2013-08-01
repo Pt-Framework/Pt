@@ -8,7 +8,7 @@
 #include <Pt/System/Thread.h>
 #include <Pt/System/Mutex.h>
 #include <Pt/Hmi/MouseDevice.h>
-#include <Pt/Hmi/Event2D.h>
+#include <Pt/Hmi/PointingEvent.h>
 
 #include <string>
 #include <windows.h>
@@ -39,7 +39,7 @@ private:
 	int _y;
 	int _delta;
 	MouseDevice&			_device;	
-	Event2D					_mouseEvent;
+	PointingEvent			_mouseEvent;
 	Pt::System::EventLoop*	_loop;
 };
 

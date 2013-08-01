@@ -13,17 +13,21 @@ SharedLibrary Pt-Hmi : $(PT_HMI_IMPL)
 					   Controller.cpp
 					   Application.cpp
 					   Cursor.cpp
-					   Event2D.cpp
+					   PointingEvent.cpp
 					   GfxController.cpp
 					   GfxModel.cpp
 					   GfxOutput.cpp
 					   Device.cpp
 					   MouseDevice.cpp
+					   ButtonModel.cpp
+					   ButtonRenderer.cpp
+					   ButtonController.cpp
+					   LabelController.cpp
+					   LabelModel.cpp
+					   LabelRenderer.cpp
 					   PanelController.cpp
 					   PanelModel.cpp
 					   PanelRenderer.cpp
-#					   TitleBarController.cpp
-#					   TitleBarRenderer.cpp
 					   WidgetController.cpp
 					   WidgetModel.cpp
 					   WidgetRenderer.cpp

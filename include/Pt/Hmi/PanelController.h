@@ -2,7 +2,7 @@
 #define Pt_Hmi_PanelController_H
 
 #include <Pt/Hmi/WidgetController.h>
-#include <Pt/Hmi/Event2D.h>
+#include <Pt/Hmi/PointingEvent.h>
 
 namespace Pt{
 namespace Hmi{
@@ -15,12 +15,29 @@ public:
 	virtual ~PanelController();	
 	
 protected:
-	virtual void onInput2D(const Event2D& ev);
+	virtual void onInput2D(const PointingEvent& ev);
 
 private:
-	void recalcPosSize(const Pt::Gfx::PointF& p);
+	enum ResizeDirection
+	{
+		No,
+		North,
+		NorthEast,
+		East,
+		SouthEast,
+		South,
+		SouthWest,
+		West,
+		NorthWest
+	};		
 
+private:
+	void recalcPosAndSize(const Pt::Gfx::PointF& p, ResizeDirection dir);	
+	void handleResize(const PointingEvent& ev);	
 
+private:
+	Pt::Gfx::PointF _lastSizePoint;
+	ResizeDirection _resizeDir;
 };
 
 }}

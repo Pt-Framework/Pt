@@ -34,7 +34,7 @@
 #include <Pt/Hmi/Model.h>
 #include <Pt/Hmi/Renderer.h>
 #include <Pt/Hmi/Api.h>
-#include <Pt/Hmi/Event2D.h>
+#include <Pt/Hmi/PointingEvent.h>
 
 namespace Pt{
 namespace Hmi{
@@ -122,7 +122,7 @@ public:
 		onModelChanged(created);
 	}
 
-	inline void notifyInput2D(const Event2D& ev)
+	inline void notifyInput2D(const PointingEvent& ev)
 	{
 		onInput2D(ev);
 	}
@@ -135,7 +135,7 @@ protected:
 	{
 	}
 	
-	virtual void onInput2D(const Event2D& ev)
+	virtual void onInput2D(const PointingEvent& ev)
 	{
 
 	}

@@ -2,8 +2,9 @@
 #define Pt_Hmi_Desktop_Window_H
 
 #include <Pt/Hmi/Desktop/Api.h>
-#include <Pt/Hmi/MouseDevice.h>
 #include <Pt/Hmi/Desktop/Widget.h>
+#include <Pt/Hmi/Desktop/Panel.h>
+#include <Pt/Hmi/MouseDevice.h>
 #include <Pt/Hmi/GfxOutput.h>
 
 namespace Pt{
@@ -22,7 +23,6 @@ public:
 	virtual ~Window();
 	
 private:
-	pt::Hmi::Panel				_panel;
 	Pt::Hmi::WindowController*	_defController;
 	Pt::Hmi::WindowModel*		_defModel;
 	Pt::Hmi::WindowRenderer*	_defRenderer;

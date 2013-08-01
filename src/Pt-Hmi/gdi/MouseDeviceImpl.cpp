@@ -32,15 +32,6 @@ void MouseDeviceImpl::onMouseEvent (int nCode, WPARAM wParam, LPARAM lParam)
 	if (mouseStruct == NULL)
 		return;
 	
-	//Clear the stats
-	for( size_t i = 0; i < _mouseEvent.buttons().size(); ++i)
-		_mouseEvent.buttons()[i].setState(DeviceButton::None);
-
-	for( size_t i = 0; i < _mouseEvent.controlDial().size(); ++i)
-	{
-		_mouseEvent.controlDial()[i].setState(DeviceButton::None);
-		_mouseEvent.controlDial()[i].setDelta(0);
-	}
 
     switch(wParam)		
     {

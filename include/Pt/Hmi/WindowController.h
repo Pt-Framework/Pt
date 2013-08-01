@@ -36,13 +36,13 @@ namespace Pt{
 namespace Hmi{
 
 class WidgetController;
-class Input2DDevice;
+class PointingDevice;
 class GfxOutput;
 
 class PT_HMI_API WindowController  : public GfxController
 {
 public:
-	WindowController(GfxModel* m = 0, Renderer* r = 0, GfxOutput* out = 0, Input2DDevice* in1 = 0, InputDevice* in2 = 0);
+	WindowController(GfxModel* m = 0, Renderer* r = 0, GfxOutput* out = 0, PointingDevice* in1 = 0, InputDevice* in2 = 0);
 	virtual ~WindowController();
 
 	WidgetController* mainWidget();
@@ -53,14 +53,14 @@ public:
 	void render();
 
 private:
-	virtual void onInput2D(const Event2D& ev);
+	virtual void onInput2D(const PointingEvent& ev);
 	virtual void onModelChanged(bool created = false);	
 	void onSizeChanged(Pt::Gfx::SizeF& size);
 	
 	GfxModel* gfxModel();
 
 private:
-	Pt::Gfx::Painter* _painter;
+	Pt::Gfx::Painter* _painter;	  
 };
 
 }}

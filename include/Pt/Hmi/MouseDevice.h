@@ -1,7 +1,7 @@
 #ifndef Pt_Hmi_Input_Mouse_H
 #define Pt_Hmi_Input_Mouse_H
 
-#include <Pt/Hmi/Input2DDevice.h>
+#include <Pt/Hmi/PointingDevice.h>
 #include <Pt/System/MainLoop.h>
 #include <Pt/Singleton.h>
 
@@ -10,7 +10,7 @@ namespace Hmi{
 
 class MouseDeviceImpl;
 
-class PT_HMI_API MouseDevice : public Input2DDevice
+class PT_HMI_API MouseDevice : public PointingDevice
 {
 
 public:

@@ -43,12 +43,12 @@ public:
 	virtual ~GfxController();
 
 	Pt::Gfx::PointF toClient(const Pt::Gfx::PointF& globalPoint);
-	Pt::Gfx::PointF fromClient(const Pt::Gfx::PointF& localPoint);
+	Pt::Gfx::PointF fromClient(const Pt::Gfx::PointF& localPoint, bool toRoot = false);
 
-	void render(Pt::Gfx::Painter* painter);
+	virtual void render(Pt::Gfx::Painter* Painter);
 	
-	virtual void invalidate()
-	{ }
+	virtual void invalidate();
+	
 		
 	GfxModel* gfxModel();
 	const GfxModel* gfxModel() const;

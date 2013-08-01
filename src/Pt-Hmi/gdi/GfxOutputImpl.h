@@ -21,12 +21,15 @@ public:
 	void output(Pt::Hmi::Model* model);
 	Pt::Gfx::Painter* nativePainter();
 private:
-	void OnPaint(HWND hwnd);
+	void onPaint(HWND hwnd);
+	void onSize(HWND hwnd, WPARAM wparam, LPARAM lparam);
+	void onMove(HWND hwnd, WPARAM wparam, LPARAM lparam);
 
 	void drawIndependentImage(size_t x, size_t y, const char* data, size_t width, size_t height);
 	HWND _hwnd;
 	Pt::Hmi::Model* _model;
 	Pt::Gfx::Painter* _nativePainter;
+	bool _ignoreSizeEvent;
 };
 
 }}
