@@ -99,7 +99,7 @@ class PT_SSL_API Connection
 
         bool writeHandshake();
 
-        bool readHandshake(const char* d, size_t n);
+        bool readHandshake();
 
     private:
         std::streambuf* _ios;

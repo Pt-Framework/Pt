@@ -137,7 +137,7 @@ int main(int argc, char** argv)
         Pt::Net::TcpSocket socket;
 
         log_debug("connecting tcp socket");
-        socket.connect("www.google.de", 443);
+        socket.connect("www.pt-framework.org", 443);
         log_debug("connected");
 
         std::stringstream ss(std::ios::binary|std::ios::in|std::ios::out);
@@ -160,7 +160,7 @@ int main(int argc, char** argv)
         ss.str( std::string(buf, read) );
 
         log_debug("read handshake");
-        conn.readHandshake(buf, read);
+        conn.readHandshake();
       
         return 0;
     }

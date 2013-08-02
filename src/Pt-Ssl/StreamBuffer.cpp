@@ -298,7 +298,7 @@ bool Connection::writeHandshake()
     return SSL_want_write(_ssl);   
 }
 
-bool Connection::readHandshake(const char* d, size_t n)
+bool Connection::readHandshake()
 {
     log_trace("Connection::readHandshake");
 
@@ -312,8 +312,6 @@ bool Connection::readHandshake(const char* d, size_t n)
 
         std::streamsize gsize = std::min( _ios->in_avail(), bufsize );
         std::streamsize n = _ios->sgetn(buf, gsize);
-
-        std::clog << "compare: " << strncmp(d, buf, n) << std::endl;
 
         const int written = BIO_write(_in, buf, static_cast<int>(n));
         assert(written == n);
