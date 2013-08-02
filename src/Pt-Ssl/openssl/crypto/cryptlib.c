@@ -740,9 +740,9 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason,
 	}
 #endif
 
-#if defined(_WIN32) && !defined(__CYGWIN__)
-#include <tchar.h>
-#include <signal.h>
+//#if defined(_WIN32) && !defined(__CYGWIN__)
+//#include <tchar.h>
+//#include <signal.h>
 //#ifdef __WATCOMC__
 //#if defined(_UNICODE) || defined(__UNICODE__)
 //#define _vsntprintf _vsnwprintf
@@ -880,7 +880,7 @@ void OPENSSL_showfatal (const char *fmta,...)
     va_end (ap);
 }
 int OPENSSL_isservice (void) { return 0; }
-#endif
+//#endif
 
 void OpenSSLDie(const char *file,int line,const char *assertion)
 	{
