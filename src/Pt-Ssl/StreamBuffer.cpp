@@ -66,6 +66,10 @@ Connection::Connection(Context& ctx, std::streambuf& ios)
     OSStatus status = SSLSetIOFuncs(_context, 
                                     &Connection::sslReadCallback, 
                                     &Connection::sslWriteCallback);
+    
+    SSLSetEnableCertVerify(_context, false);
+    
+    SSLSetSessionOption(_context, kSSLSessionOptionBreakOnServerAuth, true);
 }
 
 
@@ -101,7 +105,7 @@ bool Connection::writeHandshake()
 
     log_debug("SSLHandshake returns " << status);
 
-    if(status != noErr && status != errSSLWouldBlock)
+    if(status != noErr && status != errSSLWouldBlock && status != errSSLUnknownRootCert)
     {
         throw HandshakeFailed("SSL handshake failed");
     }
@@ -114,6 +118,7 @@ bool Connection::writeHandshake()
     return _iocount > 0;
 }
 
+
 bool Connection::readHandshake()
 {
     log_trace("Connection::readHandshake");
@@ -121,14 +126,21 @@ bool Connection::readHandshake()
     if( ! _ios )
         throw System::IOError("SSL Buffer not initialized");
 
+    again:
+
     _wantRead = false;
     _isReadingHandshake = true;
     OSStatus status = SSLHandshake(_context);
     _isReadingHandshake = false;
 
     log_debug("SSLHandshake returns " << status);
-
-    if(status != noErr && status != errSSLWouldBlock)
+    
+    if(status == errSSLServerAuthCompleted)
+    {
+        goto again;
+    }
+    
+    if(status != noErr && status != errSSLWouldBlock )
     {
         throw HandshakeFailed("SSL handshake failed");
     }
@@ -140,6 +152,7 @@ bool Connection::readHandshake()
 
     return _wantRead;
 }
+
 
 OSStatus Connection::sslRead(void* data, size_t* n)
 {    
@@ -167,6 +180,7 @@ OSStatus Connection::sslRead(void* data, size_t* n)
     return noErr;
 }
 
+
 OSStatus Connection::sslWrite(const void* data, size_t* n)
 {           
     log_trace("Connection::sslWrite: " << *n);
@@ -182,10 +196,12 @@ OSStatus Connection::sslWrite(const void* data, size_t* n)
     return noErr;
 }
 
+
 OSStatus Connection::sslWriteCallback(SSLConnectionRef connection, const void* data, size_t* n)
 {
     return ((Connection*)(connection))->sslWrite(data, n);
 }
+
 
 OSStatus Connection::sslReadCallback(SSLConnectionRef connection, void* data, size_t* n)
 {
@@ -297,6 +313,7 @@ bool Connection::writeHandshake()
 
     return SSL_want_write(_ssl);   
 }
+
 
 bool Connection::readHandshake()
 {
