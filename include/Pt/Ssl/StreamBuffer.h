@@ -60,6 +60,9 @@ class PT_SSL_API Connection
 
         void setConnecting();
 
+        bool connected() const
+        { return _connected; }
+
         bool writeHandshake();
 
         bool readHandshake();
@@ -96,6 +99,9 @@ class PT_SSL_API Connection
         void setAccepting();
 
         void setConnecting();
+
+        bool connected() const
+        { return _connected; }
 
         bool writeHandshake();
 

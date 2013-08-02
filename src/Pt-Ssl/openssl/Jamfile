@@ -7,7 +7,7 @@ SubDirHdrs $(PT_TOP)/src/Pt-Ssl/openssl/crypto/evp ;
 SubDirCcFlags [ FDefines OPENSSL_NO_DEPRECATED ] ;
 SubDirCcFlags [ FDefines OPENSSL_NO_ENGINE ] ;
 SubDirCcFlags [ FDefines OPENSSL_NO_SOCK ] ;
-SubDirCcFlags [ FDefines OPENSSL_NO_TLSEXT ] ;
+#SubDirCcFlags [ FDefines OPENSSL_NO_TLSEXT ] ;
 SubDirCcFlags [ FDefines OPENSSL_NO_CAMELLIA ] ;
 SubDirCcFlags [ FDefines OPENSSL_NO_COMP ] ;
 SubDirCcFlags [ FDefines OPENSSL_NO_IDEA ] ;
@@ -61,7 +61,7 @@ Library Pt-Ssl-openssl  :
   # ssl/bio_ssl.c
     ssl/ssl_err.c
   # ssl/kssl.c
-  # ssl/t1_reneg.c
+    ssl/t1_reneg.c
   # engines/e_4758cca.c
   # engines/e_aep.c
   # engines/e_atalla.c

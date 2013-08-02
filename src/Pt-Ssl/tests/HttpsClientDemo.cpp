@@ -144,7 +144,7 @@ int main(int argc, char** argv)
         Pt::Ssl::Connection conn( sslctx, *ss.rdbuf() );
         conn.setConnecting();
 
-        log_debug("write handshake");
+        log_debug("---write handshake---");
         conn.writeHandshake();
         
         std::string data = ss.str();
@@ -159,9 +159,34 @@ int main(int argc, char** argv)
 
         ss.str( std::string(buf, read) );
 
-        log_debug("read handshake");
+        log_debug("---read handshake---");
         conn.readHandshake();
+
+        ss.str("");
+
+        log_debug("---write handshake---");
+        conn.writeHandshake();
+        
+        data = ss.str();
+        log_debug("write: " << data.size());
+        written = socket.write(data.c_str(), data.size());
+        log_debug("wrote: " << written);
       
+        log_debug("read");
+        read = socket.read(buf, sizeof(buf));
+        log_debug("read: " << read);
+
+        ss.str( std::string(buf, read) );
+
+        log_debug("---read handshake---");
+        conn.readHandshake();
+
+        if( ! conn.connected() )
+        {
+            throw std::logic_error("expected established connection");
+        }
+
+        log_debug("---DEMO FINSHED SUCCESSFULLY---");
         return 0;
     }
     catch(const std::exception& ex)
