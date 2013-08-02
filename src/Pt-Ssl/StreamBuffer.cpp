@@ -50,7 +50,7 @@ namespace Ssl {
 
 #ifdef __APPLE__
 
-Connection::Connection(std::streambuf& ios)
+Connection::Connection(Context& ctx, std::streambuf& ios)
 : _context(0)
 , _ios(&ios)
 , _iocount(0)
@@ -75,9 +75,21 @@ Connection::~Connection()
 }
 
 
+void Connection::setAccepting()
+{
+
+}
+
+
+void Connection::setConnecting()
+{
+
+}
+
+
 bool Connection::writeHandshake()
 {
-    log_trace("Connection::writeHandshake: " << this);
+    log_trace("Connection::writeHandshake");
     
     if( ! _ios )
         throw System::IOError("SSL Buffer not initialized");
@@ -146,6 +158,7 @@ OSStatus Connection::sslRead(void* data, size_t* n)
         return errSSLWouldBlock;
     }  
 
+    log_debug("avail input: " << _ios->in_avail());
     std::streamsize gsize = std::min( _ios->in_avail(), static_cast<std::streamsize>(*n) );
     std::streamsize r = _ios->sgetn(reinterpret_cast<char*>(data), gsize);
     log_debug("read " << r << " bytes from input");
@@ -178,6 +191,166 @@ OSStatus Connection::sslReadCallback(SSLConnectionRef connection, void* data, si
 {
     return ((Connection*)(connection))->sslRead(data, n);
 }
+#else
+
+Connection::Connection(Context& ctx, std::streambuf& ios)
+: _ios(&ios)
+, _connected(false)
+, _in(0)
+, _out(0)
+, _ssl(0)
+{
+    init(ctx);
+}
+
+
+Connection::~Connection()
+{
+    if(_ssl)
+        SSL_free(_ssl); 
+}
+
+
+void Connection::init(Context& ctx)
+{
+    if(_ssl)
+    {
+        SSL_free(_ssl); 
+        _ssl = 0;
+    }
+
+    // Create the SSL objects
+    _in  = BIO_new( BIO_s_mem() );
+    _out = BIO_new( BIO_s_mem() );
+    _ssl = SSL_new( ctx.impl() );
+
+    // Connect the BIO
+    BIO_set_nbio(_in, 1);
+    BIO_set_nbio(_out, 1);
+    SSL_set_bio(_ssl, _in, _out);
+
+    _connected = false;
+}
+
+
+void Connection::setAccepting()
+{
+    if( ! _ssl)
+        return;
+
+    SSL_set_accept_state(_ssl);
+}
+
+
+void Connection::setConnecting()
+{
+    if( ! _ssl)
+        return;
+
+    SSL_set_connect_state(_ssl);
+}
+
+
+bool Connection::writeHandshake()
+{
+    log_trace("Connection::writeHandshake");
+
+    if( ! _ios || ! _ssl)
+        throw System::IOError("SSL Buffer not initialized");
+
+    int ret = SSL_do_handshake(_ssl);
+    log_debug("SSL_do_handshake returns " << ret);
+
+    if(ret <= 0)
+    {
+        const int sslerr = SSL_get_error(_ssl, ret);
+        if(sslerr != SSL_ERROR_WANT_READ && sslerr != SSL_ERROR_WANT_WRITE) 
+        {
+            if(sslerr == SSL_ERROR_SSL)
+            {
+                char buf[255];
+                ERR_error_string_n(ERR_get_error(), buf, sizeof(buf));
+                log_warn("handshake failed: " << buf);
+            }
+            
+            throw HandshakeFailed("SSL handshake failed");
+        }
+    }
+
+    if(ret == 1)
+    {
+        _connected = true;
+    }
+
+    if( BIO_pending(_out) )
+    {
+        char buff[1000];
+        const int n = BIO_read(_out, buff, sizeof(buff));
+        log_debug("wrote " << n << " bytes to output");
+
+        if(n <= 0)
+            throw System::IOError("BIO_read");
+
+        _ios->sputn(buff, n);
+        return true;
+    }
+
+    return SSL_want_write(_ssl);   
+}
+
+bool Connection::readHandshake(const char* d, size_t n)
+{
+    log_trace("Connection::readHandshake");
+
+    if( ! _ios || ! _ssl)
+        throw System::IOError("SSL Buffer not initialized");
+
+    while(_ios->in_avail() > 0)
+    {
+        const std::streamsize bufsize = 2000;
+        char buf[bufsize];
+
+        std::streamsize gsize = std::min( _ios->in_avail(), bufsize );
+        std::streamsize n = _ios->sgetn(buf, gsize);
+
+        std::clog << "compare: " << strncmp(d, buf, n) << std::endl;
+
+        const int written = BIO_write(_in, buf, static_cast<int>(n));
+        assert(written == n);
+
+        if(written <= 0 || written != n)
+            throw System::IOError("BIO_write");
+
+        log_debug("read " << n << " bytes from input");
+    }
+
+    int ret = SSL_do_handshake(_ssl);
+    log_debug("SSL_do_handshake returns " << ret);
+
+    if( ret <= 0 )
+    {
+        int sslerr = SSL_get_error(_ssl, ret);
+        if( sslerr != SSL_ERROR_WANT_READ && sslerr != SSL_ERROR_WANT_WRITE) 
+        {
+            if(sslerr == SSL_ERROR_SSL)
+            {
+                char buf[255];
+                ERR_error_string_n(ERR_get_error(), buf, sizeof(buf));
+                log_warn("handshake failed: " << buf);
+            }
+
+            throw HandshakeFailed("SSL handshake failed");
+        }
+    }
+
+    if( ret == 1 && BIO_pending(_out) <= 0 )
+    {
+        _connected = true;
+    }
+
+    return BIO_pending(_out) <= 0 && SSL_want_read(_ssl);   
+}
+
 #endif
 
 StreamBuffer::StreamBuffer(std::streambuf& sb, size_t bufferSize)

@@ -33,6 +33,7 @@
 #include <Pt/Http/Client.h>
 #include <Pt/Http/Request.h>
 #include <Pt/Http/Reply.h>
+#include <Pt/Net/TcpSocket.h>
 #include <Pt/System/MainLoop.h>
 #include <Pt/System/Logger.h>
 
@@ -61,51 +62,23 @@ void onReply(Pt::Http::Client& client)
     client.beginReceive();
 }
 
-int main(int argc, char** argv)
+void httpsGet(Pt::Ssl::Context& sslctx)
 {
-    try 
+    try
     {
-        Pt::System::Logger::setLogLevel("", Pt::System::Trace);
-        log_debug("OpenSSL HTTP test progam started");
-        
-#ifdef __APPLE__
-        std::stringstream ss;
-        Pt::Ssl::Connection conn( *ss.rdbuf() );
-        conn.writeHandshake();
-        
-        ss.rdbuf()->sgetc();
-        std::clog << ss.str().size() << std::endl;
-        std::exit(0);
-#endif        
-
         Pt::System::MainLoop loop;
-
-        Pt::Ssl::CertificateList trustedCACert;
-        trustedCACert.fromPem(caPemData, sizeof(caPemData));
-
-        Pt::Ssl::CertificateList clientCertChain;
-        clientCertChain.fromPem(clientCertPemData, sizeof(clientCertPemData));
-
-        Pt::Ssl::PrivateKey clientPrivKey("");
-        clientPrivKey.fromPem(clientKeyData, sizeof(clientKeyData));
-        
-        Pt::Ssl::Context clientContext;        
-        clientContext.setCACertificates(trustedCACert);
-        clientContext.setCertificateChain(clientCertChain);
-        clientContext.setPrivateKey(clientPrivKey);
-        clientContext.setVerifyMode(Pt::Ssl::Context::VerifyNone);
 
         //std::string addr("127.0.0.1");
         std::string  addr("www.pt-framework.org");
         unsigned short port = 443;
         
         Pt::Http::Client client(loop, addr, port);
-        client.setSecure(clientContext);
+        client.setSecure(sslctx);
         client.request().setUrl("/index.html");
         client.request().header().set("User-Agent", "Platinum");
         client.replyReceived() += Pt::slot(&onReply);
  
-        bool noblock = false;
+        bool noblock = true;
         if(noblock)
         {
             log_debug("excuting non-blocking HTTPS request");
@@ -127,6 +100,68 @@ int main(int argc, char** argv)
         }
 
         log_debug("OpenSSL HTTP test progam ended");
+    }
+    catch(const std::exception& ex)
+    {
+        log_debug("Error: " << ex.what());
+    }
+    catch(const char* ex)
+    {
+        log_debug("Error: " << ex);
+    }
+}
+
+int main(int argc, char** argv)
+{
+    try 
+    {
+        Pt::System::Logger::setLogLevel("", Pt::System::Trace);
+        log_debug("OpenSSL HTTP test progam started");
+        
+        Pt::Ssl::Context sslctx;  
+
+        Pt::Ssl::CertificateList trustedCACert;
+        trustedCACert.fromPem(caPemData, sizeof(caPemData));
+
+        Pt::Ssl::CertificateList clientCertChain;
+        clientCertChain.fromPem(clientCertPemData, sizeof(clientCertPemData));
+
+        Pt::Ssl::PrivateKey clientPrivKey("");
+        clientPrivKey.fromPem(clientKeyData, sizeof(clientKeyData));
+        
+        sslctx.setCACertificates(trustedCACert);
+        sslctx.setCertificateChain(clientCertChain);
+        sslctx.setPrivateKey(clientPrivKey);
+        sslctx.setVerifyMode(Pt::Ssl::Context::VerifyNone);
+
+        Pt::Net::TcpSocket socket;
+
+        log_debug("connecting tcp socket");
+        socket.connect("www.google.de", 443);
+        log_debug("connected");
+
+        std::stringstream ss(std::ios::binary|std::ios::in|std::ios::out);
+        Pt::Ssl::Connection conn( sslctx, *ss.rdbuf() );
+        conn.setConnecting();
+
+        log_debug("write handshake");
+        conn.writeHandshake();
+        
+        std::string data = ss.str();
+        log_debug("write: " << data.size());
+        size_t written = socket.write(data.c_str(), data.size());
+        log_debug("wrote: " << written);
+
+        log_debug("read");
+        char buf[4096];
+        size_t read = socket.read(buf, sizeof(buf));
+        log_debug("read: " << read);
+
+        ss.str( std::string(buf, read) );
+
+        log_debug("read handshake");
+        conn.readHandshake(buf, read);
+      
         return 0;
     }
     catch(const std::exception& ex)

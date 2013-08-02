@@ -49,12 +49,16 @@ namespace Ssl {
 
 #ifdef __APPLE__
 
-class Connection
+class PT_SSL_API Connection
 {
     public:
-        Connection(std::streambuf& ios);
+        Connection(Context& ctx, std::streambuf& ios);
 
         ~Connection();
+
+        void setAccepting();
+
+        void setConnecting();
 
         bool writeHandshake();
 
@@ -77,6 +81,34 @@ class Connection
         bool _isReadingHandshake;
         bool _isWritingHandshake;
 };
+
+#else
+
+class PT_SSL_API Connection
+{
+    public:
+        Connection(Context& ctx, std::streambuf& ios);
+
+        ~Connection();
+
+        void init(Context& ctx);
+
+        void setAccepting();
+
+        void setConnecting();
+
+        bool writeHandshake();
+
+        bool readHandshake(const char* d, size_t n);
+
+    private:
+        std::streambuf* _ios;
+        bool _connected;
+        bio_st* _in;
+        bio_st* _out;
+        ssl_st* _ssl;
+};
+
 #endif
 
 /** @brief SSL stream buffer.
