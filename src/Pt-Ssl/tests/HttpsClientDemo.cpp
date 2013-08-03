@@ -186,7 +186,7 @@ int main(int argc, char** argv)
             throw std::logic_error("expected established connection");
         }
 
-        log_debug("---DEMO FINSHED SUCCESSFULLY---");
+        log_debug("---DEMO FINISHED SUCCESSFULLY---");
         return 0;
     }
     catch(const std::exception& ex)
