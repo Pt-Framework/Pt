@@ -140,50 +140,38 @@ int main(int argc, char** argv)
         socket.connect("www.pt-framework.org", 443);
         log_debug("connected");
 
-        std::stringstream ss(std::ios::binary|std::ios::in|std::ios::out);
+        std::stringstream ss;
         Pt::Ssl::Connection conn( sslctx, *ss.rdbuf() );
         conn.setConnecting();
 
-        log_debug("---write handshake---");
-        conn.writeHandshake();
-        
-        std::string data = ss.str();
-        log_debug("write: " << data.size());
-        size_t written = socket.write(data.c_str(), data.size());
-        log_debug("wrote: " << written);
-
-        log_debug("read");
-        char buf[4096];
-        size_t read = socket.read(buf, sizeof(buf));
-        log_debug("read: " << read);
-
-        ss.str( std::string(buf, read) );
-
-        log_debug("---read handshake---");
-        conn.readHandshake();
-
-        ss.str("");
-
-        log_debug("---write handshake---");
-        conn.writeHandshake();
-        
-        data = ss.str();
-        log_debug("write: " << data.size());
-        written = socket.write(data.c_str(), data.size());
-        log_debug("wrote: " << written);
-      
-        log_debug("read");
-        read = socket.read(buf, sizeof(buf));
-        log_debug("read: " << read);
-
-        ss.str( std::string(buf, read) );
-
-        log_debug("---read handshake---");
-        conn.readHandshake();
-
-        if( ! conn.connected() )
+        while( ! conn.connected() )
         {
-            throw std::logic_error("expected established connection");
+            log_debug("---write handshake---");
+            conn.writeHandshake();
+            std::string data = ss.str();
+
+            log_debug("write: " << data.size());
+            while(data.size() > 0)
+            {
+                size_t written = socket.write(data.c_str(), data.size());
+                log_debug("wrote: " << written);
+
+                data.erase(0, written);
+            }
+
+            ss.str("");
+
+            log_debug("---read handshake---");
+            
+            while( conn.readHandshake() )
+            {
+                char buf[4096];
+                size_t read = socket.read(buf, sizeof(buf));
+                log_debug("read: " << read);
+                ss.str( std::string(buf, read) );
+            }
+
+            ss.str("");
         }
 
         log_debug("---DEMO FINISHED SUCCESSFULLY---");
