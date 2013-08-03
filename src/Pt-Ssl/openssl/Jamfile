@@ -23,6 +23,8 @@ SubDirHdrs $(PT_TOP)/src/Pt-Ssl/openssl/crypto/modes ;
 
 SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Ssl openssl ;
 
+# OpenSSL 1.0.1e
+
 Library Pt-Ssl-openssl  :
     ssl/t1_lib.c
     ssl/s3_meth.c
