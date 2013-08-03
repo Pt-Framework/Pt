@@ -10,6 +10,7 @@ SubDirHdrs $(PT_TOP)/src/Pt-Ssl/openssl/crypto/modes ;
  SubDirCcFlags [ FDefines OPENSSL_NO_DEPRECATED ] ;
  SubDirCcFlags [ FDefines OPENSSL_NO_ENGINE ] ;
  SubDirCcFlags [ FDefines OPENSSL_NO_SOCK ] ;
+ SubDirCcFlags [ FDefines OPENSSL_NO_SCTP ] ;
 #SubDirCcFlags [ FDefines OPENSSL_NO_TLSEXT ] ;
  SubDirCcFlags [ FDefines OPENSSL_NO_CAMELLIA ] ;
  SubDirCcFlags [ FDefines OPENSSL_NO_COMP ] ;
