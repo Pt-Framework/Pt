@@ -167,8 +167,8 @@ if --with-builtin-openssl in $(ARGV)
     }
 
     # generate opensslconf.h file
-    local opensslconf = [ FDirName $(PT_TOP) src Pt-Ssl openssl include openssl opensslconf.h ] ;
-    local r = [ TryCommand $(CP) $(opensslconf_target)  $(opensslconf) ] ;
+    local opensslconf = [ FDirName $(PT_TOP) src Pt-Ssl openssl crypto opensslconf.h ] ;
+    local r = [ TryCommand $(CP) $(opensslconf_target) $(opensslconf) ] ;
     if ! $(r)
     {
         Exit "ERROR: Could not copy opensslconf.h." ;
