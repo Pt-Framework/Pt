@@ -154,6 +154,18 @@ bool Connection::readHandshake()
 }
 
 
+std::streamsize Connection::write(const char* buf, size_t n)
+{
+    return 0;
+}
+
+
+std::streamsize Connection::read(char* buf, size_t n, std::streamsize isize)
+{
+    return 0;
+}
+
+
 OSStatus Connection::sslRead(void* data, size_t* n)
 {    
     log_trace("Connection::sslRead: " << *n);
@@ -364,6 +376,87 @@ bool Connection::readHandshake()
     }
 
     return BIO_pending(_out) <= 0 && SSL_want_read(_ssl);   
+}
+
+
+std::streamsize Connection::write(const char* buf, size_t n)
+{
+    if( ! _ios || ! _ssl )
+        return 0;
+
+    std::streamsize written = SSL_write(_ssl, buf, n);
+    log_debug("encrypted " << written << " bytes");
+
+    BUF_MEM* bm = 0;
+    BIO_get_mem_ptr(_out, &bm);
+    if(bm->length > 0)
+    {
+        _ios->sputn(bm->data, bm->length);
+        log_debug("wrote " << bm->length << " bytes to output");
+        bm->length = 0;
+    }
+
+    return written;
+}
+
+
+std::streamsize Connection::read(char* buf, size_t n, std::streamsize isize)
+{
+    if( ! _ios || ! _ssl) 
+        return 0;
+
+    while(true) 
+    {
+        // even if we could not refill the BIO, we might still get data from the SSL
+        const int readSize = SSL_read(_ssl, buf, n);
+        log_debug("Read " << readSize << " bytes from _ssl");
+        log_debug("SSL_get_shutdown() = " << SSL_get_shutdown(_ssl));
+
+        if(readSize > 0)
+        {           
+            return readSize;
+        }
+
+        long sslerr = SSL_get_error(_ssl, readSize);
+        if(sslerr != SSL_ERROR_WANT_READ)
+        {
+            // This error may indicate that the other peer has send shutdown message
+            if(sslerr == SSL_ERROR_ZERO_RETURN)
+            {
+                log_debug("SSL_ERROR_ZERO_RETURN");
+                return 0;
+            }
+
+            log_debug("ssl error occured");
+            while( ( sslerr = ERR_get_error() ) ) 
+            {
+                log_debug("ERR_error_string = " << ERR_error_string(sslerr, 0));
+            }
+            
+            throw System::IOError("Failed reading decrypted data from OpenSSL!");
+        }
+
+        if(isize == 0)
+            return 0;
+
+        // Refill the BIO with encoded bytes for decoding
+        BUF_MEM* bm = 0;
+        BIO_get_mem_ptr(_in, &bm);
+
+        if(bm->max == bm->length)
+            continue;
+
+        const std::streamsize refill = std::min(static_cast<std::streamsize>(bm->max - bm->length), isize);
+        log_debug("get " << refill << " bytes from _ios");
+        
+        std::streamsize gcount = _ios->sgetn(bm->data + bm->length, refill);
+        bm->length += static_cast<int>( gcount );
+        log_debug("Wrote " << gcount << " bytes from _ios to _in BUF_MEM");
+
+        isize -= gcount;
+    }
+
+    return 0;
 }
 
 #endif

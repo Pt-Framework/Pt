@@ -175,6 +175,55 @@ int main(int argc, char** argv)
         }
 
         log_debug("---DEMO FINISHED SUCCESSFULLY---");
+
+        const char request[] = "GET / HTTP/1.1\r\n"
+                                "Host: www.pt-framework.org\r\n"
+                                "Connection: close\r\n"
+                                //"User-Agent: Web-sniffer/1.0.46 (+http://web-sniffer.net/)\r\n"
+                                //"Accept-Charset: ISO-8859-1,UTF-8;q=0.7,*;q=0.7\r\n"
+                                //"Cache-Control: no-cache\r\n"
+                                //"Accept-Language: de,en;q=0.7,en-us;q=0.3\r\n"
+                                //"Referer: http://web-sniffer.net/\r\n"
+                                "\r\n";
+
+        log_debug("--- HTTP request---");
+        std::streamsize written = conn.write( request, sizeof(request) );
+        log_debug("encoded: " << written);
+
+        std::string data = ss.str();
+
+        log_debug("write: " << data.size() << " bytes");
+        while(data.size() > 0)
+        {
+            size_t written = socket.write(data.c_str(), data.size());
+            log_debug("wrote: " << written << " bytes");
+
+            data.erase(0, written);
+        }
+
+        ss.str("");
+        
+        log_debug("--- HTTP reply---");
+
+        std::streamsize replySize = 0;
+
+        while(replySize < 1000)
+        {
+            char buf[4096];
+            size_t read = socket.read(buf, sizeof(buf));
+            log_debug("read: " << read << " bytes");
+            ss.str( std::string(buf, read) );
+
+            while( ss.rdbuf()->in_avail() )
+            {
+                std::streamsize readDecoded = conn.read( buf, sizeof(buf), ss.rdbuf()->in_avail() );
+                log_debug("decoded: " << readDecoded << " bytes");
+
+                replySize += readDecoded;
+                std::cout.write(buf, readDecoded);
+            }
+        }
+        
         return 0;
     }
     catch(const std::exception& ex)

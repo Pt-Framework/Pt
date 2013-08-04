@@ -67,6 +67,10 @@ class PT_SSL_API Connection
 
         bool readHandshake();
 
+        std::streamsize write(const char* buf, size_t n);
+
+        std::streamsize read(char* buf, size_t n, std::streamsize isize);
+
         OSStatus sslRead(void* data, size_t* n);
 
         OSStatus sslWrite(const void* data, size_t* n);
@@ -106,6 +110,10 @@ class PT_SSL_API Connection
         bool writeHandshake();
 
         bool readHandshake();
+
+        std::streamsize write(const char* buf, size_t n);
+
+        std::streamsize read(char* buf, size_t n, std::streamsize isize);
 
     private:
         std::streambuf* _ios;
