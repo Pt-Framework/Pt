@@ -203,7 +203,7 @@ Library Pt-Ssl-openssl  :
    #crypto/md5/md5_one.c
    #crypto/md5/md5test.c
     crypto/md5/md5_dgst.c
-    crypto/md5/md5.c
+   #crypto/md5/md5.c
     crypto/mem_clr.c
     crypto/pkcs7/bio_pk7.c
     crypto/pkcs7/pk7_dgst.c
