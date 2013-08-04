@@ -8,6 +8,8 @@
 #include "Pt/Allocator.h"
 
 #include <Pt/Hmi/Application.h>
+#include <Pt/Hmi/KeyboardDevice.h>
+
 //Desktop
 #include <Pt/Hmi/Desktop/Window.h>
 
@@ -32,6 +34,12 @@ public:
 		Pt::Hmi::ButtonModel* buttonModel = (Pt::Hmi::ButtonModel*)(button.controller().model());
 	}
 
+
+	void printKey(const Pt::Hmi::KeyEvent& ev)
+	{
+		if(ev.state() == Pt::Hmi::KeyEvent::KeyDown)
+			std::cout<<ev.virtualCode()<<" "<< ev.alt() << " "<< ev.extCode()<<std::endl;
+	}
 	Pt::Hmi::Desktop::Button     button;
 };
 
@@ -44,15 +52,19 @@ int main(int argc, char* args[])
 	Pt::Hmi::Desktop::Window	window;	
 	Pt::Hmi::Desktop::Panel     panel;
 	Pt::Hmi::Desktop::Label     label;
+	Pt::Hmi::KeyboardDevice     keyboardDevice;
 	
 
-	
+	keyboardDevice.Event += Pt::slot(test, &Test::printKey);
+	 keyboardDevice.start(app.loop());
+	 
+
 	Pt::Hmi::PanelModel* panelModel = (Pt::Hmi::PanelModel*) panel.controller().model();
 	
 	panelModel->Position.set(Pt::Gfx::PointF(30,120));
 	panelModel->Size.set(Pt::Gfx::SizeF(400,500));	
 	panelModel->BorderStyle.set(Pt::Hmi::BorderStyle::Sizebale);
-	panelModel->BorderWidth.set(4);
+	panelModel->BorderWidth.set(6);
 
 	window.addChild(&panel);	
 

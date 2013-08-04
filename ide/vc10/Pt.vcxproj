@@ -73,6 +73,8 @@
     <ClInclude Include="..\..\include\Pt\Hmi\GfxModel.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\GfxOutput.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\InputDevice.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\KeyboardDevice.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\KeyEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\LabelController.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\LabelModel.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\LabelRenderer.h" />
@@ -269,6 +271,7 @@
     <ClInclude Include="..\..\src\Pt-Hmi\gdi\ApplicationImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\gdi\CursorImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\gdi\GfxOutputImpl.h" />
+    <ClInclude Include="..\..\src\Pt-Hmi\gdi\KeyboardDeviceImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\gdi\MouseDeviceImpl.h" />
     <ClInclude Include="..\..\src\Pt-Http\ClientImpl.h" />
     <ClInclude Include="..\..\src\Pt-Http\Connection.h" />
@@ -404,10 +407,13 @@
     <ClCompile Include="..\..\src\Pt-Hmi\gdi\ApplicationImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\gdi\CursorImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\gdi\GfxOutputImpl.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\gdi\KeyboardDeviceImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\gdi\MouseDeviceImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\GfxController.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\GfxModel.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\GfxOutput.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\KeyboardDevice.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\KeyEvent.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\LabelController.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\LabelModel.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\LabelRenderer.cpp" />

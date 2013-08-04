@@ -54,7 +54,8 @@ void Selector::processMessage()
 	
 }
 
-HHOOK ApplicationImpl::_hDesktopHook;
+HHOOK ApplicationImpl::_mouseHook;
+HHOOK ApplicationImpl::_keyboardHook;
 
 ApplicationImpl::ApplicationImpl()
 : Pt::System::EventLoop()
@@ -62,7 +63,8 @@ ApplicationImpl::ApplicationImpl()
 {
 	
     _instanceHandle = (HINSTANCE)GetModuleHandle(NULL);
-	_hDesktopHook = SetWindowsHookEx( WH_MOUSE, ApplicationImpl::mouseProc, _instanceHandle, GetCurrentThreadId());	
+	_mouseHook = SetWindowsHookEx( WH_MOUSE, ApplicationImpl::mouseProc, _instanceHandle, GetCurrentThreadId());	
+	_keyboardHook = SetWindowsHookEx( WH_KEYBOARD, ApplicationImpl::keyboardProc, _instanceHandle, GetCurrentThreadId());	
 
     registerWindowClasses();
 
@@ -79,10 +81,10 @@ ApplicationImpl::ApplicationImpl()
 	//FreeConsole();
 }
 
-
 ApplicationImpl::~ApplicationImpl()
 {
-	UnhookWindowsHookEx(_hDesktopHook);
+	UnhookWindowsHookEx(_mouseHook);
+	UnhookWindowsHookEx(_keyboardHook);
     unregisterWindowClasses();
 }
 
@@ -93,9 +95,19 @@ LRESULT CALLBACK ApplicationImpl::mouseProc (int nCode, WPARAM wParam, LPARAM lP
 	ApplicationImpl* appImpl =  app.impl();
 	appImpl->MouseEvent.send(nCode, wParam, lParam);
 			
-	return CallNextHookEx(desktopHook(), nCode, wParam, lParam);
+	return CallNextHookEx(mouseHook(), nCode, wParam, lParam);
 }
 
+
+LRESULT CALLBACK ApplicationImpl::keyboardProc(int code, WPARAM wParam, LPARAM lParam)
+{
+	Application& app = Application::instance();
+
+	ApplicationImpl* appImpl =  app.impl();
+	appImpl->KeyBoardEvent.send(code, wParam, lParam);
+			
+	return CallNextHookEx(keyboardHook(), code, wParam, lParam);
+}
 
 void ApplicationImpl::setResolution(double dpi)
 {

@@ -1017,6 +1017,15 @@
     <ClInclude Include="..\..\include\Pt\Hmi\ButtonRenderer.h">
       <Filter>Pt-Hmi\Headers</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\KeyboardDevice.h">
+      <Filter>Pt-Hmi\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\KeyEvent.h">
+      <Filter>Pt-Hmi\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\gdi\KeyboardDeviceImpl.h">
+      <Filter>Pt-Hmi\Sources\gdi</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -1973,6 +1982,15 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\ButtonRenderer.cpp">
       <Filter>Pt-Hmi\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\KeyEvent.cpp">
+      <Filter>Pt-Hmi\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\KeyboardDevice.cpp">
+      <Filter>Pt-Hmi\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\gdi\KeyboardDeviceImpl.cpp">
+      <Filter>Pt-Hmi\Sources\gdi</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -93,7 +93,7 @@ bool MouseDeviceImpl::onRun()
 	
 	_mouseEvent.setX(pos.x());
 	_mouseEvent.setY(pos.y());
-	_mouseEvent.controlDial()[0].setDelta(app.toUnit(_delta));
+	_mouseEvent.controlDial()[0].setDelta(app.toUnit(_delta));	
 
 	_device.Event.send(_mouseEvent);			
 	

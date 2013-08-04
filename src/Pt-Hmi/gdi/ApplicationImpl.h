@@ -64,12 +64,14 @@ class ApplicationImpl : public Pt::System::EventLoop
 		Pt::Signal<HWND>					PaintEvent;
 		Pt::Signal<HWND, WPARAM, LPARAM>	SizeEvent;
 		Pt::Signal<HWND, WPARAM, LPARAM>	MoveEvent;
-		Pt::Signal<HWND, WPARAM, LPARAM>	KeyBoardEvent;
+		Pt::Signal<int, WPARAM, LPARAM>		KeyBoardEvent;
 
     protected:
         static long CALLBACK wndProc(HWND hwnd, unsigned int message, unsigned int wParam, long lParam);
 		static LRESULT CALLBACK mouseProc (int nCode, WPARAM wParam, LPARAM lParam);
-        LRESULT dispatchGDIEvent(HWND hwnd, unsigned int message, unsigned int wParam, long lParam);
+        static LRESULT CALLBACK keyboardProc(int code, WPARAM wParam, LPARAM lParam);
+
+		LRESULT dispatchGDIEvent(HWND hwnd, unsigned int message, unsigned int wParam, long lParam);
 
      protected:
         virtual void onAttachSelectable(System::Selectable&);
@@ -109,21 +111,32 @@ class ApplicationImpl : public Pt::System::EventLoop
 		void getScreeResolution(int& horizontal, int& vertical);
 
 	public:
-		static HHOOK desktopHook()
+		static HHOOK mouseHook()
 		{
-			return _hDesktopHook;
+			return _mouseHook;
 		}
 
-		static void setDesktopHook(HHOOK h)
+		static void setMouseHook(HHOOK h)
 		{
-			_hDesktopHook = h;
+			_mouseHook = h;
+		}
+
+		static HHOOK keyboardHook()
+		{
+			return _keyboardHook;
+		}
+
+		static void setkeyboardHook(HHOOK h)
+		{
+			_keyboardHook = h;
 		}
 
     private:
         //! @brief Instance handle of this application
         HINSTANCE _instanceHandle;
         bool _trackingMouseEvent;
-		static HHOOK _hDesktopHook;
+		static HHOOK _mouseHook;
+		static HHOOK _keyboardHook;
 
 		//Unit infos
 		int _screenWidth;
