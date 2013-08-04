@@ -211,7 +211,7 @@ int main(int argc, char** argv)
         {
             char buf[4096];
             size_t read = socket.read(buf, sizeof(buf));
-            log_debug("read: " << read << " bytes");
+            log_debug("read: " << read << " bytes from socket");
             ss.str( std::string(buf, read) );
 
             while( ss.rdbuf()->in_avail() )
@@ -220,7 +220,7 @@ int main(int argc, char** argv)
                 log_debug("decoded: " << readDecoded << " bytes");
 
                 replySize += readDecoded;
-                std::cout.write(buf, readDecoded);
+                std::clog.write(buf, readDecoded);
             }
         }
         

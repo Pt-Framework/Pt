@@ -156,19 +156,37 @@ bool Connection::readHandshake()
 
 std::streamsize Connection::write(const char* buf, size_t n)
 {
-    return 0;
+    size_t processed = 0;
+    
+    OSStatus error = SSLWrite(_context, buf, n, &processed);
+    
+    if(error != noErr && error != errSSLWouldBlock)
+        throw SslError("encoding failed");
+
+    return static_cast<std::streamsize>(processed);
 }
 
 
 std::streamsize Connection::read(char* buf, size_t n, std::streamsize isize)
 {
-    return 0;
+    log_trace("Connection::read");
+
+    size_t processed = 0;
+    
+    OSStatus error = SSLRead(_context, buf, n, &processed);
+    
+    if(error != noErr && error != errSSLWouldBlock)
+        throw SslError("decoding failed");
+    
+    log_trace("Connection::read: " << error);
+    
+    return static_cast<std::streamsize>(processed);
 }
 
 
 OSStatus Connection::sslRead(void* data, size_t* n)
 {    
-    log_trace("Connection::sslRead: " << *n);
+    log_trace("Connection::sslRead: wants " << *n << " bytes");
 
     if(_isWritingHandshake)
     {
@@ -188,8 +206,12 @@ OSStatus Connection::sslRead(void* data, size_t* n)
     std::streamsize r = _ios->sgetn(reinterpret_cast<char*>(data), gsize);
     log_debug("read " << r << " bytes from input");
 
+    OSStatus ret = r < (*n) ? errSSLWouldBlock : noErr;
+
     *n = static_cast<size_t>(r);
-    return noErr;
+    
+    log_debug("sslRead: return " << ret);
+    return ret;
 }
 
 
@@ -205,6 +227,7 @@ OSStatus Connection::sslWrite(const void* data, size_t* n)
     _iocount = _ios->sputn(reinterpret_cast<const char*>(data), *n);
     assert(static_cast<size_t>(_iocount) == *n);
     log_trace("wrote: " << _iocount);
+    
     return noErr;
 }
 
@@ -1028,7 +1051,7 @@ std::streamsize StreamBuffer::sslRead(char* buf, size_t n, std::streamsize isize
                 log_debug("ERR_error_string = " << ERR_error_string(sslerr, 0));
             }
             
-            throw System::IOError("Failed reading decrypted data from OpenSSL!");
+            throw SslError("decoding failed");
         }
 
         if(isize == 0)
