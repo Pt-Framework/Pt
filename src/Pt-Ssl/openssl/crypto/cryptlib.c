@@ -114,6 +114,10 @@
  * SUN MICROSYSTEMS, INC., and contributed to the OpenSSL project.
  */
 
+#pragma comment(lib, "Advapi32.lib")
+#pragma comment(lib, "Gdi32.lib")
+#pragma comment(lib, "User32.lib")
+
 #include "cryptlib.h"
 #include <openssl/safestack.h>
 

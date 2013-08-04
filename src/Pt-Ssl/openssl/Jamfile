@@ -21,6 +21,7 @@ SubDirHdrs $(PT_TOP)/src/Pt-Ssl/openssl/crypto/modes ;
  SubDirCcFlags [ FDefines OPENSSL_NO_RC4 ] ;
  SubDirCcFlags [ FDefines OPENSSL_NO_RC5 ] ;
  SubDirCcFlags [ FDefines OPENSSL_NO_JPAKE ] ;
+ SubDirCcFlags [ FDefines OPENSSL_NO_EC_NISTP_64_GCC_128 ] ;
 
 SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Ssl openssl ;
 
@@ -207,19 +208,19 @@ Library Pt-Ssl-openssl  :
     crypto/mem_clr.c
     crypto/pkcs7/bio_pk7.c
     crypto/pkcs7/pk7_dgst.c
-    crypto/pkcs7/verify.c
-    crypto/pkcs7/example.c
+   #crypto/pkcs7/verify.c
+   #crypto/pkcs7/example.c
     crypto/pkcs7/pk7_asn1.c
     crypto/pkcs7/pk7_doit.c
-    crypto/pkcs7/sign.c
+   #crypto/pkcs7/sign.c
     crypto/pkcs7/pk7_enc.c
     crypto/pkcs7/pk7_smime.c
     crypto/pkcs7/pk7_mime.c
     crypto/pkcs7/pkcs7err.c
    #crypto/pkcs7/bio_ber.c
     crypto/pkcs7/pk7_attr.c
-    crypto/pkcs7/dec.c
-    crypto/pkcs7/enc.c
+   #crypto/pkcs7/dec.c
+   #crypto/pkcs7/enc.c
     crypto/pkcs7/pk7_lib.c
    #crypto/s390xcap.c
    #crypto/LPdir_unix.c
@@ -373,15 +374,15 @@ Library Pt-Ssl-openssl  :
     crypto/des/ofb64enc.c
    #crypto/des/des_opts.c
     crypto/des/pcbc_enc.c
-    crypto/des/rpw.c
+   #crypto/des/rpw.c
     crypto/des/des_enc.c
     crypto/des/ofb_enc.c
     crypto/des/ofb64ede.c
-    crypto/des/ncbc_enc.c
+   #crypto/des/ncbc_enc.c
     crypto/des/cfb_enc.c
    #crypto/des/des_old.c
     crypto/des/enc_writ.c
-    crypto/des/des.c
+   #crypto/des/des.c
     crypto/des/xcbc_enc.c
     crypto/des/ede_cbcm_enc.c
     crypto/des/rand_key.c
@@ -424,20 +425,20 @@ Library Pt-Ssl-openssl  :
     crypto/ec/ec2_mult.c
     crypto/ec/ecp_smpl.c
     crypto/ec/ec_print.c
-    crypto/ec/ecp_nistputil.c
+   #crypto/ec/ecp_nistputil.c
     crypto/ec/ec_pmeth.c
     crypto/ec/ec_oct.c
     crypto/ec/ec_mult.c
-    crypto/ec/ecp_nistp256.c
+   #crypto/ec/ecp_nistp256.c
     crypto/ec/ec_check.c
-    crypto/ec/ecp_nistp521.c
+   #crypto/ec/ecp_nistp521.c
     crypto/ec/ec_curve.c
     crypto/ec/ecp_mont.c
     crypto/ec/ec2_smpl.c
     crypto/ec/ec_asn1.c
    #crypto/ec/ectest.c
     crypto/ec/ec_lib.c
-    crypto/ec/ecp_nistp224.c
+   #crypto/ec/ecp_nistp224.c
     crypto/ec/ec2_oct.c
    #crypto/rc2/rc2speed.c
     crypto/rc2/rc2cfb64.c
@@ -478,16 +479,16 @@ Library Pt-Ssl-openssl  :
     crypto/ecdh/ech_err.c
     crypto/ecdh/ech_ossl.c
    #crypto/o_dir_test.c
-    crypto/dh/p512.c
+   #crypto/dh/p512.c
    #crypto/dh/dh_depr.c
    #crypto/dh/dhtest.c
     crypto/dh/dh_prn.c
-    crypto/dh/p1024.c
+   #crypto/dh/p1024.c
     crypto/dh/dh_asn1.c
     crypto/dh/dh_key.c
     crypto/dh/dh_check.c
     crypto/dh/dh_pmeth.c
-    crypto/dh/p192.c
+   #crypto/dh/p192.c
     crypto/dh/dh_gen.c
     crypto/dh/dh_lib.c
     crypto/dh/dh_ameth.c
@@ -504,7 +505,7 @@ Library Pt-Ssl-openssl  :
    #crypto/camellia/cmll_utl.c
    #crypto/LPdir_win.c
     crypto/dsa/dsa_prn.c
-    crypto/dsa/dsagen.c
+   #crypto/dsa/dsagen.c
     crypto/dsa/dsa_pmeth.c
     crypto/dsa/dsa_ossl.c
     crypto/dsa/dsa_asn1.c
@@ -539,7 +540,7 @@ Library Pt-Ssl-openssl  :
     crypto/bio/bio_err.c
     crypto/bio/bss_acpt.c
     crypto/bio/bf_buff.c
-    crypto/fips_ers.c
+   #crypto/fips_ers.c
    #crypto/LPdir_nyi.c
     crypto/aes/aes_ecb.c
     crypto/aes/aes_cfb.c
@@ -729,7 +730,7 @@ Library Pt-Ssl-openssl  :
     crypto/x509v3/pcy_lib.c
     crypto/x509v3/v3_pku.c
     crypto/x509v3/v3_int.c
-    crypto/x509v3/v3prin.c
+   #crypto/x509v3/v3prin.c
     crypto/x509v3/v3_lib.c
     crypto/x509v3/v3_purp.c
     crypto/x509v3/v3_ia5.c
@@ -789,16 +790,16 @@ Library Pt-Ssl-openssl  :
     crypto/ecdsa/ecs_asn1.c
     crypto/sha/sha1dgst.c
     crypto/sha/sha512.c
-    crypto/sha/sha1.c
+   #crypto/sha/sha1.c
    #crypto/sha/shatest.c
    #crypto/sha/sha1test.c
-    crypto/sha/sha.c
+   #crypto/sha/sha.c
     crypto/sha/sha_dgst.c
-    crypto/sha/sha512t.c
+   #crypto/sha/sha512t.c
     crypto/sha/sha256.c
    #crypto/sha/sha1_one.c
    #crypto/sha/sha_one.c
-    crypto/sha/sha256t.c
+   #crypto/sha/sha256t.c
     crypto/conf/conf_api.c
     crypto/conf/conf_err.c
     crypto/conf/conf_mod.c
