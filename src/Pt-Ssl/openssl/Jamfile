@@ -604,7 +604,7 @@ Library Pt-Ssl-openssl  :
    #crypto/rsa/rsa_depr.c
    #crypto/rsa/rsa_null.c
     crypto/rsa/rsa_asn1.c
-    crypto/rsa/rsa_prn.c
+  ##crypto/rsa/rsa_prn.c
    #crypto/rsa/rsa_test.c
     crypto/rsa/rsa_ssl.c
     crypto/rsa/rsa_pss.c
@@ -620,7 +620,7 @@ Library Pt-Ssl-openssl  :
    #crypto/armcap.c
     crypto/evp/p_sign.c
     crypto/evp/e_aes.c
-    crypto/evp/p_enc.c
+  ##crypto/evp/p_enc.c
     crypto/evp/e_rc2.c
    #crypto/evp/e_cast.c
     crypto/evp/evp_err.c
@@ -634,35 +634,35 @@ Library Pt-Ssl-openssl  :
     crypto/evp/m_sha1.c
     crypto/evp/p_lib.c
     crypto/evp/evp_enc.c
-    crypto/evp/e_xcbc_d.c
+  ##crypto/evp/e_xcbc_d.c
    #crypto/evp/c_alld.c
     crypto/evp/evp_pkey.c
     crypto/evp/m_dss1.c
     crypto/evp/pmeth_fn.c
     crypto/evp/e_aes_cbc_hmac_sha1.c
     crypto/evp/pmeth_gn.c
-    crypto/evp/m_mdc2.c
+  ##crypto/evp/m_mdc2.c
     crypto/evp/p5_crpt.c
     crypto/evp/encode.c
-    crypto/evp/openbsd_hw.c
-    crypto/evp/evp_fips.c
-    crypto/evp/m_dss.c
-    crypto/evp/p_seal.c
+  ##crypto/evp/openbsd_hw.c
+  ##crypto/evp/evp_fips.c
+  ##crypto/evp/m_dss.c
+  ##crypto/evp/p_seal.c
     crypto/evp/p5_crpt2.c
    #crypto/evp/e_camellia.c
     crypto/evp/bio_md.c
-    crypto/evp/m_md4.c
+  ##crypto/evp/m_md4.c
     crypto/evp/m_sigver.c
    #crypto/evp/m_ripemd.c
-    crypto/evp/e_bf.c
+  ##crypto/evp/e_bf.c
     crypto/evp/pmeth_lib.c
-    crypto/evp/m_sha.c
-    crypto/evp/evp_cnf.c
+  ##crypto/evp/m_sha.c
+  ##crypto/evp/evp_cnf.c
    #crypto/evp/e_old.c
     crypto/evp/e_seed.c
     crypto/evp/evp_pbe.c
     crypto/evp/digest.c
-    crypto/evp/p_open.c
+  ##crypto/evp/p_open.c
    #crypto/evp/e_rc4.c
    #crypto/evp/e_idea.c
     crypto/evp/e_des.c
@@ -674,29 +674,29 @@ Library Pt-Ssl-openssl  :
     crypto/evp/p_verify.c
     crypto/evp/bio_b64.c
    #crypto/evp/evp_test.c
-    crypto/evp/bio_ok.c
+  ##crypto/evp/bio_ok.c
    #crypto/evp/e_dsa.c
-    crypto/evp/m_md2.c
+  ##crypto/evp/m_md2.c
     crypto/evp/m_md5.c
-    crypto/evp/evp_acnf.c
-    crypto/evp/m_null.c
-    crypto/evp/p_dec.c
+  ##crypto/evp/evp_acnf.c
+  ##crypto/evp/m_null.c
+  ##crypto/evp/p_dec.c
     crypto/ex_data.c
     crypto/stack/stack.c
    #crypto/pqueue/pq_test.c
     crypto/pqueue/pqueue.c
    #crypto/ebcdic.c
-    crypto/ts/ts_req_print.c
-    crypto/ts/ts_lib.c
+  ##crypto/ts/ts_req_print.c
+  ##crypto/ts/ts_lib.c
     crypto/ts/ts_err.c
-    crypto/ts/ts_rsp_verify.c
+  ##crypto/ts/ts_rsp_verify.c
    #crypto/ts/ts_conf.c
-    crypto/ts/ts_rsp_utils.c
-    crypto/ts/ts_asn1.c
-    crypto/ts/ts_rsp_sign.c
-    crypto/ts/ts_req_utils.c
-    crypto/ts/ts_rsp_print.c
-    crypto/ts/ts_verify_ctx.c
+  ##crypto/ts/ts_rsp_utils.c
+  ##crypto/ts/ts_asn1.c
+  ##crypto/ts/ts_rsp_sign.c
+  ##crypto/ts/ts_req_utils.c
+  ##crypto/ts/ts_rsp_print.c
+  ##crypto/ts/ts_verify_ctx.c
     crypto/mem.c
    #crypto/store/str_err.c
    #crypto/store/str_lib.c
@@ -710,7 +710,7 @@ Library Pt-Ssl-openssl  :
     crypto/x509v3/v3_akey.c
     crypto/x509v3/pcy_tree.c
     crypto/x509v3/pcy_data.c
-    crypto/x509v3/v3_asid.c
+  ##crypto/x509v3/v3_asid.c
     crypto/x509v3/pcy_node.c
     crypto/x509v3/v3_crld.c
     crypto/x509v3/v3_genn.c
