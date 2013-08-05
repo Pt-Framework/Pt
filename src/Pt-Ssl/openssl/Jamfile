@@ -723,7 +723,7 @@ Library Pt-Ssl-openssl  :
     crypto/x509v3/v3_prn.c
     crypto/x509v3/v3_bcons.c
     crypto/x509v3/v3_skey.c
-    crypto/x509v3/v3_addr.c
+  ##crypto/x509v3/v3_addr.c
     crypto/x509v3/v3_utl.c
     crypto/x509v3/v3_pmaps.c
     crypto/x509v3/v3_bitst.c
@@ -742,10 +742,10 @@ Library Pt-Ssl-openssl  :
     crypto/x509v3/v3_cpols.c
     crypto/x509v3/v3_pcia.c
     crypto/cryptlib.c
-    crypto/comp/comp_lib.c
-    crypto/comp/c_rle.c
-    crypto/comp/comp_err.c
-    crypto/comp/c_zlib.c
+  ##crypto/comp/comp_lib.c
+  ##crypto/comp/c_rle.c
+  ##crypto/comp/comp_err.c
+  ##crypto/comp/c_zlib.c
    #crypto/hmac/hmactest.c
     crypto/hmac/hmac.c
     crypto/hmac/hm_ameth.c
@@ -758,10 +758,10 @@ Library Pt-Ssl-openssl  :
     crypto/pem/pem_info.c
     crypto/pem/pem_lib.c
     crypto/pem/pem_x509.c
-    crypto/pem/pem_seal.c
-    crypto/pem/pem_sign.c
+  ##crypto/pem/pem_seal.c
+  ##crypto/pem/pem_sign.c
    #crypto/pem/pvkfmt.c
-    crypto/pem/pem_pk8.c
+ #  crypto/pem/pem_pk8.c
     crypto/o_time.c
     crypto/rand/rand_lib.c
     crypto/rand/randfile.c
