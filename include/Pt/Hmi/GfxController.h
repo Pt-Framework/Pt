@@ -43,7 +43,7 @@ public:
 	virtual ~GfxController();
 
 	Pt::Gfx::PointF toClient(const Pt::Gfx::PointF& globalPoint);
-	Pt::Gfx::PointF fromClient(const Pt::Gfx::PointF& localPoint, bool toRoot = false);
+	Pt::Gfx::PointF fromClient(const Pt::Gfx::PointF& localPoint, bool toRoot);
 
 	virtual void render(Pt::Gfx::Painter* Painter);
 	

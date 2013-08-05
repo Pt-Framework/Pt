@@ -24,8 +24,12 @@ private:
 	void onPaint(HWND hwnd);
 	void onSize(HWND hwnd, WPARAM wparam, LPARAM lparam);
 	void onMove(HWND hwnd, WPARAM wparam, LPARAM lparam);
-
+	void readWindowSizeAndPos();
+	void writeWindowSizeAndPos();
+	void writeWindowProperties();
 	void drawIndependentImage(size_t x, size_t y, const char* data, size_t width, size_t height);
+
+private:
 	HWND _hwnd;
 	Pt::Hmi::Model* _model;
 	Pt::Gfx::Painter* _nativePainter;

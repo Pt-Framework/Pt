@@ -32,10 +32,14 @@ void PanelRenderer::render(Pt::Hmi::Model* model ,Pt::Gfx::Painter* painter)
 		
 	if( ctrl == 0)
 		return;
-
 	
-	Pt::Gfx::Size rectSize = fmodel->fromUnit(fmodel->Size.get());
-	Pt::Gfx::Point position = fmodel->fromUnit(ctrl->fromClient(fmodel->Position.get(), true));
+	Pt::Gfx::SizeF  clientSize(fmodel->Size.get().width() - (fmodel->BorderWidth.get() * 2), fmodel->Size.get().height() - (fmodel->BorderWidth.get() * 2));
+	Pt::Gfx::PointF clientPos(fmodel->Position.get().x() + fmodel->BorderWidth.get(), fmodel->Position.get().y() + fmodel->BorderWidth.get());
+	
+	clientPos = ctrl->fromClient(clientPos, true);
+
+	Pt::Gfx::Size  rectSize = fmodel->fromUnit(clientSize);
+	Pt::Gfx::Point position = fmodel->fromUnit(clientPos);
 	Pt::Gfx::Rect rect(position, rectSize);
 
 	Pt::Gfx::Brush	brush(fmodel->BackColor.get());		
@@ -58,7 +62,7 @@ void PanelRenderer::render(Pt::Hmi::Model* model ,Pt::Gfx::Painter* painter)
 			
 		case BorderStyle::Widget:
 		{
-			double corner = 1;
+			double corner = 2;
 			std::vector<Pt::Gfx::Point> points1(5);
 			std::vector<Pt::Gfx::Point> points2(5);
 

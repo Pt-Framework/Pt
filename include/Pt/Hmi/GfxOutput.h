@@ -56,7 +56,8 @@ protected:
 	{
 		return true;
 	}
-	
+
+
 	
 private:
 	GfxOutputImpl* _impl;

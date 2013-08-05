@@ -12,7 +12,7 @@ GfxModel::GfxModel()
 , Font(Pt::Gfx::Font("",12))
 {
 	Position = toUnit(Pt::Gfx::Point(0,0));
-	Size = toUnit(Pt::Gfx::Size(200,200));
+//	Size = toUnit(Pt::Gfx::Size(200,200));
 }
 
 GfxModel::~GfxModel()
@@ -29,14 +29,14 @@ void GfxModel::move(const Pt::Gfx::SizeF& size)
 bool GfxModel::contains(const Pt::Gfx::PointF& p)
 {
 	double x1, x2, y1, y2;
-
+	
 	x1 = 0;
 	x2 = x1  + Size.get().width();
 
 	y1 = 0;
 	y2 = y1  + Size.get().height();
-
-	return ((p.x() > x1) && (p.x() < x2) && (p.y() > y1) && (p.y() < y2));
+	
+	return ((p.x() >= x1) && (p.x() < x2) && (p.y() >= y1) && (p.y() < y2));
 }
 
 int GfxModel::fromUnit(double v)

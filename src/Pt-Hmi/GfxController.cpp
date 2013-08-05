@@ -47,22 +47,7 @@ Pt::Gfx::PointF GfxController::toClient(const Pt::Gfx::PointF& globalPoint)
 	GfxModel* m = gfxModel();	
 
 	if( par == 0)
-	{
-		WindowModel* winMod = dynamic_cast<WindowModel*>(m);
-
-		if( winMod != 0)
-		{
-			Pt::Gfx::PointF parPoint = globalPoint;
-			double clientWBorder =  (winMod->WinSize.get().width() - winMod->Size.get().width());
-			double clientHBorder =  (winMod->WinSize.get().height() - winMod->Size.get().height());
-			return Pt::Gfx::PointF(parPoint.x() - (clientWBorder + m->Position.get().x())  , parPoint.y() - (clientHBorder + m->Position.get().y()));	
-		}
-		else
-		{
-			Pt::Gfx::PointF parPoint = globalPoint;
-			return Pt::Gfx::PointF(parPoint.x() - m->Position.get().x(), parPoint.y() - m->Position.get().y());	
-		}
-	}
+		return Pt::Gfx::PointF(globalPoint.x() - m->Position.get().x(), globalPoint.y() - m->Position.get().y());	
 
 	Pt::Gfx::PointF parPoint = par->toClient(globalPoint);
 	return Pt::Gfx::PointF(parPoint.x() - m->Position.get().x(), parPoint.y() - m->Position.get().y());

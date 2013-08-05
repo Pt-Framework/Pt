@@ -95,8 +95,6 @@ void WindowController::onInput2D(const PointingEvent& ev)
 	for( size_t i = 0; i < children().size(); ++i)
 		children()[i]->notifyInput2D(ev);
 	
-	Pt::Gfx::PointF p = toClient(Pt::Gfx::PointF(ev.x(), ev.y()));
-
 	invalidate();
 }
 

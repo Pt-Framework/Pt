@@ -65,11 +65,48 @@ void GfxOutputImpl::onSize(HWND hwnd, WPARAM wParam, LPARAM lParam)
 		break;
 	}
 
-	RECT rect;
-	GetWindowRect(_hwnd, &rect);
-	Pt::Gfx::Size size(LOWORD(lParam), HIWORD(lParam));
-	winMod->Size = winMod->toUnit(size);
-	winMod->WinSize = winMod->toUnit(Pt::Gfx::Size(rect.right - rect.left, rect.bottom - rect.top));
+	readWindowSizeAndPos();
+}
+
+
+void GfxOutputImpl::writeWindowSizeAndPos()
+{
+	WindowModel* wmodel = (WindowModel*) _model;
+	Pt::Gfx::Point pos = wmodel->fromUnit(wmodel->WinPos.get());
+	Pt::Gfx::Size size = wmodel->fromUnit(wmodel->WinSize.get());
+	SetWindowPos(_hwnd,0, pos.x(), pos.y(), size.width(), size.height(), 0);
+	 
+	WINDOWINFO  info;
+	GetWindowInfo(_hwnd, &info);
+	
+	wmodel->Size = wmodel->toUnit(Pt::Gfx::Size( info.rcClient.right - info.rcClient.left, info.rcClient.bottom- info.rcClient.top));
+	wmodel->Position = wmodel->toUnit(Pt::Gfx::Point( info.rcClient.left, info.rcClient.top));
+}
+
+void GfxOutputImpl::readWindowSizeAndPos()
+{
+	WindowModel* winMod = (WindowModel*) _model;
+
+	WINDOWINFO  info;
+	GetWindowInfo(_hwnd, &info);
+
+	//Windows external Size + Pos
+	{		
+		Pt::Gfx::Point	pos( info.rcWindow.left, info.rcWindow.top);	
+		Pt::Gfx::PointF position = winMod->toUnit(pos);
+	
+		winMod->WinSize = winMod->toUnit(Pt::Gfx::Size(info.rcWindow.right - info.rcWindow.left, info.rcWindow.bottom - info.rcWindow.top));
+		winMod->WinPos	= winMod->toUnit(pos);
+	}
+
+	//Windows client Size + pos => Gfx Size + pos
+	{
+		Pt::Gfx::Point	pos( info.rcClient.left, info.rcClient.top);	
+		Pt::Gfx::PointF position = winMod->toUnit(pos);
+	
+		winMod->Size	 = winMod->toUnit(Pt::Gfx::Size(info.rcClient.right - info.rcClient.left, info.rcClient.bottom - info.rcClient.top));
+		winMod->Position = winMod->toUnit(pos);
+	}
 }
 
 void GfxOutputImpl::onMove(HWND hwnd, WPARAM wParam, LPARAM lParam)
@@ -83,11 +120,7 @@ void GfxOutputImpl::onMove(HWND hwnd, WPARAM wParam, LPARAM lParam)
 	if( _ignoreSizeEvent)
 		return;
 
-	WindowModel* winMod = (WindowModel*) _model;
-
-	Pt::Gfx::Point pos((int)LOWORD(lParam), (int)HIWORD(lParam));
-
-	winMod->Position = winMod->toUnit(pos);
+	readWindowSizeAndPos();
 }
 
 void GfxOutputImpl::onPaint(HWND hwnd)
@@ -152,27 +185,10 @@ void GfxOutputImpl::drawIndependentImage(size_t x, size_t y, const char* data, s
 	EndPaint(_hwnd, &ps);
 }
 
-void GfxOutputImpl::output(Pt::Hmi::Model* model)
+void GfxOutputImpl::writeWindowProperties()
 {
-	WindowModel* wmodel = dynamic_cast<WindowModel*>(model);
+	WindowModel* wmodel = (WindowModel*) _model;
 
-	_model = model;
-
-	if( wmodel == 0)
-		throw std::logic_error("GFX Model expected");
-
-	_ignoreSizeEvent = true;
-	Application& app = *((Application*) &Application::instance());
-
-	Pt::Gfx::Point pos = app.fromUnit(wmodel->Position.get());
-	Pt::Gfx::Size size = app.fromUnit(wmodel->WinSize.get());
-	RECT rect;
-	
-	SetWindowPos(_hwnd, 0, pos.x(), pos.y(), size.width(),size.height(), 0);
-
-	GetClientRect(_hwnd,&rect);
-	Pt::Gfx::SizeF clientSize = app.toUnit(Pt::Gfx::Size( rect.right - rect.left, rect.bottom- rect.top));
-	wmodel->Size = clientSize;
 	SetWindowText(_hwnd, wmodel->Caption.get().c_str());
 
 	long style= GetWindowLong(_hwnd, GWL_STYLE);
@@ -192,6 +208,22 @@ void GfxOutputImpl::output(Pt::Hmi::Model* model)
 		ShowWindow(_hwnd, SW_HIDE);
 	else
 		ShowWindow(_hwnd, SW_SHOW);
+	
+}
+
+void GfxOutputImpl::output(Pt::Hmi::Model* model)
+{
+	WindowModel* wmodel = dynamic_cast<WindowModel*>(model);
+
+	_model = model;
+
+	if( wmodel == 0)
+		throw std::logic_error("ERROR: WindowModel model expected!");
+
+	_ignoreSizeEvent = true;	
+
+	writeWindowSizeAndPos();
+	writeWindowProperties();
 	
 	_ignoreSizeEvent = false;
 

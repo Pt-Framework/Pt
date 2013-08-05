@@ -131,7 +131,7 @@ void PanelController::onInput2D(const PointingEvent& ev)
 		case BorderStyle::Sizebale:
 		case BorderStyle::ToolSizeable:
 		{
-			if( p.x() < size.width() && p.y() < size.height())
+			if( m->contains(p))
 			{
 				if(p.x() < m->BorderWidth.get() && p.y() <  m->BorderWidth.get())
 				{//Corner NW
@@ -160,7 +160,7 @@ void PanelController::onInput2D(const PointingEvent& ev)
 						m->CursorStatus.get().setCursor(Cursors::SizeWE);
 						_resizeDir = West;
 					}
-					else if(p.x() > sizeR)
+					else if(p.x() >= sizeR)
 					{//East
 						m->CursorStatus.get().setCursor(Cursors::SizeWE);
 						_resizeDir = East;

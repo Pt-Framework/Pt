@@ -98,10 +98,6 @@ public:
 	void move(const Pt::Gfx::SizeF& size);	
     bool contains(const Pt::Gfx::PointF& p);
 
-	//Client Handling
-	Pt::Gfx::PointF toClient(const Pt::Gfx::PointF& globalPoint);
-	Pt::Gfx::PointF fromClient(const Pt::Gfx::PointF& localPoint);
-
 
 	//Unit handling
 	double toUnit(int v);

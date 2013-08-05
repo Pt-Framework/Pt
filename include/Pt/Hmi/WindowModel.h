@@ -77,6 +77,7 @@ public:
 	Property<std::string>						Caption;
 	Property<std::string>						Name;
 	Property<BorderStyle::Type>					Border;
+	Property<Pt::Gfx::PointF>					WinPos;
 	Property<Pt::Gfx::SizeF>					WinSize;
 	Property<Pt::Gfx::ARgbImage>				Icon;
 };
