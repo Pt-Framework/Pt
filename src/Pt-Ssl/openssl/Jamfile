@@ -761,10 +761,10 @@ Library Pt-Ssl-openssl  :
   ##crypto/pem/pem_seal.c
   ##crypto/pem/pem_sign.c
    #crypto/pem/pvkfmt.c
- #  crypto/pem/pem_pk8.c
+    crypto/pem/pem_pk8.c
     crypto/o_time.c
     crypto/rand/rand_lib.c
-    crypto/rand/randfile.c
+  ##crypto/rand/randfile.c
    #crypto/rand/rand_nw.c
     crypto/rand/md_rand.c
     crypto/rand/rand_unix.c
@@ -794,7 +794,7 @@ Library Pt-Ssl-openssl  :
    #crypto/sha/shatest.c
    #crypto/sha/sha1test.c
    #crypto/sha/sha.c
-    crypto/sha/sha_dgst.c
+  ##crypto/sha/sha_dgst.c
    #crypto/sha/sha512t.c
     crypto/sha/sha256.c
    #crypto/sha/sha1_one.c
