@@ -114,11 +114,13 @@
  * SUN MICROSYSTEMS, INC., and contributed to the OpenSSL project.
  */
 
+/*
 #ifdef _MSC_VER
 #pragma comment(lib, "Advapi32.lib")
 #pragma comment(lib, "Gdi32.lib")
 #pragma comment(lib, "User32.lib")
 #endif
+*/
 
 #include "cryptlib.h"
 #include <openssl/safestack.h>
@@ -774,6 +776,8 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason,
 	}
 #endif
 
+#if 0 // Disable Windows'-specific OPENSSL_isservice() and OPENSSL_showfatal()
+
 #if defined(_WIN32) && !defined(__CYGWIN__)
 #include <tchar.h>
 #include <signal.h>
@@ -915,6 +919,18 @@ void OPENSSL_showfatal (const char *fmta,...)
 }
 int OPENSSL_isservice (void) { return 0; }
 #endif
+
+#endif // Disable Windows'-specific OPENSSL_isservice() and OPENSSL_showfatal()
+
+int OPENSSL_isservice (void) { return 0; }
+
+void OPENSSL_showfatal (const char *fmta,...)
+{ va_list ap;
+
+    va_start (ap,fmta);
+    vfprintf (stderr,fmta,ap);
+    va_end (ap);
+}
 
 void OpenSSLDie(const char *file,int line,const char *assertion)
 	{
