@@ -69,15 +69,15 @@ OPENSSL_CRYPTO_HEADERS += crypto.h ;
 OPENSSL_HEADERS += $(OPENSSL_CRYPTO_HEADERS:R=crypto) ;
 
 # ssl headers
-OPENSSL_COPY_HEADERS = ssl.h ;
-OPENSSL_SSL_HEADERS += $(OPENSSL_COPY_HEADERS:R=ssl) ;
+OPENSSL_SSL_HEADERS += srtp.h ssl23.h ssl2.h ssl3.h ssl.h ;
 
-OPENSSL_HEADERS += $(OPENSSL_COPY_HEADERS:R=ssl) ;
+OPENSSL_HEADERS += $(OPENSSL_SSL_HEADERS:R=ssl) ;
 
 # copy public headers
 OPENSSL_INCLUDES_DIR = [ FDirName $(PT_TOP) src Pt-Ssl openssl include openssl ] ;
 Bulk $(OPENSSL_INCLUDES_DIR) : $(OPENSSL_HEADERS) ;
 Depends Pt-Ssl-openssl : $(OPENSSL_HEADERS:D=$(OPENSSL_INCLUDES_DIR)) ;
+Clean clean : $(OPENSSL_HEADERS:D=$(OPENSSL_INCLUDES_DIR)) ;
 
 Library Pt-Ssl-openssl :
     ssl/t1_lib.c
