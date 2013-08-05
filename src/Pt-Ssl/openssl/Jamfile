@@ -430,7 +430,7 @@ Library Pt-Ssl-openssl  :
     crypto/ec/ec_oct.c
     crypto/ec/ec_mult.c
    #crypto/ec/ecp_nistp256.c
-    crypto/ec/ec_check.c
+  ##crypto/ec/ec_check.c
    #crypto/ec/ecp_nistp521.c
     crypto/ec/ec_curve.c
     crypto/ec/ecp_mont.c
@@ -482,7 +482,7 @@ Library Pt-Ssl-openssl  :
    #crypto/dh/p512.c
    #crypto/dh/dh_depr.c
    #crypto/dh/dhtest.c
-    crypto/dh/dh_prn.c
+  ##crypto/dh/dh_prn.c
    #crypto/dh/p1024.c
     crypto/dh/dh_asn1.c
     crypto/dh/dh_key.c
@@ -504,7 +504,7 @@ Library Pt-Ssl-openssl  :
    #crypto/camellia/cmll_ofb.c
    #crypto/camellia/cmll_utl.c
    #crypto/LPdir_win.c
-    crypto/dsa/dsa_prn.c
+  ##crypto/dsa/dsa_prn.c
    #crypto/dsa/dsagen.c
     crypto/dsa/dsa_pmeth.c
     crypto/dsa/dsa_ossl.c
@@ -523,7 +523,7 @@ Library Pt-Ssl-openssl  :
    #crypto/bio/b_sock.c
     crypto/bio/bio_lib.c
     crypto/bio/b_print.c
-    crypto/bio/bf_nbio.c
+  ##crypto/bio/bf_nbio.c
     crypto/bio/b_dump.c
    #crypto/bio/bss_rtcp.c
     crypto/bio/bss_mem.c
@@ -532,20 +532,20 @@ Library Pt-Ssl-openssl  :
    #crypto/bio/bss_sock.c
    #crypto/bio/bf_null.c
    #crypto/bio/bss_fd.c
-    crypto/bio/bio_cb.c
+  ##crypto/bio/bio_cb.c
    #crypto/bio/bss_log.c
     crypto/bio/bss_file.c
-    crypto/bio/bf_lbuf.c
+  ##crypto/bio/bf_lbuf.c
     crypto/bio/bss_null.c
     crypto/bio/bio_err.c
-    crypto/bio/bss_acpt.c
+  ##crypto/bio/bss_acpt.c
     crypto/bio/bf_buff.c
    #crypto/fips_ers.c
    #crypto/LPdir_nyi.c
-    crypto/aes/aes_ecb.c
-    crypto/aes/aes_cfb.c
+  ##crypto/aes/aes_ecb.c
+  ##crypto/aes/aes_cfb.c
    #crypto/aes/aes_ctr.c
-    crypto/aes/aes_ofb.c
+  ##crypto/aes/aes_ofb.c
     crypto/aes/aes_misc.c
     crypto/aes/aes_core.c
     crypto/aes/aes_wrap.c
@@ -587,7 +587,7 @@ Library Pt-Ssl-openssl  :
     crypto/bn/bn_word.c
     crypto/bn/bn_sqrt.c
     crypto/bn/bn_print.c
-    crypto/bn/bn_mpi.c
+  ##crypto/bn/bn_mpi.c
     crypto/bn/bn_mod.c
     crypto/lhash/lhash.c
    #crypto/lhash/lh_test.c
