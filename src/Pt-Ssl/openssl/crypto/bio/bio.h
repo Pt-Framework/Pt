@@ -70,11 +70,7 @@
 
 #ifndef OPENSSL_NO_SCTP
 # ifndef OPENSSL_SYS_VMS
-#  ifdef _MSC_VER
-#   include <openssl/ms_stdint.h>
-#  else
-#   include <stdint.h>
-#  endif
+# include <stdint.h>
 # else
 # include <inttypes.h>
 # endif

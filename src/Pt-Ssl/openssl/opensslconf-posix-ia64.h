@@ -79,6 +79,8 @@
 # endif
 #endif
 
+#define OPENSSL_CPUID_OBJ
+
 /* crypto/opensslconf.h.in */
 
 /* Generate 80386 code? */
@@ -118,7 +120,7 @@
  * - Intel P6 because partial register stalls are very expensive;
  * - elder Alpha because it lacks byte load/store instructions;
  */
-#define RC4_INT unsigned char
+#define RC4_INT unsigned int
 #endif
 #if !defined(RC4_CHUNK)
 /*
@@ -158,7 +160,7 @@
 
 #if defined(HEADER_BF_LOCL_H) && !defined(CONFIG_HEADER_BF_LOCL_H)
 #define CONFIG_HEADER_BF_LOCL_H
-#define BF_PTR
+#undef BF_PTR
 #endif /* HEADER_BF_LOCL_H */
 
 #if defined(HEADER_DES_LOCL_H) && !defined(CONFIG_HEADER_DES_LOCL_H)
