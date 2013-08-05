@@ -130,34 +130,9 @@ class PT_SSL_API Connection
 class PT_SSL_API StreamBuffer : public std::streambuf
 {
     public:
-        enum HandshakeProgress
-        {
-          None = 0,
-          Input = 1,
-          InputPending = 2,
-          Output = 3,
-          OutputPending = 4
-        };
-
-        struct HandshakeProgress2
-        {
-            HandshakeProgress2()
-            {}
-
-            bool inputPending;
-            bool outputPending;
-            bool input;
-            bool output;
-        };
-
-    public:
         /** @brief Construct an SSL stream buffer that uses the given IO stream. 
         */
-        StreamBuffer(std::streambuf& sb, size_t bufferSize = 1024);
-
-        /** @brief Construct an SSL stream buffer that uses the given SSL context. 
-        */
-        StreamBuffer(Context& ctx, size_t bufferSize = 1024);
+        StreamBuffer(size_t bufferSize = 1024);
 
         /** @brief Construct an SSL stream buffer that uses the given IO stream and SSL context. 
         */
@@ -169,7 +144,7 @@ class PT_SSL_API StreamBuffer : public std::streambuf
 
         /** @brief Initializes the SSL stream to use the given context. 
         */
-        void init(Context& ctx);
+        void open(Context& ctx, std::streambuf& sb);
 
         void discard();
 
@@ -229,10 +204,6 @@ class PT_SSL_API StreamBuffer : public std::streambuf
             if the handshake message is complete.
         */
         bool readHandshake();
-
-        /** @brief Returns false if more input is needed.
-        */
-        HandshakeProgress handshake();
 
         /** @brief Shutdown this SSL stream buffer. 
         */

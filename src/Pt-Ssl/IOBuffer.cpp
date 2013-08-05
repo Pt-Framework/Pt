@@ -36,9 +36,9 @@ namespace Pt {
 
 namespace Ssl {
 
-IOBuffer::IOBuffer(Pt::System::IOBuffer& sb)
-: StreamBuffer(sb)
-, _sb(&sb)
+IOBuffer::IOBuffer()
+: StreamBuffer()
+, _sb(0)
 , _errorPending(0)
 , _reading(false)
 , _input(false)

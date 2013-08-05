@@ -484,11 +484,11 @@ std::streamsize Connection::read(char* buf, size_t n, std::streamsize isize)
 
 #endif
 
-StreamBuffer::StreamBuffer(std::streambuf& sb, size_t bufferSize)
+StreamBuffer::StreamBuffer(size_t bufferSize)
 : _in(0)
 , _out(0)
 , _ssl(0)
-, _ios(&sb)
+, _ios(0)
 , _ibufferSize(bufferSize + 4)
 , _ibuffer(0)
 , _obufferSize(bufferSize)
@@ -510,23 +510,7 @@ StreamBuffer::StreamBuffer(Context& ctx, std::streambuf& sb, size_t bufferSize)
 , _pbmax(4)
 , _connected(false)
 {
-    this->init(ctx);
-}
-
-
-StreamBuffer::StreamBuffer(Context& ctx, size_t bufferSize)
-: _in(0)
-, _out(0)
-, _ssl(0)
-, _ios(0)
-, _ibufferSize(bufferSize + 4)
-, _ibuffer(0)
-, _obufferSize(bufferSize)
-, _obuffer(0)
-, _pbmax(4)
-, _connected(false)
-{
-    this->init(ctx);
+    this->open(ctx, sb);
 }
 
 
@@ -540,8 +524,10 @@ StreamBuffer::~StreamBuffer()
 }
 
 
-void StreamBuffer::init(Context& ctx)
+void StreamBuffer::open(Context& ctx, std::streambuf& sb)
 {
+    _ios = &sb;
+
     if(_ssl)
     {
         SSL_free(_ssl); 
@@ -780,73 +766,6 @@ bool StreamBuffer::readHandshake()
     }
 
     return BIO_pending(_out) <= 0 && SSL_want_read(_ssl);
-}
-
-
-StreamBuffer::HandshakeProgress StreamBuffer::handshake()
-{
-    if( ! _ios || ! _ssl )
-        throw System::IOError("SSL Buffer not initialized");
-      
-    int ret = SSL_do_handshake(_ssl);
-   
-    if(ret <= 0)
-    {
-        const int sslerr = SSL_get_error(_ssl, ret);
-
-        if(sslerr != SSL_ERROR_WANT_READ && sslerr != SSL_ERROR_WANT_WRITE) 
-        {
-            throw HandshakeFailed("SSL handshake failed");
-        }
-    }
-
-    if( BIO_pending(_out) )
-    {
-        while( BIO_pending(_out) )
-        {
-            char buf[1000];
-            int n = BIO_read( _out, buf, sizeof(buf) );
-            std::clog << "WRITE HANDSHAKE: " << n << std::endl;
-
-            if(n <= 0)
-                throw System::IOError("BIO_read");
-
-            _ios->sputn(buf, n);
-            log_debug("wrote " << n << " bytes to output stream");  
-        }
-
-        return Output;
-    }
-        
-    if(ret == 1)
-    {
-        _connected = true;
-    }
-
-    if( SSL_want_read(_ssl)  )
-    {
-        std::streamsize avail = _ios->in_avail();
-        if(avail == 0)
-        {
-            std::clog << "READ HANDSHAKE: need input" << std::endl;
-            return Input;
-        }
-
-        const std::streamsize bufsize = 2000;
-        char buf[bufsize];
-        std::streamsize refill = std::min( bufsize, _ios->in_avail() );
-        std::clog << "IN AVAIL: " << _ios->in_avail() << std::endl;
-
-        std::streamsize gcount = _ios->sgetn(buf, refill);
-        log_debug("read " << gcount << " bytes from input stream");
-        std::clog << "READ HANDSHAKE: " << gcount << std::endl;
-
-        int n = BIO_write(_in, buf, static_cast<int>(gcount));
-        if(n <= 0)
-            throw System::IOError("BIO_write");
-    }
-
-    return None;
 }
 
 

@@ -44,7 +44,7 @@ class PT_SSL_API IOBuffer : public StreamBuffer
     public:
         /** @brief Construct a SSL buffer that uses the given I/O buffer. 
         */
-        IOBuffer(Pt::System::IOBuffer& sb);
+        IOBuffer();
         
         /** @brief Construct a SSL client that uses the given I/O buffer and SSL context. 
         */

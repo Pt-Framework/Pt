@@ -77,7 +77,7 @@ Connection::Connection()
 , _sockbuf(8192, true)
 , _ssl(false)
 #ifdef PT_HTTP_WITH_SSL
-, _sslbuf( _sockbuf )
+, _sslbuf()
 #endif
 , _httpbuf()
 , _os(&_sockbuf)
@@ -137,7 +137,7 @@ void Connection::setSecure(Ssl::Context& ctx)
 {
     log_debug("initialize HTTPS connection");
 
-    _sslbuf.init(ctx);
+    _sslbuf.open(ctx, _sockbuf);
 
     if( ! _ssl)
     {
