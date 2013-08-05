@@ -7,6 +7,8 @@ SubDirHdrs $(PT_TOP)/src/Pt-Ssl/openssl/crypto/asn1 ;
 SubDirHdrs $(PT_TOP)/src/Pt-Ssl/openssl/crypto/evp ;
 SubDirHdrs $(PT_TOP)/src/Pt-Ssl/openssl/crypto/modes ;
 
+SubDirCcFlags [ FDefines NOCRYPT ] ;
+
  SubDirCcFlags [ FDefines OPENSSL_NO_DEPRECATED ] ;
  SubDirCcFlags [ FDefines OPENSSL_NO_ENGINE ] ;
  SubDirCcFlags [ FDefines OPENSSL_NO_SOCK ] ;
