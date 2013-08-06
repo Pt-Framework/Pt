@@ -227,6 +227,11 @@ int main(int argc, char** argv)
 
         std::clog << "SHUTDOWN: " << sslbuf.isShutdown() << std::endl;
         std::clog << "CLOSED: " << sslbuf.isClosed() << std::endl;
+        
+        sslbuf.shutdown();
+
+        std::clog << "SHUTDOWN: " << sslbuf.isShutdown() << std::endl;
+        std::clog << "CLOSED: " << sslbuf.isClosed() << std::endl;
 
         return 0;
     }

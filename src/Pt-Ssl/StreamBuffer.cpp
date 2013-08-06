@@ -56,8 +56,9 @@ Connection::Connection(Context& ctx, std::streambuf& ios, int mode)
 , _iocount(0)
 , _connected(false)
 , _wantRead(false)
-, _isReadingHandshake(false)
+, _isReading(false)
 , _isWritingHandshake(false)
+, _isShutdown(false)
 {
     Boolean isServer = (mode == StreamBuffer::Accept);
 
@@ -119,9 +120,9 @@ bool Connection::readHandshake()
     again:
 
     _wantRead = false;
-    _isReadingHandshake = true;
+    _isReading = true;
     OSStatus status = SSLHandshake(_context);
-    _isReadingHandshake = false;
+    _isReading = false;
 
     log_debug("SSLHandshake returns " << status);
     
@@ -144,20 +145,51 @@ bool Connection::readHandshake()
 }
 
 
-void Connection::shutdown()
+bool Connection::shutdown()
 {
+    if( ! _connected )
+        return true;
+
+    if(_isShutdown)
+    {
+        OSStatus error = SSLClose(_context);
+        log_trace("SSLClose: " << error);
+
+        if(error == noErr)
+        {
+            _isShutdown = false;
+            _connected = false;
+            return true;
+        }
+        
+        if(error == errSSLWouldBlock)
+            return false;
+            
+        throw SslError("shutdown failed");
+        
+    }
+    
+    _isReading = true;
+    OSStatus error = SSLClose(_context);
+    _isReading = false;
+
+    if(error != noErr)
+        throw SslError("shutdown failed");
+
+    _isShutdown = true;
+    return false;
 }
 
 
 bool Connection::isShutdown() const
 {
-    return false;
+    return _isShutdown;
 }
 
 
 bool Connection::isClosed() const
 {   
-    return false;
+    return ! _connected;
 }
 
 
@@ -185,13 +217,21 @@ std::streamsize Connection::read(char* buf, size_t n, std::streamsize isize)
 
     // TODO: consume isize bytes from input
     
+    _isReading = true;
     OSStatus error = SSLRead(_context, buf, n, &processed);
-    
-    if(error != noErr && error != errSSLWouldBlock)
-        throw SslError("decoding failed");
-    
+    _isReading = false;
+
     log_trace("Connection::read: " << error);
     
+    if(error == errSSLClosedGraceful)
+    {
+        _isShutdown = true;
+    }
+    else if(error != noErr && error != errSSLWouldBlock)
+    {
+        throw SslError("decoding failed");
+    }
+
     return static_cast<std::streamsize>(processed);
 }
 
@@ -233,7 +273,7 @@ OSStatus Connection::sslRead(void* data, size_t* n)
 OSStatus Connection::sslWrite(const void* data, size_t* n)
 {           
     log_trace("Connection::sslWrite: " << *n);
-    if(_isReadingHandshake)
+    if(_isReading)
     {
         *n = 0;
         return errSSLWouldBlock;
@@ -691,7 +731,7 @@ bool StreamBuffer::readHandshake()
 }
 
 
-void StreamBuffer::shutdown()
+bool StreamBuffer::shutdown()
 {
     if( _connection )
         _connection->shutdown();
@@ -701,6 +741,9 @@ void StreamBuffer::shutdown()
 
     setg(0, 0, 0);
     setp(0, 0);
+    
+    // TODO: return shutdown state
+    return false;
 }
 
 

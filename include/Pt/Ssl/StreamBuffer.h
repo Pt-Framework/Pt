@@ -63,7 +63,8 @@ class PT_SSL_API Connection
 
         bool readHandshake();
 
-        void shutdown();
+        // TODO: writeShutdown / readShutdown
+        bool shutdown();
 
         bool isShutdown() const;
 
@@ -87,8 +88,9 @@ class PT_SSL_API Connection
         std::streamsize _iocount;
         bool _connected;
         bool _wantRead;
-        bool _isReadingHandshake;
+        bool _isReading;
         bool _isWritingHandshake;
+        bool _isShutdown;
 };
 
 #else
@@ -200,9 +202,13 @@ class PT_SSL_API StreamBuffer : public std::streambuf
         */
         bool readHandshake();
 
-        /** @brief Shutdown this SSL stream buffer. 
+        /** @brief Shutdown the SSL connection. 
+         
+            If isShutdown() returns false, the shutdown message is written
+            to the output. If isShutdown returned true, or subsequent calls
+            return false if more data is required to read the shutdown reply.
         */
-        void shutdown();
+        bool shutdown();
 
         bool isShutdown() const;
 

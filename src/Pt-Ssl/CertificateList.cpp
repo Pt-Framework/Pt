@@ -191,6 +191,8 @@ CertificateStore::CertificateStore()
 //
 //    OSStatus status = SecItemCopyMatching(dict, (CFTypeRef*)&items);
 //
+//    std::clog << "FOUND:" << CFDictionaryGetCount(dict) << std::endl;
+//
 //    CFRelease(dict);
 //
 //    if( status != errSecSuccess && status != errSecItemNotFound ) 
@@ -200,6 +202,8 @@ CertificateStore::CertificateStore()
 //
 //    if(items)
 //        CFRelease(items);
+//        
+//    std::clog << "XXXXXXXXXXXXXXXX" << std::endl;
 }
 
 
