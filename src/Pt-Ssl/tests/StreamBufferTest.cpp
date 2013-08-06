@@ -136,12 +136,10 @@ void StreamBufferTest::Handshake()
 
     // client begins the handshake
     std::stringstream data;
-    Pt::Ssl::StreamBuffer client(clientContext, *data.rdbuf());
-    client.setConnecting();
+    Pt::Ssl::StreamBuffer client(clientContext, *data.rdbuf(), Pt::Ssl::StreamBuffer::Connect);
 
     // server begins the handskake
-    Pt::Ssl::StreamBuffer server(serverContext, *data.rdbuf());
-    server.setAccepting();
+    Pt::Ssl::StreamBuffer server(serverContext, *data.rdbuf(), Pt::Ssl::StreamBuffer::Accept);
 
     for( int n = 0; n < 20; ++n)
     {

@@ -67,7 +67,7 @@ class ContextTest : public Pt::Unit::TestSuite
         {
             //Pt::System::Logger::getTarget("Pt.Ssl").setLogLevel(Pt::System::Trace);
 
-            this->registerMethod("Ciphers", *this, &ContextTest::Ciphers);
+            //this->registerMethod("Ciphers", *this, &ContextTest::Ciphers);
 
             this->registerMethod("Certificates", *this, &ContextTest::Certificates);
         }
@@ -86,31 +86,31 @@ class ContextTest : public Pt::Unit::TestSuite
 Pt::Unit::RegisterTest<ContextTest> register_ContextTestTest;
 
 
-void ContextTest::Ciphers()
-{
-    std::vector<std::string> cipherNames1;
-    std::vector<std::string> cipherNames2;
-    Pt::Ssl::Context ctx;
-
-    std::iostream ios(0);
-    Pt::Ssl::StreamBuffer sb(ctx, *ios.rdbuf());
-
-    Pt::Ssl::CipherList::ConstIterator it;
-    Pt::Ssl::CipherList ciphers1 = sb.ciphers();
-    for(it = ciphers1.begin(); it != ciphers1.end(); ++it)
-    {
-        cipherNames1.push_back( it->name() );
-    }
-
-    Pt::Ssl::CipherList ciphers2 = ciphers1;
-    for(it = ciphers2.begin(); it != ciphers2.end(); ++it)
-    {
-        cipherNames2.push_back( it->name() );
-    }
-    
-    PT_UNIT_ASSERT(cipherNames1.size() > 0);
-    PT_UNIT_ASSERT(cipherNames1 == cipherNames2);
-}
+//void ContextTest::Ciphers()
+//{
+//    std::vector<std::string> cipherNames1;
+//    std::vector<std::string> cipherNames2;
+//    Pt::Ssl::Context ctx;
+//
+//    std::iostream ios(0);
+//    Pt::Ssl::StreamBuffer sb(ctx, *ios.rdbuf());
+//
+//    Pt::Ssl::CipherList::ConstIterator it;
+//    Pt::Ssl::CipherList ciphers1 = sb.ciphers();
+//    for(it = ciphers1.begin(); it != ciphers1.end(); ++it)
+//    {
+//        cipherNames1.push_back( it->name() );
+//    }
+//
+//    Pt::Ssl::CipherList ciphers2 = ciphers1;
+//    for(it = ciphers2.begin(); it != ciphers2.end(); ++it)
+//    {
+//        cipherNames2.push_back( it->name() );
+//    }
+//    
+//    PT_UNIT_ASSERT(cipherNames1.size() > 0);
+//    PT_UNIT_ASSERT(cipherNames1 == cipherNames2);
+//}
 
 void ContextTest::Certificates()
 {

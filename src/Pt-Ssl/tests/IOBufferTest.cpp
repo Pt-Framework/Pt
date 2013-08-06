@@ -48,7 +48,8 @@ class TcpAcceptor : public Pt::Connectable
                     const std::string& addr, unsigned short port)
         : _loop(loop)
         , _iobuf(8192, true)
-        , _ssl(ctx, _iobuf)
+        , _ctx(&ctx)
+        , _ssl()
         , _socket(0)
         {
             log_debug("listening on " << addr << ':' << port);
@@ -76,13 +77,14 @@ class TcpAcceptor : public Pt::Connectable
 
             log_debug("starting accept handshake");
             //_ssl.attach(_ios);
-            _ssl.beginAccept();
+            _ssl.beginAccept(*_ctx, _iobuf);
         }
 
     private:
         Pt::System::EventLoop& _loop;
         Pt::Net::TcpServer _server;
         Pt::System::IOBuffer _iobuf;
+        Pt::Ssl::Context* _ctx;
         Pt::Ssl::IOBuffer _ssl;
         Pt::Net::TcpSocket* _socket;
 };
@@ -94,7 +96,8 @@ class TcpConnector : public Pt::Connectable
                      const std::string& addr, unsigned short port)
         : _loop(loop)
         , _iobuf(8192, true)
-        , _ssl(ctx, _iobuf)
+        , _ctx(&ctx)
+        , _ssl()
         {
             log_debug("connecting to " << addr << ':' << port);
 
@@ -116,12 +119,13 @@ class TcpConnector : public Pt::Connectable
             _iobuf.attach(socket);
 
             log_debug("starting connect handshake");
-            _ssl.beginConnect();
+            _ssl.beginConnect(*_ctx, _iobuf);
         }
 
     private:
         Pt::System::EventLoop& _loop;
         Pt::Net::TcpSocket _socket;
+        Pt::Ssl::Context* _ctx;
         Pt::System::IOBuffer _iobuf;
         Pt::Ssl::IOBuffer _ssl;
 };
@@ -174,8 +178,8 @@ class IOBufferTest : public Pt::Unit::TestSuite
                 return;
             }
 
-            log_debug("peer name = " << ssl.peerName());
-            log_debug("current cipher = " << ssl.currentCipher().name());
+            //log_debug("peer name = " << ssl.peerName());
+            //log_debug("current cipher = " << ssl.currentCipher().name());
             ssl.beginRead();
         }
 
@@ -239,8 +243,8 @@ class IOBufferTest : public Pt::Unit::TestSuite
                 return;
             }
 
-            log_debug("peer name = " << ssl.peerName());
-            log_debug("current cipher = " << ssl.currentCipher().name());
+            //log_debug("peer name = " << ssl.peerName());
+            //log_debug("current cipher = " << ssl.currentCipher().name());
 
             std::string lmsg = "Hello world from client!";
             log_debug("client sending message... size = " << lmsg.length());

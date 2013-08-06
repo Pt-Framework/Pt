@@ -268,6 +268,7 @@ class Connection : public Connectable
 
         bool _ssl;
 #ifdef PT_HTTP_WITH_SSL
+        Ssl::Context* _ctx;
         Ssl::StreamBuffer _sslbuf;
 #endif
         HttpBuffer _httpbuf;

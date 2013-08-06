@@ -207,9 +207,15 @@ int main(int argc, char** argv)
 
         std::streamsize replySize = 0;
 
-        while(replySize < 1000)
+        while(replySize < 5000)
         {
             char buf[4096];
+            std::streamsize rd = conn.read( buf, sizeof(buf), ss.rdbuf()->in_avail() );
+            log_debug("decoded: " << rd << " bytes");
+
+            replySize += rd;
+            std::clog.write(buf, rd);
+
             size_t read = socket.read(buf, sizeof(buf));
             log_debug("read: " << read << " bytes from socket");
             ss.str( std::string(buf, read) );

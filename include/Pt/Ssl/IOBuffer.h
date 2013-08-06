@@ -45,10 +45,6 @@ class PT_SSL_API IOBuffer : public StreamBuffer
         /** @brief Construct a SSL buffer that uses the given I/O buffer. 
         */
         IOBuffer();
-        
-        /** @brief Construct a SSL client that uses the given I/O buffer and SSL context. 
-        */
-        IOBuffer(Context& ctx, Pt::System::IOBuffer& sb);
 
         /** @brief Standard dtor. 
         */
@@ -57,7 +53,7 @@ class PT_SSL_API IOBuffer : public StreamBuffer
         System::IOBuffer& buffer()
         { return *_sb; }
 
-        void connect();
+        void connect(Context& ctx, Pt::System::IOBuffer& sb);
 
         void fakeAfterConnect();
 
@@ -65,11 +61,11 @@ class PT_SSL_API IOBuffer : public StreamBuffer
 
         /** @brief Starts the client connect handshake
         */
-        void beginConnect();
+        void beginConnect(Context& ctx, Pt::System::IOBuffer& sb);
 
         /** @brief Starts the server accept handshake
         */
-        void beginAccept();
+        void beginAccept(Context& ctx, Pt::System::IOBuffer& sb);
 
         /** @brief Ends the client or server handshake
         */

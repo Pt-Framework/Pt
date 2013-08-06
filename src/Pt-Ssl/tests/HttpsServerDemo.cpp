@@ -69,8 +69,8 @@ class Server : public Pt::Connectable {
             _ios->attach(*_client);
 
             log_debug("server Starting handshake");
-            _ssl = new Pt::Ssl::IOBuffer(_sslContext, _ios->ioBuffer());
-            _ssl->beginAccept();
+            _ssl = new Pt::Ssl::IOBuffer();
+            _ssl->beginAccept(_sslContext, _ios->ioBuffer());
 
             _ssl->handshakeFinished() += Pt::slot(*this, &Server::onHandshake);
             //_ssl->shutdownFinished() += Pt::slot(*this, &Server::onShutdown);
@@ -94,8 +94,8 @@ class Server : public Pt::Connectable {
                 return;
             }
 
-            log_debug("server Peer CN = " << ssl.peerName());
-            log_debug("server Current cipher = \n" << ssl.currentCipher().name());
+            //log_debug("server Peer CN = " << ssl.peerName());
+            //log_debug("server Current cipher = \n" << ssl.currentCipher().name());
 
             ssl.beginRead();
         }

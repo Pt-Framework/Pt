@@ -46,25 +46,17 @@ IOBuffer::IOBuffer()
 }
 
 
-IOBuffer::IOBuffer(Context& ctx, Pt::System::IOBuffer& sb)
-: StreamBuffer(ctx, sb)
-, _sb(&sb)
-, _errorPending(0)
-, _reading(false)
-, _input(false)
-{
-}
-
-
 IOBuffer::~IOBuffer()
 {}
 
 
-void IOBuffer::connect()
+void IOBuffer::connect(Context& ctx, Pt::System::IOBuffer& sb)
 {
     log_trace("IOBuffer::connect");
     
-    this->setConnecting();
+    //this->setConnecting();
+    _sb = &sb;
+    this->open(ctx, sb, StreamBuffer::Connect);
 
     for( ; ; )
     {
@@ -87,15 +79,16 @@ void IOBuffer::connect()
 }
 
 
-void IOBuffer::beginConnect()
+void IOBuffer::beginConnect(Context& ctx, Pt::System::IOBuffer& sb)
 {
     log_trace("IOBuffer::beginConnect");
 
-    if( ! _sb)
-        return;
-
     _errorPending = 0;
-    StreamBuffer::setConnecting();
+    
+    //this->setConnecting();
+    _sb = &sb;
+    this->open(ctx, sb, StreamBuffer::Connect);
+    
     StreamBuffer::writeHandshake();
 
     log_debug("_sb->beginWrite()");
@@ -105,15 +98,15 @@ void IOBuffer::beginConnect()
 }
 
 
-void IOBuffer::beginAccept()
+void IOBuffer::beginAccept(Context& ctx, Pt::System::IOBuffer& sb)
 {
     log_trace("IOBuffer::beginAccept");
 
-    if( ! _sb)
-        return;
-
     _errorPending = 0;
-    StreamBuffer::setAccepting();
+    
+    //StreamBuffer::setAccepting();
+    _sb = &sb;
+    this->open(ctx, sb, StreamBuffer::Accept);
 
     log_debug("_sb->beginRead()");
     _sb->beginRead();

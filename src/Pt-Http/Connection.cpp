@@ -77,6 +77,7 @@ Connection::Connection()
 , _sockbuf(8192, true)
 , _ssl(false)
 #ifdef PT_HTTP_WITH_SSL
+, _ctx(0)
 , _sslbuf()
 #endif
 , _httpbuf()
@@ -137,7 +138,7 @@ void Connection::setSecure(Ssl::Context& ctx)
 {
     log_debug("initialize HTTPS connection");
 
-    _sslbuf.open(ctx, _sockbuf);
+    _ctx = &ctx;
 
     if( ! _ssl)
     {
@@ -203,7 +204,7 @@ void Connection::sendRequest(Request& request)
         if(_ssl)
         {
             log_debug("SSL connect");
-            _sslbuf.setConnecting();
+            _sslbuf.open(*_ctx, _sockbuf, Ssl::StreamBuffer::Connect);
 
             for( ; ; )
             {
@@ -346,7 +347,7 @@ void Connection::beginSendRequest(Request& request)
     {
         log_debug("begining SSL handshake");
         _timer.start( _timeout );
-        _sslbuf.setConnecting();
+        _sslbuf.open(*_ctx, _sockbuf, Ssl::StreamBuffer::Connect);
         _state = SslHandshakeWrite;
     }
 
@@ -660,7 +661,7 @@ void Connection::beginReceiveRequest(Request& request)
     {
         log_debug("beginning SSL handshake");
         _timer.start( _timeout );
-        _sslbuf.setAccepting();
+        _sslbuf.open(*_ctx, _sockbuf, Ssl::StreamBuffer::Accept);
         _state = SslAcceptRead;
     }
 
