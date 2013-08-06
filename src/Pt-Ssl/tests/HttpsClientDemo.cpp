@@ -141,13 +141,12 @@ int main(int argc, char** argv)
         log_debug("connected");
 
         std::stringstream ss;
-        Pt::Ssl::Connection conn( sslctx, *ss.rdbuf() );
-        conn.setConnecting();
+        Pt::Ssl::StreamBuffer sslbuf( sslctx, *ss.rdbuf(), Pt::Ssl::StreamBuffer::Connect );
 
-        while( ! conn.connected() )
+        while( ! sslbuf.isConnected() )
         {
             log_debug("---write handshake---");
-            conn.writeHandshake();
+            sslbuf.writeHandshake();
             std::string data = ss.str();
 
             log_debug("write: " << data.size());
@@ -163,7 +162,7 @@ int main(int argc, char** argv)
 
             log_debug("---read handshake---");
             
-            while( conn.readHandshake() )
+            while( sslbuf.readHandshake() )
             {
                 char buf[4096];
                 size_t read = socket.read(buf, sizeof(buf));
@@ -187,7 +186,8 @@ int main(int argc, char** argv)
                                 "\r\n";
 
         log_debug("--- HTTP request---");
-        std::streamsize written = conn.write( request, sizeof(request) );
+        std::streamsize written = sslbuf.sputn( request, sizeof(request) );
+        sslbuf.pubsync();
         log_debug("encoded: " << written);
 
         std::string data = ss.str();
@@ -205,31 +205,29 @@ int main(int argc, char** argv)
         
         log_debug("--- HTTP reply---");
 
-        std::streamsize replySize = 0;
-
-        while(replySize < 5000)
+        while( ! socket.eof() )
         {
-            char buf[4096];
-            std::streamsize rd = conn.read( buf, sizeof(buf), ss.rdbuf()->in_avail() );
-            log_debug("decoded: " << rd << " bytes");
+            sslbuf.import();
+            log_debug("decoded: " << sslbuf.in_avail() << " bytes");
 
-            replySize += rd;
-            std::clog.write(buf, rd);
-
-            size_t read = socket.read(buf, sizeof(buf));
-            log_debug("read: " << read << " bytes from socket");
-            ss.str( std::string(buf, read) );
-
-            while( ss.rdbuf()->in_avail() )
+            if(sslbuf.in_avail() <= 0)
             {
-                std::streamsize readDecoded = conn.read( buf, sizeof(buf), ss.rdbuf()->in_avail() );
-                log_debug("decoded: " << readDecoded << " bytes");
+                char buf[4096];
+                size_t read = socket.read(buf, sizeof(buf));
+                log_debug("read: " << read << " bytes from socket");
+                
+                ss.str( std::string(buf, read) );
+            }
 
-                replySize += readDecoded;
-                std::clog.write(buf, readDecoded);
+            while(sslbuf.in_avail() > 0)
+            {
+                std::clog << (char) sslbuf.sbumpc();
             }
         }
-        
+
+        std::clog << "SHUTDOWN: " << sslbuf.isShutdown() << std::endl;
+        std::clog << "CLOSED: " << sslbuf.isClosed() << std::endl;
+
         return 0;
     }
     catch(const std::exception& ex)

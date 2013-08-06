@@ -219,7 +219,7 @@ void Connection::sendRequest(Request& request)
                 while( _sslbuf.readHandshake() )
                     ;
 
-                if( _sslbuf.connected() )
+                if( _sslbuf.isConnected() )
                     break;
 
                 log_debug("continuing handshake");
@@ -369,7 +369,7 @@ void Connection::beginSendRequest(Request& request)
             return;
         }
         
-        if( ! _sslbuf.connected() )
+        if( ! _sslbuf.isConnected() )
             throw HttpError("invalid HTTP message");
 
         log_debug("Handshake finished");
@@ -395,7 +395,7 @@ void Connection::beginSendRequest(Request& request)
             return;
         }
         
-        if( ! _sslbuf.connected() )
+        if( ! _sslbuf.isConnected() )
             throw HttpError("invalid HTTP message");
             
         log_debug("Handshake finished");
@@ -683,7 +683,7 @@ void Connection::beginReceiveRequest(Request& request)
             return;
         }
 
-        if( ! _sslbuf.connected() )
+        if( ! _sslbuf.isConnected() )
             throw HttpError("invalid HTTP message");
 
         log_debug("Handshake finished");
@@ -709,7 +709,7 @@ void Connection::beginReceiveRequest(Request& request)
             return;
         }
         
-        if( ! _sslbuf.connected() )
+        if( ! _sslbuf.isConnected() )
             throw HttpError("invalid HTTP message");
         
         log_debug("Handshake finished");

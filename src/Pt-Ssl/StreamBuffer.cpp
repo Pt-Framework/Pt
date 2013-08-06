@@ -50,7 +50,7 @@ namespace Ssl {
 
 #ifdef __APPLE__
 
-Connection::Connection(Context& ctx, std::streambuf& ios)
+Connection::Connection(Context& ctx, std::streambuf& ios, int mode)
 : _context(0)
 , _ios(&ios)
 , _iocount(0)
@@ -59,7 +59,9 @@ Connection::Connection(Context& ctx, std::streambuf& ios)
 , _isReadingHandshake(false)
 , _isWritingHandshake(false)
 {
-    SSLNewContext(false, &_context);
+    Boolean isServer = (mode == StreamBuffer::Accept);
+
+    SSLNewContext(isServer, &_context);
     
     SSLSetConnection(_context, (SSLConnectionRef) this);
 
@@ -76,18 +78,6 @@ Connection::Connection(Context& ctx, std::streambuf& ios)
 Connection::~Connection()
 {
     SSLDisposeContext(_context);
-}
-
-
-void Connection::setAccepting()
-{
-
-}
-
-
-void Connection::setConnecting()
-{
-
 }
 
 
@@ -151,6 +141,23 @@ bool Connection::readHandshake()
     }
 
     return _wantRead;
+}
+
+
+void Connection::shutdown()
+{
+}
+
+
+bool Connection::isShutdown() const
+{
+    return false;
+}
+
+
+bool Connection::isClosed() const
+{   
+    return false;
 }
 
 
@@ -252,32 +259,13 @@ OSStatus Connection::sslReadCallback(SSLConnectionRef connection, void* data, si
 }
 #else
 
-Connection::Connection(Context& ctx, std::streambuf& ios)
+Connection::Connection(Context& ctx, std::streambuf& ios, int mode)
 : _ios(&ios)
 , _connected(false)
 , _in(0)
 , _out(0)
 , _ssl(0)
 {
-    init(ctx);
-}
-
-
-Connection::~Connection()
-{
-    if(_ssl)
-        SSL_free(_ssl); 
-}
-
-
-void Connection::init(Context& ctx)
-{
-    if(_ssl)
-    {
-        SSL_free(_ssl); 
-        _ssl = 0;
-    }
-
     // Create the SSL objects
     _in  = BIO_new( BIO_s_mem() );
     _out = BIO_new( BIO_s_mem() );
@@ -288,25 +276,17 @@ void Connection::init(Context& ctx)
     BIO_set_nbio(_out, 1);
     SSL_set_bio(_ssl, _in, _out);
 
-    _connected = false;
+    if(mode == StreamBuffer::Accept)
+        SSL_set_accept_state(_ssl);
+    else
+        SSL_set_connect_state(_ssl);
 }
 
 
-void Connection::setAccepting()
+Connection::~Connection()
 {
-    if( ! _ssl)
-        return;
-
-    SSL_set_accept_state(_ssl);
-}
-
-
-void Connection::setConnecting()
-{
-    if( ! _ssl)
-        return;
-
-    SSL_set_connect_state(_ssl);
+    if(_ssl)
+        SSL_free(_ssl); 
 }
 
 
@@ -547,10 +527,7 @@ std::streamsize Connection::read(char* buf, size_t n, std::streamsize isize)
 #endif
 
 StreamBuffer::StreamBuffer(size_t bufferSize)
-: _in(0)
-, _out(0)
-, _ssl(0)
-, _ios(0)
+: _connection(0)
 , _ibufferSize(bufferSize + 4)
 , _ibuffer(0)
 , _obufferSize(bufferSize)
@@ -561,16 +538,12 @@ StreamBuffer::StreamBuffer(size_t bufferSize)
 
 
 StreamBuffer::StreamBuffer(Context& ctx, std::streambuf& sb, OpenMode mode, size_t bufferSize)
-: _in(0)
-, _out(0)
-, _ssl(0)
-, _ios(&sb)
+: _connection(0)
 , _ibufferSize(bufferSize + 4)
 , _ibuffer(0)
 , _obufferSize(bufferSize)
 , _obuffer(0)
 , _pbmax(4)
-, _connected(false)
 {
     this->open(ctx, sb, mode);
 }
@@ -578,8 +551,8 @@ StreamBuffer::StreamBuffer(Context& ctx, std::streambuf& sb, OpenMode mode, size
 
 StreamBuffer::~StreamBuffer()
 { 
-    if(_ssl)
-        SSL_free(_ssl); 
+    if(_connection)
+        delete _connection; 
 
     delete [] _ibuffer;
     delete [] _obuffer;
@@ -588,30 +561,11 @@ StreamBuffer::~StreamBuffer()
 
 void StreamBuffer::open(Context& ctx, std::streambuf& sb, OpenMode mode)
 {
-    _ios = &sb;
+    if(_connection)
+        delete _connection;
 
-    if(_ssl)
-    {
-        SSL_free(_ssl); 
-        _ssl = 0;
-    }
-
-    // Create the SSL objects
-    _in  = BIO_new( BIO_s_mem() );
-    _out = BIO_new( BIO_s_mem() );
-    _ssl = SSL_new( ctx.impl() );
-
-    // Connect the BIO
-    BIO_set_nbio(_in, 1);
-    BIO_set_nbio(_out, 1);
-    SSL_set_bio(_ssl, _in, _out);
-
-    _connected = false;
-
-    if(mode == Accept)
-        SSL_set_accept_state(_ssl);
-    else
-        SSL_set_connect_state(_ssl);
+    _connection = 0;
+    _connection = new Connection(ctx, sb, mode);
 }
 
 
@@ -655,12 +609,9 @@ void StreamBuffer::open(Context& ctx, std::streambuf& sb, OpenMode mode)
 //}
 
 
-bool StreamBuffer::connected() const
+bool StreamBuffer::isConnected() const
 { 
-    if( ! _ssl )
-        return false;
-
-    return _connected; 
+    return _connection && _connection->connected(); 
 }
 
 
@@ -718,69 +669,14 @@ bool StreamBuffer::connected() const
 //}
 
 
-//void StreamBuffer::setAccepting()
-//{
-//    if( ! _ssl)
-//        return;
-//
-//    SSL_set_accept_state(_ssl);
-//}
-//
-//
-//void StreamBuffer::setConnecting()
-//{
-//    if( ! _ssl)
-//        return;
-//
-//    SSL_set_connect_state(_ssl);
-//}
-
-
 bool StreamBuffer::writeHandshake()
 {
     log_trace("StreamBuffer::writeHandshake");
     
-    if( ! _ios || ! _ssl)
-        throw System::IOError("SSL Buffer not initialized");
+    if( ! _connection )
+        throw SslError("no connection");
 
-    int ret = SSL_do_handshake(_ssl);
-    log_debug("SSL_do_handshake returns " << ret);
-
-    if(ret <= 0)
-    {
-        const int sslerr = SSL_get_error(_ssl, ret);
-        if(sslerr != SSL_ERROR_WANT_READ && sslerr != SSL_ERROR_WANT_WRITE) 
-        {
-            if(sslerr == SSL_ERROR_SSL)
-            {
-                char buf[255];
-                ERR_error_string_n(ERR_get_error(), buf, sizeof(buf));
-                log_warn("handshake failed: " << buf);
-            }
-            
-            throw HandshakeFailed("SSL handshake failed");
-        }
-    }
-
-    if(ret == 1)
-    {
-        _connected = true;
-    }
-
-    if( BIO_pending(_out) )
-    {
-        char buff[1000];
-        const int n = BIO_read(_out, buff, sizeof(buff));
-        log_debug("wrote " << n << " bytes to output");
-
-        if(n <= 0)
-            throw System::IOError("BIO_read");
-
-        _ios->sputn(buff, n);
-        return true;
-    }
-
-    return SSL_want_write(_ssl);
+    return _connection->writeHandshake();
 }
 
 
@@ -788,103 +684,93 @@ bool StreamBuffer::readHandshake()
 {
     log_trace("StreamBuffer::readHandshake");
     
-    if( ! _ios || ! _ssl)
-        throw System::IOError("SSL Buffer not initialized");
+    if( ! _connection )
+        throw SslError("no connection");
 
-    while(_ios->in_avail() > 0)
-    {
-        const std::streamsize bufsize = 1000;
-        char buf[bufsize];
-
-        std::streamsize gsize = std::min( _ios->in_avail(), bufsize );
-        std::streamsize n = _ios->sgetn(buf, gsize);
-
-        const int written = BIO_write(_in, buf, static_cast<int>(n));
-        assert(written == n);
-
-        if(written <= 0 || written != n)
-            throw System::IOError("BIO_write");
-
-        log_debug("read " << n << " bytes from input");
-    }
-
-    int ret = SSL_do_handshake(_ssl);
-    log_debug("SSL_do_handshake returns " << ret);
-
-    if( ret <= 0 )
-    {
-        int sslerr = SSL_get_error(_ssl, ret);
-        if( sslerr != SSL_ERROR_WANT_READ && sslerr != SSL_ERROR_WANT_WRITE) 
-        {
-            if(sslerr == SSL_ERROR_SSL)
-            {
-                char buf[255];
-                ERR_error_string_n(ERR_get_error(), buf, sizeof(buf));
-                log_warn("handshake failed: " << buf);
-            }
-
-            throw HandshakeFailed("SSL handshake failed");
-        }
-    }
-
-    if( ret == 1 && BIO_pending(_out) <= 0 )
-    {
-        _connected = true;
-    }
-
-    return BIO_pending(_out) <= 0 && SSL_want_read(_ssl);
+    return _connection->readHandshake();
 }
 
 
-void StreamBuffer::writeShutdown()
+void StreamBuffer::shutdown()
 {
-    if( ! _ios || ! _ssl)
-        throw System::IOError("SSL Buffer not initialized");
-
-    const int res = SSL_shutdown(_ssl);
-    log_debug("SSL_shutdown() = " << res);
-
-    // Send shutdown message to the other peer
-    char buff[1000];
-    const int n = BIO_read(_out, buff, sizeof(buff));
-    if(n <= 0)
-        throw System::IOError("Failed reading from OpenSSL ouput BIO!");
-
-    _ios->sputn(buff, n);
-    //_ios->flush();
-    log_debug("Wrote " << n << " bytes from _out BIO to _ios");
-
-    // Reset all
-    (void) BIO_reset(_in);
-    (void) BIO_reset(_out);
-    SSL_clear(_ssl);
+    if( _connection )
+        _connection->shutdown();
 
     delete [] _ibuffer; _ibuffer = 0;
     delete [] _obuffer; _obuffer = 0;
 
-    _connected = false;
+    setg(0, 0, 0);
+    setp(0, 0);
 }
 
 
 bool StreamBuffer::isShutdown() const
 {
-    if(_ssl)
-    {
-        const int shutdownState = SSL_get_shutdown(_ssl);
-        if(shutdownState & SSL_RECEIVED_SHUTDOWN) 
-        {
-            log_debug("Received shutdown notification");
-            return true;
-        }
-    }
-    return false;
+    return _connection && _connection->isShutdown(); 
 }
 
 
-void StreamBuffer::import(std::streamsize n)
+bool StreamBuffer::isClosed() const
 {
-    const std::streamsize r = do_underflow(n);
-    log_debug("imported " << r << " bytes");
+    return _connection && _connection->isClosed(); 
+}
+
+
+void StreamBuffer::import(std::streamsize isize)
+{
+    log_trace("StreamBuffer::do_underflow");
+
+    if( ! _connection )
+        return;
+
+    if( ! _ibuffer ) 
+    {
+        log_debug("setting up get area: " << _ibufferSize);
+        _ibuffer = new char[_ibufferSize];
+    }
+
+    // Return 0 if full
+    if(_ibufferSize == (this->egptr() - this->gptr() + _pbmax))
+    {
+        log_debug("get area is full");
+        return;
+    }
+
+    // Move unread bytes and putback to front
+    size_t putback  = _pbmax;
+    size_t leftover = 0;
+    if( this->gptr() ) 
+    {
+        putback = std::min<size_t>( this->gptr() - this->eback(), _pbmax);
+        char* to = _ibuffer + _pbmax - putback;
+        char* from = this->gptr() - putback;
+
+        leftover = this->egptr() - this->gptr();
+        std::memmove( to, from, putback + leftover );
+
+        this->setg( _ibuffer + (_pbmax - putback),  // start of get area
+                    _ibuffer + _pbmax,              // gptr position
+                    _ibuffer + _pbmax + leftover ); // end of get area
+    }
+
+    // We only have to make some progress
+    size_t used = _pbmax + leftover;
+    size_t unused = _ibufferSize - used;
+
+    log_debug("get area free space: " << unused);
+    assert(unused);
+
+    std::streamsize readSize = _connection->read(_ibuffer + used, unused, isize);
+    log_debug("read " << readSize << " bytes from connection");
+
+    if(readSize > 0)
+    {
+        this->setg( _ibuffer + (_pbmax - putback), // start of get area
+                    _ibuffer + _pbmax,             // gptr position
+                    _ibuffer + used + readSize );  // end of get area
+    }
+
+    return;
 }
 
 
@@ -910,13 +796,10 @@ StreamBuffer::int_type StreamBuffer::underflow()
 {
     log_trace("StreamBuffer::underflow");
 
-    if( ! _ssl )
-        return traits_type::eof();
-
     if( this->gptr() < this->egptr() )
         return traits_type::to_int_type( *this->gptr() );
 
-    this->do_underflow(_ibufferSize);
+    this->import(_ibufferSize);
 
     //if( 0 == this->do_underflow(_ibufferSize) )
     //{
@@ -933,133 +816,10 @@ StreamBuffer::int_type StreamBuffer::underflow()
     //    }
     //}
 
-    if( this->gptr() < this->egptr() )
-        return traits_type::to_int_type( *this->gptr() );
-
-    return traits_type::eof();
+    return this->gptr() < this->egptr() ? traits_type::to_int_type( *gptr() )
+                                        : traits_type::eof();
 }
 
-
-std::streamsize StreamBuffer::do_underflow(std::streamsize isize)
-{
-    log_trace("StreamBuffer::do_underflow");
-
-    if( ! _ibuffer ) 
-    {
-        log_debug("Allocating _ibuffer of size " << _ibufferSize);
-        _ibuffer = new char[_ibufferSize];
-    }
-
-    // Return 0 if full
-    if(_ibufferSize == (this->egptr() - this->gptr() + _pbmax))
-    {
-        log_debug("_ibuffer is full");
-        return 0;
-    }
-
-    // Move unread bytes and putback to front
-    size_t putback  = _pbmax;
-    size_t leftover = 0;
-    if( this->gptr() ) 
-    {
-        putback = std::min<size_t>( this->gptr() - this->eback(), _pbmax);
-        char* to = _ibuffer + _pbmax - putback;
-        char* from = this->gptr() - putback;
-
-        leftover = this->egptr() - this->gptr();
-        std::memmove( to, from, putback + leftover );
-
-        this->setg( _ibuffer + (_pbmax - putback),  // start of get area
-                    _ibuffer + _pbmax,              // gptr position
-                    _ibuffer + _pbmax + leftover ); // end of get area
-    }
-
-    // We only have to make some progress
-    size_t used = _pbmax + leftover;
-    size_t unused = _ibufferSize - used;
-
-    log_debug("available to fill: " << unused);
-    assert(unused);
-
-    std::streamsize readSize = sslRead(_ibuffer + used, unused, isize);
-
-    if(readSize > 0)
-    {
-        log_debug("place decoded data in buffer");
-        this->setg( _ibuffer + (_pbmax - putback), // start of get area
-                    _ibuffer + _pbmax,             // gptr position
-                    _ibuffer + used + readSize );  // end of get area
-    }
-
-    return readSize;
-}
-
-
-std::streamsize StreamBuffer::sslRead(char* buf, size_t n, std::streamsize isize)
-{
-    if( ! _ios || ! _ssl) 
-        return 0;
-
-    if(isize == 0) 
-        isize = _ios->in_avail();
-
-    while(true) 
-    {
-        // even if we could not refill the BIO, we might still get data from the SSL
-        const int readSize = SSL_read(_ssl, buf, n);
-        log_debug("Read " << readSize << " bytes from _ssl");
-        log_debug("SSL_get_shutdown() = " << SSL_get_shutdown(_ssl));
-
-        if(readSize > 0)
-        {           
-            return readSize;
-        }
-
-        long sslerr = SSL_get_error(_ssl, readSize);
-        if(sslerr != SSL_ERROR_WANT_READ)
-        {
-            // This error may indicate that the other peer has send shutdown message
-            if(sslerr == SSL_ERROR_ZERO_RETURN)
-            {
-                log_debug("SSL_ERROR_ZERO_RETURN");
-                return 0;
-            }
-
-            log_debug("ssl error occured");
-            while( ( sslerr = ERR_get_error() ) ) 
-            {
-                log_debug("ERR_error_string = " << ERR_error_string(sslerr, 0));
-            }
-            
-            throw SslError("decoding failed");
-        }
-
-        if(isize == 0)
-            return 0;
-
-        // Refill the BIO with encoded bytes for decoding
-        BUF_MEM* bm = 0;
-        BIO_get_mem_ptr(_in, &bm);
-
-        if(bm->max == bm->length)
-            continue;
-
-        const std::streamsize refill = std::min(static_cast<std::streamsize>(bm->max - bm->length), isize);
-        log_debug("get " << refill << " bytes from _ios");
-        
-        std::streamsize gcount = _ios->sgetn(bm->data + bm->length, refill);
-
-        if(gcount <= 0)
-            return 0;
-
-        bm->length += static_cast<int>( gcount );
-        log_debug("Wrote " << gcount << " bytes from _ios to _in BUF_MEM");
-
-        isize -= gcount;
-    }
-
-    return 0;
-}
 
 StreamBuffer::int_type StreamBuffer::overflow(int_type ch)
 {
@@ -1068,6 +828,9 @@ StreamBuffer::int_type StreamBuffer::overflow(int_type ch)
     // the eof character is passed to overflow(). When StreamBuffer is
     // constructed no output buffer area exists, therefore when overflow
     // is called for the first time, we need to set it up.
+
+    if( ! _connection )
+        return 0;
 
     // No buffer area etablished yet
     if( ! _obuffer ) 
@@ -1082,7 +845,7 @@ StreamBuffer::int_type StreamBuffer::overflow(int_type ch)
         // Normal blocking overflow case
         std::size_t avail = this->pptr() - _obuffer;
 
-        std::streamsize written = sslWrite(_obuffer, avail);
+        std::streamsize written = _connection->write(_obuffer, avail);
         if(written == 0)
             return traits_type::eof();
 
@@ -1103,27 +866,6 @@ StreamBuffer::int_type StreamBuffer::overflow(int_type ch)
     }
 
     return traits_type::not_eof(ch);
-}
-
-
-std::streamsize StreamBuffer::sslWrite(char* buf, size_t n)
-{
-    if( ! _ios || ! _ssl )
-        return 0;
-
-    std::streamsize written = SSL_write(_ssl, buf, n);
-    log_debug("encrypted " << written << " bytes");
-
-    BUF_MEM* bm = 0;
-    BIO_get_mem_ptr(_out, &bm);
-    if(bm->length > 0)
-    {
-        _ios->sputn(bm->data, bm->length);
-        log_debug("wrote " << bm->length << " bytes to output");
-        bm->length = 0;
-    }
-
-    return written;
 }
 
 

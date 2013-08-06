@@ -52,13 +52,9 @@ namespace Ssl {
 class PT_SSL_API Connection
 {
     public:
-        Connection(Context& ctx, std::streambuf& ios);
+        Connection(Context& ctx, std::streambuf& ios, int mode);
 
         ~Connection();
-
-        void setAccepting();
-
-        void setConnecting();
 
         bool connected() const
         { return _connected; }
@@ -66,6 +62,12 @@ class PT_SSL_API Connection
         bool writeHandshake();
 
         bool readHandshake();
+
+        void shutdown();
+
+        bool isShutdown() const;
+
+        bool isClosed() const;
 
         std::streamsize write(const char* buf, size_t n);
 
@@ -94,15 +96,9 @@ class PT_SSL_API Connection
 class PT_SSL_API Connection
 {
     public:
-        Connection(Context& ctx, std::streambuf& ios);
+        Connection(Context& ctx, std::streambuf& ios, int mode);
 
         ~Connection();
-
-        void init(Context& ctx);
-
-        void setAccepting();
-
-        void setConnecting();
 
         bool connected() const
         { return _connected; }
@@ -171,7 +167,7 @@ class PT_SSL_API StreamBuffer : public std::streambuf
 
         /** @brief Check if this SSL stream buffer has been connected to the SSL stream buffer at the other end. 
         */
-        bool connected() const;
+        bool isConnected() const;
 
         /** @brief Get the peer CN (Common Name). 
         */
@@ -190,20 +186,6 @@ class PT_SSL_API StreamBuffer : public std::streambuf
         */
         //void setSession(const Session& sess);
 
-        /** @brief Starts the server handshake
-            
-            After this method has been called, the first handshake message
-            can be read from the client.
-        */
-        //void setAccepting();
-
-        /** @brief Starts the client handshake
-            
-            After this method has been called, the first handshake message
-            can be written to the server.
-        */
-        //void setConnecting();
-
         /** @brief Writes a handshake message to the underlying stream
             
             Returns true if at least a part of the handshake message was
@@ -220,9 +202,11 @@ class PT_SSL_API StreamBuffer : public std::streambuf
 
         /** @brief Shutdown this SSL stream buffer. 
         */
-        void writeShutdown();
+        void shutdown();
 
         bool isShutdown() const;
+
+        bool isClosed() const;
 
         /** @brief Reads user message from the underlying stream
             
@@ -236,8 +220,6 @@ class PT_SSL_API StreamBuffer : public std::streambuf
         virtual int_type underflow();
         
         virtual int_type overflow(int_type ch);
-        
-        std::streamsize do_underflow(std::streamsize size);
 
     private:
         std::streamsize sslRead(char* buf, size_t n, std::streamsize isize);
@@ -249,16 +231,12 @@ class PT_SSL_API StreamBuffer : public std::streambuf
         //const char* getStatus() const;
 
     private:
-        bio_st*        _in;  // Input BIO
-        bio_st*        _out; // Output BIO
-        ssl_st*        _ssl; // OpenSSL SSL handle
-        std::streambuf* _ios; // IO
-        size_t         _ibufferSize;
-        char*          _ibuffer;
-        std::size_t    _obufferSize;
-        char*          _obuffer;
-        const size_t   _pbmax;
-        bool           _connected;
+        Connection*  _connection;
+        size_t       _ibufferSize;
+        char*        _ibuffer;
+        std::size_t  _obufferSize;
+        char*        _obuffer;
+        const size_t _pbmax;
 };
 
 } // namespace Ssl

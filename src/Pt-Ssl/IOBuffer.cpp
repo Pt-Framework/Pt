@@ -71,7 +71,7 @@ void IOBuffer::connect(Context& ctx, Pt::System::IOBuffer& sb)
         while( this->readHandshake() )
             ;
 
-        if( this->connected() )
+        if( this->isConnected() )
             break;
 
         log_debug("continuing handshake");
@@ -174,7 +174,7 @@ void IOBuffer::onReadHandshake(Pt::System::IOBuffer& sb)
             return;
         }
 
-        if(StreamBuffer::connected())
+        if(StreamBuffer::isConnected())
         {
             log_debug("Handshake finished");
             _sb->outputReady() -= Pt::slot(*this, &IOBuffer::onWriteHandshake);
@@ -237,7 +237,7 @@ void IOBuffer::onWriteServerHandshake(Pt::System::IOBuffer& sb)
             return;
         }
 
-        if( StreamBuffer::connected() )
+        if( StreamBuffer::isConnected() )
         {
             log_debug("SERVER Handshake finished");
             _sb->outputReady() -= Pt::slot(*this, &IOBuffer::onWriteServerHandshake);
@@ -316,7 +316,7 @@ void IOBuffer::beginShutdown()
     _sb->inputReady()  += Pt::slot(*this, &IOBuffer::onReadShutdown);
 
     log_debug("_sslbuf.beginShutdown()");
-    StreamBuffer::writeShutdown();
+    StreamBuffer::shutdown();
 
     log_debug("_sb->beginWrite() " << _sb->out_avail() << " bytes");
     _sb->beginWrite();

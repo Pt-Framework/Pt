@@ -172,7 +172,7 @@ void StreamBufferTest::Handshake()
         data.clear();
         data.str( std::string() );
 
-        if( client.connected() )
+        if( client.isConnected() )
             break;
     }
 
@@ -205,7 +205,7 @@ void StreamBufferTest::Handshake()
     //    }
     //}
 
-    PT_UNIT_ASSERT( client.connected() );
-    PT_UNIT_ASSERT( server.connected() );
+    PT_UNIT_ASSERT( client.isConnected() );
+    PT_UNIT_ASSERT( server.isConnected() );
 }
 
