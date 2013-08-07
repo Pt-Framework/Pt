@@ -29,6 +29,7 @@
 #include <Pt/Hmi/WindowModel.h>
 #include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/Brush.h>
+#include <Pt/Gfx/ImagePainter.h>
 
 namespace Pt{
 namespace Hmi{
@@ -41,22 +42,23 @@ WindowRenderer::~WindowRenderer()
 {
 }
 
-void WindowRenderer::render(Pt::Hmi::Model* model ,Pt::Gfx::Painter* painter)
+void WindowRenderer::render(Pt::Hmi::Model* m)
 {
-	GfxModel* m = dynamic_cast<GfxModel*>(model);
-	if( m == 0)
+	GfxModel* model = dynamic_cast<GfxModel*>(m);
+
+	if( model == 0)
 		throw std::logic_error("ERROR: WindowController expect a GFxModel");
 
-	Pt::Gfx::Size size = m->fromUnit(m->Size.get());
+	Pt::Gfx::Size size = model->fromUnit(model->Size.get());
 
 	Pt::Gfx::Rect rect(Pt::Gfx::Point(0,0), size);
 	
-	Pt::Gfx::Brush brush(m->BackColor.get());
+	Pt::Gfx::Brush brush(model->BackColor.get());
+	
+	Pt::Gfx::ImagePainter localPainter(model->PaintBuffer);
 
-	painter->setFont(m->Font.get());
-	painter->setBrush(brush);
-
-	painter->fillRect(rect);
+	localPainter.setBrush(brush);
+	localPainter.fillRect(rect);
 }
 
 }}

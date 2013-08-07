@@ -9,6 +9,7 @@
 
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/KeyboardDevice.h>
+#include <Pt/Hmi/WindowModel.h>
 
 //Desktop
 #include <Pt/Hmi/Desktop/Window.h>
@@ -61,29 +62,34 @@ int main(int argc, char* args[])
 
 	Pt::Hmi::PanelModel* panelModel = (Pt::Hmi::PanelModel*) panel.controller().model();
 	
-	panelModel->Position.set(Pt::Gfx::PointF(30,120));
+	panelModel->Position.set(Pt::Gfx::PointF(40,120));
 	panelModel->Size.set(Pt::Gfx::SizeF(400,500));	
 	panelModel->BorderStyle.set(Pt::Hmi::BorderStyle::Sizebale);
-	panelModel->BorderWidth.set(6);
+	panelModel->BorderWidth.set(3);
 
 	window.addChild(&panel);	
 
 	Pt::Hmi::LabelModel* labelModel = (Pt::Hmi::LabelModel*)(label.controller().model());
 	labelModel->Position.set(Pt::Gfx::PointF(100,100));
 	labelModel->ForeColor.set(Pt::Gfx::ARgbColor(0,255,0,0));
-	labelModel->Caption.set("This is a line label into a sizeable panel:");
+	labelModel->Caption.set("This is a line red label into a sizeable panel:");
 	
 	panel.addChild(&label);
 	
 	Pt::Hmi::ButtonModel* buttonModel = (Pt::Hmi::ButtonModel*)(test.button.controller().model());
 	buttonModel->Caption.set("OK");
-	buttonModel->Size.set(Pt::Gfx::SizeF(60,20));
-	buttonModel->Position.set(Pt::Gfx::PointF(300,400));
+	buttonModel->Size.set(Pt::Gfx::SizeF(80,50));
+	buttonModel->Position.set(Pt::Gfx::PointF(30,40));
 	buttonModel->ButtonState.PropertyChanged += Pt::slot(test, &Test::print);
+	buttonModel->ButtonType.set(Pt::Hmi::ButtonType::Press);
+	//buttonModel->ButtonType.set(Pt::Hmi::ButtonType::Toggle);
 
 
 	panel.addChild(&test.button);
 
+
+	Pt::Hmi::WindowModel* wm = (Pt::Hmi::WindowModel*) window.controller().model();
+	wm->Border = Pt::Hmi::BorderStyle::Sizebale;
 	window.show();
 	
 

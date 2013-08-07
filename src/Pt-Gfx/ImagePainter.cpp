@@ -219,17 +219,17 @@ void ImagePainter::drawText( const Gfx::Point& to, const String& text, const Pt:
 
 void ImagePainter::drawRect(const  Gfx::Rect& rect)
 {
-    //
-    // Emulate ImagePainter::drawRect with four calls to
-    // ImagePainter::drawLine and correct corner coordinates.
-    //
+	
     this->drawLine(rect.topLeft(), rect.topRight() );
 
-    this->drawLine(rect.topRight(), rect.bottomRight());
+    this->drawLine(Pt::Gfx::Point( rect.topRight().x(), rect.topRight().y()),
+                   Pt::Gfx::Point( rect.bottomRight().x(), rect.bottomRight().y()) );
 
-    this->drawLine(rect.bottomRight(),rect.bottomLeft());
+    this->drawLine(Pt::Gfx::Point( rect.bottomRight().x(), rect.bottomRight().y() ),
+                   Pt::Gfx::Point( rect.bottomLeft().x(), rect.bottomLeft().y() ) );
 
-    this->drawLine(rect.bottomLeft(), rect.topLeft() );
+    this->drawLine(Pt::Gfx::Point( rect.bottomLeft().x(), rect.bottomLeft().y() ),
+                   rect.topLeft() );
 }
 
 void ImagePainter::fillRect(const  Gfx::Rect& rect)
@@ -267,6 +267,45 @@ void ImagePainter::fillPolygon( const  Gfx::Point* points, const size_t pointCou
 
 void ImagePainter::drawImage( const  Gfx::Point& to, const ARgbImage& image )
 {
+	int startX =  to.x();
+	int stopX =  to.x() + image.width();
+	
+	if( startX < 0)
+		startX = 0;
+	
+	if( startX > _image.width())
+		startX = _image.width();
+
+	
+	if( stopX < 0)
+		stopX = 0;
+	
+	if( stopX > _image.width())
+		stopX = _image.width();
+
+	int startY =  to.y();
+	int stopY =  to.y() + image.height();
+		
+	if( startY < 0)
+		startY = 0;
+	
+	if( startY > _image.height())
+		startY = _image.height();
+
+
+	if( stopY < 0)
+		stopY = 0;
+	
+	if( stopY > _image.height())
+		stopY = _image.height();
+
+	for( size_t x = startX; x < stopX; ++x)
+	{		
+		for( size_t y = startY; y < stopY; ++y)
+		{
+			_image.at(x,y) = image.at(x -startX, y -startY);
+		}
+	}
 }
 
 void ImagePainter::drawImage( const  Gfx::Point& to, const ARgbImage& image, const Region& imageRegion )

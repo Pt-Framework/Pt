@@ -59,7 +59,26 @@ void ButtonController::onInput2D(const PointingEvent& ev)
 		model->Armed = true;
 
 		if( ev.buttons().size() != 0)
-			model->ButtonState = ev.buttons()[0].state();
+		{
+			switch(model->ButtonType.get())
+			{
+				case ButtonType::Press:
+					model->ButtonState = ev.buttons()[0].state();
+				break;
+
+				case ButtonType::Toggle:
+					
+					if(ev.buttons()[0].state() == DeviceButton::Pressed )
+					{
+						if(model->ButtonState.get() == DeviceButton::Pressed)
+							model->ButtonState = DeviceButton::Released;
+						else
+							model->ButtonState = DeviceButton::Pressed;
+					}
+						
+				break;
+			}
+		}
 	}
 	else
 	{

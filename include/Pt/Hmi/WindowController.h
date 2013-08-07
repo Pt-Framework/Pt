@@ -58,9 +58,6 @@ private:
 	void onSizeChanged(Pt::Gfx::SizeF& size);
 	
 	GfxModel* gfxModel();
-
-private:
-	Pt::Gfx::Painter* _painter;	  
 };
 
 }}

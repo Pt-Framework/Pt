@@ -36,7 +36,6 @@ namespace Pt{
 namespace Hmi{
 
 WindowController::WindowController(GfxModel* m, Renderer* r,  GfxOutput* out, PointingDevice* in1, InputDevice* in2)
-: _painter(0)
 {	
 	if( m != 0)
 		Controller::setModel(m);
@@ -56,7 +55,6 @@ WindowController::WindowController(GfxModel* m, Renderer* r,  GfxOutput* out, Po
 
 WindowController::~WindowController()
 {
-	delete _painter;
 }
 
 WidgetController* WindowController::mainWidget()
@@ -77,7 +75,7 @@ const WidgetController* WindowController::mainWidget() const
 
 void WindowController::render()
 {
-	GfxController::render(_painter);
+	GfxController::render();
 }
 
 void WindowController::invalidate()
@@ -123,12 +121,6 @@ void WindowController::onModelChanged(bool created)
 	if( created)
 	{
 		GfxModel* m = gfxModel();
-
-		if( _painter != 0)
-			delete _painter;
-
-		_painter = new Pt::Gfx::ImagePainter(m->PaintBuffer);
-		_painter->setFont(m->Font.get());
 
 		m->Size.PropertyChanged += Pt::slot(*this, &WindowController::onSizeChanged);					
 		m->Size.PropertyChanged.send(m->Size.get());		

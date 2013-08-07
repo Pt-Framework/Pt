@@ -13,7 +13,7 @@ public:
 	ButtonRenderer();
 	virtual ~ButtonRenderer();
 
-	virtual void render(Pt::Hmi::Model* model ,Pt::Gfx::Painter* Painter);
+	virtual void render(Pt::Hmi::Model* model);
 
 private:	
 

@@ -45,7 +45,7 @@ public:
 	Pt::Gfx::PointF toClient(const Pt::Gfx::PointF& globalPoint);
 	Pt::Gfx::PointF fromClient(const Pt::Gfx::PointF& localPoint, bool toRoot);
 
-	virtual void render(Pt::Gfx::Painter* Painter);
+	virtual void render();
 	
 	virtual void invalidate();
 	

@@ -14,7 +14,6 @@ Button::Button()
 {
 	_defController->setModel(_defModel);
 	_defController->setRenderer(_defRenderer);	
-	_defModel->BackColor.set(Pt::Gfx::ARgbColor(200,200,200));
 	_defModel->ForeColor.set(Pt::Gfx::ARgbColor(0,0,0));
 	_defModel->BorderWidth.set(1);
 	_defModel->BorderStyle.set(BorderStyle::Widget);

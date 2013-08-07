@@ -10,6 +10,17 @@
 namespace Pt{
 namespace Hmi{
 
+
+namespace ButtonType
+{
+	enum Type
+	{
+		Press,
+		Toggle
+	};
+}
+
+
 class PT_HMI_API ButtonModel : public LabelModel
 {
 
@@ -19,7 +30,8 @@ public:
 
 	Property<DeviceButton::State> ButtonState;	
 	Property<std::string>         ActionKey;		
-	Property<bool>				  Armed;		
+	Property<bool>				  Armed;	
+	Property<ButtonType::Type>    ButtonType;	
 };
 
 }}

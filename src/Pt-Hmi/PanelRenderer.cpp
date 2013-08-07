@@ -5,6 +5,7 @@
 #include <Pt/Gfx/Rgb888Color.h>
 #include <Pt/Gfx/Rgb888Image.h>
 #include <Pt/Gfx/Point.h>
+#include <Pt/Hmi/WidgetController.h>
 
 namespace Pt{
 namespace Hmi{
@@ -17,120 +18,163 @@ PanelRenderer::~PanelRenderer()
 {
 }
 
-void PanelRenderer::render(Pt::Hmi::Model* model ,Pt::Gfx::Painter* painter)
-{
-	PanelModel* fmodel = dynamic_cast<PanelModel*>(model);	
+void PanelRenderer::render(Pt::Hmi::Model* m)
+{	
+	WidgetRenderer::render(m);
 
-	if( fmodel == 0)
+	PanelModel* model = dynamic_cast<PanelModel*>(m);
+
+	if(model == 0)
+		throw std::logic_error("PanelRenderer: PanleModel expected");
+
+	if(!model->Visible.get())
 		return;
 
-	if(!fmodel->Visible.get())
-		return;
-
-
-	GfxController* ctrl = dynamic_cast<GfxController*>(fmodel->Controller.get());
+	WidgetController* ctrl = dynamic_cast<WidgetController*>(model->Controller.get());
 		
 	if( ctrl == 0)
 		return;
 	
-	Pt::Gfx::SizeF  clientSize(fmodel->Size.get().width() - (fmodel->BorderWidth.get() * 2), fmodel->Size.get().height() - (fmodel->BorderWidth.get() * 2));
-	Pt::Gfx::PointF clientPos(fmodel->Position.get().x() + fmodel->BorderWidth.get(), fmodel->Position.get().y() + fmodel->BorderWidth.get());
+	const double corner = 3;
+	int border =  model->fromUnit(model->BorderWidth.get());	
+	Pt::Gfx::Size   size = model->fromUnit(model->Size.get());
+	Pt::Gfx::SizeF  clientSize(model->Size.get().width() - (model->BorderWidth.get()), model->Size.get().height() - (model->BorderWidth.get()));	
+	Pt::Gfx::Size   rectSize = model->fromUnit(clientSize);
+	Pt::Gfx::Rect   clientRect(Pt::Gfx::Point(border/2,border/2), rectSize);
 	
-	clientPos = ctrl->fromClient(clientPos, true);
-
-	Pt::Gfx::Size  rectSize = fmodel->fromUnit(clientSize);
-	Pt::Gfx::Point position = fmodel->fromUnit(clientPos);
-	Pt::Gfx::Rect rect(position, rectSize);
-
-	Pt::Gfx::Brush	brush(fmodel->BackColor.get());		
-	painter->setFont(fmodel->Font.get());
-	painter->setBrush(brush);
-	painter->fillRect(rect);
+	Pt::Gfx::ImagePainter localPainter(model->PaintBuffer);
 						
-	switch(fmodel->BorderStyle.get())
+
+						
+	switch(model->BorderStyle.get())
 	{
 		case BorderStyle::None:
 		break;
 		case BorderStyle::Single:
 		{			
-			Pt::Gfx::Pen	pen(fmodel->BorderWidth.get(), Pt::Gfx::ARgbColor(0,0,0,0));
-			painter->setPen(pen);
-			painter->drawRect(rect);
+			std::vector<Pt::Gfx::Point> points1(5);
+			std::vector<Pt::Gfx::Point> points2(5);
+
+			//P0
+			points1[0].setX(corner);
+			points1[0].setY(clientRect.height());
+
+			//P1
+			points1[1].setX(0);
+			points1[1].setY(clientRect.height() - corner);
+
+			//P2
+			points1[2].setX(0);
+			points1[2].setY(corner);
+
+			//P3
+			points1[3].setX(corner);
+			points1[3].setY(0);
+
+			//P4
+			points1[4].setX(clientRect.width() - corner);
+			points1[4].setY(0);
+			
+			//---
+			//P0
+			points2[0].setX(clientRect.width() - corner);
+			points2[0].setY(0);
+
+			//P1
+			points2[1].setX(clientRect.width());
+			points2[1].setY(corner);
+
+			//P2
+			points2[2].setX(clientRect.width());
+			points2[2].setY(clientRect.height() - corner);
+
+			//P3
+			points2[3].setX(clientRect.width() - corner);
+			points2[3].setY(clientRect.height());
+
+			//P4
+			points2[4].setX(corner);
+			points2[4].setY(clientRect.height());
+		
+			Pt::Gfx::Pen pen(1, Pt::Gfx::ARgbColor(0,170,170,170));
+			localPainter.setPen(pen);
+				
+			localPainter.drawPolyline(&points1[0], points1.size());								
+			localPainter.drawPolyline(&points2[0], points2.size());
 		}
 
 		break;
 			
 		case BorderStyle::Widget:
-		{
-			double corner = 2;
+		{			
 			std::vector<Pt::Gfx::Point> points1(5);
 			std::vector<Pt::Gfx::Point> points2(5);
 
 			//P0
-			points1[0].setX(position.x()+corner);
-			points1[0].setY(position.y() + rect.height());
+			points1[0].setX(corner);
+			points1[0].setY(clientRect.height());
 
 			//P1
-			points1[1].setX(position.x());
-			points1[1].setY(position.y() + rect.height() - corner);
+			points1[1].setX(0);
+			points1[1].setY(clientRect.height() - corner);
 
 			//P2
-			points1[2].setX(position.x());
-			points1[2].setY(position.y()+corner);
+			points1[2].setX(0);
+			points1[2].setY(corner);
 
 			//P3
-			points1[3].setX(position.x()+corner);
-			points1[3].setY(position.y());
+			points1[3].setX(corner);
+			points1[3].setY(0);
 
 			//P4
-			points1[4].setX(position.x()+ rect.width() - corner);
-			points1[4].setY(position.y());
+			points1[4].setX(clientRect.width() - corner);
+			points1[4].setY(0);
 			
 			//---
 			//P0
-			points2[0].setX(position.x()+ rect.width() - corner);
-			points2[0].setY(position.y());
+			points2[0].setX(clientRect.width() - corner);
+			points2[0].setY(0);
 
 			//P1
-			points2[1].setX(position.x()+ rect.width());
-			points2[1].setY(position.y() + corner);
+			points2[1].setX(clientRect.width());
+			points2[1].setY(corner);
 
 			//P2
-			points2[2].setX(position.x()+ rect.width());
-			points2[2].setY(position.y() + rect.height() - corner);
+			points2[2].setX(clientRect.width());
+			points2[2].setY(clientRect.height() - corner);
 
 			//P3
-			points2[3].setX(position.x()+ rect.width() - corner);
-			points2[3].setY(position.y() + rect.height());
+			points2[3].setX(clientRect.width() - corner);
+			points2[3].setY(clientRect.height());
 
 			//P4
-			points2[4].setX(position.x()+corner);
-			points2[4].setY(position.y() + rect.height());
+			points2[4].setX(corner);
+			points2[4].setY(clientRect.height());
 
 
-			if(!fmodel->Invert3DEffect.get())
+			if(model->Invert3DEffect.get())
 			{
-				Pt::Gfx::Pen pen(fmodel->BorderWidth.get(), Pt::Gfx::ARgbColor(0,255,255,255));
-				painter->setPen(pen);
+				Pt::Gfx::Pen pen(border, Pt::Gfx::ARgbColor(0,255,255,255));
+				localPainter.setPen(pen);
 				
-				painter->drawPolyline(&points1[0], points1.size());
+				localPainter.drawPolyline(&points2[0], points2.size());
 								
-				Pt::Gfx::Pen pen2(fmodel->BorderWidth.get(), Pt::Gfx::ARgbColor(0,0,0,0));
-				painter->setPen(pen2);
+				Pt::Gfx::Pen pen2(border, Pt::Gfx::ARgbColor(0,0,0,0));
+				localPainter.setPen(pen2);
 
-				painter->drawPolyline(&points2[0], points2.size());
+				localPainter.drawPolyline(&points1[0], points1.size());
 			}
 			else
 			{
-				Pt::Gfx::Pen pen(fmodel->BorderWidth.get(), Pt::Gfx::ARgbColor(0,255,255,255));
-				painter->setPen(pen);
+				Pt::Gfx::Pen pen(border, Pt::Gfx::ARgbColor(0,0,0,0));
+				localPainter.setPen(pen);
 				
-				painter->drawPolyline(&points2[0], points2.size());
+				localPainter.drawPolyline(&points2[0], points2.size());
 								
-				Pt::Gfx::Pen pen2(fmodel->BorderWidth.get(), Pt::Gfx::ARgbColor(0,0,0,0));
-				painter->setPen(pen2);
+				Pt::Gfx::Pen pen2(border, Pt::Gfx::ARgbColor(0,255,255,255));
+				localPainter.setPen(pen2);
 
-				painter->drawPolyline(&points1[0], points1.size());
+				localPainter.drawPolyline(&points1[0], points1.size());
 			}
 		}
 		break;
@@ -140,48 +184,48 @@ void PanelRenderer::render(Pt::Hmi::Model* model ,Pt::Gfx::Painter* painter)
 			std::vector<Pt::Gfx::Point> points1(3);
 			std::vector<Pt::Gfx::Point> points2(3);
 
-			points1[0].setX(position.x());
-			points1[0].setY(position.y() + rect.height());
+			points1[0].setX(0);
+			points1[0].setY(clientRect.height());
 
-			points1[1].setX(position.x());
-			points1[1].setY(position.y());
+			points1[1].setX(0);
+			points1[1].setY(0);
 				
-			points1[2].setX(position.x() + rect.width());
-			points1[2].setY(position.y());
+			points1[2].setX(clientRect.width());
+			points1[2].setY(0);
 
 
-			points2[0].setX(position.x() + rect.width());
-			points2[0].setY(position.y());
+			points2[0].setX(clientRect.width());
+			points2[0].setY(0);
 
-			points2[1].setX(position.x() +  rect.width());
-			points2[1].setY(position.y() + rect.height());
+			points2[1].setX(clientRect.width());
+			points2[1].setY(clientRect.height());
 
-			points2[2].setX(position.x());
-			points2[2].setY(position.y() + rect.height());
+			points2[2].setX(0);
+			points2[2].setY(clientRect.height());
 
-			if(!fmodel->Invert3DEffect.get())
+			if(!model->Invert3DEffect.get())
 			{
-				Pt::Gfx::Pen pen(fmodel->BorderWidth.get(), Pt::Gfx::ARgbColor(0,255,255,255));
-				painter->setPen(pen);
+				Pt::Gfx::Pen pen(border, Pt::Gfx::ARgbColor(0,255,255,255));
+				localPainter.setPen(pen);
 				
-				painter->drawPolyline(&points1[0], points1.size());
+				localPainter.drawPolyline(&points1[0], points1.size());
 								
-				Pt::Gfx::Pen pen2(fmodel->BorderWidth.get(), Pt::Gfx::ARgbColor(0,0,0,0));
-				painter->setPen(pen2);
+				Pt::Gfx::Pen pen2(border, Pt::Gfx::ARgbColor(0,0,0,0));
+				localPainter.setPen(pen2);
 
-				painter->drawPolyline(&points2[0], points2.size());
+				localPainter.drawPolyline(&points2[0], points2.size());
 			}
 			else
 			{
-				Pt::Gfx::Pen pen(fmodel->BorderWidth.get(), Pt::Gfx::ARgbColor(0,255,255,255));
-				painter->setPen(pen);
+				Pt::Gfx::Pen pen(border, Pt::Gfx::ARgbColor(0,255,255,255));
+				localPainter.setPen(pen);
 				
-				painter->drawPolyline(&points2[0], points2.size());
+				localPainter.drawPolyline(&points2[0], points2.size());
 								
-				Pt::Gfx::Pen pen2(fmodel->BorderWidth.get(), Pt::Gfx::ARgbColor(0,0,0,0));
-				painter->setPen(pen2);
+				Pt::Gfx::Pen pen2(border, Pt::Gfx::ARgbColor(0,0,0,0));
+				localPainter.setPen(pen2);
 
-				painter->drawPolyline(&points1[0], points1.size());
+				localPainter.drawPolyline(&points1[0], points1.size());
 			}
 				
 		}
@@ -189,18 +233,25 @@ void PanelRenderer::render(Pt::Hmi::Model* model ,Pt::Gfx::Painter* painter)
 		case BorderStyle::Sizebale:
 		case BorderStyle::ToolSizeable:
 		{
-			int size = fmodel->fromUnit(fmodel->BorderWidth.get());
-			Pt::Gfx::Pen pen1(size, fmodel->ForeColor.get());
-			painter->setPen(pen1);				
-			painter->drawRect(rect);
+			Pt::Gfx::Pen pen1(border, model->ForeColor.get());
+			localPainter.setPen(pen1);				
+			localPainter.drawRect(clientRect);
 
 			Pt::Gfx::Pen pen2(1, Pt::Gfx::ARgbColor(0,255,255,255));
-			painter->setPen(pen2);				
-			painter->drawRect(rect);
+			localPainter.setPen(pen2);				
+			localPainter.drawRect(clientRect);
 		}
 		break;
 			
 	}
+	
+/*
+	Pt::Gfx::PointF clientPos(modelmodel->Position.get().x() + fmodel->BorderWidth.get(), fmodel->Position.get().y() + fmodel->BorderWidth.get());	
+	clientPos = ctrl->fromClient(clientPos, true);
+
+	Pt::Gfx::Point position = fmodel->fromUnit(clientPos);
+	painter->drawImage(position, fmodel->PaintBuffer);*/
+
 }
 
 }}

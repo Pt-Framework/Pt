@@ -1,8 +1,10 @@
 #include <Pt/Hmi/LabelRenderer.h>
 #include <Pt/Hmi/LabelModel.h>
 #include <Pt/Gfx/FontMetrics.h>
+#include <Pt/Gfx/ImagePainter.h>
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/Brush.h>
+#include <Pt/Gfx/Rect.h>
 #include <Pt/Hmi/GfxController.h>
 
 namespace Pt{
@@ -16,63 +18,61 @@ LabelRenderer::~LabelRenderer()
 {
 }
 
-void LabelRenderer::render(Pt::Hmi::Model* model ,Pt::Gfx::Painter* painter)
+void LabelRenderer::render(Pt::Hmi::Model* m)
 {
-	PanelRenderer::render(model, painter);
+	PanelRenderer::render(m);
+
+	LabelModel* model = dynamic_cast<LabelModel*>(m);	
 	
-	LabelModel* lmodel = dynamic_cast<LabelModel*>(model);	
-	
-	if(lmodel == 0)
+	if(model == 0)
 		return;	
 	
-	if(!lmodel->Visible.get())
-		return;
+	if(!model->Visible.get())
+		return;	
 
-	GfxController* ctrl = dynamic_cast<GfxController*>(lmodel->Controller.get());
-		
-	if( ctrl == 0)
-		return;
-
-	painter->setFont(lmodel->Font.get());
-
-	if(lmodel->AutoSize.get())
+	GfxController* controller = dynamic_cast<GfxController*>(m->Controller.get());
+			
+	if(model->AutoSize.get())
 	{
-		Pt::Gfx::Pen pen(1,lmodel->ForeColor.get());
-		Pt::Gfx::FontMetrics metric = painter->fontMetrics(Pt::String(lmodel->Caption.get()));
-		lmodel->Size = Pt::Gfx::SizeF(lmodel->toUnit(Pt::Gfx::Size(metric.width(), metric.height())));
-		Pt::Gfx::Point pos = lmodel->fromUnit(ctrl->fromClient(lmodel->Position.get(), true));		
+		Pt::Gfx::ImagePainter localPainter(model->PaintBuffer);				
 
-		painter->setPen(pen);
+		localPainter.setFont(model->Font.get());
+		
+		Pt::Gfx::Pen			pen(1,model->ForeColor.get());
+		Pt::Gfx::FontMetrics	metric = localPainter.fontMetrics(Pt::String(model->Caption.get()));
+		
+		model->Size = Pt::Gfx::SizeF(model->toUnit(Pt::Gfx::Size(metric.width(), metric.height())));
+		
+		Pt::Gfx::Size	size = model->fromUnit(model->Size.get());
+		Pt::Gfx::Point	pos(0, size.height() - metric.descent());
 
-		pos.addY(lmodel->Size.get().height());
-
-		painter->drawText(pos,Pt::String(lmodel->Caption.get()));
+		localPainter.setPen(pen);
+		localPainter.drawText(pos,Pt::String(model->Caption.get()));
 	}
 	else
-	{
-		switch(lmodel->TextAlign.get())
+	{		
+		Pt::Gfx::ImagePainter localPainter(model->PaintBuffer);
+
+		switch(model->TextAlign.get())
 		{
 			case Pt::Hmi::TextAlign::MidleCenter:
 			{
-				Pt::Gfx::Pen pen(1,lmodel->ForeColor.get());
-				Pt::Gfx::FontMetrics metric = painter->fontMetrics(Pt::String(lmodel->Caption.get()));
-				Pt::Gfx::SizeF textSize = Pt::Gfx::SizeF(lmodel->toUnit(Pt::Gfx::Size(metric.width(), metric.height())));
-				Pt::Gfx::PointF pos = ctrl->fromClient(lmodel->Position.get(), true);		
-
-				double wWidth2 =  lmodel->Size.get().width()/2.0;				
-				double wHeight2 =  lmodel->Size.get().height()/2.0;				
-				double tWidth2  = textSize.width()/2.0;	
-				double tHeight2  = textSize.height()/2.0;	
+				Pt::Gfx::Pen			pen(1,model->ForeColor.get());
+				Pt::Gfx::FontMetrics	metric = localPainter.fontMetrics(Pt::String(model->Caption.get()));
+				Pt::Gfx::SizeF			textSize = Pt::Gfx::SizeF(model->toUnit(Pt::Gfx::Size(metric.width(), metric.height())));
 				
-				pos.addX(wWidth2 - wHeight2);
-				pos.addY(wHeight2 - tWidth2);
-
+				const double widthHalf		= model->Size.get().width()/2.0;				
+				const double heightHalf		= model->Size.get().height()/2.0;				
+				const double textWidthHalf	= textSize.width()/2.0;	
+				const double textHeightHalf	= textSize.height()/2.0;	
 				
-				pos.addY(metric.height());
+				Pt::Gfx::PointF pos(widthHalf - textWidthHalf, heightHalf - textHeightHalf);							
+				pos.addY(metric.height() - metric.descent());				
 
-				painter->setPen(pen);
+				localPainter.setFont(model->Font.get());
+				localPainter.setPen(pen);
 
-				painter->drawText(lmodel->fromUnit(pos),Pt::String(lmodel->Caption.get()));		
+				localPainter.drawText(model->fromUnit(pos),Pt::String(model->Caption.get()));		
 			}
 			break;
 		}

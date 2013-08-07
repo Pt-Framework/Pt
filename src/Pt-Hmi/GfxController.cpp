@@ -28,6 +28,7 @@
 #include <Pt/Hmi/GfxController.h>
 #include <Pt/Hmi/GfxModel.h>
 #include <Pt/Hmi/WindowModel.h>
+#include <Pt/Gfx/ImagePainter.h>
 
 namespace Pt{
 namespace Hmi{
@@ -100,23 +101,40 @@ GfxModel* GfxController::gfxModel()
 	GfxModel* m = dynamic_cast<GfxModel*>(model());
 
 	if( m == 0)
-		throw std::logic_error("GfXmOdel"); 
+		throw std::logic_error("ERROR: GfxModel expected."); 
 
 	return m;
 }
 
 
-void GfxController::render(Pt::Gfx::Painter* painter)
+void GfxController::render()
 {
-	Renderer* re = renderer();
-	re->render(model(), painter);
+	GfxModel* m = (GfxModel*) model();
 
+	if(!m->Visible.get())
+		return;
+
+	//Draw me
+	Renderer* re = renderer();	
+	re->render(model());
+
+	//Draw my childs
 	for( size_t i = 0; i < children().size(); ++i)
 	{
 		GfxController* child = dynamic_cast<GfxController*> (children()[i]);
-		
-		if( child != 0)
-			child->render(painter);
+		child->render();
+	}
+
+	//Bit-Blit my childs	
+	Pt::Gfx::ImagePainter localPainter(m->PaintBuffer);
+
+	for( size_t i = 0; i < children().size(); ++i)
+	{
+		GfxController* child = dynamic_cast<GfxController*> (children()[i]);				
+
+		GfxModel* childModel = (GfxModel*) child->model();
+		Pt::Gfx::Point pos  = childModel->fromUnit(childModel->Position.get());
+		localPainter.drawImage(pos,childModel->PaintBuffer);
 	}
 }
 

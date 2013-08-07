@@ -16,7 +16,7 @@ GfxOutputImpl::GfxOutputImpl()
 {
 	HINSTANCE hInstance = GetModuleHandle(NULL);
 
-    _hwnd = CreateWindow( "Pt-Hmi", "", WS_OVERLAPPEDWINDOW | WS_CLIPSIBLINGS | WS_CLIPCHILDREN, 20, 20, 200, 200, NULL, NULL, hInstance, NULL );
+    _hwnd = CreateWindow( "Pt-Hmi", "", WS_OVERLAPPEDWINDOW | WS_CLIPSIBLINGS | WS_CLIPCHILDREN, 20, 20, 200, 200, GetDesktopWindow(), NULL, hInstance, NULL );
     BringWindowToTop(_hwnd);
 	ShowWindow(_hwnd, SW_HIDE);    
 	UpdateWindow(_hwnd);	
@@ -149,7 +149,8 @@ void GfxOutputImpl::onPaint(HWND hwnd)
 	}
 		
 
-    drawIndependentImage(0, 0, (char*)rgb88Image.data(), size.width(), size.height());
+	if( size.width() > 0 && size.height() > 0)
+		drawIndependentImage(0, 0, (char*)rgb88Image.data(), size.width(), size.height());
 }
 
 void GfxOutputImpl::drawIndependentImage(size_t x, size_t y, const char* data, size_t width, size_t height)
@@ -191,18 +192,68 @@ void GfxOutputImpl::writeWindowProperties()
 
 	SetWindowText(_hwnd, wmodel->Caption.get().c_str());
 
-	long style= GetWindowLong(_hwnd, GWL_STYLE);
+	long style = 0;
+	long exStyle = WS_EX_ACCEPTFILES;
 
-	if( wmodel->ShowInTaskbar.get())
+	if(wmodel->ShowInTaskbar.get())
+		exStyle |= WS_EX_APPWINDOW;  
+
+	if(wmodel->Visible.get())
+		style |= WS_VISIBLE;
+		
+	if( wmodel->ShowTitle.get())
+		style |= WS_CAPTION;
+
+	if( wmodel->ShowMinimizeBt.get())
+		style |= WS_MINIMIZEBOX;
+
+	if( wmodel->ShowMaximizeBt.get())
+		style |= WS_MAXIMIZEBOX;
+
+	if( wmodel->ShowSysMenu.get())
+		style |= WS_SYSMENU;
+
+	switch(wmodel->WindowState.get())
 	{
-		style |= WS_EX_APPWINDOW;   // flags don't work - windows remains in taskbar
+		case Pt::Hmi::WindowStateType::Normal:
+		break;
+
+		case Pt::Hmi::WindowStateType::Maximazed:
+			style |= WS_MAXIMIZE;
+		break;
+
+		case Pt::Hmi::WindowStateType::Minimized:
+			style |= WS_MINIMIZE;
+		break;
 	}
-	else
+
+	switch( wmodel->Border.get())
 	{
-		style &= ~(WS_EX_APPWINDOW); 
+		case Pt::Hmi::BorderStyle::Single:
+			style |= WS_BORDER; 
+		break;
+
+		case Pt::Hmi::BorderStyle::Sizebale:
+			style |= WS_THICKFRAME;
+		break;
+
+		case Pt::Hmi::BorderStyle::Widget:
+			style |= WS_DLGFRAME;
+		break;
+
+		case Pt::Hmi::BorderStyle::Tool:
+			style |= WS_DLGFRAME;
+			exStyle |= WS_EX_TOOLWINDOW;
+		break;
+
+		case Pt::Hmi::BorderStyle::ToolSizeable:
+			exStyle |= WS_EX_TOOLWINDOW;
+		break;
+
 	}
 
 	SetWindowLong(_hwnd, GWL_STYLE, style);  
+	SetWindowLong(_hwnd, GWL_EXSTYLE, exStyle);  
 
 	if(!wmodel->Visible.get())
 		ShowWindow(_hwnd, SW_HIDE);

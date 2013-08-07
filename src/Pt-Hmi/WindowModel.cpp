@@ -5,7 +5,11 @@ namespace Pt{
 namespace Hmi{
 
 WindowModel::WindowModel()
-: ShowInTaskbar(false)
+: ShowInTaskbar(true)
+, ShowTitle(true)
+, ShowMinimizeBt(true)
+, ShowMaximizeBt(true)
+, ShowSysMenu(true)	
 {
 	Position = toUnit(Pt::Gfx::Point(20,20));
 	Size = toUnit(Pt::Gfx::Size(200,200));

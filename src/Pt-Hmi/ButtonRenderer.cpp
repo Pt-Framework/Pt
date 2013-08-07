@@ -3,6 +3,7 @@
 #include <Pt/Hmi/ButtonModel.h>
 #include <Pt/Hmi/GfxController.h>
 #include <Pt/Gfx/Pen.h>
+#include <Pt/Gfx/ImagePainter.h>
 
 namespace Pt{
 namespace Hmi{
@@ -15,58 +16,49 @@ ButtonRenderer::~ButtonRenderer()
 {
 }
 
-void ButtonRenderer::render(Pt::Hmi::Model* model ,Pt::Gfx::Painter* painter)
+void ButtonRenderer::render(Pt::Hmi::Model* m)
 {	
-	ButtonModel* bmodel = (ButtonModel*)model;
+	ButtonModel* model = dynamic_cast<ButtonModel*>(m);
 
-	if(!bmodel->Visible.get())
-		return;
-
-	painter->setFont(bmodel->Font.get());
-	if(!bmodel->Enable.get())
+	if(!model->Visible.get())
+		return;	
+	 
+	if(!model->Enable.get())
 	{
-		bmodel->ForeColor.set(Pt::Gfx::ARgbColor(0,100,100,100));
-		LabelRenderer::render(model,painter);
+		model->ForeColor.set(Pt::Gfx::ARgbColor(0,100,100,100));
+		LabelRenderer::render(m);
 		return;
-	}
-	else
-	{
-		bmodel->ForeColor.set(Pt::Gfx::ARgbColor(0,0,0,0));
-		bmodel->Invert3DEffect.set( bmodel->ButtonState.get() == DeviceButton::Pressed);
+	}			
 
-		LabelRenderer::render(model,painter);		
-	}
+	model->ForeColor.set(Pt::Gfx::ARgbColor(0,0,0,0));
+	model->Invert3DEffect.set(model->ButtonState.get() == DeviceButton::Pressed);
 
-	if(bmodel->ButtonState.get() == DeviceButton::Pressed)
+	LabelRenderer::render(m);
+	
+	if(model->ButtonState.get() == DeviceButton::Pressed)
 		return;
 
-	GfxController* ctrl = dynamic_cast<GfxController*>(bmodel->Controller.get());
+	GfxController* ctrl = dynamic_cast<GfxController*>(model->Controller.get());
 	
 	if( ctrl== 0)
 		return;
 
+	Pt::Gfx::ImagePainter localPainter(model->PaintBuffer);
 
-	if(bmodel->Armed.get() || bmodel->Focused.get())
+	if(model->Armed.get() || model->Focused.get())
 	{
-		Pt::Gfx::Point pos = bmodel->fromUnit(ctrl->fromClient(bmodel->Position.get(), true));
-		pos.addX(2);
-		pos.addY(2);
-		Pt::Gfx::Size size = bmodel->fromUnit(bmodel->Size.get());
-		size.addHeight(-4);
-		size.addWidth(-4);
+		Pt::Gfx::Size size = model->fromUnit(model->Size.get());
+		size.addHeight(-5);
+		size.addWidth(-5);
 
-		Pt::Gfx::ARgbColor armedColor(0,100,100,100);
+		Pt::Gfx::ARgbColor armedColor(0,160,160,160);
 		 
 		Pt::Gfx::Pen pen(1, armedColor, Pt::Gfx::Pen::DashStyle);
 		
-		painter->setPen(pen);		
-		Pt::Gfx::Rect rect(pos, size);
-		painter->drawRect(rect);		
-	}
-
-	
-
-	
+		localPainter.setPen(pen);		
+		Pt::Gfx::Rect rect(Pt::Gfx::Point(2,2), size);
+		localPainter.drawRect(rect);		
+	}		
 }
 
 

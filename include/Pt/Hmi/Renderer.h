@@ -41,7 +41,7 @@ public:
 	virtual ~Renderer()
 	{ }
 
-	virtual void render(Pt::Hmi::Model* model ,Pt::Gfx::Painter* Painter) = 0;
+	virtual void render(Pt::Hmi::Model* model) = 0;
 
 protected:
 	Renderer()

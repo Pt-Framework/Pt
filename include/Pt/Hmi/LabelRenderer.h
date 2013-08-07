@@ -13,7 +13,7 @@ public:
 	LabelRenderer();
 	virtual ~LabelRenderer();
 
-	virtual void render(Pt::Hmi::Model* model ,Pt::Gfx::Painter* Painter);
+	virtual void render(Pt::Hmi::Model* m);
 
 private:	
 

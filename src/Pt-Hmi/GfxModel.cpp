@@ -6,7 +6,7 @@ namespace Hmi{
 
 GfxModel::GfxModel()
 : Visible(true)
-, BackColor(Pt::Gfx::ARgbColor(200,200,200))
+, BackColor(Pt::Gfx::ARgbColor(212,208,200))
 , ForeColor(Pt::Gfx::ARgbColor(70,70,70))
 , Focused(false)
 , Font(Pt::Gfx::Font("",12))

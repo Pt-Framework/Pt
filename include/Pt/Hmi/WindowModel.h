@@ -74,6 +74,10 @@ public:
 	Property<WindowStartPositionType::Type>		WindowStartPostion;
 	Property<WindowStateType::Type>				WindowState;	
 	Property<bool>								ShowInTaskbar;
+	Property<bool>								ShowTitle;
+	Property<bool>								ShowMinimizeBt;
+	Property<bool>								ShowMaximizeBt;
+	Property<bool>								ShowSysMenu;
 	Property<std::string>						Caption;
 	Property<std::string>						Name;
 	Property<BorderStyle::Type>					Border;
