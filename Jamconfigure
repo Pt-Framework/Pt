@@ -180,6 +180,25 @@ if --with-builtin-openssl in $(ARGV)
     {
         Exit "ERROR: Could not copy opensslconf.h." ;
     }
+
+    OPENSSL_CFLAGS += [ FDefines L_ENDIAN ] ;
+
+    switch $(TARGET_OS:L)
+    {
+        case wince : OPENSSL_CFLAGS += [ FDefines WIN32_LEAN_AND_MEAN ] ;
+
+        case nt : OPENSSL_CFLAGS += [ FDefines WIN32_LEAN_AND_MEAN ] ;
+
+        case linux : OPENSSL_CFLAGS += [ FDefines TERMIO ] ;
+                     OPENSSL_CFLAGS += [ FDefines _REENTRANT ] ;
+
+        case macosx : OPENSSL_CFLAGS += [ FDefines _REENTRANT ] ;
+
+        case * : Exit "ERROR: Target not supported by builtin OpenSSL." ;
+    }
+
+    Configure OPENSSL_CFLAGS ;
+    EchoOption OPENSSL_CFLAGS : "OpenSSL CFLAGS" ;
 }
 
 if ! $(WITH_OPENSSL)
