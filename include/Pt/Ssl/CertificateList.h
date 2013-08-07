@@ -46,8 +46,6 @@ class PT_SSL_API Certificate
     public:     
         Certificate();
 
-        Certificate(const char* data, size_t len);
-
         explicit Certificate(CertificateImpl* impl);
 
         Certificate(const Certificate& cert);

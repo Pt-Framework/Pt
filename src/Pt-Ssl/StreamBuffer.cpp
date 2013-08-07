@@ -27,6 +27,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#include "CertificateListImpl.h"
 #include <Pt/Ssl/StreamBuffer.h>
 #include <Pt/Ssl/SslError.h>
 #include <Pt/System/Logger.h>
@@ -74,6 +75,14 @@ Connection::Connection(Context& ctx, std::streambuf& ios, int mode)
     SSLSetEnableCertVerify(_context, false);
     
     SSLSetSessionOption(_context, kSSLSessionOptionBreakOnServerAuth, true);
+    
+    SecIdentityRef ident = _ctx->certificate().impl()->identity();
+    
+    SecIdentityRef certArray[1] = { ident };
+    
+    CFArrayRef certRefs = CFArrayCreate(NULL, (const void**)(&ident), 1, NULL);
+    
+    SSLSetCertificate(_context, certRefs);
 }
 
 

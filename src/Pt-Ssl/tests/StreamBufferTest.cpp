@@ -66,15 +66,15 @@ void StreamBufferTest::CertificateStore()
 {
     // adjust the path
     #ifdef _WIN32
-        std::ifstream ifs("src\\Pt-Ssl\\tests\\cert\\ca.p12", std::ios::binary);
+        std::ifstream ifs("src\\Pt-Ssl\\tests\\cert\\ca-with-password.p12", std::ios::binary);
     #else
-        std::ifstream ifs("src/Pt-Ssl/tests/cert/ca.p12", std::ios::binary);
+        std::ifstream ifs("src/Pt-Ssl/tests/cert/ca-with-password.p12", std::ios::binary);
     #endif
 
     Pt::Ssl::CertificateStore certStore;
 
     // load without password, as in the other test
-    certStore.loadPkcs12(ifs, "");
+    certStore.loadPkcs12(ifs, "123");
 }
 
 
@@ -82,33 +82,33 @@ void StreamBufferTest::Handshake()
 {
     // adjust the path
     #ifdef _WIN32
-        std::ifstream ifs("src\\Pt-Ssl\\tests\\cert\\client.p12", std::ios::binary);
+        std::ifstream ifs("src\\Pt-Ssl\\tests\\cert\\client-with-password.p12", std::ios::binary);
     #else
-        std::ifstream ifs("src/Pt-Ssl/tests/cert/client.p12", std::ios::binary);
+        std::ifstream ifs("src/Pt-Ssl/tests/cert/client-with-password.p12", std::ios::binary);
     #endif
 
     #ifdef _WIN32
-        std::ifstream ifs_ca("src\\Pt-Ssl\\tests\\cert\\ca.p12", std::ios::binary);
+        std::ifstream ifs_ca("src\\Pt-Ssl\\tests\\cert\\ca-with-password.p12", std::ios::binary);
     #else
-        std::ifstream ifs_ca("src/Pt-Ssl/tests/cert/ca.p12", std::ios::binary);
+        std::ifstream ifs_ca("src/Pt-Ssl/tests/cert/ca-with-password.p12", std::ios::binary);
     #endif
 
     #ifdef _WIN32
-        std::ifstream server_ifs("src\\Pt-Ssl\\tests\\cert\\server.p12", std::ios::binary);
+        std::ifstream server_ifs("src\\Pt-Ssl\\tests\\cert\\server-with-password.p12", std::ios::binary);
     #else
-        std::ifstream server_ifs("src/Pt-Ssl/tests/cert/server.p12", std::ios::binary);
+        std::ifstream server_ifs("src/Pt-Ssl/tests/cert/server-with-password.p12", std::ios::binary);
     #endif
 
     Pt::Ssl::CertificateStore certStore;
-    certStore.loadPkcs12(ifs, "");
+    certStore.loadPkcs12(ifs, "123");
     PT_UNIT_ASSERT( ! certStore.certificates().empty() );
 
     Pt::Ssl::CertificateStore caStore;
-    caStore.loadPkcs12(ifs_ca, "");
+    caStore.loadPkcs12(ifs_ca, "123");
     PT_UNIT_ASSERT( ! caStore.certificates().empty() );
 
     Pt::Ssl::CertificateStore serverCerts;
-    serverCerts.loadPkcs12(server_ifs, "");
+    serverCerts.loadPkcs12(server_ifs, "123");
     PT_UNIT_ASSERT( ! serverCerts.certificates().empty() );
 
     Pt::Ssl::Context serverContext;

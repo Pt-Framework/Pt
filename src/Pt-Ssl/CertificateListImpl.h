@@ -78,8 +78,8 @@ class CertificateImpl
 
         ~CertificateImpl()
         {
-            if(_identity)
-                CFRelease(_identity);
+            if(_ident)
+                CFRelease(_ident);
 
             CFRelease(_cert);
         }
@@ -131,6 +131,9 @@ class CertificateImpl
         {
             return PublicKey(0);
         }
+        
+        SecIdentityRef identity()
+        { return _ident; }
 
     private:
         SecIdentityRef _ident;

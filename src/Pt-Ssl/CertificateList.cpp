@@ -46,13 +46,6 @@ Certificate::Certificate()
 }
 
 
-Certificate::Certificate(const char* data, size_t len)
-: _impl(0)
-{
-    _impl = new CertificateImpl(data, len);
-}
-
-
 Certificate::Certificate(CertificateImpl* impl)
 : _impl(impl)
 {
@@ -163,31 +156,29 @@ CertificateImpl* Certificate::impl() const
 
 CertificateStore::CertificateStore()
 {
-//    CFArrayRef items = NULL;
-//
-//    // NOTE: kSecMatchSearchList -> (id)keychain
-//    const void* keys[]   = { kSecClass,         kSecReturnRef,  kSecMatchLimit, 0 };
-//    const void* values[] = { kSecClassIdentity, kCFBooleanTrue, kSecMatchLimitAll, 0 };
-//
-//    CFDictionaryRef dict = CFDictionaryCreate(NULL, keys, values, 3, NULL, NULL);
-//    if( ! dict)
-//        throw std::runtime_error("invalid keychain values");
-//
-//    OSStatus status = SecItemCopyMatching(dict, (CFTypeRef*)&items);
-//
-//    std::clog << "FOUND:" << CFDictionaryGetCount(dict) << std::endl;
-//
-//    CFRelease(dict);
-//
-//    if( status != errSecSuccess && status != errSecItemNotFound ) 
-//        throw std::runtime_error("invalid keychain");
-//
-//    // Do something with certificateRef here
-//
-//    if(items)
-//        CFRelease(items);
-//        
-//    std::clog << "XXXXXXXXXXXXXXXX" << std::endl;
+    CFArrayRef items = NULL;
+
+    // NOTE: kSecMatchSearchList -> (id)keychain
+    const void* keys[]   = { kSecClass,         kSecReturnRef,  kSecMatchLimit, 0 };
+    const void* values[] = { kSecClassIdentity, kCFBooleanTrue, kSecMatchLimitAll, 0 };
+
+    CFDictionaryRef dict = CFDictionaryCreate(NULL, keys, values, 3, NULL, NULL);
+    if( ! dict)
+        throw std::runtime_error("invalid keychain values");
+
+    OSStatus status = SecItemCopyMatching(dict, (CFTypeRef*)&items);
+
+    std::clog << "FOUND: " << CFDictionaryGetCount(dict) << std::endl;
+
+    CFRelease(dict);
+
+    if( status != errSecSuccess && status != errSecItemNotFound ) 
+        throw std::runtime_error("invalid keychain");
+
+    // Do something with certificateRef here
+
+    if(items)
+        CFRelease(items);
 }
 
 
@@ -203,6 +194,8 @@ void CertificateStore::addPem(const char* data, size_t len, const std::string& p
 
 void CertificateStore::loadPkcs12(const char* pkcs12, size_t len, const char* passwd)
 {
+    std::clog << "loadPkcs12: " << passwd << std::endl;
+
     CFDataRef data = CFDataCreate(NULL, reinterpret_cast<const UInt8*>(pkcs12), len);
     if( ! data)
         throw std::runtime_error("CFDataCreate");
@@ -210,7 +203,7 @@ void CertificateStore::loadPkcs12(const char* pkcs12, size_t len, const char* pa
     CFStringRef password = CFStringCreateWithCString(NULL, passwd, kCFStringEncodingUTF8);
     
     const void* keys[]   = { kSecImportExportPassphrase };
-    const void* values[] = { NULL };
+    const void* values[] = { password };
 
     CFIndex hasPassword = CFStringGetLength(password) > 0 ? 1 : 0;
 
@@ -221,6 +214,7 @@ void CertificateStore::loadPkcs12(const char* pkcs12, size_t len, const char* pa
     CFArrayRef items = NULL;
     
     OSStatus securityError = SecPKCS12Import(data, options, &items);
+    std::clog << "SecPKCS12Import: " <<  securityError << std::endl;
     assert(securityError == noErr);
     
     CFRelease(password);
@@ -236,7 +230,7 @@ void CertificateStore::loadPkcs12(const char* pkcs12, size_t len, const char* pa
         SecIdentityRef identity = (SecIdentityRef) CFDictionaryGetValue(item, kSecImportItemIdentity);
         if(identity)
         {
-            std::clog << "IDENTITY" << std::endl;
+            std::clog << "IDENTITY_" << n << std::endl;
             CFRetain(identity);
             Certificate c( new CertificateImpl(identity) );
             _certificates.push_back(c);
@@ -246,12 +240,20 @@ void CertificateStore::loadPkcs12(const char* pkcs12, size_t len, const char* pa
         if(certs)
         {
             CFIndex certCount = CFArrayGetCount(certs);
-            std::clog << "CERTS: " << certCount << std::endl;
+            std::clog << "CERTS_" << n << ": " << certCount << std::endl;
             for(CFIndex i = 0; i < certCount; ++i)
             {
                 SecCertificateRef cert = (SecCertificateRef) CFArrayGetValueAtIndex(certs, i);
                 
-                std::clog << "CERTIFICATE" << std::endl;
+                CFStringRef summary = SecCertificateCopySubjectSummary(cert);
+                if(summary)
+                {
+                    char buf[200];
+                    CFStringGetCString(summary, buf, 200, kCFStringEncodingUTF8);
+                    CFRelease(summary);
+                    std::cerr.write(buf, 16) << std::endl;
+                }
+
                 CFRetain(cert);
                 Certificate c( new CertificateImpl(cert) );
                 _certificates.push_back(c);

@@ -154,6 +154,10 @@ class PT_SSL_API Context : public NonCopyable
         ssl_ctx_st* impl() const;
 
 #ifdef __APPLE__
+
+        Certificate& certificate()
+        { return _cert; }
+    
     private:
         Protocol        _protocol;
         CertificateList _caCerts;
