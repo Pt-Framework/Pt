@@ -11,6 +11,8 @@ KeyEvent::KeyEvent()
 , _extCode(false)
 , _state(KeyNone)
 , _alt(false)
+, _shift(false)
+, _ctrl(false)
 {
 }
 

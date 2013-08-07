@@ -18,7 +18,7 @@ public:
 
 public:
 	Property<std::string> Caption;
-	Property<std::string> Name;	
+	Property<std::string> Name;		
 };
 
 }}

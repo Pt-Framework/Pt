@@ -53,8 +53,10 @@ public:
 	void render();
 
 private:
-	virtual void onInput2D(const PointingEvent& ev);
+	virtual void onPointerInput(const PointingEvent& ev);
+	virtual void onKeyInput(const KeyEvent& ev);
 	virtual void onModelChanged(bool created = false);	
+
 	void onSizeChanged(Pt::Gfx::SizeF& size);
 	
 	GfxModel* gfxModel();

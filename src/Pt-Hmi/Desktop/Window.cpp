@@ -17,6 +17,7 @@ Window::Window()
 	Pt::Hmi::Application& app = Pt::Hmi::Application::instance();
 
 	_mouseDevice.start(app.loop());
+	_keyboardDevice.start(app.loop());
 	_gfxOutputDevice.start(app.loop());
 
 	_defModel->Caption.set("New Window");
@@ -27,6 +28,7 @@ Window::Window()
 
 
 	_defController->addInputDevice(&_mouseDevice);
+	_defController->addInputDevice(&_keyboardDevice);
 	_defController->addOutputDevice(&_gfxOutputDevice);
 	_defController->setRenderer(_defRenderer);
 	_defController->setModel(_defModel);

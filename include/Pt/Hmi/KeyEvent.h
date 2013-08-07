@@ -98,6 +98,46 @@ public:
 		return _alt;
 	}
 
+	inline void setShift(bool b)
+	{
+		_shift = b;
+	}
+
+	inline bool shift() const
+	{
+		return _shift;
+	}
+
+	inline void setCtrl(bool b)
+	{
+		_ctrl = b;
+	}
+
+	inline bool ctrl() const
+	{
+		return _ctrl;
+	}
+
+	inline std::string shortCutKey() const
+	{
+		std::string shortCutKey = "";
+		
+		if( _ctrl)
+			shortCutKey += "CTRL//";
+
+		if( _alt)
+			shortCutKey += "ALT//";
+
+		if(_shift)
+			shortCutKey += "SHIFT//";  
+
+
+		char value =  (char) _virtualCode;
+		shortCutKey += value;
+
+		return shortCutKey; 			
+	}
+
 protected:
     virtual Pt::Event& onClone(Pt::Allocator& allocator) const;
     virtual void onDestroy(Pt::Allocator& allocator);
@@ -109,6 +149,8 @@ private:
 	int _scanCode;
 	bool _extCode;
 	bool _alt;
+	bool _shift;
+	bool _ctrl;
 	KeyState _state;
 };
 

@@ -31,6 +31,7 @@
 #include <Pt/Hmi/Model.h>
 #include <Pt/Hmi/Property.h>
 #include <Pt/Hmi/PointingEvent.h>
+#include <Pt/Hmi/KeyEvent.h>
 #include <Pt/Hmi/Cursor.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Size.h>
@@ -89,9 +90,11 @@ public:
 	Property<Pt::Gfx::ARgbColor>	TransparancyKey;
 	Pt::Gfx::ARgbImage				PaintBuffer;
 	Property<PointingEvent>			Pointer2DStatus;	
+	Property<KeyEvent>				KeyStatus;	
 	Property<Cursor>	            CursorStatus; 
 	Property<TextAlign::Type>	    TextAlign; 
 	Property<bool>					Focused; 
+	Property<bool>					AcceptFocus; 
 public:
 	virtual ~GfxModel();
 
@@ -108,6 +111,10 @@ public:
 	Pt::Gfx::Size fromUnit(const Pt::Gfx::SizeF& value);
 	double unitSizeInch() const;
 	double unitSizeMm() const;
+
+
+private:
+	void onFocusChanged(bool& state);
 };
 
 }}

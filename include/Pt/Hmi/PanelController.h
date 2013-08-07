@@ -15,7 +15,7 @@ public:
 	virtual ~PanelController();	
 	
 protected:
-	virtual void onInput2D(const PointingEvent& ev);
+	virtual void onPointerInput(const PointingEvent& ev);
 
 private:
 	enum ResizeDirection

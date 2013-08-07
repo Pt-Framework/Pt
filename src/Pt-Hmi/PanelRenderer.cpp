@@ -35,7 +35,11 @@ void PanelRenderer::render(Pt::Hmi::Model* m)
 	if( ctrl == 0)
 		return;
 	
-	const double corner = 3;
+	int corner = 0;
+
+	if(model->BorderRoundEdge.get())
+		corner = 1;
+
 	int border =  model->fromUnit(model->BorderWidth.get());	
 	Pt::Gfx::Size   size = model->fromUnit(model->Size.get());
 	Pt::Gfx::SizeF  clientSize(model->Size.get().width() - (model->BorderWidth.get()), model->Size.get().height() - (model->BorderWidth.get()));	
@@ -243,14 +247,7 @@ void PanelRenderer::render(Pt::Hmi::Model* m)
 		}
 		break;
 			
-	}
-	
-/*
-	Pt::Gfx::PointF clientPos(modelmodel->Position.get().x() + fmodel->BorderWidth.get(), fmodel->Position.get().y() + fmodel->BorderWidth.get());	
-	clientPos = ctrl->fromClient(clientPos, true);
-
-	Pt::Gfx::Point position = fmodel->fromUnit(clientPos);
-	painter->drawImage(position, fmodel->PaintBuffer);*/
+	}	
 
 }
 

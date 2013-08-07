@@ -84,14 +84,45 @@ void WindowController::invalidate()
 	output();
 }
 
-void WindowController::onInput2D(const PointingEvent& ev)
+
+void WindowController::onKeyInput(const KeyEvent& ev)
+{ 
+	GfxModel* m = gfxModel();
+	
+	m->KeyStatus = ev;
+
+	if(ev.virtualCode() == '\t' && ev.state() == Pt::Hmi::DeviceButton::Released && !ev.shift())
+	{
+		if( m->Focused.get())
+		{
+			if(!moveFocusNext())
+				m->Focused = true;
+		}
+	}
+
+	if(ev.virtualCode() == '\t' && ev.state() == Pt::Hmi::DeviceButton::Released && ev.shift())
+	{
+		if( m->Focused.get())
+		{
+			if(!moveFocusPrev())
+				m->Focused = true;
+		}
+	}
+
+	for( size_t i = 0; i < children().size(); ++i)
+		children()[i]->notifyKeyInput(ev);
+
+	invalidate();
+}
+
+void WindowController::onPointerInput(const PointingEvent& ev)
 {
 	GfxModel* m = gfxModel();
 	
 	m->Pointer2DStatus = ev;
 
 	for( size_t i = 0; i < children().size(); ++i)
-		children()[i]->notifyInput2D(ev);
+		children()[i]->notifyPointerInput(ev);
 	
 	invalidate();
 }

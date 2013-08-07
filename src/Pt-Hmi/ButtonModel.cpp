@@ -4,14 +4,18 @@ namespace Pt{
 namespace Hmi{
 
 ButtonModel::ButtonModel()
-:Armed(false)
-,ButtonState(DeviceButton::None)
+: ButtonState(Pt::Hmi::DeviceButton::Released)
+, ActionKey("")
+, Armed(false)
+, ButtonType(Pt::Hmi::ButtonType::Press)
 {
-	LabelModel::BorderStyle.set(Pt::Hmi::BorderStyle::Widget);
-	LabelModel::BorderWidth.set(1);
-	LabelModel::Caption.set("Button");	
-	LabelModel::AutoSize.set(false);
-	LabelModel::TextAlign.set(Pt::Hmi::TextAlign::MidleCenter);
+	BorderStyle.set(Pt::Hmi::BorderStyle::Widget);
+	BorderWidth.set(1);
+	Caption.set("Button");	
+	AutoSize.set(false);
+	TextAlign.set(Pt::Hmi::TextAlign::MidleCenter);
+	AcceptFocus.set(true);
+	BorderRoundEdge.set(true);
 }
 
 ButtonModel::~ButtonModel()

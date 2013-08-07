@@ -16,7 +16,9 @@ public:
 	virtual ~WidgetController();		
 
 public:
-	virtual void onInput2D(const PointingEvent& ev);
+	virtual void onPointerInput(const PointingEvent& ev);
+	virtual void onKeyInput(const KeyEvent& ev);
+
 };
 
 }}

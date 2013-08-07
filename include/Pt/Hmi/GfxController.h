@@ -53,7 +53,15 @@ public:
 	GfxModel* gfxModel();
 	const GfxModel* gfxModel() const;
 
+protected:
+	bool onMoveFocusNext();
+	bool onMoveFocusPrev();	
+
+	
 private:
+	bool focusNextChild(int index);
+	bool focusPrevChild(int index);
+	int getFocusedChild() const;
 
 };
 

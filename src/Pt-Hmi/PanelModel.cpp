@@ -7,7 +7,9 @@ PanelModel::PanelModel()
 : BorderStyle(BorderStyle::Sizebale)
 , BorderWidth(3)
 , Invert3DEffect(false)
+, BorderRoundEdge(false)
 {
+	AcceptFocus.set(false);
 }
 
 PanelModel::~PanelModel()

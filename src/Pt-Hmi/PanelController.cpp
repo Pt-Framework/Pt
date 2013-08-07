@@ -114,7 +114,8 @@ void PanelController::recalcPosAndSize(const Pt::Gfx::PointF& p, ResizeDirection
 	invalidate();	
 }
 
-void PanelController::onInput2D(const PointingEvent& ev)
+
+void PanelController::onPointerInput(const PointingEvent& ev)
 {
 	Pt::Gfx::PointF p =  toClient(Pt::Gfx::PointF(ev.x(), ev.y()));
 
@@ -188,7 +189,7 @@ void PanelController::onInput2D(const PointingEvent& ev)
 	}
 	
 	
-	WidgetController::onInput2D(ev);			
+	WidgetController::onPointerInput(ev);			
 }
 
 

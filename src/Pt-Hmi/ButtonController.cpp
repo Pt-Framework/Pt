@@ -44,9 +44,77 @@ ButtonController::~ButtonController()
 {
 }
 
-void ButtonController::onInput2D(const PointingEvent& ev)
-{
+void ButtonController::onKeyInput(const KeyEvent& ev)
+{	
+	ButtonModel* model = dynamic_cast<ButtonModel*>(gfxModel());
 	
+	if( model == 0)
+		return;
+
+	
+	if(!model->Enable.get())
+	{
+		LabelController::onKeyInput(ev);
+		return;
+	}
+
+	if(!model->Visible.get())
+	{
+		LabelController::onKeyInput(ev);
+		return;
+	}
+
+	switch(model->ButtonType.get())
+	{
+		case ButtonType::Press:
+		{
+			if(ev.virtualCode() == ' ' && model->Focused.get())	
+			{
+				model->ButtonState = (ev.state() == KeyEvent::KeyDown) ? DeviceButton::Pressed : DeviceButton::Released;
+			}
+			else if(ev.shortCutKey() == model->ActionKey.get())
+			{
+				model->ButtonState = (ev.state() == KeyEvent::KeyDown) ? DeviceButton::Pressed : DeviceButton::Released;				
+				model->Focused = false;
+				model->Focused = true;
+			}
+			else
+			{
+				model->ButtonState = DeviceButton::Released;
+			}
+		}
+		break;
+
+		case ButtonType::Toggle:
+		{
+			if(ev.virtualCode() == ' ' && model->Focused.get())		
+			{
+				if((ev.state() == KeyEvent::KeyDown))
+				{
+					if(model->ButtonState.get() == DeviceButton::Pressed)
+						model->ButtonState = DeviceButton::Released;
+					else
+						model->ButtonState = DeviceButton::Pressed;
+				}
+			}
+			else if(ev.shortCutKey() == model->ActionKey.get())
+			{			
+				if((ev.state() == KeyEvent::KeyDown))
+				{
+					model->ButtonState = (model->ButtonState.get() == DeviceButton::Pressed) ? DeviceButton::Released : DeviceButton::Pressed;											
+					model->Focused = false;
+					model->Focused = true;
+				}
+			}
+		}			
+		break;
+	}
+	
+	LabelController::onKeyInput(ev);
+}
+
+void ButtonController::onPointerInput(const PointingEvent& ev)
+{	
 	ButtonModel* model = dynamic_cast<ButtonModel*>(gfxModel());
 	
 	if( model == 0)
@@ -54,39 +122,63 @@ void ButtonController::onInput2D(const PointingEvent& ev)
 
 	Pt::Gfx::PointF point = toClient(Pt::Gfx::PointF(ev.x(), ev.y()));
 	
-	if(model->contains(point))
+	if(!model->Enable.get())
 	{
-		model->Armed = true;
-
-		if( ev.buttons().size() != 0)
-		{
-			switch(model->ButtonType.get())
-			{
-				case ButtonType::Press:
-					model->ButtonState = ev.buttons()[0].state();
-				break;
-
-				case ButtonType::Toggle:
-					
-					if(ev.buttons()[0].state() == DeviceButton::Pressed )
-					{
-						if(model->ButtonState.get() == DeviceButton::Pressed)
-							model->ButtonState = DeviceButton::Released;
-						else
-							model->ButtonState = DeviceButton::Pressed;
-					}
-						
-				break;
-			}
-		}
+		LabelController::onPointerInput(ev);
+		return;
 	}
-	else
+
+	if(!model->Visible.get())
+	{
+		LabelController::onPointerInput(ev);
+		return;
+	}
+
+	if(!model->contains(point))
 	{
 		model->Armed = false;
+		LabelController::onPointerInput(ev);
+		return;
 	}
 
-	LabelController::onInput2D(ev);
+	model->Armed = true;
 
+	if( ev.buttons().size() == 0)
+	{
+		LabelController::onPointerInput(ev);
+		return;
+	}
+
+	switch(model->ButtonType.get())
+	{
+		case ButtonType::Press:
+		{
+			model->ButtonState = ev.buttons()[0].state();
+			if(ev.buttons()[0].state() == DeviceButton::Pressed)
+			{
+				model->Focused = false;
+				model->Focused = true;
+			}
+		}
+		break;
+
+		case ButtonType::Toggle:
+		{
+			if(ev.buttons()[0].state() == DeviceButton::Pressed )
+			{
+				model->Focused = false;
+				model->Focused = true;
+
+				if(model->ButtonState.get() == DeviceButton::Pressed)
+					model->ButtonState = DeviceButton::Released;
+				else
+					model->ButtonState = DeviceButton::Pressed;
+			}
+		}				
+		break;
+	}
+
+	LabelController::onPointerInput(ev);
 }
 
 }}

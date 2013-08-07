@@ -15,14 +15,24 @@ WidgetController::~WidgetController()
 
 }
 
-void WidgetController::onInput2D(const PointingEvent& ev)
+void WidgetController::onKeyInput(const KeyEvent& ev)
+{ 
+	GfxModel* m = gfxModel();
+	
+	m->KeyStatus = ev;
+	
+	for( size_t i = 0; i < children().size(); ++i)
+		children()[i]->notifyKeyInput(ev);
+}
+
+void WidgetController::onPointerInput(const PointingEvent& ev)
 {
 	GfxModel* m = gfxModel();
 	
 	m->Pointer2DStatus = ev;
 
 	for( size_t i = 0; i < children().size(); ++i)
-		children()[i]->notifyInput2D(ev);
+		children()[i]->notifyPointerInput(ev);
 }
 
 }}

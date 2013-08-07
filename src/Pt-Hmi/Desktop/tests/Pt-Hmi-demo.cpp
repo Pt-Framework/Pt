@@ -31,17 +31,18 @@ class Test : public Pt::Connectable
 public:
 	void print(Pt::Hmi::DeviceButton::State& s)
 	{
-		std::cout<<"State: "<<s<<std::endl;
-		Pt::Hmi::ButtonModel* buttonModel = (Pt::Hmi::ButtonModel*)(button.controller().model());
+		for( int i = 0; i < 3; ++i)
+		{
+			Pt::Hmi::ButtonModel* buttonModel = (Pt::Hmi::ButtonModel*)(buttons[i].controller().model());
+			std::cout<<"Button "<<i<<" : "<<buttonModel->ButtonState.get()<<std::endl;
+		}
 	}
-
 
 	void printKey(const Pt::Hmi::KeyEvent& ev)
 	{
-		if(ev.state() == Pt::Hmi::KeyEvent::KeyDown)
-			std::cout<<ev.virtualCode()<<" "<< ev.alt() << " "<< ev.extCode()<<std::endl;
+		std::cout<<"VC:"<<ev.virtualCode()<<" Alt:"<< ev.alt() << " Ext:"<< ev.extCode()<<" St:"<< ev.state()<<" Shift:"<<ev.shift()<<" Ctrl:" <<ev.ctrl()<<std::endl;
 	}
-	Pt::Hmi::Desktop::Button     button;
+	Pt::Hmi::Desktop::Button     buttons[3];
 };
 
 
@@ -52,6 +53,7 @@ int main(int argc, char* args[])
 	Test test;
 	Pt::Hmi::Desktop::Window	window;	
 	Pt::Hmi::Desktop::Panel     panel;
+	Pt::Hmi::Desktop::Panel     panel2;
 	Pt::Hmi::Desktop::Label     label;
 	Pt::Hmi::KeyboardDevice     keyboardDevice;
 	
@@ -63,7 +65,7 @@ int main(int argc, char* args[])
 	Pt::Hmi::PanelModel* panelModel = (Pt::Hmi::PanelModel*) panel.controller().model();
 	
 	panelModel->Position.set(Pt::Gfx::PointF(40,120));
-	panelModel->Size.set(Pt::Gfx::SizeF(400,500));	
+	panelModel->Size.set(Pt::Gfx::SizeF(600,500));	
 	panelModel->BorderStyle.set(Pt::Hmi::BorderStyle::Sizebale);
 	panelModel->BorderWidth.set(3);
 
@@ -72,22 +74,43 @@ int main(int argc, char* args[])
 	Pt::Hmi::LabelModel* labelModel = (Pt::Hmi::LabelModel*)(label.controller().model());
 	labelModel->Position.set(Pt::Gfx::PointF(100,100));
 	labelModel->ForeColor.set(Pt::Gfx::ARgbColor(0,255,0,0));
-	labelModel->Caption.set("This is a line red label into a sizeable panel:");
+	labelModel->Caption.set("Press TAB or TAB+SHIFT for focus handling. Space for action");
 	
 	panel.addChild(&label);
 	
-	Pt::Hmi::ButtonModel* buttonModel = (Pt::Hmi::ButtonModel*)(test.button.controller().model());
-	buttonModel->Caption.set("OK");
-	buttonModel->Size.set(Pt::Gfx::SizeF(80,50));
-	buttonModel->Position.set(Pt::Gfx::PointF(30,40));
-	buttonModel->ButtonState.PropertyChanged += Pt::slot(test, &Test::print);
-	buttonModel->ButtonType.set(Pt::Hmi::ButtonType::Press);
-	//buttonModel->ButtonType.set(Pt::Hmi::ButtonType::Toggle);
+	for(size_t i = 0; i < 2; ++i)
+	{
+		Pt::Hmi::ButtonModel* buttonModel = (Pt::Hmi::ButtonModel*)(test.buttons[i].controller().model());
+		std::stringstream ss;
+
+		ss<<"Button "<<i;
+		buttonModel->Caption.set(ss.str());
+		buttonModel->Size.set(Pt::Gfx::SizeF(80,50));
+		buttonModel->Position.set(Pt::Gfx::PointF(30 +(i*90),20));
+		buttonModel->ButtonState.PropertyChanged += Pt::slot(test, &Test::print);
+		//buttonModel->ButtonType.set(Pt::Hmi::ButtonType::Press);
+		buttonModel->ButtonType.set(Pt::Hmi::ButtonType::Toggle);
+		panel.addChild(&test.buttons[i]);
+	}
+
+	Pt::Hmi::ButtonModel* buttModel = (Pt::Hmi::ButtonModel*)(test.buttons[2].controller().model());
+
+	buttModel->ButtonType.set(Pt::Hmi::ButtonType::Press);
+	buttModel->Caption.set("Test shortcut(CTRL+A)");
+	buttModel->Size.set(Pt::Gfx::SizeF(160,20));
+	buttModel->Position.set(Pt::Gfx::PointF(15,15));
+	buttModel->ActionKey.set("CTRL//A");
+	
 
 
-	panel.addChild(&test.button);
+	Pt::Hmi::PanelModel* m = (Pt::Hmi::PanelModel*)panel2.controller().model();
+	m->Size.set(Pt::Gfx::SizeF(260,150));
+	m->Position.set(Pt::Gfx::PointF(20,120));
+	m->BorderStyle.set(Pt::Hmi::BorderStyle::Single);
+	panel2.addChild(&test.buttons[2]);
 
-
+	panel.addChild(&panel2);
+	
 	Pt::Hmi::WindowModel* wm = (Pt::Hmi::WindowModel*) window.controller().model();
 	wm->Border = Pt::Hmi::BorderStyle::Sizebale;
 	window.show();
@@ -95,5 +118,4 @@ int main(int argc, char* args[])
 
 	app.run();		
 }
-
 

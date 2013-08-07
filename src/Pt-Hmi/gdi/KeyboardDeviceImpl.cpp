@@ -28,6 +28,16 @@ void KeyboardDeviceImpl::onKeyEvent (int nCode, WPARAM wParam, LPARAM lParam)
 	_keyEvent.setExtCode( (lParam & 0x1000000) != 0);
 	_keyEvent.setAlt( (lParam & 0x20000000) != 0); 
 		
+	if(_keyEvent.virtualCode() == 16 )
+	{
+		_keyEvent.setShift(_keyEvent.state() == KeyEvent::KeyDown);
+	}
+			
+	if(_keyEvent.virtualCode() == 17 )
+	{
+		_keyEvent.setCtrl(_keyEvent.state() == KeyEvent::KeyDown);
+	}
+
 	_loop->setReady(_device);
 	_loop->wake();			    
 }

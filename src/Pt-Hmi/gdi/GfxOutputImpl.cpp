@@ -255,11 +255,16 @@ void GfxOutputImpl::writeWindowProperties()
 	SetWindowLong(_hwnd, GWL_STYLE, style);  
 	SetWindowLong(_hwnd, GWL_EXSTYLE, exStyle);  
 
-	if(!wmodel->Visible.get())
+	style = GetWindowLong(_hwnd, GWL_STYLE);  
+
+
+	bool visible = ((style & WS_VISIBLE) == WS_VISIBLE);
+
+	if(!wmodel->Visible.get() && visible)
 		ShowWindow(_hwnd, SW_HIDE);
-	else
-		ShowWindow(_hwnd, SW_SHOW);
 	
+	if(wmodel->Visible.get() && !visible)
+		ShowWindow(_hwnd, SW_SHOW);	
 }
 
 void GfxOutputImpl::output(Pt::Hmi::Model* model)

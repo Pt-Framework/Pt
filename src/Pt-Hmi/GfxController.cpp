@@ -138,4 +138,123 @@ void GfxController::render()
 	}
 }
 
+
+bool GfxController::onMoveFocusPrev()
+{
+	if(children().size() == 0)
+		return false;
+
+	int index = getFocusedChild();
+
+	if( index != -1)
+	{
+		Controller* child = children()[index];
+		GfxModel* model = (GfxModel*)child->model();	
+		
+		if(!model->AcceptFocus.get())
+		{
+			if(child->moveFocusPrev())
+				return true;
+		}
+
+		model->Focused = false;
+		return focusPrevChild(index);
+	}
+	
+	return focusPrevChild(children().size());
+}
+
+bool GfxController::focusPrevChild(int index)
+{
+	index--;
+	
+	for( ; index >= 0; --index)
+	{
+		Controller* child = children()[index];
+		GfxModel* model = (GfxModel*)child->model();		
+
+		if(model->AcceptFocus.get())
+		{
+			model->Focused = true;
+			return true;
+		}
+
+		if(child->moveFocusPrev())
+		{
+			model->Focused = true;
+			return true;
+		}
+	}
+
+	return false;
+}
+
+
+
+bool GfxController::focusNextChild(int index)
+{
+	index++;
+	
+	for( ; index < (int)children().size(); ++index)
+	{
+		Controller* child = children()[index];
+		GfxModel* model = (GfxModel*)child->model();
+		
+		if(model->AcceptFocus.get())
+		{
+			model->Focused = true;
+			return true;
+		}
+
+		if(child->moveFocusNext())
+		{
+			model->Focused = true;
+			return true;
+		}
+	}
+
+	return false;
+}
+
+
+int GfxController::getFocusedChild() const
+{
+	int i = 0;
+	
+	for( ; i < (int)children().size(); ++i)
+	{
+		const GfxController* child = (GfxController*)children()[i];
+		const GfxModel* model = (const GfxModel*)child->model();
+
+		if(model->Focused.get())
+			return i;		
+	}		
+
+	return -1;
+}
+
+bool GfxController::onMoveFocusNext()
+{
+	if(children().size() == 0)
+		return false;
+
+	const int index = getFocusedChild();
+
+	if( index != -1)
+	{
+		Controller* child = children()[index];
+		GfxModel* model = (GfxModel*)child->model();	
+		
+		if(!model->AcceptFocus.get())
+		{
+			if(child->moveFocusNext())
+				return true;
+		}
+
+		model->Focused = false;
+	}
+
+	return focusNextChild(index);
+}
+
 }}

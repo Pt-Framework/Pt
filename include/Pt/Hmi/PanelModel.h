@@ -31,9 +31,10 @@ public:
 	PanelModel();
 	virtual ~PanelModel();
 
-	Property<BorderStyle::Type> BorderStyle;	
-	Property<double>			BorderWidth;	
+	Property<BorderStyle::Type> BorderStyle;		
+	Property<bool>				BorderRoundEdge;	
 	Property<bool>				Invert3DEffect;
+	Property<double>			BorderWidth;	
 	
 public:
 	Pt::Gfx::SizeF clientSize() const;	

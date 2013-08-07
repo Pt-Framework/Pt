@@ -28,6 +28,7 @@
 
 #include <Pt/Hmi/Controller.h>
 #include <Pt/Hmi/PointingDevice.h>
+#include <Pt/Hmi/KeyboardDevice.h>
 
 namespace Pt{
 namespace Hmi{
@@ -60,8 +61,14 @@ void Controller::addInputDevice(InputDevice* device)
 	PointingDevice* pointerDev = dynamic_cast<PointingDevice*>(device);
 	
 	if( pointerDev != 0)
-		pointerDev->Event += Pt::slot(*this, &Controller::notifyInput2D);
+		pointerDev->Event += Pt::slot(*this, &Controller::notifyPointerInput);
 
+
+	KeyboardDevice* keyboardDevice  = dynamic_cast<KeyboardDevice*>(device);
+
+	if(keyboardDevice != 0)
+		keyboardDevice->Event += Pt::slot(*this, &Controller::notifyKeyInput);
+		
 	_inputDevices.push_back(device);
 }
 
@@ -107,6 +114,7 @@ void Controller::removeChild(Controller* base)
 		if(_children[i] == base)
 		{
 			_children.erase(_children.begin() + i);
+			base->setParent(0);
 			return;
 		}
 	}			

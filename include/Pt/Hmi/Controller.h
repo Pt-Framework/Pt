@@ -35,6 +35,7 @@
 #include <Pt/Hmi/Renderer.h>
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/PointingEvent.h>
+#include <Pt/Hmi/KeyEvent.h>
 
 namespace Pt{
 namespace Hmi{
@@ -116,29 +117,56 @@ public:
 		_parent = p;
 	}
 
-
 	inline void notifyModelChanged(bool created)
 	{
 		onModelChanged(created);
 	}
 
-	inline void notifyInput2D(const PointingEvent& ev)
+	inline void notifyPointerInput(const PointingEvent& ev)
 	{
-		onInput2D(ev);
+		onPointerInput(ev);
 	}
+
+	inline void notifyKeyInput(const KeyEvent& ev)
+	{
+		onKeyInput(ev);
+	}
+
+
+	inline bool moveFocusNext()
+	{
+		return onMoveFocusNext();
+	}
+	
+	inline bool moveFocusPrev()
+	{
+		return onMoveFocusPrev();
+	}
+	
 	
 	void output();		
 
 protected:	
 
-	virtual void onModelChanged(bool created = false)
+	virtual bool onMoveFocusNext()
 	{
+		return false;
 	}
 	
-	virtual void onInput2D(const PointingEvent& ev)
+	virtual bool onMoveFocusPrev()
 	{
-
+		return false;
 	}
+
+	virtual void onModelChanged(bool created = false)
+	{ }
+	
+	virtual void onPointerInput(const PointingEvent& ev)
+	{ }
+
+	virtual void onKeyInput(const KeyEvent& ev)
+	{ }
+
 	 
 private:
 	void modelChanged()
