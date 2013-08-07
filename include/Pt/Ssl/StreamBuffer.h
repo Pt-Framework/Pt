@@ -83,6 +83,7 @@ class PT_SSL_API Connection
         static OSStatus sslReadCallback(SSLConnectionRef connection, void* data, size_t* n);
 
     private:
+        Context* _ctx;
         SSLContextRef   _context;
         std::streambuf* _ios;
         std::streamsize _iocount;
@@ -136,8 +137,8 @@ class PT_SSL_API StreamBuffer : public std::streambuf
     public:
         enum OpenMode
         {
-            Connect,
-            Accept
+            Connect = 3,
+            Accept = 4
         };
 
     public:

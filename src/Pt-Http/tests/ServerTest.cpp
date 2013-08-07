@@ -42,6 +42,7 @@
 #include "Pt/System/MainLoop.h"
 #include "Pt/System/Logger.h"
 #include <string>
+#include <fstream>
 
 #ifdef PT_HTTP_WITH_SSL
 #include <Pt/Ssl/Context.h>
@@ -114,7 +115,7 @@ class ServerTest : public Pt::Unit::TestSuite
         : Pt::Unit::TestSuite("ServerTest")
         , _authent("test-realm")
         {
-            Pt::System::Logger::setLogLevel("Pt.Http", Pt::System::Error);
+            Pt::System::Logger::setLogLevel("Pt", Pt::System::Error);
 
             _authent.setUser( Pt::Http::Credentials("testo", "testpwd") );
 
@@ -272,7 +273,7 @@ class ServerTest : public Pt::Unit::TestSuite
             server.listen("127.0.0.1", 8001, options);
 
             Pt::Ssl::Context clientContext;
-            setupSslClientContext(serverCtx);
+            setupSslClientContext(clientContext);
             
             // start HTTP client
             Pt::Http::Client client(*loop, "127.0.0.1", 8001);
@@ -289,39 +290,55 @@ class ServerTest : public Pt::Unit::TestSuite
 
         static void setupSslClientContext(Pt::Ssl::Context& ctx)
         {
-            // SSL configuration
-            Pt::Ssl::CertificateList caCert;
-            caCert.fromPem(caPemData, sizeof(caPemData));
+            #ifdef _WIN32
+                std::ifstream ifs("src\\Pt-Ssl\\tests\\cert\\client.p12", std::ios::binary);
+            #else
+                std::ifstream ifs("src/Pt-Ssl/tests/cert/client.p12", std::ios::binary);
+            #endif
 
-            // client-side SSL context
-            Pt::Ssl::CertificateList clientCert;
-            clientCert.fromPem(clientCertPemData, sizeof(clientCertPemData));
+            #ifdef _WIN32
+                std::ifstream ifs_ca("src\\Pt-Ssl\\tests\\cert\\ca.p12", std::ios::binary);
+            #else
+                std::ifstream ifs_ca("src/Pt-Ssl/tests/cert/ca.p12", std::ios::binary);
+            #endif
+            
+            Pt::Ssl::CertificateStore clientCerts;
+            clientCerts.loadPkcs12(ifs, "");
+            PT_UNIT_ASSERT( ! clientCerts.certificates().empty() );
 
-            Pt::Ssl::PrivateKey clientPrivKey("");
-            clientPrivKey.fromPem(clientKeyData, sizeof(clientKeyData));
+            Pt::Ssl::CertificateStore caStore;
+            caStore.loadPkcs12(ifs_ca, "");
+            PT_UNIT_ASSERT( ! caStore.certificates().empty() );
 
-            ctx.setCACertificates(caCert);
-            ctx.setCertificateChain(clientCert);
-            ctx.setPrivateKey(clientPrivKey);
+            ctx.setCertificate( *clientCerts.certificates().begin() );
+            ctx.setCACertificates( caStore.certificates() );
             ctx.setVerifyMode(Pt::Ssl::Context::VerifyPeer);
         }
 
         static void setupSslServerContext(Pt::Ssl::Context& ctx)
         {
-            // SSL configuration
-            Pt::Ssl::CertificateList caCert;
-            caCert.fromPem(caPemData, sizeof(caPemData));
+            #ifdef _WIN32
+                std::ifstream ifs_ca("src\\Pt-Ssl\\tests\\cert\\ca.p12", std::ios::binary);
+            #else
+                std::ifstream ifs_ca("src/Pt-Ssl/tests/cert/ca.p12", std::ios::binary);
+            #endif
 
-            // server-side SSL context
-            Pt::Ssl::CertificateList cert;
-            cert.fromPem(serverCertPemData, sizeof(serverCertPemData));
+            #ifdef _WIN32
+                std::ifstream server_ifs("src\\Pt-Ssl\\tests\\cert\\server.p12", std::ios::binary);
+            #else
+                std::ifstream server_ifs("src/Pt-Ssl/tests/cert/server.p12", std::ios::binary);
+            #endif
 
-            Pt::Ssl::PrivateKey privKey("abc123");
-            privKey.fromPem(serverKeyData, sizeof(serverKeyData));
+            Pt::Ssl::CertificateStore caStore;
+            caStore.loadPkcs12(ifs_ca, "");
+            PT_UNIT_ASSERT( ! caStore.certificates().empty() );
 
-            ctx.setCACertificates(caCert);
-            ctx.setCertificateChain(cert);
-            ctx.setPrivateKey(privKey);
+            Pt::Ssl::CertificateStore serverCerts;
+            serverCerts.loadPkcs12(server_ifs, "");
+            PT_UNIT_ASSERT( ! serverCerts.certificates().empty() );
+
+            ctx.setCertificate( *serverCerts.certificates().begin() );
+            ctx.setCACertificates( caStore.certificates() );
             ctx.setVerifyMode(Pt::Ssl::Context::VerifyPeerRequired);
         }
 #endif

@@ -39,12 +39,16 @@ namespace Pt {
 
 namespace Ssl {
 
+#ifndef __APPLE__
+
 //! @internal Library initialization.
 static struct PT_SSL_API SSLInit 
 {
     SSLInit();
     ~SSLInit();
 } ssl_init;
+
+#endif
 
 //! @brief Context for SSL connections.
 class PT_SSL_API Context : public NonCopyable
@@ -149,6 +153,13 @@ class PT_SSL_API Context : public NonCopyable
         //! @internal
         ssl_ctx_st* impl() const;
 
+#ifdef __APPLE__
+    private:
+        Protocol        _protocol;
+        CertificateList _caCerts;
+        Certificate     _cert;
+        CertificateList _extraCerts;
+#else
     private:
         ssl_ctx_st*     _ctx;
         Protocol        _protocol;
@@ -157,6 +168,7 @@ class PT_SSL_API Context : public NonCopyable
         std::vector<x509_st*> _extraCerts;
         PrivateKey      _privKey;
         void*           _reserved;
+#endif
 };
 
 } // namespace Ssl

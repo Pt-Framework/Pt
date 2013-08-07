@@ -93,45 +93,33 @@ void StreamBufferTest::Handshake()
         std::ifstream ifs_ca("src/Pt-Ssl/tests/cert/ca.p12", std::ios::binary);
     #endif
 
+    #ifdef _WIN32
+        std::ifstream server_ifs("src\\Pt-Ssl\\tests\\cert\\server.p12", std::ios::binary);
+    #else
+        std::ifstream server_ifs("src/Pt-Ssl/tests/cert/server.p12", std::ios::binary);
+    #endif
+
     Pt::Ssl::CertificateStore certStore;
     certStore.loadPkcs12(ifs, "");
-    certStore.loadPkcs12(ifs_ca, "");
-
-    PT_UNIT_ASSERT( ! certStore.identities().empty() );
     PT_UNIT_ASSERT( ! certStore.certificates().empty() );
 
-    Pt::Ssl::CertificateList caCert;
-    caCert.fromPem(caPemData, sizeof(caPemData));
+    Pt::Ssl::CertificateStore caStore;
+    caStore.loadPkcs12(ifs_ca, "");
+    PT_UNIT_ASSERT( ! caStore.certificates().empty() );
 
-    // server-side SSL context
-    Pt::Ssl::CertificateList serverCert;
-    serverCert.fromPem(serverCertPemData, sizeof(serverCertPemData));
-
-    Pt::Ssl::PrivateKey serverPrivKey("abc123");
-    serverPrivKey.fromPem(serverKeyData, sizeof(serverKeyData));
+    Pt::Ssl::CertificateStore serverCerts;
+    serverCerts.loadPkcs12(server_ifs, "");
+    PT_UNIT_ASSERT( ! serverCerts.certificates().empty() );
 
     Pt::Ssl::Context serverContext;
-    serverContext.setCACertificates(caCert);
-    serverContext.setCertificateChain(serverCert);
-    serverContext.setPrivateKey(serverPrivKey);
+    serverContext.setCertificate( *serverCerts.certificates().begin() );
+    serverContext.setCACertificates( caStore.certificates() );
     serverContext.setVerifyMode(Pt::Ssl::Context::VerifyPeerRequired);
 
     // client-side SSL context
-    Pt::Ssl::CertificateList clientCert;
-    clientCert.fromPem(clientCertPemData, sizeof(clientCertPemData));
-
-    Pt::Ssl::PrivateKey clientPrivKey("");
-    clientPrivKey.fromPem(clientKeyData, sizeof(clientKeyData));
-
     Pt::Ssl::Context clientContext;
-    //clientContext.setCACertificates(caCert);
-    //clientContext.setCertificateChain(clientCert);
-    //clientContext.setPrivateKey(clientPrivKey);
-
-    const Pt::Ssl::Identity& clientIdentity = certStore.identities().front();
-    clientContext.setCertificate( clientIdentity.certificate() );
-    clientContext.setPrivateKey( clientIdentity.privateKey());
-    clientContext.setCACertificates( certStore.certificates() );
+    clientContext.setCertificate( *certStore.certificates().begin() );
+    clientContext.setCACertificates( caStore.certificates() );
     clientContext.setVerifyMode(Pt::Ssl::Context::VerifyPeer);
 
     // client begins the handshake
@@ -175,35 +163,6 @@ void StreamBufferTest::Handshake()
         if( client.isConnected() )
             break;
     }
-
-    //while( ! client.connected() || ! server.connected() )
-    //{
-    //    // client handshake progress
-    //    std::clog << "\nCLIENT: " << std::endl;
-
-    //    while( ! client.connected() )
-    //    {
-    //        data.rdbuf()->sgetc();
-    //        int clientState = client.handshake();
-    //        
-    //        if( clientState == Pt::Ssl::StreamBuffer::Output )
-    //        {
-    //            break;
-    //        }
-    //    }
-
-    //    std::clog << "\nSERVER: " << std::endl;
-    //    while( ! server.connected() )
-    //    {
-    //        data.rdbuf()->sgetc();
-    //        int serverState = server.handshake();
-
-    //        if( serverState == Pt::Ssl::StreamBuffer::Output )
-    //        {
-    //            break;
-    //        }
-    //    }
-    //}
 
     PT_UNIT_ASSERT( client.isConnected() );
     PT_UNIT_ASSERT( server.isConnected() );

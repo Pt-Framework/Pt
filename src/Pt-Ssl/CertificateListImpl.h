@@ -56,30 +56,31 @@ namespace Ssl {
 
 #ifdef __APPLE__
 
-class CertificateImpl2
+class CertificateImpl
 {
     public:
-        explicit CertificateImpl2(SecCertificateRef cert)
-        : _cert(cert)
+        explicit CertificateImpl(SecCertificateRef cert)
+        : _ident(0)
+        , _cert(cert)
         , _refs(1)
         {
             assert(_cert);
         }
 
-        CertificateImpl2(const char* der, size_t len)
-        : _cert(0)
+        explicit CertificateImpl(SecIdentityRef identity)
+        : _ident(identity)
+        , _cert(0)
         , _refs(1)
         {
-            CFDataRef data =
-                CFDataCreate(NULL, reinterpret_cast<const UInt8*>(der), len);
-
-            _cert = SecCertificateCreateWithData(NULL, data);
-                
-            CFRelease(data);
+            SecIdentityCopyCertificate(identity, &_cert);
+            assert(_cert);
         }
 
-        ~CertificateImpl2()
+        ~CertificateImpl()
         {
+            if(_identity)
+                CFRelease(_identity);
+
             CFRelease(_cert);
         }
 
@@ -128,91 +129,23 @@ class CertificateImpl2
 
         PublicKey publicKey() const
         {
-            
             return PublicKey(0);
         }
 
     private:
+        SecIdentityRef _ident;
         SecCertificateRef _cert;
         Pt::atomic_t _refs;
 };
 
-class CertificateListImpl2
-{
-    public:
-        CertificateListImpl2()
-        { }
-
-        CertificateListImpl2(const CertificateListImpl2& list)
-        { _certificates = list._certificates; }
-
-        ~CertificateListImpl2()
-        { clear(); }
-
-        void push_back(const Certificate& cert)
-        { _certificates.push_back(cert); }
-
-        void clear()
-        { _certificates.clear(); }
-
-        size_t size() const
-        { return _certificates.size(); }
-
-        bool empty() const
-        { return _certificates.empty(); }
-
-        Certificate* begin()
-        { 
-            return _certificates.empty() ? 0 : &_certificates[0]; 
-        }
-
-        Certificate* end()
-        { 
-            return _certificates.empty() ? 0 : &_certificates[0] + _certificates.size(); 
-        }
-
-        const Certificate* begin() const
-        { 
-            return _certificates.empty() ? 0 : &_certificates[0]; 
-        }
-
-        const Certificate* end() const
-        { 
-            return _certificates.empty() ? 0 : &_certificates[0] + _certificates.size(); 
-        }
-
-        void fromPem(const char* pemData, size_t len)
-        {
-            std::istringstream iss( std::string(pemData, len) );
-            // alternatively:
-            // iss.write(data, len);
-            // is.seekg(0, iss.beg);
-            BasicTextIStream<char, char> b64conv( iss, new Base64Codec() );
-
-            char rbuf[255];
-            std::string data;
-            while( b64conv ) 
-            {
-                b64conv.read(rbuf, sizeof(rbuf));
-                size_t count = size_t( b64conv.gcount() );
-                data.append(rbuf, count);
-            }
-
-            Certificate cert( data.c_str(), data.size() );
-            this->push_back(cert);
-        }   
-
-    private:
-        std::vector<Certificate> _certificates;
-};
-
-#endif
+#else
     
 class CertificateImpl
 {
     public:
-        explicit CertificateImpl(x509_st* x509)
+        explicit CertificateImpl(x509_st* x509, evp_pkey_st* pkey = 0)
         : _x509(x509)
+        , _pkey(pkey)
         , _refs(1)
         {
             assert(_x509);
@@ -232,6 +165,9 @@ class CertificateImpl
 
         ~CertificateImpl()
         {
+            if(_pkey)
+                EVP_PKEY_free(_pkey);
+
             X509_free(_x509);
         }
 
@@ -275,6 +211,9 @@ class CertificateImpl
         x509_st* getX509() const
         { return _x509; }
 
+        evp_pkey_st* evp()
+        { return _pkey; }
+
     private:
         static std::string toString(const X509_NAME* val)
         {
@@ -306,9 +245,11 @@ class CertificateImpl
 
     private:
         x509_st* _x509;
+        evp_pkey_st* _pkey;
         Pt::atomic_t _refs;
 };
 
+#endif
 
 class CertificateListImpl
 {
@@ -372,6 +313,8 @@ class CertificateListImpl
         {
             this->clear();
 
+#ifndef __APPLE__
+
             BioAutoPtr in( BIO_new_mem_buf( (void*) data, len ) );
 
             // Try to read/parse the CA X509 certificates
@@ -387,6 +330,7 @@ class CertificateListImpl
                 
                 x509.release();
             }
+#endif
         }
 
     private:

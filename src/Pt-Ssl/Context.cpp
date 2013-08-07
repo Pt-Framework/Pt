@@ -38,11 +38,98 @@
 #include <openssl/err.h>
 #include <cstdio>
 
+log_define("Pt.Ssl.Context")
+
 namespace Pt {
 
 namespace Ssl {
 
-log_define("Pt.Ssl.Context")
+#ifdef __APPLE__
+
+Context::Context(Protocol protocol)
+: _protocol(protocol)
+{
+}
+
+
+Context::~Context()
+{
+}
+
+
+void Context::enableSessions(const char* id, unsigned long timeout, unsigned long cacheSize)
+{
+}
+
+
+Context::Protocol Context::protocol() const
+{ 
+    return _protocol; 
+}
+
+
+void Context::setProtocol(Protocol protocol)
+{
+    _protocol = protocol;
+}
+
+
+void Context::setVerifyDepth(int n)
+{
+}
+
+
+void Context::setVerifyMode(VerifyMode m)
+{
+}
+
+
+void Context::assign(const Context& ctx)
+{
+    setProtocol(ctx._protocol);
+
+    _caCerts =    ctx._caCerts;
+    _cert =       ctx._cert;
+    _extraCerts = ctx._extraCerts;
+    
+    // VerifyMode
+    // VerifyDepth
+}
+
+
+void Context::setCACertificates(const CertificateList& caCerts)
+{
+    _caCerts = caCerts;
+}
+
+
+void Context::setCertificate(const Certificate& cert)
+{
+    _cert = cert;
+}
+
+
+void Context::setCertificateChain(const CertificateList& certs)
+{
+    CertificateList::ConstIterator it = certs.begin();
+    if( it == certs.end() )
+        throw InvalidCertificate("invalid certificate chain");
+
+    this->setCertificate(*it);
+    ++it;
+
+    for(; it != certs.end(); ++it)
+    {
+        _extraCerts.push_back(*it);
+    }
+}
+
+
+void Context::setPrivateKey(const PrivateKey& key)
+{
+}
+
+#else
 
 static int ssl_init_counter = 0;
 
@@ -422,11 +509,21 @@ void Context::setCertificate(const Certificate& cert)
 
     if( ! SSL_CTX_use_certificate(_ctx, x509) )
     {
-        throw InvalidCertificate("invalid or mismatched certificate");
+        throw InvalidCertificate("invalid certificate");
     }
+
+    EVP_PKEY* pkey = _cert.impl()->evp();
+
+    if( pkey )
+    {
+        if( ! SSL_CTX_use_PrivateKey( _ctx, pkey ) )
+        {
+            throw InvalidCertificate("invalid certificate");
+        }
     
-    // openssl will not check the private key of this context against the 
-    // certifictate. TO do so call SSL_CTX_check_private_key(_ctx)
+        // openssl will not check the private key of this context against the 
+        // certifictate. TO do so call SSL_CTX_check_private_key(_ctx)
+    }
 }
 
 
@@ -460,6 +557,8 @@ ssl_ctx_st* Context::impl() const
 { 
     return _ctx; 
 }
+
+#endif
 
 } // namespace Ssl
 

@@ -156,22 +156,6 @@ CertificateImpl* Certificate::impl() const
 
 
 //
-// Identity
-//
-
-Identity::Identity(const Certificate& cert, const PrivateKey& key)
-: _cert(cert)
-, _key(key)
-{
-}
-
-
-Identity::~Identity()
-{
-}
-
-
-//
 // CertificateStore
 //
 
@@ -247,29 +231,35 @@ void CertificateStore::loadPkcs12(const char* pkcs12, size_t len, const char* pa
 
     for(CFIndex n = 0; n < count; ++n)
     {
-        CFDictionaryRef item = (CFDictionaryRef)CFArrayGetValueAtIndex(items, n);
+        CFDictionaryRef item = (CFDictionaryRef) CFArrayGetValueAtIndex(items, n);
 
-        SecIdentityRef identity =
-          (SecIdentityRef) CFDictionaryGetValue(item, kSecImportItemIdentity);
-
+        SecIdentityRef identity = (SecIdentityRef) CFDictionaryGetValue(item, kSecImportItemIdentity);
         if(identity)
         {
-            SecKeyRef pkey = NULL;
-            OSStatus stat1 = SecIdentityCopyPrivateKey(identity, &pkey);
+            std::clog << "IDENTITY" << std::endl;
+            CFRetain(identity);
+            Certificate c( new CertificateImpl(identity) );
+            _certificates.push_back(c);
+        }
 
-            SecCertificateRef certificateRef = NULL;
-            OSStatus stat2 = SecIdentityCopyCertificate(identity, &certificateRef);
-            
-            assert(stat1 == noErr);
-            assert(stat2 == noErr);
-            assert(pkey);
-            assert(certificateRef);
-
-            // Certificate c( new CertificateImpl(certificateRef) );
-            // PrivateKey pk( new PrivateKeyImpl(pkey) );
-            //_identities.push_back( Identity(c, pk) );
+        CFArrayRef certs = (CFArrayRef) CFDictionaryGetValue(item, kSecImportItemCertChain);
+        if(certs)
+        {
+            CFIndex certCount = CFArrayGetCount(certs);
+            std::clog << "CERTS: " << certCount << std::endl;
+            for(CFIndex i = 0; i < certCount; ++i)
+            {
+                SecCertificateRef cert = (SecCertificateRef) CFArrayGetValueAtIndex(certs, i);
+                
+                std::clog << "CERTIFICATE" << std::endl;
+                CFRetain(cert);
+                Certificate c( new CertificateImpl(cert) );
+                _certificates.push_back(c);
+            }
         }
     }
+
+    CFRelease(items);
 }
 
 #else
@@ -348,55 +338,29 @@ void CertificateStore::loadPkcs12(const char* data, size_t len, const char* pass
     if( ! status )
         throw InvalidCertificate("invalid PKCS12 content");
 
-    try
+    // TODO: use smart pointers later...
+
+    if(cert) 
     {
-        if(cert) 
-        {
-            X509AutoPtr x509(cert);
-            Certificate c( new CertificateImpl(x509.get()) );
-            _certificates.push_back(c);
-            x509.release();
-
-            if(pkey)
-            {
-                PrivateKey pk( new PrivateKeyImpl(pkey) );
-                _identities.push_back( Identity(c, pk) );
-                pkey = 0;
-            }
-        }
-
-        if(pkey) 
-        {
-            EVP_PKEY_free(pkey);
-            pkey = NULL;
-        }
-    
-        if( ca )
-        {
-            for(int i = 0; i < sk_X509_num(ca); i++)
-            {
-                X509AutoPtr x509( sk_X509_pop(ca) );
-                Certificate cert( new CertificateImpl(x509.get()) );
-                _certificates.push_back(cert);
-                x509.release();
-            }
-
-            sk_X509_pop_free(ca, X509_free);
-            ca = NULL;
-        }  
-    } 
-    catch(...)
-    {
-        // TODO: use smart pointers later...
-
-        if(pkey) 
-            EVP_PKEY_free(pkey);
-
-        if( ca )
-            sk_X509_pop_free(ca, X509_free);
-        
-        throw;
+        X509AutoPtr x509(cert);
+        Certificate c( new CertificateImpl(x509.get(), pkey) );
+        _certificates.push_back(c);
+        x509.release();
     }
+    
+    if(ca)
+    {
+        for(int i = 0; i < sk_X509_num(ca); i++)
+        {
+            X509AutoPtr x509( sk_X509_pop(ca) );
+            Certificate cert( new CertificateImpl(x509.get()) );
+            _certificates.push_back(cert);
+            x509.release();
+        }
+
+        sk_X509_pop_free(ca, X509_free);
+        ca = NULL;
+    }  
 }
 
 #endif

@@ -51,7 +51,8 @@ namespace Ssl {
 #ifdef __APPLE__
 
 Connection::Connection(Context& ctx, std::streambuf& ios, int mode)
-: _context(0)
+: _ctx(&ctx)
+, _context(0)
 , _ios(&ios)
 , _iocount(0)
 , _connected(false)

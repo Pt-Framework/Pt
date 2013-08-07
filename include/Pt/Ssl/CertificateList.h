@@ -75,26 +75,6 @@ class PT_SSL_API Certificate
 };
 
 
-class Identity
-{
-    public:
-        Identity(const Certificate& cert, const PrivateKey& key);
-
-        ~Identity();
-
-        const Certificate& certificate() const
-        { return _cert; }
-
-        const PrivateKey& privateKey() const
-        { return _key; }
-
-    private:
-        Certificate _cert;
-        PrivateKey _key;
-        
-};
-
-
 //! \brief Certificate list.
 class PT_SSL_API CertificateList
 {
@@ -147,18 +127,12 @@ class PT_SSL_API CertificateList
 };
 
 
-typedef std::vector<Identity> IdentityList;
-
-
 class PT_SSL_API CertificateStore : private NonCopyable
 {
     public:
         CertificateStore();
 
         ~CertificateStore();
-
-        const IdentityList& identities()
-        { return _identities; }
 
         const CertificateList certificates()
         { return _certificates; }
@@ -170,7 +144,6 @@ class PT_SSL_API CertificateStore : private NonCopyable
         void loadPkcs12(std::istream& is, const char* passwd);
 
     private:
-        IdentityList _identities;
         CertificateList _certificates;
 };
 
