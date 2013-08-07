@@ -24,3 +24,7 @@ openssl pkcs12 -export -inkey server.key -in server.cer -out server-with-passwor
 openssl pkcs12 -export -inkey client.key -in client.cer -out client-with-password.p12
 
 123
+
+-------------------------------------------------------------------------------
+
+openssl x509 -text -in cert.pem
