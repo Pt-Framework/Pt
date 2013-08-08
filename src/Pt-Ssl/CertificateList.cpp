@@ -26,7 +26,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#include "CertificateListImpl.h"
+#include "CertificateImpl.h"
 #include "PrivateKeyImpl.h"
 #include <Pt/Ssl/CertificateList.h>
 #include <Pt/Ssl/PrivateKey.h>
@@ -168,7 +168,8 @@ CertificateStore::CertificateStore()
 
     OSStatus status = SecItemCopyMatching(dict, (CFTypeRef*)&items);
 
-    std::clog << "FOUND: " << CFDictionaryGetCount(dict) << std::endl;
+    if(items)
+        std::clog << "FOUND: " << CFArrayGetCount(items) << std::endl;
 
     CFRelease(dict);
 
@@ -367,6 +368,46 @@ void CertificateStore::loadPkcs12(const char* data, size_t len, const char* pass
 
 #endif
 
+bool CertificateStore::empty() const
+{
+    return _certificates.empty();
+}
+
+
+size_t CertificateStore::size() const
+{
+    return _certificates.size();
+}
+
+
+CertificateStore::Iterator CertificateStore::begin()
+{ 
+    Certificate* c = _certificates.empty() ? 0 : &_certificates[0];
+    return Iterator(c);
+}
+        
+
+CertificateStore::Iterator CertificateStore::end()
+{ 
+    Certificate* c = _certificates.empty() ? 0 : &_certificates[0] + _certificates.size(); 
+    return Iterator(c); 
+}
+
+
+CertificateStore::ConstIterator CertificateStore::begin() const
+{ 
+    const Certificate* c = _certificates.empty() ? 0 : &_certificates[0];
+    return ConstIterator(c);
+}
+        
+
+CertificateStore::ConstIterator CertificateStore::end() const
+{ 
+    const Certificate* c = _certificates.empty() ? 0 : &_certificates[0] + _certificates.size();
+    return ConstIterator(c); 
+}
+
+
 void CertificateStore::loadPkcs12(std::istream& is, const char* passwd)
 {
     std::vector<char> data;
@@ -389,106 +430,106 @@ void CertificateStore::loadPkcs12(std::istream& is, const char* passwd)
 // CertificateList
 //
 
-CertificateList::CertificateList()
-: _impl( new CertificateListImpl() )
-{
-}
-
-
-CertificateList::CertificateList(const CertificateList& list)
-: _impl( new CertificateListImpl( *(list._impl) ) )
-{
-}
-
-
-CertificateList::~CertificateList()
-{
-    delete _impl;
-}
-
-
-CertificateList& CertificateList::operator=(const CertificateList& list)
-{
-    *_impl = *(list._impl);
-    return *this;
-}
-
-
-void CertificateList::fromPem(const char* data, size_t len)
-{
-    _impl->fromPem(data, len);
-}
-
-
-void CertificateList::fromPem(std::istream& is)
-{
-    char rbuf[4096];
-    const std::streamsize rbufSize = sizeof(rbuf);
-    std::string data;
-    while( is ) 
-    {
-        is.read(rbuf, rbufSize);
-        size_t count = size_t( is.gcount() );
-        data.append(rbuf, count);
-    }
-
-    _impl->fromPem( data.c_str(), data.size() );
-}
-
-
-void CertificateList::fromPemFile(const char* path)
-{
-    std::ifstream ifs(path, std::ios::binary);
-    fromPem(ifs);
-}
-
-
-void CertificateList::clear()
-{ 
-    _impl->clear(); 
-}
-
-
-void CertificateList::push_back(const Certificate& cert)
-{
-    _impl->push_back(cert);
-}
-
-
-bool CertificateList::empty() const
-{
-    return _impl->empty();
-}
-
-
-size_t CertificateList::size() const
-{
-    return _impl->size();
-}
-
-
-CertificateList::Iterator CertificateList::begin()
-{ 
-    return Iterator( _impl->begin() );
-}
-        
-
-CertificateList::Iterator CertificateList::end()
-{ 
-    return Iterator( _impl->end() ); 
-}
-
-
-CertificateList::ConstIterator CertificateList::begin() const
-{ 
-    return ConstIterator( _impl->begin() );
-}
-        
-
-CertificateList::ConstIterator CertificateList::end() const
-{ 
-    return ConstIterator( _impl->end() ); 
-}
+//CertificateList::CertificateList()
+//: _impl( new CertificateListImpl() )
+//{
+//}
+//
+//
+//CertificateList::CertificateList(const CertificateList& list)
+//: _impl( new CertificateListImpl( *(list._impl) ) )
+//{
+//}
+//
+//
+//CertificateList::~CertificateList()
+//{
+//    delete _impl;
+//}
+//
+//
+//CertificateList& CertificateList::operator=(const CertificateList& list)
+//{
+//    *_impl = *(list._impl);
+//    return *this;
+//}
+//
+//
+//void CertificateList::fromPem(const char* data, size_t len)
+//{
+//    _impl->fromPem(data, len);
+//}
+//
+//
+//void CertificateList::fromPem(std::istream& is)
+//{
+//    char rbuf[4096];
+//    const std::streamsize rbufSize = sizeof(rbuf);
+//    std::string data;
+//    while( is ) 
+//    {
+//        is.read(rbuf, rbufSize);
+//        size_t count = size_t( is.gcount() );
+//        data.append(rbuf, count);
+//    }
+//
+//    _impl->fromPem( data.c_str(), data.size() );
+//}
+//
+//
+//void CertificateList::fromPemFile(const char* path)
+//{
+//    std::ifstream ifs(path, std::ios::binary);
+//    fromPem(ifs);
+//}
+//
+//
+//void CertificateList::clear()
+//{ 
+//    _impl->clear(); 
+//}
+//
+//
+//void CertificateList::push_back(const Certificate& cert)
+//{
+//    _impl->push_back(cert);
+//}
+//
+//
+//bool CertificateList::empty() const
+//{
+//    return _impl->empty();
+//}
+//
+//
+//size_t CertificateList::size() const
+//{
+//    return _impl->size();
+//}
+//
+//
+//CertificateList::Iterator CertificateList::begin()
+//{ 
+//    return Iterator( _impl->begin() );
+//}
+//        
+//
+//CertificateList::Iterator CertificateList::end()
+//{ 
+//    return Iterator( _impl->end() ); 
+//}
+//
+//
+//CertificateList::ConstIterator CertificateList::begin() const
+//{ 
+//    return ConstIterator( _impl->begin() );
+//}
+//        
+//
+//CertificateList::ConstIterator CertificateList::end() const
+//{ 
+//    return ConstIterator( _impl->end() ); 
+//}
 
 } // namespace Ssl
 

@@ -99,27 +99,31 @@ void StreamBufferTest::Handshake()
         std::ifstream server_ifs("src/Pt-Ssl/tests/cert/server-with-password.p12", std::ios::binary);
     #endif
 
-    Pt::Ssl::CertificateStore certStore;
-    certStore.loadPkcs12(ifs, "123");
-    PT_UNIT_ASSERT( ! certStore.certificates().empty() );
+    //Pt::Ssl::CertificateStore certStore;
+    //certStore.loadPkcs12(ifs, "123");
+    //PT_UNIT_ASSERT( ! certStore.empty() );
 
     Pt::Ssl::CertificateStore caStore;
     caStore.loadPkcs12(ifs_ca, "123");
-    PT_UNIT_ASSERT( ! caStore.certificates().empty() );
+    PT_UNIT_ASSERT( ! caStore.empty() );
 
     Pt::Ssl::CertificateStore serverCerts;
     serverCerts.loadPkcs12(server_ifs, "123");
-    PT_UNIT_ASSERT( ! serverCerts.certificates().empty() );
+    PT_UNIT_ASSERT( ! serverCerts.empty() );
 
     Pt::Ssl::Context serverContext;
-    serverContext.setCertificate( *serverCerts.certificates().begin() );
-    serverContext.setCACertificates( caStore.certificates() );
+    serverContext.setCertificate( *serverCerts.begin() );
+    serverContext.setCACertificates( caStore );
     serverContext.setVerifyMode(Pt::Ssl::Context::VerifyPeerRequired);
 
     // client-side SSL context
     Pt::Ssl::Context clientContext;
-    clientContext.setCertificate( *certStore.certificates().begin() );
-    clientContext.setCACertificates( caStore.certificates() );
+    clientContext.loadPkcs12(ifs, "123");
+    const Pt::Ssl::Certificate* cert = clientContext.findCertificate("Atlantis Mainframe");
+    PT_UNIT_ASSERT( cert != 0 );
+
+    clientContext.setCertificate( *cert );
+    clientContext.setCACertificates( caStore );
     clientContext.setVerifyMode(Pt::Ssl::Context::VerifyPeer);
 
     // client begins the handshake

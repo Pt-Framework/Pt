@@ -119,19 +119,6 @@ int main(int argc, char** argv)
         log_debug("OpenSSL HTTP test progam started");
         
         Pt::Ssl::Context sslctx;  
-
-        Pt::Ssl::CertificateList trustedCACert;
-        trustedCACert.fromPem(caPemData, sizeof(caPemData));
-
-        Pt::Ssl::CertificateList clientCertChain;
-        clientCertChain.fromPem(clientCertPemData, sizeof(clientCertPemData));
-
-        Pt::Ssl::PrivateKey clientPrivKey("");
-        clientPrivKey.fromPem(clientKeyData, sizeof(clientKeyData));
-        
-        sslctx.setCACertificates(trustedCACert);
-        sslctx.setCertificateChain(clientCertChain);
-        sslctx.setPrivateKey(clientPrivKey);
         sslctx.setVerifyMode(Pt::Ssl::Context::VerifyNone);
 
         Pt::Net::TcpSocket socket;

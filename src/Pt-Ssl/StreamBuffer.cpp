@@ -27,20 +27,20 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "CertificateListImpl.h"
 #include <Pt/Ssl/StreamBuffer.h>
 #include <Pt/Ssl/SslError.h>
 #include <Pt/System/Logger.h>
 #include <Pt/System/IOError.h>
-#include <openssl/ssl.h>
-#include <openssl/err.h>
 #include <cassert>
 #include <cstring>
 
 #ifdef __APPLE__
-#import <Security/Security.h>
-#import <CoreFoundation/CoreFoundation.h>
-#import <CoreFoundation/CFDictionary.h>
+    #import <Security/Security.h>
+    #import <CoreFoundation/CoreFoundation.h>
+    #import <CoreFoundation/CFDictionary.h>
+#else
+    #include <openssl/ssl.h>
+    #include <openssl/err.h>
 #endif
 
 log_define("Pt.Ssl.StreamBuffer")

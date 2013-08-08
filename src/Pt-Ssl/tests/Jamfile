@@ -4,7 +4,7 @@ SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Ssl ;
 
 Main Pt-Ssl-test : Pt-Ssl-test.cpp
                    ContextTest.cpp
-                   IOBufferTest.cpp
+                   #IOBufferTest.cpp
                    StreamBufferTest.cpp
                    ;
 LinkSharedLibraries Pt-Ssl-test : Pt Pt-Net Pt-Ssl Pt-System Pt-Unit ;
@@ -15,9 +15,9 @@ Main HttpsClientDemo : HttpsClientDemo.cpp ;
 LinkSharedLibraries HttpsClientDemo : Pt-Ssl Pt-Net Pt-System Pt Pt-Http ;
 MakeLocate HttpsClientDemo : $(PT_OUTPUT_TARGET) ;
 
-Main HttpsServerDemo : HttpsServerDemo.cpp ;
-LinkSharedLibraries HttpsServerDemo : Pt-Ssl Pt-Net Pt-System Pt ;
-MakeLocate HttpsServerDemo : $(PT_OUTPUT_TARGET) ;
+#Main HttpsServerDemo : HttpsServerDemo.cpp ;
+#LinkSharedLibraries HttpsServerDemo : Pt-Ssl Pt-Net Pt-System Pt ;
+#MakeLocate HttpsServerDemo : $(PT_OUTPUT_TARGET) ;
 
 #Main SSLHTTPServerClientTest : SSLHTTPServerClientTest.cpp ;
 #LinkSharedLibraries SSLHTTPServerClientTest : Pt-Ssl Pt-Net Pt-System Pt ;

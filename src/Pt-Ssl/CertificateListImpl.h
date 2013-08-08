@@ -54,291 +54,91 @@ namespace Pt {
 
 namespace Ssl {
 
-#ifdef __APPLE__
-
-class CertificateImpl
-{
-    public:
-        explicit CertificateImpl(SecCertificateRef cert)
-        : _ident(0)
-        , _cert(cert)
-        , _refs(1)
-        {
-            assert(_cert);
-        }
-
-        explicit CertificateImpl(SecIdentityRef identity)
-        : _ident(identity)
-        , _cert(0)
-        , _refs(1)
-        {
-            SecIdentityCopyCertificate(identity, &_cert);
-            assert(_cert);
-        }
-
-        ~CertificateImpl()
-        {
-            if(_ident)
-                CFRelease(_ident);
-
-            CFRelease(_cert);
-        }
-
-        void ref()
-        { atomicIncrement(_refs); }
-
-        int unref()
-        { return atomicDecrement(_refs); }
-
-        int serialNumber() const
-        {
-            CFDataRef data = SecCertificateCopySerialNumber(_cert, NULL);
-            
-            if( ! data )
-                return 0;
-                
-            const size_t sz = sizeof(int); 
-            UInt8 buf[sz];
-            CFDataGetBytes(data, CFRangeMake(0, sz), buf);
-            CFRelease(data);
-            
-            int n = 0;
-            memcpy(&n, buf, sz);
-            return n;
-        }
-
-        std::string issuer() const
-        {
-            return "";
-        }
-
-        std::string subject() const
-        {
-            return "";
-        }
-        
-        std::string notBefore() const
-        {
-            return "";
-        }
-
-        std::string notAfter() const
-        {
-            return "";
-        }
-
-        PublicKey publicKey() const
-        {
-            return PublicKey(0);
-        }
-        
-        SecIdentityRef identity()
-        { return _ident; }
-
-    private:
-        SecIdentityRef _ident;
-        SecCertificateRef _cert;
-        Pt::atomic_t _refs;
-};
-
-#else
-    
-class CertificateImpl
-{
-    public:
-        explicit CertificateImpl(x509_st* x509, evp_pkey_st* pkey = 0)
-        : _x509(x509)
-        , _pkey(pkey)
-        , _refs(1)
-        {
-            assert(_x509);
-        }
-
-        CertificateImpl(const char* data, size_t len)
-        : _x509(0)
-        , _refs(1)
-        {
-            BioAutoPtr in( BIO_new_mem_buf( (void*) data, len ) );
-
-            // Try to read/parse DER encoded certificate
-            _x509 = d2i_X509_bio(in.get(), 0);
-            if( ! _x509)
-                throw InvalidCertificate("invalid DER certificate");
-        }
-
-        ~CertificateImpl()
-        {
-            if(_pkey)
-                EVP_PKEY_free(_pkey);
-
-            X509_free(_x509);
-        }
-
-        void ref()
-        { atomicIncrement(_refs); }
-
-        int unref()
-        { return atomicDecrement(_refs); }
-
-        int serialNumber() const
-        {
-            return ASN1_INTEGER_get( X509_get_serialNumber(_x509) );
-        }
-
-        std::string issuer() const
-        {
-            return toString( X509_get_issuer_name(_x509) );
-        }
-
-        std::string subject() const
-        {
-            return toString( X509_get_subject_name(_x509) );
-        }
-        
-        std::string notBefore() const
-        {
-            return toString( X509_get_notBefore(_x509) );
-        }
-
-        std::string notAfter() const
-        {
-            return toString( X509_get_notAfter(_x509) );
-        }
-
-        PublicKey publicKey() const
-        {
-            EVP_PKEY* pkey = X509_get_pubkey( _x509 );
-            return PublicKey(pkey);
-        }
-
-        x509_st* getX509() const
-        { return _x509; }
-
-        evp_pkey_st* evp()
-        { return _pkey; }
-
-    private:
-        static std::string toString(const X509_NAME* val)
-        {
-            int len = 0;
-            char buf[1024];
-            
-            BioAutoPtr out( BIO_new(BIO_s_mem()) );
-            if( X509_NAME_print( out.get(), (X509_NAME*) val, 0) ) 
-            {
-                len = BIO_read( out.get(), buf, sizeof(buf) );
-            }
-            
-            return std::string(buf, len);
-        }
-
-        static std::string toString(ASN1_TIME* val)
-        {
-            int len = 0;
-            char buf[1024];
-
-            BioAutoPtr out( BIO_new(BIO_s_mem()) );
-            if( ASN1_TIME_print( out.get(), val) )
-            {
-                len = BIO_read( out.get(), buf, sizeof(buf) );
-            }
-
-            return std::string(buf, len);
-        }
-
-    private:
-        x509_st* _x509;
-        evp_pkey_st* _pkey;
-        Pt::atomic_t _refs;
-};
-
-#endif
-
-class CertificateListImpl
-{
-    public:
-        CertificateListImpl()
-        { }
-
-        CertificateListImpl(const CertificateListImpl& list)
-        { _certificates = list._certificates; }
-
-        ~CertificateListImpl()
-        { clear(); }
-
-        void push_back(const Certificate& cert)
-        { _certificates.push_back(cert); }
-
-        void clear()
-        { _certificates.clear(); }
-
-        size_t size() const
-        { return _certificates.size(); }
-
-        bool empty() const
-        { return _certificates.empty(); }
-
-        Certificate* begin()
-        { 
-            return _certificates.empty() ? 0 : &_certificates[0]; 
-        }
-
-        Certificate* end()
-        { 
-            return _certificates.empty() ? 0 : &_certificates[0] + _certificates.size(); 
-        }
-
-        const Certificate* begin() const
-        { 
-            return _certificates.empty() ? 0 : &_certificates[0]; 
-        }
-
-        const Certificate* end() const
-        { 
-            return _certificates.empty() ? 0 : &_certificates[0] + _certificates.size(); 
-        }
-        
-        //For PEM we use:
-        //   PEM_read_PUBKEY
-        //   PEM_read_bio_PrivateKey
-        //
-        //For reading  ASN1 (DER) we use:
-        //  d2i_PUBKEY_bio
-        //  d2i_PrivateKey_bio
-        //
-        //For writing, I believe the functions are:
-        //   PEM_write_bio_PUBKEY
-        //   PEM_write_bio_PrivateKey
-        //   i2d_PUBKEY_bio
-        //   i2d_PrivateKey_bio
-        
-        void fromPem(const char* data, size_t len)
-        {
-            this->clear();
-
-#ifndef __APPLE__
-
-            BioAutoPtr in( BIO_new_mem_buf( (void*) data, len ) );
-
-            // Try to read/parse the CA X509 certificates
-            while(true) 
-            {
-                // Read the certificate
-                X509AutoPtr x509 ( PEM_read_bio_X509_AUX(in.get(), 0, 0, 0) );
-                if( ! x509) 
-                  break;
-
-                Certificate cert( new CertificateImpl(x509.get()) );
-                this->push_back(cert);
-                
-                x509.release();
-            }
-#endif
-        }
-
-    private:
-        std::vector<Certificate> _certificates;
-};
+//class CertificateListImpl
+//{
+//    public:
+//        CertificateListImpl()
+//        { }
+//
+//        CertificateListImpl(const CertificateListImpl& list)
+//        { _certificates = list._certificates; }
+//
+//        ~CertificateListImpl()
+//        { clear(); }
+//
+//        void push_back(const Certificate& cert)
+//        { _certificates.push_back(cert); }
+//
+//        void clear()
+//        { _certificates.clear(); }
+//
+//        size_t size() const
+//        { return _certificates.size(); }
+//
+//        bool empty() const
+//        { return _certificates.empty(); }
+//
+//        Certificate* begin()
+//        { 
+//            return _certificates.empty() ? 0 : &_certificates[0]; 
+//        }
+//
+//        Certificate* end()
+//        { 
+//            return _certificates.empty() ? 0 : &_certificates[0] + _certificates.size(); 
+//        }
+//
+//        const Certificate* begin() const
+//        { 
+//            return _certificates.empty() ? 0 : &_certificates[0]; 
+//        }
+//
+//        const Certificate* end() const
+//        { 
+//            return _certificates.empty() ? 0 : &_certificates[0] + _certificates.size(); 
+//        }
+//        
+//        //For PEM we use:
+//        //   PEM_read_PUBKEY
+//        //   PEM_read_bio_PrivateKey
+//        //
+//        //For reading  ASN1 (DER) we use:
+//        //  d2i_PUBKEY_bio
+//        //  d2i_PrivateKey_bio
+//        //
+//        //For writing, I believe the functions are:
+//        //   PEM_write_bio_PUBKEY
+//        //   PEM_write_bio_PrivateKey
+//        //   i2d_PUBKEY_bio
+//        //   i2d_PrivateKey_bio
+//        
+//        void fromPem(const char* data, size_t len)
+//        {
+//            this->clear();
+//
+//#ifndef __APPLE__
+//
+//            BioAutoPtr in( BIO_new_mem_buf( (void*) data, len ) );
+//
+//            // Try to read/parse the CA X509 certificates
+//            while(true) 
+//            {
+//                // Read the certificate
+//                X509AutoPtr x509 ( PEM_read_bio_X509_AUX(in.get(), 0, 0, 0) );
+//                if( ! x509) 
+//                  break;
+//
+//                Certificate cert( new CertificateImpl(x509.get()) );
+//                this->push_back(cert);
+//                
+//                x509.release();
+//            }
+//#endif
+//        }
+//
+//    private:
+//        std::vector<Certificate> _certificates;
+//};
 
 } // namespace Ssl
 

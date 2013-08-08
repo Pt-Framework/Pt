@@ -116,7 +116,9 @@ class PT_SSL_API Context : public NonCopyable
             by a trusted Certificate Authority. In this case \a trustedCert
             must contain the certificates of all CAs that you trust.
          */
-        void setCACertificates(const CertificateList& trustedCert);
+        //void setCACertificates(const CertificateList& trustedCert);
+
+        void setCACertificates(const CertificateStore& trustedCert);
 
         /** @brief Set the main certificate of this context.
 
@@ -140,18 +142,18 @@ class PT_SSL_API Context : public NonCopyable
             The remaining certificates are the certificates of the intermediate
             CAs.
         */
-        void setCertificateChain(const CertificateList& certs);
+        //void setCertificateChain(const CertificateList& certs);
 
-        /** @brief Set the private key for this context.
+        void loadPkcs12(const char* data, size_t len, const char* passwd);
 
-            Setting a private key is mandatory for a server context. Setting
-            a private key is for a client context is only needed for 
-            certificate-based client authentication.
-        */
-        void setPrivateKey(const PrivateKey& privKey);
+        void loadPkcs12(std::istream& is, const char* passwd);
 
-        //! @internal
-        ssl_ctx_st* impl() const;
+        typedef std::vector<Certificate> Certificates;
+
+        const Certificates& certificates()
+        { return _certificates; }
+
+        const Certificate* findCertificate(const std::string& subject);
 
 #ifdef __APPLE__
 
@@ -160,19 +162,24 @@ class PT_SSL_API Context : public NonCopyable
     
     private:
         Protocol        _protocol;
-        CertificateList _caCerts;
+        std::vector<Certificate> _caCerts;
         Certificate     _cert;
-        CertificateList _extraCerts;
+        //CertificateList _extraCerts;
 #else
+        //! @internal
+        ssl_ctx_st* impl() const;
+
     private:
         ssl_ctx_st*     _ctx;
         Protocol        _protocol;
-        CertificateList _caCerts;
+        std::vector<Certificate> _caCerts;
         Certificate     _cert;
         std::vector<x509_st*> _extraCerts;
         PrivateKey      _privKey;
         void*           _reserved;
 #endif
+
+        Certificates _certificates;
 };
 
 } // namespace Ssl

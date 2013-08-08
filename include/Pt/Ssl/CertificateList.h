@@ -54,6 +54,9 @@ class PT_SSL_API Certificate
 
         Certificate& operator=(const Certificate& cert);
 
+        bool isValid() const
+        { return _impl != 0; }
+
         int serialNumber() const;
 
         std::string issuer() const;
@@ -72,41 +75,28 @@ class PT_SSL_API Certificate
         CertificateImpl* _impl;
 };
 
+class CertificateIterator;
+class CertificateConstIterator;
 
-//! \brief Certificate list.
-class PT_SSL_API CertificateList
-{
+class PT_SSL_API CertificateStore : private NonCopyable
+{    
     public:
         //! @brief Forward iterator for certificate lists
-        class Iterator;
+        typedef CertificateIterator Iterator;
 
         //! @brief Forward iterator for constant certificate lists
-        class ConstIterator;
+        typedef CertificateConstIterator ConstIterator;
 
     public:
-        //! \brief Instantiate an empty certificate-list.
-        CertificateList();
+        CertificateStore();
 
-        CertificateList(const CertificateList& list);
+        ~CertificateStore();
 
-        //! \brief Standard dtor.
-        ~CertificateList();
+        void addPem(const char* data, size_t len, const std::string& passwd);
 
-        CertificateList& operator=(const CertificateList& list);
+        void loadPkcs12(const char* data, size_t len, const char* passwd);
 
-        //! \brief Read certifictates in PEM format.
-        void fromPem(const char* data, size_t len);
-
-        //! \brief Read certifictates in PEM format from a stream.
-        void fromPem(std::istream& is);
-
-        //! \brief Read certifictates in PEM format from a file.
-        void fromPemFile(const char* path);
-
-        //! \brief Clear (delete) any loaded certificate.
-        void clear();
-
-        void push_back(const Certificate& cert);
+        void loadPkcs12(std::istream& is, const char* passwd);
 
         bool empty() const;
 
@@ -121,54 +111,33 @@ class PT_SSL_API CertificateList
         ConstIterator end() const;
 
     private:
-        class CertificateListImpl* _impl;
-};
-
-
-class PT_SSL_API CertificateStore : private NonCopyable
-{
-    public:
-        CertificateStore();
-
-        ~CertificateStore();
-
-        const CertificateList certificates()
-        { return _certificates; }
-
-        void addPem(const char* data, size_t len, const std::string& passwd);
-
-        void loadPkcs12(const char* data, size_t len, const char* passwd);
-
-        void loadPkcs12(std::istream& is, const char* passwd);
-
-    private:
-        CertificateList _certificates;
+        std::vector<Certificate> _certificates;
 };
 
 
 //! @brief Forward iterator for certificate lists
-class CertificateList::Iterator
+class CertificateIterator
 {
     public:
-        Iterator()
+        CertificateIterator()
         : _c(0)
         {}
 
-        Iterator(const Iterator& other)
+        CertificateIterator(const CertificateIterator& other)
         : _c(other._c)
         {}
 
-        explicit Iterator(Certificate* c)
+        explicit CertificateIterator(Certificate* c)
         : _c(c)
         {}
 
-        Iterator& operator=(const Iterator& other)
+        CertificateIterator& operator=(const CertificateIterator& other)
         {
             _c = other._c;
             return *this;
         }
 
-        Iterator& operator++()
+        CertificateIterator& operator++()
         {
             ++_c;
             return *this;
@@ -180,10 +149,10 @@ class CertificateList::Iterator
         Certificate* operator->() const
         { return _c; }
 
-        bool operator!=(const Iterator& other) const
+        bool operator!=(const CertificateIterator& other) const
         { return _c != other._c; }
 
-        bool operator==(const Iterator& other) const
+        bool operator==(const CertificateIterator& other) const
         { return _c == other._c; }
 
     private:
@@ -191,28 +160,28 @@ class CertificateList::Iterator
 };
 
 //! @brief Forward iterator for certificate lists
-class CertificateList::ConstIterator
+class CertificateConstIterator
 {
     public:
-        ConstIterator()
+        CertificateConstIterator()
         : _c(0)
         {}
 
-        ConstIterator(const ConstIterator& other)
+        CertificateConstIterator(const CertificateConstIterator& other)
         : _c(other._c)
         {}
 
-        explicit ConstIterator(const Certificate* c)
+        explicit CertificateConstIterator(const Certificate* c)
         : _c(c)
         {}
 
-        ConstIterator& operator=(const ConstIterator& other)
+        CertificateConstIterator& operator=(const CertificateConstIterator& other)
         {
             _c = other._c;
             return *this;
         }
 
-        ConstIterator& operator++()
+        CertificateConstIterator& operator++()
         {
             ++_c;
             return *this;
@@ -224,15 +193,67 @@ class CertificateList::ConstIterator
         const Certificate* operator->() const
         { return _c; }
 
-        bool operator!=(const ConstIterator& other) const
+        bool operator!=(const CertificateConstIterator& other) const
         { return _c != other._c; }
 
-        bool operator==(const ConstIterator& other) const
+        bool operator==(const CertificateConstIterator& other) const
         { return _c == other._c; }
 
     private:
         const Certificate* _c;
 };
+
+
+//! \brief Certificate list.
+//class PT_SSL_API CertificateList
+//{
+//    public:
+//        //! @brief Forward iterator for certificate lists
+//        typedef CertificateIterator Iterator;
+//
+//        //! @brief Forward iterator for constant certificate lists
+//        typedef CertificateConstIterator ConstIterator;
+//
+//    public:
+//        //! \brief Instantiate an empty certificate-list.
+//        CertificateList();
+//
+//        CertificateList(const CertificateList& list);
+//
+//        //! \brief Standard dtor.
+//        ~CertificateList();
+//
+//        CertificateList& operator=(const CertificateList& list);
+//
+//        //! \brief Read certifictates in PEM format.
+//        void fromPem(const char* data, size_t len);
+//
+//        //! \brief Read certifictates in PEM format from a stream.
+//        void fromPem(std::istream& is);
+//
+//        //! \brief Read certifictates in PEM format from a file.
+//        void fromPemFile(const char* path);
+//
+//        //! \brief Clear (delete) any loaded certificate.
+//        void clear();
+//
+//        void push_back(const Certificate& cert);
+//
+//        bool empty() const;
+//
+//        size_t size() const;
+//
+//        Iterator begin();
+//        
+//        Iterator end();
+//
+//        ConstIterator begin() const;
+//        
+//        ConstIterator end() const;
+//
+//    private:
+//        class CertificateListImpl* _impl;
+//};
 
 } // namespace Ssl
 

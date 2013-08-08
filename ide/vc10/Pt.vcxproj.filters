@@ -1026,6 +1026,9 @@
     <ClInclude Include="..\..\src\Pt-Hmi\gdi\KeyboardDeviceImpl.h">
       <Filter>Pt-Hmi\Sources\gdi</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Ssl\CertificateImpl.h">
+      <Filter>Pt-Ssl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">

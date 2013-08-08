@@ -304,14 +304,14 @@ class ServerTest : public Pt::Unit::TestSuite
             
             Pt::Ssl::CertificateStore clientCerts;
             clientCerts.loadPkcs12(ifs, "123");
-            PT_UNIT_ASSERT( ! clientCerts.certificates().empty() );
+            PT_UNIT_ASSERT( ! clientCerts.empty() );
 
             Pt::Ssl::CertificateStore caStore;
             caStore.loadPkcs12(ifs_ca, "123");
-            PT_UNIT_ASSERT( ! caStore.certificates().empty() );
+            PT_UNIT_ASSERT( ! caStore.empty() );
 
-            ctx.setCertificate( *clientCerts.certificates().begin() );
-            ctx.setCACertificates( caStore.certificates() );
+            ctx.setCertificate( *clientCerts.begin() );
+            ctx.setCACertificates( caStore );
             ctx.setVerifyMode(Pt::Ssl::Context::VerifyPeer);
         }
 
@@ -331,14 +331,14 @@ class ServerTest : public Pt::Unit::TestSuite
 
             Pt::Ssl::CertificateStore caStore;
             caStore.loadPkcs12(ifs_ca, "123");
-            PT_UNIT_ASSERT( ! caStore.certificates().empty() );
+            PT_UNIT_ASSERT( ! caStore.empty() );
 
             Pt::Ssl::CertificateStore serverCerts;
             serverCerts.loadPkcs12(server_ifs, "123");
-            PT_UNIT_ASSERT( ! serverCerts.certificates().empty() );
+            PT_UNIT_ASSERT( ! serverCerts.empty() );
 
-            ctx.setCertificate( *serverCerts.certificates().begin() );
-            ctx.setCACertificates( caStore.certificates() );
+            ctx.setCertificate( *serverCerts.begin() );
+            ctx.setCACertificates( caStore );
             ctx.setVerifyMode(Pt::Ssl::Context::VerifyPeerRequired);
         }
 #endif

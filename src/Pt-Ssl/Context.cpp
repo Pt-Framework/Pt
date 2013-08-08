@@ -27,8 +27,11 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "OpenSsl.h"
-#include "CertificateListImpl.h"
+#ifndef __APPLE__
+    #include "OpenSsl.h"
+#endif
+
+#include "CertificateImpl.h"
 #include <Pt/Ssl/Context.h>
 #include <Pt/Ssl/SslError.h>
 #include <Pt/System/Mutex.h>
@@ -92,6 +95,7 @@ void Context::assign(const Context& ctx)
     _cert =       ctx._cert;
     _extraCerts = ctx._extraCerts;
     
+    _certificates = ctx._certificates;
     // VerifyMode
     // VerifyDepth
 }
@@ -99,7 +103,12 @@ void Context::assign(const Context& ctx)
 
 void Context::setCACertificates(const CertificateList& caCerts)
 {
-    _caCerts = caCerts;
+    _caCerts.clear();
+
+    for(CertificateStore::ConstIterator it = caCerts.begin(); it != caCerts.end(); ++it) 
+    {
+        _caCerts.push_back(*it);
+    }
 }
 
 
@@ -125,8 +134,113 @@ void Context::setCertificateChain(const CertificateList& certs)
 }
 
 
-void Context::setPrivateKey(const PrivateKey& key)
+void CertificateStore::loadPkcs12(const char* pkcs12, size_t len, const char* passwd)
 {
+    std::clog << "loadPkcs12: " << passwd << std::endl;
+
+    CFDataRef data = CFDataCreate(NULL, reinterpret_cast<const UInt8*>(pkcs12), len);
+    if( ! data)
+        throw std::runtime_error("CFDataCreate");
+
+    CFStringRef password = CFStringCreateWithCString(NULL, passwd, kCFStringEncodingUTF8);
+    
+    const void* keys[]   = { kSecImportExportPassphrase };
+    const void* values[] = { password };
+
+    CFIndex hasPassword = CFStringGetLength(password) > 0 ? 1 : 0;
+
+    CFDictionaryRef options = CFDictionaryCreate(NULL, keys, values, hasPassword, NULL, NULL);
+    if( ! options)
+        throw std::runtime_error("CFDictionaryCreate");
+
+    CFArrayRef items = NULL;
+    
+    OSStatus securityError = SecPKCS12Import(data, options, &items);
+    std::clog << "SecPKCS12Import: " <<  securityError << std::endl;
+    assert(securityError == noErr);
+    
+    CFRelease(password);
+    CFRelease(options);
+    CFRelease(data);
+
+    CFIndex count = CFArrayGetCount(items);
+
+    for(CFIndex n = 0; n < count; ++n)
+    {
+        CFDictionaryRef item = (CFDictionaryRef) CFArrayGetValueAtIndex(items, n);
+
+        SecIdentityRef identity = (SecIdentityRef) CFDictionaryGetValue(item, kSecImportItemIdentity);
+        if(identity)
+        {
+            std::clog << "IDENTITY_" << n << std::endl;
+            CFRetain(identity);
+            Certificate c( new CertificateImpl(identity) );
+            _certificates.push_back(c);
+        }
+
+        CFArrayRef certs = (CFArrayRef) CFDictionaryGetValue(item, kSecImportItemCertChain);
+        if(certs)
+        {
+            CFIndex certCount = CFArrayGetCount(certs);
+            std::clog << "CERTS_" << n << ": " << certCount << std::endl;
+            for(CFIndex i = 0; i < certCount; ++i)
+            {
+                SecCertificateRef cert = (SecCertificateRef) CFArrayGetValueAtIndex(certs, i);
+                
+                CFStringRef summary = SecCertificateCopySubjectSummary(cert);
+                if(summary)
+                {
+                    char buf[200];
+                    CFStringGetCString(summary, buf, 200, kCFStringEncodingUTF8);
+                    CFRelease(summary);
+                    std::cerr.write(buf, 16) << std::endl;
+                }
+
+                CFRetain(cert);
+                Certificate c( new CertificateImpl(cert) );
+                _certificates.push_back(c);
+            }
+        }
+    }
+
+    CFRelease(items);
+}
+
+
+const Certificate* Context::findCertificate(const std::string& subject)
+{
+    CFStringRef cfsubj = CFStringCreateWithCString(NULL, subject.c_str(), kCFStringEncodingUTF8);
+
+    // NOTE: kSecMatchSearchList -> (id)keychain
+    const void* keys[]   = { kSecClass,         kSecReturnRef,  kSecMatchLimit,    kSecMatchSubjectContains 0 };
+    const void* values[] = { kSecClassIdentity, kCFBooleanTrue, kSecMatchLimitOne, cfsubj, 0 };
+
+    CFDictionaryRef dict = CFDictionaryCreate(NULL, keys, values, 4, NULL, NULL);
+    if( ! dict)
+        throw std::logic_error("CFDictionaryCreate");
+
+    CFArrayRef items = NULL;
+    OSStatus status = SecItemCopyMatching(dict, (CFTypeRef*)&items);
+    CFRelease(dict);
+
+    if(items)
+      std::clog << "findCertificate: " << CFArrayGetCount(items) << std::endl;
+
+    if( status ) 
+        return 0;
+
+    CFIndex count = CFArrayGetCount(items);
+
+    if(count > 0)
+    {
+        SecCertificateRef cert = (SecCertificateRef) CFArrayGetValueAtIndex(items, 0);
+        std::clog << "findCertificate: " << cert << std::endl;
+    }
+
+    if(items)
+        CFRelease(items);
+
+    return 0;
 }
 
 #else
@@ -462,9 +576,22 @@ X509* addExtraCert(SSL_CTX* ctx, X509* x)
 void Context::assign(const Context& ctx)
 {
     setProtocol(ctx._protocol);
-
-    setCACertificates(ctx._caCerts);
     setCertificate(ctx._cert);
+
+    _caCerts.clear();
+    X509_STOREAutoPtr cert_store( X509_STORE_new() );
+
+    for(std::vector<Certificate>::const_iterator it = ctx._caCerts.begin(); it != ctx._caCerts.end(); ++it) 
+    {
+        if( ! X509_STORE_add_cert(cert_store.get(), it->impl()->getX509()) )
+            throw InvalidCertificate("Could not store the CA certificate as a trusted certificate");
+
+        _caCerts.push_back(*it);
+    }
+
+    // Set it to the context
+    SSL_CTX_set_cert_store(_ctx, cert_store.get());
+    cert_store.release();
 
     std::vector<X509*>::const_iterator it;
     for(it = ctx._extraCerts.begin(); it != ctx._extraCerts.end(); ++it)
@@ -476,22 +603,47 @@ void Context::assign(const Context& ctx)
     int mode = SSL_CTX_get_verify_mode(_ctx);
     SSL_CTX_set_verify(_ctx, mode, 0);
 
-    setPrivateKey(ctx._privKey);
+    _privKey = ctx._privKey;
+
+    if( ! SSL_CTX_use_PrivateKey( _ctx, _privKey.impl() ) )
+        throw InvalidKey("invalid private key");
 }
 
 
-void Context::setCACertificates(const CertificateList& caCerts)
+//void Context::setCACertificates(const CertificateList& caCerts)
+//{
+//    // certificates to validate certificate presented by peer
+//    _caCerts = caCerts;
+//
+//    // Try to add the CA X509 certificates (if any)
+//    X509_STOREAutoPtr cert_store( X509_STORE_new() );
+//
+//    for(CertificateList::Iterator it = _caCerts.begin(); it != _caCerts.end(); ++it) 
+//    {
+//        if( ! X509_STORE_add_cert(cert_store.get(), it->impl()->getX509()) )
+//            throw InvalidCertificate("Could not store the CA certificate as a trusted certificate");
+//    }
+//
+//    // Set it to the context
+//    SSL_CTX_set_cert_store(_ctx, cert_store.get());
+//    cert_store.release();
+//}
+
+
+void Context::setCACertificates(const CertificateStore& caCerts)
 {
     // certificates to validate certificate presented by peer
-    _caCerts = caCerts;
+    _caCerts.clear();
 
     // Try to add the CA X509 certificates (if any)
     X509_STOREAutoPtr cert_store( X509_STORE_new() );
 
-    for(CertificateList::Iterator it = _caCerts.begin(); it != _caCerts.end(); ++it) 
+    for(CertificateStore::ConstIterator it = caCerts.begin(); it != caCerts.end(); ++it) 
     {
         if( ! X509_STORE_add_cert(cert_store.get(), it->impl()->getX509()) )
             throw InvalidCertificate("Could not store the CA certificate as a trusted certificate");
+
+        _caCerts.push_back(*it);
     }
 
     // Set it to the context
@@ -527,29 +679,76 @@ void Context::setCertificate(const Certificate& cert)
 }
 
 
-void Context::setCertificateChain(const CertificateList& certs)
+//void Context::setCertificateChain(const CertificateList& certs)
+//{
+//    CertificateList::ConstIterator it = certs.begin();
+//    if( it == certs.end() )
+//        throw InvalidCertificate("certificate chain too short");
+//
+//    this->setCertificate(*it);
+//    ++it;
+//
+//    for(; it != certs.end(); ++it)
+//    {
+//        X509* x509 = addExtraCert(_ctx, it->impl()->getX509());
+//        _extraCerts.push_back(x509);
+//    }
+//}
+
+
+void Context::loadPkcs12(const char* data, size_t len, const char* passwd)
 {
-    CertificateList::ConstIterator it = certs.begin();
-    if( it == certs.end() )
-        throw InvalidCertificate("certificate chain too short");
+    EVP_PKEY* pkey = NULL;
+    X509* cert = NULL;
+    STACK_OF(X509)* ca = NULL;
 
-    this->setCertificate(*it);
-    ++it;
+    BioAutoPtr in( BIO_new_mem_buf( (void*) data, len ) );
 
-    for(; it != certs.end(); ++it)
+    PKCS12* p12 = d2i_PKCS12_bio(in.get(), NULL);
+    if( ! p12)
+        throw InvalidCertificate("invalid PKCS12 data");
+
+    int status = PKCS12_parse(p12, passwd, &pkey, &cert, &ca);
+    PKCS12_free(p12);
+
+    if( ! status )
+        throw InvalidCertificate("invalid PKCS12 content");
+
+    // TODO: use smart pointers later...
+
+    if(cert) 
     {
-        X509* x509 = addExtraCert(_ctx, it->impl()->getX509());
-        _extraCerts.push_back(x509);
+        X509AutoPtr x509(cert);
+        Certificate c( new CertificateImpl(x509.get(), pkey) );
+        _certificates.push_back(c);
+        x509.release();
     }
+    
+    if(ca)
+    {
+        for(int i = 0; i < sk_X509_num(ca); i++)
+        {
+            X509AutoPtr x509( sk_X509_pop(ca) );
+            Certificate cert( new CertificateImpl(x509.get()) );
+            _certificates.push_back(cert);
+            x509.release();
+        }
+
+        sk_X509_pop_free(ca, X509_free);
+        ca = NULL;
+    }  
 }
 
 
-void Context::setPrivateKey(const PrivateKey& key)
+const Certificate* Context::findCertificate(const std::string& subject)
 {
-    _privKey = key;
+    for(std::vector<Certificate>::const_iterator it = _certificates.begin(); it != _certificates.end(); ++it) 
+    {
+        if( it->subject().find(subject) != std::string::npos )
+            return &(*it);
+    }
 
-    if( ! SSL_CTX_use_PrivateKey( _ctx, _privKey.impl() ) )
-        throw InvalidKey("invalid private key");
+    return 0;
 }
 
 
@@ -559,6 +758,24 @@ ssl_ctx_st* Context::impl() const
 }
 
 #endif
+
+void Context::loadPkcs12(std::istream& is, const char* passwd)
+{
+    std::vector<char> data;
+    char rbuf[4096];
+    const std::streamsize rbufSize = sizeof(rbuf);
+
+    while( is )
+    {
+        is.read( rbuf, rbufSize );
+        data.insert( data.end(), rbuf, rbuf + is.gcount() );
+    }
+
+    if( data.empty() )
+        return;
+
+    loadPkcs12(&data[0], data.size(), passwd);
+}
 
 } // namespace Ssl
 
