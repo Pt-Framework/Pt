@@ -251,8 +251,8 @@ void CertificateStore::loadPkcs12(const char* pkcs12, size_t len, const char* pa
                 {
                     char buf[200];
                     CFStringGetCString(summary, buf, 200, kCFStringEncodingUTF8);
+                    std::cerr << buf << std::endl;
                     CFRelease(summary);
-                    std::cerr.write(buf, 16) << std::endl;
                 }
 
                 CFRetain(cert);

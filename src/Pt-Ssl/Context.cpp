@@ -93,7 +93,7 @@ void Context::assign(const Context& ctx)
 
     _caCerts =    ctx._caCerts;
     _cert =       ctx._cert;
-    _extraCerts = ctx._extraCerts;
+    //_extraCerts = ctx._extraCerts;
     
     _certificates = ctx._certificates;
     // VerifyMode
@@ -101,7 +101,7 @@ void Context::assign(const Context& ctx)
 }
 
 
-void Context::setCACertificates(const CertificateList& caCerts)
+void Context::setCACertificates(const CertificateStore& caCerts)
 {
     _caCerts.clear();
 
@@ -118,23 +118,23 @@ void Context::setCertificate(const Certificate& cert)
 }
 
 
-void Context::setCertificateChain(const CertificateList& certs)
-{
-    CertificateList::ConstIterator it = certs.begin();
-    if( it == certs.end() )
-        throw InvalidCertificate("invalid certificate chain");
+//void Context::setCertificateChain(const CertificateList& certs)
+//{
+//    CertificateList::ConstIterator it = certs.begin();
+//    if( it == certs.end() )
+//        throw InvalidCertificate("invalid certificate chain");
+//
+//    this->setCertificate(*it);
+//    ++it;
+//
+//    for(; it != certs.end(); ++it)
+//    {
+//        _extraCerts.push_back(*it);
+//    }
+//}
 
-    this->setCertificate(*it);
-    ++it;
 
-    for(; it != certs.end(); ++it)
-    {
-        _extraCerts.push_back(*it);
-    }
-}
-
-
-void CertificateStore::loadPkcs12(const char* pkcs12, size_t len, const char* passwd)
+void Context::loadPkcs12(const char* pkcs12, size_t len, const char* passwd)
 {
     std::clog << "loadPkcs12: " << passwd << std::endl;
 
@@ -192,8 +192,8 @@ void CertificateStore::loadPkcs12(const char* pkcs12, size_t len, const char* pa
                 {
                     char buf[200];
                     CFStringGetCString(summary, buf, 200, kCFStringEncodingUTF8);
+                    std::cerr << buf << std::endl;
                     CFRelease(summary);
-                    std::cerr.write(buf, 16) << std::endl;
                 }
 
                 CFRetain(cert);
@@ -209,11 +209,12 @@ void CertificateStore::loadPkcs12(const char* pkcs12, size_t len, const char* pa
 
 const Certificate* Context::findCertificate(const std::string& subject)
 {
+    std::clog << "findCertificate: " << subject << std::endl;
     CFStringRef cfsubj = CFStringCreateWithCString(NULL, subject.c_str(), kCFStringEncodingUTF8);
 
     // NOTE: kSecMatchSearchList -> (id)keychain
-    const void* keys[]   = { kSecClass,         kSecReturnRef,  kSecMatchLimit,    kSecMatchSubjectContains 0 };
-    const void* values[] = { kSecClassIdentity, kCFBooleanTrue, kSecMatchLimitOne, cfsubj, 0 };
+    const void* keys[]   = { kSecClass,         kSecReturnRef,  kSecMatchLimit,    kSecMatchSubjectContains, 0 };
+    const void* values[] = { kSecClassIdentity, kCFBooleanTrue, kSecMatchLimitAll, cfsubj, 0 };
 
     CFDictionaryRef dict = CFDictionaryCreate(NULL, keys, values, 4, NULL, NULL);
     if( ! dict)
@@ -222,11 +223,12 @@ const Certificate* Context::findCertificate(const std::string& subject)
     CFArrayRef items = NULL;
     OSStatus status = SecItemCopyMatching(dict, (CFTypeRef*)&items);
     CFRelease(dict);
+    CFRelease(cfsubj);
 
     if(items)
-      std::clog << "findCertificate: " << CFArrayGetCount(items) << std::endl;
+        std::clog << "findCertificate: " << CFArrayGetCount(items) << std::endl;
 
-    if( status ) 
+    if( status || ! items ) 
         return 0;
 
     CFIndex count = CFArrayGetCount(items);
@@ -237,9 +239,8 @@ const Certificate* Context::findCertificate(const std::string& subject)
         std::clog << "findCertificate: " << cert << std::endl;
     }
 
-    if(items)
-        CFRelease(items);
-
+    
+    CFRelease(items);
     return 0;
 }
 

@@ -27,6 +27,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#include <CertificateImpl.h>
 #include <Pt/Ssl/StreamBuffer.h>
 #include <Pt/Ssl/SslError.h>
 #include <Pt/System/Logger.h>
