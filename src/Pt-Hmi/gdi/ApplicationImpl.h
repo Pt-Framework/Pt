@@ -59,12 +59,14 @@ class ApplicationImpl : public Pt::System::EventLoop
 		void setResolution(double dpi);
 
 		double resolutionDPI() const;
-
-		Pt::Signal<int, WPARAM, LPARAM>		MouseEvent;
-		Pt::Signal<HWND>					PaintEvent;
-		Pt::Signal<HWND, WPARAM, LPARAM>	SizeEvent;
-		Pt::Signal<HWND, WPARAM, LPARAM>	MoveEvent;
-		Pt::Signal<int, WPARAM, LPARAM>		KeyBoardEvent;
+		
+		Pt::Signal<int, WPARAM, LPARAM>			MouseEvent;
+		Pt::Signal<HWND>						PaintEvent;
+		Pt::Signal<HWND, WPARAM, LPARAM>		SizeEvent;
+		Pt::Signal<HWND, WPARAM, LPARAM>		MoveEvent;
+		Pt::Signal<int, WPARAM, LPARAM>			KeyBoardEvent;
+		Pt::Signal<HWND,WPARAM,LPARAM,bool&>    ClosingEvent;
+		Pt::Signal<HWND,WPARAM,LPARAM>			ClosedEvent;
 
     protected:
         static long CALLBACK wndProc(HWND hwnd, unsigned int message, unsigned int wParam, long lParam);

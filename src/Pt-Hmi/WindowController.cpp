@@ -29,6 +29,7 @@
 #include <Pt/Hmi/PointingDevice.h>
 #include <Pt/Hmi/WidgetController.h>
 #include <Pt/Hmi/GfxOutput.h>
+#include <Pt/Hmi/WindowModel.h>
 
 #include <iostream>
 
@@ -51,6 +52,9 @@ WindowController::WindowController(GfxModel* m, Renderer* r,  GfxOutput* out, Po
 
 	if( in2 != 0)
 		Controller::addInputDevice(in2);
+
+	Closed += Pt::slot(*this, &WindowController::onClosed);
+	Closing += Pt::slot(*this, &WindowController::onClosing);
 }
 
 WindowController::~WindowController()
@@ -122,9 +126,7 @@ void WindowController::onPointerInput(const PointingEvent& ev)
 	m->Pointer2DStatus = ev;
 
 	for( size_t i = 0; i < children().size(); ++i)
-		children()[i]->notifyPointerInput(ev);
-	
-	invalidate();
+		children()[i]->notifyPointerInput(ev);	
 }
 
 void WindowController::onSizeChanged(Pt::Gfx::SizeF& sizeUnits)
@@ -158,7 +160,34 @@ void WindowController::onModelChanged(bool created)
 	}
 
 	for( size_t i = 0; i < children().size(); ++i)
-		children()[i]->notifyModelChanged(created);										
+		children()[i]->notifyModelChanged(created);	
+		
+	invalidate();									
 }
 
+void WindowController::onClosing(bool& canClose)
+{
+	WindowModel* m = dynamic_cast<WindowModel*>(model());
+	if( m == 0)
+		return;
+	
+	canClose = m->CanClose.get();
+}
+
+void WindowController::onClosed()
+{
+
+}
+
+
+void WindowController::close()
+{
+	WindowModel* m = dynamic_cast<WindowModel*>(model());
+	
+	if( m == 0)
+		return;
+
+	m->Closed = true;
+	invalidate();
+}
 }}

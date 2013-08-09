@@ -23,6 +23,13 @@ public:
 	Window();
 	virtual ~Window();
 	
+	virtual void show();
+	void close();
+	
+	Pt::Signal<> Closed;
+	Pt::Signal<> CanClose;
+
+
 private:
 	Pt::Hmi::WindowController*	_defController;
 	Pt::Hmi::WindowModel*		_defModel;

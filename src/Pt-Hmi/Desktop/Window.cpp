@@ -36,11 +36,25 @@ Window::Window()
 	setController(*_defController);
 }
 
+void Window::show()
+{
+	Pt::Hmi::WindowModel* m = (Pt::Hmi::WindowModel*) controller().model();
+	m->Closed = false;
+	Widget::show();
+}
+
+void Window::close()
+{
+	Pt::Hmi::WindowController* ctrl = (Pt::Hmi::WindowController*) &controller();
+	ctrl->close();
+}
+
 Window::~Window()
 {
 	delete _defController;
-	delete _defModel;
 	delete _defRenderer;
+	delete _defModel;
+	
 }
 		
 }}}

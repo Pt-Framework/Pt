@@ -17,8 +17,8 @@ public:
 	Widget(Widget* parent = 0);
 	virtual ~Widget();
 
-	void show();
-	void hide();
+	virtual void show();
+	virtual void hide();
 
 	const std::vector<Widget*>& children() const
 	{

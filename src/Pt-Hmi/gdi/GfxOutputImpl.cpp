@@ -6,6 +6,7 @@
 #include <Pt/Gfx/Rgb888Image.h>
 #include <Windows.h>
 #include <Pt/Hmi/WindowModel.h>
+#include <Pt/Hmi/WindowController.h>
 
 namespace Pt{
 namespace Hmi{
@@ -13,6 +14,12 @@ namespace Hmi{
 GfxOutputImpl::GfxOutputImpl()
 : _model(0)
 , _ignoreSizeEvent(false)
+{
+	create();
+}
+
+
+void GfxOutputImpl::create()
 {
 	HINSTANCE hInstance = GetModuleHandle(NULL);
 
@@ -25,11 +32,40 @@ GfxOutputImpl::GfxOutputImpl()
 	app->impl()->PaintEvent += Pt::slot(*this,&GfxOutputImpl::onPaint);
 	app->impl()->SizeEvent += Pt::slot(*this,&GfxOutputImpl::onSize);
 	app->impl()->MoveEvent += Pt::slot(*this,&GfxOutputImpl::onMove);
+	app->impl()->ClosingEvent += Pt::slot(*this,&GfxOutputImpl::onClosing);
+	app->impl()->ClosedEvent += Pt::slot(*this,&GfxOutputImpl::onClosed);
 }
 
 GfxOutputImpl::~GfxOutputImpl()
 {
     DestroyWindow(_hwnd);
+}
+
+void GfxOutputImpl::onClosing(HWND hwnd, WPARAM wparam, LPARAM lparam, bool& canClose)
+{
+	if( _hwnd != hwnd)
+		return;
+
+
+	if(_model == 0)
+		return;
+
+	WindowController* controller = (WindowController*)_model->Controller.get();
+	controller->Closing.send(canClose);
+}
+
+void GfxOutputImpl::onClosed(HWND hwnd, WPARAM wparam, LPARAM lparam)
+{
+	if( _hwnd != hwnd)
+		return;
+
+	if(_model == 0)
+		return;
+
+	WindowController* controller = (WindowController*)_model->Controller.get();
+	controller->Closed.send();
+			
+	 _model->Closed = true;
 }
 
 void GfxOutputImpl::onSize(HWND hwnd, WPARAM wParam, LPARAM lParam)
@@ -43,7 +79,6 @@ void GfxOutputImpl::onSize(HWND hwnd, WPARAM wParam, LPARAM lParam)
 	if( _ignoreSizeEvent)
 		return;
 
-	WindowModel* winMod = (WindowModel*) _model;
 			
 	switch(wParam)
 	{
@@ -53,15 +88,15 @@ void GfxOutputImpl::onSize(HWND hwnd, WPARAM wParam, LPARAM lParam)
 		break;
 
 		case SIZE_MAXIMIZED:
-			winMod->WindowState = WindowStateType::Maximazed;
+			_model->WindowState = WindowStateType::Maximazed;
 		break;
 
 		case SIZE_MINIMIZED:
-			winMod->WindowState = WindowStateType::Minimized;
+			_model->WindowState = WindowStateType::Minimized;
 		break;
  
 		case SIZE_RESTORED:
-			winMod->WindowState = WindowStateType::Normal;
+			_model->WindowState = WindowStateType::Normal;
 		break;
 	}
 
@@ -85,27 +120,25 @@ void GfxOutputImpl::writeWindowSizeAndPos()
 
 void GfxOutputImpl::readWindowSizeAndPos()
 {
-	WindowModel* winMod = (WindowModel*) _model;
-
 	WINDOWINFO  info;
 	GetWindowInfo(_hwnd, &info);
 
 	//Windows external Size + Pos
 	{		
 		Pt::Gfx::Point	pos( info.rcWindow.left, info.rcWindow.top);	
-		Pt::Gfx::PointF position = winMod->toUnit(pos);
+		Pt::Gfx::PointF position = _model->toUnit(pos);
 	
-		winMod->WinSize = winMod->toUnit(Pt::Gfx::Size(info.rcWindow.right - info.rcWindow.left, info.rcWindow.bottom - info.rcWindow.top));
-		winMod->WinPos	= winMod->toUnit(pos);
+		_model->WinSize = _model->toUnit(Pt::Gfx::Size(info.rcWindow.right - info.rcWindow.left, info.rcWindow.bottom - info.rcWindow.top));
+		_model->WinPos	= _model->toUnit(pos);
 	}
 
 	//Windows client Size + pos => Gfx Size + pos
 	{
 		Pt::Gfx::Point	pos( info.rcClient.left, info.rcClient.top);	
-		Pt::Gfx::PointF position = winMod->toUnit(pos);
+		Pt::Gfx::PointF position = _model->toUnit(pos);
 	
-		winMod->Size	 = winMod->toUnit(Pt::Gfx::Size(info.rcClient.right - info.rcClient.left, info.rcClient.bottom - info.rcClient.top));
-		winMod->Position = winMod->toUnit(pos);
+		_model->Size	 = _model->toUnit(Pt::Gfx::Size(info.rcClient.right - info.rcClient.left, info.rcClient.bottom - info.rcClient.top));
+		_model->Position = _model->toUnit(pos);
 	}
 }
 
@@ -131,17 +164,16 @@ void GfxOutputImpl::onPaint(HWND hwnd)
 	if(_model == 0)
 		return;
 
-	GfxModel* gfxModel = dynamic_cast<GfxModel*>(_model);
-    
-	Pt::Gfx::Size size = gfxModel->fromUnit(gfxModel->Size.get());
+   
+	Pt::Gfx::Size size = _model->fromUnit(_model->Size.get());
 
-	Pt::Gfx::Rgb888Image rgb88Image(gfxModel->PaintBuffer.width(), gfxModel->PaintBuffer.height());
+	Pt::Gfx::Rgb888Image rgb88Image(_model->PaintBuffer.width(), _model->PaintBuffer.height());
 
-	for( size_t x = 0; x < gfxModel->PaintBuffer.width(); ++x)
+	for( size_t x = 0; x < _model->PaintBuffer.width(); ++x)
 	{
-		for(size_t y = 0; y < gfxModel->PaintBuffer.height(); ++y)
+		for(size_t y = 0; y < _model->PaintBuffer.height(); ++y)
 		{
-			const Pt::Gfx::ARgbColor& pixel = gfxModel->PaintBuffer.pixel(x,y);
+			const Pt::Gfx::ARgbColor& pixel = _model->PaintBuffer.pixel(x,y);
 
 			Pt::Gfx::Rgb888Color color(pixel.red(), pixel.green(), pixel.blue());
 			rgb88Image.setColor(x,y,color);
@@ -188,32 +220,27 @@ void GfxOutputImpl::drawIndependentImage(size_t x, size_t y, const char* data, s
 
 void GfxOutputImpl::writeWindowProperties()
 {
-	WindowModel* wmodel = (WindowModel*) _model;
-
-	SetWindowText(_hwnd, wmodel->Caption.get().c_str());
+	SetWindowText(_hwnd, _model->Caption.get().c_str());
 
 	long style = 0;
-	long exStyle = WS_EX_ACCEPTFILES;
+	long exStyle = 0;
 
-	if(wmodel->ShowInTaskbar.get())
-		exStyle |= WS_EX_APPWINDOW;  
-
-	if(wmodel->Visible.get())
+	if(_model->Visible.get())
 		style |= WS_VISIBLE;
 		
-	if( wmodel->ShowTitle.get())
+	if( _model->ShowTitle.get())
 		style |= WS_CAPTION;
 
-	if( wmodel->ShowMinimizeBt.get())
+	if( _model->ShowMinimizeBt.get())
 		style |= WS_MINIMIZEBOX;
 
-	if( wmodel->ShowMaximizeBt.get())
+	if( _model->ShowMaximizeBt.get())
 		style |= WS_MAXIMIZEBOX;
 
-	if( wmodel->ShowSysMenu.get())
+	if( _model->ShowSysMenu.get())
 		style |= WS_SYSMENU;
 
-	switch(wmodel->WindowState.get())
+	switch(_model->WindowState.get())
 	{
 		case Pt::Hmi::WindowStateType::Normal:
 		break;
@@ -227,8 +254,12 @@ void GfxOutputImpl::writeWindowProperties()
 		break;
 	}
 
-	switch( wmodel->Border.get())
+	switch( _model->Border.get())
 	{
+		case Pt::Hmi::BorderStyle::None:
+			
+		break;
+
 		case Pt::Hmi::BorderStyle::Single:
 			style |= WS_BORDER; 
 		break;
@@ -237,8 +268,15 @@ void GfxOutputImpl::writeWindowProperties()
 			style |= WS_THICKFRAME;
 		break;
 
-		case Pt::Hmi::BorderStyle::Widget:
-			style |= WS_DLGFRAME;
+		case Pt::Hmi::BorderStyle::Dialog:
+			style |= WS_DLGFRAME;			
+			exStyle |= WS_EX_DLGMODALFRAME;
+		break;
+
+		case Pt::Hmi::BorderStyle::DialogSizeable:
+			style |= WS_DLGFRAME;			
+			exStyle |= WS_EX_DLGMODALFRAME;
+			style |= WS_THICKFRAME;
 		break;
 
 		case Pt::Hmi::BorderStyle::Tool:
@@ -247,34 +285,62 @@ void GfxOutputImpl::writeWindowProperties()
 		break;
 
 		case Pt::Hmi::BorderStyle::ToolSizeable:
+			style |= WS_THICKFRAME;
 			exStyle |= WS_EX_TOOLWINDOW;
 		break;
 
 	}
 
-	SetWindowLong(_hwnd, GWL_STYLE, style);  
-	SetWindowLong(_hwnd, GWL_EXSTYLE, exStyle);  
+	if(_model->ShowInTaskbar.get())
+	{
+		exStyle |= WS_EX_APPWINDOW;  
+		SetWindowLong(_hwnd, GWL_EXSTYLE, exStyle); 
+	}
+	else
+	{
+		SetWindowLong(_hwnd, GWL_STYLE, style);  
+	}
 
-	style = GetWindowLong(_hwnd, GWL_STYLE);  
+	long styleVisible = GetWindowLong(_hwnd, GWL_STYLE);  
 
+	bool visible = ((styleVisible & WS_VISIBLE) == WS_VISIBLE);
 
-	bool visible = ((style & WS_VISIBLE) == WS_VISIBLE);
-
-	if(!wmodel->Visible.get() && visible)
+	if(!_model->Visible.get())
 		ShowWindow(_hwnd, SW_HIDE);
-	
-	if(wmodel->Visible.get() && !visible)
-		ShowWindow(_hwnd, SW_SHOW);	
+	else if( !visible)
+		ShowWindow(_hwnd, SW_SHOW);		
+
+	SetWindowLong(_hwnd, GWL_STYLE, style);  
+}
+
+void GfxOutputImpl::destroy()
+{
+	if( _hwnd == 0)
+		return;
+
+	DestroyWindow(_hwnd);
+	_hwnd = 0;
 }
 
 void GfxOutputImpl::output(Pt::Hmi::Model* model)
 {
 	WindowModel* wmodel = dynamic_cast<WindowModel*>(model);
 
-	_model = model;
+	_model = wmodel;
 
 	if( wmodel == 0)
 		throw std::logic_error("ERROR: WindowModel model expected!");
+
+	if(wmodel->Closed.get())
+	{
+		if(_hwnd != 0)
+			destroy();
+	}
+	else
+	{
+		if(_hwnd == 0)
+			create();
+	}
 
 	_ignoreSizeEvent = true;	
 

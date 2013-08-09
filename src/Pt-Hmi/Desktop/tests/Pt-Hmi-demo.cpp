@@ -10,6 +10,7 @@
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/KeyboardDevice.h>
 #include <Pt/Hmi/WindowModel.h>
+#include <Pt/Hmi/WindowController.h>
 
 //Desktop
 #include <Pt/Hmi/Desktop/Window.h>
@@ -43,18 +44,37 @@ public:
 		std::cout<<"VC:"<<ev.virtualCode()<<" Alt:"<< ev.alt() << " Ext:"<< ev.extCode()<<" St:"<< ev.state()<<" Shift:"<<ev.shift()<<" Ctrl:" <<ev.ctrl()<<std::endl;
 	}
 	Pt::Hmi::Desktop::Button     buttons[3];
+
+	void onClosed(Pt::Hmi::DeviceButton::State& s)
+	{
+		if(s == Pt::Hmi::DeviceButton::Released)
+		{
+			Pt::Hmi::Application::instance().exit();
+		}
+	}
 };
 
 
 int main(int argc, char* args[])
 {
 	
+
+
+	
 	Pt::Hmi::Application		app;
+
+
 	Test test;
 	Pt::Hmi::Desktop::Window	window;	
+
+
+	
+
+	
 	Pt::Hmi::Desktop::Panel     panel;
 	Pt::Hmi::Desktop::Panel     panel2;
 	Pt::Hmi::Desktop::Label     label;
+	Pt::Hmi::Desktop::Button    closeBt;
 	Pt::Hmi::KeyboardDevice     keyboardDevice;
 	
 
@@ -113,9 +133,30 @@ int main(int argc, char* args[])
 	
 	Pt::Hmi::WindowModel* wm = (Pt::Hmi::WindowModel*) window.controller().model();
 	wm->Border = Pt::Hmi::BorderStyle::Sizebale;
-	window.show();
+	
+	Pt::Hmi::WindowController* winCtrl = (Pt::Hmi::WindowController*) &window.controller();
+
+	Pt::Hmi::WindowModel* model =  (Pt::Hmi::WindowModel*) window.controller().model();
+	model->Border = Pt::Hmi::BorderStyle::Single;
+	model->ShowInTaskbar.set(true);
 	
 
+	Pt::Hmi::ButtonModel* btm =  (Pt::Hmi::ButtonModel*) closeBt.controller().model();
+
+	btm->Position.set(Pt::Gfx::PointF(600,650));
+	btm->Size.set(Pt::Gfx::SizeF(130,40));
+	btm->Caption.set("Close (CTRL+X)");
+	btm->ActionKey.set("CTRL//X");
+	btm->ButtonState.PropertyChanged += Pt::slot(test,  &Test::onClosed);
+
+
+	window.addChild(&closeBt);
+	window.show();
+	window.close();
+	window.show();
+	
+	winCtrl->Closed += Pt::slot(app,&Pt::Hmi::Application::exit);
+	
 	app.run();		
 }
 

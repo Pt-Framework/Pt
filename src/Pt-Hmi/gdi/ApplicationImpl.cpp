@@ -78,18 +78,26 @@ ApplicationImpl::ApplicationImpl()
 	_offsetX = 0;
 	_offsetY = 0;
 
-	//FreeConsole();
+	FreeConsole();
 }
 
 ApplicationImpl::~ApplicationImpl()
 {
-	UnhookWindowsHookEx(_mouseHook);
-	UnhookWindowsHookEx(_keyboardHook);
+	HHOOK h = _mouseHook;
+	_mouseHook = 0;
+
+	UnhookWindowsHookEx(h);
+	h = _keyboardHook;
+	_keyboardHook = 0;
+	UnhookWindowsHookEx(h);
     unregisterWindowClasses();
 }
 
 LRESULT CALLBACK ApplicationImpl::mouseProc (int nCode, WPARAM wParam, LPARAM lParam)
 {
+	if(mouseHook() == 0)
+		return CallNextHookEx(mouseHook(), nCode, wParam, lParam);
+
 	Application& app = Application::instance();
 
 	ApplicationImpl* appImpl =  app.impl();
@@ -101,6 +109,9 @@ LRESULT CALLBACK ApplicationImpl::mouseProc (int nCode, WPARAM wParam, LPARAM lP
 
 LRESULT CALLBACK ApplicationImpl::keyboardProc(int code, WPARAM wParam, LPARAM lParam)
 {
+	if(keyboardHook() == 0)
+		return CallNextHookEx(keyboardHook(), code, wParam, lParam);
+
 	Application& app = Application::instance();
 
 	ApplicationImpl* appImpl =  app.impl();
@@ -182,6 +193,24 @@ LRESULT ApplicationImpl::dispatchGDIEvent(HWND hwnd, unsigned int message, unsig
 
 		case WM_MOVE:
 			MoveEvent.send(hwnd, wParam, lParam);
+		break;
+
+		case WM_DESTROY:
+			ClosedEvent.send(hwnd,wParam, lParam);
+		break;
+
+		case WM_CLOSE:
+		{
+			bool canClose = false;
+			ClosingEvent.send(hwnd, wParam, lParam, canClose);
+			
+			if( canClose)
+			{
+				DestroyWindow(hwnd);
+			}
+
+			return 0;				
+		}
 		break;
 	}
 

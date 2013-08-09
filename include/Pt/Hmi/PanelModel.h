@@ -20,7 +20,9 @@ namespace BorderStyle
 		Sizebale,
 		Tool,
 		ToolSizeable,
-		Widget
+		Widget,
+		Dialog,
+		DialogSizeable
 	};
 }
 
