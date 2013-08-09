@@ -179,6 +179,7 @@ void ButtonController::onPointerInput(const PointingEvent& ev)
 	}
 
 	LabelController::onPointerInput(ev);
+	invalidate();
 }
 
 }}
