@@ -11,6 +11,8 @@ namespace Pt {
 namespace Hmi {
 
 class ApplicationImpl;
+class Controller;
+class PointingEvent;
 
 class PT_HMI_API Application : public Pt::System::Application
 {
@@ -37,6 +39,15 @@ public:
 
 	ApplicationImpl* impl();
 
+	Pt::Signal<Controller*, const PointingEvent&>& pointerEvent();
+	
+/*	Pt::Signal<Controler*, const KeyEvent&> keyDeviceEvent();
+	Pt::Signal<Controler*, 
+	void onSize(HWND hwnd, WPARAM wparam, LPARAM lparam);
+	void onMove(HWND hwnd, WPARAM wparam, LPARAM lparam);
+	void onClosing(HWND hwnd, WPARAM wparam, LPARAM lparam, bool& canClose);
+	void onClosed(HWND hwnd, WPARAM wparam, LPARAM lparam);
+*/
 private:     
      ApplicationImpl* _impl; 
 };

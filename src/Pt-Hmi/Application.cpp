@@ -82,5 +82,9 @@ ApplicationImpl* Application::impl()
 	return _impl;
 }
 
+Pt::Signal<Controller*, const PointingEvent&>& Application::pointerEvent()
+{
+	return _impl->pointerEvent();
+}
 }}
 
