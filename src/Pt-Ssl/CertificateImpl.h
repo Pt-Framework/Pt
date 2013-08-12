@@ -252,12 +252,6 @@ class CertificateImpl
             return toString( X509_get_notAfter(_x509) );
         }
 
-        PublicKey publicKey() const
-        {
-            EVP_PKEY* pkey = X509_get_pubkey( _x509 );
-            return PublicKey(pkey);
-        }
-
         x509_st* getX509() const
         { return _x509; }
 

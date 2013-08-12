@@ -30,7 +30,6 @@
 #define PT_SSL_CONTEXT_H
 
 #include <Pt/Ssl/Api.h>
-#include <Pt/Ssl/PrivateKey.h>
 #include <Pt/Ssl/CertificateList.h>
 #include <Pt/NonCopyable.h>
 #include <string>
@@ -148,12 +147,7 @@ class PT_SSL_API Context : public NonCopyable
 
         void loadPkcs12(std::istream& is, const char* passwd);
 
-        typedef std::vector<Certificate> Certificates;
-
-        const Certificates& certificates()
-        { return _certificates; }
-
-        const Certificate* findCertificate(const std::string& subject);
+        Certificate findCertificate(const std::string& subject);
 
 #ifdef __APPLE__
 
@@ -161,25 +155,24 @@ class PT_SSL_API Context : public NonCopyable
         { return _cert; }
     
     private:
-        Protocol        _protocol;
+        Protocol                 _protocol;
         std::vector<Certificate> _caCerts;
-        Certificate     _cert;
-        //CertificateList _extraCerts;
+        Certificate              _cert;
+        //CertificateList          _extraCerts;
 #else
         //! @internal
         ssl_ctx_st* impl() const;
 
     private:
-        ssl_ctx_st*     _ctx;
-        Protocol        _protocol;
+        ssl_ctx_st*              _ctx;
+        Protocol                 _protocol;
         std::vector<Certificate> _caCerts;
-        Certificate     _cert;
-        std::vector<x509_st*> _extraCerts;
-        PrivateKey      _privKey;
-        void*           _reserved;
+        Certificate              _cert;
+        std::vector<x509_st*>    _extraCerts;
 #endif
 
-        Certificates _certificates;
+        std::vector<Certificate> _certificates;
+        void*                    _reserved;
 };
 
 } // namespace Ssl

@@ -33,6 +33,8 @@
 #include <iosfwd>
 #include <cstddef>
 
+PUBLIC KEY NOT USED
+
 namespace Pt {
 
 namespace Ssl {

@@ -119,10 +119,10 @@ void StreamBufferTest::Handshake()
     // client-side SSL context
     Pt::Ssl::Context clientContext;
     clientContext.loadPkcs12(ifs, "123");
-    const Pt::Ssl::Certificate* cert = clientContext.findCertificate("Atlantis Mainframe");
-    PT_UNIT_ASSERT( cert != 0 );
+    Pt::Ssl::Certificate cert = clientContext.findCertificate("Atlantis Mainframe");
+    PT_UNIT_ASSERT( cert.isValid() );
 
-    clientContext.setCertificate( *cert );
+    clientContext.setCertificate( cert );
     clientContext.setCACertificates( caStore );
     clientContext.setVerifyMode(Pt::Ssl::Context::VerifyPeer);
 

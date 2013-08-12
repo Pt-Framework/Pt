@@ -27,9 +27,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "CertificateImpl.h"
-#include "PrivateKeyImpl.h"
 #include <Pt/Ssl/CertificateList.h>
-#include <Pt/Ssl/PrivateKey.h>
 #include <Pt/System/Logger.h>
 #include <iostream>
 #include <cassert>
@@ -127,15 +125,6 @@ std::string Certificate::notAfter() const
         return std::string();
 
     return _impl->notAfter();
-}
-
-
-PublicKey Certificate::publicKey() const
-{
-    if( ! _impl)
-        return PublicKey();
-
-    return _impl->publicKey();
 }
 
 

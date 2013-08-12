@@ -30,8 +30,6 @@
 #define PT_SSL_CERTIFICATELIST_H
 
 #include <Pt/Ssl/Api.h>
-#include <Pt/Ssl/PublicKey.h>
-#include <Pt/Ssl/PrivateKey.h>
 #include <Pt/NonCopyable.h>
 #include <vector>
 
@@ -66,8 +64,6 @@ class PT_SSL_API Certificate
         std::string notBefore() const;
 
         std::string notAfter() const;
-        
-        PublicKey publicKey() const;
 
         CertificateImpl* impl() const;
 

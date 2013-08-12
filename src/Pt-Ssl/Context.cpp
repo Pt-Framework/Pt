@@ -207,7 +207,7 @@ void Context::loadPkcs12(const char* pkcs12, size_t len, const char* passwd)
 }
 
 
-const Certificate* Context::findCertificate(const std::string& subject)
+Certificate Context::findCertificate(const std::string& subject)
 {
     std::clog << "findCertificate: " << subject << std::endl;
     CFStringRef cfsubj = CFStringCreateWithCString(NULL, subject.c_str(), kCFStringEncodingUTF8);
@@ -221,27 +221,23 @@ const Certificate* Context::findCertificate(const std::string& subject)
         throw std::logic_error("CFDictionaryCreate");
 
     CFArrayRef items = NULL;
-    OSStatus status = SecItemCopyMatching(dict, (CFTypeRef*)&items);
+    OSStatus error = SecItemCopyMatching(dict, (CFTypeRef*)&items);
     CFRelease(dict);
     CFRelease(cfsubj);
 
-    if(items)
-        std::clog << "findCertificate: " << CFArrayGetCount(items) << std::endl;
+    Certificate ret;
 
-    if( status || ! items ) 
-        return 0;
-
-    CFIndex count = CFArrayGetCount(items);
-
-    if(count > 0)
+    if( ! error && items && 0 < CFArrayGetCount(items) )
     {
         SecCertificateRef cert = (SecCertificateRef) CFArrayGetValueAtIndex(items, 0);
-        std::clog << "findCertificate: " << cert << std::endl;
+        std::clog << "found certificate: " << cert << std::endl;
+        ret = Certificate c( new CertificateImpl(cert) );
     }
 
+    if(items)
+        CFRelease(items);
     
-    CFRelease(items);
-    return 0;
+    return ret;
 }
 
 #else
@@ -603,11 +599,6 @@ void Context::assign(const Context& ctx)
 
     int mode = SSL_CTX_get_verify_mode(_ctx);
     SSL_CTX_set_verify(_ctx, mode, 0);
-
-    _privKey = ctx._privKey;
-
-    if( ! SSL_CTX_use_PrivateKey( _ctx, _privKey.impl() ) )
-        throw InvalidKey("invalid private key");
 }
 
 
@@ -741,15 +732,15 @@ void Context::loadPkcs12(const char* data, size_t len, const char* passwd)
 }
 
 
-const Certificate* Context::findCertificate(const std::string& subject)
+Certificate Context::findCertificate(const std::string& subject)
 {
     for(std::vector<Certificate>::const_iterator it = _certificates.begin(); it != _certificates.end(); ++it) 
     {
         if( it->subject().find(subject) != std::string::npos )
-            return &(*it);
+            return *it;
     }
 
-    return 0;
+    return Certificate();
 }
 
 
