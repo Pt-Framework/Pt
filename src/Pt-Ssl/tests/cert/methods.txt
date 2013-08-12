@@ -1,6 +1,6 @@
 -------------------------------------------------------------------------------
 
-All *.p12 files' PKCS12-export/import-passwords are 123
+All *-with-password.p12 files' PKCS12-export/import-passwords are 123
 
 All *_chain-with-private-key.pem files' PEM-pass-phrase are 123
 
