@@ -85,17 +85,6 @@ class PT_SSL_API Context : public NonCopyable
         //! @brief Assigns the certificates, keys, validation mode and protocol.
         void assign(const Context& ctx);
 
-        /** @brief Enables session caching on the server side
-
-            The @a cacheId is a application specific ID for the session cache,
-            so that two application domains do not mix up their caches. The
-            @a timeout is in maximum lifetime of a session in seconds. The size
-            of the session cache can be limited with @a cacheSize.
-        */
-        void enableSessions(const char* cacheId, 
-                            unsigned long timeout = DefaultTimeout, 
-                            unsigned long cacheSize = DefaultCacheSize);
-
         //! @brief Returns the current protocol. 
         Protocol protocol() const;
 
