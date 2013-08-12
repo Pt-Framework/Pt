@@ -38,7 +38,7 @@ namespace std {
 
 // gcc 3.4.x violates the c++ standard by requiring a __numpunct_cache
 template <typename T>
-class __numpunct_cache;
+struct __numpunct_cache;
 
 /** @brief Numpunct localization facet
 
