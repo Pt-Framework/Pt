@@ -24,33 +24,22 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#include <Pt/Hmi/GfxOutput.h>
-#include <Pt/Hmi/GfxModel.h>
-#include <Pt/Gfx/ARgbImage.h>
-#include "GfxOutputImpl.h"
-#include <Pt/Hmi/GfxOutput.h>
-#include "GfxOutputImpl.h"
+#include <Pt/Hmi/Model.h>
 
 namespace Pt{
 namespace Hmi{
 
-GfxOutput::GfxOutput()
-: _impl(new GfxOutputImpl())
-{
+Model::Model()
+: Enable(true)
+, Tag(0)
+, Controller(0)
+{ 
+
 }
 
-GfxOutput::~GfxOutput()
-{
-}
+Model::~Model()
+{ 
 
-Pt::Gfx::Painter* GfxOutput::nativePainter()
-{
-	return _impl->nativePainter();
-}
-
-void GfxOutput::output(Pt::Hmi::Model* model)
-{	
-	_impl->output(model);
 }
 
 }}

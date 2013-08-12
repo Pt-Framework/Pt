@@ -61,13 +61,12 @@ void Controller::addInputDevice(InputDevice* device)
 	PointingDevice* pointerDev = dynamic_cast<PointingDevice*>(device);
 	
 	if( pointerDev != 0)
-		pointerDev->Event += Pt::slot(*this, &Controller::notifyPointerInput);
-
+		pointerDev->Event += Pt::slot(*this, &Controller::devicePointerInput);
 
 	KeyboardDevice* keyboardDevice  = dynamic_cast<KeyboardDevice*>(device);
 
 	if(keyboardDevice != 0)
-		keyboardDevice->Event += Pt::slot(*this, &Controller::notifyKeyInput);
+		keyboardDevice->Event += Pt::slot(*this, &Controller::deviceKeyInput);
 		
 	_inputDevices.push_back(device);
 }

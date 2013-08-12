@@ -41,11 +41,8 @@ public:
 
 	T& operator=(const T& value)
 	{
-		if(_value != value)
-		{
-			_value = value;
-			PropertyChanged.send(_value);
-		}
+		_value = value;
+		PropertyChanged.send(_value);
 		return _value;
 	}
 

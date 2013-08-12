@@ -49,8 +49,6 @@ public:
 	const WidgetController* mainWidget() const;
 	
 	void invalidate();	
-	
-	void render();
 	void close();
 
 	Pt::Signal<>		Closed;	
@@ -62,8 +60,7 @@ protected:
 	virtual void onModelChanged(bool created = false);	
 	virtual void onClosing(bool& canClose);
 	virtual void onClosed();
-
-
+	
 	void onSizeChanged(Pt::Gfx::SizeF& size);
 	
 	GfxModel* gfxModel();

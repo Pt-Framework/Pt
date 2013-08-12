@@ -122,16 +122,32 @@ public:
 		onModelChanged(created);
 	}
 
+	inline void devicePointerInput(Controller* c, const PointingEvent& ev)
+	{
+		if( this != c)
+			return;
+
+		onPointerInput(ev);
+	}
+
+
 	inline void notifyPointerInput(const PointingEvent& ev)
 	{
 		onPointerInput(ev);
 	}
 
+	inline void deviceKeyInput(Controller* c, const KeyEvent& ev)
+	{
+		if( this != c)
+			return;
+		onKeyInput(ev);
+	}
+
+	
 	inline void notifyKeyInput(const KeyEvent& ev)
 	{
 		onKeyInput(ev);
 	}
-
 
 	inline bool moveFocusNext()
 	{

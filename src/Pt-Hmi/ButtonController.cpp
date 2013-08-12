@@ -147,28 +147,38 @@ void ButtonController::onPointerInput(const PointingEvent& ev)
 	{
 		LabelController::onPointerInput(ev);
 		return;
-	}
+	}	
 
 	switch(model->ButtonType.get())
 	{
 		case ButtonType::Press:
 		{
-			model->ButtonState = ev.buttons()[0].state();
-			if(ev.buttons()[0].state() == DeviceButton::Pressed)
+			switch(ev.buttons()[0].state())
 			{
-				model->Focused = false;
-				model->Focused = true;
+				case DeviceButton::Pressed:
+				{
+					model->Focused = false;
+					model->Focused = true;					
+					model->ButtonState = DeviceButton::Pressed;							
+				}
+				break;
+			
+				case DeviceButton::Released:			
+				{
+					model->ButtonState = DeviceButton::Released;		
+				}
+				break;
 			}
 		}
 		break;
 
 		case ButtonType::Toggle:
 		{
+			model->Focused = false;
+			model->Focused = true;
+
 			if(ev.buttons()[0].state() == DeviceButton::Pressed )
 			{
-				model->Focused = false;
-				model->Focused = true;
-
 				if(model->ButtonState.get() == DeviceButton::Pressed)
 					model->ButtonState = DeviceButton::Released;
 				else

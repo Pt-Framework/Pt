@@ -7,7 +7,7 @@
 namespace Pt{
 namespace Hmi{
 
-class PT_HMI_API Device  : public Pt::System::Selectable
+class PT_HMI_API Device  : public Pt::System::Selectable, public Pt::Connectable
 {
 protected:
 	Device();
@@ -23,6 +23,17 @@ public:
 
 	virtual void stop()
 	{}
+
+
+protected:	
+    virtual void onCancel()
+	{
+	}
+
+    virtual bool onRun()
+	{
+		return true;
+	}
 };
 
 }}

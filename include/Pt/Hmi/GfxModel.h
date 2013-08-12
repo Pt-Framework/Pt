@@ -95,6 +95,7 @@ public:
 	Property<TextAlign::Type>	    TextAlign; 
 	Property<bool>					Focused; 
 	Property<bool>					AcceptFocus; 
+
 public:
 	virtual ~GfxModel();
 

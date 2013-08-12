@@ -16,8 +16,6 @@ Window::Window()
 	
 	Pt::Hmi::Application& app = Pt::Hmi::Application::instance();
 
-	_mouseDevice.start(app.loop());
-	_keyboardDevice.start(app.loop());
 	_gfxOutputDevice.start(app.loop());
 
 	_defModel->Caption.set("New Window");
@@ -39,8 +37,9 @@ Window::Window()
 void Window::show()
 {
 	Pt::Hmi::WindowModel* m = (Pt::Hmi::WindowModel*) controller().model();
-	m->Closed = false;
+	m->Closed.set(false);
 	Widget::show();
+
 }
 
 void Window::close()

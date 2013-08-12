@@ -86,6 +86,8 @@ public:
 	Property<Pt::Gfx::ARgbImage>				Icon;
 	Property<bool>								Closed;
 	Property<bool>								CanClose;
+
+private:
 };
 
 }}

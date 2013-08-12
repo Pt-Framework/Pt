@@ -40,26 +40,21 @@ class Controller;
 
 class PT_HMI_API Model : public Pt::Connectable
 {
-public:
-	virtual ~Model()
-	{ }
-
-public:
-	Property<bool>  Enable;
-	Property<bool>  Active;
-	Property<void*> Tag;  
-	Property<Controller*>	Controller;
-
-public:
-	Pt::Signal<> Changed;
 
 protected:
-	Model()
-	: Enable(true)
-	, Active(true)
-	, Tag(0)
-	, Controller(0)
-	{ }
+	Model();
+	virtual ~Model();
+
+public:
+	Property<bool>			Enable;
+	Property<void*>			Tag;  
+	Property<Controller*>	Controller;
+	Pt::Signal<>			Changed;
+
+	inline void notifyChanged()
+	{
+		Changed.send();
+	}
 };
 
 }}

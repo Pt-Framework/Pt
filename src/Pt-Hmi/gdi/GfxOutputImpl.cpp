@@ -5,6 +5,7 @@
 #include <Pt/Gfx/Rgb888Color.h>
 #include <Pt/Gfx/Rgb888Image.h>
 #include <Windows.h>
+#include <WindowsX.h>
 #include <Pt/Hmi/WindowModel.h>
 #include <Pt/Hmi/WindowController.h>
 
@@ -14,10 +15,15 @@ namespace Hmi{
 GfxOutputImpl::GfxOutputImpl()
 : _model(0)
 , _ignoreSizeEvent(false)
+, _hwnd(0)
 {
+	
+	Pt::Hmi::Application* app = (Pt::Hmi::Application*) &Pt::Hmi::Application::instance();	
+	app->impl()->WindowEvent += Pt::slot(*this, &GfxOutputImpl::onWindowEvent);
+	_pointerEvent.buttons().resize(3);
+	
 	create();
 }
-
 
 void GfxOutputImpl::create()
 {
@@ -27,13 +33,96 @@ void GfxOutputImpl::create()
     BringWindowToTop(_hwnd);
 	ShowWindow(_hwnd, SW_HIDE);    
 	UpdateWindow(_hwnd);	
-	Pt::Hmi::Application* app = (Pt::Hmi::Application*) &Pt::Hmi::Application::instance();
+}
+
+void GfxOutputImpl::onKey(unsigned int msg,  WPARAM wparam, LPARAM lparam)
+{
+	if(msg == WM_KEYDOWN)
+		_keyEvent.setState(KeyEvent::KeyDown);
+	else
+		_keyEvent.setState(KeyEvent::KeyUp);			
 	
-	app->impl()->PaintEvent += Pt::slot(*this,&GfxOutputImpl::onPaint);
-	app->impl()->SizeEvent += Pt::slot(*this,&GfxOutputImpl::onSize);
-	app->impl()->MoveEvent += Pt::slot(*this,&GfxOutputImpl::onMove);
-	app->impl()->ClosingEvent += Pt::slot(*this,&GfxOutputImpl::onClosing);
-	app->impl()->ClosedEvent += Pt::slot(*this,&GfxOutputImpl::onClosed);
+	_keyEvent.setVirtualCode(wparam);
+	_keyEvent.setRepeatCount((int)(lparam & 0xFFFF));
+	_keyEvent.setScancode((int)((lparam & 0x7F0000)>>16));
+	_keyEvent.setExtCode( (lparam & 0x1000000) != 0);
+	_keyEvent.setAlt( (lparam & 0x20000000) != 0); 
+		
+	if(_keyEvent.virtualCode() == 16 )
+	{
+		_keyEvent.setShift(_keyEvent.state() == KeyEvent::KeyDown);
+	}
+			
+	if(_keyEvent.virtualCode() == 17 )
+	{
+		_keyEvent.setCtrl(_keyEvent.state() == KeyEvent::KeyDown);
+	}
+
+	Controller* ctrl = _model->Controller.get();
+	Application::instance().keyDeviceEvent().send(ctrl, _keyEvent);
+}
+
+void GfxOutputImpl::onWindowEvent(HWND wnd, unsigned int message, unsigned int wparam, long lparam, bool& handled)
+{
+	if( _hwnd != wnd)
+		return;
+	
+	if(_model == 0)
+		return;
+
+	switch(message)
+	{
+		case WM_LBUTTONDOWN:		
+		case WM_MBUTTONDOWN:
+		case WM_RBUTTONDOWN:
+		case WM_LBUTTONUP:		
+		case WM_MBUTTONUP:
+		case WM_RBUTTONUP:
+		case WM_MOUSEMOVE:
+		case WM_LBUTTONDBLCLK:
+		case WM_RBUTTONDBLCLK:
+		case WM_MBUTTONDBLCLK:
+			onMouse(message, wparam, lparam);
+			handled = true;
+		break;
+
+		case WM_KEYDOWN:
+		case WM_KEYUP:
+			onKey(message, wparam, lparam);
+			handled = true;
+		break;
+		
+		break;
+
+		case WM_PAINT:
+			onPaint();
+			handled = true;
+		break;
+		
+		case WM_SIZE:
+			onSize(wparam, lparam);
+			handled = true;
+		break;
+
+		case WM_MOVE:
+			onMove();
+			handled = true;
+		break;
+
+		case WM_DESTROY:
+			onClosed();
+			handled = true;
+		break;
+
+		case WM_CLOSE:
+		{
+			if( onClosing())
+				DestroyWindow(_hwnd);	
+				
+			handled = true;			
+		}
+		break;
+	}
 }
 
 GfxOutputImpl::~GfxOutputImpl()
@@ -41,45 +130,25 @@ GfxOutputImpl::~GfxOutputImpl()
     DestroyWindow(_hwnd);
 }
 
-void GfxOutputImpl::onClosing(HWND hwnd, WPARAM wparam, LPARAM lparam, bool& canClose)
+bool GfxOutputImpl::onClosing()
 {
-	if( _hwnd != hwnd)
-		return;
 
-
-	if(_model == 0)
-		return;
-
+	bool canClose = false;
 	WindowController* controller = (WindowController*)_model->Controller.get();
 	controller->Closing.send(canClose);
+	return canClose;
 }
 
-void GfxOutputImpl::onClosed(HWND hwnd, WPARAM wparam, LPARAM lparam)
+void GfxOutputImpl::onClosed()
 {
-	if( _hwnd != hwnd)
-		return;
-
-	if(_model == 0)
-		return;
-
 	WindowController* controller = (WindowController*)_model->Controller.get();
 	controller->Closed.send();
 			
 	 _model->Closed = true;
 }
 
-void GfxOutputImpl::onSize(HWND hwnd, WPARAM wParam, LPARAM lParam)
-{
-	if( _hwnd != hwnd)
-		return;
-
-	if(_model == 0)
-		return;
-
-	if( _ignoreSizeEvent)
-		return;
-
-			
+void GfxOutputImpl::onSize(WPARAM wParam, LPARAM lParam)
+{			
 	switch(wParam)
 	{
 		case SIZE_MAXHIDE:
@@ -103,6 +172,47 @@ void GfxOutputImpl::onSize(HWND hwnd, WPARAM wParam, LPARAM lParam)
 	readWindowSizeAndPos();
 }
 
+void GfxOutputImpl::onMouse(unsigned int msg, WPARAM wparam, LPARAM lparam)
+{	
+	int xPos = GET_X_LPARAM(lparam); 
+	int yPos = GET_Y_LPARAM(lparam); 
+
+
+	switch(msg)
+	{
+		case WM_LBUTTONDOWN:
+			_pointerEvent.buttons()[0].setState(Pt::Hmi::DeviceButton::Pressed);
+		break;
+		
+		case WM_LBUTTONUP:		
+			_pointerEvent.buttons()[0].setState(Pt::Hmi::DeviceButton::Released);
+		break;
+							
+		case WM_MBUTTONDOWN:
+			_pointerEvent.buttons()[1].setState(Pt::Hmi::DeviceButton::Pressed);
+		break;
+
+		case WM_MBUTTONUP:
+			_pointerEvent.buttons()[1].setState(Pt::Hmi::DeviceButton::Released);
+		break;
+
+		case WM_RBUTTONDOWN:		
+			_pointerEvent.buttons()[2].setState(Pt::Hmi::DeviceButton::Pressed);
+		break;
+
+		case WM_RBUTTONUP:
+			_pointerEvent.buttons()[2].setState(Pt::Hmi::DeviceButton::Released);
+		break;		
+	}
+  
+	 Pt::Gfx::PointF p = _model->toUnit(Pt::Gfx::Point(xPos, yPos));
+	_pointerEvent.setX(p.x());
+	_pointerEvent.setY(p.y());	
+
+	Controller* ctrl = _model->Controller.get();
+
+	Application::instance().pointerEvent().send(ctrl, _pointerEvent);
+}
 
 void GfxOutputImpl::writeWindowSizeAndPos()
 {
@@ -110,12 +220,6 @@ void GfxOutputImpl::writeWindowSizeAndPos()
 	Pt::Gfx::Point pos = wmodel->fromUnit(wmodel->WinPos.get());
 	Pt::Gfx::Size size = wmodel->fromUnit(wmodel->WinSize.get());
 	SetWindowPos(_hwnd,0, pos.x(), pos.y(), size.width(), size.height(), 0);
-	 
-	WINDOWINFO  info;
-	GetWindowInfo(_hwnd, &info);
-	
-	wmodel->Size = wmodel->toUnit(Pt::Gfx::Size( info.rcClient.right - info.rcClient.left, info.rcClient.bottom- info.rcClient.top));
-	wmodel->Position = wmodel->toUnit(Pt::Gfx::Point( info.rcClient.left, info.rcClient.top));
 }
 
 void GfxOutputImpl::readWindowSizeAndPos()
@@ -137,52 +241,20 @@ void GfxOutputImpl::readWindowSizeAndPos()
 		Pt::Gfx::Point	pos( info.rcClient.left, info.rcClient.top);	
 		Pt::Gfx::PointF position = _model->toUnit(pos);
 	
-		_model->Size	 = _model->toUnit(Pt::Gfx::Size(info.rcClient.right - info.rcClient.left, info.rcClient.bottom - info.rcClient.top));
 		_model->Position = _model->toUnit(pos);
+		_model->Size	 = _model->toUnit(Pt::Gfx::Size(info.rcClient.right - info.rcClient.left, info.rcClient.bottom - info.rcClient.top));
 	}
 }
 
-void GfxOutputImpl::onMove(HWND hwnd, WPARAM wParam, LPARAM lParam)
+void GfxOutputImpl::onMove()
 {
-	if( _hwnd != hwnd)
-		return;
-
-	if(_model == 0)
-		return;
-
-	if( _ignoreSizeEvent)
-		return;
-
 	readWindowSizeAndPos();
 }
 
-void GfxOutputImpl::onPaint(HWND hwnd)
-{
-	if( _hwnd != hwnd)
-		return;
-
-	if(_model == 0)
-		return;
-
-   
-	Pt::Gfx::Size size = _model->fromUnit(_model->Size.get());
-
-	Pt::Gfx::Rgb888Image rgb88Image(_model->PaintBuffer.width(), _model->PaintBuffer.height());
-
-	for( size_t x = 0; x < _model->PaintBuffer.width(); ++x)
-	{
-		for(size_t y = 0; y < _model->PaintBuffer.height(); ++y)
-		{
-			const Pt::Gfx::ARgbColor& pixel = _model->PaintBuffer.pixel(x,y);
-
-			Pt::Gfx::Rgb888Color color(pixel.red(), pixel.green(), pixel.blue());
-			rgb88Image.setColor(x,y,color);
-		}
-	}
-		
-
-	if( size.width() > 0 && size.height() > 0)
-		drawIndependentImage(0, 0, (char*)rgb88Image.data(), size.width(), size.height());
+void GfxOutputImpl::onPaint()
+{   	
+	if( _rgb88Image.width() > 0 && _rgb88Image.height() > 0)
+		drawIndependentImage(0, 0, (char*)_rgb88Image.data(), _rgb88Image.width(), _rgb88Image.height());
 }
 
 void GfxOutputImpl::drawIndependentImage(size_t x, size_t y, const char* data, size_t width, size_t height)
@@ -334,12 +406,21 @@ void GfxOutputImpl::output(Pt::Hmi::Model* model)
 	if(wmodel->Closed.get())
 	{
 		if(_hwnd != 0)
+		{
 			destroy();
+			return;
+		}
+
 	}
 	else
 	{
 		if(_hwnd == 0)
-			create();
+		{
+			if(wmodel->Visible.get())
+				create();
+			else
+				return;
+		}
 	}
 
 	_ignoreSizeEvent = true;	
@@ -349,9 +430,27 @@ void GfxOutputImpl::output(Pt::Hmi::Model* model)
 	
 	_ignoreSizeEvent = false;
 
-	InvalidateRect(_hwnd, 0, FALSE);
+	output();
+	InvalidateRect(_hwnd, 0, TRUE);
 }
 
+void GfxOutputImpl::output()
+{
+	Pt::Gfx::Size size = _model->fromUnit(_model->Size.get());
+
+	_rgb88Image.resize(_model->PaintBuffer.width(), _model->PaintBuffer.height());
+
+	for( size_t x = 0; x < _model->PaintBuffer.width(); ++x)
+	{
+		for(size_t y = 0; y < _model->PaintBuffer.height(); ++y)
+		{
+			const Pt::Gfx::ARgbColor& pixel = _model->PaintBuffer.pixel(x,y);
+
+			Pt::Gfx::Rgb888Color color((Pt::uint8_t) pixel.red(), (Pt::uint8_t) pixel.green(), (Pt::uint8_t) pixel.blue());
+			_rgb88Image.setColor(x,y,color);
+		}
+	}
+}
 
 Pt::Gfx::Painter* GfxOutputImpl::nativePainter()
 {

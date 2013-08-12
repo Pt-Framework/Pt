@@ -77,11 +77,6 @@ const WidgetController* WindowController::mainWidget() const
 	return 0;
 }
 
-void WindowController::render()
-{
-	GfxController::render();
-}
-
 void WindowController::invalidate()
 {
 	render();
@@ -101,6 +96,8 @@ void WindowController::onKeyInput(const KeyEvent& ev)
 		{
 			if(!moveFocusNext())
 				m->Focused = true;
+
+			invalidate();
 		}
 	}
 
@@ -110,13 +107,13 @@ void WindowController::onKeyInput(const KeyEvent& ev)
 		{
 			if(!moveFocusPrev())
 				m->Focused = true;
+
+			invalidate();
 		}
 	}
 
 	for( size_t i = 0; i < children().size(); ++i)
 		children()[i]->notifyKeyInput(ev);
-
-	invalidate();
 }
 
 void WindowController::onPointerInput(const PointingEvent& ev)
@@ -136,7 +133,7 @@ void WindowController::onSizeChanged(Pt::Gfx::SizeF& sizeUnits)
 	Pt::Gfx::Size size = m->fromUnit(sizeUnits);
 
 	m->PaintBuffer.resize(size.width(), size.height());	
-	render();	
+	invalidate();
 }
 
 GfxModel* WindowController::gfxModel()
@@ -156,7 +153,7 @@ void WindowController::onModelChanged(bool created)
 		GfxModel* m = gfxModel();
 
 		m->Size.PropertyChanged += Pt::slot(*this, &WindowController::onSizeChanged);					
-		m->Size.PropertyChanged.send(m->Size.get());		
+		m->Size.PropertyChanged.send(m->Size.get());	
 	}
 
 	for( size_t i = 0; i < children().size(); ++i)

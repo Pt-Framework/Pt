@@ -975,9 +975,6 @@
     <ClInclude Include="..\..\src\Pt-Hmi\gdi\GfxOutputImpl.h">
       <Filter>Pt-Hmi\Sources\gdi</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\gdi\MouseDeviceImpl.h">
-      <Filter>Pt-Hmi\Sources\gdi</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\Renderer.h">
       <Filter>Pt-Hmi\Headers</Filter>
     </ClInclude>
@@ -1022,9 +1019,6 @@
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\KeyEvent.h">
       <Filter>Pt-Hmi\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\gdi\KeyboardDeviceImpl.h">
-      <Filter>Pt-Hmi\Sources\gdi</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Ssl\CertificateImpl.h">
       <Filter>Pt-Ssl</Filter>
@@ -1827,9 +1821,6 @@
     <ClCompile Include="..\..\src\Pt-Hmi\gdi\GfxOutputImpl.cpp">
       <Filter>Pt-Hmi\Sources\gdi</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\gdi\MouseDeviceImpl.cpp">
-      <Filter>Pt-Hmi\Sources\gdi</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\GfxModel.cpp">
       <Filter>Pt-Hmi\Sources</Filter>
     </ClCompile>
@@ -1992,8 +1983,8 @@
     <ClCompile Include="..\..\src\Pt-Hmi\KeyboardDevice.cpp">
       <Filter>Pt-Hmi\Sources</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\gdi\KeyboardDeviceImpl.cpp">
-      <Filter>Pt-Hmi\Sources\gdi</Filter>
+    <ClCompile Include="..\..\src\Pt-Hmi\Model.cpp">
+      <Filter>Pt-Hmi\Sources</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

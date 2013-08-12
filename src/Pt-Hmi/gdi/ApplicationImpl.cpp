@@ -54,8 +54,6 @@ void Selector::processMessage()
 	
 }
 
-HHOOK ApplicationImpl::_mouseHook;
-HHOOK ApplicationImpl::_keyboardHook;
 
 ApplicationImpl::ApplicationImpl()
 : Pt::System::EventLoop()
@@ -63,8 +61,6 @@ ApplicationImpl::ApplicationImpl()
 {
 	
     _instanceHandle = (HINSTANCE)GetModuleHandle(NULL);
-	_mouseHook = SetWindowsHookEx( WH_MOUSE, ApplicationImpl::mouseProc, _instanceHandle, GetCurrentThreadId());	
-	_keyboardHook = SetWindowsHookEx( WH_KEYBOARD, ApplicationImpl::keyboardProc, _instanceHandle, GetCurrentThreadId());	
 
     registerWindowClasses();
 
@@ -81,43 +77,16 @@ ApplicationImpl::ApplicationImpl()
 	FreeConsole();
 }
 
+void ApplicationImpl::showConsole(bool show)
+{
+	if(show)
+		AllocConsole();
+	else
+		FreeConsole();
+}
+
 ApplicationImpl::~ApplicationImpl()
 {
-	HHOOK h = _mouseHook;
-	_mouseHook = 0;
-
-	UnhookWindowsHookEx(h);
-	h = _keyboardHook;
-	_keyboardHook = 0;
-	UnhookWindowsHookEx(h);
-    unregisterWindowClasses();
-}
-
-LRESULT CALLBACK ApplicationImpl::mouseProc (int nCode, WPARAM wParam, LPARAM lParam)
-{
-	if(mouseHook() == 0)
-		return CallNextHookEx(mouseHook(), nCode, wParam, lParam);
-
-	Application& app = Application::instance();
-
-	ApplicationImpl* appImpl =  app.impl();
-	appImpl->MouseEvent.send(nCode, wParam, lParam);
-			
-	return CallNextHookEx(mouseHook(), nCode, wParam, lParam);
-}
-
-
-LRESULT CALLBACK ApplicationImpl::keyboardProc(int code, WPARAM wParam, LPARAM lParam)
-{
-	if(keyboardHook() == 0)
-		return CallNextHookEx(keyboardHook(), code, wParam, lParam);
-
-	Application& app = Application::instance();
-
-	ApplicationImpl* appImpl =  app.impl();
-	appImpl->KeyBoardEvent.send(code, wParam, lParam);
-			
-	return CallNextHookEx(keyboardHook(), code, wParam, lParam);
 }
 
 void ApplicationImpl::setResolution(double dpi)
@@ -181,40 +150,13 @@ long CALLBACK ApplicationImpl::wndProc(HWND hwnd, unsigned int message, unsigned
 
 LRESULT ApplicationImpl::dispatchGDIEvent(HWND hwnd, unsigned int message, unsigned int wParam, long lParam)
 {
-	switch(message)
-	{
-		case WM_PAINT:
-			PaintEvent.send(hwnd);
-		break;
-		
-		case WM_SIZE:
-			SizeEvent.send(hwnd, wParam, lParam);
-		break;
+	bool handled = false;
+	WindowEvent.send(hwnd, message, wParam, lParam, handled);
 
-		case WM_MOVE:
-			MoveEvent.send(hwnd, wParam, lParam);
-		break;
+	if(!handled)
+		return DefWindowProc(hwnd, message, wParam, lParam);
 
-		case WM_DESTROY:
-			ClosedEvent.send(hwnd,wParam, lParam);
-		break;
-
-		case WM_CLOSE:
-		{
-			bool canClose = false;
-			ClosingEvent.send(hwnd, wParam, lParam, canClose);
-			
-			if( canClose)
-			{
-				DestroyWindow(hwnd);
-			}
-
-			return 0;				
-		}
-		break;
-	}
-
-	return DefWindowProc(hwnd, message, wParam, lParam);
+	return 0;
 }
 
 
@@ -281,7 +223,6 @@ void ApplicationImpl::onQueueEvent(const Pt::Event& ev)
 
 void ApplicationImpl::onProcessEvents()
 { 
-    //TODO: should this also check selectables?
     _eventQueue.processEvents( this->event() );
 }
 
@@ -387,6 +328,4 @@ void ApplicationImpl::getScreeResolution(int& horizontal, int& vertical)
    vertical = desktop.bottom;
 }
 
-}
-
-}
+}}

@@ -39,7 +39,7 @@ public:
 		}
 	}
 
-	void printKey(const Pt::Hmi::KeyEvent& ev)
+	void printKey(Pt::Hmi::Controller* source, const Pt::Hmi::KeyEvent& ev)
 	{
 		std::cout<<"VC:"<<ev.virtualCode()<<" Alt:"<< ev.alt() << " Ext:"<< ev.extCode()<<" St:"<< ev.state()<<" Shift:"<<ev.shift()<<" Ctrl:" <<ev.ctrl()<<std::endl;
 	}
@@ -47,7 +47,7 @@ public:
 
 	void onClosed(Pt::Hmi::DeviceButton::State& s)
 	{
-		if(s == Pt::Hmi::DeviceButton::Released)
+		if(s == Pt::Hmi::DeviceButton::Pressed)
 		{
 			Pt::Hmi::Application::instance().exit();
 		}
@@ -59,29 +59,14 @@ int main(int argc, char* args[])
 {
 	
 
-
-	
 	Pt::Hmi::Application		app;
-
-
 	Test test;
 	Pt::Hmi::Desktop::Window	window;	
-
-
-	
-
-	
 	Pt::Hmi::Desktop::Panel     panel;
 	Pt::Hmi::Desktop::Panel     panel2;
 	Pt::Hmi::Desktop::Label     label;
 	Pt::Hmi::Desktop::Button    closeBt;
-	Pt::Hmi::KeyboardDevice     keyboardDevice;
-	
-
-	keyboardDevice.Event += Pt::slot(test, &Test::printKey);
-	 keyboardDevice.start(app.loop());
-	 
-
+ 
 	Pt::Hmi::PanelModel* panelModel = (Pt::Hmi::PanelModel*) panel.controller().model();
 	
 	panelModel->Position.set(Pt::Gfx::PointF(40,120));
@@ -137,7 +122,7 @@ int main(int argc, char* args[])
 	Pt::Hmi::WindowController* winCtrl = (Pt::Hmi::WindowController*) &window.controller();
 
 	Pt::Hmi::WindowModel* model =  (Pt::Hmi::WindowModel*) window.controller().model();
-	model->Border = Pt::Hmi::BorderStyle::Single;
+	model->Border = Pt::Hmi::BorderStyle::Sizebale;
 	model->ShowInTaskbar.set(true);
 	
 
@@ -155,8 +140,7 @@ int main(int argc, char* args[])
 	window.close();
 	window.show();
 	
-	winCtrl->Closed += Pt::slot(app,&Pt::Hmi::Application::exit);
-	
+	app.showConsole();
 	app.run();		
 }
 

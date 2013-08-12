@@ -5,12 +5,12 @@
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/System/EventLoop.h>
+#include <Pt/Hmi/Controller.h>
 #include "win32/Selector.h"
 #include <vector>
 #include <windows.h>
 
 namespace Pt {
-
 namespace Hmi {
 
 
@@ -60,13 +60,17 @@ class ApplicationImpl : public Pt::System::EventLoop
 
 		double resolutionDPI() const;
 		
-		Pt::Signal<int, WPARAM, LPARAM>			MouseEvent;
-		Pt::Signal<HWND>						PaintEvent;
-		Pt::Signal<HWND, WPARAM, LPARAM>		SizeEvent;
-		Pt::Signal<HWND, WPARAM, LPARAM>		MoveEvent;
-		Pt::Signal<int, WPARAM, LPARAM>			KeyBoardEvent;
-		Pt::Signal<HWND,WPARAM,LPARAM,bool&>    ClosingEvent;
-		Pt::Signal<HWND,WPARAM,LPARAM>			ClosedEvent;
+		void showConsole(bool show);
+	
+		inline Pt::Signal<Controller*, const PointingEvent&>& pointerEvent()
+		{
+			return _pointerEvent;
+		}
+
+		inline Pt::Signal<Controller*, const KeyEvent&>& keyDeviceEvent()
+		{
+			return _keyDeviceEvent;
+		}
 
     protected:
         static long CALLBACK wndProc(HWND hwnd, unsigned int message, unsigned int wParam, long lParam);
@@ -112,26 +116,8 @@ class ApplicationImpl : public Pt::System::EventLoop
 
 		void getScreeResolution(int& horizontal, int& vertical);
 
-	public:
-		static HHOOK mouseHook()
-		{
-			return _mouseHook;
-		}
-
-		static void setMouseHook(HHOOK h)
-		{
-			_mouseHook = h;
-		}
-
-		static HHOOK keyboardHook()
-		{
-			return _keyboardHook;
-		}
-
-		static void setkeyboardHook(HHOOK h)
-		{
-			_keyboardHook = h;
-		}
+	public:		
+		Pt::Signal<HWND, unsigned int, unsigned int, long, bool&> WindowEvent;
 
     private:
         //! @brief Instance handle of this application
@@ -150,6 +136,9 @@ class ApplicationImpl : public Pt::System::EventLoop
 		double _width;
 		double _height;
 		double _dpi;
+
+		Pt::Signal<Controller*, const PointingEvent&> _pointerEvent;			
+		Pt::Signal<Controller*, const KeyEvent&> _keyDeviceEvent;
 
     private:
         System::Mutex _mutex;

@@ -1,9 +1,11 @@
 #include "ApplicationImpl.h"
-#include "Pt/Hmi/Application.h"
+#include <Pt/Hmi/Application.h>
 #include <Pt/System/MainLoop.h>
+#include <Pt/Hmi/Controller.h>
+#include <Pt/Hmi/PointingEvent.h>
+#include <Pt/Hmi/KeyEvent.h>
 
 namespace Pt {
-
 namespace Hmi {
 
 Application::Application(int argc, char** argv)
@@ -36,6 +38,10 @@ Pt::Gfx::SizeF Application::toUnit(const Pt::Gfx::Size& value)
 	return _impl->toUnit(value);
 }
 
+void Application::showConsole(bool show)
+{
+	_impl->showConsole(show);
+}
 
 Pt::Gfx::Point Application::fromUnit(const Pt::Gfx::PointF& value)
 {
@@ -86,5 +92,12 @@ Pt::Signal<Controller*, const PointingEvent&>& Application::pointerEvent()
 {
 	return _impl->pointerEvent();
 }
+
+Pt::Signal<Controller*, const KeyEvent&>& Application::keyDeviceEvent()
+{
+	return _impl->keyDeviceEvent();
+}
+
+
 }}
 

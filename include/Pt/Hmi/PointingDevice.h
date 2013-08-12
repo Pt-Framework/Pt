@@ -3,6 +3,7 @@
 
 #include <Pt/Hmi/InputDevice.h>
 #include <Pt/Hmi/PointingEvent.h>
+#include <Pt/Hmi/Controller.h>
 
 namespace Pt{
 namespace Hmi{
@@ -14,7 +15,7 @@ public:
 	{ }
 
 public:
-	Pt::Signal<const PointingEvent&> Event;
+	Pt::Signal<Controller*, const PointingEvent&> Event;
 
 protected:	
 	PointingDevice()

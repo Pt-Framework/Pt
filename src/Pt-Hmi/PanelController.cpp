@@ -183,8 +183,7 @@ void PanelController::onPointerInput(const PointingEvent& ev)
 				}
 			}
 
-			handleResize(ev);
-			invalidate();
+			handleResize(ev);			
 		}
 		break;
 	}

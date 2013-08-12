@@ -70,7 +70,6 @@ public:
 		return _controlDial;
 	}
 
-
 	void operator =(const PointingEvent& copy);
 
 protected:
@@ -82,7 +81,7 @@ private:
 	double _x;
 	double _y;
 	std::vector<DeviceButton>	  _buttons;
-	std::vector<DeviceControlDial> _controlDial;
+	std::vector<DeviceControlDial> _controlDial;	
 };
 
 }}
