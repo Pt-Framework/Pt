@@ -51,6 +51,7 @@ namespace Ssl {
 
 Context::Context(Protocol protocol)
 : _protocol(protocol)
+, _verify(VerifyPeer)
 {
 }
 
@@ -79,12 +80,14 @@ void Context::setVerifyDepth(int n)
 
 void Context::setVerifyMode(VerifyMode m)
 {
+    _verify = m;
 }
 
 
 void Context::assign(const Context& ctx)
 {
     setProtocol(ctx._protocol);
+    setVerifyMode(ctx._verify);
 
     _caCerts =    ctx._caCerts;
     _cert =       ctx._cert;
@@ -315,6 +318,7 @@ SSLInit::~SSLInit()
 Context::Context(Protocol protocol)
 : _protocol(protocol)
 , _reserved(0)
+, _verify(VerifyPeer)
 {
     // Create the context for the given protocol
     switch(_protocol) 
@@ -388,8 +392,10 @@ void Context::setVerifyDepth(int n)
 
 void Context::setVerifyMode(VerifyMode m)
 {
+    _verify = m;
+
     int mode = 0;
-    switch(m)
+    switch(_verify)
     {
         case VerifyPeer:
             mode = SSL_VERIFY_PEER;
@@ -442,7 +448,10 @@ X509* addExtraCert(SSL_CTX* ctx, X509* x)
 void Context::assign(const Context& ctx)
 {
     setProtocol(ctx._protocol);
+    setVerifyMode(ctx._verify);
     setCertificate(ctx._cert);
+
+    // TODO: verify depth
 
     _caCerts.clear();
     X509_STOREAutoPtr cert_store( X509_STORE_new() );
@@ -465,9 +474,6 @@ void Context::assign(const Context& ctx)
         X509* x509 = addExtraCert(_ctx, *it);
         _extraCerts.push_back(x509);
     }
-
-    int mode = SSL_CTX_get_verify_mode(_ctx);
-    SSL_CTX_set_verify(_ctx, mode, 0);
 }
 
 

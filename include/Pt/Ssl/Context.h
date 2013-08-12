@@ -71,10 +71,6 @@ class PT_SSL_API Context : public NonCopyable
             SSLv2     //!< unsecure, not recommended.
         };
 
-        static const unsigned long DefaultTimeout = static_cast<unsigned long>(-1);
-        static const unsigned long DefaultCacheSize = static_cast<unsigned long>(-1);
-        static const unsigned long UnlimitedCacheSize = 0;
-
     public:
         //! @brief Construct with session id and protocol. 
         Context(Protocol protocol = DefaultProtocol);
@@ -93,6 +89,9 @@ class PT_SSL_API Context : public NonCopyable
 
         //! @brief Limits the number of certificates checked in the peer's certificate chain.
         void setVerifyDepth(int n);
+
+        VerifyMode verification() const
+        { return _verify; }
 
         //! @brief Sets the current validation mode.
         void setVerifyMode(VerifyMode mode);
@@ -160,6 +159,7 @@ class PT_SSL_API Context : public NonCopyable
         std::vector<x509_st*>    _extraCerts;
 #endif
 
+        VerifyMode               _verify;
         std::vector<Certificate> _certificates;
         void*                    _reserved;
 };
