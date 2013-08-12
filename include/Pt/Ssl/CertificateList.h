@@ -31,6 +31,7 @@
 
 #include <Pt/Ssl/Api.h>
 #include <Pt/NonCopyable.h>
+#include <string>
 #include <vector>
 
 namespace Pt {
