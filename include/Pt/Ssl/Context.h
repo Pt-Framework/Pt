@@ -141,6 +141,9 @@ class PT_SSL_API Context : public NonCopyable
 
         Certificate& certificate()
         { return _cert; }
+        
+        const std::vector<Certificate>& caCertificates()
+        { return _caCerts; }
     
     private:
         Protocol                 _protocol;

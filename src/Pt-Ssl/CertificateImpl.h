@@ -140,11 +140,9 @@ class CertificateImpl
         {
             return "";
         }
-
-        PublicKey publicKey() const
-        {
-            return PublicKey(0);
-        }
+        
+        SecCertificateRef certRef()
+        { return _cert; }
         
         SecIdentityRef identity()
         { return _ident; }

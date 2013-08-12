@@ -64,6 +64,7 @@ Connection::Connection(Context& ctx, std::streambuf& ios, int mode)
 , _isShutdown(false)
 {
     Boolean isServer = (mode == StreamBuffer::Accept);
+    log_debug("isServer " << (isServer == true) << " " << this);
 
     SSLNewContext(isServer, &_context);
     
@@ -139,25 +140,42 @@ bool Connection::readHandshake()
     
     if(status == errSSLServerAuthCompleted)
     {
-        bool verifyNone = true; //_ctx->verifyMode() == VerifyNone;
+        log_debug("errSSLServerAuthCompleted " << this);
+        bool verifyNone = _ctx->verification() == Context::VerifyNone;
         if(verifyNone)
             goto again;
 
         SecTrustRef trust = NULL;
         SSLCopyPeerTrust(_context, &trust);
+        
+        const Certificate& ca = _ctx->caCertificates().at(0);
+        log_debug("CA: " << ca.subject() );
 
-        CFArrayRef anchorCertificates = NULL;
-        SecTrustSetAnchorCertificates(trust, anchorCertificates);
+        SecCertificateRef certs [] = { ca.impl()->certRef() };
 
+        CFArrayRef caArr = CFArrayCreate(NULL, (const void**)certs, 1, &kCFTypeArrayCallBacks);
+        //CFArrayRef caArr = NULL;
+        SecTrustSetAnchorCertificates(trust, caArr);
+        SecTrustSetAnchorCertificatesOnly(trust, true);
+
+        log_debug("SecTrustEvaluate evaluating");
         SecTrustResultType result;
-        OSStatus SecTrustEvaluate(trust, &result);
-
+        OSStatus evalErr = SecTrustEvaluate(trust, &result);
+        
+        if(evalErr)
+            throw HandshakeFailed("SSL handshake failed");
+            
+        log_debug("SecTrustEvaluate XXXXXXX " << result << " " << (int)kSecTrustResultUnspecified);
+        
         if(trust)
             CFRelease(trust);
 
-        if(result != kSecTrustResultProceed)
+        if( (result != kSecTrustResultProceed) &&
+            (result != kSecTrustResultUnspecified) )
             throw HandshakeFailed("SSL handshake failed");
 
+        //std::exit(0);
+        log_debug("SecTrustEvaluate TRUSTED");
         goto again;
     }
     
