@@ -139,6 +139,25 @@ bool Connection::readHandshake()
     
     if(status == errSSLServerAuthCompleted)
     {
+        bool verifyNone = true; //_ctx->verifyMode() == VerifyNone;
+        if(verifyNone)
+            goto again;
+
+        SecTrustRef trust = NULL;
+        SSLCopyPeerTrust(_context, &trust);
+
+        CFArrayRef anchorCertificates = NULL;
+        SecTrustSetAnchorCertificates(trust, anchorCertificates);
+
+        SecTrustResultType result;
+        OSStatus SecTrustEvaluate(trust, &result);
+
+        if(trust)
+            CFRelease(trust);
+
+        if(result != kSecTrustResultProceed)
+            throw HandshakeFailed("SSL handshake failed");
+
         goto again;
     }
     
