@@ -171,26 +171,6 @@ rule FIncludes
 { return -I$(<) ; }
 
 
-#rule Main-Build
-#{
-#    MainFromObjects $(<) : $(>:GBS=$(SUFOBJ)) ; # FIX was only S
-#    Objects $(>) ;
-#
-#    # Add executable name decoration
-#    local _target = $(<:S=$(SUFEXE)) ;
-#
-#    LINKFLAGS on $(_target) += $(LINKFLAGS) $(MAIN_LINKFLAGS) ;
-#
-#    switch $(>:S)
-#    {
-#        case .C :   LINK on $(_target) = $(C++) ;
-#        case .cc :  LINK on $(_target) = $(C++) ;
-#        case .cpp : LINK on $(_target) = $(C++) ;
-#        case * :    LINK on $(_target) = $(CC) ;
-#    }
-#}
-
-
 rule Main-LinkSharedLibraries
 {
     local _target = [ FAppendSuffix $(<) : $(SUFEXE) ] ;
