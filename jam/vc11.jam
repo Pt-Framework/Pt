@@ -13,10 +13,9 @@ rule ConfigureVisualC
             VISUALC = [ W32_GETREG "HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Microsoft\\VCExpress\\11.0\\Setup\\VC\\" : "ProductDir" ] ;
             VISUALC ?= [ W32_GETREG "HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Microsoft\\VisualStudio\\11.0\\Setup\\VC\\" : "ProductDir"  ] ;
             VISUALC ?= [ W32_GETREG "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\11.0\\Setup\\VC\\" : "ProductDir" ] ;
-			
-            VISUALC = $(VISUALC:P) ;
-            VISUALC = $(VISUALC:P) ;
 
+            VISUALC = $(VISUALC:P) ;
+            VISUALC = $(VISUALC:P) ;
         }
         
         if ! $(VISUALC)
