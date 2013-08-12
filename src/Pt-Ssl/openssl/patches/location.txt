@@ -10,3 +10,5 @@ Changes for ICC _lrotl() and _lrotr()
     openssl/crypto/aes/aes_x86core.c
     openssl/crypto/des/des_locl.h
     openssl/crypto/rc5/rc5_locl.h
+>>> Simply change defined(__ICC) to defined(__ICC_x) to disable ICC's specific code
+
