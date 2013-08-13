@@ -227,7 +227,7 @@ Certificate Context::findCertificate(const std::string& subject)
 
     if( ! error && items && 0 < CFArrayGetCount(items) )
     {
-        SecCertificateRef cert = (SecCertificateRef) CFArrayGetValueAtIndex(items, 0);
+        SecIdentityRef cert = (SecIdentityRef) CFArrayGetValueAtIndex(items, 0);
         std::clog << "found certificate: " << cert << std::endl;
         CFRetain(cert);
         ret = Certificate( new CertificateImpl(cert) );

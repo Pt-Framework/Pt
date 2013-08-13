@@ -46,7 +46,7 @@ class StreamBufferTest : public Pt::Unit::TestSuite
             Pt::System::Logger::setLogLevel("", Pt::System::Trace);
 
             this->registerMethod("Handshake", *this, &StreamBufferTest::Handshake);
-            this->registerMethod("CertificateStore", *this, &StreamBufferTest::CertificateStore);
+            //this->registerMethod("CertificateStore", *this, &StreamBufferTest::CertificateStore);
         }
 
         void setUp()
@@ -116,6 +116,7 @@ void StreamBufferTest::Handshake()
     serverContext.setCACertificates( caStore );
     serverContext.setVerifyMode(Pt::Ssl::Context::VerifyPeerRequired);
 
+    std::clog << "--------------------" << std::endl;
     // client-side SSL context
     Pt::Ssl::Context clientContext;
     clientContext.loadPkcs12(ifs, "123");
@@ -124,7 +125,6 @@ void StreamBufferTest::Handshake()
     PT_UNIT_ASSERT( cert.isValid() );
 
     clientContext.setCertificate( cert );
-    
     clientContext.setCACertificates( caStore );
     clientContext.setVerifyMode(Pt::Ssl::Context::VerifyPeer);
 

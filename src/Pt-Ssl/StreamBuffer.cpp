@@ -73,18 +73,55 @@ Connection::Connection(Context& ctx, std::streambuf& ios, int mode)
     OSStatus status = SSLSetIOFuncs(_context, 
                                     &Connection::sslReadCallback, 
                                     &Connection::sslWriteCallback);
+
+    _server = false;
     
-    SSLSetEnableCertVerify(_context, false);
-    
-    SSLSetSessionOption(_context, kSSLSessionOptionBreakOnServerAuth, true);
-    
-    SecIdentityRef ident = _ctx->certificate().impl()->identity();
-    
-    SecIdentityRef certArray[1] = { ident };
-    
-    CFArrayRef certRefs = CFArrayCreate(NULL, (const void**)(&ident), 1, NULL);
-    
-    SSLSetCertificate(_context, certRefs);
+    if(isServer == true)
+    {
+        _server = true;
+
+        if(_ctx->verification() == Context::VerifyNone)
+        {
+            SSLSetClientSideAuthenticate(_context, kNeverAuthenticate);
+        }
+        else if(_ctx->verification() == Context::VerifyPeer)
+        {
+            SSLSetClientSideAuthenticate(_context, kTryAuthenticate);
+        }
+        else if(_ctx->verification() == Context::VerifyPeerRequired)
+        {
+            SSLSetClientSideAuthenticate(_context, kAlwaysAuthenticate);
+        }
+        // NOTE:
+        // use kNeverAuthenticate and evaluate trust after handshake like 
+        // we do in the client case
+        
+        const Certificate& ca = _ctx->caCertificates().at(0);
+        log_debug("CA: " << ca.subject() );
+
+        SecCertificateRef certs [] = { ca.impl()->certRef() };
+        CFArrayRef caArr = CFArrayCreate(NULL, (const void**)certs, 1, &kCFTypeArrayCallBacks);
+        SSLSetCertificateAuthorities(_context, caArr, true);
+        
+        SSLSetTrustedRoots(_context, caArr, true);
+    }
+    else
+    {
+        SSLSetEnableCertVerify(_context, false);
+        SSLSetSessionOption(_context, kSSLSessionOptionBreakOnServerAuth, true);
+    }
+
+    if( _ctx->certificate().isValid() )
+    {
+        SecIdentityRef ident = _ctx->certificate().impl()->identity();
+        if(ident)
+        {
+            std::clog << "USING CERTIFICATE " << _server << std::endl;
+            SecIdentityRef certArray[1] = { ident };
+            CFArrayRef certRefs = CFArrayCreate(NULL, (const void**)(&ident), 1, NULL);
+            SSLSetCertificate(_context, certRefs);
+        }
+    }
 }
 
 
@@ -96,7 +133,7 @@ Connection::~Connection()
 
 bool Connection::writeHandshake()
 {
-    log_trace("Connection::writeHandshake");
+    log_trace("Connection::writeHandshake " << _server << " XXXXXXXXXXXXXXXXXXXXXXXX");
     
     if( ! _ios )
         throw System::IOError("SSL Buffer not initialized");
@@ -124,7 +161,7 @@ bool Connection::writeHandshake()
 
 bool Connection::readHandshake()
 {
-    log_trace("Connection::readHandshake");
+    log_trace("Connection::readHandshake " << _server << " XXXXXXXXXXXXXXXXXXXXXXXX");
     
     if( ! _ios )
         throw System::IOError("SSL Buffer not initialized");
@@ -140,7 +177,8 @@ bool Connection::readHandshake()
     
     if(status == errSSLServerAuthCompleted)
     {
-        log_debug("errSSLServerAuthCompleted " << this);
+        log_debug("errSSLServerAuthCompleted " << _server);
+
         bool verifyNone = _ctx->verification() == Context::VerifyNone;
         if(verifyNone)
             goto again;
@@ -165,7 +203,7 @@ bool Connection::readHandshake()
         if(evalErr)
             throw HandshakeFailed("SSL handshake failed");
             
-        log_debug("SecTrustEvaluate XXXXXXX " << result << " " << (int)kSecTrustResultUnspecified);
+        log_debug("SecTrustEvaluate ZZZZZZZZZZZZZZZZZZZZZZZ " << result << " " << (int)kSecTrustResultUnspecified);
         
         if(trust)
             CFRelease(trust);
@@ -174,11 +212,13 @@ bool Connection::readHandshake()
             (result != kSecTrustResultUnspecified) )
             throw HandshakeFailed("SSL handshake failed");
 
-        //std::exit(0);
         log_debug("SecTrustEvaluate TRUSTED");
         goto again;
     }
     
+    if(status == errSSLUnknownRootCert)
+        throw HandshakeFailed("untrusted CA certificate");
+
     if(status != noErr && status != errSSLWouldBlock )
     {
         throw HandshakeFailed("SSL handshake failed");

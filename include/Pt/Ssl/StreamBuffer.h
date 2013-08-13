@@ -91,6 +91,7 @@ class PT_SSL_API Connection
         bool _isReading;
         bool _isWritingHandshake;
         bool _isShutdown;
+        bool _server;
 };
 
 #else
