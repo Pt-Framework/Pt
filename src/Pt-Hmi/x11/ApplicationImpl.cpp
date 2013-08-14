@@ -1,0 +1,78 @@
+/* Copyright (C) 2013 Marc Boris Duerner
+ * Copyright (C) 2013 Aloysius Indrayanto
+ * Copyright (C) 2013 Laurentiu-Gheorghe Crisan
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * As a special exception, you may use this file as part of a free
+ * software library without restriction. Specifically, if other files
+ * instantiate templates or use macros or inline functions from this
+ * file, or you compile this file and link it with other files to
+ * produce an executable, this file does not by itself cause the
+ * resulting executable to be covered by the GNU General Public
+ * License. This exception does not however invalidate any other
+ * reasons why the executable file might be covered by the GNU Library
+ * General Public License.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
+#include "ApplicationImpl.h"
+#ifndef _AIX
+#include <X11/Xft/Xft.h>
+#endif
+#include "Pt/Hmi/Application.h"
+#include "Pt/SourceInfo.h"
+#include <stdexcept>
+#include <vector>
+
+namespace Pt {
+namespace Hmi {
+
+ApplicationImpl::ApplicationImpl()
+: _display( XOpenDisplay(NULL) )
+, _xfd(_display)
+{
+    // Open a X11 display connection
+    if( ! _display)
+        throw std::runtime_error("Could not open X11 display." + PT_SOURCEINFO);
+
+    XSync(_display, false);
+
+    // Set X11 to sync mode. Slow, for debugging only.
+    //XSynchronize(_display, true);
+	/*
+    AtomAppWake      = XInternAtom(_display, "PT_APP_WAKE",      false);
+    AtomWindowResize = XInternAtom(_display, "PT_WINDOW_RESIZE", false);
+    AtomWindowMove   = XInternAtom(_display, "PT_WINDOW_MOVE",   false);
+    AtomWindowClosed = XInternAtom(_display, "WM_DELETE_WINDOW", false);
+    AtomWMProtocols  = XInternAtom(_display, "WM_PROTOCOLS",     false);
+	*/
+
+    // Do we really need this?
+    //XftInit(0);  
+
+    _xfd.setActive(*this);
+    _xfd.begin();
+
+    _xfd.flush();
+}
+
+
+ApplicationImpl::~ApplicationImpl()
+{
+    XSync(_display, true);
+    XCloseDisplay(_display);
+    _display = NULL;
+}
+
+}}
+
