@@ -95,6 +95,9 @@ Connection::Connection(Context& ctx, std::streambuf& ios, int mode)
         // NOTE:
         // use kNeverAuthenticate and evaluate trust after handshake like 
         // we do in the client case
+
+        // http://www.inmite.eu/en/blog/20120302-details-certificate-revocation-mechanisms-on-ios-iphone
+        // also try to set OCSP to 'Off' in KeyManager -> Preferences -> Certificates
         
         const Certificate& ca = _ctx->caCertificates().at(0);
         log_debug("CA: " << ca.subject() );
