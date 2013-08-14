@@ -18,7 +18,7 @@ public:
 
 public:
 	DeviceControlDial()
-	: _direction(Direction::None)
+	: _direction(None)
 	{
 	}
 	
@@ -43,7 +43,7 @@ public:
 
 	inline void setDelta(double d)
 	{
-		_delta;
+		_delta= d;
 	}
 
 private:
