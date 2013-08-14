@@ -49,13 +49,6 @@ ApplicationImpl::ApplicationImpl()
 
     // Set X11 to sync mode. Slow, for debugging only.
     //XSynchronize(_display, true);
-	/*
-    AtomAppWake      = XInternAtom(_display, "PT_APP_WAKE",      false);
-    AtomWindowResize = XInternAtom(_display, "PT_WINDOW_RESIZE", false);
-    AtomWindowMove   = XInternAtom(_display, "PT_WINDOW_MOVE",   false);
-    AtomWindowClosed = XInternAtom(_display, "WM_DELETE_WINDOW", false);
-    AtomWMProtocols  = XInternAtom(_display, "WM_PROTOCOLS",     false);
-	*/
 
     // Do we really need this?
     //XftInit(0);  
