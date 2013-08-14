@@ -70,9 +70,9 @@ Connection::Connection(Context& ctx, std::streambuf& ios, int mode)
     
     SSLSetConnection(_context, (SSLConnectionRef) this);
 
-    OSStatus status = SSLSetIOFuncs(_context, 
-                                    &Connection::sslReadCallback, 
-                                    &Connection::sslWriteCallback);
+    SSLSetIOFuncs(_context, 
+                  &Connection::sslReadCallback, 
+                  &Connection::sslWriteCallback);
 
     _server = false;
     
@@ -120,7 +120,7 @@ Connection::Connection(Context& ctx, std::streambuf& ios, int mode)
         if(ident)
         {
             std::clog << "USING CERTIFICATE " << _server << std::endl;
-            SecIdentityRef certArray[1] = { ident };
+            //SecIdentityRef certArray[1] = { ident };
             CFArrayRef certRefs = CFArrayCreate(NULL, (const void**)(&ident), 1, NULL);
             SSLSetCertificate(_context, certRefs);
         }
@@ -154,7 +154,7 @@ bool Connection::writeHandshake()
     }
 
     if(status == noErr)
-    {
+    {       
         _connected = true;
     }
 
@@ -188,6 +188,7 @@ bool Connection::readHandshake()
 
         SecTrustRef trust = NULL;
         SSLCopyPeerTrust(_context, &trust);
+        //SecTrustSetPolicies(trust, SecPolicyCreateBasicX509());
         
         const Certificate& ca = _ctx->caCertificates().at(0);
         log_debug("CA: " << ca.subject() );
@@ -199,7 +200,7 @@ bool Connection::readHandshake()
         SecTrustSetAnchorCertificates(trust, caArr);
         SecTrustSetAnchorCertificatesOnly(trust, true);
 
-        log_debug("SecTrustEvaluate evaluating");
+        log_debug("SecTrustEvaluate evaluating " << _server);
         SecTrustResultType result;
         OSStatus evalErr = SecTrustEvaluate(trust, &result);
         
@@ -349,7 +350,9 @@ OSStatus Connection::sslRead(void* data, size_t* n)
     std::streamsize r = _ios->sgetn(reinterpret_cast<char*>(data), gsize);
     log_debug("read " << r << " bytes from input");
 
-    OSStatus ret = r < (*n) ? errSSLWouldBlock : noErr;
+    OSStatus ret = noErr;
+    if( static_cast<size_t>(r) < (*n) ) 
+        ret = errSSLWouldBlock;
 
     *n = static_cast<size_t>(r);
 
