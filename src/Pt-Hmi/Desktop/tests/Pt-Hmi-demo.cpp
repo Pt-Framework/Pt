@@ -135,7 +135,7 @@ int main(int argc, char* args[])
 	btm->ButtonState.PropertyChanged += Pt::slot(test,  &Test::onClosed);
 
 
-	window.addChild(&closeBt);	
+	window.addChild(&closeBt);			
 	window.show();
 	
 	app.showConsole();
