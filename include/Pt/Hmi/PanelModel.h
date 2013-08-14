@@ -5,7 +5,7 @@
 #include <Pt/Hmi/Property.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Size.h>
-#include <Pt/Gfx/ArgbImage.h>
+#include <Pt/Gfx/ARgbImage.h>
 
 namespace Pt{
 namespace Hmi{
