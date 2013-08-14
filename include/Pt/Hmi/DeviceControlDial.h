@@ -11,14 +11,12 @@ class PT_HMI_API DeviceControlDial : public DeviceButton
 public:
 	enum Direction
 	{
-		None,
 		Left,
 		Right
 	};
 
-public:
 	DeviceControlDial()
-	: _direction(None)
+	: _direction(Left)
 	{
 	}
 	

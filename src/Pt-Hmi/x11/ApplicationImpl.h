@@ -32,6 +32,9 @@
 #include <Pt/Hmi/Api.h>
 #include <Pt/System/Selectable.h>
 #include <Pt/System/MainLoop.h>
+#include <Pt/Gfx/Point.h>
+#include <Pt/Gfx/Size.h>
+#include <Pt/Hmi/Controller.h>
 #include <Pt/Singleton.h>
 #include <Pt/Event.h>
 #include "posix/Selector.h"
@@ -51,14 +54,46 @@ public:
     inline Display* display()
     { return _display; }
 
-	Pt::Signal<XEvent&> WindowEvent;   
+		Pt::Signal<XEvent&> WindowEvent;  
+
+ 		double toUnit(int value);
+		Pt::Gfx::PointF toUnit(const Pt::Gfx::Point& value);
+		Pt::Gfx::SizeF toUnit(const Pt::Gfx::Size& value);
+
+		int fromUnit(double value);
+		Pt::Gfx::Point fromUnit(const Pt::Gfx::PointF& value);
+		Pt::Gfx::Size fromUnit(const Pt::Gfx::SizeF& value);
+
+		double unitSizeInch() const;
+		double unitSizeMm() const;
+
+		void setResolution(double dpi);
+
+		double resolutionDPI() const;
+		
+		void showConsole(bool show);
+	
+		inline Pt::Signal<Controller*, const PointingEvent&>& pointerEvent()
+		{
+			return _pointerEvent;
+		}
+
+		inline Pt::Signal<Controller*, const KeyEvent&>& keyDeviceEvent()
+		{
+			return _keyDeviceEvent;
+		}
 
 private:
     Display* _display;
     X11Fd	_xfd;
+
+	Pt::Signal<Controller*, const PointingEvent&> _pointerEvent;			
+	Pt::Signal<Controller*, const KeyEvent&> _keyDeviceEvent;
+	double _dpi;
 };
 
 }}
 
 #endif
+
 

@@ -40,6 +40,7 @@ namespace Hmi {
 ApplicationImpl::ApplicationImpl()
 : _display( XOpenDisplay(NULL) )
 , _xfd(_display)
+, _dpi(1/92.0)
 {
     // Open a X11 display connection
     if( ! _display)
@@ -59,6 +60,62 @@ ApplicationImpl::ApplicationImpl()
     _xfd.flush();
 }
 
+double ApplicationImpl::toUnit(int value)
+{
+	return value;
+}
+
+Pt::Gfx::PointF ApplicationImpl::toUnit(const Pt::Gfx::Point& value)
+{
+	return Pt::Gfx::PointF(value.x(),value.y()); 
+}
+
+Pt::Gfx::SizeF ApplicationImpl::toUnit(const Pt::Gfx::Size& value)
+{
+	return Pt::Gfx::SizeF(value.width(),value.height()); 
+}
+
+int ApplicationImpl::fromUnit(double value)
+{
+	return (int) value;
+}
+
+Pt::Gfx::Point ApplicationImpl::fromUnit(const Pt::Gfx::PointF& value)
+{
+	return Pt::Gfx::Point((int) value.x(), (int) value.y());
+}
+
+Pt::Gfx::Size ApplicationImpl::fromUnit(const Pt::Gfx::SizeF& value)
+{
+	return Pt::Gfx::Size((int) value.width(),(int)value.height()); 
+}
+
+
+double ApplicationImpl::unitSizeInch() const
+{
+	return _dpi;
+}
+
+double ApplicationImpl::unitSizeMm() const
+{
+	return _dpi;
+}
+
+
+void ApplicationImpl::setResolution(double dpi)
+{
+	_dpi = dpi;
+}
+
+
+double ApplicationImpl::resolutionDPI() const
+{
+	return _dpi;
+}
+		
+void ApplicationImpl::showConsole(bool show)
+{
+}
 
 ApplicationImpl::~ApplicationImpl()
 {

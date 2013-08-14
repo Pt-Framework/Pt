@@ -8,17 +8,17 @@ namespace Hmi{
 
 class PT_HMI_API DeviceButton
 {
+
 public:
 	enum State 
 	{
-		None,
 		Released,
 		Pressed
 	};
 
-public:
+
 	DeviceButton()
-	: _state(None)
+	: _state(Released)
 	{
 	}
 	

@@ -29,6 +29,7 @@
 #ifndef _AIX
 #include <X11/Xft/Xft.h>
 #endif
+#include "ApplicationImpl.h"
 #include "Pt/Hmi/Application.h"
 #include "Pt/SourceInfo.h"
 #include <stdexcept>
@@ -56,6 +57,7 @@ X11Fd::~X11Fd()
 
 bool X11Fd::onRun()
 {
+
     if( ! XPending(_display) )
         return false;
 

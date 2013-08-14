@@ -14,7 +14,7 @@ namespace BorderStyle
 {
 	enum Type
 	{
-		None,
+		NoBorder,
 		Single,
 		Border3D,
 		Sizebale,

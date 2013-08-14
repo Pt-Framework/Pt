@@ -31,7 +31,6 @@
 #undef Above
 #undef Below
 
-#include "Drawable.h"
 #include <Pt/Api.h>
 #include <Pt/Connectable.h>
 #include <Pt/Gfx/Point.h>
@@ -39,13 +38,11 @@
 #include <Pt/Hmi/GfxModel.h>
 #include <Pt/Hmi/PointingEvent.h>
 #include <Pt/Hmi/KeyEvent.h>
-#include <Pt/String.h>
-#include <list>
 
-namespace Pt {
-namespace Hmi {
+namespace Pt{
+namespace Hmi{
 
-class GfxOutputImpl : public Drawable, public Pt::Connectable
+class GfxOutputImpl :public Pt::Connectable
 {
 public:
     GfxOutputImpl();
@@ -65,7 +62,7 @@ private:
 	void onMouseButtonPress(XEvent& ev);
 	void onMouseButtonRelease(XEvent& xev);
 	void onPaint(XEvent& xev);
-	void onConfigureNotify( XEvent& xev);
+	void onConfigureNotify(XEvent& xev);
 	void onKeyEvent(XEvent& ev);
 
 private:
@@ -77,9 +74,7 @@ private:
 	void show();
 	void hide();
 	void output();
-	void drawIndependentImage(size_t x, size_t y, const char* data, size_t width, size_t height);
-
-       
+	void drawIndependentImage(size_t x, size_t y, const char* data, size_t width, size_t height);       
 
 private:
     Atom AtomAppWake;
@@ -87,12 +82,16 @@ private:
     Atom AtomWindowMove;
     Atom AtomWindowClosed;
     Atom AtomWMProtocols;
-	Pt::Hmi::GfxModel* _model:
-	Pt::Hmi::PointingEvent _mouseEvent;
-	Pt::Hmi::KeyEvent      _keyEvent;
+
+	Pt::Hmi::GfxModel* 		_model;
+	Pt::Hmi::PointingEvent 	_mouseEvent;
+	Pt::Hmi::KeyEvent      	_keyEvent;
 	Pt::Gfx::Rgb888Image	_rgb88Image;
+    ::Drawable 				_drawable;
+    GC 						_brushGc;
 };
 
 }}
 
 #endif
+

@@ -52,8 +52,6 @@ void PanelRenderer::render(Pt::Hmi::Model* m)
 						
 	switch(model->BorderStyle.get())
 	{
-		case BorderStyle::None:
-		break;
 		case BorderStyle::Single:
 		{			
 			std::vector<Pt::Gfx::Point> points1(5);

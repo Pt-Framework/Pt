@@ -16,7 +16,7 @@ Label::Label()
 	_defController->setRenderer(_defRenderer);	
 	_defModel->ForeColor.set(Pt::Gfx::ARgbColor(160,160,160));
 	_defModel->BorderWidth.set(1);
-	_defModel->BorderStyle.set(BorderStyle::None);
+	_defModel->BorderStyle.set(BorderStyle::NoBorder);
 
 	setController(*_defController);
 }

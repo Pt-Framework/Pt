@@ -1,7 +1,7 @@
 #ifndef Pt_Hmi_Model_Cursor_h
 #define Pt_Hmi_Model_Cursor_h
 
-#include <Pt/Hmi//Api.h>
+#include <Pt/Hmi/Api.h>
 
 namespace Pt{
 namespace Hmi{
@@ -19,7 +19,6 @@ namespace Cursors
 		Help,		
 		IBeam,
 		No,
-		None,
 		Pen,
 		ScrollAll,
 		ScrollE,

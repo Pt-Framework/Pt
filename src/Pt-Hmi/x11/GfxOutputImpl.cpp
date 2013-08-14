@@ -1,5 +1,4 @@
-/*
- * Copyright (C) 2013 Marc Boris Duerner
+/* Copyright (C) 2013 Marc Boris Duerner
  * Copyright (C) 2013 Aloysius Indrayanto
  * Copyright (C) 2013 Laurentiu-Gheorghe Crisan
  *
@@ -26,29 +25,33 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
-#include "GfcOutputImpl.h"
+#include "GfxOutputImpl.h"
 #include "ApplicationImpl.h"
 #include <Pt/Hmi/Application.h>
+#include <Pt/Gfx/Rgb888Color.h>
+#include <Pt/Gfx/Rgb888Image.h>
 #include <Pt/TextStream.h>
 #include <Pt/Utf8Codec.h>
-
+#include <Pt/Hmi/WindowModel.h>
 #include <iostream>
 #include <sstream>
 #include <algorithm>
-using namespace std;
 
-namespace Pt {
-namespace Hmi {
+namespace Pt{
+namespace Hmi{
 
 GfxOutputImpl::GfxOutputImpl()
-, _model(0)
+: _model(0)
+, _drawable(0)
 {
 	_mouseEvent.buttons().resize(3);
-    AtomAppWake      = XInternAtom(_display, "PT_APP_WAKE",      false);
-    AtomWindowResize = XInternAtom(_display, "PT_WINDOW_RESIZE", false);
-    AtomWindowMove   = XInternAtom(_display, "PT_WINDOW_MOVE",   false);
-    AtomWindowClosed = XInternAtom(_display, "WM_DELETE_WINDOW", false);
-    AtomWMProtocols  = XInternAtom(_display, "WM_PROTOCOLS",     false);
+ 	Display* display = Application::instance().impl()->display();
+
+    AtomAppWake      = XInternAtom(display, "PT_APP_WAKE",      false);
+    AtomWindowResize = XInternAtom(display, "PT_WINDOW_RESIZE", false);
+    AtomWindowMove   = XInternAtom(display, "PT_WINDOW_MOVE",   false);
+    AtomWindowClosed = XInternAtom(display, "WM_DELETE_WINDOW", false);
+    AtomWMProtocols  = XInternAtom(display, "WM_PROTOCOLS",     false);
 
 	Application::instance().impl()->WindowEvent += Pt::slot(*this, &GfxOutputImpl::onWindowEvent);
 	create();
@@ -84,16 +87,16 @@ void GfxOutputImpl::onClientMessage(XEvent& xev)
         int width = xev.xclient.data.l[0];
         int height = xev.xclient.data.l[1];
 
-		Pt::Gfx::SizeF size = _model->toUnit(Pt::Gfx::Size(width, height);
+		Pt::Gfx::SizeF size = _model->toUnit(Pt::Gfx::Size(width, height));
 		_model->Size = size;
         return;
     }
 
-    if(xev.xclient.message_type == AtomWindowMove) 
+    if( xev.xclient.message_type == AtomWindowMove ) 
 	{
         int x = xev.xclient.data.l[0];
         int y = xev.xclient.data.l[1];
-		Pt::Gfx::Pointf p = _model->toUnit(Pt::Gfx::Point(x,y);
+		Pt::Gfx::PointF p = _model->toUnit(Pt::Gfx::Point(x,y));
 		_model->Position = p;
         return;
     }
@@ -124,7 +127,7 @@ void GfxOutputImpl::onMotionNotify(XEvent& xev)
         modifiers |= MouseMoveEvent::AltDown;
 */
 
-	Pt::Gfx::PointF pos = _model->toUnit(Pt::Gfx::Point(x,y);
+	Pt::Gfx::PointF pos = _model->toUnit(Pt::Gfx::Point(x,y));
 	_mouseEvent.setX(pos.x());
 	_mouseEvent.setY(pos.y());
 
@@ -136,8 +139,7 @@ void GfxOutputImpl::onMouseButtonPress(XEvent& xev)
 {
     int x = xev.xbutton.x;
     int y = xev.xbutton.y;
-    MouseEvent::Button button = MouseEvent::LeftButton;
-
+    
     switch(xev.xbutton.button) 
 	{
         case Button1: 
@@ -156,7 +158,7 @@ void GfxOutputImpl::onMouseButtonPress(XEvent& xev)
         //case Button5: button = MouseEvent::WheelDown; break;
     }
 
-	Pt::Gfx::PointF pos = _model->toUnit(Pt::Gfx::Point(x,y);
+	Pt::Gfx::PointF pos = _model->toUnit(Pt::Gfx::Point(x,y));
 
 	_mouseEvent.setX(pos.x());
 	_mouseEvent.setY(pos.y());
@@ -188,7 +190,7 @@ void GfxOutputImpl::onMouseButtonRelease(XEvent& xev)
         //case Button5: button = MouseEvent::WheelDown; break;
     }
 
-	Pt::Gfx::PointF pos = _model->toUnit(Pt::Gfx::Point(x,y);
+	Pt::Gfx::PointF pos = _model->toUnit(Pt::Gfx::Point(x,y));
 
 	_mouseEvent.setX(pos.x());
 	_mouseEvent.setY(pos.y());
@@ -196,30 +198,28 @@ void GfxOutputImpl::onMouseButtonRelease(XEvent& xev)
 
 void GfxOutputImpl::onConfigureNotify( XEvent& xev)
 {
-    const int width = xev.xconfigure.width;
-    const int height = xev.xconfigure.height;
+    const size_t width = xev.xconfigure.width;
+    const size_t height = xev.xconfigure.height;
     const int x = xev.xconfigure.x;
-    const int y = xev.xconfigure.y;
-	
-
+    const int y = xev.xconfigure.y;	
 
 	Pt::Gfx::Size size = _model->fromUnit(_model->Size.get());
 	Pt::Gfx::Point pos = _model->fromUnit(_model->Position.get());
 
     if( size.width() != width || size.height() != height ) 
 	{
-		Pt::Gfx::SizeF s = _model->toUnit(Pt::Gfx::Size(width, height);
+		Pt::Gfx::SizeF s = _model->toUnit(Pt::Gfx::Size(width, height));
 		_model->Size = s;			
     }
 
     if(pos.x() != x || pos.y() != y) 
 	{
-		Pt::Gfx::PointF p = _model->toUnit(Pt::Gfx::Point(x, y);
+		Pt::Gfx::PointF p = _model->toUnit(Pt::Gfx::Point(x, y));
 		_model->Position = p;			
     }
 }
 
-void GfxOutputImpl::onKeyEvent(XEvent& ev)
+void GfxOutputImpl::onKeyEvent(XEvent& xev)
 {
     if(KeyRelease == xev.xkey.type)
         _keyEvent.setState(KeyEvent::KeyUp);
@@ -238,7 +238,7 @@ void GfxOutputImpl::onKeyEvent(XEvent& ev)
 	_keyEvent.setScancode(xev.xkey.serial);
 	_keyEvent.setRepeatCount(0);
     
-    switch( sym ) 
+    switch( xev.xkey.keycode ) 
 	{
         case XK_Control_L: 
 		case XK_Control_R: 
@@ -250,14 +250,14 @@ void GfxOutputImpl::onKeyEvent(XEvent& ev)
 			_keyEvent.setAlt(_keyEvent.state() == KeyEvent::KeyDown);
 		break;
 
-		case xK_Shift_L :
-		case xK_Shift_R :
+		case XK_Shift_L :
+		case XK_Shift_R :
 			_keyEvent.setShift(_keyEvent.state() == KeyEvent::KeyDown);
 		break;
 
     }
 		
-	Application::instance().keyEvent().send(_model->controller(), _keyEvent);
+	Application::instance().keyDeviceEvent().send(_model->controller(), _keyEvent);
 }
 
 void GfxOutputImpl::onWindowEvent(XEvent& ev)
@@ -297,9 +297,10 @@ void GfxOutputImpl::onWindowEvent(XEvent& ev)
         case ConfigureNotify:
         {
             // Use only last configure event for the window in queue
-            XPending(_display);
+		    Display* display = Application::instance().impl()->display();
+            XPending(display);
             
-			while( XCheckTypedWindowEvent(_display, _xev.xany.window, ConfigureNotify, &_xev) );
+			while( XCheckTypedWindowEvent(display, ev.xany.window, ConfigureNotify, &ev) );
 			
 			onConfigureNotify(ev);            
         }
@@ -307,7 +308,7 @@ void GfxOutputImpl::onWindowEvent(XEvent& ev)
 
         case KeyPress:        		
         case KeyRelease:  
-			MainLoop::instance().keyEvent(*widget, _xev);        		
+			onKeyEvent(ev);        		
 		break;
 
 		/*
@@ -371,14 +372,19 @@ void GfxOutputImpl::create()
     // Create the X11 window
     _drawable = XCreateWindow(display, parentId, 20, 20, 800, 600, borderWidth, DefaultDepth(display, screen), InputOutput, DefaultVisual(display, screen), winMask, &wattr);
 
+    _brushGc = XCreateGC( display, _drawable,0, 0);
+
     XSync(display, false);
+
+	show();
 }
 
 void GfxOutputImpl::destroy()
 {
 	if(_drawable != 0)
 	{
-		Display* display = Application::instance(),impl()->display();
+		Display* display = Application::instance().impl()->display();
+	    XFreeGC(display, _brushGc);
 		XDestroyWindow(display, _drawable);
 		XSync(display, false);
 	}
@@ -438,7 +444,7 @@ void GfxOutputImpl::move(size_t x, size_t y)
     event.type = ClientMessage;
     event.display = display;
     event.window = _drawable;
-    event.message_type = MainLoop::instance().AtomWindowMove;
+    event.message_type = AtomWindowMove;
     event.format = 32;
     event.data.l[0] = x;
     event.data.l[1] = y;
@@ -462,7 +468,7 @@ void GfxOutputImpl::resize(size_t width, size_t height)
     event.type = ClientMessage;
     event.display = display;
     event.window = _drawable;
-    event.message_type = MainLoop::instance().AtomWindowResize;
+    event.message_type = AtomWindowResize;
     event.format = 32;
     event.data.l[0] = width;
     event.data.l[1] = height;
@@ -481,8 +487,6 @@ void GfxOutputImpl::onPaint(XEvent& xev)
 
 void GfxOutputImpl::output()
 {
-	Pt::Gfx::Size size = _model->fromUnit(_model->Size.get());
-
 	_rgb88Image.resize(_model->PaintBuffer.width(), _model->PaintBuffer.height());
 
 	for( size_t x = 0; x < _model->PaintBuffer.width(); ++x)
@@ -508,7 +512,7 @@ void GfxOutputImpl::output(Pt::Hmi::Model* model)
 
 	if(wmodel->Closed.get())
 	{
-		if(_hwnd != 0)
+		if(_drawable != 0)
 		{
 			destroy();
 			return;
@@ -517,7 +521,7 @@ void GfxOutputImpl::output(Pt::Hmi::Model* model)
 	}
 	else
 	{
-		if(_hwnd == 0)
+		if(_drawable == 0)
 		{
 			if(wmodel->Visible.get())
 				create();
@@ -529,5 +533,5 @@ void GfxOutputImpl::output(Pt::Hmi::Model* model)
 	output();
 }
 
-
 }}
+

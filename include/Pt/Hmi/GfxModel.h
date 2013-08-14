@@ -48,7 +48,7 @@ namespace ImageLayout
 {
 	enum Type
 	{
-		None,
+		NoLayout,		
 		Tile,
 		Center,
 		Strech,

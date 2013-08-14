@@ -18,6 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "KeyHandler.h"
+#include <iostream>
 
 namespace Pt {
 namespace Hmi {
@@ -804,11 +805,7 @@ static const XKeySym2UCS xkeysym2ucs[] = {
     { 0x20ac, 0x20ac }, //                    EuroSign EURO SIGN
 };
 
-template< typename T>
-inline size_t elemsize(T X)
-{
- return (sizeof(T) / sizeof(*T));
-}
+#define elemsize(T) (sizeof(T) / sizeof(*T))
 
 wchar_t keySymToUtf(int sym)
 {

@@ -31,7 +31,7 @@
 #undef Above
 #undef Below
 
-#include <Pt/hmi/Api.h>
+#include <Pt/Hmi/Api.h>
 #include <Pt/System/Selectable.h>
 #include <Pt/System/MainLoop.h>
 #include <Pt/Singleton.h>
