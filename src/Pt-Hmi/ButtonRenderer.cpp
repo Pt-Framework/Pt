@@ -38,7 +38,7 @@ void ButtonRenderer::render(Pt::Hmi::Model* m)
 	if(model->ButtonState.get() == DeviceButton::Pressed)
 		return;
 
-	GfxController* ctrl = dynamic_cast<GfxController*>(model->Controller.get());
+	GfxController* ctrl = dynamic_cast<GfxController*>(model->controller());
 	
 	if( ctrl== 0)
 		return;

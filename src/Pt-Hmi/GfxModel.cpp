@@ -27,7 +27,7 @@ void GfxModel::onFocusChanged(bool& focused)
 {
 	if(focused)
 	{//True
-		Pt::Hmi::Controller* ctrl = this->Controller.get();
+		Pt::Hmi::Controller* ctrl = this->controller();
 		Pt::Hmi::Controller* par = ctrl->parent();
 	
 		if( par != 0)
@@ -50,7 +50,7 @@ void GfxModel::onFocusChanged(bool& focused)
 	}
 	else
 	{//False  
-		Pt::Hmi::Controller* ctrl = this->Controller.get();
+		Pt::Hmi::Controller* ctrl = this->controller();
 		for( size_t i = 0; i < ctrl->children().size(); ++i)
 		{//All childs set to false
 			GfxModel* m = (GfxModel*) ctrl->children()[i]->model();

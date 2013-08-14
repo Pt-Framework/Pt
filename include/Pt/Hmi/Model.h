@@ -48,13 +48,20 @@ protected:
 public:
 	Property<bool>			Enable;
 	Property<void*>			Tag;  
-	Property<Controller*>	Controller;
 	Pt::Signal<>			Changed;
+
+	const Controller* controller() const;
+	Controller* controller();
+	void setController( Controller* ctrl);
 
 	inline void notifyChanged()
 	{
 		Changed.send();
 	}
+
+
+private:
+	Controller* _ctrl;
 };
 
 }}

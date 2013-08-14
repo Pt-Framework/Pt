@@ -25,6 +25,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include <Pt/Hmi/Model.h>
+#include <Pt/Hmi/Controller.h>
 
 namespace Pt{
 namespace Hmi{
@@ -32,7 +33,7 @@ namespace Hmi{
 Model::Model()
 : Enable(true)
 , Tag(0)
-, Controller(0)
+, _ctrl(0)
 { 
 
 }
@@ -41,5 +42,21 @@ Model::~Model()
 { 
 
 }
+
+const Controller* Model::controller() const
+{
+	return _ctrl;
+}
+
+Controller* Model::controller()
+{
+	return _ctrl;
+}
+
+void Model::setController( Controller* ctrl)
+{
+	_ctrl = ctrl;
+}
+
 
 }}

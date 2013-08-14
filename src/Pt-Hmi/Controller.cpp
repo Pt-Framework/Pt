@@ -47,11 +47,8 @@ Controller::~Controller()
 
 void Controller::setModel(Model* model)
 {
-	if( _model != 0)
-		_model->Controller.set(0);
-
 	_model = model;
-	_model->Controller.set(this);
+	_model->setController(this);
 	_model->Changed += Pt::slot(*this, &Controller::modelChanged);
 	notifyModelChanged(true);
 }

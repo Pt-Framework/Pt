@@ -58,7 +58,7 @@ void GfxOutputImpl::onKey(unsigned int msg,  WPARAM wparam, LPARAM lparam)
 		_keyEvent.setCtrl(_keyEvent.state() == KeyEvent::KeyDown);
 	}
 
-	Controller* ctrl = _model->Controller.get();
+	Controller* ctrl = _model->controller();
 	Application::instance().keyDeviceEvent().send(ctrl, _keyEvent);
 }
 
@@ -134,14 +134,14 @@ bool GfxOutputImpl::onClosing()
 {
 
 	bool canClose = false;
-	WindowController* controller = (WindowController*)_model->Controller.get();
+	WindowController* controller = (WindowController*)_model->controller();
 	controller->Closing.send(canClose);
 	return canClose;
 }
 
 void GfxOutputImpl::onClosed()
 {
-	WindowController* controller = (WindowController*)_model->Controller.get();
+	WindowController* controller = (WindowController*)_model->controller();
 	controller->Closed.send();
 			
 	 _model->Closed = true;
@@ -209,7 +209,7 @@ void GfxOutputImpl::onMouse(unsigned int msg, WPARAM wparam, LPARAM lparam)
 	_pointerEvent.setX(p.x());
 	_pointerEvent.setY(p.y());	
 
-	Controller* ctrl = _model->Controller.get();
+	Controller* ctrl = _model->controller();
 
 	Application::instance().pointerEvent().send(ctrl, _pointerEvent);
 }

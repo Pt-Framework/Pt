@@ -30,7 +30,7 @@ void PanelRenderer::render(Pt::Hmi::Model* m)
 	if(!model->Visible.get())
 		return;
 
-	WidgetController* ctrl = dynamic_cast<WidgetController*>(model->Controller.get());
+	WidgetController* ctrl = dynamic_cast<WidgetController*>(model->controller());
 		
 	if( ctrl == 0)
 		return;

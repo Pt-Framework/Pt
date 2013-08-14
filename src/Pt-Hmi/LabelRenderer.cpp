@@ -30,7 +30,7 @@ void LabelRenderer::render(Pt::Hmi::Model* m)
 	if(!model->Visible.get())
 		return;	
 
-	GfxController* controller = dynamic_cast<GfxController*>(m->Controller.get());
+	GfxController* controller = dynamic_cast<GfxController*>(m->controller());
 			
 	if(model->AutoSize.get())
 	{
