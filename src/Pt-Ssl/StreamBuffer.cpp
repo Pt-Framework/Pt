@@ -64,7 +64,6 @@ Connection::Connection(Context& ctx, std::streambuf& ios, int mode)
 , _isShutdown(false)
 {
     Boolean isServer = (mode == StreamBuffer::Accept);
-    log_debug("isServer " << (isServer == true) << " " << this);
 
     SSLNewContext(isServer, &_context);
     
@@ -80,6 +79,10 @@ Connection::Connection(Context& ctx, std::streambuf& ios, int mode)
     {
         _server = true;
 
+#ifdef PT_IOS
+        SSLSetEnableCertVerify(_context, false);
+        SSLSetSessionOption(_context, kSSLSessionOptionBreakOnClientAuth, true);
+#else
         if(_ctx->verification() == Context::VerifyNone)
         {
             SSLSetClientSideAuthenticate(_context, kNeverAuthenticate);
@@ -92,21 +95,14 @@ Connection::Connection(Context& ctx, std::streambuf& ios, int mode)
         {
             SSLSetClientSideAuthenticate(_context, kAlwaysAuthenticate);
         }
-        // NOTE:
-        // use kNeverAuthenticate and evaluate trust after handshake like 
-        // we do in the client case
-
-        // http://www.inmite.eu/en/blog/20120302-details-certificate-revocation-mechanisms-on-ios-iphone
-        // also try to set OCSP to 'Off' in KeyManager -> Preferences -> Certificates
         
         const Certificate& ca = _ctx->caCertificates().at(0);
-        log_debug("CA: " << ca.subject() );
 
         SecCertificateRef certs [] = { ca.impl()->certRef() };
         CFArrayRef caArr = CFArrayCreate(NULL, (const void**)certs, 1, &kCFTypeArrayCallBacks);
         SSLSetCertificateAuthorities(_context, caArr, true);
-        
         SSLSetTrustedRoots(_context, caArr, true);
+#endif
     }
     else
     {
@@ -120,7 +116,6 @@ Connection::Connection(Context& ctx, std::streambuf& ios, int mode)
         if(ident)
         {
             std::clog << "USING CERTIFICATE " << _server << std::endl;
-            //SecIdentityRef certArray[1] = { ident };
             CFArrayRef certRefs = CFArrayCreate(NULL, (const void**)(&ident), 1, NULL);
             SSLSetCertificate(_context, certRefs);
         }
@@ -136,7 +131,7 @@ Connection::~Connection()
 
 bool Connection::writeHandshake()
 {
-    log_trace("Connection::writeHandshake " << _server << " XXXXXXXXXXXXXXXXXXXXXXXX");
+    log_trace("Connection::writeHandshake " << _server);
     
     if( ! _ios )
         throw System::IOError("SSL Buffer not initialized");
@@ -164,7 +159,7 @@ bool Connection::writeHandshake()
 
 bool Connection::readHandshake()
 {
-    log_trace("Connection::readHandshake " << _server << " XXXXXXXXXXXXXXXXXXXXXXXX");
+    log_trace("Connection::readHandshake " << _server);
     
     if( ! _ios )
         throw System::IOError("SSL Buffer not initialized");
@@ -178,9 +173,14 @@ bool Connection::readHandshake()
 
     log_debug("SSLHandshake returns " << status);
     
+    
+#ifdef PT_IOS
+    if(status == errSSLPeerAuthCompleted)
+#else
     if(status == errSSLServerAuthCompleted)
+#endif
     {
-        log_debug("errSSLServerAuthCompleted " << _server);
+        log_debug("errSSLPeerAuthCompleted " << _server);
 
         bool verifyNone = _ctx->verification() == Context::VerifyNone;
         if(verifyNone)
@@ -207,7 +207,7 @@ bool Connection::readHandshake()
         if(evalErr)
             throw HandshakeFailed("SSL handshake failed");
             
-        log_debug("SecTrustEvaluate ZZZZZZZZZZZZZZZZZZZZZZZ " << result << " " << (int)kSecTrustResultUnspecified);
+        log_debug("SecTrustEvaluate: " << result);
         
         if(trust)
             CFRelease(trust);
