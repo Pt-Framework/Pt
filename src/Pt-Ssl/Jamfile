@@ -31,7 +31,6 @@ if $(OPENSSL_LINKLIBS)
 else
 {
     LinkLibraries Pt-Ssl : Pt-Ssl-openssl ;
-    SubInclude PT_TOP src Pt-Ssl openssl ;
 }
 
 SubInclude PT_TOP src Pt-Ssl tests ;

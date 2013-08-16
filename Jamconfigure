@@ -152,13 +152,13 @@ EchoOption NETLIBS : "Network lib flags" ;
 if --with-builtin-openssl in $(ARGV)
 {   
     WITH_OPENSSL = yes ;
-    OPENSSL_INCLUDES = [ FDirName $(PT_TOP) src Pt-Ssl openssl include ] ;
+    OPENSSL_INCLUDES = [ FDirName $(PT_TOP) src openssl include ] ;
 
     # find matching openssl configuration file first for SYS, then for TARGET_OS
-    local opensslconf_target = [ FDirName $(PT_TOP) src Pt-Ssl openssl opensslconf-$(SYS:L)-$(TARGET_OSPLAT:L).h ] ;
+    local opensslconf_target = [ FDirName $(PT_TOP) src openssl opensslconf-$(SYS:L)-$(TARGET_OSPLAT:L).h ] ;
     if ! [ CHECK_IF_FILE $(opensslconf_target) ]
     {
-        opensslconf_target = [ FDirName $(PT_TOP) src Pt-Ssl openssl opensslconf-$(TARGET_OS:L)-$(TARGET_OSPLAT:L).h ] ;
+        opensslconf_target = [ FDirName $(PT_TOP) src openssl opensslconf-$(TARGET_OS:L)-$(TARGET_OSPLAT:L).h ] ;
         
         if ! [ CHECK_IF_FILE $(opensslconf_target) ]
         {
@@ -167,14 +167,14 @@ if --with-builtin-openssl in $(ARGV)
     }
 
     # generate opensslconf.h file
-    local opensslconf = [ FDirName $(PT_TOP) src Pt-Ssl openssl crypto opensslconf.h ] ;
+    local opensslconf = [ FDirName $(PT_TOP) src openssl crypto opensslconf.h ] ;
     local r = [ TryCommand $(CP) $(opensslconf_target) $(opensslconf) ] ;
     if ! $(r)
     {
         Exit "ERROR: Could not copy opensslconf.h." ;
     }
 
-    opensslconf = [ FDirName $(PT_TOP) src Pt-Ssl openssl include openssl opensslconf.h ] ;
+    opensslconf = [ FDirName $(PT_TOP) src openssl include openssl opensslconf.h ] ;
     r = [ TryCommand $(CP) $(opensslconf_target) $(opensslconf) ] ;
     if ! $(r)
     {

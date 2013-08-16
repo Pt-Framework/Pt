@@ -1,11 +1,11 @@
-SubDir PT_TOP src Pt-Ssl openssl ;
+SubDir PT_TOP src openssl ;
 
-SubDirHdrs $(PT_TOP)/src/Pt-Ssl/openssl ;
-SubDirHdrs $(PT_TOP)/src/Pt-Ssl/openssl/include ;
-SubDirHdrs $(PT_TOP)/src/Pt-Ssl/openssl/crypto ;
-SubDirHdrs $(PT_TOP)/src/Pt-Ssl/openssl/crypto/asn1 ;
-SubDirHdrs $(PT_TOP)/src/Pt-Ssl/openssl/crypto/evp ;
-SubDirHdrs $(PT_TOP)/src/Pt-Ssl/openssl/crypto/modes ;
+SubDirHdrs $(PT_TOP)/src/openssl ;
+SubDirHdrs $(PT_TOP)/src/openssl/include ;
+SubDirHdrs $(PT_TOP)/src/openssl/crypto ;
+SubDirHdrs $(PT_TOP)/src/openssl/crypto/asn1 ;
+SubDirHdrs $(PT_TOP)/src/openssl/crypto/evp ;
+SubDirHdrs $(PT_TOP)/src/openssl/crypto/modes ;
 
 SubDirCcFlags $(OPENSSL_CFLAGS) ;
 
@@ -25,7 +25,7 @@ SubDirCcFlags $(OPENSSL_CFLAGS) ;
  SubDirCcFlags [ FDefines OPENSSL_NO_JPAKE ] ;
  SubDirCcFlags [ FDefines OPENSSL_NO_EC_NISTP_64_GCC_128 ] ;
 
-SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Ssl openssl ;
+SubDirObjects $(PT_OUTPUT_OBJECT) openssl ;
 
 # OpenSSL 1.0.1e
 

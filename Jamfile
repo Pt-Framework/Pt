@@ -97,6 +97,11 @@ if $(SYS)
     if $(WITH_OPENSSL) = yes
     {
         SubInclude PT_TOP src Pt-Ssl ;
+
+        if ! $(OPENSSL_LINKLIBS)
+        {
+            SubInclude PT_TOP src openssl ;
+        }
     }
     
     if $(GUI)
