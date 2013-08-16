@@ -203,6 +203,22 @@ if --with-builtin-openssl in $(ARGV)
 
 if ! $(WITH_OPENSSL)
 {
+    WITH_OPENSSL = [ CheckBuildC++ "#include <Security/Security.h>"
+                                   "int main() {"
+                                   "SSLContextRef context;"
+                                   "SSLNewContext(false, &context);"
+                                   "return 0; }"
+                                   : ""
+                                   : "-framework Foundation" "-framework Security" ] ;
+
+    if $(WITH_OPENSSL)
+    {
+        OPENSSL_LINKLIBS = "-framework Foundation" "-framework Security" ;
+    }
+}
+
+if ! $(WITH_OPENSSL)
+{
     WITH_OPENSSL = [ CheckBuildC++ "#include <openssl/ssl.h>"
                                     "int main() {"
                                     "SSL_library_init();"
@@ -224,11 +240,6 @@ if $(WITH_OPENSSL)
 
     Configure OPENSSL_INCLUDES ;
     EchoOption OPENSSL_INCLUDES : "OpenSSL includes" ;
-
-    if $(TARGET_OS:L) = "macosx"
-    {
-        OPENSSL_LINKLIBS += "-framework Foundation" "-framework Security" ;
-    }
 
     Configure OPENSSL_LINKLIBS ;
     EchoOption OPENSSL_LINKLIBS : "OpenSSL library" ;

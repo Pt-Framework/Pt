@@ -24,7 +24,7 @@ PT_SSL_IMPL += [ GLOB $(PT_SSL_SUBDIR) : *.cpp  ] ;
 
 SharedLibrary Pt-Ssl : $(PT_SSL_IMPL)
                        Certificate.cpp
-                       CipherList.cpp
+                       #CipherList.cpp
                        Context.cpp
                        IOBuffer.cpp
                        #PrivateKey.cpp

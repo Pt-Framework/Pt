@@ -142,7 +142,7 @@ class ServerTest : public Pt::Unit::TestSuite
             _chunks.push_back("ChunkE");
 
             loop = new Pt::System::MainLoop();
-            loop->setIdleTimeout(5000);
+            loop->setIdleTimeout(10000);
             loop->timeout() += Pt::slot(*loop, &Pt::System::MainLoop::exit);
         }
 

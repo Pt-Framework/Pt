@@ -28,6 +28,7 @@
  */
 
 #include "Connection.h"
+#include "ContextImpl.h"
 #include "CertificateImpl.h"
 #include <Pt/Ssl/StreamBuffer.h>
 #include <Pt/Ssl/SslError.h>
@@ -90,7 +91,7 @@ Connection::Connection(Context& ctx, std::streambuf& ios, int mode)
             SSLSetClientSideAuthenticate(_context, kAlwaysAuthenticate);
         }
         
-        const Certificate& ca = _ctx->caCertificates().at(0);
+        const Certificate& ca = _ctx->impl()->caCertificates().at(0);
 
         SecCertificateRef certs [] = { ca.impl()->certRef() };
         CFArrayRef caArr = CFArrayCreate(NULL, (const void**)certs, 1, &kCFTypeArrayCallBacks);
@@ -104,9 +105,9 @@ Connection::Connection(Context& ctx, std::streambuf& ios, int mode)
         SSLSetSessionOption(_context, kSSLSessionOptionBreakOnServerAuth, true);
     }
 
-    if( _ctx->certificate().isValid() )
+    if( _ctx->impl()->certificate().isValid() )
     {
-        SecIdentityRef ident = _ctx->certificate().impl()->identity();
+        SecIdentityRef ident = _ctx->impl()->certificate().impl()->identity();
         if(ident)
         {
             std::clog << "USING CERTIFICATE " << _server << std::endl;
@@ -184,7 +185,7 @@ bool Connection::readHandshake()
         SSLCopyPeerTrust(_context, &trust);
         //SecTrustSetPolicies(trust, SecPolicyCreateBasicX509());
         
-        const Certificate& ca = _ctx->caCertificates().at(0);
+        const Certificate& ca = _ctx->impl()->caCertificates().at(0);
         log_debug("CA: " << ca.subject() );
 
         SecCertificateRef certs [] = { ca.impl()->certRef() };

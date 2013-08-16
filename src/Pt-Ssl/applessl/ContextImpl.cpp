@@ -27,11 +27,15 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <Pt/Ssl/Context.h>
+#include "ContextImpl.h"
+#include "CertificateImpl.h"
 #include <Pt/Ssl/SslError.h>
 #include <Pt/System/Mutex.h>
 #include <Pt/System/Logger.h>
 #include <cstdio>
+
+#include <Security/Security.h>
+#include <CoreFoundation/CFArray.h>
 
 log_define("Pt.Ssl.Context")
 
@@ -41,7 +45,7 @@ namespace Ssl {
 
 ContextImpl::ContextImpl(Context::Protocol protocol)
 : _protocol(protocol)
-, _verify(VerifyPeer)
+, _verify(Context::VerifyPeer)
 {
 }
 
@@ -74,7 +78,7 @@ void ContextImpl::setVerifyMode(Context::VerifyMode m)
 }
 
 
-void ContextImpl::assign(const Context& ctx)
+void ContextImpl::assign(const ContextImpl& ctx)
 {
     setProtocol(ctx._protocol);
     setVerifyMode(ctx._verify);
@@ -114,20 +118,20 @@ void ContextImpl::assign(const Context& ctx)
 }
 
 
-void ContextImpl::setCACertificates(const std::vector<Certificate>& caCerts)
-{
-    _caCerts.clear();
-
-    for(CertificateStore::ConstIterator it = caCerts.begin(); it != caCerts.end(); ++it) 
-    {
-        _caCerts.push_back(*it);
-    }
-}
+//void ContextImpl::setCACertificates(const std::vector<Certificate>& caCerts)
+//{
+//    _caCerts.clear();
+//
+//    for(CertificateStore::ConstIterator it = caCerts.begin(); it != caCerts.end(); ++it) 
+//    {
+//        _caCerts.push_back(*it);
+//    }
+//}
 
 
 void ContextImpl::addCACertificate(const Certificate& trustedCert)
 {
-    _caCerts.push_back(*it);
+    _caCerts.push_back(trustedCert);
 }
 
 

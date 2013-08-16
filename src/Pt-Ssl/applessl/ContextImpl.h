@@ -26,22 +26,23 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef PT_SSL_CONTEXT_H
-#define PT_SSL_CONTEXT_H
+#ifndef PT_SSL_CONTEXTIMPL_H
+#define PT_SSL_CONTEXTIMPL_H
 
 #include <Pt/Ssl/Api.h>
-#include <Pt/Ssl/CertificateList.h>
+#include <Pt/Ssl/Context.h>
 #include <Pt/NonCopyable.h>
 #include <string>
+#include <vector>
 
 namespace Pt {
 
 namespace Ssl {
 
-void SSLInitImpl()
+inline void SSLInitImpl()
 {}
 
-void SSLExitImpl()
+inline void SSLExitImpl()
 {}
 
 class ContextImpl
@@ -83,11 +84,11 @@ class ContextImpl
         { return _caCerts; }
     
     private:
-        Protocol                 _protocol;
+        Context::Protocol                 _protocol;
         std::vector<Certificate> _caCerts;
         Certificate              _cert;
         //CertificateList          _extraCerts;
-        VerifyMode               _verify;
+        Context::VerifyMode               _verify;
         std::vector<Certificate> _certificates;
         void*                    _reserved;
 };
