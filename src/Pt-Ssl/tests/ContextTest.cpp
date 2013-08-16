@@ -29,11 +29,12 @@
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/RegisterTest.h"
-#include "Pt/Ssl/CertificateList.h"
+#include "Pt/Ssl/Certificate.h"
 #include "Pt/Ssl/Context.h"
 #include "Pt/Ssl/StreamBuffer.h"
 #include "Pt/System/Logger.h"
 #include <string>
+#include <fstream>
 
 const char clientPem [] = 
     "-----BEGIN CERTIFICATE-----\n"
@@ -69,7 +70,7 @@ class ContextTest : public Pt::Unit::TestSuite
 
             //this->registerMethod("Ciphers", *this, &ContextTest::Ciphers);
 
-            this->registerMethod("Certificates", *this, &ContextTest::Certificates);
+            this->registerMethod("Import", *this, &ContextTest::Import);
         }
 
         void setUp()
@@ -78,9 +79,9 @@ class ContextTest : public Pt::Unit::TestSuite
         void tearDown()
         { }
 
-        void Ciphers();
+        //void Ciphers();
 
-        void Certificates();
+        void Import();
 };
 
 Pt::Unit::RegisterTest<ContextTest> register_ContextTestTest;
@@ -112,11 +113,17 @@ Pt::Unit::RegisterTest<ContextTest> register_ContextTestTest;
 //    PT_UNIT_ASSERT(cipherNames1 == cipherNames2);
 //}
 
-void ContextTest::Certificates()
+void ContextTest::Import()
 {
-    //Pt::Ssl::CertificateList certs;
-    //certs.fromPem(clientPem, sizeof(clientPem));
-    //Pt::Ssl::CertificateList::Iterator it =  certs.begin();
-    //PT_UNIT_ASSERT(it != certs.end());
+    // adjust the path
+    #ifdef _WIN32
+        std::ifstream ifs("src\\Pt-Ssl\\tests\\cert\\multiple\\server_chain-with-password.p12", std::ios::binary);
+    #else
+        std::ifstream ifs("src/Pt-Ssl/tests/cert/multiple/server_chain-with-password.p12", std::ios::binary);
+    #endif
+
+    Pt::Ssl::Context ctx;
+
+    ctx.loadPkcs12(ifs, "123");
 }
 

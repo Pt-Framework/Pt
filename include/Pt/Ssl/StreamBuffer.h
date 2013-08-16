@@ -36,99 +36,11 @@
 #include <streambuf>
 #include <string>
 
-#ifdef __APPLE__
-#import <Security/Security.h>
-#import <CoreFoundation/CoreFoundation.h>
-#import <CoreFoundation/CFDictionary.h>
-#endif
-
 namespace Pt {
 
 namespace Ssl {
 
-#ifdef __APPLE__
-
-class PT_SSL_API Connection
-{
-    public:
-        Connection(Context& ctx, std::streambuf& ios, int mode);
-
-        ~Connection();
-
-        bool connected() const
-        { return _connected; }
-
-        bool writeHandshake();
-
-        bool readHandshake();
-
-        // TODO: writeShutdown / readShutdown
-        bool shutdown();
-
-        bool isShutdown() const;
-
-        bool isClosed() const;
-
-        std::streamsize write(const char* buf, size_t n);
-
-        std::streamsize read(char* buf, size_t n, std::streamsize isize);
-
-        OSStatus sslRead(void* data, size_t* n);
-
-        OSStatus sslWrite(const void* data, size_t* n);
-
-        static OSStatus sslWriteCallback(SSLConnectionRef connection, const void* data, size_t* n);
-
-        static OSStatus sslReadCallback(SSLConnectionRef connection, void* data, size_t* n);
-
-    private:
-        Context* _ctx;
-        SSLContextRef   _context;
-        std::streambuf* _ios;
-        std::streamsize _iocount;
-        bool _connected;
-        bool _wantRead;
-        bool _isReading;
-        bool _isWritingHandshake;
-        bool _isShutdown;
-        bool _server;
-};
-
-#else
-
-class PT_SSL_API Connection
-{
-    public:
-        Connection(Context& ctx, std::streambuf& ios, int mode);
-
-        ~Connection();
-
-        bool connected() const
-        { return _connected; }
-
-        bool writeHandshake();
-
-        bool readHandshake();
-
-        void shutdown();
-
-        bool isShutdown() const;
-
-        bool isClosed() const;
-
-        std::streamsize write(const char* buf, size_t n);
-
-        std::streamsize read(char* buf, size_t n, std::streamsize isize);
-
-    private:
-        std::streambuf* _ios;
-        bool _connected;
-        bio_st* _in;
-        bio_st* _out;
-        ssl_st* _ssl;
-};
-
-#endif
+class Connection;
 
 /** @brief SSL stream buffer.
 */

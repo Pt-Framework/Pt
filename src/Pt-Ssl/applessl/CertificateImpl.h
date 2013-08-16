@@ -26,36 +26,23 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
- 
+
 #ifndef PT_SSL_CERTIFICATELISTIMPL_H
 #define PT_SSL_CERTIFICATELISTIMPL_H
 
-#include <Pt/Ssl/CertificateList.h>
 #include <Pt/Ssl/SslError.h>
 #include <Pt/Atomicity.h>
 #include <cassert>
+#include <string>
+#include <iostream>
 
-#ifdef __APPLE__
-    #include <Pt/Base64Codec.h>
-    #include <Pt/TextStream.h>
-    #import <Security/Security.h>
-    #import <CoreFoundation/CoreFoundation.h>
-    #import <CoreFoundation/CFDictionary.h>
-    #include <string>
-    #include <sstream>
-#else
-    #include "OpenSsl.h"
-    #include <openssl/ssl.h>
-    #include <openssl/pem.h>
-    #include <openssl/err.h>
-    #include <openssl/pkcs12.h>
-#endif
+#import <Security/Security.h>
+#import <CoreFoundation/CoreFoundation.h>
+#import <CoreFoundation/CFDictionary.h>
 
 namespace Pt {
 
 namespace Ssl {
-
-#ifdef __APPLE__
 
 class CertificateImpl
 {
@@ -152,146 +139,6 @@ class CertificateImpl
         SecCertificateRef _cert;
         Pt::atomic_t _refs;
 };
-
-#else
-    
-class CertificateImpl
-{
-    public:
-        explicit CertificateImpl(x509_st* x509, evp_pkey_st* pkey = 0)
-        : _x509(x509)
-        , _pkey(pkey)
-        , _refs(1)
-        {
-            assert(_x509);
-        }
-
-        CertificateImpl(const char* data, size_t len)
-        : _x509(0)
-        , _refs(1)
-        {
-            BioAutoPtr in( BIO_new_mem_buf( (void*) data, len ) );
-
-            // Try to read/parse DER encoded certificate
-            _x509 = d2i_X509_bio(in.get(), 0);
-            if( ! _x509)
-                throw InvalidCertificate("invalid DER certificate");
-        }
-
-        ~CertificateImpl()
-        {
-            if(_pkey)
-                EVP_PKEY_free(_pkey);
-
-            X509_free(_x509);
-        }
-
-        void ref()
-        { atomicIncrement(_refs); }
-
-        int unref()
-        { return atomicDecrement(_refs); }
-
-        int serialNumber() const
-        {
-            return ASN1_INTEGER_get( X509_get_serialNumber(_x509) );
-        }
-
-        std::string issuer() const
-        {
-            return toString( X509_get_issuer_name(_x509) );
-        }
-
-        std::string subject() const
-        {
-            char buf[255];
-
-            std::string s;
-
-            X509_NAME* subject = X509_get_subject_name(_x509);
-
-            if( 0 <= X509_NAME_get_text_by_NID(subject, NID_organizationName, buf, sizeof(buf)) ) 
-            {
-                s += buf;
-            }
-            else
-            {
-                s += "Unkown Organization";
-            }
-
-            s += ", ";
-
-            if( 0 <= X509_NAME_get_text_by_NID(subject, NID_commonName, buf, sizeof(buf)) ) 
-            {
-                s += buf;
-            }
-            else
-            {
-                s += "Unknown Name";
-            }
-
-            // NID_countryName
-            // NID_localityName
-            // NID_organizationalUnitName
-            // NID_stateOrProvinceName
-
-            return s;
-
-            //return toString( X509_get_subject_name(_x509) );
-        }
-        
-        std::string notBefore() const
-        {
-            return toString( X509_get_notBefore(_x509) );
-        }
-
-        std::string notAfter() const
-        {
-            return toString( X509_get_notAfter(_x509) );
-        }
-
-        x509_st* getX509() const
-        { return _x509; }
-
-        evp_pkey_st* evp()
-        { return _pkey; }
-
-    private:
-        static std::string toString(const X509_NAME* val)
-        {
-            int len = 0;
-            char buf[1024];
-            
-            BioAutoPtr out( BIO_new(BIO_s_mem()) );
-            if( X509_NAME_print( out.get(), (X509_NAME*) val, 0) ) 
-            {
-                len = BIO_read( out.get(), buf, sizeof(buf) );
-            }
-            
-            return std::string(buf, len);
-        }
-
-        static std::string toString(ASN1_TIME* val)
-        {
-            int len = 0;
-            char buf[1024];
-
-            BioAutoPtr out( BIO_new(BIO_s_mem()) );
-            if( ASN1_TIME_print( out.get(), val) )
-            {
-                len = BIO_read( out.get(), buf, sizeof(buf) );
-            }
-
-            return std::string(buf, len);
-        }
-
-    private:
-        x509_st* _x509;
-        evp_pkey_st* _pkey;
-        Pt::atomic_t _refs;
-};
-
-#endif
 
 } // namespace Ssl
 

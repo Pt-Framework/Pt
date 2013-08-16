@@ -1023,6 +1023,9 @@
     <ClInclude Include="..\..\src\Pt-Ssl\CertificateImpl.h">
       <Filter>Pt-Ssl</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Ssl\Certificate.h">
+      <Filter>Pt-Ssl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -1985,6 +1988,12 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\Model.cpp">
       <Filter>Pt-Hmi\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Ssl\Certificate.cpp">
+      <Filter>Pt-Ssl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Ssl\tests\ContextTest.cpp">
+      <Filter>Pt-Ssl\tests</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -30,7 +30,7 @@
 #define PT_SSL_CONTEXT_H
 
 #include <Pt/Ssl/Api.h>
-#include <Pt/Ssl/CertificateList.h>
+#include <Pt/Ssl/Certificate.h>
 #include <Pt/NonCopyable.h>
 #include <string>
 
@@ -38,7 +38,7 @@ namespace Pt {
 
 namespace Ssl {
 
-#ifndef __APPLE__
+class ContextImpl;
 
 //! @internal Library initialization.
 static struct PT_SSL_API SSLInit 
@@ -46,8 +46,6 @@ static struct PT_SSL_API SSLInit
     SSLInit();
     ~SSLInit();
 } ssl_init;
-
-#endif
 
 //! @brief Context for SSL connections.
 class PT_SSL_API Context : public NonCopyable
@@ -90,8 +88,7 @@ class PT_SSL_API Context : public NonCopyable
         //! @brief Limits the number of certificates checked in the peer's certificate chain.
         void setVerifyDepth(int n);
 
-        VerifyMode verification() const
-        { return _verify; }
+        VerifyMode verification() const;
 
         //! @brief Sets the current validation mode.
         void setVerifyMode(VerifyMode mode);
@@ -105,7 +102,15 @@ class PT_SSL_API Context : public NonCopyable
          */
         //void setCACertificates(const CertificateList& trustedCert);
 
-        void setCACertificates(const CertificateStore& trustedCert);
+        //void setCACertificates(const CertificateStore& trustedCert);
+
+        /** @brief Add a certificate to the  trusted CA certificates.
+            
+            Trusted CA certificates are needed to check, if the peer's 
+            certificate is signed by a trusted Certificate Authority. 
+            Add the certificates of all trusted CAs.
+         */
+        void addCACertificate(const Certificate& trustedCert);
 
         /** @brief Set the main certificate of this context.
 
@@ -137,34 +142,12 @@ class PT_SSL_API Context : public NonCopyable
 
         Certificate findCertificate(const std::string& subject);
 
-#ifdef __APPLE__
+        ContextImpl* impl();
 
-        Certificate& certificate()
-        { return _cert; }
-        
-        const std::vector<Certificate>& caCertificates()
-        { return _caCerts; }
-    
-    private:
-        Protocol                 _protocol;
-        std::vector<Certificate> _caCerts;
-        Certificate              _cert;
-        //CertificateList          _extraCerts;
-#else
-        //! @internal
-        ssl_ctx_st* impl() const;
+        const ContextImpl* impl() const;
 
     private:
-        ssl_ctx_st*              _ctx;
-        Protocol                 _protocol;
-        std::vector<Certificate> _caCerts;
-        Certificate              _cert;
-        std::vector<x509_st*>    _extraCerts;
-#endif
-
-        VerifyMode               _verify;
-        std::vector<Certificate> _certificates;
-        void*                    _reserved;
+        ContextImpl* _impl;
 };
 
 } // namespace Ssl

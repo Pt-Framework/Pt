@@ -38,6 +38,8 @@ namespace Pt {
 
 namespace Ssl {
 
+UNUSED_FILE UNUSED_FILE;
+
 class CertificateImpl;
     
 class PT_SSL_API Certificate

@@ -9,7 +9,21 @@ if $(OPENSSL_INCLUDES)
     SubDirHdrs $(OPENSSL_INCLUDES) ;
 }
 
-SharedLibrary Pt-Ssl : CertificateList.cpp
+if $(TARGET_OS:L) = "macosx"
+{
+    PT_SSL_SUBDIR = [ FDirName $(PT_TOP) src Pt-Ssl applessl ] ;
+}
+else
+{
+    PT_SSL_SUBDIR = [ FDirName $(PT_TOP) src Pt-Ssl openssl ] ;
+}
+
+SubDirHdrs $(PT_SSL_SUBDIR) ;
+
+PT_SSL_IMPL += [ GLOB $(PT_SSL_SUBDIR) : *.cpp  ] ;
+
+SharedLibrary Pt-Ssl : $(PT_SSL_IMPL)
+                       Certificate.cpp
                        CipherList.cpp
                        Context.cpp
                        IOBuffer.cpp

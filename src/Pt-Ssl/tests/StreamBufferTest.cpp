@@ -30,7 +30,7 @@
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/RegisterTest.h"
-#include "Pt/Ssl/CertificateList.h"
+#include "Pt/Ssl/Certificate.h"
 #include "Pt/Ssl/Context.h"
 #include "Pt/Ssl/StreamBuffer.h"
 #include "Pt/System/Logger.h"
@@ -43,10 +43,9 @@ class StreamBufferTest : public Pt::Unit::TestSuite
         StreamBufferTest()
         : Pt::Unit::TestSuite("StreamBufferTest")
         {
-            Pt::System::Logger::setLogLevel("", Pt::System::Trace);
+            Pt::System::Logger::setLogLevel("", Pt::System::Error);
 
             this->registerMethod("Handshake", *this, &StreamBufferTest::Handshake);
-            //this->registerMethod("CertificateStore", *this, &StreamBufferTest::CertificateStore);
         }
 
         void setUp()
@@ -61,22 +60,6 @@ class StreamBufferTest : public Pt::Unit::TestSuite
 
 
 Pt::Unit::RegisterTest<StreamBufferTest> register_StreamBufferTest;
-
-void StreamBufferTest::CertificateStore()
-{
-    // adjust the path
-    #ifdef _WIN32
-        std::ifstream ifs("src\\Pt-Ssl\\tests\\cert\\multiple\\server_chain-with-password.p12", std::ios::binary);
-    #else
-        std::ifstream ifs("src/Pt-Ssl/tests/cert/multiple/server_chain-with-password.p12", std::ios::binary);
-    #endif
-
-    Pt::Ssl::Context ctx;
-
-    // load without password, as in the other test
-    ctx.loadPkcs12(ifs, "123");
-}
-
 
 void StreamBufferTest::Handshake()
 {
@@ -94,40 +77,47 @@ void StreamBufferTest::Handshake()
     #endif
 
     #ifdef _WIN32
+        std::ifstream ifs_ca2("src\\Pt-Ssl\\tests\\cert\\ca-with-password.p12", std::ios::binary);
+    #else
+        std::ifstream ifs_ca2("src/Pt-Ssl/tests/cert/ca-with-password.p12", std::ios::binary);
+    #endif
+
+    #ifdef _WIN32
         std::ifstream server_ifs("src\\Pt-Ssl\\tests\\cert\\server-with-password.p12", std::ios::binary);
     #else
         std::ifstream server_ifs("src/Pt-Ssl/tests/cert/server-with-password.p12", std::ios::binary);
     #endif
 
-    //Pt::Ssl::CertificateStore certStore;
-    //certStore.loadPkcs12(ifs, "123");
-    //PT_UNIT_ASSERT( ! certStore.empty() );
-
-    Pt::Ssl::CertificateStore caStore;
-    caStore.loadPkcs12(ifs_ca, "123");
-    PT_UNIT_ASSERT( ! caStore.empty() );
-
-    Pt::Ssl::CertificateStore serverCerts;
-    serverCerts.loadPkcs12(server_ifs, "123");
-    PT_UNIT_ASSERT( ! serverCerts.empty() );
-
+    // Server context
     Pt::Ssl::Context serverContext;
-    serverContext.setCertificate( *serverCerts.begin() );
-    serverContext.setCACertificates( caStore );
     serverContext.setVerifyMode(Pt::Ssl::Context::VerifyPeerRequired);
 
-    std::clog << "--------------------" << std::endl;
-    // client-side SSL context
-    Pt::Ssl::Context clientContext;
-    clientContext.loadPkcs12(ifs, "123");
-    Pt::Ssl::Certificate cert = clientContext.findCertificate("Atlantis Mainframe");
-    
-    PT_UNIT_ASSERT( cert.isValid() );
+    serverContext.loadPkcs12(server_ifs, "123");
+    serverContext.loadPkcs12(ifs_ca2, "123");
 
-    clientContext.setCertificate( cert );
-    clientContext.setCACertificates( caStore );
+    Pt::Ssl::Certificate servCert = serverContext.findCertificate("SGC Mainframe");
+    PT_UNIT_ASSERT( servCert.isValid() );
+    serverContext.setCertificate( servCert );
+
+    Pt::Ssl::Certificate servCA = serverContext.findCertificate("SGC Certificate Authority");
+    PT_UNIT_ASSERT( servCA.isValid() );
+    serverContext.addCACertificate(servCA);
+
+    // Client context
+    Pt::Ssl::Context clientContext;
     clientContext.setVerifyMode(Pt::Ssl::Context::VerifyPeer);
 
+    clientContext.loadPkcs12(ifs, "123");
+    clientContext.loadPkcs12(ifs_ca, "123");
+
+    Pt::Ssl::Certificate clientCert = clientContext.findCertificate("Atlantis Mainframe");
+    PT_UNIT_ASSERT( clientCert.isValid() );
+    clientContext.setCertificate( clientCert );
+
+    Pt::Ssl::Certificate clientCA = clientContext.findCertificate("SGC Certificate Authority");
+    PT_UNIT_ASSERT( clientCA.isValid() );
+    clientContext.addCACertificate(clientCA);
+    
     // client begins the handshake
     std::stringstream data;
     Pt::Ssl::StreamBuffer client(clientContext, *data.rdbuf(), Pt::Ssl::StreamBuffer::Connect);

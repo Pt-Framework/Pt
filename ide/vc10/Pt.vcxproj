@@ -154,6 +154,7 @@
     <ClInclude Include="..\..\include\Pt\SmartPtr.h" />
     <ClInclude Include="..\..\include\Pt\SourceInfo.h" />
     <ClInclude Include="..\..\include\Pt\Ssl\Api.h" />
+    <ClInclude Include="..\..\include\Pt\Ssl\Certificate.h" />
     <ClInclude Include="..\..\include\Pt\Ssl\CertificateList.h" />
     <ClInclude Include="..\..\include\Pt\Ssl\CipherList.h" />
     <ClInclude Include="..\..\include\Pt\Ssl\Context.h" />
@@ -461,6 +462,7 @@
     <ClCompile Include="..\..\src\Pt-Reflex\tests\ReflectableTest.cpp" />
     <ClCompile Include="..\..\src\Pt-Reflex\Type.cpp" />
     <ClCompile Include="..\..\src\Pt-Reflex\TypeManager.cpp" />
+    <ClCompile Include="..\..\src\Pt-Ssl\Certificate.cpp" />
     <ClCompile Include="..\..\src\Pt-Ssl\CertificateList.cpp" />
     <ClCompile Include="..\..\src\Pt-Ssl\CipherList.cpp" />
     <ClCompile Include="..\..\src\Pt-Ssl\Context.cpp" />
@@ -470,6 +472,7 @@
     <ClCompile Include="..\..\src\Pt-Ssl\Session.cpp" />
     <ClCompile Include="..\..\src\Pt-Ssl\SslError.cpp" />
     <ClCompile Include="..\..\src\Pt-Ssl\StreamBuffer.cpp" />
+    <ClCompile Include="..\..\src\Pt-Ssl\tests\ContextTest.cpp" />
     <ClCompile Include="..\..\src\Pt-Ssl\tests\IOBufferTest.cpp" />
     <ClCompile Include="..\..\src\Pt-Ssl\tests\Pt-Ssl-test.cpp" />
     <ClCompile Include="..\..\src\Pt-Ssl\tests\StreamBufferTest.cpp" />
