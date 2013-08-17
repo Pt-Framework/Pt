@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef Pt_Hmi_GfxOutputImpl_h
-#define Pt_Hmi_GfxOutputImpl_h
+#ifndef Pt_Hmi_KeyHandler_h
+#define Pt_Hmi_KeyHandler_h
 
 namespace Pt {
 namespace Hmi {

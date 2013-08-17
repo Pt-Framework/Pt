@@ -36,6 +36,7 @@
 #include <iostream>
 #include <sstream>
 #include <algorithm>
+#include "KeyHandler.h"
 
 namespace Pt{
 namespace Hmi{
@@ -225,17 +226,18 @@ void GfxOutputImpl::onKeyEvent(XEvent& xev)
         _keyEvent.setState(KeyEvent::KeyUp);
 	else
 		_keyEvent.setState(KeyEvent::KeyDown);
-	/*
-    KeySym sym = 0;
-    char buffer[20]; // For dummy since the X function wants it
-   
-    //XLookupString(&xev.xkey, buffer, sizeof(buffer), &sym, NULL);
-	int vcode = KeyHandler::keySymToUtf(sym);
-	_keyEvent.setVirtualCode(vcode);
-	*/
 
-    _keyEvent.setVirtualCode( xev.xkey.keycode);
-	_keyEvent.setScancode(xev.xkey.serial);
+    KeySym sym = 0;
+    char buffer[20];   
+  	XLookupString(&xev.xkey, buffer, sizeof(buffer), &sym, NULL);
+	int vcode = KeyHandler::keySymToUtf(sym);
+
+	if(vcode== 0)
+		vcode = (char)sym;
+		
+	_keyEvent.setVirtualCode(vcode);
+
+	std::cout<<"VC = 0x"<<vcode<<std::endl; 	
 	_keyEvent.setRepeatCount(0);
     
     switch( xev.xkey.keycode ) 

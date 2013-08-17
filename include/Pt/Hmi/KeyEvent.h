@@ -58,16 +58,6 @@ public:
 		_repeatCount = c;
 	}
 
-	inline int scanCode() const
-	{
-		return _scanCode;
-	}
-
-	inline void setScancode(int c)
-	{
-		_scanCode = c;
-	}
-
 	inline bool extCode() const
 	{
 		return _extCode;
@@ -145,8 +135,7 @@ protected:
 
 private:
 	int _virtualCode;
-	int _repeatCount;
-	int _scanCode;
+	int _repeatCount;	
 	bool _extCode;
 	bool _alt;
 	bool _shift;

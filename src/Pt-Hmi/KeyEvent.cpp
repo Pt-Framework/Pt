@@ -7,7 +7,6 @@ namespace Hmi {
 KeyEvent::KeyEvent()
 : _virtualCode(-1)
 , _repeatCount(0)
-, _scanCode(-1)
 , _extCode(false)
 , _state(KeyNone)
 , _alt(false)
@@ -19,7 +18,6 @@ KeyEvent::KeyEvent()
 KeyEvent::KeyEvent(const KeyEvent& copy)
 : _virtualCode(copy._virtualCode)
 , _repeatCount(copy._repeatCount)
-, _scanCode(copy._scanCode)
 , _extCode(copy._extCode)
 , _state(copy._state)
 , _alt(copy._alt)
@@ -52,7 +50,6 @@ void KeyEvent::operator=(const KeyEvent& copy)
 {
 	_virtualCode = copy._virtualCode;
 	_repeatCount = copy._repeatCount;
-	_scanCode = copy._scanCode;
 	_extCode = copy._extCode;
 	_state = copy._state;
 	_alt = copy._alt;
