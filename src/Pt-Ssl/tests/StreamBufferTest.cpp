@@ -43,7 +43,7 @@ class StreamBufferTest : public Pt::Unit::TestSuite
         StreamBufferTest()
         : Pt::Unit::TestSuite("StreamBufferTest")
         {
-            Pt::System::Logger::setLogLevel("", Pt::System::Error);
+            Pt::System::Logger::setLogLevel("Pt.Ssl", Pt::System::Error);
 
             this->registerMethod("Handshake", *this, &StreamBufferTest::Handshake);
         }
@@ -95,13 +95,13 @@ void StreamBufferTest::Handshake()
     serverContext.loadPkcs12(server_ifs, "123");
     serverContext.loadPkcs12(ifs_ca2, "123");
 
-    Pt::Ssl::Certificate servCert = serverContext.findCertificate("SGC Mainframe");
-    PT_UNIT_ASSERT( servCert.isValid() );
-    serverContext.setCertificate( servCert );
+    Pt::Ssl::Certificate* servCert = serverContext.findCertificate("SGC Mainframe");
+    PT_UNIT_ASSERT( servCert );
+    serverContext.setCertificate( *servCert );
 
-    Pt::Ssl::Certificate servCA = serverContext.findCertificate("SGC Certificate Authority");
-    PT_UNIT_ASSERT( servCA.isValid() );
-    serverContext.addCACertificate(servCA);
+    Pt::Ssl::Certificate* servCA = serverContext.findCertificate("SGC Certificate Authority");
+    PT_UNIT_ASSERT( servCA );
+    serverContext.addCACertificate(*servCA);
 
     // Client context
     Pt::Ssl::Context clientContext;
@@ -110,13 +110,13 @@ void StreamBufferTest::Handshake()
     clientContext.loadPkcs12(ifs, "123");
     clientContext.loadPkcs12(ifs_ca, "123");
 
-    Pt::Ssl::Certificate clientCert = clientContext.findCertificate("Atlantis Mainframe");
-    PT_UNIT_ASSERT( clientCert.isValid() );
-    clientContext.setCertificate( clientCert );
+    Pt::Ssl::Certificate* clientCert = clientContext.findCertificate("Atlantis Mainframe");
+    PT_UNIT_ASSERT( clientCert );
+    clientContext.setCertificate( *clientCert );
 
-    Pt::Ssl::Certificate clientCA = clientContext.findCertificate("SGC Certificate Authority");
-    PT_UNIT_ASSERT( clientCA.isValid() );
-    clientContext.addCACertificate(clientCA);
+    Pt::Ssl::Certificate* clientCA = clientContext.findCertificate("SGC Certificate Authority");
+    PT_UNIT_ASSERT( clientCA );
+    clientContext.addCACertificate(*clientCA);
     
     // client begins the handshake
     std::stringstream data;

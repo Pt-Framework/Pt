@@ -35,6 +35,9 @@
 #include <string>
 #include <vector>
 
+#include <Security/Security.h>
+#include <CoreFoundation/CFArray.h>
+
 namespace Pt {
 
 namespace Ssl {
@@ -65,31 +68,37 @@ class ContextImpl
 
         void setVerifyMode(Context::VerifyMode mode);
 
-        void setCACertificates(const std::vector<Certificate>& trustedCert);
-
         void addCACertificate(const Certificate& trustedCert);
 
         void setCertificate(const Certificate& cert);
+        
+        void addCertificate(const Certificate& cert);
 
         void loadPkcs12(const char* data, size_t len, const char* passwd);
 
         void loadPkcs12(std::istream& is, const char* passwd);
 
-        Certificate findCertificate(const std::string& subject);
+        Certificate* findCertificate(const std::string& subject);
 
-        Certificate& certificate()
-        { return _cert; }
+        CFArrayRef certificates()
+        { return _identity ? _certs : NULL; }
         
-        const std::vector<Certificate>& caCertificates()
+        CFArrayRef caCertificates()
         { return _caCerts; }
+        
+        SecIdentityRef copyIdentity(SecIdentityRef ident) const;
+        
+        SecCertificateRef copyCertificate(SecCertificateRef cert) const;
     
     private:
-        Context::Protocol                 _protocol;
-        std::vector<Certificate> _caCerts;
-        Certificate              _cert;
+        Context::Protocol    _protocol;
+        Context::VerifyMode  _verify;
+        SecIdentityRef       _identity;
+        CFMutableArrayRef    _certs;
+        CFMutableArrayRef    _caCerts;
+        
         //CertificateList          _extraCerts;
-        Context::VerifyMode               _verify;
-        std::vector<Certificate> _certificates;
+        std::vector<Certificate*> _allCerts;
         void*                    _reserved;
 };
 

@@ -123,7 +123,25 @@ void ContextTest::Import()
     #endif
 
     Pt::Ssl::Context ctx;
-
     ctx.loadPkcs12(ifs, "123");
+    
+    Pt::Ssl::Certificate* cert = ctx.findCertificate("Server");
+    PT_UNIT_ASSERT(cert);
+    ctx.setCertificate(*cert);
+    
+    cert = ctx.findCertificate("Root CA");
+    PT_UNIT_ASSERT(cert);
+    ctx.addCACertificate(*cert);  
+
+    Pt::Ssl::Context ctx2;
+    ctx2.assign(ctx);
+    //std::exit(0);
+    
+    cert = ctx2.findCertificate("Server");
+    PT_UNIT_ASSERT(cert);
+    
+    cert = ctx2.findCertificate("Root CA");
+    PT_UNIT_ASSERT(cert);
+    //std::exit(0);
 }
 

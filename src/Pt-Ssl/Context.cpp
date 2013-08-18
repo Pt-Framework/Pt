@@ -135,7 +135,7 @@ void Context::loadPkcs12(const char* data, size_t len, const char* passwd)
 }
 
 
-Certificate Context::findCertificate(const std::string& subject)
+Certificate* Context::findCertificate(const std::string& subject)
 {
     return _impl->findCertificate(subject);
 }

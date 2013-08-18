@@ -53,7 +53,6 @@ class CertificateImpl
         , _refs(1)
         {
             assert(_cert);
-            std::clog << "CertificateImpl: " << _cert << std::endl;
         }
 
         explicit CertificateImpl(SecIdentityRef identity)
@@ -63,7 +62,6 @@ class CertificateImpl
         {
             SecIdentityCopyCertificate(identity, &_cert);
             assert(_cert);
-            std::clog << "CertificateImpl: " << _cert << std::endl;
         }
 
         ~CertificateImpl()
@@ -128,10 +126,10 @@ class CertificateImpl
             return "";
         }
         
-        SecCertificateRef certRef()
+        SecCertificateRef certificate() const
         { return _cert; }
         
-        SecIdentityRef identity()
+        SecIdentityRef identity() const
         { return _ident; }
 
     private:

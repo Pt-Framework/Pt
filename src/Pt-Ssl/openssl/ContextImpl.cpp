@@ -429,15 +429,15 @@ void ContextImpl::loadPkcs12(const char* data, size_t len, const char* passwd)
 }
 
 
-Certificate ContextImpl::findCertificate(const std::string& subject)
+Certificate* ContextImpl::findCertificate(const std::string& subject)
 {
     for(std::vector<Certificate>::const_iterator it = _certificates.begin(); it != _certificates.end(); ++it) 
     {
         if( it->subject().find(subject) != std::string::npos )
-            return *it;
+            return &(*it);
     }
 
-    return Certificate();
+    return 0;
 }
 
 

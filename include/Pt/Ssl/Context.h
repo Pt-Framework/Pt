@@ -140,7 +140,7 @@ class PT_SSL_API Context : public NonCopyable
 
         void loadPkcs12(std::istream& is, const char* passwd);
 
-        Certificate findCertificate(const std::string& subject);
+        Certificate* findCertificate(const std::string& subject);
 
         ContextImpl* impl();
 

@@ -91,10 +91,7 @@ Connection::Connection(Context& ctx, std::streambuf& ios, int mode)
             SSLSetClientSideAuthenticate(_context, kAlwaysAuthenticate);
         }
         
-        const Certificate& ca = _ctx->impl()->caCertificates().at(0);
-
-        SecCertificateRef certs [] = { ca.impl()->certRef() };
-        CFArrayRef caArr = CFArrayCreate(NULL, (const void**)certs, 1, &kCFTypeArrayCallBacks);
+        CFArrayRef caArr = _ctx->impl()->caCertificates();
         SSLSetCertificateAuthorities(_context, caArr, true);
         SSLSetTrustedRoots(_context, caArr, true);
 #endif
@@ -105,15 +102,12 @@ Connection::Connection(Context& ctx, std::streambuf& ios, int mode)
         SSLSetSessionOption(_context, kSSLSessionOptionBreakOnServerAuth, true);
     }
 
-    if( _ctx->impl()->certificate().isValid() )
+    // certificates to present to peer
+    CFArrayRef certs = _ctx->impl()->certificates();
+    if(certs)
     {
-        SecIdentityRef ident = _ctx->impl()->certificate().impl()->identity();
-        if(ident)
-        {
-            std::clog << "USING CERTIFICATE " << _server << std::endl;
-            CFArrayRef certRefs = CFArrayCreate(NULL, (const void**)(&ident), 1, NULL);
-            SSLSetCertificate(_context, certRefs);
-        }
+        log_debug("using " << CFArrayGetCount(certs) << " certificates");
+        SSLSetCertificate(_context, certs);
     }
 }
 
@@ -184,14 +178,8 @@ bool Connection::readHandshake()
         SecTrustRef trust = NULL;
         SSLCopyPeerTrust(_context, &trust);
         //SecTrustSetPolicies(trust, SecPolicyCreateBasicX509());
-        
-        const Certificate& ca = _ctx->impl()->caCertificates().at(0);
-        log_debug("CA: " << ca.subject() );
 
-        SecCertificateRef certs [] = { ca.impl()->certRef() };
-
-        CFArrayRef caArr = CFArrayCreate(NULL, (const void**)certs, 1, &kCFTypeArrayCallBacks);
-        //CFArrayRef caArr = NULL;
+        CFArrayRef caArr = _ctx->impl()->caCertificates();
         SecTrustSetAnchorCertificates(trust, caArr);
         SecTrustSetAnchorCertificatesOnly(trust, true);
 

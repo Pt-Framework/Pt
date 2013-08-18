@@ -307,13 +307,13 @@ class ServerTest : public Pt::Unit::TestSuite
             ctx.loadPkcs12(ifs, "123");
             ctx.loadPkcs12(ifs_ca, "123");
 
-            Pt::Ssl::Certificate clientCert = ctx.findCertificate("Atlantis Mainframe");
-            PT_UNIT_ASSERT( clientCert.isValid() );
-            ctx.setCertificate( clientCert );
+            Pt::Ssl::Certificate* clientCert = ctx.findCertificate("Atlantis Mainframe");
+            PT_UNIT_ASSERT( clientCert);
+            ctx.setCertificate( *clientCert );
 
-            Pt::Ssl::Certificate clientCA = ctx.findCertificate("SGC Certificate Authority");
-            PT_UNIT_ASSERT( clientCA.isValid() );
-            ctx.addCACertificate(clientCA);
+            Pt::Ssl::Certificate* clientCA = ctx.findCertificate("SGC Certificate Authority");
+            PT_UNIT_ASSERT( clientCA);
+            ctx.addCACertificate(*clientCA);
 
 
             //Pt::Ssl::CertificateStore clientCerts;
@@ -348,13 +348,13 @@ class ServerTest : public Pt::Unit::TestSuite
             ctx.loadPkcs12(server_ifs, "123");
             ctx.loadPkcs12(ifs_ca, "123");
 
-            Pt::Ssl::Certificate servCert = ctx.findCertificate("SGC Mainframe");
-            PT_UNIT_ASSERT( servCert.isValid() );
-            ctx.setCertificate( servCert );
+            Pt::Ssl::Certificate* servCert = ctx.findCertificate("SGC Mainframe");
+            PT_UNIT_ASSERT( servCert );
+            ctx.setCertificate( *servCert );
 
-            Pt::Ssl::Certificate servCA = ctx.findCertificate("SGC Certificate Authority");
-            PT_UNIT_ASSERT( servCA.isValid() );
-            ctx.addCACertificate(servCA);
+            Pt::Ssl::Certificate* servCA = ctx.findCertificate("SGC Certificate Authority");
+            PT_UNIT_ASSERT( servCA );
+            ctx.addCACertificate(*servCA);
 
             //Pt::Ssl::CertificateStore caStore;
             //caStore.loadPkcs12(ifs_ca, "123");
