@@ -429,7 +429,7 @@ void ContextImpl::loadPkcs12(const char* data, size_t len, const char* passwd)
 }
 
 
-Certificate* ContextImpl::findCertificate(const std::string& subject)
+const Certificate* ContextImpl::findCertificate(const std::string& subject)
 {
     for(std::vector<Certificate>::const_iterator it = _certificates.begin(); it != _certificates.end(); ++it) 
     {

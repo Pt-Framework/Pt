@@ -78,7 +78,7 @@ class ContextImpl
 
         void loadPkcs12(std::istream& is, const char* passwd);
 
-        Certificate* findCertificate(const std::string& subject);
+        const Certificate* findCertificate(const std::string& subject);
 
         CFArrayRef certificates()
         { return _identity ? _certs : NULL; }

@@ -406,7 +406,7 @@ void ContextImpl::loadPkcs12(const char* pkcs12, size_t len, const char* passwd)
 }
 
 
-Certificate* ContextImpl::findCertificate(const std::string& subject)
+const Certificate* ContextImpl::findCertificate(const std::string& subject)
 {
     log_trace("findCertificate: " << subject);
     

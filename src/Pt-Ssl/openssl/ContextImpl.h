@@ -73,7 +73,7 @@ class ContextImpl
 
         void loadPkcs12(std::istream& is, const char* passwd);
 
-        Certificate* findCertificate(const std::string& subject);
+        const Certificate* findCertificate(const std::string& subject);
 
         //! @internal
         ssl_ctx_st* ctx() const;

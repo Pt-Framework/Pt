@@ -95,11 +95,11 @@ void StreamBufferTest::Handshake()
     serverContext.loadPkcs12(server_ifs, "123");
     serverContext.loadPkcs12(ifs_ca2, "123");
 
-    Pt::Ssl::Certificate* servCert = serverContext.findCertificate("SGC Mainframe");
+    const Pt::Ssl::Certificate* servCert = serverContext.findCertificate("SGC Mainframe");
     PT_UNIT_ASSERT( servCert );
     serverContext.setCertificate( *servCert );
 
-    Pt::Ssl::Certificate* servCA = serverContext.findCertificate("SGC Certificate Authority");
+    const Pt::Ssl::Certificate* servCA = serverContext.findCertificate("SGC Certificate Authority");
     PT_UNIT_ASSERT( servCA );
     serverContext.addCACertificate(*servCA);
 
@@ -110,11 +110,11 @@ void StreamBufferTest::Handshake()
     clientContext.loadPkcs12(ifs, "123");
     clientContext.loadPkcs12(ifs_ca, "123");
 
-    Pt::Ssl::Certificate* clientCert = clientContext.findCertificate("Atlantis Mainframe");
+    const Pt::Ssl::Certificate* clientCert = clientContext.findCertificate("Atlantis Mainframe");
     PT_UNIT_ASSERT( clientCert );
     clientContext.setCertificate( *clientCert );
 
-    Pt::Ssl::Certificate* clientCA = clientContext.findCertificate("SGC Certificate Authority");
+    const Pt::Ssl::Certificate* clientCA = clientContext.findCertificate("SGC Certificate Authority");
     PT_UNIT_ASSERT( clientCA );
     clientContext.addCACertificate(*clientCA);
     

@@ -125,7 +125,7 @@ void ContextTest::Import()
     Pt::Ssl::Context ctx;
     ctx.loadPkcs12(ifs, "123");
     
-    Pt::Ssl::Certificate* cert = ctx.findCertificate("Server");
+    const Pt::Ssl::Certificate* cert = ctx.findCertificate("Server");
     PT_UNIT_ASSERT(cert);
     ctx.setCertificate(*cert);
     
