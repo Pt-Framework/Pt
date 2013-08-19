@@ -296,7 +296,7 @@ void HttpBuffer::import(std::streamsize n)
                     _buffer + MaxPutback + leftover ); // end of get area
     }
 
-    if(_chunked)
+    if(_chunked && _contentLength == 0)
     {
         log_debug("getting next chunk");
         _contentLength = 0;
