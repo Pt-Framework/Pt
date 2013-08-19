@@ -301,32 +301,20 @@ class ServerTest : public Pt::Unit::TestSuite
             #else
                 std::ifstream ifs_ca("src/Pt-Ssl/tests/cert/ca-with-password.p12", std::ios::binary);
             #endif
-            
+
+            Pt::Ssl::CertificateStore store;
+            store.loadPkcs12(ifs, "123");
+            store.loadPkcs12(ifs_ca, "123");
+
             ctx.setVerifyMode(Pt::Ssl::Context::VerifyPeer);
 
-            ctx.loadPkcs12(ifs, "123");
-            ctx.loadPkcs12(ifs_ca, "123");
-
-            const Pt::Ssl::Certificate* clientCert = ctx.findCertificate("Atlantis Mainframe");
+            const Pt::Ssl::Certificate* clientCert = store.findCertificate("Atlantis Mainframe");
             PT_UNIT_ASSERT( clientCert);
             ctx.setCertificate( *clientCert );
 
-            const Pt::Ssl::Certificate* clientCA = ctx.findCertificate("SGC Certificate Authority");
+            const Pt::Ssl::Certificate* clientCA = store.findCertificate("SGC Certificate Authority");
             PT_UNIT_ASSERT( clientCA);
             ctx.addCACertificate(*clientCA);
-
-
-            //Pt::Ssl::CertificateStore clientCerts;
-            //clientCerts.loadPkcs12(ifs, "123");
-            //PT_UNIT_ASSERT( ! clientCerts.empty() );
-
-            //Pt::Ssl::CertificateStore caStore;
-            //caStore.loadPkcs12(ifs_ca, "123");
-            //PT_UNIT_ASSERT( ! caStore.empty() );
-
-            //ctx.setCertificate( *clientCerts.begin() );
-            //ctx.setCACertificates( caStore );
-            //ctx.setVerifyMode(Pt::Ssl::Context::VerifyPeer);
         }
 
         static void setupSslServerContext(Pt::Ssl::Context& ctx)
@@ -343,30 +331,19 @@ class ServerTest : public Pt::Unit::TestSuite
                 std::ifstream server_ifs("src/Pt-Ssl/tests/cert/server-with-password.p12", std::ios::binary);
             #endif
 
+            Pt::Ssl::CertificateStore store;
+            store.loadPkcs12(server_ifs, "123");
+            store.loadPkcs12(ifs_ca, "123");
+
             ctx.setVerifyMode(Pt::Ssl::Context::VerifyPeerRequired);
 
-            ctx.loadPkcs12(server_ifs, "123");
-            ctx.loadPkcs12(ifs_ca, "123");
-
-            const Pt::Ssl::Certificate* servCert = ctx.findCertificate("SGC Mainframe");
+            const Pt::Ssl::Certificate* servCert = store.findCertificate("SGC Mainframe");
             PT_UNIT_ASSERT( servCert );
             ctx.setCertificate( *servCert );
 
-            const Pt::Ssl::Certificate* servCA = ctx.findCertificate("SGC Certificate Authority");
+            const Pt::Ssl::Certificate* servCA = store.findCertificate("SGC Certificate Authority");
             PT_UNIT_ASSERT( servCA );
             ctx.addCACertificate(*servCA);
-
-            //Pt::Ssl::CertificateStore caStore;
-            //caStore.loadPkcs12(ifs_ca, "123");
-            //PT_UNIT_ASSERT( ! caStore.empty() );
-
-            //Pt::Ssl::CertificateStore serverCerts;
-            //serverCerts.loadPkcs12(server_ifs, "123");
-            //PT_UNIT_ASSERT( ! serverCerts.empty() );
-
-            //ctx.setCertificate( *serverCerts.begin() );
-            //ctx.setCACertificates( caStore );
-            //ctx.setVerifyMode(Pt::Ssl::Context::VerifyPeerRequired);
         }
 #endif
 

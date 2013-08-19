@@ -47,6 +47,23 @@ static struct PT_SSL_API SSLInit
     ~SSLInit();
 } ssl_init;
 
+class PT_SSL_API CertificateStore
+{
+    public:
+        CertificateStore();
+
+        ~CertificateStore();
+
+        void loadPkcs12(std::istream& is, const char* passwd);
+
+        void loadPkcs12(const char* data, size_t len, const char* passwd);
+
+        const Certificate* findCertificate(const std::string& subject);
+
+    private:
+        class CertificateStoreImpl* _impl;
+};
+
 //! @brief Context for SSL connections.
 class PT_SSL_API Context : public NonCopyable
 {
@@ -93,17 +110,6 @@ class PT_SSL_API Context : public NonCopyable
         //! @brief Sets the current validation mode.
         void setVerifyMode(VerifyMode mode);
 
-        /** @brief Set the list of trusted CA certificates for this context.
-            
-            Setting the list of trusted CA certificates is needed if you 
-            would like to check if the other peer's certificate is signed
-            by a trusted Certificate Authority. In this case \a trustedCert
-            must contain the certificates of all CAs that you trust.
-         */
-        //void setCACertificates(const CertificateList& trustedCert);
-
-        //void setCACertificates(const CertificateStore& trustedCert);
-
         /** @brief Add a certificate to the  trusted CA certificates.
             
             Trusted CA certificates are needed to check, if the peer's 
@@ -114,33 +120,17 @@ class PT_SSL_API Context : public NonCopyable
 
         /** @brief Set the main certificate of this context.
 
-            Setting a main certificate is mandatory for a server context. 
-            Setting a main certificate for a client context is only needed 
-            for certificate-based client authentication.
+            Setting a main certificate is mandatory for a server context. For
+            a client context, it is only needed for client authentication.
          */
         void setCertificate(const Certificate& cert);
 
-        /** @brief Sets main certificate and certificate chain.
+        /** @brief Builds certificate chain.
 
-            The first certificate in the given list of certificates will
-            be used as the main certificate, the remaining certificates
-            will be added to the intermediate CA certificate chain. For
-            a server context the main certificate should be the server
-            certificate.
-
-            Setting a main certificate and certificate chain for a client 
-            context is only needed for certificate-based client authentication. 
-            In this case the main certificate must be the client certificate. 
-            The remaining certificates are the certificates of the intermediate
-            CAs.
+            Adds the certificate to the certificate chain presented to the
+            peer together with the main certificate.
         */
-        //void setCertificateChain(const CertificateList& certs);
-
-        void loadPkcs12(const char* data, size_t len, const char* passwd);
-
-        void loadPkcs12(std::istream& is, const char* passwd);
-
-        const Certificate* findCertificate(const std::string& subject);
+        void addCertificate(const Certificate& cert);
 
         ContextImpl* impl();
 

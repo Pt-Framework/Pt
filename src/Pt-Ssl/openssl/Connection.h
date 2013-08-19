@@ -29,6 +29,7 @@
 #ifndef PT_SSL_Connection_H
 #define PT_SSL_Connection_H
 
+#include "OpenSsl.h"
 #include <Pt/Ssl/Api.h>
 #include <Pt/Ssl/Context.h>
 #include <streambuf>

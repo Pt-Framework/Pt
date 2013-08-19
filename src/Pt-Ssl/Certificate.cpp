@@ -32,10 +32,10 @@ namespace Pt {
 
 namespace Ssl {
 
-Certificate::Certificate()
-: _impl(0)
-{
-}
+//Certificate::Certificate()
+//: _impl(0)
+//{
+//}
 
 
 Certificate::Certificate(CertificateImpl* impl)
@@ -44,12 +44,12 @@ Certificate::Certificate(CertificateImpl* impl)
 }
 
 
-Certificate::Certificate(const Certificate& cert)
-: _impl(cert._impl)
-{
-    if(_impl)
-        _impl->ref();
-}
+//Certificate::Certificate(const Certificate& cert)
+//: _impl(cert._impl)
+//{
+//    if(_impl)
+//        _impl->ref();
+//}
 
 
 Certificate::~Certificate()
@@ -61,20 +61,20 @@ Certificate::~Certificate()
 }
 
 
-Certificate& Certificate::operator=(const Certificate& cert)
-{
-    if( _impl && 0 == _impl->unref() )
-    {
-        delete _impl;
-    }
-
-    _impl = cert._impl;
-
-    if(_impl)
-        _impl->ref();
-
-    return *this;
-}
+//Certificate& Certificate::operator=(const Certificate& cert)
+//{
+//    if( _impl && 0 == _impl->unref() )
+//    {
+//        delete _impl;
+//    }
+//
+//    _impl = cert._impl;
+//
+//    if(_impl)
+//        _impl->ref();
+//
+//    return *this;
+//}
 
 
 int Certificate::serialNumber() const

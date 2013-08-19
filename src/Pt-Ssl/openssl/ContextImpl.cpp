@@ -28,7 +28,6 @@
  */
 
 #include "ContextImpl.h"
-#include "OpenSsl.h"
 #include "CertificateImpl.h"
 #include <Pt/Ssl/SslError.h>
 #include <Pt/System/Mutex.h>
@@ -119,10 +118,109 @@ void SSLExitImpl()
 }
 
 
+CertificateStoreImpl::CertificateStoreImpl()
+{
+}
+
+
+CertificateStoreImpl::~CertificateStoreImpl()
+{
+    for(std::vector<Certificate*>::iterator it = _allCerts.begin(); it != _allCerts.end(); ++it)
+    {
+        delete *it;
+    }
+}
+
+
+void CertificateStoreImpl::loadPkcs12(const char* data, size_t len, const char* passwd)
+{
+    EVP_PKEY* pkey = NULL;
+    X509* cert = NULL;
+    STACK_OF(X509)* ca = NULL;
+
+    BioAutoPtr in( BIO_new_mem_buf( (void*) data, len ) );
+
+    PKCS12* p12 = d2i_PKCS12_bio(in.get(), NULL);
+    if( ! p12)
+        throw InvalidCertificate("invalid PKCS12 data");
+
+    int status = PKCS12_parse(p12, passwd, &pkey, &cert, &ca);
+    PKCS12_free(p12);
+
+    if( ! status )
+        throw InvalidCertificate("invalid PKCS12 content");
+
+    // TODO: use smart pointers later...
+
+    if(cert) 
+    {
+        X509AutoPtr x509(cert);
+        Certificate* c = new Certificate( new CertificateImpl(x509.get(), pkey) );
+        _allCerts.push_back(c);
+        x509.release();
+    }
+    
+    if(ca)
+    {
+        for(int i = 0; i < sk_X509_num(ca); i++)
+        {
+            X509AutoPtr x509( sk_X509_pop(ca) );
+            Certificate* c = new Certificate( new CertificateImpl(x509.get()) );
+            _allCerts.push_back(c);
+            x509.release();
+        }
+
+        sk_X509_pop_free(ca, X509_free);
+        ca = NULL;
+    }  
+}
+
+
+const Certificate* CertificateStoreImpl::findCertificate(const std::string& subject)
+{
+    for(std::vector<Certificate*>::const_iterator it = _allCerts.begin(); it != _allCerts.end(); ++it) 
+    {
+        if( (*it)->subject().find(subject) != std::string::npos )
+            return *it;
+    }
+
+    return 0;
+}
+
+
+X509* copyX509(X509* from)
+{   
+    return X509_dup(from);
+}
+
+
+EVP_PKEY* copyPrivateKey(EVP_PKEY* from)
+{
+    BIO* b = BIO_new( BIO_s_mem() );
+
+    BioAutoPtr bio(b);
+
+    if (PEM_write_bio_PKCS8PrivateKey(bio.get(), from, 0, 0, 0, 0, 0) <= 0) 
+    {
+        throw InvalidCertificate("invalid certificate");
+    }
+
+    EVP_PKEY *target = 0;
+    if (PEM_read_bio_PrivateKey(bio.get(), &target, 0, 0) == 0) 
+    {
+        throw InvalidCertificate("invalid certificate");
+    }
+    
+    return target;
+}
+
+
 ContextImpl::ContextImpl(Context::Protocol protocol)
 : _protocol(protocol)
-, _reserved(0)
+, _x509(0)
+, _pkey(0)
 , _verify(Context::VerifyPeer)
+, _verifyDepth(1)
 {
     // Create the context for the given protocol
     switch(_protocol) 
@@ -137,7 +235,7 @@ ContextImpl::ContextImpl(Context::Protocol protocol)
 
     // Set some options
 #if (OPENSSL_VERSION_NUMBER < 0x00905100L)
-    SSL_CTX_set_verify_depth(_ctx, 1);
+    SSL_CTX_set_verify_depth(_ctx, _verifyDepth);
 #endif
     
     SSL_CTX_set_options(_ctx, SSL_OP_SINGLE_DH_USE);
@@ -152,6 +250,17 @@ ContextImpl::ContextImpl(Context::Protocol protocol)
 ContextImpl::~ContextImpl()
 {
     SSL_CTX_free(_ctx);
+
+    if(_pkey)
+        EVP_PKEY_free(_pkey);
+    
+    if(_x509)
+        X509_free(_x509);
+
+    for(std::vector<X509*>::iterator it = _caCerts.begin(); it != _caCerts.end(); ++it)
+    {
+        X509_free(*it);
+    }
 }
 
 
@@ -190,7 +299,8 @@ void ContextImpl::setProtocol(Context::Protocol protocol)
 
 void ContextImpl::setVerifyDepth(int n)
 {
-    SSL_CTX_set_verify_depth(_ctx, n);
+    _verifyDepth = n;
+    SSL_CTX_set_verify_depth(_ctx, _verifyDepth);
 }
 
 
@@ -217,115 +327,134 @@ void ContextImpl::setVerifyMode(Context::VerifyMode m)
 }
 
 
-X509* addExtraCertImpl(SSL_CTX* ctx, X509* x)
-{
-    // NOTE: SSL_CTX_add_extra_chain_cert does not copy the X509 certificate, 
-    // or increase the refcount, so we must "copy" it manually, because SSL_CTX
-    // will take ownership
-
-    X509* dupX509 = X509_dup(x);
-
-    // // Convert the X509 certificate to raw binary data
-    // unsigned char* buf = 0;
-    // int len = i2d_X509(cert.getX509(), &buf);
-    // if(len < 0)
-    //     throw InvalidCertificate("Could not convert the CA certificate to raw binary data");
-    // 
-    // // Convert the raw binary data back to an X509 certificate
-    // unsigned char** tbf = &buf;
-    // X509* x509 = d2i_X509(0, tbf, len);
-    // OPENSSL_free(buf);
-    //
-    //if( ! x509)
-    //    throw InvalidCertificate("Could not convert the raw binary data back to a CA certificate");
-
-    if( ! dupX509 )
-        throw InvalidCertificate("Could not duplicate the CA certificate");
-
-    if( ! SSL_CTX_add_extra_chain_cert( ctx, dupX509 ) )
-        throw InvalidCertificate("Could not add CA certificate");
-
-    return dupX509;
-}
-
-
 void ContextImpl::assign(const ContextImpl& ctx)
 {
+    // TODO: consider to create a new SSL_CTX if required
+
     setProtocol(ctx._protocol);
     setVerifyMode(ctx._verify);
-    setCertificate(ctx._cert);
+    setVerifyDepth(ctx._verifyDepth);
 
-    // TODO: verify depth
+    // copy certificates presented to peer
 
+    if(_pkey)
+        EVP_PKEY_free(_pkey);
+    _pkey = 0;
+    
+    if(_x509)
+        X509_free(_x509);
+    _x509 = 0;
+
+    if( ctx._x509 )
+    {
+        _pkey = copyPrivateKey( ctx._pkey );  
+        _x509 = copyX509( ctx._x509 );
+        
+        if( ! SSL_CTX_use_certificate(_ctx, _x509) )
+        {
+            throw InvalidCertificate("invalid certificate");
+        }
+
+        if( ! SSL_CTX_use_PrivateKey( _ctx, _pkey ) )
+        {
+            throw InvalidCertificate("invalid certificate");
+        }
+    }
+
+    for(std::vector<X509*>::const_iterator it = ctx._extraCerts.begin(); it != ctx._extraCerts.end(); ++it)
+    {
+        // NOTE: SSL_CTX_add_extra_chain_cert does not copy the X509 certificate, 
+        // or increase the refcount. We must copy it, because the SSL_CTX will
+        // free it
+
+        X509* extraX509 = X509_dup(*it);
+
+        if( ! extraX509 )
+            throw InvalidCertificate("Could not duplicate the CA certificate");
+
+        if( ! SSL_CTX_add_extra_chain_cert( _ctx, extraX509 ) )
+            throw InvalidCertificate("Could not add extra certificate");
+
+        _extraCerts.push_back(extraX509);
+    }
+
+    // copy trusted CA certificates
+    for(std::vector<X509*>::iterator it = _caCerts.begin(); it != _caCerts.end(); ++it)
+    {
+        X509_free(*it);
+    }
+    
     _caCerts.clear();
-    X509_STOREAutoPtr cert_store( X509_STORE_new() );
 
-    for(std::vector<Certificate>::const_iterator it = ctx._caCerts.begin(); it != ctx._caCerts.end(); ++it) 
+    X509_STORE* store = X509_STORE_new();
+
+    for(std::vector<X509*>::const_iterator it = ctx._caCerts.begin(); it != ctx._caCerts.end(); ++it)
     {
-        if( ! X509_STORE_add_cert(cert_store.get(), it->impl()->getX509()) )
-            throw InvalidCertificate("Could not store the CA certificate as a trusted certificate");
+        X509* x509 = copyX509(*it);
+        _caCerts.push_back(x509);
 
-        _caCerts.push_back(*it);
+        if( ! X509_STORE_add_cert(store, x509) )
+            throw InvalidCertificate("untrusted certificate");
     }
 
-    // Set it to the context
-    SSL_CTX_set_cert_store(_ctx, cert_store.get());
-    cert_store.release();
-
-    std::vector<X509*>::const_iterator it;
-    for(it = ctx._extraCerts.begin(); it != ctx._extraCerts.end(); ++it)
-    {
-        X509* x509 = addExtraCertImpl(_ctx, *it);
-        _extraCerts.push_back(x509);
-    }
+    SSL_CTX_set_cert_store( _ctx, store );
 }
 
 
-//void Context::setCACertificates(const CertificateList& caCerts)
-//{
-//    // certificates to validate certificate presented by peer
-//    _caCerts = caCerts;
-//
-//    // Try to add the CA X509 certificates (if any)
-//    X509_STOREAutoPtr cert_store( X509_STORE_new() );
-//
-//    for(CertificateList::Iterator it = _caCerts.begin(); it != _caCerts.end(); ++it) 
-//    {
-//        if( ! X509_STORE_add_cert(cert_store.get(), it->impl()->getX509()) )
-//            throw InvalidCertificate("Could not store the CA certificate as a trusted certificate");
-//    }
-//
-//    // Set it to the context
-//    SSL_CTX_set_cert_store(_ctx, cert_store.get());
-//    cert_store.release();
-//}
-
-
-void ContextImpl::setCACertificates(const std::vector<Certificate>& caCerts)
+void ContextImpl::setCertificate(const Certificate& cert)
 {
-    // certificates to validate certificate presented by peer
-    _caCerts.clear();
+    if( ! cert.impl()->pkey() )
+        throw InvalidCertificate("invalid certificate");
 
-    // Try to add the CA X509 certificates (if any)
-    X509_STOREAutoPtr cert_store( X509_STORE_new() );
+    if(_pkey)
+        EVP_PKEY_free(_pkey);
+    _pkey = 0;
 
-    for(std::vector<Certificate>::const_iterator it = caCerts.begin(); it != caCerts.end(); ++it) 
+    if(_x509)
+        X509_free(_x509);
+    _x509 = 0;
+
+    _x509 = copyX509( cert.impl()->x509() );
+    _pkey = copyPrivateKey( cert.impl()->pkey() );
+
+    if( ! SSL_CTX_use_certificate(_ctx, _x509) )
     {
-        if( ! X509_STORE_add_cert(cert_store.get(), it->impl()->getX509()) )
-            throw InvalidCertificate("Could not store the CA certificate as a trusted certificate");
-
-        _caCerts.push_back(*it);
+        throw InvalidCertificate("invalid certificate");
     }
 
-    // Set it to the context
-    SSL_CTX_set_cert_store(_ctx, cert_store.get());
-    cert_store.release();
+    if( ! SSL_CTX_use_PrivateKey( _ctx, _pkey ) )
+    {
+        throw InvalidCertificate("invalid certificate");
+    }
+    
+    // openssl will not check the private key of this context against the 
+    // certifictate. TO do so call SSL_CTX_check_private_key(_ctx)
+}
+
+
+void ContextImpl::addCertificate(const Certificate& certificate)
+{
+    // NOTE: SSL_CTX_add_extra_chain_cert does not copy the X509 certificate, 
+    // or increase the refcount. We must copy it, because the SSL_CTX will
+    // free it
+
+    X509* extraX509 = X509_dup( certificate.impl()->x509() );
+
+    if( ! SSL_CTX_add_extra_chain_cert( _ctx, extraX509 ) )
+        throw InvalidCertificate("Could not add extra certificate");
+
+    _extraCerts.push_back(extraX509);
 }
 
 
 void ContextImpl::addCACertificate(const Certificate& trustedCert)
 {
     log_trace("adding CA certificate:" << trustedCert.subject());
+
+    X509* x509 = copyX509( trustedCert.impl()->x509() );
+
+    _caCerts.push_back(x509);
+
     X509_STORE* store = SSL_CTX_get_cert_store(_ctx);
 
     if( ! store)
@@ -334,114 +463,12 @@ void ContextImpl::addCACertificate(const Certificate& trustedCert)
         store = X509_STORE_new();
     }
 
-    if( ! X509_STORE_add_cert(store, trustedCert.impl()->getX509()) )
+    if( ! X509_STORE_add_cert(store, x509) )
         throw InvalidCertificate("untrusted certificate");
-
-    _caCerts.push_back(trustedCert);
 }
 
 
-void ContextImpl::setCertificate(const Certificate& cert)
-{
-    // certificate to present to peer
-    _cert = cert;
-
-    X509* x509 = _cert.impl()->getX509();
-
-    if( ! SSL_CTX_use_certificate(_ctx, x509) )
-    {
-        throw InvalidCertificate("invalid certificate");
-    }
-
-    EVP_PKEY* pkey = _cert.impl()->evp();
-
-    if( pkey )
-    {
-        if( ! SSL_CTX_use_PrivateKey( _ctx, pkey ) )
-        {
-            throw InvalidCertificate("invalid certificate");
-        }
-    
-        // openssl will not check the private key of this context against the 
-        // certifictate. TO do so call SSL_CTX_check_private_key(_ctx)
-    }
-}
-
-
-//void Context::setCertificateChain(const CertificateList& certs)
-//{
-//    CertificateList::ConstIterator it = certs.begin();
-//    if( it == certs.end() )
-//        throw InvalidCertificate("certificate chain too short");
-//
-//    this->setCertificate(*it);
-//    ++it;
-//
-//    for(; it != certs.end(); ++it)
-//    {
-//        X509* x509 = addExtraCert(_ctx, it->impl()->getX509());
-//        _extraCerts.push_back(x509);
-//    }
-//}
-
-
-void ContextImpl::loadPkcs12(const char* data, size_t len, const char* passwd)
-{
-    EVP_PKEY* pkey = NULL;
-    X509* cert = NULL;
-    STACK_OF(X509)* ca = NULL;
-
-    BioAutoPtr in( BIO_new_mem_buf( (void*) data, len ) );
-
-    PKCS12* p12 = d2i_PKCS12_bio(in.get(), NULL);
-    if( ! p12)
-        throw InvalidCertificate("invalid PKCS12 data");
-
-    int status = PKCS12_parse(p12, passwd, &pkey, &cert, &ca);
-    PKCS12_free(p12);
-
-    if( ! status )
-        throw InvalidCertificate("invalid PKCS12 content");
-
-    // TODO: use smart pointers later...
-
-    if(cert) 
-    {
-        X509AutoPtr x509(cert);
-        Certificate c( new CertificateImpl(x509.get(), pkey) );
-        _certificates.push_back(c);
-        x509.release();
-    }
-    
-    if(ca)
-    {
-        for(int i = 0; i < sk_X509_num(ca); i++)
-        {
-            X509AutoPtr x509( sk_X509_pop(ca) );
-            Certificate cert( new CertificateImpl(x509.get()) );
-            _certificates.push_back(cert);
-            x509.release();
-        }
-
-        sk_X509_pop_free(ca, X509_free);
-        ca = NULL;
-    }  
-}
-
-
-const Certificate* ContextImpl::findCertificate(const std::string& subject)
-{
-    for(std::vector<Certificate>::const_iterator it = _certificates.begin(); it != _certificates.end(); ++it) 
-    {
-        if( it->subject().find(subject) != std::string::npos )
-            return &(*it);
-    }
-
-    return 0;
-}
-
-
-ssl_ctx_st* ContextImpl::ctx() const
+SSL_CTX* ContextImpl::ctx() const
 { 
     return _ctx; 
 }

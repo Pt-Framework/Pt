@@ -61,6 +61,50 @@ SSLInit::~SSLInit()
 }
 
 
+CertificateStore::CertificateStore()
+: _impl(0)
+{
+    _impl = new CertificateStoreImpl;
+}
+
+
+CertificateStore::~CertificateStore()
+{
+    delete _impl;
+}
+
+
+void CertificateStore::loadPkcs12(std::istream& is, const char* passwd)
+{
+    std::vector<char> data;
+    char rbuf[4096];
+    const std::streamsize rbufSize = sizeof(rbuf);
+
+    while( is )
+    {
+        is.read( rbuf, rbufSize );
+        data.insert( data.end(), rbuf, rbuf + is.gcount() );
+    }
+
+    if( data.empty() )
+        return;
+
+    loadPkcs12(&data[0], data.size(), passwd);
+}
+
+
+void CertificateStore::loadPkcs12(const char* data, size_t len, const char* passwd)
+{
+    _impl->loadPkcs12(data, len, passwd);
+}
+
+
+const Certificate* CertificateStore::findCertificate(const std::string& subject)
+{
+    return _impl->findCertificate(subject); 
+}
+
+
 Context::Context(Protocol protocol)
 : _impl(0)
 {
@@ -111,12 +155,6 @@ void Context::assign(const Context& ctx)
 }
 
 
-//void Context::setCACertificates(const CertificateStore& caCerts)
-//{
-//    _impl->setCACertificates(caCerts);
-//}
-
-
 void Context::addCACertificate(const Certificate& trustedCert)
 {
     _impl->addCACertificate(trustedCert);
@@ -129,15 +167,9 @@ void Context::setCertificate(const Certificate& cert)
 }
 
 
-void Context::loadPkcs12(const char* data, size_t len, const char* passwd)
+void Context::addCertificate(const Certificate& cert)
 {
-    _impl->loadPkcs12(data, len, passwd);
-}
-
-
-const Certificate* Context::findCertificate(const std::string& subject)
-{
-    return _impl->findCertificate(subject);
+    _impl->addCertificate(cert);
 }
 
 
@@ -150,25 +182,6 @@ ContextImpl* Context::impl()
 const ContextImpl* Context::impl() const
 { 
     return _impl; 
-}
-
-
-void Context::loadPkcs12(std::istream& is, const char* passwd)
-{
-    std::vector<char> data;
-    char rbuf[4096];
-    const std::streamsize rbufSize = sizeof(rbuf);
-
-    while( is )
-    {
-        is.read( rbuf, rbufSize );
-        data.insert( data.end(), rbuf, rbuf + is.gcount() );
-    }
-
-    if( data.empty() )
-        return;
-
-    loadPkcs12(&data[0], data.size(), passwd);
 }
 
 } // namespace Ssl

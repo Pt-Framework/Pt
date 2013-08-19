@@ -71,6 +71,7 @@ class ContextTest : public Pt::Unit::TestSuite
             //this->registerMethod("Ciphers", *this, &ContextTest::Ciphers);
 
             this->registerMethod("Import", *this, &ContextTest::Import);
+            this->registerMethod("Assign", *this, &ContextTest::Assign);
         }
 
         void setUp()
@@ -79,9 +80,66 @@ class ContextTest : public Pt::Unit::TestSuite
         void tearDown()
         { }
 
-        //void Ciphers();
+        void Import()
+        {
+            // adjust the path
+            #ifdef _WIN32
+                std::ifstream ifs("src\\Pt-Ssl\\tests\\cert\\multiple\\server_chain-with-password.p12", std::ios::binary);
+            #else
+                std::ifstream ifs("src/Pt-Ssl/tests/cert/multiple/server_chain-with-password.p12", std::ios::binary);
+            #endif
 
-        void Import();
+            Pt::Ssl::CertificateStore store;
+            store.loadPkcs12(ifs, "123");
+    
+            const Pt::Ssl::Certificate* cert = store.findCertificate("Server");
+            PT_UNIT_ASSERT(cert);
+    
+            cert = store.findCertificate("Intermediate CA 2");
+            PT_UNIT_ASSERT(cert);
+        }
+
+        void Assign()
+        {
+            #ifdef _WIN32
+                std::ifstream server_ifs("src\\Pt-Ssl\\tests\\cert\\server-with-password.p12", std::ios::binary);
+            #else
+                std::ifstream server_ifs("src/Pt-Ssl/tests/cert/server-with-password.p12", std::ios::binary);
+            #endif
+            
+            #ifdef _WIN32
+                std::ifstream ifs_ca("src\\Pt-Ssl\\tests\\cert\\ca-with-password.p12", std::ios::binary);
+            #else
+                std::ifstream ifs_ca("src/Pt-Ssl/tests/cert/ca-with-password.p12", std::ios::binary);
+            #endif
+
+            Pt::Ssl::CertificateStore store;
+            store.loadPkcs12(server_ifs, "123");
+            store.loadPkcs12(ifs_ca, "123");
+
+            Pt::Ssl::Context ctx;
+
+            const Pt::Ssl::Certificate* cert = store.findCertificate("SGC Mainframe");
+            PT_UNIT_ASSERT(cert);
+            ctx.setCertificate(*cert);
+
+            cert = store.findCertificate("SGC Certificate Authority");
+            PT_UNIT_ASSERT(cert);
+            ctx.addCACertificate(*cert);
+   
+            Pt::Ssl::Context ctx2;
+            ctx2.assign(ctx);
+    
+            //cert = ctx2.findCertificate("SGC Mainframe");
+            //PT_UNIT_ASSERT(cert);
+
+            //cert = ctx2.findCertificate("SGC Certificate Authority");
+            //PT_UNIT_ASSERT(cert);
+    
+            //cert = ctx2.findCertificate("Root CA");
+            //PT_UNIT_ASSERT(cert);
+            //std::exit(0);
+        }
 };
 
 Pt::Unit::RegisterTest<ContextTest> register_ContextTestTest;
@@ -112,36 +170,3 @@ Pt::Unit::RegisterTest<ContextTest> register_ContextTestTest;
 //    PT_UNIT_ASSERT(cipherNames1.size() > 0);
 //    PT_UNIT_ASSERT(cipherNames1 == cipherNames2);
 //}
-
-void ContextTest::Import()
-{
-    // adjust the path
-    #ifdef _WIN32
-        std::ifstream ifs("src\\Pt-Ssl\\tests\\cert\\multiple\\server_chain-with-password.p12", std::ios::binary);
-    #else
-        std::ifstream ifs("src/Pt-Ssl/tests/cert/multiple/server_chain-with-password.p12", std::ios::binary);
-    #endif
-
-    Pt::Ssl::Context ctx;
-    ctx.loadPkcs12(ifs, "123");
-    
-    const Pt::Ssl::Certificate* cert = ctx.findCertificate("Server");
-    PT_UNIT_ASSERT(cert);
-    ctx.setCertificate(*cert);
-    
-    cert = ctx.findCertificate("Root CA");
-    PT_UNIT_ASSERT(cert);
-    ctx.addCACertificate(*cert);  
-
-    Pt::Ssl::Context ctx2;
-    ctx2.assign(ctx);
-    //std::exit(0);
-    
-    cert = ctx2.findCertificate("Server");
-    PT_UNIT_ASSERT(cert);
-    
-    cert = ctx2.findCertificate("Root CA");
-    PT_UNIT_ASSERT(cert);
-    //std::exit(0);
-}
-

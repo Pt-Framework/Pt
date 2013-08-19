@@ -40,6 +40,109 @@ namespace Pt {
 
 namespace Ssl {
 
+CertificateStoreImpl::CertificateStoreImpl()
+{
+}
+
+
+CertificateStoreImpl::~CertificateStoreImpl()
+{
+    for(std::vector<Certificate*>::iterator it = _allCerts.begin(); it != _allCerts.end(); ++it)
+    {
+        delete *it;
+    }
+}
+
+
+void CertificateStoreImpl::loadPkcs12(const char* data, size_t len, const char* passwd)
+{
+    log_debug("loadPkcs12: " << passwd);
+
+    CFDataRef data = CFDataCreate(NULL, reinterpret_cast<const UInt8*>(pkcs12), len);
+    if( ! data)
+        throw std::runtime_error("CFDataCreate");
+
+    CFStringRef password = CFStringCreateWithCString(NULL, passwd, kCFStringEncodingUTF8);
+    
+    const void* keys[]   = { kSecImportExportPassphrase };
+    const void* values[] = { password };
+
+    CFIndex hasPassword = CFStringGetLength(password) > 0 ? 1 : 0;
+
+    CFDictionaryRef options = CFDictionaryCreate(NULL, keys, values, hasPassword, NULL, NULL);
+    if( ! options)
+        throw std::runtime_error("CFDictionaryCreate");
+
+    CFArrayRef items = NULL;
+    OSStatus securityError = SecPKCS12Import(data, options, &items);
+    log_trace("SecPKCS12Import: " <<  securityError);
+
+    CFRelease(password);
+    CFRelease(options);
+    CFRelease(data);
+    
+    if(securityError != noErr)
+    {
+        if(items)
+            CFRelease(items);
+            
+        throw InvalidCertificate("invalid PKCS12 data");
+    }
+    
+    if( ! items)
+        return;
+
+    CFIndex count = CFArrayGetCount(items);
+
+    for(CFIndex n = 0; n < count; ++n)
+    {
+        CFDictionaryRef item = (CFDictionaryRef) CFArrayGetValueAtIndex(items, n);
+
+        SecIdentityRef identity = (SecIdentityRef) CFDictionaryGetValue(item, kSecImportItemIdentity);
+        if(identity)
+        {
+            CFRetain(identity);
+            Certificate* c = new Certificate( new CertificateImpl(identity) );
+            _allCerts.push_back(c);
+            
+            log_debug("imported identity: " << c->subject());
+        }
+
+        CFArrayRef certs = (CFArrayRef) CFDictionaryGetValue(item, kSecImportItemCertChain);
+        if(certs)
+        {
+            CFIndex certCount = CFArrayGetCount(certs);
+            for(CFIndex i = 0; i < certCount; ++i)
+            {
+                SecCertificateRef cert = (SecCertificateRef) CFArrayGetValueAtIndex(certs, i);
+
+                CFRetain(cert);
+                Certificate* c = new Certificate( new CertificateImpl(cert) );
+                _allCerts.push_back(c);
+
+                log_debug("imported certificate: " << c->subject());
+            }
+        }
+    }
+
+    CFRelease(items);
+}
+
+
+const Certificate* CertificateStoreImpl::findCertificate(const std::string& subject)
+{
+    log_trace("find certificate: " << subject);
+    
+    for(std::vector<Certificate*>::const_iterator it = _allCerts.begin(); it != _allCerts.end(); ++it) 
+    {
+        if( (*it)->subject().find(subject) != std::string::npos )
+            return *it;
+    }
+
+    return 0;
+}
+
+
 ContextImpl::ContextImpl(Context::Protocol protocol)
 : _protocol(protocol)
 , _verify(Context::VerifyPeer)

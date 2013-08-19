@@ -29,6 +29,7 @@
 #ifndef PT_SSL_CONTEXTIMPL_H
 #define PT_SSL_CONTEXTIMPL_H
 
+#include "OpenSsl.h"
 #include <Pt/Ssl/Api.h>
 #include <Pt/Ssl/Context.h>
 #include <Pt/Ssl/Certificate.h>
@@ -42,6 +43,21 @@ namespace Ssl {
 void SSLInitImpl();
 
 void SSLExitImpl();
+
+class CertificateStoreImpl
+{
+    public:
+        CertificateStoreImpl();
+
+        ~CertificateStoreImpl();
+
+        void loadPkcs12(const char* data, size_t len, const char* passwd);
+
+        const Certificate* findCertificate(const std::string& subject);
+
+    private:
+        std::vector<Certificate*> _allCerts;
+};
 
 class ContextImpl
 {
@@ -63,30 +79,24 @@ class ContextImpl
 
         void setVerifyMode(Context::VerifyMode mode);
 
-        void setCACertificates(const std::vector<Certificate>& trustedCert);
-
         void addCACertificate(const Certificate& trustedCert);
 
         void setCertificate(const Certificate& cert);
 
-        void loadPkcs12(const char* data, size_t len, const char* passwd);
-
-        void loadPkcs12(std::istream& is, const char* passwd);
-
-        const Certificate* findCertificate(const std::string& subject);
+        void addCertificate(const Certificate& certificate);
 
         //! @internal
-        ssl_ctx_st* ctx() const;
+        SSL_CTX* ctx() const;
 
     private:
-        ssl_ctx_st*              _ctx;
-        Context::Protocol                 _protocol;
-        std::vector<Certificate> _caCerts;
-        Certificate              _cert;
-        std::vector<x509_st*>    _extraCerts;
-        Context::VerifyMode      _verify;
-        std::vector<Certificate> _certificates;
-        void*                    _reserved;
+        ssl_ctx_st*               _ctx;
+        Context::Protocol         _protocol;
+        std::vector<X509*>     _caCerts;
+        X509*                   _x509;
+        EVP_PKEY*                _pkey;
+        std::vector<X509*>     _extraCerts;
+        Context::VerifyMode       _verify;
+        int                       _verifyDepth;
 };
 
 } // namespace Ssl

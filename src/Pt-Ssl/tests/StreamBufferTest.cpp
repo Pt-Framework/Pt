@@ -77,29 +77,25 @@ void StreamBufferTest::Handshake()
     #endif
 
     #ifdef _WIN32
-        std::ifstream ifs_ca2("src\\Pt-Ssl\\tests\\cert\\ca-with-password.p12", std::ios::binary);
-    #else
-        std::ifstream ifs_ca2("src/Pt-Ssl/tests/cert/ca-with-password.p12", std::ios::binary);
-    #endif
-
-    #ifdef _WIN32
         std::ifstream server_ifs("src\\Pt-Ssl\\tests\\cert\\server-with-password.p12", std::ios::binary);
     #else
         std::ifstream server_ifs("src/Pt-Ssl/tests/cert/server-with-password.p12", std::ios::binary);
     #endif
 
     // Server context
+    Pt::Ssl::CertificateStore store;
+    store.loadPkcs12(server_ifs, "123");
+    store.loadPkcs12(ifs_ca, "123");
+    store.loadPkcs12(ifs, "123");
+
     Pt::Ssl::Context serverContext;
     serverContext.setVerifyMode(Pt::Ssl::Context::VerifyPeerRequired);
 
-    serverContext.loadPkcs12(server_ifs, "123");
-    serverContext.loadPkcs12(ifs_ca2, "123");
-
-    const Pt::Ssl::Certificate* servCert = serverContext.findCertificate("SGC Mainframe");
+    const Pt::Ssl::Certificate* servCert = store.findCertificate("SGC Mainframe");
     PT_UNIT_ASSERT( servCert );
     serverContext.setCertificate( *servCert );
 
-    const Pt::Ssl::Certificate* servCA = serverContext.findCertificate("SGC Certificate Authority");
+    const Pt::Ssl::Certificate* servCA = store.findCertificate("SGC Certificate Authority");
     PT_UNIT_ASSERT( servCA );
     serverContext.addCACertificate(*servCA);
 
@@ -107,14 +103,11 @@ void StreamBufferTest::Handshake()
     Pt::Ssl::Context clientContext;
     clientContext.setVerifyMode(Pt::Ssl::Context::VerifyPeer);
 
-    clientContext.loadPkcs12(ifs, "123");
-    clientContext.loadPkcs12(ifs_ca, "123");
-
-    const Pt::Ssl::Certificate* clientCert = clientContext.findCertificate("Atlantis Mainframe");
+    const Pt::Ssl::Certificate* clientCert = store.findCertificate("Atlantis Mainframe");
     PT_UNIT_ASSERT( clientCert );
     clientContext.setCertificate( *clientCert );
 
-    const Pt::Ssl::Certificate* clientCA = clientContext.findCertificate("SGC Certificate Authority");
+    const Pt::Ssl::Certificate* clientCA = store.findCertificate("SGC Certificate Authority");
     PT_UNIT_ASSERT( clientCA );
     clientContext.addCACertificate(*clientCA);
     

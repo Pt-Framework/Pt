@@ -56,17 +56,17 @@ class CertificateImpl
             assert(_x509);
         }
 
-        CertificateImpl(const char* data, size_t len)
-        : _x509(0)
-        , _refs(1)
-        {
-            BioAutoPtr in( BIO_new_mem_buf( (void*) data, len ) );
+        //CertificateImpl(const char* data, size_t len)
+        //: _x509(0)
+        //, _refs(1)
+        //{
+        //    BioAutoPtr in( BIO_new_mem_buf( (void*) data, len ) );
 
-            // Try to read/parse DER encoded certificate
-            _x509 = d2i_X509_bio(in.get(), 0);
-            if( ! _x509)
-                throw InvalidCertificate("invalid DER certificate");
-        }
+        //    // Try to read/parse DER encoded certificate
+        //    _x509 = d2i_X509_bio(in.get(), 0);
+        //    if( ! _x509)
+        //        throw InvalidCertificate("invalid DER certificate");
+        //}
 
         ~CertificateImpl()
         {
@@ -140,10 +140,10 @@ class CertificateImpl
             return toString( X509_get_notAfter(_x509) );
         }
 
-        x509_st* getX509() const
+        x509_st* x509() const
         { return _x509; }
 
-        evp_pkey_st* evp()
+        evp_pkey_st* pkey()
         { return _pkey; }
 
     private:

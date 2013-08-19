@@ -67,13 +67,33 @@ Connection::Connection(Context& ctx, std::streambuf& ios, int mode)
     SSLSetIOFuncs(_context, 
                   &Connection::sslReadCallback, 
                   &Connection::sslWriteCallback);
+   
+    SSLSetProtocolVersionEnabled(_context, kSSLProtocolAll, false);
 
-    _server = false;
-    
-    if(isServer == true)
+    switch(protocol) 
     {
-        _server = true;
+        case Context::SSLv2:
+            SSLSetProtocolVersionEnabled(_context, kSSLProtocol2, true);
+            break;
 
+        case Context::SSLv3or2:
+            SSLSetProtocolVersionEnabled(_context, kSSLProtocol2, true);
+            SSLSetProtocolVersionEnabled(_context, kSSLProtocol3, true);
+            break;
+
+        default:
+        case Context::DefaultProtocol:
+        case Context::SSLv3:
+            SSLSetProtocolVersionEnabled(_context, kSSLProtocol3, true);
+            break;
+      
+        case Context::TLSv1:
+            SSLSetProtocolVersionEnabled(_context, kTLSProtocol1, true);
+            break;
+    }
+
+    if(isServer)
+    {
 #ifdef PT_IOS
         SSLSetEnableCertVerify(_context, false);
         SSLSetSessionOption(_context, kSSLSessionOptionBreakOnClientAuth, true);
@@ -120,7 +140,7 @@ Connection::~Connection()
 
 bool Connection::writeHandshake()
 {
-    log_trace("Connection::writeHandshake " << _server);
+    log_trace("Connection::writeHandshake");
     
     if( ! _ios )
         throw System::IOError("SSL Buffer not initialized");
@@ -148,7 +168,7 @@ bool Connection::writeHandshake()
 
 bool Connection::readHandshake()
 {
-    log_trace("Connection::readHandshake " << _server);
+    log_trace("Connection::readHandshake");
     
     if( ! _ios )
         throw System::IOError("SSL Buffer not initialized");
@@ -169,7 +189,7 @@ bool Connection::readHandshake()
     if(status == errSSLServerAuthCompleted)
 #endif
     {
-        log_debug("errSSLPeerAuthCompleted " << _server);
+        log_debug("errSSLPeerAuthCompleted");
 
         bool verifyNone = _ctx->verification() == Context::VerifyNone;
         if(verifyNone)
@@ -183,7 +203,7 @@ bool Connection::readHandshake()
         SecTrustSetAnchorCertificates(trust, caArr);
         SecTrustSetAnchorCertificatesOnly(trust, true);
 
-        log_debug("SecTrustEvaluate evaluating " << _server);
+        log_debug("SecTrustEvaluate evaluating");
         SecTrustResultType result;
         OSStatus evalErr = SecTrustEvaluate(trust, &result);
         
@@ -195,11 +215,11 @@ bool Connection::readHandshake()
         if(trust)
             CFRelease(trust);
 
-        if( (result != kSecTrustResultProceed) &&
+        if( (result != kSecTrustResultProceed) && 
             (result != kSecTrustResultUnspecified) )
             throw HandshakeFailed("SSL handshake failed");
 
-        log_debug("SecTrustEvaluate TRUSTED");
+        log_debug("SecTrustEvaluate success");
         goto again;
     }
     

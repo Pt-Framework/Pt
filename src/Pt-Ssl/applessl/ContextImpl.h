@@ -48,6 +48,21 @@ inline void SSLInitImpl()
 inline void SSLExitImpl()
 {}
 
+class CertificateStoreImpl
+{
+    public:
+        CertificateStoreImpl();
+
+        ~CertificateStoreImpl();
+
+        void loadPkcs12(const char* data, size_t len, const char* passwd);
+
+        const Certificate* findCertificate(const std::string& subject);
+
+    private:
+        std::vector<Certificate*> _allCerts;
+};
+
 class ContextImpl
 {
     public:
@@ -75,8 +90,6 @@ class ContextImpl
         void addCertificate(const Certificate& cert);
 
         void loadPkcs12(const char* data, size_t len, const char* passwd);
-
-        void loadPkcs12(std::istream& is, const char* passwd);
 
         const Certificate* findCertificate(const std::string& subject);
 

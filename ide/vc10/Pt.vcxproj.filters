@@ -79,6 +79,12 @@
     <Filter Include="Pt-Hmi\Sources\Desktop\tests">
       <UniqueIdentifier>{c5aaf993-ddc9-4694-a792-2c183ef2e94c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Pt-Ssl\openssl">
+      <UniqueIdentifier>{11dcb2bb-4b1d-4c1a-8aee-a6699ce93550}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-Ssl\applessl">
+      <UniqueIdentifier>{08f68a06-945e-42cc-afe5-466486bf8c71}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\Pt\Allocator.h">
@@ -1025,6 +1031,24 @@
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Ssl\Certificate.h">
       <Filter>Pt-Ssl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Ssl\openssl\CertificateImpl.h">
+      <Filter>Pt-Ssl\openssl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Ssl\openssl\Connection.h">
+      <Filter>Pt-Ssl\openssl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Ssl\openssl\ContextImpl.h">
+      <Filter>Pt-Ssl\openssl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Ssl\applessl\CertificateImpl.h">
+      <Filter>Pt-Ssl\applessl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Ssl\applessl\Connection.h">
+      <Filter>Pt-Ssl\applessl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Ssl\applessl\ContextImpl.h">
+      <Filter>Pt-Ssl\applessl</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1994,6 +2018,18 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Ssl\tests\ContextTest.cpp">
       <Filter>Pt-Ssl\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Ssl\openssl\Connection.cpp">
+      <Filter>Pt-Ssl\openssl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Ssl\openssl\ContextImpl.cpp">
+      <Filter>Pt-Ssl\openssl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Ssl\applessl\Connection.cpp">
+      <Filter>Pt-Ssl\applessl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Ssl\applessl\ContextImpl.cpp">
+      <Filter>Pt-Ssl\applessl</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

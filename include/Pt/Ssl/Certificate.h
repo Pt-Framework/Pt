@@ -38,18 +38,18 @@ namespace Ssl {
 
 class CertificateImpl;
     
-class PT_SSL_API Certificate
+class PT_SSL_API Certificate : private NonCopyable
 {
     public:     
-        Certificate();
+        //Certificate();
 
         explicit Certificate(CertificateImpl* impl);
 
-        Certificate(const Certificate& cert);
+        //Certificate(const Certificate& cert);
 
         ~Certificate();
 
-        Certificate& operator=(const Certificate& cert);
+        //Certificate& operator=(const Certificate& cert);
 
         bool isValid() const
         { return _impl != 0; }
