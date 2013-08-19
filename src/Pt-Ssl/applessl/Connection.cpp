@@ -70,7 +70,7 @@ Connection::Connection(Context& ctx, std::streambuf& ios, int mode)
    
     SSLSetProtocolVersionEnabled(_context, kSSLProtocolAll, false);
 
-    switch(protocol) 
+    switch(_ctx->protocol()) 
     {
         case Context::SSLv2:
             SSLSetProtocolVersionEnabled(_context, kSSLProtocol2, true);

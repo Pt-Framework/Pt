@@ -89,10 +89,6 @@ class ContextImpl
         
         void addCertificate(const Certificate& cert);
 
-        void loadPkcs12(const char* data, size_t len, const char* passwd);
-
-        const Certificate* findCertificate(const std::string& subject);
-
         CFArrayRef certificates()
         { return _identity ? _certs : NULL; }
         
@@ -106,13 +102,10 @@ class ContextImpl
     private:
         Context::Protocol    _protocol;
         Context::VerifyMode  _verify;
+        int                  _verifyDepth;
         SecIdentityRef       _identity;
         CFMutableArrayRef    _certs;
         CFMutableArrayRef    _caCerts;
-        
-        //CertificateList          _extraCerts;
-        std::vector<Certificate*> _allCerts;
-        void*                    _reserved;
 };
 
 } // namespace Ssl

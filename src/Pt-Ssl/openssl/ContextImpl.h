@@ -89,14 +89,16 @@ class ContextImpl
         SSL_CTX* ctx() const;
 
     private:
-        ssl_ctx_st*               _ctx;
-        Context::Protocol         _protocol;
-        std::vector<X509*>     _caCerts;
-        X509*                   _x509;
-        EVP_PKEY*                _pkey;
-        std::vector<X509*>     _extraCerts;
-        Context::VerifyMode       _verify;
-        int                       _verifyDepth;
+        ssl_ctx_st*         _ctx;
+        Context::Protocol   _protocol;
+        Context::VerifyMode _verify;
+        int                 _verifyDepth;
+        X509*               _x509;
+        EVP_PKEY*           _pkey;
+        std::vector<X509*>  _extraCerts;
+        std::vector<X509*>  _caCerts;
+
+
 };
 
 } // namespace Ssl

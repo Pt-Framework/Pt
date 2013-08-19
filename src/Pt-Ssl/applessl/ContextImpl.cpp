@@ -54,7 +54,7 @@ CertificateStoreImpl::~CertificateStoreImpl()
 }
 
 
-void CertificateStoreImpl::loadPkcs12(const char* data, size_t len, const char* passwd)
+void CertificateStoreImpl::loadPkcs12(const char* pkcs12, size_t len, const char* passwd)
 {
     log_debug("loadPkcs12: " << passwd);
 
@@ -146,6 +146,7 @@ const Certificate* CertificateStoreImpl::findCertificate(const std::string& subj
 ContextImpl::ContextImpl(Context::Protocol protocol)
 : _protocol(protocol)
 , _verify(Context::VerifyPeer)
+, _verifyDepth(1)
 , _identity(0)
 , _certs(0)
 , _caCerts(0)
@@ -162,12 +163,6 @@ ContextImpl::~ContextImpl()
         
     if(_caCerts)
         CFRelease(_caCerts);
-        
-    std::vector<Certificate*>::iterator it;
-    for(it = _allCerts.begin(); it != _allCerts.end(); ++it)
-    {
-        delete *it;
-    }
 }
 
 
@@ -185,6 +180,7 @@ void ContextImpl::setProtocol(Context::Protocol protocol)
 
 void ContextImpl::setVerifyDepth(int n)
 {
+    _verifyDepth = n;
 }
 
 
@@ -199,29 +195,6 @@ void ContextImpl::assign(const ContextImpl& ctx)
     log_trace("ContextImpl::assign");
     setProtocol(ctx._protocol);
     setVerifyMode(ctx._verify);
-    
-    std::vector<Certificate*>::iterator iter;
-    for(iter = _allCerts.begin(); iter != _allCerts.end(); ++iter)
-        delete *iter;
-        
-    _allCerts.clear();
-    
-    std::vector<Certificate*>::const_iterator it;
-    for(it = ctx._allCerts.begin(); it != ctx._allCerts.end(); ++it)
-    {
-        CertificateImpl* certImpl = (*it)->impl();
-        
-        if( certImpl->identity() )
-        {
-            SecIdentityRef ident = ctx.copyIdentity( certImpl->identity() );
-            _allCerts.push_back( new Certificate( new CertificateImpl(ident) ) );
-        }
-        else if( certImpl->certificate() )
-        {
-            SecCertificateRef cert = ctx.copyCertificate( certImpl->certificate() );
-            _allCerts.push_back( new Certificate( new CertificateImpl(cert) ) );
-        }
-    }
     
     // copy certificates to be presented to peer
 
@@ -431,135 +404,6 @@ SecCertificateRef ContextImpl::copyCertificate(SecCertificateRef cert) const
     CFRelease(items);
 
     return foundCert;
-}
-
-
-void ContextImpl::loadPkcs12(const char* pkcs12, size_t len, const char* passwd)
-{
-    log_debug("loadPkcs12: " << passwd);
-
-    CFDataRef data = CFDataCreate(NULL, reinterpret_cast<const UInt8*>(pkcs12), len);
-    if( ! data)
-        throw std::runtime_error("CFDataCreate");
-
-    CFStringRef password = CFStringCreateWithCString(NULL, passwd, kCFStringEncodingUTF8);
-    
-    const void* keys[]   = { kSecImportExportPassphrase };
-    const void* values[] = { password };
-
-    CFIndex hasPassword = CFStringGetLength(password) > 0 ? 1 : 0;
-
-    CFDictionaryRef options = CFDictionaryCreate(NULL, keys, values, hasPassword, NULL, NULL);
-    if( ! options)
-        throw std::runtime_error("CFDictionaryCreate");
-
-    CFArrayRef items = NULL;
-    OSStatus securityError = SecPKCS12Import(data, options, &items);
-    log_trace("SecPKCS12Import: " <<  securityError);
-
-    CFRelease(password);
-    CFRelease(options);
-    CFRelease(data);
-    
-    if(securityError != noErr)
-    {
-        if(items)
-            CFRelease(items);
-            
-        throw InvalidCertificate("invalid PKCS12 data");
-    }
-    
-    if( ! items)
-        return;
-
-    CFIndex count = CFArrayGetCount(items);
-
-    for(CFIndex n = 0; n < count; ++n)
-    {
-        CFDictionaryRef item = (CFDictionaryRef) CFArrayGetValueAtIndex(items, n);
-
-        SecIdentityRef identity = (SecIdentityRef) CFDictionaryGetValue(item, kSecImportItemIdentity);
-        if(identity)
-        {
-            CFRetain(identity);
-            Certificate* c = new Certificate( new CertificateImpl(identity) );
-            _allCerts.push_back(c);
-            
-            log_debug("imported identity: " << c->subject());
-        }
-
-        CFArrayRef certs = (CFArrayRef) CFDictionaryGetValue(item, kSecImportItemCertChain);
-        if(certs)
-        {
-            CFIndex certCount = CFArrayGetCount(certs);
-            for(CFIndex i = 0; i < certCount; ++i)
-            {
-                SecCertificateRef cert = (SecCertificateRef) CFArrayGetValueAtIndex(certs, i);
-
-                CFRetain(cert);
-                Certificate* c = new Certificate( new CertificateImpl(cert) );
-                _allCerts.push_back(c);
-
-                log_debug("imported certificate: " << c->subject());
-            }
-        }
-    }
-
-    CFRelease(items);
-}
-
-
-const Certificate* ContextImpl::findCertificate(const std::string& subject)
-{
-    log_trace("findCertificate: " << subject);
-    
-    std::vector<Certificate*>::iterator it;
-    for(it = _allCerts.begin(); it != _allCerts.end(); ++it)
-    {
-        log_trace("compare: " << (*it)->subject());
-        if((*it)->subject().find(subject) != std::string::npos)
-            return *it;
-    }
-
-    log_warn("------ NOT FOUND --------");
-    return 0;
-
-    //CFStringRef cfsubj = CFStringCreateWithCString(NULL, subject.c_str(), kCFStringEncodingUTF8);
-
-    // TODO: use dedicated keychain
-
-    // NOTE: kSecMatchSearchList -> (id)keychain
-    
-    Certificate ret;
-    /*
-    const void* keys[]   = { kSecClass,         kSecReturnRef,  kSecMatchLimit,    kSecMatchSubjectContains, 0 };
-    const void* values[] = { kSecClassIdentity, kCFBooleanTrue, kSecMatchLimitAll, cfsubj, 0 };
-
-    CFDictionaryRef dict = CFDictionaryCreate(NULL, keys, values, 4, NULL, NULL);
-    if( ! dict)
-        throw std::logic_error("CFDictionaryCreate");
-
-    CFArrayRef items = NULL;
-    OSStatus error = SecItemCopyMatching(dict, (CFTypeRef*)&items);
-    CFRelease(dict);
-    CFRelease(cfsubj);
-
-    if( ! error && items && 0 < CFArrayGetCount(items) )
-    {
-        SecIdentityRef cert = (SecIdentityRef) CFArrayGetValueAtIndex(items, 0);
-        log_trace("found certificate: " << cert);
-        CFRetain(cert);
-        ret = Certificate( new CertificateImpl(cert) );
-        std::cerr << ret.subject() << std::endl;
-    }
-
-    if(items)
-        CFRelease(items);
-    */
-    
-    // TODO: search among certificates with kSecClassCertificate
-
-    //return ret;
 }
 
 } // namespace Ssl

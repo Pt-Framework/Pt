@@ -217,10 +217,10 @@ EVP_PKEY* copyPrivateKey(EVP_PKEY* from)
 
 ContextImpl::ContextImpl(Context::Protocol protocol)
 : _protocol(protocol)
-, _x509(0)
-, _pkey(0)
 , _verify(Context::VerifyPeer)
 , _verifyDepth(1)
+, _x509(0)
+, _pkey(0)
 {
     // Create the context for the given protocol
     switch(_protocol) 
