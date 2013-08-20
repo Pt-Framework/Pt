@@ -188,6 +188,11 @@ bool Responder::parseMessage()
         _fault = Fault(error.what(), 3);
         _isFault = true;
     }
+    catch(const Fault& fault)
+    {
+        _fault = fault;
+        _isFault = true;
+    }
 
     return done;
 }

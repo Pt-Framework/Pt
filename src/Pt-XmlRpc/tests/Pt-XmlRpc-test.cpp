@@ -81,6 +81,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
         {
             Pt::System::Logger::setLogLevel("", Pt::System::Error);
 
+            registerMethod("NotFound", *this, &PtXmlRpcTest::NotFound);
             registerMethod("Fault", *this, &PtXmlRpcTest::Fault);
             registerMethod("CallbackException", *this, &PtXmlRpcTest::CallbackException);
             registerMethod("ConnectError", *this, &PtXmlRpcTest::ConnectError);
@@ -119,6 +120,40 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
         {
             delete _server;
             delete _loop;
+        }
+
+        ////////////////////////////////////////////////////////////
+        // NotFound
+        //
+        void NotFound()
+        {
+            Pt::XmlRpc::ServiceDefinition service;
+            Pt::XmlRpc::HttpService httpService(service);
+            
+            Pt::Http::MapUrl servlet("/calc", httpService);
+            _server->addServlet(servlet);
+
+            Pt::XmlRpc::HttpClient client(*_loop, "127.0.0.1", 8001, "/calc");
+            Pt::XmlRpc::RemoteProcedure<bool> multiply(client, "multiply");
+            multiply.finished() += Pt::slot(*this, &PtXmlRpcTest::onNotFound);
+            multiply.begin();
+
+            _loop->run();
+        }
+
+        void onNotFound(const Pt::XmlRpc::Result<bool>& result)
+        {
+            try
+            {
+                result.get();
+                PT_UNIT_ASSERT_MSG(false, "Pt::XmlRpc::Fault exception expected");
+            }
+            catch (const Pt::XmlRpc::Fault& e)
+            {
+                PT_UNIT_ASSERT_EQUALS(e.rc(), Pt::XmlRpc::Fault::MethodNotFound);
+            }
+
+            _loop->exit();
         }
 
         ////////////////////////////////////////////////////////////
