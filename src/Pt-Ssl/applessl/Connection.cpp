@@ -55,8 +55,9 @@ Connection::Connection(Context& ctx, std::streambuf& ios, int mode)
 , _connected(false)
 , _wantRead(false)
 , _isReading(false)
-, _isWritingHandshake(false)
-, _isShutdown(false)
+, _isWriting(false)
+, _receivedShutdown(false)
+, _sentShutdown(false)
 {
     Boolean isServer = (mode == StreamBuffer::Accept);
 
@@ -146,9 +147,9 @@ bool Connection::writeHandshake()
         throw System::IOError("SSL Buffer not initialized");
 
     _iocount = 0;
-    _isWritingHandshake = true;
+    _isWriting = true;
     OSStatus status = SSLHandshake(_context);
-    _isWritingHandshake = false;
+    _isWriting = false;
 
     log_debug("SSLHandshake returns " << status);
 
@@ -245,40 +246,107 @@ bool Connection::shutdown()
     if( ! _connected )
         return true;
 
-    if(_isShutdown)
+    if( ! _sentShutdown)
     {
-        OSStatus error = SSLClose(_context);
-        log_trace("SSLClose: " << error);
+        // write shutdown notify
+        log_debug("write shutdown notify");
 
-        if(error == noErr)
-        {
-            _isShutdown = false;
-            _connected = false;
-            return true;
-        }
-        
+        _isWriting = true;
+        OSStatus error = SSLClose(_context);
+        _isWriting = false;
+
+        log_debug("SSLClose: " << error);
+
         if(error == errSSLWouldBlock)
+        {
+            // need to read shutdown alert
+            log_debug("want to read shutdown alert");
+            _sentShutdown = true;
             return false;
-            
-        throw SslError("shutdown failed");
-        
+        }
+
+        if(error != noErr)
+            throw SslError("shutdown failed");
+
+        log_debug("shutdown complete");
+        _connected = false;
+        _sentShutdown = false;
+        _receivedShutdown = false;
+        return true;
     }
     
+    // read shutdown notify
+    log_debug("read shutdown notify");
+
+    _wantRead = false;
     _isReading = true;
     OSStatus error = SSLClose(_context);
     _isReading = false;
 
+    log_debug("SSLClose: " << error);
+
+    if(error == errSSLWouldBlock)
+    {
+        return false;
+    }
+
     if(error != noErr)
         throw SslError("shutdown failed");
 
-    _isShutdown = true;
-    return false;
+    log_debug("shutdown complete");
+    _connected = false;
+    _sentShutdown = false;
+    _receivedShutdown = false;
+    return true;
 }
+
+
+//bool Connection::shutdown()
+//{
+//    if( ! _connected )
+//        return true;
+//
+//    if(_receivedShutdown) // shutdown notify was received
+//    {
+//        // send shutdown notify
+//        _isWriting = true;
+//        OSStatus error = SSLClose(_context);
+//        _isWriting = false;
+//        
+//        log_trace("SSLClose: " << error);
+//
+//        if(error == noErr)
+//        {
+//            _receivedShutdown = false;
+//            _connected = false;
+//            return true;
+//        }
+//        
+//        if(error == errSSLWouldBlock)
+//            return false;
+//            
+//        throw SslError("shutdown failed");
+//    }
+//    
+//    // read shutdown notify acknowledge
+//    _isReading = true;
+//    OSStatus error = SSLClose(_context);
+//    _isReading = false;
+//
+//    if(error == errSSLWouldBlock)
+//        return false;
+//
+//    if(error != noErr)
+//        throw SslError("shutdown failed");
+//
+//    _receivedShutdown = true;
+//    return false;
+//}
 
 
 bool Connection::isShutdown() const
 {
-    return _isShutdown;
+    return _receivedShutdown || _sentShutdown;
 }
 
 
@@ -320,7 +388,7 @@ std::streamsize Connection::read(char* buf, size_t n, std::streamsize isize)
     
     if(error == errSSLClosedGraceful)
     {
-        _isShutdown = true;
+        _receivedShutdown = true;
     }
     else if(error != noErr && error != errSSLWouldBlock)
     {
@@ -335,7 +403,7 @@ OSStatus Connection::sslRead(void* data, size_t* n)
 {    
     log_trace("Connection::sslRead: wants " << *n << " bytes");
 
-    if(_isWritingHandshake)
+    if(_isWriting)
     {
         *n = 0;
         return errSSLWouldBlock;

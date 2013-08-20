@@ -53,7 +53,7 @@ class Connection
 
         bool readHandshake();
 
-        void shutdown();
+        bool shutdown();
 
         bool isShutdown() const;
 

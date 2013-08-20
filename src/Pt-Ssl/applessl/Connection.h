@@ -84,8 +84,9 @@ class Connection
         bool _connected;
         bool _wantRead;
         bool _isReading;
-        bool _isWritingHandshake;
-        bool _isShutdown;
+        bool _isWriting;
+        bool _receivedShutdown;
+        bool _sentShutdown;
 };
 
 } // namespace Ssl

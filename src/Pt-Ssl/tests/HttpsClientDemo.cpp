@@ -215,7 +215,9 @@ int main(int argc, char** argv)
         std::clog << "SHUTDOWN: " << sslbuf.isShutdown() << std::endl;
         std::clog << "CLOSED: " << sslbuf.isClosed() << std::endl;
         
+        ss.str("");
         sslbuf.shutdown();
+        std::clog << "SHUTDOWN MESSAGE: " << ss.str().size() << " bytes" << std::endl;
 
         std::clog << "SHUTDOWN: " << sslbuf.isShutdown() << std::endl;
         std::clog << "CLOSED: " << sslbuf.isClosed() << std::endl;

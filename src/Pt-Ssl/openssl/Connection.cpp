@@ -194,29 +194,71 @@ bool Connection::readHandshake()
 }
 
 
-void Connection::shutdown()
+bool Connection::shutdown()
 {
-    if( ! _ios || ! _ssl)
-        throw System::IOError("SSL Buffer not initialized");
+    log_debug("Connection::shutdown");
 
-    const int res = SSL_shutdown(_ssl);
-    log_debug("SSL_shutdown() = " << res);
+    if( ! _connected )
+        return true;
 
-    // Send shutdown message to the other peer
-    char buff[1000];
-    const int n = BIO_read(_out, buff, sizeof(buff));
-    if(n <= 0)
-        throw SslError("BIO_read");
+    assert(_ssl);
 
-    _ios->sputn(buff, n);
-    log_debug("Wrote " << n << " bytes to output");
+    int state = SSL_get_shutdown(_ssl);
+    log_debug("SSL_get_shutdown() = " << state);
 
-    // Reset all
-    BIO_reset(_in);
-    BIO_reset(_out);
-    SSL_clear(_ssl);
+    bool shutdownSent = (SSL_SENT_SHUTDOWN & state) == SSL_SENT_SHUTDOWN;
 
-    _connected = false;
+    if( ! shutdownSent )
+    {
+        // write shutdown notify
+        log_debug("write shutdown notify");
+
+        int r = SSL_shutdown(_ssl);
+        log_debug("SSL_shutdown() = " << r);
+
+        char buf[1000];
+        const int n = BIO_read(_out, buf, sizeof(buf));
+        if(n <= 0)
+            throw SslError("BIO_read");
+
+        _ios->sputn(buf, n);
+        log_debug("wrote " << n << " bytes to output");
+
+        if(r == 1)
+        {
+            log_debug("shutdown complete");
+            SSL_clear(_ssl);
+            _connected = false;
+            return true;
+        }
+    }
+
+    // read shutdown notify
+    log_debug("read shutdown notify");
+
+    BUF_MEM* bm = 0;
+    BIO_get_mem_ptr(_in, &bm);
+
+    std::streamsize avail = _ios->in_avail();
+    std::streamsize refill = std::min(static_cast<std::streamsize>(bm->max - bm->length), avail);
+    log_debug("refill " << refill << " bytes");
+        
+    std::streamsize gcount = _ios->sgetn(bm->data + bm->length, refill);
+    bm->length += static_cast<int>( gcount );
+    log_debug("got " << gcount << " bytes from input stream");
+
+    int r = SSL_shutdown(_ssl);
+    log_debug("SSL_shutdown() = " << r);
+
+    if(r == 1)
+    {
+        log_debug("shutdown complete");
+        SSL_clear(_ssl);
+        _connected = false;
+        return true;
+    }
+
+    return false;
 }
 
 
@@ -226,19 +268,15 @@ bool Connection::isShutdown() const
         return false;
 
     int state = SSL_get_shutdown(_ssl);
+    log_debug("SSL_get_shutdown() = " << state);
     
-    return (SSL_RECEIVED_SHUTDOWN & state) == SSL_RECEIVED_SHUTDOWN;
+    return state != 0;
 }
 
 
 bool Connection::isClosed() const
 {
-    if( ! _ssl)
-        return false;
-
-    int state = SSL_get_shutdown(_ssl);
-    
-    return (SSL_SENT_SHUTDOWN & state) == SSL_SENT_SHUTDOWN;
+    return ! _connected;
 }
 
 
@@ -284,22 +322,23 @@ std::streamsize Connection::read(char* buf, size_t n, std::streamsize isize)
         }
 
         long sslerr = SSL_get_error(_ssl, readSize);
+
+        // happens when the peer has send the shutdown alert
+        if(sslerr == SSL_ERROR_ZERO_RETURN)
+        {
+            log_debug("SSL_ERROR_ZERO_RETURN");
+            return 0;
+        }
+
         if(sslerr != SSL_ERROR_WANT_READ)
         {
-            // This error may indicate that the other peer has send shutdown message
-            if(sslerr == SSL_ERROR_ZERO_RETURN)
-            {
-                log_debug("SSL_ERROR_ZERO_RETURN");
-                return 0;
-            }
-
             log_debug("ssl error occured");
-            while( ( sslerr = ERR_get_error() ) ) 
+            while( sslerr = ERR_get_error() ) 
             {
                 log_debug("ERR_error_string = " << ERR_error_string(sslerr, 0));
             }
             
-            throw System::IOError("Failed reading decrypted data from OpenSSL!");
+            throw SslError("SSL_read");
         }
 
         if(isize == 0)

@@ -117,9 +117,10 @@ class PT_SSL_API StreamBuffer : public std::streambuf
 
         /** @brief Shutdown the SSL connection. 
          
-            If isShutdown() returns false, the shutdown message is written
-            to the output. If isShutdown returned true, or subsequent calls
-            return false if more data is required to read the shutdown reply.
+            If isShutdown() returned false, the shutdown message is written
+            to the output. If isShutdown() returned true, or a previous call
+            of shutdown() returned false, more data is required to read the 
+            shutdown reply. True is returned if the shutown was completed.
         */
         bool shutdown();
 

@@ -155,8 +155,13 @@ bool StreamBuffer::readHandshake()
 
 bool StreamBuffer::shutdown()
 {
+    bool shutdownComplete = true;
+
     if( _connection )
-        _connection->shutdown();
+    {
+        sync();
+        shutdownComplete = _connection->shutdown();
+    }
 
     delete [] _ibuffer; _ibuffer = 0;
     delete [] _obuffer; _obuffer = 0;
@@ -165,13 +170,13 @@ bool StreamBuffer::shutdown()
     setp(0, 0);
     
     // TODO: return shutdown state
-    return false;
+    return shutdownComplete;
 }
 
 
 bool StreamBuffer::isShutdown() const
 {
-    return _connection && _connection->isShutdown(); 
+    return _connection && _connection->isShutdown();
 }
 
 
