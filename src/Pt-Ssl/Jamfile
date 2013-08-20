@@ -27,7 +27,7 @@ SharedLibrary Pt-Ssl : $(PT_SSL_IMPL)
                        CertificateStore.cpp
                        #CipherList.cpp
                        Context.cpp
-                       IOBuffer.cpp
+                       #IOBuffer.cpp
                        #PrivateKey.cpp
                        #PublicKey.cpp
                        #Session.cpp
