@@ -27,8 +27,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef PT_SSL_CERTIFICATELISTIMPL_H
-#define PT_SSL_CERTIFICATELISTIMPL_H
+#ifndef PT_SSL_CERTIFICATEIMPL_H
+#define PT_SSL_CERTIFICATEIMPL_H
 
 #include <Pt/Ssl/SslError.h>
 #include <Pt/Atomicity.h>

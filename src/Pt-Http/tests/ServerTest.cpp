@@ -46,6 +46,7 @@
 
 #ifdef PT_HTTP_WITH_SSL
 #include <Pt/Ssl/Context.h>
+#include <Pt/Ssl/CertificateStore.h>
 #include "../../Pt-Ssl/tests/PemData.h"
 #endif
 

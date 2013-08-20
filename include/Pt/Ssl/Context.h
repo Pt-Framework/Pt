@@ -47,23 +47,6 @@ static struct PT_SSL_API SSLInit
     ~SSLInit();
 } ssl_init;
 
-class PT_SSL_API CertificateStore
-{
-    public:
-        CertificateStore();
-
-        ~CertificateStore();
-
-        void loadPkcs12(std::istream& is, const char* passwd);
-
-        void loadPkcs12(const char* data, size_t len, const char* passwd);
-
-        const Certificate* findCertificate(const std::string& subject);
-
-    private:
-        class CertificateStoreImpl* _impl;
-};
-
 //! @brief Context for SSL connections.
 class PT_SSL_API Context : public NonCopyable
 {

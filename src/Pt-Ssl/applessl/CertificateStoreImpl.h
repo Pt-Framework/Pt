@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2010-2010 by Aloysius Indrayanto
- * Copyright (C) 2010-2012 by Marc Duerner
+ * Copyright (C) 2010-2013 by Marc Duerner
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,75 +25,35 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef PT_SSL_CONTEXTIMPL_H
-#define PT_SSL_CONTEXTIMPL_H
+#ifndef PT_SSL_CERTIFICATESTOREIMPL_H
+#define PT_SSL_CERTIFICATESTOREIMPL_H
 
 #include <Pt/Ssl/Api.h>
-#include <Pt/Ssl/Context.h>
-#include <Pt/NonCopyable.h>
+#include <Pt/Ssl/Certificate.h>
 #include <string>
 #include <vector>
-
-#include <Security/Security.h>
-#include <CoreFoundation/CFArray.h>
 
 namespace Pt {
 
 namespace Ssl {
 
-inline void SSLInitImpl()
-{}
-
-inline void SSLExitImpl()
-{}
-
-class ContextImpl
+class CertificateStoreImpl
 {
     public:
-        ContextImpl(Context::Protocol protocol);
+        CertificateStoreImpl();
 
-        ~ContextImpl();
+        ~CertificateStoreImpl();
 
-        void assign(const ContextImpl& ctx);
+        void loadPkcs12(const char* data, size_t len, const char* passwd);
 
-        Context::Protocol protocol() const;
+        const Certificate* findCertificate(const std::string& subject);
 
-        void setProtocol(Context::Protocol protocol);
-
-        void setVerifyDepth(int n);
-
-        Context::VerifyMode verification() const
-        { return _verify; }
-
-        void setVerifyMode(Context::VerifyMode mode);
-
-        void addCACertificate(const Certificate& trustedCert);
-
-        void setCertificate(const Certificate& cert);
-        
-        void addCertificate(const Certificate& cert);
-
-        CFArrayRef certificates()
-        { return _identity ? _certs : NULL; }
-        
-        CFArrayRef caCertificates()
-        { return _caCerts; }
-        
-        SecIdentityRef copyIdentity(SecIdentityRef ident) const;
-        
-        SecCertificateRef copyCertificate(SecCertificateRef cert) const;
-    
     private:
-        Context::Protocol    _protocol;
-        Context::VerifyMode  _verify;
-        int                  _verifyDepth;
-        SecIdentityRef       _identity;
-        CFMutableArrayRef    _certs;
-        CFMutableArrayRef    _caCerts;
+        std::vector<Certificate*> _allCerts;
 };
 
 } // namespace Ssl
 
 } // namespace Pt
 
-#endif
+#endif // PT_SSL_CERTIFICATESTOREIMPL_H

@@ -31,6 +31,7 @@
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/RegisterTest.h"
 #include "Pt/Ssl/Certificate.h"
+#include "Pt/Ssl/CertificateStore.h"
 #include "Pt/Ssl/Context.h"
 #include "Pt/Ssl/StreamBuffer.h"
 #include "Pt/System/Logger.h"

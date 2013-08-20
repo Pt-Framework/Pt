@@ -534,16 +534,10 @@
     <ClInclude Include="..\..\include\Pt\Ssl\CipherList.h">
       <Filter>Pt-Ssl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Ssl\CertificateList.h">
-      <Filter>Pt-Ssl</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Ssl\Context.h">
       <Filter>Pt-Ssl</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Ssl\StreamBuffer.h">
-      <Filter>Pt-Ssl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Ssl\OpenSsl.h">
       <Filter>Pt-Ssl</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Ssl\IOBuffer.h">
@@ -822,9 +816,6 @@
     <ClInclude Include="..\..\include\Pt\System\Input2DEvent.h">
       <Filter>Pt-System</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Ssl\CertificateListImpl.h">
-      <Filter>Pt-Ssl</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\Api.h">
       <Filter>Pt-Hmi\Headers</Filter>
     </ClInclude>
@@ -1026,9 +1017,6 @@
     <ClInclude Include="..\..\include\Pt\Hmi\KeyEvent.h">
       <Filter>Pt-Hmi\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Ssl\CertificateImpl.h">
-      <Filter>Pt-Ssl</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Ssl\Certificate.h">
       <Filter>Pt-Ssl</Filter>
     </ClInclude>
@@ -1048,6 +1036,18 @@
       <Filter>Pt-Ssl\applessl</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Ssl\applessl\ContextImpl.h">
+      <Filter>Pt-Ssl\applessl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Ssl\CertificateStore.h">
+      <Filter>Pt-Ssl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Ssl\openssl\CertificateStoreImpl.h">
+      <Filter>Pt-Ssl\openssl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Ssl\openssl\OpenSsl.h">
+      <Filter>Pt-Ssl\openssl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Ssl\applessl\CertificateStoreImpl.h">
       <Filter>Pt-Ssl\applessl</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1629,9 +1629,6 @@
     <ClCompile Include="..\..\src\Pt-Ssl\CipherList.cpp">
       <Filter>Pt-Ssl</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Ssl\CertificateList.cpp">
-      <Filter>Pt-Ssl</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Pt-Ssl\Context.cpp">
       <Filter>Pt-Ssl</Filter>
     </ClCompile>
@@ -2029,6 +2026,15 @@
       <Filter>Pt-Ssl\applessl</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Ssl\applessl\ContextImpl.cpp">
+      <Filter>Pt-Ssl\applessl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Ssl\CertificateStore.cpp">
+      <Filter>Pt-Ssl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Ssl\openssl\CertificateStoreImpl.cpp">
+      <Filter>Pt-Ssl\openssl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Ssl\applessl\CertificateStoreImpl.cpp">
       <Filter>Pt-Ssl\applessl</Filter>
     </ClCompile>
   </ItemGroup>

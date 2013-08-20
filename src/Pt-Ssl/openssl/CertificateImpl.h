@@ -27,19 +27,16 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
  
-#ifndef PT_SSL_CERTIFICATELISTIMPL_H
-#define PT_SSL_CERTIFICATELISTIMPL_H
+#ifndef PT_SSL_CERTIFICATEIMPL_H
+#define PT_SSL_CERTIFICATEIMPL_H
 
+#include "OpenSsl.h"
 #include <Pt/Ssl/SslError.h>
 #include <Pt/Atomicity.h>
 #include <cassert>
 
-#include "OpenSsl.h"
 #include <openssl/ssl.h>
-#include <openssl/pem.h>
 #include <openssl/err.h>
-#include <openssl/pkcs12.h>
-
 
 namespace Pt {
 

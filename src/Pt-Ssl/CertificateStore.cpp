@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2010-2010 by Aloysius Indrayanto
- * Copyright (C) 2010-2012 by Marc Duerner
+ * Copyright (C) 2010-2013 by Marc Duerner
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -27,112 +26,62 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "ContextImpl.h"
-#include "CertificateImpl.h"
-#include <Pt/Ssl/Context.h>
-#include <Pt/Ssl/SslError.h>
-#include <Pt/System/Mutex.h>
+#include "CertificateStoreImpl.h"
+#include <Pt/Ssl/CertificateStore.h>
 #include <Pt/System/Logger.h>
-#include <cstdio>
+#include <cassert>
 
-log_define("Pt.Ssl.Context")
+log_define("Pt.Ssl.CertificateStore")
 
 namespace Pt {
 
 namespace Ssl {
 
-
-SSLInit::SSLInit()
-{
-    SSLInitImpl();
-}
-
-
-SSLInit::~SSLInit()
-{
-    SSLExitImpl();
-}
-
-
-Context::Context(Protocol protocol)
+CertificateStore::CertificateStore()
 : _impl(0)
 {
-    _impl = new ContextImpl(protocol);
+    _impl = new CertificateStoreImpl;
 }
 
 
-Context::~Context()
+CertificateStore::~CertificateStore()
 {
     delete _impl;
 }
 
 
-Context::Protocol Context::protocol() const
-{ 
-    return _impl->protocol(); 
-}
-
-
-void Context::setProtocol(Protocol protocol)
+void CertificateStore::loadPkcs12(std::istream& is, const char* passwd)
 {
-    _impl->setProtocol(protocol);
+    std::vector<char> data;
+    char rbuf[4096];
+    const std::streamsize rbufSize = sizeof(rbuf);
+
+    while( is )
+    {
+        is.read( rbuf, rbufSize );
+        data.insert( data.end(), rbuf, rbuf + is.gcount() );
+    }
+
+    if( data.empty() )
+        return;
+
+    loadPkcs12(&data[0], data.size(), passwd);
 }
 
 
-void Context::setVerifyDepth(int n)
+void CertificateStore::loadPkcs12(const char* data, size_t len, const char* passwd)
 {
-    _impl->setVerifyDepth(n);
+    _impl->loadPkcs12(data, len, passwd);
 }
 
 
-Context::VerifyMode Context::verification() const
+const Certificate* CertificateStore::findCertificate(const std::string& subject)
 {
-    return _impl->verification();
-}
-
-
-void Context::setVerifyMode(VerifyMode m)
-{
-    _impl->setVerifyMode(m);
-}
-
-
-void Context::assign(const Context& ctx)
-{
-    const ContextImpl* impl = ctx.impl();
-    _impl->assign( *impl );
-}
-
-
-void Context::addCACertificate(const Certificate& trustedCert)
-{
-    _impl->addCACertificate(trustedCert);
-}
-
-
-void Context::setCertificate(const Certificate& cert)
-{
-    _impl->setCertificate(cert);
-}
-
-
-void Context::addCertificate(const Certificate& cert)
-{
-    _impl->addCertificate(cert);
-}
-
-
-ContextImpl* Context::impl()
-{ 
-    return _impl; 
-}
-
-
-const ContextImpl* Context::impl() const
-{ 
-    return _impl; 
+    return _impl->findCertificate(subject); 
 }
 
 } // namespace Ssl
 
 } // namespace Pt
+
+

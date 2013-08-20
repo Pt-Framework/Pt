@@ -76,6 +76,24 @@ Connection::~Connection()
 }
 
 
+//std::string Connection::peerName() const
+//{
+//    if( ! _ssl )
+//        return std::string();
+//
+//    if(SSL_get_verify_result(_ssl) != X509_V_OK) 
+//        return std::string();
+//
+//    X509* peer = SSL_get_peer_certificate(_ssl);
+//    if( ! peer) 
+//        return std::string();
+//
+//    char peerCN[256];
+//    int  ret = X509_NAME_get_text_by_NID(X509_get_subject_name(peer), NID_commonName, peerCN, sizeof(peerCN));
+//    return (ret > 0) ? peerCN : "";
+//}
+
+
 bool Connection::writeHandshake()
 {
     log_trace("Connection::writeHandshake");

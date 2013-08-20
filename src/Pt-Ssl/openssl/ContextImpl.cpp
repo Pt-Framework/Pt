@@ -44,8 +44,8 @@ namespace Pt {
 namespace Ssl {
 
 static int ssl_init_counter = 0;
-
 static Pt::System::Mutex* sslmtx = 0;
+
 
 void pt_locking_callback_impl(int mode, int type, const char* file,  int line)
 {
@@ -62,6 +62,7 @@ void pt_locking_callback_impl(int mode, int type, const char* file,  int line)
         sslmtx[type].unlock();
     }
 }
+
 
 void SSLInitImpl()
 {
@@ -115,76 +116,6 @@ void SSLExitImpl()
         delete [] sslmtx;
         sslmtx = 0;
     }
-}
-
-
-CertificateStoreImpl::CertificateStoreImpl()
-{
-}
-
-
-CertificateStoreImpl::~CertificateStoreImpl()
-{
-    for(std::vector<Certificate*>::iterator it = _allCerts.begin(); it != _allCerts.end(); ++it)
-    {
-        delete *it;
-    }
-}
-
-
-void CertificateStoreImpl::loadPkcs12(const char* data, size_t len, const char* passwd)
-{
-    EVP_PKEY* pkey = NULL;
-    X509* cert = NULL;
-    STACK_OF(X509)* ca = NULL;
-
-    BioAutoPtr in( BIO_new_mem_buf( (void*) data, len ) );
-
-    PKCS12* p12 = d2i_PKCS12_bio(in.get(), NULL);
-    if( ! p12)
-        throw InvalidCertificate("invalid PKCS12 data");
-
-    int status = PKCS12_parse(p12, passwd, &pkey, &cert, &ca);
-    PKCS12_free(p12);
-
-    if( ! status )
-        throw InvalidCertificate("invalid PKCS12 content");
-
-    // TODO: use smart pointers later...
-
-    if(cert) 
-    {
-        X509AutoPtr x509(cert);
-        Certificate* c = new Certificate( new CertificateImpl(x509.get(), pkey) );
-        _allCerts.push_back(c);
-        x509.release();
-    }
-    
-    if(ca)
-    {
-        for(int i = 0; i < sk_X509_num(ca); i++)
-        {
-            X509AutoPtr x509( sk_X509_pop(ca) );
-            Certificate* c = new Certificate( new CertificateImpl(x509.get()) );
-            _allCerts.push_back(c);
-            x509.release();
-        }
-
-        sk_X509_pop_free(ca, X509_free);
-        ca = NULL;
-    }  
-}
-
-
-const Certificate* CertificateStoreImpl::findCertificate(const std::string& subject)
-{
-    for(std::vector<Certificate*>::const_iterator it = _allCerts.begin(); it != _allCerts.end(); ++it) 
-    {
-        if( (*it)->subject().find(subject) != std::string::npos )
-            return *it;
-    }
-
-    return 0;
 }
 
 

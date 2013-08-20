@@ -131,60 +131,6 @@ bool StreamBuffer::isConnected() const
 }
 
 
-//const char* StreamBuffer::getStatus() const
-//{ 
-//    if( ! _ssl )
-//        return "uninitialized";
-//
-//    return SSL_state_string_long(_ssl); 
-//}
-
-
-//std::string StreamBuffer::peerName() const
-//{
-//    if( ! _ssl )
-//        return std::string();
-//
-//    if(SSL_get_verify_result(_ssl) != X509_V_OK) 
-//        return std::string();
-//
-//    X509* peer = SSL_get_peer_certificate(_ssl);
-//    if( ! peer) 
-//        return std::string();
-//
-//    char peerCN[256];
-//    int  ret = X509_NAME_get_text_by_NID(X509_get_subject_name(peer), NID_commonName, peerCN, sizeof(peerCN));
-//    return (ret > 0) ? peerCN : "";
-//}
-
-
-//Session StreamBuffer::session() const
-//{
-//    if( ! _ssl ) 
-//        return Session();
-//
-//    SSL_SESSION* sess = SSL_get1_session(_ssl);
-//    if( ! sess) 
-//        return Session(); // No session available
-//
-//   return Session(sess);
-//}
-//
-//
-//void StreamBuffer::setSession(const Session& sess)
-//{
-//    if( ! _ssl)
-//        return;
-//
-//    SSL_SESSION* rsess = sess.impl();
-//    if(!rsess)
-//        throw SessionFailed("Invalid session data!");
-//
-//    if(SSL_set_session(_ssl, rsess) == 0)
-//        throw SessionFailed("Could not set session!");
-//}
-
-
 bool StreamBuffer::writeHandshake()
 {
     log_trace("StreamBuffer::writeHandshake");
