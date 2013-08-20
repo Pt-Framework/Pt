@@ -342,6 +342,8 @@ void HttpClient::onReply(Http::Client& client)
     {
         // finished signal will call onError()
         setError();
+        finishResult();
+        return;
     }
 
     // send finished signal
