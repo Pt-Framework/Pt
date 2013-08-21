@@ -111,6 +111,7 @@ void ButtonController::onKeyInput(const KeyEvent& ev)
 	}
 	
 	LabelController::onKeyInput(ev);
+	invalidate();
 }
 
 void ButtonController::onPointerInput(const PointingEvent& ev)

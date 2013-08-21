@@ -30,7 +30,7 @@
 #include "GfxOutputImpl.h"
 #include <Pt/Hmi/GfxOutput.h>
 #include "GfxOutputImpl.h"
-
+ 
 namespace Pt{
 namespace Hmi{
 

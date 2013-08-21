@@ -37,6 +37,7 @@
 #include <sstream>
 #include <algorithm>
 #include "KeyHandler.h"
+#include <ctype.h>
 
 namespace Pt{
 namespace Hmi{
@@ -226,38 +227,44 @@ void GfxOutputImpl::onKeyEvent(XEvent& xev)
         _keyEvent.setState(KeyEvent::KeyUp);
 	else
 		_keyEvent.setState(KeyEvent::KeyDown);
+    
+    Display* display = Application::instance().impl()->display();
+
 
     KeySym sym = 0;
-    char buffer[20];   
-  	XLookupString(&xev.xkey, buffer, sizeof(buffer), &sym, NULL);
-	int vcode = KeyHandler::keySymToUtf(sym);
+	int vcode = 0;
+	
+	sym = *(XGetKeyboardMapping(display, xev.xkey.keycode,1,&vcode));
 
-	if(vcode== 0)
-		vcode = (char)sym;
-		
-	_keyEvent.setVirtualCode(vcode);
+	vcode = (char) ::toupper((int)sym);
 
-	std::cout<<"VC = 0x"<<vcode<<std::endl; 	
-	_keyEvent.setRepeatCount(0);
-    
-    switch( xev.xkey.keycode ) 
+    switch(sym ) 
 	{
         case XK_Control_L: 
 		case XK_Control_R: 
 			_keyEvent.setCtrl(_keyEvent.state() == KeyEvent::KeyDown);
+
 		break;
 
         case XK_Alt_L: 
 		case XK_Alt_R:
-			_keyEvent.setAlt(_keyEvent.state() == KeyEvent::KeyDown);
+			_keyEvent.setAlt(_keyEvent.state() == KeyEvent::KeyDown);			
 		break;
 
 		case XK_Shift_L :
 		case XK_Shift_R :
 			_keyEvent.setShift(_keyEvent.state() == KeyEvent::KeyDown);
 		break;
+		default:
+		{
+    	}
+		break;
+	}		
+			
+	_keyEvent.setVirtualCode(vcode);
 
-    }
+	_keyEvent.setRepeatCount(0);
+
 		
 	Application::instance().keyDeviceEvent().send(_model->controller(), _keyEvent);
 }
@@ -482,10 +489,14 @@ void GfxOutputImpl::resize(size_t width, size_t height)
 
 void GfxOutputImpl::onPaint(XEvent& xev)
 {
+	paint();
+}
+
+void GfxOutputImpl::paint()
+{
 	if( _rgb88Image.width() > 0 && _rgb88Image.height() > 0)
 		drawIndependentImage(0, 0, (char*)_rgb88Image.data(), _rgb88Image.width(), _rgb88Image.height());  
 }
-
 
 void GfxOutputImpl::output()
 {
@@ -519,7 +530,6 @@ void GfxOutputImpl::output(Pt::Hmi::Model* model)
 			destroy();
 			return;
 		}
-
 	}
 	else
 	{
@@ -533,6 +543,7 @@ void GfxOutputImpl::output(Pt::Hmi::Model* model)
 	}
 
 	output();
+	paint();
 }
 
 }}

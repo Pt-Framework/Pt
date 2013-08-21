@@ -74,6 +74,7 @@ private:
 	void show();
 	void hide();
 	void output();
+	void paint();
 	void drawIndependentImage(size_t x, size_t y, const char* data, size_t width, size_t height);       
 
 private:

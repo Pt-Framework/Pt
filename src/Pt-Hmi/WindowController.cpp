@@ -90,7 +90,7 @@ void WindowController::onKeyInput(const KeyEvent& ev)
 	
 	m->KeyStatus = ev;
 
-	if(ev.virtualCode() == '\t' && ev.state() == Pt::Hmi::DeviceButton::Released && !ev.shift())
+	if(ev.virtualCode() == '\t' && ev.state() == Pt::Hmi::KeyEvent::KeyUp && !ev.shift())
 	{
 		if( m->Focused.get())
 		{
@@ -101,7 +101,7 @@ void WindowController::onKeyInput(const KeyEvent& ev)
 		}
 	}
 
-	if(ev.virtualCode() == '\t' && ev.state() == Pt::Hmi::DeviceButton::Released && ev.shift())
+	if(ev.virtualCode() == '\t' && ev.state() == Pt::Hmi::KeyEvent::KeyUp && ev.shift())
 	{
 		if( m->Focused.get())
 		{
