@@ -42,7 +42,7 @@ namespace Ssl {
 
 ContextImpl::ContextImpl(Protocol protocol)
 : _protocol(protocol)
-, _verify(Context::VerifyPeer)
+, _verify(TryVerify)
 , _verifyDepth(1)
 , _identity(0)
 , _certs(0)
@@ -87,7 +87,7 @@ VerifyMode ContextImpl::verifyMode() const
 }
 
 
-void ContextImpl::setVerifyMode(Context::VerifyMode m)
+void ContextImpl::setVerifyMode(VerifyMode m)
 {
     _verify = m;
 }

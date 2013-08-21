@@ -156,6 +156,7 @@ if --with-openssl in $(ARGV)
     Configure WITH_OPENSSL ;
 
     WITH_SSL = yes ;
+    PT_SSL_IMPL = "openssl" ;
     SSL_INCLUDES = [ FDirName $(PT_TOP) src openssl include ] ;
 }
 
@@ -171,6 +172,7 @@ if ! $(WITH_SSL)
 
     if $(WITH_SSL)
     {
+        PT_SSL_IMPL = "applessl" ;
         SSL_LINKLIBS = "-framework Foundation" "-framework Security" ;
     }
 }
@@ -186,6 +188,7 @@ if ! $(WITH_SSL)
 
     if $(WITH_SSL)
     {
+        PT_SSL_IMPL = "openssl" ;
         SSL_LINKLIBS = -lssl -lcrypto ;
     }
 }
@@ -195,6 +198,9 @@ EchoOption WITH_SSL : "SSL support" : $(WITH_SSL:E="no")  ;
 if $(WITH_SSL)
 {
     Configure WITH_SSL ;
+
+    Configure PT_SSL_IMPL ;
+    EchoOption PT_SSL_IMPL : "SSL implementation" ;
 
     EchoOption --with-openssl : "Builtin OpenSSL library" : $(WITH_OPENSSL:E="no") ;
 

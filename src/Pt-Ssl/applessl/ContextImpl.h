@@ -31,6 +31,7 @@
 
 #include <Pt/Ssl/Api.h>
 #include <Pt/Ssl/Context.h>
+#include <Pt/Ssl/Certificate.h>
 #include <Pt/NonCopyable.h>
 #include <string>
 #include <vector>
@@ -65,7 +66,7 @@ class ContextImpl
 
         VerifyMode verifyMode() const;
 
-        void setVerifyMode(Context::VerifyMode mode);
+        void setVerifyMode(VerifyMode mode);
 
         void addCACertificate(const Certificate& trustedCert);
 

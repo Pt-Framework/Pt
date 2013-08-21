@@ -99,15 +99,15 @@ Connection::Connection(Context& ctx, std::streambuf& ios, int mode)
         SSLSetEnableCertVerify(_context, false);
         SSLSetSessionOption(_context, kSSLSessionOptionBreakOnClientAuth, true);
 #else
-        if(_ctx->verifyMode() == Context::NoVerify)
+        if(_ctx->verifyMode() == NoVerify)
         {
             SSLSetClientSideAuthenticate(_context, kNeverAuthenticate);
         }
-        else if(_ctx->verifyMode() == Context::TryVerify)
+        else if(_ctx->verifyMode() == TryVerify)
         {
             SSLSetClientSideAuthenticate(_context, kTryAuthenticate);
         }
-        else if(_ctx->verifyMode() == Context::AlwaysVerify)
+        else if(_ctx->verifyMode() == AlwaysVerify)
         {
             SSLSetClientSideAuthenticate(_context, kAlwaysAuthenticate);
         }
@@ -156,8 +156,6 @@ bool Connection::writeHandshake()
     {       
         log_debug("SSL handshake completed");
         _connected = true;
-        // assert(_iocount == 0);
-        // return false;
     }
     else if(status != errSSLWouldBlock)
     {
@@ -185,42 +183,40 @@ bool Connection::readHandshake()
     {
         log_debug("SSL handshake completed");
         _connected = true;
-        // assert(_wantRead == false);
-        // return false;
+        return false;
     }
 #ifdef PT_IOS
-    else if(status == errSSLPeerAuthCompleted)
+    if(status == errSSLPeerAuthCompleted)
 #else
-    else if(status == errSSLServerAuthCompleted)
+    if(status == errSSLServerAuthCompleted)
 #endif
     {
         log_debug("authenticating peer");
 
-        bool verifyNone = _ctx->verifyMode() == NoVerify;
-        if( ! verifyNone )
+        if( _ctx->verifyMode() != NoVerify )
         {
+            log_debug("evaluating trust");
+            
             SecTrustRef trust = NULL;
             SSLCopyPeerTrust(_context, &trust);
-
-            // TODO: handle TryVerify and AlwaysVerify
-            // check with SecTrustGetCertificateAtIndex 0 if a certificate is present
-            // do not allow missing certs for AlwaysVerify
 
             CFArrayRef caArr = _ctx->impl()->caCertificates();
             SecTrustSetAnchorCertificates(trust, caArr);
             SecTrustSetAnchorCertificatesOnly(trust, true);
 
-            log_debug("evaluating trust");
             SecTrustResultType result;
             OSStatus evalErr = SecTrustEvaluate(trust, &result);
-        
             if(evalErr)
                 throw HandshakeFailed("SSL handshake failed");
-            
-            log_debug("SecTrustEvaluate: " << result);
         
+            CFIndex count = SecTrustGetCertificateCount(trust);
+            log_debug("SecTrustEvaluate: " << result << " certs: " << count);
+            
             if(trust)
                 CFRelease(trust);
+
+            if(_ctx->verifyMode() == AlwaysVerify && count == 0)
+                throw HandshakeFailed("SSL handshake failed");
 
             if( (result != kSecTrustResultProceed) && 
                 (result != kSecTrustResultUnspecified) )
@@ -231,7 +227,8 @@ bool Connection::readHandshake()
 
         return readHandshake();
     }
-    else if( status != errSSLWouldBlock )
+    
+    if( status != errSSLWouldBlock )
     {
         throw HandshakeFailed("SSL handshake failed");
     }

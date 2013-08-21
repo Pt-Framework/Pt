@@ -9,20 +9,12 @@ if $(SSL_INCLUDES)
     SubDirHdrs $(SSL_INCLUDES) ;
 }
 
-if $(TARGET_OS:L) = "macosx"
-{
-    PT_SSL_SUBDIR = [ FDirName $(PT_TOP) src Pt-Ssl applessl ] ;
-}
-else
-{
-    PT_SSL_SUBDIR = [ FDirName $(PT_TOP) src Pt-Ssl openssl ] ;
-}
-
+PT_SSL_SUBDIR = [ FDirName $(PT_TOP) src Pt-Ssl $(PT_SSL_IMPL) ] ;
 SubDirHdrs $(PT_SSL_SUBDIR) ;
 
-PT_SSL_IMPL += [ GLOB $(PT_SSL_SUBDIR) : *.cpp  ] ;
+PT_SSL_SOURCES = [ GLOB $(PT_SSL_SUBDIR) : *.cpp  ] ;
 
-SharedLibrary Pt-Ssl : $(PT_SSL_IMPL)
+SharedLibrary Pt-Ssl : $(PT_SSL_SOURCES)
                        Certificate.cpp
                        CertificateStore.cpp
                        #CipherList.cpp
