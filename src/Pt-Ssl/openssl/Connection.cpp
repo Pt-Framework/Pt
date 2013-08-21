@@ -33,11 +33,7 @@
 #include <Pt/Ssl/StreamBuffer.h>
 #include <Pt/Ssl/SslError.h>
 #include <Pt/System/Logger.h>
-#include <Pt/System/IOError.h>
 #include <cassert>
-#include <cstring>
-
-#include <openssl/err.h>
 
 log_define("Pt.Ssl.StreamBuffer")
 
@@ -99,7 +95,7 @@ bool Connection::writeHandshake()
     log_trace("Connection::writeHandshake");
 
     if( ! _ios || ! _ssl)
-        throw System::IOError("SSL Buffer not initialized");
+        throw SslError("SSL Buffer not initialized");
 
     int ret = SSL_do_handshake(_ssl);
     log_debug("SSL_do_handshake returns " << ret);
@@ -132,7 +128,7 @@ bool Connection::writeHandshake()
         log_debug("wrote " << n << " bytes to output");
 
         if(n <= 0)
-            throw System::IOError("BIO_read");
+            throw SslError("BIO_read");
 
         _ios->sputn(buff, n);
         return true;
@@ -147,7 +143,7 @@ bool Connection::readHandshake()
     log_trace("Connection::readHandshake");
 
     if( ! _ios || ! _ssl)
-        throw System::IOError("SSL Buffer not initialized");
+        throw SslError("SSL Buffer not initialized");
 
     while(_ios->in_avail() > 0)
     {
@@ -161,7 +157,7 @@ bool Connection::readHandshake()
         assert(written == n);
 
         if(written <= 0 || written != n)
-            throw System::IOError("BIO_write");
+            throw SslError("BIO_write");
 
         log_debug("read " << n << " bytes from input");
     }

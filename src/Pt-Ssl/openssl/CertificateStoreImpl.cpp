@@ -32,12 +32,7 @@
 #include "OpenSsl.h"
 #include <Pt/Ssl/SslError.h>
 #include <Pt/System/Logger.h>
-#include <openssl/ssl.h>
-#include <openssl/crypto.h>
-#include <openssl/err.h>
-#include <openssl/pkcs12.h>
-#include <openssl/pem.h>
-#include <cstdio>
+#include <Pt/SmartPtr.h>
 
 log_define("Pt.Ssl.CertificateStore")
 
@@ -62,7 +57,7 @@ CertificateStoreImpl::~CertificateStoreImpl()
 void CertificateStoreImpl::loadPkcs12(const char* data, size_t len, const char* passwd)
 {
     EVP_PKEY* pkey = NULL;
-    X509* cert = NULL;
+    X509* x509 = NULL;
     STACK_OF(X509)* ca = NULL;
 
     BioAutoPtr in( BIO_new_mem_buf( (void*) data, len ) );
@@ -71,44 +66,66 @@ void CertificateStoreImpl::loadPkcs12(const char* data, size_t len, const char* 
     if( ! p12)
         throw InvalidCertificate("invalid PKCS12 data");
 
-    int status = PKCS12_parse(p12, passwd, &pkey, &cert, &ca);
+    int status = PKCS12_parse(p12, passwd, &pkey, &x509, &ca);
     PKCS12_free(p12);
 
     if( ! status )
-        throw InvalidCertificate("invalid PKCS12 content");
-
-    // TODO: use smart pointers later...
-
-    if(cert) 
     {
-        X509AutoPtr x509(cert);
-        Certificate* c = new Certificate( new CertificateImpl(x509.get(), pkey) );
-        _allCerts.push_back(c);
-        x509.release();
+        throw InvalidCertificate("invalid PKCS12 content");
+    }
+
+    X509StackAutoPtr caPtr;
+    if(ca)
+        caPtr.reset(ca);
+
+    if(x509) 
+    {
+        X509AutoPtr x509Ptr(x509);
+
+        CertificateImpl* impl = new CertificateImpl(x509, pkey);
+        AutoPtr<CertificateImpl> implPtr(impl);
+        x509Ptr.release();
+        
+        Certificate* cert = new Certificate( implPtr.get() );
+        AutoPtr<Certificate> certPtr(cert);
+        implPtr.release();
+
+        _allCerts.push_back( certPtr.get() );
+        certPtr.release();
     }
     
-    if(ca)
+    if(caPtr)
     {
-        for(int i = 0; i < sk_X509_num(ca); i++)
+        for(int i = 0; i < sk_X509_num( caPtr.get() ); i++)
         {
-            X509AutoPtr x509( sk_X509_pop(ca) );
-            Certificate* c = new Certificate( new CertificateImpl(x509.get()) );
-            _allCerts.push_back(c);
-            x509.release();
-        }
+            X509* elem = sk_X509_pop( caPtr.get() );
+            X509AutoPtr x509Ptr(elem);
 
-        sk_X509_pop_free(ca, X509_free);
-        ca = NULL;
+            CertificateImpl* impl = new CertificateImpl( x509Ptr.get() );
+            AutoPtr<CertificateImpl> implPtr(impl);
+            x509Ptr.release();
+
+            Certificate* cert = new Certificate( implPtr.get() );
+            AutoPtr<Certificate> certPtr(cert);
+            implPtr.release();
+
+            _allCerts.push_back( certPtr.get() );
+            certPtr.release();
+        }
     }  
 }
 
 
 const Certificate* CertificateStoreImpl::findCertificate(const std::string& subject)
 {
-    for(std::vector<Certificate*>::const_iterator it = _allCerts.begin(); it != _allCerts.end(); ++it) 
+    std::vector<Certificate*>::const_iterator it;
+    for(it = _allCerts.begin(); it != _allCerts.end(); ++it) 
     {
-        if( (*it)->subject().find(subject) != std::string::npos )
+        const Certificate* cert = *it;
+        if( cert->subject().find(subject) != std::string::npos )
+        {
             return *it;
+        }
     }
 
     return 0;

@@ -33,7 +33,6 @@
 #include <Pt/Ssl/Api.h>
 #include <Pt/Ssl/Context.h>
 #include <streambuf>
-#include <string>
 
 namespace Pt {
 
@@ -66,9 +65,9 @@ class Connection
     private:
         std::streambuf* _ios;
         bool _connected;
-        bio_st* _in;
-        bio_st* _out;
-        ssl_st* _ssl;
+        BIO* _in;
+        BIO* _out;
+        SSL* _ssl;
 };
 
 } // namespace Ssl

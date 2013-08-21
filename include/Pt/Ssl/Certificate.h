@@ -41,30 +41,13 @@ class CertificateImpl;
 class PT_SSL_API Certificate : private NonCopyable
 {
     public:     
-        //Certificate();
-
         explicit Certificate(CertificateImpl* impl);
-
-        //Certificate(const Certificate& cert);
 
         ~Certificate();
 
-        //Certificate& operator=(const Certificate& cert);
-
-        bool isValid() const
-        { return _impl != 0; }
-
-        int serialNumber() const;
-
-        std::string issuer() const;
-
         std::string subject() const;
-          
-        std::string notBefore() const;
 
-        std::string notAfter() const;
-
-        CertificateImpl* impl() const;
+        const CertificateImpl* impl() const;
 
     private:
         CertificateImpl* _impl;

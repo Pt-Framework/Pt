@@ -29,13 +29,10 @@
 
 #include "ContextImpl.h"
 #include "CertificateImpl.h"
+#include "OpenSsl.h"
 #include <Pt/Ssl/SslError.h>
 #include <Pt/System/Mutex.h>
 #include <Pt/System/Logger.h>
-#include <openssl/ssl.h>
-#include <openssl/crypto.h>
-#include <openssl/err.h>
-#include <cstdio>
 
 log_define("Pt.Ssl.Context")
 
@@ -345,7 +342,7 @@ void ContextImpl::assign(const ContextImpl& ctx)
     _caCerts.reserve( ctx._caCerts.size() );
 
     X509_STORE* store = X509_STORE_new();
-    X509_STOREAutoPtr storePtr(store);
+    X509StoreAutoPtr storePtr(store);
 
     for(std::vector<X509*>::const_iterator it = ctx._caCerts.begin(); it != ctx._caCerts.end(); ++it)
     {

@@ -3,7 +3,7 @@ SubDirHdrs $(PT_TOP)/include ;
 SubDirHdrs $(PT_TOP)/src/Pt-Http ;
 SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Http ;
 
-if $(WITH_OPENSSL)
+if $(WITH_SSL)
 {
     SubDirC++Flags [ FDefines PT_HTTP_WITH_SSL ] ;
 }
@@ -13,7 +13,7 @@ Main Pt-Http-test : Pt-Http-test.cpp
                     ParserTest.cpp
                     ;
 
-if $(WITH_OPENSSL)
+if $(WITH_SSL)
 {
     LinkSharedLibraries Pt-Http-test : Pt Pt-Http Pt-Net Pt-Ssl Pt-System Pt-Unit ;
 }

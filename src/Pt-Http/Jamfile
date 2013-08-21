@@ -4,7 +4,7 @@ SubDirC++Flags [ FDefines PT_HTTP_API_EXPORT ] ;
 SubDirHdrs $(PT_TOP)/src/Pt-Http/$(SYS:L) ;
 SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Http ;
 
-if $(WITH_OPENSSL)
+if $(WITH_SSL)
 {
     SubDirC++Flags [ FDefines PT_HTTP_WITH_SSL ] ;
 }
@@ -27,7 +27,7 @@ SharedLibrary Pt-Http : Authorizer.cpp
                         Servlet.cpp
                         ;
 
-if $(WITH_OPENSSL)
+if $(WITH_SSL)
 {
     LinkSharedLibraries Pt-Http : Pt Pt-System Pt-Net Pt-Ssl ;
 }

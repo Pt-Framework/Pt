@@ -72,7 +72,7 @@ class ContextImpl
         SSL_CTX* ctx() const;
 
     private:
-        ssl_ctx_st*        _ctx;
+        SSL_CTX*        _ctx;
         Protocol           _protocol;
         VerifyMode         _verify;
         int                _verifyDepth;

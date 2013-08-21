@@ -31,12 +31,7 @@
 #define PT_SSL_CERTIFICATEIMPL_H
 
 #include "OpenSsl.h"
-#include <Pt/Ssl/SslError.h>
-#include <Pt/Atomicity.h>
 #include <cassert>
-
-#include <openssl/ssl.h>
-#include <openssl/err.h>
 
 namespace Pt {
 
@@ -45,10 +40,9 @@ namespace Ssl {
 class CertificateImpl
 {
     public:
-        explicit CertificateImpl(x509_st* x509, evp_pkey_st* pkey = 0)
+        explicit CertificateImpl(X509* x509, EVP_PKEY* pkey = 0)
         : _x509(x509)
         , _pkey(pkey)
-        , _refs(1)
         {
             assert(_x509);
         }
@@ -72,12 +66,6 @@ class CertificateImpl
 
             X509_free(_x509);
         }
-
-        void ref()
-        { atomicIncrement(_refs); }
-
-        int unref()
-        { return atomicDecrement(_refs); }
 
         int serialNumber() const
         {
@@ -126,21 +114,11 @@ class CertificateImpl
 
             //return toString( X509_get_subject_name(_x509) );
         }
-        
-        std::string notBefore() const
-        {
-            return toString( X509_get_notBefore(_x509) );
-        }
 
-        std::string notAfter() const
-        {
-            return toString( X509_get_notAfter(_x509) );
-        }
-
-        x509_st* x509() const
+        X509* x509() const
         { return _x509; }
 
-        evp_pkey_st* pkey()
+        EVP_PKEY* pkey() const
         { return _pkey; }
 
     private:
@@ -173,9 +151,8 @@ class CertificateImpl
         }
 
     private:
-        x509_st* _x509;
-        evp_pkey_st* _pkey;
-        Pt::atomic_t _refs;
+        X509* _x509;
+        EVP_PKEY* _pkey;
 };
 
 } // namespace Ssl

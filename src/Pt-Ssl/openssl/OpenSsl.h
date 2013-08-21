@@ -31,46 +31,50 @@
 
 #include <Pt/Ssl/Api.h>
 #include <Pt/SmartPtr.h>
-
-// Forward declaration of some OpenSSL structures
-struct ssl_ctx_st;
-struct ssl_st;
-struct ssl_session_st;
-struct bio_st;
-struct x509_st;
-struct evp_pkey_st;
-struct rsa_st;
-struct env_md_ctx_st;
-
 #include <openssl/ssl.h>
+#include <openssl/crypto.h>
+#include <openssl/err.h>
+#include <openssl/pkcs12.h>
+//#include <openssl/pem.h>
 
 namespace Pt {
 
 namespace Ssl {
 
-// Used to automatically free a BIO*
 class FreeBIO {
     protected:
         void destroy(BIO* ptr)
         { BIO_free(ptr); }
 };
+
 typedef Pt::AutoPtr<BIO, FreeBIO> BioAutoPtr;
 
-// Used to automatically free an X509*
+
 class FreeX509 {
     protected:
         void destroy(X509* ptr)
         { X509_free(ptr); }
 };
+
 typedef Pt::AutoPtr<X509, FreeX509> X509AutoPtr;
 
-// Used to automatically free an X509_STORE*
+
 class FreeX509_STORE {
     protected:
         void destroy(X509_STORE* ptr)
         { X509_STORE_free(ptr); }
 };
-typedef Pt::AutoPtr<X509_STORE, FreeX509_STORE> X509_STOREAutoPtr;
+
+typedef Pt::AutoPtr<X509_STORE, FreeX509_STORE> X509StoreAutoPtr;
+
+
+class FreeX509_STACK {
+    protected:
+        void destroy(STACK_OF(X509)* ptr)
+        { sk_X509_pop_free(ptr, X509_free); }
+};
+
+typedef Pt::AutoPtr<STACK_OF(X509), FreeX509_STACK> X509StackAutoPtr;
 
 } // namespace Ssl
 

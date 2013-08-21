@@ -4,9 +4,9 @@ SubDirC++Flags [ FDefines NOCRYPT ] ;
 SubDirC++Flags [ FDefines PT_SSL_API_EXPORT ] ;
 SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Ssl ;
 
-if $(OPENSSL_INCLUDES)
+if $(SSL_INCLUDES)
 {
-    SubDirHdrs $(OPENSSL_INCLUDES) ;
+    SubDirHdrs $(SSL_INCLUDES) ;
 }
 
 if $(TARGET_OS:L) = "macosx"
@@ -27,10 +27,6 @@ SharedLibrary Pt-Ssl : $(PT_SSL_IMPL)
                        CertificateStore.cpp
                        #CipherList.cpp
                        Context.cpp
-                       #IOBuffer.cpp
-                       #PrivateKey.cpp
-                       #PublicKey.cpp
-                       #Session.cpp
                        SslError.cpp
                        StreamBuffer.cpp ;
 
@@ -38,14 +34,14 @@ LinkSharedLibraries Pt-Ssl : Pt Pt-Net Pt-System ;
 MakeLocate Pt-Ssl : $(PT_OUTPUT_TARGET) ;
 MakeInstall Pt-Ssl : $(PT_INSTALL_LIBDIR) ;
 
-if $(OPENSSL_LINKLIBS)
+if $(WITH_OPENSSL)
 {
-    LinkFlags Pt-Ssl : $(OPENSSL_LINKFLAGS) ;
-    LinkLibs Pt-Ssl : $(OPENSSL_LINKLIBS) ;
+    LinkLibraries Pt-Ssl : Pt-Ssl-openssl ;
 }
 else
 {
-    LinkLibraries Pt-Ssl : Pt-Ssl-openssl ;
+    LinkFlags Pt-Ssl : $(SSL_LINKFLAGS) ;
+    LinkLibs Pt-Ssl : $(SSL_LINKLIBS) ;
 }
 
 SubInclude PT_TOP src Pt-Ssl tests ;

@@ -26,7 +26,7 @@ ConfigureCc ;
 ConfigureC++ ;
 
 #############################################################################
-# output directories used by MakeLocate and SubDirObjects
+# Output directories used by MakeLocate and SubDirObjects
 #############################################################################
 PT_OUTPUT_TARGET ?= [ FDirName $(PT_TOP) build $(CONFIG) ] ;
 EchoOption PT_OUTPUT_TARGET : "Pt Binary Output Dir" ;
@@ -41,7 +41,7 @@ EchoOption PT_OUTPUT_TEST : "Pt Testing Output Dir" ;
 Configure PT_OUTPUT_TEST ;
 
 #############################################################################
-# installation directories
+# Installation directories
 #############################################################################
 PT_INSTALL_DIR ?= [ FDirName $(PT_TOP) deploy $(CONFIG) ] ;
 
@@ -58,7 +58,7 @@ EchoOption PT_INSTALL_LIBDIR : "Pt Library Install Dir" ;
 Configure PT_INSTALL_LIBDIR ;
 
 #############################################################################
-# Platform settings
+# System libraries and includes
 #############################################################################
 if $(TARGET_OS:L) = winrt
 {
@@ -144,107 +144,66 @@ EchoOption SYSLIBS : "System lib flags" ;
 Configure NETLIBS ;
 EchoOption NETLIBS : "Network lib flags" ;
 
-
 #############################################################################
-# OpenSSL libraries and includes
+# SSL libraries and includes
 #############################################################################
 
-if --with-builtin-openssl in $(ARGV)
+if --with-openssl in $(ARGV)
 {   
-    WITH_OPENSSL = yes ;
-    OPENSSL_INCLUDES = [ FDirName $(PT_TOP) src openssl include ] ;
+    include [ FDirName src openssl Jamconfigure ] ;
 
-    # find matching openssl configuration file first for SYS, then for TARGET_OS
-    local opensslconf_target = [ FDirName $(PT_TOP) src openssl opensslconf-$(SYS:L)-$(TARGET_OSPLAT:L).h ] ;
-    if ! [ CHECK_IF_FILE $(opensslconf_target) ]
-    {
-        opensslconf_target = [ FDirName $(PT_TOP) src openssl opensslconf-$(TARGET_OS:L)-$(TARGET_OSPLAT:L).h ] ;
-        
-        if ! [ CHECK_IF_FILE $(opensslconf_target) ]
-        {
-            Exit "ERROR: Could not configure builtin OpenSSL for selected target." ;
-        }
-    }
-
-    # generate opensslconf.h file
-    local opensslconf = [ FDirName $(PT_TOP) src openssl crypto opensslconf.h ] ;
-    local r = [ TryCommand $(CP) $(opensslconf_target) $(opensslconf) ] ;
-    if ! $(r)
-    {
-        Exit "ERROR: Could not copy opensslconf.h." ;
-    }
-
-    opensslconf = [ FDirName $(PT_TOP) src openssl include openssl opensslconf.h ] ;
-    r = [ TryCommand $(CP) $(opensslconf_target) $(opensslconf) ] ;
-    if ! $(r)
-    {
-        Exit "ERROR: Could not copy opensslconf.h." ;
-    }
-
-    OPENSSL_CFLAGS += [ FDefines L_ENDIAN ] ;
-
-    switch $(TARGET_OS:L)
-    {
-        case wince : OPENSSL_CFLAGS += [ FDefines WIN32_LEAN_AND_MEAN ] ;
-
-        case nt : OPENSSL_CFLAGS += [ FDefines WIN32_LEAN_AND_MEAN ] ;
-
-        case linux : OPENSSL_CFLAGS += [ FDefines TERMIO ] ;
-                     OPENSSL_CFLAGS += [ FDefines _REENTRANT ] ;
-
-        case macosx : OPENSSL_CFLAGS += [ FDefines _REENTRANT ] ;
-
-        case * : Exit "ERROR: Target not supported by builtin OpenSSL." ;
-    }
-
-    Configure OPENSSL_CFLAGS ;
-    EchoOption OPENSSL_CFLAGS : "OpenSSL CFLAGS" ;
-}
-
-if ! $(WITH_OPENSSL)
-{
-    WITH_OPENSSL = [ CheckBuildC++ "#include <Security/Security.h>"
-                                   "int main() {"
-                                   "SSLContextRef context;"
-                                   "SSLNewContext(false, &context);"
-                                   "return 0; }"
-                                   : ""
-                                   : "-framework Foundation" "-framework Security" ] ;
-
-    if $(WITH_OPENSSL)
-    {
-        OPENSSL_LINKLIBS = "-framework Foundation" "-framework Security" ;
-    }
-}
-
-if ! $(WITH_OPENSSL)
-{
-    WITH_OPENSSL = [ CheckBuildC++ "#include <openssl/ssl.h>"
-                                    "int main() {"
-                                    "SSL_library_init();"
-                                    "return 0; }"
-                                    : [ FIncludes $(OPENSSL_INCLUDES) ]
-                                    : -lssl -lcrypto ] ;
-
-    if $(WITH_OPENSSL)
-    {
-        OPENSSL_LINKLIBS = -lssl -lcrypto ;
-    }
-}
-
-EchoOption WITH_OPENSSL : "OpenSSL support" ;
-
-if $(WITH_OPENSSL)
-{
+    WITH_OPENSSL = "yes" ;
     Configure WITH_OPENSSL ;
 
-    Configure OPENSSL_INCLUDES ;
-    EchoOption OPENSSL_INCLUDES : "OpenSSL includes" ;
-
-    Configure OPENSSL_LINKLIBS ;
-    EchoOption OPENSSL_LINKLIBS : "OpenSSL library" ;
+    WITH_SSL = yes ;
+    SSL_INCLUDES = [ FDirName $(PT_TOP) src openssl include ] ;
 }
 
+if ! $(WITH_SSL)
+{
+    WITH_SSL = [ CheckBuildC++ "#include <Security/Security.h>"
+                               "int main() {"
+                               "SSLContextRef context;"
+                               "SSLNewContext(false, &context);"
+                               "return 0; }"
+                               : ""
+                               : "-framework Foundation" "-framework Security" ] ;
+
+    if $(WITH_SSL)
+    {
+        SSL_LINKLIBS = "-framework Foundation" "-framework Security" ;
+    }
+}
+
+if ! $(WITH_SSL)
+{
+    WITH_SSL = [ CheckBuildC++ "#include <openssl/ssl.h>"
+                               "int main() {"
+                               "SSL_library_init();"
+                                "return 0; }"
+                               : [ FIncludes $(SSL_INCLUDES) ]
+                               : -lssl -lcrypto ] ;
+
+    if $(WITH_SSL)
+    {
+        SSL_LINKLIBS = -lssl -lcrypto ;
+    }
+}
+
+EchoOption WITH_SSL : "SSL support" : $(WITH_SSL:E="no")  ;
+
+if $(WITH_SSL)
+{
+    Configure WITH_SSL ;
+
+    EchoOption --with-openssl : "Builtin OpenSSL library" : $(WITH_OPENSSL:E="no") ;
+
+    Configure SSL_INCLUDES ;
+    EchoOption SSL_INCLUDES : "SSL includes" ;
+
+    Configure SSL_LINKLIBS ;
+    EchoOption SSL_LINKLIBS : "SSL libs" ;
+}
 
 #############################################################################
 # Gfx libraries and includes
@@ -343,7 +302,6 @@ if $(GUI:L) = "symbian-eikon"
     GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\bitgdi.dso ;
     GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\gdi.dso ;
 }
-
 
 Configure GUI ;
 EchoOption GUI : "Graphics UI" ;

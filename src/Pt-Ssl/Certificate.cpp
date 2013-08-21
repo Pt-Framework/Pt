@@ -27,106 +27,33 @@
  */
 #include "CertificateImpl.h"
 #include <Pt/Ssl/Certificate.h>
+#include <cassert>
 
 namespace Pt {
 
 namespace Ssl {
 
-//Certificate::Certificate()
-//: _impl(0)
-//{
-//}
-
-
 Certificate::Certificate(CertificateImpl* impl)
 : _impl(impl)
 {
+    assert(_impl);
 }
-
-
-//Certificate::Certificate(const Certificate& cert)
-//: _impl(cert._impl)
-//{
-//    if(_impl)
-//        _impl->ref();
-//}
 
 
 Certificate::~Certificate()
 {
-    if( _impl && 0 == _impl->unref() )
-    {
-        delete _impl;
-    }
-}
-
-
-//Certificate& Certificate::operator=(const Certificate& cert)
-//{
-//    if( _impl && 0 == _impl->unref() )
-//    {
-//        delete _impl;
-//    }
-//
-//    _impl = cert._impl;
-//
-//    if(_impl)
-//        _impl->ref();
-//
-//    return *this;
-//}
-
-
-int Certificate::serialNumber() const
-{
-    if( ! _impl)
-        return 0;
-
-    return _impl->serialNumber();
-}
-
-
-std::string Certificate::issuer() const
-{
-    if( ! _impl)
-        return std::string();
-
-    return _impl->issuer();
+    delete _impl;
 }
 
 
 std::string Certificate::subject() const
 {
-    if( ! _impl)
-        return std::string();
-
     return _impl->subject();
 }
-   
-        
-std::string Certificate::notBefore() const
+
+
+const CertificateImpl* Certificate::impl() const
 {
-    if( ! _impl)
-        return std::string();
-
-    return _impl->notBefore();
-}
-
-
-std::string Certificate::notAfter() const
-{
-    if( ! _impl)
-        return std::string();
-
-    return _impl->notAfter();
-}
-
-
-CertificateImpl* Certificate::impl() const
-{
-    if( ! _impl)
-        throw std::logic_error("invalid certificate implementation");
-
     return _impl;
 }
 
