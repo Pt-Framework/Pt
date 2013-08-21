@@ -307,11 +307,11 @@ class ServerTest : public Pt::Unit::TestSuite
             store.loadPkcs12(ifs, "123");
             store.loadPkcs12(ifs_ca, "123");
 
-            ctx.setVerifyMode(Pt::Ssl::Context::VerifyPeer);
+            ctx.setVerifyMode(Pt::Ssl::TryVerify);
 
             const Pt::Ssl::Certificate* clientCert = store.findCertificate("Atlantis Mainframe");
             PT_UNIT_ASSERT( clientCert);
-            ctx.setCertificate( *clientCert );
+            ctx.setIdentity( *clientCert );
 
             const Pt::Ssl::Certificate* clientCA = store.findCertificate("SGC Certificate Authority");
             PT_UNIT_ASSERT( clientCA);
@@ -336,11 +336,11 @@ class ServerTest : public Pt::Unit::TestSuite
             store.loadPkcs12(server_ifs, "123");
             store.loadPkcs12(ifs_ca, "123");
 
-            ctx.setVerifyMode(Pt::Ssl::Context::VerifyPeerRequired);
+            ctx.setVerifyMode(Pt::Ssl::AlwaysVerify);
 
             const Pt::Ssl::Certificate* servCert = store.findCertificate("SGC Mainframe");
             PT_UNIT_ASSERT( servCert );
-            ctx.setCertificate( *servCert );
+            ctx.setIdentity( *servCert );
 
             const Pt::Ssl::Certificate* servCA = store.findCertificate("SGC Certificate Authority");
             PT_UNIT_ASSERT( servCA );

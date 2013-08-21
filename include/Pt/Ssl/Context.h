@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2010-2010 by Aloysius Indrayanto
- * Copyright (C) 2010-2012 by Marc Duerner
+ * Copyright (C) 2010-2013 by Marc Duerner
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,11 +26,11 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef PT_SSL_CONTEXT_H
 #define PT_SSL_CONTEXT_H
 
 #include <Pt/Ssl/Api.h>
-#include <Pt/Ssl/Certificate.h>
 #include <Pt/NonCopyable.h>
 #include <string>
 
@@ -38,6 +38,7 @@ namespace Pt {
 
 namespace Ssl {
 
+class Certificate;
 class ContextImpl;
 
 //! @internal Library initialization.
@@ -47,36 +48,37 @@ static struct PT_SSL_API SSLInit
     ~SSLInit();
 } ssl_init;
 
+//! @brief Communication protocol.
+enum Protocol 
+{
+    SSLv2,
+    SSLv3or2,
+    SSLv3,
+    TLSv1
+};
+
+//! @brief Verification mode.
+enum VerifyMode
+{
+    NoVerify = 0,
+    TryVerify = 1,
+    AlwaysVerify = 2
+};
+
 //! @brief Context for SSL connections.
 class PT_SSL_API Context : public NonCopyable
 {
     public:
-        //! @brief Verification mode.
-        enum VerifyMode
-        {
-            VerifyNone = 0,
-            VerifyPeer = 1,
-            VerifyPeerRequired = 2
-        };
+        //! @brief Construct with defaults. 
+        Context();
 
-        //! @brief Communication protocol.
-        enum Protocol 
-        {
-            DefaultProtocol,  //!< not less than SSL version 3.
-            TLSv1,    //!< the latest standard for secure TCP communication.
-            SSLv3,    //!< recommended for modern systems.
-            SSLv3or2, //!< recommended for the most compatibility.
-            SSLv2     //!< unsecure, not recommended.
-        };
-
-    public:
-        //! @brief Construct with session id and protocol. 
-        Context(Protocol protocol = DefaultProtocol);
+        //! @brief Construct with specific protocol. 
+        Context(Protocol protocol);
 
         //! @brief Destructor.
         ~Context();
 
-        //! @brief Assigns the certificates, keys, validation mode and protocol.
+        //! @brief Assigns the certificates, verify mode and protocol.
         void assign(const Context& ctx);
 
         //! @brief Returns the current protocol. 
@@ -88,7 +90,8 @@ class PT_SSL_API Context : public NonCopyable
         //! @brief Limits the number of certificates checked in the peer's certificate chain.
         void setVerifyDepth(int n);
 
-        VerifyMode verification() const;
+        //! @brief Returns the current verify mode.
+        VerifyMode verifyMode() const;
 
         //! @brief Sets the current validation mode.
         void setVerifyMode(VerifyMode mode);
@@ -106,7 +109,7 @@ class PT_SSL_API Context : public NonCopyable
             Setting a main certificate is mandatory for a server context. For
             a client context, it is only needed for client authentication.
          */
-        void setCertificate(const Certificate& cert);
+        void setIdentity(const Certificate& cert);
 
         /** @brief Builds certificate chain.
 
@@ -115,8 +118,10 @@ class PT_SSL_API Context : public NonCopyable
         */
         void addCertificate(const Certificate& cert);
 
+        //! @internal
         ContextImpl* impl();
 
+        //! @internal
         const ContextImpl* impl() const;
 
     private:

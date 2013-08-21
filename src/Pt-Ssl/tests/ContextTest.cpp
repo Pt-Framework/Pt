@@ -122,7 +122,7 @@ class ContextTest : public Pt::Unit::TestSuite
 
             const Pt::Ssl::Certificate* cert = store.findCertificate("SGC Mainframe");
             PT_UNIT_ASSERT(cert);
-            ctx.setCertificate(*cert);
+            ctx.setIdentity(*cert);
 
             cert = store.findCertificate("SGC Certificate Authority");
             PT_UNIT_ASSERT(cert);

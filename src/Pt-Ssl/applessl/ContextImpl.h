@@ -51,26 +51,25 @@ inline void SSLExitImpl()
 class ContextImpl
 {
     public:
-        ContextImpl(Context::Protocol protocol);
+        ContextImpl(Protocol protocol);
 
         ~ContextImpl();
 
         void assign(const ContextImpl& ctx);
 
-        Context::Protocol protocol() const;
+        Protocol protocol() const;
 
-        void setProtocol(Context::Protocol protocol);
+        void setProtocol(Protocol protocol);
 
         void setVerifyDepth(int n);
 
-        Context::VerifyMode verification() const
-        { return _verify; }
+        VerifyMode verifyMode() const;
 
         void setVerifyMode(Context::VerifyMode mode);
 
         void addCACertificate(const Certificate& trustedCert);
 
-        void setCertificate(const Certificate& cert);
+        void setIdentity(const Certificate& cert);
         
         void addCertificate(const Certificate& cert);
 
@@ -85,12 +84,12 @@ class ContextImpl
         SecCertificateRef copyCertificate(SecCertificateRef cert) const;
     
     private:
-        Context::Protocol    _protocol;
-        Context::VerifyMode  _verify;
-        int                  _verifyDepth;
-        SecIdentityRef       _identity;
-        CFMutableArrayRef    _certs;
-        CFMutableArrayRef    _caCerts;
+        Protocol          _protocol;
+        VerifyMode        _verify;
+        int               _verifyDepth;
+        SecIdentityRef    _identity;
+        CFMutableArrayRef _certs;
+        CFMutableArrayRef _caCerts;
 };
 
 } // namespace Ssl

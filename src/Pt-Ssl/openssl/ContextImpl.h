@@ -33,7 +33,6 @@
 #include <Pt/Ssl/Api.h>
 #include <Pt/Ssl/Context.h>
 #include <Pt/Ssl/Certificate.h>
-#include <string>
 #include <vector>
 
 namespace Pt {
@@ -44,44 +43,28 @@ void SSLInitImpl();
 
 void SSLExitImpl();
 
-class CertificateStoreImpl
-{
-    public:
-        CertificateStoreImpl();
-
-        ~CertificateStoreImpl();
-
-        void loadPkcs12(const char* data, size_t len, const char* passwd);
-
-        const Certificate* findCertificate(const std::string& subject);
-
-    private:
-        std::vector<Certificate*> _allCerts;
-};
-
 class ContextImpl
 {
     public:
-        ContextImpl(Context::Protocol protocol);
+        ContextImpl(Protocol protocol);
 
         ~ContextImpl();
 
         void assign(const ContextImpl& ctx);
 
-        Context::Protocol protocol() const;
+        Protocol protocol() const;
 
-        void setProtocol(Context::Protocol protocol);
+        void setProtocol(Protocol protocol);
 
         void setVerifyDepth(int n);
 
-        Context::VerifyMode verification() const
-        { return _verify; }
+        VerifyMode verifyMode() const;
 
-        void setVerifyMode(Context::VerifyMode mode);
+        void setVerifyMode(VerifyMode mode);
 
         void addCACertificate(const Certificate& trustedCert);
 
-        void setCertificate(const Certificate& cert);
+        void setIdentity(const Certificate& cert);
 
         void addCertificate(const Certificate& certificate);
 
@@ -89,16 +72,14 @@ class ContextImpl
         SSL_CTX* ctx() const;
 
     private:
-        ssl_ctx_st*         _ctx;
-        Context::Protocol   _protocol;
-        Context::VerifyMode _verify;
-        int                 _verifyDepth;
-        X509*               _x509;
-        EVP_PKEY*           _pkey;
-        std::vector<X509*>  _extraCerts;
-        std::vector<X509*>  _caCerts;
-
-
+        ssl_ctx_st*        _ctx;
+        Protocol           _protocol;
+        VerifyMode         _verify;
+        int                _verifyDepth;
+        X509*              _x509;
+        EVP_PKEY*          _pkey;
+        std::vector<X509*> _extraCerts;
+        std::vector<X509*> _caCerts;
 };
 
 } // namespace Ssl

@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2010-2010 by Aloysius Indrayanto
- * Copyright (C) 2010-2012 by Marc Duerner
+ * Copyright (C) 2010-2013 by Marc Duerner
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -28,14 +28,7 @@
  */
 
 #include "ContextImpl.h"
-#include "CertificateImpl.h"
 #include <Pt/Ssl/Context.h>
-#include <Pt/Ssl/SslError.h>
-#include <Pt/System/Mutex.h>
-#include <Pt/System/Logger.h>
-#include <cstdio>
-
-log_define("Pt.Ssl.Context")
 
 namespace Pt {
 
@@ -54,6 +47,13 @@ SSLInit::~SSLInit()
 }
 
 
+Context::Context()
+: _impl(0)
+{
+    _impl = new ContextImpl(SSLv3);
+}
+
+
 Context::Context(Protocol protocol)
 : _impl(0)
 {
@@ -67,7 +67,7 @@ Context::~Context()
 }
 
 
-Context::Protocol Context::protocol() const
+Protocol Context::protocol() const
 { 
     return _impl->protocol(); 
 }
@@ -85,9 +85,9 @@ void Context::setVerifyDepth(int n)
 }
 
 
-Context::VerifyMode Context::verification() const
+VerifyMode Context::verifyMode() const
 {
-    return _impl->verification();
+    return _impl->verifyMode();
 }
 
 
@@ -110,9 +110,9 @@ void Context::addCACertificate(const Certificate& trustedCert)
 }
 
 
-void Context::setCertificate(const Certificate& cert)
+void Context::setIdentity(const Certificate& cert)
 {
-    _impl->setCertificate(cert);
+    _impl->setIdentity(cert);
 }
 
 

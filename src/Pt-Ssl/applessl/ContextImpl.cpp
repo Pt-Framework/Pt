@@ -40,7 +40,7 @@ namespace Pt {
 
 namespace Ssl {
 
-ContextImpl::ContextImpl(Context::Protocol protocol)
+ContextImpl::ContextImpl(Protocol protocol)
 : _protocol(protocol)
 , _verify(Context::VerifyPeer)
 , _verifyDepth(1)
@@ -63,13 +63,13 @@ ContextImpl::~ContextImpl()
 }
 
 
-Context::Protocol ContextImpl::protocol() const
+Protocol ContextImpl::protocol() const
 { 
     return _protocol; 
 }
 
 
-void ContextImpl::setProtocol(Context::Protocol protocol)
+void ContextImpl::setProtocol(Protocol protocol)
 {
     _protocol = protocol;
 }
@@ -78,6 +78,12 @@ void ContextImpl::setProtocol(Context::Protocol protocol)
 void ContextImpl::setVerifyDepth(int n)
 {
     _verifyDepth = n;
+}
+
+
+VerifyMode ContextImpl::verifyMode() const
+{ 
+    return _verify; 
 }
 
 
@@ -148,8 +154,7 @@ void ContextImpl::addCACertificate(const Certificate& trustedCert)
 }
 
 
-// rename setIdentity
-void ContextImpl::setCertificate(const Certificate& cert)
+void ContextImpl::setIdentity(const Certificate& cert)
 {
     SecIdentityRef ident = cert.impl()->identity();
     if( ! ident)

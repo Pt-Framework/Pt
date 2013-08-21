@@ -73,22 +73,21 @@ Connection::Connection(Context& ctx, std::streambuf& ios, int mode)
 
     switch(_ctx->protocol()) 
     {
-        case Context::SSLv2:
+        case SSLv2:
             SSLSetProtocolVersionEnabled(_context, kSSLProtocol2, true);
             break;
 
-        case Context::SSLv3or2:
+        case SSLv3or2:
             SSLSetProtocolVersionEnabled(_context, kSSLProtocol2, true);
             SSLSetProtocolVersionEnabled(_context, kSSLProtocol3, true);
             break;
 
         default:
-        case Context::DefaultProtocol:
-        case Context::SSLv3:
+        case SSLv3:
             SSLSetProtocolVersionEnabled(_context, kSSLProtocol3, true);
             break;
       
-        case Context::TLSv1:
+        case TLSv1:
             SSLSetProtocolVersionEnabled(_context, kTLSProtocol1, true);
             break;
     }
@@ -99,15 +98,15 @@ Connection::Connection(Context& ctx, std::streambuf& ios, int mode)
         SSLSetEnableCertVerify(_context, false);
         SSLSetSessionOption(_context, kSSLSessionOptionBreakOnClientAuth, true);
 #else
-        if(_ctx->verification() == Context::VerifyNone)
+        if(_ctx->verifyMode() == Context::NoVerify)
         {
             SSLSetClientSideAuthenticate(_context, kNeverAuthenticate);
         }
-        else if(_ctx->verification() == Context::VerifyPeer)
+        else if(_ctx->verifyMode() == Context::TryVerify)
         {
             SSLSetClientSideAuthenticate(_context, kTryAuthenticate);
         }
-        else if(_ctx->verification() == Context::VerifyPeerRequired)
+        else if(_ctx->verifyMode() == Context::AlwaysVerify)
         {
             SSLSetClientSideAuthenticate(_context, kAlwaysAuthenticate);
         }
@@ -192,7 +191,7 @@ bool Connection::readHandshake()
     {
         log_debug("errSSLPeerAuthCompleted");
 
-        bool verifyNone = _ctx->verification() == Context::VerifyNone;
+        bool verifyNone = _ctx->verifyMode() == NoVerify;
         if(verifyNone)
             goto again;
 

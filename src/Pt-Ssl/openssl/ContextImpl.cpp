@@ -146,9 +146,9 @@ EVP_PKEY* copyPrivateKey(EVP_PKEY* from)
 }
 
 
-ContextImpl::ContextImpl(Context::Protocol protocol)
+ContextImpl::ContextImpl(Protocol protocol)
 : _protocol(protocol)
-, _verify(Context::VerifyPeer)
+, _verify(TryVerify)
 , _verifyDepth(1)
 , _x509(0)
 , _pkey(0)
@@ -156,12 +156,22 @@ ContextImpl::ContextImpl(Context::Protocol protocol)
     // Create the context for the given protocol
     switch(_protocol) 
     {
-        case Context::SSLv2    : _ctx = SSL_CTX_new( SSLv2_method () ); break;
-        case Context::SSLv3or2 : _ctx = SSL_CTX_new( SSLv23_method() ); break;
-        case Context::TLSv1    : _ctx = SSL_CTX_new( TLSv1_method () ); break;
-        case Context::DefaultProtocol  : // Fall through
-        case Context::SSLv3    : // Fall through
-        default       :  _ctx = SSL_CTX_new( SSLv3_method () ); break;
+        case SSLv2: 
+            _ctx = SSL_CTX_new( SSLv2_method () ); 
+            break;
+        
+        case SSLv3or2: 
+            _ctx = SSL_CTX_new( SSLv23_method() ); 
+            break;
+
+        default:
+        case SSLv3: 
+            _ctx = SSL_CTX_new( SSLv3_method () ); 
+            break;
+        
+        case TLSv1: 
+            _ctx = SSL_CTX_new( TLSv1_method () ); 
+            break;
     }
 
     // Set some options
@@ -195,66 +205,80 @@ ContextImpl::~ContextImpl()
 }
 
 
-Context::Protocol ContextImpl::protocol() const
+Protocol ContextImpl::protocol() const
 { 
     return _protocol; 
 }
 
 
-void ContextImpl::setProtocol(Context::Protocol protocol)
+void ContextImpl::setProtocol(Protocol protocol)
 {
     bool v2 = false;
-    int ret = 0;
 
     switch(protocol) 
     {
-        case Context::SSLv2    : ret = SSL_CTX_set_ssl_version(_ctx, SSLv2_method());  v2 = true; break;
-        case Context::SSLv3or2 : ret = SSL_CTX_set_ssl_version(_ctx, SSLv23_method()); v2 = true; break;
-        case Context::TLSv1    : ret = SSL_CTX_set_ssl_version(_ctx, TLSv1_method()); break;
-        case Context::SSLv3    : // Fall through
-        case Context::DefaultProtocol  : // Fall through
-        default       : ret = SSL_CTX_set_ssl_version(_ctx, SSLv3_method());
-    }
+        case SSLv2: 
+            SSL_CTX_set_ssl_version(_ctx, SSLv2_method() );
+            v2 = true;
+            break;
+        
+        case SSLv3or2: 
+            SSL_CTX_set_ssl_version( _ctx, SSLv23_method() ); 
+            v2 = true;
+            break;
 
-    if( 0 == ret)
-        throw std::logic_error("Unknown protocol");
+        default:
+        case SSLv3: 
+            SSL_CTX_set_ssl_version( _ctx, SSLv3_method() ); 
+            break;
+        
+        case TLSv1: 
+            SSL_CTX_set_ssl_version( _ctx, TLSv1_method() ); 
+            break;
+    }
 
     _protocol = protocol;
 
-    const char* list = v2 ? "ALL:!aNULL:!eNULL" : "ALL:!aNULL:!eNULL:!SSLv2";
-    ret = SSL_CTX_set_cipher_list(_ctx, list);
-    if( 0 == ret )
-        throw std::logic_error("Invalid default cipher list");
+    const char* ciphers = v2 ? "ALL:!aNULL:!eNULL" : "ALL:!aNULL:!eNULL:!SSLv2";
+    int ret = SSL_CTX_set_cipher_list(_ctx, ciphers);
+    assert(ret != 0);
 }
 
 
 void ContextImpl::setVerifyDepth(int n)
 {
+    SSL_CTX_set_verify_depth(_ctx, n);
     _verifyDepth = n;
-    SSL_CTX_set_verify_depth(_ctx, _verifyDepth);
 }
 
 
-void ContextImpl::setVerifyMode(Context::VerifyMode m)
-{
-    _verify = m;
+VerifyMode ContextImpl::verifyMode() const
+{ 
+    return _verify; 
+}
 
-    int mode = 0;
-    switch(_verify)
+
+void ContextImpl::setVerifyMode(VerifyMode m)
+{
+    int mode = SSL_VERIFY_NONE;
+    switch(m)
     {
-        case Context::VerifyPeer:
+        case TryVerify:
             mode = SSL_VERIFY_PEER;
             break;
     
-        case Context::VerifyPeerRequired:
+        case AlwaysVerify:
             mode = SSL_VERIFY_PEER|SSL_VERIFY_FAIL_IF_NO_PEER_CERT;
             break;
 
         default:
+        case NoVerify:
             mode = SSL_VERIFY_NONE;
     }
 
     SSL_CTX_set_verify(_ctx, mode, 0);
+
+    _verify = m;
 }
 
 
@@ -292,21 +316,23 @@ void ContextImpl::assign(const ContextImpl& ctx)
         }
     }
 
+    _extraCerts.clear();
+    _extraCerts.reserve( ctx._extraCerts.size() );
+
     for(std::vector<X509*>::const_iterator it = ctx._extraCerts.begin(); it != ctx._extraCerts.end(); ++it)
     {
         // NOTE: SSL_CTX_add_extra_chain_cert does not copy the X509 certificate, 
         // or increase the refcount. We must copy it, because the SSL_CTX will
         // free it
 
-        X509* extraX509 = X509_dup(*it);
-
-        if( ! extraX509 )
-            throw InvalidCertificate("Could not duplicate the CA certificate");
+        X509* extraX509 = copyX509(*it);
+        X509AutoPtr x509Ptr(extraX509);
 
         if( ! SSL_CTX_add_extra_chain_cert( _ctx, extraX509 ) )
-            throw InvalidCertificate("Could not add extra certificate");
+            throw InvalidCertificate("invalid extra certificate");
 
         _extraCerts.push_back(extraX509);
+        x509Ptr.release();
     }
 
     // copy trusted CA certificates
@@ -316,23 +342,29 @@ void ContextImpl::assign(const ContextImpl& ctx)
     }
     
     _caCerts.clear();
+    _caCerts.reserve( ctx._caCerts.size() );
 
     X509_STORE* store = X509_STORE_new();
+    X509_STOREAutoPtr storePtr(store);
 
     for(std::vector<X509*>::const_iterator it = ctx._caCerts.begin(); it != ctx._caCerts.end(); ++it)
     {
         X509* x509 = copyX509(*it);
-        _caCerts.push_back(x509);
+        X509AutoPtr x509Ptr(x509);
 
         if( ! X509_STORE_add_cert(store, x509) )
             throw InvalidCertificate("untrusted certificate");
+
+        _caCerts.push_back(x509);
+        x509Ptr.release();
     }
 
     SSL_CTX_set_cert_store( _ctx, store );
+    storePtr.release();
 }
 
 
-void ContextImpl::setCertificate(const Certificate& cert)
+void ContextImpl::setIdentity(const Certificate& cert)
 {
     if( ! cert.impl()->pkey() )
         throw InvalidCertificate("invalid certificate");
@@ -369,25 +401,31 @@ void ContextImpl::addCertificate(const Certificate& certificate)
     // or increase the refcount. We must copy it, because the SSL_CTX will
     // free it
 
-    X509* extraX509 = X509_dup( certificate.impl()->x509() );
+    _extraCerts.reserve(_extraCerts.size() + 1);
 
-    if( ! SSL_CTX_add_extra_chain_cert( _ctx, extraX509 ) )
-        throw InvalidCertificate("Could not add extra certificate");
+    X509* extraX509 = copyX509( certificate.impl()->x509() );
+    X509AutoPtr x509Ptr(extraX509);
+
+    if( ! SSL_CTX_add_extra_chain_cert(_ctx, extraX509) )
+    {
+        throw InvalidCertificate("invalid extra certificate");
+    }
 
     _extraCerts.push_back(extraX509);
+    x509Ptr.release();
 }
 
 
 void ContextImpl::addCACertificate(const Certificate& trustedCert)
 {
     log_trace("adding CA certificate:" << trustedCert.subject());
+    
+    _caCerts.reserve(_caCerts.size() + 1);
 
     X509* x509 = copyX509( trustedCert.impl()->x509() );
-
-    _caCerts.push_back(x509);
+    X509AutoPtr x509Ptr(x509);
 
     X509_STORE* store = SSL_CTX_get_cert_store(_ctx);
-
     if( ! store)
     {
         log_trace("creating new X509 store");
@@ -395,7 +433,12 @@ void ContextImpl::addCACertificate(const Certificate& trustedCert)
     }
 
     if( ! X509_STORE_add_cert(store, x509) )
-        throw InvalidCertificate("untrusted certificate");
+    {
+        throw InvalidCertificate("invalid CA certificate");
+    }
+    
+    _caCerts.push_back(x509);
+    x509Ptr.release();
 }
 
 

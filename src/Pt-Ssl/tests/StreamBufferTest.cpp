@@ -90,11 +90,11 @@ void StreamBufferTest::Handshake()
     store.loadPkcs12(ifs, "123");
 
     Pt::Ssl::Context serverContext;
-    serverContext.setVerifyMode(Pt::Ssl::Context::VerifyPeerRequired);
+    serverContext.setVerifyMode(Pt::Ssl::AlwaysVerify);
 
     const Pt::Ssl::Certificate* servCert = store.findCertificate("SGC Mainframe");
     PT_UNIT_ASSERT( servCert );
-    serverContext.setCertificate( *servCert );
+    serverContext.setIdentity( *servCert );
 
     const Pt::Ssl::Certificate* servCA = store.findCertificate("SGC Certificate Authority");
     PT_UNIT_ASSERT( servCA );
@@ -102,11 +102,11 @@ void StreamBufferTest::Handshake()
 
     // Client context
     Pt::Ssl::Context clientContext;
-    clientContext.setVerifyMode(Pt::Ssl::Context::VerifyPeer);
+    clientContext.setVerifyMode(Pt::Ssl::TryVerify);
 
     const Pt::Ssl::Certificate* clientCert = store.findCertificate("Atlantis Mainframe");
     PT_UNIT_ASSERT( clientCert );
-    clientContext.setCertificate( *clientCert );
+    clientContext.setIdentity( *clientCert );
 
     const Pt::Ssl::Certificate* clientCA = store.findCertificate("SGC Certificate Authority");
     PT_UNIT_ASSERT( clientCA );

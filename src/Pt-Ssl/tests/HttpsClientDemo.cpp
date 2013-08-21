@@ -119,7 +119,7 @@ int main(int argc, char** argv)
         log_debug("OpenSSL HTTP test progam started");
         
         Pt::Ssl::Context sslctx;  
-        sslctx.setVerifyMode(Pt::Ssl::Context::VerifyNone);
+        sslctx.setVerifyMode(Pt::Ssl::NoVerify);
 
         Pt::Net::TcpSocket socket;
 
