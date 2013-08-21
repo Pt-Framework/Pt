@@ -76,6 +76,8 @@ private:
 	void output();
 	void paint();
 	void drawIndependentImage(size_t x, size_t y, const char* data, size_t width, size_t height);       
+	void writeWindowSizeAndPos();
+	void writeWindowProperties();
 
 private:
     Atom AtomAppWake;

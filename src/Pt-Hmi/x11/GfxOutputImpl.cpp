@@ -514,6 +514,115 @@ void GfxOutputImpl::output()
 	}
 }
 
+
+
+void GfxOutputImpl::writeWindowProperties()
+{//TODO:
+#if 0
+	SetWindowText(_hwnd, _model->Caption.get().c_str());
+
+	long style = 0;
+	long exStyle = 0;
+
+	if(_model->Visible.get())
+		style |= WS_VISIBLE;
+		
+	if( _model->ShowTitle.get())
+		style |= WS_CAPTION;
+
+	if( _model->ShowMinimizeBt.get())
+		style |= WS_MINIMIZEBOX;
+
+	if( _model->ShowMaximizeBt.get())
+		style |= WS_MAXIMIZEBOX;
+
+	if( _model->ShowSysMenu.get())
+		style |= WS_SYSMENU;
+
+	switch(_model->WindowState.get())
+	{
+		case Pt::Hmi::WindowStateType::Normal:
+		break;
+
+		case Pt::Hmi::WindowStateType::Maximazed:
+			style |= WS_MAXIMIZE;
+		break;
+
+		case Pt::Hmi::WindowStateType::Minimized:
+			style |= WS_MINIMIZE;
+		break;
+	}
+
+	switch( _model->Border.get())
+	{
+		case Pt::Hmi::BorderStyle::None:
+			
+		break;
+
+		case Pt::Hmi::BorderStyle::Single:
+			style |= WS_BORDER; 
+		break;
+
+		case Pt::Hmi::BorderStyle::Sizebale:
+			style |= WS_THICKFRAME;
+		break;
+
+		case Pt::Hmi::BorderStyle::Dialog:
+			style |= WS_DLGFRAME;			
+			exStyle |= WS_EX_DLGMODALFRAME;
+		break;
+
+		case Pt::Hmi::BorderStyle::DialogSizeable:
+			style |= WS_DLGFRAME;			
+			exStyle |= WS_EX_DLGMODALFRAME;
+			style |= WS_THICKFRAME;
+		break;
+
+		case Pt::Hmi::BorderStyle::Tool:
+			style |= WS_DLGFRAME;
+			exStyle |= WS_EX_TOOLWINDOW;
+		break;
+
+		case Pt::Hmi::BorderStyle::ToolSizeable:
+			style |= WS_THICKFRAME;
+			exStyle |= WS_EX_TOOLWINDOW;
+		break;
+
+	}
+
+	if(_model->ShowInTaskbar.get())
+	{
+		exStyle |= WS_EX_APPWINDOW;  
+		SetWindowLong(_hwnd, GWL_EXSTYLE, exStyle); 
+	}
+	else
+	{
+		SetWindowLong(_hwnd, GWL_STYLE, style);  
+	}
+
+	long styleVisible = GetWindowLong(_hwnd, GWL_STYLE);  
+
+	bool visible = ((styleVisible & WS_VISIBLE) == WS_VISIBLE);
+
+	if(!_model->Visible.get())
+		ShowWindow(_hwnd, SW_HIDE);
+	else if( !visible)
+		ShowWindow(_hwnd, SW_SHOW);		
+
+	SetWindowLong(_hwnd, GWL_STYLE, style);  
+#endif
+}
+
+void GfxOutputImpl::writeWindowSizeAndPos()
+{//TODO:
+#if 0
+	WindowModel* wmodel = (WindowModel*) _model;
+	Pt::Gfx::Point pos = wmodel->fromUnit(wmodel->WinPos.get());
+	Pt::Gfx::Size size = wmodel->fromUnit(wmodel->WinSize.get());
+	SetWindowPos(_hwnd,0, pos.x(), pos.y(), size.width(), size.height(), 0);
+#endif
+}
+
 void GfxOutputImpl::output(Pt::Hmi::Model* model)
 {
 	WindowModel* wmodel = dynamic_cast<WindowModel*>(model);
@@ -542,6 +651,8 @@ void GfxOutputImpl::output(Pt::Hmi::Model* model)
 		}
 	}
 
+	writeWindowSizeAndPos();
+	writeWindowProperties();
 	output();
 	paint();
 }
