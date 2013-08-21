@@ -35,9 +35,7 @@
 #include <streambuf>
 #include <string>
 
-#import <Security/Security.h>
-#import <CoreFoundation/CoreFoundation.h>
-#import <CoreFoundation/CFDictionary.h>
+#include <Security/Security.h>
 
 namespace Pt {
 

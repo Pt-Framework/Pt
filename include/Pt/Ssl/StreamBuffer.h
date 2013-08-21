@@ -84,23 +84,6 @@ class PT_SSL_API StreamBuffer : public std::streambuf
         */
         bool isConnected() const;
 
-        /** @brief Get the peer CN (Common Name). 
-        */
-        //std::string peerName() const;
-
-        /** @brief Get the current session data.
-            
-            The value returned by this function is only meaningful after a
-            successful handshake.
-        */
-        //Session session() const;
-
-        /** @brief Set the current session data.
-            
-            It is only meaningful to call this function before starting any handshake.
-        */
-        //void setSession(const Session& sess);
-
         /** @brief Writes a handshake message to the underlying stream
             
             Returns true if at least a part of the handshake message was

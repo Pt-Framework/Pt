@@ -159,9 +159,6 @@
     <ClInclude Include="..\..\include\Pt\Ssl\CipherList.h" />
     <ClInclude Include="..\..\include\Pt\Ssl\Context.h" />
     <ClInclude Include="..\..\include\Pt\Ssl\IOBuffer.h" />
-    <ClInclude Include="..\..\include\Pt\Ssl\PrivateKey.h" />
-    <ClInclude Include="..\..\include\Pt\Ssl\PublicKey.h" />
-    <ClInclude Include="..\..\include\Pt\Ssl\Session.h" />
     <ClInclude Include="..\..\include\Pt\Ssl\SslError.h" />
     <ClInclude Include="..\..\include\Pt\Ssl\StreamBuffer.h" />
     <ClInclude Include="..\..\include\Pt\StreamBuffer.h" />
@@ -290,7 +287,6 @@
     <ClInclude Include="..\..\src\Pt-Ssl\openssl\Connection.h" />
     <ClInclude Include="..\..\src\Pt-Ssl\openssl\ContextImpl.h" />
     <ClInclude Include="..\..\src\Pt-Ssl\openssl\OpenSsl.h" />
-    <ClInclude Include="..\..\src\Pt-Ssl\PrivateKeyImpl.h" />
     <ClInclude Include="..\..\src\Pt-System\ConsoleChannel.h" />
     <ClInclude Include="..\..\src\Pt-System\FileChannel.h" />
     <ClInclude Include="..\..\src\Pt-System\LogManager.h" />
@@ -479,12 +475,10 @@
     <ClCompile Include="..\..\src\Pt-Ssl\openssl\CertificateStoreImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Ssl\openssl\Connection.cpp" />
     <ClCompile Include="..\..\src\Pt-Ssl\openssl\ContextImpl.cpp" />
-    <ClCompile Include="..\..\src\Pt-Ssl\PrivateKey.cpp" />
-    <ClCompile Include="..\..\src\Pt-Ssl\PublicKey.cpp" />
-    <ClCompile Include="..\..\src\Pt-Ssl\Session.cpp" />
     <ClCompile Include="..\..\src\Pt-Ssl\SslError.cpp" />
     <ClCompile Include="..\..\src\Pt-Ssl\StreamBuffer.cpp" />
     <ClCompile Include="..\..\src\Pt-Ssl\tests\ContextTest.cpp" />
+    <ClCompile Include="..\..\src\Pt-Ssl\tests\HttpsClientDemo.cpp" />
     <ClCompile Include="..\..\src\Pt-Ssl\tests\IOBufferTest.cpp" />
     <ClCompile Include="..\..\src\Pt-Ssl\tests\Pt-Ssl-test.cpp" />
     <ClCompile Include="..\..\src\Pt-Ssl\tests\StreamBufferTest.cpp" />

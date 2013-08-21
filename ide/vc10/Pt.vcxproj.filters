@@ -522,12 +522,6 @@
     <ClInclude Include="..\..\include\Pt\Ssl\Api.h">
       <Filter>Pt-Ssl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Ssl\PrivateKey.h">
-      <Filter>Pt-Ssl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Ssl\PublicKey.h">
-      <Filter>Pt-Ssl</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Ssl\SslError.h">
       <Filter>Pt-Ssl</Filter>
     </ClInclude>
@@ -541,9 +535,6 @@
       <Filter>Pt-Ssl</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Ssl\IOBuffer.h">
-      <Filter>Pt-Ssl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Ssl\Session.h">
       <Filter>Pt-Ssl</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\System\LogRecord.h">
@@ -974,9 +965,6 @@
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\Renderer.h">
       <Filter>Pt-Hmi\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Ssl\PrivateKeyImpl.h">
-      <Filter>Pt-Ssl</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\GfxController.h">
       <Filter>Pt-Hmi\Headers</Filter>
@@ -1617,12 +1605,6 @@
     <ClCompile Include="..\..\src\Pt-Net\win32\UdpSocketImpl.cpp">
       <Filter>Pt-Net\win32</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Ssl\PrivateKey.cpp">
-      <Filter>Pt-Ssl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Ssl\PublicKey.cpp">
-      <Filter>Pt-Ssl</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Pt-Ssl\SslError.cpp">
       <Filter>Pt-Ssl</Filter>
     </ClCompile>
@@ -1646,9 +1628,6 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Ssl\tests\IOBufferTest.cpp">
       <Filter>Pt-Ssl\tests</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Ssl\Session.cpp">
-      <Filter>Pt-Ssl</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-System\LogTarget.cpp">
       <Filter>Pt-System</Filter>
@@ -2036,6 +2015,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Ssl\applessl\CertificateStoreImpl.cpp">
       <Filter>Pt-Ssl\applessl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Ssl\tests\HttpsClientDemo.cpp">
+      <Filter>Pt-Ssl\tests</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -37,15 +37,16 @@
 #include <cassert>
 #include <cstring>
 
-#import <Security/Security.h>
-#import <CoreFoundation/CoreFoundation.h>
-#import <CoreFoundation/CFDictionary.h>
+#include <CoreFoundation/CoreFoundation.h>
+#include <CoreFoundation/CFDictionary.h>
 
 log_define("Pt.Ssl.StreamBuffer")
 
 namespace Pt {
 
 namespace Ssl {
+
+const char* toCipherName(SSLCipherSuite cipher) ;
 
 Connection::Connection(Context& ctx, std::streambuf& ios, int mode)
 : _ctx(&ctx)
@@ -142,8 +143,7 @@ bool Connection::writeHandshake()
 {
     log_trace("Connection::writeHandshake");
     
-    if( ! _ios )
-        throw System::IOError("SSL Buffer not initialized");
+    assert( _ios );
 
     _iocount = 0;
     _isWriting = true;
@@ -152,14 +152,16 @@ bool Connection::writeHandshake()
 
     log_debug("SSLHandshake returns " << status);
 
-    if(status != noErr && status != errSSLWouldBlock && status != errSSLUnknownRootCert)
-    {
-        throw HandshakeFailed("SSL handshake failed");
-    }
-
     if(status == noErr)
     {       
+        log_debug("SSL handshake completed");
         _connected = true;
+        // assert(_iocount == 0);
+        // return false;
+    }
+    else if(status != errSSLWouldBlock)
+    {
+        throw HandshakeFailed("SSL handshake failed");
     }
 
     return _iocount > 0;
@@ -170,10 +172,7 @@ bool Connection::readHandshake()
 {
     log_trace("Connection::readHandshake");
     
-    if( ! _ios )
-        throw System::IOError("SSL Buffer not initialized");
-
-    again:
+    assert( _ios );
 
     _wantRead = false;
     _isReading = true;
@@ -182,58 +181,59 @@ bool Connection::readHandshake()
 
     log_debug("SSLHandshake returns " << status);
     
-    
-#ifdef PT_IOS
-    if(status == errSSLPeerAuthCompleted)
-#else
-    if(status == errSSLServerAuthCompleted)
-#endif
-    {
-        log_debug("errSSLPeerAuthCompleted");
-
-        bool verifyNone = _ctx->verifyMode() == NoVerify;
-        if(verifyNone)
-            goto again;
-
-        SecTrustRef trust = NULL;
-        SSLCopyPeerTrust(_context, &trust);
-        //SecTrustSetPolicies(trust, SecPolicyCreateBasicX509());
-
-        CFArrayRef caArr = _ctx->impl()->caCertificates();
-        SecTrustSetAnchorCertificates(trust, caArr);
-        SecTrustSetAnchorCertificatesOnly(trust, true);
-
-        log_debug("SecTrustEvaluate evaluating");
-        SecTrustResultType result;
-        OSStatus evalErr = SecTrustEvaluate(trust, &result);
-        
-        if(evalErr)
-            throw HandshakeFailed("SSL handshake failed");
-            
-        log_debug("SecTrustEvaluate: " << result);
-        
-        if(trust)
-            CFRelease(trust);
-
-        if( (result != kSecTrustResultProceed) && 
-            (result != kSecTrustResultUnspecified) )
-            throw HandshakeFailed("SSL handshake failed");
-
-        log_debug("SecTrustEvaluate success");
-        goto again;
-    }
-    
-    if(status == errSSLUnknownRootCert)
-        throw HandshakeFailed("untrusted CA certificate");
-
-    if(status != noErr && status != errSSLWouldBlock )
-    {
-        throw HandshakeFailed("SSL handshake failed");
-    }
-
     if( status == noErr )
     {
+        log_debug("SSL handshake completed");
         _connected = true;
+        // assert(_wantRead == false);
+        // return false;
+    }
+#ifdef PT_IOS
+    else if(status == errSSLPeerAuthCompleted)
+#else
+    else if(status == errSSLServerAuthCompleted)
+#endif
+    {
+        log_debug("authenticating peer");
+
+        bool verifyNone = _ctx->verifyMode() == NoVerify;
+        if( ! verifyNone )
+        {
+            SecTrustRef trust = NULL;
+            SSLCopyPeerTrust(_context, &trust);
+
+            // TODO: handle TryVerify and AlwaysVerify
+            // check with SecTrustGetCertificateAtIndex 0 if a certificate is present
+            // do not allow missing certs for AlwaysVerify
+
+            CFArrayRef caArr = _ctx->impl()->caCertificates();
+            SecTrustSetAnchorCertificates(trust, caArr);
+            SecTrustSetAnchorCertificatesOnly(trust, true);
+
+            log_debug("evaluating trust");
+            SecTrustResultType result;
+            OSStatus evalErr = SecTrustEvaluate(trust, &result);
+        
+            if(evalErr)
+                throw HandshakeFailed("SSL handshake failed");
+            
+            log_debug("SecTrustEvaluate: " << result);
+        
+            if(trust)
+                CFRelease(trust);
+
+            if( (result != kSecTrustResultProceed) && 
+                (result != kSecTrustResultUnspecified) )
+                throw HandshakeFailed("SSL handshake failed");
+
+            log_debug("authentication successful");
+        }
+
+        return readHandshake();
+    }
+    else if( status != errSSLWouldBlock )
+    {
+        throw HandshakeFailed("SSL handshake failed");
     }
 
     return _wantRead;
@@ -298,49 +298,6 @@ bool Connection::shutdown()
     _receivedShutdown = false;
     return true;
 }
-
-
-//bool Connection::shutdown()
-//{
-//    if( ! _connected )
-//        return true;
-//
-//    if(_receivedShutdown) // shutdown notify was received
-//    {
-//        // send shutdown notify
-//        _isWriting = true;
-//        OSStatus error = SSLClose(_context);
-//        _isWriting = false;
-//        
-//        log_trace("SSLClose: " << error);
-//
-//        if(error == noErr)
-//        {
-//            _receivedShutdown = false;
-//            _connected = false;
-//            return true;
-//        }
-//        
-//        if(error == errSSLWouldBlock)
-//            return false;
-//            
-//        throw SslError("shutdown failed");
-//    }
-//    
-//    // read shutdown notify acknowledge
-//    _isReading = true;
-//    OSStatus error = SSLClose(_context);
-//    _isReading = false;
-//
-//    if(error == errSSLWouldBlock)
-//        return false;
-//
-//    if(error != noErr)
-//        throw SslError("shutdown failed");
-//
-//    _receivedShutdown = true;
-//    return false;
-//}
 
 
 bool Connection::isShutdown() const
@@ -460,6 +417,86 @@ OSStatus Connection::sslWriteCallback(SSLConnectionRef connection, const void* d
 OSStatus Connection::sslReadCallback(SSLConnectionRef connection, void* data, size_t* n)
 {
     return ((Connection*)(connection))->sslRead(data, n);
+}
+
+
+const char* toCipherName(SSLCipherSuite cipher) 
+{
+    switch (cipher) 
+    {
+        case SSL_RSA_WITH_NULL_MD5: return "SSL_RSA_WITH_NULL_MD5";
+        case SSL_RSA_WITH_NULL_SHA: return "SSL_RSA_WITH_NULL_SHA";
+        case SSL_RSA_EXPORT_WITH_RC4_40_MD5: return "SSL_RSA_EXPORT_WITH_RC4_40_MD5";
+        case SSL_RSA_WITH_RC4_128_MD5: return "SSL_RSA_WITH_RC4_128_MD5";
+        case SSL_RSA_WITH_RC4_128_SHA: return "SSL_RSA_WITH_RC4_128_SHA";
+        case SSL_RSA_EXPORT_WITH_RC2_CBC_40_MD5: return "SSL_RSA_EXPORT_WITH_RC2_CBC_40_MD5";
+        case SSL_RSA_WITH_IDEA_CBC_SHA: return "SSL_RSA_WITH_IDEA_CBC_SHA";
+        case SSL_RSA_EXPORT_WITH_DES40_CBC_SHA: return "SSL_RSA_EXPORT_WITH_DES40_CBC_SHA";
+        case SSL_RSA_WITH_DES_CBC_SHA: return "SSL_RSA_WITH_DES_CBC_SHA";
+        case SSL_RSA_WITH_3DES_EDE_CBC_SHA: return "SSL_RSA_WITH_3DES_EDE_CBC_SHA";
+        case SSL_DH_DSS_EXPORT_WITH_DES40_CBC_SHA: return "SSL_DH_DSS_EXPORT_WITH_DES40_CBC_SHA";
+        case SSL_DH_DSS_WITH_DES_CBC_SHA: return "SSL_DH_DSS_WITH_DES_CBC_SHA";
+        case SSL_DH_DSS_WITH_3DES_EDE_CBC_SHA: return "SSL_DH_DSS_WITH_3DES_EDE_CBC_SHA";
+        case SSL_DH_RSA_EXPORT_WITH_DES40_CBC_SHA: return "SSL_DH_RSA_EXPORT_WITH_DES40_CBC_SHA";
+        case SSL_DH_RSA_WITH_DES_CBC_SHA: return "SSL_DH_RSA_WITH_DES_CBC_SHA";
+        case SSL_DH_RSA_WITH_3DES_EDE_CBC_SHA: return "SSL_DH_RSA_WITH_3DES_EDE_CBC_SHA";
+        case SSL_DHE_DSS_EXPORT_WITH_DES40_CBC_SHA: return "SSL_DHE_DSS_EXPORT_WITH_DES40_CBC_SHA";
+        case SSL_DHE_DSS_WITH_DES_CBC_SHA: return "SSL_DHE_DSS_WITH_DES_CBC_SHA";
+        case SSL_DHE_DSS_WITH_3DES_EDE_CBC_SHA: return "SSL_DHE_DSS_WITH_3DES_EDE_CBC_SHA";
+        case SSL_DHE_RSA_EXPORT_WITH_DES40_CBC_SHA: return "SSL_DHE_RSA_EXPORT_WITH_DES40_CBC_SHA";
+        case SSL_DHE_RSA_WITH_DES_CBC_SHA: return "SSL_DHE_RSA_WITH_DES_CBC_SHA";
+        case SSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA: return "SSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA";
+        case SSL_DH_anon_EXPORT_WITH_RC4_40_MD5: return "SSL_DH_anon_EXPORT_WITH_RC4_40_MD5";
+        case SSL_DH_anon_WITH_RC4_128_MD5: return "SSL_DH_anon_WITH_RC4_128_MD5";  
+        case SSL_DH_anon_EXPORT_WITH_DES40_CBC_SHA: return "SSL_DH_anon_EXPORT_WITH_DES40_CBC_SHA";  
+        case SSL_DH_anon_WITH_DES_CBC_SHA: return "SSL_DH_anon_WITH_DES_CBC_SHA";  
+        case SSL_DH_anon_WITH_3DES_EDE_CBC_SHA: return "SSL_DH_anon_WITH_3DES_EDE_CBC_SHA";  
+        case SSL_FORTEZZA_DMS_WITH_NULL_SHA: return "SSL_FORTEZZA_DMS_WITH_NULL_SHA";  
+        case SSL_FORTEZZA_DMS_WITH_FORTEZZA_CBC_SHA: return "SSL_FORTEZZA_DMS_WITH_FORTEZZA_CBC_SHA";  
+        case TLS_RSA_WITH_AES_128_CBC_SHA: return "TLS_RSA_WITH_AES_128_CBC_SHA";  
+        case TLS_DH_DSS_WITH_AES_128_CBC_SHA: return "TLS_DH_DSS_WITH_AES_128_CBC_SHA";  
+        case TLS_DH_RSA_WITH_AES_128_CBC_SHA: return "TLS_DH_RSA_WITH_AES_128_CBC_SHA";  
+        case TLS_DHE_DSS_WITH_AES_128_CBC_SHA: return "TLS_DHE_DSS_WITH_AES_128_CBC_SHA";  
+        case TLS_DHE_RSA_WITH_AES_128_CBC_SHA: return "TLS_DHE_RSA_WITH_AES_128_CBC_SHA";  
+        case TLS_DH_anon_WITH_AES_128_CBC_SHA: return "TLS_DH_anon_WITH_AES_128_CBC_SHA";  
+        case TLS_RSA_WITH_AES_256_CBC_SHA: return "TLS_RSA_WITH_AES_256_CBC_SHA";  
+        case TLS_DH_DSS_WITH_AES_256_CBC_SHA: return "TLS_DH_DSS_WITH_AES_256_CBC_SHA";  
+        case TLS_DH_RSA_WITH_AES_256_CBC_SHA: return "TLS_DH_RSA_WITH_AES_256_CBC_SHA";  
+        case TLS_DHE_DSS_WITH_AES_256_CBC_SHA: return "TLS_DHE_DSS_WITH_AES_256_CBC_SHA";  
+        case TLS_DHE_RSA_WITH_AES_256_CBC_SHA: return "TLS_DHE_RSA_WITH_AES_256_CBC_SHA";  
+        case TLS_DH_anon_WITH_AES_256_CBC_SHA: return "TLS_DH_anon_WITH_AES_256_CBC_SHA";  
+        case TLS_ECDH_ECDSA_WITH_NULL_SHA: return "TLS_ECDH_ECDSA_WITH_NULL_SHA";  
+        case TLS_ECDH_ECDSA_WITH_RC4_128_SHA: return "TLS_ECDH_ECDSA_WITH_RC4_128_SHA";  
+        case TLS_ECDH_ECDSA_WITH_3DES_EDE_CBC_SHA: return "TLS_ECDH_ECDSA_WITH_3DES_EDE_CBC_SHA";  
+        case TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA: return "TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA";  
+        case TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA: return "TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA";  
+        case TLS_ECDHE_ECDSA_WITH_NULL_SHA: return "TLS_ECDHE_ECDSA_WITH_NULL_SHA";  
+        case TLS_ECDHE_ECDSA_WITH_RC4_128_SHA: return "TLS_ECDHE_ECDSA_WITH_RC4_128_SHA";  
+        case TLS_ECDHE_ECDSA_WITH_3DES_EDE_CBC_SHA: return "TLS_ECDHE_ECDSA_WITH_3DES_EDE_CBC_SHA";  
+        case TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA: return "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA";  
+        case TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA: return "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA";  
+        case TLS_ECDH_RSA_WITH_NULL_SHA: return "TLS_ECDH_RSA_WITH_NULL_SHA";  
+        case TLS_ECDH_RSA_WITH_RC4_128_SHA: return "TLS_ECDH_RSA_WITH_RC4_128_SHA";  
+        case TLS_ECDH_RSA_WITH_3DES_EDE_CBC_SHA: return "TLS_ECDH_RSA_WITH_3DES_EDE_CBC_SHA";  
+        case TLS_ECDH_RSA_WITH_AES_128_CBC_SHA: return "TLS_ECDH_RSA_WITH_AES_128_CBC_SHA";  
+        case TLS_ECDH_RSA_WITH_AES_256_CBC_SHA: return "TLS_ECDH_RSA_WITH_AES_256_CBC_SHA";  
+        case TLS_ECDHE_RSA_WITH_NULL_SHA: return "TLS_ECDHE_RSA_WITH_NULL_SHA";  
+        case TLS_ECDHE_RSA_WITH_RC4_128_SHA: return "TLS_ECDHE_RSA_WITH_RC4_128_SHA";  
+        case TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA: return "TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA";  
+        case TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA: return "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA";  
+        case TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA: return "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA";  
+        case TLS_ECDH_anon_WITH_NULL_SHA: return "TLS_ECDH_anon_WITH_NULL_SHA";  
+        case TLS_ECDH_anon_WITH_RC4_128_SHA: return "TLS_ECDH_anon_WITH_RC4_128_SHA";  
+        case TLS_ECDH_anon_WITH_3DES_EDE_CBC_SHA: return "TLS_ECDH_anon_WITH_3DES_EDE_CBC_SHA";  
+        case TLS_ECDH_anon_WITH_AES_128_CBC_SHA: return "TLS_ECDH_anon_WITH_AES_128_CBC_SHA";  
+        case TLS_ECDH_anon_WITH_AES_256_CBC_SHA: return "TLS_ECDH_anon_WITH_AES_256_CBC_SHA";  
+        case SSL_RSA_WITH_RC2_CBC_MD5: return "SSL_RSA_WITH_RC2_CBC_MD5";  
+        case SSL_RSA_WITH_IDEA_CBC_MD5: return "SSL_RSA_WITH_IDEA_CBC_MD5";  
+        case SSL_RSA_WITH_DES_CBC_MD5: return "SSL_RSA_WITH_DES_CBC_MD5";  
+        case SSL_RSA_WITH_3DES_EDE_CBC_MD5: return "SSL_RSA_WITH_3DES_EDE_CBC_MD5";
+    }
+
+    return "unknowm cipher";
 }
 
 } // namespace Ssl
