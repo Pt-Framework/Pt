@@ -30,9 +30,9 @@
 #include "Connection.h"
 #include "ContextImpl.h"
 #include "CertificateImpl.h"
-#include <Pt/Ssl/StreamBuffer.h>
 #include <Pt/Ssl/SslError.h>
 #include <Pt/System/Logger.h>
+#include <streambuf>
 #include <cassert>
 #include <cstring>
 
@@ -175,6 +175,7 @@ bool Connection::readHandshake()
 {
     log_trace("Connection::readHandshake");
 
+    // TODO: find better way for _wantRead and _iocount flags
     _wantRead = false;
     _isReading = true;
     OSStatus status = SSLHandshake(_context);
@@ -217,7 +218,10 @@ bool Connection::readHandshake()
             
             if(trust)
                 CFRelease(trust);
-
+            
+            // if peer presented no certificate, SecTrustGetCertificateCount
+            // should return 0. If we require one because AlwaysVerify is
+            // set, the handshake is considered to be failed
             if(_ctx->verifyMode() == AlwaysVerify && count == 0)
                 throw HandshakeFailed("SSL handshake failed");
 
@@ -362,6 +366,7 @@ OSStatus Connection::sslRead(void* data, size_t* n)
 {    
     log_trace("Connection::sslRead: wants " << *n << " bytes");
 
+    _wantRead = false;
     std::streambuf* sb = _ios->rdbuf();
 
     if(_isWriting || ! sb)
@@ -383,15 +388,19 @@ OSStatus Connection::sslRead(void* data, size_t* n)
     log_debug("read " << r << " bytes from input");
 
     OSStatus ret = noErr;
-    if( static_cast<size_t>(r) < (*n) ) 
+    if( static_cast<size_t>(r) < (*n) )
+    {
         ret = errSSLWouldBlock;
+    }
 
     *n = static_cast<size_t>(r);
 
     if(r <= 0)
-        return errSSLClosedGraceful; // errSSLClosedNoNotify
+    {
+        ret = errSSLClosedNoNotify;
+    }
     
-    log_debug("sslRead: return " << ret);
+    log_debug("sslRead: " << ret);
     return ret;
 }
 
@@ -400,6 +409,7 @@ OSStatus Connection::sslWrite(const void* data, size_t* n)
 {           
     log_trace("Connection::sslWrite: " << *n);
     
+    _iocount = 0;
     std::streambuf* sb = _ios->rdbuf();
 
     if(_isReading || ! sb)
@@ -411,10 +421,14 @@ OSStatus Connection::sslWrite(const void* data, size_t* n)
     _iocount = sb->sputn(reinterpret_cast<const char*>(data), *n);
     log_trace("wrote " << _iocount << " bytes to output");
 
-    if( ! _iocount)
-        return errSSLClosedAbort;
+    OSStatus ret = noErr;
+    if( static_cast<size_t>(_iocount) < *n)
+    {
+        ret = errSSLClosedAbort;
+    }
 
-    return noErr;
+    log_debug("sslWrite: " << ret);
+    return ret;
 }
 
 
@@ -430,7 +444,7 @@ OSStatus Connection::sslReadCallback(SSLConnectionRef connection, void* data, si
 }
 
 
-const char* Connection::toCipherName(SSLCipherSuite cipher) 
+const char* Connection::toCipherName(SSLCipherSuite cipher) const
 {
     switch (cipher) 
     {

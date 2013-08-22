@@ -31,9 +31,7 @@
 
 #include <Pt/Ssl/Api.h>
 #include <Pt/Ssl/Context.h>
-#include <Pt/Signal.h>
-#include <streambuf>
-#include <string>
+#include <ios>
 
 #include <Security/Security.h>
 
@@ -57,7 +55,6 @@ class Connection
 
         bool readHandshake();
 
-        // TODO: writeShutdown / readShutdown
         bool shutdown();
 
         bool isShutdown() const;
@@ -77,7 +74,7 @@ class Connection
         static OSStatus sslReadCallback(SSLConnectionRef connection, void* data, size_t* n);
 
     private:
-        const char* toCipherName(SSLCipherSuite cipher);
+        const char* toCipherName(SSLCipherSuite cipher) const;
 
     private:
         Context* _ctx;
