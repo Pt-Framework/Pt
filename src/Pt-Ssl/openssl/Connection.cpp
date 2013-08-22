@@ -41,7 +41,7 @@ namespace Pt {
 
 namespace Ssl {
 
-Connection::Connection(Context& ctx, std::streambuf& ios, OpenMode omode)
+Connection::Connection(Context& ctx, std::ios& ios, OpenMode omode)
 : _ios(&ios)
 , _connected(false)
 , _in(0)
@@ -62,6 +62,8 @@ Connection::Connection(Context& ctx, std::streambuf& ios, OpenMode omode)
         SSL_set_accept_state(_ssl);
     else
         SSL_set_connect_state(_ssl);
+
+    assert(_ssl);
 }
 
 
@@ -100,6 +102,20 @@ Connection::~Connection()
 //}
 
 
+//void Connection::setCiphers(const std::vector<SSLCipherInfo>& ciphers)
+//{
+//    std::string str;
+//    for(size_t i = 0; i < ciphers.size(); ++i) {
+//        if(!str.empty()) str += ":";
+//        str += ciphers[i].name;
+//    }
+//
+//    if( ! SSL_set_cipher_list(_ssl, str.c_str()))
+//        throw SSLError("invalid cipher");
+//
+//    _enabledCiphers = ciphers;
+//}
+
 const char* Connection::currentCipher() const
 {
     //char desc[512];
@@ -118,8 +134,9 @@ bool Connection::writeHandshake()
 {
     log_trace("Connection::writeHandshake");
 
-    if( ! _ios || ! _ssl)
-        throw SslError("SSL Buffer not initialized");
+    std::streambuf* sb = _ios->rdbuf();
+    if( ! sb)
+        return false;
 
     int ret = SSL_do_handshake(_ssl);
     log_debug("SSL_do_handshake returns " << ret);
@@ -154,7 +171,7 @@ bool Connection::writeHandshake()
         if(n <= 0)
             throw SslError("BIO_read");
 
-        _ios->sputn(buff, n);
+        sb->sputn(buff, n);
         return true;
     }
 
@@ -166,16 +183,17 @@ bool Connection::readHandshake()
 {
     log_trace("Connection::readHandshake");
 
-    if( ! _ios || ! _ssl)
-        throw SslError("SSL Buffer not initialized");
+    std::streambuf* sb = _ios->rdbuf();
+    if( ! sb)
+        return true;
 
-    while(_ios->in_avail() > 0)
+    while(_ios->rdbuf()->in_avail() > 0)
     {
         const std::streamsize bufsize = 2000;
         char buf[bufsize];
 
-        std::streamsize gsize = std::min( _ios->in_avail(), bufsize );
-        std::streamsize n = _ios->sgetn(buf, gsize);
+        std::streamsize gsize = std::min( sb->in_avail(), bufsize );
+        std::streamsize n = sb->sgetn(buf, gsize);
 
         const int written = BIO_write(_in, buf, static_cast<int>(n));
         assert(written == n);
@@ -221,7 +239,9 @@ bool Connection::shutdown()
     if( ! _connected )
         return true;
 
-    assert(_ssl);
+    std::streambuf* sb = _ios->rdbuf();
+    if( ! sb)
+        return false;
 
     int state = SSL_get_shutdown(_ssl);
     log_debug("SSL_get_shutdown() = " << state);
@@ -241,7 +261,7 @@ bool Connection::shutdown()
         if(n <= 0)
             throw SslError("BIO_read");
 
-        _ios->sputn(buf, n);
+        sb->sputn(buf, n);
         log_debug("wrote " << n << " bytes to output");
 
         if(r == 1)
@@ -259,11 +279,11 @@ bool Connection::shutdown()
     BUF_MEM* bm = 0;
     BIO_get_mem_ptr(_in, &bm);
 
-    std::streamsize avail = _ios->in_avail();
+    std::streamsize avail = sb->in_avail();
     std::streamsize refill = std::min(static_cast<std::streamsize>(bm->max - bm->length), avail);
     log_debug("refill " << refill << " bytes");
         
-    std::streamsize gcount = _ios->sgetn(bm->data + bm->length, refill);
+    std::streamsize gcount = sb->sgetn(bm->data + bm->length, refill);
     bm->length += static_cast<int>( gcount );
     log_debug("got " << gcount << " bytes from input stream");
 
@@ -284,9 +304,6 @@ bool Connection::shutdown()
 
 bool Connection::isShutdown() const
 {
-    if( ! _ssl)
-        return false;
-
     int state = SSL_get_shutdown(_ssl);
     log_debug("SSL_get_shutdown() = " << state);
     
@@ -302,7 +319,8 @@ bool Connection::isClosed() const
 
 std::streamsize Connection::write(const char* buf, size_t n)
 {
-    if( ! _ios || ! _ssl )
+    std::streambuf* sb = _ios->rdbuf();
+    if( ! sb)
         return 0;
 
     std::streamsize written = SSL_write(_ssl, buf, n);
@@ -312,7 +330,7 @@ std::streamsize Connection::write(const char* buf, size_t n)
     BIO_get_mem_ptr(_out, &bm);
     if(bm->length > 0)
     {
-        _ios->sputn(bm->data, bm->length);
+        sb->sputn(bm->data, bm->length);
         log_debug("wrote " << bm->length << " bytes to output");
         bm->length = 0;
     }
@@ -323,11 +341,12 @@ std::streamsize Connection::write(const char* buf, size_t n)
 
 std::streamsize Connection::read(char* buf, size_t n, std::streamsize isize)
 {
-    if( ! _ios || ! _ssl) 
+    std::streambuf* sb = _ios->rdbuf();
+    if( ! sb)
         return 0;
 
     if(isize == 0) 
-        isize = _ios->in_avail();
+        isize = sb->in_avail();
 
     while(true) 
     {
@@ -374,7 +393,7 @@ std::streamsize Connection::read(char* buf, size_t n, std::streamsize isize)
         const std::streamsize refill = std::min(static_cast<std::streamsize>(bm->max - bm->length), isize);
         log_debug("get " << refill << " bytes from _ios");
         
-        std::streamsize gcount = _ios->sgetn(bm->data + bm->length, refill);
+        std::streamsize gcount = sb->sgetn(bm->data + bm->length, refill);
         if(gcount <= 0)
             return 0;
 

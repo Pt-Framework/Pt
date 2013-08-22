@@ -34,6 +34,7 @@
 #include "Pt/Ssl/CertificateStore.h"
 #include "Pt/Ssl/Context.h"
 #include "Pt/Ssl/StreamBuffer.h"
+#include "Pt/Ssl/IOStream.h"
 #include "Pt/System/Logger.h"
 #include <sstream>
 #include <fstream>
@@ -113,10 +114,10 @@ void StreamBufferTest::Handshake()
     
     // client begins the handshake
     std::stringstream data;
-    Pt::Ssl::StreamBuffer client(clientContext, *data.rdbuf(), Pt::Ssl::Connect);
+    Pt::Ssl::StreamBuffer client(clientContext, data, Pt::Ssl::Connect);
 
     // server begins the handskake
-    Pt::Ssl::StreamBuffer server(serverContext, *data.rdbuf(), Pt::Ssl::Accept);
+    Pt::Ssl::StreamBuffer server(serverContext, data, Pt::Ssl::Accept);
 
     for( int n = 0; n < 20; ++n)
     {

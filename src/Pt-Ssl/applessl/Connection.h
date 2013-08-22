@@ -44,7 +44,7 @@ namespace Ssl {
 class Connection
 {
     public:
-        Connection(Context& ctx, std::streambuf& ios, OpenMode omode);
+        Connection(Context& ctx, std::ios& ios, OpenMode omode);
 
         ~Connection();
 
@@ -82,7 +82,7 @@ class Connection
     private:
         Context* _ctx;
         SSLContextRef   _context;
-        std::streambuf* _ios;
+        std::ios* _ios;
         std::streamsize _iocount;
         bool _connected;
         bool _wantRead;

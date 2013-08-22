@@ -273,7 +273,7 @@ class Connection : public Connectable
         Ssl::StreamBuffer _sslbuf;
 #endif
         HttpBuffer _httpbuf;
-        std::ostream _os;
+        std::ostream _os; // TODO: remove, only needed to write hex values
 
         std::size_t _timeout;
         std::size_t _keepaliveTimeout;

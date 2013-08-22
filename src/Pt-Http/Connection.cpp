@@ -207,7 +207,7 @@ void Connection::sendRequest(Request& request)
         if(_ssl)
         {
             log_debug("SSL connect");
-            _sslbuf.open(*_ctx, _sockbuf, Ssl::Connect);
+            _sslbuf.open(*_ctx, _sockios, Ssl::Connect);
 
             for( ; ; )
             {
@@ -350,7 +350,7 @@ void Connection::beginSendRequest(Request& request)
     {
         log_debug("begining SSL handshake");
         _timer.start( _timeout );
-        _sslbuf.open(*_ctx, _sockbuf, Ssl::Connect);
+        _sslbuf.open(*_ctx, _sockios, Ssl::Connect);
         _state = SslHandshakeWrite;
     }
 
@@ -373,7 +373,7 @@ void Connection::beginSendRequest(Request& request)
         }
         
         if( ! _sslbuf.isConnected() )
-            throw HttpError("invalid HTTP message");
+            throw System::IOError("HTTP I/O error");
 
         log_debug("Handshake finished");
         _timer.stop();
@@ -399,7 +399,7 @@ void Connection::beginSendRequest(Request& request)
         }
         
         if( ! _sslbuf.isConnected() )
-            throw HttpError("invalid HTTP message");
+            throw System::IOError("HTTP I/O error");
             
         log_debug("Handshake finished");
         _timer.stop();
@@ -664,7 +664,7 @@ void Connection::beginReceiveRequest(Request& request)
     {
         log_debug("beginning SSL handshake");
         _timer.start( _timeout );
-        _sslbuf.open(*_ctx, _sockbuf, Ssl::Accept);
+        _sslbuf.open(*_ctx, _sockios, Ssl::Accept);
         _state = SslAcceptRead;
     }
 
@@ -687,7 +687,7 @@ void Connection::beginReceiveRequest(Request& request)
         }
 
         if( ! _sslbuf.isConnected() )
-            throw HttpError("invalid HTTP message");
+            throw System::IOError("HTTP I/O error");
 
         log_debug("Handshake finished");
         _timer.stop();
@@ -713,7 +713,7 @@ void Connection::beginReceiveRequest(Request& request)
         }
         
         if( ! _sslbuf.isConnected() )
-            throw HttpError("invalid HTTP message");
+            throw System::IOError("HTTP I/O error");
         
         log_debug("Handshake finished");
         _timer.stop();

@@ -93,6 +93,7 @@ class HttpBuffer : public std::streambuf
         std::streambuf* buffer()
         { return _sbuf; }
 
+        // TODO: same reset semantics as XmlReader
         void reset()
         { 
             _contentLength = 0;

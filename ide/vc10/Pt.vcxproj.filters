@@ -531,9 +531,6 @@
     <ClInclude Include="..\..\include\Pt\Ssl\StreamBuffer.h">
       <Filter>Pt-Ssl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Ssl\IOBuffer.h">
-      <Filter>Pt-Ssl</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\System\LogRecord.h">
       <Filter>Pt-System</Filter>
     </ClInclude>
@@ -1034,6 +1031,9 @@
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Ssl\applessl\CertificateStoreImpl.h">
       <Filter>Pt-Ssl\applessl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Ssl\IOStream.h">
+      <Filter>Pt-Ssl</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1615,9 +1615,6 @@
       <Filter>Pt-Ssl\tests</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Ssl\StreamBuffer.cpp">
-      <Filter>Pt-Ssl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Ssl\IOBuffer.cpp">
       <Filter>Pt-Ssl</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Ssl\tests\IOBufferTest.cpp">

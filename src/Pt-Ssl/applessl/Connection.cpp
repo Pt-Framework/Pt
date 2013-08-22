@@ -33,7 +33,6 @@
 #include <Pt/Ssl/StreamBuffer.h>
 #include <Pt/Ssl/SslError.h>
 #include <Pt/System/Logger.h>
-#include <Pt/System/IOError.h>
 #include <cassert>
 #include <cstring>
 
@@ -46,7 +45,7 @@ namespace Pt {
 
 namespace Ssl {
 
-Connection::Connection(Context& ctx, std::streambuf& ios, OpenMode omode)
+Connection::Connection(Context& ctx, std::ios& ios, OpenMode omode)
 : _ctx(&ctx)
 , _context(0)
 , _ios(&ios)
@@ -150,8 +149,6 @@ const char* Connection::currentCipher() const
 bool Connection::writeHandshake()
 {
     log_trace("Connection::writeHandshake");
-    
-    assert( _ios );
 
     _iocount = 0;
     _isWriting = true;
@@ -177,8 +174,6 @@ bool Connection::writeHandshake()
 bool Connection::readHandshake()
 {
     log_trace("Connection::readHandshake");
-    
-    assert( _ios );
 
     _wantRead = false;
     _isReading = true;
@@ -320,7 +315,6 @@ bool Connection::isClosed() const
 std::streamsize Connection::write(const char* buf, size_t n)
 {
     size_t processed = 0;
-    
     OSStatus error = SSLWrite(_context, buf, n, &processed);
     
     if(error != noErr && error != errSSLWouldBlock)
@@ -334,8 +328,12 @@ std::streamsize Connection::read(char* buf, size_t n, std::streamsize isize)
 {
     log_trace("Connection::read");
 
+    std::streambuf* sb = _ios->rdbuf();
+    if( ! sb)
+        return 0;
+
     if(isize == 0) 
-        isize = _ios->in_avail();
+        isize = sb->in_avail();
 
     size_t processed = 0;
 
@@ -364,22 +362,24 @@ OSStatus Connection::sslRead(void* data, size_t* n)
 {    
     log_trace("Connection::sslRead: wants " << *n << " bytes");
 
-    if(_isWriting)
+    std::streambuf* sb = _ios->rdbuf();
+
+    if(_isWriting || ! sb)
     {
         *n = 0;
         return errSSLWouldBlock;
     }       
 
-    if(_ios->in_avail() <= 0)
+    if(sb->in_avail() <= 0)
     {
         _wantRead = true;
         *n = 0;
         return errSSLWouldBlock;
     }  
 
-    log_debug("avail input: " << _ios->in_avail());
-    std::streamsize gsize = std::min( _ios->in_avail(), static_cast<std::streamsize>(*n) );
-    std::streamsize r = _ios->sgetn(reinterpret_cast<char*>(data), gsize);
+    log_debug("avail input: " << sb->in_avail());
+    std::streamsize gsize = std::min( sb->in_avail(), static_cast<std::streamsize>(*n) );
+    std::streamsize r = sb->sgetn(reinterpret_cast<char*>(data), gsize);
     log_debug("read " << r << " bytes from input");
 
     OSStatus ret = noErr;
@@ -389,7 +389,7 @@ OSStatus Connection::sslRead(void* data, size_t* n)
     *n = static_cast<size_t>(r);
 
     if(r <= 0)
-        return errSSLClosedGraceful;
+        return errSSLClosedGraceful; // errSSLClosedNoNotify
     
     log_debug("sslRead: return " << ret);
     return ret;
@@ -399,16 +399,21 @@ OSStatus Connection::sslRead(void* data, size_t* n)
 OSStatus Connection::sslWrite(const void* data, size_t* n)
 {           
     log_trace("Connection::sslWrite: " << *n);
-    if(_isReading)
+    
+    std::streambuf* sb = _ios->rdbuf();
+
+    if(_isReading || ! sb)
     {
         *n = 0;
         return errSSLWouldBlock;
     }
 
-    _iocount = _ios->sputn(reinterpret_cast<const char*>(data), *n);
-    assert(static_cast<size_t>(_iocount) == *n);
-    log_trace("wrote: " << _iocount);
-    
+    _iocount = sb->sputn(reinterpret_cast<const char*>(data), *n);
+    log_trace("wrote " << _iocount << " bytes to output");
+
+    if( ! _iocount)
+        return errSSLClosedAbort;
+
     return noErr;
 }
 

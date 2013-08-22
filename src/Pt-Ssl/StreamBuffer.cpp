@@ -53,7 +53,7 @@ StreamBuffer::StreamBuffer(size_t bufferSize)
 }
 
 
-StreamBuffer::StreamBuffer(Context& ctx, std::streambuf& sb, OpenMode mode, size_t bufferSize)
+StreamBuffer::StreamBuffer(Context& ctx, std::ios& ios, OpenMode mode, size_t bufferSize)
 : _connection(0)
 , _ibufferSize(bufferSize + 4)
 , _ibuffer(0)
@@ -61,45 +61,39 @@ StreamBuffer::StreamBuffer(Context& ctx, std::streambuf& sb, OpenMode mode, size
 , _obuffer(0)
 , _pbmax(4)
 {
-    this->open(ctx, sb, mode);
+    this->open(ctx, ios, mode);
 }
 
 
 StreamBuffer::~StreamBuffer()
 { 
-    if(_connection)
-        delete _connection; 
-
-    delete [] _ibuffer;
-    delete [] _obuffer;
+    close();
 }
 
 
-void StreamBuffer::open(Context& ctx, std::streambuf& sb, OpenMode mode)
+void StreamBuffer::open(Context& ctx, std::ios& ios, OpenMode mode)
 {
     if(_connection)
         delete _connection;
 
     _connection = 0;
-    _connection = new Connection(ctx, sb, mode);
+    _connection = new Connection(ctx, ios, mode);
 }
 
 
-//void StreamBuffer::discard()
-//{
-//    if( ! _ssl)
-//        return;
-//
-//    // Reset all
-//    (void) BIO_reset(_in);
-//    (void) BIO_reset(_out);
-//    SSL_clear(_ssl);
-//
-//    delete [] _ibuffer; _ibuffer = 0;
-//    delete [] _obuffer; _obuffer = 0;
-//
-//    _connected = false;
-//}
+void StreamBuffer::close()
+{
+    if(_connection)
+        delete _connection;
+
+    // TODO: delete buffers only in dtor
+    // setg(0,0,0) and setp(0,0) should be enough
+    delete [] _ibuffer; _ibuffer = 0;
+    delete [] _obuffer; _obuffer = 0;
+
+    setg(0, 0, 0);
+    setp(0, 0);
+}
 
 
 const char* StreamBuffer::currentCipher() const
@@ -119,8 +113,6 @@ bool StreamBuffer::isConnected() const
 
 bool StreamBuffer::writeHandshake()
 {
-    log_trace("StreamBuffer::writeHandshake");
-    
     if( ! _connection )
         throw SslError("no connection");
 
@@ -129,9 +121,7 @@ bool StreamBuffer::writeHandshake()
 
 
 bool StreamBuffer::readHandshake()
-{
-    log_trace("StreamBuffer::readHandshake");
-    
+{   
     if( ! _connection )
         throw SslError("no connection");
 
@@ -149,6 +139,8 @@ bool StreamBuffer::shutdown()
         shutdownComplete = _connection->shutdown();
     }
 
+    // TODO: delete buffers only in dtor
+    // setg(0,0,0) and setp(0,0) should be enough
     delete [] _ibuffer; _ibuffer = 0;
     delete [] _obuffer; _obuffer = 0;
 
@@ -323,71 +315,6 @@ StreamBuffer::int_type StreamBuffer::overflow(int_type ch)
 
     return traits_type::not_eof(ch);
 }
-
-
-/*
-std::vector<CipherInfo> StreamBuffer::availableCiphers() const
-{
-    std::vector<CipherInfo> availCiphers;
-
-    STACK_OF(SSL_CIPHER)* chp = SSL_get_ciphers(_ssl);
-    for(int i = 0; i < sk_SSL_CIPHER_num(chp); ++i)
-    {
-        // Skip if not valid
-        const SSL_CIPHER* c = sk_SSL_CIPHER_value(chp, i);
-        if( ! c->valid )
-            continue;
-
-        // Get the ID and split it
-        const unsigned long id  = c->id;
-        const int           id0 = (int) (  id >> 24);
-        const int           id1 = (int) ( (id >> 16) & 0xFFL );
-        const int           id2 = (int) ( (id >>  8) & 0xFFL );
-        const int           id3 = (int) (  id        & 0xFFL );
-
-        // Convert the ID to a readable string
-        char strid[64];
-        if((id & 0xFF000000L) == 0x02000000L)
-            sprintf(strid, "0x%02X,0x%02X,0x%02X", id1, id2, id3);
-        else if((id & 0xFF000000L) == 0x03000000L)
-            sprintf(strid, "0x%02X,0x%02X", id2, id3);
-        else
-            sprintf(strid, "0x%02X,0x%02X,0x%02X,0x%02X", id0, id1, id2, id3);
-
-        // Get some information
-        char desc[512];
-        SSL_CIPHER_description(c, desc, sizeof(desc));
-        const int dlen = strlen(desc);
-        if(desc[dlen - 1] == '\n')
-            desc[dlen - 1] = 0;
-
-        // Store the chiper information
-        int usedBits;
-        int bits = SSL_CIPHER_get_bits(c, &usedBits);
-        CipherInfo cipher(id, strid, SSL_CIPHER_get_name(c), bits, usedBits, 
-                          SSL_CIPHER_get_version(c), desc);
-        
-        availCiphers.push_back(cipher);
-    }
-
-    return availCiphers;
-}*/
-
-/*
-void StreamBuffer::setCiphers(const std::vector<SSLCipherInfo>& ciphers)
-{
-    std::string str;
-    for(size_t i = 0; i < ciphers.size(); ++i) {
-        if(!str.empty()) str += ":";
-        str += ciphers[i].name;
-    }
-
-    if(!SSL_set_cipher_list(_ssl, str.c_str()))
-        throw SSLRuntimeError("Failed selecting SSL ciphers!", PT_SOURCEINFO);
-
-    _enabledCiphers = ciphers;
-}
-*/
 
 } // namespace Ssl
 
