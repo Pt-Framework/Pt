@@ -48,6 +48,13 @@ static struct PT_SSL_API SSLInit
     ~SSLInit();
 } ssl_init;
 
+//! @brief Open mode for ssl I/O.
+enum OpenMode
+{
+    Connect = 1,
+    Accept = 2
+};
+
 //! @brief Communication protocol.
 enum Protocol 
 {

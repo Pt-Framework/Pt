@@ -45,7 +45,6 @@ class StreamBufferTest : public Pt::Unit::TestSuite
         : Pt::Unit::TestSuite("StreamBufferTest")
         {
             Pt::System::Logger::setLogLevel("Pt.Ssl", Pt::System::Error);
-
             this->registerMethod("Handshake", *this, &StreamBufferTest::Handshake);
         }
 
@@ -114,10 +113,10 @@ void StreamBufferTest::Handshake()
     
     // client begins the handshake
     std::stringstream data;
-    Pt::Ssl::StreamBuffer client(clientContext, *data.rdbuf(), Pt::Ssl::StreamBuffer::Connect);
+    Pt::Ssl::StreamBuffer client(clientContext, *data.rdbuf(), Pt::Ssl::Connect);
 
     // server begins the handskake
-    Pt::Ssl::StreamBuffer server(serverContext, *data.rdbuf(), Pt::Ssl::StreamBuffer::Accept);
+    Pt::Ssl::StreamBuffer server(serverContext, *data.rdbuf(), Pt::Ssl::Accept);
 
     for( int n = 0; n < 20; ++n)
     {

@@ -102,27 +102,13 @@ void StreamBuffer::open(Context& ctx, std::streambuf& sb, OpenMode mode)
 //}
 
 
-//CipherList StreamBuffer::ciphers() const
-//{
-//    if( ! _ssl )
-//        return CipherList();
-//
-//    // TODO: possibly cache the available ciphers in the context
-//    STACK_OF(SSL_CIPHER)* ciphers = SSL_get_ciphers(_ssl);
-//    return CipherList(ciphers);
-//}
-//
-//
-//Cipher StreamBuffer::currentCipher() const
-//{
-//    if( ! _ssl )
-//        return Cipher();
-//
-//    // TODO: possibly return a Cipher that has internally a reference to a 
-//    //       CipherData in the context cache
-//    const SSL_CIPHER* c = SSL_get_current_cipher(_ssl);
-//    return Cipher(c);
-//}
+const char* StreamBuffer::currentCipher() const
+{
+    if(_connection)
+        return _connection->currentCipher();
+
+    return "NONE";
+}
 
 
 bool StreamBuffer::isConnected() const

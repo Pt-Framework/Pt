@@ -128,7 +128,7 @@ int main(int argc, char** argv)
         log_debug("connected");
 
         std::stringstream ss;
-        Pt::Ssl::StreamBuffer sslbuf( sslctx, *ss.rdbuf(), Pt::Ssl::StreamBuffer::Connect );
+        Pt::Ssl::StreamBuffer sslbuf( sslctx, *ss.rdbuf(), Pt::Ssl::Connect );
 
         while( ! sslbuf.isConnected() )
         {

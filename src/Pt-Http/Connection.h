@@ -264,6 +264,7 @@ class Connection : public Connectable
         System::Timer _timer;
         Socket _socket;
         System::IOBuffer _sockbuf;
+        std::iostream _sockios;
         Net::AddrInfo _addrInfo;
 
         bool _ssl;
@@ -272,7 +273,7 @@ class Connection : public Connectable
         Ssl::StreamBuffer _sslbuf;
 #endif
         HttpBuffer _httpbuf;
-        std::iostream _os;
+        std::ostream _os;
 
         std::size_t _timeout;
         std::size_t _keepaliveTimeout;

@@ -47,13 +47,6 @@ class Connection;
 class PT_SSL_API StreamBuffer : public std::streambuf
 {
     public:
-        enum OpenMode
-        {
-            Connect = 3,
-            Accept = 4
-        };
-
-    public:
         /** @brief Construct an SSL stream buffer that uses the given IO stream. 
         */
         StreamBuffer(size_t bufferSize = 1024);
@@ -70,15 +63,11 @@ class PT_SSL_API StreamBuffer : public std::streambuf
         */
         void open(Context& ctx, std::streambuf& sb, OpenMode mode);
 
+         /** @brief Return the currently used cipher.. 
+        */
+        const char* currentCipher() const;
+
         //void discard();
-
-        /** @brief Return a list of available ciphers for the current protocol. 
-        */
-        //CipherList ciphers() const;
-
-        /** @brief Return the currently used cipher (the cipher that are actually used to form the SSL channel). 
-        */
-        //Cipher currentCipher() const;
 
         /** @brief Check if this SSL stream buffer has been connected to the SSL stream buffer at the other end. 
         */
@@ -107,13 +96,18 @@ class PT_SSL_API StreamBuffer : public std::streambuf
         */
         bool shutdown();
 
+        /** @brief Returns true if the shutown notify has to be completed.
+        */
         bool isShutdown() const;
 
+        /** @brief Returns true if the connection is closed.
+        */
         bool isClosed() const;
 
-        /** @brief Reads user message from the underlying stream
+        /** @brief Reads user message from the underlying stream.
             
-            Call isShutdown() to find out if peer is shutting down the connection.
+            Call isShutdown() to find out if a shutdown notify was received
+            and isClosed() if the connection was prematurely closed.
         */
         void import(std::streamsize maxImport = 0);
 

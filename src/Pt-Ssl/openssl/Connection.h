@@ -41,12 +41,14 @@ namespace Ssl {
 class Connection
 {
     public:
-        Connection(Context& ctx, std::streambuf& ios, int mode);
+        Connection(Context& ctx, std::streambuf& ios, OpenMode omode);
 
         ~Connection();
 
         bool connected() const
         { return _connected; }
+
+        const char* currentCipher() const;
 
         bool writeHandshake();
 

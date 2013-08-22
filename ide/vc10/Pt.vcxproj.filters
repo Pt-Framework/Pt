@@ -525,9 +525,6 @@
     <ClInclude Include="..\..\include\Pt\Ssl\SslError.h">
       <Filter>Pt-Ssl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Ssl\CipherList.h">
-      <Filter>Pt-Ssl</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Ssl\Context.h">
       <Filter>Pt-Ssl</Filter>
     </ClInclude>
@@ -1606,9 +1603,6 @@
       <Filter>Pt-Net\win32</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Ssl\SslError.cpp">
-      <Filter>Pt-Ssl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Ssl\CipherList.cpp">
       <Filter>Pt-Ssl</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Ssl\Context.cpp">

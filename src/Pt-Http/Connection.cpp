@@ -75,6 +75,7 @@ Connection::Connection()
 , _request(0)
 , _reply(0)
 , _sockbuf(8192, true)
+, _sockios(&_sockbuf)
 , _ssl(false)
 #ifdef PT_HTTP_WITH_SSL
 , _ctx(0)
@@ -179,6 +180,8 @@ void Connection::cancel()
     _timer.stop();
     _readBytes = 0;
     _socket.close();
+    _sockbuf.discard();
+    _sockios.clear();
     _reply = 0;
     _request = 0;
     _state = NotConnected;
@@ -204,7 +207,7 @@ void Connection::sendRequest(Request& request)
         if(_ssl)
         {
             log_debug("SSL connect");
-            _sslbuf.open(*_ctx, _sockbuf, Ssl::StreamBuffer::Connect);
+            _sslbuf.open(*_ctx, _sockbuf, Ssl::Connect);
 
             for( ; ; )
             {
@@ -213,7 +216,7 @@ void Connection::sendRequest(Request& request)
                     ;
 
                 log_debug("syncing buffer");
-                _sockbuf.pubsync();
+                _sockios.flush();
 
                 log_debug("reading handshake");
                 while( _sslbuf.readHandshake() )
@@ -347,7 +350,7 @@ void Connection::beginSendRequest(Request& request)
     {
         log_debug("begining SSL handshake");
         _timer.start( _timeout );
-        _sslbuf.open(*_ctx, _sockbuf, Ssl::StreamBuffer::Connect);
+        _sslbuf.open(*_ctx, _sockbuf, Ssl::Connect);
         _state = SslHandshakeWrite;
     }
 
@@ -661,7 +664,7 @@ void Connection::beginReceiveRequest(Request& request)
     {
         log_debug("beginning SSL handshake");
         _timer.start( _timeout );
-        _sslbuf.open(*_ctx, _sockbuf, Ssl::StreamBuffer::Accept);
+        _sslbuf.open(*_ctx, _sockbuf, Ssl::Accept);
         _state = SslAcceptRead;
     }
 

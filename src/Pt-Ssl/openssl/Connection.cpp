@@ -41,7 +41,7 @@ namespace Pt {
 
 namespace Ssl {
 
-Connection::Connection(Context& ctx, std::streambuf& ios, int mode)
+Connection::Connection(Context& ctx, std::streambuf& ios, OpenMode omode)
 : _ios(&ios)
 , _connected(false)
 , _in(0)
@@ -58,7 +58,7 @@ Connection::Connection(Context& ctx, std::streambuf& ios, int mode)
     BIO_set_nbio(_out, 1);
     SSL_set_bio(_ssl, _in, _out);
 
-    if(mode == StreamBuffer::Accept)
+    if(omode == Accept)
         SSL_set_accept_state(_ssl);
     else
         SSL_set_connect_state(_ssl);
@@ -88,6 +88,30 @@ Connection::~Connection()
 //    int  ret = X509_NAME_get_text_by_NID(X509_get_subject_name(peer), NID_commonName, peerCN, sizeof(peerCN));
 //    return (ret > 0) ? peerCN : "";
 //}
+
+//CipherList Connection::ciphers() const
+//{
+//    if( ! _ssl )
+//        return CipherList();
+//
+//    // TODO: possibly cache the available ciphers in the context
+//    STACK_OF(SSL_CIPHER)* ciphers = SSL_get_ciphers(_ssl);
+//    return CipherList(ciphers);
+//}
+
+
+const char* Connection::currentCipher() const
+{
+    //char desc[512];
+    //SSL_CIPHER_description(c, desc, sizeof(desc));
+    //bits = SSL_CIPHER_get_bits(c, &usedBits);
+    //name = SSL_CIPHER_get_name(c);
+    //version = SSL_CIPHER_get_version(c);
+
+    const SSL_CIPHER* c = SSL_get_current_cipher(_ssl);
+    const char* name = SSL_CIPHER_get_name(c);
+    return name;
+}
 
 
 bool Connection::writeHandshake()

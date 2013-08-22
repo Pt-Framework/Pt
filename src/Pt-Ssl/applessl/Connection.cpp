@@ -46,9 +46,7 @@ namespace Pt {
 
 namespace Ssl {
 
-const char* toCipherName(SSLCipherSuite cipher) ;
-
-Connection::Connection(Context& ctx, std::streambuf& ios, int mode)
+Connection::Connection(Context& ctx, std::streambuf& ios, OpenMode omode)
 : _ctx(&ctx)
 , _context(0)
 , _ios(&ios)
@@ -60,7 +58,7 @@ Connection::Connection(Context& ctx, std::streambuf& ios, int mode)
 , _receivedShutdown(false)
 , _sentShutdown(false)
 {
-    Boolean isServer = (mode == StreamBuffer::Accept);
+    Boolean isServer = (omode == Accept);
 
     SSLNewContext(isServer, &_context);
     
@@ -136,6 +134,16 @@ Connection::Connection(Context& ctx, std::streambuf& ios, int mode)
 Connection::~Connection()
 {
     SSLDisposeContext(_context);
+}
+
+
+const char* Connection::currentCipher() const
+{
+    SSLCipherSuite cipherSuite;
+    SSLGetNegotiatedCipher(_context, &cipherSuite);
+
+    const char* name = toCipherName(cipherSuite);
+    return name;
 }
 
 
@@ -417,7 +425,7 @@ OSStatus Connection::sslReadCallback(SSLConnectionRef connection, void* data, si
 }
 
 
-const char* toCipherName(SSLCipherSuite cipher) 
+const char* Connection::toCipherName(SSLCipherSuite cipher) 
 {
     switch (cipher) 
     {
@@ -493,7 +501,7 @@ const char* toCipherName(SSLCipherSuite cipher)
         case SSL_RSA_WITH_3DES_EDE_CBC_MD5: return "SSL_RSA_WITH_3DES_EDE_CBC_MD5";
     }
 
-    return "unknowm cipher";
+    return "NONE";
 }
 
 } // namespace Ssl

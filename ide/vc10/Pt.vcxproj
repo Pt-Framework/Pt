@@ -156,7 +156,6 @@
     <ClInclude Include="..\..\include\Pt\Ssl\Api.h" />
     <ClInclude Include="..\..\include\Pt\Ssl\Certificate.h" />
     <ClInclude Include="..\..\include\Pt\Ssl\CertificateStore.h" />
-    <ClInclude Include="..\..\include\Pt\Ssl\CipherList.h" />
     <ClInclude Include="..\..\include\Pt\Ssl\Context.h" />
     <ClInclude Include="..\..\include\Pt\Ssl\IOBuffer.h" />
     <ClInclude Include="..\..\include\Pt\Ssl\SslError.h" />
@@ -469,7 +468,6 @@
     <ClCompile Include="..\..\src\Pt-Ssl\applessl\ContextImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Ssl\Certificate.cpp" />
     <ClCompile Include="..\..\src\Pt-Ssl\CertificateStore.cpp" />
-    <ClCompile Include="..\..\src\Pt-Ssl\CipherList.cpp" />
     <ClCompile Include="..\..\src\Pt-Ssl\Context.cpp" />
     <ClCompile Include="..\..\src\Pt-Ssl\IOBuffer.cpp" />
     <ClCompile Include="..\..\src\Pt-Ssl\openssl\CertificateStoreImpl.cpp" />

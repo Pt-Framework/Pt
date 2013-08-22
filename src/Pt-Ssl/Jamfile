@@ -17,7 +17,6 @@ PT_SSL_SOURCES = [ GLOB $(PT_SSL_SUBDIR) : *.cpp  ] ;
 SharedLibrary Pt-Ssl : $(PT_SSL_SOURCES)
                        Certificate.cpp
                        CertificateStore.cpp
-                       #CipherList.cpp
                        Context.cpp
                        SslError.cpp
                        StreamBuffer.cpp ;

@@ -44,12 +44,14 @@ namespace Ssl {
 class Connection
 {
     public:
-        Connection(Context& ctx, std::streambuf& ios, int mode);
+        Connection(Context& ctx, std::streambuf& ios, OpenMode omode);
 
         ~Connection();
 
         bool connected() const
         { return _connected; }
+
+        const char* currentCipher() const;
 
         bool writeHandshake();
 
@@ -73,6 +75,9 @@ class Connection
         static OSStatus sslWriteCallback(SSLConnectionRef connection, const void* data, size_t* n);
 
         static OSStatus sslReadCallback(SSLConnectionRef connection, void* data, size_t* n);
+
+    private:
+        const char* toCipherName(SSLCipherSuite cipher);
 
     private:
         Context* _ctx;
