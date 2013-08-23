@@ -98,6 +98,16 @@ class ContextTest : public Pt::Unit::TestSuite
     
             cert = store.findCertificate("Intermediate CA 2");
             PT_UNIT_ASSERT(cert);
+
+            std::size_t certCount = 0;
+            Pt::Ssl::CertificateStore::ConstIterator it;
+            for(it = store.begin(); it != store.end(); ++it)
+            {
+                ++certCount;
+            }
+            
+            PT_UNIT_ASSERT(certCount != 0);
+            PT_UNIT_ASSERT_EQUALS( certCount, store.size() );
         }
 
         void Assign()

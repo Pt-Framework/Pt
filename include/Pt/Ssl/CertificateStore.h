@@ -41,6 +41,9 @@ namespace Ssl {
 class PT_SSL_API CertificateStore
 {
     public:
+        class ConstIterator;
+
+    public:
         CertificateStore();
 
         ~CertificateStore();
@@ -51,8 +54,39 @@ class PT_SSL_API CertificateStore
 
         const Certificate* findCertificate(const std::string& subject);
 
+        std::size_t size() const;
+
+        ConstIterator begin() const;
+
+        ConstIterator end() const;
+
     private:
         class CertificateStoreImpl* _impl;
+};
+
+class PT_SSL_API CertificateStore::ConstIterator
+{
+    public:
+        ConstIterator();
+
+        ConstIterator(const ConstIterator& other);
+
+        explicit ConstIterator(Certificate* const* cert);
+
+        ConstIterator& operator=(const ConstIterator& other);
+
+        ConstIterator& operator++();
+
+        const Certificate& operator*() const;
+
+        const Certificate* operator->() const;
+
+        bool operator!=(const ConstIterator& other) const;
+
+        bool operator==(const ConstIterator& other) const;
+
+    private:
+        Certificate* const* _cert;
 };
 
 } // namespace Ssl

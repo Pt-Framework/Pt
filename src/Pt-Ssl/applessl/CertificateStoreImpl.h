@@ -44,6 +44,23 @@ class CertificateStoreImpl
 
         ~CertificateStoreImpl();
 
+        std::size_t size() const
+        { return _allCerts.size(); }
+
+        CertificateStore::ConstIterator begin() const
+        { 
+            Certificate* const* cert = _allCerts.empty() ? 0 
+                                                         : &_allCerts[0];
+            return CertificateStore::ConstIterator( cert); 
+        }
+
+        CertificateStore::ConstIterator end() const
+        {
+            Certificate* const* cert = _allCerts.empty() ? 0 
+                                                         : &_allCerts[0] + _allCerts.size();
+            return CertificateStore::ConstIterator(cert); 
+        }
+
         void loadPkcs12(const char* data, size_t len, const char* passwd);
 
         const Certificate* findCertificate(const std::string& subject);

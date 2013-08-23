@@ -80,8 +80,76 @@ const Certificate* CertificateStore::findCertificate(const std::string& subject)
     return _impl->findCertificate(subject); 
 }
 
+
+std::size_t CertificateStore::size() const
+{
+    return _impl->size(); 
+}
+
+CertificateStore::ConstIterator CertificateStore::begin() const
+{ 
+    return _impl->begin(); 
+}
+
+
+CertificateStore::ConstIterator CertificateStore::end() const
+{
+    return _impl->end(); 
+}
+
+
+CertificateStore::ConstIterator::ConstIterator()
+: _cert(0)
+{}
+
+
+CertificateStore::ConstIterator::ConstIterator(const CertificateStore::ConstIterator& other)
+: _cert(other._cert)
+{}
+
+
+CertificateStore::ConstIterator::ConstIterator(Certificate* const* cert)
+: _cert(cert)
+{}
+
+
+CertificateStore::ConstIterator& CertificateStore::ConstIterator::operator=(const CertificateStore::ConstIterator& other)
+{
+    _cert = other._cert;
+    return *this;
+}
+
+
+CertificateStore::ConstIterator& CertificateStore::ConstIterator::operator++()
+{
+    _cert++;
+    return *this;
+}
+
+
+const Certificate& CertificateStore::ConstIterator::operator*() const
+{ 
+    return **_cert; 
+}
+
+
+const Certificate* CertificateStore::ConstIterator::operator->() const
+{ 
+    return *_cert; 
+}
+
+
+bool CertificateStore::ConstIterator::operator!=(const CertificateStore::ConstIterator& other) const
+{ 
+    return _cert != other._cert; 
+}
+
+
+bool CertificateStore::ConstIterator::operator==(const CertificateStore::ConstIterator& other) const
+{ 
+    return _cert == other._cert; 
+}
+
 } // namespace Ssl
 
 } // namespace Pt
-
-
