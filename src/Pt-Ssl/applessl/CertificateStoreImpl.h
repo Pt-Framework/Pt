@@ -30,6 +30,7 @@
 
 #include <Pt/Ssl/Api.h>
 #include <Pt/Ssl/Certificate.h>
+#include <Pt/Ssl/CertificateStore.h>
 #include <string>
 #include <vector>
 
