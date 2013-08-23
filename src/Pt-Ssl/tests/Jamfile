@@ -2,11 +2,12 @@ SubDir PT_TOP src Pt-Ssl tests ;
 SubDirHdrs $(PT_TOP)/include ;
 SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Ssl ;
 
-Main Pt-Ssl-test : Pt-Ssl-test.cpp
+PT_SSL_TEST_SOURCES = Pt-Ssl-test.cpp
+                   CertificateStoreTest.cpp
                    ContextTest.cpp
-                   #IOBufferTest.cpp
-                   StreamBufferTest.cpp
-                   ;
+                   StreamBufferTest.cpp ;
+
+Main Pt-Ssl-test : $(PT_SSL_TEST_SOURCES) ;
 LinkSharedLibraries Pt-Ssl-test : Pt Pt-Net Pt-Ssl Pt-System Pt-Unit ;
 MakeLocate Pt-Ssl-test : $(PT_OUTPUT_TARGET) ;
 RunUnitTest Pt-Ssl-test : $(PT_OUTPUT_TEST) ;

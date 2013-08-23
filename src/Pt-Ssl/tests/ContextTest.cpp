@@ -32,7 +32,6 @@
 #include "Pt/Ssl/Certificate.h"
 #include "Pt/Ssl/Context.h"
 #include "Pt/Ssl/CertificateStore.h"
-#include "Pt/Ssl/StreamBuffer.h"
 #include "Pt/System/Logger.h"
 #include <string>
 #include <fstream>
@@ -67,11 +66,8 @@ class ContextTest : public Pt::Unit::TestSuite
         ContextTest()
         : Pt::Unit::TestSuite("ContextTest")
         {
-            //Pt::System::Logger::getTarget("Pt.Ssl").setLogLevel(Pt::System::Trace);
-
-            //this->registerMethod("Ciphers", *this, &ContextTest::Ciphers);
-
-            this->registerMethod("Import", *this, &ContextTest::Import);
+            Pt::System::Logger::setLogLevel("Pt.Ssl", Pt::System::Error);
+            
             this->registerMethod("Assign", *this, &ContextTest::Assign);
         }
 
@@ -80,35 +76,6 @@ class ContextTest : public Pt::Unit::TestSuite
 
         void tearDown()
         { }
-
-        void Import()
-        {
-            // adjust the path
-            #ifdef _WIN32
-                std::ifstream ifs("src\\Pt-Ssl\\tests\\cert\\multiple\\server_chain-with-password.p12", std::ios::binary);
-            #else
-                std::ifstream ifs("src/Pt-Ssl/tests/cert/multiple/server_chain-with-password.p12", std::ios::binary);
-            #endif
-
-            Pt::Ssl::CertificateStore store;
-            store.loadPkcs12(ifs, "123");
-    
-            const Pt::Ssl::Certificate* cert = store.findCertificate("Server");
-            PT_UNIT_ASSERT(cert);
-    
-            cert = store.findCertificate("Intermediate CA 2");
-            PT_UNIT_ASSERT(cert);
-
-            std::size_t certCount = 0;
-            Pt::Ssl::CertificateStore::ConstIterator it;
-            for(it = store.begin(); it != store.end(); ++it)
-            {
-                ++certCount;
-            }
-            
-            PT_UNIT_ASSERT(certCount != 0);
-            PT_UNIT_ASSERT_EQUALS( certCount, store.size() );
-        }
 
         void Assign()
         {
@@ -154,30 +121,3 @@ class ContextTest : public Pt::Unit::TestSuite
 };
 
 Pt::Unit::RegisterTest<ContextTest> register_ContextTestTest;
-
-
-//void ContextTest::Ciphers()
-//{
-//    std::vector<std::string> cipherNames1;
-//    std::vector<std::string> cipherNames2;
-//    Pt::Ssl::Context ctx;
-//
-//    std::iostream ios(0);
-//    Pt::Ssl::StreamBuffer sb(ctx, *ios.rdbuf());
-//
-//    Pt::Ssl::CipherList::ConstIterator it;
-//    Pt::Ssl::CipherList ciphers1 = sb.ciphers();
-//    for(it = ciphers1.begin(); it != ciphers1.end(); ++it)
-//    {
-//        cipherNames1.push_back( it->name() );
-//    }
-//
-//    Pt::Ssl::CipherList ciphers2 = ciphers1;
-//    for(it = ciphers2.begin(); it != ciphers2.end(); ++it)
-//    {
-//        cipherNames2.push_back( it->name() );
-//    }
-//    
-//    PT_UNIT_ASSERT(cipherNames1.size() > 0);
-//    PT_UNIT_ASSERT(cipherNames1 == cipherNames2);
-//}

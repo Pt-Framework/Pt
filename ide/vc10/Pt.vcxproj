@@ -286,6 +286,7 @@
     <ClInclude Include="..\..\src\Pt-Ssl\openssl\Connection.h" />
     <ClInclude Include="..\..\src\Pt-Ssl\openssl\ContextImpl.h" />
     <ClInclude Include="..\..\src\Pt-Ssl\openssl\OpenSsl.h" />
+    <ClInclude Include="..\..\src\Pt-Ssl\tests\Pkcs12Data.h" />
     <ClInclude Include="..\..\src\Pt-System\ConsoleChannel.h" />
     <ClInclude Include="..\..\src\Pt-System\FileChannel.h" />
     <ClInclude Include="..\..\src\Pt-System\LogManager.h" />
@@ -474,6 +475,7 @@
     <ClCompile Include="..\..\src\Pt-Ssl\openssl\ContextImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Ssl\SslError.cpp" />
     <ClCompile Include="..\..\src\Pt-Ssl\StreamBuffer.cpp" />
+    <ClCompile Include="..\..\src\Pt-Ssl\tests\CertificateStoreTest.cpp" />
     <ClCompile Include="..\..\src\Pt-Ssl\tests\ContextTest.cpp" />
     <ClCompile Include="..\..\src\Pt-Ssl\tests\HttpsClientDemo.cpp" />
     <ClCompile Include="..\..\src\Pt-Ssl\tests\IOBufferTest.cpp" />

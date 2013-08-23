@@ -1035,6 +1035,9 @@
     <ClInclude Include="..\..\include\Pt\Ssl\IOStream.h">
       <Filter>Pt-Ssl</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Ssl\tests\Pkcs12Data.h">
+      <Filter>Pt-Ssl\tests</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -2008,6 +2011,9 @@
       <Filter>Pt-Ssl\applessl</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Ssl\tests\HttpsClientDemo.cpp">
+      <Filter>Pt-Ssl\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Ssl\tests\CertificateStoreTest.cpp">
       <Filter>Pt-Ssl\tests</Filter>
     </ClCompile>
   </ItemGroup>
