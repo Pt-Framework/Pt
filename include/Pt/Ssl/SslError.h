@@ -61,17 +61,6 @@ class PT_SSL_API HandshakeFailed : public SslError
         ~HandshakeFailed() throw();
 };
 
-/** @brief Invalid public or private key.
-  */
-class PT_SSL_API InvalidKey : public SslError 
-{
-    public:
-        //! @brief Contructs with message.
-        InvalidKey(const std::string& what) throw();
-
-        //! @brief Destructor.
-        ~InvalidKey() throw();
-};
 
 /** @brief Invalid SSL certificate or certificate chain.
   */
@@ -83,18 +72,6 @@ class PT_SSL_API InvalidCertificate : public SslError
 
         //! @brief Destructor.
         ~InvalidCertificate() throw();
-};
-
-/** @brief SSL session failure.
-  */
-class PT_SSL_API SessionFailed : public SslError 
-{
-    public:
-        //! @brief Contructs with message.
-        SessionFailed(const std::string& what) throw();
-
-        //! @brief Destructor.
-        ~SessionFailed() throw();
 };
 
 } // namespace Ssl

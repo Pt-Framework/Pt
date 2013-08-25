@@ -37,6 +37,7 @@ SslError::SslError(const std::string& what)
 : System::IOError(what)
 {}
 
+
 SslError::~SslError() throw()
 {}
 
@@ -45,15 +46,8 @@ HandshakeFailed::HandshakeFailed(const std::string& what) throw()
 : SslError(what)
 {}
 
+
 HandshakeFailed::~HandshakeFailed() throw()
-{}
-
-
-InvalidKey::InvalidKey(const std::string& what) throw()
-: SslError(what)
-{}
-
-InvalidKey::~InvalidKey() throw()
 {}
 
 
@@ -61,15 +55,8 @@ InvalidCertificate::InvalidCertificate(const std::string& what) throw()
 : SslError(what)
 {}
 
+
 InvalidCertificate::~InvalidCertificate() throw()
-{}
-
-
-SessionFailed::SessionFailed(const std::string& what) throw()
-: SslError(what)
-{}
-
-SessionFailed::~SessionFailed() throw()
 {}
 
 } // namespace Ssl
