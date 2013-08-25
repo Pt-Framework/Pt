@@ -172,9 +172,10 @@ bool EventQueue::processEvents(Signal<const Event&>& eventSignal)
 { 
     bool isActive = true;
 
+    MutexLock lock(_mutex);
+
     while( true )
-    {
-        MutexLock lock(_mutex);
+    {    
         isActive = ! _exited;
 
         if ( _eventQueue.empty() || _exited )
@@ -182,18 +183,21 @@ bool EventQueue::processEvents(Signal<const Event&>& eventSignal)
 
         Event* ev = _eventQueue.front();
         _eventQueue.pop_front();
+        lock.unlock();
 
         try
         {
-            lock.unlock();
             eventSignal.send(*ev);
-            ev->destroy( this->allocator() );
         }
         catch(...)
         {
+            lock.lock();
             ev->destroy( this->allocator() );
             throw;
         }
+
+		lock.lock();
+        ev->destroy( this->allocator() );
     }
 
     return isActive;
