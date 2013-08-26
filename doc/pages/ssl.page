@@ -1,11 +1,11 @@
-/** \page ssl SSL/TLS Communication
+/** \page ssl Secure Communication
 
 @section ssl_CertStore Certificate Management
 
-SSL/TLS communication may require certificates and keys, i.e. for server or
+SSL/TLS communication usually requires certificates and keys, i.e. for server or
 client authentication and to build a list of trusted CA certificates to verify
 the peer. Certificates and keys encoded in PKCS12 format can be loaded into
-a into a Pt::Ssl::CertificateStore.
+a Pt::Ssl::CertificateStore, and then be used by the application.
 
 @code
 Pt::Ssl::CertificateStore store;
@@ -101,6 +101,9 @@ false, no more data needs to be read. Then writeHandshake() is called, which
 returns true if data was written to the underlying stream that needs to be
 transfered. In the non-blocking case, we can call writeHandshake() again once
 the data was written.
+
+
+@section ssl_ReadWrite Reading and Writing Data
 
 Once the connection is open, data can be send or received from the peer. This
 can be done using the blocking I/O API from std::iostream or the non-blocking
