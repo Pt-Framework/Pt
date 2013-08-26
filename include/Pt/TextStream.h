@@ -126,6 +126,7 @@ class BasicTextIStream : public std::basic_istream<CharT>
             _buffer.terminate();
         }
 
+        // TODO: rename textBuffer
         BasicTextBuffer<intern_type, extern_type>& buffer()
         { return _buffer; }
 
@@ -221,6 +222,7 @@ class BasicTextOStream : public std::basic_ostream<CharT>
             _buffer.terminate();
         }
 
+        // TODO: rename textBuffer
         BasicTextBuffer<intern_type, extern_type>& buffer()
         { return _buffer; }
 
@@ -316,6 +318,7 @@ class BasicTextStream : public std::basic_iostream<CharT>
             _buffer.terminate();
         }
 
+        // TODO: rename textBuffer
         BasicTextBuffer<intern_type, extern_type>& buffer()
         { return _buffer; }
 

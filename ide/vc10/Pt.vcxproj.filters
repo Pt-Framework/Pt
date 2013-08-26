@@ -2016,5 +2016,11 @@
     <ClCompile Include="..\..\src\Pt-Ssl\tests\CertificateStoreTest.cpp">
       <Filter>Pt-Ssl\tests</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Ssl\tests\SslServerDemo.cpp">
+      <Filter>Pt-Ssl\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Ssl\tests\SslClientDemo.cpp">
+      <Filter>Pt-Ssl\tests</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

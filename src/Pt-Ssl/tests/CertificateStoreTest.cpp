@@ -39,7 +39,7 @@
 void makePkc12Data()
 {
     #ifdef _WIN32
-        std::ifstream ifs("src\\Pt-Ssl\\tests\\cert\\multiple\\server_chain-with-password.p12", std::ios::binary);
+        std::ifstream ifs("src\\Pt-Ssl\\tests\\cert\\ca-with-password.p12", std::ios::binary);
     #else
         std::ifstream ifs("src/Pt-Ssl/tests/cert/multiple/server_chain-with-password.p12", std::ios::binary);
     #endif
@@ -81,7 +81,7 @@ class CertificateStoreTest : public Pt::Unit::TestSuite
             
             this->registerMethod("Import", *this, &CertificateStoreTest::Import);
 
-            //makePkc12Data();
+            makePkc12Data();
         }
 
         void setUp()

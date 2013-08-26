@@ -27,6 +27,7 @@
  */
 
 #include "CertificateStoreImpl.h"
+#include <Pt/Ssl/SslError.h>
 #include <Pt/Ssl/CertificateStore.h>
 #include <Pt/System/Logger.h>
 #include <cassert>
@@ -78,6 +79,16 @@ void CertificateStore::loadPkcs12(const char* data, size_t len, const char* pass
 const Certificate* CertificateStore::findCertificate(const std::string& subject)
 {
     return _impl->findCertificate(subject); 
+}
+
+
+const Certificate& CertificateStore::getCertificate(const std::string& subject)
+{
+    const Certificate* cert = _impl->findCertificate(subject);
+    if( ! cert)
+        throw InvalidCertificate("missing certificate");
+
+    return *cert;
 }
 
 

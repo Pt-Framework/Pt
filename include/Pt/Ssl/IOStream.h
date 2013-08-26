@@ -126,6 +126,9 @@ class IOStream : public std::iostream
         void import(std::streamsize maxImport = 0)
         { _sb.import(maxImport); }
 
+        StreamBuffer& sslBuffer()
+        { return _sb; }
+
     private:
         StreamBuffer _sb;
 };

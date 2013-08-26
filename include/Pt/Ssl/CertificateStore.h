@@ -54,6 +54,8 @@ class PT_SSL_API CertificateStore
 
         const Certificate* findCertificate(const std::string& subject);
 
+        const Certificate& getCertificate(const std::string& subject);
+
         std::size_t size() const;
 
         ConstIterator begin() const;

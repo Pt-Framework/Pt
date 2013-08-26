@@ -16,9 +16,13 @@ Main HttpsClientDemo : HttpsClientDemo.cpp ;
 LinkSharedLibraries HttpsClientDemo : Pt-Ssl Pt-Net Pt-System Pt Pt-Http ;
 MakeLocate HttpsClientDemo : $(PT_OUTPUT_TARGET) ;
 
-#Main HttpsServerDemo : HttpsServerDemo.cpp ;
-#LinkSharedLibraries HttpsServerDemo : Pt-Ssl Pt-Net Pt-System Pt ;
-#MakeLocate HttpsServerDemo : $(PT_OUTPUT_TARGET) ;
+Main SslClientDemo : SslClientDemo.cpp ;
+LinkSharedLibraries SslClientDemo : Pt-Ssl Pt-Net Pt-System Pt ;
+MakeLocate SslClientDemo : $(PT_OUTPUT_TARGET) ;
+
+Main SslServerDemo : SslServerDemo.cpp ;
+LinkSharedLibraries SslServerDemo : Pt-Ssl Pt-Net Pt-System Pt ;
+MakeLocate SslServerDemo : $(PT_OUTPUT_TARGET) ;
 
 #Main SSLHTTPServerClientTest : SSLHTTPServerClientTest.cpp ;
 #LinkSharedLibraries SSLHTTPServerClientTest : Pt-Ssl Pt-Net Pt-System Pt ;
