@@ -146,10 +146,16 @@ class SslClient : public Pt::Connectable
             {
                 _ios.ioBuffer().beginRead();
             }
+            
+            if(_state == WriteShutdown)
+            {
+                _ios.ioBuffer().beginWrite();
+            }
         }
 
         bool endExecute()
         {
+            log_info("endExecute");
             if(_state == Idle)
             {
                 _tcpSocket.endConnect();
@@ -222,11 +228,39 @@ class SslClient : public Pt::Connectable
                     std::clog << "CONNCTED: " << _tcpSocket.isConnected() << std::endl;
 
                     _ssl.shutdown();
-                    _ios.ioBuffer().beginWrite();
+                    _state = WriteShutdown;
+                    std::clog << "OUT AVAIL: " << _ios.ioBuffer().out_avail() << std::endl;
                     std::clog << "EOF2: " << _ios.ioBuffer().device()->eof() << std::endl;
-                    return true;
+                    return false;
                 }
             }
+            
+            if(_state == WriteShutdown)
+            {
+                log_info("wrote shutdown");
+                _ios.ioBuffer().endWrite();
+                std::clog << "SHUTDOWN: " << _ssl.isShutdown() << std::endl;
+                std::clog << "CLOSED: " << _ssl.isClosed() << std::endl;
+                std::clog << "EOF: " << _ios.ioBuffer().device()->eof() << std::endl;
+                std::clog << "CONNCTED: " << _tcpSocket.isConnected() << std::endl;
+                return true;
+            }
+
+            // POSIX:
+            //20:07:55.314 [Pt.Ssl.SslClient] Info - endExecute
+            //20:07:55.314 [Pt.Ssl.SslClient] Info - received shutdown alert
+            //SHUTDOWN: 1
+            //CLOSED: 0
+            //EOF: 0
+            //CONNCTED: 1
+            //OUT AVAIL: 37
+            //EOF2: 0
+            //20:07:55.315 [Pt.Ssl.SslClient] Info - endExecute
+            //20:07:55.315 [Pt.Ssl.SslClient] Info - wrote shutdown
+            //SHUTDOWN: 0
+            //CLOSED: 1
+            //EOF: 0
+            //CONNCTED: 1
 
             return false;
         }
@@ -268,7 +302,8 @@ class SslClient : public Pt::Connectable
             ReadHandshake,
             WriteHandshake,
             SendRequest,
-            ReceiveReply
+            ReceiveReply,
+            WriteShutdown
         } _state;
 };
 
