@@ -51,6 +51,20 @@ namespace WindowStartPositionType
 	};
 }
 
+namespace WindowBorderType
+{
+	enum Type
+	{
+		NoBorder,
+		Sizeable,
+		Tool,
+		ToolSizeable,
+		Dialog,
+		DialogSizeable
+	};
+}
+
+
 namespace WindowStateType
 {
 	enum Type
@@ -69,18 +83,18 @@ public:
 
 	Property<int>								Cursor;	
 	Property<bool>								AllowDrop;
-	Property<double>							MinimumSize;
-	Property<double>							MaximumSize;
+	Property<Pt::Gfx::SizeF>					MinimumSize;
+	Property<Pt::Gfx::SizeF>					MaximumSize;
 	Property<WindowStartPositionType::Type>		WindowStartPostion;
 	Property<WindowStateType::Type>				WindowState;	
 	Property<bool>								ShowInTaskbar;
 	Property<bool>								ShowTitle;
-	Property<bool>								ShowMinimizeBt;
-	Property<bool>								ShowMaximizeBt;
+	Property<bool>								ShowMinimizeButton;
+	Property<bool>								ShowMaximizeButton;
 	Property<bool>								ShowSysMenu;
 	Property<std::string>						Caption;
 	Property<std::string>						Name;
-	Property<BorderStyle::Type>					Border;
+	Property<WindowBorderType::Type>			Border;
 	Property<Pt::Gfx::PointF>					WinPos;
 	Property<Pt::Gfx::SizeF>					WinSize;
 	Property<Pt::Gfx::ARgbImage>				Icon;

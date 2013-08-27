@@ -52,6 +52,12 @@ public:
 			Pt::Hmi::Application::instance().exit();
 		}
 	}
+
+	void onClosedByUser(bool& s)
+	{
+		if( s )
+			Pt::Hmi::Application::instance().exit();
+	}
 };
 
 
@@ -71,7 +77,7 @@ int main(int argc, char* args[])
 	
 	panelModel->Position.set(Pt::Gfx::PointF(40,120));
 	panelModel->Size.set(Pt::Gfx::SizeF(600,500));	
-	panelModel->BorderStyle.set(Pt::Hmi::BorderStyle::Sizebale);
+	panelModel->BorderStyle.set(Pt::Hmi::BorderStyle::Sizeable);
 	panelModel->BorderWidth.set(3);
 
 	window.addChild(&panel);	
@@ -117,13 +123,12 @@ int main(int argc, char* args[])
 	panel.addChild(&panel2);
 	
 	Pt::Hmi::WindowModel* wm = (Pt::Hmi::WindowModel*) window.controller().model();
-	wm->Border = Pt::Hmi::BorderStyle::Sizebale;
-	
-	Pt::Hmi::WindowController* winCtrl = (Pt::Hmi::WindowController*) &window.controller();
-
-	Pt::Hmi::WindowModel* model =  (Pt::Hmi::WindowModel*) window.controller().model();
-	model->Border = Pt::Hmi::BorderStyle::Sizebale;
-	model->ShowInTaskbar.set(true);
+	wm->Border.set(Pt::Hmi::WindowBorderType::Sizeable);
+	wm->ShowInTaskbar.set(true);
+	wm->Caption.set("Test the best Window");
+	wm->ShowMinimizeButton.set(false);
+	wm->ShowTitle.set(true);
+	wm->Closed.PropertyChanged += Pt::slot(test,  &Test::onClosedByUser);
 	
 
 	Pt::Hmi::ButtonModel* btm =  (Pt::Hmi::ButtonModel*) closeBt.controller().model();
@@ -134,7 +139,7 @@ int main(int argc, char* args[])
 	btm->ActionKey.set("CTRL//X");
 	btm->ButtonState.PropertyChanged += Pt::slot(test,  &Test::onClosed);
 
-
+		
 	window.addChild(&closeBt);			
 	window.show();
 	

@@ -35,7 +35,7 @@
 #include <Pt/Connectable.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Rect.h>
-#include <Pt/Hmi/GfxModel.h>
+#include <Pt/Hmi/WindowModel.h>
 #include <Pt/Hmi/PointingEvent.h>
 #include <Pt/Hmi/KeyEvent.h>
 
@@ -68,9 +68,6 @@ private:
 private:
 	void create();
 	void destroy();
-	void setTitle(const Pt::String& text);
-	void move(size_t x, size_t y);
-	void resize(size_t width, size_t height);
 	void show();
 	void hide();
 	void output();
@@ -86,12 +83,14 @@ private:
     Atom AtomWindowClosed;
     Atom AtomWMProtocols;
 
-	Pt::Hmi::GfxModel* 		_model;
+	bool					_ignoreSizeEvent;
+	Pt::Hmi::WindowModel* 	_model;
 	Pt::Hmi::PointingEvent 	_mouseEvent;
 	Pt::Hmi::KeyEvent      	_keyEvent;
 	Pt::Gfx::Rgb888Image	_rgb88Image;
-    ::Drawable 				_drawable;
+    Window  				_window;
     GC 						_brushGc;
+	Display* 				_display;
 };
 
 }}

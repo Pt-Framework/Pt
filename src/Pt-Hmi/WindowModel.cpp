@@ -7,11 +7,13 @@ namespace Hmi{
 WindowModel::WindowModel()
 : ShowInTaskbar(true)
 , ShowTitle(true)
-, ShowMinimizeBt(true)
-, ShowMaximizeBt(true)
+, ShowMinimizeButton(true)
+, ShowMaximizeButton(true)
 , ShowSysMenu(true)	
 , Closed(false)
 , CanClose(true)
+, MinimumSize(Pt::Gfx::SizeF(0,0))
+, MaximumSize(Pt::Gfx::SizeF(65535,65535))
 {
 
 	Visible.set(false);

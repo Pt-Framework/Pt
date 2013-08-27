@@ -17,12 +17,8 @@ namespace BorderStyle
 		NoBorder,
 		Single,
 		Border3D,
-		Sizebale,
-		Tool,
-		ToolSizeable,
+		Sizeable,
 		Widget,
-		Dialog,
-		DialogSizeable
 	};
 }
 

@@ -181,7 +181,6 @@ void PanelRenderer::render(Pt::Hmi::Model* m)
 		}
 		break;
 		case BorderStyle::Border3D:
-		case BorderStyle::Tool:
 		{
 			std::vector<Pt::Gfx::Point> points1(3);
 			std::vector<Pt::Gfx::Point> points2(3);
@@ -232,8 +231,7 @@ void PanelRenderer::render(Pt::Hmi::Model* m)
 				
 		}
 		break;
-		case BorderStyle::Sizebale:
-		case BorderStyle::ToolSizeable:
+		case BorderStyle::Sizeable:
 		{
 			Pt::Gfx::Pen pen1(border, model->ForeColor.get());
 			localPainter.setPen(pen1);				
@@ -243,6 +241,8 @@ void PanelRenderer::render(Pt::Hmi::Model* m)
 			localPainter.setPen(pen2);				
 			localPainter.drawRect(clientRect);
 		}
+		break;
+		default:
 		break;
 			
 	}	

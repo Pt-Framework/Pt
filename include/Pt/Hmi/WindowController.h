@@ -30,7 +30,6 @@
 
 #include <Pt/Hmi/GfxController.h>
 #include <Pt/Hmi/GfxModel.h>
-#include <Pt/Gfx/ImagePainter.h>
 
 namespace Pt{
 namespace Hmi{

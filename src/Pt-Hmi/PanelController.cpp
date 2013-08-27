@@ -106,6 +106,8 @@ void PanelController::recalcPosAndSize(const Pt::Gfx::PointF& p, ResizeDirection
 			height -= deltaY;
 		}
 		break;
+		default:
+		break;
 	}
 
 	model->Size = Pt::Gfx::SizeF(width,height);
@@ -129,8 +131,7 @@ void PanelController::onPointerInput(const PointingEvent& ev)
 			
 	switch(m->BorderStyle.get())
 	{
-		case BorderStyle::Sizebale:
-		case BorderStyle::ToolSizeable:
+		case BorderStyle::Sizeable:
 		{
 			if( m->contains(p))
 			{
@@ -185,6 +186,8 @@ void PanelController::onPointerInput(const PointingEvent& ev)
 
 			handleResize(ev);			
 		}
+		break;
+		default:
 		break;
 	}
 	

@@ -33,6 +33,11 @@
 #include <Pt/TextStream.h>
 #include <Pt/Utf8Codec.h>
 #include <Pt/Hmi/WindowModel.h>
+#include <Pt/Hmi/PanelModel.h>
+#include <Pt/Hmi/WidgetController.h>
+#include <Pt/Hmi/PointingDevice.h>
+#include <Pt/Hmi/GfxOutput.h>
+#include <Pt/Hmi/WindowController.h>
 #include <iostream>
 #include <sstream>
 #include <algorithm>
@@ -43,37 +48,36 @@ namespace Pt{
 namespace Hmi{
 
 GfxOutputImpl::GfxOutputImpl()
-: _model(0)
-, _drawable(0)
+: _ignoreSizeEvent(false)
+, _model(0)
+, _window(0)
 {
 	_mouseEvent.buttons().resize(3);
- 	Display* display = Application::instance().impl()->display();
+	_display = Application::instance().impl()->display();
 
-    AtomAppWake      = XInternAtom(display, "PT_APP_WAKE",      false);
-    AtomWindowResize = XInternAtom(display, "PT_WINDOW_RESIZE", false);
-    AtomWindowMove   = XInternAtom(display, "PT_WINDOW_MOVE",   false);
-    AtomWindowClosed = XInternAtom(display, "WM_DELETE_WINDOW", false);
-    AtomWMProtocols  = XInternAtom(display, "WM_PROTOCOLS",     false);
+    AtomAppWake      = XInternAtom(_display, "PT_APP_WAKE",      false);
+    AtomWindowResize = XInternAtom(_display, "PT_WINDOW_RESIZE", false);
+    AtomWindowMove   = XInternAtom(_display, "PT_WINDOW_MOVE",   false);
+    AtomWindowClosed = XInternAtom(_display, "WM_DELETE_WINDOW", false);
+    AtomWMProtocols  = XInternAtom(_display, "WM_PROTOCOLS",     false);
 
 	Application::instance().impl()->WindowEvent += Pt::slot(*this, &GfxOutputImpl::onWindowEvent);
 	create();
 }
 
 void GfxOutputImpl::drawIndependentImage(size_t x, size_t y, const char* data, size_t width, size_t height)
-{
-    Display* display = Application::instance().impl()->display();
+{    
+    unsigned int screen = DefaultScreen(_display);
 
-    unsigned int screen = DefaultScreen(display);
-
-    Visual* visual = XDefaultVisual(display, screen);
+    Visual* visual = XDefaultVisual(_display, screen);
     
-	int depth = XDefaultDepth(display, screen);
+	int depth = XDefaultDepth(_display, screen);
 
-    XImage* ximage = XCreateImage(display, visual, depth, ZPixmap, 0, NULL, width, height, 8, 0);
+    XImage* ximage = XCreateImage(_display, visual, depth, ZPixmap, 0, NULL, width, height, 8, 0);
     ximage->data = (char*)data;
-    XPutImage(display, _drawable, _brushGc, ximage, 0, 0, x, y, width, height);
+    XPutImage(_display,_window, _brushGc, ximage, 0, 0, x, y, width, height);
 
-    XSync(display, false);
+    XSync(_display, false);
     ximage->data = NULL;
     XDestroyImage(ximage);	
 }
@@ -84,13 +88,20 @@ void GfxOutputImpl::onClientMessage(XEvent& xev)
 	if( _model == 0)
 		return;
 
+	if(_ignoreSizeEvent)
+	{
+		_ignoreSizeEvent = false;
+		return;
+	}
+
     if(xev.xclient.message_type == AtomWindowResize) 
 	{
         int width = xev.xclient.data.l[0];
         int height = xev.xclient.data.l[1];
 
-		Pt::Gfx::SizeF size = _model->toUnit(Pt::Gfx::Size(width, height));
-		_model->Size = size;
+		_model->Size = _model->toUnit(Pt::Gfx::Size(width, height));
+		_model->WinSize =_model->Size;
+		std::cout<<"Client message"<<std::endl;
         return;
     }
 
@@ -98,37 +109,39 @@ void GfxOutputImpl::onClientMessage(XEvent& xev)
 	{
         int x = xev.xclient.data.l[0];
         int y = xev.xclient.data.l[1];
-		Pt::Gfx::PointF p = _model->toUnit(Pt::Gfx::Point(x,y));
-		_model->Position = p;
+
+		Window child_return;
+		int x_return;
+		int y_return;
+   
+
+		XTranslateCoordinates(_display, _window, RootWindow(_display,0),0,0,&x_return, &y_return, & child_return);
+		
+		_model->Position = _model->toUnit(Pt::Gfx::Point(x,y));
+		_model->WinPos =_model->toUnit(Pt::Gfx::Point(x_return,y_return));
         return;
     }
 
     if(xev.xclient.message_type == AtomWMProtocols) 
-	{
-		//TODO
-        return;
-    }
+ 	{
+		WindowController* controller =  (WindowController*) _model->controller();
+	
+		bool canClose = false;
+
+		controller->Closing.send(canClose);
+
+		if(canClose)
+		{
+			controller->close();
+			_model->Closed = true;	
+		}
+	}	
 }
 
 void GfxOutputImpl::onMotionNotify(XEvent& xev)
 {
     int x = xev.xmotion.x;
     int y = xev.xmotion.y;
-/*
-
-    if( xev.xmotion.state & Button1Mask)
-        modifiers |= MouseMoveEvent::LeftButtonDown;
-
-    if( xev.xmotion.state & Button3Mask)
-        modifiers |= MouseMoveEvent::RightButtonDown;
-    if( xev.xmotion.state & Button2Mask)
-        modifiers |= MouseMoveEvent::MiddleButtonDown;
-    if( xev.xmotion.state & ControlMask)
-        modifiers |= MouseMoveEvent::CtrlDown;
-    if( xev.xmotion.state & Mod1Mask)
-        modifiers |= MouseMoveEvent::AltDown;
-*/
-
 	Pt::Gfx::PointF pos = _model->toUnit(Pt::Gfx::Point(x,y));
 	_mouseEvent.setX(pos.x());
 	_mouseEvent.setY(pos.y());
@@ -188,6 +201,7 @@ void GfxOutputImpl::onMouseButtonRelease(XEvent& xev)
 			_mouseEvent.buttons()[2].setState(DeviceButton::Released);
 		break;
 
+		//TODO: wheel
         //case Button4: button = MouseEvent::WheelUp; break;
         //case Button5: button = MouseEvent::WheelDown; break;
     }
@@ -200,25 +214,26 @@ void GfxOutputImpl::onMouseButtonRelease(XEvent& xev)
 
 void GfxOutputImpl::onConfigureNotify( XEvent& xev)
 {
-    const size_t width = xev.xconfigure.width;
-    const size_t height = xev.xconfigure.height;
-    const int x = xev.xconfigure.x;
-    const int y = xev.xconfigure.y;	
-
-	Pt::Gfx::Size size = _model->fromUnit(_model->Size.get());
-	Pt::Gfx::Point pos = _model->fromUnit(_model->Position.get());
-
-    if( size.width() != width || size.height() != height ) 
+	if(_ignoreSizeEvent)
 	{
-		Pt::Gfx::SizeF s = _model->toUnit(Pt::Gfx::Size(width, height));
-		_model->Size = s;			
-    }
+		_ignoreSizeEvent = false;
+		return;
+	}
 
-    if(pos.x() != x || pos.y() != y) 
+	XWindowAttributes attr;
+   
+	XGetWindowAttributes(_display,  _window, &attr);
+	
+
+	_model->WinSize = _model->toUnit(Pt::Gfx::Size(xev.xconfigure.width, xev.xconfigure.height));
+	_model->Size =  _model->toUnit(Pt::Gfx::Size(attr.width, attr.height));
+
+	if((xev.xconfigure.x - attr.x != 0) && (xev.xconfigure.y - attr.y != 0))
 	{
-		Pt::Gfx::PointF p = _model->toUnit(Pt::Gfx::Point(x, y));
-		_model->Position = p;			
-    }
+		_model->WinPos = _model->toUnit(Pt::Gfx::Point( xev.xconfigure.x - attr.x, xev.xconfigure.y - attr.y));
+		_model->Position = 	_model->toUnit(Pt::Gfx::Point(xev.xconfigure.x, xev.xconfigure.y));
+	}
+
 }
 
 void GfxOutputImpl::onKeyEvent(XEvent& xev)
@@ -228,13 +243,10 @@ void GfxOutputImpl::onKeyEvent(XEvent& xev)
 	else
 		_keyEvent.setState(KeyEvent::KeyDown);
     
-    Display* display = Application::instance().impl()->display();
-
-
     KeySym sym = 0;
 	int vcode = 0;
 	
-	sym = *(XGetKeyboardMapping(display, xev.xkey.keycode,1,&vcode));
+	sym = *(XGetKeyboardMapping(_display, xev.xkey.keycode,1,&vcode));
 
 	vcode = (char) ::toupper((int)sym);
 
@@ -272,7 +284,7 @@ void GfxOutputImpl::onKeyEvent(XEvent& xev)
 void GfxOutputImpl::onWindowEvent(XEvent& ev)
 {
 	
-	if(ev.xany.window != _drawable)
+	if(ev.xany.window != _window)
 		return;
         
 	if( _model == 0)
@@ -306,10 +318,9 @@ void GfxOutputImpl::onWindowEvent(XEvent& ev)
         case ConfigureNotify:
         {
             // Use only last configure event for the window in queue
-		    Display* display = Application::instance().impl()->display();
-            XPending(display);
+            XPending(_display);
             
-			while( XCheckTypedWindowEvent(display, ev.xany.window, ConfigureNotify, &ev) );
+			while( XCheckTypedWindowEvent(_display, ev.xany.window, ConfigureNotify, &ev) );
 			
 			onConfigureNotify(ev);            
         }
@@ -334,12 +345,11 @@ void GfxOutputImpl::onWindowEvent(XEvent& ev)
 void GfxOutputImpl::create()
 {
    // Display and Screen are inited in Application
-    Display* display = Application::instance().impl()->display();
-    unsigned int screen = DefaultScreen(display);
+    unsigned int screen = DefaultScreen(_display);
 
     XSetWindowAttributes wattr;
     memset(&wattr, 0, sizeof(wattr));
-    wattr.colormap = DefaultColormap(display, screen);
+    wattr.colormap = DefaultColormap(_display, screen);
 
     // The events we want to receive
     wattr.event_mask = StructureNotifyMask|ExposureMask|PropertyChangeMask|EnterWindowMask|
@@ -374,28 +384,30 @@ void GfxOutputImpl::create()
     unsigned long winMask = CWWinGravity|CWBitGravity|CWBorderPixmap|CWBorderPixel|CWEventMask|CWDontPropagate|
                             CWCursor|CWOverrideRedirect|CWColormap|CWBackingStore|CWSaveUnder|CWBackPixmap;
 
-    Window parentId = RootWindow(display, screen);
+    Window parentId = RootWindow(_display, screen);
 
     unsigned int borderWidth = 0;
 
     // Create the X11 window
-    _drawable = XCreateWindow(display, parentId, 20, 20, 800, 600, borderWidth, DefaultDepth(display, screen), InputOutput, DefaultVisual(display, screen), winMask, &wattr);
+    _window = XCreateWindow(_display, parentId, 20, 20, 800, 600, borderWidth, DefaultDepth(_display, screen), InputOutput, DefaultVisual(_display, screen), winMask, &wattr);
 
-    _brushGc = XCreateGC( display, _drawable,0, 0);
+    _brushGc = XCreateGC( _display, _window,0, 0);
 
-    XSync(display, false);
+	XSetWMProtocols(_display, _window, &AtomWindowClosed, 1);
+    XSync(_display, false);
 
 	show();
 }
 
 void GfxOutputImpl::destroy()
 {
-	if(_drawable != 0)
+	if(_window != 0)
 	{
-		Display* display = Application::instance().impl()->display();
-	    XFreeGC(display, _brushGc);
-		XDestroyWindow(display, _drawable);
-		XSync(display, false);
+	    XFreeGC(_display, _brushGc);
+		_brushGc = 0;
+		XDestroyWindow(_display, _window);
+		XSync(_display, false);
+		_window = 0;
 	}
 }
 
@@ -404,85 +416,16 @@ GfxOutputImpl::~GfxOutputImpl()
 	destroy();
 }
 
-void GfxOutputImpl::setTitle(const Pt::String& text)
-{
-    Display* display = Application::instance().impl()->display();
-    XTextProperty tp;
-
-    std::stringstream ss;
-    Pt::TextStream textStream(ss, new Pt::Utf8Codec());
-    textStream << text << Char(0); // Append extra \0 for proper line termination.
-    textStream.flush();
-
-    std::string textString = ss.str();
-    const char* addressOfTextString = textString.c_str();
-    if (XmbTextListToTextProperty(display, (char**)&addressOfTextString, 1, XStringStyle, &tp) >= 0)
-    {
-        //no error occured, but possibly not all characters could be converted
-        XSetWMName(display, _drawable, &tp);
-        XFree( tp.value );
-    }
-    XSync(display, false);
-}
-
-
 void GfxOutputImpl::show()
 {
-    Display* display = Application::instance().impl()->display();
-    XMapWindow(display, _drawable);
-
-    XSync(display, false);
+    XMapWindow(_display, _window);
+    XSync(_display, false);
 }
 
 void GfxOutputImpl::hide()
 {
 	Display* display = Application::instance().impl()->display();
-    XUnmapWindow(display, _drawable);
-    XSync(display, false);
-}
-
-void GfxOutputImpl::move(size_t x, size_t y)
-{
-	Display* display = Application::instance().impl()->display();
-    XMoveWindow(display, _drawable, x, y);
-
-    // X11 does not create move events, when we resize ourselves
-    // so we report it directly to the X11 event loop.
-    XClientMessageEvent event;
-    event.send_event = False;
-    event.type = ClientMessage;
-    event.display = display;
-    event.window = _drawable;
-    event.message_type = AtomWindowMove;
-    event.format = 32;
-    event.data.l[0] = x;
-    event.data.l[1] = y;
-
-    XPutBackEvent(display, (XEvent*)&event);
-    XSync(display, false);
-}
-
-void GfxOutputImpl::resize(size_t width, size_t height)
-{
-    width = std::max(size_t(1), width);
-    height = std::max(size_t(1), height);
-
-	Display* display = Application::instance().impl()->display();
-    XResizeWindow( display, _drawable, width, height );
-
-    // X11 does not create resize events, when we resize ourselves
-    // so we report it directly to the X11 event loop.
-    XClientMessageEvent event;
-    event.send_event = False;
-    event.type = ClientMessage;
-    event.display = display;
-    event.window = _drawable;
-    event.message_type = AtomWindowResize;
-    event.format = 32;
-    event.data.l[0] = width;
-    event.data.l[1] = height;
-
-    XPutBackEvent(display, (XEvent*)&event);
+    XUnmapWindow(display, _window);
     XSync(display, false);
 }
 
@@ -515,112 +458,142 @@ void GfxOutputImpl::output()
 }
 
 
-
 void GfxOutputImpl::writeWindowProperties()
-{//TODO:
-#if 0
-	SetWindowText(_hwnd, _model->Caption.get().c_str());
+{
 
-	long style = 0;
-	long exStyle = 0;
+	XSizeHints sizeHints;
+	long suppliedReturn = 0;
+
+    XGetWMNormalHints(_display,_window, &sizeHints, &suppliedReturn);
+
 
 	if(_model->Visible.get())
-		style |= WS_VISIBLE;
+		show();
+	else
+		hide();
 		
 	if( _model->ShowTitle.get())
-		style |= WS_CAPTION;
+		XStoreName(_display, _window, _model->Caption.get().c_str());
+	else
+		XStoreName(_display, _window, "");
 
-	if( _model->ShowMinimizeBt.get())
-		style |= WS_MINIMIZEBOX;
 
-	if( _model->ShowMaximizeBt.get())
-		style |= WS_MAXIMIZEBOX;
+	Pt::Gfx::Size winMinSize =  _model->fromUnit(_model->MinimumSize.get());
+	Pt::Gfx::Size winMaxSize =  _model->fromUnit(_model->MaximumSize.get());
 
+	switch( _model->Border.get())
+	{
+		case Pt::Hmi::WindowBorderType::Sizeable:
+		case Pt::Hmi::WindowBorderType::DialogSizeable:
+		case Pt::Hmi::WindowBorderType::ToolSizeable:
+		{//Sizeable
+			sizeHints.flags |= PMinSize | PMaxSize;
+			sizeHints.min_width  = winMinSize.width();
+			sizeHints.max_width  = winMaxSize.width();
+			sizeHints.min_height = winMinSize.height();
+			sizeHints.max_height = winMaxSize.height();
+		}
+		break;
+
+		case Pt::Hmi::WindowBorderType::Dialog:
+		case Pt::Hmi::WindowBorderType::Tool:
+		{//Fixed size
+			sizeHints.flags |= PMinSize | PMaxSize;
+			sizeHints.min_width  = _model->WinSize.get().width();
+			sizeHints.max_width  = _model->WinSize.get().width();
+			sizeHints.min_height = _model->WinSize.get().height();
+			sizeHints.max_height = _model->WinSize.get().height();
+		}
+		break;
+		default:
+		break;
+	}
+
+
+	//TODO : show/hide minimize button.
+	if( _model->ShowMinimizeButton.get())
+	{
+	}
+	else
+	{
+	}
+
+	//TODO : show/hide maximize button.
+	if( _model->ShowMaximizeButton.get())
+	{
+	}	
+	else
+	{
+	}
+
+	//TODO : show/hide system menu
 	if( _model->ShowSysMenu.get())
-		style |= WS_SYSMENU;
+	{
+	}
+	else
+	{
+	}
 
+	//TODO : Windows state min/max/normal
 	switch(_model->WindowState.get())
 	{
 		case Pt::Hmi::WindowStateType::Normal:
 		break;
 
 		case Pt::Hmi::WindowStateType::Maximazed:
-			style |= WS_MAXIMIZE;
+
 		break;
 
 		case Pt::Hmi::WindowStateType::Minimized:
-			style |= WS_MINIMIZE;
+
 		break;
 	}
 
+	//TODO: window border 
 	switch( _model->Border.get())
 	{
-		case Pt::Hmi::BorderStyle::None:
+		case Pt::Hmi::WindowBorderType::NoBorder:
 			
 		break;
 
-		case Pt::Hmi::BorderStyle::Single:
-			style |= WS_BORDER; 
+		case Pt::Hmi::WindowBorderType::Sizeable:
+
 		break;
 
-		case Pt::Hmi::BorderStyle::Sizebale:
-			style |= WS_THICKFRAME;
+		case Pt::Hmi::WindowBorderType::Dialog:
 		break;
 
-		case Pt::Hmi::BorderStyle::Dialog:
-			style |= WS_DLGFRAME;			
-			exStyle |= WS_EX_DLGMODALFRAME;
+		case Pt::Hmi::WindowBorderType::DialogSizeable:
 		break;
 
-		case Pt::Hmi::BorderStyle::DialogSizeable:
-			style |= WS_DLGFRAME;			
-			exStyle |= WS_EX_DLGMODALFRAME;
-			style |= WS_THICKFRAME;
+		case Pt::Hmi::WindowBorderType::Tool:
 		break;
 
-		case Pt::Hmi::BorderStyle::Tool:
-			style |= WS_DLGFRAME;
-			exStyle |= WS_EX_TOOLWINDOW;
-		break;
-
-		case Pt::Hmi::BorderStyle::ToolSizeable:
-			style |= WS_THICKFRAME;
-			exStyle |= WS_EX_TOOLWINDOW;
+		case Pt::Hmi::WindowBorderType::ToolSizeable:
 		break;
 
 	}
 
+	//TODO: show in taskbar
 	if(_model->ShowInTaskbar.get())
 	{
-		exStyle |= WS_EX_APPWINDOW;  
-		SetWindowLong(_hwnd, GWL_EXSTYLE, exStyle); 
 	}
 	else
 	{
-		SetWindowLong(_hwnd, GWL_STYLE, style);  
 	}
 
-	long styleVisible = GetWindowLong(_hwnd, GWL_STYLE);  
 
-	bool visible = ((styleVisible & WS_VISIBLE) == WS_VISIBLE);
-
-	if(!_model->Visible.get())
-		ShowWindow(_hwnd, SW_HIDE);
-	else if( !visible)
-		ShowWindow(_hwnd, SW_SHOW);		
-
-	SetWindowLong(_hwnd, GWL_STYLE, style);  
-#endif
+	XSetWMNormalHints(_display, _window,  &sizeHints);
 }
 
 void GfxOutputImpl::writeWindowSizeAndPos()
-{//TODO:
-#if 0
-	WindowModel* wmodel = (WindowModel*) _model;
-	Pt::Gfx::Point pos = wmodel->fromUnit(wmodel->WinPos.get());
-	Pt::Gfx::Size size = wmodel->fromUnit(wmodel->WinSize.get());
-	SetWindowPos(_hwnd,0, pos.x(), pos.y(), size.width(), size.height(), 0);
-#endif
+{
+	_ignoreSizeEvent = true;
+
+	Pt::Gfx::Point pos = _model->fromUnit(_model->WinPos.get());
+	Pt::Gfx::Size size = _model->fromUnit(_model->WinSize.get());		
+
+	XMoveResizeWindow(_display, _window,  pos.x(), pos.y(), size.width(), size.height());			
 }
 
 void GfxOutputImpl::output(Pt::Hmi::Model* model)
@@ -634,7 +607,7 @@ void GfxOutputImpl::output(Pt::Hmi::Model* model)
 
 	if(wmodel->Closed.get())
 	{
-		if(_drawable != 0)
+		if(_window != 0)
 		{
 			destroy();
 			return;
@@ -642,7 +615,7 @@ void GfxOutputImpl::output(Pt::Hmi::Model* model)
 	}
 	else
 	{
-		if(_drawable == 0)
+		if(_window == 0)
 		{
 			if(wmodel->Visible.get())
 				create();
@@ -650,6 +623,7 @@ void GfxOutputImpl::output(Pt::Hmi::Model* model)
 				return;
 		}
 	}
+
 
 	writeWindowSizeAndPos();
 	writeWindowProperties();

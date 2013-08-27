@@ -4,7 +4,7 @@ namespace Pt{
 namespace Hmi{
 
 PanelModel::PanelModel()
-: BorderStyle(BorderStyle::Sizebale)
+: BorderStyle(BorderStyle::Single)
 , BorderWidth(3)
 , Invert3DEffect(false)
 , BorderRoundEdge(false)

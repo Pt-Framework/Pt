@@ -20,7 +20,7 @@ Window::Window()
 
 	_defModel->Caption.set("New Window");
 	_defModel->ShowInTaskbar.set(true);
-	_defModel->Border.set(BorderStyle::Sizebale);
+	_defModel->Border.set(WindowBorderType::Sizeable);
 	_defModel->WinPos.set(Pt::Gfx::PointF(20,20));
 	_defModel->WinSize.set( Pt::Gfx::SizeF(800,800));
 
