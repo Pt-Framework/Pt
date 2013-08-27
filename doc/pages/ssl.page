@@ -25,12 +25,11 @@ if( ! cert)
     std::cerr << "certifictate is missing" << std::endl;
 @endcode
 
-The example above reads certificates and keys from a file protected by a
-password. The API allows to import keys into a CeetificateStore from any
-std::istream or buffer. Certificates in the store can be inspected using the
+The example shown above imports certificates and keys from a file, which is
+protected by a password. Certificates in the store can be inspected using the
 iterator API, or searched for by a subject string. Note, that a private key
-will be assigned to its certificate and is not exposed or accessible by any
-API functions.
+will be assoziated with its certificate and is not exposed or accessible by
+any API functions.
 
 
 @section ssl_Context Context Initialization
@@ -51,14 +50,14 @@ ctx.addCACertificate(myCA);
 ctx.setVerifyMode(Pt::Ssl::AlwaysVerify); // NoVerify, TryVerify, AlwaysVerify
 @endcode
 
-A context can be created for a specific protocol type, e.g. TLSv1 which limits
+A context can be created for a specific protocol type, e.g. TLSv1 which limits,
 the communication to that protocol. The method Pt::Ssl::Context::setIdentity()
 sets the certificate presented to the peer. Since private keys are always 
 assoziated with a certificate, when loaded into the CertificateStore, selecting
 a certificate means also selecting it's private key. 
 The trusted CA certificates to verify the peer's identity can be added using
 the Pt::Ssl::Context::addCACertificate() method. Pt::Ssl::Context::setVerifyMode()
-indicates whether the peer is required or to authenticate itself during
+indicates whether the peer is required to authenticate itself during
 the handshake.
 
 
@@ -73,9 +72,9 @@ module to be independent of any socket or transport layer.
 
 Besides an underlying std::iostream for the data transport to the peer, a
 Pt::Ssl::Context is required to open a Pt::Ssl::IOStream. The settings and
-certificates from this context will be used for the connection. Furthermore
+certificates from this context will be used for the connection. Furthermore,
 the stream can be opened as a client stream or server stream, indicated by
-the Pt::Ssl::OpenMode, being either Pt::Ssl::Connect or Pt::SslAccept.
+the Pt::Ssl::OpenMode, being either Pt::Ssl::Connect or Pt::Ssl::Accept.
 
 @code
 std::iostream& ios = ...;
