@@ -3,6 +3,7 @@
 
 #include <Pt/Hmi/Desktop/Api.h>
 #include <vector>
+#include <Pt/Connectable.h>
 
 namespace Pt{
 namespace Hmi{
@@ -11,7 +12,7 @@ class GfxController;
 
 namespace Desktop{
 
-class PT_HMI_DESKTOP_API Widget 
+class PT_HMI_DESKTOP_API Widget : public Pt::Connectable
 {
 public:
 	Widget(Widget* parent = 0);

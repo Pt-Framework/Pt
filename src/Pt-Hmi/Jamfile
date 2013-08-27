@@ -44,6 +44,9 @@ SharedLibrary Pt-Hmi : $(PT_HMI_IMPL)
 					   WindowController.cpp
 					   WindowModel.cpp
 					   WindowRenderer.cpp
+					   DialogController.cpp
+					   DialogModel.cpp
+					   DialogRenderer.cpp
 						;
 
 LinkSharedLibraries Pt-Hmi : Pt Pt-System Pt-Gfx  ;

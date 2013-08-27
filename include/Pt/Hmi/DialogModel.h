@@ -22,34 +22,49 @@
  * 
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
-#include <Pt/Hmi/GfxOutput.h>
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+#ifndef Pt_Hmi_Model_Model_h
+#define Pt_Hmi_Model_Model_h
+
 #include <Pt/Hmi/GfxModel.h>
+#include <Pt/Gfx/Point.h>
+#include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/ARgbImage.h>
-#include "GfxOutputImpl.h"
-#include <Pt/Hmi/GfxOutput.h>
-#include "GfxOutputImpl.h"
- 
+#include <Pt/Gfx/Font.h>
+#include <Pt/Gfx/Gfx.h>
+#include <Pt/Hmi/WindowModel.h>
+
 namespace Pt{
 namespace Hmi{
 
-GfxOutput::GfxOutput()
-: _impl(new GfxOutputImpl())
+
+namespace DialogResult
 {
+	enum Type
+	{
+        Unknown = 0,
+        OK = 1,
+        Cancel = 2,
+        Abort = 3,
+        Retry = 4,
+        Ignore = 5,
+        Yes = 6,
+        No = 7,
+	};
 }
 
-GfxOutput::~GfxOutput()
+class PT_HMI_API DialogModel : public WindowModel
 {
-}
+public:
+	DialogModel();
+	virtual ~DialogModel();
 
-Pt::Gfx::Painter* GfxOutput::nativePainter()
-{
-	return _impl->nativePainter();
-}
+	Property<DialogResult::Type>	Result;
 
-void GfxOutput::output(Pt::Hmi::Model* model)
-{	
-	_impl->output(model);
-}
+private:
+};
 
 }}
+
+#endif

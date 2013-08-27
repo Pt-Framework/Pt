@@ -22,34 +22,25 @@
  * 
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
-#include <Pt/Hmi/GfxOutput.h>
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA */
+
+#include <Pt/Hmi/DialogController.h>
 #include <Pt/Hmi/GfxModel.h>
-#include <Pt/Gfx/ARgbImage.h>
-#include "GfxOutputImpl.h"
 #include <Pt/Hmi/GfxOutput.h>
-#include "GfxOutputImpl.h"
- 
+#include <Pt/Gfx/ImagePainter.h>
+
 namespace Pt{
 namespace Hmi{
 
-GfxOutput::GfxOutput()
-: _impl(new GfxOutputImpl())
-{
-}
-
-GfxOutput::~GfxOutput()
-{
-}
-
-Pt::Gfx::Painter* GfxOutput::nativePainter()
-{
-	return _impl->nativePainter();
-}
-
-void GfxOutput::output(Pt::Hmi::Model* model)
+DialogController::DialogController(WindowController* parent, GfxModel* m, Renderer* r, GfxOutput* out )
+: WindowController(m, r, out)
 {	
-	_impl->output(model);
+	for( size_t i = 0; i < parent->inputDevices().size(); ++i)
+		WindowController::addInputDevice(parent->inputDevices()[i]);
+}
+
+DialogController::~DialogController()
+{
 }
 
 }}

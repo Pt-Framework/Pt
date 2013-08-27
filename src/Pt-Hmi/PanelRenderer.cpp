@@ -48,8 +48,6 @@ void PanelRenderer::render(Pt::Hmi::Model* m)
 	
 	Pt::Gfx::ImagePainter localPainter(model->PaintBuffer);
 						
-
-						
 	switch(model->BorderStyle.get())
 	{
 		case BorderStyle::Single:

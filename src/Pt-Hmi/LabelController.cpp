@@ -3,7 +3,6 @@
 namespace Pt{
 namespace Hmi{
 
-
 LabelController::LabelController()
 {
 }

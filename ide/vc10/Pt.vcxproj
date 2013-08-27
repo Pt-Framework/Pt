@@ -43,6 +43,7 @@
     <ClInclude Include="..\..\include\Pt\Hmi\Desktop\CheckBox.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Desktop\ComboBox.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Desktop\ContextMenu.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\Desktop\Dialog.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Desktop\DockAreaWidget.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Desktop\DockWidget.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Desktop\FlowLayout.h" />
@@ -69,6 +70,9 @@
     <ClInclude Include="..\..\include\Pt\Hmi\Device.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\DeviceButton.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\DeviceControlDial.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\DialogController.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\DialogModel.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\DialogRenderer.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\GfxController.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\GfxModel.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\GfxOutput.h" />
@@ -268,6 +272,12 @@
     <ClInclude Include="..\..\src\Pt-Hmi\gdi\ApplicationImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\gdi\CursorImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\gdi\GfxOutputImpl.h" />
+    <ClInclude Include="..\..\src\Pt-Hmi\x11\ApplicationImpl.h" />
+    <ClInclude Include="..\..\src\Pt-Hmi\x11\CursorImpl.h" />
+    <ClInclude Include="..\..\src\Pt-Hmi\x11\Drawable.h" />
+    <ClInclude Include="..\..\src\Pt-Hmi\x11\GfxOutputImpl.h" />
+    <ClInclude Include="..\..\src\Pt-Hmi\x11\KeyHandler.h" />
+    <ClInclude Include="..\..\src\Pt-Hmi\x11\X11Fd.h" />
     <ClInclude Include="..\..\src\Pt-Http\ClientImpl.h" />
     <ClInclude Include="..\..\src\Pt-Http\Connection.h" />
     <ClInclude Include="..\..\src\Pt-Http\HttpBuffer.h" />
@@ -381,6 +391,7 @@
     <ClCompile Include="..\..\src\Pt-Hmi\Desktop\CheckBox.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Desktop\ComboBox.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Desktop\ContextMenu.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\Desktop\Dialog.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Desktop\DockAreaWidget.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Desktop\DockWidget.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Desktop\FlowLayout.cpp" />
@@ -406,6 +417,9 @@
     <ClCompile Include="..\..\src\Pt-Hmi\Desktop\Widget.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Desktop\Window.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Device.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\DialogController.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\DialogModel.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\DialogRenderer.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\gdi\ApplicationImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\gdi\CursorImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\gdi\GfxOutputImpl.cpp" />
@@ -429,6 +443,12 @@
     <ClCompile Include="..\..\src\Pt-Hmi\WindowController.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\WindowModel.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\WindowRenderer.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\x11\ApplicationImpl.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\x11\CursorImpl.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\x11\Drawable.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\x11\GfxOutputImpl.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\x11\KeyHandler.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\x11\X11Fd .cpp" />
     <ClCompile Include="..\..\src\Pt-Http\Authenticator.cpp" />
     <ClCompile Include="..\..\src\Pt-Http\Authorizer.cpp" />
     <ClCompile Include="..\..\src\Pt-Http\Client.cpp" />

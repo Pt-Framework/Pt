@@ -40,6 +40,7 @@ private:
 	void create();
 	void destroy();
 	void output();
+
 private:
 	HWND					_hwnd;
 	Pt::Hmi::WindowModel*	_model;

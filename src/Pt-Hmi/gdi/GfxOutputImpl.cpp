@@ -16,8 +16,7 @@ GfxOutputImpl::GfxOutputImpl()
 : _model(0)
 , _ignoreSizeEvent(false)
 , _hwnd(0)
-{
-	
+{	
 	Pt::Hmi::Application* app = (Pt::Hmi::Application*) &Pt::Hmi::Application::instance();	
 	app->impl()->WindowEvent += Pt::slot(*this, &GfxOutputImpl::onWindowEvent);
 	_pointerEvent.buttons().resize(3);
@@ -44,7 +43,6 @@ void GfxOutputImpl::onKey(unsigned int msg,  WPARAM wparam, LPARAM lparam)
 	
 	_keyEvent.setVirtualCode(wparam);
 	_keyEvent.setRepeatCount((int)(lparam & 0xFFFF));
-	_keyEvent.setScancode((int)((lparam & 0x7F0000)>>16));
 	_keyEvent.setExtCode( (lparam & 0x1000000) != 0);
 	_keyEvent.setAlt( (lparam & 0x20000000) != 0); 
 		
@@ -64,7 +62,7 @@ void GfxOutputImpl::onKey(unsigned int msg,  WPARAM wparam, LPARAM lparam)
 
 void GfxOutputImpl::onWindowEvent(HWND wnd, unsigned int message, unsigned int wparam, long lparam, bool& handled)
 {
-	if( _hwnd != wnd)
+	if(_hwnd != wnd)
 		return;
 	
 	if(_model == 0)
@@ -132,7 +130,6 @@ GfxOutputImpl::~GfxOutputImpl()
 
 bool GfxOutputImpl::onClosing()
 {
-
 	bool canClose = false;
 	WindowController* controller = (WindowController*)_model->controller();
 	controller->Closing.send(canClose);
@@ -303,10 +300,10 @@ void GfxOutputImpl::writeWindowProperties()
 	if( _model->ShowTitle.get())
 		style |= WS_CAPTION;
 
-	if( _model->ShowMinimizeBt.get())
+	if( _model->ShowMinimizeButton.get())
 		style |= WS_MINIMIZEBOX;
 
-	if( _model->ShowMaximizeBt.get())
+	if( _model->ShowMaximizeButton.get())
 		style |= WS_MAXIMIZEBOX;
 
 	if( _model->ShowSysMenu.get())
@@ -328,39 +325,37 @@ void GfxOutputImpl::writeWindowProperties()
 
 	switch( _model->Border.get())
 	{
-		case Pt::Hmi::BorderStyle::None:
-			
+		case Pt::Hmi::WindowBorderType::NoBorder:			
 		break;
 
-		case Pt::Hmi::BorderStyle::Single:
-			style |= WS_BORDER; 
-		break;
-
-		case Pt::Hmi::BorderStyle::Sizebale:
+		case Pt::Hmi::WindowBorderType::Sizeable:
 			style |= WS_THICKFRAME;
 		break;
 
-		case Pt::Hmi::BorderStyle::Dialog:
+		case Pt::Hmi::WindowBorderType::Dialog:
 			style |= WS_DLGFRAME;			
 			exStyle |= WS_EX_DLGMODALFRAME;
 		break;
 
-		case Pt::Hmi::BorderStyle::DialogSizeable:
+		case Pt::Hmi::WindowBorderType::DialogSizeable:
 			style |= WS_DLGFRAME;			
 			exStyle |= WS_EX_DLGMODALFRAME;
 			style |= WS_THICKFRAME;
 		break;
 
-		case Pt::Hmi::BorderStyle::Tool:
+		case Pt::Hmi::WindowBorderType::Tool:
 			style |= WS_DLGFRAME;
 			exStyle |= WS_EX_TOOLWINDOW;
 		break;
 
-		case Pt::Hmi::BorderStyle::ToolSizeable:
+		case Pt::Hmi::WindowBorderType::ToolSizeable:
 			style |= WS_THICKFRAME;
 			exStyle |= WS_EX_TOOLWINDOW;
 		break;
 
+		default:
+			style |= WS_BORDER; 
+		break;
 	}
 
 	if(_model->ShowInTaskbar.get())

@@ -23,33 +23,17 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
-#include <Pt/Hmi/GfxOutput.h>
-#include <Pt/Hmi/GfxModel.h>
-#include <Pt/Gfx/ARgbImage.h>
-#include "GfxOutputImpl.h"
-#include <Pt/Hmi/GfxOutput.h>
-#include "GfxOutputImpl.h"
- 
+#include <Pt/Hmi/DialogRenderer.h>
+
 namespace Pt{
 namespace Hmi{
 
-GfxOutput::GfxOutput()
-: _impl(new GfxOutputImpl())
+DialogRenderer::DialogRenderer()
 {
 }
 
-GfxOutput::~GfxOutput()
+DialogRenderer::~DialogRenderer()
 {
-}
-
-Pt::Gfx::Painter* GfxOutput::nativePainter()
-{
-	return _impl->nativePainter();
-}
-
-void GfxOutput::output(Pt::Hmi::Model* model)
-{	
-	_impl->output(model);
 }
 
 }}

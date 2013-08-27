@@ -22,34 +22,27 @@
  * 
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
-#include <Pt/Hmi/GfxOutput.h>
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
 #include <Pt/Hmi/GfxModel.h>
+#include <Pt/Gfx/Point.h>
+#include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/ARgbImage.h>
-#include "GfxOutputImpl.h"
-#include <Pt/Hmi/GfxOutput.h>
-#include "GfxOutputImpl.h"
- 
+#include <Pt/Gfx/Font.h>
+#include <Pt/Gfx/Gfx.h>
+#include <Pt/Hmi/DialogModel.h>
+
 namespace Pt{
 namespace Hmi{
 
-GfxOutput::GfxOutput()
-: _impl(new GfxOutputImpl())
+DialogModel::DialogModel()
+: Result(DialogResult::Unknown)
 {
 }
 
-GfxOutput::~GfxOutput()
+DialogModel::~DialogModel()
 {
-}
-
-Pt::Gfx::Painter* GfxOutput::nativePainter()
-{
-	return _impl->nativePainter();
-}
-
-void GfxOutput::output(Pt::Hmi::Model* model)
-{	
-	_impl->output(model);
 }
 
 }}
