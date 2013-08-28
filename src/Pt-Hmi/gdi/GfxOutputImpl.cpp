@@ -85,38 +85,46 @@ void GfxOutputImpl::onWindowEvent(HWND wnd, unsigned int message, unsigned int w
 		case WM_LBUTTONDBLCLK:
 		case WM_RBUTTONDBLCLK:
 		case WM_MBUTTONDBLCLK:
-	
+	    {
 			onMouse(message, wparam, lparam);
 			handled = true;
+		}
 		break;
 
 		case WM_KEYDOWN:
 		case WM_KEYUP:
-
+		{
 			onKey(message, wparam, lparam);
 			handled = true;
-		break;
-		
+		}
 		break;
 
 		case WM_PAINT:
+		{
 			onPaint();
 			handled = true;
+		}
 		break;
 		
 		case WM_SIZE:
+		{
 			onSize(wparam, lparam);
 			handled = true;
+		}
 		break;
 
 		case WM_MOVE:
+		{
 			onMove();
 			handled = true;
+		}
 		break;
 
 		case WM_DESTROY:
+		{
 			onClosed();
 			handled = true;
+		}
 		break;
 
 		case WM_CLOSE:
@@ -169,11 +177,11 @@ void GfxOutputImpl::onSize(WPARAM wParam, LPARAM lParam)
 		break;
 
 		case SIZE_MAXIMIZED:
-			_model->WindowState = WindowStateType::Maximazed;
+			_model->WindowState = WindowStateType::Maximazed;							
 		break;
 
 		case SIZE_MINIMIZED:
-			_model->WindowState = WindowStateType::Minimized;
+			_model->WindowState = WindowStateType::Minimized;			
 		break;
  
 		case SIZE_RESTORED:
@@ -181,7 +189,7 @@ void GfxOutputImpl::onSize(WPARAM wParam, LPARAM lParam)
 		break;
 	}
 
-	readWindowSizeAndPos();
+	readWindowSize();
 }
 
 void GfxOutputImpl::onMouse(unsigned int msg, WPARAM wparam, LPARAM lparam)
@@ -233,7 +241,19 @@ void GfxOutputImpl::writeWindowSizeAndPos()
 	SetWindowPos(_hwnd,0, pos.x(), pos.y(), size.width(), size.height(), 0);	
 }
 
-void GfxOutputImpl::readWindowSizeAndPos()
+void GfxOutputImpl::readWindowSize()
+{
+	WINDOWINFO  info;
+	GetWindowInfo(_hwnd, &info);
+
+	//Windows external Size + Pos
+	_model->WinSize = _model->toUnit(Pt::Gfx::Size(info.rcWindow.right - info.rcWindow.left, info.rcWindow.bottom - info.rcWindow.top));
+
+	//Windows client Size + pos => Gfx Size + pos
+	_model->Size	 = _model->toUnit(Pt::Gfx::Size(info.rcClient.right - info.rcClient.left, info.rcClient.bottom - info.rcClient.top));
+}
+
+void GfxOutputImpl::readWindowPos()
 {
 	WINDOWINFO  info;
 	GetWindowInfo(_hwnd, &info);
@@ -241,19 +261,15 @@ void GfxOutputImpl::readWindowSizeAndPos()
 	//Windows external Size + Pos
 	{		
 		Pt::Gfx::Point	pos( info.rcWindow.left, info.rcWindow.top);	
-		Pt::Gfx::PointF position = _model->toUnit(pos);
-	
-		_model->WinSize = _model->toUnit(Pt::Gfx::Size(info.rcWindow.right - info.rcWindow.left, info.rcWindow.bottom - info.rcWindow.top));
+		Pt::Gfx::PointF position = _model->toUnit(pos);	
 		_model->WinPos	= _model->toUnit(pos);
 	}
 
 	//Windows client Size + pos => Gfx Size + pos
 	{
 		Pt::Gfx::Point	pos( info.rcClient.left, info.rcClient.top);	
-		Pt::Gfx::PointF position = _model->toUnit(pos);
-	
+		Pt::Gfx::PointF position = _model->toUnit(pos);	
 		_model->Position = _model->toUnit(pos);
-		_model->Size	 = _model->toUnit(Pt::Gfx::Size(info.rcClient.right - info.rcClient.left, info.rcClient.bottom - info.rcClient.top));
 	}
 }
 
@@ -266,7 +282,7 @@ void GfxOutputImpl::onMove()
 		return;
 	}
 
-	readWindowSizeAndPos();
+	readWindowPos();
 }
 
 void GfxOutputImpl::onPaint()
@@ -326,13 +342,13 @@ void GfxOutputImpl::writeWindowProperties()
 
 	if( _model->ShowMaximizeButton.get())
 		style |= WS_MAXIMIZEBOX;
-
+		
 	if( _model->ShowSysMenu.get())
 		style |= WS_SYSMENU;
-
+		
 	switch(_model->WindowState.get())
 	{
-		case Pt::Hmi::WindowStateType::Normal:
+		case Pt::Hmi::WindowStateType::Normal:			
 		break;
 
 		case Pt::Hmi::WindowStateType::Maximazed:
@@ -343,7 +359,7 @@ void GfxOutputImpl::writeWindowProperties()
 			style |= WS_MINIMIZE;
 		break;
 	}
-
+	
 	switch( _model->Border.get())
 	{
 		case Pt::Hmi::WindowBorderType::NoBorder:			
@@ -355,12 +371,10 @@ void GfxOutputImpl::writeWindowProperties()
 
 		case Pt::Hmi::WindowBorderType::Dialog:
 			style |= WS_DLGFRAME;			
-			exStyle |= WS_EX_DLGMODALFRAME;
 		break;
 
 		case Pt::Hmi::WindowBorderType::DialogSizeable:
 			style |= WS_DLGFRAME;			
-			exStyle |= WS_EX_DLGMODALFRAME;
 			style |= WS_THICKFRAME;
 		break;
 
@@ -439,10 +453,8 @@ void GfxOutputImpl::output(Pt::Hmi::Model* model)
 		}
 	}
 
-		
 	writeWindowSizeAndPos();
 	writeWindowProperties();	
-		
 	output();
 	InvalidateRect(_hwnd, 0, FALSE);
 }

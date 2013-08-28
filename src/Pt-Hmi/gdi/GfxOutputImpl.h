@@ -33,7 +33,8 @@ private:
 	virtual void onMove();
 	virtual bool onClosing();
 	virtual void onClosed();
-	void readWindowSizeAndPos();
+	void readWindowSize();
+	void readWindowPos();
 	void writeWindowSizeAndPos();
 	void writeWindowProperties();
 	void drawIndependentImage(size_t x, size_t y, const char* data, size_t width, size_t height);

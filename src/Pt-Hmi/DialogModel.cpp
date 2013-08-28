@@ -40,6 +40,7 @@ DialogModel::DialogModel()
 : Result(DialogResult::Unknown)
 {
 	ShowInTaskbar.set(false);
+	ShowSysMenu.set(true);
 }
 
 DialogModel::~DialogModel()
