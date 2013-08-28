@@ -117,6 +117,11 @@ void ApplicationImpl::showConsole(bool show)
 {
 }
 
+void ApplicationImpl::nextEvent()
+{
+	MainLoop::waitNext();
+}
+
 ApplicationImpl::~ApplicationImpl()
 {
     XSync(_display, true);

@@ -111,6 +111,8 @@ namespace System {
 
             Selector& selector();
 
+	        bool waitNext();
+
         protected:
             virtual void onAttachSelectable(Selectable&);
 

@@ -185,6 +185,12 @@ void WindowController::onClosing(bool& canClose)
 
 void WindowController::onClosed()
 {
+	WindowModel* m = dynamic_cast<WindowModel*>(model());
+
+	if( m == 0)
+		return;
+
+	m->Closed = true;	
 
 }
 

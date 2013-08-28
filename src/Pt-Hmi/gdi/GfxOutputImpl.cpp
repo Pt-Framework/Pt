@@ -150,8 +150,6 @@ void GfxOutputImpl::onClosed()
 {
 	WindowController* controller = (WindowController*)_model->controller();
 	controller->Closed.send();
-			
-	 _model->Closed = true;	 
 }
 
 void GfxOutputImpl::onSize(WPARAM wParam, LPARAM lParam)
@@ -426,8 +424,9 @@ void GfxOutputImpl::output(Pt::Hmi::Model* model)
 		if(_hwnd != 0)
 		{
 			destroy();
-			return;
 		}
+
+		return;
 	}
 	else
 	{

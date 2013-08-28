@@ -97,7 +97,6 @@ class MainLoopImpl
         void detach( Timer& timer )
         { _timerQueue.removeTimer(timer); }
 
-    protected:
         bool waitNext();
 
     private:

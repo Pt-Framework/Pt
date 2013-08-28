@@ -120,6 +120,10 @@ void MainLoop::onWake()
     _impl->wake();
 }
 
+bool MainLoop::waitNext()
+{
+	_impl->waitNext();
+}
 
 void MainLoop::onAttachTimer(Timer& timer)
 {

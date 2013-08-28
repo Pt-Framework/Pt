@@ -83,6 +83,8 @@ public:
 			return _keyDeviceEvent;
 		}
 
+		void nextEvent();
+
 private:
     Display* _display;
     X11Fd	_xfd;

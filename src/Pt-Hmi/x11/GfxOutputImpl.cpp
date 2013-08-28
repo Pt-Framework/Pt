@@ -101,7 +101,6 @@ void GfxOutputImpl::onClientMessage(XEvent& xev)
 
 		_model->Size = _model->toUnit(Pt::Gfx::Size(width, height));
 		_model->WinSize =_model->Size;
-		std::cout<<"Client message"<<std::endl;
         return;
     }
 
@@ -131,10 +130,7 @@ void GfxOutputImpl::onClientMessage(XEvent& xev)
 		controller->Closing.send(canClose);
 
 		if(canClose)
-		{
-			controller->close();
-			_model->Closed = true;	
-		}
+			destroy();
 	}	
 }
 
@@ -317,6 +313,12 @@ void GfxOutputImpl::onWindowEvent(XEvent& ev)
 
         case ConfigureNotify:
         {
+			if(!_model->Enable.get())
+			{
+				writeWindowSizeAndPos();
+				return;
+			}
+
             // Use only last configure event for the window in queue
             XPending(_display);
             
@@ -408,6 +410,8 @@ void GfxOutputImpl::destroy()
 		XDestroyWindow(_display, _window);
 		XSync(_display, false);
 		_window = 0;
+		WindowController* controller = (WindowController*)_model->controller();
+		controller->Closed.send();
 	}
 }
 
@@ -608,10 +612,9 @@ void GfxOutputImpl::output(Pt::Hmi::Model* model)
 	if(wmodel->Closed.get())
 	{
 		if(_window != 0)
-		{
 			destroy();
-			return;
-		}
+
+		return;
 	}
 	else
 	{
