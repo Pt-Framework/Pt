@@ -8,11 +8,14 @@
 namespace Pt{
 namespace Hmi{
 
+
+class 	WindowController;
+
 class CursorImpl
 {
 
 public:
-	CursorImpl();
+	CursorImpl(WindowController* parent);
 	virtual ~CursorImpl();
 
 	void setCursor(Cursors::Type c);
@@ -21,6 +24,7 @@ public:
 private:
 	Cursors::Type _type;
 	HCURSOR _cursor;
+	WindowController*  _parent;
 };
 
 }}

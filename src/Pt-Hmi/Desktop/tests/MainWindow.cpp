@@ -61,8 +61,9 @@ void MainWindow::init()
 	//Panel
 	Pt::Hmi::PanelModel* panelModel = (Pt::Hmi::PanelModel*)_mainPanel.controller().model();
 	panelModel->Position.set(Pt::Gfx::PointF(40,40));
+	panelModel->BorderWidth.set(3);
 	panelModel->Size.set(Pt::Gfx::SizeF(700,480));
-	panelModel->BorderStyle.set(Pt::Hmi::BorderStyle::Single);
+	panelModel->BorderStyle.set(Pt::Hmi::BorderStyle::Sizeable);
 	addChild(&_mainPanel);
 
 	//Text

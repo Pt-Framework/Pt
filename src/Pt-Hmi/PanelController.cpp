@@ -122,7 +122,7 @@ void PanelController::onPointerInput(const PointingEvent& ev)
 	Pt::Gfx::PointF p =  toClient(Pt::Gfx::PointF(ev.x(), ev.y()));
 
 	PanelModel* m = (PanelModel*) gfxModel();	
-
+	WindowController* window = getWindow();
 	Pt::Gfx::SizeF size = m->Size.get();
 	
 	double sizeR = size.width() -  m->BorderWidth.get();
@@ -137,49 +137,49 @@ void PanelController::onPointerInput(const PointingEvent& ev)
 			{
 				if(p.x() < m->BorderWidth.get() && p.y() <  m->BorderWidth.get())
 				{//Corner NW
-					m->CursorStatus.get().setCursor(Cursors::SizeNWSE);
+					m->CursorT.get().setCursor(Cursors::SizeNWSE, window);
 					_resizeDir = NorthWest;
 				}	
 				else if(p.x() > sizeR && p.y() <  m->BorderWidth.get())
 				{//corner NE
-					m->CursorStatus.get().setCursor(Cursors::SizeNESW);
+					m->CursorT.get().setCursor(Cursors::SizeNESW, window);
 					_resizeDir= NorthEast;
 				}
 				else if(p.x() < m->BorderWidth.get() &&  p.y() > sizeB )
 				{//corner SW
-					m->CursorStatus.get().setCursor(Cursors::SizeNESW);
+					m->CursorT.get().setCursor(Cursors::SizeNESW, window);
 					_resizeDir = SouthWest;
 				}
 				else if(p.x() > sizeR &&  p.y() > sizeB )
 				{//corner SE
-					m->CursorStatus.get().setCursor(Cursors::SizeNWSE);
+					m->CursorT.get().setCursor(Cursors::SizeNWSE, window);
 					_resizeDir = SouthEast;
 				}
 				else
 				{
 					if( p.x() < m->BorderWidth.get())				
 					{//West
-						m->CursorStatus.get().setCursor(Cursors::SizeWE);
+						m->CursorT.get().setCursor(Cursors::SizeWE, window);
 						_resizeDir = West;
 					}
 					else if(p.x() >= sizeR)
 					{//East
-						m->CursorStatus.get().setCursor(Cursors::SizeWE);
+						m->CursorT.get().setCursor(Cursors::SizeWE, window);
 						_resizeDir = East;
 					}
 					else if( p.y() < m->BorderWidth.get())
 					{//North
-						m->CursorStatus.get().setCursor(Cursors::SizeNS);
+						m->CursorT.get().setCursor(Cursors::SizeNS, window);
 						_resizeDir = North;
 					}
 					else if(p.y() >sizeB)
 					{//South
-						m->CursorStatus.get().setCursor(Cursors::SizeNS);
+						m->CursorT.get().setCursor(Cursors::SizeNS, window);
 						_resizeDir = South;
 					}
 					else
 					{
-						m->CursorStatus.get().setCursor(Cursors::Default);
+						m->CursorT.get().setCursor(Cursors::Default, window);
 					}
 				}
 			}

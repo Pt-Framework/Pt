@@ -3,11 +3,13 @@
 #include <Windows.h>
 #include <Pt/Hmi/Application.h>
 #include "ApplicationImpl.h"
+#include <Pt/Hmi/WindowController.h>
 
 namespace Pt{
 namespace Hmi{
 
-CursorImpl::CursorImpl()
+CursorImpl::CursorImpl(WindowController* parent)
+:_parent(parent)
 {
 	setCursor(Cursors::Default);
 }

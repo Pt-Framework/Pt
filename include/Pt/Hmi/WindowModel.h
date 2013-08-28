@@ -81,7 +81,6 @@ public:
 	WindowModel();
 	virtual ~WindowModel();
 
-	Property<int>								Cursor;	
 	Property<bool>								AllowDrop;
 	Property<Pt::Gfx::SizeF>					MinimumSize;
 	Property<Pt::Gfx::SizeF>					MaximumSize;

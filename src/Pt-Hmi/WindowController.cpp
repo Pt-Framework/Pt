@@ -130,6 +130,7 @@ void WindowController::onPointerInput(const PointingEvent& ev)
 		return;
 	
 	m->Pointer2DStatus = ev;
+	m->CursorT.get().setCursor(Pt::Hmi::Cursors::Default, this);
 
 	for( size_t i = 0; i < children().size(); ++i)
 		children()[i]->notifyPointerInput(ev);	

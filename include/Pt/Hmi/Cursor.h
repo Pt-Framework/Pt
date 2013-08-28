@@ -37,11 +37,22 @@ namespace Cursors
 		SizeNWSE,
 		SizeWE,
 		UpArrow,
-		Wait 
+		Wait,
+		UserDefined1,
+		UserDefined2,
+		UserDefined3,
+		UserDefined4,
+		UserDefined5,
+		UserDefined6,
+		UserDefined7,
+		UserDefined8,
+		UserDefined9,
+		UserDefined10,
 	};
 }
 
 class CursorImpl;
+class WindowController;
 
 class PT_HMI_API Cursor
 {
@@ -50,7 +61,7 @@ public:
 	Cursor();
 	virtual ~Cursor();
 
-	void setCursor(Cursors::Type c);
+	void setCursor(Cursors::Type c, WindowController* parent);
 	Cursors::Type getCursor() const;
 
 private:

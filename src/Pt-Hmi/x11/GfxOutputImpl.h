@@ -55,6 +55,11 @@ public:
 		return 0;
 	}
 
+	Window window()
+	{
+		return _window;
+	}
+
 private:
 	void onWindowEvent(XEvent& ev);
 	void onClientMessage(XEvent& ev);

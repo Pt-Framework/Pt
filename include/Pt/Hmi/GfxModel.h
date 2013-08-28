@@ -91,7 +91,7 @@ public:
 	Pt::Gfx::ARgbImage				PaintBuffer;
 	Property<PointingEvent>			Pointer2DStatus;	
 	Property<KeyEvent>				KeyStatus;	
-	Property<Cursor>	            CursorStatus; 
+	Property<Cursor>		        CursorT;
 	Property<TextAlign::Type>	    TextAlign; 
 	Property<bool>					Focused; 
 	Property<bool>					AcceptFocus; 

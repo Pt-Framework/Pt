@@ -26,9 +26,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <Pt/Hmi/Controller.h>
+#include <Pt/Hmi/WidgetController.h>
 #include <Pt/Hmi/PointingDevice.h>
 #include <Pt/Hmi/KeyboardDevice.h>
+#include <Pt/Hmi/WindowController.h>
 
 namespace Pt{
 namespace Hmi{
@@ -116,6 +117,23 @@ void Controller::removeChild(Controller* base)
 	}			
 }	
 
+
+WindowController* Controller::getWindow()
+{
+	Controller* p  = this->widgetParent();
+
+	while(p)
+	{
+		WindowController* winCtrl =  dynamic_cast<WindowController*>(p);
+		
+		if( winCtrl != 0)
+			return winCtrl;
+		
+		p = p->widgetParent();
+	}
+
+	return 0;
+}
 
 void Controller::output()
 {	

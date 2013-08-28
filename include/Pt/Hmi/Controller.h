@@ -40,6 +40,8 @@
 namespace Pt{
 namespace Hmi{
 
+class WindowController;
+
 class PT_HMI_API Controller  : public Pt::Connectable
 {
 protected:
@@ -165,6 +167,8 @@ public:
 	void output();		
 
 protected:	
+
+	WindowController* getWindow();
 
 	virtual bool onMoveFocusNext()
 	{
