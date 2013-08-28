@@ -122,7 +122,7 @@ void MainLoop::onWake()
 
 bool MainLoop::waitNext()
 {
-	_impl->waitNext();
+	return _impl->waitNext();
 }
 
 void MainLoop::onAttachTimer(Timer& timer)

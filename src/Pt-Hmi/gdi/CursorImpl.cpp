@@ -8,17 +8,15 @@
 namespace Pt{
 namespace Hmi{
 
-CursorImpl::CursorImpl(WindowController* parent)
-:_parent(parent)
-{
-	setCursor(Cursors::Default);
+CursorImpl::CursorImpl()
+{	
 }
 
 CursorImpl::~CursorImpl()
 {
 }
 
-void CursorImpl::setCursor(Cursors::Type c)
+void CursorImpl::setCursor(Cursors::Type c, WindowController* parent)
 {
 	_type = c;
 	HINSTANCE hin = NULL; //System Instance

@@ -70,7 +70,6 @@ class PT_SYSTEM_API MainLoopImpl
 
         void avail(Selectable& s);
 
-    protected:
         bool waitNext();
 
     private:
