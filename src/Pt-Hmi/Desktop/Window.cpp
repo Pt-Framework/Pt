@@ -41,6 +41,7 @@ void Window::show()
 	Pt::Hmi::WindowModel* m = (Pt::Hmi::WindowModel*) controller().model();
 	m->Closed.set(false);
 	Widget::show();
+	controller().invalidate();
 
 }
 
