@@ -219,7 +219,21 @@ class SslClient : public Pt::Connectable
             //     return true;
             // }
         }
-
+        
+        //21:42:46.098 [Pt.Ssl.SslClient] Info - received shutdown alert
+        //SHUTDOWN: 0
+        //CLOSED: 1
+        //EOF: 0
+        //CONNCTED: 1
+        //21:42:46.099 [Pt.Ssl.SslClient] Trace - endShutdown
+        //OUT AVAIL: 0
+        //21:42:46.099 [Pt.Ssl.SslClient] Info - sent shutdown alert acknowledge
+        //beginReadAck EOF: 0
+        //beginReadAck EOF: 1
+        //endReadAck EOF: 1
+        //CONNCTED: 1
+        //after close CONNCTED: 0
+        
         void beginReadAck()
         {
             std::clog << "beginReadAck EOF: " << _ios.ioBuffer().device()->eof() << std::endl;
@@ -236,7 +250,11 @@ class SslClient : public Pt::Connectable
             std::clog << "CONNCTED: " << _tcpSocket.isConnected() << std::endl;
 
             if( _ios.device()->eof() )
+            {
+                _tcpSocket.close();
+                std::clog << "after close CONNCTED: " << _tcpSocket.isConnected() << std::endl;
                 return true;
+            }
 
             throw Pt::System::IOError("connection lost");
             return false;
