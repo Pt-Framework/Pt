@@ -38,54 +38,16 @@
 
 log_define("Pt.Ssl.SslClient")
 
-class Request
-{
-    public:
-        Request()
-        {}
-
-        ~Request()
-        {}
-
-        std::string& data()
-        { return _data; }
-
-        const std::string& data() const
-        { return _data; }
-
-    private:
-        std::string _data;
-};
-
-class Reply
-{
-    public:
-        Reply()
-        {}
-
-        ~Reply()
-        {}
-
-        std::string& data()
-        { return _data; }
-
-        const std::string& data() const
-        { return _data; }
-
-    private:
-        std::string _data;
-};
-
 class SslClient : public Pt::Connectable
 {
     public:
-        SslClient(Pt::System::EventLoop& loop, const std::string& host, unsigned short port)
-        : _host(host)
+        SslClient(Pt::System::EventLoop& loop, Pt::Ssl::Context& ctx, const std::string& host, unsigned short port)
+        : _ctx(&ctx)
+        , _host(host)
         , _port(port)
-        , _state(Idle)
+        , _beginExecute(&SslClient::beginConnect)
+        , _endExecute(&SslClient::endConnect)
         {
-            _ctx.setVerifyMode(Pt::Ssl::NoVerify);
-
             _tcpSocket.setActive(loop);
             _tcpSocket.connected() += Pt::slot(*this, &SslClient::onConnect);
 
@@ -97,214 +59,239 @@ class SslClient : public Pt::Connectable
         Pt::System::EventLoop& loop()
         { return *_tcpSocket.parent(); }
 
-        Request& request()
+        std::string& request()
         { return _request; }
         
-        const Reply& reply()
+        const std::string& reply()
         { return _reply; }
 
         void beginExecute()
-        {
-            if(_state == Idle)
-            {
-                log_info("connecting to " << _host << ':' << _port);
-                _tcpSocket.beginConnect(_host, _port);
-                return;
-            }
-
-            if(_state == Connected || _state == ReadHandshake || _state == WriteHandshake)
-            {
-                bool wantRead = _ssl.readHandshake();
-                if(wantRead)
-                {
-                    _ios.ioBuffer().beginRead();
-                    _state = ReadHandshake;
-                    return;
-                }
-                
-                if( ! _ssl.isConnected() )
-                {
-                    _ssl.writeHandshake();
-                    _ios.ioBuffer().beginWrite();
-                    _state = WriteHandshake;
-                    return;
-                }
-
-                _state = SendRequest;
-            }
-
-            if(_state == SendRequest)
-            {
-                log_info("sending:\n" << _request.data() );
-                _ssl.write( _request.data().c_str(), _request.data().size() );
-                _ssl.flush();
-
-                _ios.ioBuffer().beginWrite();
-            }
-
-            if(_state == ReceiveReply)
-            {
-                _ios.ioBuffer().beginRead();
-            }
-            
-            if(_state == WriteShutdown)
-            {
-                _ios.ioBuffer().beginWrite();
-            }
-        }
+        { (this->*_beginExecute)(); }
 
         bool endExecute()
+        { return (this->*_endExecute)(); }
+
+        void close()
         {
-            log_info("endExecute");
-            if(_state == Idle)
-            {
-                _tcpSocket.endConnect();
-                _ssl.open(_ctx, _ios, Pt::Ssl::Connect);
-                _state = Connected;
-                return false;
-            }
-
-            if(_state == ReadHandshake)
-            {
-                _ios.ioBuffer().endRead();
-                return false;
-            }
-
-            if(_state == WriteHandshake)
-            {
-                _ios.ioBuffer().endWrite();
-                return false;
-            }
-
-            if(_state == SendRequest)
-            {
-                _ios.ioBuffer().endWrite();
-                
-                if(  _ios.ioBuffer().out_avail() <= 0 )
-                {
-                    log_info("request sent");
-                    _state = ReceiveReply;
-                }
-                
-                return false;
-            }
-
-            if(_state == ReceiveReply)
-            {
-                _ios.ioBuffer().endRead();
-
-                for(;;)
-                {
-                    _ssl.import();
-
-                    if(_ssl.sslBuffer().in_avail() <= 0)
-                        break;
-
-                    char buf[255];
-                    do
-                    {
-                        std::streamsize n = _ssl.readsome( buf, sizeof(buf) );
-                        std::cout.write(buf, n);
-                    }
-                    while(_ssl.sslBuffer().in_avail() > 0);
-                }
-
-                if( _ssl.isShutdown() )
-                {
-                    log_info("received shutdown alert");
-                }
-                
-                //if( ! _tcpSocket.isConnected() )
-                //{
-                //    log_info("connection closed");
-                //    return true;
-                //}
-
-                if( _ssl.isShutdown() )
-                {
-                    std::clog << "SHUTDOWN: " << _ssl.isShutdown() << std::endl;
-                    std::clog << "CLOSED: " << _ssl.isClosed() << std::endl;
-                    std::clog << "EOF: " << _ios.ioBuffer().device()->eof() << std::endl;
-                    std::clog << "CONNCTED: " << _tcpSocket.isConnected() << std::endl;
-
-                    _ssl.shutdown();
-                    _state = WriteShutdown;
-                    std::clog << "OUT AVAIL: " << _ios.ioBuffer().out_avail() << std::endl;
-                    std::clog << "EOF2: " << _ios.ioBuffer().device()->eof() << std::endl;
-                    return false;
-                }
-            }
+            _ssl.close();
+            _ios.clear();
+            _tcpSocket.close();
             
-            if(_state == WriteShutdown)
-            {
-                log_info("wrote shutdown");
-                _ios.ioBuffer().endWrite();
-                std::clog << "SHUTDOWN: " << _ssl.isShutdown() << std::endl;
-                std::clog << "CLOSED: " << _ssl.isClosed() << std::endl;
-                std::clog << "EOF: " << _ios.ioBuffer().device()->eof() << std::endl;
-                std::clog << "CONNCTED: " << _tcpSocket.isConnected() << std::endl;
-                return true;
-            }
-
-            // POSIX:
-            //20:07:55.314 [Pt.Ssl.SslClient] Info - endExecute
-            //20:07:55.314 [Pt.Ssl.SslClient] Info - received shutdown alert
-            //SHUTDOWN: 1
-            //CLOSED: 0
-            //EOF: 0
-            //CONNCTED: 1
-            //OUT AVAIL: 37
-            //EOF2: 0
-            //20:07:55.315 [Pt.Ssl.SslClient] Info - endExecute
-            //20:07:55.315 [Pt.Ssl.SslClient] Info - wrote shutdown
-            //SHUTDOWN: 0
-            //CLOSED: 1
-            //EOF: 0
-            //CONNCTED: 1
-
-            return false;
-        }
-
-        void onConnect(Pt::Net::TcpSocket&)
-        {
-            _requestProgressed.send(*this);
-        }
-
-        void onInput(Pt::System::IOBuffer&)
-        {
-            _requestProgressed.send(*this);
-        }
-
-        void onOutput(Pt::System::IOBuffer&)
-        {
-            _requestProgressed.send(*this);
+            _beginExecute = &SslClient::beginConnect;
+            _endExecute = &SslClient::endConnect;
         }
 
         Pt::Signal<SslClient&>& requestProgressed()
         { return _requestProgressed; }
 
     private:
+        void beginConnect()
+        {
+            log_info("connecting to " << _host << ':' << _port);
+            _tcpSocket.beginConnect(_host, _port);
+            
+            _endExecute = &SslClient::endConnect;
+        }
+
+        bool endConnect()
+        {
+            _tcpSocket.endConnect();
+            _ssl.open(*_ctx, _ios, Pt::Ssl::Connect);
+
+            log_info("connected to " << _host << ':' << _port);
+            _beginExecute = &SslClient::beginHandshake;
+            _endExecute = &SslClient::endWrite;
+            return false;
+        }
+
+        void beginHandshake()
+        {
+            bool wantRead = _ssl.readHandshake();
+            if(wantRead)
+            {
+                _ios.ioBuffer().beginRead();
+                _endExecute = &SslClient::endRead;
+                return;
+            }
+                
+            if( ! _ssl.isConnected() )
+            {
+                _ssl.writeHandshake();
+                _ios.ioBuffer().beginWrite();
+                _endExecute = &SslClient::endWrite;
+                return;
+            }
+
+            // write any pending handshake data
+            if( _ios.ioBuffer().out_avail() > 0 )
+            {
+                _ios.ioBuffer().beginWrite();
+                _endExecute = &SslClient::endWrite;
+                return;
+            }
+                
+            // start sending the request
+            log_info("sending " << _request.size() << " bytes" );
+            _ssl.write( _request.c_str(), _request.size() );
+            _ssl.flush();
+
+            _beginExecute = &SslClient::beginRequest;
+            _endExecute = &SslClient::endWrite;
+            beginRequest();
+        }
+
+        void beginRequest()
+        {
+            // write pending request data
+            if( _ios.ioBuffer().out_avail() > 0 )
+            {
+                _ios.ioBuffer().beginWrite();
+                _endExecute = &SslClient::endWrite;
+                return;
+            }
+
+            // start receiving the reply
+            _ios.ioBuffer().beginRead();
+            _beginExecute = &SslClient::beginRead;
+            _endExecute = &SslClient::endReply;
+        }
+
+        bool endReply()
+        {
+            _ios.ioBuffer().endRead();
+
+            for(;;)
+            {
+                _ssl.import();
+
+                if(_ssl.sslBuffer().in_avail() <= 0)
+                    break;
+
+                char buf[255];
+                do
+                {
+                    std::streamsize n = _ssl.readsome( buf, sizeof(buf) );
+                    _reply.append(buf, static_cast<size_t>(n));
+                }
+                while(_ssl.sslBuffer().in_avail() > 0);
+
+                log_info( "received " << _reply.size() << " bytes");
+            }
+
+            if( _ssl.isShutdown() )
+            {
+                log_info("received shutdown alert");
+
+                // start sending the shutdown acknowledge
+                _ssl.shutdown();
+                _beginExecute = &SslClient::beginWrite;
+                _endExecute = &SslClient::endShutdown;
+                
+                std::clog << "SHUTDOWN: " << _ssl.isShutdown() << std::endl;
+                std::clog << "CLOSED: " << _ssl.isClosed() << std::endl;
+                std::clog << "EOF: " << _ios.ioBuffer().device()->eof() << std::endl;
+                std::clog << "CONNCTED: " << _tcpSocket.isConnected() << std::endl;
+            }
+
+            return false;
+        }
+
+        bool endShutdown()
+        {
+            log_trace("endShutdown");
+
+            _ios.ioBuffer().endWrite();
+            std::clog << "OUT AVAIL: " << _ios.ioBuffer().out_avail() << std::endl;
+
+            if(_ios.ioBuffer().out_avail() <= 0)
+            {
+                log_info("sent shutdown alert acknowledge");
+                _beginExecute = &SslClient::beginReadAck;
+                _endExecute = &SslClient::endReadAck;
+            }
+            
+            return false;
+            
+            // shutdown was completed
+            // if(_ios.ioBuffer().out_avail() <= 0)
+            // {
+            //     close();
+            //     return true;
+            // }
+        }
+
+        void beginReadAck()
+        {
+            std::clog << "beginReadAck EOF: " << _ios.ioBuffer().device()->eof() << std::endl;
+            _ios.ioBuffer().beginRead();
+
+            std::clog << "beginReadAck EOF: " << _ios.ioBuffer().device()->eof() << std::endl;
+        }
+
+        bool endReadAck()
+        {
+            _ios.ioBuffer().endRead();
+
+            std::clog << "endReadAck EOF: " << _ios.ioBuffer().device()->eof() << std::endl;
+            std::clog << "CONNCTED: " << _tcpSocket.isConnected() << std::endl;
+
+            if( _ios.device()->eof() )
+                return true;
+
+            throw Pt::System::IOError("connection lost");
+            return false;
+        }
+
+        void beginRead()
+        {
+            _ios.ioBuffer().beginRead();
+
+            if( _ios.device()->eof() )
+                throw Pt::System::IOError("connection lost");
+        }
+
+        bool endRead()
+        {
+            _ios.ioBuffer().endRead();
+            return false;
+        }
+
+        void beginWrite()
+        {
+            _ios.ioBuffer().beginWrite();
+        }
+
+        bool endWrite()
+        {
+            _ios.ioBuffer().endWrite();
+            return false;
+        }
+
+        void onConnect(Pt::Net::TcpSocket&)
+        { _requestProgressed.send(*this); }
+
+        void onInput(Pt::System::IOBuffer&)
+        { _requestProgressed.send(*this); }
+
+        void onOutput(Pt::System::IOBuffer&)
+        { _requestProgressed.send(*this); }
+
+    private:
         Pt::Net::TcpSocket _tcpSocket;
         Pt::System::IOStream _ios;
-        Pt::Ssl::CertificateStore _store;
-        Pt::Ssl::Context _ctx;
+        Pt::Ssl::Context* _ctx;
         Pt::Ssl::IOStream _ssl;
         std::string _host;
         unsigned short _port;
-        Request _request;
-        Reply _reply;
+        std::string _request;
+        std::string _reply;
         Pt::Signal<SslClient&> _requestProgressed;
 
-        enum State {
-            Idle,
-            Connected,
-            Handshake,
-            ReadHandshake,
-            WriteHandshake,
-            SendRequest,
-            ReceiveReply,
-            WriteShutdown
-        } _state;
+        typedef void (SslClient::*BeginFunc)();
+        BeginFunc _beginExecute;
+
+        typedef bool (SslClient::*EndFunc)();
+        EndFunc _endExecute;
 };
 
 
@@ -328,13 +315,17 @@ int main(const char* argc, int argv)
         Pt::System::Logger::setLogLevel("Pt.Ssl.SslClient", Pt::System::Trace);
 
         const char request[] = "GET / HTTP/1.1\r\n"
-                                "Host: www.pt-framework.org\r\n"
-                                "Connection: close\r\n"
-                                "\r\n";
+                               "Host: www.pt-framework.org\r\n"
+                               "Connection: close\r\n"
+                               "\r\n";
 
         Pt::System::MainLoop loop;
-        SslClient client(loop, "www.pt-framework.org", 443);
-        client.request().data() = request;
+        
+        Pt::Ssl::Context ctx;
+        ctx.setVerifyMode(Pt::Ssl::NoVerify);
+        
+        SslClient client(loop, ctx, "www.pt-framework.org", 443);
+        client.request() = request;
         client.requestProgressed() += Pt::slot(onProgress);
         client.beginExecute();
 
