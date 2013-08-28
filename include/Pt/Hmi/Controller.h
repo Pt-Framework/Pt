@@ -138,7 +138,10 @@ public:
 
 	inline void deviceKeyInput(Controller* c, const KeyEvent& ev)
 	{
+
+		if( this != c)
 			return;
+
 		onKeyInput(ev);
 	}
 

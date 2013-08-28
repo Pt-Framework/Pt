@@ -88,11 +88,13 @@ void WindowController::invalidate()
 void WindowController::onKeyInput(const KeyEvent& ev)
 { 
 	GfxModel* m = gfxModel();
-	
+
+
 	if(!m->Enable.get())
 		return;
 
 	m->KeyStatus = ev;
+
 
 	if(ev.virtualCode() == '\t' && ev.state() == Pt::Hmi::KeyEvent::KeyUp && !ev.shift())
 	{

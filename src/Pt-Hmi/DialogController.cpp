@@ -56,9 +56,12 @@ void DialogController::modal(WindowController* parent)
 	 model()->Enable = true;
 	WindowModel* dialogParentModel = (WindowModel*)parent->model();
 	dialogParentModel->Enable = false;
+
+	invalidate();
 	
 	while(!_closed)
 		Application::instance().nextEvent();
+
 	
 	dialogParentModel->Enable = true;
 }

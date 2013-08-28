@@ -208,11 +208,28 @@ void GfxOutputImpl::onMouseButtonRelease(XEvent& xev)
 	_mouseEvent.setY(pos.y());
 }
 
+void GfxOutputImpl::redraw()
+{
+    XEvent exppp;
+    memset(&exppp, 0, sizeof(exppp));
+    exppp.type = Expose;
+    exppp.xexpose.window = _window;
+
+    XSendEvent(_display,_window,False,ExposureMask,&exppp);
+    XFlush(_display);
+}
+
 void GfxOutputImpl::onConfigureNotify( XEvent& xev)
 {
 	if(_ignoreSizeEvent)
 	{
 		_ignoreSizeEvent = false;
+		return;
+	}
+
+	if(!_model->Enable.get())
+	{
+		writeWindowSizeAndPos();
 		return;
 	}
 
@@ -272,7 +289,6 @@ void GfxOutputImpl::onKeyEvent(XEvent& xev)
 	_keyEvent.setVirtualCode(vcode);
 
 	_keyEvent.setRepeatCount(0);
-
 		
 	Application::instance().keyDeviceEvent().send(_model->controller(), _keyEvent);
 }
@@ -313,12 +329,6 @@ void GfxOutputImpl::onWindowEvent(XEvent& ev)
 
         case ConfigureNotify:
         {
-			if(!_model->Enable.get())
-			{
-				writeWindowSizeAndPos();
-				return;
-			}
-
             // Use only last configure event for the window in queue
             XPending(_display);
             
@@ -632,6 +642,7 @@ void GfxOutputImpl::output(Pt::Hmi::Model* model)
 	writeWindowProperties();
 	output();
 	paint();
+	redraw();
 }
 
 }}
