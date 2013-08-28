@@ -45,6 +45,8 @@ class ApplicationImpl : public Pt::System::EventLoop
 			return _instanceHandle; 
 		}
 
+		void nextEvent();
+
 		double toUnit(int value);
 		Pt::Gfx::PointF toUnit(const Pt::Gfx::Point& value);
 		Pt::Gfx::SizeF toUnit(const Pt::Gfx::Size& value);

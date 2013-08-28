@@ -28,6 +28,7 @@
 #include <Pt/Hmi/GfxController.h>
 #include <Pt/Hmi/GfxModel.h>
 #include <Pt/Hmi/WindowModel.h>
+#include <Pt/Hmi/WindowController.h>
 #include <Pt/Gfx/ImagePainter.h>
 
 namespace Pt{
@@ -44,7 +45,7 @@ GfxController::~GfxController()
 
 Pt::Gfx::PointF GfxController::toClient(const Pt::Gfx::PointF& globalPoint)
 {
-	GfxController* par = dynamic_cast<GfxController*>(Controller::parent());	
+	GfxController* par = dynamic_cast<GfxController*>(Controller::widgetParent());	
 	GfxModel* m = gfxModel();	
 
 	if( par == 0)
@@ -56,7 +57,7 @@ Pt::Gfx::PointF GfxController::toClient(const Pt::Gfx::PointF& globalPoint)
 
 Pt::Gfx::PointF GfxController::fromClient(const Pt::Gfx::PointF& localPoint, bool toRoot)
 {
-	const GfxController* par = dynamic_cast<const GfxController*>(Controller::parent());
+	const GfxController* par = dynamic_cast<const GfxController*>(Controller::widgetParent());
 	const GfxModel* m = gfxModel();
 
 	double x = localPoint.x();
@@ -65,7 +66,7 @@ Pt::Gfx::PointF GfxController::fromClient(const Pt::Gfx::PointF& localPoint, boo
 	while(par != 0)
 	{
 		m = par->gfxModel();
-		par = dynamic_cast<const GfxController*>(par->parent());
+		par = dynamic_cast<const GfxController*>(par->widgetParent());
 		
 		if(!(toRoot && par == 0))
 		{
@@ -89,7 +90,7 @@ const GfxModel* GfxController::gfxModel() const
 
 void GfxController::invalidate()
 {
-	GfxController* par = dynamic_cast<GfxController*>(parent());
+	GfxController* par = dynamic_cast<GfxController*>(widgetParent());
 	
 	if( par != 0)
 		par->invalidate();

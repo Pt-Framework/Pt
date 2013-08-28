@@ -37,6 +37,7 @@ namespace Pt{
 namespace Hmi{
 
 WindowController::WindowController(GfxModel* m, Renderer* r,  GfxOutput* out, PointingDevice* in1, InputDevice* in2)
+:_windowParent(0)
 {	
 	if( m != 0)
 		Controller::setModel(m);
@@ -88,6 +89,9 @@ void WindowController::onKeyInput(const KeyEvent& ev)
 { 
 	GfxModel* m = gfxModel();
 	
+	if(!m->Enable.get())
+		return;
+
 	m->KeyStatus = ev;
 
 	if(ev.virtualCode() == '\t' && ev.state() == Pt::Hmi::KeyEvent::KeyUp && !ev.shift())
@@ -119,6 +123,9 @@ void WindowController::onKeyInput(const KeyEvent& ev)
 void WindowController::onPointerInput(const PointingEvent& ev)
 {
 	GfxModel* m = gfxModel();
+
+	if(!m->Enable.get())
+		return;
 	
 	m->Pointer2DStatus = ev;
 
@@ -164,10 +171,15 @@ void WindowController::onModelChanged(bool created)
 
 void WindowController::onClosing(bool& canClose)
 {
+	
 	WindowModel* m = dynamic_cast<WindowModel*>(model());
+
 	if( m == 0)
 		return;
 	
+	if(!m->Enable.get())
+		return;
+
 	canClose = m->CanClose.get();
 }
 

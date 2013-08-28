@@ -50,6 +50,21 @@ public:
 	void invalidate();	
 	void close();
 
+	inline void setWindowParent(WindowController* parent)
+	{
+		_windowParent = parent;		
+	}
+
+	inline const WindowController* windowParent() const
+	{
+		return _windowParent;
+	}
+
+	inline WindowController* windowParent()
+	{
+		return _windowParent;
+	}
+
 	Pt::Signal<>		Closed;	
 	Pt::Signal<bool&>   Closing;
 
@@ -63,6 +78,7 @@ protected:
 	void onSizeChanged(Pt::Gfx::SizeF& size);
 	
 	GfxModel* gfxModel();
+	WindowController*  _windowParent;
 };
 
 }}

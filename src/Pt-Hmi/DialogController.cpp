@@ -25,22 +25,42 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA */
 
 #include <Pt/Hmi/DialogController.h>
+#include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/GfxModel.h>
 #include <Pt/Hmi/GfxOutput.h>
 #include <Pt/Gfx/ImagePainter.h>
+#include <Pt/Hmi/DialogModel.h>
 
 namespace Pt{
 namespace Hmi{
 
-DialogController::DialogController(WindowController* parent, GfxModel* m, Renderer* r, GfxOutput* out )
+DialogController::DialogController(GfxModel* m, Renderer* r, GfxOutput* out )
 : WindowController(m, r, out)
-{	
-	for( size_t i = 0; i < parent->inputDevices().size(); ++i)
-		WindowController::addInputDevice(parent->inputDevices()[i]);
+{				
 }
 
 DialogController::~DialogController()
 {
+}
+
+void DialogController::onClosed()
+{
+	_closed = true;
+}
+
+void DialogController::modal(WindowController* parent)
+{	
+	_closed  = false;
+	 setWindowParent(parent);
+
+	 model()->Enable = true;
+	WindowModel* dialogParentModel = (WindowModel*)parent->model();
+	dialogParentModel->Enable = false;
+	
+	while(!_closed)
+		Application::instance().nextEvent();
+	
+	dialogParentModel->Enable = true;
 }
 
 }}

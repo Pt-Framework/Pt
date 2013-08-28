@@ -29,6 +29,8 @@
 #include <Pt/Hmi/WindowController.h>
 #include <Pt/Hmi/GfxModel.h>
 #include <Pt/Gfx/ImagePainter.h>
+#include <Pt/System/Semaphore.h>
+#include <Pt/System/MainLoop.h>
 
 namespace Pt{
 namespace Hmi{
@@ -38,10 +40,17 @@ class GfxOutput;
 class PT_HMI_API DialogController  : public WindowController
 {
 public:
-	DialogController(WindowController* parent, GfxModel* m = 0, Renderer* r = 0, GfxOutput* out = 0);
+	DialogController(GfxModel* m = 0, Renderer* r = 0, GfxOutput* out = 0);
 	virtual ~DialogController();	
 
+	void modal(WindowController* parent);
+
 protected:
+	virtual void onClosed();
+
+protected:
+	Pt::System::MainLoop _done;	
+	bool _closed;
 };
 
 }}

@@ -45,7 +45,7 @@ private:
 	HWND					_hwnd;
 	Pt::Hmi::WindowModel*	_model;
 	Pt::Gfx::Painter*		_nativePainter;
-	bool					_ignoreSizeEvent;
+	bool					_ignoreEvent;
 	KeyEvent				_keyEvent;
 	PointingEvent			_pointerEvent;
 	Pt::Gfx::Rgb888Image	_rgb88Image;

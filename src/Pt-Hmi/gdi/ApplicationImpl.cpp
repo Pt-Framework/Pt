@@ -319,6 +319,11 @@ double ApplicationImpl::unitSizeMm() const
 }
 
 
+void ApplicationImpl::nextEvent()
+{
+	waitNext();
+}
+
 void ApplicationImpl::getScreeResolution(int& horizontal, int& vertical)
 {
    const HWND hDesktop = GetDesktopWindow();

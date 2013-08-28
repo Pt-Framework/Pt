@@ -45,6 +45,8 @@ public:
 	//Main application evnts
 	Pt::Signal<Controller*, const PointingEvent&>& pointerEvent();	
 	Pt::Signal<Controller*, const KeyEvent&>& keyDeviceEvent();
+	
+	void nextEvent();
 
 private:     
      ApplicationImpl* _impl; 

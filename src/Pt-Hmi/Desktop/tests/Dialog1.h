@@ -22,28 +22,37 @@
  * 
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- */
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA */
+#ifndef Pt_Hmi_Demo_Dialog1_h
+#define Pt_Hmi_Demo_Dialog1_h
 
-#include <Pt/Hmi/GfxModel.h>
-#include <Pt/Gfx/Point.h>
-#include <Pt/Gfx/Size.h>
-#include <Pt/Gfx/ARgbImage.h>
-#include <Pt/Gfx/Font.h>
-#include <Pt/Gfx/Gfx.h>
-#include <Pt/Hmi/DialogModel.h>
+#include <Pt/Hmi/Desktop/Dialog.h>
+#include <Pt/Hmi/Desktop/Button.h>
 
 namespace Pt{
 namespace Hmi{
+namespace Demo{
 
-DialogModel::DialogModel()
-: Result(DialogResult::Unknown)
+class Dialog1 : public Pt::Hmi::Desktop::Dialog
 {
-	ShowInTaskbar.set(false);
-}
+public:
+	Dialog1();
+	virtual ~Dialog1();
 
-DialogModel::~DialogModel()
-{
-}
+protected:
+	virtual void init();
 
-}}
+private:
+	void onClosedByWindow(bool& state);
+	void onClosedByButton(Pt::Hmi::DeviceButton::State& state);
+	void onShowNextDialog(Pt::Hmi::DeviceButton::State& state);
+
+private:
+	Pt::Hmi::Desktop::Button _closeButton;
+	Pt::Hmi::Desktop::Button _newDialog;
+	bool _clicked;
+}; 
+
+}}}
+
+#endif

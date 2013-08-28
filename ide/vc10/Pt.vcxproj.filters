@@ -1038,6 +1038,27 @@
     <ClInclude Include="..\..\src\Pt-Ssl\tests\Pkcs12Data.h">
       <Filter>Pt-Ssl\tests</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\DialogController.h">
+      <Filter>Pt-Hmi\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\DialogModel.h">
+      <Filter>Pt-Hmi\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\DialogRenderer.h">
+      <Filter>Pt-Hmi\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\Desktop\Dialog.h">
+      <Filter>Pt-Hmi\Headers\Desktop</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\Desktop\tests\Dialog1.h">
+      <Filter>Pt-Hmi\Sources\Desktop\tests</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\Desktop\tests\Dialog2.h">
+      <Filter>Pt-Hmi\Sources\Desktop\tests</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\Desktop\tests\MainWindow.h">
+      <Filter>Pt-Hmi\Sources\Desktop\tests</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -2021,6 +2042,27 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Ssl\tests\SslClientDemo.cpp">
       <Filter>Pt-Ssl\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\DialogController.cpp">
+      <Filter>Pt-Hmi\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\DialogModel.cpp">
+      <Filter>Pt-Hmi\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\DialogRenderer.cpp">
+      <Filter>Pt-Hmi\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\Desktop\Dialog.cpp">
+      <Filter>Pt-Hmi\Sources\Desktop</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\Desktop\tests\Dialog1.cpp">
+      <Filter>Pt-Hmi\Sources\Desktop\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\Desktop\tests\Dialog2.cpp">
+      <Filter>Pt-Hmi\Sources\Desktop\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\Desktop\tests\MainWindow.cpp">
+      <Filter>Pt-Hmi\Sources\Desktop\tests</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

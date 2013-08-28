@@ -22,28 +22,52 @@
  * 
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- */
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA */
 
-#include <Pt/Hmi/GfxModel.h>
-#include <Pt/Gfx/Point.h>
-#include <Pt/Gfx/Size.h>
-#include <Pt/Gfx/ARgbImage.h>
-#include <Pt/Gfx/Font.h>
-#include <Pt/Gfx/Gfx.h>
+#include "Dialog2.h"
 #include <Pt/Hmi/DialogModel.h>
+#include <Pt/Hmi/DialogController.h>
+#include <Pt/Hmi/ButtonModel.h>
 
 namespace Pt{
 namespace Hmi{
+namespace Demo{
 
-DialogModel::DialogModel()
-: Result(DialogResult::Unknown)
+Dialog2::Dialog2()
 {
-	ShowInTaskbar.set(false);
+	init();
 }
 
-DialogModel::~DialogModel()
+Dialog2::~Dialog2()
 {
 }
 
-}}
+void Dialog2::init()
+{
+	//Dialog
+	DialogModel* dialogModel = (DialogModel*) controller().model();
+	dialogModel->WinSize.set(Pt::Gfx::SizeF(800,600));
+	dialogModel->WinPos.set(Pt::Gfx::PointF(400,400));
+	dialogModel->Caption.set("This is a sample modal dialog 2");
+
+	//Close Button
+	Pt::Hmi::ButtonModel* closeButtonModel = (Pt::Hmi::ButtonModel*) _closeButton.controller().model();
+	closeButtonModel->Position.set(Pt::Gfx::PointF(400,360));
+	closeButtonModel->Size.set(Pt::Gfx::SizeF(200,25));
+	closeButtonModel->Caption.set("Close [CTRL+X]");
+	closeButtonModel->ActionKey.set("CTRL//X");
+	closeButtonModel->ButtonState.PropertyChanged += Pt::slot(*this,&Dialog2::onClosedByButton);
+	addChild(&_closeButton);
+}
+
+void Dialog2::onClosedByButton(Pt::Hmi::DeviceButton::State& state)
+{
+	if(state == Pt::Hmi::DeviceButton::Pressed)
+	{
+		DialogModel* m = (DialogModel*) controller().model();
+		m->Closed = true;
+	}
+}
+
+}}}
+

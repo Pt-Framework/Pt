@@ -22,28 +22,42 @@
  * 
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- */
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA */
+#ifndef Pt_Hmi_Demo_MainWindow_h
+#define Pt_Hmi_Demo_MainWindow_h
 
-#include <Pt/Hmi/GfxModel.h>
-#include <Pt/Gfx/Point.h>
-#include <Pt/Gfx/Size.h>
-#include <Pt/Gfx/ARgbImage.h>
-#include <Pt/Gfx/Font.h>
-#include <Pt/Gfx/Gfx.h>
-#include <Pt/Hmi/DialogModel.h>
+#include <Pt/Hmi/Desktop/Window.h>
+#include <Pt/Hmi/Desktop/Button.h>
+#include <Pt/Hmi/Desktop/Panel.h>
+#include <Pt/Hmi/Desktop/Label.h>
 
 namespace Pt{
 namespace Hmi{
+namespace Demo{
 
-DialogModel::DialogModel()
-: Result(DialogResult::Unknown)
+class MainWindow : public Pt::Hmi::Desktop::Window
 {
-	ShowInTaskbar.set(false);
-}
+public:
+	MainWindow();
+	virtual ~MainWindow();
 
-DialogModel::~DialogModel()
-{
-}
+protected:
+	virtual void init();
 
-}}
+private:
+	void onClosedByWindow(bool& state);
+	void onClosedByButton(Pt::Hmi::DeviceButton::State& state);
+	void onShowDialog(Pt::Hmi::DeviceButton::State& state);
+
+private:
+    Pt::Hmi::Desktop::Panel  _mainPanel;
+	Pt::Hmi::Desktop::Button _closeButton;
+	Pt::Hmi::Desktop::Button _toggleButton;
+	Pt::Hmi::Desktop::Button _dialogButton;
+	Pt::Hmi::Desktop::Label  _textLabel;
+	bool _clicked;
+}; 
+
+}}}
+
+#endif

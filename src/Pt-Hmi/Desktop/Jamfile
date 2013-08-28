@@ -6,6 +6,7 @@ SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Hmi-Desktop ;
 
 SharedLibrary Pt-Hmi-Desktop : 
 					   Window.cpp
+					   Dialog.cpp
 					   Widget.cpp
 					   Panel.cpp
 					   Label.cpp

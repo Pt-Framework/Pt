@@ -28,7 +28,7 @@ void GfxModel::onFocusChanged(bool& focused)
 	if(focused)
 	{//True
 		Pt::Hmi::Controller* ctrl = this->controller();
-		Pt::Hmi::Controller* par = ctrl->parent();
+		Pt::Hmi::Controller* par = ctrl->widgetParent();
 	
 		if( par != 0)
 		{

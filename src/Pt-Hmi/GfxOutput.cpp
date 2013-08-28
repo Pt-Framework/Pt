@@ -42,6 +42,11 @@ GfxOutput::~GfxOutput()
 {
 }
 
+GfxOutputImpl* GfxOutput::impl()
+{
+	return _impl;
+}
+
 Pt::Gfx::Painter* GfxOutput::nativePainter()
 {
 	return _impl->nativePainter();

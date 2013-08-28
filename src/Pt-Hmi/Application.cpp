@@ -98,6 +98,11 @@ Pt::Signal<Controller*, const KeyEvent&>& Application::keyDeviceEvent()
 	return _impl->keyDeviceEvent();
 }
 
+void Application::nextEvent()
+{
+	_impl->nextEvent();
+}
+
 
 }}
 

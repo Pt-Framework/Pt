@@ -100,7 +100,7 @@ void Controller::removeOutputDevice(OutputDevice* device)
 void Controller::addChild(Controller* base)
 {
 	_children.push_back(base);
-	base->setParent(this);
+	base->setWidgetParent(this);
 }
 
 void Controller::removeChild(Controller* base)
@@ -110,7 +110,7 @@ void Controller::removeChild(Controller* base)
 		if(_children[i] == base)
 		{
 			_children.erase(_children.begin() + i);
-			base->setParent(0);
+			base->setWidgetParent(0);
 			return;
 		}
 	}			

@@ -46,6 +46,8 @@ public:
 	virtual void output(Pt::Hmi::Model* model);
 
 	Pt::Gfx::Painter* nativePainter();
+	
+	GfxOutputImpl* impl();
 		
 protected:
     virtual void onCancel()
@@ -57,7 +59,7 @@ protected:
 		return true;
 	}
 
-
+	
 	
 private:
 	GfxOutputImpl* _impl;

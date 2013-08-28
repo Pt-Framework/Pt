@@ -8,13 +8,14 @@
 #include <WindowsX.h>
 #include <Pt/Hmi/WindowModel.h>
 #include <Pt/Hmi/WindowController.h>
+#include <Pt/Hmi/GfxOutput.h>
 
 namespace Pt{
 namespace Hmi{
 
 GfxOutputImpl::GfxOutputImpl()
 : _model(0)
-, _ignoreSizeEvent(false)
+, _ignoreEvent(false)
 , _hwnd(0)
 {	
 	Pt::Hmi::Application* app = (Pt::Hmi::Application*) &Pt::Hmi::Application::instance();	
@@ -36,6 +37,9 @@ void GfxOutputImpl::create()
 
 void GfxOutputImpl::onKey(unsigned int msg,  WPARAM wparam, LPARAM lparam)
 {
+	if(!_model->Enable.get())
+		return;
+
 	if(msg == WM_KEYDOWN)
 		_keyEvent.setState(KeyEvent::KeyDown);
 	else
@@ -68,6 +72,7 @@ void GfxOutputImpl::onWindowEvent(HWND wnd, unsigned int message, unsigned int w
 	if(_model == 0)
 		return;
 
+
 	switch(message)
 	{
 		case WM_LBUTTONDOWN:		
@@ -80,12 +85,14 @@ void GfxOutputImpl::onWindowEvent(HWND wnd, unsigned int message, unsigned int w
 		case WM_LBUTTONDBLCLK:
 		case WM_RBUTTONDBLCLK:
 		case WM_MBUTTONDBLCLK:
+	
 			onMouse(message, wparam, lparam);
 			handled = true;
 		break;
 
 		case WM_KEYDOWN:
 		case WM_KEYUP:
+
 			onKey(message, wparam, lparam);
 			handled = true;
 		break;
@@ -115,7 +122,7 @@ void GfxOutputImpl::onWindowEvent(HWND wnd, unsigned int message, unsigned int w
 		case WM_CLOSE:
 		{
 			if( onClosing())
-				DestroyWindow(_hwnd);	
+				destroy();	
 				
 			handled = true;			
 		}
@@ -130,6 +137,9 @@ GfxOutputImpl::~GfxOutputImpl()
 
 bool GfxOutputImpl::onClosing()
 {
+	if(!_model->Enable.get())
+		return false;
+
 	bool canClose = false;
 	WindowController* controller = (WindowController*)_model->controller();
 	controller->Closing.send(canClose);
@@ -141,11 +151,18 @@ void GfxOutputImpl::onClosed()
 	WindowController* controller = (WindowController*)_model->controller();
 	controller->Closed.send();
 			
-	 _model->Closed = true;
+	 _model->Closed = true;	 
 }
 
 void GfxOutputImpl::onSize(WPARAM wParam, LPARAM lParam)
 {			
+	if(!_model->Enable.get())
+	{
+		writeWindowSizeAndPos();
+		writeWindowProperties();
+		return;
+	}
+
 	switch(wParam)
 	{
 		case SIZE_MAXHIDE:
@@ -173,7 +190,6 @@ void GfxOutputImpl::onMouse(unsigned int msg, WPARAM wparam, LPARAM lparam)
 {	
 	int xPos = GET_X_LPARAM(lparam); 
 	int yPos = GET_Y_LPARAM(lparam); 
-
 
 	switch(msg)
 	{
@@ -216,7 +232,7 @@ void GfxOutputImpl::writeWindowSizeAndPos()
 	WindowModel* wmodel = (WindowModel*) _model;
 	Pt::Gfx::Point pos = wmodel->fromUnit(wmodel->WinPos.get());
 	Pt::Gfx::Size size = wmodel->fromUnit(wmodel->WinSize.get());
-	SetWindowPos(_hwnd,0, pos.x(), pos.y(), size.width(), size.height(), 0);
+	SetWindowPos(_hwnd,0, pos.x(), pos.y(), size.width(), size.height(), 0);	
 }
 
 void GfxOutputImpl::readWindowSizeAndPos()
@@ -245,6 +261,13 @@ void GfxOutputImpl::readWindowSizeAndPos()
 
 void GfxOutputImpl::onMove()
 {
+	if(!_model->Enable.get())
+	{
+		writeWindowSizeAndPos();
+		writeWindowProperties();
+		return;
+	}
+
 	readWindowSizeAndPos();
 }
 
@@ -377,7 +400,7 @@ void GfxOutputImpl::writeWindowProperties()
 	else if( !visible)
 		ShowWindow(_hwnd, SW_SHOW);		
 
-	SetWindowLong(_hwnd, GWL_STYLE, style);  
+	SetWindowLong(_hwnd, GWL_STYLE, style);  					
 }
 
 void GfxOutputImpl::destroy()
@@ -405,7 +428,6 @@ void GfxOutputImpl::output(Pt::Hmi::Model* model)
 			destroy();
 			return;
 		}
-
 	}
 	else
 	{
@@ -418,15 +440,12 @@ void GfxOutputImpl::output(Pt::Hmi::Model* model)
 		}
 	}
 
-	_ignoreSizeEvent = true;	
-
+		
 	writeWindowSizeAndPos();
-	writeWindowProperties();
-	
-	_ignoreSizeEvent = false;
-
+	writeWindowProperties();	
+		
 	output();
-	InvalidateRect(_hwnd, 0, TRUE);
+	InvalidateRect(_hwnd, 0, FALSE);
 }
 
 void GfxOutputImpl::output()

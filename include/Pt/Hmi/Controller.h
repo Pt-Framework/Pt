@@ -43,7 +43,7 @@ namespace Hmi{
 class PT_HMI_API Controller  : public Pt::Connectable
 {
 protected:
-	Controller(Controller* parent = 0);
+	Controller(Controller* widgetParent = 0);
 
 public:
 	virtual ~Controller();
@@ -102,17 +102,17 @@ public:
 
 	inline void removeChild(Controller* controller);
 
-	inline const Controller* parent() const
+	inline const Controller* widgetParent() const
 	{
 		return _parent;
 	}
 
-	inline Controller* parent() 
+	inline Controller* widgetParent() 
 	{
 		return _parent;
 	}
 
-	inline void setParent(Controller* p)
+	inline void setWidgetParent(Controller* p)
 	{
 		_parent = p;
 	}
@@ -138,7 +138,6 @@ public:
 
 	inline void deviceKeyInput(Controller* c, const KeyEvent& ev)
 	{
-		if( this != c)
 			return;
 		onKeyInput(ev);
 	}
