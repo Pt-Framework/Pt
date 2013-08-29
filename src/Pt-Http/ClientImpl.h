@@ -37,7 +37,7 @@
 #include <Pt/Net/TcpSocket.h>
 
 #ifdef PT_HTTP_WITH_SSL
-#include <Pt/Ssl/IOBuffer.h>
+#include <Pt/Ssl/StreamBuffer.h>
 #endif
 
 #include <Pt/System/Selectable.h>

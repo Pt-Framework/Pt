@@ -1641,9 +1641,6 @@
     <ClCompile Include="..\..\src\Pt-Ssl\StreamBuffer.cpp">
       <Filter>Pt-Ssl</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Ssl\tests\IOBufferTest.cpp">
-      <Filter>Pt-Ssl\tests</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Pt-System\LogTarget.cpp">
       <Filter>Pt-System</Filter>
     </ClCompile>
@@ -2031,13 +2028,7 @@
     <ClCompile Include="..\..\src\Pt-Ssl\applessl\CertificateStoreImpl.cpp">
       <Filter>Pt-Ssl\applessl</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Ssl\tests\HttpsClientDemo.cpp">
-      <Filter>Pt-Ssl\tests</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Pt-Ssl\tests\CertificateStoreTest.cpp">
-      <Filter>Pt-Ssl\tests</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Ssl\tests\SslServerDemo.cpp">
       <Filter>Pt-Ssl\tests</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Ssl\tests\SslClientDemo.cpp">
