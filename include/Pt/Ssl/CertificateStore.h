@@ -66,14 +66,14 @@ class PT_SSL_API CertificateStore
 
         /** @brief Finds a certificate by subject.
 
-            Searches for a certificate with the substring @subject in it's
+            Searches for a certificate with the substring @a subject in it's
             subject. Returns nullptr if no certificate was found.
         */
         const Certificate* findCertificate(const std::string& subject);
 
         /** @brief Gets a certificate by subject.
 
-            Searches for a certificate with the substring @subject in it's
+            Searches for a certificate with the substring @a subject in it's
             subject. Throws InvalidCertificate if no certificate with the
             subject was found.
         */
