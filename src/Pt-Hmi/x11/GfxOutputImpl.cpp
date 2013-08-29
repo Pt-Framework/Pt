@@ -65,7 +65,7 @@ GfxOutputImpl::GfxOutputImpl()
 	create();
 }
 
-void GfxOutputImpl::drawIndependentImage(Pt::Gfx::ARgbImage& image)
+void GfxOutputImpl::drawIndependentImage(size_t x, size_t y, const char* data, size_t width, size_t height)
 {    
     unsigned int screen = DefaultScreen(_display);
 
@@ -73,19 +73,8 @@ void GfxOutputImpl::drawIndependentImage(Pt::Gfx::ARgbImage& image)
     
 	int depth = XDefaultDepth(_display, screen);
 
-    XImage* ximage = XCreateImage(_display, visual, depth, ZPixmap, 0, NULL, image.width(), image.height(), 8, 0);
-
-	for(size_t y = 0; y <  image.height(); ++y)
-	{
-		for(size_t x = 0; x < image.width(); ++x)
-		{
-			Pt::Gfx::ARgbColor& color = image.pixel(x,y);
-			unsigned long pixValue = ((unsigned long) color.red() << 24) | ((unsigned long) color.green() << 16) | (unsigned long)color.red();
-
-			XPutPixel(ximage, x, y, pixValue);
-		}
-	}
-
+    XImage* ximage = XCreateImage(_display, visual, depth, ZPixmap, 0, NULL, width, height, 8, 0);
+    ximage->data = (char*)data;
     XPutImage(_display,_window, _brushGc, ximage, 0, 0, x, y, width, height);
 
     XSync(_display, false);
