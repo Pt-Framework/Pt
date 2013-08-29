@@ -22,7 +22,7 @@
 #import <AppKit/NSView.h>
 
 @interface WidgetView : NSView{
-
+	
 }    
 - (WidgetView*) init ;
 

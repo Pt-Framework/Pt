@@ -17,7 +17,6 @@ GfxOutputImpl::GfxOutputImpl()
 	create();
 }
 
-
 void GfxOutputImpl::create()
 {
 	std::clog <<"create"<<std::endl;
@@ -27,13 +26,7 @@ void GfxOutputImpl::create()
 	Gfx::Point at(20, 20);
 	Gfx::Size size(400, 200);
 
-	_window = [[NSWindow alloc] initWithContentRect:NSMakeRect(at.x(), at.y(), size.width(), size.height())
-													styleMask:NSTitledWindowMask |
-															  NSClosableWindowMask |
-															  NSMiniaturizableWindowMask |
-															  NSResizableWindowMask
-													 backing:NSBackingStoreBuffered
-													 defer:NO];
+	_window = [[NSWindow alloc] initWithContentRect:NSMakeRect(at.x(), at.y(), size.width(), size.height()) styleMask:NSTitledWindowMask | NSClosableWindowMask | NSMiniaturizableWindowMask | NSResizableWindowMask backing:NSBackingStoreBuffered defer:NO];
 	[_window setReleasedWhenClosed: NO];
 	[_window setAcceptsMouseMovedEvents:YES];
 	[_window setContentView: _view];
@@ -48,11 +41,11 @@ GfxOutputImpl::~GfxOutputImpl()
 	destroy();
 }
 
-
 void GfxOutputImpl::destroy()
 {
     [_window release];
     [_view release];
+	_view = nil;
 }
 
 void GfxOutputImpl::output(Pt::Hmi::Model* model)
@@ -63,26 +56,26 @@ void GfxOutputImpl::output(Pt::Hmi::Model* model)
 
 	if( wmodel == 0)
 		throw std::logic_error("ERROR: WindowModel model expected!");
-/*
+
 	if(wmodel->Closed.get())
 	{
-		if(_hwnd != 0)
+		if(_view != nil)
+		{
 			destroy();
+		}
+
+		return;
 	}
 	else
 	{
-		if(_hwnd == 0)
-			create();
+		if(_view == nil)
+		{
+			if(wmodel->Visible.get())
+				create();
+			else
+				return;
+		}
 	}
-
-	_ignoreSizeEvent = true;	
-
-	writeWindowSizeAndPos();
-	writeWindowProperties();
-	
-	_ignoreSizeEvent = false;
-
-	InvalidateRect(_hwnd, 0, FALSE);*/
 }
 
 

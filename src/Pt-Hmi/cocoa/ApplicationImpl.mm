@@ -52,7 +52,6 @@
 
 
 namespace Pt {
-
 namespace Hmi {
 
 void MainLoopImplOnWake(void* p)
@@ -61,14 +60,11 @@ void MainLoopImplOnWake(void* p)
     impl->processEvents();
 }
 
-
 void MainLoopImplOnTimer(CFRunLoopTimerRef timer, void *p)
 {
     ApplicationImpl* impl = reinterpret_cast<ApplicationImpl*>(p);
     impl->processTimers();
-
 }
-
 
 void MainLoopImplOnFd(CFFileDescriptorRef f, CFOptionFlags flags, void *p)
 {
@@ -89,13 +85,11 @@ void MainLoopImplOnFd(CFFileDescriptorRef f, CFOptionFlags flags, void *p)
     s->run();
 }
 
-
 ApplicationImpl::ApplicationImpl()
 : System::EventLoop()
 {
     init();
 }
-
 
 ApplicationImpl::~ApplicationImpl()
 {
@@ -114,10 +108,10 @@ ApplicationImpl::~ApplicationImpl()
     [NSApp release];
 }
 
-    void ApplicationImpl::nextEvent()
-    {
+void ApplicationImpl::nextEvent()
+{
         
-    }
+}
 
 void ApplicationImpl::init()
 {
@@ -146,10 +140,7 @@ void ApplicationImpl::init()
     timerCtx.release = NULL;
     timerCtx.copyDescription = NULL;
 
-    _masterTimer = CFRunLoopTimerCreate( kCFAllocatorDefault,
-                                         CFAbsoluteTimeGetCurrent(),
-                                         10000.0, 0, 0, 
-                                         &MainLoopImplOnTimer, &timerCtx);
+    _masterTimer = CFRunLoopTimerCreate( kCFAllocatorDefault, CFAbsoluteTimeGetCurrent(), 10000.0, 0, 0,  &MainLoopImplOnTimer, &timerCtx);
 
     CFRunLoopRef rl = [[NSRunLoop currentRunLoop] getCFRunLoop];
     CFRunLoopAddSource(rl, _wakeSource, kCFRunLoopCommonModes);
@@ -162,12 +153,10 @@ void ApplicationImpl::onAttachSelectable(System::Selectable& s)
     _selectables.insert(s);
 }
 
-
 void ApplicationImpl::onDetachSelectable(System::Selectable& s)
 {
     System::SelectableList::unlink(s);
 }
-
 
 void ApplicationImpl::onIdle(System::Selectable& s)
 { 
@@ -183,7 +172,6 @@ void ApplicationImpl::onIdle(System::Selectable& s)
     }
 }
 
-
 void ApplicationImpl::onReady(System::Selectable& s)
 {  
     System::MutexLock lock(_mutex);
@@ -191,7 +179,6 @@ void ApplicationImpl::onReady(System::Selectable& s)
 
     CFRunLoopSourceSignal(_wakeSource);
 }
-
 
 void ApplicationImpl::onRun()
 {
@@ -201,13 +188,11 @@ void ApplicationImpl::onRun()
     [NSApp run];
 }
 
-
 void ApplicationImpl::onExit()
 {
     _eventQueue.exit();
     wake();
 }
-
 
 void ApplicationImpl::onWake()
 {
@@ -216,19 +201,16 @@ void ApplicationImpl::onWake()
     CFRunLoopWakeUp(rl);
 }
 
-
 void ApplicationImpl::onCommitEvent(const Pt::Event& ev)
 {
     _eventQueue.pushEvent( ev ); 
     wake();
 }
 
-
 void ApplicationImpl::onQueueEvent(const Pt::Event& ev)
 {
     _eventQueue.pushEvent( ev );
 }
-
 
 void ApplicationImpl::onProcessEvents()
 { 
@@ -292,20 +274,17 @@ void ApplicationImpl::onProcessEvents()
     }
 }
 
-
 void ApplicationImpl::onAttachTimer(System::Timer& timer)
 { 
     _timerQueue.addTimer(timer); 
     this->processTimers();
 }
 
-
 void ApplicationImpl::onDetachTimer(System::Timer& timer)
 { 
     _timerQueue.removeTimer(timer);
     this->processTimers();
 }
-
 
 void ApplicationImpl::cancel(System::IOHandle& h)
 {
@@ -332,7 +311,6 @@ void ApplicationImpl::cancel(System::IOHandle& h)
 
     h.ready = 0;
 }
-
 
 ApplicationImpl::IOEntry& ApplicationImpl::enableIOHandle(System::IOHandle* h)
 {
@@ -364,7 +342,6 @@ ApplicationImpl::IOEntry& ApplicationImpl::enableIOHandle(System::IOHandle* h)
     return _iotable[h->id];
 }
 
-
 void ApplicationImpl::beginRead(System::IOHandle* h)
 {  
     CFFileDescriptorRef fdref = enableIOHandle(h).fd;
@@ -372,7 +349,6 @@ void ApplicationImpl::beginRead(System::IOHandle* h)
 
     h->events = System::IOHandle::Read;
 }
-
 
 void ApplicationImpl::endRead(System::IOHandle* h)
 {
@@ -386,7 +362,6 @@ void ApplicationImpl::endRead(System::IOHandle* h)
     h->events &= ~System::IOHandle::Read;
 }
 
-
 void ApplicationImpl::beginWrite(System::IOHandle* h)
 {  
     CFFileDescriptorRef fdref = enableIOHandle(h).fd;
@@ -394,7 +369,6 @@ void ApplicationImpl::beginWrite(System::IOHandle* h)
 
     h->events = System::IOHandle::Write;
 }
-
 
 void ApplicationImpl::endWrite(System::IOHandle* h)
 {
@@ -408,13 +382,11 @@ void ApplicationImpl::endWrite(System::IOHandle* h)
     h->events &= ~System::IOHandle::Write;
 }
 
-
 bool ApplicationImpl::isReadable(System::IOHandle* h)
 {  
     bool isReady = h->ready == System::IOHandle::Read;
     return isReady;
 }
-
 
 bool ApplicationImpl::isWritable(System::IOHandle* h)
 {
@@ -422,12 +394,10 @@ bool ApplicationImpl::isWritable(System::IOHandle* h)
     return isReady;
 }
 
-
 bool ApplicationImpl::isError(System::IOHandle* h)
 {
     return false;
 }
-
 
 void ApplicationImpl::processTimers()
 { 
@@ -443,7 +413,5 @@ void ApplicationImpl::processTimers()
     CFRunLoopTimerSetNextFireDate (_masterTimer, fireDate);
 }
 
-} // namespace Gui
-
-} // namespace Pt
+}}
 

@@ -32,7 +32,8 @@ public:
 
 	void output(Pt::Hmi::Model* model);
 	Pt::Gfx::Painter* nativePainter();
-		private:
+
+private:
 /*
 	void onPaint(HWND hwnd);
 	void onSize(HWND hwnd, WPARAM wparam, LPARAM lparam);
@@ -47,16 +48,16 @@ private:
 	void drawIndependentImage(size_t x, size_t y, const char* data, size_t width, size_t height);
 	
 	 */
-		void create();
-		void destroy();
+	void create();
+	void destroy();
 
-	private:
-		NSWindow* _window;
-		NSView* _view;
+private:
+	NSWindow* _window;
+	NSView* _view;
 
-		Pt::Hmi::WindowModel* _model;
-		Pt::Gfx::Painter* _nativePainter;
-		bool _ignoreSizeEvent;
+	Pt::Hmi::WindowModel* _model;
+	Pt::Gfx::Painter* _nativePainter;
+	bool _ignoreSizeEvent;
 };
 
 }}
