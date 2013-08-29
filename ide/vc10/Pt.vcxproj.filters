@@ -85,6 +85,12 @@
     <Filter Include="Pt-Ssl\applessl">
       <UniqueIdentifier>{08f68a06-945e-42cc-afe5-466486bf8c71}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Pt-Hmi\Sources\cocoa">
+      <UniqueIdentifier>{2b77b6e8-aec1-4d99-9506-f20e6b81d876}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-Hmi\Sources\x11">
+      <UniqueIdentifier>{54475eb3-ab9c-4ce4-a5c2-c96fc66beace}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\Pt\Allocator.h">
@@ -1059,6 +1065,33 @@
     <ClInclude Include="..\..\src\Pt-Hmi\Desktop\tests\MainWindow.h">
       <Filter>Pt-Hmi\Sources\Desktop\tests</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\cocoa\ApplicationImpl.h">
+      <Filter>Pt-Hmi\Sources\cocoa</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\cocoa\CursorImpl.h">
+      <Filter>Pt-Hmi\Sources\cocoa</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\cocoa\GfxOutputImpl.h">
+      <Filter>Pt-Hmi\Sources\cocoa</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\cocoa\WidgetView.h">
+      <Filter>Pt-Hmi\Sources\cocoa</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\x11\ApplicationImpl.h">
+      <Filter>Pt-Hmi\Sources\x11</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\x11\CursorImpl.h">
+      <Filter>Pt-Hmi\Sources\x11</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\x11\GfxOutputImpl.h">
+      <Filter>Pt-Hmi\Sources\x11</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\x11\KeyHandler.h">
+      <Filter>Pt-Hmi\Sources\x11</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\x11\X11Fd.h">
+      <Filter>Pt-Hmi\Sources\x11</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -1179,6 +1212,15 @@
     </None>
     <None Include="..\..\src\Pt-Hmi\Desktop\tests\Jamfile">
       <Filter>Pt-Hmi\Sources\Desktop\tests</Filter>
+    </None>
+    <None Include="..\..\src\Pt-Hmi\cocoa\ApplicationImpl.mm">
+      <Filter>Pt-Hmi\Sources\cocoa</Filter>
+    </None>
+    <None Include="..\..\src\Pt-Hmi\cocoa\GfxOutputImpl.mm">
+      <Filter>Pt-Hmi\Sources\cocoa</Filter>
+    </None>
+    <None Include="..\..\src\Pt-Hmi\cocoa\WidgetView.mm">
+      <Filter>Pt-Hmi\Sources\cocoa</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -1641,6 +1683,9 @@
     <ClCompile Include="..\..\src\Pt-Ssl\StreamBuffer.cpp">
       <Filter>Pt-Ssl</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Ssl\tests\IOBufferTest.cpp">
+      <Filter>Pt-Ssl\tests</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Pt-System\LogTarget.cpp">
       <Filter>Pt-System</Filter>
     </ClCompile>
@@ -2028,7 +2073,13 @@
     <ClCompile Include="..\..\src\Pt-Ssl\applessl\CertificateStoreImpl.cpp">
       <Filter>Pt-Ssl\applessl</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Ssl\tests\HttpsClientDemo.cpp">
+      <Filter>Pt-Ssl\tests</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Pt-Ssl\tests\CertificateStoreTest.cpp">
+      <Filter>Pt-Ssl\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Ssl\tests\SslServerDemo.cpp">
       <Filter>Pt-Ssl\tests</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Ssl\tests\SslClientDemo.cpp">
@@ -2054,6 +2105,24 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\Desktop\tests\MainWindow.cpp">
       <Filter>Pt-Hmi\Sources\Desktop\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\cocoa\CursorImpl.cpp">
+      <Filter>Pt-Hmi\Sources\cocoa</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\x11\ApplicationImpl.cpp">
+      <Filter>Pt-Hmi\Sources\x11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\x11\CursorImpl.cpp">
+      <Filter>Pt-Hmi\Sources\x11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\x11\GfxOutputImpl.cpp">
+      <Filter>Pt-Hmi\Sources\x11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\x11\KeyHandler.cpp">
+      <Filter>Pt-Hmi\Sources\x11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\x11\X11Fd.cpp">
+      <Filter>Pt-Hmi\Sources\x11</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

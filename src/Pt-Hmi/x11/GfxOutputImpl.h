@@ -78,7 +78,7 @@ private:
 	void hide();
 	void output();
 	void paint();
-	void drawIndependentImage(size_t x, size_t y, const char* data, size_t width, size_t height);       
+	void drawIndependentImage(Pt::Gfx::ARgbImage& image);       
 	void writeWindowSizeAndPos();
 	void writeWindowProperties();
 	void redraw();
@@ -94,7 +94,6 @@ private:
 	Pt::Hmi::WindowModel* 	_model;
 	Pt::Hmi::PointingEvent 	_mouseEvent;
 	Pt::Hmi::KeyEvent      	_keyEvent;
-	Pt::Gfx::Rgb888Image	_rgb88Image;
     Window  				_window;
     GC 						_brushGc;
 	Display* 				_display;
