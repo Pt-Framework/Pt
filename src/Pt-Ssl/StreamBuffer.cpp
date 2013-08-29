@@ -74,9 +74,11 @@ StreamBuffer::~StreamBuffer()
 void StreamBuffer::open(Context& ctx, std::ios& ios, OpenMode mode)
 {
     if(_connection)
+    {
         delete _connection;
-
-    _connection = 0;
+        _connection = 0;
+    }
+    
     _connection = new Connection(ctx, ios, mode);
 }
 
@@ -84,7 +86,10 @@ void StreamBuffer::open(Context& ctx, std::ios& ios, OpenMode mode)
 void StreamBuffer::close()
 {
     if(_connection)
+    {
         delete _connection;
+        _connection = 0;
+    }
 
     // TODO: delete buffers only in dtor
     // setg(0,0,0) and setp(0,0) should be enough

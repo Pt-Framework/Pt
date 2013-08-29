@@ -33,18 +33,19 @@
 #include <Pt/Ssl/IOStream.h>
 #include <Pt/Net/TcpSocket.h>
 #include <Pt/System/IOStream.h>
-#include <Pt/System/MainLoop.h>
+#include <Pt/System/Application.h>
 #include <Pt/System/Logger.h>
+#include <cassert>
 
 log_define("Pt.Ssl.SslClient")
 
 class SslClient : public Pt::Connectable
 {
     public:
-        SslClient(Pt::System::EventLoop& loop, Pt::Ssl::Context& ctx, const std::string& host, unsigned short port)
+        SslClient(Pt::System::EventLoop& loop, Pt::Ssl::Context& ctx)
         : _ctx(&ctx)
-        , _host(host)
-        , _port(port)
+        , _host()
+        , _port(0)
         , _beginExecute(&SslClient::beginConnect)
         , _endExecute(&SslClient::endConnect)
         {
@@ -56,11 +57,15 @@ class SslClient : public Pt::Connectable
             _ios.ioBuffer().outputReady() += Pt::slot(*this, &SslClient::onOutput);
         }
 
-        Pt::System::EventLoop& loop()
-        { return *_tcpSocket.parent(); }
-
-        std::string& request()
-        { return _request; }
+        void setTarget(const std::string& url, const std::string& host, unsigned short port)
+        {
+            _host = host;
+            _port = port;
+            _request = "GET " + url + " HTTP/1.1\r\n"
+                       "Host: " + host + "\r\n"
+                       "Connection: close\r\n"
+                       "\r\n";
+        }
         
         const std::string& reply()
         { return _reply; }
@@ -100,7 +105,7 @@ class SslClient : public Pt::Connectable
 
             log_info("connected to " << _host << ':' << _port);
             _beginExecute = &SslClient::beginHandshake;
-            _endExecute = &SslClient::endWrite;
+            _endExecute = &SslClient::endHandshake;
             return false;
         }
 
@@ -110,7 +115,6 @@ class SslClient : public Pt::Connectable
             if(wantRead)
             {
                 _ios.ioBuffer().beginRead();
-                _endExecute = &SslClient::endRead;
                 return;
             }
                 
@@ -118,15 +122,6 @@ class SslClient : public Pt::Connectable
             {
                 _ssl.writeHandshake();
                 _ios.ioBuffer().beginWrite();
-                _endExecute = &SslClient::endWrite;
-                return;
-            }
-
-            // write any pending handshake data
-            if( _ios.ioBuffer().out_avail() > 0 )
-            {
-                _ios.ioBuffer().beginWrite();
-                _endExecute = &SslClient::endWrite;
                 return;
             }
                 
@@ -136,29 +131,60 @@ class SslClient : public Pt::Connectable
             _ssl.flush();
 
             _beginExecute = &SslClient::beginRequest;
-            _endExecute = &SslClient::endWrite;
-            beginRequest();
+            _endExecute = &SslClient::endRequest;
+            _ios.ioBuffer().beginWrite();
         }
+        
+        bool endHandshake()
+        {
+            if( _ios.ioBuffer().isReading() )
+            {
+                _ios.ioBuffer().endRead();
+            
+                if( _ios.device()->eof() )
+                    throw Pt::System::IOError("connection lost");
+            }
 
+            if( _ios.ioBuffer().isWriting() )
+            {
+                _ios.ioBuffer().endWrite();
+            }
+            
+            return false;
+        }
+        
         void beginRequest()
         {
+            _ios.ioBuffer().beginWrite();
+        }
+
+        bool endRequest()
+        {
+            _ios.ioBuffer().endWrite();
+
             // write pending request data
             if( _ios.ioBuffer().out_avail() > 0 )
             {
-                _ios.ioBuffer().beginWrite();
-                _endExecute = &SslClient::endWrite;
-                return;
+                return false;
             }
 
             // start receiving the reply
-            _ios.ioBuffer().beginRead();
-            _beginExecute = &SslClient::beginRead;
+            _beginExecute = &SslClient::beginReply;
             _endExecute = &SslClient::endReply;
+            return false;
+        }
+
+        void beginReply()
+        {
+            _ios.ioBuffer().beginRead();
         }
 
         bool endReply()
         {
             _ios.ioBuffer().endRead();
+
+            if( _ios.device()->eof() )
+                throw Pt::System::IOError("connection lost");
 
             for(;;)
             {
@@ -184,105 +210,31 @@ class SslClient : public Pt::Connectable
 
                 // start sending the shutdown acknowledge
                 _ssl.shutdown();
-                _beginExecute = &SslClient::beginWrite;
+                _beginExecute = &SslClient::beginShutdown;
                 _endExecute = &SslClient::endShutdown;
-                
-                std::clog << "SHUTDOWN: " << _ssl.isShutdown() << std::endl;
-                std::clog << "CLOSED: " << _ssl.isClosed() << std::endl;
-                std::clog << "EOF: " << _ios.ioBuffer().device()->eof() << std::endl;
-                std::clog << "CONNCTED: " << _tcpSocket.isConnected() << std::endl;
             }
 
             return false;
         }
 
-        bool endShutdown()
-        {
-            log_trace("endShutdown");
-
-            _ios.ioBuffer().endWrite();
-            std::clog << "OUT AVAIL: " << _ios.ioBuffer().out_avail() << std::endl;
-
-            if(_ios.ioBuffer().out_avail() <= 0)
-            {
-                log_info("sent shutdown alert acknowledge");
-                _beginExecute = &SslClient::beginReadAck;
-                _endExecute = &SslClient::endReadAck;
-            }
-            
-            return false;
-            
-            // shutdown was completed
-            // if(_ios.ioBuffer().out_avail() <= 0)
-            // {
-            //     close();
-            //     return true;
-            // }
-        }
-        
-        //21:42:46.098 [Pt.Ssl.SslClient] Info - received shutdown alert
-        //SHUTDOWN: 0
-        //CLOSED: 1
-        //EOF: 0
-        //CONNCTED: 1
-        //21:42:46.099 [Pt.Ssl.SslClient] Trace - endShutdown
-        //OUT AVAIL: 0
-        //21:42:46.099 [Pt.Ssl.SslClient] Info - sent shutdown alert acknowledge
-        //beginReadAck EOF: 0
-        //beginReadAck EOF: 1
-        //endReadAck EOF: 1
-        //CONNCTED: 1
-        //after close CONNCTED: 0
-        
-        void beginReadAck()
-        {
-            std::clog << "beginReadAck EOF: " << _ios.ioBuffer().device()->eof() << std::endl;
-            _ios.ioBuffer().beginRead();
-
-            std::clog << "beginReadAck EOF: " << _ios.ioBuffer().device()->eof() << std::endl;
-        }
-
-        bool endReadAck()
-        {
-            _ios.ioBuffer().endRead();
-
-            std::clog << "endReadAck EOF: " << _ios.ioBuffer().device()->eof() << std::endl;
-            std::clog << "CONNCTED: " << _tcpSocket.isConnected() << std::endl;
-
-            if( _ios.device()->eof() )
-            {
-                _tcpSocket.close();
-                std::clog << "after close CONNCTED: " << _tcpSocket.isConnected() << std::endl;
-                return true;
-            }
-
-            throw Pt::System::IOError("connection lost");
-            return false;
-        }
-
-        void beginRead()
-        {
-            _ios.ioBuffer().beginRead();
-
-            if( _ios.device()->eof() )
-                throw Pt::System::IOError("connection lost");
-        }
-
-        bool endRead()
-        {
-            _ios.ioBuffer().endRead();
-            return false;
-        }
-
-        void beginWrite()
+        void beginShutdown()
         {
             _ios.ioBuffer().beginWrite();
         }
 
-        bool endWrite()
+        bool endShutdown()
         {
             _ios.ioBuffer().endWrite();
-            return false;
+
+            // write any pending shutdown data
+            if(_ios.ioBuffer().out_avail() > 0)
+            {
+                return false;
+            }
+
+            log_info("shutdown complete");
+            close();
+            return true;
         }
 
         void onConnect(Pt::Net::TcpSocket&)
@@ -318,7 +270,8 @@ void onProgress(SslClient& client)
     bool finished = client.endExecute();
     if(finished)
     {
-        client.loop().exit();
+        log_info("reply finished, got " << client.reply().size() << " bytes");
+        Pt::System::Application::instance().exit();
         return;
     }
         
@@ -330,24 +283,19 @@ int main(const char* argc, int argv)
 {
     try
     {
-        Pt::System::Logger::setLogLevel("Pt.Ssl.SslClient", Pt::System::Trace);
+        Pt::System::Logger::setLogLevel("Pt.Ssl.SslClient", Pt::System::Info);
 
-        const char request[] = "GET / HTTP/1.1\r\n"
-                               "Host: www.pt-framework.org\r\n"
-                               "Connection: close\r\n"
-                               "\r\n";
-
-        Pt::System::MainLoop loop;
+        Pt::System::Application app;
         
         Pt::Ssl::Context ctx;
         ctx.setVerifyMode(Pt::Ssl::NoVerify);
         
-        SslClient client(loop, ctx, "www.pt-framework.org", 443);
-        client.request() = request;
+        SslClient client(app.loop(), ctx);
+        client.setTarget("/index.html", "www.pt-framework.org", 443);
         client.requestProgressed() += Pt::slot(onProgress);
         client.beginExecute();
 
-        loop.run();
+        app.run();
         return 0;
     }
     catch(const std::exception& e)

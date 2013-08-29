@@ -228,16 +228,6 @@ bool TcpSocket::onRun()
 
 size_t TcpSocket::onBeginRead(char* buffer, size_t n, bool& eof)
 {
-    // TODO: this might be Win32 specific, move to win32 impl
-    if( ! _impl->isConnected() )
-    {
-        eof = true;
-        return 0;
-    }
-    
-    //if (!_impl->isConnected())
-    //    throw System::IOPending( PT_ERROR_MSG("connect operation pending") );
-
     return _impl->beginRead(*parent(), buffer, n, eof);
 }
 
@@ -256,9 +246,6 @@ size_t TcpSocket::onRead(char* buffer, size_t count, bool& eof)
 
 size_t TcpSocket::onBeginWrite(const char* buffer, size_t n)
 {
-    //if ( ! _impl->isConnected() )
-    //    throw System::IOError("socket not connected");
-
     return _impl->beginWrite(*parent(), buffer, n);
 }
 

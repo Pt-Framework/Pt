@@ -47,6 +47,7 @@ namespace Net {
 TcpSocketImpl::TcpSocketImpl(TcpSocket& socket)
 : _errorPending(false)
 , _fd(INVALID_SOCKET)
+, _fdClose(false)
 , _isConnected(false)
 , _eventFlags(FD_CLOSE)
 , _timeout(System::EventLoop::WaitInfinite)
@@ -97,6 +98,7 @@ void TcpSocketImpl::close()
     log_debug("close socket " << _fd);
     ::closesocket(_fd);
     _fd = INVALID_SOCKET;
+    _fdClose = false;
     _isConnected = false;
     _errorPending = false;
 }
@@ -332,8 +334,9 @@ bool TcpSocketImpl::runRead(System::EventLoop& loop)
 
     if( (events.lNetworkEvents & FD_CLOSE) == FD_CLOSE )
     {
-       _isConnected = false;
-       return true;
+        _fdClose = true;
+        //_isConnected = false;
+        return true;
     }
 
     if( (events.lNetworkEvents & FD_READ) == FD_READ )
@@ -354,13 +357,14 @@ bool TcpSocketImpl::runWrite(System::EventLoop& loop)
 
     if( (events.lNetworkEvents & FD_CLOSE) == FD_CLOSE )
     {
-       _isConnected = false;
-       return true;
+        _fdClose = true;
+        //_isConnected = false;
+        return true;
     }
 
     if( (events.lNetworkEvents & FD_WRITE) == FD_WRITE )
     {
-       return true;
+        return true;
     }
 
     return false;
@@ -436,6 +440,13 @@ std::string TcpSocketImpl::peerAddress() const
 size_t TcpSocketImpl::beginRead(System::EventLoop& loop, char* buffer, size_t n, bool& eof)
 {
     log_debug(_fd << " beginRead");
+
+    if(_fdClose)
+    {
+        log_debug("EOF because of previous FD_CLOSE");
+        eof = true;
+        return 0;
+    }
 
     if(_ioh.handle() == INVALID_HANDLE_VALUE)
     {
@@ -526,8 +537,9 @@ size_t TcpSocketImpl::beginWrite(System::EventLoop& loop, const char* buffer, si
     _sendBuffer.buf = const_cast<char*>(buffer);
     _sendBuffer.len = n;
 
-    DWORD numberOfBytesSent = 0;
+    log_debug("previous FD_CLOSE:" << _fdClose);
 
+    DWORD numberOfBytesSent = 0;
     int rc = WSASend(_fd, &_sendBuffer, 1, &numberOfBytesSent, 0, NULL, NULL);
 
     if(rc == SOCKET_ERROR)
@@ -542,6 +554,7 @@ size_t TcpSocketImpl::beginWrite(System::EventLoop& loop, const char* buffer, si
         }
         else
         {
+            std::cerr << WSAGetLastError() << std::endl;
             throw System::IOError("WSASend");
         }
     }

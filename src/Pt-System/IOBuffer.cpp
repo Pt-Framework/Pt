@@ -204,6 +204,18 @@ void IOBufferImpl::discard(IOBuffer& sb)
 }
 
 
+bool IOBufferImpl::isReading() const
+{
+    return _ioDevice ? _ioDevice->reading() : false;
+}
+
+
+bool IOBufferImpl::isWriting() const
+{
+    return _ioDevice ? _ioDevice->writing() : false;
+}
+
+
 int IOBufferImpl::sync(IOBuffer& sb)
 {
     typedef IOBuffer::traits_type traits_type;

@@ -64,6 +64,8 @@ class PT_SYSTEM_API IOBufferImpl
         void onWrite(IOBuffer& sb);
         size_t endWrite(IOBuffer& sb);
         void discard(IOBuffer& sb);
+        bool isReading() const;
+        bool isWriting() const;
         int sync(IOBuffer& sb);
         std::streambuf::int_type underflow(IOBuffer& sb);
         std::streambuf::int_type overflow(IOBuffer& sb, std::streambuf::int_type ch);
@@ -142,6 +144,12 @@ class PT_SYSTEM_API IOBuffer : public BasicStreamBuffer<char>
 
         void discard()
         { _impl.discard(*this); }
+
+        bool isReading() const
+        { return _impl.isReading(); }
+        
+        bool isWriting() const
+        { return _impl.isWriting(); }
 
     protected:
         virtual std::streamsize showmanyc()

@@ -124,6 +124,7 @@ class TcpSocketImpl
         System::IOHandle _ioh;
         WSABUF _sendBuffer;
         WSABUF _receiveBuffer;
+        bool _fdClose;
         bool _isConnected;
         long _eventFlags;
 };
