@@ -47,29 +47,31 @@ class Connection;
 class PT_SSL_API StreamBuffer : public std::streambuf
 {
     public:
-        /** @brief Construct an SSL stream buffer that uses the given IO stream. 
+        /** @brief Construct an SSL stream buffer. 
         */
         StreamBuffer(size_t bufferSize = 1024);
 
-        /** @brief Construct an SSL stream buffer that uses the given IO stream and SSL context. 
+        /** @brief Construct an SSL stream buffer.. 
         */
         StreamBuffer(Context& ctx, std::ios& ios, OpenMode mode, size_t bufferSize = 1024);
 
-        /** @brief Standard dtor. 
+        /** @brief Destructor. 
         */
         virtual ~StreamBuffer();
 
-        /** @brief Initializes the SSL stream to use the given context. 
+        /** @brief Opens the stream buffer. 
         */
         void open(Context& ctx, std::ios& ios, OpenMode mode);
 
-         /** @brief Return the currently used cipher.. 
+         /** @brief Return the currently used cipher.
         */
         const char* currentCipher() const;
 
+        /** @brief Closes the stream buffer.
+        */
         void close();
 
-        /** @brief Check if this SSL stream buffer has been connected to the SSL stream buffer at the other end. 
+        /** @brief Returns true if connected to peer. 
         */
         bool isConnected() const;
 
@@ -116,11 +118,6 @@ class PT_SSL_API StreamBuffer : public std::streambuf
         virtual int_type underflow();
         
         virtual int_type overflow(int_type ch);
-
-    private:
-        std::streamsize sslRead(char* buf, size_t n, std::streamsize isize);
-
-        std::streamsize sslWrite(char* buf, size_t n);
 
     private:
         Connection*  _connection;

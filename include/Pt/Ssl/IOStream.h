@@ -70,11 +70,13 @@ class IOStream : public std::iostream
         void open(Context& ctx, std::iostream& ios, OpenMode mode)
         { _sb.open( ctx, ios, mode); }
 
-         /** @brief Returns the currently used cipher.
+        /** @brief Returns the currently used cipher.
         */
         const char* currentCipher() const
         { return _sb.currentCipher(); }
 
+        /** @brief Closes the stream.
+        */
         void close()
         { _sb.close(); }
 
@@ -126,6 +128,8 @@ class IOStream : public std::iostream
         void import(std::streamsize maxImport = 0)
         { _sb.import(maxImport); }
 
+        /** @brief Returns the ssl buffer.
+        */
         StreamBuffer& sslBuffer()
         { return _sb; }
 

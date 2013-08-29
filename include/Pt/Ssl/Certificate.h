@@ -38,15 +38,22 @@ namespace Ssl {
 
 class CertificateImpl;
     
+/** @brief X509 certificate
+*/
 class PT_SSL_API Certificate : private NonCopyable
 {
     public:     
+        //! @internal @brief Constructor.
         explicit Certificate(CertificateImpl* impl);
 
+        //! @brief Destructor.
         ~Certificate();
 
+        /** @brief Returns the subject of the certificate.
+        */
         std::string subject() const;
 
+        //! @internal
         const CertificateImpl* impl() const;
 
     private:

@@ -38,28 +38,57 @@ namespace Pt {
 
 namespace Ssl {
 
+/** @brief A store for X509 certificates.
+*/
 class PT_SSL_API CertificateStore
 {
     public:
+        /** @brief Iterator to a certificate in the store.
+        */
         class ConstIterator;
 
     public:
+        /** @brief Constructor.
+        */
         CertificateStore();
 
+        /** @brief Destructor.
+        */
         ~CertificateStore();
 
+        /** @brief Loads PKCS12 data from a stream.
+        */
         void loadPkcs12(std::istream& is, const char* passwd);
 
+        /** @brief Loads PKCS12 data from memory.
+        */
         void loadPkcs12(const char* data, size_t len, const char* passwd);
 
+        /** @brief Finds a certificate by subject.
+
+            Searches for a certificate with the substring @subject in it's
+            subject. Returns nullptr if no certificate was found.
+        */
         const Certificate* findCertificate(const std::string& subject);
 
+        /** @brief Gets a certificate by subject.
+
+            Searches for a certificate with the substring @subject in it's
+            subject. Throws InvalidCertificate if no certificate with the
+            subject was found.
+        */
         const Certificate& getCertificate(const std::string& subject);
 
+        /** @brief Returns the number of ccertificates in the store.
+        */
         std::size_t size() const;
 
+        /** @brief Returns an iterator to the begin of the certificates.
+        */
         ConstIterator begin() const;
 
+        /** @brief Returns an iterator to the end of the certificates.
+        */
         ConstIterator end() const;
 
     private:
