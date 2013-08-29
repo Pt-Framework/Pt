@@ -7,6 +7,8 @@
 namespace Pt{
 namespace Hmi{
 
+class Controller;
+    
 class CursorImpl
 {
 
@@ -14,7 +16,7 @@ public:
 	CursorImpl();
 	virtual ~CursorImpl();
 
-	void setCursor(Cursors::Type c);
+	void setCursor(Cursors::Type c, Controller* ctrl);
 	Cursors::Type getCursor() const;
 
 private:

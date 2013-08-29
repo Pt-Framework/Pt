@@ -1,6 +1,7 @@
 #include "CursorImpl.h"
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/Application.h>
+#include <Pt/Hmi/Controller.h>
 #include "ApplicationImpl.h"
 
 namespace Pt{
@@ -8,14 +9,13 @@ namespace Hmi{
 
 CursorImpl::CursorImpl()
 {
-	setCursor(Cursors::Default);
 }
 
 CursorImpl::~CursorImpl()
 {
 }
 
-void CursorImpl::setCursor(Cursors::Type c)
+void CursorImpl::setCursor(Cursors::Type c, Controller* ctrl)
 {
 	_type = c;
 	/*

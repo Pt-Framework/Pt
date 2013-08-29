@@ -114,6 +114,10 @@ ApplicationImpl::~ApplicationImpl()
     [NSApp release];
 }
 
+    void ApplicationImpl::nextEvent()
+    {
+        
+    }
 
 void ApplicationImpl::init()
 {

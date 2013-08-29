@@ -85,15 +85,24 @@ class ApplicationImpl : public Pt::System::EventLoop
         void processTimers();
 
 		public:
-			Pt::Signal<>			MouseEvent;
-		Pt::Signal<	>					PaintEvent;
-		Pt::Signal<>		SizeEvent;
-		Pt::Signal<	>	MoveEvent;
-		Pt::Signal<>			KeyBoardEvent;
-		Pt::Signal<>    ClosingEvent;
-		Pt::Signal<>			ClosedEvent;
+    
+    inline Pt::Signal<Controller*, const PointingEvent&>& pointerEvent()
+    {
+        return _pointerEvent;
+    }
+    
+    inline Pt::Signal<Controller*, const KeyEvent&>& keyDeviceEvent()
+    {
+        return _keyDeviceEvent;
+    }
+    
+    void nextEvent();
 		
-		
+		void showConsole(bool show= true)
+        {
+        
+        }
+    
 		double toUnit(int value)
 		{
 			return (double) value;
@@ -145,10 +154,6 @@ class ApplicationImpl : public Pt::System::EventLoop
 			return _dpi;
 		}
 		
-		Pt::Signal<Controller*, const PointingEvent&>& pointerEvent()
-		{
-			return _pointerEvent;
-		}
 		
     protected:
         virtual void onAttachSelectable(System::Selectable&);
@@ -198,6 +203,8 @@ class ApplicationImpl : public Pt::System::EventLoop
         IOEntry& enableIOHandle(System::IOHandle* h);
 
     private:
+        Pt::Signal<Controller*, const PointingEvent&> _pointerEvent;
+        Pt::Signal<Controller*, const KeyEvent&> _keyDeviceEvent;
         System::Mutex _mutex;
         System::SelectableList _selectables;
         std::vector<IOEntry> _iotable;
@@ -207,9 +214,6 @@ class ApplicationImpl : public Pt::System::EventLoop
         CFRunLoopSourceRef _wakeSource;
         CFRunLoopTimerRef _masterTimer;
 		double _dpi;
-		
-	private:
-		Pt::Signal<Controller*, const PointingEvent&> _pointerEvent;
 };
 
 } // namespace Gui
