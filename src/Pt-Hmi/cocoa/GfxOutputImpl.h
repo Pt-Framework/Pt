@@ -10,7 +10,6 @@
 #include <map>
 
 #ifdef __OBJC__
-	#import "WidgetView.h"
     #import <AppKit/NSWindow.h>
     #import <AppKit/NSGraphicsContext.h>
 #else
@@ -32,18 +31,18 @@ public:
 
 	void output(Pt::Hmi::Model* model);
 	Pt::Gfx::Painter* nativePainter();
+    WindowModel* model()
+    {
+        return _model;
+    }
 
+public:
+    void onSize(double width, double height );
+    void onPosition(double x, double y);
+    bool onCanClose();
 private:
-/*
-	void onPaint(HWND hwnd);
-	void onSize(HWND hwnd, WPARAM wparam, LPARAM lparam);
-	void onMove(HWND hwnd, WPARAM wparam, LPARAM lparam);
-	void onClosing(HWND hwnd, WPARAM wparam, LPARAM lparam, bool& canClose);
-	void onClosed(HWND hwnd, WPARAM wparam, LPARAM lparam);
-*/
-private:
+    void writeWindowSizeAndPos();
 	/*void readWindowSizeAndPos();
-	void writeWindowSizeAndPos();
 	void writeWindowProperties();
 	void drawIndependentImage(size_t x, size_t y, const char* data, size_t width, size_t height);
 	

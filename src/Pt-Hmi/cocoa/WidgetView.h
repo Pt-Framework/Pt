@@ -18,13 +18,17 @@
  ***************************************************************************/
 
 #include <Pt/Hmi/Api.h>
-
+#include "GfxOutputImpl.h"
+#include <Pt/Hmi/WindowModel.h>
 #import <AppKit/NSView.h>
 
-@interface WidgetView : NSView{
-	
-}    
-- (WidgetView*) init ;
+@interface WidgetView : NSView
+{
+    Pt::Hmi::GfxOutputImpl* _outControll;
+    
+}
+    
+- (WidgetView*) init:  (Pt::Hmi::GfxOutputImpl*) controll ;
 
 - (void) drawRect:(NSRect)rect;
 
@@ -41,4 +45,5 @@
 - (void) mouseMoved:(NSEvent*)event;
 
 - (BOOL) windowShouldClose:(id)window;
-@end
+
+@end

@@ -17,76 +17,94 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #import "WidgetView.h"
-#include "Pt/Hmi/Application.h"
-#include "Pt/Hmi/PointingEvent.h"
-
+#include <Pt/Hmi/Application.h>
+#include <Pt/Hmi/PointingEvent.h>
 #import <AppKit/NSApplication.h>
 #import <AppKit/NSEvent.h>
 
+
 @implementation WidgetView
 
-- (WidgetView*) init
+- (WidgetView*) init : (Pt::Hmi::GfxOutputImpl*) controll
 {
     self = [super init];
+    _outControll = controll;
     return self;
 }
 
 
 - (void) drawRect:(NSRect)rect
 {
+    if(_outControll->model() == nil)
+        return;
+    
+    //Create a raw buffer to hold pixel data which we will fill algorithmically
+    NSInteger width =  _outControll->model()->PaintBuffer.width();
+    NSInteger height = _outControll->model()->PaintBuffer.height();
+    std::cout<<"Image("<<width<<","<<height<<")"<<std::endl;
+    std::cout<<"Rect("<<rect.size.width<<","<<rect.size.height<<")"<<std::endl;
+    NSInteger dataLength = width * height * 4;
+    UInt8 *data = (UInt8*)malloc(dataLength * sizeof(UInt8));
+    
+    //Fill pixel buffer with color data
+    for (int j=0; j<height; j++)
+    {
+        for (int i=0; i<width; i++)
+        {
+            
+            const Pt::Gfx::ARgbColor& pixel = _outControll->model()->PaintBuffer.pixel(i,j);
+                                       
+            int index = 4*(i+j*width);
+            
+            data[index]  = pixel.red();
+                                       
+            data[++index]=pixel.green();
+            data[++index]=pixel.blue();
+            data[++index]=255;
+            
+        }
+    }
+    
+    // Create a CGImage with the pixel data
+    CGDataProviderRef provider = CGDataProviderCreateWithData(NULL, data, dataLength, NULL);
+    CGColorSpaceRef colorspace = CGColorSpaceCreateDeviceRGB();
+    CGImageRef image = CGImageCreate(width, height, 8, 32, width * 4, colorspace, kCGBitmapByteOrder32Big | kCGImageAlphaPremultipliedLast,
+                                     
+                                     provider, NULL, true, kCGRenderingIntentDefault);
 
+    CGContextDrawImage((CGContext*)[[NSGraphicsContext currentContext] graphicsPort],rect,image);
+    
+    //Clean up
+    CGColorSpaceRelease(colorspace);
+    CGDataProviderRelease(provider);
+    free(data);
 }
 
 
 - (void)setFrameOrigin:(NSPoint)origin
 {
-
-    std::cerr << "View::setFrame " << std::endl;
+    _outControll->onPosition(origin.x, origin.y);
     [super setFrameOrigin:origin];
-
 
 }
 
 
 - (void)setFrameSize:(NSSize)frameSize
 {
-    std::cerr << "View::setFrameSize " << frameSize.width << ", " << frameSize.height << std::endl;
+    _outControll->onSize( frameSize.width,  frameSize.height);
     [super setFrameSize:frameSize];
-
-    //Pt::Gui::ResizeEvent rev(*_widget, frameSize.width, frameSize.height);
-    //Pt::Gui::MainLoop::instance().event().send(rev);
-
-    //[NSApp processEvent: &rev];
 }
 
 
 - (void) mouseDown:(NSEvent*)ev
 {
-    std::cerr << "Mouse Down: " << std::endl;
     NSPoint local_point = [self convertPoint:[ev locationInWindow] fromView:nil];
 
-    //Pt::Gui::MouseEvent mev(*_widget, local_point.x, local_point.y,
-    //                        Pt::Gui::MouseEvent::LeftButton,
-    //                        Pt::Gui::MouseEvent::Press,
-    //                        0); //modifiers
-
-    //Pt::Gui::MainLoop::instance().event().send(mev);
 }
 
 - (void) mouseUp:(NSEvent*)ev
 {
     std::cerr << "Mouse Up: " << std::endl;
-    /*NSPoint local_point = [self convertPoint:[ev locationInWindow] fromView:nil];
-
-    Pt::Gui::MouseEvent mev(*_widget, local_point.x, local_point.y,
-                            Pt::Gui::MouseEvent::LeftButton,
-                            Pt::Gui::MouseEvent::Release,
-                            0); //modifiers
-
-    Pt::Gui::MainLoop::instance().event().send(mev);*/
-    //[NSApp processEvent: &mev];
-
-    //[super mouseUp: ev];
 }
 
 - (void) mouseDragged:(NSEvent*)event
@@ -119,14 +137,8 @@
 
 - (BOOL) windowShouldClose:(id)window
 {
-	std::cerr << "Closed: " << std::endl;
 
-    //Pt::Gui::CloseEvent cev(*_widget);
-
-    //Pt::Gui::MainLoop::instance().event().send(cev);
-    //[NSApp processEvent: &cev];
-
-    return YES;
+    return _outControll->onCanClose();
 }
 
 @end
