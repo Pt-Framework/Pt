@@ -41,8 +41,7 @@
     //Create a raw buffer to hold pixel data which we will fill algorithmically
     NSInteger width =  _outControll->model()->PaintBuffer.width();
     NSInteger height = _outControll->model()->PaintBuffer.height();
-    std::cout<<"Image("<<width<<","<<height<<")"<<std::endl;
-    std::cout<<"Rect("<<rect.size.width<<","<<rect.size.height<<")"<<std::endl;
+
     NSInteger dataLength = width * height * 4;
     UInt8 *data = (UInt8*)malloc(dataLength * sizeof(UInt8));
     
@@ -83,16 +82,18 @@
 
 - (void)setFrameOrigin:(NSPoint)origin
 {
-    _outControll->onPosition(origin.x, origin.y);
     [super setFrameOrigin:origin];
+    _outControll->onPosition(origin.x, origin.y);
 
 }
 
 
 - (void)setFrameSize:(NSSize)frameSize
 {
-    _outControll->onSize( frameSize.width,  frameSize.height);
     [super setFrameSize:frameSize];
+    
+    _outControll->onSize( frameSize.width,  frameSize.height);
+
 }
 
 

@@ -7,6 +7,7 @@
 #include <Pt/Hmi/WindowModel.h>
 #include <Pt/Hmi/WindowController.h>
 #include "WidgetView.h"
+#include "Window.h"
 
 namespace Pt{
 namespace Hmi{
@@ -26,7 +27,7 @@ void GfxOutputImpl::create()
 	Gfx::Point at(20, 20);
 	Gfx::Size size(400, 200);
 
-	_window = [[NSWindow alloc] initWithContentRect:NSMakeRect(at.x(), at.y(), size.width(), size.height()) styleMask:NSTitledWindowMask | NSClosableWindowMask | NSMiniaturizableWindowMask | NSResizableWindowMask backing:NSBackingStoreBuffered defer:NO];
+	_window = [[Window alloc] initWithContentRect:NSMakeRect(at.x(), at.y(), size.width(), size.height()) styleMask:NSTitledWindowMask | NSClosableWindowMask | NSMiniaturizableWindowMask | NSResizableWindowMask backing:NSBackingStoreBuffered defer:NO];
 	[_window setReleasedWhenClosed: NO];
 	[_window setAcceptsMouseMovedEvents:YES];
 	[_window setContentView: _view];
@@ -34,6 +35,7 @@ void GfxOutputImpl::create()
 	
     [_window makeKeyAndOrderFront:nil];
     [_view setHidden:NO];
+
 }
 
 GfxOutputImpl::~GfxOutputImpl()
@@ -52,10 +54,17 @@ void GfxOutputImpl::output(Pt::Hmi::Model* model)
 {
 	WindowModel* wmodel = dynamic_cast<WindowModel*>(model);
 
-	_model = wmodel;
-
-	if( wmodel == 0)
+    if( wmodel == 0)
 		throw std::logic_error("ERROR: WindowModel model expected!");
+    
+    _model = wmodel;
+    NSRect viewRect = [_view frame];
+    
+    if(_model->Size.get().width() != viewRect.size.width && _model->Size.get().height() != viewRect.size.height)
+    {
+        writeWindowSizeAndPos();
+        return;
+    }
 
 	if(wmodel->Closed.get())
 	{
@@ -76,7 +85,10 @@ void GfxOutputImpl::output(Pt::Hmi::Model* model)
 				return;
 		}
 	}
+    
     _ignoreSizeEvent = true;
+    
+    
     writeWindowSizeAndPos();
     _ignoreSizeEvent = false;
     [_view setNeedsDisplay:YES];
@@ -86,7 +98,6 @@ void GfxOutputImpl::writeWindowSizeAndPos()
 {
     //Position
     NSPoint pos;
-    int screenWidth = [[NSScreen mainScreen] frame].size.width;
     int screenHeight = [[NSScreen mainScreen] frame].size.height;
     
     pos.x = _model->WinPos.get().x();
@@ -101,6 +112,7 @@ void GfxOutputImpl::writeWindowSizeAndPos()
     fr.size.width = _model->WinSize.get().width();
     fr.size.height = _model->WinSize.get().height();
     [_window setFrame:fr display:NO animate:NO];
+    
 }
     
 void GfxOutputImpl::onSize(double width, double height )
@@ -111,10 +123,12 @@ void GfxOutputImpl::onSize(double width, double height )
     if( _model == 0)
         return;
     
-    _model->Size = Pt::Gfx::SizeF(width,height);
-    _model->WinSize =  _model->Size.get();
-    std::cout<<"OnSize("<<width<<","<<height<<")"<<std::endl;
-    
+    int screenHeight = [[NSScreen mainScreen] frame].size.height;
+   
+    NSRect windowRect = [_window frame];
+    _model->WinPos = Pt::Gfx::PointF(windowRect.origin.x,screenHeight- windowRect.origin.y);
+    _model->WinSize = Pt::Gfx::SizeF(windowRect.size.width,windowRect.size.height);
+    _model->Size = Pt::Gfx::SizeF(width,height);   
 }
     
 
@@ -126,10 +140,11 @@ void GfxOutputImpl::onPosition(double x, double y)
     if( _model == 0)
         return;
     
-    _model->Position = Pt::Gfx::PointF(x,y);
-    _model->WinPos = _model->Position.get();
+    int screenHeight = [[NSScreen mainScreen] frame].size.height;
+    _model->Position = Pt::Gfx::PointF(x,screenHeight- y);
+    _model->WinPos = Pt::Gfx::PointF(x,screenHeight- y);
 }
-    
+
 bool GfxOutputImpl::onCanClose()
 {
     if(_model->CanClose.get())
