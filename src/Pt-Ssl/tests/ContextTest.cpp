@@ -26,6 +26,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#include "Pkcs12Data.h"
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/RegisterTest.h"
@@ -34,31 +35,6 @@
 #include "Pt/Ssl/CertificateStore.h"
 #include "Pt/System/Logger.h"
 #include <string>
-#include <fstream>
-
-const char clientPem [] = 
-    "-----BEGIN CERTIFICATE-----\n"
-    "MIIDkjCCAnqgAwIBAgIBZTANBgkqhkiG9w0BAQUFADBVMQswCQYDVQQGEwJVUzEa\n"
-    "MBgGA1UEBxMRQ2hleWVubmUgTW91bnRhaW4xGTAXBgNVBAoTEFN0YXJnYXRlIENv\n"
-    "bW1hbmQxDzANBgNVBAMTBlNHQyBDQTAeFw0xMTA2MDcwMjU0NDdaFw0xMjA2MDYw\n"
-    "MjU0NDdaMFMxCzAJBgNVBAYTAlhYMRAwDgYDVQQHEwdMYW50YW5hMRYwFAYDVQQK\n"
-    "Ew1BdGxhbnRpcyBDaXR5MRowGAYDVQQDExFBbmNpZW50IE1haW5mcmFtZTCCASIw\n"
-    "DQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAL1wssBiOCiEHc033rcg7XPzx/ka\n"
-    "Ol1XPvowBwPhOBrNpVMogC+CU9f9C4qFzjPwYXd07CE/wMcbEepbYNqW5u810rWF\n"
-    "SM1y6E5f1Ow5d+lb81ZAtrauhZsrNheJ9qJWPgcOhQ4RfCP9JNW/hUkzXuBN+G5F\n"
-    "swpI9xwksjW8AOLXyn0ayFGcVQT/4Lz7eFHGdr7rVVi5GtnV6UmKkQe6dvjBqKxn\n"
-    "s3V/gtFffZDsZj9IxWmNubdUiUHru1PTmHpGZ+684w86+ldJEb3RCeteaGnJR1kR\n"
-    "+qliCA06O0DVQ685hrnfuH4Dbk8mmBsNAi/MfSjExE3ZLP7Y/2vKukHCX70CAwEA\n"
-    "AaNvMG0wCQYDVR0TBAIwADALBgNVHQ8EBAMCBLAwEwYDVR0lBAwwCgYIKwYBBQUH\n"
-    "AwIwEQYJYIZIAYb4QgEBBAQDAgeAMCsGA1UdHwQkMCIwIKAeoByGGmh0dHA6Ly90\n"
-    "ZXN0Y2EubG9jYWwvY2EuY3JsMA0GCSqGSIb3DQEBBQUAA4IBAQC2RzOA/D5XPKfi\n"
-    "46oznIVx13cHMxoAf/0ACWZVpcXtyfXLr1/SzuLisXf5nCuk0jSKhbo0eeQAXxEW\n"
-    "/xFFo1bABBoKRQnFy0eyGeTicUf6o0O2V9vEs6rc8PM9IZo9mLIVuJBOJMDxFG7u\n"
-    "YHSgY9ZgQ1nkoOE8oO1gPSjCsYHI2SlUJ8kURedKwLxErwUpkXTquEclgQZWW5f6\n"
-    "niGdGfNUWlP/y4KTd+RyGXNfrITKG63uCEqFBeJuBfA0FjLroxxyL6umI6XRgiH0\n"
-    "nAHRivMOTNZjyft/nmHlbpGeHuQ6dBTMCGhHc+krzm/uf2vyy8guphBZNO/1A4SQ\n"
-    "jhoJkRV8\n"
-    "-----END CERTIFICATE-----\n";
 
 class ContextTest : public Pt::Unit::TestSuite
 {
@@ -79,21 +55,13 @@ class ContextTest : public Pt::Unit::TestSuite
 
         void Assign()
         {
-            #ifdef _WIN32
-                std::ifstream server_ifs("src\\Pt-Ssl\\tests\\cert\\server-with-password.p12", std::ios::binary);
-            #else
-                std::ifstream server_ifs("src/Pt-Ssl/tests/cert/server-with-password.p12", std::ios::binary);
-            #endif
-            
-            #ifdef _WIN32
-                std::ifstream ifs_ca("src\\Pt-Ssl\\tests\\cert\\ca-with-password.p12", std::ios::binary);
-            #else
-                std::ifstream ifs_ca("src/Pt-Ssl/tests/cert/ca-with-password.p12", std::ios::binary);
-            #endif
+            const char* serverCerts = reinterpret_cast<const char*>(serverPkcs12);
+            const char* clientCerts = reinterpret_cast<const char*>(clientPkcs12);
+            const char* caCerts = reinterpret_cast<const char*>(caPkcs12);
 
             Pt::Ssl::CertificateStore store;
-            store.loadPkcs12(server_ifs, "123");
-            store.loadPkcs12(ifs_ca, "123");
+            store.loadPkcs12(serverCerts, sizeof(serverPkcs12), "123");
+            store.loadPkcs12(caCerts, sizeof(caPkcs12), "123");
 
             Pt::Ssl::Context ctx;
 

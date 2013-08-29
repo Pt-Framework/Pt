@@ -39,9 +39,9 @@
 void makePkc12Data()
 {
     #ifdef _WIN32
-        std::ifstream ifs("src\\Pt-Ssl\\tests\\cert\\ca-with-password.p12", std::ios::binary);
+        std::ifstream ifs("src\\Pt-Ssl\\tests\\cert\\client.p12", std::ios::binary);
     #else
-        std::ifstream ifs("src/Pt-Ssl/tests/cert/multiple/server_chain-with-password.p12", std::ios::binary);
+        std::ifstream ifs("src/Pt-Ssl/tests/cert/client.p12", std::ios::binary);
     #endif
 
     bool first = true;
@@ -81,7 +81,7 @@ class CertificateStoreTest : public Pt::Unit::TestSuite
             
             this->registerMethod("Import", *this, &CertificateStoreTest::Import);
 
-            makePkc12Data();
+            //makePkc12Data();
         }
 
         void setUp()
@@ -92,11 +92,10 @@ class CertificateStoreTest : public Pt::Unit::TestSuite
 
         void Import()
         {
-            std::string s( chainPkcs12, chainPkcs12 + sizeof(chainPkcs12) );
-            std::istringstream iss(s);
+            const char* certChain = reinterpret_cast<const char*>(chainPkcs12);
 
             Pt::Ssl::CertificateStore store;
-            store.loadPkcs12(iss, "123");
+            store.loadPkcs12(certChain, sizeof(chainPkcs12), "123");
     
             const Pt::Ssl::Certificate* cert = store.findCertificate("Server");
             PT_UNIT_ASSERT(cert);

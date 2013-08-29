@@ -26,7 +26,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "PemData.h"
+#include "Pkcs12Data.h"
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/RegisterTest.h"
@@ -36,8 +36,6 @@
 #include "Pt/Ssl/StreamBuffer.h"
 #include "Pt/Ssl/IOStream.h"
 #include "Pt/System/Logger.h"
-#include <sstream>
-#include <fstream>
 
 class StreamBufferTest : public Pt::Unit::TestSuite
 {
@@ -64,31 +62,16 @@ Pt::Unit::RegisterTest<StreamBufferTest> register_StreamBufferTest;
 
 void StreamBufferTest::Handshake()
 {
-    // adjust the path
-    #ifdef _WIN32
-        std::ifstream ifs("src\\Pt-Ssl\\tests\\cert\\client-with-password.p12", std::ios::binary);
-    #else
-        std::ifstream ifs("src/Pt-Ssl/tests/cert/client-with-password.p12", std::ios::binary);
-    #endif
+    const char* serverCerts = reinterpret_cast<const char*>(serverPkcs12);
+    const char* clientCerts = reinterpret_cast<const char*>(clientPkcs12);
+    const char* caCerts = reinterpret_cast<const char*>(caPkcs12);
 
-    #ifdef _WIN32
-        std::ifstream ifs_ca("src\\Pt-Ssl\\tests\\cert\\ca-with-password.p12", std::ios::binary);
-    #else
-        std::ifstream ifs_ca("src/Pt-Ssl/tests/cert/ca-with-password.p12", std::ios::binary);
-    #endif
-
-    #ifdef _WIN32
-        std::ifstream server_ifs("src\\Pt-Ssl\\tests\\cert\\server-with-password.p12", std::ios::binary);
-    #else
-        std::ifstream server_ifs("src/Pt-Ssl/tests/cert/server-with-password.p12", std::ios::binary);
-    #endif
+    Pt::Ssl::CertificateStore store;
+    store.loadPkcs12(serverCerts, sizeof(serverPkcs12), "123");
+    store.loadPkcs12(clientCerts, sizeof(clientPkcs12), "123");
+    store.loadPkcs12(caCerts, sizeof(caPkcs12), "123");
 
     // Server context
-    Pt::Ssl::CertificateStore store;
-    store.loadPkcs12(server_ifs, "123");
-    store.loadPkcs12(ifs_ca, "123");
-    store.loadPkcs12(ifs, "123");
-
     Pt::Ssl::Context serverContext;
     serverContext.setVerifyMode(Pt::Ssl::AlwaysVerify);
 
