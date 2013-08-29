@@ -47,13 +47,6 @@ class StreamBufferTest : public Pt::Unit::TestSuite
             this->registerMethod("Handshake", *this, &StreamBufferTest::Handshake);
         }
 
-        void setUp()
-        { }
-
-        void tearDown()
-        { }
-
-        void CertificateStore();
         void Handshake();
 };
 

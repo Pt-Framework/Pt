@@ -36,6 +36,48 @@
 #include "Pt/System/Logger.h"
 #include <fstream>
 
+void makePkc12Data();
+
+class CertificateStoreTest : public Pt::Unit::TestSuite
+{
+    public:
+        CertificateStoreTest()
+        : Pt::Unit::TestSuite("CertificateStoreTest")
+        {
+            Pt::System::Logger::setLogLevel("Pt.Ssl", Pt::System::Error);
+            
+            this->registerMethod("Import", *this, &CertificateStoreTest::Import);
+
+            //makePkc12Data();
+        }
+
+        void Import()
+        {
+            const char* certChain = reinterpret_cast<const char*>(chainPkcs12);
+
+            Pt::Ssl::CertificateStore store;
+            store.loadPkcs12(certChain, sizeof(chainPkcs12), "123");
+    
+            const Pt::Ssl::Certificate* cert = store.findCertificate("Server");
+            PT_UNIT_ASSERT(cert);
+    
+            cert = store.findCertificate("Intermediate CA 2");
+            PT_UNIT_ASSERT(cert);
+
+            std::size_t certCount = 0;
+            Pt::Ssl::CertificateStore::ConstIterator it;
+            for(it = store.begin(); it != store.end(); ++it)
+            {
+                ++certCount;
+            }
+            
+            PT_UNIT_ASSERT(certCount != 0);
+            PT_UNIT_ASSERT_EQUALS( certCount, store.size() );
+        }
+};
+
+Pt::Unit::RegisterTest<CertificateStoreTest> register_CertificateStoreTest;
+
 void makePkc12Data()
 {
     #ifdef _WIN32
@@ -70,49 +112,3 @@ void makePkc12Data()
 
     std::cout << "\n};\n";
 }
-
-class CertificateStoreTest : public Pt::Unit::TestSuite
-{
-    public:
-        CertificateStoreTest()
-        : Pt::Unit::TestSuite("CertificateStoreTest")
-        {
-            Pt::System::Logger::setLogLevel("Pt.Ssl", Pt::System::Error);
-            
-            this->registerMethod("Import", *this, &CertificateStoreTest::Import);
-
-            //makePkc12Data();
-        }
-
-        void setUp()
-        { }
-
-        void tearDown()
-        { }
-
-        void Import()
-        {
-            const char* certChain = reinterpret_cast<const char*>(chainPkcs12);
-
-            Pt::Ssl::CertificateStore store;
-            store.loadPkcs12(certChain, sizeof(chainPkcs12), "123");
-    
-            const Pt::Ssl::Certificate* cert = store.findCertificate("Server");
-            PT_UNIT_ASSERT(cert);
-    
-            cert = store.findCertificate("Intermediate CA 2");
-            PT_UNIT_ASSERT(cert);
-
-            std::size_t certCount = 0;
-            Pt::Ssl::CertificateStore::ConstIterator it;
-            for(it = store.begin(); it != store.end(); ++it)
-            {
-                ++certCount;
-            }
-            
-            PT_UNIT_ASSERT(certCount != 0);
-            PT_UNIT_ASSERT_EQUALS( certCount, store.size() );
-        }
-};
-
-Pt::Unit::RegisterTest<CertificateStoreTest> register_CertificateStoreTest;

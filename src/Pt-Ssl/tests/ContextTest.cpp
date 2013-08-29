@@ -47,12 +47,6 @@ class ContextTest : public Pt::Unit::TestSuite
             this->registerMethod("Assign", *this, &ContextTest::Assign);
         }
 
-        void setUp()
-        { }
-
-        void tearDown()
-        { }
-
         void Assign()
         {
             const char* serverCerts = reinterpret_cast<const char*>(serverPkcs12);
@@ -63,7 +57,8 @@ class ContextTest : public Pt::Unit::TestSuite
             store.loadPkcs12(serverCerts, sizeof(serverPkcs12), "123");
             store.loadPkcs12(caCerts, sizeof(caPkcs12), "123");
 
-            Pt::Ssl::Context ctx;
+            Pt::Ssl::Context ctx(Pt::Ssl::TLSv1);
+            ctx.setVerifyMode(Pt::Ssl::AlwaysVerify);
 
             const Pt::Ssl::Certificate* cert = store.findCertificate("SGC Mainframe");
             PT_UNIT_ASSERT(cert);
@@ -75,16 +70,10 @@ class ContextTest : public Pt::Unit::TestSuite
    
             Pt::Ssl::Context ctx2;
             ctx2.assign(ctx);
-    
-            //cert = ctx2.findCertificate("SGC Mainframe");
-            //PT_UNIT_ASSERT(cert);
 
-            //cert = ctx2.findCertificate("SGC Certificate Authority");
-            //PT_UNIT_ASSERT(cert);
-    
-            //cert = ctx2.findCertificate("Root CA");
-            //PT_UNIT_ASSERT(cert);
-            //std::exit(0);
+            PT_UNIT_ASSERT_EQUALS(ctx.protocol(), ctx2.protocol());
+            PT_UNIT_ASSERT_EQUALS(ctx.verifyMode(), ctx2.verifyMode());
+
         }
 };
 
