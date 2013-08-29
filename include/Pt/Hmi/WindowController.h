@@ -75,7 +75,7 @@ protected:
 	virtual void onClosing(bool& canClose);
 	virtual void onClosed();
 	
-	void onSizeChanged(Pt::Gfx::SizeF& size);
+	void onSizeChanged(const void* sender, const PropertyBase& prop);
 	
 	GfxModel* gfxModel();
 	WindowController*  _windowParent;

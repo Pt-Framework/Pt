@@ -18,7 +18,6 @@ public:
 public:
 	virtual void onPointerInput(const PointingEvent& ev);
 	virtual void onKeyInput(const KeyEvent& ev);
-
 };
 
 }}

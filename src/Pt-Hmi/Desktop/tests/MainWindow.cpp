@@ -27,6 +27,7 @@
 
 #include <Pt/Hmi/WindowController.h>
 #include <Pt/Hmi/WindowModel.h>
+#include <Pt/Hmi/ButtonController.h>
 #include <Pt/Hmi/PanelController.h>
 #include <Pt/Hmi/PanelModel.h>
 #include <Pt/Hmi/LabelModel.h>
@@ -39,7 +40,6 @@ namespace Hmi{
 namespace Demo{
 
 MainWindow::MainWindow()
-: _clicked(false)
 {
 	init();
 }
@@ -83,53 +83,44 @@ void MainWindow::init()
 	_mainPanel.addChild(&_toggleButton);
 
 	//Dialog button
-	Pt::Hmi::ButtonModel* dialogButtonModel = (Pt::Hmi::ButtonModel*) _dialogButton.controller().model();
+	Pt::Hmi::ButtonController* dialogButtonCotroller = (Pt::Hmi::ButtonController*) &_dialogButton.controller();
+	Pt::Hmi::ButtonModel* dialogButtonModel = (Pt::Hmi::ButtonModel*) dialogButtonCotroller->model();
 	dialogButtonModel->ButtonType.set(Pt::Hmi::ButtonType::Press);
 	dialogButtonModel->Caption.set("Dialog [CTRL+D]");
 	dialogButtonModel->ActionKey.set("CTRL//D");
 	dialogButtonModel->Position.set(Pt::Gfx::PointF(20,100));
 	dialogButtonModel->Size.set(Pt::Gfx::SizeF(150,25));
-	dialogButtonModel->ButtonState.PropertyChanged += Pt::slot(*this, &MainWindow::onShowDialog);
+	dialogButtonCotroller->PressedAction  += Pt::slot(*this, &MainWindow::onShowDialog);
 	_mainPanel.addChild(&_dialogButton);
 
 	//Close button
-	Pt::Hmi::ButtonModel* closeButtonModel = (Pt::Hmi::ButtonModel*) _closeButton.controller().model();
+	Pt::Hmi::ButtonController* closeButtonCtrl = (Pt::Hmi::ButtonController*) &_closeButton.controller();
+	Pt::Hmi::ButtonModel* closeButtonModel = (Pt::Hmi::ButtonModel*) closeButtonCtrl->model();
 	closeButtonModel->ButtonType.set(Pt::Hmi::ButtonType::Press);
 	closeButtonModel->Caption.set("Close [CTRL+X]");
 	closeButtonModel->ActionKey.set("CTRL//X");
 	closeButtonModel->Position.set(Pt::Gfx::PointF(590,525));
 	closeButtonModel->Size.set(Pt::Gfx::SizeF(150,25));
-	closeButtonModel->ButtonState.PropertyChanged += Pt::slot(*this, &MainWindow::onClosedByButton);
+	closeButtonCtrl->PressedAction += Pt::slot(*this, &MainWindow::onClosed);
 	addChild(&_closeButton);
 }
 
-
-void MainWindow::onShowDialog(Pt::Hmi::DeviceButton::State& state)
+void MainWindow::onClosedByWindow(const void* sender, const PropertyBase& prop)
 {
-	if( state == Pt::Hmi::DeviceButton::Pressed)
-	{
-		_clicked = true;
-		return;
-	}
-
-	if( state == Pt::Hmi::DeviceButton::Released && _clicked)
-	{
-		_clicked = false;
-		Dialog1 dialog;
-		dialog.show(this);
-	}
-}
-
-void MainWindow::onClosedByButton(Pt::Hmi::DeviceButton::State& state)
-{
-	if( state == Pt::Hmi::DeviceButton::Pressed)
+	Pt::Hmi::Property<bool>* closedProp = (Pt::Hmi::Property<bool>*) &prop;
+	if( closedProp->get())
 		Pt::Hmi::Application::instance().exit();
 }
 
-void MainWindow::onClosedByWindow(bool& state)
+void MainWindow::onShowDialog(Pt::Hmi::Controller* ctrl)
 {
-	if( state)
-		Pt::Hmi::Application::instance().exit();
+	Dialog1 dialog;
+	dialog.show(this);
+}
+
+void MainWindow::onClosed(Pt::Hmi::Controller* ctrl)
+{
+	Pt::Hmi::Application::instance().exit();
 }
 
 }}}

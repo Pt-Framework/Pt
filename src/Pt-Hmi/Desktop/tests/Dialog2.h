@@ -43,7 +43,7 @@ protected:
 	virtual void init();
 
 private:
-	void onClosedByButton(Pt::Hmi::DeviceButton::State& state);
+	void onClosedByButton(Controller* ctrl);
 
 private:
 	Pt::Hmi::Desktop::Button _closeButton;

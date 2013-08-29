@@ -48,22 +48,36 @@ void DialogController::onClosed()
 	_closed = true;
 }
 
-void DialogController::modal(WindowController* parent)
+void DialogController::doModal(WindowController* parent)
 {	
+	bool		 parentTopMost = false;
+	WindowModel* parentModel   = (WindowModel*)parent->model();
+	WindowModel* myModel	   = (WindowModel*)model();
+
 	_closed  = false;
-	 setWindowParent(parent);
+	
+	//Set my parent window.
+	setWindowParent(parent);
+	 
+	//Setup the parent as disabled and TopMost = false.
+	parentTopMost = parentModel->TopMost.get();
+	parentModel->Enable = false;	
+	parentModel->TopMost = false;
 
-	 model()->Enable = true;
-	WindowModel* dialogParentModel = (WindowModel*)parent->model();
-	dialogParentModel->Enable = false;
+	//Setup the dialog as aenabled and top most.	
+	myModel->Enable = true;
+	myModel->TopMost = true;
 
+	//Invalidate the dialog
 	invalidate();
 	
+	//Wait of termination of the dialog.
 	while(!_closed)
 		Application::instance().nextEvent();
-
 	
-	dialogParentModel->Enable = true;
+	//Restore the parent state.
+	parentModel->Enable = true;
+	parentModel->TopMost = parentTopMost;
 }
 
 }}

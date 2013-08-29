@@ -4,10 +4,10 @@ namespace Pt{
 namespace Hmi{
 
 PanelModel::PanelModel()
-: BorderStyle(BorderStyle::Single)
-, BorderWidth(3)
-, Invert3DEffect(false)
-, BorderRoundEdge(false)
+: BorderStyle(me(),BorderStyle::Single)
+, BorderWidth(me(),3)
+, Invert3DEffect(me(),false)
+, BorderRoundEdge(me(),false)
 {
 	AcceptFocus.set(false);
 }

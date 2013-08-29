@@ -21,9 +21,6 @@ class PT_HMI_DESKTOP_API Window : public Widget
 {
 public:
 	Window();
-
-
-
 	virtual ~Window();
 	
 	virtual void show();

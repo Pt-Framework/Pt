@@ -56,7 +56,6 @@ public:
 protected:
 	bool onMoveFocusNext();
 	bool onMoveFocusPrev();	
-
 	
 private:
 	bool focusNextChild(int index);

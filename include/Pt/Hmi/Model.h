@@ -45,6 +45,11 @@ protected:
 	Model();
 	virtual ~Model();
 
+	Model* me()
+	{
+		return this;
+	}
+
 public:
 	Property<bool>			Enable;
 	Property<void*>			Tag;  

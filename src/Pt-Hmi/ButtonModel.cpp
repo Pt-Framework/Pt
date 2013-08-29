@@ -4,10 +4,11 @@ namespace Pt{
 namespace Hmi{
 
 ButtonModel::ButtonModel()
-: ButtonState(Pt::Hmi::DeviceButton::Released)
-, ActionKey("")
-, Armed(false)
-, ButtonType(Pt::Hmi::ButtonType::Press)
+: ButtonState(me(),Pt::Hmi::DeviceButton::Released)
+, ActionKey(me(),"")
+, Armed(me(),false)
+, ButtonType(me(),Pt::Hmi::ButtonType::Press)
+, DoublePressTimeInMs(me(),1500)
 {
 	BorderStyle.set(Pt::Hmi::BorderStyle::Widget);
 	BorderWidth.set(1);

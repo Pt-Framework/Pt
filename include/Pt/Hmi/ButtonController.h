@@ -31,6 +31,7 @@
 #include <Pt/Hmi/LabelController.h>
 #include <Pt/Hmi/ButtonModel.h>
 #include <Pt/Gfx/ImagePainter.h>
+#include <Pt/System/Timer.h>
 
 namespace Pt{
 namespace Hmi{
@@ -43,9 +44,30 @@ public:
 	ButtonController();
 	virtual ~ButtonController();
 
+	Signal<Controller*> PressedAction;
+	Signal<Controller*> DoublePressedAction;
+
+	Signal<Controller*, bool> CheckedAction;
+
+protected:
+	virtual void onPressedAction();
+	virtual void onDoublePressedAction();
+	virtual void onCheckedAction(bool checked);
+
+	virtual void onModelChanged(bool created = false);
+
 private:
 	virtual void onPointerInput(const PointingEvent& ev);
 	virtual void onKeyInput(const KeyEvent& ev);
+	void onButtonStateChanged(const void* sender, const PropertyBase& prop);
+	void onDoublePressedTimeout();
+
+private:	
+	bool _pressed;
+	bool _timeout;
+	int _pressCounter;
+	Pt::System::Timer _doublePressTimer;
+	ButtonModel* _myModel;
 };
 
 }}

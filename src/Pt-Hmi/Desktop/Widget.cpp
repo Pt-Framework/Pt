@@ -18,7 +18,7 @@ Widget::~Widget()
 
 void Widget::show()
 {
-	GfxModel* m = dynamic_cast<GfxModel*>(controller().model());
+	GfxModel* m = dynamic_cast<GfxModel*>(controller().model());	
 	m->Visible = true;
 	controller().invalidate();
 }

@@ -32,6 +32,7 @@ public:
 	Property<std::string>         ActionKey;		
 	Property<bool>				  Armed;	
 	Property<ButtonType::Type>    ButtonType;	
+	Property<int>				  DoublePressTimeInMs; 
 };
 
 }}

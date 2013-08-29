@@ -36,20 +36,22 @@ Dialog::Dialog()
 
 void Dialog::show(Dialog* parent)
 {
-	Pt::Hmi::WindowModel* m = (Pt::Hmi::WindowModel*) controller().model();
-	m->Closed.set(false);
-	Widget::show();
-	DialogController* ctrl = (DialogController*) &controller();
-	ctrl->modal((Pt::Hmi::WindowController*) &parent->controller());
+	show((WindowController*) &parent->controller());
 }
 
 void Dialog::show(Window* parent)
 {
-	Pt::Hmi::WindowModel* m = (Pt::Hmi::WindowModel*) controller().model();
-	m->Closed.set(false);
-	Widget::show();
-	DialogController* ctrl = (DialogController*) &controller();
-	ctrl->modal((Pt::Hmi::WindowController*) &parent->controller());
+	show((WindowController*) &parent->controller());
+}
+
+void Dialog::show(WindowController* parent)
+{
+	DialogController* myController = (DialogController*) &controller();
+	WindowModel*	  myModel	   = (WindowModel*) myController->model();
+
+	myModel->Closed.set(false);
+	Widget::show();		
+	myController->doModal(parent);	
 }
 
 Dialog::~Dialog()

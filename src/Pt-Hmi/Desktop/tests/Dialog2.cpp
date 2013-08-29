@@ -28,6 +28,7 @@
 #include <Pt/Hmi/DialogModel.h>
 #include <Pt/Hmi/DialogController.h>
 #include <Pt/Hmi/ButtonModel.h>
+#include <Pt/Hmi/ButtonController.h>
 
 namespace Pt{
 namespace Hmi{
@@ -51,22 +52,20 @@ void Dialog2::init()
 	dialogModel->Caption.set("This is a sample modal dialog 2");
 
 	//Close Button
-	Pt::Hmi::ButtonModel* closeButtonModel = (Pt::Hmi::ButtonModel*) _closeButton.controller().model();
+	Pt::Hmi::ButtonController* closeButtonController = (Pt::Hmi::ButtonController*)&_closeButton.controller();
+	Pt::Hmi::ButtonModel* closeButtonModel = (Pt::Hmi::ButtonModel*) closeButtonController->model();
 	closeButtonModel->Position.set(Pt::Gfx::PointF(400,360));
 	closeButtonModel->Size.set(Pt::Gfx::SizeF(200,25));
 	closeButtonModel->Caption.set("Close [CTRL+X]");
 	closeButtonModel->ActionKey.set("CTRL//X");
-	closeButtonModel->ButtonState.PropertyChanged += Pt::slot(*this,&Dialog2::onClosedByButton);
+	closeButtonController->PressedAction += Pt::slot(*this,&Dialog2::onClosedByButton);
 	addChild(&_closeButton);
 }
 
-void Dialog2::onClosedByButton(Pt::Hmi::DeviceButton::State& state)
+void Dialog2::onClosedByButton(Controller* ctrl)
 {
-	if(state == Pt::Hmi::DeviceButton::Pressed)
-	{
-		DialogModel* m = (DialogModel*) controller().model();
-		m->Closed = true;
-	}
+	DialogModel* m = (DialogModel*) controller().model();
+	m->Closed = true;
 }
 
 }}}

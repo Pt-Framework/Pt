@@ -45,17 +45,16 @@ protected:
 	virtual void init();
 
 private:
-	void onClosedByWindow(bool& state);
-	void onClosedByButton(Pt::Hmi::DeviceButton::State& state);
-	void onShowDialog(Pt::Hmi::DeviceButton::State& state);
+	void onClosed(Pt::Hmi::Controller* ctrl);
+	void onShowDialog(Controller* ctrl);
+	void onClosedByWindow(const void* sender, const PropertyBase& prop);
 
 private:
     Pt::Hmi::Desktop::Panel  _mainPanel;
 	Pt::Hmi::Desktop::Button _closeButton;
 	Pt::Hmi::Desktop::Button _toggleButton;
 	Pt::Hmi::Desktop::Button _dialogButton;
-	Pt::Hmi::Desktop::Label  _textLabel;
-	bool _clicked;
+	Pt::Hmi::Desktop::Label  _textLabel;	
 }; 
 
 }}}

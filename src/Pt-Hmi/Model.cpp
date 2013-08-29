@@ -31,8 +31,8 @@ namespace Pt{
 namespace Hmi{
 
 Model::Model()
-: Enable(true)
-, Tag(0)
+: Enable(me(),true)
+, Tag(me(),0)
 , _ctrl(0)
 { 
 

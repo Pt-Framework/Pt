@@ -7,16 +7,32 @@
 namespace Pt {
 namespace Hmi {
 
-template<typename T>
-class  Property 
+
+class PropertyBase
 {
 public:
-    Property()
+	PropertyBase(void* parent)
+	: _sender(parent)
+	{
+	
+	}
+
+protected:
+	void* _sender;
+};
+
+template<typename T>
+class  Property  : public PropertyBase
+{
+public:
+    Property(void* parent)
+	: PropertyBase(parent)
 	{
 	}
 
-	Property(const T& value)
-	: _value(value)
+	Property(void* parent, const T& value)
+	: PropertyBase(parent)
+	, _value(value)
 	{
 	}
 
@@ -41,13 +57,13 @@ public:
 
 	T& operator=(const T& value)
 	{
-		_value = value;
-		PropertyChanged.send(_value);
+		_value = value;		
+		PropertyChanged.send(_sender, this);
 		return _value;
 	}
 
 public:	
-	Pt::Signal<T&> PropertyChanged;
+	Pt::Signal<const void*, const PropertyBase&> PropertyChanged;
 
 private:
 	T _value;

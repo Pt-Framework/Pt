@@ -28,6 +28,7 @@
 #include <Pt/Hmi/DialogModel.h>
 #include <Pt/Hmi/DialogController.h>
 #include <Pt/Hmi/ButtonModel.h>
+#include <Pt/Hmi/ButtonController.h>
 #include "Dialog2.h"
 
 namespace Pt{
@@ -53,47 +54,36 @@ void Dialog1::init()
 	dialogModel->Caption.set("This is a sample modal dialog 1");
 
 	//New dialog button 
-	Pt::Hmi::ButtonModel* newDialogButtonModel = (Pt::Hmi::ButtonModel*) _newDialog.controller().model();
+	Pt::Hmi::ButtonController* newDialogController = (Pt::Hmi::ButtonController*) &_newDialog.controller();
+	Pt::Hmi::ButtonModel* newDialogButtonModel = (Pt::Hmi::ButtonModel*) newDialogController->model();
 	newDialogButtonModel->Position.set(Pt::Gfx::PointF(400,300));
 	newDialogButtonModel->Size.set(Pt::Gfx::SizeF(200,25));
 	newDialogButtonModel->Caption.set("New Dialog [CTRL+F]");
 	newDialogButtonModel->ActionKey.set("CTRL//F");
-	newDialogButtonModel->ButtonState.PropertyChanged += Pt::slot(*this,&Dialog1::onShowNextDialog);
+	newDialogController->PressedAction += Pt::slot(*this,&Dialog1::onShowNextDialog);
 	addChild(&_newDialog);
 
 	//Close Button
-	Pt::Hmi::ButtonModel* closeButtonModel = (Pt::Hmi::ButtonModel*) _closeButton.controller().model();
+	Pt::Hmi::ButtonController* closeButtonController = (Pt::Hmi::ButtonController*) &_closeButton.controller();
+	Pt::Hmi::ButtonModel* closeButtonModel = (Pt::Hmi::ButtonModel*) closeButtonController->model();
 	closeButtonModel->Position.set(Pt::Gfx::PointF(400,360));
 	closeButtonModel->Size.set(Pt::Gfx::SizeF(200,25));
 	closeButtonModel->Caption.set("Close [CTRL+X]");
 	closeButtonModel->ActionKey.set("CTRL//X");
-	closeButtonModel->ButtonState.PropertyChanged += Pt::slot(*this,&Dialog1::onClosedByButton);
+	closeButtonController->PressedAction += Pt::slot(*this,&Dialog1::onClosedByButton);
 	addChild(&_closeButton);
 }
 
-void Dialog1::onClosedByButton(Pt::Hmi::DeviceButton::State& state)
+void Dialog1::onClosedByButton(Controller* ctrl)
 {
-	if(state == Pt::Hmi::DeviceButton::Pressed)
-	{
-		DialogModel* m = (DialogModel*) controller().model();
-		m->Closed = true;
-	}
+	DialogModel* m = (DialogModel*) controller().model();
+	m->Closed = true;
 }
 
-void Dialog1::onShowNextDialog(Pt::Hmi::DeviceButton::State& state)
+void Dialog1::onShowNextDialog(Controller* ctrl)
 {
-	if(state == Pt::Hmi::DeviceButton::Pressed)
-	{
-		_clicked = true;
-		return;
-	} 
-	
-	if(state == Pt::Hmi::DeviceButton::Released && _clicked)
-	{
-		_clicked = false;
-		Dialog2 dialog;
-		dialog.show(this);		
-	} 
+	Dialog2 dialog;
+	dialog.show(this);		
 }
 	
 }}}

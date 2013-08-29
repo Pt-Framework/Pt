@@ -46,6 +46,7 @@ class PT_HMI_API Controller  : public Pt::Connectable
 {
 protected:
 	Controller(Controller* widgetParent = 0);
+	WindowController* getWindow();
 
 public:
 	virtual ~Controller();
@@ -166,9 +167,7 @@ public:
 	
 	void output();		
 
-protected:	
-
-	WindowController* getWindow();
+protected:		
 
 	virtual bool onMoveFocusNext()
 	{

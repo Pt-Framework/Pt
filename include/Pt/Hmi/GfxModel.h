@@ -115,7 +115,7 @@ public:
 
 
 private:
-	void onFocusChanged(bool& state);
+	void onFocusChanged(const void* sender, const PropertyBase& prop);
 };
 
 }}

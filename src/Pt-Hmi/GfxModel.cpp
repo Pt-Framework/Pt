@@ -7,12 +7,22 @@ namespace Pt{
 namespace Hmi{
 
 GfxModel::GfxModel()
-: Visible(true)
-, BackColor(Pt::Gfx::ARgbColor(212,208,200))
-, ForeColor(Pt::Gfx::ARgbColor(70,70,70))
-, Focused(false)
-, Font(Pt::Gfx::Font("",12))
-, AcceptFocus(true)
+: Visible(me(),true)
+, Font(me(),Pt::Gfx::Font("",12))
+, Position(me())
+, Size(me())
+, BackColor(me(),Pt::Gfx::ARgbColor(212,208,200))
+, ForeColor(me(), Pt::Gfx::ARgbColor(70,70,70))
+, BackgroundImage(me())
+, BackgroundImageLayout(me())
+, Opacity(me())
+, TransparancyKey(me())
+, Pointer2DStatus(me())
+, KeyStatus(me())
+, CursorT(me())
+, TextAlign(me())
+, Focused(me(), false)
+, AcceptFocus(me(),true)
 {
 	Position = toUnit(Pt::Gfx::Point(0,0));
 	Focused.PropertyChanged += Pt::slot(*this, &GfxModel::onFocusChanged);
@@ -23,9 +33,9 @@ GfxModel::~GfxModel()
 
 }
 
-void GfxModel::onFocusChanged(bool& focused)
+void GfxModel::onFocusChanged(const void* sender, const PropertyBase& prop)
 {
-	if(focused)
+	if(Focused.get())
 	{//True
 		Pt::Hmi::Controller* ctrl = this->controller();
 		Pt::Hmi::Controller* par = ctrl->widgetParent();
@@ -36,7 +46,7 @@ void GfxModel::onFocusChanged(bool& focused)
 			
 			//All parents set to true.
 			parMod->Focused.set(true);
-			parMod->Focused.PropertyChanged.send(parMod->Focused.get());
+			parMod->Focused.PropertyChanged.send(parMod, parMod->Focused);
 
 			//All sibling set to false. Only me let it true
 			for( size_t i = 0; i < par->children().size(); i++)
@@ -55,7 +65,7 @@ void GfxModel::onFocusChanged(bool& focused)
 		{//All childs set to false
 			GfxModel* m = (GfxModel*) ctrl->children()[i]->model();
 			m->Focused.set(false);						
-			m->Focused.PropertyChanged.send(m->Focused.get());
+			m->Focused.PropertyChanged.send(m, m->Focused);
 		}
 	}
 }

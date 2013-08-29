@@ -135,6 +135,15 @@ void GfxOutputImpl::onWindowEvent(HWND wnd, unsigned int message, unsigned int w
 			handled = true;			
 		}
 		break;
+		case WM_KILLFOCUS:
+		{
+			if(_model->TopMost.get())
+			{
+				BringWindowToTop(_hwnd);
+			}
+			handled = true;
+		}
+		break;		
 	}
 }
 
@@ -412,7 +421,8 @@ void GfxOutputImpl::writeWindowProperties()
 	else if( !visible)
 		ShowWindow(_hwnd, SW_SHOW);		
 
-	SetWindowLong(_hwnd, GWL_STYLE, style);  					
+	SetWindowLong(_hwnd, GWL_STYLE, style);  
+	
 }
 
 void GfxOutputImpl::destroy()

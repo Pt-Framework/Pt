@@ -43,7 +43,7 @@ public:
 	DialogController(GfxModel* m = 0, Renderer* r = 0, GfxOutput* out = 0);
 	virtual ~DialogController();	
 
-	void modal(WindowController* parent);
+	void doModal(WindowController* parent);
 
 protected:
 	virtual void onClosed();

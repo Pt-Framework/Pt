@@ -22,10 +22,13 @@ public:
 	Dialog();
 	virtual ~Dialog();
 
-	virtual void show(Window* parent);
-	virtual void show(Dialog* parent);
+	void show(Window* parent);
+	void show(Dialog* parent);
 
 	DialogResult::Type result() const;
+
+protected:
+	virtual void show(WindowController* parent); 
 
 private:
 	Pt::Hmi::DialogController*	_defController;

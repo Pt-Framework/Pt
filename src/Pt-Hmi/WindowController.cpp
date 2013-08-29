@@ -134,11 +134,11 @@ void WindowController::onPointerInput(const PointingEvent& ev)
 		children()[i]->notifyPointerInput(ev);	
 }
 
-void WindowController::onSizeChanged(Pt::Gfx::SizeF& sizeUnits)
+void WindowController::onSizeChanged(const void* sender, const PropertyBase& prop)
 {
 	GfxModel* m = gfxModel();
-
-	Pt::Gfx::Size size = m->fromUnit(sizeUnits);
+	
+	Pt::Gfx::Size size = m->fromUnit(m->Size.get());
 
 	m->PaintBuffer.resize(size.width(), size.height());	
 	invalidate();
@@ -161,7 +161,7 @@ void WindowController::onModelChanged(bool created)
 		GfxModel* m = gfxModel();
 
 		m->Size.PropertyChanged += Pt::slot(*this, &WindowController::onSizeChanged);					
-		m->Size.PropertyChanged.send(m->Size.get());	
+		m->Size.PropertyChanged.send(m, m->Size);	
 	}
 
 	for( size_t i = 0; i < children().size(); ++i)

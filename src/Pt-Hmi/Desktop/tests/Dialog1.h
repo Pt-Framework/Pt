@@ -43,9 +43,8 @@ protected:
 	virtual void init();
 
 private:
-	void onClosedByWindow(bool& state);
-	void onClosedByButton(Pt::Hmi::DeviceButton::State& state);
-	void onShowNextDialog(Pt::Hmi::DeviceButton::State& state);
+	void onClosedByButton(Controller* ctrl);
+	void onShowNextDialog(Controller* ctrl);
 
 private:
 	Pt::Hmi::Desktop::Button _closeButton;
