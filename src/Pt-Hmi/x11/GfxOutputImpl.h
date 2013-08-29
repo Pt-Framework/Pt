@@ -71,6 +71,7 @@ private:
 	void onKeyEvent(XEvent& ev);
 
 private:
+	void bringWindowToTop();
 	void create();
 	void destroy();
 	void show();

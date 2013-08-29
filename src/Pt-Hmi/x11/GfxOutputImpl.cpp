@@ -342,11 +342,18 @@ void GfxOutputImpl::onWindowEvent(XEvent& ev)
         case KeyRelease:  
 			onKeyEvent(ev);        		
 		break;
+	
+		case FocusOut:
+			if(_model->TopMost.get())
+				bringWindowToTop();
+		break;
+        case EnterNotify:    
+		break;
 
-		/*
-        case EnterNotify:     MainLoop::instance().enterNotify(*widget, _xev);     break;
-        case LeaveNotify:     MainLoop::instance().leaveNotify(*widget, _xev);     break;
-		*/
+        case LeaveNotify:
+			
+		break;
+
         default:
             break;
     }
@@ -366,7 +373,7 @@ void GfxOutputImpl::create()
     // The events we want to receive
     wattr.event_mask = StructureNotifyMask|ExposureMask|PropertyChangeMask|EnterWindowMask|
                        LeaveWindowMask|KeyPressMask|KeyReleaseMask|KeymapStateMask|
-                       ButtonPressMask|ButtonReleaseMask|PointerMotionMask;
+                       ButtonPressMask|ButtonReleaseMask|PointerMotionMask|FocusChangeMask;
 
     wattr.do_not_propagate_mask = KeyPressMask|KeyReleaseMask|ButtonPressMask| ButtonReleaseMask|PointerMotionMask|ButtonMotionMask;
 
@@ -443,6 +450,12 @@ void GfxOutputImpl::hide()
     XSync(display, false);
 }
 
+
+void GfxOutputImpl::bringWindowToTop()
+{
+	XRaiseWindow(_display, _window);
+	XSetInputFocus(_display, _window, RevertToNone, CurrentTime);
+}
 
 void GfxOutputImpl::onPaint(XEvent& xev)
 {
