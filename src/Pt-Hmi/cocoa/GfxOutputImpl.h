@@ -37,8 +37,7 @@ public:
     }
 
 public:
-    void onSize(double width, double height );
-    void onPosition(double x, double y);
+    void onPositionAndSize();
     bool onCanClose();
 private:
     void writeWindowSizeAndPos();

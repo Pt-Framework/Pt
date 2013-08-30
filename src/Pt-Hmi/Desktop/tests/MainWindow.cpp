@@ -53,7 +53,7 @@ void MainWindow::init()
 	//Window
 	Pt::Hmi::WindowController* windowController = (Pt::Hmi::WindowController*) &this->controller();
 	Pt::Hmi::WindowModel* windowModel = (Pt::Hmi::WindowModel*) windowController->model();	
-	windowModel->WinPos.set(Pt::Gfx::PointF(200,500));
+	windowModel->WinPos.set(Pt::Gfx::PointF(200,200));
 	windowModel->WinSize.set(Pt::Gfx::SizeF(800,615));
 	windowModel->Caption.set("Pt-Hmi demo");
 	windowModel->Closed.PropertyChanged += Pt::slot(*this, &MainWindow::onClosedByWindow);

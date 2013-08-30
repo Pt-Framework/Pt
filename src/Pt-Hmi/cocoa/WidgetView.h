@@ -20,11 +20,15 @@
 #include <Pt/Hmi/Api.h>
 #include "GfxOutputImpl.h"
 #include <Pt/Hmi/WindowModel.h>
+#include <Pt/Hmi/PointingEvent.h>
+#include <Pt/Hmi/KeyEvent.h>
 #import <AppKit/NSView.h>
 
 @interface WidgetView : NSView
 {
     Pt::Hmi::GfxOutputImpl* _outControll;
+    Pt::Hmi::PointingEvent 	_mouseEvent;
+	Pt::Hmi::KeyEvent      	_keyEvent;
     
 }
     

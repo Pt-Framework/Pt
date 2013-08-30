@@ -34,7 +34,7 @@
 {
     [super setFrameOrigin:origin];
     if(_outControll != nil)
-    _outControll->onPosition(origin.x, origin.y);
+    _outControll->onPositionAndSize();
 
 }
 

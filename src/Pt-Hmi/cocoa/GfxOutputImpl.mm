@@ -87,35 +87,30 @@ void GfxOutputImpl::output(Pt::Hmi::Model* model)
 	}
     
     _ignoreSizeEvent = true;
-    
-    
     writeWindowSizeAndPos();
     _ignoreSizeEvent = false;
+    
     [_view setNeedsDisplay:YES];
 }
     
 void GfxOutputImpl::writeWindowSizeAndPos()
 {
-    //Position
-    NSPoint pos;
     int screenHeight = [[NSScreen mainScreen] frame].size.height;
-    
-    pos.x = _model->WinPos.get().x();
-    pos.y = screenHeight - _model->WinPos.get().y();
-    
-    [_window setFrameOrigin: pos];
+    NSRect windowRect =  [_window frame];
+   
+    //Position
+    windowRect.origin.x = _model->WinPos.get().x();
+    windowRect.origin.y = screenHeight - (_model->WinPos.get().y() + _model->WinSize.get().height());
     
     //Size
-    NSRect fr =  [_window frame];
-    fr.origin.y -= fr.size.height;
-    fr.origin.y += _model->WinSize.get().height();
-    fr.size.width = _model->WinSize.get().width();
-    fr.size.height = _model->WinSize.get().height();
-    [_window setFrame:fr display:NO animate:NO];
+    windowRect.size.width = _model->WinSize.get().width();
+    windowRect.size.height = _model->WinSize.get().height();
+    
+    [_window setFrame:windowRect display:YES animate:NO];
     
 }
     
-void GfxOutputImpl::onSize(double width, double height )
+void GfxOutputImpl::onPositionAndSize()
 {
     if(_ignoreSizeEvent)
         return;
@@ -124,27 +119,25 @@ void GfxOutputImpl::onSize(double width, double height )
         return;
     
     int screenHeight = [[NSScreen mainScreen] frame].size.height;
-   
+    
+    //Position
+    //Window
     NSRect windowRect = [_window frame];
-    _model->WinPos = Pt::Gfx::PointF(windowRect.origin.x,screenHeight- windowRect.origin.y);
+    _model->WinPos = Pt::Gfx::PointF(windowRect.origin.x,screenHeight - (windowRect.origin.y + windowRect.size.height));
+    
+    //View
+    NSRect viewRect = [_view frame];
+    _model->Position = Pt::Gfx::PointF(viewRect.origin.x, _model->WinSize.get().height()- viewRect.origin.y);
+    
+    
+    //Size
+    //Window rect
     _model->WinSize = Pt::Gfx::SizeF(windowRect.size.width,windowRect.size.height);
-    _model->Size = Pt::Gfx::SizeF(width,height);   
+    
+    //View rect
+    _model->Size = Pt::Gfx::SizeF(viewRect.size.width,viewRect.size.height);
 }
     
-
-void GfxOutputImpl::onPosition(double x, double y)
-{
-    if(_ignoreSizeEvent)
-        return;
-    
-    if( _model == 0)
-        return;
-    
-    int screenHeight = [[NSScreen mainScreen] frame].size.height;
-    _model->Position = Pt::Gfx::PointF(x,screenHeight- y);
-    _model->WinPos = Pt::Gfx::PointF(x,screenHeight- y);
-}
-
 bool GfxOutputImpl::onCanClose()
 {
     if(_model->CanClose.get())
@@ -161,4 +154,5 @@ Pt::Gfx::Painter* GfxOutputImpl::nativePainter()
 {
 	return _nativePainter;
 }
+    
 }}

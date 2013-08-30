@@ -83,7 +83,6 @@
 - (void)setFrameOrigin:(NSPoint)origin
 {
     [super setFrameOrigin:origin];
-    _outControll->onPosition(origin.x, origin.y);
 
 }
 
@@ -92,7 +91,7 @@
 {
     [super setFrameSize:frameSize];
     
-    _outControll->onSize( frameSize.width,  frameSize.height);
+    _outControll->onPositionAndSize();
 
 }
 
@@ -105,7 +104,11 @@
 
 - (void) mouseUp:(NSEvent*)ev
 {
-    std::cerr << "Mouse Up: " << std::endl;
+	/*Pt::Gfx::PointF pos = _model->toUnit(Pt::Gfx::Point(x,y));
+    
+	_mouseEvent.setX(pos.x());
+	_mouseEvent.setY(pos.y());
+	Application::instance().pointerEvent().send(_model->controller(), _mouseEvent);*/
 }
 
 - (void) mouseDragged:(NSEvent*)event
