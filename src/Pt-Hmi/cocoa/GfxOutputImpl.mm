@@ -24,8 +24,8 @@ void GfxOutputImpl::create()
     _window = nil;
     _view = [[WidgetView alloc] init: this ];
 
-	Gfx::Point at(20, 20);
-	Gfx::Size size(400, 200);
+	Gfx::PointF at(20, 20);
+	Gfx::SizeF size(400, 200);
 
 	_window = [[Window alloc] initWithContentRect:NSMakeRect(at.x(), at.y(), size.width(), size.height()) styleMask:NSTitledWindowMask | NSClosableWindowMask | NSMiniaturizableWindowMask | NSResizableWindowMask backing:NSBackingStoreBuffered defer:NO];
 	[_window setReleasedWhenClosed: NO];
@@ -52,21 +52,22 @@ void GfxOutputImpl::destroy()
 
 void GfxOutputImpl::output(Pt::Hmi::Model* model)
 {
-	WindowModel* wmodel = dynamic_cast<WindowModel*>(model);
+	_model = dynamic_cast<WindowModel*>(model);
 
-    if( wmodel == 0)
+    if( _model == 0)
 		throw std::logic_error("ERROR: WindowModel model expected!");
-    
-    _model = wmodel;
+
     NSRect viewRect = [_view frame];
     
+    //Initial size and position
     if(_model->Size.get().width() != viewRect.size.width && _model->Size.get().height() != viewRect.size.height)
     {
         writeWindowSizeAndPos();
         return;
     }
 
-	if(wmodel->Closed.get())
+    //Create/Destroy handling
+	if(_model->Closed.get())
 	{
 		if(_view != nil)
 		{
@@ -79,17 +80,19 @@ void GfxOutputImpl::output(Pt::Hmi::Model* model)
 	{
 		if(_view == nil)
 		{
-			if(wmodel->Visible.get())
+			if(_model->Visible.get())
 				create();
 			else
 				return;
 		}
 	}
     
+    //Size and position handling
     _ignoreSizeEvent = true;
     writeWindowSizeAndPos();
     _ignoreSizeEvent = false;
     
+    //Redraw
     [_view setNeedsDisplay:YES];
 }
     
@@ -120,21 +123,14 @@ void GfxOutputImpl::onPositionAndSize()
     
     int screenHeight = [[NSScreen mainScreen] frame].size.height;
     
-    //Position
     //Window
     NSRect windowRect = [_window frame];
     _model->WinPos = Pt::Gfx::PointF(windowRect.origin.x,screenHeight - (windowRect.origin.y + windowRect.size.height));
+    _model->WinSize = Pt::Gfx::SizeF(windowRect.size.width,windowRect.size.height);
     
     //View
     NSRect viewRect = [_view frame];
     _model->Position = Pt::Gfx::PointF(viewRect.origin.x, _model->WinSize.get().height()- viewRect.origin.y);
-    
-    
-    //Size
-    //Window rect
-    _model->WinSize = Pt::Gfx::SizeF(windowRect.size.width,windowRect.size.height);
-    
-    //View rect
     _model->Size = Pt::Gfx::SizeF(viewRect.size.width,viewRect.size.height);
 }
     
