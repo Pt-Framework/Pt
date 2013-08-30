@@ -21,6 +21,7 @@
 #include <Pt/Hmi/PointingEvent.h>
 #import <AppKit/NSApplication.h>
 #import <AppKit/NSEvent.h>
+#import <AppKit/NSTrackingArea.h>
 
 
 @implementation WidgetView
@@ -29,6 +30,11 @@
 {
     self = [super init];
     _outControll = controll;
+    
+    int opts = (NSTrackingActiveAlways | NSTrackingInVisibleRect | NSTrackingMouseEnteredAndExited | NSTrackingMouseMoved);
+    NSTrackingArea *area = [[NSTrackingArea alloc] initWithRect:[self bounds] options:opts owner:self userInfo:nil];
+    [self addTrackingArea:area];
+    
     return self;
 }
 
@@ -81,9 +87,7 @@
     // Create a CGImage with the pixel data
     CGDataProviderRef provider = CGDataProviderCreateWithData(NULL, data, dataLength, NULL);
     CGColorSpaceRef colorspace = CGColorSpaceCreateDeviceRGB();
-    CGImageRef image = CGImageCreate(width, height, 8, 32, width * 4, colorspace, kCGBitmapByteOrder32Big | kCGImageAlphaPremultipliedLast,
-                                     
-                                     provider, NULL, true, kCGRenderingIntentDefault);
+    CGImageRef image = CGImageCreate(width, height, 8, 32, width * 4, colorspace, kCGBitmapByteOrder32Big | kCGImageAlphaPremultipliedLast, provider, NULL, true, kCGRenderingIntentDefault);
 
     CGContextDrawImage((CGContext*)[[NSGraphicsContext currentContext] graphicsPort],rect,image);
     

@@ -33,14 +33,14 @@ void GfxOutputImpl::create()
 	Gfx::SizeF size(400, 200);
 
 	_window = [[Window alloc] initWithContentRect:NSMakeRect(at.x(), at.y(), size.width(), size.height()) styleMask:NSTitledWindowMask | NSClosableWindowMask | NSMiniaturizableWindowMask | NSResizableWindowMask backing:NSBackingStoreBuffered defer:NO];
+    
 	[_window setReleasedWhenClosed: NO];
 	[_window setAcceptsMouseMovedEvents:YES];
 	[_window setContentView: _view];
 	[_window setDelegate: _view];
-	
+    
     [_window makeKeyAndOrderFront:nil];
     [_view setHidden:NO];
-
 }
 
 GfxOutputImpl::~GfxOutputImpl()
@@ -127,7 +127,6 @@ void GfxOutputImpl::onMouseMove(double x, double y)
     _mouseEvent.setX(pos.x());
     _mouseEvent.setY(pos.y());
     Application::instance().pointerEvent().send(_model->controller(), _mouseEvent);
-    std::cout<<"moved"<<std::endl;
 }
     
 void GfxOutputImpl::writeWindowSizeAndPos()
