@@ -62,12 +62,12 @@
 
 - (void)setFrameOrigin:(NSPoint)origin
 {
-    //std::cerr << "View::setFrame " << frameRect.size.width << ", " << frameRect.size.height << std::endl;
+    //std::cerr << "View::setFrameOrigin "<< std::endl;
     [super setFrameOrigin:origin];
 
     Pt::Gui::MoveEvent mev(*_widget, origin.x, origin.y);
     Pt::Gui::MainLoop::instance().event().send(mev);
-
+    
     //[NSApp processEvent: &mev];
 }
 

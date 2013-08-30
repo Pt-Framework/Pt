@@ -7,6 +7,9 @@
 #include <Pt/Gfx/Gfx.h>
 #include <Pt/Gfx/Painter.h>
 #include <Pt/Hmi/WindowModel.h>
+#include <Pt/Hmi/PointingEvent.h>
+#include <Pt/Hmi/KeyEvent.h>
+#include <Pt/System/Timer.h>
 #include <map>
 
 #ifdef __OBJC__
@@ -31,6 +34,7 @@ public:
 
 	void output(Pt::Hmi::Model* model);
 	Pt::Gfx::Painter* nativePainter();
+    
     WindowModel* model()
     {
         return _model;
@@ -38,7 +42,12 @@ public:
 
 public:
     void onPositionAndSize();
+    void onPosition();
     bool onCanClose();
+    void onMouseMove(double x,double y);
+    void onLMouseDown(double x, double y);
+    void onLMouseUp(double x, double y);
+    
 private:
     void writeWindowSizeAndPos();
 	/*void readWindowSizeAndPos();
@@ -48,6 +57,7 @@ private:
 	 */
 	void create();
 	void destroy();
+    Pt::Gfx::PointF convertMousePosToGlobal(double x, double y);
 
 private:
 	NSWindow* _window;
@@ -56,6 +66,9 @@ private:
 	Pt::Hmi::WindowModel* _model;
 	Pt::Gfx::Painter* _nativePainter;
 	bool _ignoreSizeEvent;
+    Pt::Hmi::PointingEvent 	_mouseEvent;
+	Pt::Hmi::KeyEvent      	_keyEvent;
+    Pt::System::Timer       _timer;
 };
 
 }}

@@ -20,15 +20,11 @@
 #include <Pt/Hmi/Api.h>
 #include "GfxOutputImpl.h"
 #include <Pt/Hmi/WindowModel.h>
-#include <Pt/Hmi/PointingEvent.h>
-#include <Pt/Hmi/KeyEvent.h>
 #import <AppKit/NSView.h>
 
 @interface WidgetView : NSView
 {
     Pt::Hmi::GfxOutputImpl* _outControll;
-    Pt::Hmi::PointingEvent 	_mouseEvent;
-	Pt::Hmi::KeyEvent      	_keyEvent;
     
 }
     
@@ -40,14 +36,18 @@
 
 - (void) setFrameSize:(NSSize)frameSize;
 
-- (void) mouseDown:(NSEvent*)event;
+- (void) mouseDown:(NSEvent*)ev;
 
 - (void) mouseUp:(NSEvent*)ev;
 
-- (void) mouseDragged:(NSEvent*)event;
+- (void) mouseDragged:(NSEvent*)ev;
 
-- (void) mouseMoved:(NSEvent*)event;
+- (void) mouseMoved:(NSEvent*)ev;
 
 - (BOOL) windowShouldClose:(id)window;
+
+- (void)awakeFromNib;
+
+- (BOOL) acceptsFirstResponder;
 
 @end

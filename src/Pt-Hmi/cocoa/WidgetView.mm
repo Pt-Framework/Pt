@@ -33,6 +33,20 @@
 }
 
 
+
+ - (void)awakeFromNib
+{
+    [[self window] makeFirstResponder: self];
+    [[self window] setAcceptsMouseMovedEvents: YES];
+    if ([[self window] acceptsMouseMovedEvents]) {NSLog(@"window now acceptsMouseMovedEvents");}
+}
+ 
+ 
+ - (BOOL) acceptsFirstResponder
+{
+     return YES;
+ }
+
 - (void) drawRect:(NSRect)rect
 {
     if(_outControll->model() == nil)
@@ -83,7 +97,8 @@
 - (void)setFrameOrigin:(NSPoint)origin
 {
     [super setFrameOrigin:origin];
-
+    
+    _outControll->onPositionAndSize();
 }
 
 
@@ -98,45 +113,27 @@
 
 - (void) mouseDown:(NSEvent*)ev
 {
-    NSPoint local_point = [self convertPoint:[ev locationInWindow] fromView:nil];
-
+    NSPoint mp = [ev locationInWindow];
+    _outControll->onLMouseDown(mp.x,mp.y);
 }
 
 - (void) mouseUp:(NSEvent*)ev
 {
-	/*Pt::Gfx::PointF pos = _model->toUnit(Pt::Gfx::Point(x,y));
+    NSPoint mp = [ev locationInWindow];
+    _outControll->onLMouseUp(mp.x,mp.y);
+}
+
+- (void) mouseDragged:(NSEvent*)ev
+{
     
-	_mouseEvent.setX(pos.x());
-	_mouseEvent.setY(pos.y());
-	Application::instance().pointerEvent().send(_model->controller(), _mouseEvent);*/
+    NSPoint mp = [ev locationInWindow];
+    _outControll->onMouseMove(mp.x,mp.y);
 }
 
-- (void) mouseDragged:(NSEvent*)event
+- (void) mouseMoved:(NSEvent *)ev
 {
-    std::cerr << "Mouse Dragged: " << std::endl;
-    /*NSPoint local_point = [self convertPoint:[event locationInWindow] fromView:nil];
-
-    Pt::Gui::MouseMoveEvent mev(*_widget, local_point.x, local_point.y,
-                                Pt::Gui::MouseMoveEvent::Moved,
-                                Pt::Gui::MouseMoveEvent::LeftButtonDown);
-
-    Pt::Gui::MainLoop::instance().event().send(mev);*/
-    //[NSApp processEvent: &mev];
-
-    //[super mouseDragged: event];
-}
-
-- (void) mouseMoved:(NSEvent *)event
-{
-    std::cerr << "Mouse Moved: " << std::endl;
-    /*NSPoint local_point = [self convertPoint:[event locationInWindow] fromView:nil];*/
-
-	Pt::Hmi::PointingEvent mev;
-	
-    Pt::Hmi::Application::instance().pointerEvent().send(0, mev);
-    //[NSApp processEvent: &mev];
-
-    //[super mouseMoved: event];
+    NSPoint mp = [ev locationInWindow];
+    _outControll->onMouseMove(mp.x,mp.y);
 }
 
 - (BOOL) windowShouldClose:(id)window

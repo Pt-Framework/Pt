@@ -20,6 +20,7 @@
 #include <Pt/Hmi/Api.h>
 #include "GfxOutputImpl.h"
 #import <AppKit/NSWindow.h>
+#include <Pt/Hmi/KeyEvent.h>
 
 @interface Window : NSWindow
 {
@@ -30,5 +31,6 @@
 - (Window*) init:  (Pt::Hmi::GfxOutputImpl*) controll ;
 
 - (void) setFrameOrigin:(NSPoint)origin;
+- (void) mouseMoved:(NSEvent*)event;
 
 @end

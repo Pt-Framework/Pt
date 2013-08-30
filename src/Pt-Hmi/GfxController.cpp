@@ -49,7 +49,7 @@ Pt::Gfx::PointF GfxController::toClient(const Pt::Gfx::PointF& globalPoint)
 	GfxModel* m = gfxModel();	
 
 	if( par == 0)
-		return Pt::Gfx::PointF(globalPoint.x(), globalPoint.y());	
+		return Pt::Gfx::PointF(globalPoint.x(), globalPoint.y());
 
 	Pt::Gfx::PointF parPoint = par->toClient(globalPoint);
 	return Pt::Gfx::PointF(parPoint.x() - m->Position.get().x(), parPoint.y() - m->Position.get().y());

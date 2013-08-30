@@ -16,6 +16,11 @@ GfxOutputImpl::GfxOutputImpl()
 : _model(0)
 , _ignoreSizeEvent(false)
 {
+    _mouseEvent.buttons().resize(3);
+    
+    _timer.setActive(Application::instance().loop());
+    _timer.timeout() += Pt::slot(*this, &GfxOutputImpl::onPosition);
+    _timer.start(100);
 	create();
 }
 
@@ -96,6 +101,35 @@ void GfxOutputImpl::output(Pt::Hmi::Model* model)
     [_view setNeedsDisplay:YES];
 }
     
+void GfxOutputImpl::onLMouseUp(double x, double y)
+{
+    Pt::Gfx::PointF pos = convertMousePosToGlobal(x,y);
+    
+    _mouseEvent.buttons()[0].setState(DeviceButton::Released);
+    _mouseEvent.setX(pos.x());
+	_mouseEvent.setY(pos.y());
+    Application::instance().pointerEvent().send(_model->controller(), _mouseEvent);
+}
+    
+void GfxOutputImpl::onLMouseDown(double x, double y)
+{
+    Pt::Gfx::PointF pos = convertMousePosToGlobal(x,y);
+    
+    _mouseEvent.buttons()[0].setState(DeviceButton::Pressed);
+    _mouseEvent.setX(pos.x());
+	_mouseEvent.setY(pos.y());
+    Application::instance().pointerEvent().send(_model->controller(), _mouseEvent);
+}
+    
+void GfxOutputImpl::onMouseMove(double x, double y)
+{
+    Pt::Gfx::PointF pos = convertMousePosToGlobal(x,y);
+    _mouseEvent.setX(pos.x());
+    _mouseEvent.setY(pos.y());
+    Application::instance().pointerEvent().send(_model->controller(), _mouseEvent);
+    std::cout<<"moved"<<std::endl;
+}
+    
 void GfxOutputImpl::writeWindowSizeAndPos()
 {
     int screenHeight = [[NSScreen mainScreen] frame].size.height;
@@ -111,6 +145,40 @@ void GfxOutputImpl::writeWindowSizeAndPos()
     
     [_window setFrame:windowRect display:YES animate:NO];
     
+}
+    
+Pt::Gfx::PointF GfxOutputImpl::convertMousePosToGlobal(double x, double y)
+{
+    int screenHeight = [[NSScreen mainScreen] frame].size.height;
+    NSRect windowRect = [_view frame];
+    double gx = x;
+    double gy = (windowRect.size.height - y);
+    return Pt::Gfx::PointF(gx,gy);
+}
+    
+void GfxOutputImpl::onPosition()
+{
+    if(_ignoreSizeEvent)
+        return;
+    
+    if( _model == 0)
+        return;
+    
+    int screenHeight = [[NSScreen mainScreen] frame].size.height;
+    
+    //Window
+    NSRect windowRect = [_window frame];
+    Pt::Gfx::PointF pos(windowRect.origin.x,screenHeight - (windowRect.origin.y + windowRect.size.height));
+    
+    if( pos.x()  == _model->WinPos.get().x() && pos.y()  == _model->WinPos.get().y())
+        return;
+    
+    _model->WinPos =pos;
+    
+    //View
+    NSRect viewRect = [_view frame];
+    
+    _model->Position = Pt::Gfx::PointF(viewRect.origin.x, windowRect.size.height - viewRect.size.height);
 }
     
 void GfxOutputImpl::onPositionAndSize()
@@ -130,7 +198,7 @@ void GfxOutputImpl::onPositionAndSize()
     
     //View
     NSRect viewRect = [_view frame];
-    _model->Position = Pt::Gfx::PointF(viewRect.origin.x, _model->WinSize.get().height()- viewRect.origin.y);
+    _model->Position = Pt::Gfx::PointF(viewRect.origin.x, windowRect.size.height - viewRect.size.height);
     _model->Size = Pt::Gfx::SizeF(viewRect.size.width,viewRect.size.height);
 }
     

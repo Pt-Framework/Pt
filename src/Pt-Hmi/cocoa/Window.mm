@@ -30,13 +30,19 @@
     return self;
 }
 
+
 - (void)setFrameOrigin:(NSPoint)origin
 {
     [super setFrameOrigin:origin];
-    if(_outControll != nil)
+    
     _outControll->onPositionAndSize();
-
 }
 
+- (void) mouseMoved:(NSEvent *)ev
+{
+    std::cout<<"moved"<<std::endl;
+    NSPoint mp = [ev locationInWindow];
+    _outControll->onMouseMove(mp.x,mp.y);
+}
 
 @end

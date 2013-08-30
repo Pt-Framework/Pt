@@ -196,8 +196,9 @@ void ButtonController::onPointerInput(const PointingEvent& ev)
 	if( _myModel == 0)
 		return;
 
+    
 	Pt::Gfx::PointF point = toClient(Pt::Gfx::PointF(ev.x(), ev.y()));
-	
+
 	if(!_myModel->Enable.get())
 	{
 		LabelController::onPointerInput(ev);
