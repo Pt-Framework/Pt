@@ -140,6 +140,7 @@ void ButtonController::onKeyInput(const KeyEvent& ev)
 		LabelController::onKeyInput(ev);
 		return;
 	}
+	bool genOutput = false;
 
 	switch(_myModel->ButtonType.get())
 	{
@@ -148,16 +149,22 @@ void ButtonController::onKeyInput(const KeyEvent& ev)
 			if(ev.virtualCode() == ' ' && _myModel->Focused.get())	
 			{
 				_myModel->ButtonState = (ev.state() == KeyEvent::KeyDown) ? DeviceButton::Pressed : DeviceButton::Released;
+				genOutput = true;
 			}
 			else if(ev.shortCutKey() == _myModel->ActionKey.get())
 			{
 				_myModel->ButtonState = (ev.state() == KeyEvent::KeyDown) ? DeviceButton::Pressed : DeviceButton::Released;				
 				_myModel->Focused = false;
 				_myModel->Focused = true;
+				genOutput = true;
 			}
 			else
 			{
-				_myModel->ButtonState = DeviceButton::Released;
+				if(_myModel->ButtonState.get() != DeviceButton::Released)
+				{
+					_myModel->ButtonState = DeviceButton::Released;
+					genOutput = true;
+				}
 			}
 		}
 		break;
@@ -172,6 +179,8 @@ void ButtonController::onKeyInput(const KeyEvent& ev)
 						_myModel->ButtonState = DeviceButton::Released;
 					else
 						_myModel->ButtonState = DeviceButton::Pressed;
+
+					genOutput = true;
 				}
 			}
 			else if(ev.shortCutKey() == _myModel->ActionKey.get())
@@ -181,6 +190,7 @@ void ButtonController::onKeyInput(const KeyEvent& ev)
 					_myModel->ButtonState = (_myModel->ButtonState.get() == DeviceButton::Pressed) ? DeviceButton::Released : DeviceButton::Pressed;											
 					_myModel->Focused = false;
 					_myModel->Focused = true;
+					genOutput = true;
 				}
 			}
 		}			
@@ -188,7 +198,9 @@ void ButtonController::onKeyInput(const KeyEvent& ev)
 	}
 	
 	LabelController::onKeyInput(ev);
-	invalidate();
+	
+	if(genOutput)
+		invalidate();
 }
 
 void ButtonController::onPointerInput(const PointingEvent& ev)
@@ -218,7 +230,13 @@ void ButtonController::onPointerInput(const PointingEvent& ev)
 		return;
 	}
 
-	_myModel->Armed = true;
+	bool genOutput = false;
+
+	if(!_myModel->Armed.get())
+	{
+		_myModel->Armed = true;
+		genOutput = true;
+	}
 
 	if( ev.buttons().size() == 0)
 	{
@@ -230,19 +248,34 @@ void ButtonController::onPointerInput(const PointingEvent& ev)
 	{
 		case ButtonType::Press:
 		{
+			if(!_myModel->Focused.get())
+			{
+				genOutput = true;						
+				_myModel->Focused = false;
+				_myModel->Focused = true;					
+			}
+
 			switch(ev.buttons()[0].state())
 			{
 				case DeviceButton::Pressed:
-				{
-					_myModel->Focused = false;
-					_myModel->Focused = true;					
-					_myModel->ButtonState = DeviceButton::Pressed;							
+				{		
+
+					if(_myModel->ButtonState.get() != DeviceButton::Pressed)
+					{
+						genOutput = true;						
+						_myModel->ButtonState = DeviceButton::Pressed;
+					}
 				}
 				break;
 			
 				case DeviceButton::Released:			
 				{
-					_myModel->ButtonState = DeviceButton::Released;		
+
+					if(_myModel->ButtonState.get() != DeviceButton::Released)
+					{
+						_myModel->ButtonState = DeviceButton::Released;						
+						genOutput = true;
+					}
 				}
 				break;
 			}
@@ -251,11 +284,16 @@ void ButtonController::onPointerInput(const PointingEvent& ev)
 
 		case ButtonType::Toggle:
 		{
-			_myModel->Focused = false;
-			_myModel->Focused = true;
+			if(!_myModel->Focused.get())	
+			{
+				_myModel->Focused = false;
+				_myModel->Focused = true;
+				genOutput = true;
+			}
 
 			if(ev.buttons()[0].state() == DeviceButton::Pressed )
 			{
+				genOutput = true;
 				if(_myModel->ButtonState.get() == DeviceButton::Pressed)
 					_myModel->ButtonState = DeviceButton::Released;
 				else
@@ -266,7 +304,9 @@ void ButtonController::onPointerInput(const PointingEvent& ev)
 	}
 
 	LabelController::onPointerInput(ev);
-	invalidate();
+	
+	if(genOutput)
+		invalidate();
 }
 
 }}

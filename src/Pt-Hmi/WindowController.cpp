@@ -141,7 +141,9 @@ void WindowController::onSizeChanged(const void* sender, const PropertyBase& pro
 	Pt::Gfx::Size size = m->fromUnit(m->Size.get());
 
 	m->PaintBuffer.resize(size.width(), size.height());	
-	invalidate();
+	
+	if(m->Visible.get())
+		invalidate();
 }
 
 GfxModel* WindowController::gfxModel()
@@ -167,7 +169,6 @@ void WindowController::onModelChanged(bool created)
 	for( size_t i = 0; i < children().size(); ++i)
 		children()[i]->notifyModelChanged(created);	
 		
-	invalidate();									
 }
 
 void WindowController::onClosing(bool& canClose)
@@ -204,6 +205,6 @@ void WindowController::close()
 		return;
 
 	m->Closed = true;
-	invalidate();
+	//invalidate();
 }
 }}

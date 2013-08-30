@@ -51,6 +51,7 @@ GfxOutputImpl::GfxOutputImpl()
 : _ignoreSizeEvent(false)
 , _model(0)
 , _window(0)
+, _visible(false)
 {
 	_mouseEvent.buttons().resize(3);
 	_display = Application::instance().impl()->display();
@@ -82,51 +83,72 @@ void GfxOutputImpl::pixelToScreen(char* data, const Pt::Gfx::ARgbColor& pixel)
 
 		case 16:
 		{
-			unsigned int red = (unsigned int)(pixel.red()/ (255/32.0));
-			unsigned int green = (unsigned int)(pixel.green()/ (255/64.0));
-			unsigned int blue= (unsigned int)(pixel.green()/ (255/32.0));
 			unsigned short* pix = (unsigned short*) data;
-			*pix = (red<<11) | (green << 5) | blue;	
+			*pix = ((pixel.red()&0xF8)<<8)| ((pixel.green()&0xFC)<<3)|((pixel.blue()&0xF8)>>3);
+
 		}
 		break;
 	}
 }
 
+//Direct draw
+#if 0
 void GfxOutputImpl::drawIndependentImage(const Pt::Gfx::ARgbImage& image)
 {    
-    unsigned int screen = DefaultScreen(_display);
-	
-
-    Visual* visual = XDefaultVisual(_display, screen);
-    
-	int depth = XDefaultDepth(_display, screen);
-
-	char* data = new char[4* image.width() * image.height()];
 
 	for(size_t y = 0; y < image.height(); ++y)
 	{
-		const int lineOffset = y *(image.width()*4);
+		for( size_t x = 0; x < image.width(); ++x)
+		{
+			const Pt::Gfx::ARgbColor& pixel = _model->PaintBuffer.pixel(x,y);
+
+			XGCValues gcv;
+
+			pixelToScreen((char*)&gcv.foreground, pixel);		
+			
+			XChangeGC (_display, _brushGc, GCForeground, &gcv);
+			XDrawPoint(_display, _window, _brushGc, x,y);
+		}
+	}
+
+  XSync(_display, false);
+}
+#endif
+
+//Buffered draw
+void GfxOutputImpl::drawIndependentImage(const Pt::Gfx::ARgbImage& image)
+{    
+
+	updateDrawBuffer();
+	unsigned int sreen  = DefaultScreen(_display);
+	int depth = XDefaultDepth(_display, sreen);
+
+	int pixelSize = depth == 16 ? 2 : 4;	
+
+	for(size_t y = 0; y < image.height(); ++y)
+	{
+		const int lineOffset = y *(image.width()*pixelSize);
 
 		for( size_t x = 0; x < image.width(); ++x)
 		{
 			const Pt::Gfx::ARgbColor& pixel = _model->PaintBuffer.pixel(x,y);
-			const int pixelOffset = lineOffset +(x* 4);
-
-			pixelToScreen(&data[pixelOffset], pixel);
+			const int pixelOffset = lineOffset +(x* pixelSize);				
+			pixelToScreen((char*)&_pixelBuffer[pixelOffset], pixel);					
 		}
 	}
 
-    XImage* ximage = XCreateImage(_display, visual, depth, ZPixmap, 0, NULL, image.width(), image.height(), 8, 0);
-    ximage->data = (char*)data;
 
-    XPutImage(_display,_window, _brushGc, ximage, 0, 0, 0,0, image.width(), image.height());
+	Visual* visual = XDefaultVisual(_display, sreen);
 
-    XSync(_display, false);
-    ximage->data = NULL;
-    XDestroyImage(ximage);	
-	delete data;
+	XImage* ximage = XCreateImage(_display, visual, depth, ZPixmap, 0, NULL, image.width(), image.height(), 8, 0);
+	ximage->data = (char*)&(_pixelBuffer[0]);
+	
+	XPutImage(_display,_window, _brushGc, ximage, 0, 0, 0,0, image.width(), image.height());
+	
+	XSync(_display, false);
+	ximage->data = NULL;
+	XDestroyImage(ximage);	
 }
-
 
 void GfxOutputImpl::onClientMessage(XEvent& xev)
 {
@@ -234,7 +256,6 @@ void GfxOutputImpl::redraw()
 void GfxOutputImpl::readClientSizeAndPos(Pt::Gfx::SizeF& size, Pt::Gfx::PointF& pos)
 {
 	XWindowAttributes xwa;
-	Window child;
 	XGetWindowAttributes(_display, _window, &xwa);
 
 	size = _model->toUnit(Pt::Gfx::Size(xwa.width, xwa.height));
@@ -455,10 +476,8 @@ void GfxOutputImpl::create()
 
     _brushGc = XCreateGC( _display, _window,0, 0);
 
-	XSetWMProtocols(_display, _window, &AtomWindowClosed, 1);
+   XSetWMProtocols(_display, _window, &AtomWindowClosed, 1);
     XSync(_display, false);
-
-	show();
 }
 
 void GfxOutputImpl::destroy()
@@ -482,8 +501,10 @@ GfxOutputImpl::~GfxOutputImpl()
 
 void GfxOutputImpl::show()
 {
+	
     XMapWindow(_display, _window);
     XSync(_display, false);
+    _visible = 	true;
 }
 
 void GfxOutputImpl::hide()
@@ -491,6 +512,7 @@ void GfxOutputImpl::hide()
 	Display* display = Application::instance().impl()->display();
     XUnmapWindow(display, _window);
     XSync(display, false);
+    _visible = 	false;
 }
 
 
@@ -503,7 +525,9 @@ void GfxOutputImpl::bringWindowToTop()
 void GfxOutputImpl::onPaint(XEvent& xev)
 {
 	if( _model != 0)
+	{
 		drawIndependentImage(_model->PaintBuffer);
+	}
 }
 
 void GfxOutputImpl::writeWindowProperties()
@@ -515,10 +539,15 @@ void GfxOutputImpl::writeWindowProperties()
     XGetWMNormalHints(_display,_window, &sizeHints, &suppliedReturn);
 
 
-	if(_model->Visible.get())
+	if(_model->Visible.get() && !_visible)
+	{
 		show();
-	else
+	}
+
+	if(!_model->Visible.get() && _visible)
+	{
 		hide();
+	}
 		
 	if( _model->ShowTitle.get())
 		XStoreName(_display, _window, _model->Caption.get().c_str());
@@ -634,6 +663,21 @@ void GfxOutputImpl::writeWindowProperties()
 	XSetWMNormalHints(_display, _window,  &sizeHints);
 }
 
+void GfxOutputImpl::updateDrawBuffer()
+{
+	unsigned int sreen  = DefaultScreen(_display);
+
+	int depth = XDefaultDepth(_display, sreen);
+    
+	size_t pixelSize = (depth == 16) ? 2 : 4;	
+
+	size_t currentSize = _model->PaintBuffer.width() * _model->PaintBuffer.height() * pixelSize;
+
+	if(_pixelBuffer.size() < currentSize)
+		_pixelBuffer.resize(currentSize);
+
+}
+
 void GfxOutputImpl::output(Pt::Hmi::Model* model)
 {
 	_model = dynamic_cast<WindowModel*>(model);
@@ -642,6 +686,11 @@ void GfxOutputImpl::output(Pt::Hmi::Model* model)
 		throw std::logic_error("ERROR: WindowModel model expected!");
 
         
+	if(!_model->Visible.get() && !_visible)
+	{
+		return;
+	}
+
 	//Initial size and position
 
 	Pt::Gfx::SizeF clientSize;
@@ -680,6 +729,7 @@ void GfxOutputImpl::output(Pt::Hmi::Model* model)
 	writeWindowSizeAndPos();
 	
 	writeWindowProperties();
+
 	drawIndependentImage(_model->PaintBuffer);
 	redraw();
 }
