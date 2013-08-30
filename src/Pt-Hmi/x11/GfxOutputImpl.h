@@ -71,17 +71,17 @@ private:
 	void onKeyEvent(XEvent& ev);
 
 private:
+	void drawIndependentImage(const Pt::Gfx::ARgbImage& image);
 	void bringWindowToTop();
 	void create();
 	void destroy();
 	void show();
 	void hide();
-	void output();
-	void paint();
-	void drawIndependentImage(Pt::Gfx::ARgbImage& image);       
 	void writeWindowSizeAndPos();
 	void writeWindowProperties();
 	void redraw();
+	void readClientSizeAndPos(Pt::Gfx::SizeF& size, Pt::Gfx::PointF& pos);
+	void pixelToScreen(char* data, const Pt::Gfx::ARgbColor& pixel);
 
 private:
     Atom AtomAppWake;

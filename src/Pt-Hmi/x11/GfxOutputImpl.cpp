@@ -65,21 +65,66 @@ GfxOutputImpl::GfxOutputImpl()
 	create();
 }
 
-void GfxOutputImpl::drawIndependentImage(size_t x, size_t y, const char* data, size_t width, size_t height)
+
+void GfxOutputImpl::pixelToScreen(char* data, const Pt::Gfx::ARgbColor& pixel)
+{
+    unsigned int screen = DefaultScreen(_display);
+	const int depth = XDefaultDepth(_display, screen);
+
+	switch(depth)
+	{
+		case 24:
+			data[2] = (char) pixel.red();
+			data[1] = (char) pixel.green();
+			data[0] = (char) pixel.blue();
+
+		break;
+
+		case 16:
+		{
+			unsigned int red = (unsigned int)(pixel.red()/ (255/32.0));
+			unsigned int green = (unsigned int)(pixel.green()/ (255/64.0));
+			unsigned int blue= (unsigned int)(pixel.green()/ (255/32.0));
+			unsigned short* pix = (unsigned short*) data;
+			*pix = (red<<11) | (green << 5) | blue;	
+		}
+		break;
+	}
+}
+
+void GfxOutputImpl::drawIndependentImage(const Pt::Gfx::ARgbImage& image)
 {    
     unsigned int screen = DefaultScreen(_display);
+	
 
     Visual* visual = XDefaultVisual(_display, screen);
     
 	int depth = XDefaultDepth(_display, screen);
 
-    XImage* ximage = XCreateImage(_display, visual, depth, ZPixmap, 0, NULL, width, height, 8, 0);
+	char* data = new char[4* image.width() * image.height()];
+
+	for(size_t y = 0; y < image.height(); ++y)
+	{
+		const int lineOffset = y *(image.width()*4);
+
+		for( size_t x = 0; x < image.width(); ++x)
+		{
+			const Pt::Gfx::ARgbColor& pixel = _model->PaintBuffer.pixel(x,y);
+			const int pixelOffset = lineOffset +(x* 4);
+
+			pixelToScreen(&data[pixelOffset], pixel);
+		}
+	}
+
+    XImage* ximage = XCreateImage(_display, visual, depth, ZPixmap, 0, NULL, image.width(), image.height(), 8, 0);
     ximage->data = (char*)data;
-    XPutImage(_display,_window, _brushGc, ximage, 0, 0, x, y, width, height);
+
+    XPutImage(_display,_window, _brushGc, ximage, 0, 0, 0,0, image.width(), image.height());
 
     XSync(_display, false);
     ximage->data = NULL;
     XDestroyImage(ximage);	
+	delete data;
 }
 
 
@@ -87,39 +132,6 @@ void GfxOutputImpl::onClientMessage(XEvent& xev)
 {
 	if( _model == 0)
 		return;
-
-	if(_ignoreSizeEvent)
-	{
-		_ignoreSizeEvent = false;
-		return;
-	}
-
-    if(xev.xclient.message_type == AtomWindowResize) 
-	{
-        int width = xev.xclient.data.l[0];
-        int height = xev.xclient.data.l[1];
-
-		_model->Size = _model->toUnit(Pt::Gfx::Size(width, height));
-		_model->WinSize =_model->Size;
-        return;
-    }
-
-    if( xev.xclient.message_type == AtomWindowMove ) 
-	{
-        int x = xev.xclient.data.l[0];
-        int y = xev.xclient.data.l[1];
-
-		Window child_return;
-		int x_return;
-		int y_return;
-   
-
-		XTranslateCoordinates(_display, _window, RootWindow(_display,0),0,0,&x_return, &y_return, & child_return);
-		
-		_model->Position = _model->toUnit(Pt::Gfx::Point(x,y));
-		_model->WinPos =_model->toUnit(Pt::Gfx::Point(x_return,y_return));
-        return;
-    }
 
     if(xev.xclient.message_type == AtomWMProtocols) 
  	{
@@ -219,34 +231,65 @@ void GfxOutputImpl::redraw()
     XFlush(_display);
 }
 
+void GfxOutputImpl::readClientSizeAndPos(Pt::Gfx::SizeF& size, Pt::Gfx::PointF& pos)
+{
+	XWindowAttributes xwa;
+	Window child;
+	XGetWindowAttributes(_display, _window, &xwa);
+
+	size = _model->toUnit(Pt::Gfx::Size(xwa.width, xwa.height));
+	pos = _model->toUnit(Pt::Gfx::Point(xwa.x, xwa.y));
+
+}
+
+void GfxOutputImpl::writeWindowSizeAndPos()
+{	
+	Pt::Gfx::Point posGlobal = _model->fromUnit(_model->WinPos.get());
+	Pt::Gfx::Point posLocal = _model->fromUnit(_model->Position.get());
+
+	Pt::Gfx::Size size = _model->fromUnit(_model->Size.get());	
+	int x = posGlobal.x() - posLocal.x()*2;
+	int y = posGlobal.y() - posLocal.y()*2;
+
+	XMoveResizeWindow(_display, _window,  x, y, size.width(), size.height());			
+}
+
+
 void GfxOutputImpl::onConfigureNotify( XEvent& xev)
 {
-	if(_ignoreSizeEvent)
-	{
-		_ignoreSizeEvent = false;
-		return;
-	}
-
 	if(!_model->Enable.get())
 	{
 		writeWindowSizeAndPos();
 		return;
 	}
-
-	XWindowAttributes attr;
-   
-	XGetWindowAttributes(_display,  _window, &attr);
 	
-
-	_model->WinSize = _model->toUnit(Pt::Gfx::Size(xev.xconfigure.width, xev.xconfigure.height));
-	_model->Size =  _model->toUnit(Pt::Gfx::Size(attr.width, attr.height));
-
-	if((xev.xconfigure.x - attr.x != 0) && (xev.xconfigure.y - attr.y != 0))
+	if(_ignoreSizeEvent)
 	{
-		_model->WinPos = _model->toUnit(Pt::Gfx::Point( xev.xconfigure.x - attr.x, xev.xconfigure.y - attr.y));
-		_model->Position = 	_model->toUnit(Pt::Gfx::Point(xev.xconfigure.x, xev.xconfigure.y));
+		_ignoreSizeEvent = false;
+		return;
 	}
+	
+	XWindowAttributes xwa;
+	Window child;
+	int    x = 0;
+    int    y = 0;
 
+	XGetWindowAttributes(_display, _window, &xwa);
+
+	Window root = DefaultRootWindow(_display);
+
+  	XTranslateCoordinates(_display,_window, root, xwa.x, xwa.y, &x, &y,&child);
+
+	_model->WinSize =  _model->toUnit(Pt::Gfx::Size(xev.xconfigure.width, xev.xconfigure.height));
+	_model->WinPos = _model->toUnit(Pt::Gfx::Point(x, y));
+	
+	Pt::Gfx::SizeF clientSize;
+	Pt::Gfx::PointF clientPos;
+
+	readClientSizeAndPos(clientSize, clientPos);
+
+	_model->Position = clientPos;
+	_model->Size = clientSize;
 }
 
 void GfxOutputImpl::onKeyEvent(XEvent& xev)
@@ -459,31 +502,9 @@ void GfxOutputImpl::bringWindowToTop()
 
 void GfxOutputImpl::onPaint(XEvent& xev)
 {
-	paint();
+	if( _model != 0)
+		drawIndependentImage(_model->PaintBuffer);
 }
-
-void GfxOutputImpl::paint()
-{
-	if( _rgb88Image.width() > 0 && _rgb88Image.height() > 0)
-		drawIndependentImage(0, 0, (char*)_rgb88Image.data(), _rgb88Image.width(), _rgb88Image.height());  
-}
-
-void GfxOutputImpl::output()
-{
-	_rgb88Image.resize(_model->PaintBuffer.width(), _model->PaintBuffer.height());
-
-	for( size_t x = 0; x < _model->PaintBuffer.width(); ++x)
-	{
-		for(size_t y = 0; y < _model->PaintBuffer.height(); ++y)
-		{
-			const Pt::Gfx::ARgbColor& pixel = _model->PaintBuffer.pixel(x,y);
-
-			Pt::Gfx::Rgb888Color color((Pt::uint8_t) pixel.red(), (Pt::uint8_t) pixel.green(), (Pt::uint8_t) pixel.blue());
-			_rgb88Image.setColor(x,y,color);
-		}
-	}
-}
-
 
 void GfxOutputImpl::writeWindowProperties()
 {
@@ -613,26 +634,31 @@ void GfxOutputImpl::writeWindowProperties()
 	XSetWMNormalHints(_display, _window,  &sizeHints);
 }
 
-void GfxOutputImpl::writeWindowSizeAndPos()
-{
-	_ignoreSizeEvent = true;
-
-	Pt::Gfx::Point pos = _model->fromUnit(_model->WinPos.get());
-	Pt::Gfx::Size size = _model->fromUnit(_model->WinSize.get());		
-
-	XMoveResizeWindow(_display, _window,  pos.x(), pos.y(), size.width(), size.height());			
-}
-
 void GfxOutputImpl::output(Pt::Hmi::Model* model)
 {
-	WindowModel* wmodel = dynamic_cast<WindowModel*>(model);
+	_model = dynamic_cast<WindowModel*>(model);
 
-	_model = wmodel;
-
-	if( wmodel == 0)
+	if( _model == 0)
 		throw std::logic_error("ERROR: WindowModel model expected!");
 
-	if(wmodel->Closed.get())
+        
+	//Initial size and position
+
+	Pt::Gfx::SizeF clientSize;
+	Pt::Gfx::PointF pos;
+
+	readClientSizeAndPos(clientSize, pos);
+
+	if( clientSize.width() != _model->Size.get().width() ||  clientSize.height() != _model->Size.get().height())
+	{
+		_model->Position = pos;
+		_model->Size = clientSize;
+		return;
+	}
+
+
+	//Handle open/close
+	if(_model->Closed.get())
 	{
 		if(_window != 0)
 			destroy();
@@ -643,18 +669,18 @@ void GfxOutputImpl::output(Pt::Hmi::Model* model)
 	{
 		if(_window == 0)
 		{
-			if(wmodel->Visible.get())
+			if(_model->Visible.get())
 				create();
 			else
 				return;
 		}
 	}
 
-
+	_ignoreSizeEvent = true;
 	writeWindowSizeAndPos();
+	
 	writeWindowProperties();
-	output();
-	paint();
+	drawIndependentImage(_model->PaintBuffer);
 	redraw();
 }
 
