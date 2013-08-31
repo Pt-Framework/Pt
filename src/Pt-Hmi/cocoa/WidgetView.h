@@ -46,8 +46,13 @@
 
 - (BOOL) windowShouldClose:(id)window;
 
-- (void)awakeFromNib;
+- (void) keyDown:(NSEvent *)ev;
+
+- (void) keyUp:(NSEvent *)ev;
+
+- (void) flagsChanged:(NSEvent*)ev;
 
 - (BOOL) acceptsFirstResponder;
+
 
 @end

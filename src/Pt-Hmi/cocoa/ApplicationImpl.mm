@@ -145,6 +145,7 @@ void ApplicationImpl::init()
     CFRunLoopRef rl = [[NSRunLoop currentRunLoop] getCFRunLoop];
     CFRunLoopAddSource(rl, _wakeSource, kCFRunLoopCommonModes);
     CFRunLoopAddTimer(rl, _masterTimer, kCFRunLoopCommonModes);
+    [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
 }
 
 
@@ -183,9 +184,8 @@ void ApplicationImpl::onReady(System::Selectable& s)
 void ApplicationImpl::onRun()
 {
     // NOTE: instead of a master timer we could also iterate using
-    //       NSApp runUntil().
-	std::clog << "run" <<std::endl;
-    [NSApp run];
+   //         NSApp runUntil().
+ [NSApp run];
 }
 
 void ApplicationImpl::onExit()

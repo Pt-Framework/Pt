@@ -32,26 +32,41 @@
     _outControll = controll;
     
     int opts = (NSTrackingActiveAlways | NSTrackingInVisibleRect | NSTrackingMouseEnteredAndExited | NSTrackingMouseMoved);
+    
     NSTrackingArea *area = [[NSTrackingArea alloc] initWithRect:[self bounds] options:opts owner:self userInfo:nil];
     [self addTrackingArea:area];
     
     return self;
 }
 
-
-
- - (void)awakeFromNib
+- (BOOL) acceptsFirstResponder
 {
-    [[self window] makeFirstResponder: self];
-    [[self window] setAcceptsMouseMovedEvents: YES];
-    if ([[self window] acceptsMouseMovedEvents]) {NSLog(@"window now acceptsMouseMovedEvents");}
+    return TRUE;
 }
- 
- 
- - (BOOL) acceptsFirstResponder
+
+
+- (void) flagsChanged:(NSEvent*)ev
 {
-     return YES;
- }
+    unsigned int mod = [ev modifierFlags];
+    _outControll->onSpezialKeyEvent(mod);
+}
+
+- (void)keyDown:(NSEvent *)ev
+{
+    NSString* chars = [ev characters];
+    unichar character = [chars characterAtIndex: 0];
+
+    _outControll->onKeyDown(character);
+}
+
+- (void)keyUp:(NSEvent *)ev
+{
+    NSString* chars = [ev characters];
+    unichar character = [chars characterAtIndex: 0];
+    
+    _outControll->onKeyUp(character);
+}
+
 
 - (void) drawRect:(NSRect)rect
 {
@@ -97,7 +112,6 @@
     free(data);
 }
 
-
 - (void)setFrameOrigin:(NSPoint)origin
 {
     [super setFrameOrigin:origin];
@@ -105,15 +119,12 @@
     _outControll->onPositionAndSize();
 }
 
-
 - (void)setFrameSize:(NSSize)frameSize
 {
     [super setFrameSize:frameSize];
     
     _outControll->onPositionAndSize();
-
 }
-
 
 - (void) mouseDown:(NSEvent*)ev
 {
@@ -142,7 +153,6 @@
 
 - (BOOL) windowShouldClose:(id)window
 {
-
     return _outControll->onCanClose();
 }
 

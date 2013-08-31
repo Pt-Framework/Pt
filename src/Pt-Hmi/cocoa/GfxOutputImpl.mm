@@ -7,7 +7,6 @@
 #include <Pt/Hmi/WindowModel.h>
 #include <Pt/Hmi/WindowController.h>
 #include "WidgetView.h"
-#include "Window.h"
 
 namespace Pt{
 namespace Hmi{
@@ -15,6 +14,7 @@ namespace Hmi{
 GfxOutputImpl::GfxOutputImpl()
 : _model(0)
 , _ignoreSizeEvent(false)
+, _visible(false)
 {
     _mouseEvent.buttons().resize(3);
     
@@ -32,14 +32,15 @@ void GfxOutputImpl::create()
 	Gfx::PointF at(20, 20);
 	Gfx::SizeF size(400, 200);
 
-	_window = [[Window alloc] initWithContentRect:NSMakeRect(at.x(), at.y(), size.width(), size.height()) styleMask:NSTitledWindowMask | NSClosableWindowMask | NSMiniaturizableWindowMask | NSResizableWindowMask backing:NSBackingStoreBuffered defer:NO];
+	_window = [[NSWindow alloc] initWithContentRect:NSMakeRect(at.x(), at.y(), size.width(), size.height()) styleMask:NSTitledWindowMask | NSClosableWindowMask | NSMiniaturizableWindowMask | NSResizableWindowMask backing:NSBackingStoreBuffered defer:NO];
     
 	[_window setReleasedWhenClosed: NO];
 	[_window setAcceptsMouseMovedEvents:YES];
+    [_window setInitialFirstResponder: _view];
 	[_window setContentView: _view];
 	[_window setDelegate: _view];
     
-    [_window makeKeyAndOrderFront:nil];
+   [_window makeKeyAndOrderFront:_window];
     [_view setHidden:NO];
 }
 
@@ -65,7 +66,7 @@ void GfxOutputImpl::output(Pt::Hmi::Model* model)
     NSRect viewRect = [_view frame];
     
     //Initial size and position
-    if(_model->Size.get().width() != viewRect.size.width && _model->Size.get().height() != viewRect.size.height)
+    if(_model->Size.get().width() != viewRect.size.width || _model->Size.get().height() != viewRect.size.height)
     {
         writeWindowSizeAndPos();
         return;
@@ -99,6 +100,7 @@ void GfxOutputImpl::output(Pt::Hmi::Model* model)
     
     //Redraw
     [_view setNeedsDisplay:YES];
+    
 }
     
 void GfxOutputImpl::onLMouseUp(double x, double y)
@@ -153,6 +155,32 @@ Pt::Gfx::PointF GfxOutputImpl::convertMousePosToGlobal(double x, double y)
     double gx = x;
     double gy = (windowRect.size.height - y);
     return Pt::Gfx::PointF(gx,gy);
+}
+    
+void GfxOutputImpl::onKeyDown(int key)
+{
+    _keyEvent.setUnicode(key);
+    
+    _keyEvent.setState(KeyEvent::KeyDown);
+    
+	Application::instance().keyDeviceEvent().send(_model->controller(), _keyEvent);
+}
+
+void GfxOutputImpl::onKeyUp(int key)
+{
+    _keyEvent.setUnicode(key);
+    
+    _keyEvent.setState(KeyEvent::KeyUp);
+    
+	Application::instance().keyDeviceEvent().send(_model->controller(), _keyEvent);
+}
+    
+void GfxOutputImpl::onSpezialKeyEvent(unsigned int mask)
+{
+    _keyEvent.setAlt((mask & NSAlternateKeyMask) == NSAlternateKeyMask);
+    _keyEvent.setShift(((mask & NSShiftKeyMask) == NSShiftKeyMask) | ((mask & NSAlphaShiftKeyMask) == NSAlphaShiftKeyMask));
+    _keyEvent.setCtrl(((mask & NSControlKeyMask) == NSControlKeyMask) | ((mask & NSCommandKeyMask) == NSCommandKeyMask));
+    Application::instance().keyDeviceEvent().send(_model->controller(), _keyEvent);
 }
     
 void GfxOutputImpl::onPosition()

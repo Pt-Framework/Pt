@@ -47,14 +47,16 @@ public:
     void onMouseMove(double x,double y);
     void onLMouseDown(double x, double y);
     void onLMouseUp(double x, double y);
+    void onKeyDown(int key);
+    void onKeyUp(int key);
+    void onSpezialKeyEvent(unsigned int mask);
     
 private:
     void writeWindowSizeAndPos();
-	/*void readWindowSizeAndPos();
-	void writeWindowProperties();
-	void drawIndependentImage(size_t x, size_t y, const char* data, size_t width, size_t height);
 	
-	 */
+	//void writeWindowProperties();
+
+    
 	void create();
 	void destroy();
     Pt::Gfx::PointF convertMousePosToGlobal(double x, double y);
@@ -69,6 +71,7 @@ private:
     Pt::Hmi::PointingEvent 	_mouseEvent;
 	Pt::Hmi::KeyEvent      	_keyEvent;
     Pt::System::Timer       _timer;
+    bool _visible ;
 };
 
 }}
