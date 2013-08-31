@@ -74,7 +74,7 @@ ApplicationImpl::ApplicationImpl()
 	_offsetX = 0;
 	_offsetY = 0;
 
-	FreeConsole();
+	//FreeConsole();
 }
 
 void ApplicationImpl::showConsole(bool show)

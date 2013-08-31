@@ -146,7 +146,7 @@ void ButtonController::onKeyInput(const KeyEvent& ev)
 	{
 		case ButtonType::Press:
 		{
-			if(ev.virtualCode() == ' ' && _myModel->Focused.get())	
+			if(ev.toUTF8String() == " " && _myModel->Focused.get())	
 			{
 				_myModel->ButtonState = (ev.state() == KeyEvent::KeyDown) ? DeviceButton::Pressed : DeviceButton::Released;
 				genOutput = true;
@@ -171,7 +171,7 @@ void ButtonController::onKeyInput(const KeyEvent& ev)
 
 		case ButtonType::Toggle:
 		{
-			if(ev.virtualCode() == ' ' && _myModel->Focused.get())		
+			if(ev.toUTF8String() == " " && _myModel->Focused.get())		
 			{
 				if((ev.state() == KeyEvent::KeyDown))
 				{

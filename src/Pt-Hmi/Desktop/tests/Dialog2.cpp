@@ -57,7 +57,7 @@ void Dialog2::init()
 	closeButtonModel->Position.set(Pt::Gfx::PointF(400,360));
 	closeButtonModel->Size.set(Pt::Gfx::SizeF(200,25));
 	closeButtonModel->Caption.set("Close [CTRL+X]");
-	closeButtonModel->ActionKey.set("CTRL//X");
+	closeButtonModel->ActionKey.set("C//x");
 	closeButtonController->PressedAction += Pt::slot(*this,&Dialog2::onClosedByButton);
 	addChild(&_closeButton);
 }

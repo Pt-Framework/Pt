@@ -87,7 +87,7 @@ void MainWindow::init()
 	Pt::Hmi::ButtonModel* dialogButtonModel = (Pt::Hmi::ButtonModel*) dialogButtonCotroller->model();
 	dialogButtonModel->ButtonType.set(Pt::Hmi::ButtonType::Press);
 	dialogButtonModel->Caption.set("Dialog [CTRL+D]");
-	dialogButtonModel->ActionKey.set("CTRL//D");
+	dialogButtonModel->ActionKey.set("C//d");
 	dialogButtonModel->Position.set(Pt::Gfx::PointF(20,100));
 	dialogButtonModel->Size.set(Pt::Gfx::SizeF(150,25));
 	dialogButtonCotroller->PressedAction  += Pt::slot(*this, &MainWindow::onShowDialog);
@@ -98,7 +98,7 @@ void MainWindow::init()
 	Pt::Hmi::ButtonModel* closeButtonModel = (Pt::Hmi::ButtonModel*) closeButtonCtrl->model();
 	closeButtonModel->ButtonType.set(Pt::Hmi::ButtonType::Press);
 	closeButtonModel->Caption.set("Close [CTRL+X]");
-	closeButtonModel->ActionKey.set("CTRL//X");
+	closeButtonModel->ActionKey.set("C//x");
 	closeButtonModel->Position.set(Pt::Gfx::PointF(590,525));
 	closeButtonModel->Size.set(Pt::Gfx::SizeF(150,25));
 	closeButtonCtrl->PressedAction += Pt::slot(*this, &MainWindow::onClosed);

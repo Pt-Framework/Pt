@@ -24,7 +24,6 @@ Window::Window()
 	_defModel->WinPos.set(Pt::Gfx::PointF(20,20));
 	_defModel->WinSize.set( Pt::Gfx::SizeF(800,800));
 
-
 	_defController->addInputDevice(&_mouseDevice);
 	_defController->addInputDevice(&_keyboardDevice);
 	_defController->addOutputDevice(&_gfxOutputDevice);

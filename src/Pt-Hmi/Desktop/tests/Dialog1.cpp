@@ -59,7 +59,7 @@ void Dialog1::init()
 	newDialogButtonModel->Position.set(Pt::Gfx::PointF(400,300));
 	newDialogButtonModel->Size.set(Pt::Gfx::SizeF(200,25));
 	newDialogButtonModel->Caption.set("New Dialog [CTRL+F]");
-	newDialogButtonModel->ActionKey.set("CTRL//F");
+	newDialogButtonModel->ActionKey.set("C//f");
 	newDialogController->PressedAction += Pt::slot(*this,&Dialog1::onShowNextDialog);
 	addChild(&_newDialog);
 
@@ -69,7 +69,7 @@ void Dialog1::init()
 	closeButtonModel->Position.set(Pt::Gfx::PointF(400,360));
 	closeButtonModel->Size.set(Pt::Gfx::SizeF(200,25));
 	closeButtonModel->Caption.set("Close [CTRL+X]");
-	closeButtonModel->ActionKey.set("CTRL//X");
+	closeButtonModel->ActionKey.set("C//x");
 	closeButtonController->PressedAction += Pt::slot(*this,&Dialog1::onClosedByButton);
 	addChild(&_closeButton);
 }

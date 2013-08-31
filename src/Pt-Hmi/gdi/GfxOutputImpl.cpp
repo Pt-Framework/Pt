@@ -18,10 +18,10 @@ GfxOutputImpl::GfxOutputImpl()
 , _ignoreEvent(false)
 , _hwnd(0)
 {	
+
 	Pt::Hmi::Application* app = (Pt::Hmi::Application*) &Pt::Hmi::Application::instance();	
 	app->impl()->WindowEvent += Pt::slot(*this, &GfxOutputImpl::onWindowEvent);
-	_pointerEvent.buttons().resize(3);
-	
+	_pointerEvent.buttons().resize(3);	
 	create();
 }
 
@@ -40,25 +40,39 @@ void GfxOutputImpl::onKey(unsigned int msg,  WPARAM wparam, LPARAM lparam)
 	if(!_model->Enable.get())
 		return;
 
+	if((lparam & 0xFFF) != 1)
+		return;//Repeat count
+
+	BYTE keyboardState[256];
+
+	GetKeyboardState(keyboardState);
+
 	if(msg == WM_KEYDOWN)
 		_keyEvent.setState(KeyEvent::KeyDown);
 	else
 		_keyEvent.setState(KeyEvent::KeyUp);			
-	
-	_keyEvent.setVirtualCode(wparam);
-	_keyEvent.setRepeatCount((int)(lparam & 0xFFFF));
-	_keyEvent.setExtCode( (lparam & 0x1000000) != 0);
+			
 	_keyEvent.setAlt( (lparam & 0x20000000) != 0); 
-		
-	if(_keyEvent.virtualCode() == 16 )
+	
+	keyboardState[VK_CONTROL] = 0;
+	keyboardState[VK_LCONTROL] = 0;
+	keyboardState[VK_RCONTROL] = 0;
+
+	if(wparam == 16 )
 	{
 		_keyEvent.setShift(_keyEvent.state() == KeyEvent::KeyDown);
 	}
-			
-	if(_keyEvent.virtualCode() == 17 )
+	else if(wparam == 17 )
 	{
 		_keyEvent.setCtrl(_keyEvent.state() == KeyEvent::KeyDown);
+
 	}
+	//Pt::uint32_t  ucode; 
+	unsigned int scanCode = ((lparam >> 16) & 0xFF);			
+	Pt::uint32_t ucode;			
+		
+	ToUnicode( wparam, scanCode , (BYTE*)keyboardState, (LPWSTR)&ucode, 4, 0);	
+	_keyEvent.setUnicode(ucode);
 
 	Controller* ctrl = _model->controller();
 	Application::instance().keyDeviceEvent().send(ctrl, _keyEvent);

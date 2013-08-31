@@ -38,34 +38,18 @@ public:
 	
 	void operator=(const KeyEvent& copy);
 
-	inline int virtualCode() const
+
+	/**@brief Return the translate key to unicode.
+	* 
+	* @return The translate key to unicode*/
+	inline Pt::uint32_t unicode() const
 	{
-		return _virtualCode;
+		return _unicode;
 	}
 
-	inline void setVirtualCode(int c)
+	inline void setUnicode(Pt::uint32_t ucode)
 	{
-		_virtualCode = c;
-	}
-
-	inline int repeatCount() const
-	{
-		return _repeatCount;
-	}
-	
-	inline void setRepeatCount(int c)
-	{
-		_repeatCount = c;
-	}
-
-	inline bool extCode() const
-	{
-		return _extCode;
-	}
-
-	inline void setExtCode(bool c)
-	{
-		_extCode = c;
+		_unicode = ucode;
 	}
 	
 	inline KeyState state() const
@@ -108,25 +92,16 @@ public:
 		return _ctrl;
 	}
 
-	inline std::string shortCutKey() const
-	{
-		std::string shortCutKey = "";
-		
-		if( _ctrl)
-			shortCutKey += "CTRL//";
+	/**@brief Return the translate key to unicode UTF8 encoding.
+	* 
+	* @return The translate key to unicode UTF8 encoding,*/
 
-		if( _alt)
-			shortCutKey += "ALT//";
+	std::string toUTF8String() const;
 
-		if(_shift)
-			shortCutKey += "SHIFT//";  
-
-
-		char value =  (char) _virtualCode;
-		shortCutKey += value;
-
-		return shortCutKey; 			
-	}
+	/**@brief Return the translate key to UTF8 encoding short cut command.
+	* 
+	* @return The translate key to UTF8 encoding short cut command.*/
+	std::string shortCutKey() const;
 
 protected:
     virtual Pt::Event& onClone(Pt::Allocator& allocator) const;
@@ -134,9 +109,7 @@ protected:
     virtual const std::type_info& onTypeInfo() const;
 
 private:
-	int _virtualCode;
-	int _repeatCount;	
-	bool _extCode;
+	Pt::uint32_t _unicode;
 	bool _alt;
 	bool _shift;
 	bool _ctrl;

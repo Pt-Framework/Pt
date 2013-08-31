@@ -10,13 +10,14 @@
 namespace Pt{
 namespace Hmi{
 
+
 class PT_HMI_API KeyboardDevice : public InputDevice
 {
 public:
 	KeyboardDevice();
 	virtual ~KeyboardDevice();
 
-	Pt::Signal<Controller*, const KeyEvent&> Event;
+  Pt::Signal<Controller*, const KeyEvent&> Event;
 
 protected:
 	virtual void onKeyEvent(Controller* source, const KeyEvent& ev)

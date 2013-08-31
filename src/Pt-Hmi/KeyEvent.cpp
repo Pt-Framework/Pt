@@ -1,13 +1,16 @@
 #include <Pt/Hmi/KeyEvent.h>
+#include <Pt/TextStream.h>
+#include <Pt/Utf8Codec.h>
+#include <Pt/String.h>
+#include <sstream>
+
 #include <new>
 
 namespace Pt {
 namespace Hmi {
 
 KeyEvent::KeyEvent()
-: _virtualCode(-1)
-, _repeatCount(0)
-, _extCode(false)
+: _unicode(-1)
 , _state(KeyNone)
 , _alt(false)
 , _shift(false)
@@ -16,9 +19,7 @@ KeyEvent::KeyEvent()
 }
 
 KeyEvent::KeyEvent(const KeyEvent& copy)
-: _virtualCode(copy._virtualCode)
-, _repeatCount(copy._repeatCount)
-, _extCode(copy._extCode)
+: _unicode(copy._unicode)
 , _state(copy._state)
 , _alt(copy._alt)
 {
@@ -46,11 +47,36 @@ const std::type_info& KeyEvent::onTypeInfo() const
     return ti;
 }
 
+std::string KeyEvent::toUTF8String() const
+{
+	Pt::Char unicodeChar(_unicode); 
+	std::stringstream ss;		
+	Pt::TextStream stream(ss, new Pt::Utf8Codec());
+	stream<<unicodeChar;
+	stream.terminate();
+	return ss.str();
+}
+
+std::string KeyEvent::shortCutKey() const
+{
+	std::string shortKey = "";
+		
+	if( _ctrl)
+		shortKey += "C//";
+
+	if( _alt)
+		shortKey += "A//";
+
+	if(_shift)
+		shortKey += "S//";  
+
+	shortKey += toUTF8String();
+	return shortKey; 			
+}
+
 void KeyEvent::operator=(const KeyEvent& copy)
 {
-	_virtualCode = copy._virtualCode;
-	_repeatCount = copy._repeatCount;
-	_extCode = copy._extCode;
+	_unicode = copy._unicode;
 	_state = copy._state;
 	_alt = copy._alt;
 }
