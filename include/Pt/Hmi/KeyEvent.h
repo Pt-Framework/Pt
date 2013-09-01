@@ -4,6 +4,7 @@
 #include <Pt/Hmi/Api.h>
 #include <Pt/Event.h>
 #include <Pt/Allocator.h>
+#include <Pt/String.h>
 #include <cstddef>
 #include <string>
 
@@ -42,14 +43,14 @@ public:
 	/**@brief Return the translate key to unicode.
 	* 
 	* @return The translate key to unicode*/
-	inline Pt::uint32_t unicode() const
+	inline const Pt::Char& unicode() const
 	{
 		return _unicode;
 	}
 
 	inline void setUnicode(Pt::uint32_t ucode)
 	{
-		_unicode = ucode;
+		_unicode = Pt::Char(ucode);
 	}
 	
 	inline KeyState state() const
@@ -109,7 +110,7 @@ protected:
     virtual const std::type_info& onTypeInfo() const;
 
 private:
-	Pt::uint32_t _unicode;
+    Pt::Char _unicode;
 	bool _alt;
 	bool _shift;
 	bool _ctrl;

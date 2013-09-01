@@ -186,6 +186,7 @@ void GfxOutputImpl::onKeyUp(int key)
     
 void GfxOutputImpl::onSpezialKeyEvent(unsigned int mask)
 {
+    _keyEvent.setUnicode(0);
     _keyEvent.setAlt((mask & NSAlternateKeyMask) == NSAlternateKeyMask);
     _keyEvent.setShift(((mask & NSShiftKeyMask) == NSShiftKeyMask) | ((mask & NSAlphaShiftKeyMask) == NSAlphaShiftKeyMask));
     _keyEvent.setCtrl(((mask & NSControlKeyMask) == NSControlKeyMask) | ((mask & NSCommandKeyMask) == NSCommandKeyMask));
