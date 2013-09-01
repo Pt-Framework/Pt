@@ -54,5 +54,7 @@
 
 - (BOOL) acceptsFirstResponder;
 
+- (void) dealloc;
+
 
 @end

@@ -156,4 +156,9 @@
     return _outControll->onCanClose();
 }
 
+-(void) dealloc
+{
+
+}
+
 @end

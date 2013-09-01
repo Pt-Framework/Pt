@@ -64,8 +64,7 @@ void Dialog2::init()
 
 void Dialog2::onClosedByButton(Controller* ctrl)
 {
-	DialogModel* m = (DialogModel*) controller().model();
-	m->Closed = true;
+	((DialogController*)&controller())->close();
 }
 
 }}}

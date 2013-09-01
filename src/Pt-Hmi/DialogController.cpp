@@ -74,7 +74,7 @@ void DialogController::doModal(WindowController* parent)
 	//Wait of termination of the dialog.
 	while(!_closed)
 		Application::instance().nextEvent();
-	
+
 	//Restore the parent state.
 	parentModel->Enable = true;
 	parentModel->TopMost = parentTopMost;

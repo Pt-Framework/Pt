@@ -20,7 +20,6 @@ GfxOutputImpl::GfxOutputImpl()
     
     _timer.setActive(Application::instance().loop());
     _timer.timeout() += Pt::slot(*this, &GfxOutputImpl::onPosition);
-    _timer.start(100);
 	create();
 }
 
@@ -41,7 +40,8 @@ void GfxOutputImpl::create()
 	[_window setDelegate: _view];
     
    [_window makeKeyAndOrderFront:_window];
-    [_view setHidden:NO];
+[_view setHidden:NO];
+  _timer.start(100);
 }
 
 GfxOutputImpl::~GfxOutputImpl()
@@ -51,9 +51,18 @@ GfxOutputImpl::~GfxOutputImpl()
 
 void GfxOutputImpl::destroy()
 {
+    if(_window == nil)
+        return;
+    
+    _timer.stop();
+    [_window close];
     [_window release];
     [_view release];
 	_view = nil;
+    _window = nil;
+    //Notife closed
+    WindowController* controller = (WindowController*)_model->controller();
+    controller->Closed.send();
 }
 
 void GfxOutputImpl::output(Pt::Hmi::Model* model)
@@ -231,13 +240,15 @@ void GfxOutputImpl::onPositionAndSize()
     
 bool GfxOutputImpl::onCanClose()
 {
-    if(_model->CanClose.get())
-    {
-        _model->Closed = true;
-        return true;
-    }
+    bool canClose = false;
     
-    return false;
+    WindowController* controller = (WindowController*)_model->controller();
+    controller->Closing.send(canClose);
+    
+    if(canClose)
+        controller->Closed.send();
+    
+    return canClose;
 }
 
 

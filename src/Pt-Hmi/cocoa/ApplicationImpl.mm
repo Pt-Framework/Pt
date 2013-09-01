@@ -110,7 +110,7 @@ ApplicationImpl::~ApplicationImpl()
 
 void ApplicationImpl::nextEvent()
 {
-        
+    onProcessEvents();
 }
 
 void ApplicationImpl::init()

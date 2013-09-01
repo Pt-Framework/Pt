@@ -173,7 +173,6 @@ void WindowController::onModelChanged(bool created)
 
 void WindowController::onClosing(bool& canClose)
 {
-	
 	WindowModel* m = dynamic_cast<WindowModel*>(model());
 
 	if( m == 0)
@@ -192,10 +191,9 @@ void WindowController::onClosed()
 	if( m == 0)
 		return;
 
-	m->Closed = true;	
-
+    if(!m->Closed.get())
+        m->Closed.set(true);
 }
-
 
 void WindowController::close()
 {
@@ -203,8 +201,18 @@ void WindowController::close()
 	
 	if( m == 0)
 		return;
-
-	m->Closed = true;
-	//invalidate();
+    
+    //Can close??
+    bool canClose = false;
+    Closing.send(canClose);
+    
+    if(canClose)
+    {
+        //Set the closed flag
+        m->Closed = true;
+        
+        //Let the system window to close its self.
+        invalidate();
+    }
 }
 }}
