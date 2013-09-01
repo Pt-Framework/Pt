@@ -255,6 +255,9 @@ void GfxOutputImpl::redraw()
 
 void GfxOutputImpl::readClientSizeAndPos(Pt::Gfx::SizeF& size, Pt::Gfx::PointF& pos)
 {
+	if(_window == 0)
+		return;
+
 	XWindowAttributes xwa;
 	XGetWindowAttributes(_display, _window, &xwa);
 
@@ -365,6 +368,9 @@ void GfxOutputImpl::onWindowEvent(XEvent& ev)
 	if(ev.xany.window != _window)
 		return;
         
+   if(_window == 0)
+		return;
+
 	if( _model == 0)
 		return;
 
@@ -693,20 +699,6 @@ void GfxOutputImpl::output(Pt::Hmi::Model* model)
 		return;
 	}
 
-	//Initial size and position
-
-	Pt::Gfx::SizeF clientSize;
-	Pt::Gfx::PointF pos;
-
-	readClientSizeAndPos(clientSize, pos);
-
-	if( clientSize.width() != _model->Size.get().width() ||  clientSize.height() != _model->Size.get().height())
-	{
-		_model->Position = pos;
-		_model->Size = clientSize;
-		return;
-	}
-
 
 	//Handle open/close
 	if(_model->Closed.get())
@@ -727,6 +719,23 @@ void GfxOutputImpl::output(Pt::Hmi::Model* model)
 		}
 	}
 
+	//Initial size and position
+
+	Pt::Gfx::SizeF clientSize;
+	Pt::Gfx::PointF pos;
+
+	readClientSizeAndPos(clientSize, pos);
+
+	if( clientSize.width() != _model->Size.get().width() ||  clientSize.height() != _model->Size.get().height())
+	{
+		_model->Position = pos;
+		_model->Size = clientSize;
+
+		_ignoreSizeEvent = true;
+		writeWindowSizeAndPos();	
+		return;
+	}
+
 	_ignoreSizeEvent = true;
 	writeWindowSizeAndPos();
 	
@@ -734,6 +743,7 @@ void GfxOutputImpl::output(Pt::Hmi::Model* model)
 
 	drawIndependentImage(_model->PaintBuffer);
 	redraw();
+	std::cout<<"INFO: GFX output done!"<<std::endl;
 }
 
 }}
