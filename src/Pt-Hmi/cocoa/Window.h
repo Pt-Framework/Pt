@@ -28,9 +28,6 @@
     
 }
     
-- (Window*) init:  (Pt::Hmi::GfxOutputImpl*) controll ;
-
-- (void) setFrameOrigin:(NSPoint)origin;
-- (void) mouseMoved:(NSEvent*)event;
+- (Window*) setController:  (Pt::Hmi::GfxOutputImpl*) controll ;
 
 @end

@@ -52,6 +52,7 @@ void DialogController::doModal(WindowController* parent)
 {	
 	bool		 parentTopMost = false;
 	WindowModel* parentModel   = (WindowModel*)parent->model();
+    WindowController* parentController = (WindowController*)parentModel->controller();
 	WindowModel* myModel	   = (WindowModel*)model();
 
 	_closed  = false;
@@ -63,6 +64,7 @@ void DialogController::doModal(WindowController* parent)
 	parentTopMost = parentModel->TopMost.get();
 	parentModel->Enable = false;	
 	parentModel->TopMost = false;
+    parentController->output(); //Notify the parent.
 
 	//Setup the dialog as aenabled and top most.	
 	myModel->Enable = true;

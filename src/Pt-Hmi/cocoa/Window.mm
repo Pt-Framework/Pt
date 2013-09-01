@@ -23,26 +23,10 @@
 
 @implementation Window
 
-- (Window*) init : (Pt::Hmi::GfxOutputImpl*) controll
+- (Window*) setController : (Pt::Hmi::GfxOutputImpl*) controll
 {
-    self = [super init];
     _outControll = controll;
     return self;
-}
-
-
-- (void)setFrameOrigin:(NSPoint)origin
-{
-    [super setFrameOrigin:origin];
-    
-    _outControll->onPositionAndSize();
-}
-
-- (void) mouseMoved:(NSEvent *)ev
-{
-    std::cout<<"moved"<<std::endl;
-    NSPoint mp = [ev locationInWindow];
-    _outControll->onMouseMove(mp.x,mp.y);
 }
 
 @end

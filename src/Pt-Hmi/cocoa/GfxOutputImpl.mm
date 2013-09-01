@@ -7,6 +7,7 @@
 #include <Pt/Hmi/WindowModel.h>
 #include <Pt/Hmi/WindowController.h>
 #include "WidgetView.h"
+#include "Window.h"
 
 namespace Pt{
 namespace Hmi{
@@ -31,7 +32,9 @@ void GfxOutputImpl::create()
 	Gfx::PointF at(20, 20);
 	Gfx::SizeF size(400, 200);
 
-	_window = [[NSWindow alloc] initWithContentRect:NSMakeRect(at.x(), at.y(), size.width(), size.height()) styleMask:NSTitledWindowMask | NSClosableWindowMask | NSMiniaturizableWindowMask | NSResizableWindowMask backing:NSBackingStoreBuffered defer:NO];
+	_window = [[Window alloc] initWithContentRect:NSMakeRect(at.x(), at.y(), size.width(), size.height()) styleMask:NSTitledWindowMask | NSClosableWindowMask | NSMiniaturizableWindowMask | NSResizableWindowMask backing:NSBackingStoreBuffered defer:NO];
+    
+    [_window setController: this ];
     
 	[_window setReleasedWhenClosed: NO];
 	[_window setAcceptsMouseMovedEvents:YES];
@@ -39,8 +42,10 @@ void GfxOutputImpl::create()
 	[_window setContentView: _view];
 	[_window setDelegate: _view];
     
+    
    [_window makeKeyAndOrderFront:_window];
 [_view setHidden:NO];
+      _level = [_window level];
   _timer.start(100);
 }
 
@@ -104,6 +109,7 @@ void GfxOutputImpl::output(Pt::Hmi::Model* model)
     
     //Size and position handling
     _ignoreSizeEvent = true;
+    checkModal();
     writeWindowSizeAndPos();
     _ignoreSizeEvent = false;
     
@@ -191,6 +197,18 @@ void GfxOutputImpl::onSpezialKeyEvent(unsigned int mask)
     _keyEvent.setShift(((mask & NSShiftKeyMask) == NSShiftKeyMask) | ((mask & NSAlphaShiftKeyMask) == NSAlphaShiftKeyMask));
     _keyEvent.setCtrl(((mask & NSControlKeyMask) == NSControlKeyMask) | ((mask & NSCommandKeyMask) == NSCommandKeyMask));
     Application::instance().keyDeviceEvent().send(_model->controller(), _keyEvent);
+}
+    
+void GfxOutputImpl::checkModal()
+{
+    if(_model->TopMost.get())
+    {
+        [_window setLevel: NSFloatingWindowLevel];
+    }
+    else
+    {
+        [_window setLevel: NSNormalWindowLevel];
+    }
 }
     
 void GfxOutputImpl::onPosition()

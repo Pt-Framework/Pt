@@ -50,10 +50,11 @@ public:
     void onKeyDown(int key);
     void onKeyUp(int key);
     void onSpezialKeyEvent(unsigned int mask);
+    void onLostFocus();
     
 private:
     void writeWindowSizeAndPos();
-	
+	void checkModal();
 	//void writeWindowProperties();
 
     
@@ -72,6 +73,7 @@ private:
 	Pt::Hmi::KeyEvent      	_keyEvent;
     Pt::System::Timer       _timer;
     bool _visible ;
+    int _level;
 };
 
 }}
