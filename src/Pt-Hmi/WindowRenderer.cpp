@@ -29,7 +29,7 @@
 #include <Pt/Hmi/WindowModel.h>
 #include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/Brush.h>
-#include <Pt/Gfx/ImagePainter.h>
+#include <Pt/Gfx/ImagePainter.h> 
 
 namespace Pt{
 namespace Hmi{

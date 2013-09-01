@@ -39,7 +39,9 @@ public:
     {
         return _model;
     }
-
+    
+    NSView* view();
+    
 public:
     void onPositionAndSize();
     void onPosition();

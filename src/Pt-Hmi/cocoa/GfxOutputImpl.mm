@@ -24,6 +24,11 @@ GfxOutputImpl::GfxOutputImpl()
 	create();
 }
 
+NSView* GfxOutputImpl::view()
+{
+        return _view;
+}
+    
 void GfxOutputImpl::create()
 {
     _window = nil;

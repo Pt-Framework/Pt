@@ -22,7 +22,7 @@ void Cursor::setCursor(Cursors::Type c, WindowController* parent)
 
 Cursors::Type Cursor::getCursor() const
 {
-	return _impl->getCursor();
+	return (Cursors::Type) _impl->getCursor();
 }
 
 }}
