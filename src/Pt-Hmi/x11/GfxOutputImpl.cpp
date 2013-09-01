@@ -315,27 +315,26 @@ void GfxOutputImpl::onConfigureNotify( XEvent& xev)
 
 void GfxOutputImpl::onKeyEvent(XEvent& xev)
 {
-    if(KeyRelease == xev.xkey.type)
-        _keyEvent.setState(KeyEvent::KeyUp);
+	if(KeyRelease == xev.xkey.type)
+        	_keyEvent.setState(KeyEvent::KeyUp);
 	else
 		_keyEvent.setState(KeyEvent::KeyDown);
     
-    KeySym sym = 0;
+	KeySym sym = 0;
 	int vcode = 0;
 	
 	sym = *(XGetKeyboardMapping(_display, xev.xkey.keycode,1,&vcode));
 
-	vcode = (char) ::toupper((int)sym);
 
-    switch(sym ) 
+	switch(sym ) 
 	{
-        case XK_Control_L: 
+        	case XK_Control_L: 
 		case XK_Control_R: 
 			_keyEvent.setCtrl(_keyEvent.state() == KeyEvent::KeyDown);
 
 		break;
 
-        case XK_Alt_L: 
+        	case XK_Alt_L: 
 		case XK_Alt_R:
 			_keyEvent.setAlt(_keyEvent.state() == KeyEvent::KeyDown);			
 		break;
@@ -346,13 +345,16 @@ void GfxOutputImpl::onKeyEvent(XEvent& xev)
 		break;
 		default:
 		{
-    	}
+	    	}
 		break;
 	}		
-			
-	_keyEvent.setVirtualCode(vcode);
+		
+	unsigned int ucode = KeyHandler::keySymToUtf(sym);
 
-	_keyEvent.setRepeatCount(0);
+	if( ucode != 0)
+		_keyEvent.setUnicode(ucode);
+	else
+		_keyEvent.setUnicode(sym & 0xFF);
 		
 	Application::instance().keyDeviceEvent().send(_model->controller(), _keyEvent);
 }
