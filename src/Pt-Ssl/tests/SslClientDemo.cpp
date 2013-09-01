@@ -279,7 +279,7 @@ void onProgress(SslClient& client)
 }
 
 
-int main(const char* argc, int argv)
+int main(int argv, const char** argc)
 {
     try
     {
