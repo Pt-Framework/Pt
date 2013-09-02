@@ -1,3 +1,28 @@
+/* Copyright (C) 2013 Laurentiu-Gheorghe Crisan
+ * Copyright (C) 2013 Marc Boris Dürner
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ * 
+ * As a special exception, you may use this file as part of a free
+ * software library without restriction. Specifically, if other files
+ * instantiate templates or use macros or inline functions from this
+ * file, or you compile this file and link it with other files to
+ * produce an executable, this file does not by itself cause the
+ * resulting executable to be covered by the GNU General Public
+ * License. This exception does not however invalidate any other
+ * reasons why the executable file might be covered by the GNU Library
+ * General Public License.
+ * 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
 #include "GfxOutputImpl.h"
 #include <Pt/Hmi/GfxModel.h>
 #include <Pt/Hmi/Application.h>
@@ -19,14 +44,16 @@ GfxOutputImpl::GfxOutputImpl()
 {
     _mouseEvent.buttons().resize(3);
     
+	//Window position tracking timer (Workaround until find a solution to obtain the window position change event
     _timer.setActive(Application::instance().loop());
     _timer.timeout() += Pt::slot(*this, &GfxOutputImpl::onPosition);
+
 	create();
 }
 
 NSView* GfxOutputImpl::view()
 {
-        return _view;
+	return _view;
 }
     
 void GfxOutputImpl::create()
@@ -48,11 +75,11 @@ void GfxOutputImpl::create()
 	[_window setDelegate: _view];
     
     
-   [_window makeKeyAndOrderFront:_window];
-[_view setHidden:NO];
-      _level = [_window level];
+	[_window makeKeyAndOrderFront:_window];
+	[_view setHidden:NO];
+     _level = [_window level];
     _visible = true;
-  _timer.start(100);
+	_timer.start(100);
 }
 
 GfxOutputImpl::~GfxOutputImpl()
@@ -75,134 +102,130 @@ void GfxOutputImpl::destroy()
     //Notife closed
     WindowController* controller = (WindowController*)_model->controller();
     controller->ClosedAction.send(controller);
-}
-    
+}    
     
 void GfxOutputImpl::writeWindowProperties()
-{
+{        
+	//Visibility
+	if(_model->Visible.get() && !_visible)
+	{
+		[_window makeKeyAndOrderFront:_window];
+		[NSApp activateIgnoringOtherApps:YES];
+		_visible = true;
+	}
         
-        //Visibility
-        if(_model->Visible.get() && !_visible)
-        {
-            [_window makeKeyAndOrderFront:_window];
-            [NSApp activateIgnoringOtherApps:YES];
-            _visible = true;
-        }
-        
-        if(!_model->Visible.get() && _visible)
-        {
-         [_window orderOut:_window];
-            _visible = false;
-            return;
-        }
+	if(!_model->Visible.get() && _visible)
+	{
+		[_window orderOut:_window];
+		_visible = false;
+		return;
+	}
     
     //Title
     NSString* title = [NSString stringWithCString:_model->Caption.get().c_str() encoding:[NSString defaultCStringEncoding]];
 		
-        if( _model->ShowTitle.get())
-            [_window setTitle: title];
-        else
-            [_window setTitle: title];
+    if( _model->ShowTitle.get())
+        [_window setTitle: title];
+    else
+        [_window setTitle: title];
         
-        //Border stely
-        Pt::Gfx::Size winMinSize =  _model->fromUnit(_model->MinimumSize.get());
-        Pt::Gfx::Size winMaxSize =  _model->fromUnit(_model->MaximumSize.get());
+    //Border style
+    Pt::Gfx::Size winMinSize =  _model->fromUnit(_model->MinimumSize.get());
+    Pt::Gfx::Size winMaxSize =  _model->fromUnit(_model->MaximumSize.get());
         
-        switch( _model->Border.get())
-        {
-            case Pt::Hmi::WindowBorderType::Sizeable:
-            case Pt::Hmi::WindowBorderType::DialogSizeable:
-            case Pt::Hmi::WindowBorderType::ToolSizeable:
-            {//Sizeable
+    switch( _model->Border.get())
+    {
+        case Pt::Hmi::WindowBorderType::Sizeable:
+        case Pt::Hmi::WindowBorderType::DialogSizeable:
+        case Pt::Hmi::WindowBorderType::ToolSizeable:
+        {//Sizeable
       
-            }
-                break;
+        }
+        break;
                 
-            case Pt::Hmi::WindowBorderType::Dialog:
-            case Pt::Hmi::WindowBorderType::Tool:
-            {//Fixed size
+        case Pt::Hmi::WindowBorderType::Dialog:
+        case Pt::Hmi::WindowBorderType::Tool:
+        {//Fixed size
      
-            }
-                break;
-            default:
-                break;
         }
-        
-        //Windows state
-        //TODO : show/hide minimize button.
-        if( _model->ShowMinimizeButton.get())
-        {
-        }
-        else
-        {
-        }
-        
-        //TODO : show/hide maximize button.
-        if( _model->ShowMaximizeButton.get())
-        {
-        }
-        else
-        {
-        }
-        
-        //TODO : show/hide system menu
-        if( _model->ShowSysMenu.get())
-        {
-        }
-        else
-        {
-        }
-        
-        //TODO : Windows state min/max/normal
-        switch(_model->WindowState.get())
-        {
-            case Pt::Hmi::WindowStateType::Normal:
-                break;
-                
-            case Pt::Hmi::WindowStateType::Maximazed:
-                
-                break;
-                
-            case Pt::Hmi::WindowStateType::Minimized:
-                
-                break;
-        }
-        
-        //TODO: window border aparetz
-        switch( _model->Border.get())
-        {
-            case Pt::Hmi::WindowBorderType::NoBorder:
-                
-                break;
-                
-            case Pt::Hmi::WindowBorderType::Sizeable:
-                
-                break;
-                
-            case Pt::Hmi::WindowBorderType::Dialog:
-                break;
-                
-            case Pt::Hmi::WindowBorderType::DialogSizeable:
-                break;
-                
-            case Pt::Hmi::WindowBorderType::Tool:
-                break;
-                
-            case Pt::Hmi::WindowBorderType::ToolSizeable:
-                break;
-                
-        }
-        
-        //TODO: show in taskbar
-        if(_model->ShowInTaskbar.get())
-        {
-        }
-        else
-        {
-        }
-        
-    }
+        break;
 
+        default:
+        break;
+    }
+        
+    //Windows state
+    //TODO : show/hide minimize button.
+    if( _model->ShowMinimizeButton.get())
+    {
+    }
+    else
+    {
+    }
+        
+    //TODO : show/hide maximize button.
+    if( _model->ShowMaximizeButton.get())
+    {
+    }
+    else
+    {
+    }
+        
+    //TODO : show/hide system menu
+    if( _model->ShowSysMenu.get())
+    {
+    }
+    else
+    {
+    }
+        
+    //TODO : Windows state min/max/normal
+    switch(_model->WindowState.get())
+    {
+        case Pt::Hmi::WindowStateType::Normal:
+        break;
+                
+        case Pt::Hmi::WindowStateType::Maximazed:
+                
+        break;
+                
+        case Pt::Hmi::WindowStateType::Minimized:
+                
+        break;
+    }
+        
+    //TODO: window border aparents
+    switch( _model->Border.get())
+    {
+        case Pt::Hmi::WindowBorderType::NoBorder:
+                
+        break;
+                
+        case Pt::Hmi::WindowBorderType::Sizeable:
+                
+        break;
+                
+        case Pt::Hmi::WindowBorderType::Dialog:
+        break;
+                
+        case Pt::Hmi::WindowBorderType::DialogSizeable:
+        break;
+                
+        case Pt::Hmi::WindowBorderType::Tool:
+        break;
+                
+        case Pt::Hmi::WindowBorderType::ToolSizeable:
+        break;                
+    }
+        
+    //TODO: show in taskbar
+    if(_model->ShowInTaskbar.get())
+    {
+    }
+    else
+    {
+    }
+}
 
 void GfxOutputImpl::output(Pt::Hmi::Model* model)
 {
@@ -224,9 +247,7 @@ void GfxOutputImpl::output(Pt::Hmi::Model* model)
 	if(_model->Closed.get())
 	{
 		if(_view != nil)
-		{
 			destroy();
-		}
 
 		return;
 	}
@@ -249,13 +270,12 @@ void GfxOutputImpl::output(Pt::Hmi::Model* model)
     _ignoreSizeEvent = false;
     
     //Redraw
-    [_view setNeedsDisplay:YES];
-    
+    [_view setNeedsDisplay:YES];    
 }
     
 void GfxOutputImpl::onLMouseUp(double x, double y)
 {
-    Pt::Gfx::PointF pos = convertMousePosToGlobal(x,y);
+    Pt::Gfx::PointF pos = convertMousePosition(x,y);
     
     _mouseEvent.buttons()[0].setState(DeviceButton::Released);
     _mouseEvent.setX(pos.x());
@@ -265,7 +285,7 @@ void GfxOutputImpl::onLMouseUp(double x, double y)
     
 void GfxOutputImpl::onLMouseDown(double x, double y)
 {
-    Pt::Gfx::PointF pos = convertMousePosToGlobal(x,y);
+    Pt::Gfx::PointF pos = convertMousePosition(x,y);
     
     _mouseEvent.buttons()[0].setState(DeviceButton::Pressed);
     _mouseEvent.setX(pos.x());
@@ -275,7 +295,7 @@ void GfxOutputImpl::onLMouseDown(double x, double y)
     
 void GfxOutputImpl::onMouseMove(double x, double y)
 {
-    Pt::Gfx::PointF pos = convertMousePosToGlobal(x,y);
+    Pt::Gfx::PointF pos = convertMousePosition(x,y);
     _mouseEvent.setX(pos.x());
     _mouseEvent.setY(pos.y());
     Application::instance().pointerEvent().send(_model->controller(), _mouseEvent);
@@ -294,11 +314,10 @@ void GfxOutputImpl::writeWindowSizeAndPos()
     windowRect.size.width = _model->WinSize.get().width();
     windowRect.size.height = _model->WinSize.get().height();
     
-    [_window setFrame:windowRect display:YES animate:NO];
-    
+    [_window setFrame:windowRect display:YES animate:NO];    
 }
     
-Pt::Gfx::PointF GfxOutputImpl::convertMousePosToGlobal(double x, double y)
+Pt::Gfx::PointF GfxOutputImpl::convertMousePosition(double x, double y)
 {
     int screenHeight = [[NSScreen mainScreen] frame].size.height;
     NSRect windowRect = [_view frame];
@@ -337,13 +356,9 @@ void GfxOutputImpl::onSpezialKeyEvent(unsigned int mask)
 void GfxOutputImpl::checkModal()
 {
     if(_model->TopMost.get())
-    {
         [_window setLevel: NSFloatingWindowLevel];
-    }
     else
-    {
         [_window setLevel: NSNormalWindowLevel];
-    }
 }
     
 void GfxOutputImpl::onPosition()
@@ -366,8 +381,7 @@ void GfxOutputImpl::onPosition()
     _model->WinPos =pos;
     
     //View
-    NSRect viewRect = [_view frame];
-    
+    NSRect viewRect = [_view frame];    
     _model->Position = Pt::Gfx::PointF(viewRect.origin.x, windowRect.size.height - viewRect.size.height);
 }
     
@@ -404,7 +418,6 @@ bool GfxOutputImpl::onCanClose()
     
     return canClose;
 }
-
 
 Pt::Gfx::Painter* GfxOutputImpl::nativePainter()
 {
