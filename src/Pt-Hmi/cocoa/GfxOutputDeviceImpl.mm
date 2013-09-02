@@ -46,7 +46,7 @@ GfxOutputDeviceImpl::GfxOutputDeviceImpl()
     
 	//Window position tracking timer (Workaround until find a solution to obtain the window position change event
     _timer.setActive(Application::instance().loop());
-    _timer.timeout() += Pt::slot(*this, &GfxOutputImpl::onPosition);
+    _timer.timeout() += Pt::slot(*this, &GfxOutputDeviceImpl::onPosition);
 
 	create();
 }
@@ -66,8 +66,7 @@ void GfxOutputDeviceImpl::create()
 
 	_window = [[Window alloc] initWithContentRect:NSMakeRect(at.x(), at.y(), size.width(), size.height()) styleMask:NSTitledWindowMask | NSClosableWindowMask | NSMiniaturizableWindowMask | NSResizableWindowMask backing:NSBackingStoreBuffered defer:NO];
     
-    [_window setController: this ];
-    
+    [_window setDevice: this ];
 	[_window setReleasedWhenClosed: NO];
 	[_window setAcceptsMouseMovedEvents:YES];
     [_window setInitialFirstResponder: _view];

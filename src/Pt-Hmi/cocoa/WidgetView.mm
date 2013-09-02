@@ -32,10 +32,10 @@
 
 @implementation WidgetView
 
-- (WidgetView*) init : (Pt::Hmi::GfxOutputImpl*) controll
+- (WidgetView*) init : (Pt::Hmi::GfxOutputDeviceImpl*) device
 {
     self = [super init];
-    _outControll = controll;
+    _outDevice = device;
     
     int opts = (NSTrackingActiveAlways | NSTrackingInVisibleRect | NSTrackingMouseEnteredAndExited | NSTrackingMouseMoved);
     
@@ -53,7 +53,7 @@
 - (void) flagsChanged:(NSEvent*)ev
 {
     unsigned int mod = [ev modifierFlags];
-    _outControll->onSpezialKeyEvent(mod);
+    _outDevice->onSpezialKeyEvent(mod);
 }
 
 - (void)keyDown:(NSEvent *)ev
@@ -65,7 +65,7 @@
     if(character == 25)
         character = 9;
     
-    _outControll->onKeyDown(character);
+    _outDevice->onKeyDown(character);
 }
 
 - (void)keyUp:(NSEvent *)ev
@@ -77,17 +77,17 @@
     if(character == 25)
         character = 9;
     
-    _outControll->onKeyUp(character);
+    _outDevice->onKeyUp(character);
 }
 
 - (void) drawRect:(NSRect)rect
 {
-    if(_outControll->model() == nil)
+    if(_outDevice->model() == nil)
         return;
     
     //Create a raw buffer to hold pixel data which we will fill algorithmically
-    NSInteger width =  _outControll->model()->PaintBuffer.width();
-    NSInteger height = _outControll->model()->PaintBuffer.height();
+    NSInteger width =  _outDevice->model()->PaintBuffer.width();
+    NSInteger height = _outDevice->model()->PaintBuffer.height();
 
     NSInteger dataLength = width * height * 4;
     UInt8 *data = (UInt8*)malloc(dataLength * sizeof(UInt8));
@@ -98,7 +98,7 @@
         for (int i=0; i<width; i++)
         {
             
-            const Pt::Gfx::ARgbColor& pixel = _outControll->model()->PaintBuffer.pixel(i,j);
+            const Pt::Gfx::ARgbColor& pixel = _outDevice->model()->PaintBuffer.pixel(i,j);
                                        
             int index = 4*(i+j*width);
             
@@ -128,44 +128,44 @@
 {
     [super setFrameOrigin:origin];
     
-    _outControll->onPositionAndSize();
+    _outDevice->onPositionAndSize();
 }
 
 - (void)setFrameSize:(NSSize)frameSize
 {
     [super setFrameSize:frameSize];
     
-    _outControll->onPositionAndSize();
+    _outDevice->onPositionAndSize();
 }
 
 - (void) mouseDown:(NSEvent*)ev
 {
     NSPoint mp = [ev locationInWindow];
-    _outControll->onLMouseDown(mp.x,mp.y);
+    _outDevice->onLMouseDown(mp.x,mp.y);
 }
 
 - (void) mouseUp:(NSEvent*)ev
 {
     NSPoint mp = [ev locationInWindow];
-    _outControll->onLMouseUp(mp.x,mp.y);
+    _outDevice->onLMouseUp(mp.x,mp.y);
 }
 
 - (void) mouseDragged:(NSEvent*)ev
 {
     
     NSPoint mp = [ev locationInWindow];
-    _outControll->onMouseMove(mp.x,mp.y);
+    _outDevice->onMouseMove(mp.x,mp.y);
 }
 
 - (void) mouseMoved:(NSEvent *)ev
 {
     NSPoint mp = [ev locationInWindow];
-    _outControll->onMouseMove(mp.x,mp.y);
+    _outDevice->onMouseMove(mp.x,mp.y);
 }
 
 - (BOOL) windowShouldClose:(id)window
 {
-    return _outControll->onCanClose();
+    return _outDevice->onCanClose();
 }
 
 @end

@@ -24,17 +24,17 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
 #include <Pt/Hmi/Api.h>
-#include "GfxOutputImpl.h"
+#include "GfxOutputDeviceImpl.h"
 #include <Pt/Hmi/WindowModel.h>
 #import <AppKit/NSView.h>
 
 @interface WidgetView : NSView
 {
-    Pt::Hmi::GfxOutputImpl* _outControll;
+    Pt::Hmi::GfxOutputDeviceImpl* _outDevice;
     
 }
     
-- (WidgetView*) init:  (Pt::Hmi::GfxOutputImpl*) controll ;
+- (WidgetView*) init:  (Pt::Hmi::GfxOutputDeviceImpl*) device ;
 
 - (void) drawRect:(NSRect)rect;
 

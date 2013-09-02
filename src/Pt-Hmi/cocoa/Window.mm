@@ -23,10 +23,9 @@
 
 @implementation Window
 
-- (Window*) setController : (Pt::Hmi::GfxOutputImpl*) controll
+- (void) setDevice : (Pt::Hmi::GfxOutputDeviceImpl*) device
 {
-    _outControll = controll;
-    return self;
+    _outDevice = device;
 }
 
 @end
