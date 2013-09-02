@@ -708,7 +708,7 @@ const Pt::String& TextInputSource::onId() const
 
 bool TextInputSource::onImportText()
 {
-    if( ! _ios || ! _ios->rdbuf() || ! _ios->good() )
+    if( ! _ios || ! _ios->rdbuf() || ! _ios->good() || _ios->rdbuf() <= 0 )
         return false;
 
     return true;
@@ -1064,7 +1064,7 @@ const Pt::String& BinaryInputSource::onId() const
 
 bool BinaryInputSource::onImportData()
 {
-    if( ! _is || ! _is->rdbuf() || ! _is->good() )
+    if( ! _is || ! _is->rdbuf() || ! _is->good() || _is->rdbuf() <= 0)
         return false;
 
     return true;

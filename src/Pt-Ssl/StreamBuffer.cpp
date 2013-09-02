@@ -125,7 +125,7 @@ bool StreamBuffer::writeHandshake()
 }
 
 
-bool StreamBuffer::readHandshake()
+bool StreamBuffer::readHandshake(std::streamsize)
 {   
     if( ! _connection )
         throw SslError("no connection");
@@ -224,6 +224,15 @@ void StreamBuffer::import(std::streamsize isize)
     }
 
     return;
+}
+
+
+std::streamsize StreamBuffer::showmanyc()
+{
+    // TODO:
+    // return _connection && _connection->rdbuf() ? _target->rdbuf()->in_avail() : -1;
+
+    return 0;
 }
 
 

@@ -86,7 +86,7 @@ class PT_SSL_API StreamBuffer : public std::streambuf
             Returns true if more handshake data needs to be read, false
             if not.
         */
-        bool readHandshake();
+        bool readHandshake(std::streamsize maxRead = 0);
 
         /** @brief Shutdown the SSL connection. 
          
@@ -113,6 +113,9 @@ class PT_SSL_API StreamBuffer : public std::streambuf
         void import(std::streamsize maxImport = 0);
 
     protected:
+        // inheritdoc
+        virtual std::streamsize showmanyc();
+
         virtual int sync();
         
         virtual int_type underflow();

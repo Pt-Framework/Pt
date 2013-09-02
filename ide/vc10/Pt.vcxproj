@@ -178,7 +178,6 @@
     <ClInclude Include="..\..\include\Pt\System\File.h" />
     <ClInclude Include="..\..\include\Pt\System\FileDevice.h" />
     <ClInclude Include="..\..\include\Pt\System\FileInfo.h" />
-    <ClInclude Include="..\..\include\Pt\System\Input2DEvent.h" />
     <ClInclude Include="..\..\include\Pt\System\IOBuffer.h" />
     <ClInclude Include="..\..\include\Pt\System\IODevice.h" />
     <ClInclude Include="..\..\include\Pt\System\IOError.h" />
@@ -527,7 +526,6 @@
     <ClCompile Include="..\..\src\Pt-System\FileChannel.cpp" />
     <ClCompile Include="..\..\src\Pt-System\FileDevice.cpp" />
     <ClCompile Include="..\..\src\Pt-System\FileInfo.cpp" />
-    <ClCompile Include="..\..\src\Pt-System\Input2DEvent.cpp" />
     <ClCompile Include="..\..\src\Pt-System\IOBuffer.cpp" />
     <ClCompile Include="..\..\src\Pt-System\IODevice.cpp" />
     <ClCompile Include="..\..\src\Pt-System\IOError.cpp" />

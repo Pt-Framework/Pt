@@ -225,7 +225,8 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
         // inheritdoc
         virtual std::streamsize showmanyc()
         {
-            return 0;
+            return _target && _target->rdbuf() ? _target->rdbuf()->in_avail() 
+                                               : -1;
         }
 
         // inheritdoc
