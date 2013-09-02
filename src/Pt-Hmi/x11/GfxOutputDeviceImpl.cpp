@@ -62,7 +62,7 @@ GfxOutputDeviceImpl::GfxOutputDeviceImpl()
     AtomWindowClosed = XInternAtom(_display, "WM_DELETE_WINDOW", false);
     AtomWMProtocols  = XInternAtom(_display, "WM_PROTOCOLS",     false);
 
-	Application::instance().impl()->WindowEvent += Pt::slot(*this, &GfxOutputImpl::onWindowEvent);
+	Application::instance().impl()->WindowEvent += Pt::slot(*this, &GfxOutputDeviceImpl::onWindowEvent);
 	create();
 }
 
@@ -180,7 +180,7 @@ void GfxOutputDeviceImpl::onMotionNotify(XEvent& xev)
 }
 
 
-void GfxOutputImpl::onMouseButtonPress(XEvent& xev)
+void GfxOutputDeviceImpl::onMouseButtonPress(XEvent& xev)
 {
     int x = xev.xbutton.x;
     int y = xev.xbutton.y;
@@ -488,7 +488,7 @@ void GfxOutputDeviceImpl::create()
     XSync(_display, false);
 }
 
-void GfxOutputImpl::destroy()
+void GfxOutputDeviceImpl::destroy()
 {
 	if(_window != 0)
 	{
@@ -502,12 +502,12 @@ void GfxOutputImpl::destroy()
 	}
 }
 
-GfxOutputImpl::~GfxOutputImpl()
+GfxOutputDeviceImpl::~GfxOutputDeviceImpl()
 {
 	destroy();
 }
 
-void GfxOutputImpl::show()
+void GfxOutputDeviceImpl::show()
 {
 	
     XMapWindow(_display, _window);
@@ -515,7 +515,7 @@ void GfxOutputImpl::show()
     _visible = 	true;
 }
 
-void GfxOutputImpl::hide()
+void GfxOutputDeviceImpl::hide()
 {
 	Display* display = Application::instance().impl()->display();
     XUnmapWindow(display, _window);
@@ -524,13 +524,13 @@ void GfxOutputImpl::hide()
 }
 
 
-void GfxOutputImpl::bringWindowToTop()
+void GfxOutputDeviceImpl::bringWindowToTop()
 {
 	XRaiseWindow(_display, _window);
 	XSetInputFocus(_display, _window, RevertToNone, CurrentTime);
 }
 
-void GfxOutputImpl::onPaint(XEvent& xev)
+void GfxOutputDeviceImpl::onPaint(XEvent& xev)
 {
 	if( _model != 0)
 	{
@@ -538,7 +538,7 @@ void GfxOutputImpl::onPaint(XEvent& xev)
 	}
 }
 
-void GfxOutputImpl::writeWindowProperties()
+void GfxOutputDeviceImpl::writeWindowProperties()
 {
 
 	XSizeHints sizeHints;
@@ -637,6 +637,10 @@ void GfxOutputImpl::writeWindowProperties()
 	//TODO: window border 
 	switch( _model->Border.get())
 	{
+		case Pt::Hmi::WindowBorderType::Fixed:
+			
+		break;
+
 		case Pt::Hmi::WindowBorderType::NoBorder:
 			
 		break;
@@ -671,7 +675,7 @@ void GfxOutputImpl::writeWindowProperties()
 	XSetWMNormalHints(_display, _window,  &sizeHints);
 }
 
-void GfxOutputImpl::updateDrawBuffer()
+void GfxOutputDeviceImpl::updateDrawBuffer()
 {
 	unsigned int sreen  = DefaultScreen(_display);
 
@@ -686,7 +690,7 @@ void GfxOutputImpl::updateDrawBuffer()
 
 }
 
-void GfxOutputImpl::output(Pt::Hmi::Model* model)
+void GfxOutputDeviceImpl::output(Pt::Hmi::Model* model)
 {
 	_model = dynamic_cast<WindowModel*>(model);
 
