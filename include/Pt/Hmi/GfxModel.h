@@ -94,7 +94,8 @@ public:
 	Property<Cursor>                CursorT;
 	Property<TextAlignType::Type>	TextAlign;
 	Property<bool>					Focused; 
-	Property<bool>					AcceptFocus; 
+	Property<bool>					AcceptFocus; 	
+	Property<std::string>			FocusedActionKey;
 
 public:
 	virtual ~GfxModel();

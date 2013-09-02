@@ -22,6 +22,7 @@ WindowModel::WindowModel()
 , Closed(me(),false)
 , CanClose(me(),true)
 , TopMost(me(), false)
+, FocuseMoveKey(me(), "\t")
 {
 	Visible.set(false);
 	Position = toUnit(Pt::Gfx::Point(20,20));

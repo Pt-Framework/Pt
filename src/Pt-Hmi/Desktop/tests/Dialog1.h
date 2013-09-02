@@ -43,8 +43,8 @@ protected:
 	virtual void init();
 
 private:
-	void onClosedByButton(Controller* ctrl);
-	void onShowNextDialog(Controller* ctrl);
+	void onClosedByButton();
+	void onShowNextDialog();
 
 private:
 	Pt::Hmi::Desktop::Button _closeButton;

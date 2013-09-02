@@ -75,17 +75,16 @@ void MainWindow::init()
 	_mainPanel.addChild(&_textLabel);
 
 	//Toggle button
-	Pt::Hmi::ButtonModel* toggleButtonModel = (Pt::Hmi::ButtonModel*) _toggleButton.controller().model();
-	toggleButtonModel->ButtonType.set(Pt::Hmi::ButtonType::Toggle);
-	toggleButtonModel->Caption.set("Toggle Me");
-	toggleButtonModel->Position.set(Pt::Gfx::PointF(20,60));
-	toggleButtonModel->Size.set(Pt::Gfx::SizeF(150,25));
+	_toggleButton.setToggleButton(true);
+	_toggleButton.setCaption("Toggle Me");
+	_toggleButton.setPosition(Pt::Gfx::PointF(20,60));
+	_toggleButton.setSize(Pt::Gfx::SizeF(150,25));
 	_mainPanel.addChild(&_toggleButton);
 
 	//Dialog button
 	Pt::Hmi::ButtonController* dialogButtonCotroller = (Pt::Hmi::ButtonController*) &_dialogButton.controller();
 	Pt::Hmi::ButtonModel* dialogButtonModel = (Pt::Hmi::ButtonModel*) dialogButtonCotroller->model();
-	dialogButtonModel->ButtonType.set(Pt::Hmi::ButtonType::Press);
+	_dialogButton.setToggleButton(false);
 	dialogButtonModel->Caption.set("Dialog [CTRL+D]");
 	dialogButtonModel->ActionKey.set("C//d");
 	dialogButtonModel->Position.set(Pt::Gfx::PointF(20,100));

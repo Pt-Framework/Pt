@@ -1,24 +1,48 @@
+/* Copyright (C) 2013 Laurentiu-Gheorghe Crisan
+ * 
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ * 
+ * As a special exception, you may use this file as part of a free
+ * software library without restriction. Specifically, if other files
+ * instantiate templates or use macros or inline functions from this
+ * file, or you compile this file and link it with other files to
+ * produce an executable, this file does not by itself cause the
+ * resulting executable to be covered by the GNU General Public
+ * License. This exception does not however invalidate any other
+ * reasons why the executable file might be covered by the GNU Library
+ * General Public License.
+ * 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
 #include "GfxOutputImpl.h"
-#include <Pt/Hmi/GfxModel.h>
-#include <Pt/Hmi/Application.h>
 #include "ApplicationImpl.h"
-#include <Pt/Gfx/Rgb888Color.h>
-#include <Pt/Gfx/Rgb888Image.h>
 #include <Windows.h>
 #include <WindowsX.h>
+#include <assert.h>
+#include <Pt/Gfx/Rgb888Color.h>
+#include <Pt/Gfx/Rgb888Image.h>
+#include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/WindowModel.h>
 #include <Pt/Hmi/WindowController.h>
-#include <Pt/Hmi/GfxOutput.h>
 
 namespace Pt{
 namespace Hmi{
 
 GfxOutputImpl::GfxOutputImpl()
-: _model(0)
+: _hwnd(0)
+, _model(0)
+, _nativePainter(0)
 , _ignoreEvent(false)
-, _hwnd(0)
 {	
-
 	Pt::Hmi::Application* app = (Pt::Hmi::Application*) &Pt::Hmi::Application::instance();	
 	app->impl()->WindowEvent += Pt::slot(*this, &GfxOutputImpl::onWindowEvent);
 	_pointerEvent.buttons().resize(3);	
@@ -59,17 +83,16 @@ void GfxOutputImpl::onKey(unsigned int msg,  WPARAM wparam, LPARAM lparam)
 	keyboardState[VK_RCONTROL] = 0;
 
 	if(wparam == 16 )
-	{
+	{//Shift key
 		_keyEvent.setShift(_keyEvent.state() == KeyEvent::KeyDown);
 	}
 	else if(wparam == 17 )
-	{
+	{//Controll key
 		_keyEvent.setCtrl(_keyEvent.state() == KeyEvent::KeyDown);
-
 	}
-	//Pt::uint32_t  ucode; 
-	unsigned int scanCode = ((lparam >> 16) & 0xFF);			
-	Pt::uint32_t ucode;			
+
+	Pt::uint32_t scanCode = ((lparam >> 16) & 0xFF);			
+	Pt::uint32_t ucode = 0;			
 		
 	ToUnicode( wparam, scanCode , (BYTE*)keyboardState, (LPWSTR)&ucode, 4, 0);	
 	_keyEvent.setUnicode(ucode);
@@ -85,7 +108,6 @@ void GfxOutputImpl::onWindowEvent(HWND wnd, unsigned int message, unsigned int w
 	
 	if(_model == 0)
 		return;
-
 
 	switch(message)
 	{
@@ -273,7 +295,7 @@ void GfxOutputImpl::getWindowSize()
 	_model->WinSize = _model->toUnit(Pt::Gfx::Size(info.rcWindow.right - info.rcWindow.left, info.rcWindow.bottom - info.rcWindow.top));
 
 	//Windows client Size + pos => Gfx Size + pos
-	_model->Size	 = _model->toUnit(Pt::Gfx::Size(info.rcClient.right - info.rcClient.left, info.rcClient.bottom - info.rcClient.top));
+	_model->Size = _model->toUnit(Pt::Gfx::Size(info.rcClient.right - info.rcClient.left, info.rcClient.bottom - info.rcClient.top));
 }
 
 void GfxOutputImpl::getWindowPos()
@@ -316,8 +338,7 @@ void GfxOutputImpl::onPaint()
 
 void GfxOutputImpl::drawIndependentImage(size_t x, size_t y, const char* data, size_t width, size_t height)
 {
-   PAINTSTRUCT ps;
-
+    PAINTSTRUCT ps;
     HDC hdc = BeginPaint(_hwnd, &ps);
 
     BITMAPINFO bitmapInfo;
@@ -423,7 +444,7 @@ void GfxOutputImpl::setWindowProperties()
 		break;
 	}
 
-	//SHow in taskbar
+	//Show in taskbar
 	if(_model->ShowInTaskbar.get())
 	{
 		exStyle |= WS_EX_APPWINDOW;  
@@ -457,14 +478,12 @@ void GfxOutputImpl::destroy()
 
 void GfxOutputImpl::output(Pt::Hmi::Model* model)
 {
-	WindowModel* wmodel = dynamic_cast<WindowModel*>(model);
+	_model = dynamic_cast<WindowModel*>(model);
 
-	_model = wmodel;
+	assert(_model != 0);
 
-	if( wmodel == 0)
-		throw std::logic_error("ERROR: WindowModel model expected!");
-
-	if(wmodel->Closed.get())
+	//Check create/destroy
+	if(_model->Closed.get())
 	{
 		if(_hwnd != 0)
 			destroy();
@@ -474,7 +493,7 @@ void GfxOutputImpl::output(Pt::Hmi::Model* model)
 	{
 		if(_hwnd == 0)
 		{
-			if(wmodel->Visible.get())
+			if(_model->Visible.get())
 				create();
 			else
 				return;

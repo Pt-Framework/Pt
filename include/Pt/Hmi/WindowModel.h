@@ -97,6 +97,7 @@ public:
 	Property<bool>								Closed;
 	Property<bool>								CanClose;
 	Property<bool>								TopMost;
+	Property<std::string>						FocuseMoveKey;
 };
 
 }}

@@ -30,7 +30,7 @@ public:
 	virtual ~WidgetModel();
 
 public:
-	Property<std::string> Caption;	
+	Property<std::string> Caption;		
 };
 
 }}

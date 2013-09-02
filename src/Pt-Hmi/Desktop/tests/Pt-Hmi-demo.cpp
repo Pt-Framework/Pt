@@ -8,6 +8,7 @@ int main(int argc, char* args[])
 	
 	mainWindow.show();
 
+	application.showConsole();
     application.run();
 }
 

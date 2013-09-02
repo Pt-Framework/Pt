@@ -23,6 +23,7 @@ GfxModel::GfxModel()
 , TextAlign(me())
 , Focused(me(), false)
 , AcceptFocus(me(),true)
+, FocusedActionKey(me()," ")
 {
 	Position = toUnit(Pt::Gfx::Point(0,0));
 	Focused.PropertyChanged += Pt::slot(*this, &GfxModel::onFocusChanged);

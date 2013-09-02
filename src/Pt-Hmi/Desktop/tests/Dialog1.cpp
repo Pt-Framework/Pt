@@ -54,33 +54,30 @@ void Dialog1::init()
 	dialogModel->Caption.set("This is a sample modal dialog 1");
 
 	//New dialog button 
-	Pt::Hmi::ButtonController* newDialogController = (Pt::Hmi::ButtonController*) &_newDialog.controller();
-	Pt::Hmi::ButtonModel* newDialogButtonModel = (Pt::Hmi::ButtonModel*) newDialogController->model();
-	newDialogButtonModel->Position.set(Pt::Gfx::PointF(400,300));
-	newDialogButtonModel->Size.set(Pt::Gfx::SizeF(200,25));
-	newDialogButtonModel->Caption.set("New Dialog [CTRL+F]");
-	newDialogButtonModel->ActionKey.set("C//f");
-	newDialogController->PressedAction += Pt::slot(*this,&Dialog1::onShowNextDialog);
+	_newDialog.setPosition(Pt::Gfx::PointF(400,300));
+	_newDialog.setSize(Pt::Gfx::SizeF(200,25));
+	_newDialog.setCaption("New Dialog [CTRL+F]");
+	_newDialog.setActionKey("C//f");
+
+	_newDialog.ClickedAction += Pt::slot(*this,&Dialog1::onShowNextDialog);
 	addChild(&_newDialog);
 
 	//Close Button
-	Pt::Hmi::ButtonController* closeButtonController = (Pt::Hmi::ButtonController*) &_closeButton.controller();
-	Pt::Hmi::ButtonModel* closeButtonModel = (Pt::Hmi::ButtonModel*) closeButtonController->model();
-	closeButtonModel->Position.set(Pt::Gfx::PointF(400,360));
-	closeButtonModel->Size.set(Pt::Gfx::SizeF(200,25));
-	closeButtonModel->Caption.set("Close [CTRL+X]");
-	closeButtonModel->ActionKey.set("C//x");
-	closeButtonController->PressedAction += Pt::slot(*this,&Dialog1::onClosedByButton);
+	_closeButton.setPosition(Pt::Gfx::PointF(400,360));
+	_closeButton.setSize(Pt::Gfx::SizeF(200,25));
+	_closeButton.setActionKey("C//x");
+	_closeButton.setCaption("Close [CTRL+X]");
+	_closeButton.ClickedAction +=  Pt::slot(*this,&Dialog1::onClosedByButton);
 	addChild(&_closeButton);
 }
 
-void Dialog1::onClosedByButton(Controller* ctrl)
+void Dialog1::onClosedByButton()
 {
 	DialogModel* m = (DialogModel*) controller().model();
 	m->Closed = true;
 }
 
-void Dialog1::onShowNextDialog(Controller* ctrl)
+void Dialog1::onShowNextDialog()
 {
 	Dialog2 dialog;
 	dialog.show(this);		

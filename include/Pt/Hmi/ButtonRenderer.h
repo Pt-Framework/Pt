@@ -1,3 +1,4 @@
+
 #ifndef Pt_Hmi_ButtonRenderer_H
 #define Pt_Hmi_ButtonRenderer_H
 

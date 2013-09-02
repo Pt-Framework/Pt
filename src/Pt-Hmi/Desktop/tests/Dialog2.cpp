@@ -52,17 +52,15 @@ void Dialog2::init()
 	dialogModel->Caption.set("This is a sample modal dialog 2");
 
 	//Close Button
-	Pt::Hmi::ButtonController* closeButtonController = (Pt::Hmi::ButtonController*)&_closeButton.controller();
-	Pt::Hmi::ButtonModel* closeButtonModel = (Pt::Hmi::ButtonModel*) closeButtonController->model();
-	closeButtonModel->Position.set(Pt::Gfx::PointF(400,360));
-	closeButtonModel->Size.set(Pt::Gfx::SizeF(200,25));
-	closeButtonModel->Caption.set("Close [CTRL+X]");
-	closeButtonModel->ActionKey.set("C//x");
-	closeButtonController->PressedAction += Pt::slot(*this,&Dialog2::onClosedByButton);
+	_closeButton.setPosition(Pt::Gfx::PointF(400,360));
+	_closeButton.setSize(Pt::Gfx::SizeF(200,25));
+	_closeButton.setCaption("Close [CTRL+X]");
+	_closeButton.setActionKey("C//x");
+	_closeButton.ClickedAction += Pt::slot(*this,&Dialog2::onClosedByButton);
 	addChild(&_closeButton);
 }
 
-void Dialog2::onClosedByButton(Controller* ctrl)
+void Dialog2::onClosedByButton()
 {
 	((DialogController*)&controller())->close();
 }
