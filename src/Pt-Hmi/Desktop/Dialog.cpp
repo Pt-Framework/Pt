@@ -54,16 +54,62 @@ void Dialog::show(WindowController* parent)
 	myController->doModal(parent);	
 }
 
+Pt::Hmi::DialogResultType::Type Dialog::result() const
+{
+	return dialogModel().Result.get();
+}
+
+void Dialog::setResult(DialogResultType::Type r)
+{
+	dialogModel().Result = r;
+}
+
+DialogController& Dialog::dialogController()
+{
+	return *((DialogController*) & controller());
+}
+
+DialogModel& Dialog::dialogModel()
+{
+	return *((DialogModel*)dialogController().model());
+}
+
+const DialogController& Dialog::dialogController() const
+{
+	return *((DialogController*) & controller());
+}
+
+const DialogModel& Dialog::dialogModel() const
+{
+	return *((DialogModel*)dialogController().model());
+}
+
+void Dialog::setSize(const Pt::Gfx::SizeF& size)
+{
+	dialogModel().Size = size;
+}
+
+const Pt::Gfx::SizeF& Dialog::size() const
+{
+	return dialogModel().Size.get();
+}
+
+
+void Dialog::setPosition(const Pt::Gfx::PointF& position)
+{
+	dialogModel().Position = position;
+}
+
+const Pt::Gfx::PointF& Dialog::position() const
+{
+	return dialogModel().Position.get();
+}
+
 Dialog::~Dialog()
 {
 	delete _defController;
 	delete _defModel;
 	delete _defRenderer;
-}
-
-Pt::Hmi::DialogResultType::Type Dialog::result() const
-{
-	return Pt::Hmi::DialogResultType::Undefined;
 }
 
 }}}

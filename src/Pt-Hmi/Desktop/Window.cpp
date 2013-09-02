@@ -33,7 +33,45 @@ Window::Window()
 	setController(*_defController);
 }
 
+WindowController& Window::windowController()
+{
+	return *((WindowController*)&controller());
+}
 
+WindowModel& Window::windowModel()
+{
+	return *((WindowModel*)windowController().model());
+}
+
+const WindowController& Window::windowController() const
+{
+	return *((WindowController*)&controller());
+}
+
+const WindowModel& Window::windowModel() const
+{
+	return *((WindowModel*)windowController().model());
+}
+
+void Window::setSize(const Pt::Gfx::SizeF& size)
+{
+	windowModel().WinSize = size;
+}
+
+const Pt::Gfx::SizeF& Window::size() const
+{
+	return windowModel().WinSize.get();
+}
+
+void Window::setPosition(const Pt::Gfx::PointF& position)
+{
+	windowModel().WinPos = position;
+}
+
+const Pt::Gfx::PointF& Window::position() const
+{
+	return windowModel().WinPos.get();
+}
 
 void Window::show()
 {

@@ -47,14 +47,26 @@ public:
 	Button();
 	virtual ~Button();
     
-    void setToggleButton(bool toggle = true);
-    void setCaption(const char* caption);
-    void setSize(const Pt::Gfx::SizeF& size);
-    void setPosition(const Pt::Gfx::PointF& position);
-	void setActionKey(const char* keyString);
+    void setToggleButton(bool toggle = true);    
+	bool isToggleButton() const;
 
-	ButtonModel* buttonModel();
-	ButtonController* buttonController();
+	void setCaption(const std::string& caption);
+    const std::string& caption() const;
+
+	void setSize(const Pt::Gfx::SizeF& size);
+	const Pt::Gfx::SizeF& size() const;
+
+    void setPosition(const Pt::Gfx::PointF& position);
+	const Pt::Gfx::PointF& position() const;
+
+	void setActionKey(const std::string& keyString);
+	const std::string& actionKey() const;
+
+	const ButtonModel& buttonModel() const;
+	const ButtonController& buttonController() const;
+
+	ButtonModel& buttonModel();
+	ButtonController& buttonController();
 
 public:    
     Pt::Signal<>	 ClickedAction;
@@ -63,15 +75,16 @@ public:
 protected:
     virtual void onClicked();
     virtual void onChecked(bool state);
+	virtual void setController(Pt::Hmi::GfxController& ctrl);
     
 private:
     void handleOnClicked(Controller* sender);
     void handleOnChecked(Controller* sender, bool state);
     
 private:
-	Pt::Hmi::ButtonController*      _defController;
-	Pt::Hmi::ButtonModel*           _defModel;
-	Pt::Hmi::ButtonRenderer*		_defRenderer;
+	Pt::Hmi::ButtonController* _defController;
+	Pt::Hmi::ButtonModel*      _defModel;
+	Pt::Hmi::ButtonRenderer*   _defRenderer;
 };
  
 }}}

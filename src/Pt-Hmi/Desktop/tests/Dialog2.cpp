@@ -46,10 +46,9 @@ Dialog2::~Dialog2()
 void Dialog2::init()
 {
 	//Dialog
-	DialogModel* dialogModel = (DialogModel*) controller().model();
-	dialogModel->WinSize.set(Pt::Gfx::SizeF(800,600));
-	dialogModel->WinPos.set(Pt::Gfx::PointF(400,400));
-	dialogModel->Caption.set("This is a sample modal dialog 2");
+	setSize(Pt::Gfx::SizeF(800,600));
+	setPosition(Pt::Gfx::PointF(400,400));
+	dialogModel().Caption.set("This is a sample modal dialog 2");
 
 	//Close Button
 	_closeButton.setPosition(Pt::Gfx::PointF(400,360));

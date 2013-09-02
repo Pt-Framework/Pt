@@ -48,10 +48,9 @@ Dialog1::~Dialog1()
 void Dialog1::init()
 {
 	//Dialog
-	DialogModel* dialogModel = (DialogModel*) controller().model();
-	dialogModel->WinSize.set(Pt::Gfx::SizeF(800,600));
-	dialogModel->WinPos.set(Pt::Gfx::PointF(400,400));
-	dialogModel->Caption.set("This is a sample modal dialog 1");
+	setSize(Pt::Gfx::SizeF(800,600));
+	setPosition(Pt::Gfx::PointF(400,400));
+	dialogModel().Caption.set("This is a sample modal dialog 1");
 
 	//New dialog button 
 	_newDialog.setPosition(Pt::Gfx::PointF(400,300));

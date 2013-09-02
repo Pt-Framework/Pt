@@ -24,7 +24,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA */
 #include "MainWindow.h"
-
+#include "Dialog1.h"
 #include <Pt/Hmi/WindowController.h>
 #include <Pt/Hmi/WindowModel.h>
 #include <Pt/Hmi/ButtonController.h>
@@ -33,7 +33,6 @@
 #include <Pt/Hmi/LabelModel.h>
 #include <Pt/Hmi/ButtonModel.h>
 #include <Pt/Hmi/Application.h>
-#include "Dialog1.h"
 
 namespace Pt{
 namespace Hmi{
@@ -51,27 +50,23 @@ MainWindow::~MainWindow()
 void MainWindow::init()
 {
 	//Window
-	Pt::Hmi::WindowController* windowController = (Pt::Hmi::WindowController*) &this->controller();
-	Pt::Hmi::WindowModel* windowModel = (Pt::Hmi::WindowModel*) windowController->model();	
-	windowModel->WinPos.set(Pt::Gfx::PointF(200,200));
-	windowModel->WinSize.set(Pt::Gfx::SizeF(800,615));
-	windowModel->Caption.set("Pt-Hmi demo");
-	windowController->ClosedAction += Pt::slot(*this, &MainWindow::onClosed);
+	setPosition(Pt::Gfx::PointF(200,200));
+	setSize(Pt::Gfx::SizeF(800,615));
+	windowModel().Caption.set("Pt-Hmi demo");
+	windowController().ClosedAction += Pt::slot(*this, &MainWindow::onClosedByWindow);
 
 	//Panel
-	Pt::Hmi::PanelModel* panelModel = (Pt::Hmi::PanelModel*)_mainPanel.controller().model();
-	panelModel->Position.set(Pt::Gfx::PointF(40,40));
-	panelModel->BorderWidth.set(3);
-	panelModel->Size.set(Pt::Gfx::SizeF(700,480));
-	panelModel->BorderStyle.set(Pt::Hmi::BorderStyleType::Sizeable);
+	_mainPanel.setSize(Pt::Gfx::SizeF(700,480));
+	_mainPanel.setPosition(Pt::Gfx::PointF(40,40));
+	_mainPanel.panelModel().BorderWidth.set(3);	
+	_mainPanel.panelModel().BorderStyle.set(Pt::Hmi::BorderStyleType::Sizeable);
 	addChild(&_mainPanel);
 
 	//Text
-	Pt::Hmi::LabelModel* labelModel = (Pt::Hmi::LabelModel*) _textLabel.controller().model();
-	labelModel->AutoSize.set(true);
-	labelModel->Caption.set("This is a Platinum C++ Human Mashine Interface demo");
-	labelModel->Position.set(Pt::Gfx::PointF(20,20));
-	labelModel->ForeColor.set(Pt::Gfx::ARgbColor(255,0,0,0));
+	_textLabel.setAutoSize(true);
+	_textLabel.setCaption("This is a Platinum C++ Human Mashine Interface demo");
+	_textLabel.setPosition(Pt::Gfx::PointF(20,20));
+	_textLabel.labelModel().ForeColor.set(Pt::Gfx::ARgbColor(255,0,0,0));
 	_mainPanel.addChild(&_textLabel);
 
 	//Toggle button
@@ -83,35 +78,36 @@ void MainWindow::init()
 	_mainPanel.addChild(&_toggleButton);
 
 	//Dialog button
-	Pt::Hmi::ButtonController* dialogButtonCotroller = (Pt::Hmi::ButtonController*) &_dialogButton.controller();
-	Pt::Hmi::ButtonModel* dialogButtonModel = (Pt::Hmi::ButtonModel*) dialogButtonCotroller->model();
 	_dialogButton.setToggleButton(false);
-	dialogButtonModel->Caption.set("Dialog [CTRL+D]");
-	dialogButtonModel->ActionKey.set("C//d");
-	dialogButtonModel->Position.set(Pt::Gfx::PointF(20,100));
-	dialogButtonModel->Size.set(Pt::Gfx::SizeF(150,25));
-	dialogButtonCotroller->PressedAction  += Pt::slot(*this, &MainWindow::onShowDialog);
+	_dialogButton.setCaption("Dialog [CTRL+D]");
+	_dialogButton.setActionKey("C//d");
+	_dialogButton.setPosition(Pt::Gfx::PointF(20,100));
+	_dialogButton.setSize(Pt::Gfx::SizeF(150,25));
+	_dialogButton.ClickedAction  += Pt::slot(*this, &MainWindow::onShowDialog);
 	_mainPanel.addChild(&_dialogButton);
 
 	//Close button
-	Pt::Hmi::ButtonController* closeButtonCtrl = (Pt::Hmi::ButtonController*) &_closeButton.controller();
-	Pt::Hmi::ButtonModel* closeButtonModel = (Pt::Hmi::ButtonModel*) closeButtonCtrl->model();
-	closeButtonModel->ButtonType.set(Pt::Hmi::ButtonType::Press);
-	closeButtonModel->Caption.set("Close [CTRL+X]");
-	closeButtonModel->ActionKey.set("C//x");
-	closeButtonModel->Position.set(Pt::Gfx::PointF(590,525));
-	closeButtonModel->Size.set(Pt::Gfx::SizeF(150,25));
-	closeButtonCtrl->PressedAction += Pt::slot(*this, &MainWindow::onClosed);
+	_closeButton.setToggleButton(false);
+	_closeButton.setCaption("Close [CTRL+X]");
+	_closeButton.setActionKey("C//x");
+	_closeButton.setPosition(Pt::Gfx::PointF(590,525));
+	_closeButton.setSize(Pt::Gfx::SizeF(150,25));
+	_closeButton.ClickedAction += Pt::slot(*this, &MainWindow::onClosed);
 	addChild(&_closeButton);
 }
 
-void MainWindow::onShowDialog(Pt::Hmi::Controller* ctrl)
+void MainWindow::onShowDialog()
 {
 	Dialog1 dialog;
 	dialog.show(this);
 }
 
-void MainWindow::onClosed(Pt::Hmi::Controller* ctrl)
+void MainWindow::onClosedByWindow(Controller* ctrl)
+{
+	onClosed();
+}
+
+void MainWindow::onClosed()
 {
 	Pt::Hmi::Application::instance().exit();
 }

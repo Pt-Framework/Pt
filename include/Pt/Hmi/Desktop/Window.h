@@ -24,8 +24,20 @@ public:
 	virtual ~Window();
 	
 	virtual void show();
-	void close();
-	
+	void close();	
+
+	WindowController& windowController();
+	WindowModel& windowModel();
+
+	const WindowController& windowController() const;
+	const WindowModel& windowModel() const;
+
+	virtual void setSize(const Pt::Gfx::SizeF& size);
+	virtual const Pt::Gfx::SizeF& size() const;
+
+    virtual void setPosition(const Pt::Gfx::PointF& position);
+	virtual const Pt::Gfx::PointF& position() const;
+
 	Pt::Signal<> Closed;
 	Pt::Signal<> CanClose;
 

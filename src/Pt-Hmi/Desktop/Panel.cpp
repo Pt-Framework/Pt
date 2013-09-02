@@ -21,6 +21,46 @@ Panel::Panel()
 	setController(*_defController);
 }
 
+Pt::Hmi::PanelController& Panel::panelController()
+{
+	return *((Pt::Hmi::PanelController*) &controller());
+}
+
+Pt::Hmi::PanelModel& Panel::panelModel()
+{
+	return *((Pt::Hmi::PanelModel*)panelController().model());
+}
+
+const Pt::Hmi::PanelController&	Panel::panelController() const
+{
+	return *((Pt::Hmi::PanelController*) &controller());
+}
+
+const Pt::Hmi::PanelModel& Panel::panelModel() const
+{
+	return *((Pt::Hmi::PanelModel*)panelController().model());
+}
+
+void Panel::setSize(const Pt::Gfx::SizeF& size)
+{
+	panelModel().Size = size;
+}
+
+const Pt::Gfx::SizeF& Panel::size() const
+{
+	return panelModel().Size.get(); 
+}
+
+void Panel::setPosition(const Pt::Gfx::PointF& position)
+{
+	panelModel().Position = position;
+}
+
+const Pt::Gfx::PointF& Panel::position() const
+{
+	return panelModel().Position.get();
+}
+
 Panel::~Panel()
 {
 	delete _defController;

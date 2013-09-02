@@ -44,32 +44,57 @@ Button::Button()
 	_defModel->BorderWidth.set(1);
 	_defModel->BorderStyle.set(BorderStyleType::Widget);
 
-    _defController->PressedAction += Pt::slot(*this, &Button::handleOnClicked);
-    _defController->CheckedAction += Pt::slot(*this, &Button::handleOnChecked);
 	setController(*_defController);
 }
-    
+
+void Button::setController(Pt::Hmi::GfxController& controller)
+{
+	Widget::setController(controller);
+    buttonController().PressedAction += Pt::slot(*this, &Button::handleOnClicked);
+    buttonController().CheckedAction += Pt::slot(*this, &Button::handleOnChecked);
+}
+
 void Button::setToggleButton(bool toggle)
 {
 	if(toggle)
-		buttonModel()->ButtonType = Pt::Hmi::ButtonType::Toggle;       
+		buttonModel().ButtonType = Pt::Hmi::ButtonType::Toggle;       
 	else
-		buttonModel()->ButtonType = Pt::Hmi::ButtonType::Press;       
+		buttonModel().ButtonType = Pt::Hmi::ButtonType::Press;       
+}
+
+bool Button::isToggleButton() const
+{
+	return (buttonModel().ButtonType.get() == Pt::Hmi::ButtonType::Toggle);	
 }
     
-void Button::setCaption(const char* caption)
+void Button::setCaption(const std::string& caption)
 {
-    buttonModel()->Caption = caption;    
+    buttonModel().Caption = caption;    
+}
+
+const std::string& Button::caption() const
+{
+	return buttonModel().Caption.get();
 }
 
 void Button::setSize(const Pt::Gfx::SizeF& size)
 {
-	buttonModel()->Size = size;        
+	buttonModel().Size = size;        
+}
+
+const Pt::Gfx::SizeF& Button::size() const
+{
+	return buttonModel().Size.get();        
 }
 
 void Button::setPosition(const Pt::Gfx::PointF& position)
 {
-    buttonModel()->Position = position; 
+    buttonModel().Position = position; 
+}
+
+const Pt::Gfx::PointF& Button::position() const
+{
+	return  buttonModel().Position.get();
 }
 
 void Button::onClicked()
@@ -92,19 +117,34 @@ void Button::handleOnChecked(Controller* sender, bool state)
     onChecked(state);
 }
     
-void Button::setActionKey(const char* keyString)
+void Button::setActionKey(const std::string& keyString)
 {
-	buttonModel()->ActionKey = keyString;
+	buttonModel().ActionKey = keyString;
 }
 
-ButtonModel* Button::buttonModel()
+const std::string& Button::actionKey() const
 {
-	return (ButtonModel*) buttonController()->model();
+	return buttonModel().ActionKey.get();
 }
 
-ButtonController* Button::buttonController()
+const ButtonModel& Button::buttonModel() const
 {
-	return (ButtonController*)&controller();
+	return *((ButtonModel*) buttonController().model());
+}
+
+const ButtonController& Button::buttonController() const
+{
+	return *((ButtonController*)&controller());
+}
+
+ButtonModel& Button::buttonModel()
+{
+	return *((ButtonModel*) buttonController().model());
+}
+
+ButtonController& Button::buttonController()
+{
+	return *((ButtonController*)&controller());
 }
 
 Button::~Button()

@@ -4,6 +4,8 @@
 #include <Pt/Hmi/Desktop/Api.h>
 #include <vector>
 #include <Pt/Connectable.h>
+#include <Pt/Gfx/Point.h>
+#include <Pt/Gfx/Size.h>
 
 namespace Pt{
 namespace Hmi{
@@ -50,9 +52,25 @@ public:
 		return _parent;
 	}
 
+	virtual void setCaption(const std::string& caption)
+	{
+	}
+
+    virtual const std::string& caption() const
+	{
+		static std::string empty;
+		return empty;
+	}
+
+	virtual void setSize(const Pt::Gfx::SizeF& size) = 0;
+	virtual const Pt::Gfx::SizeF& size() const = 0;
+
+    virtual void setPosition(const Pt::Gfx::PointF& position) = 0;
+	virtual const Pt::Gfx::PointF& position() const = 0;
+
 protected:
     
-	inline void setController(Pt::Hmi::GfxController& controller)
+	virtual void setController(Pt::Hmi::GfxController& controller)
 	{
 		_controller = &controller;
 	}

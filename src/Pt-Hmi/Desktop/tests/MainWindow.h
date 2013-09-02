@@ -45,8 +45,9 @@ protected:
 	virtual void init();
 
 private:
-	void onClosed(Pt::Hmi::Controller* ctrl);
-	void onShowDialog(Controller* ctrl);
+	void onClosed();
+	void onClosedByWindow(Pt::Hmi::Controller* ctrl);
+	void onShowDialog();
 
 private:
     Pt::Hmi::Desktop::Panel  _mainPanel;
