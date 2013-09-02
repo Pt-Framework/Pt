@@ -41,6 +41,7 @@
     #import <AppKit/NSWindow.h>
     #import <AppKit/NSGraphicsContext.h>
 #else
+    
 	struct NSView;
     struct NSWindow;
     struct NSResponder;

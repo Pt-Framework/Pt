@@ -131,99 +131,42 @@ void GfxOutputDeviceImpl::writeWindowProperties()
     //Border style
     Pt::Gfx::Size winMinSize =  _model->fromUnit(_model->MinimumSize.get());
     Pt::Gfx::Size winMaxSize =  _model->fromUnit(_model->MaximumSize.get());
-        
+    int windowStyle = 0;
+    
     switch( _model->Border.get())
     {
         case Pt::Hmi::WindowBorderType::Sizeable:
         case Pt::Hmi::WindowBorderType::DialogSizeable:
         case Pt::Hmi::WindowBorderType::ToolSizeable:
         {//Sizeable
-      
+            windowStyle = NSTitledWindowMask| NSClosableWindowMask| NSResizableWindowMask;
         }
         break;
                 
         case Pt::Hmi::WindowBorderType::Dialog:
         case Pt::Hmi::WindowBorderType::Tool:
         {//Fixed size
-     
+            windowStyle =  NSTitledWindowMask| NSClosableWindowMask;
         }
         break;
+            
+        case Pt::Hmi::WindowBorderType::NoBorder:
+        {
+             windowStyle = NSBorderlessWindowMask;
+        }
 
         default:
         break;
     }
-        
+    
     //Windows state
-    //TODO : show/hide minimize button.
     if( _model->ShowMinimizeButton.get())
     {
+        windowStyle |=  NSMiniaturizableWindowMask;
     }
-    else
-    {
-    }
-        
-    //TODO : show/hide maximize button.
-    if( _model->ShowMaximizeButton.get())
-    {
-    }
-    else
-    {
-    }
-        
-    //TODO : show/hide system menu
-    if( _model->ShowSysMenu.get())
-    {
-    }
-    else
-    {
-    }
-        
-    //TODO : Windows state min/max/normal
-    switch(_model->WindowState.get())
-    {
-        case Pt::Hmi::WindowStateType::Normal:
-        break;
-                
-        case Pt::Hmi::WindowStateType::Maximazed:
-                
-        break;
-                
-        case Pt::Hmi::WindowStateType::Minimized:
-                
-        break;
-    }
-        
-    //TODO: window border aparents
-    switch( _model->Border.get())
-    {
-        case Pt::Hmi::WindowBorderType::NoBorder:
-                
-        break;
-                
-        case Pt::Hmi::WindowBorderType::Sizeable:
-                
-        break;
-                
-        case Pt::Hmi::WindowBorderType::Dialog:
-        break;
-                
-        case Pt::Hmi::WindowBorderType::DialogSizeable:
-        break;
-                
-        case Pt::Hmi::WindowBorderType::Tool:
-        break;
-                
-        case Pt::Hmi::WindowBorderType::ToolSizeable:
-        break;                
-    }
-        
-    //TODO: show in taskbar
-    if(_model->ShowInTaskbar.get())
-    {
-    }
-    else
-    {
-    }
+
+    
+    [_window setStyleMask: windowStyle];
 }
 
 void GfxOutputDeviceImpl::output(Pt::Hmi::Model* model)
@@ -263,9 +206,9 @@ void GfxOutputDeviceImpl::output(Pt::Hmi::Model* model)
     
     //Size and position handling
     _ignoreSizeEvent = true;
+    writeWindowProperties();
     checkModal();
     writeWindowSizeAndPos();
-    writeWindowProperties();
     _ignoreSizeEvent = false;
     
     //Redraw
@@ -302,9 +245,26 @@ void GfxOutputDeviceImpl::onMouseMove(double x, double y)
     
 void GfxOutputDeviceImpl::writeWindowSizeAndPos()
 {
+    
+    switch(_model->WindowState.get())
+    {
+        case Pt::Hmi::WindowStateType::Normal:
+            if([_window isMiniaturized])
+                [_window deminiaturize:_window];
+            break;
+            
+        case Pt::Hmi::WindowStateType::Maximazed:
+            [_window setFrame: [[NSScreen mainScreen] frame] display:YES];
+            break;
+            
+        case Pt::Hmi::WindowStateType::Minimized:
+            [_window miniaturize: _window];
+            break;
+    }
+    
     int screenHeight = [[NSScreen mainScreen] frame].size.height;
     NSRect windowRect =  [_window frame];
-   
+    
     //Position
     windowRect.origin.x = _model->WinPos.get().x();
     windowRect.origin.y = screenHeight - (_model->WinPos.get().y() + _model->WinSize.get().height());
@@ -312,8 +272,8 @@ void GfxOutputDeviceImpl::writeWindowSizeAndPos()
     //Size
     windowRect.size.width = _model->WinSize.get().width();
     windowRect.size.height = _model->WinSize.get().height();
+    [_window setFrame:windowRect display:YES animate:NO];
     
-    [_window setFrame:windowRect display:YES animate:NO];    
 }
     
 Pt::Gfx::PointF GfxOutputDeviceImpl::convertMousePosition(double x, double y)
@@ -367,6 +327,27 @@ void GfxOutputDeviceImpl::onPosition()
     
     if( _model == 0)
         return;
+    
+    if([_window isMiniaturized])
+    {
+        _model->WindowState = WindowStateType::Minimized;
+    }
+    else
+    {
+        NSRect maxRect = [[NSScreen mainScreen] frame];
+        NSRect currentRect = [_window frame];
+        
+        if( maxRect.size.width == currentRect.size.width && maxRect.size.height == currentRect.size.height &&
+           maxRect.origin.x == currentRect.origin.x &&  maxRect.origin.y == currentRect.origin.y)
+        {
+            _model->WindowState = WindowStateType::Minimized;
+        }
+        else
+        {
+            _model->WindowState = WindowStateType::Normal;
+        }
+    }
+
     
     int screenHeight = [[NSScreen mainScreen] frame].size.height;
     
