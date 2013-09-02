@@ -161,7 +161,7 @@ void GfxOutputImpl::onClientMessage(XEvent& xev)
 	
 		bool canClose = false;
 
-		controller->Closing.send(canClose);
+		controller->ClosingAction.send(controller, canClose);
 
 		if(canClose)
 			destroy();
@@ -498,7 +498,7 @@ void GfxOutputImpl::destroy()
 		XSync(_display, false);
 		_window = 0;
 		WindowController* controller = (WindowController*)_model->controller();
-		controller->Closed.send();
+		controller->ClosedAction.send(controller);
 	}
 }
 

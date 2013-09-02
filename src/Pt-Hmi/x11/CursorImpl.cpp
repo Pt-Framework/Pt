@@ -28,10 +28,7 @@ void CursorImpl::setCursor(Cursors::Type c, WindowController* parent)
 	{
 		default:
 			shape = XC_top_left_arrow;
-		break;
-	
-		case Cursors::AppStarting:
-		break;
+		break;	
 	
 		case Cursors::Arrow:		
 			shape = XC_top_left_arrow;
@@ -49,37 +46,14 @@ void CursorImpl::setCursor(Cursors::Type c, WindowController* parent)
 			shape = XC_xterm;
 		break;
 	
-		case Cursors::No:
-			shape = XC_X_cursor;
-		break;
-
-		case Cursors::SizeAll:
-			shape = XC_fleur;
-		break;
-
-		case Cursors::SizeNESW:
-			shape = XC_sb_v_double_arrow;
-		break;
-	
 		case Cursors::SizeNS:
 			shape = XC_sb_v_double_arrow;
 		break;
-	
-		case Cursors::SizeNWSE:
-			shape = XC_sb_h_double_arrow;
-		break;
-	
+		
 		case Cursors::SizeWE:
 			shape = XC_sb_h_double_arrow;
 		break;
 
-		case Cursors::UpArrow:
-			shape = XC_arrow;
-		break;
-
-		case Cursors::Wait:
-			shape =XC_exchange;
-		break;
 	}
 
 	_cursorId = XCreateFontCursor(display, shape);
