@@ -21,15 +21,12 @@ void CursorImpl::setCursor(Cursors::Type c, WindowController* parent)
 	_type = c;
 	HINSTANCE hin = NULL; //System Instance
 
+	_cursor = LoadCursor(hin, IDC_ARROW);
+
 	switch(_type)
 	{
-		default:
-			_cursor = LoadCursor(hin, IDC_ARROW);
+		default:			
 		break;
-		
-		case Cursors::AppStarting:
-		break;
-		
 		case Cursors::Arrow:		
 			_cursor = LoadCursor(hin, IDC_ARROW);
 		break;
@@ -45,37 +42,13 @@ void CursorImpl::setCursor(Cursors::Type c, WindowController* parent)
 		case Cursors::IBeam:
 			_cursor = LoadCursor(hin, IDC_IBEAM);
 		break;
-		
-		case Cursors::No:
-			_cursor = LoadCursor(hin, IDC_NO);
-		break;
 
-		case Cursors::SizeAll:
-			_cursor = LoadCursor(hin, IDC_SIZEALL);
-		break;
-
-		case Cursors::SizeNESW:
-			_cursor = LoadCursor(hin, IDC_SIZENESW);
-		break;
-		
 		case Cursors::SizeNS:
 			_cursor = LoadCursor(hin, IDC_SIZENS);
-		break;
-		
-		case Cursors::SizeNWSE:
-			_cursor = LoadCursor(hin, IDC_SIZENWSE);
-		break;
+		break;		
 		
 		case Cursors::SizeWE:
 			_cursor = LoadCursor(hin, IDC_SIZEWE);
-		break;
-
-		case Cursors::UpArrow:
-			_cursor = LoadCursor(hin, IDC_UPARROW);
-		break;
-
-		case Cursors::Wait:
-			_cursor = LoadCursor(hin, IDC_WAIT);
 		break;
 	}
 

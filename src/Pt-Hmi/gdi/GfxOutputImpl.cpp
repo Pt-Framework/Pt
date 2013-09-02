@@ -173,22 +173,22 @@ bool GfxOutputImpl::onClosing()
 
 	bool canClose = false;
 	WindowController* controller = (WindowController*)_model->controller();
-	controller->Closing.send(canClose);
+	controller->ClosingAction.send(controller,canClose);
 	return canClose;
 }
 
 void GfxOutputImpl::onClosed()
 {
 	WindowController* controller = (WindowController*)_model->controller();
-	controller->Closed.send();
+	controller->ClosedAction.send(controller);
 }
 
 void GfxOutputImpl::onSize(WPARAM wParam, LPARAM lParam)
 {			
 	if(!_model->Enable.get())
 	{
-		writeWindowSizeAndPos();
-		writeWindowProperties();
+		setWindowSizeAndPos();
+		setWindowProperties();
 		return;
 	}
 
@@ -212,7 +212,7 @@ void GfxOutputImpl::onSize(WPARAM wParam, LPARAM lParam)
 		break;
 	}
 
-	readWindowSize();
+	getWindowSize();
 }
 
 void GfxOutputImpl::onMouse(unsigned int msg, WPARAM wparam, LPARAM lparam)
@@ -256,7 +256,7 @@ void GfxOutputImpl::onMouse(unsigned int msg, WPARAM wparam, LPARAM lparam)
 	Application::instance().pointerEvent().send(ctrl, _pointerEvent);
 }
 
-void GfxOutputImpl::writeWindowSizeAndPos()
+void GfxOutputImpl::setWindowSizeAndPos()
 {
 	WindowModel* wmodel = (WindowModel*) _model;
 	Pt::Gfx::Point pos = wmodel->fromUnit(wmodel->WinPos.get());
@@ -264,7 +264,7 @@ void GfxOutputImpl::writeWindowSizeAndPos()
 	SetWindowPos(_hwnd,0, pos.x(), pos.y(), size.width(), size.height(), 0);	
 }
 
-void GfxOutputImpl::readWindowSize()
+void GfxOutputImpl::getWindowSize()
 {
 	WINDOWINFO  info;
 	GetWindowInfo(_hwnd, &info);
@@ -276,7 +276,7 @@ void GfxOutputImpl::readWindowSize()
 	_model->Size	 = _model->toUnit(Pt::Gfx::Size(info.rcClient.right - info.rcClient.left, info.rcClient.bottom - info.rcClient.top));
 }
 
-void GfxOutputImpl::readWindowPos()
+void GfxOutputImpl::getWindowPos()
 {
 	WINDOWINFO  info;
 	GetWindowInfo(_hwnd, &info);
@@ -300,12 +300,12 @@ void GfxOutputImpl::onMove()
 {
 	if(!_model->Enable.get())
 	{
-		writeWindowSizeAndPos();
-		writeWindowProperties();
+		setWindowSizeAndPos();
+		setWindowProperties();
 		return;
 	}
 
-	readWindowPos();
+	getWindowPos();
 }
 
 void GfxOutputImpl::onPaint()
@@ -347,28 +347,34 @@ void GfxOutputImpl::drawIndependentImage(size_t x, size_t y, const char* data, s
 	EndPaint(_hwnd, &ps);
 }
 
-void GfxOutputImpl::writeWindowProperties()
+void GfxOutputImpl::setWindowProperties()
 {
 	SetWindowText(_hwnd, _model->Caption.get().c_str());
 
 	long style = 0;
 	long exStyle = 0;
-
+	
+	//Visibility
 	if(_model->Visible.get())
 		style |= WS_VISIBLE;
-		
+	
+	//Title	
 	if( _model->ShowTitle.get())
 		style |= WS_CAPTION;
 
+	//Minimize button
 	if( _model->ShowMinimizeButton.get())
 		style |= WS_MINIMIZEBOX;
 
+	//Maximize button
 	if( _model->ShowMaximizeButton.get())
 		style |= WS_MAXIMIZEBOX;
 		
+	//System menu
 	if( _model->ShowSysMenu.get())
 		style |= WS_SYSMENU;
 		
+	//Windows state
 	switch(_model->WindowState.get())
 	{
 		case Pt::Hmi::WindowStateType::Normal:			
@@ -383,6 +389,7 @@ void GfxOutputImpl::writeWindowProperties()
 		break;
 	}
 	
+	//Window border behaviour
 	switch( _model->Border.get())
 	{
 		case Pt::Hmi::WindowBorderType::NoBorder:			
@@ -416,6 +423,7 @@ void GfxOutputImpl::writeWindowProperties()
 		break;
 	}
 
+	//SHow in taskbar
 	if(_model->ShowInTaskbar.get())
 	{
 		exStyle |= WS_EX_APPWINDOW;  
@@ -435,8 +443,7 @@ void GfxOutputImpl::writeWindowProperties()
 	else if( !visible)
 		ShowWindow(_hwnd, SW_SHOW);		
 
-	SetWindowLong(_hwnd, GWL_STYLE, style);  
-	
+	SetWindowLong(_hwnd, GWL_STYLE, style);  	
 }
 
 void GfxOutputImpl::destroy()
@@ -460,10 +467,7 @@ void GfxOutputImpl::output(Pt::Hmi::Model* model)
 	if(wmodel->Closed.get())
 	{
 		if(_hwnd != 0)
-		{
 			destroy();
-		}
-
 		return;
 	}
 	else
@@ -477,8 +481,8 @@ void GfxOutputImpl::output(Pt::Hmi::Model* model)
 		}
 	}
 
-	writeWindowSizeAndPos();
-	writeWindowProperties();	
+	setWindowSizeAndPos();
+	setWindowProperties();	
 	output();
 	InvalidateRect(_hwnd, 0, FALSE);
 }

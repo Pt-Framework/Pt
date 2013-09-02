@@ -33,14 +33,15 @@ private:
 	virtual void onMove();
 	virtual bool onClosing();
 	virtual void onClosed();
-	void readWindowSize();
-	void readWindowPos();
-	void writeWindowSizeAndPos();
-	void writeWindowProperties();
 	void drawIndependentImage(size_t x, size_t y, const char* data, size_t width, size_t height);
 	void create();
 	void destroy();
 	void output();
+	
+	void getWindowSize();
+	void getWindowPos();
+	void setWindowSizeAndPos();
+	void setWindowProperties();	
 
 private:
 	HWND					_hwnd;
