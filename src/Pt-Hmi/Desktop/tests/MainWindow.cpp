@@ -76,7 +76,8 @@ void MainWindow::init()
 
 	//Toggle button
 	_toggleButton.setToggleButton(true);
-	_toggleButton.setCaption("Toggle Me");
+	_toggleButton.setCaption("Toggle Me [CTRL+I]");
+	_toggleButton.setActionKey("C//i");
 	_toggleButton.setPosition(Pt::Gfx::PointF(20,60));
 	_toggleButton.setSize(Pt::Gfx::SizeF(150,25));
 	_mainPanel.addChild(&_toggleButton);
