@@ -846,9 +846,6 @@
     <ClInclude Include="..\..\include\Pt\Hmi\DeviceControlDial.h">
       <Filter>Pt-Hmi\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\GfxOutput.h">
-      <Filter>Pt-Hmi\Headers</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\OutputDevice.h">
       <Filter>Pt-Hmi\Headers</Filter>
     </ClInclude>
@@ -960,9 +957,6 @@
     <ClInclude Include="..\..\include\Pt\Hmi\Desktop\Window.h">
       <Filter>Pt-Hmi\Headers\Desktop</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\gdi\GfxOutputImpl.h">
-      <Filter>Pt-Hmi\Sources\gdi</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\Renderer.h">
       <Filter>Pt-Hmi\Headers</Filter>
     </ClInclude>
@@ -1071,9 +1065,6 @@
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\CursorImpl.h">
       <Filter>Pt-Hmi\Sources\cocoa</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\cocoa\GfxOutputImpl.h">
-      <Filter>Pt-Hmi\Sources\cocoa</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\WidgetView.h">
       <Filter>Pt-Hmi\Sources\cocoa</Filter>
     </ClInclude>
@@ -1083,13 +1074,22 @@
     <ClInclude Include="..\..\src\Pt-Hmi\x11\CursorImpl.h">
       <Filter>Pt-Hmi\Sources\x11</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\x11\GfxOutputImpl.h">
-      <Filter>Pt-Hmi\Sources\x11</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\x11\KeyHandler.h">
       <Filter>Pt-Hmi\Sources\x11</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\x11\X11Fd.h">
+      <Filter>Pt-Hmi\Sources\x11</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\GfxOutputDevice.h">
+      <Filter>Pt-Hmi\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\cocoa\GfxOutputDeviceImpl.h">
+      <Filter>Pt-Hmi\Sources\cocoa</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\gdi\GfxOutputDeviceImpl.h">
+      <Filter>Pt-Hmi\Sources\gdi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\x11\GfxOutputDeviceImpl.h">
       <Filter>Pt-Hmi\Sources\x11</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1216,10 +1216,13 @@
     <None Include="..\..\src\Pt-Hmi\cocoa\ApplicationImpl.mm">
       <Filter>Pt-Hmi\Sources\cocoa</Filter>
     </None>
-    <None Include="..\..\src\Pt-Hmi\cocoa\GfxOutputImpl.mm">
+    <None Include="..\..\src\Pt-Hmi\cocoa\WidgetView.mm">
       <Filter>Pt-Hmi\Sources\cocoa</Filter>
     </None>
-    <None Include="..\..\src\Pt-Hmi\cocoa\WidgetView.mm">
+    <None Include="..\..\src\Pt-Hmi\cocoa\CursorImpl.mm">
+      <Filter>Pt-Hmi\Sources\cocoa</Filter>
+    </None>
+    <None Include="..\..\src\Pt-Hmi\cocoa\GfxOutputDeviceImpl.mm">
       <Filter>Pt-Hmi\Sources\cocoa</Filter>
     </None>
   </ItemGroup>
@@ -1878,13 +1881,7 @@
     <ClCompile Include="..\..\src\Pt-Hmi\gdi\ApplicationImpl.cpp">
       <Filter>Pt-Hmi\Sources\gdi</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\gdi\GfxOutputImpl.cpp">
-      <Filter>Pt-Hmi\Sources\gdi</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\GfxModel.cpp">
-      <Filter>Pt-Hmi\Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\GfxOutput.cpp">
       <Filter>Pt-Hmi\Sources</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\PanelController.cpp">
@@ -2106,22 +2103,25 @@
     <ClCompile Include="..\..\src\Pt-Hmi\Desktop\tests\MainWindow.cpp">
       <Filter>Pt-Hmi\Sources\Desktop\tests</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\cocoa\CursorImpl.cpp">
-      <Filter>Pt-Hmi\Sources\cocoa</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\x11\ApplicationImpl.cpp">
       <Filter>Pt-Hmi\Sources\x11</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\x11\CursorImpl.cpp">
       <Filter>Pt-Hmi\Sources\x11</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\x11\GfxOutputImpl.cpp">
-      <Filter>Pt-Hmi\Sources\x11</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\x11\KeyHandler.cpp">
       <Filter>Pt-Hmi\Sources\x11</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\x11\X11Fd.cpp">
+      <Filter>Pt-Hmi\Sources\x11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\GfxOutputDevice.cpp">
+      <Filter>Pt-Hmi\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\gdi\GfxOutputDeviceImpl.cpp">
+      <Filter>Pt-Hmi\Sources\gdi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\x11\GfxOutputDeviceImpl.cpp">
       <Filter>Pt-Hmi\Sources\x11</Filter>
     </ClCompile>
   </ItemGroup>

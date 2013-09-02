@@ -23,36 +23,34 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
-#include <Pt/Hmi/GfxOutput.h>
+#include <Pt/Hmi/GfxOutputDevice.h>
 #include <Pt/Hmi/GfxModel.h>
 #include <Pt/Gfx/ARgbImage.h>
-#include "GfxOutputImpl.h"
-#include <Pt/Hmi/GfxOutput.h>
-#include "GfxOutputImpl.h"
+#include "GfxOutputDeviceImpl.h"
  
 namespace Pt{
 namespace Hmi{
 
-GfxOutput::GfxOutput()
-: _impl(new GfxOutputImpl())
+GfxOutputDevice::GfxOutputDevice()
+: _impl(new GfxOutputDeviceImpl())
 {
 }
 
-GfxOutput::~GfxOutput()
+GfxOutputDevice::~GfxOutputDevice()
 {
 }
 
-GfxOutputImpl* GfxOutput::impl()
+GfxOutputDeviceImpl* GfxOutputDevice::impl()
 {
 	return _impl;
 }
 
-Pt::Gfx::Painter* GfxOutput::nativePainter()
+Pt::Gfx::Painter* GfxOutputDevice::nativePainter()
 {
 	return _impl->nativePainter();
 }
 
-void GfxOutput::output(Pt::Hmi::Model* model)
+void GfxOutputDevice::output(Pt::Hmi::Model* model)
 {	
 	_impl->output(model);
 }

@@ -24,7 +24,7 @@ SharedLibrary Pt-Hmi : $(PT_HMI_IMPL)
 					   PointingEvent.cpp
 					   GfxController.cpp
 					   GfxModel.cpp
-					   GfxOutput.cpp
+					   GfxOutputDevice.cpp
 					   Device.cpp
 					   MouseDevice.cpp
 					   KeyEvent.cpp

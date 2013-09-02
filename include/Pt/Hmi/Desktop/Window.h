@@ -6,7 +6,7 @@
 #include <Pt/Hmi/Desktop/Panel.h>
 #include <Pt/Hmi/MouseDevice.h>
 #include <Pt/Hmi/KeyboardDevice.h>
-#include <Pt/Hmi/GfxOutput.h>
+#include <Pt/Hmi/GfxOutputDevice.h>
 
 namespace Pt{
 namespace Hmi{
@@ -35,7 +35,7 @@ private:
 	Pt::Hmi::WindowRenderer*	_defRenderer;
 	Pt::Hmi::MouseDevice        _mouseDevice;
 	Pt::Hmi::KeyboardDevice     _keyboardDevice;
-	Pt::Hmi::GfxOutput          _gfxOutputDevice;
+	Pt::Hmi::GfxOutputDevice    _gfxOutputDevice;
 };
  
 }}}

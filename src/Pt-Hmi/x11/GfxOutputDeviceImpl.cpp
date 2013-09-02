@@ -25,7 +25,7 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
-#include "GfxOutputImpl.h"
+#include "GfxOutputDeviceImpl.h"
 #include "ApplicationImpl.h"
 #include <Pt/Hmi/Application.h>
 #include <Pt/Gfx/Rgb888Color.h>
@@ -36,7 +36,7 @@
 #include <Pt/Hmi/PanelModel.h>
 #include <Pt/Hmi/WidgetController.h>
 #include <Pt/Hmi/PointingDevice.h>
-#include <Pt/Hmi/GfxOutput.h>
+#include <Pt/Hmi/GfxOutputDevice.h>
 #include <Pt/Hmi/WindowController.h>
 #include <iostream>
 #include <sstream>
@@ -47,7 +47,7 @@
 namespace Pt{
 namespace Hmi{
 
-GfxOutputImpl::GfxOutputImpl()
+GfxOutputDeviceImpl::GfxOutputDeviceImpl()
 : _ignoreSizeEvent(false)
 , _model(0)
 , _window(0)
@@ -67,7 +67,7 @@ GfxOutputImpl::GfxOutputImpl()
 }
 
 
-void GfxOutputImpl::pixelToScreen(char* data, const Pt::Gfx::ARgbColor& pixel)
+void GfxOutputDeviceImpl::pixelToScreen(char* data, const Pt::Gfx::ARgbColor& pixel)
 {
     unsigned int screen = DefaultScreen(_display);
 	const int depth = XDefaultDepth(_display, screen);
@@ -93,7 +93,7 @@ void GfxOutputImpl::pixelToScreen(char* data, const Pt::Gfx::ARgbColor& pixel)
 
 //Direct draw
 #if 0
-void GfxOutputImpl::drawIndependentImage(const Pt::Gfx::ARgbImage& image)
+void GfxOutputDeviceImpl::drawIndependentImage(const Pt::Gfx::ARgbImage& image)
 {    
 
 	for(size_t y = 0; y < image.height(); ++y)
@@ -116,7 +116,7 @@ void GfxOutputImpl::drawIndependentImage(const Pt::Gfx::ARgbImage& image)
 #endif
 
 //Buffered draw
-void GfxOutputImpl::drawIndependentImage(const Pt::Gfx::ARgbImage& image)
+void GfxOutputDeviceImpl::drawIndependentImage(const Pt::Gfx::ARgbImage& image)
 {    
 
 	updateDrawBuffer();
@@ -150,7 +150,7 @@ void GfxOutputImpl::drawIndependentImage(const Pt::Gfx::ARgbImage& image)
 	XDestroyImage(ximage);	
 }
 
-void GfxOutputImpl::onClientMessage(XEvent& xev)
+void GfxOutputDeviceImpl::onClientMessage(XEvent& xev)
 {
 	if( _model == 0)
 		return;
@@ -168,7 +168,7 @@ void GfxOutputImpl::onClientMessage(XEvent& xev)
 	}	
 }
 
-void GfxOutputImpl::onMotionNotify(XEvent& xev)
+void GfxOutputDeviceImpl::onMotionNotify(XEvent& xev)
 {
     int x = xev.xmotion.x;
     int y = xev.xmotion.y;
@@ -211,7 +211,7 @@ void GfxOutputImpl::onMouseButtonPress(XEvent& xev)
 }
 
 
-void GfxOutputImpl::onMouseButtonRelease(XEvent& xev)
+void GfxOutputDeviceImpl::onMouseButtonRelease(XEvent& xev)
 {
     int  x = xev.xbutton.x;
     int  y = xev.xbutton.y;
@@ -242,7 +242,7 @@ void GfxOutputImpl::onMouseButtonRelease(XEvent& xev)
 	_mouseEvent.setY(pos.y());
 }
 
-void GfxOutputImpl::redraw()
+void GfxOutputDeviceImpl::redraw()
 {
     XEvent exppp;
     memset(&exppp, 0, sizeof(exppp));
@@ -253,7 +253,7 @@ void GfxOutputImpl::redraw()
     XFlush(_display);
 }
 
-void GfxOutputImpl::readClientSizeAndPos(Pt::Gfx::SizeF& size, Pt::Gfx::PointF& pos)
+void GfxOutputDeviceImpl::readClientSizeAndPos(Pt::Gfx::SizeF& size, Pt::Gfx::PointF& pos)
 {
 	if(_window == 0)
 		return;
@@ -266,7 +266,7 @@ void GfxOutputImpl::readClientSizeAndPos(Pt::Gfx::SizeF& size, Pt::Gfx::PointF& 
 
 }
 
-void GfxOutputImpl::writeWindowSizeAndPos()
+void GfxOutputDeviceImpl::writeWindowSizeAndPos()
 {	
 	Pt::Gfx::Point posGlobal = _model->fromUnit(_model->WinPos.get());
 	Pt::Gfx::Point posLocal = _model->fromUnit(_model->Position.get());
@@ -279,7 +279,7 @@ void GfxOutputImpl::writeWindowSizeAndPos()
 }
 
 
-void GfxOutputImpl::onConfigureNotify( XEvent& xev)
+void GfxOutputDeviceImpl::onConfigureNotify( XEvent& xev)
 {
 	if(!_model->Enable.get())
 	{
@@ -316,7 +316,7 @@ void GfxOutputImpl::onConfigureNotify( XEvent& xev)
 	_model->Size = clientSize;
 }
 
-void GfxOutputImpl::onKeyEvent(XEvent& xev)
+void GfxOutputDeviceImpl::onKeyEvent(XEvent& xev)
 {
 	if(KeyRelease == xev.xkey.type)
         	_keyEvent.setState(KeyEvent::KeyUp);
@@ -362,7 +362,7 @@ void GfxOutputImpl::onKeyEvent(XEvent& xev)
 	Application::instance().keyDeviceEvent().send(_model->controller(), _keyEvent);
 }
 
-void GfxOutputImpl::onWindowEvent(XEvent& ev)
+void GfxOutputDeviceImpl::onWindowEvent(XEvent& ev)
 {
 	
 	if(ev.xany.window != _window)
@@ -433,7 +433,7 @@ void GfxOutputImpl::onWindowEvent(XEvent& ev)
 
 
 
-void GfxOutputImpl::create()
+void GfxOutputDeviceImpl::create()
 {
    // Display and Screen are inited in Application
     unsigned int screen = DefaultScreen(_display);

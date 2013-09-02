@@ -23,7 +23,7 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
-#include "GfxOutputImpl.h"
+#include "GfxOutputDeviceImpl.h"
 #include <Pt/Hmi/GfxModel.h>
 #include <Pt/Hmi/Application.h>
 #include "ApplicationImpl.h"
@@ -37,7 +37,7 @@
 namespace Pt{
 namespace Hmi{
 
-GfxOutputImpl::GfxOutputImpl()
+GfxOutputDeviceImpl::GfxOutputDeviceImpl()
 : _model(0)
 , _ignoreSizeEvent(false)
 , _visible(false)
@@ -51,12 +51,12 @@ GfxOutputImpl::GfxOutputImpl()
 	create();
 }
 
-NSView* GfxOutputImpl::view()
+NSView* GfxOutputDeviceImpl::view()
 {
 	return _view;
 }
     
-void GfxOutputImpl::create()
+void GfxOutputDeviceImpl::create()
 {
     _window = nil;
     _view = [[WidgetView alloc] init: this ];
@@ -82,12 +82,12 @@ void GfxOutputImpl::create()
 	_timer.start(100);
 }
 
-GfxOutputImpl::~GfxOutputImpl()
+GfxOutputDeviceImpl::~GfxOutputDeviceImpl()
 {
 	destroy();
 }
 
-void GfxOutputImpl::destroy()
+void GfxOutputDeviceImpl::destroy()
 {
     if(_window == nil)
         return;
@@ -104,7 +104,7 @@ void GfxOutputImpl::destroy()
     controller->ClosedAction.send(controller);
 }    
     
-void GfxOutputImpl::writeWindowProperties()
+void GfxOutputDeviceImpl::writeWindowProperties()
 {        
 	//Visibility
 	if(_model->Visible.get() && !_visible)
@@ -227,7 +227,7 @@ void GfxOutputImpl::writeWindowProperties()
     }
 }
 
-void GfxOutputImpl::output(Pt::Hmi::Model* model)
+void GfxOutputDeviceImpl::output(Pt::Hmi::Model* model)
 {
 	_model = dynamic_cast<WindowModel*>(model);
 
@@ -273,7 +273,7 @@ void GfxOutputImpl::output(Pt::Hmi::Model* model)
     [_view setNeedsDisplay:YES];    
 }
     
-void GfxOutputImpl::onLMouseUp(double x, double y)
+void GfxOutputDeviceImpl::onLMouseUp(double x, double y)
 {
     Pt::Gfx::PointF pos = convertMousePosition(x,y);
     
@@ -283,7 +283,7 @@ void GfxOutputImpl::onLMouseUp(double x, double y)
     Application::instance().pointerEvent().send(_model->controller(), _mouseEvent);
 }
     
-void GfxOutputImpl::onLMouseDown(double x, double y)
+void GfxOutputDeviceImpl::onLMouseDown(double x, double y)
 {
     Pt::Gfx::PointF pos = convertMousePosition(x,y);
     
@@ -293,7 +293,7 @@ void GfxOutputImpl::onLMouseDown(double x, double y)
     Application::instance().pointerEvent().send(_model->controller(), _mouseEvent);
 }
     
-void GfxOutputImpl::onMouseMove(double x, double y)
+void GfxOutputDeviceImpl::onMouseMove(double x, double y)
 {
     Pt::Gfx::PointF pos = convertMousePosition(x,y);
     _mouseEvent.setX(pos.x());
@@ -301,7 +301,7 @@ void GfxOutputImpl::onMouseMove(double x, double y)
     Application::instance().pointerEvent().send(_model->controller(), _mouseEvent);
 }
     
-void GfxOutputImpl::writeWindowSizeAndPos()
+void GfxOutputDeviceImpl::writeWindowSizeAndPos()
 {
     int screenHeight = [[NSScreen mainScreen] frame].size.height;
     NSRect windowRect =  [_window frame];
@@ -317,7 +317,7 @@ void GfxOutputImpl::writeWindowSizeAndPos()
     [_window setFrame:windowRect display:YES animate:NO];    
 }
     
-Pt::Gfx::PointF GfxOutputImpl::convertMousePosition(double x, double y)
+Pt::Gfx::PointF GfxOutputDeviceImpl::convertMousePosition(double x, double y)
 {
     int screenHeight = [[NSScreen mainScreen] frame].size.height;
     NSRect windowRect = [_view frame];
@@ -326,7 +326,7 @@ Pt::Gfx::PointF GfxOutputImpl::convertMousePosition(double x, double y)
     return Pt::Gfx::PointF(gx,gy);
 }
     
-void GfxOutputImpl::onKeyDown(int key)
+void GfxOutputDeviceImpl::onKeyDown(int key)
 {
     _keyEvent.setUnicode(key);
     
@@ -335,7 +335,7 @@ void GfxOutputImpl::onKeyDown(int key)
 	Application::instance().keyDeviceEvent().send(_model->controller(), _keyEvent);
 }
 
-void GfxOutputImpl::onKeyUp(int key)
+void GfxOutputDeviceImpl::onKeyUp(int key)
 {
     _keyEvent.setUnicode(key);
     
@@ -344,7 +344,7 @@ void GfxOutputImpl::onKeyUp(int key)
 	Application::instance().keyDeviceEvent().send(_model->controller(), _keyEvent);
 }
     
-void GfxOutputImpl::onSpezialKeyEvent(unsigned int mask)
+void GfxOutputDeviceImpl::onSpezialKeyEvent(unsigned int mask)
 {
     _keyEvent.setUnicode(0);
     _keyEvent.setAlt((mask & NSAlternateKeyMask) == NSAlternateKeyMask);
@@ -353,7 +353,7 @@ void GfxOutputImpl::onSpezialKeyEvent(unsigned int mask)
     Application::instance().keyDeviceEvent().send(_model->controller(), _keyEvent);
 }
     
-void GfxOutputImpl::checkModal()
+void GfxOutputDeviceImpl::checkModal()
 {
     if(_model->TopMost.get())
         [_window setLevel: NSFloatingWindowLevel];
@@ -361,7 +361,7 @@ void GfxOutputImpl::checkModal()
         [_window setLevel: NSNormalWindowLevel];
 }
     
-void GfxOutputImpl::onPosition()
+void GfxOutputDeviceImpl::onPosition()
 {
     if(_ignoreSizeEvent)
         return;
@@ -385,7 +385,7 @@ void GfxOutputImpl::onPosition()
     _model->Position = Pt::Gfx::PointF(viewRect.origin.x, windowRect.size.height - viewRect.size.height);
 }
     
-void GfxOutputImpl::onPositionAndSize()
+void GfxOutputDeviceImpl::onPositionAndSize()
 {
     if(_ignoreSizeEvent)
         return;
@@ -406,7 +406,7 @@ void GfxOutputImpl::onPositionAndSize()
     _model->Size = Pt::Gfx::SizeF(viewRect.size.width,viewRect.size.height);
 }
     
-bool GfxOutputImpl::onCanClose()
+bool GfxOutputDeviceImpl::onCanClose()
 {
     bool canClose = false;
     
@@ -419,7 +419,7 @@ bool GfxOutputImpl::onCanClose()
     return canClose;
 }
 
-Pt::Gfx::Painter* GfxOutputImpl::nativePainter()
+Pt::Gfx::Painter* GfxOutputDeviceImpl::nativePainter()
 {
 	return _nativePainter;
 }

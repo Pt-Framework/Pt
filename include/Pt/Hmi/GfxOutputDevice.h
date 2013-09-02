@@ -25,8 +25,8 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef Pt_Hmi_Output_Gfx_H
-#define Pt_Hmi_Output_Gfx_H
+#ifndef Pt_Hmi_GfxOutputDevice_H
+#define Pt_Hmi_GfxOutputDevice_H
 
 #include <Pt/Hmi/Model.h>
 #include <Pt/Hmi/OutputDevice.h>
@@ -35,19 +35,19 @@
 namespace Pt{
 namespace Hmi{
 
-class GfxOutputImpl;
+class GfxOutputDeviceImpl;
 
-class PT_HMI_API GfxOutput : public OutputDevice
+class PT_HMI_API GfxOutputDevice : public OutputDevice
 {
 public:
-	GfxOutput();
-	virtual ~GfxOutput();	
+	GfxOutputDevice();
+	virtual ~GfxOutputDevice();	
 
 	virtual void output(Pt::Hmi::Model* model);
 
 	Pt::Gfx::Painter* nativePainter();
 	
-	GfxOutputImpl* impl();
+	GfxOutputDeviceImpl* impl();
 		
 protected:
     virtual void onCancel()
@@ -62,7 +62,7 @@ protected:
 	
 	
 private:
-	GfxOutputImpl* _impl;
+	GfxOutputDeviceImpl* _impl;
 };
 
 }}
