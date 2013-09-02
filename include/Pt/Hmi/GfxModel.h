@@ -44,7 +44,7 @@
 namespace Pt{
 namespace Hmi{
 
-namespace ImageLayout
+namespace ImageLayoutType
 {
 	enum Type
 	{
@@ -56,7 +56,7 @@ namespace ImageLayout
 	};
 }
 
-namespace TextAlign
+namespace TextAlignType
 {
 	enum Type
 	{
@@ -85,14 +85,14 @@ public:
 	Property<Pt::Gfx::ARgbColor>	BackColor;
 	Property<Pt::Gfx::ARgbColor>	ForeColor;
 	Property<Pt::Gfx::ARgbImage>	BackgroundImage;
-	Property<ImageLayout::Type>		BackgroundImageLayout;
+	Property<ImageLayoutType::Type>	BackgroundImageLayout;
 	Property<int>					Opacity;
 	Property<Pt::Gfx::ARgbColor>	TransparancyKey;
 	Pt::Gfx::ARgbImage				PaintBuffer;
 	Property<PointingEvent>			Pointer2DStatus;	
 	Property<KeyEvent>				KeyStatus;	
-	Property<Cursor>		        CursorT;
-	Property<TextAlign::Type>	    TextAlign; 
+	Property<Cursor>                CursorT;
+	Property<TextAlignType::Type>	TextAlign;
 	Property<bool>					Focused; 
 	Property<bool>					AcceptFocus; 
 
@@ -101,7 +101,6 @@ public:
 
 	void move(const Pt::Gfx::SizeF& size);	
     bool contains(const Pt::Gfx::PointF& p);
-
 
 	//Unit handling
 	double toUnit(int v);

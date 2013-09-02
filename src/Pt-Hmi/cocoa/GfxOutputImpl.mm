@@ -51,6 +51,7 @@ void GfxOutputImpl::create()
    [_window makeKeyAndOrderFront:_window];
 [_view setHidden:NO];
       _level = [_window level];
+    _visible = true;
   _timer.start(100);
 }
 
@@ -70,10 +71,138 @@ void GfxOutputImpl::destroy()
     [_view release];
 	_view = nil;
     _window = nil;
+    
     //Notife closed
     WindowController* controller = (WindowController*)_model->controller();
-    controller->Closed.send();
+    controller->ClosedAction.send(controller);
 }
+    
+    
+void GfxOutputImpl::writeWindowProperties()
+{
+        
+        //Visibility
+        if(_model->Visible.get() && !_visible)
+        {
+            [_window makeKeyAndOrderFront:_window];
+            [NSApp activateIgnoringOtherApps:YES];
+            _visible = true;
+        }
+        
+        if(!_model->Visible.get() && _visible)
+        {
+         [_window orderOut:_window];
+            _visible = false;
+            return;
+        }
+    
+    //Title
+    NSString* title = [NSString stringWithCString:_model->Caption.get().c_str() encoding:[NSString defaultCStringEncoding]];
+		
+        if( _model->ShowTitle.get())
+            [_window setTitle: title];
+        else
+            [_window setTitle: title];
+        
+        //Border stely
+        Pt::Gfx::Size winMinSize =  _model->fromUnit(_model->MinimumSize.get());
+        Pt::Gfx::Size winMaxSize =  _model->fromUnit(_model->MaximumSize.get());
+        
+        switch( _model->Border.get())
+        {
+            case Pt::Hmi::WindowBorderType::Sizeable:
+            case Pt::Hmi::WindowBorderType::DialogSizeable:
+            case Pt::Hmi::WindowBorderType::ToolSizeable:
+            {//Sizeable
+      
+            }
+                break;
+                
+            case Pt::Hmi::WindowBorderType::Dialog:
+            case Pt::Hmi::WindowBorderType::Tool:
+            {//Fixed size
+     
+            }
+                break;
+            default:
+                break;
+        }
+        
+        //Windows state
+        //TODO : show/hide minimize button.
+        if( _model->ShowMinimizeButton.get())
+        {
+        }
+        else
+        {
+        }
+        
+        //TODO : show/hide maximize button.
+        if( _model->ShowMaximizeButton.get())
+        {
+        }
+        else
+        {
+        }
+        
+        //TODO : show/hide system menu
+        if( _model->ShowSysMenu.get())
+        {
+        }
+        else
+        {
+        }
+        
+        //TODO : Windows state min/max/normal
+        switch(_model->WindowState.get())
+        {
+            case Pt::Hmi::WindowStateType::Normal:
+                break;
+                
+            case Pt::Hmi::WindowStateType::Maximazed:
+                
+                break;
+                
+            case Pt::Hmi::WindowStateType::Minimized:
+                
+                break;
+        }
+        
+        //TODO: window border aparetz
+        switch( _model->Border.get())
+        {
+            case Pt::Hmi::WindowBorderType::NoBorder:
+                
+                break;
+                
+            case Pt::Hmi::WindowBorderType::Sizeable:
+                
+                break;
+                
+            case Pt::Hmi::WindowBorderType::Dialog:
+                break;
+                
+            case Pt::Hmi::WindowBorderType::DialogSizeable:
+                break;
+                
+            case Pt::Hmi::WindowBorderType::Tool:
+                break;
+                
+            case Pt::Hmi::WindowBorderType::ToolSizeable:
+                break;
+                
+        }
+        
+        //TODO: show in taskbar
+        if(_model->ShowInTaskbar.get())
+        {
+        }
+        else
+        {
+        }
+        
+    }
+
 
 void GfxOutputImpl::output(Pt::Hmi::Model* model)
 {
@@ -116,6 +245,7 @@ void GfxOutputImpl::output(Pt::Hmi::Model* model)
     _ignoreSizeEvent = true;
     checkModal();
     writeWindowSizeAndPos();
+    writeWindowProperties();
     _ignoreSizeEvent = false;
     
     //Redraw
@@ -267,10 +397,10 @@ bool GfxOutputImpl::onCanClose()
     bool canClose = false;
     
     WindowController* controller = (WindowController*)_model->controller();
-    controller->Closing.send(canClose);
+    controller->ClosingAction.send(controller, canClose);
     
     if(canClose)
-        controller->Closed.send();
+        controller->ClosedAction.send(controller);
     
     return canClose;
 }

@@ -37,7 +37,7 @@ namespace Pt{
 namespace Hmi{
 
 DialogModel::DialogModel()
-: Result(me(), DialogResult::Unknown)
+: Result(me(), DialogResultType::Undefined)
 {
 	ShowInTaskbar.set(false);
 	ShowSysMenu.set(true);

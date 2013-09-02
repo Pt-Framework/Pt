@@ -56,14 +56,14 @@ void MainWindow::init()
 	windowModel->WinPos.set(Pt::Gfx::PointF(200,200));
 	windowModel->WinSize.set(Pt::Gfx::SizeF(800,615));
 	windowModel->Caption.set("Pt-Hmi demo");
-	windowModel->Closed.PropertyChanged += Pt::slot(*this, &MainWindow::onClosedByWindow);
+	windowController->ClosedAction += Pt::slot(*this, &MainWindow::onClosed);
 
 	//Panel
 	Pt::Hmi::PanelModel* panelModel = (Pt::Hmi::PanelModel*)_mainPanel.controller().model();
 	panelModel->Position.set(Pt::Gfx::PointF(40,40));
 	panelModel->BorderWidth.set(3);
 	panelModel->Size.set(Pt::Gfx::SizeF(700,480));
-	panelModel->BorderStyle.set(Pt::Hmi::BorderStyle::Sizeable);
+	panelModel->BorderStyle.set(Pt::Hmi::BorderStyleType::Sizeable);
 	addChild(&_mainPanel);
 
 	//Text
@@ -103,13 +103,6 @@ void MainWindow::init()
 	closeButtonModel->Size.set(Pt::Gfx::SizeF(150,25));
 	closeButtonCtrl->PressedAction += Pt::slot(*this, &MainWindow::onClosed);
 	addChild(&_closeButton);
-}
-
-void MainWindow::onClosedByWindow(const void* sender, const PropertyBase& prop)
-{
-	Pt::Hmi::Property<bool>* closedProp = (Pt::Hmi::Property<bool>*) &prop;
-	if( closedProp->get())
-		Pt::Hmi::Application::instance().exit();
 }
 
 void MainWindow::onShowDialog(Pt::Hmi::Controller* ctrl)

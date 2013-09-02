@@ -5,8 +5,7 @@ namespace Pt{
 namespace Hmi{
 
 WindowModel::WindowModel()
-: AllowDrop(me())
-, MinimumSize(me(),Pt::Gfx::SizeF(0,0))
+: MinimumSize(me(),Pt::Gfx::SizeF(0,0))
 , MaximumSize(me(),Pt::Gfx::SizeF(65535,65535))
 , WindowStartPostion(me())
 , WindowState(me())
@@ -16,7 +15,6 @@ WindowModel::WindowModel()
 , ShowMaximizeButton(me(),true)
 , ShowSysMenu(me(),true)	
 , Caption(me())
-, Name(me())
 , Border(me())
 , WinPos(me())
 , WinSize(me())

@@ -47,7 +47,6 @@ protected:
 private:
 	void onClosed(Pt::Hmi::Controller* ctrl);
 	void onShowDialog(Controller* ctrl);
-	void onClosedByWindow(const void* sender, const PropertyBase& prop);
 
 private:
     Pt::Hmi::Desktop::Panel  _mainPanel;

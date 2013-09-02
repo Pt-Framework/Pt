@@ -46,7 +46,7 @@ public:
 	void doModal(WindowController* parent);
 
 protected:
-	virtual void onClosed();
+	virtual void onClosed(Controller* sender);
 
 protected:
 	Pt::System::MainLoop _done;	

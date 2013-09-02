@@ -45,8 +45,6 @@ namespace WindowStartPositionType
 	{
 		Manual,
 		CenterScreen,
-		WindowsDefaultLocation,
-		WindowsDefaultBounds,
 		CenterParent,
 	};
 }
@@ -55,7 +53,8 @@ namespace WindowBorderType
 {
 	enum Type
 	{
-		NoBorder,
+        NoBorder,
+		Fixed,
 		Sizeable,
 		Tool,
 		ToolSizeable,
@@ -81,7 +80,6 @@ public:
 	WindowModel();
 	virtual ~WindowModel();
 
-	Property<bool>								AllowDrop;
 	Property<Pt::Gfx::SizeF>					MinimumSize;
 	Property<Pt::Gfx::SizeF>					MaximumSize;
 	Property<WindowStartPositionType::Type>		WindowStartPostion;
@@ -92,7 +90,6 @@ public:
 	Property<bool>								ShowMaximizeButton;
 	Property<bool>								ShowSysMenu;
 	Property<std::string>						Caption;
-	Property<std::string>						Name;
 	Property<WindowBorderType::Type>			Border;
 	Property<Pt::Gfx::PointF>					WinPos;
 	Property<Pt::Gfx::SizeF>					WinSize;

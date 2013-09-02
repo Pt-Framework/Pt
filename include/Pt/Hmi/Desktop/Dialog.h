@@ -25,7 +25,7 @@ public:
 	void show(Window* parent);
 	void show(Dialog* parent);
 
-	DialogResult::Type result() const;
+	DialogResultType::Type result() const;
 
 protected:
 	virtual void show(WindowController* parent); 

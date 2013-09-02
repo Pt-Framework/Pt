@@ -55,7 +55,11 @@
 {
     NSString* chars = [ev characters];
     unichar character = [chars characterAtIndex: 0];
-
+    
+    //Emulate tab character on shift pressed.
+    if(character == 25)
+        character = 9;
+    
     _outControll->onKeyDown(character);
 }
 
@@ -63,6 +67,10 @@
 {
     NSString* chars = [ev characters];
     unichar character = [chars characterAtIndex: 0];
+    
+    //Emulate tab charecter on shift pressed.
+    if(character == 25)
+        character = 9;
     
     _outControll->onKeyUp(character);
 }

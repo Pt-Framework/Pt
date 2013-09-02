@@ -43,8 +43,9 @@ DialogController::~DialogController()
 {
 }
 
-void DialogController::onClosed()
+void DialogController::onClosed(Controller* sender)
 {
+    WindowController::onClosed(sender);
 	_closed = true;
 }
 

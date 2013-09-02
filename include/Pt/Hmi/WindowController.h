@@ -65,15 +65,15 @@ public:
 		return _windowParent;
 	}
 
-	Pt::Signal<>		Closed;	
-	Pt::Signal<bool&>   Closing;
+	Pt::Signal<Controller*>		ClosedAction;
+	Pt::Signal<Controller*,bool&>   ClosingAction;
 
 protected:
 	virtual void onPointerInput(const PointingEvent& ev);
 	virtual void onKeyInput(const KeyEvent& ev);
 	virtual void onModelChanged(bool created = false);	
-	virtual void onClosing(bool& canClose);
-	virtual void onClosed();
+	virtual void onClosing(Controller* sender, bool& canClose);
+	virtual void onClosed(Controller* sender);
 	
 	void onSizeChanged(const void* sender, const PropertyBase& prop);
 	

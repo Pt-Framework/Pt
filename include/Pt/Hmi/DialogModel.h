@@ -39,11 +39,11 @@ namespace Pt{
 namespace Hmi{
 
 
-namespace DialogResult
+namespace DialogResultType
 {
 	enum Type
 	{
-        Unknown = 0,
+        Undefined = 0,
         OK = 1,
         Cancel = 2,
         Abort = 3,
@@ -60,7 +60,7 @@ public:
 	DialogModel();
 	virtual ~DialogModel();
 
-	Property<DialogResult::Type>	Result;
+	Property<DialogResultType::Type>	Result;
 
 private:
 };

@@ -5,7 +5,6 @@ namespace Hmi{
 
 WidgetModel::WidgetModel()
 : Caption(me())
-, Name(me())
 {
 }
 

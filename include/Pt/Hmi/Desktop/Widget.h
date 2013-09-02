@@ -38,11 +38,6 @@ public:
 	{
 		return  *_controller;
 	}
-		
-	inline void setController(Pt::Hmi::GfxController& controller)
-	{		
-		_controller = &controller;
-	}
 
 
 	inline const Widget* parent() const 
@@ -56,6 +51,12 @@ public:
 	}
 
 protected:
+    
+	inline void setController(Pt::Hmi::GfxController& controller)
+	{
+		_controller = &controller;
+	}
+    
 	inline void setParent(Widget* p)
 	{
 		_parent = p;

@@ -10,11 +10,11 @@ ButtonModel::ButtonModel()
 , ButtonType(me(),Pt::Hmi::ButtonType::Press)
 , DoublePressTimeInMs(me(),1500)
 {
-	BorderStyle.set(Pt::Hmi::BorderStyle::Widget);
+	BorderStyle.set(Pt::Hmi::BorderStyleType::Widget);
 	BorderWidth.set(1);
 	Caption.set("Button");	
 	AutoSize.set(false);
-	TextAlign.set(Pt::Hmi::TextAlign::MidleCenter);
+	TextAlign.set(Pt::Hmi::TextAlignType::MidleCenter);
 	AcceptFocus.set(true);
 	BorderRoundEdge.set(true);
 }

@@ -107,7 +107,10 @@ void PanelController::recalcPosAndSize(const Pt::Gfx::PointF& p, ResizeDirection
 		}
 		break;
 		default:
-		break;
+        {
+    
+		}
+        break;
 	}
 
 	model->Size = Pt::Gfx::SizeF(width,height);
@@ -131,28 +134,28 @@ void PanelController::onPointerInput(const PointingEvent& ev)
 			
 	switch(m->BorderStyle.get())
 	{
-		case BorderStyle::Sizeable:
+		case BorderStyleType::Sizeable:
 		{
 			if( m->contains(p))
 			{
 				if(p.x() < m->BorderWidth.get() && p.y() <  m->BorderWidth.get())
 				{//Corner NW
-					m->CursorT.get().setCursor(Cursors::SizeNWSE, window);
+					m->CursorT.get().setCursor(Cursors::SizeNS, window);
 					_resizeDir = NorthWest;
 				}	
 				else if(p.x() > sizeR && p.y() <  m->BorderWidth.get())
 				{//corner NE
-					m->CursorT.get().setCursor(Cursors::SizeNESW, window);
+					m->CursorT.get().setCursor(Cursors::SizeNS, window);
 					_resizeDir= NorthEast;
 				}
 				else if(p.x() < m->BorderWidth.get() &&  p.y() > sizeB )
 				{//corner SW
-					m->CursorT.get().setCursor(Cursors::SizeNESW, window);
+					m->CursorT.get().setCursor(Cursors::SizeWE, window);
 					_resizeDir = SouthWest;
 				}
 				else if(p.x() > sizeR &&  p.y() > sizeB )
 				{//corner SE
-					m->CursorT.get().setCursor(Cursors::SizeNWSE, window);
+					m->CursorT.get().setCursor(Cursors::SizeWE, window);
 					_resizeDir = SouthEast;
 				}
 				else
@@ -183,11 +186,16 @@ void PanelController::onPointerInput(const PointingEvent& ev)
 					}
 				}
 			}
-
-			handleResize(ev);			
+            else
+            {
+                m->CursorT.get().setCursor(Cursors::Default, window);
+            }
+			handleResize(ev);
 		}
 		break;
+            
 		default:
+          
 		break;
 	}
 	

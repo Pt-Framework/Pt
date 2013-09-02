@@ -50,7 +50,7 @@ void PanelRenderer::render(Pt::Hmi::Model* m)
 						
 	switch(model->BorderStyle.get())
 	{
-		case BorderStyle::Single:
+		case BorderStyleType::Single:
 		{			
 			std::vector<Pt::Gfx::Point> points1(5);
 			std::vector<Pt::Gfx::Point> points2(5);
@@ -105,7 +105,7 @@ void PanelRenderer::render(Pt::Hmi::Model* m)
 
 		break;
 			
-		case BorderStyle::Widget:
+		case BorderStyleType::Widget:
 		{			
 			std::vector<Pt::Gfx::Point> points1(5);
 			std::vector<Pt::Gfx::Point> points2(5);
@@ -178,7 +178,7 @@ void PanelRenderer::render(Pt::Hmi::Model* m)
 			}
 		}
 		break;
-		case BorderStyle::Border3D:
+		case BorderStyleType::Border3D:
 		{
 			std::vector<Pt::Gfx::Point> points1(3);
 			std::vector<Pt::Gfx::Point> points2(3);
@@ -229,7 +229,7 @@ void PanelRenderer::render(Pt::Hmi::Model* m)
 				
 		}
 		break;
-		case BorderStyle::Sizeable:
+		case BorderStyleType::Sizeable:
 		{
 			Pt::Gfx::Pen pen1(border, model->ForeColor.get());
 			localPainter.setPen(pen1);				

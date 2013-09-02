@@ -10,6 +10,19 @@
 namespace Pt{
 namespace Hmi{
 
+    
+    namespace BorderStyleType
+    {
+        enum Type
+        {
+            NoBorder,
+            Single,
+            Border3D,
+            Sizeable,
+            Widget,
+        };
+    }
+    
 class PT_HMI_API WidgetModel : public GfxModel
 {
 public:
@@ -17,8 +30,7 @@ public:
 	virtual ~WidgetModel();
 
 public:
-	Property<std::string> Caption;
-	Property<std::string> Name;		
+	Property<std::string> Caption;	
 };
 
 }}

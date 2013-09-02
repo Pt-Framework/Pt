@@ -54,8 +54,8 @@ WindowController::WindowController(GfxModel* m, Renderer* r,  GfxOutput* out, Po
 	if( in2 != 0)
 		Controller::addInputDevice(in2);
 
-	Closed += Pt::slot(*this, &WindowController::onClosed);
-	Closing += Pt::slot(*this, &WindowController::onClosing);
+	ClosedAction += Pt::slot(*this, &WindowController::onClosed);
+	ClosingAction += Pt::slot(*this, &WindowController::onClosing);
 }
 
 WindowController::~WindowController()
@@ -171,7 +171,7 @@ void WindowController::onModelChanged(bool created)
 		
 }
 
-void WindowController::onClosing(bool& canClose)
+void WindowController::onClosing(Controller* sender, bool& canClose)
 {
 	WindowModel* m = dynamic_cast<WindowModel*>(model());
 
@@ -184,7 +184,7 @@ void WindowController::onClosing(bool& canClose)
 	canClose = m->CanClose.get();
 }
 
-void WindowController::onClosed()
+void WindowController::onClosed(Controller* sender)
 {
 	WindowModel* m = dynamic_cast<WindowModel*>(model());
 
@@ -192,7 +192,7 @@ void WindowController::onClosed()
 		return;
 
     if(!m->Closed.get())
-        m->Closed.set(true);
+        m->Closed = true;
 }
 
 void WindowController::close()
@@ -204,7 +204,7 @@ void WindowController::close()
     
     //Can close??
     bool canClose = false;
-    Closing.send(canClose);
+    ClosingAction.send(this, canClose);
     
     if(canClose)
     {

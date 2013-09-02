@@ -55,7 +55,7 @@ void LabelRenderer::render(Pt::Hmi::Model* m)
 
 		switch(model->TextAlign.get())
 		{
-			case Pt::Hmi::TextAlign::MidleCenter:
+			case Pt::Hmi::TextAlignType::MidleCenter:
 			{
 				Pt::Gfx::Pen			pen(1,model->ForeColor.get());
 				Pt::Gfx::FontMetrics	metric = localPainter.fontMetrics(Pt::String(model->Caption.get()));

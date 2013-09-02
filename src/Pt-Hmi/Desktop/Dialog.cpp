@@ -61,9 +61,9 @@ Dialog::~Dialog()
 	delete _defRenderer;
 }
 
-Pt::Hmi::DialogResult::Type Dialog::result() const
+Pt::Hmi::DialogResultType::Type Dialog::result() const
 {
-	return Pt::Hmi::DialogResult::OK;
+	return Pt::Hmi::DialogResultType::Undefined;
 }
 
 }}}

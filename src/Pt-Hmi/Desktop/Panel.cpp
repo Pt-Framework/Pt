@@ -16,7 +16,7 @@ Panel::Panel()
 	_defController->setRenderer(_defRenderer);	
 	_defModel->ForeColor.set(Pt::Gfx::ARgbColor(160,160,160));
 	_defModel->BorderWidth.set(1);
-	_defModel->BorderStyle.set(BorderStyle::Widget);
+	_defModel->BorderStyle.set(BorderStyleType::Widget);
 
 	setController(*_defController);
 }

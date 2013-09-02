@@ -10,18 +10,6 @@
 namespace Pt{
 namespace Hmi{
 
-namespace BorderStyle
-{
-	enum Type
-	{
-		NoBorder,
-		Single,
-		Border3D,
-		Sizeable,
-		Widget,
-	};
-}
-
 class PT_HMI_API PanelModel : public WidgetModel
 {
 
@@ -29,7 +17,7 @@ public:
 	PanelModel();
 	virtual ~PanelModel();
 
-	Property<BorderStyle::Type> BorderStyle;		
+	Property<BorderStyleType::Type> BorderStyle;
 	Property<bool>				BorderRoundEdge;	
 	Property<bool>				Invert3DEffect;
 	Property<double>			BorderWidth;	

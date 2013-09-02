@@ -57,7 +57,7 @@ public:
 private:
     void writeWindowSizeAndPos();
 	void checkModal();
-	//void writeWindowProperties();
+	void writeWindowProperties();
 
     
 	void create();
