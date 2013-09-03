@@ -31,6 +31,7 @@
 #include <Pt/Gfx/Rgb888Image.h>
 #include <Pt/Hmi/WindowModel.h>
 #include <Pt/Hmi/WindowController.h>
+#include <Pt/Hmi/GfxOutputDevice.h>
 #include "WidgetView.h"
 #include "Window.h"
 
@@ -171,17 +172,16 @@ void GfxOutputDeviceImpl::writeWindowProperties()
 
 void GfxOutputDeviceImpl::output(Pt::Hmi::Model* model)
 {
+    bool firstShow = (_model == 0);
+    
 	_model = dynamic_cast<WindowModel*>(model);
-
-    if( _model == 0)
-		throw std::logic_error("ERROR: WindowModel model expected!");
 
     NSRect viewRect = [_view frame];
     
     //Initial size and position
     if(_model->Size.get().width() != viewRect.size.width || _model->Size.get().height() != viewRect.size.height)
     {
-        writeWindowSizeAndPos();
+        writeWindowSizeAndPos(firstShow);
         return;
     }
 
@@ -208,7 +208,7 @@ void GfxOutputDeviceImpl::output(Pt::Hmi::Model* model)
     _ignoreSizeEvent = true;
     writeWindowProperties();
     checkModal();
-    writeWindowSizeAndPos();
+    writeWindowSizeAndPos(firstShow);
     _ignoreSizeEvent = false;
     
     //Redraw
@@ -243,8 +243,66 @@ void GfxOutputDeviceImpl::onMouseMove(double x, double y)
     Application::instance().pointerEvent().send(_model->controller(), _mouseEvent);
 }
     
-void GfxOutputDeviceImpl::writeWindowSizeAndPos()
+    
+void GfxOutputDeviceImpl::centerWindowTo(NSRect* parentRect)
 {
+
+    int horizontal = parentRect->origin.x + parentRect->size.width/2;
+    int vertical = parentRect->origin.y + parentRect->size.height/2;
+    
+    Pt::Gfx::Size mySize  = _model->fromUnit(_model->WinSize.get());
+        
+    int posX = horizontal - (mySize.width()/2);
+    int posY = vertical - (mySize.height()/2);
+        
+    _model->WinPos.set(_model->toUnit(Pt::Gfx::Point( posX,posY)));
+}
+    
+void GfxOutputDeviceImpl::writeWindowSizeAndPos(bool firstShow)
+{
+    if(firstShow)
+    {
+        switch(_model->WindowStartPostion.get())
+        {
+            case WindowStartPositionType::Manual:
+                break;
+                
+            case WindowStartPositionType::CenterParent:
+            {
+                WindowController* controller = (WindowController*) _model->controller();
+                WindowController* parent = controller->windowParent();
+				
+                if( parent == 0)
+                {
+                    centerWindowTo(&[[NSScreen mainScreen] frame]);
+                }
+                else
+                {
+                    GfxOutputDeviceImpl* parentImpl = 0;
+                    
+                    for(size_t i = 0; i < parent->outputDevices().size(); ++i)
+                    {
+                        GfxOutputDevice* parentDevice = dynamic_cast<GfxOutputDevice*>(parent->outputDevices()[i]);
+                        
+                        if( parentDevice == 0)
+                            continue;
+                        
+                        parentImpl = dynamic_cast<GfxOutputDeviceImpl*>(parentDevice->impl());
+						
+                        if( parentImpl != 0)
+                            break;
+                    }
+                    
+                    centerWindowTo(&[parentImpl->window() frame]);
+                }
+            }
+                break;
+                
+            case WindowStartPositionType::CenterScreen:
+                centerWindowTo(&[[NSScreen mainScreen] frame]);
+                break;
+        }
+    }
     
     switch(_model->WindowState.get())
     {

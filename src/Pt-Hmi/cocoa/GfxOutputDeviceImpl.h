@@ -40,8 +40,9 @@
 #ifdef __OBJC__
     #import <AppKit/NSWindow.h>
     #import <AppKit/NSGraphicsContext.h>
+    #import <AppKit/NSView.h>
 #else
-    
+struct NSRect;
 	struct NSView;
     struct NSWindow;
     struct NSResponder;
@@ -67,6 +68,10 @@ public:
     
     NSView* view();
     
+    NSWindow* window()
+    {
+        return _window;
+    }
 public:
     void onPositionAndSize();
     void onPosition();
@@ -80,11 +85,12 @@ public:
     void onLostFocus();
     
 private:
-    void writeWindowSizeAndPos();
+    void writeWindowSizeAndPos(bool firstShow);
 	void checkModal();
 	void writeWindowProperties();    
 	void create();
 	void destroy();
+    void centerWindowTo(NSRect* parentRect);
     Pt::Gfx::PointF convertMousePosition(double x, double y);
 
 private:

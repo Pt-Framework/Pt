@@ -46,7 +46,7 @@ Dialog2::~Dialog2()
 void Dialog2::init()
 {
 	//Dialog
-	setSize(Pt::Gfx::SizeF(450,200));
+	setSize(Pt::Gfx::SizeF(435,190));
 	setPosition(Pt::Gfx::PointF(400,400));
 	dialogModel().Caption.set("Pt-Hmi-demo");
 	dialogModel().WindowStartPostion.set(WindowStartPositionType::CenterParent);
