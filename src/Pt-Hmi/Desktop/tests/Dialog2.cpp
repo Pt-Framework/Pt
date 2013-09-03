@@ -46,17 +46,41 @@ Dialog2::~Dialog2()
 void Dialog2::init()
 {
 	//Dialog
-	setSize(Pt::Gfx::SizeF(800,600));
+	setSize(Pt::Gfx::SizeF(450,200));
 	setPosition(Pt::Gfx::PointF(400,400));
-	dialogModel().Caption.set("This is a sample modal dialog 2");
+	dialogModel().Caption.set("Pt-Hmi-demo");
+	dialogModel().WindowStartPostion.set(WindowStartPositionType::CenterParent);
+	dialogModel().ShowMaximizeButton.set(false);
+	dialogModel().ShowMinimizeButton.set(false);
+	dialogModel().ShowSysMenu.set(false);
 
-	//Close Button
-	_closeButton.setPosition(Pt::Gfx::PointF(400,360));
-	_closeButton.setSize(Pt::Gfx::SizeF(200,25));
-	_closeButton.setCaption("Close [CTRL+X]");
-	_closeButton.setActionKey("C//x");
-	_closeButton.ClickedAction += Pt::slot(*this,&Dialog2::onClosedByButton);
-	addChild(&_closeButton);
+	_panel.setPosition(Pt::Gfx::PointF(25,15)); 
+	_panel.setSize(Pt::Gfx::SizeF(385,100));
+	_panel.panelModel().BorderStyle.set(BorderStyleType::Single);
+	_panel.panelModel().BorderRoundEdge.set(true);
+	addChild(&_panel);
+
+	//Label
+	_label.setPosition(Pt::Gfx::PointF(50,40));
+	_label.setAutoSize(true);
+	_label.setCaption("Do you want to close me?");
+	_panel.addChild(&_label);
+
+	//OK Button
+	_okButton.setPosition(Pt::Gfx::PointF(200,125));
+	_okButton.setSize(Pt::Gfx::SizeF(100,25));
+	_okButton.setCaption("OK");
+	_okButton.setActionKey("C//x");
+	_okButton.ClickedAction += Pt::slot(*this,&Dialog2::onClosedByButton);
+	addChild(&_okButton);
+
+	//Cancel button
+	_cancelButton.setPosition(Pt::Gfx::PointF(310,125));
+	_cancelButton.setSize(Pt::Gfx::SizeF(100,25));
+	_cancelButton.setCaption("Cancel");
+	_cancelButton.ClickedAction += Pt::slot(*this,&Dialog2::onClosedByButton);
+	addChild(&_cancelButton);
+
 }
 
 void Dialog2::onClosedByButton()

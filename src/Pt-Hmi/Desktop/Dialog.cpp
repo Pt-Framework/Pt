@@ -86,23 +86,23 @@ const DialogModel& Dialog::dialogModel() const
 
 void Dialog::setSize(const Pt::Gfx::SizeF& size)
 {
-	dialogModel().Size = size;
+	dialogModel().WinSize = size;
 }
 
 const Pt::Gfx::SizeF& Dialog::size() const
 {
-	return dialogModel().Size.get();
+	return dialogModel().WinSize.get();
 }
 
 
 void Dialog::setPosition(const Pt::Gfx::PointF& position)
 {
-	dialogModel().Position = position;
+	dialogModel().WinPos = position;
 }
 
 const Pt::Gfx::PointF& Dialog::position() const
 {
-	return dialogModel().Position.get();
+	return dialogModel().WinPos.get();
 }
 
 Dialog::~Dialog()

@@ -7,7 +7,7 @@ namespace Hmi{
 WindowModel::WindowModel()
 : MinimumSize(me(),Pt::Gfx::SizeF(0,0))
 , MaximumSize(me(),Pt::Gfx::SizeF(65535,65535))
-, WindowStartPostion(me())
+, WindowStartPostion(me(), WindowStartPositionType::Manual)
 , WindowState(me())
 , ShowInTaskbar(me(),true)
 , ShowTitle(me(),true)

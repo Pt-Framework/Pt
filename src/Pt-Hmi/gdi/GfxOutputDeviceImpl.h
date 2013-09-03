@@ -47,6 +47,10 @@ public:
 	virtual ~GfxOutputDeviceImpl();
 	void output(Pt::Hmi::Model* model);
 	Pt::Gfx::Painter* nativePainter();
+	inline HWND hwnd()
+	{
+		return _hwnd;
+	}
 
 protected:
 	void onWindowEvent(HWND wnd, unsigned int msg, WPARAM wparam, LPARAM lparam, bool& handled);
@@ -61,12 +65,13 @@ protected:
 protected:	
 	void getWindowSize();
 	void getWindowPos();
-	void setWindowSizeAndPos();
+	void setWindowSizeAndPos(bool firstShow);
 	void setWindowProperties();	
 	void drawIndependentImage(size_t x, size_t y, const char* data, size_t width, size_t height);
 	void create();
 	void destroy();
 	void output();
+	void centerWindowTo(HWND parent);
 
 private:
 	HWND					_hwnd;

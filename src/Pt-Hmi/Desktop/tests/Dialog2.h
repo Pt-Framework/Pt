@@ -28,6 +28,8 @@
 
 #include <Pt/Hmi/Desktop/Dialog.h>
 #include <Pt/Hmi/Desktop/Button.h>
+#include <Pt/Hmi/Desktop/Label.h>
+#include <Pt/Hmi/Desktop/Panel.h>
 
 namespace Pt{
 namespace Hmi{
@@ -46,7 +48,10 @@ private:
 	void onClosedByButton();
 
 private:
-	Pt::Hmi::Desktop::Button _closeButton;
+	Pt::Hmi::Desktop::Button _okButton;
+	Pt::Hmi::Desktop::Button _cancelButton;
+	Pt::Hmi::Desktop::Label  _label;
+	Pt::Hmi::Desktop::Panel  _panel;
 }; 
 
 }}}

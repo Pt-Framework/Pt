@@ -54,6 +54,7 @@ void MainWindow::init()
 	setSize(Pt::Gfx::SizeF(800,615));
 	windowModel().Caption.set("This is a Platinum C++ Human Mashine Interface demo");
     windowModel().WindowState.set(WindowStateType::Normal);
+	windowModel().WindowStartPostion.set(WindowStartPositionType::CenterScreen);
 	windowController().ClosedAction += Pt::slot(*this, &MainWindow::onClosedByWindow);
 
 	//Panel

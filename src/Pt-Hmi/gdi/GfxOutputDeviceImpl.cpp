@@ -24,6 +24,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
 #include "GfxOutputDeviceImpl.h"
+#include <Pt/Hmi/GfxOutputDevice.h>
 #include "ApplicationImpl.h"
 #include <Windows.h>
 #include <WindowsX.h>
@@ -209,7 +210,7 @@ void GfxOutputDeviceImpl::onSize(WPARAM wParam, LPARAM lParam)
 {			
 	if(!_model->Enable.get())
 	{
-		setWindowSizeAndPos();
+		setWindowSizeAndPos(false);
 		setWindowProperties();
 		return;
 	}
@@ -278,12 +279,73 @@ void GfxOutputDeviceImpl::onMouse(unsigned int msg, WPARAM wparam, LPARAM lparam
 	Application::instance().pointerEvent().send(ctrl, _pointerEvent);
 }
 
-void GfxOutputDeviceImpl::setWindowSizeAndPos()
+void GfxOutputDeviceImpl::setWindowSizeAndPos(bool firstShow)
 {
-	WindowModel* wmodel = (WindowModel*) _model;
-	Pt::Gfx::Point pos = wmodel->fromUnit(wmodel->WinPos.get());
-	Pt::Gfx::Size size = wmodel->fromUnit(wmodel->WinSize.get());
-	SetWindowPos(_hwnd,0, pos.x(), pos.y(), size.width(), size.height(), 0);	
+	if(!firstShow)
+	{
+		Pt::Gfx::Point pos = _model->fromUnit(_model->WinPos.get());
+		Pt::Gfx::Size size = _model->fromUnit(_model->WinSize.get());
+		SetWindowPos(_hwnd,0, pos.x(), pos.y(), size.width(), size.height(), 0);	
+		return;
+	}
+
+	switch(_model->WindowStartPostion.get())
+	{
+		case WindowStartPositionType::Manual:
+			setWindowSizeAndPos(false);
+		break;
+			
+		case WindowStartPositionType::CenterParent:
+		{
+			WindowController* controller = (WindowController*) _model->controller();
+			WindowController* parent = controller->windowParent();
+				
+			if( parent == 0)
+			{
+				centerWindowTo(GetDesktopWindow());
+			}
+			else
+			{
+				GfxOutputDeviceImpl* parentImpl = 0;
+
+				for(size_t i = 0; i < parent->outputDevices().size(); ++i)
+				{	
+					GfxOutputDevice* parentDevice = dynamic_cast<GfxOutputDevice*>(parent->outputDevices()[i]);
+
+					if( parentDevice == 0)
+						continue;
+
+					parentImpl = dynamic_cast<GfxOutputDeviceImpl*>(parentDevice->impl());
+						
+					if( parentImpl != 0)
+						break;
+				}
+
+				centerWindowTo(parentImpl->hwnd());
+			}
+		}
+		break;
+
+		case WindowStartPositionType::CenterScreen:
+			centerWindowTo(GetDesktopWindow());
+		break;
+	}
+}
+
+void GfxOutputDeviceImpl::centerWindowTo(HWND parent)
+{
+	RECT parentRect;   
+	GetWindowRect(parent, &parentRect);
+	int horizontal = parentRect.right/2;
+	int vertical = parentRect.bottom/2;
+	Pt::Gfx::Size mySize  = _model->fromUnit(_model->WinSize.get());
+
+	int posX = horizontal - (mySize.width()/2);
+	int posY = vertical - (mySize.height()/2);
+				
+	_model->WinPos.set(_model->toUnit(Pt::Gfx::Point( posX,posY)));
+	Pt::Gfx::Size size = _model->fromUnit(_model->WinSize.get());
+	SetWindowPos(_hwnd,0, posX, posY, size.width(), size.height(), 0);
 }
 
 void GfxOutputDeviceImpl::getWindowSize()
@@ -322,7 +384,7 @@ void GfxOutputDeviceImpl::onMove()
 {
 	if(!_model->Enable.get())
 	{
-		setWindowSizeAndPos();
+		setWindowSizeAndPos(false);
 		setWindowProperties();
 		return;
 	}
@@ -478,6 +540,8 @@ void GfxOutputDeviceImpl::destroy()
 
 void GfxOutputDeviceImpl::output(Pt::Hmi::Model* model)
 {
+	bool firstShow =  (_model == 0);
+		
 	_model = dynamic_cast<WindowModel*>(model);
 
 	assert(_model != 0);
@@ -500,7 +564,7 @@ void GfxOutputDeviceImpl::output(Pt::Hmi::Model* model)
 		}
 	}
 
-	setWindowSizeAndPos();
+	setWindowSizeAndPos(firstShow);
 	setWindowProperties();	
 	output();
 	InvalidateRect(_hwnd, 0, FALSE);

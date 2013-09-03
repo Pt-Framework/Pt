@@ -48,9 +48,10 @@ Dialog1::~Dialog1()
 void Dialog1::init()
 {
 	//Dialog
-	setSize(Pt::Gfx::SizeF(800,600));
+	setSize(Pt::Gfx::SizeF(700,500));
 	setPosition(Pt::Gfx::PointF(400,400));
 	dialogModel().Caption.set("This is a sample modal dialog 1");
+	dialogModel().WindowStartPostion.set(WindowStartPositionType::CenterParent);
 
 	//New dialog button 
 	_newDialog.setPosition(Pt::Gfx::PointF(400,300));
