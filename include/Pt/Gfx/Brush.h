@@ -41,8 +41,12 @@ namespace Gfx {
     class PT_GFX_API Brush
     {
         public:
-            enum FillStyle {
-                SolidFill = 0, TextureFill
+            enum FillStyle
+           {
+                SolidFill = 0,
+                TextureFill,
+                LinearGradientFill,
+                RadialGradientFill
             };
 
         public:

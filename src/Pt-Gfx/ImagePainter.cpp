@@ -299,10 +299,12 @@ void ImagePainter::drawImage( const  Gfx::Point& to, const ARgbImage& image )
 	if( stopY > _image.height())
 		stopY = _image.height();
 
-	for( size_t x = startX; x < stopX; ++x)
-	{		
-		for( size_t y = startY; y < stopY; ++y)
-		{
+    for( size_t y = startY; y < stopY; ++y)
+    {
+
+        for( size_t x = startX; x < stopX; ++x)
+        {
+            
 			_image.at(x,y) = image.at(x -startX, y -startY);
 		}
 	}
