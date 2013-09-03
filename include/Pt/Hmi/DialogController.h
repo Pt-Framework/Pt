@@ -35,12 +35,12 @@
 namespace Pt{
 namespace Hmi{
 
-class GfxOutput;
+class GfxOutputDevice;
 
 class PT_HMI_API DialogController  : public WindowController
 {
 public:
-	DialogController(GfxModel* m = 0, Renderer* r = 0, GfxOutput* out = 0);
+	DialogController(GfxModel* m = 0, Renderer* r = 0, GfxOutputDevice* out = 0);
 	virtual ~DialogController();	
 
 	void doModal(WindowController* parent);

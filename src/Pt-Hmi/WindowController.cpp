@@ -27,7 +27,7 @@
 #include <Pt/Hmi/WindowController.h>
 #include <Pt/Hmi/PointingDevice.h>
 #include <Pt/Hmi/WidgetController.h>
-#include <Pt/Hmi/GfxOutput.h>
+#include <Pt/Hmi/GfxOutputDevice.h>
 #include <Pt/Hmi/WindowModel.h>
 
 #include <iostream>
@@ -35,7 +35,7 @@
 namespace Pt{
 namespace Hmi{
 
-WindowController::WindowController(GfxModel* m, Renderer* r,  GfxOutput* out, PointingDevice* in1, InputDevice* in2)
+WindowController::WindowController(GfxModel* m, Renderer* r,  GfxOutputDevice* out, PointingDevice* in1, InputDevice* in2)
 :_windowParent(0)
 {	
 	if( m != 0)

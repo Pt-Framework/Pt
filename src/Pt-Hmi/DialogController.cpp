@@ -27,14 +27,14 @@
 #include <Pt/Hmi/DialogController.h>
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/GfxModel.h>
-#include <Pt/Hmi/GfxOutput.h>
+#include <Pt/Hmi/GfxOutputDevice.h>
 #include <Pt/Gfx/ImagePainter.h>
 #include <Pt/Hmi/DialogModel.h>
 
 namespace Pt{
 namespace Hmi{
 
-DialogController::DialogController(GfxModel* m, Renderer* r, GfxOutput* out )
+DialogController::DialogController(GfxModel* m, Renderer* r, GfxOutputDevice* out )
 : WindowController(m, r, out)
 {				
 }

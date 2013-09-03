@@ -36,12 +36,12 @@ namespace Hmi{
 
 class WidgetController;
 class PointingDevice;
-class GfxOutput;
+class GfxOutputDevice;
 
 class PT_HMI_API WindowController  : public GfxController
 {
 public:
-	WindowController(GfxModel* m = 0, Renderer* r = 0, GfxOutput* out = 0, PointingDevice* in1 = 0, InputDevice* in2 = 0);
+	WindowController(GfxModel* m = 0, Renderer* r = 0, GfxOutputDevice* out = 0, PointingDevice* in1 = 0, InputDevice* in2 = 0);
 	virtual ~WindowController();
 
 	WidgetController* mainWidget();

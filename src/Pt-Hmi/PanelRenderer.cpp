@@ -38,7 +38,7 @@ void PanelRenderer::render(Pt::Hmi::Model* m)
 	int corner = 0;
 
 	if(model->BorderRoundEdge.get())
-		corner = 1;
+		corner = 2;
 
 	int border =  model->fromUnit(model->BorderWidth.get());	
 	Pt::Gfx::Size   size = model->fromUnit(model->Size.get());
