@@ -68,7 +68,7 @@ void Dialog2::init()
 
 	//OK Button
 	_okButton.setPosition(Pt::Gfx::PointF(200,125));
-	_okButton.setSize(Pt::Gfx::SizeF(100,25));
+	_okButton.setSize(Pt::Gfx::SizeF(100,23));
 	_okButton.setCaption("OK");
 	_okButton.setActionKey("C//x");
 	_okButton.ClickedAction += Pt::slot(*this,&Dialog2::onClosedByButton);
@@ -76,7 +76,7 @@ void Dialog2::init()
 
 	//Cancel button
 	_cancelButton.setPosition(Pt::Gfx::PointF(310,125));
-	_cancelButton.setSize(Pt::Gfx::SizeF(100,25));
+	_cancelButton.setSize(Pt::Gfx::SizeF(100,23));
 	_cancelButton.setCaption("Cancel");
 	_cancelButton.ClickedAction += Pt::slot(*this,&Dialog2::onClosedByButton);
 	addChild(&_cancelButton);

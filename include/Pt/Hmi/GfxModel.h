@@ -83,6 +83,7 @@ public:
 	Property<Pt::Gfx::PointF>		Position;
 	Property<Pt::Gfx::SizeF>		Size;
 	Property<Pt::Gfx::ARgbColor>	BackColor;
+    Property<Pt::Gfx::ARgbColor>	BackColorHightLight;
 	Property<Pt::Gfx::ARgbColor>	ForeColor;
 	Property<Pt::Gfx::ARgbImage>	BackgroundImage;
 	Property<ImageLayoutType::Type>	BackgroundImageLayout;
@@ -94,7 +95,8 @@ public:
 	Property<Cursor>                CursorT;
 	Property<TextAlignType::Type>	TextAlign;
 	Property<bool>					Focused; 
-	Property<bool>					AcceptFocus; 	
+	Property<bool>					AcceptFocus;
+    Property<bool>					HighLight;
 	Property<std::string>			FocusedActionKey;
 
 public:

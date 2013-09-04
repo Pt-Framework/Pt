@@ -67,7 +67,7 @@ void LabelRenderer::render(Pt::Hmi::Model* m)
 				const double textHeightHalf	= textSize.height()/2.0;	
 				
 				Pt::Gfx::PointF pos(widthHalf - textWidthHalf, heightHalf - textHeightHalf);							
-				pos.addY(metric.height() - metric.descent());				
+				pos.addY(metric.height() - metric.descent()+1);
 
 				localPainter.setFont(model->Font.get());
 				localPainter.setPen(pen);

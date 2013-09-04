@@ -31,7 +31,7 @@ void ButtonRenderer::render(Pt::Hmi::Model* m)
 	}			
 
 	model->ForeColor.set(Pt::Gfx::ARgbColor(0,0,0,0));
-	model->Invert3DEffect.set(model->ButtonState.get() == DeviceButton::Pressed);
+	model->HighLight.set(model->ButtonState.get() == DeviceButton::Pressed);
 
 	LabelRenderer::render(m);
 	
@@ -44,7 +44,8 @@ void ButtonRenderer::render(Pt::Hmi::Model* m)
 		return;
 
 	Pt::Gfx::ImagePainter localPainter(model->PaintBuffer);
-
+    Pt::Gfx::Size size = model->fromUnit(model->Size.get());
+       
 	if(model->Armed.get() || model->Focused.get())
 	{
 		Pt::Gfx::Size size = model->fromUnit(model->Size.get());

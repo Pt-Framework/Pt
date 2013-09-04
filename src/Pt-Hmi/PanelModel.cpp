@@ -6,7 +6,6 @@ namespace Hmi{
 PanelModel::PanelModel()
 : BorderStyle(me(),BorderStyleType::Single)
 , BorderWidth(me(),3)
-, Invert3DEffect(me(),false)
 , BorderRoundEdge(me(),false)
 {
 	AcceptFocus.set(false);

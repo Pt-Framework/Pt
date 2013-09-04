@@ -61,6 +61,9 @@ void DialogController::doModal(WindowController* parent)
 	//Set my parent window.
 	setWindowParent(parent);
 	 
+    myModel->Closed.set(false);
+    myModel->Visible.set(true);
+
 	//Setup the parent as disabled and TopMost = false.
 	parentTopMost = parentModel->TopMost.get();
 	parentModel->Enable = false;	

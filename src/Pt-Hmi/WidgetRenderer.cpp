@@ -33,12 +33,28 @@ void WidgetRenderer::render(Pt::Hmi::Model* model)
 	if(wmodel->PaintBuffer.width() != size.width() ||wmodel->PaintBuffer.height() != size.height())
 		wmodel->PaintBuffer.resize(size.width(), size.height());
 
-	Pt::Gfx::Rect			rect(Pt::Gfx::Point(0,0), size);
-	Pt::Gfx::ImagePainter	localPainter(wmodel->PaintBuffer);
-	Pt::Gfx::Brush			brush(wmodel->BackColor.get());		
+    if(wmodel->HighLight.get())
+    {
+     	Pt::Gfx::Rect			rect(Pt::Gfx::Point(0,0), size);
+        Pt::Gfx::ImagePainter	localPainter(wmodel->PaintBuffer);
+        
+        Pt::Gfx::Brush			brush(wmodel->BackColorHightLight.get());
+        
+        localPainter.setBrush(brush);
+        
+        localPainter.fillRect(rect);
+    }
+    else
+    {
+        Pt::Gfx::Rect			rect(Pt::Gfx::Point(0,0), size);
+        Pt::Gfx::ImagePainter	localPainter(wmodel->PaintBuffer);
 	
-	localPainter.setBrush(brush);
-	localPainter.fillRect(rect);
+        Pt::Gfx::Brush			brush(wmodel->BackColor.get());
+	
+        localPainter.setBrush(brush);
+    
+        localPainter.fillRect(rect);
+    }
 }
 
 }}

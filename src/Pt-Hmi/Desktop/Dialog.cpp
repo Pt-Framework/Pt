@@ -47,10 +47,7 @@ void Dialog::show(Window* parent)
 void Dialog::show(WindowController* parent)
 {
 	DialogController* myController = (DialogController*) &controller();
-	WindowModel*	  myModel	   = (WindowModel*) myController->model();
-
-	myModel->Closed.set(false);
-	Widget::show();		
+	
 	myController->doModal(parent);	
 }
 

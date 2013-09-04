@@ -19,7 +19,6 @@ public:
 
 	Property<BorderStyleType::Type> BorderStyle;
 	Property<bool>				BorderRoundEdge;	
-	Property<bool>				Invert3DEffect;
 	Property<double>			BorderWidth;	
 	
 public:

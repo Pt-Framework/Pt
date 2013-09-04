@@ -190,7 +190,8 @@ void GfxOutputDeviceImpl::output(Pt::Hmi::Model* model)
 	{
 		if(_view != nil)
 			destroy();
-
+        
+        _model= 0;
 		return;
 	}
 	else
@@ -247,8 +248,10 @@ void GfxOutputDeviceImpl::onMouseMove(double x, double y)
 void GfxOutputDeviceImpl::centerWindowTo(NSRect* parentRect)
 {
 
-    int horizontal = parentRect->origin.x + parentRect->size.width/2;
-    int vertical = parentRect->origin.y + parentRect->size.height/2;
+      int screenHeight = [[NSScreen mainScreen] frame].size.height;
+    
+    int horizontal = parentRect->size.width/2 +parentRect->origin.x;
+    int vertical = screenHeight - (parentRect->size.height/2 + parentRect->origin.y);
     
     Pt::Gfx::Size mySize  = _model->fromUnit(_model->WinSize.get());
         
@@ -274,6 +277,7 @@ void GfxOutputDeviceImpl::writeWindowSizeAndPos(bool firstShow)
 				
                 if( parent == 0)
                 {
+                    std::cout<<"null"<<std::endl;
                     centerWindowTo(&[[NSScreen mainScreen] frame]);
                 }
                 else
@@ -292,7 +296,7 @@ void GfxOutputDeviceImpl::writeWindowSizeAndPos(bool firstShow)
                         if( parentImpl != 0)
                             break;
                     }
-                    
+                
                     centerWindowTo(&[parentImpl->window() frame]);
                 }
             }
