@@ -336,8 +336,8 @@ void GfxOutputDeviceImpl::centerWindowTo(HWND parent)
 {
 	RECT parentRect;   
 	GetWindowRect(parent, &parentRect);
-	int horizontal = parentRect.right/2;
-	int vertical = parentRect.bottom/2;
+	int horizontal = parentRect.left + ((parentRect.right - parentRect.left )/2);
+	int vertical = parentRect.top + (parentRect.bottom - parentRect.top)/2;
 	Pt::Gfx::Size mySize  = _model->fromUnit(_model->WinSize.get());
 
 	int posX = horizontal - (mySize.width()/2);
@@ -345,7 +345,7 @@ void GfxOutputDeviceImpl::centerWindowTo(HWND parent)
 				
 	_model->WinPos.set(_model->toUnit(Pt::Gfx::Point( posX,posY)));
 	Pt::Gfx::Size size = _model->fromUnit(_model->WinSize.get());
-	SetWindowPos(_hwnd,0, posX, posY, size.width(), size.height(), 0);
+	SetWindowPos(_hwnd,0, posX, posY, size.width(), size.height(), SWP_DRAWFRAME);
 }
 
 void GfxOutputDeviceImpl::getWindowSize()
@@ -541,7 +541,6 @@ void GfxOutputDeviceImpl::destroy()
 void GfxOutputDeviceImpl::output(Pt::Hmi::Model* model)
 {
 	bool firstShow =  (_model == 0);
-		
 	_model = dynamic_cast<WindowModel*>(model);
 
 	assert(_model != 0);
@@ -549,8 +548,11 @@ void GfxOutputDeviceImpl::output(Pt::Hmi::Model* model)
 	//Check create/destroy
 	if(_model->Closed.get())
 	{
+		
 		if(_hwnd != 0)
 			destroy();
+
+		_model = 0;
 		return;
 	}
 	else
@@ -558,9 +560,14 @@ void GfxOutputDeviceImpl::output(Pt::Hmi::Model* model)
 		if(_hwnd == 0)
 		{
 			if(_model->Visible.get())
+			{
 				create();
+			}
 			else
+			{
+				_model = 0;
 				return;
+			}
 		}
 	}
 
