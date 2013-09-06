@@ -456,8 +456,9 @@ bool GfxOutputDeviceImpl::onCanClose()
     controller->ClosingAction.send(controller, canClose);
     
     if(canClose)
-        controller->ClosedAction.send(controller);
-    
+    {
+        destroy();
+    }
     return canClose;
 }
 
