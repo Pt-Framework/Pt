@@ -4,9 +4,9 @@ namespace Pt{
 namespace Hmi{
 
 PanelModel::PanelModel()
-: BorderStyle(me(),BorderStyleType::Single)
-, BorderWidth(me(),3)
-, BorderRoundEdge(me(),false)
+: DefineProperty(BorderStyle,BorderStyleType::Single)
+, DefineProperty(BorderWidth,3)
+, DefineProperty(BorderRoundEdge,false)
 {
 	AcceptFocus.set(false);
 }

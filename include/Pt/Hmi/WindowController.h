@@ -71,7 +71,7 @@ public:
 protected:
 	virtual void onPointerInput(const PointingEvent& ev);
 	virtual void onKeyInput(const KeyEvent& ev);
-	virtual void onModelChanged(bool created = false);	
+	virtual void onModelChanged(bool created, const PropertyBase* prop);
 	virtual void onClosing(Controller* sender, bool& canClose);
 	virtual void onClosed(Controller* sender);
 	

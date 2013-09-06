@@ -54,7 +54,7 @@ protected:
 	virtual void onDoublePressedAction();
 	virtual void onCheckedAction(bool checked);
 
-	virtual void onModelChanged(bool created = false);
+	virtual void onModelChanged(bool created, const PropertyBase* prop);
 
 private:
 	virtual void onPointerInput(const PointingEvent& ev);

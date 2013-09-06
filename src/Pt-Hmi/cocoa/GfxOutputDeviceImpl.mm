@@ -277,7 +277,6 @@ void GfxOutputDeviceImpl::writeWindowSizeAndPos(bool firstShow)
 				
                 if( parent == 0)
                 {
-                    std::cout<<"null"<<std::endl;
                     centerWindowTo(&[[NSScreen mainScreen] frame]);
                 }
                 else
@@ -454,7 +453,7 @@ bool GfxOutputDeviceImpl::onCanClose()
     
     WindowController* controller = (WindowController*)_model->controller();
     controller->ClosingAction.send(controller, canClose);
-    
+
     if(canClose)
     {
         destroy();

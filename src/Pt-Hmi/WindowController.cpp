@@ -155,7 +155,7 @@ GfxModel* WindowController::gfxModel()
 	return m;
 }
 
-void WindowController::onModelChanged(bool created)
+void WindowController::onModelChanged(bool created,const PropertyBase* prop)
 {
 	if( created)
 	{
@@ -164,9 +164,6 @@ void WindowController::onModelChanged(bool created)
 		m->Size.PropertyChanged += Pt::slot(*this, &WindowController::onSizeChanged);					
 		m->Size.PropertyChanged.send(m, m->Size);	
 	}
-
-	for( size_t i = 0; i < children().size(); ++i)
-		children()[i]->notifyModelChanged(created);	
 		
 }
 

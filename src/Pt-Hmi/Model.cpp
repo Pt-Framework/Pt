@@ -31,8 +31,9 @@ namespace Pt{
 namespace Hmi{
 
 Model::Model()
-: Enable(me(),true)
-, Tag(me(),0)
+: _properties()
+, DefineProperty(Enable,true)
+, DefineProperty(Tag,0)
 , _ctrl(0)
 { 
 
@@ -43,6 +44,12 @@ Model::~Model()
 
 }
 
+void Model::registerProperty(PropertyBase* prop)
+{
+    std::pair<std::string,PropertyBase*> pair(prop->name(), prop);
+    _properties.insert(pair);
+}
+    
 const Controller* Model::controller() const
 {
 	return _ctrl;

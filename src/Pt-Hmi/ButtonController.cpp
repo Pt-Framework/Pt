@@ -85,9 +85,9 @@ void ButtonController::onDoublePressedAction()
 	_doublePressTimer.stop();
 }
 
-void ButtonController::onModelChanged(bool created)
+void ButtonController::onModelChanged(bool created, const PropertyBase* prop)
 {
-	LabelController::onModelChanged(created);
+	LabelController::onModelChanged(created, prop);
 
 	if( created)
 	{

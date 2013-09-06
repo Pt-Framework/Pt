@@ -122,7 +122,7 @@ public:
 
 	inline void notifyModelChanged(bool created)
 	{
-		onModelChanged(created);
+		onModelChanged(created,0);
 	}
 
 	inline void devicePointerInput(Controller* c, const PointingEvent& ev)
@@ -179,7 +179,7 @@ protected:
 		return false;
 	}
 
-	virtual void onModelChanged(bool created = false)
+	virtual void onModelChanged(bool created, const PropertyBase* prop)
 	{ }
 	
 	virtual void onPointerInput(const PointingEvent& ev)
@@ -190,9 +190,9 @@ protected:
 
 	 
 private:
-	void modelChanged()
+	void modelChanged(const PropertyBase* prop)
 	{
-		onModelChanged(false);
+		onModelChanged(false,prop);
 	}
 private:
 	std::vector<InputDevice*>	_inputDevices;

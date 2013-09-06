@@ -32,6 +32,8 @@
 #include <Pt/Signal.h>
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/Property.h>
+#include <map>
+#include <string>
 
 namespace Pt{
 namespace Hmi{
@@ -50,23 +52,38 @@ protected:
 		return this;
 	}
 
+private:
+	Controller* _ctrl;
+    std::map<std::string, PropertyBase*> _properties;
+    
 public:
 	Property<bool>			Enable;
 	Property<void*>			Tag;  
-	Pt::Signal<>			Changed;
+	Pt::Signal<const PropertyBase*>	Changed;
 
 	const Controller* controller() const;
 	Controller* controller();
 	void setController( Controller* ctrl);
-
-	inline void notifyChanged()
-	{
-		Changed.send();
-	}
-
-
+    
+    void registerProperty(PropertyBase* prop);
+    
+    std::map<std::string, PropertyBase*>& properties()
+    {
+        return _properties;
+    }
+    
+    const std::string& name() const
+    {
+        return _name;
+    }
+    
+    void setName(const std::string& n)
+    {
+        _name = n;
+    }
+    
 private:
-	Controller* _ctrl;
+    std::string _name;
 };
 
 }}
