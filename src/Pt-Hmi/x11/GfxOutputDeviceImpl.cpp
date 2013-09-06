@@ -694,16 +694,6 @@ void GfxOutputDeviceImpl::output(Pt::Hmi::Model* model)
 {
 	_model = dynamic_cast<WindowModel*>(model);
 
-	if( _model == 0)
-		throw std::logic_error("ERROR: WindowModel model expected!");
-
-        
-	if(!_model->Visible.get() && !_visible)
-	{
-		return;
-	}
-
-
 	//Handle open/close
 	if(_model->Closed.get())
 	{
@@ -722,7 +712,13 @@ void GfxOutputDeviceImpl::output(Pt::Hmi::Model* model)
 				return;
 		}
 	}
-
+    
+	if(!_model->Visible.get() && !_visible)
+	{
+		return;
+	}
+    //TODO: Center parent handling
+    
 	//Initial size and position
 
 	Pt::Gfx::SizeF clientSize;
