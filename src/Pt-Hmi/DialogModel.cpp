@@ -37,7 +37,7 @@ namespace Pt{
 namespace Hmi{
 
 DialogModel::DialogModel()
-: DefineProperty(Result, DialogResultType::Undefined)
+: DefinePropertyInitMacro(Result, DialogResultType::Undefined)
 {
 	ShowInTaskbar.set(false);
 	ShowSysMenu.set(true);

@@ -17,6 +17,7 @@ PT_HMI_IMPL += [ GLOB $(PT_HMI_SUBDIR) : *.cpp  ] ;
 PT_HMI_IMPL += [ GLOB $(PT_HMI_SUBDIR) : *.mm  ] ;
 
 SharedLibrary Pt-Hmi : $(PT_HMI_IMPL)
+					   PropertyBase.cpp
                        Model.cpp
 					   Controller.cpp
 					   Application.cpp
@@ -46,8 +47,7 @@ SharedLibrary Pt-Hmi : $(PT_HMI_IMPL)
 					   WindowRenderer.cpp
 					   DialogController.cpp
 					   DialogModel.cpp
-					   DialogRenderer.cpp	
-					Property.cpp				   
+					   DialogRenderer.cpp										   
 						;
 
 LinkSharedLibraries Pt-Hmi : Pt Pt-System Pt-Gfx  ;

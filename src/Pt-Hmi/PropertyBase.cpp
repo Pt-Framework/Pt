@@ -1,6 +1,5 @@
 #include <Pt/Hmi/Model.h>
-#include <Pt/Hmi/Property.h>
-
+#include <Pt/Hmi/PropertyBase.h>
 
 namespace Pt {
 namespace Hmi {
@@ -18,4 +17,5 @@ void PropertyBase::changed()
     _parent->Changed.send(this);
     
 }
+
 }}

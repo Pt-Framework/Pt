@@ -1089,6 +1089,9 @@
     <ClInclude Include="..\..\src\Pt-Hmi\x11\GfxOutputDeviceImpl.h">
       <Filter>Pt-Hmi\Sources\x11</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\PropertyBase.h">
+      <Filter>Pt-Hmi\Headers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -2117,6 +2120,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\x11\GfxOutputDeviceImpl.cpp">
       <Filter>Pt-Hmi\Sources\x11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\PropertyBase.cpp">
+      <Filter>Pt-Hmi\Sources</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

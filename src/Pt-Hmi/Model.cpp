@@ -32,8 +32,8 @@ namespace Hmi{
 
 Model::Model()
 : _properties()
-, DefineProperty(Enable,true)
-, DefineProperty(Tag,0)
+, DefinePropertyInitMacro(Enable,true)
+, DefinePropertyInitMacro(Tag,0)
 , _ctrl(0)
 { 
 

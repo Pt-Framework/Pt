@@ -4,11 +4,11 @@ namespace Pt{
 namespace Hmi{
 
 ButtonModel::ButtonModel()
-: DefineProperty(ButtonState,Pt::Hmi::DeviceButton::Released)
-, DefineProperty(ActionKey,"")
-, DefineProperty(Armed,false)
-, DefineProperty(ButtonType,Pt::Hmi::ButtonType::Press)
-, DefineProperty(DoublePressTimeInMs,1500)
+: DefinePropertyInitMacro(ButtonState,Pt::Hmi::DeviceButton::Released)
+, DefinePropertyInitMacro(ActionKey,"")
+, DefinePropertyInitMacro(Armed,false)
+, DefinePropertyInitMacro(ButtonType,Pt::Hmi::ButtonType::Press)
+, DefinePropertyInitMacro(DoublePressTimeInMs,1500)
 {
     BackColor.set(Pt::Gfx::ARgbColor(242,242,242));
 	BorderStyle.set(Pt::Hmi::BorderStyleType::Widget);

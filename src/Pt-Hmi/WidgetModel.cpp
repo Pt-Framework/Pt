@@ -4,7 +4,7 @@ namespace Pt{
 namespace Hmi{
 
 WidgetModel::WidgetModel()
-: DefineProperty(Caption,"")
+: DefinePropertyInitMacro(Caption,"")
 {
 }
 

@@ -91,6 +91,7 @@
     <ClInclude Include="..\..\include\Pt\Hmi\PointingDevice.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\PointingEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Property.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\PropertyBase.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Renderer.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\WidgetController.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\WidgetModel.h" />
@@ -449,6 +450,7 @@
     <ClCompile Include="..\..\src\Pt-Hmi\PanelModel.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\PanelRenderer.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\PointingEvent.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\PropertyBase.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\WidgetController.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\WidgetModel.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\WidgetRenderer.cpp" />

@@ -1,44 +1,13 @@
-#ifndef Pt_Hmi_Base_Property_h
-#define Pt_Hmi_Base_Property_h
+#ifndef Pt_Hmi_Property_h
+#define Pt_Hmi_Property_h
 
 
 #include <Pt/Signal.h>
 #include <string>
+#include <Pt/Hmi/PropertyBase.h>
 
 namespace Pt {
 namespace Hmi {
-
-#define DefineProperty(prop,value) prop(#prop,me(),value)
-#define DefinePropertyDefault(prop) prop(#prop,me())
-
-class Model;
-    
-class PropertyBase
-{
-public:
-	PropertyBase(const char* name, Model* parent);
-    
-    inline const Model* parent() const
-    {
-        return _parent;
-    }
-    
-    inline Model* parent()
-    {
-        return _parent;
-    }
-    
-    const std::string& name() const
-    {
-        return _name;
-    }
-protected:
-    void changed();
-    
-protected:
-	Model* _parent;
-    std::string _name;
-};
 
 template<typename T>
 class  Property  : public PropertyBase
@@ -77,7 +46,7 @@ public:
 	T& operator=(const T& value)
 	{
 		_value = value;		
-		PropertyChanged.send(_parent, *this);
+		PropertyChanged.send(parent(), *this);
          changed();
 		return _value;
 	}
