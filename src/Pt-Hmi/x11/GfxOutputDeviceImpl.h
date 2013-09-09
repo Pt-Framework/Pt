@@ -84,6 +84,9 @@ private:
 	void readClientSizeAndPos(Pt::Gfx::SizeF& size, Pt::Gfx::PointF& pos);
 	void pixelToScreen(char* data, const Pt::Gfx::ARgbColor& pixel);
 	void updateDrawBuffer();
+	void maximizeWindow();
+	void minimizeWindow();
+	void restoreWindow();
 
 private:
     Atom AtomAppWake;
@@ -99,8 +102,9 @@ private:
     Window  				_window;
     GC 						_brushGc;
 	Display* 				_display;
-	bool _visible;
-	std::vector<char> _pixelBuffer;
+	unsigned int			_windowBorderWidth;
+	bool 					_visible;
+	std::vector<char> 		_pixelBuffer;
 };
 
 }}

@@ -43,9 +43,17 @@
 #include <algorithm>
 #include "KeyHandler.h"
 #include <ctype.h>
+#include <assert.h>
 
 namespace Pt{
 namespace Hmi{
+
+enum
+{
+	_NET_WM_STATE_REMOVE =0,
+	_NET_WM_STATE_ADD = 1,
+	_NET_WM_STATE_TOGGLE =2
+};
 
 GfxOutputDeviceImpl::GfxOutputDeviceImpl()
 : _ignoreSizeEvent(false)
@@ -293,6 +301,7 @@ void GfxOutputDeviceImpl::onConfigureNotify( XEvent& xev)
 		return;
 	}
 	
+	std::cout<<"sizing"<<std::endl;
 	XWindowAttributes xwa;
 	Window child;
 	int    x = 0;
@@ -548,14 +557,10 @@ void GfxOutputDeviceImpl::writeWindowProperties()
 
 
 	if(_model->Visible.get() && !_visible)
-	{
 		show();
-	}
 
 	if(!_model->Visible.get() && _visible)
-	{
 		hide();
-	}
 		
 	if( _model->ShowTitle.get())
 		XStoreName(_display, _window, _model->Caption.get().c_str());
@@ -582,6 +587,7 @@ void GfxOutputDeviceImpl::writeWindowProperties()
 
 		case Pt::Hmi::WindowBorderType::Dialog:
 		case Pt::Hmi::WindowBorderType::Tool:
+		case Pt::Hmi::WindowBorderType::Fixed:
 		{//Fixed size
 			sizeHints.flags |= PMinSize | PMaxSize;
 			sizeHints.min_width  = _model->WinSize.get().width();
@@ -590,10 +596,13 @@ void GfxOutputDeviceImpl::writeWindowProperties()
 			sizeHints.max_height = _model->WinSize.get().height();
 		}
 		break;
+		case Pt::Hmi::WindowBorderType::NoBorder:
+	
 		default:
 		break;
 	}
 
+	XSetWMNormalHints(_display, _window,  &sizeHints);
 
 	//TODO : show/hide minimize button.
 	if( _model->ShowMinimizeButton.get())
@@ -619,49 +628,22 @@ void GfxOutputDeviceImpl::writeWindowProperties()
 	{
 	}
 
-	//TODO : Windows state min/max/normal
 	switch(_model->WindowState.get())
 	{
 		case Pt::Hmi::WindowStateType::Normal:
+			restoreWindow();
 		break;
 
 		case Pt::Hmi::WindowStateType::Maximazed:
-
+			maximizeWindow();
 		break;
 
 		case Pt::Hmi::WindowStateType::Minimized:
-
+			minimizeWindow();
 		break;
 	}
 
-	//TODO: window border 
-	switch( _model->Border.get())
-	{
-		case Pt::Hmi::WindowBorderType::Fixed:
-			
-		break;
 
-		case Pt::Hmi::WindowBorderType::NoBorder:
-			
-		break;
-
-		case Pt::Hmi::WindowBorderType::Sizeable:
-
-		break;
-
-		case Pt::Hmi::WindowBorderType::Dialog:
-		break;
-
-		case Pt::Hmi::WindowBorderType::DialogSizeable:
-		break;
-
-		case Pt::Hmi::WindowBorderType::Tool:
-		break;
-
-		case Pt::Hmi::WindowBorderType::ToolSizeable:
-		break;
-
-	}
 
 	//TODO: show in taskbar
 	if(_model->ShowInTaskbar.get())
@@ -671,8 +653,56 @@ void GfxOutputDeviceImpl::writeWindowProperties()
 	{
 	}
 
+}
 
-	XSetWMNormalHints(_display, _window,  &sizeHints);
+void GfxOutputDeviceImpl::minimizeWindow()
+{
+    XClientMessageEvent ev;
+    unsigned int screen = DefaultScreen(_display);
+    
+    ev.type = ClientMessage;
+    ev.window = _window;
+    ev.message_type = XInternAtom(_display, "WM_CHANGE_STATE", False);
+    ev.format = 32;
+    ev.data.l[0] = IconicState;
+    
+	XSendEvent(_display, RootWindow(_display, screen), False, SubstructureRedirectMask|SubstructureNotifyMask,(XEvent *)&ev);
+	
+}
+
+void GfxOutputDeviceImpl::restoreWindow()
+{
+    XClientMessageEvent ev;
+    unsigned int screen = DefaultScreen(_display);
+    
+    ev.type = ClientMessage;
+    ev.window = _window;
+    ev.message_type = XInternAtom(_display, "WM_CHANGE_STATE", False);
+    ev.format = 32;
+    ev.data.l[0] = NormalState;
+    
+	XSendEvent(_display, RootWindow(_display, screen), False, SubstructureRedirectMask|SubstructureNotifyMask,(XEvent *)&ev);	
+}
+
+void GfxOutputDeviceImpl::maximizeWindow()
+{
+	XEvent xev;
+
+	memset(&xev,0,sizeof(xev));
+	xev.xclient.type		 = ClientMessage;
+	xev.xclient.serial		 = 0;
+	xev.xclient.send_event	 = True;
+	xev.xclient.window		 = _window;
+	xev.xclient.format		 = 32;
+	xev.xclient.message_type = XInternAtom(_display,"_NET_WM_STATE",False);
+	xev.xclient.data.l[0]	 = (unsigned long)1;
+	xev.xclient.data.l[1]	 = XInternAtom(_display,"_NET_WM_STATE_MAXIMIZED_VERT",False);
+	xev.xclient.data.l[2]	 = XInternAtom(_display,"_NET_WM_STATE_MAXIMIZED_HORZ",False);
+
+
+	XSendEvent(_display,DefaultRootWindow(_display),False,SubstructureRedirectMask|SubstructureNotifyMask,&xev);
+
+	XRaiseWindow(_display,_window);
 }
 
 void GfxOutputDeviceImpl::updateDrawBuffer()
@@ -720,7 +750,6 @@ void GfxOutputDeviceImpl::output(Pt::Hmi::Model* model)
     //TODO: Center parent handling
     
 	//Initial size and position
-
 	Pt::Gfx::SizeF clientSize;
 	Pt::Gfx::PointF pos;
 
