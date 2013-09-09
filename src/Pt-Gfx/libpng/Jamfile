@@ -20,6 +20,22 @@ Library png :
   pngwrite.c
   pngwtran.c
   pngwutil.c
+
+  adler32.c
+  compress.c
+  crc32.c
+  deflate.c
+  gzclose.c
+  gzlib.c
+  gzread.c
+  gzwrite.c
+  infback.c
+  inffast.c
+  inflate.c
+  inftrees.c
+  trees.c
+  uncompr.c
+ zutil.c
 ;
 
 MakeLocate libpng : $(PT_OUTPUT_TARGET) ;

@@ -1,7 +1,10 @@
 SubDir PT_TOP src Pt-Gfx ;
+
 SubDirHdrs $(PT_TOP)/include ;
+SubDirHdrs  $(PT_TOP)/src/Pt-Gfx/libpng ;
 SubDirC++Flags [ FDefines PT_GFX_API_EXPORT ] ;
 SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Gfx ;
+
 
 if $(FREETYPE_INCLUDES)
 {
@@ -36,7 +39,8 @@ SharedLibrary Pt-Gfx : ARgbColor.cpp
                        DrawThickEllipse.cpp
                        FillEllipse.cpp
                        Stroke.cpp
-                       ;
+                       ImageReader.cpp
+			;
 
 LinkSharedLibraries Pt-Gfx : Pt ;
 MakeLocate Pt-Gfx : $(PT_OUTPUT_TARGET) ;
@@ -50,6 +54,8 @@ else
 {
     LinkLibraries Pt-Gfx : Pt-Gfx-freetype ;
 }
+
+ LinkLibraries Pt-Gfx : png ;
 
 if $(GUI)
 {
