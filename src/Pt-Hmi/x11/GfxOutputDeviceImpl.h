@@ -87,7 +87,9 @@ private:
 	void maximizeWindow();
 	void minimizeWindow();
 	void restoreWindow();
-
+    bool isWindowMinimized();
+    bool isWindowMaximazed();
+    
 private:
     Atom AtomAppWake;
     Atom AtomWindowResize;
