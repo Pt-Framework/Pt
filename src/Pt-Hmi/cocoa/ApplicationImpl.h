@@ -204,7 +204,8 @@ protected:
 
 private:
     void init();
-
+    void waitNext();
+    
     IOEntry& enableIOHandle(System::IOHandle* h);
 
 private:
@@ -219,6 +220,7 @@ private:
     CFRunLoopSourceRef _wakeSource;
     CFRunLoopTimerRef _masterTimer;
 	double _dpi;
+    
 };
 
 }}

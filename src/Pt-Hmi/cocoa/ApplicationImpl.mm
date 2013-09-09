@@ -117,7 +117,7 @@ ApplicationImpl::~ApplicationImpl()
 
 void ApplicationImpl::nextEvent()
 {
-    onProcessEvents();
+    waitNext();
 }
 
 void ApplicationImpl::init()
@@ -218,25 +218,40 @@ void ApplicationImpl::onQueueEvent(const Pt::Event& ev)
 {
     _eventQueue.pushEvent( ev );
 }
+    
+void ApplicationImpl::waitNext()
+{
+    NSEvent* event = nil;
+
+        event = [NSApp nextEventMatchingMask: NSAnyEventMask
+                                   untilDate: [NSDate distantFuture]
+                                      inMode: NSDefaultRunLoopMode
+                                     dequeue: YES];
+        
+        [NSApp sendEvent:event];
+
+}
+    
 
 void ApplicationImpl::onProcessEvents()
 { 
+    
     NSEvent* event = nil;
-
+    
     //
     // process cocoa events
     //
-    do
-    {
-        event = [NSApp nextEventMatchingMask: NSAnyEventMask
-                                   untilDate: nil
-                                      inMode: NSDefaultRunLoopMode
-                                     dequeue: YES];
+    do {
+        
+    event = [NSApp nextEventMatchingMask: NSAnyEventMask
+                               untilDate: nil
+                                  inMode: NSDefaultRunLoopMode
+                                 dequeue: YES];
+     } while (event != 0);
+             
+    [NSApp sendEvent:event];
     
-        [NSApp sendEvent:event];
-    }
-    while(event != nil);
-
+    
     //
     // process available selectables
     //
@@ -245,19 +260,19 @@ void ApplicationImpl::onProcessEvents()
         System::MutexLock lock(_mutex);
         if( _avail.empty() )
             break;
-
+        
         System::Selectable* selectable = _avail.back();
         _avail.pop_back();
         lock.unlock();
-
+        
         selectable->run();
     }
-
+    
     //
     // process Pt events
     //
     bool isActive = _eventQueue.processEvents( this->event() );
-
+    
     //
     // handle loop exit
     //
@@ -265,7 +280,7 @@ void ApplicationImpl::onProcessEvents()
     {
         // set stop flag
         [NSApp stop: nil];
-
+        
         // post fake event so NSApp notices the stop flag
         event = [NSEvent otherEventWithType: NSApplicationDefined
                                    location: NSMakePoint(0,0)
@@ -276,9 +291,11 @@ void ApplicationImpl::onProcessEvents()
                                     subtype: 0
                                       data1: 0
                                       data2: 0];
-
+        
         [NSApp postEvent: event atStart: false];
+      
     }
+
 }
 
 void ApplicationImpl::onAttachTimer(System::Timer& timer)

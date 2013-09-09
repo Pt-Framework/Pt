@@ -10,7 +10,7 @@ ButtonModel::ButtonModel()
 , DefinePropertyInitMacro(ButtonType,Pt::Hmi::ButtonType::Press)
 , DefinePropertyInitMacro(DoublePressTimeInMs,1500)
 {
-    BackColor.set(Pt::Gfx::ARgbColor(242,242,242));
+    BackColor.set(Pt::Gfx::ARgbColor(245,245,245));
 	BorderStyle.set(Pt::Hmi::BorderStyleType::Widget);
 	BorderWidth.set(1);
 	Caption.set("Button");	
