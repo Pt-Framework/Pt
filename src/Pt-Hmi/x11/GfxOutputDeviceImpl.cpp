@@ -300,8 +300,24 @@ void GfxOutputDeviceImpl::onConfigureNotify( XEvent& xev)
 		_ignoreSizeEvent = false;
 		return;
 	}
-	
-	
+		
+    
+    if(isWindowMinimized())
+    {
+        if(_model->WindowState.get() !=  WindowStateType::Minimized)
+            _model->WindowState = WindowStateType::Minimized;
+    }
+    else if(isWindowMaximazed())
+    {
+        if(_model->WindowState.get() !=  WindowStateType::Maximazed)
+            _model->WindowState = WindowStateType::Maximazed;
+    }
+    else
+    {
+        if(_model->WindowState.get() !=  WindowStateType::Normal)
+            _model->WindowState = WindowStateType::Normal;
+    }
+
 	XWindowAttributes xwa;
 	Window child;
 	int    x = 0;
@@ -323,22 +339,6 @@ void GfxOutputDeviceImpl::onConfigureNotify( XEvent& xev)
 
 	_model->Position = clientPos;
 	_model->Size = clientSize;
-    
-    if(isWindowMinimized())
-    {
-        if(_model->WindowState.get() !=  WindowStateType::Minimized)
-            _model->WindowState = WindowStateType::Minimized;
-    }
-    else if(isWindowMaximized())
-    {
-        if(_model->WindowState.get() !=  WindowStateType::Maximazed)
-            _model->WindowState = WindowStateType::Maximazed;
-    }
-    else
-    {
-        if(_model->WindowState.get() !=  WindowStateType::Normal)
-            _model->WindowState = WindowStateType::Normal;
-    }
 }
 
 void GfxOutputDeviceImpl::onKeyEvent(XEvent& xev)
@@ -455,7 +455,6 @@ void GfxOutputDeviceImpl::onWindowEvent(XEvent& ev)
             break;
     }
 }
-
 
 
 void GfxOutputDeviceImpl::create()
@@ -678,13 +677,15 @@ bool GfxOutputDeviceImpl::isWindowMinimized()
     unsigned long i, num_items, bytes_after;
     Atom* atoms;
         
+	Atom requestAtom = XInternAtom(_display,"_NET_WM_STATE",False);
+	Atom compareAtom = XInternAtom(_display,"_NET_WM_STATE_HIDDEN",False);
     atoms=NULL;
         
-    XGetWindowProperty(_display, _window, vdl_x11_usefull_atoms->_NET_WM_STATE, 0, 1024, False, XA_ATOM, &actual_type, &actual_format, &num_items, &bytes_after, (unsigned char**)&atoms);
+    XGetWindowProperty(_display, _window, requestAtom, 0, 1024, False, XA_ATOM, &actual_type, &actual_format, &num_items, &bytes_after, (unsigned char**)&atoms);
         
     for(i=0; i<num_items; ++i)
     {
-        if(atoms[i]==vdl_x11_usefull_atoms->_NET_WM_STATE_HIDDEN)
+        if(atoms[i]==compareAtom)
         {
             XFree(atoms);
             return true;
@@ -694,20 +695,23 @@ bool GfxOutputDeviceImpl::isWindowMinimized()
     return 0;
 }
     
-bool GfxOutputDeviceImpl::isWindowMaximized()
+bool GfxOutputDeviceImpl::isWindowMaximazed()
 {
         Atom actual_type;
         int actual_format;
         unsigned long i, num_items, bytes_after;
         Atom* atoms;
-        
+       	Atom requestAtom = XInternAtom(_display,"_NET_WM_STATE",False);
+		Atom compareAtom = XInternAtom(_display,"_NET_WM_STATE_MAXIMIZED_HORZ",False);
+
+
         atoms=NULL;
         
-        XGetWindowProperty(_display, _window, vdl_x11_usefull_atoms->_NET_WM_STATE, 0, 1024, False, XA_ATOM, &actual_type, &actual_format, &num_items, &bytes_after, (unsigned char**)&atoms);
+        XGetWindowProperty(_display, _window,requestAtom, 0, 1024, False, XA_ATOM, &actual_type, &actual_format, &num_items, &bytes_after, (unsigned char**)&atoms);
         
         for(i=0; i<num_items; ++i)
         {
-            if(atoms[i]==vdl_x11_usefull_atoms->_NET_WM_STATE_MAXIMIZED_HORZ)
+            if(atoms[i]==compareAtom)
             {
                 XFree(atoms);
                 return true;
