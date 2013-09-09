@@ -115,3 +115,5 @@ if ! $(FREETYPE_LINKFLAGS)
 {
     SubInclude PT_TOP src Pt-Gfx freetype ;
 }
+
+  SubInclude PT_TOP src Pt-Gfx libpng ;

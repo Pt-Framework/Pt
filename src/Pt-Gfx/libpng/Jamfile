@@ -1,0 +1,25 @@
+SubDir PT_TOP src Pt-Gfx libpng ;
+SubDirHdrs $(PT_TOP)/include ;
+SubDirHdrs $(PT_TOP)/src/Pt-Gfx/libpng ;
+#SubDirCcFlags [ FDefines FT2_BUILD_LIBRARY ] ;
+SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Gfx libpng ;
+
+Library png :
+	  png.c
+  pngerror.c
+  pngget.c
+  pngmem.c
+  pngpread.c
+  pngread.c
+  pngrio.c
+  pngrtran.c
+  pngrutil.c
+  pngset.c
+  pngtrans.c
+  pngwio.c
+  pngwrite.c
+  pngwtran.c
+  pngwutil.c
+;
+
+MakeLocate libpng : $(PT_OUTPUT_TARGET) ;
