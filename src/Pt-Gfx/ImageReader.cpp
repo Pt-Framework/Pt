@@ -1,5 +1,4 @@
-/*
- * Copyright (C) 2013 Laurentiu-Gheorghe Crisan 
+/* Copyright (C) 2013 Laurentiu-Gheorghe Crisan 
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,9 +22,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- */
-
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
 #include <Pt/Gfx/ImageReader.h>
 #include <fstream>
 
@@ -56,7 +53,8 @@ ARgbImage* ImageReader::read(std::istream& source)
     source.read((char*)pngsig, PNGSIGSIZE);
     
     //Check if the read worked...
-    if (!source.good()) return false;
+    if (!source.good())
+        return false;
     
     //Let LibPNG check the sig. If this function returns 0, everything is OK.
     is_png = png_sig_cmp(pngsig, 0, PNGSIGSIZE);
@@ -81,7 +79,6 @@ ARgbImage* ImageReader::read(std::istream& source)
     if (!infoPtr)
     {
         png_destroy_read_struct(&pngPtr, (png_infopp)0, (png_infopp)0);
-        
         throw std::runtime_error("ERROR: Couldn't initialize png info struct" );        
     }
     
@@ -90,10 +87,13 @@ ARgbImage* ImageReader::read(std::istream& source)
     png_bytep* rowPtrs = NULL;
     char* data = NULL;
     
-    if (setjmp(png_jmpbuf(pngPtr))) {
+    if (setjmp(png_jmpbuf(pngPtr)))
+    {
         //An error occured, so clean up what we have allocated so far...
         png_destroy_read_struct(&pngPtr, &infoPtr,(png_infopp)0);
+        
         if (rowPtrs != NULL) delete [] rowPtrs;
+       
         if (data != NULL) delete [] data;
         
         throw std::runtime_error("ERROR: An error occured while reading the PNG file");
@@ -194,7 +194,7 @@ ARgbImage* ImageReader::read(const char* file)
     std::fstream stream(file, std::ios_base::in);
     
     if( !stream)
-        throw std::runtime_error("ImageReader: open file failed");
+        throw std::runtime_error("ImageReader: Open file failed");
     
     return read(stream);
 }
