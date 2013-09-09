@@ -118,23 +118,27 @@ ARgbImage* ImageReader::read(std::istream& source)
     png_uint_32 channels   = png_get_channels(pngPtr, infoPtr);
     //Color type. (RGB, RGBA, Luminance, luminance alpha... palette... etc)
     png_uint_32 color_type = png_get_color_type(pngPtr, infoPtr);
-    switch (color_type) {
+    
+    switch (color_type)
+    {
         case PNG_COLOR_TYPE_PALETTE:
             png_set_palette_to_rgb(pngPtr);
             //Don't forget to update the channel info (thanks Tom!)
             //It's used later to know how big a buffer we need for the image
             channels = 3;
-            break;
+        break;
+        
         case PNG_COLOR_TYPE_GRAY:
             if (bitdepth < 8)
                 png_set_expand_gray_1_2_4_to_8(pngPtr);
             //And the bitdepth info
             bitdepth = 8;
-            break;
+        break;
     }
     
     /*if the image has a transperancy set.. convert it to a full Alpha channel..*/
-    if (png_get_valid(pngPtr, infoPtr, PNG_INFO_tRNS)) {
+    if (png_get_valid(pngPtr, infoPtr, PNG_INFO_tRNS))
+    {
         png_set_tRNS_to_alpha(pngPtr);
         channels+=1;
     }
@@ -158,7 +162,8 @@ ARgbImage* ImageReader::read(std::istream& source)
     //A little for-loop here to set all the row pointers to the starting
     //Adresses for every row in the buffer
     
-    for (size_t i = 0; i < imgHeight; i++) {
+    for (size_t i = 0; i < imgHeight; i++)
+    {
         //Set the pointer to the data pointer + i times the row stride.
         //Notice that the row order is reversed with q.
         //This is how at least OpenGL expects it,
@@ -171,11 +176,16 @@ ARgbImage* ImageReader::read(std::istream& source)
     //Read the imagedata and write it to the adresses pointed to
     //by rowptrs (in other words: our image databuffer)
     png_read_image(pngPtr, rowPtrs);
+    ARgbImage* image = new ARgbImage(imgWidth, imgHeight);
+    
+    //Todo: copy the pixels to ArgbImage
     
     //Delete the row pointers array....
     delete[] (png_bytep)rowPtrs;
+    
     //And don't forget to clean up the read and info structs !
     png_destroy_read_struct(&pngPtr, &infoPtr,(png_infopp)0);
+    return image;
 }
 
 
