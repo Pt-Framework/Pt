@@ -57,10 +57,23 @@ void MainWindow::init()
 	//Window
 	{
 		std::stringstream memoryStream;
+		
 		memoryStream.write((char*)Pt::Hmi::Desktop::Atesion::icon, Pt::Hmi::Desktop::Atesion::iconSize);	
+		
 		Pt::Gfx::ARgbImage* im = Pt::Gfx::ImageReader::read(memoryStream);
 		windowModel().Icon = *im;
 		delete im;
+		//Generate Alpha channel
+		for(size_t y = 0;  y < windowModel().Icon.get().height(); ++y)
+		{
+			for(size_t x = 0;  x <  windowModel().Icon.get().width(); ++x)
+			{
+				Pt::Gfx::ARgbColor& pix =  windowModel().Icon.get().pixel(x,y);
+				
+				if( pix.blue() == 255 && pix.red() == 255 && pix.green() == 255)
+					pix.setAlpha(0);
+			}
+		}			
 	}
 	
 	setPosition(Pt::Gfx::PointF(200,200));
