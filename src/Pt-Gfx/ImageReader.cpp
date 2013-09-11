@@ -53,8 +53,8 @@ ARgbImage* ImageReader::read(std::istream& source)
     source.read((char*)pngsig, PNGSIGSIZE);
     
     //Check if the read worked...
-    if (!source.good())
-        return false;
+    if (!source)
+         throw std::runtime_error("ERROR: Couldn't initialize png info struct" );
     
     //Let LibPNG check the sig. If this function returns 0, everything is OK.
     is_png = png_sig_cmp(pngsig, 0, PNGSIGSIZE);
@@ -155,7 +155,7 @@ ARgbImage* ImageReader::read(std::istream& source)
     //Alocate a buffer with enough space.
     //(Don't use the stack, these blocks get big easilly)
     //This pointer was also defined in the error handling section, so we can clean it up on error.
-    data = new char[imgWidth * imgHeight * bitdepth * channels / 8];
+    data	 = new char[imgWidth * imgHeight * bitdepth * channels / 8];
     //This is the length in bytes, of one row.
     const unsigned int stride = imgWidth * bitdepth * channels / 8;
     
@@ -178,7 +178,30 @@ ARgbImage* ImageReader::read(std::istream& source)
     png_read_image(pngPtr, rowPtrs);
     ARgbImage* image = new ARgbImage(imgWidth, imgHeight);
     
-    //Todo: copy the pixels to ArgbImage
+    for( size_t x = 0; x < imgWidth; ++x)
+	{
+	    for( size_t y = 0; y < imgHeight; ++y)
+		{
+
+			if( bitdepth == 8 && channels == 3)
+			{
+				unsigned char *red = (unsigned char *)rowPtrs[ y ] + channels * x;
+				unsigned char *green = (unsigned char *)rowPtrs[ y ] + channels * x + 1;
+				unsigned char *blue = (unsigned char *)rowPtrs[ y ] + channels * x + 2;		
+				image->setColor(x,y, Pt::Gfx::ARgbColor(0,*red,*green, *blue));
+			}
+
+
+			if( bitdepth == 8 && channels == 4)
+			{
+				unsigned char *red = (unsigned char *)rowPtrs[ y ] + channels * x;
+				unsigned char *green = (unsigned char *)rowPtrs[ y ] + channels * x + 1;
+				unsigned char *blue = (unsigned char *)rowPtrs[ y ] + channels * x + 2;		
+				unsigned char *alpha = (unsigned char *)rowPtrs[ y ] + channels * x + 3;
+				image->setColor(x,y, Pt::Gfx::ARgbColor(*alpha,*red,*green, *blue));
+			}
+		}
+	}
     
     //Delete the row pointers array....
     delete[] (png_bytep)rowPtrs;
@@ -191,7 +214,7 @@ ARgbImage* ImageReader::read(std::istream& source)
 
 ARgbImage* ImageReader::read(const char* file)
 {
-    std::fstream stream(file, std::ios_base::in);
+    std::fstream stream(file, std::ios_base::in|std::ios_base::binary);
     
     if( !stream)
         throw std::runtime_error("ImageReader: Open file failed");

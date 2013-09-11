@@ -33,6 +33,10 @@
 #include <Pt/Hmi/LabelModel.h>
 #include <Pt/Hmi/ButtonModel.h>
 #include <Pt/Hmi/Application.h>
+#include <Pt/Gfx/ImageReader.h>
+#include "DemoImage.h"
+#include "AtesionIcon.h"
+#include <sstream>
 
 namespace Pt{
 namespace Hmi{
@@ -49,7 +53,16 @@ MainWindow::~MainWindow()
 
 void MainWindow::init()
 {
+	
 	//Window
+	{
+		std::stringstream memoryStream;
+		memoryStream.write((char*)Pt::Hmi::Desktop::Atesion::icon, Pt::Hmi::Desktop::Atesion::iconSize);	
+		Pt::Gfx::ARgbImage* im = Pt::Gfx::ImageReader::read(memoryStream);
+		windowModel().Icon = *im;
+		delete im;
+	}
+	
 	setPosition(Pt::Gfx::PointF(200,200));
 	setSize(Pt::Gfx::SizeF(800,615));
 	windowModel().Caption.set("This is a Platinum C++ Human Mashine Interface demo  ");
@@ -62,6 +75,15 @@ void MainWindow::init()
 	_mainPanel.setPosition(Pt::Gfx::PointF(40,40));
 	_mainPanel.panelModel().BorderWidth.set(3);	
 	_mainPanel.panelModel().BorderStyle.set(Pt::Hmi::BorderStyleType::Sizeable);
+	{
+		std::stringstream memoryStream;
+		memoryStream.write((char*)Pt::Hmi::DemoImage::image, Pt::Hmi::DemoImage::imageSize);	
+		Pt::Gfx::ARgbImage* im = Pt::Gfx::ImageReader::read(memoryStream);
+		_mainPanel.panelModel().BackgroundImage = *im;
+		delete im;
+	}
+
+	_mainPanel.panelModel().BackgroundImageLayout = Pt::Hmi::ImageLayoutType::Strech;
 	addChild(&_mainPanel);
 
 	//Text
