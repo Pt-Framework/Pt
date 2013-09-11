@@ -46,13 +46,13 @@ protected:
 
 private:
 	void onClosedByButton();
-
+    
 private:
 	Pt::Hmi::Desktop::Button _okButton;
 	Pt::Hmi::Desktop::Button _cancelButton;
 	Pt::Hmi::Desktop::Label  _label;
 	Pt::Hmi::Desktop::Panel  _panel;
-}; 
+};
 
 }}}
 
