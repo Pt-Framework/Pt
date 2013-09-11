@@ -114,22 +114,22 @@ uLong ZEXPORT zlibCompileFlags()
 #endif
     return flags;
 }
-/*
+
 #ifdef DEBUG
 
 #  ifndef verbose
 #    define verbose 0
 #  endif
-//int ZLIB_INTERNAL z_verbose = verbose;
+int ZLIB_INTERNAL zz_verbose = verbose;
 
-void ZLIB_INTERNAL z_error (m)
+void ZLIB_INTERNAL zz_error (m)
     char *m;
 {
     fprintf(stderr, "%s\n", m);
     exit(1);
 }
 #endif
-*/
+
 /* exported to allow conversion of error code to string for compress() and
  * uncompress()
  */
