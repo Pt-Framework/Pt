@@ -393,7 +393,8 @@ void GfxOutputDeviceImpl::onMove()
 }
 
 void GfxOutputDeviceImpl::onPaint()
-{   	
+{   		
+
 	if( _rgb88Image.width() > 0 && _rgb88Image.height() > 0)
 		drawIndependentImage(0, 0, (char*)_rgb88Image.data(), _rgb88Image.width(), _rgb88Image.height());
 }
@@ -428,6 +429,37 @@ void GfxOutputDeviceImpl::drawIndependentImage(size_t x, size_t y, const char* d
     DeleteDC(bitmapDeviceConText);
     DeleteObject(bitmap);
 	EndPaint(_hwnd, &ps);
+}
+
+
+void GfxOutputDeviceImpl::setWindowIcon()
+{
+	if( _model->Icon.get().width() == 0 ||  _model->Icon.get().height() == 0)
+		return;
+
+	HINSTANCE hInstance = GetModuleHandle(NULL);
+	const size_t planes = 4;
+	std::vector<Pt::uint8_t> bitmapBuffer(_model->Icon.get().width() * _model->Icon.get().height() *planes);
+		
+	for(size_t y = 0; y <_model->Icon.get().height(); ++y)
+	{
+		const size_t offsetLine = y * (_model->Icon.get().width()*planes);
+
+		for(size_t x = 0; x <_model->Icon.get().width(); ++x)
+		{
+			const size_t index  = offsetLine + (x*planes);
+
+			const Pt::Gfx::ARgbColor& pix =  _model->Icon.get().pixel(x,y);
+				
+			bitmapBuffer[index]     = pix.blue();	
+			bitmapBuffer[index + 1] = pix.green();
+			bitmapBuffer[index + 2] = pix.red();
+
+			bitmapBuffer[index + 3] = pix.alpha();
+		}		
+	}
+	HICON icon = ::CreateIcon(GetModuleHandle(NULL), _model->Icon.get().width(), _model->Icon.get().height(), 4, 8, 0, (BYTE*)&bitmapBuffer[0]);
+	SetClassLong(_hwnd, GCL_HICON, (LONG)icon); 	
 }
 
 void GfxOutputDeviceImpl::setWindowProperties()
@@ -527,36 +559,6 @@ void GfxOutputDeviceImpl::setWindowProperties()
 		ShowWindow(_hwnd, SW_SHOW);		
 
 	SetWindowLong(_hwnd, GWL_STYLE, style);  
-	
-	if( _model->Icon.get().width() != 0 &&  _model->Icon.get().height() != 0)
-	{	
-		HINSTANCE hInstance = GetModuleHandle(NULL);
-		const size_t planes = 4;
-		std::vector<Pt::uint8_t> bitmapBuffer(_model->Icon.get().width() * _model->Icon.get().height() *planes);
-		std::vector<Pt::uint8_t> andBuffer(_model->Icon.get().width() * _model->Icon.get().height(),0);
-	
-		
-		for(size_t y = 0; y <_model->Icon.get().height(); ++y)
-		{
-			const size_t offsetLine = y * (_model->Icon.get().width()*planes);
-
-			for(size_t x = 0; x <_model->Icon.get().width(); ++x)
-			{
-				const size_t index  = offsetLine + (x*planes);
-
-				const Pt::Gfx::ARgbColor& pix =  _model->Icon.get().pixel(x,y);
-				
-				bitmapBuffer[index]     = pix.blue();	
-				bitmapBuffer[index + 1] = pix.green();
-				bitmapBuffer[index + 2] = pix.red();
-
-				bitmapBuffer[index + 3] = pix.alpha();
-			}		
-		}
-		HICON icon = ::CreateIcon(GetModuleHandle(NULL), _model->Icon.get().width(), _model->Icon.get().height(), 4, 8, 0, (BYTE*)&bitmapBuffer[0]);
-		SetClassLong(_hwnd, GCL_HICON, (LONG)icon); 	
-
-	}
 }
 
 void GfxOutputDeviceImpl::destroy()
@@ -603,6 +605,7 @@ void GfxOutputDeviceImpl::output(Pt::Hmi::Model* model)
 
 	setWindowSizeAndPos(firstShow);
 	setWindowProperties();	
+	setWindowIcon();
 	output();
 	InvalidateRect(_hwnd, 0, FALSE);
 }

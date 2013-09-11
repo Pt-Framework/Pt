@@ -67,6 +67,7 @@ protected:
 	void getWindowPos();
 	void setWindowSizeAndPos(bool firstShow);
 	void setWindowProperties();	
+	void setWindowIcon();
 	void drawIndependentImage(size_t x, size_t y, const char* data, size_t width, size_t height);
 	void create();
 	void destroy();
