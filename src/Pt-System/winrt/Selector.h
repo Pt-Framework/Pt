@@ -30,14 +30,10 @@
 #define PT_SYSTEM_SELECTOR_H
 
 #include "../SelectableList.h"
-#include "Pt/WinVer.h"
-#include "Pt/System/Api.h"
 #include "Pt/System/Api.h"
 #include "Pt/System/Mutex.h"
 #include "Pt/System/EventLoop.h"
-#include <iostream>
 #include <vector>
-#include <list>
 #include <windows.h>
 
 namespace Pt {
@@ -45,34 +41,6 @@ namespace Pt {
 namespace System {
 
 class Selectable;
-
-struct IOHandle
-{
-    IOHandle()
-    : sel(0)
-    , _handle(INVALID_HANDLE_VALUE)
-    {}
-
-    explicit IOHandle(Selectable& s)
-    : sel(&s)
-    , _handle(INVALID_HANDLE_VALUE)
-    {}
-
-    IOHandle(Selectable& s, HANDLE h)
-    : sel(&s)
-    , _handle(h)
-    {}
-
-    HANDLE handle()
-    { return _handle; }
-
-    void setHandle(HANDLE h)
-    { _handle = h; }
-
-    Selectable* sel;
-    HANDLE _handle;
-};
-
 
 class PT_SYSTEM_API Selector
 {
@@ -87,12 +55,6 @@ class PT_SYSTEM_API Selector
 
         void detach(Selectable& s);
 
-        void notify();
-
-        void enableOverlapped(IOHandle& s);
-
-        void disableOverlapped(IOHandle& s);
-
         bool waitForWake(size_t msecs);
 
     protected:
@@ -100,10 +62,7 @@ class PT_SYSTEM_API Selector
 
     private:
         HANDLE _wakeEvent;
-        HANDLE _ioEvent;
         std::vector<HANDLE> _handles;
-        Selectable* _current;
-        SelectableList _devices;
         SelectableList _selectables;
 };
 

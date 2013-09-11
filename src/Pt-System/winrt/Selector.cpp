@@ -37,40 +37,22 @@ namespace System {
 
 Selector::Selector()
 {
-    _current = 0;
-
     _wakeEvent = CreateEvent( NULL, FALSE, FALSE, NULL );
     if( _wakeEvent == NULL )
         throw SystemError( PT_ERROR_MSG("CreateEvent failed") );
 
-    _ioEvent = CreateEvent( NULL, FALSE, FALSE, NULL );
-    if( _ioEvent == NULL )
-    {
-        CloseHandle( _wakeEvent );
-        throw SystemError( PT_ERROR_MSG("CreateEvent failed") );
-    }
-
     _handles.push_back( _wakeEvent );
-    _handles.push_back( _ioEvent );
 }
 
 
 Selector::~Selector()
 { 
-    while( ! _devices.empty() )
-    {
-        _devices.first()->detach();
-    }
-
     while( ! _selectables.empty() )
     {
         _selectables.first()->detach();
     }
 
-    assert( _devices.empty() );
-
     CloseHandle( _wakeEvent );
-    CloseHandle( _ioEvent );
 }
 
 
@@ -85,30 +67,6 @@ void Selector::detach(Selectable& s)
     SelectableList::unlink(s);
 }
 
-
-void Selector::enableOverlapped(IOHandle& ioh)
-{ 
-    assert(ioh.sel);
-    Selectable* s = ioh.sel;
-
-    ioh.setHandle(_ioEvent);
-     _devices.insert(*s);
-}
-
-
-void Selector::disableOverlapped(IOHandle& ioh)
-{
-    assert(ioh.sel);
-    Selectable* s = ioh.sel;
-    ioh.setHandle(INVALID_HANDLE_VALUE);
-
-    if( _current == s )
-    {
-        _current = _current->next();
-    }
-
-     _selectables.insert(*s);
-}
 
 
 void Selector::wake()
@@ -130,7 +88,7 @@ bool Selector::waitForWake(size_t timeoutUMSecs)
         msecs = std::numeric_limits<DWORD>::max();
     }
 
-    HANDLE* handles = _handles.buildHandles();
+    HANDLE* handles = _handles.size() > 0 ? &_handles[0] : 0;
 
     bool isTimeout = false;
     DWORD offset = waitFor(_handles.size(), handles, msecs, isTimeout);
@@ -145,25 +103,9 @@ bool Selector::waitForWake(size_t timeoutUMSecs)
         {
             return true;
         }
-
-        // I/O event at offset 1 was active
-        else if (offset == 1)
-        {
-            for( _current = _devices.first(); _current != 0; )
-            {
-                Selectable* dev = _current;
-                dev->run();
-
-                if(_current == dev)
-                {
-                    _current = _current->next();
-                }
-            }
-        }
     }
     catch (...)
     {
-        _current = 0;
         throw;
     }
 

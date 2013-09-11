@@ -55,6 +55,8 @@ namespace System {
 
             void wake();
 
+            // TODO: deprecated, do not use!
+            //
             /** @brief Processes all events which are currently in the event queue
             */
             void processEvents()

@@ -38,6 +38,7 @@ MainLoopImpl::MainLoopImpl(Signal<const Pt::Event&>& eventSignal)
 {
 }
 
+
 MainLoopImpl::MainLoopImpl(Signal<const Pt::Event&>& eventSignal, Allocator& a)
 : _eventQueue(a)
 , _event(&eventSignal)
@@ -47,6 +48,30 @@ MainLoopImpl::MainLoopImpl(Signal<const Pt::Event&>& eventSignal, Allocator& a)
 
 MainLoopImpl::~MainLoopImpl()
 {
+}
+
+
+void MainLoopImpl::attach(Timer& timer)
+{ 
+    _timerQueue.addTimer(timer); 
+}
+
+
+void MainLoopImpl::detach(Timer& timer)
+{ 
+    _timerQueue.removeTimer(timer); 
+}
+
+
+void MainLoopImpl::attach(Selectable& s)
+{ 
+    _selector.attach(s); 
+}
+
+
+void MainLoopImpl::detach(Selectable& s)
+{ 
+    _selector.detach(s); 
 }
 
 
@@ -83,6 +108,12 @@ void MainLoopImpl::exit()
 {
     _eventQueue.exit();
     wake();
+}
+
+
+void MainLoopImpl::wake()
+{ 
+    _selector.wake(); 
 }
 
 

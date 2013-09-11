@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2006-2007 Marc Boris Duerner
- * Copyright (C) 2006-2007 Laurentiu-Gheorghe Crisan
+ * Copyright (C) 2013 Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,7 +25,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#include "win32.h"
+
 #include "FileDeviceImpl.h"
 #include "MainLoopImpl.h"
 #include "Pt/System/IODevice.h"
@@ -38,29 +37,11 @@ namespace Pt {
 
 namespace System {
 
-#ifdef _WIN32_WCE
-
 FileDeviceImpl::FileDeviceImpl(FileDevice& dev)
-: IODeviceImpl()
-, _device(dev)
-{
-    _readOv.Offset = 0;
-    _readOv.OffsetHigh = 0;
-    _readOv.hEvent = NULL;
-
-    _writeOv.Offset = 0;
-    _writeOv.OffsetHigh = 0;
-    _writeOv.hEvent = NULL;
-}
-
-#else
-
-FileDeviceImpl::FileDeviceImpl(FileDevice& dev)
-: OverlappedIODeviceImpl(dev)
+: _device(dev)
 {
 }
 
-#endif
 
 FileDeviceImpl::~FileDeviceImpl()
 { 
@@ -69,122 +50,31 @@ FileDeviceImpl::~FileDeviceImpl()
 
 void FileDeviceImpl::open( const char* path, std::ios::openmode mode)
 {
-    _readOv.Offset = 0;
-    _readOv.OffsetHigh = 0;
-    _readOv.hEvent = NULL;
 
-    _writeOv.Offset = 0;
-    _writeOv.OffsetHigh = 0;
-    _writeOv.hEvent = NULL;
-
-    DWORD access = GENERIC_READ;
-    DWORD share  = FILE_SHARE_READ|FILE_SHARE_WRITE;
-    DWORD create = OPEN_EXISTING;
-    DWORD flags  = 0;
-
-    if( mode & std::ios::in )
-        access |= GENERIC_READ;
-
-    if( mode & std::ios::out )
-    {
-        access |= GENERIC_WRITE;
-        create = OPEN_ALWAYS;
-    }
-
-    if( mode & std::ios::trunc )
-        create |= TRUNCATE_EXISTING;
-
-#ifndef _WIN32_WCE
-    flags |= FILE_FLAG_OVERLAPPED;
-#endif
-
-    std::basic_string<TCHAR> tpath;
-    win32::fromMultiByte(path, tpath);
-    HANDLE h = ::CreateFile(tpath.c_str(), access, share, NULL, create, flags, NULL);
-
-    if(h == INVALID_HANDLE_VALUE)
-        throw AccessFailed(path);
-
-    this->setHandle(h);
-
-    try
-    {
-        if(mode & std::ios::ate )
-            this->seek(0, std::ios::end);
-    }
-    catch(...)
-    {
-        this->close();
-        throw;
-    }
 }
 
 
 FileDeviceImpl::pos_type FileDeviceImpl::seek(off_type offset, std::ios::seekdir sd)
 {
-    DWORD whence = FILE_BEGIN;
-    switch(sd)
-    {
-        case std::ios::beg:
-            whence = FILE_BEGIN;
-            break;
-
-        case std::ios::cur:
-            whence = FILE_CURRENT;
-            break;
-
-        case std::ios::end:
-            whence = FILE_END;
-            break;
-
-        default:
-            throw std::invalid_argument("Unknown seekdir");
-            break;
-    }
-
-    DWORD ret = SetFilePointer(handle(), offset, NULL, whence);
-
-    if(ret == INVALID_SET_FILE_POINTER)
-        throw IOError( PT_ERROR_MSG("Could not set file pointer") );
-
-    _readOv.Offset = ret;
-    _writeOv.Offset = ret;
-
-    return ret;
+    return 0;
 }
 
 
 size_t FileDeviceImpl::size()
 {
-    DWORD sz = GetFileSize(handle(), NULL);
-    if(sz == INVALID_FILE_SIZE)
-        throw IOError( PT_ERROR_MSG("Could not get file size") );
-
-    return sz;
+    return 0;
 }
 
 
 size_t FileDeviceImpl::peek(char* buffer, size_t count)
 {
-    bool eof;
-    size_t ret = this->read(buffer, count, eof);
-    if(ret > 0)
-        this->seek(-((off_type)ret), std::ios::cur);
-
-    return ret;
+    return 0;
 }
 
-#ifdef _WIN32_WCE
 
 void FileDeviceImpl::close()
 {
-    IODeviceImpl::close();
 
-    _readOv.Offset = 0;
-    _readOv.OffsetHigh = 0;
-
-    _writeOv.Offset = 0;
-    _writeOv.OffsetHigh = 0;
 }
 
 
@@ -195,24 +85,49 @@ void FileDeviceImpl::cancel(EventLoop& loop)
 
 void FileDeviceImpl::setTimeout(size_t)
 {
-    // wince file systems never block...
+
 }
 
 
 bool FileDeviceImpl::runRead(EventLoop& loop)
 {
-    return false;
+    return true;
 }
+
 
 bool FileDeviceImpl::runWrite(EventLoop& loop)
 {
-    return false;
+    return true;
 }
 
 
 size_t FileDeviceImpl::beginRead(EventLoop& loop, char* buffer, size_t n, bool& eof)
 {
-    return this->read(buffer, n, eof);
+    String^ path = ...;
+    
+    IAsyncOperation<StorageFile>^ Storagefile::GetFileFromPathAsync(path);
+
+    StorageFile^ file = ...;
+
+    IAsyncOperation<IRandomAccessStream>^ = file.OpenAsync();
+
+    IRandomAccessStream^ stream = ...
+
+    IInputStream* input = 0;
+    HRESULT result = GetInputStreamAt( 0, &input);
+
+    IAsyncOperationWithProgress<IBuffer*, UINT32> operation = 0;
+    result = input->ReadAsync(IBuffer buffer, UINT32 count, InputStreamOptions options, &operation);
+
+    operation->Completed = ref new AsyncOperationWithProgressCompletedHandler<IBuffer*, UINT32>(
+      [&] () 
+      {
+          loop.setReady(_device);
+          loop.wake(); 
+      }
+    );
+
+    return 0;
 }
 
 
@@ -224,30 +139,13 @@ size_t FileDeviceImpl::endRead(EventLoop& loop, char* buffer, size_t n, bool& eo
 
 size_t FileDeviceImpl::read(char* buffer, size_t count, bool& eof)
 {
-    DWORD readBytes = 0;
-    if( FALSE == ReadFile(handle(), (void*)buffer, count, &readBytes, &_readOv) )
-    {
-        if( ERROR_HANDLE_EOF == GetLastError() || 
-            ERROR_BROKEN_PIPE == GetLastError() )
-        {
-            eof = true;
-            readBytes = 0;
-        }
-        else
-        {
-            throw IOError( PT_ERROR_MSG("Could not read from file handle") );
-        }
-    }
 
-    _readOv.Offset += readBytes;
-    _writeOv.Offset += readBytes;
-    return readBytes;
 }
 
 
 size_t FileDeviceImpl::beginWrite(EventLoop& loop, const char* buffer, size_t n)
 {
-    return this->write(buffer, n);
+    return 0;
 }
 
 
@@ -259,19 +157,8 @@ size_t FileDeviceImpl::endWrite(EventLoop& loop, const char* buffer, size_t n)
 
 size_t FileDeviceImpl::write(const char* buffer, size_t count)
 {
-    DWORD writtenBytes = 0;
-
-    if( FALSE == WriteFile(handle(), (void*)buffer, count, &writtenBytes, &_writeOv) )
-    {
-        throw IOError(PT_ERROR_MSG("Could not write to file handle") );
-    }
-
-    _readOv.Offset += writtenBytes;
-    _writeOv.Offset += writtenBytes;
-    return writtenBytes;
+    return 0;
 }
-
-#endif
 
 } //namespace System
 

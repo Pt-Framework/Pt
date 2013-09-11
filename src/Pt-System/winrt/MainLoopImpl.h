@@ -52,8 +52,7 @@ class PT_SYSTEM_API MainLoopImpl
 
         void exit();
 
-        void wake()
-        { _selector.wake(); }
+        void wake();
 
         void commitEvent(const Event& event);
 
@@ -61,17 +60,13 @@ class PT_SYSTEM_API MainLoopImpl
 
         bool processEvents();
 
-        void attach(Timer& timer)
-        { _timerQueue.addTimer(timer); }
+        void attach(Timer& timer);
 
-        void detach(Timer& timer)
-        { _timerQueue.removeTimer(timer); }
+        void detach(Timer& timer);
 
-        void attach(Selectable& s)
-        { _selector.attach(s); }
+        void attach(Selectable& s);
 
-        void detach(Selectable& s)
-        { _selector.detach(s); }
+        void detach(Selectable& s);
 
         void idle(Selectable& s);
 
