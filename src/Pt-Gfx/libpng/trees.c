@@ -165,7 +165,7 @@ local void gen_trees_header OF((void));
 
 #else /* DEBUG */
 #  define send_code(s, c, tree) \
-     { if (z_verbose>2) fprintf(stderr,"\ncd %3d ",(c)); \
+     { if (zz_verbose>2) fprintf(stderr,"\ncd %3d ",(c)); \
        send_bits(s, tree[c].Code, tree[c].Len); }
 #endif
 
