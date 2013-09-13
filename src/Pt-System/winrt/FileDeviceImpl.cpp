@@ -49,7 +49,27 @@ FileDeviceImpl::~FileDeviceImpl()
 
 
 void FileDeviceImpl::open( const char* path, std::ios::openmode mode)
-{
+{   
+    String^ sPath = path;
+
+    IAsyncOperation<StorageFile>^ getFileOp = Storagefile::GetFileFromPathAsync(sPath);
+
+    getFileOp->Completed = ref new AsyncOperationCompletedHandler<StorageFile^>
+    (
+        [&] (IAsyncOperation<StorageFile^>^ operation) 
+        {
+            StorageFile^ file = operation->GetResults();
+
+            IAsyncOperation<IRandomAccessStream>^ openOp = file.OpenAsync();
+            openOp->Completed = ref new AsyncOperationCompletedHandler<IRandomAccessStream^>
+            (
+                [](IAsyncOperation<IRandomAccessStream^>^ op)
+                {
+                    IRandomAccessStream^ accessStream = op->GetResults();
+                }
+            );
+        }
+    );
 
 }
 
