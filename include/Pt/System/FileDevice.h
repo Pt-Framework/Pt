@@ -53,10 +53,17 @@ class PT_SYSTEM_API FileDevice : public IODevice
 
         void open( const char* path, std::ios::openmode mode);
 
+        void beginOpen(const char* path, std::ios::openmode mode);
+
+        void endOpen();
+
         const char* path() const
         { return _path.c_str(); }
 
         size_t size() const;
+
+        Signal<FileDevice&>& opened()
+        { return _opened; }
 
     protected:
         size_t onBeginRead(char* buffer, size_t n, bool& eof);
@@ -90,6 +97,9 @@ class PT_SYSTEM_API FileDevice : public IODevice
 
     private:
         std::string _path;
+        Signal<FileDevice&> _opened;
+        bool _opening;
+        bool _isOpen;
 };
 
 } // namespace System

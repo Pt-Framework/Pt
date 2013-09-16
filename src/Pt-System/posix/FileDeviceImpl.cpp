@@ -87,6 +87,24 @@ void FileDeviceImpl::open( const char* path, std::ios::openmode mode)
 }
 
 
+bool FileDeviceImpl::beginOpen(EventLoop& loop, const char* path, std::ios::openmode mode)
+{
+    this->open(path, mode);
+    return true;
+}
+
+
+void FileDeviceImpl::endOpen(EventLoop& loop)
+{
+}
+
+
+bool FileDeviceImpl::runOpen(EventLoop& loop)
+{
+    return false;
+}
+
+
 bool FileDeviceImpl::seekable() const
 {
     struct stat s;

@@ -125,6 +125,8 @@ class PT_SYSTEM_API IODevice : public Selectable
 
         //! @brief Read data from I/O device without consuming them
         /**
+            TODO: deprecate this method
+
             Tries to extract up to n bytes from this object
             without consuming them. The bytes are stored in
             buffer, and the number of bytes peeked is returned.

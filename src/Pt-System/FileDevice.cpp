@@ -34,12 +34,16 @@ namespace Pt {
 namespace System {
 
 FileDevice::FileDevice()
+: _opening(false)
+, _isOpen(false)
 {
     _impl = new FileDeviceImpl(*this);
 }
 
 
 FileDevice::FileDevice(const char* path, std::ios::openmode mode)
+: _opening(false)
+, _isOpen(false)
 {
     _impl = new FileDeviceImpl(*this);
 
@@ -58,7 +62,7 @@ FileDevice::~FileDevice()
 }
 
 
-void FileDevice::open( const char* path, std::ios::openmode mode)
+void FileDevice::open(const char* path, std::ios::openmode mode)
 {
     //if( this->enabled() ) 
     {
@@ -70,9 +74,38 @@ void FileDevice::open( const char* path, std::ios::openmode mode)
 }
 
 
+void FileDevice::beginOpen(const char* path, std::ios::openmode mode)
+{
+    if( ! isActive() )
+        throw std::logic_error( PT_ERROR_MSG("I/O device not active") );
+
+    this->close();
+
+    _isOpen = _impl->beginOpen(*parent(), path, mode);
+    _opening = true;
+
+    if(_isOpen)
+    {
+        this->setReady(); 
+    }
+}
+
+
+void FileDevice::endOpen()
+{
+    if(_opening)
+    {
+        _opening = false;
+        _impl->endOpen(*parent());
+        _isOpen = true;
+    }
+}
+
+
 void FileDevice::onClose()
 {
     _impl->close();
+    _isOpen = false;
 }
 
 
@@ -114,6 +147,9 @@ size_t FileDevice::size() const
 
 FileDevice::pos_type FileDevice::onSeek(off_type offset, std::ios::seekdir sd)
 {
+    if( _opening || this->reading() || this->writing() )
+        throw IOPending( PT_ERROR_MSG("I/O operation pending") );
+    
     return _impl->seek(offset, sd);
 }
 
@@ -160,6 +196,17 @@ void FileDevice::onSync() const
 bool FileDevice::onRun()
 {
     //return _impl.run(); 
+
+    if( _opening )
+    {
+        if( _isOpen || _impl->runOpen( *parent() ) )
+        {
+            opened().send(*this);
+            return true;
+        }
+
+        return false;
+    }
 
     if( this->reading() )
     {

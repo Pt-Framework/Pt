@@ -141,7 +141,10 @@ bool MainLoopImpl::waitNext()
 {
     size_t timeout = _timerQueue.processTimers();
 
-    // check all selectables that did not require waiting
+    // check all selectables that did not require waiting, but
+    // check only N devices for fairness.
+
+    size_t n = 0;
     while( true )
     {
         Pt::System::MutexLock lock(_mutex);
@@ -149,12 +152,21 @@ bool MainLoopImpl::waitNext()
         if( _avail.empty() )
             break;
 
+        if(n == 0)
+            n = _avail.size();
+
         timeout = 0;
+
         Selectable* s = _avail.back();
         _avail.pop_back();
+        --n;
+
         lock.unlock();
 
         s->run();
+
+        if(n == 0)
+            break;
     }
 
     bool isActive = true;

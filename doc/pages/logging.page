@@ -132,7 +132,7 @@ target named "app" to write records with a threshold level of Pt::System::Info
 to a log file:
 
 @code
-Pt::System::Logger::SetLogLevel("app", Pt::System::Info);
+Pt::System::Logger::setLogLevel("app", Pt::System::Info);
 Pt::System::Logger::setChannel("app", "file:///myfile.log");
 Pt::System::Logger::setPattern("[%c] %t - %m");
 @endcode

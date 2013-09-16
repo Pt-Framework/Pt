@@ -54,6 +54,12 @@ class FileDeviceImpl
 
         void open( const char* path, std::ios::openmode mode);
 
+        bool beginOpen(EventLoop& loop, const char* path, std::ios::openmode mode);
+
+        bool runOpen(EventLoop& loop);
+
+        void endOpen(EventLoop& loop);
+
         pos_type seek( off_type offset, std::ios::seekdir sd );
 
         size_t size();
@@ -84,6 +90,14 @@ class FileDeviceImpl
 
     private:
         IODevice& _device;
+        IAsyncOperation<StorageFile^>^ _getFileOp;
+        IAsyncOperation<IRandomAccessStream^>^ _openOp;
+        IRandomAccessStream^ _stream;
+        DataReader^ _reader;
+        DataReaderLoadOperation^ _loadOp;
+        DataReader^ _writer;
+        DataWriterStoreOperation ^ _storeOp;
+        size_t _storeCount;
 };
 
 }//namespace System

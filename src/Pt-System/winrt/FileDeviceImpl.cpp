@@ -45,43 +45,124 @@ FileDeviceImpl::FileDeviceImpl(FileDevice& dev)
 
 FileDeviceImpl::~FileDeviceImpl()
 { 
+    // FileDevice destructor will call cancel and close
+}
+
+
+void FileDeviceImpl::close()
+{
+    delete _reader;
+    _reader = 0;
+
+    delete _writer;
+    _writer = 0;
+
+    _stream.Close();
+    delete _stream;
+    _stream = 0;
+}
+
+
+void FileDeviceImpl::cancel(EventLoop& loop)
+{
+    _storeOp = 0;
+    _loadOp = 0;
+    _openOp = 0;
+    _getFileOp = 0;
 }
 
 
 void FileDeviceImpl::open( const char* path, std::ios::openmode mode)
 {   
+    throw IOError("blocking I/O not supported");
+}
+
+
+bool FileDeviceImpl::beginOpen(EventLoop& loop, const char* path, std::ios::openmode mode)
+{
     String^ sPath = path;
 
-    IAsyncOperation<StorageFile>^ getFileOp = Storagefile::GetFileFromPathAsync(sPath);
+    _getFileOp = Storagefile::GetFileFromPathAsync(sPath);
 
-    getFileOp->Completed = ref new AsyncOperationCompletedHandler<StorageFile^>
+    _getFileOp->Completed = ref new AsyncOperationCompletedHandler<StorageFile^>
     (
         [&] (IAsyncOperation<StorageFile^>^ operation) 
         {
             StorageFile^ file = operation->GetResults();
 
-            IAsyncOperation<IRandomAccessStream>^ openOp = file.OpenAsync();
-            openOp->Completed = ref new AsyncOperationCompletedHandler<IRandomAccessStream^>
+            _openOp = file.OpenAsync();
+            _openOp->Completed = ref new AsyncOperationCompletedHandler<IRandomAccessStream^>
             (
-                [](IAsyncOperation<IRandomAccessStream^>^ op)
+                [&](IAsyncOperation<IRandomAccessStream^>^ op)
                 {
-                    IRandomAccessStream^ accessStream = op->GetResults();
+                    loop.setReady(_device);
+                    loop.wake();
                 }
             );
         }
     );
 
+    return false;
+}
+
+
+bool FileDeviceImpl::runOpen(EventLoop& loop)
+{
+    return _openOp && _openOp->Status == AsyncStatus::Completed;
+}
+
+
+void FileDeviceImpl::endOpen(EventLoop& loop)
+{
+    _stream = _openOp->GetResults();
+    _openOp = 0;
+    _getFileOp = 0;
 }
 
 
 FileDeviceImpl::pos_type FileDeviceImpl::seek(off_type offset, std::ios::seekdir sd)
 {
-    return 0;
+    if( ! _stream)
+      throw IOError("seek failed");
+
+    pos_type pos = 0;
+
+    switch(sd)
+    {
+        default:
+        case std::ios::beg:
+            pos = 0;
+            break;
+
+        case std::ios::cur:
+            pos = _stream->Position;
+            
+            // subtract unread data in reader
+            if(_reader)
+                pos -= _reader->UnconsumedBufferLength;
+            break;
+
+        case std::ios::end:
+            pos = _stream->Size;
+            break;
+    }
+
+    delete _reader;
+    _reader = 0;
+
+    delete _writer;
+    _writer = 0;
+    _
+    _stream->Seek(pos);
+    return pos;
 }
 
 
 size_t FileDeviceImpl::size()
 {
+    if(_stream)
+        _stream->Size;
+    
     return 0;
 }
 
@@ -92,54 +173,36 @@ size_t FileDeviceImpl::peek(char* buffer, size_t count)
 }
 
 
-void FileDeviceImpl::close()
-{
-
-}
-
-
-void FileDeviceImpl::cancel(EventLoop& loop)
-{
-}
-
-
 void FileDeviceImpl::setTimeout(size_t)
 {
-
+    // blocking I/O is not supported
 }
 
 
-bool FileDeviceImpl::runRead(EventLoop& loop)
+size_t FileDeviceImpl::beginRead(EventLoop& loop, char* buffer, size_t bufSize, bool& eof)
 {
-    return true;
-}
+    if( ! _reader )
+    {
+        _reader = ref new DataReader(_stream);
+    }
 
+    const size_t avail = _reader->UnconsumedBufferLength;
+    if(avail > 0)
+    {
+        for(unsigned n = 0; n < avail && n < bufSize; ++n)
+        {
+            buffer[n] = reinterpret_cast<char)>( _reader->ReadByte() );
+        }
 
-bool FileDeviceImpl::runWrite(EventLoop& loop)
-{
-    return true;
-}
+        return n;
+    }
 
+    // TODO: does this report EOF? Or do we have to count the bytes until
+    // we reach IRandomAccessStream.Size?
 
-size_t FileDeviceImpl::beginRead(EventLoop& loop, char* buffer, size_t n, bool& eof)
-{
-    String^ path = ...;
-    
-    IAsyncOperation<StorageFile>^ Storagefile::GetFileFromPathAsync(path);
+    _loadOp = _reader->LoadAsync(n);
 
-    StorageFile^ file = ...;
-
-    IAsyncOperation<IRandomAccessStream>^ = file.OpenAsync();
-
-    IRandomAccessStream^ stream = ...
-
-    IInputStream* input = 0;
-    HRESULT result = GetInputStreamAt( 0, &input);
-
-    IAsyncOperationWithProgress<IBuffer*, UINT32> operation = 0;
-    result = input->ReadAsync(IBuffer buffer, UINT32 count, InputStreamOptions options, &operation);
-
-    operation->Completed = ref new AsyncOperationWithProgressCompletedHandler<IBuffer*, UINT32>(
+    _loadOp->Completed = ref new AsyncOperationCompletedHandler<unsigned int>^(
       [&] () 
       {
           loop.setReady(_device);
@@ -151,32 +214,83 @@ size_t FileDeviceImpl::beginRead(EventLoop& loop, char* buffer, size_t n, bool& 
 }
 
 
-size_t FileDeviceImpl::endRead(EventLoop& loop, char* buffer, size_t n, bool& eof)
+bool FileDeviceImpl::runRead(EventLoop& loop)
 {
-    return 0;
+    return _loadOp && _loadOp->Status == AsyncStatus::Completed;
+}
+
+
+size_t FileDeviceImpl::endRead(EventLoop& loop, char* buffer, size_t bufSize, bool& eof)
+{
+    const size_t avail = _loadOp.GetResults();
+    _loadOp = 0;
+
+    unsigned n = 0;
+    for( ; n < avail && n < bufSize; ++n)
+    {
+        buffer[n] = reinterpret_cast<char)>( _reader->ReadByte() );
+    }
+
+    return n;
 }
 
 
 size_t FileDeviceImpl::read(char* buffer, size_t count, bool& eof)
 {
-
+    throw IOError("blocking I/O not supported");
+    return 0;
 }
 
 
-size_t FileDeviceImpl::beginWrite(EventLoop& loop, const char* buffer, size_t n)
+size_t FileDeviceImpl::beginWrite(EventLoop& loop, const char* buffer, size_t bufSize)
 {
+    if( ! _writer )
+    {
+        _writer = ref new DataWriter(_stream);
+    }
+
+    // UnstoredBufferLength
+    const unsigned char* ubuffer = reinterpret_cast<unsigned const *>(buffer);
+
+    unsigned n = 0;
+    for( ; n < bufSize; ++n)
+    {
+        _writer->WriteByte( ubuffer[n] );
+    }
+
+    _storeCount = n;
+    _storeOp = _reader->StoreAsync(); // FlushAsync
+
+    _storeOp->Completed = ref new AsyncOperationCompletedHandler<unsigned int>^(
+      [&] () 
+      {
+          loop.setReady(_device);
+          loop.wake(); 
+      }
+    );
+
     return 0;
+}
+
+
+bool FileDeviceImpl::runWrite(EventLoop& loop)
+{
+    return _storeOp && _storeOp->Status == AsyncStatus::Completed;
 }
 
 
 size_t FileDeviceImpl::endWrite(EventLoop& loop, const char* buffer, size_t n)
 {
-    return 0;
+    _storeOp.GetResults();
+
+    _storeOp = 0;
+    return _storeCount;
 }
 
 
 size_t FileDeviceImpl::write(const char* buffer, size_t count)
 {
+    throw IOError("blocking I/O not supported");
     return 0;
 }
 

@@ -136,6 +136,8 @@ class PT_NET_API TcpSocket : public System::IODevice
 
         //! @internal
         bool _connecting;
+
+        bool _reservedForIsConnectedFlag;
 };
 
 } // namespace Net

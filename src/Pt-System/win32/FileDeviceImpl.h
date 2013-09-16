@@ -49,6 +49,12 @@ class FileDeviceImpl  : public OverlappedIODeviceImpl
 
         void open( const char* path, std::ios::openmode mode);
 
+        bool beginOpen(EventLoop& loop, const char* path, std::ios::openmode mode);
+
+        bool runOpen(EventLoop& loop);
+
+        void endOpen(EventLoop& loop);
+
         pos_type seek( off_type offset, std::ios::seekdir sd );
 
         size_t size();

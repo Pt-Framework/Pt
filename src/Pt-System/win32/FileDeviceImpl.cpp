@@ -120,6 +120,24 @@ void FileDeviceImpl::open( const char* path, std::ios::openmode mode)
 }
 
 
+bool FileDeviceImpl::beginOpen(EventLoop& loop, const char* path, std::ios::openmode mode)
+{
+    this->open(path, mode);
+    return true;
+}
+
+
+void FileDeviceImpl::endOpen(EventLoop& loop)
+{
+}
+
+
+bool FileDeviceImpl::runOpen(EventLoop& loop)
+{
+    return false;
+}
+
+
 FileDeviceImpl::pos_type FileDeviceImpl::seek(off_type offset, std::ios::seekdir sd)
 {
     DWORD whence = FILE_BEGIN;
