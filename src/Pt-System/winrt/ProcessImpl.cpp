@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006- 2013 Marc Boris Duerner
+ * Copyright (C) 2006-2013 by Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,71 +25,83 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef PT_SYSTEM_WIN32_MUTEXIMPL_H
-#define PT_SYSTEM_WIN32_MUTEXIMPL_H
 
-#include "Pt/WinVer.h"
-#include "Pt/System/Api.h"
-#include <windows.h>
+#include "ProcessImpl.h"
+#include <Pt/System/SystemError.h>
+#include <chrono>
+#include <thread>
 
 namespace Pt {
 
 namespace System {
 
-class MutexImpl 
+ProcessImpl::ProcessImpl(const ProcessInfo& procInfo)
+: _procInfo(procInfo)
+, _state(Process::Ready)
+{}
+
+
+ProcessImpl::~ProcessImpl()
 {
-	public:
-		MutexImpl();
+}
 
-		MutexImpl(int recursive);
 
-		~MutexImpl();
-
-		void lock();
-
-		bool tryLock();
-
-		void unlock();
-
-    CRITICAL_SECTION& handle()
-    { return _handle; }
-
-	private:
-		CRITICAL_SECTION _handle;
-};
-
-class ReadWriteMutexImpl
+void ProcessImpl::start()
 {
-    public:
-        ReadWriteMutexImpl();
+    _state = Process::Failed;
+    throw SystemError("could not start process");
+}
 
-        ~ReadWriteMutexImpl();
 
-        void readLock();
+void ProcessImpl::kill()
+{
+}
 
-        bool tryReadLock();
 
-        void writeLock();
+int ProcessImpl::wait()
+{
+    return -1;
+}
 
-        bool tryWriteLock();
 
-        void unlock();
+bool ProcessImpl::tryWait(int& status)
+{
+    return false;
+}
 
-    private:
-        void addWriter();
 
-        void removeWriter();
+static void sleep(unsigned int milliSec)
+{
+    std::chrono::milliseconds msecs(milliSec);
+    std::this_thread::sleep_for(msecs);
+}
 
-	private:
-        HANDLE   _mutex;
-        HANDLE   _readEvent;
-        HANDLE   _writeEvent;
-        unsigned _readers;
-        unsigned _writers;
-};
-	
-} // namespace System
+
+unsigned long ProcessImpl::usedMemory()
+{
+    return 0;
+}
+
+
+void ProcessImpl::setEnvVar(const std::string& name, const std::string& value)
+{
+    // TODO: implement file based environment in app data dir
+}
+
+
+void ProcessImpl::unsetEnvVar(const std::string& name)
+{
+    // TODO: implement file based environment in app data dir
+}
+
+
+std::string ProcessImpl::getEnvVar(const std::string& name)
+{
+    return std::string();
+}
+
+#endif
 
 } // namespace Pt
 
-#endif // PT_SYSTEM_WIN32_MUTEXIMPL_H
+} //namespace System

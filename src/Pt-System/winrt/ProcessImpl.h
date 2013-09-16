@@ -28,14 +28,9 @@
 #ifndef PT_SYSTEM_WIN32_PROCESSIMPL_H
 #define PT_SYSTEM_WIN32_PROCESSIMPL_H
 
-#include <Pt/WinVer.h>
 #include <Pt/System/Api.h>
 #include <Pt/System/Process.h>
-#include <Pt/System/Pipe.h>
 #include <Pt/NonCopyable.h>
-#include <cstdlib>
-#include <string>
-#include <windows.h>
 
 namespace Pt {
 
@@ -49,9 +44,6 @@ class ProcessImpl : private NonCopyable
         ~ProcessImpl();
 
     public:
-        static void sleep(unsigned int milliSec)
-        { ::Sleep(milliSec); }
-
         const ProcessInfo& procInfo() const
         { return _procInfo; }
 
@@ -66,30 +58,33 @@ class ProcessImpl : private NonCopyable
 
         bool tryWait(int& status);
 
-        static unsigned long usedMemory();
-
         IODevice* stdInput()
-        { return _stdinPipe?  &_stdinPipe->in() : 0; }
+        { return 0; }
 
         IODevice* stdOutput()
-        { return _stdoutPipe?  &_stdoutPipe->out() : 0; }
+        { return 0; }
 
         IODevice* stdError()
-        { return _stderrPipe?  &_stderrPipe->out() : 0; }
+        { return 0; }
 
+        // move to Application class
+        static unsigned long usedMemory();
+
+        // move to Application class
+        static void sleep(unsigned int milliSec);
+
+        // move to Application class
         static void setEnvVar(const std::string& name, const std::string& value);
 
+        // move to Application class
         static void unsetEnvVar(const std::string& name);
 
+        // move to Application class
         static std::string getEnvVar(const std::string& name);
 
     private:
-        PROCESS_INFORMATION m_pid;
         ProcessInfo _procInfo;
         Process::State _state;
-        Pipe* _stdinPipe;
-        Pipe* _stdoutPipe;
-        Pipe* _stderrPipe;
 };
 
 } // namespace System

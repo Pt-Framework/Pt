@@ -1,7 +1,5 @@
 /*
- * Copyright (C) 2006-2007 Marc Boris Duerner
- * Copyright (C) 2006-2007 Sebastian Pieck
- * Copyright (C) 2006-2007 PTV AG
+ * Copyright (C) 2006- 2013 Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -37,13 +35,21 @@ namespace System {
 
 MutexImpl::MutexImpl()
 {
+#ifdef __cplusplus_winrt
+	InitializeCriticalSectionEx(&_handle, 1, 0);
+#else
 	InitializeCriticalSection(&_handle);
+#endif
 }
 
 
 MutexImpl::MutexImpl(int)
 {
+#ifdef __cplusplus_winrt
+	InitializeCriticalSectionEx(&_handle, 1, 0);
+#else
 	InitializeCriticalSection(&_handle);
+#endif
 }
 
 
@@ -75,164 +81,221 @@ void MutexImpl::unlock()
 ReadWriteMutexImpl::ReadWriteMutexImpl()
 : _readers(0), _writers(0)
 {
-	_mutex = CreateMutex(NULL, FALSE, NULL);
+#ifdef __cplusplus_winrt
+    _mutex = CreateMutexExW(NULL, NULL, 0, SYNCHRONIZE);
+#else
+	  _mutex = CreateMutex(NULL, FALSE, NULL);
+#endif
 
-	if(_mutex == NULL)
-		throw SystemError( PT_ERROR_MSG("CreateMutex failed") );
+	  if(_mutex == NULL)
+		    throw SystemError( PT_ERROR_MSG("CreateMutex failed") );
 
-	_readEvent = CreateEvent(NULL, TRUE, TRUE, NULL);
-	if(_readEvent == NULL)
-		throw SystemError( PT_ERROR_MSG("CreateEvent failed") );
+#ifdef __cplusplus_winrt
+    _readEvent = CreateEventExW(NULL, NULL, CREATE_EVENT_MANUAL_RESET|CREATE_EVENT_INITIAL_SET, SYNCHRONIZE);
+#else
+	  _readEvent = CreateEvent(NULL, TRUE, TRUE, NULL);
+#endif
+	  
+    if(_readEvent == NULL)
+		    throw SystemError( PT_ERROR_MSG("CreateEvent failed") );
 
-	_writeEvent = CreateEvent(NULL, TRUE, TRUE, NULL);
-	if(_writeEvent == NULL)
-		throw SystemError( PT_ERROR_MSG("CreateEvent failed") );
+#ifdef __cplusplus_winrt
+    _writeEvent = CreateEventExW(NULL, NULL, CREATE_EVENT_MANUAL_RESET|CREATE_EVENT_INITIAL_SET, SYNCHRONIZE);
+#else
+	  _writeEvent = CreateEvent(NULL, TRUE, TRUE, NULL);
+#endif
+
+	  if(_writeEvent == NULL)
+		    throw SystemError( PT_ERROR_MSG("CreateEvent failed") );
 }
 
 
 ReadWriteMutexImpl::~ReadWriteMutexImpl()
 {
-	CloseHandle(_mutex);
-	CloseHandle(_readEvent);
-	CloseHandle(_writeEvent);
+	  CloseHandle(_mutex);
+	  CloseHandle(_readEvent);
+	  CloseHandle(_writeEvent);
 }
 
 
 void ReadWriteMutexImpl::readLock()
 {
-	HANDLE h[2];
-	h[0] = _mutex;
-	h[1] = _readEvent;
+	  HANDLE h[2];
+	  h[0] = _mutex;
+	  h[1] = _readEvent;
 
-	switch( WaitForMultipleObjects(2, h, TRUE, INFINITE) )
-	{
-		case WAIT_OBJECT_0:
-		case WAIT_OBJECT_0 + 1:
-			++_readers;
-			ResetEvent(_writeEvent);
-			ReleaseMutex(_mutex);
-			break;
-		default:
-			throw SystemError( PT_ERROR_MSG("WaitForMultipleObjects failed") );
-	}
+#ifdef __cplusplus_winrt
+    DWORD ret = WaitForMultipleObjectsEx(2, h, TRUE, INFINITE, FALSE);
+#else
+    DWORD ret = WaitForMultipleObjects(2, h, TRUE, INFINITE);
+#endif
+
+	  switch(ret)
+	  {
+		  case WAIT_OBJECT_0:
+		  case WAIT_OBJECT_0 + 1:
+			  ++_readers;
+			  ResetEvent(_writeEvent);
+			  ReleaseMutex(_mutex);
+			  break;
+		  default:
+			  throw SystemError( PT_ERROR_MSG("WaitForMultipleObjects failed") );
+	  }
 }
 
 
 bool ReadWriteMutexImpl::tryReadLock()
 {
-	HANDLE h[2];
-	h[0] = _mutex;
-	h[1] = _readEvent;
+	  HANDLE h[2];
+	  h[0] = _mutex;
+	  h[1] = _readEvent;
 
-	switch( WaitForMultipleObjects(2, h, TRUE, 1) )
-	{
-		case WAIT_OBJECT_0:
-		case WAIT_OBJECT_0 + 1:
-			++_readers;
-			ResetEvent(_writeEvent);
-			ReleaseMutex(_mutex);
-			return true;
-		case WAIT_TIMEOUT:
-			return false;
-		default:
-			throw SystemError( PT_ERROR_MSG("WaitForMultipleObjects failed") );
-	}
+#ifdef __cplusplus_winrt
+    DWORD ret = WaitForMultipleObjectsEx(2, h, TRUE, 1, FALSE);
+#else
+    DWORD ret = WaitForMultipleObjects(2, h, TRUE, 1);
+#endif
+
+	  switch(ret)
+	  {
+		  case WAIT_OBJECT_0:
+		  case WAIT_OBJECT_0 + 1:
+			  ++_readers;
+			  ResetEvent(_writeEvent);
+			  ReleaseMutex(_mutex);
+			  return true;
+		  case WAIT_TIMEOUT:
+			  return false;
+		  default:
+			  throw SystemError( PT_ERROR_MSG("WaitForMultipleObjects failed") );
+	  }
 }
 
 
 void ReadWriteMutexImpl::writeLock()
 {
-	this->addWriter();
+	  this->addWriter();
 
-	HANDLE h[2];
-	h[0] = _mutex;
-	h[1] = _writeEvent;
+	  HANDLE h[2];
+	  h[0] = _mutex;
+	  h[1] = _writeEvent;
 
-	switch( WaitForMultipleObjects(2, h, TRUE, INFINITE) )
-	{
-		case WAIT_OBJECT_0:
-		case WAIT_OBJECT_0 + 1:
-			--_writers;
-			++_readers;
-			ResetEvent(_readEvent);
-			ResetEvent(_writeEvent);
-			ReleaseMutex(_mutex);
-			break;
-		default:
-			this->removeWriter();
-			throw SystemError( PT_ERROR_MSG("WaitForMultipleObjects failed") );
-	}
+#ifdef __cplusplus_winrt
+    DWORD ret = WaitForMultipleObjectsEx(2, h, TRUE, INFINITE, FALSE);
+#else
+    DWORD ret = WaitForMultipleObjects(2, h, TRUE, INFINITE);
+#endif
+
+	  switch(ret)
+	  {
+		  case WAIT_OBJECT_0:
+		  case WAIT_OBJECT_0 + 1:
+			  --_writers;
+			  ++_readers;
+			  ResetEvent(_readEvent);
+			  ResetEvent(_writeEvent);
+			  ReleaseMutex(_mutex);
+			  break;
+		  default:
+			  this->removeWriter();
+			  throw SystemError( PT_ERROR_MSG("WaitForMultipleObjects failed") );
+	  }
 }
 
 
 bool ReadWriteMutexImpl::tryWriteLock()
 {
-	this->addWriter();
+	  this->addWriter();
 
-	HANDLE h[2];
-	h[0] = _mutex;
-	h[1] = _writeEvent;
+	  HANDLE h[2];
+	  h[0] = _mutex;
+	  h[1] = _writeEvent;
 
-	switch (WaitForMultipleObjects(2, h, TRUE, 1))
-	{
-		case WAIT_OBJECT_0:
-		case WAIT_OBJECT_0 + 1:
-			--_writers;
-			++_readers;
-			ResetEvent(_readEvent);
-			ResetEvent(_writeEvent);
-			ReleaseMutex(_mutex);
-			return true;
-		case WAIT_TIMEOUT:
-			this->removeWriter();
-			return false;
-		default:
-			removeWriter();
-			throw SystemError( PT_ERROR_MSG("WaitForMultipleObjects failed") );
-	}
+#ifdef __cplusplus_winrt
+    DWORD ret = WaitForMultipleObjectsEx(2, h, TRUE, 1, FALSE);
+#else
+    DWORD ret = WaitForMultipleObjects(2, h, TRUE, 1);
+#endif
+
+	  switch(ret)
+	  {
+		  case WAIT_OBJECT_0:
+		  case WAIT_OBJECT_0 + 1:
+			  --_writers;
+			  ++_readers;
+			  ResetEvent(_readEvent);
+			  ResetEvent(_writeEvent);
+			  ReleaseMutex(_mutex);
+			  return true;
+		  case WAIT_TIMEOUT:
+			  this->removeWriter();
+			  return false;
+		  default:
+			  removeWriter();
+			  throw SystemError( PT_ERROR_MSG("WaitForMultipleObjects failed") );
+	  }
 }
 
 
 void ReadWriteMutexImpl::unlock()
 {
-	switch (WaitForSingleObject(_mutex, INFINITE))
-	{
-		case WAIT_OBJECT_0:
-			if (_writers == 0) SetEvent(_readEvent);
-			if (--_readers == 0) SetEvent(_writeEvent);
-			ReleaseMutex(_mutex);
-			break;
-		default:
-			throw SystemError( PT_ERROR_MSG("WaitForSingleObject failed") );
-	}
+
+#ifdef __cplusplus_winrt
+    DWORD ret = WaitForSingleObjectEx(_mutex, INFINITE, FALSE);
+#else
+    DWORD ret = WaitForSingleObject(_mutex, INFINITE);
+#endif
+
+	  switch(ret)
+	  {
+		  case WAIT_OBJECT_0:
+			  if (_writers == 0) SetEvent(_readEvent);
+			  if (--_readers == 0) SetEvent(_writeEvent);
+			  ReleaseMutex(_mutex);
+			  break;
+		  default:
+			  throw SystemError( PT_ERROR_MSG("WaitForSingleObject failed") );
+	  }
 }
 
 
 void ReadWriteMutexImpl::addWriter()
 {
-	switch ( WaitForSingleObject(_mutex, INFINITE) )
-	{
-		case WAIT_OBJECT_0:
-			if (++_writers == 1) ResetEvent(_readEvent);
-			ReleaseMutex(_mutex);
-			break;
-		default:
-			throw SystemError( PT_ERROR_MSG("WaitForSingleObject failed") );
-	}
+#ifdef __cplusplus_winrt
+    DWORD ret = WaitForSingleObjectEx(_mutex, INFINITE, FALSE);
+#else
+    DWORD ret = WaitForSingleObject(_mutex, INFINITE);
+#endif
+
+	  switch (ret)
+	  {
+		  case WAIT_OBJECT_0:
+			  if (++_writers == 1) ResetEvent(_readEvent);
+			  ReleaseMutex(_mutex);
+			  break;
+		  default:
+			  throw SystemError( PT_ERROR_MSG("WaitForSingleObject failed") );
+	  }
 }
 
 
 void ReadWriteMutexImpl::removeWriter()
 {
-	switch( WaitForSingleObject(_mutex, INFINITE) )
-	{
-		case WAIT_OBJECT_0:
-			if (--_writers == 0) SetEvent(_readEvent);
-			ReleaseMutex(_mutex);
-			break;
-		default:
-			throw SystemError( PT_ERROR_MSG("WaitForSingleObject failed") );
-	}
+#ifdef __cplusplus_winrt
+    DWORD ret = WaitForSingleObjectEx(_mutex, INFINITE, FALSE);
+#else
+    DWORD ret = WaitForSingleObject(_mutex, INFINITE);
+#endif
+
+	  switch( ret )
+	  {
+		  case WAIT_OBJECT_0:
+			  if (--_writers == 0) SetEvent(_readEvent);
+			  ReleaseMutex(_mutex);
+			  break;
+		  default:
+			  throw SystemError( PT_ERROR_MSG("WaitForSingleObject failed") );
+	  }
 }
 
 } // namespace System

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006- 2013 Marc Boris Duerner
+ * Copyright (C) 2013 Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,71 +25,37 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef PT_SYSTEM_WIN32_MUTEXIMPL_H
-#define PT_SYSTEM_WIN32_MUTEXIMPL_H
 
 #include "Pt/WinVer.h"
 #include "Pt/System/Api.h"
+#include "Pt/System/Mutex.h"
 #include <windows.h>
 
 namespace Pt {
 
 namespace System {
 
-class MutexImpl 
-{
-	public:
-		MutexImpl();
-
-		MutexImpl(int recursive);
-
-		~MutexImpl();
-
-		void lock();
-
-		bool tryLock();
-
-		void unlock();
-
-    CRITICAL_SECTION& handle()
-    { return _handle; }
-
-	private:
-		CRITICAL_SECTION _handle;
-};
-
-class ReadWriteMutexImpl
+class ConditionImpl 
 {
     public:
-        ReadWriteMutexImpl();
+        ConditionImpl();
 
-        ~ReadWriteMutexImpl();
+        ~ConditionImpl();
 
-        void readLock();
+        void wait(Mutex& mtx);
+            
+        bool wait(Mutex& mtx, unsigned int ms);
 
-        bool tryReadLock();
+        void signal();
 
-        void writeLock();
-
-        bool tryWriteLock();
-
-        void unlock();
+        void broadcast();
 
     private:
-        void addWriter();
-
-        void removeWriter();
-
-	private:
-        HANDLE   _mutex;
-        HANDLE   _readEvent;
-        HANDLE   _writeEvent;
-        unsigned _readers;
-        unsigned _writers;
+        PCONDITION_VARIABLE _cv;
 };
-	
-} // namespace System
+
+} //namespace System
 
 } // namespace Pt
 
-#endif // PT_SYSTEM_WIN32_MUTEXIMPL_H
+

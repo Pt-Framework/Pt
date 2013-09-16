@@ -1,6 +1,4 @@
 /*
- * Copyright (C) 2006- 2013 Marc Boris Duerner
- * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -25,71 +23,44 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef PT_SYSTEM_WIN32_MUTEXIMPL_H
-#define PT_SYSTEM_WIN32_MUTEXIMPL_H
-
-#include "Pt/WinVer.h"
-#include "Pt/System/Api.h"
-#include <windows.h>
+#include "ApplicationImpl.h"
 
 namespace Pt {
 
 namespace System {
 
-class MutexImpl 
+ApplicationImpl::ApplicationImpl()
 {
-	public:
-		MutexImpl();
+}
 
-		MutexImpl(int recursive);
 
-		~MutexImpl();
-
-		void lock();
-
-		bool tryLock();
-
-		void unlock();
-
-    CRITICAL_SECTION& handle()
-    { return _handle; }
-
-	private:
-		CRITICAL_SECTION _handle;
-};
-
-class ReadWriteMutexImpl
+ApplicationImpl::~ApplicationImpl()
 {
-    public:
-        ReadWriteMutexImpl();
+}
 
-        ~ReadWriteMutexImpl();
 
-        void readLock();
+void ApplicationImpl::init(EventLoop& s)
+{
+}
 
-        bool tryReadLock();
 
-        void writeLock();
+bool ApplicationImpl::ignoreSystemSignal(int sig)
+{
+    return false;
+}
 
-        bool tryWriteLock();
 
-        void unlock();
+bool ApplicationImpl::catchSystemSignal(int sig)
+{
+    return false;
+}
 
-    private:
-        void addWriter();
 
-        void removeWriter();
+bool ApplicationImpl::raiseSystemSignal(int sig)
+{
+    return false;
+}
 
-	private:
-        HANDLE   _mutex;
-        HANDLE   _readEvent;
-        HANDLE   _writeEvent;
-        unsigned _readers;
-        unsigned _writers;
-};
-	
 } // namespace System
 
 } // namespace Pt
-
-#endif // PT_SYSTEM_WIN32_MUTEXIMPL_H

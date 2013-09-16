@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006 PTV AG
+ * Copyright (C) 2006-2013 Marc Boris Dürner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -37,7 +37,11 @@ namespace System {
 
 SemaphoreImpl::SemaphoreImpl(unsigned int initial)
 {
+#ifdef __cplusplus_winrt
+    _handle = CreateSemaphoreExW(NULL, initial, LONG_MAX, 0, 0, SEMAPHORE_ALL_ACCESS);
+#else
     _handle = CreateSemaphore(NULL, initial, LONG_MAX, 0);
+#endif
 
     if( !_handle )
         throw SystemError( PT_ERROR_MSG("Could not create semaphore.") );
@@ -52,7 +56,12 @@ SemaphoreImpl::~SemaphoreImpl()
 
 void SemaphoreImpl::wait()
 {
+#ifdef __cplusplus_winrt
+    DWORD ret = WaitForSingleObjectEx(_handle, INFINITE, FALSE);
+#else
     DWORD ret = WaitForSingleObject(_handle, INFINITE);
+#endif
+
     if(ret == WAIT_FAILED)
         throw SystemError( PT_ERROR_MSG("Could not wait on semaphore"));
 }
@@ -60,7 +69,12 @@ void SemaphoreImpl::wait()
 
 bool SemaphoreImpl::tryWait()
 {
+#ifdef __cplusplus_winrt
+    DWORD ret = WaitForSingleObjectEx(_handle, 0, FALSE);
+#else
     DWORD ret = WaitForSingleObject(_handle, 0);
+#endif
+
     if(ret == WAIT_FAILED) {
         throw SystemError( PT_ERROR_MSG("Could not wait on semaphore") );
     }

@@ -177,30 +177,35 @@ class PT_SYSTEM_API Process : private NonCopyable
 
         IODevice* stdError();
 
+        // TODO: move to Application class
         //! Set environment variable
         /**
             @throw SystemError
         */
         static void setEnvVar(const std::string& name, const std::string& value);
 
+        // TODO: move to Application class
         //! Unset environment variable
         /**
             @throw SystemError
         */
         static void unsetEnvVar(const std::string& name);
 
+        // TODO: move to Application class
         //! Get environment variable
         /**
             @throw SystemError
         */
         static std::string getEnvVar(const std::string& name);
 
+        // vmove to Application class
         //! Called Process Sleeps milliSec Seconds
         /**
             @throw SystemError
         */
         static void sleep(size_t milliSec);
 
+        // TODO: move to Application class
         static unsigned long usedMemory();
 
     private:

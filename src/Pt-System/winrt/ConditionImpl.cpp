@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006- 2013 Marc Boris Duerner
+ * Copyright (C) 2013 Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,71 +25,64 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef PT_SYSTEM_WIN32_MUTEXIMPL_H
-#define PT_SYSTEM_WIN32_MUTEXIMPL_H
-
-#include "Pt/WinVer.h"
-#include "Pt/System/Api.h"
-#include <windows.h>
+#include "ConditionImpl.h"
+#include "MutexImpl.h"
+#include "Pt/System/SystemError.h"
 
 namespace Pt {
 
 namespace System {
 
-class MutexImpl 
+ConditionImpl::ConditionImpl()
+: _blockCount(0)
 {
-	public:
-		MutexImpl();
+    InitializeConditionVariable(_cv);
+}
 
-		MutexImpl(int recursive);
 
-		~MutexImpl();
-
-		void lock();
-
-		bool tryLock();
-
-		void unlock();
-
-    CRITICAL_SECTION& handle()
-    { return _handle; }
-
-	private:
-		CRITICAL_SECTION _handle;
-};
-
-class ReadWriteMutexImpl
+ConditionImpl::~ConditionImpl()
 {
-    public:
-        ReadWriteMutexImpl();
+}
 
-        ~ReadWriteMutexImpl();
 
-        void readLock();
+bool ConditionImpl::wait(Mutex& mtx)
+{
+    BOOL ret = SleepConditionVariableCS(_cv, mtx.impl().handle(), INFINITE);
+    if(ret == 0)
+    {
+        throw SystemError("SleepConditionVariableCS failed");
+    }
 
-        bool tryReadLock();
+    return true;
+}
 
-        void writeLock();
 
-        bool tryWriteLock();
+bool ConditionImpl::wait(Mutex& mtx, unsigned int ms)
+{
+    BOOL ret = SleepConditionVariableCS(_cv, mtx.impl().handle(), ms);
+    if(ret == 0)
+    {
+        if(GetLastError() = ERROR_TIMEOUT)
+            return false;
 
-        void unlock();
+        throw SystemError("SleepConditionVariableCS failed");
+    }
 
-    private:
-        void addWriter();
+    return true;
+}
 
-        void removeWriter();
 
-	private:
-        HANDLE   _mutex;
-        HANDLE   _readEvent;
-        HANDLE   _writeEvent;
-        unsigned _readers;
-        unsigned _writers;
-};
-	
+void ConditionImpl::signal()
+{
+    WakeConditionVariable(_cv);
+}
+
+
+void ConditionImpl::broadcast()
+{
+    WakeAllConditionVariable(_cv);
+}
+
 } // namespace System
 
 } // namespace Pt
-
-#endif // PT_SYSTEM_WIN32_MUTEXIMPL_H

@@ -38,7 +38,12 @@ void LibraryImpl::open(const std::string& path)
 
     std::basic_string<TCHAR> tpath;
     win32::fromMultiByte(path, tpath);
+
+#ifdef __cplusplus_winrt
+    _handle = ::LoadPackageLibrary( tpath.c_str(), 0 );
+#else
     _handle = ::LoadLibrary( tpath.c_str() );
+#endif
 
     if(_handle == 0)
     {
