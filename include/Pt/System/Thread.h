@@ -156,9 +156,6 @@ namespace System {
             //! @brief Joins the thread
             bool joinNoThrow();
 
-            //! @brief Terminates the thread
-            void terminate();
-
         private:
             //! @internal
             Thread::State _state;
@@ -240,15 +237,6 @@ namespace System {
             void join()
             {
                 Thread::join();
-            }
-
-            /** @brief Terminates the thread.
-
-                Forces the thread to terminate is dangerous and discouraged.
-            */
-            void terminate()
-            {
-                Thread::terminate();
             }
     };
 

@@ -19,22 +19,22 @@ namespace System {
 #endif
 
     class ThreadImpl 
-	{
+    {
         public:
             ThreadImpl()
-			: _cb(0)
-			, _handle(0)
-			, _id(0)
-			{}
+            : _cb(0)
+            , _handle(0)
+            , _id(0)
+            {}
 
             ~ThreadImpl();
 
-			void init(const Callable<void>& cb);
+            void init(const Callable<void>& cb);
 
             void start();
 
-			void detach()
-			{ this->close(); }
+            void detach()
+            { this->close(); }
 
             void join();
 
@@ -42,10 +42,10 @@ namespace System {
 
             static void exit();
 
-			static void yield()
-			{ sleep(0);	}
+            static void yield()
+            { sleep(0);    }
 
-			static void sleep(unsigned int ms);
+            static void sleep(unsigned int ms);
 
             const Callable<void>* cb()
             { return _cb; }
@@ -55,7 +55,7 @@ namespace System {
             {
                 ThreadImpl* impl = (ThreadImpl*)arg;
                 const Callable<void>* cb = impl->cb();
-				if(cb) cb->call();
+                if(cb) cb->call();
                 return 0;
             }
 

@@ -136,13 +136,6 @@ bool Thread::joinNoThrow()
     return ret;
 }
 
-
-void Thread::terminate()
-{
-    _impl->terminate();
-    _state = Thread::Finished;
-}
-
 } // namespace System
 
 } // !namespace Pt

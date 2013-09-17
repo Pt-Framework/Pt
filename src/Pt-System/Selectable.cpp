@@ -110,8 +110,10 @@ void Selectable::setReady()
 
 void Selectable::cancel()
 { 
+    // cancel all async actions
     this->onCancel(); 
 
+    // remove any ready notifications from the parent loop
     if( _parent )
     {
         _parent->onIdle(*this);

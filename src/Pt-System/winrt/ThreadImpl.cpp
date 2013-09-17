@@ -26,16 +26,32 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "ThreadImpl.h"
-#include "Pt/Types.h"
-#include "Pt/System/SystemError.h"
+#include <Pt/System/SystemError.h>
+#include <chrono>
 
 namespace Pt {
 
 namespace System {
 
+void ThreadImplFunction(const Callable<void>& cb)
+{
+    try
+    {
+        cb.invoke();
+    }
+    catch(const ThreadImpl::ThreadExit&)
+    {
+    }
+}
+
 ThreadImpl::~ThreadImpl()
 {
-    this->close();
+    if (_thread != 0) 
+    {
+        delete _thread;
+        _thread = 0;
+    }
+    
     delete _cb;
 }
 
@@ -47,72 +63,49 @@ void ThreadImpl::init(const Callable<void>& cb)
 }
 
 
-void ThreadImpl::close()
+void ThreadImpl::start() 
 {
-    if (_handle != 0) 
+    try
     {
-        ::CloseHandle(_handle);
-        _handle = 0;
+        _thread = new std::thread( &ThreadImplFunction, std::ref(*_cb) );
+    }
+    catch(const std::system_error& se)
+    {
+        throw SystemError("thread creation failed");
     }
 }
 
 
-void ThreadImpl::start() 
-{
-    SIZE_T stackSize = 0;
-
-#ifdef _WIN32_WCE
-    _handle = ::CreateThread(NULL, stackSize, entry, this, 0, &_id);
-#else
-    _handle = (HANDLE)_beginthreadex(NULL, stackSize, entry, this, 0, &_id);
-#endif
-
-    if(_handle == NULL) 
-    {
-        _id = 0;
-        throw SystemError( PT_ERROR_MSG("Thread creation failed") );
-    }
+void ThreadImpl::detach()
+{ 
+    if(_thread)
+        _thread->detach(); 
 }
 
 
 void ThreadImpl::join()
 {
-    DWORD status = ::WaitForSingleObject(_handle, INFINITE);
-    if( status != WAIT_OBJECT_0 )
-        throw SystemError( PT_ERROR_MSG("Could not join thread") );
-
-    _id = 0;
-}
-
-
-void ThreadImpl::terminate()
-{
-    if( ! TerminateThread(_handle, 0) )
-        throw SystemError( PT_ERROR_MSG("Could not kill thread.") );
-
-    _id = 0;
+    if(_thread)
+        _thread->join();
 }
 
 
 void ThreadImpl::exit()
 {
-    DWORD status = 0;
-    
-#ifdef _WIN32_WCE
-    ::ExitThread(status);
-#else
-    _endthreadex(status);
-#endif
+    throw ThreadExit;
+}
+
+
+static void ThreadImpl::yield()
+{ 
+    std::this_thread::yield();
 }
 
 
 void ThreadImpl::sleep(unsigned int ms)
 {
-#ifdef _WIN32_WCE
-    ::Sleep(ms);
-#else
-    ::SleepEx(ms, FALSE);
-#endif
+    std::chrono::milliseconds msecs(ms);
+    std::this_thread::sleep_for(msecs);
 }
 
 } // namespace System
