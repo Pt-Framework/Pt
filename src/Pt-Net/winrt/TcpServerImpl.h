@@ -1,11 +1,12 @@
 /*
- * Copyright (C) 2006-2009 by Marc Boris Duerner
- * 
+ * Copyright (C) 2006-2009 by Marc Boris Duerner, Tommi Maekitalo
+ *                            Laurentiu-Gheorghe Crisan
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -15,76 +16,77 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef Pt_Net_AddrInfo_H
-#define Pt_Net_AddrInfo_H
 
-#include <Pt/Net/Api.h>
-#include <Pt/RefCounted.h>
+#ifndef PT_NET_TcpServerImpl_H
+#define PT_NET_TcpServerImpl_H
+
+#include "Selector.h"
+#include "Pt/WinVer.h"
+#include <Pt/Net/TcpServer.h>
 #include <string>
-#include <cassert>
+
 
 namespace Pt {
 
+namespace System {
+    class EventLoop;
+}
+
 namespace Net {
 
-class AddrInfoImpl : public Pt::RefCounted
+class TcpServer;
+class AddrInfo;
+
+class TcpServerImpl
 {
     public:
-        AddrInfoImpl(const std::string& ipaddr, unsigned short port, bool listen);
+        TcpServerImpl(TcpServer& server);
 
-        ~AddrInfoImpl();
+        ~TcpServerImpl();
 
-        inline const std::string& host() const
-        { return _host; }
+        void close();
 
-        inline unsigned short port() const
-        { return _port; }
+        void cancel(System::EventLoop& s);
 
-        static AddrInfoImpl* ip4Any(unsigned short port);
+        void beginAccept(System::EventLoop& loop);
 
-        static AddrInfoImpl* ip4Loopback(unsigned short port);
+        StreamSocket^ accept();
 
-        static AddrInfoImpl* ip4Broadcast(unsigned short port);
+        void listen(const std::string& ipaddr, unsigned short int port,
+                    const TcpServer::Options& options);
 
-        static AddrInfoImpl* ip6Any(unsigned short port);
+        void listen(const AddrInfo& ipaddr, const TcpServer::Options& options);
 
-        static AddrInfoImpl* ip6Loopback(unsigned short port);
+        bool run();
 
-    protected:
-        AddrInfoImpl();
+        void setTimeout(std::size_t msecs)
+        { _timeout = msecs; }
 
-        void clear();
-
-        void init(const std::string& ipaddr, unsigned short port);
-
-        void initIp4Any(unsigned short port);
-
-        void initIp4Loopback(unsigned short port);
-
-        void initIp4Broadcast(unsigned short port);
-
-        void initIp6Any(unsigned short port);
-
-        void initIp6Loopback(unsigned short port);
+        std::size_t timeout() const
+        { return _timeout; }
 
     private:
-        std::string _host;
-        unsigned short _port;
-        bool _listen;
+        TcpServer& _server;
+        System::EventLoop* _loop;
+        AddrInfo _ai;
+        TcpServer::Options _options;
+        StreamSocketListener^ _listener;
+        IAsyncAction^ _bindOp;
+        bool _bound;
 };
 
 } // namespace Net
 
-} // nameace Pt
+} // namespace Pt
 
 #endif

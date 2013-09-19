@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2009 by Marc Boris Duerner, Tommi Maekitalo
+ * Copyright (C) 2006-2009 by Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,32 +26,21 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "AddrInfoImpl.h"
-#include "Pt/System/IOError.h"
-#include <sstream>
-#include <string.h>
 
 namespace Pt {
 
 namespace Net {
 
 AddrInfoImpl::AddrInfoImpl()
-: _ai(0)
-, _ainfo(0)
+: _listen(false)
 {
 }
 
 
 AddrInfoImpl::AddrInfoImpl(const std::string& ipaddr, unsigned short port, bool listen)
-: _ai(0)
-, _ainfo(0)
+: _listen(listen)
 {
-    struct addrinfo hints;
-    memset(&hints, 0, sizeof(hints));
-
-    if (listen)
-        hints.ai_flags |= AI_PASSIVE;
-
-    init(ipaddr, port, hints);
+    init(ipaddr, port);
 }
 
 
@@ -102,36 +91,17 @@ AddrInfoImpl* AddrInfoImpl::ip6Loopback(unsigned short port)
 
 void AddrInfoImpl::clear()
 {  
-    if(_ainfo)
-    {
-        freeaddrinfo(_ainfo);
-        _ainfo = 0;
-    }
-
-    memset( &_special, 0, sizeof(_special) );
-    memset( &_specialAddr, 0, sizeof(_specialAddr) );
-    _ai = 0;
-
     _host.clear();
     _port = 0;
 }
 
 
-
-void AddrInfoImpl::init(const std::string& ipaddr, unsigned short port, const addrinfo& hints)
+void AddrInfoImpl::init(const std::string& ipaddr, unsigned short port)
 {
     clear();
     
-    std::ostringstream p;
-    p << port;
-    
     _host = ipaddr;
     _port = port;
-    
-    if( 0 != ::getaddrinfo(ipaddr.c_str(), p.str().c_str(), &hints, &_ainfo) )
-        throw System::AccessFailed(_host + ':' + p.str());
-    
-    _ai = _ainfo;
 }
 
 
@@ -139,20 +109,9 @@ void AddrInfoImpl::initIp4Any(unsigned short port)
 {  
     clear();
 
+    // Stream-/Datagramockets must use BindServiceNameAsync if hostname is empty
+    _host = "";
     _port = port;
-
-    sockaddr_in* addr = reinterpret_cast<sockaddr_in*>(&_specialAddr);
-    addr->sin_family = AF_INET;
-    addr->sin_port = htons(port);
-    addr->sin_addr.s_addr = INADDR_ANY;
-    
-    _special.ai_family = AF_INET;
-    _special.ai_flags |= AI_PASSIVE;
-    _special.ai_addr = (sockaddr*)(addr);
-    _special.ai_addrlen = sizeof(sockaddr_in);
-    _special.ai_next = 0;
-    
-    _ai = &_special;
 }
 
 
@@ -160,39 +119,16 @@ void AddrInfoImpl::initIp4Loopback(unsigned short port)
 {  
     clear();
 
+    _host = "127.0.0.1";
     _port = port;
-
-    sockaddr_in* addr = reinterpret_cast<sockaddr_in*>(&_specialAddr);
-    addr->sin_family = AF_INET;
-    addr->sin_port = htons(port);
-    addr->sin_addr.s_addr = INADDR_LOOPBACK;
-    
-    _special.ai_family = AF_INET;
-    _special.ai_addr = (sockaddr*)(addr);
-    _special.ai_addrlen = sizeof(sockaddr_in);
-    _special.ai_next = 0;
-    
-    _ai = &_special;
 }
 
 
 void AddrInfoImpl::initIp4Broadcast(unsigned short port)
 {  
     clear();
-
+    _host = "255.255.255.255";
     _port = port;
-
-    sockaddr_in* addr = reinterpret_cast<sockaddr_in*>(&_specialAddr);
-    addr->sin_family = AF_INET;
-    addr->sin_port = htons(port);
-    addr->sin_addr.s_addr = INADDR_BROADCAST;
-    
-    _special.ai_family = AF_INET;
-    _special.ai_addr = (sockaddr*)(addr);
-    _special.ai_addrlen = sizeof(sockaddr_in);
-    _special.ai_next = 0;
-    
-    _ai = &_special;
 }
 
 
@@ -200,20 +136,9 @@ void AddrInfoImpl::initIp6Any(unsigned short port)
 {  
     clear();
 
+    // Stream-/Datagramockets must use BindServiceNameAsync if hostname is empty
+    _host = "";
     _port = port;
-
-    sockaddr_in6* addr = reinterpret_cast<sockaddr_in6*>(&_specialAddr);
-    addr->sin6_family = AF_INET6;
-    addr->sin6_port = htons(port);
-    addr->sin6_addr = in6addr_any;
-    
-    _special.ai_family = AF_INET6;
-    _special.ai_flags |= AI_PASSIVE;
-    _special.ai_addr = (sockaddr*)(addr);
-    _special.ai_addrlen = sizeof(sockaddr_in6);
-    _special.ai_next = 0;
-    
-    _ai = &_special;
 }
 
 
@@ -221,19 +146,8 @@ void AddrInfoImpl::initIp6Loopback(unsigned short port)
 {  
     clear();
 
+    _host = "0:0:0:0:0:0:0:1";
     _port = port;
-
-    sockaddr_in6* addr = reinterpret_cast<sockaddr_in6*>(&_specialAddr);
-    addr->sin6_family = AF_INET6;
-    addr->sin6_port = htons(port);
-    addr->sin6_addr = in6addr_loopback;
-    
-    _special.ai_family = AF_INET6;
-    _special.ai_addr = (sockaddr*)(addr);
-    _special.ai_addrlen = sizeof(sockaddr_in6);
-    _special.ai_next = 0;
-    
-    _ai = &_special;
 }
 
 }
