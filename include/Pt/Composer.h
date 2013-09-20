@@ -44,11 +44,13 @@ class IComposer
         virtual ~IComposer()
         {}
 
-        virtual void setName(const std::string& name) = 0;
+        virtual void setName(const std::string& name)
+        {}
+
+        virtual void setTypeName(const std::string& type)
+        {}
 
         virtual void setId(const std::string& id) = 0;
-
-        virtual void setTypeName(const std::string& type) = 0;
 
         virtual void setString(const Pt::String& value)
         { throw SerializationError("unexpected value"); }
@@ -90,6 +92,9 @@ class IComposer
         virtual IComposer* beginElement()
         { throw SerializationError("unexpected sequence"); }
 
+        // TODO:
+        // keep IComposer* parent and SerializationContext* context as members
+        // finish() can by default return _parent
         virtual IComposer* finish() = 0;
 
     protected:

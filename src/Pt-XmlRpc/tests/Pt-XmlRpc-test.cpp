@@ -38,6 +38,52 @@
 #include "Pt/System/Clock.h"
 #include "Pt/System/Logger.h"
 
+namespace Pt {
+
+template <typename T>
+class Composer< std::vector<T> > : public Pt::IComposer
+{
+    public:
+        Composer(SerializationContext* context = 0)
+        : _type(0)
+        , _parent(0)
+        {
+            _elemComposer.setParent(this);
+        }
+
+        void setParent(IComposer* parent)
+        { _parent = parent; }
+
+        void begin(std::vector<T>& type)
+        {
+            type.clear();
+            type.reserve(5);
+            _type = &type;
+        }
+
+        virtual void setId(const std::string& id)
+        { }
+
+        virtual Pt::IComposer* beginElement()
+        {
+            _type->push_back( T() );
+            _elemComposer.begin( _type->back() );
+            return &_elemComposer;
+        }
+
+        virtual Pt::IComposer* finish()
+        {
+            return _parent;
+        }
+
+    private:
+        std::vector<T>* _type;
+        Composer<T> _elemComposer;
+        IComposer* _parent;
+};
+
+}
+
 struct Color
 {
     int red;
