@@ -31,7 +31,6 @@
 #include "Pt/Net/AddressInUse.h"
 #include <memory>
 
-
 namespace Pt {
 
 namespace Net {
@@ -103,15 +102,21 @@ void TcpServer::beginAccept()
 }
 
 
-TcpServerImpl& TcpServer::impl() const
-{
-    return *_impl;
-}
-
-
 void TcpServer::close()
 {
     _impl->close();
+}
+
+
+Signal<TcpServer&>& TcpServer::connectionPending()
+{ 
+    return _connectionPending; 
+}
+
+
+TcpServerImpl& TcpServer::impl() const
+{
+    return *_impl;
 }
 
 

@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2006-2009 by Marc Boris Duerner, Tommi Maekitalo
- *                            Laurentiu-Gheorghe Crisan
+ * Copyright (C) 2013 by Marc Boris Duerner
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -30,22 +29,14 @@
 #ifndef PT_NET_TcpServerImpl_H
 #define PT_NET_TcpServerImpl_H
 
-#include "Selector.h"
-#include "Pt/WinVer.h"
 #include <Pt/Net/TcpServer.h>
+#include <Pt/Net/AddrInfo.h>
+#include <Pt/System/EventLoop.h>
 #include <string>
-
 
 namespace Pt {
 
-namespace System {
-    class EventLoop;
-}
-
 namespace Net {
-
-class TcpServer;
-class AddrInfo;
 
 class TcpServerImpl
 {
@@ -56,7 +47,7 @@ class TcpServerImpl
 
         void close();
 
-        void cancel(System::EventLoop& s);
+        void cancel(System::EventLoop& loop);
 
         void beginAccept(System::EventLoop& loop);
 
@@ -70,10 +61,14 @@ class TcpServerImpl
         bool run();
 
         void setTimeout(std::size_t msecs)
-        { _timeout = msecs; }
+        { }
 
         std::size_t timeout() const
-        { return _timeout; }
+        { return 0; }
+
+    private:
+        void onConnectionReceived(StreamSocketListener^ listener, 
+                                  StreamSocketListenerConnectionReceivedEventArgs^ args);
 
     private:
         TcpServer& _server;
@@ -82,7 +77,8 @@ class TcpServerImpl
         TcpServer::Options _options;
         StreamSocketListener^ _listener;
         IAsyncAction^ _bindOp;
-        bool _bound;
+        System::Mutex _mtx;
+        std::vector<StreamSocket^> _backlog;
 };
 
 } // namespace Net

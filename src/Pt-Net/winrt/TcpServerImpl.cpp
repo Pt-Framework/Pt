@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2009 Marc Boris Duerner, Tommi Maekitalo
- *                    Laurentiu-Gheorghe Crisan
+ * Copyright (C) 2013 Marc Boris Duerner
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -28,17 +27,11 @@
  */
 
 #include "TcpServerImpl.h"
-#include "AddrInfoImpl.h"
-#include <Pt/Net/AddrInfo.h>
 #include <Pt/Net/AddressInUse.h>
-#include <Pt/Net/TcpServer.h>
 #include <Pt/System/Logger.h>
-#include <Pt/System/EventLoop.h>
+#include <Pt/System/IOError.h>
 #include <Pt/System/SystemError.h>
-
 #include <cassert>
-#include <cstring>
-#include <limits>
 
 log_define("Pt.System.TcpServer");
 
@@ -49,20 +42,15 @@ namespace Net {
 TcpServerImpl::TcpServerImpl(TcpServer& server)
 : _server(server)
 , _loop(0)
-, _timeout(Pt::System::EventLoop::WaitInfinite)
-, _bound(false)
+, _listener(0)
+, _bindOp(0)
 {
     _listener = ref new StreamSocketListener();
 
-    _listener->ConnectionReceived += ref new TypedEventHandler<StreamSocketListener^, 
-                                                               StreamSocketListenerConnectionReceivedEventArgs^>
-    (
-        [&](StreamSocketListenerConnectionReceivedEventArgs^)
-        {
-            //this->_loop->setReady();
-            //this->_loop->wake();
-        }
-    );
+    typedef TypedEventHandler<StreamSocketListener^, 
+                              StreamSocketListenerConnectionReceivedEventArgs^> ConnectionReceivedHandler;
+
+    _listener->ConnectionReceived += ref new ConnectionReceivedHandler(*this, &TcpServerImpl::ConnectionReceived);
 }
 
 
@@ -74,17 +62,18 @@ TcpServerImpl::~TcpServerImpl()
 
 void TcpServerImpl::close()
 {
+    delete _bindOp;
+    _bindOp = 0;
+
     _listener.Close();
-    _bound = false;
 }
 
 
 void TcpServerImpl::cancel(System::EventLoop& loop)
 {
+    MutexLock lock(_mtx);
     _loop = 0;
-
-    delete _bindOp;
-    _bindOp = 0;
+    lock.unlock();
 }
 
 
@@ -102,6 +91,53 @@ void TcpServerImpl::listen(const AddrInfo& ai, const TcpServer::Options& options
 
     _ai = ai;
     _options = options;
+
+    const std::string& host = _ai.host();
+	  std::wstring whost(host.begin(), host.end());
+	  String^ shost = ref new String(whost.c_str());
+
+    std::wostringstream wss;
+    wss << _ai.port();
+	  std::wstring wport = wss.str();
+	  String^ serviceName = ref new String( wport.c_str() );
+
+    if( shost->IsEmpty() )
+        _bindOp = BindServiceNameAsync(serviceName);
+    else
+        _bindOp = BindEndpointAsync(ref new HostName(shost), serviceName);
+    
+    _bindOp->Completed = ref new AsyncActionCompletedHandler
+    (
+        [&] (IAsyncAction^ asyncAction) 
+        {
+            try
+            {
+                asyncAction->GetResults();
+            }
+            catch(...)
+            {
+                std::cerr << "BindEndpointAsync failed." << std::endl;
+            }
+        }
+    );
+}
+
+
+void TcpServerImpl::onConnectionReceived(StreamSocketListener^ listener, 
+                                         StreamSocketListenerConnectionReceivedEventArgs^ args)
+{
+    MutexLock lock(_mtx);
+
+    // I really hope that the OS stops emitting ConnectionReceived events
+    // at some point, so that apps do not get flooded in case of high load.
+
+    _backlog.push_back( args->Socket() );
+
+    if(_loop)
+    {
+        _loop->setReady(_server);
+        _loop->wake();
+    }
 }
 
 
@@ -109,39 +145,17 @@ void TcpServerImpl::beginAccept(System::EventLoop& loop)
 {
     log_debug("beginAccept");
     
-    _loop = &loop;
+    MutexLock lock(_mtx);
 
-    if(_bound)
-        return;
-
-    const std::string& host = _ai.host();
-	  std::wstring whost(host.begin(), host.end());
-	  String^ shost = ref new String(whost.c_str());
-
-    HostName^ hostName = ref new HostName(shost);
-
-    std::wostringstream wss;
-    wss << _ai.port();
-	  std::wstring wport = wss.str();
-	  String^ serviceName = ref new String( wport.c_str() );
-
-    _bindOp = BindEndpointAsync(hostName, serviceName);
-    _bindOp->Completed = ref new AsyncActionCompletedHandler
-    (
-        [&] (IAsyncAction^ asyncInfo) 
-        {
-            //loop.setReady(_server);
-            //loop.wake();
-        }
-    );
-
-    _bound = true;
-}
-
-
-StreamSocket^ TcpServerImpl::accept()
-{
-    _loop = 0;
+    if( ! _backlog.empty() )
+    {
+        loop.setReady(_server);
+        loop.wake();
+    }
+    else
+    {
+        _loop = &loop;
+    }
 }
 
 
@@ -149,10 +163,24 @@ bool TcpServerImpl::run()
 {
     log_debug("TcpServerImpl::avail");
     
-    if( _bindOp && _bindOp->Status == AsyncStatus::Completed )
-        return false;
+    MutexLock lock(_mtx);
+    return ! _backlog.empty();
+}
 
-    return false;
+
+StreamSocket^ TcpServerImpl::accept()
+{
+    MutexLock lock(_mtx);
+    _loop = 0;
+
+    assert( ! _backlog.empty() );
+
+    if( ! _backlog.empty() )
+        throw IOError("accept backlog empty");
+
+    StreamSocket^ socket = _backlog.back();
+    _backlog.pop_back();
+    return socket;
 }
 
 } // namespace Net
