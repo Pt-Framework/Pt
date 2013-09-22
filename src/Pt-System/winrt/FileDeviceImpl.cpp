@@ -26,12 +26,18 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#include "../win32/win32.h"
 #include "FileDeviceImpl.h"
 #include "MainLoopImpl.h"
 #include "Pt/System/IODevice.h"
 #include "Pt/System/SystemError.h"
 #include "Pt/System/IOError.h"
 #include <cassert>
+
+using namespace Platform;
+using namespace Windows::Storage;
+using namespace Windows::Storage::Streams;
+using namespace Windows::Foundation;
 
 namespace Pt {
 
@@ -52,23 +58,22 @@ FileDeviceImpl::~FileDeviceImpl()
 void FileDeviceImpl::close()
 {
     delete _reader;
-    _reader = 0;
+    _reader = nullptr;
 
     delete _writer;
-    _writer = 0;
+    _writer = nullptr;
 
-    _stream.Close();
     delete _stream;
-    _stream = 0;
+    _stream = nullptr;
 }
 
 
 void FileDeviceImpl::cancel(EventLoop& loop)
 {
-    _storeOp = 0;
-    _loadOp = 0;
-    _openOp = 0;
-    _getFileOp = 0;
+    _storeOp = nullptr;
+    _loadOp = nullptr;
+    _openOp = nullptr;
+    _getFileOp = nullptr;
 }
 
 
@@ -80,20 +85,24 @@ void FileDeviceImpl::open( const char* path, std::ios::openmode mode)
 
 bool FileDeviceImpl::beginOpen(EventLoop& loop, const char* path, std::ios::openmode mode)
 {
-    String^ sPath = path;
+	std::wstring wpath;
+    win32::fromMultiByte(path, wpath);
 
-    _getFileOp = Storagefile::GetFileFromPathAsync(sPath);
+	String^ sPath = ref new String(wpath.c_str());
+
+    _getFileOp = StorageFile::GetFileFromPathAsync(sPath);
 
     _getFileOp->Completed = ref new AsyncOperationCompletedHandler<StorageFile^>
     (
-        [&] (IAsyncOperation<StorageFile^>^ operation) 
+        [&] (IAsyncOperation<StorageFile^>^ operation, AsyncStatus status) 
         {
             StorageFile^ file = operation->GetResults();
 
-            _openOp = file.OpenAsync();
+			// TODO: depending on openmode
+            _openOp = file->OpenAsync(FileAccessMode::ReadWrite);
             _openOp->Completed = ref new AsyncOperationCompletedHandler<IRandomAccessStream^>
             (
-                [&](IAsyncOperation<IRandomAccessStream^>^ op)
+                [&](IAsyncOperation<IRandomAccessStream^>^ op, AsyncStatus status)
                 {
                     loop.setReady(_device);
                     loop.wake();
@@ -112,11 +121,16 @@ bool FileDeviceImpl::runOpen(EventLoop& loop)
 }
 
 
+void FileDeviceImpl::sync()
+{
+//TODO: implemnet flush
+}
+
 void FileDeviceImpl::endOpen(EventLoop& loop)
 {
     _stream = _openOp->GetResults();
-    _openOp = 0;
-    _getFileOp = 0;
+    _openOp = nullptr;
+    _getFileOp = nullptr;
 }
 
 
@@ -148,11 +162,11 @@ FileDeviceImpl::pos_type FileDeviceImpl::seek(off_type offset, std::ios::seekdir
     }
 
     delete _reader;
-    _reader = 0;
+    _reader = nullptr;
 
     delete _writer;
-    _writer = 0;
-    _
+    _writer = nullptr;
+    
     _stream->Seek(pos);
     return pos;
 }
@@ -189,9 +203,11 @@ size_t FileDeviceImpl::beginRead(EventLoop& loop, char* buffer, size_t bufSize, 
     const size_t avail = _reader->UnconsumedBufferLength;
     if(avail > 0)
     {
-        for(unsigned n = 0; n < avail && n < bufSize; ++n)
+		//TODO: use ReadBytes
+		unsigned n = 0;
+        for(; n < avail && n < bufSize; ++n)
         {
-            buffer[n] = reinterpret_cast<char)>( _reader->ReadByte() );
+            buffer[n] = static_cast<char>( _reader->ReadByte() );
         }
 
         return n;
@@ -200,10 +216,10 @@ size_t FileDeviceImpl::beginRead(EventLoop& loop, char* buffer, size_t bufSize, 
     // TODO: does this report EOF? Or do we have to count the bytes until
     // we reach IRandomAccessStream.Size?
 
-    _loadOp = _reader->LoadAsync(n);
+    _loadOp = _reader->LoadAsync(bufSize);
 
-    _loadOp->Completed = ref new AsyncOperationCompletedHandler<unsigned int>^(
-      [&] () 
+    _loadOp->Completed = ref new AsyncOperationCompletedHandler<unsigned int>(
+      [&] (IAsyncOperation<unsigned int>^ asyncInfo, AsyncStatus asyncStatus) 
       {
           loop.setReady(_device);
           loop.wake(); 
@@ -222,13 +238,14 @@ bool FileDeviceImpl::runRead(EventLoop& loop)
 
 size_t FileDeviceImpl::endRead(EventLoop& loop, char* buffer, size_t bufSize, bool& eof)
 {
-    const size_t avail = _loadOp.GetResults();
-    _loadOp = 0;
+    const size_t avail = _loadOp->GetResults();
+    _loadOp = nullptr;
 
+	//TODO: use ReadBytes 
     unsigned n = 0;
     for( ; n < avail && n < bufSize; ++n)
     {
-        buffer[n] = reinterpret_cast<char)>( _reader->ReadByte() );
+        buffer[n] = static_cast<char>( _reader->ReadByte() );
     }
 
     return n;
@@ -250,7 +267,7 @@ size_t FileDeviceImpl::beginWrite(EventLoop& loop, const char* buffer, size_t bu
     }
 
     // UnstoredBufferLength
-    const unsigned char* ubuffer = reinterpret_cast<unsigned const *>(buffer);
+    const unsigned char* ubuffer = reinterpret_cast<const unsigned char*>(buffer);
 
     unsigned n = 0;
     for( ; n < bufSize; ++n)
@@ -259,10 +276,10 @@ size_t FileDeviceImpl::beginWrite(EventLoop& loop, const char* buffer, size_t bu
     }
 
     _storeCount = n;
-    _storeOp = _reader->StoreAsync(); // FlushAsync
+    _storeOp = _writer->StoreAsync(); // FlushAsync
 
-    _storeOp->Completed = ref new AsyncOperationCompletedHandler<unsigned int>^(
-      [&] () 
+    _storeOp->Completed = ref new AsyncOperationCompletedHandler<unsigned int>(
+      [&] (IAsyncOperation<unsigned int>^ asyncInfo, AsyncStatus asyncStatus) 
       {
           loop.setReady(_device);
           loop.wake(); 
@@ -281,9 +298,9 @@ bool FileDeviceImpl::runWrite(EventLoop& loop)
 
 size_t FileDeviceImpl::endWrite(EventLoop& loop, const char* buffer, size_t n)
 {
-    _storeOp.GetResults();
+    _storeOp->GetResults();
 
-    _storeOp = 0;
+    _storeOp = nullptr;
     return _storeCount;
 }
 

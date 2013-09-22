@@ -28,15 +28,13 @@
 #include "ConditionImpl.h"
 #include "MutexImpl.h"
 #include "Pt/System/SystemError.h"
-
 namespace Pt {
 
 namespace System {
 
 ConditionImpl::ConditionImpl()
-: _blockCount(0)
 {
-    InitializeConditionVariable(_cv);
+    InitializeConditionVariable(&_cv);
 }
 
 
@@ -45,24 +43,22 @@ ConditionImpl::~ConditionImpl()
 }
 
 
-bool ConditionImpl::wait(Mutex& mtx)
+void ConditionImpl::wait(Mutex& mtx)
 {
-    BOOL ret = SleepConditionVariableCS(_cv, mtx.impl().handle(), INFINITE);
+    BOOL ret = SleepConditionVariableCS(&_cv, &mtx.impl().handle(), INFINITE);
     if(ret == 0)
     {
         throw SystemError("SleepConditionVariableCS failed");
     }
-
-    return true;
 }
 
 
 bool ConditionImpl::wait(Mutex& mtx, unsigned int ms)
 {
-    BOOL ret = SleepConditionVariableCS(_cv, mtx.impl().handle(), ms);
+    BOOL ret = SleepConditionVariableCS(&_cv, &mtx.impl().handle(), ms);
     if(ret == 0)
     {
-        if(GetLastError() = ERROR_TIMEOUT)
+        if(GetLastError() == ERROR_TIMEOUT)
             return false;
 
         throw SystemError("SleepConditionVariableCS failed");
@@ -74,13 +70,13 @@ bool ConditionImpl::wait(Mutex& mtx, unsigned int ms)
 
 void ConditionImpl::signal()
 {
-    WakeConditionVariable(_cv);
+    WakeConditionVariable(&_cv);
 }
 
 
 void ConditionImpl::broadcast()
 {
-    WakeAllConditionVariable(_cv);
+    WakeAllConditionVariable(&_cv);
 }
 
 } // namespace System

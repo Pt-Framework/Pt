@@ -26,7 +26,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "Pt/WinVer.h"
+//#include "Pt/WinVer.h"
 #include "Pt/System/Api.h"
 #include "Pt/System/Mutex.h"
 #include <windows.h>
@@ -51,7 +51,7 @@ class ConditionImpl
         void broadcast();
 
     private:
-        PCONDITION_VARIABLE _cv;
+        CONDITION_VARIABLE _cv;
 };
 
 } //namespace System

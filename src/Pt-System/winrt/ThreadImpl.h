@@ -16,6 +16,7 @@ class ThreadImpl
         ThreadImpl()
         : _cb(0)
         , _thread(0)
+		, _detach(false)
         {}
 
         ~ThreadImpl();
@@ -36,6 +37,7 @@ class ThreadImpl
 
     private:
         const Callable<void>* _cb;
+		bool _detach;
         std::thread* _thread;
   };
 

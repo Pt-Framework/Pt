@@ -21,6 +21,7 @@
 #define PT_SYSTEM_SERIALDEVICEIMPL_H
 
 #include "Pt/System/Api.h"
+#include <Pt/System/SerialDevice.h>
 #include <string>
 
 namespace Pt {
@@ -39,6 +40,8 @@ class SerialDeviceImpl
         void open(const std::string& file, std::ios::openmode mode);
 
         void close();
+
+		void sync();
 
         void cancel(EventLoop& loop);
 

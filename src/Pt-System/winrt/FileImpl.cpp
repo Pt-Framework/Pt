@@ -29,9 +29,9 @@
 #include "../win32/win32.h"
 #include <Pt/System/SystemError.h>
 #include <Pt/System/IOError.h>
-#include <Pt/WinVer.h>
 #include <string>
 #include <windows.h>
+
 
 namespace Pt {
 

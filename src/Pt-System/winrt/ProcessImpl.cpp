@@ -70,7 +70,7 @@ bool ProcessImpl::tryWait(int& status)
 }
 
 
-static void sleep(unsigned int milliSec)
+void ProcessImpl::sleep(unsigned int milliSec)
 {
     std::chrono::milliseconds msecs(milliSec);
     std::this_thread::sleep_for(msecs);
@@ -100,7 +100,6 @@ std::string ProcessImpl::getEnvVar(const std::string& name)
     return std::string();
 }
 
-#endif
 
 } // namespace Pt
 

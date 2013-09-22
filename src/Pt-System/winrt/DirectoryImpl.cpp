@@ -32,6 +32,11 @@
 #include "Pt/System/IOError.h"
 #include <windows.h>
 
+using namespace Platform;
+
+using namespace Windows::Storage;
+
+
 namespace Pt {
 
 namespace System {
@@ -134,7 +139,7 @@ void DirectoryImpl::move(const std::string& from, const std::string& to)
     win32::fromMultiByte( to, wto );
 
     if( FALSE == ::MoveFileExW( wfrom.c_str(), wto.c_str(), MOVEFILE_COPY_ALLOWED) )
-        throw AccessFailed(oldName);
+        throw AccessFailed(from);
 }
 
 
@@ -151,7 +156,6 @@ void DirectoryImpl::remove(const std::string& path)
 void DirectoryImpl::chdir(const std::string& path)
 {
     throw std::runtime_error("chdir not supported");
-    return std::string();
 }
 
 
@@ -161,7 +165,7 @@ std::string DirectoryImpl::cwd()
 
     // might want RoamingFolder?
     String^ path = ApplicationData::Current->LocalFolder->Path;
-    return marshal_as<std::string>(path);
+	return win32::toMultiByte( path->Data() );
 }
 
 
@@ -169,7 +173,7 @@ std::string DirectoryImpl::tmpdir()
 {
     // Windows.Storage
     String^ path = ApplicationData::Current->TemporaryFolder->Path;
-    return marshal_as<std::string>(path);
+    return win32::toMultiByte( path->Data() );
 }
 
 } // namespace System

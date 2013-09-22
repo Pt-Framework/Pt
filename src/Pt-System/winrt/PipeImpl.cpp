@@ -50,9 +50,9 @@ PipeIODevice::~PipeIODevice()
 }
 
 
-void PipeIODevice::init(PipeImpl& pipe)
+void PipeIODevice::init(PipeImpl* pipe)
 {
-    _pipe = &pipe;
+    _pipe = pipe;
 }
 
 
@@ -69,10 +69,10 @@ void PipeIODevice::onClose()
 void PipeIODevice::onCancel()
 {
     if( this->reading() )
-        _pipe.cancelRead();
+        _pipe->cancelRead();
 
     if( this->writing() )
-        _pipe.cancelWrite();
+        _pipe->cancelWrite();
 
     IODevice::onCancel();
 }
@@ -133,7 +133,7 @@ size_t PipeIODevice::onBeginWrite(const char* buffer, size_t n)
         throw IOError("I/O device not writable");
     }
 
-    return return _pipe->beginWrite(*parent(), buffer, n);
+    return _pipe->beginWrite(*parent(), buffer, n);
 }
 
 
@@ -161,13 +161,13 @@ static const size_t MaxBufferSize = 16384;
 
 
 PipeImpl::PipeImpl()
-: _readLoopIn(0)
-, _writeLoopIn(0)
+: _readLoop(0)
+, _writeLoop(0)
 , _in(PipeIODevice::Write)
 , _out(PipeIODevice::Read)
 {
-    _in.init(*this);
-    _out.init(*this);
+    _in.init(this);
+    _out.init(this);
 }
 
 

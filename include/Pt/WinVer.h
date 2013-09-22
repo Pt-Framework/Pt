@@ -28,19 +28,21 @@
 #ifndef Pt_WinVer_h
 #define Pt_WinVer_h
 
-#if defined(WIN32) || defined(_WIN32)
-    // Use of features specific Windows versions
-    #ifndef WINVER
-    #define WINVER 0x0501
-    #endif
+#ifndef __cplusplus_winrt
+	#if defined(WIN32) || defined(_WIN32) 
+		// Use of features specific Windows versions
+		#ifndef WINVER
+		#define WINVER 0x0501
+		#endif
 
-    #ifndef _WIN32_WINNT
-    #define _WIN32_WINNT 0x0501
-    #endif
+		#ifndef _WIN32_WINNT
+		#define _WIN32_WINNT 0x0501
+		#endif
 
-    #ifndef _WIN32_WINDOWS
-    #define _WIN32_WINDOWS 0x0410
-    #endif
+		#ifndef _WIN32_WINDOWS
+		#define _WIN32_WINDOWS 0x0410
+		#endif
+	#endif
 #endif
 
 #endif

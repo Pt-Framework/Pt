@@ -72,7 +72,7 @@ class DirectoryIteratorImpl
         mutable std::string _path;
         mutable std::string _name;
         HANDLE _findHandle;
-        WIN32_FIND_DATA _current;
+        WIN32_FIND_DATAW _current;
         bool _dirty;
 };
 

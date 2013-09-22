@@ -308,7 +308,7 @@ class PT_REFLEX_API TypeManager
 
         bool registerType(Type& type);
 
-        void registerType(Type& type, GenericType& generic, Type& t1);
+        void registerType(Type& type, GenericType& gen, Type& t1);
 
         bool unregisterType(Type& type);
 

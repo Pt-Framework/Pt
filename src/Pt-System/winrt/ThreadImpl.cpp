@@ -28,6 +28,7 @@
 #include "ThreadImpl.h"
 #include <Pt/System/SystemError.h>
 #include <chrono>
+#include <system_error>
 
 namespace Pt {
 
@@ -68,8 +69,14 @@ void ThreadImpl::start()
     try
     {
         _thread = new std::thread( &ThreadImplFunction, std::ref(*_cb) );
+
+		if(_detach)
+		{
+			_thread->detach();
+			_detach = false;
+		}
     }
-    catch(const std::system_error& se)
+    catch(const std::system_error&)
     {
         throw SystemError("thread creation failed");
     }
@@ -79,7 +86,9 @@ void ThreadImpl::start()
 void ThreadImpl::detach()
 { 
     if(_thread)
-        _thread->detach(); 
+        _thread->detach();
+	else
+		_detach = true;
 }
 
 
@@ -92,11 +101,11 @@ void ThreadImpl::join()
 
 void ThreadImpl::exit()
 {
-    throw ThreadExit;
+    throw ThreadExit();
 }
 
 
-static void ThreadImpl::yield()
+void ThreadImpl::yield()
 { 
     std::this_thread::yield();
 }

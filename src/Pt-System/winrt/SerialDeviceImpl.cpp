@@ -33,8 +33,6 @@ namespace Pt {
 
 namespace System {
 
-#ifdef _WIN32_WCE
-
 SerialDeviceImpl::SerialDeviceImpl(IODevice&)
 { 
 }
@@ -55,6 +53,10 @@ void SerialDeviceImpl::close()
 {
 }
 
+void SerialDeviceImpl::sync()
+{
+
+}
 
 void SerialDeviceImpl::cancel(EventLoop& loop)
 {
