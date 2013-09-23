@@ -33,6 +33,11 @@
 #include <Pt/System/SystemError.h>
 #include <cassert>
 
+using namespace Platform;
+using namespace Windows::Foundation;
+using namespace Windows::Networking;
+using namespace Windows::Networking::Sockets;
+
 log_define("Pt.System.TcpServer");
 
 namespace Pt {

@@ -70,10 +70,29 @@ void FileDeviceImpl::close()
 
 void FileDeviceImpl::cancel(EventLoop& loop)
 {
-    _storeOp = nullptr;
-    _loadOp = nullptr;
-    _openOp = nullptr;
-    _getFileOp = nullptr;
+    if(_storeOp)
+    {
+        _storeOp->Cancel();
+        _storeOp = nullptr;
+    }
+
+    if(_loadOp)
+    {
+        _loadOp->Cancel();
+        _loadOp = nullptr;
+    }
+
+    if(_openOp)
+    {
+        _openOp->Cancel();
+        _openOp = nullptr;
+    }
+
+    if(_getFileOp)
+    {
+        _getFileOp->Cancel();
+        _getFileOp = nullptr;
+    }
 }
 
 
@@ -85,10 +104,10 @@ void FileDeviceImpl::open( const char* path, std::ios::openmode mode)
 
 bool FileDeviceImpl::beginOpen(EventLoop& loop, const char* path, std::ios::openmode mode)
 {
-	std::wstring wpath;
+    std::wstring wpath;
     win32::fromMultiByte(path, wpath);
 
-	String^ sPath = ref new String(wpath.c_str());
+    String^ sPath = ref new String(wpath.c_str());
 
     _getFileOp = StorageFile::GetFileFromPathAsync(sPath);
 
@@ -98,7 +117,7 @@ bool FileDeviceImpl::beginOpen(EventLoop& loop, const char* path, std::ios::open
         {
             StorageFile^ file = operation->GetResults();
 
-			// TODO: depending on openmode
+            // TODO: depending on openmode
             _openOp = file->OpenAsync(FileAccessMode::ReadWrite);
             _openOp->Completed = ref new AsyncOperationCompletedHandler<IRandomAccessStream^>
             (
@@ -121,16 +140,17 @@ bool FileDeviceImpl::runOpen(EventLoop& loop)
 }
 
 
-void FileDeviceImpl::sync()
-{
-//TODO: implemnet flush
-}
-
 void FileDeviceImpl::endOpen(EventLoop& loop)
 {
     _stream = _openOp->GetResults();
     _openOp = nullptr;
     _getFileOp = nullptr;
+}
+
+
+void FileDeviceImpl::sync()
+{
+    //TODO: implement flush
 }
 
 
@@ -203,8 +223,8 @@ size_t FileDeviceImpl::beginRead(EventLoop& loop, char* buffer, size_t bufSize, 
     const size_t avail = _reader->UnconsumedBufferLength;
     if(avail > 0)
     {
-		//TODO: use ReadBytes
-		unsigned n = 0;
+        //TODO: use ReadBytes
+        unsigned n = 0;
         for(; n < avail && n < bufSize; ++n)
         {
             buffer[n] = static_cast<char>( _reader->ReadByte() );
@@ -241,7 +261,7 @@ size_t FileDeviceImpl::endRead(EventLoop& loop, char* buffer, size_t bufSize, bo
     const size_t avail = _loadOp->GetResults();
     _loadOp = nullptr;
 
-	//TODO: use ReadBytes 
+    //TODO: use ReadBytes 
     unsigned n = 0;
     for( ; n < avail && n < bufSize; ++n)
     {

@@ -51,7 +51,7 @@ class TcpServerImpl
 
         void beginAccept(System::EventLoop& loop);
 
-        StreamSocket^ accept();
+        Windows::Networking::Sockets::StreamSocket^ accept();
 
         void listen(const std::string& ipaddr, unsigned short int port,
                     const TcpServer::Options& options);
@@ -67,18 +67,18 @@ class TcpServerImpl
         { return 0; }
 
     private:
-        void onConnectionReceived(StreamSocketListener^ listener, 
-                                  StreamSocketListenerConnectionReceivedEventArgs^ args);
+        void onConnectionReceived(Windows::Networking::Sockets::StreamSocketListener^ listener, 
+                                  Windows::Networking::Sockets::StreamSocketListenerConnectionReceivedEventArgs^ args);
 
     private:
         TcpServer& _server;
         System::EventLoop* _loop;
         AddrInfo _ai;
         TcpServer::Options _options;
-        StreamSocketListener^ _listener;
-        IAsyncAction^ _bindOp;
+        Windows::Networking::Sockets::StreamSocketListener^ _listener;
+        Windows::Foundation::IAsyncAction^ _bindOp;
         System::Mutex _mtx;
-        std::vector<StreamSocket^> _backlog;
+        std::vector<Windows::Networking::Sockets::StreamSocket^> _backlog;
 };
 
 } // namespace Net

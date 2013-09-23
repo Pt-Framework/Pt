@@ -1,0 +1,273 @@
+/*
+ * Copyright (C) 2013 Marc Boris Duerner
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * As a special exception, you may use this file as part of a free
+ * software library without restriction. Specifically, if other files
+ * instantiate templates or use macros or inline functions from this
+ * file, or you compile this file and link it with other files to
+ * produce an executable, this file does not by itself cause the
+ * resulting executable to be covered by the GNU General Public
+ * License. This exception does not however invalidate any other
+ * reasons why the executable file might be covered by the GNU Library
+ * General Public License.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
+#include "UdpSocketImpl.h"
+#include "Pt/Net/AddrInfo.h"
+#include "Pt/Net/AddressInUse.h"
+#include <Pt/Net/UdpSocket.h>
+#include <Pt/System/SystemError.h>
+#include <Pt/System/IOError.h>
+#include <Pt/System/Logger.h>
+#include <cassert>
+
+using namespace Platform;
+using namespace Windows::Foundation;
+using namespace Windows::Networking;
+using namespace Windows::Networking::Sockets;
+
+log_define("Pt.System.UdpSocket");
+
+namespace Pt {
+
+namespace Net {
+
+const unsigned int DefaultHopLimit = static_cast<unsigned int>(-1);
+
+UdpSocketImpl::UdpSocketImpl(UdpSocket& socket)
+: _device(socket)
+, _timeout(Pt::System::EventLoop::WaitInfinite)
+, _broadcast(false)
+, _isConnected(false)
+, _isBound(false)
+, _hopLimit(DefaultHopLimit)
+, _storeCount(0)
+{
+    _socket = ref new DatagramSocket();
+
+    typedef TypedEventHandler<DatagramSocket^, 
+                              DatagramSocketMessageReceivedEventArgs^> MessageReceivedHandler;
+
+    _socket->MessageReceived += ref new MessageReceivedHandler(*this, &UdpSocketImpl::onMessageReceived);
+}
+
+
+UdpSocketImpl::~UdpSocketImpl()
+{
+    delete _socket;
+}
+
+
+void UdpSocketImpl::cancel(System::EventLoop& loop)
+{
+    if(_storeOp)
+    {
+        _storeOp->Cancel();
+        _storeOp = nullptr;
+    }
+}
+
+
+void UdpSocketImpl::close()
+{
+    delete _writer;
+    _writer = nullptr;
+
+    _socket->Close();
+
+    _isConnected = false;
+    _isBound = false;
+    _hopLimit = DefaultHopLimit;
+}
+
+
+void UdpSocketImpl::bind(const std::string& ipaddr, unsigned short int port, const UdpSocket::Options&)
+{
+    AddrInfo ai(ipaddr, port, true);
+
+    _isBound = true;
+}
+
+
+void UdpSocketImpl::connect(const AddrInfo& ai)
+{
+    _isConnected = true;
+}
+
+
+bool UdpSocketImpl::isConnected() const
+{
+    return _isConnected;
+}
+
+
+bool UdpSocketImpl::isBound() const
+{
+    return _isBound;
+}
+
+
+void UdpSocketImpl::setBroadcast()
+{
+    _broadcast = true;
+}
+
+
+void UdpSocketImpl::setHopLimit(unsigned int n)
+{
+    _hopLimit = n;
+    _socket->Control->OutboundUnicastHopLimit = n;
+}
+
+
+void UdpSocketImpl::joinMulticastGroup(const std::string& ipaddr)
+{
+    std::wstring waddr( ipaddr.begin(), ipaddr.end() );
+    String^ saddr = ref new String( waddr.c_str() );
+
+    _socket->JoinMulticastGroup(ref new HostName(saddr) );
+}
+
+
+void UdpSocketImpl::dropMulticastGroup(const std::string& ipaddr)
+{
+    // TODO: is this supported?
+
+    throw System::IOError("multicast group drop failed");
+}
+
+
+std::string TcpSocketImpl::socketAddress() const
+{
+    std::wstring waddr;
+
+    // TODO: use CanonicalName ?
+    String^ addr = _socket->LocalAddress->DisplayName;
+
+    if(addr)
+        waddr = addr->Data();
+
+    return std::string( waddr.begin(), waddr.end() );
+}
+
+
+std::string TcpSocketImpl::peerAddress() const
+{
+    std::wstring waddr;
+
+    // TODO: use CanonicalName ?
+    String^ addr = _socket->RemoteAddress->DisplayName;
+
+    if(addr)
+        waddr = addr->Data();
+
+    return std::string( waddr.begin(), waddr.end() );
+}
+
+
+void UdpSocketImpl::onMessageReceived(DatagramSocket^ socket, 
+                                      DatagramSocketMessageReceivedEventArgs^ args)
+{
+
+}
+
+
+size_t UdpSocketImpl::beginRead(System::EventLoop& loop, char* buffer, size_t n, bool& eof)
+{
+    return 0;
+}
+
+
+bool UdpSocketImpl::runRead(System::EventLoop& loop)
+{
+    return false;
+}
+
+
+size_t UdpSocketImpl::endRead(System::EventLoop& loop, char* buffer, size_t n, bool& eof)
+{
+    return 0;
+}
+
+
+size_t UdpSocketImpl::read(char* buffer, size_t count, bool& eof)
+{
+    throw IOError("blocking I/O not supported");
+    return 0;
+}
+
+
+size_t UdpSocketImpl::beginWrite(System::EventLoop& loop, const char* buffer, size_t n)
+{
+    log_debug("beginWrite " << n);
+
+    if( ! _writer )
+    {
+        _writer = ref new DataWriter(_socket->OutputStream);
+    }
+
+    // UnstoredBufferLength
+    const unsigned char* ubuffer = reinterpret_cast<const unsigned char*>(buffer);
+
+    unsigned n = 0;
+    for( ; n < bufSize; ++n)
+    {
+        _writer->WriteByte( ubuffer[n] );
+    }
+
+    _storeCount = n;
+    _storeOp = _writer->StoreAsync(); // FlushAsync
+
+    _storeOp->Completed = ref new AsyncOperationCompletedHandler<unsigned int>
+    (
+        [&] (IAsyncOperation<unsigned int>^ asyncInfo, AsyncStatus asyncStatus) 
+        {
+            loop.setReady(_device);
+            loop.wake(); 
+        }
+    );
+
+    return 0;
+}
+
+
+bool UdpSocketImpl::runWrite(System::EventLoop& loop)
+{
+    return _storeOp && _storeOp->Status == AsyncStatus::Completed;
+}
+
+
+size_t UdpSocketImpl::endWrite(System::EventLoop& loop, const char* buffer, size_t n)
+{
+    log_debug("endWrite");
+
+    const size_t written = _storeOp->GetResults();
+
+    _storeOp = nullptr;
+    return _storeCount;
+}
+
+
+size_t UdpSocketImpl::write(const char* buffer, size_t n)
+{
+    throw IOError("blocking I/O not supported");
+    return 0;
+}
+
+} // namespace Net
+
+} // namespace Pt

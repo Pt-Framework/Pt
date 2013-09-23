@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2009 by Marc Boris Duerner, Tommi Maekitalo
+ * Copyright (C) 2006-2013 by Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -46,14 +46,14 @@ TcpSocket::TcpSocket()
 }
 
 
-TcpSocket::TcpSocket(const TcpServer& server, const Options& o)
+TcpSocket::TcpSocket(const TcpServer& server, const Options& opts)
 : _impl(0)
 , _connecting(false)
 {
     _impl = new TcpSocketImpl(*this);
     std::auto_ptr<TcpSocketImpl> impl(_impl);
 
-    this->accept(server, o);
+    this->accept(server, opts);
 
     impl.release();
 }

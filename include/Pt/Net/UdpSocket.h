@@ -82,8 +82,10 @@ class PT_NET_API UdpSocket : public System::IODevice
         // inherit doc
         virtual void onClose();
 
+        // inherit doc
         void onSetTimeout(size_t timeout);
 
+        // inherit doc
         virtual bool onRun();
 
         // inherit doc
