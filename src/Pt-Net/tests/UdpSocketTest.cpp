@@ -61,7 +61,7 @@ class UdpSocketTest : public Pt::Unit::TestSuite
 
             _loop = new Pt::System::MainLoop();
             _loop->timeout() += Pt::slot(*_loop, &Pt::System::MainLoop::exit);
-            _loop->setIdleTimeout(2000);
+            _loop->setIdleTimeout(10000);
         }
 
         void tearDown()
@@ -85,23 +85,34 @@ class UdpSocketTest : public Pt::Unit::TestSuite
         void Unicast()
         {
             _receiver->setActive(*_loop);
+            _receiver->bound() += Pt::slot(*this, &UdpSocketTest::onUnicastBind);
+            _receiver->beginBind("127.0.0.1", 8000);
+
             _sender->setActive(*_loop);
-
-            _sender->connect("127.0.0.1", 8000);
-            PT_UNIT_ASSERT( _sender->isConnected() );
-
-            _receiver->bind("127.0.0.1", 8000);
-            PT_UNIT_ASSERT( _receiver->isBound() );
-
-            _receiver->inputReady() += Pt::slot(*this, &UdpSocketTest::onUnicastInput);
-            _receiver->beginRead(inbuf, 200);
-
-            _sender->outputReady() += Pt::slot(*this, &UdpSocketTest::onUnicastOutput);
-            _sender->beginWrite("Hello UNICAST!", 14);
+            _sender->connected() += Pt::slot(*this, &UdpSocketTest::onUnicastConnect);
+            _sender->beginConnect("127.0.0.1", 8000);
 
             _loop->run();
 
+            PT_UNIT_ASSERT( _sender->isConnected() );
+            PT_UNIT_ASSERT( _receiver->isBound() );
             PT_UNIT_ASSERT( 0 == std::strncmp(inbuf, "Hello UNICAST!", 14) );
+        }
+
+        void onUnicastConnect(Pt::Net::UdpSocket& socket)
+        {
+            socket.endConnect();
+
+            socket.outputReady() += Pt::slot(*this, &UdpSocketTest::onUnicastOutput);
+            socket.beginWrite("Hello UNICAST!", 14);
+        }
+
+        void onUnicastBind(Pt::Net::UdpSocket& socket)
+        {
+            socket.endBind();
+
+            socket.inputReady() += Pt::slot(*this, &UdpSocketTest::onUnicastInput);
+            socket.beginRead(inbuf, 200);
         }
 
         void onUnicastOutput(Pt::System::IODevice& device)

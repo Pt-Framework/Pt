@@ -34,6 +34,7 @@
 #include <Pt/Net/UdpSocket.h>
 #include <Pt/System/SystemError.h>
 #include <Pt/System/IOError.h>
+#include <Pt/System/Logger.h>
 #include <cerrno>
 #include <stdio.h>
 #include <errno.h>
@@ -42,6 +43,8 @@
 #include <fcntl.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+
+log_define("Pt.Net.UdpSocket");
 
 namespace Pt {
 
@@ -71,6 +74,26 @@ void UdpSocketImpl::close()
     System::IODeviceImpl::close();
     _isConnected = false;
     _isBound = false;
+}
+
+
+bool UdpSocketImpl::beginBind(System::EventLoop& loop, const AddrInfo& ai, const UdpSocket::Options& o)
+{
+    log_debug( "begin binding socket to " << ai.host() << ":" << ai.port() );
+
+    this->bind(ai.host(), ai.port(), o);
+    return true;
+}
+
+
+bool UdpSocketImpl::runBind(System::EventLoop& loop)
+{
+    return false;
+}
+
+
+void UdpSocketImpl::endBind(System::EventLoop& loop)
+{
 }
 
 
@@ -148,6 +171,26 @@ void UdpSocketImpl::bind(const std::string& ipaddr, unsigned short int port, con
         throw AddressInUse();
     else
         throw System::AccessFailed( ai.host() );
+}
+
+
+bool UdpSocketImpl::beginConnect(System::EventLoop& loop, const AddrInfo& ai)
+{
+    log_debug( "begin connecting socket to " << ai.host() << ":" << ai.port() );
+
+    this->connect(ai);
+    return true;
+}
+
+
+bool UdpSocketImpl::runConnect(System::EventLoop& loop)
+{
+    return false;
+}
+
+
+void UdpSocketImpl::endConnect(System::EventLoop& loop)
+{
 }
 
 

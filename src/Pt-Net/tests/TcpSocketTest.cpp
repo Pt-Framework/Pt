@@ -32,9 +32,12 @@
 #include "Pt/Net/AddrInfo.h"
 #include "Pt/Net/TcpServer.h"
 #include "Pt/Net/TcpSocket.h"
+#include "Pt/System/Thread.h"
 #include "Pt/System/MainLoop.h"
 #include "Pt/System/Logger.h"
 #include <string>
+#include <cstddef>
+#include <cstring>
 
 class TcpSocketTest : public Pt::Unit::TestSuite
 {
@@ -47,17 +50,20 @@ class TcpSocketTest : public Pt::Unit::TestSuite
         {
           Pt::System::Logger::setLogLevel("", Pt::System::Warn);
 
-          this->registerMethod( "NonBlockingWithLoop", *this,
-                                &TcpSocketTest::NonBlockingWithLoop);
+          this->registerMethod("BlockingTCP", *this, 
+                               &TcpSocketTest::BlockingTCP);
 
-          this->registerMethod( "CloseOnAccept", *this,
-                                &TcpSocketTest::CloseOnAccept);
+          this->registerMethod("NonBlockingWithLoop", *this,
+                               &TcpSocketTest::NonBlockingWithLoop);
 
-          this->registerMethod( "CloseOnConnect", *this,
-                                &TcpSocketTest::CloseOnConnect);
+          this->registerMethod("CloseOnAccept", *this,
+                               &TcpSocketTest::CloseOnAccept);
 
-          this->registerMethod( "ConnectFailed", *this,
-                                &TcpSocketTest::ConnectFailed);
+          this->registerMethod("CloseOnConnect", *this,
+                               &TcpSocketTest::CloseOnConnect);
+
+          this->registerMethod("ConnectFailed", *this,
+                               &TcpSocketTest::ConnectFailed);
         }
 
         void setUp()
@@ -92,6 +98,50 @@ class TcpSocketTest : public Pt::Unit::TestSuite
                 delete _loop;
                 _loop = 0;
             }
+        }
+
+        void runClient()
+        {
+            Pt::Net::TcpSocket socket("127.0.0.1", 5050);
+            
+            char buf[100];
+            std::memset( buf, 42, sizeof(buf) );
+            
+            for(std::size_t i = 0; i < 10; i++)
+            {
+                socket.write( buf, sizeof(buf) );
+            }
+
+            socket.close();  
+        }
+
+        void runServer(Pt::Net::TcpServer& server)
+        {
+            Pt::Net::TcpSocket socket;
+            socket.accept(server);
+
+            size_t count = 0;
+            while( ! socket.eof() )
+            {
+                char buf[100];
+                size_t n = socket.read( buf, sizeof(buf) );
+                count += n;
+            }
+            
+            _loop->exit();
+        }
+
+        void BlockingTCP()
+        {            
+            Pt::Net::TcpServer server("127.0.0.1", 5050);
+            server.connectionPending() += Pt::slot(*this, &TcpSocketTest::runServer);
+            server.setActive(*_loop);                    
+            server.beginAccept();         
+
+            Pt::System::AttachedThread clientThread( Pt::callable(*this, &TcpSocketTest::runClient) );
+            clientThread.start();
+
+            _loop->run();
         }
 
         void ConnectFailed()

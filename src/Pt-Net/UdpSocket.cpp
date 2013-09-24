@@ -38,6 +38,8 @@ namespace Net {
 
 UdpSocket::UdpSocket()
 : _impl(0)
+, _connecting(false)
+, _binding(false)
 {
     _impl = new UdpSocketImpl(*this);
 }
@@ -56,10 +58,94 @@ UdpSocket::~UdpSocket()
 }
 
 
+bool UdpSocket::beginBind(const std::string& ipaddr, unsigned short int port, const Options& o)
+{ 
+    return beginBind( AddrInfo(ipaddr, port), o); 
+}
+
+
+bool UdpSocket::beginBind(const AddrInfo& addrinfo, const Options& o)
+{
+    if( ! isActive() )
+        throw std::logic_error( PT_ERROR_MSG("socket not active") );
+
+    bool ret = _impl->beginBind(*parent(), addrinfo, o);
+    _binding = true;
+    
+    if(ret)
+    {
+        this->setReady();
+    }
+
+    return ret;
+}
+
+
+void UdpSocket::endBind()
+{
+    try
+    {
+        if(_binding)
+        {
+            _binding = false;
+            _impl->endBind( *parent() );
+            this->setEof(false);
+        }
+    }
+    catch (...)
+    {
+        close();
+        throw;
+    }
+}
+
+
 void UdpSocket::bind(const std::string& ipaddr, unsigned short int port, const Options& o)
 {
     _impl->bind(ipaddr, port, o);
     this->setEof(false);
+}
+
+
+bool UdpSocket::beginConnect(const std::string& ipaddr, unsigned short int port, const Options& o)
+{ 
+    return beginConnect(AddrInfo(ipaddr, port), o); 
+}
+
+
+bool UdpSocket::beginConnect(const AddrInfo& addrinfo, const Options&)
+{
+    if( ! isActive() )
+        throw std::logic_error( PT_ERROR_MSG("socket not active") );
+
+    bool ret = _impl->beginConnect(*parent(), addrinfo);
+    _connecting = true;
+    
+    if(ret)
+    {
+        this->setReady();
+    }
+
+    return ret;
+}
+
+
+void UdpSocket::endConnect()
+{
+    try
+    {
+        if(_connecting)
+        {
+            _connecting = false;
+            _impl->endConnect( *parent() );
+            this->setEof(false);
+        }
+    }
+    catch (...)
+    {
+        close();
+        throw;
+    }
 }
 
 
@@ -132,6 +218,28 @@ void UdpSocket::onSetTimeout(size_t timeout)
 
 bool UdpSocket::onRun()
 {
+    if( _connecting )
+    {
+        if( this->isConnected() || _impl->runConnect( *parent() ) )
+        {
+            connected().send(*this);
+            return true;
+        }
+
+        return false;
+    }
+
+    if( _binding )
+    {
+        if( this->isBound() || _impl->runBind( *parent() ) )
+        {
+            bound().send(*this);
+            return true;
+        }
+
+        return false;
+    }
+
     if( this->reading() )
     {
         if( _ravail || _impl->runRead( *parent() ) )
@@ -201,6 +309,8 @@ void UdpSocket::onCancel()
     if(this->isActive() && (_impl->isConnected() || _impl->isBound()) )
     {
         _impl->cancel( *parent() );
+        _connecting = false;
+        _binding = false;
     }
 
     IODevice::onCancel();

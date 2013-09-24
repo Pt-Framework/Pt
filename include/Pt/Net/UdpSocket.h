@@ -58,7 +58,25 @@ class PT_NET_API UdpSocket : public System::IODevice
 
         ~UdpSocket();
 
+        bool beginBind(const AddrInfo& addrinfo, const Options& o = Options());
+
+        bool beginBind(const std::string& ipaddr, unsigned short int port, const Options& o = Options());
+
+        void endBind();
+
+        Signal<UdpSocket&>& bound()
+        { return _bound; }
+
         void bind(const std::string& ipaddr, unsigned short int port, const Options& o = Options());
+
+        bool beginConnect(const AddrInfo& addrinfo, const Options& o = Options());
+
+        bool beginConnect(const std::string& ipaddr, unsigned short int port, const Options& o = Options());
+
+        void endConnect();
+
+        Signal<UdpSocket&>& connected()
+        { return _connected; }
 
         void connect(const std::string& ipaddr, unsigned short int port, const Options& o = Options());
 
@@ -112,6 +130,14 @@ class PT_NET_API UdpSocket : public System::IODevice
     private:
         //! @internal
         class UdpSocketImpl* _impl;
+
+        Signal<UdpSocket&> _connected;
+
+        bool _connecting;
+
+        Signal<UdpSocket&> _bound;
+
+        bool _binding;
 };
 
 } // namespace Net

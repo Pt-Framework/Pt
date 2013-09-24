@@ -46,15 +46,12 @@ namespace Pt {
 
 namespace Net {
 
-const unsigned int DefaultHopLimit = static_cast<unsigned int>(-1);
-
 UdpSocketImpl::UdpSocketImpl(UdpSocket& socket)
 : _device(socket)
 , _timeout(Pt::System::EventLoop::WaitInfinite)
 , _broadcast(false)
 , _isConnected(false)
 , _isBound(false)
-, _hopLimit(DefaultHopLimit)
 , _storeCount(0)
 {
     _socket = ref new DatagramSocket();
@@ -74,6 +71,18 @@ UdpSocketImpl::~UdpSocketImpl()
 
 void UdpSocketImpl::cancel(System::EventLoop& loop)
 {
+    if(_bindOp)
+    {
+        _bindOp->Cancel();
+        _bindOp = nullptr;
+    }
+
+    if(_connectOp)
+    {
+        _connectOp->Cancel();
+        _connectOp = nullptr;
+    }
+
     if(_storeOp)
     {
         _storeOp->Cancel();
@@ -91,7 +100,63 @@ void UdpSocketImpl::close()
 
     _isConnected = false;
     _isBound = false;
-    _hopLimit = DefaultHopLimit;
+}
+
+
+bool UdpSocketImpl::beginBind(System::EventLoop& loop, const AddrInfo& ai)
+{
+    log_debug( "begin binding socket to " << ai.host() << ":" << ai.port() );
+
+    const std::string& host = ai.host();
+	  std::wstring whost(host.begin(), host.end());
+	  String^ shost = ref new String(whost.c_str());
+
+    std::wostringstream wss;
+    wss << ai.port();
+	  std::wstring wport = wss.str();
+	  String^ serviceName = ref new String( wport.c_str() );
+
+    _bindOp = _socket->BindEndpointAsync(ref new HostName(shost), serviceName);
+
+    _bindOp->Completed = ref new AsyncActionCompletedHandler
+    (
+        [&](IAsyncAction asyncInfo^ asyncInfo, AsyncStatus status)
+        {
+            // set device ready state and wake our loop from the thread
+            // context of the completion handler
+            loop.setReady(_device);
+            loop.wake();
+        }
+    );
+
+    return false;
+}
+
+
+bool UdpSocketImpl::runBind(System::EventLoop& loop)
+{
+    // this method is called by the event loop, when it wakes up and checks
+    // the devices in the ready state. When true is returned, the connected
+    // signal will be emitted
+
+    return _bindOp && _bindOp->Status == AsyncStatus::Completed;
+}
+
+
+void UdpSocketImpl::endBind(System::EventLoop& loop)
+{
+    // the application reacts to the connect signal by calling endConnect
+
+    log_debug("ending bind");
+    
+    if( ! _bindOp )
+        return;
+
+    // TODO: handle connect exception
+    _bindOp->GetResults();
+    _bindOp = nullptr;
+
+    _isBound = true;
 }
 
 
@@ -99,12 +164,76 @@ void UdpSocketImpl::bind(const std::string& ipaddr, unsigned short int port, con
 {
     AddrInfo ai(ipaddr, port, true);
 
+    throw IOError("blocking I/O not supported");
+
     _isBound = true;
+}
+
+
+//<Package>
+//  <Capabilities>
+//    <Capability Name="internetClientServer" />
+
+bool UdpSocketImpl::beginConnect(System::EventLoop& loop, const AddrInfo& ai)
+{
+    log_debug( "begin connecting socket to " << ai.host() << ":" << ai.port() );
+
+    const std::string& host = ai.host();
+	  std::wstring whost(host.begin(), host.end());
+	  String^ shost = ref new String(whost.c_str());
+
+    std::wostringstream wss;
+    wss << ai.port();
+	  std::wstring wport = wss.str();
+	  String^ serviceName = ref new String( wport.c_str() );
+
+    _connectOp = _socket->ConnectAsync(ref new HostName(shost), serviceName);
+
+    _connectOp->Completed = ref new AsyncActionCompletedHandler
+    (
+        [&](IAsyncAction asyncInfo^ asyncInfo, AsyncStatus status)
+        {
+            // set device ready state and wake our loop from the thread
+            // context of the completion handler
+            loop.setReady(_device);
+            loop.wake();
+        }
+    );
+
+    return false;
+}
+
+
+bool UdpSocketImpl::runConnect(System::EventLoop& loop)
+{
+    // this method is called by the event loop, when it wakes up and checks
+    // the devices in the ready state. When true is returned, the connected
+    // signal will be emitted
+
+    return _connectOp && _connectOp->Status == AsyncStatus::Completed;
+}
+
+
+void UdpSocketImpl::endConnect(System::EventLoop& loop)
+{
+    // the application reacts to the connect signal by calling endConnect
+
+    log_debug("ending connect");
+    
+    if( ! _connectOp )
+        return;
+
+    // TODO: handle connect exception
+    _connectOp->GetResults();
+    _connectOp = nullptr;
+
+    _isConnected = true;
 }
 
 
 void UdpSocketImpl::connect(const AddrInfo& ai)
 {
+    throw IOError("blocking I/O not supported");
     _isConnected = true;
 }
 
@@ -129,7 +258,6 @@ void UdpSocketImpl::setBroadcast()
 
 void UdpSocketImpl::setHopLimit(unsigned int n)
 {
-    _hopLimit = n;
     _socket->Control->OutboundUnicastHopLimit = n;
 }
 

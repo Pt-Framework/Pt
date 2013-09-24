@@ -49,7 +49,19 @@ class UdpSocketImpl
 
         void close();
 
+        bool beginBind(System::EventLoop& loop, const AddrInfo& addrinfo, const UdpSocket::Options& o);
+
+        bool runBind(System::EventLoop& loop);
+
+        void endBind(System::EventLoop& loop);
+
         void bind(const std::string& ipaddr, unsigned short int port, const UdpSocket::Options& o);
+
+        bool beginConnect(System::EventLoop& loop, const AddrInfo& addrinfo);
+
+        bool runConnect(System::EventLoop& loop);
+
+        void endConnect(System::EventLoop& loop);
 
         void connect(const AddrInfo& addrinfo);
 
@@ -103,7 +115,8 @@ class UdpSocketImpl
         bool _broadcast;
         bool _isConnected;
         bool _isBound;
-        unsigned int _hopLimit;
+        Windows::Foundation::IAsyncAction^ _connectOp;
+        Windows::Foundation::IAsyncAction^ _bindOp;
         Windows::Storage::Streams::DataWriter^ _writer;
         Windows::Storage::Streams::DataWriterStoreOperation ^ _storeOp;
         size_t _storeCount;

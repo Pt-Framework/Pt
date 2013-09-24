@@ -40,7 +40,7 @@ using namespace Windows::Foundation;
 using namespace Windows::Networking;
 using namespace Windows::Networking::Sockets;
 
-log_define("Pt.System.TcpSocket");
+log_define("Pt.Net.TcpSocket");
 
 namespace Pt {
 
@@ -155,7 +155,7 @@ bool TcpSocketImpl::beginConnect(System::EventLoop& loop, const AddrInfo& ai)
         }
     );
 
-    return _isConnected;
+    return false;
 }
 
 

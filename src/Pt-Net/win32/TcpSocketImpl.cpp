@@ -38,7 +38,7 @@
 #include <cstring>
 #include <cassert>
 
-log_define("Pt.System.TcpSocket");
+log_define("Pt.Net.TcpSocket");
 
 namespace Pt {
 

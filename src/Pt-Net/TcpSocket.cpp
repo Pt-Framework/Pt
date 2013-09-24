@@ -146,6 +146,7 @@ bool TcpSocket::beginConnect(const AddrInfo& addrinfo, const Options&)
 
     bool ret = _impl->beginConnect(*parent(), addrinfo);
     _connecting = true;
+    
     if(ret)
     {
         this->setReady();
