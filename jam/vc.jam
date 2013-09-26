@@ -131,7 +131,7 @@ rule CheckCc
 	
 	if $(TARGET_OS:L) = "winrt"
 	{
-		LINKFLAGS += "/WINMD" "/APPCONTAINER" ;
+		LINKFLAGS += "/WINMD" "/APPCONTAINER:NO" ;
 		WINMDFILE = "/WINMDFILE:" ;
 		Configure WINMDFILE ;
 	}

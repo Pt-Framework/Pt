@@ -47,15 +47,29 @@ namespace Net {
 TcpServerImpl::TcpServerImpl(TcpServer& server)
 : _server(server)
 , _loop(0)
-, _listener(0)
-, _bindOp(0)
+, _listener(nullptr)
+, _bindOp(nullptr)
 {
-    _listener = ref new StreamSocketListener();
 
-    typedef TypedEventHandler<StreamSocketListener^, 
-                              StreamSocketListenerConnectionReceivedEventArgs^> ConnectionReceivedHandler;
+	_listener = ref new StreamSocketListener();
 
-    _listener->ConnectionReceived += ref new ConnectionReceivedHandler(*this, &TcpServerImpl::ConnectionReceived);
+    //typedef TypedEventHandler<StreamSocketListener^, 
+    //                          StreamSocketListenerConnectionReceivedEventArgs^> ConnectionReceivedHandler;
+
+    _listener->ConnectionReceived += 
+		//ref new TypedEventHandler<StreamSocketListener^, 
+        //                          StreamSocketListenerConnectionReceivedEventArgs^>
+		//(this, &TcpServerImpl::onConnectionReceived);
+		
+		ref new TypedEventHandler<StreamSocketListener^, 
+                                  StreamSocketListenerConnectionReceivedEventArgs^>
+		(
+			[&](StreamSocketListener^ listener, 
+			    StreamSocketListenerConnectionReceivedEventArgs^ args) 
+			{
+				this->onConnectionReceived(listener, args);
+			}
+		);
 }
 
 
@@ -67,16 +81,34 @@ TcpServerImpl::~TcpServerImpl()
 
 void TcpServerImpl::close()
 {
-    delete _bindOp;
-    _bindOp = 0;
+    // TODO: clear _backlog
+    
+	if(_bindOp)
+    {
+		_bindOp->Cancel();
+        delete _bindOp;
+        _bindOp = nullptr;
+    }
 
-    _listener.Close();
+    delete _listener;
+	_listener = ref new StreamSocketListener();
+	
+    _listener->ConnectionReceived += 
+		ref new TypedEventHandler<StreamSocketListener^, 
+                                  StreamSocketListenerConnectionReceivedEventArgs^>
+		(
+			[&](StreamSocketListener^ listener, 
+			    StreamSocketListenerConnectionReceivedEventArgs^ args) 
+			{
+				this->onConnectionReceived(listener, args);
+			}
+		);
 }
 
 
 void TcpServerImpl::cancel(System::EventLoop& loop)
 {
-    MutexLock lock(_mtx);
+    System::MutexLock lock(_mtx);
     _loop = 0;
     lock.unlock();
 }
@@ -94,6 +126,8 @@ void TcpServerImpl::listen(const AddrInfo& ai, const TcpServer::Options& options
 {
     log_debug("listen on " << _ai.host() << ":" << _ai.port());
 
+	// TODO: handle error from async handler, i.e. when port is already in use
+
     _ai = ai;
     _options = options;
 
@@ -107,17 +141,20 @@ void TcpServerImpl::listen(const AddrInfo& ai, const TcpServer::Options& options
 	  String^ serviceName = ref new String( wport.c_str() );
 
     if( shost->IsEmpty() )
-        _bindOp = BindServiceNameAsync(serviceName);
+        _bindOp = _listener->BindServiceNameAsync(serviceName);
     else
-        _bindOp = BindEndpointAsync(ref new HostName(shost), serviceName);
+        _bindOp = _listener->BindEndpointAsync(ref new HostName(shost), serviceName);
     
     _bindOp->Completed = ref new AsyncActionCompletedHandler
     (
-        [&] (IAsyncAction^ asyncAction) 
+        [&] (IAsyncAction^ asyncInfo, AsyncStatus status) 
         {
             try
             {
-                asyncAction->GetResults();
+				if(status == AsyncStatus::Canceled)
+					return;
+
+                asyncInfo->GetResults();
             }
             catch(...)
             {
@@ -131,12 +168,12 @@ void TcpServerImpl::listen(const AddrInfo& ai, const TcpServer::Options& options
 void TcpServerImpl::onConnectionReceived(StreamSocketListener^ listener, 
                                          StreamSocketListenerConnectionReceivedEventArgs^ args)
 {
-    MutexLock lock(_mtx);
+    System::MutexLock lock(_mtx);
 
     // I really hope that the OS stops emitting ConnectionReceived events
     // at some point, so that apps do not get flooded in case of high load.
 
-    _backlog.push_back( args->Socket() );
+    _backlog.push_back( args->Socket );
 
     if(_loop)
     {
@@ -150,7 +187,7 @@ void TcpServerImpl::beginAccept(System::EventLoop& loop)
 {
     log_debug("beginAccept");
     
-    MutexLock lock(_mtx);
+    System::MutexLock lock(_mtx);
 
     if( ! _backlog.empty() )
     {
@@ -168,20 +205,20 @@ bool TcpServerImpl::run()
 {
     log_debug("TcpServerImpl::avail");
     
-    MutexLock lock(_mtx);
+    System::MutexLock lock(_mtx);
     return ! _backlog.empty();
 }
 
 
 StreamSocket^ TcpServerImpl::accept()
 {
-    MutexLock lock(_mtx);
+    System::MutexLock lock(_mtx);
     _loop = 0;
 
     assert( ! _backlog.empty() );
 
-    if( ! _backlog.empty() )
-        throw IOError("accept backlog empty");
+    if( _backlog.empty() )
+        throw System::IOError("accept backlog empty");
 
     StreamSocket^ socket = _backlog.back();
     _backlog.pop_back();

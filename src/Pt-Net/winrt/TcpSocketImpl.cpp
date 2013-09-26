@@ -37,6 +37,7 @@
 
 using namespace Platform;
 using namespace Windows::Foundation;
+using namespace Windows::Storage::Streams;
 using namespace Windows::Networking;
 using namespace Windows::Networking::Sockets;
 
@@ -49,6 +50,7 @@ namespace Net {
 TcpSocketImpl::TcpSocketImpl(TcpSocket& socket)
 : _device(socket)
 , _timeout(System::EventLoop::WaitInfinite)
+, _isConnected(false)
 , _socket(nullptr)
 , _storeCount(0)
 {
@@ -92,8 +94,6 @@ void TcpSocketImpl::close()
 
     if(_socket)
     {
-        _socket->Close();
-
         delete _socket;
         _socket = nullptr;
     }
@@ -117,16 +117,18 @@ void TcpSocketImpl::connect(const AddrInfo& ai)
     log_debug( "connecting socket to " << ai.host() << ":" << ai.port() );
     assert( ! _isConnected );
 
-    _ai = addrinfo;
+    _ai = ai;
 
-    throw IOError("blocking I/O not supported");
+    throw System::IOError("blocking I/O not supported");
 }
 
 
 bool TcpSocketImpl::beginConnect(System::EventLoop& loop, const AddrInfo& ai)
 {
     assert( ! _isConnected );
-    log_debug( "begin connecting socket to " << addrinfo.host() << ":" << addrinfo.port() );
+    log_debug( "begin connecting socket to " << ai.host() << ":" << ai.port() );
+
+    _ai = ai;
 
     if( ! _socket )
     {
@@ -146,7 +148,7 @@ bool TcpSocketImpl::beginConnect(System::EventLoop& loop, const AddrInfo& ai)
 
     _connectOp->Completed = ref new AsyncActionCompletedHandler
     (
-        [&](IAsyncAction asyncInfo^ asyncInfo, AsyncStatus status)
+        [&](IAsyncAction^ asyncInfo, AsyncStatus status)
         {
             // set device ready state and wake our loop from the thread
             // context of the completion handler
@@ -165,7 +167,8 @@ bool TcpSocketImpl::runConnect(System::EventLoop& loop)
     // the devices in the ready state. When true is returned, the connected
     // signal will be emitted
 
-    return _connectOp && _connectOp->Status == AsyncStatus::Completed;
+    return _connectOp && (_connectOp->Status == AsyncStatus::Completed || 
+		                  _connectOp->Status == AsyncStatus::Error);
 }
 
 
@@ -177,6 +180,11 @@ void TcpSocketImpl::endConnect(System::EventLoop& loop)
     
     if( ! _connectOp )
         return;
+        
+    if(_connectOp->Status == AsyncStatus::Error)
+    {
+        throw System::AccessFailed( _ai.host() );
+    }
 
     // TODO: handle connect exception
     _connectOp->GetResults();
@@ -193,7 +201,7 @@ std::string TcpSocketImpl::socketAddress() const
     if( _socket )
     {
         // TODO: use CanonicalName ?
-        String^ addr = _socket->LocalAddress->DisplayName;
+        String^ addr = _socket->Information->LocalAddress->DisplayName;
         if(addr)
             waddr = addr->Data();
     }
@@ -209,7 +217,7 @@ std::string TcpSocketImpl::peerAddress() const
     if( _socket )
     {
         // TODO: use CanonicalName ?
-        String^ addr = _socket->RemoteAddress->DisplayName;
+        String^ addr = _socket->Information->RemoteAddress->DisplayName;
         if(addr)
             waddr = addr->Data();
     }
@@ -218,13 +226,16 @@ std::string TcpSocketImpl::peerAddress() const
 }
 
 
-size_t TcpSocketImpl::beginRead(System::EventLoop& loop, char* buffer, size_t n, bool& eof)
+size_t TcpSocketImpl::beginRead(System::EventLoop& loop, 
+								char* buffer, size_t bufSize, 
+								bool& eof)
 {
-    log_debug("beginRead " << n);
+    log_debug("beginRead " << bufSize);
 
     if( ! _reader )
     {
         _reader = ref new DataReader(_socket->InputStream);
+        _reader->InputStreamOptions = InputStreamOptions::Partial;
     }
 
     const size_t avail = _reader->UnconsumedBufferLength;
@@ -245,6 +256,7 @@ size_t TcpSocketImpl::beginRead(System::EventLoop& loop, char* buffer, size_t n,
 
     _loadOp = _reader->LoadAsync(bufSize);
 
+
     _loadOp->Completed = ref new AsyncOperationCompletedHandler<unsigned int>
     (
         [&] (IAsyncOperation<unsigned int>^ asyncInfo, AsyncStatus asyncStatus) 
@@ -260,16 +272,32 @@ size_t TcpSocketImpl::beginRead(System::EventLoop& loop, char* buffer, size_t n,
 
 bool TcpSocketImpl::runRead(System::EventLoop& loop)
 {
-    return _loadOp && _loadOp->Status == AsyncStatus::Completed;
+    return _loadOp && ( _loadOp->Status == AsyncStatus::Completed || 
+		                _loadOp->Status == AsyncStatus::Error );
 }
 
 
-size_t TcpSocketImpl::endRead(System::EventLoop& loop, char* buffer, size_t n, bool& eof)
+size_t TcpSocketImpl::endRead(System::EventLoop& loop, 
+                              char* buffer, size_t bufSize, 
+							  bool& eof)
 {
     log_debug("endRead");
 
+	if( ! _loadOp )
+		return 0;
+
+	if(_loadOp->Status == AsyncStatus::Error)
+    {
+        throw System::IOError("read failed");
+    }
+
     const size_t avail = _loadOp->GetResults();
-    _loadOp = nullptr;
+	if(avail == 0)
+	{
+		eof = true;
+	}
+    
+	_loadOp = nullptr;
 
     //TODO: use ReadBytes 
     // http://stackoverflow.com/questions/10520335/how-to-wrap-a-char-buffer-in-a-winrt-ibuffer-in-c
@@ -285,14 +313,15 @@ size_t TcpSocketImpl::endRead(System::EventLoop& loop, char* buffer, size_t n, b
 
 size_t TcpSocketImpl::read(char* buffer, size_t count, bool& eof)
 {
-    throw IOError("blocking I/O not supported");
+    throw System::IOError("blocking I/O not supported");
     return 0;
 }
 
 
-size_t TcpSocketImpl::beginWrite(System::EventLoop& loop, const char* buffer, size_t n)
+size_t TcpSocketImpl::beginWrite(System::EventLoop& loop, 
+                                 const char* buffer, size_t bufSize)
 {
-    log_debug("beginWrite " << n);
+    log_debug("beginWrite " << bufSize);
 
     if( ! _writer )
     {
@@ -310,6 +339,7 @@ size_t TcpSocketImpl::beginWrite(System::EventLoop& loop, const char* buffer, si
 
     _storeCount = n;
     _storeOp = _writer->StoreAsync(); // FlushAsync
+	
 
     _storeOp->Completed = ref new AsyncOperationCompletedHandler<unsigned int>
     (
@@ -326,13 +356,22 @@ size_t TcpSocketImpl::beginWrite(System::EventLoop& loop, const char* buffer, si
 
 bool TcpSocketImpl::runWrite(System::EventLoop& loop)
 {
-    return _storeOp && _storeOp->Status == AsyncStatus::Completed;
+    return _storeOp && _storeOp->Status == AsyncStatus::Completed || 
+		               _storeOp->Status == AsyncStatus::Error;
 }
 
 
 size_t TcpSocketImpl::endWrite(System::EventLoop& loop, const char* buffer, size_t n)
 {
     log_debug("endWrite");
+
+	if( ! _storeOp )
+		return 0;
+
+	if(_storeOp->Status == AsyncStatus::Error)
+    {
+        throw System::IOError("read failed");
+    }
 
     const size_t written = _storeOp->GetResults();
 
@@ -343,7 +382,7 @@ size_t TcpSocketImpl::endWrite(System::EventLoop& loop, const char* buffer, size
 
 size_t TcpSocketImpl::write(const char* buffer, size_t count)
 {
-    throw IOError("blocking I/O not supported");
+    throw System::IOError("blocking I/O not supported");
     return 0;
 }
 

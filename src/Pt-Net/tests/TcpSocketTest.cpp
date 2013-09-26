@@ -49,9 +49,10 @@ class TcpSocketTest : public Pt::Unit::TestSuite
         , _loop(0)
         {
           Pt::System::Logger::setLogLevel("", Pt::System::Warn);
+		  		  
 
-          this->registerMethod("BlockingTCP", *this, 
-                               &TcpSocketTest::BlockingTCP);
+          //this->registerMethod("BlockingTCP", *this, 
+          //                     &TcpSocketTest::BlockingTCP);
 
           this->registerMethod("NonBlockingWithLoop", *this,
                                &TcpSocketTest::NonBlockingWithLoop);
@@ -72,7 +73,7 @@ class TcpSocketTest : public Pt::Unit::TestSuite
 
             _loop = new Pt::System::MainLoop();
             _loop->timeout() += Pt::slot(*_loop, &Pt::System::MainLoop::exit);
-            _loop->setIdleTimeout(3000);
+            //_loop->setIdleTimeout(30000);
 
             _acceptor = new Pt::Net::TcpSocket();
         }
@@ -112,7 +113,7 @@ class TcpSocketTest : public Pt::Unit::TestSuite
                 socket.write( buf, sizeof(buf) );
             }
 
-            socket.close();  
+            socket.close();
         }
 
         void runServer(Pt::Net::TcpServer& server)
@@ -137,10 +138,10 @@ class TcpSocketTest : public Pt::Unit::TestSuite
             server.connectionPending() += Pt::slot(*this, &TcpSocketTest::runServer);
             server.setActive(*_loop);                    
             server.beginAccept();         
-
+			
             Pt::System::AttachedThread clientThread( Pt::callable(*this, &TcpSocketTest::runClient) );
             clientThread.start();
-
+			
             _loop->run();
         }
 

@@ -34,6 +34,12 @@
 #include <staticlibinit_gcce.h>
 #endif
 
+#ifdef __cplusplus_winrt
+
+[Platform::MTAThread]
+int main(int, char**);
+#endif
+
 #ifdef _WIN32_WCE
 
 #include <string.h>

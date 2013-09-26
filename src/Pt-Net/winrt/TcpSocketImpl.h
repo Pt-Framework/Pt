@@ -31,6 +31,7 @@
 
 #include <Pt/Net/Api.h>
 #include <Pt/Net/AddrInfo.h>
+#include <Pt/Net/TcpSocket.h>
 #include <Pt/System/EventLoop.h>
 
 namespace Pt {
@@ -38,7 +39,6 @@ namespace Pt {
 namespace Net {
 
 class TcpServer;
-class TcpSocket;
 
 // TODO: unify FileDeviceImpl, TcpSocketImpl -> IODeviceImpl
 class TcpSocketImpl
@@ -95,6 +95,7 @@ class TcpSocketImpl
         TcpSocket& _device;
         std::size_t _timeout;
         AddrInfo _ai;
+		bool _isConnected;
         Windows::Networking::Sockets::StreamSocket^ _socket;
         Windows::Foundation::IAsyncAction^ _connectOp;
         Windows::Storage::Streams::DataReader^ _reader;

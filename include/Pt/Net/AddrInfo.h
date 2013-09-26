@@ -91,6 +91,7 @@ class PT_NET_API AddrInfo
 inline AddrInfo::AddrInfo()
 : _impl(0)
 { 
+    // TODO: impl should not be nullptr !!!
 }
 
 inline AddrInfoImpl* AddrInfo::impl()               

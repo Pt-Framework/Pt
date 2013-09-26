@@ -31,14 +31,14 @@
 
 #include <Pt/Net/Api.h>
 #include <Pt/Net/AddrInfo.h>
+#include <Pt/Net/UdpSocket.h>
 #include <Pt/System/EventLoop.h>
 #include <string>
+#include <cstddef>
 
 namespace Pt {
 
 namespace Net {
-
-class UdpSocket;
 
 class UdpSocketImpl
 {
@@ -89,8 +89,8 @@ class UdpSocketImpl
         std::size_t timeout() const
         { return _timeout; }
 
-        void onMessageReceived(DatagramSocket^ socket, 
-                               DatagramSocketMessageReceivedEventArgs^ args)
+        void onMessageReceived(Windows::Networking::Sockets::DatagramSocket^ socket, 
+                               Windows::Networking::Sockets::DatagramSocketMessageReceivedEventArgs^ args);
 
         size_t beginRead(System::EventLoop& loop, char* buffer, size_t n, bool& eof);
 
@@ -111,12 +111,16 @@ class UdpSocketImpl
 
     private:
         UdpSocket& _device;
+		System::EventLoop* _loop;
         std::size_t _timeout;
         bool _broadcast;
         bool _isConnected;
         bool _isBound;
+		System::Mutex _mtx;
+        Windows::Networking::Sockets::DatagramSocket^ _socket;
         Windows::Foundation::IAsyncAction^ _connectOp;
         Windows::Foundation::IAsyncAction^ _bindOp;
+		std::vector<Windows::Storage::Streams::DataReader^> _messages;
         Windows::Storage::Streams::DataWriter^ _writer;
         Windows::Storage::Streams::DataWriterStoreOperation ^ _storeOp;
         size_t _storeCount;

@@ -37,6 +37,7 @@
 
 using namespace Platform;
 using namespace Windows::Foundation;
+using namespace Windows::Storage::Streams;
 using namespace Windows::Networking;
 using namespace Windows::Networking::Sockets;
 
@@ -48,6 +49,7 @@ namespace Net {
 
 UdpSocketImpl::UdpSocketImpl(UdpSocket& socket)
 : _device(socket)
+, _loop(0)
 , _timeout(Pt::System::EventLoop::WaitInfinite)
 , _broadcast(false)
 , _isConnected(false)
@@ -55,11 +57,17 @@ UdpSocketImpl::UdpSocketImpl(UdpSocket& socket)
 , _storeCount(0)
 {
     _socket = ref new DatagramSocket();
-
+	
     typedef TypedEventHandler<DatagramSocket^, 
                               DatagramSocketMessageReceivedEventArgs^> MessageReceivedHandler;
 
-    _socket->MessageReceived += ref new MessageReceivedHandler(*this, &UdpSocketImpl::onMessageReceived);
+    _socket->MessageReceived += ref new MessageReceivedHandler
+    (
+        [&](DatagramSocket^ socket, DatagramSocketMessageReceivedEventArgs^ args)
+        {
+            this->onMessageReceived(socket, args);
+        }
+    );
 }
 
 
@@ -71,6 +79,10 @@ UdpSocketImpl::~UdpSocketImpl()
 
 void UdpSocketImpl::cancel(System::EventLoop& loop)
 {
+    System::MutexLock lock(_mtx);
+    _loop = 0;
+    lock.unlock();
+
     if(_bindOp)
     {
         _bindOp->Cancel();
@@ -96,31 +108,48 @@ void UdpSocketImpl::close()
     delete _writer;
     _writer = nullptr;
 
-    _socket->Close();
+    delete _socket;
+    _socket = ref new DatagramSocket();
+
+    typedef TypedEventHandler<DatagramSocket^, 
+                              DatagramSocketMessageReceivedEventArgs^> MessageReceivedHandler;
+
+    _socket->MessageReceived += ref new MessageReceivedHandler
+    (
+        [&](DatagramSocket^ socket, DatagramSocketMessageReceivedEventArgs^ args)
+        {
+            this->onMessageReceived(socket, args);
+        }
+    );
 
     _isConnected = false;
     _isBound = false;
 }
 
 
-bool UdpSocketImpl::beginBind(System::EventLoop& loop, const AddrInfo& ai)
+bool UdpSocketImpl::beginBind(System::EventLoop& loop, 
+                              const AddrInfo& ai, 
+                              const UdpSocket::Options& o)
 {
     log_debug( "begin binding socket to " << ai.host() << ":" << ai.port() );
 
     const std::string& host = ai.host();
-	  std::wstring whost(host.begin(), host.end());
-	  String^ shost = ref new String(whost.c_str());
+    std::wstring whost(host.begin(), host.end());
+    String^ shost = ref new String(whost.c_str());
 
     std::wostringstream wss;
     wss << ai.port();
-	  std::wstring wport = wss.str();
-	  String^ serviceName = ref new String( wport.c_str() );
+    std::wstring wport = wss.str();
+    String^ serviceName = ref new String( wport.c_str() );
 
-    _bindOp = _socket->BindEndpointAsync(ref new HostName(shost), serviceName);
-
+    if( shost->IsEmpty() )
+        _bindOp = _socket->BindServiceNameAsync(serviceName);
+    else
+        _bindOp = _socket->BindEndpointAsync(ref new HostName(shost), serviceName);
+    
     _bindOp->Completed = ref new AsyncActionCompletedHandler
     (
-        [&](IAsyncAction asyncInfo^ asyncInfo, AsyncStatus status)
+        [&](IAsyncAction^ asyncInfo, AsyncStatus status)
         {
             // set device ready state and wake our loop from the thread
             // context of the completion handler
@@ -139,7 +168,8 @@ bool UdpSocketImpl::runBind(System::EventLoop& loop)
     // the devices in the ready state. When true is returned, the connected
     // signal will be emitted
 
-    return _bindOp && _bindOp->Status == AsyncStatus::Completed;
+    return _bindOp && ( _bindOp->Status == AsyncStatus::Completed ||
+		                _bindOp->Status == AsyncStatus::Error );
 }
 
 
@@ -153,7 +183,15 @@ void UdpSocketImpl::endBind(System::EventLoop& loop)
         return;
 
     // TODO: handle connect exception
-    _bindOp->GetResults();
+	try
+	{
+        _bindOp->GetResults();
+	}
+	catch(Platform::COMException^ ex)
+	{
+		std::wcerr << ex->Message->Data() << std::endl;
+	}
+    
     _bindOp = nullptr;
 
     _isBound = true;
@@ -164,7 +202,7 @@ void UdpSocketImpl::bind(const std::string& ipaddr, unsigned short int port, con
 {
     AddrInfo ai(ipaddr, port, true);
 
-    throw IOError("blocking I/O not supported");
+    throw System::IOError("blocking I/O not supported");
 
     _isBound = true;
 }
@@ -191,7 +229,7 @@ bool UdpSocketImpl::beginConnect(System::EventLoop& loop, const AddrInfo& ai)
 
     _connectOp->Completed = ref new AsyncActionCompletedHandler
     (
-        [&](IAsyncAction asyncInfo^ asyncInfo, AsyncStatus status)
+        [&](IAsyncAction^ asyncInfo, AsyncStatus status)
         {
             // set device ready state and wake our loop from the thread
             // context of the completion handler
@@ -210,7 +248,8 @@ bool UdpSocketImpl::runConnect(System::EventLoop& loop)
     // the devices in the ready state. When true is returned, the connected
     // signal will be emitted
 
-    return _connectOp && _connectOp->Status == AsyncStatus::Completed;
+    return _connectOp && ( _connectOp->Status == AsyncStatus::Completed ||
+		                   _connectOp->Status == AsyncStatus::Error );
 }
 
 
@@ -223,8 +262,17 @@ void UdpSocketImpl::endConnect(System::EventLoop& loop)
     if( ! _connectOp )
         return;
 
+	try
+	{
+        _connectOp->GetResults();
+	}
+	catch(Platform::COMException^ ex)
+	{
+		std::wcerr << ex->Message->Data() << std::endl;
+	}
+
     // TODO: handle connect exception
-    _connectOp->GetResults();
+
     _connectOp = nullptr;
 
     _isConnected = true;
@@ -233,7 +281,7 @@ void UdpSocketImpl::endConnect(System::EventLoop& loop)
 
 void UdpSocketImpl::connect(const AddrInfo& ai)
 {
-    throw IOError("blocking I/O not supported");
+    throw System::IOError("blocking I/O not supported");
     _isConnected = true;
 }
 
@@ -275,16 +323,16 @@ void UdpSocketImpl::dropMulticastGroup(const std::string& ipaddr)
 {
     // TODO: is this supported?
 
-    throw System::IOError("multicast group drop failed");
+    //throw System::IOError("multicast group drop failed");
 }
 
 
-std::string TcpSocketImpl::socketAddress() const
+std::string UdpSocketImpl::socketAddress() const
 {
     std::wstring waddr;
 
     // TODO: use CanonicalName ?
-    String^ addr = _socket->LocalAddress->DisplayName;
+    String^ addr = _socket->Information->LocalAddress->DisplayName;
 
     if(addr)
         waddr = addr->Data();
@@ -293,12 +341,12 @@ std::string TcpSocketImpl::socketAddress() const
 }
 
 
-std::string TcpSocketImpl::peerAddress() const
+std::string UdpSocketImpl::peerAddress() const
 {
     std::wstring waddr;
 
     // TODO: use CanonicalName ?
-    String^ addr = _socket->RemoteAddress->DisplayName;
+    String^ addr = _socket->Information->RemoteAddress->DisplayName;
 
     if(addr)
         waddr = addr->Data();
@@ -310,38 +358,70 @@ std::string TcpSocketImpl::peerAddress() const
 void UdpSocketImpl::onMessageReceived(DatagramSocket^ socket, 
                                       DatagramSocketMessageReceivedEventArgs^ args)
 {
+    System::MutexLock lock(_mtx);
 
+	_messages.insert( _messages.begin(), args->GetDataReader() );
+
+    if(_loop)
+    {
+        _loop->setReady(_device);
+        _loop->wake();
+    }
 }
 
 
 size_t UdpSocketImpl::beginRead(System::EventLoop& loop, char* buffer, size_t n, bool& eof)
 {
+    System::MutexLock lock(_mtx);
+    
+	_loop = &loop;
     return 0;
 }
 
 
 bool UdpSocketImpl::runRead(System::EventLoop& loop)
 {
-    return false;
+    System::MutexLock lock(_mtx);
+    return ! _messages.empty();
 }
 
 
-size_t UdpSocketImpl::endRead(System::EventLoop& loop, char* buffer, size_t n, bool& eof)
+size_t UdpSocketImpl::endRead(System::EventLoop& loop, char* buffer, size_t bufSize, bool& eof)
 {
-    return 0;
+    System::MutexLock lock(_mtx);
+    _loop = 0;
+
+    assert( ! _messages.empty() );
+
+    if( _messages.empty() )
+        throw System::IOError("accept backlog empty");
+
+    DataReader^ reader = _messages.back();
+
+    const size_t avail = reader->UnconsumedBufferLength;
+
+    unsigned n = 0;
+    for( ; n < avail && n < bufSize; ++n)
+    {
+        buffer[n] = static_cast<char>( reader->ReadByte() );
+    }
+
+    _messages.pop_back();
+    return n;
 }
 
 
 size_t UdpSocketImpl::read(char* buffer, size_t count, bool& eof)
 {
-    throw IOError("blocking I/O not supported");
+    throw System::IOError("blocking I/O not supported");
     return 0;
 }
 
 
-size_t UdpSocketImpl::beginWrite(System::EventLoop& loop, const char* buffer, size_t n)
+size_t UdpSocketImpl::beginWrite(System::EventLoop& loop, 
+                                 const char* buffer, size_t bufSize)
 {
-    log_debug("beginWrite " << n);
+    log_debug("beginWrite " << bufSize);
 
     if( ! _writer )
     {
@@ -392,7 +472,7 @@ size_t UdpSocketImpl::endWrite(System::EventLoop& loop, const char* buffer, size
 
 size_t UdpSocketImpl::write(const char* buffer, size_t n)
 {
-    throw IOError("blocking I/O not supported");
+    throw System::IOError("blocking I/O not supported");
     return 0;
 }
 
