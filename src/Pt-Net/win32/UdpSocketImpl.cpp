@@ -106,7 +106,7 @@ bool UdpSocketImpl::beginBind(System::EventLoop& loop, const AddrInfo& ai, const
 {
     log_debug( "begin binding socket to " << ai.host() << ":" << ai.port() );
 
-    this->bind(ai.host(), ai.port(), o);
+    this->bind(ai, o);
     return true;
 }
 
@@ -119,12 +119,13 @@ bool UdpSocketImpl::runBind(System::EventLoop& loop)
 
 void UdpSocketImpl::endBind(System::EventLoop& loop)
 {
+    log_debug( "end bind" );
 }
 
 
-void UdpSocketImpl::bind(const std::string& ipaddr, unsigned short int port, const UdpSocket::Options&)
+void UdpSocketImpl::bind(const AddrInfo& ai, const UdpSocket::Options&)
 {
-    AddrInfo ai(ipaddr, port, true);
+    log_debug( "bind socket to " << ai.host() << ":" << ai.port() );
 
     BOOL reuseAddr = TRUE;
     bool addrInUse = false;
@@ -321,6 +322,8 @@ void UdpSocketImpl::setHopLimit(unsigned int n)
 
 void UdpSocketImpl::joinMulticastGroup(const std::string& ipaddr)
 {
+    log_debug( "joining multicast group " << ipaddr );
+
     if( _fd == INVALID_SOCKET )
         return;
 
@@ -338,6 +341,7 @@ void UdpSocketImpl::joinMulticastGroup(const std::string& ipaddr)
 
             if (::setsockopt(_fd, IPPROTO_IP, IP_ADD_MEMBERSHIP, (char*)&req, sizeof(ip_mreq)) == 0)
             {
+                log_debug( "joined multicast group ip4 " << ipaddr );
                 return; // success
             }
         }
@@ -351,6 +355,7 @@ void UdpSocketImpl::joinMulticastGroup(const std::string& ipaddr)
 
             if (::setsockopt(_fd, IPPROTO_IPV6, IPV6_ADD_MEMBERSHIP, (char*)&req, sizeof(ipv6_mreq)) == 0)
             {
+                log_debug( "joined multicast group ip6 " << ipaddr );
                 return; // success
             }
         }

@@ -57,7 +57,7 @@ UdpSocketImpl::UdpSocketImpl(UdpSocket& socket)
 , _storeCount(0)
 {
     _socket = ref new DatagramSocket();
-	
+    
     typedef TypedEventHandler<DatagramSocket^, 
                               DatagramSocketMessageReceivedEventArgs^> MessageReceivedHandler;
 
@@ -105,6 +105,8 @@ void UdpSocketImpl::cancel(System::EventLoop& loop)
 
 void UdpSocketImpl::close()
 {
+    _messages.clear();
+
     delete _writer;
     _writer = nullptr;
 
@@ -169,7 +171,7 @@ bool UdpSocketImpl::runBind(System::EventLoop& loop)
     // signal will be emitted
 
     return _bindOp && ( _bindOp->Status == AsyncStatus::Completed ||
-		                _bindOp->Status == AsyncStatus::Error );
+                        _bindOp->Status == AsyncStatus::Error );
 }
 
 
@@ -183,14 +185,14 @@ void UdpSocketImpl::endBind(System::EventLoop& loop)
         return;
 
     // TODO: handle connect exception
-	try
-	{
+    try
+    {
         _bindOp->GetResults();
-	}
-	catch(Platform::COMException^ ex)
-	{
-		std::wcerr << ex->Message->Data() << std::endl;
-	}
+    }
+    catch(Platform::COMException^ ex)
+    {
+        std::wcerr << ex->Message->Data() << std::endl;
+    }
     
     _bindOp = nullptr;
 
@@ -198,12 +200,9 @@ void UdpSocketImpl::endBind(System::EventLoop& loop)
 }
 
 
-void UdpSocketImpl::bind(const std::string& ipaddr, unsigned short int port, const UdpSocket::Options&)
+void UdpSocketImpl::bind(const AddrInfo& addrinfo, const UdpSocket::Options&)
 {
-    AddrInfo ai(ipaddr, port, true);
-
     throw System::IOError("blocking I/O not supported");
-
     _isBound = true;
 }
 
@@ -217,19 +216,19 @@ bool UdpSocketImpl::beginConnect(System::EventLoop& loop, const AddrInfo& ai)
     log_debug( "begin connecting socket to " << ai.host() << ":" << ai.port() );
 
     const std::string& host = ai.host();
-	  std::wstring whost(host.begin(), host.end());
-	  String^ shost = ref new String(whost.c_str());
+    std::wstring whost(host.begin(), host.end());
+    String^ shost = ref new String(whost.c_str());
 
     std::wostringstream wss;
     wss << ai.port();
-	  std::wstring wport = wss.str();
-	  String^ serviceName = ref new String( wport.c_str() );
+    std::wstring wport = wss.str();
+    String^ serviceName = ref new String( wport.c_str() );
 
-    _connectOp = _socket->ConnectAsync(ref new HostName(shost), serviceName);
+    _connectOp = _socket->GetOutputStreamAsync(ref new HostName(shost), serviceName);
 
     _connectOp->Completed = ref new AsyncActionCompletedHandler
     (
-        [&](IAsyncAction^ asyncInfo, AsyncStatus status)
+        [&](IAsyncOperation<IOutputStream>^ asyncInfo, AsyncStatus asyncStatus)
         {
             // set device ready state and wake our loop from the thread
             // context of the completion handler
@@ -249,7 +248,7 @@ bool UdpSocketImpl::runConnect(System::EventLoop& loop)
     // signal will be emitted
 
     return _connectOp && ( _connectOp->Status == AsyncStatus::Completed ||
-		                   _connectOp->Status == AsyncStatus::Error );
+                           _connectOp->Status == AsyncStatus::Error );
 }
 
 
@@ -262,14 +261,15 @@ void UdpSocketImpl::endConnect(System::EventLoop& loop)
     if( ! _connectOp )
         return;
 
-	try
-	{
-        _connectOp->GetResults();
-	}
-	catch(Platform::COMException^ ex)
-	{
-		std::wcerr << ex->Message->Data() << std::endl;
-	}
+    try
+    {
+        IOutputStream^ output = _connectOp->GetResults();
+        _writer = ref new DataWriter(output);
+    }
+    catch(Platform::COMException^ ex)
+    {
+        std::wcerr << ex->Message->Data() << std::endl;
+    }
 
     // TODO: handle connect exception
 
@@ -360,7 +360,7 @@ void UdpSocketImpl::onMessageReceived(DatagramSocket^ socket,
 {
     System::MutexLock lock(_mtx);
 
-	_messages.insert( _messages.begin(), args->GetDataReader() );
+    _messages.insert( _messages.begin(), args->GetDataReader() );
 
     if(_loop)
     {
@@ -374,7 +374,7 @@ size_t UdpSocketImpl::beginRead(System::EventLoop& loop, char* buffer, size_t n,
 {
     System::MutexLock lock(_mtx);
     
-	_loop = &loop;
+    _loop = &loop;
     return 0;
 }
 
@@ -425,7 +425,7 @@ size_t UdpSocketImpl::beginWrite(System::EventLoop& loop,
 
     if( ! _writer )
     {
-        _writer = ref new DataWriter(_socket->OutputStream);
+        throw IOError("UDP socket not connected");
     }
 
     // UnstoredBufferLength
@@ -438,7 +438,7 @@ size_t UdpSocketImpl::beginWrite(System::EventLoop& loop,
     }
 
     _storeCount = n;
-    _storeOp = _writer->StoreAsync(); // FlushAsync
+    _storeOp = _writer->StoreAsync();
 
     _storeOp->Completed = ref new AsyncOperationCompletedHandler<unsigned int>
     (
@@ -455,7 +455,8 @@ size_t UdpSocketImpl::beginWrite(System::EventLoop& loop,
 
 bool UdpSocketImpl::runWrite(System::EventLoop& loop)
 {
-    return _storeOp && _storeOp->Status == AsyncStatus::Completed;
+    return _storeOp && ( _storeOp->Status == AsyncStatus::Completed ||
+                         _storeOp->Status == AsyncStatus::Error );
 }
 
 

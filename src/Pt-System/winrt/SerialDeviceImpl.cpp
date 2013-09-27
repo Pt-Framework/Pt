@@ -45,7 +45,7 @@ SerialDeviceImpl::~SerialDeviceImpl()
 
 void SerialDeviceImpl::open( const std::string& port, std::ios::openmode mode)
 {
-    throw IOError("serial I/O not supported");
+    throw AccessFailed(port)
 }
 
 

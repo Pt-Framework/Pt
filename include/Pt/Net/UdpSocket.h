@@ -67,6 +67,8 @@ class PT_NET_API UdpSocket : public System::IODevice
         Signal<UdpSocket&>& bound()
         { return _bound; }
 
+        void bind(const AddrInfo& addrinfo, const Options& o = Options());
+
         void bind(const std::string& ipaddr, unsigned short int port, const Options& o = Options());
 
         bool beginConnect(const AddrInfo& addrinfo, const Options& o = Options());
@@ -90,7 +92,7 @@ class PT_NET_API UdpSocket : public System::IODevice
 
         void joinMulticastGroup(const std::string& ipaddr);
 
-        void dropMulticastGroup(const std::string& ipaddr);
+        //void dropMulticastGroup(const std::string& ipaddr);
 
         std::string socketAddress() const;
 

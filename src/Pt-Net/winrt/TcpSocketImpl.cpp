@@ -136,13 +136,13 @@ bool TcpSocketImpl::beginConnect(System::EventLoop& loop, const AddrInfo& ai)
     }
 
     const std::string& host = _ai.host();
-	  std::wstring whost(host.begin(), host.end());
-	  String^ shost = ref new String(whost.c_str());
+      std::wstring whost(host.begin(), host.end());
+      String^ shost = ref new String(whost.c_str());
 
     std::wostringstream wss;
     wss << _ai.port();
-	  std::wstring wport = wss.str();
-	  String^ serviceName = ref new String( wport.c_str() );
+      std::wstring wport = wss.str();
+      String^ serviceName = ref new String( wport.c_str() );
 
     _connectOp = _socket->ConnectAsync(ref new HostName(shost), serviceName);
 
@@ -168,7 +168,7 @@ bool TcpSocketImpl::runConnect(System::EventLoop& loop)
     // signal will be emitted
 
     return _connectOp && (_connectOp->Status == AsyncStatus::Completed || 
-		                  _connectOp->Status == AsyncStatus::Error);
+                          _connectOp->Status == AsyncStatus::Error);
 }
 
 
@@ -227,8 +227,8 @@ std::string TcpSocketImpl::peerAddress() const
 
 
 size_t TcpSocketImpl::beginRead(System::EventLoop& loop, 
-								char* buffer, size_t bufSize, 
-								bool& eof)
+                                char* buffer, size_t bufSize, 
+                                bool& eof)
 {
     log_debug("beginRead " << bufSize);
 
@@ -273,31 +273,31 @@ size_t TcpSocketImpl::beginRead(System::EventLoop& loop,
 bool TcpSocketImpl::runRead(System::EventLoop& loop)
 {
     return _loadOp && ( _loadOp->Status == AsyncStatus::Completed || 
-		                _loadOp->Status == AsyncStatus::Error );
+                        _loadOp->Status == AsyncStatus::Error );
 }
 
 
 size_t TcpSocketImpl::endRead(System::EventLoop& loop, 
                               char* buffer, size_t bufSize, 
-							  bool& eof)
+                              bool& eof)
 {
     log_debug("endRead");
 
-	if( ! _loadOp )
-		return 0;
+    if( ! _loadOp )
+        return 0;
 
-	if(_loadOp->Status == AsyncStatus::Error)
+    if(_loadOp->Status == AsyncStatus::Error)
     {
         throw System::IOError("read failed");
     }
 
     const size_t avail = _loadOp->GetResults();
-	if(avail == 0)
-	{
-		eof = true;
-	}
+    if(avail == 0)
+    {
+        eof = true;
+    }
     
-	_loadOp = nullptr;
+    _loadOp = nullptr;
 
     //TODO: use ReadBytes 
     // http://stackoverflow.com/questions/10520335/how-to-wrap-a-char-buffer-in-a-winrt-ibuffer-in-c
@@ -339,7 +339,7 @@ size_t TcpSocketImpl::beginWrite(System::EventLoop& loop,
 
     _storeCount = n;
     _storeOp = _writer->StoreAsync(); // FlushAsync
-	
+    
 
     _storeOp->Completed = ref new AsyncOperationCompletedHandler<unsigned int>
     (
@@ -357,7 +357,7 @@ size_t TcpSocketImpl::beginWrite(System::EventLoop& loop,
 bool TcpSocketImpl::runWrite(System::EventLoop& loop)
 {
     return _storeOp && _storeOp->Status == AsyncStatus::Completed || 
-		               _storeOp->Status == AsyncStatus::Error;
+                       _storeOp->Status == AsyncStatus::Error;
 }
 
 
@@ -365,10 +365,10 @@ size_t TcpSocketImpl::endWrite(System::EventLoop& loop, const char* buffer, size
 {
     log_debug("endWrite");
 
-	if( ! _storeOp )
-		return 0;
+    if( ! _storeOp )
+        return 0;
 
-	if(_storeOp->Status == AsyncStatus::Error)
+    if(_storeOp->Status == AsyncStatus::Error)
     {
         throw System::IOError("read failed");
     }

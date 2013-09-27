@@ -112,8 +112,12 @@ void OverlappedIODeviceImpl::cancel(EventLoop& loop)
     CancelIo( handle() );
 
     DWORD bytes = 0;
-    GetOverlappedResult( handle(), &_readOv, &bytes, TRUE );
-    GetOverlappedResult( handle(), &_writeOv, &bytes, TRUE );
+
+    if(_readOv.hEvent)
+        GetOverlappedResult( handle(), &_readOv, &bytes, TRUE );
+
+    if(_writeOv.hEvent)
+        GetOverlappedResult( handle(), &_writeOv, &bytes, TRUE );
 
     if(_readOv.hEvent != NULL)
     {
@@ -173,7 +177,11 @@ size_t OverlappedIODeviceImpl::beginRead(EventLoop& loop, char* buffer, size_t n
             return 0;
         }
 
-        throw IOError( PT_ERROR_MSG("Could not begin read from file handle") );
+        loop.selector().disableOverlapped(_ioh);
+        _readOv.hEvent = NULL;
+        _writeOv.hEvent = NULL;
+
+        throw IOError("ReadFile failed");
     }
 
     return readBytes;
@@ -271,8 +279,12 @@ size_t OverlappedIODeviceImpl::beginWrite(EventLoop& loop, const char* buffer, s
         {
             return 0;
         }
-        
-        throw IOError( PT_ERROR_MSG("Could not read from file handle") );
+
+        loop.selector().disableOverlapped(_ioh);
+        _readOv.hEvent = NULL;
+        _writeOv.hEvent = NULL;
+
+        throw IOError("WriteFile failed");
     }
 
     return writtenBytes;

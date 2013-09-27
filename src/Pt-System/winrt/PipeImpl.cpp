@@ -34,6 +34,7 @@ namespace System {
 
 PipeIODevice::PipeIODevice(Mode m)
 : _mode(m)
+, _timeout(Pt::System::EventLoop::WaitInfinite)
 {
 }
 
@@ -58,6 +59,7 @@ void PipeIODevice::init(PipeImpl* pipe)
 
 void PipeIODevice::onSetTimeout(size_t timeout)
 {
+    _timeout = timeout;
 }
 
 

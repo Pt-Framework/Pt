@@ -65,7 +65,7 @@ class UdpSocketImpl
 
         void endBind(System::EventLoop& loop);
 
-        void bind(const std::string& ipaddr, unsigned short int port, const UdpSocket::Options& o);
+        void bind(const AddrInfo& addrinfo, const UdpSocket::Options& o);
 
         bool beginConnect(System::EventLoop& loop, const AddrInfo& addrinfo);
 

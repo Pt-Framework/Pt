@@ -51,25 +51,25 @@ TcpServerImpl::TcpServerImpl(TcpServer& server)
 , _bindOp(nullptr)
 {
 
-	_listener = ref new StreamSocketListener();
+    _listener = ref new StreamSocketListener();
 
     //typedef TypedEventHandler<StreamSocketListener^, 
     //                          StreamSocketListenerConnectionReceivedEventArgs^> ConnectionReceivedHandler;
 
     _listener->ConnectionReceived += 
-		//ref new TypedEventHandler<StreamSocketListener^, 
+        //ref new TypedEventHandler<StreamSocketListener^, 
         //                          StreamSocketListenerConnectionReceivedEventArgs^>
-		//(this, &TcpServerImpl::onConnectionReceived);
-		
-		ref new TypedEventHandler<StreamSocketListener^, 
+        //(this, &TcpServerImpl::onConnectionReceived);
+        
+        ref new TypedEventHandler<StreamSocketListener^, 
                                   StreamSocketListenerConnectionReceivedEventArgs^>
-		(
-			[&](StreamSocketListener^ listener, 
-			    StreamSocketListenerConnectionReceivedEventArgs^ args) 
-			{
-				this->onConnectionReceived(listener, args);
-			}
-		);
+        (
+            [&](StreamSocketListener^ listener, 
+                StreamSocketListenerConnectionReceivedEventArgs^ args) 
+            {
+                this->onConnectionReceived(listener, args);
+            }
+        );
 }
 
 
@@ -83,26 +83,26 @@ void TcpServerImpl::close()
 {
     // TODO: clear _backlog
     
-	if(_bindOp)
+    if(_bindOp)
     {
-		_bindOp->Cancel();
+        _bindOp->Cancel();
         delete _bindOp;
         _bindOp = nullptr;
     }
 
     delete _listener;
-	_listener = ref new StreamSocketListener();
-	
+    _listener = ref new StreamSocketListener();
+    
     _listener->ConnectionReceived += 
-		ref new TypedEventHandler<StreamSocketListener^, 
+        ref new TypedEventHandler<StreamSocketListener^, 
                                   StreamSocketListenerConnectionReceivedEventArgs^>
-		(
-			[&](StreamSocketListener^ listener, 
-			    StreamSocketListenerConnectionReceivedEventArgs^ args) 
-			{
-				this->onConnectionReceived(listener, args);
-			}
-		);
+        (
+            [&](StreamSocketListener^ listener, 
+                StreamSocketListenerConnectionReceivedEventArgs^ args) 
+            {
+                this->onConnectionReceived(listener, args);
+            }
+        );
 }
 
 
@@ -126,19 +126,19 @@ void TcpServerImpl::listen(const AddrInfo& ai, const TcpServer::Options& options
 {
     log_debug("listen on " << _ai.host() << ":" << _ai.port());
 
-	// TODO: handle error from async handler, i.e. when port is already in use
+    // TODO: handle error from async handler, i.e. when port is already in use
 
     _ai = ai;
     _options = options;
 
     const std::string& host = _ai.host();
-	  std::wstring whost(host.begin(), host.end());
-	  String^ shost = ref new String(whost.c_str());
+      std::wstring whost(host.begin(), host.end());
+      String^ shost = ref new String(whost.c_str());
 
     std::wostringstream wss;
     wss << _ai.port();
-	  std::wstring wport = wss.str();
-	  String^ serviceName = ref new String( wport.c_str() );
+      std::wstring wport = wss.str();
+      String^ serviceName = ref new String( wport.c_str() );
 
     if( shost->IsEmpty() )
         _bindOp = _listener->BindServiceNameAsync(serviceName);
@@ -151,8 +151,8 @@ void TcpServerImpl::listen(const AddrInfo& ai, const TcpServer::Options& options
         {
             try
             {
-				if(status == AsyncStatus::Canceled)
-					return;
+                if(status == AsyncStatus::Canceled)
+                    return;
 
                 asyncInfo->GetResults();
             }

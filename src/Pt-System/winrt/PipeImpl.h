@@ -82,6 +82,7 @@ class PipeIODevice : public IODevice
      private:
         PipeImpl* _pipe;
         Mode _mode;
+        std::size_t _timeout;
 };
 
 class PipeImpl

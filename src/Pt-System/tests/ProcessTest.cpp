@@ -42,7 +42,7 @@ class ProcessTest : public Pt::Unit::TestSuite
         ProcessTest()
         : Pt::Unit::TestSuite("ProcessTest")
         {
-#ifndef _WIN32_WCE
+#if ! defined(_WIN32_WCE) && ! defined(__cplusplus_winrt)
             Pt::Unit::TestSuite::registerMethod( "RedirectStdout", *this, &ProcessTest::RedirectStdout );
             Pt::Unit::TestSuite::registerMethod( "RedirectStderr", *this, &ProcessTest::RedirectStderr );
             Pt::Unit::TestSuite::registerMethod( "RedirectStdin", *this, &ProcessTest::RedirectStdin );

@@ -43,16 +43,16 @@ class PipeTest : public Pt::Unit::TestSuite
         PipeTest()
         : Pt::Unit::TestSuite("PipeTest")
         , _loop(0)
-        , _pos(0)
+        , _wpos(0)
         {
-            Pt::Unit::TestSuite::registerMethod( "AsyncRead", *this, &PipeTest::AsyncRead );
-            Pt::Unit::TestSuite::registerMethod( "AsyncWrite", *this, &PipeTest::AsyncWrite );
+            Pt::Unit::TestSuite::registerMethod( "AsyncReadWrite", *this, &PipeTest::AsyncReadWrite );
             Pt::Unit::TestSuite::registerMethod( "RemoveFromLoop", *this, &PipeTest::RemoveFromLoop );
             Pt::Unit::TestSuite::registerMethod( "PipeIOStream", *this, &PipeTest::PipeIOStream );
         }
 
         void setUp()
         {
+            _wpos = 0;
             _data.clear();
             _result.clear();
 
@@ -68,80 +68,64 @@ class PipeTest : public Pt::Unit::TestSuite
         }
 
     protected:
-        void AsyncRead()
+        void AsyncReadWrite()
         {
             _data = "Hello World, where do you want to GOTO day!";
 
             Pt::System::Pipe pipe;
-            pipe.in().write( _data.c_str(), _data.size() );
+            
+            std::memcpy(_wbuffer, _data.c_str(),  sizeof(_wbuffer));
+            pipe.in().setActive(*_loop);
+            pipe.in().beginWrite(_wbuffer, sizeof(_wbuffer));
+            pipe.in().outputReady() += Pt::slot( *this, &PipeTest::onWrite);
 
             pipe.out().setActive(*_loop);
-            pipe.out().beginRead( _buffer, sizeof(_buffer) );
+            pipe.out().beginRead( _rbuffer, sizeof(_rbuffer) );
             pipe.out().inputReady() += Pt::slot(*this, &PipeTest::onRead);
 
             _loop->run();
 
+            this->reportMessage(_result);
             PT_UNIT_ASSERT(_result == _data);
         }
 
         void onRead(Pt::System::IODevice& dev)
         {
             std::size_t sz = dev.endRead();
-            _result.append(_buffer, sz);
+            _result.append(_rbuffer, sz);
 
             if( _result.size() < _data.size() )
-                dev.beginRead(_buffer, sizeof(_buffer));
+                dev.beginRead(_rbuffer, sizeof(_rbuffer));
             else
             {
                 _loop->exit();
             }
         }
 
-        void AsyncWrite()
-        {
-            _data = "Hello World, where do you want to GOTO day!";
-            _pos = 0;
-
-            Pt::System::Pipe pipe;
-            
-            std::memcpy(_buffer, _data.c_str(),  sizeof(_buffer));
-            pipe.in().setActive(*_loop);
-            pipe.in().beginWrite(_buffer, sizeof(_buffer));
-            pipe.in().outputReady() += Pt::slot( *this, &PipeTest::onWrite);
-
-            _loop->run();
-
-            char buffer[1024];
-            std::size_t n = pipe.out().read(buffer, sizeof(buffer));
-            std::string result(buffer, n);
-            //this->reportMessage(result);
-            PT_UNIT_ASSERT(result == _data);
-        }
-
         void onWrite(Pt::System::IODevice& dev)
         {
-            _pos += dev.endWrite();
+            _wpos += dev.endWrite();
 
-            std::size_t len = std::min(sizeof(_buffer), _data.size() - _pos);
+            std::size_t len = std::min(sizeof(_wbuffer), _data.size() - _wpos);
             if(0 == len)
-            {
-                _loop->exit();
                 return;
-            }
 
-            std::memcpy(_buffer, _data.c_str()+_pos, len);
-            dev.beginWrite(_buffer, len);
+            std::memcpy(_wbuffer, _data.c_str() + _wpos, len);
+            dev.beginWrite(_wbuffer, len);
         }
 
         void RemoveFromLoop()
         {
-            std::string out("Hello World, where do you want to GOTO day!");
+            _data = "Hello World, where do you want to GOTO day!";
 
             Pt::System::Pipe pipe;
-            pipe.in().write( out.c_str(), out.size() );
+            
+            pipe.in().setActive(*_loop);
+            pipe.in().beginWrite( _data.c_str(), _data.size() );
+            pipe.in().outputReady() += Pt::slot( *this, &PipeTest::onWrite);
 
             pipe.out().setActive(*_loop);
-            pipe.out().beginRead(_buffer, sizeof(_buffer));
+            pipe.out().beginRead(_rbuffer, sizeof(_rbuffer));
             pipe.out().inputReady() += Pt::slot(*this, &PipeTest::onReadRemove);
 
             _loop->run();
@@ -150,7 +134,7 @@ class PipeTest : public Pt::Unit::TestSuite
         void onReadRemove(Pt::System::IODevice& dev)
         {
             std::size_t sz = dev.endRead();
-            _result.append(_buffer, sz);
+            _result.append(_rbuffer, sz);
 
             dev.close();
             _loop->setIdleTimeout(200);
@@ -185,10 +169,10 @@ class PipeTest : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT( 0 < buffer.in_avail() );
 
             char in[20];
-            std::size_t n = buffer.sgetn( in, buffer.in_avail() );
+            std::streamsize n = buffer.sgetn( in, buffer.in_avail() );
             PT_UNIT_ASSERT( 0 < n );
 
-            std::string data(in, n);
+            std::string data(in, static_cast<size_t>(n));
             PT_UNIT_ASSERT( _data.find(data) == 0 );
 
             _loop->exit();
@@ -203,8 +187,9 @@ class PipeTest : public Pt::Unit::TestSuite
     private:
         Pt::System::MainLoop* _loop;
         std::string _data;
-        std::size_t _pos;
-        char _buffer[10];
+        char _rbuffer[10];
+        char _wbuffer[10];
+        std::size_t _wpos;
         std::string _result;
         Pt::System::IOBuffer inbuf;
         Pt::System::IOBuffer outbuf;

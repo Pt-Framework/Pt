@@ -31,6 +31,7 @@
 #include "Pt/Unit/RegisterTest.h"
 #include "Pt/Net/UdpSocket.h"
 #include "Pt/System/MainLoop.h"
+#include <Pt/System/Logger.h>
 #include <string>
 
 class UdpSocketTest : public Pt::Unit::TestSuite
@@ -48,6 +49,8 @@ class UdpSocketTest : public Pt::Unit::TestSuite
 
           this->registerMethod( "Multicast", *this,
                                 &UdpSocketTest::Multicast);
+
+          Pt::System::Logger::setLogLevel("Pt.Net.UdpSocket", Pt::System::Warn);
         }
 
         void setUp()
@@ -188,50 +191,32 @@ class UdpSocketTest : public Pt::Unit::TestSuite
         {
             _receiver->setActive(*_loop);
             _receiver->bound() += Pt::slot(*this, &UdpSocketTest::onMulticastBind);
+            _receiver->inputReady() += Pt::slot(*this, &UdpSocketTest::onMulticastInput);
             _receiver->beginBind( Pt::Net::AddrInfo::ip4Any(8000) );
-
-            //_receiver2->setActive(*_loop);
-            //_receiver2->bound() += Pt::slot(*this, &UdpSocketTest::onMulticastBind2);
-            //_receiver2->beginBind( Pt::Net::AddrInfo::ip4Any(8000) );
 
             _sender->setActive(*_loop);
             _sender->connected() += Pt::slot(*this, &UdpSocketTest::onMulticastConnect);
-            _sender->beginConnect("255.255.255.255", 8000);
-
+            _sender->outputReady() += Pt::slot(*this, &UdpSocketTest::onMulticastOutput);
+            
             _loop->run();
 
-            _receiver->dropMulticastGroup("224.0.1.1");
-            //_receiver2->dropMulticastGroup("224.0.1.1");
+            //_receiver->dropMulticastGroup("226.1.1.1");
 
             PT_UNIT_ASSERT( 0 == std::strncmp(inbuf, "Hello MULTICAST!", 16) );
-            //PT_UNIT_ASSERT( 0 == std::strncmp(inbuf2, "Hello MULTICAST!", 16) );
         }
 
-		void onMulticastBind(Pt::Net::UdpSocket& socket)
+        void onMulticastBind(Pt::Net::UdpSocket& socket)
         {
             socket.endBind();
-
-			socket.joinMulticastGroup("224.0.0.1");
-
-            socket.inputReady() += Pt::slot(*this, &UdpSocketTest::onMulticastInput);
+            socket.joinMulticastGroup("226.1.1.1");
             socket.beginRead(inbuf, 200);
-        }
 
-		void onMulticastBind2(Pt::Net::UdpSocket& socket)
-        {
-            socket.endBind();
-
-			socket.joinMulticastGroup("224.0.0.1");
-
-            socket.inputReady() += Pt::slot(*this, &UdpSocketTest::onMulticastInput);
-            socket.beginRead(inbuf2, 200);
+            _sender->beginConnect("226.1.1.1", 8000);
         }
 
         void onMulticastConnect(Pt::Net::UdpSocket& socket)
         {
             socket.endConnect();
-
-            socket.outputReady() += Pt::slot(*this, &UdpSocketTest::onMulticastOutput);
             socket.beginWrite("Hello MULTICAST!", 16);
         }
 

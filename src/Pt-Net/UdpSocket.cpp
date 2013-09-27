@@ -60,7 +60,8 @@ UdpSocket::~UdpSocket()
 
 bool UdpSocket::beginBind(const std::string& ipaddr, unsigned short int port, const Options& o)
 { 
-    return beginBind( AddrInfo(ipaddr, port), o); 
+    AddrInfo ai(ipaddr, port, true);
+    return beginBind( ai, o); 
 }
 
 
@@ -100,10 +101,17 @@ void UdpSocket::endBind()
 }
 
 
+void UdpSocket::bind(const AddrInfo& addrinfo, const Options& o)
+{
+    _impl->bind(addrinfo, o);
+    this->setEof(false);
+}
+
+
 void UdpSocket::bind(const std::string& ipaddr, unsigned short int port, const Options& o)
 {
-    _impl->bind(ipaddr, port, o);
-    this->setEof(false);
+    AddrInfo ai(ipaddr, port, true);
+    bind(ai, o);
 }
 
 
@@ -186,10 +194,10 @@ void UdpSocket::joinMulticastGroup(const std::string& ipaddr)
 }
 
 
-void UdpSocket::dropMulticastGroup(const std::string& ipaddr)
-{
-    _impl->dropMulticastGroup(ipaddr);
-}
+//void UdpSocket::dropMulticastGroup(const std::string& ipaddr)
+//{
+//    _impl->dropMulticastGroup(ipaddr);
+//}
 
 
 std::string UdpSocket::socketAddress() const

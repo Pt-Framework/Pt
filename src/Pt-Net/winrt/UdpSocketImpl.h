@@ -55,7 +55,7 @@ class UdpSocketImpl
 
         void endBind(System::EventLoop& loop);
 
-        void bind(const std::string& ipaddr, unsigned short int port, const UdpSocket::Options& o);
+        void bind(const AddrInfo& addrinfo, const UdpSocket::Options& o);
 
         bool beginConnect(System::EventLoop& loop, const AddrInfo& addrinfo);
 
@@ -111,16 +111,16 @@ class UdpSocketImpl
 
     private:
         UdpSocket& _device;
-		System::EventLoop* _loop;
+        System::EventLoop* _loop;
         std::size_t _timeout;
         bool _broadcast;
         bool _isConnected;
         bool _isBound;
-		System::Mutex _mtx;
+        System::Mutex _mtx;
         Windows::Networking::Sockets::DatagramSocket^ _socket;
-        Windows::Foundation::IAsyncAction^ _connectOp;
+        Windows::Foundation::IAsyncOperation<IOutputStream>^ _connectOp;
         Windows::Foundation::IAsyncAction^ _bindOp;
-		std::vector<Windows::Storage::Streams::DataReader^> _messages;
+        std::vector<Windows::Storage::Streams::DataReader^> _messages;
         Windows::Storage::Streams::DataWriter^ _writer;
         Windows::Storage::Streams::DataWriterStoreOperation ^ _storeOp;
         size_t _storeCount;
