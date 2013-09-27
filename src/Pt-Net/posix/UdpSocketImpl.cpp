@@ -81,7 +81,7 @@ bool UdpSocketImpl::beginBind(System::EventLoop& loop, const AddrInfo& ai, const
 {
     log_debug( "begin binding socket to " << ai.host() << ":" << ai.port() );
 
-    this->bind(ai.host(), ai.port(), o);
+    this->bind(ai, o);
     return true;
 }
 
@@ -97,10 +97,8 @@ void UdpSocketImpl::endBind(System::EventLoop& loop)
 }
 
 
-void UdpSocketImpl::bind(const std::string& ipaddr, unsigned short int port, const UdpSocket::Options& o)
+void UdpSocketImpl::bind(const AddrInfo& ai, const UdpSocket::Options& o)
 {
-    AddrInfo ai(ipaddr, port, true);
-
     const int on = 1;
     bool addrInUse = false;
 

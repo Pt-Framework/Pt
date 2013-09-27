@@ -85,7 +85,6 @@ class PipeTest : public Pt::Unit::TestSuite
 
             _loop->run();
 
-            this->reportMessage(_result);
             PT_UNIT_ASSERT(_result == _data);
         }
 
