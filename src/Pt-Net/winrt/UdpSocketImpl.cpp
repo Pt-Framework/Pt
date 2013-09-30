@@ -360,7 +360,12 @@ void UdpSocketImpl::onMessageReceived(DatagramSocket^ socket,
 {
     System::MutexLock lock(_mtx);
 
-    _messages.insert( _messages.begin(), args->GetDataReader() );
+    Message m;
+    m.reader = args->GetDataReader();
+    m.remoteAddress() = args->RemoteAddress;
+    m.remotePort() = args->RemotePort;
+
+    _messages.insert( _messages.begin(), m );
 
     if(_loop)
     {
@@ -396,7 +401,10 @@ size_t UdpSocketImpl::endRead(System::EventLoop& loop, char* buffer, size_t bufS
     if( _messages.empty() )
         throw System::IOError("accept backlog empty");
 
-    DataReader^ reader = _messages.back();
+    Message m = _messages.back();
+    _messages.pop_back();
+
+    DataReader^ reader = m.reader;
 
     const size_t avail = reader->UnconsumedBufferLength;
 
@@ -406,7 +414,9 @@ size_t UdpSocketImpl::endRead(System::EventLoop& loop, char* buffer, size_t bufS
         buffer[n] = static_cast<char>( reader->ReadByte() );
     }
 
-    _messages.pop_back();
+    _currentPeerAddress = m.remoteAddress;
+    _currentPeerPort = m.remotePort;
+
     return n;
 }
 
@@ -423,8 +433,9 @@ size_t UdpSocketImpl::beginWrite(System::EventLoop& loop,
 {
     log_debug("beginWrite " << bufSize);
 
-    if( ! _writer )
+    if( ! _isConnected )
     {
+        // TODO: open output stream to _currentPeerAddress/_currentPeerPort
         throw IOError("UDP socket not connected");
     }
 

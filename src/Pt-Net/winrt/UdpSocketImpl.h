@@ -110,6 +110,14 @@ class UdpSocketImpl
         size_t write(const char* buffer, size_t n);
 
     private:
+        class Message
+        {
+            Windows::Storage::Streams::DataReader^ reader;
+            Windows::Networking::HostName^ remoteAddress;
+            Platform::String^ remotePort;
+        };
+
+    private:
         UdpSocket& _device;
         System::EventLoop* _loop;
         std::size_t _timeout;
@@ -120,7 +128,9 @@ class UdpSocketImpl
         Windows::Networking::Sockets::DatagramSocket^ _socket;
         Windows::Foundation::IAsyncOperation<IOutputStream>^ _connectOp;
         Windows::Foundation::IAsyncAction^ _bindOp;
-        std::vector<Windows::Storage::Streams::DataReader^> _messages;
+        std::vector<Message> _messages;
+        Windows::Networking::HostName^ _currentPeerAddress;
+        Platform::String^ _currentPeerPort;
         Windows::Storage::Streams::DataWriter^ _writer;
         Windows::Storage::Streams::DataWriterStoreOperation ^ _storeOp;
         size_t _storeCount;

@@ -200,7 +200,7 @@ class UdpSocketTest : public Pt::Unit::TestSuite
             
             _loop->run();
 
-            //_receiver->dropMulticastGroup("226.1.1.1");
+            //_receiver->dropMulticastGroup("224.0.1.1");
 
             PT_UNIT_ASSERT( 0 == std::strncmp(inbuf, "Hello MULTICAST!", 16) );
         }
@@ -208,10 +208,10 @@ class UdpSocketTest : public Pt::Unit::TestSuite
         void onMulticastBind(Pt::Net::UdpSocket& socket)
         {
             socket.endBind();
-            socket.joinMulticastGroup("226.1.1.1");
+            socket.joinMulticastGroup("224.0.1.1");
             socket.beginRead(inbuf, 200);
 
-            _sender->beginConnect("226.1.1.1", 8000);
+            _sender->beginConnect("224.0.1.1", 8000);
         }
 
         void onMulticastConnect(Pt::Net::UdpSocket& socket)
