@@ -272,6 +272,59 @@ void UdpSocketImpl::connect(const AddrInfo& ai)
 }
 
 
+void UdpSocketImpl::setTarget(const AddrInfo& ai)
+{
+    AddrInfoImpl::const_iterator it = ai.impl()->begin();
+
+    for( ; it != ai.impl()->end(); ++it)
+    {
+        if( _isBound )
+        {
+            if(it->ai_family != _servaddr.ss_family)
+                continue;
+        }
+        else if( _isConnected )
+        {
+            if(it->ai_family != _peeraddr.ss_family)
+                this->close();
+        }
+
+        if( _fd == INVALID_SOCKET )
+            _fd = WSASocket(it->ai_family, SOCK_DGRAM, 0, NULL, 0, 0);
+
+        if( _fd == INVALID_SOCKET )
+            continue;
+
+        if(_broadcast)
+        {
+            const int on = 1;
+            if (::setsockopt(_fd, SOL_SOCKET, SO_BROADCAST, (char*)&on, sizeof(on)) < 0)
+            {
+                this->close();
+                throw System::SystemError("setsockopt");
+            }
+        }
+
+        if(_hopLimit != DefaultHopLimit)
+        {
+            try
+            {
+                this->setHopLimit(_hopLimit);
+            }
+            catch(...)
+            {
+                this->close();
+            }
+        }
+
+        std::memmove(&_peeraddr, it->ai_addr, it->ai_addrlen);
+        return;
+    }
+
+    throw System::AccessFailed( ai.host() );
+}
+
+
 bool UdpSocketImpl::isConnected() const
 {
     return _isConnected;
@@ -559,26 +612,30 @@ size_t UdpSocketImpl::endRead(System::EventLoop& loop, char* buffer, size_t n, b
 }
 
 
-size_t UdpSocketImpl::write(const char* buffer, size_t n)
+size_t UdpSocketImpl::write(const char* buffer, size_t count)
 {
-    fd_set fds;
-    FD_ZERO(&fds);
-    FD_SET(_fd, &fds);
+    int addrlen = sizeof(_peeraddr);
+    int len = sendto( _fd, buffer, count, 
+                      0, (sockaddr*)&_peeraddr, addrlen );
 
-    this->waitSelect(0, &fds, 0, _timeout);
+    if( len == -1 && WSAGetLastError() == WSAEWOULDBLOCK)
+    {
+        fd_set fds;
+        FD_ZERO(&fds);
+        FD_SET(_fd, &fds);
+    
+        this->waitSelect(0, &fds, 0, _timeout);
 
-    WSABUF sendbuf;
-    sendbuf.buf = const_cast<char*>(buffer);
-    sendbuf.len = n;
+        len = sendto( _fd, buffer, count, 0,
+                        (sockaddr*) &_peeraddr, addrlen );
 
-    DWORD bytesSent = 0;
-    int rc = WSASend(_fd, &sendbuf, 1, &bytesSent, 0, NULL, NULL);
+        if(len < 0)
+            throw System::IOError("sendto");
+    }
 
-    if(rc == SOCKET_ERROR)
-        throw System::IOError("WSASend");  
-
-    return  bytesSent;
+    return len;
 }
+
 
 
 size_t UdpSocketImpl::beginWrite(System::EventLoop& loop, const char* buffer, size_t n)
@@ -626,7 +683,8 @@ size_t UdpSocketImpl::endWrite(System::EventLoop& loop, const char* buffer, size
     ::ioctlsocket(_fd, FIONBIO, &argp);
 
     DWORD bytesSend = 0;
-    int rc = WSASend(_fd, &_sendBuffer, 1, &bytesSend, 0, NULL, NULL);
+    int rc = WSASendTo(_fd, &_sendBuffer, 1, &bytesSend, 0, 
+                       (sockaddr*)&_peeraddr, sizeof(_peeraddr), NULL, NULL);
 
     //Set socket to non-blocking mode
     argp = 1;
