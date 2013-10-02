@@ -286,6 +286,26 @@ void UdpSocketImpl::connect(const AddrInfo& ai)
 }
 
 
+void UdpSocketImpl::setTarget(const AddrInfo& ai)
+{
+    const std::string& host = ai.host();
+    std::wstring whost(host.begin(), host.end());
+    String^ shost = ref new String(whost.c_str());
+
+    std::wostringstream wss;
+    wss << ai.port();
+    std::wstring wport = wss.str();
+    String^ serviceName = ref new String( wport.c_str() );
+
+    _currentPeerAddress = ref new HostName(shost);
+    _currentPeerPort = serviceName;
+
+    _writer = nullptr;
+
+    _isConnected = true;
+}
+
+
 bool UdpSocketImpl::isConnected() const
 {
     return _isConnected;
@@ -433,10 +453,28 @@ size_t UdpSocketImpl::beginWrite(System::EventLoop& loop,
 {
     log_debug("beginWrite " << bufSize);
 
-    if( ! _isConnected )
+    // lock
+
+    if( ! _writer )
     {
-        // TODO: open output stream to _currentPeerAddress/_currentPeerPort
-        throw IOError("UDP socket not connected");
+        _connectOp = _socket->GetOutputStreamAsync(ref new HostName(shost), serviceName);
+
+        _connectOp->Completed = ref new AsyncActionCompletedHandler
+        (
+            [&](IAsyncOperation<IOutputStream>^ asyncInfo, AsyncStatus asyncStatus)
+            {
+                IOutputStream^ output = asyncInfo->GetResults();
+
+                // lock
+                _writer = ref new DataWriter(output);
+                _connectOp = nullptr;
+                // unlock
+
+                this->beginWrite(loop, buffer, bufSize);
+            }
+        );
+
+        return 0;
     }
 
     // UnstoredBufferLength

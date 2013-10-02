@@ -65,6 +65,8 @@ class UdpSocketImpl
 
         void connect(const AddrInfo& addrinfo);
 
+        void setTarget(const AddrInfo& addrinfo);
+
         bool isConnected() const;
 
         bool isBound() const;
@@ -132,7 +134,7 @@ class UdpSocketImpl
         Windows::Networking::HostName^ _currentPeerAddress;
         Platform::String^ _currentPeerPort;
         Windows::Storage::Streams::DataWriter^ _writer;
-        Windows::Storage::Streams::DataWriterStoreOperation ^ _storeOp;
+        Windows::Foundation::IAsyncInfo^ _storeOp;
         size_t _storeCount;
 };
 

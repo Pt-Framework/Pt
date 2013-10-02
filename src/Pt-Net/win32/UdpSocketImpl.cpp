@@ -318,6 +318,7 @@ void UdpSocketImpl::setTarget(const AddrInfo& ai)
         }
 
         std::memmove(&_peeraddr, it->ai_addr, it->ai_addrlen);
+        _isConnected = true; // TODO: handle this differently
         return;
     }
 
