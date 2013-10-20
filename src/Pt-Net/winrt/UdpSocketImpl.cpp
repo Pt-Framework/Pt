@@ -37,6 +37,7 @@
 
 using namespace Platform;
 using namespace Windows::Foundation;
+using namespace Windows::Storage;
 using namespace Windows::Storage::Streams;
 using namespace Windows::Networking;
 using namespace Windows::Networking::Sockets;
@@ -93,6 +94,12 @@ void UdpSocketImpl::cancel(System::EventLoop& loop)
     {
         _connectOp->Cancel();
         _connectOp = nullptr;
+    }
+
+	if(_getOutputOp)
+	{
+        _getOutputOp->Cancel();
+        _getOutputOp = nullptr;
     }
 
     if(_storeOp)
@@ -224,11 +231,11 @@ bool UdpSocketImpl::beginConnect(System::EventLoop& loop, const AddrInfo& ai)
     std::wstring wport = wss.str();
     String^ serviceName = ref new String( wport.c_str() );
 
-    _connectOp = _socket->GetOutputStreamAsync(ref new HostName(shost), serviceName);
-
+    _connectOp = _socket->ConnectAsync(ref new HostName(shost), serviceName);
+	
     _connectOp->Completed = ref new AsyncActionCompletedHandler
     (
-        [&](IAsyncOperation<IOutputStream>^ asyncInfo, AsyncStatus asyncStatus)
+        [&](IAsyncAction^ action, AsyncStatus asyncStatus)
         {
             // set device ready state and wake our loop from the thread
             // context of the completion handler
@@ -236,7 +243,7 @@ bool UdpSocketImpl::beginConnect(System::EventLoop& loop, const AddrInfo& ai)
             loop.wake();
         }
     );
-
+	
     return false;
 }
 
@@ -263,8 +270,8 @@ void UdpSocketImpl::endConnect(System::EventLoop& loop)
 
     try
     {
-        IOutputStream^ output = _connectOp->GetResults();
-        _writer = ref new DataWriter(output);
+        _connectOp->GetResults();
+        _writer = ref new DataWriter(_socket->OutputStream);
     }
     catch(Platform::COMException^ ex)
     {
@@ -382,8 +389,8 @@ void UdpSocketImpl::onMessageReceived(DatagramSocket^ socket,
 
     Message m;
     m.reader = args->GetDataReader();
-    m.remoteAddress() = args->RemoteAddress;
-    m.remotePort() = args->RemotePort;
+    m.remoteAddress = args->RemoteAddress;
+    m.remotePort = args->RemotePort;
 
     _messages.insert( _messages.begin(), m );
 
@@ -453,22 +460,18 @@ size_t UdpSocketImpl::beginWrite(System::EventLoop& loop,
 {
     log_debug("beginWrite " << bufSize);
 
-    // lock
-
     if( ! _writer )
     {
-        _connectOp = _socket->GetOutputStreamAsync(ref new HostName(shost), serviceName);
+        _getOutputOp = _socket->GetOutputStreamAsync(_currentPeerAddress, _currentPeerPort);
 
-        _connectOp->Completed = ref new AsyncActionCompletedHandler
+        _getOutputOp->Completed = ref new AsyncOperationCompletedHandler<IOutputStream^>
         (
-            [&](IAsyncOperation<IOutputStream>^ asyncInfo, AsyncStatus asyncStatus)
+            [&](IAsyncOperation<IOutputStream^>^ output, AsyncStatus asyncStatus)
             {
-                IOutputStream^ output = asyncInfo->GetResults();
-
-                // lock
-                _writer = ref new DataWriter(output);
-                _connectOp = nullptr;
-                // unlock
+                // access to _writer reference itself is atomic, so we do not
+				// have to lock when setting the reference.
+                _writer = ref new DataWriter(output->GetResults());
+                _getOutputOp = nullptr;
 
                 this->beginWrite(loop, buffer, bufSize);
             }
@@ -488,10 +491,10 @@ size_t UdpSocketImpl::beginWrite(System::EventLoop& loop,
 
     _storeCount = n;
     _storeOp = _writer->StoreAsync();
-
+								  
     _storeOp->Completed = ref new AsyncOperationCompletedHandler<unsigned int>
     (
-        [&] (IAsyncOperation<unsigned int>^ asyncInfo, AsyncStatus asyncStatus) 
+        [&] (IAsyncOperation<unsigned int>^ asyncOp, AsyncStatus asyncStatus) 
         {
             loop.setReady(_device);
             loop.wake(); 

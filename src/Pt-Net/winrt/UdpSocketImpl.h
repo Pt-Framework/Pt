@@ -112,7 +112,7 @@ class UdpSocketImpl
         size_t write(const char* buffer, size_t n);
 
     private:
-        class Message
+        struct Message
         {
             Windows::Storage::Streams::DataReader^ reader;
             Windows::Networking::HostName^ remoteAddress;
@@ -127,14 +127,15 @@ class UdpSocketImpl
         bool _isConnected;
         bool _isBound;
         System::Mutex _mtx;
-        Windows::Networking::Sockets::DatagramSocket^ _socket;
-        Windows::Foundation::IAsyncOperation<IOutputStream>^ _connectOp;
+        Windows::Networking::Sockets::DatagramSocket^ _socket;		
+        Windows::Foundation::IAsyncAction^ _connectOp;
+		Windows::Foundation::IAsyncOperation<Windows::Storage::Streams::IOutputStream^>^ _getOutputOp;
         Windows::Foundation::IAsyncAction^ _bindOp;
         std::vector<Message> _messages;
         Windows::Networking::HostName^ _currentPeerAddress;
         Platform::String^ _currentPeerPort;
         Windows::Storage::Streams::DataWriter^ _writer;
-        Windows::Foundation::IAsyncInfo^ _storeOp;
+		Windows::Storage::Streams::DataWriterStoreOperation^ _storeOp;
         size_t _storeCount;
 };
 
