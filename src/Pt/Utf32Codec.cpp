@@ -26,7 +26,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include<Pt/Utf32Codec.h>
+#include <Pt/Utf32Codec.h>
+#include <algorithm>
 
 const Pt::Char MaxUtf16 = 0x0010FFFF;
 

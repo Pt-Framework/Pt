@@ -58,15 +58,15 @@ rule ConfigurePlatformSDK
 
         if $(TARGET_OSPLAT:L) = "x86_64"
         {
-            LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)lib\\winv6.3\\um\\x64"" ;
+            LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)lib\\winv6.3\\um\\x64\"" ;
         }
         else if $(TARGET_OSPLAT:L) = "x86"
         {
-            LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)lib\\winv6.3\\um\\x86"" ;
+            LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)lib\\winv6.3\\um\\x86\"" ;
         }
         else if $(TARGET_OSPLAT:L) = "arm"
         {
-            LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)lib\\winv6.3\\um\\arm"" ;
+            LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)lib\\winv6.3\\um\\arm\"" ;
         }
 
         Configure STDHDRS ;
