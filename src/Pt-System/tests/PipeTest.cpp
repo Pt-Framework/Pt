@@ -179,6 +179,8 @@ class PipeTest : public Pt::Unit::TestSuite
 
         void onStreamOutput(Pt::System::IOBuffer& buffer)
         {
+			buffer.endWrite();
+
             buffer.device()->close();
             inbuf.beginRead();
         }

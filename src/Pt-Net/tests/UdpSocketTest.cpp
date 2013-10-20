@@ -44,8 +44,8 @@ class UdpSocketTest : public Pt::Unit::TestSuite
           this->registerMethod( "Unicast", *this,
                                 &UdpSocketTest::Unicast);
 
-          /*this->registerMethod( "Broadcast", *this,
-                                &UdpSocketTest::Broadcast);*/
+          this->registerMethod( "Broadcast", *this,
+                                &UdpSocketTest::Broadcast);
 
           this->registerMethod( "Multicast", *this,
                                 &UdpSocketTest::Multicast);
@@ -140,35 +140,30 @@ class UdpSocketTest : public Pt::Unit::TestSuite
 
         void Broadcast()
         {
+			_sender->setActive(*_loop);
+			_sender->outputReady() += Pt::slot(*this, &UdpSocketTest::onBroadcastOutput);
             _sender->setBroadcast();
-            _sender->connect("255.255.255.255", 8000);
+            _sender->setTarget("255.255.255.255", 8000);
 
             PT_UNIT_ASSERT( _sender->isConnected() );
 
-            _receiver->bind("0.0.0.0", 8000);
-            PT_UNIT_ASSERT( _receiver->isBound() );
-
-            _receiver2->bind("0.0.0.0", 8000);
-            PT_UNIT_ASSERT( _receiver2->isBound() );
-
-            _receiver->setActive(*_loop);
-            _receiver2->setActive(*_loop);
-            _sender->setActive(*_loop);
-
-            _sender->outputReady() += Pt::slot(*this, &UdpSocketTest::onBroadcastOutput);
-            _sender->beginWrite("Hello BROADCAST!", 16);
-
-            _receiver->inputReady() += Pt::slot(*this, &UdpSocketTest::onBroadcastInput);
-            _receiver->beginRead(inbuf, 200);
-
-            _receiver2->inputReady() += Pt::slot(*this, &UdpSocketTest::onBroadcastInput);
-            _receiver2->beginRead(inbuf2, 200);
+			_receiver->setActive(*_loop);
+			_receiver->bound() += Pt::slot(*this, &UdpSocketTest::onBroadcastBind);
+			_receiver->inputReady() += Pt::slot(*this, &UdpSocketTest::onBroadcastInput);
+			_receiver->beginBind(Pt::Net::AddrInfo::ip4Any(8000));
 
             _loop->run();
 
             PT_UNIT_ASSERT( 0 == std::strncmp(inbuf, "Hello BROADCAST!", 16) );
-            PT_UNIT_ASSERT( 0 == std::strncmp(inbuf2, "Hello BROADCAST!", 16) );
         }
+		
+		void onBroadcastBind(Pt::Net::UdpSocket& socket)
+		{
+			socket.endBind();
+			socket.beginRead(inbuf, 200);
+
+			_sender->beginWrite("Hello BROADCAST!", 16);
+		}
 
         void onBroadcastOutput(Pt::System::IODevice& device)
         {
@@ -195,7 +190,7 @@ class UdpSocketTest : public Pt::Unit::TestSuite
             _receiver->beginBind( Pt::Net::AddrInfo::ip4Any(8000) );
 
             _sender->setActive(*_loop);
-            _sender->connected() += Pt::slot(*this, &UdpSocketTest::onMulticastConnect);
+			_sender->setTarget("224.0.1.1", 8000);
             _sender->outputReady() += Pt::slot(*this, &UdpSocketTest::onMulticastOutput);
             
             _loop->run();
@@ -211,13 +206,7 @@ class UdpSocketTest : public Pt::Unit::TestSuite
             socket.joinMulticastGroup("224.0.1.1");
             socket.beginRead(inbuf, 200);
 
-            _sender->beginConnect("224.0.1.1", 8000);
-        }
-
-        void onMulticastConnect(Pt::Net::UdpSocket& socket)
-        {
-            socket.endConnect();
-            socket.beginWrite("Hello MULTICAST!", 16);
+			_sender->beginWrite("Hello MULTICAST!", 16);
         }
 
         void onMulticastOutput(Pt::System::IODevice& device)

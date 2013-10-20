@@ -65,6 +65,7 @@ void PipeIODevice::onSetTimeout(size_t timeout)
 
 void PipeIODevice::onClose()
 {
+	_pipe->close();
 }
 
 
@@ -111,13 +112,13 @@ size_t PipeIODevice::onBeginRead(char* buffer, size_t n, bool& eof)
         throw IOError("I/O device not readable");
     }
 
-    return _pipe->beginRead(*parent(), buffer, n);
+    return _pipe->beginRead(*parent(), buffer, n, eof);
 }
 
 
 size_t PipeIODevice::onEndRead(char* buffer, size_t n, bool& eof)
 {
-    return _pipe->endRead(buffer, n);
+    return _pipe->endRead(buffer, n, eof);
 }
 
 
@@ -163,7 +164,8 @@ static const size_t MaxBufferSize = 16384;
 
 
 PipeImpl::PipeImpl()
-: _readLoop(0)
+: _eof(false)
+, _readLoop(0)
 , _writeLoop(0)
 , _in(PipeIODevice::Write)
 , _out(PipeIODevice::Read)
@@ -179,13 +181,25 @@ PipeImpl::~PipeImpl()
 }
 
 
-size_t PipeImpl::beginRead(EventLoop& loop, char* buf, size_t n)
+void PipeImpl::close()
+{
+	_eof = true;
+
+	if (_readLoop)
+	{
+		_readLoop->setReady(_out);
+		_readLoop = 0;
+	}
+}
+
+
+size_t PipeImpl::beginRead(EventLoop& loop, char* buf, size_t n, bool&)
 {
     MutexLock lock(_mtx);
     
     _readLoop = &loop;
     
-    if( ! _buffer.empty() )
+    if( ! _buffer.empty() || _eof )
     {
         _readLoop->setReady(_out);
         _readLoop = 0;
@@ -198,19 +212,26 @@ size_t PipeImpl::beginRead(EventLoop& loop, char* buf, size_t n)
 bool PipeImpl::readAvail()
 {
     MutexLock lock(_mtx);
-    return _buffer.size() > 0;
+    return _buffer.size() > 0 || _eof;
 }
 
 
-size_t PipeImpl::endRead(char* buf, size_t n)
+size_t PipeImpl::endRead(char* buf, size_t n, bool& eof)
 {
     MutexLock lock(_mtx);
 
     _readLoop = 0;
 
     size_t readSize = std::min<size_t>( n, _buffer.size() );
-    std::memcpy(buf, &_buffer[0], readSize);
-    _buffer.erase(_buffer.begin(), _buffer.begin() + readSize);
+	if (readSize == 0)
+	{
+		eof = _eof;
+	}
+	else
+	{
+		std::memcpy(buf, &_buffer[0], readSize);
+		_buffer.erase(_buffer.begin(), _buffer.begin() + readSize);
+	}
 
     if(_writeLoop)
     {
@@ -230,7 +251,7 @@ size_t PipeImpl::beginWrite(EventLoop& loop, const char* buf, size_t n)
     
     if( _buffer.size() < MaxBufferSize )
     {
-        _writeLoop->setReady(_out);
+        _writeLoop->setReady(_in);
         _writeLoop = 0;
     }
 

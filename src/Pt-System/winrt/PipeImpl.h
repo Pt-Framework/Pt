@@ -92,11 +92,13 @@ class PipeImpl
 
         ~PipeImpl();
 
-        size_t beginRead(EventLoop& loop, char* buf, size_t n);
+		void close();
+
+        size_t beginRead(EventLoop& loop, char* buf, size_t n, bool& eof);
         
         bool readAvail();
 
-        size_t endRead(char* buf, size_t n);
+		size_t endRead(char* buf, size_t n, bool& eof);
 
         size_t beginWrite(EventLoop& loop, const char* buf, size_t n);
 
@@ -114,6 +116,7 @@ class PipeImpl
 
     private:
         Mutex _mtx;
+		bool _eof;
         std::vector<char> _buffer;
         EventLoop* _readLoop;
         EventLoop* _writeLoop;

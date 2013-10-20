@@ -170,11 +170,11 @@ void UdpSocket::connect(const AddrInfo& addrinfo, const Options&)
 }
 
 
-//void UdpSocket::setTarget(const std::string& ipaddr, unsigned short int port, const Options&)
-//{
-//    _impl->setTarget(AddrInfo(ipaddr, port));
-//    this->setEof(false);
-//}
+void UdpSocket::setTarget(const std::string& ipaddr, unsigned short int port, const Options&)
+{
+    _impl->setTarget(AddrInfo(ipaddr, port));
+    this->setEof(false);
+}
 
 
 bool UdpSocket::isConnected() const
