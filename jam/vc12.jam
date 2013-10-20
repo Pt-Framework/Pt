@@ -22,6 +22,9 @@ rule ConfigureVisualC
         {
             Exit "VISUALC not found" ;
         }
+
+		CCFLAGS  += /FS ;
+		C++FLAGS += /FS ;
     
         VISUALC_PATH = $(VISUALC)\\Common7\\IDE ;
         Echo "Checking for Visual Studio..." $(VISUALC) ;
