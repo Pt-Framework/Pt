@@ -127,6 +127,7 @@ void AddrInfoImpl::initIp4Loopback(unsigned short port)
 void AddrInfoImpl::initIp4Broadcast(unsigned short port)
 {  
     clear();
+
     _host = "255.255.255.255";
     _port = port;
 }

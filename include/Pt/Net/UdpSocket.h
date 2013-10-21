@@ -86,6 +86,8 @@ class PT_NET_API UdpSocket : public System::IODevice
 
         void setTarget(const std::string& ipaddr, unsigned short int port, const Options& o = Options());
 
+        void setTarget(const AddrInfo& addrinfo, const Options& o = Options());
+
         bool isConnected() const;
 
         bool isBound() const;

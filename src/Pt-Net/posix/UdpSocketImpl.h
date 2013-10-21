@@ -76,6 +76,8 @@ class UdpSocketImpl : public System::IODeviceImpl
 
         void connect(const AddrInfo& addrinfo);
 
+        void setTarget(const AddrInfo& addrinfo);
+
         bool isConnected() const;
 
         bool isBound() const;

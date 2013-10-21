@@ -195,6 +195,7 @@ void UdpSocketImpl::endConnect(System::EventLoop& loop)
 void UdpSocketImpl::connect(const AddrInfo& ai)
 {
     AddrInfoImpl::const_iterator it = ai.impl()->begin();
+
     for( ; it != ai.impl()->end(); ++it)
     {
         if( _isBound )
@@ -239,6 +240,53 @@ void UdpSocketImpl::connect(const AddrInfo& ai)
 
         if( ! _isBound )
             this->close();
+    }
+
+    throw System::AccessFailed( ai.host() );
+}
+
+
+void UdpSocketImpl::setTarget(const AddrInfo& ai)
+{
+    AddrInfoImpl::const_iterator it = ai.impl()->begin();
+
+    for( ; it != ai.impl()->end(); ++it)
+    {
+        if( _isBound )
+        {
+            if(it->ai_family != reinterpret_cast <struct sockaddr*>(&_servaddr)->sa_family)
+                continue;
+        }
+        else if( _isConnected )
+        {
+            if(it->ai_family != reinterpret_cast <struct sockaddr*>(&_peeraddr)->sa_family)
+                this->close();
+        }
+
+        if( this->fd() < 0 )
+        {
+            int fd = socket(it->ai_family, SOCK_DGRAM, 0);
+            IODeviceImpl::open(fd, false);
+        }
+
+        if( this->fd() < 0 )
+            continue;
+
+        if( _broadcast)
+        {
+            const int on = 1;
+            if( 0 > ::setsockopt(this->fd(), SOL_SOCKET, SO_BROADCAST, (char*)&on, sizeof(on)) )
+            {
+                if( ! _isBound )
+                    this->close();
+
+                throw System::SystemError("setsockopt SO_BROADCAST failed");
+            }
+        }
+
+        std::memmove(&_peeraddr, it->ai_addr, it->ai_addrlen);
+        _isConnected = true; // TODO: handle this differently
+        return;
     }
 
     throw System::AccessFailed( ai.host() );

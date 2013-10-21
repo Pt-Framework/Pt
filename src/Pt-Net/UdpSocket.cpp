@@ -177,6 +177,12 @@ void UdpSocket::setTarget(const std::string& ipaddr, unsigned short int port, co
 }
 
 
+void UdpSocket::setTarget(const AddrInfo& addrinfo, const Options&)
+{
+    _impl->setTarget(addrinfo);
+    this->setEof(false);
+}
+
 bool UdpSocket::isConnected() const
 {
     return _impl->isConnected();
@@ -321,7 +327,7 @@ size_t UdpSocket::onWrite(const char* buffer, size_t count)
 
 void UdpSocket::onCancel()
 {
-    if(this->isActive() && (_impl->isConnected() || _impl->isBound()) )
+    if( this->isActive() )
     {
         _impl->cancel( *parent() );
         _connecting = false;
