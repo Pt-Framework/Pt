@@ -409,6 +409,7 @@ std::string UdpSocketImpl::peerAddress() const
     return ret;
 }
 
+// overload beginRead to use recvfrom
 
 size_t UdpSocketImpl::read( char* buffer, size_t count, bool& eof )
 {
@@ -443,6 +444,7 @@ size_t UdpSocketImpl::read( char* buffer, size_t count, bool& eof )
 
 size_t UdpSocketImpl::beginWrite(System::EventLoop& loop, const char* buffer, size_t n)
 {
+    // TODO: correct sizeof sockaddr_in/sockaddr_in6
     ssize_t ret = ::sendto( this->fd(), buffer, n, 0, (sockaddr*)&_peeraddr, sizeof(_peeraddr));
 
     if (ret > 0)
@@ -463,6 +465,7 @@ size_t UdpSocketImpl::write( const char* buffer, size_t count )
 
     while(true)
     {
+        // TODO: correct sizeof sockaddr_in/sockaddr_in6
         if(_isConnected)
             ret = ::write( this->fd(), buffer, count);
         else
