@@ -69,7 +69,7 @@ void UdpSocketImpl::setEventFlags(HANDLE ev, long events)
 {
     if( WSAEventSelect(_fd, ev, events) == SOCKET_ERROR )
     {
-        throw System::SystemError("WSAEventSelectt failed");
+        throw System::SystemError("WSAEventSelect failed");
     }
 }
 
@@ -318,7 +318,6 @@ void UdpSocketImpl::setTarget(const AddrInfo& ai)
         }
 
         std::memmove(&_peeraddr, it->ai_addr, it->ai_addrlen);
-        _isConnected = true; // TODO: handle this differently
         return;
     }
 
@@ -537,6 +536,12 @@ size_t UdpSocketImpl::read(char* buffer, size_t count, bool& eof)
     WSABUF recvbuf;
     recvbuf.buf = buffer;
     recvbuf.len = count;
+
+    // TODO: do not write to _peeraddr, so setTarget address is kept until
+    //       it is called again. This matches the behaviour of WinRT
+
+    //TODO2: Add enum for broadcast, server, etc... addresses so we can get
+    //       rid of setBroadcast
 
     int addrlen = sizeof(_peeraddr);
     int len = recvfrom( _fd, recvbuf.buf, recvbuf.len, 

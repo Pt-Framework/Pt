@@ -143,8 +143,6 @@ class UdpSocketTest : public Pt::Unit::TestSuite
             _sender->setBroadcast();
             _sender->setTarget( Pt::Net::AddrInfo::ip4Broadcast(8000) );
 
-            PT_UNIT_ASSERT( _sender->isConnected() );
-
             _receiver->setActive(*_loop);
             _receiver->bound() += Pt::slot(*this, &UdpSocketTest::onBroadcastBind);
             _receiver->inputReady() += Pt::slot(*this, &UdpSocketTest::onBroadcastInput);

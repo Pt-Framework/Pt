@@ -92,6 +92,8 @@ class UdpSocketImpl : public System::IODeviceImpl
 
         std::string peerAddress() const;
 
+        size_t beginRead(System::EventLoop& loop, char* buffer, size_t n, bool& eof);
+
         size_t read(char* buffer, size_t count, bool& eof);
 
         size_t beginWrite(System::EventLoop& loop, const char* buffer, size_t n);
@@ -103,6 +105,7 @@ class UdpSocketImpl : public System::IODeviceImpl
         bool             _isConnected;
         bool             _isBound;
         sockaddr_storage _peeraddr;
+        socklen_t        _peeraddrLen;
         sockaddr_storage _servaddr;
 };
 

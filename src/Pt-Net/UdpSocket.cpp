@@ -285,7 +285,7 @@ bool UdpSocket::onRun()
 
 size_t UdpSocket::onBeginRead(char* buffer, size_t n, bool& eof)
 {
-    if( ! _impl->isConnected() && ! _impl->isBound() )
+    if( /*! _impl->isConnected() && */ ! _impl->isBound() )
         throw System::IOError("socket not connected");
 
     return _impl->beginRead(*parent(), buffer, n, eof);
@@ -306,8 +306,8 @@ size_t UdpSocket::onRead(char* buffer, size_t count, bool& eof)
 
 size_t UdpSocket::onBeginWrite(const char* buffer, size_t n)
 {
-    if( ! _impl->isConnected() && ! _impl->isBound() )
-        throw System::IOError("socket not connected");
+    //if( ! _impl->isConnected() && ! _impl->isBound() )
+    //    throw System::IOError("socket not connected");
 
     return _impl->beginWrite(*parent(), buffer, n);
 }

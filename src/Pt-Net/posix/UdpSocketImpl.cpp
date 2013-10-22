@@ -55,6 +55,7 @@ UdpSocketImpl::UdpSocketImpl(UdpSocket& socket)
 , _broadcast(false)
 , _isConnected(false)
 , _isBound(false)
+, _peeraddrLen(0)
 {
 }
 
@@ -74,6 +75,7 @@ void UdpSocketImpl::close()
     System::IODeviceImpl::close();
     _isConnected = false;
     _isBound = false;
+    _peeraddrLen = 0;
 }
 
 
@@ -231,6 +233,7 @@ void UdpSocketImpl::connect(const AddrInfo& ai)
         }
 
         std::memmove(&_peeraddr, it->ai_addr, it->ai_addrlen);
+        _peeraddrLen = it->ai_addrlen;
 
         if( 0 == ::connect(this->fd(), it->ai_addr, it->ai_addrlen) )
         {
@@ -285,7 +288,7 @@ void UdpSocketImpl::setTarget(const AddrInfo& ai)
         }
 
         std::memmove(&_peeraddr, it->ai_addr, it->ai_addrlen);
-        _isConnected = true; // TODO: handle this differently
+        _peeraddrLen = it->ai_addrlen;
         return;
     }
 
@@ -409,7 +412,33 @@ std::string UdpSocketImpl::peerAddress() const
     return ret;
 }
 
-// overload beginRead to use recvfrom
+
+size_t UdpSocketImpl::beginRead(System::EventLoop& loop, char* buffer, size_t n, bool& eof)
+{
+    log_debug("begin read on fd:" << _ioh.fd);
+    socklen_t addrlen = sizeof(_peeraddr);
+
+    for(;;)
+    {
+        ssize_t ret = ::recvfrom( this->fd(), buffer, n, 0, (sockaddr*)&_peeraddr, &addrlen );
+        if (ret > 0)
+        {
+            log_debug("read:" << ret << " bytes");
+            _peeraddrLen = addlen;
+            return static_cast<size_t>(ret);
+        }
+
+        if(errno == EAGAIN || errno == EWOULDBLOCK)
+            break;
+
+        if(errno != EINTR)
+            throw IOError("read failed");
+    }
+
+    loop.selector().beginRead( &_ioh );
+    return 0;
+}
+
 
 size_t UdpSocketImpl::read( char* buffer, size_t count, bool& eof )
 {
@@ -418,7 +447,7 @@ size_t UdpSocketImpl::read( char* buffer, size_t count, bool& eof )
 
     while(true)
     {
-        ret = ::recvfrom( this->fd(), buffer, count, 0, (sockaddr*)&_peeraddr, &addrlen );
+        ret = ::recvfrom( this->fd(), buffer, count, 0, (sockaddr*)&_peeraddr, &_peeraddrLen );
         if(ret > 0)
             break;
 
@@ -438,14 +467,19 @@ size_t UdpSocketImpl::read( char* buffer, size_t count, bool& eof )
         }
     }
 
+    _peeraddrLen = addlen;
     return ret;
 }
 
 
 size_t UdpSocketImpl::beginWrite(System::EventLoop& loop, const char* buffer, size_t n)
 {
-    // TODO: correct sizeof sockaddr_in/sockaddr_in6
-    ssize_t ret = ::sendto( this->fd(), buffer, n, 0, (sockaddr*)&_peeraddr, sizeof(_peeraddr));
+    ssize_t ret = =;
+
+    if(_isConnected)
+        ret = ::write( this->fd(), buffer, n);
+    else
+        ret = ::sendto( this->fd(), buffer, n, 0, (sockaddr*)&_peeraddr, _peeraddrLen);
 
     if (ret > 0)
         return static_cast<size_t>(ret);
@@ -465,11 +499,10 @@ size_t UdpSocketImpl::write( const char* buffer, size_t count )
 
     while(true)
     {
-        // TODO: correct sizeof sockaddr_in/sockaddr_in6
         if(_isConnected)
             ret = ::write( this->fd(), buffer, count);
         else
-            ret = ::sendto( this->fd(), buffer, count, 0, (sockaddr*)&_peeraddr, sizeof(_peeraddr));
+            ret = ::sendto( this->fd(), buffer, count, 0, (sockaddr*)&_peeraddr, _peeraddrLen);
 
         if(ret >= 0)
             break;

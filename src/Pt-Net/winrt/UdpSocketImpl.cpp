@@ -96,8 +96,8 @@ void UdpSocketImpl::cancel(System::EventLoop& loop)
         _connectOp = nullptr;
     }
 
-	if(_getOutputOp)
-	{
+    if(_getOutputOp)
+    {
         _getOutputOp->Cancel();
         _getOutputOp = nullptr;
     }
@@ -232,7 +232,7 @@ bool UdpSocketImpl::beginConnect(System::EventLoop& loop, const AddrInfo& ai)
     String^ serviceName = ref new String( wport.c_str() );
 
     _connectOp = _socket->ConnectAsync(ref new HostName(shost), serviceName);
-	
+    
     _connectOp->Completed = ref new AsyncActionCompletedHandler
     (
         [&](IAsyncAction^ action, AsyncStatus asyncStatus)
@@ -243,7 +243,7 @@ bool UdpSocketImpl::beginConnect(System::EventLoop& loop, const AddrInfo& ai)
             loop.wake();
         }
     );
-	
+    
     return false;
 }
 
@@ -308,8 +308,6 @@ void UdpSocketImpl::setTarget(const AddrInfo& ai)
     _currentPeerPort = serviceName;
 
     _writer = nullptr;
-
-    _isConnected = true;
 }
 
 
@@ -469,7 +467,7 @@ size_t UdpSocketImpl::beginWrite(System::EventLoop& loop,
             [&](IAsyncOperation<IOutputStream^>^ output, AsyncStatus asyncStatus)
             {
                 // access to _writer reference itself is atomic, so we do not
-				// have to lock when setting the reference.
+                // have to lock when setting the reference.
                 _writer = ref new DataWriter(output->GetResults());
                 _getOutputOp = nullptr;
 
@@ -491,7 +489,7 @@ size_t UdpSocketImpl::beginWrite(System::EventLoop& loop,
 
     _storeCount = n;
     _storeOp = _writer->StoreAsync();
-								  
+                                  
     _storeOp->Completed = ref new AsyncOperationCompletedHandler<unsigned int>
     (
         [&] (IAsyncOperation<unsigned int>^ asyncOp, AsyncStatus asyncStatus) 
