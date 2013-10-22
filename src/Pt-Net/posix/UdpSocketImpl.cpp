@@ -424,7 +424,7 @@ size_t UdpSocketImpl::beginRead(System::EventLoop& loop, char* buffer, size_t n,
         if (ret > 0)
         {
             log_debug("read:" << ret << " bytes");
-            _peeraddrLen = addlen;
+            _peeraddrLen = addrlen;
             return static_cast<size_t>(ret);
         }
 
@@ -432,7 +432,7 @@ size_t UdpSocketImpl::beginRead(System::EventLoop& loop, char* buffer, size_t n,
             break;
 
         if(errno != EINTR)
-            throw IOError("read failed");
+            throw System::IOError("read failed");
     }
 
     loop.selector().beginRead( &_ioh );
@@ -467,14 +467,14 @@ size_t UdpSocketImpl::read( char* buffer, size_t count, bool& eof )
         }
     }
 
-    _peeraddrLen = addlen;
+    _peeraddrLen = addrlen;
     return ret;
 }
 
 
 size_t UdpSocketImpl::beginWrite(System::EventLoop& loop, const char* buffer, size_t n)
 {
-    ssize_t ret = =;
+    ssize_t ret = 0;
 
     if(_isConnected)
         ret = ::write( this->fd(), buffer, n);
