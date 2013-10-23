@@ -483,7 +483,7 @@ std::string UdpSocketImpl::peerAddress() const
 {
     std::string address;
 
-    if(this->isConnected() )
+    //if(this->isConnected() )
     {
         SOCKADDR* saddr = reinterpret_cast<SOCKADDR*>(&_peeraddr);
     

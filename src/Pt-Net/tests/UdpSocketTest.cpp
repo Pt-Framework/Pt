@@ -129,6 +129,8 @@ class UdpSocketTest : public Pt::Unit::TestSuite
             //char* buffer = device.rbuf();
             std::size_t n = device.endRead();
 
+            std::cerr << "PEER: " << _receiver->peerAddress() << std::endl;
+
             //std::string msg(buffer, n);
             //this->reportMessage("INPUT RECVD: " + msg);
             PT_UNIT_ASSERT(n > 10);
@@ -216,6 +218,8 @@ class UdpSocketTest : public Pt::Unit::TestSuite
         {
             //char* buffer = device.rbuf();
             std::size_t n = device.endRead();
+
+            std::cerr << "PEER: " << _receiver->peerAddress() << std::endl;
 
             //std::string msg(buffer, n);
             //this->reportMessage("INPUT RECVD: " + msg);
