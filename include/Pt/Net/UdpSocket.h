@@ -49,6 +49,8 @@ class PT_NET_API UdpSocket : public System::IODevice
                 : _flags(0)
                 {}
 
+                // TODO: add HopLimit/TTL
+
             private:
                 unsigned long _flags;
         };

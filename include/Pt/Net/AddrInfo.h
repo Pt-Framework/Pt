@@ -47,9 +47,11 @@ class AddrInfoImpl;
     does not require to call the resolver again.
 
     @todo Defer hostname resolution until connect
-	@todo Add enum for broadcast, server, etc... addresses:
-	      udpSocket.setTarget( AddrInfo("192.168.1.255", 8000, AddrInfo::Broadcast) );
-		  tcpServer.bind( AddrInfo("192.168.1.255", 8000, AddrInfo::Server) );
+    @todo Implement a class that can either hold a hostname string or an
+          address structure and is copyable.
+    @todo Add enum for broadcast, server, etc... addresses:
+          udpSocket.setTarget( AddrInfo("192.168.1.255", 8000, AddrInfo::Broadcast) );
+          tcpServer.bind( AddrInfo("192.168.1.255", 8000, AddrInfo::Server) );
  */
 class PT_NET_API AddrInfo
 {

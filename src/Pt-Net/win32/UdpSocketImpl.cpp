@@ -98,6 +98,7 @@ void UdpSocketImpl::close()
     _fd = INVALID_SOCKET;
     _isConnected = false;
     _isBound = false;
+
     _hopLimit = DefaultHopLimit;
 }
 
@@ -134,7 +135,7 @@ void UdpSocketImpl::bind(const AddrInfo& ai, const UdpSocket::Options&)
     {
         if( _isConnected )
         {
-            if(it->ai_family != _peeraddr.ss_family)
+            if(it->ai_family != _sendAddr.ss_family)
                 continue;
         }
         else if( _isBound )
@@ -224,7 +225,7 @@ void UdpSocketImpl::connect(const AddrInfo& ai)
         }
         else if( _isConnected )
         {
-            if(it->ai_family != _peeraddr.ss_family)
+            if(it->ai_family != _sendAddr.ss_family)
                 this->close();
         }
 
@@ -256,7 +257,7 @@ void UdpSocketImpl::connect(const AddrInfo& ai)
             }
         }
 
-        std::memmove(&_peeraddr, it->ai_addr, it->ai_addrlen);
+        std::memmove(&_sendAddr, it->ai_addr, it->ai_addrlen);
 
         if( 0 == ::connect(_fd, it->ai_addr, it->ai_addrlen) )
         {
@@ -285,7 +286,7 @@ void UdpSocketImpl::setTarget(const AddrInfo& ai)
         }
         else if( _isConnected )
         {
-            if(it->ai_family != _peeraddr.ss_family)
+            if(it->ai_family != _sendAddr.ss_family)
                 this->close();
         }
 
@@ -317,7 +318,7 @@ void UdpSocketImpl::setTarget(const AddrInfo& ai)
             }
         }
 
-        std::memmove(&_peeraddr, it->ai_addr, it->ai_addrlen);
+        std::memmove(&_sendAddr, it->ai_addr, it->ai_addrlen);
         return;
     }
 
@@ -350,7 +351,9 @@ void UdpSocketImpl::setHopLimit(unsigned int n)
     if(_fd < 0 || n == DefaultHopLimit)
         return;
 
-    sockaddr_storage* sa = _isBound ? &_peeraddr : &_servaddr;
+    // TODO: move this to UdpOptions
+
+    sockaddr_storage* sa = _isBound ? &_servaddr : &_sendAddr;
     if(sa->ss_family == AF_INET)
     {
         unsigned char ttl = static_cast<unsigned char>(_hopLimit);
@@ -463,7 +466,7 @@ std::string UdpSocketImpl::socketAddress() const
 {
     std::string address;
 
-    if(this->isBound() )
+    if( this->isBound() )
     {
         SOCKADDR* saddr = reinterpret_cast<SOCKADDR*>(&_servaddr);
     
@@ -479,20 +482,21 @@ std::string UdpSocketImpl::socketAddress() const
 }
 
 
+//TODO: return a class that can contain an address struct or a hostname string
+//      and which is copyable, so we can cache it here and allocate only once
+//
+//      use AddrInfo as getaddrinfo warpper only in impl
 std::string UdpSocketImpl::peerAddress() const
 {
     std::string address;
 
-    //if(this->isConnected() )
+    SOCKADDR* saddr = reinterpret_cast<SOCKADDR*>(&_peeraddr);
+    char addrStr[32] = {0};
+    char serviceStr[32] = {0};
+
+    if( 0 == getnameinfo(saddr, sizeof(_peeraddr), addrStr, 32, serviceStr, 32, NI_NUMERICHOST) )
     {
-        SOCKADDR* saddr = reinterpret_cast<SOCKADDR*>(&_peeraddr);
-    
-        DWORD len = 32;
-        TCHAR adr[32];
-        WSAAddressToString(saddr, sizeof(SOCKADDR), NULL, adr, &len);
-    
-        for(unsigned n = 0; n < len; n++)
-            address.push_back( int(adr[n]) );
+        address = addrStr;
     }
 
     return address;
@@ -536,9 +540,6 @@ size_t UdpSocketImpl::read(char* buffer, size_t count, bool& eof)
     WSABUF recvbuf;
     recvbuf.buf = buffer;
     recvbuf.len = count;
-
-    // TODO: do not write to _peeraddr, so setTarget address is kept until
-    //       it is called again. This matches the behaviour of WinRT
 
     //TODO2: Add enum for broadcast, server, etc... addresses so we can get
     //       rid of setBroadcast
@@ -620,9 +621,9 @@ size_t UdpSocketImpl::endRead(System::EventLoop& loop, char* buffer, size_t n, b
 
 size_t UdpSocketImpl::write(const char* buffer, size_t count)
 {
-    int addrlen = sizeof(_peeraddr);
+    int addrlen = sizeof(_sendAddr);
     int len = sendto( _fd, buffer, count, 
-                      0, (sockaddr*)&_peeraddr, addrlen );
+                      0, (sockaddr*)&_sendAddr, addrlen );
 
     if( len == -1 && WSAGetLastError() == WSAEWOULDBLOCK)
     {
@@ -633,7 +634,7 @@ size_t UdpSocketImpl::write(const char* buffer, size_t count)
         this->waitSelect(0, &fds, 0, _timeout);
 
         len = sendto( _fd, buffer, count, 0,
-                        (sockaddr*) &_peeraddr, addrlen );
+                        (sockaddr*) &_sendAddr, addrlen );
 
         if(len < 0)
             throw System::IOError("sendto");
@@ -657,7 +658,7 @@ size_t UdpSocketImpl::beginWrite(System::EventLoop& loop, const char* buffer, si
     DWORD numberOfBytesSent = 0;
 
     int rc = WSASendTo( _fd, &_sendBuffer, 1, &numberOfBytesSent, 0,
-                        (sockaddr*)&_peeraddr, sizeof(_peeraddr), NULL, NULL);
+                        (sockaddr*)&_sendAddr, sizeof(_sendAddr), NULL, NULL);
 
     if(rc == SOCKET_ERROR)
     {
@@ -690,7 +691,7 @@ size_t UdpSocketImpl::endWrite(System::EventLoop& loop, const char* buffer, size
 
     DWORD bytesSend = 0;
     int rc = WSASendTo(_fd, &_sendBuffer, 1, &bytesSend, 0, 
-                       (sockaddr*)&_peeraddr, sizeof(_peeraddr), NULL, NULL);
+                       (sockaddr*)&_sendAddr, sizeof(_sendAddr), NULL, NULL);
 
     //Set socket to non-blocking mode
     argp = 1;

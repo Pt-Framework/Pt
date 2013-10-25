@@ -128,6 +128,7 @@ class UdpSocketImpl
         bool                         _isConnected;
         bool                         _isBound;
         mutable sockaddr_storage     _peeraddr;
+        mutable sockaddr_storage     _sendAddr;
         mutable sockaddr_storage     _servaddr;
         unsigned int                 _hopLimit;
         long                         _eventFlags;

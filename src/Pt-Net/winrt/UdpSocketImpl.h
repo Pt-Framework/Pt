@@ -127,15 +127,15 @@ class UdpSocketImpl
         bool _isConnected;
         bool _isBound;
         System::Mutex _mtx;
-        Windows::Networking::Sockets::DatagramSocket^ _socket;		
+        Windows::Networking::Sockets::DatagramSocket^ _socket;        
         Windows::Foundation::IAsyncAction^ _connectOp;
-		Windows::Foundation::IAsyncOperation<Windows::Storage::Streams::IOutputStream^>^ _getOutputOp;
+        Windows::Foundation::IAsyncOperation<Windows::Storage::Streams::IOutputStream^>^ _getOutputOp;
         Windows::Foundation::IAsyncAction^ _bindOp;
         std::vector<Message> _messages;
         Windows::Networking::HostName^ _currentPeerAddress;
         Platform::String^ _currentPeerPort;
         Windows::Storage::Streams::DataWriter^ _writer;
-		Windows::Storage::Streams::DataWriterStoreOperation^ _storeOp;
+        Windows::Storage::Streams::DataWriterStoreOperation^ _storeOp;
         size_t _storeCount;
 };
 

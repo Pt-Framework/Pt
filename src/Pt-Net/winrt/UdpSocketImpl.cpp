@@ -371,7 +371,7 @@ std::string UdpSocketImpl::peerAddress() const
     std::wstring waddr;
 
     // TODO: use CanonicalName ?
-    String^ addr = _socket->Information->RemoteAddress->DisplayName;
+    String^ addr = _currentPeerAddress->DisplayName;
 
     if(addr)
         waddr = addr->Data();
