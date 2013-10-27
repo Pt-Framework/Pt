@@ -356,8 +356,7 @@ std::string UdpSocketImpl::socketAddress() const
 {
     std::wstring waddr;
 
-    // TODO: use CanonicalName ?
-    String^ addr = _socket->Information->LocalAddress->DisplayName;
+    String^ addr = _socket->Information->LocalAddress->RawName;
 
     if(addr)
         waddr = addr->Data();
@@ -370,8 +369,7 @@ std::string UdpSocketImpl::peerAddress() const
 {
     std::wstring waddr;
 
-    // TODO: use CanonicalName ?
-    String^ addr = _currentPeerAddress->DisplayName;
+	String^ addr = _currentPeerAddress->RawName;;
 
     if(addr)
         waddr = addr->Data();
@@ -464,7 +462,7 @@ size_t UdpSocketImpl::beginWrite(System::EventLoop& loop,
 
         _getOutputOp->Completed = ref new AsyncOperationCompletedHandler<IOutputStream^>
         (
-            [&](IAsyncOperation<IOutputStream^>^ output, AsyncStatus asyncStatus)
+            [&, buffer, bufSize](IAsyncOperation<IOutputStream^>^ output, AsyncStatus asyncStatus)
             {
                 // access to _writer reference itself is atomic, so we do not
                 // have to lock when setting the reference.
