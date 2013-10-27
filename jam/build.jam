@@ -1206,12 +1206,12 @@ actions As
 
 actions C++
 {
-    $(C++) -c $(C++FLAGS) $(OPTIM) $(WARN) -I$(HDRS) -o $(<) $(>) 
+    $(C++) -c $(C++FLAGS) $(OPTIM) $(WARN) -I$(HDRS) -I$(STDHDRS) -o $(<) $(>) 
 }
 
 actions Cc
 {
-    $(CC) -c $(CCFLAGS) $(OPTIM) $(WARN) -I$(HDRS) -o $(<) $(>)
+    $(CC) -c $(CCFLAGS) $(OPTIM) $(WARN) -I$(HDRS) -I$(STDHDRS) -o $(<) $(>)
 }
 
 actions Chgrp

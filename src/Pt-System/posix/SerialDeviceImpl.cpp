@@ -46,6 +46,9 @@
 #define CRTSCTS (CTSXON | RTSXOFF)
 #endif
 
+#if defined(__ANDROID__) && ! defined(_POSIX_VDISABLE)
+    #define _POSIX_VDISABLE _PC_VDISABLE
+#endif
 
 namespace Pt {
 

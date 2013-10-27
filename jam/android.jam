@@ -1,0 +1,27 @@
+##############################################################################
+# Platform specific prefixes and suffixes
+##############################################################################
+
+PRELIB = lib ;
+SUFLIB = .a ;
+SUFDLL = .so ;
+SUFEXE = "" ;
+SUFDBG = "" ;
+SUFOBJ = .o ;
+
+##############################################################################
+# Default toolkit
+##############################################################################
+
+TOOLSET ?= gcc ;
+TOOLSET_ROOT = $(ANDROID_NDK)\\toolchains\\arm-linux-androideabi-4.8\\prebuilt\\windows-x86_64\\bin\\arm-linux-androideabi- ;
+
+STDHDRS += $(ANDROID_NDK)\\sources\\cxx-stl\\gnu-libstdc++\\4.8\\include ;
+STDHDRS += $(ANDROID_NDK)\\sources\\cxx-stl\\gabi++\\include ;
+STDHDRS += $(ANDROID_NDK)\\sources\\cxx-stl\\gnu-libstdc++\\4.8\\libs\\armeabi\\include ;
+
+CCFLAGS += --sysroot="$(ANDROID_NDK)\\platforms\\android-18\\arch-arm" ;
+C++FLAGS += --sysroot="$(ANDROID_NDK)\\platforms\\android-18\\arch-arm" ;
+
+LINKFLAGS += -lgnustl_shared -L$(ANDROID_NDK)\\sources\\cxx-stl\\gnu-libstdc++\\4.8\\libs\\armeabi ;
+LINKFLAGS += --sysroot="$(ANDROID_NDK)\\platforms\\android-18\\arch-arm" ;

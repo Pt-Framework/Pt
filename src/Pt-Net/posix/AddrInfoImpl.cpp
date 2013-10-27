@@ -34,7 +34,7 @@
 #include <iostream>
 #include <cstring>
 #include <arpa/inet.h> // inet_ntop
-#include <ifaddrs.h> // getifaddr
+#include <netdb.h> // getifaddr
 
 namespace Pt {
 

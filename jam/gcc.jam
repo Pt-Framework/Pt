@@ -83,14 +83,14 @@ rule TryBuild
 rule TryBuildCc
 {
     local _cflags = $(CCFLAGS) $(2) ;
-    return [ TryBuild $(CC) : $(1) : $(2) : $(3) : $(4) ] ;
+    return [ TryBuild $(CC) : $(1) : $(_cflags) : $(3) : $(4) ] ;
 }
 
 
 rule TryBuildC++
 {
     local _cflags = $(C++FLAGS) $(2) ;
-    return [ TryBuild $(C++) : $(1) : $(2) : $(3) : $(4) ] ;
+    return [ TryBuild $(C++) : $(1) : $(_cflags) : $(3) : $(4) ] ;
 }
 
 
@@ -163,6 +163,7 @@ rule CheckCc
 
     WARN ?= -Wall ;
 
+	Configure STDHDRS ;
     Configure CCFLAGS ;
     Configure WARN ;
     Configure OPTIM ;
