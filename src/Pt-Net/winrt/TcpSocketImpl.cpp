@@ -238,24 +238,19 @@ size_t TcpSocketImpl::beginRead(System::EventLoop& loop,
         _reader->InputStreamOptions = InputStreamOptions::Partial;
     }
 
-    const size_t avail = _reader->UnconsumedBufferLength;
-    if(avail > 0)
+    size_t dataToRead = _reader->UnconsumedBufferLength;
+	dataToRead = std::min(dataToRead, bufSize);
+    
+	if(dataToRead > 0)
     {
-        //TODO: use ReadBytes
-        unsigned n = 0;
-        for( ; n < avail && n < bufSize; ++n)
-        {
-            buffer[n] = static_cast<char>( _reader->ReadByte() );
-        }
-
-        return n;
+		_reader->ReadBytes(::Platform::ArrayReference<unsigned char>((unsigned char*) buffer,dataToRead)); 
+		return dataToRead;
     }
 
     // TODO: does this report EOF? Or do we have to count the bytes until
     // we reach IRandomAccessStream.Size?
 
     _loadOp = _reader->LoadAsync(bufSize);
-
 
     _loadOp->Completed = ref new AsyncOperationCompletedHandler<unsigned int>
     (
@@ -291,23 +286,24 @@ size_t TcpSocketImpl::endRead(System::EventLoop& loop,
         throw System::IOError("read failed");
     }
 
-    const size_t avail = _loadOp->GetResults();
-    if(avail == 0)
+    size_t dataToRead = _loadOp->GetResults();
+	_loadOp = nullptr;
+
+    if(dataToRead == 0)
     {
-        eof = true;
+        eof = true;		
+		return 0;
     }
-    
-    _loadOp = nullptr;
+
+
+	dataToRead = std::min(dataToRead, bufSize);
+
+	_reader->ReadBytes(::Platform::ArrayReference<unsigned char>((unsigned char*) buffer,dataToRead));
 
     //TODO: use ReadBytes 
     // http://stackoverflow.com/questions/10520335/how-to-wrap-a-char-buffer-in-a-winrt-ibuffer-in-c
-    unsigned n = 0;
-    for( ; n < avail && n < bufSize; ++n)
-    {
-        buffer[n] = static_cast<char>( _reader->ReadByte() );
-    }
-
-    return n;
+    
+	return dataToRead;
 }
 
 
@@ -324,22 +320,12 @@ size_t TcpSocketImpl::beginWrite(System::EventLoop& loop,
     log_debug("beginWrite " << bufSize);
 
     if( ! _writer )
-    {
         _writer = ref new DataWriter(_socket->OutputStream);
-    }
 
-    // UnstoredBufferLength
-    const unsigned char* ubuffer = reinterpret_cast<const unsigned char*>(buffer);
+	_writer->WriteBytes(::Platform::ArrayReference<unsigned char>((unsigned char*) buffer,bufSize));
 
-    unsigned n = 0;
-    for( ; n < bufSize; ++n)
-    {
-        _writer->WriteByte( ubuffer[n] );
-    }
-
-    _storeCount = n;
-    _storeOp = _writer->StoreAsync(); // FlushAsync
-    
+    _storeCount = bufSize;
+    _storeOp = _writer->StoreAsync(); // FlushAsync    
 
     _storeOp->Completed = ref new AsyncOperationCompletedHandler<unsigned int>
     (
@@ -374,6 +360,7 @@ size_t TcpSocketImpl::endWrite(System::EventLoop& loop, const char* buffer, size
     }
 
     const size_t written = _storeOp->GetResults();
+	assert(_storeCount == written);
 
     _storeOp = nullptr;
     return _storeCount;

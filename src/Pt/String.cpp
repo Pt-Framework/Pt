@@ -127,13 +127,13 @@ void basic_string<Pt::Char>::swap(basic_string& str)
     {
         if (str.isShortString())
         {
-            for (unsigned nn = 0; nn < _N; ++nn)
+            for (unsigned nn = 0; nn < _nN; ++nn)
                 std::swap(shortStringData()[nn], str.shortStringData()[nn]);
         }
         else
         {
             Ptr p = str._d._u._p;
-            for (unsigned nn = 0; nn < _N; ++nn)
+            for (unsigned nn = 0; nn < _nN; ++nn)
                 str.shortStringData()[nn] = shortStringData()[nn];
             markLongString();
             _d._u._p = p;
@@ -144,7 +144,7 @@ void basic_string<Pt::Char>::swap(basic_string& str)
         if (str.isShortString())
         {
             Ptr p = _d._u._p;
-            for (unsigned nn = 0; nn < _N; ++nn)
+            for (unsigned nn = 0; nn < _nN; ++nn)
                 shortStringData()[nn] = str.shortStringData()[nn];
             str.markLongString();
             str._d._u._p = p;
