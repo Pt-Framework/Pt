@@ -79,8 +79,8 @@ class TcpSocketImpl : public System::IODeviceImpl
         TcpSocket& _socket;
         bool _errorPending;
         bool _isConnected;
-        AddrInfo _addrInfo;
-        AddrInfoImpl::const_iterator _addrInfoPtr;
+        Resolver _addrInfo;
+        Resolver::const_iterator _addrInfoPtr;
 };
 
 } // namespace Net

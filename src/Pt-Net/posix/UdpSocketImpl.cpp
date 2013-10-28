@@ -55,7 +55,7 @@ UdpSocketImpl::UdpSocketImpl(UdpSocket& socket)
 , _broadcast(false)
 , _isConnected(false)
 , _isBound(false)
-, _peeraddrLen(0)
+, _sendaddrLen(0)
 {
 }
 
@@ -75,7 +75,8 @@ void UdpSocketImpl::close()
     System::IODeviceImpl::close();
     _isConnected = false;
     _isBound = false;
-    _peeraddrLen = 0;
+    
+    _sendaddrLen = 0;
 }
 
 
@@ -99,21 +100,24 @@ void UdpSocketImpl::endBind(System::EventLoop& loop)
 }
 
 
-void UdpSocketImpl::bind(const AddrInfo& ai, const UdpSocket::Options& o)
+void UdpSocketImpl::bind(const AddrInfo& ain, const UdpSocket::Options& o)
 {
     const int on = 1;
     bool addrInUse = false;
+    
+    Resolver r;
+    r.resolve( *ain.impl() );
 
-    for (AddrInfoImpl::const_iterator it = ai.impl()->begin(); it != ai.impl()->end(); ++it)
+    for (Resolver::const_iterator it = r.begin(); it != r.end(); ++it)
     {
         if( _isConnected )
         {
-            if(it->ai_family != reinterpret_cast <struct sockaddr*>(&_peeraddr)->sa_family)
+            if(it->ai_family != _sendaddr.ss_family)
                 continue;
         }
         else if( _isBound )
         {
-            if(it->ai_family != reinterpret_cast <struct sockaddr*>(&_servaddr)->sa_family)
+            if(it->ai_family != _servaddr.ss_family)
                 this->close();
         }
 
@@ -170,7 +174,7 @@ void UdpSocketImpl::bind(const AddrInfo& ai, const UdpSocket::Options& o)
     if(addrInUse)
         throw AddressInUse();
     else
-        throw System::AccessFailed( ai.host() );
+        throw System::AccessFailed( ain.host() );
 }
 
 
@@ -194,11 +198,14 @@ void UdpSocketImpl::endConnect(System::EventLoop& loop)
 }
 
 
-void UdpSocketImpl::connect(const AddrInfo& ai)
+void UdpSocketImpl::connect(const AddrInfo& ain)
 {
-    AddrInfoImpl::const_iterator it = ai.impl()->begin();
+    Resolver ainfo;
+    ainfo.resolve( *ain.impl() );
 
-    for( ; it != ai.impl()->end(); ++it)
+    Resolver::const_iterator it = ainfo.begin();
+
+    for( ; it != ainfo.end(); ++it)
     {
         if( _isBound )
         {
@@ -207,7 +214,7 @@ void UdpSocketImpl::connect(const AddrInfo& ai)
         }
         else if( _isConnected )
         {
-            if(it->ai_family != reinterpret_cast <struct sockaddr*>(&_peeraddr)->sa_family)
+            if(it->ai_family != reinterpret_cast <struct sockaddr*>(&_sendaddr)->sa_family)
                 this->close();
         }
 
@@ -232,8 +239,8 @@ void UdpSocketImpl::connect(const AddrInfo& ai)
             }
         }
 
-        std::memmove(&_peeraddr, it->ai_addr, it->ai_addrlen);
-        _peeraddrLen = it->ai_addrlen;
+        std::memmove(&_sendaddr, it->ai_addr, it->ai_addrlen);
+        _sendaddrLen = it->ai_addrlen;
 
         if( 0 == ::connect(this->fd(), it->ai_addr, it->ai_addrlen) )
         {
@@ -245,15 +252,18 @@ void UdpSocketImpl::connect(const AddrInfo& ai)
             this->close();
     }
 
-    throw System::AccessFailed( ai.host() );
+    throw System::AccessFailed( ain.host() );
 }
 
 
-void UdpSocketImpl::setTarget(const AddrInfo& ai)
+void UdpSocketImpl::setTarget(const AddrInfo& ain)
 {
-    AddrInfoImpl::const_iterator it = ai.impl()->begin();
+    Resolver ainfo;
+    ainfo.resolve( *ain.impl() );
 
-    for( ; it != ai.impl()->end(); ++it)
+    Resolver::const_iterator it = ainfo.begin();
+
+    for( ; it != ainfo.end(); ++it)
     {
         if( _isBound )
         {
@@ -262,7 +272,7 @@ void UdpSocketImpl::setTarget(const AddrInfo& ai)
         }
         else if( _isConnected )
         {
-            if(it->ai_family != reinterpret_cast <struct sockaddr*>(&_peeraddr)->sa_family)
+            if(it->ai_family != reinterpret_cast <struct sockaddr*>(&_sendaddr)->sa_family)
                 this->close();
         }
 
@@ -287,12 +297,12 @@ void UdpSocketImpl::setTarget(const AddrInfo& ai)
             }
         }
 
-        std::memmove(&_peeraddr, it->ai_addr, it->ai_addrlen);
-        _peeraddrLen = it->ai_addrlen;
+        std::memmove(&_sendaddr, it->ai_addr, it->ai_addrlen);
+        _sendaddrLen = it->ai_addrlen;
         return;
     }
 
-    throw System::AccessFailed( ai.host() );
+    throw System::AccessFailed( ain.host() );
 }
 
 
@@ -319,8 +329,12 @@ void UdpSocketImpl::joinMulticastGroup(const std::string& ipaddr)
     if( this->fd() < 0 )
         return;
 
-    AddrInfo ai(ipaddr, 0, true);
-    for(AddrInfoImpl::const_iterator it = ai.impl()->begin(); it != ai.impl()->end(); ++it)
+    AddrInfo ain(ipaddr, 0, true);
+
+    Resolver ai;
+    ai.resolve( *ain.impl() );
+
+    for(Resolver::const_iterator it = ai.begin(); it != ai.end(); ++it)
     {
         if(it->ai_family == AF_INET)
         {
@@ -361,8 +375,12 @@ void UdpSocketImpl::dropMulticastGroup(const std::string& ipaddr)
     if( this->fd() < 0 )
         return;
 
-    AddrInfo ai(ipaddr, 0, true);
-    for(AddrInfoImpl::const_iterator it = ai.impl()->begin(); it != ai.impl()->end(); ++it)
+    AddrInfo ain(ipaddr, 0, true);
+
+    Resolver ai;
+    ai.resolve( *ain.impl() );
+
+    for(Resolver::const_iterator it = ai.begin(); it != ai.end(); ++it)
     {
         if(it->ai_family == AF_INET)
         {
@@ -405,26 +423,28 @@ std::string UdpSocketImpl::socketAddress() const
 }
 
 
-std::string UdpSocketImpl::peerAddress() const
+const AddrInfo& UdpSocketImpl::peerAddress() const
 {
-    std::string ret;
-    sockaddrToString(_peeraddr, ret);
-    return ret;
+    return _peerAddr;
 }
 
 
 size_t UdpSocketImpl::beginRead(System::EventLoop& loop, char* buffer, size_t n, bool& eof)
 {
     log_debug("begin read on fd:" << _ioh.fd);
-    socklen_t addrlen = sizeof(_peeraddr);
+
+    sockaddr_storage peerAddr;
+    socklen_t addrlen = sizeof(peerAddr);
+    sockaddr* addr = reinterpret_cast<sockaddr*>(&peerAddr);
 
     for(;;)
     {
-        ssize_t ret = ::recvfrom( this->fd(), buffer, n, 0, (sockaddr*)&_peeraddr, &addrlen );
+        ssize_t ret = ::recvfrom( this->fd(), buffer, n, 0, addr, &addrlen );
         if (ret > 0)
         {
             log_debug("read:" << ret << " bytes");
-            _peeraddrLen = addrlen;
+            
+            _peerAddr.impl()->init(addr, addrlen);
             return static_cast<size_t>(ret);
         }
 
@@ -443,11 +463,14 @@ size_t UdpSocketImpl::beginRead(System::EventLoop& loop, char* buffer, size_t n,
 size_t UdpSocketImpl::read( char* buffer, size_t count, bool& eof )
 {
     ssize_t ret = 0;
-    socklen_t addrlen = sizeof(_peeraddr);
+
+    sockaddr_storage peerAddr;
+    socklen_t addrlen = sizeof(peerAddr);
+    sockaddr* addr = reinterpret_cast<sockaddr*>(&peerAddr);
 
     while(true)
     {
-        ret = ::recvfrom( this->fd(), buffer, count, 0, (sockaddr*)&_peeraddr, &_peeraddrLen );
+        ret = ::recvfrom( this->fd(), buffer, count, 0, addr, &addrlen );
         if(ret > 0)
             break;
 
@@ -467,7 +490,7 @@ size_t UdpSocketImpl::read( char* buffer, size_t count, bool& eof )
         }
     }
 
-    _peeraddrLen = addrlen;
+    _peerAddr.impl()->init(addr, addrlen);
     return ret;
 }
 
@@ -479,7 +502,7 @@ size_t UdpSocketImpl::beginWrite(System::EventLoop& loop, const char* buffer, si
     if(_isConnected)
         ret = ::write( this->fd(), buffer, n);
     else
-        ret = ::sendto( this->fd(), buffer, n, 0, (sockaddr*)&_peeraddr, _peeraddrLen);
+        ret = ::sendto( this->fd(), buffer, n, 0, (sockaddr*)&_sendaddr, _sendaddrLen);
 
     if (ret > 0)
         return static_cast<size_t>(ret);
@@ -502,7 +525,7 @@ size_t UdpSocketImpl::write( const char* buffer, size_t count )
         if(_isConnected)
             ret = ::write( this->fd(), buffer, count);
         else
-            ret = ::sendto( this->fd(), buffer, count, 0, (sockaddr*)&_peeraddr, _peeraddrLen);
+            ret = ::sendto( this->fd(), buffer, count, 0, (sockaddr*)&_sendaddr, _sendaddrLen);
 
         if(ret >= 0)
             break;

@@ -90,7 +90,7 @@ class UdpSocketImpl : public System::IODeviceImpl
 
         std::string socketAddress() const;
 
-        std::string peerAddress() const;
+        const AddrInfo& peerAddress() const;
 
         size_t beginRead(System::EventLoop& loop, char* buffer, size_t n, bool& eof);
 
@@ -104,9 +104,10 @@ class UdpSocketImpl : public System::IODeviceImpl
         bool             _broadcast;
         bool             _isConnected;
         bool             _isBound;
-        sockaddr_storage _peeraddr;
-        socklen_t        _peeraddrLen;
+        AddrInfo         _peerAddr;
         sockaddr_storage _servaddr;
+        sockaddr_storage _sendaddr;
+        socklen_t        _sendaddrLen;
 };
 
 } // namespace Net

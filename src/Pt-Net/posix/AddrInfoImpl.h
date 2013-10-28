@@ -28,7 +28,7 @@
 #ifndef PT_NET_ADDRINFOIMPL_H
 #define PT_NET_ADDRINFOIMPL_H
 
-#include <Pt/RefCounted.h>
+#include <Pt/NonCopyable.h>
 #include <string>
 #include <iterator>
 #include <cassert>
@@ -40,11 +40,69 @@ namespace Pt {
 
 namespace Net {
 
-class AddrInfoImpl : public Pt::RefCounted
+class AddrInfoImpl
 {
     public:
-        class const_iterator : public std::iterator<std::forward_iterator_tag, addrinfo>
+        AddrInfoImpl();
+
+        AddrInfoImpl(const std::string& ipaddr, unsigned short port, bool listen);
+
+        AddrInfoImpl(const AddrInfoImpl& ipaddr);
+
+        ~AddrInfoImpl();
+
+        AddrInfoImpl& operator=(const AddrInfoImpl& ipaddr);
+
+        void init(const sockaddr* addr, size_t addrlen);
+
+        std::string host() const;
+
+        unsigned short port() const
+        { return _port; }
+
+        bool isListen() const
+        { return _listen; }
+
+        const ::sockaddr* addr() const
+        { return _addrlen > 0 ? reinterpret_cast<const sockaddr*>(&_addr) : 0; }
+
+        size_t addrlen() const
+        { return _addrlen; }
+
+        static AddrInfoImpl* ip4Any(unsigned short port);
+
+        static AddrInfoImpl* ip4Loopback(unsigned short port);
+
+        static AddrInfoImpl* ip4Broadcast(unsigned short port);
+
+        static AddrInfoImpl* ip6Any(unsigned short port);
+
+        static AddrInfoImpl* ip6Loopback(unsigned short port);
+
+    protected:
+        void clear();
+
+    private:
+        size_t _addrlen;
+        ::sockaddr_storage _addr;
+        std::string _host;
+        unsigned short _port;
+        bool _listen;
+};
+
+
+class Resolver : private NonCopyable
+{
+    public:  
+        class const_iterator
         {
+            public:
+                typedef ::addrinfo value_type;
+                typedef std::ptrdiff_t difference_type;
+                typedef std::forward_iterator_tag iterator_category;
+                typedef const ::addrinfo* pointer;
+                typedef const ::addrinfo& reference;
+
             public:
                 explicit const_iterator(struct addrinfo* ai = 0)
                 : current(ai)
@@ -84,57 +142,33 @@ class AddrInfoImpl : public Pt::RefCounted
                 }
 
             private:
-                struct addrinfo* current;
+                ::addrinfo* current;
         };
 
-        AddrInfoImpl(const std::string& host, unsigned short port, bool listen);
+    public:
+        Resolver();
 
-        ~AddrInfoImpl();
+        ~Resolver();
 
-        const std::string& host() const
-        { return _host; }
-        
-        unsigned short port() const
-        { return _port; }
-
-        const_iterator begin() const  
-        { return const_iterator(_ai); }
-
-        const_iterator end() const    
-        { return const_iterator(); }
-        
-        static AddrInfoImpl* ip4Any(unsigned short port); 
-
-        static AddrInfoImpl* ip4Loopback(unsigned short port);
-
-        static AddrInfoImpl* ip4Broadcast(unsigned short port);
-
-        static AddrInfoImpl* ip6Any(unsigned short port);
-
-        static AddrInfoImpl* ip6Loopback(unsigned short port);
-
-    protected:
-        AddrInfoImpl();
+        void resolve(const AddrInfoImpl& ai);
 
         void clear();
 
-        void init(const std::string& host, unsigned short port, const addrinfo& hints);
+        std::string host();
 
-        void initIp4Any(unsigned short port);
+        const_iterator begin() const
+        { return const_iterator(_ai); }
 
-        void initIp4Loopback(unsigned short port);
-
-        void initIp4Broadcast(unsigned short port);
-
-        void initIp6Any(unsigned short port);
-
-        void initIp6Loopback(unsigned short port);
+        const_iterator end() const
+        { return const_iterator(); }
 
     private:
-        struct addrinfo* _ai;
-        struct addrinfo* _ainfo;
-        struct addrinfo _special;
-        struct sockaddr_storage _specialAddr;
+        ::addrinfo* _ai;
+        ::addrinfo* _gainfo;
+        ::addrinfo _special;
+        ::sockaddr_storage _addr;
+
+        // TODO: place hostname string in sockaddr_storage and addrinfo
         std::string _host;
         unsigned short _port;
 };

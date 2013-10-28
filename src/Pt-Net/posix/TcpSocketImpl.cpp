@@ -106,8 +106,8 @@ void TcpSocketImpl::connect(const AddrInfo& addrInfo)
     log_trace("connect");
     assert( ! _isConnected );
 
-    _addrInfo = addrInfo;
-    _addrInfoPtr = _addrInfo.impl()->begin();
+    _addrInfo.resolve( *addrInfo.impl() );
+    _addrInfoPtr = _addrInfo.begin();
 
     this->connect();
 }
@@ -117,7 +117,7 @@ void TcpSocketImpl::connect()
 {
     for( ; ; ++_addrInfoPtr)
     {
-        if(_addrInfoPtr == _addrInfo.impl()->end())
+        if(_addrInfoPtr == _addrInfo.end())
         {
             log_info("could not connect to any address");
             throw System::AccessFailed( _addrInfo.host() );
@@ -176,14 +176,15 @@ void TcpSocketImpl::connect()
 }
 
 
-bool TcpSocketImpl::beginConnect(System::EventLoop& loop, const AddrInfo& addrInfo)
+bool TcpSocketImpl::beginConnect(System::EventLoop& loop, const AddrInfo& ai)
 {
     log_trace("begin connect");
     assert( ! _isConnected );
 
     _errorPending = false;
-    _addrInfo = addrInfo;
-    _addrInfoPtr = _addrInfo.impl()->begin();
+    
+    _addrInfo.resolve( *ai.impl() );
+    _addrInfoPtr = _addrInfo.begin();
 
     /*while(true)
     {
@@ -215,7 +216,7 @@ bool TcpSocketImpl::beginConnect(System::EventLoop& loop)
 {
     for( ; ; ++_addrInfoPtr)
     {
-        if(_addrInfoPtr == _addrInfo.impl()->end())
+        if(_addrInfoPtr == _addrInfo.end())
         {
             log_debug("connect failed to all possible addresses");
             throw System::AccessFailed( _addrInfo.host() );
