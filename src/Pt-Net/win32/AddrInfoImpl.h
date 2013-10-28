@@ -28,15 +28,16 @@
 #ifndef Pt_Net_AddrInfo_H
 #define Pt_Net_AddrInfo_H
 
+#include "Pt/WinVer.h"
+#include <Pt/Net/Api.h>
+#include <Pt/NonCopyable.h>
+#include <string>
+#include <cassert>
+
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
 
-#include "Pt/WinVer.h"
-#include <Pt/Net/Api.h>
-#include <Pt/RefCounted.h>
-#include <string>
-#include <cassert>
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <iphlpapi.h>
@@ -45,7 +46,58 @@ namespace Pt {
 
 namespace Net {
 
-class AddrInfoImpl : public Pt::RefCounted
+class AddrInfoImpl
+{
+    public:
+        AddrInfoImpl();
+
+        AddrInfoImpl(const std::string& ipaddr, unsigned short port, bool listen);
+
+        AddrInfoImpl(const AddrInfoImpl& ipaddr);
+
+        ~AddrInfoImpl();
+
+        AddrInfoImpl& operator=(const AddrInfoImpl& ipaddr);
+
+        void init(const sockaddr* addr, size_t addrlen);
+
+        std::string host() const;
+
+        unsigned short port() const
+        { return _port; }
+
+        bool isListen() const
+        { return _listen; }
+
+        const ::sockaddr* addr() const
+        { return _addrlen > 0 ? reinterpret_cast<const sockaddr*>(&_addr) : 0; }
+
+        size_t addrlen() const
+        { return _addrlen; }
+
+        static AddrInfoImpl* ip4Any(unsigned short port);
+
+        static AddrInfoImpl* ip4Loopback(unsigned short port);
+
+        static AddrInfoImpl* ip4Broadcast(unsigned short port);
+
+        static AddrInfoImpl* ip6Any(unsigned short port);
+
+        static AddrInfoImpl* ip6Loopback(unsigned short port);
+
+    protected:
+        void clear();
+
+    private:
+        size_t _addrlen;
+        ::sockaddr_storage _addr;
+        std::string _host;
+        unsigned short _port;
+        bool _listen;
+};
+
+
+class Resolver : private NonCopyable
 {
     public:  
         class const_iterator
@@ -100,9 +152,15 @@ class AddrInfoImpl : public Pt::RefCounted
         };
 
     public:
-        AddrInfoImpl(const std::string& ipaddr, unsigned short port, bool listen);
+        Resolver();
 
-        ~AddrInfoImpl();
+        ~Resolver();
+
+        void resolve(const AddrInfoImpl& ai);
+
+        void clear();
+
+        std::string host();
 
         const_iterator begin() const
         { return const_iterator(_ai); }
@@ -110,44 +168,13 @@ class AddrInfoImpl : public Pt::RefCounted
         const_iterator end() const
         { return const_iterator(); }
 
-        inline const std::string& host() const
-        { return _host; }
-
-        inline unsigned short port() const
-        { return _port; }
-
-        static AddrInfoImpl* ip4Any(unsigned short port);
-
-        static AddrInfoImpl* ip4Loopback(unsigned short port);
-
-        static AddrInfoImpl* ip4Broadcast(unsigned short port);
-
-        static AddrInfoImpl* ip6Any(unsigned short port);
-
-        static AddrInfoImpl* ip6Loopback(unsigned short port);
-
-    protected:
-        AddrInfoImpl();
-
-        void clear();
-
-        void init(const std::string& ipaddr, unsigned short port, const addrinfo& hints);
-
-        void initIp4Any(unsigned short port);
-
-        void initIp4Loopback(unsigned short port);
-
-        void initIp4Broadcast(unsigned short port);
-
-        void initIp6Any(unsigned short port);
-
-        void initIp6Loopback(unsigned short port);
-
     private:
         ::addrinfo* _ai;
-        ::addrinfo* _ainfo;
+        ::addrinfo* _gainfo;
         ::addrinfo _special;
-        ::sockaddr_storage _specialAddr;
+        ::sockaddr_storage _addr;
+
+        // TODO: place hostname string in sockaddr_storage and addrinfo
         std::string _host;
         unsigned short _port;
 };

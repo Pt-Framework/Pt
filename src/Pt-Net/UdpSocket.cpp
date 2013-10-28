@@ -219,7 +219,7 @@ std::string UdpSocket::socketAddress() const
 }
 
 
-std::string UdpSocket::peerAddress() const
+const AddrInfo& UdpSocket::peerAddress() const
 {
     return _impl->peerAddress();
 }

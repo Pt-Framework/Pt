@@ -116,8 +116,8 @@ class TcpSocketImpl
         int waitSelect(fd_set* rfds, fd_set* wfds, fd_set* efds, size_t timeout);
 
     private:
-        AddrInfo _addrInfo;
-        AddrInfoImpl::const_iterator _addrInfoPtr;
+        Resolver _addrInfo;
+        Resolver::const_iterator _addrInfoPtr;
         bool _errorPending;
         SOCKET _fd;
         std::size_t _timeout;

@@ -46,18 +46,18 @@ class AddrInfoImpl;
     might cache the resolved addresses in the %AddrInfo, so that a reconnect 
     does not require to call the resolver again.
 
-    @todo Defer hostname resolution until connect
-    @todo Implement a class that can either hold a hostname string or an
-          address structure and is copyable.
     @todo Add enum for broadcast, server, etc... addresses:
           udpSocket.setTarget( AddrInfo("192.168.1.255", 8000, AddrInfo::Broadcast) );
           tcpServer.bind( AddrInfo("192.168.1.255", 8000, AddrInfo::Server) );
  */
 class PT_NET_API AddrInfo
 {
+    // TODO: rename Endpoint
+
     public:
         AddrInfo();
 
+        //! @internal
         explicit AddrInfo(AddrInfoImpl* impl);
 
         AddrInfo(const std::string& host, unsigned short port, bool passive = false);
@@ -68,7 +68,7 @@ class PT_NET_API AddrInfo
 
         AddrInfo& operator=(const AddrInfo& src);
 
-        const std::string& host() const;
+        std::string host() const;
 
         unsigned short port() const;
 
@@ -91,23 +91,6 @@ class PT_NET_API AddrInfo
     private:
         AddrInfoImpl* _impl;
 };
-
-
-inline AddrInfo::AddrInfo()
-: _impl(0)
-{ 
-    // TODO: impl should not be nullptr !!!
-}
-
-inline AddrInfoImpl* AddrInfo::impl()               
-{ 
-    return _impl; 
-}
-
-inline const AddrInfoImpl* AddrInfo::impl() const   
-{ 
-    return _impl; 
-}
 
 } // namespace Net
 

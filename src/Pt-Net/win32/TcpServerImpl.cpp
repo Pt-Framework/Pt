@@ -126,14 +126,15 @@ void TcpServerImpl::listen(const std::string& ipaddr, unsigned short int port,
 }
 
 
-void TcpServerImpl::listen(const AddrInfo& ai, const TcpServer::Options& options)
+void TcpServerImpl::listen(const AddrInfo& ain, const TcpServer::Options& options)
 {
     BOOL reuseAddr = TRUE;
     static const int on = 1;
 
-    // getaddrinfo() may return more than one addrinfo structure, so work
-    // them all out, until we find a pretty useable one
-    for (AddrInfoImpl::const_iterator it = ai.impl()->begin(); it != ai.impl()->end(); ++it)
+    Resolver r;
+    r.resolve( *ain.impl() );
+
+    for (Resolver::const_iterator it = r.begin(); it != r.end(); ++it)
     {
         try
         {
@@ -190,7 +191,7 @@ void TcpServerImpl::listen(const AddrInfo& ai, const TcpServer::Options& options
     close();
 
     if (WSAGetLastError() == WSAEADDRINUSE)
-        throw AddressInUse( ai.host(), ai.port() );
+        throw AddressInUse( ain.host(), ain.port() );
     else
         throw System::IOError("bind");
 }

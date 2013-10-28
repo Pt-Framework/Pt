@@ -102,7 +102,7 @@ class PT_NET_API UdpSocket : public System::IODevice
 
         std::string socketAddress() const;
 
-        std::string peerAddress() const;
+        const AddrInfo& peerAddress() const;
 
     protected:
         // inherit doc

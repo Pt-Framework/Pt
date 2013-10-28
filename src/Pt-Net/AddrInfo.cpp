@@ -28,17 +28,21 @@
 
 #include "AddrInfoImpl.h"
 #include "Pt/Net/AddrInfo.h"
-#include "Pt/System/IOError.h"
-#include <sstream>
 
 namespace Pt {
 
 namespace Net {
 
+AddrInfo::AddrInfo()
+: _impl(0)
+{ 
+    _impl = new AddrInfoImpl();
+}
+
+
 AddrInfo::AddrInfo(AddrInfoImpl* impl)
 : _impl(impl)
 {
-    _impl->addRef();
 }
 
 
@@ -46,42 +50,42 @@ AddrInfo::AddrInfo(const std::string& host, unsigned short port, bool passive)
 : _impl(0)
 {
     _impl = new AddrInfoImpl(host, port, passive);
-    _impl->addRef();
 }
 
 
 AddrInfo::AddrInfo(const AddrInfo& src)
-: _impl(src._impl)
+: _impl(0)
 {
-    _impl->addRef();
+    _impl = new AddrInfoImpl( *src._impl );
 }
 
 
 AddrInfo::~AddrInfo()
 {
-    if (_impl)
-        _impl->release();
+    delete _impl;
+}
+
+
+AddrInfoImpl* AddrInfo::impl()               
+{ 
+    return _impl; 
+}
+
+
+const AddrInfoImpl* AddrInfo::impl() const   
+{ 
+    return _impl; 
 }
 
 
 AddrInfo& AddrInfo::operator= (const AddrInfo& src)
 {
-    if (src._impl != _impl)
-    {
-        if (_impl)
-            _impl->release();
-
-        _impl = src._impl;
-
-        if (_impl)
-            _impl->addRef();
-    }
-
+    *_impl = *src._impl;
     return *this;
 }
 
 
-const std::string& AddrInfo::host() const
+std::string AddrInfo::host() const
 {
     return _impl->host();
 }
@@ -122,7 +126,6 @@ AddrInfo AddrInfo::ip6Loopback(unsigned short port)
     return AddrInfo( AddrInfoImpl::ip6Loopback(port) );
 }
 
-}
+} // namespace Net
 
-}
-
+} // namespace Pt

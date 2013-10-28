@@ -117,8 +117,8 @@ void TcpSocketImpl::connect(const AddrInfo& addrinfo)
     log_debug("connect");
     assert( ! _isConnected );
 
-    _addrInfo = addrinfo;
-    _addrInfoPtr = _addrInfo.impl()->begin();
+    _addrInfo.resolve( *addrinfo.impl() );
+    _addrInfoPtr = _addrInfo.begin();
 
     this->connect();
 }
@@ -130,7 +130,7 @@ void TcpSocketImpl::connect()
 
     for( ; ; ++_addrInfoPtr)
     {
-        if(_addrInfoPtr == _addrInfo.impl()->end())
+        if(_addrInfoPtr == _addrInfo.end())
         {
             log_debug("no more address informations");
             throw System::AccessFailed( _addrInfo.host() );
@@ -176,8 +176,8 @@ bool TcpSocketImpl::beginConnect(System::EventLoop& loop, const AddrInfo& ai)
         log_debug("enabled i/o handle " << _ioh.handle());
     }
     
-    _addrInfo = ai;
-    _addrInfoPtr = _addrInfo.impl()->begin();
+    _addrInfo.resolve( *ai.impl() );
+    _addrInfoPtr = _addrInfo.begin();
 
     _isConnected = beginConnect();
     return _isConnected;
@@ -188,7 +188,7 @@ bool TcpSocketImpl::beginConnect()
 {
     for( ; ; ++_addrInfoPtr)
     {
-        if(_addrInfoPtr == _addrInfo.impl()->end())
+        if(_addrInfoPtr == _addrInfo.end())
         {
             log_debug("connect failed to all possible addresses");
             throw System::AccessFailed( _addrInfo.host() );

@@ -93,7 +93,7 @@ class UdpSocketImpl
 
         std::string socketAddress() const;
 
-        std::string peerAddress() const;
+        const AddrInfo& peerAddress() const;
 
         void setTimeout(std::size_t msecs)
         { _timeout = msecs; }
@@ -119,22 +119,23 @@ class UdpSocketImpl
 
     protected:
         void setEventFlags(HANDLE ev, long events);
+
         int waitSelect(fd_set* rfds, fd_set* wfds, fd_set* efds, size_t timeout);
 
     private:
-        System::IOHandle             _ioh;
-        SOCKET                       _fd;
-        bool                         _broadcast;
-        bool                         _isConnected;
-        bool                         _isBound;
-        mutable sockaddr_storage     _peeraddr;
-        mutable sockaddr_storage     _sendAddr;
-        mutable sockaddr_storage     _servaddr;
-        unsigned int                 _hopLimit;
-        long                         _eventFlags;
-        std::size_t                  _timeout;
-        WSABUF                       _sendBuffer;
-        WSABUF                       _receiveBuffer;
+        System::IOHandle _ioh;
+        SOCKET           _fd;
+        bool             _broadcast;
+        bool             _isConnected;
+        bool             _isBound;
+        AddrInfo         _peerAddr;
+        sockaddr_storage _sendAddr;
+        mutable sockaddr_storage _servaddr;
+        unsigned int     _hopLimit;
+        long             _eventFlags;
+        std::size_t      _timeout;
+        WSABUF           _sendBuffer;
+        WSABUF           _receiveBuffer;
 };
 
 } // namespace Net

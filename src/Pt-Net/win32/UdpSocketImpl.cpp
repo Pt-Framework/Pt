@@ -124,14 +124,17 @@ void UdpSocketImpl::endBind(System::EventLoop& loop)
 }
 
 
-void UdpSocketImpl::bind(const AddrInfo& ai, const UdpSocket::Options&)
+void UdpSocketImpl::bind(const AddrInfo& ain, const UdpSocket::Options&)
 {
-    log_debug( "bind socket to " << ai.host() << ":" << ai.port() );
+    log_debug( "bind socket to " << ain.host() << ":" << ain.port() );
+
+    Resolver r;
+    r.resolve( *ain.impl() );
 
     BOOL reuseAddr = TRUE;
     bool addrInUse = false;
 
-    for (AddrInfoImpl::const_iterator it = ai.impl()->begin(); it != ai.impl()->end(); ++it)
+    for (Resolver::const_iterator it = r.begin(); it != r.end(); ++it)
     {
         if( _isConnected )
         {
@@ -188,7 +191,7 @@ void UdpSocketImpl::bind(const AddrInfo& ai, const UdpSocket::Options&)
     if(addrInUse)
         throw AddressInUse();
     else
-        throw System::AccessFailed( ai.host() );
+        throw System::AccessFailed( ain.host() );
 }
 
 
@@ -212,11 +215,14 @@ void UdpSocketImpl::endConnect(System::EventLoop& loop)
 }
 
 
-void UdpSocketImpl::connect(const AddrInfo& ai)
+void UdpSocketImpl::connect(const AddrInfo& ain)
 {
-    AddrInfoImpl::const_iterator it = ai.impl()->begin();
+    Resolver ainfo;
+    ainfo.resolve( *ain.impl() );
 
-    for( ; it != ai.impl()->end(); ++it)
+    Resolver::const_iterator it = ainfo.begin();
+
+    for( ; it != ainfo.end(); ++it)
     {
         if( _isBound )
         {
@@ -269,15 +275,18 @@ void UdpSocketImpl::connect(const AddrInfo& ai)
             this->close();
     }
 
-    throw System::AccessFailed( ai.host() );
+    throw System::AccessFailed( ain.host() );
 }
 
 
-void UdpSocketImpl::setTarget(const AddrInfo& ai)
+void UdpSocketImpl::setTarget(const AddrInfo& ain)
 {
-    AddrInfoImpl::const_iterator it = ai.impl()->begin();
+    Resolver ainfo;
+    ainfo.resolve( *ain.impl() );
 
-    for( ; it != ai.impl()->end(); ++it)
+    Resolver::const_iterator it = ainfo.begin();
+
+    for( ; it != ainfo.end(); ++it)
     {
         if( _isBound )
         {
@@ -322,7 +331,7 @@ void UdpSocketImpl::setTarget(const AddrInfo& ai)
         return;
     }
 
-    throw System::AccessFailed( ai.host() );
+    throw System::AccessFailed( ain.host() );
 }
 
 
@@ -383,8 +392,12 @@ void UdpSocketImpl::joinMulticastGroup(const std::string& ipaddr)
     if( _fd == INVALID_SOCKET )
         return;
 
-    AddrInfo ai(ipaddr, 0, true);
-    for(AddrInfoImpl::const_iterator it = ai.impl()->begin(); it != ai.impl()->end(); ++it)
+    AddrInfo ain(ipaddr, 0, true);
+
+    Resolver ai;
+    ai.resolve( *ain.impl() );
+
+    for(Resolver::const_iterator it = ai.begin(); it != ai.end(); ++it)
     {
         if(it->ai_family == AF_INET)
         {
@@ -426,8 +439,12 @@ void UdpSocketImpl::dropMulticastGroup(const std::string& ipaddr)
     if( _fd == INVALID_SOCKET )
         return;
 
-    AddrInfo ai(ipaddr, 0, true);
-    for(AddrInfoImpl::const_iterator it = ai.impl()->begin(); it != ai.impl()->end(); ++it)
+    AddrInfo ain(ipaddr, 0, true);
+
+    Resolver ai;
+    ai.resolve( *ain.impl() );
+
+    for(Resolver::const_iterator it = ai.begin(); it != ai.end(); ++it)
     {
         if(it->ai_family == AF_INET)
         {
@@ -482,24 +499,9 @@ std::string UdpSocketImpl::socketAddress() const
 }
 
 
-//TODO: return a class that can contain an address struct or a hostname string
-//      and which is copyable, so we can cache it here and allocate only once
-//
-//      use AddrInfo as getaddrinfo warpper only in impl
-std::string UdpSocketImpl::peerAddress() const
+const AddrInfo& UdpSocketImpl::peerAddress() const
 {
-    std::string address;
-
-    SOCKADDR* saddr = reinterpret_cast<SOCKADDR*>(&_peeraddr);
-    char addrStr[32] = {0};
-    char serviceStr[32] = {0};
-
-    if( 0 == getnameinfo(saddr, sizeof(_peeraddr), addrStr, 32, serviceStr, 32, NI_NUMERICHOST) )
-    {
-        address = addrStr;
-    }
-
-    return address;
+    return _peerAddr;
 }
 
 
@@ -544,9 +546,12 @@ size_t UdpSocketImpl::read(char* buffer, size_t count, bool& eof)
     //TODO2: Add enum for broadcast, server, etc... addresses so we can get
     //       rid of setBroadcast
 
-    int addrlen = sizeof(_peeraddr);
-    int len = recvfrom( _fd, recvbuf.buf, recvbuf.len, 
-                        0, (sockaddr*)&_peeraddr, &addrlen );
+    sockaddr_storage peerAddr;
+    int addrlen = sizeof(peerAddr);
+    sockaddr* addr = reinterpret_cast<sockaddr*>(&peerAddr);
+
+    int len = recvfrom( _fd, recvbuf.buf, recvbuf.len, 0, 
+                        addr, &addrlen );
 
     if( len == -1 && WSAGetLastError() == WSAEWOULDBLOCK)
     {
@@ -557,11 +562,13 @@ size_t UdpSocketImpl::read(char* buffer, size_t count, bool& eof)
         this->waitSelect(&fds, 0, 0, _timeout);
 
         len = recvfrom( _fd, recvbuf.buf, recvbuf.len, 0,
-                        (sockaddr*) &_peeraddr,  &addrlen );
+                        addr,  &addrlen );
 
         if(len < 0)
             throw System::IOError("recvfrom");
     }
+
+    _peerAddr.impl()->init(addr, addrlen);
 
     return len;
 }
@@ -590,9 +597,12 @@ size_t UdpSocketImpl::endRead(System::EventLoop& loop, char* buffer, size_t n, b
     _eventFlags &= ~FD_READ;
     setEventFlags(_ioh.handle(), _eventFlags);
 
-    int addrlen = sizeof(_peeraddr);
+    sockaddr_storage peerAddr;
+    int addrlen = sizeof(peerAddr);
+    sockaddr* addr = reinterpret_cast<sockaddr*>(&peerAddr);
+
     int len = recvfrom( _fd, _receiveBuffer.buf, _receiveBuffer.len, 0,
-                        (sockaddr*) &_peeraddr, &addrlen );
+                        addr, &addrlen );
 
     if( len == -1 && WSAGetLastError() == WSAEWOULDBLOCK)
     {
@@ -603,7 +613,7 @@ size_t UdpSocketImpl::endRead(System::EventLoop& loop, char* buffer, size_t n, b
         ::ioctlsocket(_fd, FIONBIO, &argp);
 
         len = recvfrom( _fd, _receiveBuffer.buf, _receiveBuffer.len, 0,
-                        (sockaddr*) &_peeraddr,  &addrlen );
+                        addr,  &addrlen );
 
         //Set socket to non-blocking mode
         argp = 1;
@@ -614,6 +624,8 @@ size_t UdpSocketImpl::endRead(System::EventLoop& loop, char* buffer, size_t n, b
         if(len < 0)
             throw System::IOError("recvfrom");
     }
+
+    _peerAddr.impl()->init(addr, addrlen);
 
     return len;
 }
