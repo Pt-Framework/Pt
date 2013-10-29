@@ -101,7 +101,7 @@ void TcpServerImpl::listen(const Endpoint& ep, const TcpServer::Options& options
 
     // getaddrinfo() may return more than one addrinfo structure, so work
     // them all out, until we find a pretty useable one
-    for (Resolver::const_iterator it = ai.begin(); it != ai.end(); ++it)
+    for (AddrInfo::const_iterator it = ai.begin(); it != ai.end(); ++it)
     {
         try
         {
@@ -161,7 +161,7 @@ void TcpServerImpl::listen(const Endpoint& ep, const TcpServer::Options& options
                 close();
 
                 if (errno == EADDRINUSE)
-                    throw AddressInUse();
+                    throw AddressInUse( ep.toString() );
                 else
                     throw System::IOError("listen");
             }

@@ -90,7 +90,7 @@ class UdpSocketImpl : public System::IODeviceImpl
 
         void localEndpoint(Endpoint& ep) const;
 
-        const Endpoint& peerAddress() const;
+        const Endpoint& remoteEndpoint() const;
 
         size_t beginRead(System::EventLoop& loop, char* buffer, size_t n, bool& eof);
 

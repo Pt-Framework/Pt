@@ -80,11 +80,11 @@ void UdpSocketImpl::close()
 }
 
 
-bool UdpSocketImpl::beginBind(System::EventLoop& loop, const Endpoint& ai, const UdpSocket::Options& o)
+bool UdpSocketImpl::beginBind(System::EventLoop& loop, const Endpoint& ep, const UdpSocket::Options& o)
 {
-    log_debug( "begin binding socket to " << ai.host() << ":" << ai.port() );
+    log_debug( "begin binding socket to " << ep.toString() );
 
-    this->bind(ai, o);
+    this->bind(ep, o);
     return true;
 }
 
@@ -108,7 +108,7 @@ void UdpSocketImpl::bind(const Endpoint& ep, const UdpSocket::Options& o)
     AddrInfo ai;
     ai.resolve(ep);
 
-    for (Resolver::const_iterator it = ai.begin(); it != ai.end(); ++it)
+    for (AddrInfo::const_iterator it = ai.begin(); it != ai.end(); ++it)
     {
         if( _isConnected )
         {
@@ -203,18 +203,18 @@ void UdpSocketImpl::connect(const Endpoint& ep)
     AddrInfo ainfo;
     ainfo.resolve(ep);
 
-    Resolver::const_iterator it = ainfo.begin();
+    AddrInfo::const_iterator it = ainfo.begin();
 
     for( ; it != ainfo.end(); ++it)
     {
         if( _isBound )
         {
-            if(it->ai_family != reinterpret_cast <struct sockaddr*>(&_servaddr)->sa_family)
+            if(it->ai_family != _servaddr.ss_family);
                 continue;
         }
         else if( _isConnected )
         {
-            if(it->ai_family != reinterpret_cast <struct sockaddr*>(&_sendaddr)->sa_family)
+            if(it->ai_family != _sendaddr.ss_family);
                 this->close();
         }
 
@@ -261,18 +261,18 @@ void UdpSocketImpl::setTarget(const Endpoint& ep)
     AddrInfo ainfo;
     ainfo.resolve(ep);
 
-    Resolver::const_iterator it = ainfo.begin();
+    AddrInfo::const_iterator it = ainfo.begin();
 
     for( ; it != ainfo.end(); ++it)
     {
         if( _isBound )
         {
-            if(it->ai_family != reinterpret_cast <struct sockaddr*>(&_servaddr)->sa_family)
+            if(it->ai_family != _servaddr.ss_family)
                 continue;
         }
         else if( _isConnected )
         {
-            if(it->ai_family != reinterpret_cast <struct sockaddr*>(&_sendaddr)->sa_family)
+            if(it->ai_family != _sendaddr.ss_family)
                 this->close();
         }
 
@@ -334,7 +334,7 @@ void UdpSocketImpl::joinMulticastGroup(const std::string& ipaddr)
     AddrInfo ai;
     ai.resolve(ep);
 
-    for(Resolver::const_iterator it = ai.begin(); it != ai.end(); ++it)
+    for(AddrInfo::const_iterator it = ai.begin(); it != ai.end(); ++it)
     {
         if(it->ai_family == AF_INET)
         {
@@ -380,7 +380,7 @@ void UdpSocketImpl::dropMulticastGroup(const std::string& ipaddr)
     AddrInfo ai;
     ai.resolve(ep);
 
-    for(Resolver::const_iterator it = ai.begin(); it != ai.end(); ++it)
+    for(AddrInfo::const_iterator it = ai.begin(); it != ai.end(); ++it)
     {
         if(it->ai_family == AF_INET)
         {
@@ -417,7 +417,15 @@ void UdpSocketImpl::dropMulticastGroup(const std::string& ipaddr)
 
 void UdpSocketImpl::localEndpoint(Endpoint& ep) const
 {
-    ep.impl()->init( (sockaddr*)&_servaddr, sizeof(_servaddr) );
+    struct sockaddr_storage addr;
+
+    socklen_t slen = sizeof(addr);
+    if (::getsockname(fd(), reinterpret_cast<struct sockaddr*>(&addr), &slen) < 0)
+        throw System::SystemError("getsockname");
+        
+    ep.impl()->init( (sockaddr*)&addr, slen);
+        
+    //ep.impl()->init( (sockaddr*)&_servaddr, sizeof(_servaddr) );
 }
 
 
