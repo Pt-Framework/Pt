@@ -80,7 +80,7 @@ void UdpSocketImpl::close()
 }
 
 
-bool UdpSocketImpl::beginBind(System::EventLoop& loop, const AddrInfo& ai, const UdpSocket::Options& o)
+bool UdpSocketImpl::beginBind(System::EventLoop& loop, const Endpoint& ai, const UdpSocket::Options& o)
 {
     log_debug( "begin binding socket to " << ai.host() << ":" << ai.port() );
 
@@ -100,15 +100,15 @@ void UdpSocketImpl::endBind(System::EventLoop& loop)
 }
 
 
-void UdpSocketImpl::bind(const AddrInfo& ain, const UdpSocket::Options& o)
+void UdpSocketImpl::bind(const Endpoint& ep, const UdpSocket::Options& o)
 {
     const int on = 1;
     bool addrInUse = false;
     
-    Resolver r;
-    r.resolve( *ain.impl() );
+    AddrInfo ai;
+    ai.resolve(ep);
 
-    for (Resolver::const_iterator it = r.begin(); it != r.end(); ++it)
+    for (Resolver::const_iterator it = ai.begin(); it != ai.end(); ++it)
     {
         if( _isConnected )
         {
@@ -172,17 +172,17 @@ void UdpSocketImpl::bind(const AddrInfo& ain, const UdpSocket::Options& o)
     }
 
     if(addrInUse)
-        throw AddressInUse();
+        throw AddressInUse( ep.toString() );
     else
-        throw System::AccessFailed( ain.host() );
+        throw System::AccessFailed( ep.toString() );
 }
 
 
-bool UdpSocketImpl::beginConnect(System::EventLoop& loop, const AddrInfo& ai)
+bool UdpSocketImpl::beginConnect(System::EventLoop& loop, const Endpoint& ep)
 {
-    log_debug( "begin connecting socket to " << ai.host() << ":" << ai.port() );
+    log_debug( "begin connecting socket to " << ep.toString() );
 
-    this->connect(ai);
+    this->connect(ep);
     return true;
 }
 
@@ -198,10 +198,10 @@ void UdpSocketImpl::endConnect(System::EventLoop& loop)
 }
 
 
-void UdpSocketImpl::connect(const AddrInfo& ain)
+void UdpSocketImpl::connect(const Endpoint& ep)
 {
-    Resolver ainfo;
-    ainfo.resolve( *ain.impl() );
+    AddrInfo ainfo;
+    ainfo.resolve(ep);
 
     Resolver::const_iterator it = ainfo.begin();
 
@@ -252,14 +252,14 @@ void UdpSocketImpl::connect(const AddrInfo& ain)
             this->close();
     }
 
-    throw System::AccessFailed( ain.host() );
+    throw System::AccessFailed( ep.toString() );
 }
 
 
-void UdpSocketImpl::setTarget(const AddrInfo& ain)
+void UdpSocketImpl::setTarget(const Endpoint& ep)
 {
-    Resolver ainfo;
-    ainfo.resolve( *ain.impl() );
+    AddrInfo ainfo;
+    ainfo.resolve(ep);
 
     Resolver::const_iterator it = ainfo.begin();
 
@@ -302,7 +302,7 @@ void UdpSocketImpl::setTarget(const AddrInfo& ain)
         return;
     }
 
-    throw System::AccessFailed( ain.host() );
+    throw System::AccessFailed( ep.toString() );
 }
 
 
@@ -329,10 +329,10 @@ void UdpSocketImpl::joinMulticastGroup(const std::string& ipaddr)
     if( this->fd() < 0 )
         return;
 
-    AddrInfo ain(ipaddr, 0, true);
+    Endpoint ep(ipaddr, 0, true);
 
-    Resolver ai;
-    ai.resolve( *ain.impl() );
+    AddrInfo ai;
+    ai.resolve(ep);
 
     for(Resolver::const_iterator it = ai.begin(); it != ai.end(); ++it)
     {
@@ -375,10 +375,10 @@ void UdpSocketImpl::dropMulticastGroup(const std::string& ipaddr)
     if( this->fd() < 0 )
         return;
 
-    AddrInfo ain(ipaddr, 0, true);
+    Endpoint ep(ipaddr, 0, true);
 
-    Resolver ai;
-    ai.resolve( *ain.impl() );
+    AddrInfo ai;
+    ai.resolve(ep);
 
     for(Resolver::const_iterator it = ai.begin(); it != ai.end(); ++it)
     {
@@ -415,15 +415,13 @@ void UdpSocketImpl::dropMulticastGroup(const std::string& ipaddr)
 }
 
 
-std::string UdpSocketImpl::socketAddress() const
+void UdpSocketImpl::localEndpoint(Endpoint& ep) const
 {
-    std::string ret;
-    sockaddrToString(_servaddr, ret);
-    return ret;
+    ep.impl()->init( (sockaddr*)&_servaddr, sizeof(_servaddr) );
 }
 
 
-const AddrInfo& UdpSocketImpl::peerAddress() const
+const Endpoint& UdpSocketImpl::remoteEndpoint() const
 {
     return _peerAddr;
 }

@@ -43,7 +43,7 @@ class EventLoop;
 }
 
 namespace Net {
-class AddrInfo;
+class Endpoint;
 }
 
 namespace Ssl {
@@ -99,7 +99,7 @@ class PT_HTTP_API Server : public Connectable
 
         Server(System::EventLoop& loop, const std::string& ip, unsigned short int port, const Options& = Options());
 
-        Server(System::EventLoop& loop, const Net::AddrInfo& addr, const Options& = Options());
+        Server(System::EventLoop& loop, const Net::Endpoint& addr, const Options& = Options());
 
         ~Server();
 
@@ -117,7 +117,7 @@ class PT_HTTP_API Server : public Connectable
 
         void listen(const std::string& ip, unsigned short int port, const Options& options = Options());
 
-        void listen(const Net::AddrInfo& addr, const Options& options = Options());
+        void listen(const Net::Endpoint& addr, const Options& options = Options());
 
         void cancel();
 

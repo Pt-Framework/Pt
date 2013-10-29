@@ -38,7 +38,7 @@ namespace Pt {
 namespace Net {
 
 class TcpServerImpl;
-class AddrInfo;
+class Endpoint;
 
 /** @brief TCP server socket
  */
@@ -83,13 +83,13 @@ class PT_NET_API TcpServer : public System::Selectable
         */
         TcpServer(const std::string& ipaddr, unsigned short int port, const Options& options = Options());
 
-        TcpServer(const AddrInfo& ipaddr, const Options& options = Options());
+        TcpServer(const Endpoint& ipaddr, const Options& options = Options());
         
         ~TcpServer();
         
         void listen(const std::string& ipaddr, unsigned short int port, const Options& options = Options());
 
-        void listen(const AddrInfo& ipaddr, const Options& options = Options());
+        void listen(const Endpoint& ipaddr, const Options& options = Options());
         
         void beginAccept();
         

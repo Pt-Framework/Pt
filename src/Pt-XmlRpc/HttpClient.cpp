@@ -73,7 +73,7 @@ HttpClient::HttpClient()
 }
 
 
-HttpClient::HttpClient(const Net::AddrInfo& addrinfo, 
+HttpClient::HttpClient(const Net::Endpoint& addrinfo, 
                        const std::string& url)
 : _v1(0)
 , _v2(0)
@@ -102,7 +102,7 @@ HttpClient::HttpClient(System::EventLoop& loop)
 }
 
 
-HttpClient::HttpClient(System::EventLoop& loop, const Net::AddrInfo& addrinfo,
+HttpClient::HttpClient(System::EventLoop& loop, const Net::Endpoint& addrinfo,
                        const std::string& url)
 : _client(loop)
 , _v1(0)
@@ -161,7 +161,7 @@ void HttpClient::setTimeout(std::size_t timeout)
 }
 
 
-void HttpClient::setTarget(const Net::AddrInfo& addrinfo, const std::string& url)
+void HttpClient::setTarget(const Net::Endpoint& addrinfo, const std::string& url)
 {
     _client.setHost(addrinfo);
     _client.request().setUrl(url);
@@ -181,7 +181,7 @@ void HttpClient::setServiceUrl(const std::string& serviceUrl)
 }
 
 
-void HttpClient::setHost(const Net::AddrInfo& addrinfo)
+void HttpClient::setHost(const Net::Endpoint& addrinfo)
 {
     _client.setHost(addrinfo);
 }
@@ -193,7 +193,7 @@ void HttpClient::setHost(const std::string& host, unsigned short int port)
 }
 
 
-const Net::AddrInfo& HttpClient::host() const
+const Net::Endpoint& HttpClient::host() const
 {
     return _client.host();
 }

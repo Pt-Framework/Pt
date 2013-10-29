@@ -203,7 +203,7 @@ class TcpSocketTest : public Pt::Unit::TestSuite
 
         void CloseOnConnect()
         {
-            Pt::Net::TcpServer server( Pt::Net::AddrInfo::ip4Any(9000) );
+            Pt::Net::TcpServer server( Pt::Net::Endpoint::ip4Any(9000) );
             server.connectionPending() += Pt::slot(*this, &TcpSocketTest::onAcceptAndBeginRead);
             server.setActive(*_loop);
             server.beginAccept();

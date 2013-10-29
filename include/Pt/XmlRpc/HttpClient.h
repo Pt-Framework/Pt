@@ -51,7 +51,7 @@ class PT_XMLRPC_API HttpClient : public Client
 
         /** @brief Construct with host and service URL.
         */
-        HttpClient(const Net::AddrInfo& addrinfo, 
+        HttpClient(const Net::Endpoint& addrinfo, 
                    const std::string& serviceUrl);
 
         /** @brief Construct with host and service URL.
@@ -65,7 +65,7 @@ class PT_XMLRPC_API HttpClient : public Client
 
         /** @brief Construct with host and service URL.
         */
-        HttpClient(System::EventLoop& loop, const Net::AddrInfo& addrinfo, 
+        HttpClient(System::EventLoop& loop, const Net::Endpoint& addrinfo, 
                    const std::string& serviceUrl);
 
         /** @brief Construct with host and service URL.
@@ -96,7 +96,7 @@ class PT_XMLRPC_API HttpClient : public Client
 
         /** @brief Sets target host and service URL.
         */
-        void setTarget(const Net::AddrInfo& addrinfo, 
+        void setTarget(const Net::Endpoint& addrinfo, 
                        const std::string& serviceUrl);
 
         /** @brief Sets target host and service URL.
@@ -110,7 +110,7 @@ class PT_XMLRPC_API HttpClient : public Client
 
         /** @brief Sets host to connect.
         */
-        void setHost(const Net::AddrInfo& addrinfo);
+        void setHost(const Net::Endpoint& addrinfo);
         
         /** @brief Sets host to connect.
         */
@@ -118,7 +118,7 @@ class PT_XMLRPC_API HttpClient : public Client
 
         /** @brief Returns target host.
         */
-        const Net::AddrInfo& host() const;
+        const Net::Endpoint& host() const;
 
         //! @internal
         Http::Client& httpClient();

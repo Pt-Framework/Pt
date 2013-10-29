@@ -121,20 +121,20 @@ void TcpServerImpl::listen(const std::string& ipaddr, unsigned short int port,
 {
     log_debug("listen on " << ipaddr << " port " << port);
 
-    AddrInfo ai(ipaddr, port, true);
-    listen(ai, options);
+    Endpoint e(ipaddr, port, true);
+    listen(e, options);
 }
 
 
-void TcpServerImpl::listen(const AddrInfo& ain, const TcpServer::Options& options)
+void TcpServerImpl::listen(const Endpoint& ep, const TcpServer::Options& options)
 {
     BOOL reuseAddr = TRUE;
     static const int on = 1;
 
-    Resolver r;
-    r.resolve( *ain.impl() );
+    AddrInfo ai;
+    ai.resolve(ep);
 
-    for (Resolver::const_iterator it = r.begin(); it != r.end(); ++it)
+    for (AddrInfo::const_iterator it = ai.begin(); it != ai.end(); ++it)
     {
         try
         {
@@ -177,7 +177,7 @@ void TcpServerImpl::listen(const AddrInfo& ain, const TcpServer::Options& option
                 close();
     
                 if (WSAGetLastError() == WSAEADDRINUSE)
-                    throw AddressInUse();
+                    throw AddressInUse( ep.toString() );
                 else
                     throw System::IOError("listen");
             }
@@ -191,34 +191,10 @@ void TcpServerImpl::listen(const AddrInfo& ain, const TcpServer::Options& option
     close();
 
     if (WSAGetLastError() == WSAEADDRINUSE)
-        throw AddressInUse( ain.host(), ain.port() );
+        throw AddressInUse( ep.toString() );
     else
         throw System::IOError("bind");
 }
-
-
-//SOCKET TcpServerImpl::accept()
-//{
-//    // set the server socket to blocking-mode
-//    u_long argp = 0;
-//    setEventFlags(0, 0);
-//    ::ioctlsocket(_fd, FIONBIO, &argp);
-//
-//    SOCKET fd = ::WSAAccept(_fd, NULL, NULL, NULL, 0);
-//
-//    if( fd == SOCKET_ERROR)
-//    {
-//        log_debug("accept failed: " << WSAGetLastError());
-//        throw System::IOError( PT_ERROR_MSG("accept failed") );
-//    }
-//
-//    // reset the blocking mode
-//    if(_ioh.handle() != INVALID_HANDLE_VALUE)
-//        setEventFlags(_ioh.handle(), FD_ACCEPT);
-//
-//    log_debug(fd << " accepted ");
-//    return fd;
-//}
 
 
 void TcpServerImpl::beginAccept(System::EventLoop& loop)

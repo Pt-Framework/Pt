@@ -41,7 +41,7 @@ class EventLoop;
 }
 
 namespace Net {
-class AddrInfo;
+class Endpoint;
 }
 
 namespace Ssl {
@@ -64,7 +64,7 @@ class PT_HTTP_API Client : public Connectable
 
         Client(System::EventLoop& loop, const std::string& host, unsigned short int port);
         
-        Client(System::EventLoop& loop, const Net::AddrInfo& addrinfo);
+        Client(System::EventLoop& loop, const Net::Endpoint& addrinfo);
 
         ~Client();
 
@@ -72,11 +72,11 @@ class PT_HTTP_API Client : public Connectable
 
         void setActive(System::EventLoop& loop);
 
-        void setHost(const Net::AddrInfo& addrinfo);
+        void setHost(const Net::Endpoint& addrinfo);
         
         void setHost(const std::string& host, unsigned short int port);
 
-        const Net::AddrInfo& host() const;
+        const Net::Endpoint& host() const;
 
         void setSecure(Ssl::Context& ctx);
 

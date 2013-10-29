@@ -59,7 +59,7 @@ Server::Server(System::EventLoop& loop, const std::string& ip, unsigned short in
 }
 
 
-Server::Server(System::EventLoop& loop, const Pt::Net::AddrInfo& addr, const Options& options)
+Server::Server(System::EventLoop& loop, const Pt::Net::Endpoint& addr, const Options& options)
 : _impl(0)
 {
     _impl = new ServerImpl();
@@ -110,7 +110,7 @@ void Server::setKeepAliveTimeout(std::size_t ms)
 }
 
 
-void Server::listen(const Pt::Net::AddrInfo& addr, const Options& options)
+void Server::listen(const Pt::Net::Endpoint& addr, const Options& options)
 {
     _impl->listen(addr, options);
 }
@@ -118,7 +118,7 @@ void Server::listen(const Pt::Net::AddrInfo& addr, const Options& options)
 
 void Server::listen(const std::string& ip, unsigned short int port, const Options& options)
 {
-    Net::AddrInfo ai(ip, port, true);
+    Net::Endpoint ai(ip, port, true);
     _impl->listen(ai, options);
 }
 

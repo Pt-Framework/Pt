@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 Tommi Maekitalo
+ * Copyright (C) 2013 Marc Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,6 +25,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef PT_NET_ADDRINFOIMPL_H
 #define PT_NET_ADDRINFOIMPL_H
 
@@ -32,52 +33,71 @@
 #include <string>
 #include <iterator>
 #include <cassert>
-#include <sys/ioctl.h>
-#include <sys/socket.h>
-#include <netdb.h>
+
+#ifdef WIN32
+    #include "Pt/WinVer.h"
+
+    #ifndef WIN32_LEAN_AND_MEAN
+    #define WIN32_LEAN_AND_MEAN
+    #endif
+
+    #include <winsock2.h>
+    #include <ws2tcpip.h>
+    #include <iphlpapi.h>
+#else
+    #include <sys/ioctl.h>
+    #include <sys/socket.h>
+    #include <arpa/inet.h> // inet_ntop
+    #include <netdb.h>
+#endif
 
 namespace Pt {
 
 namespace Net {
 
-class AddrInfoImpl
+class Endpoint;
+
+class EndpointImpl
 {
     public:
-        AddrInfoImpl();
+        EndpointImpl();
 
-        AddrInfoImpl(const std::string& ipaddr, unsigned short port, bool listen);
+        EndpointImpl(const std::string& ipaddr, unsigned short port, bool listen);
 
-        AddrInfoImpl(const AddrInfoImpl& ipaddr);
+        EndpointImpl(const EndpointImpl& ipaddr);
 
-        ~AddrInfoImpl();
+        ~EndpointImpl();
 
-        AddrInfoImpl& operator=(const AddrInfoImpl& ipaddr);
+        EndpointImpl& operator=(const EndpointImpl& ipaddr);
 
         void init(const sockaddr* addr, size_t addrlen);
 
-        std::string host() const;
+        std::string toString() const;
 
-        unsigned short port() const
-        { return _port; }
+        const std::string& host() const
+        { return _host; }
+
+        const std::string& service() const
+        { return _service; }
 
         bool isListen() const
         { return _listen; }
 
         const ::sockaddr* addr() const
-        { return _addrlen > 0 ? reinterpret_cast<const sockaddr*>(&_addr) : 0; }
+        { return reinterpret_cast<const sockaddr*>(&_addr); }
 
         size_t addrlen() const
         { return _addrlen; }
 
-        static AddrInfoImpl* ip4Any(unsigned short port);
+        static EndpointImpl* ip4Any(unsigned short port);
 
-        static AddrInfoImpl* ip4Loopback(unsigned short port);
+        static EndpointImpl* ip4Loopback(unsigned short port);
 
-        static AddrInfoImpl* ip4Broadcast(unsigned short port);
+        static EndpointImpl* ip4Broadcast(unsigned short port);
 
-        static AddrInfoImpl* ip6Any(unsigned short port);
+        static EndpointImpl* ip6Any(unsigned short port);
 
-        static AddrInfoImpl* ip6Loopback(unsigned short port);
+        static EndpointImpl* ip6Loopback(unsigned short port);
 
     protected:
         void clear();
@@ -86,12 +106,12 @@ class AddrInfoImpl
         size_t _addrlen;
         ::sockaddr_storage _addr;
         std::string _host;
-        unsigned short _port;
+        std::string _service;
         bool _listen;
 };
 
 
-class Resolver : private NonCopyable
+class AddrInfo : private NonCopyable
 {
     public:  
         class const_iterator
@@ -146,11 +166,11 @@ class Resolver : private NonCopyable
         };
 
     public:
-        Resolver();
+        AddrInfo();
 
-        ~Resolver();
+        ~AddrInfo();
 
-        void resolve(const AddrInfoImpl& ai);
+        void resolve(const Endpoint& ep);
 
         void clear();
 
@@ -170,7 +190,7 @@ class Resolver : private NonCopyable
 
         // TODO: place hostname string in sockaddr_storage and addrinfo
         std::string _host;
-        unsigned short _port;
+        std::string _service;
 };
 
 void sockaddrToString(const sockaddr_storage& addr, std::string& str);

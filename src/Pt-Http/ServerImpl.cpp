@@ -526,7 +526,7 @@ ServerImpl::~ServerImpl()
 }
 
 
-void ServerImpl::listen(const Pt::Net::AddrInfo& addr, const Server::Options& options)
+void ServerImpl::listen(const Pt::Net::Endpoint& addr, const Server::Options& options)
 {
     std::vector<ServerThread*>::iterator thread;
     for(thread = _serverThreads.begin(); thread != _serverThreads.end(); ++thread)

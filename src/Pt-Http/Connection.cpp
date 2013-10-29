@@ -124,7 +124,7 @@ void Connection::accept(Net::TcpServer& tcpServer)
 }
 
 
-void Connection::setHost(const Net::AddrInfo& addrinfo)
+void Connection::setHost(const Net::Endpoint& addrinfo)
 {
     if(_state != NotConnected)
     {
@@ -201,7 +201,7 @@ void Connection::sendRequest(Request& request)
 
     if( ! isConnected() )
     {
-        log_debug("opening new connection to " << _addrInfo.host());
+        log_debug("opening new connection to " << _addrInfo.toString());
         _socket.connect(_addrInfo);
 #ifdef PT_HTTP_WITH_SSL
         if(_ssl)
@@ -339,7 +339,7 @@ void Connection::beginSendRequest(Request& request)
 
     if( ! isConnected() )
     {
-        log_debug("opening new connection to " << _addrInfo.host());
+        log_debug("opening new connection to " << _addrInfo.toString());
         _timer.start( _timeout );
         _socket.beginConnect(_addrInfo);
         return;
@@ -479,7 +479,7 @@ MessageProgress Connection::endSendRequest()
     {
         _timer.stop();
         _socket.endConnect();
-        log_debug("connected to " << _addrInfo.host());
+        log_debug("connected to " << _addrInfo.toString());
 
         if(_ssl)
             _state = SslHandshake;
@@ -1202,13 +1202,8 @@ void Connection::writeRequestHeader(std::ostream& os, Request& request)
 
     if( ! header.has("Host"))
     {
-        os << "Host: " << _addrInfo.host();
-        unsigned short port = _addrInfo.port();
-        if (port != 80)
-        {
-            os << ':';
-            putInt(oit, port);
-        }
+        // TODO: use operator << (ostream, Endpoint)
+        os << "Host: " << _addrInfo.toString();
         os.write("\r\n", 2);
     }
 

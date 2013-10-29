@@ -42,9 +42,7 @@ namespace Net {
 class PT_NET_API AddressInUse : public System::IOError
 {
     public:
-        AddressInUse();
-
-        AddressInUse(const std::string& ipaddr, unsigned short int port);
+        AddressInUse(const std::string& endpoint);
 
         ~AddressInUse() throw()
         {}

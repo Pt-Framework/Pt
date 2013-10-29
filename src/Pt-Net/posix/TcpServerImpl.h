@@ -80,7 +80,7 @@ class TcpServerImpl
                     unsigned short int port,
                     const TcpServer::Options& options);
 
-        void listen(const AddrInfo& ipaddr, const TcpServer::Options& options);
+        void listen(const Endpoint& ep, const TcpServer::Options& options);
 
         void beginAccept(System::EventLoop& loop);
 

@@ -173,9 +173,9 @@ class Connection : public Connectable
 
         void accept(Net::TcpServer& tcpServer);
 
-        void setHost(const Net::AddrInfo& addrinfo);
+        void setHost(const Net::Endpoint& addrinfo);
 
-        const Net::AddrInfo& host() const
+        const Net::Endpoint& host() const
         { return _addrInfo; }
 
         void setSecure(Ssl::Context& ctx);
@@ -265,7 +265,7 @@ class Connection : public Connectable
         Socket _socket;
         System::IOBuffer _sockbuf;
         std::iostream _sockios;
-        Net::AddrInfo _addrInfo;
+        Net::Endpoint _addrInfo;
 
         bool _ssl;
 #ifdef PT_HTTP_WITH_SSL

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005,2009 Tommi Maekitalo
+ * Copyright (C) 2013 Marc Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -27,103 +27,97 @@
  */
 
 #include "AddrInfoImpl.h"
-#include "Pt/Net/AddrInfo.h"
+#include <Pt/Net/AddrInfo.h>
 
 namespace Pt {
 
 namespace Net {
 
-AddrInfo::AddrInfo()
+Endpoint::Endpoint()
 : _impl(0)
 { 
-    _impl = new AddrInfoImpl();
+    _impl = new EndpointImpl();
 }
 
 
-AddrInfo::AddrInfo(AddrInfoImpl* impl)
+Endpoint::Endpoint(EndpointImpl* impl)
 : _impl(impl)
 {
 }
 
 
-AddrInfo::AddrInfo(const std::string& host, unsigned short port, bool passive)
+Endpoint::Endpoint(const std::string& host, unsigned short port, bool passive)
 : _impl(0)
 {
-    _impl = new AddrInfoImpl(host, port, passive);
+    _impl = new EndpointImpl(host, port, passive);
 }
 
 
-AddrInfo::AddrInfo(const AddrInfo& src)
+Endpoint::Endpoint(const Endpoint& src)
 : _impl(0)
 {
-    _impl = new AddrInfoImpl( *src._impl );
+    _impl = new EndpointImpl( *src._impl );
 }
 
 
-AddrInfo::~AddrInfo()
+Endpoint::~Endpoint()
 {
     delete _impl;
 }
 
 
-AddrInfoImpl* AddrInfo::impl()               
+EndpointImpl* Endpoint::impl()               
 { 
     return _impl; 
 }
 
 
-const AddrInfoImpl* AddrInfo::impl() const   
+const EndpointImpl* Endpoint::impl() const   
 { 
     return _impl; 
 }
 
 
-AddrInfo& AddrInfo::operator= (const AddrInfo& src)
+Endpoint& Endpoint::operator= (const Endpoint& src)
 {
     *_impl = *src._impl;
     return *this;
 }
 
 
-std::string AddrInfo::host() const
+std::string Endpoint::toString() const
 {
-    return _impl->host();
+    return _impl->toString();
 }
 
 
-unsigned short AddrInfo::port() const
+Endpoint Endpoint::ip4Any(unsigned short port)
 {
-    return _impl->port();
+    return Endpoint( EndpointImpl::ip4Any(port) );
 }
 
 
-AddrInfo AddrInfo::ip4Any(unsigned short port)
+Endpoint Endpoint::ip4Loopback(unsigned short port)
 {
-    return AddrInfo( AddrInfoImpl::ip4Any(port) );
+    return Endpoint( EndpointImpl::ip4Loopback(port) );
 }
 
 
-AddrInfo AddrInfo::ip4Loopback(unsigned short port)
+Endpoint Endpoint::ip4Broadcast(unsigned short port)
 {
-    return AddrInfo( AddrInfoImpl::ip4Loopback(port) );
+    return Endpoint( EndpointImpl::ip4Broadcast(port) );
 }
 
 
-AddrInfo AddrInfo::ip4Broadcast(unsigned short port)
+Endpoint Endpoint::ip6Any(unsigned short port)
 {
-    return AddrInfo( AddrInfoImpl::ip4Broadcast(port) );
+    return Endpoint( EndpointImpl::ip6Any(port) );
 }
 
 
-AddrInfo AddrInfo::ip6Any(unsigned short port)
+Endpoint Endpoint::ip6Loopback(unsigned short port)
 {
-    return AddrInfo( AddrInfoImpl::ip6Any(port) );
-}
-
-
-AddrInfo AddrInfo::ip6Loopback(unsigned short port)
-{
-    return AddrInfo( AddrInfoImpl::ip6Loopback(port) );
+    return Endpoint( EndpointImpl::ip6Loopback(port) );
 }
 
 } // namespace Net

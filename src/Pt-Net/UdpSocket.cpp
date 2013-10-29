@@ -60,12 +60,12 @@ UdpSocket::~UdpSocket()
 
 bool UdpSocket::beginBind(const std::string& ipaddr, unsigned short int port, const Options& o)
 { 
-    AddrInfo ai(ipaddr, port, true);
+    Endpoint ai(ipaddr, port, true);
     return beginBind( ai, o); 
 }
 
 
-bool UdpSocket::beginBind(const AddrInfo& addrinfo, const Options& o)
+bool UdpSocket::beginBind(const Endpoint& addrinfo, const Options& o)
 {
     if( ! isActive() )
         throw std::logic_error( PT_ERROR_MSG("socket not active") );
@@ -101,7 +101,7 @@ void UdpSocket::endBind()
 }
 
 
-void UdpSocket::bind(const AddrInfo& addrinfo, const Options& o)
+void UdpSocket::bind(const Endpoint& addrinfo, const Options& o)
 {
     _impl->bind(addrinfo, o);
     this->setEof(false);
@@ -110,18 +110,18 @@ void UdpSocket::bind(const AddrInfo& addrinfo, const Options& o)
 
 void UdpSocket::bind(const std::string& ipaddr, unsigned short int port, const Options& o)
 {
-    AddrInfo ai(ipaddr, port, true);
+    Endpoint ai(ipaddr, port, true);
     bind(ai, o);
 }
 
 
 bool UdpSocket::beginConnect(const std::string& ipaddr, unsigned short int port, const Options& o)
 { 
-    return beginConnect(AddrInfo(ipaddr, port), o); 
+    return beginConnect(Endpoint(ipaddr, port), o); 
 }
 
 
-bool UdpSocket::beginConnect(const AddrInfo& addrinfo, const Options&)
+bool UdpSocket::beginConnect(const Endpoint& addrinfo, const Options&)
 {
     if( ! isActive() )
         throw std::logic_error( PT_ERROR_MSG("socket not active") );
@@ -159,11 +159,11 @@ void UdpSocket::endConnect()
 
 void UdpSocket::connect(const std::string& ipaddr, unsigned short int port, const Options&)
 {
-    connect( AddrInfo(ipaddr, port) );
+    connect( Endpoint(ipaddr, port) );
 }
 
 
-void UdpSocket::connect(const AddrInfo& addrinfo, const Options&)
+void UdpSocket::connect(const Endpoint& addrinfo, const Options&)
 {
     _impl->connect(addrinfo);
     this->setEof(false);
@@ -172,12 +172,12 @@ void UdpSocket::connect(const AddrInfo& addrinfo, const Options&)
 
 void UdpSocket::setTarget(const std::string& ipaddr, unsigned short int port, const Options&)
 {
-    _impl->setTarget(AddrInfo(ipaddr, port));
+    _impl->setTarget(Endpoint(ipaddr, port));
     this->setEof(false);
 }
 
 
-void UdpSocket::setTarget(const AddrInfo& addrinfo, const Options&)
+void UdpSocket::setTarget(const Endpoint& addrinfo, const Options&)
 {
     _impl->setTarget(addrinfo);
     this->setEof(false);
@@ -213,15 +213,15 @@ void UdpSocket::joinMulticastGroup(const std::string& ipaddr)
 //}
 
 
-std::string UdpSocket::socketAddress() const
+void UdpSocket::localEndpoint(Endpoint& ep) const
 {
-    return _impl->socketAddress();
+    _impl->localEndpoint(ep);
 }
 
 
-const AddrInfo& UdpSocket::peerAddress() const
+const Endpoint& UdpSocket::remoteEndpoint() const
 {
-    return _impl->peerAddress();
+    return _impl->remoteEndpoint();
 }
 
 

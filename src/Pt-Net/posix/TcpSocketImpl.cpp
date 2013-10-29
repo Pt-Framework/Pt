@@ -101,12 +101,12 @@ void TcpSocketImpl::accept(const TcpServer& server, const TcpSocket::Options& o)
 }
 
 
-void TcpSocketImpl::connect(const AddrInfo& addrInfo)
+void TcpSocketImpl::connect(const Endpoint& ep)
 {
     log_trace("connect");
     assert( ! _isConnected );
 
-    _addrInfo.resolve( *addrInfo.impl() );
+    _addrInfo.resolve(ep);
     _addrInfoPtr = _addrInfo.begin();
 
     this->connect();
@@ -176,14 +176,14 @@ void TcpSocketImpl::connect()
 }
 
 
-bool TcpSocketImpl::beginConnect(System::EventLoop& loop, const AddrInfo& ai)
+bool TcpSocketImpl::beginConnect(System::EventLoop& loop, const Endpoint& ep)
 {
     log_trace("begin connect");
     assert( ! _isConnected );
 
     _errorPending = false;
     
-    _addrInfo.resolve( *ai.impl() );
+    _addrInfo.resolve(ep);
     _addrInfoPtr = _addrInfo.begin();
 
     /*while(true)

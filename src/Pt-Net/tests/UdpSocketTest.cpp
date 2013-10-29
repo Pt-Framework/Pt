@@ -113,6 +113,11 @@ class UdpSocketTest : public Pt::Unit::TestSuite
         void onUnicastBind(Pt::Net::UdpSocket& socket)
         {
             socket.endBind();
+
+            Pt::Net::Endpoint ep;
+            socket.localEndpoint(ep);
+            std::cerr << "LOCAL: " << ep.toString() << std::endl;
+
             socket.beginRead(inbuf, 200);
         }
 
@@ -129,7 +134,7 @@ class UdpSocketTest : public Pt::Unit::TestSuite
             //char* buffer = device.rbuf();
             std::size_t n = device.endRead();
 
-            std::cerr << "PEER: " << _receiver->peerAddress().host() << std::endl;
+            std::cerr << "PEER: " << _receiver->remoteEndpoint().toString() << std::endl;
 
             //std::string msg(buffer, n);
             //this->reportMessage("INPUT RECVD: " + msg);
@@ -143,12 +148,12 @@ class UdpSocketTest : public Pt::Unit::TestSuite
             _sender->setActive(*_loop);
             _sender->outputReady() += Pt::slot(*this, &UdpSocketTest::onBroadcastOutput);
             _sender->setBroadcast();
-            _sender->setTarget( "255.255.255.255", 8000/*Pt::Net::AddrInfo::ip4Broadcast(8000)*/ );
+            _sender->setTarget( Pt::Net::Endpoint::ip4Broadcast(8000) );
 
             _receiver->setActive(*_loop);
             _receiver->bound() += Pt::slot(*this, &UdpSocketTest::onBroadcastBind);
             _receiver->inputReady() += Pt::slot(*this, &UdpSocketTest::onBroadcastInput);
-            _receiver->beginBind( Pt::Net::AddrInfo::ip4Any(8000) );
+            _receiver->beginBind( Pt::Net::Endpoint::ip4Any(8000) );
 
             _loop->run();
 
@@ -185,7 +190,7 @@ class UdpSocketTest : public Pt::Unit::TestSuite
             _receiver->setActive(*_loop);
             _receiver->bound() += Pt::slot(*this, &UdpSocketTest::onMulticastBind);
             _receiver->inputReady() += Pt::slot(*this, &UdpSocketTest::onMulticastInput);
-            _receiver->beginBind( Pt::Net::AddrInfo::ip4Any(8000) );
+            _receiver->beginBind( Pt::Net::Endpoint::ip4Any(8000) );
 
             _sender->setActive(*_loop);
             _sender->setTarget("224.0.1.1", 8000);
@@ -204,6 +209,9 @@ class UdpSocketTest : public Pt::Unit::TestSuite
             socket.joinMulticastGroup("224.0.1.1");
             socket.beginRead(inbuf, 200);
 
+            Pt::Net::Endpoint ep;
+            socket.localEndpoint(ep);
+            std::cerr << "LOCAL: " << ep.toString() << std::endl;
             _sender->beginWrite("Hello MULTICAST!", 16);
         }
 
@@ -219,7 +227,7 @@ class UdpSocketTest : public Pt::Unit::TestSuite
             //char* buffer = device.rbuf();
             std::size_t n = device.endRead();
 
-            std::cerr << "PEER: " << _receiver->peerAddress().host() << std::endl;
+            std::cerr << "PEER: " << _receiver->remoteEndpoint().toString() << std::endl;
 
             //std::string msg(buffer, n);
             //this->reportMessage("INPUT RECVD: " + msg);

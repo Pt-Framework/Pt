@@ -54,7 +54,7 @@ TcpServer::TcpServer(const std::string& ipaddr, unsigned short int port, const O
 }
 
 
-TcpServer::TcpServer(const AddrInfo& ipaddr, const Options& options)
+TcpServer::TcpServer(const Endpoint& ipaddr, const Options& options)
 : _impl(0)
 {
     _impl = new TcpServerImpl(*this);
@@ -86,7 +86,7 @@ void TcpServer::listen(const std::string& ipaddr, unsigned short int port, const
 }
 
 
-void TcpServer::listen(const AddrInfo& ipaddr, const Options& options)
+void TcpServer::listen(const Endpoint& ipaddr, const Options& options)
 {
     this->close();
     _impl->listen(ipaddr, options);

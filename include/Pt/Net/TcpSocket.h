@@ -68,7 +68,7 @@ class PT_NET_API TcpSocket : public System::IODevice
          */
         TcpSocket(const std::string& ipaddr, unsigned short int port, const Options& o = Options());
 
-        explicit TcpSocket(const AddrInfo& addrinfo, const Options& o = Options());
+        explicit TcpSocket(const Endpoint& addrinfo, const Options& o = Options());
 
         ~TcpSocket();
 
@@ -78,7 +78,7 @@ class PT_NET_API TcpSocket : public System::IODevice
 
         void accept(const TcpServer& server, const Options& o = Options());
 
-        void connect(const AddrInfo& addrinfo, const Options& o = Options());
+        void connect(const Endpoint& addrinfo, const Options& o = Options());
 
         /** @brief Connect to a host
             
@@ -86,7 +86,7 @@ class PT_NET_API TcpSocket : public System::IODevice
          */
         void connect(const std::string& ipaddr, unsigned short int port, const Options& o = Options());
 
-        bool beginConnect(const AddrInfo& addrinfo, const Options& o = Options());
+        bool beginConnect(const Endpoint& addrinfo, const Options& o = Options());
 
         bool beginConnect(const std::string& ipaddr, unsigned short int port, const Options& o = Options());
 

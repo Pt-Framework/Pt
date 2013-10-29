@@ -112,12 +112,12 @@ void TcpSocketImpl::accept(const TcpServer& server, const TcpSocket::Options&)
 }
 
 
-void TcpSocketImpl::connect(const AddrInfo& addrinfo)
+void TcpSocketImpl::connect(const Endpoint& ep)
 {
     log_debug("connect");
     assert( ! _isConnected );
 
-    _addrInfo.resolve( *addrinfo.impl() );
+    _addrInfo.resolve( ep );
     _addrInfoPtr = _addrInfo.begin();
 
     this->connect();
@@ -163,7 +163,7 @@ void TcpSocketImpl::connect()
 }
 
 
-bool TcpSocketImpl::beginConnect(System::EventLoop& loop, const AddrInfo& ai)
+bool TcpSocketImpl::beginConnect(System::EventLoop& loop, const Endpoint& ep)
 {
     assert( ! _isConnected );
     log_debug("begin connect");
@@ -176,7 +176,7 @@ bool TcpSocketImpl::beginConnect(System::EventLoop& loop, const AddrInfo& ai)
         log_debug("enabled i/o handle " << _ioh.handle());
     }
     
-    _addrInfo.resolve( *ai.impl() );
+    _addrInfo.resolve(ep);
     _addrInfoPtr = _addrInfo.begin();
 
     _isConnected = beginConnect();

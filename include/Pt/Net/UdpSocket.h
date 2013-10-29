@@ -60,7 +60,7 @@ class PT_NET_API UdpSocket : public System::IODevice
 
         ~UdpSocket();
 
-        bool beginBind(const AddrInfo& addrinfo, const Options& o = Options());
+        bool beginBind(const Endpoint& addrinfo, const Options& o = Options());
 
         bool beginBind(const std::string& ipaddr, unsigned short int port, const Options& o = Options());
 
@@ -69,11 +69,11 @@ class PT_NET_API UdpSocket : public System::IODevice
         Signal<UdpSocket&>& bound()
         { return _bound; }
 
-        void bind(const AddrInfo& addrinfo, const Options& o = Options());
+        void bind(const Endpoint& addrinfo, const Options& o = Options());
 
         void bind(const std::string& ipaddr, unsigned short int port, const Options& o = Options());
 
-        bool beginConnect(const AddrInfo& addrinfo, const Options& o = Options());
+        bool beginConnect(const Endpoint& addrinfo, const Options& o = Options());
 
         bool beginConnect(const std::string& ipaddr, unsigned short int port, const Options& o = Options());
 
@@ -84,11 +84,11 @@ class PT_NET_API UdpSocket : public System::IODevice
 
         void connect(const std::string& ipaddr, unsigned short int port, const Options& o = Options());
 
-        void connect(const AddrInfo& addrinfo, const Options& o = Options());
+        void connect(const Endpoint& addrinfo, const Options& o = Options());
 
         void setTarget(const std::string& ipaddr, unsigned short int port, const Options& o = Options());
 
-        void setTarget(const AddrInfo& addrinfo, const Options& o = Options());
+        void setTarget(const Endpoint& addrinfo, const Options& o = Options());
 
         bool isConnected() const;
 
@@ -100,9 +100,9 @@ class PT_NET_API UdpSocket : public System::IODevice
 
         //void dropMulticastGroup(const std::string& ipaddr);
 
-        std::string socketAddress() const;
+        void localEndpoint(Endpoint& ep) const;
 
-        const AddrInfo& peerAddress() const;
+        const Endpoint& remoteEndpoint() const;
 
     protected:
         // inherit doc

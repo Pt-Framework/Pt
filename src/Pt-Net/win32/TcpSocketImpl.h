@@ -54,7 +54,7 @@ namespace System {
 
 namespace Net {
 
-class AddrInfo;
+class Endpoint;
 class TcpServer;
 class TcpSocket;
 
@@ -74,9 +74,9 @@ class TcpSocketImpl
 
         void accept(const TcpServer& server, const TcpSocket::Options& o);
 
-        void connect(const AddrInfo& addrinfo);
+        void connect(const Endpoint& addrinfo);
 
-        bool beginConnect(System::EventLoop& loop, const AddrInfo& addrinfo);
+        bool beginConnect(System::EventLoop& loop, const Endpoint& addrinfo);
 
         void endConnect(System::EventLoop& loop);
 
@@ -116,8 +116,8 @@ class TcpSocketImpl
         int waitSelect(fd_set* rfds, fd_set* wfds, fd_set* efds, size_t timeout);
 
     private:
-        Resolver _addrInfo;
-        Resolver::const_iterator _addrInfoPtr;
+        AddrInfo _addrInfo;
+        AddrInfo::const_iterator _addrInfoPtr;
         bool _errorPending;
         SOCKET _fd;
         std::size_t _timeout;

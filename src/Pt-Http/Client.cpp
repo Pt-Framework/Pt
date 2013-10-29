@@ -54,7 +54,7 @@ Client::Client(System::EventLoop& loop)
 }
 
 
-Client::Client(System::EventLoop& loop, const Net::AddrInfo& addrinfo)
+Client::Client(System::EventLoop& loop, const Net::Endpoint& addrinfo)
 : _impl( new ClientImpl() )
 {
     _impl->request().outputSent() += Pt::slot(*this, &Client::onRequestSent);
@@ -71,7 +71,7 @@ Client::Client(System::EventLoop& loop, const std::string& host, unsigned short 
     _impl->reply().inputReceived() += Pt::slot(*this, &Client::onReplyReceived);
 
     _impl->setActive(loop);
-    _impl->setHost( Net::AddrInfo(host, port) );
+    _impl->setHost( Net::Endpoint(host, port) );
 }
 
 Client::~Client()
@@ -79,17 +79,17 @@ Client::~Client()
     delete _impl;
 }
 
-void Client::setHost(const Net::AddrInfo& addrinfo)
+void Client::setHost(const Net::Endpoint& addrinfo)
 {
     _impl->setHost(addrinfo);
 }
 
 void Client::setHost(const std::string& host, unsigned short int port)
 {
-    _impl->setHost( Net::AddrInfo(host, port) );
+    _impl->setHost( Net::Endpoint(host, port) );
 }
 
-const Net::AddrInfo& Client::host() const
+const Net::Endpoint& Client::host() const
 {
     return _impl->host();
 }

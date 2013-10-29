@@ -92,16 +92,16 @@ void TcpServerImpl::close()
 }
 
 
-void TcpServerImpl::listen(const AddrInfo& ain, const TcpServer::Options& options)
+void TcpServerImpl::listen(const Endpoint& ep, const TcpServer::Options& options)
 {
     static const int on = 1;
 
-    Resolver r;
-    r.resolve( *ain.impl() );
+    AddrInfo ai;
+    ai.resolve(ep);
 
     // getaddrinfo() may return more than one addrinfo structure, so work
     // them all out, until we find a pretty useable one
-    for (Resolver::const_iterator it = r.begin(); it != r.end(); ++it)
+    for (Resolver::const_iterator it = ai.begin(); it != ai.end(); ++it)
     {
         try
         {
@@ -189,7 +189,7 @@ void TcpServerImpl::listen(const AddrInfo& ain, const TcpServer::Options& option
     close();
 
     if (errno == EADDRINUSE)
-        throw AddressInUse(ain.host(), ain.port());
+        throw AddressInUse( ep.toString() );
     else
         throw System::IOError("bind");
 }
@@ -200,8 +200,8 @@ void TcpServerImpl::listen(const std::string& ipaddr,  unsigned short int port,
 
     log_debug("listen on " << ipaddr << " port " << port);
 
-    AddrInfo ai(ipaddr, port, true);
-    listen(ai, options); 
+    Endpoint ep(ipaddr, port, true);
+    listen(ep, options); 
 }
 
 

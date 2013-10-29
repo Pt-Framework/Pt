@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005,2009 Tommi Maekitalo
+ * Copyright (C) 2013 Marc Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,8 +26,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef PT_NET_ADDRINFO_H
-#define PT_NET_ADDRINFO_H
+#ifndef PT_NET_ENDPOINT_H
+#define PT_NET_ENDPOINT_H
 
 #include <Pt/Net/Api.h>
 #include <string>
@@ -36,64 +36,57 @@ namespace Pt {
 
 namespace Net {
 
-class AddrInfoImpl;
+class EndpointImpl;
 
 /** @brief Represents a Network Host
     
-    AddrInfo are constructed from an IP address string or a hostname. Hostnames
-    are resolved and may result in a number of possible endpoints. Thus, this
-    class represents also the result of resolving a hostname. An implementation
-    might cache the resolved addresses in the %AddrInfo, so that a reconnect 
-    does not require to call the resolver again.
+    Endpoints are constructed from a hostname and service name such as
+    an IP port number.
 
     @todo Add enum for broadcast, server, etc... addresses:
-          udpSocket.setTarget( AddrInfo("192.168.1.255", 8000, AddrInfo::Broadcast) );
-          tcpServer.bind( AddrInfo("192.168.1.255", 8000, AddrInfo::Server) );
+          udpSocket.setTarget( Endpoint("192.168.1.255", 8000, Endpoint::Broadcast) );
+          tcpServer.bind( Endpoint("192.168.1.255", 8000, Endpoint::Server) );
  */
-class PT_NET_API AddrInfo
+class PT_NET_API Endpoint
 {
-    // TODO: rename Endpoint
-
     public:
-        AddrInfo();
+        Endpoint();
+
+        Endpoint(const std::string& host, unsigned short port, bool passive = false);
+
+        Endpoint(const Endpoint& src);
+
+        ~Endpoint();
+
+        Endpoint& operator=(const Endpoint& src);
+
+        std::string toString() const;
+
+        static Endpoint ip4Any(unsigned short port);
+
+        static Endpoint ip4Loopback(unsigned short port);
+
+        static Endpoint ip4Broadcast(unsigned short port);
+
+        static Endpoint ip6Any(unsigned short port);
+
+        static Endpoint ip6Loopback(unsigned short port);
 
         //! @internal
-        explicit AddrInfo(AddrInfoImpl* impl);
-
-        AddrInfo(const std::string& host, unsigned short port, bool passive = false);
-
-        AddrInfo(const AddrInfo& src);
-
-        ~AddrInfo();
-
-        AddrInfo& operator=(const AddrInfo& src);
-
-        std::string host() const;
-
-        unsigned short port() const;
-
-        static AddrInfo ip4Any(unsigned short port);
-
-        static AddrInfo ip4Loopback(unsigned short port);
-
-        static AddrInfo ip4Broadcast(unsigned short port);
-
-        static AddrInfo ip6Any(unsigned short port);
-
-        static AddrInfo ip6Loopback(unsigned short port);
+        explicit Endpoint(EndpointImpl* impl);
 
         //! @internal
-        AddrInfoImpl* impl();
+        EndpointImpl* impl();
 
         //! @internal
-        const AddrInfoImpl* impl() const;
+        const EndpointImpl* impl() const;
 
     private:
-        AddrInfoImpl* _impl;
+        EndpointImpl* _impl;
 };
 
 } // namespace Net
 
 } // namespace Pt
 
-#endif // PT_NET_ADDRINFO_H
+#endif // PT_NET_ENDPOINT_H

@@ -59,23 +59,23 @@ class UdpSocketImpl
 
         void close();
 
-        bool beginBind(System::EventLoop& loop, const AddrInfo& addrinfo, const UdpSocket::Options& o);
+        bool beginBind(System::EventLoop& loop, const Endpoint& addrinfo, const UdpSocket::Options& o);
 
         bool runBind(System::EventLoop& loop);
 
         void endBind(System::EventLoop& loop);
 
-        void bind(const AddrInfo& addrinfo, const UdpSocket::Options& o);
+        void bind(const Endpoint& addrinfo, const UdpSocket::Options& o);
 
-        bool beginConnect(System::EventLoop& loop, const AddrInfo& addrinfo);
+        bool beginConnect(System::EventLoop& loop, const Endpoint& addrinfo);
 
         bool runConnect(System::EventLoop& loop);
 
         void endConnect(System::EventLoop& loop);
 
-        void connect(const AddrInfo& addrinfo);
+        void connect(const Endpoint& addrinfo);
 
-        void setTarget(const AddrInfo& addrinfo);
+        void setTarget(const Endpoint& addrinfo);
 
         bool isConnected() const;
 
@@ -91,9 +91,9 @@ class UdpSocketImpl
 
         void cancel(System::EventLoop& loop);
 
-        std::string socketAddress() const;
+        void localEndpoint(Endpoint& ep) const;
 
-        const AddrInfo& peerAddress() const;
+        const Endpoint& remoteEndpoint() const;
 
         void setTimeout(std::size_t msecs)
         { _timeout = msecs; }
@@ -128,7 +128,7 @@ class UdpSocketImpl
         bool             _broadcast;
         bool             _isConnected;
         bool             _isBound;
-        AddrInfo         _peerAddr;
+        Endpoint         _peerAddr;
         sockaddr_storage _sendAddr;
         mutable sockaddr_storage _servaddr;
         unsigned int     _hopLimit;

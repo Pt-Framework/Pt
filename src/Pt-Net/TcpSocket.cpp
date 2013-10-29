@@ -72,7 +72,7 @@ TcpSocket::TcpSocket(const std::string& ipaddr, unsigned short int port, const O
 }
 
 
-TcpSocket::TcpSocket(const AddrInfo& addrinfo, const Options&)
+TcpSocket::TcpSocket(const Endpoint& addrinfo, const Options&)
 : _impl(0)
 , _connecting(false)
 {
@@ -118,7 +118,7 @@ void TcpSocket::accept(const TcpServer& server, const Options& o)
 }
 
 
-void TcpSocket::connect(const AddrInfo& addrinfo, const Options&)
+void TcpSocket::connect(const Endpoint& addrinfo, const Options&)
 {
     this->close();
     _impl->connect(addrinfo);
@@ -127,17 +127,17 @@ void TcpSocket::connect(const AddrInfo& addrinfo, const Options&)
 
 void TcpSocket::connect(const std::string& ipaddr, unsigned short int port, const Options&)
 { 
-    connect(AddrInfo(ipaddr, port)); 
+    connect(Endpoint(ipaddr, port)); 
 }
 
 
 bool TcpSocket::beginConnect(const std::string& ipaddr, unsigned short int port, const Options&)
 { 
-    return beginConnect(AddrInfo(ipaddr, port)); 
+    return beginConnect(Endpoint(ipaddr, port)); 
 }
 
 
-bool TcpSocket::beginConnect(const AddrInfo& addrinfo, const Options&)
+bool TcpSocket::beginConnect(const Endpoint& addrinfo, const Options&)
 {
     if( ! isActive() )
         throw std::logic_error( PT_ERROR_MSG("socket not active") );

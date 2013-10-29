@@ -62,9 +62,9 @@ class TcpSocketImpl : public System::IODeviceImpl
         bool isConnected() const
         { return _isConnected; }
 
-        void connect(const AddrInfo& addrinfo);
+        void connect(const Endpoint& ep);
 
-        bool beginConnect(System::EventLoop& loop, const AddrInfo& addrinfo);
+        bool beginConnect(System::EventLoop& loop, const Endpoint& ep);
 
         void endConnect(System::EventLoop& loop);
 
@@ -72,15 +72,15 @@ class TcpSocketImpl : public System::IODeviceImpl
 
     protected:
         void connect();
+        
         bool beginConnect(System::EventLoop& loop);
-        //bool beginConnect(System::EventLoop& loop, const ::addrinfo& ai);
 
     private:
         TcpSocket& _socket;
         bool _errorPending;
         bool _isConnected;
-        Resolver _addrInfo;
-        Resolver::const_iterator _addrInfoPtr;
+        AddrInfo _addrInfo;
+        AddrInfo::const_iterator _addrInfoPtr;
 };
 
 } // namespace Net

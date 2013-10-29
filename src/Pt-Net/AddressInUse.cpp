@@ -29,30 +29,13 @@
 #include "Pt/Net/AddressInUse.h"
 #include <sstream>
 
-namespace
-{
-  std::string AddressInUseMsg(const std::string& ipaddr, unsigned short int port)
-  {
-    std::ostringstream msg;
-    msg << "address " << ipaddr << ':' << port << " in use";
-    return msg.str();
-  }
-}
-
-
 namespace Pt {
 
 namespace Net {
 
-AddressInUse::AddressInUse()
-: IOError("address in use")
+AddressInUse::AddressInUse(const std::string& endpoint)
+: IOError("address " + endpoint + " in use")
 { }
-
-
-AddressInUse::AddressInUse(const std::string& ipaddr, unsigned short int port)
-: IOError(AddressInUseMsg(ipaddr, port))
-{
-}
 
 } // namespace Net
 

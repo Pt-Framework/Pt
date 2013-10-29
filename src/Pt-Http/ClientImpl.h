@@ -92,10 +92,10 @@ class ClientImpl : public Connectable
         void setTimeout(std::size_t timeout)
         { _conn.setTimeout(timeout); }
 
-        void setHost(const Net::AddrInfo& addrinfo)
+        void setHost(const Net::Endpoint& addrinfo)
         { _conn.setHost(addrinfo); }
 
-        const Net::AddrInfo& host() const
+        const Net::Endpoint& host() const
         { return _conn.host(); }
 
         void setSecure(Ssl::Context& ctx);

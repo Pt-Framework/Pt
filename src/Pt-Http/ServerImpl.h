@@ -225,7 +225,7 @@ class ServerImpl : public Connectable
         void setKeepAliveTimeout(std::size_t ms)
         { _keepAliveTimeout = ms; }
 
-        void listen(const Pt::Net::AddrInfo& addr, const Server::Options& options);
+        void listen(const Pt::Net::Endpoint& addr, const Server::Options& options);
 
         void cancel();
 

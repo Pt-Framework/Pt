@@ -60,23 +60,23 @@ class UdpSocketImpl : public System::IODeviceImpl
 
         void close();
 
-        bool beginBind(System::EventLoop& loop, const AddrInfo& addrinfo, const UdpSocket::Options& o);
+        bool beginBind(System::EventLoop& loop, const Endpoint& ep, const UdpSocket::Options& o);
 
         bool runBind(System::EventLoop& loop);
 
         void endBind(System::EventLoop& loop);
 
-        void bind(const AddrInfo& addrinfo, const UdpSocket::Options& o);
+        void bind(const Endpoint& ep, const UdpSocket::Options& o);
 
-        bool beginConnect(System::EventLoop& loop, const AddrInfo& addrinfo);
+        bool beginConnect(System::EventLoop& loop, const Endpoint& ep);
 
         bool runConnect(System::EventLoop& loop);
 
         void endConnect(System::EventLoop& loop);
 
-        void connect(const AddrInfo& addrinfo);
+        void connect(const Endpoint& ep);
 
-        void setTarget(const AddrInfo& addrinfo);
+        void setTarget(const Endpoint& ep);
 
         bool isConnected() const;
 
@@ -88,9 +88,9 @@ class UdpSocketImpl : public System::IODeviceImpl
 
         void dropMulticastGroup(const std::string& ipaddr);
 
-        std::string socketAddress() const;
+        void localEndpoint(Endpoint& ep) const;
 
-        const AddrInfo& peerAddress() const;
+        const Endpoint& peerAddress() const;
 
         size_t beginRead(System::EventLoop& loop, char* buffer, size_t n, bool& eof);
 
@@ -104,7 +104,7 @@ class UdpSocketImpl : public System::IODeviceImpl
         bool             _broadcast;
         bool             _isConnected;
         bool             _isBound;
-        AddrInfo         _peerAddr;
+        Endpoint         _peerAddr;
         sockaddr_storage _servaddr;
         sockaddr_storage _sendaddr;
         socklen_t        _sendaddrLen;
