@@ -29,7 +29,7 @@
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/RegisterTest.h"
-#include "Pt/Net/AddrInfo.h"
+#include "Pt/Net/Endpoint.h"
 #include "Pt/Net/TcpServer.h"
 #include "Pt/Net/TcpSocket.h"
 #include "Pt/System/Thread.h"

@@ -28,8 +28,8 @@
  */
 
 #include "TcpServerImpl.h"
-#include "AddrInfoImpl.h"
-#include <Pt/Net/AddrInfo.h>
+#include "AddrInfo.h"
+#include <Pt/Net/Endpoint.h>
 #include <Pt/Net/AddressInUse.h>
 #include <Pt/Net/TcpServer.h>
 #include <Pt/System/Logger.h>

@@ -29,7 +29,7 @@
 #include "ServerImpl.h"
 #include <Pt/Http/Server.h>
 #include <Pt/Http/Servlet.h>
-#include <Pt/Net/AddrInfo.h>
+#include <Pt/Net/Endpoint.h>
 
 namespace Pt {
 

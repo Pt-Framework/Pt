@@ -10,10 +10,10 @@ PT_NET_IMPL += [ GLOB $(PT_NET_SUBDIR) : *.cpp  ] ;
 
 SharedLibrary Pt-Net : $(PT_NET_IMPL)
                        AddressInUse.cpp
+                       Endpoint.cpp
                        TcpServer.cpp
                        TcpSocket.cpp
-                       UdpSocket.cpp
-                       AddrInfo.cpp ;
+                       UdpSocket.cpp ;
 
 LinkSharedLibraries Pt-Net : Pt Pt-System ;
 LinkLibs Pt-Net : $(NETLIBS) ;

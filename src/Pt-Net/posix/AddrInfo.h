@@ -26,8 +26,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef PT_NET_ADDRINFOIMPL_H
-#define PT_NET_ADDRINFOIMPL_H
+#ifndef PT_NET_ADDRINFO_H
+#define PT_NET_ADDRINFO_H
 
 #include <Pt/NonCopyable.h>
 #include <string>
@@ -56,60 +56,6 @@ namespace Pt {
 namespace Net {
 
 class Endpoint;
-
-class EndpointImpl
-{
-    public:
-        EndpointImpl();
-
-        EndpointImpl(const std::string& ipaddr, unsigned short port, bool listen);
-
-        EndpointImpl(const EndpointImpl& ipaddr);
-
-        ~EndpointImpl();
-
-        EndpointImpl& operator=(const EndpointImpl& ipaddr);
-
-        void init(const sockaddr* addr, size_t addrlen);
-
-        std::string toString() const;
-
-        const std::string& host() const
-        { return _host; }
-
-        const std::string& service() const
-        { return _service; }
-
-        bool isListen() const
-        { return _listen; }
-
-        const ::sockaddr* addr() const
-        { return reinterpret_cast<const sockaddr*>(&_addr); }
-
-        size_t addrlen() const
-        { return _addrlen; }
-
-        static EndpointImpl* ip4Any(unsigned short port);
-
-        static EndpointImpl* ip4Loopback(unsigned short port);
-
-        static EndpointImpl* ip4Broadcast(unsigned short port);
-
-        static EndpointImpl* ip6Any(unsigned short port);
-
-        static EndpointImpl* ip6Loopback(unsigned short port);
-
-    protected:
-        void clear();
-
-    private:
-        size_t _addrlen;
-        ::sockaddr_storage _addr;
-        std::string _host;
-        std::string _service;
-        bool _listen;
-};
-
 
 class AddrInfo : private NonCopyable
 {

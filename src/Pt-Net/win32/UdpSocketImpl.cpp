@@ -28,7 +28,8 @@
 
 #include "UdpSocketImpl.h"
 #include "MainLoopImpl.h"
-#include "Pt/Net/AddrInfo.h"
+#include "EndpointImpl.h"
+#include "AddrInfo.h"
 #include "Pt/Net/AddressInUse.h"
 #include <Pt/Net/UdpSocket.h>
 #include <Pt/System/EventLoop.h>

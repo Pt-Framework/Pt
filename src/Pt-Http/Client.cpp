@@ -28,7 +28,7 @@
 
 #include "ClientImpl.h"
 #include <Pt/Http/Client.h>
-#include <Pt/Net/AddrInfo.h>
+#include <Pt/Net/Endpoint.h>
 #include <Pt/System/Logger.h>
 
 log_define("Pt.Http.Client")

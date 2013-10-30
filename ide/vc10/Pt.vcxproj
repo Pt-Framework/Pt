@@ -162,8 +162,8 @@
     <ClInclude Include="..\..\include\Pt\Math.h" />
     <ClInclude Include="..\..\include\Pt\Method.h" />
     <ClInclude Include="..\..\include\Pt\Net\AddressInUse.h" />
-    <ClInclude Include="..\..\include\Pt\Net\AddrInfo.h" />
     <ClInclude Include="..\..\include\Pt\Net\Api.h" />
+    <ClInclude Include="..\..\include\Pt\Net\Endpoint.h" />
     <ClInclude Include="..\..\include\Pt\Net\TcpServer.h" />
     <ClInclude Include="..\..\include\Pt\Net\TcpSocket.h" />
     <ClInclude Include="..\..\include\Pt\Net\UdpSocket.h" />
@@ -356,7 +356,8 @@
     <ClInclude Include="..\..\src\Pt-Http\HttpBuffer.h" />
     <ClInclude Include="..\..\src\Pt-Http\Parser.h" />
     <ClInclude Include="..\..\src\Pt-Http\ServerImpl.h" />
-    <ClInclude Include="..\..\src\Pt-Net\win32\AddrInfoImpl.h" />
+    <ClInclude Include="..\..\src\Pt-Net\posix\AddrInfo.h" />
+    <ClInclude Include="..\..\src\Pt-Net\posix\EndpointImpl.h" />
     <ClInclude Include="..\..\src\Pt-Net\win32\TcpServerImpl.h" />
     <ClInclude Include="..\..\src\Pt-Net\win32\TcpSocketImpl.h" />
     <ClInclude Include="..\..\src\Pt-Net\win32\UdpSocketImpl.h" />
@@ -598,14 +599,15 @@
     <ClCompile Include="..\..\src\Pt-Http\tests\Pt-Http-test.cpp" />
     <ClCompile Include="..\..\src\Pt-Http\tests\ServerTest.cpp" />
     <ClCompile Include="..\..\src\Pt-Net\AddressInUse.cpp" />
-    <ClCompile Include="..\..\src\Pt-Net\AddrInfo.cpp" />
+    <ClCompile Include="..\..\src\Pt-Net\Endpoint.cpp" />
+    <ClCompile Include="..\..\src\Pt-Net\posix\AddrInfo.cpp" />
+    <ClCompile Include="..\..\src\Pt-Net\posix\EndpointImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Net\TcpServer.cpp" />
     <ClCompile Include="..\..\src\Pt-Net\TcpSocket.cpp" />
     <ClCompile Include="..\..\src\Pt-Net\tests\Pt-Net-test.cpp" />
     <ClCompile Include="..\..\src\Pt-Net\tests\TcpSocketTest.cpp" />
     <ClCompile Include="..\..\src\Pt-Net\tests\UdpSocketTest.cpp" />
     <ClCompile Include="..\..\src\Pt-Net\UdpSocket.cpp" />
-    <ClCompile Include="..\..\src\Pt-Net\win32\AddrInfoImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Net\win32\TcpServerImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Net\win32\TcpSocketImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Net\win32\UdpSocketImpl.cpp" />

@@ -30,7 +30,7 @@
 #define Pt_Net_UdpSocket_h
 
 #include <Pt/Net/Api.h>
-#include <Pt/Net/AddrInfo.h>
+#include <Pt/Net/Endpoint.h>
 #include <Pt/System/IODevice.h>
 
 namespace Pt {

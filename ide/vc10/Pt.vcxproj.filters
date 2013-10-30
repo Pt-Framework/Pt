@@ -501,9 +501,6 @@
     <ClInclude Include="..\..\include\Pt\Unit\TextProtocol.h">
       <Filter>Pt-Unit</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Net\win32\AddrInfoImpl.h">
-      <Filter>Pt-Net\win32</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Pt-Net\win32\TcpServerImpl.h">
       <Filter>Pt-Net\win32</Filter>
     </ClInclude>
@@ -514,9 +511,6 @@
       <Filter>Pt-Net\win32</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Net\AddressInUse.h">
-      <Filter>Pt-Net</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Net\AddrInfo.h">
       <Filter>Pt-Net</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Net\Api.h">
@@ -1299,6 +1293,15 @@
     <ClInclude Include="..\..\src\Pt-Hmi\Desktop\tests\AtesionIcon.h">
       <Filter>Pt-Hmi\Sources\Desktop\tests</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Net\posix\EndpointImpl.h">
+      <Filter>Pt-Net\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Net\Endpoint.h">
+      <Filter>Pt-Net</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Net\posix\AddrInfo.h">
+      <Filter>Pt-Net\win32</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -1860,9 +1863,6 @@
     <ClCompile Include="..\..\src\Pt-Net\AddressInUse.cpp">
       <Filter>Pt-Net</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Net\AddrInfo.cpp">
-      <Filter>Pt-Net</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Pt-Net\TcpServer.cpp">
       <Filter>Pt-Net</Filter>
     </ClCompile>
@@ -1880,9 +1880,6 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Net\tests\UdpSocketTest.cpp">
       <Filter>Pt-Net\tests</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Net\win32\AddrInfoImpl.cpp">
-      <Filter>Pt-Net\win32</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Net\win32\TcpServerImpl.cpp">
       <Filter>Pt-Net\win32</Filter>
@@ -2477,6 +2474,15 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Gfx\Stroke.cpp">
       <Filter>Pt-Gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Net\posix\EndpointImpl.cpp">
+      <Filter>Pt-Net\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Net\Endpoint.cpp">
+      <Filter>Pt-Net</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Net\posix\AddrInfo.cpp">
+      <Filter>Pt-Net\win32</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

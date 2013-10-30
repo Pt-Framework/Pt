@@ -35,10 +35,9 @@
 #endif
 
 #include "Selector.h"
-#include "AddrInfoImpl.h"
+#include "AddrInfo.h"
 #include "Pt/WinVer.h"
 #include "Pt/Net/Api.h"
-#include "Pt/Net/AddrInfo.h"
 #include <Pt/Net/TcpSocket.h>
 
 #include <string>

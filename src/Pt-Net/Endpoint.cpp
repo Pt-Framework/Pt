@@ -26,8 +26,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "AddrInfoImpl.h"
-#include <Pt/Net/AddrInfo.h>
+#include "EndpointImpl.h"
+#include <Pt/Net/Endpoint.h>
 
 namespace Pt {
 
