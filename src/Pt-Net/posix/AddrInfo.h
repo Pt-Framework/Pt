@@ -116,7 +116,7 @@ class AddrInfo : private NonCopyable
 
         ~AddrInfo();
 
-        void resolve(const Endpoint& ep);
+        void resolve(const Endpoint& ep, bool passive = false);
 
         void clear();
 

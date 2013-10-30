@@ -66,21 +66,19 @@ class UdpSocketImpl
 
         void bind(const Endpoint& addrinfo, const UdpSocket::Options& o);
 
-        bool beginConnect(System::EventLoop& loop, const Endpoint& addrinfo);
+        bool beginConnect(System::EventLoop& loop, const Endpoint& addrinfo, const UdpSocket::Options& o);
 
         bool runConnect(System::EventLoop& loop);
 
         void endConnect(System::EventLoop& loop);
 
-        void connect(const Endpoint& addrinfo);
+        void connect(const Endpoint& addrinfo, const UdpSocket::Options& o);
 
-        void setTarget(const Endpoint& addrinfo);
+        void setTarget(const Endpoint& addrinfo, const UdpSocket::Options& o);
 
         bool isConnected() const;
 
         bool isBound() const;
-
-        void setBroadcast();
 
         void setHopLimit(unsigned int n);
 
@@ -124,7 +122,6 @@ class UdpSocketImpl
     private:
         System::IOHandle _ioh;
         SOCKET           _fd;
-        bool             _broadcast;
         bool             _isConnected;
         bool             _isBound;
         Endpoint         _peerAddr;

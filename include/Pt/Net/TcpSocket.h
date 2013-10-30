@@ -72,9 +72,9 @@ class PT_NET_API TcpSocket : public System::IODevice
 
         ~TcpSocket();
 
-        std::string socketAddress() const;
+        void localEndpoint(Endpoint& ep) const;
 
-        std::string peerAddress() const;
+        void remoteEndpoint(Endpoint& ep) const;
 
         void accept(const TcpServer& server, const Options& o = Options());
 
@@ -137,6 +137,7 @@ class PT_NET_API TcpSocket : public System::IODevice
         //! @internal
         bool _connecting;
 
+        //! @internal
         bool _reservedForIsConnectedFlag;
 };
 

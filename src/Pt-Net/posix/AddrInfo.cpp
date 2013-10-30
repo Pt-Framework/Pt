@@ -50,7 +50,7 @@ AddrInfo::~AddrInfo()
 }
 
 
-void AddrInfo::resolve(const Endpoint& ep)
+void AddrInfo::resolve(const Endpoint& ep, bool passive)
 {
     clear();
 
@@ -74,7 +74,7 @@ void AddrInfo::resolve(const Endpoint& ep)
     struct addrinfo hints;
     memset(&hints, 0, sizeof(hints));
 
-    if( impl->isListen() )
+    if( passive )
         hints.ai_flags |= AI_PASSIVE;
     
     _host = impl->host();

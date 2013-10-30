@@ -52,7 +52,6 @@ namespace Net {
 
 UdpSocketImpl::UdpSocketImpl(UdpSocket& socket)
 : System::IODeviceImpl(socket)
-, _broadcast(false)
 , _isConnected(false)
 , _isBound(false)
 , _sendaddrLen(0)
@@ -106,7 +105,7 @@ void UdpSocketImpl::bind(const Endpoint& ep, const UdpSocket::Options& o)
     bool addrInUse = false;
     
     AddrInfo ai;
-    ai.resolve(ep);
+    ai.resolve(ep, true);
 
     for (AddrInfo::const_iterator it = ai.begin(); it != ai.end(); ++it)
     {
@@ -121,7 +120,7 @@ void UdpSocketImpl::bind(const Endpoint& ep, const UdpSocket::Options& o)
                 this->close();
         }
 
-        if(it->ai_family == AF_INET6 && _broadcast )
+        if(it->ai_family == AF_INET6 && opts.isBroadcast() )
             continue;
 
         if( this->fd() < 0 )
@@ -178,7 +177,7 @@ void UdpSocketImpl::bind(const Endpoint& ep, const UdpSocket::Options& o)
 }
 
 
-bool UdpSocketImpl::beginConnect(System::EventLoop& loop, const Endpoint& ep)
+bool UdpSocketImpl::beginConnect(System::EventLoop& loop, const Endpoint& ep, const UdpSocket::Options& o)
 {
     log_debug( "begin connecting socket to " << ep.toString() );
 
@@ -198,7 +197,7 @@ void UdpSocketImpl::endConnect(System::EventLoop& loop)
 }
 
 
-void UdpSocketImpl::connect(const Endpoint& ep)
+void UdpSocketImpl::connect(const Endpoint& ep, const UdpSocket::Options& opts)
 {
     AddrInfo ainfo;
     ainfo.resolve(ep);
@@ -227,7 +226,7 @@ void UdpSocketImpl::connect(const Endpoint& ep)
         if( this->fd() < 0 )
             continue;
 
-        if( _broadcast)
+        if( opts.isBroadcast() )
         {
             const int on = 1;
             if( 0 > ::setsockopt(this->fd(), SOL_SOCKET, SO_BROADCAST, (char*)&on, sizeof(on)) )
@@ -256,7 +255,7 @@ void UdpSocketImpl::connect(const Endpoint& ep)
 }
 
 
-void UdpSocketImpl::setTarget(const Endpoint& ep)
+void UdpSocketImpl::setTarget(const Endpoint& ep, const UdpSocket::Options& o)
 {
     AddrInfo ainfo;
     ainfo.resolve(ep);
@@ -285,7 +284,7 @@ void UdpSocketImpl::setTarget(const Endpoint& ep)
         if( this->fd() < 0 )
             continue;
 
-        if( _broadcast)
+        if( opts.isBroadcast() )
         {
             const int on = 1;
             if( 0 > ::setsockopt(this->fd(), SOL_SOCKET, SO_BROADCAST, (char*)&on, sizeof(on)) )
@@ -318,21 +317,15 @@ bool UdpSocketImpl::isBound() const
 }
 
 
-void UdpSocketImpl::setBroadcast()
-{
-    _broadcast = true;
-}
-
-
 void UdpSocketImpl::joinMulticastGroup(const std::string& ipaddr)
 {
     if( this->fd() < 0 )
         return;
 
-    Endpoint ep(ipaddr, 0, true);
+    Endpoint ep(ipaddr, 0);
 
     AddrInfo ai;
-    ai.resolve(ep);
+    ai.resolve(ep, true);
 
     for(AddrInfo::const_iterator it = ai.begin(); it != ai.end(); ++it)
     {
@@ -375,10 +368,10 @@ void UdpSocketImpl::dropMulticastGroup(const std::string& ipaddr)
     if( this->fd() < 0 )
         return;
 
-    Endpoint ep(ipaddr, 0, true);
+    Endpoint ep(ipaddr, 0);
 
     AddrInfo ai;
-    ai.resolve(ep);
+    ai.resolve(ep, true);
 
     for(AddrInfo::const_iterator it = ai.begin(); it != ai.end(); ++it)
     {
@@ -416,15 +409,17 @@ void UdpSocketImpl::dropMulticastGroup(const std::string& ipaddr)
 
 
 void UdpSocketImpl::localEndpoint(Endpoint& ep) const
-{
+{      
     struct sockaddr_storage addr;
-
     socklen_t slen = sizeof(addr);
-    if (::getsockname(fd(), reinterpret_cast<struct sockaddr*>(&addr), &slen) < 0)
-        throw System::SystemError("getsockname");
-        
-    ep.impl()->init( (sockaddr*)&addr, slen);
-        
+
+    int ret = ::getsockname(fd(), reinterpret_cast<struct sockaddr*>(&addr), &slen);
+
+    if(ret == 0)
+        ep.impl()->init( &sockadr, slen );
+    else
+        ep.clear();
+
     //ep.impl()->init( (sockaddr*)&_servaddr, sizeof(_servaddr) );
 }
 

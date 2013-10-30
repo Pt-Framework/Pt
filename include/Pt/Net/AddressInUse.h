@@ -39,7 +39,7 @@ namespace Net {
 
 /** @brief Network address is already used
  */
-class PT_NET_API AddressInUse : public System::IOError
+class PT_NET_API AddressInUse : public System::AccessFailed
 {
     public:
         AddressInUse(const std::string& endpoint);

@@ -121,7 +121,7 @@ void TcpServerImpl::listen(const std::string& ipaddr, unsigned short int port,
 {
     log_debug("listen on " << ipaddr << " port " << port);
 
-    Endpoint e(ipaddr, port, true);
+    Endpoint e(ipaddr, port);
     listen(e, options);
 }
 
@@ -132,7 +132,7 @@ void TcpServerImpl::listen(const Endpoint& ep, const TcpServer::Options& options
     static const int on = 1;
 
     AddrInfo ai;
-    ai.resolve(ep);
+    ai.resolve(ep, true);
 
     for (AddrInfo::const_iterator it = ai.begin(); it != ai.end(); ++it)
     {

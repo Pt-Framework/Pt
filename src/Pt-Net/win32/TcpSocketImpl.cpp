@@ -28,6 +28,7 @@
  */
 #include "TcpSocketImpl.h"
 #include "AddrInfo.h"
+#include "EndpointImpl.h"
 #include "TcpServerImpl.h"
 #include "MainLoopImpl.h"
 #include <Pt/Net/Endpoint.h>
@@ -395,45 +396,29 @@ bool TcpSocketImpl::wait(std::size_t umsecs)
 }
 
 
-std::string TcpSocketImpl::socketAddress() const
+void TcpSocketImpl::localEndpoint(Endpoint& ep) const
 {
     SOCKADDR sockadr;
     int l = sizeof(sockadr);
     int ret = getsockname(_fd, &sockadr, &l);
 
-    SOCKADDR* saddr = const_cast<SOCKADDR*>(&sockadr);
-    DWORD len = 32;
-    TCHAR adr[32];
-    WSAAddressToString(saddr, sizeof(SOCKADDR), NULL, adr, &len);
-
-    std::string address;
-    for(unsigned n = 0; n < len; n++)
-    {
-        address.push_back( int(adr[n]) );
-    }
-
-    return address;
+    if(ret == 0)
+        ep.impl()->init( &sockadr, l );
+    else
+        ep.clear();
 }
 
 
-std::string TcpSocketImpl::peerAddress() const
+void TcpSocketImpl::remoteEndpoint(Endpoint& ep) const
 {
     SOCKADDR sockadr;
     int l = sizeof(sockadr);
     int ret = getpeername(_fd, &sockadr, &l);
 
-    SOCKADDR* saddr = const_cast<SOCKADDR*>(&sockadr);
-    DWORD len = 32;
-    TCHAR adr[32];
-    WSAAddressToString(saddr, sizeof(SOCKADDR), NULL, adr, &len);
-
-    std::string address;
-    for(unsigned n = 0; n < len; n++)
-    {
-        address.push_back( int(adr[n]) );
-    }
-
-    return address;
+    if(ret == 0)
+        ep.impl()->init( &sockadr, l );
+    else
+        ep.clear();
 }
 
 

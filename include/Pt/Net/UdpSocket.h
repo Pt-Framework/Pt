@@ -48,11 +48,27 @@ class PT_NET_API UdpSocket : public System::IODevice
                 explicit Options()
                 : _flags(0)
                 {}
+                
+                bool isBroadcast() const
+                { return (_flags & Broadcast) != 0; }
+                
+                void setBroadcast()
+                { _flags |= Broadcast; }
 
-                // TODO: add HopLimit/TTL
+                int hopLimit() const
+                { return _hoplimit; }
+
+                void setHopLimit(int n)
+                { _hoplimit = n; }
 
             private:
+                enum SocketFlags 
+                { 
+                    Broadcast = 1,
+                };
+
                 unsigned long _flags;
+                int _hoplimit;
         };
 
     public:
@@ -93,8 +109,6 @@ class PT_NET_API UdpSocket : public System::IODevice
         bool isConnected() const;
 
         bool isBound() const;
-
-        void setBroadcast();
 
         void joinMulticastGroup(const std::string& ipaddr);
 
@@ -139,12 +153,16 @@ class PT_NET_API UdpSocket : public System::IODevice
         //! @internal
         class UdpSocketImpl* _impl;
 
+        //! @internal
         Signal<UdpSocket&> _connected;
 
+        //! @internal
         bool _connecting;
 
+        //! @internal
         Signal<UdpSocket&> _bound;
 
+        //! @internal
         bool _binding;
 };
 

@@ -98,15 +98,15 @@ TcpSocket::~TcpSocket()
 }
 
 
-std::string TcpSocket::socketAddress() const
+void TcpSocket::localEndpoint(Endpoint& ep) const
 {
-    return _impl->socketAddress();
+    _impl->localEndpoint(ep);
 }
 
 
-std::string TcpSocket::peerAddress() const
+void TcpSocket::remoteEndpoint(Endpoint& ep) const
 {
-    return _impl->peerAddress();
+    _impl->remoteEndpoint(ep);
 }
 
 

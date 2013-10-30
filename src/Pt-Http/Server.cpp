@@ -118,7 +118,7 @@ void Server::listen(const Pt::Net::Endpoint& addr, const Options& options)
 
 void Server::listen(const std::string& ip, unsigned short int port, const Options& options)
 {
-    Net::Endpoint ai(ip, port, true);
+    Net::Endpoint ai(ip, port);
     _impl->listen(ai, options);
 }
 

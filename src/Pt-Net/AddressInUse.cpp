@@ -27,14 +27,13 @@
  */
 
 #include "Pt/Net/AddressInUse.h"
-#include <sstream>
 
 namespace Pt {
 
 namespace Net {
 
 AddressInUse::AddressInUse(const std::string& endpoint)
-: IOError("address " + endpoint + " in use")
+: AccessFailed(endpoint)
 { }
 
 } // namespace Net

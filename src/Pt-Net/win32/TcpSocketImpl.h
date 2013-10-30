@@ -97,9 +97,9 @@ class TcpSocketImpl
 
         size_t write(const char* buffer, size_t count);
 
-        std::string socketAddress() const;
+        void localEndpoint(Endpoint& ep) const;
 
-        std::string peerAddress() const;
+        void remoteEndpoint(Endpoint& ep) const;
 
         void setTimeout(std::size_t msecs)
         { _timeout = msecs; }

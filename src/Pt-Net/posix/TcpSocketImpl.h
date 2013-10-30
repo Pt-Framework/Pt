@@ -55,9 +55,9 @@ class TcpSocketImpl : public System::IODeviceImpl
 
         bool runConnect(System::EventLoop& loop);
 
-        std::string socketAddress() const;
+        void localEndpoint(Endpoint& ep) const;
 
-        std::string peerAddress() const;
+        void remoteEndpoint(Endpoint& ep) const;
 
         bool isConnected() const
         { return _isConnected; }

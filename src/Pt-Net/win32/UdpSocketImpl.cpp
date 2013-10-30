@@ -51,7 +51,6 @@ const unsigned int DefaultHopLimit = static_cast<unsigned int>(-1);
 UdpSocketImpl::UdpSocketImpl(UdpSocket& socket)
 : _ioh(socket)
 , _fd(INVALID_SOCKET)
-, _broadcast(false)
 , _isConnected(false)
 , _isBound(false)
 , _hopLimit(DefaultHopLimit)
@@ -125,12 +124,12 @@ void UdpSocketImpl::endBind(System::EventLoop& loop)
 }
 
 
-void UdpSocketImpl::bind(const Endpoint& e, const UdpSocket::Options&)
+void UdpSocketImpl::bind(const Endpoint& e, const UdpSocket::Options& opts)
 {
     log_debug( "bind socket to " << e.toString() );
 
     AddrInfo ai;
-    ai.resolve(e);
+    ai.resolve(e, true);
 
     BOOL reuseAddr = TRUE;
     bool addrInUse = false;
@@ -148,7 +147,7 @@ void UdpSocketImpl::bind(const Endpoint& e, const UdpSocket::Options&)
                 this->close();
         }
 
-        if( it->ai_family == AF_INET6 && _broadcast)
+        if( it->ai_family == AF_INET6 && opts.isBroadcast() )
             continue;
 
         if( _fd == INVALID_SOCKET )
@@ -196,11 +195,11 @@ void UdpSocketImpl::bind(const Endpoint& e, const UdpSocket::Options&)
 }
 
 
-bool UdpSocketImpl::beginConnect(System::EventLoop& loop, const Endpoint& ai)
+bool UdpSocketImpl::beginConnect(System::EventLoop& loop, const Endpoint& ai, const UdpSocket::Options& o)
 {
     log_debug( "begin connecting socket to " << ai.toString() );
 
-    this->connect(ai);
+    this->connect(ai, o);
     return true;
 }
 
@@ -216,7 +215,7 @@ void UdpSocketImpl::endConnect(System::EventLoop& loop)
 }
 
 
-void UdpSocketImpl::connect(const Endpoint& ep)
+void UdpSocketImpl::connect(const Endpoint& ep, const UdpSocket::Options& opts)
 {
     AddrInfo ainfo;
     ainfo.resolve(ep);
@@ -242,7 +241,7 @@ void UdpSocketImpl::connect(const Endpoint& ep)
         if( _fd == INVALID_SOCKET )
             continue;
 
-        if(_broadcast)
+        if( opts.isBroadcast() )
         {
             const int on = 1;
             if (::setsockopt(_fd, SOL_SOCKET, SO_BROADCAST, (char*)&on, sizeof(on)) < 0)
@@ -280,7 +279,7 @@ void UdpSocketImpl::connect(const Endpoint& ep)
 }
 
 
-void UdpSocketImpl::setTarget(const Endpoint& ep)
+void UdpSocketImpl::setTarget(const Endpoint& ep, const UdpSocket::Options& opts)
 {
     AddrInfo ainfo;
     ainfo.resolve(ep);
@@ -306,7 +305,7 @@ void UdpSocketImpl::setTarget(const Endpoint& ep)
         if( _fd == INVALID_SOCKET )
             continue;
 
-        if(_broadcast)
+        if( opts.isBroadcast() )
         {
             const int on = 1;
             if (::setsockopt(_fd, SOL_SOCKET, SO_BROADCAST, (char*)&on, sizeof(on)) < 0)
@@ -345,12 +344,6 @@ bool UdpSocketImpl::isConnected() const
 bool UdpSocketImpl::isBound() const
 {
     return _isBound;
-}
-
-
-void UdpSocketImpl::setBroadcast()
-{
-    _broadcast = true;
 }
 
 
@@ -393,10 +386,10 @@ void UdpSocketImpl::joinMulticastGroup(const std::string& ipaddr)
     if( _fd == INVALID_SOCKET )
         return;
 
-    Endpoint ep(ipaddr, 0, true);
+    Endpoint ep(ipaddr, 0);
 
     AddrInfo ai;
-    ai.resolve(ep);
+    ai.resolve(ep, true);
 
     for(AddrInfo::const_iterator it = ai.begin(); it != ai.end(); ++it)
     {
@@ -440,10 +433,10 @@ void UdpSocketImpl::dropMulticastGroup(const std::string& ipaddr)
     if( _fd == INVALID_SOCKET )
         return;
 
-    Endpoint ep(ipaddr, 0, true);
+    Endpoint ep(ipaddr, 0);
 
     AddrInfo ai;
-    ai.resolve(ep);
+    ai.resolve(ep, true);
 
     for(AddrInfo::const_iterator it = ai.begin(); it != ai.end(); ++it)
     {
@@ -482,7 +475,16 @@ void UdpSocketImpl::dropMulticastGroup(const std::string& ipaddr)
 
 void UdpSocketImpl::localEndpoint(Endpoint& ep) const
 {
-    ep.impl()->init( (sockaddr*)&_servaddr, sizeof(_servaddr) );
+    SOCKADDR sockadr;
+    int l = sizeof(sockadr);
+    int ret = getsockname(_fd, &sockadr, &l);
+
+    if(ret == 0)
+        ep.impl()->init( &sockadr, l );
+    else
+        ep.clear();
+
+    //ep.impl()->init( (sockaddr*)&_servaddr, sizeof(_servaddr) );
 }
 
 
@@ -529,9 +531,6 @@ size_t UdpSocketImpl::read(char* buffer, size_t count, bool& eof)
     WSABUF recvbuf;
     recvbuf.buf = buffer;
     recvbuf.len = count;
-
-    //TODO2: Add enum for broadcast, server, etc... addresses so we can get
-    //       rid of setBroadcast
 
     sockaddr_storage peerAddr;
     int addrlen = sizeof(peerAddr);

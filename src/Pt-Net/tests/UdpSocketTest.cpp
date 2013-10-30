@@ -145,10 +145,12 @@ class UdpSocketTest : public Pt::Unit::TestSuite
 
         void Broadcast()
         {
+            Pt::Net::UdpSocket::Options opts;
+            opts.setBroadcast();
+
             _sender->setActive(*_loop);
             _sender->outputReady() += Pt::slot(*this, &UdpSocketTest::onBroadcastOutput);
-            _sender->setBroadcast();
-            _sender->setTarget( Pt::Net::Endpoint::ip4Broadcast(8000) );
+            _sender->setTarget( Pt::Net::Endpoint::ip4Broadcast(8000), opts );
 
             _receiver->setActive(*_loop);
             _receiver->bound() += Pt::slot(*this, &UdpSocketTest::onBroadcastBind);

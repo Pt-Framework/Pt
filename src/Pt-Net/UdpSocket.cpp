@@ -60,7 +60,7 @@ UdpSocket::~UdpSocket()
 
 bool UdpSocket::beginBind(const std::string& ipaddr, unsigned short int port, const Options& o)
 { 
-    Endpoint ai(ipaddr, port, true);
+    Endpoint ai(ipaddr, port);
     return beginBind( ai, o); 
 }
 
@@ -101,32 +101,32 @@ void UdpSocket::endBind()
 }
 
 
-void UdpSocket::bind(const Endpoint& addrinfo, const Options& o)
+void UdpSocket::bind(const Endpoint& addrinfo, const Options& opts)
 {
-    _impl->bind(addrinfo, o);
+    _impl->bind(addrinfo, opts);
     this->setEof(false);
 }
 
 
-void UdpSocket::bind(const std::string& ipaddr, unsigned short int port, const Options& o)
+void UdpSocket::bind(const std::string& ipaddr, unsigned short int port, const Options& opts)
 {
-    Endpoint ai(ipaddr, port, true);
-    bind(ai, o);
+    Endpoint ai(ipaddr, port);
+    bind(ai, opts);
 }
 
 
-bool UdpSocket::beginConnect(const std::string& ipaddr, unsigned short int port, const Options& o)
+bool UdpSocket::beginConnect(const std::string& ipaddr, unsigned short int port, const Options& opts)
 { 
-    return beginConnect(Endpoint(ipaddr, port), o); 
+    return beginConnect(Endpoint(ipaddr, port), opts); 
 }
 
 
-bool UdpSocket::beginConnect(const Endpoint& addrinfo, const Options&)
+bool UdpSocket::beginConnect(const Endpoint& addrinfo, const Options& opts)
 {
     if( ! isActive() )
         throw std::logic_error( PT_ERROR_MSG("socket not active") );
 
-    bool ret = _impl->beginConnect(*parent(), addrinfo);
+    bool ret = _impl->beginConnect(*parent(), addrinfo, opts);
     _connecting = true;
     
     if(ret)
@@ -157,29 +157,29 @@ void UdpSocket::endConnect()
 }
 
 
-void UdpSocket::connect(const std::string& ipaddr, unsigned short int port, const Options&)
+void UdpSocket::connect(const std::string& ipaddr, unsigned short int port, const Options& opts)
 {
-    connect( Endpoint(ipaddr, port) );
+    connect( Endpoint(ipaddr, port), opts );
 }
 
 
-void UdpSocket::connect(const Endpoint& addrinfo, const Options&)
+void UdpSocket::connect(const Endpoint& addrinfo, const Options& opts)
 {
-    _impl->connect(addrinfo);
+    _impl->connect(addrinfo, opts);
     this->setEof(false);
 }
 
 
-void UdpSocket::setTarget(const std::string& ipaddr, unsigned short int port, const Options&)
+void UdpSocket::setTarget(const std::string& ipaddr, unsigned short int port, const Options& opts)
 {
-    _impl->setTarget(Endpoint(ipaddr, port));
+    _impl->setTarget(Endpoint(ipaddr, port), opts);
     this->setEof(false);
 }
 
 
-void UdpSocket::setTarget(const Endpoint& addrinfo, const Options&)
+void UdpSocket::setTarget(const Endpoint& addrinfo, const Options& opts)
 {
-    _impl->setTarget(addrinfo);
+    _impl->setTarget(addrinfo, opts);
     this->setEof(false);
 }
 
@@ -192,12 +192,6 @@ bool UdpSocket::isConnected() const
 bool UdpSocket::isBound() const
 {
     return _impl->isBound();
-}
-
-
-void UdpSocket::setBroadcast()
-{
-    _impl->setBroadcast();
 }
 
 

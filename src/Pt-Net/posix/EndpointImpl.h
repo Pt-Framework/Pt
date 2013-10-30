@@ -59,7 +59,7 @@ class EndpointImpl
     public:
         EndpointImpl();
 
-        EndpointImpl(const std::string& ipaddr, unsigned short port, bool listen);
+        EndpointImpl(const std::string& ipaddr, unsigned short port);
 
         EndpointImpl(const EndpointImpl& ipaddr);
 
@@ -69,6 +69,8 @@ class EndpointImpl
 
         void init(const sockaddr* addr, size_t addrlen);
 
+        void clear();
+
         std::string toString() const;
 
         const std::string& host() const
@@ -76,9 +78,6 @@ class EndpointImpl
 
         const std::string& service() const
         { return _service; }
-
-        bool isListen() const
-        { return _listen; }
 
         const ::sockaddr* addr() const
         { return reinterpret_cast<const sockaddr*>(&_addr); }
@@ -96,15 +95,11 @@ class EndpointImpl
 
         static EndpointImpl* ip6Loopback(unsigned short port);
 
-    protected:
-        void clear();
-
     private:
         size_t _addrlen;
         ::sockaddr_storage _addr;
         std::string _host;
         std::string _service;
-        bool _listen;
 };
 
 } // namespace Net

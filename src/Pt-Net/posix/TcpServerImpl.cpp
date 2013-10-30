@@ -97,7 +97,7 @@ void TcpServerImpl::listen(const Endpoint& ep, const TcpServer::Options& options
     static const int on = 1;
 
     AddrInfo ai;
-    ai.resolve(ep);
+    ai.resolve(ep, true);
 
     // getaddrinfo() may return more than one addrinfo structure, so work
     // them all out, until we find a pretty useable one

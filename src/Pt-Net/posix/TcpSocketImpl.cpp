@@ -466,31 +466,31 @@ bool TcpSocketImpl::runConnect(System::EventLoop& loop)
 }
 
 
-std::string TcpSocketImpl::socketAddress() const
+void TcpSocketImpl::localEndpoint(Endpoint& ep) const
 {
     struct sockaddr_storage addr;
-
     socklen_t slen = sizeof(addr);
-    if (::getsockname(fd(), reinterpret_cast<struct sockaddr*>(&addr), &slen) < 0)
-        throw System::SystemError("getsockname");
 
-    std::string ret;
-    sockaddrToString(addr, ret);
-    return ret;
+    int ret = ::getsockname(fd(), reinterpret_cast<struct sockaddr*>(&addr), &slen);
+
+    if(ret == 0)
+        ep.impl()->init( &sockadr, slen );
+    else
+        ep.clear();
 }
 
 
-std::string TcpSocketImpl::peerAddress() const
+void TcpSocketImpl::remoteEndpoint(Endpoint& ep) const
 {
     struct sockaddr_storage addr;
-
     socklen_t slen = sizeof(addr);
-    if (::getpeername(fd(), reinterpret_cast<struct sockaddr*>(&addr), &slen) < 0)
-        throw System::SystemError("getsockname");
 
-    std::string ret;
-    sockaddrToString(addr, ret);
-    return ret;
+    int ret = ::getpeername(fd(), reinterpret_cast<struct sockaddr*>(&addr), &slen);
+
+    if(ret == 0)
+        ep.impl()->init( &sockadr, slen );
+    else
+        ep.clear();
 }
 
 } // namespace Net

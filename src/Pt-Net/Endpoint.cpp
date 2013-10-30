@@ -46,10 +46,10 @@ Endpoint::Endpoint(EndpointImpl* impl)
 }
 
 
-Endpoint::Endpoint(const std::string& host, unsigned short port, bool passive)
+Endpoint::Endpoint(const std::string& host, unsigned short port)
 : _impl(0)
 {
-    _impl = new EndpointImpl(host, port, passive);
+    _impl = new EndpointImpl(host, port);
 }
 
 
@@ -82,6 +82,11 @@ Endpoint& Endpoint::operator= (const Endpoint& src)
 {
     *_impl = *src._impl;
     return *this;
+}
+
+void Endpoint::clear()
+{
+    return _impl->clear();
 }
 
 

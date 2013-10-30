@@ -42,23 +42,21 @@ class EndpointImpl;
     
     Endpoints are constructed from a hostname and service name such as
     an IP port number.
-
-    @todo Add enum for broadcast, server, etc... addresses:
-          udpSocket.setTarget( Endpoint("192.168.1.255", 8000, Endpoint::Broadcast) );
-          tcpServer.bind( Endpoint("192.168.1.255", 8000, Endpoint::Server) );
  */
 class PT_NET_API Endpoint
 {
     public:
         Endpoint();
 
-        Endpoint(const std::string& host, unsigned short port, bool passive = false);
+        Endpoint(const std::string& host, unsigned short port);
 
         Endpoint(const Endpoint& src);
 
         ~Endpoint();
 
         Endpoint& operator=(const Endpoint& src);
+
+        void clear();
 
         std::string toString() const;
 

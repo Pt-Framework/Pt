@@ -39,15 +39,13 @@ namespace Net {
 
 EndpointImpl::EndpointImpl()
 : _addrlen(0)
-, _listen(false)
 {
 }
 
 
-EndpointImpl::EndpointImpl(const std::string& ipaddr, unsigned short port, bool listen)
+EndpointImpl::EndpointImpl(const std::string& ipaddr, unsigned short port)
 : _addrlen(0)
 , _host(ipaddr)
-, _listen(listen)
 {
     std::stringstream ss;
     ss << port;
@@ -59,7 +57,6 @@ EndpointImpl::EndpointImpl(const EndpointImpl& ainfo)
 : _addrlen(0)
 , _host(ainfo._host)
 , _service(ainfo._service)
-, _listen(ainfo._listen)
 {
     if(ainfo._addrlen)
     {
@@ -79,7 +76,6 @@ void EndpointImpl::clear()
     _addrlen = 0;
     _host.clear();
     _service.clear();
-    _listen = false;
 }
 
 
@@ -97,7 +93,6 @@ EndpointImpl& EndpointImpl::operator=(const EndpointImpl& ainfo)
     _addrlen = 0;
     _host = ainfo._host;
     _service = ainfo._service;
-    _listen = ainfo._listen;
 
     if(ainfo._addrlen)
     {      

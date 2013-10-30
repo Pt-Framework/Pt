@@ -47,8 +47,8 @@ namespace Pt {
 */
 namespace Net {
 
-class AddrInfo;
-class ConnectFailed;
+class AddressInUse;
+class Endpoint;
 class TcpServer;
 class TcpSocket;
 class UdpSocket;
