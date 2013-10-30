@@ -29,9 +29,8 @@
 #ifndef PT_NET_TcpSocketImpl_H
 #define PT_NET_TcpSocketImpl_H
 
+#include "AddrInfo.h"
 #include "IODeviceImpl.h"
-#include "AddrInfoImpl.h"
-#include "Pt/Net/AddrInfo.h"
 #include "Pt/Net/TcpSocket.h"
 #include <string>
 

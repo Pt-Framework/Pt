@@ -26,11 +26,11 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#include "AddrInfo.h"
 #include "TcpServerImpl.h"
-#include "AddrInfoImpl.h"
 #include "MainLoopImpl.h"
 #include "IODeviceImpl.h"
-#include <Pt/Net/AddrInfo.h>
+#include <Pt/Net/Endpoint.h>
 #include <Pt/Net/AddressInUse.h>
 #include <Pt/Net/TcpServer.h>
 #include <Pt/System/SystemError.h>
@@ -200,7 +200,7 @@ void TcpServerImpl::listen(const std::string& ipaddr,  unsigned short int port,
 
     log_debug("listen on " << ipaddr << " port " << port);
 
-    Endpoint ep(ipaddr, port, true);
+    Endpoint ep(ipaddr, port);
     listen(ep, options); 
 }
 

@@ -26,10 +26,12 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "Pt/Net/AddrInfo.h"
+#include "AddrInfo.h"
+#include "EndpointImpl.h"
 #include "TcpSocketImpl.h"
 #include "TcpServerImpl.h"
 #include "MainLoopImpl.h"
+#include "Pt/Net/Endpoint.h"
 #include "Pt/Net/TcpServer.h"
 #include "Pt/Net/TcpSocket.h"
 #include "Pt/System/SystemError.h"
@@ -474,7 +476,7 @@ void TcpSocketImpl::localEndpoint(Endpoint& ep) const
     int ret = ::getsockname(fd(), reinterpret_cast<struct sockaddr*>(&addr), &slen);
 
     if(ret == 0)
-        ep.impl()->init( &sockadr, slen );
+        ep.impl()->init( (sockaddr*)&addr, slen );
     else
         ep.clear();
 }
@@ -488,7 +490,7 @@ void TcpSocketImpl::remoteEndpoint(Endpoint& ep) const
     int ret = ::getpeername(fd(), reinterpret_cast<struct sockaddr*>(&addr), &slen);
 
     if(ret == 0)
-        ep.impl()->init( &sockadr, slen );
+        ep.impl()->init( (sockaddr*)&addr, slen );
     else
         ep.clear();
 }

@@ -398,12 +398,12 @@ bool TcpSocketImpl::wait(std::size_t umsecs)
 
 void TcpSocketImpl::localEndpoint(Endpoint& ep) const
 {
-    SOCKADDR sockadr;
+    sockaddr_storage sockadr;
     int l = sizeof(sockadr);
-    int ret = getsockname(_fd, &sockadr, &l);
+    int ret = getsockname(_fd, (sockaddr*)&sockadr, &l);
 
     if(ret == 0)
-        ep.impl()->init( &sockadr, l );
+        ep.impl()->init( (sockaddr*)&sockadr, l );
     else
         ep.clear();
 }
@@ -411,12 +411,12 @@ void TcpSocketImpl::localEndpoint(Endpoint& ep) const
 
 void TcpSocketImpl::remoteEndpoint(Endpoint& ep) const
 {
-    SOCKADDR sockadr;
+    sockaddr_storage sockadr;
     int l = sizeof(sockadr);
-    int ret = getpeername(_fd, &sockadr, &l);
+    int ret = getpeername(_fd, (sockaddr*)&sockadr, &l);
 
     if(ret == 0)
-        ep.impl()->init( &sockadr, l );
+        ep.impl()->init( (sockaddr*)&sockadr, l );
     else
         ep.clear();
 }

@@ -475,9 +475,9 @@ void UdpSocketImpl::dropMulticastGroup(const std::string& ipaddr)
 
 void UdpSocketImpl::localEndpoint(Endpoint& ep) const
 {
-    SOCKADDR sockadr;
+    sockaddr_storage sockadr;
     int l = sizeof(sockadr);
-    int ret = getsockname(_fd, &sockadr, &l);
+    int ret = getsockname(_fd, (sockaddr*)&sockadr, &l);
 
     if(ret == 0)
         ep.impl()->init( &sockadr, l );

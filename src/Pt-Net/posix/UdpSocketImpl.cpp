@@ -29,7 +29,8 @@
 
 #include "UdpSocketImpl.h"
 #include "MainLoopImpl.h"
-#include <Pt/Net/AddrInfo.h>
+#include "AddrInfo.h"
+#include "EndpointImpl.h"
 #include <Pt/Net/AddressInUse.h>
 #include <Pt/Net/UdpSocket.h>
 #include <Pt/System/SystemError.h>
@@ -99,7 +100,7 @@ void UdpSocketImpl::endBind(System::EventLoop& loop)
 }
 
 
-void UdpSocketImpl::bind(const Endpoint& ep, const UdpSocket::Options& o)
+void UdpSocketImpl::bind(const Endpoint& ep, const UdpSocket::Options& opts)
 {
     const int on = 1;
     bool addrInUse = false;
@@ -181,7 +182,7 @@ bool UdpSocketImpl::beginConnect(System::EventLoop& loop, const Endpoint& ep, co
 {
     log_debug( "begin connecting socket to " << ep.toString() );
 
-    this->connect(ep);
+    this->connect(ep, o);
     return true;
 }
 
@@ -255,7 +256,7 @@ void UdpSocketImpl::connect(const Endpoint& ep, const UdpSocket::Options& opts)
 }
 
 
-void UdpSocketImpl::setTarget(const Endpoint& ep, const UdpSocket::Options& o)
+void UdpSocketImpl::setTarget(const Endpoint& ep, const UdpSocket::Options& opts)
 {
     AddrInfo ainfo;
     ainfo.resolve(ep);
@@ -416,7 +417,7 @@ void UdpSocketImpl::localEndpoint(Endpoint& ep) const
     int ret = ::getsockname(fd(), reinterpret_cast<struct sockaddr*>(&addr), &slen);
 
     if(ret == 0)
-        ep.impl()->init( &sockadr, slen );
+        ep.impl()->init( (sockaddr*)&addr, slen );
     else
         ep.clear();
 
