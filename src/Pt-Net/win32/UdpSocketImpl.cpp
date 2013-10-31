@@ -480,7 +480,7 @@ void UdpSocketImpl::localEndpoint(Endpoint& ep) const
     int ret = getsockname(_fd, (sockaddr*)&sockadr, &l);
 
     if(ret == 0)
-        ep.impl()->init( &sockadr, l );
+        ep.impl()->init( (sockaddr*)&sockadr, l );
     else
         ep.clear();
 
