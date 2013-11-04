@@ -154,7 +154,7 @@ class PT_XML_API XmlFormatter : public Formatter
         
         
         // inherit docs
-        void beginElement(const char* type, const char* id);
+        void beginElement();
         
         // inherit docs
         void finishElement();
@@ -167,8 +167,7 @@ class PT_XML_API XmlFormatter : public Formatter
                          const char* id);
         
         // inherit docs
-        void beginMember(const char* name, const char* type,
-                         const char* id);
+        void beginMember(const char* name);
         
         // inherit docs
         void finishMember();

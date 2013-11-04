@@ -82,6 +82,78 @@ class Composer< std::vector<T> > : public Pt::IComposer
         IComposer* _parent;
 };
 
+template <typename T>
+class Decomposer< std::vector<T> > : public IDecomposer
+{
+    public:
+        Decomposer(SerializationContext* context = 0)
+        : _parent(0)
+        , _type(0)
+        { 
+            _elemDecomposer.setParent(this);
+        }
+
+        void setParent(IDecomposer* parent)
+        { _parent = parent; }
+
+        void begin(const std::vector<T>& type, const char* name)
+        {
+            _type = &type;
+            _name = name;
+        }
+
+        virtual void format(Formatter& formatter)
+        {
+            formatter.beginArray(_name.c_str(), "std::vector", "");
+
+            std::vector<T>::const_iterator it;
+            for(it = _type->begin(); it != _type->end(); ++it)
+            {
+                formatter.beginElement();
+                _elemDecomposer.begin(*it, "");
+                _elemDecomposer.format(formatter);
+
+                formatter.finishElement();
+            }
+
+            formatter.finishArray();
+        }
+
+        virtual void beginFormat(Formatter& formatter)
+        {
+            formatter.beginArray(_name.c_str(), "std::vector", "");
+            _it = _type->begin();
+        }
+
+        virtual IDecomposer* advanceFormat(Formatter& formatter)
+        {
+            if( _it != _type->begin() )
+            {
+                formatter.finishElement();
+            }
+
+            if( _it == _type->end() )
+            {
+                formatter.finishArray();
+                return _parent;
+            }
+
+            formatter.beginElement();
+            _elemDecomposer.begin(*_it, "");
+            _elemDecomposer.beginFormat(formatter);
+            ++_it;
+
+            return &_elemDecomposer;
+        }
+
+    private:
+        IDecomposer* _parent;
+        std::string _name;
+        const std::vector<T>* _type;
+        Decomposer<T> _elemDecomposer;
+        typename std::vector<T>::const_iterator _it;
+};
+
 }
 
 struct Color

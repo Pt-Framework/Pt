@@ -102,7 +102,7 @@ class Formatter
         virtual void beginArray(const char* name, const char* type,
                                 const char* id) = 0;
 
-        virtual void beginElement(const char* type, const char* id) = 0;
+        virtual void beginElement() = 0;
 
         virtual void finishElement() = 0;
 
@@ -111,8 +111,7 @@ class Formatter
         virtual void beginObject(const char* name, const char* type,
                                  const char* id) = 0;
 
-        virtual void beginMember(const char* name, const char* type,
-                                 const char* id) = 0;
+        virtual void beginMember(const char* name) = 0;
 
         virtual void finishMember() = 0;
 

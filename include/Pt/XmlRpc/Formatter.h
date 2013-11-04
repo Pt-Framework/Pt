@@ -105,7 +105,7 @@ class PT_XMLRPC_API Formatter : public Pt::Formatter
         void beginArray(const char* name, const char* type,
                         const char* id);
 
-        virtual void beginElement(const char* type, const char* id);
+        virtual void beginElement();
 
         virtual void finishElement();
 
@@ -114,8 +114,7 @@ class PT_XMLRPC_API Formatter : public Pt::Formatter
         void beginObject(const char* name, const char* type,
                          const char* id);
 
-        void beginMember(const char* name, const char* type,
-                         const char* id);
+        void beginMember(const char* name);
 
         void finishMember();
 

@@ -265,7 +265,7 @@ void XmlFormatter::beginArray(const char* name, const char* type,
 }
 
 
-void XmlFormatter::beginElement(const char* type, const char* id)
+void XmlFormatter::beginElement()
 {
 }
 
@@ -304,8 +304,7 @@ void XmlFormatter::beginObject(const char* name, const char* type,
 }
 
 
-void XmlFormatter::beginMember(const char* name, const char* type,
-                               const char* id)
+void XmlFormatter::beginMember(const char*)
 {
 }
 

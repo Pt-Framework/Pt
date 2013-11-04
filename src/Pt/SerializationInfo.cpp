@@ -115,11 +115,11 @@ SerializationInfo::Iterator SerializationInfo::beginFormat(Formatter& formatter)
 {
     if( this->parent() && this->parent()->type() == Struct )
     {
-        formatter.beginMember(_Name, this->typeName(), this->id() );
+        formatter.beginMember(_Name);
     }
     else if( this->parent() && this->parent()->type() == Sequence )
     {
-        formatter.beginElement(this->typeName(), this->id() );
+        formatter.beginElement();
     }
 
     switch(_type)
@@ -373,7 +373,7 @@ void SerializationInfo::format(Formatter& formatter)
             SerializationInfo::Iterator end = this->end();
             for(it = this->begin(); it != end; ++it)
             {
-                formatter.beginMember( it->name(), it->typeName(), it->id() );
+                formatter.beginMember( it->name() );
                 it->format(formatter);
                 formatter.finishMember();
             }
@@ -390,7 +390,7 @@ void SerializationInfo::format(Formatter& formatter)
             SerializationInfo::Iterator end = this->end();
             for(it = this->begin(); it != end; ++it)
             {
-                formatter.beginElement( it->typeName(), it->id()  );
+                formatter.beginElement();
                 it->format(formatter);
                 formatter.finishElement();
             }

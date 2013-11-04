@@ -358,7 +358,7 @@ void Formatter::beginArray(const char*, const char*,
 }
 
 
-void Formatter::beginElement(const char* type, const char* id)
+void Formatter::beginElement()
 {
 }
 
@@ -384,7 +384,7 @@ void Formatter::beginObject(const char* name, const char* type,
 }
 
 
-void Formatter::beginMember(const char* name, const char*, const char*)
+void Formatter::beginMember(const char* name)
 {
     _str.assign(name);
 
