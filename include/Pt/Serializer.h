@@ -64,7 +64,7 @@ class PT_API Serializer
             type must be serializable.
         */
         template <typename T>
-        void serialize(const T& type, const char* name)
+        void begin(const T& type, const char* name)
         {
             void* m = this->allocate( sizeof(Decomposer<T>) );
             Decomposer<T>* dec = new (m) Decomposer<T>(_context);
@@ -72,8 +72,6 @@ class PT_API Serializer
 
             dec->begin(type, name);
         }
-
-        void begin();
 
         /** @brief Returns true if type was completely serialized.
             

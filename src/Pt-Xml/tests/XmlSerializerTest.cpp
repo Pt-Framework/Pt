@@ -167,12 +167,12 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             Pt::Xml::XmlSerializer ser(writer);
             ser.context()->registerSurrogate("date", &fromXmlString, &toXmlString);
 
-            ser.serialize(date1, "date1");
-            ser.serialize(dr, "dr");
-            ser.serialize(dateptr, "dateptr");
-            ser.serialize(datesp, "datesp");
-            ser.serialize(datesp2, "datesp2");
-            ser.serialize(dateNull, "dateNull");
+            ser.begin(date1, "date1");
+            ser.begin(dr, "dr");
+            ser.begin(dateptr, "dateptr");
+            ser.begin(datesp, "datesp");
+            ser.begin(datesp2, "datesp2");
+            ser.begin(dateNull, "dateNull");
 
             ser.finish();
             tos.flush();
@@ -193,14 +193,25 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             Pt::Xml::XmlDeserializer deser(reader);
             deser.context()->registerSurrogate("date", &fromXmlString, &toXmlString);
 
-            deser.deserialize(date2);
-            deser.deserialize(dr);
-            deser.deserialize(dateptr2);
-            deser.deserialize(datesp3);
-            deser.deserialize(datesp4);
-            deser.deserialize(nullDate);
-
+            deser.begin(date2);
             deser.finish();
+
+            deser.begin(dr);
+            deser.finish();
+            
+            deser.begin(dateptr2);
+            deser.finish();
+            
+            deser.begin(datesp3);
+            deser.finish();
+            
+            deser.begin(datesp4);
+            deser.finish();
+            
+            deser.begin(nullDate);
+            deser.finish();
+
+            deser.fixup();
             //std::cerr << "FIXED POINTER: "<< dr.date << " - " << &date2 << std::endl;
             //std::cerr << "RESULT: "<< dr.date()->toIsoString() << std::endl;
             /*std::cerr << "RESULT: "<< dateptr2->toIsoString() << std::endl;
@@ -227,8 +238,8 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             writer.reset(tos);
             Pt::Xml::XmlSerializer ser(writer);
 
-            ser.serialize(dates, "dates");
-            ser.serialize(dateptr, "dateptr");
+            ser.begin(dates, "dates");
+            ser.begin(dateptr, "dateptr");
 
             ser.finish();
             tos.flush();
@@ -245,9 +256,13 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             Pt::Xml::XmlReader reader(is);
             Pt::Xml::XmlDeserializer deser(reader);
 
-            deser.deserialize(dates);
-            deser.deserialize(dateptr);
+            deser.begin(dates);
             deser.finish();
+
+            deser.begin(dateptr);
+            deser.finish();
+
+            deser.fixup();
 
             PT_UNIT_ASSERT( dateptr );
             PT_UNIT_ASSERT( dates.size() == 3 );
@@ -267,10 +282,10 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             Pt::Xml::XmlSerializer ser(writer);
             ser.context()->enableReferencing(false);
 
-            ser.serialize(date1, "date1a");
-            ser.serialize(date2, "date2a");
-            ser.serialize(date1, "date1b");
-            ser.serialize(date2, "date2b");
+            ser.begin(date1, "date1a");
+            ser.begin(date2, "date2a");
+            ser.begin(date1, "date1b");
+            ser.begin(date2, "date2b");
 
             ser.finish();
             tos.flush();
@@ -288,9 +303,13 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             Pt::Xml::XmlDeserializer deser(reader);
             deser.context()->enableReferencing(false);
 
-            deser.deserialize(date3);
-            deser.deserialize(date4);
+            deser.begin(date3);
             deser.finish();
+            
+            deser.begin(date4);
+            deser.finish();
+            
+            deser.fixup();
 
             // std::cerr << "IMPORT: " << tis.buffer().import() << std::endl;
             // std::cerr << "AVAIL: " << tis.buffer().in_avail() << std::endl;
@@ -319,12 +338,12 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
 
             Pt::Xml::XmlSerializer ser(writer);
 
-            ser.serialize(date1a, "date1");
-            ser.serialize(date2a, "date2");
-            ser.serialize(dateptr1a, "dateptr1");
+            ser.begin(date1a, "date1");
+            ser.begin(date2a, "date2");
+            ser.begin(dateptr1a, "dateptr1");
 
             //std::cerr << "\n--------------------" << std::endl;
-            ser.begin();
+
             while( ! ser.advance() )
             {
                 //ser.flush();
@@ -356,7 +375,7 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             deser.begin(dateptr1b);
             PT_UNIT_ASSERT( deser.advance() );
 
-            deser.finish();
+            deser.fixup();
 
             //std::cerr << "date1b: " << date1b.toIsoString() << std::endl;
             //std::cerr << "date2b: " << date2b.toIsoString() << std::endl;

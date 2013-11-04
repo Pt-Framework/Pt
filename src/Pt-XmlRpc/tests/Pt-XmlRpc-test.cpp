@@ -87,14 +87,10 @@ class Decomposer< std::vector<T> > : public IDecomposer
 {
     public:
         Decomposer(SerializationContext* context = 0)
-        : _parent(0)
-        , _type(0)
+        : _type(0)
         { 
             _elemDecomposer.setParent(this);
         }
-
-        void setParent(IDecomposer* parent)
-        { _parent = parent; }
 
         void begin(const std::vector<T>& type, const char* name)
         {
@@ -135,7 +131,7 @@ class Decomposer< std::vector<T> > : public IDecomposer
             if( _it == _type->end() )
             {
                 formatter.finishArray();
-                return _parent;
+                return this->parent();
             }
 
             formatter.beginElement();
@@ -147,7 +143,6 @@ class Decomposer< std::vector<T> > : public IDecomposer
         }
 
     private:
-        IDecomposer* _parent;
         std::string _name;
         const std::vector<T>* _type;
         Decomposer<T> _elemDecomposer;

@@ -57,39 +57,42 @@ class PT_API Deserializer
         // TODO: rethink clear/reset i.e. for derived XmlDeserializer
         void clear();
 
-        /** @brief Deserialize an object
+        /** @brief Starts parsing of an object.
 
-            This method will deserialize the object \a type.
-            The type \a type must be serializable.
+            This method will begin to parse the object \a t. The type \a t must
+            be serializable. Parsing can be completed by calling advance()
+            repeatedly, or by calling finish().
         */
         template <typename T>
-        void deserialize(T& type)
-        {
-            Composer<T> comp(_context);
-            comp.begin(type);
-            _fmt->parse(comp);
-        }
-
-        template <typename T>
-        void begin(T& type)
+        void begin(T& t)
         {
             void* m = this->allocate( sizeof(Composer<T>) );
             Composer<T>* composer = new (m) Composer<T>(_context);
             _current = composer;
-            composer->begin(type);
+            composer->begin(t);
 
             _fmt->beginParse(*composer);
         }
 
-        /** @brief Deserialize as far as data is available
+        /** @brief Advances parsing of an object.
 
-            Returns true if the type could be deserialized, otherwise false.
-            If false is returned, no further progress can be made, unless
-            more data becomes available.
+            Returns true if the object passed to begin() could be parsed
+            completely, otherwise false is returned. If false is returned,
+            no further progress can be made, until more data becomes available.
+            When parsing is complete, references can be fixed up by calling
+            fixup().
         */
         bool advance();
 
+        /** @brief Finishes parsing of an object.
+
+            This method will finish parsing of the object started by begin().
+            After all objects have been parsed, references can be fixed up by
+            calling fixup()
+        */
         void finish();
+
+        void fixup();
 
     private:
         void* allocate(size_t n);

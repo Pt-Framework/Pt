@@ -186,15 +186,15 @@ class XmlReaderTest : public Pt::Unit::TestSuite
             this->registerMethod("ProcessingInstructionInEpilog", *this, &XmlReaderTest::ProcessingInstructionInEpilog );
 
             this->registerMethod("ZZZ1_Benchmark", *this, &XmlReaderTest::Benchmark);
-            this->registerMethod("ZZZ2_Benchmark", *this, &XmlReaderTest::Benchmark);
-            this->registerMethod("ZZZ3_Benchmark", *this, &XmlReaderTest::Benchmark);
-            this->registerMethod("ZZZ4_Benchmark", *this, &XmlReaderTest::Benchmark);
-            this->registerMethod("ZZZ5_Benchmark", *this, &XmlReaderTest::Benchmark);
-            this->registerMethod("ZZZ6_Benchmark", *this, &XmlReaderTest::Benchmark);
-            this->registerMethod("ZZZ7_Benchmark", *this, &XmlReaderTest::Benchmark);
-            this->registerMethod("ZZZ8_Benchmark", *this, &XmlReaderTest::Benchmark);
-            this->registerMethod("ZZZ9_Benchmark", *this, &XmlReaderTest::Benchmark);
-            this->registerMethod("ZZZ0_Benchmark", *this, &XmlReaderTest::Benchmark);
+            //this->registerMethod("ZZZ2_Benchmark", *this, &XmlReaderTest::Benchmark);
+            //this->registerMethod("ZZZ3_Benchmark", *this, &XmlReaderTest::Benchmark);
+            //this->registerMethod("ZZZ4_Benchmark", *this, &XmlReaderTest::Benchmark);
+            //this->registerMethod("ZZZ5_Benchmark", *this, &XmlReaderTest::Benchmark);
+            //this->registerMethod("ZZZ6_Benchmark", *this, &XmlReaderTest::Benchmark);
+            //this->registerMethod("ZZZ7_Benchmark", *this, &XmlReaderTest::Benchmark);
+            //this->registerMethod("ZZZ8_Benchmark", *this, &XmlReaderTest::Benchmark);
+            //this->registerMethod("ZZZ9_Benchmark", *this, &XmlReaderTest::Benchmark);
+            //this->registerMethod("ZZZ0_Benchmark", *this, &XmlReaderTest::Benchmark);
         }
 
     protected:

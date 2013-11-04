@@ -34,6 +34,7 @@ namespace Pt {
 Serializer::Serializer()
 : _context(0)
 , _formatter(0)
+, _current(0)
 , _alloc(0)
 {}
 
@@ -89,33 +90,23 @@ void Serializer::clear()
     }
 
     _stack.clear();
-}
-
-
-void Serializer::begin()
-{
     _current = 0;
-    if( _stack.empty() )
-        return;
-
-    _current = _stack.front();
-    _current->beginFormat(*_formatter);
 }
 
 
 bool Serializer::advance()
 {
-    if( ! _current )
-        return true;
+    if(_current)
+    {
+        _current = _current->advanceFormat(*_formatter);
+        if( _current )
+            return false;
 
-    _current = _current->advanceFormat(*_formatter);
-    if( _current )
-        return false;
-
-    // at least one on the stack, otherwise _current is 0
-    _stack.front()->~IDecomposer();
-    this->deallocate( _stack.front() );
-    _stack.erase( _stack.begin() );
+        // at least one on the stack, otherwise _current is 0
+        _stack.front()->~IDecomposer();
+        this->deallocate( _stack.front() );
+        _stack.erase( _stack.begin() );
+    }
 
     if( _stack.empty() )
         return true;
@@ -138,6 +129,7 @@ void Serializer::finish()
     }
 
     _stack.clear();
+    _current = 0;
 }
 
 

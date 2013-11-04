@@ -26,6 +26,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "Pt/Deserializer.h"
+#include <cassert>
 
 namespace Pt {
 
@@ -105,6 +106,22 @@ bool Deserializer::advance()
 
 void Deserializer::finish()
 {
+    if(_current)
+    {
+        _fmt->parse(*_current);
+        _current->~IComposer();
+        _current = 0;
+    }
+
+    //if(_context)
+    //    _context->fixup();
+}
+
+
+void Deserializer::fixup()
+{
+    assert(_current == 0);
+
     if(_context)
         _context->fixup();
 }

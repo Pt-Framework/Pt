@@ -108,6 +108,7 @@ class Formatter
 
         virtual void finishArray() = 0;
 
+        // TODO: rename beginStruct
         virtual void beginObject(const char* name, const char* type,
                                  const char* id) = 0;
 
@@ -115,6 +116,7 @@ class Formatter
 
         virtual void finishMember() = 0;
 
+        // TODO: rename finishStruct
         virtual void finishObject() = 0;
 
     public:

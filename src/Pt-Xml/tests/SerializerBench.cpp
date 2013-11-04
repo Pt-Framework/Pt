@@ -81,7 +81,7 @@ void benchSerialization(const T& d, const char* fname = 0)
 
     Pt::System::Clock clock;
     clock.start();
-    serializer.serialize(d, "d");
+    serializer.begin(d, "d");
     serializer.finish();
     tos.flush();
     Pt::Timespan ts = clock.stop();
@@ -94,7 +94,12 @@ void benchSerialization(const T& d, const char* fname = 0)
 
     T v2;
     clock.start();
-    deserializer.deserialize(v2);
+    
+    deserializer.begin(v2);
+    deserializer.finish();
+
+    deserializer.fixup();
+
     Pt::Timespan td = clock.stop();
 
     std::cout << "\tserialization: " << ts.toUSecs() / 1e6 << " sec\n"

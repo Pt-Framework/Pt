@@ -45,6 +45,12 @@ class IDecomposer
         virtual ~IDecomposer()
         {}
 
+        void setParent(IDecomposer* parent)
+        { _parent = parent; }
+
+        IDecomposer* parent() const
+        { return _parent; }
+
         virtual void format(Formatter& formatter) = 0;
 
         virtual void beginFormat(Formatter& formatter) {}
@@ -53,7 +59,11 @@ class IDecomposer
 
     protected:
         IDecomposer()
+        : _parent(0)
         {}
+
+    private:
+        IDecomposer* _parent;
 };
 
 /** @brief Manages the decomposition of types during serialization.
@@ -65,14 +75,10 @@ class Decomposer : public IDecomposer
 {
     public:
         Decomposer(SerializationContext* context = 0)
-        : _parent(0)
-        , _type(0)
+        : _type(0)
         , _si(context)
         , _current(0)
         { }
-
-        void setParent(IDecomposer* parent)
-        { _parent = parent; }
 
         void begin(const T& type, const char* name)
         {
@@ -125,7 +131,7 @@ class Decomposer : public IDecomposer
                         _it = _current->end();
                 }
 
-                return _current != 0 ? this : _parent;
+                return _current != 0 ? this : parent();
             }
 
             SerializationInfo::Iterator it = _it->beginFormat(formatter);
@@ -144,7 +150,6 @@ class Decomposer : public IDecomposer
         }
 
     private:
-        IDecomposer* _parent;
         const T* _type;
         SerializationInfo _si;
         SerializationInfo* _current;
