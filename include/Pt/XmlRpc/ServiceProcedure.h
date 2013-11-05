@@ -56,7 +56,7 @@ class ServiceProcedure
         { _responder->endCall(); }
 
         //! @internal
-        IComposer** beginArgs()
+        Composer** beginArgs()
         { return onBeginArgs(); }
 
         //! @internal
@@ -64,7 +64,7 @@ class ServiceProcedure
         { onBeginCall(loop); }
 
         //! @internal
-        IDecomposer* endCall()
+        Decomposer* endCall()
         { return onEndCall(); }
 
     protected:
@@ -75,13 +75,13 @@ class ServiceProcedure
         {}
 
         //! @internal
-        virtual IComposer** onBeginArgs() = 0;
+        virtual Composer** onBeginArgs() = 0;
 
         //! @internal
         virtual void onBeginCall(System::EventLoop& loop) = 0;
 
         //! @internal
-        virtual IDecomposer* onEndCall() = 0;  
+        virtual Decomposer* onEndCall() = 0;  
 
     private:
         Responder* _responder;

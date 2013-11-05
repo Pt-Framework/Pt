@@ -64,13 +64,13 @@ class PT_XMLRPC_API Client : private NonCopyable
         SerializationContext& context();
 
         //! @internal
-        void beginCall(IComposer& r, RemoteCall& call, IDecomposer** argv, unsigned argc);
+        void beginCall(Composer& r, RemoteCall& call, Decomposer** argv, unsigned argc);
 
         //! @internal
         void endCall();
 
         //! @internal
-        void call(IComposer& r, RemoteCall& call, IDecomposer** argv, unsigned argc);
+        void call(Composer& r, RemoteCall& call, Decomposer** argv, unsigned argc);
 
         /** @brief Cancels the currently executing procedure.
         */
@@ -208,9 +208,9 @@ class PT_XMLRPC_API Client : private NonCopyable
         
         Pt::Utf8Codec _utf8;
         TextOStream _ts;
-        IDecomposer** _argv;
+        Decomposer** _argv;
         unsigned _argc;
-        IDecomposer* _arg;
+        Decomposer* _arg;
         unsigned _argn;
 
         Xml::BinaryInputSource _bin;
@@ -219,7 +219,7 @@ class PT_XMLRPC_API Client : private NonCopyable
         
         Formatter _formatter;
         Fault _fault;
-        Composer<Fault> _fh;
+        BasicComposer<Fault> _fh;
         bool _error;
         bool _isFault;
         void* _r1;

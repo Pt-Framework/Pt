@@ -457,9 +457,7 @@
     <None Include="..\..\src\Pt-XmlRpc\tests\Jamfile" />
     <None Include="..\..\src\Pt-Xml\Jamfile" />
     <None Include="..\..\src\Pt-Xml\tests\Jamfile" />
-    <None Include="..\..\src\Pt\itest.mm" />
     <None Include="..\..\src\Pt\Jamfile" />
-    <None Include="..\..\src\Pt\Makefile.am" />
     <None Include="..\..\src\Pt\tests\Jamfile" />
     <None Include="..\..\src\Pt\tests\Makefile.am" />
   </ItemGroup>
@@ -738,7 +736,6 @@
     <ClCompile Include="..\..\src\Pt-Xml\XmlFormatter.cpp" />
     <ClCompile Include="..\..\src\Pt-Xml\XmlReader.cpp" />
     <ClCompile Include="..\..\src\Pt-Xml\XmlSerializationContext.cpp" />
-    <ClCompile Include="..\..\src\Pt-Xml\XmlSerializer.cpp" />
     <ClCompile Include="..\..\src\Pt-Xml\XmlWriter.cpp" />
     <ClCompile Include="..\..\src\Pt\Atomicity.cpp" />
     <ClCompile Include="..\..\src\Pt\Atomicity.cw.x86.cpp" />

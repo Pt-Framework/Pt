@@ -408,7 +408,7 @@ void Formatter::finishObject()
 }
 
 
-void Formatter::beginParse(IComposer& composer)
+void Formatter::beginParse(Composer& composer)
 {
     _state = OnParam;
     _composer = &composer;
@@ -421,7 +421,7 @@ bool Formatter::parseSome()
 }
 
 
-void Formatter::parse(IComposer& composer)
+void Formatter::parse()
 {
 }
 

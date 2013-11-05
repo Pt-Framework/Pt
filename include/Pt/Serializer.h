@@ -57,41 +57,66 @@ class PT_API Serializer
 
         void clear();
 
-        /** @brief Serialize an object
+        /** @brief Begins serialization of an object
 
-            The serializer will serialize the object \a type. The string
-            \a name will be used as the instance name of \a type. The
+            This method has to be called for each object to be part of the
+            object stream before formatting is done by calling advance() or
+            finish(). This is neccessary, because reference IDs have to be
+            assigned to referenced objects before they can formatted. The
+            string \a name will be used as the instance name of \a type. The
             type must be serializable.
         */
         template <typename T>
         void begin(const T& type, const char* name)
         {
-            void* m = this->allocate( sizeof(Decomposer<T>) );
-            Decomposer<T>* dec = new (m) Decomposer<T>(_context);
-            _stack.push_back(dec);
+            void* m = this->allocate( sizeof(BasicDecomposer<T>) );
+            
+            BasicDecomposer<T>* dec = 0;
+            try
+            {
+                dec = new (m) BasicDecomposer<T>(_context);
+                dec->begin(type, name);
+                _stack.push_back(dec);
+            }
+            catch(...)
+            {
+                if(dec)
+                    dec->~BasicDecomposer<T>();
 
-            dec->begin(type, name);
+                this->deallocate(m);
+                throw;
+            }
         }
 
-        /** @brief Returns true if type was completely serialized.
-            
-            If false is returned, only some progress has been made, but the
-            type was not completed yet.
+        /** @brief Advances formatting the object sset.
+
+            Returns true if the objects passed to begin() were completely
+            formatted, otherwise false is returned, in which case only a
+            part of the objects was formatted and advance() has to be called
+            again until formatting is complete.
         */
         bool advance();
 
+        /** @brief Finishes parsing of the object set.
+
+            This method will finish formatting of all objects started by
+            begin() or partially formatted by calling advance().
+
+        */
         void finish();
 
     private:
+        //! @internal
         void* allocate(size_t n);
 
+        //! @internal
         void deallocate(void* p);
 
     private:
         SerializationContext* _context;
         Formatter* _formatter;
-        std::vector<IDecomposer*> _stack;
-        IDecomposer* _current;
+        std::vector<Decomposer*> _stack;
+        Decomposer* _current;
         void* _alloc;
 };
 

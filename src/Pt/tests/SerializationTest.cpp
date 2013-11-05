@@ -44,7 +44,7 @@
 #include <iostream>
 #include <cstddef>
 
-class IntComposer : public Pt::IComposer
+class IntComposer : public Pt::Composer
 {
     public:
         typedef int value_type;
@@ -55,7 +55,7 @@ class IntComposer : public Pt::IComposer
         , _parent(0)
         {}
 
-        void setParent(IComposer* parent)
+        void setParent(Composer* parent)
         { _parent = parent; }
 
         void begin(value_type& type)
@@ -77,18 +77,18 @@ class IntComposer : public Pt::IComposer
             *_type = static_cast<int>(l);
         }
 
-        virtual Pt::IComposer* finish()
+        virtual Pt::Composer* finish()
         {
             return _parent;
         }
 
     private:
         value_type* _type;
-        IComposer* _parent;
+        Composer* _parent;
 };
 
 
-class VectorComposer : public Pt::IComposer
+class VectorComposer : public Pt::Composer
 {
     public:
         typedef std::vector<int> value_type;
@@ -117,21 +117,21 @@ class VectorComposer : public Pt::IComposer
         virtual void setTypeName(const std::string& type)
         { }
 
-        virtual Pt::IComposer* beginMember(const std::string& name)
+        virtual Pt::Composer* beginMember(const std::string& name)
         {
             _type->push_back( elem_type() );
             _deser.begin( _type->back() );
             return &_deser;
         }
 
-        virtual Pt::IComposer* beginElement()
+        virtual Pt::Composer* beginElement()
         {
             _type->push_back( elem_type() );
             _deser.begin( _type->back() );
             return &_deser;
         }
 
-        virtual Pt::IComposer* finish()
+        virtual Pt::Composer* finish()
         {
             return 0;
         }
@@ -375,7 +375,7 @@ void SerializationTest::Benchmark2()
 
     Pt::SerializationContext context;
     VectorComposer vecdes;
-    Pt::IComposer* deser = &vecdes;
+    Pt::Composer* deser = &vecdes;
 
     Pt::StringStream input(L"111 222 333 444 555");
     std::vector<int> vec;
@@ -448,9 +448,9 @@ void SerializationTest::Benchmark3()
     clock.start();
     for(unsigned n = 0; n < 50000; ++n)
     {
-        Pt::Composer< std::vector<int> > com(&context);
+        Pt::BasicComposer< std::vector<int> > com(&context);
         com.begin(vec);
-        Pt::IComposer* composer = &com;
+        Pt::Composer* composer = &com;
 
         input.clear();
         input.seekg(std::ios::beg);

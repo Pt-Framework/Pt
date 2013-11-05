@@ -62,7 +62,8 @@ class PT_API SerializationContext : public SerializationInfo
             return _refsEnabled;
         }
 
-        // TOOD: public non-virtual / protected virtual
+        // TOOD: public non-virtual calls protected virtuals
+
         /** @brief Clears all content.
         */
         virtual void clear();

@@ -175,12 +175,12 @@ class PT_XMLRPC_API Responder : private NonCopyable
         
         Xml::BinaryInputSource _bin;
         Xml::XmlReader _reader;
-        IComposer** _args;
+        Composer** _args;
         State _state;
         
         Utf8Codec _utf8;
         TextOStream _ts;
-        IDecomposer* _result;
+        Decomposer* _result;
         
         Formatter _formatter;
         Fault _fault;

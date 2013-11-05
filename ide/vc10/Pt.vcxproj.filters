@@ -1331,13 +1331,7 @@
     <None Include="..\..\include\Pt\String.tpp">
       <Filter>Pt</Filter>
     </None>
-    <None Include="..\..\src\Pt\itest.mm">
-      <Filter>Pt</Filter>
-    </None>
     <None Include="..\..\src\Pt\Jamfile">
-      <Filter>Pt</Filter>
-    </None>
-    <None Include="..\..\src\Pt\Makefile.am">
       <Filter>Pt</Filter>
     </None>
     <None Include="..\..\src\Pt\tests\Jamfile">
@@ -1999,9 +1993,6 @@
       <Filter>Pt-Xml</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Xml\XmlSerializationContext.cpp">
-      <Filter>Pt-Xml</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Xml\XmlSerializer.cpp">
       <Filter>Pt-Xml</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Xml\XmlWriter.cpp">

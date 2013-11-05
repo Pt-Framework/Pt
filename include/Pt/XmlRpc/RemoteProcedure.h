@@ -149,7 +149,7 @@ class RemoteProcedureBase : public RemoteCall
         void onFinished()
         { _finished.send(_result); }
 
-        Composer<R>& beginResult()
+        BasicComposer<R>& beginResult()
         {
             _r.begin( result().value() );
             return _r;
@@ -158,7 +158,7 @@ class RemoteProcedureBase : public RemoteCall
     private:
         Signal< const Result<R>& > _finished;
         Result<R> _result;
-        Composer<R> _r;
+        BasicComposer<R> _r;
 };
 
 } // namespace XmlRpc

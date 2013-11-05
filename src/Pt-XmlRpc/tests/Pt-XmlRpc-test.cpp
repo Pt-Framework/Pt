@@ -41,18 +41,14 @@
 namespace Pt {
 
 template <typename T>
-class Composer< std::vector<T> > : public Pt::IComposer
+class BasicComposer< std::vector<T> > : public Composer
 {
     public:
-        Composer(SerializationContext* context = 0)
+        BasicComposer(SerializationContext* context = 0)
         : _type(0)
-        , _parent(0)
         {
             _elemComposer.setParent(this);
         }
-
-        void setParent(IComposer* parent)
-        { _parent = parent; }
 
         void begin(std::vector<T>& type)
         {
@@ -64,29 +60,23 @@ class Composer< std::vector<T> > : public Pt::IComposer
         virtual void setId(const std::string& id)
         { }
 
-        virtual Pt::IComposer* beginElement()
+        virtual Pt::Composer* beginElement()
         {
             _type->push_back( T() );
             _elemComposer.begin( _type->back() );
             return &_elemComposer;
         }
 
-        virtual Pt::IComposer* finish()
-        {
-            return _parent;
-        }
-
     private:
         std::vector<T>* _type;
-        Composer<T> _elemComposer;
-        IComposer* _parent;
+        BasicComposer<T> _elemComposer;
 };
 
 template <typename T>
-class Decomposer< std::vector<T> > : public IDecomposer
+class BasicDecomposer< std::vector<T> > : public Decomposer
 {
     public:
-        Decomposer(SerializationContext* context = 0)
+        BasicDecomposer(SerializationContext* context = 0)
         : _type(0)
         { 
             _elemDecomposer.setParent(this);
@@ -121,7 +111,7 @@ class Decomposer< std::vector<T> > : public IDecomposer
             _it = _type->begin();
         }
 
-        virtual IDecomposer* advanceFormat(Formatter& formatter)
+        virtual Decomposer* advanceFormat(Formatter& formatter)
         {
             if( _it != _type->begin() )
             {
@@ -145,7 +135,7 @@ class Decomposer< std::vector<T> > : public IDecomposer
     private:
         std::string _name;
         const std::vector<T>* _type;
-        Decomposer<T> _elemDecomposer;
+        BasicDecomposer<T> _elemDecomposer;
         typename std::vector<T>::const_iterator _it;
 };
 

@@ -39,31 +39,31 @@ namespace Pt {
 
     @ingroup Serialization
 */
-class IDecomposer
+class Decomposer
 {
     public:
-        virtual ~IDecomposer()
+        virtual ~Decomposer()
         {}
 
-        void setParent(IDecomposer* parent)
+        void setParent(Decomposer* parent)
         { _parent = parent; }
 
-        IDecomposer* parent() const
+        Decomposer* parent() const
         { return _parent; }
 
         virtual void format(Formatter& formatter) = 0;
 
-        virtual void beginFormat(Formatter& formatter) {}
+        virtual void beginFormat(Formatter& formatter) = 0;
 
-        virtual IDecomposer* advanceFormat(Formatter& formatter) { return 0; }
+        virtual Decomposer* advanceFormat(Formatter& formatter) = 0;
 
     protected:
-        IDecomposer()
+        Decomposer()
         : _parent(0)
         {}
 
     private:
-        IDecomposer* _parent;
+        Decomposer* _parent;
 };
 
 /** @brief Manages the decomposition of types during serialization.
@@ -71,10 +71,10 @@ class IDecomposer
     @ingroup Serialization
 */
 template <typename T>
-class Decomposer : public IDecomposer
+class BasicDecomposer : public Decomposer
 {
     public:
-        Decomposer(SerializationContext* context = 0)
+        BasicDecomposer(SerializationContext* context = 0)
         : _type(0)
         , _si(context)
         , _current(0)
@@ -113,7 +113,7 @@ class Decomposer : public IDecomposer
             _it = _si.beginFormat(formatter);
         }
 
-        virtual IDecomposer* advanceFormat(Formatter& formatter)
+        virtual Decomposer* advanceFormat(Formatter& formatter)
         {
             if( _it == _current->end() )
             {

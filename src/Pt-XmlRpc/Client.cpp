@@ -93,7 +93,7 @@ SerializationContext& Client::context()
 }
 
 
-void Client::beginCall(IComposer& r, RemoteCall& method, IDecomposer** argv, unsigned argc)
+void Client::beginCall(Composer& r, RemoteCall& method, Decomposer** argv, unsigned argc)
 {
     _method = &method;
     _state = OnBegin;
@@ -130,7 +130,7 @@ void Client::endCall()
 }
 
 
-void Client::call(IComposer& r, RemoteCall& method, IDecomposer** argv, unsigned argc)
+void Client::call(Composer& r, RemoteCall& method, Decomposer** argv, unsigned argc)
 {
     _method = &method;
     _state = OnBegin;

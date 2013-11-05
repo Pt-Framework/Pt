@@ -35,6 +35,7 @@
 #include <Pt/Composer.h>
 #include "Pt/Convert.h"
 #include "Pt/String.h"
+#include <cassert>
 
 namespace Pt {
 
@@ -323,11 +324,16 @@ void XmlFormatter::finishObject()
 }
 
 
-void XmlFormatter::parse(IComposer& comp)
+void XmlFormatter::beginParse(Composer& comp)
 {
     _composer = &comp;
-
     _processNode = &XmlFormatter::OnBegin;
+}
+
+
+void XmlFormatter::parse()
+{
+    assert(_composer);
 
     InputIterator it = _reader->current();
     if(it->type() == Node::EndElement)
@@ -343,16 +349,9 @@ void XmlFormatter::parse(IComposer& comp)
 }
 
 
-void XmlFormatter::beginParse(IComposer& comp)
-{
-    _composer = &comp;
-    _processNode = &XmlFormatter::OnBegin;
-}
-
-
 bool XmlFormatter::parseSome()
 {
-    //_composer = &comp;
+    assert(_composer);
 
     while(_composer != 0)
     {
@@ -378,8 +377,7 @@ void XmlFormatter::OnBegin(const Node& node)
         {
             const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
 
-            Pt::String name = se.name().name();
-            _composer->setName( name.narrow() );
+            const Pt::String& name = se.name().name();
 
             AttributeList::ConstIterator nodeId = se.attributes().find(L"id");
             if( nodeId != se.attributes().end() )
@@ -475,7 +473,7 @@ void XmlFormatter::OnMemberBegin(const Node& node)
     }
 }
 
-void setValue(Pt::IComposer& composer, const Pt::String& value)
+void setValue(Pt::Composer& composer, const Pt::String& value)
 {
 	//TODO: also look at the parsed type name
 

@@ -34,7 +34,7 @@
 
 namespace Pt {
 
-class IComposer;
+class Composer;
 
 /** @brief Support for serialization to different formats.
 
@@ -121,13 +121,13 @@ class Formatter
 
     public:
         //! @brief Begin to parse to a composer
-        virtual void beginParse(IComposer& composer) = 0;
+        virtual void beginParse(Composer& composer) = 0;
 
         //! @brief Returns true if composer completes, false if no more data available
         virtual bool parseSome() = 0;
 
         //! @brief Parse until composer completes.
-        virtual void parse(IComposer& composer) = 0;
+        virtual void parse() = 0;
 
     protected:
         Formatter()

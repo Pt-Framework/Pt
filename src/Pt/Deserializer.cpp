@@ -43,7 +43,7 @@ Deserializer::~Deserializer()
 {
     if(_current)
     {
-        _current->~IComposer();
+        _current->~Composer();
     }
 
     this->deallocate(_mem);
@@ -82,7 +82,7 @@ void Deserializer::clear()
 
     if(_current)
     {
-        _current->~IComposer();
+        _current->~Composer();
         _current = 0;
     }
 }
@@ -90,13 +90,13 @@ void Deserializer::clear()
 
 bool Deserializer::advance()
 {
-    if( ! _current )
+    if( ! _current || ! _fmt )
         return false;
 
     bool finished = _fmt->parseSome();
     if(finished)
     {
-        _current->~IComposer();
+        _current->~Composer();
         _current = 0;
     }
 
@@ -108,13 +108,12 @@ void Deserializer::finish()
 {
     if(_current)
     {
-        _fmt->parse(*_current);
-        _current->~IComposer();
+        if(_fmt)
+            _fmt->parse();
+        
+        _current->~Composer();
         _current = 0;
     }
-
-    //if(_context)
-    //    _context->fixup();
 }
 
 
@@ -131,7 +130,7 @@ void* Deserializer::allocate(size_t n)
 {
     if(_current)
     {
-        _current->~IComposer();
+        _current->~Composer();
         _current = 0;
     }
 

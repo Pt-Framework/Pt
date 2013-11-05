@@ -137,15 +137,15 @@ SerializationInfo::Iterator SerializationInfo::beginFormat(Formatter& formatter)
             break;
 
         case Int8:
-            formatter.addInt8( _Name, _value.l, _id );
+            formatter.addInt8( _Name, static_cast<Pt::int8_t>(_value.l), _id );
             break;
 
         case Int16:
-            formatter.addInt16( _Name, _value.l, _id );
+            formatter.addInt16( _Name, static_cast<Pt::int16_t>(_value.l), _id );
             break;
 
         case Int32:
-            formatter.addInt32( _Name, _value.l, _id );
+            formatter.addInt32( _Name, static_cast<Pt::int32_t>(_value.l), _id );
             break;
 
         case Int64:
@@ -153,15 +153,15 @@ SerializationInfo::Iterator SerializationInfo::beginFormat(Formatter& formatter)
             break;
 
         case UInt8:
-            formatter.addUInt8( _Name, _value.ul, _id );
+            formatter.addUInt8( _Name, static_cast<Pt::uint8_t>(_value.ul), _id );
             break;
 
         case UInt16:
-            formatter.addUInt16( _Name, _value.ul, _id );
+            formatter.addUInt16( _Name, static_cast<Pt::uint16_t>(_value.ul), _id );
             break;
 
         case UInt32:
-            formatter.addUInt32( _Name, _value.ul, _id );
+            formatter.addUInt32( _Name, static_cast<Pt::uint32_t>(_value.ul), _id );
             break;
 
         case UInt64:
@@ -169,7 +169,7 @@ SerializationInfo::Iterator SerializationInfo::beginFormat(Formatter& formatter)
             break;
 
         case Float:
-            formatter.addFloat( _Name, _value.f, _id );
+            formatter.addFloat( _Name, static_cast<float>(_value.f), _id );
             break;
 
         case Double:
@@ -280,15 +280,15 @@ void SerializationInfo::format(Formatter& formatter)
             break;
 
         case Int8:
-            formatter.addInt8( _Name, _value.l, _id );
+            formatter.addInt8( _Name, static_cast<Pt::int8_t>(_value.l), _id );
             break;
 
         case Int16:
-            formatter.addInt16( _Name, _value.l, _id );
+            formatter.addInt16( _Name, static_cast<Pt::int16_t>(_value.l), _id );
             break;
 
         case Int32:
-            formatter.addInt32( _Name, _value.l, _id );
+            formatter.addInt32( _Name, static_cast<Pt::int32_t>(_value.l), _id );
             break;
 
         case Int64:
@@ -296,15 +296,15 @@ void SerializationInfo::format(Formatter& formatter)
             break;
 
         case UInt8:
-            formatter.addUInt8( _Name, _value.ul, _id );
+            formatter.addUInt8( _Name, static_cast<Pt::uint8_t>(_value.ul), _id );
             break;
 
         case UInt16:
-            formatter.addUInt16( _Name, _value.ul, _id );
+            formatter.addUInt16( _Name, static_cast<Pt::uint16_t>(_value.ul), _id );
             break;
 
         case UInt32:
-            formatter.addUInt32( _Name, _value.ul, _id );
+            formatter.addUInt32( _Name, static_cast<Pt::uint32_t>(_value.ul), _id );
             break;
 
         case UInt64:
@@ -312,7 +312,7 @@ void SerializationInfo::format(Formatter& formatter)
             break;
 
         case Float:
-            formatter.addFloat( _Name, _value.f, _id );
+            formatter.addFloat( _Name, static_cast<float>(_value.f), _id );
             break;
 
         case Double:

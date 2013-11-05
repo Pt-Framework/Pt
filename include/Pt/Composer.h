@@ -38,14 +38,17 @@ namespace Pt {
 
     @ingroup Serialization
 */
-class IComposer
+class Composer
 {
     public:
-        virtual ~IComposer()
+        virtual ~Composer()
         {}
 
-        virtual void setName(const std::string& name)
-        {}
+        void setParent(Composer* parent)
+        { _parent = parent; }
+
+        Composer* parent() const
+        { return _parent; }
 
         virtual void setTypeName(const std::string& type)
         {}
@@ -86,20 +89,22 @@ class IComposer
         virtual void setReference(const std::string& id)
         { throw SerializationError("unexpected reference"); }
 
-        virtual IComposer* beginMember(const std::string& name)
+        virtual Composer* beginMember(const std::string& name)
         { throw SerializationError("unexpected struct"); }
 
-        virtual IComposer* beginElement()
+        virtual Composer* beginElement()
         { throw SerializationError("unexpected sequence"); }
 
-        // TODO:
-        // keep IComposer* parent and SerializationContext* context as members
-        // finish() can by default return _parent
-        virtual IComposer* finish() = 0;
+        virtual Composer* finish()
+        { return _parent; }
 
     protected:
-        IComposer()
+        Composer()
+        : _parent(0)
         {}
+
+    private:
+        Composer* _parent;
 };
 
 /** @brief Manages the composition of types during serialization.
@@ -107,18 +112,14 @@ class IComposer
     @ingroup Serialization
 */
 template <typename T>
-class Composer : public IComposer
+class BasicComposer : public Composer
 {
     public:
-        Composer(SerializationContext* context = 0)
-        : _parent(0)
-        , _type(0)
+        BasicComposer(SerializationContext* context = 0)
+        : _type(0)
         , _si(context)
         , _current(&_si)
         { }
-
-        void setParent(IComposer* parent)
-        { _parent = parent; }
 
         void begin(T& type)
         {
@@ -129,11 +130,6 @@ class Composer : public IComposer
 
             _type = &type;
             _current = &_si;
-        }
-
-        virtual void setName(const std::string& name)
-        {
-            _current->setName(name);
         }
 
         virtual void setId(const std::string& id)
@@ -186,26 +182,26 @@ class Composer : public IComposer
            _current->setReference(id);
         }
 
-        virtual IComposer* beginMember(const std::string& name)
+        virtual Composer* beginMember(const std::string& name)
         {
             SerializationInfo& child = _current->addMember(name);
             _current = &child;
             return this;
         }
 
-        virtual IComposer* beginElement()
+        virtual Composer* beginElement()
         {
             SerializationInfo& child = _current->addElement();
             _current = &child;
             return this;
         }
 
-        virtual IComposer* finish()
+        virtual Composer* finish()
         {
             if( ! _current->parent() )
             {
                 *_current >> Pt::load() >>= *_type;
-                return _parent;
+                return parent();
             }
 
             _current = _current->parent();
@@ -213,7 +209,6 @@ class Composer : public IComposer
         }
 
     private:
-        IComposer* _parent;
         T* _type;
         Pt::SerializationInfo _si;
         Pt::SerializationInfo* _current;

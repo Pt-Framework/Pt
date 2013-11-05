@@ -120,11 +120,11 @@ class PT_XMLRPC_API Formatter : public Pt::Formatter
 
         void finishObject();
 
-        virtual void beginParse(IComposer& composer);
+        virtual void beginParse(Composer& composer);
 
         virtual bool parseSome();
 
-        virtual void parse(IComposer& composer);
+        virtual void parse();
 
         // @internal
         bool advance(const Pt::Xml::Node& node);
@@ -155,7 +155,7 @@ class PT_XMLRPC_API Formatter : public Pt::Formatter
 
         Xml::XmlReader* _reader;
         State _state;
-        IComposer* _composer;
+        Composer* _composer;
 
         std::basic_ostream<Char>* _os;
         Pt::String _str;

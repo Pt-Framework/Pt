@@ -41,10 +41,10 @@ Serializer::Serializer()
 
 Serializer::~Serializer()
 {
-    std::vector<IDecomposer*>::iterator it;
+    std::vector<Decomposer*>::iterator it;
     for(it = _stack.begin(); it != _stack.end(); ++it)
     {
-        (*it)->~IDecomposer();
+        (*it)->~Decomposer();
         this->deallocate(*it);
     }
 
@@ -82,10 +82,10 @@ void Serializer::clear()
     if(_context)
         _context->clear();
 
-    std::vector<IDecomposer*>::iterator it;
+    std::vector<Decomposer*>::iterator it;
     for(it = _stack.begin(); it != _stack.end(); ++it)
     {
-        (*it)->~IDecomposer();
+        (*it)->~Decomposer();
         this->deallocate(*it);
     }
 
@@ -102,8 +102,7 @@ bool Serializer::advance()
         if( _current )
             return false;
 
-        // at least one on the stack, otherwise _current is 0
-        _stack.front()->~IDecomposer();
+        _stack.front()->~Decomposer();
         this->deallocate( _stack.front() );
         _stack.erase( _stack.begin() );
     }
@@ -119,12 +118,24 @@ bool Serializer::advance()
 
 void Serializer::finish()
 {
-    std::vector<IDecomposer*>::iterator it;
+    if(_current)
+    {
+        while(_current)
+        {
+            _current = _current->advanceFormat(*_formatter);
+        }
+
+        _stack.front()->~Decomposer();
+        this->deallocate( _stack.front() );
+        _stack.erase( _stack.begin() );
+    }
+
+    std::vector<Decomposer*>::iterator it;
 
     for(it = _stack.begin(); it != _stack.end(); ++it)
     {
         (*it)->format(*_formatter);
-        (*it)->~IDecomposer();
+        (*it)->~Decomposer();
         this->deallocate(*it);
     }
 

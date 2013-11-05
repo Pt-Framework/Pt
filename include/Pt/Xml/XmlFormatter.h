@@ -175,13 +175,13 @@ class PT_XML_API XmlFormatter : public Formatter
         // inherit docs
         void finishObject();
 
-        virtual void beginParse(IComposer& composer);
+        virtual void beginParse(Composer& composer);
 
         // inherit docs
         virtual bool parseSome();
 
         // inherit docs
-        virtual void parse(IComposer& composer);
+        virtual void parse();
 
     protected:
         //! @internal
@@ -222,7 +222,7 @@ class PT_XML_API XmlFormatter : public Formatter
         ProcessNode _processNode;
 
         //! @internal
-        IComposer* _composer;
+        Composer* _composer;
 };
 
 } // namespace Xml

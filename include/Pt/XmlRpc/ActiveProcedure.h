@@ -97,7 +97,7 @@ class ActiveProcedure : public ServiceProcedure
         }
 
     protected:
-        IComposer** onBeginArgs()
+        Composer** onBeginArgs()
         {
             _a1.begin(_v1);
             _a2.begin(_v2);
@@ -118,7 +118,7 @@ class ActiveProcedure : public ServiceProcedure
             onInvoke(loop, _v1, _v2, _v3, _v4, _v5, _v6, _v7, _v8, _v9, _v10);
         }
 
-        IDecomposer* onEndCall()
+        Decomposer* onEndCall()
         {
             const R& r = onResult();
             _r.begin(r, "");
@@ -147,18 +147,18 @@ class ActiveProcedure : public ServiceProcedure
         A9 _v9;
         A10 _v10;
 
-        IComposer* _args[11];
-        Composer<A1> _a1;
-        Composer<A2> _a2;
-        Composer<A3> _a3;
-        Composer<A4> _a4;
-        Composer<A5> _a5;
-        Composer<A6> _a6;
-        Composer<A7> _a7;
-        Composer<A8> _a8;
-        Composer<A9> _a9;
-        Composer<A10> _a10;
-        Decomposer<R> _r;
+        Composer* _args[11];
+        BasicComposer<A1> _a1;
+        BasicComposer<A2> _a2;
+        BasicComposer<A3> _a3;
+        BasicComposer<A4> _a4;
+        BasicComposer<A5> _a5;
+        BasicComposer<A6> _a6;
+        BasicComposer<A7> _a7;
+        BasicComposer<A8> _a8;
+        BasicComposer<A9> _a9;
+        BasicComposer<A10> _a10;
+        BasicDecomposer<R> _r;
 };
 
 
@@ -215,7 +215,7 @@ class ActiveProcedure<R, A1, A2, A3, A4, A5, A6, A7, A8, A9,
         }
 
     protected:
-        IComposer** onBeginArgs()
+        Composer** onBeginArgs()
         {
             _a1.begin(_v1);
             _a2.begin(_v2);
@@ -235,7 +235,7 @@ class ActiveProcedure<R, A1, A2, A3, A4, A5, A6, A7, A8, A9,
             onInvoke(loop, _v1, _v2, _v3, _v4, _v5, _v6, _v7, _v8, _v9);
         }
 
-        IDecomposer* onEndCall()
+        Decomposer* onEndCall()
         {
             const R& r = onResult();
             _r.begin(r, "");
@@ -263,17 +263,17 @@ class ActiveProcedure<R, A1, A2, A3, A4, A5, A6, A7, A8, A9,
         A8 _v8;
         A9 _v9;
 
-        IComposer* _args[10];
-        Composer<A1> _a1;
-        Composer<A2> _a2;
-        Composer<A3> _a3;
-        Composer<A4> _a4;
-        Composer<A5> _a5;
-        Composer<A6> _a6;
-        Composer<A7> _a7;
-        Composer<A8> _a8;
-        Composer<A9> _a9;
-        Decomposer<R> _r;
+        Composer* _args[10];
+        BasicComposer<A1> _a1;
+        BasicComposer<A2> _a2;
+        BasicComposer<A3> _a3;
+        BasicComposer<A4> _a4;
+        BasicComposer<A5> _a5;
+        BasicComposer<A6> _a6;
+        BasicComposer<A7> _a7;
+        BasicComposer<A8> _a8;
+        BasicComposer<A9> _a9;
+        BasicDecomposer<R> _r;
 };
 
 
@@ -328,7 +328,7 @@ class ActiveProcedure<R, A1, A2, A3, A4, A5, A6, A7, A8,
         }
 
     protected:
-        IComposer** onBeginArgs()
+        Composer** onBeginArgs()
         {
             _a1.begin(_v1);
             _a2.begin(_v2);
@@ -347,7 +347,7 @@ class ActiveProcedure<R, A1, A2, A3, A4, A5, A6, A7, A8,
             onInvoke(loop, _v1, _v2, _v3, _v4, _v5, _v6, _v7, _v8);
         }
 
-        IDecomposer* onEndCall()
+        Decomposer* onEndCall()
         {
             const R& r = onResult();
             _r.begin(r, "");
@@ -373,16 +373,16 @@ class ActiveProcedure<R, A1, A2, A3, A4, A5, A6, A7, A8,
         A7 _v7;
         A8 _v8;
 
-        IComposer* _args[9];
-        Composer<A1> _a1;
-        Composer<A2> _a2;
-        Composer<A3> _a3;
-        Composer<A4> _a4;
-        Composer<A5> _a5;
-        Composer<A6> _a6;
-        Composer<A7> _a7;
-        Composer<A8> _a8;
-        Decomposer<R> _r;
+        Composer* _args[9];
+        BasicComposer<A1> _a1;
+        BasicComposer<A2> _a2;
+        BasicComposer<A3> _a3;
+        BasicComposer<A4> _a4;
+        BasicComposer<A5> _a5;
+        BasicComposer<A6> _a6;
+        BasicComposer<A7> _a7;
+        BasicComposer<A8> _a8;
+        BasicDecomposer<R> _r;
 };
 
 
@@ -435,7 +435,7 @@ class ActiveProcedure<R, A1, A2, A3, A4, A5, A6, A7,
         }
 
     protected:
-        IComposer** onBeginArgs()
+        Composer** onBeginArgs()
         {
             _a1.begin(_v1);
             _a2.begin(_v2);
@@ -453,7 +453,7 @@ class ActiveProcedure<R, A1, A2, A3, A4, A5, A6, A7,
             onInvoke(loop, _v1, _v2, _v3, _v4, _v5, _v6, _v7);
         }
 
-        IDecomposer* onEndCall()
+        Decomposer* onEndCall()
         {
             const R& r = onResult();
             _r.begin(r, "");
@@ -478,15 +478,15 @@ class ActiveProcedure<R, A1, A2, A3, A4, A5, A6, A7,
         A6 _v6;
         A7 _v7;
 
-        IComposer* _args[8];
-        Composer<A1> _a1;
-        Composer<A2> _a2;
-        Composer<A3> _a3;
-        Composer<A4> _a4;
-        Composer<A5> _a5;
-        Composer<A6> _a6;
-        Composer<A7> _a7;
-        Decomposer<R> _r;
+        Composer* _args[8];
+        BasicComposer<A1> _a1;
+        BasicComposer<A2> _a2;
+        BasicComposer<A3> _a3;
+        BasicComposer<A4> _a4;
+        BasicComposer<A5> _a5;
+        BasicComposer<A6> _a6;
+        BasicComposer<A7> _a7;
+        BasicDecomposer<R> _r;
 };
 
 
@@ -537,7 +537,7 @@ class ActiveProcedure<R, A1, A2, A3, A4, A5, A6,
         }
 
     protected:
-        IComposer** onBeginArgs()
+        Composer** onBeginArgs()
         {
             _a1.begin(_v1);
             _a2.begin(_v2);
@@ -554,7 +554,7 @@ class ActiveProcedure<R, A1, A2, A3, A4, A5, A6,
             onInvoke(loop, _v1, _v2, _v3, _v4, _v5, _v6);
         }
 
-        IDecomposer* onEndCall()
+        Decomposer* onEndCall()
         {
             const R& r = onResult();
             _r.begin(r, "");
@@ -577,14 +577,14 @@ class ActiveProcedure<R, A1, A2, A3, A4, A5, A6,
         A5 _v5;
         A6 _v6;
 
-        IComposer* _args[7];
-        Composer<A1> _a1;
-        Composer<A2> _a2;
-        Composer<A3> _a3;
-        Composer<A4> _a4;
-        Composer<A5> _a5;
-        Composer<A6> _a6;
-        Decomposer<R> _r;
+        Composer* _args[7];
+        BasicComposer<A1> _a1;
+        BasicComposer<A2> _a2;
+        BasicComposer<A3> _a3;
+        BasicComposer<A4> _a4;
+        BasicComposer<A5> _a5;
+        BasicComposer<A6> _a6;
+        BasicDecomposer<R> _r;
 };
 
 
@@ -633,7 +633,7 @@ class ActiveProcedure<R, A1, A2, A3, A4, A5,
         }
 
     protected:
-        IComposer** onBeginArgs()
+        Composer** onBeginArgs()
         {
             _a1.begin(_v1);
             _a2.begin(_v2);
@@ -649,7 +649,7 @@ class ActiveProcedure<R, A1, A2, A3, A4, A5,
             onInvoke(loop, _v1, _v2, _v3, _v4, _v5);
         }
 
-        IDecomposer* onEndCall()
+        Decomposer* onEndCall()
         {
             const R& r = onResult();
             _r.begin(r, "");
@@ -671,13 +671,13 @@ class ActiveProcedure<R, A1, A2, A3, A4, A5,
         A4 _v4;
         A5 _v5;
 
-        IComposer* _args[6];
-        Composer<A1> _a1;
-        Composer<A2> _a2;
-        Composer<A3> _a3;
-        Composer<A4> _a4;
-        Composer<A5> _a5;
-        Decomposer<R> _r;
+        Composer* _args[6];
+        BasicComposer<A1> _a1;
+        BasicComposer<A2> _a2;
+        BasicComposer<A3> _a3;
+        BasicComposer<A4> _a4;
+        BasicComposer<A5> _a5;
+        BasicDecomposer<R> _r;
 };
 
 
@@ -724,7 +724,7 @@ class ActiveProcedure<R, A1, A2, A3, A4,
         }
 
     protected:
-        IComposer** onBeginArgs()
+        Composer** onBeginArgs()
         {
             _a1.begin(_v1);
             _a2.begin(_v2);
@@ -739,7 +739,7 @@ class ActiveProcedure<R, A1, A2, A3, A4,
             onInvoke(loop, _v1, _v2, _v3, _v4);
         }
 
-        IDecomposer* onEndCall()
+        Decomposer* onEndCall()
         {
             const R& r = onResult();
             _r.begin(r, "");
@@ -759,12 +759,12 @@ class ActiveProcedure<R, A1, A2, A3, A4,
         A3 _v3;
         A4 _v4;
 
-        IComposer* _args[5];
-        Composer<A1> _a1;
-        Composer<A2> _a2;
-        Composer<A3> _a3;
-        Composer<A4> _a4;
-        Decomposer<R> _r;
+        Composer* _args[5];
+        BasicComposer<A1> _a1;
+        BasicComposer<A2> _a2;
+        BasicComposer<A3> _a3;
+        BasicComposer<A4> _a4;
+        BasicDecomposer<R> _r;
 };
 
 
@@ -810,7 +810,7 @@ class ActiveProcedure<R, A1, A2, A3,
         }
 
     protected:
-        IComposer** onBeginArgs()
+        Composer** onBeginArgs()
         {
             _a1.begin(_v1);
             _a2.begin(_v2);
@@ -824,7 +824,7 @@ class ActiveProcedure<R, A1, A2, A3,
             onInvoke(loop, _v1, _v2, _v3);
         }
 
-        IDecomposer* onEndCall()
+        Decomposer* onEndCall()
         {
             const R& r = onResult();
             _r.begin(r, "");
@@ -843,11 +843,11 @@ class ActiveProcedure<R, A1, A2, A3,
         A2 _v2;
         A3 _v3;
 
-        IComposer* _args[4];
-        Composer<A1> _a1;
-        Composer<A2> _a2;
-        Composer<A3> _a3;
-        Decomposer<R> _r;
+        Composer* _args[4];
+        BasicComposer<A1> _a1;
+        BasicComposer<A2> _a2;
+        BasicComposer<A3> _a3;
+        BasicDecomposer<R> _r;
 };
 
 
@@ -890,7 +890,7 @@ class ActiveProcedure<R, A1, A2,
         }
 
     protected:
-        IComposer** onBeginArgs()
+        Composer** onBeginArgs()
         {
             _a1.begin(_v1);
             _a2.begin(_v2);
@@ -903,7 +903,7 @@ class ActiveProcedure<R, A1, A2,
             onInvoke(loop, _v1, _v2);
         }
 
-        IDecomposer* onEndCall()
+        Decomposer* onEndCall()
         {
             const R& r = onResult();
             _r.begin(r, "");
@@ -920,10 +920,10 @@ class ActiveProcedure<R, A1, A2,
         A1 _v1;
         A2 _v2;
 
-        IComposer* _args[3];
-        Composer<A1> _a1;
-        Composer<A2> _a2;
-        Decomposer<R> _r;
+        Composer* _args[3];
+        BasicComposer<A1> _a1;
+        BasicComposer<A2> _a2;
+        BasicDecomposer<R> _r;
 };
 
 
@@ -964,7 +964,7 @@ class ActiveProcedure<R, A1,
         }
 
     protected:
-        IComposer** onBeginArgs()
+        Composer** onBeginArgs()
         {
             _a1.begin(_v1);
             return _args;
@@ -975,7 +975,7 @@ class ActiveProcedure<R, A1,
             onInvoke(loop, _v1);
         }
 
-        IDecomposer* onEndCall()
+        Decomposer* onEndCall()
         {
             const R& r = onResult();
             _r.begin(r, "");
@@ -989,9 +989,9 @@ class ActiveProcedure<R, A1,
 
     private:
         A1 _v1;
-        IComposer* _args[2];
-        Composer<A1> _a1;
-        Decomposer<R> _r;
+        Composer* _args[2];
+        BasicComposer<A1> _a1;
+        BasicDecomposer<R> _r;
 };
 
 
@@ -1030,7 +1030,7 @@ class ActiveProcedure<R,
         }
 
     protected:
-        IComposer** onBeginArgs()
+        Composer** onBeginArgs()
         {
             return _args;
         }
@@ -1040,7 +1040,7 @@ class ActiveProcedure<R,
             onInvoke(loop);
         }
 
-        IDecomposer* onEndCall()
+        Decomposer* onEndCall()
         {
             const R& r = onResult();
             _r.begin(r, "");
@@ -1053,8 +1053,8 @@ class ActiveProcedure<R,
         virtual const R& onResult() = 0;
 
     private:
-        IComposer* _args[1];
-        Decomposer<R> _r;
+        Composer* _args[1];
+        BasicDecomposer<R> _r;
 };
 
 

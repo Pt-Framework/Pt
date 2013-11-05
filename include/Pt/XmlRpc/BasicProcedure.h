@@ -96,7 +96,7 @@ class BasicProcedure : public ServiceProcedure
         }
 
     protected:
-        IComposer** onBeginArgs()
+        Composer** onBeginArgs()
         {
             _a1.begin(_v1);
             _a2.begin(_v2);
@@ -117,7 +117,7 @@ class BasicProcedure : public ServiceProcedure
             this->setReady();
         }
 
-        IDecomposer* onEndCall()
+        Decomposer* onEndCall()
         {
             _rv = _cb->call(_v1, _v2, _v3, _v4, _v5, _v6, _v7, _v8, _v9, _v10);
             _r.begin(_rv, "");
@@ -151,18 +151,18 @@ class BasicProcedure : public ServiceProcedure
         V9 _v9;
         V10 _v10;
 
-        IComposer* _args[11];
-        Composer<V1> _a1;
-        Composer<V2> _a2;
-        Composer<V3> _a3;
-        Composer<V4> _a4;
-        Composer<V5> _a5;
-        Composer<V6> _a6;
-        Composer<V7> _a7;
-        Composer<V8> _a8;
-        Composer<V9> _a9;
-        Composer<V10> _a10;
-        Decomposer<RV> _r;
+        Composer* _args[11];
+        BasicComposer<V1> _a1;
+        BasicComposer<V2> _a2;
+        BasicComposer<V3> _a3;
+        BasicComposer<V4> _a4;
+        BasicComposer<V5> _a5;
+        BasicComposer<V6> _a6;
+        BasicComposer<V7> _a7;
+        BasicComposer<V8> _a8;
+        BasicComposer<V9> _a9;
+        BasicComposer<V10> _a10;
+        BasicDecomposer<RV> _r;
 };
 
 
@@ -215,7 +215,7 @@ class BasicProcedure<R, A1, A2, A3, A4, A5, A6, A7, A8, A9,
         }
 
     protected:
-        IComposer** onBeginArgs()
+        Composer** onBeginArgs()
         {
             _a1.begin(_v1);
             _a2.begin(_v2);
@@ -235,7 +235,7 @@ class BasicProcedure<R, A1, A2, A3, A4, A5, A6, A7, A8, A9,
             this->setReady();
         }
 
-        IDecomposer* onEndCall()
+        Decomposer* onEndCall()
         {
             _rv = _cb->call(_v1, _v2, _v3, _v4, _v5, _v6, _v7, _v8, _v9);
             _r.begin(_rv, "");
@@ -267,17 +267,17 @@ class BasicProcedure<R, A1, A2, A3, A4, A5, A6, A7, A8, A9,
         V8 _v8;
         V9 _v9;
 
-        IComposer* _args[10];
-        Composer<V1> _a1;
-        Composer<V2> _a2;
-        Composer<V3> _a3;
-        Composer<V4> _a4;
-        Composer<V5> _a5;
-        Composer<V6> _a6;
-        Composer<V7> _a7;
-        Composer<V8> _a8;
-        Composer<V9> _a9;
-        Decomposer<RV> _r;
+        Composer* _args[10];
+        BasicComposer<V1> _a1;
+        BasicComposer<V2> _a2;
+        BasicComposer<V3> _a3;
+        BasicComposer<V4> _a4;
+        BasicComposer<V5> _a5;
+        BasicComposer<V6> _a6;
+        BasicComposer<V7> _a7;
+        BasicComposer<V8> _a8;
+        BasicComposer<V9> _a9;
+        BasicDecomposer<RV> _r;
 };
 
 
@@ -328,7 +328,7 @@ class BasicProcedure<R, A1, A2, A3, A4, A5, A6, A7, A8,
         }
 
     protected:
-        IComposer** onBeginArgs()
+        Composer** onBeginArgs()
         {
             _a1.begin(_v1);
             _a2.begin(_v2);
@@ -347,7 +347,7 @@ class BasicProcedure<R, A1, A2, A3, A4, A5, A6, A7, A8,
             this->setReady();
         }
 
-        IDecomposer* onEndCall()
+        Decomposer* onEndCall()
         {
             _rv = _cb->call(_v1, _v2, _v3, _v4, _v5, _v6, _v7, _v8);
             _r.begin(_rv, "");
@@ -377,16 +377,16 @@ class BasicProcedure<R, A1, A2, A3, A4, A5, A6, A7, A8,
         V7 _v7;
         V8 _v8;
 
-        IComposer* _args[9];
-        Composer<V1> _a1;
-        Composer<V2> _a2;
-        Composer<V3> _a3;
-        Composer<V4> _a4;
-        Composer<V5> _a5;
-        Composer<V6> _a6;
-        Composer<V7> _a7;
-        Composer<V8> _a8;
-        Decomposer<RV> _r;
+        Composer* _args[9];
+        BasicComposer<V1> _a1;
+        BasicComposer<V2> _a2;
+        BasicComposer<V3> _a3;
+        BasicComposer<V4> _a4;
+        BasicComposer<V5> _a5;
+        BasicComposer<V6> _a6;
+        BasicComposer<V7> _a7;
+        BasicComposer<V8> _a8;
+        BasicDecomposer<RV> _r;
 };
 
 
@@ -435,7 +435,7 @@ class BasicProcedure<R, A1, A2, A3, A4, A5, A6, A7,
         }
 
     protected:
-        IComposer** onBeginArgs()
+        Composer** onBeginArgs()
         {
             _a1.begin(_v1);
             _a2.begin(_v2);
@@ -453,7 +453,7 @@ class BasicProcedure<R, A1, A2, A3, A4, A5, A6, A7,
             this->setReady();
         }
 
-        IDecomposer* onEndCall()
+        Decomposer* onEndCall()
         {
             _rv = _cb->call(_v1, _v2, _v3, _v4, _v5, _v6, _v7);
             _r.begin(_rv, "");
@@ -481,15 +481,15 @@ class BasicProcedure<R, A1, A2, A3, A4, A5, A6, A7,
         V6 _v6;
         V7 _v7;
 
-        IComposer* _args[8];
-        Composer<V1> _a1;
-        Composer<V2> _a2;
-        Composer<V3> _a3;
-        Composer<V4> _a4;
-        Composer<V5> _a5;
-        Composer<V6> _a6;
-        Composer<V7> _a7;
-        Decomposer<RV> _r;
+        Composer* _args[8];
+        BasicComposer<V1> _a1;
+        BasicComposer<V2> _a2;
+        BasicComposer<V3> _a3;
+        BasicComposer<V4> _a4;
+        BasicComposer<V5> _a5;
+        BasicComposer<V6> _a6;
+        BasicComposer<V7> _a7;
+        BasicDecomposer<RV> _r;
 };
 
 
@@ -536,7 +536,7 @@ class BasicProcedure<R, A1, A2, A3, A4, A5, A6,
         }
 
     protected:
-        IComposer** onBeginArgs()
+        Composer** onBeginArgs()
         {
             _a1.begin(_v1);
             _a2.begin(_v2);
@@ -553,7 +553,7 @@ class BasicProcedure<R, A1, A2, A3, A4, A5, A6,
             this->setReady();
         }
 
-        IDecomposer* onEndCall()
+        Decomposer* onEndCall()
         {
             _rv = _cb->call(_v1, _v2, _v3, _v4, _v5, _v6);
             _r.begin(_rv, "");
@@ -579,14 +579,14 @@ class BasicProcedure<R, A1, A2, A3, A4, A5, A6,
         V5 _v5;
         V6 _v6;
 
-        IComposer* _args[7];
-        Composer<V1> _a1;
-        Composer<V2> _a2;
-        Composer<V3> _a3;
-        Composer<V4> _a4;
-        Composer<V5> _a5;
-        Composer<V6> _a6;
-        Decomposer<RV> _r;
+        Composer* _args[7];
+        BasicComposer<V1> _a1;
+        BasicComposer<V2> _a2;
+        BasicComposer<V3> _a3;
+        BasicComposer<V4> _a4;
+        BasicComposer<V5> _a5;
+        BasicComposer<V6> _a6;
+        BasicDecomposer<RV> _r;
 };
 
 
@@ -631,7 +631,7 @@ class BasicProcedure<R, A1, A2, A3, A4, A5,
         }
 
     protected:
-        IComposer** onBeginArgs()
+        Composer** onBeginArgs()
         {
             _a1.begin(_v1);
             _a2.begin(_v2);
@@ -647,7 +647,7 @@ class BasicProcedure<R, A1, A2, A3, A4, A5,
             this->setReady();
         }
 
-        IDecomposer* onEndCall()
+        Decomposer* onEndCall()
         {
             _rv = _cb->call(_v1, _v2, _v3, _v4, _v5);
             _r.begin(_rv, "");
@@ -671,13 +671,13 @@ class BasicProcedure<R, A1, A2, A3, A4, A5,
         V4 _v4;
         V5 _v5;
 
-        IComposer* _args[6];
-        Composer<V1> _a1;
-        Composer<V2> _a2;
-        Composer<V3> _a3;
-        Composer<V4> _a4;
-        Composer<V5> _a5;
-        Decomposer<RV> _r;
+        Composer* _args[6];
+        BasicComposer<V1> _a1;
+        BasicComposer<V2> _a2;
+        BasicComposer<V3> _a3;
+        BasicComposer<V4> _a4;
+        BasicComposer<V5> _a5;
+        BasicDecomposer<RV> _r;
 };
 
 
@@ -720,7 +720,7 @@ class BasicProcedure<R, A1, A2, A3, A4,
         }
 
     protected:
-        IComposer** onBeginArgs()
+        Composer** onBeginArgs()
         {
             _a1.begin(_v1);
             _a2.begin(_v2);
@@ -735,7 +735,7 @@ class BasicProcedure<R, A1, A2, A3, A4,
             this->setReady();
         }
 
-        IDecomposer* onEndCall()
+        Decomposer* onEndCall()
         {
             _rv = _cb->call(_v1, _v2, _v3, _v4);
             _r.begin(_rv, "");
@@ -757,12 +757,12 @@ class BasicProcedure<R, A1, A2, A3, A4,
         V3 _v3;
         V4 _v4;
 
-        IComposer* _args[5];
-        Composer<V1> _a1;
-        Composer<V2> _a2;
-        Composer<V3> _a3;
-        Composer<V4> _a4;
-        Decomposer<RV> _r;
+        Composer* _args[5];
+        BasicComposer<V1> _a1;
+        BasicComposer<V2> _a2;
+        BasicComposer<V3> _a3;
+        BasicComposer<V4> _a4;
+        BasicDecomposer<RV> _r;
 };
 
 
@@ -803,7 +803,7 @@ class BasicProcedure<R, A1, A2, A3,
         }
 
     protected:
-        IComposer** onBeginArgs()
+        Composer** onBeginArgs()
         {
             _a1.begin(_v1);
             _a2.begin(_v2);
@@ -817,7 +817,7 @@ class BasicProcedure<R, A1, A2, A3,
             this->setReady();
         }
 
-        IDecomposer* onEndCall()
+        Decomposer* onEndCall()
         {
             _rv = _cb->call(_v1, _v2, _v3);
             _r.begin(_rv, "");
@@ -837,11 +837,11 @@ class BasicProcedure<R, A1, A2, A3,
         V2 _v2;
         V3 _v3;
 
-        IComposer* _args[4];
-        Composer<V1> _a1;
-        Composer<V2> _a2;
-        Composer<V3> _a3;
-        Decomposer<RV> _r;
+        Composer* _args[4];
+        BasicComposer<V1> _a1;
+        BasicComposer<V2> _a2;
+        BasicComposer<V3> _a3;
+        BasicDecomposer<RV> _r;
 };
 
 
@@ -880,7 +880,7 @@ class BasicProcedure<R, A1, A2,
         }
 
     protected:
-        IComposer** onBeginArgs()
+        Composer** onBeginArgs()
         {
             _a1.begin(_v1);
             _a2.begin(_v2);
@@ -893,7 +893,7 @@ class BasicProcedure<R, A1, A2,
             this->setReady();
         }
 
-        IDecomposer* onEndCall()
+        Decomposer* onEndCall()
         {
             _rv = _cb->call(_v1, _v2);
             _r.begin(_rv, "");
@@ -911,10 +911,10 @@ class BasicProcedure<R, A1, A2,
         V1 _v1;
         V2 _v2;
 
-        IComposer* _args[3];
-        Composer<V1> _a1;
-        Composer<V2> _a2;
-        Decomposer<RV> _r;
+        Composer* _args[3];
+        BasicComposer<V1> _a1;
+        BasicComposer<V2> _a2;
+        BasicDecomposer<RV> _r;
 };
 
 
@@ -951,7 +951,7 @@ class BasicProcedure<R, A1,
         }
 
     protected:
-        IComposer** onBeginArgs()
+        Composer** onBeginArgs()
         {
             _a1.begin(_v1);
 
@@ -963,7 +963,7 @@ class BasicProcedure<R, A1,
             this->setReady();
         }
 
-        IDecomposer* onEndCall()
+        Decomposer* onEndCall()
         {
             _rv = _cb->call(_v1);
             _r.begin(_rv, "");
@@ -978,9 +978,9 @@ class BasicProcedure<R, A1,
         RV _rv;
         V1 _v1;
 
-        IComposer* _args[2];
-        Composer<V1> _a1;
-        Decomposer<RV> _r;
+        Composer* _args[2];
+        BasicComposer<V1> _a1;
+        BasicDecomposer<RV> _r;
 };
 
 
@@ -1018,7 +1018,7 @@ class BasicProcedure<R,
         }
 
     protected:
-        IComposer** onBeginArgs()
+        Composer** onBeginArgs()
         {
             return _args;
         }
@@ -1028,7 +1028,7 @@ class BasicProcedure<R,
             this->setReady();
         }
 
-        IDecomposer* onEndCall()
+        Decomposer* onEndCall()
         {
             _rv = _cb->call();
             _r.begin(_rv, "");
@@ -1041,8 +1041,8 @@ class BasicProcedure<R,
         Callable<R>* _cb;
         RV _rv;
 
-        IComposer* _args[1];
-        Decomposer<RV> _r;
+        Composer* _args[1];
+        BasicDecomposer<RV> _r;
 };
 
 

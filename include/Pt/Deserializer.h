@@ -54,7 +54,6 @@ class PT_API Deserializer
 
         void setFormatter(Formatter& formatter);
 
-        // TODO: rethink clear/reset i.e. for derived XmlDeserializer
         void clear();
 
         /** @brief Starts parsing of an object.
@@ -66,12 +65,29 @@ class PT_API Deserializer
         template <typename T>
         void begin(T& t)
         {
-            void* m = this->allocate( sizeof(Composer<T>) );
-            Composer<T>* composer = new (m) Composer<T>(_context);
-            _current = composer;
-            composer->begin(t);
+            if( ! _fmt)
+                return;
 
-            _fmt->beginParse(*composer);
+            // allocate() also destructs _current
+            void* m = this->allocate( sizeof(BasicComposer<T>) );
+
+            BasicComposer<T>* comp = 0;
+            try
+            {
+                comp = new (m) BasicComposer<T>(_context);
+                comp->begin(t);
+                _current = comp;
+            }
+            catch(...)
+            {
+                if(comp)
+                    comp->~BasicComposer<T>();
+
+                this->deallocate(m);
+                throw;
+            }
+
+            _fmt->beginParse(*_current);
         }
 
         /** @brief Advances parsing of an object.
@@ -92,17 +108,25 @@ class PT_API Deserializer
         */
         void finish();
 
+        /** @brief Fixes up references.
+
+            Weak references between the parsed objects can be fixed up calling
+            this method. Fixup has to happen after all objects have been parsed
+            so references can be forward and backward in the object stream.
+        */
         void fixup();
 
     private:
+        //! @internal
         void* allocate(size_t n);
 
+        //! @internal
         void deallocate(void* p);
 
     private:
         SerializationContext* _context;
         Formatter* _fmt;
-        IComposer* _current;
+        Composer* _current;
         void* _mem;
         std::size_t _memsize;
 };
