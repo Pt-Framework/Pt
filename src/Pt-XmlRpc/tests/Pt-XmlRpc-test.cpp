@@ -92,7 +92,7 @@ class BasicDecomposer< std::vector<T> > : public Decomposer
         {
             formatter.beginArray(_name.c_str(), "std::vector", "");
 
-            std::vector<T>::const_iterator it;
+            typename std::vector<T>::const_iterator it;
             for(it = _type->begin(); it != _type->end(); ++it)
             {
                 formatter.beginElement();
