@@ -32,6 +32,7 @@
 #include <Pt/Xml/XmlWriter.h>
 #include <Pt/Xml/XmlReader.h>
 #include <Pt/String.h>
+#include <Pt/NonCopyable.h>
 #include <Pt/Formatter.h>
 
 namespace Pt {
@@ -47,6 +48,7 @@ class EndElement;
 /** @brief Format objects or data to XML
 */
 class PT_XML_API XmlFormatter : public Formatter
+                              , private NonCopyable
 {
     public:
         /** @brief Default Constructor.
@@ -142,8 +144,8 @@ class PT_XML_API XmlFormatter : public Formatter
                            const char* id);
         
         // inherit docs
-        void addBytes(const char* name, const char* type,
-                      const char* value, size_t length, const char* id);
+        void addBinary(const char* name, const char* type,
+                       const char* value, size_t length, const char* id);
         
         // inherit docs
         void addReference(const char* name, const char* value);
@@ -151,8 +153,7 @@ class PT_XML_API XmlFormatter : public Formatter
         // inherit docs
         void beginArray(const char* name, const char* type,
                         const char* id);
-        
-        
+
         // inherit docs
         void beginElement();
         
@@ -163,7 +164,7 @@ class PT_XML_API XmlFormatter : public Formatter
         void finishArray();
         
         // inherit docs
-        void beginObject(const char* name, const char* type,
+        void beginStruct(const char* name, const char* type,
                          const char* id);
         
         // inherit docs
@@ -173,7 +174,7 @@ class PT_XML_API XmlFormatter : public Formatter
         void finishMember();
         
         // inherit docs
-        void finishObject();
+        void finishStruct();
 
         virtual void beginParse(Composer& composer);
 
@@ -214,6 +215,9 @@ class PT_XML_API XmlFormatter : public Formatter
 
         //! @internal
         Pt::String _value;
+
+        //! @internal
+        int _valueType;
 
         //! @internal
         typedef void (XmlFormatter::*ProcessNode)(const Node&);

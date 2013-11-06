@@ -49,8 +49,8 @@ class Formatter
         virtual void addString(const char* name, const char* type,
                                const Pt::Char* value, const char* id) = 0;
 
-        virtual void addBytes(const char* name, const char* type,
-                              const char* value, size_t length, const char* id) = 0;
+        virtual void addBinary(const char* name, const char* type,
+                               const char* value, size_t length, const char* id) = 0;
 
         virtual void addString8(const char* name, const char* value, 
                                 const char* id) = 0;
@@ -108,16 +108,14 @@ class Formatter
 
         virtual void finishArray() = 0;
 
-        // TODO: rename beginStruct
-        virtual void beginObject(const char* name, const char* type,
+        virtual void beginStruct(const char* name, const char* type,
                                  const char* id) = 0;
 
         virtual void beginMember(const char* name) = 0;
 
         virtual void finishMember() = 0;
 
-        // TODO: rename finishStruct
-        virtual void finishObject() = 0;
+        virtual void finishStruct() = 0;
 
     public:
         //! @brief Begin to parse to a composer

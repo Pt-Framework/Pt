@@ -326,8 +326,8 @@ void Formatter::addLongDouble(const char* name, long double value,const char* id
 }
 
 
-void Formatter::addBytes(const char* name, const char* type,
-                         const char* data, std::size_t length, const char* id)
+void Formatter::addBinary(const char* name, const char* type,
+                          const char* data, std::size_t length, const char* id)
 {
     // TODO: this should be base64 encoded
 
@@ -376,7 +376,7 @@ void Formatter::finishArray()
 }
 
 
-void Formatter::beginObject(const char* name, const char* type,
+void Formatter::beginStruct(const char* name, const char* type,
                             const char* id)
 {
     _os->write(XMLRPC_VALUE, sizeof(XMLRPC_VALUE)/sizeof(Char));
@@ -401,7 +401,7 @@ void Formatter::finishMember()
 }
 
 
-void Formatter::finishObject()
+void Formatter::finishStruct()
 {
     _os->write(XMLRPC_STRUCT_END, sizeof(XMLRPC_STRUCT_END)/sizeof(Char));
     _os->write(XMLRPC_VALUE_END, sizeof(XMLRPC_VALUE_END)/sizeof(Char));

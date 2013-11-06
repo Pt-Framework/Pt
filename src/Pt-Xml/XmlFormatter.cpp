@@ -44,6 +44,7 @@ namespace Xml {
 XmlFormatter::XmlFormatter()
 : _writer(0)
 , _reader(0)
+, _valueType(0)
 , _composer(0)
 {
     _processNode = &XmlFormatter::OnBegin;
@@ -53,6 +54,7 @@ XmlFormatter::XmlFormatter()
 XmlFormatter::XmlFormatter(XmlWriter& writer)
 : _writer(0)
 , _reader(0)
+, _valueType(0)
 , _composer(0)
 {
     this->attach(writer);
@@ -63,6 +65,7 @@ XmlFormatter::XmlFormatter(XmlWriter& writer)
 XmlFormatter::XmlFormatter(XmlReader& reader)
 : _writer(0)
 , _reader(0)
+, _valueType(0)
 , _composer(0)
 {
     this->attach(reader);
@@ -126,8 +129,8 @@ void XmlFormatter::addString8(const char* name, const char* value,
 }
 
 
-void XmlFormatter::addBytes(const char* name, const char* type,
-                            const char* value, size_t length, const char* id)
+void XmlFormatter::addBinary(const char* name, const char* type,
+                             const char* value, size_t length, const char* id)
 {
     convert(_value, std::string(value, length));
     this->addString(name, type, _value.c_str(), id);
@@ -285,7 +288,7 @@ void XmlFormatter::finishArray()
 }
 
 
-void XmlFormatter::beginObject(const char* name, const char* type,
+void XmlFormatter::beginStruct(const char* name, const char* type,
                                const char* id)
 {
     if( ! _writer )
@@ -315,7 +318,7 @@ void XmlFormatter::finishMember()
 }
 
 
-void XmlFormatter::finishObject()
+void XmlFormatter::finishStruct()
 {
     if( ! _writer )
         return;
@@ -473,9 +476,10 @@ void XmlFormatter::OnMemberBegin(const Node& node)
     }
 }
 
-void setValue(Pt::Composer& composer, const Pt::String& value)
+void setValue(Pt::Composer& composer, const Pt::String& value) //, int valueType)
 {
-	//TODO: also look at the parsed type name
+	//TODO: also look at the type, which is held in the _valueType int for
+  //      primitive types
 
 	if(value == L"yes" || value == L"YES" ||
 	   value == L"on" || value == L"ON" ||

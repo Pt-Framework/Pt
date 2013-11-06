@@ -97,8 +97,8 @@ class PT_XMLRPC_API Formatter : public Pt::Formatter
         void addLongDouble(const char* name, long double value, 
                            const char* id);
 
-        void addBytes(const char* name, const char* type,
-                      const char* value, size_t length, const char* id);
+        void addBinary(const char* name, const char* type,
+                       const char* value, size_t length, const char* id);
 
         void addReference(const char* name, const char* id);
 
@@ -111,14 +111,14 @@ class PT_XMLRPC_API Formatter : public Pt::Formatter
 
         void finishArray();
 
-        void beginObject(const char* name, const char* type,
+        void beginStruct(const char* name, const char* type,
                          const char* id);
 
         void beginMember(const char* name);
 
         void finishMember();
 
-        void finishObject();
+        void finishStruct();
 
         virtual void beginParse(Composer& composer);
 

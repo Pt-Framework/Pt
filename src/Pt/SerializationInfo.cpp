@@ -197,7 +197,7 @@ SerializationInfo::Iterator SerializationInfo::beginFormat(Formatter& formatter)
                 len = *last;
             }
 
-            formatter.addBytes( _Name, _TypeName, data, len, _id );
+            formatter.addBinary( _Name, _TypeName, data, len, _id );
              break;
         }
         case Str8:
@@ -223,7 +223,7 @@ SerializationInfo::Iterator SerializationInfo::beginFormat(Formatter& formatter)
 
         case Struct:
         {
-            formatter.beginObject( _Name, this->typeName(), this->id() );
+            formatter.beginStruct( _Name, this->typeName(), this->id() );
             return this->begin();
         }
 
@@ -245,7 +245,7 @@ void SerializationInfo::endFormat(Formatter& formatter)
 {
     if(_type == SerializationInfo::Struct)
     {
-        formatter.finishObject();
+        formatter.finishStruct();
     }
     else if(_type == Pt::SerializationInfo::Sequence)
     {
@@ -340,7 +340,7 @@ void SerializationInfo::format(Formatter& formatter)
                 len = *last;
             }
 
-            formatter.addBytes( _Name, _TypeName, data, len, _id );
+            formatter.addBinary( _Name, _TypeName, data, len, _id );
             break;
         }
         case Str8:
@@ -367,7 +367,7 @@ void SerializationInfo::format(Formatter& formatter)
 
         case Struct:
         {
-            formatter.beginObject( _Name, this->typeName(), this->id() );
+            formatter.beginStruct( _Name, this->typeName(), this->id() );
 
             SerializationInfo::Iterator it;
             SerializationInfo::Iterator end = this->end();
@@ -378,7 +378,7 @@ void SerializationInfo::format(Formatter& formatter)
                 formatter.finishMember();
             }
 
-            formatter.finishObject();
+            formatter.finishStruct();
             break;
         }
 
