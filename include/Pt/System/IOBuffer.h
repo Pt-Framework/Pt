@@ -44,6 +44,8 @@ class PT_SYSTEM_API IOBufferImpl
     public:
         IOBufferImpl();
 
+        ~IOBufferImpl();
+
         void init(IOBuffer& sb, size_t bufferSize, bool extend);
 
         IODevice* ioDevice()

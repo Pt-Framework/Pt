@@ -38,6 +38,7 @@ namespace System {
 IOBuffer::~IOBuffer()
 {}
 
+
 IOBufferImpl::IOBufferImpl()
 : _ioDevice   (0)
 , _ibufferSize(0)
@@ -47,6 +48,13 @@ IOBufferImpl::IOBufferImpl()
 , _pbmax      (4)
 , _oextend    (false)
 {
+}
+
+
+IOBufferImpl::~IOBufferImpl()
+{
+    delete _ibuffer;
+    delete _obuffer;
 }
 
 
