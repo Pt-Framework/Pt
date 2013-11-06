@@ -34,7 +34,7 @@
 
 namespace Pt {
 
-/** @brief Manages the composition of types during serialization.
+/** @brief Composes types during serialization.
 
     @ingroup Serialization
 */
@@ -50,58 +50,101 @@ class Composer
         Composer* parent() const
         { return _parent; }
 
-        virtual void setTypeName(const std::string& type)
-        {}
+        /** @brief Name of the type to compose.
 
-        virtual void setId(const std::string& id) = 0;
+            This is only supported by formats that save typename information.
+        */
+        void setTypeName(const std::string& type)
+        { onSetTypeName( type.c_str(), type.size() ); }
 
-        virtual void setString(const Pt::String& value)
-        { throw SerializationError("unexpected value"); }
+        void setId(const std::string& id)
+        { onSetId( id.c_str(), id.size() ); }
 
-        virtual void setBinary(const char* data, size_t length)
-        { throw SerializationError("unexpected value"); }
+        void setString(const Pt::String& value)
+        { onSetString( value.c_str(), value.size() ); }
 
-        virtual void setChar(const Pt::Char& ch)
-        { throw SerializationError("unexpected bool value"); }
+        void setBinary(const char* data, size_t length)
+        { onSetBinary(data, length); }
 
-        virtual void setBool(bool value)
-        { throw SerializationError("unexpected bool value"); }
+        void setChar(const Pt::Char& ch)
+        { onSetChar(ch); }
+
+        void setBool(bool value)
+        { onSetBool(value); }
 
         /** @brief Compose a signed integer type.
 
             There is only one method for all sizes of signed integer types,
             because that type information is not required for composition. 
         */
-        virtual void setInt(Pt::int64_t value)
-        { throw SerializationError("unexpected integer value"); }
+        void setInt(Pt::int64_t value)
+        { onSetInt(value); }
         
         /** @brief Compose a unsigned integer type.
 
             There is only one method for all sizes of unsigned integer types,
             because that type information is not required for composition. 
         */
-        virtual void setUInt(Pt::int64_t value)
-        { throw SerializationError("unexpected unsigned value"); }
+        void setUInt(Pt::int64_t value)
+        { onSetUInt(value); }
 
-        virtual void setDouble(double value)
-        { throw SerializationError("unexpected float value"); }
+        void setDouble(double value)
+        { onSetDouble(value); }
 
-        virtual void setReference(const std::string& id)
-        { throw SerializationError("unexpected reference"); }
+        void setReference(const std::string& id)
+        { onSetReference(id.c_str(), id.size()); }
 
-        virtual Composer* beginMember(const std::string& name)
-        { throw SerializationError("unexpected struct"); }
+        Composer* beginMember(const std::string& name)
+        { return onBeginMember( name.c_str(), name.size() ); }
 
-        virtual Composer* beginElement()
-        { throw SerializationError("unexpected sequence"); }
+        Composer* beginElement()
+        { return onBeginElement(); }
 
-        virtual Composer* finish()
-        { return _parent; }
+        Composer* finish()
+        { return onFinish(); }
 
     protected:
         Composer()
         : _parent(0)
         {}
+
+        virtual void onSetTypeName(const char* type, size_t len)
+        {}
+
+        virtual void onSetId(const char* id, size_t len) = 0;
+
+        virtual void onSetString(const Pt::Char* value, size_t len)
+        { throw SerializationError("unexpected value"); }
+
+        virtual void onSetBinary(const char* data, size_t length)
+        { throw SerializationError("unexpected value"); }
+
+        virtual void onSetChar(const Pt::Char& ch)
+        { throw SerializationError("unexpected bool value"); }
+
+        virtual void onSetBool(bool value)
+        { throw SerializationError("unexpected bool value"); }
+
+        virtual void onSetInt(Pt::int64_t value)
+        { throw SerializationError("unexpected integer value"); }
+        
+        virtual void onSetUInt(Pt::int64_t value)
+        { throw SerializationError("unexpected unsigned value"); }
+
+        virtual void onSetDouble(double value)
+        { throw SerializationError("unexpected float value"); }
+
+        virtual void onSetReference(const char* id, size_t len)
+        { throw SerializationError("unexpected reference"); }
+
+        virtual Composer* onBeginMember(const char* name, size_t len)
+        { throw SerializationError("unexpected struct"); }
+
+        virtual Composer* onBeginElement()
+        { throw SerializationError("unexpected sequence"); }
+
+        virtual Composer* onFinish()
+        { return _parent; }
 
     private:
         Composer* _parent;
@@ -132,71 +175,71 @@ class BasicComposer : public Composer
             _current = &_si;
         }
 
-        virtual void setId(const std::string& id)
+        void onSetId(const char* id, size_t len)
         {
-            _current->setId(id);
+            _current->setId(id, len);
         }
 
-        virtual void setTypeName(const std::string& type)
+        void onSetTypeName(const char* type, size_t len)
         {
-            _current->setTypeName(type);
+            _current->setTypeName(type, len);
         }
 
-        virtual void setString(const Pt::String& value)
+        void onSetString(const Pt::Char* value, size_t len)
         {
-            _current->setString(value);
+            _current->setString(value, len);
         }
 
-        virtual void setBinary(const char* data, size_t length)
+        void onSetBinary(const char* data, size_t length)
         {
             _current->setBinary(data, length);
         }
 
-        virtual void setChar(const Pt::Char& ch)
+        void onSetChar(const Pt::Char& ch)
         {
             _current->setChar(ch);
         }
 
-        virtual void setBool(bool value)
+        void onSetBool(bool value)
         {
             _current->setBool(value);
         }
 
-        virtual void setInt(Pt::int64_t value)
+        void onSetInt(Pt::int64_t value)
         {
             _current->setInt64(value);
         }
 
-        virtual void setUInt(Pt::uint64_t value)
+        void onSetUInt(Pt::uint64_t value)
         {
             _current->setUInt64(value);
         }
 
-        virtual void setDouble(double value)
+        void onSetDouble(double value)
         {
             _current->setDouble(value);
         }
 
-        virtual void setReference(const std::string& id)
+        void onSetReference(const char* id, size_t len)
         {
-           _current->setReference(id);
+           _current->setReference(id, len);
         }
 
-        virtual Composer* beginMember(const std::string& name)
+        Composer* onBeginMember(const char* name, size_t len)
         {
-            SerializationInfo& child = _current->addMember(name);
+            SerializationInfo& child = _current->addMember(name, len);
             _current = &child;
             return this;
         }
 
-        virtual Composer* beginElement()
+        Composer* onBeginElement()
         {
             SerializationInfo& child = _current->addElement();
             _current = &child;
             return this;
         }
 
-        virtual Composer* finish()
+        Composer* onFinish()
         {
             if( ! _current->parent() )
             {

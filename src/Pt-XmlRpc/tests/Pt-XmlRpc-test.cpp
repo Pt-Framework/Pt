@@ -57,10 +57,10 @@ class BasicComposer< std::vector<T> > : public Composer
             _type = &type;
         }
 
-        virtual void setId(const std::string& id)
+        virtual void onSetId(const char* id, size_t len)
         { }
 
-        virtual Pt::Composer* beginElement()
+        virtual Pt::Composer* onBeginElement()
         {
             _type->push_back( T() );
             _elemComposer.begin( _type->back() );
@@ -88,7 +88,7 @@ class BasicDecomposer< std::vector<T> > : public Decomposer
             _name = name;
         }
 
-        virtual void format(Formatter& formatter)
+        void onFormat(Formatter& formatter)
         {
             formatter.beginArray(_name.c_str(), "std::vector", "");
 
@@ -105,13 +105,13 @@ class BasicDecomposer< std::vector<T> > : public Decomposer
             formatter.finishArray();
         }
 
-        virtual void beginFormat(Formatter& formatter)
+        void onBeginFormat(Formatter& formatter)
         {
             formatter.beginArray(_name.c_str(), "std::vector", "");
             _it = _type->begin();
         }
 
-        virtual Decomposer* advanceFormat(Formatter& formatter)
+        Decomposer* onAdvanceFormat(Formatter& formatter)
         {
             if( _it != _type->begin() )
             {

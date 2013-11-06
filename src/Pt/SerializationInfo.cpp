@@ -498,6 +498,12 @@ void SerializationInfo::setName(const char* name)
 }
 
 
+void SerializationInfo::setName(const char* name, size_t len)
+{
+    copyRefStr2(_Name, _flags, NAME_REF_BIT, name, len);
+}
+
+
 void SerializationInfo::setName(const LiteralPtr<char>& name)
 {
     setRefStr2(_Name, _flags, NAME_REF_BIT, name.get() );
@@ -514,6 +520,12 @@ void SerializationInfo::setTypeName(const std::string& type)
 void SerializationInfo::setTypeName(const char* type)
 {
     const std::size_t len = std::strlen(type);
+    copyRefStr2(_TypeName, _flags, TYPENAME_REF_BIT, type, len);
+}
+
+
+void SerializationInfo::setTypeName(const char* type, size_t len)
+{
     copyRefStr2(_TypeName, _flags, TYPENAME_REF_BIT, type, len);
 }
 
@@ -535,6 +547,13 @@ void SerializationInfo::setId(const char* id)
     const std::string::size_type len = std::strlen(id);
     copyRefStr2(_id, _flags, ID_REF_BIT, id, len);
 }
+
+
+void SerializationInfo::setId(const char* id, size_t len)
+{
+    copyRefStr2(_id, _flags, ID_REF_BIT, id, len);
+}
+
 
 
 void SerializationInfo::setSequence()
@@ -599,23 +618,23 @@ void SerializationInfo::setReference(const void* ref)
 
 
 // called during deserialization, when a reference id was parsed
-void SerializationInfo::setReference(const std::string& id)
+void SerializationInfo::setReference(const char* id, size_t idlen)
 {
     if(_type != Reference)
     {
         this->clearValue();
 
-        _value.ref.refId = new char[ id.size() + 1 ];
-        std::memcpy(_value.ref.refId, id.c_str(), id.size() + 1);
+        _value.ref.refId = new char[ idlen + 1 ];
+        std::memcpy(_value.ref.refId, id, idlen + 1);
         _type = Reference;
         _isCompound = false;
     }
     else
     {
-        char* str = new char[ id.size() + 1 ];
+        char* str = new char[ idlen + 1 ];
         delete [] _value.ref.refId;
         _value.ref.refId = str;
-        std::memcpy(_value.ref.refId, id.c_str(), id.size() + 1);
+        std::memcpy(_value.ref.refId, id, idlen + 1);
     }
 
     _value.ref.address = 0;
@@ -855,7 +874,7 @@ void SerializationInfo::getString(Pt::String& s) const
 }
 
 
-void SerializationInfo::setString(const Pt::String& value)
+void SerializationInfo::setString(const Pt::Char* value, size_t len)
 {
     if( _type == Context )
         return;
@@ -867,10 +886,10 @@ void SerializationInfo::setString(const Pt::String& value)
         _isCompound = false;
     }
 
-    size_t len = value.size() + 1;
-    _value.ustr.str = new Pt::Char[len];
-    _value.ustr.length = value.size();
-    std::char_traits<Pt::Char>::copy(_value.ustr.str, value.c_str(), len);
+    size_t size = len + 1;
+    _value.ustr.str = new Pt::Char[size];
+    _value.ustr.length = len;
+    std::char_traits<Pt::Char>::copy(_value.ustr.str, value, size);
 
     _isCompound = false;
     _type = Str;
@@ -1474,12 +1493,11 @@ void SerializationInfo::finishLoad() const
     }
 }
 
-
-SerializationInfo& SerializationInfo::addMember(const char* name)
+SerializationInfo& SerializationInfo::addMember(const char* name, size_t len)
 {
     if( _type == Context )
     {
-        this->setName(name);
+        this->setName(name, len);
         return *this;
     }
 
@@ -1496,7 +1514,7 @@ SerializationInfo& SerializationInfo::addMember(const char* name)
     _type = Struct;
 
     SerializationInfo& si = this->addChild();
-    si.setName(name);
+    si.setName(name, len);
     return si;
 }
 

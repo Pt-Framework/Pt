@@ -63,21 +63,15 @@ class IntComposer : public Pt::Composer
             _type = &type;
         }
 
-        virtual void setName(const std::string& name)
+        virtual void onSetId(const char* id, size_t len)
         { }
 
-        virtual void setId(const std::string& id)
-        { }
-
-        virtual void setTypeName(const std::string& type)
-        { }
-
-        virtual void setInt(Pt::int64_t l)
+        virtual void onSetInt(Pt::int64_t l)
         {
             *_type = static_cast<int>(l);
         }
 
-        virtual Pt::Composer* finish()
+        virtual Pt::Composer* onFinish()
         {
             return _parent;
         }
@@ -108,30 +102,24 @@ class VectorComposer : public Pt::Composer
             _type = &type;
         }
 
-        virtual void setName(const std::string& name)
+        virtual void onSetId(const char* id, size_t len)
         { }
 
-        virtual void setId(const std::string& id)
-        { }
-
-        virtual void setTypeName(const std::string& type)
-        { }
-
-        virtual Pt::Composer* beginMember(const std::string& name)
+        virtual Pt::Composer* onBeginMember(const char* name, size_t len)
         {
             _type->push_back( elem_type() );
             _deser.begin( _type->back() );
             return &_deser;
         }
 
-        virtual Pt::Composer* beginElement()
+        virtual Pt::Composer* onBeginElement()
         {
             _type->push_back( elem_type() );
             _deser.begin( _type->back() );
             return &_deser;
         }
 
-        virtual Pt::Composer* finish()
+        virtual Pt::Composer* onFinish()
         {
             return 0;
         }

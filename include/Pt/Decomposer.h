@@ -51,16 +51,25 @@ class Decomposer
         Decomposer* parent() const
         { return _parent; }
 
-        virtual void format(Formatter& formatter) = 0;
+        void format(Formatter& formatter)
+        { onFormat(formatter); }
 
-        virtual void beginFormat(Formatter& formatter) = 0;
+        void beginFormat(Formatter& formatter)
+        { onBeginFormat(formatter); }
 
-        virtual Decomposer* advanceFormat(Formatter& formatter) = 0;
+        Decomposer* advanceFormat(Formatter& formatter)
+        { return onAdvanceFormat(formatter); }
 
     protected:
         Decomposer()
         : _parent(0)
         {}
+
+        virtual void onFormat(Formatter& formatter) = 0;
+
+        virtual void onBeginFormat(Formatter& formatter) = 0;
+
+        virtual Decomposer* onAdvanceFormat(Formatter& formatter) = 0;
 
     private:
         Decomposer* _parent;
@@ -99,13 +108,13 @@ class BasicDecomposer : public Decomposer
             }
         }
 
-        virtual void format(Formatter& formatter)
+        void onFormat(Formatter& formatter)
         {
             _si << Pt::save() <<= *_type;
             _si.format(formatter);
         }
 
-        virtual void beginFormat(Formatter& formatter)
+        void onBeginFormat(Formatter& formatter)
         {
             _si << Pt::save() <<= *_type;
             _current = &_si;
@@ -113,7 +122,7 @@ class BasicDecomposer : public Decomposer
             _it = _si.beginFormat(formatter);
         }
 
-        virtual Decomposer* advanceFormat(Formatter& formatter)
+        Decomposer* onAdvanceFormat(Formatter& formatter)
         {
             if( _it == _current->end() )
             {

@@ -42,6 +42,7 @@
 #include <map>
 #include <list>
 #include <deque>
+#include <cstring>
 
 namespace Pt {
 
@@ -187,6 +188,8 @@ class PT_API SerializationInfo
         void setTypeName(const std::string& type);
 
         void setTypeName(const char* type);
+
+        void setTypeName(const char* type, size_t len);
         
         void setTypeName(const LiteralPtr<char>& type);
 
@@ -195,7 +198,9 @@ class PT_API SerializationInfo
 
         void setName(const std::string& name);
 
-        void setName(const char* type);
+        void setName(const char* name);
+
+        void setName(const char* type, size_t len);
         
         void setName(const LiteralPtr<char>& type);
 
@@ -205,6 +210,8 @@ class PT_API SerializationInfo
         void setId(const std::string& id);
 
         void setId(const char* id);
+
+        void setId(const char* id, size_t len);
 
         void getString8(std::string& s) const;
 
@@ -223,7 +230,10 @@ class PT_API SerializationInfo
 
         void getString(Pt::String& s) const;
 
-        void setString(const Pt::String& s);
+        void setString(const Pt::String& s)
+        { setString( s.c_str(), s.length() ); }
+
+        void setString(const Pt::Char* s, size_t len);
 
         const char* getBinary(size_t& length) const;
 
@@ -296,9 +306,12 @@ class PT_API SerializationInfo
         /** @brief Serialization of member data
         */
         SerializationInfo& addMember(const std::string& name)
-        { return this->addMember( name.c_str() ); }
+        { return this->addMember( name.c_str(), name.length() ); }
+
+        SerializationInfo& addMember(const char* name)
+        { return this->addMember(name, std::strlen(name)); }
         
-        SerializationInfo& addMember(const char* name);
+        SerializationInfo& addMember(const char* name, size_t len);
         
         SerializationInfo& addMember(const LiteralPtr<char>& name);
 
@@ -364,7 +377,12 @@ class PT_API SerializationInfo
 
         /** @brief Deserialization of weak pointers (parse phase)
         */
-        void setReference(const std::string& id);
+        void setReference(const std::string& id)
+        { setReference( id.c_str(), id.length() ); }
+
+        /** @brief Deserialization of weak pointers (parse phase)
+        */
+        void setReference(const char* id, size_t idlen);
 
         /** @brief Deserialization of references
         */
