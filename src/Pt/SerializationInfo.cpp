@@ -808,7 +808,8 @@ void SerializationInfo::getString(std::string& s, const TextCodec<Pt::Char, char
 
 void SerializationInfo::getString(std::string& s) const
 {
-    getString( s, Utf8Codec() );
+    Utf8Codec codec;
+    getString( s, codec );
     
     //switch(_type)
     //{
@@ -905,7 +906,8 @@ void SerializationInfo::setString(const char* value, size_t size, const TextCode
 void SerializationInfo::setString(const char* s)
 {
     // TODO: use codec from SerializationContext
-    setString( s, std::strlen(s), Utf8Codec() );
+    Utf8Codec codec;
+    setString( s, std::strlen(s), codec );
 
     //if( _type == Context )
     //    return;
@@ -930,7 +932,8 @@ void SerializationInfo::setString(const char* s)
 void SerializationInfo::setString(const std::string& s)
 {
     // TODO: use codec from SerializationContext
-    setString( s.c_str(), s.size(), Utf8Codec() );
+    Utf8Codec codec;
+    setString( s.c_str(), s.size(), codec );
 
     //if( _type == Context )
     //    return;
