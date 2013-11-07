@@ -30,6 +30,7 @@
 #define Pt_XmlRpc_Fault_h
 
 #include <Pt/XmlRpc/Api.h>
+#include <Pt/Utf8Codec.h>
 #include <Pt/SerializationInfo.h>
 #include <stdexcept>
 #include <string>
@@ -124,14 +125,14 @@ class PT_XMLRPC_API Fault : public std::exception
 inline void operator >>=(const Pt::SerializationInfo& si, Fault& fault)
 {
     si.getMember("faultCode") >>= fault._rc;
-    si.getMember("faultString") >>= fault._msg;
+    si.getMember("faultString").getString( fault._msg );
 }
 
 
 inline void operator <<=(Pt::SerializationInfo& si, const Fault& fault)
 {
     si.addMember("faultCode") <<= fault.rc();
-    si.addMember("faultString") <<= fault.text();
+    si.addMember("faultString").setString( fault.text() );
 }
 
 } // namespace XmlRpc

@@ -58,15 +58,11 @@ class PT_XMLRPC_API Formatter : public Pt::Formatter
         void addString(const char* name, const char* type,
                        const Pt::Char* value, const char* id);
 
-        void addString8(const char* name, const char* value, const char* id);
-
         void addBool(const char* name, bool value, 
                      const char* id);
 
         void addChar(const char* name, const Pt::Char& value,
                      const char* id);
-
-        void addChar8(const char* name, char value, const char* id);
 
         void addInt8(const char* name, Pt::int8_t value,
                      const char* id);

@@ -101,31 +101,7 @@ void XmlFormatter::detach()
 void XmlFormatter::addString(const char* name, const char* type,
                              const Pt::Char* value, const char* id)
 {
-    if( ! _writer )
-        return;
-
-    _writer->writeStartElement( String::widen( *name ? name : type ) );
-
-    if (*name)
-    {
-        _writer->writeAttribute(L"type", Pt::String(type));
-    }
-
-    if (*id)
-    {
-        _writer->writeAttribute(L"id", Pt::String(id));
-    }
-
-    _writer->writeCharacters(value);
-    _writer->writeEndElement();
-}
-
-
-void XmlFormatter::addString8(const char* name, const char* value, 
-                              const char* id)
-{
-    _value = value;
-    this->addString(name, "string", _value.c_str(), id);
+    addValue(name, type, value, id);
 }
 
 
@@ -133,7 +109,7 @@ void XmlFormatter::addBinary(const char* name, const char* type,
                              const char* value, size_t length, const char* id)
 {
     convert(_value, std::string(value, length));
-    this->addString(name, type, _value.c_str(), id);
+    this->addValue(name, type, _value.c_str(), id);
 }
 
 
@@ -141,7 +117,7 @@ void XmlFormatter::addBool(const char* name, bool value,
                            const char* id)
 {
     convert(_value, value);
-    this->addString(name, "bool", _value.c_str(), id);
+    this->addValue(name, "bool", _value.c_str(), id);
 }
 
 
@@ -150,15 +126,7 @@ void XmlFormatter::addChar(const char* name, const Pt::Char& value,
 {
     _value.clear();
     _value += value;
-    this->addString(name, "char", _value.c_str(), id);
-}
-
-
-void XmlFormatter::addChar8(const char* name, char value, const char* id)
-{
-    _value.clear();
-    _value += Pt::Char(value);
-    this->addString(name, "char", _value.c_str(), id);
+    this->addValue(name, "char", _value.c_str(), id);
 }
 
 
@@ -184,7 +152,7 @@ void XmlFormatter::addInt64(const char* name, Pt::int64_t value,
                           const char* id)
 {
     convert(_value, value);
-    this->addString(name, "int", _value.c_str(), id);
+    this->addValue(name, "int", _value.c_str(), id);
 }
 
 
@@ -210,7 +178,7 @@ void XmlFormatter::addUInt64(const char* name, Pt::uint64_t value,
                              const char* id)
 {
     convert(_value, value);
-    this->addString(name, "unsigned", _value.c_str(), id);
+    this->addValue(name, "unsigned", _value.c_str(), id);
 }
 
 
@@ -218,7 +186,7 @@ void XmlFormatter::addFloat(const char* name, float value,
                             const char* id)
 {
     convert(_value, value);
-    this->addString(name, "float", _value.c_str(), id);
+    this->addValue(name, "float", _value.c_str(), id);
 }
 
 
@@ -226,7 +194,7 @@ void XmlFormatter::addDouble(const char* name, double value,
                             const char* id)
 {
     convert(_value, value);
-    this->addString(name, "double", _value.c_str(), id);
+    this->addValue(name, "double", _value.c_str(), id);
 }
 
 
@@ -234,7 +202,30 @@ void XmlFormatter::addLongDouble(const char* name, long double value,
                                  const char* id)
 {
     convert(_value, value);
-    this->addString(name, "long double", _value.c_str(), id);
+    this->addValue(name, "long double", _value.c_str(), id);
+}
+
+
+void XmlFormatter::addValue(const char* name, const char* type,
+                            const Pt::Char* value, const char* id)
+{
+    if( ! _writer )
+        return;
+
+    _writer->writeStartElement( String::widen( *name ? name : type ) );
+
+    if (*name)
+    {
+        _writer->writeAttribute(L"type", Pt::String(type));
+    }
+
+    if (*id)
+    {
+        _writer->writeAttribute(L"id", Pt::String(id));
+    }
+
+    _writer->writeCharacters(value);
+    _writer->writeEndElement();
 }
 
 
@@ -371,6 +362,40 @@ bool XmlFormatter::parseSome()
     return _composer == 0 ;
 }
 
+enum ValueType
+{
+    Void = 0,
+    Int = 1,
+    Unsigned = 2,
+    String = 3,
+    Bool = 4,
+    Char = 5,
+    Float = 6,
+    Double = 7,
+    LongDouble = 8
+};
+
+int toValueType(const Pt::String& str)
+{
+    if(str == "int")
+        return Int;
+    else if(str == "unsigned")
+        return Unsigned;
+    else if(str == "string")
+        return String;
+    else if(str == "bool")
+        return Bool;
+    else if(str == "char")
+        return Char;
+    else if(str == "float")
+        return Float;
+    else if(str == "double")
+        return Double;
+    else if(str == "long double")
+        return LongDouble;
+
+    return Void;
+}
 
 void XmlFormatter::OnBegin(const Node& node)
 {
@@ -396,6 +421,7 @@ void XmlFormatter::OnBegin(const Node& node)
             else
             {
                 _composer->setTypeName(type->value().narrow());
+                _valueType = toValueType( type->value() );
             }
 
             AttributeList::ConstIterator refId = se.attributes().find(L"ref");
@@ -476,50 +502,49 @@ void XmlFormatter::OnMemberBegin(const Node& node)
     }
 }
 
-void setValue(Pt::Composer& composer, const Pt::String& value) //, int valueType)
+
+void setValue(Pt::Composer& composer, const Pt::String& value, int valueType)
 {
-	//TODO: also look at the type, which is held in the _valueType int for
-  //      primitive types
+  switch(valueType)
+  {
+      case Bool:
+	        if(value == L"yes" || value == L"YES" ||
+	           value == L"on" || value == L"ON" ||
+	           value == L"true" || value == L"TRUE" )
+	        {
+	            composer.setBool(true);
+	        }
+	        else if(value == L"no" || value == L"NO" ||
+	                value == L"off" || value == L"OFF" ||
+	                value == L"false" || value == L"FALSE" )
+	        {
+	            composer.setBool(false);
+	        }
+          else
+              throw SerializationError("invalid bool");
 
-	if(value == L"yes" || value == L"YES" ||
-	   value == L"on" || value == L"ON" ||
-	   value == L"true" || value == L"TRUE" )
-	{
-	    composer.setBool(true);
-	}
-	else if(value == L"no" || value == L"NO" ||
-	        value == L"off" || value == L"OFF" ||
-	        value == L"false" || value == L"FALSE" )
-	{
-	    composer.setBool(false);
-	}
-	else
-	{
-		unsigned dot = 0;
-		unsigned digits = 0;
-		Pt::String::const_iterator it;
-		for( it = value.begin(); it != value.end(); ++it )
-		{
-			if(*it == '.')
-				dot++;
-			else if(Pt::isdigit(*it))
-				digits++;
-		}
+          break;
 
-		if(dot == 1 && digits >= 1 && (value.length() - 1) == digits )
-		{
-			composer.setDouble( convert<double>(value) );
-		}
-		else if(value.length() == digits && digits >= 1)
-		{
-			composer.setInt( convert<Pt::int32_t>(value) );
-		}
-		else
-		{
-			composer.setString(value);
-		}
-	}
+      case Int:
+          composer.setInt( convert<Pt::int32_t>(value) );
+          break;
+
+      case Unsigned:
+          composer.setUInt( convert<Pt::uint32_t>(value) );
+          break;
+      
+      case Float:
+      case Double:
+          composer.setFloat( convert<double>(value) );
+          break;
+      
+      default:
+      case String:
+          composer.setString(value);
+          break;
+  }
 }
+
 
 void XmlFormatter::OnValue(const Node& node)
 {
@@ -534,7 +559,7 @@ void XmlFormatter::OnValue(const Node& node)
 
         case Node::EndElement:
         {
-            setValue(*_composer, _value);
+            setValue(*_composer, _value, _valueType);
 
             const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
             this->finishXmlMember(ee);
@@ -586,6 +611,7 @@ void XmlFormatter::beginXmlMember(const Xml::StartElement& se)
     if( type != se.attributes().end() )
     {
         _composer->setTypeName(type->value().narrow());
+        _valueType = toValueType( type->value() );
     }
 
     AttributeList::ConstIterator refId = se.attributes().find(L"ref");

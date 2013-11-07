@@ -91,21 +91,14 @@ class PT_XML_API XmlFormatter : public Formatter
         // inherit docs
         void addString(const char*, const char* type,
                        const Pt::Char* value, const char* id);
-        
-        // inherit docs
-        void addString8(const char* name, const char* value, 
-                        const char* id);
-        
+
         // inherit docs
         void addBool(const char* name, bool value,
                      const char* id);
 
+        // inherit docs
         void addChar(const char* name, const Pt::Char& value,
                      const char* id);
-
-        // inherit docs
-        void addChar8(const char* name, char value,
-                      const char* id);
 
         // inherit docs
         void addInt8(const char* name, Pt::int8_t value, const char* id);
@@ -185,6 +178,10 @@ class PT_XML_API XmlFormatter : public Formatter
         virtual void parse();
 
     protected:
+        //! @internal
+        void addValue(const char*, const char* type,
+                      const Pt::Char* value, const char* id);
+
         //! @internal
         void OnBegin(const Node& node);
 

@@ -33,6 +33,7 @@
 #include <Pt/Types.h>
 #include <Pt/LiteralPtr.h>
 #include <Pt/FixupInfo.h>
+#include <Pt/TextCodec.h>
 #include <Pt/SerializationError.h>
 #include <Pt/SerializationSurrogate.h>
 #include <typeinfo>
@@ -61,9 +62,9 @@ class PT_API SerializationInfo
             Context    = 1,
             Reference  = 2,
             Boolean    = 3,
-            Char8      = 4,
+            //Char8      = 4,
             Char       = 5,
-            Str8       = 6,
+            //Str8       = 6,
             Str        = 7,
             Int8       = 8,
             Int16      = 9,
@@ -213,20 +214,22 @@ class PT_API SerializationInfo
 
         void setId(const char* id, size_t len);
 
-        void getString8(std::string& s) const;
+        void getString(std::string& s, const TextCodec<Pt::Char, char>& codec) const;
 
-        void setString8(const char* s);
+        void getString(std::string& s) const;
 
-        void setString8(const std::string& s);
+        void setString(const char* s);
+
+        void setString(const char* s, size_t len, const TextCodec<Pt::Char, char>& codec);
+
+        void setString(const std::string& s);
+
+        void setString(const std::string& str, const TextCodec<Pt::Char, char>& codec)
+        { setString(str.c_str(), str.size(), codec); }
 
         /** @internal DEPRECATED Returns the content as string.
         */
-        Pt::String toString() const
-        {
-            Pt::String value;
-            this->getString(value);
-            return value;
-        }
+        Pt::String toString() const;
 
         void getString(Pt::String& s) const;
 
@@ -239,9 +242,9 @@ class PT_API SerializationInfo
 
         void setBinary(const char* data, size_t length);
 
-        void getChar8(char c) const;
+        void getChar(char c) const;
 
-        void setChar8(char c);
+        void setChar(char c);
 
         void getChar(Pt::Char& c) const;
 
@@ -466,7 +469,7 @@ class PT_API SerializationInfo
             long long l;
             unsigned long long ul;
             long double f;
-            char* cstr;
+            //char* cstr;
             StrValue ustr;
             BlobValue blob;
             Ref ref;
@@ -914,7 +917,7 @@ inline void operator <<=(SerializationInfo& si, char ch)
 
 inline void operator <<=(SerializationInfo& si, const char* str)
 {
-    si.setString8(str);
+    si.setString(str);
     //si.setTypeName( Pt::LiteralPtr<char>("string") );
 }
 
@@ -924,9 +927,7 @@ inline void operator <<=(SerializationInfo& si, const char* str)
 */
 inline void operator >>=(const SerializationInfo& si, std::string& str)
 {
-    Pt::String tmp;
-    si.getString(tmp);
-    str = tmp.narrow();
+    si.getString(str);
 }
 
 /** @brief Serializes a std::string
@@ -935,7 +936,7 @@ inline void operator >>=(const SerializationInfo& si, std::string& str)
 */
 inline void operator <<=(SerializationInfo& si, const std::string& str)
 {
-    si.setString8( str.c_str() );
+    si.setString( str.c_str() );
     //si.setTypeName( Pt::LiteralPtr<char>("std::string") );
 }
 

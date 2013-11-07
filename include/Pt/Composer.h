@@ -88,8 +88,8 @@ class Composer
         void setUInt(Pt::int64_t value)
         { onSetUInt(value); }
 
-        void setDouble(double value)
-        { onSetDouble(value); }
+        void setFloat(double value)
+        { onSetFloat(value); }
 
         void setReference(const std::string& id)
         { onSetReference(id.c_str(), id.size()); }
@@ -128,10 +128,10 @@ class Composer
         virtual void onSetInt(Pt::int64_t value)
         { throw SerializationError("unexpected integer value"); }
         
-        virtual void onSetUInt(Pt::int64_t value)
+        virtual void onSetUInt(Pt::uint64_t value)
         { throw SerializationError("unexpected unsigned value"); }
 
-        virtual void onSetDouble(double value)
+        virtual void onSetFloat(double value)
         { throw SerializationError("unexpected float value"); }
 
         virtual void onSetReference(const char* id, size_t len)
@@ -215,7 +215,7 @@ class BasicComposer : public Composer
             _current->setUInt64(value);
         }
 
-        void onSetDouble(double value)
+        void onSetFloat(double value)
         {
             _current->setDouble(value);
         }

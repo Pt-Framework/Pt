@@ -195,8 +195,8 @@ void SettingsTest::Comment()
     Pt::Settings settings;
     settings.load(ts);
 
-	std::string a;
-	settings.getMember("a") >>= a;
+    Pt::String a;
+    settings.getMember("a") >>= a;
     PT_UNIT_ASSERT("1#;2" == a );
     
     int b = 0;
@@ -404,28 +404,28 @@ void SettingsTest::Section()
 
     PT_UNIT_ASSERT( settings.findMember("a.b.c.d") );
     
-    std::string v;
+    int v;
     settings.findMember("a.b.c.d")->getMember("v") >>= v;
-    PT_UNIT_ASSERT( v == "1");
+    PT_UNIT_ASSERT( v == 1);
     
-    std::string u;
+    int u;
     settings.findMember("a.b.c.d")->getMember("u") >>= u;
-    PT_UNIT_ASSERT( u == "2");
+    PT_UNIT_ASSERT( u == 2);
 
     PT_UNIT_ASSERT( settings.findMember("x.y.z.u") );
     
     settings.findMember("x.y.z.u")->getMember("v") >>= v;
-    PT_UNIT_ASSERT( v == "3");
+    PT_UNIT_ASSERT( v == 3);
     
-    std::string w;
+    int w;
     settings.findMember("x.y.z.u")->getMember("w") >>= w;
-    PT_UNIT_ASSERT( w == "4");
+    PT_UNIT_ASSERT( w == 4);
 
     PT_UNIT_ASSERT( settings.findMember("e.f.g.u") );
     
     settings.findMember("e.f.g.u")->getMember("v") >>= v;
-    PT_UNIT_ASSERT( v == "5");
+    PT_UNIT_ASSERT( v == 5);
     
     settings.findMember("e.f.g.u")->getMember("w") >>= w;
-    PT_UNIT_ASSERT( w == "6");
+    PT_UNIT_ASSERT( w == 6);
 }

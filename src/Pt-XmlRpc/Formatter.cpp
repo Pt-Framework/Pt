@@ -177,18 +177,6 @@ void Formatter::addString(const char* name, const char* type,
 }
 
 
-void Formatter::addString8(const char* name, const char* value, const char* id)
-{
-    _str.assign(value);
-    
-    _os->write(XMLRPC_VALUE, sizeof(XMLRPC_VALUE)/sizeof(Char));
-    _os->write(XMLRPC_STRING, sizeof(XMLRPC_STRING)/sizeof(Char));
-    Xml::xmlEncode(*_os, _str);
-    _os->write(XMLRPC_STRING_END, sizeof(XMLRPC_STRING_END)/sizeof(Char));
-    _os->write(XMLRPC_VALUE_END, sizeof(XMLRPC_VALUE_END)/sizeof(Char));
-}
-
-
 void Formatter::addBool(const char* name, bool value, 
                         const char* id)
 {
@@ -205,19 +193,6 @@ void Formatter::addBool(const char* name, bool value,
 void Formatter::addChar(const char* name, const Pt::Char& value,
                         const char* id)
 {
-    _os->write(XMLRPC_VALUE, sizeof(XMLRPC_VALUE)/sizeof(Char));
-    _os->write(XMLRPC_STRING, sizeof(XMLRPC_STRING)/sizeof(Char));
-    Xml::xmlEncode(*_os, &value, 1);
-    _os->write(XMLRPC_STRING_END, sizeof(XMLRPC_STRING_END)/sizeof(Char));
-    _os->write(XMLRPC_VALUE_END, sizeof(XMLRPC_VALUE_END)/sizeof(Char));
-}
-
-
-void Formatter::addChar8(const char* name, char ch,
-                         const char* id)
-{
-    Pt::Char value(ch);
-
     _os->write(XMLRPC_VALUE, sizeof(XMLRPC_VALUE)/sizeof(Char));
     _os->write(XMLRPC_STRING, sizeof(XMLRPC_STRING)/sizeof(Char));
     Xml::xmlEncode(*_os, &value, 1);
@@ -813,7 +788,7 @@ bool Formatter::advance(const Pt::Xml::Node& node)
                 if( ! ok )
                     throwSerializationError();
 
-                _composer->setDouble(number);
+                _composer->setFloat(number);
                 log_debug("-> parsed double " << number);
                 _state = OnScalar;
             }

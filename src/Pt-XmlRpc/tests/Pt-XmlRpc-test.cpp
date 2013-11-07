@@ -539,14 +539,14 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             Pt::XmlRpc::RemoteProcedure<std::string, std::string> echo(client, "echoString");
             echo.finished() += Pt::slot(*this, &PtXmlRpcTest::onStringEchoFinished);
 
-            echo.begin("\xc3\xaf\xc2\xbb\xc2\xbf'\"&<> foo?");
+            echo.begin("Hello'\"&<> foo?");
 
             _loop->run();
         }
 
         void onStringEchoFinished(const Pt::XmlRpc::Result<std::string>& r)
         {
-            PT_UNIT_ASSERT_EQUALS(r.get(), "\xc3\xaf\xc2\xbb\xc2\xbf'\"&<> foo?");
+            PT_UNIT_ASSERT_EQUALS(r.get(), "Hello'\"&<> foo?");
 
             _loop->exit();
         }

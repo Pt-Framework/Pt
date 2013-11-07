@@ -46,23 +46,28 @@ class Formatter
         virtual ~Formatter()
         { }
 
+        /** @brief Formats a string value.
+
+            Serialization:
+                Surrogate: calls addString with typename set to actual object, like Pt::DateTime
+                Formatter: can be set up to format string values differently, depending on typename
+
+            Deserialization:
+                Parser: can be set up to to report special types as string
+                Surrogate: builds actual object like Pt::DateTime from string, in which
+                           case the typename is not string, but the format specific one
+        */
         virtual void addString(const char* name, const char* type,
                                const Pt::Char* value, const char* id) = 0;
 
         virtual void addBinary(const char* name, const char* type,
                                const char* value, size_t length, const char* id) = 0;
 
-        virtual void addString8(const char* name, const char* value, 
-                                const char* id) = 0;
-
         virtual void addBool(const char* name, bool value,
                              const char* id) = 0;
 
         virtual void addChar(const char* name, const Pt::Char& value,
                              const char* id) = 0;
-
-        virtual void addChar8(const char* name, char value,
-                              const char* id) = 0;
 
         virtual void addInt8(const char* name, Pt::int8_t value,
                              const char* id) = 0;
