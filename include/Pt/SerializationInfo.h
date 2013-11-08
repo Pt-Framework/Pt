@@ -62,35 +62,23 @@ class PT_API SerializationInfo
             Context    = 1,
             Reference  = 2,
             Boolean    = 3,
-            //Char8      = 4,
-            Char       = 5,
-            //Str8       = 6,
-            Str        = 7,
-            Int8       = 8,
-            Int16      = 9,
-            Int32      = 10,
-            Int64      = 11,
-            UInt8      = 12,
-            UInt16     = 13,
-            UInt32     = 14,
-            UInt64     = 15,
-            Float      = 16,
-            Double     = 17,
-            LongDouble = 18,
-            Binary     = 19,
-            Struct     = 20,
-            Sequence   = 21
+            Char       = 4,
+            Str        = 5,
+            Int8       = 6,
+            Int16      = 7,
+            Int32      = 8,
+            Int64      = 9,
+            UInt8      = 10,
+            UInt16     = 11,
+            UInt32     = 12,
+            UInt64     = 13,
+            Float      = 14,
+            Double     = 15,
+            LongDouble = 16,
+            Binary     = 17,
+            Struct     = 18,
+            Sequence   = 19
         };
-
-        // type info layout
-        // 0 - public / private
-        // 1 - scalar / compound
-        // 2 - type id
-        // 3 - type id
-        // 4 - type id
-        // 5 - type id
-        // 6 - type id
-        // 7 - type id
 
         class Iterator;
         class ConstIterator;
@@ -469,7 +457,6 @@ class PT_API SerializationInfo
             long long l;
             unsigned long long ul;
             long double f;
-            //char* cstr;
             StrValue ustr;
             BlobValue blob;
             Ref ref;
@@ -489,6 +476,16 @@ class PT_API SerializationInfo
         bool _isAlloc;       // TODO: join into bitfield
         Pt::uint8_t _type;   // TODO: join into bitfield
         Pt::uint8_t _flags;
+
+        // TODO: possible type info layout
+        // 0 - public / private
+        // 1 - scalar / compound
+        // 2 - type id
+        // 3 - type id
+        // 4 - type id
+        // 5 - type id
+        // 6 - type id
+        // 7 - type id
 };
 
 template <typename T>

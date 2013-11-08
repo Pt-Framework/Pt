@@ -55,75 +55,79 @@ class PT_XMLRPC_API Formatter : public Pt::Formatter
 
         void attach(std::basic_ostream<Char>& os);
 
-        void addString(const char* name, const char* type,
-                       const Pt::Char* value, const char* id);
+        /** @internal @brief onParse()onParseSome() should be implemented 
+            instead of this method.
+        */
+        bool advance(const Pt::Xml::Node& node);
 
-        void addBool(const char* name, bool value, 
-                     const char* id);
+    protected:
+        void onAddString(const char* name, const char* type,
+                         const Pt::Char* value, const char* id);
 
-        void addChar(const char* name, const Pt::Char& value,
-                     const char* id);
-
-        void addInt8(const char* name, Pt::int8_t value,
-                     const char* id);
-        
-        void addInt16(const char* name, Pt::int16_t value,
-                      const char* id);
-        
-        void addInt32(const char* name, Pt::int32_t value,
-                      const char* id);
-        
-        void addInt64(const char* name, Pt::int64_t value,
-                      const char* id);
-
-        void addUInt8(const char* name, Pt::uint8_t value, const char* id);
-        
-        void addUInt16(const char* name, Pt::uint16_t value,  const char* id);
-        
-        void addUInt32(const char* name, Pt::uint32_t value, const char* id);
-        
-        void addUInt64(const char* name, Pt::uint64_t value, const char* id);
-
-        void addFloat(const char* name, float value, 
-                      const char* id);
-
-        void addDouble(const char* name, double value, 
+        void onAddBool(const char* name, bool value, 
                        const char* id);
 
-        void addLongDouble(const char* name, long double value, 
-                           const char* id);
+        void onAddChar(const char* name, const Pt::Char& value,
+                       const char* id);
 
-        void addBinary(const char* name, const char* type,
-                       const char* value, size_t length, const char* id);
-
-        void addReference(const char* name, const char* id);
-
-        void beginArray(const char* name, const char* type,
+        void onAddInt8(const char* name, Pt::int8_t value,
+                       const char* id);
+        
+        void onAddInt16(const char* name, Pt::int16_t value,
+                        const char* id);
+        
+        void onAddInt32(const char* name, Pt::int32_t value,
+                        const char* id);
+        
+        void onAddInt64(const char* name, Pt::int64_t value,
                         const char* id);
 
-        virtual void beginElement();
+        void onAddUInt8(const char* name, Pt::uint8_t value, const char* id);
+        
+        void onAddUInt16(const char* name, Pt::uint16_t value,  const char* id);
+        
+        void onAddUInt32(const char* name, Pt::uint32_t value, const char* id);
+        
+        void onAddUInt64(const char* name, Pt::uint64_t value, const char* id);
 
-        virtual void finishElement();
+        void onAddFloat(const char* name, float value, 
+                        const char* id);
 
-        void finishArray();
-
-        void beginStruct(const char* name, const char* type,
+        void onAddDouble(const char* name, double value, 
                          const char* id);
 
-        void beginMember(const char* name);
+        void onAddLongDouble(const char* name, long double value, 
+                             const char* id);
 
-        void finishMember();
+        void onAddBinary(const char* name, const char* type,
+                         const char* value, size_t length, const char* id);
 
-        void finishStruct();
+        void onAddReference(const char* name, const char* id);
 
-        virtual void beginParse(Composer& composer);
+        void onBeginArray(const char* name, const char* type,
+                          const char* id);
 
-        virtual bool parseSome();
+        virtual void onBeginElement();
 
-        virtual void parse();
+        virtual void onFinishElement();
 
-        // @internal
-        bool advance(const Pt::Xml::Node& node);
+        void onFinishArray();
+
+        void onBeginStruct(const char* name, const char* type,
+                           const char* id);
+
+        void onBeginMember(const char* name);
+
+        void onFinishMember();
+
+        void onFinishStruct();
+
+    protected:
+        void onBeginParse(Composer& composer);
+
+        bool onParseSome();
+
+        void onParse();
 
     private:
         enum State

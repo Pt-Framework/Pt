@@ -98,31 +98,31 @@ void XmlFormatter::detach()
 }
 
 
-void XmlFormatter::addString(const char* name, const char* type,
-                             const Pt::Char* value, const char* id)
+void XmlFormatter::onAddString(const char* name, const char* type,
+                               const Pt::Char* value, const char* id)
 {
     addValue(name, type, value, id);
 }
 
 
-void XmlFormatter::addBinary(const char* name, const char* type,
-                             const char* value, size_t length, const char* id)
+void XmlFormatter::onAddBinary(const char* name, const char* type,
+                               const char* value, size_t length, const char* id)
 {
     convert(_value, std::string(value, length));
     this->addValue(name, type, _value.c_str(), id);
 }
 
 
-void XmlFormatter::addBool(const char* name, bool value,
-                           const char* id)
+void XmlFormatter::onAddBool(const char* name, bool value,
+                             const char* id)
 {
     convert(_value, value);
     this->addValue(name, "bool", _value.c_str(), id);
 }
 
 
-void XmlFormatter::addChar(const char* name, const Pt::Char& value,
-                           const char* id)
+void XmlFormatter::onAddChar(const char* name, const Pt::Char& value,
+                             const char* id)
 {
     _value.clear();
     _value += value;
@@ -130,76 +130,76 @@ void XmlFormatter::addChar(const char* name, const Pt::Char& value,
 }
 
 
-void XmlFormatter::addInt8(const char* name, Pt::int8_t value, const char* id)
+void XmlFormatter::onAddInt8(const char* name, Pt::int8_t value, const char* id)
 {
-	this->addInt64(name, value, id);
+	this->onAddInt64(name, value, id);
 }
 
 
-void XmlFormatter::addInt16(const char* name, Pt::int16_t value, const char* id)
+void XmlFormatter::onAddInt16(const char* name, Pt::int16_t value, const char* id)
 {
-	this->addInt64(name, value, id);
+	this->onAddInt64(name, value, id);
 }    
 
 
-void XmlFormatter::addInt32(const char* name, Pt::int32_t value, const char* id)
+void XmlFormatter::onAddInt32(const char* name, Pt::int32_t value, const char* id)
 {
-	this->addInt64(name, value, id);
+	this->onAddInt64(name, value, id);
 }
 
 
-void XmlFormatter::addInt64(const char* name, Pt::int64_t value,
-                          const char* id)
+void XmlFormatter::onAddInt64(const char* name, Pt::int64_t value,
+                              const char* id)
 {
     convert(_value, value);
     this->addValue(name, "int", _value.c_str(), id);
 }
 
 
-void XmlFormatter::addUInt8(const char* name, Pt::uint8_t value, const char* id)
+void XmlFormatter::onAddUInt8(const char* name, Pt::uint8_t value, const char* id)
 {
-	this->addUInt64(name, value, id);
+	this->onAddUInt64(name, value, id);
 }
 
 
-void XmlFormatter::addUInt16(const char* name, Pt::uint16_t value, const char* id)
+void XmlFormatter::onAddUInt16(const char* name, Pt::uint16_t value, const char* id)
 {
-	this->addUInt64(name, value, id);
+	this->onAddUInt64(name, value, id);
 }    
 
 
-void XmlFormatter::addUInt32(const char* name, Pt::uint32_t value, const char* id)
+void XmlFormatter::onAddUInt32(const char* name, Pt::uint32_t value, const char* id)
 {
-	this->addUInt64(name, value, id);
+	this->onAddUInt64(name, value, id);
 }
 
 
-void XmlFormatter::addUInt64(const char* name, Pt::uint64_t value,
-                             const char* id)
+void XmlFormatter::onAddUInt64(const char* name, Pt::uint64_t value,
+                               const char* id)
 {
     convert(_value, value);
     this->addValue(name, "unsigned", _value.c_str(), id);
 }
 
 
-void XmlFormatter::addFloat(const char* name, float value,
-                            const char* id)
+void XmlFormatter::onAddFloat(const char* name, float value,
+                              const char* id)
 {
     convert(_value, value);
     this->addValue(name, "float", _value.c_str(), id);
 }
 
 
-void XmlFormatter::addDouble(const char* name, double value,
-                            const char* id)
+void XmlFormatter::onAddDouble(const char* name, double value,
+                              const char* id)
 {
     convert(_value, value);
     this->addValue(name, "double", _value.c_str(), id);
 }
 
 
-void XmlFormatter::addLongDouble(const char* name, long double value,
-                                 const char* id)
+void XmlFormatter::onAddLongDouble(const char* name, long double value,
+                                   const char* id)
 {
     convert(_value, value);
     this->addValue(name, "long double", _value.c_str(), id);
@@ -229,7 +229,7 @@ void XmlFormatter::addValue(const char* name, const char* type,
 }
 
 
-void XmlFormatter::addReference(const char* name, const char* id)
+void XmlFormatter::onAddReference(const char* name, const char* id)
 {
     if( ! _writer )
         return;
@@ -240,8 +240,8 @@ void XmlFormatter::addReference(const char* name, const char* id)
 }
 
 
-void XmlFormatter::beginArray(const char* name, const char* type,
-                              const char* id)
+void XmlFormatter::onBeginArray(const char* name, const char* type,
+                                const char* id)
 {
     if( ! _writer )
         return;
@@ -260,17 +260,17 @@ void XmlFormatter::beginArray(const char* name, const char* type,
 }
 
 
-void XmlFormatter::beginElement()
+void XmlFormatter::onBeginElement()
 {
 }
 
 
-void XmlFormatter::finishElement()
+void XmlFormatter::onFinishElement()
 {
 }
 
 
-void XmlFormatter::finishArray()
+void XmlFormatter::onFinishArray()
 {
     if( ! _writer )
         return;
@@ -279,8 +279,8 @@ void XmlFormatter::finishArray()
 }
 
 
-void XmlFormatter::beginStruct(const char* name, const char* type,
-                               const char* id)
+void XmlFormatter::onBeginStruct(const char* name, const char* type,
+                                 const char* id)
 {
     if( ! _writer )
         return;
@@ -299,17 +299,17 @@ void XmlFormatter::beginStruct(const char* name, const char* type,
 }
 
 
-void XmlFormatter::beginMember(const char*)
+void XmlFormatter::onBeginMember(const char*)
 {
 }
 
 
-void XmlFormatter::finishMember()
+void XmlFormatter::onFinishMember()
 {
 }
 
 
-void XmlFormatter::finishStruct()
+void XmlFormatter::onFinishStruct()
 {
     if( ! _writer )
         return;
@@ -318,14 +318,14 @@ void XmlFormatter::finishStruct()
 }
 
 
-void XmlFormatter::beginParse(Composer& comp)
+void XmlFormatter::onBeginParse(Composer& comp)
 {
     _composer = &comp;
     _processNode = &XmlFormatter::OnBegin;
 }
 
 
-void XmlFormatter::parse()
+void XmlFormatter::onParse()
 {
     assert(_composer);
 
@@ -343,7 +343,7 @@ void XmlFormatter::parse()
 }
 
 
-bool XmlFormatter::parseSome()
+bool XmlFormatter::onParseSome()
 {
     assert(_composer);
 

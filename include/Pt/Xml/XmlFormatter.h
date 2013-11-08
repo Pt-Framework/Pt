@@ -89,93 +89,94 @@ class PT_XML_API XmlFormatter : public Formatter
         void detach();
 
         // inherit docs
-        void addString(const char*, const char* type,
-                       const Pt::Char* value, const char* id);
+        void onAddString(const char*, const char* type,
+                         const Pt::Char* value, const char* id);
 
         // inherit docs
-        void addBool(const char* name, bool value,
-                     const char* id);
-
-        // inherit docs
-        void addChar(const char* name, const Pt::Char& value,
-                     const char* id);
-
-        // inherit docs
-        void addInt8(const char* name, Pt::int8_t value, const char* id);
-        
-        // inherit docs
-        void addInt16(const char* name, Pt::int16_t value,  const char* id);
-        
-        // inherit docs
-        void addInt32(const char* name, Pt::int32_t value, const char* id);
-        
-        // inherit docs
-        void addInt64(const char* name, Pt::int64_t value, const char* id);
-
-        // inherit docs
-        void addUInt8(const char* name, Pt::uint8_t value, const char* id);
-        
-        // inherit docs
-        void addUInt16(const char* name, Pt::uint16_t value,  const char* id);
-        
-        // inherit docs
-        void addUInt32(const char* name, Pt::uint32_t value, const char* id);
-        
-        // inherit docs
-        void addUInt64(const char* name, Pt::uint64_t value, const char* id);
-
-        // inherit docs
-        void addFloat(const char* name, float value,
-                      const char* id);
-
-        // inherit docs
-        void addDouble(const char* name, double value,
+        void onAddBool(const char* name, bool value,
                        const char* id);
+
+        // inherit docs
+        void onAddChar(const char* name, const Pt::Char& value,
+                       const char* id);
+
+        // inherit docs
+        void onAddInt8(const char* name, Pt::int8_t value, const char* id);
         
         // inherit docs
-        void addLongDouble(const char* name, long double value,
-                           const char* id);
+        void onAddInt16(const char* name, Pt::int16_t value,  const char* id);
         
         // inherit docs
-        void addBinary(const char* name, const char* type,
-                       const char* value, size_t length, const char* id);
+        void onAddInt32(const char* name, Pt::int32_t value, const char* id);
         
         // inherit docs
-        void addReference(const char* name, const char* value);
+        void onAddInt64(const char* name, Pt::int64_t value, const char* id);
+
+        // inherit docs
+        void onAddUInt8(const char* name, Pt::uint8_t value, const char* id);
         
         // inherit docs
-        void beginArray(const char* name, const char* type,
+        void onAddUInt16(const char* name, Pt::uint16_t value,  const char* id);
+        
+        // inherit docs
+        void onAddUInt32(const char* name, Pt::uint32_t value, const char* id);
+        
+        // inherit docs
+        void onAddUInt64(const char* name, Pt::uint64_t value, const char* id);
+
+        // inherit docs
+        void onAddFloat(const char* name, float value,
                         const char* id);
 
         // inherit docs
-        void beginElement();
-        
-        // inherit docs
-        void finishElement();
-        
-        // inherit docs
-        void finishArray();
-        
-        // inherit docs
-        void beginStruct(const char* name, const char* type,
+        void onAddDouble(const char* name, double value,
                          const char* id);
         
         // inherit docs
-        void beginMember(const char* name);
+        void onAddLongDouble(const char* name, long double value,
+                             const char* id);
         
         // inherit docs
-        void finishMember();
+        void onAddBinary(const char* name, const char* type,
+                         const char* value, size_t length, const char* id);
         
         // inherit docs
-        void finishStruct();
-
-        virtual void beginParse(Composer& composer);
+        void onAddReference(const char* name, const char* value);
+        
+        // inherit docs
+        void onBeginArray(const char* name, const char* type,
+                          const char* id);
 
         // inherit docs
-        virtual bool parseSome();
+        void onBeginElement();
+        
+        // inherit docs
+        void onFinishElement();
+        
+        // inherit docs
+        void onFinishArray();
+        
+        // inherit docs
+        void onBeginStruct(const char* name, const char* type,
+                           const char* id);
+        
+        // inherit docs
+        void onBeginMember(const char* name);
+        
+        // inherit docs
+        void onFinishMember();
+        
+        // inherit docs
+        void onFinishStruct();
 
         // inherit docs
-        virtual void parse();
+        void onBeginParse(Composer& composer);
+
+        // inherit docs
+        bool onParseSome();
+
+        // inherit docs
+        void onParse();
 
     protected:
         //! @internal

@@ -57,80 +57,183 @@ class Formatter
                 Surrogate: builds actual object like Pt::DateTime from string, in which
                            case the typename is not string, but the format specific one
         */
-        virtual void addString(const char* name, const char* type,
-                               const Pt::Char* value, const char* id) = 0;
+        void addString(const char* name, const char* type,
+                       const Pt::Char* value, const char* id)
+        { onAddString(name, type, value, id); }
 
-        virtual void addBinary(const char* name, const char* type,
-                               const char* value, size_t length, const char* id) = 0;
+        void addBinary(const char* name, const char* type,
+                       const char* value, size_t length, const char* id)
+        { onAddBinary(name, type, value, length, id); }
 
-        virtual void addBool(const char* name, bool value,
-                             const char* id) = 0;
+        void addBool(const char* name, bool value,
+                     const char* id)
+        { onAddBool(name, value, id); }
 
-        virtual void addChar(const char* name, const Pt::Char& value,
-                             const char* id) = 0;
+        void addChar(const char* name, const Pt::Char& value,
+                     const char* id)
+        { onAddChar(name, value, id); }
 
-        virtual void addInt8(const char* name, Pt::int8_t value,
-                             const char* id) = 0;
+        void addInt8(const char* name, Pt::int8_t value,
+                     const char* id)
+        { onAddInt8(name, value, id); }
 
-        virtual void addInt16(const char* name, Pt::int16_t value,
-                              const char* id) = 0;
+        void addInt16(const char* name, Pt::int16_t value,
+                      const char* id)
+        { onAddInt16(name, value, id); }
 
-        virtual void addInt32(const char* name, Pt::int32_t value,
-                              const char* id) = 0;
+        void addInt32(const char* name, Pt::int32_t value,
+                      const char* id)
+        { onAddInt32(name, value, id); }
 
-        virtual void addInt64(const char* name, Pt::int64_t value,
-                              const char* id) = 0;
+        void addInt64(const char* name, Pt::int64_t value,
+                      const char* id)
+        { onAddInt64(name, value, id); }
 
-        virtual void addUInt8(const char* name, Pt::uint8_t value,
-                              const char* id) = 0;
+        void addUInt8(const char* name, Pt::uint8_t value,
+                      const char* id)
+        { onAddUInt8(name, value, id); }
 
-        virtual void addUInt16(const char* name, Pt::uint16_t value,
-                               const char* id) = 0;
+        void addUInt16(const char* name, Pt::uint16_t value,
+                       const char* id)
+        { onAddUInt16(name, value, id); }
 
-        virtual void addUInt32(const char* name, Pt::uint32_t value,
-                               const char* id) = 0;
+        void addUInt32(const char* name, Pt::uint32_t value,
+                       const char* id)
+        { onAddUInt32(name, value, id); }
 
-        virtual void addUInt64(const char* name, Pt::uint64_t value,
-                               const char* id) = 0;
+        void addUInt64(const char* name, Pt::uint64_t value,
+                       const char* id)
+        { onAddUInt64(name, value, id); }
 
-        virtual void addFloat(const char* name, float value,
-                              const char* id) = 0;
+        void addFloat(const char* name, float value,
+                      const char* id)
+        { onAddFloat(name, value, id); }
 
-        virtual void addDouble(const char* name, double value,
-                               const char* id) = 0;
+        void addDouble(const char* name, double value,
+                       const char* id)
+        { onAddDouble(name, value, id); }
 
-        virtual void addLongDouble(const char* name, long double value,
-                                   const char* id) = 0;
+        void addLongDouble(const char* name, long double value,
+                           const char* id)
+        { onAddLongDouble(name, value, id); }
 
-        virtual void addReference(const char* name, const char* refId) = 0;
+        void addReference(const char* name, const char* refId)
+        { onAddReference(name, refId); }
 
-        virtual void beginArray(const char* name, const char* type,
-                                const char* id) = 0;
+        void beginArray(const char* name, const char* type,
+                        const char* id)
+        { onBeginArray(name, type, id); }
 
-        virtual void beginElement() = 0;
+        void beginElement()
+        { onBeginElement(); }
 
-        virtual void finishElement() = 0;
+        void finishElement()
+        { onFinishElement(); }
 
-        virtual void finishArray() = 0;
+        void finishArray()
+        { onFinishArray(); }
 
-        virtual void beginStruct(const char* name, const char* type,
-                                 const char* id) = 0;
+        void beginStruct(const char* name, const char* type,
+                         const char* id)
+        { onBeginStruct(name, type, id); }
 
-        virtual void beginMember(const char* name) = 0;
+        void beginMember(const char* name)
+        { onBeginMember(name); }
 
-        virtual void finishMember() = 0;
+        void finishMember()
+        { onFinishMember(); }
 
-        virtual void finishStruct() = 0;
+        void finishStruct()
+        { onFinishStruct(); }
 
     public:
         //! @brief Begin to parse to a composer
-        virtual void beginParse(Composer& composer) = 0;
+        void beginParse(Composer& composer)
+        { onBeginParse(composer); }
 
         //! @brief Returns true if composer completes, false if no more data available
-        virtual bool parseSome() = 0;
+        bool parseSome()
+        { return onParseSome(); }
 
         //! @brief Parse until composer completes.
-        virtual void parse() = 0;
+        void parse()
+        { onParse(); }
+
+    protected:
+        virtual void onAddString(const char* name, const char* type,
+                               const Pt::Char* value, const char* id) = 0;
+
+        virtual void onAddBinary(const char* name, const char* type,
+                               const char* value, size_t length, const char* id) = 0;
+
+        virtual void onAddBool(const char* name, bool value,
+                             const char* id) = 0;
+
+        virtual void onAddChar(const char* name, const Pt::Char& value,
+                             const char* id) = 0;
+
+        virtual void onAddInt8(const char* name, Pt::int8_t value,
+                             const char* id) = 0;
+
+        virtual void onAddInt16(const char* name, Pt::int16_t value,
+                              const char* id) = 0;
+
+        virtual void onAddInt32(const char* name, Pt::int32_t value,
+                              const char* id) = 0;
+
+        virtual void onAddInt64(const char* name, Pt::int64_t value,
+                              const char* id) = 0;
+
+        virtual void onAddUInt8(const char* name, Pt::uint8_t value,
+                              const char* id) = 0;
+
+        virtual void onAddUInt16(const char* name, Pt::uint16_t value,
+                               const char* id) = 0;
+
+        virtual void onAddUInt32(const char* name, Pt::uint32_t value,
+                               const char* id) = 0;
+
+        virtual void onAddUInt64(const char* name, Pt::uint64_t value,
+                               const char* id) = 0;
+
+        virtual void onAddFloat(const char* name, float value,
+                              const char* id) = 0;
+
+        virtual void onAddDouble(const char* name, double value,
+                               const char* id) = 0;
+
+        virtual void onAddLongDouble(const char* name, long double value,
+                                   const char* id) = 0;
+
+        virtual void onAddReference(const char* name, const char* refId) = 0;
+
+        virtual void onBeginArray(const char* name, const char* type,
+                                const char* id) = 0;
+
+        virtual void onBeginElement() = 0;
+
+        virtual void onFinishElement() = 0;
+
+        virtual void onFinishArray() = 0;
+
+        virtual void onBeginStruct(const char* name, const char* type,
+                                 const char* id) = 0;
+
+        virtual void onBeginMember(const char* name) = 0;
+
+        virtual void onFinishMember() = 0;
+
+        virtual void onFinishStruct() = 0;
+
+    protected:
+        //! @brief Begin to parse to a composer
+        virtual void onBeginParse(Composer& composer) = 0;
+
+        //! @brief Returns true if composer completes, false if no more data available
+        virtual bool onParseSome() = 0;
+
+        //! @brief Parse until composer completes.
+        virtual void onParse() = 0;
 
     protected:
         Formatter()

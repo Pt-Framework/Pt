@@ -166,8 +166,8 @@ void Formatter::attach(std::basic_ostream<Char>& os)
 }
 
 
-void Formatter::addString(const char* name, const char* type,
-                          const Pt::Char* value, const char* id)
+void Formatter::onAddString(const char* name, const char* type,
+                            const Pt::Char* value, const char* id)
 {
     _os->write(XMLRPC_VALUE, sizeof(XMLRPC_VALUE)/sizeof(Char));
     _os->write(XMLRPC_STRING, sizeof(XMLRPC_STRING)/sizeof(Char));
@@ -177,8 +177,8 @@ void Formatter::addString(const char* name, const char* type,
 }
 
 
-void Formatter::addBool(const char* name, bool value, 
-                        const char* id)
+void Formatter::onAddBool(const char* name, bool value, 
+                          const char* id)
 {
     _os->write(XMLRPC_VALUE, sizeof(XMLRPC_VALUE)/sizeof(Char));
 
@@ -190,8 +190,8 @@ void Formatter::addBool(const char* name, bool value,
 }
 
 
-void Formatter::addChar(const char* name, const Pt::Char& value,
-                        const char* id)
+void Formatter::onAddChar(const char* name, const Pt::Char& value,
+                          const char* id)
 {
     _os->write(XMLRPC_VALUE, sizeof(XMLRPC_VALUE)/sizeof(Char));
     _os->write(XMLRPC_STRING, sizeof(XMLRPC_STRING)/sizeof(Char));
@@ -201,25 +201,25 @@ void Formatter::addChar(const char* name, const Pt::Char& value,
 }
 
 
-void Formatter::addInt8(const char* name, Pt::int8_t value, const char* id)
+void Formatter::onAddInt8(const char* name, Pt::int8_t value, const char* id)
 {
-	this->addInt64(name, value, id);
+	this->onAddInt64(name, value, id);
 }
 
 
-void Formatter::addInt16(const char* name, Pt::int16_t value, const char* id)
+void Formatter::onAddInt16(const char* name, Pt::int16_t value, const char* id)
 {
-	this->addInt64(name, value, id);
+	this->onAddInt64(name, value, id);
 }    
 
 
-void Formatter::addInt32(const char* name, Pt::int32_t value, const char* id)
+void Formatter::onAddInt32(const char* name, Pt::int32_t value, const char* id)
 {
-	this->addInt64(name, value, id);
+	this->onAddInt64(name, value, id);
 }
 
 
-void Formatter::addInt64(const char* name, Pt::int64_t value, const char* id)
+void Formatter::onAddInt64(const char* name, Pt::int64_t value, const char* id)
 {    
     const unsigned _bufsize = 64;
     Pt::Char _buf[_bufsize];
@@ -235,25 +235,25 @@ void Formatter::addInt64(const char* name, Pt::int64_t value, const char* id)
 }
 
 
-void Formatter::addUInt8(const char* name, Pt::uint8_t value, const char* id)
+void Formatter::onAddUInt8(const char* name, Pt::uint8_t value, const char* id)
 {
-	this->addUInt64(name, value, id);
+	this->onAddUInt64(name, value, id);
 }
 
 
-void Formatter::addUInt16(const char* name, Pt::uint16_t value, const char* id)
+void Formatter::onAddUInt16(const char* name, Pt::uint16_t value, const char* id)
 {
-	this->addUInt64(name, value, id);
+	this->onAddUInt64(name, value, id);
 }    
 
 
-void Formatter::addUInt32(const char* name, Pt::uint32_t value, const char* id)
+void Formatter::onAddUInt32(const char* name, Pt::uint32_t value, const char* id)
 {
-	this->addUInt64(name, value, id);
+	this->onAddUInt64(name, value, id);
 }
 
 
-void Formatter::addUInt64(const char* name, Pt::uint64_t value, const char* id)
+void Formatter::onAddUInt64(const char* name, Pt::uint64_t value, const char* id)
 {    
     const unsigned _bufsize = 64;
     Pt::Char _buf[_bufsize];
@@ -269,14 +269,14 @@ void Formatter::addUInt64(const char* name, Pt::uint64_t value, const char* id)
 }
 
 
-void Formatter::addFloat(const char* name, float value,const char* id)
+void Formatter::onAddFloat(const char* name, float value,const char* id)
 {
     // spec supports only double precision floats
-    this->addDouble(name, value, id);
+    this->onAddDouble(name, value, id);
 }
 
 
-void Formatter::addDouble(const char* name, double value, const char* id)
+void Formatter::onAddDouble(const char* name, double value, const char* id)
 {
     const unsigned _bufsize = 64;
     Pt::Char _buf[_bufsize];
@@ -294,15 +294,15 @@ void Formatter::addDouble(const char* name, double value, const char* id)
 }
 
 
-void Formatter::addLongDouble(const char* name, long double value,const char* id)
+void Formatter::onAddLongDouble(const char* name, long double value,const char* id)
 {
     // spec supports only double precision floats
-    this->addDouble(name, static_cast<double>(value), id);
+    this->onAddDouble(name, static_cast<double>(value), id);
 }
 
 
-void Formatter::addBinary(const char* name, const char* type,
-                          const char* data, std::size_t length, const char* id)
+void Formatter::onAddBinary(const char* name, const char* type,
+                            const char* data, std::size_t length, const char* id)
 {
     // TODO: this should be base64 encoded
 
@@ -318,14 +318,14 @@ void Formatter::addBinary(const char* name, const char* type,
 }
 
 
-void Formatter::addReference(const char* name, const char*value)
+void Formatter::onAddReference(const char* name, const char*value)
 {
     throw SerializationError("references not supported");
 }
 
 
-void Formatter::beginArray(const char*, const char*,
-                           const char*)
+void Formatter::onBeginArray(const char*, const char*,
+                             const char*)
 {
     _os->write(XMLRPC_VALUE, sizeof(XMLRPC_VALUE)/sizeof(Char));
     _os->write(XMLRPC_ARRAY, sizeof(XMLRPC_ARRAY)/sizeof(Char));
@@ -333,17 +333,17 @@ void Formatter::beginArray(const char*, const char*,
 }
 
 
-void Formatter::beginElement()
+void Formatter::onBeginElement()
 {
 }
 
 
-void Formatter::finishElement()
+void Formatter::onFinishElement()
 {
 }
 
 
-void Formatter::finishArray()
+void Formatter::onFinishArray()
 {
     _os->write(XMLRPC_DATA_END, sizeof(XMLRPC_DATA_END)/sizeof(Char));
     _os->write(XMLRPC_ARRAY_END, sizeof(XMLRPC_ARRAY_END)/sizeof(Char));
@@ -351,15 +351,15 @@ void Formatter::finishArray()
 }
 
 
-void Formatter::beginStruct(const char* name, const char* type,
-                            const char* id)
+void Formatter::onBeginStruct(const char* name, const char* type,
+                             const char* id)
 {
     _os->write(XMLRPC_VALUE, sizeof(XMLRPC_VALUE)/sizeof(Char));
     _os->write(XMLRPC_STRUCT, sizeof(XMLRPC_STRUCT)/sizeof(Char));
 }
 
 
-void Formatter::beginMember(const char* name)
+void Formatter::onBeginMember(const char* name)
 {
     _str.assign(name);
 
@@ -370,33 +370,33 @@ void Formatter::beginMember(const char* name)
 }
 
 
-void Formatter::finishMember()
+void Formatter::onFinishMember()
 {
     _os->write(XMLRPC_MEMBER_END, sizeof(XMLRPC_MEMBER_END)/sizeof(Char));
 }
 
 
-void Formatter::finishStruct()
+void Formatter::onFinishStruct()
 {
     _os->write(XMLRPC_STRUCT_END, sizeof(XMLRPC_STRUCT_END)/sizeof(Char));
     _os->write(XMLRPC_VALUE_END, sizeof(XMLRPC_VALUE_END)/sizeof(Char));
 }
 
 
-void Formatter::beginParse(Composer& composer)
+void Formatter::onBeginParse(Composer& composer)
 {
     _state = OnParam;
     _composer = &composer;
 }
 
 
-bool Formatter::parseSome()
+bool Formatter::onParseSome()
 { 
     return false; 
 }
 
 
-void Formatter::parse()
+void Formatter::onParse()
 {
 }
 
