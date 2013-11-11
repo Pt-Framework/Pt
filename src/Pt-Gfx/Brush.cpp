@@ -117,7 +117,9 @@ bool operator<(const Brush& a, const Brush& b)
 
 void operator >>=( const SerializationInfo& si, Gfx::Brush& brush )
 {
-    brush = Gfx::Brush( Gfx::ARgbColor::fromHtml( si.toString() ) );
+    Pt::String s;
+    si.getString(s);
+    brush = Gfx::Brush( Gfx::ARgbColor::fromHtml(s) );
 }
 
 

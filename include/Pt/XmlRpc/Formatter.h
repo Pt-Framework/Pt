@@ -104,14 +104,14 @@ class PT_XMLRPC_API Formatter : public Pt::Formatter
 
         void onAddReference(const char* name, const char* id);
 
-        void onBeginArray(const char* name, const char* type,
-                          const char* id);
+        void onBeginSequence(const char* name, const char* type,
+                             const char* id);
 
         virtual void onBeginElement();
 
         virtual void onFinishElement();
 
-        void onFinishArray();
+        void onFinishSequence();
 
         void onBeginStruct(const char* name, const char* type,
                            const char* id);

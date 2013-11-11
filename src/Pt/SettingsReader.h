@@ -406,7 +406,7 @@ class SettingsReader
 
             virtual State* onQuote(Pt::Char c, SettingsReader& reader)
             {
-                reader.pushValue();
+                reader.pushString();
                 return AfterQuotedValue::instance();
             }
 
@@ -856,6 +856,8 @@ class SettingsReader
         void leaveMember();
 
         void pushValue();
+
+        void pushString();
 
         void pushTypeName();
 

@@ -157,6 +157,29 @@ class BasicTextBuffer : public std::basic_streambuf<CharT>
             _target = 0;
         }
 
+        /** @brief Resets the buffer and target.
+
+            The target is removed removed and the buffer content is discarded.
+            The codec is kept, so a new target can be attached later. 
+        */
+        void reset()
+        {
+            discard();
+            detach();
+        }
+
+        /** @brief Resets the buffer and target.
+
+            The buffer is discarded and the buffer is attached to the new
+            target. The codec is kept, so the buffer is usable after calling
+            this method. 
+        */
+        void reset(std::basic_ios<extern_type>& target)
+        {
+            discard();
+            attach(target);
+        }
+
         void discard()
         {
             _ebufsize = 0;

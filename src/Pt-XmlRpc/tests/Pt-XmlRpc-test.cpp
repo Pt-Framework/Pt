@@ -90,7 +90,7 @@ class BasicDecomposer< std::vector<T> > : public Decomposer
 
         void onFormat(Formatter& formatter)
         {
-            formatter.beginArray(_name.c_str(), "std::vector", "");
+            formatter.beginSequence(_name.c_str(), "std::vector", "");
 
             typename std::vector<T>::const_iterator it;
             for(it = _type->begin(); it != _type->end(); ++it)
@@ -102,12 +102,12 @@ class BasicDecomposer< std::vector<T> > : public Decomposer
                 formatter.finishElement();
             }
 
-            formatter.finishArray();
+            formatter.finishSequence();
         }
 
         void onBeginFormat(Formatter& formatter)
         {
-            formatter.beginArray(_name.c_str(), "std::vector", "");
+            formatter.beginSequence(_name.c_str(), "std::vector", "");
             _it = _type->begin();
         }
 
@@ -120,7 +120,7 @@ class BasicDecomposer< std::vector<T> > : public Decomposer
 
             if( _it == _type->end() )
             {
-                formatter.finishArray();
+                formatter.finishSequence();
                 return this->parent();
             }
 

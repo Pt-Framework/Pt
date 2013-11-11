@@ -180,13 +180,17 @@ void SettingsReader::pushValue()
 		}
 		else
 		{
-			if(_token.length() == 1)
-				_current->setChar( _token.at(0) );
-			else
-				_current->setString(_token);
+      throw SettingsError("invalid entry value", line());
 		}
 	}
 
+    _token.clear();
+}
+
+
+void SettingsReader::pushString()
+{
+    _current->setString(_token);
     _token.clear();
 }
 

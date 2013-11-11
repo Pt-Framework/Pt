@@ -26,6 +26,69 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "SettingsWriter.h"
+#include <Pt/Convert.h>
+
+namespace {
+
+// TODO: use a formatter
+Pt::String toString(const Pt::SerializationInfo& si)
+{
+    Pt::String s;
+
+    switch( si.type() )
+    {
+        case Pt::SerializationInfo::Str:
+            si.getString(s);
+            break;
+        
+        case Pt::SerializationInfo::Boolean:
+            bool b;
+            si.getBool(b);
+            Pt::convert(s, b);
+            break;
+    
+        case Pt::SerializationInfo::Char:
+        {
+            Pt::Char c;
+            si.getChar(c);
+            s += c;
+            break;
+        }
+    
+        case Pt::SerializationInfo::Int8:
+        case Pt::SerializationInfo::Int16:
+        case Pt::SerializationInfo::Int32:
+        case Pt::SerializationInfo::Int64:
+            Pt::int64_t i;
+            si.getInt64(i);
+            Pt::convert(s, i);
+            break;
+    
+        case Pt::SerializationInfo::UInt8:
+        case Pt::SerializationInfo::UInt16:
+        case Pt::SerializationInfo::UInt32:
+        case Pt::SerializationInfo::UInt64:
+            Pt::uint64_t u;
+            si.getUInt64(u);
+            Pt::convert(s, u);
+            break;
+    
+        case Pt::SerializationInfo::Float:
+        case Pt::SerializationInfo::Double:
+        case Pt::SerializationInfo::LongDouble:
+            long double d;
+            si.getLongDouble(d);
+            Pt::convert(s, d);
+            break;
+        
+        default:
+            throw std::logic_error("conversion to string failed");
+    }
+
+    return s;
+}
+
+}
 
 namespace Pt {
 
@@ -37,7 +100,7 @@ void SettingsWriter::write(const SerializationInfo& si)
     {
         if( it->isScalar() )
         {
-            value = it->toString();
+            value = toString(*it);
             this->writeEntry( it->name(), value, it->typeName() );
             *_os << std::endl;
         }
@@ -77,7 +140,7 @@ void SettingsWriter::writeParent(const SerializationInfo& sd, const std::string&
             if( separate && name.empty() )
                 *_os << Pt::String(L", ");
 
-             value = it->toString();
+             value = toString(*it);
              if( ! prefix.empty() )
                 *_os << Pt::String::widen( prefix ) << '.';
 
@@ -116,7 +179,7 @@ void SettingsWriter::writeChild(const SerializationInfo& sd)
 
         if( it->isScalar() )
         {
-            value = it->toString();
+            value = toString(*it);
             this->writeEntry( it->name(), value, it->typeName() );
         }
         else if( it->isStruct() || it->isSequence() )

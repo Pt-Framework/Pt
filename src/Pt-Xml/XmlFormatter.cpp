@@ -240,8 +240,8 @@ void XmlFormatter::onAddReference(const char* name, const char* id)
 }
 
 
-void XmlFormatter::onBeginArray(const char* name, const char* type,
-                                const char* id)
+void XmlFormatter::onBeginSequence(const char* name, const char* type,
+                                   const char* id)
 {
     if( ! _writer )
         return;
@@ -270,7 +270,7 @@ void XmlFormatter::onFinishElement()
 }
 
 
-void XmlFormatter::onFinishArray()
+void XmlFormatter::onFinishSequence()
 {
     if( ! _writer )
         return;

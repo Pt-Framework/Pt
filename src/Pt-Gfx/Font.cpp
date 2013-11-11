@@ -85,7 +85,9 @@ void operator >>=(const SerializationInfo& si, Gfx::Font& f)
     ssize_t     fontAngle;
     ssize_t     fontDirection;
 
-    Pt::StringStream ss( si.toString() );
+    Pt::String s;
+    si.getString(s);
+    Pt::StringStream ss(s);
     getline( ss, fontName, Pt::Char('-') );
 
     ss >> fontSize;

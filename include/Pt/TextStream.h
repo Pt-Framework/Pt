@@ -106,9 +106,9 @@ class BasicTextIStream : public std::basic_istream<CharT>
             _buffer.setCodec(codec);
         }
 
-        void attach(StreamType& os)
+        void attach(StreamType& is)
         {
-            _buffer.attach( os );
+            _buffer.attach(is);
         }
 
         void detach()
@@ -119,6 +119,16 @@ class BasicTextIStream : public std::basic_istream<CharT>
         void discard()
         {
             _buffer.discard();
+        }
+
+        void reset()
+        {
+            _buffer.reset();
+        }
+
+        void reset(StreamType& is)
+        {
+            _buffer.reset(is);
         }
 
         void terminate()
@@ -204,7 +214,7 @@ class BasicTextOStream : public std::basic_ostream<CharT>
 
         void attach(StreamType& os)
         {
-            _buffer.attach( os );
+            _buffer.attach(os);
         }
 
         void detach()
@@ -215,6 +225,16 @@ class BasicTextOStream : public std::basic_ostream<CharT>
         void discard()
         {
             _buffer.discard();
+        }
+
+        void reset()
+        {
+            _buffer.reset();
+        }
+
+        void reset(StreamType& os)
+        {
+            _buffer.reset(os);
         }
 
         void terminate()
@@ -298,9 +318,9 @@ class BasicTextStream : public std::basic_iostream<CharT>
             _buffer.setCodec(codec);
         }
 
-        void attach(StreamType& os)
+        void attach(StreamType& ios)
         {
-            _buffer.attach( os );
+            _buffer.attach(ios);
         }
 
         void detach()
@@ -311,6 +331,16 @@ class BasicTextStream : public std::basic_iostream<CharT>
         void discard()
         {
             _buffer.discard();
+        }
+
+        void reset()
+        {
+            _buffer.reset();
+        }
+
+        void reset(StreamType& ios)
+        {
+            _buffer.reset(ios);
         }
 
         void terminate()

@@ -95,9 +95,6 @@ class PT_API SerializationInfo
         , _isCompound(false)
         , _isAlloc(false)
         , _type(Void)
-        //, _nameRef(true)
-        //, _tnRef(true)
-        //, _idRef(true)
         , _flags(0)
         { }
 
@@ -112,9 +109,6 @@ class PT_API SerializationInfo
         , _isCompound(false)
         , _isAlloc(false)
         , _type(Void)
-        //, _nameRef(true)
-        //, _tnRef(true)
-        //, _idRef(true)
         , _flags(0)
         { }
 
@@ -206,6 +200,8 @@ class PT_API SerializationInfo
 
         void getString(std::string& s) const;
 
+        void getString(Pt::String& s) const;
+
         void setString(const char* s);
 
         void setString(const char* s, size_t len, const TextCodec<Pt::Char, char>& codec);
@@ -214,12 +210,6 @@ class PT_API SerializationInfo
 
         void setString(const std::string& str, const TextCodec<Pt::Char, char>& codec)
         { setString(str.c_str(), str.size(), codec); }
-
-        /** @internal DEPRECATED Returns the content as string.
-        */
-        Pt::String toString() const;
-
-        void getString(Pt::String& s) const;
 
         void setString(const Pt::String& s)
         { setString( s.c_str(), s.length() ); }
@@ -614,10 +604,6 @@ inline SerializationInfo::ConstIterator SerializationInfo::end() const
 
 
 
-struct SerPubl
-{};
-
-
 class SaveInfo
 {
     public:
@@ -645,13 +631,17 @@ class SaveInfo
 };
 
 
-inline SerPubl save()
+struct Save
+{};
+
+
+inline Save save()
 {
-    return SerPubl();
+    return Save();
 }
 
 
-inline SaveInfo operator <<(SerializationInfo& si, const SerPubl&)
+inline SaveInfo operator <<(SerializationInfo& si, const Save&)
 {
     return SaveInfo(si);
 }
@@ -701,13 +691,17 @@ class LoadInfo
 };
 
 
-inline SerPubl load()
+struct Load
+{};
+
+
+inline Load load()
 {
-    return SerPubl();
+    return Load();
 }
 
 
-inline LoadInfo operator >>(const SerializationInfo& si, const SerPubl&)
+inline LoadInfo operator >>(const SerializationInfo& si, const Load&)
 {
     return LoadInfo(si);
 }

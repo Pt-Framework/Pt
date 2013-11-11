@@ -116,7 +116,9 @@ void operator >>=(const SerializationInfo& si, Gfx::Pen& pen)
     Pt::ssize_t         penStyle;
     Pt::String html;
 
-    Pt::StringStream ss( si.toString() );
+    Pt::String s;
+    si.getString(s);
+    Pt::StringStream ss(s);
     ss >> penSize;
     ss.get();
 

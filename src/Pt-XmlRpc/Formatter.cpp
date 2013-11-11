@@ -324,8 +324,8 @@ void Formatter::onAddReference(const char* name, const char*value)
 }
 
 
-void Formatter::onBeginArray(const char*, const char*,
-                             const char*)
+void Formatter::onBeginSequence(const char*, const char*,
+                                const char*)
 {
     _os->write(XMLRPC_VALUE, sizeof(XMLRPC_VALUE)/sizeof(Char));
     _os->write(XMLRPC_ARRAY, sizeof(XMLRPC_ARRAY)/sizeof(Char));
@@ -343,7 +343,7 @@ void Formatter::onFinishElement()
 }
 
 
-void Formatter::onFinishArray()
+void Formatter::onFinishSequence()
 {
     _os->write(XMLRPC_DATA_END, sizeof(XMLRPC_DATA_END)/sizeof(Char));
     _os->write(XMLRPC_ARRAY_END, sizeof(XMLRPC_ARRAY_END)/sizeof(Char));

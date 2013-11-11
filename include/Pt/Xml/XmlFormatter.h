@@ -88,6 +88,7 @@ class PT_XML_API XmlFormatter : public Formatter
         */
         void detach();
 
+    protected:
         // inherit docs
         void onAddString(const char*, const char* type,
                          const Pt::Char* value, const char* id);
@@ -144,8 +145,8 @@ class PT_XML_API XmlFormatter : public Formatter
         void onAddReference(const char* name, const char* value);
         
         // inherit docs
-        void onBeginArray(const char* name, const char* type,
-                          const char* id);
+        void onBeginSequence(const char* name, const char* type,
+                             const char* id);
 
         // inherit docs
         void onBeginElement();
@@ -154,7 +155,7 @@ class PT_XML_API XmlFormatter : public Formatter
         void onFinishElement();
         
         // inherit docs
-        void onFinishArray();
+        void onFinishSequence();
         
         // inherit docs
         void onBeginStruct(const char* name, const char* type,

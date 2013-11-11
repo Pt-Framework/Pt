@@ -230,7 +230,7 @@ SerializationInfo::Iterator SerializationInfo::beginFormat(Formatter& formatter)
 
         case Sequence:
         {
-            formatter.beginArray( _Name, this->typeName(), this->id() );
+            formatter.beginSequence( _Name, this->typeName(), this->id() );
             return this->begin();
         }
 
@@ -250,7 +250,7 @@ void SerializationInfo::endFormat(Formatter& formatter)
     }
     else if(_type == Pt::SerializationInfo::Sequence)
     {
-        formatter.finishArray();
+        formatter.finishSequence();
     }
 
     if( this->parent() && this->parent()->type() == Struct )
@@ -385,7 +385,7 @@ void SerializationInfo::format(Formatter& formatter)
 
         case Sequence:
         {
-            formatter.beginArray( _Name, this->typeName(), this->id() );
+            formatter.beginSequence( _Name, this->typeName(), this->id() );
 
             SerializationInfo::Iterator it;
             SerializationInfo::Iterator end = this->end();
@@ -396,7 +396,7 @@ void SerializationInfo::format(Formatter& formatter)
                 formatter.finishElement();
             }
 
-            formatter.finishArray();
+            formatter.finishSequence();
             break;
         }
 
@@ -735,6 +735,53 @@ void SerializationInfo::setBinary(const char* data, std::size_t length)
 }
 
 
+//Pt::String SerializationInfo::toString() const
+//{
+//    Pt::String s;
+//
+//    switch(_type)
+//    {
+//        case Str:
+//            s.assign(_value.ustr.str, _value.ustr.length);
+//            break;
+//        
+//        case Boolean:
+//            convert(s, _value.b);
+//            break;
+//    
+//        case Char:
+//            s.clear();
+//            s += Pt::Char(_value.ui32);
+//            break;
+//    
+//        case Int8:
+//        case Int16:
+//        case Int32:
+//        case Int64:
+//            convert(s, _value.l);
+//            break;
+//    
+//        case UInt8:
+//        case UInt16:
+//        case UInt32:
+//        case UInt64:
+//            convert(s, _value.ul);
+//            break;
+//    
+//        case Float:
+//        case Double:
+//        case LongDouble:
+//            convert(s, _value.f);
+//            break;
+//        
+//        default:
+//            throw SerializationError("expected scalar value");
+//    }
+//
+//    return s;
+//}
+
+
 void SerializationInfo::getString(std::string& s, const TextCodec<Pt::Char, char>& codec) const
 {
     switch(_type)
@@ -857,6 +904,54 @@ void SerializationInfo::getString(std::string& s) const
 }
 
 
+void SerializationInfo::getString(Pt::String& s) const
+{
+    switch(_type)
+    {
+        case Str:
+            s.assign(_value.ustr.str, _value.ustr.length);
+            break;
+        
+        //case Str8:
+        //    s = Pt::String::widen(_value.cstr);
+        //    break;
+        //
+        //case Boolean:
+        //    convert(s, _value.b);
+        //    break;
+    
+        //case Char:
+        //case Char8:
+        //    s.clear();
+        //    s += Pt::Char(_value.ui32);
+        //    break;
+    
+        //case Int8:
+        //case Int16:
+        //case Int32:
+        //case Int64:
+        //    convert(s, _value.l);
+        //    break;
+    
+        //case UInt8:
+        //case UInt16:
+        //case UInt32:
+        //case UInt64:
+        //    convert(s, _value.ul);
+        //    break;
+    
+        //case Float:
+        //case Double:
+        //case LongDouble:
+        //    convert(s, _value.f);
+        //    break;
+        
+        default:
+            throw SerializationError("not a string value");
+    }
+}
+
+
 void SerializationInfo::setString(const char* value, size_t size, const TextCodec<Pt::Char, char>& codec)
 {
     if( _type == Context )
@@ -952,106 +1047,6 @@ void SerializationInfo::setString(const std::string& s)
 
     //_type = Str8;
     //_isCompound = false;
-}
-
-
-Pt::String SerializationInfo::toString() const
-{
-    Pt::String s;
-
-    switch(_type)
-    {
-        case Str:
-            s.assign(_value.ustr.str, _value.ustr.length);
-            break;
-        
-        //case Str8:
-        //    s = Pt::String::widen(_value.cstr);
-        //    break;
-        
-        case Boolean:
-            convert(s, _value.b);
-            break;
-    
-        case Char:
-        //case Char8:
-            s.clear();
-            s += Pt::Char(_value.ui32);
-            break;
-    
-        case Int8:
-        case Int16:
-        case Int32:
-        case Int64:
-            convert(s, _value.l);
-            break;
-    
-        case UInt8:
-        case UInt16:
-        case UInt32:
-        case UInt64:
-            convert(s, _value.ul);
-            break;
-    
-        case Float:
-        case Double:
-        case LongDouble:
-            convert(s, _value.f);
-            break;
-        
-        default:
-            throw SerializationError("not a string value");
-    }
-
-    return s;
-}
-
-
-void SerializationInfo::getString(Pt::String& s) const
-{
-    switch(_type)
-    {
-        case Str:
-            s.assign(_value.ustr.str, _value.ustr.length);
-            break;
-        
-        //case Str8:
-        //    s = Pt::String::widen(_value.cstr);
-        //    break;
-        //
-        //case Boolean:
-        //    convert(s, _value.b);
-        //    break;
-    
-        //case Char:
-        //case Char8:
-        //    s.clear();
-        //    s += Pt::Char(_value.ui32);
-        //    break;
-    
-        //case Int8:
-        //case Int16:
-        //case Int32:
-        //case Int64:
-        //    convert(s, _value.l);
-        //    break;
-    
-        //case UInt8:
-        //case UInt16:
-        //case UInt32:
-        //case UInt64:
-        //    convert(s, _value.ul);
-        //    break;
-    
-        //case Float:
-        //case Double:
-        //case LongDouble:
-        //    convert(s, _value.f);
-        //    break;
-        
-        default:
-            throw SerializationError("not a string value");
-    }
 }
 
 

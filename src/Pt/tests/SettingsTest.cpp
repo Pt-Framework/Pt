@@ -390,12 +390,12 @@ void SettingsTest::Section()
     std::stringstream ss;
     ss << "[a.b.c]\n";
     ss << "d.v = 1\n";
-    ss << "d.u = \"2\"\n";
+    ss << "d.u = 2\n";
     ss << "[x.y.z]\n";
     ss << "u.v = 3\n";
-    ss << "u.w = \"4\"\n";
+    ss << "u.w = 4\n";
     ss << "[e.f.g]\n";
-    ss << "u.v = \"5\"\n";
+    ss << "u.v = 5\n";
     ss << "u.w = 6\n";
     Pt::TextIStream ts(ss, new Pt::Utf8Codec);
 

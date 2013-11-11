@@ -44,35 +44,60 @@ class Composer
         virtual ~Composer()
         {}
 
+        /** @brief Sets the parent composer.
+        */
         void setParent(Composer* parent)
         { _parent = parent; }
 
+        /** @brief Returns the parent composer.
+        */
         Composer* parent() const
         { return _parent; }
 
-        /** @brief Name of the type to compose.
+        /** @brief sets the type name of the type to compose.
 
             This is only supported by formats that save typename information.
         */
         void setTypeName(const std::string& type)
         { onSetTypeName( type.c_str(), type.size() ); }
 
+        void setTypeName(const char* type, size_t len)
+        { onSetTypeName(type, len); }
+
+        /** @brief Sets the reference id of the type to compose.
+
+            This is only supported by formats that support references.
+        */
         void setId(const std::string& id)
         { onSetId( id.c_str(), id.size() ); }
 
+        void setId(const char* id, size_t len)
+        { onSetId(id, len); }
+
+        /** @brief Composes a string value.
+        */
         void setString(const Pt::String& value)
         { onSetString( value.c_str(), value.size() ); }
 
+        void setString(const Pt::Char* value, size_t len)
+        { onSetString(value, len); }
+
+        /** @brief Composes a binary value.
+        */
         void setBinary(const char* data, size_t length)
         { onSetBinary(data, length); }
 
+        /** @brief Composes a char value.
+        */
         void setChar(const Pt::Char& ch)
         { onSetChar(ch); }
 
+        /** @brief Composes a boolean value.
+        */
         void setBool(bool value)
         { onSetBool(value); }
 
-        /** @brief Compose a signed integer type.
+        /** @brief Composes a signed integer type.
 
             There is only one method for all sizes of signed integer types,
             because that type information is not required for composition. 
@@ -80,7 +105,7 @@ class Composer
         void setInt(Pt::int64_t value)
         { onSetInt(value); }
         
-        /** @brief Compose a unsigned integer type.
+        /** @brief Composes an unsigned integer type.
 
             There is only one method for all sizes of unsigned integer types,
             because that type information is not required for composition. 
@@ -88,18 +113,34 @@ class Composer
         void setUInt(Pt::int64_t value)
         { onSetUInt(value); }
 
-        void setFloat(double value)
+        /** @brief Composes a float value.
+        */
+        void setFloat(long double value)
         { onSetFloat(value); }
 
+        /** @brief Composes a reference.
+        */
         void setReference(const std::string& id)
         { onSetReference(id.c_str(), id.size()); }
 
+        void setReference(const char* id, size_t len)
+        { onSetReference(id, len); }
+
+        /** @brief Begins composition of a struct member.
+        */
         Composer* beginMember(const std::string& name)
         { return onBeginMember( name.c_str(), name.size() ); }
 
+        Composer* beginMember(const char* name, size_t len)
+        { return onBeginMember(name, len); }
+
+        /** @brief Begins composition of a sequence member.
+        */
         Composer* beginElement()
         { return onBeginElement(); }
 
+        /** @brief Finishes composition of a struct or sequence member.
+        */
         Composer* finish()
         { return onFinish(); }
 
@@ -114,13 +155,13 @@ class Composer
         virtual void onSetId(const char* id, size_t len) = 0;
 
         virtual void onSetString(const Pt::Char* value, size_t len)
-        { throw SerializationError("unexpected value"); }
+        { throw SerializationError("unexpected string value"); }
 
         virtual void onSetBinary(const char* data, size_t length)
-        { throw SerializationError("unexpected value"); }
+        { throw SerializationError("unexpected binary value"); }
 
         virtual void onSetChar(const Pt::Char& ch)
-        { throw SerializationError("unexpected bool value"); }
+        { throw SerializationError("unexpected char value"); }
 
         virtual void onSetBool(bool value)
         { throw SerializationError("unexpected bool value"); }
@@ -131,7 +172,7 @@ class Composer
         virtual void onSetUInt(Pt::uint64_t value)
         { throw SerializationError("unexpected unsigned value"); }
 
-        virtual void onSetFloat(double value)
+        virtual void onSetFloat(long double value)
         { throw SerializationError("unexpected float value"); }
 
         virtual void onSetReference(const char* id, size_t len)
@@ -215,7 +256,7 @@ class BasicComposer : public Composer
             _current->setUInt64(value);
         }
 
-        void onSetFloat(double value)
+        void onSetFloat(long double value)
         {
             _current->setDouble(value);
         }
