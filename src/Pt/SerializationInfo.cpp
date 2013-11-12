@@ -793,6 +793,7 @@ void SerializationInfo::getString(std::string& s, const TextCodec<Pt::Char, char
             std::codecvt_base::result r;
             const Pt::Char* from = _value.ustr.str;
             size_t size = _value.ustr.length;
+            s.clear();
 
             do 
             {

@@ -169,7 +169,7 @@ void SettingsTest::LoadSaveSerializable()
 {
     Pt::Date date(2001, 11, 15);
     Pt::Settings settings;
-    settings.setObject(date, "myDate");
+    settings.root().add("myDate").set(date);
 
     std::ostringstream ss;
     Pt::TextOStream ts(ss, new Pt::Utf8Codec);
@@ -196,11 +196,11 @@ void SettingsTest::Comment()
     settings.load(ts);
 
     Pt::String a;
-    settings.getMember("a") >>= a;
+    settings.entry("a").get(a);
     PT_UNIT_ASSERT("1#;2" == a );
     
     int b = 0;
-    settings.getMember("b") >>= b;
+    settings.entry("b").get(b);
     PT_UNIT_ASSERT(2 == b );
 }
 
@@ -214,8 +214,13 @@ void SettingsTest::ArrayOfArrays()
     Pt::Settings settings;
     settings.load(ts);
 
-    PT_UNIT_ASSERT(2 == settings.getMember("a").memberCount() );
-    PT_UNIT_ASSERT(2 == settings.getMember("b").memberCount() );
+    std::vector< std::vector<int> > vecOfVecs;
+    
+    settings.entry("a").get(vecOfVecs);
+    PT_UNIT_ASSERT(2 == vecOfVecs.size() );
+
+    settings.entry("b").get(vecOfVecs);
+    PT_UNIT_ASSERT(2 == vecOfVecs.size() );
 }
 
 
@@ -230,11 +235,11 @@ void SettingsTest::SimpleValue()
     settings.load(ts);
     
     int a = 0;
-    settings.getMember("a") >>= a;
+    settings.entry("a").get(a);
     PT_UNIT_ASSERT(5 == a );
     
     int b = 0;
-    settings.getMember("b") >>= b;
+    settings.entry("b").get(b);
     PT_UNIT_ASSERT(6 == b );
 }
 
@@ -249,11 +254,11 @@ void SettingsTest::SimpleTypedValue()
     settings.load(ts);
     
     int a = 0;
-    settings.getMember("a") >>= a;
+    settings.entry("a").get(a);
     PT_UNIT_ASSERT(5 == a );
     
     int b = 0;
-    settings.getMember("b") >>= b;
+    settings.entry("b").get(b);
     PT_UNIT_ASSERT(6 == b );
 }
 
@@ -268,11 +273,11 @@ void SettingsTest::SimpleQoutedValue()
     settings.load(ts);
     
     std::string a;
-    settings.getMember("a") >>= a;
+    settings.entry("a").get(a);
     PT_UNIT_ASSERT("a b c" == a );
     
     std::string b;
-    settings.getMember("b") >>= b;
+    settings.entry("b").get(b);
     PT_UNIT_ASSERT("a b c" == b );
 }
 
@@ -352,8 +357,12 @@ void SettingsTest::ComplexType()
     Pt::Settings settings;
     settings.load(ts);
 
-    PT_UNIT_ASSERT(3 == settings.getMember("a").memberCount() );
-    PT_UNIT_ASSERT(3 ==  settings.getMember("b").memberCount() );
+    int n = 0;
+    PT_UNIT_ASSERT( settings.entry("a").entry("green").get(n) );
+    PT_UNIT_ASSERT(2 == n);
+
+    PT_UNIT_ASSERT( settings.entry("b").entry("blue").get(n) );
+    PT_UNIT_ASSERT(6 == n);
 }
 
 void SettingsTest::ComplexTypeNamedQoutedValues()
@@ -366,8 +375,12 @@ void SettingsTest::ComplexTypeNamedQoutedValues()
     Pt::Settings settings;
     settings.load(ts);
 
-    PT_UNIT_ASSERT(3 == settings.getMember("a").memberCount() );
-    PT_UNIT_ASSERT(3 ==  settings.getMember("b").memberCount() );
+    std::string n;
+    PT_UNIT_ASSERT( settings.entry("a").entry("green").get(n) );
+    PT_UNIT_ASSERT("2" == n);
+
+    PT_UNIT_ASSERT( settings.entry("b").entry("blue").get(n) );
+    PT_UNIT_ASSERT_EQUALS("6", n);
 }
 
 void SettingsTest::ComplexNamedType()
@@ -381,8 +394,12 @@ void SettingsTest::ComplexNamedType()
     Pt::Settings settings;
     settings.load(ts);
 
-    PT_UNIT_ASSERT(3 == settings.getMember("a").memberCount() );
-    PT_UNIT_ASSERT(3 ==  settings.getMember("b").memberCount() );
+    int n = 0;
+    PT_UNIT_ASSERT( settings.entry("a").entry("green").get(n) );
+    PT_UNIT_ASSERT(2 == n);
+
+    PT_UNIT_ASSERT( settings.entry("b").entry("blue").get(n) );
+    PT_UNIT_ASSERT(6 == n);
 }
 
 void SettingsTest::Section()
@@ -402,30 +419,30 @@ void SettingsTest::Section()
     Pt::Settings settings;
     settings.load(ts);
 
-    PT_UNIT_ASSERT( settings.findMember("a.b.c.d") );
+    PT_UNIT_ASSERT( settings.entry("a.b.c.d") );
     
-    int v;
-    settings.findMember("a.b.c.d")->getMember("v") >>= v;
+    int v = 0;
+    settings.entry("a.b.c.d")->entry("v").get(v);
     PT_UNIT_ASSERT( v == 1);
     
-    int u;
-    settings.findMember("a.b.c.d")->getMember("u") >>= u;
+    int u = 0;
+    settings.entry("a.b.c.d")->entry("u").get(u);
     PT_UNIT_ASSERT( u == 2);
 
-    PT_UNIT_ASSERT( settings.findMember("x.y.z.u") );
+    PT_UNIT_ASSERT( settings.entry("x.y.z.u") );
     
-    settings.findMember("x.y.z.u")->getMember("v") >>= v;
+    settings.entry("x.y.z.u")->entry("v").get(v);
     PT_UNIT_ASSERT( v == 3);
     
     int w;
-    settings.findMember("x.y.z.u")->getMember("w") >>= w;
+    settings.entry("x.y.z.u")->entry("w").get(w);
     PT_UNIT_ASSERT( w == 4);
 
-    PT_UNIT_ASSERT( settings.findMember("e.f.g.u") );
+    PT_UNIT_ASSERT( settings.entry("e.f.g.u") );
     
-    settings.findMember("e.f.g.u")->getMember("v") >>= v;
+    settings.entry("e.f.g.u")->entry("v").get(v);
     PT_UNIT_ASSERT( v == 5);
     
-    settings.findMember("e.f.g.u")->getMember("w") >>= w;
+    settings.entry("e.f.g.u")->entry("w").get(w);
     PT_UNIT_ASSERT( w == 6);
 }

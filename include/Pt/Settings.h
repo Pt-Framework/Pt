@@ -29,10 +29,8 @@
 #define Pt_Settings_h
 
 #include <Pt/Api.h>
-#include <Pt/String.h>
 #include <Pt/SerializationInfo.h>
-#include <iostream>
-#include <cassert>
+#include <string>
 
 namespace Pt {
 
@@ -59,10 +57,8 @@ class PT_API SettingsError : public SerializationError
 };
 
 /** @brief Store application settings
-    
-    TODO: this should not publically inherit SerializationInfo !!!
 */
-class PT_API Settings : public SerializationInfo
+class PT_API Settings : private SerializationInfo
 {
     public:
         /** @brief Modifiable Settings Entry
@@ -303,22 +299,8 @@ class PT_API Settings : public SerializationInfo
         {
             return this->entry(name);
         }
-
-        // @internal DEPRECATED
-        template <typename T>
-        bool getObject(T& value, const std::string& name) const
-        {
-            return this->entry(name).get(value);
-        }
-
-        // @internal DEPRECATED
-        template <typename T>
-        void setObject(const T& value, const std::string& name)
-        {
-            this->root().add(name).set(value);
-        }
 };
 
-}
+} // namespace Pt
 
 #endif
