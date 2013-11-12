@@ -35,6 +35,7 @@ struct pt_regmatch_t
 
 struct pt_regexp
 {
+    unsigned regrefs;
     CHARTYPE regstart;        /* Internal use only. */
     char reganch;        /* Internal use only. */
     CHARTYPE *regmust;        /* Internal use only. */

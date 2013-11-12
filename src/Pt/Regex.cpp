@@ -30,23 +30,83 @@
 #include "regexp.h"
 #include <stdexcept>
 #include <cctype>
+#include <cassert>
 
 namespace Pt {
 
-InvalidRegex::InvalidRegex(const std::string& s)
-: std::invalid_argument(s)
+InvalidRegex::InvalidRegex(const char* msg)
+: std::runtime_error(msg)
 {}
 
 
+Regex::Regex()
+: _expr(0)
+{
+}
+
+
 Regex::Regex(const Pt::Char* ex)
+: _expr(0)
 {
     _expr = ::regcomp(ex);
+
+    if( ! _expr )
+        throw InvalidRegex("invalid regex");
+
+    assert(_expr->regrefs == 0);
+    ++_expr->regrefs;
 }
 
 
 Regex::Regex(const Pt::String& ex)
+: _expr(0)
 {
     _expr = ::regcomp( ex.c_str() );
+
+    if( ! _expr )
+        throw InvalidRegex("invalid regex");
+
+    assert(_expr->regrefs == 0);
+    ++_expr->regrefs;
+}
+
+
+Regex::Regex(const Regex& other)
+: _expr(0)
+{
+    if( other._expr )
+    {
+        _expr = other._expr;
+        ++_expr->regrefs;
+    }
+}
+
+
+Regex::~Regex()
+{
+    if(_expr && 0 == --_expr->regrefs)
+    {
+        std::free(_expr);
+        _expr = 0;
+    }
+}
+
+
+Regex& Regex::operator=(const Regex& other)
+{
+    if(_expr && 0 == --_expr->regrefs)
+    {
+        std::free(_expr);
+        _expr = 0;
+    }
+
+    if( other._expr )
+    {
+        _expr = other._expr;
+        ++_expr->regrefs;
+    }
+
+    return *this;
 }
 
 
@@ -60,10 +120,12 @@ bool Regex::match(const Pt::String& str) const
 bool Regex::match(const Pt::String& str, RegexSMatch& smatch) const
 {
     smatch._size = 0;
-    smatch._str = str;
+    smatch._str = &str;
 
-    pt_regexp* exp = const_cast<pt_regexp*>( _expr.getPointer() );
-    int ret = regexec( exp, smatch._match, smatch._str.c_str() );
+    if( ! _expr )
+        return false;
+
+    int ret = regexec( _expr, smatch._match, smatch._str->c_str() );
 
     if(ret == 0)
     {
@@ -83,10 +145,20 @@ bool Regex::match(const Pt::String& str, RegexSMatch& smatch) const
 
 
 RegexSMatch::RegexSMatch()
-: _size(0)
+: _str(0)
+, _size(0)
 , _match(0)
 {
     _match = new pt_regmatch_t;
+}
+
+
+RegexSMatch::RegexSMatch(const RegexSMatch& other)
+: _str(0)
+, _size(0)
+, _match(0)
+{
+    _match = new pt_regmatch_t( *other._match );
 }
 
 
@@ -96,133 +168,166 @@ RegexSMatch::~RegexSMatch()
 }
 
 
+RegexSMatch& RegexSMatch::operator=(const RegexSMatch& other)
+{
+    _str = other._str;
+    _size = other._size;
+    *_match = *other._match;
+    return *this;
+}
+
+
+bool RegexSMatch::empty() const
+{
+    return _size > 0;
+}
+
+
 unsigned RegexSMatch::size() const
 {
     return _size;
 }
 
-unsigned RegexSMatch::offsetBegin(unsigned n) const
+
+unsigned RegexSMatch::maxSize() const
 {
-    return _match->startp[n] - _str.c_str();
+    return NSUBEXP;
 }
 
 
-unsigned RegexSMatch::offsetEnd(unsigned n) const
+unsigned RegexSMatch::position(unsigned n) const
 {
-    return _match->endp[n] - _str.c_str();
+    if(n >= _size)
+        return 0;
+
+    return _match->startp[n] - _str->c_str();
 }
 
 
-bool RegexSMatch::has(unsigned n) const
+unsigned RegexSMatch::length(unsigned n) const
 {
-    return _match->startp[n] != 0;
+    if(n >= _size)
+        return 0;
+
+    return _match->endp[n] - _match->startp[n];
 }
 
 
-Pt::String RegexSMatch::get(unsigned n) const
+Pt::String RegexSMatch::str(unsigned n) const
 {
+    if(n >= _size)
+        return String();
+
     return Pt::String( _match->startp[n], _match->endp[n] );
 }
 
 
-  Pt::String RegexSMatch::format(const Pt::String& str) const
+Pt::String RegexSMatch::format(const Pt::String& str) const
+{
+  enum state_type
   {
-    enum state_type
-    {
-      state_0,
-      state_esc,
-      state_var0,
-      state_var1,
-      state_1
-    } state;
+    state_0,
+    state_esc,
+    state_var0,
+    state_var1,
+    state_1
+  } state;
 
-    state = state_0;
-    Pt::String ret;
+  state = state_0;
+  Pt::String ret;
 
-    for (Pt::String::const_iterator it = str.begin(); it != str.end(); ++it)
-    {
-      Char ch = *it;
-
-      switch (state)
-      {
-        case state_0:
-          if (ch == '$')
-            state = state_var0;
-          else if (ch == '\\')
-            state = state_esc;
-          break;
-
-        case state_esc:
-          ret += ch;
-          state = state_1;
-          break;
-
-        case state_var0:
-          if( isdigit(ch) )
-          {
-            ret = Pt::String(str.begin(), it - 1);
-            const Pt::Char* s = _match->startp[ch - '0'];
-            const Pt::Char* e = _match->endp[ch - '0'];
-
-            if (s != 0 && e != 0)
-              ret.append(s, e-s);
-
-              state = state_1;
-          }
-          else
-            state = state_0;
-          break;
-
-        case state_1:
-          if (ch == '$')
-            state = state_var1;
-          else if (ch == '\\')
-            state = state_esc;
-          else
-            ret += ch;
-          break;
-
-        case state_var1:
-          if( isdigit(ch) )
-          {
-            const Pt::Char* s = _match->startp[ch - '0'];
-            const Pt::Char* e = _match->endp[ch - '0'];
-
-            if (s != 0 && e != 0)
-              ret.append(s, e-s);
-
-            state = state_1;
-          }
-          else if (ch == '$')
-            ret += '$';
-          else
-          {
-            ret += '$';
-            ret += ch;
-          }
-          break;
-      }
-    }
+  for (Pt::String::const_iterator it = str.begin(); it != str.end(); ++it)
+  {
+    Char ch = *it;
 
     switch (state)
     {
       case state_0:
-      case state_var0:
-        return str;
+        if (ch == '$')
+          state = state_var0;
+        else if (ch == '\\')
+          state = state_esc;
+        break;
 
       case state_esc:
-        return ret + '\\';
+        ret += ch;
+        state = state_1;
+        break;
 
-      case state_var1:
-        return ret + '$';
+      case state_var0:
+        if( isdigit(ch) )
+        {
+          ret = Pt::String(str.begin(), it - 1);
+            
+          unsigned n = ch - '0';
+          if(n < _size)
+          {
+            const Pt::Char* s = _match->startp[n];
+            const Pt::Char* e = _match->endp[n];
+            assert(s && e);
+
+            ret.append(s, e-s);
+          }
+
+            state = state_1;
+        }
+        else
+          state = state_0;
+        break;
 
       case state_1:
-        return ret;
-    }
+        if (ch == '$')
+          state = state_var1;
+        else if (ch == '\\')
+          state = state_esc;
+        else
+          ret += ch;
+        break;
 
-    return ret;
+      case state_var1:
+        if( isdigit(ch) )
+        {
+          unsigned n = ch - '0';
+
+          if(n < _size)
+          {
+            const Pt::Char* s = _match->startp[n];
+            const Pt::Char* e = _match->endp[n];
+            assert(s && e);
+
+            ret.append(s, e-s);
+          }
+
+          state = state_1;
+        }
+        else if (ch == '$')
+          ret += '$';
+        else
+        {
+          ret += '$';
+          ret += ch;
+        }
+        break;
+    }
   }
 
+  switch (state)
+  {
+    case state_0:
+    case state_var0:
+      return str;
 
+    case state_esc:
+      return ret + '\\';
 
+    case state_var1:
+      return ret + '$';
+
+    case state_1:
+      return ret;
+  }
+
+  return ret;
 }
+
+} // namespace Pt

@@ -336,6 +336,8 @@ pt_regexp* regcomp( const CHARTYPE *exp )
     /*if ( DEBUG_PROFILE )
         profile_memory( sizeof(pt_regexp) + (unsigned)regsize );*/
 
+    rx->regrefs = 0;
+
     /* Second pass: emit code. */
     ///regparse = exp;
     state.regparse = exp;

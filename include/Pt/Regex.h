@@ -41,25 +41,14 @@ namespace Pt {
 
 class RegexSMatch;
 
-
-template <typename T>
-class RegexDestroyPolicy
-{
-    protected:
-        void destroy(T* expr)
-        {
-            std::free(expr);
-        }
-};
-
 /** @brief Invalid regular expression.
 
     @ingroup Unicode
 */
-class PT_API InvalidRegex : public std::invalid_argument
+class PT_API InvalidRegex : public std::runtime_error
 {
     public:
-        InvalidRegex(const std::string& s);
+        InvalidRegex(const char* msg);
 
         ~InvalidRegex() throw()
         {}
@@ -67,64 +56,86 @@ class PT_API InvalidRegex : public std::invalid_argument
 
 /** @brief Regular Expression for unicode strings.
 
+    The regular expression syntax is a subset of the extended POSIX syntax.
+    The following meta characters are supported: . ^ $ < > - [] () | ? + *.
+    Characters are escaped using \.
+
     @ingroup Unicode
 */
 class PT_API Regex
 {
-      SmartPtr<pt_regexp, ExternalRefCounted, RegexDestroyPolicy > _expr;
-
     public:
+        Regex();
+
         explicit Regex(const Pt::Char* ex);
 
         explicit Regex(const Pt::String& ex);
 
-        bool match(const Pt::String& str, RegexSMatch& smatch) const;
+        Regex(const Regex& other);
+
+        ~Regex();
+
+        Regex& operator=(const Regex& other);
+
+        /** @brief Matches the regular experession to a string.
+
+            The result @ sm holds pointers into the original string that was
+            matched and therefore should not be used after the original string
+            was destroyed.
+        */
+        bool match(const Pt::String& str, RegexSMatch& sm) const;
 
         bool match(const Pt::String& str) const;
 
-        void free()  { _expr = 0; }
+    private:
+        pt_regexp* _expr;
 };
 
 
-/// collects matches in a regex
+/** @brief Result of a regular expression match.
+
+    @ingroup Unicode
+*/
 class PT_API RegexSMatch
 {
     friend class Regex;
 
-    private:
-        Pt::String _str;
-        unsigned _size;
-        pt_regmatch_t* _match;
-
     public:
         RegexSMatch();
 
+        RegexSMatch(const RegexSMatch& other);
+
         ~RegexSMatch();
 
-        /// returns the number of expressions, which were found
+        RegexSMatch& operator=(const RegexSMatch& other);
+
+        bool empty() const;
+
+        /** @brief Returns the number of matches.
+        */
         unsigned size() const;
 
-        /// returns the start position of the n-th expression
-        unsigned offsetBegin(unsigned n) const;
+        unsigned maxSize() const;
 
-        /// returns the end position of the n-th expression
-        unsigned offsetEnd(unsigned n) const;
+        unsigned position(unsigned n = 0) const;
 
-        /// returns true if the n-th element is set.
-        bool has(unsigned n) const;
+        unsigned length(unsigned n = 0) const;
 
-        /// returns the n-th element. No range checking is done.
-        Pt::String get(unsigned n) const;
+        Pt::String str(unsigned n = 0) const;
 
-        /// replace each occurence of "$n" with the n-th element (n: 0..9).
+        /** @brief Formats a string according to a format specifier.
+
+            Each occurance of $N in the format specifying string @a str is
+            replaced with the N-th element of the match.
+        */
         Pt::String format(const Pt::String& str) const;
 
-        /// returns the n-th element. No range checking is done.
-        Pt::String operator[] (unsigned n) const
-        { return get(n); }
+    private:
+        const Pt::String* _str;
+        unsigned _size;
+        pt_regmatch_t* _match;
 };
 
-}
+} // namespace Pt
 
 #endif // PT_REGEX_H
-
