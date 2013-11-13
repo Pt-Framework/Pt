@@ -360,11 +360,10 @@ HttpBuffer::int_type HttpBuffer::underflow()
 
 std::streamsize HttpBuffer::showmanyc()
 {
-    // TODO: make sure Http::Connection can handle -1 returns...
-    //
-    // return 0 even if data is available, because we can't tell if its just
-    // header or if its the body. We return -1 if the underlying stream is
-    // EOF.
+    // TODO: return -1 if the underlying stream is EOF, otherwise return 
+    // always 0, because we can't tell if its the body or chunked encoding
+    // statements
+
     // return _sbuf && _sbuf->in_avail() >= 0 ? 0 : -1;
 
     return 0;

@@ -796,7 +796,7 @@ MessageProgress Connection::endReceiveRequest()
     endRead();
 
     // TODO: if we haven't read anything yet we maybe should not report is as
-    //       an error, the client might have run into a keepalive timeout. 
+    //       an error, the connection might have run into a keepalive timeout. 
     //       Might need another MessageProgress state to indicate CLOSED event
     if( _socket.eof() )
     {
@@ -836,6 +836,9 @@ MessageProgress Connection::endReceiveRequest()
     if( _parser.end() )
     {
         std::streamsize avail = _httpbuf.in_avail();
+
+        if(avail < 0)
+            throw HttpError("connection lost");
         
         _httpbuf.import();
         log_debug("bytes available: " << _httpbuf.in_avail());
@@ -911,13 +914,13 @@ MessageProgress Connection::endReceiveReply()
 
     log_debug("input available: " << inputAvailable());
 
+    if( _socket.eof() )
+    {
+        throw HttpError("connection lost");
+    }
+
     if ( ! _replyParser.end() )
     {
-        if( _socket.eof() )
-        {
-            throw HttpError("connection lost");
-        }
-        
         _replyParser.advance( *_httpbuf.buffer() );
 
         if( _replyParser.fail() )
@@ -941,6 +944,9 @@ MessageProgress Connection::endReceiveReply()
     if( _replyParser.end() )
     {
         std::streamsize avail = _httpbuf.in_avail();
+
+        if(avail < 0)
+            throw HttpError("connection lost");
         
         _httpbuf.import();
         log_debug("bytes available: " << _httpbuf.in_avail());
@@ -974,10 +980,6 @@ MessageProgress Connection::endReceiveReply()
 
                 //TODO: start SSL shutdown here
             }
-        }
-        else if( _socket.eof() )
-        {
-            throw HttpError("connection lost");
         }
     }
 

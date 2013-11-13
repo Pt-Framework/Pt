@@ -151,27 +151,27 @@ void Responder::beginMessage(std::istream& is)
 
 bool Responder::parseMessage()
 {
-    bool done = true;
-    
     try
     {
+        if(_isFault)
+            return true;
+        
         for(;;)
         {
             const Xml::Node* node = _reader.advance();
             if( ! node )
             {
-                done = false;
                 break;
             }
             
-            done = this->advance(*node);
+            bool done = this->advance(*node);
             if(done)
             {
-                break;
+                return true;
             }
         }
 
-        return done;
+        return false;
     }
     catch(const Xml::XmlError& error)
     {
@@ -194,7 +194,7 @@ bool Responder::parseMessage()
         _isFault = true;
     }
 
-    return done;
+    return true;
 }
 
 

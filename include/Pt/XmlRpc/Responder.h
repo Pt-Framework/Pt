@@ -106,8 +106,9 @@ class PT_XMLRPC_API Responder : private NonCopyable
 
             This method is used by derived responders to parse a XML-RPC
             message. Each call consumes the available data from the 
-            std::istream set with beginMessage() and returns true if the
-            result is complete.
+            std::istream set with beginMessage() and returns true if no more
+            message data needs to be parsed, either because the message is
+            complete or an error occured.
         */
         bool parseMessage();
 

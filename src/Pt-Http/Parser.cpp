@@ -118,19 +118,21 @@ namespace Http {
         _header->add(_key, value.c_str());
     }
 
-    std::size_t HeaderParser::advance(std::streambuf& sb)
+    void HeaderParser::advance(std::streambuf& sb)
     {
-        std::size_t ret = 0;
-
-        while (sb.in_avail() > 0)
+        std::streamsize avail = sb.in_avail();
+        
+        if(avail < 0)
         {
-            ++ret;
-            if (parse(sb.sbumpc()))
-                return ret;
+            state = &HeaderParser::state_error;
         }
 
-        return ret;
-    }
+        while(avail > 0)
+        {
+            if( parse(sb.sbumpc()) )
+                break;
+        }
+   }
 
     void HeaderParser::state_cmd0(char ch)
     {

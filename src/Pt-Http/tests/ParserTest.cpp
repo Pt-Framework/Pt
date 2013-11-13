@@ -61,10 +61,9 @@ class ParserTest : public Pt::Unit::TestSuite, private Pt::Http::HeaderParser::E
 
             std::istringstream msg("GET /foo HTTP/1.0\r\n\r\n");
 
-            bool end = parser.advance(msg) != 0;
+            parser.advance(msg);
 
             PT_UNIT_ASSERT(parser.end());
-            PT_UNIT_ASSERT(end);
             PT_UNIT_ASSERT(!parser.fail());
             PT_UNIT_ASSERT_EQUALS(std::size_t( msg.tellg() ), msg.str().size());
             PT_UNIT_ASSERT_EQUALS(events.str(), "M(GET)U(/foo)V(1.0)E()");
@@ -76,10 +75,9 @@ class ParserTest : public Pt::Unit::TestSuite, private Pt::Http::HeaderParser::E
 
             std::istringstream msg("GET /foo HTTP/1.0\r\nUser-Agent: Pt-Unit\nContent-Size:47\r\n\r\n");
 
-            bool end = parser.advance(msg) != 0;
+            parser.advance(msg);
 
             PT_UNIT_ASSERT(parser.end());
-            PT_UNIT_ASSERT(end);
             PT_UNIT_ASSERT(!parser.fail());
             PT_UNIT_ASSERT_EQUALS(std::size_t( msg.tellg() ), msg.str().size());
             PT_UNIT_ASSERT_EQUALS(events.str(), "M(GET)U(/foo)V(1.0)K(User-Agent)H(Pt-Unit)K(Content-Size)H(47)E()");
@@ -91,10 +89,9 @@ class ParserTest : public Pt::Unit::TestSuite, private Pt::Http::HeaderParser::E
 
             std::istringstream msg("GET /foo HTTP/1.0\r\nContent-Size:47\nFoo:line1\r\n line2\n line3\nBar:bar\r\n\r\n");
 
-            bool end = parser.advance(msg) != 0;
+            parser.advance(msg);
 
             PT_UNIT_ASSERT(parser.end());
-            PT_UNIT_ASSERT(end);
             PT_UNIT_ASSERT(!parser.fail());
             PT_UNIT_ASSERT_EQUALS(std::size_t( msg.tellg() ), msg.str().size());
             PT_UNIT_ASSERT_EQUALS(events.str(), "M(GET)U(/foo)V(1.0)K(Content-Size)H(47)K(Foo)H(line1 line2 line3)K(Bar)H(bar)E()");
@@ -106,10 +103,9 @@ class ParserTest : public Pt::Unit::TestSuite, private Pt::Http::HeaderParser::E
 
             std::istringstream msg("PUT   /foo   HTTP  /  1  .  0  \r\n  Content-Size  :  47  \r\n\r\n");
 
-            bool end = parser.advance(msg) != 0;
+            parser.advance(msg);
 
             PT_UNIT_ASSERT(parser.end());
-            PT_UNIT_ASSERT(end);
             PT_UNIT_ASSERT(!parser.fail());
             PT_UNIT_ASSERT_EQUALS(std::size_t( msg.tellg() ), msg.str().size());
             PT_UNIT_ASSERT_EQUALS(events.str(), "M(PUT)U(/foo)V(1.0)K(Content-Size)H(47  )E()");
@@ -121,10 +117,9 @@ class ParserTest : public Pt::Unit::TestSuite, private Pt::Http::HeaderParser::E
 
             std::istringstream msg("GET /foo+bar?a=4&b=Hello+World HTTP/1.1\r\n\r\n");
 
-            bool end = parser.advance(msg) != 0;
+            parser.advance(msg);
 
             PT_UNIT_ASSERT(parser.end());
-            PT_UNIT_ASSERT(end);
             PT_UNIT_ASSERT(!parser.fail());
             PT_UNIT_ASSERT_EQUALS(std::size_t( msg.tellg() ), msg.str().size());
             PT_UNIT_ASSERT_EQUALS(events.str(), "M(GET)U(/foo bar)Q(a=4&b=Hello+World)V(1.1)E()");
@@ -136,10 +131,9 @@ class ParserTest : public Pt::Unit::TestSuite, private Pt::Http::HeaderParser::E
 
             std::istringstream msg("HTTP/1.1 200 OK\r\nConnection:close\nContent-Type : text/xml\r\n\r\n");
 
-            bool end = parser.advance(msg) != 0;
+            parser.advance(msg);
 
             PT_UNIT_ASSERT(parser.end());
-            PT_UNIT_ASSERT(end);
             PT_UNIT_ASSERT(!parser.fail());
             PT_UNIT_ASSERT_EQUALS(std::size_t( msg.tellg() ), msg.str().size());
             PT_UNIT_ASSERT_EQUALS(events.str(), "V(1.1)R(200,OK)K(Connection)H(close)K(Content-Type)H(text/xml)E()");

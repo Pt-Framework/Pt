@@ -131,10 +131,10 @@ class PT_HTTP_API HeaderParser
             { }
 
         /// parse as many characters as available in buffer without blocking
-        std::size_t advance(std::streambuf& sb);
+        void advance(std::streambuf& sb);
 
-        std::size_t advance(std::istream& is)
-        { return advance(*is.rdbuf()); }
+        void advance(std::istream& is)
+        { advance(*is.rdbuf()); }
 
         /// parses a single character and returns true, if message is finished
         bool parse(char ch)

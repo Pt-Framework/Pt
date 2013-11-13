@@ -52,6 +52,7 @@ HttpResponder::~HttpResponder()
 }
 
 
+// pass only ReplyHeader and body stream
 void HttpResponder::onBeginRequest(Http::Request& request, Http::Reply& reply, System::EventLoop& loop)
 {
     // _reply != 0 means that request was completely parsed
@@ -61,14 +62,17 @@ void HttpResponder::onBeginRequest(Http::Request& request, Http::Reply& reply, S
 }
 
 
+// pass only ReplyHeader and body stream
 void HttpResponder::onReadRequest(Http::Request& request, Http::Reply& reply, System::EventLoop& loop)
 {
     bool done = parseMessage();
-    if( done )
-    {
-        _reply = &reply;
-        finishMessage(loop);
-    }
+
+    // remove this
+    //if( done )
+    //{
+    //    _reply = &reply;
+    //    finishMessage(loop);
+    //}
 }
 
 
