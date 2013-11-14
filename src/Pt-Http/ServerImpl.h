@@ -92,11 +92,7 @@ class Acceptor : public Pt::Connectable
 
         void onAuthorization(Authorization& auth);
 
-        bool onRequestBegin();
-
-        bool onRequestBody();
-
-        bool onRequestFinished();
+        void onRequest(MessageProgress progress);
 
         void onReplySent(Reply& r);
 

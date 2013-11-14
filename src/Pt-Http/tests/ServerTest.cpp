@@ -63,10 +63,10 @@ class HelloResponder : public Pt::Http::Responder
         virtual void onReadRequest(Pt::Http::Request& request, Pt::Http::Reply& reply, Pt::System::EventLoop& loop)
         {}
 
-        virtual void onBeginReply(Pt::Http::Request& request, Pt::Http::Reply& reply, Pt::System::EventLoop& loop)
+        virtual void onBeginReply(const Pt::Http::Request& request, Pt::Http::Reply& reply, Pt::System::EventLoop& loop)
         { onWriteReply(request, reply, loop); }
 
-        virtual void onWriteReply(Pt::Http::Request& request, Pt::Http::Reply& reply, Pt::System::EventLoop& loop)
+        virtual void onWriteReply(const Pt::Http::Request& request, Pt::Http::Reply& reply, Pt::System::EventLoop& loop)
         {
             reply.body() << "Hello World!";
             reply.beginSend(true);
@@ -89,10 +89,10 @@ class ChunkedResponder : public Pt::Http::Responder
         virtual void onReadRequest(Pt::Http::Request& request, Pt::Http::Reply& reply, Pt::System::EventLoop& loop)
         {}
 
-        virtual void onBeginReply(Pt::Http::Request& request, Pt::Http::Reply& reply, Pt::System::EventLoop& loop)
+        virtual void onBeginReply(const Pt::Http::Request& request, Pt::Http::Reply& reply, Pt::System::EventLoop& loop)
         { onWriteReply(request, reply, loop); }
 
-        virtual void onWriteReply(Pt::Http::Request& request, Pt::Http::Reply& reply, Pt::System::EventLoop& loop)
+        virtual void onWriteReply(const Pt::Http::Request& request, Pt::Http::Reply& reply, Pt::System::EventLoop& loop)
         {
             reply.body() << "Chunk" << _chunks--;
 

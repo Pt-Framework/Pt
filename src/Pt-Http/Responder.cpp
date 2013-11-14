@@ -70,13 +70,13 @@ void Responder::readRequest(Request& request, Reply& reply, System::EventLoop& l
 }
 
 
-void Responder::beginReply(Request& request, Reply& reply, System::EventLoop& loop)
+void Responder::beginReply(const Request& request, Reply& reply, System::EventLoop& loop)
 { 
     onBeginReply(request, reply, loop);
 }
 
 
-void Responder::writeReply(Request& request, Reply& reply, System::EventLoop& loop)
+void Responder::writeReply(const Request& request, Reply& reply, System::EventLoop& loop)
 { 
     onWriteReply(request, reply, loop); 
 }

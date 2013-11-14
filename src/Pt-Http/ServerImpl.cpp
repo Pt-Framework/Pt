@@ -103,9 +103,9 @@ void Acceptor::onRequestReceived(Request& req)
     
     try
     {
-        MessageProgress progress = _request.endReceive();
+        _requestProgress = _request.endReceive();
         
-        if( progress.header() )
+        if( _requestProgress.header() )
         {
             log_debug("received request header");
 
@@ -128,7 +128,6 @@ void Acceptor::onRequestReceived(Request& req)
                 if(_auth)
                 {
                     log_debug("authorization started");
-                    _requestProgress = progress;
                     _auth->beginAuthorize(_request, _reply);
                     _auth->finished() += Pt::slot(*this, &Acceptor::onAuthorization);
                     return;
@@ -147,25 +146,9 @@ void Acceptor::onRequestReceived(Request& req)
 
                 log_debug("access immediately granted");
             }
-
-            if( ! this->onRequestBegin() )
-                return;
         }
     
-        if( progress.body() )
-        {     
-            if( ! this->onRequestBody() )
-                return;
-        }
-
-        if( progress.finished() )
-        {
-            if( ! this->onRequestFinished() )
-                return;
-        }
-
-        log_debug("read request");
-        _request.beginReceive();
+        onRequest(_requestProgress);
     }
     catch(const System::IOError& e) // TODO: HttpError is also an IOError
     {
@@ -195,23 +178,7 @@ void Acceptor::onAuthorization(Authorization& auth)
         }
         else
         {
-            if( ! this->onRequestBegin() )
-                return;
-
-            if( _requestProgress.body() )
-            {     
-                if( ! this->onRequestBody() )
-                    return;
-            }
-
-            if( _requestProgress.finished() )
-            {
-                if( ! this->onRequestFinished() )
-                    return;
-            }
-
-            log_debug("read request");
-            _request.beginReceive();
+            onRequest(_requestProgress);
         }
     }
     catch(const System::IOError& e) // TODO: HttpError is also an IOError
@@ -225,66 +192,69 @@ void Acceptor::onAuthorization(Authorization& auth)
 }
 
 
-bool Acceptor::onRequestBegin()
-{   
-    assert(_responder == 0);
-    _responder = _servlet->service()->getResponder( _request );
+void Acceptor::onRequest(MessageProgress progress)
+{
+    log_trace("Acceptor::onRequest");
+
+    if( progress.header() )
+    {
+        log_debug("received request header");
+        assert(_responder == 0);
+        _responder = _servlet->service()->getResponder( _request );
             
-    assert(_responder);
-    _responder->beginRequest( _request, _reply, *_conn.loop() );
-
-    if( _reply.isSending() )
-    {
-        log_debug("request interrupted");
-        return false;
-    }
-
-    return true;
-}
-
-
-bool Acceptor::onRequestBody()
-{      
-    if( _responder)
-    {
-        log_debug("reading request");
-        _responder->readRequest(_request, _reply, *_conn.loop());
+        assert(_responder);
+        _responder->beginRequest( _request, _reply, *_conn.loop() );
 
         if( _reply.isSending() )
         {
             log_debug("request interrupted");
-            return false;
+            return;
         }
     }
-    else
-    {
-        log_debug("ignoring request body");
-        _request.discard();
+    
+    if( progress.body() )
+    {     
+        if( _responder)
+        {
+            log_debug("received request body");
+            _responder->readRequest(_request, _reply, *_conn.loop());
+
+            if( _reply.isSending() )
+            {
+                log_debug("request interrupted");
+                return;
+            }
+        }
+        else
+        {
+            // no responder means that request was interruped and will be ignored
+            log_debug("ignoring request body");
+            _request.discard();
+        }
     }
 
-    return true;
-}
-
-
-bool Acceptor::onRequestFinished()
-{
-    if( ! _conn.isConnected() )
+    if( progress.finished() )
     {
-        log_debug("not connected anymore");
-        _finished.send(*this);
-        return false;
+        if( ! _conn.isConnected() )
+        {
+            log_debug("not connected anymore");
+            _finished.send(*this);
+            return;
+        }
+
+        if(_responder)
+        {
+            log_debug("request body finished, begin reply");
+            _responder->beginReply(_request, _reply, *_conn.loop());
+            return;
+        }
+
+        // if there is no responder, the reply was finished before the request was
+        // read completely. In this case the remaining request will be ignored
     }
 
-    if(_responder)
-    {
-        log_debug("request body finished, begin reply");
-        _responder->beginReply(_request, _reply, *_conn.loop());
-        return false;
-    }
-
-    // if there is no responder, the reply was already sent, because a 
-    // request, interrupted at an early stage, was just finished
-    return true;
+    log_debug("read request");
+    _request.beginReceive();
 }
 
 
@@ -304,29 +274,38 @@ void Acceptor::onReplySent(Reply& r)
             return;
         }
 
-        if( ! _reply.isFinished() )
+        if( _reply.isFinished() )
         {
-            log_debug("continuing response");
-            _reply.discard();
-            assert(_responder);
-            _responder->writeReply(_request, _reply, *_conn.loop());
+            log_debug("response finished");
+
+            releaseResponder();
+            _reply.clear();
+            _request.clear();
+
+            if( ! _conn.isConnected() )
+            {
+                log_debug("not connected anymore");
+                _finished.send(*this);
+                return;
+            }
+
+            _request.beginReceive();
             return;
         }
 
-        log_debug("response finished");
-
-        releaseResponder();
-        _reply.clear();
-        _request.clear();
-
-        if( ! _conn.isConnected() )
+        // reply chunks are written while reading request
+        if( ! _requestProgress.finished() )
         {
-            log_debug("not connected anymore");
-            _finished.send(*this);
+            log_debug("continuing request");
+            _request.beginReceive();
             return;
         }
 
-        _request.beginReceive();
+        log_debug("continuing response");
+        _reply.discard();
+        assert(_responder);
+
+        _responder->writeReply(_request, _reply, *_conn.loop());
     }
     catch(const System::IOError& e) // TODO: HttpError is also an IOError
     {

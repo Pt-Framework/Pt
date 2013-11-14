@@ -53,9 +53,8 @@ HttpResponder::~HttpResponder()
 
 
 // pass only ReplyHeader and body stream
-void HttpResponder::onBeginRequest(Http::Request& request, Http::Reply& reply, System::EventLoop& loop)
+void HttpResponder::onBeginRequest(Http::Request& request, Pt::Http::Reply& reply, System::EventLoop& loop)
 {
-    // _reply != 0 means that request was completely parsed
     _reply = 0;
     
     beginMessage( request.body() );
@@ -63,31 +62,20 @@ void HttpResponder::onBeginRequest(Http::Request& request, Http::Reply& reply, S
 
 
 // pass only ReplyHeader and body stream
-void HttpResponder::onReadRequest(Http::Request& request, Http::Reply& reply, System::EventLoop& loop)
+void HttpResponder::onReadRequest(Http::Request& request, Pt::Http::Reply& reply, System::EventLoop& loop)
 {
-    bool done = parseMessage();
-
-    // remove this
-    //if( done )
-    //{
-    //    _reply = &reply;
-    //    finishMessage(loop);
-    //}
+    parseMessage();
 }
 
 
-void HttpResponder::onBeginReply(Http::Request& request, Http::Reply& reply, System::EventLoop& loop)
+void HttpResponder::onBeginReply(const Http::Request& request, Http::Reply& reply, System::EventLoop& loop)
 {
-    // _reply != 0 means that finishMessage() was already called
-    if( ! _reply )
-    {
-        _reply = &reply;
-        finishMessage(loop);
-    }
+    _reply = &reply;
+    finishMessage(loop);
 }
 
 
-void HttpResponder::onWriteReply(Http::Request& request, Http::Reply& reply, System::EventLoop& loop)
+void HttpResponder::onWriteReply(const Http::Request& request, Http::Reply& reply, System::EventLoop& loop)
 {
     while( ! advanceResult() )
     {

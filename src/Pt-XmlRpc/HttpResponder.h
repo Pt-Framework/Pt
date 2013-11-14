@@ -48,16 +48,16 @@ class PT_XMLRPC_API HttpResponder : public Http::Responder
 
     protected:
         // inheritdoc
-        void onBeginRequest(Http::Request& request, Http::Reply& reply, System::EventLoop& loop);
+        void onBeginRequest(Http::Request& request, Pt::Http::Reply& reply, System::EventLoop& loop);
 
         // inheritdoc
-        void onReadRequest(Http::Request& request, Http::Reply& reply, System::EventLoop& loop);
+        void onReadRequest(Http::Request& request, Pt::Http::Reply& reply, System::EventLoop& loop);
 
         // inheritdoc
-        void onBeginReply(Http::Request& request, Http::Reply& reply, System::EventLoop& loop);
+        void onBeginReply(const Http::Request& request, Http::Reply& reply, System::EventLoop& loop);
 
         // inheritdoc
-        void onWriteReply(Http::Request& request, Http::Reply& reply, System::EventLoop& loop);
+        void onWriteReply(const Http::Request& request, Http::Reply& reply, System::EventLoop& loop);
 
     protected:
         // inheritdoc

@@ -60,18 +60,18 @@ class PT_HTTP_API Responder
         
         void readRequest(Request& request, Reply& reply, System::EventLoop& loop);
 
-        void beginReply(Request& request, Reply& reply, System::EventLoop& loop);
+        void beginReply(const Request& request, Reply& reply, System::EventLoop& loop);
 
-        void writeReply(Request& request, Reply& reply, System::EventLoop& loop);
+        void writeReply(const Request& request, Reply& reply, System::EventLoop& loop);
 
     protected:
         virtual void onBeginRequest(Request& request, Reply& reply, System::EventLoop& loop) = 0;
         
         virtual void onReadRequest(Request& request, Reply& reply, System::EventLoop& loop) = 0;
 
-        virtual void onBeginReply(Request& request, Reply& reply, System::EventLoop& loop) = 0;
+        virtual void onBeginReply(const Request& request, Reply& reply, System::EventLoop& loop) = 0;
 
-        virtual void onWriteReply(Request& request, Reply& reply, System::EventLoop& loop) = 0;
+        virtual void onWriteReply(const Request& request, Reply& reply, System::EventLoop& loop) = 0;
 
     private:
         Service& _service;
