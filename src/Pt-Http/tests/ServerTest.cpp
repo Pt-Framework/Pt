@@ -129,6 +129,7 @@ class ServerTest : public Pt::Unit::TestSuite
             this->registerMethod( "ReplyWithBody", *this, &ServerTest::ReplyWithBody);
             this->registerMethod( "ChunkedReply", *this, &ServerTest::ChunkedReply);
             this->registerMethod( "PipelinedRequests", *this, &ServerTest::PipelinedRequests);
+            //this->registerMethod( "MaxRequestSize", *this, &ServerTest::MaxRequestSize);
         }
 
         void setUp()
@@ -151,6 +152,42 @@ class ServerTest : public Pt::Unit::TestSuite
         {
             delete loop;
         }
+
+        void MaxRequestSize()
+        {
+            HelloService service;
+
+            Pt::Http::Server server(*loop, "127.0.0.1", 8001);
+            server.setMaxRequestSize(5);
+
+            Pt::Http::MapUrl mapurl("/test", service);
+            server.addServlet(mapurl);
+
+            Pt::Http::Client client(*loop, "127.0.0.1", 8001);
+            client.replyReceived() += Pt::slot(*this, &ServerTest::onMaxRequestSizeReply);
+            client.request().setUrl("/test");
+            client.request().header().set("foo", "bar");
+            client.request().body() << "Hello World";
+            client.beginReceive();
+
+            loop->run();
+            PT_UNIT_ASSERT_EQUALS(client.reply().statusCode(), 500);
+            PT_UNIT_ASSERT_EQUALS(_reply, "Hello World!");
+        }
+
+        void onMaxRequestSizeReply(Pt::Http::Client& client)
+        {
+            Pt::Http::MessageProgress progress = client.endReceive();
+
+            if( progress.finished() )
+            {
+                loop->exit();
+                return;
+            }
+
+            client.beginReceive();
+        }
+
 
         void PipelinedRequests()
         {

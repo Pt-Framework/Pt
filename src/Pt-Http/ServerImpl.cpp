@@ -489,6 +489,7 @@ ServerImpl::ServerImpl()
 , _useWorker(0)
 , _timeout(30000)
 , _keepAliveTimeout(30000)
+, _maxRequestSize( std::numeric_limits<std::size_t>::max() )
 {
     _serverSocket.connectionPending() += Pt::slot(*this, &ServerImpl::onAccept);
 }
@@ -688,6 +689,7 @@ void ServerImpl::onAccept(Net::TcpServer& server)
     log_debug("handler timeouts: " << _timeout << ", " << _keepAliveTimeout);
     handler->setTimeout(_timeout);
     handler->setKeepAliveTimeout(_keepAliveTimeout);
+    handler->setMaxReadSize(_maxRequestSize);
 
     if( _useWorker < _serverThreads.size() ) // worker thread
     {

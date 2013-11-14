@@ -115,6 +115,10 @@ class PT_HTTP_API Server : public Connectable
 
         void setKeepAliveTimeout(std::size_t ms);
 
+        std::size_t maxRequestSize() const;
+
+        void setMaxRequestSize(std::size_t maxSize);
+
         void listen(const std::string& ip, unsigned short int port, const Options& options = Options());
 
         void listen(const Net::Endpoint& addr, const Options& options = Options());

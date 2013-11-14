@@ -110,6 +110,18 @@ void Server::setKeepAliveTimeout(std::size_t ms)
 }
 
 
+std::size_t Server::maxRequestSize() const
+{
+    return _impl->maxRequestSize();
+}
+
+
+void Server::setMaxRequestSize(std::size_t maxSize)
+{
+    _impl->setMaxRequestSize(maxSize);
+}
+
+
 void Server::listen(const Pt::Net::Endpoint& addr, const Options& options)
 {
     _impl->listen(addr, options);

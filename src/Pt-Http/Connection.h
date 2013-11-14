@@ -194,6 +194,9 @@ class Connection : public Connectable
         void setKeepAliveTimeout(std::size_t timeout)
         { _keepaliveTimeout = timeout; }
 
+        void setMaxReadSize(std::size_t maxSize)
+        { _maxReadSize = maxSize; }
+
         bool isConnected() const
         { return _socket.isConnected(); }
 
@@ -277,6 +280,8 @@ class Connection : public Connectable
 
         std::size_t _timeout;
         std::size_t _keepaliveTimeout;
+        std::size_t _maxReadSize;
+        std::size_t _readSize;
         std::streamsize _readBytes;
 
         enum State

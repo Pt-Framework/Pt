@@ -85,6 +85,8 @@ Connection::Connection()
 , _os(&_sockbuf)
 , _timeout(WaitInfinite)
 , _keepaliveTimeout(WaitInfinite)
+, _maxReadSize( std::numeric_limits<std::size_t>::max() )
+, _readSize(0)
 , _readBytes(0)
 , _state(NotConnected)
 , _chunked(false)
@@ -178,6 +180,7 @@ void Connection::cancel()
 {
     log_debug("cancelling connection");
     _timer.stop();
+    _readSize = 0;
     _readBytes = 0;
     _socket.close();
     _sockbuf.discard();
@@ -740,7 +743,9 @@ void Connection::beginReceiveRequest(Request& request)
 
     if( _parser.begin() )
     {
+        _readSize = 0;
         _readBytes = 0;
+
         if(_keepAlive)
         {
             log_debug("use keep alive timeout: " << _keepaliveTimeout);
@@ -844,6 +849,13 @@ MessageProgress Connection::endReceiveRequest()
         log_debug("bytes available: " << _httpbuf.in_avail());
         
         _readBytes += _httpbuf.in_avail() - avail;
+        _readSize += _readBytes; // TODO: handle overflow?
+
+        if(_readSize > _maxReadSize)
+        {
+            throw HttpError("request too large");
+        }
+
         if(_readBytes >= 8192)
         {
             _readBytes = 0;
@@ -859,6 +871,7 @@ MessageProgress Connection::endReceiveRequest()
             progress.setFinished();
 
             _timer.stop();
+            _readSize = 0;
             _readBytes = 0;
             _parser.reset(false);
         }
@@ -886,6 +899,7 @@ void Connection::beginReceiveReply(Reply& r)
 
     if( _replyParser.begin() )
     {
+        _readSize = 0;
         _readBytes = 0;
         _timer.start( _timeout );
     }
@@ -952,6 +966,13 @@ MessageProgress Connection::endReceiveReply()
         log_debug("bytes available: " << _httpbuf.in_avail());
         
         _readBytes += _httpbuf.in_avail() - avail;
+        _readSize += _readBytes; // TODO: handle overflow?
+
+        if(_readSize > _maxReadSize)
+        {
+            throw HttpError("reply too large");
+        }
+        
         if(_readBytes >= 8192)
         {
             _readBytes = 0;
@@ -971,6 +992,7 @@ MessageProgress Connection::endReceiveReply()
             _reply = 0;
             _replyParser.reset(true);
             _timer.stop();
+            _readSize = 0;
             _readBytes = 0;
 
             if( ! keepalive )

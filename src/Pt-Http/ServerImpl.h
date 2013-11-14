@@ -77,6 +77,9 @@ class Acceptor : public Pt::Connectable
         void setKeepAliveTimeout(std::size_t timeout)
         { _conn.setKeepAliveTimeout(timeout); }
 
+        void setMaxReadSize(std::size_t maxSize)
+        { _conn.setMaxReadSize(maxSize); }
+
         void beginServe(System::EventLoop& loop);
 
         Signal<Acceptor&>& finished()
@@ -221,6 +224,12 @@ class ServerImpl : public Connectable
         void setKeepAliveTimeout(std::size_t ms)
         { _keepAliveTimeout = ms; }
 
+        std::size_t maxRequestSize() const
+        { return _maxRequestSize; }
+
+        void setMaxRequestSize(std::size_t maxSize)
+        { _maxRequestSize = maxSize; }
+
         void listen(const Pt::Net::Endpoint& addr, const Server::Options& options);
 
         void cancel();
@@ -268,6 +277,7 @@ class ServerImpl : public Connectable
         unsigned _useWorker;
         std::size_t _timeout;
         std::size_t _keepAliveTimeout;
+        std::size_t _maxRequestSize;
         System::ReadWriteMutex _serviceMutex;
         typedef std::vector<ServletListEntry> ServletList;
         ServletList _servlets;
