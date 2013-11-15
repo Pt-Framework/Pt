@@ -31,6 +31,7 @@
 #include <Pt/Http/Service.h>
 #include <Pt/Http/Responder.h>
 #include <Pt/Http/Authorizer.h>
+#include <Pt/Http/HttpError.h>
 #include <Pt/System/Logger.h>
 #include <memory>
 #include <cassert>
@@ -97,9 +98,6 @@ void Acceptor::beginServe(System::EventLoop& loop)
 void Acceptor::onRequestReceived(Request& req)
 {
     log_trace("Acceptor::onRequestReceived");
-
-    // TODO: error reply on HTTP related exceptions
-    // replyError();
     
     try
     {
@@ -150,7 +148,14 @@ void Acceptor::onRequestReceived(Request& req)
     
         onRequest(_requestProgress);
     }
-    catch(const System::IOError& e) // TODO: HttpError is also an IOError
+    catch(const HttpError& e)
+    {
+        log_warn("EXCEPTION: " << e.what());
+
+        replyError();
+        _finished.send(*this);
+    }
+    catch(const System::IOError& e)
     {
         log_warn("EXCEPTION: " << e.what());
         _finished.send(*this);
@@ -181,12 +186,16 @@ void Acceptor::onAuthorization(Authorization& auth)
             onRequest(_requestProgress);
         }
     }
-    catch(const System::IOError& e) // TODO: HttpError is also an IOError
+    catch(const HttpError& e)
     {
         log_warn("EXCEPTION: " << e.what());
 
-        // TODO: error reply on HTTP related exceptions
-        // replyError();
+        replyError();
+        _finished.send(*this);
+    }
+    catch(const System::IOError& e) 
+    {
+        log_warn("EXCEPTION: " << e.what());
         _finished.send(*this);
     }
 }
@@ -319,10 +328,10 @@ void Acceptor::replyError()
 {
     _reply.clear();
 
-    _reply.setStatus(500, "internal server error");
+    _reply.setStatus(400, "Bad Request");
     _reply.header().set("Content-Type", "text/plain");
     _reply.header().set("Connection", "close");
-    _reply.body() << "Error 500: Internal server error.";
+    _reply.body() << "Error 400: Bad Request.";
 
     _reply.beginSend(true);
 }

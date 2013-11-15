@@ -142,13 +142,15 @@ void IOBufferImpl::onRead(IOBuffer& sb)
 }
 
 
-void IOBufferImpl::endRead(IOBuffer& sb)
+size_t IOBufferImpl::endRead(IOBuffer& sb)
 {
     size_t readSize = _ioDevice->endRead();
 
     sb.setg(sb.eback(),             // start of get area
             sb.gptr(),              // gptr position
             sb.egptr() + readSize); // end of get area
+
+    return readSize;
 }
 
 

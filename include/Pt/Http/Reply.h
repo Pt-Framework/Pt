@@ -43,6 +43,18 @@ class PT_HTTP_API Reply : public Message
     friend class Connection;
 
     public:
+        enum StatusCode
+        {
+            Continue = 100,
+            OK = 200,
+            MultipleChoices = 300,
+            BadRequest = 400,
+            Unauthorized = 401,
+            RequestEntityTooLarge = 413,
+            InternalServerError = 500
+        };
+
+    public:
         explicit Reply(Http::Connection& conn)
         : Message(conn)
         , _statusCode(200)

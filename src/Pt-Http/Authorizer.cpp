@@ -166,7 +166,7 @@ Authorization* BasicAuthorizer::onBeginAuthorize(const Request& req, Reply& repl
 
     if( ! author && ! granted )
     {
-        reply.setStatus(401, "Authorization Required");
+        reply.setStatus(Reply::Unauthorized, "Authorization Required");
         reply.header().set("WWW-Authenticate", ("Basic realm=\"" + realm() + '"').c_str());
     }
 

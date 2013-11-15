@@ -85,7 +85,7 @@ Connection::Connection()
 , _os(&_sockbuf)
 , _timeout(WaitInfinite)
 , _keepaliveTimeout(WaitInfinite)
-, _maxReadSize( std::numeric_limits<std::size_t>::max() )
+, _maxReadSize( NoRequestSizeLimit )
 , _readSize(0)
 , _readBytes(0)
 , _state(NotConnected)
@@ -376,7 +376,7 @@ void Connection::beginSendRequest(Request& request)
         }
         
         if( ! _sslbuf.isConnected() )
-            throw System::IOError("HTTP I/O error");
+            throw HttpError("HTTP I/O error");
 
         log_debug("Handshake finished");
         _timer.stop();
@@ -402,7 +402,7 @@ void Connection::beginSendRequest(Request& request)
         }
         
         if( ! _sslbuf.isConnected() )
-            throw System::IOError("HTTP I/O error");
+            throw HttpError("HTTP I/O error");
             
         log_debug("Handshake finished");
         _timer.stop();
@@ -476,7 +476,7 @@ MessageProgress Connection::endSendRequest()
     MessageProgress progress;
 
     if(_onTimeout)
-        throw System::IOError("timeout");
+        throw HttpError("timeout");
 
     if(_state == NotConnected)
     {
@@ -611,7 +611,7 @@ MessageProgress Connection::endSendReply()
     MessageProgress progress;
     
     if(_onTimeout)
-        throw System::IOError("timeout");
+        throw HttpError("timeout");
         
     if( ! _reply->isFinished() || ! _keepAlive)
     {
@@ -690,7 +690,7 @@ void Connection::beginReceiveRequest(Request& request)
         }
 
         if( ! _sslbuf.isConnected() )
-            throw System::IOError("HTTP I/O error");
+            throw HttpError("HTTP I/O error");
 
         log_debug("Handshake finished");
         _timer.stop();
@@ -716,7 +716,7 @@ void Connection::beginReceiveRequest(Request& request)
         }
         
         if( ! _sslbuf.isConnected() )
-            throw System::IOError("HTTP I/O error");
+            throw HttpError("HTTP I/O error");
         
         log_debug("Handshake finished");
         _timer.stop();
@@ -768,7 +768,7 @@ MessageProgress Connection::endReceiveRequest()
     MessageProgress progress;
 
     if(_onTimeout)
-        throw System::IOError("timeout");
+        throw HttpError("timeout");
 
 #ifdef PT_HTTP_WITH_SSL
    
@@ -847,21 +847,7 @@ MessageProgress Connection::endReceiveRequest()
         
         _httpbuf.import();
         log_debug("bytes available: " << _httpbuf.in_avail());
-        
-        _readBytes += _httpbuf.in_avail() - avail;
-        _readSize += _readBytes; // TODO: handle overflow?
-
-        if(_readSize > _maxReadSize)
-        {
-            throw HttpError("request too large");
-        }
-
-        if(_readBytes >= 8192)
-        {
-            _readBytes = 0;
-            _timer.start(_timeout);
-        }
-        
+               
         if(_httpbuf.in_avail() > 0)
             progress.setBody();
 
@@ -914,7 +900,7 @@ MessageProgress Connection::endReceiveReply()
     MessageProgress progress;
 
     if(_onTimeout)
-        throw System::IOError("timeout");
+        throw HttpError("timeout");
 
     if(_state == RequestOutputPending)
     {
@@ -964,20 +950,6 @@ MessageProgress Connection::endReceiveReply()
         
         _httpbuf.import();
         log_debug("bytes available: " << _httpbuf.in_avail());
-        
-        _readBytes += _httpbuf.in_avail() - avail;
-        _readSize += _readBytes; // TODO: handle overflow?
-
-        if(_readSize > _maxReadSize)
-        {
-            throw HttpError("reply too large");
-        }
-        
-        if(_readBytes >= 8192)
-        {
-            _readBytes = 0;
-            _timer.start(_timeout);
-        }
 
         if(_httpbuf.in_avail() > 0)
             progress.setBody();
@@ -1115,7 +1087,8 @@ void Connection::beginRead()
 void Connection::endRead()
 {
     // TODO: do not call endRead if data was available
-    _sockbuf.endRead();
+
+    std::size_t readSize = _sockbuf.endRead();
 
 #ifdef PT_HTTP_WITH_SSL
     if(_ssl)
@@ -1123,6 +1096,25 @@ void Connection::endRead()
         _sslbuf.import();
     }
 #endif
+
+    _readBytes += readSize;
+
+    if(_maxReadSize != NoRequestSizeLimit)
+    {
+        _readSize += readSize; // TODO: handle overflow?
+
+        if(_readSize > _maxReadSize)
+        {
+            log_warn("request too large");
+            throw HttpError("request too large");
+        }
+    }
+
+    if(_readBytes >= 8192)
+    {
+        _readBytes = 0;
+        _timer.start(_timeout);
+    }
 }
 
 
@@ -1187,7 +1179,7 @@ void Connection::writeRequestHeader(std::ostream& os, Request& request)
 
     std::ostream_iterator<char> oit (os);
     os << request.method() << ' ';
-    os << request.url();
+    os << request.url() << '?' << request.qparams();
     os.write(" HTTP/", 6);
     putInt(oit, header.versionMajor());
     os << '.';

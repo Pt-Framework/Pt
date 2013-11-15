@@ -61,7 +61,7 @@ class PT_SYSTEM_API IOBufferImpl
         void detach(IOBuffer& sb);
         void beginRead(IOBuffer& sb);
         void onRead(IOBuffer& sb);
-        void endRead(IOBuffer& sb);
+        size_t endRead(IOBuffer& sb);
         size_t beginWrite(IOBuffer& sb);
         void onWrite(IOBuffer& sb);
         size_t endWrite(IOBuffer& sb);
@@ -132,8 +132,8 @@ class PT_SYSTEM_API IOBuffer : public BasicStreamBuffer<char>
         void onRead(IODevice& dev)
         { _impl.onRead(*this); }
 
-        void endRead()
-        { _impl.endRead(*this); }
+        size_t endRead()
+        { return _impl.endRead(*this); }
 
         void beginWrite()
         { _impl.beginWrite(*this); }
@@ -141,8 +141,8 @@ class PT_SYSTEM_API IOBuffer : public BasicStreamBuffer<char>
         void onWrite(IODevice& dev)
         { _impl.onWrite(*this); }
 
-        void endWrite()
-        { _impl.endWrite(*this); }
+        size_t endWrite()
+        { return _impl.endWrite(*this); }
 
         void discard()
         { _impl.discard(*this); }

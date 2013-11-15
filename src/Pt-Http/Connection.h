@@ -166,6 +166,8 @@ class Connection : public Connectable
     public:
         static const std::size_t WaitInfinite = static_cast<const std::size_t>(-1);
 
+        static const std::size_t NoRequestSizeLimit = static_cast<const std::size_t>(-1);
+
     public:
         Connection();
 

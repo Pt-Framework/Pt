@@ -50,6 +50,32 @@
 #include "../../Pt-Ssl/tests/PemData.h"
 #endif
 
+class EchoQueryResponder : public Pt::Http::Responder
+{
+    public:
+        EchoQueryResponder(Pt::Http::Service& s)
+        : Pt::Http::Responder(s)
+        {}
+        
+        virtual void onBeginRequest(Pt::Http::Request& request, Pt::Http::Reply& reply, Pt::System::EventLoop& loop)
+        {}
+        
+        virtual void onReadRequest(Pt::Http::Request& request, Pt::Http::Reply& reply, Pt::System::EventLoop& loop)
+        {}
+
+        virtual void onBeginReply(const Pt::Http::Request& request, Pt::Http::Reply& reply, Pt::System::EventLoop& loop)
+        { onWriteReply(request, reply, loop); }
+
+        virtual void onWriteReply(const Pt::Http::Request& request, Pt::Http::Reply& reply, Pt::System::EventLoop& loop)
+        {
+            reply.body() << request.qparams();
+            reply.beginSend(true);
+        }
+};
+
+typedef Pt::Http::BasicService<EchoQueryResponder> EchoQueryService;
+
+
 class HelloResponder : public Pt::Http::Responder
 {
     public:
@@ -129,7 +155,8 @@ class ServerTest : public Pt::Unit::TestSuite
             this->registerMethod( "ReplyWithBody", *this, &ServerTest::ReplyWithBody);
             this->registerMethod( "ChunkedReply", *this, &ServerTest::ChunkedReply);
             this->registerMethod( "PipelinedRequests", *this, &ServerTest::PipelinedRequests);
-            //this->registerMethod( "MaxRequestSize", *this, &ServerTest::MaxRequestSize);
+            this->registerMethod( "MaxRequestSize", *this, &ServerTest::MaxRequestSize);
+            this->registerMethod( "QueryString", *this, &ServerTest::QueryString);
         }
 
         void setUp()
@@ -166,13 +193,11 @@ class ServerTest : public Pt::Unit::TestSuite
             Pt::Http::Client client(*loop, "127.0.0.1", 8001);
             client.replyReceived() += Pt::slot(*this, &ServerTest::onMaxRequestSizeReply);
             client.request().setUrl("/test");
-            client.request().header().set("foo", "bar");
             client.request().body() << "Hello World";
             client.beginReceive();
 
             loop->run();
-            PT_UNIT_ASSERT_EQUALS(client.reply().statusCode(), 500);
-            PT_UNIT_ASSERT_EQUALS(_reply, "Hello World!");
+            PT_UNIT_ASSERT_EQUALS(client.reply().statusCode(), 400);
         }
 
         void onMaxRequestSizeReply(Pt::Http::Client& client)
@@ -187,7 +212,6 @@ class ServerTest : public Pt::Unit::TestSuite
 
             client.beginReceive();
         }
-
 
         void PipelinedRequests()
         {
@@ -462,6 +486,48 @@ class ServerTest : public Pt::Unit::TestSuite
         }
 
         void onHelloReceived(Pt::Http::Client& client)
+        {
+            Pt::Http::MessageProgress progress = client.endReceive();
+
+            if( progress.header() )
+            {
+                PT_UNIT_ASSERT_EQUALS(client.reply().statusCode(), 200);
+            }
+            
+            if( progress.body() )
+                while ( client.reply().body().rdbuf()->in_avail() )
+                    _reply += client.reply().body().get();
+
+            if( progress.finished() )
+            {
+                loop->exit();
+                return;
+            }
+
+            client.beginReceive();
+        }
+
+        void QueryString()
+        {
+            EchoQueryService service;
+
+            Pt::Http::Server server(*loop, "127.0.0.1", 8001);
+
+            Pt::Http::MapUrl mapurl("/test", service);
+            server.addServlet(mapurl);
+
+            Pt::Http::Client client(*loop, "127.0.0.1", 8001);
+            client.replyReceived() += Pt::slot(*this, &ServerTest::onQueryStringReceived);
+            client.request().setUrl("/test");
+            client.request().setQParams("a=4&b=Hello");
+            client.beginReceive();
+
+            loop->run();
+            PT_UNIT_ASSERT_EQUALS(client.reply().statusCode(), 200);
+            PT_UNIT_ASSERT_EQUALS(_reply, "a=4&b=Hello");
+        }
+
+        void onQueryStringReceived(Pt::Http::Client& client)
         {
             Pt::Http::MessageProgress progress = client.endReceive();
 
