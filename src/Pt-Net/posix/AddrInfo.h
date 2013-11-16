@@ -34,7 +34,7 @@
 #include <iterator>
 #include <cassert>
 
-#ifdef WIN32
+#if defined(WIN32) || defined(_WIN32)
     #include "Pt/WinVer.h"
 
     #ifndef WIN32_LEAN_AND_MEAN
