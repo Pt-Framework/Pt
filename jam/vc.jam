@@ -186,7 +186,7 @@ rule CheckC++
 		C++FLAGS += "/ZW" ;
 	}
 
-    C++FLAGS += /EHsc /fp:fast /GR /TP /FD ;
+    C++FLAGS += /EHsc /fp:precise /GR /TP /FD ;
 
     if $(WITH_DEBUG)
     {

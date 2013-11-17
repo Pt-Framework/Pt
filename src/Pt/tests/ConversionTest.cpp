@@ -262,6 +262,19 @@ void ConversionTest::stdstring()
     PT_UNIT_ASSERT( value == "bbb" );
 }
 
+// TODO:
+//3.141592653579893
+//0.314
+//0.0314
+//0.00123
+//123456789.55555555
+//0
+//1
+//1.4567e17
+//12345
+//1.4567e-17
+//0.2
+//12
 
 void ConversionTest::FloatToString()
 {
@@ -293,6 +306,16 @@ void ConversionTest::FloatToString()
     str = Pt::convert<Pt::String>(value);
     PT_UNIT_ASSERT( str.substr(0, 4) == L"-inf" );
 }
+
+// TODO:
+//"1.5"
+//" -345.75 "
+//"\n1e6\r"
+//"7.0e4"
+//"-2e-3"
+//"-8E-5"
+//"-3.0e-12"
+//"-8.5E-23"
 
 void ConversionTest::StringToFloat()
 {
