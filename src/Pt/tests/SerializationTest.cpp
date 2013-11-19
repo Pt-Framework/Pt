@@ -63,7 +63,7 @@ class IntComposer : public Pt::Composer
             _type = &type;
         }
 
-        virtual void onSetId(const char* id, size_t len)
+        virtual void onSetId(const char* id, std::size_t len)
         { }
 
         virtual void onSetInt(Pt::int64_t l)
@@ -102,10 +102,10 @@ class VectorComposer : public Pt::Composer
             _type = &type;
         }
 
-        virtual void onSetId(const char* id, size_t len)
+        virtual void onSetId(const char* id, std::size_t len)
         { }
 
-        virtual Pt::Composer* onBeginMember(const char* name, size_t len)
+        virtual Pt::Composer* onBeginMember(const char* name, std::size_t len)
         {
             _type->push_back( elem_type() );
             _deser.begin( _type->back() );
