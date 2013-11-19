@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2004-2007 by Marc Boris Duerner
+ * Copyright (C) 2004-2013 by Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -46,7 +46,7 @@
 namespace Pt {
 
 //
-// Conversions to Pt::String
+// Conversions to or from Pt::String
 //
 
 PT_API void convert(String& s, bool value);
@@ -64,23 +64,6 @@ PT_API void convert(String& s, double value);
 PT_API void convert(String& s, long double value);
 PT_API void convert(String& s, const std::string& value);
 
-inline void convert(String& s, const String& str)
-{
-    s = str;
-}
-
-template <typename T>
-inline void convert(String& s, const T& value)
-{
-    OStringStream os;
-    os << value;
-    s = os.str();
-}
-
-//
-// Conversions from Pt::String
-//
-
 PT_API void convert(bool& n, const String& str);
 PT_API void convert(char& n, const String& str);
 PT_API void convert(unsigned char& n, const String& str);
@@ -97,18 +80,8 @@ PT_API void convert(long double& n, const String& str);
 
 PT_API void convert(int& n, const Pt::Char* str);
 
-template <typename T>
-inline void convert(T& t, const String& str)
-{
-    IStringStream is(str);
-    Char ch;
-    is >> t;
-    if (is.fail() || !(is >> ch).eof())
-        throw ConversionError("conversion from Pt::String failed");
-}
-
 //
-// Conversions to std::string
+// Conversions to or from std::string
 //
 
 PT_API void convert(std::string& s, bool value);
@@ -126,23 +99,6 @@ PT_API void convert(std::string& s, double value);
 PT_API void convert(std::string& s, long double value);
 PT_API void convert(std::string& s, const String& str);
 
-inline void convert(std::string& s, const std::string& str)
-{
-    s = str;
-}
-
-template <typename T>
-inline void convert(std::string& s, const T& value)
-{
-    std::ostringstream os;
-    os << value;
-    s = os.str();
-}
-
-//
-// Conversions from std::string
-//
-
 PT_API void convert(bool& n, const std::string& str);
 PT_API void convert(char& n, const std::string& str);
 PT_API void convert(signed char& n, const std::string& str);
@@ -159,19 +115,43 @@ PT_API void convert(long double& n, const std::string& str);
 
 PT_API void convert(int& n, const char* str);
 
-template <typename T>
-inline void convert(T& t, const std::string& str)
-{
-    std::istringstream is(str);
-    char ch;
-    is >> t;
-    if (is.fail() || !(is >> ch).eof())
-        throw ConversionError("conversion from std::string failed");
-}
-
 //
 // Generic stream-based conversions
 //
+
+/** @brief Convert to string.
+
+    @ingroup CoreTypes
+*/
+template <typename T>
+inline void convert(std::string& to, const T& from)
+{
+    std::stringstream ss;
+    if( ! (ss << from && ss >> to) )
+        throw ConversionError("conversion failed");
+}
+
+/** @brief Convert from string.
+
+    @ingroup CoreTypes
+*/
+template <typename T>
+inline void convert(T& to, const std::string& from)
+{
+    std::stringstream ss;
+    if( ! (ss << from && ss >> to) )
+        throw ConversionError("conversion failed");
+}
+
+/** @brief Convert between two types.
+
+    @ingroup CoreTypes
+*/
+template<typename T>
+void convert(T& to, const T& from)
+{
+    to = from;
+}
 
 /** @brief Convert between two types.
 
@@ -181,7 +161,7 @@ template<typename T, typename S>
 void convert(T& to, const S& from)
 {
     StringStream ss;
-    if( !(ss << from && ss >> to) )
+    if( ! (ss << from && ss >> to) )
         throw ConversionError("conversion failed");
 }
 
