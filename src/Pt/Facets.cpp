@@ -186,17 +186,18 @@ template <typename IterT, typename T, typename CharT>
 inline IterT putFloat(IterT it, T d, 
                       std::ios_base::fmtflags flags, 
                       std::streamsize width, CharT fill,
-                      std::streamsize precision = 6)
+                      std::streamsize precision)
 {
     bool scientific = (flags & std::ios_base::scientific) == std::ios_base::scientific;
-    //bool fixed = (flags & std::ios_base::fixed) == std::ios_base::fixed;
+    bool fixed = (flags & std::ios_base::fixed) == std::ios_base::fixed;
     bool leftAdjust = (flags & std::ios_base::left) == std::ios_base::left;
     bool internalAdjust = (flags & std::ios_base::internal) == std::ios_base::internal;
     bool rightAdjust = ! (leftAdjust || internalAdjust);
     
-    if( 0 == (flags & std::ios_base::floatfield) )
+    if( scientific )
     {
-        precision = std::numeric_limits<T>::digits10;
+        // always one digit before decimal point 
+        precision += 1;
     }
 
     const std::streamsize bufsize = std::numeric_limits<T>::digits10;
@@ -205,34 +206,50 @@ inline IterT putFloat(IterT it, T d,
     int i = 0;
     int e = 0;
     Pt::FloatFormat<Pt::Char> fmt;
-    std::streamsize fractSize = Pt::formatFloat(fract, bufsize, i, e, d, fmt, int(precision), scientific);
+    std::streamsize fractSize = Pt::formatFloat(fract, bufsize, i, e, d, fmt, int(precision), fixed);
 
-    std::streamsize len = 0;
-    if( 0 == (flags & std::ios_base::floatfield) )
-    {
-        // show only significant digits for default format
-        precision = 1;
-        if(e < fractSize)
-            precision = fractSize - e;
-    }
+    std::streamsize digits = 0;
 
     if(scientific)
     {
-        len += precision + 6; // fraction digits, intpart, 3 exp digits, signed e/E
+        // fraction digits, intpart, 3 exp digits, signed e/E
+        digits += precision + 5; 
     }
-    else // fixed and default
+    else if(fixed)
     {
-        len += precision + 1;
+        // digits after decimal point
+        digits += precision;
     
-        if(e > 0)
-            len += e;
+        // digits before decimal point
+        digits += (e > 0) ? e + 1 : 1;
     }
+    else
+    {
+        if(e < fractSize)
+        {
+            // digits after decimal point
+            digits += fractSize - e;
+
+            // digits before decimal point
+            digits += digits < fractSize ? fractSize - digits + 1: 1;
+        }
+        else
+        {
+            // digits after decimal point
+            digits += (precision > 1) ? 1 : 0;
+
+            // digits before decimal point
+            digits += e + 1;
+        }
+    }
+
+    std::streamsize len = digits;
 
     bool hasSign = (i < 0) || (flags & std::ios_base::showpos);
     if(hasSign)
         ++len;
 
-    bool hasPoint = (precision > 0) || (flags & std::ios_base::showpoint);
+    bool hasPoint = (precision > 1) || (flags & std::ios_base::showpoint);
     if(hasPoint)
         len++;
     
@@ -247,40 +264,52 @@ inline IterT putFloat(IterT it, T d,
         while(len++ < width)
             *it++ = fill;
 
-    i = (i < 0) ? -i : i;   
+    i = (i < 0) ? -i : i;
+  
     std::streamsize n = 0;
 
     if(scientific) 
     {
         *it++ = '0' + i;
+        --digits;
 
         if(hasPoint)
-            *it++ = '.'; 
+            *it++ = '.';
+
+        // 3 exp digits, signed e/E
+        digits -= 5;
     }
     else if(e >= 0) // fixed and default
     {
         *it++ = '0' + i;
+        --digits;
+
         for(; n < e; ++n)
             *it++ = (n < fractSize) ? fract[n] : CharT('0');
+
+        digits -= n;
 
         if(hasPoint)
             *it++ = '.';
     }
-    else
+    else // e < 0
     {
         *it++ = '0';
+        --digits;
         
         if(hasPoint)
             *it++ = '.';
 
-        for( ;n > ++e && precision > 0; --precision)
+        digits += e;
+
+        while(++e < 0)
             *it++ = '0';
 
-        if(precision-- > 0)
-            *it++ = '0' + i;
+        *it++ = '0' + i;
+        --digits;
     }
 
-    for(; precision > 0; ++n, --precision)
+    for(; digits > 0; ++n, --digits)
         *it++ = (n < fractSize) ?  fract[n] : CharT('0');   
 
     if(scientific) 

@@ -50,6 +50,7 @@ class StringStreamTest : public Pt::Unit::TestSuite
             Pt::Unit::TestSuite::registerMethod("WriteHex", *this, &StringStreamTest::WriteHex );
             Pt::Unit::TestSuite::registerMethod("WriteOct", *this, &StringStreamTest::WriteOct );
             Pt::Unit::TestSuite::registerMethod("WriteDec", *this, &StringStreamTest::WriteDec );
+            Pt::Unit::TestSuite::registerMethod("WriteFloat", *this, &StringStreamTest::WriteFloat );
             Pt::Unit::TestSuite::registerMethod("WriteFixed", *this, &StringStreamTest::WriteFixed );
             Pt::Unit::TestSuite::registerMethod("WriteScientific", *this, &StringStreamTest::WriteScientific );
             Pt::Unit::TestSuite::registerMethod("WritePtr", *this, &StringStreamTest::WritePtr );
@@ -64,6 +65,7 @@ class StringStreamTest : public Pt::Unit::TestSuite
         void WriteHex();
         void WriteOct();
         void WriteDec();
+        void WriteFloat();
         void WriteFixed();
         void WriteScientific();
         void WritePtr();
@@ -327,6 +329,95 @@ void StringStreamTest::WriteDec()
 }
 
 
+void StringStreamTest::WriteFloat()
+{
+    Pt::StringStream ss;
+    Pt::String str;
+    
+    ss << std::setprecision(3) << std::left << std::setw(10) << 0.0;
+    str = ss.str();
+    PT_UNIT_ASSERT(str == L"0.0       ");
+    
+    ss.clear();
+    ss.str( Pt::String() );
+
+    ss << std::setprecision(6) << std::left << std::noshowpos << std::setw(10)  << 123.456;
+    str = ss.str();
+    PT_UNIT_ASSERT(str == L"123.456   ");
+
+    ss.clear();
+    ss.str( Pt::String() );
+
+    ss << std::setprecision(6) << std::left << std::showpos << std::setw(10) << 123.4568;
+    str = ss.str();
+    PT_UNIT_ASSERT(str == L"+123.457  ");
+
+    ss.clear();
+    ss.str( Pt::String() );
+
+    ss << std::setprecision(6) << std::left << std::noshowpos << std::setw(10) << -123.4568;
+    str = ss.str();
+    PT_UNIT_ASSERT(str == L"-123.457  ");
+
+    ss.clear();
+    ss.str( Pt::String() );
+
+    ss << std::setprecision(6) << std::internal << std::noshowpos << std::setw(10) << 123.4561;
+    str = ss.str();
+    PT_UNIT_ASSERT(str == L"   123.456");
+
+    ss.clear();
+    ss.str( Pt::String() );
+
+    ss  << std::setprecision(6) << std::internal << std::noshowpos << std::setw(10) << -123.4561;
+    str = ss.str();
+    PT_UNIT_ASSERT(str == L"-  123.456");
+    
+    ss.clear();
+    ss.str( Pt::String() );
+
+    ss << std::setprecision(6) << std::internal << std::showpos << std::setw(10) << 123.4561;
+    str = ss.str();
+    PT_UNIT_ASSERT(str == L"+  123.456");
+    
+    ss.clear();
+    ss.str( Pt::String() );
+
+    ss << std::setprecision(1) << std::right << std::noshowpoint << std::noshowpos << std::setw(10) << 2.8;
+    str = ss.str();
+    PT_UNIT_ASSERT(str == L"         3");
+    
+    ss.clear();
+    ss.str( Pt::String() );
+
+    ss << std::setprecision(1) << std::right << std::showpoint << std::noshowpos << std::setw(10) << 2.8;
+    str = ss.str();
+    PT_UNIT_ASSERT(str == L"        3.");
+    
+    ss.clear();
+    ss.str( Pt::String() );
+
+    ss << std::setprecision(2) << std::right << std::showpos << std::setw(10) << 3.14;
+    str = ss.str();
+    PT_UNIT_ASSERT(str == L"      +3.1");
+    
+    ss.clear();
+    ss.str( Pt::String() );
+
+    ss << std::setprecision(7) << std::right << std::noshowpos << std::setw(10) << -10000.0;
+    str = ss.str();
+    PT_UNIT_ASSERT(str == L"  -10000.0");
+    
+    
+    ss.clear();
+    ss.str( Pt::String() );
+
+    ss << std::setprecision(1) << std::right << std::noshowpos << std::setw(10) << 0.00001;
+    str = ss.str();
+    PT_UNIT_ASSERT(str == L"   0.00001");
+}
+
+
 void StringStreamTest::WriteFixed()
 {
     Pt::StringStream ss;
@@ -339,9 +430,9 @@ void StringStreamTest::WriteFixed()
     ss.clear();
     ss.str( Pt::String() );
 
-    ss << std::fixed << std::setprecision(3) << std::left << std::noshowpos << std::setw(10)  << 123.4568;
+    ss << std::fixed << std::setprecision(3) << std::left << std::noshowpos << std::setw(10)  << 123.456;
     str = ss.str();
-    PT_UNIT_ASSERT(str == L"123.457   ");
+    PT_UNIT_ASSERT(str == L"123.456   ");
 
     ss.clear();
     ss.str( Pt::String() );

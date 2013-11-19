@@ -4,30 +4,30 @@ SubDirObjects $(PT_OUTPUT_OBJECT) Pt ;
 
 Main Pt-test : Pt-test.cpp
                AllocatorTest.cpp
-                 AnyTest.cpp
-                 AtomicTest.cpp
-                 ByteorderTest.cpp
-                 CharTest.cpp
-                 ConversionTest.cpp
-                 DateTest.cpp
-                 DateTimeTest.cpp
-                 DelegateTest.cpp
-                 ExceptionTest.cpp
-                 NonCopyableTest.cpp
-                 RegExpTest.cpp
-                 SerializationTest.cpp
-                 SettingsTest.cpp
-                 SingletonTest.cpp
-                 SignalTest.cpp
-                 SmartPtrTest.cpp
-                 StringStreamTest.cpp
-                 StringTest.cpp
-                 TextStreamTest.cpp
-                 TimeTest.cpp
-                 TimespanTest.cpp
-                 TypesTest.cpp
-                 TypeTraitsTest.cpp
-                 VariantTest.cpp ;
+               AnyTest.cpp
+               AtomicTest.cpp
+               ByteorderTest.cpp
+               CharTest.cpp
+               ConversionTest.cpp
+               DateTest.cpp
+               DateTimeTest.cpp
+               DelegateTest.cpp
+               ExceptionTest.cpp
+               NonCopyableTest.cpp
+               RegExpTest.cpp
+               SerializationTest.cpp
+               SettingsTest.cpp
+               SingletonTest.cpp
+               SignalTest.cpp
+               SmartPtrTest.cpp
+               StringStreamTest.cpp
+               StringTest.cpp
+               TextStreamTest.cpp
+               TimeTest.cpp
+               TimespanTest.cpp
+               TypesTest.cpp
+               TypeTraitsTest.cpp
+               VariantTest.cpp ;
 
 LinkSharedLibraries Pt-test : Pt-System Pt-Unit Pt ;
 MakeLocate Pt-test : $(PT_OUTPUT_TARGET) ;

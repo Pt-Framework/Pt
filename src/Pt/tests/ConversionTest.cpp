@@ -54,9 +54,10 @@ class ConversionTest : public Pt::Unit::TestSuite
             Pt::Unit::TestSuite::registerMethod( "UChar8", *this, &ConversionTest::UChar8 );
             Pt::Unit::TestSuite::registerMethod( "SChar8", *this, &ConversionTest::SChar8 );
             Pt::Unit::TestSuite::registerMethod( "stdstring", *this, &ConversionTest::stdstring );
+            Pt::Unit::TestSuite::registerMethod( "DoubleToString", *this, &ConversionTest::DoubleToString);
+            Pt::Unit::TestSuite::registerMethod( "StringToDouble", *this, &ConversionTest::StringToDouble );
             Pt::Unit::TestSuite::registerMethod( "FloatToString", *this, &ConversionTest::FloatToString );
             Pt::Unit::TestSuite::registerMethod( "StringToFloat", *this, &ConversionTest::StringToFloat );
-            Pt::Unit::TestSuite::registerMethod( "Double", *this, &ConversionTest::Double );
             Pt::Unit::TestSuite::registerMethod( "VoidPtr", *this, &ConversionTest::VoidPtr );
 
             Pt::Unit::TestSuite::registerMethod( "ShortLimitMin", *this, &ConversionTest::LimitMin<short> );
@@ -89,9 +90,10 @@ class ConversionTest : public Pt::Unit::TestSuite
         void UChar8();
         void SChar8();
         void stdstring();
+        void DoubleToString();
+        void StringToDouble();
         void FloatToString();
         void StringToFloat();
-        void Double();
         void VoidPtr();
         template <typename T> void LimitMin();
         template <typename T> void LimitMax();
@@ -262,19 +264,66 @@ void ConversionTest::stdstring()
     PT_UNIT_ASSERT( value == "bbb" );
 }
 
-// TODO:
-//3.141592653579893
-//0.314
-//0.0314
-//0.00123
-//123456789.55555555
-//0
-//1
-//1.4567e17
-//12345
-//1.4567e-17
-//0.2
-//12
+
+void ConversionTest::DoubleToString()
+{
+    double value = 3.141592653579893;
+    std::string str = Pt::convert<std::string>(value);
+    PT_UNIT_ASSERT_EQUALS( str.substr(0, 7), "3.14159" );
+
+    value = 0.314;
+    str = Pt::convert<std::string>(value);
+    PT_UNIT_ASSERT_EQUALS( str, "0.314" );
+
+    value = 0.0314;
+    str = Pt::convert<std::string>(value);
+    PT_UNIT_ASSERT_EQUALS( str, "0.0314" );
+
+    value = 0.00123;
+    str = Pt::convert<std::string>(value);
+    PT_UNIT_ASSERT_EQUALS( str, "0.00123" );
+
+    value = 123456789.55555555;
+    str = Pt::convert<std::string>(value);
+    PT_UNIT_ASSERT_EQUALS( str.substr(0, 12), "123456789.55" );
+
+    value = 0.;
+    str = Pt::convert<std::string>(value);
+    PT_UNIT_ASSERT_EQUALS( str, "0.0" );
+
+    value = 1.;
+    str = Pt::convert<std::string>(value);
+    PT_UNIT_ASSERT_EQUALS( str, "1.0" );
+
+    value = 1.4567e17;
+    str = Pt::convert<std::string>(value);
+    PT_UNIT_ASSERT_EQUALS( str.substr(0, 6), "145670" );
+
+    value = 1.4567e-17;
+    str = Pt::convert<std::string>(value);
+    PT_UNIT_ASSERT_EQUALS( str.substr(0, 10), "0.00000000" );
+
+    value = 12345;
+    str = Pt::convert<std::string>(value);
+    PT_UNIT_ASSERT_EQUALS( str, "12345.0" );
+
+    value = 0.2;
+    str = Pt::convert<std::string>(value);
+    PT_UNIT_ASSERT_EQUALS( str, "0.2" );
+
+    value = 12;
+    str = Pt::convert<std::string>(value);
+    PT_UNIT_ASSERT_EQUALS( str, "12.0" );
+}
+
+
+void ConversionTest::StringToDouble()
+{
+    Pt::String str = L"2.3456789";
+    double value = Pt::convert<double>(str);
+    PT_UNIT_ASSERT( value > 2.345 && value < 2.346 );
+}
+
 
 void ConversionTest::FloatToString()
 {
@@ -282,7 +331,7 @@ void ConversionTest::FloatToString()
     Pt::String str = Pt::convert<Pt::String>(value);
     PT_UNIT_ASSERT( str.substr(0, 4) == L"1.23" );
 
-    value = -123.4567f;
+    value = -123.456f;
     str = Pt::convert<Pt::String>(value);
     PT_UNIT_ASSERT( str.substr(0, 8) == L"-123.456" );
     
@@ -290,9 +339,9 @@ void ConversionTest::FloatToString()
     str = Pt::convert<Pt::String>(value);
     PT_UNIT_ASSERT( str.substr(0, 12) == L"1000000000.0" );
     
-    value = 0.00000000011f;
+    value = 0.00001f;
     str = Pt::convert<Pt::String>(value);
-    PT_UNIT_ASSERT( str.substr(0, 12) == L"0.0000000001" );
+    PT_UNIT_ASSERT( str.substr(0, 12) == L"0.00001" );
     
     value = std::numeric_limits<float>::quiet_NaN();
     str = Pt::convert<Pt::String>(value);
@@ -307,7 +356,7 @@ void ConversionTest::FloatToString()
     PT_UNIT_ASSERT( str.substr(0, 4) == L"-inf" );
 }
 
-// TODO:
+// TODO: float and double
 //"1.5"
 //" -345.75 "
 //"\n1e6\r"
@@ -356,16 +405,6 @@ void ConversionTest::StringToFloat()
     PT_UNIT_ASSERT(value == std::numeric_limits<float>::infinity());
 }
 
-void ConversionTest::Double()
-{
-    double value = 1.2345678910;
-    Pt::String str = Pt::convert<Pt::String>(value);
-    PT_UNIT_ASSERT( str.substr(0, 10) == L"1.23456789" );
-
-    str = L"2.3456789";
-    value = Pt::convert<double>(str);
-    PT_UNIT_ASSERT( value > 2.345 && value < 2.346 );
-}
 
 void ConversionTest::VoidPtr()
 {
