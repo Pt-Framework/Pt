@@ -525,7 +525,7 @@ class PT_API codecvt<char, char, Pt::MBState> : public codecvt_base, public loca
         virtual int do_max_length() const throw() = 0;
 }; 
 
-}
+} // namespace std
 
 
 namespace Pt {
@@ -536,7 +536,6 @@ static struct PT_API InitLocale
 {
     InitLocale()
     {
-        
         std::locale::global( std::locale(std::locale(), new std::ctype<Pt::Char>) );
         std::locale::global( std::locale(std::locale(), new std::numpunct<Pt::Char>) );
         std::locale::global( std::locale(std::locale(), new std::num_get<Pt::Char>) );
@@ -545,6 +544,6 @@ static struct PT_API InitLocale
     }
 } pt_init_locale;
 
-}
+} // namespace Pt
 
 #endif

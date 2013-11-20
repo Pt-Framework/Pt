@@ -107,8 +107,7 @@ class PT_SSL_API StreamBuffer : public std::streambuf
 
         /** @brief Reads user message from the underlying stream.
             
-            Call isShutdown() to find out if a shutdown notify was received
-            and isClosed() if the connection was prematurely closed.
+            Call isShutdown() to find out if a shutdown notify was received.
         */
         void import(std::streamsize maxImport = 0);
 

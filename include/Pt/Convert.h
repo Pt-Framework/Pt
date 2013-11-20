@@ -272,7 +272,7 @@ struct DecimalFormat : public NumberFormat<CharType>
         Returns a number equal or less than the base on success or a number
         greater than base on failure.
     */
-    static unsigned char toDigit(CharT ch)
+    static unsigned toDigit(CharT ch)
     {
         typename std::char_traits<CharT>::int_type cc = std::char_traits<CharT>::to_int_type(ch);
         
@@ -300,7 +300,7 @@ struct OctalFormat : public NumberFormat<CharType>
         greater than base on failure.
         
     */
-    static unsigned char toDigit(CharT ch)
+    static unsigned toDigit(CharT ch)
     {
         typename std::char_traits<CharT>::int_type cc = std::char_traits<CharT>::to_int_type(ch);
         
@@ -329,7 +329,7 @@ struct HexFormat : public NumberFormat<CharType>
         Returns a number equal or less than the base on success or a number
         greater than base on failure.
     */
-    static unsigned char toDigit(CharT ch)
+    static unsigned toDigit(CharT ch)
     {
         static const unsigned char chartab[64] = 
         {
@@ -371,7 +371,7 @@ struct BinaryFormat : public NumberFormat<CharType>
         greater than base on failure.
         
     */
-    static unsigned char toDigit(CharT ch)
+    static unsigned toDigit(CharT ch)
     {
         typename std::char_traits<CharT>::int_type cc = std::char_traits<CharT>::to_int_type(ch);
         
@@ -588,27 +588,8 @@ inline int formatFloat(CharT* fraction, int fractSize, int& intpart, int& exp, T
     
     exp = static_cast<int>( std::floor( std::log10(n) ) );
     
-    // scale number to a value between > 1.0 and < 10.0
-    //if(exp != 0)
-    //    n /= std::pow(T(10.0), exp);
- 
-    //// rounding errors due to floating point representation might lead
-    //// to values > 10.0 or < 1.0.
-    //if(n >= 10)
-    //{
-    //    // in case e.g. log10(1000.0) is less than 3
-    //    n /= 10;
-    //    ++exp;
-    //}
-    //else if(n < 1)
-    //{
-    //    // in case e.g. log10(0.001) is less than -3
-    //    n *= 10;
-    //    --exp;
-    //}
-
-    // when fixed is set, the precision specifies the number of digits after 
-    // the decimal point
+    // precision specifies the number of digits after the decimal point
+    // in fixed notation
     if(fixed)
         precision += exp + 1;
 
@@ -618,11 +599,9 @@ inline int formatFloat(CharT* fraction, int fractSize, int& intpart, int& exp, T
     // intpart is first significant digit
     --precision;
 
-    // move remaining significant digits before dot
-    //n *= std::pow(T(10.0), precision);
+    // move remaining significant digits before dot and 
+    // add 0.5 to round last signicifant digit
     n *= std::pow(T(10.0), precision - exp);
-
-    // round value later
     n += 0.5;
 
     int places = 0;
@@ -634,7 +613,7 @@ inline int formatFloat(CharT* fraction, int fractSize, int& intpart, int& exp, T
         int digit = static_cast<int>( std::floor(n - q) );
         n = p;
 
-        // insignificant digits
+        // ignore trailing zeros
         trailZero = trailZero && (digit == 0);
 
         if( trailZero )
@@ -772,10 +751,13 @@ InIterT getInt(InIterT it, InIterT end, bool& ok, T& n, const FormatT& fmt)
 
     n = 0;
     ok = false;
-    UnsignedInt max = std::numeric_limits<T>::max();
+    UnsignedInt max = static_cast<UnsignedInt>( std::numeric_limits<T>::max() );
 
     bool pos = false;
     it = getSign(it, end, pos, fmt);
+
+    if (it == end)
+        return it;
 
     bool isNeg = ! pos;
     if( isNeg )
@@ -792,7 +774,7 @@ InIterT getInt(InIterT it, InIterT end, bool& ok, T& n, const FormatT& fmt)
     // parse number
     UnsignedInt u = 0;
     const UnsignedInt base = fmt.base;
-    unsigned char d = 0;
+    unsigned d = 0;
     while(it != end)
     {    
         d = fmt.toDigit(*it);
@@ -805,7 +787,7 @@ InIterT getInt(InIterT it, InIterT end, bool& ok, T& n, const FormatT& fmt)
 
         u *= base;
 
-        if(d > max - u)
+        if(static_cast<unsigned char>(d) > max - u)
             return it;
 
         u += d;
@@ -922,11 +904,16 @@ InIterT getFloat(InIterT it, InIterT end, bool& ok, T& n, const FormatT& fmt)
     }
 
     // integral part
+    bool withFractional = false;
     for( ; it != end; ++it)
     {
-        if( *it == fmt.point() )
+        if( *it == fmt.point() || *it == fmt.e() || *it == fmt.E() )
         {
-            ++it;
+            if( *it == fmt.point() )
+            {
+                withFractional = true;
+                ++it;
+            }
             break;
         }
         
@@ -948,42 +935,45 @@ InIterT getFloat(InIterT it, InIterT end, bool& ok, T& n, const FormatT& fmt)
         return it;
     }
 
-    // fractional part, ignore 0 digits after dot
-    unsigned short fractDigits = 0;
-    size_t maxDigits = std::numeric_limits<unsigned short>::max() - std::numeric_limits<T>::digits10;
-    while(it != end && *it == zero)
+    T base = 10.0;
+    if( withFractional)
     {
-        if( fractDigits > maxDigits )
-            return it;
-
-        ++fractDigits;
-        ++it;
-    }
- 
-    // fractional part, parse like integer, skip insignificant digits
-    unsigned short significants = 0;
-    T fraction = 0.0;
-    for( ; it != end; ++it)
-    {
-        unsigned digit = fmt.toDigit(*it); 
-        if(digit >= fmt.base)
-            break;
-
-        if( significants <= std::numeric_limits<T>::digits10 )
+        // fractional part, ignore 0 digits after dot
+        unsigned short fractDigits = 0;
+        size_t maxDigits = std::numeric_limits<unsigned short>::max() - std::numeric_limits<T>::digits10;
+        while(it != end && *it == zero)
         {
-            fraction *= 10;
-            fraction += digit;
+            if( fractDigits > maxDigits )
+                return it;
 
             ++fractDigits;
-            ++significants;
+            ++it;
         }
+ 
+        // fractional part, parse like integer, skip insignificant digits
+        unsigned short significants = 0;
+        T fraction = 0.0;
+        for( ; it != end; ++it)
+        {
+            unsigned digit = fmt.toDigit(*it); 
+            if(digit >= fmt.base)
+                break;
+
+            if( significants <= std::numeric_limits<T>::digits10 )
+            {
+                fraction *= 10;
+                fraction += digit;
+
+                ++fractDigits;
+                ++significants;
+            }
+        }
+
+        // fractional part, scale down
+        fraction /= std::pow(base, T(fractDigits));
+        n += fraction;
     }
-
-    // fractional part, scale down
-    T base = 10.0;
-    fraction /= std::pow(base, T(fractDigits));
-    n += fraction;
-
+    
     // exponent [e|E][+|-][0-9]*
     if(it != end && (*it == fmt.e() || *it == fmt.E()) )
     {

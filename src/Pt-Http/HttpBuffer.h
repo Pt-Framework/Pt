@@ -37,6 +37,11 @@ namespace Pt {
 
 namespace Http {
 
+/** @internal @brief Parses HTTP chunked encoding format.
+
+    @todo Pass a reference to the MessageHeader, so the trailer fields
+          can be added, which follow the HTTP body
+*/
 class ChunkParser
 {
     public: 

@@ -384,6 +384,30 @@ void ConversionTest::StringToFloat()
     value = Pt::convert<float>(str);
     PT_UNIT_ASSERT( value > -1000010000.0f && value < -999999000.0f );
     
+    str = L"1e6";
+    value = Pt::convert<float>(str);
+    PT_UNIT_ASSERT( value > 999990.0f && value < 1000010.0f );
+
+    str = L"7.0e4";
+    value = Pt::convert<float>(str);
+    PT_UNIT_ASSERT( value > 69999.0f && value < 70001.0f );
+
+    str = L"-2e-3";
+    value = Pt::convert<float>(str);
+    PT_UNIT_ASSERT( value > -0.0021f && value < -0.0019f );
+
+    str = L"-8E-5";
+    value = Pt::convert<float>(str);
+    PT_UNIT_ASSERT( value > -0.000081f && value < -0.000079f );
+    
+    str = L"-3.0e-12";
+    value = Pt::convert<float>(str);
+    PT_UNIT_ASSERT( value > -0.0000000000031f && value < -0.0000000000029f );
+    
+    str = L"-8.5E-23";
+    value = Pt::convert<float>(str);
+    PT_UNIT_ASSERT( value > -0.000000000000000000000086f && value < -0.000000000000000000000084f );
+
     str = L"nan";
     value = Pt::convert<float>(str);
     PT_UNIT_ASSERT(value != value);

@@ -626,11 +626,8 @@
     <ClCompile Include="..\..\src\Pt-Ssl\StreamBuffer.cpp" />
     <ClCompile Include="..\..\src\Pt-Ssl\tests\CertificateStoreTest.cpp" />
     <ClCompile Include="..\..\src\Pt-Ssl\tests\ContextTest.cpp" />
-    <ClCompile Include="..\..\src\Pt-Ssl\tests\HttpsClientDemo.cpp" />
-    <ClCompile Include="..\..\src\Pt-Ssl\tests\IOBufferTest.cpp" />
     <ClCompile Include="..\..\src\Pt-Ssl\tests\Pt-Ssl-test.cpp" />
     <ClCompile Include="..\..\src\Pt-Ssl\tests\SslClientDemo.cpp" />
-    <ClCompile Include="..\..\src\Pt-Ssl\tests\SslServerDemo.cpp" />
     <ClCompile Include="..\..\src\Pt-Ssl\tests\StreamBufferTest.cpp" />
     <ClCompile Include="..\..\src\Pt-System\Application.cpp" />
     <ClCompile Include="..\..\src\Pt-System\Clock.cpp" />

@@ -216,6 +216,9 @@ void ChunkParser::onTrailer(char ch)
 {
     log_trace("onTrailer, ch=" << charToPrint(ch));
 
+    // @todo Report trailer fields by adding them to the other header fields.
+    //       HttpBuffer and ChunkParser need a reference to a MessageHeader.
+
     if (ch == '\n')
         _state = 0;
     else if (ch == '\r')
