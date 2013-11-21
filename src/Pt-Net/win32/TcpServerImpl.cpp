@@ -119,8 +119,6 @@ void TcpServerImpl::cancel(System::EventLoop& loop)
 void TcpServerImpl::listen(const std::string& ipaddr, unsigned short int port,
                            const TcpServer::Options& options)
 {
-    log_debug("listen on " << ipaddr << " port " << port);
-
     Endpoint e(ipaddr, port);
     listen(e, options);
 }
@@ -128,6 +126,8 @@ void TcpServerImpl::listen(const std::string& ipaddr, unsigned short int port,
 
 void TcpServerImpl::listen(const Endpoint& ep, const TcpServer::Options& options)
 {
+    log_debug("listen on " << ep.toString());
+
     BOOL reuseAddr = TRUE;
     static const int on = 1;
 

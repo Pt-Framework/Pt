@@ -30,7 +30,7 @@
 #define PT_NET_TcpServerImpl_H
 
 #include <Pt/Net/TcpServer.h>
-#include <Pt/Net/AddrInfo.h>
+#include <Pt/Net/Endpoint.h>
 #include <Pt/System/EventLoop.h>
 #include <string>
 
@@ -56,7 +56,7 @@ class TcpServerImpl
         void listen(const std::string& ipaddr, unsigned short int port,
                     const TcpServer::Options& options);
 
-        void listen(const AddrInfo& ipaddr, const TcpServer::Options& options);
+        void listen(const Endpoint& e, const TcpServer::Options& options);
 
         bool run();
 
@@ -73,8 +73,6 @@ class TcpServerImpl
     private:
         TcpServer& _server;
         System::EventLoop* _loop;
-        AddrInfo _ai;
-        TcpServer::Options _options;
         Windows::Networking::Sockets::StreamSocketListener^ _listener;
         Windows::Foundation::IAsyncAction^ _bindOp;
         System::Mutex _mtx;

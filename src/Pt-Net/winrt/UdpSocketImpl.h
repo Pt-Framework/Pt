@@ -30,7 +30,7 @@
 #define PT_NET_UdpSocketImpl_H
 
 #include <Pt/Net/Api.h>
-#include <Pt/Net/AddrInfo.h>
+#include <Pt/Net/Endpoint.h>
 #include <Pt/Net/UdpSocket.h>
 #include <Pt/System/EventLoop.h>
 #include <string>
@@ -49,23 +49,23 @@ class UdpSocketImpl
 
         void close();
 
-        bool beginBind(System::EventLoop& loop, const AddrInfo& addrinfo, const UdpSocket::Options& o);
+        bool beginBind(System::EventLoop& loop, const Endpoint& ep, const UdpSocket::Options& o);
 
         bool runBind(System::EventLoop& loop);
 
         void endBind(System::EventLoop& loop);
 
-        void bind(const AddrInfo& addrinfo, const UdpSocket::Options& o);
+        void bind(const Endpoint& ep, const UdpSocket::Options& o);
 
-        bool beginConnect(System::EventLoop& loop, const AddrInfo& addrinfo);
+        bool beginConnect(System::EventLoop& loop, const Endpoint& ep);
 
         bool runConnect(System::EventLoop& loop);
 
         void endConnect(System::EventLoop& loop);
 
-        void connect(const AddrInfo& addrinfo);
+        void connect(const Endpoint& ep);
 
-        void setTarget(const AddrInfo& addrinfo);
+        void setTarget(const Endpoint& ep);
 
         bool isConnected() const;
 
@@ -81,9 +81,9 @@ class UdpSocketImpl
 
         void cancel(System::EventLoop& loop);
 
-        std::string socketAddress() const;
+        void localEndpoint(Endpoint& ep) const;
 
-        std::string peerAddress() const;
+        const Endpoint& remoteEndpoint() const;
 
         void setTimeout(std::size_t msecs)
         { _timeout = msecs; }
@@ -126,14 +126,15 @@ class UdpSocketImpl
         bool _broadcast;
         bool _isConnected;
         bool _isBound;
+        Endpoint _peerAddr;
         System::Mutex _mtx;
         Windows::Networking::Sockets::DatagramSocket^ _socket;        
         Windows::Foundation::IAsyncAction^ _connectOp;
         Windows::Foundation::IAsyncOperation<Windows::Storage::Streams::IOutputStream^>^ _getOutputOp;
         Windows::Foundation::IAsyncAction^ _bindOp;
         std::vector<Message> _messages;
-        Windows::Networking::HostName^ _currentPeerAddress;
-        Platform::String^ _currentPeerPort;
+        Windows::Networking::HostName^ _sendAddress;
+        Platform::String^ _sendPort;
         Windows::Storage::Streams::DataWriter^ _writer;
         Windows::Storage::Streams::DataWriterStoreOperation^ _storeOp;
         size_t _storeCount;

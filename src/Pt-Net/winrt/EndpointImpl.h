@@ -37,50 +37,46 @@ namespace Pt {
 
 namespace Net {
 
-class AddrInfoImpl : public Pt::RefCounted
+class EndpointImpl
 {
     public:
-        AddrInfoImpl(const std::string& ipaddr, unsigned short port, bool listen);
+        EndpointImpl();
 
-        ~AddrInfoImpl();
+        EndpointImpl(const std::string& ipaddr, unsigned short port);
 
-        inline const std::string& host() const
-        { return _host; }
+        EndpointImpl(const EndpointImpl& ipaddr);
 
-        inline unsigned short port() const
-        { return _port; }
+        ~EndpointImpl();
 
-        static AddrInfoImpl* ip4Any(unsigned short port);
+        EndpointImpl& operator=(const EndpointImpl& ipaddr);
 
-        static AddrInfoImpl* ip4Loopback(unsigned short port);
-
-        static AddrInfoImpl* ip4Broadcast(unsigned short port);
-
-        static AddrInfoImpl* ip6Any(unsigned short port);
-
-        static AddrInfoImpl* ip6Loopback(unsigned short port);
-
-    protected:
-        AddrInfoImpl();
+        void init(Platform::String^ host, Platform::String^ service);
 
         void clear();
 
-        void init(const std::string& ipaddr, unsigned short port);
+        std::string toString() const;
 
-        void initIp4Any(unsigned short port);
+        // TODO: return Windows::Networking::HostName^
+        const std::string& host() const
+        { return _host; }
 
-        void initIp4Loopback(unsigned short port);
+        // TODO: return Platform::String^
+        const std::string& service() const
+        { return _service; }
 
-        void initIp4Broadcast(unsigned short port);
+        static EndpointImpl* ip4Any(unsigned short port);
 
-        void initIp6Any(unsigned short port);
+        static EndpointImpl* ip4Loopback(unsigned short port);
 
-        void initIp6Loopback(unsigned short port);
+        static EndpointImpl* ip4Broadcast(unsigned short port);
+
+        static EndpointImpl* ip6Any(unsigned short port);
+
+        static EndpointImpl* ip6Loopback(unsigned short port);
 
     private:
-        std::string _host;
-        unsigned short _port;
-        bool _listen;
+        std::string _host; // TODO: Windows::Networking::HostName^
+        std::string _service; // TODO: Platform::String^
 };
 
 } // namespace Net

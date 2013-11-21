@@ -117,28 +117,24 @@ void TcpServerImpl::cancel(System::EventLoop& loop)
 void TcpServerImpl::listen(const std::string& ipaddr, unsigned short int port,
                            const TcpServer::Options& options)
 {
-    AddrInfo ai(ipaddr, port, true);
-    listen(ai, options);
+    Endpoint e(ipaddr, port);
+    listen(e, options);
 }
 
 
-void TcpServerImpl::listen(const AddrInfo& ai, const TcpServer::Options& options)
+void TcpServerImpl::listen(const Endpoint& ep, const TcpServer::Options& options)
 {
-    log_debug("listen on " << _ai.host() << ":" << _ai.port());
+    log_debug("listen on " << ep.toString());
 
     // TODO: handle error from async handler, i.e. when port is already in use
 
-    _ai = ai;
-    _options = options;
+    const std::string& host = ep.impl()->host();
+    std::wstring whost(host.begin(), host.end());
+    String^ shost = ref new String(whost.c_str());
 
-    const std::string& host = _ai.host();
-      std::wstring whost(host.begin(), host.end());
-      String^ shost = ref new String(whost.c_str());
-
-    std::wostringstream wss;
-    wss << _ai.port();
-      std::wstring wport = wss.str();
-      String^ serviceName = ref new String( wport.c_str() );
+    const std::string& service = ep.impl()->service();
+    std::wstring wservice(service.begin(), service.end());
+    String^ serviceName = ref new String( wservice.c_str() );
 
     if( shost->IsEmpty() )
         _bindOp = _listener->BindServiceNameAsync(serviceName);
@@ -218,7 +214,7 @@ StreamSocket^ TcpServerImpl::accept()
     assert( ! _backlog.empty() );
 
     if( _backlog.empty() )
-        throw System::IOError("accept backlog empty");
+        throw System::IOError("blocking I/O not supported");
 
     StreamSocket^ socket = _backlog.back();
     _backlog.pop_back();

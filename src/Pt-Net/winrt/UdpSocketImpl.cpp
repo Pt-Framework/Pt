@@ -27,7 +27,7 @@
  */
 
 #include "UdpSocketImpl.h"
-#include "Pt/Net/AddrInfo.h"
+#include "EndpointImpl.h"
 #include "Pt/Net/AddressInUse.h"
 #include <Pt/Net/UdpSocket.h>
 #include <Pt/System/SystemError.h>
@@ -137,19 +137,18 @@ void UdpSocketImpl::close()
 
 
 bool UdpSocketImpl::beginBind(System::EventLoop& loop, 
-                              const AddrInfo& ai, 
+                              const Endpoint& ep, 
                               const UdpSocket::Options& o)
 {
-    log_debug( "begin binding socket to " << ai.host() << ":" << ai.port() );
+    log_debug( "begin binding socket to " << ep.host() << ":" << ep.ervice() );
 
-    const std::string& host = ai.host();
+    const std::string& host = ep.impl()->host();
     std::wstring whost(host.begin(), host.end());
     String^ shost = ref new String(whost.c_str());
 
-    std::wostringstream wss;
-    wss << ai.port();
-    std::wstring wport = wss.str();
-    String^ serviceName = ref new String( wport.c_str() );
+    const std::string& service = ep.impl()->service();
+    std::wstring wservice(service.begin(), service.end());
+    String^ serviceName = ref new String(wservice.c_str());
 
     if( shost->IsEmpty() )
         _bindOp = _socket->BindServiceNameAsync(serviceName);
@@ -207,7 +206,7 @@ void UdpSocketImpl::endBind(System::EventLoop& loop)
 }
 
 
-void UdpSocketImpl::bind(const AddrInfo& addrinfo, const UdpSocket::Options&)
+void UdpSocketImpl::bind(const Endpoint& ep, const UdpSocket::Options&)
 {
     throw System::IOError("blocking I/O not supported");
     _isBound = true;
@@ -218,18 +217,17 @@ void UdpSocketImpl::bind(const AddrInfo& addrinfo, const UdpSocket::Options&)
 //  <Capabilities>
 //    <Capability Name="internetClientServer" />
 
-bool UdpSocketImpl::beginConnect(System::EventLoop& loop, const AddrInfo& ai)
+bool UdpSocketImpl::beginConnect(System::EventLoop& loop, const Endpoint& ep)
 {
-    log_debug( "begin connecting socket to " << ai.host() << ":" << ai.port() );
+    log_debug( "begin connecting socket to " << ep.toString() );
 
-    const std::string& host = ai.host();
+    const std::string& host = ep.impl()->host();
     std::wstring whost(host.begin(), host.end());
     String^ shost = ref new String(whost.c_str());
 
-    std::wostringstream wss;
-    wss << ai.port();
-    std::wstring wport = wss.str();
-    String^ serviceName = ref new String( wport.c_str() );
+    const std::string& service = ep.impl()->service();
+    std::wstring wservice(service.begin(), service.end());
+    String^ serviceName = ref new String(wservice.c_str());
 
     _connectOp = _socket->ConnectAsync(ref new HostName(shost), serviceName);
     
@@ -286,27 +284,27 @@ void UdpSocketImpl::endConnect(System::EventLoop& loop)
 }
 
 
-void UdpSocketImpl::connect(const AddrInfo& ai)
+void UdpSocketImpl::connect(const Endpoint& ep)
 {
     throw System::IOError("blocking I/O not supported");
     _isConnected = true;
 }
 
 
-void UdpSocketImpl::setTarget(const AddrInfo& ai)
+void UdpSocketImpl::setTarget(const Endpoint& ep)
 {
-    const std::string& host = ai.host();
+    const std::string& host = ep.impl()->host();
     std::wstring whost(host.begin(), host.end());
     String^ shost = ref new String(whost.c_str());
 
-    std::wostringstream wss;
-    wss << ai.port();
-    std::wstring wport = wss.str();
-    String^ serviceName = ref new String( wport.c_str() );
+    const std::string& service = ep.impl()->service();
+    std::wstring wservice(service.begin(), service.end());
+    String^ serviceName = ref new String(wservice.c_str());
 
-    _currentPeerAddress = ref new HostName(shost);
-    _currentPeerPort = serviceName;
+    _sendAddress = ref new HostName(shost);
+    _sendPort = serviceName;
 
+    // next beginWrite must create new output stream
     _writer = nullptr;
 }
 
@@ -352,29 +350,24 @@ void UdpSocketImpl::dropMulticastGroup(const std::string& ipaddr)
 }
 
 
-std::string UdpSocketImpl::socketAddress() const
+void UdpSocketImpl::localEndpoint(Endpoint& ep) const
 {
-    std::wstring waddr;
-
-    String^ addr = _socket->Information->LocalAddress->RawName;
-
-    if(addr)
-        waddr = addr->Data();
-
-    return std::string( waddr.begin(), waddr.end() );
+    if( _socket )
+    {
+        String^ host = _socket->Information->LocalAddress->DisplayName;
+        String^ service = _socket->Information->LocalPort;
+        ep.impl()->init(host, service);
+    }
+    else
+    {
+        ep.clear();
+    }
 }
 
 
-std::string UdpSocketImpl::peerAddress() const
+const Endpoint& UdpSocketImpl::remoteEndpoint() const const
 {
-    std::wstring waddr;
-
-	String^ addr = _currentPeerAddress->RawName;;
-
-    if(addr)
-        waddr = addr->Data();
-
-    return std::string( waddr.begin(), waddr.end() );
+    return _peerAddr;
 }
 
 
@@ -437,8 +430,7 @@ size_t UdpSocketImpl::endRead(System::EventLoop& loop, char* buffer, size_t bufS
         buffer[n] = static_cast<char>( reader->ReadByte() );
     }
 
-    _currentPeerAddress = m.remoteAddress;
-    _currentPeerPort = m.remotePort;
+    _peerAddr.impl()->init(m.remoteAddress.DisplayName, m.remotePort);
 
     return n;
 }
@@ -456,9 +448,10 @@ size_t UdpSocketImpl::beginWrite(System::EventLoop& loop,
 {
     log_debug("beginWrite " << bufSize);
 
+    // no writer means neither connect nor setTarget was called
     if( ! _writer )
     {
-        _getOutputOp = _socket->GetOutputStreamAsync(_currentPeerAddress, _currentPeerPort);
+        _getOutputOp = _socket->GetOutputStreamAsync(_sendAddress, _sendPort);
 
         _getOutputOp->Completed = ref new AsyncOperationCompletedHandler<IOutputStream^>
         (

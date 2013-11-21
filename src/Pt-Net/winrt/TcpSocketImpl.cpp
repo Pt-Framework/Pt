@@ -112,37 +112,34 @@ void TcpSocketImpl::accept(const TcpServer& server, const TcpSocket::Options&)
 }
 
 
-void TcpSocketImpl::connect(const AddrInfo& ai)
+void TcpSocketImpl::connect(const Endpoint& ep)
 {
-    log_debug( "connecting socket to " << ai.host() << ":" << ai.port() );
+    log_debug( "connecting socket to " << ep.host() << ":" << ep.service() );
     assert( ! _isConnected );
-
-    _ai = ai;
 
     throw System::IOError("blocking I/O not supported");
 }
 
 
-bool TcpSocketImpl::beginConnect(System::EventLoop& loop, const AddrInfo& ai)
+bool TcpSocketImpl::beginConnect(System::EventLoop& loop, const Endpoint& ep)
 {
     assert( ! _isConnected );
-    log_debug( "begin connecting socket to " << ai.host() << ":" << ai.port() );
+    log_debug( "begin connecting socket to " << ep.host() << ":" << ep.service() );
 
-    _ai = ai;
+    _ep = ep;
 
     if( ! _socket )
     {
         _socket = ref new StreamSocket();
     }
 
-    const std::string& host = _ai.host();
-      std::wstring whost(host.begin(), host.end());
-      String^ shost = ref new String(whost.c_str());
+    const std::string& host = _ep.impl()->host();
+    std::wstring whost(host.begin(), host.end());
+    String^ shost = ref new String(whost.c_str());
 
-    std::wostringstream wss;
-    wss << _ai.port();
-      std::wstring wport = wss.str();
-      String^ serviceName = ref new String( wport.c_str() );
+    const std::string& service = _ep.impl()->service();
+    std::wstring wservice(service.begin(), service.end());
+    String^ serviceName = ref new String( wservice.c_str() );
 
     _connectOp = _socket->ConnectAsync(ref new HostName(shost), serviceName);
 
@@ -176,14 +173,14 @@ void TcpSocketImpl::endConnect(System::EventLoop& loop)
 {
     // the application reacts to the connect signal by calling endConnect
 
-    log_debug( "ending connect to "  << _ai.host() << ":" << _ai.port() );
+    log_debug( "ending connect to "  << _ep.host() << ":" << _ep.service() );
     
     if( ! _connectOp )
         return;
         
     if(_connectOp->Status == AsyncStatus::Error)
     {
-        throw System::AccessFailed( _ai.host() );
+        throw System::AccessFailed( _ep.host() );
     }
 
     // TODO: handle connect exception
@@ -194,35 +191,33 @@ void TcpSocketImpl::endConnect(System::EventLoop& loop)
 }
 
 
-std::string TcpSocketImpl::socketAddress() const
+void TcpSocketImpl::localEndpoint(Endpoint& ep) const
 {
-    std::wstring waddr;
-
     if( _socket )
     {
-        // TODO: use CanonicalName ?
-        String^ addr = _socket->Information->LocalAddress->DisplayName;
-        if(addr)
-            waddr = addr->Data();
+        String^ host = _socket->Information->LocalAddress->DisplayName;
+        String^ service = _socket->Information->LocalPort;
+        ep.impl()->init(host, service);
     }
-
-    return std::string( waddr.begin(), waddr.end() );
+    else
+    {
+        ep.clear();
+    }
 }
 
 
-std::string TcpSocketImpl::peerAddress() const
+void TcpSocketImpl::remoteEndpoint(Endpoint& ep) const
 {
-    std::wstring waddr;
-
     if( _socket )
     {
-        // TODO: use CanonicalName ?
-        String^ addr = _socket->Information->RemoteAddress->DisplayName;
-        if(addr)
-            waddr = addr->Data();
+        String^ host = _socket->Information->RemoteAddress->DisplayName;
+        String^ service = _socket->Information->RemotePort;
+        ep.impl()->init(host, service);
     }
-
-    return std::string( waddr.begin(), waddr.end() );
+    else
+    {
+        ep.clear();
+    }
 }
 
 
@@ -239,12 +234,12 @@ size_t TcpSocketImpl::beginRead(System::EventLoop& loop,
     }
 
     size_t dataToRead = _reader->UnconsumedBufferLength;
-	dataToRead = std::min(dataToRead, bufSize);
+    dataToRead = std::min(dataToRead, bufSize);
     
-	if(dataToRead > 0)
+    if(dataToRead > 0)
     {
-		_reader->ReadBytes(::Platform::ArrayReference<unsigned char>((unsigned char*) buffer,dataToRead)); 
-		return dataToRead;
+        _reader->ReadBytes(::Platform::ArrayReference<unsigned char>((unsigned char*) buffer,dataToRead)); 
+        return dataToRead;
     }
 
     // TODO: does this report EOF? Or do we have to count the bytes until
@@ -287,23 +282,22 @@ size_t TcpSocketImpl::endRead(System::EventLoop& loop,
     }
 
     size_t dataToRead = _loadOp->GetResults();
-	_loadOp = nullptr;
+    _loadOp = nullptr;
 
     if(dataToRead == 0)
     {
-        eof = true;		
-		return 0;
+        eof = true;
+        return 0;
     }
 
+    dataToRead = std::min(dataToRead, bufSize);
 
-	dataToRead = std::min(dataToRead, bufSize);
-
-	_reader->ReadBytes(::Platform::ArrayReference<unsigned char>((unsigned char*) buffer,dataToRead));
+    _reader->ReadBytes(::Platform::ArrayReference<unsigned char>((unsigned char*) buffer,dataToRead));
 
     //TODO: use ReadBytes 
     // http://stackoverflow.com/questions/10520335/how-to-wrap-a-char-buffer-in-a-winrt-ibuffer-in-c
     
-	return dataToRead;
+    return dataToRead;
 }
 
 
@@ -322,7 +316,7 @@ size_t TcpSocketImpl::beginWrite(System::EventLoop& loop,
     if( ! _writer )
         _writer = ref new DataWriter(_socket->OutputStream);
 
-	_writer->WriteBytes(::Platform::ArrayReference<unsigned char>((unsigned char*) buffer,bufSize));
+    _writer->WriteBytes(::Platform::ArrayReference<unsigned char>((unsigned char*) buffer,bufSize));
 
     _storeCount = bufSize;
     _storeOp = _writer->StoreAsync(); // FlushAsync    
@@ -360,7 +354,7 @@ size_t TcpSocketImpl::endWrite(System::EventLoop& loop, const char* buffer, size
     }
 
     const size_t written = _storeOp->GetResults();
-	assert(_storeCount == written);
+    assert(_storeCount == written);
 
     _storeOp = nullptr;
     return _storeCount;

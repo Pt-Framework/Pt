@@ -30,7 +30,7 @@
 #define PT_NET_TCPSOCKETIMPL_H
 
 #include <Pt/Net/Api.h>
-#include <Pt/Net/AddrInfo.h>
+#include <Pt/Net/Endpoint.h>
 #include <Pt/Net/TcpSocket.h>
 #include <Pt/System/EventLoop.h>
 
@@ -57,9 +57,9 @@ class TcpSocketImpl
 
         void accept(const TcpServer& server, const TcpSocket::Options& o);
 
-        void connect(const AddrInfo& addrinfo);
+        void connect(const Endpoint& ep);
 
-        bool beginConnect(System::EventLoop& loop, const AddrInfo& addrinfo);
+        bool beginConnect(System::EventLoop& loop, const Endpoint& ep);
 
         void endConnect(System::EventLoop& loop);
 
@@ -81,9 +81,9 @@ class TcpSocketImpl
 
         size_t write(const char* buffer, size_t count);
 
-        std::string socketAddress() const;
+        void localEndpoint(Endpoint& ep) const;
 
-        std::string peerAddress() const;
+        void remoteEndpoint(Endpoint& ep) const;
 
         void setTimeout(std::size_t msecs)
         { _timeout = msecs; }
@@ -94,8 +94,8 @@ class TcpSocketImpl
     private:
         TcpSocket& _device;
         std::size_t _timeout;
-        AddrInfo _ai;
-		bool _isConnected;
+        Endpoint _ep;
+        bool _isConnected;
         Windows::Networking::Sockets::StreamSocket^ _socket;
         Windows::Foundation::IAsyncAction^ _connectOp;
         Windows::Storage::Streams::DataReader^ _reader;

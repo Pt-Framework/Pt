@@ -27,33 +27,92 @@
  */
 #include "AddrInfoImpl.h"
 
+using namespace Platform;
+
 namespace Pt {
 
 namespace Net {
 
-AddrInfoImpl::AddrInfoImpl()
-: _listen(false)
+EndpointImpl::EndpointImpl()
 {
 }
 
 
-AddrInfoImpl::AddrInfoImpl(const std::string& ipaddr, unsigned short port, bool listen)
-: _listen(listen)
+EndpointImpl::EndpointImpl(const std::string& ipaddr, unsigned short port)
+: _host(ipaddr)
 {
-    init(ipaddr, port);
+    std::stringstream ss;
+    ss << port;
+    ss >> _service;
 }
 
 
-AddrInfoImpl::~AddrInfoImpl()
+EndpointImpl::EndpointImpl(const EndpointImpl& ep)
+: _host(ep._host)
+, _service(ep._service)
 {
-    clear();
+}
+
+
+EndpointImpl::~EndpointImpl()
+{
+}
+
+
+void EndpointImpl::clear()
+{  
+    _host.clear();
+    _service.clear();
+}
+
+
+void EndpointImpl::init(Platform::String^ host, Platform::String^ service)
+{
+    std::wstring waddr;
+    std::wstring wport;
+
+    if(host)
+        waddr = addr->Data();
+
+    if(service)
+        wport = service->Data();
+
+    _host.assign( waddr.begin(), waddr.end() );
+    _service.assign( wport.begin(), wport.end() );
+}
+
+
+EndpointImpl& EndpointImpl::operator=(const EndpointImpl& ainfo)
+{
+    _host = ainfo._host;
+    _service = ainfo._service;
+    return *this;
+}
+
+
+std::string EndpointImpl::toString() const
+{ 
+    std::string str;
+
+    str += _host;
+    str += ':';
+    str += _service;
+    
+    return str; 
 }
 
 
 AddrInfoImpl* AddrInfoImpl::ip4Any(unsigned short port)
 {
     AddrInfoImpl* impl = new AddrInfoImpl();
-    impl->initIp4Any(port);
+
+    // Stream-/Datagramockets must use BindServiceNameAsync if hostname is empty
+    impl->_host.clear();
+
+    std::stringstream ss;
+    ss << port;
+    ss >> impl->_service;
+    
     return impl;
 }
 
@@ -61,14 +120,26 @@ AddrInfoImpl* AddrInfoImpl::ip4Any(unsigned short port)
 AddrInfoImpl* AddrInfoImpl::ip4Loopback(unsigned short port)
 {
     AddrInfoImpl* impl = new AddrInfoImpl();
-    impl->initIp4Loopback(port);
+    
+    impl->_host = "127.0.0.1";
+    
+    std::stringstream ss;
+    ss << port;
+    ss >> impl->_service;
+    
     return impl;
 }
 
 AddrInfoImpl* AddrInfoImpl::ip4Broadcast(unsigned short port)
 {
     AddrInfoImpl* impl = new AddrInfoImpl();
-    impl->initIp4Broadcast(port);
+
+    impl->_host = "255.255.255.255";
+    
+    std::stringstream ss;
+    ss << port;
+    ss >> impl->_service;
+    
     return impl;
 }
 
@@ -76,7 +147,14 @@ AddrInfoImpl* AddrInfoImpl::ip4Broadcast(unsigned short port)
 AddrInfoImpl* AddrInfoImpl::ip6Any(unsigned short port)
 {
     AddrInfoImpl* impl = new AddrInfoImpl();
-    impl->initIp6Any(port);
+    
+    // Stream-/Datagramockets must use BindServiceNameAsync if hostname is empty
+    impl->_host.clear();
+
+    std::stringstream ss;
+    ss << port;
+    ss >> impl->_service;
+    
     return impl;
 }
 
@@ -84,73 +162,16 @@ AddrInfoImpl* AddrInfoImpl::ip6Any(unsigned short port)
 AddrInfoImpl* AddrInfoImpl::ip6Loopback(unsigned short port)
 {
     AddrInfoImpl* impl = new AddrInfoImpl();
-    impl->initIp6Loopback(port);
+
+    impl->_host = "0:0:0:0:0:0:0:1";
+    
+    std::stringstream ss;
+    ss << port;
+    ss >> impl->_service;
+    
     return impl;
 }
 
+} // namespace Net
 
-void AddrInfoImpl::clear()
-{  
-    _host.clear();
-    _port = 0;
-}
-
-
-void AddrInfoImpl::init(const std::string& ipaddr, unsigned short port)
-{
-    clear();
-    
-    _host = ipaddr;
-    _port = port;
-}
-
-
-void AddrInfoImpl::initIp4Any(unsigned short port)
-{  
-    clear();
-
-    // Stream-/Datagramockets must use BindServiceNameAsync if hostname is empty
-    _host = "";
-    _port = port;
-}
-
-
-void AddrInfoImpl::initIp4Loopback(unsigned short port)
-{  
-    clear();
-
-    _host = "127.0.0.1";
-    _port = port;
-}
-
-
-void AddrInfoImpl::initIp4Broadcast(unsigned short port)
-{  
-    clear();
-
-    _host = "255.255.255.255";
-    _port = port;
-}
-
-
-void AddrInfoImpl::initIp6Any(unsigned short port)
-{  
-    clear();
-
-    // Stream-/Datagramockets must use BindServiceNameAsync if hostname is empty
-    _host = "";
-    _port = port;
-}
-
-
-void AddrInfoImpl::initIp6Loopback(unsigned short port)
-{  
-    clear();
-
-    _host = "0:0:0:0:0:0:0:1";
-    _port = port;
-}
-
-}
-
-}
+} // namespace Pt

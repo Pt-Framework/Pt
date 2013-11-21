@@ -53,15 +53,15 @@ EndpointImpl::EndpointImpl(const std::string& ipaddr, unsigned short port)
 }
 
 
-EndpointImpl::EndpointImpl(const EndpointImpl& ainfo)
+EndpointImpl::EndpointImpl(const EndpointImpl& ep)
 : _addrlen(0)
-, _host(ainfo._host)
-, _service(ainfo._service)
+, _host(ep._host)
+, _service(ep._service)
 {
-    if(ainfo._addrlen)
+    if(ep._addrlen)
     {
-        memcpy(&_addr, ainfo.addr(), ainfo._addrlen);
-        _addrlen = ainfo._addrlen;
+        memcpy(&_addr, ep.addr(), ep._addrlen);
+        _addrlen = ep._addrlen;
     }
 }
 
