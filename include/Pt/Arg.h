@@ -32,8 +32,7 @@
 #include <sstream>
 #include <string.h>
 
-namespace Pt
-{
+namespace Pt {
 
 class ArgBase
 {

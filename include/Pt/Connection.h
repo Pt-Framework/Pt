@@ -32,117 +32,118 @@
 
 namespace Pt {
 
-    class Connectable;
-	class Connection;
+class Connectable;
+class Connection;
 
-    /** @internal
-    */
-    class ConnectionData {
-        public:
-            ConnectionData()
-            : _refs(1)
-            , _valid(false)
-            , _slot(0)
-            , _sender(0)
-            { }
+/** @internal
+*/
+class ConnectionData {
+    public:
+        ConnectionData()
+        : _refs(1)
+        , _valid(false)
+        , _slot(0)
+        , _sender(0)
+        { }
 
-            ConnectionData(Connectable& sender, Slot* slot)
-			: _refs(1)
-			, _valid(true)
-			, _slot(slot)
-			, _sender(&sender)
-			{ }
+        ConnectionData(Connectable& sender, Slot* slot)
+        : _refs(1)
+        , _valid(true)
+        , _slot(slot)
+        , _sender(&sender)
+        { }
 
-            ~ConnectionData()
-            { delete _slot; }
+        ~ConnectionData()
+        { delete _slot; }
 
-            unsigned ref()
-            { return ++_refs; }
+        unsigned ref()
+        { return ++_refs; }
 
-            unsigned unref()
-            { return --_refs; }
+        unsigned unref()
+        { return --_refs; }
 
-            unsigned refs() const
-            { return _refs; }
+        unsigned refs() const
+        { return _refs; }
 
-            bool valid() const
-            { return _valid; }
+        bool valid() const
+        { return _valid; }
 
-            void setValid(bool valid)
-            { _valid = valid; }
+        void setValid(bool valid)
+        { _valid = valid; }
 
-            Connectable& sender()
-            { return *_sender; }
+        Connectable& sender()
+        { return *_sender; }
 
-            const Connectable& sender() const
-            { return *_sender; }
+        const Connectable& sender() const
+        { return *_sender; }
 
-            Slot& slot()
-            { return *_slot; }
+        Slot& slot()
+        { return *_slot; }
 
-            const Slot& slot() const
-            { return *_slot; }
+        const Slot& slot() const
+        { return *_slot; }
 
-        private:
-            unsigned _refs;
-            bool _valid;
-            Slot* _slot;
-            Connectable* _sender;
-    };
+    private:
+        unsigned _refs;
+        bool _valid;
+        Slot* _slot;
+        Connectable* _sender;
+};
 
-    /** @brief Represents a connection between a Signal/Delegate and a slot
-        @ingroup sigslot
-    */
-    class PT_API Connection
-    {
-        public:
-            Connection()
-            { _data = new ConnectionData(); }
+/** @brief Represents a connection between a Signal/Delegate and a slot
+    @ingroup sigslot
+*/
+class PT_API Connection
+{
+    public:
+        Connection()
+        { _data = new ConnectionData(); }
 
-			Connection(Connectable& sender, Slot* slot);
+        Connection(Connectable& sender, Slot* slot);
 
-			Connection(const Connection& connection)
+        Connection(const Connection& connection)
+        {
+            _data = connection._data;
+            _data->ref();
+        }
+
+        ~Connection();
+
+        bool valid() const
+        { return _data->valid(); }
+
+        const Connectable& sender() const
+        { return _data->sender(); }
+
+        const Slot& slot() const
+        { return _data->slot(); }
+
+        bool operator!() const
+        { return this->valid() == false; }
+
+        void close();
+
+        Connection& operator=(const Connection& connection)
+        {
+            if( 0 == _data->unref() ) 
             {
-                _data = connection._data;
-                _data->ref();
+                this->close();
+                delete _data;
             }
 
-            ~Connection();
+            _data = connection._data;
+            _data->ref();
+            return (*this);
+        }
 
-            bool valid() const
-            { return _data->valid(); }
+        bool operator==(const Connection& connection) const
+        {
+            return _data == connection._data;
+        }
 
-            const Connectable& sender() const
-            { return _data->sender(); }
-
-            const Slot& slot() const
-            { return _data->slot(); }
-
-            bool operator!() const
-            { return this->valid() == false; }
-
-            void close();
-
-            Connection& operator=(const Connection& connection)
-			{
-			    if( 0 == _data->unref() ) 
-			    {
-			        this->close();
-			        delete _data;
-			    }
-
-			    _data = connection._data;
-			    _data->ref();
-			    return (*this);
-			}
-            bool operator==(const Connection& connection) const
-            {
-                return _data == connection._data;
-            }
-
-        private:
-            ConnectionData* _data;
-    };
+    private:
+        ConnectionData* _data;
+};
 
 } // namespace Pt
 

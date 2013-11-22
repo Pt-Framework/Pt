@@ -41,6 +41,8 @@ namespace Pt {
 class Composer
 {
     public:
+        /** @brief Destructor.
+        */
         virtual ~Composer()
         {}
 
@@ -60,7 +62,11 @@ class Composer
         */
         void setTypeName(const std::string& type)
         { onSetTypeName( type.c_str(), type.size() ); }
+        
+        /** @brief sets the type name of the type to compose.
 
+            This is only supported by formats that save typename information.
+        */
         void setTypeName(const char* type, size_t len)
         { onSetTypeName(type, len); }
 
@@ -70,7 +76,11 @@ class Composer
         */
         void setId(const std::string& id)
         { onSetId( id.c_str(), id.size() ); }
+        
+        /** @brief Sets the reference id of the type to compose.
 
+            This is only supported by formats that support references.
+        */
         void setId(const char* id, size_t len)
         { onSetId(id, len); }
 
@@ -79,6 +89,8 @@ class Composer
         void setString(const Pt::String& value)
         { onSetString( value.c_str(), value.size() ); }
 
+        /** @brief Composes a string value.
+        */
         void setString(const Pt::Char* value, size_t len)
         { onSetString(value, len); }
 
@@ -122,7 +134,9 @@ class Composer
         */
         void setReference(const std::string& id)
         { onSetReference(id.c_str(), id.size()); }
-
+        
+        /** @brief Composes a reference.
+        */
         void setReference(const char* id, size_t len)
         { onSetReference(id, len); }
 
@@ -130,7 +144,9 @@ class Composer
         */
         Composer* beginMember(const std::string& name)
         { return onBeginMember( name.c_str(), name.size() ); }
-
+        
+        /** @brief Begins composition of a struct member.
+        */
         Composer* beginMember(const char* name, size_t len)
         { return onBeginMember(name, len); }
 
@@ -145,6 +161,8 @@ class Composer
         { return onFinish(); }
 
     protected:
+        /** @brief Constructor.
+        */
         Composer()
         : _parent(0)
         {}

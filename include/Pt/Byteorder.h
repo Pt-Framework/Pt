@@ -202,12 +202,12 @@ namespace Pt {
         return *reinterpret_cast<const int8_t*>(&i) == 1;
     }
 
-    /** @brief Returns a given value converted from host-byteorder to little-endian.
+    /** @brief Converts a value from host-byteorder to little-endian.
      
         This function does nothing on a LE system, but calls swap() on a BE system.
-        The generic swap() function expects the type passed in to be bitwise-copyable
-        and thus does this function. Overloading swab can remove this restriction and
-        may improve performance for custon types.
+        The generic swap() function expects the type passed in to be an integer type
+        and so does this function. Overloading swab can remove this restriction and
+        may improve performance for custom types.
        
         @ingroup CoreTypes
      */
@@ -221,12 +221,12 @@ namespace Pt {
 #endif
     }
 
-    /** @brief Returns a given value converted from little-endian to host-byteorder.
+    /** @brief Converts a value from little-endian to host-byteorder.
 
         This function does nothing on a LE system, but calls swap() on a BE system.
-        The generic swap() function expects the type passed in to be bitwise-copyable
-        and thus does this function. Overloading swab can remove this restriction and
-        may improve performance for custon types.
+        The generic swap() function expects the type passed in to be an integer type
+        and so does this function. Overloading swab can remove this restriction and
+        may improve performance for custom types.
 
         @ingroup CoreTypes
      */
@@ -240,12 +240,12 @@ namespace Pt {
 #endif
     }
 
-    /** @brief Returns a given value converted from the host-byteorder to big-endian.
+    /** @brief Converts a value from the host-byteorder to big-endian.
 
         This function does nothing on a BE system, but calls swap() on a LE system.
-        The generic swap() function expects the type passed in to be bitwise-copyable
-        and thus does this function. Overloading swab can remove this restriction and
-        may improve performance for custon types.
+        The generic swap() function expects the type passed in to be an integer type
+        and so does this function. Overloading swab can remove this restriction and
+        may improve performance for custom types.
        
         @ingroup CoreTypes
      */
@@ -259,12 +259,12 @@ namespace Pt {
 #endif
     }
 
-    /** @brief Returns a given value converted from big-endian to host-byteorder.
+    /** @brief Converts a value from big-endian to host-byteorder.
      
         This function does nothing on a BE system, but calls swap() on a LE system.
-        The generic swap() function expects the type passed in to be bitwise-copyable
-        and thus does this function. Overloading swab can remove this restriction and
-        may improve performance for custon types.
+        The generic swap() function expects the type passed in to be an integer type
+        and so does this function. Overloading swab can remove this restriction and
+        may improve performance for custom types.
 
         @ingroup CoreTypes
      */

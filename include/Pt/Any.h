@@ -37,41 +37,16 @@ namespace Pt {
 
 /** @brief Contains an arbitrary type.
 
-    Any can contain any other type that is default- and copy constructible
-    and less-than and equality comparable. When a value is assigned to an
-    Any a copy is made, just like when a type is inserted in a standard
-    C++ container. The contained type can be accessed via Pt::any_cast<>.
-    It is only possible to get the contained value if the type matches
+    %Any can contain any other type that is default- and copy constructible.
+    When a value is assigned to an %Any a copy is made, just like when a type
+    is inserted in a standard C++ container. The contained type can be accessed
+    via Pt::any_cast<>. It is only possible to get the contained value if the
+    type matches.
 
     @code
     Any a = 5;
     int i = any_cast<int>( a );    // i is 5 now
     float f = any_cast<float>( a ) // throws std::bad_cast
-    @endcode
-
-    Anys can be compared by the contained types and values. Two Anys are
-    considered equal when the contained values are equal and of the same
-    type. A special case is less-than comparison, when the contained
-    types are different. std::type_info::before will be used to decide
-    which Any is less.
-
-    @code
-    Any a = 6;
-    Any b = 6;
-    Any c = '6';
-    Any d = 1;
-
-    // true, same type, same value
-    a == b;
-
-    // false, different types
-    b == c;
-
-    // true, same type and less
-    d \< a;
-
-    // implementation dependent
-    d \< c;
     @endcode
 
     @ingroup CoreTypes
@@ -345,7 +320,7 @@ class Any
             return *this;
         }
 
-        /** @brief Assign reference
+        /** @brief Assign reference.
 
             Initializes an %Any from a pointer to an arbitrary type. The
             assignment will not make a copy, but only keep a shallow
@@ -426,7 +401,8 @@ class Any
         char _data[sizeofData];
 };
 
-
+/** @internal Implementation of any_cast.
+*/
 template <typename T>
 struct AnyCast
 {
@@ -459,6 +435,8 @@ struct AnyCast
     }
 };
 
+/** @internal Implementation of any_cast.
+*/
 template <typename T>
 struct AnyCast<T*>
 {

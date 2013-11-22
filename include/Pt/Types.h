@@ -114,7 +114,6 @@ namespace Pt {
 
 #if ULONG_MAX == 18446744073709551615ULL
     #define PT_WITH_INT64 1
-    #define PT_WITH_LONG_LONG 1
 
     /** @brief Signed 64-bit integer type.
 
@@ -130,18 +129,20 @@ namespace Pt {
 
 #elif ULLONG_MAX == 18446744073709551615ULL
     #define PT_WITH_INT64 1
-    #define PT_WITH_LONG_LONG 1
 
     typedef long long int64_t;
     typedef unsigned long long uint64_t;
 
 #elif defined(__GNUC__) || defined(__MWERKS_SYMBIAN__)
     #define PT_WITH_INT64 1
-    #define PT_WITH_LONG_LONG 1
 
     typedef long long int64_t;
     typedef unsigned long long uint64_t;
 
+#endif
+
+#ifdef ULLONG_MAX
+    #define PT_WITH_LONG_LONG 1
 #endif
 
 } // namespace Pt

@@ -39,17 +39,25 @@ namespace Pt {
 class Allocator
 {
     public:
+        /** @brief Default constructor.
+        */
         Allocator()
         {}
 
+        /** @brief Destructor.
+        */
         virtual ~Allocator()
         {}
 
+        /** @brief Allocates @a size bytes of memory.
+        */
         virtual void* allocate(std::size_t size)
         {
             return operator new(size);
         }
 
+        /** @brief Deallocates memory of @a size bytes.
+        */
         virtual void deallocate(void* p, std::size_t size)
         {
             operator delete(p);

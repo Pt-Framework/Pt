@@ -37,7 +37,6 @@ namespace Pt {
 
     /** @brief %Connection management for signal and slot objects
 
-
         This class implements connection management for signal and slot
         objects. It makes sure that all connections where this object
         is involved are closed on destruction. Deriving classes can
@@ -113,8 +112,7 @@ namespace Pt {
             { return _connections; }
 
         protected:
-            /** @brief A list of all current connections
-            */
+            //! @internal @brief A list of all current connections
             mutable std::list<Connection> _connections;
 
             //! @internal

@@ -128,5 +128,6 @@ PT_API void* atomicExchange(void* volatile& val, void* exch);
 */
 PT_API void* atomicCompareExchange(void* volatile& val, void* exch, void* comp);
 
-}
+} // namespace Pt
+
 #endif

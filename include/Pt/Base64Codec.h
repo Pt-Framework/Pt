@@ -34,21 +34,26 @@
 
 namespace Pt {
 
-/** @brief A codec for base-64
+/** @brief A codec for base-64 encoding.
 
     @ingroup Unicode
 */
 class Base64Codec : public TextCodec<char, char>
 {
     public:
+        /** @brief Default constructor.
+        */
         explicit Base64Codec(size_t ref = 0)
         : TextCodec<char, char>(ref)
         {}
 
+        /** @brief Destructor.
+        */
         virtual ~Base64Codec()
         {}
 
     protected:
+        // inherit docs
         result do_in(MBState& s,
                      const char* fromBegin,
                      const char* fromEnd,
@@ -57,6 +62,7 @@ class Base64Codec : public TextCodec<char, char>
                      char* toEnd,
                      char*& toNext) const;
 
+        // inherit docs
         result do_out(MBState& s,
                       const char* fromBegin,
                       const char* fromEnd,
@@ -65,16 +71,19 @@ class Base64Codec : public TextCodec<char, char>
                       char* toEnd,
                       char*& toNext) const;
 
+        // inherit docs
         result do_unshift(MBState& state,
                           char* toBegin,
                           char* toEnd,
                           char*& toNext) const;
 
+        // inherit docs
         bool do_always_noconv() const throw()
         {
             return false;
         }
 
+        // inherit docs
         int do_length(MBState& s, const char* fromBegin,
                       const char* fromEnd, size_t max) const
         {
@@ -83,12 +92,14 @@ class Base64Codec : public TextCodec<char, char>
             return to > from ? from * 4 : to * 4;
         }
 
+        // inherit docs
         int do_encoding() const throw()
         {
             // stateful encoding
             return -1;
         }
 
+        // inherit docs
         int do_max_length() const throw()
         {
             //worst case: XX== -> x
@@ -96,7 +107,7 @@ class Base64Codec : public TextCodec<char, char>
         }
 };
 
-
+//! @internal
 inline char toBase64(uint8_t n)
 {
     static const char b64enc[]
@@ -105,7 +116,7 @@ inline char toBase64(uint8_t n)
     return b64enc[n];
 }
 
-
+//! @internal
 inline uint8_t fromBase64(char b64)
 {
     static const uint8_t b64dec[]
