@@ -447,7 +447,63 @@ SerialDevice::FlowControl SerialDeviceImpl::flowControl() const
 }
 
 bool SerialDeviceImpl::setSignal(SerialDevice::SerialLine signal)
-{
+{    
+
+
+	struct termios ios;
+
+	if( ::tcgetattr(IODeviceImpl::fd(), &ios) == -1 )
+		throw IOError("tcgetattr failed");
+
+#if defined(TIOCMGET)
+	int flags = 0;
+	ioctl(IODeviceImpl::fd(), TIOCMGET, &flags);
+#endif
+
+	switch(signal)
+    {	
+#if defined(TIOCSBRK)
+        case SerialDevice::SET_BREAK:
+			ioctl(IODeviceImpl::fd(), TIOCSBRK, 0);
+		break;
+
+		case SerialDevice::CLR_BREAK:            
+			ioctl(IODeviceImpl::fd(), TIOCCBRK, 0);			  
+        break;
+#endif
+
+#if defined (TIOCM_DTR) 
+        case SerialDevice::SET_DTR:		
+			flags |= TIOCM_DTR;		
+        break;
+
+        case SerialDevice::CLR_DTR:
+           flags &= ~TIOCM_DTR;
+        break;
+
+		case SerialDevice::SET_RTS:
+			flags |= TIOCM_RTS;
+        break;
+
+		case SerialDevice::CLR_RTS:
+			flags &= ~TIOCM_RTS;
+        break;
+#endif
+        case SerialDevice::SET_XON:
+			ios.c_iflag |= IXON;
+        break;
+
+        case SerialDevice::SET_XOFF:
+			ios.c_iflag |= IXOFF;
+        break;
+    }
+
+#if defined(TIOCMSET)	
+	ioctl(IODeviceImpl::fd(), TIOCMSET, &flags);
+#endif 
+
+	tcsetattr(IODeviceImpl::fd(), TCSANOW, &ios);
+
     return false;
 }
 
