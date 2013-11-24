@@ -35,6 +35,8 @@
 #include <cerrno>
 #include <iostream>
 
+#include <sys/ioctl.h>
+
 /*
  * #if defined(__QNX__)
 #define CRTSCTS (IHFLOW | OHFLOW)
@@ -455,14 +457,14 @@ bool SerialDeviceImpl::setSignal(SerialDevice::SerialLine signal)
 	if( ::tcgetattr(IODeviceImpl::fd(), &ios) == -1 )
 		throw IOError("tcgetattr failed");
 
-#if defined(TIOCMGET)
+#ifdef TIOCMGET
 	int flags = 0;
 	ioctl(IODeviceImpl::fd(), TIOCMGET, &flags);
 #endif
 
 	switch(signal)
     {	
-#if defined(TIOCSBRK)
+#ifdef TIOCSBRK
         case SerialDevice::SET_BREAK:
 			ioctl(IODeviceImpl::fd(), TIOCSBRK, 0);
 		break;
@@ -472,9 +474,9 @@ bool SerialDeviceImpl::setSignal(SerialDevice::SerialLine signal)
         break;
 #endif
 
-#if defined (TIOCM_DTR) 
+#ifdef TIOCM_DTR
         case SerialDevice::SET_DTR:		
-			flags |= TIOCM_DTR;		
+			flags |= TIOCM_DTR;
         break;
 
         case SerialDevice::CLR_DTR:
@@ -498,7 +500,7 @@ bool SerialDeviceImpl::setSignal(SerialDevice::SerialLine signal)
         break;
     }
 
-#if defined(TIOCMSET)	
+#ifdef TIOCMSET	
 	ioctl(IODeviceImpl::fd(), TIOCMSET, &flags);
 #endif 
 

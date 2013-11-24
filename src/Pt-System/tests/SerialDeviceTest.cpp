@@ -44,6 +44,33 @@ class SerialDeviceTest : public Pt::Unit::TestSuite
             //Pt::Unit::TestSuite::registerMethod( "ReadPnp", *this, &SerialDeviceTest::ReadPnp );
         }
 
+		void testRTS()
+		{
+			try {
+				std::cout << "running" << std::endl;
+				std::string port("/dev/ttyS0");
+				Pt::System::SerialDevice serdev( port, std::ios_base::in );
+
+				for(;;)
+				{ 
+					serdev.setSignal(Pt::System::SerialDevice::SET_RTS);
+					Pt::System::Thread::sleep( 500 );
+
+					serdev.setSignal(Pt::System::SerialDevice::CLR_RTS);
+					Pt::System::Thread::sleep( 500 );
+
+					std::cout << '.' << std::flush;
+				}
+			}
+			catch(const Pt::System::AccessFailed& f)
+			{
+				std::cerr << "No device found" <<  std::endl;
+				// do not fail in case no device is connected.
+			}
+
+			std::exit(0);
+		}
+
     protected:
         void ReadPnp();
 };
