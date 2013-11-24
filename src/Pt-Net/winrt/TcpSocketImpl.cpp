@@ -28,6 +28,7 @@
 
 #include "TcpSocketImpl.h"
 #include "TcpServerImpl.h"
+#include "EndpointImpl.h"
 #include "Pt/Net/AddressInUse.h"
 #include <Pt/Net/TcpSocket.h>
 #include <Pt/System/SystemError.h>
@@ -114,7 +115,7 @@ void TcpSocketImpl::accept(const TcpServer& server, const TcpSocket::Options&)
 
 void TcpSocketImpl::connect(const Endpoint& ep)
 {
-    log_debug( "connecting socket to " << ep.host() << ":" << ep.service() );
+    log_debug( "connecting socket to " << ep.toString() );
     assert( ! _isConnected );
 
     throw System::IOError("blocking I/O not supported");
@@ -124,7 +125,7 @@ void TcpSocketImpl::connect(const Endpoint& ep)
 bool TcpSocketImpl::beginConnect(System::EventLoop& loop, const Endpoint& ep)
 {
     assert( ! _isConnected );
-    log_debug( "begin connecting socket to " << ep.host() << ":" << ep.service() );
+    log_debug( "begin connecting socket to " << ep.toString() );
 
     _ep = ep;
 
@@ -173,14 +174,14 @@ void TcpSocketImpl::endConnect(System::EventLoop& loop)
 {
     // the application reacts to the connect signal by calling endConnect
 
-    log_debug( "ending connect to "  << _ep.host() << ":" << _ep.service() );
+    log_debug( "ending connect to "  << _ep.toString() );
     
     if( ! _connectOp )
         return;
         
     if(_connectOp->Status == AsyncStatus::Error)
     {
-        throw System::AccessFailed( _ep.host() );
+        throw System::AccessFailed( _ep.toString() );
     }
 
     // TODO: handle connect exception

@@ -57,15 +57,15 @@ class UdpSocketImpl
 
         void bind(const Endpoint& ep, const UdpSocket::Options& o);
 
-        bool beginConnect(System::EventLoop& loop, const Endpoint& ep);
+		bool beginConnect(System::EventLoop& loop, const Endpoint& ep, const UdpSocket::Options& o);
 
         bool runConnect(System::EventLoop& loop);
 
         void endConnect(System::EventLoop& loop);
 
-        void connect(const Endpoint& ep);
+		void connect(const Endpoint& ep, const UdpSocket::Options& o);
 
-        void setTarget(const Endpoint& ep);
+		void setTarget(const Endpoint& ep, const UdpSocket::Options& o);
 
         bool isConnected() const;
 

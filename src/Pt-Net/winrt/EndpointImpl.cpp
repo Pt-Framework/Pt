@@ -25,7 +25,8 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#include "AddrInfoImpl.h"
+#include "EndpointImpl.h"
+#include <sstream>
 
 using namespace Platform;
 
@@ -72,7 +73,7 @@ void EndpointImpl::init(Platform::String^ host, Platform::String^ service)
     std::wstring wport;
 
     if(host)
-        waddr = addr->Data();
+		waddr = host->Data();
 
     if(service)
         wport = service->Data();
@@ -102,9 +103,9 @@ std::string EndpointImpl::toString() const
 }
 
 
-AddrInfoImpl* AddrInfoImpl::ip4Any(unsigned short port)
+EndpointImpl* EndpointImpl::ip4Any(unsigned short port)
 {
-    AddrInfoImpl* impl = new AddrInfoImpl();
+	EndpointImpl* impl = new EndpointImpl();
 
     // Stream-/Datagramockets must use BindServiceNameAsync if hostname is empty
     impl->_host.clear();
@@ -117,9 +118,9 @@ AddrInfoImpl* AddrInfoImpl::ip4Any(unsigned short port)
 }
 
 
-AddrInfoImpl* AddrInfoImpl::ip4Loopback(unsigned short port)
+EndpointImpl* EndpointImpl::ip4Loopback(unsigned short port)
 {
-    AddrInfoImpl* impl = new AddrInfoImpl();
+	EndpointImpl* impl = new EndpointImpl();
     
     impl->_host = "127.0.0.1";
     
@@ -130,9 +131,9 @@ AddrInfoImpl* AddrInfoImpl::ip4Loopback(unsigned short port)
     return impl;
 }
 
-AddrInfoImpl* AddrInfoImpl::ip4Broadcast(unsigned short port)
+EndpointImpl* EndpointImpl::ip4Broadcast(unsigned short port)
 {
-    AddrInfoImpl* impl = new AddrInfoImpl();
+	EndpointImpl* impl = new EndpointImpl();
 
     impl->_host = "255.255.255.255";
     
@@ -144,9 +145,9 @@ AddrInfoImpl* AddrInfoImpl::ip4Broadcast(unsigned short port)
 }
 
 
-AddrInfoImpl* AddrInfoImpl::ip6Any(unsigned short port)
+EndpointImpl* EndpointImpl::ip6Any(unsigned short port)
 {
-    AddrInfoImpl* impl = new AddrInfoImpl();
+	EndpointImpl* impl = new EndpointImpl();
     
     // Stream-/Datagramockets must use BindServiceNameAsync if hostname is empty
     impl->_host.clear();
@@ -159,9 +160,9 @@ AddrInfoImpl* AddrInfoImpl::ip6Any(unsigned short port)
 }
 
 
-AddrInfoImpl* AddrInfoImpl::ip6Loopback(unsigned short port)
+EndpointImpl* EndpointImpl::ip6Loopback(unsigned short port)
 {
-    AddrInfoImpl* impl = new AddrInfoImpl();
+	EndpointImpl* impl = new EndpointImpl();
 
     impl->_host = "0:0:0:0:0:0:0:1";
     

@@ -140,7 +140,7 @@ bool UdpSocketImpl::beginBind(System::EventLoop& loop,
                               const Endpoint& ep, 
                               const UdpSocket::Options& o)
 {
-    log_debug( "begin binding socket to " << ep.host() << ":" << ep.ervice() );
+    log_debug( "begin binding socket to " << ep.toString() );
 
     const std::string& host = ep.impl()->host();
     std::wstring whost(host.begin(), host.end());
@@ -217,7 +217,7 @@ void UdpSocketImpl::bind(const Endpoint& ep, const UdpSocket::Options&)
 //  <Capabilities>
 //    <Capability Name="internetClientServer" />
 
-bool UdpSocketImpl::beginConnect(System::EventLoop& loop, const Endpoint& ep)
+bool UdpSocketImpl::beginConnect(System::EventLoop& loop, const Endpoint& ep, const UdpSocket::Options&)
 {
     log_debug( "begin connecting socket to " << ep.toString() );
 
@@ -284,14 +284,14 @@ void UdpSocketImpl::endConnect(System::EventLoop& loop)
 }
 
 
-void UdpSocketImpl::connect(const Endpoint& ep)
+void UdpSocketImpl::connect(const Endpoint& ep, const UdpSocket::Options& o)
 {
     throw System::IOError("blocking I/O not supported");
     _isConnected = true;
 }
 
 
-void UdpSocketImpl::setTarget(const Endpoint& ep)
+void UdpSocketImpl::setTarget(const Endpoint& ep, const UdpSocket::Options& o)
 {
     const std::string& host = ep.impl()->host();
     std::wstring whost(host.begin(), host.end());
@@ -365,7 +365,7 @@ void UdpSocketImpl::localEndpoint(Endpoint& ep) const
 }
 
 
-const Endpoint& UdpSocketImpl::remoteEndpoint() const const
+const Endpoint& UdpSocketImpl::remoteEndpoint() const
 {
     return _peerAddr;
 }
@@ -430,7 +430,7 @@ size_t UdpSocketImpl::endRead(System::EventLoop& loop, char* buffer, size_t bufS
         buffer[n] = static_cast<char>( reader->ReadByte() );
     }
 
-    _peerAddr.impl()->init(m.remoteAddress.DisplayName, m.remotePort);
+    _peerAddr.impl()->init(m.remoteAddress->DisplayName, m.remotePort);
 
     return n;
 }

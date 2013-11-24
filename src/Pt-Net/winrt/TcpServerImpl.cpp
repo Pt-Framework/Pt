@@ -27,6 +27,7 @@
  */
 
 #include "TcpServerImpl.h"
+#include "EndpointImpl.h"
 #include <Pt/Net/AddressInUse.h>
 #include <Pt/System/Logger.h>
 #include <Pt/System/IOError.h>
