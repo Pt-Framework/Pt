@@ -346,6 +346,9 @@
     <ClInclude Include="..\..\src\Pt-Hmi\gdi\ApplicationImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\gdi\CursorImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\gdi\GfxOutputDeviceImpl.h" />
+    <ClInclude Include="..\..\src\Pt-Hmi\winrt\ApplicationImpl.h" />
+    <ClInclude Include="..\..\src\Pt-Hmi\winrt\CursorImpl.h" />
+    <ClInclude Include="..\..\src\Pt-Hmi\winrt\GfxOutputDeviceImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\x11\ApplicationImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\x11\CursorImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\x11\GfxOutputDeviceImpl.h" />
@@ -572,6 +575,9 @@
     <ClCompile Include="..\..\src\Pt-Hmi\WindowController.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\WindowModel.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\WindowRenderer.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\winrt\ApplicationImpl.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\winrt\CursorImpl.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\winrt\GfxOutputDeviceImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\x11\ApplicationImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\x11\CursorImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\x11\GfxOutputDeviceImpl.cpp" />
@@ -822,9 +828,9 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Configured|Win32'">
-    <NMakeBuildCommandLine>cd ..\.. &amp;&amp; jam.bat -q -j2 -sPT_TOP=$(SolutionDir)..\..\</NMakeBuildCommandLine>
+    <NMakeBuildCommandLine>cd ..\.. &amp;&amp; jam.bat -q -j4 -sPT_TOP=$(SolutionDir)..\..\</NMakeBuildCommandLine>
     <NMakeCleanCommandLine>cd ..\.. &amp;&amp; jam.bat clean -sPT_TOP=$(SolutionDir)..\..\</NMakeCleanCommandLine>
-    <NMakeReBuildCommandLine>cd ..\.. &amp;&amp; jam.bat -qa -j2 -sPT_TOP=$(SolutionDir)..\..\</NMakeReBuildCommandLine>
+    <NMakeReBuildCommandLine>cd ..\.. &amp;&amp; jam.bat -qa -j4 -sPT_TOP=$(SolutionDir)..\..\</NMakeReBuildCommandLine>
     <NMakePreprocessorDefinitions>WIN32;_DEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
     <NMakeIncludeSearchPath>$(SolutionDir)..\..\include</NMakeIncludeSearchPath>
   </PropertyGroup>

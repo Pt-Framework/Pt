@@ -97,6 +97,9 @@
     <Filter Include="Pt-Gfx\tests">
       <UniqueIdentifier>{8f9be891-3492-48bf-ac55-a48600e684bb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Pt-Hmi\Sources\winrt">
+      <UniqueIdentifier>{0190cd64-c6e5-4b5d-ab0e-7d4e1a17e9c7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\Pt\Allocator.h">
@@ -1302,6 +1305,15 @@
     <ClInclude Include="..\..\src\Pt-Net\posix\AddrInfo.h">
       <Filter>Pt-Net\win32</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\winrt\ApplicationImpl.h">
+      <Filter>Pt-Hmi\Sources\winrt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\winrt\CursorImpl.h">
+      <Filter>Pt-Hmi\Sources\winrt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\winrt\GfxOutputDeviceImpl.h">
+      <Filter>Pt-Hmi\Sources\winrt</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -2465,6 +2477,15 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Net\posix\AddrInfo.cpp">
       <Filter>Pt-Net\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\winrt\ApplicationImpl.cpp">
+      <Filter>Pt-Hmi\Sources\winrt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\winrt\CursorImpl.cpp">
+      <Filter>Pt-Hmi\Sources\winrt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\winrt\GfxOutputDeviceImpl.cpp">
+      <Filter>Pt-Hmi\Sources\winrt</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

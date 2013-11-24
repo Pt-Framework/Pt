@@ -57,36 +57,36 @@ else
 
  LinkLibraries Pt-Gfx : png ;
 
-if $(GUI)
-{
-    Main ImagePainterDemo : ImagePainterDemo.cpp ;
-    LinkSharedLibraries ImagePainterDemo : Pt Pt-System  Pt-Gfx Pt-Gui ;
-    MakeLocate ImagePainterDemo : $(PT_OUTPUT_TARGET) ;
+#if $(GUI)
+#{
+#    Main ImagePainterDemo : ImagePainterDemo.cpp ;
+#    LinkSharedLibraries ImagePainterDemo : Pt Pt-System  Pt-Gfx Pt-Gui ;
+#    MakeLocate ImagePainterDemo : $(PT_OUTPUT_TARGET) ;
 
-    Main DrawLineDemo : DrawLineDemo.cpp ;
-    LinkSharedLibraries DrawLineDemo : Pt Pt-System  Pt-Gfx Pt-Gui ;
-    MakeLocate DrawLineDemo : $(PT_OUTPUT_TARGET) ;
+#    Main DrawLineDemo : DrawLineDemo.cpp ;
+#    LinkSharedLibraries DrawLineDemo : Pt Pt-System  Pt-Gfx Pt-Gui ;
+#    MakeLocate DrawLineDemo : $(PT_OUTPUT_TARGET) ;
 
-    Main DrawLineBenchmark : DrawLineBenchmark.cpp ;
-    LinkSharedLibraries DrawLineBenchmark : Pt Pt-System  Pt-Gfx Pt-Gui ;
-    MakeLocate DrawLineBenchmark : $(PT_OUTPUT_TARGET) ;
+#    Main DrawLineBenchmark : DrawLineBenchmark.cpp ;
+#    LinkSharedLibraries DrawLineBenchmark : Pt Pt-System  Pt-Gfx Pt-Gui ;
+#    MakeLocate DrawLineBenchmark : $(PT_OUTPUT_TARGET) ;
 
-    Main DrawRectDemo : DrawRectDemo.cpp ;
-    LinkSharedLibraries DrawRectDemo : Pt Pt-System  Pt-Gfx Pt-Gui ;
-    MakeLocate DrawRectDemo : $(PT_OUTPUT_TARGET) ;
+#    Main DrawRectDemo : DrawRectDemo.cpp ;
+#    LinkSharedLibraries DrawRectDemo : Pt Pt-System  Pt-Gfx Pt-Gui ;
+#    MakeLocate DrawRectDemo : $(PT_OUTPUT_TARGET) ;
 
-    Main FillPolygonDemo : FillPolygonDemo.cpp ;
-    LinkSharedLibraries FillPolygonDemo : Pt Pt-System  Pt-Gfx Pt-Gui ;
-    MakeLocate FillPolygonDemo : $(PT_OUTPUT_TARGET) ;
+#    Main FillPolygonDemo : FillPolygonDemo.cpp ;
+#    LinkSharedLibraries FillPolygonDemo : Pt Pt-System  Pt-Gfx Pt-Gui ;
+#    MakeLocate FillPolygonDemo : $(PT_OUTPUT_TARGET) ;
 
-    Main DrawEllipseDemo : DrawEllipseDemo.cpp ;
-    LinkSharedLibraries DrawEllipseDemo : Pt Pt-System  Pt-Gfx Pt-Gui ;
-    MakeLocate DrawEllipseDemo : $(PT_OUTPUT_TARGET) ;
+#    Main DrawEllipseDemo : DrawEllipseDemo.cpp ;
+#    LinkSharedLibraries DrawEllipseDemo : Pt Pt-System  Pt-Gfx Pt-Gui ;
+#    MakeLocate DrawEllipseDemo : $(PT_OUTPUT_TARGET) ;
 
-    Main GfxPerf : GfxPerf.cpp ;
-    LinkSharedLibraries GfxPerf : Pt Pt-System  Pt-Gfx Pt-Gui ;
-    MakeLocate GfxPerf : $(PT_OUTPUT_TARGET) ;
-}
+#    Main GfxPerf : GfxPerf.cpp ;
+#    LinkSharedLibraries GfxPerf : Pt Pt-System  Pt-Gfx Pt-Gui ;
+#    MakeLocate GfxPerf : $(PT_OUTPUT_TARGET) ;
+#}
 
 Main GreyscaleTest : GreyscaleTest.cpp ;
 LinkSharedLibraries GreyscaleTest : Pt Pt-Gfx ;

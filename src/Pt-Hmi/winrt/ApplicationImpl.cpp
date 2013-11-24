@@ -28,60 +28,18 @@
 #include <Pt/Hmi/Application.h>
 #include <Pt/System/IOError.h>
 
+using namespace Windows::UI::Core;
+
 namespace Pt {
+
 namespace Hmi {
 
-Selector::Selector()
-{
-}
-
-Selector::~Selector()
-{
-}
-
-DWORD Selector::waitFor(DWORD numHandles, const HANDLE *handles, DWORD msecs, bool& isTimeout)
-{	
-    DWORD result = MsgWaitForMultipleObjects(numHandles, (HANDLE *)handles, false, msecs, QS_ALLEVENTS);
-
-    if(result == WAIT_FAILED)
-        throw Pt::System::IOError( PT_ERROR_MSG("WaitForMultipleObjects failed") );
-
-    if( result == WAIT_TIMEOUT)
-    {
-        isTimeout = true;
-        return 0;
-    }
-
-    DWORD offset = result - WAIT_OBJECT_0;
-
-    if(offset == numHandles)
-    {
-        processMessage();
-    }
-
-    return offset;
-}
-
-void Selector::processMessage()
-{
-    MSG msg;
-
-    while( PeekMessage( &msg, NULL, 0, 0, PM_REMOVE) )
-    {
-        TranslateMessage(&msg);
-        DispatchMessage(&msg);
-    }
-	
-}
 
 ApplicationImpl::ApplicationImpl()
 : Pt::System::EventLoop()
+, _isClosed(false)
 , _dpi(96.0)
 {
-    _instanceHandle = (HINSTANCE)GetModuleHandle(NULL);
-
-    registerWindowClasses();
-
 	getScreeResolution(_screenWidth, _screenHeight);
 
 	_width  = _screenWidth * unitSizeInch()*_dpi;
@@ -102,6 +60,7 @@ void ApplicationImpl::showConsole(bool show)
 	else
 		FreeConsole();
 }
+
 
 ApplicationImpl::~ApplicationImpl()
 {
@@ -127,58 +86,31 @@ double ApplicationImpl::toUnit(int unit)
 	return unitSizeInch()/_dpi * unit;
 }
 
-void ApplicationImpl::registerWindowClasses()
-{
-    std::string topLevelWindow = "Pt-Hmi";
 
-    WNDCLASS topWindowClass;
-
-    topWindowClass.style         = CS_HREDRAW | CS_VREDRAW;
-    topWindowClass.lpfnWndProc   = (WNDPROC)ApplicationImpl::wndProc;
-    topWindowClass.cbClsExtra    = 0;
-    topWindowClass.cbWndExtra    = 0;
-    topWindowClass.hInstance     = _instanceHandle;
-    topWindowClass.hIcon         = NULL;
-    topWindowClass.hCursor       = LoadCursor(NULL, IDC_ARROW);
-    topWindowClass.hbrBackground = NULL;
-    topWindowClass.lpszMenuName  = NULL;
-    topWindowClass.lpszClassName = topLevelWindow.c_str();
-
-    RegisterClass(&topWindowClass);
+void ApplicationImpl::onAttachTimer(System::Timer& timer)
+{ 
+    _timerQueue.addTimer(timer); 
 }
 
-void ApplicationImpl::unregisterWindowClasses()
-{
-    UnregisterClass("Pt-Hmi", _instanceHandle);
+
+void ApplicationImpl::onDetachTimer(System::Timer& timer )
+{ 
+    _timerQueue.removeTimer(timer); 
 }
 
-long CALLBACK ApplicationImpl::wndProc(HWND hwnd, unsigned int message, unsigned int wParam, long lParam)
-{
-	Pt::Hmi::Application& app =  *((Pt::Hmi::Application*)&Pt::Hmi::Application::instance());
 
-    return app.impl()->dispatchGDIEvent(hwnd, message, wParam, lParam);
-}
-
-LRESULT ApplicationImpl::dispatchGDIEvent(HWND hwnd, unsigned int message, unsigned int wParam, long lParam)
-{
-	bool handled = false;
-	WindowEvent.send(hwnd, message, wParam, lParam, handled);
-
-	if(!handled)
-		return DefWindowProc(hwnd, message, wParam, lParam);
-
-	return 0;
-}
 
 void ApplicationImpl::onAttachSelectable(System::Selectable& s)
 { 
-    _selector.attach(s); 
+	_selector.attach(s); 
 }
+
 
 void ApplicationImpl::onDetachSelectable(System::Selectable& s)
 { 
-    _selector.detach(s); 
+	_selector.detach(s);
 }
+
 
 void ApplicationImpl::onIdle(System::Selectable& s)
 {
@@ -200,17 +132,13 @@ void ApplicationImpl::onReady(System::Selectable& s)
     _avail.push_back(&s);
 }
 
-void ApplicationImpl::onRun()
-{
-    while( this->waitNext() )
-        ;
-}
 
 void ApplicationImpl::onExit()
 {
     _eventQueue.exit();
     wake();
 }
+
 
 void ApplicationImpl::onCommitEvent(const Pt::Event& ev)
 { 
@@ -224,25 +152,55 @@ void ApplicationImpl::onQueueEvent(const Pt::Event& ev)
     _eventQueue.pushEvent(ev); 
 }
 
+
 void ApplicationImpl::onProcessEvents()
 { 
     _eventQueue.processEvents( this->event() );
 }
 
+
 void ApplicationImpl::onWake()
-{ 
-    _selector.wake(); 
+{
+	_dispatcher->RunAsync( Windows::UI::Core::CoreDispatcherPriority::Normal, 
+						   ref new Windows::UI::Core::DispatchedHandler([](){}) );
+
 }
 
-void ApplicationImpl::onAttachTimer(System::Timer& timer)
-{ 
-    _timerQueue.addTimer(timer); 
+
+void ApplicationImpl::Run()
+{
+	//Obtain hat pointer to the window
+	_dispatcher = CoreWindow::GetForCurrentThread()->Dispatcher;
+	
+	//Loop until application closes
+	while( waitNext() )
+		break;
 }
 
-void ApplicationImpl::onDetachTimer(System::Timer& timer )
-{ 
-    _timerQueue.removeTimer(timer); 
+
+void ApplicationImpl::SetWindow( Windows::UI::Core::CoreWindow^ window )
+{
+	//Hook our PointerPressed event
+	//window->PointerPressed += ref new
+	//	TypedEventHandler<CoreWindow^, PointerEventArgs^>(this, &App::PointerPressed);
+	
+	//Hook our Closed event
+	/*window->Closed +=
+		ref new TypedEventHandler<CoreWindow^, CoreWindowEventArgs^>(this, &ApplicationImpl::Closed);*/
 }
+
+
+void ApplicationImpl::Closed(CoreWindow^ Sender, CoreWindowEventArgs^ Args)
+{
+	_isClosed = true;
+}
+
+
+void ApplicationImpl::onRun()
+{
+    CoreApplication::Run( ref new AppSource(this) );
+}
+
 
 bool ApplicationImpl::waitNext()
 {
@@ -264,12 +222,13 @@ bool ApplicationImpl::waitNext()
         s->run();
     }
 
-    bool isActive = true;
-    if( _selector.waitForWake(timeout) )
-        isActive = _eventQueue.processEvents( this->event() );
-
-    return isActive;
+	// TODO: use timeout
+	_dispatcher->ProcessEvents(CoreProcessEventsOption::ProcessAllIfPresent);
+		
+	// returns false when Application::exit was called
+	return _eventQueue.processEvents( this->event() );
 }
+
 
 Pt::Gfx::PointF ApplicationImpl::toUnit(const Pt::Gfx::Point& value)
 {
